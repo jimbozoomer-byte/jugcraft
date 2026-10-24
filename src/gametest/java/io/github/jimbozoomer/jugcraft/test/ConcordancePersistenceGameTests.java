@@ -755,7 +755,7 @@ public class ConcordancePersistenceGameTests {
 			helper.assertTrue(after != null && !Pacts.seated(after) && after.pact().presence() == null && owner.getUUID().equals(after.holder())
 					&& after.pact().hold() == before.pact().hold() && after.pact().upkeep().due() == before.pact().upkeep().due()
 					&& ConcordanceWorkerGameTests.escrowed(level, record.id()) == 3, "not the pact: kept without its perch, its escrow and clock untouched");
-			helper.assertTrue(presence == null || presence.isRemoved(), "Stolas leaves the world");
+			helper.assertTrue(presence == null || presence.gone(), "Stolas leaves the world");
 			helper.assertTrue(level.getEntitiesOfClass(ItemEntity.class, new AABB(absolute).inflate(6.0), item -> item.isAlive() && item.getItem().is(Items.AMETHYST_SHARD)).isEmpty(),
 					"and no offering drops: the block held none");
 			List<ItemEntity> loose = level.getEntitiesOfClass(ItemEntity.class, helper.getBounds(), ItemEntity::isAlive);

@@ -14293,6 +14293,7 @@ def check_concordance(registered):
     check_pacts(co, root, lang, registered, research)
     check_stolas_regard(co, root, lang, research)
     check_pact_screen(co, lang)
+    check_stolas_body(co)
     check_logistics(co, root, lang, registered)
     check_hand(co, root, lang, research)
     check_crucible_supply(co, root)
@@ -17269,14 +17270,14 @@ def _box_faces(u, v, w, h, d):
 
 
 def check_geckolib(name, java_text, uvs, sizes, kind="block", faces=False):
-    """A GeckoLib block's (or entity's) assets agree: every animation the Java names (a loop, or a clip played and held)
-    exists, every animated bone exists, and every cube's box-UV region lies inside the sheet without overlapping another's;
+    """A GeckoLib block's (or entity's) assets agree: every animation the Java names (a loop, a clip played once or played
+    and held: a triggerable clip is pinned through the RawAnimation that names it) exists, every animated bone exists, and every cube's box-UV region lies inside the sheet without overlapping another's;
     the sheet is the size the model says. With faces (an owner's rig copied as drawn: Stolas's, Concordance Chunk D,
     D-S5), two cubes clash only where faces they draw share texels."""
     geo = load(ASSETS / "geckolib" / "models" / kind / f"{name}.geo.json") or {}
     animations = load(ASSETS / "geckolib" / "animations" / kind / f"{name}.animation.json") or {}
     clips = set(animations.get("animations", {}))
-    for clip in re.findall(r'then(?:Loop|PlayAndHold)\("([^"]+)"\)', java_text):
+    for clip in re.findall(r'then(?:Loop|PlayAndHold|Play)\("([^"]+)"\)', java_text) + re.findall(r'\.then\("([^"]+)", LoopType\.', java_text):
         if clip not in clips:
             err(f"{name}: animation {clip} is not in {name}.animation.json")
     definition = (geo.get("minecraft:geometry") or [{}])[0]
@@ -18557,9 +18558,8 @@ def check_pact_screen(co, lang):
     """Concordance Chunk D, unit 2 (D-04 client, D-05; D-S5, D-S14, D-S15, D-S21): the pact perch's screen and Stolas's
     provisional body (the payloads are check_pacts'). Only PactClient sends, only for the open menu, and it drops a state
     for any other. The screen is native (no text box, chat, command or vanilla Dialog) and narrated, ends a pact only from
-    a confirmation, and has words for every term D-S15 lists. Stolas is drawn by GeckoLib from the owner's Flashjack files,
-    copied under his name by tools/owner_art.py, at BODY_SCALE, playing only clips his animation file has. The client
-    class that shows all this is registered and takes its pictures."""
+    a confirmation, and has words for every term D-S15 lists. Stolas's body is check_stolas_body's. The client class that
+    shows all this is registered and takes its pictures."""
     pa = co.pacts
 
     def text(path):
@@ -18599,23 +18599,6 @@ def check_pact_screen(co, lang):
     for key in re.findall(r'\bui\("([a-z_.]+)"', screen):
         if f"screen.{MOD}.pact.{key}" not in lang:
             err(f"client/PactScreen.java: missing lang screen.{MOD}.pact.{key}")
-    # Stolas's provisional body (D-S5).
-    body = {"geckolib/models/entity/stolas.geo.json": "geo/flashjack.geo.json",
-            "geckolib/animations/entity/stolas.animation.json": "animations/flashjack.animation.json",
-            "textures/entity/stolas.png": "textures/entity/flashjack.png"}
-    for target, source in body.items():
-        if pa.OWNER_FILES.get(target) != "assets/ars_jymbaumental/" + source:
-            err(f"tools/concordance_pacts.py OWNER_FILES: {target} is the owner's Flashjack {source}, copied unchanged (D-S5)")
-    if not set(pa.OWNER_FILES) <= {target for target, _ in owner_art.magic_imports()}:
-        err("tools/owner_art.py: imports Stolas's body (concordance_pacts.OWNER_FILES in magic_imports)")
-    workers = text(CLIENT_JAVA_ROOT / "WorkerClient.java")
-    if "Workers.STOLAS" not in workers or f"STOLAS_SCALE = {pa.BODY_SCALE}F;" not in workers or ".withScale(STOLAS_SCALE)" not in workers:
-        err("client/WorkerClient.java: Stolas is drawn by GeckoLib at BODY_SCALE (tools/concordance_pacts.py)")
-    stolas = text(JAVA_ROOT / "concordance" / "spirits" / "StolasEntity.java")
-    for clip in pa.BODY_CLIPS.values():
-        if f'"{clip}"' not in stolas:
-            err(f"spirits/StolasEntity.java: his body plays {clip} (BODY_CLIPS)")
-    check_geckolib("stolas", stolas, None, None, kind="entity", faces=True)
     # The client class that shows it.
     entry = "io.github.jimbozoomer.jugcraft.test.ConcordancePactClientGameTests"
     mod = load(ROOT / "src" / "gametest" / "resources" / "fabric.mod.json") or {}
@@ -18625,6 +18608,127 @@ def check_pact_screen(co, lang):
     for name in pa.CLIENT_SHOTS:
         if f'"{name}"' not in shots:
             err(f"ConcordancePactClientGameTests: takes {name}")
+
+
+def check_stolas_body(co):
+    """Concordance Chunk D, D-06 (D-S5): Stolas's raven body. The Flashjack rig's geometry is the owner's, copied unchanged
+    (concordance_pacts.OWNER_FILES); his skin, his glowmask and his animations are tools/stolas_body.py's adaptations of
+    the rig's own files (ADAPTED), which tools/owner_art.py writes and checks (a runtime copy that differs is one of
+    owner_art.errors()), and Flashjack's own clips stay in his animation file as the owner made them. The Java plays only
+    clips that file has (check_geckolib): his loops on the worker's main controller, his gestures as triggerable clips on
+    a gesture controller registered after it, each named as the generator names it and as long; his departure lasts its
+    gesture, discarding him only when it ends; a summoned Stolas arrives; a perch's Stolas is never one leaving, nor, at a
+    copy, the original's presence. He is drawn at BODY_SCALE with his eyes lit, and his glowmask is his eyes alone. The
+    pact's client test catches each gesture inside its telling pose and checks his real arrival and departure."""
+    pa = co.pacts
+    flash = "assets/ars_jymbaumental/"
+
+    def text(path):
+        return path.read_text(encoding="utf-8") if path.exists() else ""
+    if pa.OWNER_FILES != {"geckolib/models/entity/stolas.geo.json": flash + "geo/flashjack.geo.json"}:
+        err("tools/concordance_pacts.py OWNER_FILES: Stolas's geometry is the owner's Flashjack, copied unchanged, and only "
+            "it (his skin and animations are ADAPTED, D-06)")
+    adapted = {"textures/entity/stolas.png": (flash + "textures/entity/flashjack.png", "skin"),
+               "textures/entity/stolas_glowmask.png": (flash + "textures/entity/flashjack.png", "glowmask"),
+               "geckolib/animations/entity/stolas.animation.json": (flash + "animations/flashjack.animation.json", "animations")}
+    if pa.ADAPTED != adapted:
+        err("tools/concordance_pacts.py ADAPTED: Stolas's skin, glowmask and animations, each from its Flashjack file by "
+            "its tools/stolas_body.py adapter (D-S5)")
+    if {target for target, _, _ in owner_art.adaptations()} != set(adapted):
+        err("tools/owner_art.py: writes and checks Stolas's adapted files (adaptations(), from concordance_pacts.ADAPTED)")
+    if not set(pa.OWNER_FILES) <= {target for target, _ in owner_art.magic_imports()}:
+        err("tools/owner_art.py: imports Stolas's geometry (concordance_pacts.OWNER_FILES in magic_imports)")
+    path = ASSETS / "geckolib" / "animations" / "entity" / "stolas.animation.json"
+    clips = (load(path) or {}).get("animations", {}) if path.is_file() else {}
+    library = ROOT / "art" / "owner-library" / "originals" / "Magic" / flash / "animations" / "flashjack.animation.json"
+    for name, clip in ((load(library) or {}).get("animations", {}) if library.is_file() else {}).items():
+        if clips.get(name) != clip:
+            err(f"stolas.animation.json: Flashjack's {name} is kept as the owner made it (tools/stolas_body.py)")
+    for key, name in pa.LOOPS.items():
+        if name not in clips:
+            err(f"stolas.animation.json: missing his {key} loop {name}")
+        elif name.startswith("animation.stolas.") and clips[name].get("loop") is not True:
+            err(f"stolas.animation.json: {name} loops")
+    for key, (length, (start, end)) in pa.GESTURE_TIMES.items():
+        clip = clips.get(pa.GESTURES.get(key), {})
+        held = "hold_on_last_frame" if key == "depart" else False
+        if clip.get("animation_length") != length or clip.get("loop") != held:
+            err(f"stolas.animation.json: his {key} gesture is {length} s long and "
+                f"{'holds its last frame' if held else 'plays once'} (GESTURE_TIMES)")
+        if not 0 < start < end < length or end - start < 0.5:
+            err(f"tools/concordance_pacts.py GESTURE_TIMES: {key}'s telling pose lies inside it and lasts half a second")
+    stolas = text(JAVA_ROOT / "concordance" / "spirits" / "StolasEntity.java")
+    for key, name in pa.LOOPS.items():
+        if f'RawAnimation.begin().thenLoop("{name}")' not in stolas:
+            err(f"spirits/StolasEntity.java: his {key} loop plays {name} (concordance_pacts.LOOPS)")
+    declared = re.findall(r'^\t\t([A-Z]+)\("([a-z]+)", (\d+), RawAnimation\.begin\(\)\.then(Play|PlayAndHold)\("([a-z.]+)"\)\)[,;]$',
+                          stolas, re.M)
+    wanted = [(key.upper(), key, str(round(length * 20)), "PlayAndHold" if key == "depart" else "Play", pa.GESTURES[key])
+              for key, (length, _) in pa.GESTURE_TIMES.items()]
+    if declared != wanted:
+        err(f"spirits/StolasEntity.java: Gesture is {[g[1] for g in wanted]}, each its clip and its length in ticks "
+            f"(concordance_pacts.GESTURES, GESTURE_TIMES): {declared}")
+    controllers = _java_body(stolas, "public void registerControllers(")
+    for needle in ("super.registerControllers(controllers);",
+                   "new AnimationController<StolasEntity>(GESTURE_CONTROLLER, 0, test -> PlayState.STOP)",
+                   "gestures.triggerableAnim(gesture.id, gesture.animation);", "controllers.add(gestures);"):
+        if needle not in controllers:
+            err(f"spirits/StolasEntity.java registerControllers: the worker's main controller, then a gesture controller that "
+                f"only plays what the server triggers ({needle})")
+    if controllers.find("super.registerControllers(controllers);") > controllers.find("controllers.add(gestures);"):
+        err("spirits/StolasEntity.java registerControllers: his gestures' controller comes after the main one, so a gesture's "
+            "bones win while it plays")
+    if 'public static final String GESTURE_CONTROLLER = "gesture";' not in stolas \
+            or "triggerAnim(GESTURE_CONTROLLER, gesture.id);" not in _java_body(stolas, "public void gesture(Gesture gesture)"):
+        err("spirits/StolasEntity.java: a gesture is fired on the server through gesture(), on the gesture controller")
+    leave = _java_body(stolas, "public void leave(")
+    if "departing = Gesture.DEPART.ticks;" not in leave or "gesture(Gesture.DEPART);" not in leave or "discard()" in leave:
+        err("spirits/StolasEntity.java leave: he makes his departing gesture and is discarded only when it ends")
+    if "discard();" not in _java_body(stolas, "protected void customServerAiStep(") \
+            or "return departing == 0 && super.shouldBeSaved();" not in stolas:
+        err("spirits/StolasEntity.java: a departing Stolas counts down to his discard and is never saved")
+    perch = text(JAVA_ROOT / "concordance" / "spirits" / "PactPerchBlockEntity.java")
+    summon = _java_body(perch, "private @Nullable StolasEntity summon(")
+    if summon.find("level.addFreshEntity(stolas)") < 0 \
+            or summon.find("stolas.gesture(StolasEntity.Gesture.ARRIVE);") < summon.find("level.addFreshEntity(stolas)"):
+        err("spirits/PactPerchBlockEntity.java summon: a summoned Stolas arrives (his gesture, once he is in the world)")
+    found = _java_body(perch, "public @Nullable StolasEntity stolas(ServerLevel level)")
+    if "!guest.gone()" not in _java_body(perch, "private @Nullable StolasEntity unbound(") or "!presence.gone()" not in found:
+        err("spirits/PactPerchBlockEntity.java: a Stolas leaving is never its visitor or presence (unbound, stolas: gone())")
+    if "getBlockPos().equals(presence.perch())" not in found:
+        err("spirits/PactPerchBlockEntity.java stolas: a copy of a perch names the original's presence, who is perched there, "
+            "never at the copy (getBlockPos().equals(presence.perch()))")
+    workers = text(CLIENT_JAVA_ROOT / "WorkerClient.java")
+    start = workers.find("EntityRendererRegistry.register(Workers.STOLAS,")
+    end = workers.find("EntityRendererRegistry.register(", start + 1)
+    block = workers[start:end if end >= 0 else len(workers)] if start >= 0 else ""
+    if f"STOLAS_SCALE = {pa.BODY_SCALE}F;" not in workers or ".withScale(STOLAS_SCALE)" not in block \
+            or ".withRenderLayer(AutoGlowingGeoLayer::new)" not in block:
+        err("client/WorkerClient.java: Stolas is drawn by GeckoLib at BODY_SCALE with his glowmask lit (tools/concordance_pacts.py)")
+    sheet, mask = ASSETS / "textures" / "entity" / "stolas.png", ASSETS / "textures" / "entity" / "stolas_glowmask.png"
+    if sheet.is_file() and mask.is_file():
+        with Image.open(sheet) as a, Image.open(mask) as b:
+            skin, glow = a.convert("RGBA"), b.convert("RGBA")
+            lit = [(x, y) for y in range(glow.height) for x in range(glow.width) if glow.getpixel((x, y))[3]]
+            if glow.size != skin.size or any(glow.getpixel(p) != skin.getpixel(p) for p in lit) or set(lit) != set(pa.EYE_TEXELS):
+                err(f"textures/entity/stolas_glowmask.png: his eyes alone, as his skin draws them ({pa.EYE_TEXELS}): {lit}")
+    else:
+        err("textures/entity/stolas.png and stolas_glowmask.png: run tools/owner_art.py (Stolas's adapted body)")
+    check_geckolib("stolas", stolas, None, None, kind="entity", faces=True)
+    shots = text(ROOT / "src" / "gametest" / "java" / "io" / "github" / "jimbozoomer" / "jugcraft" / "test" / "ConcordancePactClientGameTests.java")
+    for name in pa.BODY_SHOTS:
+        if f'"{name}"' not in shots:
+            err(f"ConcordancePactClientGameTests: takes {name}")
+    for key in ("idle", "listen", "waiting", "suspended"):
+        if f'"{pa.LOOPS[key]}"' not in shots:
+            err(f"ConcordancePactClientGameTests: checks his {key} loop ({pa.LOOPS[key]})")
+    posed = {key.lower(): (float(a), float(b)) for key, a, b in re.findall(
+        r'gesturePose\(context, server, perch, StolasEntity\.Gesture\.([A-Z]+), ([0-9.]+), ([0-9.]+), "jugcraft_stolas_[a-z]+"\);', shots)}
+    if posed != {key: window for key, (_, window) in pa.GESTURE_TIMES.items()}:
+        err(f"ConcordancePactClientGameTests: each gesture is frozen inside its telling pose (GESTURE_TIMES): {posed}")
+    for needle in ("StolasEntity.Gesture.ARRIVE.animation.equals(", "StolasEntity.Gesture.DEPART.animation.equals("):
+        if needle not in shots:
+            err(f"ConcordancePactClientGameTests: his real arrival and departure play their gestures ({needle})")
 
 
 def check_logistics(co, root, lang, registered):

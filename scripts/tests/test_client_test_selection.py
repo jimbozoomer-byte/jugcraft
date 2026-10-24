@@ -62,6 +62,11 @@ class ClientTestSelectionTests(unittest.TestCase):
         self.assertIn("ConcordancePactClientGameTests", chosen)
         self.assertIn("ConcordancePactClientGameTests", selection.WEIGHTS)
 
+    def test_stolas_glowmask_selects_the_pact_client_test(self):
+        # Concordance Chunk D unit 3 (D-06): his glowmask is shown by the pact's client class ("stolas_glowmask" starts with stolas).
+        chosen, _ = selection.select(["src/main/resources/assets/jugcraft/textures/entity/stolas_glowmask.png"], self.tests, set())
+        self.assertIn("ConcordancePactClientGameTests", chosen)
+
     def test_workflow_runs_every_selected_shard(self):
         workflow = (ROOT / ".github/workflows/build.yml").read_text()
         matrix = re.search(r"shard: \[([\d, ]+)\]", workflow)

@@ -17,9 +17,10 @@ and the pact menu's protocol. D-05 (D-S1, D-S3, D-S6, D-S12, D-S16): Star-reckon
 
 Java: concordance/spirits/StolasRegard.java, PactPerchBlock(Entity), PactMenu, PactRequestPayload, PactStatePayload,
 PactSessions, PactCompact, PactKeeping, StarReckoning, StolasEntity; concordance/worker/PactDefinition, PactParser,
-PactCatalog; client/PactClient, PactScreen and WorkerClient (Stolas's provisional body, the owner's Flashjack rig
-copied by tools/owner_art.py from OWNER_FILES). tools/concordance.py merges these tables into its own; Styx's words are
-tools/styx.py's; tools/check_mod_data.py (check_stolas_regard, check_pacts, check_pact_screen) holds the Java and the
+PactCatalog; client/PactClient, PactScreen and WorkerClient (Stolas's raven body, D-06 (D-S5): the Flashjack rig's
+geometry copied by tools/owner_art.py from OWNER_FILES, its skin, glowmask and animations adapted by tools/stolas_body.py
+from ADAPTED). tools/concordance.py merges these tables into its own; Styx's words are tools/styx.py's;
+tools/check_mod_data.py (check_stolas_regard, check_pacts, check_pact_screen, check_stolas_body) holds the Java and the
 data to them.
 """
 
@@ -371,23 +372,44 @@ SCREEN = {
     "screen.jugcraft.pact.help": "Tab and Shift+Tab move between his words and the choices; Enter or Space chooses; Esc closes. "
                                  "Closing before you accept agrees to nothing.",
 }
-# Stolas's provisional body (D-S5): the owner library's Flashjack rig, copied unchanged under his name by
-# tools/owner_art.py: art/owner-library/originals/Magic/assets/ars_jymbaumental/ geo/flashjack.geo.json (SHA-256
-# d23b5372...), animations/flashjack.animation.json (c4015c93...) and textures/entity/flashjack.png (567b44a5...);
-# catalog rows art/owner-library/catalog/files.csv:21291, 21330, 21676. Its folder's leftover metadata labels it Ars
-# Elemental by Alexthw, "GNU Lesser General Public License v3.0" (ports/jug-nouveau/ars_jymbaumental-1.21.1-0.7.10.4/
-# META-INF/neoforge.mods.toml); the owner's declaration is art/owner-library/PROVENANCE.md. Not imported: the
-# Blockbench project (flashjack.bbmodel) and the other skins (flapjack.png, bluejay.png); the attack and idle.air clips
-# are copied but unused. Its raven recolour and authored clips are D-06's, which then moves the texture and the
-# animations out of this table into its adapter.
+# Stolas's body (D-S5, D-06): the owner library's Flashjack rig in his raven form (art/owner-library/catalog/files.csv:21291,
+# 21330, 21676; SHA-256 d23b5372..., c4015c93..., 567b44a5...). Its geometry is copied unchanged by tools/owner_art.py
+# (OWNER_FILES); his skin, the glowmask that lights his eyes and his animations are adapted from the rig's own files by
+# tools/stolas_body.py (ADAPTED: runtime path -> (library file, adapter)), which tools/owner_art.py writes and checks.
+# Its folder's leftover metadata labels it Ars Elemental by Alexthw, "GNU Lesser General Public License v3.0"
+# (ports/jug-nouveau/ars_jymbaumental-1.21.1-0.7.10.4/META-INF/neoforge.mods.toml:7, 15, 25); the owner's declaration is
+# art/owner-library/PROVENANCE.md:3-7. Not imported: flashjack.bbmodel, flapjack.png, bluejay.png; attack and idle.air
+# stay in his animation file, unused. check_stolas_body holds the Java, the client test and the files to these tables.
 FLASHJACK = "assets/ars_jymbaumental/"
-OWNER_FILES = {
-    "geckolib/models/entity/stolas.geo.json": FLASHJACK + "geo/flashjack.geo.json",
-    "geckolib/animations/entity/stolas.animation.json": FLASHJACK + "animations/flashjack.animation.json",
-    "textures/entity/stolas.png": FLASHJACK + "textures/entity/flashjack.png",
+OWNER_FILES = {"geckolib/models/entity/stolas.geo.json": FLASHJACK + "geo/flashjack.geo.json"}
+ADAPTED = {
+    "textures/entity/stolas.png": (FLASHJACK + "textures/entity/flashjack.png", "skin"),
+    "textures/entity/stolas_glowmask.png": (FLASHJACK + "textures/entity/flashjack.png", "glowmask"),
+    "geckolib/animations/entity/stolas.animation.json": (FLASHJACK + "animations/flashjack.animation.json", "animations"),
 }
-BODY_SCALE = 1.4  # client/WorkerClient.STOLAS_SCALE
-BODY_CLIPS = {"perched": "idle.sitting", "grounded": "idle.ground", "astir": "idle.flapping"}  # spirits/StolasEntity
+BODY_SCALE = 1.4  # client/WorkerClient.STOLAS_SCALE: the owner's rig is about a block tall, so he stands 1.45 (Workers.STOLAS)
+# His loops (Java: StolasEntity.Loop on the worker's main controller, for what the server synced) and gestures
+# (StolasEntity.Gesture on its "gesture" controller, each fired by the server's action). "astir" is the owner's idle.flapping.
+LOOPS = {"idle": "animation.stolas.idle", "listen": "animation.stolas.listen", "waiting": "animation.stolas.waiting",
+         "suspended": "animation.stolas.suspended", "astir": "idle.flapping"}
+GESTURES = {"arrive": "animation.stolas.arrive", "inspect": "animation.stolas.inspect", "assent": "animation.stolas.assent",
+            "refuse": "animation.stolas.refuse", "depart": "animation.stolas.depart"}
+# Each gesture's length (seconds; Java: Gesture's ticks) and the stretch that holds its telling pose (seconds):
+# ConcordancePactClientGameTests freezes the world inside it. Depart holds its last frame (he is gone by then).
+GESTURE_TIMES = {"arrive": (2.0, (0.70, 1.20)), "inspect": (2.5, (0.40, 1.10)), "assent": (2.0, (0.45, 1.25)),
+                 "refuse": (2.0, (0.50, 1.30)), "depart": (2.0, (0.30, 0.80))}
+LOOP_LENGTHS = {"idle": 4.0, "listen": 3.0, "waiting": 4.0, "suspended": 6.0}
+# His listening pose, as offsets from the perched one (degrees; the head's position in pixels): every gesture starts
+# and ends on it.
+ATTEND = {"head": (6, 8, -16), "head_position": (0, 0, -0.5), "body": (4, 0, 0), "wing": (0, 0, -6)}
+EYE_TEXELS = ((9, 10), (9, 11), (14, 10), (14, 11))  # his skin's eyes: all his glowmask lights (measured)
+# What ConcordancePactClientGameTests.poses photographs (D-06): each of his four loops of his own and his five gestures.
+# Not his astir loop (the owner's idle.flapping, played while an offering is due): posing it would need an offering due
+# in the client test, which would change the pact's upkeep that its later steps read (a recorded deviation from D-06's
+# "a frozen-tick pose for each clip"; check_geckolib still holds the clip to his animation file).
+BODY_SHOTS = ["jugcraft_stolas_idle", "jugcraft_stolas_listen", "jugcraft_stolas_suspended", "jugcraft_stolas_waiting",
+              "jugcraft_stolas_inspect", "jugcraft_stolas_assent", "jugcraft_stolas_refuse", "jugcraft_stolas_depart",
+              "jugcraft_stolas_arrive"]
 # What ConcordancePactClientGameTests photographs (D-05 appends its own).
 CLIENT_SHOTS = ["jugcraft_pact_conversation", "jugcraft_pact_terms", "jugcraft_pact_terms_scale4", "jugcraft_pact_conversation_scale4",
                 "jugcraft_pact_terms_small", "jugcraft_pact_conversation_small", "jugcraft_pact_refused", "jugcraft_pact_kept",

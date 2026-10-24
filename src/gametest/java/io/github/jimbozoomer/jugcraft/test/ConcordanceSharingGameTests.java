@@ -500,7 +500,7 @@ public class ConcordanceSharingGameTests {
 		helper.assertTrue(copy.holder().look(level, now + 7 * Agreement.DAY) == Pacts.Event.NONE, "Its upkeep looks at nothing");
 		holder.closeContainer();
 		helper.setBlock(copyAt, Blocks.AIR);
-		helper.assertTrue(record.equals(BoundWills.of(level.getServer()).ledger().get(record.id())) && !presence.isRemoved()
+		helper.assertTrue(record.equals(BoundWills.of(level.getServer()).ledger().get(record.id())) && !presence.gone()
 				&& WorkerRoster.of(level.getServer()).workers(holder.getUUID()).containsKey(presence.getUUID())
 				&& ConcordanceWorkerGameTests.escrowed(level, record.id()) == 2, "Broken, the copy releases and unseats nothing");
 		helper.assertTrue(original.holder().verify(level, now) == AgreementHolder.Standing.VALID && presence.think(level, 0L, now) != Status.FINISHED

@@ -1,6 +1,9 @@
 package io.github.jimbozoomer.jugcraft.concordance.spirits;
 
+import com.geckolib.animatable.manager.AnimatableManager;
+import com.geckolib.animation.AnimationController;
 import com.geckolib.animation.RawAnimation;
+import com.geckolib.animation.object.PlayState;
 import io.github.jimbozoomer.jugcraft.concordance.Authority;
 import io.github.jimbozoomer.jugcraft.concordance.worker.PactDefinition;
 import io.github.jimbozoomer.jugcraft.concordance.worker.Pacts;
@@ -9,6 +12,9 @@ import java.util.UUID;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.GlobalPos;
 import net.minecraft.core.UUIDUtil;
+import net.minecraft.network.syncher.EntityDataAccessor;
+import net.minecraft.network.syncher.EntityDataSerializers;
+import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.tags.DamageTypeTags;
 import net.minecraft.world.damagesource.DamageSource;
@@ -30,22 +36,69 @@ import org.jspecify.annotations.Nullable;
  * a visitor is saved with his chunk (his perch only) and leaves at his first think after it loads. Once a pact is sealed
  * he is its one presence; he leaves when the pact is ended, kept elsewhere or answered by another. Only damage that
  * bypasses invulnerability harms him (Styx's rule); if he is lost all the same, the pact is not: its holder calls him
- * again at no cost. He keeps to his perch. Provisional body (D-S5, unit 2): the owner's Flashjack rig under his name;
- * D-06 gives him his own.
+ * again at no cost. He keeps to his perch.
+ * <p>
+ * His body (D-06, D-S5): the owner's Flashjack rig in his raven form (tools/stolas_body.py). His main controller (the
+ * worker's) plays a {@link Loop} for what the server synced: perched, listening while a conversation is open at his
+ * perch, astir while an offering is due, hunched while his pact is suspended, waiting while he is off his service for any
+ * other reason. His gestures play on a controller of their own over it, each fired by the server through
+ * {@link #gesture} (GeckoLib sends it to those watching him then; one who starts watching later sees his state, never a
+ * replay). He arrives when he is summoned to a perch; when he leaves he makes his departing gesture and is gone
+ * {@link Gesture#DEPART}'s length later: struck off his holder's roster at once, never saved meanwhile.
  */
 public class StolasEntity extends WorkerEntity<StolasEntity> implements AgreementHolder.Presence {
 	/** His pacts' counterpart (the pact definition's id). */
 	public static final String COUNTERPART = PactDefinition.STOLAS;
-	// ---------------------------------------------------------------- his provisional body (D-S5, unit 2)
-	/** Perched and serving, or hearing a visitor: the owner's Flashjack settling onto its feet, held there. */
-	private static final RawAnimation PERCHED = RawAnimation.begin().thenPlayAndHold("idle.sitting");
-	/** Off duty (suspended, held for upkeep, his holder away, the Concordance off): standing, breathing. */
-	private static final RawAnimation GROUNDED = RawAnimation.begin().thenLoop("idle.ground");
-	/** Astir (an offering due; travelling or working, which he never is in unit 2): wings beating. */
-	private static final RawAnimation ASTIR = RawAnimation.begin().thenLoop("idle.flapping");
+	// ---------------------------------------------------------------- his body (D-06, D-S5; tools/concordance_pacts.py LOOPS, GESTURES)
+	/** The controller his gestures play on, registered after the worker's own "main" one, so a gesture's bones win while it plays. */
+	public static final String GESTURE_CONTROLLER = "gesture";
+	/** Whether a conversation is open at his perch (the server's; never saved). */
+	private static final EntityDataAccessor<Boolean> LISTENING = SynchedEntityData.defineId(StolasEntity.class, EntityDataSerializers.BOOLEAN);
+
+	/** His loops on the worker's main controller, for what the server synced (tools/concordance_pacts.py LOOPS). */
+	public enum Loop {
+		IDLE(RawAnimation.begin().thenLoop("animation.stolas.idle")),
+		LISTEN(RawAnimation.begin().thenLoop("animation.stolas.listen")),
+		WAITING(RawAnimation.begin().thenLoop("animation.stolas.waiting")),
+		SUSPENDED(RawAnimation.begin().thenLoop("animation.stolas.suspended")),
+		ASTIR(RawAnimation.begin().thenLoop("idle.flapping"));
+
+		final RawAnimation animation;
+
+		Loop(RawAnimation animation) {
+			this.animation = animation;
+		}
+	}
+
+	/** His gestures: each a one-shot clip on {@link #GESTURE_CONTROLLER}, its length in ticks (tools/concordance_pacts.py GESTURE_TIMES). */
+	public enum Gesture {
+		ARRIVE("arrive", 40, RawAnimation.begin().thenPlay("animation.stolas.arrive")),
+		INSPECT("inspect", 50, RawAnimation.begin().thenPlay("animation.stolas.inspect")),
+		ASSENT("assent", 40, RawAnimation.begin().thenPlay("animation.stolas.assent")),
+		REFUSE("refuse", 40, RawAnimation.begin().thenPlay("animation.stolas.refuse")),
+		DEPART("depart", 40, RawAnimation.begin().thenPlayAndHold("animation.stolas.depart"));
+
+		/** Its name on the gesture controller (what the server triggers). */
+		public final String id;
+		public final int ticks;
+		public final RawAnimation animation;
+
+		Gesture(String id, int ticks, RawAnimation animation) {
+			this.id = id;
+			this.ticks = ticks;
+			this.animation = animation;
+		}
+
+		/** The clip it plays (its name in stolas.animation.json). */
+		public String clip() {
+			return animation.getAnimationStages().getFirst().animationName();
+		}
+	}
 
 	private @Nullable BlockPos perch;
 	private @Nullable UUID record;
+	/** Ticks left of his departure; 0 while he is not leaving. Never saved: a departing Stolas is not written to the world. */
+	private int departing;
 
 	public StolasEntity(EntityType<? extends PathfinderMob> type, Level level) {
 		super(type, level);
@@ -54,6 +107,12 @@ public class StolasEntity extends WorkerEntity<StolasEntity> implements Agreemen
 
 	public static AttributeSupplier.Builder createAttributes() {
 		return Mob.createMobAttributes().add(Attributes.MAX_HEALTH, 20.0).add(Attributes.MOVEMENT_SPEED, 0.0).add(Attributes.FOLLOW_RANGE, 8.0);
+	}
+
+	@Override
+	protected void defineSynchedData(SynchedEntityData.Builder builder) {
+		super.defineSynchedData(builder);
+		builder.define(LISTENING, false);
 	}
 
 	@Override
@@ -89,6 +148,21 @@ public class StolasEntity extends WorkerEntity<StolasEntity> implements Agreemen
 		return perch;
 	}
 
+	/** Whether a conversation is open at his perch (both sides: the client draws him listening). */
+	public boolean listening() {
+		return entityData.get(LISTENING);
+	}
+
+	/** Whether he is leaving: his departing gesture is playing and he will be gone when it ends. */
+	public boolean departing() {
+		return departing > 0;
+	}
+
+	/** Gone, or going: removed, or departing. No perch, roster, pact or test counts him from then on. */
+	public boolean gone() {
+		return isRemoved() || departing > 0;
+	}
+
 	@Override
 	public boolean hurtServer(ServerLevel level, DamageSource source, float amount) {
 		return source.is(DamageTypeTags.BYPASSES_INVULNERABILITY) && super.hurtServer(level, source, amount);
@@ -102,8 +176,12 @@ public class StolasEntity extends WorkerEntity<StolasEntity> implements Agreemen
 	@Override
 	public Status think(ServerLevel level, long time, long gameTime) {
 		Status next = decide(level, gameTime);
-		if (!isRemoved()) {
+		if (!gone()) {
+			// Leaving, he keeps his last status, as he did when he left at once: no sign over him, no roster entry touched.
 			setStatus(next);
+			// D-06: he listens while a conversation is open at his perch (its screen open, its time not past).
+			entityData.set(LISTENING, perch != null && next != Status.DISABLED
+					&& PactSessions.live(level.getServer(), GlobalPos.of(level.dimension(), perch), gameTime));
 		}
 		return next;
 	}
@@ -178,13 +256,34 @@ public class StolasEntity extends WorkerEntity<StolasEntity> implements Agreemen
 
 	@Override
 	public void leave(ServerLevel level, AgreementHolder.@Nullable Holds home, BlockPos at) {
-		if (isRemoved()) {
+		if (gone()) {
 			return;
 		}
 		if (owner != null) {
 			WorkerRoster.of(level.getServer()).remove(owner, getUUID());
 		}
-		discard();
+		// D-06: he makes his departing gesture, and is discarded when it ends (customServerAiStep).
+		departing = Gesture.DEPART.ticks;
+		stop();
+		gesture(Gesture.DEPART);
+	}
+
+	/** Departing, he only counts down to his going; otherwise he thinks as every worker does. */
+	@Override
+	protected void customServerAiStep(ServerLevel level) {
+		if (departing > 0) {
+			if (--departing == 0) {
+				discard();
+			}
+			return;
+		}
+		super.customServerAiStep(level);
+	}
+
+	/** Departing, he is not written to the world: a chunk unloaded mid-departure, or a stop, finishes it. */
+	@Override
+	public boolean shouldBeSaved() {
+		return departing == 0 && super.shouldBeSaved();
 	}
 
 	/** Killed or discarded: struck off his holder's roster, which is how the perch knows he is lost (D-S18's rule). */
@@ -196,13 +295,46 @@ public class StolasEntity extends WorkerEntity<StolasEntity> implements Agreemen
 		super.remove(reason);
 	}
 
+	/**
+	 * Plays one of his gestures for everyone watching him now (server side only: GeckoLib sends it to those tracking him;
+	 * one who starts watching later sees his state, never a replay). Nothing else follows from it.
+	 */
+	public void gesture(Gesture gesture) {
+		if (!isRemoved() && level() instanceof ServerLevel) {
+			triggerAnim(GESTURE_CONTROLLER, gesture.id);
+		}
+	}
+
+	/** His loop for {@code status}: listening over all else while he serves; never a claim of work he is not doing. */
+	public static Loop loop(Status status, boolean listening) {
+		if (status == Status.DISABLED || status == Status.FINISHED) {
+			return Loop.WAITING;
+		}
+		if (listening) {
+			return Loop.LISTEN;
+		}
+		return switch (status) {
+			case TRAVELLING, RETURNING, WORKING, UPKEEP_DUE -> Loop.ASTIR;
+			case SUSPENDED, UPKEEP_HELD -> Loop.SUSPENDED;
+			case OWNER_OFFLINE, OTHER_DIMENSION, OUTSIDE_AGREEMENT, DESTINATION_UNLOADED -> Loop.WAITING;
+			default -> Loop.IDLE;
+		};
+	}
+
 	@Override
 	protected RawAnimation animation(Status status) {
-		return switch (status) {
-			case TRAVELLING, RETURNING, WORKING, UPKEEP_DUE -> ASTIR;
-			case SUSPENDED, UPKEEP_HELD, OWNER_OFFLINE, OTHER_DIMENSION, OUTSIDE_AGREEMENT, DESTINATION_UNLOADED, FINISHED, DISABLED -> GROUNDED;
-			default -> PERCHED;
-		};
+		return loop(status, listening()).animation;
+	}
+
+	/** The worker's main controller (his loops), then his gestures' over it: triggered only, it draws nothing between them. */
+	@Override
+	public void registerControllers(AnimatableManager.ControllerRegistrar controllers) {
+		super.registerControllers(controllers);
+		AnimationController<StolasEntity> gestures = new AnimationController<StolasEntity>(GESTURE_CONTROLLER, 0, test -> PlayState.STOP);
+		for (Gesture gesture : Gesture.values()) {
+			gestures.triggerableAnim(gesture.id, gesture.animation);
+		}
+		controllers.add(gestures);
 	}
 
 	@Override

@@ -74,8 +74,9 @@ WEIGHTS = {
     # Concordance Chunk D unit 2: a dedicated server's start, the pact screen walked by keyboard (his three beats, the
     # terms, a refused and a sealed acceptance; D-05 adds a recall, an offering and the end with its confirmation) and its
     # shots at three sizes and of Stolas on his perch: about 140 s at the pace the Winter entry implies (an estimate, not a
-    # measurement).
-    "ConcordancePactClientGameTests": 150,
+    # measurement). Unit 3 (D-06) adds his nine poses: four loops waited out and five gestures frozen, about 50 s; an
+    # estimate.
+    "ConcordancePactClientGameTests": 200,
     "JugcraftServerClientGameTests": 90,
     # Companion suites exercise timed AI, inventory trips and cooking, not just
     # showrooms. Allow CI headroom over the focused local runtime measurements.

@@ -1800,7 +1800,7 @@ public class ConcordanceWorkerGameTests {
 
 	static @Nullable StolasEntity stolas(ServerLevel level, PactPerchBlockEntity perch) {
 		UUID id = perch.holder().spirit();
-		return id != null && level.getEntity(id) instanceof StolasEntity found && !found.isRemoved() ? found : null;
+		return id != null && level.getEntity(id) instanceof StolasEntity found && !found.gone() ? found : null;
 	}
 
 	static @Nullable BoundWill recordOf(ServerLevel level, ServerPlayer holder) {
@@ -1809,7 +1809,7 @@ public class ConcordanceWorkerGameTests {
 	}
 
 	static List<StolasEntity> stolases(GameTestHelper helper) {
-		return helper.getLevel().getEntitiesOfClass(StolasEntity.class, helper.getBounds(), Entity::isAlive);
+		return helper.getLevel().getEntitiesOfClass(StolasEntity.class, helper.getBounds(), found -> found.isAlive() && !found.gone());
 	}
 
 	static boolean answered(@Nullable PactStatePayload state, String reason) {
@@ -2203,21 +2203,21 @@ public class ConcordanceWorkerGameTests {
 			beside(helper, player, at);
 			PactMenu menu = open(helper, player, perch);
 			StolasEntity visitor = (StolasEntity) level.getEntity(perch.visitor());
-			helper.assertTrue(visitor != null && visitor.think(level, 0L, now) == Status.IDLE && !visitor.isRemoved(), "Stolas waits while it is open");
+			helper.assertTrue(visitor != null && visitor.think(level, 0L, now) == Status.IDLE && !visitor.gone(), "Stolas waits while it is open");
 			return new Visit(player, perch, menu, visitor);
 		};
 		Visit declined = visit.apply(new BlockPos(1, 1, 1));
 		send(declined.player(), declined.menu(), PactRequestPayload.DECLINE, 0);
-		helper.assertTrue(declined.visitor().think(level, 0L, now) == Status.FINISHED && declined.visitor().isRemoved(), "Declined: he leaves");
+		helper.assertTrue(declined.visitor().think(level, 0L, now) == Status.FINISHED && declined.visitor().gone(), "Declined: he leaves");
 		Visit closed = visit.apply(new BlockPos(4, 1, 1));
 		closed.player().closeContainer();
-		helper.assertTrue(closed.visitor().think(level, 0L, now) == Status.FINISHED && closed.visitor().isRemoved(), "Closed: he leaves");
+		helper.assertTrue(closed.visitor().think(level, 0L, now) == Status.FINISHED && closed.visitor().gone(), "Closed: he leaves");
 		Visit idle = visit.apply(new BlockPos(7, 1, 1));
 		helper.assertTrue(idle.visitor().think(level, 0L, now + PactSessions.TIMEOUT_TICKS) == Status.IDLE, "Within its time he waits");
-		helper.assertTrue(idle.visitor().think(level, 0L, now + PactSessions.TIMEOUT_TICKS + 1) == Status.FINISHED && idle.visitor().isRemoved(), "Timed out: he leaves");
+		helper.assertTrue(idle.visitor().think(level, 0L, now + PactSessions.TIMEOUT_TICKS + 1) == Status.FINISHED && idle.visitor().gone(), "Timed out: he leaves");
 		Visit gone = visit.apply(new BlockPos(1, 1, 5));
 		TestPlayers.leave(gone.player());
-		helper.assertTrue(gone.visitor().think(level, 0L, now) == Status.FINISHED && gone.visitor().isRemoved(), "Its player gone: he leaves");
+		helper.assertTrue(gone.visitor().think(level, 0L, now) == Status.FINISHED && gone.visitor().gone(), "Its player gone: he leaves");
 		Visit saved = visit.apply(new BlockPos(5, 1, 5));
 		CompoundTag perchSave = saved.perch().saveWithoutMetadata(level.registryAccess());
 		TagValueOutput out = TagValueOutput.createWithContext(ProblemReporter.DISCARDING, level.registryAccess());
@@ -2228,11 +2228,11 @@ public class ConcordanceWorkerGameTests {
 		saved.perch().loadWithComponents(TagValueInput.create(ProblemReporter.DISCARDING, level.registryAccess(), perchSave));
 		StolasEntity reloaded = Workers.STOLAS.create(level, EntitySpawnReason.LOAD);
 		reloaded.load(TagValueInput.create(ProblemReporter.DISCARDING, level.registryAccess(), body));
-		helper.assertTrue(saved.perch().visitor() == null && reloaded.think(level, 0L, now) == Status.FINISHED && reloaded.isRemoved()
+		helper.assertTrue(saved.perch().visitor() == null && reloaded.think(level, 0L, now) == Status.FINISHED && reloaded.gone()
 				&& saved.visitor().think(level, 0L, now) == Status.FINISHED, "After a restart the perch knows no visitor, and he leaves");
 		StolasEntity loadedOff = Workers.STOLAS.create(level, EntitySpawnReason.LOAD);
 		loadedOff.load(TagValueInput.create(ProblemReporter.DISCARDING, level.registryAccess(), body));
-		off(() -> helper.assertTrue(loadedOff.think(level, 0L, now) == Status.FINISHED && loadedOff.isRemoved(),
+		off(() -> helper.assertTrue(loadedOff.think(level, 0L, now) == Status.FINISHED && loadedOff.gone(),
 				"Loaded while the Concordance is off, a visitor leaves all the same"));
 		for (Visit each : List.of(declined, closed, idle, gone, saved)) {
 			helper.assertTrue(BoundWills.of(level.getServer()).ledger().heldBy(each.player().getUUID()).isEmpty()
@@ -2578,7 +2578,7 @@ public class ConcordanceWorkerGameTests {
 		helper.assertTrue(inventory.countItem(Items.AMETHYST_SHARD) == 64 && looseNear(level, feet, Items.AMETHYST_SHARD) == 2 && looseNear(level, feet, starflower()) == 1,
 				"What was paid ahead comes back once: what fits into the inventory, the rest at their feet");
 		BoundWills wills = BoundWills.of(level.getServer());
-		helper.assertTrue(wills.ledger().get(record) == null && wills.escrow(record).isEmpty() && stolas.isRemoved()
+		helper.assertTrue(wills.ledger().get(record) == null && wills.escrow(record).isEmpty() && stolas.gone()
 				&& !WorkerRoster.of(level.getServer()).workers(keeper.getUUID()).containsKey(stolas.getUUID()) && perch.holder().agreement() == null,
 				"The record and its escrow go; Stolas departs and is struck off");
 		List<Pacts.Departure> history = PactHistory.of(level.getServer()).history(keeper.getUUID());
@@ -2632,7 +2632,7 @@ public class ConcordanceWorkerGameTests {
 		helper.assertTrue(kept != null && keeper.getUUID().equals(kept.holder()) && !Pacts.seated(kept) && kept.pact().presence() == null
 				&& kept.pact().upkeep().equals(before.pact().upkeep()) && kept.pact().service().equals(before.pact().service()) && escrowed(level, record) == 2,
 				"Broken, the perch ends nothing: the pact is without its perch, its terms and escrow kept");
-		helper.assertTrue(stolas.isRemoved() && !WorkerRoster.of(level.getServer()).workers(keeper.getUUID()).containsKey(stolas.getUUID())
+		helper.assertTrue(stolas.gone() && !WorkerRoster.of(level.getServer()).workers(keeper.getUUID()).containsKey(stolas.getUUID())
 				&& looseNear(level, new AABB(helper.absolutePos(at)).inflate(2.0), Items.AMETHYST_SHARD) == 0
 				&& PactHistory.of(level.getServer()).history(keeper.getUUID()).isEmpty(), "Stolas leaves the world; nothing drops; nothing departed");
 		PactPerchBlockEntity other = perch(helper, new BlockPos(5, 1, 5), keeper);
@@ -2734,5 +2734,51 @@ public class ConcordanceWorkerGameTests {
 		helper.assertTrue(stolas(level, perch) != null && BoundWills.of(level.getServer()).ledger().get(record) != null
 				&& PactHistory.of(level.getServer()).history(keeper.getUUID()).isEmpty(), "Back near it, he returns; the pact never ended");
 		helper.succeed();
+	}
+
+	// ---------------------------------------------------------------- Concordance Chunk D, D-06: Stolas's body and his leaving
+
+	/**
+	 * D-06 (D-S7): leaving, Stolas makes his departing gesture and is gone when it ends: struck off at once, never saved
+	 * meanwhile, never taken for the perch's visitor or presence again; a new invitation summons a new Stolas. A declined
+	 * visitor and an ended pact's presence alike. He listens while the screen is open; nothing of this is saved.
+	 */
+	@GameTest(maxTicks = 80)
+	public void aDepartingStolasIsNeverAVisitorAgain(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		long now = level.getGameTime();
+		ServerPlayer guest = ready(level, TestPlayers.mock(helper));
+		BlockPos at = new BlockPos(1, 1, 1);
+		PactPerchBlockEntity perch = perch(helper, at, guest);
+		beside(helper, guest, at);
+		PactMenu menu = open(helper, guest, perch);
+		StolasEntity visitor = (StolasEntity) level.getEntity(perch.visitor());
+		helper.assertTrue(visitor != null && visitor.think(level, 0L, now) == Status.IDLE && visitor.listening() && !visitor.gone()
+				&& visitor.equals(perch.stolas(level)), "Invited, he waits at the perch, listening");
+		send(guest, menu, PactRequestPayload.DECLINE, 0);
+		helper.assertTrue(visitor.think(level, 0L, now) == Status.FINISHED && visitor.departing() && !visitor.isRemoved() && visitor.gone()
+				&& !visitor.shouldBeSaved() && perch.stolas(level) == null,
+				"Declined, he departs: gone for the perch, not saved, still in the world for his gesture");
+		helper.assertTrue(visitor.think(level, 0L, now) == Status.FINISHED && visitor.departing(), "Thinking again changes nothing");
+		open(helper, guest, perch);
+		StolasEntity second = (StolasEntity) level.getEntity(perch.visitor());
+		helper.assertTrue(second != null && !second.equals(visitor) && !second.gone() && second.equals(perch.stolas(level)),
+				"A new invitation summons a new Stolas, never the departing one");
+		ServerPlayer keeper = ready(level, TestPlayers.survivor(helper));
+		PactPerchBlockEntity home = stolasPact(helper, keeper, new BlockPos(5, 1, 5), now);
+		StolasEntity presence = stolas(level, home);
+		TagValueOutput out = TagValueOutput.createWithContext(ProblemReporter.DISCARDING, level.registryAccess());
+		presence.saveWithoutId(out);
+		CompoundTag body = out.buildResult();
+		helper.assertTrue(!body.contains("listening") && !body.contains("departing") && !body.contains("cues"), "Nothing of his presentation is saved: " + body);
+		helper.assertTrue(PactKeeping.end(level, keeper, home.holder(), StolasEntity.COUNTERPART, now).ended() == AgreementHolder.Ended.ENDED
+				&& presence.departing() && !presence.isRemoved() && !presence.shouldBeSaved() && home.stolas(level) == null
+				&& !WorkerRoster.of(level.getServer()).workers(keeper.getUUID()).containsKey(presence.getUUID()),
+				"Ended, his presence departs at once: struck off, never saved");
+		helper.runAfterDelay(StolasEntity.Gesture.DEPART.ticks + 2, () -> {
+			helper.assertTrue(visitor.isRemoved() && presence.isRemoved() && !second.isRemoved(),
+					"Their departures end with them gone; the new visitor, its screen still open, stays");
+			helper.succeed();
+		});
 	}
 }
