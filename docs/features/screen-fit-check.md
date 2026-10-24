@@ -30,9 +30,9 @@ Minecraft never gives a GUI smaller than 320 × 240 GUI pixels: whatever GUI sca
 - the recipe page of the form with the most recipes;
 - the prospector, rocket pad, logic controller, storage tank, reactor console, remote shutdown panel, drone depot terminal and drone tower.
 - since [the benches in the workshop look](bench-screens.md): the cooking pot, lampwright's bench, farm stand, cave survey desk and carving knife.
-- since Concordance Chunk D, D-07 (not merged; [the roster screen](arcane-concordance-workers.md#the-roster-screen-concordance-chunk-d-d-07)): the Concordance's roster, before its first state (its size and layout only). Not yet run in CI.
+- since Concordance Chunk D, D-07 (not merged; [the roster screen](arcane-concordance-workers.md#the-roster-screen-concordance-chunk-d-d-07)): the Concordance's roster, before its first state (its size and layout only; shot `jugcraft_fit_concordance_roster`). Not yet run in CI.
 
-For each screen it checks that the panel the screen reports (`ScreenKit.Fitted.panelArea`, after any scaling to fit) lies inside the window. It fails with a list of the screens that do not fit. It photographs one machine screen, the busiest form, the recipe page and the eight other screens at that size (`jugcraft_fit_*`), then puts the window and GUI scale back.
+For each screen it checks that the panel the screen reports (`ScreenKit.Fitted.panelArea`, after any scaling to fit) lies inside the window. It fails with a list of the screens that do not fit. It photographs one machine screen, the busiest form, the recipe page and the fourteen other screens at that size (`jugcraft_fit_*`), then puts the window and GUI scale back.
 
 The screens are opened on stand-in menus, with no block and no server round trip. That is enough to judge their size and layout; the other client tests show them working.
 

@@ -18489,8 +18489,16 @@ def check_pacts(co, root, lang, registered, research):
         if [s.get("name") for s in entry.get("sounds", [])] != [f"{MOD}:{n}" for n in pa.SOUND_FILES.get(event, [])]:
             err(f"sounds.json: {event} plays {pa.SOUND_FILES.get(event)} (run tools/generate_material_data.py)")
         for name in pa.SOUND_FILES.get(event, []):
-            if not (ASSETS / "sounds" / f"{name}.ogg").is_file():
+            path = ASSETS / "sounds" / f"{name}.ogg"
+            if not path.is_file():
                 err(f"sounds/{name}.ogg: Stolas's sounds play runtime files only (no new audio, D-S5)")
+                continue
+            # The unit review (D1): OpenAL places only a mono source, so each cue is heard from him and fades with distance
+            # (D-P101); a Vorbis identification header's channel count is the byte 11 after its b"\x01vorbis".
+            data = path.read_bytes()
+            at = data.find(b"\x01vorbis")
+            if at < 0 or len(data) <= at + 11 or data[at + 11] != 1:
+                err(f"sounds/{name}.ogg: {event} plays a mono file, so it is heard from him within 16 blocks (D-P101)")
     if set(pa.SOUND_FILES) != set(pa.SOUND_EVENTS) or not set(pa.SOUND_EVENTS) <= set(co.SOUND_EVENTS) \
             or any(co.SOUND_FILES.get(e) != pa.SOUND_FILES[e] for e in pa.SOUND_EVENTS):
         err("tools/concordance.py: SOUND_EVENTS and SOUND_FILES take all of Stolas's, each playing runtime files")
@@ -18691,11 +18699,11 @@ def check_stolas_regard(co, root, lang, research):
 
 
 def check_pact_screen(co, lang):
-    """Concordance Chunk D, unit 2 (D-04 client, D-05; D-S5, D-S14, D-S15, D-S21): the pact perch's screen and Stolas's
-    provisional body (the payloads are check_pacts'). Only PactClient sends, only for the open menu, and it drops a state
-    for any other. The screen is native (no text box, chat, command or vanilla Dialog) and narrated, ends a pact only from
-    a confirmation, and has words for every term D-S15 lists. Stolas's body is check_stolas_body's. The client class that
-    shows all this is registered and takes its pictures."""
+    """Concordance Chunk D, unit 2 (D-04 client, D-05; D-S5, D-S14, D-S15, D-S21): the pact perch's screen (the payloads
+    are check_pacts'). Only PactClient sends, only for the open menu, and it drops a state for any other. The screen is
+    native (no text box, chat, command or vanilla Dialog) and narrated, ends a pact only from a confirmation, and has words
+    for every term D-S15 lists. Stolas's body is check_stolas_body's. The client class that shows all this is registered
+    and takes its pictures."""
     pa = co.pacts
 
     def text(path):
@@ -18821,11 +18829,24 @@ def check_stolas_body(co):
             or "triggerAnim(GESTURE_CONTROLLER, gesture.id);" not in _java_body(stolas, "public void gesture(Gesture gesture)"):
         err("spirits/StolasEntity.java: a gesture is fired on the server through gesture(), on the gesture controller")
     leave = _java_body(stolas, "public void leave(")
-    if "departing = Gesture.DEPART.ticks;" not in leave or "gesture(Gesture.DEPART);" not in leave or "discard()" in leave:
-        err("spirits/StolasEntity.java leave: he makes his departing gesture and is discarded only when it ends")
-    if "discard();" not in _java_body(stolas, "protected void customServerAiStep(") \
-            or "return departing == 0 && super.shouldBeSaved();" not in stolas:
-        err("spirits/StolasEntity.java: a departing Stolas counts down to his discard and is never saved")
+    if "departAt = level.getGameTime() + Gesture.DEPART.ticks;" not in leave or "gesture(Gesture.DEPART);" not in leave \
+            or "discard()" in leave:
+        err("spirits/StolasEntity.java leave: he makes his departing gesture and is discarded only when it ends (game time)")
+    if "departed(level.getGameTime());" not in _java_body(stolas, "protected void customServerAiStep(") \
+            or "discard();" not in _java_body(stolas, "private boolean departed(long gameTime)") \
+            or "return departAt == 0 && super.shouldBeSaved();" not in stolas:
+        err("spirits/StolasEntity.java: a departing Stolas is discarded when his departure's game time comes, and never saved")
+    # The unit review (G1): his departure ends on time where his entity does not tick (a chunk tracked but not ticking, or
+    # unloaded around him, since an unsaved entity is not unloaded): a server-tick sweep of every Stolas leaving.
+    sweep = _java_body(stolas, "public static void registerSweep()")
+    if "LEAVING.add(this);" not in leave or "ServerTickEvents.END_SERVER_TICK.register(" not in sweep \
+            or "LEAVING.clear()" not in sweep or "StolasEntity.registerSweep();" not in text(JAVA_ROOT / "concordance" / "spirits" / "Workers.java"):
+        err("spirits/StolasEntity.java: each departure is swept at the end of every server tick, ticking or not (registerSweep, "
+            "once in Workers.register; emptied at stop)")
+    # The unit review (G2): leaving, he listens no more and his departure is synced; the client draws him leaving only where it
+    # saw his departing gesture fired, so one who starts watching then sees him gone.
+    if "entityData.set(LISTENING, false);" not in leave or "entityData.set(DEPARTING, true);" not in leave:
+        err("spirits/StolasEntity.java leave: he listens no more, and his departure is synced (DEPARTING)")
     perch = text(JAVA_ROOT / "concordance" / "spirits" / "PactPerchBlockEntity.java")
     summon = _java_body(perch, "private @Nullable StolasEntity summon(")
     if summon.find("level.addFreshEntity(stolas)") < 0 \
@@ -18844,6 +18865,11 @@ def check_stolas_body(co):
     if f"STOLAS_SCALE = {pa.BODY_SCALE}F;" not in workers or ".withScale(STOLAS_SCALE)" not in block \
             or ".withRenderLayer(AutoGlowingGeoLayer::new)" not in block:
         err("client/WorkerClient.java: Stolas is drawn by GeckoLib at BODY_SCALE with his glowmask lit (tools/concordance_pacts.py)")
+    hidden = _java_body(block, "public boolean shouldRender(")
+    if "stolas.leaving()" not in hidden or "departs(stolas)" not in hidden \
+            or "StolasEntity.Gesture.DEPART.animation.equals(" not in _java_body(workers, "static boolean departs(StolasEntity stolas)"):
+        err("client/WorkerClient.java: a Stolas leaving is drawn only where his departing gesture was fired (shouldRender, "
+            "departs; the unit review)")
     sheet, mask = ASSETS / "textures" / "entity" / "stolas.png", ASSETS / "textures" / "entity" / "stolas_glowmask.png"
     if sheet.is_file() and mask.is_file():
         with Image.open(sheet) as a, Image.open(mask) as b:
@@ -18927,6 +18953,15 @@ def check_roster_screen(co, lang):
     for key in re.findall(r'\bui\("([a-z_.]+)"', screen):
         if f"screen.{MOD}.roster.{key}" not in lang:
             err(f"client/RosterScreen.java: missing lang screen.{MOD}.roster.{key}")
+    # The unit review (D3): a key chosen inside the call (ui(loaded ? "row.loaded" : "row.unloaded", ...)), both ways.
+    for pair in re.findall(r'\bui\([^;"]*?\?\s*"([a-z_.]+)"\s*:\s*"([a-z_.]+)"', screen):
+        for key in pair:
+            if f"screen.{MOD}.roster.{key}" not in lang:
+                err(f"client/RosterScreen.java: missing lang screen.{MOD}.roster.{key} (chosen in a conditional)")
+    # The unit review (D4): as for the pact screen, the roster is an in-game screen whose subtitles draw over it.
+    if "minecraft.gui.hud.extractDeferredSubtitles();" not in _java_body(screen, "public void extractBackground(") \
+            or "return true;" not in _java_body(screen, "public boolean isInGameUi("):
+        err("client/RosterScreen.java: an in-game screen (isInGameUi true) that draws his subtitles over its background")
     for action in ro.ACTIONS[1:]:
         for suffix in ("", ".hint"):
             if f"screen.{MOD}.roster.{action}{suffix}" not in lang:
@@ -20700,6 +20735,12 @@ def check_roster(co, root, lang):
             "listing, the row's revision and its offer, in that order, before it acts")
     if "Workers.enabled() ? notOffered() : disabled()" not in receive:
         err("spirits/Roster.java receive: switched off, an action the row does not offer is answered disabled (D-P110)")
+    # The unit review (C1): one "too fast" answer, with the roster again, a gate's span; the rest are dropped, so a client's
+    # sequence numbers never make the server resend its roster for every packet.
+    if not 0 <= receive.find("if (now - session.tooFastAt < gate) {") < receive.find("session.tooFastAt = now;") \
+            < receive.find("return again(player, session, new PactMenu.Answered(PactMenu.TOO_FAST"):
+        err("spirits/Roster.java receive: an action refused by its gate is answered once a gate's span, the rest dropped "
+            "(Session.tooFastAt)")
     acting = "".join(_java_body(roster, start) for start in (
         "public static PactMenu.Answered act(", "private static PactMenu.Answered record(",
         "private static PactMenu.Answered end(", "private static PactMenu.Answered request("))
@@ -20720,7 +20761,13 @@ def check_roster(co, root, lang):
     if re.search(r"setDirty|\.note\((?!\))|\.remove\(|\.seal\(|\.update\(|\.release\(|\.claim\(|\.cancel\(|\.recover\(|\.file\(|"
                  r"ConcordanceProgress\.(record|grant)", reading):
         err("spirits/Roster.java: the roster and the journal's pacts lines only read")
-    if re.search(r"getChunk\(|getChunkAt\(|setChunkForced|addRegionTicket|ChunkPos", roster):
+    # The unit review (D10): the Cancel hint speaks of cargo only when some is in transit.
+    if 'p.carried() > 0 ? line("confirm.cancel", request.id(), p.carried()) : line("confirm.cancel_none", request.id())' \
+            not in _java_body(roster, "private static RosterStatePayload.Row requestRow("):
+        err("spirits/Roster.java requestRow: the Cancel hint names cargo in transit only when there is some (confirm.cancel_none)")
+    # getBlockEntity and getBlockState on a server level load the chunk they read (the unit review, D5); the guarded read of a
+    # place stays in AgreementHolder.stranded.
+    if re.search(r"getChunk\(|getChunkAt\(|setChunkForced|addRegionTicket|ChunkPos|getBlockEntity\(|getBlockState\(", roster):
         err("spirits/Roster.java: it loads nothing; it reads only what is loaded")
     if "Roster.report(player, out);" not in _java_body(text(spirits / "StolasRegard.java"), "public static void report("):
         err("spirits/StolasRegard.java report: the journal's pacts section lists the pacts kept and the departures (Roster.report, D-07)")
@@ -20742,6 +20789,14 @@ def check_roster(co, root, lang):
     for key in ("journal.jugcraft.pacts.kept", "journal.jugcraft.pacts.departed"):
         if key not in lang:
             err(f"roster: missing lang {key}")
+    # The unit review (D8): every dimension the mod adds is named in a place's words, each lair as its own name says it.
+    for path in sorted((DATA / MOD / "dimension").glob("*.json")):
+        dim = f"{MOD}:{path.stem}"
+        if f"message.{MOD}.concordance.roster.dimension.{MOD}.{path.stem}" not in lang:
+            err(f"tools/concordance_roster.py DIMENSIONS: {dim} has no words (a place there would read as its id)")
+        name = lang.get(f"lair.{MOD}.{path.stem}")
+        if name and ro.DIMENSIONS.get(dim, "").lower() != name.lower():
+            err(f"tools/concordance_roster.py DIMENSIONS: {dim} is {name!r}, as lair.{MOD}.{path.stem} says")
     tests = ROOT / "src" / "gametest" / "java" / "io" / "github" / "jimbozoomer" / "jugcraft" / "test"
     for cls, names in D07_TESTS.items():
         source = text(tests / f"{cls}.java")
@@ -21563,7 +21618,8 @@ D05_ON_STOLAS = ["upkeepWarnsThenSuspendsAfterGraceAndResumes", "aReturnAfterAbs
 # Concordance Chunk D, D-06's game tests (check_pacts).
 D06_TESTS = {"ConcordanceWorkerGameTests": ["stolasGesturesAndSoundsFollowTheirTable", "stolasAnswersEachActionWithItsGesture",
                                             "aDepartingStolasIsNeverAVisitorAgain", "aRemovedStolasNeverEndsThePact", "onePresencePerPact",
-                                            "killingStolasIsNeverTheFastestRoute", "theJadeReadingsNameNoPlayerAndChangeNothing"]}
+                                            "killingStolasIsNeverTheFastestRoute", "theJadeReadingsNameNoPlayerAndChangeNothing",
+                                            "aDepartureEndsWithoutHisTicks"]}
 # Concordance Chunk D, D-03's game tests (check_stolas_regard).
 D03_TESTS = {
     "StyxGameTests": ["styxHintsByTheListenersOwnProgress", "talkingGrantsNoResearch", "styxNamesTheSkyStepUntilOneIsRecorded"],

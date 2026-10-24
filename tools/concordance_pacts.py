@@ -483,7 +483,10 @@ def pact_pages():
 CUE_TICKS = 10
 # His cues, in StolasEntity.SOUND_IDS' order: jugcraft:stolas.<cue>, each with its subtitle (D-S5), bound to .ogg files
 # already in runtime (no new audio, no voice; the raven's call is beast_crow's too). Being in SOUND_FILES, none is drawn
-# by tools/concordance_sounds.py.
+# by tools/concordance_sounds.py. Every file is mono, since OpenAL places only a mono source, so each is heard from him and
+# fades with distance (check_pacts reads each file's channels; the unit review, D1): the leaves of a spelunkery table's
+# paper for listening and inspecting, and a vesper's wing beats for his going (the cave book's pages and the ghost's weep
+# that were first bound are stereo).
 SOUND_EVENTS = {
     "stolas.arrive": "Stolas alights",
     "stolas.listen": "Stolas listens",
@@ -494,11 +497,11 @@ SOUND_EVENTS = {
 }
 SOUND_FILES = {
     "stolas.arrive": [f"menagerie/beast/flutter_flap_{n}" for n in range(3)],
-    "stolas.listen": [f"menagerie/cavern/item/cave_book/book_turn_{n}" for n in range(3)],
-    "stolas.inspect": [f"menagerie/cavern/item/cave_book/book_open_{n}" for n in range(3)],
+    "stolas.listen": ["menagerie/cavern/block/spelunkery_table/spelunkery_table_paper_insert"],
+    "stolas.inspect": ["menagerie/cavern/block/spelunkery_table/spelunkery_table_paper_remove"],
     "stolas.assent": ["household/block/doorbell/chime"],
     "stolas.refuse": [f"menagerie/beast/crow_idle_{n}" for n in range(4)],
-    "stolas.depart": ["menagerie/herbal/ghost_weep"],
+    "stolas.depart": [f"menagerie/cavern/mob/vesper/vesper_flap_{n}" for n in range(4)],
 }
 # What Jade shows (Java: spirits/PactReading; client/compat/JugcraftJadeClient). Sent as ids; worded on the client.
 JADE_KEYS = ["standing", "visiting", "departing", "counterpart", "service", "state", "due_days", "grace_days", "waiting"]

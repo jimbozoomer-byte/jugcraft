@@ -123,14 +123,17 @@ request of yours with what each waits for, and suspends, resumes, ends (asked fi
   the cheapest recall; offerings are a sink of at most 1/7 of an offering a day a pact. `tools/concordance_economy.py`
   still reports "gaining cycles: none" ([economy record](arcane-concordance-economy.md)). Consumed offerings stay in
   equivalence (D-S19); only the perch's item is excluded, and `values.json` values it from its recipe at 74.
-- **Automation:** none. Every action is a player's, in person, at the perch: no hopper, pipe or machine pays, reckons
-  or ends (the perch holds no item and has no slots).
+- **Automation:** none. Every action is a player's, in person, at the perch or, since unit 3, from the roster (D-07):
+  no hopper, pipe or machine pays, reckons or ends (the perch holds no item and has no slots).
 
 ## Failure behaviour, multiplayer and persistence
 
 - **Every action is server-side,** behind the rate gate (`RateGate`, one key for opening, one for acting and one for
   hearing the terms, D-P35):
   - a request is five bounded numbers (container, sequence, action, choice, revision): no text, ids or totals;
+  - since unit 3 the roster's request (D-07) is four (sequence, action, a listed row's id and its revision); its
+    suspend, resume and end pass the `workers` gate (4 ticks) and its cancel and recover the `logistics` gate (10
+    ticks), each answered "too fast" at most once a gate's span (the unit review);
   - only the perch's owner, in person, may accept there (never their party, never a stand-in);
   - only the pact's holder, in person, may reckon, pay, suspend, resume, end or seat it;
   - a stand-in never answers for upkeep, and pays, reckons, ends and suspends nothing for its player.
@@ -148,9 +151,9 @@ request of yours with what each waits for, and suspends, resumes, ends (asked fi
   its reason (D-P34).
 - **Breaking or blowing up the perch** (the Concordance on): the pact is left without its perch, its escrow, hold and
   terms kept; Stolas leaves the world. Seat it at a new perch of yours (`AgreementHolder.seat`: the same record,
-  terms, day's count, upkeep clock and escrow; D-P45), or end it from any perch that keeps nothing. Broken while
-  switched off: the record is untouched and stays kept at its vanished place, and once its place is loaded keeping
-  nothing it can be seated again (`AgreementHolder.stranded`, D-P25).
+  terms, day's count, upkeep clock and escrow; D-P45), or end it from any perch that keeps nothing or, since unit 3,
+  from the roster (D-07). Broken while switched off: the record is untouched and stays kept at its vanished place, and
+  once its place is loaded keeping nothing it can be seated again (`AgreementHolder.stranded`, D-P25).
 - **Ending** returns what was paid ahead once, into the living holder's inventory (the rest at their feet), never to a
   dead holder; Stolas departs and the departure is kept in the holder's history. Suspend and resume are idempotent
   (D-P46).
@@ -220,12 +223,12 @@ plays the gestures the server fires (D-P94). Each gesture starts and ends on his
 |---|---|---|---|---|---|
 | `animation.stolas.idle` | loop | 4.0 s | serving, or waiting at the perch, with no conversation open | — | — |
 | `animation.stolas.listen` | loop | 3.0 s | while any conversation at his perch is open (D-P95) | — | `jugcraft:stolas.listen` ("Stolas listens"), when one opens |
-| `animation.stolas.waiting` | loop | 4.0 s | switched off, his day's service done, his holder away or out of his terms | — | — |
+| `animation.stolas.waiting` | loop | 4.0 s | switched off, his holder away or out of his terms | — | — |
 | `animation.stolas.suspended` | loop | 6.0 s | his pact suspended, by its holder or for upkeep | — | — |
 | `idle.flapping` (the owner's, "astir") | loop | 4.75 s | an offering due | not posed (below) | — |
 | `animation.stolas.arrive` | gesture | 2.0 s | summoned to the perch: an invitation, a presence called back, a pact seated (D-P96) | 0.70-1.20 s | `jugcraft:stolas.arrive` ("Stolas alights") |
 | `animation.stolas.inspect` | gesture | 2.5 s | a Star-reckoning done, an offering paid ahead | 0.40-1.10 s | `jugcraft:stolas.inspect` ("Stolas inspects") |
-| `animation.stolas.assent` | gesture | 2.0 s | a pact sealed, a pact resumed | 0.45-1.25 s | `jugcraft:stolas.assent` ("Stolas assents") |
+| `animation.stolas.assent` | gesture | 2.0 s | a pact sealed, a pact resumed at the perch | 0.45-1.25 s | `jugcraft:stolas.assent` ("Stolas assents") |
 | `animation.stolas.refuse` | gesture | 2.0 s | an acceptance or a Star-reckoning refused | 0.50-1.30 s | `jugcraft:stolas.refuse` ("Stolas refuses") |
 | `animation.stolas.depart` | gesture | 2.0 s (holds its last frame) | leaving: declined, ended, a visitor whose conversation is gone | 0.30-0.80 s | `jugcraft:stolas.depart` ("Stolas departs") |
 
@@ -236,11 +239,16 @@ plays the gestures the server fires (D-P94). Each gesture starts and ends on his
   observatory, has none.
 - **Listening** (D-P95): a synced flag, set at once when a conversation opens at his perch and recomputed at every
   think; his listening cue is not voiced within 10 ticks of his arrival, whose wing beats carry the moment.
-- **Leaving** (D-P97): his departing gesture lasts 40 ticks, and he is gone when it ends. He is struck off his holder's
-  roster at once, never saved meanwhile, and never taken for a perch's visitor or presence again (`gone()`); a copied
+- **Leaving** (D-P97): his departing gesture lasts 40 ticks of game time, and he is gone when it ends: discarded by his
+  own tick or, where his chunk no longer ticks him (a roster End from afar, a holder who goes away within the 40
+  ticks), by the server's sweep at the end of every tick (`StolasEntity.registerSweep`; the unit review). He is struck
+  off his holder's roster at once, never saved meanwhile, listens no more, and is never taken for a perch's visitor or
+  presence again (`gone()`); his departure is synced, so one who starts watching him while he leaves sees him already
+  gone, never perched until he vanishes (`WorkerClient` draws him only where his departing gesture was fired). A copied
   perch never moves the original's Stolas (`PactPerchBlockEntity.stolas` asks his own perch; the unit's critique 6).
 - **Cues** (D-P100, D-P101): one of a kind at most every 10 ticks a Stolas (`CUE_TICKS`), none while the Concordance is
-  off except his departure. Each is entity-attached (NEUTRAL, heard within 16 blocks). The pact screen and the roster
+  off except his departure. Each is entity-attached (NEUTRAL, heard within 16 blocks) and plays mono files, which
+  OpenAL places, so each is heard from him and fades with distance (the unit review). The pact screen and the roster
   are in-game screens that draw subtitles over themselves (D-P103). CI's client runners have no sound device, so the
   client test checks the subtitles as defined and as fired, never as seen there (D-P104).
 - **Jade** (D-P102; the optional integration, behind its entrypoints): a pact perch's and a Spirit Anchor's agreement
@@ -249,9 +257,9 @@ plays the gestures the server fires (D-P94). Each gesture starts and ends on his
   no player, shows nothing of the escrow but when the next offering falls due, and only reads (`AgreementHolder.peek`).
 - **One presence a pact.** His death or removal, or his perch unloading, ends nothing and drops nothing; killing him is
   never a route (`aRemovedStolasNeverEndsThePact`, `onePresencePerPact`, `killingStolasIsNeverTheFastestRoute`).
-- **Not posed:** his astir loop is the only clip the client test does not photograph frozen. Making an offering due in
-  that test would change the upkeep its later steps read, so it is a recorded deviation from D-06's "a frozen-tick pose
-  for each clip" (the unit's critique 11); `check_geckolib` still holds the clip to his animation file.
+- **Not posed:** his astir loop is the only clip he plays that the client test does not photograph frozen. Making an
+  offering due in that test would change the upkeep its later steps read, so it is a recorded deviation from D-06's "a
+  frozen-tick pose for each clip" (the unit's critique 11); `check_geckolib` still holds the clip to his animation file.
 
 ## The roster (D-07)
 
@@ -274,9 +282,9 @@ worker).
 - **Gates** (D-P107): suspend, resume and end share the Spirit Anchor's (`workers`, 4 ticks); cancel and recover the
   logistics commands' (`logistics`, 10 ticks); opening has its own (`roster`, 10 ticks), served later by the server
   rather than refused.
-- **Answers:** `not_listed`, `changed` (with the roster again), `too_fast` ("One moment"), `not_offered`,
-  `not_permitted` and `disabled`, besides the holder's and the courier ledger's own outcomes; each shown with a tick or
-  a cross and read aloud.
+- **Answers:** `not_listed`, `changed` (with the roster again), `too_fast` ("One moment", once a gate's span: the rest
+  are dropped, since the unit review), `not_offered`, `not_permitted` and `disabled`, besides the holder's and the
+  courier ledger's own outcomes; each shown with a tick or a cross and read aloud.
 - **Switched off** (D-P110): the rows are listed, none offers an action, and an action is answered `disabled`; records,
   escrow and requests are untouched.
 - **The journal** (D-P111): its Pacts section lists, after Stolas's Regard's lines, every pact and agreement held (where,
@@ -297,7 +305,8 @@ No new dependency (Fabric API and GeckoLib as pinned; Jade, optional, as pinned)
 library's Flashjack rig in his raven form: since unit 3 (D-P90, D-P91) its geometry is still copied byte for byte by
 `tools/owner_art.py` from `tools/concordance_pacts.py`'s `OWNER_FILES`, and his skin, the glowmask that lights his eyes
 and his animation file are adapted from the rig's own files by `tools/stolas_body.py` (`ADAPTED`), which
-`tools/owner_art.py` writes and checks. `python3 tools/owner_art.py --provenance pacts` prints these rows:
+`tools/owner_art.py` writes and checks. `python3 tools/owner_art.py --provenance pacts` prints these rows (the copy's
+Change cell added here):
 
 | Runtime file (`src/main/resources/assets/jugcraft/`) | Library file (`art/owner-library/`) | Library SHA-256 | Change |
 |---|---|---|---|
@@ -335,17 +344,25 @@ files always give the same output):
 
 **Sounds** (D-P101): six events through the generator (`tools/concordance_pacts.py`'s `SOUND_EVENTS` and `SOUND_FILES`,
 merged by `tools/concordance.py`; `sounds.json` written by `tools/generate_material_data.py`), each bound to `.ogg`
-files already in runtime. No new audio, no voice; the raven's call is `beast_crow`'s too. His words are the generators'
-(English only, D-S21).
+files already in runtime, every one mono, so each is heard from him and fades with distance (`check_pacts` reads each
+file's channels; the unit review replaced the cave book's pages and the ghost's weep, which are stereo). No new audio,
+no voice; the raven's call is `beast_crow`'s too. His words are the generators' (English only, D-S21).
 
 | Event | Runtime files (`src/main/resources/assets/jugcraft/sounds/`) | Subtitle |
 |---|---|---|
 | `jugcraft:stolas.arrive` | `menagerie/beast/flutter_flap_0` to `_2` | Stolas alights |
-| `jugcraft:stolas.listen` | `menagerie/cavern/item/cave_book/book_turn_0` to `_2` | Stolas listens |
-| `jugcraft:stolas.inspect` | `menagerie/cavern/item/cave_book/book_open_0` to `_2` | Stolas inspects |
+| `jugcraft:stolas.listen` | `menagerie/cavern/block/spelunkery_table/spelunkery_table_paper_insert` | Stolas listens |
+| `jugcraft:stolas.inspect` | `menagerie/cavern/block/spelunkery_table/spelunkery_table_paper_remove` | Stolas inspects |
 | `jugcraft:stolas.assent` | `household/block/doorbell/chime` | Stolas assents |
 | `jugcraft:stolas.refuse` | `menagerie/beast/crow_idle_0` to `_3` (also `beast_crow`'s) | Stolas refuses |
-| `jugcraft:stolas.depart` | `menagerie/herbal/ghost_weep` | Stolas departs |
+| `jugcraft:stolas.depart` | `menagerie/cavern/mob/vesper/vesper_flap_0` to `_3` | Stolas departs |
+
+These files are the owner library's imports, each catalogued with its source path and SHA-256 under
+`art/owner-library/catalog/edited-2026-10-18-part2/`: `beast-runtime.json` (`flutter_flap`, `crow_idle`),
+`cavern-runtime.json` (`spelunkery_table_paper_insert`, `spelunkery_table_paper_remove`, `vesper_flap`) and
+`household-runtime.json` (`doorbell/chime`). The supplied labels are kept where the files were imported:
+`sounds.json`'s own `household.block.doorbell.chime` keeps `subtitle.refurbished_furniture.doorbell_chime`; Stolas's
+events carry subtitles of their own.
 
 ## Verification
 
@@ -385,9 +402,11 @@ Each entry is what actually ran. No server or client game test of this feature h
     `aVisitingStolasLeavesWithoutARecord` (a visitor loaded while switched off leaves), `thePactScreensMessagesAreBounded`
     (a 209-character choice id is sent and read back) and `thePactDefinitionParsesStrictly` (`"party"` for
     Star-reckoning is refused).
-- **Unit 3's server game tests (17 new, none yet run in CI):**
-  - D-06 (7, `D06_TESTS`): `ConcordanceWorkerGameTests` `aDepartingStolasIsNeverAVisitorAgain` (a declined visitor and
-    an ended presence depart, are gone for the perch, unsaved, and never return; with their cues),
+- **Unit 3's server game tests (18 new, the unit review's one included; none yet run in CI):**
+  - D-06 (8, `D06_TESTS`): `ConcordanceWorkerGameTests` `aDepartingStolasIsNeverAVisitorAgain` (a declined visitor and
+    an ended presence depart, are gone for the perch, unsaved, and never return; with their cues; since the unit review
+    he listens no more and his departure is synced), the unit review's `aDepartureEndsWithoutHisTicks` (the sweep, at
+    explicit game times with no tick between, ends a departure at its length and never before),
     `stolasGesturesAndSoundsFollowTheirTable`, `stolasAnswersEachActionWithItsGesture`,
     `aRemovedStolasNeverEndsThePact`, `onePresencePerPact`, `killingStolasIsNeverTheFastestRoute` and
     `theJadeReadingsNameNoPlayerAndChangeNothing` (a copied perch's `stolas(level)` is nobody; no visit is read after a
@@ -462,8 +481,9 @@ Known limits:
 - Since unit 3 a pact is ended at a perch (its own, or for a pact without its perch, any perch that keeps nothing) or
   from the roster. The roster shows at most 64 rows (the journal and the commands list the rest), and an action within 4
   ticks of a Spirit Anchor's use (10 of a logistics command) answers "One moment".
-- His astir loop is not posed in the client test (a recorded deviation, above); whether a GeckoLib creature draws as a
-  roster portrait is unverified until the client test runs (the Spirit Anchor's icon stands in otherwise).
+- His astir loop is not posed in the client test (a recorded deviation, above). The Spirit Anchor's icon is drawn as a
+  roster portrait only when the creature cannot be made; whether GeckoLib draws in the GUI is shown only by the client
+  test's shots (its `drawn` records the attempt, not pixels).
 - The first obligation counts once a player, not once a pact (D-P44), which is stricter than the contract's wording.
 - A pact broken while switched off whose old place stays unloaded cannot be seated until that place loads; it can
   still be ended.

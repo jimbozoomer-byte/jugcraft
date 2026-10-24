@@ -11,10 +11,16 @@ import io.github.jimbozoomer.jugcraft.concordance.worker.Pacts;
 import io.github.jimbozoomer.jugcraft.concordance.worker.Status;
 import java.util.ArrayDeque;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.IdentityHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
+import java.util.function.ToLongFunction;
+import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
+import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.GlobalPos;
 import net.minecraft.core.Registry;
@@ -55,7 +61,9 @@ import org.jspecify.annotations.Nullable;
  * other reason. His gestures play on a controller of their own over it, each fired by the server through
  * {@link #gesture} (GeckoLib sends it to those watching him then; one who starts watching later sees his state, never a
  * replay). He arrives when he is summoned to a perch; when he leaves he makes his departing gesture and is gone
- * {@link Gesture#DEPART}'s length later: struck off his holder's roster at once, never saved meanwhile.
+ * {@link Gesture#DEPART}'s length of game time later: struck off his holder's roster at once, never saved meanwhile,
+ * discarded by his own tick or, where his chunk no longer ticks him, by the server's sweep ({@link #registerSweep}); one
+ * who starts watching him while he leaves sees him already gone (his synced departure, the unit review).
  * <p>
  * His cues (D-06): each gesture and his listening is fired by the server's action, once, with its sound and subtitle, at
  * most one of a kind every {@link #CUE_TICKS} and none while the Concordance is off but his departure; the pact screen
@@ -69,6 +77,8 @@ public class StolasEntity extends WorkerEntity<StolasEntity> implements Agreemen
 	public static final String GESTURE_CONTROLLER = "gesture";
 	/** Whether a conversation is open at his perch (the server's; never saved). */
 	private static final EntityDataAccessor<Boolean> LISTENING = SynchedEntityData.defineId(StolasEntity.class, EntityDataSerializers.BOOLEAN);
+	/** Whether he is leaving (the server's, set with his departing gesture; never saved): the client hides one it never saw go. */
+	private static final EntityDataAccessor<Boolean> DEPARTING = SynchedEntityData.defineId(StolasEntity.class, EntityDataSerializers.BOOLEAN);
 	/** His sound events, jugcraft:stolas.<id>, in tools/concordance_pacts.py SOUND_EVENTS' order: each gesture's and his listening's. */
 	public static final List<String> SOUND_IDS = List.of("arrive", "listen", "inspect", "assent", "refuse", "depart");
 	/**
@@ -79,6 +89,12 @@ public class StolasEntity extends WorkerEntity<StolasEntity> implements Agreemen
 	/** How many recent cues he keeps for reading (tests); never saved. */
 	private static final int SHOWN = 8;
 	private static final Map<String, SoundEvent> SOUNDS = new HashMap<>();
+	/**
+	 * Every Stolas leaving now, by identity, for the server's sweep: it ends a departure on time where his own ticks do not
+	 * (his chunk tracked but not ticking, or unloaded around him, since a departing Stolas is never saved and so never
+	 * unloaded with it; the unit review). Memory only, emptied when the server stops.
+	 */
+	private static final Set<StolasEntity> LEAVING = Collections.newSetFromMap(new IdentityHashMap<>());
 
 	/** His loops on the worker's main controller, for what the server synced (tools/concordance_pacts.py LOOPS). */
 	public enum Loop {
@@ -122,8 +138,11 @@ public class StolasEntity extends WorkerEntity<StolasEntity> implements Agreemen
 
 	private @Nullable BlockPos perch;
 	private @Nullable UUID record;
-	/** Ticks left of his departure; 0 while he is not leaving. Never saved: a departing Stolas is not written to the world. */
-	private int departing;
+	/**
+	 * The game time his departure ends at; 0 while he is not leaving. Never saved: a departing Stolas is not written to the
+	 * world. His own tick or the server's sweep discards him once it is reached, whether or not his chunk ticks him.
+	 */
+	private long departAt;
 	/** When each of his cues last showed (game time, by SOUND_IDS' index); never saved. */
 	private final long[] cued = new long[SOUND_IDS.size()];
 	/** His recent cues, oldest first; never saved. */
@@ -143,6 +162,7 @@ public class StolasEntity extends WorkerEntity<StolasEntity> implements Agreemen
 	protected void defineSynchedData(SynchedEntityData.Builder builder) {
 		super.defineSynchedData(builder);
 		builder.define(LISTENING, false);
+		builder.define(DEPARTING, false);
 	}
 
 	@Override
@@ -183,14 +203,19 @@ public class StolasEntity extends WorkerEntity<StolasEntity> implements Agreemen
 		return entityData.get(LISTENING);
 	}
 
-	/** Whether he is leaving: his departing gesture is playing and he will be gone when it ends. */
+	/** Whether he is leaving (the server's): his departing gesture is playing and he will be gone when it ends. */
 	public boolean departing() {
-		return departing > 0;
+		return departAt != 0;
+	}
+
+	/** Whether he is leaving, as synced (both sides): the client draws him only where it saw his departing gesture fired. */
+	public boolean leaving() {
+		return entityData.get(DEPARTING);
 	}
 
 	/** Gone, or going: removed, or departing. No perch, roster, pact or test counts him from then on. */
 	public boolean gone() {
-		return isRemoved() || departing > 0;
+		return isRemoved() || departAt != 0;
 	}
 
 	@Override
@@ -292,28 +317,69 @@ public class StolasEntity extends WorkerEntity<StolasEntity> implements Agreemen
 		if (owner != null) {
 			WorkerRoster.of(level.getServer()).remove(owner, getUUID());
 		}
-		// D-06: he makes his departing gesture, and is discarded when it ends (customServerAiStep).
-		departing = Gesture.DEPART.ticks;
+		// D-06: he makes his departing gesture, and is discarded when it ends (customServerAiStep, or the server's sweep where
+		// his chunk no longer ticks him); he listens no more, and one who starts watching him now sees him gone (the unit review).
+		departAt = level.getGameTime() + Gesture.DEPART.ticks;
+		LEAVING.add(this);
+		entityData.set(LISTENING, false);
+		entityData.set(DEPARTING, true);
 		stop();
 		gesture(Gesture.DEPART);
 	}
 
-	/** Departing, he only counts down to his going; otherwise he thinks as every worker does. */
+	/** Departing, he only waits for his going; otherwise he thinks as every worker does. */
 	@Override
 	protected void customServerAiStep(ServerLevel level) {
-		if (departing > 0) {
-			if (--departing == 0) {
-				discard();
-			}
+		if (departAt != 0) {
+			departed(level.getGameTime());
 			return;
 		}
 		super.customServerAiStep(level);
 	}
 
-	/** Departing, he is not written to the world: a chunk unloaded mid-departure, or a stop, finishes it. */
+	/**
+	 * Departing, he is not written to the world: a chunk saved or unloaded, or a server stopped, mid-departure leaves him
+	 * out. An unsaved entity is not unloaded with its chunk, so the server's sweep ({@link #registerSweep}) discards him on
+	 * time, ticking or not.
+	 */
 	@Override
 	public boolean shouldBeSaved() {
-		return departing == 0 && super.shouldBeSaved();
+		return departAt == 0 && super.shouldBeSaved();
+	}
+
+	/** Whether his departure is over by {@code gameTime}; if it is, he is discarded. */
+	private boolean departed(long gameTime) {
+		if (departAt == 0 || gameTime < departAt) {
+			return false;
+		}
+		discard();
+		return true;
+	}
+
+	/**
+	 * Registers, once (Workers.register), the server's sweep at the end of every tick: each departure ends on time, at his
+	 * own level's game time, his entity ticking or not.
+	 */
+	public static void registerSweep() {
+		ServerTickEvents.END_SERVER_TICK.register(server -> sweep(stolas -> stolas.level().getGameTime()));
+		ServerLifecycleEvents.SERVER_STOPPED.register(server -> LEAVING.clear());
+	}
+
+	/** The sweep at game time {@code gameTime}, as if the server's ran then (tests: no entity ticks meanwhile). */
+	public static void sweep(long gameTime) {
+		sweep(stolas -> gameTime);
+	}
+
+	/** Each Stolas leaving whose departure is over by {@code time} is discarded, and one already removed is dropped. */
+	private static void sweep(ToLongFunction<StolasEntity> time) {
+		if (LEAVING.isEmpty()) {
+			return;
+		}
+		for (StolasEntity stolas : List.copyOf(LEAVING)) {
+			if (stolas.isRemoved() || stolas.departed(time.applyAsLong(stolas))) {
+				LEAVING.remove(stolas);
+			}
+		}
 	}
 
 	/** Killed or discarded: struck off his holder's roster, which is how the perch knows he is lost (D-S18's rule). */

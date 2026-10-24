@@ -2767,6 +2767,8 @@ public class ConcordanceWorkerGameTests {
 		helper.assertTrue(visitor.think(level, 0L, now) == Status.FINISHED && visitor.departing() && !visitor.isRemoved() && visitor.gone()
 				&& !visitor.shouldBeSaved() && perch.stolas(level) == null && "depart".equals(visitor.cues().getLast()),
 				"Declined, he departs: gone for the perch, not saved, still in the world for his gesture, its sound with it: " + visitor.cues());
+		helper.assertTrue(!visitor.listening() && visitor.leaving(),
+				"Leaving, he listens no more, and his departure is synced: one who starts watching him now sees him gone (the unit review)");
 		helper.assertTrue(visitor.think(level, 0L, now) == Status.FINISHED && visitor.departing(), "Thinking again changes nothing");
 		open(helper, guest, perch);
 		StolasEntity second = (StolasEntity) level.getEntity(perch.visitor());
@@ -2788,6 +2790,33 @@ public class ConcordanceWorkerGameTests {
 					"Their departures end with them gone; the new visitor, its screen still open, stays");
 			helper.succeed();
 		});
+	}
+
+	/**
+	 * D-06 (the unit review): a departure ends on time where his entity does not tick (his chunk tracked but not ticking, or
+	 * unloaded around him, since a departing Stolas is never saved): the server's sweep discards him when it ends, never
+	 * before. The sweep runs here at explicit game times, with no tick between.
+	 */
+	@GameTest(maxTicks = 20)
+	public void aDepartureEndsWithoutHisTicks(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		ServerPlayer guest = ready(level, TestPlayers.mock(helper));
+		BlockPos at = new BlockPos(1, 1, 1);
+		PactPerchBlockEntity perch = perch(helper, at, guest);
+		beside(helper, guest, at);
+		open(helper, guest, perch);
+		StolasEntity visitor = (StolasEntity) level.getEntity(perch.visitor());
+		helper.assertTrue(visitor != null && visitor.listening() && !visitor.leaving() && !visitor.departing(), "Invited, he listens at the perch");
+		long now = level.getGameTime();
+		visitor.leave(level, null, perch.getBlockPos());
+		helper.assertTrue(visitor.departing() && visitor.leaving() && !visitor.listening() && !visitor.isRemoved() && !visitor.shouldBeSaved(),
+				"Leaving, he listens no more, his departure synced and never saved");
+		StolasEntity.sweep(now + StolasEntity.Gesture.DEPART.ticks - 1);
+		helper.assertTrue(!visitor.isRemoved(), "The sweep never ends a departure before its gesture's length");
+		StolasEntity.sweep(now + StolasEntity.Gesture.DEPART.ticks);
+		helper.assertTrue(visitor.isRemoved() && visitor.getRemovalReason() == Entity.RemovalReason.DISCARDED,
+				"Its length over, the sweep discards him, whether or not he ticked: " + visitor.getRemovalReason());
+		helper.succeed();
 	}
 
 	// D-06: his cues (the server fires each with its sound), his one presence a pact, and Jade's readings.

@@ -87,11 +87,15 @@ public final class Roster {
 			"construct", "jugcraft:clockwork_porter", "pact", "jugcraft:stolas");
 	private static final String KEY = "message.jugcraft.concordance.roster.";
 
-	/** One reader's open roster: the last sequence taken, the rows last listed (id to type) and the state last sent. */
+	/**
+	 * One reader's open roster: the last sequence taken, the rows last listed (id to type), the state last sent and when an
+	 * action was last answered "too fast" (game time).
+	 */
 	private static final class Session {
 		private int sequence;
 		private final Map<UUID, Integer> listed = new HashMap<>();
 		private @Nullable RosterStatePayload lastSent;
+		private long tooFastAt = Long.MIN_VALUE / 2;
 	}
 
 	/** What a reader is shown (at most MAX_ROWS rows, with each row's type, which stays here) and how many rows there are in all. */
@@ -140,7 +144,15 @@ public final class Roster {
 		session.sequence = request.sequence();
 		long now = player.level().getGameTime();
 		boolean courier = action == RosterRequestPayload.CANCEL || action == RosterRequestPayload.RECOVER;
-		if (!RateGate.allow(player, courier ? COURIER_ACTION : AGREEMENT_ACTION, courier ? COURIER_TICKS : AGREEMENT_TICKS)) {
+		int gate = courier ? COURIER_TICKS : AGREEMENT_TICKS;
+		if (!RateGate.allow(player, courier ? COURIER_ACTION : AGREEMENT_ACTION, gate)) {
+			// One "too fast" answer a gate's span: the rest are dropped, as the composer drops them, so a client's sequence
+			// numbers never make the server resend its roster for every packet (the unit review). A screen has one action
+			// in flight, and its patience returns its controls if an answer never comes.
+			if (now - session.tooFastAt < gate) {
+				return null;
+			}
+			session.tooFastAt = now;
 			return again(player, session, new PactMenu.Answered(PactMenu.TOO_FAST, false, line("answer.too_fast")), request.sequence());
 		}
 		Integer type = session.listed.get(request.row());
@@ -461,7 +473,7 @@ public final class Roster {
 				line("service.request", place(request.ticket().destination())), place(post), loaded,
 				Component.translatable("compose.jugcraft.courier.state." + state.id),
 				line("next.delivered", p.delivered(), request.ticket().wanted(), p.carried()), waiting, icon, revision(request), actions,
-				line("confirm.cancel", request.id(), p.carried()));
+				p.carried() > 0 ? line("confirm.cancel", request.id(), p.carried()) : line("confirm.cancel_none", request.id()));
 	}
 
 	private static RosterStatePayload.Row workerRow(MinecraftServer server, UUID id, WorkerRoster.Entry entry, Map<UUID, Request> claims) {

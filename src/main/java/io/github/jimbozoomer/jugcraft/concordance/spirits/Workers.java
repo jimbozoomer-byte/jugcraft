@@ -121,6 +121,8 @@ public final class Workers {
 		PactMenu.register();
 		// Concordance Chunk D, D-06: Stolas's cues (jugcraft:stolas.*; sounds.json and subtitles are the generator's).
 		StolasEntity.registerSounds();
+		// The unit review: his departures end on time, his chunk ticking him or not.
+		StolasEntity.registerSweep();
 		CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess, environment) -> command(dispatcher));
 		CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.FUNCTIONAL_BLOCKS).register(output -> {
 			output.accept(anchor);

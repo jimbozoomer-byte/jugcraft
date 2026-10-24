@@ -1,5 +1,7 @@
 package io.github.jimbozoomer.jugcraft.client;
 
+import com.geckolib.animatable.manager.AnimatableManager;
+import com.geckolib.animation.AnimationController;
 import com.geckolib.renderer.GeoEntityRenderer;
 import com.geckolib.renderer.layer.builtin.AutoGlowingGeoLayer;
 import io.github.jimbozoomer.jugcraft.concordance.dreaming.DreamWispEntity;
@@ -11,6 +13,7 @@ import io.github.jimbozoomer.jugcraft.concordance.spirits.StolasEntity;
 import io.github.jimbozoomer.jugcraft.concordance.spirits.Workers;
 import io.github.jimbozoomer.jugcraft.concordance.spirits.WorkshopHandEntity;
 import net.fabricmc.fabric.api.client.rendering.v1.EntityRendererRegistry;
+import net.minecraft.client.renderer.culling.Frustum;
 import net.minecraft.client.renderer.entity.state.EntityRenderState;
 import net.minecraft.world.phys.AABB;
 
@@ -48,6 +51,24 @@ final class WorkerClient {
 				// depart gestures): he stays drawn while any of him can be on screen.
 				return stolas.getBoundingBox().inflate(1.2, 0.1, 1.2).expandTowards(0.0, 2.0, 0.0);
 			}
+
+			@Override
+			public boolean shouldRender(StolasEntity stolas, Frustum culler, double camX, double camY, double camZ, float partialTicks) {
+				// Leaving, he is drawn only where his departing gesture was fired: one who began watching him after it sees
+				// him already gone, never perched until he vanishes (the unit review).
+				return (!stolas.leaving() || departs(stolas)) && super.shouldRender(stolas, culler, camX, camY, camZ, partialTicks);
+			}
 		}.withRenderLayer(AutoGlowingGeoLayer::new).withScale(STOLAS_SCALE));
+	}
+
+	/**
+	 * Whether this client was sent his departing gesture: his gesture controller was triggered with it, and keeps it once it
+	 * has played (it holds its last frame). Read from the trigger, not from the clip drawn, since a clip starts only when he
+	 * is drawn.
+	 */
+	static boolean departs(StolasEntity stolas) {
+		AnimatableManager<StolasEntity> manager = stolas.getAnimatableInstanceCache().getManagerForId(stolas.getId());
+		AnimationController<StolasEntity> gestures = manager.getAnimationControllers().get(StolasEntity.GESTURE_CONTROLLER);
+		return gestures != null && StolasEntity.Gesture.DEPART.animation.equals(gestures.getCurrentRawAnimation());
 	}
 }

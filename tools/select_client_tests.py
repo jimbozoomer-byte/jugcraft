@@ -17,6 +17,7 @@ How a changed file picks classes (src/gametest/resources/fabric.mod.json lists t
   "Renderer" and similar endings taken off: "GiantBeatingHeartRenderer" -> giant_beating_heart) or shows a Jugcraft
   class that uses it ("CrewedGun" -> the classes showing the Siege Mortar, Flak Gun and tower guns); a class no test
   shows picks nothing, as the mod job's server game tests still run;
+- a Java class in SHOWN_BY (one a test shows without naming it): the classes listed there as well;
 - a Java class that a quarter of the classes or more show (a registry such as JugcraftAgriculture or Jugcraft, which
   most tests use to reach their blocks): the classes matching the names and IDs on the lines it lost or gained, as
   for a class only gaining code, since what changed is what those lines name;
@@ -97,6 +98,10 @@ WEIGHTS = {
     "TransportCrateClientTests": 60,
     "TikiTorchClientTests": 30,
 }
+# Classes a client test shows without naming them (registered by another class, or reached through an optional
+# integration), by the classes that show them: Stolas's renderer (his glowmask layer, scale, culling and departure) and
+# his perch's and anchor's Jade provider (the unit review, D2).
+SHOWN_BY = {"WorkerClient": {"ConcordancePactClientGameTests"}, "PactDataProvider": {"ConcordancePactClientGameTests"}}
 HUB = 5  # a class this many test classes name is a shared registry, not one feature
 WIDE = 4  # a changed class shown by this share of the classes (a quarter) or more is picked by its changed lines
 ENDINGS = ("BlockEntityRenderer", "BlockEntity", "Renderer", "Block", "Item", "Entity", "Model", "Screen", "Menu",
@@ -283,6 +288,7 @@ def select(changed, tests, newly_listed, base=None, head=None):
                                    f"the names on its changed lines pick {len(hits)}")
                     chosen |= hits
                     continue
+            hits |= SHOWN_BY.get(name, set()) & tests.keys()
             if not hits:
                 reasons.append(f"{path}: no client test shows {name}")
             chosen |= hits

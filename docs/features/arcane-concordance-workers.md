@@ -485,7 +485,9 @@ their pacts and agreements, and their courier requests.
   itself.
 - **Portraits** (D-P115): the worker's own creature, drawn still and never added to a level or ticked (at most 16, all
   forgotten on leaving a world); a request's item; for an unloaded spirit (a Gathering Shade's and a Workshop Hand's
-  kind are both `spirit`) or anything that cannot be drawn, the Spirit Anchor's icon.
+  kind are both `spirit`) or anything that cannot be made, the Spirit Anchor's icon. The icon is drawn only when the
+  creature cannot be made; whether GeckoLib draws in the GUI is shown only by the client test's shots (its `drawn`
+  records the attempt, not pixels).
 - **No second inventory:** the screen keeps nothing and decides nothing; its requests carry four fields (sequence,
   action, row id, revision), no player id, text or total. Roster sessions are memory only, forgotten when their reader
   leaves or the server stops; no saved data.
@@ -537,8 +539,8 @@ Open items:
 
 - A spirit agrees to one kind of work (gathering, or since Chunk D's unit 4 a courier's); more kinds each need their own
   server behaviour.
-- An agreement's terms come from the definition; letting a holder choose narrower hours or a smaller area needs the
-  roster (D-07) or more anchor controls.
+- An agreement's terms come from the definition; letting a holder choose narrower hours or a smaller area needs a
+  terms control added to the roster (D-07) or more anchor controls.
 - A familiar waits rather than following through a portal, and the charm recalls it only within the same dimension.
 - Ending an agreement without breaking its anchor (`AgreementHolder.end`): since unit 2 the pact perch's screen ends
   Stolas's pact, and a pact without its perch is ended from any perch keeping nothing (or from the roster, D-07); since

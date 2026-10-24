@@ -488,15 +488,7 @@
     "subtitle": "subtitles.jugcraft.stolas.listen",
     "sounds": [
       {
-        "name": "jugcraft:menagerie/cavern/item/cave_book/book_turn_0",
-        "attenuation_distance": 16
-      },
-      {
-        "name": "jugcraft:menagerie/cavern/item/cave_book/book_turn_1",
-        "attenuation_distance": 16
-      },
-      {
-        "name": "jugcraft:menagerie/cavern/item/cave_book/book_turn_2",
+        "name": "jugcraft:menagerie/cavern/block/spelunkery_table/spelunkery_table_paper_insert",
         "attenuation_distance": 16
       }
     ]
@@ -505,15 +497,7 @@
     "subtitle": "subtitles.jugcraft.stolas.inspect",
     "sounds": [
       {
-        "name": "jugcraft:menagerie/cavern/item/cave_book/book_open_0",
-        "attenuation_distance": 16
-      },
-      {
-        "name": "jugcraft:menagerie/cavern/item/cave_book/book_open_1",
-        "attenuation_distance": 16
-      },
-      {
-        "name": "jugcraft:menagerie/cavern/item/cave_book/book_open_2",
+        "name": "jugcraft:menagerie/cavern/block/spelunkery_table/spelunkery_table_paper_remove",
         "attenuation_distance": 16
       }
     ]
@@ -552,7 +536,19 @@
     "subtitle": "subtitles.jugcraft.stolas.depart",
     "sounds": [
       {
-        "name": "jugcraft:menagerie/herbal/ghost_weep",
+        "name": "jugcraft:menagerie/cavern/mob/vesper/vesper_flap_0",
+        "attenuation_distance": 16
+      },
+      {
+        "name": "jugcraft:menagerie/cavern/mob/vesper/vesper_flap_1",
+        "attenuation_distance": 16
+      },
+      {
+        "name": "jugcraft:menagerie/cavern/mob/vesper/vesper_flap_2",
+        "attenuation_distance": 16
+      },
+      {
+        "name": "jugcraft:menagerie/cavern/mob/vesper/vesper_flap_3",
         "attenuation_distance": 16
       }
     ]

@@ -6,6 +6,8 @@ tools/concordance.py (MESSAGES into its MESSAGES; lang_entries from write_all); 
 check_roster and check_roster_screen. English only (D-S21).
 """
 
+import lairs
+
 MOD = "jugcraft"
 
 # The most rows one roster payload carries (Java: RosterStatePayload.MAX_ROWS). 32 Bound Wills, 16 requests and 32 workers
@@ -48,7 +50,14 @@ KIND_SERVICES = {
 # drawn as its own entity type, and a record's row as its counterpart.
 KIND_PORTRAITS = {"familiar": "jugcraft:hearthling", "spirit": "", "construct": "jugcraft:clockwork_porter",
                   "pact": "jugcraft:stolas"}
-DIMENSIONS = {"minecraft:overworld": "the Overworld", "minecraft:the_nether": "the Nether", "minecraft:the_end": "the End"}
+# A place's dimension in words (Java: Roster.place; any other is its id): vanilla's three, each lair by its own name
+# (tools/lairs.py LAIRS' display, as lair.jugcraft.<lair> says it, its "The" lower-cased mid-sentence) and a Planarium's
+# cells by the block's name (block.jugcraft.nouveau_planarium; the unit review, D8). check_roster holds it to
+# data/jugcraft/dimension.
+DIMENSIONS = {"minecraft:overworld": "the Overworld", "minecraft:the_nether": "the Nether", "minecraft:the_end": "the End",
+              **{f"{MOD}:{lair}": "t" + spec["display"][1:] if spec["display"].startswith("The ") else spec["display"]
+                 for lair, spec in lairs.LAIRS.items()},
+              f"{MOD}:nouveau_planarium": "a Planarium"}
 
 MESSAGES = {
     "roster.answer.not_listed": "That is not on your roster as you last read it; read it again. Nothing was done",
@@ -92,6 +101,8 @@ MESSAGES = {
                           "come back to you, once",
     "roster.confirm.end_none": "End your agreement with %s? Its Bound Will is released and it departs",
     "roster.confirm.cancel": "Cancelling request #%s closes it; cargo in transit (%s) is first taken back where it came from",
+    # The unit review (D10): with nothing in transit, the hint says nothing of cargo.
+    "roster.confirm.cancel_none": "Cancelling request #%s closes it",
     **{f"roster.service.{work}": text for work, text in SERVICES.items()},
     **{f"roster.kind_service.{kind}": text for kind, text in KIND_SERVICES.items()},
     **{f"roster.dimension.{dim.replace(':', '.')}": text for dim, text in DIMENSIONS.items()},
