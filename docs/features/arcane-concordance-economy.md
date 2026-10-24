@@ -108,6 +108,10 @@ The table is rendered by `python3 tools/concordance_economy.py`, and `check_econ
 | sunpetal, hastened | 4 | 8 |
 <!-- economy:end -->
 
+Since Concordance Chunk D (D-05; not merged; [Stolas's pact](stolas-pact.md#costs-balance-and-automation)):
+Star-reckoning is a sink of resonance (modelled at the cheapest recall, 6), and Stolas's offerings are a sink of at most
+1/7 of an offering a day a pact. `tools/concordance_economy.py` still reports "gaining cycles: none".
+
 ## Interactions tested
 
 The brief's combinations, and the tests that exercise them (new in this step marked **new**):

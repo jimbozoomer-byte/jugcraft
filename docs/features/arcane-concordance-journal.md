@@ -46,6 +46,8 @@ knows of this player now, in sections:
 - Once their research is met: **Vitae**, **the Sky** (the forecast), **Workers**, **Deliveries**, **Relics**, **Prima
   Materia**; **Curses and Wards** once Sympathy is met or while a curse or ward touches the player; **the Conclave**
   for its members; **Spires** for those who keep one.
+- **Pacts** (Concordance Chunk D, D-03; not merged), right after Deliveries: Stolas's Regard's next step, and the sky
+  step named apart; shown from the Binding Arts understood. D-07 adds the pacts kept.
 
 **Exact values** add, after a line, the figures behind it: how many of what each way to the next research state needs
 ("examined 1 of 3; or studied 0 of 1"), and caps. They are off by default; the journal's own switch (or **X**) and the

@@ -4,7 +4,8 @@ Status: merged to main ([#244](https://github.com/jimbozoomer-byte/jugcraft/pull
 `claude/awesome-davinci-iwv3b9`, integrated by [#263](https://github.com/jimbozoomer-byte/jugcraft/pull/263) on
 8 October 2026); see Verification for what has run. Extended by Concordance Chunk D, unit 1 (D-01: the agreements
 keep their promises, and a familiar fades only for its person's own play time; D-02: one pact record; [the chunk's
-contract](concordance-chunk-d.md)), not merged; none of its tests has run in CI yet (see Verification).
+contract](concordance-chunk-d.md)) and unit 2 (D-03 to D-05: [Stolas's pact](stolas-pact.md), a pact kept at a Pact
+Perch), not merged; none of their tests has run in CI yet (see Verification).
 Proposal issue: none; the owner's Arcane Concordance brief (roadmap step 17) is the scope approval.
 Owner: @jimbozoomer-byte. AI-assisted implementation with Claude Code; the model is named in the commit trailers.
 Target milestone and tier: Concordance milestone 9, Practitioner stage (Jugcraft Workshops). Roadmap step 17.
@@ -109,6 +110,21 @@ looping clip for its synced status: the Hearthling's idle, following, supporting
 travelling, working and suspended; the porter's idle, walking, working and broken. Jade shows the status and the
 model's own numbers (bond; carried; integrity, charge and load).
 
+**Pacts** (Concordance Chunk D, unit 2; not merged; [Stolas's pact](stolas-pact.md)). The Pact Perch is a second holder
+block on the same `AgreementHolder` as the Spirit Anchor, and Stolas a fourth worker entity (not a fourth definition
+kind: his offer is the Concordance's `pact` data, `concordance/pact/stolas.json`):
+- the roster's kind `pact` (`workers.kind.pact`), noted when the pact is sealed or its presence is called again;
+- the perch's look once a second, spread by position (`PactKeeping.tick`): unit 1's upkeep look, and a lost presence
+  called back at no cost while its holder is within 64 blocks;
+- breaking a holder block now depends on the block: the anchor releases its agreement as before (`OnBreak.RELEASE`); the
+  perch leaves its pact without its place (`OnBreak.UNSEAT`), and `AgreementHolder.seat` seats a pact without its place
+  (or `stranded`: broken while switched off) at a new block of its owner's, with the same record, terms, day's count,
+  upkeep clock and escrow, refused with one of the `workers.seat_*` outcomes (`SEAT_OUTCOMES`: seated, disabled,
+  not_holder, nothing, not_permitted, taken, roster_full, unavailable);
+- `StarReckoning`, Stolas's service: once a game day at the perch, a pattern its holder observed recalled through the
+  one recall path (`AstrolabeItem.recall`), and the pact's first obligation (`practice jugcraft:pact_service`, never
+  `worker_service`, so the Binding Arts' mastery keeps its three kinds).
+
 ## Connections
 
 - Input producer: First Light (the Binding Arts need it understood); Ley Charge from Ley Pylons (Radiance or
@@ -141,8 +157,10 @@ model's own numbers (bond; carried; integrity, charge and load).
 - Server authority: binding, sealing, routing, repair and every decision are the server's; the client draws the synced
   status. Uses of the charm and the anchor are rate-limited.
 - Permissions: only a familiar's person commands it; only the anchor's owner or their party seal at it, never a
-  stand-in; only a shade's holder suspends it, calls another and ends it (`AgreementHolder.end`; the pact screens of
-  Chunk D units 2 and 3 call it; until then breaking the anchor ends it in game); anyone may read its terms; breaking
+  stand-in; only a shade's holder suspends it, calls another and ends it (`AgreementHolder.end`; since Chunk D unit 2
+  the pact perch's screen calls it for Stolas's pact, while a shade's agreement waits for D-07's roster, and until then
+  breaking the anchor ends it in game); only a perch's owner, in person, seals a pact there, and only a pact's holder
+  reckons, pays, suspends, ends or seats it; anyone may read its terms; breaking
   the anchor needs the right to break it; only a porter's keeper's party routes or repairs it.
 - A shade whose holder is away (offline, dead or in another dimension) keeps its agreement but waits at its anchor and
   says its person is not here; it takes nothing for an absent holder unless the server's
@@ -282,6 +300,17 @@ written, so none of its Java has been compiled against Minecraft and none of the
 - **Not run:** `./gradlew build` and every server and client game test (CI is their first compile and run), any
   client, two clients, a real world saved before Chunk D, a restart.
 
+**Concordance Chunk D, unit 2: D-03 to D-05** (commits `9daf23ae1`, `832129b95`, `7da686ad4`, `ee82c1dc7` and the
+records' commit; [Stolas's pact](stolas-pact.md) and the [contract](concordance-chunk-d.md)'s As built notes, proposals
+D-P17 to D-P49; not merged). **Not yet run in CI**, like unit 1. In this record's suites: `ConcordanceWorkerGameTests`
++21 (22 to 43: D-04's 12 and D-05's 9, with unit 1's four upkeep tests now also on Stolas's own pact),
+`ConcordanceAuthorityGameTests` +1 (`aPerchIsPlacedOnlyWhereItsPlacerMayBuild`; `aChangeOfOwnerMovesNoPact` extended
+to the perch and Star-reckoning), `ConcordancePersistenceGameTests` +4, `ConcordanceSharingGameTests` +4 and
+`ConcordanceResourceGameTests` +2; the client class `ConcordancePactClientGameTests`. Audits: `check_pacts` (D-04's and
+D-05's parts), `check_pact_screen`, and `check_workers` covering `StolasEntity` (in `concordance/spirits/`: no chunk
+loading, no dimension crossing, no brain memories). The local checks, the parse check, the pure harnesses and the 80
+audit mutations are reported in the contract's D-05 As built note.
+
 ## World and event applicability
 
 Works in every dimension; a shade's agreement and a porter's route belong to the dimension they were made in. No
@@ -300,13 +329,19 @@ and `upkeep_held` (appended); the seal outcomes (`SEAL_OUTCOMES`), the holds (`n
 departure reasons (`ended`, `broken`), each saved or worded, so append only; optional saved keys (the anchor's `owner`,
 the bond's `seen_played`, a Bound Will's `pact` and `escrow`). No new block, item or entity.
 
+Since Concordance Chunk D, unit 2 (not merged): entity `jugcraft:stolas`; block, item, block entity and menu
+`jugcraft:pact_perch`; the roster kind `pact`; the seat outcomes (`SEAT_OUTCOMES`, worded, so append only); the perch's
+saved `owner`, `agreement` and `spirit` and Stolas's `perch` and `record` (stamps 1). [Stolas's pact](stolas-pact.md)
+lists the rest.
+
 Open items:
 
 - A spirit agrees to one kind of work (gathering); more kinds each need their own server behaviour.
 - An agreement's terms come from the definition; letting a holder choose narrower hours or a smaller area needs a
   management screen (GuiLib, step 26) or more anchor controls.
 - A familiar waits rather than following through a portal, and the charm recalls it only within the same dimension.
-- Ending an agreement without breaking its anchor has its method (`AgreementHolder.end`) but no in-game action until the
-  pact screens of Concordance Chunk D (units 2 and 3); a Bound Will left without its place can be ended only by code
-  until D-07's roster.
+- Ending an agreement without breaking its anchor has its method (`AgreementHolder.end`) but no in-game action until
+  D-07's roster (Concordance Chunk D, unit 3); since unit 2 the pact perch's screen ends Stolas's pact, and a pact
+  without its perch is ended from any perch keeping nothing. A shade's Bound Will left without its place can be ended
+  only by code until D-07's roster.
 - Workers have not walked real terrain in a test: navigation failure is tested in the harness, not in game.
