@@ -1800,8 +1800,6 @@ def main():
     write(ASSETS / "handbook" / "en_us.json", book)
     import encyclopedia_routes
     write(ASSETS / "encyclopedia" / "en_us.json", encyclopedia_routes.build(book))
-    import recipe_view
-    write(ASSETS / "recipe_view.json", recipe_view.build())
     loot_tables()
     recipes()
     tags()
@@ -1892,6 +1890,9 @@ def main():
     walnut_data.reconcile(write)
     from generated_resource_cleanup import prune
     prune(RES, previous, WRITTEN_RESOURCES)
+    # Include finished server recipes after removing obsolete generated recipes.
+    import recipe_view
+    write(ASSETS / "recipe_view.json", recipe_view.build())
     RESOURCE_MANIFEST.write_text(json.dumps(sorted(WRITTEN_RESOURCES), indent=2) + "\n", encoding="utf-8")
 
 

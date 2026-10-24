@@ -77,6 +77,7 @@ public class JugcraftJeiPlugin implements IModPlugin {
 	private @Nullable Bench bench;
 	/** Other Concordance stations shown like the bench (recipe_view.json "concordance_stations": the Circle Anchor). */
 	private List<Bench> stations = new ArrayList<>();
+	private List<JugcraftJeiStations.Station> processingStations = List.of();
 	/** JEI's fluid amount for one bucket on this platform (81,000 droplets on Fabric). */
 	private static long bucketVolume = 1000;
 
@@ -98,6 +99,8 @@ public class JugcraftJeiPlugin implements IModPlugin {
 		fluidMachines = loadFluidMachines();
 		bucketVolume = registration.getJeiHelpers().getPlatformFluidHelper().bucketVolume();
 		IGuiHelper gui = registration.getJeiHelpers().getGuiHelper();
+		processingStations = JugcraftJeiStations.load();
+		for (var station : processingStations) registration.addRecipeCategories(new JugcraftJeiStations.Category(gui, station));
 		for (Machine machine : machines) {
 			registration.addRecipeCategories(new MachineCategory(gui, machine));
 		}
@@ -116,6 +119,8 @@ public class JugcraftJeiPlugin implements IModPlugin {
 
 	@Override
 	public void registerRecipes(IRecipeRegistration registration) {
+		for (var station : processingStations) registration.addRecipes(station.type(), station.recipes());
+		JugcraftJeiStations.addInformation(registration);
 		for (Machine machine : machines()) {
 			registration.addRecipes(machine.type(), machine.recipes());
 		}
@@ -136,6 +141,11 @@ public class JugcraftJeiPlugin implements IModPlugin {
 
 	@Override
 	public void registerRecipeCatalysts(IRecipeCatalystRegistration registration) {
+		for (var station : processingStations) for (var catalyst : station.catalysts()) registration.addCraftingStation(station.type(), catalyst);
+		registration.addCraftingStation(mezz.jei.api.constants.RecipeTypes.SMELTING, item("jugcraft:electric_furnace"));
+		registration.addCraftingStation(mezz.jei.api.constants.RecipeTypes.BLASTING, item("jugcraft:cavern_nuclear_furnace_component"));
+		for (String block : List.of("kitchen_stove", "skillet", "halloween_bonfire"))
+			registration.addCraftingStation(mezz.jei.api.constants.RecipeTypes.CAMPFIRE_COOKING, item("jugcraft:" + block));
 		for (Machine machine : machines()) {
 			registration.addCraftingStation(machine.type(), machine.block());
 		}
