@@ -5,8 +5,15 @@ import io.github.jimbozoomer.jugcraft.compat.jade.JugcraftJadePlugin;
 import io.github.jimbozoomer.jugcraft.compat.jade.MachineDataProvider;
 import io.github.jimbozoomer.jugcraft.concordance.KindledLanternItem;
 import io.github.jimbozoomer.jugcraft.concordance.CircleAnchorBlock;
+import io.github.jimbozoomer.jugcraft.concordance.ComposeText;
 import io.github.jimbozoomer.jugcraft.concordance.CrucibleBlock;
+import io.github.jimbozoomer.jugcraft.concordance.CrucibleBlockEntity;
+import io.github.jimbozoomer.jugcraft.concordance.CrucibleStandBlock;
 import io.github.jimbozoomer.jugcraft.concordance.alchemy.Mixture;
+import io.github.jimbozoomer.jugcraft.concordance.compose.Text;
+import io.github.jimbozoomer.jugcraft.concordance.diagnostic.Diagnostic;
+import io.github.jimbozoomer.jugcraft.concordance.ecology.Factor;
+import io.github.jimbozoomer.jugcraft.concordance.ecology.Habitat;
 import io.github.jimbozoomer.jugcraft.concordance.LampwrightBenchBlock;
 import io.github.jimbozoomer.jugcraft.concordance.LeyPylonBlock;
 import io.github.jimbozoomer.jugcraft.concordance.LeyPylonBlockEntity;
@@ -34,10 +41,12 @@ import io.github.jimbozoomer.jugcraft.compat.jade.SpireDataProvider;
 import io.github.jimbozoomer.jugcraft.concordance.spire.SpireHeartBlock;
 import io.github.jimbozoomer.jugcraft.Jugcraft;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.core.registries.BuiltInRegistries;
 import io.github.jimbozoomer.jugcraft.machine.MachineBlock;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
+import net.minecraft.world.item.ItemStack;
 import snownee.jade.api.BlockAccessor;
 import snownee.jade.api.EntityAccessor;
 import snownee.jade.api.IEntityComponentProvider;
@@ -56,6 +65,7 @@ public final class JugcraftJadeClient implements JugcraftJadePlugin.ClientRegist
 		registration.registerBlockComponent(ConcordanceTooltip.ANCHOR, CircleAnchorBlock.class);
 		registration.registerBlockComponent(ConcordanceTooltip.PYLON, LeyPylonBlock.class);
 		registration.registerBlockComponent(ConcordanceTooltip.CRUCIBLE, CrucibleBlock.class);
+		registration.registerBlockComponent(StandTooltip.INSTANCE, CrucibleStandBlock.class);
 		registration.registerBlockComponent(ConcordanceTooltip.BED, VerdantBedBlock.class);
 		registration.registerBlockComponent(ConcordanceTooltip.HEART, VerdantHeartBlock.class);
 		registration.registerBlockComponent(ConcordanceTooltip.MAW, MulchMawBlock.class);
@@ -210,12 +220,17 @@ public final class JugcraftJadeClient implements JugcraftJadePlugin.ClientRegist
 		}
 	}
 
-	/** One of the simulation's reasons, sent as "key|factor|value|a|b" (VerdantBedBlockEntity.note). */
+	/**
+	 * One of the simulation's reasons, sent as "key|factor|value|a|b" (VerdantBedBlockEntity.note): a field 1 that names a
+	 * factor is shown by its name. Since Concordance Chunk C (C-08) a reason may carry no factor ("ecology.mixed|25"): its
+	 * fields are shown as sent.
+	 */
 	private static Component reasonText(String encoded) {
 		String[] parts = encoded.split("\\|");
+		boolean factor = parts.length > 1 && Factor.fromId(parts[1]) != null;
 		Object[] args = new Object[parts.length - 1];
 		for (int i = 1; i < parts.length; i++) {
-			args[i - 1] = i == 1 ? Component.translatable("compose.jugcraft.factor." + parts[1]) : parts[i];
+			args[i - 1] = i == 1 && factor ? Component.translatable("compose.jugcraft.factor." + parts[1]) : parts[i];
 		}
 		return Component.translatable("compose.jugcraft." + parts[0], args);
 	}
@@ -231,9 +246,17 @@ public final class JugcraftJadeClient implements JugcraftJadePlugin.ClientRegist
 		}
 	}
 
+	/** Concordance Chunk C (C-08): how far its harvests have strained a bed, as the server counts it. */
+	private static void strain(ITooltip tooltip, int strain) {
+		if (strain > 0) {
+			tooltip.add(Component.translatable("compose.jugcraft.ecology.strain", strain, Habitat.MAX_STRAIN));
+		}
+	}
+
 	/**
-	 * A Greenwarden crop: its step, and its bed's last verdict for it, which the server sends with the bed (a crop
-	 * has no block entity of its own to ask).
+	 * A Greenwarden crop: its step, and its bed's last verdict for it (ripe, as it grew: Concordance Chunk C, C-07, C-P55),
+	 * which the server sends with the bed (a crop has no block entity of its own to ask), its bed's strain (C-08), and (C-09)
+	 * its bed's graft when the crop is its host (the server sends the organism the graft is for).
 	 */
 	private enum CropTooltip implements IBlockComponentProvider {
 		INSTANCE;
@@ -249,10 +272,21 @@ public final class JugcraftJadeClient implements JugcraftJadePlugin.ClientRegist
 			if (!(state.getBlock() instanceof OrganismCropBlock crop)) {
 				return;
 			}
+			boolean ripe = crop.isMaxAge(state);
 			tooltip.add(Component.translatable("message.jugcraft.concordance.garden.crop", crop.getName(), crop.getAge(state),
-					OrganismCropBlock.MAX_AGE, crop.isMaxAge(state) ? Component.translatable("compose.jugcraft.ecology.mature") : Component.empty()));
-			if (!crop.isMaxAge(state) && accessor.getLevel().getBlockEntity(accessor.getPosition().below()) instanceof VerdantBedBlockEntity bed) {
-				verdict(tooltip, bed.growth(), String.join("\n", bed.reasons()));
+					OrganismCropBlock.MAX_AGE, ripe ? Component.translatable("compose.jugcraft.ecology.mature") : Component.empty()));
+			if (accessor.getLevel().getBlockEntity(accessor.getPosition().below()) instanceof VerdantBedBlockEntity bed) {
+				String growth = bed.growth();
+				// Concordance Chunk C (C-07): ripe, it still shows its bed's last verdict, as it grew: what its regrowth will meet.
+				if (ripe && !growth.isEmpty() && !growth.equals("dormant") && !growth.equals("waiting")) {
+					tooltip.add(Component.translatable("tooltip.jugcraft.concordance.jade.as_it_grew", growthText(growth)));
+					growth = "";
+				}
+				verdict(tooltip, growth, String.join("\n", bed.reasons()));
+				strain(tooltip, bed.strainNow());
+				if (!bed.graft().isEmpty() && bed.graftFor().equals(crop.organismId())) {
+					tooltip.add(Component.translatable("tooltip.jugcraft.concordance.jade.graft", ComposeText.name(new Text.Ref("graft", bed.graft()))));
+				}
 			}
 		}
 	}
@@ -287,7 +321,7 @@ public final class JugcraftJadeClient implements JugcraftJadePlugin.ClientRegist
 	private static Component anchorPhase(String phase, CompoundTag data) {
 		String key = "message.jugcraft.concordance.circle.phase." + phase;
 		return switch (phase) {
-			case "gathering" -> Component.translatable(key, data.getIntOr("joined", 0), "?");
+			case "gathering" -> Component.translatable(key, data.getIntOr("joined", 0), data.getIntOr("needed", 0));
 			case "channeling" -> Component.translatable(key, data.getIntOr("done", 0) + 1, data.getIntOr("steps", 0));
 			default -> Component.translatable(key);
 		};
@@ -356,6 +390,8 @@ public final class JugcraftJadeClient implements JugcraftJadePlugin.ClientRegist
 						tooltip.add(Component.translatable("tooltip.jugcraft.concordance.jade.held", held));
 					}
 					tooltip.add(Component.translatable("tooltip.jugcraft.concordance.jade.volume", data.getIntOr("parts", 0), Mixture.MAX_PARTS));
+					// Concordance Chunk C (C-01): the tank, and why it waits as the crucible says it (worded here, worked out on the server).
+					tooltip.add(Component.translatable("tooltip.jugcraft.concordance.jade.tank", data.getIntOr("tank", 0), CrucibleBlockEntity.WATER_PER_BUCKET));
 					int steps = data.getIntOr("steps", 0);
 					if (steps > 0) {
 						tooltip.add(Component.translatable("tooltip.jugcraft.concordance.jade.step", Math.min(steps, data.getIntOr("step", 0) + 1), steps));
@@ -363,6 +399,10 @@ public final class JugcraftJadeClient implements JugcraftJadePlugin.ClientRegist
 						if (!next.isEmpty()) {
 							tooltip.add(Component.translatable("tooltip.jugcraft.concordance.jade.waiting", next));
 						}
+					}
+					Diagnostic reason = Diagnostic.decode(data.getStringOr("reason", ""));
+					if (reason != null) {
+						tooltip.add(ComposeText.show(reason.text()));
 					}
 				}
 				int capacity = data.getIntOr("capacity", -1);
@@ -377,6 +417,12 @@ public final class JugcraftJadeClient implements JugcraftJadePlugin.ClientRegist
 						tooltip.add(Component.translatable("tooltip.jugcraft.concordance.jade.area", habitat[3], habitat[4]));
 					}
 					verdict(tooltip, data.getStringOr("growth", ""), data.getStringOr("reasons", ""));
+					strain(tooltip, data.getIntOr("strain", 0));
+					// Concordance Chunk C (C-09): the graft it carries, when the rules know it.
+					String graft = data.getStringOr("graft", "");
+					if (!graft.isEmpty()) {
+						tooltip.add(Component.translatable("tooltip.jugcraft.concordance.jade.graft", ComposeText.name(new Text.Ref("graft", graft))));
+					}
 				}
 				String device = data.getStringOr("device", "");
 				if (!device.isEmpty()) {
@@ -410,6 +456,28 @@ public final class JugcraftJadeClient implements JugcraftJadePlugin.ClientRegist
 				String phase = data.getStringOr("phase", "");
 				if (!phase.isEmpty()) {
 					tooltip.add(anchorPhase(phase, data));
+					// Concordance Chunk C (C-03): who is channelling, what lies in the anchor, and while a rite holds it what it
+					// has spent apart from what it still holds, as the server worked them out.
+					if (phase.equals("channeling") || phase.equals("complete")) {
+						tooltip.add(Component.translatable("tooltip.jugcraft.concordance.jade.participants", data.getIntOr("joined", 0)));
+					}
+					int offerings = data.getIntOr("offerings", 0);
+					for (int i = 0; i < Math.min(offerings, ConcordanceDataProvider.SHOWN_OFFERINGS); i++) {
+						String[] offering = data.getStringOr("offering" + i, "").split("\\|");
+						Identifier item = offering.length == 2 ? Identifier.tryParse(offering[0]) : null;
+						if (item != null) {
+							tooltip.add(Component.translatable("tooltip.jugcraft.concordance.jade.offering",
+									new ItemStack(BuiltInRegistries.ITEM.getValue(item)).getHoverName(), offering[1]));
+						}
+					}
+					if (offerings > ConcordanceDataProvider.SHOWN_OFFERINGS) {
+						tooltip.add(Component.literal("+" + (offerings - ConcordanceDataProvider.SHOWN_OFFERINGS)));
+					}
+					int spentFocus = data.getIntOr("spent_focus", -1);
+					if (spentFocus >= 0) {
+						tooltip.add(Component.translatable("tooltip.jugcraft.concordance.jade.spent", spentFocus, data.getIntOr("spent_ley", 0)));
+						tooltip.add(Component.translatable("tooltip.jugcraft.concordance.jade.reserved", data.getIntOr("reserved", 0)));
+					}
 					int faults = data.getIntOr("faults", 0);
 					for (int i = 0; i < Math.min(faults, ConcordanceDataProvider.SHOWN_FAULTS); i++) {
 						String[] fault = data.getStringOr("fault" + i, "").split("\\|");
@@ -420,6 +488,44 @@ public final class JugcraftJadeClient implements JugcraftJadePlugin.ClientRegist
 					if (faults > ConcordanceDataProvider.SHOWN_FAULTS) {
 						tooltip.add(Component.literal("+" + (faults - ConcordanceDataProvider.SHOWN_FAULTS)));
 					}
+				}
+			});
+		}
+	}
+
+	/** A Crucible Stand (Concordance Chunk C, C-05): its JE, what decides its heat and at what, what it pays, why it gives none. */
+	private enum StandTooltip implements IBlockComponentProvider {
+		INSTANCE;
+
+		@Override
+		public Identifier getUid() {
+			return ConcordanceDataProvider.STAND.id;
+		}
+
+		@Override
+		public void appendTooltip(ITooltip tooltip, BlockAccessor accessor, IPluginConfig config) {
+			accessor.getServerData().getCompound(ConcordanceDataProvider.STAND.dataKey).ifPresent(data -> {
+				if (data.getBooleanOr("disabled", false)) {
+					tooltip.add(Component.translatable("message.jugcraft.concordance.disabled"));
+					return;
+				}
+				tooltip.add(Component.translatable("tooltip.jugcraft.concordance.jade.stand_energy", data.getLongOr("energy", 0L), data.getLongOr("capacity", 0L)));
+				String aim = data.getStringOr("aim", "");
+				Component heat = aim.isEmpty() ? Component.translatable("tooltip.jugcraft.concordance.jade.stand_off")
+						: Component.translatable("tooltip.jugcraft.concordance.jade.stand_heat", Component.translatable("compose.jugcraft.band." + aim),
+								data.getIntOr("target", 0));
+				tooltip.add(Component.translatable(data.getBooleanOr("following", false) ? "tooltip.jugcraft.concordance.jade.stand_following"
+						: "tooltip.jugcraft.concordance.jade.stand_setting", heat));
+				int draw = data.getIntOr("draw", 0);
+				if (draw > 0) {
+					tooltip.add(Component.translatable("tooltip.jugcraft.concordance.jade.stand_draw", draw));
+				}
+				Diagnostic reason = Diagnostic.decode(data.getStringOr("reason", ""));
+				if (reason != null) {
+					if (data.getBooleanOr("waits", false)) {
+						tooltip.add(Component.translatable("tooltip.jugcraft.concordance.jade.stand_waits"));
+					}
+					tooltip.add(ComposeText.show(reason.text()));
 				}
 			});
 		}

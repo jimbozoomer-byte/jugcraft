@@ -29,6 +29,9 @@ ANCHORING_KEYS = {
     "rooted": ("Earthbound Thallite", "take a blow in Earthbound Thallite armour on natural ground"),
 }
 ANCHORING_MASTERY = 3
+# Concordance Chunk C, C-04: Root and Rivet's codex entry (tools/concordance_rituals.py), linked from Understood. A link to
+# no entry stops the whole book opening, so check_concordance holds every entry:// link to an entry on disk (C-P42).
+ROOT_AND_RIVET = "[Root and Rivet](entry://jugcraft:arcane_concordance/circles/root_and_rivet)"
 _UNDERSTOOD = {"research": RESEARCH_ID, "state": "understood"}
 _ELECTIVE = "; ".join(text for needs, text in ANCHORING_KEYS.values() if needs is not None)
 
@@ -128,7 +131,8 @@ def codex():
                 ("text", "Observed", f"You have examined {OBSERVED_DISTINCT} kinds of stone. Study one at a "
                  "**Lampwright's Bench**, or read someone's **Research Notes**.", (research, "observed")),
                 ("text", "Understood", f"You can now cast **Brace**. To **master** Stratawrighting, anchor "
-                 f"{ANCHORING_MASTERY} ways: {own}. Any of these can stand for one: {_ELECTIVE}.",
+                 f"{ANCHORING_MASTERY} ways: {own}. Any of these can stand for one: {_ELECTIVE}. {ROOT_AND_RIVET}, a "
+                 "Circlewrights' rite that roots a Thallite plate into a foundation, is one such ritual.",
                  (research, "understood")),
                 ("text", "Mastered", "Brace costs a point less Focus.", (research, "mastered")),
             ]},

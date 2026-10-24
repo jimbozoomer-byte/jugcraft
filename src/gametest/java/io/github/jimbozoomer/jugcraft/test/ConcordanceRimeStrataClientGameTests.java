@@ -71,8 +71,9 @@ public class ConcordanceRimeStrataClientGameTests implements FabricClientGameTes
 			Jugcraft.LOGGER.info("[rime strata client] the owner's icons: {}", missing.isEmpty() ? "present" : missing);
 			check(missing.isEmpty(), "The client lacks Rime's and Strata's icons: " + missing);
 
-			// Both researches understood and the wand in hand: Spell Engine's bar.
-			server.runOnServer(ConcordanceRimeStrataClientGameTests::learn);
+			// Both researches understood and the wand in hand: Spell Engine's bar. One research a tick (see learnEach).
+			learnEach(context, server, "jugcraft:first_light", Rime.RESEARCH, Strata.RESEARCH);
+			server.runOnServer(ConcordanceRimeStrataClientGameTests::arm);
 			context.waitTicks(40);
 			singleplayer.getConnection().waitForChunksRender();
 			clearToasts(context);
@@ -136,11 +137,21 @@ public class ConcordanceRimeStrataClientGameTests implements FabricClientGameTes
 	}
 
 	/** First Light, Rimekeeping and Stratawrighting understood, the Initiate's Wand in hand, and the spell bar refreshed. */
-	private static void learn(MinecraftServer minecraft) {
+	/**
+	 * Understands each research in its own server tick. Each learning sends Modonomicon's book state, and the payload
+	 * holds a live map that the next learning in the same tick can change while the connection is still encoding it: CI
+	 * saw {@code modonomicon:sync_book_visual_states} fail to encode and the client drop (run 38679932446).
+	 */
+	private static void learnEach(ClientGameTestContext context, TestServerContext server, String... researches) {
+		for (String research : researches) {
+			server.runOnServer(minecraft -> ConcordanceProgress.grant(player(minecraft), research, ResearchState.UNDERSTOOD));
+			context.waitTicks(2);
+		}
+	}
+
+	/** The wand in hand, and Spell Engine told to rebuild the bar. */
+	private static void arm(MinecraftServer minecraft) {
 		ServerPlayer player = player(minecraft);
-		ConcordanceProgress.grant(player, "jugcraft:first_light", ResearchState.UNDERSTOOD);
-		ConcordanceProgress.grant(player, Rime.RESEARCH, ResearchState.UNDERSTOOD);
-		ConcordanceProgress.grant(player, Strata.RESEARCH, ResearchState.UNDERSTOOD);
 		player.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(JugcraftConcordance.INITIATE_WAND));
 		SpellContainerSource.setDirty(player, ConcordanceSpells.SOURCE);
 		SpellContainerSource.setDirty(player, "main_hand");

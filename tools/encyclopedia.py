@@ -247,6 +247,28 @@ INSPECT = {
     "pylon.fill_energy": "Fill it with Jugcraft Energy (%s JE a Ley Charge)",
     "pylon.lends": "It lends its charge to your rituals",
     "pylon.owned": "It is someone else's: it lends only to rituals they take part in",
+    # Concordance Chunk C, C-07: a Verdant Bed or a crop: what the plant on it needs, against what it has.
+    "garden.habitat": "What %s needs, and what it has",
+    "garden.here": "The habitat here",
+    # Concordance Chunk C, C-01: an Alembic Crucible's slots, and the hint that a glass reads more.
+    "crucible.buffer": "Waiting to go in: %s",
+    "crucible.bottles": "Bottles and bowls: %s",
+    "crucible.output": "Made: %s",
+    "crucible.none": "nothing",
+    "crucible.count": "%s %s",
+    "crucible.glass": "An Assay Glass, carried by someone who understands the Alembic Arts, reads its makeup here",
+    # Concordance Chunk C (C-03): a rite's readiness, what a running one has spent and holds, how the last broke off, and
+    # its stages and payments.
+    "readiness": "Before %s can begin",
+    "readiness.ready": "Nothing is missing: use the anchor with an empty hand to begin it",
+    "readiness.unknown": "These offerings answer a rite you have not learned; the codex says how to learn it",
+    "unknown_rite": "a rite you have not learned",
+    "under_way": "%s, under way",
+    "completed": "%s, complete",
+    "anchor.held": "Held until it ends, and consumed only if it completes: %s",
+    "anchor.count": "%s %s",
+    "last": "Last attempt: %s",
+    "stages": "%s: its stages and what each pays",
 }
 
 DOSSIER = {
@@ -270,6 +292,14 @@ DOSSIER = {
                         "Overworld (the Volcano or the Cinder Barrens). The magma cracks open into a vent of sparks and "
                         "smoke and you sink through the stone to the kiln's ledge; the seal is used up only if the kiln "
                         "opens. While the vent smokes, friends follow by using it",
+    # Concordance Chunk C (C-02, C-P9): what readies a player for his slag and flame, as text and icons, no recipe grid.
+    "cinder_kiln.prepare": "Against his slag and flame: the Kiln Draught, magma cream or sugar stirred in an Alembic "
+                           "Crucible, gives Fire Resistance for up to %s seconds a draught, and under it the slag does not "
+                           "burn and his flame does not take, though his blows, gobs and cinders still land; the Salamander "
+                           "Charm from his loot, held in the other hand, keeps hot ground from burning its holder for as "
+                           "long as it is held",
+    "cinder_kiln.prepare.charm": "Against his slag: the Salamander Charm from his loot, held in the other hand, keeps hot "
+                                 "ground from burning its holder for as long as it is held",
     "grave": "A grave: any headstone, such as a %s",
     "any_night": "The rite works on any night",
     "in_season": "The rite works now, in the Halloween season",
@@ -294,6 +324,10 @@ DOSSIER = {
                           "of his bowl",
     "credit.wards": "Cast a ward after the keeper wakes: one cast before is not counted. Those who fall are paid when "
                     "they are back on their feet, and those who leave the game when they come back",
+    # Concordance Chunk C (C-02, C-P8): after credit.wards, while the Concordance's Verdance brews Regeneration.
+    "credit.poultice": "A Stillroot Poultice you put on a friend in the fight counts as healing: each health its "
+                       "Regeneration then gives back of what the keeper's side took from them, while they stay in the "
+                       "fight. One on yourself earns nothing, and two on one friend heal, and earn, no faster than one",
     "won": "You have beaten this keeper: %s",
     "first_win": "A first win always brings the %s",
     "first_win.pair": "A first win always brings one of two trophies, at random: the %s or the %s",

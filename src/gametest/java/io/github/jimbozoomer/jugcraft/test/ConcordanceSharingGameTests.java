@@ -38,7 +38,7 @@ public class ConcordanceSharingGameTests {
 	private static final String FIRST_LIGHT = "jugcraft:first_light";
 
 	private static ServerPlayer player(GameTestHelper helper, BlockPos standAt) {
-		ServerPlayer player = helper.makeMockServerPlayerInLevel();
+		ServerPlayer player = TestPlayers.mock(helper);
 		player.setGameMode(GameType.SURVIVAL);
 		BlockPos absolute = helper.absolutePos(standAt);
 		player.snapTo(absolute.getX() + 0.5, absolute.getY(), absolute.getZ() + 0.5, 0.0F, 0.0F);

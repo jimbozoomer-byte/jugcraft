@@ -11874,7 +11874,10 @@ def check_acquisition(registered):
     a ritual other than the page's own, the Assayer's Scale's catalogue), while the hood's page names its own recipe. The
     Adept's Attunement makes the Adept's Wand from what its page lists. The JEI plugin shows the rows. Every piece of the
     first loadout is made by a recipe or a bench working on disk, and the server test that loads those recipes names
-    each; none of those sources gives the owner's armour tiers the record keeps creative-only. Only data is read, and
+    each; none of those sources gives the owner's armour tiers the record keeps creative-only. The living workshop's rows
+    (tools/acquisition.py WORKSHOP and FACTORY; Concordance Chunk C, C-10) are each registered and made as they say (a
+    recipe of their own result, a bench working, or a rite RITUALS pages), every item Chunk C registered is a WORKSHOP
+    row, and the journey's server test loads every recipe they name. Only data is read, and
     the loot classes' few lines named above: what Java alone gives (a creature's drops coded in its class) is not seen.
     (check_arms_variants forbids the trophies' recipes on its own; nothing here relaxes it.)"""
     import acquisition as aq
@@ -12103,6 +12106,41 @@ def check_acquisition(registered):
             working = DATA / MOD / "concordance" / "working" / f"{how.split(':', 1)[1]}.json"
             if not working.is_file() or (load(working) or {}).get("result") != f"{MOD}:{item}":
                 err(f"acquisition: concordance/working/{working.name} does not make the first loadout's {item}")
+    # Concordance Chunk C (C-10): the living workshop's rows (tools/acquisition.py WORKSHOP and FACTORY). Each is registered
+    # and made as its row says: by a crafting recipe whose own result it is, a bench working that makes it, or a ritual
+    # RITUALS pages for it (whose transformation the check above holds to its page); every item Chunk C registered is a
+    # WORKSHOP row; and the journey's server test loads every recipe the rows name (WORKSHOP_RECIPES).
+    journey_path = tests_path.with_name("ConcordanceJourneyGameTests.java")
+    journey = journey_path.read_text(encoding="utf-8") if journey_path.is_file() else ""
+    listed = re.search(r"WORKSHOP_RECIPES = List\.of\(([^)]*)\)", journey)
+    rows = {**aq.WORKSHOP, **aq.FACTORY}
+    wanted = {aq.recipe_file(item, how) for item, how in rows.items()} - {None}
+    if "public void theWorkshopsRecipesLoad(" not in journey or not listed \
+            or set(re.findall(r'"([a-z_]+)"', listed.group(1))) != wanted:
+        err("ConcordanceJourneyGameTests.theWorkshopsRecipesLoad must load the recipe of every workshop row "
+            f"(WORKSHOP_RECIPES: {sorted(wanted)})")
+    for item in aq.CHUNK_C_ITEMS:
+        if item not in aq.WORKSHOP:
+            err(f"acquisition: {item}, registered by Concordance Chunk C, is no row of WORKSHOP (tools/acquisition.py)")
+    for item, how in rows.items():
+        if item not in registered:
+            err(f"acquisition: the workshop's {item} is not registered")
+        recipe = aq.recipe_file(item, how)
+        kind, _, name = how.partition(":")
+        if recipe is not None:
+            path = DATA / MOD / "recipe" / f"{recipe}.json"
+            result = ((load(path) or {}) if path.is_file() else {}).get("result")
+            if (result.get("id") if isinstance(result, dict) else result) != f"{MOD}:{item}":
+                err(f"acquisition: recipe/{recipe}.json does not make the workshop's {item} (its own result)")
+        elif kind == "working":
+            working = DATA / MOD / "concordance" / "working" / f"{name}.json"
+            if not working.is_file() or (load(working) or {}).get("result") != f"{MOD}:{item}":
+                err(f"acquisition: concordance/working/{name}.json does not make the workshop's {item}")
+        elif kind == "ritual":
+            if item in aq.FACTORY or aq.RITUALS.get(item) != name:
+                err(f"acquisition: the workshop's {item} is made by the ritual {name}: RITUALS must page it for {item}")
+        else:
+            err(f"acquisition: the workshop's {item} is made by {how!r}, not a recipe, a working or a ritual")
     # The owner's armour tiers the record keeps creative-only: nothing gives them.
     for tier in aq.CREATIVE_ONLY:
         for piece in gear.ARMOR:
@@ -13940,7 +13978,7 @@ def check_concordance(registered):
     # Every Concordance item icon is its 16x16 map in tools/item_icons/, committed as drawn (docs/ITEM_ICONS.md).
     import item_icons
     for icon in ("initiate_wand", "adept_wand", "kindled_lantern", "kindled_lantern_lit", "research_notes",
-                 "research_notes_written", "arcane_concordance"):
+                 "research_notes_written", "arcane_concordance", "rooted_thallite_foundation"):
         texture = ASSETS / "textures" / "item" / f"{icon}.png"
         if not item_icons.has(icon) or not texture.is_file():
             err(f"concordance: {icon} needs its map tools/item_icons/{icon}.txt and its texture (tools/generate_textures.py)")
@@ -13948,6 +13986,12 @@ def check_concordance(registered):
         with Image.open(texture) as img:
             if img.convert("RGBA").tobytes() != item_icons.draw(icon).tobytes() or img.size != (16, 16):
                 err(f"concordance: textures/item/{icon}.png differs from its map: run tools/generate_textures.py")
+    # The foundation's thallite is the Thallite metal's own ramp (Concordance Chunk C, C-04): only its outline is darker.
+    import icon_materials
+    import material_icons
+    thallite = icon_materials.MATERIALS.get("thallite")
+    if thallite is None or (thallite.dark, thallite.mid, thallite.light, thallite.highlight) != material_icons.METAL_RAMPS["thallite"][1:]:
+        err("tools/icon_materials.py: thallite's dark, mid, light and highlight are the Thallite metal's (tools/material_icons.py METAL_RAMPS)")
     resource_java = (root / "resource" / "ResourceType.java").read_text(encoding="utf-8") \
         if (root / "resource" / "ResourceType.java").exists() else ""
     match = re.search(r"PRINCIPLES = Set\.of\(([^;]*)\);", resource_java)
@@ -14169,6 +14213,26 @@ def check_concordance(registered):
         for key in re.findall(r'"(book\.[a-z_.0-9]+|research_node\.[a-z_.0-9]+)"', text):
             if key not in lang:
                 err(f"codex {path.relative_to(book)}: missing lang {key}")
+    # A codex link (Modonomicon's entry://) names an entry of this book (Concordance Chunk C, C-04, C-P42). Modonomicon
+    # will not open a book with a broken link (allow_open_book_with_invalid_links defaults to false), so one stale link
+    # would close the whole codex.
+    # Its @anchor must be a page's id and its #page a page of the entry: BookLink.fromEntry refuses either otherwise.
+    for key, text in sorted(lang.items()):
+        if not key.startswith(f"book.{MOD}.{co.BOOK}."):
+            continue
+        for link in re.findall(r"\]\((entry://[^)\s]*)\)", text):
+            target, at, anchor = link[len("entry://"):].rpartition("@") if "@" in link else (link[len("entry://"):], "", "")
+            target, hashed, page = target.rpartition("#") if "#" in target else (target, "", "")
+            owner, _, path = target.partition("/")
+            entry = book / "entries" / f"{path}.json"
+            if owner != f"{MOD}:{co.BOOK}" or not entry.is_file():
+                err(f"codex lang {key}: {link} names no entry of the codex ({MOD}:{co.BOOK}/<category>/<entry>)")
+                continue
+            pages = (load(entry) or {}).get("pages", [])
+            if at and anchor not in {each.get("id") for each in pages}:
+                err(f"codex lang {key}: {link} names no page id of {path} (@{anchor})")
+            if hashed and not (page.isdigit() and int(page) < len(pages)):
+                err(f"codex lang {key}: {link} names no page of {path} (#{page}: it has {len(pages)})")
     # Opt-outs name real items; the Kindled mote has its block state and name; LambDynamicLights names a real item.
     for path in (DATA / MOD / "spell_assignments").glob("*.json"):
         if path.stem not in registered:
@@ -14217,11 +14281,17 @@ def check_concordance(registered):
     check_rituals(co, root, lang, registered, research)
     check_alchemy(co, root, lang, registered, research)
     check_winter_brine(co, root, lang)
+    check_diagnostics(co, root, lang)
+    check_workshop_products(co, root, lang)
+    check_poultice_credit(co, lang)
+    check_crucible_stand(co, root, lang)
     check_ecology(co, root, lang, registered, research)
+    check_graft(co, root, lang)
     check_celestial(co, root, lang, registered, research)
     check_crimson(co, root, lang, registered, research)
     check_workers(co, root, lang, registered, research)
     check_logistics(co, root, lang, registered)
+    check_crucible_supply(co, root)
     check_artifice(co, root, lang, registered, research)
     check_relics(co, root, lang, registered, research)
     check_equivalence(co, root, lang, registered, research)
@@ -14240,6 +14310,8 @@ def check_concordance(registered):
     check_journey()
     check_delivery()
     check_game_test_entrypoints()
+    check_load_card()
+    check_workshop_client_evidence()
 
 
 def check_composition(co, root, lang, registered, research):
@@ -14518,6 +14590,156 @@ def check_game_test_entrypoints():
             err(f"src/gametest/{path.name}: has game tests but is not a fabric-gametest or fabric-client-gametest entrypoint")
 
 
+def check_load_card():
+    """Concordance Chunk C, C-10 (C-P20, C-P66): the workshop load card. It stays opted in: it measures only when Fabric's
+    filter names it alone, so ordinary runs pass it at once. It names Fabric's own id for itself, reads whole 100-tick
+    windows of MinecraftServer's ring over at least 6,000 ticks, has room in maxTicks for its phases, force-loads its
+    yard from begin() (the game test server sets no simulation distance) and never schedules an entry for every
+    remaining tick (test work that shrinks as the run goes on). It builds every part of C-10's workload, checks the
+    courier ledger and is registered; a selected card begins. docs/TESTING.md, and the Build workflow if it carries the
+    job, name the same id; the workflow's filter is only in the load-card job, behind exactly the manual-run guard. The
+    Gleaner's Heart search is timed (C-P21). Comments are ignored."""
+    name = "ConcordanceWorkshopLoadGameTests"
+    test_dir = ROOT / "src" / "gametest" / "java" / "io" / "github" / "jimbozoomer" / "jugcraft" / "test"
+    path = test_dir / f"{name}.java"
+    if not path.exists():
+        err(f"src/gametest/{name}.java: missing (Concordance Chunk C's load card, C-10)")
+        return
+    text = path.read_text(encoding="utf-8")
+    code = re.sub(r"//[^\n]*|/\*.*?\*/", " ", text, flags=re.S)
+    ident = "jugcraft-test:" + re.sub(r"([a-z])([A-Z])", r"\1_\2", f"{name}_loadCard").lower()
+    if f'public static final String ID = "{ident}";' not in code:
+        err(f"{name}.java: ID must be Fabric's id for loadCard, {ident}")
+    if 'static final String FILTER = "fabric-api.gametest.filter";' not in code or "return ID.equals(System.getProperty(FILTER));" not in code:
+        err(f"{name}.java: selected() must compare Fabric's filter property with ID exactly")
+    if not re.search(r"public void loadCard\(GameTestHelper helper\) \{\s*if \(!selected\(\)\) \{\s*helper\.succeed\(\);\s*return;\s*\}"
+                     r"\s*new Card\(helper\)\.begin\(\);\s*\}", code):
+        err(f"{name}.java: loadCard must pass at once unless it is selected, and selected, begin the card (new Card(helper).begin())")
+    if "@GameTest(maxTicks = MAX_TICKS, skyAccess = true)" not in code:
+        err(f"{name}.java: loadCard's @GameTest must take maxTicks = MAX_TICKS")
+    numbers = {key: int(value.replace("_", "")) for key, value in re.findall(r"static final int ([A-Z_]+) = ([0-9_]+);", code)}
+    missing = [key for key in ("WINDOW", "MEASURED", "WARMUP_CAP", "MAX_TICKS", "OFF") if key not in numbers]
+    if missing:
+        err(f"{name}.java: missing constants {missing}")
+    else:
+        if numbers["WINDOW"] != 100:
+            err(f"{name}.java: WINDOW must be MinecraftServer's 100-tick ring of tick times")
+        if numbers["MEASURED"] < 6000 or numbers["MEASURED"] % numbers["WINDOW"]:
+            err(f"{name}.java: MEASURED must be at least 6,000 ticks in whole windows (C-10)")
+        if numbers["MAX_TICKS"] < 2 * numbers["WARMUP_CAP"] + 2 * numbers["MEASURED"] + 2 * numbers["WINDOW"] + 100:
+            err(f"{name}.java: MAX_TICKS leaves no room for two warm-ups and two measured spans")
+        if numbers["OFF"] < 9:
+            err(f"{name}.java: OFF must keep the yard clear of the default structure's barrier walls (x and z of 8)")
+    # setChunkForced appears twice (forcing, and releasing at the end), so the forcing call and its caller are checked.
+    if not re.search(r"\bsetChunkForced\([^;]*,\s*true\)", code) or not re.search(r"\bvoid begin\(\)\s*\{[^}]*\bforce\(\);", code):
+        err(f"{name}.java: loadCard must force-load its yard's chunks (setChunkForced(..., true), from begin())")
+    for needle, what in (("getTickTimesNanos()", "the server's ring of tick times"), ("problems()", "the courier ledger's own check"),
+                         ("Signs.observe(", "the signs it would be sent"),
+                         ("JugcraftConcordance.CRUCIBLE_STAND", "a Crucible Stand"), ("JugcraftConcordance.CRUCIBLE)", "an Alembic Crucible"),
+                         ("STILLROOT_POULTICE", "the Stillroot Poultice"), ("JugcraftFluids.ELECTRIC_PUMP", "an Electric Pump"),
+                         ("JugcraftConcordance.CIRCLE_ANCHOR", "a circle"), ("ROOTED_THALLITE_FOUNDATION", "Root and Rivet"),
+                         ("PeepoMod.PEEPO", "a Peepo"), ("Workers.CLOCKWORK_PORTER", "a porter"),
+                         ("Garden.MULCH_MAW", "a Mulch Maw"), ("Garden.GLEANER", "a Gleaner")):
+        if needle not in code:
+            err(f"{name}.java: C-10's workload lacks {what}")
+    if len(re.findall(r"new Planting\(", code)) != 9:
+        err(f"{name}.java: C-10's workload plants nine beds")
+    if "onEachTick" in code:
+        err(f"{name}.java: no onEachTick (its entry for every remaining tick is test work that shrinks as the run goes on)")
+    mod = load(ROOT / "src" / "gametest" / "resources" / "fabric.mod.json") or {}
+    if f"io.github.jimbozoomer.jugcraft.test.{name}" not in mod.get("entrypoints", {}).get("fabric-gametest", []):
+        err(f"src/gametest/resources/fabric.mod.json: {name} must be a fabric-gametest entrypoint")
+    if f"fabric-api.gametest.filter={ident}" not in (ROOT / "docs" / "TESTING.md").read_text(encoding="utf-8"):
+        err("docs/TESTING.md: the load card's command must select its id")
+    # The workflow, if it carries the card: the filter appears once, inside the load-card job, and that job's own if is
+    # exactly the manual-run guard, so no ordinary run selects the card and the card's job runs nothing else. Whole-line
+    # comments are dropped first, so a guard or filter only in a comment does not count.
+    workflow = (ROOT / ".github" / "workflows" / "build.yml").read_text(encoding="utf-8")
+    workflow = re.sub(r"^[ \t]*#[^\n]*\n", "", workflow, flags=re.M)
+    job = re.search(r"^  load-card:\n(.*?)(?=^  [A-Za-z][\w-]*:\s*$|\Z)", workflow, re.S | re.M)
+    body = job.group(1) if job else ""
+    if "fabric-api.gametest.filter" in workflow and (workflow.count("fabric-api.gametest.filter") != 1
+                                                     or f"fabric-api.gametest.filter={ident}" not in body
+                                                     or not re.search(r"^    if: github\.event_name == 'workflow_dispatch' && inputs\.load_card[ \t]*$",
+                                                                      body, re.M)):
+        err(".github/workflows/build.yml: the load card's filter must appear once, in the load-card job, whose if must be exactly "
+            "github.event_name == 'workflow_dispatch' && inputs.load_card")
+    workload = (test_dir / "ConcordanceWorkloadGameTests.java").read_text(encoding="utf-8")
+    if "public void gleanersHeartSearch(GameTestHelper helper)" not in workload or "GleanerBlockEntity.HEART_REACH" not in workload:
+        err("ConcordanceWorkloadGameTests.java: the Gleaner's Heart search must be timed (C-P21)")
+
+
+WORKSHOP_CLIENT = "io.github.jimbozoomer.jugcraft.test.ConcordanceWorkshopClientGameTests"
+WORKSHOP_CLIENT_SHOTS = ("jugcraft_concordance_workshop", "jugcraft_concordance_stand_lit", "jugcraft_concordance_stand_dark",
+                         "jugcraft_encyclopedia_inspect_crucible_stand", "jugcraft_encyclopedia_inspect_root_and_rivet",
+                         "jugcraft_encyclopedia_inspect_root_and_rivet_scale4", "jugcraft_concordance_anchor_root_and_rivet_jade")
+WORKSHOP_CLIENT_PIECES = ("JugcraftConcordance.CRUCIBLE_STAND", "JugcraftConcordance.CRUCIBLE.", "JugcraftFluids.ELECTRIC_PUMP",
+                          "JugcraftConcordance.CIRCLE_ANCHOR", "JugcraftConcordance.LEY_PYLON", "Garden.VERDANT_BED",
+                          "Garden.MULCH_MAW", "Garden.GLEANER")
+
+
+def check_workshop_client_evidence():
+    """Concordance Chunk C, C-10: the living workshop's client evidence (plan 08:169-181). ConcordanceWorkshopClientGameTests
+    is listed by the test mod and weighed by tools/select_client_tests.py (an entry that is not a comment), so its shard
+    stays inside the client jobs' 60 minutes (.github/workflows/build.yml); it builds the whole workshop in one view,
+    takes its shots (the high-scale one in a window resized for it, its applied GUI scale checked: at the client tests'
+    854x480 no scale above 2 applies) and records a client frame time (Mesa's, C-P70), calling the sampler; and it uses
+    Jade's provider (a call or a method reference) only inside an isModLoaded("jade") block, so it runs without Jade.
+    The contract's other client shot, a bed's Inspect page, is EncyclopediaClientGameTests'
+    jugcraft_encyclopedia_inspect_bed (unit 4), held here to that class. Comments are ignored."""
+    name = "src/gametest/ConcordanceWorkshopClientGameTests.java"
+    path = (ROOT / "src" / "gametest" / "java" / "io" / "github" / "jimbozoomer" / "jugcraft" / "test"
+            / "ConcordanceWorkshopClientGameTests.java")
+    if not path.exists():
+        err(f"{name}: missing (Concordance Chunk C, C-10)")
+        return
+    text = path.read_text(encoding="utf-8")
+    mod = load(ROOT / "src" / "gametest" / "resources" / "fabric.mod.json") or {}
+    if WORKSHOP_CLIENT not in mod.get("entrypoints", {}).get("fabric-client-gametest", []):
+        err(f"{name}: not a fabric-client-gametest entrypoint")
+    selector = (ROOT / "tools" / "select_client_tests.py").read_text(encoding="utf-8")
+    weights = re.search(r"^WEIGHTS = \{(.*?)^\}", selector, re.S | re.M)
+    entries = re.sub(r"#[^\n]*", "", weights.group(1)) if weights else ""
+    if not re.search(r'"ConcordanceWorkshopClientGameTests":\s*\d+,', entries):
+        err(f"{name}: needs a WEIGHTS entry in tools/select_client_tests.py")
+    # Comments blanked to spaces with their line breaks kept, so offsets and line numbers stay the source's.
+    code = re.sub(r"//[^\n]*|/\*.*?\*/", lambda m: re.sub(r"[^\n]", " ", m.group(0)), text, flags=re.S)
+    for piece in WORKSHOP_CLIENT_PIECES:
+        if piece not in code:
+            err(f"{name}: the workshop in one view lacks {piece}")
+    for shot in WORKSHOP_CLIENT_SHOTS:
+        if f'takeScreenshot("{shot}")' not in code:
+            err(f"{name}: no shot {shot}")
+    if "getFrameTimeNs()" not in code or not re.search(r"\bframeTimes\(context\)", code):
+        err(f"{name}: records no client frame time (C-10): getFrameTimeNs() read in frameTimes, and frameTimes(context) called")
+    large = any(int(w) >= 1280 and int(h) >= 960 for w, h in re.findall(r"\bresizeWindow\((\d+),\s*(\d+)\)", code))
+    if not large or not re.search(r"getGuiScale\(\)\);[\s\S]{0,400}?check\(\w+ == 4\b", code):
+        err(f"{name}: the GUI scale 4 shot needs a window large enough for it (resizeWindow to at least 1280x960) and its "
+            "applied scale checked (getGuiScale() == 4): at 854x480 no scale above 2 applies")
+    blank = re.sub(r'"(?:\\.|[^"\\\n])*"', lambda m: '"' + " " * (len(m.group(0)) - 2) + '"', code)
+    guard = 'if (FabricLoader.getInstance().isModLoaded("jade")) {'
+    opens = [m.end() for m in re.finditer(re.escape(guard), code)]
+    for use in re.finditer(r"\bConcordanceDataProvider(?:\.|::)", blank):
+        if not any(start <= use.start() and _inside_block(blank, start, use.start()) for start in opens):
+            err(f"{name}: Jade's provider is used outside an isModLoaded(\"jade\") block "
+                f"(line {code.count(chr(10), 0, use.start()) + 1})")
+    encyclopedia = (ROOT / "src" / "gametest" / "java" / "io" / "github" / "jimbozoomer" / "jugcraft" / "test"
+                    / "EncyclopediaClientGameTests.java")
+    shots = re.sub(r"//[^\n]*|/\*.*?\*/", " ", encyclopedia.read_text(encoding="utf-8"), flags=re.S) if encyclopedia.exists() else ""
+    if 'takeScreenshot("jugcraft_encyclopedia_inspect_bed")' not in shots:
+        err("src/gametest/EncyclopediaClientGameTests.java: no shot jugcraft_encyclopedia_inspect_bed (C-10's bed Inspect page)")
+
+
+def _inside_block(text, start, at):
+    """Whether `at` lies inside the block whose opening brace ends just before `start` (string contents blanked)."""
+    depth = 1
+    for ch in text[start:at]:
+        depth += (ch == "{") - (ch == "}")
+        if depth == 0:
+            return False
+    return True
+
+
 def check_baselines(root):
     """Roadmap step 11: the benchmark and the rules it runs are pure Java (the harness and the game test run the same
     code), and presentation options cannot change server outcomes: no shared class reads the client's display settings,
@@ -14525,7 +14747,8 @@ def check_baselines(root):
     concordance/sign/Presentation.java) are read only in animateTick, which runs on the client (check_signs checks the
     intensity's readers)."""
     for package in ("balance", "compose", "effect", "rules", "resource", "ritual", "alchemy", "ecology", "celestial", "crimson",
-                    "worker", "logistics", "artifice", "relic", "equivalence", "hex", "dream", "conclave", "progression", "wonder"):
+                    "worker", "logistics", "artifice", "relic", "equivalence", "hex", "dream", "conclave", "progression", "wonder",
+                    "diagnostic"):
         for path in sorted((root / package).glob("*.java")):
             if re.search(r"^import net\.(minecraft|fabricmc|spell_engine|spell_power)", path.read_text(encoding="utf-8"), re.M):
                 err(f"concordance/{package}/{path.name}: must stay pure Java (no Minecraft or mod imports)")
@@ -14548,15 +14771,22 @@ def check_rituals(co, root, lang, registered, research):
     """Roadmap step 12: the Java lifecycle and limits mirror tools/concordance_rituals.py; every structure and ritual
     names things that exist, stays within its limits and is reachable (each offering can be crafted or found, each
     ritual is unlocked by the research that teaches it); every interruption, fault, role and phase has its words; and
-    the anchor's GeckoLib assets, the participants' gesture and the Fusion built-in pack are all there."""
+    the anchor's GeckoLib assets, the participants' gesture and the Fusion built-in pack are all there. Concordance Chunk
+    C, C-03: a full pylon pays a whole run; a start and readiness choose through one function; what the Inspect page and
+    Jade read only reads; readings and refused starts mark the faulted parts; an interruption is told in one line. C-04:
+    any recipe whose result an offering is counts as its way to make it; what a ritual makes is excluded from the scale,
+    made by that ritual in the progression graph and given its JEI page; the feature switches a rite's offerings need
+    beside the Concordance's are the ones its generator states, and Concordance data carries no load condition; and
+    Stratawrighting's Understood page links Root and Rivet's codex entry."""
     ri = co.rituals
+    import acquisition as aq
     def java(name, base=root):
         path = base / name
         return path.read_text(encoding="utf-8") if path.exists() else ""
     constants = {
         "ritual/RitualMachine.java": {"STEP_TICKS": ri.STEP_TICKS, "GATHER_TICKS": ri.GATHER_TICKS,
                                       "PARTICIPANT_MARGIN": ri.PARTICIPANT_MARGIN, "PARTICIPANT_HEIGHT": ri.PARTICIPANT_HEIGHT},
-        "CircleAnchorBlockEntity.java": {"SLOTS": ri.ANCHOR_SLOTS, "CACHE_TICKS": ri.REPORT_CACHE_TICKS},
+        "CircleAnchorBlockEntity.java": {"SLOTS": ri.ANCHOR_SLOTS, "CACHE_TICKS": ri.REPORT_CACHE_TICKS, "MARK_TICKS": ri.STATUS_MARK_TICKS},
         "LeyPylonBlockEntity.java": {"CAPACITY": ri.PYLON_CAPACITY, "POUR": ri.PYLON_POUR, "JE_PER_LEY": ri.JE_PER_LEY,
                                      "JE_RATE": ri.PYLON_JE_RATE},
         "ritual/StructurePattern.java": ri.STRUCTURE_LIMITS,
@@ -14613,7 +14843,14 @@ def check_rituals(co, root, lang, registered, research):
             err(f"structure {key}: missing lang structure.{MOD}.{key}")
     # Rituals: references, limits, reachability and the research that unlocks them.
     rituals = {path.stem: load(path) or {} for path in (DATA / MOD / "concordance" / "ritual").glob("*.json")}
-    recipes = {path.stem for path in (DATA / MOD / "recipe").glob("*.json")}
+    # A way to make an offering is a recipe whose result it is, in any recipe folder (the Metal Press's pressing/ too), not
+    # a file of its name: the Thallite plate's hand recipe is thallite_plate_by_hand (Concordance Chunk C, C-04).
+    recipes = set()
+    for path in DATA.glob("*/recipe/**/*.json"):
+        made_by = (load(path) or {}).get("result")
+        made_by = made_by.get("id") if isinstance(made_by, dict) else made_by
+        if isinstance(made_by, str) and split(made_by)[0] == MOD:
+            recipes.add(split(made_by)[1])
     made = {split(r["result"]["transform"]["into"])[1] for r in rituals.values() if "transform" in r.get("result", {})}
     unlocked = {split(ref)[1] for entry in research.values() for block in entry.get("unlocks", {}).values()
                 for ref in block.get("rituals", [])}
@@ -14657,6 +14894,14 @@ def check_rituals(co, root, lang, registered, research):
                 err(f"ritual {key}: makes unknown item {into}")
             if not any(o.get("item") == result["transform"].get("from") and o.get("count") == 1 for o in offerings):
                 err(f"ritual {key}: transforms an item that is not offered once")
+            # What a ritual makes is beyond the scale, the progression graph's to make, and has its JEI page (the Adept's
+            # Wand since roadmap step 21 and Chunk A; Concordance Chunk C, C-04).
+            if into not in co.equivalence.EXCLUDED:
+                err(f"ritual {key}: {into} is never weighed: add it to tools/concordance_equivalence.py EXCLUDED")
+            if co.progression.PRODUCERS.get(into, ("",))[0] != f"ritual:{MOD}:{key}":
+                err(f"ritual {key}: tools/concordance_progression.py PRODUCERS must say this ritual makes {into}")
+            if aq.RITUALS.get(split(into)[1]) != key:
+                err(f"ritual {key}: tools/acquisition.py RITUALS must give {into} its JEI page, naming this ritual")
         elif not 0 < len(result.get("effects", [])) <= lim["MAX_GRANTS"]:
             err(f"ritual {key}: needs a transform or 1 to {lim['MAX_GRANTS']} effects")
         for grant in result.get("effects", []):
@@ -14667,6 +14912,62 @@ def check_rituals(co, root, lang, registered, research):
                 err(f"ritual {key}: effect {operation.get('effect')} does not act on creatures")
         if f"ritual.{MOD}.{key}" not in lang:
             err(f"ritual {key}: missing lang ritual.{MOD}.{key}")
+    # Concordance Chunk C, C-04 (C-P41): the feature switches a rite's offerings need beside the Concordance's are the ones
+    # tools/concordance_rituals.py states for it ("switches"): those every recipe making an offering asks for, with those
+    # every recipe making each thing it is made from asks for (one step down; a tag needs what all its members need, and a
+    # thing not Jugcraft's needs none), an offering that is itself a tag likewise. With one off the rite stays known but its
+    # offering cannot be made. A condition with "or" alternatives needs none of its switches alone (FeatureEnabledCondition
+    # loads it if any is on), and a machine recipe's {"ingredient", "count"} entries are followed like any other. Concordance
+    # data carries no load condition: whether Fabric applies one to the Concordance's loader is unverified.
+    makers = {}
+    for path in sorted(DATA.glob("*/recipe/**/*.json")):
+        body = load(path) or {}
+        result = body.get("result")
+        result = result.get("id") if isinstance(result, dict) else result
+        if not isinstance(result, str):
+            continue
+        switches = {c.get("feature") for c in body.get("fabric:load_conditions", [])
+                    if c.get("condition") == f"{MOD}:feature_enabled" and not c.get("or")} - {"concordance"}
+        refs = list(body.get("key", {}).values()) + list(body.get("ingredients", [])) + [body.get("ingredient")]
+        makers.setdefault(result, []).append((switches, refs))
+    def members(ref):
+        """What an ingredient stands for: an item, a #tag's values, a machine recipe's {"ingredient", "count"}, or a list."""
+        if isinstance(ref, list):
+            return [m for each in ref for m in members(each)]
+        if isinstance(ref, dict):
+            return members(ref.get("ingredient", ref.get("id")))
+        if not isinstance(ref, str):
+            return []
+        if ref.startswith("#"):
+            ns, path = split(ref[1:])
+            tag = DATA / ns / "tags" / "item" / f"{path}.json"
+            return [m for value in ((load(tag) or {}).get("values", []) if tag.is_file() else []) for m in members(value)]
+        return [ref]
+    def needs(item, depth=1):
+        if split(item)[0] != MOD or not makers.get(item):
+            return set()
+        each = []
+        for switches, refs in makers[item]:
+            more = set(switches)
+            if depth > 0:
+                for ref in refs:
+                    things = members(ref)
+                    if things:
+                        more |= set.intersection(*(needs(thing, depth - 1) for thing in things))
+            each.append(more)
+        return set.intersection(*each)
+    def offering_needs(ref):
+        things = members(ref)
+        return set.intersection(*(needs(thing) for thing in things)) if things else set()
+    for key, entry in rituals.items():
+        needed = set().union(*(offering_needs(o.get("item", "")) for o in entry.get("offerings", [])))
+        stated = set(ri.RITUALS.get(key, {}).get("switches", []))
+        if needed != stated:
+            err(f"ritual {key}: its offerings are made only with the switches {sorted(needed)}, but tools/concordance_rituals.py "
+                f"states {sorted(stated)} (\"switches\")")
+    for path in sorted((DATA / MOD / "concordance").rglob("*.json")):
+        if "fabric:load_conditions" in path.read_text(encoding="utf-8"):
+            err(f"{path.relative_to(DATA)}: Concordance data carries no load conditions (a rite stays known whatever the switches)")
     # Ley Charge comes in only through a losing conversion, and nothing turns it back.
     conversion = load(DATA / MOD / "concordance" / "conversion" / "radiance_to_ley.json") or {}
     if conversion.get("from", {}).get("resource") != "essence/radiance" or conversion.get("to", {}).get("resource") != "ley_charge" \
@@ -14716,6 +15017,74 @@ def check_rituals(co, root, lang, registered, research):
         err("textures/block/warding_stone_connected.png needs its Fusion metadata")
     if 'isModLoaded("fusion")' not in java("CircleClient.java", CLIENT_JAVA_ROOT):
         err("CircleClient.java: register the Fusion pack only when Fusion is installed (it is optional)")
+    # Concordance Chunk C, C-03: a full pylon pays a whole run; every rite at the Circle Anchor uses one structure (the
+    # idle report's); a start and readiness choose through one function; what the Inspect page and Jade read only reads;
+    # a reading in chat and a refused start mark every faulted part, the start still asking one step's Ley Charge (C-P10);
+    # an interruption is told in one line; the readiness words exist; Jade's anchor lines name no rite, Focus or research.
+    anchor_structures = set()
+    for key, entry in rituals.items():
+        need = entry.get("steps", 0) * entry.get("ley", 0)
+        if need > ri.PYLON_CAPACITY:
+            err(f"ritual {key}: {entry.get('steps')} steps of {entry.get('ley')} Ley Charge draw {need} from each pylon, "
+                f"more than a full pylon holds ({ri.PYLON_CAPACITY})")
+        if structures.get(split(entry.get("structure", ":"))[1], {}).get("anchor") == f"{MOD}:circle_anchor":
+            anchor_structures.add(entry.get("structure"))
+    if len(anchor_structures) > 1:
+        err(f"rituals at the Circle Anchor use {sorted(anchor_structures)}: an idle report and readiness read one structure")
+    anchor = java("CircleAnchorBlockEntity.java")
+    begin = _java_body(anchor, "private void begin(ServerPlayer player, ServerLevel level)")
+    if "Offerings.match(" in anchor or "Choice.of(" not in _java_body(anchor, "public Choice choose(ServerPlayer player)") \
+            or "Choice choice = choose(player);" not in begin:
+        err("CircleAnchorBlockEntity: a start and readiness choose the rite through one function, choose() (C-03)")
+    for signature in ("public void status(ServerLevel level, Consumer<Component> out)",
+                      "public @Nullable Readiness readiness(ServerLevel level, ServerPlayer reader)",
+                      "public Choice choose(ServerPlayer player)", "private List<Readiness.Channel> channels(",
+                      "public Readiness.@Nullable Spent spent()"):
+        body = _java_body(anchor, signature)
+        found = [n for n in ("Signs.", "mark", "setChanged(", "sync(", "tell(", "Message(", "apply(", "RateGate.",
+                             "spendFocus(", ".draw(", "setLey(") if n in body]
+        if not body or found:
+            err(f"CircleAnchorBlockEntity {signature}: what the Inspect page and Jade read only reads ({found or 'missing'})")
+    chat = _java_body(anchor, "public void status(ServerPlayer player, ServerLevel level)")
+    if "status(level, player::sendSystemMessage);" not in chat or "markReadiness(level, player);" not in chat \
+            or 'RateGate.allow(player, "circle_marks", MARK_TICKS)' not in chat:
+        err("CircleAnchorBlockEntity.status(player, level): a reading in chat marks every faulted part, once a second a player (C-03)")
+    if "markFaults(level, seen.report(), warning);" not in begin \
+            or "check(level, pattern, ritual.ley(), joined)" not in _java_body(anchor, "private RitualMachine.Observation observe(") \
+            or "leyPerRun" in anchor:
+        err("CircleAnchorBlockEntity: a refused start marks the parts that refused it, and a start asks one step's Ley Charge a "
+            "channel; a run's shortfall only warns (C-03, C-P10)")
+    applied = _java_body(anchor, "private boolean apply(ServerLevel level, RitualRun.Transition transition")
+    ended = applied[applied.find("run.last() != null"):]
+    if ended.count("tell(") != 1 or "tell(level, before.joined(), endingLine(" not in ended or "circle.kept" in anchor \
+            or "circle.kept" in ri.MESSAGES:
+        err("CircleAnchorBlockEntity.apply: an interruption is told in one line, with where the offerings are and what it lost (C-03)")
+    for path in sorted((root / "ritual").glob("*.java")):
+        for key in re.findall(r'Text\.of\("([a-z_.]+)"', path.read_text(encoding="utf-8")):
+            if f"compose.{MOD}.{key}" not in lang:
+                err(f"concordance/ritual/{path.name}: missing lang compose.{MOD}.{key}")
+    for key in sorted(set(re.findall(r'"(message\.jugcraft\.concordance\.circle\.[a-z_.]*[a-z_])"', anchor))):
+        if key not in lang:
+            err(f"CircleAnchorBlockEntity.java: missing lang {key}")
+    snapshot = _java_body(java("ConcordanceDataProvider.java", JAVA_ROOT / "compat" / "jade"),
+                          "public static CompoundTag snapshot(CircleAnchorBlockEntity anchor, ServerLevel level)")
+    put = set(re.findall(r'snapshot\.put\w+\("([a-z_]+)"', snapshot))
+    if not put <= {"phase", "joined", "done", "steps", "needed", "offerings", "offering", "spent_focus", "spent_ley", "reserved",
+                   "faults", "fault"} or not {"needed", "offering", "spent_focus", "spent_ley", "reserved"} <= put:
+        err(f"ConcordanceDataProvider.java: Jade's anchor snapshot is phase, participants, offerings, spent, held and faults, not {sorted(put)}")
+    for needle in ("ConcordanceProgress.", "knowledge", "Focus(", "getPlayer", "readiness(", "ritualName(", "run().ritual()"):
+        if needle in snapshot:
+            err(f"ConcordanceDataProvider.java: Jade's anchor snapshot names no rite and no one's Focus or research ({needle})")
+    client = java("JugcraftJadeClient.java", CLIENT_JAVA_ROOT / "compat")
+    if '"?"' in client or 'data.getIntOr("needed", 0)' not in client:
+        err("JugcraftJadeClient.java: the gathering line shows the participants the rite needs, from the server (C-03)")
+    for key in ("offering", "participants", "spent", "reserved"):
+        if f'"tooltip.{MOD}.concordance.jade.{key}"' not in client or f"tooltip.{MOD}.concordance.jade.{key}" not in lang:
+            err(f"JugcraftJadeClient.java: the anchor's Jade lines use tooltip.{MOD}.concordance.jade.{key} (C-03)")
+    # Root and Rivet's codex entry is linked from Stratawrighting's Understood page (Concordance Chunk C, C-04): its
+    # completion is a Stratawright's foundation (strata/Strata.java's listener).
+    if f"(entry://{MOD}:{co.BOOK}/circles/root_and_rivet)" not in lang.get(f"book.{MOD}.{co.BOOK}.stone.stratawrighting.p2.text", ""):
+        err("codex: Stratawrighting's Understood page must link Root and Rivet's entry (tools/concordance_strata.py ROOT_AND_RIVET)")
 
 
 def check_ember(co, root, lang, research):
@@ -15697,11 +16066,18 @@ def check_alchemy(co, root, lang, registered, research):
                                  "RIME_KEEP_WARM": ("long", al.RIME_KEEP["warm"]),
                                  "RIME_KEEP_HOT": ("long", al.RIME_KEEP["hot"]),
                                  "RIME_KEEP_SEARING": ("long", al.RIME_KEEP["searing"])},
-        "alchemy/Heat.java": {"AMBIENT": ("int", al.AMBIENT), "RATE": ("int", al.HEAT_RATE)},
+        "alchemy/Heat.java": {"AMBIENT": ("int", al.AMBIENT), "RATE": ("int", al.HEAT_RATE),
+                              # Concordance Chunk C, C-05: where a Crucible Stand heats a crucible for each band.
+                              "STAND_WARM": ("int", al.STAND_TARGETS["warm"]), "STAND_HOT": ("int", al.STAND_TARGETS["hot"]),
+                              "STAND_SEARING": ("int", al.STAND_TARGETS["searing"])},
         "alchemy/Assay.java": {"SPOON": ("int", al.SPOON), "GLASS": ("int", al.GLASS), "MASTERED": ("int", al.MASTERED)},
         "CrucibleBlockEntity.java": {"BUFFER_SLOTS": ("int", al.BUFFER_SLOTS), "STIR_TICKS": ("int", al.STIR_TICKS),
                                      "AUTOMATION_TICKS": ("int", al.AUTOMATION_TICKS),
                                      "WATER_PER_BUCKET": ("int", al.WATER_PER_BUCKET)},
+        # Concordance Chunk C, C-05: the Crucible Stand's rates, store, intake and how often one player may set it.
+        "CrucibleStandBlockEntity.java": {"JE_WARM": ("long", al.STAND_JE["warm"]), "JE_HOT": ("long", al.STAND_JE["hot"]),
+                                          "JE_SEARING": ("long", al.STAND_JE["searing"]), "CAPACITY": ("long", al.STAND_CAPACITY),
+                                          "INTAKE": ("long", al.STAND_INTAKE), "SET_TICKS": ("int", al.STAND_SET_TICKS)},
     }
     for name, values in constants.items():
         text = java(name)
@@ -15780,10 +16156,32 @@ def check_alchemy(co, root, lang, registered, research):
             err(f"property {key}: {status} has no vanilla potion at level {top}")
         elif bound is not None and entry.get("max_ticks", 0) > bound:
             err(f"property {key}: {entry.get('max_ticks')} ticks outlasts vanilla's level {top} {status} potion ({bound})")
+    # Concordance Chunk C, C-02 (C-P7): the yield rule, mirrored. A helpful axis may declare fouling; the contaminant
+    # takes its share before the level and duration are worked out (amount less what was taken, then judged), with a
+    # reason naming the foulers; a dirtier Stillroot Poultice holds less, and the game test says so in the same numbers.
+    for key, info in al.PROPERTIES.items():
+        fouling = info.get("fouling", 0)
+        if fouling and (key == "contaminant" or info.get("intent") != "helpful" or not 0 < fouling <= al.MAX_PROPERTY):
+            err(f"tools/concordance_alchemy.py PROPERTIES {key}: only a helpful axis may declare fouling, 0..{al.MAX_PROPERTY} (C-P7)")
+    if "long fouling" not in java("alchemy/Property.java") \
+            or "Math.min(amount, Math.multiplyExact(contaminant, fouling) / 1000L)" not in java("alchemy/Property.java"):
+        err("concordance/alchemy/Property.java: fouling takes its units for each unit of contaminant, never more than there is (C-P7)")
+    of = _java_body(java("alchemy/Outcome.java"), "public static Outcome of(")
+    at_foul, at_taken, at_judge = of.find("property.fouled(amount, contaminant)"), of.find("amount -= taken;"), of.find("judge(property, amount,")
+    if at_foul < 0 or not at_foul < at_taken < at_judge or 'Text.of("alchemy.fouled"' not in of:
+        err("concordance/alchemy/Outcome.of: a property's fouling is taken before its level and duration, with a reason naming the foulers (C-P7)")
+    if not re.search(r'only\(object, [^;]*"fouling"[^;]*\);', _java_body(java("rules/RulesParser.java"), "public @Nullable Property property(")):
+        err("concordance/rules/RulesParser.property: the allow-list takes a property's fouling")
+    series = al.poultice_verdance()
+    if any(a <= b for a, b in zip(series, series[1:])):
+        err(f"tools/concordance_alchemy.py: a dirtier Stillroot Poultice must hold less Verdance ({series})")
+    tests = java("ConcordanceAlchemyGameTests.java", ROOT / "src" / "gametest" / "java" / "io" / "github" / "jimbozoomer" / "jugcraft" / "test")
+    if f"long[] verdance = {{{', '.join(map(str, series))}}};" not in tests:
+        err(f"ConcordanceAlchemyGameTests.aStillrootPoulticeRepeatsAndADirtyBatchHealsLess: verdance must be the generator's {series}")
     for ref in al.ALCHEMY_SPECIMENS:
         if ref not in items:
             err(f"alchemy specimen {ref} is not an ingredient")
-    for item in ("crucible", "mortar", "stirring_rod", "sampling_spoon", "assay_glass", "formula"):
+    for item in ("crucible", "mortar", "stirring_rod", "sampling_spoon", "assay_glass", "formula", "crucible_stand"):
         if item not in recipes:
             err(f"alchemy: {item} has no recipe")
     # Every line the simulation can say has its words.
@@ -15791,6 +16189,13 @@ def check_alchemy(co, root, lang, registered, research):
         for key in re.findall(r'Text\.of\("([a-z_.]+)"', path.read_text(encoding="utf-8")):
             if f"compose.{MOD}.{key}" not in lang:
                 err(f"concordance/alchemy/{path.name}: missing lang compose.{MOD}.{key}")
+    # Concordance Chunk C, C-01: a step's words name its preparation; a written formula is set by a plain use.
+    for key in preparations:
+        if f"preparation.{MOD}.{key}" not in lang:
+            err(f"preparation {key}: missing lang preparation.{MOD}.{key} (a step's words: tools/concordance_alchemy.py PREPARATION_NAMES)")
+    if re.search(r"sneak[^.;(]*\bset", al.ITEMS["formula"]["tooltip"], re.I) \
+            or "isShiftKeyDown" in _java_body(java("CrucibleBlock.java"), "protected InteractionResult useItemOn("):
+        err("tools/concordance_alchemy.py: a written formula is set by a plain use (the formula's tooltip; useItemOn asks no sneak)")
     for band in al.BANDS:
         if f"compose.{MOD}.band.{band}" not in lang:
             err(f"alchemy: missing lang compose.{MOD}.band.{band}")
@@ -15849,13 +16254,42 @@ def _item_tags():
     return found
 
 
-def _made_from(start):
+_RECIPE_EDGES = []
+
+
+def _recipe_edges(scale=True):
+    """_made_from's edges: (what a file takes, what it makes) for each recipe-like file, read once a run (Concordance
+    Chunk C, C-02: check_workshop_products asks for every boss drop), and, with scale, the Assayer's Scale's."""
+    if not _RECIPE_EDGES:
+        _RECIPE_EDGES.append(_read_recipe_edges())
+    edges = _RECIPE_EDGES[0]
+    if scale:
+        materials = [load(path) or {} for path in sorted((DATA / MOD / "concordance" / "material").glob("*.json"))]
+        edges = edges + [(frozenset(m.get("item") for m in materials if m.get("dissolve")),
+                          frozenset(m.get("item") for m in materials if m.get("form")))]
+    return edges
+
+
+def _made_from(start, scale=True):
     """Every item Jugcraft's recipe-like data makes, step by step, from the items in start: a file that names one of them
     (and does not make it) adds what it makes (B-08's must-fail loop: Yeti Fur must reach no Rime ingredient). An input
     tag (#ns:path) stands for its members in the repository's own tag files; a villager trade's `wants` makes its
     `gives`; and the Assayer's Scale (data/jugcraft/concordance/material) makes every material it forms from any it
     dissolves. Vanilla's recipes and tags are not in the repository; no vanilla recipe makes a snowball, an amethyst
-    shard, a mushroom or glow lichen from anything (gloamcap's inputs), and a town's coin shops are money, not this."""
+    shard, a mushroom or glow lichen from anything (gloamcap's inputs), and a town's coin shops are money, not this.
+    check_workshop_products leaves the Scale out (scale=False): its exchange is priced (check_equivalence), so a drop that
+    reaches an ingredient only through it is no reward route."""
+    reached, grown = set(start), True
+    while grown:
+        grown = False
+        for takes, made in _recipe_edges(scale):
+            if takes & reached and not made <= reached:
+                reached |= made
+                grown = True
+    return reached - set(start)
+
+
+def _read_recipe_edges():
     ids = re.compile(r'"(#?[a-z0-9_.-]+:[a-z0-9_/.-]+)"')
     tags = _item_tags()
 
@@ -15891,17 +16325,8 @@ def _made_from(start):
         data = load(path)
         made = results(data) if data is not None else set()
         if made:
-            recipes.append((named(path.read_text(encoding="utf-8")) - made, made))
-    scale = [load(path) or {} for path in sorted((DATA / MOD / "concordance" / "material").glob("*.json"))]
-    recipes.append(({m.get("item") for m in scale if m.get("dissolve")}, {m.get("item") for m in scale if m.get("form")}))
-    reached, grown = set(start), True
-    while grown:
-        grown = False
-        for takes, made in recipes:
-            if takes & reached and not made <= reached:
-                reached |= made
-                grown = True
-    return reached - set(start)
+            recipes.append((frozenset(named(path.read_text(encoding="utf-8")) - made), frozenset(made)))
+    return recipes
 
 
 def check_winter_brine(co, root, lang):
@@ -15971,6 +16396,546 @@ def check_winter_brine(co, root, lang):
     for key in (f"encyclopedia.{MOD}.dossier.glacier_hall.prepare", f"encyclopedia.{MOD}.dossier.glacier_hall.prepare.mitten"):
         if key not in lang:
             err(f"Winter Brine: missing lang {key}")
+
+
+# Each product's consumer in the game's code: (path under src/main/java/io/github/jimbozoomer/jugcraft, text that must be
+# there). Concordance Chunk C, C-02 (09:124: "no decorative recipes with no consumer").
+PRODUCT_CONSUMERS = {
+    "stillroot_poultice": [("concordance/BrewItem.java", "applySalve(level, server, stack, target, target == player ? null : player);"),
+                           ("lair/Encounter.java", "public static void mended(ServerPlayer helper, ServerPlayer patient)")],
+    "kiln_draught": [("lair/MoltenSlagBlock.java", "living.hasEffect(MobEffects.FIRE_RESISTANCE)")],
+    "winter_brine": [("lair/yeti/YetiKingEntity.java", "Frostward.warded(player)")],
+}
+
+
+def check_workshop_products(co, root, lang):
+    """Concordance Chunk C, C-02 (C-D1, C-P2, C-P7, C-P9; docs/features/arcane-concordance-alchemy.md): the workshop's
+    products are brews the crucible already makes, named by what they carry. The data is the generator's; each product's
+    worked processes brew its status, alone among the products of its form and with nothing harmful, from vanilla
+    things and recipes of vanilla things; each has a consumer in the game's code; none is an ingredient, a Scale
+    material or anything a recipe, trade or the Scale takes, and the crucible's hand, hopper and the mortar take only
+    ingredients; bottling takes one container and using one gives it back; diluting a product's process gives no more in
+    all; a second dose never adds a level; the only boss drops that reach a product's ingredient by recipes are the
+    declared reward routes; health stays out of the economy, so the Vitae bound holds whatever heals; each ingredient's
+    JEI page names its product; and the Cinder Kiln's dossier names the Kiln Draught as text and icons, never a grid."""
+    sys.path.insert(0, str(ROOT / "tools"))
+    import concordance_economy as ec
+    al, eq = co.alchemy, co.equivalence
+
+    def source(path):
+        return path.read_text(encoding="utf-8") if path.exists() else ""
+    data = {p.stem: load(p) or {} for p in (DATA / MOD / "concordance" / "product").glob("*.json")}
+    if set(data) != set(al.PRODUCTS):
+        err(f"concordance/product: {sorted(data)} differ from PRODUCTS (run tools/generate_material_data.py)")
+    forms = {f"{MOD}:{info['form']}" for info in al.PRODUCTS.values()}
+    inputs = set()
+    entries = DATA / MOD / "modonomicon" / "books" / "arcane_concordance" / "entries"
+    for key, info in al.PRODUCTS.items():
+        if data.get(key) != al.product_json(key, info):
+            err(f"concordance/product/{key}.json differs from PRODUCTS (run tools/generate_material_data.py)")
+        prop = al.PROPERTIES.get(info["property"], {})
+        if info["form"] not in ("draught", "salve") or prop.get("intent") != "helpful":
+            err(f"product {key}: a draught or a salve of a helpful property")
+        if lang.get(al.product_name_key(key, info)) != info["name"]:
+            err(f"product {key}: lang {al.product_name_key(key, info)} must be {info['name']}")
+        if not (entries / f"{info['codex']}.json").is_file():
+            err(f"product {key}: codex entry {info['codex']} does not exist")
+        if not PRODUCT_CONSUMERS.get(key):
+            err(f"product {key}: no consumer (09:124: no decorative recipes)")
+        for path, needle in PRODUCT_CONSUMERS.get(key, []):
+            if needle not in source(JAVA_ROOT / path):
+                err(f"product {key}: its consumer is gone from {path} ({needle})")
+        for name, process in info["processes"].items():
+            if process[:1] != [("water", 1)]:
+                err(f"product {key}: process {name} starts with one part of water")
+                continue
+            effects = al.outcome(*al.bottle(process))
+            statuses = {effect[0] for effect in effects.values() if effect}
+            harmful = any(al.PROPERTIES[axis]["intent"] == "harmful" for axis, effect in effects.items() if effect)
+            matching = [other for other, each in al.PRODUCTS.items()
+                        if each["form"] == info["form"] and al.PROPERTIES[each["property"]]["status"] in statuses]
+            if harmful or matching != [key]:
+                err(f"product {key}: process {name} must brew {prop.get('status')} alone among the {info['form']}s, with "
+                    f"nothing harmful ({effects})")
+            # Dilution gains nothing: the same batch in more parts gives no more in all (health healed, or ticks); and
+            # every dose of one batch is the same, so an automated crucible's doses stack.
+            whole = al.realised([effects], info["property"])
+            for parts in range(2, al.MAX_PARTS + 1):
+                doses = [al.bottle([("water", parts)] + process[1:], drawn) for drawn in range(parts)]
+                if al.realised([al.outcome(*dose) for dose in doses], info["property"]) > whole:
+                    err(f"product {key}: process {name} in {parts} parts gives more in all than in one")
+                if any(dose != doses[0] for dose in doses):
+                    err(f"product {key}: process {name} in {parts} parts bottles unequal doses, which do not stack")
+            for operation in process:
+                if operation[0] != "add":
+                    continue
+                item = al.INGREDIENTS[operation[1]]["item"]
+                inputs.add(item)
+                # Reachable from a manual start: vanilla, or a Jugcraft item crafted from vanilla things alone.
+                if split(item)[0] == MOD:
+                    recipe = load(DATA / MOD / "recipe" / f"{split(item)[1]}.json") or {}
+                    named = set(re.findall(r'"(#?[a-z0-9_.-]+:[a-z0-9_/.-]+)"', json.dumps(recipe.get("ingredients", recipe.get("key", {})))))
+                    if not named or any(not ref.startswith("minecraft:") for ref in named):
+                        err(f"product {key}: {item} is not crafted from vanilla things alone ({sorted(named)})")
+        for ingredient in info["jei"]:
+            if info["name"] not in lang.get(f"jei.{MOD}.alchemy.{ingredient}", ""):
+                err(f"lang jei.{MOD}.alchemy.{ingredient}: names no {info['name']}")
+    for item in sorted(inputs):
+        page = next((lang.get(f"jei.{MOD}.alchemy.{k}", "") for k, i in al.INGREDIENTS.items() if i["item"] == item), "")
+        if not any(info["name"] in page for info in al.PRODUCTS.values()):
+            err(f"lang: the JEI page of {item}, a product's ingredient, names no product")
+    # Not weighable, and brews never feed brews.
+    materials = {(load(p) or {}).get("item") for p in (DATA / MOD / "concordance" / "material").glob("*.json")}
+    ingredients = {info["item"] for info in al.INGREDIENTS.values()}
+    for thing in sorted(forms):
+        if thing in eq.MATERIALS or thing in materials or f'"{thing}"' in json.dumps(eq.TRANSMUTATIONS) or thing in ingredients:
+            err(f"{thing} is neither weighed nor an ingredient: products feed no Scale and no crucible")
+    fed = _made_from(forms)
+    if fed:
+        err(f"a brew feeds {sorted(fed)}: no recipe, trade or Scale material may take a draught or salve")
+    if not re.search(r'MAGIC_NAMESPACES = Set\.of\([^)]*"jugcraft"', source(root / "equivalence" / "Eligibility.java")):
+        err("equivalence/Eligibility.java: jugcraft components are magic, so a brew is never weighed")
+    alchemy_java = source(root / "Alchemy.java")
+    if f'STILLROOT_POULTICE = "{MOD}:stillroot_poultice";' not in alchemy_java or "stillroot_poultice" not in al.PRODUCTS:
+        err("Alchemy.STILLROOT_POULTICE names the generator's poultice")
+    brew = _java_body(alchemy_java, "public static ItemStack brew(")
+    at_brew, at_name = brew.find("stack.set(JugcraftConcordance.BREW"), brew.find("stack.set(DataComponents.ITEM_NAME")
+    if at_brew < 0 or at_name < at_brew or "DataComponents.CUSTOM_NAME" in alchemy_java:
+        err("Alchemy.brew: a product carries jugcraft:brew and is named after it with vanilla's item name, never a custom name")
+    crucible = source(root / "CrucibleBlockEntity.java")
+    # The whole of each condition, not a part of it: a widened one (`true ||`, `|| stack.has(BREW)`, `&& false`) fails.
+    place = " ".join(_java_body(crucible, "public boolean canPlaceItem(").split())
+    returns = re.findall(r"\breturn [^;]*;", place)
+    if "if (slot < BUFFER_SLOTS) { return stack.has(" not in place or returns != [
+            "return stack.has(JugcraftConcordance.REAGENT) || Alchemy.catalog().ingredient(ConcordanceProgress.itemId(stack)) != null;",
+            "return slot == BOTTLE_SLOT && formFor(stack) != null;"]:
+        err(f"CrucibleBlockEntity.canPlaceItem: hoppers put in only ingredients, reagents and containers ({returns})")
+    mortar = " ".join(_java_body(source(root / "MortarItem.java"), "public InteractionResult use(").split())
+    if "if (other.isEmpty() || other.has(JugcraftConcordance.REAGENT) || ground == null || Alchemy.catalog().ingredient(item) == null) {" not in mortar:
+        err("MortarItem.use: the mortar grinds only ingredients (the whole refusal condition)")
+    # Every dose of a batch is one share (tools/concordance_alchemy.py bottle mirrors it): what is left holds that share
+    # for each part, the remainder lost, never given to the last dose.
+    if "dose.times(parts - 1), fouled * (parts - 1)" not in _java_body(source(root / "alchemy" / "Mixture.java"), "public @Nullable Bottled bottle("):
+        err("alchemy/Mixture.bottle: every dose of a batch is the same share (the rest holds dose.times(parts - 1)), as "
+            "tools/concordance_alchemy.py bottle models it")
+    # Containers net to zero: bottling takes one, using one gives it back.
+    if _java_body(crucible, "private @Nullable Diagnostic bottleIntoOutput(").count("container.shrink(1);") != 1 \
+            or _java_body(crucible, "private InteractionResult bottle(").count("held.shrink(1);") != 1:
+        err("CrucibleBlockEntity: bottling takes exactly one bottle or bowl")
+    salve = _java_body(source(root / "BrewItem.java"), "private static void applySalve(")
+    if salve.count("stack.shrink(1);") != 1 or "placeItemBackInInventory(new ItemStack(Items.BOWL), Prediction.SERVER_ONLY);" not in salve:
+        err("BrewItem.applySalve: a salve used gives exactly its bowl back")
+    if not re.search(r'DRAUGHT = item\("draught".*?\.usingConvertsTo\(Items\.GLASS_BOTTLE\)', source(root / "JugcraftConcordance.java"), re.S):
+        err("JugcraftConcordance: a draught drunk gives its glass bottle back")
+    # The dilution audit's Regeneration interval is vanilla's: 50 >> amplifier ticks a heal.
+    if al.REGENERATION_INTERVAL != {a: 50 >> a for a in al.REGENERATION_INTERVAL} \
+            or set(al.REGENERATION_INTERVAL) != set(range(al.PROPERTIES["verdance"]["max_level"])):
+        err(f"tools/concordance_alchemy.py REGENERATION_INTERVAL: vanilla's 50 >> amplifier for each level Verdance reaches ({al.REGENERATION_INTERVAL})")
+    # No stacking: a second dose never adds a level.
+    if "Stacking.STRONGEST" not in _java_body(alchemy_java, "public static int apply("):
+        err("Alchemy.apply: brews stack as the strongest, never adding a level")
+    # Boss routes: recipes alone (the Scale's exchange is priced, check_equivalence).
+    bosses = sorted(p.stem for p in (DATA / MOD / "loot_table" / "bosses").glob("*.json"))
+    drops = set()
+    for boss in bosses:
+        for table in (DATA / MOD / "loot_table" / "bosses" / f"{boss}.json", DATA / MOD / "loot_table" / "entities" / f"{boss}.json"):
+            drops |= set(re.findall(r'"name": "([a-z0-9_]+:[a-z0-9_/]+)"', source(table)))
+    for drop in sorted(drops):
+        reached = _made_from({drop}, scale=False) & inputs
+        if reached != al.PRODUCT_REWARD_ROUTES.get(drop, set()):
+            err(f"{drop} (a boss's drop) reaches {sorted(reached)} of the products' ingredients; declared "
+                f"{sorted(al.PRODUCT_REWARD_ROUTES.get(drop, set()))} (tools/concordance_alchemy.py PRODUCT_REWARD_ROUTES)")
+    # Vitae: health is no modelled resource, so whatever heals a giver, check_crimson's hourly bound holds.
+    if "health" in ec.RESOURCES or set(al.PRODUCTS) & set(ec.RESOURCES):
+        err("economy: health and the products are no modelled resource; model their conversions before one feeds another")
+    # The Cinder Kiln's dossier (C-P9): text and icons, a codex link at the Alembic Arts observed, never a grid.
+    dossiers = source(JAVA_ROOT / "lair" / "LairDossiers.java")
+    prepare = _java_body(dossiers, "private static void prepare(")
+    if (f'String FIRE_RESISTANCE = "{al.PROPERTIES["ember"]["status"]}";' not in dossiers
+            or "brews(ember, FIRE_RESISTANCE)" not in prepare or "out.recipe(" in prepare
+            or 'out.codex("alembic/kiln_draught", "jugcraft:alembic_arts", ResearchState.OBSERVED);' not in prepare):
+        err("lair/LairDossiers.prepare: the Cinder Kiln's preparation fact names the Kiln Draught while Ember brews Fire "
+            "Resistance, as text and icons only (C-P9)")
+    for key in (f"encyclopedia.{MOD}.dossier.cinder_kiln.prepare", f"encyclopedia.{MOD}.dossier.cinder_kiln.prepare.charm"):
+        if key not in lang:
+            err(f"Kiln Draught: missing lang {key}")
+
+
+def check_poultice_credit(co, lang):
+    """Concordance Chunk C, C-02 (C-P8; docs/features/lair-encounter-credit.md): a Stillroot Poultice another player put
+    on someone in a lair fight credits its helper with each heal its Regeneration gives, at most one health a heal and
+    within the fight's healing bounds; the heals are read from Regeneration's own time (vanilla's 50 >> amplifier, the
+    interval check_workshop_products holds tools/concordance_alchemy.py REGENERATION_INTERVAL to, measured by
+    LairEncounterGameTests.regenerationHealsOnItsVanillaInterval) at each tick's end, at each blow (before the fight's
+    hurt is settled) and at each Concordance heal, with no mixin; only a poultice put on another player starts a note,
+    which is never saved and is forgotten with the fight; the poultice is a salve of the status Verdance brews, and the
+    dossiers name its credit while it is brewed."""
+    def source(path):
+        return path.read_text(encoding="utf-8") if path.exists() else ""
+    al = co.alchemy
+    encounter = source(JAVA_ROOT / "lair" / "Encounter.java")
+    brew_item = source(JAVA_ROOT / "concordance" / "BrewItem.java")
+    lairs = source(JAVA_ROOT / "lair" / "Lairs.java")
+    dossiers = source(JAVA_ROOT / "lair" / "LairDossiers.java")
+    found = re.search(r'public static final String POULTICE_STATUS = "([a-z0-9_.:-]+)";', encounter)
+    status = found.group(1) if found else None
+    if status is None or al.PROPERTIES.get("verdance", {}).get("status") != status:
+        err("lair/Encounter.java POULTICE_STATUS: the status Verdance brews (tools/concordance_alchemy.py PROPERTIES), whose "
+            "heals a poultice's helper is credited for (C-02)")
+    poultice = al.PRODUCTS.get("stillroot_poultice", {})
+    if poultice.get("form") != "salve" or al.PROPERTIES.get(poultice.get("property"), {}).get("status") != status:
+        err("tools/concordance_alchemy.py PRODUCTS: the Stillroot Poultice is a salve carrying Encounter.POULTICE_STATUS")
+    salve = _java_body(brew_item, "private static void applySalve(")
+    for needle in ("actor instanceof ServerPlayer", "target instanceof ServerPlayer", "Alchemy.product(stack)",
+                   "Alchemy.STILLROOT_POULTICE.equals(product.id())", "int hadTicks =",
+                   "observer.mended((ServerPlayer) actor, (ServerPlayer) target)"):
+        if needle not in salve:
+            err(f"concordance/BrewItem.applySalve: only a poultice put on another player tells the lairs ({needle})")
+    if brew_item.count("observer.mended(") != 1:
+        err("concordance/BrewItem.java: only applySalve tells of a poultice, never a draught drunk or a salve on oneself")
+    if "BrewItem.observe(Encounter::mended);" not in lairs:
+        err("lair/Lairs.java: the lairs observe the poultice (BrewItem.observe(Encounter::mended))")
+    register = _java_body(encounter, "static void register(")
+    read = _java_body(encounter, "private void readMending(")
+    for needle, where, why in (
+            ("ServerTickEvents.END_SERVER_TICK.register(", register, "read at each tick's end"),
+            ("fight.readMending(player, before[0], player.getHealth());", register, "read at each blow"),
+            ("fight.readMending(player, player.getHealth() - amount, player.getHealth());",
+             _java_body(encounter, "public static void helped("), "read at each Concordance heal"),
+            ("50 >> amplifier", _java_body(encounter, "public static int regenerationHeals("), "counted by vanilla's interval"),
+            ("Math.min(rose, heals * REGENERATION_HEAL)", read, "at most one health a heal"),
+            ("creditHealing(mending.helper(), patient, health,", read, "credited within the fight's healing bounds"),
+            ("regeneration.getDuration() > mending.left()", read, "ended once the Regeneration is no longer the poultice's"),
+            ("helper == patient", _java_body(encounter, "public static void mended("), "never the patient's own")):
+        if needle not in where:
+            err(f"lair/Encounter.java: a poultice's heals are {why} ({needle})")
+    blow, settle = register.find("fight.readMending(player, before[0]"), register.find("fight.settle(player, before[0])")
+    if blow < 0 or settle < 0 or blow > settle:
+        err("lair/Encounter.java: a blow reads the poultice before it settles the fight's hurt (or the heal is taken twice)")
+    if "mends.clear();" not in _java_body(encounter, "private void forget("):
+        err("lair/Encounter.java: a forgotten fight forgets its poultices")
+    if "com.mojang.serialization" in encounter:
+        err("lair/Encounter.java: nothing about a fight in progress is saved, the poultice's note included")
+    folders = [JAVA_ROOT / "mixin", ROOT / "src" / "client" / "java" / "io" / "github" / "jimbozoomer" / "jugcraft" / "mixin"]
+    for path in sorted(p for folder in folders if folder.is_dir() for p in folder.rglob("*.java")):
+        text = path.read_text(encoding="utf-8")
+        # One heal() mixin is allowed: main's NouveauThreadMixin (merged with main f904df3fd) only rescales a heal's amount
+        # for Nouveau statuses, and the credit counts at most the health that rose (Encounter.readMending, held above). It
+        # stays allowed only while it does not touch the fight's credit; any other heal() mixin is refused.
+        nouveau = path.name == "NouveauThreadMixin.java" \
+            and not re.search(r'\b(Encounter|BrewItem|Mending|mended|poultice|Poultice)\b', text)
+        if re.search(r'RegenerationMobEffect|MobEffectInstance|tickEffects', text) or re.search(r'"heal', text) and not nouveau:
+            err(f"{path.relative_to(ROOT)}: no mixin for the poultice's credit (CLAUDE.md; C-02 reads Regeneration's own time)")
+    keeper = _java_body(dossiers, "private static void keeper(")
+    if '"encyclopedia.jugcraft.dossier.credit.poultice"' not in keeper or "if (poultices())" not in keeper \
+            or "brews(verdance, Encounter.POULTICE_STATUS)" not in _java_body(dossiers, "private static boolean poultices(") \
+            or "catalog.product(Product.Form.SALVE, List.of(Encounter.POULTICE_STATUS), false)" not in _java_body(dossiers, "private static boolean poultices(") \
+            or "Alchemy.STILLROOT_POULTICE.equals(salve.id())" not in _java_body(dossiers, "private static boolean poultices("):
+        err("lair/LairDossiers.java: each keeper's dossier names the poultice's credit while the Concordance's Verdance brews "
+            "it and a salve of that status alone is the Stillroot Poultice (Alchemy.product's match, which the credit needs)")
+    if f"encyclopedia.{MOD}.dossier.credit.poultice" not in lang:
+        err(f"encyclopedia: missing lang encyclopedia.{MOD}.dossier.credit.poultice (tools/encyclopedia.py DOSSIER)")
+
+
+def check_diagnostics(co, root, lang):
+    """Concordance Chunk C, C-01 (plan 03:9; C-P6, C-P22): the shared diagnostic codes and kinds are
+    tools/concordance_diagnostics.py's, in its order, each with its words; a diagnostic is worded by its code; the crucible
+    keeps a formula the rules refuse (no step clears it), shows a reason's sign once, asks Authority before any change and
+    has words for every message; the Peepo port maps from the crucible's own reason and asks nothing for an incompatible
+    formula; no client class reads the server-only rules; and a game test swaps the rules only through under(), which
+    restores them in a finally before its tick ends."""
+    dg = co.diagnostics
+
+    def source(path):
+        return path.read_text(encoding="utf-8") if path.exists() else ""
+    code_java = source(root / "diagnostic" / "Code.java")
+    found = re.findall(r'^\t([A-Z_]+)\("([a-z_]+)", Kind\.([A-Z]+)\)[,;]', code_java, re.M)
+    if [(cid, kind) for _, cid, kind in found] != [(key, kind.upper()) for key, (kind, _) in dg.CODES.items()]:
+        err("concordance/diagnostic/Code.java: the codes differ from tools/concordance_diagnostics.py CODES (ids, kinds, order)")
+    for name, cid, _ in found:
+        if name != cid.upper():
+            err(f"concordance/diagnostic/Code.java: {name} must be named after its id {cid}")
+    kinds = re.search(r"enum Kind \{\s*([A-Z_, ]+?)\s*\}", code_java)
+    if not kinds or [k.strip().lower() for k in kinds.group(1).split(",")] != list(dg.KINDS):
+        err("concordance/diagnostic/Code.java: Code.Kind must list KINDS of tools/concordance_diagnostics.py, in order")
+    for key in dg.CODES:
+        if f"compose.{MOD}.diagnostic.{key}" not in lang:
+            err(f"diagnostic: missing lang compose.{MOD}.diagnostic.{key}")
+    diagnostic = source(root / "diagnostic" / "Diagnostic.java")
+    if 'PREFIX = "diagnostic.";' not in diagnostic or "new Text(PREFIX + code.id, args)" not in diagnostic:
+        err("concordance/diagnostic/Diagnostic.text(): worded by compose.jugcraft.diagnostic.<id>")
+    crucible = source(root / "CrucibleBlockEntity.java")
+    automate = _java_body(crucible, "public @Nullable Diagnostic automate(ServerLevel level)")
+    if not automate or "program = null" in automate or "incompatibility()" not in automate:
+        err("CrucibleBlockEntity.automate: a formula the rules refuse is kept and named (C-01, C-P1), never program = null")
+    pause = _java_body(crucible, "private Diagnostic pause(")
+    if "waiting.code() != reason.code()" not in pause or "Sign.PERIL" not in pause or "case CONDITION ->" not in pause:
+        err("CrucibleBlockEntity.pause: a reason's sign shows once, when it begins; a fault as danger, a condition as none")
+    use = _java_body(crucible, "public InteractionResult use(ServerPlayer player")
+    empty = _java_body(crucible, "public void useEmpty(ServerPlayer player")
+    if not 0 <= use.find("Authority.mayChange(") < use.find("return formula(player, held);") \
+            or not 0 <= empty.find("Authority.mayChange(") < empty.find("program = null;"):
+        err("CrucibleBlockEntity: use and useEmpty ask Authority.mayChange before changing the crucible (C-01, C-P5)")
+    formula = _java_body(crucible, "private InteractionResult formula(")
+    if "Component refused = refusal(formula, catalog);" not in formula or "player.sendOverlayMessage(refused);" not in formula \
+            or "Assay.risks(formula, mixture, !mixture.isEmpty(), Alchemy::harmfulStatus, catalog)" not in formula:
+        err("CrucibleBlockEntity.formula: a refused formula is told through refusal() (what the game test asserts), and setting "
+            "one names its risk and that of a mixture already in it, harm judged by the server (C-01, plan 03:54)")
+    for key in sorted(set(re.findall(r'"(message\.jugcraft\.[a-z_.]+)"', crucible))):
+        if key not in lang:
+            err(f"CrucibleBlockEntity.java: missing lang {key}")
+    companion = source(ROOT / "src" / "main" / "java" / "local" / "peepo" / "CrucibleCompanion.java")
+    status = re.search(r"public CompanionStatus status\(\)\{(.*?)\n    \}", companion, re.S)
+    if not status or "OUTPUT_SLOT" in status.group(1) or "crucible.waiting()" not in status.group(1):
+        err("local/peepo/CrucibleCompanion.status: maps from the crucible's own reason, never the output slot (C-01)")
+    needed = re.search(r"public int needed\(ItemStack stack\)\{(.*?)\n    \}", companion, re.S)
+    if not needed or "crucible.incompatibility()" not in needed.group(1):
+        err("local/peepo/CrucibleCompanion.needed: an incompatible formula asks for nothing (C-01)")
+    for path in sorted((ROOT / "src" / "client" / "java").rglob("*.java")):
+        text = source(path)
+        for needle in ("ConcordanceData.rules()", "Alchemy.catalog()", ".incompatibility()",
+                       # Concordance Chunk C, C-07: the garden's organisms are the server's rules too.
+                       "Garden.catalog()", "Garden.organism(", ".organism()", ".niche()"):
+            if needle in text:
+                err(f"{path.relative_to(ROOT)}: the Concordance's rules are the server's (ConcordanceData.java:28); a client never reads them ({needle})")
+    for path in sorted((ROOT / "src" / "gametest" / "java").rglob("*.java")):
+        text = source(path)
+        helper = _java_body(text, "private static <T> T under(ConcordanceRules rules, Supplier<T> during)")
+        start = text.find(helper) if helper else -1
+        # Rules saved in a variable, for a swap that opens a try and is put back first thing in its finally, in one tick:
+        # main's AlchemicalWorkshopGameTests (merged with main f904df3fd) swaps them so, without an under().
+        saved = set(re.findall(r"\b(?:var|ConcordanceRules)\s+(\w+)\s*=\s*ConcordanceData\.rules\(\);", text))
+        for swap in re.finditer(r"ConcordanceData\.replace\(([^;]*)\);", text):
+            if swap.group(1) == "ConcordanceData.rules()":
+                continue  # the same rules again: a reload that changes nothing
+            before = text[max(0, swap.start() - 40):swap.start()]
+            if re.search(r"\}\s*finally\s*\{\s*\Z", before) and swap.group(1) in saved:
+                continue  # the saved rules put back
+            if re.search(r"\btry\s*\{\s*\Z", before):
+                back = re.compile(r"\}\s*finally\s*\{\s*ConcordanceData\.replace\((\w+)\);").search(text, swap.end())
+                if back and back.group(1) in saved and not re.search(r"\btry\b|ConcordanceData\.replace\(", text[swap.end():back.start()]):
+                    continue
+            if not (0 <= start <= swap.start() < start + len(helper)) or "ConcordanceData.replace(rules);\n\t\ttry {" not in helper \
+                    or "} finally {\n\t\t\tConcordanceData.replace(was);" not in helper:
+                err(f"{path.relative_to(ROOT)}: the Concordance's rules are every test's: swap them only through under(), which "
+                    "puts them back in a finally before the tick ends")
+
+
+def check_crucible_stand(co, root, lang):
+    """Concordance Chunk C, C-05 (C-D3, C-P12, C-P43 to C-P49): the Crucible Stand. Its targets lie inside their bands and
+    its rates rise with them; it is never a HEAT_SOURCES block; Heat.standBand lets a hold win first and a formula drive it
+    only while its crucible waits for nothing or for heat alone; it pays once, in heat(), from its own store, after one
+    block entity read and no scan; its light updates nothing else; its store is never drawn on and takes nothing with the
+    switch off; its seat takes no JE and it carries no worldgen connection marker; the crucible asks it for its heat; only
+    an empty hand sets it, and only someone who may change it, rate-gated; its art is the owner's, with sockets only where
+    JE goes in; and its words, recipe, codex entry and Jade lines exist."""
+    al = co.alchemy
+
+    def source(path):
+        return path.read_text(encoding="utf-8") if path.exists() else ""
+    order = list(al.BANDS)
+    for band, target in al.STAND_TARGETS.items():
+        index = order.index(band) if band in order else 0
+        top = al.BANDS[order[index + 1]][0] if 0 < index < len(order) - 1 else None
+        if index <= 0 or not (al.BANDS[band][0] <= target and (top is None or target < top)):
+            err(f"tools/concordance_alchemy.py STAND_TARGETS: {band} {target} must lie inside its band, and cold is off")
+    rates = list(al.STAND_JE.values())
+    if list(al.STAND_TARGETS) != order[1:] or list(al.STAND_JE) != order[1:] or any(a >= b for a, b in zip(rates, rates[1:])):
+        err("tools/concordance_alchemy.py: STAND_TARGETS and STAND_JE name warm, hot and searing in order; a hotter band costs more")
+    if al.STAND_INTAKE < max(rates) or al.STAND_CAPACITY < al.STAND_INTAKE:
+        err("tools/concordance_alchemy.py: a stand takes at least a searing tick's JE a tick, and holds at least that")
+    if f"{MOD}:crucible_stand" in al.HEAT_SOURCES:
+        err("the Crucible Stand heats only when it pays, never as a HEAT_SOURCES block")
+    if set(al.STAND_PORTS) != {"north", "south", "west", "east", "down"} or len(al.STAND_PORTS) != 5:
+        err("tools/concordance_alchemy.py STAND_PORTS: a socket on each face that takes JE, none on its seat")
+    if al.OWNER_BLOCKS_FILES != {
+            "textures/block/crucible_stand_plates.png": "Guns/block/treated_iron_plates.png",
+            "textures/block/crucible_stand_frame.png": "Guns/block/treated_iron_block.png",
+            "textures/block/crucible_stand_coil.png": "Big Cannons and Mounted Guns/textures/block/coilside.png"}:
+        err("tools/concordance_alchemy.py OWNER_BLOCKS_FILES: the stand's art is the owner's treated iron and copper coil (C-P48)")
+    heat = source(root / "alchemy" / "Heat.java")
+    target = _java_body(heat, "public static int standTarget(Band band)")
+    if "case COLD -> AMBIENT;" not in target or any(f"case {b.upper()} -> STAND_{b.upper()};" not in target for b in order[1:]):
+        err("concordance/alchemy/Heat.standTarget: cold is off (AMBIENT); each other band aims at its STAND_ target")
+    waits = _java_body(heat, "public static boolean waitsForHeat(")
+    if not all(n in waits for n in ("waiting == null", "Code.WRONG_HEAT", "Code.HELD")):
+        err("concordance/alchemy/Heat.waitsForHeat: nothing, the wrong band or a hold are the only waits a stand heats through")
+    rule = _java_body(heat, "public static @Nullable Band standBand(")
+    if not 0 <= rule.find("if (held)") < rule.find("program == null") or "!waitsForHeat(waiting)" not in rule \
+            or "stir.band() == Band.COLD ? null" not in rule:
+        err("concordance/alchemy/Heat.standBand: a hold wins first; a formula drives it only while its crucible waits for heat; a cold stir is off")
+    stand = source(root / "CrucibleStandBlockEntity.java")
+    plan = _java_body(stand, "public Plan plan(ServerLevel level)")
+    pay = _java_body(stand, "public boolean heat(ServerLevel level)")
+    if "Plan plan = plan(level);" not in pay or "if (plan.heats())" not in pay or pay.count("energy.setAmount(") != 1:
+        err("CrucibleStandBlockEntity.heat: it pays once, from its own store, only when its plan heats")
+    if "Block.UPDATE_CLIENTS | Block.UPDATE_KNOWN_SHAPE" not in pay:
+        err("CrucibleStandBlockEntity.heat: its light changes how it looks only (no neighbour, cable or light update)")
+    if plan.count("getBlockEntity(") != 1 or "worldPosition.above()" not in plan or re.search(r"\b(for|while) \(", plan + pay):
+        err("CrucibleStandBlockEntity.plan: one block entity read, the crucible directly above; no scan")
+    # The unit review (C-P43): fed too little, a tick it cannot pay holds the crucible below the band (following a formula,
+    # also at its lowest degree), never inside it, and it goes dark only after DARK_TICKS such ticks.
+    hold = _java_body(stand, "static boolean holds(Plan plan)")
+    if "starving && fedAt >= now - FED_TICKS && holds(plan) ? plan.temperature() : Heat.AMBIENT" not in pay \
+            or "starving && starvedTicks < DARK_TICKS" not in pay or "temperature < Heat.standTarget(band)" not in hold \
+            or "(Band.of(temperature) != band || plan.following() && Band.of(temperature - Heat.RATE) != band)" not in hold:
+        err("CrucibleStandBlockEntity.heat: fed too little, it holds the crucible only below its band (or, following a formula, at "
+            "its lowest degree), and short of JE goes dark only after DARK_TICKS ticks (C-P43)")
+    if "new Heat.Below(block, stand.given() == Heat.AMBIENT, stand.given())" not in source(root / "CrucibleBlockEntity.java"):
+        err("CrucibleBlockEntity.below: a stand is out when it gave nothing, whatever its light shows (C-P43)")
+    for needle in ("JugcraftConfig.isFeatureEnabled(JugcraftConcordance.FEATURE)", "Heat.standBand(", "Heat.waitsForHeat(waiting)",
+                   "crucible.temperature() > Heat.standTarget(band)", "Code.UNAVAILABLE_POWER", "Code.NO_CRUCIBLE"):
+        if needle not in plan:
+            err(f"CrucibleStandBlockEntity.plan: missing {needle} (C-05, C-P43)")
+    if "new SimpleEnergyStorage(CAPACITY, INTAKE, 0, this::setChanged)" not in stand \
+            or "return JugcraftConfig.isFeatureEnabled(JugcraftConcordance.FEATURE) ? super.insert(maxAmount, transaction) : 0L;" not in stand:
+        err("CrucibleStandBlockEntity.energy: never extracted, and it takes nothing with the Concordance switched off")
+    use = _java_body(stand, "public void useEmpty(ServerPlayer player, boolean sneaking)")
+    if "!plan.following()" not in use or not 0 <= use.find("Authority.mayChange(level, player, worldPosition)") \
+            < use.find('RateGate.allow(player, "crucible_stand", SET_TICKS)') < use.find("setting = next(setting);"):
+        err("CrucibleStandBlockEntity.useEmpty: with no formula, only someone who may change it sets it, rate-gated (C-P46)")
+    block = source(root / "CrucibleStandBlock.java")
+    if "stack.isEmpty() ? super.useItemOn(" not in _java_body(block, "protected InteractionResult useItemOn("):
+        err("CrucibleStandBlock.useItemOn: only an empty hand sets the stand; anything held is used as itself (C-P46)")
+    for key in sorted(set(re.findall(r'"(message\.jugcraft\.[a-z_.]+)"', stand))):
+        if key not in lang:
+            err(f"CrucibleStandBlockEntity.java: missing lang {key}")
+    for key in sorted(set(re.findall(r'Text\.of\("([a-z_.]+)"', stand))):
+        if f"compose.{MOD}.{key}" not in lang:
+            err(f"CrucibleStandBlockEntity.java: missing lang compose.{MOD}.{key}")
+    if "EnergyStorage.SIDED.registerForBlockEntity((entity, side) -> side == Direction.UP ? null : entity.energy, CRUCIBLE_STAND_ENTITY);" \
+            not in source(root / "JugcraftConcordance.java"):
+        err("JugcraftConcordance.java: the stand takes JE on every face but its seat")
+    if re.search(r"\bimplements\b[^{]*\bEnergyConnectable\b", block):
+        err("CrucibleStandBlock: no EnergyConnectable; a cable meets it only where it takes JE (CableBlock.connectsTo, C-P44)")
+    if "stand.given()" not in _java_body(source(root / "CrucibleBlockEntity.java"), "public Heat.Below below(ServerLevel level)"):
+        err("CrucibleBlockEntity.below: a Crucible Stand beneath gives the heat it paid for (C-05)")
+    for lit in ("", "_lit"):
+        model = load(ASSETS / "models" / "block" / f"crucible_stand{lit}.json") or {}
+        textures = model.get("textures", {})
+        if (textures.get("plates"), textures.get("frame"), textures.get("coil"), textures.get("foundation")) != (
+                f"{MOD}:block/crucible_stand_plates", f"{MOD}:block/crucible_stand_frame", f"{MOD}:block/crucible_stand_coil",
+                f"{MOD}:block/thallite_block"):
+            err(f"models/block/crucible_stand{lit}.json: the owner's treated iron and copper coil on Jugcraft's thallite")
+        glowing = any(e.get("light_emission") for e in model.get("elements", []))
+        if glowing != (lit == "_lit"):
+            err(f"models/block/crucible_stand{lit}.json: only the lit model's coil is drawn full-bright")
+    for key in ("stand_energy", "stand_setting", "stand_following", "stand_heat", "stand_off", "stand_draw", "stand_waits"):
+        if f"tooltip.{MOD}.concordance.jade.{key}" not in lang:
+            err(f"Jade: missing lang tooltip.{MOD}.concordance.jade.{key}")
+    if "ConcordanceDataProvider.STAND, CrucibleStandBlockEntity.class" not in source(JAVA_ROOT / "compat" / "jade" / "JugcraftJadePlugin.java") \
+            or "StandTooltip.INSTANCE, CrucibleStandBlock.class" not in source(CLIENT_JAVA_ROOT / "compat" / "JugcraftJadeClient.java") \
+            or f"config.jade.plugin_{MOD}.crucible_stand" not in lang:
+        err("Jade: the Crucible Stand needs its provider, its lines and its config name")
+    snapshot = _java_body(source(JAVA_ROOT / "compat" / "jade" / "ConcordanceDataProvider.java"), "public static CompoundTag standSnapshot(")
+    if "stand.plan(level)" not in snapshot or 'putString("band"' in snapshot \
+            or any(n in snapshot for n in ("heat(", "useEmpty(", "setAmount(", "setBlock(")):
+        err("ConcordanceDataProvider.standSnapshot: reads the stand's plan (its band as \"aim\") and changes nothing")
+    recipe = load(DATA / MOD / "recipe" / "crucible_stand.json") or {}
+    conditions = {c.get("feature") for c in recipe.get("fabric:load_conditions", [])}
+    if set(recipe.get("key", {}).values()) != {"minecraft:iron_ingot", "minecraft:copper_ingot", f"{MOD}:rooted_thallite_foundation"} \
+            or conditions != {"concordance", "machines", "thallite"}:
+        err("recipe/crucible_stand.json: the foundation, iron and copper, with the concordance, machines and thallite switches (C-P47)")
+    if not (DATA / MOD / "modonomicon" / "books" / co.BOOK / "entries" / "alembic" / "crucible_stand.json").is_file():
+        err("codex: the Crucible Stand's entry (alembic/crucible_stand) is missing")
+
+
+def check_crucible_supply(co, root):
+    """Concordance Chunk C, C-06 (C-D4, C-P13, C-P50 to C-P53): one demand, two carriers. The crucible owns its shortage;
+    the Peepo port asks for it less what a courier holding the crucible's request brings (a live claim, not being taken
+    back); the crucible files one request, its setter's, while they answer, through the shared nearest-post helper (no
+    copy), backs off with tools/concordance_logistics.py's numbers and says COURIER_QUOTA; every way its formula ends turns
+    the request back (as its requester), as does breaking it, which still drops its slots; its two keys are optional and
+    its stamp stays 1; no client calls the demand or the ledger."""
+    lg = co.logistics
+
+    def text(path):
+        return path.read_text(encoding="utf-8") if path.exists() else ""
+    crucible = text(root / "CrucibleBlockEntity.java")
+    companion = text(ROOT / "src" / "main" / "java" / "local" / "peepo" / "CrucibleCompanion.java")
+    spire, couriers = text(root / "spire" / "ConcordSpire.java"), text(root / "courier" / "Couriers.java")
+    shortage = _java_body(crucible, "public @Nullable Shortage shortage()")
+    if not shortage or "incompatibility() != null" not in shortage:
+        err("CrucibleBlockEntity.shortage: the one demand, nothing for a formula it cannot follow (C-06)")
+    if "needs.merge(" in companion or re.search(r"\bshortage\(\)\s*\{", companion):
+        err("local/peepo/CrucibleCompanion: the shortage is the crucible's (CrucibleBlockEntity.shortage), never worked out again here")
+    needed = re.search(r"public int needed\(ItemStack stack\)\{(.*?)\n    \}", companion, re.S)
+    if not needed or "crucible.shortage()" not in needed.group(1) or "crucible.courierRemainder(missing.add())" not in needed.group(1):
+        err("local/peepo/CrucibleCompanion.needed: the crucible's shortage less its courier request's remainder (C-06, C-P50)")
+    status = re.search(r"public CompanionStatus status\(\)\{(.*?)\n    \}", companion, re.S)
+    if not status or "COURIER_QUOTA->CompanionStatus.NO_INPUT" not in status.group(1) or "crucible.shortage()" not in status.group(1):
+        err("local/peepo/CrucibleCompanion.status: a courier quota is still missing input (C-P52); the lookahead is the crucible's shortage")
+    remainder = _java_body(crucible, "public int courierRemainder(Operation.Add add)")
+    if not all(n in remainder for n in ("progress().returning()", "worker() == null", "progress().lease() < server.getGameTime()",
+                                        "open.ticket().wanted() - open.progress().delivered()")):
+        err("CrucibleBlockEntity.courierRemainder: only a request a courier holds (its lease live), not being taken back, is "
+            "subtracted: asked less delivered (C-P50)")
+    automate = _java_body(crucible, "public @Nullable Diagnostic automate(ServerLevel level)")
+    if not 0 <= automate.find("turnBack();") < automate.find("return pause(level, refused);"):
+        err("CrucibleBlockEntity.automate: a formula it cannot follow turns its courier request back (C-06)")
+    if "return pause(level, supply(level, missing(add)));" not in automate or "reconcile(level);" not in automate:
+        err("CrucibleBlockEntity.automate: an ingredient wait asks the couriers and each pulse reconciles its request (C-06, C-P51)")
+    supply = _java_body(crucible, "private Diagnostic supply(ServerLevel level, Diagnostic reason)")
+    for needle in ("formulaOwner == null || request > 0L", "Authority.answering(level, formulaOwner) == null", "now >= nextFiling",
+                   "Couriers.nearestPost(level, worldPosition, formulaOwner, POST_REACH)", "Logistics.Outcome.TOO_MANY",
+                   "backoffAfter(backoff)", "Diagnostic.courierQuota("):
+        if needle not in supply:
+            err(f"CrucibleBlockEntity.supply: one request, its setter's while they answer, at the shared nearest post, with its backoff ({needle})")
+    # The unit review: no request it has no room for (a porter would wait at it, FULL, holding its post's queue).
+    if not 0 <= supply.find("ItemStorage.SIDED.find(level, worldPosition, null)") < supply.find("if (room <= 0L) {") \
+            < supply.find("Couriers.nearestPost(") or "CourierLedger.room(self, ItemVariant.of(sample), shortage.count())" not in supply \
+            or "sample, (int) room, level.registryAccess()" not in supply:
+        err("CrucibleBlockEntity.supply: it measures its room as a porter delivers (ItemStorage.SIDED, no side) and asks only "
+            "for what fits, nothing when none would")
+    reconcile = _java_body(crucible, "private void reconcile(ServerLevel level)")
+    if not 0 <= reconcile.find("if (open.progress().carried() > 0) {") < reconcile.find("turnBack();") \
+            or "> shortage.count() || barred" not in reconcile or "!matchesIngredient(shortage.add(), item.toStack())" not in reconcile:
+        err("CrucibleBlockEntity.reconcile: cargo already carried is always delivered; with nothing carried, a request for another "
+            "item or more than is lacked is turned back (C-P51)")
+    if "new LinkedHashMap<>()" not in shortage:
+        err("CrucibleBlockEntity.shortage: the formula's needs in step order (a LinkedHashMap), so the first one short is asked for")
+    back = _java_body(crucible, "private void turnBack()")
+    if "ledger.cancel(request, open.ticket().requester()," not in back:
+        err("CrucibleBlockEntity.turnBack: cancels as the request's requester, the only one the ledger lets cancel it")
+    for const, value in (("FILING_BACKOFF", lg.CRUCIBLE_BACKOFF), ("MAX_FILING_BACKOFF", lg.CRUCIBLE_MAX_BACKOFF)):
+        if not re.search(rf"\bint {const} = {value};", crucible):
+            err(f"CrucibleBlockEntity.java: {const} differs from tools/concordance_logistics.py ({value})")
+    if "POST_REACH = Couriers.FILING_REACH;" not in crucible:
+        err("CrucibleBlockEntity.POST_REACH: the Spire's reach, Couriers.FILING_REACH")
+    follow = _java_body(crucible, "public void follow(Formula formula, @Nullable UUID setter)")
+    if not 0 <= follow.find("turnBack();") < follow.find("program = formula;") or "formulaOwner = setter;" not in follow:
+        err("CrucibleBlockEntity.follow: a formula replaced or set by another turns the request back, then records its setter")
+    if "follow(formula, player.getUUID());" not in _java_body(crucible, "private InteractionResult formula(ServerPlayer player, ItemStack held)"):
+        err("CrucibleBlockEntity.formula: the formula item records its user as the setter (C-06)")
+    empty = _java_body(crucible, "public void useEmpty(ServerPlayer player")
+    if not 0 <= empty.find("Authority.mayChange(") < empty.find("turnBack();") < empty.find("program = null;"):
+        err("CrucibleBlockEntity.useEmpty: clearing a formula turns its request back, after Authority (C-06)")
+    removal = _java_body(crucible, "public void preRemoveSideEffects(BlockPos pos, BlockState state)")
+    if not 0 <= removal.find(".destinationGone(") < removal.find("super.preRemoveSideEffects(pos, state);"):
+        err("CrucibleBlockEntity.preRemoveSideEffects: broken, its requests turn back and its slots still drop (C-06)")
+    saving = _java_body(crucible, "protected void saveAdditional(ValueOutput output)")
+    for needle in ('FORMULA_OWNER = "formula_owner"', 'REQUEST = "request"', "input.read(FORMULA_OWNER, UUIDUtil.CODEC).orElse(null)",
+                   "input.getLongOr(REQUEST, -1L)", "asked > 0L ? asked : -1L"):
+        if needle not in crucible:
+            err(f"CrucibleBlockEntity: the setter and request are optional keys read with defaults ({needle})")
+    if "Saved.stamp(output, 1);" not in saving or "if (request > 0L) {\n\t\t\toutput.putLong(REQUEST, request);" not in saving \
+            or "if (formulaOwner != null) {\n\t\t\toutput.store(FORMULA_OWNER, UUIDUtil.CODEC, formulaOwner);" not in saving:
+        err("CrucibleBlockEntity.saveAdditional: the setter and request are written only when set; the stamp stays 1 (C-06)")
+    if "private static @Nullable CourierPostBlockEntity nearestPost(" in spire \
+            or "Couriers.nearestPost(level, heart.getBlockPos(), state.keeper(), REACH)" not in spire:
+        err("spire/ConcordSpire.restock: uses the shared Couriers.nearestPost, no copy (C-06)")
+    if "public static @Nullable CourierPostBlockEntity nearestPost(ServerLevel level, BlockPos from, UUID user, int reach)" not in couriers:
+        err("courier/Couriers.nearestPost: the shared nearest-post helper (C-06)")
+    scans = sum(text(path).count("entity instanceof CourierPostBlockEntity post && distance <=") for path in root.rglob("*.java"))
+    if scans != 1:
+        err(f"concordance: the nearest-post scan is written once (Couriers.nearestPost); found {scans}")
+    if "of(Code.COURIER_QUOTA, count, what, seconds)" not in text(root / "diagnostic" / "Diagnostic.java"):
+        err("diagnostic/Diagnostic.courierQuota: (count, what, seconds)")
+    for path in sorted((ROOT / "src" / "client" / "java").rglob("*.java")):
+        source = text(path)
+        for needle in (".shortage()", ".courierRemainder(", "CourierLedger"):
+            if needle in source:
+                err(f"{path.relative_to(ROOT)}: the crucible's demand and the ledger are the server's ({needle})")
 
 
 def _geo_faces(cube):
@@ -16333,7 +17298,10 @@ def check_geckolib(name, java_text, uvs, sizes, kind="block"):
 def check_ecology(co, root, lang, registered, research):
     """Roadmap step 14: the Java mirrors tools/concordance_ecology.py (factors, sampling bounds, devices); every organism
     and disturbance names things that exist and can be grown or made; composting never gives back what growing cost (no
-    positive loop); every word the garden says has its text; its icons are their maps; its GeckoLib assets agree."""
+    positive loop); every word the garden says has its text; its icons are their maps; its GeckoLib assets agree.
+    Concordance Chunk C, C-08: a mixed bed is the generator's, names other crops that cost nutrients and speeds only;
+    harvest strain is saved and sent as it should, eased only by rest, compost and tending (never a gift), counted only
+    against a disturbance limit, never written by a reader, and nothing in the garden reads industrial pollution."""
     ec = co.ecology
     garden = root / "garden"
     registered = set(registered) | set(co.itemless_blocks())
@@ -16341,14 +17309,15 @@ def check_ecology(co, root, lang, registered, research):
         path = base / name
         return path.read_text(encoding="utf-8") if path.exists() else ""
     constants = {
-        "ecology/Habitat.java": {"MAX_NUTRIENTS": ec.MAX_NUTRIENTS},
+        "ecology/Habitat.java": {"MAX_NUTRIENTS": ec.MAX_NUTRIENTS, "MAX_STRAIN": ec.MAX_STRAIN},
+        "ecology/Neighbours.java": {"MAX_PERCENT": ec.MAX_MIXED_BED_PERCENT},
         "ecology/Sampler.java": {"RADIUS": ec.SAMPLE_RADIUS, "HEIGHT": ec.SAMPLE_HEIGHT, "MAX_DIVERSITY": ec.MAX_DIVERSITY,
                                  "MAX_DISTURBANCE": ec.MAX_DISTURBANCE, "FRESH_TICKS": ec.FRESH_TICKS},
         "ecology/SampleBudget.java": {"PER_TICK": ec.SAMPLES_PER_TICK},
         "ecology/Mulch.java": {"QUARTERS": ec.MULCH_QUARTERS},
         "ecology/Organism.java": {"STAGES": ec.STAGES},
         "garden/Garden.java": {"BONE_MEAL_NUTRIENTS": ec.BONE_MEAL_NUTRIENTS, "AWAKEN_LIMIT": ec.AWAKEN_LIMIT,
-                               "WATER_REACH": ec.WATER_REACH},
+                               "WATER_REACH": ec.WATER_REACH, "TEND_TICKS": ec.TEND_TICKS},
         "garden/VerdantHeartBlockEntity.java": {"BEAT_TICKS": ec.BEAT_TICKS, "CAPACITY": ec.HEART_CAPACITY},
         "garden/MulchMawBlockEntity.java": {"DIGEST_TICKS": ec.DIGEST_TICKS, "REACH": ec.MAW_REACH},
         "garden/HabitatGaugeBlockEntity.java": {"GAUGE_TICKS": ec.GAUGE_TICKS},
@@ -16421,6 +17390,113 @@ def check_ecology(co, root, lang, registered, research):
     for device in ("verdant_bed", "verdant_heart", "mulch_maw", "habitat_gauge", "gleaner"):
         if device not in recipes:
             err(f"garden: {device} has no recipe")
+    # Concordance Chunk C, C-08 (C-P58): a mixed bed. Each "neighbours" is the generator's; only a crop that costs nutrients
+    # takes one, naming other such crops (no fixer either way), never itself; it speeds by 1 to MAX_MIXED_BED_PERCENT.
+    for key, entry in sorted(organisms.items()):
+        mixed = entry.get("neighbours")
+        if mixed is None:
+            continue
+        expected = ec.organism_json(key).get("neighbours") if key in ec.ORGANISMS else None
+        if mixed != expected:
+            err(f"organism {key}: neighbours {mixed} differ from tools/concordance_ecology.py ({expected})")
+        if entry.get("role") != "crop" or entry.get("fix", 0) > 0:
+            err(f"organism {key}: only a crop that costs nutrients takes a mixed bed")
+        if not isinstance(mixed, dict) or set(mixed) != {"organisms", "percent"} or not mixed.get("organisms"):
+            err(f"organism {key}: neighbours must be {{\"organisms\": [ids], \"percent\": n}}")
+            continue
+        percent = mixed.get("percent")
+        if not isinstance(percent, int) or not 1 <= percent <= ec.MAX_MIXED_BED_PERCENT:
+            err(f"organism {key}: a mixed bed speeds by 1 to {ec.MAX_MIXED_BED_PERCENT} percent, not {percent}")
+        for ref in mixed["organisms"]:
+            ns, name = split(ref)
+            other = organisms.get(name) if ns == MOD else None
+            if other is None or other.get("role") != "crop" or other.get("fix", 0) > 0 or name == key:
+                err(f"organism {key}: neighbour {ref} is not another crop that costs nutrients")
+    crop = java("garden/OrganismCropBlock.java")
+    takes = [line for line in crop.splitlines() if "bed.take(" in line]
+    speed = _java_body(crop, "public float speed(")
+    if not takes or any(re.search(r"neighbours|mixed|percent", line) for line in takes) \
+            or "definition.neighbours().percent()" not in speed or "bed.mixed(definition)" not in speed:
+        err("OrganismCropBlock: a mixed bed's bonus is in the speed only, never in what a step costs (C-P58: it mints no nutrient)")
+    grow_body = _java_body(crop, "private Growth grow(ServerLevel level, BlockPos pos, BlockState state, RandomSource random, boolean certain, boolean hastened)")
+    if "float speed = speed(level, pos, definition, verdict, bed);" not in grow_body \
+            or "CropGrowth.chanceDivisor(speed, (float) definition.growth())" not in grow_body or "CropGrowth.speed(" in grow_body:
+        err("OrganismCropBlock.grow: a growth attempt's chance is speed()'s, the mixed bed's bonus included (C-P58)")
+    # C-08 (C-P59 to C-P61): harvest strain only ever worsens the disturbance fit; a gift never eases it; only the explicit
+    # compost points do, and tending only through the bed's empty-hand use, after the rate gate, Garden.knows and Authority.
+    verdict_java = java("ecology/Verdict.java")
+    if "habitat.strained()" not in verdict_java or "worse(" not in _java_body(verdict_java, "public static Verdict of("):
+        err("Verdict.of: disturbance is judged as the worse of the area alone and the area with the strain (C-P59)")
+    if "state.habitat().strain()" not in _java_body(java("ecology/HabitatInspection.java"), "static Text line("):
+        err("HabitatInspection.line: the disturbance row names the strain counted against its limit (C-P59)")
+    bed_java = java("garden/VerdantBedBlockEntity.java")
+    if re.search(r"strain|compost\(|ease\(|settle\(", _java_body(bed_java, "public int give(")):
+        err("VerdantBedBlockEntity.give: a gift never eases strain (C-P61: nitrogen fixing would keep beds unstrained)")
+    if re.search(r"changed\(|settle\(|ease\(|ripened =|strain =", _java_body(bed_java, "public int strainNow()")):
+        err("VerdantBedBlockEntity.strainNow: a reading counts nothing (C-P59)")
+    if re.search(r"strain|compost\(", _java_body(java("garden/Garden.java"), "public static int nourish(")):
+        err("Garden.nourish: a fixer's gift never eases strain (C-P61)")
+    callers = {"compost": set(), "tend": set(), "setStrain": set()}
+    tenders = set()
+    for path in sorted((ROOT / "src" / "main" / "java").rglob("*.java")):
+        source = path.read_text(encoding="utf-8")
+        for method in callers:
+            if re.search(rf"\.{method}\(", source):
+                callers[method].add(path.name)
+        if re.search(r"\btendBy\(", source):
+            tenders.add(path.name)
+    if callers["compost"] != {"MulchMawBlockEntity.java", "OrganismCropBlock.java", "VerdantBedBlock.java"}:
+        err(f"garden: strain is eased by compost only at bone meal on a bed, bone meal or fertilizer on a crop and a Maw's nutrient, not {sorted(callers['compost'])}")
+    if callers["tend"] != {"VerdantBedBlock.java"} or callers["setStrain"]:
+        err(f"garden: only a Greenwarden's use tends a bed, and no game code sets a strain ({sorted(callers['tend'])}, {sorted(callers['setStrain'])})")
+    if tenders != {"OrganismCropBlock.java", "VerdantBedBlock.java"}:
+        err(f"garden: only the bed's use and its crop's tend a bed through VerdantBedBlock.tendBy, not {sorted(tenders)}")
+    # A crop covers its bed from above, so an empty hand on a growing crop tends the bed beneath by the bed's rule (the
+    # unit review): after the crop's rate gate, with an empty main hand, at the bed's position.
+    crop_use = _java_body(crop, "protected InteractionResult useWithoutItem(")
+    if not 0 <= crop_use.find("RateGate.allow(") < crop_use.find("VerdantBedBlock.tendBy(serverLevel, pos.below(), server, bed)") \
+            or "player.getMainHandItem().isEmpty() && level.getBlockEntity(pos.below()) instanceof VerdantBedBlockEntity bed" not in crop_use:
+        err("OrganismCropBlock.useWithoutItem: an empty hand on a growing crop tends the bed beneath by the bed's rule, after the rate gate (C-P61)")
+    block = java("garden/VerdantBedBlock.java")
+    use = _java_body(block, "protected InteractionResult useWithoutItem(")
+    tending = _java_body(block, "static void tendBy(")
+    if not 0 <= use.find("RateGate.allow(") < use.find("tendBy(serverLevel") \
+            or not all(needle in tending for needle in ("Garden.knows(", "Garden.enabled()", "Authority.mayChange(level, player, pos)")) \
+            or not 0 <= tending.find("Authority.mayChange(") < tending.find("bed.tend("):
+        err("VerdantBedBlock: a Greenwarden's empty hand tends, after the rate gate, Garden.knows and Authority (C-P61)")
+    # Fertilizer on a growing crop is its own use; bone meal on one feeds the bed below by the bed's own rule (the rate gate,
+    # then whether its user may change the bed) before it composts, and a refusal consumes the use so the bone meal's own
+    # use cannot feed the bed either (C-P61).
+    use_item = _java_body(crop, "protected InteractionResult useItemOn(")
+    if not re.search(r"!isMaxAge\(state\) && stack\.getItem\(\) instanceof FertilizerItem\) \{\s*return InteractionResult\.PASS;", use_item) \
+            or "!isMaxAge(state) && stack.is(Items.BONE_MEAL)" not in use_item \
+            or not 0 <= use_item.find('RateGate.allow(server, "garden", 4)') \
+            < use_item.find("Illumination.mayChange(serverLevel, player, pos.below())") < use_item.find("bed.compost();"):
+        err("OrganismCropBlock.useItemOn: fertilizer on a growing crop is its own use, and bone meal on one feeds its bed only "
+            "by the bed's rule (rate gate, then who may change the bed) before it composts (C-P61)")
+    load_body = _java_body(bed_java, "protected void loadAdditional(")
+    save_body = _java_body(bed_java, "protected void saveAdditional(")
+    update = _java_body(bed_java, "public CompoundTag getUpdateTag(")
+    if "input.getIntOr(STRAIN, 0)" not in load_body or "input.getBooleanOr(RIPENED, false)" not in load_body \
+            or "Saved.stamp(output, 1)" not in save_body or "keeper" in update \
+            or "tag.putInt(STRAIN, strain)" not in update or "tag.putBoolean(RIPENED, ripened)" not in update:
+        err("VerdantBedBlockEntity: strain and ripened are optional saved keys read with defaults at stamp 1, and sent to clients without the keeper (C-08)")
+    snapshot = _java_body(java("compat/jade/ConcordanceDataProvider.java", JAVA_ROOT), "public static CompoundTag bedSnapshot(")
+    found = re.search(r"\.(settle|compost|tend|setStrain|ripen|note)\(", snapshot)
+    if found:
+        err(f"ConcordanceDataProvider.bedSnapshot: reading a bed never counts, eases or notes its strain ({found.group(0)})")
+    if not re.search(r"new int\[\] \{habitat\.moisture\(\), habitat\.light\(\), habitat\.nutrients\(\), habitat\.diversity\(\),\s*habitat\.disturbance\(\)\}", snapshot) \
+            or 'snapshot.putInt("strain", strain)' not in snapshot:
+        err("ConcordanceDataProvider.bedSnapshot: the habitat stays the five factors, and the strain is its own value (C-08)")
+    jade_client = java("compat/JugcraftJadeClient.java", CLIENT_JAVA_ROOT)
+    if "Factor.fromId(" not in _java_body(jade_client, "private static Component reasonText(") or '"compose.jugcraft.ecology.strain"' not in jade_client:
+        err("JugcraftJadeClient: a reason with no factor is shown as sent, and a bed's strain has its line (C-08)")
+    if "bed.mixedLine(organism)" not in _java_body(java("encyclopedia/InspectPage.java"), "private static void garden("):
+        err("InspectPage.garden: a mixed bed's bonus is on the page (C-P58)")
+    # The garden never reads industrial pollution or process emissions (D-005; 09:128).
+    for path in sorted((root / "ecology").glob("*.java")) + sorted(garden.glob("*.java")):
+        if re.search(r"(?i)pollution|emission|FormMachine|FluidRecipe", path.read_text(encoding="utf-8")):
+            err(f"{path.name}: the garden never reads industrial pollution or process emissions (D-005)")
     # Every word the garden says has its text.
     for path in sorted((root / "ecology").glob("*.java")) + sorted(garden.glob("*.java")):
         text = path.read_text(encoding="utf-8")
@@ -16456,6 +17532,203 @@ def check_ecology(co, root, lang, registered, research):
         check_geckolib(name, java(f"{entity}.java", garden), uvs, sizes)
     if not re.search(r"HEART_ENTITY", java("CircleClient.java", CLIENT_JAVA_ROOT)):
         err("the garden's living devices must be drawn by GeckoLib on the client")
+    # Concordance Chunk C, C-07 (C-P14, C-P54 to C-P57): the habitat made visible. The Inspect page's lines are
+    # HabitatInspection's, judged by the verdict growth reaches, the light given as sky and lamps and each reach named from
+    # Sampler; the bed's reading only reads; a bed's random tick forgets a verdict once nothing that notes it stands on it,
+    # and saves that; an item held in the main hand is its own use on a bed; a canteen wets a bed through the bed's own rule
+    # (RateGate, then Authority) and spends a sip only when it does; Jade shows a ripe crop's last verdict; the compost page
+    # is the generator's and JEI shows it; every new word has its text. Each judgement names all four of the range's
+    # bounds (least, ideal from, ideal to, most), and each reach is its own line's argument.
+    inspection = java("ecology/HabitatInspection.java")
+    judged = _java_body(inspection, "public static List<Text> judged(")
+    line = _java_body(inspection, "static Text line(")
+    reaches = ('"ecology.inspect.moisture", value, Factor.MOISTURE.max, state.waterReach())',
+               '"ecology.inspect.light", value, state.sky(), state.lamps())',
+               '"ecology.inspect.diversity", value, Sampler.RADIUS)', "int square = 2 * Sampler.RADIUS + 1;",
+               '"ecology.inspect.disturbance", value, square, square, Sampler.HEIGHT)')
+    if "verdict.fit(factor)" not in judged or "Niche.Range.any(factor)" not in judged or not all(n in line for n in reaches) \
+            or any(judged.count(f"range.{bound}()") != 4 for bound in ("min", "idealMin", "idealMax", "max")):
+        err("concordance/ecology/HabitatInspection: each factor is judged by the verdict's own fit against all four bounds, its "
+            "reach named from Sampler, the light given as sky and lamps (C-07, C-P14)")
+    bed = java("VerdantBedBlockEntity.java", garden)
+    inspect = _java_body(bed, "public HabitatInspection.@Nullable State inspect(ServerLevel level)")
+    if "habitat(level)" not in inspect or "LightLayer.SKY" not in inspect or "LightLayer.BLOCK" not in inspect \
+            or any(n in inspect for n in ("note(", "sync(", "setChanged(", "take(", "give(", "setBlock(")):
+        err("VerdantBedBlockEntity.inspect: the habitat growth reads and the light's two sources, and it only reads (C-07)")
+    forget = _java_body(bed, "public void forgetVerdict()")
+    if 'note("", List.of());' not in forget or "setChanged();" not in forget or re.search(r"strain|ripened|graft|nutrients", forget):
+        err("VerdantBedBlockEntity.forgetVerdict: clears only the verdict, sends it and saves it (C-07, C-P55)")
+    bed_block = java("VerdantBedBlock.java", garden)
+    tick = _java_body(bed_block, "protected void randomTick(")
+    if "!(above.getBlock() instanceof OrganismCropBlock) && !above.is(Garden.VERDANT_HEART)" not in tick or "bed.forgetVerdict();" not in tick:
+        err("VerdantBedBlock.randomTick: forgets a verdict once neither a crop nor a Verdant Heart stands on the bed (C-07, C-P55)")
+    # The unit review: another crop set on a bed, or a graft, forgets the last plant's verdict at once, so Jade never shows
+    # one plant's reasons (or the ungrafted niche's) on another; a step or a harvest of the same crop forgets nothing.
+    crop_block = java("OrganismCropBlock.java", garden)
+    placed = _java_body(crop_block, "protected void onPlace(")
+    if not re.search(r"if \(!oldState\.is\(this\) && level\.getBlockEntity\(pos\.below\(\)\) instanceof VerdantBedBlockEntity bed\) \{\s*"
+                     r"bed\.forgetVerdict\(\);", placed) \
+            or not re.search(r"bed\.setGraft\(graft\.id\(\)\);\s*(//[^\n]*\s*)?bed\.forgetVerdict\(\);", _java_body(crop_block, "private InteractionResult graftBed(")):
+        err("OrganismCropBlock: another crop set on a bed, or a graft, forgets the last plant's verdict at once (C-07, C-P55)")
+    pour = _java_body(bed_block, "public static boolean pour(ServerLevel level, BlockPos pos, ServerPlayer player)")
+    if not 0 <= pour.find('RateGate.allow(player, "garden", 4)') < pour.find("Authority.mayChange(level, player, pos)") < pour.find("level.setBlock("):
+        err("VerdantBedBlock.pour: a canteen's sip wets a bed only for someone who may change it, rate-gated (C-07, C-P56)")
+    use = _java_body(bed_block, "protected InteractionResult useWithoutItem(")
+    if not re.search(r"if \(!player\.getMainHandItem\(\)\.isEmpty\(\)\) \{\s*return InteractionResult\.PASS;", use) \
+            or not 0 <= use.find("getMainHandItem().isEmpty()") < use.find("RateGate.allow("):
+        err("VerdantBedBlock.useWithoutItem: an item in the main hand is its own use (a seed plants, a canteen pours); only an "
+            "empty hand reports, wakes or tends (C-07, C-P56)")
+    canteen = java("GourdCanteenItem.java", JAVA_ROOT / "agriculture")
+    spend = canteen.find("stack.set(JugcraftAgriculture.CANTEEN_WATER, water(stack) - 1);")
+    if "VerdantBedBlock.pour(server, pos, gardener)" not in canteen or not 0 <= canteen.find("VerdantBedBlock.pour(") < spend:
+        err("GourdCanteenItem.useOn: a sip on a Verdant Bed goes through VerdantBedBlock.pour before it is spent (C-07, C-P56)")
+    client = java("JugcraftJadeClient.java", CLIENT_JAVA_ROOT / "compat")
+    crop_tip = client[client.find("private enum CropTooltip"):client.find("private enum MachineTooltip")]
+    if "!crop.isMaxAge(state) &&" in crop_tip or '"tooltip.jugcraft.concordance.jade.as_it_grew"' not in crop_tip:
+        err("JugcraftJadeClient CropTooltip: a ripe crop shows its bed's last verdict, as it grew (C-07, C-P55)")
+    if (load(ASSETS / "recipe_view.json") or {}).get("garden_compost") != ec.compost_view():
+        err("recipe_view.json garden_compost is not tools/concordance_ecology.py's compost_view(): run tools/generate_material_data.py")
+    jei = java("JugcraftJeiPlugin.java", CLIENT_JAVA_ROOT / "compat")
+    if '"garden_compost"' not in jei or '"jei.jugcraft.garden.compost"' not in jei or "addCompostInfo(registration);" not in jei:
+        err("JugcraftJeiPlugin: shows recipe_view.json's garden_compost as the Mulch Maw's information pages (C-07, C-P57)")
+    for key in (f"jei.{MOD}.garden.compost", f"tooltip.{MOD}.concordance.jade.as_it_grew",
+                f"encyclopedia.{MOD}.inspect.garden.habitat", f"encyclopedia.{MOD}.inspect.garden.here"):
+        if key not in lang:
+            err(f"garden: missing lang {key}")
+
+
+def _graft_effect(values, base):
+    """+1 when a graft's range takes in all of its host's and more, -1 when less, 0 when the same or mixed."""
+    if values == base:
+        return 0
+    wider = values[0] <= base[0] and values[1] <= base[1] and values[2] >= base[2] and values[3] >= base[3]
+    narrower = values[0] >= base[0] and values[1] >= base[1] and values[2] <= base[2] and values[3] <= base[3]
+    return 1 if wider else -1 if narrower else 0
+
+
+def check_graft(co, root, lang):
+    """Concordance Chunk C, C-09 (C-P18, C-P62 to C-P65): one stable graft trait. The pilot holds one graft (plan 03:81),
+    joining two different crops, one range better and one worse (03:76), its data naming nothing but a host, a donor and
+    ranges, and the loader reading no more. Every reader of a bed's niche asks the bed (VerdantBedBlockEntity.niche), the
+    Verdant Heart alone reading its own. The gesture asks research, RateGate and Authority at crop and bed, and a refusal
+    consumes the use. Another organism's growth clears it and reading never does. The bed saves it only when it has one and
+    tells clients it with its host, never the keeper. Jade and the Inspect page name it on its host's crop only. Every word
+    has its lang."""
+    ec = co.ecology
+    garden = root / "garden"
+
+    def java(path):
+        return path.read_text(encoding="utf-8") if path.exists() else ""
+
+    files = {p.stem: load(p) or {} for p in (DATA / MOD / "concordance" / "graft").glob("*.json")}
+    if ec.GRAFT_CAP != 1 or len(ec.GRAFTS) != ec.GRAFT_CAP or set(files) != set(ec.GRAFTS):
+        err(f"grafts: the pilot holds exactly one graft (plan 03:81): GRAFTS {sorted(ec.GRAFTS)}, data {sorted(files)}")
+    for key, entry in sorted(files.items()):
+        if set(entry) != {"schema", "host", "donor", "niche"}:
+            err(f"graft {key}: names a host, a donor and ranges only, never a cost, yield or alchemy ({sorted(entry)})")
+        if key in ec.GRAFTS and entry != ec.graft_json(key):
+            err(f"graft {key}: differs from tools/concordance_ecology.py: run tools/generate_material_data.py")
+        host_ns, host_key = split(entry.get("host", ":"))
+        donor_ns, donor_key = split(entry.get("donor", ":"))
+        host, donor = ec.ORGANISMS.get(host_key, {}), ec.ORGANISMS.get(donor_key, {})
+        if host_ns != MOD or donor_ns != MOD or host.get("role") != "crop" or donor.get("role") != "crop" or host_key == donor_key:
+            err(f"graft {key}: joins two different crops the garden grows (host {entry.get('host')}, donor {entry.get('donor')})")
+            continue
+        effects = []
+        for factor, values in entry.get("niche", {}).items():
+            top = ec.FACTORS.get(factor)
+            if top is None or not isinstance(values, list) or len(values) != 4 or values != sorted(values) or values[0] < 0 \
+                    or values[3] > top:
+                err(f"graft {key}: niche.{factor} must be [least, ideal from, ideal to, most] within 0..{top}")
+                continue
+            effects.append(_graft_effect(values, host["niche"].get(factor, [0, 0, top, top])))
+            if factor == "nutrients" and values[0] < host.get("cost", 0):
+                err(f"graft {key}: its nutrient floor ({values[0]}) is below its host's cost")
+        if sorted(effects) != [-1, 1]:
+            err(f"graft {key}: changes one range for the better and one for the worse (plan 03:76), found {effects}")
+    # The loader reads the kind and nothing more.
+    parser = _java_body(java(root / "ecology" / "EcologyParser.java"), "public @Nullable Graft graft(String id, JsonElement json)")
+    if 'Json.only(object, "schema", "host", "donor", "niche");' not in parser:
+        err("EcologyParser.graft: a graft names a host, a donor and ranges, and nothing else (C-09)")
+    rules = java(root / "rules" / "ConcordanceRules.java")
+    if 'case "graft" ->' not in rules or "new EcologyCatalog(organisms, disturbances, grafts)" not in rules:
+        err("ConcordanceRules.build: reads concordance/graft and gives the grafts to the ecology catalog (C-09)")
+    # One niche helper for every reader.
+    bed = java(garden / "VerdantBedBlockEntity.java")
+    if "return Garden.catalog().niche(organism, graft);" not in _java_body(bed, "public Niche niche(Organism organism)"):
+        err("VerdantBedBlockEntity.niche: the one niche helper asks the catalog with the bed's graft (C-09)")
+    for path in sorted(garden.glob("*.java")) + [root / "encyclopedia" / "InspectPage.java"]:
+        if path.name == "VerdantHeartBlockEntity.java":
+            continue  # the Heart reads its own niche (C-09 leaves it untouched)
+        for match in re.finditer(r"\b\w+\.niche\(\)", java(path)):
+            err(f"concordance/{path.relative_to(root).as_posix()}: {match.group(0)}: a bed's niche is the bed's to give "
+                "(VerdantBedBlockEntity.niche), so its graft reaches every reader (C-09)")
+    crop = java(garden / "OrganismCropBlock.java")
+    grow = _java_body(crop, "private Growth grow(ServerLevel level, BlockPos pos, BlockState state, RandomSource random, boolean certain, boolean hastened)")
+    report = _java_body(crop, "public void report(")
+    gauge = java(garden / "HabitatGaugeBlockEntity.java")
+    inspect = java(root / "encyclopedia" / "InspectPage.java")
+    inspect_garden = _java_body(inspect, "private static void garden(")
+    for where, text_, needle in (("OrganismCropBlock.grow", grow, "Verdict.of(bed.niche(definition), habitat)"),
+                                 ("OrganismCropBlock.report", report, "Niche niche = bed.niche(definition);"),
+                                 ("HabitatGaugeBlockEntity.read", gauge, "Verdict.of(bed.niche(organism), habitat)"),
+                                 ("VerdantBedBlockEntity.note", bed, "verdict.reasons(niche(organism), habitat)"),
+                                 ("InspectPage.garden", inspect_garden, "Niche niche = bed.niche(organism);")):
+        if needle not in text_:
+            err(f"{where}: reads the bed's niche ({needle}) (C-09)")
+    # The gesture.
+    use = _java_body(crop, "protected InteractionResult useItemOn(")
+    for needle in ("Garden.knows(server)", "Garden.catalog().graft(organismId(), ConcordanceProgress.itemId(stack))",
+                   "return super.useItemOn(stack, state, level, pos, player, hand, hit);"):
+        if needle not in use:
+            err(f"OrganismCropBlock.useItemOn: a Greenwarden's donor grafts; anything else goes on as before ({needle}) (C-09)")
+    act = _java_body(crop, "private InteractionResult graftBed(")
+    for needle in ('RateGate.allow(player, "garden", 4)', "Authority.mayChange(level, player, pos)",
+                   "Authority.mayChange(level, player, pos.below())", "!bed.graft().isEmpty() && Garden.catalog().graft(bed.graft()) != null",
+                   "donor.consume(1, player)"):
+        if needle not in act:
+            err(f"OrganismCropBlock.graftBed: rate, Authority at crop and bed, one graft the rules know a bed (one they no longer "
+                f"know is replaced), one donor spent ({needle}) (C-09)")
+    if "InteractionResult.FAIL" in act:
+        err("OrganismCropBlock.graftBed: a refused graft consumes the use (CONSUME), so the donor's own use never plants it (C-09)")
+    # Clearing, and only growth clears.
+    if "bed.clearGraftUnlessFor(organismId());" not in grow or grow.find("bed.clearGraftUnlessFor(") > grow.find("bed.awake()"):
+        err("OrganismCropBlock.grow: another organism's growth clears the bed's graft, before the dormant check (C-09)")
+    for path in sorted(root.rglob("*.java")):
+        if re.search(r"\.(setGraft|clearGraftUnlessFor)\(", java(path)) and path.name != "OrganismCropBlock.java":
+            err(f"concordance/{path.relative_to(root).as_posix()}: only the gesture grafts and only growth clears (C-09)")
+    if re.search(r"(setGraft|clearGraftUnlessFor)\(", report):
+        err("OrganismCropBlock.report: a report reads and clears nothing (C-09)")
+    # Saved and sent.
+    save = _java_body(bed, "protected void saveAdditional(ValueOutput output)")
+    if not re.search(r"if \(!graft\.isEmpty\(\)\) \{\s*output\.putString\(GRAFT, graft\);", save) or "GRAFT_HOST" in save:
+        err("VerdantBedBlockEntity.saveAdditional: saves the graft only when it carries one, never its host (C-09)")
+    if 'graft = input.getStringOr(GRAFT, "");' not in _java_body(bed, "protected void loadAdditional(ValueInput input)") \
+            or 'GRAFT = "graft";' not in bed or 'GRAFT_HOST = "graft_host";' not in bed:
+        err("VerdantBedBlockEntity.loadAdditional: an older bed reads as ungrafted (C-09)")
+    update = _java_body(bed, "public CompoundTag getUpdateTag(HolderLookup.Provider registries)")
+    if "tag.putString(GRAFT, graft);" not in update or "tag.putString(GRAFT_HOST," not in update or '"keeper"' in update:
+        err("VerdantBedBlockEntity.getUpdateTag: clients are told the graft and the organism it is for, never the keeper (C-09)")
+    # Shown.
+    snapshot = _java_body(java(JAVA_ROOT / "compat" / "jade" / "ConcordanceDataProvider.java"), "public static CompoundTag bedSnapshot(")
+    if 'snapshot.putString("graft", bed.graft());' not in snapshot or re.search(r"(setGraft|clearGraftUnlessFor)\(", snapshot):
+        err("ConcordanceDataProvider.bedSnapshot: tells Jade the graft and changes nothing (C-09)")
+    named = _java_body(inspect, "private static void grafted(")
+    if "grafted(out, bed, " not in inspect_garden or "Garden.catalog().graftLines(held.id())" not in named \
+            or "!held.host().equals(crop)" not in named:
+        err("InspectPage: a bed's page names its graft, and a crop's page only when the crop is its host (C-09)")
+    client = java(CLIENT_JAVA_ROOT / "compat" / "JugcraftJadeClient.java")
+    crop_tooltip = client[client.find("private enum CropTooltip"):]
+    crop_tooltip = crop_tooltip[:crop_tooltip.find("\n\t}\n")]
+    if "bed.graftFor().equals(crop.organismId())" not in crop_tooltip or client.count('"tooltip.jugcraft.concordance.jade.graft"') != 2:
+        err("JugcraftJadeClient: names the graft on the bed, and on a crop only when it is the graft's host (C-09)")
+    if 'case "graft" -> "graft." + namespace + "." + path;' not in java(root / "ComposeText.java"):
+        err("ComposeText.name: a graft is named graft.<ns>.<path> (C-09)")
+    for key in [f"graft.{MOD}.{name}" for name in ec.GRAFTS] + [
+            f"tooltip.{MOD}.concordance.jade.graft", f"message.{MOD}.concordance.garden.grafted",
+            f"message.{MOD}.concordance.garden.graft_held", f"compose.{MOD}.ecology.graft", f"compose.{MOD}.ecology.graft.range"]:
+        if key not in lang:
+            err(f"graft: missing lang {key}")
 
 
 def check_celestial(co, root, lang, registered, research):
@@ -16708,7 +17981,7 @@ def check_logistics(co, root, lang, registered):
         if f"long {const} = {value}L;" not in ledger:
             err(f"concordance/logistics/Logistics.java: {const} differs from tools/concordance_logistics.py ({value})")
     couriers = java("courier/Couriers.java")
-    for const, value in (("SOURCE_RADIUS", lg.SOURCE_RADIUS), ("SHOWN_HISTORY", lg.SHOWN_HISTORY)):
+    for const, value in (("SOURCE_RADIUS", lg.SOURCE_RADIUS), ("SHOWN_HISTORY", lg.SHOWN_HISTORY), ("FILING_REACH", lg.FILING_REACH)):
         if not re.search(rf"\bint {const} = {value};", couriers):
             err(f"concordance/courier/Couriers.java: {const} differs from tools/concordance_logistics.py ({value})")
     if not re.search(rf"\bint SLOTS = {lg.POST_SLOTS};", java("courier/CourierPostBlockEntity.java")):
@@ -18544,7 +19817,17 @@ def check_encyclopedia(root, lang):
     # The pages only read.
     forbidden = re.compile(r"setAttached\(|removeAttached\(|\.award\(|ConcordanceProgress\.(record|grant|setFocus|award|spendFocus)\(|"
                            r"Composing\.(compose|clear)\(|\.set\(JugcraftConcordance\.INSCRIPTION|StructureValidator\.check\(|"
-                           r"new Inscription\(|\.setItem\(|\.shrink\(|LairRewards\.(owe|pay|handOver)\(")
+                           r"new Inscription\(|\.setItem\(|\.shrink\(|LairRewards\.(owe|pay|handOver)\(|"
+                           # Concordance Chunk C, C-01: reading a crucible shows no sign, holds, heats, works or saves nothing.
+                           r"Signs\.(?:show|flow)\(|\.hold\(|setTemperature\(|useEmpty\(|setChanged\(|sendBlockUpdated\(|\.automate\("
+                           # Concordance Chunk C, C-03: reading an anchor marks no part and never takes the chat reading's path.
+                           r"|markReadiness\(|markFaults\(|\.status\([a-z]+, [a-z]+\)"
+                           # Concordance Chunk C, C-07: reading a bed or a crop notes, grows, feeds, takes and forgets nothing.
+                           r"|\.note\(|forgetVerdict\(|forgetSample\(|\.take\(|\.give\(|\.grow\(|\.hasten\("
+                           # Concordance Chunk C, C-08: nor counts, eases or sets a strain.
+                           r"|\.settle\(|\.compost\(|\.tend\(|setStrain\(|\.ripen\("
+                           # Concordance Chunk C, C-09: nor grafts or clears a graft.
+                           r"|setGraft\(|clearGraftUnlessFor\(")
     for name, source in builders.items():
         if forbidden.search(source):
             err(f"{name}: the encyclopedia only reads ({forbidden.search(source).group(0)})")
@@ -18559,6 +19842,28 @@ def check_encyclopedia(root, lang):
     if "player.distanceToSqr(Vec3.atCenterOf(pos)) > reach * reach" not in builders["concordance/encyclopedia/InspectPage.java"] \
             or "level.isLoaded(pos)" not in builders["concordance/encyclopedia/InspectPage.java"]:
         err("concordance/encyclopedia/InspectPage.java: the looked-at block is checked on the server: loaded and within reach")
+    # Concordance Chunk C, C-01 (C-P3, C-P26): a crucible within the reader's own block reach; its makeup only with a glass.
+    inspect = builders["concordance/encyclopedia/InspectPage.java"]
+    branch = _java_body(inspect, "private static void crucible(")
+    if "entity instanceof CrucibleBlockEntity crucible && player.isWithinBlockInteractionRange(pos, CRUCIBLE_REACH)" not in inspect \
+            or not re.search(r"\bdouble CRUCIBLE_REACH = 1\.0;", inspect):
+        err("concordance/encyclopedia/InspectPage.java: a crucible is read only within the reader's own block reach (C-P3, C-P26)")
+    if "stack.is(JugcraftConcordance.ASSAY_GLASS)" not in branch or "Alchemy.glassLevel(player)" not in branch or "CrucibleInspection.read(" not in branch:
+        err("concordance/encyclopedia/InspectPage.java: a crucible's makeup is read with an Assay Glass carried, at the glass's level, through CrucibleInspection")
+    if "crucible.step() == 0 || crucible.incompatibility() != null" not in branch or "Alchemy::harmfulStatus" not in branch:
+        err("concordance/encyclopedia/InspectPage.java: the risk line names a mixture that is not its formula's batch, harm judged by the server (C-01)")
+    # Concordance Chunk C, C-07 (C-P14, C-P54): a Verdant Bed, or a crop through the bed below it, within the reader's own
+    # block reach; the reading is the bed's own and is judged by the plant's niche as growth judges it; a dormant bed is
+    # not read. (That the page writes nothing is the forbidden list above.)
+    garden_branch = _java_body(inspect, "private static void garden(")
+    if "entity instanceof VerdantBedBlockEntity bed && player.isWithinBlockInteractionRange(pos, GARDEN_REACH)" not in inspect \
+            or "getBlock() instanceof OrganismCropBlock crop" not in inspect \
+            or inspect.count("isWithinBlockInteractionRange(pos, GARDEN_REACH)") != 2 or not re.search(r"\bdouble GARDEN_REACH = 1\.0;", inspect):
+        err("concordance/encyclopedia/InspectPage.java: a bed or a crop is read only within the reader's own block reach (C-07)")
+    if "bed.awake() ? bed.inspect(level) : null" not in garden_branch or "Verdict.of(niche, state.habitat())" not in garden_branch \
+            or "HabitatInspection.judged(state, niche, verdict)" not in garden_branch:
+        err("concordance/encyclopedia/InspectPage.java garden: the bed's own reading, judged by the plant's niche as growth "
+            "judges it; a dormant bed is not read (C-07)")
 
     # The keys: every Jugcraft key has its name and its help on the Keys page.
     keys = set()
@@ -18620,7 +19925,8 @@ def check_signs(co, root, lang):
     its order; the warnings' sounds are registered, drawn and subtitled; every server-side Concordance particle goes
     through a sign (no sendParticles), so each client draws it as its settings allow; the display settings are read only
     by client code and blocks' animateTick (the server never decides from them); a crucible tells a client only its
-    heat, volume and the spoon's reading; and the setting's words exist."""
+    heat, volume and the spoon's reading, and Jade (Concordance Chunk C, C-01) its tank and own encoded reason, never its
+    makeup; and the setting's words exist."""
     sg = co.signs
     def text(path):
         return path.read_text(encoding="utf-8") if path.exists() else ""
@@ -18662,6 +19968,22 @@ def check_signs(co, root, lang):
     sent = set(re.findall(r'tag\.put\w+\("([a-z_]+)"', update.group(1))) if update else set()
     if sent != {"temperature", "parts", "taste", "murky"}:
         err(f"CrucibleBlockEntity.java: a client is told only the heat, the volume and the spoon's reading, not {sorted(sent)}")
+    # Concordance Chunk C, C-01 (C-P4): Jade's crucible snapshot adds the tank and the crucible's own reason (encoded),
+    # never the makeup; the client words what it was sent and works nothing out.
+    jade = _java_body(text(JAVA_ROOT / "compat" / "jade" / "ConcordanceDataProvider.java"), "public static CompoundTag snapshot(CrucibleBlockEntity")
+    put = set(re.findall(r'snapshot\.put\w+\("([a-z_]+)"', jade))
+    if not jade or not put <= {"temperature", "band", "held", "parts", "tank", "step", "steps", "next", "reason"} \
+            or 'snapshot.putString("reason", reason.encode())' not in jade or "crucible.waiting()" not in jade:
+        err(f"ConcordanceDataProvider.java: Jade's crucible snapshot is the heat, hold, volume, tank, step and the crucible's own reason, not {sorted(put)}")
+    for needle in ("mixture()", "dissolved", "pending", "contaminant", "concentration", "history", "Assay.", "outcome(", "replay(", "catalog()", "rules()"):
+        if needle in jade:
+            err(f"ConcordanceDataProvider.java: Jade's crucible snapshot never reads the makeup ({needle})")
+    client = text(CLIENT_JAVA_ROOT / "compat" / "JugcraftJadeClient.java")
+    for needle in ("Alchemy.", "ConcordanceData.", ".replay(", "Outcome", "Assay.", "Mixture.Step", "Diagnostic.of("):
+        if needle in client:
+            err(f"JugcraftJadeClient.java: Jade's lines show what the server sent and work nothing out ({needle})")
+    if "Diagnostic.decode(" not in client or '"tooltip.jugcraft.concordance.jade.tank"' not in client or f"tooltip.{MOD}.concordance.jade.tank" not in lang:
+        err("JugcraftJadeClient.java: the crucible's lines show its tank and decode its reason")
     settings = text(CLIENT_JAVA_ROOT / "ConcordanceSettingsScreen.java")
     if '"screen.jugcraft.concordance.config.intensity." + value.id()' not in settings:
         err("ConcordanceSettingsScreen.java: each intensity is named by screen.jugcraft.concordance.config.intensity.<id>")
@@ -18720,6 +20042,10 @@ AUTHORITY_ROUTES = {
     "ConcordanceEffects.java": ["Authority.answering(level, behind(context))", "Authority.mayStrike(context.level(), context.actor(), behind(context), target)"],
     "Illumination.java": ["return Authority.mayChange(level, player, pos);"],
     "garden/GleanerBlockEntity.java": ["Authority.answering(level, keeper)", "Authority.mayChange(level, answering, pos)"],
+    # Concordance Chunk C, C-07 (C-P56): a canteen's sip on a Verdant Bed; and (C-08, C-P61) a Greenwarden's tending.
+    "garden/VerdantBedBlock.java": ["Authority.mayChange(level, player, pos)"],
+    # Concordance Chunk C, C-09 (C-P62): a graft asks at the crop and at the bed.
+    "garden/OrganismCropBlock.java": ["Authority.mayChange(level, player, pos)", "Authority.mayChange(level, player, pos.below())"],
     "spirits/ClockworkPorterEntity.java": ["Authority.answering(level, owner) == null", "Authority.mayChangeFor(level, owner, source)",
                                            "Authority.mayChangeFor(level, owner, target)",
                                            "Authority.mayChangeFor(level, request.ticket().requester(), pos)"],
@@ -18730,6 +20056,12 @@ AUTHORITY_ROUTES = {
     "sympathy/ScryingGlassItem.java": ["Sympathy.allowed(player, target)", "Hexes.MAX_RANGE"],
     "CircleAnchorBlockEntity.java": ["Authority.present(level, disturber)"],
     "Alchemy.java": ["harmful(dose) ? Intent.HARMFUL"],
+    # Concordance Chunk C, C-01 (C-P5): working a crucible by hand, and clearing its formula; C-06 (C-P53): it files a
+    # courier request only while its formula's setter answers.
+    "CrucibleBlockEntity.java": ["Authority.mayChange(level, player, worldPosition)", "Authority.mayChange(player.level(), player, worldPosition)",
+                                 "Authority.answering(level, formulaOwner) == null"],
+    # Concordance Chunk C, C-05 (C-P46): setting a Crucible Stand's heat by hand.
+    "CrucibleStandBlockEntity.java": ["Authority.mayChange(level, player, worldPosition)"],
 }
 
 
@@ -18782,8 +20114,11 @@ def check_economy(root):
     """Roadmap step 29: tools/concordance_economy.py models every Concordance conversion and every source that time alone
     drives. Its figures must be the game's (each anchor is in its Java or data file), the data conversions must all be
     in it, no cycle of conversions across the systems (every crop's regrow-and-compost loop included, grown by time and
-    hastened by a spire) may come back with as much as it started with, and the record's table must be the model's."""
+    hastened by a spire) may come back with as much as it started with, and the record's table must be the model's. Since
+    Concordance Chunk C (C-04), each ritual sink is its ritual's run as the data states it; since C-05, a crucible's heat
+    is a sink that becomes nothing else, modelled at a Crucible Stand's cheapest rate."""
     sys.path.insert(0, str(ROOT / "tools"))
+    import concordance_alchemy as al
     import concordance_economy as ec
     def text(path):
         return path.read_text(encoding="utf-8") if path.exists() else ""
@@ -18799,6 +20134,25 @@ def check_economy(root):
     for key, entry in conversions.items():
         if modelled.get(key) != (entry.get("from", {}).get("amount"), entry.get("to", {}).get("amount")):
             err(f"economy: the conversion {key} is not modelled as it is in the data ({modelled.get(key)})")
+    # Concordance Chunk C, C-04: each ritual sink is its ritual's run: Ley Charge from every channel, every participant's
+    # Focus, its steps' time and the thing it makes.
+    structures = {path.stem: load(path) or {} for path in (DATA / MOD / "concordance" / "structure").glob("*.json")}
+    for key, sink in ec.RITUAL_SINKS.items():
+        ritual = load(DATA / MOD / "concordance" / "ritual" / f"{key}.json") or {}
+        parts = structures.get(split(ritual.get("structure", ":"))[1], {}).get("parts", [])
+        channels = sum(len(group.get("at", [])) for group in parts if group.get("role") == "channel")
+        made = ((ritual.get("result") or {}).get("transform") or {}).get("into")
+        if (sink["ley"], sink["focus"], sink["ticks"], f"{MOD}:{sink['makes']}") != (
+                ritual.get("steps", 0) * ritual.get("ley", 0) * channels, ritual.get("focus", 0) * ritual.get("participants", 0),
+                ritual.get("steps", 0) * ec.STEP_TICKS, made) or sink["makes"] not in ec.RESOURCES:
+            err(f"economy: the ritual sink {key} is not concordance/ritual/{key}.json's run (tools/concordance_economy.py RITUAL_SINKS)")
+    # Concordance Chunk C, C-05: a crucible's heat is a sink nothing converts back, modelled at the cheapest band's rate.
+    if any(source == "crucible_heat" for source, _ in ec.edges()):
+        err("economy: a crucible's heat becomes nothing else (tools/concordance_economy.py)")
+    if {key: amount for key, _, amount, _, _ in ec.CONVERSIONS}.get("je_to_heat") != min(ec.STAND_JE.values()):
+        err("economy: je_to_heat is modelled at the stand's cheapest rate (STAND_JE)")
+    if ec.STAND_JE != al.STAND_JE:
+        err("economy: STAND_JE is not tools/concordance_alchemy.py's (CrucibleStandBlockEntity.JE_*)")
     heart = load(DATA / MOD / "concordance" / "organism" / "verdant_heart.json") or {}
     if (heart.get("cost"), max(heart.get("thriving", 0), heart.get("tolerating", 0))) != (1, 2):
         err("economy: the Verdant Heart's beat is modelled as 1 nutrient for at most 2 Verdance")
@@ -18861,7 +20215,8 @@ def check_journey():
     """Roadmap step 31: tools/concordance_journey.py's three routes each reach the Architect stage for one player alone
     with only their own research, need their own Spire's practice and differ from one another; the first success is the
     data's; one player makes the first loadout (Concordance Chunk A) in the Overworld with First Light understood and no
-    other research; every game test the routes name exists; and the record's routes are the tool's."""
+    other research; the living workshop (Concordance Chunk C, C-10) holds from a manual start, step by step (WORKSHOP);
+    every game test the routes name exists; and the record's routes are the tool's."""
     sys.path.insert(0, str(ROOT / "tools"))
     import concordance_journey as jr
     for problem in jr.problems():

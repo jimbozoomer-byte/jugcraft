@@ -10,10 +10,21 @@ import com.mojang.serialization.DynamicOps;
 import com.mojang.serialization.JsonOps;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import io.github.jimbozoomer.jugcraft.concordance.CrucibleBlockEntity;
+import io.github.jimbozoomer.jugcraft.concordance.CrucibleStandBlockEntity;
 import io.github.jimbozoomer.jugcraft.concordance.JugcraftConcordance;
+import io.github.jimbozoomer.jugcraft.concordance.RateGate;
 import io.github.jimbozoomer.jugcraft.concordance.Rituals;
 import io.github.jimbozoomer.jugcraft.concordance.Saved;
+import io.github.jimbozoomer.jugcraft.concordance.alchemy.Band;
+import io.github.jimbozoomer.jugcraft.concordance.alchemy.Formula;
+import io.github.jimbozoomer.jugcraft.concordance.alchemy.Heat;
 import io.github.jimbozoomer.jugcraft.concordance.courier.CourierLedger;
+import io.github.jimbozoomer.jugcraft.concordance.courier.CourierPostBlockEntity;
+import io.github.jimbozoomer.jugcraft.concordance.courier.Couriers;
+import io.github.jimbozoomer.jugcraft.concordance.ecology.Habitat;
+import io.github.jimbozoomer.jugcraft.concordance.ecology.Organism;
+import io.github.jimbozoomer.jugcraft.concordance.garden.Garden;
+import io.github.jimbozoomer.jugcraft.concordance.garden.VerdantBedBlockEntity;
 import io.github.jimbozoomer.jugcraft.concordance.resource.BoundWill;
 import io.github.jimbozoomer.jugcraft.concordance.rime.Rime;
 import io.github.jimbozoomer.jugcraft.concordance.rime.RimeGear;
@@ -30,6 +41,9 @@ import java.util.List;
 import java.util.UUID;
 import java.util.function.UnaryOperator;
 import net.fabricmc.fabric.api.gametest.v1.GameTest;
+import net.fabricmc.fabric.api.transfer.v1.fluid.FluidConstants;
+import net.fabricmc.fabric.api.transfer.v1.fluid.FluidVariant;
+import net.fabricmc.fabric.api.transfer.v1.transaction.Transaction;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -40,11 +54,14 @@ import net.minecraft.nbt.NbtOps;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.ProblemReporter;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.enchantment.Enchantments;
+import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.material.Fluids;
 import net.minecraft.world.level.storage.TagValueInput;
 
 /**
@@ -52,7 +69,9 @@ import net.minecraft.world.level.storage.TagValueInput;
  * Concordance saves in a world reads its own saves from before versions began, is written with its version, brings an
  * older version forward step by step and reads what it can of a newer one; a record keeps an entry it cannot read
  * exactly as written; block entities stamp their version; the crucible keeps Preserve's hold through a save (Concordance
- * Chunk B, unit 3); and the circle index looks only at the chunks in reach.
+ * Chunk B, unit 3); the Crucible Stand keeps its JE and setting (Concordance Chunk C, C-05); the crucible keeps its
+ * formula's setter and its courier request (C-06); the circle index looks only at the chunks in reach; and a Verdant
+ * Bed saved before harvest strain reads unstrained (C-08), and one saved before grafts ungrafted (C-09).
  */
 public class ConcordancePersistenceGameTests {
 	private static JsonElement json(String text) {
@@ -167,7 +186,7 @@ public class ConcordancePersistenceGameTests {
 
 	/**
 	 * A Concordance block entity's save carries its version, for a later format to read. The crucible's stays 1 with
-	 * Preserve's optional hold (Concordance Chunk B, unit 3).
+	 * Preserve's optional hold (Concordance Chunk B, unit 3); the Crucible Stand's is 1 (Concordance Chunk C, C-05).
 	 */
 	@GameTest(maxTicks = 20)
 	public void blockEntitiesStampTheirVersion(GameTestHelper helper) {
@@ -175,10 +194,12 @@ public class ConcordancePersistenceGameTests {
 		BlockPos pylon = new BlockPos(1, 1, 1);
 		BlockPos sconce = new BlockPos(3, 1, 1);
 		BlockPos crucible = new BlockPos(5, 1, 1);
+		BlockPos stand = new BlockPos(1, 1, 3);
 		helper.setBlock(pylon, JugcraftConcordance.LEY_PYLON);
 		helper.setBlock(sconce, JugcraftConcordance.LUMEN_SCONCE);
 		helper.setBlock(crucible, JugcraftConcordance.CRUCIBLE);
-		for (BlockPos at : List.of(pylon, sconce, crucible)) {
+		helper.setBlock(stand, JugcraftConcordance.CRUCIBLE_STAND);
+		for (BlockPos at : List.of(pylon, sconce, crucible, stand)) {
 			BlockEntity entity = level.getBlockEntity(helper.absolutePos(at));
 			CompoundTag saved = entity.saveWithoutMetadata(level.registryAccess());
 			helper.assertValueEqual(saved.getIntOr(Saved.VERSION, 0), 1, entity.getType() + " stamps its version");
@@ -288,8 +309,166 @@ public class ConcordancePersistenceGameTests {
 		helper.succeed();
 	}
 
+	/**
+	 * Concordance Chunk C, C-05: a stand saves its JE and setting, stamped 1, and reads them back exactly. An older save
+	 * without them, stamped or not, reads as an empty stand set off. A setting this build does not know reads as off, and JE
+	 * outside its store is brought within it. What it paid for last is never saved.
+	 */
+	@GameTest(maxTicks = 20)
+	public void theCrucibleStandKeepsItsEnergyAndSettingThroughASave(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		BlockPos at = new BlockPos(2, 1, 2);
+		helper.setBlock(at, JugcraftConcordance.CRUCIBLE_STAND);
+		CrucibleStandBlockEntity stand = helper.getBlockEntity(at, CrucibleStandBlockEntity.class);
+		ServerPlayer player = TestPlayers.mock(helper);
+		player.setGameMode(GameType.SURVIVAL);
+		for (int i = 0; i < 2; i++) {
+			RateGate.forget(player.getUUID());
+			stand.useEmpty(player, false);
+		}
+		stand.energy.setAmount(300);
+		CompoundTag saved = stand.saveWithoutMetadata(level.registryAccess());
+		helper.assertTrue(saved.getIntOr(Saved.VERSION, 0) == 1 && saved.getLongOr("energy", -1L) == 300L && "hot".equals(saved.getStringOr("setting", ""))
+				&& !saved.contains("given"), "Saved: its JE and setting, at version 1: " + saved);
+		CrucibleStandBlockEntity read = loadStand(level, stand, saved);
+		helper.assertTrue(read.energy.getAmount() == 300 && read.setting() == Band.HOT && read.given() == Heat.AMBIENT, "Read back exactly");
+		CompoundTag unversioned = saved.copy();
+		unversioned.remove(Saved.VERSION);
+		helper.assertTrue(loadStand(level, stand, unversioned).energy.getAmount() == 300 && loadStand(level, stand, unversioned).setting() == Band.HOT,
+				"An unstamped save reads the same");
+		CrucibleStandBlockEntity older = loadStand(level, stand, new CompoundTag());
+		helper.assertTrue(older.energy.getAmount() == 0 && older.setting() == Band.COLD, "A save without them reads as empty and off");
+		CompoundTag forged = saved.copy();
+		forged.putLong("energy", 1_000_000L);
+		forged.putString("setting", "boiling");
+		CrucibleStandBlockEntity odd = loadStand(level, stand, forged);
+		helper.assertTrue(odd.energy.getAmount() == CrucibleStandBlockEntity.CAPACITY && odd.setting() == Band.COLD,
+				"JE beyond its store is cut to it; an unknown setting is off");
+		forged.putLong("energy", -5L);
+		helper.assertTrue(loadStand(level, stand, forged).energy.getAmount() == 0, "Negative JE reads as none");
+		helper.succeed();
+	}
+
+	/**
+	 * Concordance Chunk C, C-06: a crucible saves its formula's setter and its open courier request, stamped 1, and reads
+	 * them back exactly. A save from before (stamped or not) reads as nobody's formula with no request, its formula and
+	 * step kept; a request numbered 0 reads as none; a crucible with no formula writes neither key; broken, its request
+	 * goes with it.
+	 */
+	@GameTest(maxTicks = 20)
+	public void theCrucibleKeepsItsRequestThroughASave(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		String twoGlow = "water 2; add minecraft:glowstone_dust jugcraft:raw; add minecraft:glowstone_dust jugcraft:raw; stir hot; stir hot";
+		// The setter is here: a crucible files only while its setter answers (C-P53).
+		ServerPlayer setter = TestPlayers.mock(helper);
+		UUID owner = setter.getUUID();
+		BlockPos postAt = new BlockPos(4, 2, 2);
+		helper.setBlock(postAt, Couriers.COURIER_POST);
+		helper.getBlockEntity(postAt, CourierPostBlockEntity.class).setOwner(owner);
+		BlockPos relative = new BlockPos(2, 2, 2);
+		helper.setBlock(relative.below(), Blocks.STONE);
+		helper.setBlock(relative, JugcraftConcordance.CRUCIBLE);
+		CrucibleBlockEntity crucible = helper.getBlockEntity(relative, CrucibleBlockEntity.class);
+		crucible.follow(Formula.parse(twoGlow), owner);
+		try (Transaction transaction = Transaction.openOuter()) {
+			crucible.water.insert(FluidVariant.of(Fluids.WATER), 2 * FluidConstants.BOTTLE, transaction);
+			transaction.commit();
+		}
+		crucible.automate(level);
+		crucible.automate(level);
+		long id = crucible.request();
+		CourierLedger ledger = CourierLedger.of(level.getServer());
+		helper.assertTrue(id > 0L && ledger.ledger().get(id) != null && crucible.step() == 1, "It has asked a courier for its glowstone: request " + id);
+		CompoundTag saved = crucible.saveWithoutMetadata(level.registryAccess());
+		helper.assertTrue(saved.getIntOr(Saved.VERSION, 0) == 1 && saved.getLongOr(CrucibleBlockEntity.REQUEST, -1L) == id
+				&& saved.contains(CrucibleBlockEntity.FORMULA_OWNER), "Saved: its setter and request, still at version 1: " + saved);
+		CrucibleBlockEntity read = load(level, crucible, saved);
+		helper.assertTrue(owner.equals(read.formulaOwner()) && read.request() == id && read.step() == 1, "and read back exactly");
+		CompoundTag before = saved.copy();
+		before.remove(CrucibleBlockEntity.FORMULA_OWNER);
+		before.remove(CrucibleBlockEntity.REQUEST);
+		CompoundTag unversioned = before.copy();
+		unversioned.remove(Saved.VERSION);
+		for (CompoundTag legacy : List.of(before, unversioned)) {
+			CrucibleBlockEntity older = load(level, crucible, legacy);
+			helper.assertTrue(older.formulaOwner() == null && older.request() == -1L && older.program() != null
+					&& twoGlow.equals(older.program().text()) && older.step() == 1,
+					"A save from before reads as nobody's formula with no request, the formula and its step kept");
+		}
+		CompoundTag forged = saved.copy();
+		forged.putLong(CrucibleBlockEntity.REQUEST, 0L);
+		helper.assertTrue(load(level, crucible, forged).request() == -1L, "A request numbered 0 reads as none");
+		BlockPos freshAt = new BlockPos(6, 2, 2);
+		helper.setBlock(freshAt, JugcraftConcordance.CRUCIBLE);
+		CompoundTag fresh = helper.getBlockEntity(freshAt, CrucibleBlockEntity.class).saveWithoutMetadata(level.registryAccess());
+		helper.assertTrue(!fresh.contains(CrucibleBlockEntity.FORMULA_OWNER) && !fresh.contains(CrucibleBlockEntity.REQUEST),
+				"A crucible with no formula writes neither key: " + fresh);
+		helper.setBlock(relative, Blocks.AIR);
+		helper.assertTrue(ledger.ledger().get(id) == null, "Broken, its request goes with it");
+		helper.succeed();
+	}
+
+	/**
+	 * Concordance Chunk C (C-08): a Verdant Bed saved before harvest strain, with or without its version, reads unstrained and
+	 * unripened and keeps the rest; a strain from a save beyond its cap is held to it; the bed's version stays 1. (C-09) A
+	 * graft is saved, never its host, still at version 1; a bed saved before grafts reads ungrafted and saves no graft.
+	 */
+	@GameTest(maxTicks = 20)
+	public void anOlderBedLoadsWithoutItsNewKeys(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		BlockPos relative = new BlockPos(2, 1, 2);
+		helper.setBlock(relative, Garden.VERDANT_BED);
+		VerdantBedBlockEntity bed = (VerdantBedBlockEntity) level.getBlockEntity(helper.absolutePos(relative));
+		UUID keeper = new UUID(30L, 8L);
+		bed.awaken(keeper);
+		bed.setNutrients(17);
+		bed.setStrain(2);
+		CompoundTag saved = bed.saveWithoutMetadata(level.registryAccess());
+		helper.assertTrue(saved.getIntOr(Saved.VERSION, 0) == 1 && saved.getIntOr(VerdantBedBlockEntity.STRAIN, 0) == 2,
+				"The strain is saved, still at version 1: " + saved);
+		CompoundTag before = saved.copy();
+		before.remove(VerdantBedBlockEntity.STRAIN);
+		before.remove(VerdantBedBlockEntity.RIPENED);
+		CompoundTag unversioned = before.copy();
+		unversioned.remove(Saved.VERSION);
+		for (CompoundTag legacy : List.of(before, unversioned)) {
+			VerdantBedBlockEntity read = loadBed(level, bed, legacy);
+			helper.assertTrue(read.strain() == 0 && !read.ripened() && read.nutrients() == 17 && read.awake() && keeper.equals(read.keeper()),
+					"A bed from before reads unstrained and keeps the rest: " + read.strain() + ", " + read.nutrients());
+		}
+		CompoundTag forged = saved.copy();
+		forged.putInt(VerdantBedBlockEntity.STRAIN, 99);
+		helper.assertTrue(loadBed(level, bed, forged).strain() == Habitat.MAX_STRAIN, "A strain past its cap is held to it");
+		forged.putInt(VerdantBedBlockEntity.STRAIN, -4);
+		helper.assertTrue(loadBed(level, bed, forged).strain() == 0, "and one below none reads as none");
+		bed.setGraft("jugcraft:dewlit");
+		CompoundTag grafted = bed.saveWithoutMetadata(level.registryAccess());
+		helper.assertTrue(grafted.getStringOr(VerdantBedBlockEntity.GRAFT, "").equals("jugcraft:dewlit") && !grafted.contains(VerdantBedBlockEntity.GRAFT_HOST)
+				&& grafted.getIntOr(Saved.VERSION, 0) == 1, "The graft is saved, never its host, still at version 1: " + grafted);
+		CompoundTag older = grafted.copy();
+		older.remove(VerdantBedBlockEntity.GRAFT);
+		Organism petal = Garden.catalog().organism("jugcraft:sunpetal");
+		VerdantBedBlockEntity read = loadBed(level, bed, older);
+		helper.assertTrue(petal != null && read.graft().isEmpty() && read.niche(petal).equals(petal.niche()) && read.nutrients() == 17,
+				"A bed from before grafts reads ungrafted");
+		helper.assertTrue(!read.saveWithoutMetadata(level.registryAccess()).contains(VerdantBedBlockEntity.GRAFT), "and saves no graft");
+		helper.succeed();
+	}
+
+	private static VerdantBedBlockEntity loadBed(ServerLevel level, VerdantBedBlockEntity like, CompoundTag saved) {
+		VerdantBedBlockEntity copy = new VerdantBedBlockEntity(like.getBlockPos(), like.getBlockState());
+		copy.loadWithComponents(TagValueInput.create(ProblemReporter.DISCARDING, level.registryAccess(), saved));
+		return copy;
+	}
+
 	private static CrucibleBlockEntity load(ServerLevel level, CrucibleBlockEntity like, CompoundTag saved) {
 		CrucibleBlockEntity copy = new CrucibleBlockEntity(like.getBlockPos(), like.getBlockState());
+		copy.loadWithComponents(TagValueInput.create(ProblemReporter.DISCARDING, level.registryAccess(), saved));
+		return copy;
+	}
+
+	private static CrucibleStandBlockEntity loadStand(ServerLevel level, CrucibleStandBlockEntity like, CompoundTag saved) {
+		CrucibleStandBlockEntity copy = new CrucibleStandBlockEntity(like.getBlockPos(), like.getBlockState());
 		copy.loadWithComponents(TagValueInput.create(ProblemReporter.DISCARDING, level.registryAccess(), saved));
 		return copy;
 	}
