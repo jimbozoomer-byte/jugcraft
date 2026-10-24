@@ -78,6 +78,9 @@ WEIGHTS = {
     # subtitles listened for at the refusal and the acceptance, the answers' marks and Jade's two shots, about 30 s more;
     # estimates.
     "ConcordancePactClientGameTests": 230,
+    # Concordance Chunk D unit 3 (D-07): a dedicated server's start, the roster walked by keyboard (suspend and resume, an
+    # end asked first, a recovery and a cancel), 64 rows paged, and ten shots at three sizes: an estimate, not a measurement.
+    "ConcordanceRosterClientGameTests": 140,
     "JugcraftServerClientGameTests": 90,
     # Companion suites exercise timed AI, inventory trips and cooking, not just
     # showrooms. Allow CI headroom over the focused local runtime measurements.

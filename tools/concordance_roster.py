@@ -104,6 +104,79 @@ JOURNAL = {
 }
 
 
+# ------------------------------------------------------------------------------------- D-07: the roster screen's words
+# A row's state word beside its mark, keyed by ICONS (Java: client/RosterScreen.stateWord; check_roster_screen).
+STATES = {
+    "active": "At work",
+    "waiting": "Waiting",
+    "suspended": "Suspended",
+    "upkeep": "Upkeep",
+    "unloaded": "Not loaded",
+    "lost": "Lost",
+    "without_place": "Without its place",
+    "unclaimed": "Not yet claimed",
+    "in_transit": "In transit",
+    "stranded": "Stranded",
+    "returning": "Going back",
+    "disabled": "Switched off",
+}
+ROWS_PER_PAGE = 8  # client/RosterScreen.ROWS_PER_PAGE
+REFRESH_TICKS = 40  # client/RosterClient.REFRESH_TICKS
+
+CLIENT = {
+    "key.jugcraft.concordance_roster": "Concordance Roster",
+    "screen.jugcraft.roster.title": "Roster",
+    "screen.jugcraft.roster.page": "Page %s of %s · %s listed",
+    "screen.jugcraft.roster.opening": "Reading your roster...",
+    "screen.jugcraft.roster.unavailable": "This server keeps no roster: the Arcane Concordance is not on it.",
+    "screen.jugcraft.roster.disabled": "The Concordance is switched off on this server: your roster is shown, and nothing can be done from it.",
+    "screen.jugcraft.roster.empty": "Nothing is on your roster yet: no pact, agreement, familiar, spirit, construct or courier request of yours.",
+    "screen.jugcraft.roster.empty.hint": "Bond a Hearthling, seal a Spirit Anchor or a pact, or file a request at a Courier Post, "
+                                         "and it is listed here.",
+    "screen.jugcraft.roster.more": "%s more are not listed: the roster shows at most %s. The journal, and the workers and logistics "
+                                   "commands, list them all.",
+    "screen.jugcraft.roster.waiting": "Asking the server...",
+    "screen.jugcraft.roster.row.title": "%s · %s",
+    "screen.jugcraft.roster.row.state": "%s: %s",
+    "screen.jugcraft.roster.row.loaded": "%s (loaded)",
+    "screen.jugcraft.roster.row.unloaded": "%s (not loaded: as it last reported)",
+    "screen.jugcraft.roster.row.task": "Now: %s",
+    "screen.jugcraft.roster.row.obligation": "Next: %s",
+    "screen.jugcraft.roster.row.usage": "Its actions follow it: Tab moves to them",
+    "screen.jugcraft.roster.row.usage.none": "Nothing to do for it from the roster",
+    "screen.jugcraft.roster.suspend": "Suspend",
+    "screen.jugcraft.roster.suspend.hint": "%s: its service stops; nothing is taken and nothing is lost",
+    "screen.jugcraft.roster.resume": "Resume",
+    "screen.jugcraft.roster.resume.hint": "%s: its service starts again",
+    "screen.jugcraft.roster.end": "End...",
+    "screen.jugcraft.roster.end.hint": "%s: asks first; then it leaves, and anything held for it comes back to you once",
+    "screen.jugcraft.roster.end.title": "End the agreement with %s?",
+    "screen.jugcraft.roster.end.confirm": "%s (%s) leaves, and anything held for it comes back to you once. This cannot be undone.",
+    "screen.jugcraft.roster.end.yes": "End it",
+    "screen.jugcraft.roster.end.no": "Keep it",
+    "screen.jugcraft.roster.cancel": "Cancel",
+    "screen.jugcraft.roster.cancel.hint": "%s: closes the request, or first sends what is carried back where it came from",
+    "screen.jugcraft.roster.recover": "Recover",
+    "screen.jugcraft.roster.recover.hint": "%s: the stranded items come to your inventory, once",
+    "screen.jugcraft.roster.previous": "Previous",
+    "screen.jugcraft.roster.previous.hint": "The roster's previous page (Page Up)",
+    "screen.jugcraft.roster.next": "Next",
+    "screen.jugcraft.roster.next.hint": "The roster's next page (Page Down)",
+    "screen.jugcraft.roster.refresh": "Refresh",
+    "screen.jugcraft.roster.refresh.hint": "Asks the server for your roster again",
+    "screen.jugcraft.roster.close": "Close",
+    "screen.jugcraft.roster.help": "Tab and Shift+Tab move between entries and their actions; Enter or Space presses; Page Up "
+                                   "and Page Down turn the page; Esc closes. Ending asks first.",
+}
+# What ConcordanceRosterClientGameTests photographs (check_roster_screen).
+CLIENT_SHOTS = ["jugcraft_roster_empty", "jugcraft_roster", "jugcraft_roster_scale4", "jugcraft_roster_small",
+                "jugcraft_roster_suspended", "jugcraft_roster_end_confirm", "jugcraft_roster_ended", "jugcraft_roster_recovered",
+                "jugcraft_roster_full", "jugcraft_roster_full_small"]
+
+
 def lang_entries(lang):
-    """The journal's pacts lines (the MESSAGES go through tools/concordance.py's MESSAGES)."""
+    """The journal's pacts lines, the roster screen's words and its key's name (MESSAGES go through tools/concordance.py's)."""
     lang.update(JOURNAL)
+    lang.update(CLIENT)
+    for state, word in STATES.items():
+        lang[f"screen.{MOD}.roster.state.{state}"] = word

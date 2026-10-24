@@ -67,6 +67,13 @@ class ClientTestSelectionTests(unittest.TestCase):
         chosen, _ = selection.select(["src/main/resources/assets/jugcraft/textures/entity/stolas_glowmask.png"], self.tests, set())
         self.assertIn("ConcordancePactClientGameTests", chosen)
 
+    def test_roster_screen_selects_the_roster_client_test(self):
+        # Concordance Chunk D unit 3 (D-07): the roster screen is shown by its own client class and by the screen fit check.
+        chosen, _ = selection.select(["src/client/java/io/github/jimbozoomer/jugcraft/client/RosterScreen.java"], self.tests, set())
+        self.assertIn("ConcordanceRosterClientGameTests", chosen)
+        self.assertIn("ScreenFitClientGameTests", chosen)
+        self.assertIn("ConcordanceRosterClientGameTests", selection.WEIGHTS)
+
     def test_workflow_runs_every_selected_shard(self):
         workflow = (ROOT / ".github/workflows/build.yml").read_text()
         matrix = re.search(r"shard: \[([\d, ]+)\]", workflow)

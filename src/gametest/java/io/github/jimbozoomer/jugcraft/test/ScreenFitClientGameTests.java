@@ -21,6 +21,7 @@ import io.github.jimbozoomer.jugcraft.client.ProspectorScreen;
 import io.github.jimbozoomer.jugcraft.client.ReactorConsoleScreen;
 import io.github.jimbozoomer.jugcraft.client.RemoteShutdownScreen;
 import io.github.jimbozoomer.jugcraft.client.RocketPadScreen;
+import io.github.jimbozoomer.jugcraft.client.RosterScreen;
 import io.github.jimbozoomer.jugcraft.client.ScreenKit;
 import io.github.jimbozoomer.jugcraft.client.StorageTankScreen;
 import io.github.jimbozoomer.jugcraft.client.TowerScreen;
@@ -55,8 +56,9 @@ import net.minecraft.world.entity.player.Inventory;
  * Every machine screen fits the smallest GUI Minecraft's automatic scale gives: a 640 x 480 window at scale 2, which is
  * 320 x 240 GUI pixels (docs/features/screen-fit-check.md). With the window at that size it opens every machine kind's
  * screen, every form's, a form's recipe page and the other machine screens, on stand-in menus (no block or server round
- * trip: only their size and layout are judged here; other tests show them working) and the workshop benches, checks that each one's panel
- * ({@link ScreenKit.Fitted}) lies inside the window, and photographs a few at that size. Then it puts the window back.
+ * trip: only their size and layout are judged here; other tests show them working), the workshop benches and the Concordance's
+ * roster, checks that each one's panel ({@link ScreenKit.Fitted}) lies inside the window, and photographs a few at that
+ * size. Then it puts the window back.
  */
 public class ScreenFitClientGameTests implements FabricClientGameTest {
 	/** The window Fabric's client game tests run in, put back afterwards. */
@@ -147,6 +149,8 @@ public class ScreenFitClientGameTests implements FabricClientGameTest {
 						Component.empty()));
 				check(context, faults, "carving knife", "carving", inventory -> new CarvingScreen(new OpenCarvingPayload(BlockPos.ZERO, Direction.NORTH,
 						new CarvingFace.Sized(PumpkinCarving.SIZE, CarvingTemplates.ALL.getFirst().face().clone()), true, Optional.empty())));
+				// The Concordance's roster (Concordance Chunk D, D-07), before its first state: only its size and layout.
+				check(context, faults, "Concordance roster", "concordance_roster", inventory -> new RosterScreen());
 			} finally {
 				context.runOnClient(client -> {
 					client.player.containerMenu = client.player.inventoryMenu;

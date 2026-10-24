@@ -14294,6 +14294,7 @@ def check_concordance(registered):
     check_stolas_regard(co, root, lang, research)
     check_pact_screen(co, lang)
     check_stolas_body(co)
+    check_roster_screen(co, lang)
     check_logistics(co, root, lang, registered)
     check_hand(co, root, lang, research)
     check_crucible_supply(co, root)
@@ -18867,6 +18868,85 @@ def check_stolas_body(co):
     for needle in ("StolasEntity.Gesture.ARRIVE.animation.equals(", "StolasEntity.Gesture.DEPART.animation.equals("):
         if needle not in shots:
             err(f"ConcordancePactClientGameTests: his real arrival and departure play their gestures ({needle})")
+
+
+def check_roster_screen(co, lang):
+    """Concordance Chunk D, D-07 client (D-S11; D-S21): the roster screen. Only RosterClient sends a roster request: four
+    numbers naming a listed row and its revision; answers are read aloud; its key is not bound at first and opens from the
+    game only. The screen is native, narrated and in-game (subtitles over it; no text box, chat, command, vanilla Dialog or
+    literal words), fits the smallest GUI (ScreenKit.Fitted; the screen fit check opens it), pages with Page Up and Down,
+    ends only from a confirmation whose keyboard starts on Keep it, marks each answer (PactScreen.Verdict) and draws a mark
+    of its own for every icon the payload names, beside its words. Every state and action has its words. The client class
+    that shows it is registered and takes its pictures."""
+    ro = co.roster
+
+    def text(path):
+        return path.read_text(encoding="utf-8") if path.exists() else ""
+    spirits = JAVA_ROOT / "concordance" / "spirits"
+    icons = re.search(r'List<String> ICONS = List\.of\(([^)]*)\)', text(spirits / "RosterStatePayload.java"))
+    if not icons or re.findall(r'"([a-z_]+)"', icons.group(1)) != list(ro.STATES):
+        err("tools/concordance_roster.py STATES: a word for each of RosterStatePayload.ICONS, in its order (append only)")
+    client = text(CLIENT_JAVA_ROOT / "RosterClient.java")
+    screen = text(CLIENT_JAVA_ROOT / "RosterScreen.java")
+    if "RosterClient.register();" not in text(CLIENT_JAVA_ROOT / "ConcordanceClient.java"):
+        err("client/ConcordanceClient.java: registers RosterClient (the roster's key and state)")
+    for path in sorted(CLIENT_JAVA_ROOT.rglob("*.java")):
+        # A qualified name is a request too (new io.github...RosterRequestPayload(...)).
+        if path.name != "RosterClient.java" and re.search(r"\bnew\s+(?:[\w.]+\.)?RosterRequestPayload\s*\(", text(path)):
+            err(f"client/{path.name}: only RosterClient sends a roster request (D-07)")
+    for needle in ('new KeyMapping("key.jugcraft.concordance_roster", InputConstants.UNKNOWN.getValue(), PartyClient.CATEGORY)',
+                   "client.gui.screen() == null && client.player != null",
+                   "new RosterRequestPayload(sequence, action, row, revision)",
+                   "getNarrator().saySystemNow(answer.message())", f"REFRESH_TICKS = {ro.REFRESH_TICKS};"):
+        if needle not in client:
+            err(f"client/RosterClient.java: its key is not bound at first and opens from the game only; a request names a listed row "
+                f"and its revision; answers are read aloud; it asks again every REFRESH_TICKS ({needle})")
+    for forbidden in ("new EditBox(", "sendCommand(", "sendChat(", "server.dialog", "Component.literal("):
+        if forbidden in screen + client:
+            err(f"roster screen: native, command-free, its words the generator's (D-S21): no {forbidden}")
+    for needle in ("implements ScreenKit.Fitted", "public ScreenRectangle panelArea()", "BookArt.Paragraph", "BookArt.Tab",
+                   "new ComposerScroll(", "protected Component getUsageNarration()", "InventoryScreen.extractEntityInInventoryFollowsMouse(",
+                   f"ROWS_PER_PAGE = {ro.ROWS_PER_PAGE};", "InputConstants.KEY_PAGEDOWN", "InputConstants.KEY_PAGEUP",
+                   "minecraft.gui.hud.extractDeferredSubtitles()", "public boolean isInGameUi()", "new PactScreen.Verdict("):
+        if needle not in screen:
+            err(f"client/RosterScreen.java: a native, narrated, in-game, paged screen that fits the smallest GUI, draws portraits, "
+                f"marks its answers and keeps subtitles ({needle})")
+    act = _java_body(screen, "private void act(")
+    confirm = _java_body(screen, "private void confirmEnd(")
+    if "if (action == RosterRequestPayload.END) {\n\t\t\tconfirmEnd(row);" not in act \
+            or "new KeepFirstConfirmScreen(" not in confirm or "RosterClient.request(RosterRequestPayload.END, row.id(), row.revision())" not in confirm \
+            or screen.count("RosterRequestPayload.END, row.id(), row.revision())") != 1:
+        err("client/RosterScreen.java: an agreement is ended only from its confirmation's yes, the keyboard starting on Keep it")
+    marks = _java_body(screen, "static void mark(")
+    for name in ro.ICONS:
+        if f"case RosterStatePayload.{name.upper()}" not in marks:
+            err(f"client/RosterScreen.java mark: the icon {name} has a mark of its own beside its words (never colour alone)")
+    for key in re.findall(r'"((?:screen|key|message)\.jugcraft\.[a-z_.]+)"', screen + client):
+        if not key.endswith(".") and key not in lang:
+            err(f"roster screen: missing lang {key}")
+    for key in re.findall(r'\bui\("([a-z_.]+)"', screen):
+        if f"screen.{MOD}.roster.{key}" not in lang:
+            err(f"client/RosterScreen.java: missing lang screen.{MOD}.roster.{key}")
+    for action in ro.ACTIONS[1:]:
+        for suffix in ("", ".hint"):
+            if f"screen.{MOD}.roster.{action}{suffix}" not in lang:
+                err(f"roster screen: missing lang screen.{MOD}.roster.{action}{suffix}")
+    for state in ro.STATES:
+        if f"screen.{MOD}.roster.state.{state}" not in lang:
+            err(f"roster screen: missing lang screen.{MOD}.roster.state.{state}")
+    if "key.jugcraft.concordance_roster" not in lang:
+        err("roster screen: missing lang key.jugcraft.concordance_roster")
+    tests = ROOT / "src" / "gametest" / "java" / "io" / "github" / "jimbozoomer" / "jugcraft" / "test"
+    if "new RosterScreen()" not in text(tests / "ScreenFitClientGameTests.java"):
+        err("ScreenFitClientGameTests: the roster is checked at the smallest GUI (ScreenKit.Fitted)")
+    entry = "io.github.jimbozoomer.jugcraft.test.ConcordanceRosterClientGameTests"
+    mod = load(ROOT / "src" / "gametest" / "resources" / "fabric.mod.json") or {}
+    if entry not in mod.get("entrypoints", {}).get("fabric-client-gametest", []):
+        err(f"src/gametest/resources/fabric.mod.json: {entry} is a registered client game test")
+    shots = text(tests / "ConcordanceRosterClientGameTests.java")
+    for name in ro.CLIENT_SHOTS:
+        if f'"{name}"' not in shots:
+            err(f"ConcordanceRosterClientGameTests: takes {name}")
 
 
 def check_logistics(co, root, lang, registered):
