@@ -32,7 +32,7 @@ public final class JimtaRobotGameTests {
     private static WorkshopRobot robot(GameTestHelper h,ServerPlayer p,String program){
         var r=WorkshopRobots.TYPE.create(h.getLevel(),EntitySpawnReason.SPAWN_ITEM_USE);
         var home=h.absolutePos(new BlockPos(2,1,2));r.configure(p.getUUID(),home);r.program(program);r.snapTo(Vec3.atCenterOf(home.above()));
-        p.setItemInHand(InteractionHand.MAIN_HAND,new ItemStack(Items.REDSTONE));r.interact(p,InteractionHand.MAIN_HAND);
+        p.setItemInHand(InteractionHand.MAIN_HAND,new ItemStack(Items.REDSTONE));r.interact(p,InteractionHand.MAIN_HAND,net.minecraft.world.phys.Vec3.ZERO);
         h.assertTrue(r.energy()==1000&&p.getMainHandItem().isEmpty(),"One starter redstone consumed for finite charge");return r;
     }
     private static void ticks(WorkshopRobot r,int count){for(int i=0;i<count;i++)r.tick();}

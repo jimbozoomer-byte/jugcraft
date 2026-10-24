@@ -24,6 +24,7 @@ def load(path):
 
 def registry_ref(value,kind='item'):
     if not isinstance(value,str):return value
+    if value=='minecraft:chain':return 'minecraft:iron_chain'
     if value.startswith('#'):return '#'+registry_ref(value[1:],'tag')
     if not value.startswith('irons_spellbooks:'):return value
     name=value.split(':',1)[1]

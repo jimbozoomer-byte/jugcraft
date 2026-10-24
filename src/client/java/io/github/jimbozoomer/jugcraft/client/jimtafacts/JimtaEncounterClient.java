@@ -40,7 +40,7 @@ public final class JimtaEncounterClient {
             var facing=e.getForward().multiply(1,0,1).normalize();var momentum=e.getDeltaMovement().multiply(1,0,1).normalize();s.addGeckolibData(FORWARD,(float)facing.dot(momentum));s.addGeckolibData(SIDE,(float)new Vec3(-facing.z,0,facing.x).dot(momentum)*.35F);
             if(e instanceof JimtaEncounterCreatures.IceSpider ice){s.addGeckolibData(CROUCH,ice.crouch(partial));s.addGeckolibData(NORMAL,ice.lastNormal.lerp(ice.normal,partial));}else if(e instanceof JimtaEncounterCreatures.Keeper k)s.addGeckolibData(RESTORED,k.restored());
         }
-        @Override public void adjustRenderPose(RenderPassInfo<EntityRenderState> info){super.adjustRenderPose(info);if(spider){var n=info.getOrDefaultGeckolibData(NORMAL,new Vec3(0,1,0));info.poseStack().mulPose(new org.joml.Quaternionf().rotationTo(0,1,0,(float)n.x,(float)n.y,(float)n.z));}}
+        @Override public void adjustRenderPose(RenderPassInfo<EntityRenderState> info){super.adjustRenderPose(info);if(spider){var n=info.getOrDefaultGeckolibData(NORMAL,new Vec3(0,1,0));info.poseStack().rotate(new org.joml.Quaternionf().rotationTo(0,1,0,(float)n.x,(float)n.y,(float)n.z));}}
         @Override public void adjustModelBonesForRender(RenderPassInfo<EntityRenderState> info,BoneSnapshots bones){
             super.adjustModelBonesForRender(info,bones);float swing=info.getOrDefaultGeckolibData(WALK,0F),speed=info.getOrDefaultGeckolibData(SPEED,0F),yaw=info.getOrDefaultGeckolibData(YAW,0F),pitch=info.getOrDefaultGeckolibData(PITCH,0F),age=info.getOrDefaultGeckolibData(AGE,0F);
             bones.ifPresent("head",p->{p.setRotX(p.getRotX()-pitch);p.setRotY(p.getRotY()-yaw);});

@@ -9,7 +9,7 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.material.Fluids;
 
 public final class JimtaCivilGameTests {
-    private CivilWorkshops.Node node(GameTestHelper h,String kind){var p=new BlockPos(2,2,2);h.setBlock(p,CivilWorkshops.BLOCKS.get(kind));return (CivilWorkshops.Node)h.getBlockEntity(p);}
+    private CivilWorkshops.Node node(GameTestHelper h,String kind){var p=new BlockPos(2,2,2);h.setBlock(p,CivilWorkshops.BLOCKS.get(kind));return h.getBlockEntity(p, CivilWorkshops.Node.class);}
     @GameTest public void quarryChecksClaimAndOutputCapacityBeforeConsumingPowerOrTool(GameTestHelper h){var p=JimtaRobotGameTests.player(h);try{
         var n=node(h,"quarry");n.owner=p.getUUID();var at=new BlockPos(3,2,2);h.setBlock(at,Blocks.STONE);n.setArea(h.absolutePos(at),h.absolutePos(at));n.running=true;n.energy.setAmount(1000);n.setItem(0,new ItemStack(Items.IRON_PICKAXE));
         try(var claim=TestClaims.open().block(h.absolutePos(at),UUID.randomUUID())){n.step(h.getLevel());h.assertTrue(h.getBlockState(at).is(Blocks.STONE)&&n.energy.getAmount()==1000&&n.cursor==0,"Protected work waits without advancing or consuming");}

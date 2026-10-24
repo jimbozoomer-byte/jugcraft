@@ -7,9 +7,9 @@
     "ICI"
   ],
   "key": {
-    "I": "minecraft:iron_ingot",
     "L": "jugcraft:jimta_logic_processor",
     "C": "jugcraft:jimta_fluix_glass_cable",
+    "I": "minecraft:iron_ingot",
     "H": "minecraft:furnace",
     "F": "jugcraft:jimta_fluix_crystal"
   },

@@ -57,7 +57,7 @@ def generate(shared=True):
  recipes['recover_plutonium']={'type':'jugcraft:jimta_thermal_centrifuging','ingredient':'jugcraft:spent_fuel_assembly','input_count':9,'result':{'id':'jugcraft:jimta_plutonium_pellet','count':1},'byproducts':[{'result':{'id':'jugcraft:uranium_dust','count':4},'chance':1}],'minimum_heat':2000,'time':2400}
  for id,p in PARTS.items():
   if p['kind'] in ('uranium','mox','spent','plutonium','isotope','empty','rtg'):continue
-  if id=='jimta_lithium_cell':parts=['jugcraft:lithium_ingot','jugcraft:jimta_empty_fuel_rod']
+  if id=='jimta_lithium_cell':parts=['jugcraft:lithium_carbonate','jugcraft:jimta_empty_fuel_rod']
   elif p['kind']=='coolant':parts=['jugcraft:tin_plate']*(p['capacity']//10000)+['minecraft:water_bucket']
   elif p['kind']=='plating':parts=['jugcraft:lead_plate','jugcraft:steel_plate']+(['jugcraft:copper_plate'] if p['plating']==2000 else ['minecraft:obsidian'] if p['plating']==500 else [])
   elif p['kind']=='reflector':parts=['jugcraft:tin_plate','jugcraft:copper_plate','jugcraft:jimta_coal_dust']*(2 if p['life']>10000 else 1)
@@ -69,6 +69,7 @@ def generate(shared=True):
  craft('isotope_check_source',['jugcraft:jimta_tritium_cell','jugcraft:lead_plate'],'check_source')
  for name,value in recipes.items():dump(RES/f'data/jugcraft/recipe/jimtafacts_reactor/{name}.json',value)
  dump(RES/'data/jugcraft/tags/block/jimtafacts_reactor.json',{'replace':False,'values':['jugcraft:'+id for id in sorted(BLOCKS)]})
+ lang['item.jugcraft.jimta_lithium_cell']='Reactor Lithium Cell'
  if shared:
   path=RES/'assets/jugcraft/lang/en_us.json';value=json.loads(path.read_text(encoding='utf-8'));value.update(lang);dump(path,value)
   for tag in ('mineable/pickaxe','needs_iron_tool'):

@@ -11,7 +11,7 @@ import net.minecraft.core.component.DataComponents;
 import net.minecraft.world.item.component.CustomData;
 
 public final class JimtaCropGameTests {
-    private static IndustrialCrops.Genes crop(GameTestHelper h,BlockPos p,String name,int age){h.setBlock(p.below(),Blocks.FARMLAND);h.setBlock(p,IndustrialCrops.CROPS.get(name).getStateForAge(age));return (IndustrialCrops.Genes)h.getBlockEntity(p);}
+    private static IndustrialCrops.Genes crop(GameTestHelper h,BlockPos p,String name,int age){h.setBlock(p.below(),Blocks.FARMLAND);h.setBlock(p,IndustrialCrops.CROPS.get(name).getStateForAge(age));return h.getBlockEntity(p, IndustrialCrops.Genes.class);}
     @GameTest public void metalPlantsRequireTheirActualNearbyOreAnchor(GameTestHelper h){
         var p=new BlockPos(2,4,2);crop(h,p,"ferru",6);var plant=IndustrialCrops.CROPS.get("ferru");
         h.assertTrue(!plant.canRipen(h.getLevel(),h.absolutePos(p)),"Metal crop cannot mature on plain soil");h.setBlock(p.below(2),Blocks.IRON_BLOCK);
@@ -27,7 +27,7 @@ public final class JimtaCropGameTests {
             try(var claims=TestClaims.open().block(h.absolutePos(center.north()),UUID.randomUUID())){
                 h.assertTrue(!IndustrialCrops.crossbreed(h.getLevel(),absolute,dest,RandomSource.create(1)),"Protected parent's genes cannot be used across claim boundary");}
             h.assertTrue(IndustrialCrops.crossbreed(h.getLevel(),absolute,dest,RandomSource.create(1)),"Authorized crossbreeding creates hops from wheat and reed");
-            h.assertTrue(h.getBlockState(center).is(IndustrialCrops.CROPS.get("hops")),"Explicit reachable breeding outcome");var child=(IndustrialCrops.Genes)h.getBlockEntity(center);
+            h.assertTrue(h.getBlockState(center).is(IndustrialCrops.CROPS.get("hops")),"Explicit reachable breeding outcome");var child=h.getBlockEntity(center, IndustrialCrops.Genes.class);
             h.assertTrue(child.growth<=31&&child.gain<=31&&child.resistance<=31&&player.getUUID().equals(child.owner),"Genes remain bounded and retain plot owner");
             var seed=IndustrialCrops.seed(IndustrialCrops.CROPS.get("hops"),child);var data=seed.getOrDefault(DataComponents.CUSTOM_DATA,CustomData.EMPTY).copyTag();
             h.assertTrue(data.getIntOr("Growth",-1)==child.growth&&data.getIntOr("Gain",-1)==child.gain,"Recovered seed bag carries real inherited genes");

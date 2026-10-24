@@ -30,7 +30,7 @@ public final class JimtaWardClient {
     private static final DataTicket<Float> WALK=DataTicket.create("jimta_scapegoat_walk",Float.class),SPEED=DataTicket.create("jimta_scapegoat_speed",Float.class);
     public static void register(){
         net.minecraft.client.renderer.blockentity.BlockEntityRenderers.register(JimtaPortalFrames.NODE,JimtaPortalFrameRenderer::new);
-        EntityModelLayerRegistry.registerModelLayer(SHIELD,()->shield(false));EntityModelLayerRegistry.registerModelLayer(TRIM,()->shield(true));
+        ModelLayerRegistry.registerModelLayer(SHIELD,()->shield(false));ModelLayerRegistry.registerModelLayer(TRIM,()->shield(true));
         JimtaWardEntity.TYPES.values().forEach(type->EntityRendererRegistry.register(type,WardRenderer::new));
         EntityRendererRegistry.register(JimtaScapegoat.TYPE,c->new GeoEntityRenderer<JimtaScapegoat,EntityRenderState>(c,new GeoModel<>(){
             @Override public Identifier getModelResource(GeoRenderState s){return Jugcraft.id("entity/jimtafacts/scapegoat");}
@@ -72,7 +72,7 @@ public final class JimtaWardClient {
             }pose.popPose();super.submit(s,pose,collector,camera);
         }
         private static void chain(WardState s,PoseStack pose,SubmitNodeCollector collector){
-            double length=s.chain.length();if(length<1e-4)return;Vec3 direction=s.chain.normalize();pose.mulPose(new org.joml.Quaternionf().rotationTo(0,0,1,(float)direction.x,(float)direction.y,(float)direction.z));
+            double length=s.chain.length();if(length<1e-4)return;Vec3 direction=s.chain.normalize();pose.rotate(new org.joml.Quaternionf().rotationTo(0,0,1,(float)direction.x,(float)direction.y,(float)direction.z));
             float start=(float)(length*(1-Math.clamp(s.time/3,0,1))),end=(float)length;
             collector.submitCustomGeometry(pose,RenderTypes.entityTranslucentEmissive(tex("entity/ender_chain")),(matrix,v)->{
                 for(int plane=0;plane<2;plane++)for(int side=0;side<2;side++){

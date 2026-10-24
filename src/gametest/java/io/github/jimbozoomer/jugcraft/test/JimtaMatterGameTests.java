@@ -6,7 +6,7 @@ import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.world.item.*;
 
 public final class JimtaMatterGameTests {
-    private MatterWorkshops.Node node(GameTestHelper h,String kind){var pos=new BlockPos(2,2,2);h.setBlock(pos,MatterWorkshops.BLOCKS.get(kind));return (MatterWorkshops.Node)h.getBlockEntity(pos);}
+    private MatterWorkshops.Node node(GameTestHelper h,String kind){var pos=new BlockPos(2,2,2);h.setBlock(pos,MatterWorkshops.BLOCKS.get(kind));return h.getBlockEntity(pos, MatterWorkshops.Node.class);}
     @GameTest public void scannerConsumesOneRealSampleAndBlankMemory(GameTestHelper h){
         var n=node(h,"matter_scanner");n.setItem(0,new ItemStack(Items.COBBLESTONE,2));n.setItem(1,new ItemStack(MatterWorkshops.MEMORY));n.energy.setAmount(10000);
         for(int i=0;i<10;i++)n.step(h.getLevel());

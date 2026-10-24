@@ -1885,6 +1885,9 @@ def main():
     language = json.loads((ASSETS / "lang/en_us.json").read_text(encoding="utf-8"))
     language.update(spellbook_language)
     write(ASSETS / "lang/en_us.json", language)
+    # Imported walls/fences are generated after the shared pass and need the same connections.
+    import diagonal_connections
+    diagonal_connections.write_all(write, ASSETS, RES / 'assets/minecraft')
     import walnut_data
     walnut_data.reconcile(write)
     from generated_resource_cleanup import prune

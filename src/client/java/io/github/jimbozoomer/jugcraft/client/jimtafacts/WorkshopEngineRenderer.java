@@ -43,7 +43,7 @@ public final class WorkshopEngineRenderer implements BlockEntityRenderer<Worksho
             float[][] points=switch(face){case NORTH->new float[][]{{X,Y,z},{X,y,z},{x,y,z},{x,Y,z}};case SOUTH->new float[][]{{x,Y,Z},{x,y,Z},{X,y,Z},{X,Y,Z}};
                 case WEST->new float[][]{{x,Y,z},{x,y,z},{x,y,Z},{x,Y,Z}};case EAST->new float[][]{{X,Y,Z},{X,y,Z},{X,y,z},{X,Y,z}};
                 case UP->new float[][]{{x,Y,z},{x,Y,Z},{X,Y,Z},{X,Y,z}};case DOWN->new float[][]{{x,y,Z},{x,y,z},{X,y,z},{X,y,Z}};};
-            out.submitCustomGeometry(pose,RenderTypes.entityCutoutNoCull(texture),(matrix,vertices)->{for(int i=0;i<4;i++)vertices.addVertex(matrix,points[i][0]/16,points[i][1]/16,points[i][2]/16).setColor(0xffffffff)
+            out.submitCustomGeometry(pose,RenderTypes.entityCutout(texture),(matrix,vertices)->{for(int i=0;i<4;i++)vertices.addVertex(matrix,points[i][0]/16,points[i][1]/16,points[i][2]/16).setColor(0xffffffff)
                 .setUv((i<2?uv[0]:uv[2])/16,(i==0||i==3?uv[1]:uv[3])/16).setOverlay(OverlayTexture.NO_OVERLAY).setLight(light).setNormal(matrix,face.getStepX(),face.getStepY(),face.getStepZ());});
         }
     }

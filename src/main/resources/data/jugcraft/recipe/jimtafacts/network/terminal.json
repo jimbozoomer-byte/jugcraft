@@ -10,8 +10,8 @@
     "G": "minecraft:glass",
     "L": "jugcraft:jimta_logic_processor",
     "C": "jugcraft:jimta_fluix_glass_cable",
-    "R": "minecraft:redstone",
-    "F": "jugcraft:jimta_fluix_crystal"
+    "F": "jugcraft:jimta_fluix_crystal",
+    "R": "minecraft:redstone"
   },
   "result": {
     "id": "jugcraft:jimta_terminal",

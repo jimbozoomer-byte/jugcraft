@@ -7,8 +7,8 @@
     "FQF"
   ],
   "key": {
-    "Q": "jugcraft:jimta_certus_quartz_crystal",
     "F": "jugcraft:jimta_fluix_crystal",
+    "Q": "jugcraft:jimta_certus_quartz_crystal",
     "R": "minecraft:redstone"
   },
   "result": {

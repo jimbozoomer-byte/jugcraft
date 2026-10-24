@@ -20,7 +20,7 @@ public final class JimtaWardGameTests {
         JimtaWardSpells.settleDebt(p);h.assertTrue(p.getHealth()==14,"Debt cannot be replayed");h.succeed();
     }
     @GameTest public void invisibilityClearsAndRejectsEnemyTargetThenReleases(GameTestHelper h){
-        var p=h.makeMockServerPlayerInLevel();var zombie=h.spawn(EntityType.ZOMBIE,2,2,2);zombie.setTarget(p);
+        var p=h.makeMockServerPlayerInLevel();var zombie=h.spawn(net.minecraft.world.entity.EntityTypes.ZOMBIE,2,2,2);zombie.setTarget(p);
         JimtaWardSpells.trueInvisibility(p,200);h.assertTrue(zombie.getTarget()==null&&JimtaWardSpells.concealed(p),"Caster and equipment are concealed, target cleared");
         zombie.setTarget(p);h.assertTrue(zombie.getTarget()==null,"A target cannot be immediately reacquired");
         p.removeEffect(JimtaWardSpells.EFFECTS.get("true_invisibility"));JimtaWardSpells.refreshConcealment(p);zombie.setTarget(p);
@@ -34,7 +34,7 @@ public final class JimtaWardGameTests {
         e.setYRot(90);h.assertTrue(e.intersects(center.add(-2,0,0),center.add(2,0,0)),"Yaw rotates the blocking plane");h.succeed();
     }
     @GameTest public void telekinesisRefusesPartyAndProtectedTargets(GameTestHelper h){
-        var p=h.makeMockServerPlayerInLevel();var animal=h.spawn(EntityType.COW,2,2,2);
+        var p=h.makeMockServerPlayerInLevel();var animal=h.spawn(net.minecraft.world.entity.EntityTypes.COW,2,2,2);
         var protectedClaim=TestClaims.open().block(animal.blockPosition(),java.util.UUID.randomUUID());
         try{h.assertTrue(!JimtaWardSpells.permitted(p,animal),"Protected occupants cannot be forcibly moved");}finally{protectedClaim.close();}
         h.assertTrue(!JimtaWardSpells.permitted(p,p),"Caster is not a hostile target");h.succeed();

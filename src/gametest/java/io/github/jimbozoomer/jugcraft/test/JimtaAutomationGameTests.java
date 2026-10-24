@@ -32,7 +32,7 @@ public final class JimtaAutomationGameTests {
             h.assertTrue(!io.github.jimbozoomer.jugcraft.jimtafacts.industry.IndustrialGateCopier.valid(new int[]{1,16,0,50,0,1}),"Invalid channel is rejected");
             var a=new BlockPos(2,2,2);var b=new BlockPos(3,2,2);
             h.setBlock(a,IndustrialAutomation.BLOCKS.get("jimta_gate_gold_and"));h.setBlock(b,IndustrialAutomation.BLOCKS.get("jimta_gate_gold_and"));
-            var source=(IndustrialAutomation.GateEntity)h.getBlockEntity(a);var target=(IndustrialAutomation.GateEntity)h.getBlockEntity(b);
+            var source=h.getBlockEntity(a, IndustrialAutomation.GateEntity.class);var target=h.getBlockEntity(b, IndustrialAutomation.GateEntity.class);
             source.owner(p.getUUID());target.owner(java.util.UUID.randomUUID());source.setRule(0,true,DyeColor.BLUE,true,65,DyeColor.RED,false);
             var oldOwner=target.saveWithoutMetadata(h.getLevel().registryAccess()).get("GateOwner");
             p.setItemInHand(net.minecraft.world.InteractionHand.MAIN_HAND,new ItemStack(copier));
@@ -40,7 +40,7 @@ public final class JimtaAutomationGameTests {
             copier.useOn(context.apply(a));copier.useOn(context.apply(b));
             h.assertTrue(target.rule(0,LogicControllerBlockEntity.THRESHOLD)==65&&target.rule(0,LogicControllerBlockEntity.SENSOR)==DyeColor.BLUE.ordinal(),"Copier applies bounded real rules");
             h.assertTrue(oldOwner.equals(target.saveWithoutMetadata(h.getLevel().registryAccess()).get("GateOwner")),"Target retains its own owner");
-            h.setBlock(b,IndustrialAutomation.BLOCKS.get("jimta_gate_clay_brick_and"));var small=(IndustrialAutomation.GateEntity)h.getBlockEntity(b);
+            h.setBlock(b,IndustrialAutomation.BLOCKS.get("jimta_gate_clay_brick_and"));var small=h.getBlockEntity(b, IndustrialAutomation.GateEntity.class);
             copier.useOn(context.apply(b));h.assertTrue(small.rule(0,LogicControllerBlockEntity.ENABLED)==0,"Eight saved rows cannot be silently truncated onto one-row gate");
         }finally{h.getLevel().getServer().getPlayerList().remove(p);}h.succeed();
     }
@@ -60,7 +60,7 @@ public final class JimtaAutomationGameTests {
     }
     @GameTest public void sourceFilterUsesSamplesAndAtomicNativeTransfer(GameTestHelper h){
         h.setBlock(new BlockPos(2,2,2),IndustrialAutomation.BLOCKS.get("jimta_item_filter").defaultBlockState().setValue(ItemSorterBlock.FACING,Direction.EAST));h.setBlock(new BlockPos(3,2,2),Blocks.CHEST);
-        var filter=(ItemSorterBlockEntity)h.getBlockEntity(new BlockPos(2,2,2));filter.setItem(0,new ItemStack(Items.IRON_INGOT));var target=(ChestBlockEntity)h.getBlockEntity(new BlockPos(3,2,2));
+        var filter=h.getBlockEntity(new BlockPos(2,2,2), ItemSorterBlockEntity.class);filter.setItem(0,new ItemStack(Items.IRON_INGOT));var target=h.getBlockEntity(new BlockPos(3,2,2), ChestBlockEntity.class);
         try(var tx=Transaction.openOuter()){h.assertTrue(filter.itemsFor(Direction.WEST).insert(ItemVariant.of(Items.GOLD_INGOT),4,tx)==0,"Unlisted item never passes");h.assertTrue(filter.itemsFor(Direction.WEST).insert(ItemVariant.of(Items.IRON_INGOT),4,tx)==4,"Listed item reaches connected container");}
         h.assertTrue(target.isEmpty(),"Rollback preserves output when the transaction does not commit");
         try(var tx=Transaction.openOuter()){filter.itemsFor(Direction.WEST).insert(ItemVariant.of(Items.IRON_INGOT),4,tx);tx.commit();}

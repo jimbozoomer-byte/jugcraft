@@ -363,6 +363,15 @@
           ],
           "texture": "#inside",
           "cullface": "north"
+        },
+        "south": {
+          "uv": [
+            7,
+            1,
+            9,
+            15
+          ],
+          "texture": "#front"
         }
       }
     },
@@ -376,7 +385,7 @@
       "to": [
         15,
         4,
-        7
+        7.1
       ],
       "faces": {
         "up": {
@@ -400,6 +409,16 @@
           "rotation": 270,
           "texture": "#inside",
           "cullface": "north"
+        },
+        "south": {
+          "rotation": 90,
+          "texture": "#inside_top",
+          "uv": [
+            4.5,
+            1.0,
+            5.5,
+            15.0
+          ]
         }
       }
     },
@@ -593,7 +612,7 @@
       "to": [
         15,
         7,
-        7
+        7.1
       ],
       "faces": {
         "up": {
@@ -617,6 +636,16 @@
           "rotation": 270,
           "texture": "#inside",
           "cullface": "north"
+        },
+        "south": {
+          "rotation": 90,
+          "texture": "#inside_top",
+          "uv": [
+            8.5,
+            1.0,
+            9.5,
+            15.0
+          ]
         }
       }
     },
@@ -630,7 +659,7 @@
       "to": [
         15,
         10,
-        7
+        7.1
       ],
       "faces": {
         "up": {
@@ -654,6 +683,16 @@
           "rotation": 270,
           "texture": "#inside",
           "cullface": "north"
+        },
+        "south": {
+          "rotation": 90,
+          "texture": "#inside_top",
+          "uv": [
+            12.5,
+            15.0,
+            13.5,
+            1.0
+          ]
         }
       }
     },
@@ -667,7 +706,7 @@
       "to": [
         15,
         13,
-        7
+        7.1
       ],
       "faces": {
         "up": {
@@ -691,6 +730,16 @@
           "rotation": 270,
           "texture": "#inside",
           "cullface": "north"
+        },
+        "south": {
+          "rotation": 90,
+          "texture": "#inside_top",
+          "uv": [
+            8.5,
+            15.0,
+            9.5,
+            1.0
+          ]
         }
       }
     }

@@ -23,7 +23,7 @@ public final class JimtaApparitionRenderer extends EntityRenderer<JimtaApparitio
     @Override public void extractRenderState(JimtaApparition e,State s,float partial){super.extractRenderState(e,s,partial);s.time=e.age()+partial;s.size=e.size();s.yaw=e.getYRot();s.jaw=jaw;s.wait=e.waitTicks();float t=s.time-s.wait;s.offset=t<0?-1:t<6?(float)(Math.sin(t/6*Math.PI)/Math.PI+t/6-1):t<46?0:-(float)(Math.sin((Math.clamp((t-46)/30,0,1)+1)*Math.PI)/Math.PI+Math.clamp((t-46)/30,0,1));}
     @Override public void submit(State s,PoseStack pose,SubmitNodeCollector collector,CameraRenderState camera){
         if(s.jaw&&s.time<5)return;pose.pushPose();pose.rotateDegrees(Axis.YP,-s.yaw);if(s.jaw)pose.scale(-1.85F,-1.85F,1.85F);else{float scale=(s.size-1)*.25F+1;pose.scale(scale,-scale,scale);pose.translate(0,-s.offset*68/16F,0);}
-        collector.order(0).submitModel(model,s,pose,RenderTypes.entityCutoutNoCull(Jugcraft.id("textures/jimtafacts/spellbooks/entity/"+(s.jaw?"devour_jaw":"ice_spike")+".png")),s.lightCoords,OverlayTexture.NO_OVERLAY,-1,null,s.outlineColor);pose.popPose();super.submit(s,pose,collector,camera);
+        collector.order(0).submitModel(model,s,pose,RenderTypes.entityCutout(Jugcraft.id("textures/jimtafacts/spellbooks/entity/"+(s.jaw?"devour_jaw":"ice_spike")+".png")),s.lightCoords,OverlayTexture.NO_OVERLAY,-1,null,s.outlineColor);pose.popPose();super.submit(s,pose,collector,camera);
     }
     private static final class Form extends EntityModel<State>{
         private final boolean jaw;

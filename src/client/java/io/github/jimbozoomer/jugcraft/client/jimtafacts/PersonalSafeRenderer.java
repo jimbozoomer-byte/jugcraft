@@ -25,7 +25,7 @@ public final class PersonalSafeRenderer implements BlockEntityRenderer<PersonalW
     public void extractRenderState(PersonalWorkshops.Node n,State s,float partial,Vec3 camera,ModelFeatureRenderer.CrumblingOverlay overlay){BlockEntityRenderState.extractBase(n,s,overlay);s.safe=n.safe();s.facing=n.getBlockState().getValue(PersonalWorkshops.FACING);float a=n.previousDoor+(n.door-n.previousDoor)*partial;s.door=(1-(1-a)*(1-a)*(1-a))*(float)Math.PI/2;}
     public void submit(State s,PoseStack pose,SubmitNodeCollector collector,net.minecraft.client.renderer.state.level.CameraRenderState camera){if(!s.safe)return;pose.pushPose();pose.translate(0,1,1);pose.scale(1,-1,-1);pose.translate(.5,.5,.5);
         pose.rotateDegrees(Axis.YP,s.facing==Direction.NORTH?180:s.facing==Direction.WEST?90:s.facing==Direction.EAST?-90:0);pose.translate(-.5,-.5,-.5);model.getChild("door").yRot=s.door;
-        collector.order(0).submitModelPart(model,pose,RenderTypes.entityCutoutNoCull(Jugcraft.id("textures/block/jimtafacts/personal/newsafe.png")),s.lightCoords,OverlayTexture.NO_OVERLAY,null);pose.popPose();}
+        collector.order(0).submitModelPart(model,pose,RenderTypes.entityCutout(Jugcraft.id("textures/block/jimtafacts/personal/newsafe.png")),s.lightCoords,OverlayTexture.NO_OVERLAY,null);pose.popPose();}
     public static LayerDefinition layer(){var mesh=new MeshDefinition();var root=mesh.getRoot();
         root.addOrReplaceChild("right",CubeListBuilder.create().texOffs(0,0).mirror().addBox(0,0,0,14,16,1),PartPose.offsetAndRotation(1,0,15,0,1.570796F,0));
         root.addOrReplaceChild("left",CubeListBuilder.create().texOffs(0,0).mirror().addBox(0,0,0,14,16,1),PartPose.offsetAndRotation(15,0,1,0,-1.570796F,0));

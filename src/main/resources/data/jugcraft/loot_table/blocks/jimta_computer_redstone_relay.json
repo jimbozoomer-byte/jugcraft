@@ -9,11 +9,9 @@
           "name": "jugcraft:jimta_computer_redstone_relay"
         }
       ],
-      "conditions": [
-        {
-          "condition": "minecraft:survives_explosion"
-        }
-      ]
+      "condition": {
+        "type": "minecraft:survives_explosion"
+      }
     }
   ]
 }

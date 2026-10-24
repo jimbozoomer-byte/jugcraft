@@ -12,9 +12,9 @@
               "type": "minecraft:set_count",
               "count": 2,
               "condition": {
-                "type": "minecraft:block_state_property",
-                "block": "jugcraft:jimta_cut_quartz_slab",
-                "properties": {
+                "type": "minecraft:match_block",
+                "blocks": "jugcraft:jimta_cut_quartz_slab",
+                "state": {
                   "type": "double"
                 }
               }

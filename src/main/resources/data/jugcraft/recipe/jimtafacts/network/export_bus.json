@@ -7,8 +7,8 @@
     " C "
   ],
   "key": {
-    "I": "minecraft:iron_ingot",
     "L": "jugcraft:jimta_logic_processor",
+    "I": "minecraft:iron_ingot",
     "C": "jugcraft:jimta_fluix_glass_cable",
     "P": "minecraft:piston"
   },

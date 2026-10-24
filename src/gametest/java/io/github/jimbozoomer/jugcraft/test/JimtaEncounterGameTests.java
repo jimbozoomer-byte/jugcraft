@@ -10,7 +10,7 @@ import net.minecraft.world.level.GameType;
 public final class JimtaEncounterGameTests {
     @GameTest public void predatorsRespectVillagersAndClaimedAnimals(GameTestHelper h){
         var spider=h.spawn(JimtaEncounterCreatures.ICE_SPIDER,2,2,2);var keeper=h.spawn(JimtaEncounterCreatures.KEEPER,4,2,2);
-        var villager=h.spawn(EntityType.VILLAGER,2,2,4);var cow=h.spawn(EntityType.COW,4,2,4);
+        var villager=h.spawn(net.minecraft.world.entity.EntityTypes.VILLAGER,2,2,4);var cow=h.spawn(net.minecraft.world.entity.EntityTypes.COW,4,2,4);
         h.assertTrue(!spider.canAttack(villager)&&!keeper.canAttack(villager),"Source enemies retain Jugcraft villager protection");
         try(var claim=TestClaims.open().block(cow.blockPosition(),java.util.UUID.randomUUID())){h.assertTrue(!spider.canAttack(cow),"Claimed livestock cannot be hunted");}
         h.succeed();

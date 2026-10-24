@@ -9,6 +9,7 @@ def generate(dump,RES,ART,SPELLS):
   if isinstance(value,list):return [adapt(x) for x in value]
   if not isinstance(value,dict):return value
   value=dict(value)
+  if set(value)=={'min','max'}:value['type']='minecraft:uniform'
   if value.get('function')=='irons_spellbooks:randomize_spell':
    filt=value.get('spell_filter',{});names=[('angel_wings' if x.split(':')[-1]=='angel_wing' else x.split(':')[-1]) for x in filt.get('spells',SPELLS)]
    if filt.get('school'):names=[n for n in names if SPELLS[n][0]==filt['school'].split(':')[-1]]

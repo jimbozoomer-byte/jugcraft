@@ -13,7 +13,7 @@ import net.minecraft.world.level.storage.TagValueInput;
 public final class JimtaWorkshopTableGameTests {
     @GameTest public void engineOutputQuotaSurvivesSimulationAndFuelWaitsForCapacity(GameTestHelper h){
         var p=JimtafactsComputerGameTests.player(h);var pos=new BlockPos(2,2,2);h.setBlock(pos,WorkshopEngines.BLOCKS.get("stirling_engine"));h.setBlock(pos.west(),net.minecraft.world.level.block.Blocks.REDSTONE_BLOCK);
-        var node=(WorkshopEngines.Node)h.getBlockEntity(pos);node.owner=p.getUUID();node.energy.setAmount(32000);node.setItem(0,new ItemStack(Items.COAL));node.step();
+        var node=h.getBlockEntity(pos, WorkshopEngines.Node.class);node.owner=p.getUUID();node.energy.setAmount(32000);node.setItem(0,new ItemStack(Items.COAL));node.step();
         h.assertTrue(node.burn==0&&node.getItem(0).getCount()==1&&node.getItem(1).isEmpty(),"Full engine does not consume fuel or create ash");
         try(var tx=net.fabricmc.fabric.api.transfer.v1.transaction.Transaction.openOuter()){h.assertTrue(node.powerPort(Direction.UP).extract(1000,tx)==256,"Engine output is limited per tick");}
         h.assertTrue(node.energy.getAmount()==32000,"Simulation leaves stored energy intact");
@@ -21,7 +21,7 @@ public final class JimtaWorkshopTableGameTests {
         h.assertTrue(node.energy.getAmount()==31744,"Only committed energy leaves");h.succeed();
     }
     @GameTest public void chuteKeepsFailedDeliveriesAndChargesOnlyWhenItemsMove(GameTestHelper h){
-        var p=JimtafactsComputerGameTests.player(h);var pos=new BlockPos(2,3,2);h.setBlock(pos,WorkshopChute.BLOCK);var node=(WorkshopChute.Node)h.getBlockEntity(pos);node.owner=p.getUUID();node.energy.setAmount(20);node.setItem(0,new ItemStack(Items.IRON_INGOT,20));
+        var p=JimtafactsComputerGameTests.player(h);var pos=new BlockPos(2,3,2);h.setBlock(pos,WorkshopChute.BLOCK);var node=h.getBlockEntity(pos, WorkshopChute.Node.class);node.owner=p.getUUID();node.energy.setAmount(20);node.setItem(0,new ItemStack(Items.IRON_INGOT,20));
         node.step();h.assertTrue(node.getItem(0).getCount()==20&&node.energy.getAmount()==20,"No receiver preserves cargo and boost energy");
         try(var tx=net.fabricmc.fabric.api.transfer.v1.transaction.Transaction.openOuter()){
             h.assertTrue(node.port(Direction.NORTH).extract(net.fabricmc.fabric.api.transfer.v1.item.ItemVariant.of(Items.IRON_INGOT),64,tx)==0,"Disabled outlet refuses extraction");
@@ -29,7 +29,7 @@ public final class JimtaWorkshopTableGameTests {
         }h.succeed();
     }
     @GameTest public void transformerQuotasRollbackAndAreSharedAcrossFaces(GameTestHelper h){
-        var p=JimtafactsComputerGameTests.player(h);var pos=new BlockPos(2,2,2);h.setBlock(pos,IndustrialTransformers.BLOCKS.get("lv"));var node=(IndustrialTransformers.Node)h.getBlockEntity(pos);node.owner=p.getUUID();
+        var p=JimtafactsComputerGameTests.player(h);var pos=new BlockPos(2,2,2);h.setBlock(pos,IndustrialTransformers.BLOCKS.get("lv"));var node=h.getBlockEntity(pos, IndustrialTransformers.Node.class);node.owner=p.getUUID();
         try(var tx=net.fabricmc.fabric.api.transfer.v1.transaction.Transaction.openOuter()){h.assertTrue(node.port(Direction.NORTH).insert(500,tx)==128,"LV front accepts only its 128-JE tick budget");}
         h.assertTrue(node.energy.getAmount()==0,"Aborted insertion restores energy");
         try(var tx=net.fabricmc.fabric.api.transfer.v1.transaction.Transaction.openOuter()){h.assertTrue(node.port(Direction.NORTH).insert(500,tx)==128,"Aborted insertion also restores throughput");tx.commit();}
@@ -38,7 +38,7 @@ public final class JimtaWorkshopTableGameTests {
     }
     @GameTest public void regulatorPaysOnlyAfterRealDeliveryAndCannotBeDrainedAroundItsLimit(GameTestHelper h){
         var p=JimtafactsComputerGameTests.player(h);var pos=new BlockPos(3,2,3);h.setBlock(pos,IndustrialFluidServices.BLOCKS.get("fluid_regulator"));h.setBlock(pos.north(),IndustrialFluidServices.BLOCKS.get("solar_distiller"));
-        var regulator=(IndustrialFluidServices.Node)h.getBlockEntity(pos);var target=(IndustrialFluidServices.Node)h.getBlockEntity(pos.north());regulator.owner=target.owner=p.getUUID();regulator.alternate=true;
+        var regulator=h.getBlockEntity(pos, IndustrialFluidServices.Node.class);var target=h.getBlockEntity(pos.north(), IndustrialFluidServices.Node.class);regulator.owner=target.owner=p.getUUID();regulator.alternate=true;
         regulator.input.fill(net.minecraft.world.level.material.Fluids.WATER,500);regulator.energy.setAmount(10);regulator.step();
         h.assertTrue(regulator.input.millibuckets()==400&&target.input.millibuckets()==100&&regulator.energy.getAmount()==0,"One 100-mB delivery pays exactly 10 JE");
         try(var tx=net.fabricmc.fabric.api.transfer.v1.transaction.Transaction.openOuter()){
@@ -47,11 +47,11 @@ public final class JimtaWorkshopTableGameTests {
         regulator.step();h.assertTrue(regulator.input.millibuckets()==400,"Repeated same-tick request does not deliver twice");h.succeed();
     }
     @GameTest(maxTicks=60) public void steamRecoveryMatchesTheNativeBoilerExpansion(GameTestHelper h){
-        var p=JimtafactsComputerGameTests.player(h);var pos=new BlockPos(2,2,2);h.setBlock(pos,IndustrialFluidServices.BLOCKS.get("steam_condenser"));var node=(IndustrialFluidServices.Node)h.getBlockEntity(pos);node.owner=p.getUUID();node.input.fill(IndustrialHeat.STEAM.fluid(),1000);
+        var p=JimtafactsComputerGameTests.player(h);var pos=new BlockPos(2,2,2);h.setBlock(pos,IndustrialFluidServices.BLOCKS.get("steam_condenser"));var node=h.getBlockEntity(pos, IndustrialFluidServices.Node.class);node.owner=p.getUUID();node.input.fill(IndustrialHeat.STEAM.fluid(),1000);
         h.runAfterDelay(21,()->{h.assertTrue(node.input.millibuckets()==0&&node.output.has(IndustrialFluidServices.DISTILLED.source(),100)&&node.output.millibuckets()==100,"1000 steam recovers exactly the 100 water used to create it");h.succeed();});
     }
     @GameTest public void barterChecksStockPaymentAndCapacityBeforeCommitting(GameTestHelper h){
-        var owner=JimtafactsComputerGameTests.player(h);var buyer=JimtafactsComputerGameTests.player(h);var pos=new BlockPos(2,2,2);h.setBlock(pos,PersonalWorkshops.BLOCKS.get("barter_station"));var node=(PersonalWorkshops.Node)h.getBlockEntity(pos);node.owner=owner.getUUID();node.published=true;node.price=new ItemStack(Items.EMERALD,2);node.offer=new ItemStack(Items.DIAMOND);node.setItem(0,new ItemStack(Items.DIAMOND,3));
+        var owner=JimtafactsComputerGameTests.player(h);var buyer=JimtafactsComputerGameTests.player(h);var pos=new BlockPos(2,2,2);h.setBlock(pos,PersonalWorkshops.BLOCKS.get("barter_station"));var node=h.getBlockEntity(pos, PersonalWorkshops.Node.class);node.owner=owner.getUUID();node.published=true;node.price=new ItemStack(Items.EMERALD,2);node.offer=new ItemStack(Items.DIAMOND);node.setItem(0,new ItemStack(Items.DIAMOND,3));
         for(int i=0;i<36;i++)buyer.getInventory().setItem(i,new ItemStack(Items.COBBLESTONE,64));buyer.getInventory().setItem(0,new ItemStack(Items.EMERALD,3));
         h.assertTrue(!node.trade(buyer)&&buyer.getInventory().getItem(0).getCount()==3&&node.getItem(0).getCount()==3&&node.getItem(9).isEmpty(),"Full inventory leaves payment and stock intact");
         buyer.getInventory().setItem(1,ItemStack.EMPTY);h.assertTrue(node.trade(buyer),"One complete trade fits");
@@ -59,10 +59,10 @@ public final class JimtaWorkshopTableGameTests {
         h.assertTrue(node.getSlotsForFace(Direction.DOWN).length==0&&!node.template(buyer,0,ItemStack.EMPTY)&&!node.trade(buyer),"Public trading never exposes stock or configuration; same-tick repeats are refused");h.succeed();
     }
     @GameTest public void chargingVendorAndPrivateSafeKeepTheirInventoriesPrivate(GameTestHelper h){
-        var owner=JimtafactsComputerGameTests.player(h);var buyer=JimtafactsComputerGameTests.player(h);var pos=new BlockPos(2,2,2);h.setBlock(pos,PersonalWorkshops.BLOCKS.get("energy_vendor"));var node=(PersonalWorkshops.Node)h.getBlockEntity(pos);node.owner=owner.getUUID();node.published=true;node.price=new ItemStack(Items.EMERALD);node.energy.setAmount(1000);
+        var owner=JimtafactsComputerGameTests.player(h);var buyer=JimtafactsComputerGameTests.player(h);var pos=new BlockPos(2,2,2);h.setBlock(pos,PersonalWorkshops.BLOCKS.get("energy_vendor"));var node=h.getBlockEntity(pos, PersonalWorkshops.Node.class);node.owner=owner.getUUID();node.published=true;node.price=new ItemStack(Items.EMERALD);node.energy.setAmount(1000);
         var battery=new ItemStack(IndustrialGear.ITEMS.get("jimta_re_battery"));buyer.setItemInHand(net.minecraft.world.InteractionHand.MAIN_HAND,battery);buyer.getInventory().setItem(10,new ItemStack(Items.EMERALD));
         h.assertTrue(node.trade(buyer)&&node.energy.getAmount()==0&&Chargeable.energy(buyer.getMainHandItem())==1000&&node.getItem(9).is(Items.EMERALD),"One real payment buys exactly 1000 stored JE in the selected held battery");
-        var safePos=new BlockPos(3,2,2);h.setBlock(safePos,PersonalWorkshops.BLOCKS.get("personal_safe"));var safe=(PersonalWorkshops.Node)h.getBlockEntity(safePos);safe.owner=owner.getUUID();safe.setItem(0,new ItemStack(Items.DIAMOND));
+        var safePos=new BlockPos(3,2,2);h.setBlock(safePos,PersonalWorkshops.BLOCKS.get("personal_safe"));var safe=h.getBlockEntity(safePos, PersonalWorkshops.Node.class);safe.owner=owner.getUUID();safe.setItem(0,new ItemStack(Items.DIAMOND));
         h.assertTrue(!safe.canOpen(buyer)&&safe.canOpen(owner)&&safe.getSlotsForFace(Direction.DOWN).length==0,"Unrelated buyers and hoppers cannot open or empty the personal safe");h.succeed();
     }
     @GameTest public void electricBoatUsesEquippedPowerAndOwnerAccess(GameTestHelper h){
@@ -78,7 +78,7 @@ public final class JimtaWorkshopTableGameTests {
     }
     @GameTest public void latheRefusesUnpaidOrBlockedCuts(GameTestHelper h){
         var player=JimtafactsComputerGameTests.player(h);var pos=new BlockPos(2,2,2);h.setBlock(pos,IndustrialLathe.BLOCK);
-        var node=(IndustrialLathe.Node)h.getBlockEntity(pos);node.owner=player.getUUID();
+        var node=h.getBlockEntity(pos, IndustrialLathe.Node.class);node.owner=player.getUUID();
         var blank=new ItemStack(JimtaIndustry.MATERIALS.get("jimta_iron_turning_blank"));var tool=new ItemStack(IndustrialUtilityItems.ITEMS.get("lathing_tool"));node.setItem(1,blank);node.setItem(0,tool);
         h.assertTrue(!node.cut(0,player)&&IndustrialLathe.profile(blank)[0]==5&&tool.getDamageValue()==0,"No power means no changed profile or tool wear");
         node.acceptKinetic(Direction.WEST,10000);
@@ -94,7 +94,7 @@ public final class JimtaWorkshopTableGameTests {
     }
     @GameTest public void luminatorPaysForItsLight(GameTestHelper h){
         var pos=new BlockPos(2,2,2);h.setBlock(pos.below(),net.minecraft.world.level.block.Blocks.IRON_BLOCK);h.setBlock(pos,IndustrialLighting.LUMINATOR);
-        var node=(IndustrialLighting.Node)h.getBlockEntity(pos);node.energy.setAmount(2);node.step();h.assertTrue(h.getBlockState(pos).getValue(IndustrialLighting.LIT)&&node.energy.getAmount()==1,"First four-tick light interval pays one JE");
+        var node=h.getBlockEntity(pos, IndustrialLighting.Node.class);node.energy.setAmount(2);node.step();h.assertTrue(h.getBlockState(pos).getValue(IndustrialLighting.LIT)&&node.energy.getAmount()==1,"First four-tick light interval pays one JE");
         node.step();node.step();h.assertTrue(!h.getBlockState(pos).getValue(IndustrialLighting.LIT)&&node.energy.getAmount()==0,"Exhausted luminator switches off without negative storage");
         node.energy.setAmount(2);node.inverted=true;node.step();h.assertTrue(node.energy.getAmount()==2&&!h.getBlockState(pos).getValue(IndustrialLighting.LIT),"Inverted lamp waits for redstone without spending JE");h.succeed();
     }
@@ -118,7 +118,7 @@ public final class JimtaWorkshopTableGameTests {
         var player=JimtafactsComputerGameTests.player(h);var machine=new BlockPos(2,2,2);var soil=new BlockPos(3,2,2);
         h.setBlock(machine,CivilWorkshops.BLOCKS.get("terraformer"));h.setBlock(soil,net.minecraft.world.level.block.Blocks.DIRT);
         h.setBlock(soil.above(),net.minecraft.world.level.block.Blocks.AIR);
-        var node=(CivilWorkshops.Node)h.getBlockEntity(machine);node.owner=player.getUUID();node.setArea(h.absolutePos(soil),h.absolutePos(soil));
+        var node=h.getBlockEntity(machine, CivilWorkshops.Node.class);node.owner=player.getUUID();node.setArea(h.absolutePos(soil),h.absolutePos(soil));
         node.setItem(0,new ItemStack(Terraforming.PLANS.get("irrigation")));node.energy.setAmount(8192);node.running=true;
         node.step(h.getLevel());h.assertTrue(h.getBlockState(soil).is(net.minecraft.world.level.block.Blocks.DIRT)&&node.energy.getAmount()==8192,"Missing water pauses the machine before soil or power changes");
         node.fluid.fill(net.minecraft.world.level.material.Fluids.WATER,500);node.step(h.getLevel());
@@ -133,8 +133,8 @@ public final class JimtaWorkshopTableGameTests {
         h.setBlock(new BlockPos(2,2,1),IndustrialCables.BLOCKS.get("splitter"));
         h.setBlock(new BlockPos(3,2,1),WorkshopTables.BLOCKS.get("charging"));
         h.setBlock(new BlockPos(1,2,2),WorkshopTables.BLOCKS.get("charging"));
-        var remote=(WorkshopTables.Node)h.getBlockEntity(new BlockPos(3,2,1));
-        var local=(WorkshopTables.Node)h.getBlockEntity(new BlockPos(1,2,2));
+        var remote=h.getBlockEntity(new BlockPos(3,2,1), WorkshopTables.Node.class);
+        var local=h.getBlockEntity(new BlockPos(1,2,2), WorkshopTables.Node.class);
         var source=new io.github.jimbozoomer.jugcraft.energy.SimpleEnergyStorage(2000,0,2000,()->{});source.setAmount(2000);
         long moved=io.github.jimbozoomer.jugcraft.energy.EnergyNetworks.pushToNeighbors(level,h.absolutePos(new BlockPos(0,2,1)),source,1000,java.util.List.of(Direction.EAST));
         h.assertTrue(moved>0&&local.energy.getAmount()==moved&&remote.energy.getAmount()==0&&source.getAmount()+moved==2000,"Closed splitter isolates only the far branch and preserves actual JE");
@@ -152,7 +152,7 @@ public final class JimtaWorkshopTableGameTests {
     }
     @GameTest public void barrelAgeAndPortableContentsStayFinite(GameTestHelper h) {
         var pos = new BlockPos(2,2,2); h.setBlock(pos, BreweryBarrel.BLOCK);
-        var barrel = (BreweryBarrel.Node) h.getBlockEntity(pos);
+        var barrel = h.getBlockEntity(pos, BreweryBarrel.Node.class);
         barrel.kind = 1; barrel.portions = 4; barrel.wheat = 4; barrel.hops = 2;
         barrel.age(24000); h.assertTrue(barrel.stage == 1 && barrel.age == 0, "Beer advances at the recovered loaded-time threshold");
         barrel.tap = true; barrel.locked = true; barrel.body = 3; barrel.bitterness = 3;
@@ -176,7 +176,7 @@ public final class JimtaWorkshopTableGameTests {
     @GameTest public void programmingConservesCardsAndWaitsForOutput(GameTestHelper h) {
         var player = JimtafactsComputerGameTests.player(h); var pos = new BlockPos(2,2,2);
         h.setBlock(pos, WorkshopTables.BLOCKS.get("programming"));
-        var table = (WorkshopTables.Node) h.getBlockEntity(pos); table.owner = player.getUUID();
+        var table = h.getBlockEntity(pos, WorkshopTables.Node.class); table.owner = player.getUUID();
         table.selected = WorkshopRobots.PROGRAMS.indexOf("planter");
         table.setItem(0, new ItemStack(WorkshopTables.BLANK_BOARD, 2));
         table.energy.setAmount(1999); table.step();
@@ -196,7 +196,7 @@ public final class JimtaWorkshopTableGameTests {
     @GameTest public void chargingConservesJeAndOnlyAutomatesFinishedEquipment(GameTestHelper h) {
         var player = JimtafactsComputerGameTests.player(h); var pos = new BlockPos(2,2,2);
         h.setBlock(pos, WorkshopTables.BLOCKS.get("charging"));
-        var table = (WorkshopTables.Node) h.getBlockEntity(pos); table.owner = player.getUUID();
+        var table = h.getBlockEntity(pos, WorkshopTables.Node.class); table.owner = player.getUUID();
         var item = net.minecraft.core.registries.BuiltInRegistries.ITEM.stream().filter(i -> i instanceof Chargeable && Chargeable.capacity(new ItemStack(i)) >= 100).findFirst().orElseThrow();
         var tool = new ItemStack(item); Chargeable.setEnergy(tool, Math.max(0, Chargeable.capacity(tool) - 100));
         table.setItem(0, tool); table.energy.setAmount(1000);

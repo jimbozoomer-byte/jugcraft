@@ -8,8 +8,8 @@
   ],
   "key": {
     "E": "jugcraft:jimta_engineering_processor",
-    "F": "jugcraft:jimta_fluix_crystal",
-    "I": "minecraft:iron_ingot"
+    "I": "minecraft:iron_ingot",
+    "F": "jugcraft:jimta_fluix_crystal"
   },
   "result": {
     "id": "jugcraft:jimta_controller",

@@ -27,7 +27,7 @@
   {
     "source": "art/owner-library/originals/Oct23/Jimtafacts/buildcraft reborn by jimbo/assets/buildcraftsilicon/models/block/table/charging.json",
     "runtime": "src/main/resources/assets/jugcraft/models/block/jimta_charging_table.json",
-    "adaptation": "Original elements and UVs unchanged; namespaced runtime textures and modern vanilla white glass."
+    "adaptation": "Original elements retained; namespaced runtime textures and modern vanilla white glass. Programming-table overlapping surface separated by 0.1 pixel with pinned UVs."
   },
   {
     "source": "art/owner-library/originals/Oct23/Jimtafacts/buildcraft reborn by jimbo/assets/buildcraftsilicon/textures/gui/charging_table.png",
@@ -67,7 +67,7 @@
   {
     "source": "art/owner-library/originals/Oct23/Jimtafacts/buildcraft reborn by jimbo/assets/buildcraftsilicon/models/block/table/programming.json",
     "runtime": "src/main/resources/assets/jugcraft/models/block/jimta_programming_table.json",
-    "adaptation": "Original elements and UVs unchanged; namespaced runtime textures and modern vanilla white glass."
+    "adaptation": "Original elements retained; namespaced runtime textures and modern vanilla white glass. Programming-table overlapping surface separated by 0.1 pixel with pinned UVs."
   },
   {
     "source": "art/owner-library/originals/Oct23/Jimtafacts/buildcraft reborn by jimbo/assets/buildcraftsilicon/textures/gui/programming_table.png",

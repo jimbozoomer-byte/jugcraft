@@ -2,7 +2,7 @@
 import json
 def generate(dump,RES,SOURCE):
  source=SOURCE/'data/irons_spellbooks';records=[]
- def ident(value):return value.replace('irons_spellbooks:','jugcraft:jimta_spellbooks_')
+ def ident(value):return value.replace('irons_spellbooks:','jugcraft:jimta_spellbooks_').replace('minecraft:chain','minecraft:iron_chain')
  def tag(value):return value.replace('irons_spellbooks:','jugcraft:jimtafacts/spellbooks/')
  def ingredient(value):
   if isinstance(value,str):return '#'+tag(value[1:]) if value.startswith('#') else ident(value)
@@ -21,6 +21,12 @@ def generate(dump,RES,SOURCE):
   if not components:value.pop('components',None)
   return value
  for path in (source/'recipe').rglob('*.json'):
+  if path.stem in ('chronicle','patchouli_book'):
+   # These require book systems not registered by the native port yet.
+   # Keep the source, but do not ship a recipe which prevents worlds from loading.
+   obsolete=RES/'data/jugcraft/recipe/jimtafacts/source'/path.relative_to(source/'recipe')
+   if obsolete.is_file():obsolete.unlink()
+   continue
   row=json.loads(path.read_text(encoding='utf-8'));kind=row.get('type','')
   if not kind.startswith('minecraft:'):continue
   row=dict(row);row.pop('neoforge:conditions',None)
@@ -49,4 +55,12 @@ def generate(dump,RES,SOURCE):
  for directory,name in [('configured_feature','ore_mithril_feature'),('placed_feature','ore_mithril_placement')]:
   path=source/f'worldgen/{directory}/{name}.json'
   text=path.read_text(encoding='utf-8').replace('irons_spellbooks:ore_mithril_feature','jugcraft:jimtafacts/spellbooks/ore_mithril_feature').replace('irons_spellbooks:mithril_ore','jugcraft:jimta_spellbooks_mithril_ore').replace('irons_spellbooks:deepslate_mithril_ore','jugcraft:jimta_spellbooks_deepslate_mithril_ore')
-  dump(RES/f'data/jugcraft/worldgen/{directory}/jimtafacts/spellbooks/{name}.json',json.loads(text))
+  data=json.loads(text)
+  if directory=='configured_feature':
+   data={'type':data['type'],**data['config']}
+   for target in data['targets']:
+    state=target['state'];target['state']={'id':state['Name'],**({'properties':state['Properties']} if state.get('Properties') else {})}
+   obsolete=RES/f'data/jugcraft/worldgen/configured_feature/jimtafacts/spellbooks/{name}.json'
+   if obsolete.exists():obsolete.unlink()
+   directory='feature'
+  dump(RES/f'data/jugcraft/worldgen/{directory}/jimtafacts/spellbooks/{name}.json',data)

@@ -116,6 +116,7 @@ def generate(shared=True):
   'luminator':['minecraft:glass_pane']*3+['jugcraft:copper_wire']*2+['minecraft:glowstone_dust']*2+['jugcraft:tin_plate']}
  for name,ingredients in recipes.items():dump(RES/f'data/jugcraft/recipe/jimtafacts_utilities/{name}.json',{'type':'minecraft:crafting_shapeless','category':'misc','ingredients':ingredients,'result':{'id':'jugcraft:jimta_'+name}})
  dump(RES/'data/jugcraft/recipe/jimtafacts_utilities/repair_rubber_boat.json',{'type':'minecraft:crafting_shapeless','category':'misc','ingredients':['jugcraft:jimta_broken_rubber_boat']+['jugcraft:rubber']*3,'result':{'id':'jugcraft:jimta_rubber_boat'}})
+ lang['item.jugcraft.jimta_wire_cutters']='Industrial Wire Cutters'
  if shared:
   path=RES/'assets/jugcraft/lang/en_us.json';value=json.loads(path.read_text(encoding='utf-8'));value.update(lang);dump(path,value)
   path=RES/'data/minecraft/tags/block/mineable/axe.json';value=json.loads(path.read_text(encoding='utf-8'))

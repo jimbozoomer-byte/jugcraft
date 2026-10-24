@@ -18,7 +18,7 @@ import net.minecraft.world.level.storage.TagValueInput;
 public final class JimtaUpgradeGameTests {
     private static MachineBlockEntity machine(GameTestHelper h) {
         var at = new BlockPos(2,2,2); h.setBlock(at, JimtaIndustry.MACHINES.get("jimta_macerator"));
-        return (MachineBlockEntity) h.getBlockEntity(at);
+        return h.getBlockEntity(at, MachineBlockEntity.class);
     }
     private static ItemStack card(IndustrialUpgrades.Kind kind) { return new ItemStack(IndustrialUpgrades.ITEMS.get(kind)); }
     @GameTest public void upgradesChangeRealEnergyAndPersistStrandedChargeWithoutCreatingIt(GameTestHelper h) {
@@ -45,7 +45,7 @@ public final class JimtaUpgradeGameTests {
     }
     @GameTest public void pullingUsesSidedTransactionsAndCannotCrossAnotherPlayersClaim(GameTestHelper h) {
         var machine = machine(h); var chestPos = new BlockPos(2,3,2); h.setBlock(chestPos, Blocks.CHEST);
-        var chest = (ChestBlockEntity) h.getBlockEntity(chestPos); chest.setItem(0, new ItemStack(Items.COAL, 10));
+        var chest = h.getBlockEntity(chestPos, ChestBlockEntity.class); chest.setItem(0, new ItemStack(Items.COAL, 10));
         machine.setItem(machine.kind().slots, card(IndustrialUpgrades.Kind.PULLING));
         try (var claim = TestClaims.open().block(h.absolutePos(chestPos), UUID.randomUUID())) {
             IndustrialUpgrades.transfer(machine, h.getLevel());

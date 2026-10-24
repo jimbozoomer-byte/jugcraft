@@ -255,10 +255,13 @@
     "jugcraft:high_striker",
     "jugcraft:iron_bound_coffin",
     "jugcraft:jarrahdale_pumpkin",
+    "jugcraft:jimta_brewing_barrel",
     "jugcraft:jimta_spellbooks_book_stack",
     "jugcraft:jimta_spellbooks_wisewood_bookshelf",
     "jugcraft:jimta_spellbooks_wisewood_chiseled_bookshelf",
     "jugcraft:jimta_spellbooks_wisewood_planks",
+    "jugcraft:jimta_wood_scaffold",
+    "jugcraft:jimta_wood_scaffold_reinforced",
     "jugcraft:judges_table",
     "jugcraft:judging_stand",
     "jugcraft:jump_scare_trap",
@@ -381,9 +384,6 @@
     "peepo_companion:red_companion_bed",
     "peepo_companion:white_companion_bed",
     "peepo_companion:wooden_stool",
-    "peepo_companion:yellow_companion_bed",
-    "jugcraft:jimta_wood_scaffold",
-    "jugcraft:jimta_wood_scaffold_reinforced",
-    "jugcraft:jimta_brewing_barrel"
+    "peepo_companion:yellow_companion_bed"
   ]
 }

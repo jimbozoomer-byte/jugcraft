@@ -12,7 +12,8 @@ import net.minecraft.client.model.geom.builders.*;
 import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.minecraft.client.renderer.rendertype.RenderTypes;
 import net.minecraft.client.renderer.special.*;
-import org.joml.*;
+import org.joml.Vector3f;
+import org.joml.Vector3fc;
 
 /** Source numeric head/orb cubes, original UVs, and the original floating/pulsing timing. */
 public final class JimtaPyriumRenderer implements NoDataSpecialModelRenderer {
@@ -23,10 +24,10 @@ public final class JimtaPyriumRenderer implements NoDataSpecialModelRenderer {
         @Override public MapCodec<Unbaked> type(){return CODEC;}
         @Override public SpecialModelRenderer<Void> bake(SpecialModelRenderer.BakingContext context){return new JimtaPyriumRenderer();}
     }
-    private static final class Form extends Model<Void>{Form(ModelPart root){super(root,RenderTypes::entityCutoutNoCull);}}
+    private static final class Form extends Model<Void>{Form(ModelPart root){super(root,RenderTypes::entityCutout);}}
     @Override public void submit(PoseStack pose,SubmitNodeCollector out,int light,int overlay,boolean foil,int outline){
         pose.pushPose();pose.translate(.5,.5,.5);pose.rotateDegrees(Axis.ZP,135);pose.rotateDegrees(Axis.YP,-90);pose.translate(0,-.3984375,0);pose.scale(.5F,.5F,.5F);
-        out.order(0).submitModel(head,null,pose,RenderTypes.entityCutoutNoCull(Jugcraft.id("textures/jimtafacts/spellbooks/item/pyrium_staff_head.png")),light,overlay,-1,null,outline);
+        out.order(0).submitModel(head,null,pose,RenderTypes.entityCutout(Jugcraft.id("textures/jimtafacts/spellbooks/item/pyrium_staff_head.png")),light,overlay,-1,null,outline);
         float f=Minecraft.getInstance().player==null?0:(Minecraft.getInstance().player.tickCount+Minecraft.getInstance().getDeltaTracker().getGameTimeDeltaPartialTick(true))*.75F;
         pose.translate(0,-.296875+Math.sin(f*.3)/32,0);float scale=(float)((Math.sin(f*.5)+Math.sin(f*3))/2*.04+1);pose.scale(scale,scale,scale);
         out.order(1).submitModel(orb,null,pose,RenderTypes.entityTranslucentEmissive(Jugcraft.id("textures/jimtafacts/spellbooks/item/pyrium_staff_orb.png")),0xf000f0,overlay,-1,null,outline);pose.popPose();

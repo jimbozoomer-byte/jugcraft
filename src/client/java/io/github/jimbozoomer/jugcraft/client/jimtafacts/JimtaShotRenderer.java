@@ -25,7 +25,7 @@ public final class JimtaShotRenderer extends EntityRenderer<JimtaShot,JimtaShotR
     @Override public void submit(State s,PoseStack pose,SubmitNodeCollector collector,CameraRenderState camera){
         if(s.kind.endsWith("_field"))return;pose.pushPose();pose.rotateDegrees(Axis.YP,s.yaw);pose.rotateDegrees(Axis.XP,s.pitch);
         if(!s.item.isEmpty()){if(s.kind.equals("throw"))pose.rotateDegrees(Axis.XP,s.time*30);s.item.submit(pose,collector,s.lightCoords,OverlayTexture.NO_OVERLAY,0);}
-        else if(s.kind.equals("ice_shard")){pose.scale(1,-1,1);collector.order(0).submitModelPart(icicle,pose,RenderTypes.entityCutoutNoCull(tex("entity/icicle_projectile")),s.lightCoords,OverlayTexture.NO_OVERLAY,null);}
+        else if(s.kind.equals("ice_shard")){pose.scale(1,-1,1);collector.order(0).submitModelPart(icicle,pose,RenderTypes.entityCutout(tex("entity/icicle_projectile")),s.lightCoords,OverlayTexture.NO_OVERLAY,null);}
         else if(s.kind.equals("snowball")||s.kind.equals("magma_bomb")){
             pose.rotateDegrees(Axis.XP,s.time*8);pose.rotateDegrees(Axis.YP,s.time*5);pose.rotateDegrees(Axis.ZP,s.time*3);
             cube(pose,collector,s.kind.equals("snowball")?Identifier.withDefaultNamespace("textures/block/snow.png"):tex("entity/fireball/magma"),8,8,8,8,8,true,s.lightCoords);
@@ -40,6 +40,6 @@ public final class JimtaShotRenderer extends EntityRenderer<JimtaShot,JimtaShotR
         float x=dx/32,y=dy/32,z=dz/32;
         float[][][] faces={{{-x,-y,-z},{-x,-y,z},{-x,y,z},{-x,y,-z}},{{-x,-y,-z},{x,-y,-z},{x,y,-z},{-x,y,-z}},{{x,-y,z},{x,-y,-z},{x,y,-z},{x,y,z}},{{x,-y,z},{-x,-y,z},{-x,y,z},{x,y,z}},{{-x,y,-z},{x,y,-z},{x,y,z},{-x,y,z}},{{-x,-y,z},{x,-y,z},{x,-y,-z},{-x,-y,-z}}};
         float[][] rectangles={{0,dz,dz,dz+dy},{dz,dz,dz+dx,dz+dy},{dz+dx,dz,dz+dx+dz,dz+dy},{dz+dx+dz,dz,2*dz+2*dx,dz+dy},{dz,0,dz+dx,dz},{dz+dx,dz,dz+2*dx,0}};
-        collector.submitCustomGeometry(pose,RenderTypes.entityCutoutNoCull(texture),(matrix,buffer)->{for(int f=0;f<6;f++){float[] r=repeat?new float[]{0,0,tw,th}:rectangles[f];float[][] uv={{r[0]/tw,r[3]/th},{r[2]/tw,r[3]/th},{r[2]/tw,r[1]/th},{r[0]/tw,r[1]/th}};for(int v=0;v<4;v++)buffer.addVertex(matrix,faces[f][v][0],faces[f][v][1],faces[f][v][2]).setColor(-1).setUv(uv[v][0],uv[v][1]).setOverlay(OverlayTexture.NO_OVERLAY).setLight(light).setNormal(matrix,0,1,0);}});
+        collector.submitCustomGeometry(pose,RenderTypes.entityCutout(texture),(matrix,buffer)->{for(int f=0;f<6;f++){float[] r=repeat?new float[]{0,0,tw,th}:rectangles[f];float[][] uv={{r[0]/tw,r[3]/th},{r[2]/tw,r[3]/th},{r[2]/tw,r[1]/th},{r[0]/tw,r[1]/th}};for(int v=0;v<4;v++)buffer.addVertex(matrix,faces[f][v][0],faces[f][v][1],faces[f][v][2]).setColor(-1).setUv(uv[v][0],uv[v][1]).setOverlay(OverlayTexture.NO_OVERLAY).setLight(light).setNormal(matrix,0,1,0);}});
     }
 }

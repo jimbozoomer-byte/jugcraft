@@ -18,7 +18,7 @@ import net.minecraft.resources.Identifier;
 public final class JimtaMimicClient {
     private static final ModelLayerLocation INSIDE=new ModelLayerLocation(Jugcraft.id("jimta_mimic"),"main");
     private static final ModelLayerLocation CHEST=new ModelLayerLocation(Jugcraft.id("jimta_mimic"),"chest");
-    public static void register(){EntityModelLayerRegistry.registerModelLayer(INSIDE,Model::inside);EntityModelLayerRegistry.registerModelLayer(CHEST,Model::chest);EntityRendererRegistry.register(JimtaMimic.TYPE,Renderer::new);}
+    public static void register(){ModelLayerRegistry.registerModelLayer(INSIDE,Model::inside);ModelLayerRegistry.registerModelLayer(CHEST,Model::chest);EntityRendererRegistry.register(JimtaMimic.TYPE,Renderer::new);}
     public static final class State extends LivingEntityRenderState {public float air;}
     public static final class Model extends EntityModel<State>{
         private final ModelPart bottom,lid;
@@ -47,9 +47,9 @@ public final class JimtaMimicClient {
         private final Model model;private final SpriteGetter sprites;
         Shell(RenderLayerParent<State,Model> parent,EntityRendererProvider.Context context){super(parent);model=new Model(context.bakeLayer(CHEST));sprites=context.getSprites();}
         @Override public void submit(PoseStack poses,SubmitNodeCollector collector,int light,State s,float yaw,float pitch){
-            if(s.isInvisible)return;poses.pushPose();poses.mulPose(Axis.XP.rotationDegrees(180));poses.translate(-.5,-1.5,-.5);model.setupAnim(s);
+            if(s.isInvisible)return;poses.pushPose();poses.rotateDegrees(Axis.XP,180);poses.translate(-.5,-1.5,-.5);model.setupAnim(s);
             var material=net.minecraft.util.SpecialDates.isExtendedChristmas()?Sheets.CHEST_CHRISTMAS.single():Sheets.CHEST_REGULAR.single();
-            collector.submitModel(model,s,poses,material.renderType(RenderTypes::entityCutout),light,LivingEntityRenderer.getOverlayCoords(s,0),-1,sprites.get(material),0,null);
+            collector.submitModel(model,s,poses,material.renderType(RenderTypes::entityCutout),light,LivingEntityRenderer.getOverlayCoords(s,0),-1,sprites.get(material),s.outlineColor);
             poses.popPose();
         }
     }

@@ -43,9 +43,9 @@ public final class DigitalExplorationClient {
         private final BlockModelResolver resolver;
         TinyRenderer(EntityRendererProvider.Context c) { super(c); resolver = c.getBlockModelResolver(); shadowRadius = .25f; }
         @Override public TntRenderState createRenderState() { return new TntRenderState(); }
-        @Override public void extractRenderState(DigitalTinyTnt.Charge e, TntRenderState s, float partial) { super.extractRenderState(e, s, partial); s.fuseRemainingInTicks = e.getFuse(); resolver.update(s.blockState, DigitalTinyTnt.BLOCK.defaultBlockState(), DISPLAY); }
+        @Override public void extractRenderState(DigitalTinyTnt.Charge e, TntRenderState s, float partial) { super.extractRenderState(e, s, partial); s.fuseRemainingInTicks = e.getFuse() - partial; resolver.update(s.blockState, DigitalTinyTnt.BLOCK.defaultBlockState(), DISPLAY); }
         @Override public void submit(TntRenderState s, PoseStack pose, SubmitNodeCollector out, CameraRenderState camera) {
-            pose.pushPose(); float fraction = Math.clamp(1 - (s.fuseRemainingInTicks - s.partialTick + 1) / 10f, 0, 1); float size = 1 + fraction * fraction * fraction * fraction * .3f;
+            pose.pushPose(); float fraction = Math.clamp(1 - (s.fuseRemainingInTicks + 1) / 10f, 0, 1); float size = 1 + fraction * fraction * fraction * fraction * .3f;
             pose.translate(0, .25, 0); pose.scale(size, size, size); pose.translate(-.5, -.25, -.5);
             if (!s.blockState.isEmpty()) TntMinecartRenderer.submitWhiteSolidBlock(s.blockState, pose, out, s.lightCoords, ((int)s.fuseRemainingInTicks / 5) % 2 == 0, s.outlineColor);
             pose.popPose(); super.submit(s, pose, out, camera);

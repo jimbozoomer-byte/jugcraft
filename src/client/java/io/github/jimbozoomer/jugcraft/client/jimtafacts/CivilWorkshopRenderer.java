@@ -39,7 +39,7 @@ public final class CivilWorkshopRenderer implements BlockEntityRenderer<CivilWor
     }
     @Override public void submit(State s,PoseStack stack,SubmitNodeCollector nodes,net.minecraft.client.renderer.state.level.CameraRenderState camera){
         if(!s.visible)return;
-        nodes.submitCustomGeometry(stack,RenderTypes.entityCutoutNoCull(FRAME),(pose,out)->{
+        nodes.submitCustomGeometry(stack,RenderTypes.entityCutout(FRAME),(pose,out)->{
             double x0=s.min.x+.25,x1=s.max.x+.75,z0=s.min.z+.25,z1=s.max.z+.75,top=s.max.y+1.5;
             // Four fixed upper rails and four supports surround the actual selected work volume.
             beam(out,pose,new Vec3(x0,top,z0),new Vec3(x1,top,z0),s.lightCoords,false);
@@ -53,7 +53,7 @@ public final class CivilWorkshopRenderer implements BlockEntityRenderer<CivilWor
             beam(out,pose,new Vec3(x0,top,hz),new Vec3(x1,top,hz),s.lightCoords,false);
             beam(out,pose,new Vec3(hx,s.head.y+1.25,hz),new Vec3(hx,top,hz),s.lightCoords,false);
         });
-        nodes.submitCustomGeometry(stack,RenderTypes.entityCutoutNoCull(DRILL),(pose,out)->beam(out,pose,s.head.add(.5,.25,.5),s.head.add(.5,1.25,.5),s.lightCoords,true));
+        nodes.submitCustomGeometry(stack,RenderTypes.entityCutout(DRILL),(pose,out)->beam(out,pose,s.head.add(.5,.25,.5),s.head.add(.5,1.25,.5),s.lightCoords,true));
     }
     private static void beam(VertexConsumer out,PoseStack.Pose pose,Vec3 a,Vec3 b,int light,boolean drill){
         int axis=Math.abs(a.x-b.x)>.001?0:Math.abs(a.y-b.y)>.001?1:2;

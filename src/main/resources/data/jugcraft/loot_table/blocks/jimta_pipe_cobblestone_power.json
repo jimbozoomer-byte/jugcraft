@@ -9,11 +9,9 @@
           "name": "jugcraft:jimta_pipe_cobblestone_power"
         }
       ],
-      "conditions": [
-        {
-          "condition": "minecraft:survives_explosion"
-        }
-      ]
+      "condition": {
+        "type": "minecraft:survives_explosion"
+      }
     }
   ]
 }

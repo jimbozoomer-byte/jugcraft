@@ -98,6 +98,7 @@ import graveyard as gy
 import diagonal_connections as dg
 import menagerie_registry as menagerie
 import jimtafacts
+import jimtafacts_catalog
 import jimtafacts_network
 import jimtafacts_robots
 import jimtafacts_gear
@@ -207,12 +208,14 @@ def texture(ref):
         # Animated textures are a vertical strip of square frames of 16x16, 32x32, 48x48 or 64x64 with an .mcmeta beside
         # them.
         width, height = img.size
+        if not animated and max(img.size) <= 1024 and jimtafacts_catalog.original_texture(png):
+            return  # Supplied rectangular face atlases retain their original pixels and mapped UVs.
         if not animated and ref == "jugcraft:menagerie/rotten/block/treasure_chest" and img.size == (48, 32):
             return  # Supplied chest atlas; its original block-model UVs are normalized to 0..16.
         if not animated and ref.startswith("jugcraft:crafted/") and all(0 < v <= 1024 for v in img.size): return  # Authored rectangular trophy skins retain their supplied UV dimensions.
         if not animated and ref.startswith(("jugcraft:household/", "jugcraft:menagerie/")) and all(v > 0 and v <= 1024 and v & (v-1) == 0 for v in img.size):
             return  # supplied model atlases use rectangular UV sheets
-        if animated and not (width in (16, 32, 48, 64) and height % width == 0 and height > width):
+        if animated and not (width in (16, 32, 48, 64) and height % width == 0 and height >= width):
             err(f"Animated texture {ref} is {img.size}, expected a strip of 16x16, 32x32, 48x48 or 64x64 frames")
         elif not animated and not (ref in {"jugcraft:nouveau/entity/signs/archwood", "jugcraft:nouveau/entity/signs/hanging/archwood"} and img.size == (64,32)) and img.size not in ((16, 16), (32, 32), (48, 48), (64, 64), (128, 128)) \
                 and not (img.size in ((256, 256), (512, 512), (1024, 1024)) and _sharp(png.stem)):
@@ -282,7 +285,8 @@ def check_assets(registered):
     for block in (all_blocks() + machine_blocks() + ag.all_blocks() + petro.petro_blocks() + deposits.all_blocks()
                   + list(tank_display.BLOCKS) + plastic.blocks() + ph.blocks() + (town_assets.blocks() + styx.blocks()) + seasons.BLOCKS
                   + construction.blocks() + control_electronics.blocks() + rocketry.blocks() + dieselworks.blocks() + kaiserworks.blocks() + trenchworks.blocks() + fortifications.blocks() + bunkerworks.blocks() + aged_wood.blocks() + fire_control.blocks()
-                  + concordance.blocks() + guns.blocks() + industrial_forms.blocks() + list(vehicle_bays.BLOCKS) + menagerie.blocks() + starter_workshop.STATIONS):
+                  + concordance.blocks() + guns.blocks() + industrial_forms.blocks() + list(vehicle_bays.BLOCKS) + menagerie.blocks() + starter_workshop.STATIONS
+                  + sorted(jimtafacts_catalog.blocks() & jimtafacts_catalog.items())):
         state = load(ASSETS / "blockstates" / f"{block}.json")
         if state:
             for variant in state.get("variants", {}).values():
@@ -304,7 +308,7 @@ def check_assets(registered):
         definition = load(ASSETS / "items" / f"{item}.json")
         if definition:
             item_models(definition["model"])
-        if item not in (all_blocks() + machine_blocks() + ag.all_blocks() + petro.petro_blocks() + deposits.all_blocks()
+        if item not in jimtafacts_catalog.blocks() and item not in (all_blocks() + machine_blocks() + ag.all_blocks() + petro.petro_blocks() + deposits.all_blocks()
                         + list(tank_display.BLOCKS) + plastic.blocks() + ph.blocks() + (town_assets.blocks() + styx.blocks())
                         + construction.blocks() + control_electronics.blocks() + rocketry.blocks() + dieselworks.blocks() + kaiserworks.blocks() + trenchworks.blocks() + fortifications.blocks() + bunkerworks.blocks() + aged_wood.blocks() + fire_control.blocks()
                         + concordance.blocks() + guns.blocks() + industrial_forms.blocks() + list(vehicle_bays.BLOCKS) + menagerie.blocks() + starter_workshop.STATIONS
@@ -507,6 +511,16 @@ def item_units(ref):
             return {}
         pieces = ("pickaxe", "axe", "shovel") if piece == "paxel" else (piece,)
         return {tier: 9 * sum("".join(gear.PATTERNS[p]).count("#") for p in pieces)}
+    if path in jimtafacts_catalog.items():
+        # Finished devices follow the existing no-salvage convention. Reversible
+        # industrial metal forms retain the shared plate mass instead of gaining it.
+        from fractions import Fraction
+        for metal in jimtafacts_industry.CASING_METALS:
+            if path == f'jimta_{metal}_casing': return {metal: Fraction(PART_UNITS['plate'], 2)}
+            if path == f'jimta_dense_{metal}_plate': return {metal: 9 * PART_UNITS['plate']}
+        if path == 'jimta_gold_plate': return {'gold': 9}
+        if path == 'jimta_iron_turning_blank': return {'iron': 9}
+        return {}
     err(f"No metal content known for {ref}")
     return {}
 
@@ -17319,7 +17333,9 @@ def check_aluminum_bootstrap():
         return ns == MOD and "aluminum" in path and ref not in NOT_ALUMINUM_METAL
 
     tags = {}
-    reachable = set()
+    # Vanilla smelts mined clay balls into bricks independently of Jugcraft's
+    # newly-added reversible brick/block compressor and extractor recipes.
+    reachable = {'minecraft:clay_ball', 'minecraft:brick'}
 
     def ok(choice):
         if choice.startswith("#"):

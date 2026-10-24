@@ -194,13 +194,11 @@ public final class JimtafactsWearables {
             Frame frame = new Frame(humanoid, (HumanoidModel<HumanoidRenderState>) source, access.index(),
                     name.equals("pocket_piston") ? piston(wearer, state.ageInTicks - wearer.tickCount) : 0);
             Identifier texture = texture(name, slim);
-            collector.order(0).submitModel(model, frame, pose, model.renderType(texture), light,
-                    OverlayTexture.NO_OVERLAY, state.outlineColor, null);
+            collector.order(0).submitModel(model, frame, pose, wearableRender(name, texture, stack.hasFoil()), light,
+                    OverlayTexture.NO_OVERLAY, -1, null, state.outlineColor);
             Identifier glow = glow(name, slim, state.ageInTicks);
             if (glow != null) collector.order(0).submitModel(model, frame, pose, model.renderType(glow), 0xF000F0,
-                    OverlayTexture.NO_OVERLAY, state.outlineColor, null);
-            if (stack.hasFoil()) collector.order(1).submitModel(model, frame, pose, RenderTypes.armorEntityGlint(), light,
-                    OverlayTexture.NO_OVERLAY, state.outlineColor, null);
+                    OverlayTexture.NO_OVERLAY, -1, null, state.outlineColor);
         }
 
         @Override
@@ -225,11 +223,15 @@ public final class JimtafactsWearables {
             ModelPart part = arm == HumanoidArm.LEFT ? model.wearable.leftArm : model.wearable.rightArm;
             copyTransform(part, sourceArm);
             if (name.equals("pocket_piston")) setPiston(part, piston(player, 0));
-            collector.order(0).submitModelPart(part, pose, model.renderType(texture(name, slim)), light, OverlayTexture.NO_OVERLAY, null);
+            collector.order(0).submitModelPart(part, pose, wearableRender(name, texture(name, slim), stack.hasFoil()), light, OverlayTexture.NO_OVERLAY, null);
             Identifier glow = glow(name, slim, player.tickCount);
             if (glow != null) collector.order(0).submitModelPart(part, pose, model.renderType(glow), 0xF000F0, OverlayTexture.NO_OVERLAY, null);
-            if (stack.hasFoil()) collector.order(1).submitModelPart(part, pose, RenderTypes.armorEntityGlint(), light, OverlayTexture.NO_OVERLAY, null);
         }
+    }
+
+    private static net.minecraft.client.renderer.rendertype.RenderType wearableRender(String name, Identifier texture, boolean foil) {
+        if (translucent(name)) return foil ? RenderTypes.itemTranslucentGlint(texture) : RenderTypes.entityTranslucent(texture);
+        return foil ? RenderTypes.armorCutoutNoCullGlint(texture) : RenderTypes.armorCutoutNoCull(texture);
     }
 
     private static HumanoidArm wornArm(TrinketSlotAccess access, HumanoidArm main) {
@@ -243,9 +245,9 @@ public final class JimtafactsWearables {
             this(name, geometry(name, variant.slim, variant.arm, variant.bootsCovered).bakeRoot());
         }
         private WornModel(String name, ModelPart root) {
-            super(root, translucent(name) ? RenderTypes::armorTranslucent : RenderTypes::armorCutoutNoCull);
+            super(root, translucent(name) ? RenderTypes::entityTranslucent : RenderTypes::armorCutoutNoCull);
             this.name = name;
-            this.wearable = new HumanoidModel<>(root, translucent(name) ? RenderTypes::armorTranslucent : RenderTypes::armorCutoutNoCull);
+            this.wearable = new HumanoidModel<>(root, translucent(name) ? RenderTypes::entityTranslucent : RenderTypes::armorCutoutNoCull);
         }
         @Override public void setupAnim(Frame frame) {
             wearable.setupAnim(frame.state);
@@ -312,7 +314,7 @@ public final class JimtafactsWearables {
         if (motion.lastTick != wearer.tickCount) {
             if (wearer.tickCount - motion.lastTick > 1) { motion.length = 0; motion.remaining = 0; }
             motion.length = Math.clamp(motion.length + (motion.remaining < 2 ? -.5F : .5F), 0, 1);
-            if (wearer.swingTime != 0) motion.remaining = 6;
+            if (wearer.isSwinging()) motion.remaining = 6;
             if (motion.remaining > 0) --motion.remaining;
             motion.lastTick = wearer.tickCount;
         }

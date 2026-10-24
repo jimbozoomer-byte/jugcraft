@@ -29,7 +29,7 @@ public final class WorkshopLaserRenderer implements BlockEntityRenderer<Workshop
     }
     @Override public void submit(State s,PoseStack stack,SubmitNodeCollector nodes,net.minecraft.client.renderer.state.level.CameraRenderState camera){
         if(s.distance<=0||s.distance>16)return;
-        nodes.submitCustomGeometry(stack,RenderTypes.entityCutoutNoCull(TEXTURE),(pose,out)->{
+        nodes.submitCustomGeometry(stack,RenderTypes.entityCutout(TEXTURE),(pose,out)->{
             double[] start={.5,.5,.5};int axis=s.direction.getAxis()==Direction.Axis.X?0:s.direction.getAxis()==Direction.Axis.Y?1:2;
             int sign=s.direction.getStepX()+s.direction.getStepY()+s.direction.getStepZ();
             for(double offset=.3125;offset<s.distance;offset+=1){double a=.5+sign*offset,b=.5+sign*Math.min(s.distance,offset+1);double[] lo={.46875,.46875,.46875},hi={.53125,.53125,.53125};lo[axis]=Math.min(a,b);hi[axis]=Math.max(a,b);cube(out,pose,lo,hi,s.frame);}

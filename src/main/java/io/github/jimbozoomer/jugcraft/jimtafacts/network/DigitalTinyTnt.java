@@ -5,8 +5,6 @@ import io.github.jimbozoomer.jugcraft.concordance.Authority;
 import io.github.jimbozoomer.jugcraft.concordance.ConcordanceEffects;
 import io.github.jimbozoomer.jugcraft.finance.LandRegistry;
 import io.github.jimbozoomer.jugcraft.town.TownProtection;
-import com.mojang.authlib.GameProfile;
-import net.fabricmc.fabric.api.entity.FakePlayer;
 import java.util.UUID;
 import net.fabricmc.fabric.api.object.builder.v1.block.entity.FabricBlockEntityTypeBuilder;
 import net.minecraft.core.*;
@@ -57,7 +55,7 @@ public final class DigitalTinyTnt {
     private static boolean unclaimed(ServerLevel level, BlockPos pos) {
         return level.isLoaded(pos) && level.getWorldBorder().isWithinBounds(pos) && !TownProtection.shieldsBlock(level, pos)
                 && (level.dimension() != Level.OVERWORLD || LandRegistry.get(level.getServer()).claim(LandRegistry.keyOf(pos)) == null)
-                && Authority.mayChange(level, FakePlayer.get(level, new GameProfile(new UUID(0, 46123), "[Tiny TNT]")), pos);
+                && Authority.mayChange(level, Authority.unownedTinyTntActor(level), pos);
     }
     public static Charge spawn(ServerLevel level, BlockPos pos, UUID owner, int fuse) {
         Charge e = new Charge(ENTITY, level); e.actor = owner; e.setPos(pos.getX() + .5, pos.getY(), pos.getZ() + .5);

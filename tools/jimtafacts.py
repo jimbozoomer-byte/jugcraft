@@ -110,7 +110,8 @@ def generate():
             return {k:remap(v) for k,v in value.items()}
         return value
     for source in (SOURCE / 'assets/artifacts/models/item').glob('*.json'):
-        dump(RES / 'assets/jugcraft/models/item/jimtafacts' / source.name, remap(json.loads(source.read_text(encoding='utf-8'))))
+        from jimtafacts_model_repairs import repair
+        dump(RES / 'assets/jugcraft/models/item/jimtafacts' / source.name, repair('item/jimtafacts/'+source.stem,remap(json.loads(source.read_text(encoding='utf-8')))))
     for source in (SOURCE / 'assets/artifacts/textures/item').glob('*'):
         if source.is_file():
             dest = RES / 'assets/jugcraft/textures/item/jimtafacts' / source.name
@@ -172,6 +173,9 @@ def generate():
     for name,provider in palette_source.items():
         if 'state' in provider:palette[name]=[provider['state']]
         elif 'entries' in provider:palette[name]=[entry['data'] for entry in provider['entries'] for _ in range(entry['weight'])]
+    # 26.3 block states use id/properties, not the older NBT-shaped Name/Properties.
+    palette={name:[{'id':state['Name'], **({'properties':state['Properties']} if state.get('Properties') else {})}
+                   for state in states] for name,states in palette.items() if states}
     dump(RES/'data/jugcraft/worldgen/feature/jimtafacts/campsite.json',{'type':'jugcraft:jimta_campsite','palette':palette})
     dump(RES/'data/jugcraft/worldgen/placed_feature/jimtafacts/campsite.json',{'feature':'jugcraft:jimtafacts/campsite','placement':[
         {'type':'minecraft:rarity_filter','chance':10},{'type':'minecraft:in_square'},
@@ -183,7 +187,7 @@ def generate():
             src=SOURCE/f'assets/artifacts/sounds/{file}.ogg';dest=RES/f'assets/jugcraft/sounds/jimtafacts/{file}.ogg';dest.parent.mkdir(parents=True,exist_ok=True);shutil.copyfile(src,dest)
     dump(soundfile,sounddata)
     dest=RES/'assets/jugcraft/textures/entity/jimtafacts/mimic.png';dest.parent.mkdir(parents=True,exist_ok=True);shutil.copyfile(SOURCE/'assets/artifacts/textures/entity/mimic.png',dest)
-    lang_path=RES/'assets/jugcraft/lang/en_us.json';existing=json.loads(lang_path.read_text(encoding='utf-8'));existing['entity.jugcraft.jimta_mimic']='Mimic';dump(lang_path,existing)
+    lang_path=RES/'assets/jugcraft/lang/en_us.json';existing=json.loads(lang_path.read_text(encoding='utf-8'));existing['entity.jugcraft.jimta_mimic']='Chest Mimic';existing['item.jugcraft.jimta_mimic_spawn_egg']='Chest Mimic Spawn Egg';dump(lang_path,existing)
     dump(ROOT / 'art/owner-library/catalog/edited-2026-10-23-jimtafacts/runtime-copies.json', copies)
     return catalog
 

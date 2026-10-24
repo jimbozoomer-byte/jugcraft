@@ -29,7 +29,7 @@ public final class JimtaBloodRenderer extends EntityRenderer<JimtaBloodProjectil
     private static void quad(State s,PoseStack pose,SubmitNodeCollector collector,int frameOffset){
         var texture=s.slash?Identifier.withDefaultNamespace("textures/particle/sweep_"+((int)(s.time/6)+frameOffset)%8+".png"):Jugcraft.id("textures/jimtafacts/spellbooks/entity/blood_needle/needle_5.png");
         float w=s.width/2;float[][] vertices=s.slash?new float[][]{{-w,-.1F,-w},{w,-.1F,-w},{w,-.1F,w},{-w,-.1F,w}}:new float[][]{{0,-w,-w},{0,w,-w},{0,w,w},{0,-w,w}};
-        collector.submitCustomGeometry(pose,RenderTypes.entityCutoutNoCull(texture),(matrix,buffer)->{
+        collector.submitCustomGeometry(pose,RenderTypes.entityCutout(texture),(matrix,buffer)->{
             float[][] uv={{0,1},{1,1},{1,0},{0,0}};for(int i=0;i<4;i++)buffer.addVertex(matrix,vertices[i][0],vertices[i][1],vertices[i][2]).setColor(0xFF5A000A).setUv(uv[i][0],uv[i][1]).setOverlay(OverlayTexture.NO_OVERLAY).setLight(s.lightCoords).setNormal(matrix,0,1,0);
         });
     }

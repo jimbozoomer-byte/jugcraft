@@ -42,7 +42,7 @@ def generate(source, assets, resources, model, dump, recipe):
     for name in BLOCKS:
         entry = {'type': 'minecraft:item', 'name': ji('certus_quartz_crystal') if name == 'quartz_cluster' else ji(name)}
         if name.endswith('_slab'):
-            entry['modifier'] = [{'type': 'minecraft:set_count', 'count': 2, 'condition': {'type': 'minecraft:block_state_property', 'block': ji(name), 'properties': {'type': 'double'}}}]
+            entry['modifier'] = [{'type': 'minecraft:set_count', 'count': 2, 'condition': {'type': 'minecraft:match_block', 'blocks': ji(name), 'state': {'type': 'double'}}}]
         elif name == 'quartz_cluster':
             entry['modifier'] = [{'type': 'minecraft:set_count', 'count': 4}]
         dump(resources / f'data/jugcraft/loot_table/blocks/jimta_{name}.json', {'type': 'minecraft:block', 'pools': [{'rolls': 1, 'entries': [entry], 'condition': {'type': 'minecraft:survives_explosion'}}]})

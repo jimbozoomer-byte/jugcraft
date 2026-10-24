@@ -9,11 +9,9 @@
           "name": "jugcraft:jimta_pipe_iron_power"
         }
       ],
-      "conditions": [
-        {
-          "condition": "minecraft:survives_explosion"
-        }
-      ]
+      "condition": {
+        "type": "minecraft:survives_explosion"
+      }
     }
   ]
 }

@@ -49,9 +49,10 @@ def generate(shared=True):
                 copy(sidecar, Path(str(target) + '.mcmeta'))
             model['textures'][field] = f'jugcraft:block/jimtafacts/tables/{namespace}/{path}'
         target = RES / f'assets/jugcraft/models/block/{name}.json'
-        dump(target, model)
+        from jimtafacts_model_repairs import repair
+        dump(target, repair('block/'+name, model))
         manifest.append({'source': original.relative_to(ROOT).as_posix(), 'runtime': target.relative_to(ROOT).as_posix(),
-                         'adaptation': 'Original elements and UVs unchanged; namespaced runtime textures and modern vanilla white glass.'})
+                         'adaptation': 'Original elements retained; namespaced runtime textures and modern vanilla white glass. Programming-table overlapping surface separated by 0.1 pixel with pinned UVs.'})
         dump(RES / f'assets/jugcraft/blockstates/{name}.json', {'variants': {'': {'model': 'jugcraft:block/' + name}}})
         dump(RES / f'assets/jugcraft/items/{name}.json', {'model': {'type': 'minecraft:model', 'model': 'jugcraft:block/' + name}})
         dump(RES / f'data/jugcraft/loot_table/blocks/{name}.json', {'type': 'minecraft:block', 'pools': [

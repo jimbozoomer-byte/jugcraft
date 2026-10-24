@@ -551,8 +551,7 @@ public final class ComputerNode extends BlockEntity implements Container {
                 if(remote!=level&&!advanced)continue;
                 if(remote==level&&receiver.worldPosition.distSqr(sender.worldPosition)>(advanced?256*256:64*64))continue;
                 // A remote identity answers only protection questions; packets cannot execute commands or move the owner.
-                ServerPlayer remoteActor=remote==level?actor:net.fabricmc.fabric.api.entity.FakePlayer.get(remote,
-                        new com.mojang.authlib.GameProfile(actor.getUUID(),"[Workshop modem]"));
+                ServerPlayer remoteActor=Authority.remoteModemActor(remote,actor);
                 if(!receiver.permitted(remoteActor))continue;
                 if(remote!=level){if(energy.getAmount()<10)break;energy.setAmount(energy.getAmount()-10);}
                 reached++;

@@ -73,6 +73,7 @@ def generate(shared=True):
  craft('compost_weeds',['jugcraft:jimta_weed']*4,'minecraft:bone_meal')
  for id,recipe in recipes.items():dump(RES/f'data/jugcraft/recipe/jimtafacts_crops/{id}.json',recipe)
  dump(RES/'data/jugcraft/tags/block/jimtafacts_crops.json',{'replace':False,'values':['jugcraft:'+b for b in sorted(blocks())]})
+ lang['item.jugcraft.jimta_coffee_beans']='Cultivated Coffee Beans'
  if shared:
   path=RES/'assets/jugcraft/lang/en_us.json';value=json.loads(path.read_text(encoding='utf-8'));value.update(lang);dump(path,value)
   path=RES/'data/minecraft/tags/block/crops.json';value=json.loads(path.read_text(encoding='utf-8')) if path.exists() else {'replace':False,'values':[]};ref='#jugcraft:jimtafacts_crops'

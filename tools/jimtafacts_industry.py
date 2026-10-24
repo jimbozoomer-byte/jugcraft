@@ -85,6 +85,7 @@ def recipes():
   if extras:value['byproducts']=[{'result':{'id':item,'count':n},'chance':1} for item,n in extras]
   result[name]=value
  def craft(name,ingredients,output,count=1):
+  if ':' not in output:output='jugcraft:'+output
   result[name]={'type':'minecraft:crafting_shapeless','category':'misc','ingredients':ingredients,'result':{'id':output,'count':count}}
  for metal,feed in [('gold','minecraft:gold_ingot'),('obsidian','minecraft:obsidian'),('lapis','minecraft:lapis_lazuli')]:
   process('compress_'+metal+'_plate','jimta_compressing',feed,plate(metal),inputs=1 if metal=='gold' else 4)
@@ -224,6 +225,11 @@ def generate(shared=True):
     states[f'facing={facing},lit={str(active).lower()}']={'model':'jugcraft:block/'+model,'y':rot}
   dump(RES/f'assets/jugcraft/blockstates/{id}.json',{'variants':states})
   dump(RES/f'assets/jugcraft/items/{id}.json',{'model':{'type':'minecraft:model','model':'jugcraft:block/'+id}})
+  # Supplied housings retain their original appearance under either machine style.
+  if native is None:
+   alternate=RES/'resourcepacks/alternate_machines/assets/jugcraft'
+   dump(alternate/f'blockstates/{id}.json',{'variants':states})
+   dump(alternate/f'items/{id}.json',{'model':{'type':'minecraft:model','model':'jugcraft:block/'+id}})
   dump(RES/f'data/jugcraft/loot_table/blocks/{id}.json',{'type':'minecraft:block','pools':[{'rolls':1,'entries':[{'type':'minecraft:item','name':'jugcraft:'+id}],
        'condition':{'type':'minecraft:survives_explosion'}}]})
  for id,(label,texture) in MATERIALS.items():

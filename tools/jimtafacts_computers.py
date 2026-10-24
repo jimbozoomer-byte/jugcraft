@@ -85,11 +85,12 @@ def apply():
     target = RES / 'assets/jugcraft/lang/en_us.json'; lang = json.loads(target.read_text(encoding='utf-8'))
     for name in (*DEVICES, 'cable'): lang['block.jugcraft.jimta_computer_' + name] = language['block.computercraft.' + name]
     for name in ITEMS: lang['item.jugcraft.jimta_' + name] = language['item.computercraft.' + name]
+    lang['item.jugcraft.jimta_treasure_disk'] = 'Program Library Disk'
     lang['block.jugcraft.jimta_computer_wireless_modem_advanced'] = 'Advanced Wireless Modem'
     dump(target, lang)
     for name in blocks():
         dump(RES / f'data/jugcraft/loot_table/blocks/{name}.json', {'type': 'minecraft:block', 'pools': [{'rolls': 1,
-             'entries': [{'type': 'minecraft:item', 'name': 'jugcraft:' + name}], 'conditions': [{'condition': 'minecraft:survives_explosion'}]}]})
+             'entries': [{'type': 'minecraft:item', 'name': 'jugcraft:' + name}], 'condition': {'type': 'minecraft:survives_explosion'}}]})
     # Existing factory components provide the entry path; no parallel ore/energy currency.
     recipes = {
         'computer_normal': ['jugcraft:logic_controller', 'minecraft:glass_pane', 'minecraft:redstone'],

@@ -8,6 +8,16 @@ BLOCKS = [f'{color}_{suffix(kind)}_cable' for kind in KINDS for color in COLORS 
 
 
 def generate(source, assets, root, model, texture, dump, recipe):
+    # Remove pre-integration spellings only; these never entered a published save.
+    # Current registered names put "dense" after covered/smart, matching the supplied models.
+    for color in COLORS + ['fluix']:
+        for kind in ('covered','smart'):
+            obsolete=f'jimta_{color}_dense_{kind}_cable'
+            for path in (assets/f'blockstates/{obsolete}.json', assets/f'items/{obsolete}.json',
+                         root/f'src/main/resources/data/jugcraft/loot_table/blocks/{obsolete}.json',
+                         root/f'src/main/resources/data/jugcraft/recipe/jimtafacts/network/{obsolete[6:]}.json'):
+                assert path.resolve().is_relative_to((root/'src/main/resources').resolve())
+                if path.is_file():path.unlink()
     records = []
     for name in BLOCKS:
         kind = next(k for k in reversed(KINDS) if name.endswith('_' + suffix(k) + '_cable'))

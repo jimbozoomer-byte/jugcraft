@@ -41,7 +41,7 @@ public final class IndustrialRotorRenderer implements BlockEntityRenderer<Indust
         pose.pushPose();pose.translate(.5,.5,.5);
         int direction=s.facing==Direction.WEST?0:s.facing==Direction.NORTH?1:s.facing==Direction.EAST?2:3;
         pose.rotateDegrees(Axis.YP,-90*direction);pose.rotateDegrees(Axis.XP,s.angle);pose.translate(-.2,0,0);
-        collector.order(0).submitModelPart(models[s.tier],pose,RenderTypes.entityCutoutNoCull(Jugcraft.id("textures/block/jimtafacts/heat/rotor_"+IndustrialHeat.ROTOR_NAMES.get(s.tier)+".png")),s.lightCoords,OverlayTexture.NO_OVERLAY,null);
+        collector.order(0).submitModelPart(models[s.tier],pose,RenderTypes.entityCutout(Jugcraft.id("textures/block/jimtafacts/heat/rotor_"+IndustrialHeat.ROTOR_NAMES.get(s.tier)+".png")),s.lightCoords,OverlayTexture.NO_OVERLAY,null);
         pose.popPose();
     }
     private static LayerDefinition layer(int diameter){

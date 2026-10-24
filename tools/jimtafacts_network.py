@@ -117,8 +117,9 @@ def generate():
                 if face.get('texture') in data.get('textures', {}): face['texture'] = '#' + face['texture']
         data.pop('render_type', None)
         dest = ASSETS / ('models/' + PREFIX + path + '.json')
-        dump(dest, data)
-        copies.append({'source': src.relative_to(ROOT).as_posix(), 'runtime': dest.relative_to(ROOT).as_posix(), 'changes': 'Namespace references and native emission metadata; original geometry, UVs and texture pixels retained.'})
+        from jimtafacts_model_repairs import repair, REPAIRED, CLOSED
+        dump(dest, repair(PREFIX+path, data))
+        copies.append({'source': src.relative_to(ROOT).as_posix(), 'runtime': dest.relative_to(ROOT).as_posix(), 'changes': 'Namespace references and native emission metadata; original elements and pixels retained.' + (' Audited overlapping faces separated and exposed box faces closed for the native renderer, UVs pinned.' if PREFIX+path in REPAIRED | CLOSED else ' Geometry and UVs unchanged.')})
         return target
 
     sources = {
@@ -215,6 +216,7 @@ def generate():
         dump(ASSETS / f'items/jimta_{name}.json', {'model': {'type': 'minecraft:model', 'model': model('item/' + name)}})
 
     language = json.loads((ASSETS / 'lang/en_us.json').read_text(encoding='utf-8'))
+    language['encyclopedia.jugcraft.page.jimta_network'] = 'Digital Storage Networks'
     source_lang = json.loads((SOURCE / 'lang/en_us.json').read_text(encoding='utf-8'))
     for name in BLOCKS + ITEMS + equipment.ITEMS + paint.ITEMS + exploration.ITEMS + facades.ITEMS:
         key = ('block' if name in BLOCKS else 'item')

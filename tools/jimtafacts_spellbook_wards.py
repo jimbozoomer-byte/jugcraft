@@ -4,7 +4,7 @@ from nouveau_nbt import adapt
 
 WARDS={
  'abyssal_shroud':('eldritch',30,200,0,'echo_shard','For six seconds, dodge incoming attacks into nearby clear, permitted ground. Fall and bypass damage still apply.'),
- 'arcane_shackle':('ender',4,45,.5,'chain','Launch an ender chain that tethers a permitted enemy to a breakable fifteen-health anchor for eleven seconds.'),
+ 'arcane_shackle':('ender',4,45,.5,'iron_chain','Launch an ender chain that tethers a permitted enemy to a breakable fifteen-health anchor for eleven seconds.'),
  'heartstop':('blood',10,120,0,'redstone','Defer post-armour damage for ten seconds, then repay the entire accumulated debt. Cleansing or logout cannot erase the debt.'),
  'planar_sight':('eldritch',15,200,0,'ender_eye','See nearby living creatures through terrain for forty seconds. Only your view changes.'),
  'pocket_dimension':('eldritch',30,60,2,'nether_star','Leave combat and enter your own persistent room. Touch its portal frame to return. The original room is built only on first entry.'),

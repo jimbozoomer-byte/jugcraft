@@ -166,7 +166,8 @@ def generate():
         # closed inventory/held models; authored geometry/UV/display is preserved.
         data.pop('overrides', None)
         data.pop('loader', None)
-        dump(RES / ('assets/jugcraft/models/jimtafacts/spellbooks/' + path + '.json'), data)
+        from jimtafacts_model_repairs import repair
+        dump(RES / ('assets/jugcraft/models/jimtafacts/spellbooks/' + path + '.json'), repair('jimtafacts/spellbooks/'+path, data))
         return target
 
     def definition(source_model, ident):
@@ -373,6 +374,24 @@ def generate():
         'armor': list(ARMOR), 'model_rule':'Original cube geometry, UVs and texture bytes; no replacement meshes.'})
     dump(ROOT / 'art/owner-library/catalog/edited-2026-10-23-jimtafacts/spellbooks-runtime-copies.json', copies)
     source_recipes.generate(dump,RES,SOURCE)
+    # Translate removed/loader-specific tags to equivalent registered 26.3 members.
+    tag_replacements={
+        '#minecraft:dripstone_replaceable_blocks':['#minecraft:base_stone_overworld'],
+        '#minecraft:wart_blocks':['minecraft:nether_wart_block','minecraft:warped_wart_block'],
+        '#c:barrels':['minecraft:barrel'],
+        '#c:ingots/gold':['minecraft:gold_ingot'],
+        '#curios:spellbook':[j(name) for name in BOOKS],
+        'jugcraft:jimta_spellbooks_chronicle':[],
+    }
+    for tag_path in (RES/'data/jugcraft/tags').rglob('*.json'):
+        if 'jimtafacts' not in tag_path.parts:continue
+        tag_data=json.loads(tag_path.read_text(encoding='utf-8'))
+        values=[]
+        for value in tag_data.get('values',[]):
+            if isinstance(value,dict) and value.get('id')=='jugcraft:jimta_spellbooks_arcane_salvage' and not value.get('required',True):continue
+            values.extend(tag_replacements.get(value,[value]) if isinstance(value,str) else [value])
+        tag_data['values']=values
+        dump(tag_path,tag_data)
     dump(RES / "jugcraft/jimtafacts_spellbooks/power_scaling.json",{("angel_wings" if n=="angel_wing" else n):{"base":r.get("baseSpellPower",1),"per_level":r.get("spellPowerPerLevel",0)} for n,r in source_info.items()})
     return lang
 if __name__ == '__main__':

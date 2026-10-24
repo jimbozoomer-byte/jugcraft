@@ -10,6 +10,12 @@ record, not a claim that the candidate passed validation or was deployed.
 
 ## Implement later
 
+- **Chronicle and legacy guide-book integration.** The supplied Chronicle recipe
+  and Patchouli guide recipe require book systems absent from the native port.
+  Their source files are retained; invalid runtime recipes are withheld until
+  their reading/progression interfaces are implemented. Players can use the
+  existing Jugcraft Encyclopedia in the meantime.
+
 1. **Large spatial storage and entity migration.** The current 2³/16³ cells move
    supported static blocks only. Add incremental 128³ exchanges, durable entity
    identity and supported block-entity contents, interruption recovery and

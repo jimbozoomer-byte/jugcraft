@@ -28,7 +28,10 @@ def generate(source, assets, resources, model, texture, dump, recipe):
     hash_texture = texture('ae2:item/memory_card_hash')
     elements = []
     for x in range(4):
-        for y in range(2): elements.append({'from': [8+x, 9-y, 7.5], 'to': [9+x, 10-y, 8.5], 'faces': {face: {'texture': '#hash', 'uv': [0, 0, 1, 1], 'tintindex': x*2+y+1} for face in ('north', 'south')}})
+        for y in range(2):
+            for face,z in [('north',7.5),('south',8.5)]:
+                elements.append({'from':[8+x,9-y,z],'to':[9+x,10-y,z],
+                    'faces':{face:{'texture':'#hash','uv':[0,0,1,1],'tintindex':x*2+y+1}}})
     hash_ref = 'jugcraft:item/jimtafacts/ae2/memory_card_identity'
     dump(assets / 'models/item/jimtafacts/ae2/memory_card_identity.json', {'parent': 'minecraft:item/generated', 'textures': {'hash': hash_texture, 'particle': hash_texture}, 'elements': elements})
     memory_tints = [{'type': 'minecraft:custom_model_data', 'index': i, 'default': 9526733} for i in range(9)]

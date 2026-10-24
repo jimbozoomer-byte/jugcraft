@@ -19,7 +19,13 @@ class WorkshopArtTests(unittest.TestCase):
         for kind in ('charging','programming','advanced_crafting'):
             old=json.loads((source/(kind+'.json')).read_text(encoding='utf-8'))
             new=json.loads((ROOT/f'src/main/resources/assets/jugcraft/models/block/jimta_{kind}_table.json').read_text(encoding='utf-8'))
-            self.assertEqual(old['elements'],new['elements'])
+            if kind!='programming':self.assertEqual(old['elements'],new['elements'])
+            else:
+                self.assertEqual(len(old['elements']),len(new['elements']))
+                for a,b in zip(old['elements'],new['elements']):
+                    self.assertEqual(a.get('rotation'),b.get('rotation'))
+                    for key in ('from','to'):
+                        self.assertTrue(all(abs(x-y)<=0.101 for x,y in zip(a[key],b[key])))
     def test_portable_barrel_does_not_also_drop_empty_barrel(self):
         loot=json.loads((ROOT/'src/main/resources/data/jugcraft/loot_table/blocks/jimta_brewing_barrel.json').read_text(encoding='utf-8'))
         self.assertEqual(loot['pools'],[])

@@ -9,7 +9,7 @@ import net.minecraft.core.component.DataComponents;
 import net.minecraft.world.item.component.CustomData;
 
 public final class JimtaReactorGameTests {
-    private CompactReactor.Core reactor(GameTestHelper h){h.setBlock(new BlockPos(2,2,2),CompactReactor.CORE);return (CompactReactor.Core)h.getBlockEntity(new BlockPos(2,2,2));}
+    private CompactReactor.Core reactor(GameTestHelper h){h.setBlock(new BlockPos(2,2,2),CompactReactor.CORE);return h.getBlockEntity(new BlockPos(2,2,2), CompactReactor.Core.class);}
     private ItemStack part(String name){return new ItemStack(CompactReactor.PARTS.get("jimta_"+name));}
     @GameTest public void fuelProducesFiniteEnergyAndBecomesSpentExactlyOnce(GameTestHelper h){
         var r=reactor(h);var rod=part("uranium_rod_simple");CustomData.update(DataComponents.CUSTOM_DATA,rod,t->t.putInt("Used",19999));r.setItem(0,rod);r.enabled=true;r.step(h.getLevel());
