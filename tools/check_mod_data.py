@@ -18134,7 +18134,8 @@ def check_logistics(co, root, lang, registered):
         if word not in lg.EVENTS and word not in lg.NOTES:
             err(f"concordance/logistics/Logistics.java: '{word}' is neither an event in EVENTS nor a note in NOTES")
     porter = java("spirits/ClockworkPorterEntity.java")
-    for word in set(re.findall(r'release\([^;]*?"([a-z_]+)"', porter + java("courier/CourierLedger.java"))):
+    couriers_work = porter + java("spirits/CourierWork.java") + java("spirits/WorkshopHandEntity.java") + java("courier/CourierLedger.java")
+    for word in set(re.findall(r'release\([^;]*?"([a-z_]+)"', couriers_work)):
         if word not in lg.NOTES:
             err(f"logistics: the release note '{word}' has no text in NOTES")
     for key in lg.EVENTS:
@@ -18151,11 +18152,14 @@ def check_logistics(co, root, lang, registered):
         for key in re.findall(r'"message\.jugcraft\.concordance\.(courier\.[a-z_.]+)"', path.read_text(encoding="utf-8")):
             if not key.endswith(".") and f"message.{MOD}.concordance.{key}" not in lang:
                 err(f"{path.name}: missing lang message.{MOD}.concordance.{key}")
-    # A courier's work moves items only through CourierLedger; CourierLedger moves them only in committed transactions.
+    # A courier's work moves items only through CourierLedger (since Concordance Chunk D, D-08, the decision is
+    # spirits/CourierWork, shared by the porter and the workshop hand); CourierLedger moves them only in committed transactions.
     work = porter.split("courier work (roadmap step 18)", 1)[-1].split("Draws Ley Charge", 1)[0]
-    for move in (".insert(", ".extract(", "removeItem(", "setItem(", "insert(container"):
-        if move in work:
-            err(f"spirits/ClockworkPorterEntity.java: courier work moves items itself ({move}); use CourierLedger")
+    for name, text in (("ClockworkPorterEntity.java", work), ("CourierWork.java", java("spirits/CourierWork.java")),
+                       ("WorkshopHandEntity.java", java("spirits/WorkshopHandEntity.java"))):
+        for move in (".insert(", ".extract(", "removeItem(", "setItem(", "insert(container"):
+            if move in text:
+                err(f"spirits/{name}: courier work moves items itself ({move}); use CourierLedger")
     if java("courier/CourierLedger.java").count("transaction.commit()") < 2:
         err("concordance/courier/CourierLedger.java: pickups and deliveries must commit their transactions with the ledger step")
     # The post.
@@ -20184,8 +20188,11 @@ AUTHORITY_ROUTES = {
     # Concordance Chunk C, C-09 (C-P62): a graft asks at the crop and at the bed.
     "garden/OrganismCropBlock.java": ["Authority.mayChange(level, player, pos)", "Authority.mayChange(level, player, pos.below())"],
     "spirits/ClockworkPorterEntity.java": ["Authority.answering(level, owner) == null", "Authority.mayChangeFor(level, owner, source)",
-                                           "Authority.mayChangeFor(level, owner, target)",
-                                           "Authority.mayChangeFor(level, request.ticket().requester(), pos)"],
+                                           "Authority.mayChangeFor(level, owner, target)"],
+    # Concordance Chunk D, D-08: the porter's courier decision, shared with the workshop hand.
+    "spirits/CourierWork.java": ["Authority.mayChangeFor(level, keeper, pos) && Authority.mayChangeFor(level, request.ticket().requester(), pos)",
+                                 "Authority.answering(level, next.ticket().requester()) == null",
+                                 "Authority.mayChangeFor(level, worker.owner(), from)"],
     "spirits/GatheringShadeEntity.java": ["Authority.answering(level, agreement.holder()) == null"],
     # Concordance Chunk D (D-S8): sealing asks at the place, as the sealer and never as a stand-in.
     # D-S3 (D-02): upkeep is looked at only with the holder present near the place, never a stand-in.
