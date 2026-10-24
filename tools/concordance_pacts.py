@@ -17,8 +17,10 @@ and the pact menu's protocol. D-05 (D-S1, D-S3, D-S6, D-S12, D-S16): Star-reckon
 
 Java: concordance/spirits/StolasRegard.java, PactPerchBlock(Entity), PactMenu, PactRequestPayload, PactStatePayload,
 PactSessions, PactCompact, PactKeeping, StarReckoning, StolasEntity; concordance/worker/PactDefinition, PactParser,
-PactCatalog. tools/concordance.py merges these tables into its own; Styx's words are tools/styx.py's;
-tools/check_mod_data.py (check_stolas_regard, check_pacts, check_pact_screen) holds the Java and the data to them.
+PactCatalog; client/PactClient, PactScreen and WorkerClient (Stolas's provisional body, the owner's Flashjack rig
+copied by tools/owner_art.py from OWNER_FILES). tools/concordance.py merges these tables into its own; Styx's words are
+tools/styx.py's; tools/check_mod_data.py (check_stolas_regard, check_pacts, check_pact_screen) holds the Java and the
+data to them.
 """
 
 MOD = "jugcraft"
@@ -225,6 +227,7 @@ def lang_entries(lang):
     lang[f"container.{MOD}.pact_perch"] = BLOCKS["pact_perch"]["name"]
     lang[f"tooltip.{MOD}.pact_perch"] = PERCH_TOOLTIP
     lang[f"tag.item.{OFFERINGS_TAG.replace(':', '.')}"] = "Stolas's Offerings"
+    screen_lang(lang)
 
 
 def codex():
@@ -303,3 +306,92 @@ def write_all(write, assets, data, lang, condition, self_drop):
 def write_data(write, data):
     for key, info in PACTS.items():
         write(data / "concordance" / "pact" / f"{key}.json", dict({"schema": 1}, **info))
+
+
+# ------------------------------------------------------------------------------------------- D-04: the screen and body
+# The terms page's label for each term (D-S15), in TERMS' order (check_pact_screen).
+TERM_LABELS = {
+    "service": "Service", "hours": "Hours", "area": "Area", "quota": "Daily quota", "upkeep": "Upkeep", "grace": "Grace",
+    "suspension": "If suspended", "duration": "How long", "breach": "Breach", "ending": "How to end it",
+    "returns": "What comes back", "perch": "If the perch is broken", "beneficiaries": "Who benefits",
+    "compact": "The Open Hand Compact",
+}
+# The pact perch's screen (Java: client/PactScreen.java, ui("<key>")). English only (D-S21).
+SCREEN = {
+    "screen.jugcraft.pact.opening": "He settles on the perch...",
+    "screen.jugcraft.pact.page": "%s of %s",
+    "screen.jugcraft.pact.back": "Back",
+    "screen.jugcraft.pact.next": "Next",
+    "screen.jugcraft.pact.hear_terms": "Hear his terms",
+    "screen.jugcraft.pact.leave": "Leave",
+    "screen.jugcraft.pact.leave.hint": "Nothing is spent or agreed; he leaves the perch",
+    "screen.jugcraft.pact.terms": "His terms",
+    "screen.jugcraft.pact.term_row": "%s: %s",
+    "screen.jugcraft.pact.terms_note": "Nothing is spent or agreed until you accept.",
+    "screen.jugcraft.pact.in_the_way": "Before he can agree:",
+    "screen.jugcraft.pact.waiting": "He considers your answer...",
+    "screen.jugcraft.pact.accept": "Accept the pact",
+    "screen.jugcraft.pact.accept.hint": "Pays the Open Hand Compact and seals the pact, both at once",
+    "screen.jugcraft.pact.decline": "Decline",
+    "screen.jugcraft.pact.decline.hint": "Nothing is spent; he leaves the perch",
+    "screen.jugcraft.pact.kept": "Your pact",
+    "screen.jugcraft.pact.standing": "How it stands:",
+    "screen.jugcraft.pact.tab.service": "His service",
+    "screen.jugcraft.pact.tab.terms": "Terms",
+    "screen.jugcraft.pact.recall_heading": "Star-reckoning: recall a pattern you have observed",
+    "screen.jugcraft.pact.no_patterns": "You have observed no sky pattern yet: record one at an observatory.",
+    "screen.jugcraft.pact.pattern.cost": "%s resonance from your astrolabe",
+    "screen.jugcraft.pact.pattern.chosen": "Chosen: %s resonance from your astrolabe",
+    "screen.jugcraft.pact.pattern.claimed": "Already recalled this occurrence",
+    "screen.jugcraft.pact.recall": "Recall %s",
+    "screen.jugcraft.pact.recall.none": "Choose a pattern to recall",
+    "screen.jugcraft.pact.offerings_heading": "Offerings for his upkeep",
+    "screen.jugcraft.pact.no_offerings": "You carry none of the offerings he takes.",
+    "screen.jugcraft.pact.offer": "Offer %s (%s carried)",
+    "screen.jugcraft.pact.offer.hint": "Paid ahead into the pact's keeping, as many as it has room for",
+    "screen.jugcraft.pact.suspend": "Suspend the pact",
+    "screen.jugcraft.pact.suspend.hint": "His service stops; nothing is taken and nothing is lost",
+    "screen.jugcraft.pact.resume": "Resume the pact",
+    "screen.jugcraft.pact.resume.hint": "His service starts again",
+    "screen.jugcraft.pact.end": "End the pact",
+    "screen.jugcraft.pact.end.hint": "He leaves; what you paid ahead comes back to you once",
+    "screen.jugcraft.pact.end.title": "End your pact with %s?",
+    "screen.jugcraft.pact.end.confirm": "%s will leave, and what you paid ahead comes back to you once. This cannot be undone.",
+    "screen.jugcraft.pact.end.yes": "End the pact",
+    "screen.jugcraft.pact.end.no": "Keep it",
+    "screen.jugcraft.pact.seat": "Seat the pact here",
+    "screen.jugcraft.pact.seat.hint": "Your pact without its perch is kept at this perch from now on",
+    "screen.jugcraft.pact.without_perch": "Without its perch",
+    "screen.jugcraft.pact.closed": "At this perch:",
+    "screen.jugcraft.pact.close": "Close",
+    "screen.jugcraft.pact.help": "Tab and Shift+Tab move between his words and the choices; Enter or Space chooses; Esc closes. "
+                                 "Closing before you accept agrees to nothing.",
+}
+# Stolas's provisional body (D-S5): the owner library's Flashjack rig, copied unchanged under his name by
+# tools/owner_art.py: art/owner-library/originals/Magic/assets/ars_jymbaumental/ geo/flashjack.geo.json (SHA-256
+# d23b5372...), animations/flashjack.animation.json (c4015c93...) and textures/entity/flashjack.png (567b44a5...);
+# catalog rows art/owner-library/catalog/files.csv:21291, 21330, 21676. Its folder's leftover metadata labels it Ars
+# Elemental by Alexthw, "GNU Lesser General Public License v3.0" (ports/jug-nouveau/ars_jymbaumental-1.21.1-0.7.10.4/
+# META-INF/neoforge.mods.toml); the owner's declaration is art/owner-library/PROVENANCE.md. Not imported: the
+# Blockbench project (flashjack.bbmodel) and the other skins (flapjack.png, bluejay.png); the attack and idle.air clips
+# are copied but unused. Its raven recolour and authored clips are D-06's, which then moves the texture and the
+# animations out of this table into its adapter.
+FLASHJACK = "assets/ars_jymbaumental/"
+OWNER_FILES = {
+    "geckolib/models/entity/stolas.geo.json": FLASHJACK + "geo/flashjack.geo.json",
+    "geckolib/animations/entity/stolas.animation.json": FLASHJACK + "animations/flashjack.animation.json",
+    "textures/entity/stolas.png": FLASHJACK + "textures/entity/flashjack.png",
+}
+BODY_SCALE = 1.4  # client/WorkerClient.STOLAS_SCALE
+BODY_CLIPS = {"perched": "idle.sitting", "grounded": "idle.ground", "astir": "idle.flapping"}  # spirits/StolasEntity
+# What ConcordancePactClientGameTests photographs (D-05 appends its own).
+CLIENT_SHOTS = ["jugcraft_pact_conversation", "jugcraft_pact_terms", "jugcraft_pact_terms_scale4", "jugcraft_pact_conversation_scale4",
+                "jugcraft_pact_terms_small", "jugcraft_pact_conversation_small", "jugcraft_pact_refused", "jugcraft_pact_kept",
+                "jugcraft_pact_stolas"]
+
+
+def screen_lang(lang):
+    """The pact screen's words (D-S21: English only)."""
+    lang.update(SCREEN)
+    for key, label in TERM_LABELS.items():
+        lang[f"screen.{MOD}.pact.term.{key}"] = label

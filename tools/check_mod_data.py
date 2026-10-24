@@ -14292,6 +14292,7 @@ def check_concordance(registered):
     check_workers(co, root, lang, registered, research)
     check_pacts(co, root, lang, registered, research)
     check_stolas_regard(co, root, lang, research)
+    check_pact_screen(co, lang)
     check_logistics(co, root, lang, registered)
     check_crucible_supply(co, root)
     check_artifice(co, root, lang, registered, research)
@@ -17257,14 +17258,24 @@ def check_winter_links(co, root):
         err(f"Rime.column is called only where the column deed is earned (lair/yeti/YetiKingEntity.java), not {found}")
 
 
-def check_geckolib(name, java_text, uvs, sizes, kind="block"):
-    """A GeckoLib block's (or entity's) assets agree: every animation the Java names exists, every animated bone exists,
-    and every cube's box-UV region lies inside the sheet without overlapping another's; the sheet is the size the model
-    says."""
+def _box_faces(u, v, w, h, d):
+    """The faces a box-UV cube draws on its sheet, as (u0, v0, u1, v1), those with area only: GeckoLib's layout
+    (GeometryQuadUvs.ofBoxUv), top and bottom over the four sides."""
+    faces = ((u + d, v, u + d + w, v + d), (u + d + w, v, u + d + 2 * w, v + d),
+             (u, v + d, u + d, v + d + h), (u + d, v + d, u + d + w, v + d + h),
+             (u + d + w, v + d, u + 2 * d + w, v + d + h), (u + 2 * d + w, v + d, u + 2 * d + 2 * w, v + d + h))
+    return [f for f in faces if f[2] > f[0] and f[3] > f[1]]
+
+
+def check_geckolib(name, java_text, uvs, sizes, kind="block", faces=False):
+    """A GeckoLib block's (or entity's) assets agree: every animation the Java names (a loop, or a clip played and held)
+    exists, every animated bone exists, and every cube's box-UV region lies inside the sheet without overlapping another's;
+    the sheet is the size the model says. With faces (an owner's rig copied as drawn: Stolas's, Concordance Chunk D,
+    D-S5), two cubes clash only where faces they draw share texels."""
     geo = load(ASSETS / "geckolib" / "models" / kind / f"{name}.geo.json") or {}
     animations = load(ASSETS / "geckolib" / "animations" / kind / f"{name}.animation.json") or {}
     clips = set(animations.get("animations", {}))
-    for clip in re.findall(r'thenLoop\("([^"]+)"\)', java_text):
+    for clip in re.findall(r'then(?:Loop|PlayAndHold)\("([^"]+)"\)', java_text):
         if clip not in clips:
             err(f"{name}: animation {clip} is not in {name}.animation.json")
     definition = (geo.get("minecraft:geometry") or [{}])[0]
@@ -17283,10 +17294,10 @@ def check_geckolib(name, java_text, uvs, sizes, kind="block"):
             region = (u, v, u + 2 * (w + d), v + d + h)
             if region[2] > width or region[3] > height:
                 err(f"{name}.geo.json: a cube in {bone['name']} maps outside the {width}x{height} sheet")
-            regions.append(region)
-    for i, a in enumerate(regions):
-        for b in regions[i + 1:]:
-            if a != b and a[0] < b[2] and b[0] < a[2] and a[1] < b[3] and b[1] < a[3]:
+            regions.append((region, _box_faces(u, v, w, h, d) if faces else [region]))
+    for i, (a, drawn_a) in enumerate(regions):
+        for b, drawn_b in regions[i + 1:]:
+            if a != b and any(p[0] < q[2] and q[0] < p[2] and p[1] < q[3] and q[1] < p[3] for p in drawn_a for q in drawn_b):
                 err(f"{name}.geo.json: UV regions {a} and {b} overlap")
     sheet = ASSETS / "textures" / kind / f"{name}.png"
     if not sheet.is_file():
@@ -18394,6 +18405,80 @@ def check_stolas_regard(co, root, lang, research):
         for name in names:
             if not re.search(rf"public void {name}\(GameTestHelper \w+\)", source):
                 err(f"{cls}: missing Concordance Chunk D, D-03 game test {name}")
+
+
+def check_pact_screen(co, lang):
+    """Concordance Chunk D, unit 2 (D-04 client, D-05; D-S5, D-S14, D-S15, D-S21): the pact perch's screen and Stolas's
+    provisional body (the payloads are check_pacts'). Only PactClient sends, only for the open menu, and it drops a state
+    for any other. The screen is native (no text box, chat, command or vanilla Dialog) and narrated, ends a pact only from
+    a confirmation, and has words for every term D-S15 lists. Stolas is drawn by GeckoLib from the owner's Flashjack files,
+    copied under his name by tools/owner_art.py, at BODY_SCALE, playing only clips his animation file has. The client
+    class that shows all this is registered and takes its pictures."""
+    pa = co.pacts
+
+    def text(path):
+        return path.read_text(encoding="utf-8") if path.exists() else ""
+    if list(pa.TERM_LABELS) != pa.TERMS:
+        err("tools/concordance_pacts.py: TERM_LABELS labels every term of TERMS, in order (D-S15)")
+    for key in pa.TERMS:
+        if f"screen.{MOD}.pact.term.{key}" not in lang:
+            err(f"pact screen: missing lang screen.{MOD}.pact.term.{key}")
+    client = text(CLIENT_JAVA_ROOT / "PactClient.java")
+    screen = text(CLIENT_JAVA_ROOT / "PactScreen.java")
+    if "PactClient.register();" not in text(CLIENT_JAVA_ROOT / "ConcordanceClient.java"):
+        err("client/ConcordanceClient.java: registers PactClient (the perch's screen and its state)")
+    for path in sorted(CLIENT_JAVA_ROOT.rglob("*.java")):
+        if path.name != "PactClient.java" and "new PactRequestPayload(" in text(path):
+            err(f"client/{path.name}: only PactClient sends a pact request (D-S14)")
+    for needle in ("new PactRequestPayload(menu.containerId, sequence, action, choice, shown.revision())",
+                   "menu.containerId != payload.containerId()", "getNarrator().saySystemNow(result.message())",
+                   "MenuScreens.register(Workers.PERCH_MENU, PactScreen::new)"):
+        if needle not in client:
+            err(f"client/PactClient.java: a request names the open menu, a rising sequence and the revision shown; a state for "
+                f"another menu is dropped; answers are read aloud; the perch's menu opens PactScreen ({needle})")
+    for forbidden in ("new EditBox(", "sendCommand(", "sendChat(", "server.dialog", "Component.literal("):
+        if forbidden in screen + client:
+            err(f"pact screen: native, command-free, its words the generator's (D-S14, D-S21): no {forbidden}")
+    for needle in ("implements MenuAccess<PactMenu>", "BookArt.Paragraph", "new ComposerScroll(", "protected Component getUsageNarration()",
+                   "minecraft.player.closeContainer()"):
+        if needle not in screen:
+            err(f"client/PactScreen.java: a native menu screen whose words are narrated paragraphs in a scroll ({needle})")
+    confirm = _java_body(screen, "private void confirmEnd(")
+    if "new ConfirmScreen(" not in confirm or "PactClient.request(menu, PactRequestPayload.END, 0)" not in confirm \
+            or screen.count("PactRequestPayload.END, 0)") != 1:
+        err("client/PactScreen.java: a pact is ended only from its confirmation's yes (confirmEnd)")
+    for key in re.findall(r'"((?:screen|key|message)\.jugcraft\.[a-z_.]+)"', screen + client):
+        if not key.endswith(".") and key not in lang:
+            err(f"pact screen: missing lang {key}")
+    for key in re.findall(r'\bui\("([a-z_.]+)"', screen):
+        if f"screen.{MOD}.pact.{key}" not in lang:
+            err(f"client/PactScreen.java: missing lang screen.{MOD}.pact.{key}")
+    # Stolas's provisional body (D-S5).
+    body = {"geckolib/models/entity/stolas.geo.json": "geo/flashjack.geo.json",
+            "geckolib/animations/entity/stolas.animation.json": "animations/flashjack.animation.json",
+            "textures/entity/stolas.png": "textures/entity/flashjack.png"}
+    for target, source in body.items():
+        if pa.OWNER_FILES.get(target) != "assets/ars_jymbaumental/" + source:
+            err(f"tools/concordance_pacts.py OWNER_FILES: {target} is the owner's Flashjack {source}, copied unchanged (D-S5)")
+    if not set(pa.OWNER_FILES) <= {target for target, _ in owner_art.magic_imports()}:
+        err("tools/owner_art.py: imports Stolas's body (concordance_pacts.OWNER_FILES in magic_imports)")
+    workers = text(CLIENT_JAVA_ROOT / "WorkerClient.java")
+    if "Workers.STOLAS" not in workers or f"STOLAS_SCALE = {pa.BODY_SCALE}F;" not in workers or ".withScale(STOLAS_SCALE)" not in workers:
+        err("client/WorkerClient.java: Stolas is drawn by GeckoLib at BODY_SCALE (tools/concordance_pacts.py)")
+    stolas = text(JAVA_ROOT / "concordance" / "spirits" / "StolasEntity.java")
+    for clip in pa.BODY_CLIPS.values():
+        if f'"{clip}"' not in stolas:
+            err(f"spirits/StolasEntity.java: his body plays {clip} (BODY_CLIPS)")
+    check_geckolib("stolas", stolas, None, None, kind="entity", faces=True)
+    # The client class that shows it.
+    entry = "io.github.jimbozoomer.jugcraft.test.ConcordancePactClientGameTests"
+    mod = load(ROOT / "src" / "gametest" / "resources" / "fabric.mod.json") or {}
+    if entry not in mod.get("entrypoints", {}).get("fabric-client-gametest", []):
+        err(f"src/gametest/resources/fabric.mod.json: {entry} is a registered client game test")
+    shots = text(ROOT / "src" / "gametest" / "java" / "io" / "github" / "jimbozoomer" / "jugcraft" / "test" / "ConcordancePactClientGameTests.java")
+    for name in pa.CLIENT_SHOTS:
+        if f'"{name}"' not in shots:
+            err(f"ConcordancePactClientGameTests: takes {name}")
 
 
 def check_logistics(co, root, lang, registered):

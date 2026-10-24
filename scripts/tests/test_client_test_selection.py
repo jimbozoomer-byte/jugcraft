@@ -56,6 +56,12 @@ class ClientTestSelectionTests(unittest.TestCase):
         finally:
             selection.WEIGHTS[name] = old
 
+    def test_stolas_assets_select_the_pact_client_test(self):
+        # Concordance Chunk D unit 2: Stolas's body is shown by the pact's client class, which has its own running time.
+        chosen, _ = selection.select(["src/main/resources/assets/jugcraft/textures/entity/stolas.png"], self.tests, set())
+        self.assertIn("ConcordancePactClientGameTests", chosen)
+        self.assertIn("ConcordancePactClientGameTests", selection.WEIGHTS)
+
     def test_workflow_runs_every_selected_shard(self):
         workflow = (ROOT / ".github/workflows/build.yml").read_text()
         matrix = re.search(r"shard: \[([\d, ]+)\]", workflow)
