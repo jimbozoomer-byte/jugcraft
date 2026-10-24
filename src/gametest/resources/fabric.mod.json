@@ -297,6 +297,7 @@
       "io.github.jimbozoomer.jugcraft.finance.ExchangeIntegrationGameTests",
       "io.github.jimbozoomer.jugcraft.test.PlayerRulesGameTests",
       "io.github.jimbozoomer.jugcraft.finance.ClaimProtectionGameTests",
+      "io.github.jimbozoomer.jugcraft.finance.ClaimCombatGameTests",
       "io.github.jimbozoomer.jugcraft.finance.ServerDefenseGameTests"
     ],
     "fabric-client-gametest": [
