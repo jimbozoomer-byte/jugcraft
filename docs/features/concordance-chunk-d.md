@@ -1,7 +1,9 @@
 # Concordance Chunk D: the pact hall (contract and handoff)
 
-Status: contract written; nothing built. No code, data, art, record or test of Chunk D exists yet: this page is the
-chunk's first change. Chunk D is developed on branch `claude/chunk-d-pact-hall` (local `wip/chunk-d`), started from
+Status: unit 1 (D-01, D-02) built on this branch (not merged; not yet pushed when its As built notes were written), its
+local checks run and passed; none of its Java has been compiled against Minecraft and none of its game tests has run
+(no Minecraft build where it was written; CI is its first compile). Units 2 to 5 are not started. Chunk D is developed
+on branch `claude/chunk-d-pact-hall` (local `wip/chunk-d`), started from
 Chunk C's head `779851cdb` ([#466](https://github.com/jimbozoomer-byte/jugcraft/pull/466), itself stacked on Chunk B's
 [#465](https://github.com/jimbozoomer-byte/jugcraft/pull/465)); when it is ready it is reviewed as a third stacked pull
 request against `claude/chunk-c-living-workshop` (D-D1). Not merged; Chunks B and C beneath it are not merged either.
@@ -111,7 +113,7 @@ completes the path. Nothing in units 3 and 4 comes before it.
 
 | Unit | Tickets | What it delivers | Record (proposed) | State |
 |---|---|---|---|---|
-| 1 | D-01, D-02 | The existing agreements keep their promises (shade death and re-call, seal refusals, the roster at once, anchor ownership, the familiar's fade, ending without breaking); one pact record: the agreement holder extracted from the Spirit Anchor and shared, a place on the Bound Will, one source of truth for suspension, the upkeep rules, the departure history, the copy check and the offline, restart and feature-disable policy | `arcane-concordance-workers.md`; this contract | Not started |
+| 1 | D-01, D-02 | The existing agreements keep their promises (shade death and re-call, seal refusals, the roster at once, anchor ownership, the familiar's fade, ending without breaking); one pact record: the agreement holder extracted from the Spirit Anchor and shared, a place on the Bound Will, one source of truth for suspension, the upkeep rules, the departure history, the copy check and the offline, restart and feature-disable policy | `arcane-concordance-workers.md`; this contract | Built (not merged): D-01 and D-02 on `claude/chunk-d-pact-hall` (local `wip/chunk-d`; commits `56a74f4be`, `7477efbcd`, `fa5360d0d` and the records' commit). Local checks run and passed, 45 of 46 audit mutations reported (D-02's As built); `./gradlew build`, the server and client game tests and CI not run |
 | 2 | D-03, D-04, D-05 | The first end-to-end path: Styx and the codex to Stolas's Regard and its evidence, the perch, Stolas's arrival, the conversation and terms, acceptance with the Open Hand Compact, Star-reckoning, the first obligation, upkeep, suspension, ending. A provisional body for Stolas is acceptable here | new `stolas-pact.md`; `styxhexenhammer.md`; `arcane-concordance-celestial.md` | Not started |
 | 3 | D-06, D-07 | Stolas's character: the Flashjack-derived raven body, arrive, listen, inspect, assent, refuse and depart, sounds with subtitles, Jade; the roster screen with suspend, end, cancel and recovery, and the journal's pacts section | `stolas-pact.md`; `arcane-concordance-workers.md` | Not started |
 | 4 | D-08 | The workshop hand (a courier agreement carrying a post's exact requests) and the schema review | `arcane-concordance-logistics.md`; `arcane-concordance-workers.md`; this contract | Not started |
@@ -335,6 +337,65 @@ another's anchor). The familiar's fix is a routine adjacent fix and not E2 evide
 
 **Review boundary:** fixes to existing behaviour only. No new id, block, entity or art.
 
+**As built (unit 1: commits `56a74f4be`, D-01, and `7477efbcd`, D-S17; record
+[arcane-concordance-workers.md](arcane-concordance-workers.md)).**
+- **Built:**
+  - `concordance/spirits/AgreementHolder` (new; the Spirit Anchor keeps one by composition and implements its `Holds`):
+    the owner (`setOwner`, saved as the anchor's optional `owner`), `maySeal(level, player, partySeals)`, `seal`
+    returning one `Pacts.Outcome`, the presence noted on its holder's roster at once, `spiritLost` (read from the
+    roster, D-S18), `recall` (the same Bound Will, nothing spent; `ROSTER_FULL` refused), `end` (holder only, once: an
+    instance method at the block and a static one by record id for D-07's roster), `toggle` and `broken`. The anchor's
+    `AGREEMENT_CODEC` moved into it unchanged, so an anchor's save reads as before.
+  - The pure `concordance/worker/Pacts`: `Outcome` (`DONE, DISABLED, NOT_PERMITTED, TAKEN, ALREADY_HELD, HOLDER_FULL,
+    ROSTER_FULL, UNAVAILABLE, CANNOT_AFFORD`, mirrored by `SEAL_OUTCOMES` in `tools/concordance_workers.py` and each
+    worded `message.jugcraft.concordance.workers.seal_<id>`), `refusal` (one reason, in that order), `holds`,
+    `counterpart` (namespaced; records before G9 wrote none), `ENDED` and `BROKEN`; `WorkerRoster.full`.
+  - `SpiritAnchorBlock`: `setPlacedBy` records the placer, never a stand-in; `use` says the switch, then a copy's
+    `CONFLICTING_AGREEMENT` or an unreadable record (D-02), then seals (or says the one reason not), suspends or resumes
+    (its holder, sneaking), calls a lost shade again (its holder), or reads its terms, state and spirit ("lost" or
+    "away").
+  - `GatheringShadeEntity`: a `remove(RemovalReason)` override (killed or discarded: its load into its anchor once, when
+    loaded and keeping its own holder's agreement, otherwise where it fell; struck off the roster); `depart` and `leave`
+    deliver the same way; it notes itself on its roster in `decide`, as its anchor's current spirit only.
+  - D-S17: `Bond.seenPlayed` (key `seen_played`, read with `lenientOptionalFieldOf`, `UNSEEN` for a bond saved before),
+    `neglected(played)`, `together(now, played)`, `restart(played)`; `HearthlingEntity` reads `Stats.PLAY_TIME` and
+    counts the fade whenever its person is in its level, before a visit counts.
+  - `TestPlayers.survivor`, `leave`, `again`, `played` and `play`; `mock` shares the end-of-test log-out.
+  - Generators: `SEAL_OUTCOMES`, the D-01 messages, the anchor's tooltip, the spirits codex ("Its Terms" and a new "If
+    It Is Lost" page) and "The Bond"; lang and the codex entry regenerated. G8's open item in the workers record
+    removed.
+- **Departures from this ticket and from the unit's specification** (proposals D-P6, D-P11 to D-P15 in Decisions):
+  - the outcomes are the ticket's without `UNKNOWN_RESEARCH`, plus `ALREADY_HELD` (D-02's), `UNAVAILABLE` and
+    `CANNOT_AFFORD`: "the Binding Arts are not understood" stays the anchor's own check before sealing, worded as before
+    (`workers.unknown`), not an outcome (D-P6);
+  - the holder was extracted once, in D-01's commit (not D-02's, as Dependencies and order planned), and extended by
+    D-02, so the anchor was rewritten once;
+  - `Holds.call(level, who, counterpart)` names the counterpart and returns a `WorkerEntity`; only `WorkerEntity`
+    subclasses are presences (the review's corrections 7 and 8; D-P15);
+  - `Sealing` carries `partySeals` (the anchor true, D-04's perch false, D-S8; correction 6; D-P6) and an optional cost,
+    `affords` asked after the refusals and before anything is called, `pay` once the Bound Will is recorded, refused as
+    `CANNOT_AFFORD` (correction 10; D-P14), so D-04's compact is spent in the sealing call;
+  - a shade's load goes into its anchor only when that anchor keeps its own holder's agreement, never into one sealed
+    again by someone else (correction 12; D-P12 as built);
+  - the shade's self-note is in `decide`, for its anchor's current spirit only, so a replaced or switched-off shade
+    never takes roster room (correction 11);
+  - a familiar whose person is online while the Concordance is off restarts its play-time count, so no fade accrues
+    while off; one not loaded meanwhile counts that play at its first look after the switch is on (correction 13;
+    D-P13); the play time is read through one helper, `played(person)`, which `check_workers` audits;
+  - G10's shade save is in `workersKeepTheirModelsThroughASave`; the anchor joins `blockEntitiesStampTheirVersion`
+    (D-P11 for the test players).
+- **Tests (none yet run in CI):** `ConcordanceWorkerGameTests` +10 (the eight above and the familiar pair),
+  `ConcordanceAuthorityGameTests.onlyTheOwnersSideSealsAnAnchor` and `aStandInNeverSeals`,
+  `ConcordancePersistenceGameTests.anAnchorsAgreementRoundTrips`; extended: `aSpiritKeepsToItsAgreement`,
+  `workersKeepTheirModelsThroughASave`, `blockEntitiesStampTheirVersion`.
+- **Audits:** `check_workers` (a worker that carries things leaves them once and is struck off its roster when killed;
+  the familiar's play-time fade, its restart while switched off and its lenient key); `check_pacts` (new; D-01's part:
+  the outcomes in order and worded, the refusal order, the cost's order, the stand-in, the owner saved and recorded,
+  the cargo rule, the unit's test names); `AUTHORITY_ROUTES` names the holder's whole sealing check
+  (`Authority.isStandIn(player) || !Authority.mayChange(...)`, correction 14).
+- **Commit 1 alone is not shippable:** its interim `verify` compares holders only, so the copy check (G2) closes in
+  D-02's commit; the unit lands as one.
+
 ### D-02. One pact record: the shared holder, states, copies, offline and restart (unit 1)
 
 **What the player sees.**
@@ -433,6 +494,102 @@ next write; not supported, and said so in the record.
 
 **Review boundary:** the schema, the shared holder and pure rules, shown on the existing anchor. No new entity, block or
 art.
+
+**As built (unit 1: commit `fa5360d0d`; records in the records' commit "Concordance Chunk D: unit 1's records":
+[arcane-concordance-workers.md](arcane-concordance-workers.md),
+[arcane-concordance-persistence.md](arcane-concordance-persistence.md)).**
+- **Built:**
+  - `resource/BoundWill`: an optional `Pact`: `place` (null: without its place), `Hold` (`none`, `holder`, `upkeep`) and
+    since when, `beneficiaries` (`personal` or `party`), `presence`, `Upkeep` (offering tag, count, period, grace, cap,
+    and its clock: due, grace end, last look), `Service` (work, radius, hours, quota) and the day's count (`window`,
+    `done_today`). The six-argument constructor stays. `BoundWillLedger.get` and `update` (the same id and holder only).
+  - `spirits/BoundWills`: each entry's optional `pact` and `escrow` (exact stacks), defaults not written, still version
+    1 and read will by will; `release` hands a record's escrow back once (`Released`); `deposit` (up to the cap),
+    `take`, `periods`, `escrow`, `unreadable` and `problems`.
+  - `spirits/PactHistory` (`jugcraft:pact_history`, version 1, read holder by holder, the last 8 departures each).
+  - `worker/Pacts` (pure): `claim`, `unclaimed`, `suspend`, `resume` (the clock moves on by the time held), `due` (the
+    Spire model), `done` and `didTask` (the day's count on the record), `status`, `held`, `seated`, `unseat`, `keptAt`,
+    `sealed`, `service`, `terms`, `benefits`, `valid`, `problems`, `departed` and `bounded`; the numbers `PACT` mirrors
+    (`ABSENT_TICKS` 1,200, `WRITE_TICKS` 200, `REACH` 64, `HISTORY` 8, and the bounds of an upkeep's terms).
+    `Status.UPKEEP_DUE` and `UPKEEP_HELD` are appended and show a want sign.
+  - `AgreementHolder`: `verify` (`Standing`: `NONE`, `VALID`, `ELSEWHERE` for a copy, `UNREADABLE`), with the legacy
+    claim (D-P3, D-P4) and a gone record forgotten (D-P7); `held` and `state`; `look` (D-S3, D-S16); `deposit`; `end`
+    with the escrow back into the living holder's inventory (overflow at their feet) and a history entry; a static
+    `toggle` by record id; `taskDone` on the record; `broken` only with the Concordance on. `Authority.presentNear`;
+    `CourierLedger.PLACE` made public and shared; `Code.CONFLICTING_AGREEMENT` has its first user (no parameters).
+  - The anchor seals with optional upkeep terms (`sealing(terms, upkeep)`; none in play); the shade waits on an
+    unreadable record and shows an upkeep hold with its suspended clip.
+  - Generators: `PACT`, `PACT_HOLDS`, `PACT_DEPARTURES`, the two statuses, the D-02 messages (`held_for_upkeep`,
+    `unreadable_record`, `upkeep_paid`, `upkeep_warned`, `upkeep_held`, `upkeep_resumed`, `departed.ended`,
+    `departed.broken`), `CONFLICTING_AGREEMENT`'s wording in `tools/concordance_diagnostics.py`, the codex's copy
+    sentence; lang regenerated.
+- **Departures from this ticket and from the unit's specification** (proposals D-P1 to D-P5, D-P7 to D-P10 and D-P16 in
+  Decisions):
+  - **no `jugcraft:pacts`:** the pact is on the Bound Will and its escrow in the same entry (D-P1). The ticket's
+    `Agreement` "for service, area, hours and quota" became the record's `Service` with its day's count (`window`,
+    `done_today`), copied at sealing or at the legacy claim (the review's correction 4), so a pact seated again at a new
+    perch keeps its terms and its day (D-S1, D-S6, D-S23); the block's `Agreement` is a copy its presence and its
+    reading use;
+  - the legacy claim is by sealed coordinates, not "first to load" (D-P3; stricter than D-S9, and it never refuses a
+    genuine anchor);
+  - upkeep (D-P2 as built, correction 3): a due date that passed while nobody looked becomes the moment of return, and
+    a pact resumed from an upkeep hold by an offering falls due a whole period from then, so neither time away nor time
+    held is charged;
+  - breaking a holder block while the Concordance is off releases nothing (correction 5; D-P16);
+  - suspend and resume by record id alone (`AgreementHolder.toggle(level, player, id, now)`) for D-07's roster while the
+    place is unloaded (correction 9; D-P8); `end` has the same static form;
+  - a broken anchor's escrow drops where the block stood with `Containers.dropItemStack`, whatever the block-drop rule
+    says (the specification had `Block.popResource`, which `doTileDrops` would suppress: the escrow was paid, not
+    mined);
+  - `Pacts.unclaimed` tells a record from before Chunk D that no block has claimed from one without its place
+    (correction 16), for D-07's roster;
+  - the anchor has no upkeep, so E2 is shown on test terms (the vanilla `#minecraft:wool` tag, one an offering, a
+    7-day period, a day's grace, 4 ahead) until D-05; `look` has no production caller until D-04's perch ticker (D-P9);
+  - the Gentle loophole stays (Risks); an unreadable record is tested inside `aBoundWillReadsItsOlderSave`;
+    `aChangeOfOwnerMovesNoPact` and `thePactRulesKeepTheirShape` are new.
+- **Tests (none yet run in CI):** `ConcordanceWorkerGameTests` +7 (`upkeepWarnsThenSuspendsAfterGraceAndResumes`,
+  `aReturnAfterAbsenceGetsTheFullGrace`, `absentAndUnloadedTimeIsNeverOwed`, `onlyTheHolderEnds`,
+  `twoPlayersCannotBothSealOnePlace`, `noOneBindsAnotherPlayer`, `theConcordanceOffHoldsEveryClock`),
+  `ConcordanceAuthorityGameTests.aChangeOfOwnerMovesNoPact`, `ConcordancePersistenceGameTests` +4
+  (`aBoundWillReadsItsOlderSave`, `aPactRecordRoundTrips`, `thePactHistoryKeepsEight`,
+  `aSuspendedAnchorMigratesItsHold`), `ConcordanceSharingGameTests` +3 (`aCopiedAnchorGivesNothingAndReleasesNothing`,
+  `aLegacyAnchorClaimsItsPlaceOnce`, `endingTwiceReturnsOnce`),
+  `ConcordanceResourceGameTests.thePactRulesKeepTheirShape`; extended: `everyRecordReadsItsSaveFromBeforeVersions` (a
+  pact, its escrow, the history) and `aSpiritKeepsToItsAgreement` (suspended on its Bound Will). With D-01's, the unit
+  adds 29 server game tests: Worker 5 to 22, Authority 5 to 8, Persistence 10 to 15, Sharing 2 to 5, Resource +1. No
+  test class is new.
+- **Audits:** the rest of `check_pacts` (the rules' numbers, holds and departure reasons against the generator; the
+  Bound Will's optional keys; no item list in a holder block; the copy check and the claim in `verify`; the day's count
+  on the record; `end`'s order; `broken` while switched off; `toggle` by record; `look`; the anchor's
+  `CONFLICTING_AGREEMENT`; the shade's `verify`); `ENTRY_BY_ENTRY` gains `PactHistory`; `AUTHORITY_ROUTES` gains
+  `presentNear`.
+- **Commands** (run and passed before each of the unit's four commits): `python3 tools/owner_art.py --check`,
+  `python3 -B tools/check_mod_data.py`, `python3 scripts/check_repository.py`,
+  `python3 tools/concordance_journey.py --check` ("every route holds"), `python3 tools/check_icon_maps.py`,
+  `node --test tools/world-designer/model.test.cjs`, `python3 -m unittest discover -s scripts/tests` and
+  `git diff --check`. For these notes: every changed Java file parse-checked (24 files, no syntax error); the pure
+  classes (`worker/Pacts`, `Agreement`, `Status`, `Bond`, `resource/BoundWill`, `BoundWillLedger`, `logistics/Place`)
+  compiled with JDK 21's `javac` against the jspecify jar, and two pure harnesses replaying the upkeep tests' traces and
+  `thePactRulesKeepTheirShape`'s rules passed; `python3 tools/select_client_tests.py --base a8c7cd770` chose every
+  client class (239: `TestPlayers.java` is a shared file, D-P11).
+- **Audit mutations** (run in place on the final tree, every file restored after each and the tree verified
+  unchanged): the specification's 30 (M1 to M12, M14 to M31) and 16 for the review's corrections (the cost asked after
+  the call and paid before the record, the cargo into any anchor, `cannot_afford` dropped from `SEAL_OUTCOMES`, a
+  renamed `theHolderEndsWithoutBreaking`, the play-time helper reading game time, no restart while switched off, the
+  fade counted only beyond the follow distance, a renamed `aFamiliarFadesWhileItsPersonPlaysElsewhere`, `broken`
+  releasing while switched off, the record `toggle` letting a stand-in through, `taskDone` counting only on the block,
+  `done_today` and `service` made required, the legacy claim copying nothing, the generator's `REACH` 32). 45 of the
+  46 are reported and the unchanged tree reports nothing. Not reported: counting the familiar's fade only beyond its
+  follow distance, as before Chunk D; `aFamiliarFadesWhileItsPersonPlaysElsewhere`'s last step catches it when it runs.
+  M5 (`ROSTER_FULL`'s id changed) is reported by the outcome checks, not by a missing lang key as the specification
+  expected: the lang check reads the generator's list.
+- **Not run:** `./gradlew build` (with or without the optional integrations) and every server and client game test (CI
+  is their first compile and run), any client, two clients, a real world saved before Chunk D, a server restart.
+- **Not confirmed until CI:** that DFU's `optionalFieldOf` fails on a present malformed value (so an unknown hold keeps
+  its entry unread; read in the DFU source, not run); that `NbtOps` refuses a string tag read as a long (the unreadable
+  `seen_played` step); the game-test server's Nether, writable player and statistics files and enabled parties; that a
+  Fabric `FakePlayer`'s messages are harmless; that a SmartBrainLib brain works on a Hearthling loaded and added within
+  the test's tick.
 
 ### D-03. Stolas is found through Styx, or without him (unit 2)
 
@@ -865,6 +1022,17 @@ change, two observatories).
 
 ## Interfaces expected to change
 
+**As built in unit 1** (D-01, D-02; see their As built notes): `concordance/spirits/AgreementHolder` (new: the shared
+holder, its `Holds`, `Presence` and `Sealing`) and `spirits/PactHistory` (new, `jugcraft:pact_history`); the pure
+`concordance/worker/Pacts` (new); `resource/BoundWill` (an optional `Pact` with `Hold`, `Upkeep` and `Service`, not the
+ticket's `place` and `hold` fields) and `BoundWillLedger` (`get`, `update`); `spirits/BoundWills` (the pact and escrow
+keys, `release` returning the escrow); `Status` (two appended reasons); `Bond`; `SpiritAnchorBlock` and
+`SpiritAnchorBlockEntity`; `GatheringShadeEntity`; `HearthlingEntity`; `WorkerRoster.full`; `WorkerEntity.sign`;
+`Authority.presentNear`; `CourierLedger.PLACE` (public); `Code`'s Javadoc; `Agreement`'s Javadoc; `TestPlayers`. No
+`PactRecords` and no `jugcraft:pacts` (D-P1). `tools/concordance_workers.py`, `tools/concordance_diagnostics.py` and
+`tools/check_mod_data.py` (`check_workers`, `check_pacts`, `AUTHORITY_ROUTES`, `ENTRY_BY_ENTRY`); the lang and the
+spirits codex entry regenerated. No payload, block, item, entity or art.
+
 **Existing files edited:**
 
 | Area | Files |
@@ -875,7 +1043,8 @@ change, two observatories).
 | Client | `JugcraftClient.java` (registrations: renderer, screens, key); `WorkerClient.java` (the hand drawn by GeckoLib, as `check_workers` requires, `tools/check_mod_data.py:17918-17919`) |
 
 **New code and data:**
-- Java: the shared agreement holder and pure `Pacts` rules (beside `Agreement`); `PactRecords`, `PactHistory`; the perch
+- Java: the shared agreement holder and pure `Pacts` rules (beside `Agreement`); `PactHistory` (all three built in unit
+  1; `PactRecords` is not built: the pact is on the Bound Will, D-P1); the perch
   block and block entity; the pact definition and its parser; `PactMenu`, `PactRequestPayload`, `PactStatePayload`; the
   roster payloads; `StolasEntity` and `WorkshopHandEntity` in `concordance/spirits/`; the shared courier helper.
 - Client: `PactScreen`, `RosterScreen`, Stolas's and the hand's renderers.
@@ -898,13 +1067,15 @@ change, two observatories).
 - Tests: the suites named above; `TestPlayers` (`survivor`, `again`); `ConcordancePactClientGameTests`; the gametest
   `fabric.mod.json`.
 - Network: two new payload pairs (the pact menu's, the roster's); a menu type for the perch.
-- Saved: optional Bound Will keys; `jugcraft:pacts`, `jugcraft:pact_history`; the anchor's optional `owner` and `post`;
+- Saved: optional Bound Will keys (as built, `pact` and `escrow`); `jugcraft:pact_history` (no `jugcraft:pacts`, D-P1);
+  the anchor's optional `owner` (built in unit 1) and `post`;
   the bond's optional `seen_played`; the perch's block entity; the entities' keys. Every stamp stays at 1.
 
 ## Dependencies and order
 
 1. D-00: this contract.
-2. Unit 1: D-01, then D-02 (the holder is extracted once, in D-02; D-02's copy check is shown on the anchor).
+2. Unit 1: D-01, then D-02 (the holder is extracted once, in D-02; D-02's copy check is shown on the anchor). As built,
+   the holder was extracted once in D-01's commit and extended in D-02's; the unit lands as one.
 3. Unit 2: D-03 (data and the gate file; nothing spent), then D-04 (D-02's holder and records; D-S1 and D-S3 for the
    terms page, critique 21), then D-05 (D-02's upkeep rules; D-03's gate).
 4. Unit 3: D-06 after D-04's entity; D-07 after D-02 (states) and D-05 (actions).
@@ -939,8 +1110,15 @@ The smallest first step is D-01: no new id, block, entity or art; it closes G1 a
   without spending. `TestPlayers.survivor` must be used, and checked to report survival.
 - **Copies by operators:** `/clone`, structure blocks or pick-block can copy a block entity: D makes the copy inert but
   cannot stop operator tools duplicating items elsewhere. Escrow in a world record cannot be copied this way.
-- **The legacy claim:** two pre-Chunk-D copies of an anchor whose shade is already lost are told apart only by which
-  loads first; the first wins and the other is inert. Tested; documented.
+- **The legacy claim (D-P3, as built in unit 1):** a record from before Chunk D is claimed only by the block whose
+  agreement's own sealed coordinates are its place, and only while its spirit, if loaded, is seated there; a copy at
+  another place never claims, whichever loads first, and stays inert. Tested (`aLegacyAnchorClaimsItsPlaceOnce`);
+  documented.
+- **Unit 1 has not run (as built):** none of its Java has been compiled against Minecraft and none of its 29 server game
+  tests has run; CI is their first compile. Two of them teleport a test player into the Nether (the repository's
+  first), and the familiar and upkeep tests rely on the test world's player and statistics files being written and
+  read back (`TestPlayers.leave` and `again`). If CI shows the Nether is unavailable, the Nether steps can be dropped:
+  the rules are still shown 20 and 70 blocks away.
 - **The Spirit Anchor keeps its own rules:** hoppers below still take its deliveries, and an explosion still ends a
   shade's agreement and drops its contents once (G15). Claims shield explosions; unclaimed land does not. Changing that
   is not in this chunk.
@@ -1036,7 +1214,9 @@ Chunk A's, B's and C's decisions are unchanged: B-D0 to B-D3, C-D0, C-D0b, C-D1 
 owner's, while C-D4 and every B-P and C-P stay Proposed (Chunk C's contract, Decisions and Where to resume, CC:2351,
 CC:2444-2445). D-D decisions are the owner's. D-S decisions are the session's under D-D2: the owner
 asked not to be asked, so they are recorded here as the session's choices, never as accepted by the owner, and stay
-reviewable at the checkpoint (10:162).
+reviewable at the checkpoint (10:162). D-P decisions are the units' proposals: choices the session made in building a
+unit where the tickets above left room or had to be corrected (D-P1 to D-P12 from unit 1's specification, D-P13 to
+D-P16 from its review), each with what was built; none is the owner's, and each is reviewable at the checkpoint.
 
 | ID | Date | Decision | Status | Affects |
 |---|---|---|---|---|
@@ -1067,6 +1247,22 @@ reviewable at the checkpoint (10:162).
 | D-S21 | 23 October 2026 | Text comes from the generators; English only | Decided by the session under D-D2 (23 October 2026) | every ticket |
 | D-S22 | 23 October 2026 | #467's two-client harness is an unmerged fork contribution and is not imported; two-client checks are attempted only with what this branch has, otherwise recorded as not run (D-09) | Decided by the session under D-D2 (23 October 2026) | D-09 |
 | D-S23 | 23 October 2026 | An invalid or missing pact definition reports cleanly on reload, and sealed pacts keep the terms copied at sealing; a holder leaving a party or the perch's land changing hands never moves a pact to another player; both tested (D-04, D-05) | Decided by the session under D-D2 (23 October 2026) | D-04, D-05 |
+| D-P1 | 24 October 2026 | Pact data is `BoundWill.Pact`, an optional `pact` key, and the escrow an optional `escrow` key (an `ItemStack` list) of the same `jugcraft:bound_wills` entry, still version 1; there is no `jugcraft:pacts` (the ticket's `PactRecords`), so release removes a record and its escrow in one call. The departure history is `PactHistory` (`jugcraft:pact_history`, version 1, read holder by holder, 8 entries each). As built, the pact also keeps its service terms (`service`) and day's count (`window`, `done_today`) as optional keys (the review's correction 4), so a pact seated again keeps its terms and its day | Proposed (unit 1, reviewable at the checkpoint) | D-02, D-04, D-05, D-07 |
+| D-P2 | 24 October 2026 | Upkeep runs on game time, on the Spire's model. It is looked at only with the Concordance on and the holder present: online, alive, in the place's level, within `Pacts.REACH` = 64 blocks, never a stand-in. At most one period falls due a look. With none in escrow, a warning and the grace; the grace over, an `upkeep` hold; paying resumes the pact. After a gap of more than `ABSENT_TICKS` = 1,200 ticks without a look, a warned pact is warned again with the whole grace. The holder's own suspension pauses the clock: due date and grace move on by the time held. The last look is written at most every `WRITE_TICKS` = 200 ticks. As built (correction 3): paid, the next falls a period after the due date, or a period from now if that has passed; after an absence a passed due date becomes the moment of return; resumed from an upkeep hold by an offering, the next falls a whole period from then. Neither time away nor time held is charged | Proposed (unit 1, reviewable at the checkpoint) | D-02, D-05 |
+| D-P3 | 24 October 2026 | A record from before Chunk D is claimed only by the block whose agreement's own `dimension`, `x`, `y` and `z` are its place, and only while its spirit, if loaded, is seated there; a copy elsewhere never claims, whichever loads first (stricter than D-S9's "first claim wins"). A new seal or claim at a place still keeping an orphan record leaves that record without its place, its holder and escrow kept. As built, the claim also copies the block's service terms and day's count onto the record | Proposed (unit 1, reviewable at the checkpoint) | D-02, D-04 |
+| D-P4 | 24 October 2026 | After the claim the block's `Agreement.suspended` is written false; the record's hold is the only authority. A downgrade is unsupported | Proposed (unit 1, reviewable at the checkpoint) | D-02 |
+| D-P5 | 24 October 2026 | `TAKEN` means the holder block already keeps terms, not that the ledger has some record at the place: safe with game-test structure clearing (flag 818 skips side effects) and with crash orphans | Proposed (unit 1, reviewable at the checkpoint) | D-02, D-04 |
+| D-P6 | 24 October 2026 | Sealing an owned holder block needs its owner, or their party where the block lets parties seal, **and** `Authority.mayChange` at the block; an ownerless legacy anchor needs only `mayChange`; a stand-in never seals. As built: `Sealing.partySeals` (the anchor true; D-04's perch false, D-S8; correction 6); "the Binding Arts are not understood" stays the anchor's own check before sealing, worded as before, not a seal outcome | Proposed (unit 1, reviewable at the checkpoint) | D-01, D-04 |
+| D-P7 | 24 October 2026 | A block whose Bound Will is gone (and not merely unreadable) forgets its terms when it next verifies, and may be sealed again; its shade then departs, its load dropped at the anchor (which no longer keeps its holder's agreement, D-P12). An unreadable record makes the block and its shade wait | Proposed (unit 1, reviewable at the checkpoint) | D-02 |
+| D-P8 | 24 October 2026 | `end`, `toggle`, `recall` and `deposit` are not rate-gated themselves; the anchor's use keeps `RateGate.allow(server, "workers", 4)`. D-04's and D-07's menus and roster actions must call `RateGate.allow` before `end`, `toggle`, `deposit` and `recall` (a later `check_pacts` needle can hold it at their payload handlers). As built: suspend and resume by record id alone (`AgreementHolder.toggle(level, player, id, now)`), for D-07's roster while the place is unloaded (correction 9); `end` has the same static form | Proposed (unit 1, reviewable at the checkpoint) | D-02, D-04, D-07 |
+| D-P9 | 24 October 2026 | The anchor gets no server ticker: its definition has no upkeep. `AgreementHolder.look` is the rule's driver, called by D-04's perch ticker. `OnBreak.UNSEAT` (a broken perch leaves its pact without its place) arrives with D-04 | Proposed (unit 1, reviewable at the checkpoint) | D-02, D-04 |
+| D-P10 | 24 October 2026 | Status ids `upkeep_due` and `upkeep_held` are appended (each a want sign) | Proposed (unit 1, reviewable at the checkpoint) | D-02, D-07 |
+| D-P11 | 24 October 2026 | `TestPlayers` gains `survivor`, `leave`, `again`, `played` and `play`. Editing `TestPlayers.java` makes `tools/select_client_tests.py` choose every client class (a shared file); accepted. As built: every class, 239 | Proposed (unit 1, reviewable at the checkpoint) | D-01, D-02 |
+| D-P12 | 24 October 2026 | A departing or killed shade's load goes into the anchor at its seat when that anchor is loaded and keeps an agreement of the shade's own holder, whether or not it still names the shade; otherwise it drops at its anchor's place (departing) or where it fell (killed). The specification had any anchor at the seat; as built, never one sealed again by someone else (correction 12) | Proposed (unit 1, reviewable at the checkpoint) | D-01 |
+| D-P13 | 24 October 2026 | Switched off, a loaded familiar whose person is online (in any level) restarts its play-time count at each look, so it fades for none of their play meanwhile (correction 13, D-S16). One not loaded while the Concordance was off counts its person's play meanwhile at its first look after the switch is on: no switch-off time is recorded. The residual case is accepted and said in the records | Proposed (unit 1, reviewable at the checkpoint) | D-01 |
+| D-P14 | 24 October 2026 | A seal may carry a cost (`Sealing.affords` and `pay`): asked after the refusals and before anything is called, refused as the appended outcome `CANNOT_AFFORD` (`seal_cannot_afford`, nothing spent), and paid in the same server call only once the Bound Will is recorded (correction 10, D-S13). The anchor's seal costs nothing; D-04's Open Hand Compact uses it | Proposed (unit 1, reviewable at the checkpoint) | D-01, D-04 |
+| D-P15 | 24 October 2026 | A holder block calls its presence by counterpart (`Holds.call(level, who, counterpart)`) and calls nothing (so `UNAVAILABLE`) for a counterpart it does not serve: the anchor serves only `jugcraft:gathering_shade`. Every presence (`AgreementHolder.Presence`) is a `WorkerEntity` subclass, unit 2's Stolas and unit 4's hand included, so each has a roster entry to note and strike (corrections 7 and 8) | Proposed (unit 1, reviewable at the checkpoint) | D-01, D-04, D-06, D-08 |
+| D-P16 | 24 October 2026 | Breaking a holder block while the Concordance is off releases nothing: its record stays kept at that place with its escrow, no departure is written and its shade is not sent away (correction 5, D-S16). Once the switch is on, the shade finds no anchor and departs, its load dropped where the anchor stood; the next seal there leaves the record without its place; its holder can end it (by code until D-07's roster) | Proposed (unit 1, reviewable at the checkpoint) | D-02, D-07 |
 
 **The checkpoint's three questions** (09:174; at most three, 09:18):
 1. Stolas's personality and appearance: the Flashjack-derived raven, his three dialogue beats and two memorable details
@@ -1080,13 +1276,20 @@ questions.
 
 ## Where to resume
 
-Nothing of Chunk D is built. Before more work:
-1. Refresh main and the open pull requests (REST, read only); merge main if it has moved past `f904df3fd`, and Chunk
+Unit 1 (D-01, D-02) is built on the local `wip/chunk-d` (four commits on `a8c7cd770`: `56a74f4be`, `7477efbcd`,
+`fa5360d0d` and the records' commit), not pushed when these notes were written, and nothing of it has run in CI. Before
+more work:
+1. Push to `claude/chunk-d-pact-hall` and run the Build workflow by workflow_dispatch with every client class (CI is
+   the unit's first compile); fix what fails and record each failure and fix in D-01's or D-02's As built notes, the
+   units table and the workers record.
+2. Refresh main and the open pull requests (REST, read only); merge main if it has moved past `f904df3fd`, and Chunk
    C's branch if it has moved in review.
-2. Start unit 1 with D-01 on `claude/chunk-d-pact-hall` (local `wip/chunk-d`): the shade's removal and re-call, the
-   seal outcomes and `ROSTER_FULL`, anchor ownership, the familiar's play-time fade, `end(holder)`, and `TestPlayers`'
-   `survivor` and `again`; then D-02, extracting the shared holder.
-3. Keep this page's units table, decisions and evidence current as each unit lands, with an As built note per ticket.
+3. Unit 2 next (D-03, D-04, D-05), on the holder and records unit 1 built: the perch is a second `Holds` (calling
+   Stolas by counterpart, `partySeals` false, the compact through `Sealing.affords` and `pay`, D-P14, D-P15), its ticker
+   drives `AgreementHolder.look` (D-P9), `OnBreak.UNSEAT` leaves a broken perch's pact without its place, a pact is
+   seated again at a new perch with the record's own terms and day (D-P1), and its menu asks `RateGate` before `end`,
+   `toggle`, `deposit` and `recall` (D-P8).
+4. Keep this page's units table, decisions and evidence current as each unit lands, with an As built note per ticket.
 
 ## How this contract was checked
 
@@ -1137,6 +1340,13 @@ Nothing of Chunk D is built. Before more work:
   marked *(survey)* in the first draft, were read by REST in the verification pass.
 - **Not determined:** whether a GeckoLib entity draws as a roster portrait; whether Flashjack's UV regions pass
   `check_geckolib`; whether two clients can be run here.
+- **For unit 1's As built notes and proposals (24 October 2026):** re-read at the unit's head `fa5360d0d`: `Pacts`,
+  `BoundWill`, `BoundWillLedger`'s additions, `BoundWills`' codecs and methods, `PactHistory`, `AgreementHolder`
+  (whole), `SpiritAnchorBlock`, `SpiritAnchorBlockEntity`, `GatheringShadeEntity`, `HearthlingEntity`'s and `Bond`'s
+  changes, `Authority.present`, `presentNear` and `answering`, `Status`, `WorkerEntity.sign`, the generator tables and
+  audits this unit changed, and every new test's name and Javadoc; the unit's specification and its review's 16
+  corrections. Run: the unit's audit mutations, the parse check, the pure classes' `javac` and harnesses, client-test
+  selection and the records commit's local checks (D-02's As built).
 - **Run for this page, after the verification pass's corrections:** `python3 scripts/check_repository.py` (passed:
   repository structure and local documentation links) and `git diff --check` (clean; the page is untracked, so it was
   also checked as a new file with `git diff --no-index --check`, clean). Not run: any build, game test, client,

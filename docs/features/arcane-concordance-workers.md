@@ -2,7 +2,9 @@
 
 Status: merged to main ([#244](https://github.com/jimbozoomer-byte/jugcraft/pull/244), from branch
 `claude/awesome-davinci-iwv3b9`, integrated by [#263](https://github.com/jimbozoomer-byte/jugcraft/pull/263) on
-8 October 2026); see Verification for what has run.
+8 October 2026); see Verification for what has run. Extended by Concordance Chunk D, unit 1 (D-01: the agreements
+keep their promises, and a familiar fades only for its person's own play time; D-02: one pact record; [the chunk's
+contract](concordance-chunk-d.md)), not merged; none of its tests has run in CI yet (see Verification).
 Proposal issue: none; the owner's Arcane Concordance brief (roadmap step 17) is the scope approval.
 Owner: @jimbozoomer-byte. AI-assisted implementation with Claude Code; the model is named in the commit trailers.
 Target milestone and tier: Concordance milestone 9, Practitioner stage (Jugcraft Workshops). Roadmap step 17.
@@ -21,7 +23,9 @@ of helper then answer you, each with its own rules.
 
 **A familiar: the Hearthling.** Use a **Bonding Charm** (string, a gold ingot, glow berries, an amethyst shard) to bind
 one; a person keeps one familiar. It keeps within 8 blocks of you. Your **bond** grows by time spent together (a point
-every ten seconds you are near it, at most 24 a day) and fades by 4 for each day you are online but away from it. At 20
+every ten seconds you are near it, at most 24 a day) and fades by 4 for each day of your own play time spent away from
+it (here or in another dimension; time you are logged out never counts, and nor does play while the Concordance is
+switched off with the familiar loaded). At 20
 it mends you when you are at half health or below (Regeneration for five seconds, at most once a minute); at 60, twice
 as often. Use the charm again to call it to your side; sneak and use it to release it. It never follows you through a
 portal: while you are in another dimension or offline it waits where it is and says so.
@@ -34,6 +38,14 @@ says it is outside its agreement; when its day's work is done it is finished unt
 could not take yourself. Sneak and use the anchor to **suspend** or resume it; anyone may use the anchor to read its terms
 and what the shade is doing. Break the anchor to **release** it: the Bound Will is released, the shade leaves what it
 carried and departs.
+
+Only the anchor's owner (who placed it) or their party may seal at it, and only where they may build; an anchor placed
+before Chunk D, whoever may build there; never a stand-in. A refused seal says why (not yours, the anchor already keeps
+one, you hold 32 agreements, your roster is full) and spends nothing. If the shade is killed, what it carried goes into
+the anchor (or drops where it fell, if the anchor is not loaded or keeps someone else's agreement), the anchor says it
+was lost, and its holder's next use calls another under the same agreement at no cost. A copy of an anchor (its data at
+another place) does nothing, says another agreement covers it, and breaking it releases nothing; nor does breaking an
+anchor while the Concordance is switched off.
 
 **A construct: the Clockwork Porter.** Unfold one (copper, a barrel, redstone, iron) on a block; it is yours. Use a
 **Porter Key** on a container (its source), then on another (its target), then on the porter. It carries up to 16 items
@@ -56,20 +68,27 @@ hours, daily quota and load; a construct's integrity, wear (no more than its int
 trip energy and load. Each kind keeps its own model, saved with it and never in its brain:
 
 - **Bond** (`worker/Bond.java`, on the Hearthling): strength, the day's gain and the game-time day it belongs to, the
-  last mending and the last visit. Growth and fading are worked out from game time, so turning the world clock changes
-  nothing.
-- **Agreement** (`worker/Agreement.java`, on the Spirit Anchor, the one authoritative copy): its Bound Will record's id,
-  its holder, the work, dimension, centre, radius, hours, quota, the day's tasks and whether it is suspended.
-  `permits` names the reason a task is refused: suspended, outside the agreement (work, dimension, area or hours) or
-  finished (the quota). The Bound Will itself lives in the world's `BoundWills` ledger (one record a sealed agreement,
-  never merged or split).
+  last mending, the last visit, and the play time it counted to (`seen_played`). Growth is worked out from game time and
+  fading from its person's own play time (the game's play-time statistic), so turning the clock changes neither and
+  time logged out never fades it (Concordance Chunk D, D-S17).
+- **Agreement** (`worker/Agreement.java`, on the Spirit Anchor, kept through its `AgreementHolder`, shared with Chunk
+  D's perch): its Bound Will record's id, its holder, the work, dimension, centre, radius, hours, quota, the day's tasks
+  and whether it is suspended. `permits` names the reason a task is refused: suspended, outside the agreement (work,
+  dimension, area or hours) or finished (the quota). The Bound Will itself lives in the world's `BoundWills` ledger (one
+  record a sealed agreement, never merged or split). Since Concordance Chunk D the Bound Will (`BoundWill.Pact`) is the
+  one authority for whether it stands, where it is kept, whether it is suspended (by its holder, or for upkeep), the
+  service terms and day's count it was sealed with, and its upkeep and escrow; an anchor's terms count only while its
+  record keeps them for the same holder at that place, and the anchor's own `suspended` is kept only so that an older
+  save reads (moved onto the record once, then written false).
 - **Body** (`worker/Body.java`, on the porter): integrity and Ley Charge, with the trips, repairs and charging its
   definition allows. `ready` names the reason it cannot go: needs repair or no energy.
 
 **Decisions** (`spirits/`): every second each worker `think`s once on the server and leaves one `Status`
 (`worker/Status.java`), an intent or a reason. The roster (`WorkerRoster`, world data) records each worker's kind, last
 status, dimension and place when its status changes, so the `workers` command answers for unloaded workers without
-loading them. A familiar its person released while it was unloaded strikes itself off when it next loads.
+loading them. A familiar its person released while it was unloaded strikes itself off when it next loads. A spirit
+sealed or called again is noted at once; one missing from the roster notes itself when it next thinks, if it is still
+its anchor's spirit; one killed is struck off, which is how its anchor knows it was lost.
 
 **Movement** is SmartBrainLib's: `WorkerEntity` is a `SmartBrainOwner` with a nearby-players sensor and two core
 behaviours (`LookAtTarget`, `MoveToWalkTarget`). A decision sets the walk-target memory; SmartBrainLib walks there. When
@@ -113,22 +132,33 @@ model's own numbers (bond; carried; integrity, charge and load).
   Charge, or 1000 JE for 1; step 12).
 - A shade's day is bounded by its quota (64 tasks of at most 16 items) and its hours; a familiar mends at most once a
   minute (thirty seconds at full bond) with Regeneration I for five seconds.
-- The bond needs days: at most 24 a day, 20 to start mending and 60 for the faster mending, fading by 4 a day away.
+- The bond needs days: at most 24 a day, 20 to start mending and 60 for the faster mending, fading by 4 a day of play
+  time away.
 - Roster and Bound Will ledgers keep at most 32 entries a player; brains run two light behaviours and one sensor.
 
 ## Multiplayer and persistence
 
 - Server authority: binding, sealing, routing, repair and every decision are the server's; the client draws the synced
   status. Uses of the charm and the anchor are rate-limited.
-- Permissions: only a familiar's person commands it; only a shade's holder suspends it (anyone may read its terms;
-  breaking the anchor needs the right to break it); only a porter's keeper's party routes or repairs it.
-- Persistence: the bond, the porter's body, route and load, the shade's anchor and load and each worker's person or
-  keeper on the entity; the agreement, the day's tasks and the delivered items on the anchor; Bound Will records
-  (`jugcraft:bound_wills`) and the roster (`jugcraft:worker_roster`) in the world's data; a key's route in its
-  `jugcraft:porter_route` component.
+- Permissions: only a familiar's person commands it; only the anchor's owner or their party seal at it, never a
+  stand-in; only a shade's holder suspends it, calls another and ends it (`AgreementHolder.end`; the pact screens of
+  Chunk D units 2 and 3 call it; until then breaking the anchor ends it in game); anyone may read its terms; breaking
+  the anchor needs the right to break it; only a porter's keeper's party routes or repairs it.
+- A shade whose holder is away (offline, dead or in another dimension) keeps its agreement but waits at its anchor and
+  says its person is not here; it takes nothing for an absent holder unless the server's
+  `concordance.absent_owner_authority` lets a stand-in answer protection questions for them.
+- Persistence: the bond (with the play time it counted to), the porter's body, route and load, the shade's anchor and
+  load and each worker's person or keeper on the entity; the anchor's owner, the agreement, the day's tasks and the
+  delivered items on the anchor; Bound Will records with their optional pact and escrow (`jugcraft:bound_wills`), the
+  pact history (`jugcraft:pact_history`) and the roster (`jugcraft:worker_roster`) in the world's data; a key's route
+  in its `jugcraft:porter_route` component. The new keys are optional and every stamp stays at 1; a downgrade drops
+  them on its next write (unsupported).
 - PvP: no worker attacks anyone.
 - Disable behaviour: with `concordance.enabled=false` every worker stops and says it is switched off; nothing is
-  unregistered or lost.
+  unregistered or lost. While switched off nothing of a pact falls due, is suspended, released or ended (breaking an
+  anchor then releases nothing: its Bound Will stays kept at that place, and the next seal there leaves it without its
+  place), but a killed shade still leaves its load. A loaded familiar counts none of its person's play meanwhile; one
+  not loaded then counts that play at its first look after the switch is on (Concordance Chunk D, D-P13, proposed).
 
 ## Dependencies and assets
 
@@ -191,6 +221,67 @@ been seen in game. The art has not been shown to the owner yet.
 Not yet run: any client (the models, animations, icons, Jade lines and codex pages in game), a two-client dedicated
 server, real walking over real terrain (the tests stand workers within reach), and a night of a shade's work.
 
+**Concordance Chunk D, unit 1: D-01 and D-02** (commits `56a74f4be` (D-01), `7477efbcd` (D-S17), `fa5360d0d` (D-02)
+and the records' commit "Concordance Chunk D: unit 1's records"; [the chunk's contract](concordance-chunk-d.md), its As
+built notes and proposals D-P1 to D-P16; not merged). **Not yet run in CI:** there is no Minecraft build where it was
+written, so none of its Java has been compiled against Minecraft and none of the tests below has run.
+- New server game tests (29), none yet run in CI:
+  - `ConcordanceWorkerGameTests` +17 (22 in all). D-01: `aKilledShadeLeavesItsLoadOnce` (into its loaded anchor once,
+    struck off, a second removal gives nothing; 25 ticks), `aKilledShadeAwayFromItsAnchorDropsWhereItFell` (the anchor
+    unloaded; switched off too), `aLostShadeIsCalledAgainUnderItsAgreement` (the same Bound Will, nothing spent; a full
+    roster refuses; a Bound Will gone is forgotten), `anUnloadedShadeReplacedLeavesOnceAndDeliversOnce`,
+    `aSealedShadeIsOnTheRosterAtOnce`, `aFullRosterRefusesTheSeal`, `aFullHolderIsToldWhy` (with a cost refused before
+    anything is called and paid once, once sealed) and `theHolderEndsWithoutBreaking`. D-S17:
+    `aFamiliarDoesNotFadeWhileItsPersonIsAway` (logged out three days, the familiar unloaded and loaded again; two days
+    played while switched off) and `aFamiliarFadesWhileItsPersonPlaysElsewhere` (20 blocks away, the Nether, then back
+    beside it). D-02: `upkeepWarnsThenSuspendsAfterGraceAndResumes`, `aReturnAfterAbsenceGetsTheFullGrace`,
+    `absentAndUnloadedTimeIsNeverOwed` (logged out, beyond 64 blocks, in the Nether, and with the absent-owner option
+    on: nothing looked at; with no ticker in unit 1, "unloaded" is a gap between looks), `onlyTheHolderEnds`,
+    `twoPlayersCannotBothSealOnePlace`, `noOneBindsAnotherPlayer` and `theConcordanceOffHoldsEveryClock` (an anchor
+    broken while switched off releases nothing). The upkeep tests use test terms on the vanilla `#minecraft:wool` tag:
+    the anchor itself has no upkeep.
+  - `ConcordanceAuthorityGameTests` +3 (8): `onlyTheOwnersSideSealsAnAnchor`, `aStandInNeverSeals`,
+    `aChangeOfOwnerMovesNoPact`.
+  - `ConcordancePersistenceGameTests` +5 (15): `anAnchorsAgreementRoundTrips`, `aBoundWillReadsItsOlderSave` (an
+    unreadable record kept as written), `aPactRecordRoundTrips`, `thePactHistoryKeepsEight`,
+    `aSuspendedAnchorMigratesItsHold`.
+  - `ConcordanceSharingGameTests` +3 (5): `aCopiedAnchorGivesNothingAndReleasesNothing`,
+    `aLegacyAnchorClaimsItsPlaceOnce`, `endingTwiceReturnsOnce`.
+  - `ConcordanceResourceGameTests` +1: `thePactRulesKeepTheirShape`.
+  - Extended, not yet run either: `aSpiritKeepsToItsAgreement` (suspended on its Bound Will, the anchor's flag false),
+    `workersKeepTheirModelsThroughASave` (the bond's `seen_played`, an older, an unreadable and a forged one; a shade's
+    anchor, holder and load, G10), `blockEntitiesStampTheirVersion` (the anchor) and
+    `everyRecordReadsItsSaveFromBeforeVersions` (a Bound Will with a pact and escrow; the pact history).
+  - `TestPlayers` gains `survivor` (an ordinary survival player), `leave`, `again` (the same identity with its saved
+    data and statistics), `played` and `play`. The familiar and upkeep tests rely on the test world's player files
+    being writable, and two of them on a test server with a Nether (the repository's first player teleport into the
+    Nether in a game test).
+- Audits in `tools/check_mod_data.py`: `check_workers` (a worker that carries things leaves them once and is struck off
+  its roster when killed; the familiar fades by play time, never game time, restarts its count while switched off and
+  reads `seen_played` leniently); `check_pacts` (new: the seal outcomes and their words, the refusal order, the cost
+  asked before anything is called and paid once recorded, the stand-in and the owner, the cargo rule, the rules'
+  numbers, holds and departure reasons, the Bound Will's optional keys, no item in a holder block, the copy check and
+  the legacy claim, the day's count on the record, ending, breaking while switched off, suspending by record, the
+  upkeep look, the unit's test names); `AUTHORITY_ROUTES` (the holder's whole sealing check and `presentNear`);
+  `ENTRY_BY_ENTRY` (`PactHistory`).
+- Audit mutations, run in place on the final tree with every file restored after each and the tree verified
+  unchanged: the unit specification's 30 (M1 to M12, M14 to M31) and 16 more for the review's corrections. 45 of the
+  46 are reported; the unchanged tree reports nothing. Not reported by the audits: counting the familiar's fade only
+  beyond its follow distance (as before Chunk D); `aFamiliarFadesWhileItsPersonPlaysElsewhere`'s last step catches it,
+  when it runs.
+- Commands run and passed before each of the four commits: `python3 tools/owner_art.py --check`,
+  `python3 -B tools/check_mod_data.py`, `python3 scripts/check_repository.py`,
+  `python3 tools/concordance_journey.py --check`, `python3 tools/check_icon_maps.py`,
+  `node --test tools/world-designer/model.test.cjs`, `python3 -m unittest discover -s scripts/tests` and
+  `git diff --check`; the generators were run one at a time (`python3 -B tools/generate_material_data.py`) after each
+  table change. For these records: every changed Java file parse-checked (24, no syntax error); the pure classes
+  (`worker/Pacts`, `Agreement`, `Status`, `Bond`, `resource/BoundWill`, `BoundWillLedger`, `logistics/Place`) compiled
+  with JDK 21's `javac` against the jspecify jar; two pure harnesses replaying the upkeep tests' traces and
+  `thePactRulesKeepTheirShape`'s rules passed. `python3 tools/select_client_tests.py --base a8c7cd770` chooses every
+  client class (239), as `TestPlayers.java` is a shared file.
+- **Not run:** `./gradlew build` and every server and client game test (CI is their first compile and run), any
+  client, two clients, a real world saved before Chunk D, a restart.
+
 ## World and event applicability
 
 Works in every dimension; a shade's agreement and a porter's route belong to the dimension they were made in. No
@@ -204,12 +295,18 @@ data component `jugcraft:porter_route`; saved data `jugcraft:worker_roster` and 
 `jugcraft:binding_arts`; practice `jugcraft:worker_service`; item tag `jugcraft:binding_specimens`; data folder
 `concordance/worker`. Removing them needs a migration.
 
+Since Concordance Chunk D, unit 1 (not merged): saved data `jugcraft:pact_history`; the worker status ids `upkeep_due`
+and `upkeep_held` (appended); the seal outcomes (`SEAL_OUTCOMES`), the holds (`none`, `holder`, `upkeep`) and the
+departure reasons (`ended`, `broken`), each saved or worded, so append only; optional saved keys (the anchor's `owner`,
+the bond's `seen_played`, a Bound Will's `pact` and `escrow`). No new block, item or entity.
+
 Open items:
 
 - A spirit agrees to one kind of work (gathering); more kinds each need their own server behaviour.
 - An agreement's terms come from the definition; letting a holder choose narrower hours or a smaller area needs a
   management screen (GuiLib, step 26) or more anchor controls.
 - A familiar waits rather than following through a portal, and the charm recalls it only within the same dimension.
-- A shade whose holder is offline still keeps its agreement, but can then check only world bounds and town protection
-  for the items it takes.
+- Ending an agreement without breaking its anchor has its method (`AgreementHolder.end`) but no in-game action until the
+  pact screens of Concordance Chunk D (units 2 and 3); a Bound Will left without its place can be ended only by code
+  until D-07's roster.
 - Workers have not walked real terrain in a test: navigation failure is tested in the harness, not in game.

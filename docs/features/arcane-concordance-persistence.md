@@ -62,13 +62,14 @@ by 2), however many circles the world holds. An anchor that is unloaded and load
 |---|---|---|---|
 | Spires | world (`jugcraft:spires`) | versioned, entry by entry | entry kept as written; a spire whose configuration is gone stays recorded and shows "unknown" |
 | Worker roster | world (`jugcraft:worker_roster`) | versioned, player by player | kept as written |
-| Bound Wills | world (`jugcraft:bound_wills`) | versioned, will by will | kept as written |
+| Bound Wills | world (`jugcraft:bound_wills`) | versioned, will by will; since Concordance Chunk D, unit 1 (not merged), each entry's optional `pact` (place, hold, beneficiaries, presence, upkeep, service terms, day's count) and `escrow` (exact stacks), defaults not written, still version 1 | kept as written; an entry with a pact key it cannot read (an unknown hold, say) is kept as written, and its anchor waits |
+| Pact history | world (`jugcraft:pact_history`; Concordance Chunk D, unit 1, not merged) | versioned, holder by holder (at most 8 departures each) | kept as written |
 | Sky's claims | world (`jugcraft:astral_claims`) | versioned, player by player | kept as written; a pattern no longer defined is skipped when read |
 | Conclave projects | world (`jugcraft:conclave`) | versioned, project by project | kept as written; a project no longer defined is set aside when its owner begins another |
 | Courier ledger | world (`jugcraft:courier_ledger`) | versioned, whole | read as written or not at all (its parts refer to one another) |
 | Knowledge, Focus, stage, milestones, standing, attunement, offerings, dream, dreams, curses, wards, Prima ledger | player or creature attachments | versioned | knowledge keeps unknown entries; an unknown stage is recomputed; an unknown curse lifts |
-| Block entities (pylon, sconce, crucible, anchor, heart, shrine, observatory, garden devices, bench, lectern, post, spirit anchor) | chunk | stamped `version`, every field defaulted | a ritual run that cannot be read is reset to idle; since Concordance Chunk C (C-01), a crucible's formula that cannot be read is kept as written under `program`, saved back and reported, never followed. Since Chunk C, unit 3 (not merged): the Crucible Stand saves `energy` and `setting` (an unknown setting reads as off); the crucible's optional `formula_owner` and `request` read with defaults, so an older crucible asks no courier until its formula is set again. Since unit 4 (not merged): the Verdant Bed saves optional `strain`, `ripened` and `graft` (stamp still 1); `graft_host` is only sent to clients; a graft the rules no longer know is kept as written, read by nothing and replaced by the next graft |
-| Workers (porter, shade, Hearthling) | chunk | stamped `version`, every field defaulted | a worker whose definition is gone says it is disabled |
+| Block entities (pylon, sconce, crucible, anchor, heart, shrine, observatory, garden devices, bench, lectern, post, spirit anchor) | chunk | stamped `version`, every field defaulted | a ritual run that cannot be read is reset to idle; since Concordance Chunk C (C-01), a crucible's formula that cannot be read is kept as written under `program`, saved back and reported, never followed. Since Chunk C, unit 3 (not merged): the Crucible Stand saves `energy` and `setting` (an unknown setting reads as off); the crucible's optional `formula_owner` and `request` read with defaults, so an older crucible asks no courier until its formula is set again. Since unit 4 (not merged): the Verdant Bed saves optional `strain`, `ripened` and `graft` (stamp still 1); `graft_host` is only sent to clients; a graft the rules no longer know is kept as written, read by nothing and replaced by the next graft. Since Chunk D, unit 1 (not merged): the Spirit Anchor saves an optional `owner` (an older anchor reads as nobody's); its agreement's `suspended` is moved onto the Bound Will once and then written false (stamp still 1) |
+| Workers (porter, shade, Hearthling) | chunk | stamped `version`, every field defaulted | a worker whose definition is gone says it is disabled; since Concordance Chunk D, unit 1 (not merged), the Hearthling's bond has an optional `seen_played`, read leniently: an older or unreadable one keeps the rest of the bond and starts the count at its next look (stamp still 1) |
 | Item components (Radiance, notes, inscription, tunings, brew, relic, artifice, reagent, link, route, and so on) | item stacks | unchanged | most fields optional. A changed shape gets a new component id, since an envelope would change every stack, command and recipe that names one |
 
 A dream wisp is never saved.
@@ -85,7 +86,10 @@ Simulation pauses; nothing models what an unloaded place would have done:
 - a Preserve hold runs on the world clock: a crucible unloaded while held finds its minute over when it loads;
 - a Crucible Stand and its crucible stop together; a courier carrying for an unloaded crucible waits with the cargo
   aboard (`DESTINATION_UNLOADED`, its lease renewed), and the crucible's request counts against its setter's quota
-  until it is delivered or cancelled (Concordance Chunk C, C-06; not merged).
+  until it is delivered or cancelled (Concordance Chunk C, C-06; not merged);
+- a pact's upkeep is looked at only while its place is loaded and its holder is near: a due date that passed while
+  nobody looked becomes the moment they look again, and at most one period falls due a look, so no unloaded or absent
+  time is owed (Concordance Chunk D, unit 1; not merged).
 
 No Concordance code forces, tickets or synchronously loads a chunk.
 
@@ -155,6 +159,11 @@ No new dependency or asset.
   - `ConcordanceConclaveGameTests.aProjectWhoseDefinitionIsGoneIsSetAside`.
 - CI: Build run 37683103100 on 441cd24, the first compile of `Saved` and of this step's tests: `mod` and `optional
   integrations absent` passed, "All 1075 required tests passed" in each.
+- Concordance Chunk D, unit 1 (not merged; [its contract](concordance-chunk-d.md)): `ConcordancePersistenceGameTests`
+  +5 (`anAnchorsAgreementRoundTrips`, `aBoundWillReadsItsOlderSave`, `aPactRecordRoundTrips`,
+  `thePactHistoryKeepsEight`, `aSuspendedAnchorMigratesItsHold`), and `everyRecordReadsItsSaveFromBeforeVersions` and
+  `blockEntitiesStampTheirVersion` extended (a Bound Will with a pact and escrow, the pact history, the Spirit Anchor);
+  `check_persistence` lists `PactHistory` as read entry by entry. None of these tests has run in CI yet.
 
 Not yet run:
 - a real world saved by an earlier build and opened with this one (none is kept: world saves are not committed);
