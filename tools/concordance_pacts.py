@@ -282,6 +282,7 @@ def codex():
                                                          for c in compact["items"])
              + ". It counts as the first offering. Only this perch's owner may accept here, and one pact with Stolas a holder."),
         ]}
+    entries[("binding", "stolas_pact")]["pages"] += pact_pages()
     return entries
 
 
@@ -395,3 +396,57 @@ def screen_lang(lang):
     lang.update(SCREEN)
     for key, label in TERM_LABELS.items():
         lang[f"screen.{MOD}.pact.term.{key}"] = label
+
+
+# ------------------------------------------------------------------------------------------- D-05: Star-reckoning
+# Java: worker/Pacts.Reckoning and serves; spirits/StarReckoning; sky/AstrolabeItem.recall (the one recall). Ids are worded:
+# append only. check_pacts holds the Java to these.
+RECKONING_WORK = "star_reckoning"  # Java: StarReckoning.WORK (Stolas's service.work in PACTS; one of WORK)
+RECKONING_CHOICES = 8  # Java: StarReckoning.MAX_CHOICES (= STATE_LIMITS["MAX_CHOICES"]; the catalog has six)
+RECKONING = ["recalled", "disabled", "nothing", "conflicting", "not_holder", "suspended", "upkeep_held", "outside_area",
+             "outside_hours", "quota_spent", "not_observed", "no_astrolabe", "too_little", "recalled_already"]
+CLIENT_SHOTS += ["jugcraft_pact_service", "jugcraft_pact_end_confirm", "jugcraft_pact_ended"]
+
+MESSAGES.update({
+    "pact.reckoning.recalled": "Stolas reckons %s for you: its effect is yours for two minutes, whatever the sky",
+    "pact.reckoning.nothing": "No pact with Stolas is kept at this perch",
+    "pact.reckoning.not_holder": "Only the pact's holder may ask Stolas to reckon",
+    "pact.reckoning.suspended": "The pact is suspended: resume it, and Stolas will reckon again",
+    "pact.reckoning.upkeep_held": "The pact is suspended for its upkeep: an offering resumes it",
+    "pact.reckoning.outside_area": "Stand at the perch, within %s blocks, to ask Stolas",
+    "pact.reckoning.outside_hours": "Stolas reckons only between %s and %s",
+    "pact.reckoning.quota_spent": "Stolas has reckoned for you this game day; ask again tomorrow",
+    "pact.reckoning.not_observed": "Stolas recalls only a pattern you observed yourself at an observatory",
+    "pact.reckoning.no_astrolabe": "Carry an astrolabe: its stored resonance pays for the recall",
+    "pact.reckoning.too_little": "Your astrolabe needs %s resonance to recall %s",
+    "pact.reckoning.recalled_already": "You have recalled %s since it last rose",
+    "pact.row.service": "Star-reckoning: recall a pattern you observed, %s a game day (%s left today), paid from your astrolabe",
+    "pact.row.obligation": "First obligation: record a sky observation at an observatory while the pact is active",
+    "pact.row.obligation_kept": "First obligation kept: Stolas's Regard is mastered",
+    "pact.obligation_kept": "Your pact's first obligation is kept: %s regards you",
+})
+
+
+def pact_pages():
+    """D-05's pages of the binding/stolas_pact codex entry, from Stolas's offer (PACTS)."""
+    import concordance_celestial as celestial
+    service, upkeep = PACTS["stolas"]["service"], PACTS["stolas"]["upkeep"]
+    return [
+        ("text", "Star-reckoning",
+         f"While your pact is active, stand at the perch (within {service['radius']} blocks) and ask Stolas to **reckon**: "
+         "choose any sky pattern you observed yourself at an observatory, and your astrolabe pays that pattern's recall "
+         f"price, {service['quota']} a game day. Its effect is yours for {celestial.RECALL_TICKS // 1200} minutes wherever "
+         "you go, whatever the sky or the season. Each rising of a pattern pays one recall, whether Stolas or a master's "
+         "own recall asks first."),
+        ("text", "His Upkeep",
+         "Pay **offerings** ahead at the perch: a Stolas Starflower, Ravenquill Lupine, Amethyst Mourningbell or an amethyst "
+         f"shard. One is taken every {upkeep['period_days']} game days; up to {upkeep['cap']} wait paid ahead, and the "
+         f"compact paid the first. With none waiting you are warned and have {upkeep['grace_days']} game day of grace; then "
+         "the pact is suspended: nothing is taken or lost, and an offering resumes it. Time you are away, or the perch "
+         "unloaded, is never owed, and a pact never ends by itself."),
+        ("text", "Ending and Moving",
+         "Its holder may **suspend** and **resume** it, or **end** it: what is paid ahead comes back to you once (at your "
+         "feet if your pockets are full) and Stolas departs. Breaking the perch ends nothing: Stolas leaves the world and the "
+         "pact waits, with all it holds, until you **seat** it at a new perch of your own. Your first obligation: record a "
+         "sky observation at an observatory while the pact is active."),
+    ]

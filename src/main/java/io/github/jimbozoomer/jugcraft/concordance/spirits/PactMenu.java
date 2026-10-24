@@ -5,12 +5,15 @@ import io.github.jimbozoomer.jugcraft.concordance.ComposeText;
 import io.github.jimbozoomer.jugcraft.concordance.ConcordanceData;
 import io.github.jimbozoomer.jugcraft.concordance.ConcordanceProgress;
 import io.github.jimbozoomer.jugcraft.concordance.RateGate;
+import io.github.jimbozoomer.jugcraft.concordance.celestial.Pattern;
 import io.github.jimbozoomer.jugcraft.concordance.diagnostic.Code;
 import io.github.jimbozoomer.jugcraft.concordance.diagnostic.Diagnostic;
 import io.github.jimbozoomer.jugcraft.concordance.resource.BoundWill;
 import io.github.jimbozoomer.jugcraft.concordance.rules.Definitions;
 import io.github.jimbozoomer.jugcraft.concordance.rules.ResearchState;
 import io.github.jimbozoomer.jugcraft.concordance.sky.AstralClaims;
+import io.github.jimbozoomer.jugcraft.concordance.sky.AstrolabeItem;
+import io.github.jimbozoomer.jugcraft.concordance.sky.Sky;
 import io.github.jimbozoomer.jugcraft.concordance.worker.PactDefinition;
 import io.github.jimbozoomer.jugcraft.concordance.worker.Pacts;
 import java.util.ArrayList;
@@ -245,7 +248,7 @@ public class PactMenu extends AbstractContainerMenu {
 			case PactRequestPayload.CHOOSE -> null;
 			case PactRequestPayload.ACCEPT -> accept(level, player, now);
 			case PactRequestPayload.DECLINE -> decline(player);
-			case PactRequestPayload.RECALL -> notOffered(); // D-05: Star-reckoning
+			case PactRequestPayload.RECALL -> recall(level, player, choice, now);
 			case PactRequestPayload.DEPOSIT -> deposit(level, player, choice, now);
 			case PactRequestPayload.SUSPEND -> toggled(PactKeeping.suspend(level, player, perch.holder(), now));
 			case PactRequestPayload.RESUME -> toggled(PactKeeping.resume(level, player, perch.holder(), now));
@@ -304,6 +307,18 @@ public class PactMenu extends AbstractContainerMenu {
 		Item kind = offeringItems.get(choice);
 		int taken = PactKeeping.deposit(level, player, perch.holder(), kind, now);
 		return new Answered(taken > 0 ? DEPOSITED : NOTHING_DEPOSITED, taken > 0, PactKeeping.deposited(level, perch.holder(), kind, taken));
+	}
+
+	/** Star-reckoning (D-05, D-S1): the pattern this menu last offered at {@code choice}, reckoned through the one recall. */
+	private Answered recall(ServerLevel level, ServerPlayer player, int choice, long now) {
+		if (choice >= patternIds.size()) {
+			return notOffered();
+		}
+		String id = patternIds.get(choice);
+		Pacts.Reckoning reckoning = StarReckoning.reckon(level, player, perch.holder(), id, Sky.time(level), now);
+		BoundWill record = perch.holder().record(level);
+		BoundWill.Service service = record == null || record.pact() == null ? null : record.pact().service();
+		return new Answered(reckoning.id, reckoning == Pacts.Reckoning.RECALLED, StarReckoning.told(reckoning, Sky.catalog().pattern(id), service));
 	}
 
 	private static Answered toggled(AgreementHolder.Toggle toggle) {
@@ -384,8 +399,16 @@ public class PactMenu extends AbstractContainerMenu {
 	private View kept(ServerLevel level, ServerPlayer player, BoundWill record, long now) {
 		PactKeeping.Page page = PactKeeping.page(level, player, perch.holder(), now);
 		BoundWill.Pact pact = record.pact();
-		List<PactStatePayload.Choice> patterns = List.of(); // D-05: the patterns a reckoning offers
-		List<String> ids = List.of();
+		List<PactStatePayload.Choice> patterns = new ArrayList<>();
+		long time = Sky.time(level);
+		for (String id : page.patterns()) {
+			Pattern pattern = Sky.catalog().pattern(id);
+			if (pattern != null) {
+				patterns.add(new PactStatePayload.Choice(id, Sky.patternName(id), pattern.recallCost(),
+						AstrolabeItem.mayRecall(level, player, pattern, time, now)));
+			}
+		}
+		List<String> ids = patterns.stream().map(PactStatePayload.Choice::id).toList();
 		List<PactStatePayload.Choice> offerings = new ArrayList<>();
 		boolean room = PactKeeping.room(level, record);
 		for (Item item : page.offerings()) {

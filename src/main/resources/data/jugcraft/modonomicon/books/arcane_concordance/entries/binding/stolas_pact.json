@@ -40,6 +40,27 @@
       "title": "book.jugcraft.arcane_concordance.binding.stolas_pact.p2.title",
       "text": "book.jugcraft.arcane_concordance.binding.stolas_pact.p2.text",
       "show_title_separator": true
+    },
+    {
+      "type": "modonomicon:text",
+      "id": "p3",
+      "title": "book.jugcraft.arcane_concordance.binding.stolas_pact.p3.title",
+      "text": "book.jugcraft.arcane_concordance.binding.stolas_pact.p3.text",
+      "show_title_separator": true
+    },
+    {
+      "type": "modonomicon:text",
+      "id": "p4",
+      "title": "book.jugcraft.arcane_concordance.binding.stolas_pact.p4.title",
+      "text": "book.jugcraft.arcane_concordance.binding.stolas_pact.p4.text",
+      "show_title_separator": true
+    },
+    {
+      "type": "modonomicon:text",
+      "id": "p5",
+      "title": "book.jugcraft.arcane_concordance.binding.stolas_pact.p5.title",
+      "text": "book.jugcraft.arcane_concordance.binding.stolas_pact.p5.text",
+      "show_title_separator": true
     }
   ]
 }

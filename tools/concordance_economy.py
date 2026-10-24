@@ -36,6 +36,8 @@ RESOURCES = {
     "bone_meal": "bone meal",
     "rooted_thallite_foundation": "Rooted Thallite Foundations (Root and Rivet's; nothing turns one back)",
     "crucible_heat": "a crucible's heat (a tick held at a Crucible Stand's target)",
+    "astral_resonance": "Astral Resonance (in an astrolabe; observatories gather it, once an occurrence)",
+    "recalled_attunement": "a recalled attunement (2,400 ticks of a pattern's effect; nothing turns one back)",
 }
 
 # Every conversion: (id, from, amount, to, amount). The best case is used (a thriving Heart), so the audit is safe.
@@ -51,6 +53,9 @@ CONVERSIONS = [
     # Concordance Chunk C, C-05: a Crucible Stand pays JE for a crucible's heat, modelled at its cheapest band (warm), so
     # the audit is safe; heat goes nowhere else (an edge into a node with no way out).
     ("je_to_heat", "je", 8, "crucible_heat", 1),
+    # Concordance Chunk D, D-05 (D-S1): Star-reckoning spends resonance on one recalled attunement, modelled at its cheapest
+    # recall (an edge into a node with no way out).
+    ("star_reckoning", "astral_resonance", 6, "recalled_attunement", 1),
 ]
 
 # Where each figure lives: (path under concordance/ or data:path, text that must be there).
@@ -80,7 +85,20 @@ ANCHORS = {
     "je_to_heat": [("CrucibleStandBlockEntity.java", "JE_WARM = 8;"), ("CrucibleStandBlockEntity.java", "JE_HOT = 16;"),
                    ("CrucibleStandBlockEntity.java", "JE_SEARING = 32;"),
                    ("CrucibleStandBlockEntity.java", "new SimpleEnergyStorage(CAPACITY, INTAKE, 0, this::setChanged)")],
+    "star_reckoning": [("sky/AstrolabeItem.java", 'return "recall:" + pattern.id();'),
+                       ("sky/AstrolabeItem.java", "setCharge(astrolabe, held - pattern.recallCost());"),
+                       ("celestial/Calendar.java", "RECALL_TICKS = 2400;"),
+                       ("spirits/StarReckoning.java", "AstrolabeItem.recall(player, level, astrolabe, pattern, time, gameTime)"),
+                       ("data:concordance/pact/stolas.json", None)],
 }
+
+# Concordance Chunk D, D-05: Stolas's terms as concordance/pact/stolas.json writes them (days), and the recall's figures.
+RECKONING_QUOTA = 1
+RECALL_TICKS = 2_400  # celestial/Calendar.RECALL_TICKS
+RECALL_COSTS = (6, 16)  # the cheapest and dearest recall (concordance/pattern/*.json attunement.recall)
+STOLAS_UPKEEP = {"count": 1, "period_days": 7, "grace_days": 1, "cap": 4}
+STOLAS_OFFERINGS = ["jugcraft:stolas_starflower", "jugcraft:ravenquill_lupine", "jugcraft:amethyst_mourningbell",
+                    "minecraft:amethyst_shard"]
 
 # The figures the anchors must show (checked against the data files by check_economy).
 HASTENED_COST = 1
@@ -230,6 +248,13 @@ def installations():
         ("Crimson Surge", f"{DAY // SURGE_COOLDOWN * 6} Vitae", f"{DAY // SURGE_COOLDOWN * 6} Focus",
          f"one every {SURGE_COOLDOWN} ticks", "health given (offering exhaustion)"),
     ]
+    rows.append(("Stolas's pact, kept and served every day",
+                 f"{STOLAS_UPKEEP['count']} offering every {STOLAS_UPKEEP['period_days']} game days (a Styx flower, which one bone "
+                 f"meal grows back, or an amethyst shard), and {RECALL_COSTS[0]} to {RECALL_COSTS[1]} Astral Resonance a recall",
+                 f"{RECKONING_QUOTA} recalled attunement a game day, {RECALL_TICKS:,} ticks long",
+                 f"{RECKONING_QUOTA} a game day a pact; one recall an occurrence of each pattern, shared with a master's; at most "
+                 f"{STOLAS_UPKEEP['cap']} offerings held ahead",
+                 "none; an offering paid becomes nothing, and no resonance is made"))
     for key, sink in RITUAL_SINKS.items():
         runs = DAY // sink["ticks"]
         rows.append((f"{sink['rite']}, worked again and again at one Lesser Circle",

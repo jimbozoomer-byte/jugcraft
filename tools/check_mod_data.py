@@ -18014,7 +18014,12 @@ def check_pacts(co, root, lang, registered, research):
     before any action; the menu has no slots; the compact is checked and spent by the seal itself; the perch holds no
     item, records its owner, is placed only where its placer may build and never ends a pact when broken; a pact is seated
     again only by its owner; Stolas is MISC, hurt only past invulnerability, and leaves without a record or a live
-    conversation; the perch is a pact item, never weighed; and D-04's game tests exist."""
+    conversation; the perch is a pact item, never weighed; and D-04's game tests exist. D-05 (D-S1, D-S3, D-S12, D-S23):
+    Pacts.Reckoning is RECKONING, its rules one reason in order and each worded; Star-reckoning asks, in order, the switch,
+    the place's record, its holder in person, the pact's rules, a pattern they observed and the paying astrolabe, and
+    recalls only through AstrolabeItem.recall, the one recall (one key, one cost, one duration), which a master's recall
+    shares; the menu reckons only what it last offered; an observation keeps an active pact's first obligation once; and
+    D-05's game tests exist, unit 1's upkeep tests shown on Stolas's pact too."""
     wk = co.workers
     def java(relative):
         path = root / relative
@@ -18292,6 +18297,91 @@ def check_pacts(co, root, lang, registered, research):
             err(f"pact_perch: its grid is also {path.relative_to(DATA)}'s")
     if "public static boolean covers(ServerLevel level, BlockPos pos)" not in (JAVA_ROOT / "styx" / "StyxConservatory.java").read_text(encoding="utf-8"):
         err("styx/StyxConservatory.java: covers (no perch in Styx's home, D-S15)")
+    # --- Concordance Chunk D, D-05 (D-S1, D-S12): Star-reckoning, the one recall, the first obligation ---
+    reckoning = re.findall(r'^\t\t([A-Z_]+)\("([a-z_]+)"\)[,;]', _java_body(pacts, "public enum Reckoning"), re.M)
+    if [oid for _, oid in reckoning] != pa.RECKONING or any(n != oid.upper() for n, oid in reckoning):
+        err("concordance/worker/Pacts.java: Reckoning differs from RECKONING in tools/concordance_pacts.py (same order, each named after its id)")
+    serves = _java_body(pacts, "public static @Nullable Reckoning serves(")
+    order = [serves.find(f"Reckoning.{n}") for n in ("NOTHING", "SUSPENDED", "UPKEEP_HELD", "OUTSIDE_AREA", "OUTSIDE_HOURS", "QUOTA_SPENT")]
+    if -1 in order or order != sorted(order):
+        err("Pacts.serves: one reason, in order: no service, suspended, held for upkeep, outside the area, outside the hours, the day's quota")
+    star = java("spirits/StarReckoning.java")
+    told_r = _java_body(star, "public static Component told(Pacts.Reckoning reckoning")
+    for oid in pa.RECKONING:
+        if oid in ("disabled", "conflicting"):
+            continue
+        key = f"message.{MOD}.concordance.pact.reckoning.{oid}"
+        if key not in lang:
+            err(f"pacts: missing lang {key}")
+        if f'"{key}"' not in told_r:
+            err(f"spirits/StarReckoning.java: a reckoning that ends {oid} is told as {key}")
+    reckon = _java_body(star, "public static Pacts.Reckoning reckon(")
+    steps = [reckon.find(n) for n in ("Workers.enabled()", "holder.verify(level, gameTime)", "Authority.isStandIn(player)", "Pacts.serves(",
+                                      ".observed(player.getUUID())", "PactCompact.astrolabe(player, pattern.recallCost())",
+                                      "AstrolabeItem.recall(player, level, astrolabe, pattern, time, gameTime)", "holder.taskDone(level, gameTime)")]
+    if -1 in steps or steps != sorted(steps):
+        err("StarReckoning.reckon: switched on, this place's record, its holder in person, the pact's rules, a pattern they observed, the paying astrolabe, the one recall, then the day's count")
+    for needle in (".claim(", "setCharge(", "Sky.ATTUNEMENT", "RECALL_TICKS", '"recall:'):
+        if needle in star:
+            err(f"spirits/StarReckoning.java: Star-reckoning claims, spends and attunes only through AstrolabeItem.recall ({needle}; D-S1)")
+    if f'String WORK = "{pa.RECKONING_WORK}";' not in star or f"int MAX_CHOICES = {pa.RECKONING_CHOICES};" not in star \
+            or pa.RECKONING_CHOICES != pa.STATE_LIMITS["MAX_CHOICES"] or pa.PACTS["stolas"]["service"]["work"] != pa.RECKONING_WORK \
+            or pa.RECKONING_WORK not in pa.WORK:
+        err("spirits/StarReckoning.java: WORK and MAX_CHOICES are tools/concordance_pacts.py's (Stolas's service; the screen's bound)")
+    astro = java("sky/AstrolabeItem.java")
+    recall = _java_body(astro, "public static Recall recall(")
+    for needle in ("recallKey(pattern)", "Calendar.occurrence(pattern, time)", "Calendar.minGap(pattern)",
+                   "setCharge(astrolabe, held - pattern.recallCost())", "new Attunement(pattern.id(), gameTime + Calendar.RECALL_TICKS, true)"):
+        if needle not in recall:
+            err(f"AstrolabeItem.recall: the one recall claims once an occurrence, at the recall cost, for RECALL_TICKS ({needle})")
+    if "recall(player, level, astrolabe, recalled, time, gameTime)" not in _java_body(astro, "Function<Pattern, @Nullable String> sky) {"):
+        err("AstrolabeItem.attune: a master's recall goes through AstrolabeItem.recall (one recall path, D-S1)")
+    may = _java_body(astro, "public static boolean mayRecall(")
+    if ".ledger(player.getUUID())" not in may or "setCharge(" in may or "AstralClaims.of(level.getServer()).claim(" in may:
+        err("AstrolabeItem.mayRecall: asks a copy of the ledger; claims, spends and attaches nothing")
+    for path in sorted(JAVA_ROOT.rglob("*.java")):
+        source = path.read_text(encoding="utf-8")
+        relative = path.relative_to(JAVA_ROOT).as_posix()
+        recalled = re.findall(r"new Attunement\([^;]*, true\)", source)
+        if relative == "concordance/sky/AstrolabeItem.java":
+            if source.count('"recall:"') != 1 or len(recalled) != 1:
+                err("sky/AstrolabeItem.java: the recall key and a recalled attunement are written once, in recallKey and recall")
+        elif '"recall:"' in source or recalled:
+            err(f"{relative}: a recall is made only by AstrolabeItem.recall (one claim, one cost, one duration; D-S1)")
+    menu_recall = _java_body(menu, "private Answered recall(")
+    if "choice >= patternIds.size()" not in menu_recall \
+            or "StarReckoning.reckon(level, player, perch.holder(), id, Sky.time(level), now)" not in menu_recall \
+            or "AstrolabeItem.mayRecall(level, player, pattern, time, now)" not in _java_body(menu, "private View kept("):
+        err("PactMenu: RECALL reckons the pattern this menu last offered; each offered pattern says whether it can be recalled")
+    page = _java_body(keeping, "public static Page page(")
+    if "StarReckoning.choices(server, player.getUUID())" not in page or "StarReckoning.kept(player)" not in page:
+        err("PactKeeping.page: offers the patterns the holder observed and names the first obligation (D-05)")
+    observe = _java_body(java("sky/ObservatoryBlockEntity.java"), "public int observe(")
+    if not 0 <= observe.find("ConcordanceProgress.record(player, new Evidence.Practiced(Sky.ACTIVITY") < observe.find("StarReckoning.observed(player)"):
+        err("ObservatoryBlockEntity.observe: an observation it records keeps the observer's pact's first obligation (StarReckoning.observed)")
+    obliged = _java_body(star, "public static void observed(")
+    if not 0 <= obliged.find("Workers.enabled()") < obliged.find("Pacts.serving(record)") < obliged.find("ConcordanceProgress.record(") \
+            or "kept(player)" not in obliged or "StolasRegard.ACTIVITY" not in obliged:
+        err("StarReckoning.observed: switched on, the pact active, never once kept, before pact_service is recorded (D-S12)")
+    for name in ("spirits/StarReckoning.java", "spirits/PactKeeping.java", "spirits/StolasEntity.java"):
+        if "Workers.ACTIVITY" in java(name):
+            err(f"concordance/{name}: Stolas's service never records worker_service (Don't 7)")
+    for key in sorted(set(re.findall(r'"(message\.jugcraft\.concordance\.pact\.[a-z_.]*[a-z_])"', star))):
+        if key not in lang:
+            err(f"pacts: missing lang {key}")
+    for cls, wanted in D05_TESTS.items():
+        path = tests / f"{cls}.java"
+        source = path.read_text(encoding="utf-8") if path.exists() else ""
+        for name in wanted:
+            if f"public void {name}(GameTestHelper helper)" not in source:
+                err(f"{cls}: missing Concordance Chunk D, D-05 game test {name}")
+    worker_tests = (tests / "ConcordanceWorkerGameTests.java").read_text(encoding="utf-8")
+    for name in D05_ON_STOLAS:
+        if "stolasPact(" not in _java_body(worker_tests, f"public void {name}(GameTestHelper helper)"):
+            err(f"ConcordanceWorkerGameTests.{name}: shows its rule on Stolas's own pact too (E2; D-05)")
+    if "StarReckoning.reckon(" not in _java_body((tests / "ConcordanceAuthorityGameTests.java").read_text(encoding="utf-8"),
+                                                 "public void aChangeOfOwnerMovesNoPact(GameTestHelper helper)"):
+        err("ConcordanceAuthorityGameTests.aChangeOfOwnerMovesNoPact: the perch's new owner is not served (D-S23)")
     for cls, names in D04_TESTS.items():
         path = tests / f"{cls}.java"
         source = path.read_text(encoding="utf-8") if path.exists() else ""
@@ -20578,6 +20668,8 @@ AUTHORITY_ROUTES = {
     "spirits/PactPerchBlock.java": ["Authority.isStandIn(player)", "Authority.mayChange(level, player, at)", "StyxConservatory.covers(level, at)"],
     "spirits/PactMenu.java": ["Authority.isStandIn(player)", "perch.holder().maySeal(level, player, false)"],
     "spirits/PactKeeping.java": ["Authority.presentNear(level, record.holder(), at, Pacts.REACH)", "Authority.isStandIn(player)"],
+    # Concordance Chunk D, D-05: Star-reckoning is its holder's own, never a stand-in's.
+    "spirits/StarReckoning.java": ["Authority.isStandIn(player)"],
     "spirits/PorterKeyItem.java": ["Authority.mayChange(level, player, pos)"],
     "spire/ConcordSpire.java": ["Authority.answering(level, state.keeper())", "Authority.mayChange(level, keeper, at)"],
     "sympathy/Sympathy.java": ["Authority.mayStrike(caster, target)", 'return "not_yours";'],
@@ -20644,7 +20736,9 @@ def check_economy(root):
     in it, no cycle of conversions across the systems (every crop's regrow-and-compost loop included, grown by time and
     hastened by a spire) may come back with as much as it started with, and the record's table must be the model's. Since
     Concordance Chunk C (C-04), each ritual sink is its ritual's run as the data states it; since C-05, a crucible's heat
-    is a sink that becomes nothing else, modelled at a Crucible Stand's cheapest rate."""
+    is a sink that becomes nothing else, modelled at a Crucible Stand's cheapest rate; since Concordance Chunk D (D-05), a
+    recalled attunement is a sink too, modelled at the cheapest recall, and Stolas's upkeep, quota and offerings are his
+    definition's and tag's."""
     sys.path.insert(0, str(ROOT / "tools"))
     import concordance_alchemy as al
     import concordance_economy as ec
@@ -20688,6 +20782,20 @@ def check_economy(root):
         err("economy: FOCUS_MAX is not FocusPool.MAX")
     if ec.VITAE_AN_HOUR != HOURLY_VITAE_BOUND:
         err("economy: VITAE_AN_HOUR is not check_crimson's HOURLY_VITAE_BOUND")
+    # Concordance Chunk D, D-05 (D-S1, D-S3, D-S19): Stolas's terms and offerings are the model's; a recall is a sink.
+    import concordance_pacts as pa
+    definition = load(DATA / MOD / "concordance" / "pact" / "stolas.json") or {}
+    upkeep, service = definition.get("upkeep", {}), definition.get("service", {})
+    if {key: upkeep.get(key) for key in ec.STOLAS_UPKEEP} != ec.STOLAS_UPKEEP or service.get("quota") != ec.RECKONING_QUOTA:
+        err("economy: Stolas's upkeep and quota are not concordance/pact/stolas.json's (tools/concordance_economy.py STOLAS_UPKEEP)")
+    offered = (load(DATA / MOD / "tags" / "item" / "stolas_offerings.json") or {}).get("values", [])
+    if sorted(offered) != sorted(ec.STOLAS_OFFERINGS) or ec.STOLAS_OFFERINGS != pa.OFFERINGS:
+        err("economy: #jugcraft:stolas_offerings is not STOLAS_OFFERINGS")
+    costs = sorted((load(p) or {}).get("attunement", {}).get("recall", 0) for p in (DATA / MOD / "concordance" / "pattern").glob("*.json"))
+    if not costs or (costs[0], costs[-1]) != ec.RECALL_COSTS:
+        err("economy: RECALL_COSTS are not the patterns' cheapest and dearest recall")
+    if any(source == "recalled_attunement" for source, _ in ec.edges()):
+        err("economy: a recalled attunement becomes nothing else")
     gaining = ec.gaining_cycles(ec.edges())
     if gaining:
         err(f"economy: a cycle of conversions gives back at least what it took, from {gaining}")
@@ -20732,6 +20840,20 @@ D04_TESTS = {
     "ConcordanceAuthorityGameTests": ["aPerchIsPlacedOnlyWhereItsPlacerMayBuild"],
     "ConcordanceResourceGameTests": ["thePactDefinitionParsesStrictly"],
 }
+# Concordance Chunk D, D-05's game tests (check_pacts), and unit 1's upkeep tests shown on Stolas's pact too.
+D05_TESTS = {
+    "ConcordanceSkyGameTests": ["stolasRecallsAnObservedPatternOncePerOccurrence", "aMastersRecallAndStolassShareOneClaim",
+                                "aChangedClockGivesNoSecondRecall", "theHarvestMoonRecallsOutsideItsEvent", "anUnobservedPatternIsRefused"],
+    "ConcordanceWorkerGameTests": ["theObligationMastersTheEntryOnce", "aSuspendedPactRecallsNothing", "theQuotaAndTheAreaRefuseWithReasons",
+                                   "aStandInNeverAnswersForUpkeep", "endingReturnsTheEscrowOnce", "aDeadHolderIsNeverHandedTheEscrow",
+                                   "aBrokenPerchLeavesThePactWithoutItsPerch", "aPactIsSeatedAgainAtANewPerch",
+                                   "aLostPresenceIsCalledBackAndEndsNothing"],
+    "ConcordanceSharingGameTests": ["aCopiedPerchRecallsNothing", "anotherPlayerCannotUseTheHoldersService"],
+    "ConcordancePersistenceGameTests": ["thePactAndItsEscrowSurviveARestart", "aRestartWhileSuspendedStaysSuspended"],
+    "ConcordanceResourceGameTests": ["theServiceRulesKeepTheirShape"],
+}
+D05_ON_STOLAS = ["upkeepWarnsThenSuspendsAfterGraceAndResumes", "aReturnAfterAbsenceGetsTheFullGrace",
+                 "absentAndUnloadedTimeIsNeverOwed", "theConcordanceOffHoldsEveryClock"]
 # Concordance Chunk D, D-03's game tests (check_stolas_regard).
 D03_TESTS = {
     "StyxGameTests": ["styxHintsByTheListenersOwnProgress", "talkingGrantsNoResearch", "styxNamesTheSkyStepUntilOneIsRecorded"],

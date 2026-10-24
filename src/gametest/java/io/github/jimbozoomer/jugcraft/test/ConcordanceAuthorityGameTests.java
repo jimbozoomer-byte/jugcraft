@@ -16,12 +16,14 @@ import io.github.jimbozoomer.jugcraft.concordance.effect.Ledger;
 import io.github.jimbozoomer.jugcraft.concordance.effect.Stacking;
 import io.github.jimbozoomer.jugcraft.concordance.resource.BoundWill;
 import io.github.jimbozoomer.jugcraft.concordance.rules.ResearchState;
+import io.github.jimbozoomer.jugcraft.concordance.sky.AstrolabeItem;
 import io.github.jimbozoomer.jugcraft.concordance.spire.ConcordSpire;
 import io.github.jimbozoomer.jugcraft.concordance.spire.SpireHeartBlockEntity;
 import io.github.jimbozoomer.jugcraft.concordance.spirits.AgreementHolder;
 import io.github.jimbozoomer.jugcraft.concordance.spirits.BoundWills;
 import io.github.jimbozoomer.jugcraft.concordance.spirits.ClockworkPorterEntity;
 import io.github.jimbozoomer.jugcraft.concordance.spirits.GatheringShadeEntity;
+import io.github.jimbozoomer.jugcraft.concordance.spirits.PactKeeping;
 import io.github.jimbozoomer.jugcraft.concordance.spirits.PactMenu;
 import io.github.jimbozoomer.jugcraft.concordance.spirits.PactPerchBlock;
 import io.github.jimbozoomer.jugcraft.concordance.spirits.PactPerchBlockEntity;
@@ -29,6 +31,8 @@ import io.github.jimbozoomer.jugcraft.concordance.spirits.PactRequestPayload;
 import io.github.jimbozoomer.jugcraft.concordance.spirits.PactStatePayload;
 import io.github.jimbozoomer.jugcraft.concordance.spirits.SpiritAnchorBlock;
 import io.github.jimbozoomer.jugcraft.concordance.spirits.SpiritAnchorBlockEntity;
+import io.github.jimbozoomer.jugcraft.concordance.spirits.StarReckoning;
+import io.github.jimbozoomer.jugcraft.concordance.spirits.StolasEntity;
 import io.github.jimbozoomer.jugcraft.concordance.spirits.Workers;
 import io.github.jimbozoomer.jugcraft.concordance.sympathy.Sympathy;
 import io.github.jimbozoomer.jugcraft.concordance.sympathy.TaglockItem;
@@ -404,7 +408,8 @@ public class ConcordanceAuthorityGameTests {
 
 	/**
 	 * D-02 (D-S23, E1): the holder leaving the party, or the anchor changing hands, never moves a pact; the owner cannot end
-	 * or suspend another's, by the anchor or by its Bound Will alone; nobody else benefits.
+	 * or suspend another's, by the anchor or by its Bound Will alone; nobody else benefits. At a pact perch too (D-04, D-05):
+	 * its new owner reads, does and is served nothing of another's pact, whose holder is still served there.
 	 */
 	@GameTest(maxTicks = 20)
 	public void aChangeOfOwnerMovesNoPact(GameTestHelper helper) {
@@ -461,6 +466,18 @@ public class ConcordanceAuthorityGameTests {
 		}
 		stranger.closeContainer();
 		helper.assertTrue(wills.ledger().heldBy(stranger.getUUID()).isEmpty(), "Nothing became theirs");
+		// Concordance Chunk D, D-05 (D-S23): nor is its new owner served there; its holder still is.
+		ConcordanceWorkerGameTests.observed(level, keeper, ConcordanceWorkerGameTests.FULL_MOON);
+		ConcordanceWorkerGameTests.holding(keeper, AstrolabeItem.CAPACITY);
+		ConcordanceWorkerGameTests.holding(stranger, AstrolabeItem.CAPACITY);
+		ConcordanceWorkerGameTests.beside(helper, stranger, perchAt);
+		helper.assertTrue(StarReckoning.reckon(level, stranger, perch.holder(), ConcordanceWorkerGameTests.FULL_MOON, 24006L, now) == Pacts.Reckoning.NOT_HOLDER
+				&& PactKeeping.suspend(level, stranger, perch.holder(), now) == AgreementHolder.Toggle.NOT_HOLDER
+				&& perch.holder().seat(level, stranger, StolasEntity.COUNTERPART, now) == AgreementHolder.Seat.NOTHING
+				&& keeper.getUUID().equals(wills.ledger().get(pact).holder()), "The perch's new owner neither uses, suspends nor re-seats another's pact");
+		ConcordanceWorkerGameTests.beside(helper, keeper, perchAt);
+		helper.assertValueEqual(StarReckoning.reckon(level, keeper, perch.holder(), ConcordanceWorkerGameTests.FULL_MOON, 24006L, now), Pacts.Reckoning.RECALLED,
+				"Its holder is still served there");
 		helper.succeed();
 	}
 

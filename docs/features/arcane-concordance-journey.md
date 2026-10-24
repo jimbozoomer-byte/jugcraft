@@ -142,6 +142,7 @@ Stolas found through Styx or without him (Concordance Chunk D, D-03). No stage r
 | 2. With Verdant Husbandry understood, harvest a ripe organism crop by hand | Verdant Husbandry | `styxHintsByTheListenersOwnProgress`, `stolasRegardIsReachable` |
 | 3. With the Assay understood, dissolve a sample at an Assayer's Scale: Stolas's Regard is understood | Assay | `notesNeverStandInForStolasEvidence`, `stolasRegardIsReachable` |
 | 4. Record a sky observation at an Orrery Observatory while a pattern is up and visible: the invitation's precondition, no research, which Styx and the journal name apart | nothing new | `styxNamesTheSkyStepUntilOneIsRecorded`, `aRecordedObservationCountsWithoutAWindow`, `aTurnedClockMakesNoNewClaim`, `thePactsSectionNamesTheSkyStep` |
+| 5. Build a Pact Perch where you may build and invite Stolas; accept his terms with the Open Hand Compact, then record a sky observation at an observatory while the pact is active (its first obligation): Stolas's Regard is mastered, and once a game day at the perch he recalls a pattern you observed | nothing new | `acceptingSealsOnceAndSpendsOnce`, `theObligationMastersTheEntryOnce`, `stolasRecallsAnObservedPatternOncePerOccurrence` |
 
 ### Cooperative play
 

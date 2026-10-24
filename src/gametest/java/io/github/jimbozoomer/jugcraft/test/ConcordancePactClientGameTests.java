@@ -6,6 +6,7 @@ import io.github.jimbozoomer.jugcraft.Jugcraft;
 import io.github.jimbozoomer.jugcraft.client.PactClient;
 import io.github.jimbozoomer.jugcraft.client.PactScreen;
 import io.github.jimbozoomer.jugcraft.concordance.ConcordanceProgress;
+import io.github.jimbozoomer.jugcraft.concordance.resource.BoundWill;
 import io.github.jimbozoomer.jugcraft.concordance.rules.ResearchState;
 import io.github.jimbozoomer.jugcraft.concordance.sky.AstralClaims;
 import io.github.jimbozoomer.jugcraft.concordance.sky.AstrolabeItem;
@@ -18,6 +19,7 @@ import io.github.jimbozoomer.jugcraft.concordance.worker.Pacts;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+import java.util.UUID;
 import net.fabricmc.fabric.api.client.gametest.v1.FabricClientGameTest;
 import net.fabricmc.fabric.api.client.gametest.v1.context.ClientGameTestContext;
 import net.fabricmc.fabric.api.client.gametest.v1.context.TestDedicatedServerConnection;
@@ -26,6 +28,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.events.ContainerEventHandler;
 import net.minecraft.client.gui.components.events.GuiEventListener;
+import net.minecraft.client.gui.screens.ConfirmScreen;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -38,6 +41,7 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.BlockHitResult;
@@ -45,8 +49,8 @@ import net.minecraft.world.phys.Vec3;
 import org.jspecify.annotations.Nullable;
 
 /**
- * Concordance Chunk D, D-04 (unit 2): the pact perch's screen in a real client, on the game's own dedicated server, and
- * Stolas's provisional body. One client. Results are logged with the prefix "[pact-check]". The player is in survival, so
+ * Concordance Chunk D, D-04 and D-05 (unit 2): the pact perch's screen in a real client, on the game's own dedicated server,
+ * and Stolas's provisional body. One client. Results are logged with the prefix "[pact-check]". The player is in survival, so
  * what is spent is spent.
  * <ul>
  * <li><b>The conversation</b>: with Stolas's Regard understood and two patterns observed, the owner's perch is used; Stolas
@@ -57,6 +61,10 @@ import org.jspecify.annotations.Nullable;
  * <li><b>Acceptance by keyboard</b>: Accept without the compact's materials is refused as cannot_afford and spends nothing
  * ({@code jugcraft_pact_refused}); given them, Accept seals once and spends once ({@code jugcraft_pact_kept}).</li>
  * <li><b>His body</b>: the screen closed and the pact kept; Stolas on his perch drawn by GeckoLib ({@code jugcraft_pact_stolas}).</li>
+ * <li>(D-05) <b>His service</b>: the Lantern Star recalled at its cost under the shared recall claim; an amethyst shard paid
+ * ahead ({@code jugcraft_pact_service}).</li>
+ * <li>(D-05) <b>The end</b>: End asks first ({@code jugcraft_pact_end_confirm}); Esc keeps the pact; yes ends it once, the
+ * offering back in the holder's inventory, Stolas gone ({@code jugcraft_pact_ended}).</li>
  * </ul>
  * The perch is opened by the server's use of it (no aimed click), and each step that opens it waits for a menu newer than
  * the one open before, with its first state. The narrator is not heard, and one client is not two.
@@ -96,6 +104,8 @@ public class ConcordancePactClientGameTests implements FabricClientGameTest {
 				sizes(context);
 				acceptance(context, server);
 				body(context, server, connection, perch);
+				service(context, server, perch); // D-05
+				ending(context, server, perch); // D-05
 				context.runOnClient(client -> {
 					client.options.guiScale().set(scale);
 					client.resizeGui();
@@ -251,6 +261,68 @@ public class ConcordancePactClientGameTests implements FabricClientGameTest {
 	}
 
 	/**
+	 * D-05: the kept pact's service. The amethyst shard is given before the one open (critique 6: a second open within the
+	 * perch's rate gate would be refused), so the first state already offers it.
+	 */
+	private static void service(ClientGameTestContext context, TestDedicatedServerContext server, BlockPos perch) {
+		server.runOnServer(minecraft -> player(minecraft).getInventory().add(new ItemStack(Items.AMETHYST_SHARD)));
+		context.waitTicks(5);
+		open(context, server, perch);
+		context.waitFor(client -> PactClient.state() != null && PactClient.state().mode() == PactStatePayload.KEEP, WAIT);
+		int star = context.computeOnClient(client -> index(PactClient.state().patterns(), LANTERN_STAR));
+		check(star >= 0 && context.computeOnClient(client -> PactClient.state().patterns().get(star).ready()),
+				"His service offers the patterns the holder observed, this occurrence still recallable (D-S1)");
+		int cost = context.computeOnClient(client -> PactClient.state().patterns().get(star).amount());
+		int before = server.computeOnServer(ConcordancePactClientGameTests::charge);
+		press(context, "pattern:" + star);
+		check(context.computeOnClient(client -> {
+			AbstractWidget recall = screen(client).control("recall");
+			Component named = Component.translatable("screen.jugcraft.pact.recall", PactClient.state().patterns().get(star).name());
+			return recall != null && recall.active && recall.getMessage().getString().equals(named.getString());
+		}), "Choosing the Lantern Star names it on Recall");
+		tabTo(context, "recall");
+		PactStatePayload.Result recalled = answer(context);
+		String claimed = server.computeOnServer(minecraft -> charge(minecraft) + " "
+				+ AstralClaims.of(minecraft).ledger(player(minecraft).getUUID()).claims().containsKey("recall:" + LANTERN_STAR));
+		Jugcraft.LOGGER.info("[pact-check] Star-reckoning: {}, astrolabe and claim = {}", recalled.reason(), claimed);
+		check(recalled.done() && "recalled".equals(recalled.reason()) && claimed.equals((before - cost) + " true"),
+				"Star-reckoning recalls the chosen pattern at its recall cost, under the shared claim: " + claimed);
+		int shard = context.computeOnClient(client -> index(PactClient.state().offerings(), "minecraft:amethyst_shard"));
+		check(shard >= 0, "The amethyst shard carried is offered (D-S3)");
+		tabTo(context, "offer:" + shard);
+		PactStatePayload.Result offered = answer(context);
+		String escrow = server.computeOnServer(minecraft -> BoundWills.of(minecraft).escrow(pact(minecraft).id()).stream()
+				.mapToInt(ItemStack::getCount).sum() + " " + player(minecraft).getInventory().countItem(Items.AMETHYST_SHARD));
+		Jugcraft.LOGGER.info("[pact-check] offering: {}, escrow and shards = {}", offered.reason(), escrow);
+		check(offered.done() && "deposited".equals(offered.reason()) && escrow.equals("1 0"), "The offering is paid ahead: " + escrow);
+		shot(context, "jugcraft_pact_service");
+	}
+
+	/** D-05: End asks first; Esc keeps the pact; its yes ends it once, the offering back, Stolas gone. */
+	private static void ending(ClientGameTestContext context, TestDedicatedServerContext server, BlockPos perch) {
+		press(context, "end");
+		context.waitForScreen(ConfirmScreen.class);
+		shot(context, "jugcraft_pact_end_confirm");
+		context.getInput().pressKey(InputConstants.KEY_ESCAPE);
+		context.waitForScreen(PactScreen.class);
+		context.waitTicks(5);
+		check(server.computeOnServer(ConcordancePactClientGameTests::held), "Keep it (Esc) ends nothing");
+		press(context, "end");
+		context.waitForScreen(ConfirmScreen.class);
+		tabToLabel(context, Component.translatable("screen.jugcraft.pact.end.yes").getString());
+		PactStatePayload.Result ended = answer(context);
+		String after = server.computeOnServer(minecraft -> held(minecraft) + " " + player(minecraft).getInventory().countItem(Items.AMETHYST_SHARD));
+		Jugcraft.LOGGER.info("[pact-check] ended: {}, held and shards = {}", ended.reason(), after);
+		check(ended.done() && "ended".equals(ended.reason()) && after.equals("false 1")
+				&& context.computeOnClient(client -> PactClient.state().mode()) == PactStatePayload.CLOSED,
+				"Ending ends the pact once and hands what was paid ahead back: " + after);
+		context.waitFor(client -> stolas(client, perch) == null, WAIT);
+		shot(context, "jugcraft_pact_ended");
+		context.getInput().pressKey(InputConstants.KEY_ESCAPE);
+		context.waitForScreen(null);
+	}
+
+	/**
 	 * The perch used by its owner on the server (its own interaction; no click is aimed), and its menu's first state. It waits
 	 * for a menu newer than the one open before, so a use the server refused (its rate gate) fails here, never passing
 	 * against the screen and state already shown.
@@ -281,6 +353,19 @@ public class ConcordancePactClientGameTests implements FabricClientGameTest {
 			context.waitTicks(1);
 		}
 		throw new AssertionError("Tab never reached " + key);
+	}
+
+	/** D-05: Tab until the focused control's words are {@code label} (a vanilla screen's button, as the confirmation's). */
+	private static void tabToLabel(ClientGameTestContext context, String label) {
+		for (int i = 0; i < 8; i++) {
+			if (context.computeOnClient(client -> client.gui.screen().getFocused() instanceof AbstractWidget widget
+					&& widget.getMessage().getString().equals(label))) {
+				return;
+			}
+			context.getInput().pressKey(InputConstants.KEY_TAB);
+			context.waitTicks(1);
+		}
+		throw new AssertionError("Tab never reached " + label);
 	}
 
 	/** Enter on the focused control, then the server's answer to it (its own sequence; never an earlier answer). */
@@ -335,6 +420,16 @@ public class ConcordancePactClientGameTests implements FabricClientGameTest {
 				+ state.notes().stream().map(Component::getString).toList();
 	}
 
+	/** D-05: the index of the choice {@code id} in a state's list, or -1. */
+	private static int index(List<PactStatePayload.Choice> choices, String id) {
+		for (int i = 0; i < choices.size(); i++) {
+			if (choices.get(i).id().equals(id)) {
+				return i;
+			}
+		}
+		return -1;
+	}
+
 	private static ItemStack stack(String line) {
 		String[] part = line.split(" ");
 		return new ItemStack(BuiltInRegistries.ITEM.getValue(Identifier.parse(part[0])), Integer.parseInt(part[1]));
@@ -346,6 +441,13 @@ public class ConcordancePactClientGameTests implements FabricClientGameTest {
 
 	private static boolean held(MinecraftServer minecraft) {
 		return Pacts.holds(BoundWills.of(minecraft).ledger(), player(minecraft).getUUID(), STOLAS);
+	}
+
+	/** D-05: the player's pact with Stolas (its record, for its escrow). */
+	private static BoundWill pact(MinecraftServer minecraft) {
+		UUID holder = player(minecraft).getUUID();
+		return BoundWills.of(minecraft).ledger().heldBy(holder).stream()
+				.filter(will -> Pacts.counterpart(will.counterpart()).equals(STOLAS)).findFirst().orElseThrow();
 	}
 
 	private static int charge(MinecraftServer minecraft) {

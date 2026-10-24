@@ -1,5 +1,6 @@
 package io.github.jimbozoomer.jugcraft.test;
 
+import com.mojang.authlib.GameProfile;
 import com.mojang.serialization.JsonOps;
 import io.github.jimbozoomer.jugcraft.compat.jade.ConcordanceDataProvider;
 import io.github.jimbozoomer.jugcraft.concordance.ConcordanceData;
@@ -24,16 +25,19 @@ import io.github.jimbozoomer.jugcraft.concordance.rules.Knowledge;
 import io.github.jimbozoomer.jugcraft.concordance.rules.ResearchState;
 import io.github.jimbozoomer.jugcraft.concordance.resource.Transfers;
 import io.github.jimbozoomer.jugcraft.concordance.sky.AstrolabeItem;
+import io.github.jimbozoomer.jugcraft.concordance.sky.ObservatoryBlockEntity;
 import io.github.jimbozoomer.jugcraft.concordance.spirits.AgreementHolder;
 import io.github.jimbozoomer.jugcraft.concordance.spirits.BoundWills;
 import io.github.jimbozoomer.jugcraft.concordance.spirits.GatheringShadeEntity;
 import io.github.jimbozoomer.jugcraft.concordance.spirits.PactHistory;
+import io.github.jimbozoomer.jugcraft.concordance.spirits.PactKeeping;
 import io.github.jimbozoomer.jugcraft.concordance.spirits.PactMenu;
 import io.github.jimbozoomer.jugcraft.concordance.spirits.PactPerchBlockEntity;
 import io.github.jimbozoomer.jugcraft.concordance.spirits.PactRequestPayload;
 import io.github.jimbozoomer.jugcraft.concordance.spirits.PactStatePayload;
 import io.github.jimbozoomer.jugcraft.concordance.spirits.SpiritAnchorBlock;
 import io.github.jimbozoomer.jugcraft.concordance.spirits.SpiritAnchorBlockEntity;
+import io.github.jimbozoomer.jugcraft.concordance.spirits.StarReckoning;
 import io.github.jimbozoomer.jugcraft.concordance.spirits.StolasEntity;
 import io.github.jimbozoomer.jugcraft.concordance.spirits.StolasRegard;
 import io.github.jimbozoomer.jugcraft.concordance.spirits.WorkerRoster;
@@ -42,8 +46,11 @@ import io.github.jimbozoomer.jugcraft.concordance.worker.Agreement;
 import io.github.jimbozoomer.jugcraft.concordance.worker.Pacts;
 import io.github.jimbozoomer.jugcraft.concordance.worker.Status;
 import io.github.jimbozoomer.jugcraft.concordance.worker.WorkerDefinition;
+import io.github.jimbozoomer.jugcraft.party.JugcraftParties;
+import io.github.jimbozoomer.jugcraft.party.PartyManager;
 import java.util.List;
 import java.util.UUID;
+import net.fabricmc.fabric.api.entity.FakePlayer;
 import net.fabricmc.fabric.api.gametest.v1.GameTest;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.advancements.AdvancementHolder;
@@ -58,6 +65,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.ProblemReporter;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Inventory;
@@ -75,7 +83,9 @@ import org.jspecify.annotations.Nullable;
  * instructions to another without carrying their observation or mastery, and the Lumen Sconce takes Radiance only
  * through the typed transfer rules (what fits, at the rate allowed, drawn back only by its owner); and (Concordance Chunk
  * D, D-02) a copied Spirit Anchor gives nothing and releases nothing, an anchor from before Chunk D claims its record only
- * at its own place, and ending a pact twice returns its escrow once; and (D-04) a copied pact perch is inert.
+ * at its own place, and ending a pact twice returns its escrow once; and (D-04) a copied pact perch is inert; and (D-05)
+ * it recalls nothing, and nobody but its holder (their party, a stranger, a stand-in) uses, pays, suspends or ends their
+ * pact or keeps its obligation.
  */
 public class ConcordanceSharingGameTests {
 	private static final String FIRST_LIGHT = "jugcraft:first_light";
@@ -495,6 +505,101 @@ public class ConcordanceSharingGameTests {
 				&& ConcordanceWorkerGameTests.escrowed(level, record.id()) == 2, "Broken, the copy releases and unseats nothing");
 		helper.assertTrue(original.holder().verify(level, now) == AgreementHolder.Standing.VALID && presence.think(level, 0L, now) != Status.FINISHED
 				&& BoundWills.of(level.getServer()).problems().isEmpty(), "The original keeps its pact and its Stolas");
+		helper.succeed();
+	}
+
+	/** D-05 (E3, 10:52): a perch's data copied to a second place recalls nothing: it spends, claims, pays, looks, suspends, ends, seats and calls nothing; broken, it releases nothing; the original still serves. */
+	@GameTest(maxTicks = 20)
+	public void aCopiedPerchRecallsNothing(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		ServerPlayer keeper = ConcordanceWorkerGameTests.regarded(helper);
+		long g0 = ConcordanceWorkerGameTests.dayStart(level, 100);
+		BlockPos originalAt = new BlockPos(2, 1, 2);
+		BlockPos copyAt = new BlockPos(6, 1, 2);
+		PactPerchBlockEntity original = ConcordanceWorkerGameTests.stolasPact(helper, keeper, originalAt, g0);
+		UUID record = original.holder().agreement().record();
+		ConcordanceWorkerGameTests.observed(level, keeper, ConcordanceWorkerGameTests.FULL_MOON);
+		ItemStack held = ConcordanceWorkerGameTests.holding(keeper, AstrolabeItem.CAPACITY);
+		ConcordanceWorkerGameTests.give(keeper, new ItemStack(Items.AMETHYST_SHARD, 2));
+		helper.assertValueEqual(PactKeeping.deposit(level, keeper, original.holder(), Items.AMETHYST_SHARD, g0), 2, "Two paid ahead");
+		helper.setBlock(copyAt, Workers.PACT_PERCH);
+		PactPerchBlockEntity copy = helper.getBlockEntity(copyAt, PactPerchBlockEntity.class);
+		copy.loadWithComponents(TagValueInput.create(ProblemReporter.DISCARDING, level.registryAccess(), original.saveWithoutMetadata(level.registryAccess())));
+		BoundWills wills = BoundWills.of(level.getServer());
+		BoundWill before = wills.ledger().get(record);
+		ConcordanceWorkerGameTests.beside(helper, keeper, copyAt);
+		helper.assertTrue(copy.holder().verify(level, g0) == AgreementHolder.Standing.ELSEWHERE, "The copy is not the record's");
+		helper.assertValueEqual(StarReckoning.reckon(level, keeper, copy.holder(), ConcordanceWorkerGameTests.FULL_MOON, 24006L, g0), Pacts.Reckoning.CONFLICTING,
+				"At the copy, Stolas reckons nothing");
+		ConcordanceWorkerGameTests.give(keeper, new ItemStack(Items.AMETHYST_SHARD, 1));
+		helper.assertTrue(AstrolabeItem.charge(held) == AstrolabeItem.CAPACITY && !ConcordanceWorkerGameTests.recalledEver(level, keeper, ConcordanceWorkerGameTests.FULL_MOON)
+				&& PactKeeping.deposit(level, keeper, copy.holder(), Items.AMETHYST_SHARD, g0) == 0 && ConcordanceWorkerGameTests.shards(keeper) == 1
+				&& copy.holder().look(level, g0 + 7 * 24000L) == Pacts.Event.NONE && copy.holder().end(level, keeper, g0) == AgreementHolder.Ended.CONFLICTING
+				&& PactKeeping.suspend(level, keeper, copy.holder(), g0) == AgreementHolder.Toggle.CONFLICTING
+				&& copy.holder().seat(level, keeper, StolasEntity.COUNTERPART, g0) == AgreementHolder.Seat.NOTHING
+				&& PactKeeping.page(level, keeper, copy.holder(), g0) == PactKeeping.Page.NONE
+				&& wills.ledger().get(record).equals(before) && ConcordanceWorkerGameTests.escrowed(level, record) == 2,
+				"nothing is spent, claimed, paid, held, ended, seated or shown through it");
+		ConcordanceWorkerGameTests.stolas(level, original).remove(Entity.RemovalReason.KILLED);
+		PactKeeping.tick(level, copy.holder(), copy.getBlockPos(), g0 + 20);
+		helper.assertTrue(ConcordanceWorkerGameTests.stolas(level, original) == null && original.holder().spiritLost(level), "The copy's ticker calls nobody");
+		PactKeeping.tick(level, original.holder(), original.getBlockPos(), g0 + 40);
+		helper.assertTrue(ConcordanceWorkerGameTests.stolas(level, original) != null, "the original's calls Stolas back");
+		helper.setBlock(copyAt, Blocks.AIR);
+		helper.assertTrue(Pacts.seated(wills.ledger().get(record)) && ConcordanceWorkerGameTests.escrowed(level, record) == 2, "Broken, the copy releases nothing");
+		ConcordanceWorkerGameTests.beside(helper, keeper, originalAt);
+		helper.assertTrue(StarReckoning.reckon(level, keeper, original.holder(), ConcordanceWorkerGameTests.FULL_MOON, 24006L, g0) == Pacts.Reckoning.RECALLED
+				&& wills.problems().isEmpty(), "The original still serves");
+		helper.succeed();
+	}
+
+	/** D-05 (E1, D-S8): the holder's party, a stranger and a stand-in with the holder's identity cannot use, pay, suspend or end the holder's pact, and another's observation keeps no obligation of it. */
+	@GameTest(maxTicks = 20)
+	public void anotherPlayerCannotUseTheHoldersService(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		ServerPlayer keeper = ConcordanceWorkerGameTests.regarded(helper);
+		ServerPlayer friend = ConcordanceWorkerGameTests.regarded(helper);
+		ServerPlayer stranger = ConcordanceWorkerGameTests.regarded(helper);
+		BlockPos at = new BlockPos(2, 1, 2);
+		PartyManager parties = JugcraftParties.manager();
+		long ms = System.currentTimeMillis();
+		try {
+			helper.assertTrue(parties.invite(keeper.getUUID(), friend.getUUID(), ms) == PartyManager.Result.OK
+					&& parties.accept(friend.getUUID(), ms) == PartyManager.Result.OK, "The holder and a friend form a party");
+			long g0 = ConcordanceWorkerGameTests.dayStart(level, 100);
+			PactPerchBlockEntity perch = ConcordanceWorkerGameTests.stolasPact(helper, keeper, at, g0);
+			String full = ConcordanceWorkerGameTests.FULL_MOON;
+			for (ServerPlayer player : List.of(keeper, friend, stranger)) {
+				ConcordanceWorkerGameTests.observed(level, player, full);
+				ConcordanceWorkerGameTests.holding(player, AstrolabeItem.CAPACITY);
+			}
+			ConcordanceWorkerGameTests.beside(helper, friend, at);
+			ConcordanceWorkerGameTests.beside(helper, stranger, at);
+			FakePlayer standIn = FakePlayer.get(level, new GameProfile(keeper.getUUID(), "[Concordance]"));
+			helper.assertTrue(StarReckoning.reckon(level, friend, perch.holder(), full, 24006L, g0) == Pacts.Reckoning.NOT_HOLDER
+					&& StarReckoning.reckon(level, stranger, perch.holder(), full, 24006L, g0) == Pacts.Reckoning.NOT_HOLDER
+					&& StarReckoning.reckon(level, standIn, perch.holder(), full, 24006L, g0) == Pacts.Reckoning.NOT_HOLDER,
+					"Its holder's party, a stranger and a stand-in are refused");
+			helper.assertTrue(AstrolabeItem.charge(friend.getMainHandItem()) == AstrolabeItem.CAPACITY && !ConcordanceWorkerGameTests.recalledEver(level, friend, full)
+					&& ConcordanceWorkerGameTests.done(level, perch, g0) == 0, "spending, claiming and counting nothing");
+			ConcordanceWorkerGameTests.give(friend, new ItemStack(Items.AMETHYST_SHARD, 2));
+			UUID record = perch.holder().agreement().record();
+			helper.assertTrue(PactKeeping.deposit(level, friend, perch.holder(), Items.AMETHYST_SHARD, g0) == 0 && ConcordanceWorkerGameTests.shards(friend) == 2
+					&& PactKeeping.suspend(level, friend, perch.holder(), g0) == AgreementHolder.Toggle.NOT_HOLDER
+					&& perch.holder().end(level, friend, g0) == AgreementHolder.Ended.NOT_HOLDER
+					&& ConcordanceWorkerGameTests.key(PactKeeping.end(level, friend, perch.holder(), StolasEntity.COUNTERPART, g0).said())
+							.equals("message.jugcraft.concordance.workers.not_holder")
+					&& PactKeeping.page(level, friend, perch.holder(), g0) == PactKeeping.Page.NONE
+					&& !Pacts.benefits(BoundWills.of(level.getServer()).ledger().get(record), friend.getUUID(), true), "nor pay, suspend, end or read it; it benefits its holder alone");
+			ObservatoryBlockEntity observatory = ConcordanceWorkerGameTests.observatory(helper, new BlockPos(0, 1, 6));
+			helper.assertTrue(observatory.observe(friend, level, ConcordanceWorkerGameTests.NIGHT_ZERO, g0 + 20, ConcordanceWorkerGameTests.ONLY_MOON) == 1
+					&& ConcordanceWorkerGameTests.regard(friend) == ResearchState.UNDERSTOOD && ConcordanceWorkerGameTests.regard(keeper) == ResearchState.UNDERSTOOD,
+					"Another's observation keeps no one's obligation");
+			ConcordanceWorkerGameTests.beside(helper, keeper, at);
+			helper.assertValueEqual(StarReckoning.reckon(level, keeper, perch.holder(), full, 24006L, g0), Pacts.Reckoning.RECALLED, "Its holder is served");
+		} finally {
+			parties.adminDisband(keeper.getUUID());
+		}
 		helper.succeed();
 	}
 }

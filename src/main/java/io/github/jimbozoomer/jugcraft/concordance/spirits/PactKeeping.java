@@ -1,6 +1,7 @@
 package io.github.jimbozoomer.jugcraft.concordance.spirits;
 
 import io.github.jimbozoomer.jugcraft.concordance.Authority;
+import io.github.jimbozoomer.jugcraft.concordance.celestial.Pattern;
 import io.github.jimbozoomer.jugcraft.concordance.resource.BoundWill;
 import io.github.jimbozoomer.jugcraft.concordance.worker.Pacts;
 import io.github.jimbozoomer.jugcraft.concordance.worker.Status;
@@ -215,7 +216,8 @@ public final class PactKeeping {
 		if (holder.spiritLost(level)) {
 			rows.add(Component.translatable("message.jugcraft.concordance.pact.row.lost", name(record.counterpart()), WorkerRoster.MAX_PER_PLAYER));
 		}
-		// (D-05 inserts the service row here)
+		rows.add(Component.translatable("message.jugcraft.concordance.pact.row.service", service.quota(),
+				Math.max(0, service.quota() - Pacts.done(pact, now))));
 		if (upkeep != null) {
 			if (!Pacts.held(record)) {
 				rows.add(Component.translatable("message.jugcraft.concordance.pact.row.next", upkeep.count(), offering, AgreementHolder.days(upkeep.due() - now)));
@@ -223,12 +225,13 @@ public final class PactKeeping {
 			rows.add(Component.translatable("message.jugcraft.concordance.pact.row.escrow",
 					BoundWills.of(server).periods(record.id(), AgreementHolder.offering(upkeep.offering()), upkeep.count()), upkeep.cap()));
 		}
-		// (D-05 inserts the obligation row here)
+		rows.add(Component.translatable(StarReckoning.kept(player) ? "message.jugcraft.concordance.pact.row.obligation_kept"
+				: "message.jugcraft.concordance.pact.row.obligation"));
 		rows.add(service.from() == 0 && service.to() == Pacts.DAY
 				? Component.translatable("message.jugcraft.concordance.pact.row.area_any", service.radius())
 				: Component.translatable("message.jugcraft.concordance.pact.row.area", service.radius(), Workers.clock(service.from()), Workers.clock(service.to())));
 		rows.add(Component.translatable("message.jugcraft.concordance.pact.row.end"));
-		List<String> patterns = List.of(); // D-05: StarReckoning.choices
+		List<String> patterns = StarReckoning.choices(server, player.getUUID()).stream().map(Pattern::id).toList();
 		return new Page(List.copyOf(rows), patterns, offerings(player, record));
 	}
 }

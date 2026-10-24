@@ -361,4 +361,74 @@ public final class Pacts {
 	public static List<Departure> bounded(List<Departure> history) {
 		return List.copyOf(history.subList(Math.max(0, history.size() - HISTORY), history.size()));
 	}
+
+	/**
+	 * How a pact's service went (Concordance Chunk D, D-05, D-S1): its holder's Star-reckoning at the perch. After RECALLED,
+	 * in the order checked: the server's (switched off; nothing kept here; a copy; not its holder in person), the pact's
+	 * ({@link #serves}), then the pattern's, the astrolabe's and the claim's. Worded as
+	 * message.jugcraft.concordance.pact.reckoning.<id> (DISABLED as the switch's, CONFLICTING as the diagnostic's); equal to
+	 * tools/concordance_pacts.py RECKONING (check_pacts). Append only.
+	 */
+	public enum Reckoning {
+		RECALLED("recalled"),
+		DISABLED("disabled"),
+		NOTHING("nothing"),
+		CONFLICTING("conflicting"),
+		NOT_HOLDER("not_holder"),
+		SUSPENDED("suspended"),
+		UPKEEP_HELD("upkeep_held"),
+		OUTSIDE_AREA("outside_area"),
+		OUTSIDE_HOURS("outside_hours"),
+		QUOTA_SPENT("quota_spent"),
+		NOT_OBSERVED("not_observed"),
+		NO_ASTROLABE("no_astrolabe"),
+		TOO_LITTLE("too_little"),
+		RECALLED_ALREADY("recalled_already");
+
+		public final String id;
+
+		Reckoning(String id) {
+			this.id = id;
+		}
+	}
+
+	/**
+	 * The first reason {@code record}'s pact serves nobody now, in this order, or null: no service or no place (NOTHING);
+	 * held by its holder (SUSPENDED); held for upkeep (UPKEEP_HELD); {@code who} outside its area or in another dimension
+	 * (OUTSIDE_AREA); outside its hours by the world's clock {@code time} (OUTSIDE_HOURS); the quota of the game day of
+	 * {@code gameTime} spent (QUOTA_SPENT: game time only runs forward, so moving the clock cannot reset it). An offering
+	 * due still serves through its grace.
+	 */
+	public static @Nullable Reckoning serves(BoundWill record, Place who, long time, long gameTime) {
+		BoundWill.Pact pact = record.pact();
+		BoundWill.Service service = pact == null ? null : pact.service();
+		if (service == null || pact.place() == null) {
+			return Reckoning.NOTHING;
+		}
+		if (pact.hold() == BoundWill.Hold.HOLDER) {
+			return Reckoning.SUSPENDED;
+		}
+		if (pact.hold() == BoundWill.Hold.UPKEEP) {
+			return Reckoning.UPKEEP_HELD;
+		}
+		if (!pact.place().within(who, service.radius())) {
+			return Reckoning.OUTSIDE_AREA;
+		}
+		if (!inHours(service, time)) {
+			return Reckoning.OUTSIDE_HOURS;
+		}
+		return done(pact, gameTime) >= service.quota() ? Reckoning.QUOTA_SPENT : null;
+	}
+
+	/** Whether the world clock's hour allows its service; the hours may run past midnight (as Agreement.inHours). */
+	public static boolean inHours(BoundWill.Service service, long time) {
+		int tick = (int) Math.floorMod(time, DAY);
+		return service.from() <= service.to() ? tick >= service.from() && tick < service.to() : tick >= service.from() || tick < service.to();
+	}
+
+	/** Whether {@code record}'s pact is active (D-05): kept at its place and held by nobody (an offering due still serves). */
+	public static boolean serving(BoundWill record) {
+		BoundWill.Pact pact = record.pact();
+		return pact != null && pact.place() != null && pact.hold() == BoundWill.Hold.NONE;
+	}
 }

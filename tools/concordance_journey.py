@@ -233,7 +233,7 @@ WORKSHOP = {
 # step is out of reach), nothing else mastered, nothing past the Practitioner stage and no structure loot (Styx's flowers
 # are his gift, so a feather stands in). Each step: the research it adds, what the player does, the graph nodes it
 # reaches and the server game tests that exercise it. The sky step is no research state: it is the invitation's
-# precondition, had through an observatory under an open night sky. D-05 appends the perch, the pact and its obligation.
+# precondition, had through an observatory under an open night sky. D-05's step: the perch, the pact and its first obligation.
 PACT = {
     "name": "Stolas's Regard",
     "steps": [
@@ -257,6 +257,13 @@ PACT = {
          "reaches": [f"item:{rid('observatory')}", "encounter:night", "encounter:open_sky"],
          "tests": ["styxNamesTheSkyStepUntilOneIsRecorded", "aRecordedObservationCountsWithoutAWindow",
                    "aTurnedClockMakesNoNewClaim", "thePactsSectionNamesTheSkyStep"]},
+        {"research": [],
+         "text": "Build a Pact Perch where you may build and invite Stolas; accept his terms with the Open Hand Compact, then "
+                 "record a sky observation at an observatory while the pact is active (its first obligation): Stolas's "
+                 "Regard is mastered, and once a game day at the perch he recalls a pattern you observed",
+         "reaches": [f"item:{rid('pact_perch')}", f"practice:{rid('pact_service')}", f"research:{rid('stolas_regard')}@mastered"],
+         "tests": ["acceptingSealsOnceAndSpendsOnce", "theObligationMastersTheEntryOnce",
+                   "stolasRecallsAnObservedPatternOncePerOccurrence"]},
     ],
 }
 
