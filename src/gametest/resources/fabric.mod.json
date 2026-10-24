@@ -331,7 +331,8 @@
       "io.github.jimbozoomer.jugcraft.test.JimtaUpgradeGameTests",
       "io.github.jimbozoomer.jugcraft.jimtafacts.network.DigitalSpatialGameTests",
       "io.github.jimbozoomer.jugcraft.test.JimtaHeatGameTests",
-      "io.github.jimbozoomer.jugcraft.test.JimtaWorkshopTableGameTests"
+      "io.github.jimbozoomer.jugcraft.test.JimtaWorkshopTableGameTests",
+      "io.github.jimbozoomer.jugcraft.finance.ClaimCombatGameTests"
     ],
     "jei_mod_plugin": [
       "io.github.jimbozoomer.jugcraft.test.JeiStationClientGameTests$WithJei$Probe"
