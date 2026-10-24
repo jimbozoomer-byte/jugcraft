@@ -17945,6 +17945,17 @@ def check_workers(co, root, lang, registered, research):
             body = found.group(1) if found else ""
             if "shouldDestroy()" not in body or ".remove(owner, getUUID())" not in body or not ("carried" in body or "unload(" in body):
                 err(f"spirits/{path.name}: a worker that carries things leaves them once and is struck off its roster when killed (remove)")
+    # Concordance Chunk D, D-S17: the familiar's bond fades by its person's own play time, never by game time, and switched
+    # off (D-S16) it counts none of their play meanwhile.
+    hearthling = java("HearthlingEntity.java", spirits)
+    if "Stats.PLAY_TIME" not in hearthling or "bond.neglected(played)" not in hearthling \
+            or "return person.getStats().getValue(Stats.CUSTOM.get(Stats.PLAY_TIME));" not in hearthling \
+            or "long played = played(person);" not in hearthling or re.search(r"\.neglected\(\s*gameTime", hearthling):
+        err("spirits/HearthlingEntity.java: a familiar fades only for its person's own play time away (Stats.PLAY_TIME), never by game time (D-S17)")
+    if not re.search(r"if \(!Workers\.enabled\(\).*?bond = bond\.restart\(played\(.*?return Status\.DISABLED;", hearthling, re.S):
+        err("spirits/HearthlingEntity.java: switched off, a familiar counts none of its person's play time away (bond.restart, D-S16)")
+    if 'lenientOptionalFieldOf("seen_played", Bond.UNSEEN)' not in hearthling:
+        err("spirits/HearthlingEntity.java: the bond saves the play time it counted to (seen_played), read leniently so an older or unreadable one keeps the bond")
     # Every word has its text.
     for path in sorted(spirits.glob("*.java")):
         for key in re.findall(r'"message\.jugcraft\.concordance\.(workers\.[a-z_]+)"', path.read_text(encoding="utf-8")):
@@ -20247,12 +20258,13 @@ STAMPING_BASES = ("LivingDeviceBlockEntity", "WorkerEntity")
 # The records whose entries are independent, read entry by entry (an unreadable one kept as written).
 ENTRY_BY_ENTRY = {"spire/SpireRecord.java", "spirits/BoundWills.java", "spirits/WorkerRoster.java", "sky/AstralClaims.java",
                   "starbound/ConclaveProjects.java"}
-# Concordance Chunk D, unit 1's game tests (check_pacts): D-01's; D-S17's and D-02's join with their commits.
+# Concordance Chunk D, unit 1's game tests (check_pacts): D-01's and D-S17's; D-02's join with their commit.
 UNIT1_TESTS = {
     "ConcordanceWorkerGameTests": ["aKilledShadeLeavesItsLoadOnce", "aKilledShadeAwayFromItsAnchorDropsWhereItFell",
                                    "aLostShadeIsCalledAgainUnderItsAgreement", "anUnloadedShadeReplacedLeavesOnceAndDeliversOnce",
                                    "aSealedShadeIsOnTheRosterAtOnce", "aFullRosterRefusesTheSeal", "aFullHolderIsToldWhy",
-                                   "theHolderEndsWithoutBreaking"],
+                                   "theHolderEndsWithoutBreaking", "aFamiliarDoesNotFadeWhileItsPersonIsAway",
+                                   "aFamiliarFadesWhileItsPersonPlaysElsewhere"],
     "ConcordanceAuthorityGameTests": ["onlyTheOwnersSideSealsAnAnchor", "aStandInNeverSeals"],
     "ConcordancePersistenceGameTests": ["anAnchorsAgreementRoundTrips"],
 }

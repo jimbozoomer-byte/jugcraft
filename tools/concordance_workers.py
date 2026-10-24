@@ -18,7 +18,9 @@ Concordance Chunk D, unit 1 (D-01; docs/features/concordance-chunk-d.md): the ex
 Spirit Anchor records who placed it, and only its owner or their party seal at it, never a stand-in; a seal is refused
 with one reason (SEAL_OUTCOMES) before anything is recorded, spent or called, and a new shade is on the roster at once; a
 killed shade's load goes home once and its holder calls another under the same agreement at no cost; only the holder ends
-an agreement, once (Java: worker/Pacts.java, spirits/AgreementHolder.java).
+an agreement, once (Java: worker/Pacts.java, spirits/AgreementHolder.java). A familiar's bond fades only for its
+person's own play time away, never for time they are logged out or the Concordance is switched off (D-S17; Java:
+worker/Bond.java, spirits/HearthlingEntity.java).
 """
 
 MOD = "jugcraft"
@@ -255,7 +257,8 @@ def codex():
                  f"to release it.", rid("bonding_charm")),
                 ("text", "The Bond",
                  f"The bond grows by time spent together, {BOND_GAIN} a visit and at most {BOND_DAILY_GAIN} a day, and "
-                 f"fades by {BOND_NEGLECT} for each day you are online but away from it. At {BOND_FIRST} it mends you "
+                 f"fades by {BOND_NEGLECT} for each day you play away from it, here or in another dimension; time you are "
+                 f"logged out never counts, nor time the Concordance is switched off. At {BOND_FIRST} it mends you "
                  f"(at most once a minute); at {BOND_SECOND}, twice as often. It never follows you into another "
                  f"dimension and never waits in a place that is not loaded: it simply waits where it is."),
             ],

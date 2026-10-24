@@ -5,6 +5,7 @@ import io.github.jimbozoomer.jugcraft.concordance.ConcordanceProgress;
 import io.github.jimbozoomer.jugcraft.concordance.LeyPylonBlockEntity;
 import io.github.jimbozoomer.jugcraft.concordance.JugcraftConcordance;
 import io.github.jimbozoomer.jugcraft.concordance.RateGate;
+import io.github.jimbozoomer.jugcraft.concordance.Saved;
 import io.github.jimbozoomer.jugcraft.concordance.resource.BoundWill;
 import io.github.jimbozoomer.jugcraft.concordance.resource.BoundWillLedger;
 import io.github.jimbozoomer.jugcraft.concordance.rules.ResearchState;
@@ -49,8 +50,10 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.GameType;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.entity.ChestBlockEntity;
+import net.minecraft.world.level.portal.TeleportTransition;
 import net.minecraft.world.level.storage.TagValueInput;
 import net.minecraft.world.level.storage.TagValueOutput;
 import net.minecraft.world.phys.AABB;
@@ -66,7 +69,7 @@ import org.jspecify.annotations.Nullable;
  * route, is waiting for resources, carries and delivers, spends energy and wear, is full, needs repair and is fuelled
  * by a pylon; and each worker's model survives a save. Concordance Chunk D, unit 1: a killed shade leaves its load once
  * and its holder calls another under the same agreement; a sealed shade is on the roster at once; a refused seal says why
- * and spends nothing; only the holder ends an agreement, once.
+ * and spends nothing; only the holder ends an agreement, once; a familiar fades only for its person's own play time.
  */
 public class ConcordanceWorkerGameTests {
 	private static final long NIGHT = 18000L;
@@ -75,6 +78,11 @@ public class ConcordanceWorkerGameTests {
 	private static ServerPlayer binder(GameTestHelper helper) {
 		ServerPlayer player = TestPlayers.mock(helper);
 		player.setGameMode(GameType.SURVIVAL);
+		return taught(player);
+	}
+
+	/** {@code player} taught the Binding Arts, with no action of theirs rate-limited. */
+	private static ServerPlayer taught(ServerPlayer player) {
 		ConcordanceProgress.grant(player, "jugcraft:first_light", ResearchState.UNDERSTOOD);
 		ConcordanceProgress.grant(player, Workers.RESEARCH, ResearchState.UNDERSTOOD);
 		RateGate.forget(player.getUUID());
@@ -129,6 +137,21 @@ public class ConcordanceWorkerGameTests {
 		return helper.getBlockEntity(at, SpiritAnchorBlockEntity.class);
 	}
 
+	/** The Hearthling {@code person}'s Bonding Charm binds where they stand. */
+	private static HearthlingEntity bindFamiliar(GameTestHelper helper, ServerPlayer person) {
+		ServerLevel level = helper.getLevel();
+		helper.assertTrue(BondingCharmItem.use(person, level, false).equals(InteractionResult.SUCCESS), "The charm binds a Hearthling");
+		UUID id = WorkerRoster.of(level.getServer()).familiar(person.getUUID());
+		helper.assertTrue(id != null && level.getEntity(id) instanceof HearthlingEntity, "Its person's roster holds it");
+		return (HearthlingEntity) level.getEntity(id);
+	}
+
+	private static HearthlingEntity loadFamiliar(ServerLevel level, CompoundTag saved) {
+		HearthlingEntity copy = Workers.HEARTHLING.create(level, EntitySpawnReason.LOAD);
+		copy.load(TagValueInput.create(ProblemReporter.DISCARDING, level.registryAccess(), saved));
+		return copy;
+	}
+
 	/** Runs {@code during} with the Concordance switched off, then puts the switch back, in the same tick. */
 	private static void off(Runnable during) {
 		boolean on = JugcraftConfig.isFeatureEnabled(JugcraftConcordance.FEATURE);
@@ -175,6 +198,81 @@ public class ConcordanceWorkerGameTests {
 		level.addFreshEntity(orphan);
 		WorkerRoster.of(level.getServer()).note(absent, orphan.getUUID(), "familiar", Status.IDLE, "minecraft:overworld", orphan.blockPosition());
 		helper.assertTrue(orphan.think(level, NIGHT, game) == Status.OWNER_OFFLINE, "Its person offline, it waits and says so");
+		helper.succeed();
+	}
+
+	/**
+	 * D-S17: logged out for days, the familiar unloaded and loaded again meanwhile, its bond does not fade, though its person
+	 * comes back 20 blocks away; nor does it fade for days they play while the Concordance is switched off (D-S16).
+	 */
+	@GameTest(maxTicks = 20)
+	public void aFamiliarDoesNotFadeWhileItsPersonIsAway(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		ServerPlayer person = taught(TestPlayers.survivor(helper));
+		place(helper, person, 2.5, 1.0, 2.5);
+		HearthlingEntity familiar = bindFamiliar(helper, person);
+		TestPlayers.play(person, 5_000);
+		long game = level.getGameTime() + 400_000L;
+		familiar.setBond(new Bond(50, Long.MIN_VALUE, 0, Long.MIN_VALUE / 2, 0L, Bond.UNSEEN));
+		familiar.think(level, NIGHT, game);
+		helper.assertTrue(familiar.bond().strength() == 51 && familiar.bond().seenPlayed() == 5_000L,
+				"Together, the bond grows and counts its person's play time from here: " + familiar.bond());
+		UUID id = person.getUUID();
+		TestPlayers.leave(person);
+		helper.assertTrue(familiar.think(level, NIGHT, game + Bond.DAY) == Status.OWNER_OFFLINE && familiar.bond().strength() == 51,
+				"Its person logged out, it waits and says so, its bond unchanged");
+		TagValueOutput saved = TagValueOutput.createWithContext(ProblemReporter.DISCARDING, level.registryAccess());
+		familiar.saveWithoutId(saved);
+		familiar.remove(Entity.RemovalReason.UNLOADED_TO_CHUNK);
+		HearthlingEntity reloaded = Workers.HEARTHLING.create(level, EntitySpawnReason.LOAD);
+		reloaded.load(TagValueInput.create(ProblemReporter.DISCARDING, level.registryAccess(), saved.buildResult()));
+		level.addFreshEntity(reloaded);
+		ServerPlayer back = TestPlayers.again(helper, id);
+		place(helper, back, 22.5, 1.0, 2.5);
+		helper.assertTrue(TestPlayers.played(back) == 5_000L && back.distanceTo(reloaded) >= 19.0F,
+				"The same person comes back 20 blocks away, with their own play time: " + TestPlayers.played(back));
+		reloaded.think(level, NIGHT, game + 3 * Bond.DAY);
+		helper.assertValueEqual(reloaded.bond().strength(), 51, "the bond after three days logged out, the familiar unloaded meanwhile");
+		off(() -> {
+			TestPlayers.play(back, 2 * (int) Bond.DAY);
+			helper.assertTrue(reloaded.think(level, NIGHT, game + 4 * Bond.DAY) == Status.DISABLED && reloaded.bond().strength() == 51,
+					"Switched off, it waits and says so, its bond unchanged");
+		});
+		reloaded.think(level, NIGHT, game + 5 * Bond.DAY);
+		helper.assertValueEqual(reloaded.bond().strength(), 51, "the bond after two days played while the Concordance was switched off");
+		helper.succeed();
+	}
+
+	/**
+	 * D-S17: days its person plays away fade it by 4 each, once, in this level or another; back beside it, that day fades it
+	 * before the visit counts.
+	 */
+	@GameTest(maxTicks = 20)
+	public void aFamiliarFadesWhileItsPersonPlaysElsewhere(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		ServerPlayer person = taught(TestPlayers.survivor(helper));
+		place(helper, person, 2.5, 1.0, 2.5);
+		HearthlingEntity familiar = bindFamiliar(helper, person);
+		long game = level.getGameTime() + 500_000L;
+		familiar.setBond(new Bond(50, Long.MIN_VALUE, 0, Long.MIN_VALUE / 2, 0L, Bond.UNSEEN));
+		familiar.think(level, NIGHT, game);
+		helper.assertValueEqual(familiar.bond().strength(), 51, "Together, the bond grows");
+		place(helper, person, 22.5, 1.0, 2.5);
+		TestPlayers.play(person, 3 * (int) Bond.DAY);
+		familiar.think(level, NIGHT, game + 40);
+		helper.assertValueEqual(familiar.bond().strength(), 51 - 3 * Bond.NEGLECT, "three days played 20 blocks away fade it by 12");
+		familiar.think(level, NIGHT, game + 60);
+		helper.assertValueEqual(familiar.bond().strength(), 51 - 3 * Bond.NEGLECT, "once");
+		ServerLevel nether = level.getServer().getLevel(Level.NETHER);
+		helper.assertTrue(nether != null, "The test server has a Nether");
+		person.teleport(new TeleportTransition(nether, new Vec3(0.5, 64.0, 0.5), Vec3.ZERO, 0.0F, 0.0F, TeleportTransition.DO_NOTHING));
+		helper.assertTrue(person.level() == nether && familiar.think(level, NIGHT, game + 80) == Status.OTHER_DIMENSION
+				&& familiar.bond().strength() == 51 - 3 * Bond.NEGLECT, "Its person in another dimension, it waits and says so");
+		TestPlayers.play(person, (int) Bond.DAY);
+		person.teleport(new TeleportTransition(level, helper.absoluteVec(new Vec3(3.5, 1.0, 2.5)), Vec3.ZERO, 0.0F, 0.0F, TeleportTransition.DO_NOTHING));
+		familiar.think(level, NIGHT, game + 400);
+		helper.assertValueEqual(familiar.bond().strength(), 51 - 4 * Bond.NEGLECT + Bond.GAIN,
+				"a day played in another dimension, then back beside it: that day fades it before the visit counts");
 		helper.succeed();
 	}
 
@@ -542,18 +640,37 @@ public class ConcordanceWorkerGameTests {
 
 	// ---------------------------------------------------------------- saving
 
-	/** A familiar's bond, a porter's body and route, and a shade's anchor, holder and load (G10) survive a save. */
+	/**
+	 * A familiar's bond (with the play time it counted to, D-S17; one saved before reads it as unknown, and an unreadable one
+	 * keeps the rest), a porter's body and route, and a shade's anchor, holder and load (G10) survive a save.
+	 */
 	@GameTest(maxTicks = 20)
 	public void workersKeepTheirModelsThroughASave(GameTestHelper helper) {
 		ServerLevel level = helper.getLevel();
 		HearthlingEntity familiar = Workers.HEARTHLING.create(level, EntitySpawnReason.LOAD);
 		familiar.setOwner(new UUID(17L, 5L));
-		familiar.setBond(new Bond(42, 3L, 7, 1000L, 2000L));
+		familiar.setBond(new Bond(42, 3L, 7, 1000L, 2000L, 96_000L));
 		TagValueOutput out = TagValueOutput.createWithContext(ProblemReporter.DISCARDING, level.registryAccess());
 		familiar.saveWithoutId(out);
 		HearthlingEntity copy = Workers.HEARTHLING.create(level, EntitySpawnReason.LOAD);
 		copy.load(TagValueInput.create(ProblemReporter.DISCARDING, level.registryAccess(), out.buildResult()));
 		helper.assertTrue(copy.bond().equals(familiar.bond()) && familiar.owner().equals(copy.owner()), "The bond and its person are saved");
+		CompoundTag bondSaved = out.buildResult();
+		helper.assertTrue(bondSaved.getCompoundOrEmpty("bond").getLongOr("seen_played", Bond.UNSEEN) == 96_000L && bondSaved.getIntOr(Saved.VERSION, 0) == 1,
+				"The play time it counted to is saved, still at version 1");
+		Bond rest = new Bond(42, 3L, 7, 1000L, 2000L);
+		CompoundTag older = bondSaved.copy();
+		older.getCompoundOrEmpty("bond").remove("seen_played");
+		helper.assertTrue(loadFamiliar(level, older).bond().equals(rest), "A bond saved before reads the rest unchanged, its play time not yet counted");
+		CompoundTag unreadable = bondSaved.copy();
+		unreadable.getCompoundOrEmpty("bond").putString("seen_played", "soon");
+		helper.assertTrue(loadFamiliar(level, unreadable).bond().equals(rest), "One whose play time cannot be read keeps the rest of its bond");
+		CompoundTag forged = bondSaved.copy();
+		forged.getCompoundOrEmpty("bond").putLong("seen_played", -50L);
+		helper.assertTrue(loadFamiliar(level, forged).bond().equals(rest), "and one below none reads as none");
+		helper.assertTrue(rest.neglected(5 * Bond.DAY).equals(new Bond(42, 3L, 7, 1000L, 2000L, 5 * Bond.DAY))
+				&& new Bond(42, 3L, 7, 1000L, 2000L, 96_000L).neglected(10_000L).equals(new Bond(42, 3L, 7, 1000L, 2000L, 10_000L)),
+				"A first count, and a play time that went back, only start the count: nothing is owed for time it never counted");
 		ClockworkPorterEntity porter = Workers.CLOCKWORK_PORTER.create(level, EntitySpawnReason.LOAD);
 		porter.setBody(new Body(30, 12L));
 		porter.setRoute(new ClockworkPorterEntity.Route(new BlockPos(1, 2, 3), new BlockPos(4, 5, 6), "minecraft:overworld"));
