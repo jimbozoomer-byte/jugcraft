@@ -186,7 +186,9 @@ amd64, Java VM 25.0.4.1+1-LTS):
 | A fed pulse: its crop search, 147 positions, nothing ripe | 62 µs |
 
 The server's tick time with and without one small workshop is the load card's, recorded in
-[Chunk C's contract](concordance-chunk-c.md#the-load-card-run-38774859294). Not measured: server tick time with a large
+[Chunk C's contract](concordance-chunk-c.md#the-load-card-run-38774859294). The server's tick time with and without a pact
+hall (eight pacts, a visitor, two conversations, a roster, four workshop hands) is its own card's, recorded in
+[Chunk D's contract](concordance-chunk-d.md#the-pact-hall-load-card). Not measured: server tick time with a large
 installation. Client frame time: `ConcordanceWorkshopClientGameTests` logs 100 frames' times under Mesa's software
 renderer in CI (its shard passed in run 38774859294; that line was not read for these records); a player's hardware is
 not measured.

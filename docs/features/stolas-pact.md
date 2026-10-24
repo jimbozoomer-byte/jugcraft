@@ -1,8 +1,9 @@
 # Stolas's pact
 
-Status: implemented, unmerged (Concordance Chunk D, unit 2: D-03, D-04, D-05; unit 3: D-06, D-07); owner checkpoint
-pending. None of its Java has been compiled against Minecraft and none of its game tests has run: there is no Minecraft
-build where it was written, so CI is its first compile and run (see Verification).
+Status: implemented, unmerged (Concordance Chunk D: unit 2, D-03 to D-05; unit 3, D-06 and D-07; unit 5's evidence,
+D-09); owner checkpoint pending. Built and tested in CI on the candidate `48d99c904` (run 40133540741: every job passed
+on the first attempt; see Verification), with three fixes from that run's pictures since (`b773913c4` and `d00fa2167`; run
+40140478331 on `d00fa2167`: every job passed, and the pictures were seen fixed). No person has played it; two automated clients on one machine, no two people or accounts.
 Proposal issue: none; the owner's selected scope ([the chunk's contract](concordance-chunk-d.md), D-D0 to D-D2).
 Owner: @jimbozoomer-byte. AI-assisted implementation with Claude Code; the model is named in the commit trailers.
 Target milestone and tier: Concordance Chunk D; Practitioner stage, Spiritbinders (tier: practitioner).
@@ -11,8 +12,9 @@ of the Ars Goetia who teaches the stars, gives its holder a chosen recall of a s
 
 Builds on [spirits, familiars and constructs](arcane-concordance-workers.md) (the shared agreement holder, the Bound
 Will's pact and escrow from unit 1), [celestial cycles](arcane-concordance-celestial.md) (observations, the astrolabe
-and its recall) and [Styxhexenhammer](styxhexenhammer.md). Session decisions D-S1 to D-S23, unit 2's proposals D-P17 to
-D-P50 and unit 3's D-P90 to D-P121 are in the [contract](concordance-chunk-d.md#decisions); none is the owner's.
+and its recall) and [Styxhexenhammer](styxhexenhammer.md). Session decisions D-S1 to D-S23 (decided by the
+session under D-D2) and the proposals of units 2, 3 and 5 (D-P17 to D-P50, D-P90 to D-P121, D-P122 to D-P137) are in the
+[contract](concordance-chunk-d.md#decisions); none is the owner's.
 
 ## Player experience
 
@@ -23,6 +25,8 @@ Binding category, the journal's Pacts section and a feather). With the Binding A
   Assayer's Scale (in any order; Research Notes never stand in): Stolas's Regard is understood;
 - record a sky observation at an Orrery Observatory while a pattern is up and visible (not research: the invitation's
   precondition, which Styx and the journal name apart);
+- fill an astrolabe at an observatory you keep (only a Starwatcher, with Celestial Attunement understood, keeps one; a
+  party member's observatory or a traded astrolabe also serves): the compact asks 8 Astral Resonance;
 - build a **Pact Perch** where you may build and use it: Stolas arrives on it and speaks three beats, then names every
   term before anything is spent;
 - **accept**: the Open Hand Compact is paid and the pact sealed in the same server action; **decline**, closing the
@@ -45,6 +49,18 @@ shows whether a perch or an anchor keeps a pact, with whom, its service, state a
 roster (its key not bound at first: Controls, then the Keys page) lists every pact, agreement, worker and courier
 request of yours with what each waits for, and suspends, resumes, ends (asked first), cancels or recovers.
 
+## Record fields (CLAUDE.md)
+
+| Field | Stolas's pact |
+|---|---|
+| Tier | Practitioner, Spiritbinders: Stolas's Regard needs the Binding Arts understood |
+| Input producer | a feather or Styx flower examined; a ripe organism crop harvested; a sample dissolved at the Assayer's Scale; one sky observation at an Orrery Observatory; the perch (two sticks, an amethyst shard, a dark oak log, polished deepslate); the Open Hand Compact (2 amethyst shards, 3 feathers, 8 Astral Resonance, which only an observatory's keeper gathers); offerings (`#jugcraft:stolas_offerings`) |
+| Output consumer | recalled attunements (2,400 ticks); Stolas's Regard mastered, which the workshop hand needs (D-08); the Starbound Conclave hears `pact_service` |
+| Costs | the compact once; a recall's own cost (6 to 16 Astral Resonance); one offering every 7 game days, at most 4 ahead |
+| Unlocks | the invitation (Regard understood and an observation); Star-reckoning (the pact); the workshop hand (Regard mastered) |
+| Failure behaviour | every refusal spends nothing and names its reason; a missed offering warns, gives a game day's grace, then suspends with nothing lost; a pact never ends by itself; ending returns what was paid ahead once; a broken perch ends nothing; switched off, everything waits |
+| Test evidence | below (Verification), every result from CI run 40133540741 unless another run is named |
+
 ## Connections
 
 - Tier: Practitioner (Stolas's Regard requires the Binding Arts understood, and nothing else in code: D-P17).
@@ -52,14 +68,17 @@ request of yours with what each waits for, and suspends, resumes, ends (asked fi
   - the Binding Arts (understood);
   - ripe organism crops from Verdant Beds (the cultivation practice);
   - the Assayer's Scale (the assay practice);
-  - Orrery Observatories (observations, and Astral Resonance carried in an astrolabe);
+  - Orrery Observatories (observations; and Astral Resonance, which one gathers only once a Starwatcher keeps it and
+    fills into its keeper's party's astrolabes: the compact's 8 come from there, or from an astrolabe a party member or
+    a trade gives, D-P123);
   - a feather, or Styx's flowers (the specimens, `#jugcraft:stolas_specimens`);
   - the perch's recipe: two sticks, an amethyst shard, a dark oak log and polished deepslate;
   - offerings (`#jugcraft:stolas_offerings`: Stolas Starflower, Ravenquill Lupine, Amethyst Mourningbell, or an
     amethyst shard).
 - Output consumers:
   - recalled attunements (the six patterns' effects, 2,400 ticks each);
-  - Stolas's Regard mastered (the first obligation), which D-08's workshop hand (unit 4) will consume;
+  - Stolas's Regard mastered (the first obligation), which unlocks D-08's workshop hand (the anchor seals it only
+    then, D-P72);
   - the Starbound Conclave hears `pact_service` once a player, as it hears every recorded practice.
 - Technology and magic connections:
   - the shared agreement holder (`AgreementHolder`), the Bound Will's pact, escrow and upkeep rules, and the departure
@@ -70,13 +89,18 @@ request of yours with what each waits for, and suspends, resumes, ends (asked fi
   - Stolas's Regard understood: the invitation (with one observation recorded);
   - the pact: Star-reckoning;
   - the first obligation: Stolas's Regard mastered.
-- Reachable entry path: `tools/concordance_journey.py`'s Stolas's Regard route, five steps, one player alone in the
-  Overworld, nothing past the Practitioner stage and no structure loot (a feather stands in for Styx's flowers);
-  `python3 tools/concordance_journey.py --check` holds it and the [journey record](arcane-concordance-journey.md)
-  shows it. It is a check over the data, not a played journey.
+- Reachable entry path: `tools/concordance_journey.py`'s pact hall route (`PACT`), nine steps from the Binding Arts
+  understood to the pact ended and the workshop hand at work: one player alone in the Overworld (the hand's step in the
+  Nether too, for its anchor's soul lantern), nothing past the Practitioner stage and no structure loot (a feather
+  stands in for Styx's flowers, an amethyst shard keeps the pact). The compact's resonance makes it understand Celestial
+  Attunement (D-P123). `python3 tools/concordance_journey.py --check` holds it, the [journey
+  record](arcane-concordance-journey.md) shows it, and `ConcordanceJourneyGameTests.thePactHallFromStyxToDeparture`
+  walks it on one survival player; that is a server test, not a played journey.
 - Required versus optional:
   - Styx is optional: the feather route reaches every step;
   - offerings have a source without Styx (the amethyst shard);
+  - Celestial Attunement is required to seal a pact alone (the compact's resonance has no other source, D-P123); the
+    Nether is visited once, for the workshop hand's anchor (D-P124), never for the pact;
   - nothing gates core progression.
 - Specialty: the pact is personal, one with Stolas a holder; its holder's party does not benefit. An observer without
   the pact keeps the master's own recall of the pattern they last observed.
@@ -334,7 +358,7 @@ files always give the same output):
   (`art/owner-library/ports/jug-nouveau/ars_jymbaumental-1.21.1-0.7.10.4/META-INF/neoforge.mods.toml:7, 15, 25`). The
   owner's declaration is [PROVENANCE.md](../../art/owner-library/PROVENANCE.md) (lines 3-7). Catalog rows:
   `art/owner-library/catalog/files.csv:21291` (animations), `:21330` (model) and `:21676` (skin); `:21329` is the
-  Blockbench project, not imported. The look and the licence label are checkpoint questions.
+  Blockbench project, not imported. The look is a checkpoint question; the supplied labels are kept as provenance.
 - `check_geckolib` checks his model by face (three UV regions of the rig overlap as drawn; no face overlaps, D-P42) and
   holds every clip the Java plays, looped, played once or played and held; `check_stolas_body` holds the Java, the client
   test and the files to the generator's tables.
@@ -366,9 +390,14 @@ events carry subtitles of their own.
 
 ## Verification
 
-Each entry is what actually ran. No server or client game test of this feature has run: CI is their first run.
+Each entry is what actually ran, with the CI run it ran in; a result is that run's, on that commit. "Server" means a
+game-test server with test players, "client" one real client on the game's own dedicated server; the two-client test is
+two client JVMs on one CI runner. No person has played any of it.
 
-- **Server game tests (46 new, none yet run in CI):**
+- **Server game tests (unit 2's 46):** compiled first in run 40090825848 (on `92868ff82`), which failed two of them in
+  both server jobs, each a defect of the test: `aBrokenPactDefinitionIsReported` read Stolas's offer after refusing it on
+  purpose, and `talkingGrantsNoResearch` assumed a test player joins with nothing; both were fixed in `8a3425f9e`, whose
+  run 40094972598 passed all 46 in both server jobs, as did run 40133540741:
   - D-03 (9): `StyxGameTests` `styxHintsByTheListenersOwnProgress`, `talkingGrantsNoResearch`,
     `styxNamesTheSkyStepUntilOneIsRecorded`; `ConcordanceSharingGameTests.notesNeverStandInForStolasEvidence`;
     `ConcordanceProgressionGameTests.stolasRegardIsReachable`; `ConcordanceSkyGameTests`
@@ -402,7 +431,9 @@ Each entry is what actually ran. No server or client game test of this feature h
     `aVisitingStolasLeavesWithoutARecord` (a visitor loaded while switched off leaves), `thePactScreensMessagesAreBounded`
     (a 209-character choice id is sent and read back) and `thePactDefinitionParsesStrictly` (`"party"` for
     Star-reckoning is refused).
-- **Unit 3's server game tests (18 new, the unit review's one included; none yet run in CI):**
+- **Unit 3's server game tests (18 new, the unit review's one included):** first compiled and run in run 40121823509
+  on `040d73ece`, where they passed (run 40120355940 on `554d71ab1` failed to compile at the roster client test, fixed
+  in `040d73ece`), and passed again in run 40133540741:
   - D-06 (8, `D06_TESTS`): `ConcordanceWorkerGameTests` `aDepartingStolasIsNeverAVisitorAgain` (a declined visitor and
     an ended presence depart, are gone for the perch, unsaved, and never return; with their cues; since the unit review
     he listens no more and his departure is synced), the unit review's `aDepartureEndsWithoutHisTicks` (the sweep, at
@@ -422,20 +453,49 @@ Each entry is what actually ran. No server or client game test of this feature h
   - Changed by unit 3 (leaving now lingers 40 ticks, so "he has left" reads `gone()`, not `isRemoved()`):
     `thePerchHoldsNothing`, `aCopiedPerchIsInert`, `aVisitingStolasLeavesWithoutARecord`, `endingReturnsTheEscrowOnce`,
     `aBrokenPerchLeavesThePactWithoutItsPerch` and the helpers `stolas` and `stolases`.
-- **Client game tests (not yet run):**
-  - `ConcordancePactClientGameTests`: unit 2's twelve shots (the conversation, the terms at three sizes, acceptance
-    refused (`cannot_afford`) and then sealed by keyboard, Stolas on his perch, a recall and an offering, the end's
-    confirmation and the ended pact); since unit 3 also his four loops of his own and five gestures frozen in their
-    telling poses (nine shots), his real arrival and departure, his refusal and assent fired with their subtitles (heard
-    only where the machine has a sound device), each answer's mark awaited before it is checked, Keep it holding the
-    keyboard, and Jade's readings, with two Jade shots when Jade is loaded: 23 shots with Jade, 21 without.
-    `tools/select_client_tests.py` weighs it at 230 s (an estimate), and `scripts/tests/test_client_test_selection.py`
-    checks that Stolas's assets, his glowmask among them, select it.
-  - `ConcordanceRosterClientGameTests` (new): the roster empty, with rows (each row's portrait checked one at a time,
-    after Tab brings it into view), at three sizes, suspend and resume, an end asked first and kept by Esc, then ended by
-    keyboard, a recovery and a cancel, and 64 rows on eight pages: ten shots. Weighed at 140 s.
-  - `ScreenFitClientGameTests` opens the roster at 320×240.
-  - One client on the game's dedicated server; no two-client playtest.
+- **Client game tests** (one client on the game's own dedicated server, in survival; each passed in its shard of run
+  40133540741; its shots are that run's `client-screenshots-<shard>` artifacts; the evidence bundle and what was viewed are
+  in [the contract](concordance-chunk-d.md#client-evidence)). Unit 3's additions first ran in run 40121823509 on
+  `040d73ece`, where they passed, after run 40120355940 failed to compile the roster client test:
+  - `ConcordancePactClientGameTests` (shard 5): his beats and terms reached by Enter alone; the terms and a beat at GUI
+    scale 4 in a 1920×1080 window and in a 640×360 one, every control on screen and named; Accept refused as
+    `cannot_afford` (a cross), then sealed by keyboard (a tick) and spent once; his four loops and five gestures frozen
+    in their telling poses, and a timed sequence through his refusal (frozen at 0.290, 0.647, 1.004 and 1.357 s), all
+    photographed from his front; his refusal's and assent's subtitles defined and fired (CI has no sound device, so none
+    is heard there); Jade's readings of the perch and of him, naming no player (his own Jade line showed
+    "entity.minecraft." in that run's picture, fixed in `b773913c4` and seen fixed in run
+    40140478331); a recall at its cost under the shared claim; an offering paid ahead; End asked first with the keyboard on
+    Keep it, Esc keeping the pact, the end returning the offering once while he departs. It passed earlier in runs 40090825848 and 40094972598 (shard 12) as unit 2 left it.
+  - `ConcordanceRosterClientGameTests` (shard 14): the roster empty, then a pact, a shade's agreement, a workshop hand
+    and two requests with their states in words beside their marks, at three sizes; suspend and resume; an end asked
+    first; a recovery and a cancel; the workshop hand carrying three copper ingots across the yard, frozen with its
+    cargo aboard, then delivering them once; 64 rows paged and the rest counted.
+  - `ScreenFitClientGameTests` (shard 13): the roster fits the smallest GUI, 320×240.
+  - `tools/select_client_tests.py` weighs the pact class at 240 s, the roster at 170 s and the two-client class at 300
+    s: estimates, not measurements.
+- **Two clients (D-09, D-S22):** `ConcordancePactNetworkTests` (shard 3) starts a second, separate client JVM (offline
+  name `PactPeer`, its own temporary profile) against the first client's loopback-only dedicated server, on the
+  pattern of main's `OwnerCollectionsNetworkTests` (#435), not #467's harness. The stranger, south of the holder's
+  perch, saw Stolas arrive, assent and depart; at the holder's perch its Accept, sent with the compact in hand, was
+  refused (`not_permitted`) and spent nothing; at the kept perch its End was refused (`not_holder`); its roster listed
+  nothing of the holder's and refused an End naming the holder's pact (`not_listed`); the holder's pact sealed once and
+  ended once, and the stranger kept everything it carried. Passed in shard 3 of run 40133540741 and in its opt-in job
+  without the optional integrations; two of its three pictures were defective there (the arrival showed "Loading
+  terrain", the refusal was not in view), fixed in `b773913c4` and `d00fa2167` and seen fixed in run 40140478331 (every job passed). Two automated
+  clients on one machine with offline names: no two people, no two accounts, no network between machines.
+- **The whole path (D-09):** `ConcordanceJourneyGameTests.thePactHallFromStyxToDeparture` walks the route on one
+  survival player from Styx's hint to Stolas's departure, ended from the roster, with the workshop hand carrying one
+  request; `thePactHallsRecipesLoad` loads the route's nine recipes. Both passed in both server jobs of run 40133540741
+  (`mod`: "All 2572 required tests passed"; `optional integrations absent`; the log names no passing test one by one).
+  The codex's compact page now says where the resonance comes from (generated).
+- **Load (D-09):** `ConcordancePactHallLoadGameTests.loadCard`, opted in. Eight pacts with their perches and Stolas, a
+  visitor, two open conversations, an open roster and four workshop hands, measured against the same world without
+  them, with D-09's rules (one presence a pact, one pact a holder, the perch's look once a second) sampled every 100
+  ticks. Its result, the CI runner's, is in [Chunk D's contract](concordance-chunk-d.md#the-pact-hall-load-card); in run
+  40133540741 the hall added +0.098 ms to the median and +0.311 ms to the p95 server tick on CI's runner, within the proposed
+  budget.
+- **Without the optional integrations:** every server game test, in the `optional integrations absent` job of run
+  40133540741; the pact, roster and two-client classes passed in that run's opt-in job (Jade not loaded, so no Jade shot).
 - **Audits** (`tools/check_mod_data.py`, run and passing): `check_stolas_regard` (D-03), `check_pacts` (D-04, D-05;
   since unit 3 its D-06 block: the cues, the reactions, the Jade readings, a copied perch moving nobody, the hand's
   roster rule), `check_pact_screen` (the client, the screen and the client test; since unit 3 the confirmation through
@@ -444,7 +504,10 @@ Each entry is what actually ran. No server or client game test of this feature h
   `check_roster_screen` (new: the roster's client classes, key and client test), `check_economy` (Stolas's terms,
   offerings and recall costs against the data), `check_geckolib` (his model by face; every clip looped, played once or
   held), `check_rime_strata_assets` (his sound files counted), `AUTHORITY_ROUTES` (Star-reckoning),
-  `concordance_journey --check`, `owner_art --check` and the icon maps.
+  `concordance_journey --check`, `owner_art --check` and the icon maps; and since unit 5, `check_stolas_body`'s front
+  camera and refusal sequence, `check_pact_network` (the two-client class, its reasons and shots, the shards' upload
+  and the opt-in job's guard) and the pact hall's rows in `check_acquisition` and `concordance_journey --check`, whose
+  mutations were each reported (D-09's As built in the contract).
 - **Audit mutations** (run in place on scratch edits and restored, per code commit): D-03's 18, D-04's 26, the client
   commit's 17 and D-05's 19 were each reported, and each commit's unchanged tree reported nothing. The unit review's
   are listed in the [contract](concordance-chunk-d.md#d-05-star-reckoning-the-obligation-upkeep-renew-suspend-and-end-unit-2).
@@ -455,15 +518,18 @@ Each entry is what actually ran. No server or client game test of this feature h
   and trailing whitespace in the contract (reported by `git diff --check`); seven of the code commits' mutations (B7,
   B21, P5, P15, S9, C13, C17) were run again on the final tree against the Concordance audit alone and each reported;
   the unchanged tree reported nothing.
-- **Not run for unit 3:** `./gradlew build` (with or without the optional integrations), its server game tests and its
-  client tests: none of its Java has been compiled, and CI is their first compile and run.
+- **Unit 3 in CI:** run 40120355940 on `554d71ab1` failed to compile at the roster client test (`LOGGER.info` with a
+  generic `computeOnClient` result was ambiguous, two errors; fixed in `040d73ece`); run 40121823509 on `040d73ece`
+  first compiled and ran it and passed every job, its server tests with and without the optional integrations
+  (`optional integrations absent` after one re-run: `TurkeyGameTests.hensLayEggs`, from #112 and untouched by Chunk D,
+  failed there once and passed in that run's `mod` job) and its client tests among them.
 - **Design-pass simulations** (scratch copies, before the build): the progression graph with the perch had 0 problems;
   a slab in the perch's recipe gave 3 (hence polished deepslate, D-P32); the journey's fifth step was reached; the
   perch's icon map had no errors.
-- **Not exercised:** a real chunk unload (modelled as a gap), the narrator's audio, two clients, an aimed click on the
-  perch (the client test opens it by the server's use), a human playthrough; since unit 3 also a sound device on CI (his
-  subtitles are checked as defined and fired, never as seen there), his astir loop in a frozen pose, and a GeckoLib
-  portrait on the roster seen by a person.
+- **Not run:** a person playing any of it, alone or with others; two people or two accounts; a sound device (CI has
+  none, so no subtitle has been seen); the narrator's audio; an aimed click on the perch (the tests open it by the
+  server's use); client frame times on a player's hardware; a real chunk unload (modelled as a gap); a busy server; his
+  astir loop in a frozen pose; a GeckoLib portrait on the roster seen by a person.
 
 ## World and event applicability
 
@@ -491,14 +557,15 @@ Known limits:
   that it has none.
 - Suspending, recalling and resuming once a day keeps the upkeep period counting only a few ticks of active time a day
   (checkpoint question).
+- Stolas is summoned facing south and keeps that facing, so a holder north of the perch sees his back (the evidence
+  photographs him from the south, D-P133).
+- CI has no sound device: his subtitles are checked as defined and fired, never seen there.
 
-Checkpoint questions:
-- Stolas's character and words (D-06): his raven look and its licence label, his gestures' timing, his sounds, Jade's
-  words and the cue spacing (D-P100);
-- the roster key's default (unbound, D-P112) and its portraits (D-P115);
-- the Harvest Moon balance for non-masters (the quota is the only hard limit);
-- once-a-player versus once-a-pact obligation (D-P44);
-- the compact's numbers and the upkeep's strictness, with the two routes around upkeep (D-P50 closes one).
+Asked at the owner's checkpoint ([the contract](concordance-chunk-d.md#the-owner-checkpoint-as-reported)): Stolas's look
+and manner; how strict pacts should feel (D-P50 and the suspend, recall and resume route); which six-spirit cohort
+follows. The Harvest Moon balance, the once-a-player obligation (D-P44), the compact's numbers, its resonance's one
+source (D-P123), his gestures' timing, sounds and Jade's words (D-P100), and the roster key's default (D-P112) and
+portraits (D-P115) are listed in its handoff for the owner's review, not as further questions.
 
 Ids are stable once released: `jugcraft:pact_perch` (block, item, block entity and menu), `jugcraft:stolas` (entity),
 `jugcraft:stolas_regard` (research), `jugcraft:pact_service` (practice), `#jugcraft:stolas_offerings` and

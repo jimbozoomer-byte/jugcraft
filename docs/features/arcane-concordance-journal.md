@@ -159,7 +159,7 @@ other GUI scales, and a two-client server. The screenshots above were looked at 
 Concordance Chunk D, unit 3 (D-07; not merged): `ConcordanceJournalGameTests.thePactsSectionListsPactsOnlyAfterTheBindingArts`
 (a pact kept by a player who has not understood the Binding Arts shows no section; understood, the section gives the
 Regard's step, the sky step, then the pact kept, named, without its perch, with its next offering and why it waits as
-the exact figure) is added; not yet run in CI, since nothing of the unit has been compiled. `check_roster` holds the
+the exact figure) is added; it passed in CI run 40121823509 on `040d73ece`, its first run, and in run 40133540741. `check_roster` holds the
 lines to the generator (`tools/concordance_roster.py`).
 
 ## World and event applicability

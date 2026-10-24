@@ -1,22 +1,22 @@
 # Concordance Chunk D: the pact hall (contract and handoff)
 
-Status: units 1 (D-01, D-02), 4 (D-08) and 2 (D-03, D-04, D-05) are built on this branch (not merged). Unit 1, with its
-unit review's fixes, is pushed and green in CI: run 40067977680 on `da185dd0d` passed every job (the build, the server
-game tests with and without the optional integrations, every client class). Unit 4, with its unit review's fixes, was
-built on the local `wip/chunk-d-u4` beside unit 2 and merged here at `df3006850`; CI compiled it, and its twenty hand
-tests failed at their first step in runs 40079227985 and 40082852322 through a test helper's comparison (fixed in
-`86c4e7127`); run 40085012234 on `86c4e7127` passed them in both server jobs, and every job, its client companion check
-among them, after one re-run of a client shard for main's `PeepoPopulationClientTests` cow-breeding flake. Unit 2,
-with its unit review's fixes, was built on the local `wip/chunk-d-u2` from unit 1's records commit and merged here
-after unit 4; its local checks run and passed, and the next CI run is its Java's first compile. Unit 3 (D-06, D-07)
-is built on the local `wip/chunk-d-u3`, from this branch at `92868ff82` (units 1, 4 and 2 merged, with their review
-fixes), with its unit review's fixes; not merged here, nothing of it compiled locally, and its game tests and CI not
-run. Unit 5 is not started.
+Status: units 1 to 5 (D-01 to D-09) are built on this branch (not merged). The candidate `48d99c904` was run in CI run
+40133540741 (a manual Build run with every client class and both opt-in inputs): every job passed on the first attempt.
+Three defects its pictures showed were fixed after it in `b773913c4` and `d00fa2167` (run 40140478331: every job passed,
+and the three pictures were seen fixed). Unit 1 passed
+in run 40067977680. Unit 4 passed in run 40085012234, after runs 40079227985 and 40082852322 failed its twenty hand
+tests at a test helper's comparison. Units 1, 2 and 4 together passed in run 40094972598 on `8a3425f9e`, after run
+40090825848 failed two of unit 2's server tests, each a defect of the test. Unit 3: run 40120355940 on `554d71ab1`
+failed to compile (two errors at an ambiguous `LOGGER.info` in the roster client test; fixed in `040d73ece`); run
+40121823509 on `040d73ece` passed every job, unit 3's 18 server tests and its client tests run there first, after one
+re-run of `optional integrations absent` for `TurkeyGameTests.hensLayEggs` (#112, untouched by Chunk D; it passed in
+that run's `mod` job). Unit 5's combined fixes, whole path, load card, client evidence and two-client attempt are under
+[Unit 5](#unit-5-evidence-and-handoff-d-09).
 Chunk D is developed on branch
 `claude/chunk-d-pact-hall` (local `wip/chunk-d`), started from
 Chunk C's head `779851cdb` ([#466](https://github.com/jimbozoomer-byte/jugcraft/pull/466), itself stacked on Chunk B's
-[#465](https://github.com/jimbozoomer-byte/jugcraft/pull/465)); when it is ready it is reviewed as a third stacked pull
-request against `claude/chunk-c-living-workshop` (D-D1). Not merged; Chunks B and C beneath it are not merged either.
+[#465](https://github.com/jimbozoomer-byte/jugcraft/pull/465)); it is reviewed as the third stacked pull request, [jimbozoomer-byte/jugcraft#474](https://github.com/jimbozoomer-byte/jugcraft/pull/474),
+against `claude/chunk-c-living-workshop` (D-D1). Not merged; Chunks B and C beneath it are not merged either.
 Proposal: the owner chose Chunk D on 23 October 2026 ("begin chunk d"), from
 [the expansion plan's delivery chunks](../plans/concordance-expansion-2026-10-10/09-claude-delivery-chunks.md) (section 6,
 D1 to D4, 09:146-174), with [workshops, ecology and pacts](../plans/concordance-expansion-2026-10-10/03-workshops-ecology-and-pacts.md),
@@ -124,10 +124,10 @@ completes the path. Nothing in units 3 and 4 comes before it.
 | Unit | Tickets | What it delivers | Record (proposed) | State |
 |---|---|---|---|---|
 | 1 | D-01, D-02 | The existing agreements keep their promises (shade death and re-call, seal refusals, the roster at once, anchor ownership, the familiar's fade, ending without breaking); one pact record: the agreement holder extracted from the Spirit Anchor and shared, a place on the Bound Will, one source of truth for suspension, the upkeep rules, the departure history, the copy check and the offline, restart and feature-disable policy | `arcane-concordance-workers.md`; this contract | Built (not merged): D-01 and D-02 on `claude/chunk-d-pact-hall` (local `wip/chunk-d`; commits `56a74f4be`, `7477efbcd`, `fa5360d0d`, the records' `97e1facd4`, the unit review's fixes `3775eac3b` and 26.3's white wool `da185dd0d`). Local checks run and passed, 52 of 53 audit mutations reported (D-02's As built). Green in CI: run 40067977680 on `da185dd0d` passed every job (the build, the server game tests with and without the optional integrations, every client class) |
-| 2 | D-03, D-04, D-05 | The first end-to-end path: Styx and the codex to Stolas's Regard and its evidence, the perch, Stolas's arrival, the conversation and terms, acceptance with the Open Hand Compact, Star-reckoning, the first obligation, upkeep, suspension, ending. A provisional body for Stolas is acceptable here | new `stolas-pact.md`; `styxhexenhammer.md`; `arcane-concordance-celestial.md` | Built (not merged), merged here after unit 4; checkpoint pending: D-03, D-04 and D-05 on the local `wip/chunk-d-u2`, from unit 1's records commit `97e1facd4` (commits `9daf23ae1`, `832129b95`, `7da686ad4`, `ee82c1dc7`, the records' `8f0635d9e` and the unit review's fixes `f6ef0b85d`; records: new `stolas-pact.md`, `styxhexenhammer.md`, `arcane-concordance-celestial.md`). Local checks run and passed, all 80 audit mutations reported (D-05's As built) and the unit review's 15; `./gradlew build`, the server and client game tests and CI not run: the next CI run is its Java's first compile |
-| 3 | D-06, D-07 | Stolas's character: the Flashjack-derived raven body, arrive, listen, inspect, assent, refuse and depart, sounds with subtitles, Jade; the roster screen with suspend, end, cancel and recovery, and the journal's pacts section | `stolas-pact.md`; `arcane-concordance-workers.md` | Built (not merged): D-06 and D-07 on the local `wip/chunk-d-u3`, from `92868ff82`, commits `9805a9a7c` (Stolas's raven body), `773b85aba` (his presence, sounds, subtitles and Jade), `a3ee00822` (the roster's server side and the journal's pacts), `66b741868` (the roster screen and its client test), the records' commit "Concordance Chunk D: unit 3's records" and the unit review's fixes ("Chunk D unit 3: fixes from the unit review"). Local checks run and passed, all 104 audit mutations reported (D-06's and D-07's As built) and the unit review's 27; `./gradlew build` (with or without the optional integrations), the server and client game tests and CI not run: the next CI run is its Java's first compile |
+| 2 | D-03, D-04, D-05 | The first end-to-end path: Styx and the codex to Stolas's Regard and its evidence, the perch, Stolas's arrival, the conversation and terms, acceptance with the Open Hand Compact, Star-reckoning, the first obligation, upkeep, suspension, ending. A provisional body for Stolas is acceptable here | new `stolas-pact.md`; `styxhexenhammer.md`; `arcane-concordance-celestial.md` | Built (not merged), merged here after unit 4; checkpoint pending: D-03, D-04 and D-05 on the local `wip/chunk-d-u2`, from unit 1's records commit `97e1facd4` (commits `9daf23ae1`, `832129b95`, `7da686ad4`, `ee82c1dc7`, the records' `8f0635d9e` and the unit review's fixes `f6ef0b85d`; records: new `stolas-pact.md`, `styxhexenhammer.md`, `arcane-concordance-celestial.md`). Local checks run and passed, all 80 audit mutations reported (D-05's As built) and the unit review's 15. Merged here at `bfdf98ff9`, with `92868ff82`'s fixes to the merge; CI run 40090825848 on `92868ff82` compiled it and passed every client shard, its client test among them, but failed `aBrokenPactDefinitionIsReported` and `talkingGrantsNoResearch` in both server jobs, each a defect of the test (fixed in `8a3425f9e`); run 40094972598 on `8a3425f9e` passed every job |
+| 3 | D-06, D-07 | Stolas's character: the Flashjack-derived raven body, arrive, listen, inspect, assent, refuse and depart, sounds with subtitles, Jade; the roster screen with suspend, end, cancel and recovery, and the journal's pacts section | `stolas-pact.md`; `arcane-concordance-workers.md` | Built (not merged): D-06 and D-07 on the local `wip/chunk-d-u3`, from `92868ff82`, commits `9805a9a7c` (Stolas's raven body), `773b85aba` (his presence, sounds, subtitles and Jade), `a3ee00822` (the roster's server side and the journal's pacts), `66b741868` (the roster screen and its client test), the records' `8820a86dd` and the unit review's fixes `426b16196`; merged here at `554d71ab1`, with the roster client test's compile fix `040d73ece`. Local checks run and passed, all 104 audit mutations reported (D-06's and D-07's As built) and the unit review's 27. CI run 40120355940 on `554d71ab1` failed to compile (two errors at an ambiguous `LOGGER.info` in the roster client test); run 40121823509 on `040d73ece` was its first run: its 18 server game tests and its client tests passed, every job passing after one re-run of `optional integrations absent` for `TurkeyGameTests.hensLayEggs` (#112, untouched by Chunk D; it passed in that run's `mod` job); run 40133540741 passed them again |
 | 4 | D-08 | The workshop hand (a courier agreement carrying a post's exact requests) and the schema review | `arcane-concordance-logistics.md`; `arcane-concordance-workers.md`; this contract | Built (not merged): D-08 on the local `wip/chunk-d-u4`, from unit 1's head `97e1facd4` beside unit 2, commits `023b681e8`, `e51ef2b11`, the records' commit and the unit review's fixes ("Chunk D unit 4: fixes from the unit review"); merged here at `df3006850`, with the test fixes `ca2957291` and `86c4e7127`. Local checks run and passed, all 42 audit mutations reported and the nine the fixes add (D-08's As built). Compiled in CI: runs 40079227985 and 40082852322 failed its twenty hand tests at their first step (a test helper compared an item's use with the SUCCESS constant, which 26.3's `ItemStack.useOn` never returns; fixed in `86c4e7127`); run 40085012234 passed its 21 server game tests and the client companion check, every job passing after one client shard's re-run for main's `PeepoPopulationClientTests` cow-breeding flake |
-| 5 | D-09 | Combined fixes, the whole-path test, load, client evidence, the two-client attempt, records, the checkpoint and the handoff | this page; `arcane-concordance-journey.md`; `docs/TESTING.md` | Not started |
+| 5 | D-09 | Combined fixes, the whole-path test, load, client evidence, the two-client attempt, records, the checkpoint and the handoff | this page; `stolas-pact.md`; `arcane-concordance-journey.md`; `docs/TESTING.md` | Built (not merged): D-09, commits `90dd7a756`, `8b821326a`, `3a0b6363d`, the unit review's fixes `aca4aca1c`, the merge of unit 3's compile fix `8842c3bb5`, merged here at `48d99c904`, and the fixes from CI's pictures `b773913c4` and `d00fa2167`; the candidate `48d99c904` in run 40133540741: every job passed on the first attempt; `b773913c4` in run 40137136287: failed the second client's refusal check (fixed in `d00fa2167`); `d00fa2167` in run 40140478331: every job passed on the first attempt; local checks as run (D-09's As built) |
 
 The plan allows three to five units (09:3); this is five plus the baseline. The completion evidence E1 to E7 that every
 ticket's acceptance names is defined, and mapped to tickets and tests, in [Completion evidence](#completion-evidence).
@@ -639,7 +639,9 @@ art.
   Beyond the findings, `check_pacts` also holds fixes 1, 2, 3 and 7 (M50 to M54 above), and `WorkerRoster`'s Javadoc
   says a shade only updates an entry it has.
 - **Not run:** `./gradlew build` (with or without the optional integrations) and every server and client game test (CI
-  is their first compile and run), any client, two clients, a real world saved before Chunk D, a server restart.
+  is their first compile and run), any client, two clients, a real world saved before Chunk D, a server restart. Since
+  run in CI: run 40067977680 on `da185dd0d` passed every job, these tests among them; on the merged branch, runs
+  40094972598, 40121823509 and 40133540741 passed them again.
 - **Not confirmed until CI:** that DFU's `optionalFieldOf` fails on a present malformed value (so an unknown hold keeps
   its entry unread; read in the DFU source, not run); that `NbtOps` refuses a string tag read as a long (the unreadable
   `seen_played` step); the game-test server's Nether, writable player and statistics files and enabled parties; that a
@@ -757,7 +759,8 @@ D-05)": [stolas-pact.md](stolas-pact.md), [styxhexenhammer.md](styxhexenhammer.m
     the clock), and the Journal suite's is `thePactsSectionWaitsForTheBindingArts` (the ticket's "hidden before the
     Binding Arts");
   - the guide's research table had to be regenerated as well (the first local check said so).
-- **Tests (none yet run in CI):** `StyxGameTests` +3 (7 to 10: `styxHintsByTheListenersOwnProgress`,
+- **Tests (passed in CI run 40094972598; `talkingGrantsNoResearch` failed in run 40090825848 as a test defect, fixed in
+  `8a3425f9e`):** `StyxGameTests` +3 (7 to 10: `styxHintsByTheListenersOwnProgress`,
   `talkingGrantsNoResearch`, `styxNamesTheSkyStepUntilOneIsRecorded`), `ConcordanceSharingGameTests`
   `notesNeverStandInForStolasEvidence`, `ConcordanceProgressionGameTests.stolasRegardIsReachable`,
   `ConcordanceSkyGameTests` +2 (`aRecordedObservationCountsWithoutAWindow`, `aTurnedClockMakesNoNewClaim`),
@@ -935,7 +938,8 @@ dialogue (09:158).
   - the perch's icon was drawn by `tools/item_icons.py` (through `tools/concordance_worker_art.py`) and checked to be
     its map's drawing; `tools/generate_textures.py`, which the specification listed, was not run;
   - test messages cite no proposal number (the specification's placeholders were renumbered for these records).
-- **Tests (none yet run in CI):** `ConcordanceWorkerGameTests` +12 (`stolasExplainsBeforeAgreeing`,
+- **Tests (passed in CI run 40094972598; `aBrokenPactDefinitionIsReported` failed in run 40090825848 as a test defect,
+  fixed in `8a3425f9e`):** `ConcordanceWorkerGameTests` +12 (`stolasExplainsBeforeAgreeing`,
   `aStaleTermsRevisionIsRefused`, `aRefusalSpendsNothing`, `acceptingSealsOnceAndSpendsOnce`, `oneStolasPactPerHolder`,
   `anotherPlayerCannotAcceptForTheHolder`, `twoNegotiationsAtOnePerchSealOnce`, `aVisitingStolasLeavesWithoutARecord`,
   `aCrateRefusesStolas`, `stolasTakesNoOrdinaryDamage`, `aBrokenPactDefinitionIsReported`,
@@ -981,7 +985,7 @@ dialogue (09:158).
   for a menu newer than the one open before, with its first state (and, in D-05's service step, one open with the
   offering given first); the test checks `PactClient.state()` for null before reading it, names
   `PactRequestPayload.ACCEPT` instead of its index and logs the service step's offering under `[pact-check]`.
-- **Tests (none yet run):** the client test above.
+- **Tests (passed in CI runs 40090825848 and 40094972598):** the client test above.
 - **Audit mutations:** the specification's 17 (C3-M1 to C3-M17; C3-M14 and C3-M16 caught by the selection unit test)
   were each reported; the unchanged tree (C3-M18) reported nothing new.
 
@@ -1110,7 +1114,7 @@ this ticket.
     locals renamed where they met unit 1's (`stolasBack`, `stolasTr`, ...);
   - `aLostPresenceIsCalledBackAndEndsNothing` compares Stolas's identity with `assertTrue` rather than
     `assertValueEqual`.
-- **Tests (none yet run in CI):** `ConcordanceSkyGameTests` +5 (`stolasRecallsAnObservedPatternOncePerOccurrence`,
+- **Tests (passed in CI runs 40090825848 and 40094972598):** `ConcordanceSkyGameTests` +5 (`stolasRecallsAnObservedPatternOncePerOccurrence`,
   `aMastersRecallAndStolassShareOneClaim`, `aChangedClockGivesNoSecondRecall`, `theHarvestMoonRecallsOutsideItsEvent`,
   `anUnobservedPatternIsRefused`), `ConcordanceWorkerGameTests` +9 (`theObligationMastersTheEntryOnce`,
   `aSuspendedPactRecallsNothing`, `theQuotaAndTheAreaRefuseWithReasons`, `aStandInNeverAnswersForUpkeep`,
@@ -1150,7 +1154,8 @@ this ticket.
   58 of 240 client classes, `ConcordancePactClientGameTests` among them.
 - **Not run:** `./gradlew build` (with or without the optional integrations), every server game test and the client
   test (CI is their first compile and run), two clients, a human playthrough, a real chunk unload, a server restart
-  outside the tests.
+  outside the tests. Since run in CI: run 40090825848 failed two of the unit's server tests in both server jobs, each a
+  defect of the test (fixed in `8a3425f9e`); run 40094972598 passed every job.
 - **Not confirmed until CI:** `ItemStorage.SIDED.find` returning nothing for the perch; a power-3 explosion
   (`Level.ExplosionInteraction.TNT`) breaking a perch of resistance 3.0 in `thePerchHoldsNothing`;
   `MobTransportCrate.capture` of a cow in a game test; the route from `Mob.interact` to Stolas's `mobInteract`;
@@ -1163,8 +1168,8 @@ this ticket.
   harmless; `TownProtection` near spawn in a fresh client-test world (if Accept is refused there as not permitted, the
   test's stand moves away from spawn); that `StolasEntity.remove(KILLED)` strikes the roster at once.
 
-**Unit 2's unit review (the commit "Chunk D unit 2: fixes from the unit review"; none of it yet run in CI).** Sixteen
-findings were confirmed and fixed:
+**Unit 2's unit review (the commit "Chunk D unit 2: fixes from the unit review"; run in CI 40090825848, then passing
+in runs 40094972598 and 40133540741).** Sixteen findings were confirmed and fixed:
 - **Upkeep (D-P50, amending D-S3; a checkpoint question):** a holder warned before an absence is warned again on return
   with the grace they had left, its end moved on by the time away, instead of a whole new day (`Pacts.due`, unit 1's
   code: the unit 1 merge must carry it). Time away is still never charged, and the first warning after an absence
@@ -1216,7 +1221,7 @@ findings were confirmed and fixed:
   `git diff --check`; every changed Java file parse-checked (12, no syntax error). No generator was needed: the
   generator's new numbers (`STATE_LIMITS["MAX_ID"]`, `HOLDER_ONLY`) are read only by the audit.
 - **Not run:** `./gradlew build`, the server game tests (the new and changed ones included) and the client test: CI is
-  their first compile and run.
+  their first compile and run. Since run in CI: run 40090825848, then passing in run 40094972598.
 - **Rejected by the unit review, unchanged:** the perch's level against the player's, a test listener in a static
   initializer, the decision numbering, offer data against the parser's bounds, the economy figure, the clip mapping,
   the shot names, list sizes against the screen's bounds, figures in player text, the perch's icon against its model,
@@ -1224,7 +1229,7 @@ findings were confirmed and fixed:
   roster").
 
 **Merged into the pact hall after unit 4** (the commit "Merge Chunk D unit 2 (Stolas and the pact perch) into the pact
-hall"; not yet run in CI):
+hall"; run in CI 40090825848, then passing in run 40094972598):
 - `Pacts.due` carries D-P50 beside unit 1's review fixes 1 and 7 (a resumed pact's last look moves on by the time held;
   a look in the tick of the last one goes on). `aReturnAfterAbsenceGetsTheFullGrace` keeps unit 1's suspend-and-resume
   step and the Stolas step, both exact under D-P50: each holder was warned as they left, so the grace left is all of it.
@@ -1364,7 +1369,9 @@ presentation bundle (08:169-181).
     subtitle and HUD switches put back in `finally` blocks, and the sharing test's `aCopiedPerchIsInert` reading
     `gone()` (critique 12).
   None of the ticket's behaviour was dropped.
-- **Tests (none yet run in CI):** `ConcordanceWorkerGameTests` +7 (`D06_TESTS`): `aDepartingStolasIsNeverAVisitorAgain`
+- **Tests (first run in CI run 40121823509 on `040d73ece`, where they passed, after run 40120355940 on `554d71ab1` failed
+  to compile at the roster client test; passed again in run 40133540741):** `ConcordanceWorkerGameTests` +7
+  (`D06_TESTS`): `aDepartingStolasIsNeverAVisitorAgain`
   (commit 1; its cue checks in commit 2), `stolasGesturesAndSoundsFollowTheirTable`,
   `stolasAnswersEachActionWithItsGesture`, `aRemovedStolasNeverEndsThePact`, `onePresencePerPact`,
   `killingStolasIsNeverTheFastestRoute` and `theJadeReadingsNameNoPlayerAndChangeNothing` (with `copy.stolas(level) ==
@@ -1385,8 +1392,12 @@ presentation bundle (08:169-181).
   `python3 -m unittest discover -s scripts/tests` (197 tests) and `git diff --check`; every changed Java file
   parse-checked. Generators run one at a time: `python3 tools/owner_art.py` (commit 1 wrote the three adapted files),
   then `python3 -B tools/generate_material_data.py` (lang and `sounds.json`).
-- **Not run:** `./gradlew build` (with or without the optional integrations), the server game tests and the client
-  test: nothing of unit 3 has been compiled, and CI is its first compile and run.
+- **Since run in CI:** run 40120355940 on `554d71ab1` (unit 3 merged) failed to compile at the roster client test (two
+  errors; fixed in `040d73ece`); run 40121823509 on `040d73ece` built it and ran the server game tests with and without
+  the optional integrations and every client class, the pact client test among them: all passed (`optional
+  integrations absent` after one re-run: `TurkeyGameTests.hensLayEggs`, from #112 and untouched by Chunk D, failed there
+  once and passed in that run's `mod` job). Run 40133540741 passed them again and ran the
+  pact client test without the optional integrations too. Still not run: a person playing, two people.
 - **Not confirmed until CI:** that the pinned GeckoLib's trigger packets reach `TestPlayers`' connections (the server
   tests assert the server's state and `cues()`, not a client's clip); `level.playSound` for an entity not in a level
   (believed a no-op send); that `tick freeze` holds a triggered clip exactly; Jade's overlays in client screenshots;
@@ -1397,6 +1408,7 @@ presentation bundle (08:169-181).
 - Unit 2's tests that asserted `isRemoved()` for Stolas leaving were changed to `gone()` in commit `9805a9a7c` (above);
   `aLostPresenceIsCalledBackAndEndsNothing`'s `first.isRemoved()` stays, since he is removed with `KILLED` there.
 - Chunk A's `ComposerScreen` draws subtitles under its own fill, as `PactScreen` did before D-P103; left for unit 5.
+  Done in unit 5 (D-P122).
 
 ### D-07. The roster screen, with cancel and recovery (unit 3)
 
@@ -1498,7 +1510,8 @@ client test; records: [stolas-pact.md](stolas-pact.md#the-roster-d-07) and
     (critique 2).
   None of the ticket's behaviour was dropped. The vanilla `ConfirmScreen` the ticket names is used through its subclass
   `KeepFirstConfirmScreen`.
-- **Tests (none yet run in CI):** `ConcordanceWorkerGameTests` +7 (`theRosterEndsOnlyWhatTheReaderHolds`,
+- **Tests (first run in CI run 40121823509 on `040d73ece`, where they passed; passed again in run 40133540741):**
+  `ConcordanceWorkerGameTests` +7 (`theRosterEndsOnlyWhatTheReaderHolds`,
   `aRequestNamingAnotherPlayersRecordIsRefused`, `theRosterListsAPactWithoutItsPerch`, `endingAnOrphanReturnsItsEscrowOnce`,
   `aStaleRosterRevisionIsRefused`, `theRosterStopsAt64Rows` and `aReplacedHandLoadingWhileSwitchedOffStaysOffTheRoster`),
   `ConcordanceLogisticsGameTests` +2 (`recoveryNeverTakesCargoOutOfAnUnloadedContainer`,
@@ -1528,15 +1541,19 @@ client test; records: [stolas-pact.md](stolas-pact.md#the-roster-d-07) and
   by `scripts/check_repository.py`), trailing whitespace in this page (reported by `git diff --check`), and seven of
   the code commits' (B7, B21, P5, P15, S9, C13, C17) again on the final tree against the Concordance audit alone (each
   reported); the unchanged tree reported nothing.
-- **Not run:** `./gradlew build` (with or without the optional integrations), the server game tests and the client
-  tests: CI is their first compile and run. Two clients; the narrator heard.
+- **Since run in CI:** run 40120355940 on `554d71ab1` failed to compile at the roster client test (`LOGGER.info` with a
+  generic `computeOnClient` result was ambiguous; fixed in `040d73ece`); run 40121823509 on `040d73ece` passed the
+  server game tests with and without the optional integrations and the client tests, `ConcordanceRosterClientGameTests`
+  and `ScreenFitClientGameTests` among them; run 40133540741 passed them again. Still not run: two people; the narrator
+  heard.
 - **Not confirmed until CI:** generic inference for the 14-field `Row` codec with `UUIDUtil.STREAM_CODEC`; that a
   GeckoLib creature draws through the GUI's entity picture (the Spirit Anchor's icon is drawn only when the creature
   cannot be made; whether GeckoLib draws in the GUI is shown only by the shots, since the client test's `drawn` records
   the attempt, not pixels); that `setHealth(0)` on a test player leaves it not alive for one synchronous test; the
   keyboard's Tab focus scrolling a card into view at every size.
 
-**Unit 3's unit review (the commit "Chunk D unit 3: fixes from the unit review"; none of it yet run in CI).**
+**Unit 3's unit review (`426b16196`, the commit "Chunk D unit 3: fixes from the unit review"; first run in CI run
+40121823509, where it passed, and again in run 40133540741).**
 Twenty-two findings were confirmed and fixed; nine were rejected and left unchanged.
 - **A departure always ends (G1; D-P97 as fixed):** his 40 ticks were counted in `customServerAiStep`, which runs only
   while his entity ticks, so after a roster End from afar, or a holder who went away within the 40 ticks, he stayed
@@ -1596,12 +1613,16 @@ Twenty-two findings were confirmed and fixed; nine were rejected and left unchan
   reordering of `docs/features/jug-nouveau-content-map.json` was restored. Server game tests now: Worker 64. After the
   commit, `python3 tools/select_client_tests.py --base 92868ff82 --head HEAD` chooses 52 of 242 client classes,
   `ConcordancePactClientGameTests`, `ConcordanceRosterClientGameTests` and `ScreenFitClientGameTests` among them.
-- **Not run:** `./gradlew build` (with or without the optional integrations), the server game tests and the client
-  tests: CI is their first compile and run.
+- **Since run in CI:** the build, the server game tests (with `aDepartureEndsWithoutHisTicks`) and the client tests
+  passed in run 40121823509 on `040d73ece` and in run 40133540741.
 - **Not confirmed until CI:** the `shouldRender` override's signature (26.3's `EntityRenderer`, from the mirror) and
   `getManagerForId`'s inference in `WorkerClient`; that `discard()` removes a departing Stolas from a section whose chunk
   has unloaded; that a sweep run by a test at a future time, which ends every departure due by then, disturbs no other
   test (none watches a departing Stolas across ticks).
+- **Confirmed from source, not run (unit 5):** `/tick freeze` stops game time (`mc263src` `ServerLevel.java:346-366`:
+  the level's time moves only while the tick rate runs normally), so the sweep, which ends a departure at its game time
+  (`departAt`), holds a frozen departure; and GeckoLib's animation clock is the render state's `ageInTicks`
+  (`EntityRenderStateMixin:46`). No test checks either by itself.
 
 ### D-08. The contrasting service: the workshop hand (unit 4)
 
@@ -1827,8 +1848,9 @@ points are the last item below).**
   run): without M41's check `aHandTakesCargoBackOnlyInsideItsArea` would not see `RETURNING` (the hand would set off
   for the chest), without M43's refusal it would not see `IDLE`, and without M42's
   `aHandLeavesStrandedCargoBeyondItsCarry` would see the hand take up the 65.
-- **Not run:** `./gradlew build`, with or without the optional integrations (the Jade edit), the 21 server game tests
-  and the client companion check (CI is their first compile and run), any client, two clients, a real server restart,
+- **Not run where it was written:** `./gradlew build`, with or without the optional integrations (the Jade edit), the
+  21 server game tests and the client companion check; since run in CI, all passed in run 40085012234 on `86c4e7127`
+  and in runs 40094972598 and 40133540741. Still not run: any client by hand, two clients, a real server restart,
   real walking (the path test sets SmartBrainLib's `CANT_REACH_WALK_TARGET_SINCE` directly; death is `remove(KILLED)`;
   the restart is codec round trips, an unload and the entity added again).
 - **Not confirmed until CI:** that the whole unit compiles, in particular `CourierWork`'s use of `WorkerEntity`'s
@@ -1920,6 +1942,103 @@ points are the last item below).**
   three questions (below).
 - **The pull request:** the third of the stack, against `claude/chunk-c-living-workshop` (D-D1).
 
+**As built (unit 5):** commits `90dd7a756` (the whole path), `8b821326a` (the load card), `3a0b6363d` (client evidence
+and two clients), the unit review's fixes `aca4aca1c`, the merge of unit 3's compile fix `8842c3bb5`, merged into the
+pact hall at `48d99c904`; then `b773913c4` and `d00fa2167`, the fixes from CI's pictures. AI-assisted implementation with Claude Code;
+the model is named in the commit trailers.
+- **Combined fixes:** the composer (Chunk A) draws subtitles over itself (D-P122; unit 3's R10, left to unit 5), held by
+  `check_composer` (unseen: CI has no sound device); codex places unique within a category (unit 4's review, Data 2),
+  held by `check_concordance`; units 1 and 4's identifiers added to `docs/ARCANE_CONCORDANCE.md` (unit 4's review, Data
+  8; unit 3's were already there); the progression graph models the compact's resonance (`RESONANCE_SOURCES`) and the
+  codex's compact page says where it comes from (D-P123); the records' CI statements for units 2, 3 and 4 brought up to
+  date.
+- **The whole path:** `ConcordanceJourneyGameTests.thePactHallFromStyxToDeparture` (D-P125): one survival player from
+  Styx's hint to Stolas's departure, ended from the roster (D-07), with the workshop hand carrying one request between
+  the first obligation and upkeep; `thePactHallsRecipesLoad` loads the route's nine recipes. Both passed in both server
+  jobs of run 40133540741 (`mod`: "All 2572 required tests passed"; `optional integrations absent`; the log names no
+  passing test one by one).
+- **The journey:** the pact hall (`PACT`, nine steps, to the workshop hand), its things `tools/acquisition.py`
+  `PACT_HALL` (D-P126); Celestial Attunement for the compact's resonance (D-P123); the hand's step in the Nether
+  (D-P124); "each kind of worker" stays three (D-P127). `concordance_journey.py --check` holds it.
+- **Load (D-P128 to D-P132):** `ConcordancePactHallLoadGameTests.loadCard`, the workshop card's twin, sharing its
+  measuring parts. It measures only when Fabric's game test filter names exactly its id,
+  `jugcraft-test:concordance_pact_hall_load_game_tests_load_card`; in every other run, every ordinary build included, it
+  passes at its first tick and places nothing. A manual Build run with `load_card` ticked runs it in the `load-card` job
+  after the workshop's card, in a server of its own, and repeats its lines as a notice (a workflow change for the
+  owner's review).
+  - **The hall.** Eight survival test players each hold Stolas's pact at a perch they placed, sealed under the shipped
+    offer as unit 2's tests seal it (the compact left out), with four amethyst shards in its escrow. A ninth negotiates
+    at a ninth perch, a visiting Stolas listening. Holder 0 reads their pact. Holder 1's roster is read every 40 ticks.
+    Four workshop hands (holders 0 to 3), each at a Spirit Anchor bound by Porter Key to its holder's Courier Post, carry
+    64 glowstone from a chest five blocks off whenever their holder files a request (every 400 ticks, staggered); the
+    test empties each post back into its chest.
+  - **Measured as the workshop's.** The same world twice, baseline first, with the nine players standing where they
+    stand. Each span is a warm-up, then 6,000 ticks from the server's 100-tick ring, net of the test's own work. The
+    players' actions are timed apart. A look, a think, a pact page and a roster listing are timed call by call after the
+    spans.
+  - **D-09's rules**, sampled every 100 ticks while measured: one presence a pact, one pact a holder, each pact looked at
+    within 220 ticks (its perch looks every 20 ticks and writes every 200), the visitor listening, each hand its
+    anchor's.
+  - **Every item**, checked every 1,000 ticks: each workshop's 128 glowstone, each escrow's four shards, nothing on the
+    ground, both ledgers' own checks.
+  - Run 40133540741: passed; the hall added +0.098 ms to the median and +0.311 ms to the p95 server tick and +0 MiB
+    retained heap beyond the baseline's change, within the proposed budget on all three. The figures are the CI
+    runner's, not a player's hardware: [the pact hall load card](#the-pact-hall-load-card).
+- **Client evidence** (D-P133 to D-P135): Stolas is photographed from his front (he is summoned facing south; the camera
+  stands south of his perch); a timed sequence through his refusal (`jugcraft_stolas_refuse_seq_1` to `_4`, frozen at
+  0.25, 0.65, 1.05 and 1.45 s; `REFUSAL_SEQUENCE`); the workshop hand at work in the roster's client test
+  (`jugcraft_workshop_hand_at_work`). Held by `check_stolas_body` and `check_roster_screen`. `ConcordancePactClientGameTests`
+  passed in shard 5, `ConcordanceRosterClientGameTests` in shard 14 and `ScreenFitClientGameTests` in shard 13 of run
+  40133540741; the refusal's frames were frozen at 0.290, 0.647, 1.004 and 1.357 s. The bundle is under [Client
+  evidence](#client-evidence).
+- **Two clients** (D-P136): this branch had a two-client harness after all, main's `OwnerCollectionsNetworkTests` (#435,
+  20 October 2026), which runs in every full client run and whose second client's log the shards upload.
+  `ConcordancePactNetworkTests` copies its launcher with its own names (the owner's test is not edited) and puts a
+  stranger at the holder's perch. Held by `check_pact_network`. Passed in shard 3 of run 40133540741 and in its opt-in
+  job without the optional integrations: two automated clients on one machine, not two people.
+- **Without the optional integrations** (D-P137): an opt-in Build input, `clients_without_optional`, and its job
+  `pact-clients-without-optional`; its three classes passed in run 40133540741 ("BUILD SUCCESSFUL in 4m 38s"; Jade not
+  loaded, so no Jade shot). A workflow change for the owner's review.
+- **Fixes from CI's pictures** (`b773913c4`, `d00fa2167`): run 40133540741 passed, but three of its pictures showed what the
+  assertions did not: Stolas's own Jade line read "Keeps an agreement with entity.minecraft." (now no line where a
+  reading names no counterpart, held by `check_pacts`); the second client's arrival picture showed "Loading terrain"
+  (it now waits until no screen is open); its refused picture showed Stolas's first words, not the refusal (it now
+  turns to his terms, brings the answer into view and checks it is shown as refused). Run 40137136287 on `b773913c4`
+  failed that check: the stranger turned to his terms after its refused Accept, and turning asks to hear them (CHOOSE),
+  whose answer carries no result, so the refusal was gone and Tab never reached it (shard 3 and the opt-in job).
+  `d00fa2167` turns to the terms first and accepts after their answer. Run [40140478331](https://github.com/jimbozoomer-byte/jugcraft/actions/runs/40140478331) on `d00fa2167`: every job
+  passed on the first attempt, and the three pictures, viewed, show Stolas arriving over the world, the refusal with
+  its cross under his terms ("You may not seal an agreement here: it is not yours or your party's, or you could not build
+  here", Accept greyed), and his Jade lines with no raw key.
+- **Audits strengthened:** `check_load_card`'s and `check_pact_hall_load_card`'s TESTING.md tests require the whole id (a
+  substring test passed `..._load_cards`); `check_pact_network` reads the peer-log upload in the client-shard job only,
+  and requires the opt-in job, guarded, without the optional integrations, listing exactly its three classes;
+  `check_stolas_body` requires the front camera's exact command twice and `check_roster_screen` the hand at work between
+  the recovery and the full roster, both reading the tests without their comments since the unit review (`aca4aca1c`).
+  Mutations (each logged when its commit was built, on scratch copies; each unchanged tree reported nothing): for
+  `90dd7a756`, J1 to J15 (the journey), A1 to A9 (`check_acquisition`) and C3 (codex places) each reported; for
+  `8b821326a`, H1 to H19 each reported; for `3a0b6363d`, N1 to N13, N15 to N21, C1 and C2 each reported, and N14 failed
+  the selection unit test; for `aca4aca1c`, six comment-outs the two audits had missed each reported, and N1 to N13
+  again.
+- **Confirmed from source, not run:** `/tick freeze` stops game time (`mc263src` `ServerLevel.java:346-366`: the level's
+  time moves only while the tick rate runs normally), so unit 3's review sweep, which ends a departure at a game time
+  (`departAt`), holds a frozen departure; and GeckoLib's animation clock is the render state's `ageInTicks`
+  (`EntityRenderStateMixin:46`). No test checks either by itself.
+- **Records:** this page, `stolas-pact.md`, the journey, workers, logistics, celestial, progression, persistence,
+  journal, delivery and Styx records, `docs/ARCANE_CONCORDANCE.md`, `docs/TESTING.md`, `docs/WHAT_EXISTS.md`,
+  `docs/INTEGRATION_STATUS.md` and `CHANGELOG.md`.
+- **The pull request:** [jimbozoomer-byte/jugcraft#474](https://github.com/jimbozoomer-byte/jugcraft/pull/474), against `claude/chunk-c-living-workshop` (D-D1).
+- **Local checks** (each run and passed when its commit was built): `python3 -B tools/check_mod_data.py`;
+  `python3 tools/concordance_journey.py --check`; `python3 scripts/check_repository.py`; `python3 tools/owner_art.py
+  --check`; `python3 tools/check_icon_maps.py`; `node --test tools/world-designer/model.test.cjs`; `python3 -m unittest
+  discover -s scripts/tests`; `git diff --check`; the Java parse check of the changed files; the mutations above;
+  `python3 tools/select_client_tests.py --base 554d71ab1 --head HEAD` (0 of 242 client classes at `90dd7a756`; all
+  242 at `8b821326a`; from `3a0b6363d` on, all 243 in 16 shards, as CI chose them in run 40133540741);
+  `python3 -B tools/generate_material_data.py` (commit 1: one lang key, the codex's compact page). For these records:
+  `python3 scripts/check_repository.py`, `python3 -B tools/check_mod_data.py`, `python3
+  tools/concordance_journey.py --check`, `python3 -m unittest discover -s scripts/tests` and `git diff --check`. Not run
+  here: `./gradlew` (no Minecraft build locally); CI is the build.
+
 ## Completion evidence
 
 The plan's evidence (09:168-174), used in every ticket's acceptance, with the scenario rows 10:51 (a worker's death,
@@ -1929,12 +2048,12 @@ change, two observatories).
 | Code | Requirement | Tickets | Tests |
 |---|---|---|---|
 | E1 | "No one can bind another player" | D-01, D-02, D-04, D-05, D-07 | `onlyTheOwnersSideSealsAnAnchor`, `aStandInNeverSeals`, `noOneBindsAnotherPlayer`, `anotherPlayerCannotAcceptForTheHolder`, `anotherPlayerCannotUseTheHoldersService`, `aRequestNamingAnotherPlayersRecordIsRefused`, `theRosterEndsOnlyWhatTheReaderHolds`, `aChangeOfOwnerMovesNoPact`, `aStrangerCannotBindAHandToAnotherPlayersPost`, `aHandServesOnlyItsBeneficiaries`, `anAnchorIsBoundOnlyWhileItKeepsNoAgreement` |
-| E2 | "Upkeep can suspend without hidden offline punishment" | D-02 (the rules), D-05 (Stolas) | `upkeepWarnsThenSuspendsAfterGraceAndResumes`, `aReturnAfterAbsenceGetsTheFullGrace`, `absentAndUnloadedTimeIsNeverOwed`, `aStandInNeverAnswersForUpkeep`, `theConcordanceOffHoldsEveryClock`, `aRestartWhileSuspendedStaysSuspended` |
+| E2 | "Upkeep can suspend without hidden offline punishment" | D-02 (the rules), D-05 (Stolas) | `upkeepWarnsThenSuspendsAfterGraceAndResumes`, `aReturnAfterAbsenceGetsTheFullGrace`, `absentAndUnloadedTimeIsNeverOwed`, `aStandInNeverAnswersForUpkeep`, `theConcordanceOffHoldsEveryClock`, `aRestartWhileSuspendedStaysSuspended`; `ConcordanceJourneyGameTests.thePactHallFromStyxToDeparture` |
 | E3 | "Agreement copying does not multiply benefits" | D-02, D-03, D-04, D-05 | `aCopiedAnchorGivesNothingAndReleasesNothing`, `aLegacyAnchorClaimsItsPlaceOnce`, `aCopiedPerchIsInert`, `aCopiedPerchRecallsNothing`, `aMastersRecallAndStolassShareOneClaim`, `aChangedClockGivesNoSecondRecall`, `notesNeverStandInForStolasEvidence` |
-| E4 | "End/death/unload/restart returns appropriate property once" | D-01, D-02, D-04, D-05, D-06, D-07, D-08 | `aKilledShadeLeavesItsLoadOnce`, `aKilledShadeAwayFromItsAnchorDropsWhereItFell`, `anUnloadedShadeReplacedLeavesOnceAndDeliversOnce`, `endingTwiceReturnsOnce`, `thePerchHoldsNothing`, `endingReturnsTheEscrowOnce`, `aDeadHolderIsNeverHandedTheEscrow`, `aBrokenPerchLeavesThePactWithoutItsPerch`, `thePactAndItsEscrowSurviveARestart`, `killingStolasIsNeverTheFastestRoute`, `aRemovedStolasNeverEndsThePact`, `onePresencePerPact`, `aDepartingStolasIsNeverAVisitorAgain`, `endingAnOrphanReturnsItsEscrowOnce`, `recoveryNeverTakesCargoOutOfAnUnloadedContainer`, `theRosterEndsAHandAndRecoversItsCargoOnce`, `endingWithCargoAboardStrandsItOnce`, `aHandFillsACrucibleUntilItIsFull`, `aHandTakesNothingWhereItsHolderMayNot`, `aHandThatCannotFindItsWayStrandsItsCargoOnce`, `anUnloadedDestinationKeepsTheHandWaiting`, `aKilledHandStrandsItsCargoOnce`, `anAbsentHolderStopsTheHand`, `aBrokenSourceReleasesTheHandsClaim`, `aHandsClaimSurvivesARestart`, `aHandLeavesStrandedCargoBeyondItsCarry`, `aHandTakesCargoBackOnlyInsideItsArea` |
-| E5 | "Two users cannot both own a unique reserved service instance accidentally" | D-02, D-04, D-08, D-09 | `twoPlayersCannotBothSealOnePlace`, `twoNegotiationsAtOnePerchSealOnce`, `acceptingSealsOnceAndSpendsOnce`, `oneStolasPactPerHolder`, `twoHandsCannotHoldOneRequest`; the two-client attempt (D-09), or not run |
-| E6 | Extend `ConcordanceWorkerGameTests`, `ConcordanceLogisticsGameTests`, `ConcordanceSharingGameTests`, `ConcordancePersistenceGameTests` and the relevant client companion tests (09:172) | every ticket | the four suites above; `CompanionAutomationChecks.workshopHand` through `PeepoCompanionClientTests` (D-08); `ConcordancePactClientGameTests` (D-04, D-05, D-06); `ConcordanceRosterClientGameTests` and `ScreenFitClientGameTests` (D-07, as built in unit 3) |
-| E7 | The checkpoint: "a complete conversation-to-service-to-departure sequence" (09:174) | D-09 | the whole-path server test; the client sequence of the conversation, a recall and the departure |
+| E4 | "End/death/unload/restart returns appropriate property once" | D-01, D-02, D-04, D-05, D-06, D-07, D-08 | `aKilledShadeLeavesItsLoadOnce`, `aKilledShadeAwayFromItsAnchorDropsWhereItFell`, `anUnloadedShadeReplacedLeavesOnceAndDeliversOnce`, `endingTwiceReturnsOnce`, `thePerchHoldsNothing`, `endingReturnsTheEscrowOnce`, `aDeadHolderIsNeverHandedTheEscrow`, `aBrokenPerchLeavesThePactWithoutItsPerch`, `thePactAndItsEscrowSurviveARestart`, `killingStolasIsNeverTheFastestRoute`, `aRemovedStolasNeverEndsThePact`, `onePresencePerPact`, `aDepartingStolasIsNeverAVisitorAgain`, `endingAnOrphanReturnsItsEscrowOnce`, `recoveryNeverTakesCargoOutOfAnUnloadedContainer`, `theRosterEndsAHandAndRecoversItsCargoOnce`, `endingWithCargoAboardStrandsItOnce`, `aHandFillsACrucibleUntilItIsFull`, `aHandTakesNothingWhereItsHolderMayNot`, `aHandThatCannotFindItsWayStrandsItsCargoOnce`, `anUnloadedDestinationKeepsTheHandWaiting`, `aKilledHandStrandsItsCargoOnce`, `anAbsentHolderStopsTheHand`, `aBrokenSourceReleasesTheHandsClaim`, `aHandsClaimSurvivesARestart`, `aHandLeavesStrandedCargoBeyondItsCarry`, `aHandTakesCargoBackOnlyInsideItsArea`; `ConcordanceJourneyGameTests.thePactHallFromStyxToDeparture` |
+| E5 | "Two users cannot both own a unique reserved service instance accidentally" | D-02, D-04, D-08, D-09 | `twoPlayersCannotBothSealOnePlace`, `twoNegotiationsAtOnePerchSealOnce`, `acceptingSealsOnceAndSpendsOnce`, `oneStolasPactPerHolder`, `twoHandsCannotHoldOneRequest`; `ConcordancePactNetworkTests` (two client JVMs at one perch, D-P136; passed in shard 3 of run 40133540741 and in its opt-in job without the optional integrations; two automated clients on one machine, not two people) |
+| E6 | Extend `ConcordanceWorkerGameTests`, `ConcordanceLogisticsGameTests`, `ConcordanceSharingGameTests`, `ConcordancePersistenceGameTests` and the relevant client companion tests (09:172) | every ticket | the four suites above; `CompanionAutomationChecks.workshopHand` through `PeepoCompanionClientTests` (D-08); `ConcordancePactClientGameTests` (D-04, D-05, D-06); `ConcordanceRosterClientGameTests` and `ScreenFitClientGameTests` (D-07, as built in unit 3; the hand at work, D-09); `ConcordancePactNetworkTests` (D-09) |
+| E7 | The checkpoint: "a complete conversation-to-service-to-departure sequence" (09:174) | D-09 | `ConcordanceJourneyGameTests.thePactHallFromStyxToDeparture`; `ConcordancePactClientGameTests` (the conversation, a recall, the departure) and `ConcordancePactNetworkTests` (the departure seen by a second client) |
 
 ## Schema review (D-08; 09:164-166, 03:177)
 
@@ -2120,10 +2239,11 @@ The smallest first step is D-01: no new id, block, entity or art; it closes G1 a
   and `TestPlayers.mock` exist only on Chunk C's branch (#466).
 - **Styx is not guaranteed** (old saves, worlds without a fresh town, a resident killed for good). The non-Styx route
   is required, not optional (`CLAUDE.md:57`).
-- **Route depth:** in the progression graph, the Binding Arts, Verdant Husbandry and the Assay understood, plus one
-  recorded observation (which asks no research); in code only the Binding Arts gate the entry, since the cultivation and
-  assay practices are recorded without a research check (D-03). `concordance_journey.py` must find the route reachable
-  and not excessive.
+- **Route depth:** in the progression graph, the Binding Arts, Verdant Husbandry, the Assay and, for the compact's
+  resonance, Celestial Attunement understood, plus one recorded observation (which asks no research) and the Nether once
+  for the workshop hand's anchor; in code only the Binding Arts gate the entry (D-03), and Celestial Attunement gates
+  only keeping an observatory (D-P123). `concordance_journey.py` finds the route reachable; its five understood entries in
+  five traditions make a generalist Adept (open at the checkpoint).
 - **Balance (D-S1):** non-masters gain recall of any pattern they observed; the Harvest Moon (Hero of the Village) can
   then be recalled daily and the Winter Crown every other day, within the one-a-day quota. Tested and stated; the owner
   may narrow it at the checkpoint.
@@ -2162,7 +2282,9 @@ The smallest first step is D-01: no new id, block, entity or art; it closes G1 a
   in a fresh client-test world, its stand moves away from spawn); the explosion in `thePerchHoldsNothing` (a power-3
   blast against the perch's resistance of 3.0); the pinned GeckoLib's `thenPlayAndHold` and Flashjack's Molang loops;
   the test-only listener counting recorded `pact_service` practices stays registered for the test server's life (it only
-  reads). The full list is D-05's "Not confirmed until CI".
+  reads). The full list is D-05's "Not confirmed until CI". Since run: run 40090825848 failed two of its tests in both
+  server jobs, each a defect of the test (fixed in `8a3425f9e`); run 40094972598 passed every job, its client test in
+  shard 12.
 - **Unit 2's balance (D-S1):** a holder who is not a master may recall the Harvest Moon (Hero of the Village, with its
   trade discounts) daily and the Winter Crown every other day. The once-a-day quota is the only hard limit: resonance
   is paid from any carried astrolabe that holds enough, claims are each keeper's own, and astrolabes can be stockpiled,
@@ -2182,7 +2304,10 @@ The smallest first step is D-01: no new id, block, entity or art; it closes G1 a
   `beast_crow`; later cohorts meet a name collision (Goetia's Murmur against `beast_murmur` and the Murmur SMG, `en_us.json:18957, 10232`).
   The licence metadata found with the source is kept with the provenance.
 - **Shared hot files:** above; `sounds.json` contention with #470, `ScreenKit` with #469 and #471.
-- **Two clients:** likely not available; E5 may stay unverified in multiplayer.
+- **Two clients (as built):** two client JVMs on one CI runner (`ConcordancePactNetworkTests`, D-P136), offline names on
+  a loopback server: not two people, two accounts or two machines, which stay not run. The second JVM takes 2 GiB beside
+  the first client's 4 GiB, as the owner's network test does in every full run; a runner without room fails the class
+  with the second client's log tail. It passed in shard 3 of run 40133540741 and in its opt-in job.
 - **Unit 4 has not run (as built):** none of its Java has been compiled against Minecraft, and none of its 21 server
   game tests or its client companion check has run; CI is their first compile. It was built beside unit 2 and has not
   met it: the merge (D-08's As built) is where `check_hand` first checks the Regard's research. Since run: CI compiled
@@ -2224,7 +2349,11 @@ The smallest first step is D-01: no new id, block, entity or art; it closes G1 a
 - **Unit 3 has not run (as built):** nothing of it has been compiled against Minecraft, and none of its 17 server game
   tests, its new client class or its additions to `ConcordancePactClientGameTests` and `ScreenFitClientGameTests` has
   run; CI is their first compile. Generic inference (the 14-field `Row` codec with `UUIDUtil.STREAM_CODEC`, the Jade
-  providers, nested lambdas in the client tests' `computeOnClient`) may need small fixes at the first build.
+  providers, nested lambdas in the client tests' `computeOnClient`) may need small fixes at the first build. Since run:
+  run 40120355940 on `554d71ab1` failed to compile at one such call (`LOGGER.info` with a generic `computeOnClient`
+  result, two errors; fixed in `040d73ece`); run 40121823509 on `040d73ece` passed every job, its 18 server game tests
+  and client tests among them, after one re-run of `optional integrations absent` for `TurkeyGameTests.hensLayEggs`
+  (#112, untouched by Chunk D; it passed in that run's `mod` job).
 - **Its base (resolved):** unit 3 needed `55b3ca698` (`ScreenKit.Fitted`) and units 2 and 4 together; it was built on
   `92868ff82`, which has all three, so the specification's fallback (no `ScreenKit.Fitted`, no screen fit line) was not
   used. Unit 2's commits after `ee82c1dc7`, where its specification read unit 2 (its records `8f0635d9e` and its unit
@@ -2242,8 +2371,24 @@ The smallest first step is D-01: no new id, block, entity or art; it closes G1 a
   moment".
 - **Truncation:** 80 possible rows become 64 (`more` says so); the journal and the commands list everything.
 - **Sound on CI:** the client runners have no sound device, so Stolas's subtitles are proven defined and fired there,
-  never seen (D-P104); an OpenAL null driver is left to unit 5 or the owner.
+  never seen (D-P104); an OpenAL null driver is left to unit 5 or the owner. Unit 5 added none.
 - **Open pull request #467** touches `JugcraftJadeClient`, which unit 3 edits; refresh before landing.
+- **Evidence timing (D-P134, D-P135):** the refusal frames and the hand's frozen carry depend on CI load; each frozen
+  time and state is logged, and an assertion, never a fixed delay, decides.
+- **Stolas's facing:** summoned at yaw 0, he faces south whoever speaks to him (`PactPerchBlockEntity.summon`); only the
+  evidence's camera is moved (D-P133). Turning him toward his speaker needs a client run to judge (checkpoint question 1).
+- **Pictures the assertions pass:** run 40133540741 passed while three of its pictures were wrong (Stolas's own Jade
+  line, the second client's arrival and refusal); `b773913c4` and `d00fa2167` change them and assert the refusal shown
+  (run 40140478331: every job passed; the pictures viewed and as intended). A screenshot is evidence only once someone
+  has looked at it.
+- **The pact hall's load card (D-P128 to D-P132):**
+  - One run on one shared runner, baseline first, so JIT warmth favours the hall's span; the drift line reports this and does not remove it.
+  - Nine server-side test players, not clients: they do not move, the card acknowledges their chunk batches, payloads go only to clients that declared them (sized as such, never sent), and Jade's replies are not measured. Only holder 0's packets are sized; the other eight are counted.
+  - The players' own actions are out of the net figures (timed apart).
+  - No offering falls due (the shipped period is 7 game days), so paying, warning and suspending looks are not timed here.
+  - A hand walks five blocks to its chest; no earlier test makes a courier walk beyond its reach. In run 40133540741 each hand carried 15 loads, so the chest stayed where it is.
+  - A warm-up longer than about 5,000 ticks would bring a hand near its quota of 32 loads a game day; the card reports how often a hand was at its quota (0 in run 40133540741).
+  - The figures are the CI runner's, not a player's hardware.
 
 ## Explicit don'ts
 
@@ -2277,6 +2422,292 @@ The smallest first step is D-01: no new id, block, entity or art; it closes G1 a
 17. Do not mark a session decision as the owner's, count one client as two, or call the chunk complete because tests
     compile (10:162; 09:20; 09:315).
 
+## Unit 5: evidence and handoff (D-09)
+
+### Candidate and CI
+
+- Candidate: `48d99c904` on `claude/chunk-d-pact-hall` (units 1 to 5 on the base `779851cdb`, with Chunk C's merge
+  `55b3ca698`); pull request [jimbozoomer-byte/jugcraft#474](https://github.com/jimbozoomer-byte/jugcraft/pull/474), the third of the stack, against `claude/chunk-c-living-workshop` (D-D1). CI run
+  [40133540741](https://github.com/jimbozoomer-byte/jugcraft/actions/runs/40133540741), a workflow_dispatch of the Build
+  workflow on `claude/chunk-d-pact-hall` with every client class and both opt-in inputs (`load_card`,
+  `clients_without_optional`): every job passed on the first attempt.
+- After it, `b773913c4` fixed three defects its pictures showed (under Combined fixes); its run, 40137136287, failed
+  the second client's new refusal check, fixed in `d00fa2167`, whose run [40140478331](https://github.com/jimbozoomer-byte/jugcraft/actions/runs/40140478331) passed every job on the first
+  attempt (with both opt-in inputs); the three pictures, viewed there, show the fixes.
+- The jobs of run 40133540741, each passed on its first attempt: `mod` (the build and the server game tests: "All 2572
+  required tests passed"); `optional integrations absent`; `Concordance load cards` (the workshop's card, then the pact
+  hall's); `choose client tests` (every class, 243, in 16 shards); `pact clients without optional integrations` ("BUILD
+  SUCCESSFUL in 4m 38s"); client shards 0 to 15, the classes of Client evidence in shards 3
+  (`ConcordancePactNetworkTests`), 5 (`ConcordancePactClientGameTests`), 13 (`ScreenFitClientGameTests`) and 14
+  (`ConcordanceRosterClientGameTests`), main's `OwnerCollectionsNetworkTests` in shard 12; and `client`. The jobs'
+  durations are not recorded here.
+- Runs on the way: 40066789750 (`55b3ca698`: stopped at 18 compile errors, `Items.WHITE_WOOL`, fixed in `da185dd0d`);
+  40067977680 (`da185dd0d`, unit 1: every job passed); 40079227985 (`df3006850`, unit 4 merged: both server jobs failed
+  its twenty hand tests at their first step); 40082852322 (`ca2957291`: both server jobs failed the same way; cancelled with
+  four client shards unfinished); 40085012234 (`86c4e7127`: every job passed after one client shard's re-run for main's
+  cow-breeding flake); 40090825848 (`92868ff82`, units 1, 2 and 4: every client shard passed; both server jobs failed
+  `aBrokenPactDefinitionIsReported` and `talkingGrantsNoResearch`, test defects fixed in `8a3425f9e`); 40094972598
+  (`8a3425f9e`: every job passed, first attempt); 40120355940 (`554d71ab1`, unit 3 merged: failed to compile, two errors
+  at `ConcordanceRosterClientGameTests.java:255`, where `LOGGER.info` with a generic `computeOnClient` result was
+  ambiguous between `info(String, Object...)` and `info(String, Throwable)`; every job failed; fixed in `040d73ece`);
+  40121823509 (`040d73ece`, units 1 to 4: every job passed, unit 3's 18 server game tests and its client tests run there
+  first; `optional integrations absent` failed once on main's `jugcraft-test:turkey_game_tests_hens_lay_eggs` and passed
+  on its one re-run, job 120963228067); 40133540741 (`48d99c904`, units 1 to 5: every job passed on the first attempt);
+  40137136287 (`b773913c4`, the fixes from its pictures: failed; `ConcordancePactNetworkTests`, "Tab never reached
+  result", in shard 3 and the opt-in job, fixed in `d00fa2167`; also main's `PeepoPopulationClientTests` cow-breeding
+  timeout in shard 12 and `FlailClientGameTests` in shard 10 ("the flail's ball sank into the holder's body by 0.076
+  blocks"), both outside Chunk D and passing in the runs before and after); 40140478331 (`d00fa2167`: every job passed on
+  the first attempt).
+
+### Combined fixes
+
+- The composer (Chunk A) drew the HUD's subtitles under its own fill; it is now an in-game screen that draws them over
+  itself (D-P122), as unit 3 made the pact and roster screens (unit 3's R10). Unseen: CI has no sound device, and
+  `check_composer` reads the code.
+- Codex places: no two entries of a category may share one (`check_concordance`; unit 4's review, Data 2).
+- `docs/ARCANE_CONCORDANCE.md` lists units 1 and 4's identifiers (unit 4's review, Data 8; unit 3's were already
+  there).
+- The progression graph models the Open Hand Compact's resonance, which only an observatory's keeper gathers, and the
+  codex's compact page says so (D-P123).
+- Stolas photographed from his front, a timed refusal and the hand at work (D-P133 to D-P135; below).
+- Two audits made exact (D-09's As built), and since the unit review (`aca4aca1c`) they read the test classes without
+  their comments, so a guarded step commented out is reported.
+- Unit 3's roster client test did not compile: `LOGGER.info` with a generic `computeOnClient` result was ambiguous (run
+  40120355940 on `554d71ab1`, two errors, every job failed). `040d73ece` reads the rows into a `String` first; its run
+  40121823509 passed every job. Merged into unit 5 at `8842c3bb5`.
+- Three defects seen in run 40133540741's pictures, which its assertions had passed, fixed in `b773913c4` and
+  `d00fa2167` (run 40140478331: every job passed; the fixed pictures viewed there and as intended):
+  - `jugcraft_pact_stolas_jade` read "Keeps an agreement with entity.minecraft.": Stolas's own reading names no
+    counterpart (he is it), and an empty id parsed as `minecraft:` with an empty path. An empty counterpart now shows
+    no line; the perch's line, which names Stolas, is unchanged; `check_pacts` reports the old form.
+  - `jugcraft_pact_peer_arrival` showed the second client's "Loading terrain" screen: the level was drawn, but the
+    loading screen stays until the client has compiled its own section. The stranger now waits until no screen is open
+    before telling the holder it is watching.
+  - `jugcraft_pact_peer_refused` showed Stolas's first words, where the refusal does not appear. The stranger now turns
+    to his terms first, sends its Accept after their answer (turning asks to hear them, and that answer carries no
+    result: `d00fa2167`, after run 40137136287 lost the refusal that way), brings the refusal into view and checks it is
+    shown as refused before the picture.
+
+### The demonstration (E1 to E7)
+
+"Server" means a game-test server with test players; "client" one real client on the game's own dedicated server; the
+two-client test is two client JVMs on one CI runner. Every test named passed in run 40133540741 unless marked otherwise.
+
+| Code | Evidence |
+|---|---|
+| E1 | the tests in Completion evidence; across the network, `ConcordancePactNetworkTests` (`not_permitted`, `not_holder`, `not_listed`) |
+| E2 | the tests in Completion evidence; the whole path's upkeep |
+| E3 | the tests in Completion evidence |
+| E4 | the tests in Completion evidence; the whole path's end (the escrow back once); `ConcordancePactClientGameTests` (the offering back once); the roster class (a recovery once; the hand's delivery once) |
+| E5 | the tests in Completion evidence; `ConcordancePactNetworkTests` (two automated clients on one machine, not two people) |
+| E6 | the four suites; `ConcordancePactClientGameTests`, `ConcordanceRosterClientGameTests`, `CompanionAutomationChecks.workshopHand` |
+| E7 | `ConcordanceJourneyGameTests.thePactHallFromStyxToDeparture`; the pact client class's conversation, recall and departure; the second client's arrival and departure shots (the arrival's picture defective in this run, fixed in `b773913c4` and `d00fa2167`, viewed in run 40140478331: Stolas arriving over the world) |
+
+### Client evidence
+
+Run 40133540741. What was viewed for these records: the 480×270 previews the client jobs print in their logs (the
+screenshot steps of `.github/workflows/build.yml`), extracted from the logs; the full-size images are in the run's
+`client-screenshots-<shard>` and `client-screenshots-without-optional` artifacts (the second client's under
+`owner-network-evidence/.../peer-profile/screenshots/`). A screenshot shows presentation; the tests' assertions are the
+evidence of behaviour. Each class named passed in its shard of that run.
+
+| 08 item | Shots (class, shard) | What the test asserts | Seen |
+|---|---|---|---|
+| Each workspace at ordinary scale | `jugcraft_pact_conversation`, `jugcraft_pact_terms`, `jugcraft_pact_kept` (tick), `jugcraft_pact_refused` (cross), `jugcraft_pact_service` (pact, 5); `jugcraft_roster`, `jugcraft_roster_suspended`, `jugcraft_roster_recovered`, `jugcraft_roster_empty` (roster, 14) | fits, named, beats and terms in order, spent once | Viewed, as intended: `jugcraft_pact_conversation`, `jugcraft_pact_terms`, `jugcraft_pact_kept`, `jugcraft_pact_refused` (the refusal under the Accept button's hint), `jugcraft_pact_service`, `jugcraft_roster`. Not viewed; its shard passed: `jugcraft_roster_suspended`, `jugcraft_roster_recovered`, `jugcraft_roster_empty` |
+| Small window and high scale | `jugcraft_pact_terms_scale4`, `jugcraft_pact_conversation_scale4` (GUI 4, 1920×1080), `jugcraft_pact_terms_small`, `jugcraft_pact_conversation_small` (640×360); `jugcraft_roster_scale4`, `jugcraft_roster_small`, `jugcraft_roster_full`, `jugcraft_roster_full_small` (320×240); `jugcraft_fit_concordance_roster` (`ScreenFitClientGameTests`, 13) | applied scale 4; every control on screen | Viewed, as intended: `jugcraft_pact_terms_small`, `jugcraft_roster_small`. Not viewed; its shard passed: the other seven |
+| Keyboard-only walkthrough | none (the pact and roster classes' assertions; logs `[pact-check]`, `[roster-check]`) | Enter through his beats, Tab to Accept, a recall, an offering, End asked first, Esc keeps; the roster key, Tab, Enter, Page Down, Esc | not applicable |
+| A timed sequence for important tells | each Stolas pose: `jugcraft_stolas_idle`, `_listen`, `_suspended`, `_waiting`, `_inspect`, `_assent`, `_refuse`, `_depart`, `_arrive`, `jugcraft_pact_stolas`; `jugcraft_stolas_refuse_seq_1` to `_4` | from his front; clip and frozen time checked (logged) | Viewed, as intended: `jugcraft_pact_stolas`, `jugcraft_stolas_arrive`, `jugcraft_stolas_depart`, `jugcraft_stolas_listen`, `jugcraft_stolas_refuse_seq_1` to `_4` (from his front; the first with wings out, the other three with his head turned away). Not viewed; its shard passed: `jugcraft_stolas_idle`, `_suspended`, `_waiting`, `_inspect`, `_assent`, `_refuse` |
+| Jade | `jugcraft_pact_perch_jade`, `jugcraft_pact_stolas_jade`; `jugcraft_workshop_hand_at_work` (the overlay when Jade is loaded) | Jade's readings, naming no player (server) | Viewed, as intended: `jugcraft_pact_perch_jade` ("Keeps an agreement with Stolas ... Next offering in 7 game days"), `jugcraft_workshop_hand_at_work` ("Workshop Hand, on its way, Carrying 3"). Viewed, defective in run 40133540741: `jugcraft_pact_stolas_jade` (read "Keeps an agreement with entity.minecraft."); fixed in `b773913c4` and viewed in run 40140478331 ("Stolas / idle: nothing to do / Service: Star-reckoning / Active / Next offering in 7 game days", no raw key) |
+| The contrasting service at work | `jugcraft_workshop_hand_at_work` | the three aboard on its own claim; delivered once | Viewed, as intended (above) |
+| Ending | `jugcraft_pact_end_confirm`, `jugcraft_pact_ended`, `jugcraft_roster_end_confirm`, `jugcraft_roster_ended` | keyboard on Keep it; ended once; escrow back once | Viewed, as intended: `jugcraft_pact_end_confirm`, `jugcraft_pact_ended`. Not viewed; its shard passed: `jugcraft_roster_end_confirm`, `jugcraft_roster_ended` |
+| Remote player and dedicated-server sync | `jugcraft_pact_peer_arrival`, `_refused`, `_departure` (network, 3) | the two-client attempt, below | Viewed, as intended: `jugcraft_pact_peer_departure` (from the stranger's client: Stolas, wings out, leaving). Viewed, defective in run 40133540741: `jugcraft_pact_peer_arrival` (the "Loading terrain" screen), `jugcraft_pact_peer_refused` (Stolas's first words; the refusal not in view); fixed in `b773913c4` and `d00fa2167` and viewed in run 40140478331 (shard 3 and the opt-in job: Stolas descending over the world, wings out; his terms with the note "Only this perch's owner may invite Stolas here" and the refusal's cross, Accept greyed) |
+| Optional integrations absent | none | server: the `optional integrations absent` job; client: the pact, roster and two-client classes passed in the opt-in job of run 40133540741 | not applicable |
+| First- and third-person equipment | none | not relevant: Chunk D adds no equipment | not applicable |
+
+Logged in run 40133540741 (`[pact-check]`, the pact client test): his refusal frozen at 0.290, 0.647, 1.004 and 1.357 s
+into its clip (asked 0.25, 0.65, 1.05 and 1.45 s); his inspect at 0.737 s, assent 0.830 s, refuse 0.938 s, depart
+0.530 s and arrive 0.966 s; "no sound device: the sound engine is off, so no subtitle can show; checked as defined and
+as fired"; Jade's readings ok; Star-reckoning recalled (astrolabe 18, claim true); an offering deposited (1); ended,
+the shards back (1). `[roster-check]`, the roster client test: 5 rows (a shade, Stolas, a workshop hand, a stranded
+courier request and an open one), drawn as three portraits and an icon; a suspension; an end (gone, departed, kept); a
+recovery (closed, 2 glowstone carried); the hand at work (3 carried, aboard on its own claim, 0 left at the source,
+seen travelling), then 3 delivered; the full roster, 64 listed and 14 more. The opt-in job's log adds "Jade is not
+loaded: no Jade shot of Stolas or his perch" and the roster's "Jade not loaded".
+
+### The pact hall load card
+
+The "Concordance load cards" job's pact hall output, as the job logged it in run 40133540741, on `48d99c904` (the
+workshop's card ran before it in the same job and passed; one trailing space trimmed, after "0 total;"):
+
+```text
+===== Concordance Chunk D pact hall load card (D-09) =====
+build: Jugcraft 0.1.0-alpha; Jade loaded
+runner: Minecraft Version: 26.3
+runner: Operating System: Linux (amd64) version 6.17.0-1022-azure
+runner: Java Version: 25.0.4.1, Eclipse Adoptium
+runner: Java VM Version: OpenJDK 64-Bit Server VM (mixed mode, sharing), Eclipse Adoptium
+runner: Processor Vendor: AuthenticAMD
+runner: Processor Name: AMD EPYC 9V45 96-Core Processor
+runner: Frequency (GHz): -0.00
+runner: Number of physical packages: 1
+runner: Number of physical CPUs: 2
+runner: Number of logical CPUs: 4
+runner: Memory: 555745280 bytes (530 MiB) / 1071644672 bytes (1022 MiB) up to 4192206848 bytes (3998 MiB)
+runner: JVM Flags: 0 total;
+runner: max heap 3998 MiB; collectors G1 Young Generation, G1 Concurrent GC, G1 Old Generation
+runner: JVM arguments: -Dfabric-api.gametest.filter=jugcraft-test:concordance_pact_hall_load_game_tests_load_card -Dfabric-api.gametest -Dfabric.dli.config=/home/runner/work/jugcraft/jugcraft/.gradle/loom-cache/launch.cfg -Dfabric.dli.env=server -Dfabric.dli.main=net.fabricmc.loader.impl.launch.knot.KnotServer --sun-misc-unsafe-memory-access=allow --enable-native-access=ALL-UNNAMED -Dfile.encoding=UTF-8 -Duser.country -Duser.language=en -Duser.variant
+world: game test server (flat world, ticks run back to back); noon and weather held, mobs and wandering traders off, random tick speed 3; player list view 0 and simulation 0 (the chunk map views at least 2); the yard's 9 chunks force-loaded (9 by the card); players 9 in both spans (8 holders and a guest: server-side test players, no client)
+spans: baseline from tick 2023, pact hall from tick 9524; each 6000 ticks in 60 windows of 100 after warm-ups of 2000 and 1500 ticks (at least 2000 and 1500, then until the loaded chunk count held 400 ticks); tick times net of the test's own work, the simulated players' requests, filings and restocking included (timed apart below)
+tick ms, net of the test's own work | median p95 mean max over-50ms | 100-tick window means: median p95
+baseline 0.051 0.080 0.066 64.0 1 | 0.055 0.067
+pact hall 0.149 0.391 0.182 30.9 0 | 0.174 0.262
+raw medians 0.052 and 0.157 ms; the test's own work 0.005 and 0.028 ms a tick
+delta: median +0.098 ms, p95 +0.311 ms; baseline drift (second half less first) -0.004 ms
+memory: retained after a full collection: baseline 466 -> 467 MiB, pact hall 468 -> 468 MiB (+0 MiB beyond the baseline's change); heap in use +18.03 and +117.29 MiB per 1,000 ticks; collections 1 (3 ms) and 0 (0 ms)
+chunks loaded: baseline 1054 -> 1054, pact hall 1054 -> 1054
+counts: Pact Perches 9 (8 keeping a pact with Stolas, the guest's keeping none), Stolas 9 (8 serving, 1 visiting), players 9 (8 holders, 1 guest), Bound Wills 12 (8 pacts, 4 hand agreements), escrow 32 amethyst shards (4 a pact), Courier Posts 4, Spirit Anchors 4 (each bound to its post), Workshop Hands 4, chests 4 (128 glowstone each, five blocks from their post), open conversations 2 (the guest negotiating at the ninth perch; holder 0 reading their pact; each asked again every 200 ticks), open rosters 1 (holder 1's, read every 40 ticks), requests filed every 400 ticks at each post (staggered by 100), when none is open
+level at the end: players: 9, entities: 22,22,7,108,108,0,0 [jugcraft:stolas:9,minecraft:player:9,jugcraft:workshop_hand:4], block_entities: 9 [jugcraft:pact_perch:9], block_ticks: 0, fluid_ticks: 0, chunk_source: Chunks[S] W: 1054 E: 22,22,7,108,108,0,0
+active terms: Stolas's pact star_reckoning (radius 8, hours 0 to 24000, 1 a day; upkeep 1 of #jugcraft:stolas_offerings every 168000 ticks, grace 24000, up to 4 ahead); the workshop hand's courier agreement (radius 12, hours 0 to 12000, 32 loads a day, 64 a trip)
+the hall's rules (by the code's constants, not sampled: each Stolas thinks every 20 ticks, each perch looks every 20, writing at most every 200); sampled every 100 ticks while measured (60 samples): one presence a pact, one pact a holder, the visitor listening and each hand its anchor's at every one (problems below); the oldest last look seen 160 ticks; Stolas {idle=420, idle listening=60}; hands {idle=180, working=60} (at their day's quota 0)
+work while measured: loads 60 (by hand [15, 15, 15, 15]; a request is one load of 64), glowstone delivered 3840, requests filed 60, conversation answers 60, roster reads 150 (2 rows at the last)
+the players' actions, timed apart (part of the test's own work, so not in the tick figures above): answers 60 at 261.1 us, roster reads 150 at 140.4 us, filings 60 at 143.1 us, restocks 1200 at 9.7 us; 0.010 ms a tick in all
+calls timed after the spans (one unmeasured tick; 1000 looks and thinks, 200 pages and listings, each after as many untimed): a perch's look 1.59 us, a Stolas's think 1.09 us, holder 0's pact page 7.69 us, holder 1's roster listing 20.63 us (3600 rows read)
+inventory: glowstone 512 = chests 512 + posts 0 + carried 0 (each workshop's 128 on its own account); escrow 32 amethyst shards = 8 pacts x 4, none taken (no period fell due); the compact not paid (sealed as unit 2's tests seal); Bound Wills held 12; open requests 1; ground and both ledgers checked; problems none
+network to holder 0, the observed player (uncompressed, unframed): baseline 952 packets 11.9 KiB (0.04 KiB/s), pact hall 4451 packets 46.3 KiB (0.15 KiB/s); unsized 0 and 0; signs in reach 0 and 0 (0.0 KiB, an upper bound); pact states a client that declared them would be sent 30 (56.9 KiB)
+network to the others: the other eight players were sent 7723 and 32909 messages (counted, not sized); the guest's pact states 30 (52.8 KiB) and holder 1's roster states 150 (294.0 KiB), sized as declared clients would receive them
+network, pact hall, holder 0 by kind: minecraft:move_entity_pos 2135/20.8 KiB, minecraft:set_entity_motion 824/6.4 KiB, minecraft:move_entity_pos_rot 374/4.4 KiB, minecraft:entity_position_sync 103/3.8 KiB, minecraft:set_entity_data 225/3.0 KiB, minecraft:set_time 300/2.9 KiB, minecraft:system_chat 15/2.0 KiB, minecraft:player_info_update 10/1.5 KiB, minecraft:rotate_head 465/1.4 KiB
+not measured: Jade's replies (they answer a client's request); compression and framing; client frame time (no client here)
+not in the workload: Star-reckoning (once a game day a pact; its 2,400-tick attunement is the sky's, as a master's recall), an offering falling due, a warning or a suspension (the shipped period is 7 game days), ending a pact, a second roster, an unloading chunk
+budget (D-P129 in C-P67's form, proposed; the owner decides at merge review): median +1.0 ms: within; p95 +2.5 ms: within; retained +4 MiB beyond the baseline's: within. Asserted here: +5.0, +12.5 ms, +64 MiB
+===== end =====
+```
+
+Read with D-P129's proposed budget (median +1.0 ms, p95 +2.5 ms, retained +4 MiB beyond the baseline's): within, on all
+three, by the card's own budget line (the hall added +0.098 ms to the median and +0.311 ms to the p95 server tick, and
++0 MiB retained beyond the baseline's change), on this runner (an AMD EPYC 9V45, 4 logical CPUs, Java 25.0.4.1), in
+this one run. The card names its runner and claims nothing for other hardware.
+
+### The two-client attempt
+
+`ConcordancePactNetworkTests` (shard 3) starts a second, separate client JVM (offline name `PactPeer`, its own
+temporary profile) against the first client's loopback-only dedicated server, on the pattern of main's
+`OwnerCollectionsNetworkTests` (#435), not #467's harness. The stranger, south of the holder's perch, saw Stolas arrive,
+assent and depart; at the holder's perch its Accept, sent with the compact in hand, was refused (`not_permitted`) and
+spent nothing; at the kept perch its End was refused (`not_holder`); its roster listed nothing of the holder's and refused
+an End naming the holder's pact (`not_listed`); the holder's pact sealed once and ended once, and the stranger kept
+everything it carried. Passed in shard 3 of run 40133540741 and in its opt-in job without the optional integrations.
+The class's `[pact-network]` lines, from the opt-in job's log (shard 3's log tail, as read, did not reach them):
+
+```text
+the stranger's Accept: not_permitted; holder holds, stranger's records, stranger's pocket kept = false 0 true
+the stranger's End and roster End: not_holder not_listed; held, escrow, Stolas on his perch, stranger's records = true 0 true 0
+the holder ends it: ended; held, departure kept, stranger's pocket kept = false true true
+```
+
+Two of its three pictures were defective in that run (Client evidence); `b773913c4` and `d00fa2167` change what the second
+client waits for before them and check the refusal is shown (run 40140478331: every job passed; both pictures viewed
+and as intended; the [pact-network] lines the same as above). The second client's log: the shard's
+artifact, `owner-network-evidence/pact-<id>/peer.log`. Two automated clients on one machine with offline names: no two
+people, no two accounts, no network between machines.
+
+### Not run
+
+A person playing any of it, alone or with others; two people, two accounts or two machines; a sound device (no subtitle
+has been seen); the narrator's audio; an aimed click on the perch; client frame times on a player's hardware; a busy
+server; JEI's pages in a client; `ScreenFitClientGameTests` without the optional integrations.
+
+### Known defects and limits
+
+- Stolas faces south whoever speaks to him (repro: place a perch, stand north of it, use it; outside the screen you see
+  his back); the evidence photographs him from the south (D-P133).
+- Suspending after each reckoning and resuming the next day stretches the upkeep week (checkpoint question 2).
+- The first obligation counts once a player (D-P44); an absent requester at the head of a hand's queue holds it (D-P81);
+  a crucible beyond a hand's 12 blocks waits for a porter.
+- A solo pact needs Celestial Attunement for the compact's resonance (D-P123); the route makes its player a generalist
+  Adept (open question).
+- CI has no sound device; subtitles are checked as defined and fired.
+- Found in run 40133540741's pictures, which its assertions passed: Stolas's own Jade line, the second client's arrival
+  picture and its refused picture (Combined fixes); fixed in `b773913c4` and `d00fa2167`, seen fixed in run 40140478331 (every job passed).
+- Outside Chunk D: main's `PeepoPopulationClientTests` cow-breeding flake (run 40085012234, one client shard re-run);
+  main's `TurkeyGameTests` (#112) `jugcraft-test:turkey_game_tests_hens_lay_eggs` failed once in `optional integrations
+  absent` of run 40121823509 ("The hen laid an egg and started on the next; the tom laid none on tick 10") and passed on
+  its one re-run (job 120963228067), and in that run's `mod` job. Chunk D touches neither test.
+- The other as-built limits are under Risks.
+
+### Record fields (CLAUDE.md)
+
+| Feature | Tier | Input producer | Output consumer | Costs | Unlocks | Failure behaviour | Test evidence |
+|---|---|---|---|---|---|---|---|
+| Agreements keep their promises (D-01) | Practitioner (the Binding Arts) | a Spirit Anchor and its owner; a shade's load | the anchor's slots, the roster, the familiar's bond | none new | nothing | a killed shade's load goes home once or drops where it fell; a refused seal names its reason and spends nothing | D-01's tests (its ticket) |
+| One pact record (D-02) | shared | every holder block's seal | the perch, the anchor, the roster, the history | none | nothing | a copy is inert and releases nothing; upkeep never owes time away; ending returns the escrow once | D-02's tests |
+| Stolas's Regard (D-03) | Practitioner, Spiritbinders | the Binding Arts understood; a feather or Styx flower examined; an organism crop harvested; a sample at the Assayer's Scale; one sky observation | the invitation; mastered, the workshop hand | none beyond the steps | the invitation; mastered: the workshop hand | notes never stand in; talking teaches nothing | D-03's tests; the whole path |
+| Perch, terms and compact (D-04) | Practitioner | the perch's recipe; the compact (2 amethyst shards, 3 feathers, 8 Astral Resonance from an observatory its keeper fills) | the pact (a Bound Will with escrow) | the compact, once | Star-reckoning | refusals spend nothing and name their reason; a second acceptance `taken`; a stranger `not_permitted` | D-04's tests; the whole path; the pact and network client classes |
+| Star-reckoning and upkeep (D-05) | Practitioner | observed patterns; resonance (6 to 16 a recall); offerings | recalled attunements; the Regard mastered | a recall's cost; one offering every 7 game days, at most 4 ahead | the Regard mastered | warning, a day's grace, suspension with nothing lost; never ends by itself; ending returns the escrow once | D-05's tests; the whole path; the pact client class |
+| Stolas's character (D-06) | presentation | the server's actions and states | the player's eyes and ears; Jade | none | nothing | a lost presence called back free; leaving takes 40 ticks, never saved; no cue while switched off but his departure | D-06's tests; poses, sequence, hearing and Jade in the pact client class |
+| The roster (D-07) | management | the roster, Bound Wills and courier requests | suspend, resume, end, cancel and recover, each through its own authority | none | nothing | not listed, stale or not offered is refused with its reason; switched off, listed and nothing offered | D-07's tests; the roster client class; `ScreenFitClientGameTests`; the network class (`not_listed`); the whole path's end |
+| The workshop hand (D-08) | Practitioner (the Regard mastered) | an anchor bound to its holder's post; the post's requests | the requests' destinations, a crucible's shortage among them | none in fuel or upkeep; 32 loads a day of at most 64 | nothing | hold, hours and day's loads stop only new claims; killed or ended, its cargo waits at the post for one recovery | D-08's tests; `CompanionAutomationChecks.workshopHand`; the hand at work; the whole path |
+| The evidence (D-09) | none | Chunk D | the owner's checkpoint | none in play | nothing | not applicable | the whole path; the load card; the client classes; `ConcordancePactNetworkTests` |
+
+### The handoff (10:133-146)
+
+- **What was built:** base `779851cdb` to final `d00fa2167` (the last code commit; these records follow it): D-01 to
+  D-09; the contracts changed are under Interfaces expected to change and each ticket's As built notes.
+- **APIs reused:** `AgreementHolder`, `BoundWills`, `BoundWillLedger`, `WorkerRoster`, `CourierLedger`, `Logistics`,
+  `CourierWork`, `Authority`, `RateGate`, `AstrolabeItem.recall`, `AstralClaims`, `ConcordanceProgress`, `Signs`,
+  `BookArt`, `ComposerScroll`, `ScreenKit.Fitted`, GeckoLib's triggerable clips, the Jade providers, `TestPlayers.survivor`,
+  Fabric's client game test API, `OwnerCollectionsNetworkTests`' second-client pattern, Chunk C's load card's measuring parts.
+- **Schemas, defaults, migration:** the Bound Will's optional `pact` and `escrow`; `jugcraft:pact_history`; the perch's
+  `owner`, `agreement` and `spirit` (stamp 1); Stolas's `perch` and `record`; the Spirit Anchor's `owner` and `post`; the
+  hand's `anchor` and `task`; `data/jugcraft/concordance/pact/stolas.json` (schema 1, strict); payload types
+  `jugcraft:concordance_pact_request` and `_state`, `jugcraft:concordance_roster_request` and `_state`. A legacy anchor's
+  `suspended` migrates on load and a legacy record is claimed once at its own place (D-P3); older saves load; there is no
+  downgrade path (Deferrals). Unit 5 changes no saved data.
+- **Generators and provenance:** `tools/concordance_pacts.py`, `concordance_workers.py`, `concordance_roster.py`,
+  `stolas_body.py`, `owner_art.py` (the Flashjack rows and SHA-256 in `stolas-pact.md`), `concordance.py` (sounds, lang),
+  the perch's icon map, `concordance_journey.py`, `concordance_progression.py`, `acquisition.py`, `concordance_economy.py`.
+- **What the owner should look at:** the checkpoint below; the shots under Client evidence.
+- **How to verify:** run the Build workflow by workflow_dispatch with every client class, ticking `load_card` and
+  `clients_without_optional` when wanted; locally, the commands in `docs/TESTING.md`.
+- **What is not verified:** under Not run.
+- **Known defects:** under Known defects and limits.
+- **Decisions:** the owner's are D-D0 to D-D2 and the carried direction D-002. The session's D-S1 to D-S23 were decided
+  by the session under D-D2 (23 October 2026) and are not the owner's. Proposed, reviewable at the checkpoint: D-P1 to
+  D-P50 (units 1 and 2), D-P70 to D-P83 (unit 4), D-P90 to D-P121 (unit 3) and D-P122 to D-P137 (unit 5); the load
+  budget (D-P129); the workflow changes (the load job's second card and `clients_without_optional`) for review in the
+  pull request.
+- **Where to resume:** under Where to resume.
+- **Next smallest complete outcome:** the first spirit of the cohort the owner chooses, one unit on the shared pact record
+  with its character brief before its art; or Gloam Ink (C-D6), whichever the owner orders first.
+
+### The owner checkpoint (as reported)
+
+**Chunk D: meet Stolas, negotiate, use and safely end a working pact**
+
+**What you can do now**
+- With the Binding Arts understood, learn Stolas's Regard: examine a feather or Styx flower, harvest an organism crop, dissolve a sample at an Assayer's Scale; then record a sky observation.
+- Build and use a Pact Perch: Stolas lands and names every term before anything is spent. Accept pays 2 amethyst shards, 3 feathers and 8 Astral Resonance; only an observatory's keeper gathers resonance, so a solo player learns Celestial Attunement.
+- Once a game day at the perch, Star-reckoning recalls a sky pattern you observed. One offering a week, paid ahead, keeps the pact.
+- End it at the perch or from the new roster: he departs, and what you paid ahead comes back once.
+- Mastering his Regard unlocks the workshop hand, which carries your Courier Post's requests.
+
+**What changed**
+Spirit Anchors have owners, a killed Gathering Shade's load goes home once, familiars no longer fade offline, and the composer now draws subtitles over itself (unseen: CI has no sound).
+
+**What I checked**
+Candidate `48d99c904`, CI run 40133540741: every job passed first time. One server test walks from Styx to departure. Two game clients on one CI machine at one perch: passed (a stranger was refused the holder's pact). Load card: +0.098 ms median, +0.311 ms p95 tick on CI's runner, within the proposed budget. Three faults its pictures showed are fixed, and seen fixed in run 40140478331. Not checked: anyone playing it; sound; any hardware but CI's.
+
+**What to look at**
+- `jugcraft_pact_conversation`, `jugcraft_pact_terms`, `jugcraft_stolas_refuse_seq_1` to `_4`, `jugcraft_roster`, `jugcraft_workshop_hand_at_work`, `jugcraft_pact_peer_departure` (run 40133540741).
+- In creative (the compact is free, a recall is not): `/jugcraft concordance grant @s <id> understood` for `jugcraft:binding_arts`, then `jugcraft:stolas_regard`; `/give @s jugcraft:astrolabe[jugcraft:astral_charge=32]`; observe at an observatory at night, place a perch, accept, reckon; bind the roster key (unbound at first) and end it there.
+
+**Decisions for you**
+1. **Stolas's look and manner.** A raven from your library's Flashjack rig: dry and patient ("I teach the stars to those who keep their word"), five gestures, sounds and subtitles, no voice; he faces south whoever speaks. I recommend keeping him, turning him toward his speaker, and giving later spirits their own silhouettes.
+2. **How strict pacts feel.** A missed offering warns, gives a day's grace, then suspends with nothing lost; a pact never ends by itself. Suspending after each reckoning still stretches the week. I recommend accepting D-P50 (short trips never renew the grace) and letting the week run while suspended.
+3. **The next six spirits.** I recommend gardens: they build on your living workshop (and Gloam Ink, once built), and a spirit tending beds tests work on someone's land with permission.
+
+**Next proposed chunk**
+The cohort you choose, one spirit a unit on the shared pact record, each briefed before its art; it needs Chunks B to D merged. Its main risk is six spirits differing only in yield.
+
 ## Deferrals
 
 - **Gloam Ink** (D-S4): not part of Chunk D. It stays a separate small outcome (C-D6, CC:2363; its timing is not yet
@@ -2294,6 +2725,10 @@ The smallest first step is D-01: no new id, block, entity or art; it closes G1 a
 - **The observatory chart** (08:61-63) and a GuiLib view of the pact screens.
 - **Importing #467's two-client harness:** for its author or the owner to bring in.
 - **A downgrade path** for the new keys.
+- **One second-client helper:** `ConcordancePactNetworkTests` copies `OwnerCollectionsNetworkTests`' launcher (D-P136);
+  moving both onto one helper is left for a third two-client test.
+- **Stolas turning toward his speaker:** the evidence photographs his front (D-P133); turning him is the owner's choice
+  (checkpoint question 1) and needs a client run to judge.
 
 ## Validation plan
 
@@ -2301,9 +2736,9 @@ The smallest first step is D-01: no new id, block, entity or art; it closes G1 a
 |---|---|---|---|---|
 | 1 | Worker, Authority, Sharing, Persistence, Resource | none | `check_workers`, `check_persistence`, the pact `problems()` audit, `check_repository`, `gradlew build` | an older Bound Will; an anchor's agreement; a legacy `suspended`; an unreadable record kept; stamps |
 | 2 | Worker, Sharing, Persistence, Sky, Styx, Progression, Journal, Authority, Resource | `ConcordancePactClientGameTests` (conversation, terms, keyboard, service, ending) | `check_stolas_regard`, `check_pacts`, `check_pact_screen`, `check_economy`, `owner_art --check`, `concordance_journey --check`, `check_acquisition`, the icon maps, the recipe-conflict fixture if #462 has merged | the perch; the escrow and clock; a restart while suspended; a reload with a broken definition |
-| 3 | Worker (presence), Journal, Logistics (recovery). As built: Worker +14, Logistics +2, Journal +1, written, not run (CI is their first run) | poses, subtitles, Jade, the roster; the build without optional integrations. As built: `ConcordancePactClientGameTests` extended, `ConcordanceRosterClientGameTests` new, `ScreenFitClientGameTests` extended; none run, and the build with or without the optional integrations not run | `check_geckolib` (triggerables), `owner_art --check`, client-test selection. As built, run and passed: `owner_art --check`, `check_mod_data.py` (with `check_stolas_body`, `check_roster`, `check_roster_screen` and the D-06 block of `check_pacts`; 104 audit mutations reported), `check_repository.py`, `concordance_journey.py --check`, `check_icon_maps.py`, the World Designer and script tests, `git diff --check`, the Java parse check; `select_client_tests.py --base 92868ff82` chooses 52 of 242 client classes, the three above among them | the entity's keys. As built: no saved-data change (the departure and the listening flag are never saved; roster sessions are memory only) |
+| 3 | Worker (presence), Journal, Logistics (recovery). As built: Worker +14, Logistics +2, Journal +1, first compiled and run in CI run 40121823509 on `040d73ece`, where they passed (run 40120355940 failed to compile the roster client test); passed again in run 40133540741 | poses, subtitles, Jade, the roster; the build without optional integrations. As built: `ConcordancePactClientGameTests` extended, `ConcordanceRosterClientGameTests` new, `ScreenFitClientGameTests` extended; passed in run 40121823509, where the build also passed with and without the optional integrations (`optional integrations absent` after one re-run); in run 40133540741 they passed in shards 5, 14 and 13, the pact and roster classes also in the opt-in job without the optional integrations | `check_geckolib` (triggerables), `owner_art --check`, client-test selection. As built, run and passed: `owner_art --check`, `check_mod_data.py` (with `check_stolas_body`, `check_roster`, `check_roster_screen` and the D-06 block of `check_pacts`; 104 audit mutations reported), `check_repository.py`, `concordance_journey.py --check`, `check_icon_maps.py`, the World Designer and script tests, `git diff --check`, the Java parse check; `select_client_tests.py --base 92868ff82` chooses 52 of 242 client classes, the three above among them | the entity's keys. As built: no saved-data change (the departure and the listening flag are never saved; roster sessions are memory only) |
 | 4 | Logistics (seven of 03:193's cases and four more), Worker (five), Authority (one), Persistence (two) | `PeepoCompanionClientTests` / `CompanionAutomationChecks` | `check_workers` (`WORK`, the class map), `check_hand`, the logistics audit | a claim across a restart; an anchor's post |
-| 5 | the whole path; load | the evidence bundle; the two-client attempt | every check | none |
+| 5 | the whole path (`ConcordanceJourneyGameTests.thePactHallFromStyxToDeparture`, `thePactHallsRecipesLoad`); load (`ConcordancePactHallLoadGameTests.loadCard`, opted in: a manual Build run with `load_card`) | the bundle (pact, roster, screen fit); `ConcordancePactNetworkTests`; the opt-in run without optional integrations | every check, with `check_acquisition`'s pact hall, `concordance_journey --check`, `check_load_card`, `check_pact_hall_load_card`, `check_stolas_body`'s sequence, `check_pact_network`, `check_composer` and the codex-place audit | none |
 
 Every unit also runs `tools/check_mod_data.py`, `scripts/check_repository.py`, `scripts/tests`, the generators (their
 output current) and the build with its server game tests, and its CI by workflow_dispatch of the Build workflow with
@@ -2334,6 +2769,7 @@ numbered from D-P70, a block reserved for it so that units built in parallel nev
 after unit 1's): D-P70 to D-P80 from its specification (its D-P60 to D-P70, renumbered), D-P81 from its specification's
 review and D-P82 and D-P83 from the unit review's fixes. Unit 3 takes D-P90 upward: D-P90 to D-P121 from its
 reconciled specification (its four part designs' numbers, renumbered), as corrected by the specification's critique.
+Unit 5 takes D-P122 upward: D-P122 to D-P137 from its reconciled specification.
 
 | ID | Date | Decision | Status | Affects |
 |---|---|---|---|---|
@@ -2460,6 +2896,22 @@ reconciled specification (its four part designs' numbers, renumbered), as correc
 | D-P119 | 24 October 2026 | State and place marks are drawn shapes, one for each icon, always beside its word; no new texture | Proposed (unit 3, reviewable at the checkpoint) | D-07 |
 | D-P120 | 24 October 2026 | The roster is in the screen fit check (320×240) | Proposed (unit 3, reviewable at the checkpoint) | D-07 |
 | D-P121 | 24 October 2026 | Unit 3 builds on the merge of `wip/chunk-d`, unit 2 and unit 4. As built, on `92868ff82` (units 1, 4 and 2 merged with their review fixes), so the specification's fallback was not needed (critique 9) | Proposed (unit 3, reviewable at the checkpoint) | D-06, D-07 |
+| D-P122 | 24 October 2026 | The composer (Chunk A) is an in-game screen that draws the HUD's deferred subtitles over its own fill, as the pact and roster screens do (unit 3's R10 finding, left to unit 5); held by `check_composer`. Unseen: CI has no sound device | Proposed (unit 5, reviewable at the checkpoint) | D-09 |
+| D-P123 | 24 October 2026 | The compact's resonance has one survival source, an observatory's keeper (a Starwatcher); the graph models it (`RESONANCE_SOURCES`; `pact_service` needs the perch, the compact's items and the resonance), the route understands Celestial Attunement, and the codex says so; unit 2's route passed only unmodelled. Alternatives for the owner: a resonance source outside the Starwatchers, or a compact without resonance | Proposed (unit 5, reviewable at the checkpoint) | D-03, D-04, D-09 |
+| D-P124 | 24 October 2026 | The hand's step leaves the Overworld: the anchor's soul lantern (`recipe/spirit_anchor.json`) is the Nether's; the route names that step's dimensions and the check holds the Nether needed there alone | Proposed (unit 5, reviewable at the checkpoint) | D-08, D-09 |
+| D-P125 | 24 October 2026 | The whole path is one server test in `ConcordanceJourneyGameTests` (as C-10): named at every step, selecting no client test, reusing `drone_depot`. The route's research is granted, but Stolas's Regard's three evidence kinds, the sky and every action after are the player's own through server calls; later times are passed to the methods that take them; ending is from the roster | Proposed (unit 5, reviewable at the checkpoint) | D-09, E7 |
+| D-P126 | 24 October 2026 | `PACT_HALL` (nine recipe rows) and `CHUNK_D_ITEMS` (= `concordance_pacts.BLOCKS`), held by `check_acquisition` through one `made_as`, and loaded by `thePactHallsRecipesLoad`; Stolas and the hand are entities, the compact a cost, Star-reckoning a service | Proposed (unit 5, reviewable at the checkpoint) | D-09 |
+| D-P127 | 24 October 2026 | The routes' "each kind of worker" stays three: the hand serves as a spirit (D-P70, D-P71), held by `worker_kinds_problems` | Proposed (unit 5, reviewable at the checkpoint) | D-08, D-09 |
+| D-P128 | 24 October 2026 | The pact hall's load card is its own opted-in server game test, run in the existing `load-card` job after the workshop's, in a second `runGameTest` under the same `load_card` input and guard: not a new job and not a third span of Chunk C's card, whose code changes only by widened access to `Measure`, `Traffic` and `Stats` and a payload count | Proposed (unit 5, reviewable at the checkpoint) | D-09 |
+| D-P129 | 24 October 2026 | The budget, in C-P19's form (C-P67): the pact hall adds at most +1.0 ms median and +2.5 ms p95 server tick, and +4 MiB retained heap beyond the baseline's change, net of the test's own work, on the stated runner. Reported, not asserted; asserted at +5.0 ms, +12.5 ms and +64 MiB. The owner decides at merge review | Proposed (unit 5, reviewable at the checkpoint) | D-09 |
+| D-P130 | 24 October 2026 | The workload is D-09's As built's hall. Not in it: Star-reckoning (once a game day; its attunement is the sky's), an offering falling due, a warning or a suspension (the shipped period is 7 game days, so each look is measured in its steady state), ending, a second roster, an unloading chunk. Requests come every 400 ticks, about twice the rate the hand's quota of 32 a game day allows on average, so the span shows hands at work | Proposed (unit 5, reviewable at the checkpoint) | D-09 |
+| D-P131 | 24 October 2026 | The simulated players' requests (answers, roster reads, filings, restocking) are the test's own work and out of the net figures, as the workshop card's simulated player's are; they are timed apart and reported, with per-call costs of a look, a think, a page and a roster listing timed after the spans | Proposed (unit 5, reviewable at the checkpoint) | D-09 |
+| D-P132 | 24 October 2026 | D-09's rules are asserted from the run, not from the code alone: one presence a pact, one pact a holder, each pact looked at within `WRITE_TICKS + LOOK_TICKS`, the visitor listening and each hand its anchor's, sampled every 100 ticks while measured; items, escrow and both ledgers every 1,000 ticks. Any breach fails the card | Proposed (unit 5, reviewable at the checkpoint) | D-09 |
+| D-P133 | 24 October 2026 | Stolas is photographed from his front: he is summoned facing south (yaw 0), so the pact client test's camera for his body, poses, sequence and Jade stands south of him, facing north, its floor extended there. Whether he should turn toward whoever speaks to him is the owner's (checkpoint question 1) | Proposed (unit 5, reviewable at the checkpoint) | D-06, D-09 |
+| D-P134 | 24 October 2026 | A timed sequence through his refusal (08:176): four frames frozen at 0.25, 0.65, 1.05 and 1.45 s into the clip, each inside it and later than the one before, its time logged (`REFUSAL_SEQUENCE`) | Proposed (unit 5, reviewable at the checkpoint) | D-06, D-09 |
+| D-P135 | 24 October 2026 | The workshop hand at work is shown by the roster's client test, whose world already seals a hand at a post: three copper ingots carried across the yard, frozen while aboard and photographed from beside its path, then delivered once; before the full roster, so its sixteen requests still fit | Proposed (unit 5, reviewable at the checkpoint) | D-08, D-09 |
+| D-P136 | 24 October 2026 | The two-client attempt (D-S22) uses this branch's own two-JVM pattern, main's `OwnerCollectionsNetworkTests` (#435): `ConcordancePactNetworkTests` copies its launcher with its own names (that test is not edited), never #467's harness; a stranger (offline `PactPeer`) at the holder's perch; its evidence under `owner-network-evidence/`, which the shards already upload; recorded as two automated clients on one machine, never as two people | Proposed (unit 5, reviewable at the checkpoint) | D-04, D-07, D-09 (E1, E5) |
+| D-P137 | 24 October 2026 | An opt-in Build input, `clients_without_optional`, runs the pact, roster and two-client classes without the optional integrations in a job of their own; ordinary runs never do (a workflow change for the owner's review) | Proposed (unit 5, reviewable at the checkpoint) | D-09 |
 
 **The checkpoint's three questions** (09:174; at most three, 09:18):
 1. Stolas's personality and appearance: the Flashjack-derived raven, his three dialogue beats and two memorable details
@@ -2475,41 +2927,19 @@ questions.
 
 ## Where to resume
 
-Units 1 (D-01, D-02), 4 (D-08) and 2 (D-03, D-04, D-05) are on the local `wip/chunk-d` (pushed as
-`claude/chunk-d-pact-hall`): unit 1 with its unit review's fixes (`3775eac3b`) and 26.3's white wool (`da185dd0d`),
-green in CI (run 40067977680); unit 4 from `wip/chunk-d-u4`, merged at `df3006850` with the test fixes `ca2957291` and
-`86c4e7127`, green in CI (run 40085012234, one client shard re-run for main's cow-breeding flake); unit 2 from
-`wip/chunk-d-u2` (six commits on `97e1facd4`: `9daf23ae1`, `832129b95`, `7da686ad4`, `ee82c1dc7`, the records'
-`8f0635d9e` and the unit review's fixes `f6ef0b85d`), merged after unit 4 by the commit "Merge Chunk D unit 2 (Stolas
-and the pact perch) into the pact hall", not pushed when these notes were written. Unit 3 (D-06, D-07) is on the local
-`wip/chunk-d-u3`, five commits on `92868ff82` (`9805a9a7c`, `773b85aba`, `a3ee00822`, `66b741868` and the records'
-commit "Concordance Chunk D: unit 3's records"), not merged here and not pushed; its owner checkpoint (his look, gestures
-and sounds, Jade's words, the roster's key and portraits) is pending. Before more work:
-1. Push to `claude/chunk-d-pact-hall` and run the Build workflow by workflow_dispatch with every client class (CI is
-   unit 2's first compile; unit 4's hand tests already passed after the helper fix, in run 40085012234); fix what
-   fails and record each failure and fix in the ticket's As built notes, the units table and the records (the workers
-   record for units 1
-   and 4, [stolas-pact.md](stolas-pact.md) for unit 2).
-2. Refresh main and the open pull requests (REST, read only); merge main if it has moved past `f904df3fd`, and Chunk
-   C's branch if it has moved in review.
-3. Unit 2 is built on the holder and records unit 1 built: the perch is a second `Holds` (calling Stolas by
-   counterpart, `partySeals` false, the compact through `Sealing.affords` and `pay`, D-P14, D-P15), its ticker drives
-   `AgreementHolder.look` (D-P9), `OnBreak.UNSEAT` leaves a broken perch's pact without its place, a pact is seated
-   again at a new perch with the record's own terms and day (D-P1, D-P45), and its menu asks `RateGate` before every
-   action (D-P8, D-P35). Its owner checkpoint (the look, the Harvest Moon balance, the obligation once a player) is
-   pending. Unit 4's hand now finds unit 2's research: `check_hand` checks `jugcraft:stolas_regard`'s mastered state,
-   and the hand's codex entry links `binding/stolas_regard`.
-4. Unit 1's review fix 2 for the hand (D-08's As built, the last item) is done in unit 3 (`a3ee00822`): the hand's
-   `joinsRosterOnStatus()` is false, as the shade's and Stolas's, held by `check_pacts` and
-   `aReplacedHandLoadingWhileSwitchedOffStaysOffTheRoster`. Still open from unit 4:
-   `docs/ARCANE_CONCORDANCE.md` lists unit 2's saved identifiers but not unit 4's (`jugcraft:workshop_hand` and the
-   Spirit Anchor's `post`).
-5. Keep this page's units table, decisions and evidence current as each unit lands, with an As built note per ticket.
-   Merge unit 3 here (its records and this page by union; lang and `sounds.json` regenerated, never hand-merged), run CI
-   with every client class (unit 3's first compile: its 17 server game tests, `ConcordancePactClientGameTests`,
-   `ConcordanceRosterClientGameTests` and `ScreenFitClientGameTests`, and the build without the optional integrations),
-   and record each failure and fix in D-06's and D-07's As built notes. Then unit 5 (D-09), which also takes Chunk A's
-   `ComposerScreen` subtitle finding (D-06's Findings for other units).
+Chunk D (D-01 to D-09) is built on `claude/chunk-d-pact-hall` (code at `d00fa2167`; these records follow it) and in
+review as [jimbozoomer-byte/jugcraft#474](https://github.com/jimbozoomer-byte/jugcraft/pull/474), the third of the stack. It stops here for the owner's checkpoint (09:174). Before more work:
+1. Record the owner's answers to the three questions as D-D3 to D-D5 ("Accepted (owner)", the date, their words) and do
+   what they choose. A new look or the cohort is a new chunk's work; a change to strictness is a unit of its own, in
+   `Pacts.due` and `PactKeeping`, with tests.
+2. Refresh main and the open pull requests (REST, read only); merge main or Chunk C if they moved; run the Build workflow
+   by workflow_dispatch with every client class, `load_card` ticked (paste the pact hall block verbatim under [The pact
+   hall load card](#the-pact-hall-load-card), or record it as not run). Look again at the three pictures
+   `b773913c4` and `d00fa2167` fixed (`jugcraft_pact_stolas_jade`, `jugcraft_pact_peer_arrival`,
+   `jugcraft_pact_peer_refused`; seen fixed in run 40140478331) in that later run.
+3. Start no second Goetia spirit before the owner names the cohort (Explicit don'ts 1).
+4. Open items: Stolas's facing; one second-client helper (Deferrals); the opt-in workflow inputs await the owner's
+   review.
 
 ## How this contract was checked
 
@@ -2559,7 +2989,8 @@ and sounds, Jade's words, the roster's key and portraits) is pending. Before mor
   `LandRegistry.mayBuildFor`, #465's and #466's CI state and the shared files of #468, #459, #455, #454, #449 and #448,
   marked *(survey)* in the first draft, were read by REST in the verification pass.
 - **Not determined:** whether a GeckoLib entity draws as a roster portrait; whether Flashjack's UV regions pass
-  `check_geckolib`; whether two clients can be run here.
+  `check_geckolib`; whether two clients can be run here. Since determined: two client JVMs can run on one runner, on
+  main's #435 pattern (D-P136).
 - **For unit 1's As built notes and proposals (24 October 2026):** re-read at the unit's head `fa5360d0d`: `Pacts`,
   `BoundWill`, `BoundWillLedger`'s additions, `BoundWills`' codecs and methods, `PactHistory`, `AgreementHolder`
   (whole), `SpiritAnchorBlock`, `SpiritAnchorBlockEntity`, `GatheringShadeEntity`, `HearthlingEntity`'s and `Bond`'s
@@ -2606,3 +3037,8 @@ and sounds, Jade's words, the roster's key and portraits) is pending. Before mor
   the generated files' SHA-256 (`tools/owner_art.py --provenance pacts` and `sha256sum`); unit 2's records at
   `8f0635d9e` and its merge fixes at `92868ff82`. Run for these notes: the records commit's local checks and its
   mutations (D-07's As built, the records' commit).
+- **For unit 5's records (24 October 2026):** re-read at `b773913c4`: the Build workflow's client jobs and upload
+  paths, `ConcordancePactNetworkTests`' evidence folder and second-client heap, and `b773913c4`'s diff; from the
+  session's reading of the runs by REST (read only): run 40133540741's job list, the load card's block, the shard and
+  opt-in job logs' previews and `[pact-check]`, `[roster-check]` and `[pact-network]` lines, and the results of runs
+  40120355940 and 40121823509. Run: as in D-09's As built.

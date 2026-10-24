@@ -5,7 +5,9 @@ branch `claude/concordance-steps-26-32`, integrated by [#263](https://github.com
 8 October 2026). **The human playtest has not been run**; see Verification for what has. Concordance Chunk C (C-10)
 adds the living workshop (`WORKSHOP` in `tools/concordance_journey.py`;
 `ConcordanceJourneyGameTests.theLivingWorkshopFromAManualStart` and `theWorkshopsRecipesLoad`). Not merged; its two
-server game tests passed in CI (run 38774859294 on `bb856f873`).
+server game tests passed in CI (run 38774859294 on `bb856f873`). Concordance Chunk D (D-09) adds the pact hall (`PACT`;
+`ConcordanceJourneyGameTests.thePactHallFromStyxToDeparture` and `thePactHallsRecipesLoad`). Not merged; both passed in
+both server jobs of run 40133540741.
 Proposal issue: none; the owner's Arcane Concordance brief (roadmap step 31) is the scope approval.
 Owner: @jimbozoomer-byte. AI-assisted implementation with Claude Code; the model is named in the commit trailers.
 Target milestone and tier: Concordance milestone 23, every stage. Roadmap step 31.
@@ -71,10 +73,11 @@ From a fresh world, with nothing from the Nether or the End and nothing past the
   CI's log the tools here cannot fetch. Whether Kindle, the light First Light is about, should be on the use key is
   an open question for the owner. It would be a small change to the order `ConcordanceSpells` offers them in.
 
-## The three routes and the living workshop
+## The three routes, the living workshop and the pact hall
 
 The living workshop, below the routes, is not a fourth way to Architect but Chunk C's way from a manual start to a
-powered, supplied crucible and its garden.
+powered, supplied crucible and its garden. The pact hall, after it, is Chunk D's: from Styx's hint, or a feather, to
+Stolas's pact kept and ended, and the workshop hand his Regard unlocks. It is not a route to Architect either.
 
 A route is not a script the game enforces: a player may take any research in any order. A route is the smallest set of
 research one player needs to reach the Architect stage that way. Dreamwalking is on no route; any route can take it up
@@ -226,6 +229,10 @@ Each player's research, Focus, rings and bound relics must stay their own.
 - The living workshop: input producers are crafting from vanilla things and the garden; output consumers are a friend's
   healing and a lair support share (the poultice), the Cinder Kiln's slag (the Kiln Draught) and the Crucible Stand
   (the foundation).
+- The pact hall (Concordance Chunk D): input producers are the Binding Arts, the garden (a ripe crop), the Assayer's
+  Scale, an observatory its player keeps (the sky step, the compact's resonance and the first obligation), the perch's
+  recipe and an amethyst shard a week; output consumers are Star-reckoning, Stolas's Regard mastered and the workshop
+  hand it unlocks, which carries a Courier Post's requests ([Stolas's pact](stolas-pact.md)).
 
 ## Balance
 
@@ -239,7 +246,8 @@ the two-client test has not been run.
 ## Dependencies and assets
 
 No new dependency or asset. The codex's new Casting page is generated text. The living workshop's server test reuses the
-existing test structure `jugcraft-test:drone_depot` (16×8×16 air); no structure is added.
+existing test structure `jugcraft-test:drone_depot` (16×8×16 air); no structure is added. The pact hall's server test
+reuses the same structure; nothing is added.
 
 ## Verification
 
@@ -275,7 +283,22 @@ existing test structure `jugcraft-test:drone_depot` (16×8×16 air); no structur
     `31bc7087d`'s message records 32 audit mutations run for them; Chunk C's evidence is in
     [its contract](concordance-chunk-c.md#unit-5-evidence-and-handoff-c-10).
 
+- The pact hall (Concordance Chunk D, D-09):
+  - Server game tests: `ConcordanceJourneyGameTests.thePactHallFromStyxToDeparture` (up to 80 ticks: the path in one
+    tick on one survival test player, then Stolas's 40-tick departing gesture) and `thePactHallsRecipesLoad`. Both
+    passed in both server jobs of run 40133540741 (`mod`: "All 2572 required tests passed"; `optional integrations
+    absent`); CI was their first compile and run.
+  - Given inputs: the route's research other than Stolas's Regard is granted, as `eachRouteClimbsItsOwnWay` grants it;
+    the compact's materials, nine iron nuggets, the perch's ingredients and amethyst shards are given. Placed with
+    `setBlock`: the Verdant Bed and its ripe Sunpetal, the Assayer's Scale, the observatory, and the hand's post, chest,
+    crucible and anchor (`WorkshopHands`). The perch is crafted by its recipe and placed by hand. The full moons, Stolas's
+    thinking and upkeep's days are times given to the methods that take them.
+  - Run locally: `python3 tools/concordance_journey.py --check` and `check_acquisition`'s pact-hall rows (inside
+    `tools/check_mod_data.py`): both passed for each unit 5 commit and again for these records; audit mutations J1 to J15
+    (the journey) and A1 to A9 (`check_acquisition`) each reported, logged when `90dd7a756` was built.
+
 Not yet run:
+- the pact hall played by a person, alone or with a party sharing an observatory;
 - the playtest of each route, in both setups;
 - the two-client cooperative test;
 - a shader pack;
@@ -284,7 +307,8 @@ Not yet run:
 ## World and event applicability
 
 Works everywhere. The exploration route needs the Nether: the Crimson Rites are observed from a Nether specimen, and the
-Thornheart Blade takes nether wart.
+Thornheart Blade takes nether wart. The pact hall's workshop hand needs the Nether once: the Spirit Anchor's recipe
+takes a soul lantern. Every other step is the Overworld's.
 
 ## Rollout and open questions
 
@@ -294,3 +318,6 @@ Thornheart Blade takes nether wart.
   - are the three routes the ones the owner wants played first?
   - the workshop's five entries make its player a generalist Adept, though nothing in it needs Adept: is that the
     intended reading?
+  - the pact hall's entries (First Light, the Binding Arts, Verdant Husbandry, the Assay and Celestial Attunement
+    understood: five traditions) make its player a generalist Adept, though nothing in it needs Adept; Celestial
+    Attunement is there only for the compact's resonance (D-P123): is that the intended reading?

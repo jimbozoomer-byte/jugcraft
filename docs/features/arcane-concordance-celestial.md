@@ -102,6 +102,8 @@ not the world clock, ends it, so moving the clock neither stretches nor renews i
 - Input producer: First Light (Celestial Attunement needs it understood); vanilla instruments; the sky itself.
 - Output consumer: Astral Resonance is the Concordance's celestial-alignment resource (separate from Focus, Ley Charge,
   essences and Vitae); attunements now; later steps (relics, the endgame project) can draw on stored resonance.
+  Stolas's Open Hand Compact takes 8 from a carried astrolabe ([Stolas's pact](stolas-pact.md)), so a solo pact needs
+  a Starwatcher's observatory.
 - Technology connection: the observatory and astrolabe are crafted from copper, gold and vanilla instruments.
 - Magic connection: patterns carry Principles; attunements go through the shared effect boundary and its limits.
 - Reachable entry path: First Light understood → examine a spyglass, clock or compass → study at the bench → craft an
@@ -196,7 +198,7 @@ library file is read, never changed. The icons have not been shown to the owner 
 Not yet run: any client (the GeckoLib observatory, the icons, Jade lines, the dynamic light and the codex pages in game),
 a two-client dedicated server, and a real night of play.
 
-Concordance Chunk D (not merged; [Stolas's pact](stolas-pact.md)): `ConcordanceSkyGameTests` +7, none yet run in CI.
+Concordance Chunk D (not merged; [Stolas's pact](stolas-pact.md)): `ConcordanceSkyGameTests` +7, passed in CI runs 40090825848, 40094972598 and 40133540741.
 D-03: `aRecordedObservationCountsWithoutAWindow` and `aTurnedClockMakesNoNewClaim`. D-05:
 `stolasRecallsAnObservedPatternOncePerOccurrence`, `aMastersRecallAndStolassShareOneClaim` (a full astrolabe in hand,
 so only the shared claim refuses), `aChangedClockGivesNoSecondRecall`, `theHarvestMoonRecallsOutsideItsEvent` (and the

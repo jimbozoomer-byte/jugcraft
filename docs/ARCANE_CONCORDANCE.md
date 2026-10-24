@@ -505,6 +505,12 @@ item tags `jugcraft:stolas_offerings` and `jugcraft:stolas_specimens`; the pact 
 `jugcraft:concordance_pact_request` and `jugcraft:concordance_pact_state`; the roster kind `pact`; codex entries
 `binding/stolas_regard` and `binding/stolas_pact`.
 
+Since Concordance Chunk D, units 1 and 4 ([the chunk's contract](features/concordance-chunk-d.md#interfaces-expected-to-change);
+not merged): the saved data `jugcraft:pact_history`; a Bound Will's optional `pact` and `escrow` (in
+`jugcraft:bound_wills`); a bond's optional `seen_played`; the Spirit Anchor's saved `owner` (unit 1) and `post` (unit
+4); entity `jugcraft:workshop_hand` (saved `anchor` and `task`; data `concordance/worker/workshop_hand.json`; codex
+`binding/workshop_hand`).
+
 Since Concordance Chunk D (unit 3, [Stolas's pact](features/stolas-pact.md#rollout-and-open-questions); not merged): the
 sound events `jugcraft:stolas.arrive`, `.listen`, `.inspect`, `.assent`, `.refuse` and `.depart`; payload types
 `jugcraft:concordance_roster_request` and `jugcraft:concordance_roster_state` (the roster's actions and icons travel as

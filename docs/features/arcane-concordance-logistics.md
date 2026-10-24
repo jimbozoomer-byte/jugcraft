@@ -9,7 +9,8 @@ Verification). Extended by Concordance Chunk D, unit 4 (D-08; [the chunk's contr
 merged: a Workshop Hand, a spirit, carries a post's requests with the porter's own decision, now `spirits/CourierWork`,
 shared; its tests passed in CI run 40085012234 on `86c4e7127` (see Verification). Extended by Concordance Chunk D,
 unit 3 (D-07: [the roster screen](arcane-concordance-workers.md#the-roster-screen-concordance-chunk-d-d-07) cancels a
-request and recovers stranded cargo), not merged; its tests have not run in CI yet.
+request and recovers stranded cargo), not merged; its tests passed in CI run 40121823509 on `040d73ece` and in run
+40133540741.
 Proposal issue: none; the owner's Arcane Concordance brief (roadmap step 18) is the scope approval.
 Owner: @jimbozoomer-byte. AI-assisted implementation with Claude Code; the model is named in the commit trailers.
 Target milestone and tier: Concordance milestone 10, Practitioner stage (Jugcraft Workshops). Roadmap step 18.
@@ -364,9 +365,9 @@ one re-run of a client shard for main's `PeepoPopulationClientTests` cow-breedin
   (239). **Not run where it was written:** `./gradlew build` and the game tests (run by CI, above); any client by hand,
   two clients, a real restart and real walking.
 
-**Concordance Chunk D, unit 3: D-07** (commits `a3ee00822` and `66b741868` on the local `wip/chunk-d-u3`; [the chunk's
-contract](concordance-chunk-d.md), D-07's As built note; not merged). **Not yet run in CI:** nothing of it has been
-compiled.
+**Concordance Chunk D, unit 3: D-07** (commits `a3ee00822` and `66b741868` on the local `wip/chunk-d-u3`, merged at `554d71ab1`; [the chunk's
+contract](concordance-chunk-d.md), D-07's As built note; not merged). **CI:** passed in run 40121823509 on `040d73ece`
+(after run 40120355940 failed to compile the roster client test) and in run 40133540741.
 - `ConcordanceLogisticsGameTests` +2 (30 in all): `recoveryNeverTakesCargoOutOfAnUnloadedContainer` (a request reserved
   at a container that is not loaded, and one aboard a courier waiting on an unloaded destination, offer Cancel, not
   Recover, and a recovery forced on either moves nothing; once the courier is gone the stranded cargo comes to its
@@ -375,6 +376,10 @@ compiled.
   departs and the cargo is stranded at its post; the roster then recovers it once, from the ledger).
 - `check_roster` holds the roster to `CourierLedger.cancel` and `recover` (never a container's own move) and to the
   logistics commands' gate.
+
+Since Concordance Chunk D, unit 5: a hand carrying a real request in a real client
+(`ConcordanceRosterClientGameTests.handAtWork`: claimed, three items aboard, delivered once, the request closed),
+passed in shard 14 of run 40133540741 (3 carried, aboard on its own claim, 0 left at the source; 3 delivered).
 
 ## World and event applicability
 

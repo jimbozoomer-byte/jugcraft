@@ -9,10 +9,13 @@ contract](concordance-chunk-d.md)), not merged; its tests passed in CI with its 
 carrying a Courier Post's requests; [The Workshop Hand](#the-workshop-hand-concordance-chunk-d-d-08)), built beside unit
 2 and not merged; compiled in CI, and its tests passed in run 40085012234 on `86c4e7127` (both server jobs and every
 client class; see Verification). Extended by Concordance Chunk D, unit 2
-(D-03 to D-05: [Stolas's pact](stolas-pact.md), a pact kept at a Pact Perch), not merged; none of its tests has run in
-CI yet. Extended by Concordance Chunk D, unit 3 (D-06: Stolas's character; D-07: [the roster
-screen](#the-roster-screen-concordance-chunk-d-d-07)), built on its own local branch and not merged; nothing of it has
-been compiled, and none of its tests has run in CI yet.
+(D-03 to D-05: [Stolas's pact](stolas-pact.md), a pact kept at a Pact Perch), not merged; its tests first ran in CI
+run 40090825848, which failed two of them as defects of the tests (fixed in `8a3425f9e`), and passed in runs
+40094972598 (on `8a3425f9e`) and 40133540741. Extended by Concordance Chunk D, unit 3 (D-06: Stolas's character;
+D-07: [the roster screen](#the-roster-screen-concordance-chunk-d-d-07)), built on its own local branch and merged
+into the pact hall at `554d71ab1`, not merged; its tests were first compiled and run in CI run 40121823509 on
+`040d73ece`, where they passed (after run 40120355940 failed to compile the roster client test), and passed again in
+run 40133540741.
 Proposal issue: none; the owner's Arcane Concordance brief (roadmap step 17) is the scope approval.
 Owner: @jimbozoomer-byte. AI-assisted implementation with Claude Code; the model is named in the commit trailers.
 Target milestone and tier: Concordance milestone 9, Practitioner stage (Jugcraft Workshops). Roadmap step 17.
@@ -359,8 +362,9 @@ passed them (both server jobs), and every job, after one re-run of a client shar
 
 **Concordance Chunk D, unit 2: D-03 to D-05** (commits `9daf23ae1`, `832129b95`, `7da686ad4`, `ee82c1dc7`, the
 records' commit and the unit review's fixes; [Stolas's pact](stolas-pact.md) and the [contract](concordance-chunk-d.md)'s As built notes, proposals
-D-P17 to D-P50; not merged). **Not yet run in CI** (unit 1's tests have run there; unit 2's Java is first compiled by
-the next run). In this record's suites: `ConcordanceWorkerGameTests` +22 (D-04's 12 and D-05's 10, with unit 1's four
+D-P17 to D-P50; not merged). **CI:** first compiled in run 40090825848, which failed
+`aBrokenPactDefinitionIsReported` in both server jobs (a defect of the test, fixed in `8a3425f9e`); every job passed in
+runs 40094972598 and 40133540741. In this record's suites: `ConcordanceWorkerGameTests` +22 (D-04's 12 and D-05's 10, with unit 1's four
 upkeep tests now also on Stolas's own pact; 49 in all with unit 4's five),
 `ConcordanceAuthorityGameTests` +1 (`aPerchIsPlacedOnlyWhereItsPlacerMayBuild`; `aChangeOfOwnerMovesNoPact` extended
 to the perch and Star-reckoning), `ConcordancePersistenceGameTests` +4, `ConcordanceSharingGameTests` +4 and
@@ -370,9 +374,11 @@ loading, no dimension crossing, no brain memories). The local checks, the parse 
 audit mutations are reported in the contract's D-05 As built note.
 
 **Concordance Chunk D, unit 3: D-06 and D-07** (commits `9805a9a7c`, `773b85aba`, `a3ee00822`, `66b741868` and the
-records' commit "Concordance Chunk D: unit 3's records", on the local `wip/chunk-d-u3` from `92868ff82`;
+records' commit "Concordance Chunk D: unit 3's records", on the local `wip/chunk-d-u3` from `92868ff82`, merged at `554d71ab1`;
 [Stolas's pact](stolas-pact.md) and the [contract](concordance-chunk-d.md)'s D-06 and D-07 As built notes, proposals
-D-P90 to D-P121; not merged). **Not yet run in CI:** nothing of it has been compiled. In this record's suites:
+D-P90 to D-P121; not merged). **CI:** run 40120355940 on `554d71ab1` failed to compile at the roster client test
+(fixed in `040d73ece`); run 40121823509 on `040d73ece` passed every job (`optional integrations absent` after one
+re-run), these tests among them, and so did run 40133540741. In this record's suites:
 `ConcordanceWorkerGameTests` +14 (D-06's seven, D-07's six and `aReplacedHandLoadingWhileSwitchedOffStaysOffTheRoster`;
 63 in all), with unit 2's tests that read Stolas leaving now reading `gone()`; the client classes
 `ConcordancePactClientGameTests` (extended) and `ConcordanceRosterClientGameTests` (new). Audits: `check_stolas_body`,
@@ -380,8 +386,18 @@ D-P90 to D-P121; not merged). **Not yet run in CI:** nothing of it has been comp
 locally: `python3 tools/owner_art.py --check`, `python3 -B tools/check_mod_data.py`, `python3 scripts/check_repository.py`,
 `python3 tools/concordance_journey.py --check`, `python3 tools/check_icon_maps.py`,
 `node --test tools/world-designer/model.test.cjs`, `python3 -m unittest discover -s scripts/tests` and
-`git diff --check`; 104 audit mutations, each reported. **Not run:** `./gradlew build` (with or without the optional
-integrations), the server and client game tests, two clients.
+`git diff --check`; 104 audit mutations, each reported. **Not run where it was written:** `./gradlew build` and the
+game tests (run by CI, above); any client by hand, two people.
+
+**Concordance Chunk D, unit 5 (D-09)** ([the contract](concordance-chunk-d.md#unit-5-evidence-and-handoff-d-09); not
+merged): `ConcordanceRosterClientGameTests` also photographs a workshop hand carrying a request's three copper ingots
+across the yard, frozen with its cargo aboard on its own claim, then delivering them once
+(`jugcraft_workshop_hand_at_work`); `ConcordancePactNetworkTests` has a second client JVM refused at another player's
+perch and roster; `ConcordancePactHallLoadGameTests` measures four workshop hands at work among eight pacts. In run
+40133540741 the roster class passed in shard 14 (the hand: 3 carried, aboard on its own claim, 0 left at the source,
+then 3 delivered), the network class in shard 3 and in the opt-in job without the optional integrations, and the load
+card passed (the four hands carried 60 loads, 3,840 glowstone, while measured). Two automated clients on one machine,
+not two people.
 
 ## The Workshop Hand (Concordance Chunk D, D-08)
 
@@ -493,7 +509,8 @@ their pacts and agreements, and their courier requests.
   leaves or the server stops; no saved data.
 - **The journal** (D-P111): the Pacts section lists every pact and agreement held, with where it is kept, its next
   obligation and why it waits, and the last eight departures.
-- **Test evidence (none yet run in CI):** server game tests `theRosterEndsOnlyWhatTheReaderHolds`,
+- **Test evidence (first run in CI run 40121823509 on `040d73ece`, where it passed, and again in run 40133540741):**
+  server game tests `theRosterEndsOnlyWhatTheReaderHolds`,
   `aRequestNamingAnotherPlayersRecordIsRefused`, `theRosterListsAPactWithoutItsPerch`,
   `endingAnOrphanReturnsItsEscrowOnce`, `aStaleRosterRevisionIsRefused`, `theRosterStopsAt64Rows`
   (`ConcordanceWorkerGameTests`), `recoveryNeverTakesCargoOutOfAnUnloadedContainer`,
@@ -545,5 +562,5 @@ Open items:
 - Ending an agreement without breaking its anchor (`AgreementHolder.end`): since unit 2 the pact perch's screen ends
   Stolas's pact, and a pact without its perch is ended from any perch keeping nothing (or from the roster, D-07); since
   unit 3 the roster ends any agreement or pact its reader holds, a shade's Bound Will left without its place included.
-  Not yet run in game (unit 3's tests have not run in CI).
+  Its tests passed in CI (runs 40121823509 and 40133540741); not played by a person.
 - Workers have not walked real terrain in a test: navigation failure is tested in the harness, not in game.
