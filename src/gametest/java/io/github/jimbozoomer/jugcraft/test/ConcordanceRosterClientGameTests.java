@@ -262,7 +262,8 @@ public class ConcordanceRosterClientGameTests implements FabricClientGameTest {
 		openByKey(context);
 		context.waitFor(client -> row(STOLAS) != null && row(SHADE) != null && row(HAND) != null && stranded() != null && open() != null, WAIT);
 		context.waitTicks(3);
-		Jugcraft.LOGGER.info("[roster-check] rows: {}", context.computeOnClient(client -> describe(RosterClient.state())));
+		String described = context.computeOnClient(client -> describe(RosterClient.state()));
+		Jugcraft.LOGGER.info("[roster-check] rows: {}", described);
 		check(context.computeOnClient(client -> {
 			RosterStatePayload.Row stolas = row(STOLAS);
 			RosterStatePayload.Row shade = row(SHADE);
