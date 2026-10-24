@@ -467,6 +467,96 @@
       }
     ]
   },
+  "stolas.arrive": {
+    "subtitle": "subtitles.jugcraft.stolas.arrive",
+    "sounds": [
+      {
+        "name": "jugcraft:menagerie/beast/flutter_flap_0",
+        "attenuation_distance": 16
+      },
+      {
+        "name": "jugcraft:menagerie/beast/flutter_flap_1",
+        "attenuation_distance": 16
+      },
+      {
+        "name": "jugcraft:menagerie/beast/flutter_flap_2",
+        "attenuation_distance": 16
+      }
+    ]
+  },
+  "stolas.listen": {
+    "subtitle": "subtitles.jugcraft.stolas.listen",
+    "sounds": [
+      {
+        "name": "jugcraft:menagerie/cavern/item/cave_book/book_turn_0",
+        "attenuation_distance": 16
+      },
+      {
+        "name": "jugcraft:menagerie/cavern/item/cave_book/book_turn_1",
+        "attenuation_distance": 16
+      },
+      {
+        "name": "jugcraft:menagerie/cavern/item/cave_book/book_turn_2",
+        "attenuation_distance": 16
+      }
+    ]
+  },
+  "stolas.inspect": {
+    "subtitle": "subtitles.jugcraft.stolas.inspect",
+    "sounds": [
+      {
+        "name": "jugcraft:menagerie/cavern/item/cave_book/book_open_0",
+        "attenuation_distance": 16
+      },
+      {
+        "name": "jugcraft:menagerie/cavern/item/cave_book/book_open_1",
+        "attenuation_distance": 16
+      },
+      {
+        "name": "jugcraft:menagerie/cavern/item/cave_book/book_open_2",
+        "attenuation_distance": 16
+      }
+    ]
+  },
+  "stolas.assent": {
+    "subtitle": "subtitles.jugcraft.stolas.assent",
+    "sounds": [
+      {
+        "name": "jugcraft:household/block/doorbell/chime",
+        "attenuation_distance": 16
+      }
+    ]
+  },
+  "stolas.refuse": {
+    "subtitle": "subtitles.jugcraft.stolas.refuse",
+    "sounds": [
+      {
+        "name": "jugcraft:menagerie/beast/crow_idle_0",
+        "attenuation_distance": 16
+      },
+      {
+        "name": "jugcraft:menagerie/beast/crow_idle_1",
+        "attenuation_distance": 16
+      },
+      {
+        "name": "jugcraft:menagerie/beast/crow_idle_2",
+        "attenuation_distance": 16
+      },
+      {
+        "name": "jugcraft:menagerie/beast/crow_idle_3",
+        "attenuation_distance": 16
+      }
+    ]
+  },
+  "stolas.depart": {
+    "subtitle": "subtitles.jugcraft.stolas.depart",
+    "sounds": [
+      {
+        "name": "jugcraft:menagerie/herbal/ghost_weep",
+        "attenuation_distance": 16
+      }
+    ]
+  },
   "alchemy_chargetick": {
     "sounds": [
       "jugcraft:alchemy/chargetick"

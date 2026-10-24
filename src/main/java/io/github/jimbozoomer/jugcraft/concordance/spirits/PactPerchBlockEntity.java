@@ -105,6 +105,23 @@ public class PactPerchBlockEntity extends BlockEntity implements AgreementHolder
 		return summon(level, who);
 	}
 
+	/** D-06: a conversation opens here: he attends (StolasEntity.listen); at a copy, nobody (stolas()). */
+	void heard(ServerLevel level) {
+		StolasEntity stolas = stolas(level);
+		if (stolas != null) {
+			stolas.listen();
+		}
+	}
+
+	/** D-06: he answers a screen's action with its gesture and sound (StolasEntity.reaction), fired here, on the server. */
+	void react(ServerLevel level, int action, String reason, boolean done) {
+		StolasEntity.Gesture gesture = StolasEntity.reaction(action, reason, done);
+		StolasEntity stolas = gesture == null ? null : stolas(level);
+		if (stolas != null) {
+			stolas.gesture(gesture);
+		}
+	}
+
 	private @Nullable StolasEntity unbound(ServerLevel level) {
 		return visitor != null && level.getEntity(visitor) instanceof StolasEntity guest && !guest.gone() && guest.owner() == null ? guest : null;
 	}

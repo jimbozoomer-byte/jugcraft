@@ -4,18 +4,29 @@ import com.geckolib.animatable.manager.AnimatableManager;
 import com.geckolib.animation.AnimationController;
 import com.geckolib.animation.RawAnimation;
 import com.geckolib.animation.object.PlayState;
+import io.github.jimbozoomer.jugcraft.Jugcraft;
 import io.github.jimbozoomer.jugcraft.concordance.Authority;
 import io.github.jimbozoomer.jugcraft.concordance.worker.PactDefinition;
 import io.github.jimbozoomer.jugcraft.concordance.worker.Pacts;
 import io.github.jimbozoomer.jugcraft.concordance.worker.Status;
+import java.util.ArrayDeque;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.GlobalPos;
+import net.minecraft.core.Registry;
 import net.minecraft.core.UUIDUtil;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.sounds.SoundEvent;
+import net.minecraft.sounds.SoundSource;
 import net.minecraft.tags.DamageTypeTags;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.EntityType;
@@ -45,6 +56,10 @@ import org.jspecify.annotations.Nullable;
  * {@link #gesture} (GeckoLib sends it to those watching him then; one who starts watching later sees his state, never a
  * replay). He arrives when he is summoned to a perch; when he leaves he makes his departing gesture and is gone
  * {@link Gesture#DEPART}'s length later: struck off his holder's roster at once, never saved meanwhile.
+ * <p>
+ * His cues (D-06): each gesture and his listening is fired by the server's action, once, with its sound and subtitle, at
+ * most one of a kind every {@link #CUE_TICKS} and none while the Concordance is off but his departure; the pact screen
+ * marks each answer, and Jade reads his pact (PactReading).
  */
 public class StolasEntity extends WorkerEntity<StolasEntity> implements AgreementHolder.Presence {
 	/** His pacts' counterpart (the pact definition's id). */
@@ -54,6 +69,16 @@ public class StolasEntity extends WorkerEntity<StolasEntity> implements Agreemen
 	public static final String GESTURE_CONTROLLER = "gesture";
 	/** Whether a conversation is open at his perch (the server's; never saved). */
 	private static final EntityDataAccessor<Boolean> LISTENING = SynchedEntityData.defineId(StolasEntity.class, EntityDataSerializers.BOOLEAN);
+	/** His sound events, jugcraft:stolas.<id>, in tools/concordance_pacts.py SOUND_EVENTS' order: each gesture's and his listening's. */
+	public static final List<String> SOUND_IDS = List.of("arrive", "listen", "inspect", "assent", "refuse", "depart");
+	/**
+	 * The least time between two of his cues of one kind (tools/concordance_pacts.py CUE_TICKS): a player's cues come from
+	 * rate-gated actions; this bounds what any number of players can make him do (08:145-155).
+	 */
+	public static final int CUE_TICKS = 10;
+	/** How many recent cues he keeps for reading (tests); never saved. */
+	private static final int SHOWN = 8;
+	private static final Map<String, SoundEvent> SOUNDS = new HashMap<>();
 
 	/** His loops on the worker's main controller, for what the server synced (tools/concordance_pacts.py LOOPS). */
 	public enum Loop {
@@ -99,10 +124,15 @@ public class StolasEntity extends WorkerEntity<StolasEntity> implements Agreemen
 	private @Nullable UUID record;
 	/** Ticks left of his departure; 0 while he is not leaving. Never saved: a departing Stolas is not written to the world. */
 	private int departing;
+	/** When each of his cues last showed (game time, by SOUND_IDS' index); never saved. */
+	private final long[] cued = new long[SOUND_IDS.size()];
+	/** His recent cues, oldest first; never saved. */
+	private final ArrayDeque<String> shown = new ArrayDeque<>(SHOWN);
 
 	public StolasEntity(EntityType<? extends PathfinderMob> type, Level level) {
 		super(type, level);
 		setNoGravity(true);
+		Arrays.fill(cued, Long.MIN_VALUE / 2);
 	}
 
 	public static AttributeSupplier.Builder createAttributes() {
@@ -296,13 +326,85 @@ public class StolasEntity extends WorkerEntity<StolasEntity> implements Agreemen
 	}
 
 	/**
-	 * Plays one of his gestures for everyone watching him now (server side only: GeckoLib sends it to those tracking him;
-	 * one who starts watching later sees his state, never a replay). Nothing else follows from it.
+	 * Plays one of his gestures for everyone watching him now, with its sound (server side only: GeckoLib sends it to those
+	 * tracking him; one who starts watching later sees his state, never a replay). Shown only as his cues allow
+	 * ({@link #cueing}): never while the Concordance is off, at most one of a kind every CUE_TICKS; his departure always.
+	 * Nothing else follows from it.
 	 */
 	public void gesture(Gesture gesture) {
-		if (!isRemoved() && level() instanceof ServerLevel) {
+		if (!isRemoved() && level() instanceof ServerLevel level && cueing(level, gesture.id, gesture != Gesture.DEPART)) {
 			triggerAnim(GESTURE_CONTROLLER, gesture.id);
 		}
+	}
+
+	/** Registers his sound events once (Workers.register); sounds.json and their subtitles are tools/concordance_pacts.py's. */
+	public static void registerSounds() {
+		for (String id : SOUND_IDS) {
+			Identifier key = Jugcraft.id("stolas." + id);
+			SOUNDS.put(id, Registry.register(BuiltInRegistries.SOUND_EVENT, key, SoundEvent.createVariableRangeEvent(key)));
+		}
+	}
+
+	/** His recent cues, oldest first (server side; never saved: one reloaded or newly watched has none). */
+	public List<String> cues() {
+		return List.copyOf(shown);
+	}
+
+	/**
+	 * A conversation opens at his perch (PactPerchBlockEntity.heard): he listens at once (his loop, synced) and is heard to,
+	 * unless he has only just alighted, whose wing beats carry the moment. Switched off, nothing.
+	 */
+	void listen() {
+		if (gone() || !Workers.enabled() || !(level() instanceof ServerLevel level)) {
+			return;
+		}
+		entityData.set(LISTENING, true);
+		if (level.getGameTime() - cued[SOUND_IDS.indexOf(Gesture.ARRIVE.id)] >= CUE_TICKS) {
+			cueing(level, "listen", true);
+		}
+	}
+
+	/**
+	 * Whether cue {@code id} shows now; if so its sound plays at him (entity-attached, NEUTRAL, heard within 16 blocks:
+	 * sounds.json) and it is noted. Never while the Concordance is off, and at most one of a kind every CUE_TICKS, when
+	 * {@code bounded} (his departure is neither: it happens once, when he leaves).
+	 */
+	private boolean cueing(ServerLevel level, String id, boolean bounded) {
+		int kind = SOUND_IDS.indexOf(id);
+		long now = level.getGameTime();
+		if (kind < 0 || bounded && (!Workers.enabled() || now - cued[kind] < CUE_TICKS)) {
+			return false;
+		}
+		cued[kind] = now;
+		SoundEvent sound = SOUNDS.get(id);
+		if (sound != null) {
+			level.playSound(null, this, sound, SoundSource.NEUTRAL, 1.0F, 1.0F);
+		}
+		shown.addLast(id);
+		while (shown.size() > SHOWN) {
+			shown.removeFirst();
+		}
+		return true;
+	}
+
+	/**
+	 * The gesture with which he answers a pact screen's action (PactMenu.receive through PactPerchBlockEntity.react), from its
+	 * answer: an acceptance sealed, assent; refused, refuse; a reckoning done, inspect (his astrolabe); refused, refuse; an
+	 * offering paid ahead, inspect; a resumption, assent. None for the menu's own "not offered" ("changed" and "too fast"
+	 * never reach an action), hearing his terms (he listens), declining and ending (he departs), suspending (his loop shows
+	 * it) or seating (he arrives).
+	 */
+	public static @Nullable Gesture reaction(int action, String reason, boolean done) {
+		if (PactMenu.NOT_OFFERED.equals(reason)) {
+			return null;
+		}
+		return switch (action) {
+			case PactRequestPayload.ACCEPT -> done ? Gesture.ASSENT : Gesture.REFUSE;
+			case PactRequestPayload.RECALL -> done ? Gesture.INSPECT : Gesture.REFUSE;
+			case PactRequestPayload.DEPOSIT -> done ? Gesture.INSPECT : null;
+			case PactRequestPayload.RESUME -> done ? Gesture.ASSENT : null;
+			default -> null;
+		};
 	}
 
 	/** His loop for {@code status}: listening over all else while he serves; never a claim of work he is not doing. */

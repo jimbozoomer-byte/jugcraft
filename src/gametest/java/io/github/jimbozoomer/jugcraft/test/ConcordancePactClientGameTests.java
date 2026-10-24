@@ -20,6 +20,7 @@ import io.github.jimbozoomer.jugcraft.concordance.spirits.AgreementHolder;
 import io.github.jimbozoomer.jugcraft.concordance.spirits.BoundWills;
 import io.github.jimbozoomer.jugcraft.concordance.spirits.PactKeeping;
 import io.github.jimbozoomer.jugcraft.concordance.spirits.PactPerchBlockEntity;
+import io.github.jimbozoomer.jugcraft.concordance.spirits.PactReading;
 import io.github.jimbozoomer.jugcraft.concordance.spirits.PactRequestPayload;
 import io.github.jimbozoomer.jugcraft.concordance.spirits.PactStatePayload;
 import io.github.jimbozoomer.jugcraft.concordance.spirits.StolasEntity;
@@ -29,23 +30,31 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.UUID;
+import java.util.concurrent.CopyOnWriteArrayList;
 import net.fabricmc.fabric.api.client.gametest.v1.FabricClientGameTest;
 import net.fabricmc.fabric.api.client.gametest.v1.context.ClientGameTestContext;
 import net.fabricmc.fabric.api.client.gametest.v1.context.TestDedicatedServerConnection;
 import net.fabricmc.fabric.api.client.gametest.v1.context.TestDedicatedServerContext;
+import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.events.ContainerEventHandler;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.screens.ConfirmScreen;
+import net.minecraft.client.resources.sounds.SimpleSoundInstance;
+import net.minecraft.client.sounds.SoundEngine;
+import net.minecraft.client.sounds.SoundEventListener;
+import net.minecraft.client.sounds.WeighedSoundEvents;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.player.Inventory;
@@ -71,10 +80,13 @@ import org.jspecify.annotations.Nullable;
  * ({@code jugcraft_pact_refused}); given them, Accept seals once and spends once ({@code jugcraft_pact_kept}).</li>
  * <li><b>His body</b>: the screen closed and the pact kept; Stolas on his perch drawn by GeckoLib ({@code jugcraft_pact_stolas}).</li>
  * <li>(D-06) <b>His body</b>: each loop as the server's state drives it and each gesture as the server fires it, frozen inside its telling pose ({@code jugcraft_stolas_*}); his real arrival and departure play their gestures.</li>
+ * <li>(D-06) <b>His cues</b>: his refusal and assent are fired by the server with their subtitles (seen only on a machine
+ * with a sound device), each answer marked with a tick or a cross; Jade's readings of him and his perch, and their overlays
+ * with Jade loaded ({@code jugcraft_pact_perch_jade}, {@code jugcraft_pact_stolas_jade}).</li>
  * <li>(D-05) <b>His service</b>: the Lantern Star recalled at its cost under the shared recall claim; an amethyst shard paid
  * ahead ({@code jugcraft_pact_service}).</li>
- * <li>(D-05) <b>The end</b>: End asks first ({@code jugcraft_pact_end_confirm}); Esc keeps the pact; yes ends it once, the
- * offering back in the holder's inventory, Stolas gone ({@code jugcraft_pact_ended}).</li>
+ * <li>(D-05) <b>The end</b>: End asks first ({@code jugcraft_pact_end_confirm}), the keyboard on Keep it (D-06); Esc keeps
+ * the pact; yes ends it once, the offering back in the holder's inventory, Stolas gone ({@code jugcraft_pact_ended}).</li>
  * </ul>
  * The perch is opened by the server's use of it (no aimed click), and each step that opens it waits for a menu newer than
  * the one open before, with its first state. The narrator is not heard, and one client is not two.
@@ -118,9 +130,12 @@ public class ConcordancePactClientGameTests implements FabricClientGameTest {
 				});
 				conversation(context, server, perch);
 				sizes(context);
+				Hearing hearing = hear(context); // D-06
 				acceptance(context, server);
+				heard(context, server, hearing, perch); // D-06
 				body(context, server, connection, perch);
 				poses(context, server, perch); // D-06
+				jade(context, server, perch); // D-06
 				service(context, server, perch); // D-05
 				ending(context, server, perch); // D-05
 				context.runOnClient(client -> {
@@ -230,6 +245,8 @@ public class ConcordancePactClientGameTests implements FabricClientGameTest {
 				"Without the compact's materials Accept is refused with its reason: " + refused.reason());
 		check(!server.computeOnServer(ConcordancePactClientGameTests::held)
 				&& server.computeOnServer(ConcordancePactClientGameTests::charge) == AstrolabeItem.CAPACITY, "A refusal records and spends nothing");
+		// D-06: the screen rebuilds on its next tick; the refusal carries its mark, a cross, not colour alone (waited for: critique 4).
+		context.waitFor(client -> screen(client).control("result") instanceof PactScreen.Verdict verdict && verdict.refused(), WAIT);
 		shot(context, "jugcraft_pact_refused");
 		List<String> cost = context.computeOnClient(client -> PactClient.state().compact().stream()
 				.map(stack -> BuiltInRegistries.ITEM.getKey(stack.getItem()) + " " + stack.getCount()).toList());
@@ -246,6 +263,8 @@ public class ConcordancePactClientGameTests implements FabricClientGameTest {
 				+ cost.stream().mapToInt(line -> player(minecraft).getInventory().countItem(stack(line).getItem())).sum());
 		Jugcraft.LOGGER.info("[pact-check] sealed: held, astrolabe, materials left = {}", spent);
 		check(spent.equals("true " + (AstrolabeItem.CAPACITY - resonance) + " 0"), "Sealed once, materials and resonance spent once: " + spent);
+		// D-06: sealed, the answer carries the tick, once the screen has rebuilt for it (critique 4).
+		context.waitFor(client -> screen(client).control("result") instanceof PactScreen.Verdict verdict && !verdict.refused(), WAIT);
 		fits(context, "the kept pact at GUI scale 2");
 		named(context);
 		shot(context, "jugcraft_pact_kept");
@@ -321,6 +340,9 @@ public class ConcordancePactClientGameTests implements FabricClientGameTest {
 	private static void ending(ClientGameTestContext context, TestDedicatedServerContext server, BlockPos perch) {
 		press(context, "end");
 		context.waitForScreen(ConfirmScreen.class);
+		check(context.computeOnClient(client -> client.gui.screen().getFocused() instanceof AbstractWidget keep
+				&& keep.getMessage().getString().equals(Component.translatable("screen.jugcraft.pact.end.no").getString())),
+				"End asks first, the keyboard on Keep it (D-06)");
 		shot(context, "jugcraft_pact_end_confirm");
 		context.getInput().pressKey(InputConstants.KEY_ESCAPE);
 		context.waitForScreen(PactScreen.class);
@@ -473,6 +495,108 @@ public class ConcordancePactClientGameTests implements FabricClientGameTest {
 	// D-06
 	private static AgreementHolder holder(MinecraftServer minecraft, BlockPos perch) {
 		return ((AgreementHolder.Holds) minecraft.overworld().getBlockEntity(perch)).holder();
+	}
+
+	// D-06
+	private record Hearing(List<String> heard, SoundEventListener listener, boolean sounding, boolean subtitles) {
+	}
+
+	// D-06
+	/** Subtitles shown and a listener on the sound manager before the refusal and the acceptance (03:159). */
+	private static Hearing hear(ClientGameTestContext context) {
+		List<String> heard = new CopyOnWriteArrayList<>();
+		SoundEventListener listener = (sound, events, range) -> {
+			Component subtitle = events.getSubtitle();
+			if (subtitle != null) {
+				heard.add(subtitle.getString());
+			}
+		};
+		boolean subtitles = context.computeOnClient(client -> client.options.showSubtitles().get());
+		boolean sounding = context.computeOnClient(client -> {
+			client.options.showSubtitles().set(true);
+			client.getSoundManager().addListener(listener);
+			// The sound engine starts only with a sound device; without one (CI's runners) nothing plays and no subtitle shows.
+			return client.getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.UI_BUTTON_CLICK, 1.0F)) != SoundEngine.PlayResult.NOT_STARTED;
+		});
+		return new Hearing(heard, listener, sounding, subtitles);
+	}
+
+	// D-06
+	/** His refuse and assent fired by the server, their subtitles his; heard where the machine can play sound. */
+	private static void heard(ClientGameTestContext context, TestDedicatedServerContext server, Hearing hearing, BlockPos perch) {
+		String refuse = context.computeOnClient(client -> Component.translatable("subtitles.jugcraft.stolas.refuse").getString());
+		String assent = context.computeOnClient(client -> Component.translatable("subtitles.jugcraft.stolas.assent").getString());
+		check(!refuse.startsWith("subtitles.") && !assent.startsWith("subtitles.")
+				&& context.computeOnClient(client -> refuse.equals(subtitle(client, "stolas.refuse")) && assent.equals(subtitle(client, "stolas.assent"))),
+				"His refuse and assent have their subtitles in the client's sounds: " + refuse + ", " + assent);
+		List<String> cues = server.computeOnServer(minecraft -> presence(minecraft, perch).cues());
+		Jugcraft.LOGGER.info("[pact-check] Stolas's cues so far: {}", cues);
+		check(cues.contains("refuse") && "assent".equals(cues.getLast()), "The server fired his refusal, then his assent: " + cues);
+		try {
+			if (hearing.sounding()) {
+				context.waitFor(client -> hearing.heard().contains(refuse) && hearing.heard().contains(assent), WAIT);
+				Jugcraft.LOGGER.info("[pact-check] subtitles heard: {}", hearing.heard());
+			} else {
+				Jugcraft.LOGGER.info("[pact-check] no sound device: the sound engine is off, so no subtitle can show; checked as defined and as fired");
+			}
+		} finally {
+			context.runOnClient(client -> {
+				client.getSoundManager().removeListener(hearing.listener());
+				client.options.showSubtitles().set(hearing.subtitles());
+			});
+		}
+	}
+
+	// D-06
+	/** Jade's readings of Stolas and his perch (PactReading, read on the server: no Jade class); with Jade loaded, their overlays. */
+	private static void jade(ClientGameTestContext context, TestDedicatedServerContext server, BlockPos perch) {
+		String readings = server.computeOnServer(minecraft -> {
+			ServerLevel level = minecraft.overworld();
+			CompoundTag ofPerch = PactReading.holder(level, (PactPerchBlockEntity) level.getBlockEntity(perch), level.getGameTime());
+			CompoundTag ofHim = PactReading.stolas(level, presence(minecraft, perch), level.getGameTime());
+			String both = ofPerch + " " + ofHim;
+			boolean right = "kept".equals(ofPerch.getStringOr("standing", "")) && STOLAS.equals(ofPerch.getStringOr("counterpart", ""))
+					&& "star_reckoning".equals(ofPerch.getStringOr("service", "")) && "active".equals(ofPerch.getStringOr("state", ""))
+					&& ofPerch.getIntOr("due_days", -1) == 7 && "kept".equals(ofHim.getStringOr("standing", ""))
+					&& PactReading.KEYS.containsAll(ofPerch.keySet()) && PactReading.KEYS.containsAll(ofHim.keySet())
+					&& !both.contains(player(minecraft).getUUID().toString()) && !both.contains(player(minecraft).getName().getString());
+			return (right ? "ok " : "bad ") + both;
+		});
+		Jugcraft.LOGGER.info("[pact-check] Jade's readings of the perch and of Stolas: {}", readings);
+		check(readings.startsWith("ok"), "Jade's readings: the pact, service, state and next offering, naming no player: " + readings);
+		if (FabricLoader.getInstance().isModLoaded("jade")) {
+			boolean hidden = context.computeOnClient(client -> client.gui.hud.isHidden());
+			context.runOnClient(client -> {
+				if (client.gui.hud.isHidden()) {
+					client.gui.hud.toggle();
+				}
+			});
+			try {
+				server.runCommand(String.format(Locale.ROOT, "tp @a %.1f %d %.1f 0 0", perch.getX() + 0.5, perch.getY(), perch.getZ() - 2.5));
+				context.waitTicks(10);
+				context.getInput().lookAt(perch);
+				context.waitTicks(20);
+				shot(context, "jugcraft_pact_perch_jade");
+				context.getInput().lookAt(perch.above());
+				context.waitTicks(20);
+				shot(context, "jugcraft_pact_stolas_jade");
+			} finally {
+				context.runOnClient(client -> {
+					if (client.gui.hud.isHidden() != hidden) {
+						client.gui.hud.toggle();
+					}
+				});
+			}
+		} else {
+			Jugcraft.LOGGER.info("[pact-check] Jade is not loaded: no Jade shot of Stolas or his perch");
+		}
+	}
+
+	// D-06
+	private static String subtitle(Minecraft client, String event) {
+		WeighedSoundEvents events = client.getSoundManager().getSoundEvent(Jugcraft.id(event));
+		Component subtitle = events == null ? null : events.getSubtitle();
+		return subtitle == null ? "" : subtitle.getString();
 	}
 
 	/**

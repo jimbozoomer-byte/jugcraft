@@ -15581,8 +15581,8 @@ def check_rime_strata_assets(co, lang):
         cue = event.split(".", 1)[1]
         if cue not in cues or not (ASSETS / "sounds" / "concordance" / f"{cue}.ogg").exists():
             err(f"{event}: no drawn cue or no sounds/concordance/{cue}.ogg (tools/concordance_sounds.py)")
-    if set(co.SOUND_FILES) != set(co.ember.SOUND_FILES) | set(st.SOUND_FILES):
-        err("tools/concordance.py SOUND_FILES must be Ember's and Strata's owner recordings")
+    if set(co.SOUND_FILES) != set(co.ember.SOUND_FILES) | set(st.SOUND_FILES) | set(co.pacts.SOUND_FILES):
+        err("tools/concordance.py SOUND_FILES must be Ember's and Strata's owner recordings and Stolas's runtime files (D-06)")
     effects = set()
     for path in sorted(JAVA_ROOT.rglob("*.java")):
         effects |= set(re.findall(r'registerForHolder\(\s*BuiltInRegistries\.MOB_EFFECT,\s*Jugcraft\.id\("([a-z_]+)"\)',
@@ -18426,6 +18426,131 @@ def check_pacts(co, root, lang, registered, research):
     for key in sorted(set(re.findall(r'"(message\.jugcraft\.concordance\.pact\.[a-z_.]*[a-z_])"', star))):
         if key not in lang:
             err(f"pacts: missing lang {key}")
+    # --- Concordance Chunk D, D-06 (D-S5, D-S7; 03:159, 08:145): the cues the server fires, his sounds through the generator,
+    # the screen's mark and his subtitles over it, Jade read only (G11) ---
+    ids = re.search(r"SOUND_IDS = List\.of\(([^)]*)\)", stolas)
+    if not ids or re.findall(r'"([a-z]+)"', ids.group(1)) != [e.split(".", 1)[1] for e in pa.SOUND_EVENTS]:
+        err("spirits/StolasEntity.java: SOUND_IDS differs from tools/concordance_pacts.py SOUND_EVENTS (same order)")
+    for _, gid in re.findall(r'^\t\t([A-Z]+)\("([a-z]+)", \d+,', _java_body(stolas, "public enum Gesture"), re.M):
+        if f"stolas.{gid}" not in pa.SOUND_EVENTS:
+            err(f"StolasEntity.Gesture.{gid.upper()}: has no sound event (tools/concordance_pacts.py SOUND_EVENTS)")
+    if not re.search(rf"\bint CUE_TICKS = {pa.CUE_TICKS};", stolas):
+        err(f"spirits/StolasEntity.java: CUE_TICKS must be {pa.CUE_TICKS} (tools/concordance_pacts.py)")
+    gesture = _java_body(stolas, "public void gesture(Gesture gesture)")
+    if not 0 <= gesture.find("cueing(level, gesture.id, gesture != Gesture.DEPART)") < gesture.find("triggerAnim(GESTURE_CONTROLLER, gesture.id);"):
+        err("StolasEntity.gesture: shown (its sound, the switch, CUE_TICKS) before GeckoLib is told; his departure always")
+    cueing = _java_body(stolas, "private boolean cueing(")
+    for needle in ("Workers.enabled()", "now - cued[kind] < CUE_TICKS", "level.playSound(null, this, sound, SoundSource.NEUTRAL, 1.0F, 1.0F)"):
+        if needle not in cueing:
+            err(f"StolasEntity.cueing: switched on, one of a kind every CUE_TICKS, its sound at him ({needle})")
+    listen = _java_body(stolas, "void listen()")
+    if "entityData.set(LISTENING, true)" not in listen or 'cueing(level, "listen", true)' not in listen:
+        err("StolasEntity.listen: a conversation opening at his perch shows him listening, and is heard")
+    registered = _java_body(stolas, "public static void registerSounds()")
+    if 'Jugcraft.id("stolas." + id)' not in registered or "SoundEvent.createVariableRangeEvent(key)" not in registered \
+            or "StolasEntity.registerSounds();" not in java("spirits/Workers.java"):
+        err("spirits/StolasEntity.java: his sound events jugcraft:stolas.<id> are registered once (Workers.register)")
+    reaction = _java_body(stolas, "public static @Nullable Gesture reaction(")
+    for needle in ("PactMenu.NOT_OFFERED.equals(reason)", "case PactRequestPayload.ACCEPT -> done ? Gesture.ASSENT : Gesture.REFUSE;",
+                   "case PactRequestPayload.RECALL -> done ? Gesture.INSPECT : Gesture.REFUSE;",
+                   "case PactRequestPayload.DEPOSIT -> done ? Gesture.INSPECT : null;", "case PactRequestPayload.RESUME -> done ? Gesture.ASSENT : null;"):
+        if needle not in reaction:
+            err(f"StolasEntity.reaction: {needle}")
+    for path in sorted(CLIENT_JAVA_ROOT.rglob("*.java")):
+        text = path.read_text(encoding="utf-8")
+        if "StolasEntity" in text and re.search(r"\.gesture\(|triggerAnim\(", text):
+            err(f"client/{path.name}: his gestures are the server's to fire (a late joiner sees his state, never a replay)")
+    receive = _java_body(menu, "public static @Nullable PactStatePayload receive(")
+    if not 0 <= receive.find("menu.act(") < receive.find("menu.perch.react(level, request.action(), done.reason(), done.done())") \
+            < receive.find("player.inventoryMenu.broadcastChanges()"):
+        err("PactMenu.receive: once an action is answered, Stolas answers it too (PactPerchBlockEntity.react)")
+    if "perch.heard(level)" not in _java_body(menu, "private void begin("):
+        err("PactMenu.begin: he attends while a conversation is open (PactPerchBlockEntity.heard)")
+    if "stolas.gesture(gesture)" not in _java_body(perch, "void react(") or "stolas.listen()" not in _java_body(perch, "void heard(") \
+            or "stolas(level)" not in _java_body(perch, "void react(") or "stolas(level)" not in _java_body(perch, "void heard("):
+        err("spirits/PactPerchBlockEntity.java: it passes the screen's actions and openings to its own Stolas (react, heard: stolas(level), "
+            "so a copy moves nobody, critique 6)")
+    played = load(ASSETS / "sounds.json") or {}
+    for event, subtitle in pa.SOUND_EVENTS.items():
+        entry = played.get(event, {})
+        if entry.get("subtitle") != f"subtitles.{MOD}.{event}" or lang.get(f"subtitles.{MOD}.{event}") != subtitle:
+            err(f"sounds.json and lang: {event}'s subtitle is subtitles.{MOD}.{event}, {subtitle!r} (run tools/generate_material_data.py)")
+        if [s.get("name") for s in entry.get("sounds", [])] != [f"{MOD}:{n}" for n in pa.SOUND_FILES.get(event, [])]:
+            err(f"sounds.json: {event} plays {pa.SOUND_FILES.get(event)} (run tools/generate_material_data.py)")
+        for name in pa.SOUND_FILES.get(event, []):
+            if not (ASSETS / "sounds" / f"{name}.ogg").is_file():
+                err(f"sounds/{name}.ogg: Stolas's sounds play runtime files only (no new audio, D-S5)")
+    if set(pa.SOUND_FILES) != set(pa.SOUND_EVENTS) or not set(pa.SOUND_EVENTS) <= set(co.SOUND_EVENTS) \
+            or any(co.SOUND_FILES.get(e) != pa.SOUND_FILES[e] for e in pa.SOUND_EVENTS):
+        err("tools/concordance.py: SOUND_EVENTS and SOUND_FILES take all of Stolas's, each playing runtime files")
+    screen_path = CLIENT_JAVA_ROOT / "PactScreen.java"
+    screen = screen_path.read_text(encoding="utf-8") if screen_path.is_file() else ""
+    if "public static final class Verdict extends AbstractWidget" not in screen \
+            or "verdict(result.message(), result.done())" not in _java_body(screen, "private void result(") \
+            or "minecraft.gui.hud.extractDeferredSubtitles();" not in _java_body(screen, "public void extractBackground(") \
+            or "return true;" not in _java_body(screen, "public boolean isInGameUi("):
+        err("client/PactScreen.java: each answer has its mark, done or refused (never colour alone), and his subtitles draw over it")
+    reading = java("spirits/PactReading.java")
+    for const, table in (("KEYS", pa.JADE_KEYS), ("STANDINGS", pa.JADE_STANDINGS), ("STATES", pa.JADE_STATES)):
+        found = re.search(rf"\b{const} = List\.of\(([^)]*)\)", reading)
+        if not found or re.findall(r'"([a-z_]+)"', found.group(1)) != table:
+            err(f"spirits/PactReading.java: {const} differs from tools/concordance_pacts.py")
+    for put in re.findall(r'\.put(?:String|Int|Boolean|Long)\("([a-z_]+)"', reading):
+        if put not in pa.JADE_KEYS:
+            err(f"spirits/PactReading.java: a reading carries JADE_KEYS only, not {put} (no player, no escrow)")
+    for banned in ("verify(", ".update(", ".seal(", "setChanged", ".clear()", ".recall(", ".call(", ".escrow(", "getName(", "getGameProfile", "snownee"):
+        if banned in reading:
+            err(f"spirits/PactReading.java: read only, naming no player, showing no escrow ({banned})")
+    if "visiting.getUUID().equals(perch.visitor())" not in _java_body(reading, "public static CompoundTag holder("):
+        err("PactReading.holder: a perch keeping nothing reads as visited only by its own visitor (critique 7)")
+    peek = _java_body(holder, "public Standing peek(ServerLevel level)")
+    if not peek or any(n in peek for n in ("clear()", "wills.update(", "setChanged", "Pacts.claim(")):
+        err("AgreementHolder.peek: how its terms stand, read only (Jade)")
+    jade_root = JAVA_ROOT / "compat" / "jade"
+    plugin = (jade_root / "JugcraftJadePlugin.java").read_text(encoding="utf-8")
+    provider = (jade_root / "PactDataProvider.java").read_text(encoding="utf-8") if (jade_root / "PactDataProvider.java").is_file() else ""
+    worker_data = (jade_root / "WorkerDataProvider.java").read_text(encoding="utf-8")
+    jade_client = (CLIENT_JAVA_ROOT / "compat" / "JugcraftJadeClient.java").read_text(encoding="utf-8")
+    for needle, text, where in (
+            ("registration.registerBlockDataProvider(PactDataProvider.PERCH, PactPerchBlockEntity.class);", plugin, "JugcraftJadePlugin"),
+            ("registration.registerBlockDataProvider(PactDataProvider.ANCHOR, SpiritAnchorBlockEntity.class);", plugin, "JugcraftJadePlugin"),
+            ("PactReading.holder(level, holds, level.getGameTime())", provider, "PactDataProvider"),
+            ('snapshot.put("pact", PactReading.stolas(level, stolas, level.getGameTime()));', worker_data, "WorkerDataProvider"),
+            ("registration.registerBlockComponent(AgreementTooltip.PERCH, PactPerchBlock.class);", jade_client, "JugcraftJadeClient"),
+            ("registration.registerBlockComponent(AgreementTooltip.ANCHOR, SpiritAnchorBlock.class);", jade_client, "JugcraftJadeClient"),
+            ('data.getCompound("pact").ifPresent(pact -> pactLines(tooltip, pact));', jade_client, "JugcraftJadeClient")):
+        if needle not in text:
+            err(f"{where}: {needle} (Jade on Stolas, the pact perch and the Spirit Anchor, G11)")
+    for path in sorted(JAVA_ROOT.rglob("*.java")):
+        if "compat" not in path.relative_to(JAVA_ROOT).parts and re.search(r"\bPactDataProvider\b", path.read_text(encoding="utf-8")):
+            err(f"{path.relative_to(ROOT)}: Jade's provider is reached through Jade's entrypoint only (built without optional integrations)")
+    for key in [f"tooltip.{MOD}.concordance.jade.pact.state.{s}" for s in pa.JADE_STATES] \
+            + [f"tooltip.{MOD}.concordance.jade.pact.service.{w}" for w in pa.SERVICE_NAMES] \
+            + [f"config.jade.plugin_{MOD}.{p}" for p in pa.JADE_PROVIDERS] + [f"screen.{MOD}.pact.result.done", f"screen.{MOD}.pact.result.refused"] \
+            + re.findall(r'"(tooltip\.jugcraft\.concordance\.jade\.pact\.[a-z_]+)"', jade_client):
+        if key not in lang:
+            err(f"pacts: missing lang {key}")
+    if set(pa.SERVICE_NAMES) != set(co.workers.WORK) | set(pa.WORK):
+        err("tools/concordance_pacts.py SERVICE_NAMES names every work (concordance_workers.WORK and the pacts' WORK)")
+    client_path = tests / "ConcordancePactClientGameTests.java"
+    code = re.sub(r"//[^\n]*|/\*.*?\*/", lambda m: re.sub(r"[^\n]", " ", m.group(0)),
+                  client_path.read_text(encoding="utf-8") if client_path.is_file() else "", flags=re.S)
+    blank = re.sub(r'"(?:\\.|[^"\\\n])*"', lambda m: '"' + " " * (len(m.group(0)) - 2) + '"', code)
+    guards = [m.end() for m in re.finditer(re.escape('if (FabricLoader.getInstance().isModLoaded("jade")) {'), code)]
+    if "compat.jade" in code:
+        err("ConcordancePactClientGameTests: uses no Jade class (its readings are PactReading's), so it runs without Jade")
+    for name in ("jugcraft_pact_perch_jade", "jugcraft_pact_stolas_jade"):
+        at = code.find(f'"{name}"')
+        if at < 0 or not any(start <= at and _inside_block(blank, start, at) for start in guards):
+            err(f"ConcordancePactClientGameTests: {name} is taken, and only with Jade loaded")
+    for needle in ("getSoundManager().addListener(", "getSoundManager().removeListener(", "showSubtitles().set(true)", "PactScreen.Verdict"):
+        if needle not in code:
+            err(f"ConcordancePactClientGameTests: listens for his subtitles and checks the answers' marks ({needle})")
+    for cls, names in D06_TESTS.items():
+        source = (tests / f"{cls}.java").read_text(encoding="utf-8") if (tests / f"{cls}.java").is_file() else ""
+        for name in names:
+            if f"public void {name}(GameTestHelper helper)" not in source:
+                err(f"{cls}: missing Concordance Chunk D, D-06 game test {name}")
     for cls, wanted in D05_TESTS.items():
         path = tests / f"{cls}.java"
         source = path.read_text(encoding="utf-8") if path.exists() else ""
@@ -18590,9 +18715,12 @@ def check_pact_screen(co, lang):
         if needle not in screen:
             err(f"client/PactScreen.java: a native menu screen whose words are narrated paragraphs in a scroll ({needle})")
     confirm = _java_body(screen, "private void confirmEnd(")
-    if "new ConfirmScreen(" not in confirm or "PactClient.request(menu, PactRequestPayload.END, 0)" not in confirm \
+    if "new KeepFirstConfirmScreen(" not in confirm or "PactClient.request(menu, PactRequestPayload.END, 0)" not in confirm \
             or screen.count("PactRequestPayload.END, 0)") != 1:
-        err("client/PactScreen.java: a pact is ended only from its confirmation's yes (confirmEnd)")
+        err("client/PactScreen.java: a pact is ended only from its confirmation's yes, the keyboard on Keep it (confirmEnd)")
+    keep_first = text(CLIENT_JAVA_ROOT / "KeepFirstConfirmScreen.java")
+    if "extends ConfirmScreen" not in keep_first or "setInitialFocus(noButton);" not in _java_body(keep_first, "protected void setInitialFocus()"):
+        err("client/KeepFirstConfirmScreen.java: vanilla's confirmation, the keyboard starting on its no (Keep it; D-06, D-07)")
     for key in re.findall(r'"((?:screen|key|message)\.jugcraft\.[a-z_.]+)"', screen + client):
         if not key.endswith(".") and key not in lang:
             err(f"pact screen: missing lang {key}")
@@ -21210,6 +21338,10 @@ D05_TESTS = {
 }
 D05_ON_STOLAS = ["upkeepWarnsThenSuspendsAfterGraceAndResumes", "aReturnAfterAbsenceGetsTheFullGrace",
                  "absentAndUnloadedTimeIsNeverOwed", "theConcordanceOffHoldsEveryClock"]
+# Concordance Chunk D, D-06's game tests (check_pacts).
+D06_TESTS = {"ConcordanceWorkerGameTests": ["stolasGesturesAndSoundsFollowTheirTable", "stolasAnswersEachActionWithItsGesture",
+                                            "aDepartingStolasIsNeverAVisitorAgain", "aRemovedStolasNeverEndsThePact", "onePresencePerPact",
+                                            "killingStolasIsNeverTheFastestRoute", "theJadeReadingsNameNoPlayerAndChangeNothing"]}
 # Concordance Chunk D, D-03's game tests (check_stolas_regard).
 D03_TESTS = {
     "StyxGameTests": ["styxHintsByTheListenersOwnProgress", "talkingGrantsNoResearch", "styxNamesTheSkyStepUntilOneIsRecorded"],

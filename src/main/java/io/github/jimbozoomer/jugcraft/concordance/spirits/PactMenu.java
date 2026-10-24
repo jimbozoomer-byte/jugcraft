@@ -170,6 +170,8 @@ public class PactMenu extends AbstractContainerMenu {
 		if (invitable(level, player, PactPerchBlockEntity.definition(), now)) {
 			perch.welcome(level);
 		}
+		// Concordance Chunk D, D-06: he attends while the conversation is open (his listening loop; its sound).
+		perch.heard(level);
 		answer(level, player, null, 0, now);
 	}
 
@@ -238,6 +240,10 @@ public class PactMenu extends AbstractContainerMenu {
 			return menu.answer(level, player, new Answered(CHANGED, false, line("answer.changed")), request.sequence(), now);
 		}
 		Answered done = menu.act(level, player, request.action(), request.choice(), now);
+		if (done != null) {
+			// Concordance Chunk D, D-06: Stolas answers the action with his gesture and its sound, fired here, never replayed.
+			menu.perch.react(level, request.action(), done.reason(), done.done());
+		}
 		player.inventoryMenu.broadcastChanges();
 		if (player.containerMenu != menu) {
 			// Declined: the menu closed in this call and its client drops a state for a closed menu, so the answer is shown

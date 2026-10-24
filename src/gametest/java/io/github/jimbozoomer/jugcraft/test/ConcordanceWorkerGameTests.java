@@ -38,6 +38,7 @@ import io.github.jimbozoomer.jugcraft.concordance.spirits.PactHistory;
 import io.github.jimbozoomer.jugcraft.concordance.spirits.PactKeeping;
 import io.github.jimbozoomer.jugcraft.concordance.spirits.PactMenu;
 import io.github.jimbozoomer.jugcraft.concordance.spirits.PactPerchBlockEntity;
+import io.github.jimbozoomer.jugcraft.concordance.spirits.PactReading;
 import io.github.jimbozoomer.jugcraft.concordance.spirits.PactRequestPayload;
 import io.github.jimbozoomer.jugcraft.concordance.spirits.PactSessions;
 import io.github.jimbozoomer.jugcraft.concordance.spirits.PactStatePayload;
@@ -105,6 +106,7 @@ import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.EntityTypes;
+import net.minecraft.world.entity.ExperienceOrb;
 import net.minecraft.world.entity.MobCategory;
 import net.minecraft.world.entity.animal.cow.Cow;
 import net.minecraft.world.entity.item.ItemEntity;
@@ -2757,13 +2759,13 @@ public class ConcordanceWorkerGameTests {
 				&& visitor.equals(perch.stolas(level)), "Invited, he waits at the perch, listening");
 		send(guest, menu, PactRequestPayload.DECLINE, 0);
 		helper.assertTrue(visitor.think(level, 0L, now) == Status.FINISHED && visitor.departing() && !visitor.isRemoved() && visitor.gone()
-				&& !visitor.shouldBeSaved() && perch.stolas(level) == null,
-				"Declined, he departs: gone for the perch, not saved, still in the world for his gesture");
+				&& !visitor.shouldBeSaved() && perch.stolas(level) == null && "depart".equals(visitor.cues().getLast()),
+				"Declined, he departs: gone for the perch, not saved, still in the world for his gesture, its sound with it: " + visitor.cues());
 		helper.assertTrue(visitor.think(level, 0L, now) == Status.FINISHED && visitor.departing(), "Thinking again changes nothing");
 		open(helper, guest, perch);
 		StolasEntity second = (StolasEntity) level.getEntity(perch.visitor());
-		helper.assertTrue(second != null && !second.equals(visitor) && !second.gone() && second.equals(perch.stolas(level)),
-				"A new invitation summons a new Stolas, never the departing one");
+		helper.assertTrue(second != null && !second.equals(visitor) && !second.gone() && second.equals(perch.stolas(level))
+				&& "arrive".equals(second.cues().getLast()), "A new invitation summons a new Stolas, never the departing one; he alights");
 		ServerPlayer keeper = ready(level, TestPlayers.survivor(helper));
 		PactPerchBlockEntity home = stolasPact(helper, keeper, new BlockPos(5, 1, 5), now);
 		StolasEntity presence = stolas(level, home);
@@ -2773,12 +2775,285 @@ public class ConcordanceWorkerGameTests {
 		helper.assertTrue(!body.contains("listening") && !body.contains("departing") && !body.contains("cues"), "Nothing of his presentation is saved: " + body);
 		helper.assertTrue(PactKeeping.end(level, keeper, home.holder(), StolasEntity.COUNTERPART, now).ended() == AgreementHolder.Ended.ENDED
 				&& presence.departing() && !presence.isRemoved() && !presence.shouldBeSaved() && home.stolas(level) == null
-				&& !WorkerRoster.of(level.getServer()).workers(keeper.getUUID()).containsKey(presence.getUUID()),
-				"Ended, his presence departs at once: struck off, never saved");
+				&& !WorkerRoster.of(level.getServer()).workers(keeper.getUUID()).containsKey(presence.getUUID())
+				&& "depart".equals(presence.cues().getLast()), "Ended, his presence departs at once: struck off, never saved; heard to go");
 		helper.runAfterDelay(StolasEntity.Gesture.DEPART.ticks + 2, () -> {
 			helper.assertTrue(visitor.isRemoved() && presence.isRemoved() && !second.isRemoved(),
 					"Their departures end with them gone; the new visitor, its screen still open, stays");
 			helper.succeed();
 		});
+	}
+
+	// D-06: his cues (the server fires each with its sound), his one presence a pact, and Jade's readings.
+
+	static int offering(PactStatePayload state, String item) {
+		for (int i = 0; i < state.offerings().size(); i++) {
+			if (state.offerings().get(i).id().equals(item)) {
+				return i;
+			}
+		}
+		return -1;
+	}
+
+	/** D-06 (03:159): which gesture answers which action (none for the menu's own answers), which loop each state shows, every cue's sound registered. */
+	@GameTest(maxTicks = 20)
+	public void stolasGesturesAndSoundsFollowTheirTable(GameTestHelper helper) {
+		record Reaction(int action, String reason, boolean done, StolasEntity.@Nullable Gesture gesture) {
+		}
+		for (Reaction row : List.of(new Reaction(PactRequestPayload.ACCEPT, PactMenu.SEALED, true, StolasEntity.Gesture.ASSENT),
+				new Reaction(PactRequestPayload.ACCEPT, Pacts.Outcome.CANNOT_AFFORD.id, false, StolasEntity.Gesture.REFUSE),
+				new Reaction(PactRequestPayload.ACCEPT, PactMenu.MISSING_EVIDENCE, false, StolasEntity.Gesture.REFUSE),
+				new Reaction(PactRequestPayload.ACCEPT, Pacts.Outcome.TAKEN.id, false, StolasEntity.Gesture.REFUSE),
+				new Reaction(PactRequestPayload.ACCEPT, PactMenu.NOT_OFFERED, false, null),
+				new Reaction(PactRequestPayload.RECALL, Pacts.Reckoning.RECALLED.id, true, StolasEntity.Gesture.INSPECT),
+				new Reaction(PactRequestPayload.RECALL, Pacts.Reckoning.QUOTA_SPENT.id, false, StolasEntity.Gesture.REFUSE),
+				new Reaction(PactRequestPayload.RECALL, PactMenu.NOT_OFFERED, false, null),
+				new Reaction(PactRequestPayload.DEPOSIT, PactMenu.DEPOSITED, true, StolasEntity.Gesture.INSPECT),
+				new Reaction(PactRequestPayload.DEPOSIT, PactMenu.NOTHING_DEPOSITED, false, null),
+				new Reaction(PactRequestPayload.RESUME, "resumed", true, StolasEntity.Gesture.ASSENT),
+				new Reaction(PactRequestPayload.RESUME, "held_for_upkeep", false, null),
+				new Reaction(PactRequestPayload.SUSPEND, "suspended", true, null),
+				new Reaction(PactRequestPayload.DECLINE, PactMenu.DECLINED, true, null),
+				new Reaction(PactRequestPayload.END, "ended", true, null),
+				new Reaction(PactRequestPayload.SEAT, AgreementHolder.Seat.SEATED.id, true, null),
+				new Reaction(PactRequestPayload.CHOOSE, "", true, null))) {
+			helper.assertTrue(StolasEntity.reaction(row.action(), row.reason(), row.done()) == row.gesture(),
+					PactRequestPayload.ACTIONS.get(row.action()) + " answered " + row.reason() + " is answered by " + row.gesture());
+		}
+		record Shown(Status status, boolean listening, StolasEntity.Loop loop) {
+		}
+		for (Shown row : List.of(new Shown(Status.IDLE, false, StolasEntity.Loop.IDLE), new Shown(Status.IDLE, true, StolasEntity.Loop.LISTEN),
+				new Shown(Status.SUSPENDED, false, StolasEntity.Loop.SUSPENDED), new Shown(Status.SUSPENDED, true, StolasEntity.Loop.LISTEN),
+				new Shown(Status.UPKEEP_HELD, false, StolasEntity.Loop.SUSPENDED), new Shown(Status.UPKEEP_DUE, false, StolasEntity.Loop.ASTIR),
+				new Shown(Status.OWNER_OFFLINE, false, StolasEntity.Loop.WAITING), new Shown(Status.DESTINATION_UNLOADED, false, StolasEntity.Loop.WAITING),
+				new Shown(Status.OUTSIDE_AGREEMENT, false, StolasEntity.Loop.WAITING), new Shown(Status.DISABLED, true, StolasEntity.Loop.WAITING),
+				new Shown(Status.FINISHED, false, StolasEntity.Loop.WAITING))) {
+			helper.assertTrue(StolasEntity.loop(row.status(), row.listening()) == row.loop(),
+					"while " + row.status().id + (row.listening() ? ", listening" : "") + ": " + row.loop());
+		}
+		for (String id : StolasEntity.SOUND_IDS) {
+			helper.assertTrue(BuiltInRegistries.SOUND_EVENT.containsKey(Jugcraft.id("stolas." + id)), "jugcraft:stolas." + id + " is registered");
+		}
+		for (StolasEntity.Gesture gesture : StolasEntity.Gesture.values()) {
+			helper.assertTrue(StolasEntity.SOUND_IDS.contains(gesture.id), gesture.id + " has its sound");
+		}
+		helper.succeed();
+	}
+
+	/** D-06 (03:159, 08:145): each gesture is fired by the server's own action, once, with its sound: he alights as the invitation opens (his listening not cued over it), refuses a refused acceptance, assents to a sealed one, inspects an offering paid ahead (a second inspection in the same moment is not repeated), shows suspension and listening by his loop, and departs when the pact ends. */
+	@GameTest(maxTicks = 20)
+	public void stolasAnswersEachActionWithItsGesture(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		ServerPlayer owner = ready(level, TestPlayers.survivor(helper));
+		BlockPos at = new BlockPos(2, 1, 2);
+		PactPerchBlockEntity perch = perch(helper, at, owner);
+		beside(helper, owner, at);
+		PactMenu menu = open(helper, owner, perch);
+		StolasEntity stolas = (StolasEntity) level.getEntity(perch.visitor());
+		helper.assertTrue(stolas != null && stolas.cues().equals(List.of("arrive")) && stolas.listening(),
+				"The invitation opens: he alights and listens (his loop; no second sound over his arrival): " + (stolas == null ? "none" : stolas.cues()));
+		helper.assertTrue(answered(send(owner, menu, PactRequestPayload.ACCEPT, 0), Pacts.Outcome.CANNOT_AFFORD.id) && "refuse".equals(stolas.cues().getLast()),
+				"Accepting without the compact: refused, and he refuses: " + stolas.cues());
+		pocket(owner, 1, AstrolabeItem.CAPACITY);
+		helper.assertTrue(answered(send(owner, menu, PactRequestPayload.ACCEPT, 0), PactMenu.SEALED) && stolas.equals(stolas(level, perch))
+				&& "assent".equals(stolas.cues().getLast()), "Sealed: the visitor is the presence, and he assents: " + stolas.cues());
+		give(owner, new ItemStack(Items.AMETHYST_SHARD, 3));
+		send(owner, menu, PactRequestPayload.CHOOSE, 0);
+		helper.assertTrue(answered(send(owner, menu, PactRequestPayload.DEPOSIT, offering(menu.lastSent(), "minecraft:amethyst_shard")), PactMenu.DEPOSITED)
+				&& "inspect".equals(stolas.cues().getLast()), "An offering paid ahead: he inspects it: " + stolas.cues());
+		int shown = stolas.cues().size();
+		give(owner, new ItemStack(Items.AMETHYST_SHARD, 1));
+		send(owner, menu, PactRequestPayload.CHOOSE, 0);
+		helper.assertTrue(answered(send(owner, menu, PactRequestPayload.DEPOSIT, offering(menu.lastSent(), "minecraft:amethyst_shard")), PactMenu.DEPOSITED)
+				&& stolas.cues().size() == shown, "A second offering the same moment: no second inspection (one of a kind every CUE_TICKS)");
+		helper.assertTrue(answered(send(owner, menu, PactRequestPayload.SUSPEND, 0), "suspended") && stolas.cues().size() == shown
+				&& stolas.think(level, 0L, level.getGameTime()) == Status.SUSPENDED && stolas.listening()
+				&& StolasEntity.loop(stolas.status(), stolas.listening()) == StolasEntity.Loop.LISTEN, "Suspended: no gesture; the screen open, he listens");
+		owner.closeContainer();
+		stolas.think(level, 0L, level.getGameTime());
+		helper.assertTrue(!stolas.listening() && StolasEntity.loop(stolas.status(), false) == StolasEntity.Loop.SUSPENDED, "Closed, his loop is the suspended pact's");
+		Component said = PactKeeping.end(level, owner, perch.holder(), StolasEntity.COUNTERPART, level.getGameTime()).said();
+		helper.assertTrue(key(said).equals(PACT_KEY + "departed") && stolas.departing() && "depart".equals(stolas.cues().getLast()),
+				"Ended: told who departs, and he departs: " + stolas.cues());
+		helper.succeed();
+	}
+
+	/** D-06 (D-S7, E4): Stolas discarded (as a server tool removes an entity) ends nothing: record, terms, escrow and clock stay, nothing departs; his holder away, nobody is called; back near, he returns under the same record, alighting, at no cost. */
+	@GameTest(maxTicks = 20)
+	public void aRemovedStolasNeverEndsThePact(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		ServerPlayer keeper = ready(level, TestPlayers.survivor(helper));
+		BlockPos at = new BlockPos(3, 1, 3);
+		long g0 = level.getGameTime();
+		PactPerchBlockEntity perch = stolasPact(helper, keeper, at, g0);
+		UUID record = perch.holder().agreement().record();
+		give(keeper, new ItemStack(Items.AMETHYST_SHARD, 2));
+		PactKeeping.deposit(level, keeper, perch.holder(), Items.AMETHYST_SHARD, g0);
+		BoundWill before = pactOf(level, perch);
+		StolasEntity first = stolas(level, perch);
+		first.discard();
+		BoundWill kept = BoundWills.of(level.getServer()).ledger().get(record);
+		helper.assertTrue(kept != null && kept.pact().upkeep().due() == before.pact().upkeep().due() && kept.pact().service().equals(before.pact().service())
+				&& kept.pact().hold() == before.pact().hold() && escrowed(level, record) == 2 && PactHistory.of(level.getServer()).history(keeper.getUUID()).isEmpty()
+				&& perch.holder().spiritLost(level), "Discarded, he ends nothing; he is lost");
+		place(helper, keeper, at.getX() + 100.5, at.getY(), at.getZ() + 0.5);
+		PactKeeping.tick(level, perch.holder(), perch.getBlockPos(), g0 + 20);
+		helper.assertTrue(stolas(level, perch) == null, "His holder away, nobody is called");
+		beside(helper, keeper, at);
+		PactKeeping.tick(level, perch.holder(), perch.getBlockPos(), g0 + 40);
+		StolasEntity second = stolas(level, perch);
+		helper.assertTrue(second != null && second.getUUID().equals(pactOf(level, perch).pact().presence()) && second.cues().equals(List.of("arrive"))
+				&& escrowed(level, record) == 2 && shards(keeper) == 0 && pactOf(level, perch).pact().upkeep().due() == before.pact().upkeep().due(),
+				"Back near, he returns under the same record, alighting, at no cost; the clock untouched");
+		helper.succeed();
+	}
+
+	/** D-06 (D-S7, E5): one presence a pact: looks, openings and a recall call no second while he serves or is merely unloaded; struck off he is called once; the old one loaded again finds another in his place and departs. */
+	@GameTest(maxTicks = 20)
+	public void onePresencePerPact(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		ServerPlayer keeper = ready(level, TestPlayers.survivor(helper));
+		BlockPos at = new BlockPos(3, 1, 3);
+		long g0 = level.getGameTime();
+		PactPerchBlockEntity perch = stolasPact(helper, keeper, at, g0);
+		StolasEntity first = stolas(level, perch);
+		for (int i = 1; i <= 3; i++) {
+			PactKeeping.tick(level, perch.holder(), perch.getBlockPos(), g0 + 20L * i);
+			RateGate.forget(keeper.getUUID());
+			PactMenu.open(keeper, level, perch);
+			keeper.closeContainer();
+		}
+		helper.assertTrue(level.getEntitiesOfClass(StolasEntity.class, helper.getBounds(), s -> !s.gone()).size() == 1 && first.equals(stolas(level, perch))
+				&& perch.holder().recall(level, keeper, g0 + 100) == AgreementHolder.Recall.NOT_LOST, "Serving, he is the only one");
+		TagValueOutput saved = TagValueOutput.createWithContext(ProblemReporter.DISCARDING, level.registryAccess());
+		first.saveWithoutId(saved);
+		first.remove(Entity.RemovalReason.UNLOADED_TO_CHUNK);
+		PactKeeping.tick(level, perch.holder(), perch.getBlockPos(), g0 + 120);
+		helper.assertTrue(!perch.holder().spiritLost(level) && level.getEntitiesOfClass(StolasEntity.class, helper.getBounds(), s -> !s.gone()).isEmpty()
+				&& perch.holder().recall(level, keeper, g0 + 120) == AgreementHolder.Recall.NOT_LOST, "Unloaded is not lost: no second is called");
+		WorkerRoster.of(level.getServer()).remove(keeper.getUUID(), first.getUUID());
+		PactKeeping.tick(level, perch.holder(), perch.getBlockPos(), g0 + 140);
+		StolasEntity second = stolas(level, perch);
+		helper.assertTrue(second != null && !second.getUUID().equals(first.getUUID()), "Struck off, he is lost and one is called back");
+		StolasEntity back = Workers.STOLAS.create(level, EntitySpawnReason.LOAD);
+		back.load(TagValueInput.create(ProblemReporter.DISCARDING, level.registryAccess(), saved.buildResult()));
+		helper.assertTrue(back.getUUID().equals(first.getUUID()) && back.think(level, 0L, g0 + 160) == Status.FINISHED && back.gone()
+				&& "depart".equals(back.cues().getLast()), "The old one, loaded again, finds another in his place and departs");
+		helper.assertTrue(second.equals(stolas(level, perch)) && WorkerRoster.of(level.getServer()).workers(keeper.getUUID()).size() == 1,
+				"One presence, one roster entry, one pact");
+		helper.succeed();
+	}
+
+	/** D-06 (D-S7, 02:151, 03:146, E4): killing Stolas is never the fastest route: only damage past invulnerability can; his death ends, returns and drops nothing; he is called back at no cost; only ending returns what was paid ahead, once. */
+	@GameTest(maxTicks = 60)
+	public void killingStolasIsNeverTheFastestRoute(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		ServerPlayer keeper = ready(level, TestPlayers.survivor(helper));
+		BlockPos at = new BlockPos(3, 1, 3);
+		long g0 = level.getGameTime();
+		PactPerchBlockEntity perch = stolasPact(helper, keeper, at, g0);
+		UUID record = perch.holder().agreement().record();
+		give(keeper, new ItemStack(Items.AMETHYST_SHARD, 2));
+		PactKeeping.deposit(level, keeper, perch.holder(), Items.AMETHYST_SHARD, g0);
+		holding(keeper, AstrolabeItem.CAPACITY);
+		int resonance = resonance(keeper);
+		StolasEntity first = stolas(level, perch);
+		helper.assertTrue(!first.hurtServer(level, level.damageSources().playerAttack(keeper), Float.MAX_VALUE) && first.isAlive(), "A blow does nothing");
+		helper.assertTrue(first.hurtServer(level, level.damageSources().fellOutOfWorld(), Float.MAX_VALUE) && first.isDeadOrDying(), "Only damage past invulnerability kills him");
+		helper.runAfterDelay(25, () -> {
+			AABB around = new AABB(helper.absolutePos(at)).inflate(4.0);
+			helper.assertTrue(first.isRemoved() && BoundWills.of(level.getServer()).ledger().get(record) != null && escrowed(level, record) == 2
+					&& shards(keeper) == 0 && resonance(keeper) == resonance && PactHistory.of(level.getServer()).history(keeper.getUUID()).isEmpty()
+					&& looseNear(level, around, Items.AMETHYST_SHARD) == 0 && looseNear(level, around, Items.FEATHER) == 0
+					&& level.getEntitiesOfClass(ExperienceOrb.class, around).isEmpty(), "Killed, he ends, returns and drops nothing");
+			long now = level.getGameTime();
+			PactKeeping.tick(level, perch.holder(), perch.getBlockPos(), now);
+			StolasEntity second = stolas(level, perch);
+			helper.assertTrue(second != null && !second.getUUID().equals(first.getUUID()) && shards(keeper) == 0 && resonance(keeper) == resonance
+					&& escrowed(level, record) == 2, "His holder near, he is called back at no cost");
+			helper.assertTrue(PactKeeping.end(level, keeper, perch.holder(), StolasEntity.COUNTERPART, now).ended() == AgreementHolder.Ended.ENDED
+					&& shards(keeper) == 2 && escrowed(level, record) == 0, "Only ending returns what was paid ahead");
+			helper.assertTrue(PactKeeping.end(level, keeper, perch.holder(), StolasEntity.COUNTERPART, now).ended() != AgreementHolder.Ended.ENDED
+					&& shards(keeper) == 2 && PactHistory.of(level.getServer()).history(keeper.getUUID()).size() == 1, "and only once");
+			helper.succeed();
+		});
+	}
+
+	/** D-06 (G11): Jade's readings say whether an agreement is kept, with whom, its service and state, the next offering or the grace, why its presence waits, a copy or a visit, for a perch, a Spirit Anchor and Stolas; no player named, no escrow, nothing changed. */
+	@GameTest(maxTicks = 20)
+	public void theJadeReadingsNameNoPlayerAndChangeNothing(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		ServerPlayer keeper = ready(level, TestPlayers.survivor(helper));
+		ServerPlayer neighbour = ready(level, TestPlayers.survivor(helper));
+		ServerPlayer guest = ready(level, TestPlayers.survivor(helper));
+		long g0 = level.getGameTime();
+		List<CompoundTag> readings = new ArrayList<>();
+		PactPerchBlockEntity perch = stolasPact(helper, keeper, new BlockPos(2, 1, 2), g0);
+		BoundWill sealed = pactOf(level, perch);
+		CompoundTag kept = PactReading.holder(level, perch, g0);
+		CompoundTag his = PactReading.stolas(level, stolas(level, perch), g0);
+		readings.addAll(List.of(kept, his));
+		helper.assertTrue("kept".equals(kept.getStringOr("standing", "")) && StolasEntity.COUNTERPART.equals(kept.getStringOr("counterpart", ""))
+				&& StarReckoning.WORK.equals(kept.getStringOr("service", "")) && "active".equals(kept.getStringOr("state", ""))
+				&& kept.getIntOr("due_days", -1) == 7 && !kept.contains("grace_days") && !kept.contains("waiting") && sealed.equals(pactOf(level, perch)),
+				"Kept: Stolas, Star-reckoning, active, next offering in 7 game days; reading changed nothing: " + kept);
+		helper.assertTrue("kept".equals(his.getStringOr("standing", "")) && his.getIntOr("due_days", -1) == 7 && !his.contains("counterpart"), "Stolas: " + his);
+		long due = sealed.pact().upkeep().due();
+		stay(level, perch.holder(), g0 + 1_000L, due - 1_000L);
+		helper.assertTrue(perch.holder().look(level, due) == Pacts.Event.WARNED, "Nothing paid ahead: warned when due");
+		CompoundTag warned = PactReading.holder(level, perch, due);
+		readings.add(warned);
+		helper.assertTrue("upkeep_due".equals(warned.getStringOr("state", "")) && warned.getIntOr("grace_days", -1) == 1 && !warned.contains("due_days"), "Warned: " + warned);
+		stay(level, perch.holder(), due + 1_000L, due + Pacts.DAY - 1_000L);
+		helper.assertTrue(perch.holder().look(level, due + Pacts.DAY) == Pacts.Event.SUSPENDED, "The grace over, held");
+		CompoundTag held = PactReading.holder(level, perch, due + Pacts.DAY);
+		readings.add(held);
+		helper.assertTrue("upkeep_held".equals(held.getStringOr("state", "")) && !held.contains("due_days") && !held.contains("grace_days"), "Held: " + held);
+		SpiritAnchorBlockEntity anchor = sealed(helper, keeper, new BlockPos(6, 1, 2), null, g0);
+		CompoundTag gathering = PactReading.holder(level, anchor, g0);
+		readings.add(gathering);
+		helper.assertTrue("kept".equals(gathering.getStringOr("standing", "")) && Pacts.counterpart(SpiritAnchorBlockEntity.COUNTERPART).equals(gathering.getStringOr("counterpart", ""))
+				&& "gather".equals(gathering.getStringOr("service", "")) && "active".equals(gathering.getStringOr("state", "")) && !gathering.contains("due_days"),
+				"The anchor keeps a Gathering Shade's agreement, gathering, no upkeep: " + gathering);
+		((WorkerEntity<?>) level.getEntity(anchor.spirit())).remove(Entity.RemovalReason.KILLED);
+		CompoundTag lost = PactReading.holder(level, anchor, g0);
+		readings.add(lost);
+		helper.assertTrue(PactReading.LOST.equals(lost.getStringOr("waiting", "")), "Its shade killed, lost: " + lost);
+		PactPerchBlockEntity theirs = stolasPact(helper, neighbour, new BlockPos(2, 1, 6), g0);
+		place(helper, neighbour, 100.5, 1.0, 100.5);
+		helper.assertTrue(stolas(level, theirs).think(level, 0L, g0 + 20) == Status.OWNER_OFFLINE, "Its holder away, he waits");
+		CompoundTag away = PactReading.holder(level, theirs, g0 + 20);
+		readings.add(away);
+		helper.assertTrue(Status.OWNER_OFFLINE.id.equals(away.getStringOr("waiting", "")), "The perch says why: " + away);
+		PactPerchBlockEntity copy = perch(helper, new BlockPos(4, 1, 4), keeper);
+		copy.loadWithComponents(TagValueInput.create(ProblemReporter.DISCARDING, level.registryAccess(), perch.saveWithoutMetadata(level.registryAccess())));
+		CompoundTag copied = PactReading.holder(level, copy, g0);
+		readings.add(copied);
+		helper.assertTrue("copy".equals(copied.getStringOr("standing", "")) && copy.stolas(level) == null,
+				"A copied perch reads as a copy, and the original's Stolas is never the copy's (critique 6): " + copied);
+		BlockPos visited = new BlockPos(6, 1, 6);
+		PactPerchBlockEntity fresh = perch(helper, visited, guest);
+		beside(helper, guest, visited);
+		open(helper, guest, fresh);
+		CompoundTag visiting = PactReading.holder(level, fresh, g0);
+		readings.add(visiting);
+		helper.assertTrue("none".equals(visiting.getStringOr("standing", "")) && visiting.getBooleanOr("visiting", false), "Visiting: " + visiting);
+		CompoundTag switchedOff = new CompoundTag();
+		off(() -> switchedOff.merge(PactReading.holder(level, perch, g0)));
+		helper.assertTrue("disabled".equals(switchedOff.getStringOr("standing", "")), "Switched off, it says so");
+		for (CompoundTag reading : readings) {
+			String text = reading.toString();
+			helper.assertTrue(PactReading.KEYS.containsAll(reading.keySet()), "Only PactReading.KEYS: " + text);
+			for (ServerPlayer player : List.of(keeper, neighbour, guest)) {
+				helper.assertTrue(!text.contains(player.getUUID().toString()) && !text.contains(player.getName().getString()), "No player named: " + text);
+			}
+		}
+		BoundWills.of(level.getServer()).release(perch.holder().agreement().record(), keeper.getUUID());
+		CompoundTag released = PactReading.holder(level, perch, g0);
+		helper.assertTrue("none".equals(released.getStringOr("standing", "")) && !released.getBooleanOr("visiting", false)
+				&& perch.holder().agreement() != null,
+				"Its record gone, the reading says none, no visit (its presence is not its visitor, critique 7), and forgets nothing: " + released);
+		helper.assertTrue(perch.holder().verify(level, g0) == AgreementHolder.Standing.NONE && perch.holder().agreement() == null, "only verifying forgets");
+		helper.succeed();
 	}
 }

@@ -232,6 +232,7 @@ def lang_entries(lang):
     lang[f"tooltip.{MOD}.pact_perch"] = PERCH_TOOLTIP
     lang[f"tag.item.{OFFERINGS_TAG.replace(':', '.')}"] = "Stolas's Offerings"
     screen_lang(lang)
+    presence_lang(lang)
 
 
 def codex():
@@ -475,3 +476,63 @@ def pact_pages():
          "pact waits, with all it holds, until you **seat** it at a new perch of your own. Your first obligation: record a "
          "sky observation at an observatory while the pact is active."),
     ]
+
+
+# ------------------------------------------------------------------------------------------- D-06: Stolas's presence
+# Java: spirits/StolasEntity.CUE_TICKS (the least time between two of his cues of one kind).
+CUE_TICKS = 10
+# His cues, in StolasEntity.SOUND_IDS' order: jugcraft:stolas.<cue>, each with its subtitle (D-S5), bound to .ogg files
+# already in runtime (no new audio, no voice; the raven's call is beast_crow's too). Being in SOUND_FILES, none is drawn
+# by tools/concordance_sounds.py.
+SOUND_EVENTS = {
+    "stolas.arrive": "Stolas alights",
+    "stolas.listen": "Stolas listens",
+    "stolas.inspect": "Stolas inspects",
+    "stolas.assent": "Stolas assents",
+    "stolas.refuse": "Stolas refuses",
+    "stolas.depart": "Stolas departs",
+}
+SOUND_FILES = {
+    "stolas.arrive": [f"menagerie/beast/flutter_flap_{n}" for n in range(3)],
+    "stolas.listen": [f"menagerie/cavern/item/cave_book/book_turn_{n}" for n in range(3)],
+    "stolas.inspect": [f"menagerie/cavern/item/cave_book/book_open_{n}" for n in range(3)],
+    "stolas.assent": ["household/block/doorbell/chime"],
+    "stolas.refuse": [f"menagerie/beast/crow_idle_{n}" for n in range(4)],
+    "stolas.depart": ["menagerie/herbal/ghost_weep"],
+}
+# What Jade shows (Java: spirits/PactReading; client/compat/JugcraftJadeClient). Sent as ids; worded on the client.
+JADE_KEYS = ["standing", "visiting", "departing", "counterpart", "service", "state", "due_days", "grace_days", "waiting"]
+JADE_STANDINGS = ["none", "kept", "copy", "unreadable", "disabled"]
+JADE_STATES = ["active", "suspended", "upkeep_due", "upkeep_held"]
+# Every work's short name (concordance_workers.WORK and WORK here; check_pacts holds the tables together).
+SERVICE_NAMES = {"gather": "Gathering", "courier": "Carrying its post's requests", "star_reckoning": "Star-reckoning"}
+JADE_PROVIDERS = {"pact_perch": "Pact Perch", "spirit_anchor": "Spirit Anchor"}
+TOOLTIPS.update({
+    "jade.pact.none": "Keeps no agreement",
+    "jade.pact.visiting": "Stolas is visiting: he waits for an answer",
+    "jade.pact.departing": "Departing",
+    "jade.pact.unreadable": "Its agreement cannot be read by this version; it is kept as it was",
+    "jade.pact.keeps": "Keeps an agreement with %s",
+    "jade.pact.service": "Service: %s",
+    "jade.pact.state.active": "Active",
+    "jade.pact.state.suspended": "Suspended by its holder",
+    "jade.pact.state.upkeep_due": "An offering is due; it serves on through its grace",
+    "jade.pact.state.upkeep_held": "Suspended for its upkeep: nothing is lost, and an offering resumes it",
+    "jade.pact.next": "Next offering in %s game days",
+    "jade.pact.grace": "Grace: %s game days left",
+    # Its presence's own status word (compose.jugcraft.worker.status.*) follows, which may start "waiting: ...".
+    "jade.pact.waiting": "Its presence: %s",
+    "jade.pact.lost": "Its presence is lost: its holder, near its place, calls it back at no cost",
+    **{f"jade.pact.service.{work}": name for work, name in SERVICE_NAMES.items()},
+})
+SCREEN.update({
+    "screen.jugcraft.pact.result.done": "Done: %s",
+    "screen.jugcraft.pact.result.refused": "Refused: %s",
+})
+CLIENT_SHOTS += ["jugcraft_pact_perch_jade", "jugcraft_pact_stolas_jade"]
+
+
+def presence_lang(lang):
+    """D-06: Jade's provider names (its plugin settings list them)."""
+    for key, name in JADE_PROVIDERS.items():
+        lang[f"config.jade.plugin_{MOD}.{key}"] = name

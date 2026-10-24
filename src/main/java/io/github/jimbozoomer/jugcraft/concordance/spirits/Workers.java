@@ -119,6 +119,8 @@ public final class Workers {
 		PACT_PERCH_ITEM = item("pact_perch", properties -> new SkyItem(PACT_PERCH, properties), new Item.Properties().useBlockDescriptionPrefix());
 		PERCH_MENU = Registry.register(BuiltInRegistries.MENU, Jugcraft.id("pact_perch"), new ExtendedMenuType<>(PactMenu::new, PactMenu.Opening.STREAM_CODEC));
 		PactMenu.register();
+		// Concordance Chunk D, D-06: Stolas's cues (jugcraft:stolas.*; sounds.json and subtitles are the generator's).
+		StolasEntity.registerSounds();
 		CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess, environment) -> command(dispatcher));
 		CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.FUNCTIONAL_BLOCKS).register(output -> {
 			output.accept(anchor);

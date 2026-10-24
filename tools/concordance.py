@@ -1552,14 +1552,18 @@ SOUND_EVENTS.update(signs.SOUND_EVENTS)
 SOUND_EVENTS.update(ember.SOUND_EVENTS)
 SOUND_EVENTS.update(rime.SOUND_EVENTS)
 SOUND_EVENTS.update(strata.SOUND_EVENTS)
-# Events that play the owner's recordings instead of a drawn cue: event -> sound files (copied by tools/owner_art.py).
-SOUND_FILES = {**ember.SOUND_FILES, **strata.SOUND_FILES}
+# Concordance Chunk D, D-06 (D-S5): Stolas's cues (tools/concordance_pacts.py), played from runtime files.
+SOUND_EVENTS.update(pacts.SOUND_EVENTS)
+# Events that play the owner's recordings (copied by tools/owner_art.py), or runtime files, instead of a drawn cue:
+# event -> sound files.
+SOUND_FILES = {**ember.SOUND_FILES, **strata.SOUND_FILES, **pacts.SOUND_FILES}
 
 
 def sounds():
     """Each event plays its drawn cue (tools/concordance_sounds.py), or the owner's recordings it is given instead
-    (SOUND_FILES: tools/concordance_ember.py's and tools/concordance_strata.py's), one picked at random. The Exchange
-    artifacts' events are tools/concordance_ee_artifacts.py's."""
+    (SOUND_FILES: tools/concordance_ember.py's and tools/concordance_strata.py's), or, for Stolas's cues, runtime files
+    (tools/concordance_pacts.py's), one picked at random. The Exchange artifacts' events are
+    tools/concordance_ee_artifacts.py's."""
     return {**{event: {"subtitle": f"subtitles.{MOD}.{event}",
                        "sounds": [{"name": f"{MOD}:{name}", "attenuation_distance": 16}
                                   for name in SOUND_FILES.get(event, [f"concordance/{event.split('.', 1)[1]}"])]}
