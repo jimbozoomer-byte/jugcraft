@@ -80,7 +80,7 @@
           "name": "minecraft:goat_horn",
           "modifier": [
             {
-              "options": "#irons_spellbooks:fog_horn",
+              "options": "#jugcraft:jimtafacts/spellbooks/fog_horn",
               "type": "minecraft:set_instrument"
             }
           ]

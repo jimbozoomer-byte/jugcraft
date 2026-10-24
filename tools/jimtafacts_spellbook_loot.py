@@ -8,6 +8,8 @@ def generate(dump,RES,ART,SPELLS):
  def adapt(value):
   if isinstance(value,list):return [adapt(x) for x in value]
   if value=='minecraft:chain':return 'minecraft:iron_chain'
+  if isinstance(value,str) and value.startswith('#irons_spellbooks:'):
+   return value.replace('#irons_spellbooks:','#jugcraft:jimtafacts/spellbooks/')
   if not isinstance(value,dict):return value
   value=dict(value)
   if set(value)=={'min','max'}:value['type']='minecraft:uniform'
@@ -46,4 +48,6 @@ def generate(dump,RES,ART,SPELLS):
    if isinstance(x,dict) and 'id' in x:x={**x,'id':x['id'].replace('irons_spellbooks:','jugcraft:jimta_spellbooks_')}
    values.append(x)
   dump(RES/'data/jugcraft/tags/item/jimtafacts/spellbooks'/rel,{'replace':False,'values':values})
+ for path in (source/'tags/instrument').rglob('*.json'):
+  dump(RES/'data/jugcraft/tags/instrument/jimtafacts/spellbooks'/path.relative_to(source/'tags/instrument'),adapt(json.loads(path.read_text(encoding='utf-8'))))
  dump(RES/'jugcraft/jimtafacts_spellbooks/source_loot.json',{'tables':count,'scroll_adaptation':'Original school/name filters and all table rolls/weights retained. Native workings currently use level one; source quality-level scaling is not claimed.','filtered_scrolls':reports})
