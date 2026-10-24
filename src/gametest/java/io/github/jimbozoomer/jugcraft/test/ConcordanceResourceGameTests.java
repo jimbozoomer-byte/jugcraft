@@ -1,6 +1,7 @@
 package io.github.jimbozoomer.jugcraft.test;
 
 import io.github.jimbozoomer.jugcraft.concordance.ConcordanceData;
+import io.github.jimbozoomer.jugcraft.concordance.logistics.Place;
 import io.github.jimbozoomer.jugcraft.concordance.resource.Allocator;
 import io.github.jimbozoomer.jugcraft.concordance.resource.AstralLedger;
 import io.github.jimbozoomer.jugcraft.concordance.resource.BoundWill;
@@ -16,6 +17,8 @@ import io.github.jimbozoomer.jugcraft.concordance.resource.ResourceKind;
 import io.github.jimbozoomer.jugcraft.concordance.resource.ResourceType;
 import io.github.jimbozoomer.jugcraft.concordance.resource.Transfers;
 import io.github.jimbozoomer.jugcraft.concordance.rules.Definitions;
+import io.github.jimbozoomer.jugcraft.concordance.worker.Agreement;
+import io.github.jimbozoomer.jugcraft.concordance.worker.Pacts;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -27,7 +30,8 @@ import net.minecraft.gametest.framework.GameTestHelper;
  * Roadmap step 7, the typed resource rules (concordance/resource), run on the test server so CI checks them: typed
  * containers and their overflow, transfers (type, portability, ownership, rate, capacity), conversions that always
  * lose, deterministic allocation of a short supply, Bound Will records, once-only Astral claims and Prima Materia's
- * rounding. These use no world; the loaded data is checked against them in {@link #loadedConversionsDriveTheChannel}.
+ * rounding, and (Concordance Chunk D, D-02) one pact record's pure rules. These use no world; the loaded data is checked
+ * against them in {@link #loadedConversionsDriveTheChannel}.
  */
 public class ConcordanceResourceGameTests {
 	private static final ResourceType LEY = ResourceType.of(ResourceKind.LEY_CHARGE);
@@ -152,6 +156,64 @@ public class ConcordanceResourceGameTests {
 
 		PrimaValue third = new PrimaValue(1, 3);
 		helper.assertTrue(third.grains(2) == 0 && third.grains(3) == 1 && third.grains(10) == 3, "Prima Materia rounds down, once");
+		helper.succeed();
+	}
+
+	/**
+	 * Concordance Chunk D (D-02): one pact record's pure rules: a seal's first reason in order; counterparts by namespace; a
+	 * legacy claim once, with the terms and day's count its block kept; updates keep holder and identity; without its place
+	 * it is kept; the day's count is the record's; nothing due with the holder away or suspended by them; resumed, the clock
+	 * moves on; beneficiaries; bounds; eight departures.
+	 */
+	@GameTest(maxTicks = 20)
+	public void thePactRulesKeepTheirShape(GameTestHelper helper) {
+		helper.assertTrue(Pacts.refusal(false, true, true, 32, true) == Pacts.Outcome.NOT_PERMITTED
+				&& Pacts.refusal(true, true, true, 32, true) == Pacts.Outcome.TAKEN
+				&& Pacts.refusal(true, false, true, 32, true) == Pacts.Outcome.ALREADY_HELD
+				&& Pacts.refusal(true, false, false, 32, true) == Pacts.Outcome.HOLDER_FULL
+				&& Pacts.refusal(true, false, false, 31, true) == Pacts.Outcome.ROSTER_FULL
+				&& Pacts.refusal(true, false, false, 31, false) == Pacts.Outcome.DONE, "A seal is refused with its first reason, in order");
+		UUID holder = new UUID(4, 1);
+		UUID other = new UUID(4, 3);
+		BoundWill stolas = new BoundWill(new UUID(4, 2), "jugcraft:stolas_pact", "stolas", holder, 0L, false);
+		BoundWillLedger ledger = BoundWillLedger.EMPTY.seal(stolas).ledger();
+		helper.assertTrue(Pacts.holds(ledger, holder, "jugcraft:stolas") && !Pacts.holds(ledger, other, "jugcraft:stolas")
+				&& Pacts.counterpart("gathering_shade").equals("jugcraft:gathering_shade"), "A counterpart is matched with its namespace, older records too");
+		Place here = new Place("minecraft:overworld", 1, 2, 3);
+		Agreement kept = new Agreement(stolas.id(), holder, "gather", "minecraft:overworld", 1, 2, 3, 8, 13000, 23000, 64, 7L, 2, true);
+		BoundWill claimed = Pacts.claim(stolas, here, new UUID(7, 7), kept, 40L);
+		helper.assertTrue(Pacts.unclaimed(stolas) && !Pacts.unclaimed(claimed)
+				&& new BoundWill.Pact(here, BoundWill.Hold.HOLDER, 40L, Pacts.PERSONAL, new UUID(7, 7), null, new BoundWill.Service("gather", 8, 13000, 23000, 64),
+						7L, 2).equals(claimed.pact())
+				&& Pacts.claim(claimed, new Place("minecraft:overworld", 9, 9, 9), null, kept.suspended(false), 80L).equals(claimed),
+				"A record from before is claimed once, its suspension, terms and day's count with it");
+		helper.assertTrue(ledger.update(claimed.withHolder(other)).outcome() == BoundWillLedger.Outcome.NOT_HOLDER
+				&& ledger.update(new BoundWill(new UUID(4, 9), "a", "b", holder, 0L, false)).outcome() == BoundWillLedger.Outcome.UNKNOWN
+				&& ledger.update(claimed).ledger().get(stolas.id()).equals(claimed), "An update keeps its holder and identity");
+		BoundWill unseated = Pacts.unseat(claimed);
+		helper.assertTrue(!Pacts.seated(unseated) && !Pacts.unclaimed(unseated) && unseated.pact().presence() == null && unseated.holder().equals(holder),
+				"Without its place it is kept, its holder's, and it is not taken for one never claimed");
+		helper.assertTrue(Pacts.done(claimed.pact(), 7 * Pacts.DAY + 5) == 2 && Pacts.didTask(claimed.pact(), 7 * Pacts.DAY + 9).doneToday() == 3
+				&& Pacts.done(claimed.pact(), 8 * Pacts.DAY) == 0 && Pacts.done(Pacts.didTask(claimed.pact(), 8 * Pacts.DAY), 8 * Pacts.DAY + 1) == 1,
+				"The day's count is the record's: it counts within its game day and starts again the next");
+		BoundWill.Upkeep terms = Pacts.terms("minecraft:wool", 1, 7 * Pacts.DAY, Pacts.DAY, 4);
+		BoundWill paying = stolas.with(Pacts.sealed(here, Pacts.PERSONAL, null, null, terms, 1_000L));
+		helper.assertTrue(paying.pact().upkeep().due() == 1_000L + 7 * Pacts.DAY && !Pacts.due(paying, false, 0, 1_000L + 8 * Pacts.DAY).changed()
+				&& !Pacts.due(Pacts.suspend(paying, 2_000L), true, 0, 1_000L + 8 * Pacts.DAY).changed(),
+				"Nothing falls due with its holder away, or suspended by them");
+		BoundWill resumed = Pacts.resume(Pacts.suspend(paying, 2_000L), 2_000L + Pacts.DAY);
+		helper.assertTrue(resumed.pact().hold() == BoundWill.Hold.NONE && resumed.pact().upkeep().due() == 1_000L + 8 * Pacts.DAY,
+				"Resumed by its holder, its clock moves on by the time suspended");
+		helper.assertTrue(Pacts.benefits(paying, holder, false) && !Pacts.benefits(paying, other, true)
+				&& Pacts.benefits(stolas.with(new BoundWill.Pact(here, BoundWill.Hold.NONE, 0L, Pacts.PARTY, null, null)), other, true),
+				"Only its holder benefits, and their party only when the pact says so");
+		helper.assertTrue(Pacts.valid(terms).isEmpty() && Pacts.valid(Pacts.terms("minecraft:wool", 1, 7 * Pacts.DAY, Pacts.DAY, Pacts.MAX_CAP + 1)).equals("cap"),
+				"Upkeep terms are held to their bounds");
+		List<Pacts.Departure> history = new ArrayList<>();
+		for (int i = 0; i < 10; i++) {
+			history = Pacts.departed(history, new Pacts.Departure(new UUID(5, i), "a", "b", Pacts.ENDED, i, null));
+		}
+		helper.assertTrue(history.size() == Pacts.HISTORY && history.getFirst().time() == 2L && history.getLast().time() == 9L, "The last eight departures are kept");
 		helper.succeed();
 	}
 }

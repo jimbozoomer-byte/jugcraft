@@ -26,30 +26,39 @@ import io.github.jimbozoomer.jugcraft.concordance.ecology.Habitat;
 import io.github.jimbozoomer.jugcraft.concordance.ecology.Organism;
 import io.github.jimbozoomer.jugcraft.concordance.garden.Garden;
 import io.github.jimbozoomer.jugcraft.concordance.garden.VerdantBedBlockEntity;
+import io.github.jimbozoomer.jugcraft.concordance.logistics.Place;
 import io.github.jimbozoomer.jugcraft.concordance.resource.BoundWill;
+import io.github.jimbozoomer.jugcraft.concordance.resource.BoundWillLedger;
 import io.github.jimbozoomer.jugcraft.concordance.rime.Rime;
 import io.github.jimbozoomer.jugcraft.concordance.rime.RimeGear;
 import io.github.jimbozoomer.jugcraft.concordance.ritual.StructurePattern;
 import io.github.jimbozoomer.jugcraft.concordance.rules.ResearchState;
 import io.github.jimbozoomer.jugcraft.concordance.sky.AstralClaims;
 import io.github.jimbozoomer.jugcraft.concordance.spire.SpireRecord;
+import io.github.jimbozoomer.jugcraft.concordance.spirits.AgreementHolder;
 import io.github.jimbozoomer.jugcraft.concordance.spirits.BoundWills;
+import io.github.jimbozoomer.jugcraft.concordance.spirits.GatheringShadeEntity;
+import io.github.jimbozoomer.jugcraft.concordance.spirits.PactHistory;
 import io.github.jimbozoomer.jugcraft.concordance.spirits.SpiritAnchorBlock;
 import io.github.jimbozoomer.jugcraft.concordance.spirits.SpiritAnchorBlockEntity;
 import io.github.jimbozoomer.jugcraft.concordance.spirits.WorkerRoster;
 import io.github.jimbozoomer.jugcraft.concordance.spirits.Workers;
 import io.github.jimbozoomer.jugcraft.concordance.starbound.ConclaveProjects;
+import io.github.jimbozoomer.jugcraft.concordance.worker.Agreement;
+import io.github.jimbozoomer.jugcraft.concordance.worker.Pacts;
 import io.github.jimbozoomer.jugcraft.concordance.worker.Status;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.UUID;
+import java.util.function.Predicate;
 import java.util.function.UnaryOperator;
 import net.fabricmc.fabric.api.gametest.v1.GameTest;
 import net.fabricmc.fabric.api.transfer.v1.fluid.FluidConstants;
 import net.fabricmc.fabric.api.transfer.v1.fluid.FluidVariant;
 import net.fabricmc.fabric.api.transfer.v1.transaction.Transaction;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.UUIDUtil;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
@@ -60,14 +69,17 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.tags.ItemTags;
 import net.minecraft.util.ProblemReporter;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.item.enchantment.Enchantments;
 import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.material.Fluids;
 import net.minecraft.world.level.storage.TagValueInput;
+import net.minecraft.world.level.storage.TagValueOutput;
 
 /**
  * Roadmap step 30, persistence and migration (docs/features/arcane-concordance-persistence.md): every format the
@@ -77,7 +89,9 @@ import net.minecraft.world.level.storage.TagValueInput;
  * Chunk B, unit 3); the Crucible Stand keeps its JE and setting (Concordance Chunk C, C-05); the crucible keeps its
  * formula's setter and its courier request (C-06); the circle index looks only at the chunks in reach; and a Verdant
  * Bed saved before harvest strain reads unstrained (C-08), and one saved before grafts ungrafted (C-09); a Spirit Anchor
- * keeps its owner and agreement through a save (Concordance Chunk D, D-01).
+ * keeps its owner and agreement through a save (Concordance Chunk D, D-01); a Bound Will saved before pacts reads without
+ * one, a pact record and its escrow round-trip, the pact history keeps eight, and an anchor from before Chunk D moves its
+ * suspension onto its Bound Will once (D-02).
  */
 public class ConcordancePersistenceGameTests {
 	private static JsonElement json(String text) {
@@ -140,8 +154,8 @@ public class ConcordancePersistenceGameTests {
 
 	/**
 	 * Every record the Concordance keeps in a world reads its save from before versions (the bare data) into the same
-	 * record it was written from: the spires, the worker roster, the Bound Wills, the sky's claims, the Conclave's
-	 * projects and the courier ledger.
+	 * record it was written from: the spires, the worker roster, the Bound Wills (Concordance Chunk D: with a pact and its
+	 * escrow), the sky's claims, the Conclave's projects, the courier ledger and the pact history.
 	 */
 	@GameTest(maxTicks = 20)
 	public void everyRecordReadsItsSaveFromBeforeVersions(GameTestHelper helper) {
@@ -151,6 +165,12 @@ public class ConcordancePersistenceGameTests {
 		UUID owner = UUID.randomUUID();
 		WorkerRoster.of(server).note(owner, UUID.randomUUID(), "construct", Status.IDLE, "minecraft:overworld", helper.absolutePos(BlockPos.ZERO));
 		BoundWills.of(server).seal(new BoundWill(UUID.randomUUID(), "jugcraft:hearth_pact", "jugcraft:ember_sprite", owner, 0L, false));
+		UUID pact = UUID.randomUUID();
+		Place where = new Place("jugcraft:test", (int) pact.getMostSignificantBits(), 1, (int) pact.getLeastSignificantBits());
+		BoundWills.of(server).seal(new BoundWill(pact, "jugcraft:test_pact", "jugcraft:stolas", owner, 0L, false, new BoundWill.Pact(where,
+				BoundWill.Hold.NONE, 0L, Pacts.PERSONAL, null, Pacts.terms("minecraft:wool", 1, 7 * Agreement.DAY, Agreement.DAY, 4))));
+		BoundWills.of(server).deposit(pact, new ItemStack(Items.WHITE_WOOL, 2), stack -> stack.is(ItemTags.WOOL), 4);
+		PactHistory.of(server).add(owner, new Pacts.Departure(UUID.randomUUID(), "jugcraft:test_pact", "jugcraft:stolas", Pacts.ENDED, 0L, where));
 		AstralClaims.of(server).claim(owner, "jugcraft:test", 1L, level.getGameTime(), 0L);
 		sameAfterLegacy(helper, ops, "spires", SpireRecord.CODEC, SpireRecord.of(server));
 		sameAfterLegacy(helper, ops, "worker roster", WorkerRoster.CODEC, WorkerRoster.of(server));
@@ -158,6 +178,7 @@ public class ConcordancePersistenceGameTests {
 		sameAfterLegacy(helper, ops, "astral claims", AstralClaims.CODEC, AstralClaims.of(server));
 		sameAfterLegacy(helper, ops, "Conclave projects", ConclaveProjects.CODEC, ConclaveProjects.of(server));
 		sameAfterLegacy(helper, ops, "courier ledger", CourierLedger.CODEC, CourierLedger.of(server));
+		sameAfterLegacy(helper, ops, "pact history", PactHistory.CODEC, PactHistory.of(server));
 		helper.succeed();
 	}
 
@@ -505,6 +526,151 @@ public class ConcordancePersistenceGameTests {
 		CompoundTag fresh = helper.getBlockEntity(freshAt, SpiritAnchorBlockEntity.class).saveWithoutMetadata(level.registryAccess());
 		helper.assertTrue(!fresh.contains("owner") && !fresh.contains("agreement"), "An anchor set without a placer writes no owner: " + fresh);
 		helper.succeed();
+	}
+
+	/**
+	 * D-02 (D-P1): a Bound Will saved before pacts reads with no pact and no escrow; a pact's missing keys read as their
+	 * defaults (no service terms copied, no task counted); one it cannot read is kept, known, and written back as it was; the
+	 * bare save reads the same.
+	 */
+	@GameTest(maxTicks = 20)
+	public void aBoundWillReadsItsOlderSave(GameTestHelper helper) {
+		DynamicOps<JsonElement> ops = helper.getLevel().registryAccess().createSerializationContext(JsonOps.INSTANCE);
+		JsonElement older = json("""
+				{"version": 1, "data": {
+				 "00000000-0000-0d02-0000-000000000001": {"id": [0, 3330, 0, 1], "agreement": "jugcraft:gathering_shade", "counterpart": "gathering_shade",
+				  "holder": [0, 3330, 0, 9], "sealed_at": 77, "transferable": false},
+				 "00000000-0000-0d02-0000-000000000002": {"id": [0, 3330, 0, 2], "agreement": "jugcraft:gathering_shade",
+				  "counterpart": "jugcraft:gathering_shade", "holder": [0, 3330, 0, 9], "sealed_at": 78, "transferable": false,
+				  "pact": {"place": {"dimension": "jugcraft:test", "x": 1, "y": 2, "z": 3}}},
+				 "00000000-0000-0d02-0000-000000000003": {"id": [0, 3330, 0, 3], "agreement": "jugcraft:gathering_shade", "counterpart": "gathering_shade",
+				  "holder": [0, 3330, 0, 9], "sealed_at": 79, "transferable": false, "pact": {"hold": "asleep"}}}}""");
+		BoundWills read = BoundWills.CODEC.parse(ops, older).result().orElse(null);
+		UUID holder = new UUID(0xD02L, 9L);
+		helper.assertTrue(read != null && new BoundWill(new UUID(0xD02L, 1L), "jugcraft:gathering_shade", "gathering_shade", holder, 77L, false)
+				.equals(read.ledger().get(new UUID(0xD02L, 1L))) && read.escrow(new UUID(0xD02L, 1L)).isEmpty(),
+				"A Bound Will saved before pacts reads with no pact and no escrow");
+		BoundWill placed = read.ledger().get(new UUID(0xD02L, 2L));
+		helper.assertTrue(placed != null && new BoundWill.Pact(new Place("jugcraft:test", 1, 2, 3), BoundWill.Hold.NONE, 0L, Pacts.PERSONAL, null, null,
+				null, BoundWill.Pact.NO_WINDOW, 0).equals(placed.pact()), "A pact's missing keys read as their defaults: " + placed);
+		helper.assertTrue(read.ledger().get(new UUID(0xD02L, 3L)) == null && read.unreadable(new UUID(0xD02L, 3L)),
+				"One it cannot read is not guessed at, and is known to be kept");
+		JsonElement written = BoundWills.CODEC.encodeStart(ops, read).result().orElse(null);
+		helper.assertTrue(written != null && written.equals(older), "and every entry is written back as it was: " + written);
+		BoundWills bare = BoundWills.CODEC.parse(ops, older.getAsJsonObject().get("data")).result().orElse(null);
+		helper.assertTrue(bare != null && read.ledger().get(new UUID(0xD02L, 1L)).equals(bare.ledger().get(new UUID(0xD02L, 1L))),
+				"and the bare save from before versions reads the same");
+		helper.succeed();
+	}
+
+	/**
+	 * D-02 (D-P1, D-S6, D-S23): a full pact record (its service terms and day's count among it, critique 4) and its escrow
+	 * (exact stacks, components and all) are saved and read back exactly.
+	 */
+	@GameTest(maxTicks = 20)
+	public void aPactRecordRoundTrips(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		DynamicOps<JsonElement> ops = level.registryAccess().createSerializationContext(JsonOps.INSTANCE);
+		BoundWills wills = BoundWills.of(level.getServer());
+		UUID id = UUID.randomUUID();
+		Place place = new Place("jugcraft:test", (int) id.getMostSignificantBits(), 0, (int) id.getLeastSignificantBits());
+		BoundWill.Upkeep upkeep = new BoundWill.Upkeep("minecraft:wool", 1, 7 * Agreement.DAY, Agreement.DAY, 4, 900_000L, 924_000L, 899_000L);
+		BoundWill record = new BoundWill(id, "jugcraft:test_pact", "jugcraft:stolas", UUID.randomUUID(), 5L, false,
+				new BoundWill.Pact(place, BoundWill.Hold.UPKEEP, 924_000L, Pacts.PARTY, UUID.randomUUID(), upkeep,
+						new BoundWill.Service("gather", 8, 13000, 23000, 64), 38L, 5));
+		helper.assertValueEqual(wills.seal(record).outcome(), BoundWillLedger.Outcome.DONE, "A full pact record is sealed");
+		ItemStack plain = new ItemStack(Items.WHITE_WOOL, 2);
+		ItemStack named = new ItemStack(Items.WHITE_WOOL, 1);
+		named.set(DataComponents.CUSTOM_NAME, Component.literal("Offering"));
+		List<ItemStack> given = List.of(plain.copy(), named.copy());
+		Predicate<ItemStack> wool = stack -> stack.is(ItemTags.WOOL);
+		wills.deposit(id, plain, wool, 4);
+		wills.deposit(id, named, wool, 4);
+		helper.assertTrue(plain.isEmpty() && named.isEmpty() && wills.escrow(id).size() == 2, "Its escrow keeps exact stacks: " + wills.escrow(id));
+		JsonElement written = BoundWills.CODEC.encodeStart(ops, wills).result().orElse(null);
+		JsonObject entry = written == null ? null : written.getAsJsonObject().getAsJsonObject("data").getAsJsonObject(id.toString());
+		helper.assertTrue(entry != null && entry.has("pact") && entry.getAsJsonObject("pact").has("service") && entry.getAsJsonObject("pact").has("window")
+				&& entry.getAsJsonObject("pact").has("done_today") && entry.getAsJsonArray("escrow").size() == 2, "Saved with its pact and its escrow: " + entry);
+		BoundWills read = BoundWills.CODEC.parse(ops, written).result().orElse(null);
+		List<ItemStack> back = read == null ? List.of() : read.escrow(id);
+		helper.assertTrue(read != null && record.equals(read.ledger().get(id)) && back.size() == 2 && ItemStack.matches(back.get(0), given.get(0))
+				&& ItemStack.matches(back.get(1), given.get(1)), "and read back exactly, components and all");
+		helper.assertTrue(read.problems().isEmpty(), "sound: " + read.problems());
+		wills.release(id, record.holder());
+		helper.succeed();
+	}
+
+	/** D-02 (D-S6): a holder's last eight departures are kept, a place or none; read back exactly; a list it cannot read is written back as it was. */
+	@GameTest(maxTicks = 20)
+	public void thePactHistoryKeepsEight(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		DynamicOps<JsonElement> ops = level.registryAccess().createSerializationContext(JsonOps.INSTANCE);
+		PactHistory history = PactHistory.of(level.getServer());
+		UUID holder = UUID.randomUUID();
+		List<UUID> records = new ArrayList<>();
+		for (int i = 0; i < 10; i++) {
+			UUID record = UUID.randomUUID();
+			records.add(record);
+			history.add(holder, new Pacts.Departure(record, "jugcraft:test_pact", "jugcraft:stolas", i % 2 == 0 ? Pacts.ENDED : Pacts.BROKEN, i,
+					i == 9 ? null : new Place("jugcraft:test", i, 0, 0)));
+		}
+		List<Pacts.Departure> kept = history.history(holder);
+		helper.assertTrue(kept.size() == Pacts.HISTORY && kept.get(0).record().equals(records.get(2)) && kept.get(7).record().equals(records.get(9)),
+				"A holder's last eight departures are kept, the oldest dropped");
+		JsonElement written = PactHistory.CODEC.encodeStart(ops, history).result().orElse(null);
+		helper.assertTrue(written != null, "The pact history is written");
+		JsonArray damaged = new JsonArray();
+		damaged.add(json("{\"record\": \"not a uuid\"}"));
+		written.getAsJsonObject().getAsJsonObject("data").add(UUID.randomUUID().toString(), damaged);
+		PactHistory read = PactHistory.CODEC.parse(ops, written).result().orElse(null);
+		helper.assertTrue(read != null && read.history(holder).equals(kept), "read back exactly, a place or none");
+		JsonElement again = PactHistory.CODEC.encodeStart(ops, read).result().orElse(null);
+		helper.assertTrue(again != null && again.equals(written), "and a list it cannot read is written back as it was");
+		helper.succeed();
+	}
+
+	/**
+	 * D-02 (D-S9, D-P4): an anchor from before Chunk D, suspended on the anchor, moves its suspension onto its Bound Will once,
+	 * with the terms and day's count it keeps; the anchor's flag is written false.
+	 */
+	@GameTest(maxTicks = 20)
+	public void aSuspendedAnchorMigratesItsHold(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		BoundWills wills = BoundWills.of(level.getServer());
+		UUID holder = UUID.randomUUID();
+		UUID record = UUID.randomUUID();
+		UUID spirit = UUID.randomUUID();
+		wills.seal(new BoundWill(record, GatheringShadeEntity.DEFINITION, "gathering_shade", holder, 5L, false));
+		BlockPos at = new BlockPos(2, 1, 2);
+		helper.setBlock(at, Workers.SPIRIT_ANCHOR);
+		SpiritAnchorBlockEntity anchor = helper.getBlockEntity(at, SpiritAnchorBlockEntity.class);
+		anchor.loadWithComponents(TagValueInput.create(ProblemReporter.DISCARDING, level.registryAccess(),
+				olderAnchor(level, record, holder, helper.absolutePos(at), spirit, true)));
+		helper.assertTrue(anchor.agreement().suspended() && wills.ledger().get(record).pact() == null, "A save from before: suspended on the anchor, no pact");
+		long now = level.getGameTime();
+		helper.assertValueEqual(anchor.holder().verify(level, now), AgreementHolder.Standing.VALID, "Its own anchor claims it");
+		BoundWill claimed = wills.ledger().get(record);
+		helper.assertTrue(claimed.pact() != null && claimed.pact().hold() == BoundWill.Hold.HOLDER
+				&& Couriers.place(level, helper.absolutePos(at)).equals(claimed.pact().place()) && spirit.equals(claimed.pact().presence())
+				&& new BoundWill.Service("gather", 8, 13000, 23000, 64).equals(claimed.pact().service())
+				&& "gathering_shade".equals(claimed.counterpart()) && !anchor.agreement().suspended()
+				&& anchor.holder().held(level) == Status.SUSPENDED, "Its suspension and terms move onto the Bound Will; the anchor's flag is cleared: " + claimed);
+		helper.assertTrue(anchor.holder().verify(level, now + 20) == AgreementHolder.Standing.VALID && wills.ledger().get(record).equals(claimed),
+				"Verified again, nothing changes");
+		helper.assertTrue(!anchor.saveWithoutMetadata(level.registryAccess()).getCompoundOrEmpty("agreement").getBooleanOr("suspended", true),
+				"and the anchor saves its flag cleared");
+		wills.release(record, holder);
+		helper.succeed();
+	}
+
+	/** An anchor's save from before Chunk D: its agreement sealed at {@code at}, its spirit, no owner (shared with ConcordanceSharingGameTests). */
+	static CompoundTag olderAnchor(ServerLevel level, UUID record, UUID holder, BlockPos at, UUID spirit, boolean suspended) {
+		TagValueOutput out = TagValueOutput.createWithContext(ProblemReporter.DISCARDING, level.registryAccess());
+		out.putInt(Saved.VERSION, 1);
+		out.store("agreement", AgreementHolder.AGREEMENT_CODEC, new Agreement(record, holder, "gather", level.dimension().identifier().toString(),
+				at.getX(), at.getY(), at.getZ(), 8, 13000, 23000, 64, Long.MIN_VALUE, 0, suspended));
+		out.store("spirit", UUIDUtil.CODEC, spirit);
+		return out.buildResult();
 	}
 
 	private static SpiritAnchorBlockEntity loadAnchor(ServerLevel level, SpiritAnchorBlockEntity like, CompoundTag saved) {

@@ -1,6 +1,7 @@
 package io.github.jimbozoomer.jugcraft.test;
 
 import com.mojang.authlib.GameProfile;
+import io.github.jimbozoomer.jugcraft.concordance.Authority;
 import io.github.jimbozoomer.jugcraft.concordance.ConcordanceProgress;
 import io.github.jimbozoomer.jugcraft.concordance.LeyPylonBlockEntity;
 import io.github.jimbozoomer.jugcraft.concordance.JugcraftConcordance;
@@ -16,17 +17,21 @@ import io.github.jimbozoomer.jugcraft.concordance.spirits.BoundWills;
 import io.github.jimbozoomer.jugcraft.concordance.spirits.ClockworkPorterEntity;
 import io.github.jimbozoomer.jugcraft.concordance.spirits.GatheringShadeEntity;
 import io.github.jimbozoomer.jugcraft.concordance.spirits.HearthlingEntity;
+import io.github.jimbozoomer.jugcraft.concordance.spirits.PactHistory;
 import io.github.jimbozoomer.jugcraft.concordance.spirits.SpiritAnchorBlock;
 import io.github.jimbozoomer.jugcraft.concordance.spirits.SpiritAnchorBlockEntity;
 import io.github.jimbozoomer.jugcraft.concordance.spirits.WorkerEntity;
 import io.github.jimbozoomer.jugcraft.concordance.spirits.WorkerRoster;
 import io.github.jimbozoomer.jugcraft.concordance.spirits.Workers;
+import io.github.jimbozoomer.jugcraft.concordance.worker.Agreement;
 import io.github.jimbozoomer.jugcraft.concordance.worker.Body;
 import io.github.jimbozoomer.jugcraft.concordance.worker.Bond;
 import io.github.jimbozoomer.jugcraft.concordance.worker.Pacts;
 import io.github.jimbozoomer.jugcraft.concordance.worker.Status;
 import io.github.jimbozoomer.jugcraft.concordance.worker.WorkerDefinition;
 import io.github.jimbozoomer.jugcraft.config.JugcraftConfig;
+import io.github.jimbozoomer.jugcraft.party.JugcraftParties;
+import io.github.jimbozoomer.jugcraft.party.PartyManager;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -69,11 +74,17 @@ import org.jspecify.annotations.Nullable;
  * route, is waiting for resources, carries and delivers, spends energy and wear, is full, needs repair and is fuelled
  * by a pylon; and each worker's model survives a save. Concordance Chunk D, unit 1: a killed shade leaves its load once
  * and its holder calls another under the same agreement; a sealed shade is on the roster at once; a refused seal says why
- * and spends nothing; only the holder ends an agreement, once; a familiar fades only for its person's own play time.
+ * and spends nothing; only the holder ends an agreement, once; a familiar fades only for its person's own play time; and
+ * one pact record's upkeep warns, gives grace, suspends and resumes, never owing time away or switched off, while no one
+ * binds another and no place keeps two.
  */
 public class ConcordanceWorkerGameTests {
 	private static final long NIGHT = 18000L;
 	private static final long NOON = 6000L;
+	private static final long DAY = Agreement.DAY;
+	private static final long PERIOD = 7 * DAY;
+	/** Gentle's numbers on the vanilla #minecraft:wool tag (D-04 brings Stolas's own tag). */
+	private static final BoundWill.Upkeep UPKEEP = Pacts.terms("minecraft:wool", 1, PERIOD, DAY, 4);
 
 	private static ServerPlayer binder(GameTestHelper helper) {
 		ServerPlayer player = TestPlayers.mock(helper);
@@ -135,6 +146,48 @@ public class ConcordanceWorkerGameTests {
 	private static SpiritAnchorBlockEntity anchor(GameTestHelper helper, BlockPos at) {
 		helper.setBlock(at, Workers.SPIRIT_ANCHOR);
 		return helper.getBlockEntity(at, SpiritAnchorBlockEntity.class);
+	}
+
+	private static void beside(GameTestHelper helper, ServerPlayer player, BlockPos at) {
+		Vec3 to = helper.absoluteVec(new Vec3(at.getX() + 0.5, at.getY(), at.getZ() + 2.5));
+		player.snapTo(to.x, to.y, to.z, 0.0F, 0.0F);
+	}
+
+	/** An anchor at {@code at} sealed for {@code holder} at {@code now}, with {@code upkeep}; its holder stands beside it. */
+	private static SpiritAnchorBlockEntity sealed(GameTestHelper helper, ServerPlayer holder, BlockPos at, BoundWill.@Nullable Upkeep upkeep, long now) {
+		SpiritAnchorBlockEntity anchor = anchor(helper, at);
+		beside(helper, holder, at);
+		helper.assertValueEqual(anchor.holder().seal(helper.getLevel(), holder, anchor.sealing(terms(), upkeep), now).outcome(), Pacts.Outcome.DONE,
+				"the agreement is sealed");
+		return anchor;
+	}
+
+	private static BoundWill will(ServerLevel level, SpiritAnchorBlockEntity anchor) {
+		return BoundWills.of(level.getServer()).ledger().get(anchor.agreement().record());
+	}
+
+	private static BoundWill.Upkeep upkeep(ServerLevel level, SpiritAnchorBlockEntity anchor) {
+		return will(level, anchor).pact().upkeep();
+	}
+
+	private static int escrowed(ServerLevel level, UUID record) {
+		return BoundWills.of(level.getServer()).escrow(record).stream().mapToInt(ItemStack::getCount).sum();
+	}
+
+	private static int wool(ServerPlayer player) {
+		return player.getInventory().countItem(Items.WHITE_WOOL);
+	}
+
+	/** Looks at the pact every 1,000 ticks (less than ABSENT_TICKS) from {@code from} to {@code to}; returns what happened. */
+	private static List<Pacts.Event> stay(ServerLevel level, SpiritAnchorBlockEntity anchor, long from, long to) {
+		List<Pacts.Event> events = new ArrayList<>();
+		for (long t = from; t <= to; t += 1_000L) {
+			Pacts.Event event = anchor.holder().look(level, t);
+			if (event != Pacts.Event.NONE) {
+				events.add(event);
+			}
+		}
+		return events;
 	}
 
 	/** The Hearthling {@code person}'s Bonding Charm binds where they stand. */
@@ -305,8 +358,8 @@ public class ConcordanceWorkerGameTests {
 		helper.assertTrue(anchor.agreement().done(game + 20) == 1, "one task of its quota");
 		helper.assertTrue(shade.think(level, NOON, game + 40) == Status.OUTSIDE_AGREEMENT, "At noon it is outside its agreement");
 		SpiritAnchorBlock.use(holder, level, anchor, true);
-		helper.assertTrue(anchor.holder().held(level) == Status.SUSPENDED && shade.think(level, NIGHT, game + 60) == Status.SUSPENDED,
-				"Suspended, it says so");
+		helper.assertTrue(anchor.holder().held(level) == Status.SUSPENDED && !anchor.agreement().suspended()
+				&& shade.think(level, NIGHT, game + 60) == Status.SUSPENDED, "Suspended on its Bound Will, the one authority, it says so");
 		helper.setBlock(at, Blocks.AIR);
 		helper.assertTrue(shade.isRemoved() && BoundWills.of(level.getServer()).ledger().heldBy(holder.getUUID()).isEmpty(),
 				"The anchor broken, the agreement is released and the shade departs");
@@ -365,7 +418,7 @@ public class ConcordanceWorkerGameTests {
 
 	/**
 	 * D-01 (D-S18): a lost shade is reported; switched off nothing is called; its holder's next use calls another, at no
-	 * cost; a full roster refuses.
+	 * cost, and its Bound Will names it; a full roster refuses; an agreement whose Bound Will is gone is forgotten (D-02, D-P7).
 	 */
 	@GameTest(maxTicks = 20)
 	public void aLostShadeIsCalledAgainUnderItsAgreement(GameTestHelper helper) {
@@ -379,6 +432,7 @@ public class ConcordanceWorkerGameTests {
 		UUID record = anchor.agreement().record();
 		UUID first = anchor.spirit();
 		WorkerRoster roster = WorkerRoster.of(level.getServer());
+		BoundWills wills = BoundWills.of(level.getServer());
 		level.getEntity(first).remove(Entity.RemovalReason.KILLED);
 		helper.assertTrue(anchor.holder().spiritLost(level), "Killed, its anchor knows its shade is lost");
 		helper.assertValueEqual(key(SpiritAnchorBlock.use(passer, level, anchor, false)), "message.jugcraft.concordance.workers.spirit_lost",
@@ -393,6 +447,7 @@ public class ConcordanceWorkerGameTests {
 		helper.assertTrue(second != null && !second.equals(first) && level.getEntity(second) instanceof GatheringShadeEntity shade
 				&& id.equals(shade.owner()) && helper.absolutePos(at).equals(shade.anchor()), "a new shade for the same holder at the same anchor");
 		helper.assertTrue(record.equals(anchor.agreement().record()) && held(level, id) == 1, "under the same agreement and Bound Will, at no cost");
+		helper.assertTrue(second.equals(wills.ledger().get(record).pact().presence()), "the Bound Will names its new presence");
 		helper.assertTrue(roster.workers(id).containsKey(second) && !roster.workers(id).containsKey(first), "on the roster at once, in the lost one's place");
 		helper.assertValueEqual(key(SpiritAnchorBlock.use(holder, level, anchor, false)), "message.jugcraft.concordance.workers.spirit",
 				"Used again, it reads its shade: no second call");
@@ -407,6 +462,10 @@ public class ConcordanceWorkerGameTests {
 				&& Integer.valueOf(WorkerRoster.MAX_PER_PLAYER).equals(arg(crowded, 0)), "A full roster refuses the call and says so: " + crowded);
 		helper.assertTrue(second.equals(anchor.spirit()) && shades(helper, id) == 0 && anchor.holder().spiritLost(level), "still lost; nothing called");
 		List.copyOf(roster.workers(id).keySet()).forEach(worker -> roster.remove(id, worker));
+		wills.release(record, id);
+		helper.assertValueEqual(key(SpiritAnchorBlock.use(holder, level, anchor, false)), "message.jugcraft.concordance.workers.sealed",
+				"An agreement whose Bound Will is gone is forgotten, and the anchor may be sealed again");
+		helper.assertTrue(!record.equals(anchor.agreement().record()) && held(level, id) == 1, "under a new Bound Will");
 		helper.succeed();
 	}
 
@@ -523,16 +582,16 @@ public class ConcordanceWorkerGameTests {
 		kept.forEach(will -> wills.release(will, id));
 		long now = level.getGameTime();
 		int[] paid = {0};
-		AgreementHolder.Sealing plain = anchor.sealing(terms());
-		AgreementHolder.Sealing dear = new AgreementHolder.Sealing(plain.agreement(), plain.counterpart(), plain.service(), plain.onePerHolder(),
-				plain.partySeals(), player -> false, player -> paid[0]++);
+		AgreementHolder.Sealing plain = anchor.sealing(terms(), null);
+		AgreementHolder.Sealing dear = new AgreementHolder.Sealing(plain.agreement(), plain.counterpart(), plain.service(), plain.upkeep(),
+				plain.beneficiaries(), plain.onePerHolder(), plain.partySeals(), player -> false, player -> paid[0]++);
 		helper.assertValueEqual(anchor.holder().seal(level, holder, dear, now).outcome(), Pacts.Outcome.CANNOT_AFFORD, "A seal they cannot pay for is refused");
 		helper.assertTrue(paid[0] == 0 && anchor.agreement() == null && held(level, id) == 0 && shades(helper, id) == 0
 				&& AgreementHolder.told(Pacts.Outcome.CANNOT_AFFORD).getContents() instanceof TranslatableContents why
 				&& why.getKey().equals("message.jugcraft.concordance.workers.seal_cannot_afford"), "and says so, before anything is spent, recorded or called");
 		SpiritAnchorBlockEntity other = anchor(helper, new BlockPos(5, 1, 5));
-		AgreementHolder.Sealing paying = new AgreementHolder.Sealing(plain.agreement(), plain.counterpart(), plain.service(), plain.onePerHolder(),
-				plain.partySeals(), player -> true, player -> paid[0]++);
+		AgreementHolder.Sealing paying = new AgreementHolder.Sealing(plain.agreement(), plain.counterpart(), plain.service(), plain.upkeep(),
+				plain.beneficiaries(), plain.onePerHolder(), plain.partySeals(), player -> true, player -> paid[0]++);
 		helper.assertTrue(other.holder().seal(level, holder, paying, now).outcome() == Pacts.Outcome.DONE && paid[0] == 1 && held(level, id) == 1,
 				"One they can pay for is sealed and paid once");
 		helper.assertValueEqual(key(SpiritAnchorBlock.use(holder, level, anchor, false)), "message.jugcraft.concordance.workers.sealed", "With fewer, it seals");
@@ -577,6 +636,282 @@ public class ConcordanceWorkerGameTests {
 		helper.assertTrue(AgreementHolder.end(level, null, holder, record, Pacts.ENDED, now) == AgreementHolder.Ended.NOTHING
 				&& wheat(anchor) == 3 && loose(helper, Items.WHEAT) == 0, "and ending the record again returns nothing more");
 		helper.assertValueEqual(key(SpiritAnchorBlock.use(holder, level, anchor, false)), "message.jugcraft.concordance.workers.sealed", "The anchor may be sealed again");
+		helper.succeed();
+	}
+
+	/**
+	 * D-02 (E2, D-S3): due with none held, a warning and a day of grace; its end, suspended for upkeep (nothing taken, nothing
+	 * accrues, its holder's word cannot lift it); an offering resumes it at once, a whole period from then (critique 3: the
+	 * time held is never charged); paid ahead, one period at a time.
+	 */
+	@GameTest(maxTicks = 20)
+	public void upkeepWarnsThenSuspendsAfterGraceAndResumes(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		ServerPlayer holder = binder(helper);
+		BoundWills wills = BoundWills.of(level.getServer());
+		long t0 = level.getGameTime() + 1_000_000L;
+		SpiritAnchorBlockEntity anchor = sealed(helper, holder, new BlockPos(3, 1, 3), UPKEEP, t0);
+		GatheringShadeEntity shade = (GatheringShadeEntity) level.getEntity(anchor.spirit());
+		UUID id = anchor.agreement().record();
+		helper.assertTrue(upkeep(level, anchor).due() == t0 + PERIOD && !upkeep(level, anchor).warned(), "Sealed, its first offering falls due a period on");
+		helper.assertTrue(stay(level, anchor, t0 + 1_000L, t0 + PERIOD - 1_000L).isEmpty(), "Nothing falls due before then");
+		long t1 = t0 + PERIOD;
+		helper.assertValueEqual(anchor.holder().look(level, t1), Pacts.Event.WARNED, "Due with none held: a warning");
+		helper.assertTrue(upkeep(level, anchor).graceUntil() == t1 + DAY && Pacts.status(will(level, anchor)) == Status.UPKEEP_DUE
+				&& anchor.holder().held(level) == null && shade.think(level, NIGHT, t1) != Status.UPKEEP_HELD, "and a day of grace, the service still on");
+		helper.assertTrue(wills.problems().isEmpty(), "warned, the records are sound: " + wills.problems());
+		helper.assertTrue(stay(level, anchor, t1 + 1_000L, t1 + DAY - 1_000L).isEmpty() && anchor.holder().held(level) == null, "Within its grace, nothing more");
+		helper.assertValueEqual(anchor.holder().look(level, t1 + DAY), Pacts.Event.SUSPENDED, "The grace over, it is suspended for upkeep");
+		helper.assertTrue(anchor.holder().held(level) == Status.UPKEEP_HELD && shade.think(level, NIGHT, t1 + DAY) == Status.UPKEEP_HELD, "and its shade says so");
+		helper.assertTrue(anchor.isEmpty() && escrowed(level, id) == 0 && wills.problems().isEmpty(), "Nothing is taken, from the anchor or anyone");
+		helper.assertTrue(stay(level, anchor, t1 + DAY + 1_000L, t1 + 6 * DAY).isEmpty() && upkeep(level, anchor).due() == t0 + PERIOD
+				&& will(level, anchor).pact().hold() == BoundWill.Hold.UPKEEP, "Held, nothing accrues and nothing more falls due");
+		helper.assertValueEqual(key(SpiritAnchorBlock.use(holder, level, anchor, true)), "message.jugcraft.concordance.workers.held_for_upkeep",
+				"Its holder's word does not lift an upkeep hold");
+		helper.assertTrue(will(level, anchor).pact().hold() == BoundWill.Hold.UPKEEP, "it stays held");
+		long t2 = t1 + 6 * DAY + 500L;
+		ItemStack offered = new ItemStack(Items.WHITE_WOOL, 6);
+		helper.assertValueEqual(anchor.holder().deposit(level, holder, offered, t2), 4, "An offering fills its escrow to its cap");
+		helper.assertTrue(offered.getCount() == 2 && anchor.holder().held(level) == null && escrowed(level, id) == 3
+				&& upkeep(level, anchor).due() == t2 + PERIOD && !upkeep(level, anchor).warned(),
+				"takes one period and resumes it at once, the next a whole period on: " + upkeep(level, anchor));
+		helper.assertTrue(shade.think(level, NIGHT, t2) != Status.UPKEEP_HELD, "its shade works again");
+		helper.assertTrue(stay(level, anchor, t2 + 1_000L, t2 + PERIOD - 1_000L).isEmpty(), "Paid ahead, nothing falls due early");
+		helper.assertValueEqual(anchor.holder().look(level, t2 + PERIOD), Pacts.Event.PAID, "At the next period one offering is taken");
+		helper.assertTrue(escrowed(level, id) == 2 && upkeep(level, anchor).due() == t2 + 2 * PERIOD && wills.problems().isEmpty(),
+				"one only, the next a period on");
+		helper.succeed();
+	}
+
+	/**
+	 * D-02 (E2, D-S3, critique 2a): a holder away while warned, or away past both due date and grace, is warned again at their
+	 * first look back with the whole grace; never suspended at once.
+	 */
+	@GameTest(maxTicks = 20)
+	public void aReturnAfterAbsenceGetsTheFullGrace(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		ServerPlayer holder = taught(TestPlayers.survivor(helper));
+		UUID id = holder.getUUID();
+		long t0 = level.getGameTime() + 1_000_000L;
+		BlockPos first = new BlockPos(2, 1, 2);
+		SpiritAnchorBlockEntity anchor = sealed(helper, holder, first, UPKEEP, t0);
+		helper.assertTrue(stay(level, anchor, t0 + 1_000L, t0 + PERIOD - 1_000L).isEmpty(), "Nothing due before its period");
+		long t1 = t0 + PERIOD;
+		helper.assertTrue(anchor.holder().look(level, t1) == Pacts.Event.WARNED && upkeep(level, anchor).graceUntil() == t1 + DAY, "Warned, with a day of grace");
+		TestPlayers.leave(holder);
+		helper.assertTrue(stay(level, anchor, t1 + 1_000L, t1 + 10 * DAY).isEmpty() && anchor.holder().held(level) == null
+				&& upkeep(level, anchor).graceUntil() == t1 + DAY, "Its holder away ten days, nothing is looked at: no suspension");
+		ServerPlayer back = taught(TestPlayers.again(helper, id));
+		beside(helper, back, first);
+		long t2 = t1 + 10 * DAY + 500L;
+		helper.assertValueEqual(anchor.holder().look(level, t2), Pacts.Event.WARNED, "Back, they are warned again");
+		helper.assertTrue(upkeep(level, anchor).graceUntil() == t2 + DAY && anchor.holder().held(level) == null, "with the whole day of grace from their return");
+		helper.assertTrue(stay(level, anchor, t2 + 1_000L, t2 + DAY - 1_000L).isEmpty(), "and nothing within it");
+		helper.assertValueEqual(anchor.holder().look(level, t2 + DAY), Pacts.Event.SUSPENDED, "Still unpaid at its end, it is suspended; nothing is lost");
+		BlockPos second = new BlockPos(5, 1, 2);
+		long t3 = t2 + 2 * DAY;
+		SpiritAnchorBlockEntity other = sealed(helper, back, second, UPKEEP, t3);
+		helper.assertTrue(stay(level, other, t3 + 1_000L, t3 + DAY).isEmpty(), "A second agreement, a day attended");
+		TestPlayers.leave(back);
+		ServerPlayer again = taught(TestPlayers.again(helper, id));
+		beside(helper, again, second);
+		long tr = t3 + 21 * DAY;
+		helper.assertValueEqual(other.holder().look(level, tr), Pacts.Event.WARNED, "Away past its due date and past a grace, the first look back warns");
+		helper.assertTrue(upkeep(level, other).graceUntil() == tr + DAY && other.holder().held(level) == null, "with the whole grace: never suspended at once");
+		helper.succeed();
+	}
+
+	/**
+	 * D-02 (E2, critique 2b): logged out, online beyond 64 blocks, in another dimension, or away while the server lets
+	 * stand-ins answer for absent owners, nothing is looked at; back, at most one period falls due, and a due date that
+	 * passed while nobody looked becomes the moment of return (critique 3): no debt. With no ticker in unit 1, "unloaded" is
+	 * only a gap between looks here; D-04's perch tests unload the place itself (critique 16).
+	 */
+	@GameTest(maxTicks = 20)
+	public void absentAndUnloadedTimeIsNeverOwed(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		ServerPlayer holder = taught(TestPlayers.survivor(helper));
+		UUID id = holder.getUUID();
+		BlockPos at = new BlockPos(3, 1, 3);
+		long t0 = level.getGameTime() + 1_000_000L;
+		SpiritAnchorBlockEntity anchor = sealed(helper, holder, at, UPKEEP, t0);
+		UUID record = anchor.agreement().record();
+		helper.assertValueEqual(anchor.holder().deposit(level, holder, new ItemStack(Items.WHITE_WOOL, 4), t0), 4, "Four periods paid ahead");
+		TestPlayers.leave(holder);
+		for (long t = t0 + DAY; t <= t0 + 30 * DAY; t += DAY) {
+			helper.assertValueEqual(anchor.holder().look(level, t), Pacts.Event.NONE, "Logged out, nothing is looked at");
+		}
+		helper.assertValueEqual(escrowed(level, record), 4, "and nothing is taken");
+		ServerPlayer back = taught(TestPlayers.again(helper, id));
+		beside(helper, back, at);
+		long tr = t0 + 30 * DAY + 500L;
+		helper.assertValueEqual(anchor.holder().look(level, tr), Pacts.Event.PAID, "Back after thirty days, one period falls due");
+		helper.assertTrue(escrowed(level, record) == 3 && upkeep(level, anchor).due() == tr + PERIOD, "one offering, never four; the next a period from now");
+		long tu = tr + 21 * DAY; // nobody looks for three periods, as if the anchor were unloaded
+		helper.assertValueEqual(anchor.holder().look(level, tu), Pacts.Event.PAID, "Unlooked at for three periods, one falls due");
+		helper.assertTrue(escrowed(level, record) == 2 && upkeep(level, anchor).due() == tu + PERIOD, "one offering");
+		Vec3 far = helper.absoluteVec(new Vec3(at.getX() + 70.5, at.getY(), at.getZ() + 0.5));
+		back.snapTo(far.x, far.y, far.z, 0.0F, 0.0F);
+		helper.assertTrue(stay(level, anchor, tu + 1_000L, tu + 3 * PERIOD).isEmpty() && escrowed(level, record) == 2,
+				"Online but beyond 64 blocks, nothing is looked at");
+		beside(helper, back, at);
+		long tw = tu + 3 * PERIOD + 500L;
+		helper.assertValueEqual(anchor.holder().look(level, tw), Pacts.Event.PAID, "Back near it, one period falls due");
+		helper.assertTrue(escrowed(level, record) == 1 && upkeep(level, anchor).due() == tw + PERIOD && BoundWills.of(level.getServer()).problems().isEmpty(),
+				"one offering for three periods away: no debt");
+		long tx = tw + 2 * PERIOD - 1_000L; // no look since tw: an absence across tw + PERIOD
+		helper.assertValueEqual(anchor.holder().look(level, tx), Pacts.Event.PAID, "Back just before the next due date, one offering");
+		helper.assertTrue(upkeep(level, anchor).due() == tx + PERIOD && anchor.holder().look(level, tw + 2 * PERIOD) == Pacts.Event.NONE,
+				"the next a period from the return, not 1,000 ticks later");
+		BoundWill kept = will(level, anchor);
+		ServerLevel nether = level.getServer().getLevel(Level.NETHER);
+		helper.assertTrue(nether != null, "The test server has a Nether");
+		back.teleport(new TeleportTransition(nether, new Vec3(0.5, 64.0, 0.5), Vec3.ZERO, 0.0F, 0.0F, TeleportTransition.DO_NOTHING));
+		long tn = tx + PERIOD + 500L;
+		helper.assertTrue(back.level() == nether && anchor.holder().look(level, tn) == Pacts.Event.NONE && will(level, anchor).equals(kept),
+				"Its holder in another dimension, nothing is looked at");
+		boolean answering = JugcraftConfig.option(Authority.ABSENT_OPTION);
+		JugcraftConfig.setOption(Authority.ABSENT_OPTION, true);
+		try {
+			TestPlayers.leave(back);
+			helper.assertTrue(anchor.holder().look(level, tn + PERIOD) == Pacts.Event.NONE && will(level, anchor).equals(kept),
+					"Logged out while stand-ins may answer for absent owners, nothing is looked at: a stand-in never pays or is warned");
+		} finally {
+			JugcraftConfig.setOption(Authority.ABSENT_OPTION, answering);
+		}
+		helper.succeed();
+	}
+
+	/** D-02 (E1, E4, D-S6): its holder's party, a stand-in and a holder who is not alive cannot end it; the living holder ends it and the escrow comes back once. */
+	@GameTest(maxTicks = 20)
+	public void onlyTheHolderEnds(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		ServerPlayer holder = binder(helper);
+		ServerPlayer friend = binder(helper);
+		PartyManager parties = JugcraftParties.manager();
+		long ms = System.currentTimeMillis();
+		try {
+			helper.assertTrue(parties.invite(holder.getUUID(), friend.getUUID(), ms) == PartyManager.Result.OK
+					&& parties.accept(friend.getUUID(), ms) == PartyManager.Result.OK, "The holder and a friend form a party");
+			long now = level.getGameTime() + 1_000_000L;
+			SpiritAnchorBlockEntity anchor = sealed(helper, holder, new BlockPos(3, 1, 3), UPKEEP, now);
+			UUID record = anchor.agreement().record();
+			BoundWills wills = BoundWills.of(level.getServer());
+			helper.assertValueEqual(anchor.holder().deposit(level, holder, new ItemStack(Items.WHITE_WOOL, 2), now), 2, "Two periods paid ahead");
+			helper.assertValueEqual(anchor.holder().end(level, friend, now), AgreementHolder.Ended.NOT_HOLDER, "Their party may not end it");
+			FakePlayer standIn = FakePlayer.get(level, new GameProfile(holder.getUUID(), "[Concordance]"));
+			helper.assertValueEqual(anchor.holder().end(level, standIn, now), AgreementHolder.Ended.NOT_PERMITTED, "nor a stand-in with the holder's identity");
+			holder.setHealth(0.0F);
+			helper.assertValueEqual(anchor.holder().end(level, holder, now), AgreementHolder.Ended.NOT_PERMITTED, "nor a holder who is not alive");
+			helper.assertTrue(wool(holder) == 0 && escrowed(level, record) == 2 && wills.ledger().get(record) != null,
+					"the escrow is never handed to a dead holder; it stays with the record");
+			holder.setHealth(holder.getMaxHealth());
+			helper.assertValueEqual(anchor.holder().end(level, holder, now), AgreementHolder.Ended.ENDED, "Its living holder ends it");
+			helper.assertTrue(wool(holder) == 2 && wills.ledger().get(record) == null && wills.escrow(record).isEmpty() && anchor.agreement() == null,
+					"and the escrow comes back into their inventory, once");
+		} finally {
+			parties.adminDisband(holder.getUUID());
+		}
+		helper.succeed();
+	}
+
+	/**
+	 * D-02 (E5, D-S10): two seals in one tick: one DONE, one TAKEN, one shade; a record kept here by a block that forgot it
+	 * is left without its place, still its holder's; no place keeps two.
+	 */
+	@GameTest(maxTicks = 20)
+	public void twoPlayersCannotBothSealOnePlace(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		ServerPlayer first = binder(helper);
+		ServerPlayer second = binder(helper);
+		SpiritAnchorBlockEntity anchor = anchor(helper, new BlockPos(3, 1, 3));
+		long now = level.getGameTime();
+		int before = level.getEntitiesOfClass(GatheringShadeEntity.class, helper.getBounds(), Entity::isAlive).size();
+		helper.assertValueEqual(anchor.seal(level, first, terms(), now).outcome(), Pacts.Outcome.DONE, "The first seals");
+		AgreementHolder.Sealed late = anchor.seal(level, second, terms(), now);
+		helper.assertTrue(late.outcome() == Pacts.Outcome.TAKEN && late.presence() == null, "the second, in the same tick, is refused as taken and calls nothing");
+		helper.assertTrue(held(level, first.getUUID()) == 1 && held(level, second.getUUID()) == 0
+				&& level.getEntitiesOfClass(GatheringShadeEntity.class, helper.getBounds(), Entity::isAlive).size() == before + 1, "One Bound Will, one shade");
+		UUID kept = anchor.agreement().record();
+		anchor.holder().clear(); // as a block replaced without its side effects: the record is still kept at this place
+		helper.assertValueEqual(anchor.seal(level, second, terms(), now + 1).outcome(), Pacts.Outcome.DONE, "A block that knows no terms may be sealed");
+		BoundWill orphan = BoundWills.of(level.getServer()).ledger().get(kept);
+		helper.assertTrue(orphan != null && first.getUUID().equals(orphan.holder()) && !Pacts.seated(orphan) && !Pacts.unclaimed(orphan)
+				&& orphan.pact().presence() == null, "the record it replaces stays its holder's, without its place");
+		helper.assertTrue(BoundWills.of(level.getServer()).problems().isEmpty(), "and no place keeps two");
+		helper.succeed();
+	}
+
+	/** D-02 (E1): a stand-in binds nobody; the actor is always the holder; no transfer or update gives a record away; another's sneaking use only reads it. */
+	@GameTest(maxTicks = 20)
+	public void noOneBindsAnotherPlayer(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		ServerPlayer holder = binder(helper);
+		ServerPlayer actor = binder(helper);
+		SpiritAnchorBlockEntity anchor = anchor(helper, new BlockPos(3, 1, 3));
+		FakePlayer standIn = FakePlayer.get(level, new GameProfile(holder.getUUID(), "[Concordance]"));
+		long now = level.getGameTime();
+		helper.assertValueEqual(anchor.seal(level, standIn, terms(), now).outcome(), Pacts.Outcome.NOT_PERMITTED, "A stand-in never seals for anyone");
+		helper.assertTrue(held(level, holder.getUUID()) == 0 && anchor.agreement() == null, "and binds nobody");
+		helper.assertValueEqual(anchor.seal(level, actor, terms(), now).outcome(), Pacts.Outcome.DONE, "A player seals");
+		BoundWills wills = BoundWills.of(level.getServer());
+		BoundWill record = wills.ledger().get(anchor.agreement().record());
+		helper.assertTrue(actor.getUUID().equals(record.holder()) && held(level, holder.getUUID()) == 0 && !record.transferable(),
+				"for themself alone, and the record cannot change hands");
+		helper.assertValueEqual(wills.ledger().transfer(record.id(), actor.getUUID(), holder.getUUID()).outcome(), BoundWillLedger.Outcome.NOT_TRANSFERABLE,
+				"no transfer moves it");
+		helper.assertValueEqual(wills.update(record.withHolder(holder.getUUID())).outcome(), BoundWillLedger.Outcome.NOT_HOLDER, "and no update gives it away");
+		helper.assertValueEqual(key(SpiritAnchorBlock.use(holder, level, anchor, true)), "message.jugcraft.concordance.workers.spirit",
+				"Another player's sneaking use only reads it");
+		helper.assertTrue(anchor.holder().toggle(level, holder, now) == AgreementHolder.Toggle.NOT_HOLDER
+				&& wills.ledger().get(record.id()).pact().hold() == BoundWill.Hold.NONE, "and suspends nothing");
+		helper.succeed();
+	}
+
+	/**
+	 * D-02 (E2, D-S16): switched off, nothing falls due or is taken, its shade waits, nothing is suspended, ended or paid in,
+	 * and breaking an anchor releases nothing (critique 5: its record, escrow and shade stay, and no departure is kept); on
+	 * again, at most one period at the first look, and a record whose anchor was broken meanwhile is still its holder's to end.
+	 */
+	@GameTest(maxTicks = 20)
+	public void theConcordanceOffHoldsEveryClock(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		ServerPlayer holder = binder(helper);
+		BoundWills wills = BoundWills.of(level.getServer());
+		long t0 = level.getGameTime() + 1_000_000L;
+		BlockPos brokenAt = new BlockPos(6, 1, 3);
+		SpiritAnchorBlockEntity other = sealed(helper, holder, brokenAt, UPKEEP, t0);
+		GatheringShadeEntity otherShade = (GatheringShadeEntity) level.getEntity(other.spirit());
+		UUID otherRecord = other.agreement().record();
+		helper.assertValueEqual(other.holder().deposit(level, holder, new ItemStack(Items.WHITE_WOOL, 1), t0), 1, "One period paid ahead at a second anchor");
+		BlockPos at = new BlockPos(3, 1, 3);
+		SpiritAnchorBlockEntity anchor = sealed(helper, holder, at, UPKEEP, t0);
+		GatheringShadeEntity shade = (GatheringShadeEntity) level.getEntity(anchor.spirit());
+		UUID record = anchor.agreement().record();
+		helper.assertValueEqual(anchor.holder().deposit(level, holder, new ItemStack(Items.WHITE_WOOL, 1), t0), 1, "One period paid ahead");
+		helper.assertTrue(stay(level, anchor, t0 + 1_000L, t0 + PERIOD - 1_000L).isEmpty(), "Nothing due yet");
+		BoundWill before = will(level, anchor);
+		BoundWill otherBefore = wills.ledger().get(otherRecord);
+		int departures = PactHistory.of(level.getServer()).history(holder.getUUID()).size();
+		off(() -> {
+			helper.assertTrue(stay(level, anchor, t0 + PERIOD, t0 + 3 * PERIOD).isEmpty() && will(level, anchor).equals(before)
+					&& escrowed(level, record) == 1, "Switched off, nothing falls due and nothing is taken");
+			helper.assertTrue(shade.think(level, NIGHT, t0 + PERIOD) == Status.DISABLED, "its shade waits, switched off");
+			helper.assertValueEqual(key(SpiritAnchorBlock.use(holder, level, anchor, true)), "message.jugcraft.concordance.disabled", "its holder's word waits");
+			helper.assertValueEqual(anchor.holder().end(level, holder, t0 + PERIOD), AgreementHolder.Ended.DISABLED, "nothing ends");
+			helper.assertValueEqual(anchor.holder().deposit(level, holder, new ItemStack(Items.WHITE_WOOL, 1), t0 + PERIOD), 0, "and nothing is paid in");
+			helper.assertTrue(will(level, anchor).equals(before) && escrowed(level, record) == 1, "the record and its escrow untouched");
+			helper.setBlock(brokenAt, Blocks.AIR);
+			helper.assertTrue(otherBefore.equals(wills.ledger().get(otherRecord)) && escrowed(level, otherRecord) == 1 && !otherShade.isRemoved()
+					&& PactHistory.of(level.getServer()).history(holder.getUUID()).size() == departures,
+					"Broken while switched off, an anchor releases nothing: its record, escrow and shade stay, and no departure is kept");
+		});
+		helper.assertTrue(wills.problems().isEmpty(), "and the records stay sound: " + wills.problems());
+		long back = t0 + 3 * PERIOD + 500L;
+		helper.assertValueEqual(anchor.holder().look(level, back), Pacts.Event.PAID, "On again, one period falls due at the first look");
+		helper.assertTrue(escrowed(level, record) == 0 && upkeep(level, anchor).due() == back + PERIOD, "one offering only, the next a period from now");
+		helper.assertTrue(AgreementHolder.end(level, null, holder, otherRecord, Pacts.ENDED, back) == AgreementHolder.Ended.ENDED && wool(holder) == 1
+				&& wills.ledger().get(otherRecord) == null, "The record whose anchor was broken while switched off is still its holder's to end, escrow and all");
 		helper.succeed();
 	}
 

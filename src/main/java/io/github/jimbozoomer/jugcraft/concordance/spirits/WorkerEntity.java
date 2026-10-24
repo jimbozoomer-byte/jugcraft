@@ -114,7 +114,7 @@ public abstract class WorkerEntity<T extends WorkerEntity<T>> extends Pathfinder
 	 */
 	public static @Nullable Sign sign(Status status) {
 		return switch (status) {
-			case WAITING_FOR_RESOURCES, BLOCKED_BY_ACCESS, CANNOT_NAVIGATE, NEEDS_REPAIR, NO_ENERGY, FULL, DESTINATION_UNLOADED -> Sign.WANT;
+			case WAITING_FOR_RESOURCES, BLOCKED_BY_ACCESS, CANNOT_NAVIGATE, NEEDS_REPAIR, NO_ENERGY, FULL, DESTINATION_UNLOADED, UPKEEP_DUE, UPKEEP_HELD -> Sign.WANT;
 			case FINISHED -> Sign.DONE;
 			default -> null;
 		};

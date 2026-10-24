@@ -29,8 +29,9 @@ import org.jspecify.annotations.Nullable;
  * The Spirit Anchor's block (roadmap step 17). An empty hand: someone who understands Binding Arts and may seal here (its
  * owner or their party, where they may build; an anchor placed before owners were recorded, whoever may build there) seals
  * an agreement, or is told the one reason not; its holder, sneaking, suspends or resumes it, and calls another shade when
- * theirs is lost; anyone reads its terms and how its spirit is. One whose Bound Will does not keep it says another
- * agreement covers it. Breaking it releases the agreement ({@link SpiritAnchorBlockEntity#preRemoveSideEffects}).
+ * theirs is lost; anyone reads its terms and how its spirit is. One whose Bound Will does not keep it (a copy) says another
+ * agreement covers it; one whose Bound Will this version cannot read says so, and the agreement waits (Concordance Chunk
+ * D, D-02). Breaking it releases the agreement ({@link SpiritAnchorBlockEntity#preRemoveSideEffects}).
  */
 public class SpiritAnchorBlock extends BaseEntityBlock {
 	public SpiritAnchorBlock(Properties properties) {
@@ -82,6 +83,9 @@ public class SpiritAnchorBlock extends BaseEntityBlock {
 			AgreementHolder.Sealed sealed = anchor.seal(level, player, terms, now);
 			return say(player, sealed.outcome() == Pacts.Outcome.DONE ? Component.translatable("message.jugcraft.concordance.workers.sealed",
 					terms.radius(), Workers.clock(terms.from()), Workers.clock(terms.to()), terms.quota()) : AgreementHolder.told(sealed.outcome()));
+		}
+		if (standing == AgreementHolder.Standing.UNREADABLE) {
+			return overlay(player, Component.translatable("message.jugcraft.concordance.workers.unreadable_record"));
 		}
 		if (standing != AgreementHolder.Standing.VALID) {
 			return overlay(player, ComposeText.show(Diagnostic.of(Code.CONFLICTING_AGREEMENT).text()));

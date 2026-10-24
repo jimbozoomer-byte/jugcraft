@@ -1,9 +1,11 @@
 package io.github.jimbozoomer.jugcraft.concordance.spirits;
 
 import io.github.jimbozoomer.jugcraft.concordance.Saved;
+import io.github.jimbozoomer.jugcraft.concordance.resource.BoundWill;
 import io.github.jimbozoomer.jugcraft.concordance.worker.Agreement;
 import io.github.jimbozoomer.jugcraft.concordance.worker.Pacts;
 import io.github.jimbozoomer.jugcraft.concordance.worker.WorkerDefinition;
+import io.github.jimbozoomer.jugcraft.party.UseMode;
 import java.util.List;
 import java.util.UUID;
 import net.minecraft.core.BlockPos;
@@ -26,11 +28,13 @@ import org.jspecify.annotations.Nullable;
 /**
  * The Spirit Anchor (roadmap step 17): where a spirit's agreement is kept and what it delivers to. Its agreement is kept
  * through an {@link AgreementHolder} (Concordance Chunk D, unit 1): placed, it records its owner, and its owner or their
- * party seal a Gathering Shade's agreement here, recorded as a Bound Will for its holder ({@link BoundWills}); the anchor
- * holds the terms as sealed here and the day's tasks, and nine slots the shade fills and hoppers below may empty. Its
- * holder may suspend or resume the agreement and calls another shade when theirs is lost (AgreementHolder.end ends it
- * without breaking the anchor); breaking the anchor with the Concordance on releases it: the Bound Will is released, the
- * shade leaves its load here, and everything here drops where the anchor stood.
+ * party seal a Gathering Shade's agreement here, recorded as a Bound Will for its holder ({@link BoundWills}): the one
+ * authority for whether it stands, where it is kept and whether it is suspended (Concordance Chunk D, D-02). The anchor
+ * holds the terms as sealed here and a copy of the day's tasks, and nine slots the shade fills and hoppers below may
+ * empty. A copy of an anchor elsewhere is inert. Its holder may suspend or resume the agreement and calls another shade
+ * when theirs is lost (AgreementHolder.end ends it without breaking the anchor); breaking the anchor with the Concordance
+ * on releases it: the Bound Will is released, the shade leaves its load here, and everything here drops where the anchor
+ * stood.
  */
 public class SpiritAnchorBlockEntity extends BlockEntity implements WorldlyContainer, AgreementHolder.Holds {
 	public static final int SLOTS = 9;
@@ -62,19 +66,25 @@ public class SpiritAnchorBlockEntity extends BlockEntity implements WorldlyConta
 		return holder.owner();
 	}
 
-	/** The spirit's own record of a finished task (the anchor keeps the day's count). */
+	/** The spirit's own record of a finished task (its Bound Will keeps the day's count; the anchor a copy). */
 	public void taskDone(long gameTime) {
-		holder.taskDone(gameTime);
+		if (level instanceof ServerLevel server) {
+			holder.taskDone(server, gameTime);
+		}
 	}
 
-	/** What the anchor seals: a Gathering Shade under {@code terms}, for its holder alone, sealed by its owner or their party, at no cost. */
-	public AgreementHolder.Sealing sealing(WorkerDefinition.Spirit terms) {
-		return new AgreementHolder.Sealing(GatheringShadeEntity.DEFINITION, COUNTERPART, AgreementHolder.Service.of(terms), false, true, null, null);
+	/**
+	 * What the anchor seals: a Gathering Shade under {@code terms}, for its holder alone, sealed by its owner or their party,
+	 * at no cost, with {@code upkeep} (none in play: the anchor's definition has none, D-P9; tests seal with test terms).
+	 */
+	public AgreementHolder.Sealing sealing(WorkerDefinition.Spirit terms, BoundWill.@Nullable Upkeep upkeep) {
+		return new AgreementHolder.Sealing(GatheringShadeEntity.DEFINITION, COUNTERPART, AgreementHolder.service(terms), upkeep, UseMode.PERSONAL,
+				false, true, null, null);
 	}
 
 	/** Seals a Gathering Shade's agreement for {@code player} under {@code terms}: DONE, or the one reason not. */
 	public AgreementHolder.Sealed seal(ServerLevel level, ServerPlayer player, WorkerDefinition.Spirit terms, long gameTime) {
-		return holder.seal(level, player, sealing(terms), gameTime);
+		return holder.seal(level, player, sealing(terms, null), gameTime);
 	}
 
 	/** Calls a Gathering Shade beside the anchor for {@code who}; the anchor calls no other counterpart (critique 7). */

@@ -17,6 +17,7 @@ import net.minecraft.world.entity.monster.Enemy;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.phys.Vec3;
 import org.jspecify.annotations.Nullable;
 
 /**
@@ -62,6 +63,15 @@ public final class Authority {
 		}
 		ServerPlayer player = level.getServer().getPlayerList().getPlayer(owner);
 		return player != null && player.level() == level && player.isAlive() ? player : null;
+	}
+
+	/**
+	 * The person behind a place, present (online, alive, in this level) and within {@code reach} blocks of it; never a
+	 * stand-in (Concordance Chunk D, D-S3: a pact's upkeep is looked at only then).
+	 */
+	public static @Nullable ServerPlayer presentNear(ServerLevel level, @Nullable UUID owner, BlockPos at, int reach) {
+		ServerPlayer here = present(level, owner);
+		return here != null && here.distanceToSqr(Vec3.atCenterOf(at)) <= (double) reach * reach ? here : null;
 	}
 
 	/**

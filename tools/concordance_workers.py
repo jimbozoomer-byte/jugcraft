@@ -21,6 +21,15 @@ killed shade's load goes home once and its holder calls another under the same a
 an agreement, once (Java: worker/Pacts.java, spirits/AgreementHolder.java). A familiar's bond fades only for its
 person's own play time away, never for time they are logged out or the Concordance is switched off (D-S17; Java:
 worker/Bond.java, spirits/HearthlingEntity.java).
+
+Concordance Chunk D, unit 1 (D-02): one pact record. A Bound Will carries its pact: where it is kept, whether it is held
+and why (PACT_HOLDS), who benefits, the presence serving it, the service terms and day's count it was sealed with, and its
+upkeep, with the offerings paid ahead kept beside it in the world's record, never in a block. A copied anchor is inert and
+releases nothing; an anchor from before claims its record once, at its own place. Upkeep falls due on the Spire's model
+(PACT: looked at only with the Concordance on and the holder within REACH, at most one period a look, never owing time
+away or held), warns, gives a grace and holds the pact without loss; only its living holder ends it, once, and the last
+HISTORY departures of each holder are kept (PACT_DEPARTURES; Java: worker/Pacts.java, resource/BoundWill.java,
+spirits/AgreementHolder.java, spirits/BoundWills.java, spirits/PactHistory.java).
 """
 
 MOD = "jugcraft"
@@ -57,6 +66,12 @@ ROSTER_MAX = 32
 # worded: append only.
 SEAL_OUTCOMES = ["done", "disabled", "not_permitted", "taken", "already_held", "holder_full", "roster_full", "unavailable",
                  "cannot_afford"]
+# Concordance Chunk D, unit 1 (D-02; Java: worker/Pacts.java, resource/BoundWill.java Hold). The pact rules' numbers (ticks
+# and blocks), why a pact is held and why one departed: ids are saved or worded, so append only.
+PACT = {"ABSENT_TICKS": 1200, "WRITE_TICKS": 200, "REACH": 64, "HISTORY": 8, "MAX_CAP": 4, "MAX_COUNT": 64,
+        "MAX_PERIOD": 672000, "MAX_GRACE": 168000}
+PACT_HOLDS = ["none", "holder", "upkeep"]
+PACT_DEPARTURES = ["ended", "broken"]
 
 STATUSES = {
     "following": "following its person",
@@ -78,6 +93,9 @@ STATUSES = {
     "no_energy": "out of Ley Charge (a pylon by its source fuels it)",
     "full": "full: there is no room to deliver",
     "disabled": "switched off",
+    # Concordance Chunk D, D-02: a pact's upkeep (appended; ids are saved).
+    "upkeep_due": "an offering is due for its upkeep (it works on through its grace)",
+    "upkeep_held": "suspended for its upkeep: nothing is taken or lost, and an offering resumes it",
 }
 
 BINDING_SPECIMEN_TAG = f"{MOD}:binding_specimens"
@@ -197,6 +215,17 @@ MESSAGES = {
     "workers.no_agreement": "No agreement is kept here",
     "workers.not_holder": "Only the agreement's holder may do that",
     "workers.end_not_permitted": "Only the agreement's holder, alive and in person, may end it",
+    # Concordance Chunk D, D-02: one pact record (its upkeep, an unreadable record, why a pact departed).
+    "workers.held_for_upkeep": "It is suspended for its upkeep: an offering resumes it, not your word",
+    "workers.unreadable_record": "Its Bound Will cannot be read by this version: it is kept as it was, and the agreement waits",
+    "workers.upkeep_paid": "An offering is taken for the agreement's upkeep (%s periods remain paid ahead)",
+    "workers.upkeep_warned": "The agreement's upkeep is due: offer %s %s within %s game days, or it is suspended (nothing is "
+                             "lost; time away does not count)",
+    "workers.upkeep_held": "The agreement is suspended for its upkeep: nothing is taken and nothing accrues; an offering of %s "
+                           "%s resumes it",
+    "workers.upkeep_resumed": "Its upkeep is paid: the agreement is resumed",
+    "workers.departed.ended": "ended by its holder",
+    "workers.departed.broken": "released: its place was broken",
 }
 
 TOOLTIPS = {
@@ -283,7 +312,8 @@ def codex():
                  "A shade that is killed leaves what it carried in its anchor (or where it fell, if the anchor is not "
                  "loaded or keeps someone else's agreement), and the anchor says it was lost: its holder uses it and "
                  "another answers the same agreement, at no cost. A seal that is refused says why (not yours, already "
-                 "kept, too many Bound Wills, a full roster) and spends nothing."),
+                 "kept, too many Bound Wills, a full roster) and spends nothing. A copy of an anchor keeps nothing: it "
+                 "says another agreement covers it, and breaking it releases nothing."),
             ],
         },
         ("binding", "constructs"): {

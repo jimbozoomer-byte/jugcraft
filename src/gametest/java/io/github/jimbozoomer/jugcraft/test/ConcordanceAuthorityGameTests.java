@@ -68,7 +68,8 @@ import org.jspecify.annotations.Nullable;
  * Concordance's indirect routes to change or harm them: a spell's light, a spell's and a forged salve's harm, a link
  * taken by touch, a porter's trip, a device whose owner is away (and the same with the server's explicit option that
  * lets a stand-in answer for them), a hopper under a Spire Heart, and a link used by someone who did not take it; and a
- * Spirit Anchor sealed only by its owner's side where they may build, never by a stand-in (Concordance Chunk D, D-01).
+ * Spirit Anchor sealed only by its owner's side where they may build, never by a stand-in (Concordance Chunk D, D-01),
+ * and a pact no change of owner moves (D-02).
  */
 public class ConcordanceAuthorityGameTests {
 	private static final long NIGHT = 18000L;
@@ -384,6 +385,47 @@ public class ConcordanceAuthorityGameTests {
 				&& anchor.holder().end(level, standIn, now) == AgreementHolder.Ended.NOT_PERMITTED && anchor.agreement() != null,
 				"and it neither suspends nor ends the agreement");
 		helper.assertTrue(placed(helper, new BlockPos(5, 2, 2), standIn).owner() == null, "A stand-in placing an anchor records no owner");
+		helper.succeed();
+	}
+
+	/**
+	 * D-02 (D-S23, E1): the holder leaving the party, or the anchor changing hands, never moves a pact; the owner cannot end
+	 * or suspend another's, by the anchor or by its Bound Will alone; nobody else benefits.
+	 */
+	@GameTest(maxTicks = 20)
+	public void aChangeOfOwnerMovesNoPact(GameTestHelper helper) {
+		floor(helper);
+		ServerLevel level = helper.getLevel();
+		ServerPlayer owner = spiritbinder(helper);
+		ServerPlayer holder = spiritbinder(helper);
+		ServerPlayer stranger = spiritbinder(helper);
+		SpiritAnchorBlockEntity anchor = placed(helper, new BlockPos(2, 2, 2), owner);
+		PartyManager parties = JugcraftParties.manager();
+		long ms = System.currentTimeMillis();
+		long now = level.getGameTime();
+		try {
+			helper.assertTrue(parties.invite(owner.getUUID(), holder.getUUID(), ms) == PartyManager.Result.OK
+					&& parties.accept(holder.getUUID(), ms) == PartyManager.Result.OK, "The owner and the holder form a party");
+			helper.assertValueEqual(anchor.seal(level, stranger, shadeTerms(), now).outcome(), Pacts.Outcome.NOT_PERMITTED, "A stranger may not seal at it");
+			helper.assertValueEqual(anchor.seal(level, holder, shadeTerms(), now).outcome(), Pacts.Outcome.DONE, "The owner's party may");
+			helper.assertValueEqual(parties.leave(holder.getUUID()), PartyManager.Result.OK, "The holder leaves the party");
+		} finally {
+			parties.adminDisband(owner.getUUID());
+		}
+		UUID record = anchor.agreement().record();
+		BoundWills wills = BoundWills.of(level.getServer());
+		helper.assertTrue(holder.getUUID().equals(wills.ledger().get(record).holder()) && anchor.holder().verify(level, now) == AgreementHolder.Standing.VALID,
+				"Leaving the party moves the pact to nobody");
+		helper.assertValueEqual(anchor.holder().end(level, owner, now), AgreementHolder.Ended.NOT_HOLDER, "The anchor's owner cannot end another's pact");
+		anchor.holder().setOwner(stranger.getUUID()); // the place changes hands
+		helper.assertTrue(holder.getUUID().equals(wills.ledger().get(record).holder()) && anchor.holder().end(level, stranger, now) == AgreementHolder.Ended.NOT_HOLDER,
+				"A new owner of the place neither takes nor ends it");
+		helper.assertValueEqual(anchor.holder().toggle(level, holder, now), AgreementHolder.Toggle.SUSPENDED, "Its holder still keeps it");
+		helper.assertTrue(AgreementHolder.toggle(level, owner, record, now) == AgreementHolder.Toggle.NOT_HOLDER
+				&& AgreementHolder.toggle(level, holder, record, now) == AgreementHolder.Toggle.RESUMED,
+				"By its Bound Will alone, as from the roster, the owner suspends nothing and its holder resumes it");
+		helper.assertTrue(!Pacts.benefits(wills.ledger().get(record), owner.getUUID(), JugcraftParties.sameParty(holder.getUUID(), owner.getUUID())),
+				"and nobody else benefits from it");
 		helper.succeed();
 	}
 

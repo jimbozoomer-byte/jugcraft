@@ -23,7 +23,8 @@ CODES = {
     "unloaded_target": ("blocked", "What it works with is not loaded"),
     "incomplete_pattern": ("blocked", "%s is not complete: faults to mend: %s"),
     "unavailable_worker": ("shortage", "No worker is free for it"),
-    "conflicting_agreement": ("blocked", "Another agreement already covers it"),
+    # Concordance Chunk D, D-02: raised by a holder block whose Bound Will is kept elsewhere or for someone else (a copy).
+    "conflicting_agreement": ("blocked", "Another agreement already covers it: this is a copy, so it does nothing and releases nothing"),
     "dormant_occurrence": ("condition", "It waits for its occurrence"),
     "needs_water": ("shortage", "Needs %s parts of water in its tank; it holds %s"),
     "needs_container": ("shortage", "Needs a glass bottle or a bowl to bottle into"),

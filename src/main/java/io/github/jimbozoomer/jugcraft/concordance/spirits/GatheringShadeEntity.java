@@ -35,11 +35,12 @@ import org.jspecify.annotations.Nullable;
  * them there; outside them it waits at the anchor and says why (outside its agreement, finished for the day,
  * suspended). It refuses items where its holder could not build (a protected town, spawn protection: "blocked by
  * access"), waits when its anchor is full, and stops when its anchor's chunk is unloaded ("destination unloaded"). It
- * never uses portals; released, it departs, leaving what it carried at the anchor. Since Concordance Chunk D (D-01) it
- * serves only while its anchor's Bound Will keeps the agreement and names it as the anchor's spirit. Killed, what it
- * carried goes into its anchor when that is loaded and keeps its holder's agreement, otherwise where it fell, and it is
- * struck off its holder's roster, which is how its anchor knows it is lost; released, ended or replaced, it leaves what it
- * carried in its anchor once and departs.
+ * never uses portals; released, it departs, leaving what it carried at the anchor. Since Concordance Chunk D (D-01, D-02)
+ * it serves only while its anchor's Bound Will keeps the agreement there and names it as the anchor's spirit, and waits
+ * while that Bound Will holds it (suspended by its holder, or for its upkeep). Killed, what it carried goes into its
+ * anchor when that is loaded and keeps its holder's agreement, otherwise where it fell, and it is struck off its holder's
+ * roster, which is how its anchor knows it is lost; released, ended or replaced, it leaves what it carried in its anchor
+ * once and departs.
  */
 public class GatheringShadeEntity extends WorkerEntity<GatheringShadeEntity> implements AgreementHolder.Presence {
 	public static final String DEFINITION = "jugcraft:gathering_shade";
@@ -101,11 +102,16 @@ public class GatheringShadeEntity extends WorkerEntity<GatheringShadeEntity> imp
 			return Status.DESTINATION_UNLOADED;
 		}
 		SpiritAnchorBlockEntity home = level.getBlockEntity(anchor) instanceof SpiritAnchorBlockEntity found ? found : null;
-		// Concordance Chunk D (D-01, D-S9): its anchor's terms count only as the world's Bound Will keeps them.
+		// Concordance Chunk D (D-01, D-02, D-S9): its anchor's terms count only as the world's Bound Will keeps them there.
 		AgreementHolder.Standing standing = home == null ? AgreementHolder.Standing.NONE : home.holder().verify(level, gameTime);
+		if (standing == AgreementHolder.Standing.UNREADABLE) {
+			// Its Bound Will is kept as written by a version that cannot read it: it waits, and leaves nothing.
+			stop();
+			return Status.OUTSIDE_AGREEMENT;
+		}
 		if (standing != AgreementHolder.Standing.VALID || !getUUID().equals(home.spirit())) {
-			// Released, ended, or another shade now answers its agreement (its holder called one while it was away): it
-			// leaves what it carried at its anchor, once, and departs (D-S18).
+			// Released, ended elsewhere, a copy's, or another shade now answers its agreement (its holder called one while it
+			// was away): it leaves what it carried at its anchor, once, and departs (D-S18).
 			depart(level, home, anchor);
 			return Status.FINISHED;
 		}
@@ -277,7 +283,7 @@ public class GatheringShadeEntity extends WorkerEntity<GatheringShadeEntity> imp
 		return switch (status) {
 			case TRAVELLING, RETURNING -> TRAVELLING;
 			case WORKING -> WORKING;
-			case SUSPENDED, OUTSIDE_AGREEMENT, FINISHED, DESTINATION_UNLOADED, DISABLED -> SUSPENDED;
+			case SUSPENDED, UPKEEP_HELD, OUTSIDE_AGREEMENT, FINISHED, DESTINATION_UNLOADED, DISABLED -> SUSPENDED;
 			case WAITING_FOR_RESOURCES, BLOCKED_BY_ACCESS, CANNOT_NAVIGATE, FULL, OWNER_OFFLINE -> WAITING;
 			default -> IDLE;
 		};

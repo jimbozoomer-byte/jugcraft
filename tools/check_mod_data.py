@@ -17985,12 +17985,18 @@ def check_workers(co, root, lang, registered, research):
 
 
 def check_pacts(co, root, lang):
-    """Concordance Chunk D, unit 1 (D-01; D-S8, D-S11, D-S13, D-S18; docs/features/concordance-chunk-d.md): the agreements
-    keep their promises. Pacts.Outcome is SEAL_OUTCOMES in order, refused with its first reason before anything is called
-    or recorded, and each worded where the holder tells it; a seal's cost is asked before anything is called and paid only
-    once its Bound Will is recorded; a killed or departing shade's load goes only into an anchor keeping its own holder's
-    agreement; the anchor records who placed it (never a stand-in) and the holder saves its owner; and the unit's game
-    tests exist."""
+    """Concordance Chunk D, unit 1 (D-01, D-02; D-S3, D-S6, D-S8, D-S9, D-S11, D-S13, D-S16, D-S18;
+    docs/features/concordance-chunk-d.md): the agreements keep their promises, and each has one pact record.
+    Pacts.Outcome is SEAL_OUTCOMES in order, refused with its first reason before anything is called or recorded, and
+    each worded where the holder tells it; a seal's cost is asked before anything is called and paid only once its Bound
+    Will is recorded; a killed or departing shade's load goes only into an anchor keeping its own holder's agreement; the
+    anchor records who placed it (never a stand-in) and the holder saves its owner. D-02: the rules' numbers, holds and
+    departure reasons are the generator's; a Bound Will's pact and escrow are optional keys of its entry (read will by
+    will), and no holder block keeps an item; a holder counts its terms only as the record keeps them, and its day's count
+    is the record's; only a living holder, in person, with the Concordance on, ends a pact before its escrow is handed
+    back, and breaking a block releases nothing while the Concordance is off; upkeep is looked at only with the
+    Concordance on and its holder near; its holder suspends or resumes a pact by its record alone; a copy says
+    CONFLICTING_AGREEMENT; the shade serves only an anchor whose record keeps it there; and the unit's game tests exist."""
     wk = co.workers
     def java(relative):
         path = root / relative
@@ -18032,6 +18038,59 @@ def check_pacts(co, root, lang):
         err("spirits/SpiritAnchorBlock.java: the anchor records who placed it, never a stand-in (D-S8)")
     if "owner.equals(home.agreement().holder())" not in _java_body(java("spirits/GatheringShadeEntity.java"), "private void unload("):
         err("spirits/GatheringShadeEntity.java: a shade's load goes only into an anchor keeping its own holder's agreement (D-S18)")
+    # D-02: one pact record.
+    for const, value in wk.PACT.items():
+        if not re.search(rf"\b(?:int|long) {const} = {value}L?;", pacts):
+            err(f"concordance/worker/Pacts.java: {const} differs from tools/concordance_workers.py PACT ({value})")
+    holds = re.findall(r'^\t\t([A-Z_]+)\("([a-z_]+)"\)[,;]', _java_body(java("resource/BoundWill.java"), "public enum Hold"), re.M)
+    if [hid for _, hid in holds] != wk.PACT_HOLDS:
+        err(f"concordance/resource/BoundWill.java: Hold {[hid for _, hid in holds]} differs from PACT_HOLDS in tools/concordance_workers.py (same order)")
+    for name, hid in holds:
+        if name != hid.upper():
+            err(f"concordance/resource/BoundWill.java: Hold.{name} must be named after its id {hid}")
+    names = dict(re.findall(r'String ([A-Z_]+) = "([a-z_]+)";', pacts))
+    listed = re.search(r"DEPARTURES = List\.of\(([^)]*)\)", pacts)
+    if not listed or [names.get(t.strip()) for t in listed.group(1).split(",")] != wk.PACT_DEPARTURES:
+        err("concordance/worker/Pacts.java: DEPARTURES differs from PACT_DEPARTURES in tools/concordance_workers.py")
+    for reason in wk.PACT_DEPARTURES:
+        if f"message.{MOD}.concordance.workers.departed.{reason}" not in lang:
+            err(f"pacts: missing lang message.{MOD}.concordance.workers.departed.{reason}")
+    wills = java("spirits/BoundWills.java")
+    for needle in ('PACT.optionalFieldOf("pact")', 'optionalFieldOf("escrow")', 'Saved.keeping("bound_wills", UUIDUtil.STRING_CODEC, ENTRY)'):
+        if needle not in wills:
+            err(f"spirits/BoundWills.java: a Bound Will's D-02 data is an optional key of its entry, read will by will ({needle})")
+    for key in ("pact", "escrow", "place", "hold", "hold_since", "beneficiaries", "presence", "upkeep", "grace_until", "service", "window",
+                "done_today"):
+        if re.search(rf'\.fieldOf\("{key}"\)', wills):
+            err(f"spirits/BoundWills.java: {key} is new since Chunk D, so it is optional (an older save has none)")
+    if re.search(r"(?:NonNullList|List)<ItemStack> \w+\s*=", holder):
+        err("spirits/AgreementHolder.java: a pact's escrow is the world record's (BoundWills), never a holder block's (D-S6)")
+    verify = _java_body(holder, "public Standing verify(")
+    for needle in ("wills.unreadable(agreement.record())", "sealedHere", "Pacts.claim(record, here, spirit, agreement, now)",
+                   "return Standing.ELSEWHERE;"):
+        if needle not in verify:
+            err(f"AgreementHolder.verify: a holder counts its terms only as the record keeps them ({needle})")
+    if "Pacts.didTask(record.pact(), now)" not in _java_body(holder, "public void taskDone("):
+        err("AgreementHolder.taskDone: a pact's day's count is its record's, so a pact seated again keeps its day (D-S1)")
+    end = _java_body(holder, "public static Ended end(")
+    if not 0 <= end.find("Workers.enabled()") < end.find("player.isAlive()") < end.find("placeItemBackInInventory(") \
+            or "Authority.isStandIn(player)" not in end:
+        err("AgreementHolder.end: switched on, a living holder, never a stand-in, before the escrow is handed back (D-S6)")
+    broken = _java_body(holder, "public void broken(")
+    if not 0 <= broken.find("Workers.enabled()") < broken.find(".release("):
+        err("AgreementHolder.broken: breaking a holder block while the Concordance is off releases nothing (D-S16)")
+    toggled = _java_body(holder, "public static Toggle toggle(ServerLevel level, ServerPlayer player, UUID id, long now)")
+    if not toggled or not 0 <= toggled.find("Workers.enabled()") < toggled.find("Authority.isStandIn(player)") < toggled.find("Pacts.suspend("):
+        err("AgreementHolder.toggle: its holder suspends or resumes a pact by its record alone, switched on, never a stand-in (D-07's roster)")
+    look = _java_body(holder, "public Pacts.Event look(")
+    if not 0 <= look.find("Workers.enabled()") < look.find("Pacts.due(") \
+            or "Authority.presentNear(level, record.holder(), block.getBlockPos(), Pacts.REACH)" not in look:
+        err("AgreementHolder.look: upkeep only with the Concordance on and its holder present near the place (D-S3, D-S16)")
+    use = _java_body(java("spirits/SpiritAnchorBlock.java"), "public static Component use(")
+    if not 0 <= use.find("Workers.enabled()") < use.find("holder.verify(level, now)") or "Code.CONFLICTING_AGREEMENT" not in use:
+        err("SpiritAnchorBlock.use: switched off it says so; a copied anchor does nothing and says CONFLICTING_AGREEMENT (D-S9)")
+    if "home.holder().verify(level, gameTime)" not in java("spirits/GatheringShadeEntity.java"):
+        err("spirits/GatheringShadeEntity.java: it serves only an anchor whose record keeps it there (D-S9)")
     tests = ROOT / "src" / "gametest" / "java" / "io" / "github" / "jimbozoomer" / "jugcraft" / "test"
     for cls, wanted in UNIT1_TESTS.items():
         path = tests / f"{cls}.java"
@@ -20129,7 +20188,9 @@ AUTHORITY_ROUTES = {
                                            "Authority.mayChangeFor(level, request.ticket().requester(), pos)"],
     "spirits/GatheringShadeEntity.java": ["Authority.answering(level, agreement.holder()) == null"],
     # Concordance Chunk D (D-S8): sealing asks at the place, as the sealer and never as a stand-in.
-    "spirits/AgreementHolder.java": ["if (Authority.isStandIn(player) || !Authority.mayChange(level, player, block.getBlockPos()))"],
+    # D-S3 (D-02): upkeep is looked at only with the holder present near the place, never a stand-in.
+    "spirits/AgreementHolder.java": ["if (Authority.isStandIn(player) || !Authority.mayChange(level, player, block.getBlockPos()))",
+                                     "Authority.presentNear(level, record.holder(), block.getBlockPos(), Pacts.REACH)"],
     "spirits/PorterKeyItem.java": ["Authority.mayChange(level, player, pos)"],
     "spire/ConcordSpire.java": ["Authority.answering(level, state.keeper())", "Authority.mayChange(level, keeper, at)"],
     "sympathy/Sympathy.java": ["Authority.mayStrike(caster, target)", 'return "not_yours";'],
@@ -20257,16 +20318,21 @@ UNSAVED_ENTITIES = {"dreaming/DreamWispEntity.java"}
 STAMPING_BASES = ("LivingDeviceBlockEntity", "WorkerEntity")
 # The records whose entries are independent, read entry by entry (an unreadable one kept as written).
 ENTRY_BY_ENTRY = {"spire/SpireRecord.java", "spirits/BoundWills.java", "spirits/WorkerRoster.java", "sky/AstralClaims.java",
-                  "starbound/ConclaveProjects.java"}
-# Concordance Chunk D, unit 1's game tests (check_pacts): D-01's and D-S17's; D-02's join with their commit.
+                  "starbound/ConclaveProjects.java", "spirits/PactHistory.java"}
+# Concordance Chunk D, unit 1's game tests (check_pacts): D-01's, D-S17's and D-02's.
 UNIT1_TESTS = {
     "ConcordanceWorkerGameTests": ["aKilledShadeLeavesItsLoadOnce", "aKilledShadeAwayFromItsAnchorDropsWhereItFell",
                                    "aLostShadeIsCalledAgainUnderItsAgreement", "anUnloadedShadeReplacedLeavesOnceAndDeliversOnce",
                                    "aSealedShadeIsOnTheRosterAtOnce", "aFullRosterRefusesTheSeal", "aFullHolderIsToldWhy",
                                    "theHolderEndsWithoutBreaking", "aFamiliarDoesNotFadeWhileItsPersonIsAway",
-                                   "aFamiliarFadesWhileItsPersonPlaysElsewhere"],
-    "ConcordanceAuthorityGameTests": ["onlyTheOwnersSideSealsAnAnchor", "aStandInNeverSeals"],
-    "ConcordancePersistenceGameTests": ["anAnchorsAgreementRoundTrips"],
+                                   "aFamiliarFadesWhileItsPersonPlaysElsewhere", "upkeepWarnsThenSuspendsAfterGraceAndResumes",
+                                   "aReturnAfterAbsenceGetsTheFullGrace", "absentAndUnloadedTimeIsNeverOwed", "onlyTheHolderEnds",
+                                   "twoPlayersCannotBothSealOnePlace", "noOneBindsAnotherPlayer", "theConcordanceOffHoldsEveryClock"],
+    "ConcordanceAuthorityGameTests": ["onlyTheOwnersSideSealsAnAnchor", "aStandInNeverSeals", "aChangeOfOwnerMovesNoPact"],
+    "ConcordancePersistenceGameTests": ["anAnchorsAgreementRoundTrips", "aBoundWillReadsItsOlderSave", "aPactRecordRoundTrips",
+                                        "thePactHistoryKeepsEight", "aSuspendedAnchorMigratesItsHold"],
+    "ConcordanceSharingGameTests": ["aCopiedAnchorGivesNothingAndReleasesNothing", "aLegacyAnchorClaimsItsPlaceOnce", "endingTwiceReturnsOnce"],
+    "ConcordanceResourceGameTests": ["thePactRulesKeepTheirShape"],
 }
 
 

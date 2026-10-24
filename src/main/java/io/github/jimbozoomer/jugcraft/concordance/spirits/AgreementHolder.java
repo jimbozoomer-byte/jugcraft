@@ -15,30 +15,45 @@ import io.github.jimbozoomer.jugcraft.concordance.worker.Pacts;
 import io.github.jimbozoomer.jugcraft.concordance.worker.Status;
 import io.github.jimbozoomer.jugcraft.concordance.worker.WorkerDefinition;
 import io.github.jimbozoomer.jugcraft.party.JugcraftParties;
+import io.github.jimbozoomer.jugcraft.party.UseMode;
 import java.util.UUID;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.UUIDUtil;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.tags.TagKey;
+import net.minecraft.util.Prediction;
+import net.minecraft.world.Containers;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.storage.ValueInput;
 import net.minecraft.world.level.storage.ValueOutput;
 import org.jspecify.annotations.Nullable;
 
 /**
- * Concordance Chunk D, unit 1 (D-01): what a block that keeps an agreement shares, extracted from the Spirit Anchor
- * (critique 27) for the anchor now and D-04's pact perch. It keeps who placed the block, the agreement's terms as sealed
- * here and the presence serving it; the world's Bound Will says whether the agreement stands. A block counts its terms
- * only while its record is kept for the same holder: otherwise it is inert, says CONFLICTING_AGREEMENT and releases
- * nothing. Sealing asks the owner's side and Authority, never a stand-in (D-S8), is refused with one reason before
+ * Concordance Chunk D, unit 1 (D-01, D-02): what a block that keeps an agreement shares, extracted from the Spirit
+ * Anchor (critique 27) for the anchor now and D-04's pact perch. It keeps who placed the block, the agreement's terms as
+ * sealed here and the presence serving it; the world's Bound Will is the one authority for the rest (D-S9): whether it
+ * stands, where it is kept, whether it is held and why, its service terms and day's count, its upkeep and its escrow. A
+ * block counts its terms only while the record keeps them for the same holder at this place: a copy elsewhere is inert,
+ * says CONFLICTING_AGREEMENT and releases nothing; a record from before Chunk D is claimed only by the block its terms
+ * were sealed at. Sealing asks the owner's side and Authority, never a stand-in (D-S8), is refused with one reason before
  * anything is recorded, spent or called (D-S11), spends its cost only once sealed (D-S13), and notes the presence on its
- * holder's roster at once (G5). A lost presence is called again under the same record at no cost (D-S18). Only its living
- * holder, in person and with the Concordance on, ends it, once; breaking the block with the Concordance on releases it
- * (D-S16). No item lives here.
+ * holder's roster at once (G5). A lost presence is called again under the same record at no cost (D-S18). Only its
+ * living holder, in person and with the Concordance on, ends it, once; its escrow goes back into their inventory (the
+ * rest at their feet) and the departure is kept (D-S6); breaking the block with the Concordance on releases it (D-S16).
+ * Upkeep is looked at only while the Concordance is on and its holder is present near the place (D-S3, D-S16). No item
+ * lives here: the escrow is the record's. Its actions are not rate-gated themselves: the anchor's use asks RateGate, and
+ * the pact screens of D-04 and D-07 ask it before they end, suspend, pay in or call again (D-P8).
  */
 public final class AgreementHolder {
 	/** The terms as sealed here (moved unchanged from SpiritAnchorBlockEntity, so an anchor's save reads as before). */
@@ -53,12 +68,14 @@ public final class AgreementHolder {
 
 	/** How a block's terms stand against the world's Bound Wills (D-S9). */
 	public enum Standing {
-		/** It keeps no terms. */
+		/** It keeps no terms (or its record ended elsewhere, and it has just forgotten them, D-P7). */
 		NONE,
-		/** Its record is kept, for the same holder. */
+		/** The record keeps them, for the same holder, at this place. */
 		VALID,
-		/** Its record is gone or kept for someone else: inert. */
-		ELSEWHERE
+		/** The record is kept elsewhere or for someone else: this is a copy, inert. */
+		ELSEWHERE,
+		/** The record is saved in a form this version cannot read: kept as written; the agreement waits. */
+		UNREADABLE
 	}
 
 	public enum Recall {
@@ -66,7 +83,7 @@ public final class AgreementHolder {
 	}
 
 	public enum Toggle {
-		SUSPENDED, RESUMED, NOTHING, NOT_HOLDER, CONFLICTING, DISABLED
+		SUSPENDED, RESUMED, HELD_FOR_UPKEEP, NOTHING, NOT_HOLDER, CONFLICTING, DISABLED
 	}
 
 	public enum Ended {
@@ -95,20 +112,19 @@ public final class AgreementHolder {
 		void leave(ServerLevel level, @Nullable Holds home, BlockPos at);
 	}
 
-	/** The service terms copied into the block's Agreement at sealing. */
-	public record Service(String work, int radius, int from, int to, int quota) {
-		public static Service of(WorkerDefinition.Spirit terms) {
-			return new Service(terms.work(), terms.radius(), terms.from(), terms.to(), terms.quota());
-		}
+	/** A spirit definition's service terms, as a pact copies them at sealing (D-S23). */
+	public static BoundWill.Service service(WorkerDefinition.Spirit terms) {
+		return new BoundWill.Service(terms.work(), terms.radius(), terms.from(), terms.to(), terms.quota());
 	}
 
 	/**
-	 * What a block seals: its agreement and counterpart ids, its service; whether a holder keeps one with this counterpart
-	 * at most; whether the owner's party may seal here as well as the owner (the anchor: yes; D-04's perch: no, D-S8); and
-	 * its cost, if any: asked before anything is called, paid in the same call once sealed (D-S13).
+	 * What a block seals: its agreement and counterpart ids; its service terms; its upkeep (or none); who benefits; whether a
+	 * holder keeps one with this counterpart at most; whether the owner's party may seal here as well as the owner (the
+	 * anchor: yes; D-04's perch: no, D-S8); and its cost, if any: asked before anything is called, paid in the same call once
+	 * sealed (D-S13).
 	 */
-	public record Sealing(String agreement, String counterpart, Service service, boolean onePerHolder, boolean partySeals,
-			@Nullable Predicate<ServerPlayer> affords, @Nullable Consumer<ServerPlayer> pay) {
+	public record Sealing(String agreement, String counterpart, BoundWill.Service service, BoundWill.@Nullable Upkeep upkeep, UseMode beneficiaries,
+			boolean onePerHolder, boolean partySeals, @Nullable Predicate<ServerPlayer> affords, @Nullable Consumer<ServerPlayer> pay) {
 	}
 
 	public record Sealed(Pacts.Outcome outcome, @Nullable WorkerEntity<?> presence) {
@@ -147,6 +163,11 @@ public final class AgreementHolder {
 		return Couriers.place(level, block.getBlockPos());
 	}
 
+	/** The Bound Will its terms name (whether or not they count here), or null. */
+	public @Nullable BoundWill record(ServerLevel level) {
+		return agreement == null ? null : BoundWills.of(level.getServer()).ledger().get(agreement.record());
+	}
+
 	/** The block forgets its terms (its record is untouched). */
 	public void clear() {
 		agreement = null;
@@ -154,12 +175,19 @@ public final class AgreementHolder {
 		block.setChanged();
 	}
 
-	/** The presence's own record of a finished task (the block keeps the day's count). */
-	public void taskDone(long gameTime) {
-		if (agreement != null) {
-			agreement = agreement.didTask(gameTime);
-			block.setChanged();
+	/**
+	 * The presence's own record of a finished task, while its terms count here: the day's count is the Bound Will's (D-S1,
+	 * so a pact seated again keeps its day; critique 4), and the block keeps a copy its presence and its reading use.
+	 */
+	public void taskDone(ServerLevel level, long now) {
+		if (verify(level, now) != Standing.VALID) {
+			return;
 		}
+		agreement = agreement.didTask(now);
+		block.setChanged();
+		BoundWills wills = BoundWills.of(level.getServer());
+		BoundWill record = wills.ledger().get(agreement.record());
+		wills.update(record.with(Pacts.didTask(record.pact(), now)));
 	}
 
 	/**
@@ -178,7 +206,8 @@ public final class AgreementHolder {
 	/**
 	 * Seals {@code sealing} for {@code player}: DONE, or the one reason it was refused. A refusal records, spends and calls
 	 * nothing; the roster and the cost are asked before anything is called (D-S11, D-S13), and the cost is paid only once
-	 * the Bound Will is recorded.
+	 * the Bound Will is recorded. A record still kept at this place by a block that no longer knows it is left without its
+	 * place (it keeps its holder and escrow, D-P3).
 	 */
 	public Sealed seal(ServerLevel level, ServerPlayer player, Sealing sealing, long now) {
 		if (!Workers.enabled()) {
@@ -201,18 +230,24 @@ public final class AgreementHolder {
 		if (presence == null) {
 			return new Sealed(Pacts.Outcome.UNAVAILABLE, null);
 		}
-		BoundWill record = new BoundWill(UUID.randomUUID(), sealing.agreement(), sealing.counterpart(), holder, now, false);
+		Place here = place(level);
+		BoundWill orphan = Pacts.keptAt(wills.ledger(), here);
+		BoundWill record = new BoundWill(UUID.randomUUID(), sealing.agreement(), sealing.counterpart(), holder, now, false,
+				Pacts.sealed(here, sealing.beneficiaries().id(), presence.getUUID(), sealing.service(), sealing.upkeep(), now));
 		if (wills.seal(record).outcome() != BoundWillLedger.Outcome.DONE) {
 			presence.discard();
 			return new Sealed(Pacts.Outcome.UNAVAILABLE, null);
+		}
+		if (orphan != null) {
+			wills.update(Pacts.unseat(orphan));
 		}
 		if (sealing.pay() != null) {
 			sealing.pay().accept(player);
 		}
 		BlockPos pos = block.getBlockPos();
-		Service service = sealing.service();
-		agreement = new Agreement(record.id(), holder, service.work(), place(level).dimension(), pos.getX(), pos.getY(), pos.getZ(),
-				service.radius(), service.from(), service.to(), service.quota(), Long.MIN_VALUE, 0, false);
+		BoundWill.Service service = sealing.service();
+		agreement = new Agreement(record.id(), holder, service.work(), here.dimension(), pos.getX(), pos.getY(), pos.getZ(), service.radius(),
+				service.from(), service.to(), service.quota(), BoundWill.Pact.NO_WINDOW, 0, false);
 		spirit = presence.getUUID();
 		block.setChanged();
 		note(level, presence);
@@ -229,25 +264,71 @@ public final class AgreementHolder {
 	}
 
 	/**
-	 * Whether this block's terms count (D-S9): its Bound Will kept, for the same holder. Until the record knows its place
-	 * (D-02), a record gone or held by someone else leaves the block inert.
+	 * Whether this block's terms count (D-S9): its Bound Will kept for the same holder at this place. A record gone forgets
+	 * the terms (it was ended elsewhere, D-P7); an unreadable one waits. A record from before Chunk D is claimed here once,
+	 * only if its terms were sealed here and its spirit, if loaded, is seated here (D-P3): its place, presence, service terms
+	 * and day's count written, a suspension the block kept moved onto it (the block's flag written false, D-P4), and a record
+	 * still kept here left without its place.
 	 */
 	public Standing verify(ServerLevel level, long now) {
 		if (agreement == null) {
 			return Standing.NONE;
 		}
-		BoundWill record = BoundWills.of(level.getServer()).ledger().records().get(agreement.record());
-		return record != null && record.holder().equals(agreement.holder()) ? Standing.VALID : Standing.ELSEWHERE;
+		BoundWills wills = BoundWills.of(level.getServer());
+		BoundWill record = wills.ledger().get(agreement.record());
+		if (record == null) {
+			if (wills.unreadable(agreement.record())) {
+				return Standing.UNREADABLE;
+			}
+			clear();
+			return Standing.NONE;
+		}
+		if (!record.holder().equals(agreement.holder())) {
+			return Standing.ELSEWHERE;
+		}
+		Place here = place(level);
+		BoundWill.Pact pact = record.pact();
+		if (pact == null) {
+			boolean sealedHere = here.equals(new Place(agreement.dimension(), agreement.x(), agreement.y(), agreement.z()));
+			Entity found = spirit == null ? null : level.getEntity(spirit);
+			if (!sealedHere || found instanceof Presence presence && !block.getBlockPos().equals(presence.seat())) {
+				return Standing.ELSEWHERE;
+			}
+			BoundWill orphan = Pacts.keptAt(wills.ledger(), here);
+			if (orphan != null) {
+				wills.update(Pacts.unseat(orphan));
+			}
+			wills.update(Pacts.claim(record, here, spirit, agreement, now));
+			if (agreement.suspended()) {
+				agreement = agreement.suspended(false);
+				block.setChanged();
+			}
+			return Standing.VALID;
+		}
+		if (!here.equals(pact.place())) {
+			return Standing.ELSEWHERE;
+		}
+		if (agreement.suspended()) {
+			agreement = agreement.suspended(false);
+			block.setChanged();
+		}
+		if (pact.presence() != null && !pact.presence().equals(spirit)) {
+			spirit = pact.presence();
+			block.setChanged();
+		}
+		return Standing.VALID;
 	}
 
-	/** Why its service is held now (SUSPENDED), or null. */
+	/** Why its service is held now (SUSPENDED or UPKEEP_HELD), or null. */
 	public @Nullable Status held(ServerLevel level) {
-		return agreement != null && agreement.suspended() ? Status.SUSPENDED : null;
+		BoundWill record = record(level);
+		return record == null || !Pacts.held(record) ? null : Pacts.status(record);
 	}
 
-	/** Its state for a reading: held, or null when simply active. */
+	/** Its state for a reading: held, or an offering due (UPKEEP_DUE), or null when simply active. */
 	public @Nullable Status state(ServerLevel level) {
-		return held(level);
+		BoundWill record = record(level);
+		return record == null ? null : Pacts.status(record);
 	}
 
 	/**
@@ -267,7 +348,10 @@ public final class AgreementHolder {
 		return !WorkerRoster.of(level.getServer()).workers(agreement.holder()).containsKey(spirit);
 	}
 
-	/** Its holder calls another presence under the same record, at no cost, when theirs is lost (D-S18); refused when their roster is full. */
+	/**
+	 * Its holder calls another presence under the same record, at no cost, when theirs is lost (D-S18); refused when their
+	 * roster is full. The Bound Will names its new presence.
+	 */
 	public Recall recall(ServerLevel level, ServerPlayer actor, long now) {
 		if (!Workers.enabled()) {
 			return Recall.DISABLED;
@@ -288,18 +372,20 @@ public final class AgreementHolder {
 		if (WorkerRoster.of(level.getServer()).full(actor.getUUID())) {
 			return Recall.ROSTER_FULL;
 		}
-		BoundWill record = BoundWills.of(level.getServer()).ledger().records().get(agreement.record());
+		BoundWills wills = BoundWills.of(level.getServer());
+		BoundWill record = wills.ledger().get(agreement.record());
 		WorkerEntity<?> presence = holds.call(level, actor.getUUID(), Pacts.counterpart(record.counterpart()));
 		if (presence == null) {
 			return Recall.UNAVAILABLE;
 		}
 		spirit = presence.getUUID();
 		block.setChanged();
+		wills.update(record.with(record.pact().withPresence(spirit)));
 		note(level, presence);
 		return Recall.RECALLED;
 	}
 
-	/** Its holder suspends or resumes it. */
+	/** Its holder suspends or resumes the agreement kept here, on its Bound Will (D-S9); a hold for upkeep lifts only by paying. */
 	public Toggle toggle(ServerLevel level, ServerPlayer player, long now) {
 		if (!Workers.enabled()) {
 			return Toggle.DISABLED;
@@ -311,12 +397,88 @@ public final class AgreementHolder {
 		if (standing != Standing.VALID) {
 			return Toggle.CONFLICTING;
 		}
-		if (Authority.isStandIn(player) || !agreement.holder().equals(player.getUUID())) {
+		return toggle(level, player, agreement.record(), now);
+	}
+
+	/**
+	 * Its holder suspends or resumes record {@code id} by itself, its place loaded or not (D-07's roster; critique 9): only
+	 * with the Concordance on, never a stand-in, only its holder; a hold for upkeep lifts only by paying.
+	 */
+	public static Toggle toggle(ServerLevel level, ServerPlayer player, UUID id, long now) {
+		if (!Workers.enabled()) {
+			return Toggle.DISABLED;
+		}
+		BoundWills wills = BoundWills.of(level.getServer());
+		BoundWill record = wills.ledger().get(id);
+		if (record == null || record.pact() == null) {
+			return Toggle.NOTHING;
+		}
+		if (Authority.isStandIn(player) || !record.holder().equals(player.getUUID())) {
 			return Toggle.NOT_HOLDER;
 		}
-		agreement = agreement.suspended(!agreement.suspended());
-		block.setChanged();
-		return agreement.suspended() ? Toggle.SUSPENDED : Toggle.RESUMED;
+		BoundWill next = Pacts.suspend(record, now);
+		if (next != null) {
+			wills.update(next);
+			return Toggle.SUSPENDED;
+		}
+		next = Pacts.resume(record, now);
+		if (next != null) {
+			wills.update(next);
+			return Toggle.RESUMED;
+		}
+		return Toggle.HELD_FOR_UPKEEP;
+	}
+
+	/**
+	 * One look at its upkeep at {@code now} (D-S3, D-S16): only with the Concordance on, this block's terms counting, and its
+	 * holder present near it; at most one period a look. D-04's perch ticker calls this; the anchor's definition has no upkeep
+	 * (D-P9).
+	 */
+	public Pacts.Event look(ServerLevel level, long now) {
+		if (!Workers.enabled() || verify(level, now) != Standing.VALID) {
+			return Pacts.Event.NONE;
+		}
+		BoundWills wills = BoundWills.of(level.getServer());
+		BoundWill record = wills.ledger().get(agreement.record());
+		BoundWill.Upkeep upkeep = record.pact().upkeep();
+		if (upkeep == null) {
+			return Pacts.Event.NONE;
+		}
+		ServerPlayer present = Authority.presentNear(level, record.holder(), block.getBlockPos(), Pacts.REACH);
+		Predicate<ItemStack> offering = offering(upkeep.offering());
+		Pacts.Due due = Pacts.due(record, present != null, wills.periods(record.id(), offering, upkeep.count()), now);
+		if (!due.changed() || due.take() && !wills.take(record.id(), offering, upkeep.count())) {
+			return Pacts.Event.NONE;
+		}
+		wills.update(due.next());
+		if (present != null && due.event() != Pacts.Event.NONE) {
+			present.sendSystemMessage(said(due.event(), due.next(), wills.periods(record.id(), offering, upkeep.count()), now));
+		}
+		return due.event();
+	}
+
+	/**
+	 * Its holder, in person and near it, pays offerings into its escrow (what matches, up to its cap); paid while held for
+	 * upkeep, it resumes at once. Returns how many were taken from {@code stack}. D-04's menu calls this (server-side action, D-S6).
+	 */
+	public int deposit(ServerLevel level, ServerPlayer player, ItemStack stack, long now) {
+		if (!Workers.enabled() || Authority.isStandIn(player) || verify(level, now) != Standing.VALID) {
+			return 0;
+		}
+		BoundWills wills = BoundWills.of(level.getServer());
+		BoundWill record = wills.ledger().get(agreement.record());
+		BoundWill.Upkeep upkeep = record.pact().upkeep();
+		if (upkeep == null || !record.holder().equals(player.getUUID())
+				|| Authority.presentNear(level, player.getUUID(), block.getBlockPos(), Pacts.REACH) != player) {
+			return 0;
+		}
+		int before = stack.getCount();
+		wills.deposit(record.id(), stack, offering(upkeep.offering()), upkeep.cap() * upkeep.count());
+		int taken = before - stack.getCount();
+		if (taken > 0) {
+			look(level, now);
+		}
+		return taken;
 	}
 
 	/** Its holder ends the agreement kept here, without breaking the block (G6). */
@@ -335,9 +497,9 @@ public final class AgreementHolder {
 	}
 
 	/**
-	 * Its holder ends record {@code id} (here, or with {@code home} null where no block keeps it): only with the Concordance
-	 * on, never a stand-in, only a living holder; the record goes once and its presence leaves, its load left at its place.
-	 * A second end finds nothing.
+	 * Its holder ends record {@code id} (here, or from D-07's roster with {@code home} null): only with the Concordance on,
+	 * never a stand-in, only a living holder; the record goes once; its escrow back into their inventory (overflow at their
+	 * feet), never to a dead player (D-S6); its presence leaves; the departure is kept. A second end finds nothing.
 	 */
 	public static Ended end(ServerLevel level, @Nullable Holds home, ServerPlayer player, UUID id, String reason, long now) {
 		if (!Workers.enabled()) {
@@ -346,43 +508,69 @@ public final class AgreementHolder {
 		if (Authority.isStandIn(player) || !player.isAlive()) {
 			return Ended.NOT_PERMITTED;
 		}
-		BoundWillLedger.Change released = BoundWills.of(level.getServer()).release(id, player.getUUID());
+		BoundWills.Released released = BoundWills.of(level.getServer()).release(id, player.getUUID());
 		if (released.outcome() != BoundWillLedger.Outcome.DONE) {
 			return released.outcome() == BoundWillLedger.Outcome.NOT_HOLDER ? Ended.NOT_HOLDER : Ended.NOTHING;
 		}
-		departed(level, home, id, player.getUUID());
+		for (ItemStack stack : released.escrow()) {
+			player.getInventory().placeItemBackInInventory(stack, Prediction.SERVER_ONLY);
+		}
+		departed(level, home, released.record(), reason, now);
 		return Ended.ENDED;
 	}
 
 	/**
 	 * Its block is broken (preRemoveSideEffects): with the Concordance on (D-S16), an agreement whose terms count here is
-	 * released once and its presence leaves its load here; one that does not count releases nothing.
+	 * released once, its escrow dropped where the block stood (whatever the drop rules: it was paid, not mined) and its
+	 * presence leaving its load here; one that does not count, or one broken while switched off, releases nothing: the
+	 * record stays, kept at this place, and the next seal here leaves it without its place (critique 5). (D-04 adds the
+	 * perch's "without its place".)
 	 */
 	public void broken(ServerLevel level, long now) {
 		if (agreement != null && Workers.enabled() && verify(level, now) == Standing.VALID) {
-			UUID id = agreement.record();
-			UUID holder = agreement.holder();
-			if (BoundWills.of(level.getServer()).release(id, holder).outcome() == BoundWillLedger.Outcome.DONE) {
-				departed(level, holds, id, holder);
+			BoundWills.Released released = BoundWills.of(level.getServer()).release(agreement.record(), agreement.holder());
+			if (released.outcome() == BoundWillLedger.Outcome.DONE) {
+				BlockPos pos = block.getBlockPos();
+				for (ItemStack stack : released.escrow()) {
+					Containers.dropItemStack(level, pos.getX(), pos.getY(), pos.getZ(), stack);
+				}
+				departed(level, holds, released.record(), Pacts.BROKEN, now);
 			}
 		}
 		agreement = null;
 		spirit = null;
 	}
 
-	/** Record {@code id} was released: the block keeping it lets its presence go (off the roster, leaving its load there) and forgets it. */
-	private static void departed(ServerLevel level, @Nullable Holds home, UUID id, UUID holder) {
-		if (home == null || home.holder().agreement == null || !id.equals(home.holder().agreement.record())) {
-			return;
-		}
-		AgreementHolder kept = home.holder();
-		if (kept.spirit != null) {
-			WorkerRoster.of(level.getServer()).remove(holder, kept.spirit);
-			if (level.getEntity(kept.spirit) instanceof Presence leaving) {
-				leaving.leave(level, home, kept.block.getBlockPos());
+	/**
+	 * Record {@code record} was released: its presence is struck off its holder's roster and leaves its load at the block
+	 * keeping it ({@code home}, or the loaded block at its place), which forgets it; the departure is kept (D-S6).
+	 */
+	private static void departed(ServerLevel near, @Nullable Holds home, BoundWill record, String reason, long now) {
+		MinecraftServer server = near.getServer();
+		BoundWill.Pact pact = record.pact();
+		Place place = pact == null ? null : pact.place();
+		ServerLevel where = home != null || place == null ? near : levelOf(server, place.dimension());
+		BlockPos seat = home != null ? home.holder().block.getBlockPos() : place == null ? null : Couriers.pos(place);
+		Holds kept = home != null ? home
+				: where != null && seat != null && where.isLoaded(seat) && where.getBlockEntity(seat) instanceof Holds found ? found : null;
+		boolean keeps = kept != null && kept.holder().agreement != null && record.id().equals(kept.holder().agreement.record());
+		UUID presence = pact != null && pact.presence() != null ? pact.presence() : keeps ? kept.holder().spirit : null;
+		if (presence != null) {
+			WorkerRoster.of(server).remove(record.holder(), presence);
+			Entity entity = where == null ? null : where.getEntity(presence);
+			if (entity instanceof Presence leaving) {
+				leaving.leave(where, kept, seat != null && where.isLoaded(seat) ? seat : entity.blockPosition());
 			}
 		}
-		kept.clear();
+		if (keeps) {
+			kept.holder().clear();
+		}
+		PactHistory.of(server).add(record.holder(), new Pacts.Departure(record.id(), record.agreement(), record.counterpart(), reason, now, place));
+	}
+
+	private static @Nullable ServerLevel levelOf(MinecraftServer server, String dimension) {
+		Identifier id = Identifier.tryParse(dimension);
+		return id == null ? null : server.getLevel(ResourceKey.create(Registries.DIMENSION, id));
 	}
 
 	private static Component conflicting() {
@@ -421,6 +609,7 @@ public final class AgreementHolder {
 		return switch (toggle) {
 			case SUSPENDED -> Component.translatable("message.jugcraft.concordance.workers.suspended");
 			case RESUMED -> Component.translatable("message.jugcraft.concordance.workers.resumed");
+			case HELD_FOR_UPKEEP -> Component.translatable("message.jugcraft.concordance.workers.held_for_upkeep");
 			case NOTHING -> Component.translatable("message.jugcraft.concordance.workers.no_agreement");
 			case NOT_HOLDER -> Component.translatable("message.jugcraft.concordance.workers.not_holder");
 			case CONFLICTING -> conflicting();
@@ -437,6 +626,38 @@ public final class AgreementHolder {
 			case CONFLICTING -> conflicting();
 			case DISABLED -> Component.translatable("message.jugcraft.concordance.disabled");
 		};
+	}
+
+	/** What one look tells its holder: an offering taken, a warning with its grace, a hold for upkeep, a resumption. */
+	private static Component said(Pacts.Event event, BoundWill record, int periods, long now) {
+		BoundWill.Upkeep upkeep = record.pact().upkeep();
+		Component what = offeringName(upkeep.offering());
+		return switch (event) {
+			case PAID -> Component.translatable("message.jugcraft.concordance.workers.upkeep_paid", periods);
+			case WARNED -> Component.translatable("message.jugcraft.concordance.workers.upkeep_warned", upkeep.count(), what,
+					days(upkeep.graceUntil() - now));
+			case SUSPENDED -> Component.translatable("message.jugcraft.concordance.workers.upkeep_held", upkeep.count(), what);
+			case RESUMED -> Component.translatable("message.jugcraft.concordance.workers.upkeep_resumed");
+			case NONE -> Component.empty();
+		};
+	}
+
+	/** Whether a stack is an offering of item tag {@code tag} (none matches a tag id that cannot be read). */
+	static Predicate<ItemStack> offering(String tag) {
+		Identifier id = Identifier.tryParse(tag);
+		if (id == null) {
+			return stack -> false;
+		}
+		TagKey<Item> key = TagKey.create(Registries.ITEM, id);
+		return stack -> !stack.isEmpty() && stack.is(key);
+	}
+
+	private static Component offeringName(String tag) {
+		return Component.translatableWithFallback("tag.item." + tag.replace(':', '.'), "#" + tag);
+	}
+
+	private static long days(long ticks) {
+		return Math.max(0L, (ticks + Pacts.DAY - 1) / Pacts.DAY);
 	}
 
 	public void load(ValueInput input) {
