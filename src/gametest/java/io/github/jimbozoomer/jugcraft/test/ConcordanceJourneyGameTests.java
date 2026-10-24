@@ -8,6 +8,7 @@ import io.github.jimbozoomer.jugcraft.concordance.ConcordanceData;
 import io.github.jimbozoomer.jugcraft.concordance.ConcordanceProgress;
 import io.github.jimbozoomer.jugcraft.concordance.CrucibleBlockEntity;
 import io.github.jimbozoomer.jugcraft.concordance.CrucibleStandBlockEntity;
+import io.github.jimbozoomer.jugcraft.concordance.Examination;
 import io.github.jimbozoomer.jugcraft.concordance.JugcraftConcordance;
 import io.github.jimbozoomer.jugcraft.concordance.KindledLanternItem;
 import io.github.jimbozoomer.jugcraft.concordance.LeyPylonBlockEntity;
@@ -16,51 +17,94 @@ import io.github.jimbozoomer.jugcraft.concordance.alchemy.Band;
 import io.github.jimbozoomer.jugcraft.concordance.alchemy.Formula;
 import io.github.jimbozoomer.jugcraft.concordance.alchemy.Operation;
 import io.github.jimbozoomer.jugcraft.concordance.alchemy.Product;
+import io.github.jimbozoomer.jugcraft.concordance.assay.Assaying;
+import io.github.jimbozoomer.jugcraft.concordance.celestial.Attunement;
+import io.github.jimbozoomer.jugcraft.concordance.celestial.Calendar;
+import io.github.jimbozoomer.jugcraft.concordance.celestial.Pattern;
 import io.github.jimbozoomer.jugcraft.concordance.courier.CourierLedger;
 import io.github.jimbozoomer.jugcraft.concordance.courier.CourierPostBlockEntity;
+import io.github.jimbozoomer.jugcraft.concordance.courier.Couriers;
 import io.github.jimbozoomer.jugcraft.concordance.diagnostic.Code;
 import io.github.jimbozoomer.jugcraft.concordance.diagnostic.Diagnostic;
 import io.github.jimbozoomer.jugcraft.concordance.ecology.Organism;
 import io.github.jimbozoomer.jugcraft.concordance.garden.Garden;
+import io.github.jimbozoomer.jugcraft.concordance.garden.OrganismCropBlock;
+import io.github.jimbozoomer.jugcraft.concordance.garden.VerdantBedBlock;
 import io.github.jimbozoomer.jugcraft.concordance.garden.VerdantBedBlockEntity;
+import io.github.jimbozoomer.jugcraft.concordance.journal.Journal;
 import io.github.jimbozoomer.jugcraft.concordance.progression.Route;
 import io.github.jimbozoomer.jugcraft.concordance.progression.StageDefinition;
 import io.github.jimbozoomer.jugcraft.concordance.progression.Stages;
+import io.github.jimbozoomer.jugcraft.concordance.resource.AstralLedger;
+import io.github.jimbozoomer.jugcraft.concordance.resource.BoundWill;
 import io.github.jimbozoomer.jugcraft.concordance.ritual.Readiness;
 import io.github.jimbozoomer.jugcraft.concordance.ritual.RitualMachine;
 import io.github.jimbozoomer.jugcraft.concordance.ritual.StructurePattern;
 import io.github.jimbozoomer.jugcraft.concordance.rules.Evidence;
 import io.github.jimbozoomer.jugcraft.concordance.rules.ResearchState;
+import io.github.jimbozoomer.jugcraft.concordance.sky.AstralClaims;
+import io.github.jimbozoomer.jugcraft.concordance.sky.AstrolabeItem;
+import io.github.jimbozoomer.jugcraft.concordance.sky.ObservatoryBlockEntity;
+import io.github.jimbozoomer.jugcraft.concordance.sky.Sky;
 import io.github.jimbozoomer.jugcraft.concordance.spire.ConcordSpire;
 import io.github.jimbozoomer.jugcraft.concordance.spire.SpireRecord;
+import io.github.jimbozoomer.jugcraft.concordance.spirits.BoundWills;
 import io.github.jimbozoomer.jugcraft.concordance.spirits.ClockworkPorterEntity;
+import io.github.jimbozoomer.jugcraft.concordance.spirits.PactHistory;
+import io.github.jimbozoomer.jugcraft.concordance.spirits.PactKeeping;
+import io.github.jimbozoomer.jugcraft.concordance.spirits.PactMenu;
+import io.github.jimbozoomer.jugcraft.concordance.spirits.PactPerchBlockEntity;
+import io.github.jimbozoomer.jugcraft.concordance.spirits.PactRequestPayload;
+import io.github.jimbozoomer.jugcraft.concordance.spirits.PactStatePayload;
+import io.github.jimbozoomer.jugcraft.concordance.spirits.Roster;
+import io.github.jimbozoomer.jugcraft.concordance.spirits.RosterRequestPayload;
+import io.github.jimbozoomer.jugcraft.concordance.spirits.RosterStatePayload;
+import io.github.jimbozoomer.jugcraft.concordance.spirits.SpiritAnchorBlockEntity;
+import io.github.jimbozoomer.jugcraft.concordance.spirits.StarReckoning;
+import io.github.jimbozoomer.jugcraft.concordance.spirits.StolasEntity;
+import io.github.jimbozoomer.jugcraft.concordance.spirits.StolasRegard;
+import io.github.jimbozoomer.jugcraft.concordance.spirits.WorkerRoster;
 import io.github.jimbozoomer.jugcraft.concordance.spirits.Workers;
+import io.github.jimbozoomer.jugcraft.concordance.spirits.WorkshopHandEntity;
 import io.github.jimbozoomer.jugcraft.concordance.stages.StageProgress;
+import io.github.jimbozoomer.jugcraft.concordance.worker.PactDefinition;
+import io.github.jimbozoomer.jugcraft.concordance.worker.Pacts;
+import io.github.jimbozoomer.jugcraft.concordance.worker.Status;
 import io.github.jimbozoomer.jugcraft.fluid.JugcraftFluids;
 import io.github.jimbozoomer.jugcraft.lair.MoltenSlagBlock;
 import io.github.jimbozoomer.jugcraft.machine.JugcraftMachines;
 import io.github.jimbozoomer.jugcraft.machine.MachineBlockEntity;
 import io.github.jimbozoomer.jugcraft.machine.MachineKind;
+import io.github.jimbozoomer.jugcraft.styx.JugcraftStyx;
+import io.github.jimbozoomer.jugcraft.styx.StyxState;
+import io.github.jimbozoomer.jugcraft.styx.Styxhexenhammer;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
+import java.util.UUID;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.stream.IntStream;
 import net.fabricmc.fabric.api.gametest.v1.GameTest;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.gametest.framework.GameTestHelper;
+import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 import net.minecraft.resources.ResourceKey;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
+import net.minecraft.world.entity.EntitySpawnReason;
+import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
@@ -93,6 +137,9 @@ import net.minecraft.world.phys.Vec3;
  * <p>
  * Since Concordance Chunk C (C-10), the living workshop (tools/concordance_journey.py WORKSHOP): one survival player plays it
  * from a manual start with real blocks, and every recipe its rows name loads.
+ * <p>
+ * Since Concordance Chunk D (D-09), the pact hall (tools/concordance_journey.py PACT): one ordinary survival player walks it
+ * whole, from Styx's hint to Stolas's departure, and every recipe its rows name loads.
  */
 public class ConcordanceJourneyGameTests {
 	/** A route: what reaching Adept takes and by which stage route, what reaching Master takes, its Spire and the ones refused. */
@@ -606,6 +653,370 @@ public class ConcordanceJourneyGameTests {
 					"The hopper's one bowl was bottled");
 			helper.assertTrue(mossBed.habitat(level) != null && mossBed.mixed(moss) && capBed.habitat(level) != null && capBed.mixed(cap),
 					"Dewmoss and Gloamcap two blocks apart are a mixed bed, each way");
+		});
+	}
+
+	// ---------------------------------------------------------------- Concordance Chunk D, D-09: the pact hall, whole
+
+	/**
+	 * Every recipe the pact hall's rows name (tools/acquisition.py PACT_HALL; check_acquisition holds this list to the rows).
+	 */
+	private static final List<String> PACT_HALL_RECIPES = List.of("verdant_bed", "sunpetal", "assayers_scale", "observatory", "astrolabe",
+			"pact_perch", "spirit_anchor", "courier_post", "porter_key");
+
+	// The pact hall in the yard (jugcraft-test:drone_depot, its floor laid first). WorkshopHands' corner (x 1 to 3, z 2 to 5)
+	// keeps the workshop hand's post, chest, crucible and anchor, as the hand's own tests place them.
+	/** Where Styxhexenhammer stands, the perch, the observatory, the Verdant Bed (its crop above it) and the Assayer's Scale. */
+	private static final BlockPos STYX_AT = new BlockPos(13, 1, 2);
+	private static final BlockPos PERCH_AT = new BlockPos(10, 1, 10);
+	private static final BlockPos OBSERVATORY_AT = new BlockPos(13, 1, 10);
+	private static final BlockPos BED_AT = new BlockPos(6, 1, 13);
+	private static final BlockPos SCALE_AT = new BlockPos(13, 1, 13);
+	/** Inventory slots past the hotbar for what the holder carries, so a use with the main hand never touches them. */
+	private static final int COMPACT_SLOT = 9;
+	private static final int ASTROLABE_SLOT = 20;
+	private static final int OFFERING_SLOT = 21;
+	/** Noon by the world's clock, for Stolas's thinking (ConcordanceWorkerGameTests' NOON is private). */
+	private static final long PACT_NOON = 6000L;
+
+	/** What Styx says to {@code listener} after his own line, as translation keys (his line first, as StyxGameTests reads it). */
+	private static List<String> styxHint(GameTestHelper helper, Styxhexenhammer styx, ServerPlayer listener) {
+		List<String> said = styx.says(listener).stream().map(ConcordanceWorkerGameTests::key).toList();
+		helper.assertTrue(!said.isEmpty() && said.getFirst().startsWith("message.jugcraft.styx.line."), "Styx's own line comes first: " + said);
+		return said.subList(1, said.size());
+	}
+
+	/** The keys of the journal's pacts section for {@code player}, as Journal.build sends it; empty when it is not shown. */
+	private static List<String> pactsSection(ServerPlayer player) {
+		return Journal.build(player).stream().filter(section -> section.id().equals("pacts")).findFirst()
+				.map(section -> section.lines().stream().map(line -> ConcordanceWorkerGameTests.key(line.text())).toList()).orElse(List.of());
+	}
+
+	/**
+	 * Styx's hint and the journal's pacts section name the same next step of Stolas's Regard for {@code player}, Styx with the
+	 * sky step while {@code sky} (none recorded), the journal with the sky step apart: the route with Styx and without him.
+	 */
+	private static void sameStep(GameTestHelper helper, Styxhexenhammer styx, ServerPlayer player, String step, boolean sky, String when) {
+		List<String> hint = sky ? List.of("message.jugcraft.styx.stolas." + step, "message.jugcraft.styx.stolas.sky")
+				: List.of("message.jugcraft.styx.stolas." + step);
+		helper.assertValueEqual(styxHint(helper, styx, player), hint, when + ": Styx tells the holder their own next step");
+		List<String> lines = pactsSection(player);
+		helper.assertTrue(lines.size() >= 2 && lines.get(0).equals("journal.jugcraft.pacts.regard." + step)
+				&& lines.get(1).equals(sky ? "journal.jugcraft.pacts.sky_needed" : "journal.jugcraft.pacts.sky_recorded"),
+				when + ": the journal's pacts section names the same step without him, and the sky apart: " + lines);
+	}
+
+	/** D-09: every recipe the pact hall's rows name loads (check_acquisition holds PACT_HALL_RECIPES to tools/acquisition.py PACT_HALL). */
+	@GameTest(maxTicks = 20)
+	public void thePactHallsRecipesLoad(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		List<String> missing = new ArrayList<>();
+		for (String name : PACT_HALL_RECIPES) {
+			if (level.recipeAccess().byKey(ResourceKey.create(Registries.RECIPE, Jugcraft.id(name))).isEmpty()) {
+				missing.add(name);
+			}
+		}
+		helper.assertTrue(missing.isEmpty(), "These pact-hall recipes did not load: " + missing);
+		helper.succeed();
+	}
+
+	/**
+	 * Concordance Chunk D, D-09 (E7, 09:174; tools/concordance_journey.py PACT, step by step): the whole pact path on one
+	 * ordinary survival player, in order. At each stage Styx tells them their own next step and the journal's pacts section
+	 * names the same one without him. They examine a feather, harvest a ripe Sunpetal by hand and dissolve iron nuggets at an
+	 * Assayer's Scale (no notes, never one of Styx's flowers); record the full moon at an observatory, which asks no research;
+	 * keep that observatory once they understand Celestial Attunement and let it gather eight full moons' resonance. They
+	 * craft a Pact Perch and place it; opening it, Stolas arrives and names every term; accepting with an empty astrolabe is
+	 * refused with its reason and spends nothing; filled at their observatory, they accept and the Open Hand Compact is spent
+	 * once. Star-reckoning recalls the full moon, once a game day, under the claim a master's recall makes; an observation
+	 * while the pact is active keeps its first obligation and masters Stolas's Regard once, which lets them seal a workshop
+	 * hand at an anchor bound to their Courier Post: it carries the crucible's own request once, its glowstone conserved.
+	 * Unpaid, the pact is warned, graced a day and suspended with nothing taken; an offering resumes it; away past a due date
+	 * and a grace, they come back to a warning with the whole grace. Ended from the roster, what was paid ahead comes back
+	 * once, Stolas makes his departing gesture and is gone, the departure is kept, and the Bound Wills and the courier ledger
+	 * stay sound. The path takes one tick; the test then waits out Stolas's departing gesture.
+	 */
+	// The drone tests' 16 by 8 by 16 air box, as theLivingWorkshopFromAManualStart reuses it (no new structure file).
+	@GameTest(structure = "jugcraft-test:drone_depot", maxTicks = 80)
+	public void thePactHallFromStyxToDeparture(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		for (int x = 0; x < 16; x++) {
+			for (int z = 0; z < 16; z++) {
+				helper.setBlock(new BlockPos(x, 0, z), Blocks.STONE);
+			}
+		}
+		MinecraftServer server = level.getServer();
+		PactDefinition offer = ConcordanceWorkerGameTests.stolasOffer();
+		Pattern full = Sky.catalog().pattern(ConcordanceWorkerGameTests.FULL_MOON);
+		ServerPlayer holder = TestPlayers.survivor(helper);
+		UUID id = holder.getUUID();
+		RateGate.forget(id);
+		ConcordanceWorkerGameTests.beside(helper, holder, PERCH_AT);
+		Inventory inventory = holder.getInventory();
+		for (int i = 0; i < offer.compact().size(); i++) {
+			PactDefinition.Cost cost = offer.compact().get(i);
+			inventory.setItem(COMPACT_SLOT + i, new ItemStack(BuiltInRegistries.ITEM.getValue(Identifier.parse(cost.item())), cost.count()));
+		}
+		ItemStack astrolabe = new ItemStack(Sky.ASTROLABE);
+		inventory.setItem(ASTROLABE_SLOT, astrolabe);
+		Styxhexenhammer styx = JugcraftStyx.WIZARD.create(level, EntitySpawnReason.COMMAND);
+		helper.assertTrue(styx != null, "Styxhexenhammer creates on a server");
+		Vec3 styxAt = helper.absoluteVec(Vec3.atBottomCenterOf(STYX_AT));
+		styx.snapTo(styxAt.x, styxAt.y, styxAt.z, 0.0F, 0.0F);
+		level.addFreshEntity(styx);
+		helper.assertTrue(styxHint(helper, styx, holder).isEmpty() && pactsSection(holder).isEmpty() && StolasRegard.step(holder) == null,
+				"A stranger to binding: Styx says only his line, and the journal has no pacts section");
+
+		// PACT step 1: the Binding Arts understood (granted, as the journey grants a route's research); a feather examined.
+		ConcordanceProgress.grant(holder, "jugcraft:first_light", ResearchState.UNDERSTOOD);
+		ConcordanceProgress.grant(holder, Workers.RESEARCH, ResearchState.UNDERSTOOD);
+		sameStep(helper, styx, holder, "examine", true, "The Binding Arts understood");
+		Examination.forget(id);
+		ItemStack feather = new ItemStack(Items.FEATHER);
+		helper.assertTrue(Examination.examine(holder, level, feather) != null && feather.getCount() == 1
+				&& ConcordanceWorkerGameTests.regard(holder) == ResearchState.ENCOUNTERED, "A feather examined begins Stolas's Regard; the feather stays");
+		sameStep(helper, styx, holder, "cultivate", true, "A feather examined");
+
+		// Step 2: Verdant Husbandry understood; a ripe Sunpetal on a Verdant Bed harvested by hand, by the server's own use.
+		ConcordanceProgress.grant(holder, Garden.RESEARCH, ResearchState.UNDERSTOOD);
+		helper.setBlock(BED_AT, Garden.VERDANT_BED.defaultBlockState().setValue(VerdantBedBlock.MOISTURE, VerdantBedBlock.WET));
+		OrganismCropBlock sunpetal = (OrganismCropBlock) Garden.SUNPETAL_CROP;
+		helper.setBlock(BED_AT.above(), sunpetal.getStateForAge(OrganismCropBlock.MAX_AGE));
+		helper.assertTrue(use(helper, holder, BED_AT.above(), ItemStack.EMPTY).consumesAction() && !sunpetal.isMaxAge(helper.getBlockState(BED_AT.above()))
+				&& ConcordanceWorkerGameTests.regard(holder) == ResearchState.OBSERVED, "A ripe Sunpetal harvested by hand: Stolas's Regard is observed");
+		sameStep(helper, styx, holder, "assay", true, "A crop harvested");
+
+		// Step 3: the Assay understood; nine iron nuggets weighed, then dissolved, at an Assayer's Scale.
+		ConcordanceProgress.grant(holder, Assaying.RESEARCH, ResearchState.UNDERSTOOD);
+		helper.setBlock(SCALE_AT, Assaying.SCALE);
+		ItemStack sample = new ItemStack(Items.IRON_NUGGET, 9);
+		use(helper, holder, SCALE_AT, sample);
+		helper.assertTrue(sample.getCount() == 9, "Weighed at the scale, nothing is taken yet");
+		use(helper, holder, SCALE_AT, sample);
+		helper.assertTrue(sample.isEmpty() && Assaying.balance(holder) > 0L && ConcordanceWorkerGameTests.regard(holder) == ResearchState.UNDERSTOOD,
+				"Dissolved there: Stolas's Regard is understood");
+		Set<String> evidence = ConcordanceProgress.knowledge(holder).progress(StolasRegard.RESEARCH).evidence().keySet();
+		helper.assertTrue(evidence.contains("examine:minecraft:feather")
+				&& evidence.stream().anyMatch(key -> key.startsWith("practice:" + Garden.ACTIVITY + ":"))
+				&& evidence.stream().anyMatch(key -> key.startsWith("practice:" + Assaying.ACTIVITY + ":"))
+				&& evidence.stream().noneMatch(key -> key.startsWith("notes:")), "Its evidence is the holder's own three deeds, no notes: " + evidence);
+		sameStep(helper, styx, holder, "serve", true, "A sample dissolved");
+
+		// Step 4, the sky step: an observatory its holder places (no Starwatcher yet, so it keeps no one) records the full moon.
+		ObservatoryBlockEntity observatory = ConcordanceWorkerGameTests.observatory(helper, OBSERVATORY_AT);
+		Sky.OBSERVATORY.setPlacedBy(level, helper.absolutePos(OBSERVATORY_AT), helper.getBlockState(OBSERVATORY_AT), holder, ItemStack.EMPTY);
+		long g = level.getGameTime();
+		helper.assertTrue(observatory.keeper() == null && !StolasRegard.skySeen(holder), "Placed by one who is no Starwatcher, it keeps no one; no sky yet");
+		helper.assertTrue(observatory.observe(holder, level, ConcordanceWorkerGameTests.NIGHT_ZERO, g, ConcordanceWorkerGameTests.ONLY_MOON) == 1
+				&& StolasRegard.skySeen(holder), "The full moon observed there: the sky step, which asks no research");
+		sameStep(helper, styx, holder, "serve", false, "An observation recorded");
+
+		// Step 5: Celestial Attunement understood, they align that observatory by using it; it gathers eight full moons.
+		ConcordanceProgress.grant(holder, Sky.RESEARCH, ResearchState.UNDERSTOOD);
+		helper.assertTrue(use(helper, holder, OBSERVATORY_AT, ItemStack.EMPTY).consumesAction() && id.equals(observatory.keeper()),
+				"A Starwatcher now, its holder keeps the observatory");
+		for (int k = 0; k < ObservatoryBlockEntity.CAPACITY / full.resonance(); k++) {
+			helper.assertValueEqual(observatory.gather(level, ConcordanceWorkerGameTests.NIGHT_ZERO + k * 8L * Pacts.DAY, g + k * Calendar.minGap(full),
+					ConcordanceWorkerGameTests.ONLY_MOON), "gathering", "Full moon " + k + " pays its keeper once");
+		}
+		helper.assertValueEqual(observatory.resonance(), (long) ObservatoryBlockEntity.CAPACITY, "Its store is full");
+
+		// Step 6: the perch, crafted by its recipe and placed by hand; Stolas invited; a refusal; acceptance.
+		ItemStack perchItem = craft(helper, Workers.PACT_PERCH_ITEM, 1, of(Items.STICK), of(Items.AMETHYST_SHARD), of(Items.STICK), null,
+				of(Items.DARK_OAK_LOG), null, null, of(Items.POLISHED_DEEPSLATE), null);
+		helper.assertTrue(place(helper, holder, PERCH_AT.below(), perchItem).consumesAction() && perchItem.isEmpty()
+				&& helper.getBlockState(PERCH_AT).is(Workers.PACT_PERCH), "The perch, crafted by its recipe, is placed by hand");
+		PactPerchBlockEntity perch = helper.getBlockEntity(PERCH_AT, PactPerchBlockEntity.class);
+		helper.assertTrue(id.equals(perch.holder().owner()), "It records its owner");
+		helper.assertTrue(use(helper, holder, PERCH_AT, ItemStack.EMPTY).consumesAction() && holder.containerMenu instanceof PactMenu,
+				"Its owner opens it: the pact screen");
+		PactMenu menu = (PactMenu) holder.containerMenu;
+		PactStatePayload invited = menu.lastSent();
+		helper.assertTrue(invited != null && invited.mode() == PactStatePayload.NEGOTIATE && invited.revision() == 1 && invited.notes().isEmpty()
+				&& invited.offers(PactRequestPayload.ACCEPT) && invited.terms().stream().map(PactStatePayload.Term::key).toList().equals(PactStatePayload.TERMS)
+				&& ConcordanceWorkerGameTests.keys(invited.beats())
+						.equals(offer.beats().stream().map(beat -> ConcordanceWorkerGameTests.PACT_KEY + "stolas.beat." + beat).toList()),
+				"Invited: his three beats and every term before anything is agreed, and nothing in the way: " + invited);
+		UUID visitorId = perch.visitor();
+		StolasEntity visitor = visitorId != null && level.getEntity(visitorId) instanceof StolasEntity found ? found : null;
+		helper.assertTrue(visitor != null && visitor.owner() == null && helper.absolutePos(PERCH_AT).equals(visitor.perch()) && visitor.listening()
+				&& visitor.cues().equals(List.of("arrive")), "Stolas alights on the perch, a visitor bound to no one, and listens");
+		helper.assertTrue(BoundWills.of(server).ledger().heldBy(id).isEmpty() && perch.holder().agreement() == null, "Nothing is stored yet");
+		PactStatePayload refused = ConcordanceWorkerGameTests.send(holder, menu, PactRequestPayload.ACCEPT, 0);
+		helper.assertTrue(ConcordanceWorkerGameTests.answered(refused, Pacts.Outcome.CANNOT_AFFORD.id) && !refused.result().get().done()
+				&& ConcordanceWorkerGameTests.said(refused).equals(ConcordanceWorkerGameTests.PACT_KEY + "answer.cannot_afford")
+				&& Integer.valueOf(offer.resonance()).equals(ConcordanceWorkerGameTests.arg(refused.result().get().message(), 0)),
+				"Accepting with an empty astrolabe is refused, and says why: the compact's resonance");
+		helper.assertTrue(ConcordanceWorkerGameTests.pocketed(holder, 1) && AstrolabeItem.charge(astrolabe) == 0 && perch.holder().agreement() == null
+				&& BoundWills.of(server).ledger().heldBy(id).isEmpty() && visitorId.equals(perch.visitor()) && !visitor.gone(),
+				"Nothing is spent or sealed, and Stolas stays");
+		helper.assertValueEqual(observatory.fill(holder, level, astrolabe), (long) AstrolabeItem.CAPACITY, "Their observatory fills their astrolabe");
+		long sealedAt = level.getGameTime();
+		PactStatePayload sealed = ConcordanceWorkerGameTests.send(holder, menu, PactRequestPayload.ACCEPT, 0);
+		helper.assertTrue(ConcordanceWorkerGameTests.answered(sealed, PactMenu.SEALED) && sealed.result().get().done() && sealed.mode() == PactStatePayload.KEEP,
+				"Accepted: sealed, and kept here");
+		int afterCompact = AstrolabeItem.CAPACITY - offer.resonance();
+		helper.assertTrue(ConcordanceWorkerGameTests.pocketed(holder, 0) && AstrolabeItem.charge(astrolabe) == afterCompact,
+				"The Open Hand Compact is spent once: its materials, and its resonance from the astrolabe");
+		BoundWill will = ConcordanceWorkerGameTests.recordOf(level, holder);
+		helper.assertTrue(will != null && PactDefinition.STOLAS.equals(will.counterpart()) && visitorId.equals(will.pact().presence())
+				&& id.equals(visitor.owner()) && will.pact().upkeep().due() == sealedAt + offer.period() && ConcordanceWorkerGameTests.escrowed(level, will.id()) == 0
+				&& "pact".equals(WorkerRoster.of(server).workers(id).get(visitorId).kind()),
+				"One Bound Will, its presence the visitor, on the roster as a pact; the compact paid the first period: " + will);
+		UUID record = will.id();
+		PactStatePayload again = ConcordanceWorkerGameTests.send(holder, menu, PactRequestPayload.ACCEPT, 0);
+		helper.assertTrue(ConcordanceWorkerGameTests.answered(again, Pacts.Outcome.TAKEN.id) && ConcordanceWorkerGameTests.pocketed(holder, 0)
+				&& AstrolabeItem.charge(astrolabe) == afterCompact && BoundWills.of(server).ledger().heldBy(id).size() == 1,
+				"Accepting again seals and spends nothing");
+		helper.assertTrue(BoundWills.of(server).problems().isEmpty(), "Sealed, the Bound Wills are sound: " + BoundWills.of(server).problems());
+
+		// Step 7: Star-reckoning through the screen, once a game day, on the master's claim; the first obligation.
+		long clock = Sky.time(level);
+		List<PactStatePayload.Choice> patterns = again.patterns();
+		int moon = IntStream.range(0, patterns.size()).filter(i -> patterns.get(i).id().equals(ConcordanceWorkerGameTests.FULL_MOON)).findFirst().orElse(-1);
+		helper.assertTrue(moon >= 0 && patterns.get(moon).ready() && again.offers(PactRequestPayload.RECALL), "Kept here, the screen offers the full moon to recall");
+		PactStatePayload recalled = ConcordanceWorkerGameTests.send(holder, menu, PactRequestPayload.RECALL, moon);
+		Attunement attuned = holder.getAttached(Sky.ATTUNEMENT);
+		int afterRecall = afterCompact - full.recallCost();
+		helper.assertTrue(ConcordanceWorkerGameTests.answered(recalled, Pacts.Reckoning.RECALLED.id) && AstrolabeItem.charge(astrolabe) == afterRecall
+				&& attuned != null && attuned.recalled() && ConcordanceWorkerGameTests.FULL_MOON.equals(attuned.pattern())
+				&& attuned.until() == sealedAt + Calendar.RECALL_TICKS && ConcordanceWorkerGameTests.done(level, perch, sealedAt) == 1,
+				"Star-reckoning: the full moon recalled at its recall cost, for 2,400 ticks, the game day's one");
+		helper.assertTrue(new AstralLedger.Claim(Calendar.occurrence(full, clock), sealedAt)
+				.equals(AstralClaims.of(server).ledger(id).claims().get(AstrolabeItem.recallKey(full))), "claimed under the key a master's recall claims");
+		PactStatePayload twice = ConcordanceWorkerGameTests.send(holder, menu, PactRequestPayload.RECALL, moon);
+		helper.assertTrue(ConcordanceWorkerGameTests.answered(twice, Pacts.Reckoning.QUOTA_SPENT.id) && AstrolabeItem.charge(astrolabe) == afterRecall,
+				"A second the same game day: the quota is spent, and nothing with it");
+		helper.assertTrue(StarReckoning.reckon(level, holder, perch.holder(), ConcordanceWorkerGameTests.FULL_MOON, clock, sealedAt + Pacts.DAY)
+				== Pacts.Reckoning.RECALLED_ALREADY && AstrolabeItem.charge(astrolabe) == afterRecall
+				&& ConcordanceWorkerGameTests.done(level, perch, sealedAt + Pacts.DAY) == 0,
+				"The next game day the same occurrence is recalled already, by the one shared claim: nothing spent, no quota used");
+		holder.closeContainer();
+		// The workshop hand's post, chest and crucible (its request filed); an anchor bound to the post before the Regard is mastered.
+		WorkshopHands.post(helper, holder, WorkshopHands.POST);
+		ChestBlockEntity chest = WorkshopHands.chest(helper, WorkshopHands.CHEST, 10);
+		CrucibleBlockEntity crucible = WorkshopHands.crucible(helper, WorkshopHands.CRUCIBLE, holder);
+		long request = crucible.request();
+		List<Long> requests = List.of(request);
+		SpiritAnchorBlockEntity anchor = WorkshopHands.anchor(helper, holder, WorkshopHands.ANCHOR);
+		helper.assertTrue(WorkshopHands.use(helper, holder, WorkshopHands.keyFor(helper, holder, WorkshopHands.POST), WorkshopHands.ANCHOR) == InteractionResult.SUCCESS
+				&& anchor.post() != null, "They bind a Spirit Anchor to their Courier Post with a Porter Key"
+						+ WorkshopHands.why(helper, holder, WorkshopHands.ANCHOR, WorkshopHands.POST));
+		helper.assertTrue(WorkshopHands.UNKNOWN.equals(WorkshopHands.key(WorkshopHands.seal(helper, holder, anchor))) && anchor.agreement() == null,
+				"Stolas's Regard understood, not mastered: no workshop hand yet");
+		WorkshopHands.conserved(helper, requests, WorkshopHands.PLAIN, 10, 0, "the crucible's request filed", chest, crucible);
+		helper.assertTrue(observatory.observe(holder, level, ConcordanceWorkerGameTests.NIGHT_ZERO, sealedAt + 200, ConcordanceWorkerGameTests.ONLY_MOON) == 1
+				&& ConcordanceWorkerGameTests.regard(holder) == ResearchState.MASTERED && ConcordanceWorkerGameTests.served(holder) == 1 && StarReckoning.kept(holder)
+				&& ConcordanceWorkerGameTests.earned(holder, ConcordanceProgress.advancementFor(StolasRegard.RESEARCH, ResearchState.MASTERED)),
+				"An observation while the pact is active keeps its first obligation: Stolas's Regard is mastered");
+		helper.assertTrue(observatory.observe(holder, level, ConcordanceWorkerGameTests.NIGHT_ZERO, sealedAt + 400, ConcordanceWorkerGameTests.ONLY_MOON) == 1
+				&& ConcordanceWorkerGameTests.served(holder) == 1, "Once: a second observation keeps nothing more");
+		sameStep(helper, styx, holder, "kept", false, "Stolas's Regard mastered");
+		styx.discard();
+
+		// Step 8: the workshop hand, unlocked by the mastery, carries the crucible's own request once.
+		RateGate.forget(id);
+		helper.assertValueEqual(WorkshopHands.key(WorkshopHands.seal(helper, holder, anchor)), WorkshopHands.SEALED, "Mastered: they seal a workshop hand there");
+		WorkshopHandEntity hand = level.getEntity(anchor.spirit()) instanceof WorkshopHandEntity found ? found : null;
+		helper.assertTrue(hand != null && id.equals(hand.owner()) && BoundWills.of(server).ledger().heldBy(id).size() == 2
+				&& BoundWills.of(server).problems().isEmpty(), "Its own Bound Will beside the pact's; the records sound");
+		UUID handRecord = anchor.agreement().record();
+		WorkshopHands.stand(helper, hand, 2.5, 1.0, 3.5);
+		long morning = WorkshopHands.morning(level, 5_200_000L);
+		long in = WorkshopHands.inHours();
+		CourierLedger ledger = CourierLedger.of(server);
+		helper.assertTrue(hand.think(level, in, morning) == Status.TRAVELLING && hand.task() == request, "The hand claims the crucible's own request");
+		WorkshopHands.conserved(helper, requests, WorkshopHands.PLAIN, 10, 0, "claimed", chest, crucible);
+		helper.assertTrue(hand.think(level, in, morning + 20) == Status.WORKING && ledger.ledger().get(request).progress().carried() == 2
+				&& WorkshopHands.matching(chest, WorkshopHands.PLAIN) == 8, "It picks up the two the crucible asked for");
+		WorkshopHands.conserved(helper, requests, WorkshopHands.PLAIN, 10, 0, "carried", chest, crucible);
+		helper.assertTrue(hand.think(level, in, morning + 40) == Status.WORKING && ledger.ledger().get(request) == null
+				&& WorkshopHands.matching(crucible, WorkshopHands.PLAIN) == 2 && anchor.agreement().done(morning + 40) == 1,
+				"and delivers them once: the request closed, one load counted");
+		WorkshopHands.conserved(helper, requests, WorkshopHands.PLAIN, 10, 0, "delivered", chest, crucible);
+		helper.assertTrue(ConcordanceProgress.knowledge(holder).progress(Workers.RESEARCH).evidence().containsKey("practice:" + Workers.ACTIVITY + ":spirit")
+				&& ConcordanceProgress.knowledge(holder).state(Workers.RESEARCH) == ResearchState.UNDERSTOOD,
+				"A spirit's service, one of the Binding Arts' three kinds, not mastering them by itself");
+
+		// Step 9, keeping: due a week after sealing with nothing paid ahead; warned, a day's grace, then suspended, nothing taken.
+		ConcordanceWorkerGameTests.beside(helper, holder, PERCH_AT);
+		inventory.setItem(OFFERING_SLOT, new ItemStack(Items.AMETHYST_SHARD, 1));
+		long due = sealedAt + ConcordanceWorkerGameTests.PERIOD_7;
+		helper.assertTrue(ConcordanceWorkerGameTests.stay(level, perch.holder(), sealedAt + 1_000L, due - 1_000L).isEmpty(), "Nothing falls due before its week");
+		helper.assertValueEqual(perch.holder().look(level, due), Pacts.Event.WARNED, "Due with none paid ahead: a warning");
+		helper.assertTrue(ConcordanceWorkerGameTests.pactOf(level, perch).pact().upkeep().graceUntil() == due + Pacts.DAY && perch.holder().held(level) == null
+				&& ConcordanceWorkerGameTests.stolas(level, perch).think(level, PACT_NOON, due) == Status.UPKEEP_DUE,
+				"A day of grace, the service still on; Stolas says an offering is due");
+		helper.assertTrue(ConcordanceWorkerGameTests.stay(level, perch.holder(), due + 1_000L, due + Pacts.DAY - 1_000L).isEmpty(), "Graced: nothing more within the day");
+		helper.assertValueEqual(perch.holder().look(level, due + Pacts.DAY), Pacts.Event.SUSPENDED, "Unpaid at its end: suspended for upkeep");
+		helper.assertTrue(perch.holder().held(level) == Status.UPKEEP_HELD
+				&& ConcordanceWorkerGameTests.stolas(level, perch).think(level, PACT_NOON, due + Pacts.DAY) == Status.UPKEEP_HELD
+				&& StarReckoning.reckon(level, holder, perch.holder(), ConcordanceWorkerGameTests.FULL_MOON, clock, due + Pacts.DAY) == Pacts.Reckoning.UPKEEP_HELD
+				&& AstrolabeItem.charge(astrolabe) == afterRecall, "The service stops: Stolas says so and reckons nothing");
+		helper.assertTrue(ConcordanceWorkerGameTests.shards(holder) == 1 && ConcordanceWorkerGameTests.escrowed(level, record) == 0
+				&& BoundWills.of(server).ledger().get(record) != null && BoundWills.of(server).problems().isEmpty(),
+				"Nothing is taken: the shard they carry is still theirs, and the pact stays");
+		long resumedAt = due + Pacts.DAY + 500L;
+		helper.assertValueEqual(PactKeeping.deposit(level, holder, perch.holder(), Items.AMETHYST_SHARD, resumedAt), 1, "They offer the shard they carry");
+		helper.assertTrue(perch.holder().held(level) == null
+				&& ConcordanceWorkerGameTests.pactOf(level, perch).pact().upkeep().due() == resumedAt + ConcordanceWorkerGameTests.PERIOD_7
+				&& ConcordanceWorkerGameTests.shards(holder) == 0 && ConcordanceWorkerGameTests.escrowed(level, record) == 0
+				&& ConcordanceWorkerGameTests.stolas(level, perch).think(level, PACT_NOON, resumedAt) != Status.UPKEEP_HELD,
+				"It pays the period held and resumes at once, the next a whole week on: one shard given, one taken, none ahead");
+		// Away past the next due date and past a grace; back, the whole grace.
+		TestPlayers.leave(holder);
+		helper.assertTrue(ConcordanceWorkerGameTests.stay(level, perch.holder(), resumedAt + 1_000L, resumedAt + ConcordanceWorkerGameTests.PERIOD_7 + 3 * Pacts.DAY).isEmpty()
+				&& perch.holder().held(level) == null && !ConcordanceWorkerGameTests.pactOf(level, perch).pact().upkeep().warned(),
+				"Away past the next due date and a grace: nothing is looked at, warned or held");
+		ServerPlayer back = TestPlayers.again(helper, id);
+		RateGate.forget(id);
+		ConcordanceWorkerGameTests.beside(helper, back, PERCH_AT);
+		long returned = resumedAt + ConcordanceWorkerGameTests.PERIOD_7 + 3 * Pacts.DAY + 500L;
+		helper.assertValueEqual(perch.holder().look(level, returned), Pacts.Event.WARNED, "Back, they are warned, never suspended at once");
+		helper.assertTrue(ConcordanceWorkerGameTests.pactOf(level, perch).pact().upkeep().graceUntil() == returned + Pacts.DAY && perch.holder().held(level) == null
+				&& ConcordanceWorkerGameTests.stolas(level, perch).think(level, PACT_NOON, returned) == Status.UPKEEP_DUE
+				&& ConcordanceWorkerGameTests.regard(back) == ResearchState.MASTERED, "with the whole day of grace from their return; nothing of theirs lost");
+		back.getInventory().setItem(OFFERING_SLOT, new ItemStack(Items.AMETHYST_SHARD, 3));
+		helper.assertValueEqual(PactKeeping.deposit(level, back, perch.holder(), Items.AMETHYST_SHARD, returned + 500L), 3, "They pay three");
+		helper.assertTrue(ConcordanceWorkerGameTests.escrowed(level, record) == 2 && ConcordanceWorkerGameTests.shards(back) == 0
+				&& ConcordanceWorkerGameTests.pactOf(level, perch).pact().upkeep().due() == returned + ConcordanceWorkerGameTests.PERIOD_7
+				&& !ConcordanceWorkerGameTests.pactOf(level, perch).pact().upkeep().warned() && BoundWills.of(server).problems().isEmpty(),
+				"One for the period due, two kept ahead: four shards given in all, two taken by upkeep, two kept, none lost");
+
+		// Ending, from the roster (D-07): the escrow back once, Stolas departs, the departure kept.
+		RosterStatePayload listing = ConcordanceWorkerGameTests.roster(back);
+		RosterStatePayload.Row row = ConcordanceWorkerGameTests.rowOf(listing, record);
+		helper.assertTrue(row != null && row.offers(RosterRequestPayload.END) && ConcordanceWorkerGameTests.key(row.name()).equals("entity.jugcraft.stolas")
+				&& ConcordanceWorkerGameTests.rowOf(listing, handRecord) != null, "Their roster lists the pact, end offered, and the workshop hand");
+		StolasEntity presence = ConcordanceWorkerGameTests.stolas(level, perch);
+		RosterStatePayload ended = ConcordanceWorkerGameTests.act(back, row, RosterRequestPayload.END);
+		Component told = ConcordanceWorkerGameTests.result(ended);
+		helper.assertTrue(ConcordanceWorkerGameTests.answered(ended, "ended") && ConcordanceWorkerGameTests.key(told).equals("message.jugcraft.concordance.pact.departed")
+				&& Integer.valueOf(2).equals(ConcordanceWorkerGameTests.arg(told, 2)), "Ended from the roster: told who departs, why, and that two came back");
+		helper.assertTrue(ConcordanceWorkerGameTests.shards(back) == 2 && BoundWills.of(server).escrow(record).isEmpty() && BoundWills.of(server).ledger().get(record) == null
+				&& perch.holder().agreement() == null && helper.getBlockState(PERCH_AT).is(Workers.PACT_PERCH),
+				"What was paid ahead comes back once (four given: two taken, two returned); the record goes; the perch stays");
+		helper.assertTrue(presence != null && presence.departing() && presence.gone() && !presence.isRemoved()
+				&& !WorkerRoster.of(server).workers(id).containsKey(presence.getUUID()) && perch.stolas(level) == null
+				&& presence.cues().equals(List.of("arrive", "refuse", "assent", "inspect", "depart")),
+				"Stolas makes his departing gesture, struck off at once; his cues in order: " + (presence == null ? "none" : presence.cues()));
+		List<Pacts.Departure> history = PactHistory.of(server).history(id);
+		helper.assertTrue(history.size() == 1 && record.equals(history.getFirst().record()) && Pacts.ENDED.equals(history.getFirst().reason())
+				&& Couriers.place(level, helper.absolutePos(PERCH_AT)).equals(history.getFirst().place()), "The departure is kept once, with its reason and place: " + history);
+		helper.assertValueEqual(pactsSection(back), List.of("journal.jugcraft.pacts.regard.kept", "journal.jugcraft.pacts.sky_recorded",
+				"journal.jugcraft.pacts.kept", "journal.jugcraft.pacts.departed"), "The journal: the Regard kept, the sky recorded, the hand kept, Stolas's departure");
+		helper.assertTrue(ConcordanceWorkerGameTests.rowOf(ended, record) == null && ConcordanceWorkerGameTests.rowOf(ended, handRecord) != null
+				&& Roster.act(back, Roster.RECORD, record, RosterRequestPayload.END, level.getGameTime()).reason().equals("nothing")
+				&& ConcordanceWorkerGameTests.shards(back) == 2 && PactHistory.of(server).history(id).size() == 1, "Ending again returns nothing more");
+		helper.assertTrue(!StyxState.get(level).claimed(id) && ConcordanceWorkerGameTests.count(back, "jugcraft:stolas_starflower") == 0
+				&& ConcordanceWorkerGameTests.count(back, "jugcraft:ravenquill_lupine") == 0
+				&& ConcordanceWorkerGameTests.count(back, "jugcraft:amethyst_mourningbell") == 0,
+				"The whole way without Styx's gift: a feather examined and amethyst offered, never one of his flowers");
+		helper.assertTrue(BoundWills.of(server).problems().isEmpty() && CourierLedger.of(server).problems().isEmpty(),
+				"The Bound Wills and the courier ledger are sound: " + BoundWills.of(server).problems() + ", " + CourierLedger.of(server).problems());
+		helper.runAfterDelay(StolasEntity.Gesture.DEPART.ticks + 2, () -> {
+			helper.assertTrue(presence.isRemoved() && ConcordanceWorkerGameTests.stolases(helper).isEmpty(), "His gesture over, Stolas is gone from the world");
+			helper.succeed();
 		});
 	}
 }

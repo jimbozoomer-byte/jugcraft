@@ -11877,7 +11877,9 @@ def check_acquisition(registered):
     each; none of those sources gives the owner's armour tiers the record keeps creative-only. The living workshop's rows
     (tools/acquisition.py WORKSHOP and FACTORY; Concordance Chunk C, C-10) are each registered and made as they say (a
     recipe of their own result, a bench working, or a rite RITUALS pages), every item Chunk C registered is a WORKSHOP
-    row, and the journey's server test loads every recipe they name. Only data is read, and
+    row, and the journey's server test loads every recipe they name; the pact hall's rows (PACT_HALL; Concordance Chunk D,
+    D-09) likewise, every item Chunk D registered (CHUNK_D_ITEMS, which is tools/concordance_pacts.py's BLOCKS) a PACT_HALL
+    row, and the same test class loads their recipes (PACT_HALL_RECIPES). Only data is read, and
     the loot classes' few lines named above: what Java alone gives (a creature's drops coded in its class) is not seen.
     (check_arms_variants forbids the trophies' recipes on its own; nothing here relaxes it.)"""
     import acquisition as aq
@@ -12122,25 +12124,47 @@ def check_acquisition(registered):
     for item in aq.CHUNK_C_ITEMS:
         if item not in aq.WORKSHOP:
             err(f"acquisition: {item}, registered by Concordance Chunk C, is no row of WORKSHOP (tools/acquisition.py)")
-    for item, how in rows.items():
-        if item not in registered:
-            err(f"acquisition: the workshop's {item} is not registered")
-        recipe = aq.recipe_file(item, how)
-        kind, _, name = how.partition(":")
-        if recipe is not None:
-            path = DATA / MOD / "recipe" / f"{recipe}.json"
-            result = ((load(path) or {}) if path.is_file() else {}).get("result")
-            if (result.get("id") if isinstance(result, dict) else result) != f"{MOD}:{item}":
-                err(f"acquisition: recipe/{recipe}.json does not make the workshop's {item} (its own result)")
-        elif kind == "working":
-            working = DATA / MOD / "concordance" / "working" / f"{name}.json"
-            if not working.is_file() or (load(working) or {}).get("result") != f"{MOD}:{item}":
-                err(f"acquisition: concordance/working/{name}.json does not make the workshop's {item}")
-        elif kind == "ritual":
-            if item in aq.FACTORY or aq.RITUALS.get(item) != name:
-                err(f"acquisition: the workshop's {item} is made by the ritual {name}: RITUALS must page it for {item}")
-        else:
-            err(f"acquisition: the workshop's {item} is made by {how!r}, not a recipe, a working or a ritual")
+
+    def made_as(table, what, factory=()):
+        """Each row of {table} is registered and made as it says: by a crafting recipe whose own result it is, a bench
+        working that makes it, or a ritual RITUALS pages for it (never a factory part)."""
+        for item, how in table.items():
+            if item not in registered:
+                err(f"acquisition: {what}'s {item} is not registered")
+            recipe = aq.recipe_file(item, how)
+            kind, _, name = how.partition(":")
+            if recipe is not None:
+                path = DATA / MOD / "recipe" / f"{recipe}.json"
+                result = ((load(path) or {}) if path.is_file() else {}).get("result")
+                if (result.get("id") if isinstance(result, dict) else result) != f"{MOD}:{item}":
+                    err(f"acquisition: recipe/{recipe}.json does not make {what}'s {item} (its own result)")
+            elif kind == "working":
+                working = DATA / MOD / "concordance" / "working" / f"{name}.json"
+                if not working.is_file() or (load(working) or {}).get("result") != f"{MOD}:{item}":
+                    err(f"acquisition: concordance/working/{name}.json does not make {what}'s {item}")
+            elif kind == "ritual":
+                if item in factory or aq.RITUALS.get(item) != name:
+                    err(f"acquisition: {what}'s {item} is made by the ritual {name}: RITUALS must page it for {item}")
+            else:
+                err(f"acquisition: {what}'s {item} is made by {how!r}, not a recipe, a working or a ritual")
+    made_as(rows, "the workshop", aq.FACTORY)
+    # Concordance Chunk D (D-09): the pact hall's rows (tools/acquisition.py PACT_HALL) likewise; every item Chunk D
+    # registered (CHUNK_D_ITEMS: the blocks tools/concordance_pacts.py registers) is a PACT_HALL row; and the journey's
+    # server test loads every recipe they name (PACT_HALL_RECIPES).
+    import concordance_pacts as pacts_tables
+    if sorted(aq.CHUNK_D_ITEMS) != sorted(pacts_tables.BLOCKS):
+        err(f"acquisition: CHUNK_D_ITEMS {sorted(aq.CHUNK_D_ITEMS)} must be every item Concordance Chunk D registers "
+            f"(tools/concordance_pacts.py BLOCKS: {sorted(pacts_tables.BLOCKS)})")
+    for item in aq.CHUNK_D_ITEMS:
+        if item not in aq.PACT_HALL:
+            err(f"acquisition: {item}, registered by Concordance Chunk D, is no row of PACT_HALL (tools/acquisition.py)")
+    listed = re.search(r"PACT_HALL_RECIPES = List\.of\(([^)]*)\)", journey)
+    wanted = {aq.recipe_file(item, how) for item, how in aq.PACT_HALL.items()} - {None}
+    if "public void thePactHallsRecipesLoad(" not in journey or not listed \
+            or set(re.findall(r'"([a-z_]+)"', listed.group(1))) != wanted:
+        err("ConcordanceJourneyGameTests.thePactHallsRecipesLoad must load the recipe of every pact-hall row "
+            f"(PACT_HALL_RECIPES: {sorted(wanted)})")
+    made_as(aq.PACT_HALL, "the pact hall")
     # The owner's armour tiers the record keeps creative-only: nothing gives them.
     for tier in aq.CREATIVE_ONLY:
         for piece in gear.ARMOR:
@@ -14213,6 +14237,16 @@ def check_concordance(registered):
         for key in re.findall(r'"(book\.[a-z_.0-9]+|research_node\.[a-z_.0-9]+)"', text):
             if key not in lang:
                 err(f"codex {path.relative_to(book)}: missing lang {key}")
+    # Concordance Chunk D, D-09 (unit 4's review, Data 2): no two entries of one category share a place on its map, where
+    # Modonomicon would draw one over the other (units 2 and 4 placed Binding entries by hand: (0,4), (2,4) and (4,4)).
+    places = {}
+    for path in sorted((book / "entries").rglob("*.json")):
+        entry = load(path) or {}
+        place = (entry.get("category"), entry.get("x"), entry.get("y"))
+        if place in places:
+            err(f"codex {path.relative_to(book)}: drawn at {place[1]},{place[2]} of {place[0]}, where {places[place]} is")
+        else:
+            places[place] = entry.get("id")
     # A codex link (Modonomicon's entry://) names an entry of this book (Concordance Chunk C, C-04, C-P42). Modonomicon
     # will not open a book with a broken link (allow_open_book_with_invalid_links defaults to false), so one stale link
     # would close the whole codex.
@@ -14294,6 +14328,7 @@ def check_concordance(registered):
     check_stolas_regard(co, root, lang, research)
     check_pact_screen(co, lang)
     check_stolas_body(co)
+    check_pact_network(co)
     check_roster_screen(co, lang)
     check_logistics(co, root, lang, registered)
     check_hand(co, root, lang, research)
@@ -14318,6 +14353,7 @@ def check_concordance(registered):
     check_delivery()
     check_game_test_entrypoints()
     check_load_card()
+    check_pact_hall_load_card()
     check_workshop_client_evidence()
 
 
@@ -14597,6 +14633,15 @@ def check_game_test_entrypoints():
             err(f"src/gametest/{path.name}: has game tests but is not a fabric-gametest or fabric-client-gametest entrypoint")
 
 
+PACT_HALL_CARD = "ConcordancePactHallLoadGameTests"
+LOAD_CARDS = ("ConcordanceWorkshopLoadGameTests", PACT_HALL_CARD)
+
+
+def load_card_id(name):
+    """Fabric's id for a card's loadCard: the test mod's id, then the class and method in snake case (TestAnnotationLocator)."""
+    return "jugcraft-test:" + re.sub(r"([a-z])([A-Z])", r"\1_\2", f"{name}_loadCard").lower()
+
+
 def check_load_card():
     """Concordance Chunk C, C-10 (C-P20, C-P66): the workshop load card. It stays opted in: it measures only when Fabric's
     filter names it alone, so ordinary runs pass it at once. It names Fabric's own id for itself, reads whole 100-tick
@@ -14614,7 +14659,7 @@ def check_load_card():
         return
     text = path.read_text(encoding="utf-8")
     code = re.sub(r"//[^\n]*|/\*.*?\*/", " ", text, flags=re.S)
-    ident = "jugcraft-test:" + re.sub(r"([a-z])([A-Z])", r"\1_\2", f"{name}_loadCard").lower()
+    ident = load_card_id(name)
     if f'public static final String ID = "{ident}";' not in code:
         err(f"{name}.java: ID must be Fabric's id for loadCard, {ident}")
     if 'static final String FILTER = "fabric-api.gametest.filter";' not in code or "return ID.equals(System.getProperty(FILTER));" not in code:
@@ -14656,24 +14701,120 @@ def check_load_card():
     mod = load(ROOT / "src" / "gametest" / "resources" / "fabric.mod.json") or {}
     if f"io.github.jimbozoomer.jugcraft.test.{name}" not in mod.get("entrypoints", {}).get("fabric-gametest", []):
         err(f"src/gametest/resources/fabric.mod.json: {name} must be a fabric-gametest entrypoint")
-    if f"fabric-api.gametest.filter={ident}" not in (ROOT / "docs" / "TESTING.md").read_text(encoding="utf-8"):
+    if not re.search(rf"fabric-api\.gametest\.filter={re.escape(ident)}(?![\w-])", (ROOT / "docs" / "TESTING.md").read_text(encoding="utf-8")):
         err("docs/TESTING.md: the load card's command must select its id")
-    # The workflow, if it carries the card: the filter appears once, inside the load-card job, and that job's own if is
-    # exactly the manual-run guard, so no ordinary run selects the card and the card's job runs nothing else. Whole-line
-    # comments are dropped first, so a guard or filter only in a comment does not count.
+    # The workflow, if it carries the cards: each card's filter appears once, all inside the load-card job (the workshop's
+    # card always among them), and that job's own if is exactly the manual-run guard, so no ordinary run selects a card.
+    # Whole-line comments are dropped first, so a guard or filter only in a comment does not count.
     workflow = (ROOT / ".github" / "workflows" / "build.yml").read_text(encoding="utf-8")
     workflow = re.sub(r"^[ \t]*#[^\n]*\n", "", workflow, flags=re.M)
     job = re.search(r"^  load-card:\n(.*?)(?=^  [A-Za-z][\w-]*:\s*$|\Z)", workflow, re.S | re.M)
     body = job.group(1) if job else ""
-    if "fabric-api.gametest.filter" in workflow and (workflow.count("fabric-api.gametest.filter") != 1
-                                                     or f"fabric-api.gametest.filter={ident}" not in body
-                                                     or not re.search(r"^    if: github\.event_name == 'workflow_dispatch' && inputs\.load_card[ \t]*$",
-                                                                      body, re.M)):
-        err(".github/workflows/build.yml: the load card's filter must appear once, in the load-card job, whose if must be exactly "
-            "github.event_name == 'workflow_dispatch' && inputs.load_card")
+    if "fabric-api.gametest.filter" in workflow:
+        named = re.findall(r"fabric-api\.gametest\.filter=([\w:.-]+)", workflow)
+        known = {load_card_id(card) for card in LOAD_CARDS}
+        if (workflow.count("fabric-api.gametest.filter") != len(named) or len(set(named)) != len(named) or not set(named) <= known
+                or ident not in named or sorted(re.findall(r"fabric-api\.gametest\.filter=([\w:.-]+)", body)) != sorted(named)
+                or not re.search(r"^    if: github\.event_name == 'workflow_dispatch' && inputs\.load_card[ \t]*$", body, re.M)):
+            err(".github/workflows/build.yml: each load card's filter must appear once, only in the load-card job (the workshop's card "
+                "among them), whose if must be exactly github.event_name == 'workflow_dispatch' && inputs.load_card")
     workload = (test_dir / "ConcordanceWorkloadGameTests.java").read_text(encoding="utf-8")
     if "public void gleanersHeartSearch(GameTestHelper helper)" not in workload or "GleanerBlockEntity.HEART_REACH" not in workload:
         err("ConcordanceWorkloadGameTests.java: the Gleaner's Heart search must be timed (C-P21)")
+
+
+def check_pact_hall_load_card():
+    """Concordance Chunk D, D-09 (D-P128 to D-P132): the pact hall's load card, opted in as the workshop's (check_load_card holds
+    the workflow's filters). It names Fabric's own id for itself and passes at once unless selected; shares the workshop card's
+    Measure, so its WINDOW and MEASURED are that card's; has room in maxTicks for its phases; force-loads its yard from begin();
+    never schedules an entry for every remaining tick; drains every player's channel; keeps its conversations inside
+    PactSessions' timeout and reads the roster as often as its screen asks; and asks each hand for no more loads than the span
+    allows. It builds D-09's hall (eight perches keeping Stolas's pact with offerings in escrow, the guest's conversation,
+    holder 0's page, holder 1's roster, four hands bound to their posts and fed by requests), checks both ledgers and D-09's
+    rules, and times a look, a think, a page and a roster listing. It is registered, docs/TESTING.md names its id, and the
+    load-card job, if the workflow has one, runs it and shows its lines. Comments are ignored."""
+    test_dir = ROOT / "src" / "gametest" / "java" / "io" / "github" / "jimbozoomer" / "jugcraft" / "test"
+    path = test_dir / f"{PACT_HALL_CARD}.java"
+    name = f"{PACT_HALL_CARD}.java"
+    if not path.exists():
+        err(f"src/gametest/{name}: missing (Concordance Chunk D's pact hall load card, D-09)")
+        return
+
+    def strip(text):
+        return re.sub(r"//[^\n]*|/\*.*?\*/", " ", text, flags=re.S)
+
+    code = strip(path.read_text(encoding="utf-8"))
+    ident = load_card_id(PACT_HALL_CARD)
+    if f'public static final String ID = "{ident}";' not in code:
+        err(f"{name}: ID must be Fabric's id for loadCard, {ident}")
+    if 'static final String FILTER = "fabric-api.gametest.filter";' not in code or "return ID.equals(System.getProperty(FILTER));" not in code:
+        err(f"{name}: selected() must compare Fabric's filter property with ID exactly")
+    if not re.search(r"public void loadCard\(GameTestHelper helper\) \{\s*if \(!selected\(\)\) \{\s*helper\.succeed\(\);\s*return;\s*\}"
+                     r"\s*new Card\(helper\)\.begin\(\);\s*\}", code):
+        err(f"{name}: loadCard must pass at once unless it is selected, and selected, begin the card (new Card(helper).begin())")
+    if "@GameTest(maxTicks = MAX_TICKS, skyAccess = true)" not in code:
+        err(f"{name}: loadCard's @GameTest must take maxTicks = MAX_TICKS")
+    number = re.compile(r"static final int ([A-Z_]+) = ([0-9_]+);")
+    numbers = {key: int(value.replace("_", "")) for key, value in number.findall(code)}
+    workshop_card = strip((test_dir / "ConcordanceWorkshopLoadGameTests.java").read_text(encoding="utf-8"))
+    workshop = {key: int(value.replace("_", "")) for key, value in number.findall(workshop_card)}
+    wanted = ("WINDOW", "MEASURED", "WARMUP_CAP", "MAX_TICKS", "OFF", "HOLDERS", "HANDS", "REQUEST_TICKS", "MIN_LOADS", "CONVERSE_TICKS",
+              "ROSTER_TICKS")
+    missing = [key for key in wanted if key not in numbers]
+    if missing:
+        err(f"{name}: missing constants {missing}")
+    else:
+        if numbers["WINDOW"] != workshop.get("WINDOW") or numbers["MEASURED"] != workshop.get("MEASURED"):
+            err(f"{name}: WINDOW and MEASURED must be the workshop card's, whose Measure it shares")
+        if numbers["MEASURED"] < 6000 or numbers["MEASURED"] % numbers["WINDOW"]:
+            err(f"{name}: MEASURED must be at least 6,000 ticks in whole windows")
+        if numbers["MAX_TICKS"] < 2 * numbers["WARMUP_CAP"] + 2 * numbers["MEASURED"] + 2 * numbers["WINDOW"] + 100:
+            err(f"{name}: MAX_TICKS leaves no room for two warm-ups and two measured spans")
+        if numbers["OFF"] < 9:
+            err(f"{name}: OFF must keep the yard clear of the default structure's barrier walls (x and z of 8)")
+        if numbers["HOLDERS"] != 8 or numbers["HANDS"] != 4:
+            err(f"{name}: D-09's hall has eight holders and four workshop hands")
+        sessions = (ROOT / "src" / "main" / "java" / "io" / "github" / "jimbozoomer" / "jugcraft" / "concordance" / "spirits"
+                    / "PactSessions.java").read_text(encoding="utf-8")
+        timeout = re.search(r"\bTIMEOUT_TICKS = (\d+)L;", sessions)
+        if not timeout or numbers["CONVERSE_TICKS"] >= int(timeout.group(1)):
+            err(f"{name}: CONVERSE_TICKS must keep each conversation inside PactSessions.TIMEOUT_TICKS")
+        roster = ROOT / "tools" / "concordance_roster.py"
+        refresh = re.search(r"^REFRESH_TICKS = (\d+)", roster.read_text(encoding="utf-8"), re.M) if roster.exists() else None
+        if not refresh or numbers["ROSTER_TICKS"] != int(refresh.group(1)):
+            err(f"{name}: ROSTER_TICKS must read the roster as often as its screen asks (tools/concordance_roster.py REFRESH_TICKS)")
+        if numbers["MIN_LOADS"] < 1 or numbers["MIN_LOADS"] * numbers["REQUEST_TICKS"] > numbers["MEASURED"]:
+            err(f"{name}: MIN_LOADS must be loads each hand can be asked for while measured (at most MEASURED / REQUEST_TICKS)")
+    if not re.search(r"\bsetChunkForced\([^;]*,\s*true\)", code) or not re.search(r"\bvoid begin\(\)\s*\{[^}]*\bforce\(\);", code):
+        err(f"{name}: loadCard must force-load its yard's chunks (setChunkForced(..., true), from begin())")
+    if "i < channels.size()" not in code or "readOutbound()" not in code:
+        err(f"{name}: every player's channel must be drained every tick (nothing a test player is sent may pile up)")
+    for needle, what in (("getTickTimesNanos()", "the server's ring of tick times"), ("ledger.problems()", "the courier ledger's own check"),
+                         ("BoundWills.of(server).problems()", "the Bound Wills' own check"), ("Signs.observe(", "the signs it would be sent"),
+                         ("Workers.PACT_PERCH.setPlacedBy(", "perches placed by their holders"),
+                         ("PactPerchBlockEntity.sealing(", "pacts sealed under Stolas's offer"), ("PactKeeping.deposit(", "offerings in each pact's escrow"),
+                         ("PactMenu.open(guest,", "the guest's conversation"), ("PactMenu.open(reader,", "holder 0 reading their pact"),
+                         ("PactRequestPayload.CHOOSE", "conversations kept open by their readers"), ("Roster.receive(", "the open roster"),
+                         ("RosterRequestPayload.OPEN", "the roster read as its screen reads it"),
+                         ("WorkshopHands.keyFor(", "anchors bound to posts with a Porter Key"), ("WorkshopHands.seal(", "hands sealed as a player seals them"),
+                         ("Couriers.request(", "requests filed at the posts"), ("PactKeeping.tick(", "a perch's look timed"),
+                         ("Roster.list(", "a roster listing timed"), ("Pacts.WRITE_TICKS + PactPerchBlockEntity.LOOK_TICKS", "each pact looked at lately")):
+        if needle not in code:
+            err(f"{name}: D-09's hall lacks {what}")
+    if "onEachTick" in code:
+        err(f"{name}: no onEachTick (its entry for every remaining tick is test work that shrinks as the run goes on)")
+    if 'LOGGER.info("Pact hall load card | {}", line)' not in code:
+        err(f'{name}: its lines must begin "Pact hall load card |" (the workflow\'s notice reads them)')
+    mod = load(ROOT / "src" / "gametest" / "resources" / "fabric.mod.json") or {}
+    if f"io.github.jimbozoomer.jugcraft.test.{PACT_HALL_CARD}" not in mod.get("entrypoints", {}).get("fabric-gametest", []):
+        err(f"src/gametest/resources/fabric.mod.json: {PACT_HALL_CARD} must be a fabric-gametest entrypoint")
+    selects = re.compile(rf"fabric-api\.gametest\.filter={re.escape(ident)}(?![\w-])")
+    if not selects.search((ROOT / "docs" / "TESTING.md").read_text(encoding="utf-8")):
+        err("docs/TESTING.md: the pact hall card's command must select its id")
+    workflow = re.sub(r"^[ \t]*#[^\n]*\n", "", (ROOT / ".github" / "workflows" / "build.yml").read_text(encoding="utf-8"), flags=re.M)
+    job = re.search(r"^  load-card:\n(.*?)(?=^  [A-Za-z][\w-]*:\s*$|\Z)", workflow, re.S | re.M)
+    if job and (not selects.search(job.group(1)) or "Pact hall load card |" not in job.group(1)):
+        err(".github/workflows/build.yml: the load-card job must run the pact hall card too, and show its lines as a notice")
 
 
 WORKSHOP_CLIENT = "io.github.jimbozoomer.jugcraft.test.ConcordanceWorkshopClientGameTests"
@@ -18894,6 +19035,59 @@ def check_stolas_body(co):
     for needle in ("StolasEntity.Gesture.ARRIVE.animation.equals(", "StolasEntity.Gesture.DEPART.animation.equals("):
         if needle not in shots:
             err(f"ConcordancePactClientGameTests: his real arrival and departure play their gestures ({needle})")
+    # D-09: photographed from his front, and a timed sequence through his refusal, rising inside its clip. The camera stands
+    # south of his perch facing north (yaw 180), in the body's shots and in Jade's (at least twice; the unit 5 critique).
+    # Read without comments, so a step commented out no longer counts (the unit 5 review).
+    front = '"tp @a %.1f %d %.1f 180 0", perch.getX() + 0.5, perch.getY(), perch.getZ() + 3.0)'
+    code = re.sub(r"//[^\n]*|/\*.*?\*/", " ", shots, flags=re.S)
+    if code.count(front) < 2 or "perch.getZ() - 2.5" in code:
+        err("ConcordancePactClientGameTests: Stolas is photographed from his front, south of his perch, facing him (D-P133)")
+    length = pa.GESTURE_TIMES["refuse"][0]
+    times = list(pa.REFUSAL_SEQUENCE)
+    if times != sorted(set(times)) or not all(0 < t < length for t in times) or len(times) != len(pa.SEQUENCE_SHOTS):
+        err(f"tools/concordance_pacts.py REFUSAL_SEQUENCE: rising times inside his refusal's {length} s, one a shot: {times}")
+    wanted = "private static final double[] REFUSAL_TIMES = {" + ", ".join(str(t) for t in times) + "};"
+    if wanted not in code or "refusalSequence(context, server, perch);" not in code:
+        err(f"ConcordancePactClientGameTests: his refusal is photographed as a timed sequence ({wanted})")
+    for name in pa.SEQUENCE_SHOTS:
+        if f'"{name}"' not in shots:
+            err(f"ConcordancePactClientGameTests: takes {name}")
+
+
+def check_pact_network(co):
+    """Concordance Chunk D, D-09 (D-S22, D-P136, D-P137): the two-client attempt. ConcordancePactNetworkTests is a
+    registered client game test that starts a second client JVM on this branch's own pattern (OwnerCollectionsNetworkTests,
+    #435), never #467's harness; the second client is a stranger at the holder's perch whose Accept, End and roster End are
+    refused with their reasons while the holder's pact seals and ends once; it takes its pictures; its evidence directory is
+    the one the client shards upload. The opt-in run without the optional integrations runs only when a manual run asks."""
+    pa = co.pacts
+    path = ROOT / "src" / "gametest" / "java" / "io" / "github" / "jimbozoomer" / "jugcraft" / "test" / "ConcordancePactNetworkTests.java"
+    code = path.read_text(encoding="utf-8") if path.exists() else ""
+    entry = "io.github.jimbozoomer.jugcraft.test.ConcordancePactNetworkTests"
+    mod = load(ROOT / "src" / "gametest" / "resources" / "fabric.mod.json") or {}
+    if entry not in mod.get("entrypoints", {}).get("fabric-client-gametest", []):
+        err(f"src/gametest/resources/fabric.mod.json: {entry} is a registered client game test (D-09)")
+    for name in pa.NETWORK_SHOTS:
+        if f'"{name}"' not in code:
+            err(f"ConcordancePactNetworkTests: takes {name}")
+    for needle in ("Pacts.Outcome.NOT_PERMITTED.id", "AgreementHolder.Ended.NOT_HOLDER", "Roster.NOT_LISTED", "ConnectScreen.startConnecting(",
+                   'Path.of("owner-network-evidence", "pact-"', "net.fabricmc.loader.impl.launch.knot.KnotClient"):
+        if needle not in code:
+            err(f"ConcordancePactNetworkTests: a second client JVM, refused with each reason, its evidence uploaded ({needle})")
+    if "StorageCrateMultiplayer" in code or "storage-crate-multiplayer" in code:
+        err("ConcordancePactNetworkTests: #467's harness is not imported (D-S22)")
+    workflow = re.sub(r"^[ \t]*#[^\n]*\n", "", (ROOT / ".github" / "workflows" / "build.yml").read_text(encoding="utf-8"), flags=re.M)
+    shards = re.search(r"^  client-shard:\n(.*?)(?=^  [A-Za-z][\w-]*:\s*$|\Z)", workflow, re.S | re.M)
+    if not shards or "**/owner-network-evidence/**/peer.log" not in shards.group(1):
+        err(".github/workflows/build.yml: the client shards upload the second clients' logs (owner-network-evidence)")
+    job = re.search(r"^  pact-clients-without-optional:\n(.*?)(?=^  [A-Za-z][\w-]*:\s*$|\Z)", workflow, re.S | re.M)
+    classes = re.findall(r"-PclientTests=([\w,]+)", job.group(1)) if job else []
+    if not job or not re.search(r"^    if: github\.event_name == 'workflow_dispatch' && inputs\.clients_without_optional[ \t]*$", job.group(1), re.M) \
+            or "-PjugcraftOptionalIntegrations=false" not in job.group(1) \
+            or classes != ["ConcordancePactClientGameTests,ConcordanceRosterClientGameTests,ConcordancePactNetworkTests"]:
+        err(".github/workflows/build.yml: the job pact-clients-without-optional runs ConcordancePactClientGameTests, "
+            "ConcordanceRosterClientGameTests and ConcordancePactNetworkTests without the optional integrations, only when a manual "
+            f"run asks (D-P137): {classes}")
 
 
 def check_roster_screen(co, lang):
@@ -18982,6 +19176,15 @@ def check_roster_screen(co, lang):
     for name in ro.CLIENT_SHOTS:
         if f'"{name}"' not in shots:
             err(f"ConcordanceRosterClientGameTests: takes {name}")
+    # D-09 (D-P135; the unit 5 critique): the hand at work is walked in the run itself, after the recovery and the cancel and
+    # before the full roster (which files all sixteen of the holder's open requests). Read without comments, so a step
+    # commented out no longer counts (the unit 5 review).
+    run = _java_body(re.sub(r"//[^\n]*|/\*.*?\*/", " ", shots, flags=re.S), "public void runTest(")
+    steps = [run.find(call) for call in ("recoverAndCancel(context, server, setup);", "handAtWork(context, server, stand);",
+                                         "full(context, server, setup);")]
+    if min(steps) < 0 or not steps[0] < steps[1] < steps[2]:
+        err("ConcordanceRosterClientGameTests: runTest calls handAtWork(context, server, stand) after recoverAndCancel and before full "
+            "(the workshop hand at work, D-P135)")
 
 
 def check_logistics(co, root, lang, registered):
@@ -20905,6 +21108,9 @@ def check_composer(co, root, lang):
     for forbidden in ('new EditBox(', 'Compiler.compile(', '.set(JugcraftConcordance.INSCRIPTION'):
         if forbidden in visual:
             err(f"composer: constellation view must not require text entry or decide server state ({forbidden})")
+    # Concordance Chunk D, D-09 (D-P122): the composer draws the HUD's subtitles over itself, as the pact and roster screens do.
+    if "@Override public boolean isInGameUi() { return true; }" not in visual or "minecraft.gui.hud.extractDeferredSubtitles();" not in visual:
+        err("composer: an in-game screen that draws subtitles over itself (isInGameUi, extractDeferredSubtitles; 03:159)")
     for required in ('ComposerClient.inscribable()', 'ComposerClient::inscribe', 'ComposerClient.edited()', 'ConcordanceClientOptions.reducedMotion()'):
         if required not in visual:
             err(f"composer: visual editor retains validation, inscription and accessibility ({required})")
@@ -21666,8 +21872,9 @@ def check_journey():
     with only their own research, need their own Spire's practice and differ from one another; the first success is the
     data's; one player makes the first loadout (Concordance Chunk A) in the Overworld with First Light understood and no
     other research; the living workshop (Concordance Chunk C, C-10) holds from a manual start, step by step (WORKSHOP);
-    every game test the routes name exists; Stolas's Regard (PACT, Concordance Chunk D) holds without Styx; and the
-    record's routes are the tool's."""
+    every game test the routes name exists; the pact hall (PACT, Concordance Chunk D) holds without Styx, step by step,
+    to the workshop hand, its things PACT_HALL's rows; the routes' "each kind of worker" is the Binding Arts' mastery; and
+    the record's routes are the tool's."""
     sys.path.insert(0, str(ROOT / "tools"))
     import concordance_journey as jr
     for problem in jr.problems():

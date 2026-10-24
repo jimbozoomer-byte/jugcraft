@@ -77,11 +77,16 @@ WEIGHTS = {
     # shots at three sizes and of Stolas on his perch: about 140 s at the pace the Winter entry implies (an estimate, not a
     # measurement). Unit 3 (D-06) adds his nine poses: four loops waited out and five gestures frozen, about 50 s; and
     # subtitles listened for at the refusal and the acceptance, the answers' marks and Jade's two shots, about 30 s more;
-    # estimates.
-    "ConcordancePactClientGameTests": 230,
+    # estimates. Unit 5 (D-09) adds a timed sequence through his refusal, four frozen frames, about 10 s; an estimate.
+    "ConcordancePactClientGameTests": 240,
     # Concordance Chunk D unit 3 (D-07): a dedicated server's start, the roster walked by keyboard (suspend and resume, an
     # end asked first, a recovery and a cancel), 64 rows paged, and ten shots at three sizes: an estimate, not a measurement.
-    "ConcordanceRosterClientGameTests": 140,
+    # Unit 5 (D-09): the workshop hand carrying one request across the yard, about 30 s more; an estimate.
+    "ConcordanceRosterClientGameTests": 170,
+    # Concordance Chunk D unit 5 (D-09, D-S22): a dedicated server's start, a second client JVM's start and join (as
+    # OwnerCollectionsNetworkTests does), and the stranger's steps at the holder's perch with three shots: an estimate,
+    # not a measurement.
+    "ConcordancePactNetworkTests": 300,
     "JugcraftServerClientGameTests": 90,
     # Companion suites exercise timed AI, inventory trips and cooking, not just
     # showrooms. Allow CI headroom over the focused local runtime measurements.

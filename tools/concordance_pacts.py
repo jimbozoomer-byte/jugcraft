@@ -283,7 +283,8 @@ def codex():
              "or any refusal, spends nothing and names why."),
             ("text", "The Open Hand Compact",
              f"**Accept** pays the compact in the same moment the pact is sealed: {compact['resonance']} Astral Resonance from "
-             "an astrolabe you carry, and " + ", ".join(f"{c['count']} × {c['item'].split(':')[1].replace('_', ' ')}"
+             "an astrolabe you carry (an Orrery Observatory fills it for its keeper's party, and only a Starwatcher, who "
+             "understands Celestial Attunement, keeps one), and " + ", ".join(f"{c['count']} × {c['item'].split(':')[1].replace('_', ' ')}"
                                                          for c in compact["items"])
              + ". It counts as the first offering. Only this perch's owner may accept here, and one pact with Stolas a holder."),
         ]}
@@ -539,3 +540,13 @@ def presence_lang(lang):
     """D-06: Jade's provider names (its plugin settings list them)."""
     for key, name in JADE_PROVIDERS.items():
         lang[f"config.jade.plugin_{MOD}.{key}"] = name
+
+
+# ------------------------------------------------------------------------------------------- D-09: the evidence bundle
+# A timed sequence through his refusal (08:176; 03:159, the tell a player most needs to read without words):
+# ConcordancePactClientGameTests.refusalSequence freezes the world at each time (seconds into the clip) and photographs it.
+REFUSAL_SEQUENCE = (0.25, 0.65, 1.05, 1.45)
+SEQUENCE_SHOTS = ["jugcraft_stolas_refuse_seq_1", "jugcraft_stolas_refuse_seq_2", "jugcraft_stolas_refuse_seq_3",
+                  "jugcraft_stolas_refuse_seq_4"]
+# What ConcordancePactNetworkTests' second client photographs (D-09, D-S22).
+NETWORK_SHOTS = ["jugcraft_pact_peer_arrival", "jugcraft_pact_peer_refused", "jugcraft_pact_peer_departure"]
