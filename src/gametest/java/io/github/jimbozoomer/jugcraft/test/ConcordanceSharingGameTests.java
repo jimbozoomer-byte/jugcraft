@@ -239,7 +239,7 @@ public class ConcordanceSharingGameTests {
 	}
 
 	private static int wool(GameTestHelper helper, AABB box) {
-		return helper.getLevel().getEntitiesOfClass(ItemEntity.class, box, item -> item.isAlive() && item.getItem().is(Items.WHITE_WOOL))
+		return helper.getLevel().getEntitiesOfClass(ItemEntity.class, box, item -> item.isAlive() && item.getItem().is(Items.WOOL.white()))
 				.stream().mapToInt(item -> item.getItem().getCount()).sum();
 	}
 
@@ -273,7 +273,7 @@ public class ConcordanceSharingGameTests {
 		helper.assertValueEqual(original.holder().seal(level, holder, original.sealing(terms(), UPKEEP), now).outcome(), Pacts.Outcome.DONE, "Sealed with upkeep");
 		BoundWills wills = BoundWills.of(level.getServer());
 		UUID record = original.agreement().record();
-		helper.assertValueEqual(original.holder().deposit(level, holder, new ItemStack(Items.WHITE_WOOL, 2), now), 2, "two periods in its escrow");
+		helper.assertValueEqual(original.holder().deposit(level, holder, new ItemStack(Items.WOOL.white(), 2), now), 2, "two periods in its escrow");
 		GatheringShadeEntity shade = (GatheringShadeEntity) level.getEntity(original.spirit());
 		copy.loadWithComponents(TagValueInput.create(ProblemReporter.DISCARDING, level.registryAccess(), original.saveWithoutMetadata(level.registryAccess())));
 		BoundWill before = wills.ledger().get(record);
@@ -285,7 +285,7 @@ public class ConcordanceSharingGameTests {
 		helper.assertTrue(copy.holder().end(level, holder, now) == AgreementHolder.Ended.CONFLICTING
 				&& copy.holder().toggle(level, holder, now) == AgreementHolder.Toggle.CONFLICTING
 				&& copy.holder().look(level, now + 7 * Agreement.DAY) == Pacts.Event.NONE
-				&& copy.holder().deposit(level, holder, new ItemStack(Items.WHITE_WOOL, 1), now) == 0
+				&& copy.holder().deposit(level, holder, new ItemStack(Items.WOOL.white(), 1), now) == 0
 				&& wills.ledger().get(record).equals(before) && escrowed(level, record) == 2, "It suspends, ends, takes and pays nothing");
 		helper.setBlock(copyAt, Blocks.AIR);
 		helper.assertTrue(wills.ledger().get(record) != null && !shade.isRemoved()
@@ -370,15 +370,15 @@ public class ConcordanceSharingGameTests {
 		helper.assertValueEqual(anchor.holder().seal(level, holder, anchor.sealing(terms(), UPKEEP), now).outcome(), Pacts.Outcome.DONE, "Sealed with upkeep");
 		UUID record = anchor.agreement().record();
 		GatheringShadeEntity shade = (GatheringShadeEntity) level.getEntity(anchor.spirit());
-		helper.assertValueEqual(anchor.holder().deposit(level, holder, new ItemStack(Items.WHITE_WOOL, 3), now), 3, "three periods in its escrow");
+		helper.assertValueEqual(anchor.holder().deposit(level, holder, new ItemStack(Items.WOOL.white(), 3), now), 3, "three periods in its escrow");
 		copy.loadWithComponents(TagValueInput.create(ProblemReporter.DISCARDING, level.registryAccess(), anchor.saveWithoutMetadata(level.registryAccess())));
 		Inventory inventory = holder.getInventory();
 		for (int slot = 0; slot < 36; slot++) {
-			inventory.setItem(slot, slot == 0 ? new ItemStack(Items.WHITE_WOOL, 63) : new ItemStack(Items.STONE, 64));
+			inventory.setItem(slot, slot == 0 ? new ItemStack(Items.WOOL.white(), 63) : new ItemStack(Items.STONE, 64));
 		}
 		helper.assertValueEqual(anchor.holder().end(level, holder, now), AgreementHolder.Ended.ENDED, "Its holder ends it");
 		AABB feet = holder.getBoundingBox().inflate(3.0);
-		helper.assertTrue(inventory.countItem(Items.WHITE_WOOL) == 64 && wool(helper, feet) == 2,
+		helper.assertTrue(inventory.countItem(Items.WOOL.white()) == 64 && wool(helper, feet) == 2,
 				"the escrow comes back once: what fits into the inventory, the rest at their feet");
 		BoundWills wills = BoundWills.of(level.getServer());
 		helper.assertTrue(wills.ledger().get(record) == null && wills.escrow(record).isEmpty() && shade.isRemoved()
@@ -390,7 +390,7 @@ public class ConcordanceSharingGameTests {
 		helper.assertTrue(copy.holder().verify(level, now) == AgreementHolder.Standing.NONE && copy.agreement() == null, "The copy, its record gone, forgets its terms");
 		helper.setBlock(copyAt, Blocks.AIR);
 		helper.assertValueEqual(AgreementHolder.end(level, null, holder, record, Pacts.ENDED, now + 20), AgreementHolder.Ended.NOTHING, "Ending again finds nothing");
-		helper.assertTrue(inventory.countItem(Items.WHITE_WOOL) == 64 && wool(helper, feet) == 2 && PactHistory.of(level.getServer()).history(holder.getUUID()).size() == 1,
+		helper.assertTrue(inventory.countItem(Items.WOOL.white()) == 64 && wool(helper, feet) == 2 && PactHistory.of(level.getServer()).history(holder.getUUID()).size() == 1,
 				"and nothing more comes back, by the copy's breaking or the second end");
 		helper.succeed();
 	}

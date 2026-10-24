@@ -169,7 +169,7 @@ public class ConcordancePersistenceGameTests {
 		Place where = new Place("jugcraft:test", (int) pact.getMostSignificantBits(), 1, (int) pact.getLeastSignificantBits());
 		BoundWills.of(server).seal(new BoundWill(pact, "jugcraft:test_pact", "jugcraft:stolas", owner, 0L, false, new BoundWill.Pact(where,
 				BoundWill.Hold.NONE, 0L, Pacts.PERSONAL, null, Pacts.terms("minecraft:wool", 1, 7 * Agreement.DAY, Agreement.DAY, 4))));
-		BoundWills.of(server).deposit(pact, new ItemStack(Items.WHITE_WOOL, 2), stack -> stack.is(ItemTags.WOOL), 4);
+		BoundWills.of(server).deposit(pact, new ItemStack(Items.WOOL.white(), 2), stack -> stack.is(ItemTags.WOOL), 4);
 		PactHistory.of(server).add(owner, new Pacts.Departure(UUID.randomUUID(), "jugcraft:test_pact", "jugcraft:stolas", Pacts.ENDED, 0L, where));
 		AstralClaims.of(server).claim(owner, "jugcraft:test", 1L, level.getGameTime(), 0L);
 		sameAfterLegacy(helper, ops, "spires", SpireRecord.CODEC, SpireRecord.of(server));
@@ -579,8 +579,8 @@ public class ConcordancePersistenceGameTests {
 				new BoundWill.Pact(place, BoundWill.Hold.UPKEEP, 924_000L, Pacts.PARTY, UUID.randomUUID(), upkeep,
 						new BoundWill.Service("gather", 8, 13000, 23000, 64), 38L, 5));
 		helper.assertValueEqual(wills.seal(record).outcome(), BoundWillLedger.Outcome.DONE, "A full pact record is sealed");
-		ItemStack plain = new ItemStack(Items.WHITE_WOOL, 2);
-		ItemStack named = new ItemStack(Items.WHITE_WOOL, 1);
+		ItemStack plain = new ItemStack(Items.WOOL.white(), 2);
+		ItemStack named = new ItemStack(Items.WOOL.white(), 1);
 		named.set(DataComponents.CUSTOM_NAME, Component.literal("Offering"));
 		List<ItemStack> given = List.of(plain.copy(), named.copy());
 		Predicate<ItemStack> wool = stack -> stack.is(ItemTags.WOOL);

@@ -176,7 +176,7 @@ public class ConcordanceWorkerGameTests {
 	}
 
 	private static int wool(ServerPlayer player) {
-		return player.getInventory().countItem(Items.WHITE_WOOL);
+		return player.getInventory().countItem(Items.WOOL.white());
 	}
 
 	/** Looks at the pact every 1,000 ticks (less than ABSENT_TICKS) from {@code from} to {@code to}; returns what happened. */
@@ -685,7 +685,7 @@ public class ConcordanceWorkerGameTests {
 		long t2 = t1 + 6 * DAY + 500L;
 		helper.assertTrue(anchor.holder().look(level, t2) == Pacts.Event.NONE && upkeep(level, anchor).lookedAt() == t2,
 				"A ticker's look in the offering's tick (the unit review's fix 7)");
-		ItemStack offered = new ItemStack(Items.WHITE_WOOL, 6);
+		ItemStack offered = new ItemStack(Items.WOOL.white(), 6);
 		helper.assertValueEqual(anchor.holder().deposit(level, holder, offered, t2), 4, "An offering fills its escrow to its cap");
 		helper.assertTrue(offered.getCount() == 2 && anchor.holder().held(level) == null && escrowed(level, id) == 3
 				&& upkeep(level, anchor).due() == t2 + PERIOD && !upkeep(level, anchor).warned(),
@@ -762,7 +762,7 @@ public class ConcordanceWorkerGameTests {
 		long t0 = level.getGameTime() + 1_000_000L;
 		SpiritAnchorBlockEntity anchor = sealed(helper, holder, at, UPKEEP, t0);
 		UUID record = anchor.agreement().record();
-		helper.assertValueEqual(anchor.holder().deposit(level, holder, new ItemStack(Items.WHITE_WOOL, 4), t0), 4, "Four periods paid ahead");
+		helper.assertValueEqual(anchor.holder().deposit(level, holder, new ItemStack(Items.WOOL.white(), 4), t0), 4, "Four periods paid ahead");
 		TestPlayers.leave(holder);
 		for (long t = t0 + DAY; t <= t0 + 30 * DAY; t += DAY) {
 			helper.assertValueEqual(anchor.holder().look(level, t), Pacts.Event.NONE, "Logged out, nothing is looked at");
@@ -826,8 +826,8 @@ public class ConcordanceWorkerGameTests {
 			SpiritAnchorBlockEntity anchor = sealed(helper, holder, new BlockPos(3, 1, 3), UPKEEP, now);
 			UUID record = anchor.agreement().record();
 			BoundWills wills = BoundWills.of(level.getServer());
-			helper.assertValueEqual(anchor.holder().deposit(level, holder, new ItemStack(Items.WHITE_WOOL, 2), now), 2, "Two periods paid ahead");
-			helper.assertTrue(anchor.holder().deposit(level, friend, new ItemStack(Items.WHITE_WOOL, 1), now) == 0 && escrowed(level, record) == 2,
+			helper.assertValueEqual(anchor.holder().deposit(level, holder, new ItemStack(Items.WOOL.white(), 2), now), 2, "Two periods paid ahead");
+			helper.assertTrue(anchor.holder().deposit(level, friend, new ItemStack(Items.WOOL.white(), 1), now) == 0 && escrowed(level, record) == 2,
 					"Their party pays nothing into it (the unit review's fix 5)");
 			helper.assertValueEqual(anchor.holder().end(level, friend, now), AgreementHolder.Ended.NOT_HOLDER, "Their party may not end it");
 			FakePlayer standIn = FakePlayer.get(level, new GameProfile(holder.getUUID(), "[Concordance]"));
@@ -914,12 +914,12 @@ public class ConcordanceWorkerGameTests {
 		SpiritAnchorBlockEntity other = sealed(helper, holder, brokenAt, UPKEEP, t0);
 		GatheringShadeEntity otherShade = (GatheringShadeEntity) level.getEntity(other.spirit());
 		UUID otherRecord = other.agreement().record();
-		helper.assertValueEqual(other.holder().deposit(level, holder, new ItemStack(Items.WHITE_WOOL, 1), t0), 1, "One period paid ahead at a second anchor");
+		helper.assertValueEqual(other.holder().deposit(level, holder, new ItemStack(Items.WOOL.white(), 1), t0), 1, "One period paid ahead at a second anchor");
 		BlockPos at = new BlockPos(3, 1, 3);
 		SpiritAnchorBlockEntity anchor = sealed(helper, holder, at, UPKEEP, t0);
 		GatheringShadeEntity shade = (GatheringShadeEntity) level.getEntity(anchor.spirit());
 		UUID record = anchor.agreement().record();
-		helper.assertValueEqual(anchor.holder().deposit(level, holder, new ItemStack(Items.WHITE_WOOL, 1), t0), 1, "One period paid ahead");
+		helper.assertValueEqual(anchor.holder().deposit(level, holder, new ItemStack(Items.WOOL.white(), 1), t0), 1, "One period paid ahead");
 		helper.assertTrue(stay(level, anchor, t0 + 1_000L, t0 + PERIOD - 1_000L).isEmpty(), "Nothing due yet");
 		BoundWill before = will(level, anchor);
 		BoundWill otherBefore = wills.ledger().get(otherRecord);
@@ -930,7 +930,7 @@ public class ConcordanceWorkerGameTests {
 			helper.assertTrue(shade.think(level, NIGHT, t0 + PERIOD) == Status.DISABLED, "its shade waits, switched off");
 			helper.assertValueEqual(key(SpiritAnchorBlock.use(holder, level, anchor, true)), "message.jugcraft.concordance.disabled", "its holder's word waits");
 			helper.assertValueEqual(anchor.holder().end(level, holder, t0 + PERIOD), AgreementHolder.Ended.DISABLED, "nothing ends");
-			helper.assertValueEqual(anchor.holder().deposit(level, holder, new ItemStack(Items.WHITE_WOOL, 1), t0 + PERIOD), 0, "and nothing is paid in");
+			helper.assertValueEqual(anchor.holder().deposit(level, holder, new ItemStack(Items.WOOL.white(), 1), t0 + PERIOD), 0, "and nothing is paid in");
 			helper.assertTrue(will(level, anchor).equals(before) && escrowed(level, record) == 1, "the record and its escrow untouched");
 			helper.setBlock(brokenAt, Blocks.AIR);
 			helper.assertTrue(otherBefore.equals(wills.ledger().get(otherRecord)) && escrowed(level, otherRecord) == 1 && !otherShade.isRemoved()
