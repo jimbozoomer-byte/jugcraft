@@ -59,6 +59,7 @@ NOTES = {
     "cancelled": "cancelled",
     "destination_gone": "where it was going was broken",
     "nowhere_to_return": "there is no room to take it back",
+    "agreement_ended": "its courier's agreement was ended",  # Concordance Chunk D, D-08: a Workshop Hand's
 }
 EVENTS = {
     "filed": "#%1$s filed: %2$s wanted",
@@ -103,7 +104,7 @@ MESSAGES = {
     "courier.cancelled": "Request #%s cancelled",
     "courier.returning": "Request #%s: its cargo is being taken back first",
     "courier.recovered": "Recovered request #%s's cargo",
-    "courier.key_post": "Courier Post at %s %s %s (now use the key on a porter)",
+    "courier.key_post": "Courier Post at %s %s %s (now use the key on a porter, or on a Spirit Anchor for a Workshop Hand)",
     "courier.assigned": "The porter now serves that Courier Post",
     "courier.still_carrying": "It still carries its route's load: let it deliver first",
     "courier.too_fast": "Wait a moment before asking the couriers again",

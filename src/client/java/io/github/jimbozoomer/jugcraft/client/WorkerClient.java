@@ -7,6 +7,7 @@ import io.github.jimbozoomer.jugcraft.concordance.spirits.ClockworkPorterEntity;
 import io.github.jimbozoomer.jugcraft.concordance.spirits.GatheringShadeEntity;
 import io.github.jimbozoomer.jugcraft.concordance.spirits.HearthlingEntity;
 import io.github.jimbozoomer.jugcraft.concordance.spirits.Workers;
+import io.github.jimbozoomer.jugcraft.concordance.spirits.WorkshopHandEntity;
 import net.fabricmc.fabric.api.client.rendering.v1.EntityRendererRegistry;
 import net.minecraft.client.renderer.entity.state.EntityRenderState;
 
@@ -26,6 +27,8 @@ final class WorkerClient {
 				context -> new GeoEntityRenderer<GatheringShadeEntity, EntityRenderState>(context, Workers.GATHERING_SHADE));
 		EntityRendererRegistry.register(Workers.CLOCKWORK_PORTER,
 				context -> new GeoEntityRenderer<ClockworkPorterEntity, EntityRenderState>(context, Workers.CLOCKWORK_PORTER));
+		EntityRendererRegistry.register(Workers.WORKSHOP_HAND,
+				context -> new GeoEntityRenderer<WorkshopHandEntity, EntityRenderState>(context, Workers.WORKSHOP_HAND));
 		EntityRendererRegistry.register(Dreaming.WISP, context -> new GeoEntityRenderer<DreamWispEntity, EntityRenderState>(context, Dreaming.WISP));
 	}
 }

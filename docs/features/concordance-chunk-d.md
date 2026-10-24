@@ -2,8 +2,12 @@
 
 Status: unit 1 (D-01, D-02) built on this branch (not merged; not yet pushed when its As built notes were written), its
 local checks run and passed; none of its Java has been compiled against Minecraft and none of its game tests has run
-(no Minecraft build where it was written; CI is its first compile). Units 2 to 5 are not started. Chunk D is developed
-on branch `claude/chunk-d-pact-hall` (local `wip/chunk-d`), started from
+(no Minecraft build where it was written; CI is its first compile). Unit 4 (D-08) is built, with its unit review's fixes
+(not merged; not pushed when its As built note was written), on the local `wip/chunk-d-u4`, from unit 1's head beside
+unit 2, which is built in parallel on `wip/chunk-d-u2` and is not in unit 4's tree: its local checks run and passed, and
+none of its Java has been compiled or its game tests run either (D-08's As built). Units 3 and 5 are not started.
+Chunk D is developed on branch
+`claude/chunk-d-pact-hall` (local `wip/chunk-d`), started from
 Chunk C's head `779851cdb` ([#466](https://github.com/jimbozoomer-byte/jugcraft/pull/466), itself stacked on Chunk B's
 [#465](https://github.com/jimbozoomer-byte/jugcraft/pull/465)); when it is ready it is reviewed as a third stacked pull
 request against `claude/chunk-c-living-workshop` (D-D1). Not merged; Chunks B and C beneath it are not merged either.
@@ -114,9 +118,9 @@ completes the path. Nothing in units 3 and 4 comes before it.
 | Unit | Tickets | What it delivers | Record (proposed) | State |
 |---|---|---|---|---|
 | 1 | D-01, D-02 | The existing agreements keep their promises (shade death and re-call, seal refusals, the roster at once, anchor ownership, the familiar's fade, ending without breaking); one pact record: the agreement holder extracted from the Spirit Anchor and shared, a place on the Bound Will, one source of truth for suspension, the upkeep rules, the departure history, the copy check and the offline, restart and feature-disable policy | `arcane-concordance-workers.md`; this contract | Built (not merged): D-01 and D-02 on `claude/chunk-d-pact-hall` (local `wip/chunk-d`; commits `56a74f4be`, `7477efbcd`, `fa5360d0d`, the records' `97e1facd4` and the unit review's fixes). Local checks run and passed, 52 of 53 audit mutations reported (D-02's As built); `./gradlew build`, the server and client game tests and CI not run |
-| 2 | D-03, D-04, D-05 | The first end-to-end path: Styx and the codex to Stolas's Regard and its evidence, the perch, Stolas's arrival, the conversation and terms, acceptance with the Open Hand Compact, Star-reckoning, the first obligation, upkeep, suspension, ending. A provisional body for Stolas is acceptable here | new `stolas-pact.md`; `styxhexenhammer.md`; `arcane-concordance-celestial.md` | Not started |
+| 2 | D-03, D-04, D-05 | The first end-to-end path: Styx and the codex to Stolas's Regard and its evidence, the perch, Stolas's arrival, the conversation and terms, acceptance with the Open Hand Compact, Star-reckoning, the first obligation, upkeep, suspension, ending. A provisional body for Stolas is acceptable here | new `stolas-pact.md`; `styxhexenhammer.md`; `arcane-concordance-celestial.md` | In progress on `wip/chunk-d-u2` (not in this tree) |
 | 3 | D-06, D-07 | Stolas's character: the Flashjack-derived raven body, arrive, listen, inspect, assent, refuse and depart, sounds with subtitles, Jade; the roster screen with suspend, end, cancel and recovery, and the journal's pacts section | `stolas-pact.md`; `arcane-concordance-workers.md` | Not started |
-| 4 | D-08 | The workshop hand (a courier agreement carrying a post's exact requests) and the schema review | `arcane-concordance-logistics.md`; `arcane-concordance-workers.md`; this contract | Not started |
+| 4 | D-08 | The workshop hand (a courier agreement carrying a post's exact requests) and the schema review | `arcane-concordance-logistics.md`; `arcane-concordance-workers.md`; this contract | Built (not merged): D-08 on the local `wip/chunk-d-u4`, from unit 1's head `97e1facd4` beside unit 2 (built in parallel on `wip/chunk-d-u2`; the two join `claude/chunk-d-pact-hall` by a merge), commits `023b681e8`, `e51ef2b11`, the records' commit and the unit review's fixes ("Chunk D unit 4: fixes from the unit review"). Local checks run and passed, all 42 audit mutations reported and the nine the fixes add (D-08's As built); `./gradlew build`, the 21 server game tests, the client companion check and CI not run |
 | 5 | D-09 | Combined fixes, the whole-path test, load, client evidence, the two-client attempt, records, the checkpoint and the handoff | this page; `arcane-concordance-journey.md`; `docs/TESTING.md` | Not started |
 
 The plan allows three to five units (09:3); this is five plus the baseline. The completion evidence E1 to E7 that every
@@ -1004,9 +1008,9 @@ presentation bundle (08:169-181).
   `mayTake` at `:508-510`): the porter and the hand call it; the porter behaves identically, as its existing logistics
   tests show. The hand holds only its claim id (saved `task`); its `remove` releases with `worker_removed`, stranding the
   cargo (`ClockworkPorterEntity.java:586-602`); an unload lets the lease lapse (200 ticks, `Logistics.java:41`).
-- The agreement gains optional `beneficiaries` (holder, or holder and party); the anchor gains an optional `post`.
-- `UNAVAILABLE_WORKER` (`Code.java:31-32`) gets its first user if the design needs it (a request waiting on a hand
-  outside its hours), which fixes its parameters.
+- Who benefits is the Bound Will's `pact.beneficiaries` (`party` for a hand; D-P1, D-P74); `Agreement` gains nothing.
+  The anchor gains an optional `post` (D-P73).
+- `UNAVAILABLE_WORKER` stays unused (D-P79).
 - **The schema review (09:166; 03:177):** a section of this contract written at this ticket, comparing what the
   knowledge service (Star-reckoning) needed with what the cargo service needs (claims, leases, reservations, a loaded
   destination, access for keeper and requester, exact variants, beneficiaries), and proposing the shared schema to
@@ -1026,9 +1030,255 @@ presentation bundle (08:169-181).
 **Acceptance:** E4 and E5 with real cargo; E6 (Logistics and the client companion tests); the different requirements of
 a cargo service written down.
 
-**Saves:** the hand's `task`; the anchor's `post`; the agreement's `beneficiaries`; the courier ledger's codec unchanged.
+**Saves:** the hand's `task` (and, as built, its `anchor`); the anchor's `post`; who benefits on the Bound Will's pact
+(`beneficiaries`, a key since unit 1; D-P74); the courier ledger's codec unchanged.
 
 **Review boundary:** no file under `src/main/java/local/peepo` (D-S20); the porter's behaviour unchanged.
+
+**As built (unit 4: commits `023b681e8`, the shared courier decision, and `e51ef2b11`, the hand; records and the schema
+review in the records' commit "Concordance Chunk D: unit 4's records and the schema review"; the unit review's fixes in
+the commit "Chunk D unit 4: fixes from the unit review":
+[arcane-concordance-logistics.md](arcane-concordance-logistics.md),
+[arcane-concordance-workers.md](arcane-concordance-workers.md),
+[arcane-concordance-persistence.md](arcane-concordance-persistence.md)). Built on the local `wip/chunk-d-u4` from unit
+1's head `97e1facd4`, beside unit 2, which is built in parallel on `wip/chunk-d-u2` and is not in this tree (the merge
+points are the last item below).**
+- **Built:**
+  - `023b681e8`: the porter's courier decision moved, unchanged, into `spirits/CourierWork`, which holds the claim's id
+    (each courier saves it as `task`) and asks a courier's `Terms`: `ready` (asked only with no live claim), `refuses`,
+    `reaches`, `load`, `atPost`, `delivered` and `postGone`. The porter's terms are its body, every request, every
+    container, no cap, a pylon at its post and a construct's trip on each delivery (D-P80).
+    `Logistics.next(post, now, serves)` skips requests a courier does not serve and `next(post, now)` serves every one;
+    `Logistics.reserve` and `CourierLedger.reserve` take a per-trip cap and their old signatures pass
+    `Integer.MAX_VALUE` (D-P78). The porter's 15 logistics tests are unchanged: the diff of their file removes no line.
+  - `e51ef2b11`: `spirits/WorkshopHandEntity` (`jugcraft:workshop_hand`, a spirit, D-P70, D-P71). Its decision asks, in
+    order, the switch, its anchor's standing (`verify`: a copy, a record gone or another hand answering the agreement
+    makes it leave), its roster place, its holder answering (`Authority.answering`), then the shared decision under its
+    terms: new claims only while its Bound Will holds nothing, within its hours and day's loads; only its beneficiaries'
+    requests bound inside its area (D-P74, D-P76); sources inside its area; at most its carry a trip; a load delivered
+    in full one task (D-P77); each delivery a spirit's service for its holder, present. Ended it releases with
+    `agreement_ended`; killed or discarded it is struck off and releases with `worker_removed` (D-P75); it saves
+    `anchor` and `task` only.
+  - The Spirit Anchor: an optional `post`; `handSealing` (the hand's own agreement and counterpart, party beneficiaries,
+    no upkeep, any number a holder, party seals, no cost); `call` returns a `WorkerEntity<?>`, a shade or a hand by
+    counterpart (D-P15). `SpiritAnchorBlock.use` seals a hand at an anchor bound to a post (`sealHand`: the Regard, who
+    may seal, the post still usable, then the seal; D-P72) and shows the post (or that it is gone) when read;
+    `useItemOn` passes a Porter Key through to the key. `PorterKeyItem.bind` and `Binding` (D-P73).
+    `Workers.WORKSHOP_HAND` (MISC, 0.6 by 1.6, 16 health); `WorkerClient` draws it with GeckoLib; Jade's
+    `WorkerDataProvider` shows its carried count. `WorkerParser.WORK` gains `courier`.
+  - Generators, their output regenerated with `python3 -B tools/generate_material_data.py` and never hand-edited:
+    `tools/concordance_workers.py` (`WORK`, `HAND_RESEARCH`, the definition, `ENTITY_NAMES`, the key's and anchor's
+    tooltips, nine messages, the codex entry `binding/workshop_hand` at (4,4), and the Binding Arts' Understood page
+    changed only in "a spirit's delivery (a Workshop Hand's is a spirit's)"); `tools/concordance_logistics.py` (the note
+    `agreement_ended`; the key's post message names the anchor); `tools/concordance_worker_models.py` (the shade's body
+    unchanged, a wicker pack and lid on a bone of their own, five clips); `tools/concordance_worker_art.py`
+    (`hand_sheet`: the shade's sheet with amber eyes and a wicker pack with a brass buckle). The sheet was written by
+    `hand_sheet()` with the textures generator's own save call; `tools/generate_textures.py` was not run.
+- **Departures from this ticket and from the unit's specification** (proposals D-P70 to D-P83 in Decisions):
+  - **Order:** built beside unit 2 from unit 1's head, not after Stolas works (Dependencies and order, item 5). The gate
+    names unit 2's research id `jugcraft:stolas_regard` only (D-P72) and the game tests grant that id directly
+    (`ConcordanceProgress.grant` stores any id). `check_hand` checks that the research exists with a mastered state only
+    once unit 2's `tools/concordance_pacts.py` is in the tree; the specification had that check report until unit 2
+    lands, which would have failed this tree's checks.
+  - Who benefits is on the Bound Will, not `Agreement` (D-P74); `UNAVAILABLE_WORKER` stays unused (D-P79).
+  - The specification's reconciliation, kept: a hold, the hours and the day's loads stop only new claims and a claim
+    held is finished, with no release note (D-P75); a request that is not a beneficiary's is `IDLE` and left for other
+    couriers, one bound outside the area `OUTSIDE_AGREEMENT` (D-P76); a task is one load delivered in full (D-P77);
+    radius 12, 06:00 to 18:00, 32 loads, 64 a trip (D-P70); a hand is called without asking for a bound post (an anchor
+    keeping an agreement cannot be unbound; with no post a hand waits, `OUTSIDE_AGREEMENT`).
+  - The unit review's nine corrections: the codex entry at (4,4), since unit 2 holds (0,4) and (2,4) (1); the Understood
+    page changed by its substring only, and `check_hand`'s call, definition and test lists placed by text (2);
+    `aHandsServiceIsASpiritsService` asserts that exactly a familiar's and a spirit's service are recorded, and that a
+    spirit's again records nothing (3); `aRequestOutsideTheHoursOrAreaIsRefusedWithItsReason` suspends the hand with a
+    load claimed: it finishes the load, claims nothing new (`SUSPENDED`, asked before its day's loads) and, resumed,
+    serves again (4); "checked at each new claim; a load already claimed is finished", asserted in
+    `aHandServesOnlyItsBeneficiaries` with a load claimed before its requester leaves the party (5);
+    `anAnchorIsBoundOnlyWhileItKeepsNoAgreement` binds through `bind` to the owner's posts 13 blocks (refused) and 12
+    blocks (bound) above the anchor (6); `WorkshopHands.conserved` after every step the review named (7); the risks
+    corrected (8; Risks); the optional ninth, skipping an absent requester's request, not taken (D-P81).
+  - The audit's item-list pattern also matches qualified names (`java.util.List<net.minecraft.world.item.ItemStack>`),
+    which the specification's pattern missed (M13 below).
+  - The specification's risk "the key now binds instead of setting a useless route source" was half right: before, a key
+    used on an anchor acted as an empty hand (the anchor's own use) and, sneaking, took the anchor for a route's
+    container; now it binds and, sneaking, unbinds (Risks).
+  - Tests: the ticket's names kept (`theHandNeedsStolasRegardMastered` in the Worker suite; the restart in the
+    Persistence suite, as C-06's was). Added beyond the ticket: `aHandTakesOnlyFromInsideItsArea`,
+    `theConcordanceOffHoldsTheHand`, `aHandsServiceIsASpiritsService`, `anAnchorIsBoundOnlyWhileItKeepsNoAgreement`,
+    `aStrangerCannotBindAHandToAnotherPlayersPost` and `aBoundAnchorKeepsItsPost`.
+- **The unit review's fixes** (commit "Chunk D unit 4: fixes from the unit review"; the review read the code at
+  `0d04161a5` and confirmed 13 findings, rejecting 9; each confirmed one is handled here, two of them only as merge
+  notes because what they need is not in this tree):
+  1. A hand no longer takes up stranded cargo larger than its carry: a porter's (which reserves with no cap of its own,
+     up to a request's 256) killed at the hand's post, or its own after a data pack lowered its carry. Its terms refuse
+     it (`IDLE`) before the beneficiary and area check, so it waits for porters or its requester's one recovery, and the
+     "at most 64 a trip" and "2,048 a day" promises hold (D-P82); `aHandLeavesStrandedCargoBeyondItsCarry`.
+  2. Nor does it claim cargo to be taken back to a source beyond its area: it could put that only into the post, and
+     with the post full it claimed, took up and stranded it again at each decision (three of the post's 32 history
+     entries a cycle, bounded, nothing lost). Refused (`IDLE`) with the first (D-P82). Cargo it already holds whose
+     source is beyond its area still goes into the post when cancelled, never to that source: `takeBack`'s
+     `terms.reaches(from)`, which D-P76 promised, is now audited (M41) and tested
+     (`aHandTakesCargoBackOnlyInsideItsArea`).
+  3. A courier whose post is gone says why it waits: `Terms.postGone()` returns the status `serve` gives. A porter
+     forgets its post and is `IDLE`, as before; a hand says `OUTSIDE_AGREEMENT`, as with no post, so D-P79 ("the hand's
+     status already says why it waits") holds here too (D-P83).
+  4. `SpiritAnchorBlock.use` asks the switch alone, then only the definition of the worker the anchor serves: a hand's
+     for an anchor bound to a post with no agreement or keeping a `courier` agreement (`WorkshopHandEntity.WORK`), the
+     shade's otherwise. Before, a data pack that broke `gathering_shade` made every hand's anchor answer "disabled" to
+     sealing, suspending, recalling and reading, while the hand itself worked on. `sealHand` now takes the definition.
+     `verify` runs before a definition is asked, as `PorterKeyItem.bind` already did (D-P83).
+  5. The pack's lid is a bone of its own (`pack_lid`, on the pack, hinged at `[0, 18, 2]`, along its edge against the
+     body), and the working clip turns only the lid, +30 on x, so its back edge lifts about 1.5 px. Before, the clip
+     turned the whole pack -12 on x, the arms' forward sense, pushing the pack's foot about 1 px into the body and
+     dropping the lid's back edge about 0.4 px. The review's example hinge, the lid's far edge `[0, 18, 5]`, would lift
+     the near edge into the hood, so the near edge was taken.
+  6. Records: the cargo tests' claim corrected (below; `e51ef2b11`'s message, "each checking the ledger, the Bound Wills
+     and the item count after every step", is left as committed, since no commit is rewritten: the two binding tests
+     move no cargo); unit 2's row in the units table; D-P15's extension on D-P80; "the code's second user" dropped from
+     D-P73 (the key is its third, after `AgreementHolder` and the anchor's block); the rule for anchors placed before
+     Chunk D in the binding wording (`CHANGELOG.md`, the logistics and workers records); the schema review's fulfilment
+     and departures cells; the merge notes re-read against unit 2's head and against unit 1's review fixes (below).
+  7. The codex's "Its Terms" page names what the hand leaves (cargo beyond its carry, or that must go back beyond its
+     area) and its post gone among the reasons it waits; the lang regenerated.
+- **Tests (none yet run in CI):** 21 server game tests, each `maxTicks = 20` and synchronous in one tick, on a new
+  `WorkshopHands` fixture (package-private, not a test class). The 19 that move cargo start at a game day's beginning
+  and check `problems()`, the Bound Wills and the conserved count after every step; the two binding tests
+  (`anAnchorIsBoundOnlyWhileItKeepsNoAgreement`, `aBoundAnchorKeepsItsPost`) move none:
+  - `ConcordanceLogisticsGameTests` +13 (15 to 28): seven of 03:193's cases (`aHandFillsACrucibleUntilItIsFull`,
+    `aHandTakesNothingWhereItsHolderMayNot`, `aHandThatCannotFindItsWayStrandsItsCargoOnce`,
+    `anUnloadedDestinationKeepsTheHandWaiting`, `aKilledHandStrandsItsCargoOnce`, `anAbsentHolderStopsTheHand`,
+    `aBrokenSourceReleasesTheHandsClaim`), `twoHandsCannotHoldOneRequest`, `endingWithCargoAboardStrandsItOnce`,
+    `aHandServesOnlyItsBeneficiaries` and `aHandTakesOnlyFromInsideItsArea`; and, from the unit review,
+    `aHandLeavesStrandedCargoBeyondItsCarry` (a porter's stranded 65 passed and left for its requester's one recovery,
+    its history showing no claim by the hand; a stranded 64 behind it taken up and delivered, one load counted) and
+    `aHandTakesCargoBackOnlyInsideItsArea` (under a test area of 3, a held load from a chest beyond the area, cancelled,
+    goes into the post and not to the chest; a stranded load to be taken back there is never claimed and is recovered
+    once).
+  - `ConcordanceWorkerGameTests` +5 (22 to 27): `aRequestOutsideTheHoursOrAreaIsRefusedWithItsReason`,
+    `theHandNeedsStolasRegardMastered`, `theConcordanceOffHoldsTheHand`, `aHandsServiceIsASpiritsService`,
+    `anAnchorIsBoundOnlyWhileItKeepsNoAgreement`.
+  - `ConcordanceAuthorityGameTests` +1 (8 to 9): `aStrangerCannotBindAHandToAnotherPlayersPost`.
+  - `ConcordancePersistenceGameTests` +2 (15 to 17): `aHandsClaimSurvivesARestart` (03:193's eighth case),
+    `aBoundAnchorKeepsItsPost`.
+  - Client: `CompanionAutomationChecks.workshopHand` ("a crucible's need subtracts a workshop hand's live claim"), run
+    by `PeepoCompanionClientTests`.
+- **Audits** (`tools/check_mod_data.py`): `check_hand` (new, called after `check_logistics`): one courier decision
+  (`next` and `reserve` delegate; `CourierWork.serve`'s needles and its order, terms asked only with no live claim;
+  `reserve` within reach and load; neither courier repeating a ledger step), the hand a spirit whose service is a
+  spirit's and no worker's service recorded under another key, the Regard at MASTERED and asked before the seal, the
+  decision's order, the terms' needles, the refusal, `leave` and `remove`'s notes, no item list, the anchor's optional
+  `post`, `call` and party `handSealing`, the key's order and `bind`'s, the sheet against the generator, the unit's 21
+  tests, the porter's 15 and the companion check; `check_workers`' class map; `check_logistics` (release notes and item
+  moves also scanned in `CourierWork` and the hand); `AUTHORITY_ROUTES` (the porter's requester check moved to
+  `CourierWork`, which also names the requester's `answering` and the take-back check; the hand's `answering`; the key's
+  `maySeal`). Since the unit review, `check_hand` also holds `takeBack`'s area check, `serve` returning the terms'
+  reason when the post is gone, the hand's carry refusal (before its beneficiary check) and take-back refusal and its
+  `postGone`, `WorkshopHandEntity.WORK` against the generator, the lid a bone of its own on the pack that the working
+  clip turns instead of the pack, and `use` asking the switch alone and then the definition by the anchor's path,
+  passing it to `sealHand`; the Terms' methods are read to their own closing brace.
+- **Commands** (run and passed before each of the unit's three commits): `python3 tools/owner_art.py --check`,
+  `python3 -B tools/check_mod_data.py`, `python3 scripts/check_repository.py`,
+  `python3 tools/concordance_journey.py --check` ("every route holds"), `python3 tools/check_icon_maps.py`,
+  `node --test tools/world-designer/model.test.cjs` (12 passed), `python3 -m unittest discover -s scripts/tests` (195
+  passed) and `git diff --check`; the generators run one at a time after each table change. Every changed Java file
+  parse-checked (19, no syntax error); `CourierWork` type-checked against stubs, and a scratch trace of the pure ledger
+  with the old calls matched the ledger before the change (commit `023b681e8`).
+  `python3 tools/select_client_tests.py --base 97e1facd4 --head HEAD` chooses every client class (239):
+  `WorkshopHands.java` and `CompanionAutomationChecks.java` are shared files. For the unit review's fixes, the same
+  commands ran and passed before their commit (`tools/check_mod_data.py` PASS, the journey "every route holds", the
+  World Designer 12 passed, the script tests 195 passed, `git diff --check` clean);
+  `python3 -B tools/generate_material_data.py` ran once after the generator changes (it reordered
+  `docs/features/jug-nouveau-content-map.json` without changing its content, which was restored); the five changed Java
+  files were parse-checked (no syntax error); nothing was type-checked against stubs this time.
+- **Audit mutations** (each applied in place on the final tree to the audits the unit touches, `check_workers`,
+  `check_pacts`, `check_logistics`, `check_hand`, `check_authority` and `check_persistence`, every file restored after
+  each): the specification's 40 (M1 to M40; M18 in two forms with unit 2's tables
+  simulated by a scratch marker, and a control with a mastered state that reports nothing) and M13 also with qualified
+  names. All 42 are reported and the unchanged tree reports nothing. M13 with qualified names was not reported until the
+  pattern was widened (above). As run: M2 as `Math.min(most, available)`; M3 as the porter making a ledger claim itself;
+  M29 and M34 without regenerating (the audits compare the tables with the generated data); M32 is reported by
+  `check_workers`' clip check rather than `check_geckolib`. For the unit review's fixes, nine more, each applied in
+  place to `check_workers`, `check_pacts`, `check_logistics`, `check_hand` and `check_authority` and the file restored
+  byte for byte after it: M41 `takeBack` without `&& terms.reaches(from)`; M42 the hand's carry refusal removed; M43
+  its take-back refusal disabled; M44 its `postGone` returning `IDLE`; M45 `serve` returning `IDLE` whatever the terms
+  say; M46 `use` asking the shade's definition for every anchor again; M47 `WORK = "gather"`; M48
+  `aHandLeavesStrandedCargoBeyondItsCarry` renamed; M49 the working clip turning the pack again. All nine are reported
+  by `check_hand`, and the unchanged tree reports nothing; M5, M9, M10 and M19, whose code the fixes touched, were run
+  again and are still reported. The two new tests are what would catch the behaviour itself (by reading; neither has
+  run): without M41's check `aHandTakesCargoBackOnlyInsideItsArea` would not see `RETURNING` (the hand would set off
+  for the chest), without M43's refusal it would not see `IDLE`, and without M42's
+  `aHandLeavesStrandedCargoBeyondItsCarry` would see the hand take up the 65.
+- **Not run:** `./gradlew build`, with or without the optional integrations (the Jade edit), the 21 server game tests
+  and the client companion check (CI is their first compile and run), any client, two clients, a real server restart,
+  real walking (the path test sets SmartBrainLib's `CANT_REACH_WALK_TARGET_SINCE` directly; death is `remove(KILLED)`;
+  the restart is codec round trips, an unload and the entity added again).
+- **Not confirmed until CI:** that the whole unit compiles, in particular `CourierWork`'s use of `WorkerEntity`'s
+  protected `walkTo`, `near`, `arrived`, `stop` and `centre` (same package) and the anonymous `Terms` classes assigning
+  their enclosing fields; that the SmartBrainLib the repository pins keeps a `CANT_REACH_WALK_TARGET_SINCE` set directly
+  (the test asserts the slot first); `addFreshEntity` of a hand read back after `remove(UNLOADED_TO_CHUNK)`; a Fabric
+  `FakePlayer` through `UseOnContext` and `PorterKeyItem.useOn`; `Authority.mayChange` for the client player in the
+  integrated client world; `TagValueInput.read("post", GlobalPos.CODEC)` on a string value returning empty rather than
+  throwing; that the default test structure is 8 by 8 by 8; how a client-side `ItemStack.useOn` answers for the key;
+  that unit 2 keeps `jugcraft:stolas_regard` with a mastered state (it does at `832129b95`) and leaves
+  `AgreementHolder`'s members the hand uses unchanged (`maySeal`, `seal`, `Sealing`, `Sealed`, `verify`, `Standing`,
+  `record`, `held`, `taskDone`, `told`, `spiritLost`, `recall`, `end`, `service`; unchanged at `832129b95`).
+- **Where unit 4 meets unit 2 in the merge** (unit 2 read at `wip/chunk-d-u2` `832129b95`, and again for the unit
+  review's fixes at its head `8f0635d9e`, after its D-05 commit `ee82c1dc7` and its records' commit, read only; a trial
+  three-way `git merge-file` of each file both units change, in scratch, since deleted):
+  - Generated files, `src/main/resources/assets/jugcraft/lang/en_us.json` and
+    `tools/data/generated-material-resources.json`: take either side and run
+    `python3 -B tools/generate_material_data.py`; never hand-merge them.
+  - `tools/concordance_workers.py` (two hunks): both append to `MESSAGES` after `workers.departed.broken` (keep both
+    blocks); both change the Binding Arts' Understood page (keep unit 4's substring and unit 2's appended sentence: "a
+    spirit's delivery (a Workshop Hand's is a spirit's) and a construct's trip. Stolas, a raven among the spirits, may
+    take notice of you as well:" and its link to `binding/stolas_regard`). Unit 2 adds `SEAT_OUTCOMES`; unit 4 the
+    docstring, `WORK`, `HAND_RESEARCH`, the definition, `ENTITY_NAMES`, the tooltips and the codex entry.
+  - `tools/concordance_worker_art.py` (one hunk): keep unit 2's `ICONS` line (`pact_perch`) and unit 4's `SHEETS`
+    (`workshop_hand`); both edit the docstring.
+  - `tools/check_mod_data.py` (two hunks in the trial). In `check_concordance` (merged cleanly): unit 2's
+    `check_stolas_regard` and `check_pact_screen(co, lang)` (from `ee82c1dc7`) come before `check_logistics`, and unit
+    4's `check_hand` after it; keep all four calls in that order. Unit 2 widens `check_pacts`' signature and its call;
+    unit 4's `def check_hand` follows `def check_logistics`. The test tables, one hunk: unit 2's `D04_TESTS`,
+    `D05_TESTS`, `D05_ON_STOLAS` and `D03_TESTS` and unit 4's `UNIT4_TESTS` and `PORTER_LOGISTICS_TESTS` all follow
+    `UNIT1_TESTS`; keep every table. `AUTHORITY_ROUTES`, the other hunk: keep unit 4's `spirits/PorterKeyItem.java` line
+    with both needles (`Authority.mayChange(level, player, pos)` and `holder.maySeal(level, player, true)`) beside unit
+    2's new entries (`PactPerchBlock`, `PactMenu`, `PactKeeping`, `StarReckoning`): unit 2's side still has the old
+    one-needle line, and taking it would drop the `maySeal` check silently. With unit 2's `tools/concordance_pacts.py`
+    present, `check_hand` checks the Regard's mastered state (`stolas_regard.json` has one at `8f0635d9e`).
+  - `src/client/java/io/github/jimbozoomer/jugcraft/client/WorkerClient.java` (merged cleanly in the trial): unit 2's
+    `7da686ad4` adds Stolas's import, `STOLAS_SCALE` and his renderer, unit 4 the hand's import and renderer; keep both
+    imports and both renderers.
+  - `concordance/spirits/Workers.java` (one hunk): unit 2's Stolas and perch fields and registrations sit beside
+    `WORKSHOP_HAND`'s, and both rewrite the class Javadoc's last line; keep both sentences.
+  - `ConcordanceWorkerGameTests` (seven hunks in the trial), `ConcordancePersistenceGameTests` (four),
+    `ConcordanceAuthorityGameTests` (one): both append tests at each class's end and add imports; keep both sides.
+  - Codex positions: unit 2's `binding/stolas_regard` at (0,4) and `binding/stolas_pact` at (2,4); the hand's at (4,4).
+    At the merge, link `binding/workshop_hand` to `binding/stolas_regard` (the codex's link check would fail here
+    without unit 2's entry, so it is not added in this tree).
+  - This contract (the status line, the units table, D-08, the schema review, Completion evidence, Interfaces, Order,
+    Risks, Decisions, Where to resume), `CHANGELOG.md` (one hunk), `docs/INTEGRATION_STATUS.md` (two),
+    `docs/WHAT_EXISTS.md` (one, the workers row) and `arcane-concordance-workers.md` (three), which unit 2's records'
+    commit `8f0635d9e` also edits: merge by union.
+  - Decision numbers: unit 1 holds D-P1 to D-P16 and unit 2's block, at `8f0635d9e`, D-P17 to D-P49; unit 4's D-P70 to
+    D-P83 sit in a block reserved for it.
+  - `AgreementHolder`: unit 2 adds `OnBreak`, `Seat`, `seat`, `stranded` and a second constructor, keeps the
+    one-argument constructor the anchor uses and changes what breaking does by `OnBreak`; unit 4 does not edit it, and
+    the members the hand uses are unchanged at `8f0635d9e`. Unit 2 does not edit `SpiritAnchorBlock`,
+    `SpiritAnchorBlockEntity` or `CourierWork`.
+  - After the merge: the schema review's Star-reckoning column re-read against unit 2's D-05 as built (its fulfilment
+    cell already corrected from `StarReckoning.observed` at `8f0635d9e`).
+- **Where unit 4 meets unit 1's review fixes** (`3775eac3b` "Chunk D unit 1: fixes from the unit review", the merge
+  `55b3ca698` and `da185dd0d`, on `origin/claude/chunk-d-pact-hall`, read only; not in this tree):
+  - Files both change: `CHANGELOG.md`, `docs/INTEGRATION_STATUS.md`, `docs/WHAT_EXISTS.md`, this contract, the workers
+    and persistence records, `ConcordanceWorkerGameTests`, `ConcordanceAuthorityGameTests`,
+    `ConcordancePersistenceGameTests`, `tools/check_mod_data.py` and `tools/concordance_workers.py`: merge by union;
+    the lang is regenerated, never hand-merged.
+  - Unit 1's fix 2: `WorkerEntity.setStatus` notes a worker on its holder's roster only if `joinsRosterOnStatus()`,
+    true by default and false only for the shade. The hand would inherit true, so a hand replaced while its chunk was
+    unloaded, loading later while the Concordance is off or its anchor unloaded, would report `DISABLED` or
+    `DESTINATION_UNLOADED` and take one of its holder's 32 roster places again; `check_pacts`' needle covers only the
+    shade. At the merge: add `@Override protected boolean joinsRosterOnStatus() { return false; }` to
+    `WorkshopHandEntity`, extend `check_pacts`' needle to the hand, and add a test that a replaced hand loading while
+    switched off stays off the roster. It cannot be done in this tree, which has no such method.
 
 ### D-09. Combined fixes, evidence, the checkpoint and the handoff (unit 5)
 
@@ -1056,13 +1306,69 @@ change, two observatories).
 
 | Code | Requirement | Tickets | Tests |
 |---|---|---|---|
-| E1 | "No one can bind another player" | D-01, D-02, D-04, D-05, D-07 | `onlyTheOwnersSideSealsAnAnchor`, `aStandInNeverSeals`, `noOneBindsAnotherPlayer`, `anotherPlayerCannotAcceptForTheHolder`, `anotherPlayerCannotUseTheHoldersService`, `aRequestNamingAnotherPlayersRecordIsRefused`, `aChangeOfOwnerMovesNoPact` |
+| E1 | "No one can bind another player" | D-01, D-02, D-04, D-05, D-07 | `onlyTheOwnersSideSealsAnAnchor`, `aStandInNeverSeals`, `noOneBindsAnotherPlayer`, `anotherPlayerCannotAcceptForTheHolder`, `anotherPlayerCannotUseTheHoldersService`, `aRequestNamingAnotherPlayersRecordIsRefused`, `aChangeOfOwnerMovesNoPact`, `aStrangerCannotBindAHandToAnotherPlayersPost`, `aHandServesOnlyItsBeneficiaries`, `anAnchorIsBoundOnlyWhileItKeepsNoAgreement` |
 | E2 | "Upkeep can suspend without hidden offline punishment" | D-02 (the rules), D-05 (Stolas) | `upkeepWarnsThenSuspendsAfterGraceAndResumes`, `aReturnAfterAbsenceGetsTheFullGrace`, `absentAndUnloadedTimeIsNeverOwed`, `aStandInNeverAnswersForUpkeep`, `theConcordanceOffHoldsEveryClock`, `aRestartWhileSuspendedStaysSuspended` |
 | E3 | "Agreement copying does not multiply benefits" | D-02, D-03, D-04, D-05 | `aCopiedAnchorGivesNothingAndReleasesNothing`, `aLegacyAnchorClaimsItsPlaceOnce`, `aCopiedPerchIsInert`, `aCopiedPerchRecallsNothing`, `aMastersRecallAndStolassShareOneClaim`, `aChangedClockGivesNoSecondRecall`, `notesNeverStandInForStolasEvidence` |
-| E4 | "End/death/unload/restart returns appropriate property once" | D-01, D-02, D-04, D-05, D-06, D-07, D-08 | `aKilledShadeLeavesItsLoadOnce`, `aKilledShadeAwayFromItsAnchorDropsWhereItFell`, `anUnloadedShadeReplacedLeavesOnceAndDeliversOnce`, `endingTwiceReturnsOnce`, `thePerchHoldsNothing`, `endingReturnsTheEscrowOnce`, `aDeadHolderIsNeverHandedTheEscrow`, `aBrokenPerchLeavesThePactWithoutItsPerch`, `thePactAndItsEscrowSurviveARestart`, `killingStolasIsNeverTheFastestRoute`, `recoveryNeverTakesCargoOutOfAnUnloadedContainer`, `endingWithCargoAboardStrandsItOnce`, 03:193's eight cases |
+| E4 | "End/death/unload/restart returns appropriate property once" | D-01, D-02, D-04, D-05, D-06, D-07, D-08 | `aKilledShadeLeavesItsLoadOnce`, `aKilledShadeAwayFromItsAnchorDropsWhereItFell`, `anUnloadedShadeReplacedLeavesOnceAndDeliversOnce`, `endingTwiceReturnsOnce`, `thePerchHoldsNothing`, `endingReturnsTheEscrowOnce`, `aDeadHolderIsNeverHandedTheEscrow`, `aBrokenPerchLeavesThePactWithoutItsPerch`, `thePactAndItsEscrowSurviveARestart`, `killingStolasIsNeverTheFastestRoute`, `recoveryNeverTakesCargoOutOfAnUnloadedContainer`, `endingWithCargoAboardStrandsItOnce`, `aHandFillsACrucibleUntilItIsFull`, `aHandTakesNothingWhereItsHolderMayNot`, `aHandThatCannotFindItsWayStrandsItsCargoOnce`, `anUnloadedDestinationKeepsTheHandWaiting`, `aKilledHandStrandsItsCargoOnce`, `anAbsentHolderStopsTheHand`, `aBrokenSourceReleasesTheHandsClaim`, `aHandsClaimSurvivesARestart`, `aHandLeavesStrandedCargoBeyondItsCarry`, `aHandTakesCargoBackOnlyInsideItsArea` |
 | E5 | "Two users cannot both own a unique reserved service instance accidentally" | D-02, D-04, D-08, D-09 | `twoPlayersCannotBothSealOnePlace`, `twoNegotiationsAtOnePerchSealOnce`, `oneStolasPactPerHolder`, `twoHandsCannotHoldOneRequest`; the two-client attempt (D-09), or not run |
-| E6 | Extend `ConcordanceWorkerGameTests`, `ConcordanceLogisticsGameTests`, `ConcordanceSharingGameTests`, `ConcordancePersistenceGameTests` and the relevant client companion tests (09:172) | every ticket | the four suites above; `CompanionAutomationChecks` through `PeepoCompanionClientTests` (D-08); `ConcordancePactClientGameTests` (D-04, D-06, D-07) |
+| E6 | Extend `ConcordanceWorkerGameTests`, `ConcordanceLogisticsGameTests`, `ConcordanceSharingGameTests`, `ConcordancePersistenceGameTests` and the relevant client companion tests (09:172) | every ticket | the four suites above; `CompanionAutomationChecks.workshopHand` through `PeepoCompanionClientTests` (D-08); `ConcordancePactClientGameTests` (D-04, D-06, D-07) |
 | E7 | The checkpoint: "a complete conversation-to-service-to-departure sequence" (09:174) | D-09 | the whole-path server test; the client sequence of the conversation, a recall and the departure |
+
+## Schema review (D-08; 09:164-166, 03:177)
+
+Written at D-08 (unit 4) on unit 1's one record. Unit 4 was built beside unit 2, not after Stolas's Star-reckoning
+(D-05), so the knowledge service's column is taken from unit 2's branch as far as it is built (D-03, and D-04's server
+side: `wip/chunk-d-u2` at `832129b95`, read only: `concordance/pact/stolas.json`, `PactPerchBlockEntity.sealing`,
+`AgreementHolder.OnBreak` and `seat`, `PactKeeping`) and, for Star-reckoning itself, from the session's decisions D-S1,
+D-S3, D-S6, D-S7 and D-S12, marked *(decided)*. Re-read both at the merge and correct this table. **A proposal only:**
+the shared schema is frozen at the checkpoint, not before (03:177), and nothing here is the owner's decision.
+
+| Concern | Star-reckoning (knowledge service) | Workshop hand (cargo service) | Kept in | For the shared schema |
+|---|---|---|---|---|
+| Identity: record, agreement, counterpart, holder, sealed at, never transferable | agreement `jugcraft:stolas_pact`, counterpart `jugcraft:stolas` | agreement and counterpart `jugcraft:workshop_hand` | `BoundWill` (unit 1) | Shared, unchanged |
+| Place | the pact perch, a marker holding nothing; broken with the Concordance on, the pact stays its holder's without its perch and Stolas leaves the world, to be seated at a new perch (`OnBreak.UNSEAT`, `seat`); broken while switched off, nothing changes | a Spirit Anchor (a hand leaves its slots alone); broken, it releases the agreement (G15; unit 2 names this `OnBreak.RELEASE`) | `Pact.place` | Shared; what breaking the block does belongs to the block (`OnBreak`) |
+| Service terms | `star_reckoning`; radius 8 round the perch, all day (0 to 24000), quota 1 a day (`stolas.json`); a task is one recall *(decided, D-S1)* | `courier`; 06:00 to 18:00; radius 12 round the anchor, applied to every place it goes (destinations and sources); quota 32, a task being one load delivered in full; at most its carry (64) a trip, read live from its definition | `Pact.service`, `window`, `doneToday` | Shared shape; the work id says what a task and the area mean; per-trip limits stay the definition's |
+| Who benefits | its holder alone (`personal`, `stolas.json`) | its holder and their party (`party`), checked at each new claim against today's party; a load already claimed is finished, and a former member's open request is skipped (`IDLE`) | `Pact.beneficiaries` | Shared closed vocabulary; no list of named players (each would have to consent: the deferred ward keeper) |
+| Upkeep, escrow, grace | Gentle (D-S3): one of `#jugcraft:stolas_offerings` every 7 days, a day's grace, up to 4 ahead (`stolas.json`), looked at by the perch's ticker (`PactKeeping`) | none | `Pact.upkeep`, escrow beside the record | Shared, optional |
+| Suspension | by its holder, or by upkeep | by its holder; held, no new claim, and a claim it holds is finished | `Pact.hold`, `holdSince` | Shared; a hold stops new work and never strands work in progress |
+| Presence | one a pact, called back at no cost while its holder is near (`PactKeeping`, D-S7) | mortal; killed, its claim is let go and the cargo stranded at the post; called back at no cost under the same record | `Pact.presence`, the roster | Shared |
+| Claim on an outside authority | `recall:<pattern>` in `AstralClaims` *(decided, D-S1)* | a `CourierLedger` request: exclusive, leased 200 ticks and renewed each decision, `CLAIMED` for anyone else | the authority; the presence saves only the claim's id | **Not in the pact.** Shared rule: a presence keeps at most an authoritative claim's id, never a copy of property (03:191) |
+| Reservations | none | at a source, at most what it holds less other live reservations, at most its carry; stranded cargo beyond its carry, or to be taken back beyond its area, never taken up (D-P82) | `CourierLedger` | Service-specific |
+| Property in flight | none | owned by the request; released, stranded at the post | `CourierLedger` | Service-specific; shared rule: end, death, unload and restart move property only through its authority's steps |
+| Recovery | the escrow, once, on ending (D-S6; unit 1's `end`) | `recover` by the requester, once (`NOT_FOUND` after), or another courier's take-up | `CourierLedger`; the escrow beside the record | Service-specific |
+| Access | the holder in person, never a stand-in | the holder answering (a stand-in only with the absent-owner option, as for porters); the post usable by the holder; each source changeable by holder and requester | `Authority` | Shared through `Authority`; each service says whether a stand-in may answer |
+| Exact variants | pattern ids | `ItemVariant` | ledger samples | Service-specific |
+| A loaded destination | not applicable | `DESTINATION_UNLOADED`: waits, lease renewed, no step | the courier decision | Service-specific |
+| A binding to a second place | none | the anchor's `post`: bound only by the anchor's owner's side, never a stand-in, to a post they may use in its level within its radius, only while no agreement is kept; at each decision the post must still stand, loaded, usable by the holder | the holder block | **Not in the pact:** block data, checked again at use; a copied block is inert (D-S9) |
+| Unlock | Stolas's Regard understood and a recorded sky observation, to invite (D-03, D-04) | Stolas's Regard mastered, asked at sealing only | research | Per service |
+| Fulfilment evidence | `pact_service`, recorded when the holder makes a sky observation while the pact serves, and only once a player (unit 2's `StarReckoning.observed` at `8f0635d9e`; D-S12) | `worker_service` `spirit` on each delivery (the Binding Arts' distinct 3 unchanged) | research | Per service |
+| Terms shown before accepting | the perch's screen: Stolas's three beats and every term before anything is spent (D-S15; D-04's server side built, its client screen not yet) | the seal message (post, area, hours, loads, carry, for whom) and the codex | lang | Known gap: a hand has no terms page |
+| How many, who seals, cost | one a holder; the perch's owner only (`partySeals` false); the Open Hand Compact (two amethyst shards, three feathers, 8 Astral Resonance) | any number within 32 Bound Wills and 32 roster places; the anchor's owner or their party; nothing | `Sealing` (`onePerHolder`, `partySeals`, `affords` and `pay`) | Shared switches |
+| Departures and statuses | `ended`, `broken`; `upkeep_due`, `upkeep_held`, `suspended`, `disabled`; a pact without its place seated again (`SEAT_OUTCOMES`) | `ended`, `broken` (the ledger notes `agreement_ended`; killed, `worker_removed`); `outside_agreement` (hours, area, no post or its post gone), `finished`, `idle` (no beneficiary's request), `owner_offline`, `blocked_by_access`, `destination_unloaded`, `full`, `cannot_navigate`, `waiting_for_resources`, `suspended`, `disabled` | `PACT_DEPARTURES`, `Status` | Shared vocabularies; the hand adds no id, and `UNAVAILABLE_WORKER` stays unused |
+
+**What the cargo service needed that the knowledge service did not:** an exclusive leased claim; reservations; property
+in flight owned by an authority and stranded on release; one recovery; exact variants; a loaded destination; access for
+both holder and requester; party beneficiaries checked again at each new claim; a binding to a second place; a per-trip
+load; a task counted per load. **What neither needed:** a list of named beneficiaries, a new status or departure reason,
+a second ledger, or a generic job adapter beyond the courier decision the porter and the hand share.
+
+**Proposed shared schema, to freeze at the checkpoint:**
+1. One record, unchanged by D-08: `BoundWill(id, agreement, counterpart, holder, sealedAt, transferable = false)` with
+   its `Pact`: `place?`, `hold`, `holdSince`, `beneficiaries` (`personal` or `party`), `presence?`, `upkeep?`,
+   `service(work, radius, from, to, quota)?`, `window` and `doneToday`; the escrow beside it and each holder's last 8
+   departures.
+2. S1: a service's claims and property in flight live with the authority that owns that kind of thing (`CourierLedger`,
+   `AstralClaims`); the presence saves only a claim's id.
+3. S2: the work defines a task and the subject of the area; the count lives on the record.
+4. S3: beneficiaries are a closed vocabulary, checked at each new use against current membership; work already begun is
+   finished.
+5. S4: a holder block's bindings to other places are block data, checked at each use.
+6. S5: terms gates stop new work only; work in progress is finished or handed back through its authority.
+7. S6: death and unload never end a pact; ending releases claims through their authority, once.
+
+**Left open at the checkpoint:** beneficiaries beyond the party; a job-adapter interface (canPlan, reserve, begin,
+progress, complete, cancel, recover; 03:191), after a third service; a terms page for worker pacts; whether a courier
+should skip an absent requester's request rather than wait on it (D-P81).
 
 ## Interfaces expected to change
 
@@ -1077,11 +1383,27 @@ keys, `release` returning the escrow); `Status` (two appended reasons); `Bond`; 
 `tools/check_mod_data.py` (`check_workers`, `check_pacts`, `AUTHORITY_ROUTES`, `ENTRY_BY_ENTRY`); the lang and the
 spirits codex entry regenerated. No payload, block, item, entity or art.
 
+**As built in unit 4** (D-08; see its As built note): `concordance/spirits/CourierWork` (new: the porter's courier
+decision and its `Terms`) and `WorkshopHandEntity` (new); `logistics/Logistics.next(Place, long, Predicate<Request>)`
+and `reserve(..., most, ...)`; `courier/CourierLedger.reserve(..., most, ...)`; `ClockworkPorterEntity` (its decision
+moved into `CourierWork`, its terms kept); `SpiritAnchorBlockEntity`'s `post`, `handSealing` and `call` (a
+`WorkerEntity<?>`: a shade or a hand); `SpiritAnchorBlock.useItemOn` and `sealHand`; `PorterKeyItem.bind` and `Binding`;
+`Workers.WORKSHOP_HAND`; `WorkerParser.WORK` (`courier`) and `WorkerDefinition`'s Javadoc; `client/WorkerClient` (the
+hand drawn by GeckoLib); `compat/jade/WorkerDataProvider` (its carried count). `tools/concordance_workers.py`,
+`tools/concordance_logistics.py`, `tools/concordance_worker_models.py` and `tools/concordance_worker_art.py`;
+`tools/check_mod_data.py` (`check_hand`, new; `check_workers`' class map; `check_logistics`; `AUTHORITY_ROUTES`;
+`UNIT4_TESTS` and `PORTER_LOGISTICS_TESTS`). Generated: `concordance/worker/workshop_hand.json`, the codex entry
+`entries/binding/workshop_hand.json`, the hand's GeckoLib model, animations and sheet, lang. Tests: `T/WorkshopHands`
+(new fixture) and the four suites; `local/peepo/CompanionAutomationChecks`. New registration: the entity
+`jugcraft:workshop_hand`. No `Agreement` field, payload, block, item or saved-data id. The unit review's fixes add
+`WorkshopHandEntity.WORK`, make `CourierWork.Terms.postGone()` return a `Status` (both couriers' terms follow), pass
+the definition to `SpiritAnchorBlock.sealHand` and give the hand's model a `pack_lid` bone.
+
 **Existing files edited:**
 
 | Area | Files |
 |---|---|
-| Records and spirits | `concordance/resource/BoundWill.java` (optional `place`, `hold`; a six-argument constructor kept); `concordance/spirits/BoundWills.java` (the codec's optional fields); `concordance/worker/Agreement.java` (optional `beneficiaries`, D-08); `Status.java` (two appended reasons); `WorkerParser.java` (`WORK`, D-08); `Bond.java`; `SpiritAnchorBlock.java` and `SpiritAnchorBlockEntity.java` (the extracted holder, owner, outcomes, `post`); `GatheringShadeEntity.java` (removal, delivery on departure); `HearthlingEntity.java`; `ClockworkPorterEntity.java` (the extracted courier decision); `WorkerRoster.java` (if the outcome needs a capacity query) |
+| Records and spirits | `concordance/resource/BoundWill.java` (optional `place`, `hold`; a six-argument constructor kept); `concordance/spirits/BoundWills.java` (the codec's optional fields); `Status.java` (two appended reasons); `WorkerParser.java` (`WORK`, D-08); `Bond.java`; `SpiritAnchorBlock.java` and `SpiritAnchorBlockEntity.java` (the extracted holder, owner, outcomes, `post`); `GatheringShadeEntity.java` (removal, delivery on departure); `HearthlingEntity.java`; `ClockworkPorterEntity.java` (the extracted courier decision); `WorkerRoster.java` (if the outcome needs a capacity query) |
 | Sky, Styx, journal | `concordance/sky/AstrolabeItem.java` (the shared recall); `styx/Styxhexenhammer.java` (the hint); `concordance/journal/Journal.java` (the pacts section) |
 | Jade | `compat/jade/JugcraftJadePlugin.java`, `WorkerDataProvider.java`; `client/compat/JugcraftJadeClient.java` |
 | Client | `JugcraftClient.java` (registrations: renderer, screens, key); `WorkerClient.java` (the hand drawn by GeckoLib, as `check_workers` requires, `tools/check_mod_data.py:17918-17919`) |
@@ -1123,7 +1445,10 @@ spirits codex entry regenerated. No payload, block, item, entity or art.
 3. Unit 2: D-03 (data and the gate file; nothing spent), then D-04 (D-02's holder and records; D-S1 and D-S3 for the
    terms page, critique 21), then D-05 (D-02's upkeep rules; D-03's gate).
 4. Unit 3: D-06 after D-04's entity; D-07 after D-02 (states) and D-05 (actions).
-5. Unit 4: D-08 only after Stolas works (09:164) and Stolas's Regard can be mastered, using C-06 from #466.
+5. Unit 4: D-08 only after Stolas works (09:164) and Stolas's Regard can be mastered, using C-06 from #466. As built,
+   unit 4 was built beside unit 2 from unit 1's head `97e1facd4` on the local `wip/chunk-d-u4`, not after it: its gate
+   names unit 2's research id only, its tests grant that id, and the two join in a merge (D-08's As built). The player's
+   order is unchanged: the hand still needs Stolas's Regard mastered.
 6. Unit 5: D-09.
 
 The smallest first step is D-01: no new id, block, entity or art; it closes G1 and G3 to G8 on systems already shipped
@@ -1181,6 +1506,39 @@ The smallest first step is D-01: no new id, block, entity or art; it closes G1 a
   The licence metadata found with the source is kept with the provenance.
 - **Shared hot files:** above; `sounds.json` contention with #470, `ScreenKit` with #469 and #471.
 - **Two clients:** likely not available; E5 may stay unverified in multiplayer.
+- **Unit 4 has not run (as built):** none of its Java has been compiled against Minecraft, and none of its 21 server
+  game tests or its client companion check has run; CI is their first compile. It was built beside unit 2 and has not
+  met it: the merge (D-08's As built) is where `check_hand` first checks the Regard's research.
+- **Holds finish claims (D-P75):** a suspended hand, or one past its hours or its day's loads, finishes the load it has
+  claimed. A claim on a full destination stays held until there is room or the holder ends the agreement; it blocks only
+  its own request, and other couriers still claim the rest of the post's queue.
+- **An absent requester at the head of the queue** holds the hand with `OWNER_OFFLINE`, as it holds porters
+  (`arcane-concordance-logistics.md`, Multiplayer and persistence); not changed (D-P81).
+- **Crucibles outside the area:** a crucible files at a post up to 16 blocks away (`Couriers.FILING_REACH`), so it may
+  lie outside a hand's 12 blocks of its anchor; its request is refused with `OUTSIDE_AGREEMENT` and waits for a porter.
+- **Carry is live:** read from the definition, not the sealed terms (as for the shade); a data pack's change alters a
+  sealed hand's load a trip, and cargo of its own stranded at its post beyond a lowered carry it leaves to porters or
+  its requester (D-P82).
+- **Cargo a hand leaves (D-P82):** at a post served only by hands, cargo stranded beyond their carry (a killed porter's)
+  or to be taken back to a container beyond their area waits for its requester's one recovery; it is counted in the
+  ledger and nothing is lost.
+- **The hand's balance:** no fuel, repair or upkeep; at most 32 loads of 64, 2,048 items, a day a hand (no stranded
+  load beyond its carry is taken up, D-P82); nothing is created. For the owner's review at the checkpoint.
+- **The Porter Key on an anchor:** used on a Spirit Anchor, the key now binds it (sneaking: unbinds it). Before, it
+  acted as an empty hand there (the anchor's own use) and, sneaking, took the anchor for a route's container.
+- **Simulated failures in unit 4's tests:** the path test sets SmartBrainLib's `CANT_REACH_WALK_TARGET_SINCE` directly
+  (asserting first that the memory slot exists); death is `remove(KILLED)`; the restart is codec round trips, an unload
+  (`UNLOADED_TO_CHUNK`) and the entity added again.
+- **Leases across tests:** each new test calls `lapse` with far-future times on the shared courier ledger, as the 15
+  existing logistics tests already do. `ConcordanceJourneyGameTests` (900 ticks, a real porter) and
+  `ConcordanceWorkshopLoadGameTests` hold claims across ticks, so a lapse from a test running beside them can strand
+  their cargo mid-flight; it is taken up again at the post, which those tests tolerate. Game-test positions are not
+  reused between batches (`clearOnBatch` false), so a leftover far-future lease cannot reach a later test's request.
+- **A far-reaching test area:** `anUnloadedDestinationKeepsTheHandWaiting` seals with a radius of 100,008, kept until
+  that test's own end.
+- **The companion check** grants research to the client player in the disposable Peepo world.
+- **Client CI cost:** `WorkshopHands.java` and `CompanionAutomationChecks.java` are shared files, so every client class
+  runs (239).
 
 ## Explicit don'ts
 
@@ -1239,7 +1597,7 @@ The smallest first step is D-01: no new id, block, entity or art; it closes G1 a
 | 1 | Worker, Authority, Sharing, Persistence, Resource | none | `check_workers`, `check_persistence`, the pact `problems()` audit, `check_repository`, `gradlew build` | an older Bound Will; an anchor's agreement; a legacy `suspended`; an unreadable record kept; stamps |
 | 2 | Worker, Sharing, Persistence, Sky, Styx, Progression, Journal | `ConcordancePactClientGameTests` (conversation, terms, keyboard) | `check_pacts`, `concordance_journey --check`, `check_acquisition`, the icon maps, the economy check, the recipe-conflict fixture if #462 has merged | the perch; the escrow and clock; a restart while suspended; a reload with a broken definition |
 | 3 | Worker (presence), Journal, Logistics (recovery) | poses, subtitles, Jade, the roster; the build without optional integrations | `check_geckolib` (triggerables), `owner_art --check`, client-test selection | the entity's keys |
-| 4 | Logistics (the eight cases and three more), Worker, Persistence | `PeepoCompanionClientTests` / `CompanionAutomationChecks` | `check_workers` (`WORK`, the class map), the logistics audit | a claim across a restart |
+| 4 | Logistics (seven of 03:193's cases and four more), Worker (five), Authority (one), Persistence (two) | `PeepoCompanionClientTests` / `CompanionAutomationChecks` | `check_workers` (`WORK`, the class map), `check_hand`, the logistics audit | a claim across a restart; an anchor's post |
 | 5 | the whole path; load | the evidence bundle; the two-client attempt | every check | none |
 
 Every unit also runs `tools/check_mod_data.py`, `scripts/check_repository.py`, `scripts/tests`, the generators (their
@@ -1264,8 +1622,11 @@ owner's, while C-D4 and every B-P and C-P stay Proposed (Chunk C's contract, Dec
 CC:2444-2445). D-D decisions are the owner's. D-S decisions are the session's under D-D2: the owner
 asked not to be asked, so they are recorded here as the session's choices, never as accepted by the owner, and stay
 reviewable at the checkpoint (10:162). D-P decisions are the units' proposals: choices the session made in building a
-unit where the tickets above left room or had to be corrected (D-P1 to D-P12 from unit 1's specification, D-P13 to
-D-P16 from its review), each with what was built; none is the owner's, and each is reviewable at the checkpoint.
+unit where the tickets above left room or had to be corrected (D-P1 to D-P12 from unit 1's specification, D-P13 to D-P16
+from its review), each with what was built; none is the owner's, and each is reviewable at the checkpoint. Unit 4's are
+numbered from D-P70, a block reserved for it so that units built in parallel never collide (unit 2 takes the numbers
+after unit 1's): D-P70 to D-P80 from its specification (its D-P60 to D-P70, renumbered), D-P81 from its specification's
+review and D-P82 and D-P83 from the unit review's fixes.
 
 | ID | Date | Decision | Status | Affects |
 |---|---|---|---|---|
@@ -1312,6 +1673,20 @@ D-P16 from its review), each with what was built; none is the owner's, and each 
 | D-P14 | 24 October 2026 | A seal may carry a cost (`Sealing.affords` and `pay`): asked after the refusals and before anything is called, refused as the appended outcome `CANNOT_AFFORD` (`seal_cannot_afford`, nothing spent), and paid in the same server call only once the Bound Will is recorded (correction 10, D-S13). The anchor's seal costs nothing; D-04's Open Hand Compact uses it | Proposed (unit 1, reviewable at the checkpoint) | D-01, D-04 |
 | D-P15 | 24 October 2026 | A holder block calls its presence by counterpart (`Holds.call(level, who, counterpart)`) and calls nothing (so `UNAVAILABLE`) for a counterpart it does not serve: the anchor serves only `jugcraft:gathering_shade`. Every presence (`AgreementHolder.Presence`) is a `WorkerEntity` subclass, unit 2's Stolas and unit 4's hand included, so each has a roster entry to note and strike (corrections 7 and 8) | Proposed (unit 1, reviewable at the checkpoint) | D-01, D-04, D-06, D-08 |
 | D-P16 | 24 October 2026 | Breaking a holder block while the Concordance is off releases nothing: its record stays kept at that place with its escrow, no departure is written and its shade is not sent away (correction 5, D-S16). Once the switch is on, the shade finds no anchor and departs, its load dropped where the anchor stood; the next seal there leaves the record without its place; its holder can end it (by code until D-07's roster) | Proposed (unit 1, reviewable at the checkpoint) | D-02, D-07 |
+| D-P70 | 24 October 2026 | Definition `jugcraft:workshop_hand`: kind `spirit`, work `courier`, radius 12, hours 0 to 12000 (06:00 to 18:00), quota 32 loads a day, carry 64 items a trip; `WorkerParser.WORK` and the generator's `WORK` gain `courier`. A MISC entity with 16 health and no loot table, the Gathering Shade's body with a wicker pack (a generator variant, D-S2); not a Goetia identity | Proposed (unit 4, reviewable at the checkpoint) | D-08 |
+| D-P71 | 24 October 2026 | Its service is a spirit's: each delivery records `Practiced(worker_service, "spirit")` for its holder, present. The Binding Arts' "distinct 3" is unchanged, so the hand gives no shortcut to mastery and no fourth kind | Proposed (unit 4, reviewable at the checkpoint) | D-08 |
+| D-P72 | 24 October 2026 | The Stolas's Regard gate: `jugcraft:stolas_regard` MASTERED, asked in code by the anchor before it seals (`WorkshopHandEntity.regarded`; research unlocks name only invocations, workings and rituals). Asked only at sealing: calling back a lost hand, or the Regard later falling, never stops a sealed hand. As built beside unit 2, the gate names the id only; `check_hand`'s check that the research exists with a mastered state runs once unit 2's `tools/concordance_pacts.py` is in the tree | Proposed (unit 4, reviewable at the checkpoint) | D-03, D-08 |
+| D-P73 | 24 October 2026 | Binding an anchor to a post: the anchor gains an optional `post` (`GlobalPos`). A Porter Key set on a Courier Post binds it, and the same key used while sneaking unbinds it, only with the Concordance on; never at a copy (`CONFLICTING_AGREEMENT`); only by one who may seal there (`maySeal(level, player, true)`: the owner or their party, where they may build, never a stand-in); only while the anchor keeps no agreement; only to a post in the anchor's level, loaded, within the definition's radius and one the player may use. The key's anchor branch asks `RateGate.allow(player, "workers", 4)` and comes before its container branch; the anchor's `useItemOn` passes for the key. A bound anchor seals a hand, an unbound one a shade | Proposed (unit 4, reviewable at the checkpoint) | D-08 |
+| D-P74 | 24 October 2026 | Who benefits lives on the record: `handSealing` seals with `UseMode.PARTY`, so the Bound Will's `pact.beneficiaries` is `party`, and `Agreement` gains no field (this supersedes the ticket's "the agreement gains optional `beneficiaries`"). Checked at each new claim against today's party; a load already claimed is finished (the review's correction 5) | Proposed (unit 4, reviewable at the checkpoint) | D-08 |
+| D-P75 | 24 October 2026 | Terms gate only new claims: a hold, being outside the hours, or the day's loads met stops new claims only; a claim already held is finished, as a shade takes its load home. Releases are noted: ended, its anchor broken or another hand answering, `agreement_ended`; killed or discarded, `worker_removed`; unloaded, its holder away or switched off, no release (the 200-tick lease lapses by itself). The ledger always owns the cargo | Proposed (unit 4, reviewable at the checkpoint) | D-08 |
+| D-P76 | 24 October 2026 | The area: a request's destination, and every source (a take-back source included), must lie within the agreement's radius of the anchor. A request bound outside gives `OUTSIDE_AGREEMENT`; one not a beneficiary's is skipped (`IDLE`) and left for other couriers; the hand serves the oldest request it may, past those it skips. With nothing it may serve, it gives the reason the post's next request is not its own | Proposed (unit 4, reviewable at the checkpoint) | D-08 |
+| D-P77 | 24 October 2026 | The quota counts loads: a claim ended by a delivery that emptied its cargo calls `taskDone` once (on the record and the anchor's copy); a part delivery counts nothing | Proposed (unit 4, reviewable at the checkpoint) | D-08 |
+| D-P78 | 24 October 2026 | A per-trip cap: `Logistics.reserve(..., int most, ...)` and `CourierLedger.reserve(..., int most, ...)`; the old signatures pass `Integer.MAX_VALUE`, so the porter is unchanged. Carry is read live from the definition, not sealed, as for the shade | Proposed (unit 4, reviewable at the checkpoint) | D-08 |
+| D-P79 | 24 October 2026 | `UNAVAILABLE_WORKER` stays unused: the hand's status (Jade, the roster, the anchor, `workers`) already says why it waits, and an open request stays visible at the post | Proposed (unit 4, reviewable at the checkpoint) | D-08 |
+| D-P80 | 24 October 2026 | One courier decision: `spirits/CourierWork` holds the claim's id and makes the porter's decision; its `Terms` supply ready, refuses, reaches, load, at its post, delivered and post gone. `Logistics.next(post, now, serves)` skips requests a courier does not serve; `next(post, now)` serves every one. Tests seal a hand under test terms through `anchor.handSealing(...)`, as unit 1 seals with test upkeep. The codex entry is at (4,4): (0,4) and (2,4) are unit 2's (the review's correction 1). Extends D-P15: the anchor also calls `jugcraft:workshop_hand` (`SpiritAnchorBlockEntity.call`); unit 1's row is left as written | Proposed (unit 4, reviewable at the checkpoint) | D-01, D-08 |
+| D-P81 | 24 October 2026 | An absent requester's request at the head of a hand's queue holds the hand (`OWNER_OFFLINE`), as it holds porters: the review's optional correction 9 (skip such requests in the hand's own terms, so it serves those behind them) is not taken, so the two couriers keep one rule for absent requesters; recorded as a risk and left open at the checkpoint | Proposed (unit 4, reviewable at the checkpoint) | D-08 |
+| D-P82 | 24 October 2026 | A hand never takes up cargo stranded at its post that is more than its definition's carry (a porter's, which has no cap of its own; or its own after a data pack lowered its carry), and never claims cargo to be taken back to a source beyond its area (it could put that only into the post, and with the post full would claim and strand it again at each decision): both refused (`IDLE`) in its terms before the beneficiary and area check, and left to porters or to the requester's one recovery. Cargo it already holds whose source is beyond its area still goes into the post when cancelled, never to that source (D-P76). The unit review's findings 1 and 6 | Proposed (unit 4, reviewable at the checkpoint) | D-08 |
+| D-P83 | 24 October 2026 | A courier whose post is gone says why it waits: `CourierWork.Terms.postGone()` returns the status (a porter, which forgets its post, `IDLE` as before; a hand, whose anchor keeps it, `OUTSIDE_AGREEMENT`, as with no post). The anchor's use asks the switch alone, then only the definition of the worker it serves (a hand's for an anchor bound to a post with no agreement or keeping a `courier` agreement, `WorkshopHandEntity.WORK`; the shade's otherwise), so a data pack that drops one leaves the other's anchors working. The unit review's findings 7 and 8 | Proposed (unit 4, reviewable at the checkpoint) | D-08 |
 
 **The checkpoint's three questions** (09:174; at most three, 09:18):
 1. Stolas's personality and appearance: the Flashjack-derived raven, his three dialogue beats and two memorable details
@@ -1339,6 +1714,16 @@ more work:
    seated again at a new perch with the record's own terms and day (D-P1), and its menu asks `RateGate` before `end`,
    `toggle`, `deposit` and `recall` (D-P8).
 4. Keep this page's units table, decisions and evidence current as each unit lands, with an As built note per ticket.
+5. Unit 4 (D-08) is built on the local `wip/chunk-d-u4` (on unit 1's head `97e1facd4`: `023b681e8`, `e51ef2b11`, the
+   records' commit and the unit review's fixes), beside unit 2 on `wip/chunk-d-u2`; not pushed, and nothing of it has
+   run in CI. Merging it with unit 1's review fixes (`3775eac3b` to `da185dd0d`) needs the hand's `joinsRosterOnStatus`
+   (D-08's As built, the last item). To join units 2 and 4: merge unit 2 and unit 4 at the points in D-08's As built
+   note (keep both sides; take either side of the lang and generated resources and run
+   `python3 -B tools/generate_material_data.py`, never hand-merging them); run `tools/check_mod_data.py` with unit 2's
+   research in the tree, so `check_hand` checks `jugcraft:stolas_regard`'s mastered state; link the hand's codex entry
+   to `binding/stolas_regard`; correct the schema review's Star-reckoning column against unit 2's D-05 as built; keep
+   D-P70 to D-P83 as numbered; then push and CI as in item 1, and record each failure and fix in D-08's As built note.
+   Then unit 3 (D-06, D-07) and unit 5 (D-09).
 
 ## How this contract was checked
 
@@ -1400,3 +1785,19 @@ more work:
   repository structure and local documentation links) and `git diff --check` (clean; the page is untracked, so it was
   also checked as a new file with `git diff --no-index --check`, clean). Not run: any build, game test, client,
   generator or other check.
+- **For unit 4's As built note, proposals and schema review (24 October 2026):** re-read at the unit's head `e51ef2b11`:
+  `CourierWork`, `WorkshopHandEntity`, the anchor's, its block's and the key's changes, `Logistics`' and
+  `CourierLedger`'s additions, the porter's terms, the generator tables and audits the unit changed, and every new
+  test's name and Javadoc; the unit's specification, its three part designs and its review's nine corrections; unit 2's
+  `wip/chunk-d-u2` at `832129b95`, read only (`stolas.json`, `stolas_regard.json`, `PactPerchBlockEntity.sealing`,
+  `AgreementHolder`'s additions, `PactKeeping`, the codex positions in `tools/concordance_pacts.py`, and where its edits
+  sit in the files both units change) for the schema review and the merge points. Run for these records: the parse
+  check (19 Java files), M13's two forms again, client-test selection and the records commit's local checks; the other
+  mutations ran for `e51ef2b11` (D-08's As built).
+- **For the unit review's fixes (24 October 2026):** the review's 13 confirmed findings checked against the code at
+  `0d04161a5` before each change; re-read for the merge notes: unit 2 at `wip/chunk-d-u2` `8f0635d9e` (`WorkerClient`,
+  `check_concordance`'s calls, the test tables, `AUTHORITY_ROUTES`, `StarReckoning.observed`, `AgreementHolder`'s
+  constructors and members, its decision numbers, and a trial three-way merge of each file both units change) and unit
+  1's review fixes at `da185dd0d` (`WorkerEntity.setStatus` and `joinsRosterOnStatus`, `check_pacts`' needle and the
+  files both change), read only. Run: the parse check, the generator, the nine new mutations and four old ones, and the
+  fixes commit's local checks (D-08's As built).

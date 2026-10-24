@@ -3,12 +3,18 @@ package io.github.jimbozoomer.jugcraft.test;
 import com.mojang.authlib.GameProfile;
 import io.github.jimbozoomer.jugcraft.concordance.Authority;
 import io.github.jimbozoomer.jugcraft.concordance.ConcordanceProgress;
+import io.github.jimbozoomer.jugcraft.concordance.CrucibleBlockEntity;
 import io.github.jimbozoomer.jugcraft.concordance.LeyPylonBlockEntity;
 import io.github.jimbozoomer.jugcraft.concordance.JugcraftConcordance;
 import io.github.jimbozoomer.jugcraft.concordance.RateGate;
 import io.github.jimbozoomer.jugcraft.concordance.Saved;
+import io.github.jimbozoomer.jugcraft.concordance.courier.CourierLedger;
+import io.github.jimbozoomer.jugcraft.concordance.courier.CourierPostBlockEntity;
+import io.github.jimbozoomer.jugcraft.concordance.courier.Couriers;
+import io.github.jimbozoomer.jugcraft.concordance.logistics.RequestState;
 import io.github.jimbozoomer.jugcraft.concordance.resource.BoundWill;
 import io.github.jimbozoomer.jugcraft.concordance.resource.BoundWillLedger;
+import io.github.jimbozoomer.jugcraft.concordance.rules.Evidence;
 import io.github.jimbozoomer.jugcraft.concordance.rules.ResearchState;
 import io.github.jimbozoomer.jugcraft.concordance.sign.Sign;
 import io.github.jimbozoomer.jugcraft.concordance.spirits.AgreementHolder;
@@ -18,11 +24,13 @@ import io.github.jimbozoomer.jugcraft.concordance.spirits.ClockworkPorterEntity;
 import io.github.jimbozoomer.jugcraft.concordance.spirits.GatheringShadeEntity;
 import io.github.jimbozoomer.jugcraft.concordance.spirits.HearthlingEntity;
 import io.github.jimbozoomer.jugcraft.concordance.spirits.PactHistory;
+import io.github.jimbozoomer.jugcraft.concordance.spirits.PorterKeyItem;
 import io.github.jimbozoomer.jugcraft.concordance.spirits.SpiritAnchorBlock;
 import io.github.jimbozoomer.jugcraft.concordance.spirits.SpiritAnchorBlockEntity;
 import io.github.jimbozoomer.jugcraft.concordance.spirits.WorkerEntity;
 import io.github.jimbozoomer.jugcraft.concordance.spirits.WorkerRoster;
 import io.github.jimbozoomer.jugcraft.concordance.spirits.Workers;
+import io.github.jimbozoomer.jugcraft.concordance.spirits.WorkshopHandEntity;
 import io.github.jimbozoomer.jugcraft.concordance.worker.Agreement;
 import io.github.jimbozoomer.jugcraft.concordance.worker.Body;
 import io.github.jimbozoomer.jugcraft.concordance.worker.Bond;
@@ -34,10 +42,12 @@ import io.github.jimbozoomer.jugcraft.party.JugcraftParties;
 import io.github.jimbozoomer.jugcraft.party.PartyManager;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 import net.fabricmc.fabric.api.entity.FakePlayer;
 import net.fabricmc.fabric.api.gametest.v1.GameTest;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.GlobalPos;
 import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtOps;
@@ -1104,6 +1114,309 @@ public class ConcordanceWorkerGameTests {
 				&& WorkerEntity.shown(Status.FOLLOWING, false) == Status.IDLE && WorkerEntity.shown(Status.WORKING, false) == Status.WORKING,
 				"On its way but not moving, a worker is shown still; working, it is shown working");
 		signs.close();
+		helper.succeed();
+	}
+
+	// ---------------------------------------------------------------- the workshop hand (Concordance Chunk D, D-08)
+
+	/**
+	 * D-08 (D-S2, D-S23): a workshop hand keeps to the terms sealed at its anchor (narrow test terms: 3 blocks, its hours, 2
+	 * loads a day). Outside its hours it takes nothing and says OUTSIDE_AGREEMENT, though a claim it holds is carried to its
+	 * end; a request for a crucible outside its area is refused with the same reason and left open while one inside is taken
+	 * past it; its day's loads done it says FINISHED; the next day it serves again. Suspended by its holder (critique 4), it
+	 * finishes the load it has claimed but claims nothing new, saying SUSPENDED (held is asked before its day's loads);
+	 * resumed, it serves again. Nothing moves twice.
+	 */
+	@GameTest(maxTicks = 20)
+	public void aRequestOutsideTheHoursOrAreaIsRefusedWithItsReason(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		ServerPlayer holder = WorkshopHands.holder(helper);
+		CourierPostBlockEntity post = WorkshopHands.post(helper, holder, WorkshopHands.POST);
+		ChestBlockEntity chest = WorkshopHands.chest(helper, WorkshopHands.CHEST, 10);
+		long now = WorkshopHands.morning(level, 3_200_000L);
+		WorkerDefinition.Spirit terms = WorkshopHands.terms();
+		WorkshopHandEntity hand = WorkshopHands.handUnder(helper, holder,
+				new WorkerDefinition.Spirit(WorkshopHandEntity.DEFINITION, terms.work(), 3, terms.from(), terms.to(), 2, terms.carry()), now);
+		SpiritAnchorBlockEntity anchor = helper.getBlockEntity(WorkshopHands.ANCHOR, SpiritAnchorBlockEntity.class);
+		CourierLedger ledger = CourierLedger.of(level.getServer());
+		CrucibleBlockEntity inside = WorkshopHands.crucible(helper, WorkshopHands.CRUCIBLE, holder); // 3 blocks from the anchor
+		long first = inside.request();
+		List<Long> ids = new ArrayList<>(List.of(first));
+		long in = WorkshopHands.inHours();
+		long out = WorkshopHands.outOfHours();
+		helper.assertTrue(hand.think(level, out, now) == Status.OUTSIDE_AGREEMENT && hand.status() == Status.OUTSIDE_AGREEMENT && hand.task() == 0L
+				&& ledger.ledger().get(first).state() == RequestState.OPEN, "Outside its hours it takes nothing and says why");
+		WorkshopHands.conserved(helper, ids, WorkshopHands.PLAIN, 10, 0, "outside its hours", chest, inside, post);
+		helper.assertTrue(hand.think(level, in, now + 20) == Status.TRAVELLING && hand.task() == first, "In its hours it takes the crucible's request");
+		WorkshopHands.conserved(helper, ids, WorkshopHands.PLAIN, 10, 0, "claimed", chest, inside, post);
+		helper.assertTrue(hand.think(level, out, now + 40) == Status.WORKING && ledger.ledger().get(first).progress().carried() == 2,
+				"A claim it holds is carried on past its hours: it picks up");
+		WorkshopHands.conserved(helper, ids, WorkshopHands.PLAIN, 10, 0, "picked up past its hours", chest, inside, post);
+		helper.assertTrue(hand.think(level, out, now + 60) == Status.WORKING && ledger.ledger().get(first) == null
+				&& WorkshopHands.matching(inside, WorkshopHands.PLAIN) == 2 && anchor.agreement().done(now + 60) == 1, "and delivers: one of its two loads today");
+		WorkshopHands.conserved(helper, ids, WorkshopHands.PLAIN, 10, 0, "the first delivered", chest, inside, post);
+		CrucibleBlockEntity outside = WorkshopHands.crucible(helper, new BlockPos(1, 1, 1), holder); // 4 blocks from the anchor
+		long far = outside.request();
+		ids.add(far);
+		helper.assertTrue(hand.think(level, in, now + 80) == Status.OUTSIDE_AGREEMENT && hand.task() == 0L && ledger.ledger().get(far).state() == RequestState.OPEN,
+				"A request for a crucible outside its area is refused with the same reason and left open for another courier");
+		WorkshopHands.conserved(helper, ids, WorkshopHands.PLAIN, 10, 0, "outside its area", chest, inside, outside, post);
+		Couriers.request(holder, level, post, new ItemStack(Items.GLOWSTONE_DUST), 2);
+		long near = WorkshopHands.lastFiled(helper, WorkshopHands.POST);
+		ids.add(near);
+		helper.assertTrue(hand.think(level, in, now + 100) == Status.TRAVELLING && hand.task() == near && ledger.ledger().get(far).progress().worker() == null,
+				"One inside its area is taken past it");
+		WorkshopHands.conserved(helper, ids, WorkshopHands.PLAIN, 10, 0, "the second claimed", chest, inside, outside, post);
+		helper.assertValueEqual(hand.think(level, in, now + 120), Status.WORKING, "it picks up");
+		WorkshopHands.conserved(helper, ids, WorkshopHands.PLAIN, 10, 0, "the second picked up", chest, inside, outside, post);
+		helper.assertTrue(hand.think(level, in, now + 140) == Status.WORKING && ledger.ledger().get(near) == null
+				&& WorkshopHands.matching(post, WorkshopHands.PLAIN) == 2 && anchor.agreement().done(now + 140) == 2, "and delivered: its two loads for the day");
+		WorkshopHands.conserved(helper, ids, WorkshopHands.PLAIN, 10, 0, "the second delivered", chest, inside, outside, post);
+		Couriers.request(holder, level, post, new ItemStack(Items.GLOWSTONE_DUST), 2);
+		long late = WorkshopHands.lastFiled(helper, WorkshopHands.POST);
+		ids.add(late);
+		helper.assertTrue(hand.think(level, in, now + 160) == Status.FINISHED && hand.task() == 0L && ledger.ledger().get(late).state() == RequestState.OPEN,
+				"Its loads done, it says FINISHED and takes nothing more today");
+		WorkshopHands.conserved(helper, ids, WorkshopHands.PLAIN, 10, 0, "finished", chest, inside, outside, post);
+		long tomorrow = now + Agreement.DAY;
+		helper.assertTrue(hand.think(level, in, tomorrow) == Status.TRAVELLING && hand.task() == late, "The next day it serves again");
+		WorkshopHands.conserved(helper, ids, WorkshopHands.PLAIN, 10, 0, "the next day claimed", chest, inside, outside, post);
+		helper.assertValueEqual(hand.think(level, in, tomorrow + 20), Status.WORKING, "it picks up");
+		WorkshopHands.conserved(helper, ids, WorkshopHands.PLAIN, 10, 0, "the next day picked up", chest, inside, outside, post);
+		helper.assertTrue(hand.think(level, in, tomorrow + 40) == Status.WORKING && ledger.ledger().get(late) == null
+				&& WorkshopHands.matching(post, WorkshopHands.PLAIN) == 4, "and delivers");
+		helper.assertTrue(ledger.ledger().get(far).state() == RequestState.OPEN && ledger.ledger().get(far).progress().worker() == null,
+				"It never took the request outside its area");
+		WorkshopHands.conserved(helper, ids, WorkshopHands.PLAIN, 10, 0, "the next day", chest, inside, outside, post);
+		// Critique 4 (D-P75): a hold stops new claims only; the load it has claimed it finishes.
+		Couriers.request(holder, level, post, new ItemStack(Items.GLOWSTONE_DUST), 2);
+		long kept = WorkshopHands.lastFiled(helper, WorkshopHands.POST);
+		ids.add(kept);
+		helper.assertTrue(hand.think(level, in, tomorrow + 60) == Status.TRAVELLING && hand.task() == kept, "Its second load today is claimed");
+		WorkshopHands.conserved(helper, ids, WorkshopHands.PLAIN, 10, 0, "claimed before the hold", chest, inside, outside, post);
+		helper.assertValueEqual(anchor.holder().toggle(level, holder, tomorrow + 70), AgreementHolder.Toggle.SUSPENDED, "Its holder suspends it");
+		helper.assertTrue(hand.think(level, in, tomorrow + 80) == Status.WORKING && ledger.ledger().get(kept).progress().carried() == 2,
+				"Suspended, it still picks up the load it had claimed");
+		WorkshopHands.conserved(helper, ids, WorkshopHands.PLAIN, 10, 0, "picked up while suspended", chest, inside, outside, post);
+		helper.assertTrue(hand.think(level, in, tomorrow + 100) == Status.WORKING && ledger.ledger().get(kept) == null
+				&& WorkshopHands.matching(post, WorkshopHands.PLAIN) == 6, "and delivers it");
+		WorkshopHands.conserved(helper, ids, WorkshopHands.PLAIN, 10, 0, "delivered while suspended", chest, inside, outside, post);
+		Couriers.request(holder, level, post, new ItemStack(Items.GLOWSTONE_DUST), 2);
+		long waiting = WorkshopHands.lastFiled(helper, WorkshopHands.POST);
+		ids.add(waiting);
+		helper.assertTrue(hand.think(level, in, tomorrow + 120) == Status.SUSPENDED && hand.task() == 0L
+				&& ledger.ledger().get(waiting).state() == RequestState.OPEN && ledger.ledger().get(waiting).progress().worker() == null,
+				"but claims nothing new, and says it is suspended (before its day's loads, now done)");
+		WorkshopHands.conserved(helper, ids, WorkshopHands.PLAIN, 10, 0, "suspended", chest, inside, outside, post);
+		helper.assertValueEqual(anchor.holder().toggle(level, holder, tomorrow + 130), AgreementHolder.Toggle.RESUMED, "Its holder resumes it");
+		helper.assertTrue(hand.think(level, in, tomorrow + Agreement.DAY) == Status.TRAVELLING && hand.task() == waiting
+				&& ledger.ledger().get(waiting).progress().reserved() == 2, "Resumed, it claims the waiting request on its next day");
+		WorkshopHands.conserved(helper, ids, WorkshopHands.PLAIN, 10, 0, "resumed", chest, inside, outside, post);
+		helper.succeed();
+	}
+
+	/**
+	 * D-08 (D-S12, D-S2): binding asks no mastery, but a workshop hand is sealed only once Stolas's Regard is mastered: never
+	 * met or understood, the anchor names the reason and records, calls and notes nothing. Mastered, its own agreement is on
+	 * its Bound Will (its terms, for the holder and their party) and it is on the roster at once. An anchor bound to no post
+	 * still seals a shade. Mastery is asked at sealing only: the sealed hand serves on.
+	 */
+	@GameTest(maxTicks = 20)
+	public void theHandNeedsStolasRegardMastered(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		ServerPlayer holder = WorkshopHands.taught(TestPlayers.survivor(helper), null);
+		CourierPostBlockEntity post = WorkshopHands.post(helper, holder, WorkshopHands.POST);
+		ChestBlockEntity chest = WorkshopHands.chest(helper, WorkshopHands.CHEST, 10);
+		Couriers.request(holder, level, post, new ItemStack(Items.GLOWSTONE_DUST), 2);
+		long id = WorkshopHands.lastFiled(helper, WorkshopHands.POST);
+		List<Long> ids = List.of(id);
+		SpiritAnchorBlockEntity anchor = WorkshopHands.anchor(helper, holder, WorkshopHands.ANCHOR);
+		helper.assertTrue(WorkshopHands.use(helper, holder, WorkshopHands.keyFor(helper, holder, WorkshopHands.POST), WorkshopHands.ANCHOR) == InteractionResult.SUCCESS
+				&& anchor.post() != null, "Binding an anchor to one's own post asks no mastery");
+		for (ResearchState regard : new ResearchState[] {ResearchState.NONE, ResearchState.UNDERSTOOD}) {
+			if (regard != ResearchState.NONE) {
+				ConcordanceProgress.grant(holder, WorkshopHandEntity.REGARD, regard);
+			}
+			helper.assertValueEqual(WorkshopHands.key(WorkshopHands.seal(helper, holder, anchor)), WorkshopHands.UNKNOWN,
+					"Stolas's Regard " + regard.id() + ": no hand, and the reason is named");
+			helper.assertTrue(anchor.agreement() == null && anchor.spirit() == null && held(level, holder.getUUID()) == 0
+					&& level.getEntitiesOfClass(WorkshopHandEntity.class, helper.getBounds(), Entity::isAlive).isEmpty()
+					&& WorkerRoster.of(level.getServer()).workers(holder.getUUID()).isEmpty(), "Nothing is recorded, called or noted");
+			WorkshopHands.conserved(helper, ids, WorkshopHands.PLAIN, 10, 0, "refused at " + regard.id(), chest, post);
+		}
+		ConcordanceProgress.grant(holder, WorkshopHandEntity.REGARD, ResearchState.MASTERED);
+		helper.assertValueEqual(WorkshopHands.key(WorkshopHands.seal(helper, holder, anchor)), WorkshopHands.SEALED, "Mastered, its holder seals a workshop hand");
+		WorkshopHandEntity hand = level.getEntity(anchor.spirit()) instanceof WorkshopHandEntity found ? found : null;
+		BoundWill will = BoundWills.of(level.getServer()).ledger().get(anchor.agreement().record());
+		WorkerDefinition.Spirit terms = WorkshopHands.terms();
+		helper.assertTrue(hand != null && holder.getUUID().equals(hand.owner()) && helper.absolutePos(WorkshopHands.ANCHOR).equals(hand.seat())
+				&& WorkshopHandEntity.DEFINITION.equals(will.agreement()) && WorkshopHandEntity.DEFINITION.equals(will.counterpart()) && !will.transferable()
+				&& Couriers.place(level, anchor.getBlockPos()).equals(will.pact().place()) && Pacts.PARTY.equals(will.pact().beneficiaries())
+				&& will.pact().upkeep() == null && new BoundWill.Service("courier", terms.radius(), terms.from(), terms.to(), terms.quota()).equals(will.pact().service()),
+				"Its own agreement on its Bound Will: the hand's terms, for its holder and their party: " + will);
+		WorkerRoster.Entry noted = WorkerRoster.of(level.getServer()).workers(holder.getUUID()).get(hand.getUUID());
+		helper.assertTrue(noted != null && "spirit".equals(noted.kind()), "On its holder's roster at once, as a spirit");
+		SpiritAnchorBlockEntity plain = WorkshopHands.anchor(helper, holder, new BlockPos(4, 1, 5));
+		helper.assertValueEqual(WorkshopHands.key(WorkshopHands.seal(helper, holder, plain)), "message.jugcraft.concordance.workers.sealed",
+				"An anchor bound to no post still seals a Gathering Shade");
+		helper.assertTrue(level.getEntity(plain.spirit()) instanceof GatheringShadeEntity, "a shade, not a hand");
+		ConcordanceProgress.grant(holder, WorkshopHandEntity.REGARD, ResearchState.UNDERSTOOD);
+		WorkshopHands.stand(helper, hand, 2.5, 1.0, 3.5);
+		long now = WorkshopHands.morning(level, 3_300_000L);
+		long in = WorkshopHands.inHours();
+		helper.assertTrue(hand.think(level, in, now) == Status.TRAVELLING && hand.task() == id, "Mastery is asked at sealing only: the sealed hand serves on");
+		WorkshopHands.conserved(helper, ids, WorkshopHands.PLAIN, 10, 0, "claimed", chest, post);
+		helper.assertValueEqual(hand.think(level, in, now + 20), Status.WORKING, "it picks up");
+		WorkshopHands.conserved(helper, ids, WorkshopHands.PLAIN, 10, 0, "picked up", chest, post);
+		helper.assertTrue(hand.think(level, in, now + 40) == Status.WORKING && CourierLedger.of(level.getServer()).ledger().get(id) == null
+				&& WorkshopHands.matching(post, WorkshopHands.PLAIN) == 2, "and delivers");
+		WorkshopHands.conserved(helper, ids, WorkshopHands.PLAIN, 10, 0, "delivered", chest, post);
+		BlockPos thirdAt = new BlockPos(6, 1, 5);
+		SpiritAnchorBlockEntity third = WorkshopHands.anchor(helper, holder, thirdAt);
+		helper.assertTrue(WorkshopHands.use(helper, holder, WorkshopHands.keyFor(helper, holder, WorkshopHands.POST), thirdAt) == InteractionResult.SUCCESS
+				&& WorkshopHands.UNKNOWN.equals(WorkshopHands.key(WorkshopHands.seal(helper, holder, third))) && third.agreement() == null,
+				"but no new hand is sealed without mastery");
+		helper.succeed();
+	}
+
+	/**
+	 * D-08 (D-S16): switched off, a workshop hand carrying for a crucible waits, DISABLED, its claim, cargo and lease
+	 * untouched; no anchor is bound, nothing sealed, no agreement ended; on again within its lease, it delivers once.
+	 */
+	@GameTest(maxTicks = 20)
+	public void theConcordanceOffHoldsTheHand(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		WorkshopHands.Workshop shop = WorkshopHands.workshop(helper);
+		WorkshopHandEntity hand = shop.hand();
+		CrucibleBlockEntity crucible = shop.crucible();
+		ServerPlayer holder = shop.holder();
+		long id = shop.request();
+		List<Long> ids = List.of(id);
+		CourierLedger ledger = CourierLedger.of(level.getServer());
+		BlockPos spareAt = new BlockPos(4, 1, 5);
+		SpiritAnchorBlockEntity spare = WorkshopHands.anchor(helper, holder, spareAt);
+		ItemStack portersKey = WorkshopHands.keyFor(helper, holder, WorkshopHands.POST);
+		long now = WorkshopHands.morning(level, 3_400_000L);
+		long in = WorkshopHands.inHours();
+		helper.assertValueEqual(hand.think(level, in, now), Status.TRAVELLING, "The hand claims the crucible's request");
+		WorkshopHands.conserved(helper, ids, WorkshopHands.PLAIN, 10, 0, "claimed", shop.chest(), crucible);
+		hand.think(level, in, now + 20);
+		var carrying = ledger.ledger().get(id);
+		helper.assertTrue(carrying.state() == RequestState.IN_TRANSIT && carrying.progress().carried() == 2, "The hand carries two for the crucible");
+		WorkshopHands.conserved(helper, ids, WorkshopHands.PLAIN, 10, 0, "carried", shop.chest(), crucible);
+		BoundWill will = BoundWills.of(level.getServer()).ledger().get(shop.anchor().agreement().record());
+		off(() -> {
+			helper.assertTrue(hand.think(level, in, now + 40) == Status.DISABLED && hand.task() == id
+					&& ledger.ledger().get(id).progress().equals(carrying.progress()), "Switched off, it waits: its claim, cargo and lease untouched");
+			WorkshopHands.conserved(helper, ids, WorkshopHands.PLAIN, 10, 0, "switched off", shop.chest(), crucible);
+			helper.assertTrue(WorkshopHands.use(helper, holder, portersKey, spareAt) == InteractionResult.FAIL && spare.post() == null, "No anchor is bound to a post");
+			helper.assertValueEqual(key(SpiritAnchorBlock.use(holder, level, spare, false)), "message.jugcraft.concordance.disabled", "nothing is sealed");
+			helper.assertValueEqual(shop.anchor().holder().end(level, holder, now + 40), AgreementHolder.Ended.DISABLED, "and no agreement ends");
+			helper.assertTrue(will.equals(BoundWills.of(level.getServer()).ledger().get(will.id())) && !hand.isRemoved() && spare.agreement() == null,
+					"Its Bound Will and its hand untouched");
+		});
+		helper.assertTrue(hand.think(level, in, now + 60) == Status.WORKING && ledger.ledger().get(id) == null
+				&& WorkshopHands.matching(crucible, WorkshopHands.PLAIN) == 2, "On again within its lease, it delivers once");
+		WorkshopHands.conserved(helper, ids, WorkshopHands.PLAIN, 10, 0, "delivered", shop.chest(), crucible);
+		helper.succeed();
+	}
+
+	/**
+	 * D-08 (D-P71): a workshop hand's delivery is a spirit's service, so the Binding Arts' "each kind once" is unchanged: a
+	 * familiar's and the hand's are two of the three, and exactly those two are recorded; a spirit's again adds nothing; a
+	 * construct's masters them.
+	 */
+	@GameTest(maxTicks = 20)
+	public void aHandsServiceIsASpiritsService(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		WorkshopHands.Workshop shop = WorkshopHands.workshop(helper);
+		ServerPlayer holder = shop.holder();
+		WorkshopHandEntity hand = shop.hand();
+		ConcordanceProgress.record(holder, new Evidence.Practiced(Workers.ACTIVITY, "familiar"));
+		List<Long> ids = List.of(shop.request());
+		long now = WorkshopHands.morning(level, 3_500_000L);
+		long in = WorkshopHands.inHours();
+		helper.assertValueEqual(hand.think(level, in, now), Status.TRAVELLING, "The hand claims the crucible's request");
+		WorkshopHands.conserved(helper, ids, WorkshopHands.PLAIN, 10, 0, "claimed", shop.chest(), shop.crucible());
+		helper.assertValueEqual(hand.think(level, in, now + 20), Status.WORKING, "it picks up");
+		WorkshopHands.conserved(helper, ids, WorkshopHands.PLAIN, 10, 0, "picked up", shop.chest(), shop.crucible());
+		helper.assertTrue(hand.think(level, in, now + 40) == Status.WORKING && CourierLedger.of(level.getServer()).ledger().get(shop.request()) == null
+				&& shop.anchor().agreement().done(now + 40) == 1, "The hand delivers the crucible's two: one load");
+		WorkshopHands.conserved(helper, ids, WorkshopHands.PLAIN, 10, 0, "delivered", shop.chest(), shop.crucible());
+		helper.assertValueEqual(ConcordanceProgress.knowledge(holder).progress(Workers.RESEARCH).evidence().keySet(),
+				Set.of("practice:" + Workers.ACTIVITY + ":familiar", "practice:" + Workers.ACTIVITY + ":spirit"),
+				"the hand's delivery recorded exactly a spirit's service");
+		helper.assertValueEqual(ConcordanceProgress.knowledge(holder).state(Workers.RESEARCH), ResearchState.UNDERSTOOD,
+				"A familiar's and the hand's service: two of the three kinds");
+		helper.assertTrue(!ConcordanceProgress.record(holder, new Evidence.Practiced(Workers.ACTIVITY, "spirit")).recorded(),
+				"A spirit's again adds nothing: the hand's was a spirit's");
+		helper.assertValueEqual(ConcordanceProgress.knowledge(holder).state(Workers.RESEARCH), ResearchState.UNDERSTOOD,
+				"and the Binding Arts stay understood");
+		ConcordanceProgress.record(holder, new Evidence.Practiced(Workers.ACTIVITY, "construct"));
+		helper.assertValueEqual(ConcordanceProgress.knowledge(holder).state(Workers.RESEARCH), ResearchState.MASTERED,
+				"A construct's makes the three: the Binding Arts are mastered, as before the hand");
+		helper.succeed();
+	}
+
+	/**
+	 * D-08 (D-P73): an anchor is bound only while it keeps no agreement, only with the Concordance on, only by a key that names
+	 * a post in its level inside a hand's area; sneaking unbinds; sealed, it is neither unbound nor bound anew; a copied anchor
+	 * binds nothing (CONFLICTING_AGREEMENT).
+	 */
+	@GameTest(maxTicks = 20)
+	public void anAnchorIsBoundOnlyWhileItKeepsNoAgreement(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		ServerPlayer owner = WorkshopHands.holder(helper);
+		WorkshopHands.post(helper, owner, WorkshopHands.POST);
+		SpiritAnchorBlockEntity anchor = WorkshopHands.anchor(helper, owner, WorkshopHands.ANCHOR);
+		ItemStack mine = WorkshopHands.keyFor(helper, owner, WorkshopHands.POST);
+		GlobalPos bound = GlobalPos.of(level.dimension(), helper.absolutePos(WorkshopHands.POST));
+		PorterKeyItem.Binding none = PorterKeyItem.bind(owner, level, anchor, new ItemStack(Workers.PORTER_KEY), false);
+		helper.assertTrue(!none.changed() && key(none.told()).equals("message.jugcraft.concordance.workers.key_no_post") && anchor.post() == null,
+				"A key that names no post binds nothing, and says how");
+		ItemStack nether = new ItemStack(Workers.PORTER_KEY);
+		nether.set(Couriers.KEY_POST, GlobalPos.of(Level.NETHER, helper.absolutePos(WorkshopHands.POST)));
+		PorterKeyItem.Binding elsewhere = PorterKeyItem.bind(owner, level, anchor, nether, false);
+		helper.assertTrue(!elsewhere.changed() && key(elsewhere.told()).equals("message.jugcraft.concordance.workers.post_unusable") && anchor.post() == null
+				&& WorkshopHandEntity.within(anchor.getBlockPos(), anchor.getBlockPos().offset(12, -12, 12), 12)
+				&& !WorkshopHandEntity.within(anchor.getBlockPos(), anchor.getBlockPos().offset(13, 0, 0), 12),
+				"A post in another dimension, or past a hand's 12 blocks, binds nothing");
+		// Critique 6: a hand's 12 blocks through bind itself, with posts of the owner's own straight above the anchor (the space
+		// over this test's structure is no other test's), removed again.
+		BlockPos tooFar = new BlockPos(2, 14, 5);
+		BlockPos atTheEdge = new BlockPos(2, 13, 5);
+		WorkshopHands.post(helper, owner, tooFar);
+		WorkshopHands.post(helper, owner, atTheEdge);
+		PorterKeyItem.Binding past = PorterKeyItem.bind(owner, level, anchor, WorkshopHands.keyFor(helper, owner, tooFar), false);
+		helper.assertTrue(!past.changed() && key(past.told()).equals("message.jugcraft.concordance.workers.post_unusable") && anchor.post() == null,
+				"Their own post 13 blocks above the anchor, past a hand's 12, binds nothing");
+		PorterKeyItem.Binding edge = PorterKeyItem.bind(owner, level, anchor, WorkshopHands.keyFor(helper, owner, atTheEdge), false);
+		helper.assertTrue(edge.changed() && key(edge.told()).equals("message.jugcraft.concordance.workers.post_bound")
+				&& GlobalPos.of(level.dimension(), helper.absolutePos(atTheEdge)).equals(anchor.post()), "One 12 blocks above, at its edge, binds it");
+		helper.assertTrue(PorterKeyItem.bind(owner, level, anchor, mine, true).changed() && anchor.post() == null, "and sneaking unbinds it again");
+		helper.setBlock(tooFar, Blocks.AIR);
+		helper.setBlock(atTheEdge, Blocks.AIR);
+		off(() -> helper.assertTrue(key(PorterKeyItem.bind(owner, level, anchor, mine, false).told()).equals("message.jugcraft.concordance.disabled")
+				&& anchor.post() == null, "Switched off, nothing is bound"));
+		PorterKeyItem.Binding first = PorterKeyItem.bind(owner, level, anchor, mine, false);
+		helper.assertTrue(first.changed() && key(first.told()).equals("message.jugcraft.concordance.workers.post_bound") && bound.equals(anchor.post()),
+				"Its owner binds it to their post");
+		PorterKeyItem.Binding unbound = PorterKeyItem.bind(owner, level, anchor, mine, true);
+		helper.assertTrue(unbound.changed() && key(unbound.told()).equals("message.jugcraft.concordance.workers.post_unbound") && anchor.post() == null,
+				"sneaking unbinds it");
+		helper.assertTrue(PorterKeyItem.bind(owner, level, anchor, mine, false).changed() && bound.equals(anchor.post()), "and it binds again");
+		helper.assertValueEqual(WorkshopHands.key(WorkshopHands.seal(helper, owner, anchor)), WorkshopHands.SEALED, "A hand is sealed there");
+		PorterKeyItem.Binding sealedUnbind = PorterKeyItem.bind(owner, level, anchor, mine, true);
+		PorterKeyItem.Binding sealedRebind = PorterKeyItem.bind(owner, level, anchor, mine, false);
+		helper.assertTrue(!sealedUnbind.changed() && !sealedRebind.changed() && key(sealedUnbind.told()).equals("message.jugcraft.concordance.workers.post_sealed")
+				&& key(sealedRebind.told()).equals("message.jugcraft.concordance.workers.post_sealed") && bound.equals(anchor.post()),
+				"Sealed, it is neither unbound nor bound anew");
+		helper.setBlock(new BlockPos(5, 1, 5), Workers.SPIRIT_ANCHOR);
+		SpiritAnchorBlockEntity copy = helper.getBlockEntity(new BlockPos(5, 1, 5), SpiritAnchorBlockEntity.class);
+		copy.loadWithComponents(TagValueInput.create(ProblemReporter.DISCARDING, level.registryAccess(), anchor.saveWithoutMetadata(level.registryAccess())));
+		PorterKeyItem.Binding copied = PorterKeyItem.bind(owner, level, copy, mine, true);
+		helper.assertTrue(!copied.changed() && key(copied.told()).equals("compose.jugcraft.diagnostic.conflicting_agreement") && bound.equals(copy.post()),
+				"A copied anchor binds and unbinds nothing: another agreement covers it");
 		helper.succeed();
 	}
 }

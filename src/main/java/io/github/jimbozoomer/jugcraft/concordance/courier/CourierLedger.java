@@ -253,7 +253,12 @@ public final class CourierLedger extends SavedData {
 	}
 
 	public Logistics.Outcome reserve(long id, UUID worker, Place source, Storage<ItemVariant> storage, long now) {
-		Logistics.Outcome outcome = ledger.reserve(id, worker, source, (int) Math.min(Integer.MAX_VALUE, available(id, storage)), now);
+		return reserve(id, worker, source, storage, Integer.MAX_VALUE, now);
+	}
+
+	/** As reserve, at most {@code most} (a courier's load a trip; Concordance Chunk D, D-08). */
+	public Logistics.Outcome reserve(long id, UUID worker, Place source, Storage<ItemVariant> storage, int most, long now) {
+		Logistics.Outcome outcome = ledger.reserve(id, worker, source, (int) Math.min(Integer.MAX_VALUE, available(id, storage)), most, now);
 		setDirty();
 		return outcome;
 	}
