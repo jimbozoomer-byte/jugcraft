@@ -243,6 +243,9 @@ public final class ConcordancePactNetworkTests implements FabricClientGameTest {
 		// Its world drawn round the perch before it says it is watching (a predicate, never a fixed wait).
 		Block perchBlock = BuiltInRegistries.BLOCK.getValue(Identifier.parse(PERCH));
 		context.waitFor(client -> client.level.getBlockState(perch).is(perchBlock) && client.levelRenderer.hasRenderedAllSections(), PEER_WAIT);
+		// "Loading terrain" closes once this client has compiled its own section (or after the game's own 30 s): the arrival
+		// is seen over the world, not under the loading screen (run 40133540741's picture was the loading screen).
+		context.waitFor(client -> client.gui.screen() == null, PEER_WAIT);
 		mark("watching", "");
 		context.waitFor(client -> StolasEntity.Gesture.ARRIVE.animation.equals(gestured(client, perch)), PEER_WAIT);
 		shot(context, "jugcraft_pact_peer_arrival");
@@ -257,7 +260,16 @@ public final class ConcordancePactNetworkTests implements FabricClientGameTest {
 		mark("accept.txt", accept.reason());
 		check(!accept.done() && Pacts.Outcome.NOT_PERMITTED.id.equals(accept.reason()),
 				"The stranger's Accept, sent all the same, is refused as not permitted: " + accept.reason());
-		context.waitTicks(5);
+		// The refusal is shown under his terms: turn to them and bring the answer into view before the picture.
+		tabTo(context, "next");
+		for (int beat = 0; beat < 3; beat++) {
+			context.getInput().pressKey(InputConstants.KEY_RETURN);
+			context.waitTicks(3);
+		}
+		tabTo(context, "result");
+		check(context.computeOnClient(client -> client.gui.screen() instanceof PactScreen screen && screen.page() == PactScreen.TERMS_PAGE
+				&& screen.control("result") instanceof PactScreen.Verdict verdict && verdict.refused()),
+				"The stranger's screen shows the refusal under his terms");
 		shot(context, "jugcraft_pact_peer_refused");
 		context.getInput().pressKey(InputConstants.KEY_ESCAPE);
 		context.waitForScreen(null);
@@ -414,6 +426,18 @@ public final class ConcordancePactNetworkTests implements FabricClientGameTest {
 		AnimatableManager<StolasEntity> manager = stolas.getAnimatableInstanceCache().getManagerForId(stolas.getId());
 		AnimationController<StolasEntity> gestures = manager.getAnimationControllers().get(StolasEntity.GESTURE_CONTROLLER);
 		return gestures == null ? null : gestures.getCurrentRawAnimation();
+	}
+
+	/** Tab until the pact screen's focused control is {@code key} (as the pact client test does). */
+	private static void tabTo(ClientGameTestContext context, String key) {
+		for (int i = 0; i < 64; i++) {
+			if (key.equals(context.computeOnClient(client -> client.gui.screen() instanceof PactScreen screen ? screen.focusedKey() : ""))) {
+				return;
+			}
+			context.getInput().pressKey(InputConstants.KEY_TAB);
+			context.waitTicks(1);
+		}
+		throw new AssertionError("Tab never reached " + key);
 	}
 
 	/** A picture with no toast over it (the peer's own profile keeps it, under owner-network-evidence/). */

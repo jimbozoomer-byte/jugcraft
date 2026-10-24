@@ -144,7 +144,9 @@ public final class JugcraftJadeClient implements JugcraftJadePlugin.ClientRegist
 			case "copy" -> tooltip.add(ComposeText.show(Text.of(Diagnostic.PREFIX + Code.CONFLICTING_AGREEMENT.id)));
 			case "unreadable" -> tooltip.add(Component.translatable("tooltip.jugcraft.concordance.jade.pact.unreadable"));
 			case "kept" -> {
-				Identifier counterpart = Identifier.tryParse(data.getStringOr("counterpart", ""));
+				// Stolas's own reading names no counterpart (he is it): an empty id would parse as "minecraft:" and show a raw key.
+				String named = data.getStringOr("counterpart", "");
+				Identifier counterpart = named.isEmpty() ? null : Identifier.tryParse(named);
 				if (counterpart != null) {
 					tooltip.add(Component.translatable("tooltip.jugcraft.concordance.jade.pact.keeps",
 							Component.translatable("entity." + counterpart.getNamespace() + "." + counterpart.getPath())));

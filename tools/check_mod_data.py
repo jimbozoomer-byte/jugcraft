@@ -18681,6 +18681,9 @@ def check_pacts(co, root, lang, registered, research):
             ('data.getCompound("pact").ifPresent(pact -> pactLines(tooltip, pact));', jade_client, "JugcraftJadeClient")):
         if needle not in text:
             err(f"{where}: {needle} (Jade on Stolas, the pact perch and the Spirit Anchor, G11)")
+    if "Identifier counterpart = named.isEmpty() ? null : Identifier.tryParse(named);" not in jade_client \
+            or 'Identifier.tryParse(data.getStringOr("counterpart", ""))' in jade_client:
+        err("JugcraftJadeClient.pactLines: a reading with no counterpart (Stolas's own) names none, never the raw key entity.minecraft. (D-09)")
     for path in sorted(JAVA_ROOT.rglob("*.java")):
         if "compat" not in path.relative_to(JAVA_ROOT).parts and re.search(r"\bPactDataProvider\b", path.read_text(encoding="utf-8")):
             err(f"{path.relative_to(ROOT)}: Jade's provider is reached through Jade's entrypoint only (built without optional integrations)")
