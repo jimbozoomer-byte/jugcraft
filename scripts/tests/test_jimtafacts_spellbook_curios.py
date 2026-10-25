@@ -25,7 +25,8 @@ class SpellbookCurioAssets(unittest.TestCase):
                 runtime = RES / 'assets/jugcraft/textures/jimtafacts/spellbooks' / relative
                 self.assertEqual(original.read_bytes(), runtime.read_bytes(), name)
                 if original.with_suffix('.png.mcmeta').exists():
-                    self.assertEqual(original.with_suffix('.png.mcmeta').read_bytes(), runtime.with_suffix('.png.mcmeta').read_bytes())
+                    self.assertEqual(json.loads(original.with_suffix('.png.mcmeta').read_text(encoding='utf-8')),
+                                     json.loads(runtime.with_suffix('.png.mcmeta').read_text(encoding='utf-8')))
 
     def test_affinity_switch_retains_all_nine_authored_appearances(self):
         model = json.loads((RES / 'assets/jugcraft/items/jimta_spellbooks_affinity_ring.json').read_text(encoding='utf-8'))['model']

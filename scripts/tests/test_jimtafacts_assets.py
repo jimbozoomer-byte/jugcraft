@@ -12,6 +12,13 @@ import jimtafacts
 
 
 class JimtafactsAssetsTests(unittest.TestCase):
+    def test_native_static_gecko_assets_have_a_parseable_idle_definition(self):
+        base = ROOT / 'src/main/resources/assets/jugcraft/geckolib/animations'
+        for name in ('armor/jimtafacts/empty', 'block/jimtafacts/tyros_statue'):
+            row = json.loads((base / (name + '.animation.json')).read_text(encoding='utf-8'))
+            # GeckoLib rejects a file with no animation definitions even for static meshes.
+            self.assertEqual(row['animations']['idle'], {'loop': True, 'bones': {}})
+
     def test_copied_icons_match_the_supplied_files(self):
         copies = json.loads((ROOT / 'art/owner-library/catalog/edited-2026-10-23-jimtafacts/runtime-copies.json').read_text(encoding='utf-8'))
         icons=[row for row in copies if '/textures/item/' in row['runtime']]

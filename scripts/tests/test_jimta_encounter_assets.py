@@ -1,6 +1,7 @@
 """Original asset fidelity; authored now, run with the final combined suite."""
 from pathlib import Path
 import hashlib
+import json
 import unittest
 
 ROOT=Path(__file__).resolve().parents[2]
@@ -12,4 +13,8 @@ class EncounterAssets(unittest.TestCase):
         for path in ('entity/ice_spider/ice_spider','entity/keeper/keeper','entity/keeper/keeper_restored','entity/keeper/keeper_ghost','entity/ice_spike','entity/ice_tomb/ice_tomb','entity/ice_tomb/ice_tomb_cull'):
             pairs.append((f'textures/{path}.png',f'textures/jimtafacts/spellbooks/{path}.png'))
         for before,after in pairs:
-            self.assertEqual(hashlib.sha256((source/before).read_bytes()).digest(),hashlib.sha256((target/after).read_bytes()).digest(),before)
+            if before.endswith('.json'):
+                # Git normalizes runtime text to LF; the archived source keeps its original CRLF.
+                self.assertEqual(json.loads((source/before).read_text(encoding='utf-8')),json.loads((target/after).read_text(encoding='utf-8')),before)
+            else:
+                self.assertEqual(hashlib.sha256((source/before).read_bytes()).digest(),hashlib.sha256((target/after).read_bytes()).digest(),before)

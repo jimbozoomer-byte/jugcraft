@@ -17,7 +17,8 @@ import net.minecraft.world.item.ItemStack;
 /** Run only with the combined integration validation; screenshots are evidence for human visual review. */
 public final class JimtafactsWearablesClientGameTests implements FabricClientGameTest {
     @Override public void runTest(ClientGameTestContext context) {
-        try (var world = context.worldBuilder().adjustSettings(s -> s.setGameMode(WorldCreationUiState.SelectedGameMode.CREATIVE)).create()) {
+        // Creative replaces InventoryScreen with its catalog, hiding the equipped player.
+        try (var world = context.worldBuilder().adjustSettings(s -> s.setGameMode(WorldCreationUiState.SelectedGameMode.SURVIVAL)).create()) {
             world.getConnection().waitForChunksRender();
             world.getServer().runCommand("time set noon");
             world.getServer().runCommand("gamerule minecraft:spawn_mobs false");
@@ -50,6 +51,9 @@ public final class JimtafactsWearablesClientGameTests implements FabricClientGam
                 context.waitTicks(5);
                 context.setScreen(() -> new InventoryScreen(Minecraft.getInstance().player));
                 context.waitTicks(3);
+                context.runOnClient(mc -> {
+                    if (!(mc.gui.screen() instanceof InventoryScreen)) throw new AssertionError("Wearable preview must show the player inventory");
+                });
                 context.takeScreenshot("jimtafacts_worn_" + name);
                 context.setScreen(() -> null);
             }

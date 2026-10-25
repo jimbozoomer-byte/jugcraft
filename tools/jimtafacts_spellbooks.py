@@ -208,7 +208,7 @@ def generate():
         copy(ART / f'geo/{geometry}.geo.json', RES / f'assets/jugcraft/geckolib/models/armor/jimtafacts/{geometry}.geo.json')
         copy(ART / f'textures/models/armor/{tex}.png', RES / f'assets/jugcraft/textures/jimtafacts/spellbooks/models/armor/{tex}.png')
     copy(ART / 'animations/wizard_armor_animation.json', RES / 'assets/jugcraft/geckolib/animations/armor/jimtafacts/wizard.animation.json')
-    dump(RES / 'assets/jugcraft/geckolib/animations/armor/jimtafacts/empty.animation.json', {'format_version': '1.8.0', 'animations': {}})
+    dump(RES / 'assets/jugcraft/geckolib/animations/armor/jimtafacts/empty.animation.json', {'format_version': '1.8.0', 'animations': {'idle': {'loop': True, 'bones': {}}}})
     for name,animation in {'root':'root_animations','wisp':'wisp.animation'}.items():
         copy(ART / f'geo/{name}.geo.json', RES / f'assets/jugcraft/geckolib/models/entity/jimtafacts/{name}.geo.json')
         copy(ART / f'animations/{animation}.json', RES / f'assets/jugcraft/geckolib/animations/entity/jimtafacts/{name}.animation.json')

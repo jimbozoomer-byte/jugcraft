@@ -19,7 +19,7 @@ def generate(copy,definition,model,texture,dump,RES,ART,lang):
   if name=='tyros_statue':
    copy(ART/'geo/statue/tyros_statue.geo.json',RES/'assets/jugcraft/geckolib/models/block/jimtafacts/tyros_statue.geo.json')
    texture('irons_spellbooks:entity/statue/tyros')
-   dump(RES/'assets/jugcraft/geckolib/animations/block/jimtafacts/tyros_statue.animation.json',{'format_version':'1.8.0','animations':{}})
+   dump(RES/'assets/jugcraft/geckolib/animations/block/jimtafacts/tyros_statue.animation.json',{'format_version':'1.8.0','animations':{'idle':{'loop':True,'bones':{}}}})
    # Original mesh is rendered by the block and item special renderer; the
    # absent external library's particle is replaced only with vanilla stone.
    dump(RES/'assets/jugcraft/models/jimtafacts/spellbooks/block/tyros_statue.json',{'textures':{'particle':'minecraft:block/stone'}})

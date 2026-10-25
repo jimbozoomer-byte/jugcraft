@@ -141,3 +141,18 @@ from cancellable return injections. Twenty-nine groups of ambiguous crafting
 bills were separated using existing parts; spell-forge bills and crafting-table
 bills stay identical. The survival audit still reports zero invalid ingredients.
 The full CI suite and rendered-client checks remain required before release.
+
+The final regenerated data audit and 267 Python tests passed locally. Six client
+test classes completed successfully: accessories, wearables, computers, JEI
+stations, screen fitting and the aircraft/furniture/graves gallery. Screenshot
+inspection exposed a wearable fixture that showed the creative catalog instead
+of the player; that fixture now uses survival and asserts the correct screen.
+The first client startup also exposed eager statue-renderer initialization;
+initialization is now lazy. Two static Gecko assets now declare a valid no-motion
+idle animation rather than an invalid empty animation file. A focused statue
+item and corrected wearable render rerun is pending.
+
+Linux Foundation exposed three asset-fidelity checks comparing archived CRLF
+JSON with normalized runtime LF JSON. Text checks now compare all parsed data;
+binary texture hashes remain exact, and source originals remain untouched. The
+seven affected checks pass locally; the next CI run must validate Linux as well.

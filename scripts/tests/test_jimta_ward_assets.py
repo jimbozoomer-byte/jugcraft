@@ -16,7 +16,12 @@ class WardAssetTests(unittest.TestCase):
         pairs=[('geo/scapegoat.geo.json','geckolib/models/entity/jimtafacts/scapegoat.geo.json'),('animations/scapegoat_animations.animation.json','geckolib/animations/entity/jimtafacts/scapegoat.animation.json')]
         for name in ('entity/scapegoat','entity/ender_chain','entity/shield/shield_overlay','entity/shield/shield_trim','entity/portal/portal_round','entity/portal/pocket_dimension_portal_round'):
             pairs.append((f'textures/{name}.png',f'textures/jimtafacts/spellbooks/{name}.png'))
-        for old,new in pairs:self.assertEqual(hashlib.sha256((source/old).read_bytes()).digest(),hashlib.sha256((resources/new).read_bytes()).digest(),old)
+        for old,new in pairs:
+            if old.endswith('.json'):
+                # Preserve all geometry/animation data while allowing Git's runtime LF normalization.
+                self.assertEqual(json.loads((source/old).read_text(encoding='utf-8')),json.loads((resources/new).read_text(encoding='utf-8')),old)
+            else:
+                self.assertEqual(hashlib.sha256((source/old).read_bytes()).digest(),hashlib.sha256((resources/new).read_bytes()).digest(),old)
 
     def test_original_room_layout_preserved_and_palette_registered(self):
         source=ROOT/'art/owner-library/originals/Oct23/Jimtafacts/data/irons_spellbooks/structure/pocket_room.nbt'
