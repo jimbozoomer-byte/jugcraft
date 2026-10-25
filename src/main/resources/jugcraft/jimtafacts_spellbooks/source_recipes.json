@@ -376,16 +376,6 @@
       "result": "jugcraft:jimta_spellbooks_expulsion_ring"
     },
     {
-      "source": "data/irons_spellbooks/recipe/firefly_jar.json",
-      "type": "minecraft:crafting_shaped",
-      "result": "jugcraft:jimta_spellbooks_firefly_jar"
-    },
-    {
-      "source": "data/irons_spellbooks/recipe/fireward_ring.json",
-      "type": "minecraft:crafting_shaped",
-      "result": "jugcraft:jimta_spellbooks_fireward_ring"
-    },
-    {
       "source": "data/irons_spellbooks/recipe/fire_rune.json",
       "type": "minecraft:crafting_shaped",
       "result": "jugcraft:jimta_spellbooks_fire_rune"
@@ -394,6 +384,16 @@
       "source": "data/irons_spellbooks/recipe/fire_upgrade_orb.json",
       "type": "minecraft:crafting_shaped",
       "result": "jugcraft:jimta_spellbooks_fire_upgrade_orb"
+    },
+    {
+      "source": "data/irons_spellbooks/recipe/firefly_jar.json",
+      "type": "minecraft:crafting_shaped",
+      "result": "jugcraft:jimta_spellbooks_firefly_jar"
+    },
+    {
+      "source": "data/irons_spellbooks/recipe/fireward_ring.json",
+      "type": "minecraft:crafting_shaped",
+      "result": "jugcraft:jimta_spellbooks_fireward_ring"
     },
     {
       "source": "data/irons_spellbooks/recipe/frosted_helve.json",
@@ -551,6 +551,11 @@
       "result": "jugcraft:jimta_spellbooks_nature_upgrade_orb"
     },
     {
+      "source": "data/irons_spellbooks/recipe/nether_brick_pillar.json",
+      "type": "minecraft:stonecutting",
+      "result": "jugcraft:jimta_spellbooks_nether_brick_pillar"
+    },
+    {
       "source": "data/irons_spellbooks/recipe/netherite_mage_boots.json",
       "type": "minecraft:smithing_transform",
       "result": "jugcraft:jimta_spellbooks_netherite_mage_boots"
@@ -574,11 +579,6 @@
       "source": "data/irons_spellbooks/recipe/netherite_spell_book.json",
       "type": "minecraft:crafting_shaped",
       "result": "jugcraft:jimta_spellbooks_netherite_spell_book"
-    },
-    {
-      "source": "data/irons_spellbooks/recipe/nether_brick_pillar.json",
-      "type": "minecraft:stonecutting",
-      "result": "jugcraft:jimta_spellbooks_nether_brick_pillar"
     },
     {
       "source": "data/irons_spellbooks/recipe/paladin_chestplate.json",

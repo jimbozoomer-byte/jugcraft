@@ -20,7 +20,7 @@ def generate(dump,RES,SOURCE):
    if names:components['jugcraft:jimtafacts_spellbook_contents']=names
   if not components:value.pop('components',None)
   return value
- for path in (source/'recipe').rglob('*.json'):
+ for path in sorted((source/'recipe').rglob('*.json'),key=lambda p:p.as_posix()):
   if path.stem in ('chronicle','patchouli_book'):
    # These require book systems not registered by the native port yet.
    # Keep the source, but do not ship a recipe which prevents worlds from loading.
@@ -43,7 +43,7 @@ def generate(dump,RES,SOURCE):
   dump(RES/'data/jugcraft/recipe/jimtafacts/source'/path.relative_to(source/'recipe'),row)
   records.append({'source':str(path.relative_to(SOURCE)).replace('\\','/'),'type':kind,'result':product})
  # Source c: material aliases are merged, not allowed to erase the other native industries' tags.
- for path in (SOURCE/'data/c/tags/item').rglob('*.json'):
+ for path in sorted((SOURCE/'data/c/tags/item').rglob('*.json'),key=lambda p:p.as_posix()):
   target=RES/'data/c/tags/item'/path.relative_to(SOURCE/'data/c/tags/item');data=json.loads(path.read_text(encoding='utf-8'));old=json.loads(target.read_text(encoding='utf-8')) if target.exists() else {'replace':False,'values':[]}
   for entry in data.get('values',[]):
    if isinstance(entry,str):mapped='#'+tag(entry[1:]) if entry.startswith('#') else ident(entry)

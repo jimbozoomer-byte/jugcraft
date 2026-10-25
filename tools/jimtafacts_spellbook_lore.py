@@ -24,7 +24,7 @@ def generate(copy,definition,texture,dump,RES,ART,lang):
    dump(RES/f'data/jugcraft/recipe/jimtafacts/brewing/{out}_{name}_conversion.json',{'type':'minecraft:brewing','input':{'item':'minecraft:'+form,'potion_contents':{'potions':'jugcraft:jimta_spellbooks_'+name}},'output':{'id':'minecraft:'+out,'components':{'minecraft:potion_contents':{'potion':'jugcraft:jimta_spellbooks_'+name}}},'reagent':{'item':'minecraft:'+reagent}})
  sounds={}
  source_sounds=json.loads((ART/'sounds.json').read_text(encoding='utf-8'))
- for path in (source/'jukebox_song').glob('*.json'):
+ for path in sorted((source/'jukebox_song').glob('*.json'),key=lambda p:p.as_posix()):
   data=json.loads(path.read_text(encoding='utf-8'));old=data['sound_event'];old=old['sound_id'] if isinstance(old,dict) else old;key=old.split(':')[1];new='jimtafacts.spellbooks.'+key
   data['sound_event']='jugcraft:'+new;dump(RES/f'data/jugcraft/jukebox_song/jimtafacts/{path.name}',data)
   entry=source_sounds[key];entry=json.loads(json.dumps(entry));

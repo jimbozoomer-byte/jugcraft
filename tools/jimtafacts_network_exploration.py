@@ -26,12 +26,17 @@ def generate(source, assets, resources, model, texture, dump, recipe):
     for frame in range(128):
         angle = frame * math.tau / 128
         c, s = math.cos(angle), math.sin(angle)
+        def stable(value):
+            # Windows and Linux libm can differ by one ULP. Nine model-unit
+            # decimals preserve the source shape while producing identical JSON.
+            result = round(value, 9)
+            return result if result else 0.0
         def rotate(p):
             x, y, z = p
-            return [(x-8)*c + (z-8)*s + 8, y, -(x-8)*s + (z-8)*c + 8]
+            return [stable((x-8)*c + (z-8)*s + 8), y, stable(-(x-8)*s + (z-8)*c + 8)]
         def normal(n):
             x, y, z = n
-            return [x*c + z*s, y, -x*s + z*c]
+            return [stable(x*c + z*s), y, stable(-x*s + z*c)]
         quads = []
         for element in original['elements']:
             a, b, d = element['from']; x, y, z = element['to']

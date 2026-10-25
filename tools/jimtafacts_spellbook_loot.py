@@ -30,7 +30,7 @@ def generate(dump,RES,ART,SPELLS):
   if value.get('name')=='jugcraft:jimta_spellbooks_scroll':value['name']='jugcraft:jimta_spellbooks_scroll_firebolt'
   return value
  count=0
- for path in (source/'loot_table').rglob('*.json'):
+ for path in sorted((source/'loot_table').rglob('*.json'),key=lambda p:p.as_posix()):
   rel=path.relative_to(source/'loot_table')
   if rel.parts[0]=='blocks':
    if path.stem not in ('mithril_ore','deepslate_mithril_ore'):continue
@@ -38,7 +38,7 @@ def generate(dump,RES,ART,SPELLS):
   converted=loot(adapt(json.loads(path.read_text(encoding='utf-8'))))
   dump(RES/'data/jugcraft/loot_table/jimtafacts/spellbooks'/rel,converted);count+=1
   if rel.parts[0]=='entities' and not path.stem.startswith('additional_'):dump(RES/f'data/jugcraft/loot_table/entities/jimtafacts_{path.name}',converted)
- for path in (source/'tags/item').rglob('*.json'):
+ for path in sorted((source/'tags/item').rglob('*.json'),key=lambda p:p.as_posix()):
   # Focus and component ingredient tags are the source's own crafting graph.
   rel=path.relative_to(source/'tags/item');data=json.loads(path.read_text(encoding='utf-8'));values=[]
   for x in data.get('values',[]):
@@ -50,6 +50,6 @@ def generate(dump,RES,ART,SPELLS):
    if x=='#c:ingots/gold':x='minecraft:gold_ingot'
    values.append(x)
   dump(RES/'data/jugcraft/tags/item/jimtafacts/spellbooks'/rel,{'replace':False,'values':values})
- for path in (source/'tags/instrument').rglob('*.json'):
+ for path in sorted((source/'tags/instrument').rglob('*.json'),key=lambda p:p.as_posix()):
   dump(RES/'data/jugcraft/tags/instrument/jimtafacts/spellbooks'/path.relative_to(source/'tags/instrument'),adapt(json.loads(path.read_text(encoding='utf-8'))))
  dump(RES/'jugcraft/jimtafacts_spellbooks/source_loot.json',{'tables':count,'scroll_adaptation':'Original school/name filters and all table rolls/weights retained. Native workings currently use level one; source quality-level scaling is not claimed.','filtered_scrolls':reports})

@@ -94,14 +94,14 @@ public class MineralSandClientGameTests implements FabricClientGameTest {
     }
     private static void natural(ClientGameTestContext context, String seed, boolean export) {
         List<Sample> samples = new ArrayList<>(); List<BlockPos> depleted = new ArrayList<>(), cameras = new ArrayList<>(); Path source; TestWorldSave save;
-        String[] targets = {"dune_beach", "outback", "lake_district", "highland"};
+        String[] targets = {"dune_beach", "outback", "lake_district", "gravel_beach"};
         try (TestSingleplayerContext world = context.worldBuilder().adjustSettings(c -> {
             normal(c, seed); c.setName(export ? "Mineral Sands Field Trip" : "Mineral Sands Sampling");
         }).create()) {
             for (int i = 0; i < 4; i++) {
                 final int family = i;
                 BlockPos center = world.getServer().computeOnServer(server -> {
-                    var found = server.overworld().findClosestBiome3d(b -> b.is(Jugcraft.id(targets[family])), BlockPos.ZERO.atY(80), 16384, 32, 64);
+                    var found = server.overworld().findClosestBiome3d(b -> b.is(Jugcraft.id(targets[family])), BlockPos.ZERO.atY(family == 3 ? 64 : 80), 16384, 32, 64);
                     check(found != null, "No target biome " + targets[family]); return found.getFirst();
                 });
                 Sample result = world.getServer().computeOnServer(server -> {
@@ -109,16 +109,17 @@ public class MineralSandClientGameTests implements FabricClientGameTest {
                     if (found.exposed.isEmpty()) found = sample(server.overworld(), center, 18, family, seed + " expanded");
                     // A small coastal strip need not contain a successful rare attempt. Survey additional
                     // eligible regions without changing production rates or manually placing a deposit.
-                    // Use the production biome tag: garnet is also intentionally found on gravel shores.
-                    // Restricting retries to Highland/Shield can keep returning tiny, steep fragments
-                    // that correctly fail the sediment/footprint checks after regional biome overlays.
+                    // Garnet's gravel shores provide sediment; mountain-tag matches alone can keep
+                    // returning steep fragments which correctly reject every candidate lens. Survey
+                    // actual gravel shores at sea level without altering production placement rates.
                     Set<net.minecraft.world.level.ChunkPos> surveyed = new HashSet<>();
                     surveyed.add(new net.minecraft.world.level.ChunkPos(center.getX() >> 4, center.getZ() >> 4));
                     for (int region = 1; found.exposed.isEmpty() && region <= 10; region++) {
                         var next = server.overworld().findClosestBiome3d(b -> family == 2
                                         ? b.is(Jugcraft.id("basin")) || b.is(Jugcraft.id("lake_district"))
+                                        : family == 3 ? b.is(Jugcraft.id("gravel_beach"))
                                         : b.is(feature(server.overworld(), family).surfaceBiomes()),
-                                center.offset(region * 2048, 0, region * -2048), 16384, 32, 64);
+                                center.offset(region * 2048, 0, region * -2048).atY(family == 3 ? 64 : center.getY()), 16384, 32, 64);
                         if (next != null && surveyed.add(new net.minecraft.world.level.ChunkPos(next.getFirst().getX() >> 4, next.getFirst().getZ() >> 4)))
                             found = sample(server.overworld(), next.getFirst(), 14, family, seed + " region " + region);
                     }

@@ -162,3 +162,41 @@ Linux Foundation exposed three asset-fidelity checks comparing archived CRLF
 JSON with normalized runtime LF JSON. Text checks now compare all parsed data;
 binary texture hashes remain exact, and source originals remain untouched. The
 seven affected checks pass locally; the next CI run must validate Linux as well.
+
+Linux Foundation passed on `cf7bf7f2a4`. The broader Build run then found
+platform-dependent directory enumeration in recipe/loot/music reports and tiny
+libm differences in compass meshes. Source enumeration is now sorted and rotated
+mesh coordinates/normals are serialized to nine decimal places. A regression
+compares forward and reversed directory enumeration without changing source files.
+The companion machine-port fixture now expects the five additional Jimtafacts
+processors. The free-roaming breeding fixture uses a smaller temporary pen so
+parents cannot wander beyond Minecraft's eight-block partner search range; the
+larger slaughter fixture and all behavior/conservation assertions are retained.
+
+An isolated packaged dedicated-server rehearsal started and restarted successfully
+with the complete candidate dependency set. A copied test world's furniture
+cabinet retained seven diamonds and its cargo airship survived restart
+(`build/jimtafacts-packaged-world-start-oct25.log` and
+`build/jimtafacts-packaged-world-restart-oct25.log`). This used localhost port
+25576, not the live world. The rehearsal patch from the published October 22.3
+bundle contains only `mods/jugcraft.jar`: no removals, configuration overwrites or
+world files. Final release files must be rebuilt from the final tested revision.
+Live deployment and client-channel promotion still await the release gates and
+the owner's explicit server-restart confirmation.
+
+The expanded client suite also exposed a Modonomicon 2.16.0 research-packet race:
+`SyncResearchStateMessage` held the live mutable research state while Netty encoded
+it on another thread. A narrow compatibility mixin snapshots its four public
+collections when the message is constructed on the sender thread. The regression
+queues a message, resets and repopulates live state, then round-trips the queued
+packet and checks the original facts, nodes, values and stages. This preserves the
+pinned library and its progression state; no external dependency code is copied.
+The natural garnet survey now searches gravel shores at sea level, avoiding
+repeated mountain fragments that correctly reject sediment lenses. Production
+biomes, rarity, terrain safety and the two-seed persistence assertions are unchanged.
+
+After these repairs, all 268 Python tests pass. The focused companion client run
+passes 43 groups / 737 assertions plus all 36 livestock-population assertions
+(`build/jimtafacts-peepo-client-oct25.log`), including a dedicated-server reconnect.
+The new research snapshot and adjusted mineral survey are under validation;
+their presence in the candidate is not yet a claim that the release gates passed.
