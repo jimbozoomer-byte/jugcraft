@@ -5,7 +5,8 @@
     "minecraft:paper",
     "jugcraft:jimta_spellbooks_common_ink",
     "jugcraft:jimta_spellbooks_ender_rune",
-    "minecraft:chorus_fruit"
+    "minecraft:chorus_fruit",
+    "minecraft:rabbit_foot"
   ],
   "result": {
     "id": "jugcraft:jimta_spellbooks_scroll_evasion",

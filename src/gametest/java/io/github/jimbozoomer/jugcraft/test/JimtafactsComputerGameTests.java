@@ -154,7 +154,8 @@ public final class JimtafactsComputerGameTests {
         h.runAfterDelay(40, () -> {
             var book = printer.getItem(17);
             h.assertTrue(book.is(WorkshopComputers.ITEMS.get("printed_book")) && book.getOrDefault(WorkshopComputers.DOCUMENT, "").contains("workshop journal"), "Readable book carries real output");
-            for (int i = 0; i < 4; i++) h.assertTrue(printer.getItem(i).isEmpty(), "Paper, ink, binding and leather consumed once"); h.succeed();
+            h.assertTrue(printer.getItem(0).is(Items.PAPER) && printer.getItem(0).getCount() == 2, "One printed page consumes one of three sheets");
+            for (int i = 1; i < 4; i++) h.assertTrue(printer.getItem(i).isEmpty(), "Ink, binding and leather consumed once"); h.succeed();
         });
     }
     @GameTest(maxTicks = 100) public void monitorWallUsesOriginalConnectedModelState(GameTestHelper h) {

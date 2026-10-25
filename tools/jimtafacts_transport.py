@@ -1,3 +1,4 @@
+from jimtafacts_crafting import distinct
 """Original transport pixels on native connected pipe geometry and bounded logistics."""
 from pathlib import Path
 import json, shutil, hashlib
@@ -82,7 +83,7 @@ def generate(shared=True):
         if flow=='fluid': ingredients.append('jugcraft:rubber')
         if flow=='power': ingredients.append('minecraft:redstone')
         if material in ('wood','diamond','diamond_wood','stripes','emzuli','daizuli'): ingredients.append('jugcraft:basic_circuit')
-        dump(RES/f'data/jugcraft/recipe/jimtafacts_transport/{id}.json',{'type':'minecraft:crafting_shapeless','category':'redstone','ingredients':ingredients,'result':{'id':'jugcraft:'+id,'count':1 if material in ('wood','diamond') or device or colored else 8}})
+        dump(RES/f'data/jugcraft/recipe/jimtafacts_transport/{id}.json',{'type':'minecraft:crafting_shapeless','category':'redstone','ingredients':distinct('jimtafacts_transport/'+id,ingredients),'result':{'id':'jugcraft:'+id,'count':1 if material in ('wood','diamond') or device or colored else 8}})
         dump(RES/f'data/jugcraft/loot_table/blocks/{id}.json',{'type':'minecraft:block','pools':[{'rolls':1,'entries':[{'type':'minecraft:item','name':'jugcraft:'+id}],'condition':{'type':'minecraft:survives_explosion'}}]})
     dump(RES/'data/jugcraft/tags/block/jimtafacts_transport.json',{'replace':False,'values':['jugcraft:'+id for id in sorted(blocks())]})
     if shared:

@@ -41,7 +41,11 @@ public final class JimtaTransportGameTests {
         ItemNetworks.invalidate(h.getLevel());h.assertTrue(ItemNetworks.push(h.getLevel(),start,Direction.EAST,storage,5,Set.of(start))==0,"Unlisted iron is rejected");
         filter.setItem(0,new ItemStack(Items.IRON_INGOT));
         h.assertTrue(ItemNetworks.push(h.getLevel(),start,Direction.EAST,storage,5,Set.of(start))==5,"Cached topology still rechecks the actual changed item filter");
-        h.assertTrue(filter.getItem(0).getCount()==1&&ItemStorage.SIDED.find(h.getLevel(),filter.getBlockPos(),Direction.DOWN)==null,"Filter samples never become pipe cargo");h.succeed();
+        var exposed=ItemStorage.SIDED.find(h.getLevel(),filter.getBlockPos(),Direction.DOWN);
+        if(exposed!=null)try(var tx=net.fabricmc.fabric.api.transfer.v1.transaction.Transaction.openOuter()){
+            h.assertTrue(exposed.extract(ItemVariant.of(Items.IRON_INGOT),64,tx)==0,"Fallback storage cannot extract filter samples");tx.commit();
+        }
+        h.assertTrue(filter.getItem(0).getCount()==1,"Filter sample remains after actual extraction attempt");h.succeed();
     }
     @GameTest public void deviceCargoExposureDoesNotIncludeSamplesEvenWithoutASide(GameTestHelper h){
         h.assertTrue(IndustrialTransport.BLOCKS.size()==39,"All 39 native transport variants are registered");

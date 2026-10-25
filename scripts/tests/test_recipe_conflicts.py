@@ -38,7 +38,8 @@ class RecipeConflicts(unittest.TestCase):
 
     def test_crafting_regression_fixtures_match_shipped_recipes(self):
         cases = read(ROOT / 'src/gametest/resources/recipe_conflict_cases.json')
-        self.assertEqual(len(cases), 87)
+        self.assertGreaterEqual(len(cases), 174)
+        self.assertEqual(len({case['recipe'] for case in cases}), len(cases))
         for case in cases:
             ns, name = case['recipe'].split(':', 1)
             if ns == 'minecraft':

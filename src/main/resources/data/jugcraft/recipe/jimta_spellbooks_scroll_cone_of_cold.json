@@ -5,7 +5,8 @@
     "minecraft:paper",
     "jugcraft:jimta_spellbooks_common_ink",
     "jugcraft:jimta_spellbooks_ice_rune",
-    "minecraft:snowball"
+    "minecraft:snowball",
+    "minecraft:quartz"
   ],
   "result": {
     "id": "jugcraft:jimta_spellbooks_scroll_cone_of_cold",

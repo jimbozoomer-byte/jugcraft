@@ -1,6 +1,8 @@
 package io.github.jimbozoomer.jugcraft.jimtafacts.mixin;
 import io.github.jimbozoomer.jugcraft.jimtafacts.*;
 import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
+import com.llamalad7.mixinextras.injector.ModifyReturnValue;
+import com.llamalad7.mixinextras.sugar.Local;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.effect.*;
@@ -14,9 +16,9 @@ import org.spongepowered.asm.mixin.injection.callback.*;
 public abstract class JimtaLivingMixin {
     @Shadow protected int useItemRemaining;
     @Unique private int jimta$eatenNutrition;
-    @Inject(method="getDamageAfterMagicAbsorb",at=@At("RETURN"),cancellable=true)
-    private void jimta$industrialShield(net.minecraft.world.damagesource.DamageSource source,float amount,CallbackInfoReturnable<Float> cir){
-        cir.setReturnValue(io.github.jimbozoomer.jugcraft.jimtafacts.industry.IndustrialGear.absorb((LivingEntity)(Object)this,source,cir.getReturnValue()));
+    @ModifyReturnValue(method="getDamageAfterMagicAbsorb",at=@At("RETURN"))
+    private float jimta$industrialShield(float amount,@Local(argsOnly=true) net.minecraft.world.damagesource.DamageSource source){
+        return io.github.jimbozoomer.jugcraft.jimtafacts.industry.IndustrialGear.absorb((LivingEntity)(Object)this,source,amount);
     }
     @Inject(method="canStandOnFluid",at=@At("HEAD"),cancellable=true)
     private void jimta$walkFluid(FluidState state,CallbackInfoReturnable<Boolean> cir){if(JimtaAbilities.fluidWalking((LivingEntity)(Object)this,state))cir.setReturnValue(true);}

@@ -10,7 +10,7 @@
     "jugcraft:steel_plate",
     "jugcraft:machine_casing",
     "minecraft:diamond",
-    "minecraft:glass"
+    "minecraft:chest"
   ],
   "result": {
     "id": "jugcraft:jimta_pattern_storage",

@@ -5,7 +5,8 @@
     "minecraft:paper",
     "jugcraft:jimta_spellbooks_common_ink",
     "jugcraft:jimta_spellbooks_fire_rune",
-    "minecraft:blaze_powder"
+    "minecraft:blaze_powder",
+    "minecraft:coal"
   ],
   "result": {
     "id": "jugcraft:jimta_spellbooks_scroll_fire_breath",

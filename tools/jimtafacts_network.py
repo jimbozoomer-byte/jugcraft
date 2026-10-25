@@ -270,7 +270,7 @@ def generate():
         'pattern_provider': ['ILI', 'BHB', 'ICI'], 'crafting_unit': ['IEI', 'LFL', 'ICI'],
     }.items():
         used = set(''.join(pattern)) - {' '}
-        shaped(name, pattern, {k: common[k] for k in used})
+        shaped(name, pattern, {k: common[k] for k in sorted(used)})
     shapeless('crafting_terminal', [ji('terminal'), ji('calculation_processor'), 'minecraft:crafting_table'])
     shapeless('pattern_encoding_terminal', [ji('crafting_terminal'), ji('engineering_processor'), ji('blank_pattern')])
     shapeless('crafting_monitor', [ji('crafting_unit'), ji('terminal')])
@@ -322,7 +322,7 @@ def generate():
         if name == 'vibration_chamber': key['H'] = 'minecraft:furnace'
         if name == 'cell_workbench': key['H'] = 'minecraft:crafting_table'
         if name == 'io_port': key['H'] = ji('drive')
-        shaped(name, pattern, {k: key[k] for k in set(''.join(pattern)) - {' '}})
+        shaped(name, pattern, {k: key[k] for k in sorted(set(''.join(pattern)) - {' '})})
     for name in BLOCKS:
         entry = {'type': 'minecraft:item', 'name': ji(name)}
         if name in POWERED:

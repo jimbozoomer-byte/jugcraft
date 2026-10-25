@@ -30,7 +30,8 @@ def generate(copy,texture,dump,res,art,lang):
         if 'parent' in raw:raw['parent']=model(raw['parent'])
         raw['textures']={key:texture(value) for key,value in raw.get('textures',{}).items()}
         raw.pop('loader',None);raw.pop('render_type',None);raw.pop('overrides',None)
-        dump(res/f'assets/jugcraft/models/jimtafacts/spellbooks/{path}.json',raw);return native
+        from jimtafacts_model_repairs import repair
+        dump(res/f'assets/jugcraft/models/jimtafacts/spellbooks/{path}.json',repair('jimtafacts/spellbooks/'+path,raw));return native
     for name in ITEMS:
         raw=json.loads((art/f'models/item/{name}.json').read_text(encoding='utf-8'))
         if name.endswith('_spawn_egg'):

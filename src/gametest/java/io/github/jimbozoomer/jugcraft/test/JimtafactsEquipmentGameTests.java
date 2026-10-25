@@ -15,7 +15,7 @@ import net.minecraft.world.phys.*;
 /** Authored now; execute with the final combined implementation suite. */
 public final class JimtafactsEquipmentGameTests {
     @GameTest public void namePressConsumesOneIngotAndKnifeDurability(GameTestHelper h) {
-        var p = h.makeMockServerPlayerInLevel(); var knife = new ItemStack(DigitalStorage.ITEMS.get("certus_quartz_cutting_knife")); p.setItemInHand(InteractionHand.MAIN_HAND, knife);
+        var p = h.makeMockServerPlayerInLevel(); p.setGameMode(net.minecraft.world.level.GameType.SURVIVAL); var knife = new ItemStack(DigitalStorage.ITEMS.get("certus_quartz_cutting_knife")); p.setItemInHand(InteractionHand.MAIN_HAND, knife);
         var menu = new DigitalPressMenu.Menu(1, p.getInventory(), InteractionHand.MAIN_HAND, knife);
         menu.slots.get(0).set(new ItemStack(Items.IRON_INGOT, 2)); menu.name("Workshop pick");
         var output = menu.slots.get(1).remove(1); menu.slots.get(1).onTake(p, output);

@@ -3,6 +3,6 @@
   "values": [
     "#c:ingots/iron",
     "#c:ingots/copper",
-    "#c:ingots/gold"
+    "minecraft:gold_ingot"
   ]
 }

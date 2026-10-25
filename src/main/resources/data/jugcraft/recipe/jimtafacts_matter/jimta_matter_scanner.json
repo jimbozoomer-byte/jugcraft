@@ -10,7 +10,7 @@
     "jugcraft:steel_plate",
     "jugcraft:machine_casing",
     "minecraft:diamond",
-    "minecraft:glass"
+    "minecraft:observer"
   ],
   "result": {
     "id": "jugcraft:jimta_matter_scanner",

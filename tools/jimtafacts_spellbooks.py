@@ -1,3 +1,4 @@
+from jimtafacts_crafting import distinct
 """Native spellbook content; supplied art is copied, never redrawn or executed.
 
 Only entries with an implemented player outcome belong in this runtime catalog.
@@ -285,6 +286,7 @@ def generate():
 
     forge_recipes={}
     def recipe(name, ingredients, count=1, suffix=''):
+        ingredients=distinct(PREFIX+name,ingredients)
         dump(RES / f'data/jugcraft/recipe/{PREFIX}{name}{suffix}.json', {
             'type': 'minecraft:crafting_shapeless', 'category': 'misc', 'ingredients': ingredients,
             'result': {'id': 'jugcraft:' + PREFIX + name, 'count': count},

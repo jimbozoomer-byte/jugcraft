@@ -2,7 +2,8 @@
   "type": "minecraft:crafting_shapeless",
   "category": "misc",
   "ingredients": [
-    "jugcraft:circuit_assembler"
+    "jugcraft:circuit_assembler",
+    "jugcraft:basic_circuit"
   ],
   "result": {
     "id": "jugcraft:jimta_integration_table",

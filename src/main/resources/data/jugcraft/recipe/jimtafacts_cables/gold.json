@@ -4,7 +4,8 @@
   "ingredients": [
     "minecraft:gold_ingot",
     "minecraft:gold_ingot",
-    "minecraft:gold_ingot"
+    "minecraft:gold_ingot",
+    "minecraft:iron_nugget"
   ],
   "result": {
     "id": "jugcraft:jimta_gold_cable",

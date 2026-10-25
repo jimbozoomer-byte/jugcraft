@@ -5,7 +5,8 @@
     "jugcraft:copper_plate",
     "minecraft:iron_bars",
     "jugcraft:electric_motor",
-    "minecraft:diamond"
+    "minecraft:diamond",
+    "jugcraft:copper_plate"
   ],
   "result": {
     "id": "jugcraft:jimta_advanced_heat_exchanger",

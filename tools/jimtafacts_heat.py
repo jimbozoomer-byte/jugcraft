@@ -1,3 +1,4 @@
+from jimtafacts_crafting import distinct
 """Original six-face IC heat/kinetic atlases; native heat buffers and existing JE/KE networks."""
 from pathlib import Path
 import hashlib, json, shutil
@@ -44,7 +45,7 @@ def generate(shared=True):
   dump(RES/f'data/jugcraft/loot_table/blocks/{ident}.json',{'type':'minecraft:block','pools':[{'rolls':1,'entries':[{'type':'minecraft:item','name':'jugcraft:'+ident}],'condition':{'type':'minecraft:survives_explosion'}}]})
   parts=['jugcraft:iron_plate']*3+['jugcraft:machine_casing','jugcraft:copper_wire']
   parts+=['minecraft:furnace'] if name=='solid_heat_generator' else ['minecraft:lever','jugcraft:iron_gear'] if name=='manual_kinetic_generator' else ['jugcraft:electric_motor','jugcraft:basic_circuit'] if name.startswith('electric_') else ['jugcraft:heat_exchanger','jugcraft:electric_motor']
-  dump(RES/f'data/jugcraft/recipe/jimtafacts_heat/{name}.json',{'type':'minecraft:crafting_shapeless','category':'misc','ingredients':parts,'result':{'id':'jugcraft:'+ident}})
+  dump(RES/f'data/jugcraft/recipe/jimtafacts_heat/{name}.json',{'type':'minecraft:crafting_shapeless','category':'misc','ingredients':distinct('jimtafacts_heat/'+name,parts),'result':{'id':'jugcraft:'+ident}})
   lang['block.jugcraft.'+ident]=name.replace('_',' ').title()
  # Fluids retain source pixels and animation metadata, with namespace-only adaptation.
  def copy(src,dst):
@@ -58,7 +59,7 @@ def generate(shared=True):
    dump(RES/f'assets/jugcraft/models/item/{ident}.json',{'parent':'minecraft:item/generated','textures':{'layer0':'jugcraft:item/jimtafacts/heat/'+ident}})
    dump(RES/f'assets/jugcraft/items/{ident}.json',{'model':{'type':'minecraft:model','model':'jugcraft:item/'+ident}});lang['item.jugcraft.'+ident]=(name+' rotor'+suffix.replace('_',' ')).title()
   material={'wood':'minecraft:oak_planks','iron':'jugcraft:iron_plate','steel':'jugcraft:steel_plate','carbon':'jugcraft:jimta_carbon_plate'}[name]
-  dump(RES/f'data/jugcraft/recipe/jimtafacts_heat/{name}_blade.json',{'type':'minecraft:crafting_shapeless','category':'misc','ingredients':[material]*3,'result':{'id':f'jugcraft:jimta_{name}_rotor_blade'}})
+  dump(RES/f'data/jugcraft/recipe/jimtafacts_heat/{name}_blade.json',{'type':'minecraft:crafting_shapeless','category':'misc','ingredients':[material]*3+['minecraft:iron_nugget'],'result':{'id':f'jugcraft:jimta_{name}_rotor_blade'}})
   dump(RES/f'data/jugcraft/recipe/jimtafacts_heat/{name}_rotor.json',{'type':'minecraft:crafting_shapeless','category':'misc','ingredients':[f'jugcraft:jimta_{name}_rotor_blade']*4+['jugcraft:iron_gear'],'result':{'id':f'jugcraft:jimta_{name}_rotor'}})
  for name,source,cell in [('coolant' ,'coolant','Coolant'),('hot_coolant','hotcoolant','HotCoolant')]:
   for kind in ('still','flow'):

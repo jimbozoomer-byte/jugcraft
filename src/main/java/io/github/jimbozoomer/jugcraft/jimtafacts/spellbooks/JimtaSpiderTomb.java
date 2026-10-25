@@ -30,7 +30,9 @@ public final class JimtaSpiderTomb extends Entity {
     public static void entomb(JimtaEncounterCreatures.IceSpider spider,LivingEntity target){
         if(!(spider.level() instanceof ServerLevel l)||target.isPassenger()||!JimtaEncounterCreatures.prey(spider,target)||Town.isInside(l,target.blockPosition())||LandRegistry.isClaimed(l,target.blockPosition()))return;
         var tomb=TOMB.create(l,EntitySpawnReason.TRIGGERED);if(tomb==null)return;tomb.owner=spider.getUUID();tomb.victim=target.getUUID();tomb.setPos(target.position());tomb.setDeltaMovement(target.getDeltaMovement().add(spider.getForward().add(0,1,0).scale(.5)));
-        if(!l.noCollision(tomb)||!l.addFreshEntity(tomb))return;if(!target.startRiding(tomb,true,false))tomb.release();
+        // The victim necessarily overlaps its prison. Exclude only that victim,
+        // while retaining solid terrain, world-border and other entity collision checks.
+        if(!l.noCollision(target,tomb.getBoundingBox())||!l.addFreshEntity(tomb))return;if(!target.startRiding(tomb,true,false))tomb.release();
     }
     public static void spikes(JimtaEncounterCreatures.IceSpider spider,LivingEntity target){
         if(!(spider.level() instanceof ServerLevel l)||!JimtaEncounterCreatures.prey(spider,target)||l.getEntitiesOfClass(JimtaSpiderTomb.class,spider.getBoundingBox().inflate(48),e->spider.getUUID().equals(e.owner)).size()>=16)return;

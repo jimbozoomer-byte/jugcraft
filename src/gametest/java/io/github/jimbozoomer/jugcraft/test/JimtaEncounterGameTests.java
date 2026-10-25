@@ -28,14 +28,14 @@ public final class JimtaEncounterGameTests {
         var spider=h.spawn(JimtaEncounterCreatures.ICE_SPIDER,2,2,2);var keeper=h.spawn(JimtaEncounterCreatures.KEEPER,4,2,2);
         var villager=h.spawn(net.minecraft.world.entity.EntityTypes.VILLAGER,2,2,4);var cow=h.spawn(net.minecraft.world.entity.EntityTypes.COW,4,2,4);
         h.assertTrue(!spider.canAttack(villager)&&!keeper.canAttack(villager),"Source enemies retain Jugcraft villager protection");
-        try(var claim=TestClaims.open().block(cow.blockPosition(),java.util.UUID.randomUUID())){h.assertTrue(!spider.canAttack(cow),"Claimed livestock cannot be hunted");}
+        try(var claim=new NativeTestClaim(h,cow.blockPosition())){h.assertTrue(!spider.canAttack(cow),"Claimed livestock cannot be hunted");}
         h.succeed();
     }
     @GameTest public void hostileTombReleasesWhenItsSpiderDies(GameTestHelper h){
-        var spider=h.spawn(JimtaEncounterCreatures.ICE_SPIDER,2,3,2);var p=h.makeMockServerPlayerInLevel();p.gameMode.changeGameModeForPlayer(GameType.SURVIVAL);
-        p.setPos(spider.position().add(5,0,0));p.setHealth(10);JimtaSpiderTomb.entomb(spider,p);
+        var spider=h.spawn(JimtaEncounterCreatures.ICE_SPIDER,2,3,2);var p=JimtaRobotGameTests.player(h);try{
+        p.setPos(spider.position().add(2,0,2));p.setHealth(10);JimtaSpiderTomb.entomb(spider,p);
         h.assertTrue(p.getVehicle() instanceof JimtaSpiderTomb,"Spider captures the player");var tomb=(JimtaSpiderTomb)p.getVehicle();
-        spider.discard();tomb.tick();h.assertTrue(!p.isPassenger()&&tomb.isRemoved(),"Losing the owner releases the victim");h.assertTrue(p.getHealth()==10,"Hostile tomb never heals");h.succeed();
+        spider.discard();tomb.tick();h.assertTrue(!p.isPassenger()&&tomb.isRemoved(),"Losing the owner releases the victim");h.assertTrue(p.getHealth()==10,"Hostile tomb never heals");h.succeed();}finally{h.getLevel().getServer().getPlayerList().remove(p);}
     }
     @GameTest public void restoredKeeperUsesTheOriginalRestoredWeapon(GameTestHelper h){
         var keeper=h.spawn(JimtaEncounterCreatures.KEEPER,2,2,2);keeper.setRestored(true);

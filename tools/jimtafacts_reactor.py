@@ -1,3 +1,4 @@
+from jimtafacts_crafting import distinct
 """Original compact reactor textures, GUI and component tuning on native JE/radiation."""
 from pathlib import Path
 import json,shutil,hashlib
@@ -41,7 +42,7 @@ def generate(shared=True):
  copy(SOURCE/'textures/gui/GUINuclearReaktor.png',RES/'assets/jugcraft/textures/gui/jimtafacts/compact_reactor.png')
  dump(RES/'jugcraft/jimtafacts/reactor.json',{id:{k:v for k,v in p.items() if k!='source'} for id,p in PARTS.items()})
  recipes={}
- def craft(name,parts,out,count=1):recipes[name]={'type':'minecraft:crafting_shapeless','category':'misc','ingredients':parts,'result':{'id':'jugcraft:'+out,'count':count}}
+ def craft(name,parts,out,count=1):recipes[name]={'type':'minecraft:crafting_shapeless','category':'misc','ingredients':distinct('jimtafacts_reactor/'+name,parts),'result':{'id':'jugcraft:'+out,'count':count}}
  craft('core',['jugcraft:steel_plate']*3+['jugcraft:lead_plate']*3+['jugcraft:advanced_circuit','jugcraft:heat_exchanger','jugcraft:electric_motor'],'jimta_compact_reactor')
  craft('chamber',['jugcraft:steel_plate']*4+['jugcraft:lead_plate']*4,'jimta_reactor_chamber')
  for part,extra in [('vessel','jugcraft:lead_plate'),('fluid_port','jugcraft:steel_fluid_pipe'),('access_hatch','minecraft:hopper'),('redstone_port','minecraft:comparator')]:

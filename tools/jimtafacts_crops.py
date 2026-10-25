@@ -1,3 +1,4 @@
+from jimtafacts_crafting import distinct
 from pathlib import Path
 import json,shutil,hashlib
 ROOT=Path(__file__).resolve().parents[1];RES=ROOT/'src/main/resources';SOURCE=ROOT/'art/owner-library/originals/Oct23/Jimtafacts/industrialcraft reborn by jimbo/assets/ic2'
@@ -61,7 +62,7 @@ def generate(shared=True):
  def craft(id,parts,out,count=1):recipes[id]={'type':'minecraft:crafting_shapeless','category':'misc','ingredients':parts,'result':{'id':out,'count':count}}
  for name,item in {'wheat':'wheat_seeds','pumpkin':'pumpkin_seeds','melon':'melon_seeds','carrots':'carrot','potato':'potato','reed':'sugar_cane','cocoa':'cocoa_beans','nether_wart':'nether_wart','red_mushroom':'red_mushroom','brown_mushroom':'brown_mushroom'}.items():craft('seed_'+name,['minecraft:'+item,'minecraft:paper','minecraft:stick'],'jugcraft:jimta_seed_'+name)
  craft('sticks',['minecraft:stick']*4,'jugcraft:jimta_crop_sticks',2)
- craft('mug',['minecraft:brick']*3,'jugcraft:jimta_empty_mug')
+ craft('mug',distinct('jimtafacts_crops/mug',['minecraft:brick']*3),'jugcraft:jimta_empty_mug')
  craft('coffee',['jugcraft:jimta_coffee_powder','jugcraft:jimta_empty_mug','minecraft:water_bucket'],'jugcraft:jimta_coffee_mug')
  craft('dark_coffee',['jugcraft:jimta_coffee_mug','jugcraft:jimta_coffee_powder','minecraft:sugar'],'jugcraft:jimta_dark_coffee_mug')
  craft('iced_coffee',['jugcraft:jimta_coffee_mug','minecraft:snowball','minecraft:sugar'],'jugcraft:jimta_iced_coffee_mug')

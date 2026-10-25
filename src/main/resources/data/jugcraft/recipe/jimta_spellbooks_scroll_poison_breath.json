@@ -5,7 +5,8 @@
     "minecraft:paper",
     "jugcraft:jimta_spellbooks_common_ink",
     "jugcraft:jimta_spellbooks_nature_rune",
-    "minecraft:spider_eye"
+    "minecraft:spider_eye",
+    "minecraft:slime_ball"
   ],
   "result": {
     "id": "jugcraft:jimta_spellbooks_scroll_poison_breath",

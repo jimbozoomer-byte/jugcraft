@@ -2,7 +2,7 @@
 
 ## October 23 continuation status (local, unvalidated)
 
-The current continuation adds native transport/gate variants, four-bank Emzuli filtering, heat/rotor/reactor devices, laser tables, 32 independently saved cable attachment types, item/fluid cell fill/empty and partitions, paid spatial anchors, joined plane geometry, asynchronous crafting reservations/cancellation, and the native computer/turtle/peripheral system. Original asset pixels and supplied meshes are retained where available; programmatic source geometry is adapted explicitly. The earlier encounter and 236-template/nine-structure implementations are also local, with their explicit asset/behavior limitations. No builds or tests have run for this continuation, per the owner's combined-test request. Earlier validation results below apply only to their named earlier slices. The full collection is not yet complete: larger/entity spatial migration, Lua/CraftOS compatibility and remaining industrial mappings remain open in the linked feature records.
+The current continuation adds native transport/gate variants, four-bank Emzuli filtering, heat/rotor/reactor devices, laser tables, 32 independently saved cable attachment types, item/fluid cell fill/empty and partitions, paid spatial anchors, joined plane geometry, asynchronous crafting reservations/cancellation, and the native computer/turtle/peripheral system. Original asset pixels and supplied meshes are retained where available; programmatic source geometry is adapted explicitly. The earlier encounter and 236-template/nine-structure implementations are also local, with their explicit asset/behavior limitations. Testing was deferred during authoring; the combined validation records below supersede that earlier hold. Earlier validation results below apply only to their named earlier slices. The full collection is not yet complete: larger/entity spatial migration, Lua/CraftOS compatibility and remaining industrial mappings remain open in the linked feature records.
 
 
 Owner-approved scope, 23 October 2026: integrate all supplied Jimtafacts content into the single Jugcraft mod, retaining the edited assets and adapting platform-specific behavior. This is a multi-package port, not installation of the old binaries. AI assistance: OpenAI Codex (GPT-6).
@@ -105,3 +105,39 @@ claims. Final runtime, packaged-client and exact release results must be appende
 before promotion. No live restart or client-channel promotion has occurred.
 
 AI assistance: OpenAI Codex, user-selected Astra High.
+## Combined validation follow-up — 25 October 2026
+
+OpenAI Codex, user-selected Astra High. The first complete combined server run
+finished: 2,454 of 2,476 tests passed, with 22 failures. This is **not** a release
+approval. The original log is local at `build/jimtafacts-runtime5-oct23.log`.
+
+Repairs under validation include distinct rotor-blade/wood-blank crafts (the
+original recipes collided with conduits and vanilla sticks), composable spell
+damage reducers, one item/fluid provider per network block-entity type, and
+spider tomb collision that excludes only its intended captive. Regression
+fixtures now exercise survival durability, actual claim boundaries, filter
+extraction, armor-bypassing damage, paginated printing and the expanded fermenter
+recipe roster. Source regeneration must also retain the ship horn instrument tag
+and the repaired ice-spider egg shell.
+
+The incomplete collection systems remain in [the follow-up list](jimtafacts-remaining.md).
+No candidate deployment or player-channel promotion is claimed here. The owner
+must confirm the live server restart before the authorized 30-second warning.
+
+Completed October 25 checks so far: common/client/game-test compilation, 79
+in-game updater assertions, all 264 Python tests, repository/pack checks, and the
+model/data audit (7,797 material IDs, 24,409 models, 3,729 quad parts and 180
+assemblies). The survival audit uses the actual exported server registry and
+reports zero ingredient diagnostics. All 142 focused Jimtafacts server tests
+passed after the repairs. Existing-system integration and rendered regressions
+remain pending; these focused results do not replace the full release CI gates.
+
+The follow-up combined runtime selection now passes all **389 server tests**
+(`build/jimtafacts-integration2-oct25.log`). It includes every Jimtafacts test,
+the actual sided storage providers, 174 crafting fixtures, grounding-strap and
+Nouveau defenses, fermenters, encyclopedia and affected wood/assay tests.
+All four competing magic-damage reducers now compose instead of returning early
+from cancellable return injections. Twenty-nine groups of ambiguous crafting
+bills were separated using existing parts; spell-forge bills and crafting-table
+bills stay identical. The survival audit still reports zero invalid ingredients.
+The full CI suite and rendered-client checks remain required before release.

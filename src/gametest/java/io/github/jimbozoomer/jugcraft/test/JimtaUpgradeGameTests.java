@@ -43,13 +43,23 @@ public final class JimtaUpgradeGameTests {
         h.assertTrue(!MachineUpgrades.isFormUpgrade(card(IndustrialUpgrades.Kind.ENERGY_STORAGE)), "Form controllers cannot accept unsupported storage cards");
         h.assertTrue(MachineUpgrades.isFormUpgrade(card(IndustrialUpgrades.Kind.OVERCLOCKER)), "Forms share actual process speed support"); h.succeed();
     }
-    @GameTest public void pullingUsesSidedTransactionsAndCannotCrossAnotherPlayersClaim(GameTestHelper h) {
-        var machine = machine(h); var chestPos = new BlockPos(2,3,2); h.setBlock(chestPos, Blocks.CHEST);
-        var chest = h.getBlockEntity(chestPos, ChestBlockEntity.class); chest.setItem(0, new ItemStack(Items.COAL, 10));
+    @GameTest(structure="jugcraft-test:claim_combat_arena") public void pullingUsesSidedTransactionsAndCannotCrossAnotherPlayersClaim(GameTestHelper h) {
+        // Place actual adjacent endpoints on opposite sides of a chunk boundary.
+        var base=h.absolutePos(new BlockPos(16,2,16));
+        var machineAbs=new BlockPos(Math.floorDiv(base.getX(),16)*16+15,base.getY(),base.getZ());
+        var chestPos=machineAbs.east();
+        // Use absolute world placement: helper-relative round trips rotate the
+        // points again in rotated test arenas and can move both into one chunk.
+        h.getLevel().setBlockAndUpdate(machineAbs,JimtaIndustry.MACHINES.get("jimta_macerator").defaultBlockState());
+        var machine=(MachineBlockEntity)h.getLevel().getBlockEntity(machineAbs);
+        h.getLevel().setBlockAndUpdate(chestPos,Blocks.CHEST.defaultBlockState());
+        var chest=(ChestBlockEntity)h.getLevel().getBlockEntity(chestPos);chest.setItem(0,new ItemStack(Items.COAL,10));
         machine.setItem(machine.kind().slots, card(IndustrialUpgrades.Kind.PULLING));
-        try (var claim = TestClaims.open().block(h.absolutePos(chestPos), UUID.randomUUID())) {
+        try (var claim = new NativeTestClaim(h,chestPos)) {
+            h.assertTrue(!io.github.jimbozoomer.jugcraft.finance.ClaimTransfers.allowed(h.getLevel(),machine.getBlockPos(),chest.getBlockPos()),"Native endpoints cross ownership boundary: "+machine.getBlockPos()+" to "+chest.getBlockPos());
+            h.assertTrue(machine.getItem(0).isEmpty(),"Machine input starts empty: "+machine.getItem(0));
             IndustrialUpgrades.transfer(machine, h.getLevel());
-            h.assertTrue(chest.getItem(0).getCount() == 10 && machine.getItem(0).isEmpty(), "Protected source untouched");
+            h.assertTrue(chest.getItem(0).getCount() == 10 && machine.getItem(0).isEmpty(), "Protected source untouched; chest="+chest.getItem(0)+", machine="+machine.getItem(0));
         }
         IndustrialUpgrades.transfer(machine, h.getLevel());
         h.assertTrue(chest.getItem(0).getCount() == 6 && machine.getItem(0).is(Items.COAL) && machine.getItem(0).getCount() == 4, "One bounded real transfer");

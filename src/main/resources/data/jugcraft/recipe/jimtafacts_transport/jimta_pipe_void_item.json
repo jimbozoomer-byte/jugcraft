@@ -4,7 +4,8 @@
   "ingredients": [
     "minecraft:obsidian",
     "minecraft:glass",
-    "minecraft:obsidian"
+    "minecraft:obsidian",
+    "minecraft:redstone"
   ],
   "result": {
     "id": "jugcraft:jimta_pipe_void_item",

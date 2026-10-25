@@ -26,9 +26,12 @@ public final class DigitalNetworkSystemsGameTests {
     @GameTest public void condenserFractionalFluidRollbackAndBlockedOutputPreserveCredit(GameTestHelper h) {
         var p = player(h); var n = node(h, p, "condenser", 1, 2, 1); n.setItem(0, item("cell_component_1k"));
         var water = FluidVariant.of(Fluids.WATER);
-        try (var tx = Transaction.openOuter()) { h.assertTrue(n.condenserStorage.insert(water, 255 * FluidConstants.BUCKET + 1, tx) > 0, "Fractional fluid accepted"); }
+        var port=FluidStorage.SIDED.find(h.getLevel(),n.getBlockPos(),Direction.UP);
+        h.assertTrue(port!=null,"Condenser exposes its fluid automation port");
+        h.assertTrue(net.fabricmc.fabric.api.transfer.v1.item.ItemStorage.SIDED.find(h.getLevel(),n.getBlockPos(),Direction.UP)!=null,"Condenser exposes its item automation port");
+        try (var tx = Transaction.openOuter()) { h.assertTrue(port.insert(water, 255 * FluidConstants.BUCKET + 1, tx) > 0, "Fractional fluid accepted"); }
         h.assertTrue(n.condensed == 0, "Rollback restores exact fluid credit");
-        try (var tx = Transaction.openOuter()) { n.condenserStorage.insert(water, 255 * FluidConstants.BUCKET + 1, tx); tx.commit(); }
+        try (var tx = Transaction.openOuter()) { port.insert(water, 255 * FluidConstants.BUCKET + 1, tx); tx.commit(); }
         DigitalCondenser.tick(n); h.assertTrue(n.getItem(2).isEmpty(), "Fraction does not round up into an output");
         n.setItem(1, new ItemStack(Items.COBBLESTONE)); n.setItem(2, new ItemStack(Items.DIRT)); DigitalCondenser.tick(n);
         h.assertTrue(n.condensed == 256 * FluidConstants.BUCKET + 1, "Blocked output keeps all paid credit");

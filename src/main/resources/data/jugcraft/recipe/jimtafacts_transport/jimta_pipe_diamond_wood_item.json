@@ -5,7 +5,8 @@
     "minecraft:diamond",
     "minecraft:glass",
     "minecraft:diamond",
-    "jugcraft:basic_circuit"
+    "jugcraft:basic_circuit",
+    "minecraft:oak_planks"
   ],
   "result": {
     "id": "jugcraft:jimta_pipe_diamond_wood_item",

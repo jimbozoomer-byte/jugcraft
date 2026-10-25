@@ -7,11 +7,11 @@
     "ICI"
   ],
   "key": {
-    "F": "jugcraft:jimta_fluix_crystal",
+    "C": "jugcraft:jimta_fluix_glass_cable",
     "E": "jugcraft:jimta_engineering_processor",
-    "L": "jugcraft:jimta_logic_processor",
+    "F": "jugcraft:jimta_fluix_crystal",
     "I": "minecraft:iron_ingot",
-    "C": "jugcraft:jimta_fluix_glass_cable"
+    "L": "jugcraft:jimta_logic_processor"
   },
   "result": {
     "id": "jugcraft:jimta_crafting_unit",

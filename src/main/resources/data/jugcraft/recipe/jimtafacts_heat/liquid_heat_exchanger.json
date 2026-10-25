@@ -8,7 +8,8 @@
     "jugcraft:machine_casing",
     "jugcraft:copper_wire",
     "jugcraft:heat_exchanger",
-    "jugcraft:electric_motor"
+    "jugcraft:electric_motor",
+    "jugcraft:copper_plate"
   ],
   "result": {
     "id": "jugcraft:jimta_liquid_heat_exchanger"

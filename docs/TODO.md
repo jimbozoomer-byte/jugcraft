@@ -8,6 +8,12 @@ prepare the coordinated release. Further implementation is tracked in
 defer tests are superseded by the owner's October 23 release request. No test or
 deployment is considered passed until its evidence is recorded.
 
+October 25 checkpoint: 389 combined server regressions now pass, including the
+Jimtafacts systems and affected older features; compilation, asset/data and
+updater checks have passed. Full release CI and rendered-client checks remain
+pending. Earlier "not run" text below describes the implementation checkpoints;
+the [validation record](features/jimtafacts-integration.md) is the current evidence.
+
 - [x] Preserve and SHA-256 verify all 17,598 supplied files; index named content, namespaces, legacy class generations and source-format issues.
 - [x] Implement and validate the first 28 accessory/food item behaviors: native slots, cooldowns, acquisition, party protection and grave interactions. Source-parity and worn-model work remains below.
 - [ ] Validate the locally implemented 49 accessory/items, mimic/campsites, original wearable models and animations in the final combined batch. Source defaults intentionally disable durability.

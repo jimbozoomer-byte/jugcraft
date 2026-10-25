@@ -5,7 +5,8 @@
     "jugcraft:copper_plate",
     "minecraft:iron_bars",
     "jugcraft:electric_motor",
-    "jugcraft:tin_plate"
+    "jugcraft:tin_plate",
+    "minecraft:gold_ingot"
   ],
   "result": {
     "id": "jugcraft:jimta_core_heat_exchanger",

@@ -5,7 +5,8 @@
     "minecraft:paper",
     "jugcraft:jimta_spellbooks_uncommon_ink",
     "jugcraft:jimta_spellbooks_fire_rune",
-    "minecraft:magma_block"
+    "minecraft:magma_block",
+    "minecraft:bone"
   ],
   "result": {
     "id": "jugcraft:jimta_spellbooks_scroll_raise_hell",

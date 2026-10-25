@@ -5,7 +5,8 @@
     "jugcraft:copper_plate",
     "minecraft:iron_bars",
     "jugcraft:electric_motor",
-    "jugcraft:tin_plate"
+    "jugcraft:tin_plate",
+    "minecraft:redstone"
   ],
   "result": {
     "id": "jugcraft:jimta_component_heat_vent",

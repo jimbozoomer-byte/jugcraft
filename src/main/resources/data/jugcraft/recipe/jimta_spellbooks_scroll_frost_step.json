@@ -5,7 +5,8 @@
     "minecraft:paper",
     "jugcraft:jimta_spellbooks_common_ink",
     "jugcraft:jimta_spellbooks_ice_rune",
-    "minecraft:packed_ice"
+    "minecraft:packed_ice",
+    "minecraft:leather"
   ],
   "result": {
     "id": "jugcraft:jimta_spellbooks_scroll_frost_step",

@@ -71,7 +71,7 @@ public final class JimtaWorkshopTableGameTests {
         var hull=IndustrialBoats.TYPES.get("electric").create(h.getLevel(),net.minecraft.world.entity.EntitySpawnReason.COMMAND);h.assertTrue(hull!=null,"Electric hull is registered");hull.owner=player.getUUID();
         h.assertTrue(hull.permitted(player)&&!hull.permitted(JimtafactsComputerGameTests.player(h)),"Unrelated player cannot drive or collect a private hull");h.assertTrue(hull.lavaHull(),"Only the electric variant enables lava flotation");h.succeed();
     }
-    @GameTest public void electricBoatFloatsOnContainedLava(GameTestHelper h){
+    @GameTest(maxTicks = 60) public void electricBoatFloatsOnContainedLava(GameTestHelper h){
         for(int x=1;x<=5;x++)for(int z=1;z<=5;z++){h.setBlock(new BlockPos(x,0,z),net.minecraft.world.level.block.Blocks.OBSIDIAN);h.setBlock(new BlockPos(x,1,z),x==1||x==5||z==1||z==5?net.minecraft.world.level.block.Blocks.OBSIDIAN:net.minecraft.world.level.block.Blocks.LAVA);}
         var boat=IndustrialBoats.TYPES.get("electric").create(h.getLevel(),net.minecraft.world.entity.EntitySpawnReason.COMMAND);var at=h.absolutePos(new BlockPos(3,2,3));boat.setInitialPos(at.getX()+.5,at.getY(),at.getZ()+.5);h.getLevel().addFreshEntity(boat);
         h.runAtTickTime(40,()->{h.assertTrue(boat.isAlive()&&boat.getY()>h.absolutePos(new BlockPos(3,1,3)).getY()+.3,"Electric boat remains afloat and intact in the bounded lava pool");boat.discard();h.succeed();});

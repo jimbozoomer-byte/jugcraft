@@ -7,11 +7,11 @@
     "ICI"
   ],
   "key": {
+    "C": "jugcraft:jimta_fluix_glass_cable",
     "F": "jugcraft:jimta_fluix_crystal",
-    "L": "jugcraft:jimta_logic_processor",
-    "I": "minecraft:iron_ingot",
     "H": "minecraft:furnace",
-    "C": "jugcraft:jimta_fluix_glass_cable"
+    "I": "minecraft:iron_ingot",
+    "L": "jugcraft:jimta_logic_processor"
   },
   "result": {
     "id": "jugcraft:jimta_vibration_chamber",

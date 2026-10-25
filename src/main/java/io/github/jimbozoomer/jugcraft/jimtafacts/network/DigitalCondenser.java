@@ -19,8 +19,6 @@ public final class DigitalCondenser {
     private DigitalCondenser() {}
     public static void register() {
         MATTER = Registry.register(BuiltInRegistries.DATA_COMPONENT_TYPE, Jugcraft.id("jimta_condensed_matter"), DataComponentType.<Long>builder().persistent(io.github.jimbozoomer.jugcraft.jimtafacts.JimtaCodecs.longRange(0, 2_097_152L * FluidConstants.BUCKET)).networkSynchronized(ByteBufCodecs.VAR_LONG).build());
-        FluidStorage.SIDED.registerForBlockEntity((node, side) -> node.kind().equals("condenser") ? node.condenserStorage : null, DigitalStorage.NODE);
-        net.fabricmc.fabric.api.transfer.v1.item.ItemStorage.SIDED.registerForBlockEntity((node, side) -> node.kind().equals("condenser") && node.actor() != null && node.permitted(node.actor()) ? new ItemPort(node) : null, DigitalStorage.NODE);
     }
     public static int capacity(DigitalNode node) {
         for (int size : new int[]{1, 4, 16, 64, 256}) if (node.getItem(0).is(DigitalStorage.ITEMS.get("cell_component_" + size + "k"))) return size * 8192;
@@ -61,7 +59,7 @@ public final class DigitalCondenser {
         public Iterator<StorageView<FluidVariant>> iterator() { return Collections.emptyIterator(); }
     }
     /** Only material input/result output are automated; the capacity component is manually removable. */
-    private static final class ItemPort implements Storage<net.fabricmc.fabric.api.transfer.v1.item.ItemVariant> {
+    static final class ItemPort implements Storage<net.fabricmc.fabric.api.transfer.v1.item.ItemVariant> {
         private final DigitalNode node;
         ItemPort(DigitalNode node) { this.node = node; }
         private boolean allowed() { var p = node.actor(); return p != null && node.permitted(p) && !node.getLevel().hasNeighborSignal(node.getBlockPos()); }

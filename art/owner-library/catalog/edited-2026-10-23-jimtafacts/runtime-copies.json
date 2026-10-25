@@ -290,7 +290,7 @@
   {
     "source": "art/owner-library/originals/Oct23/Jimtafacts/assets/artifacts/textures/entity/mimic.png",
     "runtime": "src/main/resources/assets/jugcraft/textures/entity/jimtafacts/mimic.png",
-    "changes": "None; original entity atlas retained.",
-    "sha256": "2b97e4636225638016792195093177452cbfe97d475238d8356921566381882e"
+    "sha256": "2b97e4636225638016792195093177452cbfe97d475238d8356921566381882e",
+    "changes": "None; original entity atlas retained."
   }
 ]

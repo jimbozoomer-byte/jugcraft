@@ -85,7 +85,7 @@ public final class JimtaSpellbookCurioGameTests {
     @GameTest public void invisibilityAttackBonusRespectsClaimsAndItsSharedCooldown(GameTestHelper h) {
         var p = player(h); equip(p, "lurker_ring"); p.setInvisible(true); var mob = h.spawn(EntityTypes.ZOMBIE, new BlockPos(2, 2, 2));
         var source = p.damageSources().playerAttack(p);
-        try (var claim = TestClaims.open().block(mob.blockPosition(), UUID.randomUUID())) {
+        try (var claim = TestClaims.open().creature(mob, UUID.randomUUID())) {
             h.assertTrue(JimtaSpellbookCurios.damage(mob, source, 10) == 10, "Protected target grants no bonus or cooldown proc");
         }
         h.assertTrue(JimtaSpellbookCurios.damage(mob, source, 10) == 15, "First permitted invisible strike gains source bonus");

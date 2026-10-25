@@ -46,6 +46,8 @@ def generate(dump,RES,ART,SPELLS):
     if x.startswith('#irons_spellbooks:'):x=x.replace('#irons_spellbooks:','#jugcraft:jimtafacts/spellbooks/')
     elif x.startswith('irons_spellbooks:'):x=ident(x)
    if isinstance(x,dict) and 'id' in x:x={**x,'id':x['id'].replace('irons_spellbooks:','jugcraft:jimta_spellbooks_')}
+   if isinstance(x,dict) and x.get('id')=='jugcraft:jimta_spellbooks_arcane_salvage' and not x.get('required',True):continue
+   if x=='#c:ingots/gold':x='minecraft:gold_ingot'
    values.append(x)
   dump(RES/'data/jugcraft/tags/item/jimtafacts/spellbooks'/rel,{'replace':False,'values':values})
  for path in (source/'tags/instrument').rglob('*.json'):

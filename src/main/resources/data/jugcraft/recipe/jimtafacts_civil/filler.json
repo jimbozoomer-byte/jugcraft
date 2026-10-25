@@ -10,7 +10,7 @@
     "jugcraft:advanced_circuit",
     "jugcraft:electric_motor",
     "jugcraft:machine_casing",
-    "minecraft:glass"
+    "minecraft:hopper"
   ],
   "result": {
     "id": "jugcraft:jimta_civil_filler",

@@ -59,8 +59,12 @@ public final class DigitalStorage {
                 FabricBlockEntityTypeBuilder.create(DigitalNode::new, BLOCKS.entrySet().stream()
                         .filter(e -> e.getValue() instanceof DigitalNodeBlock).map(Map.Entry::getValue).toArray(Block[]::new)).build());
         EnergyStorage.SIDED.registerForBlockEntity((node, side) -> node.poweredSource() ? node.energy : null, NODE);
+        net.fabricmc.fabric.api.transfer.v1.fluid.FluidStorage.SIDED.registerForBlockEntity((node, side) ->
+                node.kind().equals("condenser") ? node.condenserStorage :
+                node.kind().equals("interface") || node.kind().equals("me_chest") ? new FluidCells.Port(node, null) : null, NODE);
         net.fabricmc.fabric.api.transfer.v1.item.ItemStorage.SIDED.registerForBlockEntity((node, side) -> {
             var actor = node.actor();
+            if(node.kind().equals("condenser"))return actor!=null&&node.permitted(actor)?new DigitalCondenser.ItemPort(node):null;
             if(node.kind().equals("io_port"))return actor!=null&&node.permitted(actor)?new DigitalCellIO.Port(node,side):null;
             if (!node.kind().equals("interface") || actor == null || !node.permitted(actor)) return null;
             var buffer = net.fabricmc.fabric.api.transfer.v1.item.ContainerStorage.of(node, side);

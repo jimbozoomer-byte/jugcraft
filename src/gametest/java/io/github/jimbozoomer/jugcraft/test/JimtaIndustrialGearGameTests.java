@@ -40,11 +40,13 @@ public final class JimtaIndustrialGearGameTests {
     @GameTest public void nanoShieldScalesToActualAvailableEnergy(GameTestHelper h){
         var p=JimtaRobotGameTests.player(h);try{
             var suit=gear("nano_chestplate",500);p.setItemSlot(EquipmentSlot.CHEST,suit);
-            float damage=IndustrialGear.absorb(p,p.damageSources().generic(),10);
+            h.assertTrue(IndustrialGear.absorb(p,p.damageSources().generic(),10)==10&&Chargeable.energy(suit)==500,"Armor-bypassing damage leaves shield charge untouched");
+            var attacker=h.spawn(net.minecraft.world.entity.EntityTypes.ZOMBIE,2,2,2);
+            float damage=IndustrialGear.absorb(p,p.damageSources().mobAttack(attacker),10);
             h.assertTrue(Math.abs(damage-9.5F)<.0001F&&Chargeable.energy(suit)==0,"Five hundred JE can absorb only half one damage point");
-            h.assertTrue(IndustrialGear.absorb(p,p.damageSources().generic(),10)==10,"Empty shield cannot reduce another hit");
+            h.assertTrue(IndustrialGear.absorb(p,p.damageSources().mobAttack(attacker),10)==10,"Empty shield cannot reduce another hit");
             Chargeable.setEnergy(suit,10000);CustomData.update(DataComponents.CUSTOM_DATA,suit,t->t.putBoolean("JimtaGearOff",true));
-            h.assertTrue(IndustrialGear.absorb(p,p.damageSources().generic(),10)==10&&Chargeable.energy(suit)==10000,"Disabled shield spends no power and grants no bonus");
+            h.assertTrue(IndustrialGear.absorb(p,p.damageSources().mobAttack(attacker),10)==10&&Chargeable.energy(suit)==10000,"Disabled shield spends no power and grants no bonus");
         }finally{h.getLevel().getServer().getPlayerList().remove(p);}h.succeed();
     }
     @GameTest public void quantumChestUsesExistingPaidJetpackInput(GameTestHelper h){

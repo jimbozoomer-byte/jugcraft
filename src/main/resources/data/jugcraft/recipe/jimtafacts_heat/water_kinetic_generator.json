@@ -8,7 +8,8 @@
     "jugcraft:machine_casing",
     "jugcraft:copper_wire",
     "jugcraft:heat_exchanger",
-    "jugcraft:electric_motor"
+    "jugcraft:electric_motor",
+    "minecraft:oak_boat"
   ],
   "result": {
     "id": "jugcraft:jimta_water_kinetic_generator"

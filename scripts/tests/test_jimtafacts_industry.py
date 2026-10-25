@@ -31,7 +31,9 @@ class IndustryAssets(unittest.TestCase):
   self.assertEqual(recipes['extract_latex']['byproducts'][0]['result'],{'id':'minecraft:glass_bottle','count':1})
   for id,row in industry.MACHINES.items():
    if row[3]:
-    self.assertEqual(recipes[id+'_housing']['ingredients'],['jugcraft:'+row[3]])
+    extras = {'jimta_advanced_crafting_table': ['jugcraft:advanced_circuit'],
+              'jimta_integration_table': ['jugcraft:basic_circuit']}
+    self.assertEqual(recipes[id+'_housing']['ingredients'],['jugcraft:'+row[3]] + extras.get(id, []))
     self.assertEqual(recipes[id+'_restore']['result'],{'id':'jugcraft:'+row[3],'count':1})
 
 if __name__=='__main__':unittest.main()

@@ -48,7 +48,6 @@ public final class FluidCells {
     public static void register() {
         CONTENTS = Registry.register(BuiltInRegistries.DATA_COMPONENT_TYPE, Jugcraft.id("jimta_fluid_cell_contents"), DataComponentType.<Contents>builder()
                 .persistent(Contents.CODEC).networkSynchronized(ByteBufCodecs.fromCodecWithRegistries(Contents.CODEC)).build());
-        FluidStorage.SIDED.registerForBlockEntity((node, side) -> node.kind().equals("interface") || node.kind().equals("me_chest") ? new Port(node, null) : null, DigitalStorage.NODE);
     }
     public static boolean filtered(ItemStack cell,FluidVariant fluid){
         var filters=cell.getOrDefault(DigitalWorkshops.FILTERS,List.<ItemStack>of());

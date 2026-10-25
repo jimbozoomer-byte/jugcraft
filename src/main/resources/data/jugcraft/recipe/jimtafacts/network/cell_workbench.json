@@ -7,11 +7,11 @@
     "ICI"
   ],
   "key": {
-    "L": "jugcraft:jimta_logic_processor",
-    "I": "minecraft:iron_ingot",
-    "Q": "jugcraft:jimta_certus_quartz_crystal",
+    "C": "jugcraft:jimta_fluix_glass_cable",
     "H": "minecraft:crafting_table",
-    "C": "jugcraft:jimta_fluix_glass_cable"
+    "I": "minecraft:iron_ingot",
+    "L": "jugcraft:jimta_logic_processor",
+    "Q": "jugcraft:jimta_certus_quartz_crystal"
   },
   "result": {
     "id": "jugcraft:jimta_cell_workbench",

@@ -1,3 +1,4 @@
+from jimtafacts_crafting import distinct
 """Source stationary BuildCraft geometry with bounded native civil-work devices."""
 from pathlib import Path
 import json,shutil,hashlib
@@ -28,7 +29,7 @@ def generate(shared=True):
   dump(RES/f'assets/jugcraft/blockstates/{id}.json',{'variants':variants});dump(RES/f'assets/jugcraft/items/{id}.json',{'model':{'type':'minecraft:model','model':'jugcraft:block/'+id}})
   dump(RES/f'data/jugcraft/loot_table/blocks/{id}.json',{'type':'minecraft:block','pools':[{'rolls':1,'entries':[{'type':'minecraft:item','name':'jugcraft:'+id}],'condition':{'type':'minecraft:survives_explosion'}}]})
   lang['block.jugcraft.'+id]=key.replace('_',' ').title()
-  dump(RES/f'data/jugcraft/recipe/jimtafacts_civil/{key}.json',{'type':'minecraft:crafting_shapeless','category':'misc','ingredients':['jugcraft:steel_plate']*3+['jugcraft:iron_gear']*2+['jugcraft:advanced_circuit','jugcraft:electric_motor','jugcraft:machine_casing','minecraft:diamond' if key=='quarry' else 'minecraft:glass'],'result':{'id':'jugcraft:'+id,'count':1}})
+  dump(RES/f'data/jugcraft/recipe/jimtafacts_civil/{key}.json',{'type':'minecraft:crafting_shapeless','category':'misc','ingredients':distinct('jimtafacts_civil/'+key,['jugcraft:steel_plate']*3+['jugcraft:iron_gear']*2+['jugcraft:advanced_circuit','jugcraft:electric_motor','jugcraft:machine_casing','minecraft:diamond' if key=='quarry' else 'minecraft:glass']),'result':{'id':'jugcraft:'+id,'count':1}})
  ref=texture('buildcraftcore:items/marker_volume');dump(RES/'assets/jugcraft/models/item/jimta_volume_marker.json',{'parent':'minecraft:item/generated','textures':{'layer0':ref}});dump(RES/'assets/jugcraft/items/jimta_volume_marker.json',{'model':{'type':'minecraft:model','model':'jugcraft:item/jimta_volume_marker'}});lang['item.jugcraft.jimta_volume_marker']='Volume Marker'
  dump(RES/'data/jugcraft/recipe/jimtafacts_civil/volume_marker.json',{'type':'minecraft:crafting_shapeless','category':'misc','ingredients':['minecraft:redstone_torch','minecraft:lapis_lazuli','jugcraft:basic_circuit'],'result':{'id':'jugcraft:jimta_volume_marker','count':1}})
  dump(RES/'data/jugcraft/tags/block/jimtafacts_civil.json',{'replace':False,'values':['jugcraft:'+id for id in sorted(blocks())]})

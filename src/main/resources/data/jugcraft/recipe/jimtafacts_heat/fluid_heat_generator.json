@@ -8,7 +8,8 @@
     "jugcraft:machine_casing",
     "jugcraft:copper_wire",
     "jugcraft:heat_exchanger",
-    "jugcraft:electric_motor"
+    "jugcraft:electric_motor",
+    "minecraft:bucket"
   ],
   "result": {
     "id": "jugcraft:jimta_fluid_heat_generator"

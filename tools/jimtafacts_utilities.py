@@ -1,3 +1,4 @@
+from jimtafacts_crafting import distinct
 """Original tool, toolbox and barrel art with explicit native item/recipe registration."""
 from pathlib import Path
 import hashlib,json,shutil
@@ -114,7 +115,7 @@ def generate(shared=True):
   'toolbox':['minecraft:chest','jugcraft:bronze_plate','jugcraft:bronze_plate','jugcraft:bronze_plate'],
   'brewing_barrel':['minecraft:barrel','jugcraft:rubber','jugcraft:rubber'],
   'luminator':['minecraft:glass_pane']*3+['jugcraft:copper_wire']*2+['minecraft:glowstone_dust']*2+['jugcraft:tin_plate']}
- for name,ingredients in recipes.items():dump(RES/f'data/jugcraft/recipe/jimtafacts_utilities/{name}.json',{'type':'minecraft:crafting_shapeless','category':'misc','ingredients':ingredients,'result':{'id':'jugcraft:jimta_'+name}})
+ for name,ingredients in recipes.items():dump(RES/f'data/jugcraft/recipe/jimtafacts_utilities/{name}.json',{'type':'minecraft:crafting_shapeless','category':'misc','ingredients':distinct('jimtafacts_utilities/'+name,ingredients),'result':{'id':'jugcraft:jimta_'+name}})
  dump(RES/'data/jugcraft/recipe/jimtafacts_utilities/repair_rubber_boat.json',{'type':'minecraft:crafting_shapeless','category':'misc','ingredients':['jugcraft:jimta_broken_rubber_boat']+['jugcraft:rubber']*3,'result':{'id':'jugcraft:jimta_rubber_boat'}})
  lang['item.jugcraft.jimta_wire_cutters']='Industrial Wire Cutters'
  if shared:

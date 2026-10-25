@@ -1,3 +1,4 @@
+from jimtafacts_crafting import distinct
 """Native industrial consolidation and missing processes; supplied art is copied unchanged.
 
 The old binaries are never loaded. Original six/twelve-face horizontal texture sheets
@@ -86,7 +87,7 @@ def recipes():
   result[name]=value
  def craft(name,ingredients,output,count=1):
   if ':' not in output:output='jugcraft:'+output
-  result[name]={'type':'minecraft:crafting_shapeless','category':'misc','ingredients':ingredients,'result':{'id':output,'count':count}}
+  result[name]={'type':'minecraft:crafting_shapeless','category':'misc','ingredients':distinct('jimtafacts_industry/'+name,ingredients),'result':{'id':output,'count':count}}
  for metal,feed in [('gold','minecraft:gold_ingot'),('obsidian','minecraft:obsidian'),('lapis','minecraft:lapis_lazuli')]:
   process('compress_'+metal+'_plate','jimta_compressing',feed,plate(metal),inputs=1 if metal=='gold' else 4)
  for metal in CASING_METALS:
@@ -101,7 +102,7 @@ def recipes():
  craft('turbine_rotor',['jugcraft:jimta_turbine_blade']*3,'jugcraft:jimta_turbine_rotor')
  craft('small_power_unit',['jugcraft:electric_motor','jugcraft:jimta_re_battery','jugcraft:jimta_iron_casing']*1,'jugcraft:jimta_small_power_unit')
  craft('power_unit',['jugcraft:electric_motor','jugcraft:jimta_advanced_battery','jugcraft:advanced_circuit','jugcraft:jimta_steel_casing']*1,'jugcraft:jimta_power_unit')
- craft('wood_turning_blank',['#minecraft:planks']*2,'jugcraft:jimta_wood_turning_blank')
+ craft('wood_turning_blank',['#minecraft:planks']*2+['minecraft:flint'],'jugcraft:jimta_wood_turning_blank')
  craft('iron_turning_blank',['jugcraft:iron_plate']*2,'jugcraft:jimta_iron_turning_blank')
  # Original component routes supplement existing reachable machines. They never convert a whole machine back to ingredients.
  for name,parts,output in [

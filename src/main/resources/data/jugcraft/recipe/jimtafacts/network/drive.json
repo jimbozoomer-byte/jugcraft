@@ -8,8 +8,8 @@
   ],
   "key": {
     "C": "jugcraft:jimta_fluix_glass_cable",
-    "I": "minecraft:iron_ingot",
     "H": "minecraft:chest",
+    "I": "minecraft:iron_ingot",
     "L": "jugcraft:jimta_logic_processor"
   },
   "result": {

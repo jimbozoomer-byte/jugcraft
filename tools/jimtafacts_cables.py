@@ -43,7 +43,7 @@ def generate(shared=True):
   lang['block.jugcraft.'+id]='Industrial '+name.replace('_',' ').title()+' Cable'
   if name in ('copper','gold','iron','tin'):
    ingot='minecraft:'+name+'_ingot' if name in ('copper','gold','iron') else 'jugcraft:tin_ingot'
-   inputs=[ingot,ingot,ingot];count=6
+   inputs=[ingot,ingot,ingot,'minecraft:iron_nugget'];count=6
   elif name=='glass':inputs=['minecraft:glass','minecraft:glass','minecraft:diamond','minecraft:redstone'];count=4
   elif name in ('detector','splitter'):inputs=['jugcraft:jimta_glass_cable','jugcraft:advanced_circuit','minecraft:comparator' if name=='detector' else 'minecraft:repeater'];count=1
   else:

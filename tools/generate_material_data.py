@@ -1885,6 +1885,10 @@ def main():
     jimtafacts_computers.apply()
     import jimtafacts_spellbooks
     spellbook_language = jimtafacts_spellbooks.generate()
+    # The source importer writes these independently; retain them in the shared
+    # manifest so stale-resource pruning cannot delete a freshly imported tag.
+    for instrument_tag in (RES / 'data/jugcraft/tags/instrument/jimtafacts/spellbooks').rglob('*.json'):
+        write(instrument_tag, json.loads(instrument_tag.read_text(encoding='utf-8')))
     language = json.loads((ASSETS / "lang/en_us.json").read_text(encoding="utf-8"))
     language.update(spellbook_language)
     write(ASSETS / "lang/en_us.json", language)

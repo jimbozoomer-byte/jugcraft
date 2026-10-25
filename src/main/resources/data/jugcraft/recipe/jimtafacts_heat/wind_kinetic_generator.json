@@ -8,7 +8,8 @@
     "jugcraft:machine_casing",
     "jugcraft:copper_wire",
     "jugcraft:heat_exchanger",
-    "jugcraft:electric_motor"
+    "jugcraft:electric_motor",
+    "jugcraft:jimta_wood_rotor"
   ],
   "result": {
     "id": "jugcraft:jimta_wind_kinetic_generator"

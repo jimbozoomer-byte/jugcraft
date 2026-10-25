@@ -8,7 +8,7 @@
     "jugcraft:steel_plate",
     "jugcraft:electric_motor",
     "jugcraft:machine_casing",
-    "minecraft:glass"
+    "jugcraft:tin_ingot"
   ],
   "result": {
     "id": "jugcraft:jimta_solid_canner",

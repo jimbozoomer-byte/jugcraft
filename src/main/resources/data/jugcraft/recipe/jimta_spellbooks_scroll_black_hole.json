@@ -5,7 +5,8 @@
     "minecraft:paper",
     "jugcraft:jimta_spellbooks_rare_ink",
     "jugcraft:jimta_spellbooks_ender_rune",
-    "minecraft:ender_eye"
+    "minecraft:ender_eye",
+    "minecraft:obsidian"
   ],
   "result": {
     "id": "jugcraft:jimta_spellbooks_scroll_black_hole",

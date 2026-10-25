@@ -10,21 +10,23 @@ import net.minecraft.world.phys.Vec3;
 
 /** Written for the final combined suite; not executed during content authoring. */
 public final class JimtaWardGameTests {
-    @GameTest public void heartstopAccumulatesAndRepaysOnceWhenCleansed(GameTestHelper h){
-        var p=h.makeMockServerPlayerInLevel();p.gameMode.changeGameModeForPlayer(GameType.SURVIVAL);p.setHealth(20);
+    @GameTest(maxTicks = 120) public void heartstopAccumulatesAndRepaysOnceWhenCleansed(GameTestHelper h){
+        var p=h.makeMockServerPlayerInLevel();p.gameMode.changeGameModeForPlayer(GameType.SURVIVAL);p.setHealth(20);p.setPos(net.minecraft.world.phys.Vec3.atCenterOf(h.absolutePos(new net.minecraft.core.BlockPos(2,2,2))));
+        // Newly created players retain vanilla loading invulnerability for 60 ticks.
+        h.runAfterDelay(80,()->{
         p.addEffect(new MobEffectInstance(JimtaWardSpells.EFFECTS.get("heartstop"),200));
         p.hurtServer(h.getLevel(),p.damageSources().generic(),6);
         h.assertTrue(p.getHealth()==20&&p.getAttachedOrElse(JimtaWardSpells.HEART_DEBT,0F)==6,"Damage is held as persistent debt");
         p.removeEffect(JimtaWardSpells.EFFECTS.get("heartstop"));JimtaWardSpells.settleDebt(p);
         h.assertTrue(p.getHealth()==14&&p.getAttachedOrElse(JimtaWardSpells.HEART_DEBT,0F)==0,"Cleanse repays the entire debt");
-        JimtaWardSpells.settleDebt(p);h.assertTrue(p.getHealth()==14,"Debt cannot be replayed");h.succeed();
+        JimtaWardSpells.settleDebt(p);h.assertTrue(p.getHealth()==14,"Debt cannot be replayed");h.succeed();});
     }
     @GameTest public void invisibilityClearsAndRejectsEnemyTargetThenReleases(GameTestHelper h){
-        var p=h.makeMockServerPlayerInLevel();var zombie=h.spawn(net.minecraft.world.entity.EntityTypes.ZOMBIE,2,2,2);zombie.setTarget(p);
+        var p=JimtaRobotGameTests.player(h);try{p.setPos(net.minecraft.world.phys.Vec3.atCenterOf(h.absolutePos(new net.minecraft.core.BlockPos(3,2,2))));var zombie=h.spawn(net.minecraft.world.entity.EntityTypes.ZOMBIE,2,2,2);zombie.setTarget(p);
         JimtaWardSpells.trueInvisibility(p,200);h.assertTrue(zombie.getTarget()==null&&JimtaWardSpells.concealed(p),"Caster and equipment are concealed, target cleared");
         zombie.setTarget(p);h.assertTrue(zombie.getTarget()==null,"A target cannot be immediately reacquired");
         p.removeEffect(JimtaWardSpells.EFFECTS.get("true_invisibility"));JimtaWardSpells.refreshConcealment(p);zombie.setTarget(p);
-        h.assertTrue(zombie.getTarget()==p&&!JimtaWardSpells.concealed(p),"Visibility and normal targeting restore");h.succeed();
+        h.assertTrue(!JimtaWardSpells.concealed(p),"Concealment clears when effect ends");h.assertTrue(zombie.getTarget()==p,"Normal targeting restores when effect ends");h.succeed();}finally{h.getLevel().getServer().getPlayerList().remove(p);}
     }
     @GameTest public void shieldPlaneUsesRotationAndDoesNotBlockUncrossedAttacks(GameTestHelper h){
         var e=JimtaWardEntity.TYPES.get("shield").create(h.getLevel(),EntitySpawnReason.MOB_SUMMONED);var center=Vec3.atCenterOf(h.absolutePos(new net.minecraft.core.BlockPos(2,2,2)));e.snapTo(center.x,center.y,center.z,0,0);

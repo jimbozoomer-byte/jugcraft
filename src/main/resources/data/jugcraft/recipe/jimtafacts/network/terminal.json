@@ -7,11 +7,11 @@
     " C "
   ],
   "key": {
+    "C": "jugcraft:jimta_fluix_glass_cable",
     "F": "jugcraft:jimta_fluix_crystal",
-    "L": "jugcraft:jimta_logic_processor",
     "G": "minecraft:glass",
-    "R": "minecraft:redstone",
-    "C": "jugcraft:jimta_fluix_glass_cable"
+    "L": "jugcraft:jimta_logic_processor",
+    "R": "minecraft:redstone"
   },
   "result": {
     "id": "jugcraft:jimta_terminal",

@@ -4,10 +4,6 @@
     {
       "id": "jugcraft:jimta_spellbooks_mithril_ingot",
       "required": false
-    },
-    {
-      "id": "jugcraft:jimta_spellbooks_arcane_salvage",
-      "required": false
     }
   ]
 }

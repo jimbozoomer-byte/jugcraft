@@ -3,6 +3,8 @@ package io.github.jimbozoomer.jugcraft.mixin;
 import io.github.jimbozoomer.jugcraft.jimtafacts.spellbooks.JimtaSpellStatuses;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.damagesource.DamageSource;
+import com.llamalad7.mixinextras.injector.ModifyReturnValue;
+import com.llamalad7.mixinextras.sugar.Local;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ItemStack;
 import org.spongepowered.asm.mixin.*;
@@ -14,9 +16,9 @@ import org.spongepowered.asm.mixin.injection.callback.*;
 public abstract class JimtaSpellStatusMixin {
     @Unique private ItemStack jimtafacts$foodBefore=ItemStack.EMPTY;
     @Unique private ItemStack jimtafacts$foodReference=ItemStack.EMPTY;
-    @Inject(method="getDamageAfterMagicAbsorb",at=@At("RETURN"),cancellable=true)
-    private void jimtafacts$spellDefense(DamageSource source,float amount,CallbackInfoReturnable<Float> result) {
-        result.setReturnValue(JimtaSpellStatuses.incoming((LivingEntity)(Object)this,source,result.getReturnValue()));
+    @ModifyReturnValue(method="getDamageAfterMagicAbsorb",at=@At("RETURN"))
+    private float jimtafacts$spellDefense(float amount,@Local(argsOnly=true) DamageSource source) {
+        return JimtaSpellStatuses.incoming((LivingEntity)(Object)this,source,amount);
     }
     @ModifyVariable(method="heal",at=@At("HEAD"),argsOnly=true)
     private float jimtafacts$spellHealing(float amount) {return JimtaSpellStatuses.healing((LivingEntity)(Object)this,amount);}

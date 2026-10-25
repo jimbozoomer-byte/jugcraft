@@ -15,7 +15,8 @@
     "minecraft:paper",
     "jugcraft:jimta_spellbooks_common_ink",
     "jugcraft:jimta_spellbooks_ice_rune",
-    "minecraft:packed_ice"
+    "minecraft:packed_ice",
+    "minecraft:snowball"
   ],
   "sculk_tentacles": [
     "minecraft:paper",
@@ -219,7 +220,8 @@
     "minecraft:paper",
     "jugcraft:jimta_spellbooks_uncommon_ink",
     "jugcraft:jimta_spellbooks_lightning_rune",
-    "minecraft:lightning_rod"
+    "minecraft:lightning_rod",
+    "minecraft:amethyst_shard"
   ],
   "wither_skull": [
     "minecraft:paper",
@@ -327,7 +329,8 @@
     "minecraft:paper",
     "jugcraft:jimta_spellbooks_common_ink",
     "jugcraft:jimta_spellbooks_fire_rune",
-    "minecraft:blaze_rod"
+    "minecraft:blaze_rod",
+    "minecraft:gunpowder"
   ],
   "starfall": [
     "minecraft:paper",
@@ -339,7 +342,8 @@
     "minecraft:paper",
     "jugcraft:jimta_spellbooks_common_ink",
     "jugcraft:jimta_spellbooks_fire_rune",
-    "minecraft:blaze_powder"
+    "minecraft:blaze_powder",
+    "minecraft:coal"
   ],
   "dragon_breath": [
     "minecraft:paper",
@@ -351,19 +355,22 @@
     "minecraft:paper",
     "jugcraft:jimta_spellbooks_common_ink",
     "jugcraft:jimta_spellbooks_nature_rune",
-    "minecraft:spider_eye"
+    "minecraft:spider_eye",
+    "minecraft:slime_ball"
   ],
   "cone_of_cold": [
     "minecraft:paper",
     "jugcraft:jimta_spellbooks_common_ink",
     "jugcraft:jimta_spellbooks_ice_rune",
-    "minecraft:snowball"
+    "minecraft:snowball",
+    "minecraft:quartz"
   ],
   "electrocute": [
     "minecraft:paper",
     "jugcraft:jimta_spellbooks_common_ink",
     "jugcraft:jimta_spellbooks_lightning_rune",
-    "minecraft:copper_ingot"
+    "minecraft:copper_ingot",
+    "minecraft:redstone"
   ],
   "ray_of_siphoning": [
     "minecraft:paper",
@@ -381,7 +388,8 @@
     "minecraft:paper",
     "jugcraft:jimta_spellbooks_common_ink",
     "jugcraft:jimta_spellbooks_holy_rune",
-    "minecraft:glowstone_dust"
+    "minecraft:glowstone_dust",
+    "minecraft:iron_ingot"
   ],
   "flaming_strike": [
     "minecraft:paper",
@@ -459,7 +467,8 @@
     "minecraft:paper",
     "jugcraft:jimta_spellbooks_uncommon_ink",
     "jugcraft:jimta_spellbooks_fire_rune",
-    "minecraft:fire_charge"
+    "minecraft:fire_charge",
+    "minecraft:gunpowder"
   ],
   "gust": [
     "minecraft:paper",
@@ -519,7 +528,8 @@
     "minecraft:paper",
     "jugcraft:jimta_spellbooks_uncommon_ink",
     "jugcraft:jimta_spellbooks_fire_rune",
-    "minecraft:magma_block"
+    "minecraft:magma_block",
+    "minecraft:bone"
   ],
   "thunder_step": [
     "minecraft:paper",
@@ -537,7 +547,8 @@
     "minecraft:paper",
     "jugcraft:jimta_spellbooks_common_ink",
     "jugcraft:jimta_spellbooks_ice_rune",
-    "minecraft:packed_ice"
+    "minecraft:packed_ice",
+    "minecraft:leather"
   ],
   "frostbite": [
     "minecraft:paper",
@@ -561,7 +572,8 @@
     "minecraft:paper",
     "jugcraft:jimta_spellbooks_common_ink",
     "jugcraft:jimta_spellbooks_ice_rune",
-    "minecraft:ice"
+    "minecraft:ice",
+    "minecraft:pointed_dripstone"
   ],
   "abyssal_shroud": [
     "minecraft:paper",
@@ -603,7 +615,8 @@
     "minecraft:paper",
     "jugcraft:jimta_spellbooks_common_ink",
     "jugcraft:jimta_spellbooks_ender_rune",
-    "minecraft:chorus_fruit"
+    "minecraft:chorus_fruit",
+    "minecraft:rabbit_foot"
   ],
   "portal": [
     "minecraft:paper",
@@ -639,7 +652,8 @@
     "minecraft:paper",
     "jugcraft:jimta_spellbooks_rare_ink",
     "jugcraft:jimta_spellbooks_ender_rune",
-    "minecraft:ender_eye"
+    "minecraft:ender_eye",
+    "minecraft:obsidian"
   ],
   "gravity_fissure": [
     "minecraft:paper",
@@ -651,7 +665,8 @@
     "minecraft:paper",
     "jugcraft:jimta_spellbooks_common_ink",
     "jugcraft:jimta_spellbooks_lightning_rune",
-    "minecraft:copper_ingot"
+    "minecraft:copper_ingot",
+    "minecraft:slime_ball"
   ],
   "firefly_swarm": [
     "minecraft:paper",
@@ -675,7 +690,8 @@
     "minecraft:paper",
     "jugcraft:jimta_spellbooks_common_ink",
     "jugcraft:jimta_spellbooks_fire_rune",
-    "minecraft:blaze_powder"
+    "minecraft:blaze_powder",
+    "minecraft:brick"
   ],
   "ice_tomb": [
     "minecraft:paper",

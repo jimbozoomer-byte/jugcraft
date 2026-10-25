@@ -1,3 +1,4 @@
+from jimtafacts_crafting import distinct
 """Original matter device atlases and animated UU fluid, with native economy-aware replication."""
 from pathlib import Path
 import json,shutil,hashlib
@@ -29,7 +30,7 @@ def generate(shared=True):
   for suffix in ('.png','.png.mcmeta'):copy(SOURCE/f'textures/blocks/fluids/uumatter_{kind}{suffix}',RES/f'assets/jugcraft/textures/block/jimta_uu_matter_{kind}{suffix}')
  dump(RES/'assets/jugcraft/blockstates/jimta_uu_matter.json',{'variants':{'':{'model':'minecraft:block/water'}}});lang['block.jugcraft.jimta_uu_matter']='UU-Matter';lang['item.jugcraft.jimta_uu_matter_bucket']='UU-Matter Bucket'
  recipes={}
- def craft(name,parts,result):recipes[name]={'type':'minecraft:crafting_shapeless','category':'misc','ingredients':parts,'result':{'id':'jugcraft:'+result,'count':1}}
+ def craft(name,parts,result):recipes[name]={'type':'minecraft:crafting_shapeless','category':'misc','ingredients':distinct('jimtafacts_matter/'+name,parts),'result':{'id':'jugcraft:'+result,'count':1}}
  craft('raw_memory',['minecraft:quartz']*4+['minecraft:diamond','minecraft:redstone'],'jimta_raw_crystal_memory')
  recipes['crystal_memory']={'type':'minecraft:smelting','ingredient':'jugcraft:jimta_raw_crystal_memory','result':{'id':'jugcraft:jimta_crystal_memory'},'experience':0.1,'cookingtime':200}
  for id in DEVICES:
