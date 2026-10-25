@@ -198,5 +198,22 @@ biomes, rarity, terrain safety and the two-seed persistence assertions are uncha
 After these repairs, all 268 Python tests pass. The focused companion client run
 passes 43 groups / 737 assertions plus all 36 livestock-population assertions
 (`build/jimtafacts-peepo-client-oct25.log`), including a dedicated-server reconnect.
-The new research snapshot and adjusted mineral survey are under validation;
-their presence in the candidate is not yet a claim that the release gates passed.
+The three framework server tests, including the research snapshot regression,
+passed locally; the alchemical client group also passed in Linux CI. The second
+mineral seed exposed a further survey limitation: small coastal fragments did not
+contain a successful rare garnet attempt. The bounded survey now alternates shores
+with the production biome tag and yields server ticks between regions so temporary
+chunk tickets can expire. Production generation and every depletion/persistence
+assertion remain unchanged. An isolated second-seed run found 446 natural garnet
+reserve blocks, including 37 visible blocks, then verified all four mineral
+families after reopening the world; the alchemy client test passed in the same run
+(`build/jimtafacts-mineral-client3-oct25.log`). The complete mineral client class
+then passed in 14m 36s, including designed terrain, both fixed-seed natural worlds,
+all four mineral families, depletion, inventory units and remaining reserves after
+reopening (`build/jimtafacts-mineral-final-oct25.log`). Final CI gates remain
+required before release.
+
+The complete server jobs have a 90-minute wall-clock budget. The earlier local
+2,476-test run finished in 76 minutes (71 in the test server), so a 60-minute job
+could terminate a still-progressing suite before generation/packaging finished.
+No tests, assertions or individual game-test deadlines are removed or relaxed.

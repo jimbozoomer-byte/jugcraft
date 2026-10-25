@@ -104,29 +104,7 @@ public class MineralSandClientGameTests implements FabricClientGameTest {
                     var found = server.overworld().findClosestBiome3d(b -> b.is(Jugcraft.id(targets[family])), BlockPos.ZERO.atY(family == 3 ? 64 : 80), 16384, 32, 64);
                     check(found != null, "No target biome " + targets[family]); return found.getFirst();
                 });
-                Sample result = world.getServer().computeOnServer(server -> {
-                    Sample found = sample(server.overworld(), center, 10, family, seed);
-                    if (found.exposed.isEmpty()) found = sample(server.overworld(), center, 18, family, seed + " expanded");
-                    // A small coastal strip need not contain a successful rare attempt. Survey additional
-                    // eligible regions without changing production rates or manually placing a deposit.
-                    // Garnet's gravel shores provide sediment; mountain-tag matches alone can keep
-                    // returning steep fragments which correctly reject every candidate lens. Survey
-                    // actual gravel shores at sea level without altering production placement rates.
-                    Set<net.minecraft.world.level.ChunkPos> surveyed = new HashSet<>();
-                    surveyed.add(new net.minecraft.world.level.ChunkPos(center.getX() >> 4, center.getZ() >> 4));
-                    for (int region = 1; found.exposed.isEmpty() && region <= 10; region++) {
-                        var next = server.overworld().findClosestBiome3d(b -> family == 2
-                                        ? b.is(Jugcraft.id("basin")) || b.is(Jugcraft.id("lake_district"))
-                                        : family == 3 ? b.is(Jugcraft.id("gravel_beach"))
-                                        : b.is(feature(server.overworld(), family).surfaceBiomes()),
-                                center.offset(region * 2048, 0, region * -2048).atY(family == 3 ? 64 : center.getY()), 16384, 32, 64);
-                        if (next != null && surveyed.add(new net.minecraft.world.level.ChunkPos(next.getFirst().getX() >> 4, next.getFirst().getZ() >> 4)))
-                            found = sample(server.overworld(), next.getFirst(), 14, family, seed + " region " + region);
-                    }
-                    check(!found.reserve.isEmpty() && !found.exposed.isEmpty(), "No visible natural " + MineralSandGameTests.names().get(family) + " deposit on " + seed);
-                    // Include the whole bed when its first visible block lay at a regional survey boundary.
-                    return sample(server.overworld(), found.exposed.get(found.exposed.size() / 2), 4, family, seed + " complete inspection bed");
-                });
+                Sample result = survey(context, world, center, family, seed);
                 samples.add(result);
                 if (export) {
                     BlockPos view = result.exposed.get(result.exposed.size() / 2);
@@ -168,6 +146,34 @@ public class MineralSandClientGameTests implements FabricClientGameTest {
         }
         if (export) copySave(source, Path.of("mineral-sands-inspection", "Mineral Sands Field Trip"));
         Jugcraft.LOGGER.info("[mineral-sands] {}: all four depleted blocks, inventory units and remaining reserves survived reopening", seed);
+    }
+    private static Sample survey(ClientGameTestContext context, TestSingleplayerContext world, BlockPos center, int family, String seed) {
+        var server = world.getServer();
+        Sample found = server.computeOnServer(s -> sample(s.overworld(), center, 10, family, seed));
+        // Yield between regions so temporary chunk tickets expire and distant chunks can unload.
+        // A single uninterrupted server callback accumulates every surveyed chunk until shutdown.
+        context.waitTicks(5);
+        if (found.exposed.isEmpty()) found = server.computeOnServer(s -> sample(s.overworld(), center, 18, family, seed + " expanded"));
+        Set<net.minecraft.world.level.ChunkPos> surveyed = new HashSet<>();
+        surveyed.add(new net.minecraft.world.level.ChunkPos(center.getX() >> 4, center.getZ() >> 4));
+        // Rare coastal fragments offer few eligible anchors. Keep the search bounded while
+        // alternating gravel shores and the entire production biome tag, including inland beds.
+        for (int region = 1; found.exposed.isEmpty() && region <= 32; region++) {
+            context.waitTicks(5);
+            final int attempt = region;
+            final boolean shore = family == 3 && region % 2 == 0;
+            var next = server.computeOnServer(s -> s.overworld().findClosestBiome3d(b -> family == 2
+                            ? b.is(Jugcraft.id("basin")) || b.is(Jugcraft.id("lake_district"))
+                            : shore ? b.is(Jugcraft.id("gravel_beach"))
+                            : b.is(feature(s.overworld(), family).surfaceBiomes()),
+                    center.offset(attempt * 2048, 0, attempt * -2048).atY(shore ? 64 : center.getY()), 16384, 32, 64));
+            if (next != null && surveyed.add(new net.minecraft.world.level.ChunkPos(next.getFirst().getX() >> 4, next.getFirst().getZ() >> 4)))
+                found = server.computeOnServer(s -> sample(s.overworld(), next.getFirst(), 14, family, seed + " region " + attempt));
+        }
+        check(!found.reserve.isEmpty() && !found.exposed.isEmpty(), "No visible natural " + MineralSandGameTests.names().get(family) + " deposit on " + seed);
+        BlockPos bed = found.exposed.get(found.exposed.size() / 2);
+        context.waitTicks(5);
+        return server.computeOnServer(s -> sample(s.overworld(), bed, 4, family, seed + " complete inspection bed"));
     }
     private static BlockPos camera(ClientGameTestContext context, TestSingleplayerContext world, BlockPos view, String name) {
         BlockPos camera = world.getServer().computeOnServer(s -> {
