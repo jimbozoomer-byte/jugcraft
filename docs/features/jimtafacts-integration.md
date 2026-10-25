@@ -150,7 +150,13 @@ of the player; that fixture now uses survival and asserts the correct screen.
 The first client startup also exposed eager statue-renderer initialization;
 initialization is now lazy. Two static Gecko assets now declare a valid no-motion
 idle animation rather than an invalid empty animation file. A focused statue
-item and corrected wearable render rerun is pending.
+item and corrected wearable render rerun passed on October 25
+(`build/jimtafacts-statue-worn-client-oct25.log`). The 46 corrected screenshots
+include the statue item and 45 equipped models; inspected hat/goggle views show
+the player wearing the supplied geometry, and the two animation-load errors no
+longer appear. The earlier 95-shot batch includes aircraft, furniture, the guard
+pilot/grave, JEI pages and fitted machine screens. These isolated tests do not
+control the owner's player profile and are not a hosted two-account test.
 
 Linux Foundation exposed three asset-fidelity checks comparing archived CRLF
 JSON with normalized runtime LF JSON. Text checks now compare all parsed data;
