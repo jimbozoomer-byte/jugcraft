@@ -217,6 +217,11 @@ The complete server jobs have a 90-minute wall-clock budget. The earlier local
 2,476-test run finished in 76 minutes (71 in the test server), so a 60-minute job
 could terminate a still-progressing suite before generation/packaging finished.
 No tests, assertions or individual game-test deadlines are removed or relaxed.
+The first Linux full-server jobs reached that old 60-minute job limit while still
+progressing through batches 37/39, with no logged gameplay assertion failures.
+The server test JVM previously had no explicit heap cap; both test JVMs now use
+the same 4 GB limit and exit immediately on memory exhaustion. This is a test
+runner setting, not a hosted-server configuration change or a full-suite pass.
 
 A fresh local package from `7bde6ba335` includes the research snapshot repair and
 passes the distributable check for four mixin configurations / 105 classes. Its
