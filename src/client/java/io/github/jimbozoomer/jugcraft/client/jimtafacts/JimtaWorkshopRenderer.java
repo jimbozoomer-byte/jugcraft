@@ -24,7 +24,15 @@ import net.minecraft.world.phys.Vec3;
 public final class JimtaWorkshopRenderer extends GeoBlockRenderer<JimtaWorkshops.Node,JimtaWorkshopRenderer.State> {
     private final ItemModelResolver resolver;
     public static void register(){BlockEntityRenderers.register(JimtaWorkshops.NODE,JimtaWorkshopRenderer::new);
-        var provider=new GeoRenderProvider(){final GeoItemRenderer<JimtaWorkshops.StatueItem> renderer=new GeoItemRenderer<>(statueModel());@Override public GeoItemRenderer<?> getGeoItemRenderer(){return renderer;}};
+        var provider=new GeoRenderProvider(){
+            private GeoItemRenderer<JimtaWorkshops.StatueItem> renderer;
+            @Override public GeoItemRenderer<?> getGeoItemRenderer(){
+                // Client entrypoints run before Minecraft's model manager exists.
+                // Gecko item renderers must be constructed on first rendering use.
+                if(renderer==null)renderer=new GeoItemRenderer<>(statueModel());
+                return renderer;
+            }
+        };
         JimtaWorkshops.statueRenderer=()->provider;
     }
     private static <T extends com.geckolib.animatable.GeoAnimatable> GeoModel<T> statueModel(){return new GeoModel<>(){
