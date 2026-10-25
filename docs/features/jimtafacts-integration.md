@@ -217,3 +217,11 @@ The complete server jobs have a 90-minute wall-clock budget. The earlier local
 2,476-test run finished in 76 minutes (71 in the test server), so a 60-minute job
 could terminate a still-progressing suite before generation/packaging finished.
 No tests, assertions or individual game-test deadlines are removed or relaxed.
+
+A fresh local package from `7bde6ba335` includes the research snapshot repair and
+passes the distributable check for four mixin configurations / 105 classes. Its
+patch against the published October 22.3 bundle again changes only
+`mods/jugcraft.jar`. The isolated existing-world server started successfully with
+that JAR, retained the cabinet's seven diamonds and the saved cargo airship, and
+saved/stopped cleanly (`build/jimtafacts-packaged-world-final-oct25.log`). This
+remains a local rehearsal, not a hosted deployment or two-account join test.
