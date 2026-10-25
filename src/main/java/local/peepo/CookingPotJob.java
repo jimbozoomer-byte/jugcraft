@@ -46,6 +46,13 @@ public final class CookingPotJob implements CompanionJob {
     private PeepoEntity occupant() {
         return pot.getLevel() instanceof ServerLevel level && worker != null && level.getEntity(worker) instanceof PeepoEntity npc ? npc : null;
     }
+    /** Only the present, permitted cook can earn a recipe bonus; no nearby-entity search. */
+    public PeepoEntity productiveChef(){
+        var npc=occupant();
+        return npc!=null && mounted && isOccupant(npc) && npc.isAlive() && npc.preferences.canWork()
+            && npc.isUsingJobAt(stationPosition()) && npc.orders.station(this) && CompanionJobs.permitted(npc,stationPosition())
+            && npc.uniforms.wearing(CompanionUniforms.Type.CHEF)?npc:null;
+    }
     private void expire() {
         if (worker == null) return;
         var npc = occupant();

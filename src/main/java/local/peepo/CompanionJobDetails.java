@@ -16,15 +16,18 @@ public final class CompanionJobDetails {
         if(!CompanionJobs.permitted(npc,target.at().pos()) || status==CompanionStatus.FORBIDDEN)return "Access denied; check ownership, party access and protection.";
         String delivery=npc.transport.jobDetail(target);
         if(!delivery.isEmpty())return delivery;
+        if(target.fishing() && status==CompanionStatus.WORKING)return npc.fishing.detail(target);
         String source=containers(npc,target,false),output=containers(npc,target,true);
         String tool=npc.assignments.supplies.handLocked()?"Unlock Hand to fetch a tool, or equip it manually.":"Equip it or enable Tools on a stocked Supply.";
         return switch(status){
             case NO_INPUT, SUPPLY_EMPTY, RECIPE_MISSING -> input(npc,row,target,status,source);
-            case FULL -> target.block().getPath().equals("generator_wheel")?"Wheel energy buffer full; use power from its side outputs.":
+            case FULL -> target.fishing() && npc.fishing.outputBlocked(target)?"Catch delivery blocked; "+transport(npc,row,false,output)+".":target.block().getPath().equals("generator_wheel")?"Wheel energy buffer full; use power from its side outputs.":
                 target.block().getPath().equals("hand_crank")?"Kinetic network is not accepting power; check flywheel capacity and connections.":
                 target.carriesProduce()?"Harvest/cargo capacity full; "+transport(npc,row,false,output)+".":
                 "Output needs collecting; "+transport(npc,row,false,output)+".";
             case BLOCKED -> "Cannot reach the work position; clear a safe path and standing space.";
+            case NEEDS_ROD -> "Needs a fishing rod. "+tool;
+            case FISHING_BLOCKED -> "Clear the dry seat, casting line and water surface; maximum cast is 10 blocks.";
             case NO_TOOL -> "Needs a knife. "+tool;
             case NEEDS_SHEARS -> "Needs shears. "+tool;
             case NEEDS_CUTTER -> "Needs shears or a knife. "+tool;

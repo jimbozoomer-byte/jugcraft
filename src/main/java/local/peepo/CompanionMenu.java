@@ -105,7 +105,7 @@ public final class CompanionMenu extends AbstractContainerMenu {
         var contents=npc==null?new net.minecraft.world.SimpleContainer(10):npc.belongings;
         for(int row=0;row<2;row++)for(int col=0;col<4;col++)addSlot(new Slot(contents,col+row*4,16+col*18,96+row*18));
         addSlot(new Slot(contents,8,16,54){
-            public boolean mayPlace(ItemStack stack){return stack.is(net.minecraft.world.item.Items.JACK_O_LANTERN);}
+            public boolean mayPlace(ItemStack stack){return CompanionUniforms.costume(stack);}
             public int getMaxStackSize(){return 1;}
         });
         addSlot(new Slot(contents,9,70,54){public int getMaxStackSize(){return 1;}});
@@ -145,7 +145,7 @@ public final class CompanionMenu extends AbstractContainerMenu {
         return target;
     }
     private net.minecraft.world.level.block.entity.BlockEntity recipeStation(int row){
-        var target=recipeTarget(row);if(target==null || target.livestock() || target.garden())return null;
+        var target=recipeTarget(row);if(target==null || target.fishing() || target.livestock() || target.garden())return null;
         var be=npc.level().getBlockEntity(target.at().pos());
         if(be instanceof io.github.jimbozoomer.jugcraft.machine.form.FormMachineBlockEntity form)return form.companionPort.accessible(npc) && form.companionPort.playerMayEdit(playerInventory.player) && form.companionPort.selectable()?be:null;
         var serving=ServingCompanion.of(be);if(serving!=null)return !serving.hasOutput() && serving.allowed(npc)?be:null;
@@ -293,7 +293,7 @@ public final class CompanionMenu extends AbstractContainerMenu {
         var stack=slot.getItem();var copy=stack.copy();
         if(index<10){if(!moveItemStackTo(stack,10,46,true))return ItemStack.EMPTY;}
         else {
-            if(stack.is(net.minecraft.world.item.Items.JACK_O_LANTERN) && !slots.get(8).hasItem())moveItemStackTo(stack,8,9,false);
+            if(CompanionUniforms.costume(stack) && !slots.get(8).hasItem())moveItemStackTo(stack,8,9,false);
             if(!stack.isEmpty())moveItemStackTo(stack,0,8,false);
             if(stack.getCount()==copy.getCount())return ItemStack.EMPTY;
         }

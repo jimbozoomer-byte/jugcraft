@@ -89,7 +89,7 @@ public class CiderPressBlockEntity extends BlockEntity {
 		var status=companionStatus();if(status!=local.peepo.CompanionStatus.READY)return status;
 		long now=level.getGameTime();if(!ready(now))return local.peepo.CompanionStatus.WORKING;
 		try(var tx=net.fabricmc.fabric.api.transfer.v1.transaction.Transaction.openOuter()){
-			if(npc.extractEnergy(64,tx)<=0)return local.peepo.CompanionStatus.RECOVERING;
+			if(npc.extractWorkEnergy(local.peepo.CompanionUniforms.Type.ORCHARD_KEEPER,64,tx)<=0)return local.peepo.CompanionStatus.RECOVERING;
 			tx.commit();
 		}
 		if(apples>0 && !pressing())grind(now);

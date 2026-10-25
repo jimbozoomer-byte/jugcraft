@@ -93,6 +93,7 @@ public class CookingPotBlockEntity extends BaseContainerBlockEntity implements W
 	private Object recipeRevision;
 	private int assistHalf;
 	private long lastAssisted = -1000;
+	private ItemStack chefPending=ItemStack.EMPTY;
 
 	private static final int[] INPUT_SLOTS = {0, 1, 2, 3, 4, 5};
 	private static final int[] RESULT_SLOTS = {6, 7, 8, 9};
@@ -148,8 +149,9 @@ public class CookingPotBlockEntity extends BaseContainerBlockEntity implements W
 
 	public void serverTick(ServerLevel level, BlockPos pos, BlockState state) {
 		heated = isHeated(level, pos);
+		if(!chefPending.isEmpty() && level.getGameTime()%20==0)flushChefPending();
 		refreshRecipe(level);
-		boolean cooking = heated && recipe != null && resultSlotFor(recipe.output().create()) >= 0;
+		boolean cooking = chefPending.isEmpty() && heated && recipe != null && resultSlotFor(recipe.output().create()) >= 0;
 		if (cooking) {
 			advance(level, 1);
 		} else {
@@ -207,6 +209,7 @@ public class CookingPotBlockEntity extends BaseContainerBlockEntity implements W
 	public local.peepo.CompanionStatus cookingStatus() {
 		if (!(level instanceof ServerLevel server) || isRemoved()) return local.peepo.CompanionStatus.MISSING;
 		refreshRecipe(server);
+		if(!chefPending.isEmpty())return local.peepo.CompanionStatus.FULL;
 		if (selectedRecipe != null && !CookingPotRecipe.catalog(server.getServer()).containsKey(selectedRecipe)) return local.peepo.CompanionStatus.RECIPE_MISSING;
 		if (!isHeated(level, worldPosition)) return local.peepo.CompanionStatus.NO_HEAT;
 		if (recipe == null) return local.peepo.CompanionStatus.NO_INPUT;
@@ -218,7 +221,7 @@ public class CookingPotBlockEntity extends BaseContainerBlockEntity implements W
 			|| !companionJob.isOccupant(npc) || !local.peepo.CompanionJobs.permitted(npc, worldPosition)
 			|| cookingStatus() != local.peepo.CompanionStatus.READY) return false;
 		try (var tx = net.fabricmc.fabric.api.transfer.v1.transaction.Transaction.openOuter()) {
-			if (npc.extractEnergy(16, tx) <= 0) return false;
+			if (npc.extractWorkEnergy(local.peepo.CompanionUniforms.Type.CHEF,16, tx) <= 0) return false;
 			tx.commit();
 		}
 		lastAssisted = level.getGameTime();
@@ -295,6 +298,15 @@ public class CookingPotBlockEntity extends BaseContainerBlockEntity implements W
 		return false;
 	}
 
+	private void flushChefPending(){
+        int slot=resultSlotFor(chefPending);if(slot<0)return;
+        if(items.get(slot).isEmpty())items.set(slot,chefPending);else items.get(slot).grow(chefPending.getCount());
+        chefPending=ItemStack.EMPTY;recheck=true;setChanged();
+    }
+    @Override public void preRemoveSideEffects(BlockPos pos,BlockState state){
+        if(level!=null && !level.isClientSide() && !chefPending.isEmpty()){Block.popResource(level,pos,chefPending);chefPending=ItemStack.EMPTY;}
+        super.preRemoveSideEffects(pos,state);
+    }
 	/** Takes one batch of ingredients (leaving containers such as buckets behind) and adds the meal. */
 	private void cook(ServerLevel level, BlockPos pos, CookingPotRecipe cooked) {
 		Optional<CookingPotRecipe.Match> match = companionMatch(level);
@@ -302,6 +314,7 @@ public class CookingPotBlockEntity extends BaseContainerBlockEntity implements W
 			recheck = true;
 			return;
 		}
+		if(!chefPending.isEmpty())return;
 		ItemStack meal = served(cooked.output(), level.getGameTime());
 		int slot = resultSlotFor(meal);
 		if (slot < 0) {
@@ -326,6 +339,11 @@ public class CookingPotBlockEntity extends BaseContainerBlockEntity implements W
 		} else {
 			items.get(slot).grow(meal.getCount());
 		}
+        var chef=level.getGameTime()-lastAssisted<=1?companionJob.productiveChef():null;
+        if(chef!=null)try(var tx=net.fabricmc.fabric.api.transfer.v1.transaction.Transaction.openOuter()){
+            if(chef.uniforms.bonus(local.peepo.CompanionUniforms.Type.CHEF,tx)){chefPending=meal.copy();flushChefPending();}
+            tx.commit();
+        }
 		// Containers go to the result slots, never back among the ingredients, where they would stop the next batch.
 		for (ItemStack leftover : leftovers) {
 			if (!storeLeftover(leftover)) {
@@ -428,6 +446,7 @@ public class CookingPotBlockEntity extends BaseContainerBlockEntity implements W
 	protected void loadAdditional(ValueInput input) {
 		super.loadAdditional(input);
 		companionFilter.load(input);
+		chefPending=input.read("ChefPending",ItemStack.OPTIONAL_CODEC).orElse(ItemStack.EMPTY);
 		items = NonNullList.withSize(SLOTS, ItemStack.EMPTY);
 		ContainerHelper.loadAllItems(input, items);
 		progress = input.getInt("progress").orElse(0);
@@ -440,6 +459,7 @@ public class CookingPotBlockEntity extends BaseContainerBlockEntity implements W
 	protected void saveAdditional(ValueOutput output) {
 		super.saveAdditional(output);
 		filter().save(output);
+		output.store("ChefPending",ItemStack.OPTIONAL_CODEC,chefPending);
 		ContainerHelper.saveAllItems(output, items);
 		output.putInt("progress", progress);
 		if (selectedRecipe != null) output.store("CompanionRecipe", net.minecraft.resources.Identifier.CODEC, selectedRecipe);

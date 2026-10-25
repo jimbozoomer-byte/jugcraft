@@ -15,6 +15,7 @@ public final class CompanionJobs {
     }
     static CompanionJob resolveFresh(PeepoEntity npc,BlockPos pos){
         if(!npc.level().hasChunkAt(pos))return null;
+        var fishing=npc.fishing.job(pos);if(fishing!=null)return fishing;
         var tap=npc.treeTaps.job(pos);if(tap!=null)return tap;
         var water=npc.water.job(pos);if(water!=null)return water;
         var livestock=npc.livestock.job(pos);if(livestock!=null)return livestock;

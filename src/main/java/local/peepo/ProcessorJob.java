@@ -175,9 +175,9 @@ public final class ProcessorJob implements CompanionJob {
         int quarters=host.companionHelperCount()==2?1:2;
         int cost=quarters*Math.clamp(effortPerQuarter,1,
             io.github.jimbozoomer.jugcraft.machine.MachineCompanionEffort.MAX_PER_QUARTER)*Math.clamp(workUnits,1,4);
-        if(!npc.hasWorkEnergy(cost))return 0;
+        if(!npc.hasWorkEnergy((int)Math.ceil(cost*(100-npc.uniforms.saving(CompanionUniforms.Type.MECHANIC))/100.0)))return 0;
         try(var tx=net.fabricmc.fabric.api.transfer.v1.transaction.Transaction.openOuter()){
-            if(npc.extractEnergy(cost,tx)!=cost)return 0;
+            if(npc.extractWorkEnergy(CompanionUniforms.Type.MECHANIC,cost,tx)!=cost)return 0;
             tx.commit();
         }
         lastSpent=now;return quarters;

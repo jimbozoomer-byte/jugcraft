@@ -35,6 +35,7 @@ public final class CompanionLogistics {
     public static void register(Adapter adapter){ADAPTERS.add(Objects.requireNonNull(adapter));}
     public static Port resolve(PeepoEntity npc,CompanionAssignments.Target target){
         if(target==null || !target.present(npc.level()) || !npc.assignments.assignedWork(target.at().pos()) || !CompanionJobs.permitted(npc,target.at().pos()))return null;
+        if(target.fishing())return npc.fishing.port(target);
         if(target.water())return npc.water.port(target);
         if(target.treeTap())return npc.treeTaps.port(target);
         if(target.garden())return npc.garden.port(target);

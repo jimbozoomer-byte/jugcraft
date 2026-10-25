@@ -93,7 +93,7 @@ public final class StarterWorkshopJob implements CompanionJob {
         if(now==lastPaid || now<heartbeat || now-heartbeat>1 || !present(npc) || npc.editingSettings()
             || !npc.preferences.canWork() || !npc.orders.station(this) || workStatus(npc)!=CompanionStatus.READY)return false;
         try(var tx=Transaction.openOuter()){
-            int cost=Math.min(EFFORT,npc.getEnergy());if(cost<=0 || npc.extractEnergy(cost,tx)!=cost)return false;
+            int cost=Math.min(EFFORT,npc.getEnergy());if(cost<=0 || npc.extractWorkEnergy(CompanionUniforms.Type.MECHANIC,cost,tx)!=cost)return false;
             tx.commit();lastPaid=now;return true;
         }
     }

@@ -28,6 +28,8 @@ final class CompanionRoutine extends Goal {
     boolean deferTransport(BlockPos pos){
         if(!active || !(station instanceof CompanionJob job)
             || !npc.preferences.canWork() || !npc.orders.station(station))return false;
+        if(station instanceof CompanionFishing.Job && npc.fishing.deferOutput(npc.assignments.get(npc.assignments.workPriority(station.stationPosition()))))
+            return npc.assignments.workPriority(pos)>=npc.assignments.workPriority(station.stationPosition());
         if(station instanceof CookingPotJob && job.planningStatus(npc)==CompanionStatus.READY)
             return npc.assignments.workPriority(pos)>=npc.assignments.workPriority(station.stationPosition());
         if(npc.level().getGameTime()>=sessionUntil)return false;

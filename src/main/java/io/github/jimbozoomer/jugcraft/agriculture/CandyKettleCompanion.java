@@ -192,14 +192,16 @@ public final class CandyKettleCompanion extends SnapshotParticipant<List<ItemSta
             if(trayTarget==CandyKind.LOLLIPOP && kind==CandyKind.HARD_CANDY && items[STICKS].getCount()>=batch.pieces())kind=CandyKind.LOLLIPOP;
             products=List.of(Candies.make(kind,batch.flavours(),batch.colors(),batch.pieces()));
         }else if(batch==null && !kettle.batch())products=remainders();
-        if(!store(products,false))return CompanionStatus.FULL;
+        boolean mutated=false;
         try(var tx=Transaction.openOuter()){
-            if(npc.extractEnergy(4,tx)!=4)return CompanionStatus.RECOVERING;tx.commit();
-        }
-        lastWorked=now();boolean mutated=false;
+            if(batch!=null && batch.ready(now()) && !batch.pullable(now()))products=npc.uniforms.chefResults(products,tx);
+            if(!store(products,false))return CompanionStatus.FULL;
+            if(npc.extractWorkEnergy(local.peepo.CompanionUniforms.Type.CHEF,4,tx)!=4)return CompanionStatus.RECOVERING;
+            updateSnapshots(tx);
+            lastWorked=now();
         if(batch!=null){
             if(batch.pullable(now())){
-                if(++pullTicks>=CandyTrayItem.PULL_TICKS){mutated=true;pullTicks=0;CandyTrayItem.fill(items[TRAY],batch.pull());sound(SoundEvents.HONEY_BLOCK_SLIDE);}
+                if(++pullTicks>=npc.uniforms.duration(local.peepo.CompanionUniforms.Type.CHEF,CandyTrayItem.PULL_TICKS)){mutated=true;pullTicks=0;CandyTrayItem.fill(items[TRAY],batch.pull());sound(SoundEvents.HONEY_BLOCK_SLIDE);}
             }else if(batch.ready(now())){
                 mutated=true;store(products,true);
                 if(products.getFirst().is(CandyKind.LOLLIPOP.item()))items[STICKS].shrink(batch.pieces());
@@ -222,6 +224,8 @@ public final class CandyKettleCompanion extends SnapshotParticipant<List<ItemSta
                 CandyTrayItem.fill(items[TRAY],new CandyBatch(kettle.makes(),kettle.flavours(),List.of(kettle.color()),kettle.sugar()*CandyKettleBlockEntity.PIECES_PER_SUGAR,now(),0));
                 kettle.clear();sound(SoundEvents.HONEY_BLOCK_PLACE);
             }
+        }
+            tx.commit();
         }
         if(mutated)changed();return CompanionStatus.WORKING;
     }

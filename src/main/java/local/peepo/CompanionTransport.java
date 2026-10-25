@@ -55,6 +55,22 @@ public final class CompanionTransport extends Goal {
         for(var c:unused){stacks++;items+=c.stack.getCount();}
         return 2+Math.max(0,stacks-1)+Math.max(0,(items+31)/32-1);
     }
+    public boolean carryingDelivery(){
+        if(!active || manifest.isEmpty() || cargoSlot<0 || cargoSlot>=8)return false;
+        var held=npc.belongings.getItem(cargoSlot);return !held.isEmpty() && ItemStack.isSameItemSameComponents(held,manifest);
+    }
+    private CompanionUniforms.Type deliveryUniform(){
+        if(npc.uniforms.wearing(CompanionUniforms.Type.PORTER))return CompanionUniforms.Type.PORTER;
+        if(porter)return CompanionUniforms.Type.NONE;
+        // Preserve the Chef's existing kitchen-route discount, including its tool-fetch legs.
+        if(CompanionUniforms.kitchen(workstation))return CompanionUniforms.Type.CHEF;
+        return tooling?CompanionUniforms.Type.NONE:CompanionUniforms.deliveryJob(workstation);
+    }
+    /** Transfers are instantaneous; handling speed benefits the loaded trip instead. */
+    double deliverySpeedBonus(){
+        var type=deliveryUniform();if(!npc.uniforms.wearing(type))return 0;
+        return switch(type){case PORTER -> .25;case ALCHEMIST,ORCHARD_KEEPER,GROUNDSKEEPER -> .20;default -> 0;};
+    }
     public CompanionStatus activity(){return active?status:CompanionStatus.IDLE;}
     private record Detail(CompanionAssignments.Target target,String text,long until){}
     private final Map<BlockPos,Detail> jobDetails=new HashMap<>();
@@ -130,7 +146,7 @@ public final class CompanionTransport extends Goal {
         long now=npc.level().getGameTime();
         if(pieAction!=action){pieAction=action;pieActionStarted=now;}
         faceOven();piePose(action,stack);npc.getNavigation().stop();
-        return now-pieActionStarted>=PIE_ACTION_TICKS;
+        return now-pieActionStarted>=npc.uniforms.duration(CompanionUniforms.Type.BAKER,PIE_ACTION_TICKS);
     }
     private void forget(){handoffUntil=0;releaseTending();clearPiePose();manifest=ItemStack.EMPTY;cargoSlot=-1;pending.clear();unused.clear();workstation=store=null;recipe=null;returning=porter=tooling=false;route=-1;approach=null;}
     private boolean advanceCargo(){
@@ -189,6 +205,7 @@ public final class CompanionTransport extends Goal {
         if(port==null || storage==null)return false;
         if(supplying && port.plan()==null)return false;
         tooling=porter=false;route=-1;workstation=work;store=bound;supply=supplying;recipe=port.plan();returning=false;
+        if(work.fishing() && !supplying && npc.fishing.deferOutput(work))return false;
         if(work.carriesProduce() && !supplying){
             // Harvests already occupy real slots. Probe their combined destination capacity once.
             try(var tx=Transaction.openOuter()){
@@ -426,7 +443,7 @@ public final class CompanionTransport extends Goal {
         if(approach==null || npc.position().distanceToSqr(approach)>.64){
             if(pieAction==WorkAnimation.PIE_LOAD)clearPiePose();
             if(now>=nextPath && (approach==null || travel.needsPath(npc,approach)))pathTo(target);
-            if(npc.position().distanceToSqr(lastPosition)>.0001)try(var tx=Transaction.openOuter()){npc.extractEnergy(movementCost(),tx);tx.commit();}
+            if(npc.position().distanceToSqr(lastPosition)>.0001)try(var tx=Transaction.openOuter()){npc.extractWorkEnergy(deliveryUniform(),movementCost(),tx);tx.commit();}
             lastPosition=npc.position();return;
         }
         npc.getNavigation().stop();
@@ -469,7 +486,7 @@ public final class CompanionTransport extends Goal {
             var variant=view.getResource();var stack=variant.toStack(1);
             try(var tx=Transaction.openOuter()){
                 if(view.extract(variant,1,tx)!=1 || !npc.food.putCargo(slot,stack,tx))return;
-                if(npc.extractEnergy(16,tx)<=0){fail(CompanionStatus.RECOVERING);return;}
+                if(npc.extractWorkEnergy(deliveryUniform(),16,tx)<=0){fail(CompanionStatus.RECOVERING);return;}
                 tx.commit();cargoSlot=slot;manifest=stack.copy();
             }
             releaseTending();animatePie(WorkAnimation.PIE_TAKE,carried());approach=null;nextPath=0;deadline=now+600;return;
@@ -487,7 +504,7 @@ public final class CompanionTransport extends Goal {
             var stack=selected.copyWithCount(taken);
             if(!npc.food.putCargo(slot,stack,tx)){fail(CompanionStatus.FULL);return;}
             if(!porter && !supply && npc.level().getBlockEntity(workstation.at().pos()) instanceof io.github.jimbozoomer.jugcraft.agriculture.HearthOvenBlockEntity
-                && npc.extractEnergy(16,tx)<=0){fail(CompanionStatus.RECOVERING);return;}
+                && npc.extractWorkEnergy(deliveryUniform(),16,tx)<=0){fail(CompanionStatus.RECOVERING);return;}
             tx.commit();cargoSlot=slot;manifest=stack.copy();
         }
         approach=null;nextPath=0;deadline=npc.level().getGameTime()+600;
@@ -509,7 +526,7 @@ public final class CompanionTransport extends Goal {
                 if(source.extract(ItemVariant.of(stack),stack.getCount(),tx)!=stack.getCount()
                         || !npc.food.putCargo(slots.get(i),stack,tx)){fail(CompanionStatus.NO_INPUT);return;}
             }
-            if(hearthRoute() && !supply && npc.extractEnergy(16,tx)<=0){fail(CompanionStatus.RECOVERING);return;}
+            if(hearthRoute() && !supply && npc.extractWorkEnergy(deliveryUniform(),16,tx)<=0){fail(CompanionStatus.RECOVERING);return;}
             tx.commit();
         }
         for(int i=0;i<batch.size();i++)pending.add(new Cargo(slots.get(i),batch.get(i).copy()));
@@ -575,13 +592,14 @@ public final class CompanionTransport extends Goal {
     }
     private boolean toolFits(CompanionAssignments.Target work,ItemStack stack){
         if(stack.isEmpty() || stack.isDamageableItem() && stack.getDamageValue()>=stack.getMaxDamage())return false;
+        if(work.fishing())return CompanionFishing.rod(stack);
         if(HiveCompanionJob.needsShears(npc,work))return stack.is(net.minecraft.world.item.Items.SHEARS);
         if(work.care()){int task=npc.livestock.requiredTool(work);return task==AnimalCareZone.SHEAR?stack.is(net.minecraft.world.item.Items.SHEARS):task==AnimalCareZone.SLAUGHTER && CompanionHusbandry.weapon(stack);}
         return work.task(AnimalCareZone.SHEAR)?stack.is(net.minecraft.world.item.Items.SHEARS):work.garden()?CompanionGarden.toolFits(work,stack):work.block().equals(io.github.jimbozoomer.jugcraft.Jugcraft.id("cutting_board")) && stack.is(io.github.jimbozoomer.jugcraft.agriculture.JugcraftAgriculture.KNIVES);
     }
     private boolean needsTool(CompanionAssignments.Target work){
-        return !npc.assignments.supplies.handLocked() && work.present(npc.level()) && CompanionJobs.permitted(npc,work.at().pos())
-            && (HiveCompanionJob.needsShears(npc,work) || work.garden() && !work.orchard() && !CompanionGarden.hanging(work) || work.task(AnimalCareZone.SHEAR) || work.task(AnimalCareZone.SLAUGHTER) || work.block().equals(io.github.jimbozoomer.jugcraft.Jugcraft.id("cutting_board"))) && !toolFits(work,npc.belongings.getItem(9));
+        return (!work.fishing() || npc.assignments.transportAllowed(work,true)) && !npc.assignments.supplies.handLocked() && work.present(npc.level()) && CompanionJobs.permitted(npc,work.at().pos())
+            && (work.fishing() || HiveCompanionJob.needsShears(npc,work) || work.garden() && !work.orchard() && !CompanionGarden.hanging(work) || work.task(AnimalCareZone.SHEAR) || work.task(AnimalCareZone.SLAUGHTER) || work.block().equals(io.github.jimbozoomer.jugcraft.Jugcraft.id("cutting_board"))) && !toolFits(work,npc.belongings.getItem(9));
     }
     private boolean readyTool(CompanionAssignments.Target work){
         if(!npc.assignments.supplies.anyTools() || !needsTool(work))return false;
@@ -623,7 +641,7 @@ public final class CompanionTransport extends Goal {
         return ItemStack.EMPTY;
     }
     private java.util.function.Predicate<ItemStack> toolUsefulness(CompanionAssignments.Target work){
-        if(HiveCompanionJob.needsShears(npc,work) || work.garden() || work.care() || work.task(AnimalCareZone.SHEAR))return tool->true;
+        if(work.fishing() || HiveCompanionJob.needsShears(npc,work) || work.garden() || work.care() || work.task(AnimalCareZone.SHEAR))return tool->true;
         if(!(npc.level().getBlockEntity(work.at().pos()) instanceof io.github.jimbozoomer.jugcraft.agriculture.CuttingBoardBlockEntity board)
             || !(npc.level() instanceof net.minecraft.server.level.ServerLevel level))return tool->false;
         // One rolled-back input snapshot per search, not one full scan for every knife in storage.
@@ -650,11 +668,11 @@ public final class CompanionTransport extends Goal {
     }
     private static void saveTarget(ValueOutput out,String name,CompanionAssignments.Target t){
         var child=out.child(name);child.store("At",GlobalPos.CODEC,t.at());child.store("Block",Identifier.CODEC,t.block());child.putInt("Face",t.face().ordinal());
-        if(t.garden())child.store("Plot",BlockPos.CODEC.listOf(),t.plot());if(t.zone()!=null)t.zone().save(child);if(t.gardenZone()!=null)t.gardenZone().save(child);
+        if(t.fishingWater()!=null)child.store("FishingWater",BlockPos.CODEC,t.fishingWater());if(t.garden())child.store("Plot",BlockPos.CODEC.listOf(),t.plot());if(t.zone()!=null)t.zone().save(child);if(t.gardenZone()!=null)t.gardenZone().save(child);
     }
     private static CompanionAssignments.Target loadTarget(ValueInput in,String name){
         var c=in.child(name);if(c.isEmpty())return null;var at=c.get().read("At",GlobalPos.CODEC).orElse(null);var id=c.get().read("Block",Identifier.CODEC).orElse(null);
-        return at==null || id==null?null:new CompanionAssignments.Target(at,id,Direction.values()[Math.clamp(c.get().getIntOr("Face",1),0,5)],c.get().read("Plot",BlockPos.CODEC.listOf()).orElse(List.of()),AnimalCareZone.load(c.get()),GardenZone.load(c.get()));
+        return at==null || id==null?null:new CompanionAssignments.Target(at,id,Direction.values()[Math.clamp(c.get().getIntOr("Face",1),0,5)],c.get().read("Plot",BlockPos.CODEC.listOf()).orElse(List.of()),AnimalCareZone.load(c.get()),GardenZone.load(c.get()),c.get().read("FishingWater",BlockPos.CODEC).orElse(null));
     }
     public void save(ValueOutput out){
         if(manifest.isEmpty() || workstation==null || store==null)return;

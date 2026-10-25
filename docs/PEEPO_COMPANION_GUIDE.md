@@ -293,6 +293,16 @@ Bottles become ordinary water potions; canteens refill to all three charges and 
 
 A collection Output chest can also be Supply for brewing, cooking or another job. This collects portable water containers; it does not irrigate crops or fill machine tanks directly. Mob-griefing, town protection, job priorities, resting and settings-menu pauses apply. See the [water collection feature record](features/companion-water-collection.md).
 
+### Fishing
+
+Select Peepo or Jughead with the **Companion Planner**, shift-right-click to choose **Fishing: choose seat, then water**, then right-click a solid, dry shore/dock block and a source-water block. The cast can span **10 blocks horizontally**, with water at the seat block's height or up to three blocks below. Leave a clear casting line and space for the companion above the seat. Each seat uses one work slot; only one helper uses that seat at a time. The Planner shows both markers and their connecting line.
+
+Equip a **fishing rod in Hand**, or stock a Supply chest with rods and enable its **Tools** setting. Keep Hand unlocked for automatic replacement. Link **Output** and select **Work**. Existing job priorities, per-job Supply/Output modes, container links, owner permissions, schedules and energy recovery apply. Fishing has no recipe Filter: catches use Minecraft's normal random fishing loot table, including data-pack changes. Open-water treasure requires the normal clear 5-by-5 water footprint; smaller pools can yield fish and junk. Rain, sky cover, Lure and Luck of the Sea affect fishing. Rods wear down normally, Unbreaking applies, and Mending can repair the working rod from catch experience without spawning player XP. Player-triggered magical rod abilities are not automated.
+
+The companion sits facing the water with kicking feet, casts a full-size rod, waits with a visible line and bobber, reacts to a bite, and leans back to reel in. Up to **eight catches** are collected before delivery, or fewer when cargo space runs low. A linked Output that cannot accept accumulated catches pauses fishing. With Output disabled or unassigned, catches stay in cargo for manual collection. Landed catches that cannot fit are saved until space is available; changing orders or reloading does not reroll them.
+
+Fishing uses **1 reserve JE per tick**, plus **80 JE per completed cast/reel cycle**, and normal hauling effort. Sitting while fishing is work and does not grant chair-rest regeneration. A missing rod/source, blocked seat/cast, full cargo, occupied seat or blocked Output appears in job status. See the [fishing feature record](features/companion-fishing.md).
+
 ### Tree Tap collection
 
 Select a companion with the Planner and right-click a placed **Tree Tap**. Each tap takes one work slot. Link **Supply** containing empty glass bottles and **Output**, then select Work. The companion keeps up to eight unreserved empty bottles in cargo and uses the general interaction animation to collect all currently fitting complete bottles in a batch: one from an ordinary full tap, up to eight from a bucket-upgraded tap. Partial bottle progress stays in the tap.
@@ -376,6 +386,50 @@ Place a **Lunch Crate**, or put a **Lunch Cover** over a compatible accessible c
 On **Routine**, set the work schedule, break/resume energy thresholds, food preference, carried meal target, alerts and social behavior. Auto works whenever energy allows; Day/Night shifts use Overworld time. Exhausted companions rest before resuming. Beds restore more energy than seats, but sleeping happens only at night in the Overworld. Other dimensions use seated/passive rest.
 
 Companion beds are small, come in the vanilla bed colors and stack into bunks. Assign the specific bunk as home and leave the bottom entrance accessible. Vanilla beds can also be homes. Stools, supported player seats, bed edges and supported fence rails provide sitting places. They close their eyes for sleep and kick their legs while sitting.
+
+## Job uniforms
+
+Farmer, Fisherman, Chef, Mechanic, Porter, Baker, Ranch Hand, Beekeeper, Runner, Alchemist, Orchard Keeper and Groundskeeper outfits fit **both Peepo and Jughead**. Put one in the existing **Costume** slot in the companion menu, or right-click the companion with it when that slot is empty. Remove the current costume through the menu before changing outfits. The Jack o'Lantern costume remains available; outfits cannot stack with it or each other. Tools still belong in **Hand**. Uniforms remain equipped during idle time, sleep, work and transport, and are saved with the companion. Jughead keeps his jug: brimmed hats have an opening, and his chef's hat sits on top of it. The Mechanic has a cap and tool belt, **no goggles**.
+
+| Uniform | Bonus |
+| --- | --- |
+| Farmer's Overalls | 15% faster crop planting/harvesting and 15% less crop-work energy. Each successful harvest has a **15% chance for one extra produce item**. Covers farmland, planter crops, mushroom colonies and magic crops; not orchards, dried bundles, repair or fertilizing. Replanting reserves are taken first, and separate seed drops are not increased. |
+| Fisherman's Outfit | **15% shorter bite waits**, 20% less fishing energy, and a **15% chance to double one fish stack** in a catch. Uses the fish item tag, including tagged modded fish. Treasure/junk are not doubled. |
+| Chef's Outfit | **15% chance to double a produced batch** from the cooking pot, skillet, stove, candy kettle or cutting board. **20% faster timed preparation** on the cutting board and while pulling candy; 10% less energy for cooking-pot/candy/cutting work and linked kitchen Supply/Output travel. Covers pot, skillet, stove, board, candy and canning routes. Native heating, baking, cooking and cooling times stay unchanged. Instantaneous transfers remain instantaneous. |
+| Mechanic's Coveralls | **25% less machine-assistance energy**, including standard/industrial processors and starter workshop benches. The two-helper limit and each helper's existing speed contribution remain unchanged. |
+| Porter's Outfit | **25% less delivery energy** and **25% faster movement while carrying an active delivery**. Works with ordinary job Supply/Output and general porter routes. Empty-hand trips do not receive the speed bonus. The backpack is cosmetic; storage remains eight slots. |
+| Baker's Outfit | **20% faster oven loading/unloading**, and **20% less Hearth Oven delivery/handling energy**, including pies, cakes and fuel. Native baking time is unchanged. |
+| Ranch Hand's Outfit | **20% faster shearing and milking**; **15% less livestock-work energy**, including egg collection, breeding and slaughter when enabled. Milk, breeding and wool-regrowth cooldowns are unchanged. |
+| Beekeeper's Suit | **20% less hive-harvest energy**. Smoke is still required. Successful smoked harvests retain the existing safe behavior and do not provoke bees; the suit does not grant general sting immunity. |
+| Runner's Kit | **15% less reserve energy** while working a Generator Wheel or Hand Crank. The same electricity/kinetic output and storage limits apply. |
+| Alchemist's Robe | **20% faster movement with loaded brewing-stand/crucible deliveries** and **20% less delivery energy**. Native brewing, formulas, fuel and research remain unchanged. |
+| Orchard Keeper's Outfit | **20% faster fruit/tree-tap collection** and loaded orchard, tap, cider-press and cider-barrel deliveries; **15% less corresponding work/delivery energy**. No extra fruit, latex or cider; native growing, pressing and fermentation intervals are unchanged. |
+| Groundskeeper's Raincoat | **20% faster water filling** and loaded water/sprinkler deliveries; **20% less water-work, water/sprinkler-delivery, farmland-repair and fertilizing energy**. Fertilizer cooldowns, dose limits and priorities stay unchanged. |
+
+Handling transfers that are instantaneous stay instantaneous: the Alchemist, Orchard Keeper and Groundskeeper get their handling-speed benefit during the loaded Supply/Output trip. It does not speed empty-hand trips, generic porter routes or tool fetching. The Baker's bonus instead shortens the actual reach into/out of the oven. Faster timed actions round up to a whole game tick. Work-energy percentages describe the discount per productive tick/debit; completing an action sooner also avoids the remaining work ticks.
+
+Chef bonuses duplicate the recipe's normal result quantities: a recipe making four items can make eight. Peepo/Jughead must wear the Chef outfit while actively cooking/cutting/finishing candy, or when supplying the skillet/stove's raw food. Bonus eligibility stays with that raw food through saves and reloads. Simply collecting finished food never rolls a bonus. Returned buckets, bottles, reusable trays and the act of sealing already-cooked preserves are excluded. Earned extras remain in the station's output or saved pending output if storage is full, and use normal Output deliveries.
+
+Extra crop/fish items use ordinary cargo and Output, including full-storage and interrupted-work handling. Uniforms add no extra crop-growth ticks or world scans. Energy discounts include fractional accounting, so even the Fisherman's one-JE waiting ticks receive the advertised saving over time. Hover a uniform item to read its bonus.
+
+Craft each outfit with **three matching wool, two string, one leather and one job item**. Arrange `string / job item / string` across the top, `wool / leather / wool` in the middle, and one wool in the bottom center:
+
+| Outfit | Wool | Job item |
+| --- | --- | --- |
+| Farmer | Blue | Wheat |
+| Fisherman | Brown | Raw cod |
+| Chef | White | Bowl |
+| Mechanic | Blue | Copper ingot |
+| Porter | Green | Chest |
+| Baker | White | Bread |
+| Ranch Hand | Brown | Shears |
+| Beekeeper | Yellow | Honeycomb |
+| Runner | Red | Sugar |
+| Alchemist | Purple | Glass bottle |
+| Orchard Keeper | Green | Apple |
+| Groundskeeper | Green | Water bucket (returns an empty bucket) |
+
+Recipes unlock when you obtain the job item. The outfits are also in Creative's Tools & Utilities tab. See the [uniform feature record](features/companion-uniforms.md).
 
 ## Personal touches and moving companions
 

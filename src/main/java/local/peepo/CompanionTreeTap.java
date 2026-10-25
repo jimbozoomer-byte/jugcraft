@@ -142,10 +142,11 @@ public final class CompanionTreeTap {
         public CompanionStatus work(PeepoEntity other){
             if(!npc.preferences.canWork() || !npc.orders.station(this) || !occupy(other))return CompanionStatus.IDLE;
             var status=workStatus(other);if(status!=CompanionStatus.READY)return status;
-            boolean finishing=progress+1>=WORK_TICKS;
+            int actionTicks=npc.uniforms.duration(CompanionUniforms.Type.ORCHARD_KEEPER,WORK_TICKS);
+            boolean finishing=progress+1>=actionTicks;
             int count=finishing?fittingCount():0;if(finishing && count==0)return CompanionStatus.FULL;
             try(var tx=Transaction.openOuter()){
-                if(npc.extractEnergy(ENERGY_PER_TICK,tx)!=ENERGY_PER_TICK)return CompanionStatus.RECOVERING;
+                if(npc.extractWorkEnergy(CompanionUniforms.Type.ORCHARD_KEEPER,ENERGY_PER_TICK,tx)!=ENERGY_PER_TICK)return CompanionStatus.RECOVERING;
                 if(finishing){
                     if(!convert(count,tx))return CompanionStatus.FULL;
                     var state=npc.level().getBlockState(stationPosition());
@@ -155,7 +156,7 @@ public final class CompanionTreeTap {
             }
             float yaw=(float)Math.toDegrees(Math.atan2(-(stationPosition().getX()+.5-npc.getX()),stationPosition().getZ()+.5-npc.getZ()));
             npc.setYRot(yaw);npc.yBodyRot=yaw;npc.setYHeadRot(yaw);
-            if(++progress<WORK_TICKS)return CompanionStatus.WORKING;
+            if(++progress<actionTicks)return CompanionStatus.WORKING;
             progress=0;nextRoom=0;
             npc.level().playSound(null,stationPosition(),SoundEvents.BOTTLE_FILL,SoundSource.BLOCKS,.8F,1);
             npc.level().gameEvent(npc,GameEvent.BLOCK_CHANGE,stationPosition());
