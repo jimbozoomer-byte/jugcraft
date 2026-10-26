@@ -10,6 +10,7 @@ import io.github.jimbozoomer.jugcraft.concordance.rules.Knowledge;
 import io.github.jimbozoomer.jugcraft.concordance.strata.Strata;
 import io.github.jimbozoomer.jugcraft.concordance.trinket.Wayfaring;
 import io.github.jimbozoomer.jugcraft.energy.EnergyStorage;
+import io.github.jimbozoomer.jugcraft.weapons.DescribedItem;
 import java.util.List;
 import java.util.function.Function;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentRegistry;
@@ -23,6 +24,7 @@ import net.fabricmc.fabric.api.object.builder.v1.block.entity.FabricBlockEntityT
 import net.fabricmc.fabric.api.resource.v1.ResourceLoader;
 import net.fabricmc.fabric.api.transfer.v1.fluid.FluidStorage;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.core.Registry;
 import net.minecraft.core.component.DataComponentType;
 import net.minecraft.core.component.DataComponents;
@@ -107,6 +109,8 @@ public final class JugcraftConcordance {
 	public static Block LEY_PYLON;
 	public static Block WARDING_STONE;
 	public static Item ADEPT_WAND;
+	/** Concordance Chunk C, C-04: what Root and Rivet makes of a Thallite plate (the Crucible Stand's base, C-05). */
+	public static Item ROOTED_THALLITE_FOUNDATION;
 	public static BlockEntityType<CircleAnchorBlockEntity> ANCHOR_ENTITY;
 	public static BlockEntityType<LeyPylonBlockEntity> PYLON_ENTITY;
 	/** Roadmap step 13: alchemy. */
@@ -120,6 +124,9 @@ public final class JugcraftConcordance {
 	public static Item DRAUGHT;
 	public static Item SALVE;
 	public static BlockEntityType<CrucibleBlockEntity> CRUCIBLE_ENTITY;
+	/** Concordance Chunk C, C-05: the Crucible Stand, JE heat for the crucible on it. */
+	public static Block CRUCIBLE_STAND;
+	public static BlockEntityType<CrucibleStandBlockEntity> CRUCIBLE_STAND_ENTITY;
 	public static ExtendedMenuType<LampwrightBenchMenu, BlockPos> BENCH_MENU;
 
 	/** What a player has learned (saved with them, kept through death, sent only to them). */
@@ -234,6 +241,8 @@ public final class JugcraftConcordance {
 				.strength(2.0F, 6.0F).sound(SoundType.STONE).requiresCorrectToolForDrops().pushReaction(PushReaction.IMMOVEABLE));
 		Item stone = item("warding_stone", properties -> new BlockItem(WARDING_STONE, properties), new Item.Properties().useBlockDescriptionPrefix());
 		ADEPT_WAND = item("adept_wand", InitiateWandItem::new, new Item.Properties().stacksTo(1).rarity(Rarity.UNCOMMON));
+		// Concordance Chunk C, C-04: Root and Rivet's result (data/jugcraft/concordance/ritual/root_and_rivet.json).
+		ROOTED_THALLITE_FOUNDATION = item("rooted_thallite_foundation", DescribedItem::new, new Item.Properties());
 		ANCHOR_ENTITY = Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, Jugcraft.id("circle_anchor"),
 				FabricBlockEntityTypeBuilder.create(CircleAnchorBlockEntity::new, CIRCLE_ANCHOR).build());
 		PYLON_ENTITY = Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, Jugcraft.id("ley_pylon"),
@@ -257,6 +266,14 @@ public final class JugcraftConcordance {
 				FabricBlockEntityTypeBuilder.create(CrucibleBlockEntity::new, CRUCIBLE).build());
 		// Water by pipe into the crucible's tank (a formula's water steps draw on it); items through its container.
 		FluidStorage.SIDED.registerForBlockEntity((entity, side) -> entity.water, CRUCIBLE_ENTITY);
+		// Concordance Chunk C, C-05: the Crucible Stand, on Root and Rivet's foundation. JE in on every face but its seat (a
+		// cable meets it only where it takes JE, CableBlock.connectsTo); heat out only to the crucible on it; nothing back.
+		CRUCIBLE_STAND = block("crucible_stand", CrucibleStandBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.METAL)
+				.strength(3.0F, 6.0F).sound(SoundType.METAL).requiresCorrectToolForDrops().noOcclusion());
+		Item crucibleStand = item("crucible_stand", properties -> new BlockItem(CRUCIBLE_STAND, properties), new Item.Properties().useBlockDescriptionPrefix());
+		CRUCIBLE_STAND_ENTITY = Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, Jugcraft.id("crucible_stand"),
+				FabricBlockEntityTypeBuilder.create(CrucibleStandBlockEntity::new, CRUCIBLE_STAND).build());
+		EnergyStorage.SIDED.registerForBlockEntity((entity, side) -> side == Direction.UP ? null : entity.energy, CRUCIBLE_STAND_ENTITY);
 		// Roadmap step 14: the Greenwardens' beds, crops and living devices.
 		io.github.jimbozoomer.jugcraft.concordance.garden.Garden.register();
 		// Roadmap step 15: the Starwatchers' observatory, astrolabe and attunements.
@@ -339,7 +356,10 @@ public final class JugcraftConcordance {
 			output.accept(pylon);
 			output.accept(stone);
 			output.accept(crucible);
+			output.accept(crucibleStand);
 		});
+		// Concordance Chunk C, C-04: Root and Rivet's foundation, an ingredient.
+		CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.INGREDIENTS).register(output -> output.accept(ROOTED_THALLITE_FOUNDATION));
 	}
 
 	private static SoundEvent sound(String id) {

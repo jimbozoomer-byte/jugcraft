@@ -67,7 +67,7 @@ by 2), however many circles the world holds. An anchor that is unloaded and load
 | Conclave projects | world (`jugcraft:conclave`) | versioned, project by project | kept as written; a project no longer defined is set aside when its owner begins another |
 | Courier ledger | world (`jugcraft:courier_ledger`) | versioned, whole | read as written or not at all (its parts refer to one another) |
 | Knowledge, Focus, stage, milestones, standing, attunement, offerings, dream, dreams, curses, wards, Prima ledger | player or creature attachments | versioned | knowledge keeps unknown entries; an unknown stage is recomputed; an unknown curse lifts |
-| Block entities (pylon, sconce, crucible, anchor, heart, shrine, observatory, garden devices, bench, lectern, post, spirit anchor) | chunk | stamped `version`, every field defaulted | a ritual run that cannot be read is reset to idle |
+| Block entities (pylon, sconce, crucible, anchor, heart, shrine, observatory, garden devices, bench, lectern, post, spirit anchor) | chunk | stamped `version`, every field defaulted | a ritual run that cannot be read is reset to idle; since Concordance Chunk C (C-01), a crucible's formula that cannot be read is kept as written under `program`, saved back and reported, never followed. Since Chunk C, unit 3 (not merged): the Crucible Stand saves `energy` and `setting` (an unknown setting reads as off); the crucible's optional `formula_owner` and `request` read with defaults, so an older crucible asks no courier until its formula is set again. Since unit 4 (not merged): the Verdant Bed saves optional `strain`, `ripened` and `graft` (stamp still 1); `graft_host` is only sent to clients; a graft the rules no longer know is kept as written, read by nothing and replaced by the next graft |
 | Workers (porter, shade, Hearthling) | chunk | stamped `version`, every field defaulted | a worker whose definition is gone says it is disabled |
 | Item components (Radiance, notes, inscription, tunings, brew, relic, artifice, reagent, link, route, and so on) | item stacks | unchanged | most fields optional. A changed shape gets a new component id, since an envelope would change every stack, command and recipe that names one |
 
@@ -82,7 +82,10 @@ Simulation pauses; nothing models what an unloaded place would have done:
 - a ritual whose circle is partly unloaded stops as unloaded;
 - a cursed creature that unloads leaves the curse index and returns when it loads;
 - a dream's wisps gather only where creatures are live;
-- a Preserve hold runs on the world clock: a crucible unloaded while held finds its minute over when it loads.
+- a Preserve hold runs on the world clock: a crucible unloaded while held finds its minute over when it loads;
+- a Crucible Stand and its crucible stop together; a courier carrying for an unloaded crucible waits with the cargo
+  aboard (`DESTINATION_UNLOADED`, its lease renewed), and the crucible's request counts against its setter's quota
+  until it is delivered or cancelled (Concordance Chunk C, C-06; not merged).
 
 No Concordance code forces, tickets or synchronously loads a chunk.
 
@@ -97,7 +100,7 @@ thing once.
 | A circle anchor | nothing while idle; a ritual checks its circle (at most 64 positions) every step (40 ticks) |
 | A block broken or a pylon changed | the anchors in the chunks within 8 blocks (at most 2 by 2 chunks) |
 | Garden beds and crops | an area sample of at most 100 positions; at most 16 samples a level a tick |
-| Verdant Heart, Gleaner, Mulch Maw, Habitat Gauge | one pulse every 200, 40, 40 and 40 ticks, staggered |
+| Verdant Heart, Gleaner, Mulch Maw, Habitat Gauge | one pulse every 200, 40, 40 and 40 ticks, staggered; a Gleaner short of Verdance searches 729 positions a pulse (measured since Concordance Chunk C: 333 µs a starved pulse in run 38774859294's `mod` job, [the ecology record](arcane-concordance-ecology.md)) |
 | Spire Heart | one look every 20 ticks; a field pulse every 100 ticks of at most its count (4 or 6) |
 | Reliquary Shrine, Observatory | one pulse every 20 and 100 ticks, staggered |
 | Workers | one decision every 20 ticks; a porter searches at most the loaded block entities within 8 blocks of its post |
@@ -107,9 +110,11 @@ thing once.
 | Signs | at most 48 a level a tick, plus 16 warnings |
 | Courier ledger | at most 1,024 open requests, 32 history events a post |
 
-The budget is stated in work, not in milliseconds. It has not been profiled under load. Four pieces of it (a block
-change's circle look-up, a spell compile, the graph's audit walk, a garden sample) are timed on a CI runner by
-`ConcordanceWorkloadGameTests`; the figures are in the [delivery record](arcane-concordance-delivery.md). A large
+The budget is stated in work, not in milliseconds. One small workshop is profiled by Concordance Chunk C's load card
+([C-10](concordance-chunk-c.md#unit-5-evidence-and-handoff-c-10), not merged); a larger installation has not been.
+Five pieces of it (a block change's circle look-up, a spell compile, the graph's audit walk, a garden sample and, since
+Chunk C, a Gleaner's pulse) are timed on a CI runner by `ConcordanceWorkloadGameTests`; the figures are in the
+[delivery record](arcane-concordance-delivery.md). A large
 installation's frame cost (GeckoLib, particles, GUI, shaders) has not been measured on a client.
 
 ## Connections
@@ -154,7 +159,7 @@ No new dependency or asset.
 Not yet run:
 - a real world saved by an earlier build and opened with this one (none is kept: world saves are not committed);
 - a server restart;
-- profiling under load.
+- profiling a large installation under load (one small workshop is measured by Chunk C's load card, above).
 
 ## World and event applicability
 

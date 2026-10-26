@@ -1,6 +1,7 @@
 package io.github.jimbozoomer.jugcraft.lair;
 
 import io.github.jimbozoomer.jugcraft.Jugcraft;
+import io.github.jimbozoomer.jugcraft.concordance.BrewItem;
 import io.github.jimbozoomer.jugcraft.concordance.ConcordanceEffects;
 import io.github.jimbozoomer.jugcraft.concordance.effect.EffectKind;
 import io.github.jimbozoomer.jugcraft.config.JugcraftConfig;
@@ -81,6 +82,8 @@ public final class Lairs {
 		Encounter.register();
 		ConcordanceEffects.observe((person, effect, target, amount) -> Encounter.helped(person, target,
 				effect.kind() == EffectKind.RESTORATION, amount, effect.duration()));
+		// Concordance Chunk C (C-02): a Stillroot Poultice put on another player in a fight credits its Regeneration's heals.
+		BrewItem.observe(Encounter::mended);
 		VISIT = AttachmentRegistry.<LairVisit>builder().persistent(LairVisit.CODEC).buildAndRegister(Jugcraft.id("lair_visit"));
 		GRAVE_GOODS = AttachmentRegistry.<GraveGoods>builder().persistent(GraveGoods.CODEC).copyOnDeath()
 				.buildAndRegister(Jugcraft.id("grave_goods"));

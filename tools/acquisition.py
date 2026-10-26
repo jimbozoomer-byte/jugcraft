@@ -1,11 +1,12 @@
 """Where the things only a ritual or a lair boss gives come from, for JEI (Concordance Chunk A, unit 4:
 docs/features/concordance-first-loadout.md; the Yeti King and the Cinder Tyrant since Chunk B, unit 1).
 
-JEI shows a crafting or machine recipe for most things. The Adept's Wand (made by a ritual) and what the lair bosses
-give (rolled from their loot tables when they fall: Vesperine, Madame Tatterlace, the Yeti King and the Cinder Tyrant)
-have none, so each gets an information page instead, written here from the generators' own tables (tools/vesperine.py,
-tools/tatterlace.py, tools/yeti_king.py, tools/cinder_tyrant.py, tools/concordance_rituals.py, tools/lairs.py and
-tools/biomes.py) so that its numbers are the data's.
+JEI shows a crafting or machine recipe for most things. The Adept's Wand and, since Concordance Chunk C, the Rooted
+Thallite Foundation (each made by a ritual) and what the lair bosses give (rolled from their loot tables when they fall:
+Vesperine, Madame Tatterlace, the Yeti King and the Cinder Tyrant) have none, so each gets an information page instead,
+written here from the generators' own tables (tools/vesperine.py, tools/tatterlace.py, tools/yeti_king.py,
+tools/cinder_tyrant.py, tools/concordance_rituals.py, tools/lairs.py and tools/biomes.py) so that its numbers are the
+data's.
 
 The pages are a client copy of the default data, as the rest of recipe_view.json is: a server whose data pack changes a
 boss's loot table or the Adept's Attunement is not reflected, so every page says "with the default data". A player's
@@ -17,8 +18,10 @@ client/compat/JugcraftJeiPlugin, which adds each as an information page) and the
 jei.jugcraft.acquire.<key>. The first magic loadout the record recommends is listed here too (LOADOUT), so the checker
 can confirm survival already makes every piece of it (with its optional branches: the Wayfaring trinkets and, since
 Chunk B, the Rime travel kit), and so are the owner's armour tiers that stay creative-only
-(CREATIVE_ONLY), so it can confirm nothing gives them yet. tools/check_mod_data.py (check_acquisition) ties each page,
-the loadout and the creative-only tiers to the files on disk.
+(CREATIVE_ONLY), so it can confirm nothing gives them yet, and, since Concordance Chunk C (C-10), the living workshop's
+things (WORKSHOP; the factory's parts in FACTORY; Chunk C's own items in CHUNK_C_ITEMS), so it can confirm survival makes
+each as its row says. tools/check_mod_data.py (check_acquisition) ties each page, the loadout, the workshop and the
+creative-only tiers to the files on disk.
 
 Pure data: it imports only the generators' tables, which import nothing of the generator's.
 """
@@ -92,8 +95,9 @@ def _crafted(key, recipes, names):
 
 # Loot a crafting recipe makes as well: item -> (recipe, ingredient, count, the ingredient's name).
 CRAFTED = {"reaper_hood": _crafted("reaper_hood", vs.RECIPES, vs.ITEMS)}
-# Things only a ritual makes: item -> the ritual (tools/concordance_rituals.py RITUALS).
-RITUALS = {"adept_wand": "adept_attunement"}
+# Things only a ritual makes: item -> the ritual (tools/concordance_rituals.py RITUALS). The Rooted Thallite Foundation
+# since Concordance Chunk C (C-04, Root and Rivet).
+RITUALS = {"adept_wand": "adept_attunement", "rooted_thallite_foundation": "root_and_rivet"}
 
 # The first magic loadout (the record's route): nothing new, only what survival already makes. Item -> how it is made:
 # "recipe" (the crafting recipe of its own name) or "working:<name>" (a Lampwright's Bench working). The Wayfaring
@@ -109,6 +113,32 @@ OPTIONAL = {**{item: "recipe" for item in trinkets.TRINKETS}, "fire_focus": "rec
 # later"; the later designs likewise, as tools/gear.py records). The first loadout leaves that as it is. When the owner
 # settles how a tier is won, take it out of here and out of the record's creative-only table.
 CREATIVE_ONLY = list(gear.ARMOR_TIERS)
+# Concordance Chunk C (C-10): the living workshop's route (tools/concordance_journey.py WORKSHOP). WORKSHOP: every
+# Concordance thing it makes or places, each made in survival as it is: by the crafting recipe of its own name ("recipe"),
+# the recipe named ("recipe:<file>": the Thallite plate's is thallite_plate_by_hand), a Lampwright's Bench working
+# ("working:<name>") or a ritual RITUALS gives a JEI page ("ritual:<name>"). FACTORY: the factory's parts the powered
+# workshop takes (JE and piped water), each by its own recipe; their bronze, plates and gears are the factory's
+# (docs/features/machines-and-power.md), not followed by the Concordance's graph. CHUNK_C_ITEMS: every item Concordance
+# Chunk C registered (C-04's foundation, C-05's stand; the Stillroot Poultice and the Kiln Draught are brews, never items,
+# and a graft or a mixed bed is a bed's state), each a WORKSHOP row. check_acquisition ties all three to the files on disk
+# and to the server test that loads their recipes (ConcordanceJourneyGameTests.WORKSHOP_RECIPES).
+WORKSHOP = {"mendvetch": "recipe", "crucible": "recipe", "formula": "recipe", "lampwright_bench": "recipe",
+            "kindled_lantern": "working:kindle_lantern", "ley_pylon": "recipe", "circle_anchor": "recipe",
+            "warding_stone": "recipe", "thallite_plate": "recipe:thallite_plate_by_hand",
+            "rooted_thallite_foundation": "ritual:root_and_rivet", "crucible_stand": "recipe", "courier_post": "recipe",
+            "clockwork_porter": "recipe", "porter_key": "recipe", "verdant_bed": "recipe", "sunpetal": "recipe",
+            "dewmoss": "recipe", "gloamcap": "recipe"}
+FACTORY = {"coal_generator": "recipe", "copper_cable": "recipe", "machine_casing": "recipe", "metal_press": "recipe",
+           "electric_pump": "recipe", "bronze_fluid_pipe": "recipe"}
+CHUNK_C_ITEMS = ["rooted_thallite_foundation", "crucible_stand"]
+
+
+def recipe_file(item, how):
+    """The recipe file a WORKSHOP or FACTORY row is made by ("recipe": its own name; "recipe:<file>"), or None for a
+    bench working or a ritual."""
+    if how == "recipe":
+        return item
+    return how.split(":", 1)[1] if how.startswith("recipe:") else None
 
 
 def pct(chance):
@@ -182,9 +212,14 @@ def _ritual_page(key):
     else:
         takes = f"{info['participants']} practitioners, {info['focus']} Focus each, and {info['steps']} steps"
     blocks = rituals.BLOCKS
-    return (f"Not crafted or traded. {DEFAULT.capitalize()}, the {info['name']} turns "
-            f"{_a(rituals._item_name(info['result']['transform']['from']))} into it, keeping what was inscribed and "
-            f"tuned on it. Work it at {_a(blocks['circle_anchor']['name'])} in {_a(structure['name'])} "
+    transform = info["result"]["transform"]
+    # Only an instrument carries an inscription and tunings over (CircleAnchorBlockEntity.commit copies both).
+    keeps = ", keeping what was inscribed and tuned on it" if transform["into"].split(":")[1] in rituals.INSTRUMENTS else ""
+    # A rite named for whose it is takes "the" (the Adept's Attunement); one named for what it does, none (Root and Rivet).
+    rite = f"the {info['name']}" if "'s " in info["name"] else info["name"]
+    return (f"Not crafted or traded. {DEFAULT.capitalize()}, {rite} turns "
+            f"{_a(rituals._item_name(transform['from']))} into it{keeps}. Work it at {_a(blocks['circle_anchor']['name'])} "
+            f"in {_a(structure['name'])} "
             f"({parts['channel']} {blocks['ley_pylon']['name']}s and {parts['boundary']} "
             f"{blocks['warding_stone']['name']}s round it) with {research} {info['stage']}: offer {offer}. It takes "
             f"{takes}, drawing {info['ley']} Ley Charge from each pylon a step "

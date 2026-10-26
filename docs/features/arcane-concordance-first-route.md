@@ -42,7 +42,11 @@ that has something to show this player:
   that far itself, past the crosshair's reach; the server checks the distance again). For an anchor, its own report
   (the same lines chat and `/jugcraft concordance circle` show, from the anchor's cached report; Jade shows its phase
   and first three faults its own way) and the rituals the player knows there; for a pylon, its charge, how it fills and
-  whose rituals it lends to.
+  whose rituals it lends to. Since Concordance Chunk C (C-01, not merged), also an Alembic Crucible within the player's
+  own block reach (the server allows 1.0 more, as for a use). Anyone sees its heat and what heats it, Preserve's hold,
+  its volume and tank, its formula's step, why it waits, the risk line and its slots. With an Assay Glass carried, the
+  page adds what the glass would tell this player: its measures with the Alembic Arts understood, and the formula's
+  outcome once mastered ([the alchemy record](arcane-concordance-alchemy.md)).
 - **Keys**: every Jugcraft key with its binding now, what it does, and any other key bound the same; the vanilla keys the
   route uses; and where to change them.
 
@@ -208,6 +212,15 @@ begun, and could read the pages from before the refresh; the test now waits for 
 
 Settled in CI by the client test: B is shared with no other loaded default; the button covers no slot or widget,
 beside the recipe book or on the creative Survival Inventory tab (below the slots Trinkets adds there).
+
+Concordance Chunk C, unit 1 (C-01, C-02; not merged) adds `EncyclopediaGameTests.theInspectPageReadsACrucibleByResearch`
+(a crucible read at the spoon's level, with the risk line, by anyone; the glass's level only with the research and the
+glass carried; the preview only for a master; nothing beyond reach or in an unloaded chunk; reading changes nothing).
+It also adds `theCinderKilnsRiteNamesTheKilnDraught` and `theDossiersNameThePoulticesCredit`. The client test's new
+step `crucibleInspection` takes the shots `jugcraft_encyclopedia_inspect_crucible`, `_inspect_crucible_scale4` and
+`_inspect_poultice`, and `jugcraft_concordance_crucible_jade` when Jade is loaded. They were written where no
+Minecraft jar is available; they passed in CI (run 38684732031, and again in run 38774859294), the client test by its
+shard (its shots not viewed).
 
 Not run: the full route by keys from a fresh world to a lair win as one test (the chunk's handoff maps each A-08 step
 to the separate tests that cover it: [Unit 5](concordance-chunk-a.md#unit-5-evidence-and-handoff-a-08)); a person

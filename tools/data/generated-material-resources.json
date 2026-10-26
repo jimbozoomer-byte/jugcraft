@@ -26100,5 +26100,22 @@
   "assets/jugcraft/models/item/quarrel_carbine.json",
   "data/jugcraft/recipe/cloudburst_gun.json",
   "data/jugcraft/recipe/hinterland_rifle.json",
-  "data/jugcraft/recipe/quarrel_carbine.json"
+  "data/jugcraft/recipe/quarrel_carbine.json",
+  "assets/jugcraft/blockstates/crucible_stand.json",
+  "assets/jugcraft/items/crucible_stand.json",
+  "assets/jugcraft/items/rooted_thallite_foundation.json",
+  "assets/jugcraft/models/block/crucible_stand.json",
+  "assets/jugcraft/models/block/crucible_stand_lit.json",
+  "assets/jugcraft/models/item/rooted_thallite_foundation.json",
+  "data/jugcraft/concordance/graft/dewlit.json",
+  "data/jugcraft/concordance/product/kiln_draught.json",
+  "data/jugcraft/concordance/product/stillroot_poultice.json",
+  "data/jugcraft/concordance/product/winter_brine.json",
+  "data/jugcraft/concordance/ritual/root_and_rivet.json",
+  "data/jugcraft/loot_table/blocks/crucible_stand.json",
+  "data/jugcraft/modonomicon/books/arcane_concordance/entries/alembic/crucible_stand.json",
+  "data/jugcraft/modonomicon/books/arcane_concordance/entries/alembic/kiln_draught.json",
+  "data/jugcraft/modonomicon/books/arcane_concordance/entries/alembic/stillroot_poultice.json",
+  "data/jugcraft/modonomicon/books/arcane_concordance/entries/circles/root_and_rivet.json",
+  "data/jugcraft/recipe/crucible_stand.json"
 ]

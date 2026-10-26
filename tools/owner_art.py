@@ -8,8 +8,9 @@ same way: OWNER_FILES from the magic collection and OWNER_BLOCKS_FILES from the 
 encyclopedia (tools/encyclopedia.py, Chunk A) adds its inventory button's scroll sprite. Concordance Chunk B, unit 3 adds
 Rime's and Strata's (tools/concordance_rime.py, tools/concordance_strata.py OWNER_FILES): the spell and status icons of
 Rimebind, Preserve and Brace, at their own sizes, and Brace's four earth recordings; unit 4 adds Frostward's status icon
-and the travel kit's icons, worn sheets and heavy model (tools/concordance_rime_kit.py OWNER_FILES). Two tables may not
-import different files to one path.
+and the travel kit's icons, worn sheets and heavy model (tools/concordance_rime_kit.py OWNER_FILES). Concordance Chunk C,
+unit 3 adds the Crucible Stand's treated iron and copper coil from the Blocks folder (tools/concordance_alchemy.py
+OWNER_BLOCKS_FILES). Two tables may not import different files to one path.
 
 On 7 October 2026 the owner asked for their farming and food textures to be used ("I have already made a ton of custom
 textures and food ... I made all of the textures in there myself its all mine"). Each imported texture is a byte-for-byte
@@ -39,6 +40,7 @@ ROOT = os.path.dirname(HERE)
 sys.path.insert(0, HERE)
 
 import arms_pixel  # noqa: E402
+import concordance_alchemy  # noqa: E402
 import concordance_workshops
 import jug_nouveau
 import concordance_ee_equipment
@@ -107,9 +109,15 @@ def magic_imports():
 
 
 def block_asset_imports():
-    """(runtime path under assets/jugcraft, library path under Blocks/) for every Blocks-folder file copied to a path other
-    than textures/ (the trinkets slice's slot icon)."""
-    return sorted(concordance_trinkets.OWNER_BLOCKS_FILES.items())
+    """(runtime path under assets/jugcraft, library path under Blocks/) for every Blocks-folder file copied whole by path:
+    the trinkets slice's slot icon, and the Crucible Stand's treated iron and copper coil (tools/concordance_alchemy.py,
+    Concordance Chunk C, C-05). Two tables may not import different files to one path."""
+    merged = {}
+    for table in (concordance_trinkets.OWNER_BLOCKS_FILES, concordance_alchemy.OWNER_BLOCKS_FILES):
+        for target, source in table.items():
+            if merged.setdefault(target, source) != source:
+                raise SystemExit(f"tools/owner_art.py: two slices import different files to {target}")
+    return sorted(merged.items())
 
 
 def recolourings():
@@ -199,7 +207,7 @@ def expected():
 
 def provenance():
     """(runtime path, library path, SHA-256 of the library file) for every magic-collection import and every Blocks-folder
-    file copied outside textures/."""
+    file copied whole by path (block_asset_imports)."""
     out = []
     for root, name, table in ((MAGIC, "Magic", magic_imports()), (LIBRARY, "Blocks", block_asset_imports())):
         for target, source in table:

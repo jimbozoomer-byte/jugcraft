@@ -4,6 +4,7 @@ import com.google.gson.JsonElement;
 import io.github.jimbozoomer.jugcraft.concordance.alchemy.AlchemyCatalog;
 import io.github.jimbozoomer.jugcraft.concordance.alchemy.Ingredient;
 import io.github.jimbozoomer.jugcraft.concordance.alchemy.Preparation;
+import io.github.jimbozoomer.jugcraft.concordance.alchemy.Product;
 import io.github.jimbozoomer.jugcraft.concordance.alchemy.Property;
 import io.github.jimbozoomer.jugcraft.concordance.compose.Authored;
 import io.github.jimbozoomer.jugcraft.concordance.compose.Catalog;
@@ -56,6 +57,8 @@ import io.github.jimbozoomer.jugcraft.concordance.worker.WorkerParser;
 import io.github.jimbozoomer.jugcraft.concordance.ecology.Disturbance;
 import io.github.jimbozoomer.jugcraft.concordance.ecology.EcologyCatalog;
 import io.github.jimbozoomer.jugcraft.concordance.ecology.EcologyParser;
+import io.github.jimbozoomer.jugcraft.concordance.ecology.Factor;
+import io.github.jimbozoomer.jugcraft.concordance.ecology.Graft;
 import io.github.jimbozoomer.jugcraft.concordance.ecology.Organism;
 import io.github.jimbozoomer.jugcraft.concordance.resource.Conversion;
 import io.github.jimbozoomer.jugcraft.concordance.resource.ConversionTable;
@@ -300,7 +303,8 @@ public final class ConcordanceRules {
 
 	/**
 	 * The files under {@code data/<ns>/concordance/}: kind (research, invocation, working, conversion, component,
-	 * instrument, structure, ritual, ingredient, preparation, property, organism, disturbance or pattern), id, content.
+	 * instrument, structure, ritual, ingredient, preparation, property, product, organism, disturbance, graft or pattern), id,
+	 * content.
 	 */
 	public record Source(String kind, String id, JsonElement json) {
 	}
@@ -337,6 +341,7 @@ public final class ConcordanceRules {
 		Map<String, SpireConfiguration> wonderConfigurations = new TreeMap<>();
 		Map<String, Organism> organisms = new TreeMap<>();
 		Map<String, Disturbance> disturbances = new TreeMap<>();
+		Map<String, Graft> grafts = new TreeMap<>();
 		Map<String, Definitions.Research> research = new TreeMap<>();
 		Map<String, Definitions.Invocation> invocations = new TreeMap<>();
 		Map<String, Definitions.Working> workings = new TreeMap<>();
@@ -348,6 +353,7 @@ public final class ConcordanceRules {
 		Map<String, Ingredient> ingredients = new TreeMap<>();
 		Map<String, Preparation> preparations = new TreeMap<>();
 		Map<String, Property> properties = new TreeMap<>();
+		Map<String, Product> products = new TreeMap<>();
 		List<String> problems = new ArrayList<>();
 		for (Source source : sources) {
 			switch (source.kind()) {
@@ -422,6 +428,12 @@ public final class ConcordanceRules {
 						properties.put(property.id(), property);
 					}
 				}
+				case "product" -> {
+					Product product = parser.product(source.id(), source.json());
+					if (product != null) {
+						products.put(product.id(), product);
+					}
+				}
 				case "organism" -> {
 					Organism organism = ecologyParser.organism(source.id(), source.json());
 					if (organism != null) {
@@ -432,6 +444,12 @@ public final class ConcordanceRules {
 					Disturbance disturbance = ecologyParser.disturbance(source.id(), source.json());
 					if (disturbance != null) {
 						disturbances.put(disturbance.id(), disturbance);
+					}
+				}
+				case "graft" -> {
+					Graft graft = ecologyParser.graft(source.id(), source.json());
+					if (graft != null) {
+						grafts.put(graft.id(), graft);
 					}
 				}
 				case "pattern" -> {
@@ -538,7 +556,7 @@ public final class ConcordanceRules {
 				}
 				default -> problems.add(source.id() + ": unknown kind of Concordance file \"" + source.kind()
 						+ "\" (expected research, invocation, working, conversion, component, instrument, structure, ritual, ingredient, "
-						+ "preparation, property, organism, disturbance, pattern, offering, worker, substrate, gem, rune, affix, relic, material, transmutation, "
+						+ "preparation, property, product, organism, disturbance, graft, pattern, offering, worker, substrate, gem, rune, affix, relic, material, transmutation, "
 						+ "curse, commission, project, stage, practice, wonder or wonder_configuration)");
 			}
 		}
@@ -691,7 +709,7 @@ public final class ConcordanceRules {
 		if (!byItem.isEmpty() && plain != 1) {
 			problems.add("alchemy: exactly one preparation must have no tool (how an ingredient goes in as it comes); found " + plain);
 		}
-		AlchemyCatalog alchemy = new AlchemyCatalog(byItem, preparations, properties);
+		AlchemyCatalog alchemy = new AlchemyCatalog(byItem, preparations, properties, products);
 		// Ecology: a block is one organism and an item plants one crop, or the garden could not tell which grows.
 		Map<String, String> organismBlocks = new HashMap<>();
 		Map<String, String> organismItems = new HashMap<>();
@@ -704,7 +722,43 @@ public final class ConcordanceRules {
 				organisms.remove(organism.id());
 			}
 		}
-		EcologyCatalog ecology = new EcologyCatalog(organisms, disturbances);
+		// Concordance Chunk C (C-08, C-P58): a mixed bed names other crops that cost nutrients (a fixer's company already speeds
+		// its neighbours as a legume). A name that is not one is reported, and never speeds anything (EcologyCatalog.mixed).
+		for (Organism organism : organisms.values()) {
+			for (String neighbour : organism.neighbours().organisms()) {
+				Organism other = organisms.get(neighbour);
+				if (other == null || !other.crop() || other.fix() > 0 || other.id().equals(organism.id())) {
+					problems.add("organism " + organism.id() + ": neighbour " + neighbour + " is not another crop that costs nutrients");
+				}
+			}
+		}
+		// Concordance Chunk C (C-09, C-P63): a graft joins two different loaded crops, keeps its host's nutrient floor at least
+		// its cost (so a step it allows can be paid), and is the only one joining that host and donor.
+		Map<String, String> graftPairs = new HashMap<>();
+		for (Graft graft : List.copyOf(grafts.values())) {
+			Organism host = organisms.get(graft.host());
+			Organism donor = organisms.get(graft.donor());
+			String problem = null;
+			if (host == null || !host.crop()) {
+				problem = "its host " + graft.host() + " is not a crop";
+			} else if (donor == null || !donor.crop()) {
+				problem = "its donor " + graft.donor() + " is not a crop";
+			} else if (host.id().equals(donor.id())) {
+				problem = "its host and its donor are the same crop";
+			} else if (graft.apply(host.niche()).range(Factor.NUTRIENTS).min() < host.cost()) {
+				problem = "niche.nutrients must need at least " + host.id() + "'s cost (" + host.cost() + ")";
+			} else {
+				String other = graftPairs.putIfAbsent(host.id() + "|" + donor.id(), graft.id());
+				if (other != null) {
+					problem = "graft " + other + " already joins " + host.id() + " and " + donor.id();
+				}
+			}
+			if (problem != null) {
+				problems.add("graft " + graft.id() + ": " + problem);
+				grafts.remove(graft.id());
+			}
+		}
+		EcologyCatalog ecology = new EcologyCatalog(organisms, disturbances, grafts);
 		// Unlock lists and invoke evidence must name things that exist (a typo would silently teach nothing).
 		for (Definitions.Research entry : research.values()) {
 			for (Map.Entry<ResearchState, Definitions.Unlocks> unlock : entry.unlocks().entrySet()) {

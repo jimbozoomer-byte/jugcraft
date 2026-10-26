@@ -39664,6 +39664,28 @@
             1
           ],
           "value": 5
+        },
+        {
+          "kind": "ritual",
+          "in": [
+            [
+              "jugcraft:thallite_plate",
+              1
+            ],
+            [
+              "minecraft:copper_ingot",
+              4
+            ],
+            [
+              "jugcraft:mendvetch",
+              4
+            ]
+          ],
+          "out": [
+            "jugcraft:rooted_thallite_foundation",
+            1
+          ],
+          "value": 4
         }
       ]
     }
@@ -39780,6 +39802,10 @@
       "key": "rimeclaw"
     },
     {
+      "item": "jugcraft:rooted_thallite_foundation",
+      "key": "rooted_thallite_foundation"
+    },
+    {
       "item": "jugcraft:salamander_charm",
       "key": "salamander_charm"
     },
@@ -39810,6 +39836,24 @@
     {
       "item": "jugcraft:yeti_mitten",
       "key": "yeti_mitten"
+    }
+  ],
+  "garden_compost": [
+    {
+      "tag": "jugcraft:mulch/quarter",
+      "quarters": 1
+    },
+    {
+      "tag": "jugcraft:mulch/half",
+      "quarters": 2
+    },
+    {
+      "tag": "jugcraft:mulch/three_quarters",
+      "quarters": 3
+    },
+    {
+      "tag": "jugcraft:mulch/whole",
+      "quarters": 4
     }
   ]
 }

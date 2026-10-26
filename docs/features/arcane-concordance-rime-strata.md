@@ -45,8 +45,9 @@ utility (Preserve).
 - Understood, Stratawrighting teaches **Brace**. **Mastery** is three ways of anchoring: Brace someone standing on soil
   (grass, dirt, mud, moss), Brace someone standing on bare stone, sand or gravel, and have a Brace you cast hold against
   a blow. Any of three electives can stand for one: bracing a party member, completing a ritual at a Circle Anchor
-  (Circle Lore), or taking a creature's blow in Earthbound Thallite armour on natural ground. Mastered, Brace costs a
-  point less.
+  (Circle Lore; Root and Rivet's codex entry is linked from Stratawrighting's Understood page: Concordance Chunk C,
+  C-04; not merged; its tests passed in CI, run 38693262154), or taking a creature's blow in Earthbound Thallite armour on natural ground. Mastered,
+  Brace costs a point less.
 - The three invocations, cast with any Concordance instrument like First Light's and Ember's:
 
 | Invocation | Role | What it does | Focus (mastered) | Cast | Cooldown | Learned | Tunings | Counter |
@@ -100,7 +101,7 @@ utility (Preserve).
   - **The Glacier Hall** is caught by Fabric's `ServerEntityLevelChangeEvents.AFTER_PLAYER_CHANGE_LEVEL` (lairs move
     players with `teleportTo`): no lair code changes.
   - **Examination** says why a snow or stone specimen matters (`message.jugcraft.concordance.examine.cold`, `.weight`).
-  - **Strata's practice** listens to rituals completed (`Rituals.listen`: every player present) and to damage
+  - **Strata's practice** listens to rituals completed (`Rituals.listen`: every participant present) and to damage
     (`AFTER_DAMAGE`: an Earthbound wearer struck by a creature on natural ground, not wholly blocked). Ground is read
     with Thallite's own tags, `ThalliteGear.LIVING_GROUND` and `EARTHEN_GROUND`; nothing is added to them (B-P28).
 
@@ -120,7 +121,7 @@ Each key is a piece of evidence, saved as `practice:<activity>:<key>` and counte
 | | `ground:earthen` | the same on other natural ground (stone, sand, gravel) | nothing |
 | | `held` | a Brace the caster put on is spent by a push | a blow or a harmful push to meet it |
 | | `ally` (elective) | a Brace that takes on another player | another player in the party |
-| | `foundation` (elective) | a ritual completed at a Circle Anchor, for every player present | Circle Lore and a circle |
+| | `foundation` (elective) | a ritual completed at a Circle Anchor, for every participant present | Circle Lore and a circle |
 | | `rooted` (elective) | struck by a creature, not wholly blocked, in Earthbound Thallite on natural ground | Earthbound Thallite armour (the thallite switch) |
 
 Rimekeeping's mastery needs three kinds of cold work: its own three keys, of which the elective can stand for one (a

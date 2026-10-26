@@ -36,7 +36,7 @@ public class ConcordanceJournalGameTests {
 	/** A newcomer: their Focus and stage, research only counted, no tradition's section, and the stage's route in words. */
 	@GameTest(maxTicks = 20)
 	public void aNewcomersJournalNamesNothingUnmet(GameTestHelper helper) {
-		ServerPlayer player = helper.makeMockServerPlayerInLevel();
+		ServerPlayer player = TestPlayers.mock(helper);
 		List<JournalSection> sections = Journal.build(player);
 		helper.assertTrue(section(sections, "overview") != null && section(sections, "stage") != null, "overview and stage: " + sections);
 		JournalSection research = section(sections, "research");
@@ -54,7 +54,7 @@ public class ConcordanceJournalGameTests {
 	/** Met research shows its next state in words, with how far each way has come as exact figures. */
 	@GameTest(maxTicks = 20)
 	public void metResearchSaysWhatComesNext(GameTestHelper helper) {
-		ServerPlayer player = helper.makeMockServerPlayerInLevel();
+		ServerPlayer player = TestPlayers.mock(helper);
 		ConcordanceProgress.grant(player, "jugcraft:first_light", ResearchState.ENCOUNTERED);
 		JournalSection research = section(Journal.build(player), "research");
 		JournalLine next = research.lines().stream().filter(line -> key(line.text()).equals("journal.jugcraft.research.next")).findFirst().orElse(null);
@@ -71,7 +71,7 @@ public class ConcordanceJournalGameTests {
 	/** A tradition's own section appears once its research is met: here the Crimson Rites' Vitae. */
 	@GameTest(maxTicks = 20)
 	public void aTraditionsSectionAppearsOnceMet(GameTestHelper helper) {
-		ServerPlayer player = helper.makeMockServerPlayerInLevel();
+		ServerPlayer player = TestPlayers.mock(helper);
 		helper.assertTrue(section(Journal.build(player), "vitae") == null, "no Vitae before the Crimson Rites");
 		ConcordanceProgress.grant(player, Vigil.RESEARCH, ResearchState.ENCOUNTERED);
 		JournalSection vitae = section(Journal.build(player), "vitae");
@@ -88,7 +88,7 @@ public class ConcordanceJournalGameTests {
 		helper.assertValueEqual(key(StageProgress.need("mastered 5 (2)")), "message.jugcraft.concordance.stage.need.mastered", "a count");
 		helper.assertValueEqual(key(StageProgress.need("milestone jugcraft:spire_raised")), "message.jugcraft.concordance.stage.need.milestone",
 				"a milestone");
-		ServerPlayer player = helper.makeMockServerPlayerInLevel();
+		ServerPlayer player = TestPlayers.mock(helper);
 		JournalSection stage = section(Journal.build(player), "stage");
 		helper.assertTrue(stage.lines().stream().noneMatch(line -> line.text().getString().contains("@")), "no data in the routes: " + stage);
 		helper.succeed();
@@ -97,7 +97,7 @@ public class ConcordanceJournalGameTests {
 	/** The journal crosses to the client whole: the same sections, the same lines, the same words. */
 	@GameTest(maxTicks = 20)
 	public void theJournalSurvivesTheTrip(GameTestHelper helper) {
-		ServerPlayer player = helper.makeMockServerPlayerInLevel();
+		ServerPlayer player = TestPlayers.mock(helper);
 		ConcordanceProgress.grant(player, "jugcraft:first_light", ResearchState.UNDERSTOOD);
 		JournalPayload sent = new JournalPayload(Journal.build(player));
 		RegistryFriendlyByteBuf buffer = new RegistryFriendlyByteBuf(Unpooled.buffer(), helper.getLevel().registryAccess());

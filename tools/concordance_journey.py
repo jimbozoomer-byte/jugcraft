@@ -26,10 +26,19 @@ Nothing here is generated into the game. tools/check_mod_data.py (check_journey)
 - the first loadout (tools/acquisition.py LOADOUT, Concordance Chunk A) is made by one player in the Overworld, each
   piece by its recipe or its bench working, with no research but First Light up to understood, and the Rime travel kit
   (Chunk B, B-10; tools/concordance_rime_kit.py) likewise, every piece by its recipe;
+- the living workshop (WORKSHOP, Concordance Chunk C, C-10) holds from a manual start: one player alone, in the Overworld
+  alone, with only the research its steps have understood so far and nothing mastered, makes every Concordance thing each
+  step names (tools/acquisition.py WORKSHOP), works its practices and its rite with nothing past the Practitioner stage,
+  and reaches the stage the step says; each step's own research is needed (without it something the step makes or works
+  is out of reach); each step's switches are exactly those its recipes load under, the first step's only the
+  Concordance's; every thing named is a row of tools/acquisition.py WORKSHOP or FACTORY and every row is named; and each
+  product is brewed by its named process, from things the same player has, over a heat whose degrees lie in the band it
+  stirs at;
 - every game test a step names exists;
 - the record's table is the one table() renders.
 
-Run it to print the table and any problem: python3 tools/concordance_journey.py
+Run it to print the table and any problem: python3 tools/concordance_journey.py; with --check it prints only the
+problems and exits 1 if there are any.
 """
 import copy
 import json
@@ -151,6 +160,71 @@ ROUTES = {
     },
 }
 
+# Concordance Chunk C (C-10; 09:140, "The entire loop is survival-reachable from a manual start. A powered version
+# improves convenience"): the living workshop. Not a stage route: what one player alone does, in the Overworld alone, from
+# a manual start (crafted Mendvetch, a campfire crucible, lantern-filled pylons) to a powered crucible a porter supplies,
+# and the garden's two Chunk C rules. Each step: the stage reached with the research understood so far and nothing
+# mastered (five entries in five traditions are the generalist's Adept); the research it adds; what the player does; the
+# feature switches its recipes load under; the things it makes or places (tools/acquisition.py WORKSHOP and FACTORY); the
+# practices and the rite it works; and the server game tests that exercise it. Each product is brewed by the process named
+# (tools/concordance_alchemy.py PRODUCTS) over the heat named.
+WORKSHOP = {
+    "name": "The living workshop",
+    "products": {"stillroot_poultice": ("mendvetch", "minecraft:magma_block"),
+                 "kiln_draught": ("sugar", "minecraft:campfire")},
+    # What each form is bottled in (Java: CrucibleBlockEntity.formFor; tools/concordance_alchemy.py CONTAINERS).
+    "containers": {"draught": "minecraft:glass_bottle", "salve": "minecraft:bowl"},
+    "steps": [
+        {"stage": "practitioner", "research": ["first_light", "alembic_arts"],
+         "text": "Craft Mendvetch from wheat seeds, bone meal and an amethyst shard. Set an Alembic Crucible over a campfire "
+                 "and another over a magma block; with the Alembic Arts understood, brew the Kiln Draught by hand (two "
+                 "sugar in a bottle of water, stirred hot twice over the campfire) and the Stillroot Poultice (two "
+                 "Mendvetch, stirred warm four times over the magma block), and record the poultice's process on a formula",
+         "switches": ["concordance"], "things": ["mendvetch", "crucible", "formula"], "practices": ["alchemy"],
+         "tests": ["theLivingWorkshopFromAManualStart", "aCampfireCrucibleStillWorks",
+                   "aStillrootPoulticeRepeatsAndADirtyBatchHealsLess", "aKilnDraughtCarriesItsDrinkerAcrossTheSlag",
+                   "aPoulticeOnAFriendIsCreditedForWhatItHeals"]},
+        {"stage": "practitioner", "research": ["circle_lore"],
+         "text": "With Circle Lore understood, build a Lesser Circle (a Circle Anchor, four Ley Pylons and eight Warding "
+                 "Stones), fill each pylon from a Kindled Lantern and perform Root and Rivet on a Thallite plate with four "
+                 "copper ingots and four Mendvetch: a Rooted Thallite Foundation",
+         "switches": ["concordance", "machines", "thallite"],
+         "things": ["lampwright_bench", "kindled_lantern", "ley_pylon", "circle_anchor", "warding_stone", "thallite_plate",
+                    "rooted_thallite_foundation"],
+         "practices": ["ritual"], "ritual": "root_and_rivet",
+         "tests": ["theLivingWorkshopFromAManualStart", "aPylonFillsFromLightAndElectricity",
+                   "anIdleCircleSaysEverythingARiteStillNeeds", "rootAndRivetAttunesOnePlateOnce",
+                   "aDryPylonStopsRootAndRivetAndKeepsTheOfferings"]},
+        {"stage": "practitioner", "research": [],
+         "text": "Craft a Crucible Stand from the foundation, iron and copper and set the crucible on it; feed it JE from a "
+                 "Coal Generator through Copper Cable and pipe water in from an Electric Pump (bronze plates for the pump "
+                 "and its pipes are pressed at a Metal Press the generator powers): following the poultice's formula, the "
+                 "stand heats the crucible for each stir and pays nothing while the crucible waits",
+         "switches": ["concordance", "machines", "thallite", "tin", "zinc"],
+         "things": ["crucible_stand", "coal_generator", "copper_cable", "machine_casing", "metal_press", "electric_pump",
+                    "bronze_fluid_pipe"],
+         "practices": ["alchemy"],
+         "tests": ["theLivingWorkshopFromAManualStart", "aStandFollowsTheFormulasBands", "theFullChainRunsFromAPumpAndACable",
+                   "aStandIdlesForAWaitingOrIncompatibleFormula", "aCableMeetsTheStandWhereItTakesPower"]},
+        {"stage": "practitioner", "research": ["binding_arts"],
+         "text": "With the Binding Arts understood, set down a Clockwork Porter and key it to a Courier Post beside a "
+                 "lantern-filled pylon, which fuels it: the crucible asks the post for its formula's exact shortage, which "
+                 "the porter brings from a chest by the post (a Peepo serves through its crucible port as well)",
+         "switches": ["concordance"], "things": ["courier_post", "clockwork_porter", "porter_key"],
+         "practices": ["worker_service"],
+         "tests": ["theLivingWorkshopFromAManualStart", "aCrucibleAsksOnceForItsExactShortage",
+                   "aCourierFillsACrucibleUntilItIsFull", "anUnloadedCrucibleWaitsAndLosesNothing"]},
+        {"stage": "adept", "research": ["verdant_husbandry"],
+         "text": "With Verdant Husbandry understood (five entries in five traditions: the generalist's Adept), lay Verdant "
+                 "Beds, grow Dewmoss beside Gloamcap (a mixed bed) and graft Dewlit onto a Sunpetal's bed with a Dewmoss",
+         "switches": ["concordance"], "things": ["verdant_bed", "sunpetal", "dewmoss", "gloamcap"],
+         "practices": ["cultivation"],
+         "tests": ["theLivingWorkshopFromAManualStart", "aBedSaysWhatItsPlantNeedsAndHowFar",
+                   "aMixedBedGrowsFasterOnlyForAnotherKind", "restCompostAndTendingEaseStrain",
+                   "aGraftTakesOnceAndConsumesItsDonor"]},
+    ],
+}
+
 # Cooperative play with shared infrastructure and separate ownership: what is shared, what stays one player's, and the
 # server game tests that show it. These are single-server tests with mock players, not two clients.
 COOPERATIVE = [
@@ -241,6 +315,124 @@ def game_tests():
     return names
 
 
+def _band(degrees):
+    """The band a crucible at {degrees} stirs at (tools/concordance_alchemy.py BANDS; Java: alchemy/Band.of)."""
+    import concordance_alchemy as al
+    reached = [band for band, (start, _dissolve) in al.BANDS.items() if start is not None and degrees >= start]
+    return max(reached, key=lambda band: al.BANDS[band][0], default="cold")
+
+
+def _switches(recipe):
+    """The feature switches the recipe file {recipe} (under data/jugcraft/recipe) loads under, or None if it is missing."""
+    path = DATA / MOD / "recipe" / f"{recipe}.json"
+    if not path.is_file():
+        return None
+    body = json.loads(path.read_text(encoding="utf-8"))
+    return {condition.get("feature") for condition in body.get("fabric:load_conditions", [])
+            if condition.get("condition") == f"{MOD}:feature_enabled"}
+
+
+def workshop_walk(pg, research, invocations, rituals, at_hand, understood, cap=None):
+    """What one player alone reaches in the Overworld alone, with only the research entries {understood} understood and
+    nothing mastered: every other research state is removed from the graph, to which every Concordance thing the workshop
+    names (tools/acquisition.py WORKSHOP) and every product's ingredients and heat are added as a step needing them would
+    add them. Returns (reached, the graph's problems)."""
+    import acquisition
+    import concordance_alchemy as al
+    problems = []
+    nodes = pg.graph(research, invocations, rituals, at_hand, problems)
+    for item in acquisition.WORKSHOP:
+        pg.item_node(nodes, at_hand, rid(item), problems)
+    for product, (process, heat) in WORKSHOP["products"].items():
+        for operation in al.PRODUCTS.get(product, {}).get("processes", {}).get(process, []):
+            if operation[0] == "add":
+                pg.item_node(nodes, at_hand, al.INGREDIENTS[operation[1]]["item"], problems)
+        pg.item_node(nodes, at_hand, heat, problems)
+        container = WORKSHOP["containers"].get(al.PRODUCTS.get(product, {}).get("form"))
+        if container:
+            pg.item_node(nodes, at_hand, container, problems)
+    without = {pg.research_node(rid(key), state) for key in research for state in pg.RESEARCH_STATES
+               if state == "mastered" or key not in understood}
+    return pg.reachable(nodes, research, cap=cap, dimensions={""}, without=without), problems
+
+
+def _workshop_wants(step):
+    """The nodes a workshop step makes or works: its Concordance things, its practices and its rite."""
+    import acquisition
+    wants = [f"item:{rid(item)}" for item in step["things"] if item in acquisition.WORKSHOP]
+    wants += [f"practice:{rid(practice)}" for practice in step["practices"]]
+    return wants + ([f"ritual:{rid(step['ritual'])}"] if step.get("ritual") else [])
+
+
+def workshop_problems(pg, research, invocations, rituals, at_hand):
+    """What is wrong with the living workshop (see the module's description): an empty list when it holds."""
+    import acquisition
+    import concordance_alchemy as al
+    found = []
+    steps = WORKSHOP["steps"]
+    named = [item for step in steps for item in step["things"]]
+    rows = {**acquisition.WORKSHOP, **acquisition.FACTORY}
+    for item in sorted(set(named) - set(rows)):
+        found.append(f"journey workshop: {item} is no row of tools/acquisition.py WORKSHOP or FACTORY")
+    for item in sorted(set(rows) - set(named)):
+        found.append(f"journey workshop: tools/acquisition.py's {item} is named by no step")
+    if steps and steps[0]["switches"] != ["concordance"]:
+        found.append("journey workshop: the manual start needs the Concordance's switch alone")
+    understood = []
+    for number, step in enumerate(steps, 1):
+        for key in step["research"]:
+            if key not in research:
+                found.append(f"journey workshop step {number}: {key} is not a research entry")
+        understood = understood + [key for key in step["research"] if key not in understood]
+        switches = set()
+        for item in step["things"]:
+            recipe = acquisition.recipe_file(item, rows.get(item, ""))
+            loads = _switches(recipe) if recipe else set()
+            if loads is None:
+                found.append(f"journey workshop step {number}: recipe/{recipe}.json, which makes {item}, is missing")
+            switches |= loads or set()
+        if switches != set(step["switches"]):
+            found.append(f"journey workshop step {number}: its recipes load under {sorted(switches)}, not "
+                         f"{step['switches']}")
+        reached, graph_problems = workshop_walk(pg, research, invocations, rituals, at_hand, understood)
+        capped, _ = workshop_walk(pg, research, invocations, rituals, at_hand, understood, cap="practitioner")
+        found.extend(f"journey workshop step {number}: {problem}" for problem in graph_problems)
+        stage = max((key[len("stage:"):] for key in reached if key.startswith("stage:")), key=lambda s: pg.STAGES[s]["order"],
+                    default="none")
+        if stage != step["stage"]:
+            found.append(f"journey workshop step {number}: understanding {understood} makes one {stage}, not "
+                         f"{step['stage']}")
+        wants = _workshop_wants(step)
+        for want in wants:
+            if want not in capped:
+                found.append(f"journey workshop step {number}: one player alone in the Overworld, with {understood} "
+                             f"understood and nothing past the Practitioner stage, does not reach {want}")
+        for key in step["research"]:
+            lost, _ = workshop_walk(pg, research, invocations, rituals, at_hand, [k for k in understood if k != key])
+            if all(want in lost for want in wants):
+                found.append(f"journey workshop step {number}: nothing it makes or works needs {key}")
+    final, _ = workshop_walk(pg, research, invocations, rituals, at_hand, understood, cap="practitioner")
+    for product, (process, heat) in WORKSHOP["products"].items():
+        operations = al.PRODUCTS.get(product, {}).get("processes", {}).get(process)
+        if not operations:
+            found.append(f"journey workshop: {product} has no process {process} (tools/concordance_alchemy.py PRODUCTS)")
+            continue
+        for operation in operations:
+            if operation[0] == "add" and f"item:{al.INGREDIENTS[operation[1]]['item']}" not in final:
+                found.append(f"journey workshop: {product}'s {operation[1]} is not had in the Overworld by the route")
+            if operation[0] == "stir" and _band(al.HEAT_SOURCES.get(heat, al.AMBIENT)) != operation[1]:
+                found.append(f"journey workshop: {product} stirs {operation[1]}, but {heat} holds a crucible at "
+                             f"{al.HEAT_SOURCES.get(heat, al.AMBIENT)}, {_band(al.HEAT_SOURCES.get(heat, al.AMBIENT))}")
+        if f"item:{heat}" not in final:
+            found.append(f"journey workshop: {product}'s heat, {heat}, is not had in the Overworld by the route")
+        form = al.PRODUCTS[product]["form"]
+        container = WORKSHOP["containers"].get(form, "")
+        if al.CONTAINERS.get(form, "?") not in container or f"item:{container}" not in final:
+            found.append(f"journey workshop: {product} is bottled in a {al.CONTAINERS.get(form)}, which WORKSHOP's "
+                         f"containers ({container or 'none'}) do not give in the Overworld by the route")
+    return found
+
+
 def problems():
     """What is wrong with the journey: an empty list when every route holds (see the module's description)."""
     found = []
@@ -306,12 +498,16 @@ def problems():
         if f"item:{rid(item)}" not in first:
             found.append(f"journey: the Rime travel kit's {item} needs more than First Light understood, another player, "
                          "the Nether or the End")
+    # The living workshop (Concordance Chunk C, C-10).
+    found.extend(workshop_problems(pg, research, invocations, rituals, at_hand))
     # Every game test named exists.
     tests = game_tests()
     named = list(FIRST_SUCCESS["tests"])
     for route in ROUTES.values():
         for _stage, _text, names in route["steps"]:
             named += names
+    for step in WORKSHOP["steps"]:
+        named += step["tests"]
     for _text, names in COOPERATIVE:
         named += names
     for _mistake, _remedy, names in RECOVERY:
@@ -348,6 +544,22 @@ def table():
             lines.append("")
         for number, (stage, text, listed) in enumerate(route["steps"], 1):
             lines.append(f"{number}. **{STAGE_NAMES[stage]}.** {text}. Tests: {tests(listed)}.")
+    import acquisition
+    items = {**acquisition.WORKSHOP, **acquisition.FACTORY}
+
+    def thing(item):
+        return lang.get(f"item.{MOD}.{item}") or lang.get(f"block.{MOD}.{item}") or item
+    lines += ["", f"### {WORKSHOP['name']}", "",
+              "From a manual start to a powered crucible a porter supplies, and the garden's mixed bed and graft "
+              "(Concordance Chunk C). It is no stage route: one player alone does each step in the Overworld, with the "
+              "research understood so far and nothing mastered. The factory's parts are made by their own recipes; their "
+              "bronze, plates and gears are the factory's.", "",
+              "| Step | Stage | Understands | Switches | Makes or places | Server game tests |", "|---|---|---|---|---|---|"]
+    for number, step in enumerate(WORKSHOP["steps"], 1):
+        made = ", ".join(thing(item) + ("" if item in acquisition.WORKSHOP else " (factory)") for item in step["things"]
+                         if item in items)
+        lines.append(f"| {number}. {step['text']} | {STAGE_NAMES[step['stage']]} | {names(step['research']) or 'nothing new'} "
+                     f"| {', '.join(step['switches'])} | {made} | {tests(step['tests'])} |")
     lines += ["", "### Cooperative play", "", "| Shared, and what stays one player's | Server game tests |", "|---|---|"]
     for text, listed in COOPERATIVE:
         lines.append(f"| {text} | {tests(listed)} |")
@@ -358,6 +570,8 @@ def table():
 
 
 if __name__ == "__main__":
-    print("\n".join(table()))
+    if "--check" not in sys.argv:
+        print("\n".join(table()))
     issues = problems()
     print("\n".join(issues) if issues else "journey: every route holds")
+    sys.exit(1 if issues else 0)

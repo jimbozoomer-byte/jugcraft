@@ -23,6 +23,7 @@ Locally:
 - `./gradlew runClientGameTest` runs every class.
 - `python3 tools/select_client_tests.py --base origin/main` shows what a branch would run.
 - `-PclientTestShard=<n> -PclientTestShards=<count>` still keeps every count-th class.
+- The Concordance workshop load card (Chunk C, C-10): `JAVA_TOOL_OPTIONS=-Dfabric-api.gametest.filter=jugcraft-test:concordance_workshop_load_game_tests_load_card ./gradlew runGameTest --no-daemon`. In PowerShell, set `$env:JAVA_TOOL_OPTIONS='-Dfabric-api.gametest.filter=jugcraft-test:concordance_workshop_load_game_tests_load_card'` first, then run `.\gradlew.bat runGameTest --no-daemon`, then `Remove-Item Env:JAVA_TOOL_OPTIONS`. Fabric's filter makes it the only server game test that runs, and only then does it measure; in every other run it passes at once. Its lines begin `Concordance load card |`. `JAVA_TOOL_OPTIONS` reaches every Java program started while it is set, Gradle's own included. A manual Build run with `load_card` ticked runs it in its own job, once that workflow change is approved.
 
 The client tests a pull request skips still run on `main` after it merges. A break they catch there is fixed in a follow-up pull request.
 
@@ -38,7 +39,7 @@ Record commit SHA, exact client/server/dependency versions, test world origin, c
 - Concurrent use by two players, permissions, disconnect/reconnect, save and restart.
 - Existing systems interacting with the new feature; dependency present/absent for optional integrations.
 - Invalid requests, repeated actions, full inventories, interrupted crafts, chunk unloads, and duplicate reward attempts where relevant.
-- Before/after performance under a stated workload: machine count, players, hardware, median/p95 tick time and memory observations. Agree per-feature limits before merge; do not claim support for an untested player count.
+- Before/after performance under a stated workload: machine count, players, hardware, median/p95 tick time and memory observations. Agree per-feature limits before merge; do not claim support for an untested player count. The Concordance workshop's before/after measurement is its load card (above; [Chunk C's contract](features/concordance-chunk-c.md), C-P19 for the proposed limits).
 - Upgrade from the prior released world version and safe feature-disable behavior where persisted content changes.
 
 ## Dedicated server and two clients

@@ -230,6 +230,13 @@ public class ConcordanceWinterClientGameTests implements FabricClientGameTest {
 
 			// The real Trinkets slots on the real player: a Focus of Water lengthens Preserve, and the bangle braces through
 			// the server's own tick.
+			// Rimekeeping understood, one research a tick: each learning sends Modonomicon's book state as a live map that a
+			// second learning in the same tick can change while it is still being encoded (CI run 38679932446 dropped a
+			// client so).
+			for (String research : List.of("jugcraft:first_light", Rime.RESEARCH)) {
+				server.runOnServer(minecraft -> ConcordanceProgress.grant(player(minecraft), research, ResearchState.UNDERSTOOD));
+				context.waitTicks(2);
+			}
 			String slotted = server.computeOnServer(ConcordanceWinterClientGameTests::wearKit);
 			check(slotted.isEmpty(), slotted);
 			context.waitTicks(5);
@@ -372,11 +379,9 @@ public class ConcordanceWinterClientGameTests implements FabricClientGameTest {
 		return slowest;
 	}
 
-	/** Rimekeeping understood, a Focus of Water in the Spell Focus slot and the Water Bangle in a Bracelet slot; an empty string, or what is wrong. */
+	/** A Focus of Water in the Spell Focus slot and the Water Bangle in a Bracelet slot (Rimekeeping understood first); an empty string, or what is wrong. */
 	private static String wearKit(MinecraftServer minecraft) {
 		ServerPlayer player = player(minecraft);
-		ConcordanceProgress.grant(player, "jugcraft:first_light", ResearchState.UNDERSTOOD);
-		ConcordanceProgress.grant(player, Rime.RESEARCH, ResearchState.UNDERSTOOD);
 		var focus = TrinketsApi.getAttachment(player).getInventory("chest/spell_focus");
 		var bracelets = TrinketsApi.getAttachment(player).getInventory("hand/bracelet");
 		if (focus == null || bracelets == null) {

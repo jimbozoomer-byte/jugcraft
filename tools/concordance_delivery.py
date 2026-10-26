@@ -164,11 +164,17 @@ MATRIX = {
     "jade": (
         "Readouts from server snapshots: bench study, lantern Radiance, sconce charge, circle phase and faults, pylon "
         "charge, crucible state and Preserve's hold, beds and crops, living devices, observatory, workers, courier posts, "
-        "shrines",
+        "shrines; since Concordance Chunk C (not merged), a crucible's reason and tank, a circle's needs, spending and "
+        "held offerings, the Crucible Stand, a bed's strain and graft",
         "nothing shown on looking; the same facts come from the journal, the commands and each device's own messages",
-        ["benchStudyUnderstandsFirstLight", "preserveHoldsOneBandAndExpires"],
-        "Server tests run without Jade in CI's optional-absent job; its overlay has not been seen in a client; Preserve's "
-        "hold, as Jade reads it, passed its test in CI's mod job (run 38519234934, Chunk B unit 3, not merged)"),
+        ["benchStudyUnderstandsFirstLight", "preserveHoldsOneBandAndExpires", "jadeIsToldTheTankAndWhyNeverTheMakeup",
+         "EncyclopediaClientGameTests", "ConcordanceWorkshopClientGameTests"],
+        "Server tests run without Jade in CI's optional-absent job; CI runs no client test without it; the client tests "
+        "are written to photograph its overlay on a crucible, a stand, an anchor and a crop (Concordance Chunk C, not "
+        "merged; they pass in CI, run 38774859294); the one Jade shot viewed, the anchor's in that run, shows no Jade box "
+        "at the log's 480x270 preview size, though its snapshot assertion passed, so the overlay is still not seen in a "
+        "client; Preserve's hold, as Jade reads it, passed its test in CI's mod job (run 38519234934, Chunk B unit 3, not "
+        "merged)"),
     "jei": (
         "Recipe categories for the Lampwright's Bench, the Circle Anchor and the Resonant Ring; alchemy ingredients' "
         "properties as information (never outcomes); since Concordance Chunk A, an information page each on where the "

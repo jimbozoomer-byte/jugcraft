@@ -5,6 +5,9 @@ import java.util.function.BiConsumer;
 import io.github.jimbozoomer.jugcraft.agriculture.*;
 import io.github.jimbozoomer.jugcraft.machine.*;
 import io.github.jimbozoomer.jugcraft.kinetic.*;
+import io.github.jimbozoomer.jugcraft.concordance.CrucibleBlockEntity;
+import io.github.jimbozoomer.jugcraft.concordance.JugcraftConcordance;
+import io.github.jimbozoomer.jugcraft.concordance.alchemy.Formula;
 import net.fabricmc.fabric.api.client.gametest.v1.context.*;
 import net.fabricmc.fabric.api.transfer.v1.item.*;
 import net.fabricmc.fabric.api.transfer.v1.storage.Storage;
@@ -71,6 +74,8 @@ final class CompanionAutomationChecks {
         group.accept("automatic cider supply, work and output",()->kitchen(server,"cider_press"));
         group.accept("automatic canning supply, bucket return and output",()->kitchen(server,"canning_kettle"));
         group.accept("automatic hearth fuel, tending and timely output",()->kitchen(server,"hearth_oven"));
+        group.accept("a full crucible leaves the companion's cargo with it",()->crucibleFull(server));
+        group.accept("an unloaded crucible: the job says UNLOADED and keeps its cargo",()->crucibleUnloaded(server));
         server.runOnServer(s->reset(s.overworld()));
     }
     private void staticGroup(String name,ServerLevel level,Runnable action){group.accept(name,()->{reset(level);try{action.run();}finally{cleanup();}});}
@@ -422,5 +427,83 @@ final class CompanionAutomationChecks {
         server.runOnServer(s->{check(count(source[0],Items.IRON_ORE)==1,"one batch ingredient physically picked up");helper[0].assignments.cycleTransport(1,true);helper[0].assignments.cycleTransport(1,true);});
         server.waitFor(s->count(source[0],Items.IRON_ORE)==2,500);
         server.runOnServer(s->{check(processor[0].getItem(0).isEmpty() && count(helper[0].belongings,Items.IRON_ORE)==0,"Off returned ingredient without insertion or duplication");cleanup();});
+    }
+    private static final String THREE_GLOW="water 3; add minecraft:glowstone_dust jugcraft:raw; add minecraft:glowstone_dust jugcraft:raw; add minecraft:glowstone_dust jugcraft:raw; stir hot; stir hot";
+    /** Concordance Chunk C, C-06: a crucible full of something else takes none of a companion's cargo, which goes back, none lost or doubled. No water is poured, so the crucible waits at its first step and consumes nothing that arrives. */
+    private void crucibleFull(TestServerContext server){
+        final PeepoEntity[] helper={null};final Container[] supply={null};final CrucibleBlockEntity[] crucible={null};
+        server.runOnServer(s->{var l=s.overworld();reset(l);var owner=s.getPlayerList().getPlayers().getFirst();var p=npc(l,owner,false);helper[0]=p;
+            var pos=base.offset(2,0,3);l.setBlockAndUpdate(pos,JugcraftConcordance.CRUCIBLE.defaultBlockState());var c=(CrucibleBlockEntity)l.getBlockEntity(pos);crucible[0]=c;
+            c.follow(Formula.parse(THREE_GLOW),owner.getUUID());check(c.companion.needed(new ItemStack(Items.GLOWSTONE_DUST))==3,"the crucible wants three glowstone");
+            supply[0]=chest(l,base.west(4));supply[0].setItem(0,new ItemStack(Items.GLOWSTONE_DUST,3));
+            p.assignments.assign(l,pos);p.assignments.assignContainer(l,base.west(4),Direction.UP,false);walking(p);});
+        server.waitFor(s->count(supply[0],Items.GLOWSTONE_DUST)==0,800);
+        server.runOnServer(s->{helper[0].setNoAi(true);check(count(helper[0].belongings,Items.GLOWSTONE_DUST)==3,"the companion carries the three");
+            for(int i=0;i<CrucibleBlockEntity.BUFFER_SLOTS;i++)crucible[0].setItem(i,new ItemStack(Items.SPIDER_EYE,64));walking(helper[0]);});
+        server.waitFor(s->count(supply[0],Items.GLOWSTONE_DUST)==3,1600);
+        server.runOnServer(s->{check(count(crucible[0],Items.GLOWSTONE_DUST)==0 && count(crucible[0],Items.SPIDER_EYE)==320
+            && count(helper[0].belongings,Items.GLOWSTONE_DUST)==0,"a full crucible took none; the cargo went back once");cleanup();});
+    }
+    /** The ring of barriers three blocks round {@code base}, two high: it keeps a walking companion where the chunk is forced. */
+    private List<BlockPos> fence(){
+        var ring=new ArrayList<BlockPos>();
+        for(int d=-3;d<=3;d++)for(int y=0;y<=1;y++){ring.add(base.offset(d,y,-3));ring.add(base.offset(d,y,3));if(d>-3 && d<3){ring.add(base.offset(-3,y,d));ring.add(base.offset(3,y,d));}}
+        return ring;
+    }
+    /**
+     * Concordance Chunk C, C-06: the crucible's chunk unloads with the cargo aboard. The companion walks on its own the whole
+     * time (fenced in where the chunk is forced, never frozen), so its own transport meets the unloaded crucible: the job
+     * says UNLOADED and the cargo is kept; loaded again, it is delivered once.
+     */
+    private void crucibleUnloaded(TestServerContext server){
+        final PeepoEntity[] helper={null};final Container[] supply={null};final BlockPos far=base.east(56);
+        server.runOnServer(s->{var l=s.overworld();reset(l);var owner=s.getPlayerList().getPlayers().getFirst();var p=npc(l,owner,false);helper[0]=p;
+            for(var pos:BlockPos.betweenClosed(base.offset(9,-1,-1),base.offset(57,-1,1)))l.setBlock(pos,Blocks.STONE.defaultBlockState(),2);
+            l.setBlockAndUpdate(far,JugcraftConcordance.CRUCIBLE.defaultBlockState());((CrucibleBlockEntity)l.getBlockEntity(far)).follow(Formula.parse(THREE_GLOW),owner.getUUID());
+            supply[0]=chest(l,base.west(4));supply[0].setItem(0,new ItemStack(Items.GLOWSTONE_DUST,3));
+            p.assignments.assign(l,far);check(p.assignments.get(1)!=null && p.assignments.get(1).at().pos().equals(far),"the far crucible is its work");
+            p.assignments.assignContainer(l,base.west(4),Direction.UP,false);walking(p);});
+        server.waitFor(s->count(supply[0],Items.GLOWSTONE_DUST)==0,800);
+        server.runOnServer(s->{var l=s.overworld();var p=helper[0];p.setNoAi(true);p.setNoGravity(true);p.snapTo(base.getX()+.5,base.getY(),base.getZ()+.5,0,0);
+            check(count(p.belongings,Items.GLOWSTONE_DUST)==3,"the companion carries the three, back where the chunk will be forced");
+            for(var pos:fence())l.setBlock(pos,Blocks.BARRIER.defaultBlockState(),2);walking(p);});
+        String area=String.format(Locale.ROOT,"%d %d %d %d",base.getX()-8,base.getZ()-8,base.getX()+8,base.getZ()+8);
+        server.runCommand("forceload add "+area);
+        try{
+            server.runCommand(String.format(Locale.ROOT,"tp @a %d %d %d",base.getX()+2000,base.getY(),base.getZ()));
+            server.waitFor(s->!s.overworld().hasChunkAt(far),1200);
+            // At least two of its transport's 200-tick retries pass with the crucible unloaded.
+            serverTicks(server,450);
+            server.runOnServer(s->{var p=helper[0];check(!p.isRemoved() && count(p.belongings,Items.GLOWSTONE_DUST)==3 && count(supply[0],Items.GLOWSTONE_DUST)==0
+                && CompanionJobs.inspect(p,p.assignments.get(1))==CompanionStatus.UNLOADED,"unloaded: the job says so and the cargo is kept, walking all the while");});
+            server.runOnServer(s->{var l=s.overworld();for(var pos:fence())l.setBlock(pos,Blocks.AIR.defaultBlockState(),2);});
+            // The companion's chunks stay forced until the end. A teleport's own loading tickets come through the throttled
+            // player-ticket queue, ticks later; lifting the force with the teleport left them unloaded for a tick, which saved
+            // the companion and loaded a new copy of it, so helper[0] was a removed object still listing the three.
+            teleportPlayer(server,-3.5);
+            server.waitFor(s->s.overworld().hasChunkAt(far),600);
+            server.runOnServer(s->check(count((Container)s.overworld().getBlockEntity(far),Items.GLOWSTONE_DUST)==0,"nothing arrived while it was unloaded"));
+            UUID id=helper[0].getUUID();BlockPos chest=base.west(4);
+            try{server.waitFor(s->glowstone(s.overworld(),id,far,chest)[0]>=3,2400);}
+            catch(AssertionError e){throw new AssertionError("never delivered: "+server.computeOnServer(s->glowstoneText(s.overworld(),id,far,chest)),e);}
+            server.runOnServer(s->{var l=s.overworld();int[] n=glowstone(l,id,far,chest);String where=glowstoneText(l,id,far,chest);
+                check(l.getEntity(id)==helper[0] && !helper[0].isRemoved(),"the companion stayed loaded through the crucible's reload: "+where);
+                check(n[0]==3 && n[1]==0 && n[2]==0,"delivered once, none lost or doubled: "+where);
+                l.setBlockAndUpdate(far,Blocks.AIR.defaultBlockState());
+                for(var pos:BlockPos.betweenClosed(base.offset(9,-1,-1),base.offset(57,-1,1)))l.setBlock(pos,Blocks.AIR.defaultBlockState(),2);cleanup();});
+        }finally{
+            server.runCommand("forceload remove "+area);
+        }
+    }
+    /** Where crucibleUnloaded's glowstone is now, read live (never a held reference): the crucible, the companion found by its UUID, the chest; -1 for one not there. */
+    private int[] glowstone(ServerLevel l,UUID companion,BlockPos crucible,BlockPos chest){
+        return new int[]{
+            l.getBlockEntity(crucible) instanceof Container brew?count(brew,Items.GLOWSTONE_DUST):-1,
+            l.getEntity(companion) instanceof PeepoEntity carrier?count(carrier.belongings,Items.GLOWSTONE_DUST):-1,
+            l.getBlockEntity(chest) instanceof Container store?count(store,Items.GLOWSTONE_DUST):-1};
+    }
+    private String glowstoneText(ServerLevel l,UUID companion,BlockPos crucible,BlockPos chest){
+        int[] n=glowstone(l,companion,crucible,chest);
+        return String.format(Locale.ROOT,"crucible %d, carried %d, chest %d (of 3)",n[0],n[1],n[2]);
     }
 }

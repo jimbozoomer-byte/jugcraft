@@ -44816,6 +44816,16 @@
       "numerator": 1251,
       "denominator": 2,
       "source": "recipe jugcraft:quarrel_carbine"
+    },
+    "jugcraft:crucible_stand": {
+      "numerator": 1793,
+      "denominator": 1,
+      "source": "recipe jugcraft:crucible_stand"
+    },
+    "jugcraft:rooted_thallite_foundation": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
     }
   }
 }

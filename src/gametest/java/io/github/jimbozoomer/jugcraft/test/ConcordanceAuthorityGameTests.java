@@ -65,7 +65,7 @@ public class ConcordanceAuthorityGameTests {
 	private static final EffectSpec SEAR = new EffectSpec(EffectKind.DAMAGE, Intent.HARMFUL, 2, 0, null, Stacking.STRONGEST, "spell_power:arcane");
 
 	private static ServerPlayer player(GameTestHelper helper) {
-		ServerPlayer player = helper.makeMockServerPlayerInLevel();
+		ServerPlayer player = TestPlayers.mock(helper);
 		player.setGameMode(GameType.SURVIVAL);
 		BlockPos absolute = helper.absolutePos(new BlockPos(0, 2, 0));
 		player.snapTo(absolute.getX() + 0.5, absolute.getY(), absolute.getZ() + 0.5, 0.0F, 0.0F);
