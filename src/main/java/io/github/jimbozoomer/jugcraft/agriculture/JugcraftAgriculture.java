@@ -473,6 +473,7 @@ public final class JugcraftAgriculture {
 	/** Low ground fog from the Fog Machine (drawn by the client: client/FogParticle.java). */
 	public static final SimpleParticleType FOG = FabricParticleTypes.simple();
 	public static final SimpleParticleType SNOWPETAL = FabricParticleTypes.simple();
+	public static final SimpleParticleType ACADEMY_LEAF = FabricParticleTypes.simple();
 	/** What each kind of pumpkin becomes when first carved by hand, and the loot table its seeds come from. */
 	private static final Map<Block, Block> CARVED_FROM = new HashMap<>();
 	private static final Map<Block, ResourceKey<LootTable>> CARVE_LOOT = new HashMap<>();
@@ -684,6 +685,7 @@ public final class JugcraftAgriculture {
 				MapColor.COLOR_BROWN, MapColor.COLOR_LIGHT_GRAY);
 		registerWildPlants();
 		Registry.register(BuiltInRegistries.PARTICLE_TYPE, Jugcraft.id("snowpetal"), SNOWPETAL);
+		Registry.register(BuiltInRegistries.PARTICLE_TYPE, Jugcraft.id("academy_leaf"), ACADEMY_LEAF);
 		registerFoliage("snowpetal_cherry", "snowpetal_cherry_leaves", SNOWPETAL_CHERRY_GROWER, Blocks.CHERRY_SAPLING, Blocks.CHERRY_LEAVES,
 				props -> new net.minecraft.world.level.block.UntintedParticleLeavesBlock(0.1F, SNOWPETAL,
 						net.minecraft.world.level.block.sounds.AmbientLeavesBlockSoundPlayer.noAmbientSound(), props));
