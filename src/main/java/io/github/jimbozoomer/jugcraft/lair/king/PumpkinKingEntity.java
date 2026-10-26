@@ -924,8 +924,9 @@ public class PumpkinKingEntity extends Monster implements GeoEntity {
 				entry.setValue(left);
 				continue;
 			}
+			Hill hill = entry.getKey();  // an EnumMap entry cannot be read once removed
 			it.remove();
-			split(level, entry.getKey());
+			split(level, hill);
 		}
 		for (Iterator<Map.Entry<Hill, Integer>> it = regrowIn.entrySet().iterator(); it.hasNext(); ) {
 			Map.Entry<Hill, Integer> entry = it.next();
@@ -934,8 +935,8 @@ public class PumpkinKingEntity extends Monster implements GeoEntity {
 				entry.setValue(left);
 				continue;
 			}
-			it.remove();
 			BlockPos at = entry.getKey().at(origin);
+			it.remove();
 			if (level.getBlockState(at).getBlock() instanceof KingsGourdBlock
 					&& level.getBlockState(at).getValue(KingsGourdBlock.STAGE) == KingsGourdBlock.PICKED) {
 				KingsGourdBlock.setStage(level, at, KingsGourdBlock.GREEN);
