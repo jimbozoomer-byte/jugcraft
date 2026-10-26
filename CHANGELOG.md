@@ -174,6 +174,10 @@ No numbered release yet. Entries on feature branches remain proposed until their
 - **Halloween and autumn creatures reach them too:** wisps rise over the landscape swamps on Halloween nights. On full moons, werewolves stalk the landscape woods, snow werewolves its snowy land and shadow werewolves the Ominous Woods, where the Howling Totem rite also works. Squirrels and wild turkeys come to its woods and open country.
 - **Every Jugcraft biome now needs a seasons decision:** the data check fails on a new biome without one, so a future collection cannot miss the seasons. The audit of every seasonal system against the newer collections is in [seasonal-biome-audit.md](docs/features/seasonal-biome-audit.md).
 
+### Unmerged: Guns, heavy bullets: knockback and armour piercing
+- A gun's bullets can now knock back what they hit further than a plain hit, and pass through some of its armour, as the owner's gun data asks. The **Jawbreaker** is the first: its shots push about twice as far as a plain hit (a second push of 0.6) and pass through 4.5 points of armour; a creature without armour takes its damage as before.
+- Record: [guns.md, the heavy-bullets follow-up](docs/features/guns.md#follow-up-heavy-bullets-knockback-and-armour-piercing).
+
 ### Unmerged: Guns, no flash from a gun silenced by its build
 - The **Gallant Rifle**, silenced the length of its barrel, no longer shows a muzzle flash when fired, as a gun with a Silencer fitted shows none. The guns' client test checks it.
 - Record: [guns.md, the silenced-flash follow-up](docs/features/guns.md#follow-up-no-flash-from-a-gun-silenced-by-its-build).

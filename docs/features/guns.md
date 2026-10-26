@@ -2859,7 +2859,7 @@ The next three of the owner's diamond-steel guns, taken up after slice 15A (on 2
 | The view aimed | 0.9 | 0.9 | 0.9 |
 | Takes | the barrels' four, the magazines and the stocks | the barrels' four, the magazines and the stocks | the barrels' four, the stocks, the three scopes and the Laser Sight |
 
-**Their numbers** start from the owner's own, in the gun data of the same upload, set beside the guns already built: the Krauser is their quick semi-automatic pistol of thirteen (9.5 a shot, every 4 ticks), the Soul Drummer their machine pistol of twenty-five that strays even aimed (`alwaysSpread`), the Uppercut their four-round magnum (23 a shot, every 7 ticks). The reloads are the owner's animations'. The owner's data gives the Uppercut knockback and armour piercing; the guns have neither yet, so it hits by its damage alone.
+**Their numbers** start from the owner's own, in the gun data of the same upload, set beside the guns already built: the Krauser is their quick semi-automatic pistol of thirteen (9.5 a shot, every 4 ticks), the Soul Drummer their machine pistol of twenty-five that strays even aimed (`alwaysSpread`), the Uppercut their four-round magnum (23 a shot, every 7 ticks). The reloads are the owner's animations'. The owner's data gives the Uppercut knockback and armour piercing, which the guns had not; the [heavy-bullets follow-up](#follow-up-heavy-bullets-knockback-and-armour-piercing) gives the Jawbreaker both.
 
 **Crafting** (a crafting table; they switch with the guns): stainless steel, a diamond and a lever, as slice 15A's.
 - **Kreuzer Pistol:** three stainless steel ingots over a diamond and a lever.
@@ -2896,7 +2896,7 @@ The next three of the owner's diamond-steel guns, taken up after slice 15A (on 2
 
 **Known limits:**
 - **The Kreuzer and the Psalm take no scope:** their models have no sights to stand one in place of.
-- **No knockback or armour piercing:** the owner's Uppercut has both; the guns have neither yet.
+- **No knockback or armour piercing in this slice:** the owner's Uppercut has both; the [heavy-bullets follow-up](#follow-up-heavy-bullets-knockback-and-armour-piercing) adds them.
 - **The arms in the reloads and inspections** come large into the view in places, as on the guns before them, the right arm most in the inspections.
 - **Not played:** none of it has been played yet. The numbers want play to set.
 
@@ -2904,6 +2904,14 @@ The next three of the owner's diamond-steel guns, taken up after slice 15A (on 2
 Slice 15A's Gallant Rifle is silenced the length of its barrel and fires the owner's silenced shot, but in CI's third-person screenshot of that slice its shot still showed a muzzle flash: only a fitted Silencer or Baffled Silencer hid one. Offered as a fix after slice 15B, the owner chose it (26 October 2026).
 - **What changes:** a gun silenced by its own build (`tools/guns.py` `SILENCED`, `JugcraftGuns.SILENCED`; the Gallant Rifle alone so far) shows no muzzle flash when fired, in first or third person, as a gun with a fitted silencer shows none (`GunRenderer`). Its sound, its numbers and what fits it are unchanged.
 - **Checked:** `tools/check_mod_data.py` holds `JugcraftGuns.SILENCED` to `tools/guns.py`, and each gun in it to one that takes no barrel attachment (a silencer on a silenced gun would mean nothing). The guns' client test (`GunsClientGameTests`) now asserts that a silenced gun draws no flash frame when fired, where every other gun must draw one.
+
+## Follow-up: heavy bullets, knockback and armour piercing
+The owner's data for the Uppercut (slice 15B's Jawbreaker) gives its shots knockback (`knockbackStrength` 0.6) and armour piercing (`armorPen` 4.5), which the guns had not. Offered as a follow-up after slice 15B, the owner chose it (26 October 2026), as its own pull request; the Jawbreaker uses it, and other heavy guns of the owner's that have the same numbers in their data can take it later.
+- **Knockback** (`tools/guns.py` `KNOCKBACK`, `JugcraftGuns.KNOCKBACK`): each creature a gun's bullet hurts is given a second push of this strength, away from the shooter, after the 0.4 every hit gives (a sword's), as the guns' bayonet stab pushes (`GunShots.bullets`). The game halves a creature's motion before each push, so from standing the two come to about 0.8 against a plain hit's 0.4. The Jawbreaker's is the owner's 0.6.
+- **Armour piercing** (`PIERCING`): a hit deals what it would if the target wore this many points less armour (`GunShots.pierced`). The game's own armour keeps off a share of each hit, 4% a point, between a fifth of the armour and 20 points' worth, less as the hit grows against the armour's toughness; the hit is raised, before the armour, until the full armour lets through what the lighter would. A creature without armour takes the gun's damage, no more. The Jawbreaker's is the owner's 4.5 points: its 12 against 10 points of armour deals about 11.5 where a plain bullet's deals about 10.1.
+- **Raider gunners** (slice 10F) fire their guns the same way; none of their service arms has either.
+- **Checked:** `tools/check_mod_data.py` holds the Java tables to `tools/guns.py`, each to a gun that fires bullets, each value above 0 and at most 8. `HeavyBulletsGameTests`: only the Jawbreaker has either, at the owner's numbers; side by side, a pig in 10 points of armour shot by the Jawbreaker is knocked away faster than one shot by the Kreuzer Pistol, and takes more through its armour than a third such pig takes from a plain bullet hit of the Jawbreaker's damage, and no more than that damage. The Jawbreaker's magazine test (slice 15B) still takes exactly its damage from an unarmoured pig.
+- **Tooltip:** the Jawbreaker's says it knocks back what it hits and pierces armour.
 - **Save compatibility:** nothing saved changes.
 
 ## Connections

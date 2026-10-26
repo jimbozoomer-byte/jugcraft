@@ -286,6 +286,16 @@ public final class JugcraftGuns {
 	 * barrel attachment fits them (tools/guns.py SILENCED). Slice 15A's Gallant Rifle is the first.
 	 */
 	public static final Set<String> SILENCED = Set.of("gallant_rifle");
+	/**
+	 * The guns whose bullets knock back each creature they hurt a second time, by this strength, after the 0.4 every hit
+	 * gives (tools/guns.py KNOCKBACK). Slice 15B's Jawbreaker is the first, from the owner's Uppercut.
+	 */
+	public static final Map<String, Float> KNOCKBACK = Map.of("jawbreaker", 0.6F);
+	/**
+	 * The guns whose bullets pierce armour: a hit deals what it would if the target wore this many points less armour
+	 * ({@link GunShots#pierced}; tools/guns.py PIERCING). Slice 15B's Jawbreaker is the first, from the owner's Uppercut.
+	 */
+	public static final Map<String, Float> PIERCING = Map.of("jawbreaker", 4.5F);
 
 	/** The attachments, in the order the creative tab shows them (tools/guns.py ATTACHMENTS). */
 	public static final Map<String, GunAttachment> ATTACHMENTS = new LinkedHashMap<>();
@@ -711,6 +721,16 @@ public final class JugcraftGuns {
 	/** Whether this gun's bullets make what they hurt float (slice 12A, {@link #LEVITATING}). */
 	public static boolean levitates(GunItem gun) {
 		return LEVITATING.contains(gun.name());
+	}
+
+	/** How much further this gun's bullets knock back what they hurt ({@link #KNOCKBACK}); 0 for most. */
+	public static float knockback(GunItem gun) {
+		return KNOCKBACK.getOrDefault(gun.name(), 0.0F);
+	}
+
+	/** How many points of armour this gun's bullets pass through ({@link #PIERCING}); 0 for most. */
+	public static float piercing(GunItem gun) {
+		return PIERCING.getOrDefault(gun.name(), 0.0F);
 	}
 
 	/** JE a round of this energy weapon draws from Energy Cells (slice 8D, {@link #CHARGE}); 0 for a gun that loads rounds. */
