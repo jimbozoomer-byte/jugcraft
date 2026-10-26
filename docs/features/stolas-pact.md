@@ -1,7 +1,7 @@
 # Stolas's pact
 
 Status: implemented, unmerged (Concordance Chunk D: unit 2, D-03 to D-05; unit 3, D-06 and D-07; unit 5's evidence,
-D-09); owner checkpoint pending. Built and tested in CI on the candidate `48d99c904` (run 40133540741: every job passed
+D-09); owner checkpoint answered on 26 October 2026 (the contract's D-D3 to D-D5: keep Stolas, D-P50 accepted, gardens next). Built and tested in CI on the candidate `48d99c904` (run 40133540741: every job passed
 on the first attempt; see Verification), with three fixes from that run's pictures since (`b773913c4` and `d00fa2167`; run
 40140478331 on `d00fa2167`: every job passed, and the pictures were seen fixed). No person has played it; two automated clients on one machine, no two people or accounts.
 Proposal issue: none; the owner's selected scope ([the chunk's contract](concordance-chunk-d.md), D-D0 to D-D2).
@@ -118,11 +118,12 @@ request of yours with what each waits for, and suspends, resumes, ends (asked fi
     through a stand-in; time away, unloaded or switched off is never owed;
   - after an absence (over 1,200 ticks without a look) the holder is warned again: a first warning gives the whole
     grace, and one given before the absence gives the grace they had left, its end moved on by the time away (D-P50,
-    the unit review's proposal amending D-S3);
+    the unit review's proposal amending D-S3, accepted by the owner as D-D4);
   - two routes around it, found by the unit review (checkpoint question 2): before D-P50, a warned holder away for over
     a minute at least every 20 minutes got the whole grace again at each return and was never suspended, while
     Star-reckoning kept serving (closed by D-P50); and suspending, recalling and resuming once a day moves the due date
-    on by the time held, so the 7-day period counts only a few ticks of active time a day (open, left to the owner);
+    on by the time held, so the 7-day period counts only a few ticks of active time a day (left as built: the owner
+    accepted D-P50 alone, D-D4);
   - a pact never ends by itself.
 - **Star-reckoning:** the pattern's own recall cost (6 to 16 resonance), 1 a game day a pact, within 8 blocks of the
   perch at any hour, for patterns the holder observed; one recall an occurrence of each pattern, shared with a master's
@@ -358,7 +359,7 @@ files always give the same output):
   (`art/owner-library/ports/jug-nouveau/ars_jymbaumental-1.21.1-0.7.10.4/META-INF/neoforge.mods.toml:7, 15, 25`). The
   owner's declaration is [PROVENANCE.md](../../art/owner-library/PROVENANCE.md) (lines 3-7). Catalog rows:
   `art/owner-library/catalog/files.csv:21291` (animations), `:21330` (model) and `:21676` (skin); `:21329` is the
-  Blockbench project, not imported. The look is a checkpoint question; the supplied labels are kept as provenance.
+  Blockbench project, not imported. The owner kept his look and manner (D-D3); the supplied labels are kept as provenance.
 - `check_geckolib` checks his model by face (three UV regions of the rig overlap as drawn; no face overlaps, D-P42) and
   holds every clip the Java plays, looped, played once or played and held; `check_stolas_body` holds the Java, the client
   test and the files to the generator's tables.
@@ -556,7 +557,7 @@ Known limits:
 - A perch set by a machine is inert (no owner) and its screen says only its owner may invite Stolas; it does not say
   that it has none.
 - Suspending, recalling and resuming once a day keeps the upkeep period counting only a few ticks of active time a day
-  (checkpoint question).
+  (left as built: the owner accepted D-P50 alone, D-D4).
 - Stolas is summoned facing south and keeps that facing, so a holder north of the perch sees his back (the evidence
   photographs him from the south, D-P133).
 - CI has no sound device: his subtitles are checked as defined and fired, never seen there.
