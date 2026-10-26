@@ -438,6 +438,8 @@ Implemented with Claude Code; the model is named in the commit trailers.
   (`PowderSnowBlock.canEntityWalkOnPowderSnow`); there is no boots tag, and the contract said to drop the claim rather
   than add a mixin. A kit wearer can still wear leather boots with other kit pieces, and be both freeze-proof and able
   to walk on powder snow. The alternative for the owner: a mixin reading a `#jugcraft:powder_snow_walkable_boots` tag.
+  Since main's #475, the Jimtafacts snowshoes walk on powder snow by their own mixin (`JimtaSnowMixin`); that is
+  Jimtafacts', not the kit's, and `check_rime_kit` allows that one file and no other.
 - **The bangle is a Brace,** the plan's "short Brace accessory" (02:168; B-P25), not the owner's chill on every hit.
 - **The foci exceed the Initiate's Wand's duration limit,** for the reason under Balance (B-P50).
 - **No JEI acquisition pages for the kit:** each item has a crafting recipe, which JEI already shows; the
