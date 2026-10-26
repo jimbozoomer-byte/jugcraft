@@ -8,6 +8,11 @@ Every change to Jugcraft, newest first, grouped by pull request. For what each t
 
 No numbered release yet. Entries on feature branches remain proposed until their pull requests merge.
 
+### Unmerged: Cola and MMH
+- **Cola:** the Chemical Reactor purifies Industrial Phosphoric Acid over charcoal into a vial of **Food-grade Phosphoric Acid**. The vial crafts with caramel, sugar, cinnamon, vanilla and lemon into **Cola Syrup**. The reactor carbonates the syrup with water and carbon dioxide into three bottles of **Cola**, which give Speed for 45 seconds and leave the bottle.
+- **MMH:** the Bulk Chemical Reactor methylates hydrazine with methyl chloride into **Monomethylhydrazine (MMH)**. The reactor seals it into a **Sealed MMH Tank**, and the Rocket Workshop makes four Storable Bipropellant Motors from an MMH tank and an N2O4 tank (hydrazine makes three).
+- Two new handbook pages. Quantities await review. Record: [cola-and-mmh.md](docs/features/cola-and-mmh.md).
+
 ### Unmerged: The benches in the workshop look
 - The **Cooking Pot**, **Lampwright's Bench**, **Farm Stand**, **cave survey desk** and **Carving Knife** screens take the workshop machines' look: brass casing, orange glass, a status lamp by the title and keys that light up when they are on (the tool in use, Mirror, the candle, the crate being priced, a study you can cancel). The farm stand's owner is in a chip by the title; the survey desk's words are now translatable. Slots, buttons, button ids and labels are unchanged.
 - The blueprint table keeps its own drafting-sheet look.
