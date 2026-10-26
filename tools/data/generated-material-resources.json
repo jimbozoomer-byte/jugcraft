@@ -26228,5 +26228,21 @@
   "data/jugcraft/modonomicon/books/arcane_concordance/entries/alembic/kiln_draught.json",
   "data/jugcraft/modonomicon/books/arcane_concordance/entries/alembic/stillroot_poultice.json",
   "data/jugcraft/modonomicon/books/arcane_concordance/entries/circles/root_and_rivet.json",
-  "data/jugcraft/recipe/crucible_stand.json"
+  "data/jugcraft/recipe/crucible_stand.json",
+  "data/jugcraft/tags/worldgen/biome/landscape_habitat/badlands.json",
+  "data/jugcraft/tags/worldgen/biome/landscape_habitat/beach.json",
+  "data/jugcraft/tags/worldgen/biome/landscape_habitat/deep_ocean.json",
+  "data/jugcraft/tags/worldgen/biome/landscape_habitat/desert.json",
+  "data/jugcraft/tags/worldgen/biome/landscape_habitat/end.json",
+  "data/jugcraft/tags/worldgen/biome/landscape_habitat/forest.json",
+  "data/jugcraft/tags/worldgen/biome/landscape_habitat/jungle.json",
+  "data/jugcraft/tags/worldgen/biome/landscape_habitat/meadow.json",
+  "data/jugcraft/tags/worldgen/biome/landscape_habitat/mountain.json",
+  "data/jugcraft/tags/worldgen/biome/landscape_habitat/nether.json",
+  "data/jugcraft/tags/worldgen/biome/landscape_habitat/ocean.json",
+  "data/jugcraft/tags/worldgen/biome/landscape_habitat/overworld.json",
+  "data/jugcraft/tags/worldgen/biome/landscape_habitat/plains.json",
+  "data/jugcraft/tags/worldgen/biome/landscape_habitat/river.json",
+  "data/jugcraft/tags/worldgen/biome/landscape_habitat/savanna.json",
+  "data/jugcraft/tags/worldgen/biome/landscape_habitat/swamp.json"
 ]
