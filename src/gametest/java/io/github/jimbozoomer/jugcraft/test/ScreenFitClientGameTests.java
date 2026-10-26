@@ -135,6 +135,9 @@ public class ScreenFitClientGameTests implements FabricClientGameTest {
 				check(context, faults, "remote shutdown panel", "remote_shutdown", inventory -> new RemoteShutdownScreen(BlockPos.ZERO));
 				check(context, faults, "drone depot terminal", "drone_terminal", inventory -> new DroneTerminalScreen(BlockPos.ZERO));
 				check(context, faults, "drone tower", "drone_tower", inventory -> new TowerScreen(BlockPos.ZERO));
+				// The blueprint table: its drafting board scales down to fit (docs/features/blueprint-table-fit.md).
+				check(context, faults, "blueprint table", "blueprint_table",
+						inventory -> new io.github.jimbozoomer.jugcraft.client.blueprint.BlueprintTableScreen(BlockPos.ZERO));
 
 				// The benches in the workshop look (docs/features/bench-screens.md).
 				check(context, faults, "cooking pot", "cooking_pot", inventory -> new CookingPotScreen(new CookingPotMenu(0, inventory), inventory,

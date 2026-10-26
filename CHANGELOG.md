@@ -8,6 +8,10 @@ Every change to Jugcraft, newest first, grouped by pull request. For what each t
 
 No numbered release yet. Entries on feature branches remain proposed until their pull requests merge.
 
+### Unmerged: The blueprint table fits a small window
+- The **blueprint table**'s drafting board (410 or 440 × 250) scales down to fit a small window, as the reactor console and storage tank do. Its tabs, register, turning preview, stamps, paste box and the mouse scale with it. Before, it ran off the edges of the smallest GUI (320 × 240). Its look is unchanged.
+- The screen fit check opens it too. Record: [blueprint-table-fit.md](docs/features/blueprint-table-fit.md).
+
 ### Unmerged: The benches in the workshop look
 - The **Cooking Pot**, **Lampwright's Bench**, **Farm Stand**, **cave survey desk** and **Carving Knife** screens take the workshop machines' look: brass casing, orange glass, a status lamp by the title and keys that light up when they are on (the tool in use, Mirror, the candle, the crate being priced, a study you can cancel). The farm stand's owner is in a chip by the title; the survey desk's words are now translatable. Slots, buttons, button ids and labels are unchanged.
 - The blueprint table keeps its own drafting-sheet look.
