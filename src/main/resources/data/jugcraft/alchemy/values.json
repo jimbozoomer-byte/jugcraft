@@ -12317,6 +12317,11 @@
       "denominator": 1,
       "source": "fallback (balance pending)"
     },
+    "jugcraft:gallant_rifle": {
+      "numerator": 17905,
+      "denominator": 2,
+      "source": "recipe jugcraft:gallant_rifle"
+    },
     "jugcraft:garden_herb_soup": {
       "numerator": 137,
       "denominator": 1,
@@ -30762,6 +30767,11 @@
       "denominator": 1,
       "source": "recipe jugcraft:pot_cooking/onion_soup"
     },
+    "jugcraft:onrush_smg": {
+      "numerator": 8208,
+      "denominator": 1,
+      "source": "recipe jugcraft:onrush_smg"
+    },
     "jugcraft:open_grave": {
       "numerator": 559,
       "denominator": 2,
@@ -37121,6 +37131,11 @@
       "numerator": 1041,
       "denominator": 4,
       "source": "recipe jugcraft:vertical_grip"
+    },
+    "jugcraft:vesper_rifle": {
+      "numerator": 8209,
+      "denominator": 1,
+      "source": "recipe jugcraft:vesper_rifle"
     },
     "jugcraft:vesper_scythe": {
       "numerator": 1,
