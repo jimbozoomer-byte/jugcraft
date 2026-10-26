@@ -11817,6 +11817,11 @@
       "denominator": 1,
       "source": "fallback (balance pending)"
     },
+    "jugcraft:firedrake": {
+      "numerator": 3685,
+      "denominator": 2,
+      "source": "recipe jugcraft:firedrake"
+    },
     "jugcraft:first_aid_kit": {
       "numerator": 1,
       "denominator": 1,
@@ -13256,6 +13261,11 @@
       "numerator": 1,
       "denominator": 1,
       "source": "fallback (balance pending)"
+    },
+    "jugcraft:harrow": {
+      "numerator": 619,
+      "denominator": 2,
+      "source": "recipe jugcraft:harrow"
     },
     "jugcraft:harvest_balloon": {
       "numerator": 5306,

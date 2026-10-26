@@ -215,6 +215,7 @@
       "io.github.jimbozoomer.jugcraft.test.BrassCarbinesGameTests",
       "io.github.jimbozoomer.jugcraft.test.BrassQuickFirersGameTests",
       "io.github.jimbozoomer.jugcraft.test.BrassGunsIVGameTests",
+      "io.github.jimbozoomer.jugcraft.test.BrassGunsVGameTests",
       "io.github.jimbozoomer.jugcraft.test.ArmorSetsGameTests",
       "io.github.jimbozoomer.jugcraft.test.TitaniumGearGameTests",
       "io.github.jimbozoomer.jugcraft.test.ThalliteGameTests",

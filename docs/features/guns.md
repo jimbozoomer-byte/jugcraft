@@ -41,6 +41,7 @@ Status:
 - **Slice 14B** (the brass carbines: the Holler Carbine, Minuet Carbine and Grange Carbine; [below](#slice-14b-the-brass-carbines)): implemented on `claude/guns-14b`, stacked on slice 14A, awaiting review.
 - **Slice 14C** (the brass quick-firers: the Sprocket Gun, Navvy Shotgun and Freeholder Rifle; [below](#slice-14c-the-brass-quick-firers)): implemented on `claude/guns-14c`, stacked on slice 14B, awaiting review.
 - **Slice 14D** (a crossbow-gun, a molten rifle and a drum gun: the Quarrel Carbine, Hinterland Rifle and Cloudburst Gun; [below](#slice-14d-a-crossbow-gun-a-molten-rifle-and-a-drum-gun)): implemented on `claude/guns-14d`, from `main`, awaiting review. Its CI passed ([below](#verification)), and again with the fix for an aimed shot without the owner's aim_shoot. Slice 14E's run showed that the sleeve that fix was for comes from the animations' one-tick ease, now removed: with it every check passed, and the Cloudburst Gun fires aimed with no sleeve ([below](#verification)).
+- **Slice 14E** (a flamethrower and a fire shotgun: the Firedrake and the Harrow; [below](#slice-14e-a-flamethrower-and-a-fire-shotgun)): implemented on `claude/guns-14e`, on slice 14D's branch, awaiting review. Its first CI run failed only the guns' client test, whose husk the guns' shots together had killed; with the fix (each gun fires at it at full health) every check passed ([below](#verification)). Slice 14D's change for the hip guns' sleeve is merged in: with it every check passed (a flaky clock test aside, which passed on its re-run), and the Firedrake fires aimed with no sleeve.
 - **Not yet played:** the Java compiles only in CI, and the game tests there are the only runs.
 Proposal issue: none. The owner asked on 7 October 2026: "I want to start working on the Guns plugin which I want to base off of the Mod Scorched Guns 2 I have models and animations that I have created already on the github in the "Blocks" folder for that part". The owner's answers:
 - on the files: "the files in the blocks folder are all mine I made all of them myself and have all the rights to them they are inspired by scorched guns 2 but I made all of them including the animations";
@@ -2657,6 +2658,78 @@ The reload times are the owner's animations'. The Quarrel Carbine takes every at
 - **Where each gun and lid turns, and where the hands hold, are chosen here:** from previews, not the owner's own pivots.
 - **Not played:** none of it has been played yet. The numbers want play to set.
 
+## Slice 14E: a flamethrower and a fire shotgun
+The last two of the owner's treated-brass guns but the Grandle OG (an earlier make of slice 14B's Grange Carbine), taken up after slice 14D (on 23 October 2026, offered them among other work, the owner answered "lets do the spitfire and scratches"): the Spitfire and the Scratches. The Spitfire's animations are of the Gattaler's family (the Thresher's, slice 8C, and the Cloudburst Gun's, slice 14D); the Scratches' are of the Kiln Gun's (the Stoker's, slice 8C).
+
+| | Firedrake | Harrow |
+|---|---|---|
+| The owner's gun | Spitfire | Scratches |
+| What it is | a short flamethrower: a perforated shroud over its nozzle, a pilot flame burning at its mouth, two fuel tanks slung under its body, a hoop on its top and a raised handle behind | four barrels before an octagonal drum, a can under the barrels, a pistol grip and a crank on its left side |
+| Held | in both hands, as the Thresher: the right at the back of its body, where its rear handle rises, the left on its left fuel tank | in both hands: the right on the pistol grip, the left on the rod under the barrels |
+| What it fires | a burst of flame, for as long as the trigger is held | Buckshot Shells, a pull a shot: four pellets and a burst of flame from the muzzle; the pellets set what they hurt alight |
+| Damage | 1.5 a burst to each creature in the jet, and it sets them alight for 4 s | 4.5 a pellet, four a shell, and fire |
+| Rate | 10 bursts a second (every 2 ticks) | about 1.8 a second (every 11 ticks) |
+| Holds | 64 bursts of fuel | 8 shells |
+| Reload | 3.9 s, the tanks | 3 s, the can |
+| Spread, hip / aimed | the jet's half width: 12° / 8° | 3.5° / 2° |
+| Range | 6 blocks | 32 blocks |
+| Ammunition | blaze powder: each is four bursts | Buckshot Shell |
+| The view aimed | narrowed to 0.95 (no sights: aimed, it stays at the hip) | 0.9 |
+| Takes | nothing | the three stocks |
+
+The reload times are the owner's animations'. The Harrow takes the three stocks the owner made for it; the owner made no attachment for the Spitfire.
+
+**Crafting** (a crafting table; the guns switch, as every gun): steel, brass and a lever, as slices 14A to 14D's, with a fire charge for each gun's fire.
+- **Firedrake:** two steel ingots and a fire charge over a brass ingot, a lever and a brass ingot, over two buckets: the buckets are its two fuel tanks.
+- **Harrow:** three steel ingots over a steel ingot, a fire charge and a steel ingot, over a brass ingot, a lever and a brass ingot: five steel ingots for its four barrels and drum.
+
+**How they fire:**
+- **Firedrake:** as the Stoker's flame (slice 8C, `GunShots`): each burst reaches every creature the shooter may strike within 6 blocks, inside the jet (12° from the hip, 8° aimed) and with no block between it and the eye. Each takes the burst's damage as fire and burns for 4 s. No block is set alight. Blaze powder fuels four bursts, as the Stoker's does.
+- **Harrow:** each pull fires four pellets along the look, each strayed by the spread. Each creature they hurt is set alight for four seconds, as the Nether guns' and the Hinterland Rifle's bullets do (`INCENDIARY`); pellets on one creature set it alight once. No block is set alight.
+
+**What you see:** the owner's animations.
+- **Firedrake:** its pilot flame is always lit at its mouth. Each burst throws flames along the look to its reach, as the Stoker's does, and kicks the gun. To reload, the left hand pulls the tanks off below and brings them back, and the hoop on its top is worked forward and back like a lever.
+- **Harrow:** each shot kicks it and throws a burst of the owner's pilot flame from its muzzle, which slides back to the muzzle at twice its size and shrinks away, as the Stoker's jet does. To reload, the crank on its left side is swung over, the gun is tipped up, the knob behind the can is turned an eighth, the can swings out under the grip and back, and the crank is swung back. A spent hull is thrown as the reload begins (its animation's cue).
+- **Sounds:** the owner's long flamethrower sound for the Firedrake (the Stoker has the short burst) and their brass shotgun shot (the Coach Gun's, the Crackling's and the Waystation Shotgun's) for the Harrow. Neither carries a tag naming another source. Each animation's own cues play as they name: the tanks or can out and in, the lever, the crank.
+
+**How the models were built:**
+- **Firedrake:**
+  - **Held as the Thresher:** the Spitfire's first-person placement is the Gattaler's raised 5 px, and its hoop is the Gattaler's hoop 4.91 px lower, its feet at the same depth. So it takes the Thresher's hold, which slice 8C's in-game shots chose, 4.91 px lower: the body turns about the right hand at the back of its body (owner point (8, 4.09, 16.4)), the left hand holds the back of its left tank, and the arms run as the Thresher's. Its third-person transform is the Gattaler's too, so seen from outside its holder's arms hang lower (`GunLooks.TILT`).
+  - **Tanks:** the two fuel tanks (the main part's 12th to 14th, 18th and 29th to 32nd elements) are its magazine, turning about the point the owner turned their elements about.
+  - **Hoop:** the hoop on its top (the 3rd to 6th and 33rd elements) is its grip, worked about its feet.
+  - **Pilot flame:** the owner's (the 35th and 36th elements, `spitfire_flame.png`, its first frame), on the body at the nozzle's mouth.
+  - **No sights:** aiming only steadies it and narrows the view.
+- **Harrow:**
+  - **Where it turns:** about the pistol grip in the right hand (owner point (8, 3.45, 7.9)), as the Stoker turns about its grip.
+  - **Can:** the can under the barrels with its end caps (the main part's 2nd, 3rd, 6th to 8th and 35th elements) is its magazine, swung out about the can's middle.
+  - **Knob:** the octagonal knob behind the can (the 31st and 33rd elements) is mag2, turned about the gun's line.
+  - **Drum:** the octagonal drum behind the barrels (the 21st to 26th elements) is the cylinder_magazine; no animation moves it.
+  - **Crank:** the crank on its left side (the 36th to 38th elements) is its grip, swung about the point the owner turned it about.
+  - **Burst of flame:** the flame bone carries a prop of the owner's pilot flame, as the Stoker's does, its back end 5.5 px before the muzzle, where the shot's first offset brings it.
+  - **Left hand:** on the rod under the barrels. The reload's can follows neither hand (in these models a hand moves only with its bone's offsets), so a hand on the can would hold nothing while it is out.
+  - **Aiming:** along the rib on its drum's top, held 3 px further out (`"eye_relief"`): the top of its body came within 0.7 px of the eye through its aimed shot. Held there, it is 2.3 px away.
+- **The arms:** the Firedrake's are the Thresher's. The Harrow's were chosen in first-person previews, with the game's rule that leaves an arm out while any of it is within a tenth of a block of the eye, to cover as little of the screen as they can through its hold, shot, reload and inspection.
+- **Checked** in first-person, aimed and orthographic previews: idle, fired, through each reload and inspection; the Firedrake's tanks and hoop; the Harrow's burst of flame, crank, knob and can, and its three stocks.
+
+**Connections:**
+- **Rounds:** blaze powder (the Stoker's fuel) and the Buckshot Shell; nothing new.
+- **Parts:** steel, brass, a lever and a fire charge; the Firedrake two buckets.
+- **Their place:** past steel. The Firedrake with the Stoker; the Harrow with the shotguns, and with the Nether guns and the Hinterland Rifle that set alight.
+
+**Balance:** starting numbers, at point blank with every burst or pellet landing, over a load and its reload.
+- **Firedrake:** 1.5 a burst to each creature in the jet; about 9.4 a second to each, against the Stoker's 6.9, and each burns besides. It reaches 6 blocks to the Stoker's 8, its jet is wider, and it burns 2.5 blaze powder a second, twice the Stoker's.
+- **Harrow:** 4.5 a pellet, 18 a shell; about 21 a second, beside the Navvy Shotgun's (22.2) and the Breacher's (21.8), with fire besides. Its pellets fly closer together than any other shotgun's.
+- **Fuel and rounds:** each burst or shot spends one; nothing converts back.
+
+**Save compatibility:** new items `jugcraft:firedrake` and `harrow`; nothing saved changes. `guns.enabled=false` turns their recipes off; the items stay registered.
+
+**Known limits:**
+- **The Harrow is held close:** its first-person transform is the Kiln Gun's, as the Stoker's is, and holds its back by the eye, so at the hip it fills the right of the screen. It is left as the owner made it.
+- **The Harrow's can comes out by itself:** neither hand follows it in the reload.
+- **The Firedrake's pilot flame does not flicker:** it takes its texture's first frame, as the Stoker's jet does.
+- **Where each part turns, and where the Harrow's hands hold, are chosen here:** from previews, not the owner's own pivots.
+- **Not played:** none of it has been played yet. The numbers want play to set.
+
 ## Connections
 - **Existing input producers:** copper, iron and gunpowder (vanilla); lead nuggets (the lead switch's lead); brass nuggets (brass, from zinc); paper and planks.
 - **Existing output consumer:** combat. The guns kill what drops loot for every branch.
@@ -4330,6 +4403,22 @@ Slice 9E's files: the guns' tactical grip parts and the Laser Sight's textures m
 | cloudburst_gun | `Guns/models/special/thunderhead/main.json` | `4a404c1ef15ced7d` |
 | cloudburst_gun | `Guns/models/special/thunderhead/barrel.json` | `7f24f3f3d96a44a0` |
 | cloudburst_gun | `Guns/sounds/item/new_rifle/fire.ogg` | `267e176ad9bae07a` |
+| firedrake | `Guns/models/item/spitfire.json` | `28a483c85bb4bada` |
+| firedrake | `Guns/item/spitfire.png` | `32410580d835b418` |
+| firedrake | `Guns/item/spitfire.animation.json` | `725469f57f9b9eb9` |
+| firedrake | `Guns/models/special/spitfire/main.json` | `6a16044374ac991d` |
+| firedrake | `Guns/sounds/item/flamethrower/fire.ogg` | `53c4fe2c17d1bd6c` |
+| firedrake | `Guns/item/spitfire_flame.png` | `c81c31bd15a64d7c` |
+| harrow | `Guns/models/item/scratches.json` | `591967b76e526e0b` |
+| harrow | `Guns/item/scratches.png` | `b3f05f9c5e22ea9c` |
+| harrow | `Guns/item/scratches.animation.json` | `78fd1492f025ccd1` |
+| harrow | `Guns/models/special/scratches/main.json` | `c680e72bcb8f6d54` |
+| harrow | `Guns/models/special/scratches/barrels.json` | `23f4943169b54683` |
+| harrow | `Guns/models/special/scratches/light_stock.json` | `bcc2a0c889ba90c4` |
+| harrow | `Guns/models/special/scratches/heavy_stock.json` | `9b5963bd59281dd8` |
+| harrow | `Guns/models/special/scratches/wooden_stock.json` | `011b6ded6b061113` |
+| harrow | `Guns/sounds/item/brass_shotgun/fire.ogg` | `95eee6d27b87d35a` |
+| harrow | `Guns/item/spitfire_flame.png` | `c81c31bd15a64d7c` |
 
 - **The bolt sound's tag:** `bolt.ogg` carries Vorbis tags naming another source ("All Epic Infantry Assault Rifle Reload Sounds (Fortnite)"). The owner, asked about the eight tagged sounds in the library, answered "I have the rights", so it is used like the rest. None of the other sounds used here carries such a tag.
 - **The scopes' reticles and lens rims (slice 7b):** the owner uploaded them on 8 October 2026 ("heres reticles and vignette"). Two files in that upload carry embedded Photoshop metadata:
@@ -5366,13 +5455,41 @@ Slice 9E's files: the guns' tactical grip parts and the Laser Sight's textures m
   - **The Cloudburst Gun fired aimed:** it kicks up at the lower right with its shot, and no arm crosses the view. So does slice 14E's Firedrake, in that slice's run on top of this one ([run 39893842247](https://github.com/jimbozoomer-byte/jugcraft/actions/runs/39893842247)).
   - **The Borer fired aimed:** not looked at; its screenshot is before the part of the guns shard's log that could be fetched here.
   - The Quarrel Carbine's and the Hinterland Rifle's fired screenshots look as in the runs before.
+- **Slice 14E, run locally (23 October 2026):**
+  - `python3 tools/guns.py`: PASS. It wrote the two guns' models, animations and textures and copied the long flamethrower sound; every other gun's files came out unchanged.
+  - `python3 tools/generate_material_data.py`: wrote the guns' item models, definitions, recipes, names and sounds. (It also reordered `docs/features/jug-nouveau-content-map.json`, unrelated; that file is left as before.)
+  - `python3 tools/check_mod_data.py`: PASS (6245 material IDs).
+  - `python3 scripts/check_repository.py`: PASS.
+  - **Java:** a syntax parse only: 0 errors in the changed files.
+  - **Recipes:** every shaped recipe in the mod's data compared, mirrors included: neither gun's grid matches another.
+  - **Alchemy values:** the two guns' records in `data/jugcraft/alchemy/values.json`, priced from their recipes as `tools/build_alchemy_values.py` prices them (that tool needs a Minecraft jar, which isn't available here; the same rule gives the Cloudburst Gun's record exactly). `python3 -m unittest discover -s scripts/tests`: 191 tests passed; `python3 scripts/package_modrinth.py check`: PASS.
+- **Slice 14E game tests (not run yet; CI runs them):**
+  - `BrassGunsVGameTests`:
+    - `brassGunsVAreRegistered`: each is registered with its numbers and its recipe loads, held in both hands. The Firedrake fires bursts of flame as long as the trigger is held, sixty-four bursts of blaze powder, reaching less far than the Stoker's jet and wider, and takes nothing; the Harrow fires a buckshot shell a pull from a can of eight, four pellets that set what they hit alight, and takes the three stocks.
+    - `firedrakeBurnsCloseAtHand`: a burst singes the pig four blocks ahead by its damage and sets it alight; a pig eight blocks ahead (within the Stoker's reach, beyond the Firedrake's) and one beside the shooter are untouched; it spends one burst; no block catches fire.
+    - `harrowSetsWhatItHitsAlight`: a shot at a pig three blocks ahead lands most of its pellets, sets the pig alight, and the fire hurts it again within two seconds; it spends its shell; no block catches fire.
+    - `harrowChangesItsCan`: an empty Harrow with ten shells loads nothing before its reload's time and eight after it, leaving two.
+  - `GunsGameTests` counts 89 guns. `NetherGunsGameTests`: no gun but the Nether guns, the Hinterland Rifle and the Harrow sets alight.
+- **Slice 14E in CI** ([run 39885099461](https://github.com/jimbozoomer-byte/jugcraft/actions/runs/39885099461), on bc678ebf8): every check passed but `GunsClientGameTests`.
+  - **Passed:** the `mod` job (the build and every server game test, `BrassGunsVGameTests`, `GunsGameTests` and `NetherGunsGameTests` among them), the job without the optional integrations, the repository check and fifteen of the sixteen client shards.
+  - **Failed:** the guns' client shard, after its Steel Bayonet screenshot: the stab found no husk to hurt. Every gun fires one shot at the same husk, of 1000 health (a creature has no more than 1024). With every pellet landing, the 89 guns' shots come to 1000.5 before any fire, and the Harrow, the last, killed it. Its own check passed: a husk that has died reads as hurt.
+  - **The fix:** the husk is healed to its full health before each gun fires at it (`GunsClientGameTests.heal`), so the guns' shots no longer add up. Each gun's check still measures its own shot.
+- **Slice 14E's fix in CI** ([run 39888943001](https://github.com/jimbozoomer-byte/jugcraft/actions/runs/39888943001), on dd37795ec): every check passed: the `mod` job, the job without the optional integrations, the repository check and all sixteen client shards.
+  - **The husk:** in front of the wall in every one of the Harrow's stock screenshots, and at 979 of 1000 for the stab (in the failed run, none of them showed it).
+  - **Firedrake** (first person, from the guns shard's log): held at the lower right as the Thresher, 4.91 px lower, its tanks and grip in view and its nozzle toward the husk three blocks off; aimed, the same, at the hip. Fired: its flame bursts from the nozzle at the husk, which burns while it reloads. **Fired, the left arm's sleeve crossed the lower left of the view,** as the Cloudburst Gun's did in the same run: the animations' one-tick ease, removed by slice 14D's change merged here. Reloading, it is lowered at the lower right while the husk burns; inspected, turned at the lower right.
+  - **Harrow:** held, its body fills the right of the view (known limits), the husk clear at the left; aimed and fired, it looks along the rib on its drum, the crosshair on the husk. Reloading, turned up at the right while the husk it hit burns; inspected, turned toward the middle. With each of its three stocks, held and aimed, the stock is behind the view.
+  - **Third person:** the Firedrake carried low at the hip, as the Thresher, a flame at its mouth when fired; the Harrow raised, a burst of flame from its muzzle.
+  - **Noted, nothing failing:** in third person each gun fires again at the husk, which is not healed there; it is at 158 of 1000 by the last. Nothing there checks its health.
+- **Slice 14D's ease, merged, in CI** ([run 39893842247](https://github.com/jimbozoomer-byte/jugcraft/actions/runs/39893842247), on f0bfa6d6b): every check passed, the job without the optional integrations on its re-run.
+  - **Its first attempt** failed only `LaboratoryLarderDiningGameTests.clockKeepsTheHour` ("The pulse ends on tick 12"), the flaky clock test also seen on slices 14D's and the seasonal audit's pull requests. It touches no gun code ([comment](https://github.com/jimbozoomer-byte/jugcraft/pull/459#issuecomment-6356648041)); the one re-run passed.
+  - **Fired aimed, no sleeve:** the Firedrake's flame bursts at the husk with the view clear, and the Cloudburst Gun kicks up at the lower right. The Harrow's shot and reload look as before.
 - **Not run:** the client by hand, a two-client dedicated server, and play.
 
 ## World and event applicability
 No worldgen, structures, bosses or seasonal content. Guns, rounds and the Cell Rack come from crafting (and the creative tab). The one loot is slice 10F's: raider gunners, in raids and raider camps, may drop their service arms (their equipment's drop chance) and rounds (the mob loot table `jugcraft:entities/raider_gunner`).
 
 ## Rollout and open questions
-- **Names:** proposed here (Rust Midge, Patchwork Carbine, Thunderpipe, Warden Pistol, Riveter SMG, Haymaker, Longhorn Rifle, Drover Rifle, Coach Gun, Duelling Pistol, Line Musket, Bellmouth, Bulldog Pistol, Marshal Revolver, Sapper Revolver, Sentry Pistol, Garrison Rifle, Breacher, Trench Lobber, Thresher, Stoker, Beam Pistol, Stormlock Rifle, Linesman, Picket Rifle, Ranger Rifle, Kestrel Rifle, Rattler Pistol, Bronco SMG, Squall Rifle, Spikedriver, Seam Cutter, Caisson Pistol, Sledge, Highwayman, Throttle, Earthmover, Skylark Rifle, Bullfrog, Solenoid Rifle, Votive Rifle, Glowmouth, Mule, Fowler, Culverin, Undertone Rifle, Murmur SMG, Reverb, Tusker, Cinder Repeater, Bastion Rifle, Ashfall Pistol, Goldbristle Carbine, Crackling, Chitin SMG, Hermit Rifle, Borer, Penny Pistol, Conductor Carbine, Magpie SMG, Tuppence Pistol, Goshawk Revolver, Lament Rifle, Tabby Revolver, Lookout Rifle, Ammonite Carbine, Fencepost Carbine, Waystation Shotgun, Highball Rifle, Flatboat Gun, Windlass Musket, Millstone Rifle, Fencepost Thumper, Parley Revolver, Lantern Musket, Holler Pistol, Minuet Pistol, Half-Crown Revolver, Holler Carbine, Minuet Carbine, Grange Carbine, Sprocket Gun, Navvy Shotgun, Freeholder Rifle, Quarrel Carbine, Hinterland Rifle, Cloudburst Gun, Light Round, Rifle Round, Buckshot Shell, Paper Cartridge, Energy Cell, Cell Rack, Raider Gunner; the attachments keep plain names: Silencer, Baffled Silencer, Muzzle Brake, Extended Barrel, Extended Magazine, Speed Magazine, Light Stock, Weighted Stock, Wooden Stock, Light Grip, Vertical Grip, the four bayonets, Long Scope, Medium Scope, Reflex Sight, Tactical Grip, Laser Sight). The owner may rename them before release; IDs are stable only after release.
+- **Names:** proposed here (Rust Midge, Patchwork Carbine, Thunderpipe, Warden Pistol, Riveter SMG, Haymaker, Longhorn Rifle, Drover Rifle, Coach Gun, Duelling Pistol, Line Musket, Bellmouth, Bulldog Pistol, Marshal Revolver, Sapper Revolver, Sentry Pistol, Garrison Rifle, Breacher, Trench Lobber, Thresher, Stoker, Beam Pistol, Stormlock Rifle, Linesman, Picket Rifle, Ranger Rifle, Kestrel Rifle, Rattler Pistol, Bronco SMG, Squall Rifle, Spikedriver, Seam Cutter, Caisson Pistol, Sledge, Highwayman, Throttle, Earthmover, Skylark Rifle, Bullfrog, Solenoid Rifle, Votive Rifle, Glowmouth, Mule, Fowler, Culverin, Undertone Rifle, Murmur SMG, Reverb, Tusker, Cinder Repeater, Bastion Rifle, Ashfall Pistol, Goldbristle Carbine, Crackling, Chitin SMG, Hermit Rifle, Borer, Penny Pistol, Conductor Carbine, Magpie SMG, Tuppence Pistol, Goshawk Revolver, Lament Rifle, Tabby Revolver, Lookout Rifle, Ammonite Carbine, Fencepost Carbine, Waystation Shotgun, Highball Rifle, Flatboat Gun, Windlass Musket, Millstone Rifle, Fencepost Thumper, Parley Revolver, Lantern Musket, Holler Pistol, Minuet Pistol, Half-Crown Revolver, Holler Carbine, Minuet Carbine, Grange Carbine, Sprocket Gun, Navvy Shotgun, Freeholder Rifle, Quarrel Carbine, Hinterland Rifle, Cloudburst Gun, Firedrake, Harrow, Light Round, Rifle Round, Buckshot Shell, Paper Cartridge, Energy Cell, Cell Rack, Raider Gunner; the attachments keep plain names: Silencer, Baffled Silencer, Muzzle Brake, Extended Barrel, Extended Magazine, Speed Magazine, Light Stock, Weighted Stock, Wooden Stock, Light Grip, Vertical Grip, the four bayonets, Long Scope, Medium Scope, Reflex Sight, Tactical Grip, Laser Sight). The owner may rename them before release; IDs are stable only after release.
 - **The arms:** placed from the animations' own evidence, without the models they were made for. The CI screenshots show where they sit; the rest points and arm directions above are the knobs.
 - **The gun sets the owner chose on 8 October 2026** are all built: the revolvers (slice 8), the service arms (slice 8B), the heavy weapons (slice 8C) and the energy weapons (slice 8D).
 - **The gun sets the owner chose on 10 October 2026** are all built, each its own pull request: the marksman rifles (slice 9A), the automatic weapons (slice 9B), the second energy weapons (slice 9C) and the pump shotguns (slice 9D).

@@ -30,6 +30,11 @@ No numbered release yet. Entries on feature branches remain proposed until their
 - **Halloween and autumn creatures reach them too:** wisps rise over the landscape swamps on Halloween nights. On full moons, werewolves stalk the landscape woods, snow werewolves its snowy land and shadow werewolves the Ominous Woods, where the Howling Totem rite also works. Squirrels and wild turkeys come to its woods and open country.
 - **Every Jugcraft biome now needs a seasons decision:** the data check fails on a new biome without one, so a future collection cannot miss the seasons. The audit of every seasonal system against the newer collections is in [seasonal-biome-audit.md](docs/features/seasonal-biome-audit.md).
 
+### Unmerged: Guns, slice 14E (a flamethrower and a fire shotgun)
+- **Two guns** from the owner's models and animations, the last of their treated-brass guns but an earlier make of the Grange Carbine, each held in both hands: the **Firedrake**, a short flamethrower with two fuel tanks slung under it and a pilot flame always lit, whose wide, close jet burns blaze powder and sets creatures alight; and the **Harrow**, four barrels before a drum, whose four buckshot pellets and burst of flame set what they hit alight.
+- Each is made from steel, brass, a lever and a fire charge; the Firedrake two buckets for its tanks. The Harrow takes the three stocks; the Firedrake nothing.
+- Record: [guns.md, slice 14E](docs/features/guns.md#slice-14e-a-flamethrower-and-a-fire-shotgun).
+
 ### Unmerged: Guns, slice 14D (a crossbow-gun, a molten rifle and a drum gun)
 - **Three guns** from the owner's models and animations, more of their treated-brass guns, each held in both hands: the **Quarrel Carbine**, a repeating crossbow-gun of eight rifle rounds whose strings snap forward with each shot; the **Hinterland Rifle**, a two-pronged rifle of molten stone whose shots set what they hit alight and whose two top lids flick open as it fires; and the **Cloudburst Gun**, a drum-fed automatic of thirty rifle rounds, held and aimed at the hip as the Thresher is.
 - Each is made from steel, brass and a lever, with a crossbow, a magma block or a lightning rod. The Quarrel Carbine takes the magazines, the stocks and the four sights; the Hinterland Rifle the Medium Scope and the Reflex Sight; the Cloudburst Gun nothing.
