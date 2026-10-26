@@ -1,6 +1,6 @@
 # Wildlife in the landscape biomes
 
-Status: implemented on `claude/intelligent-mendel-yh3cui`, stacked on the seasonal biome audit ([#454](https://github.com/jimbozoomer-byte/jugcraft/pull/454)); awaiting review. CI has not run yet. **Not yet played.**
+Status: implemented on `claude/intelligent-mendel-yh3cui` ([#476](https://github.com/jimbozoomer-byte/jugcraft/pull/476)), stacked on the seasonal biome audit ([#454](https://github.com/jimbozoomer-byte/jugcraft/pull/454)); awaiting review. Its CI passed (below). **Not yet played.**
 Proposal issue: none. This is the wildlife follow-up the seasonal biome audit recorded ([seasonal-biome-audit.md](seasonal-biome-audit.md#rollout-and-open-questions)). On 26 October 2026, offered it as the next work, the owner answered "Lets do the wildlife follow-up".
 Owner: @jimbozoomer-byte
 Target milestone and tier: world generation and ecology; no tier.
@@ -10,7 +10,7 @@ Primary specialty and supported player role: exploration, hunting, taming and ri
 - **The menagerie places its creatures by habitat** (`menagerie/Menagerie.habitat`): the wildlife, beasts, fables, companions, mounts, grove creatures, fauna, the rotten and the landscape collection's own cave creatures, 277 species in all. Each lives in one habitat (forest, swamp, ocean, desert and so on), which it finds through vanilla's biome tags (`#minecraft:is_forest`, `#minecraft:is_ocean` and the like) and a few biome names. Before anything else it asks the dimension's tag: `#minecraft:is_overworld`, `#minecraft:is_nether` or `#minecraft:is_end`.
 - **The landscape collection carries none of those tags.** Its 159 biomes (`tools/landscape_kinds.py`) take about a quarter of each Jugcraft region, and their Nether and End biomes join those dimensions. Being in none of the dimension tags, they held **no menagerie species at all**: no deer in the landscape woods, no alligators in its swamps, no lions on its savannas, no whales in its ocean. Not even the landscape collection's own cave creatures (the gob, the garch and the rest) lived in its caves.
 - **A correction to the audit's note:** it counted "13 species" reading `#c:is_swamp`. Those are the 47 `#jugcraft:wildlife_has_*` and `blacklist/wildlife_blacklist_*` tag files, which came with the wildlife and which no code reads. The menagerie never used them, so they are left as they were.
-- **Also found, not changed here:** 95 of the 159 landscape biome files list no creatures or monsters of their own (`minecraft:gameplay/natural_mob_spawns`); among them the Sakura Grove, the Cloud Forest, the Lavender Forest and the Highlands. The game test below logs what may spawn in each biome it checks, to show whether anything else fills them.
+- **Also found, and not empty:** 95 of the 159 landscape biome files list no creatures or monsters of their own (`minecraft:gameplay/natural_mob_spawns`); among them the Sakura Grove, the Cloud Forest, the Lavender Forest and the Highlands. In game they are not empty: the game test's log shows 15 spawn entries in the Sakura Grove besides the menagerie's, as many as in vanilla's forest. They come from outside the biome's file.
 
 ## Player experience
 The menagerie's creatures now come to the landscape biomes as they come to vanilla's and Jugcraft's own: 195 Overworld species by habitat, 14 Nether and 8 End species.
@@ -69,7 +69,7 @@ No new dependencies or art.
   - `Menagerie.habitat` reads the tags and has a rule for each of those habitats in the landscape biomes.
 - **Game test** `LandscapeWildlifeGameTests.landscapeBiomesHoldTheirWildlife`: over the test, `/fillbiome` makes each of 14 biomes in turn, and the creatures that may spawn there (the biome's natural mob spawns) are read:
   - the Maple Woods: deer and the gob, not alligators or lions;
-  - the Sakura Grove, with no creatures of its own: deer;
+  - the Sakura Grove, whose file lists no creatures: deer;
   - the Bayou: alligators, not deer;
   - the Lavender Field: rats and butterflies, not deer;
   - the White Mesa, the Lush Savanna and the Desert Canyon: vultures, lions and scorpions, each not the others';
@@ -79,7 +79,29 @@ No new dependencies or art.
   - the Volcano: the gob, not deer or mammoths;
   - the Erupting Inferno and the End Wilds: the netherbat and the endergrade, not deer;
   - vanilla's forest: deer still, not alligators.
-  - It logs, for each, how many spawn entries are the menagerie's and how many the biome's own.
+  - It logs, for each, how many spawn entries are the menagerie's and how many are not.
+- **In CI** ([run 40363306807](https://github.com/jimbozoomer-byte/jugcraft/actions/runs/40363306807), on e1a441dd1): every check passed on its first run: the `mod` job (the build and the server game tests), the job without the optional integrations, the repository check and all sixteen client shards.
+  - **The `mod` job:** all 2264 required server game tests passed, `LandscapeWildlifeGameTests` among them.
+  - **Spawn entries** (the menagerie's, then the others) in each biome the test made:
+
+    | Biome | Menagerie | Others |
+    | --- | --- | --- |
+    | Maple Woods | 54 | 16 |
+    | Sakura Grove | 54 | 15 |
+    | Bayou | 33 | 14 |
+    | Lavender Field | 29 | 17 |
+    | White Mesa | 18 | 12 |
+    | Lush Savanna | 30 | 22 |
+    | Desert Canyon | 34 | 12 |
+    | Tropics | 36 | 17 |
+    | Deep Warm Ocean | 25 | 16 |
+    | Wintry Forest | 66 | 17 |
+    | Volcano | 16 | 10 |
+    | Erupting Inferno (Nether) | 15 | 6 |
+    | End Wilds | 8 | 0 |
+    | vanilla's forest | 54 | 15 |
+
+  - The landscape woods now hold as many of the menagerie's creatures as vanilla's forest (54 entries each).
 - **Not run:** a world, a dedicated server and play.
 
 ## World and event applicability
@@ -94,6 +116,6 @@ No new dependencies or art.
   - which fields are flowered (meadow besides);
   - volcanic land and the coastal cliffs holding only the climate's creatures;
   - the Skylands as open country.
-- **The 95 landscape biomes with no creatures or monsters of their own** in their files: whether to give them vanilla's is a separate decision.
+- **The 95 landscape biome files with no creatures or monsters of their own:** in game they have other spawns (15 entries in the Sakura Grove, as in vanilla's forest), so nothing is needed for them here. Giving them their own, as the other 64 have, is a separate choice.
 - **The unused `#jugcraft:wildlife_has_*` tags:** left in place; they could be removed, or the menagerie could read them, in a later change.
 - **Owner check:** walk a landscape wood, swamp and savanna and see their creatures.
