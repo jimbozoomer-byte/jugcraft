@@ -13,12 +13,39 @@ No numbered release yet. Entries on feature branches remain proposed until their
 - **MMH:** the Bulk Chemical Reactor methylates hydrazine with methyl chloride into **Monomethylhydrazine (MMH)**. The reactor seals it into a **Sealed MMH Tank**, and the Rocket Workshop makes four Storable Bipropellant Motors from an MMH tank and an N2O4 tank (hydrazine makes three).
 - Two new handbook pages. Quantities await review. Record: [cola-and-mmh.md](docs/features/cola-and-mmh.md).
 
+### Unmerged: The drone depot terminal in the language file
+- Every word on the **Drone Depot Terminal**'s screen (title, tabs, every readout and warning, the mode key) now comes from the language file (`screen.jugcraft.terminal.*`), so it can be translated. In English it reads as before, except that the FLEET tab names each tier by its drone ("T1 Courier Quad Drone"), the JOBS tab names missing materials by their item names, and the mode key reads PERSONAL or PARTY from the start. Record: [drone-terminal-lang.md](docs/features/drone-terminal-lang.md).
+
+### Unmerged: The trade look
+- Every screen where Jugs or goods change hands has the Exchange's walnut and brass: the **town shops**, the **Jug Teller**, the **personal safe** and the **barter station** and **energy vendor**, with the Exchange and market chest. It has a brass-rimmed walnut panel, slate ledgers and slot trays, gold sums, and brass and walnut plates for keys. The shop's Buy and Sell are folder tabs; the Jug Teller's chosen name is in brass; a personal shop's state is green when ready and red when something is in the way. Every button id and slot is unchanged.
+- The **market chest** (332 wide) scales down to fit a narrower window.
+- The screen fit check opens all of them. Record: [trade-look.md](docs/features/trade-look.md).
+
+### Unmerged: The blueprint table fits a small window
+- The **blueprint table**'s drafting board (410 or 440 × 250) scales down to fit a small window, as the reactor console and storage tank do. Its tabs, register, turning preview, stamps, paste box and the mouse scale with it. Before, it ran off the edges of the smallest GUI (320 × 240). Its look is unchanged.
+- The screen fit check opens it too. Record: [blueprint-table-fit.md](docs/features/blueprint-table-fit.md).
+
+### Unmerged: The workshop, aircraft and furniture screens in the looks
+- The screens PR #475 brought in take the machine looks: the **lathe**, **fluid services** and **aircraft** the industrial look; the **workshop engines**, **chute**, **robot programming table** and **equipment charger**, and the **artisan's workstation** the workshop look; the **transformer** and **computer** the electric look; the **compact reactor** the advanced look. Each has the look's casing, glass panes, a status lamp by the title and keys that light up when they are on (the transformer's mode, open chute outputs, the chosen robot program, a running reactor, the artisan's features). The gate parameters, heat and kinetic generators, civil and matter workshops keep the electric look, with keys in it in place of vanilla buttons. Every slot, button id and payload is unchanged.
+- The **computer** (360 × 288), **compact reactor**, **gate parameters** and the larger **aircraft** now scale down to fit a small window, slots and keys with them (a new `FittedContainerScreen`).
+- The scribing desk keeps its scroll forge; the personal safe and shops keep their panels until the trade look.
+- The screen fit check now opens all 15 at the smallest GUI, every aircraft layout and both workshop table kinds. Record: [new-screen-styles.md](docs/features/new-screen-styles.md).
+
+### Changed: The benches in the workshop look
+
+### Unmerged: Fixed: the tower cost check on Linux
+- `tools/tower_costs.py` reads the recipe files in name order. Where several crafting recipes make the same item and none is named after it, the check takes the first; the file system's own order differs between Windows and Linux, so since the Jimtafacts batch it worked out five drone tower blocks' values differently on Linux (CI) and failed `check_mod_data.py` there. The values themselves are unchanged.
+
+### Unmerged: Fixed: the server game tests slowing to a stop since the Jimtafacts batch
+- The accessories' per-player check (`JimtaAbilities.tick`) read the block under every online player's feet, every time it ran, whatever they wore. Through an unloaded chunk that read loads, or even generates, the chunk on the spot. The game tests leave about 1,300 unticked mock players at the world origin, so the check ran every tick for each of them. Since the batch, the server's tick time has grown from about 10 ms to about 1 s over a test run, and CI's `mod` and `optional integrations absent` jobs have hit their 90-minute limit on main and on every pull request. This read is the only new per-player code that touches the world whatever is worn; that it caused the slowdown is the best-supported explanation, which CI's run of this change will confirm or refute.
+- The ground is now read only when snowshoes are worn, and only from a chunk that is already loaded. Snowshoes behave as before.
+
 ### Unmerged: The benches in the workshop look
 - The **Cooking Pot**, **Lampwright's Bench**, **Farm Stand**, **cave survey desk** and **Carving Knife** screens take the workshop machines' look: brass casing, orange glass, a status lamp by the title and keys that light up when they are on (the tool in use, Mirror, the candle, the crate being priced, a study you can cancel). The farm stand's owner is in a chip by the title; the survey desk's words are now translatable. Slots, buttons, button ids and labels are unchanged.
 - The blueprint table keeps its own drafting-sheet look.
 - The screen fit check now opens the five benches at the smallest GUI too. Record: [bench-screens.md](docs/features/bench-screens.md).
 
-### Unmerged: The recipe page in its machine's look, and a screen fit check
+### Changed: The recipe page in its machine's look, and a screen fit check
 - The industrial forms' **recipe page** takes the forms' industrial look instead of its own teal. It has a status lamp by "<machine>: recipes" (green while a recipe is locked, amber when the recipes were reloaded), the list and the details in panes, and keys in the look: the chosen recipe, Automatic and the locked recipe's Lock key are lit. Every function and button id is unchanged.
 - The **storage tank** screen (352 wide) now scales itself down to fit a narrower window, as the reactor console and remote shutdown panel do.
 - A new client game test, `ScreenFitClientGameTests`, opens every machine screen, form screen, the recipe page and the eight other machine screens at the smallest GUI Minecraft gives (320 × 240, a 640 × 480 window), checks that each fits the window, and photographs some. Record: [screen-fit-check.md](docs/features/screen-fit-check.md).
