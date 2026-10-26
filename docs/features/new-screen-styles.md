@@ -30,7 +30,7 @@ Every screen keeps its functions: the same slots, button ids, payloads, tooltips
 
 These are unchanged:
 - the **scribing desk** keeps the source's scroll forge (a spellbook forge in a purple atlas);
-- the **personal safe** and the **shops** (barter station, energy vendor) keep their own panels for now: they take the trade look, and join the fit check, in a later polish item;
+- the **personal safe** and the **shops** (barter station, energy vendor) keep their own panels for now: they take the trade look, and join the fit check, in [trade-look.md](trade-look.md);
 - the source GUI images the restyled screens drew (`textures/gui/jimtafacts/lathe.png` and the like) stay in the mod; the lathe still draws the workpiece's profile from its images.
 
 ## Size
@@ -79,7 +79,7 @@ Everywhere these machines and vehicles are.
 
 ## Rollout and open questions
 
-- The personal safe and shops take the trade look, and join the fit check, in a later polish item.
+- The personal safe and shops take the trade look, and join the fit check, in [trade-look.md](trade-look.md).
 - The blueprint table (410 to 440 × 250) is still not in the fit check: the polish item after this one.
 
 ## History

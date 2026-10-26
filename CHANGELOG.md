@@ -90,6 +90,11 @@ No numbered release yet. Entries on feature branches remain proposed until their
 - The chunk's contract, decisions and evidence: [concordance-chunk-b.md](docs/features/concordance-chunk-b.md).
 - **The server game tests no longer run out of memory:** with main's #488 merged, all 2,575 of this branch's server tests ran, then the suite stopped with `OutOfMemoryError: Java heap space` on its last one (run 40414783975; main's 2,477 fit). A game-test mock player's connection ends in Netty's EmbeddedChannel, which keeps every packet written to it until something reads it; no test does, and the players stay logged in for the whole run, so their join packets and every later player's join message stayed in the heap. A test-only hook (`MockPlayerChannels`) now empties those channels each tick and logs how many packets it released; real and integrated-server connections are untouched. The game itself is unchanged.
 
+### Unmerged: The trade look
+- Every screen where Jugs or goods change hands has the Exchange's walnut and brass: the **town shops**, the **Jug Teller**, the **personal safe** and the **barter station** and **energy vendor**, with the Exchange and market chest. It has a brass-rimmed walnut panel, slate ledgers and slot trays, gold sums, and brass and walnut plates for keys. The shop's Buy and Sell are folder tabs; the Jug Teller's chosen name is in brass; a personal shop's state is green when ready and red when something is in the way. Every button id and slot is unchanged.
+- The **market chest** (332 wide) scales down to fit a narrower window.
+- The screen fit check opens all of them. Record: [trade-look.md](docs/features/trade-look.md).
+
 ### Unmerged: The blueprint table fits a small window
 - The **blueprint table**'s drafting board (410 or 440 × 250) scales down to fit a small window, as the reactor console and storage tank do. Its tabs, register, turning preview, stamps, paste box and the mouse scale with it. Before, it ran off the edges of the smallest GUI (320 × 240). Its look is unchanged.
 - The screen fit check opens it too. Record: [blueprint-table-fit.md](docs/features/blueprint-table-fit.md).

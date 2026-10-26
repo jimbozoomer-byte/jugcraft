@@ -29,6 +29,11 @@ public abstract class FittedContainerScreen<T extends AbstractContainerMenu> ext
 		topPos = Math.round((height / scale - imageHeight) / 2);
 	}
 
+	/** The scale the screen is drawn at: 1 where it fits, less in a smaller window. */
+	protected float scale() {
+		return scale;
+	}
+
 	/** The panel under the slots and widgets, in the screen's own (unscaled) coordinates. */
 	protected abstract void background(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float delta);
 
