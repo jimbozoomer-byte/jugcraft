@@ -1,6 +1,6 @@
 # Wildlife in the landscape biomes
 
-Status: implemented on `claude/intelligent-mendel-yh3cui` ([#476](https://github.com/jimbozoomer-byte/jugcraft/pull/476)), stacked on the seasonal biome audit ([#454](https://github.com/jimbozoomer-byte/jugcraft/pull/454)); awaiting review. Its CI passed (below). **Not yet played.**
+Status: implemented on `claude/intelligent-mendel-yh3cui` ([#476](https://github.com/jimbozoomer-byte/jugcraft/pull/476)), stacked on the seasonal biome audit ([#454](https://github.com/jimbozoomer-byte/jugcraft/pull/454)); awaiting review. Its CI passed (below). **Not yet played.** A tidy-up follows on `claude/landscape-wildlife-tidy` ([below](#follow-up-the-tidy-up)).
 Proposal issue: none. This is the wildlife follow-up the seasonal biome audit recorded ([seasonal-biome-audit.md](seasonal-biome-audit.md#rollout-and-open-questions)). On 26 October 2026, offered it as the next work, the owner answered "Lets do the wildlife follow-up".
 Owner: @jimbozoomer-byte
 Target milestone and tier: world generation and ecology; no tier.
@@ -9,8 +9,8 @@ Primary specialty and supported player role: exploration, hunting, taming and ri
 ## What was found
 - **The menagerie places its creatures by habitat** (`menagerie/Menagerie.habitat`): the wildlife, beasts, fables, companions, mounts, grove creatures, fauna, the rotten and the landscape collection's own cave creatures, 277 species in all. Each lives in one habitat (forest, swamp, ocean, desert and so on), which it finds through vanilla's biome tags (`#minecraft:is_forest`, `#minecraft:is_ocean` and the like) and a few biome names. Before anything else it asks the dimension's tag: `#minecraft:is_overworld`, `#minecraft:is_nether` or `#minecraft:is_end`.
 - **The landscape collection carries none of those tags.** Its 159 biomes (`tools/landscape_kinds.py`) take about a quarter of each Jugcraft region, and their Nether and End biomes join those dimensions. Being in none of the dimension tags, they held **no menagerie species at all**: no deer in the landscape woods, no alligators in its swamps, no lions on its savannas, no whales in its ocean. Not even the landscape collection's own cave creatures (the gob, the garch and the rest) lived in its caves.
-- **A correction to the audit's note:** it counted "13 species" reading `#c:is_swamp`. Those are the 47 `#jugcraft:wildlife_has_*` and `blacklist/wildlife_blacklist_*` tag files, which came with the wildlife and which no code reads. The menagerie never used them, so they are left as they were.
-- **Also found, and not empty:** 95 of the 159 landscape biome files list no creatures or monsters of their own (`minecraft:gameplay/natural_mob_spawns`); among them the Sakura Grove, the Cloud Forest, the Lavender Forest and the Highlands. In game they are not empty: the game test's log shows 15 spawn entries in the Sakura Grove besides the menagerie's, as many as in vanilla's forest. They come from outside the biome's file.
+- **A correction to the audit's note:** it counted "13 species" reading `#c:is_swamp`. Those are the 107 tag files `#jugcraft:wildlife_has_*` (53) and `blacklist/wildlife_blacklist_*` (54), copied from the owner's naturalist data with the wildlife, which no code reads. The menagerie never used them; the tidy-up removes them ([below](#follow-up-the-tidy-up)).
+- **Every landscape biome carries its own spawn list:** all 159 landscape biome files have one (`minecraft:gameplay/natural_mob_spawns`; the four End lands' are empty), 68 as a modifier's `argument` and 91 as the attribute's plain value; the game reads both. (This record first said 95 of them listed none: that count read only the first form. The game test's log bears the files out: the Sakura Grove's 15 spawn entries besides the menagerie's are its file's 15, and so for each biome it logs.) 123 list passive creatures; the other 36 are ten of the eleven caves, the mountains and cliffs, the volcanic and waste lands, the dead forests, a bog, a warm river and a warm deep ocean, two beaches, a grotto, the Spider Nest, the Withered Abyss and the four End lands.
 
 ## Player experience
 The menagerie's creatures now come to the landscape biomes as they come to vanilla's and Jugcraft's own: 195 Overworld species by habitat, 14 Nether and 8 End species.
@@ -116,6 +116,15 @@ No new dependencies or art.
   - which fields are flowered (meadow besides);
   - volcanic land and the coastal cliffs holding only the climate's creatures;
   - the Skylands as open country.
-- **The 95 landscape biome files with no creatures or monsters of their own:** in game they have other spawns (15 entries in the Sakura Grove, as in vanilla's forest), so nothing is needed for them here. Giving them their own, as the other 64 have, is a separate choice.
-- **The unused `#jugcraft:wildlife_has_*` tags:** left in place; they could be removed, or the menagerie could read them, in a later change.
+- **The 36 landscape biomes that list no passive creatures of their own** ([above](#what-was-found)): the menagerie's creatures come to them by habitat and climate. Giving them vanilla's animals too would be a separate choice.
+- **The unused `#jugcraft:wildlife_has_*` tags:** removed by the tidy-up ([below](#follow-up-the-tidy-up)).
 - **Owner check:** walk a landscape wood, swamp and savanna and see their creatures.
+
+## Follow-up: the tidy-up
+Offered after this change as a tidy-up, the owner chose it ("Wildlife tidy-up", 26 October 2026), as its own pull request: give the landscape biomes this record said listed no creatures some vanilla spawns, and remove the wildlife tags nothing reads.
+- **No spawns added:** none were missing. Every landscape biome file lists its own (see [What was found](#what-was-found), corrected here); the 95 were a miscount.
+- **The 107 unread tags removed:** `data/jugcraft/tags/worldgen/biome/wildlife_has_*.json` (53) and `blacklist/wildlife_blacklist_*.json` (54). Nothing read them: the menagerie places each species by its habitat (`Menagerie.habitat`), and no data, code or test named them. The owner's originals stay in the library (`art/owner-library/originals/Edited-2026-10-18/`).
+- **`tools/menagerie_content.py`** no longer copies the naturalist data's biome tags, so running it again does not bring them back. Its other tags (blocks, items and entity types, 56 in all) are copied as before.
+- **Checked:** `tools/check_mod_data.py` (`check_landscape_habitats`) now fails on a `wildlife_has_*` or `blacklist/wildlife_blacklist_*` biome tag, and on a landscape biome without its natural spawns, in either form.
+- **Save compatibility:** biome tags are not saved in worlds; nothing saved changes. A data pack that named `#jugcraft:wildlife_has_*` would find it gone; none in Jugcraft does.
+

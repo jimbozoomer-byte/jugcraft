@@ -17983,6 +17983,20 @@ def check_landscape_habitats():
         for habitat in lh.BY_RULE:
             if f'"{habitat}"' not in rules:
                 err(f"Menagerie.habitat has no rule for the landscape biomes' {habitat} habitat")
+    # The naturalist data's biome spawn tags (#jugcraft:wildlife_has_*, blacklist/wildlife_blacklist_*) came with the
+    # wildlife, but nothing read them; tools/menagerie_content.py no longer copies them.
+    biome_tags = DATA / MOD / "tags" / "worldgen" / "biome"
+    for stray in sorted([*biome_tags.glob("wildlife_has_*.json"), *biome_tags.glob("blacklist/wildlife_blacklist_*.json")]):
+        err(f"{stray.relative_to(RES).as_posix()} is a naturalist spawn tag nothing reads: Menagerie places each species by "
+            "its habitat")
+    # Every landscape biome lists its own natural spawns, in either form the game reads: the attribute's value, or a
+    # modifier's argument.
+    for biome in lk.KINDS:
+        attribute = ((load(DATA / MOD / "worldgen" / "biome" / f"{biome}.json") or {}).get("attributes", {})
+                     .get("minecraft:gameplay/natural_mob_spawns"))
+        value = attribute.get("argument", attribute) if isinstance(attribute, dict) else None
+        if not isinstance(value, dict) or not isinstance(value.get("spawns_by_category"), dict):
+            err(f"Landscape biome {MOD}:{biome} lists no natural spawns (minecraft:gameplay/natural_mob_spawns)")
 
 
 if __name__ == "__main__":
