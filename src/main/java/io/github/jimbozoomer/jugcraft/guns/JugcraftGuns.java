@@ -98,6 +98,9 @@ import net.minecraft.world.level.block.state.BlockBehaviour;
  * <li>Slice 14C, three more treated-brass guns sharing one family of animations: the Sprocket Gun, an automatic rifle
  * fed from a pan magazine on its top; the Navvy Shotgun, an automatic shotgun fed from a box magazine; and the
  * Freeholder Rifle, a quick-firing rifle.</li>
+ * <li>Slice 14D, three more treated-brass guns: the Quarrel Carbine, a repeating crossbow-gun whose bow throws each
+ * round; the Hinterland Rifle, a two-pronged rifle of molten stone whose shots set what they hit alight
+ * ({@link #INCENDIARY}); and the Cloudburst Gun, a drum-fed twin-barrelled automatic.</li>
  * <li>Attachments ({@link #ATTACHMENTS}), one a slot, are fitted in a crafting grid ({@link GunAttachmentRecipe}) and
  * held in {@link #FITTED}; they change the gun's numbers ({@link GunItem#spec(ItemStack)}) and show on its model.
  * Slice 9E adds the Tactical Grip and the Laser Sight, whose red dot the client draws where the gun points.</li>
@@ -193,6 +196,9 @@ public final class JugcraftGuns {
 		SPECS.put("sprocket_gun", new GunSpec(4.5F, 1, 4, true, 40, 63, 0, 0, 0, 4.0F, 1.5F, 80, "rifle_round"));
 		SPECS.put("navvy_shotgun", new GunSpec(2.5F, 6, 8, true, 8, 52, 0, 0, 0, 6.0F, 4.0F, 24, "buckshot_shell"));
 		SPECS.put("freeholder_rifle", new GunSpec(6.0F, 1, 5, false, 20, 53, 0, 0, 0, 2.5F, 0.3F, 104, "rifle_round"));
+		SPECS.put("quarrel_carbine", new GunSpec(9.0F, 1, 10, false, 8, 51, 0, 0, 0, 2.0F, 0.2F, 112, "rifle_round"));
+		SPECS.put("hinterland_rifle", new GunSpec(7.0F, 1, 8, false, 10, 51, 0, 0, 0, 2.5F, 0.35F, 96, "rifle_round"));
+		SPECS.put("cloudburst_gun", new GunSpec(5.0F, 1, 4, true, 30, 78, 0, 0, 0, 4.5F, 2.0F, 72, "rifle_round"));
 	}
 
 	/**
@@ -246,9 +252,10 @@ public final class JugcraftGuns {
 	public static final float DUAL_SPREAD = 1.5F;
 	/**
 	 * Slices 11A and 11B, the Nether guns: the guns whose bullets set each creature they hurt alight, for
-	 * {@link GunShots#BURN_SECONDS} as the Stoker's flame does (tools/guns.py INCENDIARY).
+	 * {@link GunShots#BURN_SECONDS} as the Stoker's flame does (tools/guns.py INCENDIARY). Slice 14D adds the
+	 * Hinterland Rifle.
 	 */
-	public static final Set<String> INCENDIARY = Set.of("tusker", "cinder_repeater", "bastion_rifle", "ashfall_pistol", "goldbristle_carbine", "crackling");
+	public static final Set<String> INCENDIARY = Set.of("tusker", "cinder_repeater", "bastion_rifle", "ashfall_pistol", "goldbristle_carbine", "crackling", "hinterland_rifle");
 	/**
 	 * Slice 12A, the End guns: the guns whose bullets make each creature they hurt float, for {@link GunShots#LIFT_TICKS}
 	 * as a shulker's bullet does (tools/guns.py LEVITATING).
@@ -464,6 +471,9 @@ public final class JugcraftGuns {
 				"iron_bayonet", "steel_bayonet", "diamond_bayonet", "netherite_bayonet", "tactical_grip"));
 		ACCEPTS.put("freeholder_rifle", List.of("extended_magazine", "speed_magazine", "medium_scope", "reflex_sight",
 				"laser_sight"));
+		ACCEPTS.put("quarrel_carbine", List.of("extended_magazine", "speed_magazine", "light_stock", "weighted_stock",
+				"wooden_stock", "long_scope", "medium_scope", "reflex_sight", "laser_sight"));
+		ACCEPTS.put("hinterland_rifle", List.of("medium_scope", "reflex_sight"));
 	}
 
 	/** The rounds. */

@@ -26000,5 +26000,14 @@
   "resourcepacks/fusion_textures/assets/jugcraft/models/block/verdant_bed.json",
   "resourcepacks/fusion_textures/assets/jugcraft/models/block/verdant_bed_wet.json",
   "resourcepacks/fusion_textures/assets/jugcraft/models/block/warding_stone.json",
-  "resourcepacks/fusion_textures/pack.mcmeta"
+  "resourcepacks/fusion_textures/pack.mcmeta",
+  "assets/jugcraft/items/cloudburst_gun.json",
+  "assets/jugcraft/items/hinterland_rifle.json",
+  "assets/jugcraft/items/quarrel_carbine.json",
+  "assets/jugcraft/models/item/cloudburst_gun.json",
+  "assets/jugcraft/models/item/hinterland_rifle.json",
+  "assets/jugcraft/models/item/quarrel_carbine.json",
+  "data/jugcraft/recipe/cloudburst_gun.json",
+  "data/jugcraft/recipe/hinterland_rifle.json",
+  "data/jugcraft/recipe/quarrel_carbine.json"
 ]

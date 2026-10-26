@@ -1888,6 +1888,10 @@ def check_guns():
         err(f"GunRenderer.PROPS does not list every prop bone of tools/guns.py PROPS: {sorted(own_bones)}")
     if f'EJECT_CUE = "{guns.EJECT_CUE}";' not in animations:
         err(f"GunAnimations.EJECT_CUE differs from tools/guns.py ({guns.EJECT_CUE})")
+    # Slice 14D: the guns without an aim_shoot play their shoot aimed.
+    aimed = ", ".join(f'"{gun}"' for gun in guns.shoot_aimed())
+    if f"SHOOT_AIMED = Set.of({aimed});" not in animations:
+        err(f"GunAnimations.SHOOT_AIMED differs from tools/guns.py shoot_aimed(): expected Set.of({aimed})")
     client_mixins = load(ROOT / "src" / "client" / "resources" / f"{MOD}.client.mixins.json") or {}
     if "GunFovMixin" not in client_mixins.get("client", []):
         err(f"{MOD}.client.mixins.json does not list GunFovMixin (no zoom aimed down the sights)")

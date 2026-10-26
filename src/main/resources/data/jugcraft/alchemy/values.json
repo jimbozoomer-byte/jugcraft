@@ -44716,6 +44716,21 @@
       "numerator": 112,
       "denominator": 1,
       "source": "recipe peepo_companion:yellow_companion_bed"
+    },
+    "jugcraft:cloudburst_gun": {
+      "numerator": 1171,
+      "denominator": 2,
+      "source": "recipe jugcraft:cloudburst_gun"
+    },
+    "jugcraft:hinterland_rifle": {
+      "numerator": 929,
+      "denominator": 4,
+      "source": "recipe jugcraft:hinterland_rifle"
+    },
+    "jugcraft:quarrel_carbine": {
+      "numerator": 1251,
+      "denominator": 2,
+      "source": "recipe jugcraft:quarrel_carbine"
     }
   }
 }
