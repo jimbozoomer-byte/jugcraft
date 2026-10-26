@@ -98,7 +98,7 @@ public class DiamondSteelGunsGameTests {
 	 * magazine after it, and the rest left. Then two pulls at once both fire (the trigger's bank), the first taking its
 	 * damage from the pig, a third does not, and one after the gun's interval does: three rounds spent.
 	 */
-	private static void changesItsMagazine(GameTestHelper helper, String name, int rounds) {
+	static void changesItsMagazine(GameTestHelper helper, String name, int rounds) {
 		GunsGameTests.floor(helper);
 		Mob pig = NetherGunsGameTests.sturdyPig(helper, new BlockPos(1, 2, 4));
 		GunSpec spec = JugcraftGuns.SPECS.get(name);

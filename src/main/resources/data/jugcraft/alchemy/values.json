@@ -45016,6 +45016,21 @@
       "numerator": 1,
       "denominator": 1,
       "source": "fallback (balance pending)"
+    },
+    "jugcraft:jawbreaker": {
+      "numerator": 8201,
+      "denominator": 1,
+      "source": "recipe jugcraft:jawbreaker"
+    },
+    "jugcraft:kreuzer_pistol": {
+      "numerator": 8200,
+      "denominator": 1,
+      "source": "recipe jugcraft:kreuzer_pistol"
+    },
+    "jugcraft:psalm_smg": {
+      "numerator": 8264,
+      "denominator": 1,
+      "source": "recipe jugcraft:psalm_smg"
     }
   }
 }

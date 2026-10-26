@@ -1658,6 +1658,33 @@
       }
     ]
   },
+  "guns.kreuzer_pistol.fire": {
+    "subtitle": "subtitles.jugcraft.guns.fire",
+    "sounds": [
+      {
+        "name": "jugcraft:guns/brass_pistol_fire",
+        "attenuation_distance": 64
+      }
+    ]
+  },
+  "guns.psalm_smg.fire": {
+    "subtitle": "subtitles.jugcraft.guns.fire",
+    "sounds": [
+      {
+        "name": "jugcraft:guns/brass_pistol_fire",
+        "attenuation_distance": 64
+      }
+    ]
+  },
+  "guns.jawbreaker.fire": {
+    "subtitle": "subtitles.jugcraft.guns.fire",
+    "sounds": [
+      {
+        "name": "jugcraft:guns/brass_revolver_fire",
+        "attenuation_distance": 64
+      }
+    ]
+  },
   "nouveau.empty": {
     "sounds": []
   },

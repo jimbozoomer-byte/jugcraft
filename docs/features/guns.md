@@ -2841,6 +2841,65 @@ The first three of the owner's diamond-steel guns, taken up after slice 14F (on 
 - **The arms in the reloads and inspections** come large into the view in places, as on the guns before them; the hands and the arms' ways are chosen here.
 - **Not played:** none of it has been played yet. The numbers want play to set.
 
+## Slice 15B: three diamond-steel sidearms
+The next three of the owner's diamond-steel guns, taken up after slice 15A (on 26 October 2026 the owner asked "Lets do slice 15B"): the Krauser, the Soul Drummer and the Uppercut. The owner's data names all three one-handed carbines (`one_handed_carbine`), as it does the Pax and the Osgood 50, so each is held in one hand, and in both with a stock fitted. Each is built from the owner's own GeckoLib model of it, from the upload of 23 October 2026 ([the library record](../../art/owner-library/README.md#gun-geometry-23-october-2026)), as slice 15A's are.
+
+| | Kreuzer Pistol | Psalm SMG | Jawbreaker |
+|---|---|---|---|
+| The owner's gun | Krauser | Soul Drummer | Uppercut |
+| What it is | a pistol whose box magazine stands ahead of its trigger, a wax seal with a strip of scripture on its left side | a machine pistol, a wax seal and scripture on its left side | a heavy magnum fed from a box of four, a wax seal and scripture on its left side |
+| Held | in one hand; with a stock, in both, the left hand ahead of the magazine | in one hand; with a stock, in both, the left hand at the magazine | in one hand; with a stock, in both, the left hand under the barrel |
+| What it fires | Light Rounds, a pull a shot | Light Rounds, as long as the trigger is held | Rifle Rounds, a pull a shot |
+| Damage | 5 | 3 | 12 |
+| Rate | 5 a second (every 4 ticks) | 10 a second (every 2 ticks) | 2.5 a second (every 8 ticks) |
+| Holds | 13 | 25 | 4 |
+| Reload | 2.5 s | 2.75 s | 2.35 s |
+| Spread, hip / aimed | 2° / 0.5° | 5.5° / 3° | 2.5° / 0.5° |
+| Range | 64 blocks | 40 blocks | 72 blocks |
+| The view aimed | 0.9 | 0.9 | 0.9 |
+| Takes | the barrels' four, the magazines and the stocks | the barrels' four, the magazines and the stocks | the barrels' four, the stocks, the three scopes and the Laser Sight |
+
+**Their numbers** start from the owner's own, in the gun data of the same upload, set beside the guns already built: the Krauser is their quick semi-automatic pistol of thirteen (9.5 a shot, every 4 ticks), the Soul Drummer their machine pistol of twenty-five that strays even aimed (`alwaysSpread`), the Uppercut their four-round magnum (23 a shot, every 7 ticks). The reloads are the owner's animations'. The owner's data gives the Uppercut knockback and armour piercing; the guns have neither yet, so it hits by its damage alone.
+
+**Crafting** (a crafting table; they switch with the guns): stainless steel, a diamond and a lever, as slice 15A's.
+- **Kreuzer Pistol:** three stainless steel ingots over a diamond and a lever.
+- **Psalm SMG:** three stainless steel ingots over a diamond, a lever and redstone (the owner's recipe takes a rapid firing unit; redstone is the Bronco SMG's sear too).
+- **Jawbreaker:** three stainless steel ingots over a stainless steel ingot, a diamond and a lever (the owner's recipe takes a heavy barrel and a frame).
+
+**How they fire:** as the guns before them: each round flies along the look, strayed by the spread.
+
+**Carbines:** with a Light, Weighted or Wooden Stock fitted, each is held in both hands and plays the owner's `carbine_` animations, as the Parley Revolver and the Half-Crown Revolver do (slice 13D); it is then no longer one of two guns held at once (slice 10G). Without a stock, each pairs with another one-handed gun.
+
+**What you see:** the owner's animations. Each shot kicks the gun and works the bolt, and the seal swings. Held in one hand, the left arm is hidden but in the reload and the inspection; there the left hand takes the magazine out below and brings the full one in, the left arm hanging under the magazine in the owner's models so the hand carries it (`carry()`, slice 14F). Held as a carbine, the left hand holds the gun ahead of or at the magazine. Sounds: the brass pistol's shot for the Kreuzer and the Psalm, the brass revolver's for the Jawbreaker, as the owner's data names for each.
+
+**How the models were built:**
+- **From the owner's GeckoLib models,** as slice 15A's (`GEO_PARTS`): each gun's parts are the bones of its model; their standard magazines are the bones the owner named `standard_mag` (on the Uppercut, `Mag`), the Uppercut's butt its `standard_grip`. Their textures are the models' own (`Guns/animated/gun/`), laid out anew by the owner (`GEO_RELAID`).
+- **Checked against the earlier parts:** where a bone keeps its item-model part's shape, the converter must give back that part's elements corner for corner and turn for turn (`GEO_TWINS`): on the Krauser 3 bones (23 elements: its bolt and two stocks), on the Soul Drummer 5 (29: its bolt, barrel and muzzle attachments), on the Uppercut 10 (52: its sights, rail, bolt, barrel, silencers, butt and stocks). Where the owner reshaped a part (every gun's body and extended barrel; the Krauser's and the Soul Drummer's magazines; the Krauser's barrel, muzzle attachments and light stock; the Uppercut's muzzle brake), the model's is used. The Uppercut's magazine and the Soul Drummer's stocks have no item-model parts at all.
+- **Bones:** the models' own, turning about the models' pivots (checked): `gun_body` (under `gun_body2` on the Krauser); `bolt`; `seal`; `magazine` (`Mag` on the Uppercut). The Krauser's animations also move a `gun_body3` its model lacks and a `LeftArm` that holds nothing; both are empty here, so they move nothing, as in the owner's model. The Uppercut's `shell` holds a round that every one of its animations keeps hidden; its spent cases are the shots' casing cue, as on every gun.
+- **Hands:** placed from the owner's own arm bones as slice 15A's are. The right hand is given for the idle; the left, which the idle hides, for the carbine idle, where the owner's animation brings it to the gun. The arms' ways were chosen in first-person previews, to cover as little of the screen as they can through the hold, the carbine hold, the shot, the reloads and the inspections; the Kreuzer's carbine pose turns its left arm another way from the others', and the way first tried for it ran its sleeve up across the view.
+- **Sights:** each is the notch between two posts on the back of its bolt over a front post: at the muzzle on the Kreuzer and the Psalm, at the front of the frame on the Jawbreaker. Aimed, the Psalm and the Jawbreaker are held 1 px further out (`"eye_relief"`), so that nothing comes within 2.3 px of the eye through the aimed shot; the Kreuzer needs none (2.6 px at the hip's depth).
+- **Scopes:** only on the Jawbreaker, on the owner's rail over its frame (`no_sights`). The Krauser and the Soul Drummer have no sights part to stand a scope in place of (their sights are on their bodies), so they take none, nor the Laser Sight.
+- **Checked** in first-person, aimed and orthographic previews: idle, as a carbine, fired, aimed, through each reload and inspection, both plain and as carbines, and with each attachment.
+
+**Connections:**
+- **Rounds:** the Light Round and the Rifle Round; nothing new.
+- **Parts:** stainless steel, a diamond and a lever; redstone for the Psalm SMG.
+- **Their place:** past stainless steel, beside slice 15A's guns: the diamond-steel sidearms.
+
+**Balance:** starting numbers, at point blank with every shot landing, over a magazine and its reload.
+- **Kreuzer Pistol:** about 13.3 a second, against the Warden Pistol's 9.4 and the Sentry Pistol's 9.8; quicker to fire than any other one-handed gun fired a pull at a time.
+- **Psalm SMG:** about 14.6 a second, against the Bronco SMG's 14.0 and the Rattler Pistol's 11.4, the one-handed automatics before it; it strays further aimed than either.
+- **Jawbreaker:** 12 a shot, the hardest of the one-handed guns with the Spikedriver; about 13.5 a second, its box of four quick to change, against the Half-Crown Revolver's 7.4 and the Parley Revolver's 6.6, which load a round at a time.
+- **Rounds:** each shot spends one; nothing converts back.
+
+**Save compatibility:** new items `jugcraft:kreuzer_pistol`, `psalm_smg` and `jawbreaker`; nothing saved changes. `guns.enabled=false` turns their recipes off; the items stay registered.
+
+**Known limits:**
+- **The Kreuzer and the Psalm take no scope:** their models have no sights to stand one in place of.
+- **No knockback or armour piercing:** the owner's Uppercut has both; the guns have neither yet.
+- **The arms in the reloads and inspections** come large into the view in places, as on the guns before them, the right arm most in the inspections.
+- **Not played:** none of it has been played yet. The numbers want play to set.
+
 ## Connections
 - **Existing input producers:** copper, iron and gunpowder (vanilla); lead nuggets (the lead switch's lead); brass nuggets (brass, from zinc); paper and planks.
 - **Existing output consumer:** combat. The guns kill what drops loot for every branch.
@@ -2947,7 +3006,7 @@ The owner supplied each gun's parts as Blockbench Java item models (`Guns/models
    - **Gun body:** turns about the right hand's grip.
 3. **Copies the files unchanged:** the atlases (the Thunderpipe's with the shell added), the animations (byte for byte) and the sounds. One part is moved as it is read: the Whistler's light stock, which stands off the gun ([slice 9A](#slice-9a-the-marksman-rifles)).
 4. **Checks the result:** it re-bakes every model the way GeckoLib 5.5.7 does (`GeometryCube`, `VertexSet`, `GeometryQuadUvs`) and compares each face with the owner's. Run `python3 tools/guns.py --check`; `tools/check_mod_data.py` runs it too. It was shown to fail on a flipped UV, a moved cube and a turned face.
-5. **Reads a gun the owner modelled in GeckoLib** (slice 14F, the Old Grange Carbine; slice 15A's three): its parts are the bones of the owner's own model (`Guns/geo/item/gun/`), turned back into item-model elements by step 1 run backwards (`geo_element()`), drawn from the model's own texture (`Guns/animated/gun/`), and built and checked as above. The check also converts the model's bones that are item-model parts and compares them element for element (`GEO_TWINS`; corner for corner only where the owner laid the texture out anew, `GEO_RELAID`), and holds the gun's bones to the model's pivots ([slice 14F](#slice-14f-the-old-grange-carbine), [slice 15A](#slice-15a-the-first-diamond-steel-guns)).
+5. **Reads a gun the owner modelled in GeckoLib** (slice 14F, the Old Grange Carbine; slice 15A's three and slice 15B's): its parts are the bones of the owner's own model (`Guns/geo/item/gun/`), turned back into item-model elements by step 1 run backwards (`geo_element()`), drawn from the model's own texture (`Guns/animated/gun/`), and built and checked as above. The check also converts the model's bones that are item-model parts and compares them element for element (`GEO_TWINS`; corner for corner only where the owner laid the texture out anew, `GEO_RELAID`), and holds the gun's bones to the model's pivots ([slice 14F](#slice-14f-the-old-grange-carbine), [slice 15A](#slice-15a-the-first-diamond-steel-guns)).
 
 The animations' sound cues map to the library's sounds as follows:
 - `gun_rustle` and `rustle`: gun_rustle
@@ -4570,6 +4629,26 @@ Slice 9E's files: the guns' tactical grip parts and the Laser Sight's textures m
 | gallant_rifle | `Guns/item/relex_sight.png` | `c8a38dbce7c266b0` |
 | gallant_rifle | `Guns/item/laser_sight.png` | `1e0a3342068bc5df` |
 | gallant_rifle | `Guns/item/laser.png` | `aac5f06e892e350a` |
+| kreuzer_pistol | `Guns/models/item/krauser.json` | `76f257a5dc6f89cc` |
+| kreuzer_pistol | `Guns/animated/gun/krauser.png` | `60363a0885ae5250` |
+| kreuzer_pistol | `Guns/item/krauser.animation.json` | `f3654b06e5ded9d4` |
+| kreuzer_pistol | `Guns/geo/item/gun/krauser.geo.json` | `7fb800e0313868d4` |
+| kreuzer_pistol | `Guns/sounds/item/brass_pistol/fire.ogg` | `4fca376e2ece67b2` |
+| psalm_smg | `Guns/models/item/soul_drummer.json` | `467483ddc86deddf` |
+| psalm_smg | `Guns/animated/gun/soul_drummer.png` | `d92554b4c96f807a` |
+| psalm_smg | `Guns/item/soul_drummer.animation.json` | `d6acbfe324886fea` |
+| psalm_smg | `Guns/geo/item/gun/soul_drummer.geo.json` | `a5b24e90849dc1b6` |
+| psalm_smg | `Guns/sounds/item/brass_pistol/fire.ogg` | `4fca376e2ece67b2` |
+| jawbreaker | `Guns/models/item/uppercut.json` | `80a240361d18eb65` |
+| jawbreaker | `Guns/animated/gun/uppercut.png` | `0da0e8f3c1334c9a` |
+| jawbreaker | `Guns/item/uppercut.animation.json` | `d6a4b95f00d93cbb` |
+| jawbreaker | `Guns/geo/item/gun/uppercut.geo.json` | `3186043f87389877` |
+| jawbreaker | `Guns/sounds/item/brass_revolver/fire.ogg` | `9ede81f3520dfd5c` |
+| jawbreaker | `Guns/item/long_scope_texture.png` | `e69191017eb081ad` |
+| jawbreaker | `Guns/item/medium_scope.png` | `543abecf859783be` |
+| jawbreaker | `Guns/item/relex_sight.png` | `c8a38dbce7c266b0` |
+| jawbreaker | `Guns/item/laser_sight.png` | `1e0a3342068bc5df` |
+| jawbreaker | `Guns/item/laser.png` | `aac5f06e892e350a` |
 
 - **The bolt sound's tag:** `bolt.ogg` carries Vorbis tags naming another source ("All Epic Infantry Assault Rifle Reload Sounds (Fortnite)"). The owner, asked about the eight tagged sounds in the library, answered "I have the rights", so it is used like the rest. None of the other sounds used here carries such a tag.
 - **The scopes' reticles and lens rims (slice 7b):** the owner uploaded them on 8 October 2026 ("heres reticles and vignette"). Two files in that upload carry embedded Photoshop metadata:
@@ -5673,13 +5752,34 @@ Slice 9E's files: the guns' tactical grip parts and the Laser Sight's textures m
   - **Gallant Rifle:** held at the lower right, its seal red at the back; aimed and fired, it looks along its back with the husk at the crosshair. Reloading, tipped up at the lower right with the left hand at its magazine; inspected, turned toward the left in both hands.
   - **Fitted:** each with each of its four sets, held and aimed. The Extended Magazine takes the counts to 12, 35 and 26. The Laser Sight's housing stands large at the upper right of the view held, beside the line of sight aimed.
   - **Third person:** each carried raised at the shoulder; fired, a flash at its muzzle, the Gallant's too (known limits).
+- **Slice 15B, run locally (26 October 2026):**
+  - `python3 tools/guns.py`: PASS. It wrote the three guns' models, animations and atlases; every other gun's files came out unchanged. The converter check passes on the three models (`GEO_TWINS`: 18 bones, 104 elements, corner for corner) and holds every bone the models have to the models' pivots.
+  - `python3 tools/generate_material_data.py`: wrote the guns' item models, definitions, recipes, names and sounds. (It also reordered `docs/features/jug-nouveau-content-map.json`, unrelated; that file is left as before.)
+  - `python3 tools/check_mod_data.py`: PASS (6252 material IDs). Its first run caught `JugcraftGuns.CARBINES` wrapped over two lines, which it reads as one; fixed.
+  - `python3 scripts/check_repository.py`: PASS. `python3 -m unittest discover -s scripts/tests`: 191 tests passed; `python3 scripts/package_modrinth.py check`: PASS.
+  - **Java:** a syntax parse only: 0 errors in the changed files.
+  - **Recipes:** every shaped recipe in the mod's data compared, mirrors included: no gun's grid matches another.
+  - **Alchemy values:** the three guns' records, priced from their recipes as `tools/build_alchemy_values.py` prices them (that tool needs a Minecraft jar, which isn't available here).
+  - **Eye clearance aimed** (the previews' measure): the nearest point of each gun through its aimed shot is 2.6 px before the eye (Kreuzer, held at the hip's depth), 2.8 px (Psalm, 1 px further out) and 2.5 px (Jawbreaker, 1 px further out). As carbines, a fitted stock comes about 2.2 px from the eye; aimed, the renderer leaves a fitted stock out (slice 9F).
+- **Slice 15B game tests (not run yet; CI runs them):**
+  - `DiamondSteelGunsIIGameTests`:
+    - `diamondSteelSidearmsAreRegistered`: each is registered with its numbers and its recipe loads, held in one hand and a carbine with a stock, firing plain bullets a magazine at a time. The Kreuzer Pistol is thirteen light rounds, a pull a shot, quicker to fire than any other one-handed gun fired a pull at a time; the Psalm SMG twenty-five light rounds as long as the trigger is held, every second tick, straying further aimed than the Onrush SMG; both take the barrels' four, the magazines and the stocks, nine in all. The Jawbreaker is four rifle rounds, a pull a shot, harder hitting than the Bulldog Pistol, the Parley Revolver and the Half-Crown Revolver, taking the barrels' four, the stocks and the four sights, no magazine, eleven in all.
+    - `diamondSteelSidearmsPairUntilStocked`: without a stock each pairs with a Minuet Pistol; with a Wooden Stock it is a carbine held in both hands and the other hand's gun does not fire; without it again it is one-handed.
+    - `kreuzerPistolChangesItsMagazine`, `psalmSmgChangesItsMagazine`, `jawbreakerChangesItsMagazine`: as slice 15A's (`DiamondSteelGunsGameTests.changesItsMagazine`).
+  - `GunsGameTests` counts 96 guns; `DualGunsGameTests` 24 one-handed guns.
+- **Slice 15B in CI** ([run 40395759839](https://github.com/jimbozoomer-byte/jugcraft/actions/runs/40395759839), on b0f9e866f): every check passed on its first run: the `mod` job (the build and every server game test, `DiamondSteelGunsIIGameTests` among them), the job without the optional integrations, the repository check and all sixteen client shards.
+  - **Kreuzer Pistol** (first person, from the guns shard's log): held at the lower right, its red seal at the back; aimed and fired, it looks along its back with the husk at the crosshair just above it, the hand below, as the previews have it. Reloading, turned toward the left with the hand under it; inspected, turned up at the right.
+  - **Psalm SMG:** held at the lower right; aimed and fired, as the Kreuzer, a round spent. Reloading, turned toward the left at the lower right; inspected, turned up at the right.
+  - **Jawbreaker:** held larger at the lower right, the hand under its grip; aimed and fired, it looks along its back with the husk at the crosshair. Reloading, tipped at the lower right; inspected, turned up at the right.
+  - **Fitted:** each with each set it takes any of, held and aimed. The first three sets each carry a stock, so each is held as a carbine, the left hand at its front. The Extended Magazine takes the counts to 20 and 38; aimed, the Psalm's shows under its back. The Jawbreaker's fourth set is the Laser Sight alone: held one-handed, the housing on its rail; aimed, beside the line of sight, as on the guns before it. Aimed, no stock shows: the test's check that a fitted stock is left out aimed (slice 9F) passed for all three.
+  - **Third person:** each held up before the chest, pointing ahead; fired, a flash at its muzzle.
 - **Not run:** the client by hand, a two-client dedicated server, and play.
 
 ## World and event applicability
 No worldgen, structures, bosses or seasonal content. Guns, rounds and the Cell Rack come from crafting (and the creative tab). The one loot is slice 10F's: raider gunners, in raids and raider camps, may drop their service arms (their equipment's drop chance) and rounds (the mob loot table `jugcraft:entities/raider_gunner`).
 
 ## Rollout and open questions
-- **Names:** proposed here (Rust Midge, Patchwork Carbine, Thunderpipe, Warden Pistol, Riveter SMG, Haymaker, Longhorn Rifle, Drover Rifle, Coach Gun, Duelling Pistol, Line Musket, Bellmouth, Bulldog Pistol, Marshal Revolver, Sapper Revolver, Sentry Pistol, Garrison Rifle, Breacher, Trench Lobber, Thresher, Stoker, Beam Pistol, Stormlock Rifle, Linesman, Picket Rifle, Ranger Rifle, Kestrel Rifle, Rattler Pistol, Bronco SMG, Squall Rifle, Spikedriver, Seam Cutter, Caisson Pistol, Sledge, Highwayman, Throttle, Earthmover, Skylark Rifle, Bullfrog, Solenoid Rifle, Votive Rifle, Glowmouth, Mule, Fowler, Culverin, Undertone Rifle, Murmur SMG, Reverb, Tusker, Cinder Repeater, Bastion Rifle, Ashfall Pistol, Goldbristle Carbine, Crackling, Chitin SMG, Hermit Rifle, Borer, Penny Pistol, Conductor Carbine, Magpie SMG, Tuppence Pistol, Goshawk Revolver, Lament Rifle, Tabby Revolver, Lookout Rifle, Ammonite Carbine, Fencepost Carbine, Waystation Shotgun, Highball Rifle, Flatboat Gun, Windlass Musket, Millstone Rifle, Fencepost Thumper, Parley Revolver, Lantern Musket, Holler Pistol, Minuet Pistol, Half-Crown Revolver, Holler Carbine, Minuet Carbine, Grange Carbine, Sprocket Gun, Navvy Shotgun, Freeholder Rifle, Quarrel Carbine, Hinterland Rifle, Cloudburst Gun, Firedrake, Harrow, Old Grange Carbine, Vesper Rifle, Onrush SMG, Gallant Rifle, Light Round, Rifle Round, Buckshot Shell, Paper Cartridge, Energy Cell, Cell Rack, Raider Gunner; the attachments keep plain names: Silencer, Baffled Silencer, Muzzle Brake, Extended Barrel, Extended Magazine, Speed Magazine, Light Stock, Weighted Stock, Wooden Stock, Light Grip, Vertical Grip, the four bayonets, Long Scope, Medium Scope, Reflex Sight, Tactical Grip, Laser Sight). The owner may rename them before release; IDs are stable only after release.
+- **Names:** proposed here (Rust Midge, Patchwork Carbine, Thunderpipe, Warden Pistol, Riveter SMG, Haymaker, Longhorn Rifle, Drover Rifle, Coach Gun, Duelling Pistol, Line Musket, Bellmouth, Bulldog Pistol, Marshal Revolver, Sapper Revolver, Sentry Pistol, Garrison Rifle, Breacher, Trench Lobber, Thresher, Stoker, Beam Pistol, Stormlock Rifle, Linesman, Picket Rifle, Ranger Rifle, Kestrel Rifle, Rattler Pistol, Bronco SMG, Squall Rifle, Spikedriver, Seam Cutter, Caisson Pistol, Sledge, Highwayman, Throttle, Earthmover, Skylark Rifle, Bullfrog, Solenoid Rifle, Votive Rifle, Glowmouth, Mule, Fowler, Culverin, Undertone Rifle, Murmur SMG, Reverb, Tusker, Cinder Repeater, Bastion Rifle, Ashfall Pistol, Goldbristle Carbine, Crackling, Chitin SMG, Hermit Rifle, Borer, Penny Pistol, Conductor Carbine, Magpie SMG, Tuppence Pistol, Goshawk Revolver, Lament Rifle, Tabby Revolver, Lookout Rifle, Ammonite Carbine, Fencepost Carbine, Waystation Shotgun, Highball Rifle, Flatboat Gun, Windlass Musket, Millstone Rifle, Fencepost Thumper, Parley Revolver, Lantern Musket, Holler Pistol, Minuet Pistol, Half-Crown Revolver, Holler Carbine, Minuet Carbine, Grange Carbine, Sprocket Gun, Navvy Shotgun, Freeholder Rifle, Quarrel Carbine, Hinterland Rifle, Cloudburst Gun, Firedrake, Harrow, Old Grange Carbine, Vesper Rifle, Onrush SMG, Gallant Rifle, Kreuzer Pistol, Psalm SMG, Jawbreaker, Light Round, Rifle Round, Buckshot Shell, Paper Cartridge, Energy Cell, Cell Rack, Raider Gunner; the attachments keep plain names: Silencer, Baffled Silencer, Muzzle Brake, Extended Barrel, Extended Magazine, Speed Magazine, Light Stock, Weighted Stock, Wooden Stock, Light Grip, Vertical Grip, the four bayonets, Long Scope, Medium Scope, Reflex Sight, Tactical Grip, Laser Sight). The owner may rename them before release; IDs are stable only after release.
 - **The arms:** placed from the animations' own evidence, without the models they were made for. The CI screenshots show where they sit; the rest points and arm directions above are the knobs.
 - **The gun sets the owner chose on 8 October 2026** are all built: the revolvers (slice 8), the service arms (slice 8B), the heavy weapons (slice 8C) and the energy weapons (slice 8D).
 - **The gun sets the owner chose on 10 October 2026** are all built, each its own pull request: the marksman rifles (slice 9A), the automatic weapons (slice 9B), the second energy weapons (slice 9C) and the pump shotguns (slice 9D).
@@ -5691,5 +5791,5 @@ No worldgen, structures, bosses or seasonal content. Guns, rounds and the Cell R
   - the Whizzbanger, which waits for the model its animations were made for ([above](#the-whizzbanger-waits));
   - the guns beyond these sets;
   - the owner's other GeckoLib gun models from their upload of 23 October 2026: only the Grandle OG's, the MAS 55's, the Prush Gun's and the Valora's are in the library so far ([the library record](../../art/owner-library/README.md#gun-geometry-23-october-2026));
-  - the other twelve diamond-steel guns.
+  - the other nine diamond-steel guns.
 - **Balance:** the numbers are starting points for the owner to set.
