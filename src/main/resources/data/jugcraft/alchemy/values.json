@@ -3692,6 +3692,11 @@
       "denominator": 9,
       "source": "recipe jugcraft:cargo_packager"
     },
+    "jugcraft:cargo_wagon": {
+      "numerator": 1346,
+      "denominator": 1,
+      "source": "recipe jugcraft:cargo_wagon"
+    },
     "jugcraft:cargo_winch": {
       "numerator": 2861,
       "denominator": 9,
@@ -7097,6 +7102,16 @@
       "denominator": 1,
       "source": "fallback (balance pending)"
     },
+    "jugcraft:cola": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
+    "jugcraft:cola_syrup": {
+      "numerator": 5,
+      "denominator": 1,
+      "source": "recipe jugcraft:phosphate_cola_syrup"
+    },
     "jugcraft:collector_mk1": {
       "numerator": 111570,
       "denominator": 1,
@@ -7736,6 +7751,11 @@
       "numerator": 1,
       "denominator": 1,
       "source": "fallback (balance pending)"
+    },
+    "jugcraft:coupler": {
+      "numerator": 135,
+      "denominator": 1,
+      "source": "recipe jugcraft:coupler"
     },
     "jugcraft:courier_post": {
       "numerator": 721,
@@ -12048,6 +12068,11 @@
       "source": "recipe jugcraft:foam_sprayer"
     },
     "jugcraft:fog_machine": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
+    "jugcraft:food_grade_phosphoric_acid": {
       "numerator": 1,
       "denominator": 1,
       "source": "fallback (balance pending)"
@@ -26597,6 +26622,11 @@
       "denominator": 1,
       "source": "recipe jugcraft:locker_security"
     },
+    "jugcraft:locomotive": {
+      "numerator": 10483,
+      "denominator": 8,
+      "source": "recipe jugcraft:locomotive"
+    },
     "jugcraft:logic_controller": {
       "numerator": 32851,
       "denominator": 12,
@@ -27152,6 +27182,11 @@
       "denominator": 1,
       "source": "fallback (balance pending)"
     },
+    "jugcraft:mmh_tank": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
     "jugcraft:mobius_fuel": {
       "numerator": 2241,
       "denominator": 2,
@@ -27191,6 +27226,11 @@
       "numerator": 10690,
       "denominator": 3,
       "source": "recipe jugcraft:monomer_preparation_unit"
+    },
+    "jugcraft:monomethylhydrazine_bucket": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
     },
     "jugcraft:monster_head": {
       "numerator": 2960,
@@ -30191,6 +30231,11 @@
       "numerator": 16,
       "denominator": 1,
       "source": "recipe jugcraft:parsley_bundle"
+    },
+    "jugcraft:passenger_car": {
+      "numerator": 10659,
+      "denominator": 8,
+      "source": "recipe jugcraft:passenger_car"
     },
     "jugcraft:pasta_with_meatballs": {
       "numerator": 1,

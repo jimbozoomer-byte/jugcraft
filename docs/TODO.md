@@ -62,7 +62,7 @@ See [town release scope and evidence](features/town-updater-release-oct22.md).
 - [ ] Owner visual playtest, hosted multiplayer acceptance and existing-world upgrade rehearsal before the coordinated client/server update.
 - [ ] Review exact old-cave coordinates, claims/builds and a consistent backup; test any approved refresh on a copy first.
 - [ ] Design opt-in/progression triggers for player-directed raids later; do not restore equipment-blind random attacks.
-- [ ] Benchmark server tick time, memory and client frame times under representative player load.
+- [ ] Benchmark server tick time, memory and client frame times under representative player load. Started: `ServerLoadGameTests` measures what a tick of an 80-machine factory and a 24-mob crowd costs the server ([server-load-benchmark.md](features/server-load-benchmark.md)). Memory, client frame times and real players are still to do.
 
 
 ## Local transmutation economy follow-up — October 21
@@ -616,6 +616,11 @@ Owner-requested 7 October 2026. Independent briefs: [industrial chemistry and fu
 
 - [x] Unmasking: a beaten villain reveals a named crook, drops its mask as a trophy and awards Mystery Solved ([costumed-villains-unmasking.md](features/costumed-villains-unmasking.md)). Implemented; CI pending, not yet played in a client.
 - [ ] Still ideas, if the owner wants them: traps, and village mysteries with clues before the chase.
+## Trains — 26 October 2026
+
+- [x] The train framework: a diesel locomotive, a passenger coach, a cargo wagon and the Coupler, on any rails ([trains.md](features/trains.md)). Implemented; CI pending, not yet played in a client.
+- [ ] The armoured train on the framework: an armoured locomotive and a turret car reusing the Landship's cannon ([raiders.md](features/raiders.md), idea 4).
+- [ ] Later, if wanted: signals and stations, timetables, a goods loader, longer curves.
 
 ## Reference gallery
 

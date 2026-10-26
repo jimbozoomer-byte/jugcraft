@@ -7200,6 +7200,28 @@
           ],
           "extra": [],
           "ticks": 240
+        },
+        {
+          "in": [
+            [
+              "jugcraft:mmh_tank",
+              1
+            ],
+            [
+              "jugcraft:n2o4_tank",
+              1
+            ],
+            [
+              "jugcraft:rocket_nozzle",
+              2
+            ]
+          ],
+          "out": [
+            "jugcraft:storable_bipropellant_motor",
+            4
+          ],
+          "extra": [],
+          "ticks": 240
         }
       ]
     },
@@ -10826,6 +10848,70 @@
         {
           "items": [
             [
+              "minecraft:charcoal",
+              1
+            ],
+            [
+              "minecraft:glass_bottle",
+              1
+            ]
+          ],
+          "fluids": [
+            [
+              "jugcraft:phosphoric_acid",
+              250
+            ],
+            [
+              "minecraft:water",
+              250
+            ]
+          ],
+          "fluid_results": [],
+          "results": [
+            [
+              "jugcraft:food_grade_phosphoric_acid",
+              1
+            ]
+          ],
+          "ticks": 200,
+          "tool": "",
+          "retained_inputs": []
+        },
+        {
+          "items": [
+            [
+              "jugcraft:cola_syrup",
+              1
+            ],
+            [
+              "minecraft:glass_bottle",
+              2
+            ]
+          ],
+          "fluids": [
+            [
+              "minecraft:water",
+              500
+            ],
+            [
+              "jugcraft:carbon_dioxide",
+              250
+            ]
+          ],
+          "fluid_results": [],
+          "results": [
+            [
+              "jugcraft:cola",
+              3
+            ]
+          ],
+          "ticks": 120,
+          "tool": "",
+          "retained_inputs": []
+        },
+        {
+          "items": [
+            [
               "jugcraft:rocket_casing",
               1
             ]
@@ -10912,6 +10998,30 @@
           "results": [
             [
               "jugcraft:n2o4_tank",
+              1
+            ]
+          ],
+          "ticks": 80,
+          "tool": "",
+          "retained_inputs": []
+        },
+        {
+          "items": [
+            [
+              "jugcraft:rocket_casing",
+              1
+            ]
+          ],
+          "fluids": [
+            [
+              "jugcraft:monomethylhydrazine",
+              1000
+            ]
+          ],
+          "fluid_results": [],
+          "results": [
+            [
+              "jugcraft:mmh_tank",
               1
             ]
           ],
@@ -13786,6 +13896,39 @@
           "fluid_results": [
             [
               "jugcraft:dinitrogen_tetroxide",
+              250
+            ]
+          ],
+          "results": [
+            [
+              "jugcraft:propellant_residue",
+              1
+            ]
+          ],
+          "ticks": 320,
+          "tool": "",
+          "energy_per_tick": 87
+        },
+        {
+          "items": [
+            [
+              "minecraft:redstone",
+              1
+            ]
+          ],
+          "fluids": [
+            [
+              "jugcraft:hydrazine",
+              250
+            ],
+            [
+              "jugcraft:methyl_chloride",
+              250
+            ]
+          ],
+          "fluid_results": [
+            [
+              "jugcraft:monomethylhydrazine",
               250
             ]
           ],
