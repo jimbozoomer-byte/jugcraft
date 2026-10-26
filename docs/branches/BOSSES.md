@@ -1,6 +1,6 @@
 # Bosses branch (brainstorm)
 
-Status: **a brainstorm; eight bosses are built.** On 10 October 2026 the owner chose to build a new boss "the same way" as Madame Tatterlace ([features/tatterlace.md](../features/tatterlace.md)); the Yeti King is first, to the plan below. The same day the owner asked for "the next boss same way" as him: the Cinder Tyrant, to his plan below. Both are built. On 13 October 2026 the owner chose the next: the Mire Hag, to her plan below, who is built too; and after her, the same day, the Crypt Lich, to his plan below, who is built too. On 14 October 2026 the owner chose the Iron Dreadnought, to his plan below, who is built too. The same day the owner chose the Alpha Werewolf, to his plan below. On 23 October 2026 the owner chose a Halloween boss, the Pumpkin King, to his plan below. On 4 October 2026 the owner asked for variant weapons, many of them "drops from bosses ill make later", themed around those bosses ("example: Yeti King"), and to "brainstorm bosses we could make". This page is that brainstorm. The bosses' weapons already exist: Arms VII ([features/arms-vii.md](../features/arms-vii.md)) adds two trophies for each of the first eight bosses below, and their loot tables are ready (`data/jugcraft/loot_table/bosses/<boss>.json`, one of the two per roll). Building a boss is a separate, reviewed feature each time, in the order the Yeti King was built in: [BOSS_PLAYBOOK.md](BOSS_PLAYBOOK.md). Everything here is a proposal for the owner to pick from, change or drop.
+Status: **a brainstorm; nine bosses are built.** On 10 October 2026 the owner chose to build a new boss "the same way" as Madame Tatterlace ([features/tatterlace.md](../features/tatterlace.md)); the Yeti King is first, to the plan below. The same day the owner asked for "the next boss same way" as him: the Cinder Tyrant, to his plan below. Both are built. On 13 October 2026 the owner chose the next: the Mire Hag, to her plan below, who is built too; and after her, the same day, the Crypt Lich, to his plan below, who is built too. On 14 October 2026 the owner chose the Iron Dreadnought, to his plan below, who is built too. The same day the owner chose the Alpha Werewolf, to his plan below. On 23 October 2026 the owner chose a Halloween boss, the Pumpkin King, to his plan below, who is built too. On 4 October 2026 the owner asked for variant weapons, many of them "drops from bosses ill make later", themed around those bosses ("example: Yeti King"), and to "brainstorm bosses we could make". This page is that brainstorm. The bosses' weapons already exist: Arms VII ([features/arms-vii.md](../features/arms-vii.md)) adds two trophies for each of the first eight bosses below, and their loot tables are ready (`data/jugcraft/loot_table/bosses/<boss>.json`, one of the two per roll). Building a boss is a separate, reviewed feature each time, in the order the Yeti King was built in: [BOSS_PLAYBOOK.md](BOSS_PLAYBOOK.md). Everything here is a proposal for the owner to pick from, change or drop.
 
 The owner's Mars adventure, the Cydonian Sentinel, is also implemented: [feature record](../features/cydonian-sentinel.md).
 
@@ -27,7 +27,7 @@ From [CONTENT_BRANCHES.md](../CONTENT_BRANCHES.md) ("Caves, dungeons and bosses"
 | **The Crypt Lich** | The Archive of Last Names: the Writ of Exhumation | [crypt-archive.md](../features/crypt-archive.md), [crypt-lich.md](../features/crypt-lich.md) | #350 and #353, through #352 |
 | **The Iron Dreadnought** | The Foundry Trench: Sealed Orders | [foundry-trench.md](../features/foundry-trench.md), [iron-dreadnought.md](../features/iron-dreadnought.md) | Not yet |
 | **The Alpha Werewolf** | The Moonlit Ring: the Howling Totem | [moonlit-ring.md](../features/moonlit-ring.md), [alpha-werewolf.md](../features/alpha-werewolf.md) | Not yet |
-| **The Pumpkin King** | The Crowfield: the Harvest Crown | [crowfield.md](../features/crowfield.md) (part 2's record to come) | Not yet |
+| **The Pumpkin King** | The Crowfield: the Harvest Crown | [crowfield.md](../features/crowfield.md), [pumpkin-king.md](../features/pumpkin-king.md) | Not yet |
 
 The first two are the Witching Season's ([features/witching-season.md](../features/witching-season.md)); all six, the Iron Dreadnought's trench and the Alpha Werewolf's ring are on the shared lair framework (`lair/`). Vesperine and Madame Tatterlace roll their own loot table, `loot_table/entities/<boss>.json`, for each player who took part: their trophies, the Vesper Scythe and the Needle Rapier (Arms VII's), come at 15% a share and always on a player's first win. The Arms VII trophy tables `bosses/vesperine` and `bosses/tatterlace` are written by `tools/arms_variants.py` as the others' are, but nothing rolls them. The Yeti King and the Cinder Tyrant roll theirs the same way, a trophy always on a player's first win; they still credit damage alone, without Concordance Chunk A's support credit ([lair-encounter-credit.md](../features/lair-encounter-credit.md)).
 
@@ -884,7 +884,7 @@ The design joins three sources:
 
 **The season.** He is a Witching Season boss, as Vesperine and Madame Tatterlace are ([features/witching-season.md](../features/witching-season.md#multiplayer-persistence-and-seasons)): his crown works on any night of the year by default, and only during the Halloween event when the server sets `lairs.off_season=off`. During the event his kill adds the Witching Season's event loot (`lairs.event_loot`): a roll of seasonal candy and a better chance of his costume. Ending the event takes nothing away.
 
-The numbers here are the plan's. Each part's feature record says what changed in building it. Part 1, the field and the crown: [features/crowfield.md](../features/crowfield.md); part 2, the King, his Jacks and his loot, will have `features/pumpkin-king.md`.
+The numbers here are the plan's. Each part's feature record says what changed in building it. Part 1, the field and the crown: [features/crowfield.md](../features/crowfield.md); part 2, the King, his Jacks and his loot: [features/pumpkin-king.md](../features/pumpkin-king.md#changes-from-the-plan).
 
 *A scarecrow three times the height of a man, stuffed with straw into a patched harvest coat of burlap and sacking, hands of twisted corn husk, a crown of dried vines and corn ears, and for a head a giant carved pumpkin with a fire inside that burns out through its eyes and grin.* He is the oldest scarecrow, the one the crows answer. His field is a pumpkin patch walled with corn under a dusk that never ends, where whatever is planted ripens for him.
 
@@ -941,7 +941,7 @@ From anywhere in the field, a sprinting player reaches every gourd of a harvest 
 | Attack | Read it by | What it does |
 | --- | --- | --- |
 | Vine Snare | He drives a hand into the earth and the vines ripple along a furrow toward a player (1.2 s) | Vines lash up where they stand: 5 damage, rooted for 1.5 s (Slowness IV). Step across the furrow |
-| Head Roll | He lifts his burning head from his shoulders and sets it rolling (1.5 s) | It rolls along a row, 18 blocks long and 2 wide: 10 damage, thrown aside. Step out of the row |
+| Head Roll | He lifts his burning head from his shoulders and sets it rolling (1.5 s) | It rolls along a line toward a player, 18 blocks long and 2 wide: 10 damage, thrown aside. Step out of the line |
 
 **Below a quarter, "The Last Harvest":** he calls the harvest every 15 seconds, three gourds at a time; they still ripen in 10, and the bereft window and his tells stay as long as ever.
 
@@ -960,12 +960,12 @@ A participant is a player who hurt him or his Jacks, or picked a gourd of a harv
 | **The Crowward Charm** | 25% |
 | **The Pumpkin King's Crown** | 20% |
 | 300 experience, shared out | always |
-| The advancement **Harvest Home** | always |
+| The advancement **Uncrowned** | always |
 
 - **The King's Ember:** for those who never fight, a fuel that burns as long as a block of coal (80 items), and with any heirloom pumpkin it makes a **King's Lantern**, a jack-o'-lantern whose fire never goes out. No loop: nothing makes an ember but him.
 - **The Crowward Charm:** held in the offhand, crows will not come down on crops within 12 blocks of its holder, as a lit scarecrow keeps them off (`CropGuard`).
 - **The Pumpkin King's Crown:** a costume worn on the head, his crown of dried vines and corn ears (in `#jugcraft:trick_or_treat_costumes`).
-- **The trophies** are new to Arms VII ([features/arms-vii.md](../features/arms-vii.md)), which made none for him: two weapons and the **Fright** boon (a struck monster, never a boss, panics and runs for 1.5 s, once every 6 s per target). They come with part 2, or a part of their own if they grow large.
+- **The trophies** are new to Arms VII ([features/arms-vii.md](../features/arms-vii.md)), which made none for him: two weapons and the **Fright** boon (a struck monster, never a boss, panics and runs for 1.5 s, once every 6 s per target). They come with part 2, as the owner chose.
 - During the Halloween event (and `lairs.event_loot=on`), a roll of seasonal candy and 10% more for the crown, as at Vesperine's and Madame Tatterlace's.
 - When he falls, his head drops from his shoulders and rolls to a stop, its fire going out; his straw collapses, the crows settle, and Grey Mist opens at his post, the way home.
 
@@ -996,7 +996,7 @@ Nothing a tier needs comes only from him: heirloom pumpkins, gold and hay come w
 
 ## More bosses to consider (no trophies yet)
 
-- **The Pumpkin King** (Halloween nights): a giant scarecrow made of the harvest. It would be summoned with heirloom pumpkins in a bounded field, and it ties into the giant pumpkins, the scarecrows and the Headless Horseman already in the world. It must not be the only source of anything core, and what it drops must be kept after the season ends. *Now being built, to [his plan above](#the-pumpkin-king-the-plan-being-built).*
+- **The Pumpkin King** (Halloween nights): a giant scarecrow made of the harvest. It would be summoned with heirloom pumpkins in a bounded field, and it ties into the giant pumpkins, the scarecrows and the Headless Horseman already in the world. It must not be the only source of anything core, and what it drops must be kept after the season ends. *Now built, to [his plan above](#the-pumpkin-king-the-plan-being-built).*
 - **The Headless Horseman, as a boss fight:** it already exists as a Halloween-night encounter ([features/halloween-nights.md](../features/halloween-nights.md)). It could gain a lair and a trophy, such as a lantern-headed flail.
 - **The Marrow Colossus** (Nether, Marrow Heap): a giant made of bones that sheds parts of itself as it is hurt. Bone-themed trophies would fit the bonecarved style.
 - **The Chorus Sovereign** (End, Chorus Reef and Phantom Garden): a crowned shulker-like being that teleports with its arena. It suits levitation or void boons.

@@ -842,6 +842,9 @@ def check_tags():
             # These entity IDs have no same-named item. Derive them from actual registrations.
             scary = (JAVA_ROOT / "creatures" / "scary" / "ScaryMod.java").read_text(encoding="utf-8")
             known |= set(re.findall(r'Registry\.register\(BuiltInRegistries\.ENTITY_TYPE,\s*id\("([a-z_]+)"\)', scary))
+            # The lairs' bosses and creatures, and the agriculture branch's (the Headless Horseman): their registrations name them.
+            for java in [*(JAVA_ROOT / "lair").rglob("*.java"), JAVA_ROOT / "agriculture" / "JugcraftAgriculture.java"]:
+                known |= set(re.findall(r'entity\("([a-z_]+)",\s*EntityType\.Builder', java.read_text(encoding="utf-8")))
         # A worldgen tag's registry is two folders deep (worldgen/biome): a tag it names lives beside it there.
         tag_registry = "/".join(path.relative_to(DATA).parts[2:4]) if registry == "worldgen" else registry
         for value in (load(path) or {}).get("values", []):
@@ -13666,6 +13669,341 @@ def check_alpha_werewolf():
                 err(f"{cls}.java {why} ({banned})")
 
 
+def check_pumpkin_king():
+    """The Pumpkin King (tools/pumpkin_king.py, docs/features/pumpkin-king.md): every number the Java uses is the table's
+    (his, his Jacks', his loot's, the Fright boon's and the Crowward Charm's); his attacks are the table's, and his rule can
+    be played (the Crowning before the Last Harvest; fire bites deeper, and bereft deeper still; a harvest is called,
+    ripens, lights and splits before the next is due, and his harvests come sooner as he weakens; he calls no more gourds
+    than the field's harvest walk proves one player can pick in time, and they ripen in the time that walk is measured
+    against; his stagger is shorter than his bereft spell; each attack's reach is its range); his clips last as long as the
+    Java waits on them; his model stands as tall as his box, and hanging, his shoulders meet the crossbar; where his fight
+    looks for the field's parts (Crowfield.java) is where tools/crowfield.py builds them: he steps down off his mound onto
+    open floor with room for him, and his Jacks climb out of the rows and out of each gourd onto open floor with room for
+    them; the harvest's picks, the bereft spell, his deeds and his fire are wired as the record says; every entity is
+    registered, named and drawn; his GeckoLib bodies have their models, clips (every clip the Java names) and sheets, their
+    box-UV regions inside the sheet without overlapping, their sheets and glowmasks TEXTURE_SCALE times the size each model
+    declares and cut out; no bone is animated by two of his controllers; his loot table is the table's and his trophies are
+    Arms VII's; the King's Lantern, its recipe (and none that makes an ember), the tags (the costume, the crow wards, the
+    creatures Fright spares: every lair boss with a bar among them) and his advancement are there; every message he sends
+    has its words; and nothing of his loads a chunk or leaves its dimension."""
+    import math
+    import arms_variants
+    import crowfield as cf
+    import pumpkin_king as pk
+    import pumpkin_king_models as pm
+    folder = JAVA_ROOT / "lair" / "king"
+    sources = {path.stem: path.read_text(encoding="utf-8") for path in folder.glob("*.java")}
+    if not sources:
+        err("lair/king: no Java")
+        return
+    fright = (JAVA_ROOT / "weapons" / "FrightBoon.java").read_text(encoding="utf-8")
+    scarecrows = (JAVA_ROOT / "agriculture" / "Scarecrows.java").read_text(encoding="utf-8")
+    sources_all = {**sources, "FrightBoon": fright, "Scarecrows": scarecrows}
+    king = sources.get("PumpkinKingEntity", "")
+    jack = sources.get("JackOStrawEntity", "")
+    registry = sources.get("JugcraftPumpkinKing", "")
+    loot_java = sources.get("PumpkinKingLoot", "")
+    d = pk.PUMPKIN_KING
+    for cls, table in (("PumpkinKingEntity", d), ("JackOStrawEntity", pk.JACK), ("JugcraftPumpkinKing", pk.CHARM),
+                       ("JugcraftPumpkinKing", {"EMBER_BURN": pk.EMBER_BURN, "LANTERN_LIGHT": pk.LANTERN_LIGHT}),
+                       ("PumpkinKingLoot", {"EVENT_CROWN_CHANCE": pk.EVENT_CROWN_CHANCE}),
+                       ("FrightBoon", {"PANIC_TICKS": arms_variants.FRIGHT[0], "COOLDOWN": arms_variants.FRIGHT[1],
+                                       "RUN": arms_variants.FRIGHT_RUN, "MAX": arms_variants.FRIGHT_MAX}),
+                       ("Scarecrows", {"LIT": pk.CHARM["CHARM_REACH"]})):
+        for name, value in table.items():
+            if not java_number(sources_all.get(cls, ""), name, value):
+                err(f"{cls}.{name} is not tools/pumpkin_king.py's {value}")
+    spots = "CROWN_JACK_SPOTS = {" + ", ".join("{" + f"{float(x)}, {float(z)}" + "}" for x, z in pk.CROWN_JACK_SPOTS) + "};"
+    if spots not in king:
+        err(f"PumpkinKingEntity.CROWN_JACK_SPOTS is not tools/pumpkin_king.py's: expected {spots}")
+    for attack, (windup, active, recovery, cooldown, near, far, reaping, hallowed) in pk.ATTACKS.items():
+        expected = (f"{attack}({windup}, {active}, {recovery}, {cooldown}, {float(near)}, {float(far)}, "
+                    f"{str(reaping).lower()}, {str(hallowed).lower()})")
+        if expected not in king:
+            err(f"PumpkinKingEntity.Attack: expected {expected}")
+    for call in ("LairBosses.damage(base)", "LairBosses.partyScale(players, PARTY_STEP, PARTY_MAX)"):
+        if call not in king:
+            err(f"PumpkinKingEntity does not scale as every lair boss does ({call})")
+    # His rule can be played.
+    if not 0.0 < d["LAST_AT"] < d["CROWN_AT"] < 1.0:
+        err("tools/pumpkin_king.py: the Last Harvest (LAST_AT) must come after the Crowning (CROWN_AT)")
+    if not 1.0 < d["FIRE"] <= d["BEREFT_FIRE"] or not 1.0 < d["BEREFT"] <= d["BEREFT_FIRE"]:
+        err("tools/pumpkin_king.py: fire must bite deeper than a plain blow, and bereft, every blow deeper, fire most of all")
+    harvest = d["CALL_TICKS"] + d["RIPEN_TICKS"] + d["SPLIT_TICKS"]
+    if not harvest < d["LAST_EVERY"] < d["HALLOWED_EVERY"] < d["HARVEST_EVERY"]:
+        err("tools/pumpkin_king.py: his harvests must come sooner as he weakens, and each must ripen and split before the next "
+            f"is due (CALL_TICKS + RIPEN_TICKS + SPLIT_TICKS {harvest} < LAST_EVERY < HALLOWED_EVERY < HARVEST_EVERY)")
+    if not 0 < d["SWELL_TICKS"] < d["RIPEN_TICKS"]:
+        err("tools/pumpkin_king.py: a gourd must swell before it ripens (0 < SWELL_TICKS < RIPEN_TICKS)")
+    if not 0 < d["REAPING_GOURDS"] <= d["HALLOWED_GOURDS"] <= cf.CALLED or d["RIPEN_TICKS"] != cf.RIPEN_SECONDS * 20:
+        err(f"tools/pumpkin_king.py: he may call at most the {cf.CALLED} gourds the field's harvest walk proves one player can "
+            f"pick, and they must ripen in its {cf.RIPEN_SECONDS} seconds (tools/crowfield.py CALLED, RIPEN_SECONDS)")
+    if not 0 < d["STAGGER_TICKS"] < d["BEREFT_TICKS"]:
+        err("tools/pumpkin_king.py: his bereft spell must outlast his stagger")
+    if len(pk.CROWN_JACK_SPOTS) != d["CROWN_JACKS"] or d["CROWN_JACKS"] > d["JACKS_MAX"] or not 0.0 < d["FEED"] < 0.25:
+        err("tools/pumpkin_king.py: CROWN_JACK_SPOTS must give each of the Crowning's Jacks a place, within JACKS_MAX, and a "
+            "gourd's fire may feed him only a little")
+    for attack, reach in (("SCYTHE_SWEEP", d["SWEEP_REACH"]), ("GOURD_TOSS", d["TOSS_RANGE"]), ("CROW_STORM", d["STORM_LENGTH"]),
+                          ("HEAD_ROLL", d["ROLL_LENGTH"])):
+        if pk.ATTACKS[attack][5] != reach:
+            err(f"tools/pumpkin_king.py: he must use {attack} only on a foe within its reach ({reach})")
+    if pk.ATTACKS["GOURD_TOSS"][1] != d["TOSS_FLIGHT"] or pk.ATTACKS["CROW_STORM"][1] < d["STORM_EVERY"]:
+        err("tools/pumpkin_king.py: the Gourd Toss's active ticks must be its pumpkin's flight, and the Crow Storm must last a beat")
+    if d["DOWN_AT"] >= d["LEASH"]:
+        err("tools/pumpkin_king.py: where he steps down (DOWN_AT) must be within his leash")
+    clips = pm.pumpkin_king_animations()["animations"]
+    for clip, ticks in (("tear_free", d["WAKE_TICKS"]), ("crown", d["CROWNING_TICKS"]), ("call", d["CALL_TICKS"]),
+                        ("sweep_windup", pk.ATTACKS["SCYTHE_SWEEP"][0]), ("toss_windup", pk.ATTACKS["GOURD_TOSS"][0]),
+                        ("storm_windup", pk.ATTACKS["CROW_STORM"][0]), ("snare_windup", pk.ATTACKS["VINE_SNARE"][0]),
+                        ("roll_windup", pk.ATTACKS["HEAD_ROLL"][0])):
+        length = clips.get(f"animation.pumpkin_king.{clip}", {}).get("animation_length", 0)
+        if round(length * 20) != ticks:
+            err(f"tools/pumpkin_king_models.py: his {clip} clip ({length} s) must last {ticks} ticks, as the Java waits on it")
+    climb = pm.jack_o_straw_animations()["animations"].get("animation.jack_o_straw.climb", {}).get("animation_length", 0)
+    if not java_number(jack, "CLIMB_TICKS", round(climb * 20)):
+        err(f"JackOStrawEntity.CLIMB_TICKS must be its climb clip's {climb} s")
+    sizes = {entity: re.search(rf'entity\("{entity}".*?sized\(([\d.]+)F, ([\d.]+)F\)', registry, re.S) for entity in pk.ENTITIES}
+    for entity, stands in pm.STANDS.items():
+        size = sizes.get(entity)
+        if not size or abs(stands / 16.0 - float(size.group(2))) > 0.25:
+            err(f"JugcraftPumpkinKing: the {entity}'s box must be as tall as its model ({stands / 16.0} blocks)")
+    shoulders = (pm.SHOULDER_Y + pm.HANG_LIFT) / 16.0
+    if abs(cf.WAIT[1] + shoulders - (cf.CROSSBAR_Y + 0.5)) > 0.15:
+        err(f"tools/pumpkin_king_models.py: hanging, his shoulders ({cf.WAIT[1] + shoulders}) must meet the crossbar "
+            f"({cf.CROSSBAR_Y + 0.5})")
+
+    # Where his fight looks for the field's parts is where tools/crowfield.py builds them.
+    blocks = cf.build()
+    name = lambda pos: blocks[pos][0] if pos in blocks else None
+    passable = {None, "minecraft:light", "minecraft:short_grass", "minecraft:dead_bush", "minecraft:moss_carpet", "jugcraft:lair_exit"}
+    whole = {"minecraft:dirt", "minecraft:coarse_dirt", "minecraft:podzol", "minecraft:rooted_dirt", "minecraft:farmland",
+             "minecraft:moss_block", "minecraft:mud", "minecraft:packed_mud"}
+    free = lambda pos: name(pos) in passable
+
+    def room(x, z, wide, high):
+        """Whether a box `wide` across and `high` tall fits standing at (x, z) on the field's floor."""
+        for bx in range(math.floor(x - wide / 2), math.floor(x + wide / 2 - 1.0E-6) + 1):
+            for bz in range(math.floor(z - wide / 2), math.floor(z + wide / 2 - 1.0E-6) + 1):
+                if name((bx, cf.SOIL, bz)) is None or name((bx, cf.SOIL, bz)) in passable \
+                        or not all(free((bx, cf.STAND + dy, bz)) for dy in range(math.ceil(high))):
+                    return False
+        return cf.in_field(x, z)
+    king_size, jack_size = sizes.get("pumpkin_king"), sizes.get("jack_o_straw")
+    kw, kh = (float(king_size.group(1)), float(king_size.group(2))) if king_size else (0.0, 0.0)
+    jw, jh = (float(jack_size.group(1)), float(jack_size.group(2))) if jack_size else (0.0, 0.0)
+    cx, cz = cf.CENTRE
+    for x, z in ((0, 1), (0, -1), (1, 0), (-1, 0)):
+        down = (cx + x * d["DOWN_AT"], cz + z * d["DOWN_AT"])
+        if not room(*down, kw, kh):
+            err(f"Where he steps down off his mound, {down}, is not open floor in the field with room for him")
+    for spot in pk.CROWN_JACK_SPOTS:
+        if not room(*spot, jw, jh):
+            err(f"Where a Jack climbs out of the rows at the Crowning, {spot}, is not open floor with room for it")
+    steps = {"north": (0, -1), "south": (0, 1), "east": (1, 0), "west": (-1, 0)}
+    for hill, (hx, hy, hz) in cf.hill_cells().items():
+        facing = dict(blocks.get((hx, hy, hz), (None, ()))[1]).get("facing")
+        sx, sz = steps.get(facing, (0, 0))
+        if not facing or not room(hx + sx + 0.5, hz + sz + 0.5, jw, jh):
+            err(f"A Jack climbing out of the {hill} hill's gourd ({facing}) would not stand on open floor before it")
+    # His rule, as the record says: a picked gourd of the harvest counts toward bereaving him only before any has lit; the
+    # pickers of a harvest that left him bereft take part; fire bites deeper, bereft deeper still; waking and crowned he is
+    # unhurt; his Jacks burn twice as fast, take part for him, stand dazed while he is bereft and crumble without him.
+    for needed, why in (("if (picked.containsAll(harvest)) { if (!burnt) { bereave(level); }", "be bereft only when a whole harvest is picked before any lights"),
+                        ('encounter.deed(picker, "bereft:" + harvests + ":" + id)', "count the pickers of a harvest that left him bereft as taking part"),
+                        ("float dealt = amount * (bereft() ? (fire ? BEREFT_FIRE : BEREFT) : (fire ? FIRE : 1.0F));", "let fire bite deeper, and bereft deeper still"),
+                        ("if (phase == Phase.WAKING || phase == Phase.CROWNING) { return false; }", "be unhurt waking and crowned"),
+                        ("KingsGourdBlock.setStage(level, hill.at(origin), KingsGourdBlock.SWELLING);", "ripen the gourds he calls"),
+                        ("if (jacks.size() >= JACKS_MAX) { return null; }", "keep his Jacks to JACKS_MAX"),
+                        ("LairRewards.pay(level, PumpkinKingLoot.BOSS, encounter, position(), centre(), EXPERIENCE);", "pay his fall as every Witching Season boss's is paid")):
+        if needed not in re.sub(r"\s+", " ", king):
+            err(f"PumpkinKingEntity must {why} ({needed})")
+    for needed, why in (("PumpkinKingEntity.fiery(source) ? amount * FIRE : amount", "burn twice as fast"),
+                        ("master.took(player, dealt)", "take part for him"), ("master.bereft()", "stand dazed while he is bereft"),
+                        ("crumble(level)", "crumble without him")):
+        if needed not in jack:
+            err(f"JackOStrawEntity must {why} ({needed})")
+    for needed, why in (("Lairs.onPlaced(Lair.CROWFIELD, PumpkinKingEntity::summon)", "hang him on the post of every Crowfield"),
+                        ("KingsGourdBlock.onPicked(JugcraftPumpkinKing::gourdPicked)", "hear the gourds picked"),
+                        ("king.gourdPicked(level, pos, player)", "tell him who picked which gourd"),
+                        ("LairRewards.payer(PumpkinKingLoot.BOSS, PumpkinKingLoot::pay)", "let his rewards wait for a player"),
+                        ("FrightBoon.register()", "run the Fright boon"),
+                        ("lightLevel(state -> LANTERN_LIGHT)", "light the King's Lantern")):
+        if needed not in registry:
+            err(f"JugcraftPumpkinKing must {why} ({needed})")
+    if "target instanceof PathfinderMob && target instanceof Enemy && !target.getType().is(FRIGHTLESS)" not in fright \
+            or 'Jugcraft.id("frightless")' not in fright or "PANICKED.size() >= MAX" not in fright:
+        err("FrightBoon must frighten only monsters that walk, never one in #jugcraft:frightless, and at most MAX at once")
+    if "case FRIGHT -> FrightBoon.struck(level, target, attacker);" not in (JAVA_ROOT / "weapons" / "ArmItem.java").read_text(encoding="utf-8"):
+        err("ArmItem must work the Fright boon (FrightBoon.struck)")
+    if '"crow_wards"' not in scarecrows or "(entity instanceof CropGuard || wardsCrows(entity))" not in scarecrows:
+        err("Scarecrows.guarded must count anyone holding a crow ward (#jugcraft:crow_wards) as a lit scarecrow")
+    client = (CLIENT_JAVA_ROOT / "PumpkinKingClient.java").read_text(encoding="utf-8")
+    if "PumpkinKingClient.register();" not in (CLIENT_JAVA_ROOT / "JugcraftClient.java").read_text(encoding="utf-8"):
+        err("JugcraftClient must register PumpkinKingClient")
+    if "lair.king.JugcraftPumpkinKing.register();" not in (JAVA_ROOT / "Jugcraft.java").read_text(encoding="utf-8"):
+        err("Jugcraft must register JugcraftPumpkinKing")
+
+    def drawn(entity):
+        start = client.find(f"register(JugcraftPumpkinKing.{entity.upper()},")
+        end = client.find("EntityRendererRegistry.register(", start + 1)
+        return client[start:end if end >= 0 else len(client)] if start >= 0 else ""
+    if f'ADVANCEMENT = "{pk.ADVANCEMENT["key"]}";' not in loot_java:
+        err("PumpkinKingLoot's advancement differs from tools/pumpkin_king.py")
+    lang = load(ASSETS / "lang" / "en_us.json") or {}
+    for entity in pk.ENTITIES:
+        if f'entity("{entity}"' not in registry:
+            err(f"JugcraftPumpkinKing does not register the {entity} entity")
+        if lang.get(f"entity.{MOD}.{entity}") != pk.ENTITIES[entity]:
+            err(f"The {entity} entity is not named {pk.ENTITIES[entity]!r}")
+        if not drawn(entity):
+            err(f"PumpkinKingClient draws no {entity}")
+    for item in pk.items():
+        if f'"{item}"' not in registry:
+            err(f"JugcraftPumpkinKing does not register {item}")
+    for block in pk.BLOCKS:
+        for path in (ASSETS / "blockstates" / f"{block}.json", ASSETS / "models" / "block" / f"{block}.json",
+                     DATA / MOD / "loot_table" / "blocks" / f"{block}.json"):
+            if not path.is_file():
+                err(f"{block}: missing {path.relative_to(ROOT)}")
+    # His GeckoLib bodies.
+    gecko = ASSETS / "geckolib"
+    clips_named = {}
+    for text in sources.values():
+        for clip in re.findall(r'"(animation\.[a-z_]+\.[a-z_]+)"', text):
+            clips_named.setdefault(clip.split(".")[1], set()).add(clip)
+    for cls, body in (("PumpkinKingEntity", "pumpkin_king"), ("JackOStrawEntity", "jack_o_straw")):
+        for clip in re.findall(r'prefix \+ "([a-z_]+)"', sources.get(cls, "")):
+            clips_named.setdefault(body, set()).add(f"animation.{body}.{clip}")
+    for entity, body in pk.GECKO.items():
+        geo = load(gecko / "models" / "entity" / f"{entity}.geo.json") or {}
+        animations = load(gecko / "animations" / "entity" / f"{entity}.animation.json") or {}
+        definition = (geo.get("minecraft:geometry") or [{}])[0]
+        if not definition:
+            err(f"{entity}: no GeckoLib model")
+            continue
+        body_clips = animations.get("animations", {})
+        for clip in clips_named.get(body, set()):
+            if clip not in body_clips:
+                err(f"{entity}: the Java plays {clip}, which is not in {entity}.animation.json")
+        for clip in pm.CLIPS[body]:
+            if f"animation.{body}.{clip}" not in body_clips:
+                err(f"{entity}.animation.json: missing animation.{body}.{clip}")
+        sheet_w = definition.get("description", {}).get("texture_width", 0)
+        sheet_h = definition.get("description", {}).get("texture_height", 0)
+        bones = {bone["name"] for bone in definition.get("bones", [])}
+        for clip in body_clips.values():
+            for bone in clip.get("bones", {}):
+                if bone not in bones:
+                    err(f"{entity}.animation.json: animates unknown bone {bone}")
+        regions = set()
+        for bone in definition.get("bones", []):
+            for cube in bone.get("cubes", []):
+                w, h_, dd = cube["size"]
+                u, v = cube["uv"]
+                region = (u, v, u + 2 * (w + dd), v + dd + h_)
+                if region[2] > sheet_w or region[3] > sheet_h:
+                    err(f"{entity}.geo.json: a cube in {bone['name']} maps outside the {sheet_w}x{sheet_h} sheet")
+                regions.add(region)
+        regions = sorted(regions)
+        for i, a in enumerate(regions):
+            for b in regions[i + 1:]:
+                if a[0] < b[2] and b[0] < a[2] and a[1] < b[3] and b[1] < a[3]:
+                    err(f"{entity}.geo.json: UV regions {a} and {b} overlap")
+        glows = entity in pk.GLOWING
+        part = drawn(entity)
+        if not part or ("AutoGlowingGeoLayer" in part) != glows:
+            err(f"PumpkinKingClient: the {entity}'s glow layer must match tools/pumpkin_king.py GLOWING")
+        for name_ in (entity, f"{entity}_glowmask") if glows else (entity,):
+            sheet = ASSETS / "textures" / "entity" / f"{name_}.png"
+            if not sheet.is_file():
+                err(f"{entity}: missing textures/entity/{name_}.png")
+                continue
+            with Image.open(sheet) as image:
+                if image.size != (sheet_w * pm.TEXTURE_SCALE, sheet_h * pm.TEXTURE_SCALE):
+                    err(f"textures/entity/{name_}.png must be {sheet_w * pm.TEXTURE_SCALE}x{sheet_h * pm.TEXTURE_SCALE}")
+                if any(image.convert("RGBA").getchannel("A").histogram()[1:255]):
+                    err(f"textures/entity/{name_}.png has half-transparent pixels (it is drawn cut out)")
+    # His controllers own their bones: no bone is animated by two.
+    owned = {bone: controller for controller, bones in pm.CONTROLLERS.items() for bone in bones}
+    for clip_name, clip in clips.items():
+        controller = pm.owner(clip_name.split(".")[-1])
+        for bone in clip.get("bones", {}):
+            if owned.get(bone, "body") != controller:
+                err(f"pumpkin_king: {clip_name} ({controller}) animates {bone}, which the {owned.get(bone, 'body')} controller owns")
+    for controller in ("body", *pm.CONTROLLERS):
+        if f'new AnimationController<PumpkinKingEntity>("{controller}"' not in king:
+            err(f"PumpkinKingEntity has no {controller} controller (tools/pumpkin_king_models.py CONTROLLERS)")
+    # His loot, and his trophies: Arms VII's, as his bosses/pumpkin_king table holds them.
+    table = load(DATA / MOD / "loot_table" / "entities" / "pumpkin_king.json") or {}
+    if table.get("type") != "minecraft:gift":
+        err("loot_table/entities/pumpkin_king.json must be a gift table (rolled for each player paid)")
+    found_loot = {}
+    for pool in table.get("pools", []):
+        for entry in pool.get("entries", []):
+            found_loot[entry.get("name", "").split(":")[-1]] = pool.get("condition", {}).get("chance", 1.0)
+    expected = {"kings_ember": 1.0, **{item: pk.TROPHY_CHANCE for item in pk.TROPHIES}, **pk.CHANCES}
+    if found_loot != expected:
+        err(f"loot_table/entities/pumpkin_king.json gives {found_loot}, not tools/pumpkin_king.py's {expected}")
+    if tuple(arms_variants.trophies("pumpkin_king")) != tuple(pk.TROPHIES):
+        err(f"tools/pumpkin_king.py TROPHIES {pk.TROPHIES} are not Arms VII's: {arms_variants.trophies('pumpkin_king')}")
+    if any(arms_variants.BY_ID[t][2] != "fright" for t in pk.TROPHIES if t in arms_variants.BY_ID):
+        err("The Pumpkin King's trophies must carry the Fright boon")
+    trophies = load(DATA / MOD / "loot_table" / "bosses" / "pumpkin_king.json") or {}
+    held_items = [entry.get("name") for pool in trophies.get("pools", []) for entry in pool.get("entries", [])]
+    if held_items != [f"{MOD}:{item}" for item in pk.TROPHIES]:
+        err(f"loot_table/bosses/pumpkin_king.json holds {held_items}, not his trophies {pk.TROPHIES}")
+    for table_id in ("entities/pumpkin_king", "bosses/pumpkin_king"):
+        if f'Jugcraft.id("{table_id}")' not in loot_java:
+            err(f"PumpkinKingLoot must roll loot_table/{table_id}.json")
+    for trophy in pk.TROPHIES:
+        if f'Jugcraft.id("{trophy}")' not in registry:
+            err(f"JugcraftPumpkinKing must find the {trophy} (Arms VII registers it)")
+    for key in pk.RECIPES:
+        if not (DATA / MOD / "recipe" / f"{key}.json").is_file():
+            err(f"recipe/{key}.json is missing")
+    # The King's Ember comes only from him: no recipe makes it, so nothing turns back into it.
+    for path in (DATA / MOD / "recipe").glob("*.json"):
+        result = (load(path) or {}).get("result", {})
+        if isinstance(result, dict) and result.get("id") == f"{MOD}:kings_ember":
+            err(f"recipe/{path.name} makes the King's Ember, which only the Pumpkin King gives")
+    costumes = json.dumps(load(DATA / MOD / "tags" / "item" / "trick_or_treat_costumes.json") or {})
+    for item in pk.COSTUMES:
+        if f"{MOD}:{item}" not in costumes:
+            err(f"{item} must count as a costume (tags/item/trick_or_treat_costumes.json)")
+    if f"{MOD}:crowward_charm" not in (load(DATA / MOD / "tags" / "item" / "crow_wards.json") or {}).get("values", []):
+        err("The Crowward Charm must be a crow ward (tags/item/crow_wards.json)")
+    frightless = (load(DATA / MOD / "tags" / "entity_type" / "frightless.json") or {}).get("values", [])
+    if tuple(frightless) != tuple(arms_variants.FRIGHTLESS):
+        err(f"tags/entity_type/frightless.json is not tools/arms_variants.py FRIGHTLESS: {frightless}")
+    # Every lair boss with a bar is spared by Fright, in the table and in the tag.
+    spared = set(frightless) & set(arms_variants.FRIGHTLESS)
+    lair_sources = {java.stem: java.read_text(encoding="utf-8") for java in (JAVA_ROOT / "lair").rglob("*.java")}
+    registrations = "".join(lair_sources.values())
+    for stem, text in lair_sources.items():
+        if "new ServerBossEvent(" not in text:
+            continue
+        for found in re.finditer(rf'entity\("([a-z_]+)",\s*EntityType\.Builder\.<{stem}>of', registrations):
+            if f"{MOD}:{found.group(1)}" not in spared:
+                err(f"{stem} ({found.group(1)}) is a boss with a bar, but Fright does not spare it (tools/arms_variants.py FRIGHTLESS)")
+    advancement = load(DATA / MOD / "advancement" / f"{pk.ADVANCEMENT['key']}.json") or {}
+    if advancement.get("criteria", {}).get("done", {}).get("trigger") != "minecraft:impossible" \
+            or advancement.get("display", {}).get("icon", {}).get("id") != pk.ADVANCEMENT["icon"]:
+        err(f"advancement/{pk.ADVANCEMENT['key']}.json must be his, granted from code (an impossible \"done\")")
+    sent = "".join(sources.values())
+    for key in pk.MESSAGES:
+        if f'"message.jugcraft.pumpkin_king.{key}"' not in sent:
+            err(f"tools/pumpkin_king.py MESSAGES has {key}, which the Java never sends")
+    for cls, text in sources_all.items():
+        for key in re.findall(r'"((?:message|tooltip|entity)\.jugcraft\.[a-z_.]+[a-z_])"', text):
+            if key not in lang:
+                err(f"{cls}.java sends {key}, which has no words in en_us.json")
+        for banned, why in (("setChunkForced", "loads a chunk"), ("addRegionTicket", "loads a chunk"),
+                            ("TicketType", "loads a chunk"), ("changeDimension", "crosses dimensions"),
+                            ("TeleportTransition", "crosses dimensions")):
+            if banned in text:
+                err(f"{cls}.java {why} ({banned})")
+
+
 def check_material_sets():
     """The material sets (tools/material_icons.py, docs/MATERIAL_SETS.md): every map loads, every texture they draw is the
     committed PNG (CI does not re-run tools/generate_textures.py), every ore overlay is a clean cut-out, every ore model
@@ -17493,6 +17831,7 @@ def main():
     check_crypt_lich()
     check_iron_dreadnought()
     check_alpha_werewolf()
+    check_pumpkin_king()
     check_cydonian_sentinel()
     check_material_sets()
     check_art()
