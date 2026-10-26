@@ -90,6 +90,11 @@ No numbered release yet. Entries on feature branches remain proposed until their
 - The chunk's contract, decisions and evidence: [concordance-chunk-b.md](docs/features/concordance-chunk-b.md).
 - **The server game tests no longer run out of memory:** with main's #488 merged, all 2,575 of this branch's server tests ran, then the suite stopped with `OutOfMemoryError: Java heap space` on its last one (run 40414783975; main's 2,477 fit). A game-test mock player's connection ends in Netty's EmbeddedChannel, which keeps every packet written to it until something reads it; no test does, and the players stay logged in for the whole run, so their join packets and every later player's join message stayed in the heap. A test-only hook (`MockPlayerChannels`) now empties those channels each tick and logs how many packets it released; real and integrated-server connections are untouched. The game itself is unchanged.
 
+### Unmerged: Cola and MMH
+- **Cola:** the Chemical Reactor purifies Industrial Phosphoric Acid over charcoal into a vial of **Food-grade Phosphoric Acid**. The vial crafts with caramel, sugar, cinnamon, vanilla and lemon into **Cola Syrup**. The reactor carbonates the syrup with water and carbon dioxide into three bottles of **Cola**, which give Speed for 45 seconds and leave the bottle.
+- **MMH:** the Bulk Chemical Reactor methylates hydrazine with methyl chloride into **Monomethylhydrazine (MMH)**. The reactor seals it into a **Sealed MMH Tank**, and the Rocket Workshop makes four Storable Bipropellant Motors from an MMH tank and an N2O4 tank (hydrazine makes three).
+- Two new handbook pages. Quantities await review. Record: [cola-and-mmh.md](docs/features/cola-and-mmh.md).
+
 ### Unmerged: The drone depot terminal in the language file
 - Every word on the **Drone Depot Terminal**'s screen (title, tabs, every readout and warning, the mode key) now comes from the language file (`screen.jugcraft.terminal.*`), so it can be translated. In English it reads as before, except that the FLEET tab names each tier by its drone ("T1 Courier Quad Drone"), the JOBS tab names missing materials by their item names, and the mode key reads PERSONAL or PARTY from the start. Record: [drone-terminal-lang.md](docs/features/drone-terminal-lang.md).
 
