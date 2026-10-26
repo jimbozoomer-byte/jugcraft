@@ -282,6 +282,11 @@ public final class JugcraftGuns {
 	 */
 	public static final Set<String> LEVITATING = Set.of("chitin_smg", "hermit_rifle", "borer");
 	/**
+	 * Guns silenced along their own barrels, as a fitted silencer silences others: a shot shows no muzzle flash, and no
+	 * barrel attachment fits them (tools/guns.py SILENCED). Slice 15A's Gallant Rifle is the first.
+	 */
+	public static final Set<String> SILENCED = Set.of("gallant_rifle");
+	/**
 	 * The guns whose bullets knock back each creature they hurt a second time, by this strength, after the 0.4 every hit
 	 * gives (tools/guns.py KNOCKBACK). Slice 15B's Jawbreaker is the first, from the owner's Uppercut.
 	 */

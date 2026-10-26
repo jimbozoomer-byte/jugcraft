@@ -3603,7 +3603,7 @@ CYLINDER_CUE = "rotate_cylinder"
 QUIET_CUES = ("loaded", "end_reload", "loop_end", "reload_end", "stop_mag_tracking", "reset_mag_position",
               "resume_mag_tracking")
 # The muzzle flash: the owner's four flash frames, copied to textures/item/guns/flash/flash_<n>.png; each shot shows
-# one, turned at random about the barrel. A silencer hides it ("hides_flash").
+# one, turned at random about the barrel. A silencer hides it ("hides_flash"), as does a gun's own build (SILENCED).
 FLASH_FRAMES = ["muzzleflash", "muzzleflash2", "muzzleflash3", "muzzleflash4"]
 FLASH_SOURCE = BLOCKS / "Big Cannons and Mounted Guns" / "textures"
 # How big the flash is, across, in the gun model's pixels, by the round: black powder flares widest. A grenade's
@@ -3995,6 +3995,15 @@ BURN_SECONDS = 4
 # It falls when it ends, and takes the fall's damage (JugcraftGuns.LEVITATING).
 LEVITATING = ("chitin_smg", "hermit_rifle", "borer")
 LIFT_TICKS = 20
+
+
+# ------------------------------------------------------------------ guns silenced by their build
+
+# Guns silenced along their own barrels, as a fitted silencer silences others: a shot shows no muzzle flash (client/
+# guns/GunRenderer, as for the "hides_flash" attachments), and no barrel attachment fits them (JugcraftGuns.SILENCED).
+# Slice 15A's Gallant Rifle, which fires the owner's silenced shot, is the first: in CI's third-person screenshot of
+# 23 October 2026 its shot still showed a flash.
+SILENCED = ("gallant_rifle",)
 
 
 # ------------------------------------------------------------------ heavy bullets: knockback and armour piercing
