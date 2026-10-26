@@ -74,11 +74,20 @@ This adds no dependencies, assets or mixins. It reuses the shared keep-inventory
 | Structure and links | `python scripts/check_repository.py` | passed | locally, before pushing |
 | Material data and recipe audit | `python tools/check_mod_data.py` | passed | locally, before pushing |
 | Syntax of the changed Java files | the session's parse helper (javac's parser, no Minecraft classes) | passed | locally |
-| Compilation and headless server game tests (including `PlayerRulesGameTests`) | `./gradlew build` (CI job `mod`) | passed | CI run 39821173207, commit f836db854 |
-| Core without optional integrations | CI job `optional integrations absent` | passed | same run |
+| Compilation and headless server game tests (including `PlayerRulesGameTests`) | `./gradlew build` (CI job `mod`) | passed before the graves merge | CI run 39821173207, commit f836db854 |
+| Core without optional integrations | CI job `optional integrations absent` | passed before the graves merge | same run |
 | Rendered-client game tests | `./gradlew runClientGameTest` (CI job `client`, 16 shards) | passed: all 236 client test classes ran, because a shared mixin changed; `LairClientGameTests` ran in shard 10 | same run |
+| Rendered-client game tests, with main's death graves (#475) merged in | CI job `client`, 16 shards | passed: every client test class ran; `OwnerBatchClientGameTests` (its lair death now kept in place) ran in shard 3, `LairClientGameTests` in shard 10 | CI run 40365916464, commit 912c9cc84 |
+| Compilation and server game tests, with the graves merged in | CI jobs `mod` and `optional integrations absent` | **not completed**: both were cancelled at the workflow's 90-minute limit | same run |
 
-Those CI results come from before main's death graves (#475) were merged in. The merged version changes `DeathGraves` and the lair checks in `OwnerBatchClientGameTests`. CI on that merge is the evidence for the combined behaviour, and it is not recorded here yet.
+The `mod` and `optional integrations absent` cancellations are not from this change:
+- The game compiled, since the client jobs build the same code.
+- The server tests ran: 2,049 of 2,050 passed, and none failed.
+- One test in the last batch never finished, while the test server fell about 10,000 ticks behind.
+- Main's own Build for #475 (commit 7317e5d44, run 40223676835) was cancelled the same way. So was #477, which only changes a Python tool.
+- This change only acts in lair dimensions, which the server test world does not have.
+
+Until that stall on main is fixed, the server game tests that touch this change (`DeathGraveGameTests`, `PlayerRulesGameTests`) have no recorded pass on the merged code. Before the merge (f836db854), `PlayerRulesGameTests` passed.
 
 The game is not compiled locally (its toolchain downloads are blocked there), so CI is the evidence for the three rows above. The first push, 182d143ee, failed to compile the test: in 26.3 the open screen is `client.gui.screen()`, not a field of `Minecraft`. f836db854 fixed that.
 
