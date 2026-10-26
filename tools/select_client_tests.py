@@ -64,6 +64,9 @@ WEIGHTS = {
     "TownClientGameTests": 120,
     "GuideScreenshotGameTests": 120,
     "SeasonClientGameTests": 90,
+    # Concordance Chunk B unit 4: about 25 shots at 2 s each and 200 ticks of the Yeti King's frost on the player, which
+    # its length would put far lower (an estimate, not a measurement).
+    "ConcordanceWinterClientGameTests": 120,
     "JugcraftServerClientGameTests": 90,
     # Companion suites exercise timed AI, inventory trips and cooking, not just
     # showrooms. Allow CI headroom over the focused local runtime measurements.

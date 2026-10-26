@@ -9,8 +9,8 @@ The owner's Mars adventure, the Cydonian Sentinel, is also implemented: [feature
 From [CONTENT_BRANCHES.md](../CONTENT_BRANCHES.md) ("Caves, dungeons and bosses" and "Rare loot"):
 - **An arena with edges:** a lair, or a summoning that builds one. The boss does not wander out of it, and it resets when everyone leaves.
 - **Readable attacks:** every big attack is telegraphed (a wind-up, a sound, a shadow on the ground) and can be dodged or blocked.
-- **Recovery:** dying in the fight is not the end; a player who falls in a lair keeps their whole inventory and experience, as keepInventory does there only, and the boss heals and resets rather than keeping its gains.
-- **Multiplayer:** its health scales with the players in the arena; every player who took part gets a roll of its loot table, not just the last hit. A blow to it, or to a creature that counts for it, is taking part; at Vesperine and Madame Tatterlace, since Concordance Chunk A, so is support: healing or warding another player against the fight, or one of its objectives ([lair encounter credit](../features/lair-encounter-credit.md)).
+- **Recovery:** dying in the fight is not the end; players retain their entire inventory and experience, and the boss heals and resets rather than keeping its gains.
+- **Multiplayer:** its health scales with the players in the arena; every player who took part gets a roll of its loot table, not just the last hit. A blow to it, or to a creature that counts for it, is taking part; at Vesperine and Madame Tatterlace since Concordance Chunk A, and the Yeti King and the Cinder Tyrant since Chunk B, so is support: healing or warding another player against the fight, or one of its objectives ([lair encounter credit](../features/lair-encounter-credit.md)).
 - **No griefing:** a summoned boss cannot be called inside a town's protection or another player's claim, and its attacks do not break player builds.
 - **No farming loop:** a long respawn timer per lair (or a costly summoning item), so a trophy stays a trophy.
 - **Optional:** no core progression needs a boss. Its trophies are side-grades with a boon, and each boss also drops something useful to non-fighters (a crafting material, a decoration, a trophy head).
@@ -28,7 +28,7 @@ From [CONTENT_BRANCHES.md](../CONTENT_BRANCHES.md) ("Caves, dungeons and bosses"
 | **The Iron Dreadnought** | The Foundry Trench: Sealed Orders | [foundry-trench.md](../features/foundry-trench.md), [iron-dreadnought.md](../features/iron-dreadnought.md) | Not yet |
 | **The Alpha Werewolf** | The Moonlit Ring: the Howling Totem | [moonlit-ring.md](../features/moonlit-ring.md), [alpha-werewolf.md](../features/alpha-werewolf.md) | Not yet |
 
-The first two are the Witching Season's ([features/witching-season.md](../features/witching-season.md)); all six, the Iron Dreadnought's trench and the Alpha Werewolf's ring are on the shared lair framework (`lair/`). Vesperine and Madame Tatterlace roll their own loot table, `loot_table/entities/<boss>.json`, for each player who took part: their trophies, the Vesper Scythe and the Needle Rapier (Arms VII's), come at 15% a share and always on a player's first win. The Arms VII trophy tables `bosses/vesperine` and `bosses/tatterlace` are written by `tools/arms_variants.py` as the others' are, but nothing rolls them. The Yeti King and the Cinder Tyrant roll theirs the same way, a trophy always on a player's first win; they still credit damage alone, without Concordance Chunk A's support credit ([lair-encounter-credit.md](../features/lair-encounter-credit.md)).
+The first two are the Witching Season's ([features/witching-season.md](../features/witching-season.md)); all six, the Iron Dreadnought's trench and the Alpha Werewolf's ring are on the shared lair framework (`lair/`). Vesperine and Madame Tatterlace roll their own loot table, `loot_table/entities/<boss>.json`, for each player who took part: their trophies, the Vesper Scythe and the Needle Rapier (Arms VII's), come at 15% a share and always on a player's first win. The Arms VII trophy tables `bosses/vesperine` and `bosses/tatterlace` are written by `tools/arms_variants.py` as the others' are, but nothing rolls them. The Yeti King and the Cinder Tyrant roll theirs the same way, a trophy always on a player's first win. Both have been on Concordance Chunk A's support credit since Chunk B ([lair-encounter-credit.md](../features/lair-encounter-credit.md)). JEI's information pages on their loot and the encyclopedia's lair dossiers cover the first four (the Yeti King and the Cinder Tyrant since Chunk B; [concordance-first-loadout.md](../features/concordance-first-loadout.md), [arcane-concordance-first-route.md](../features/arcane-concordance-first-route.md)).
 
 ## The first eight (trophies built)
 
@@ -99,15 +99,15 @@ The Yeti King: 420 health (scaled for the party: half as much again for each pla
 | Glacial Spikes | He drives a fist into the ice, and cracks race towards his foe (0.8 s) | Spikes of ice burst up along the cracks, 12 blocks: 10 damage, thrown up |
 | Kin Call | He beats his chest and howls (1 s) | Two Yeti Whelps climb out of the dens; at most four at a time |
 
-**Yeti Whelps:** young yetis, 16 health, their blows 3 damage, quick. They go for the nearest player, drop nothing, and flee into the snow when he falls, resets or is gone. Whoever hurts one has taken part in his fight.
+**Yeti Whelps:** young yetis, 16 health, their blows 3 damage, quick. They go for the nearest player, drop nothing, and flee into the snow when he falls, resets or is gone. Whoever hurts one, or whose tamed creature does, has taken part in his fight.
 
 **Below a fifth, "The Fury of the Peaks":** his crown blazes and his eyes burn blue. Every cooldown (and his pause between attacks) is a third shorter, his slam bares twice the ring, and a charge that does not stun him is followed at once by another.
 
-**Left alone** for 10 seconds, he climbs back to his throne, healed; the snow drifts back, his whelps flee, and who hurt him is forgotten.
+**Left alone** for 10 seconds, he climbs back to his throne, healed; the snow drifts back, his whelps flee, and who took part is forgotten.
 
 ### His loot (per participant)
 
-A participant is a player who hurt him or his whelps and is within 64 blocks of the lake's centre when he falls.
+A participant is a player who qualified in his fight: by a blow to him or a whelp (their own or their tamed creature's, the felling blow included), by healing or warding other players against 4 of his side's blows with the Concordance; by baiting his charge into an ice column, having already taken part; or by bracing another player who then takes one of his throws, a Brace on oneself or the Water Bangle's counting for no one (since Concordance Chunk B, [lair-encounter-credit.md](../features/lair-encounter-credit.md); the Brace since its unit 5, B-09). One alive within 64 blocks of the lake's centre when he falls is paid at once; one who died in the fight once back on their feet; one who left the game in it on joining again. Each fall pays each player once.
 
 | Loot | Chance |
 | --- | --- |
@@ -115,13 +115,13 @@ A participant is a player who hurt him or his whelps and is within 64 blocks of 
 | **A trophy:** the Glacier Maul or the Rimeclaw (his `bosses/yeti_king` table, one of the two) | 15%; certain on a player's first kill |
 | **Yeti Mitten** | 25% |
 | **The Yeti King's Crown** | 20% |
-| 300 experience, shared out | always |
+| 300 experience, shared out among everyone paid | always |
 | The advancement **Abominable** | always |
 
 - **Yeti Fur:** a cheaper Frost Horn (fur in place of the two leather and a gold ingot), his "part of what summons him again"; or two white wool.
-- **Yeti Mitten:** held in the offhand, you never freeze: powder snow, his Frost Breath and the blizzard leave you warm.
+- **Yeti Mitten:** held in the offhand, you never freeze: powder snow, his Frost Breath and the blizzard leave you warm. It stays the permanent prize; since Concordance Chunk B, Winter Brine (brewed at an Alembic Crucible) gives Frostward, the timed answer to his frost ([the winter record](../features/arcane-concordance-winter.md)).
 - **The Yeti King's Crown:** a costume worn on the head, his crown of blue ice in small.
-- **The trophies** are Arms VII's ([features/arms-vii.md](../features/arms-vii.md)), with their Frost boon; until now they were in the creative tab only.
+- **The trophies** are Arms VII's ([features/arms-vii.md](../features/arms-vii.md)), with their Frost boon; until now they were in the creative tab only. Since Concordance Chunk B, the boon's slow is also Rimekeeping practice (an elective), with no number changed.
 - When he falls, Grey Mist opens in the middle of the lake, the way home.
 
 ### Rules kept
@@ -201,17 +201,17 @@ The slag never cools. The shelves and the dry troughs are firm footing.
 
 In this phase the sluices take turns: one at a time is choked with slag and will not turn. It is shown by the slag glowing in its gate, and the choke moves every 20 seconds, so one or two always work. Every 30 seconds the channel surges again, announced as before.
 
-**Cinderlings:** small salamanders of glowing slag. They have 14 health and bite for 3 damage, setting you burning for 2 s. They are quick and immune to fire, but in a flooded trough they gutter out. They go for the nearest player, drop nothing, and crumble to ash when he falls, resets or is gone. Whoever hurts one has taken part in his fight.
+**Cinderlings:** small salamanders of glowing slag. They have 14 health and bite for 3 damage, setting you burning for 2 s. They are quick and immune to fire, but in a flooded trough they gutter out. They go for the nearest player, drop nothing, and crumble to ash when he falls, resets or is gone. Whoever hurts one, or whose tamed creature does, has taken part in his fight.
 
 **Below a fifth, "The Molten Heart":** his cracks blaze white. Every cooldown, and his pause between attacks, is a third shorter. His Ember Spit throws five, and his Kiln Breath sweeps 90°. Quenching him still works as before.
 
-**Left alone** for 10 seconds, he sinks back into the crucible, healed. The troughs drain, the sluices reset, his Cinderlings crumble, and who hurt him is forgotten.
+**Left alone** for 10 seconds, he sinks back into the crucible, healed. The troughs drain, the sluices reset, his Cinderlings crumble, and who took part is forgotten.
 
 **Fire Resistance**, from a potion or the Ember invocation Hearthguard, stops his fire: the breath, the slag, the wave, the fire patches and burning. It never stops his blows: the Tail Sweep, the Body Slam, the gobs' and cinders' impact, and the Cinderlings' bites. It helps the prepared without emptying the fight. Hearthguard is the planning pack's Ember link; its Tide, Rime and Strata links wait for those schools.
 
 ### His loot (per participant)
 
-A participant is a player who hurt him or his Cinderlings and is within 64 blocks of the bowl's centre when he falls.
+A participant is a player who qualified in his fight: by a blow to him or a Cinderling (their own or their tamed creature's, the felling blow included), or by healing or warding other players against 4 of his side's blows with the Concordance (since Concordance Chunk B, [lair-encounter-credit.md](../features/lair-encounter-credit.md); his slag's heat and burning are no one's blows, and he names no objective of his own). One alive within 64 blocks of the bowl's centre when he falls is paid at once; one who died in the fight once back on their feet; one who left the game in it on joining again. Each fall pays each player once.
 
 | Loot | Chance |
 | --- | --- |
@@ -219,7 +219,7 @@ A participant is a player who hurt him or his Cinderlings and is within 64 block
 | **A trophy:** the Cinderbrand or the Magmaw (his `bosses/cinder_tyrant` table, one of the two) | 15%; certain on a player's first kill |
 | **Salamander Charm** | 25% |
 | **The Tyrant's Crest** | 20% |
-| 300 experience, shared out | always |
+| 300 experience, shared out among everyone paid | always |
 | The advancement **Tempered** | always |
 
 - **Tyrant Scale:** two magma cream, for Fire Resistance; or a cheaper Kiln Seal, his part of what summons him again.
@@ -243,7 +243,7 @@ The planning pack's chapter 04 asks each lair to answer these:
 - **Who fights:** players who may fight a lair's boss (`LairBosses`), with party health as above.
 - **Reset:** when no eligible player is left, or he is left alone for 10 seconds.
 - **Clean-up:** his gobs, cinders, waves, fire patches and Cinderlings are his, capped, and gone with him.
-- **Death, disconnect and restart:** as every lair. A player who falls drops nothing and respawns with everything they carried, and instances close on a restart. Each participant's loot is rolled once when he falls.
+- **Death, disconnect and restart:** as every lair. Players keep their entire inventory and experience; Grave Goods catch residual drops, and instances close on a restart. Each participant's share is paid once and rolled when it is handed over: at once, or kept for one who died or left the game in the fight.
 - **An ordinary player** can do everything: the sluices are turned by hand, the bait is standing in a trough, and a hot Tyrant still takes half damage from any weapon.
 
 ### Rules kept

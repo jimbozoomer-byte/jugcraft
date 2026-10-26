@@ -8,7 +8,8 @@
   "environment": "*",
   "entrypoints": {
     "main": [
-      "io.github.jimbozoomer.jugcraft.test.TestForms"
+      "io.github.jimbozoomer.jugcraft.test.TestForms",
+      "io.github.jimbozoomer.jugcraft.test.MockPlayerChannels"
     ],
     "fabric-gametest": [
       "io.github.jimbozoomer.jugcraft.test.JimtaFactoryExpansionGameTests",
@@ -72,6 +73,8 @@
       "io.github.jimbozoomer.jugcraft.test.ConcordanceInvocationGameTests",
       "io.github.jimbozoomer.jugcraft.test.ConcordanceEmberGameTests",
       "io.github.jimbozoomer.jugcraft.test.ConcordanceEmberGearGameTests",
+      "io.github.jimbozoomer.jugcraft.test.ConcordanceRimeStrataGameTests",
+      "io.github.jimbozoomer.jugcraft.test.ConcordanceWinterGameTests",
       "io.github.jimbozoomer.jugcraft.test.ConcordanceWayfaringGameTests",
       "io.github.jimbozoomer.jugcraft.test.ConcordanceBaselineGameTests",
       "io.github.jimbozoomer.jugcraft.test.ConcordanceRitualGameTests",
@@ -511,6 +514,8 @@
       "io.github.jimbozoomer.jugcraft.test.KnightArmorClientGameTests",
       "io.github.jimbozoomer.jugcraft.test.TitaniumGearClientGameTests",
       "io.github.jimbozoomer.jugcraft.test.ConcordanceEmberGearClientGameTests",
+      "io.github.jimbozoomer.jugcraft.test.ConcordanceRimeStrataClientGameTests",
+      "io.github.jimbozoomer.jugcraft.test.ConcordanceWinterClientGameTests",
       "io.github.jimbozoomer.jugcraft.test.ConcordanceWayfaringClientGameTests",
       "io.github.jimbozoomer.jugcraft.test.ArmorTiersClientGameTests",
       "io.github.jimbozoomer.jugcraft.test.StyxClientGameTests",

@@ -46,12 +46,16 @@ Chili in the other hand grinds into two Paprika ([vegetables-herbs-and-spices.md
 20, magma 60, soul campfire 100, campfire 120, soul fire 150, fire 175, lava 220 (a campfire only while lit). Four
 bands decide what a **stir** (a Stirring Rod or a stick, at most one every half second) does:
 
-| Band | From | A stir dissolves of what is pending | Also |
-|---|---|---|---|
-| Cold | | 10% | |
-| Warm | 40 | 30% | |
-| Hot | 90 | 55% | |
-| Searing | 160 | 80% | keeps only 85% of the dissolved Radiance and Verdance, and adds 0.50 contaminant |
+| Band | From | A stir dissolves of what is pending | Rime kept | Also |
+|---|---|---|---|---|
+| Cold | | 10% | all | |
+| Warm | 40 | 30% | 60% | |
+| Hot | 90 | 55% | 30% | |
+| Searing | 160 | 80% | none | keeps only 85% of the dissolved Radiance and Verdance, and adds 0.50 contaminant |
+
+**Rime is cold's own** (since Concordance Chunk B, unit 4, B-08; [the winter record](arcane-concordance-winter.md)):
+every stir above the cold band keeps only that share of the Rime already dissolved. A ground ingredient's ready share
+stays until a stir, since an addition has no band.
 
 Put in water first (a water bottle is one part, a water bucket three; at most six parts), then ingredients, then stir.
 **Bottling** draws one part's share of everything dissolved: that is the dose. A glass bottle makes a **draught**
@@ -64,12 +68,16 @@ Put in water first (a water bottle is one part, a water bucket three; at most si
 | Radiance | Night Vision | 0.50 | | I | 60 s (120 s) |
 | Verdance | Regeneration | 0.60 | 1.50 | II | 15 s (22.5 s) |
 | Ember | Fire Resistance | 0.60 | | I | 60 s (120 s) |
-| Rime | Resistance | 0.80 | | I | 30 s (60 s) |
+| Rime | Frostward | 0.80 | | I | 60 s (120 s) |
 | Tide | Water Breathing | 0.60 | | I | 60 s (120 s) |
 | Hollow | Poison | 0.40 | 1.00 | II | 10 s (21.6 s) |
 | Contaminant | Nausea | 0.50 | | I | 8 s (20 s) |
 
-Below its threshold a property does nothing, and the explanation says so.
+Below its threshold a property does nothing, and the explanation says so. **Frostward** (since Chunk B, unit 4) is a
+Jugcraft status: while it lasts no frost gathers on its holder and the Yeti King's frost does not take; milk ends it.
+Three snowballs in one part of water, stirred cold three times, make **Winter Brine**: 0.813 Rime a part, Frostward I
+for 48.75 seconds. Stirred warm, the same keep 0.685 and do nothing. Before unit 4, Rime gave Resistance (30 s a unit,
+at most 60 s); a Rime draught bottled then still gives Resistance.
 
 **A worked example** (the one the game tests use). One water bottle, one glowstone dust as it comes (1.50 Radiance
 pending), the crucible over a campfire (hot). The first stir dissolves 55%: 0.825. The second dissolves 55% of the 0.675
@@ -83,7 +91,8 @@ would last longer; stirred over fire (searing), it would lose 15% of its Radianc
 - **Assay Glass** (the Alembic Arts understood): the temperature, every property dissolved and still pending, a part's
   share and the contaminant. Without the research it reads like a spoon.
 - **Assay Glass, mastered**: what a dose bottled now would do, and why: each effect with its property, how much a part
-  holds against the threshold, and which ingredients (or searing stirs) put it there.
+  holds against the threshold, and which ingredients (or searing stirs) put it there; for Rime, also "stirs above the
+  cold, which thaw Rime" when a warmer stir thawed some.
 
 **Formulas.** Use a blank formula on a crucible whose mixture is fresh (nothing bottled yet) and would do something: it
 writes down the whole process, for example `water 1; add minecraft:glowstone_dust jugcraft:raw; stir hot; stir hot`.
@@ -132,7 +141,11 @@ counts once.
 - Technology connection: water through the Fabric Transfer API (Jugcraft pipes or any mod's), hoppers for ingredients and
   bottles, the output for any extractor. A formula is canonical process data any automation can carry.
 - Magic connection: the six axes are the Principles' own names; the same research, notes and practice rules as the rest
-  of the Concordance; the shared effect boundary.
+  of the Concordance; the shared effect boundary. Since Concordance Chunk B, unit 3
+  ([Rime and Strata](arcane-concordance-rime-strata.md)): a brew that carries Rime, bottled by hand, is Rimekeeping's
+  workshop study, and Preserve holds a crucible's heat in its band for a minute while you stir (two with a Focus of
+  Water worn, unit 4). Since unit 4 ([the winter record](arcane-concordance-winter.md)): Winter Brine is the winter
+  workshop's brew, and the Yeti King's frost respects its Frostward.
 - Reachable entry path: First Light understood → the Alembic Arts by examining vanilla items → craft the crucible
   (four copper, a cauldron, three bricks) and tools from vanilla materials.
 - Solo, trade and cooperative routes: entirely solo; Research Notes and written formulas can be traded.
@@ -143,12 +156,16 @@ counts once.
 - Every effect is a vanilla status effect at level I or II, and **no brew outlasts the vanilla potion of the same effect
   at the highest level it can reach**: night vision, fire resistance and water breathing at most 2 minutes (vanilla: 3);
   Regeneration (which reaches II) at most 22.5 seconds and Poison (which reaches II) at most 21.6 seconds, vanilla's
-  strong-potion durations, even at level I. Resistance I (at most 1 minute) and Nausea have no vanilla potion.
+  strong-potion durations, even at level I. Nausea has no vanilla potion, and nor has Frostward (since Chunk B, unit 4),
+  which is held to the Fire Resistance brew's numbers (at most 2 minutes). No brew gives Resistance any more: Rime gave
+  Resistance I for at most a minute until unit 4.
   `tools/check_mod_data.py` enforces this. Brewing is cheaper than vanilla brewing (no blaze powder, nether wart or
   brewing stand), so it is held to vanilla's ceilings rather than allowed to exceed them.
 - Nothing alchemy makes is a resource another system consumes, so there is no conversion loop.
 - Searing heat trades quality for speed (85% of Radiance and Verdance kept and contaminant added), so the fastest fire
-  is not always the best.
+  is not always the best. Any heat above cold thaws Rime (warm keeps 60%, hot 30%, searing none), so a Rime brew wants
+  the cold band, per recipe: four raw snowballs stirred warm twice still reach Frostward, and five stirred hot once;
+  searing never does.
 - Grinding loses a tenth for speed: a ground ingredient needs fewer stirs.
 - A crucible holds at most six parts: six doses per fill.
 
@@ -157,8 +174,9 @@ counts once.
 - Server authority: the crucible simulates on the server; clients receive the temperature and volume only (for the
   vessel's animation), never the makeup, which takes sampling. Hand operations are rate-limited and check research; a
   stir's band is the server's.
-- Persistence: the crucible saves its mixture exactly (to the thousandth), history, formula, step, tank and slots;
-  broken, its items drop (vanilla's container behaviour) and the mixture spills. Items carry `jugcraft:brew`,
+- Persistence: the crucible saves its mixture exactly (to the thousandth), history, formula, step, tank and slots, and
+  Preserve's hold, `held_until` (game time), only while held; broken, its items drop (vanilla's container behaviour) and
+  the mixture spills. Items carry `jugcraft:brew`,
   `jugcraft:reagent` and `jugcraft:formula`.
 - Disable behaviour: with `concordance.enabled=false`, crucibles refuse work and stop following formulas; everything stays
   registered.
@@ -174,9 +192,12 @@ No new dependency. Framework use:
 - **Jade** (optional): temperature and band, volume, and when following a formula its step and the next operation it
   waits for.
 - **JEI** (optional): each ingredient's properties and the mortar's preparation as ingredient information, and the tools'
-  crafting recipes. JEI never shows outcomes: those are for the player to work out (or the mastered Assay Glass).
+  crafting recipes. JEI never shows outcomes: those are for the player to work out (or the mastered Assay Glass). Since
+  Chunk B, unit 4, the Rime ingredients' pages (snowball, amethyst shard, gloamcap) add "stirred cold, its Rime brews
+  Frostward (Winter Brine)": a fact about the property, never a formula's outcome.
 - **Modonomicon**: a new **Alembic** codex category (the Alembic Arts, the crucible, properties, sampling and formulas),
-  generated from the same tables as the data.
+  generated from the same tables as the data. Since Chunk B, unit 4, it has a **Winter Brine** entry (the Alembic Arts
+  observed), and the Stirring page names the Rime each warmer band keeps.
 - **Fabric Transfer API**: the water tank (`FluidStorage.SIDED`).
 
 Sounds `jugcraft:concordance.crucible_add`, `.crucible_stir`, `.crucible_bottle` are synthesised by
@@ -233,6 +254,15 @@ Not yet run: any client (the crucible's GeckoLib animation and animated surface,
 game), a two-client dedicated server, and a fluid pipe network filling the tank (the machinery test fills it through
 the Transfer API, the interface pipes use).
 
+**Concordance Chunk B, unit 4** ([the winter record](arcane-concordance-winter.md); not yet merged) added four game
+tests to `ConcordanceAlchemyGameTests`: `winterBrineNeedsTheColdBand` (the Rime each band keeps, the generator's
+numbers; a cold and a warm crucible by hand; Frostward for 975 ticks), `oldRimeBottlesStillGiveResistance` (a save
+test), `aRimeFormulaWrittenBeforeBrewsFrostward` and `frostwardIsNeverCheaperThanItsSnow` (economy loops that must
+fail). They passed in CI (run 38549876709 on `b012875ab`, by workflow_dispatch; not merged), among its 1676 required
+server tests. The existing alchemy tests are unchanged, and passed there too: none of them brews Rime.
+`check_alchemy` now mirrors `RIME_KEEP_*` and accepts a property's status only if vanilla or Jugcraft registers it; the
+new `check_winter_brine` holds the rest. `check_mod_data` passes, locally and in that run's `mod` job.
+
 ## World and event applicability
 
 No worldgen, creatures, loot or seasons.
@@ -247,5 +277,10 @@ No worldgen, creatures, loot or seasons.
 - `jugcraft:concordance_specimens` (added in step 12) now also includes `#jugcraft:alchemy_specimens`.
 - Save compatibility: additive. The formula text format (`water`, `add`, `stir`) is part of the saved data and must
   stay readable.
+- Since Chunk B, unit 4: the Rime property's status changed from `minecraft:resistance` to `jugcraft:frostward` (a new
+  stable id). Bottles keep the status they were bottled with, so old Rime draughts still give Resistance; formulas are
+  operations only and replay under the new rule (a warm, hot or searing Rime stir now brews weaker or nothing). A
+  crucible whose output still holds old Resistance draughts waits for them to be taken, because a Frostward draught
+  does not stack with them.
 - Open: more preparations (distilling, calcining) and ingredients arrive with later Principles; a GuiLib crucible
   screen.

@@ -202,7 +202,10 @@ Among the pictures the owner sent on 8 October 2026 without words is a render of
   - paper, dyes, flint, leather, amethyst.
 - **Existing output consumer:** the player against mobs and, where PvP is on, players.
 - **Technology connection:** steel and the plate press (ironclad); the arms' tiers.
-- **Magic connection:** the runebound style needs ectoplasm, from the ghost-hunting branch.
+- **Magic connection:** the runebound style needs ectoplasm, from the ghost-hunting branch. Since Concordance Chunk B
+  (unit 4, [the winter record](arcane-concordance-winter.md); not yet merged), a Frost boon slow that takes on a hostile
+  creature is Rimekeeping's elective practice for a wielder who understands Rimekeeping (the Glacier Maul, the Rimeclaw
+  and the Frost Knight Greatsword); the boon, its numbers and its tooltip are unchanged.
 - **Reachable entry path:** a steel arm, then the pattern's ingredients, then a smithing table. All existing and craftable solo. No circular unlock.
 - **Required vs optional:** all optional.
   - The styles can be crafted solo or traded.

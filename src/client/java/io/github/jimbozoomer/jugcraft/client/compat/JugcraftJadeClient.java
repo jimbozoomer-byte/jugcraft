@@ -351,6 +351,10 @@ public final class JugcraftJadeClient implements JugcraftJadePlugin.ClientRegist
 				if (!band.isEmpty()) {
 					tooltip.add(Component.translatable("tooltip.jugcraft.concordance.jade.temperature", data.getIntOr("temperature", 0),
 							Component.translatable("compose.jugcraft.band." + band)));
+					int held = data.getIntOr("held", 0);
+					if (held > 0) {
+						tooltip.add(Component.translatable("tooltip.jugcraft.concordance.jade.held", held));
+					}
 					tooltip.add(Component.translatable("tooltip.jugcraft.concordance.jade.volume", data.getIntOr("parts", 0), Mixture.MAX_PARTS));
 					int steps = data.getIntOr("steps", 0);
 					if (steps > 0) {

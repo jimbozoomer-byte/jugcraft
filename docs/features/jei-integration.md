@@ -1,6 +1,6 @@
 # JEI integration
 
-Status: implemented; expanded during the owner's 22 October 2026 server bug-fix pass. Actual tool/model: OpenAI Codex (GPT-6). See the dated verification record below for the checks actually run.
+Status: implemented; expanded during the owner's 22 October 2026 server bug-fix pass. Actual tool/model: OpenAI Codex (GPT-6). See the dated verification record below for the checks actually run. The plugin also compiles in CI with Concordance Chunk A's information pages (`addAcquisitionInfo`; #337's CI on `d4c07bf56` passed every job); Concordance Chunk B adds pages only through data.
 Proposal issue: none. The owner asked for "JEI/EMI recipes" on 30 September 2026. EMI has no build for Minecraft 26.3 yet (checked on its maven), so this is JEI only.
 Owner: @jimbozoomer-byte
 Target milestone and tier: all tiers (it only displays recipes).
@@ -15,7 +15,7 @@ Machine coverage includes the item processors, fluid processors, industrial form
 
 Crafting-table recipes show in JEI's own crafting page when JEI's recipe sync reaches the client: always in a single-player world, and on a server only if JEI is installed there too. A server without JEI sends none, and JEI falls back to vanilla's own recipes (read in JEI's 31.9 source; the pin is 31.8.0.49).
 
-**Information pages** (JEI's Information tab) cover what no recipe shows: the alchemy ingredients' properties and the mortar, how a Resonant Ring is forged, and, since Concordance Chunk A, where the things only a ritual or a lair boss gives come from (the Adept's Wand, and Vesperine's and Madame Tatterlace's loot), with the default data's chances ([concordance-first-loadout.md](concordance-first-loadout.md)).
+**Information pages** (JEI's Information tab) cover what no recipe shows: the alchemy ingredients' properties and the mortar, how a Resonant Ring is forged, and, since Concordance Chunk A, where the things only a ritual or a lair boss gives come from (the Adept's Wand, and Vesperine's and Madame Tatterlace's loot; the Yeti King's and the Cinder Tyrant's since Concordance Chunk B), with the default data's chances ([concordance-first-loadout.md](concordance-first-loadout.md)).
 
 ## How it works
 - **Optional:** the plugin compiles against JEI's API only (`compileOnly`, maven.blamejared.com). The JEI mod itself is an optional entry of the framework lock, which `build.gradle` loads at runtime in development and test runs unless `-PjugcraftOptionalIntegrations=false` (as CI's "optional integrations absent" job runs). The plugin class is reached only through JEI's `jei_mod_plugin` entrypoint, so Jugcraft runs normally without JEI.
@@ -29,7 +29,8 @@ Crafting-table recipes show in JEI's own crafting page when JEI's recipe sync re
 ## Verification
 - `tools/check_mod_data.py` passes.
 - The expanded client plugin compiled locally against the pinned JEI API on 22 October 2026.
-- `check_acquisition` (`tools/check_mod_data.py`) ties the information pages to `tools/acquisition.py` and the data on disk. It reads data only, so a drop coded in Java is not seen ([concordance-first-loadout.md](concordance-first-loadout.md), Known limits).
+- CI compiled the plugin against the JEI API, Concordance Chunk A's `addAcquisitionInfo` included (#337's CI on `d4c07bf56`, every job passed). Concordance Chunk B adds pages only through data (`recipe_view.json` rows and their words); the plugin is unchanged by it.
+- `check_acquisition` (`tools/check_mod_data.py`) ties the information pages to `tools/acquisition.py` and the data on disk, and since Concordance Chunk B each boss's pages to its loot class's pools, first-victory trophy and payment through `LairRewards`. It reads data, and only the loot class's and the boss package's reward and deed lines; other drops coded in Java are not seen ([concordance-first-loadout.md](concordance-first-loadout.md), Known limits).
 - The focused real-client JEI test and screenshots passed on 22 October 2026; this does not substitute for the owner's multiplayer playtest.
 
 ## Rollout and open questions
