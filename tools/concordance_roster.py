@@ -57,7 +57,9 @@ KIND_PORTRAITS = {"familiar": "jugcraft:hearthling", "spirit": "", "construct": 
 DIMENSIONS = {"minecraft:overworld": "the Overworld", "minecraft:the_nether": "the Nether", "minecraft:the_end": "the End",
               **{f"{MOD}:{lair}": "t" + spec["display"][1:] if spec["display"].startswith("The ") else spec["display"]
                  for lair, spec in lairs.LAIRS.items()},
-              f"{MOD}:nouveau_planarium": "a Planarium"}
+              f"{MOD}:nouveau_planarium": "a Planarium",
+              # Main's Jimtafacts spellbooks (#475): its Pocket Dimension spell's place.
+              f"{MOD}:jimtafacts_pocket_dimension": "a Pocket Dimension"}
 
 MESSAGES = {
     "roster.answer.not_listed": "That is not on your roster as you last read it; read it again. Nothing was done",

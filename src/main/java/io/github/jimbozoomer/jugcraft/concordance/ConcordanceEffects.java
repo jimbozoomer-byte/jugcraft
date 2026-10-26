@@ -164,6 +164,7 @@ public final class ConcordanceEffects {
 		if (!target.isAlive() || target.isRemoved()) {
 			return Result.NOTHING;
 		}
+		spec = io.github.jimbozoomer.jugcraft.jimtafacts.spellbooks.JimtaSpellPower.adjust(context, spec);
 		EffectSpec effect = spec;
 		// The multiplayer rules judge the person behind it (roadmap step 28): its actor, or whoever its cause names.
 		ServerPlayer person = person(context);
@@ -235,6 +236,7 @@ public final class ConcordanceEffects {
 		};
 		if (result.applied()) {
 			io.github.jimbozoomer.jugcraft.nouveau.NouveauThreads.afterSpell(context,effect,target,healthBefore);
+            io.github.jimbozoomer.jugcraft.jimtafacts.spellbooks.JimtaImmolate.after(context,effect,target);
 			show(level, effect.kind(), target.getX(), target.getY() + target.getBbHeight() * 0.6, target.getZ());
 			if (effect.kind() == EffectKind.RESTORATION || effect.kind() == EffectKind.PROTECTION) {
 				float amount = effect.kind() == EffectKind.RESTORATION ? gained : 4.0F * (effect.protectionAmplifier() + 1);

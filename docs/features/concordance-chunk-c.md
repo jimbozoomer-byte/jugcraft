@@ -2095,7 +2095,9 @@ after the first path (09:16).
 10. Do not change Preserve's crucible-only scope (`Rime.java:31-33`) or Chunk B's Proposed decisions without the owner.
 11. Do not hand-edit generated data; change the generators.
 12. Do not execute anything in the owner's library, and do not import whole trees (08:167).
-13. Do not add a mixin for the poultice's credit while the tick rule works (CLAUDE.md: avoid unnecessary mixins).
+13. Do not add a mixin for the poultice's credit while the tick rule works (CLAUDE.md: avoid unnecessary mixins). Main's
+    own heal and effect mixins (`NouveauThreadMixin`; since main's #475, `JimtaSpellStatusMixin` and
+    `JimtaCurioLivingMixin`) are allowed while they name nothing of the fight's credit (`check_mod_data`).
 14. Do not show signs, or write anything, from the anchor's shared `status()` or any encyclopedia page.
 15. Do not read the server-only rules on the client.
 16. Do not mark a Proposed decision approved for want of a reply; do not count one client as two; do not call the chunk
