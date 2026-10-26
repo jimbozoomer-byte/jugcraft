@@ -97,6 +97,12 @@ No numbered release yet. Entries on feature branches remain proposed until their
 - **Halloween and autumn creatures reach them too:** wisps rise over the landscape swamps on Halloween nights. On full moons, werewolves stalk the landscape woods, snow werewolves its snowy land and shadow werewolves the Ominous Woods, where the Howling Totem rite also works. Squirrels and wild turkeys come to its woods and open country.
 - **Every Jugcraft biome now needs a seasons decision:** the data check fails on a new biome without one, so a future collection cannot miss the seasons. The audit of every seasonal system against the newer collections is in [seasonal-biome-audit.md](docs/features/seasonal-biome-audit.md).
 
+### Unmerged: Guns, slice 14F (the Old Grange Carbine)
+- **One gun** from the owner's own GeckoLib model and animations, the last of their treated-brass guns: the **Old Grange Carbine**, the Grange Carbine's older make, with a longer barrel, loaded from the top with a stripper clip of seven rifle rounds. Slower than the Grange Carbine, it hits harder, reaches further and aims straighter. Held in both hands.
+- Made from steel, brass, a lever and planks. It takes the Grange Carbine's attachments but the magazines; its scopes stand on its own rail ahead of the receiver.
+- The guns' converter now reads a gun the owner modelled in GeckoLib, checked against the item-model parts it shares with their Grandle. The owner's model is added to the library (`Guns/geo/item/gun/grandle_og.geo.json`).
+- Record: [guns.md, slice 14F](docs/features/guns.md#slice-14f-the-old-grange-carbine).
+
 ### Unmerged: Guns, slice 14E (a flamethrower and a fire shotgun)
 - **Two guns** from the owner's models and animations, the last of their treated-brass guns but an earlier make of the Grange Carbine, each held in both hands: the **Firedrake**, a short flamethrower with two fuel tanks slung under it and a pilot flame always lit, whose wide, close jet burns blaze powder and sets creatures alight; and the **Harrow**, four barrels before a drum, whose four buckshot pellets and burst of flame set what they hit alight.
 - Each is made from steel, brass, a lever and a fire charge; the Firedrake two buckets for its tanks. The Harrow takes the three stocks; the Firedrake nothing.

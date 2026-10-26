@@ -104,6 +104,8 @@ import net.minecraft.world.level.block.state.BlockBehaviour;
  * <li>Slice 14E, two more treated-brass guns: the Firedrake, a short flamethrower with two fuel tanks slung under
  * it ({@link #FLAME}); and the Harrow, four barrels before a drum, whose four pellets and burst of flame set what they
  * hit alight ({@link #INCENDIARY}).</li>
+ * <li>Slice 14F, the last treated-brass gun: the Old Grange Carbine, the Grange Carbine's older make, with a longer
+ * barrel, loaded from the top with a stripper clip of seven.</li>
  * <li>Attachments ({@link #ATTACHMENTS}), one a slot, are fitted in a crafting grid ({@link GunAttachmentRecipe}) and
  * held in {@link #FITTED}; they change the gun's numbers ({@link GunItem#spec(ItemStack)}) and show on its model.
  * Slice 9E adds the Tactical Grip and the Laser Sight, whose red dot the client draws where the gun points.</li>
@@ -204,6 +206,7 @@ public final class JugcraftGuns {
 		SPECS.put("cloudburst_gun", new GunSpec(5.0F, 1, 4, true, 30, 78, 0, 0, 0, 4.5F, 2.0F, 72, "rifle_round"));
 		SPECS.put("firedrake", new GunSpec(1.5F, 1, 2, true, 64, 78, 0, 0, 0, 12.0F, 8.0F, 6, "minecraft:blaze_powder"));
 		SPECS.put("harrow", new GunSpec(4.5F, 4, 11, false, 8, 60, 0, 0, 0, 3.5F, 2.0F, 32, "buckshot_shell"));
+		SPECS.put("old_grange_carbine", new GunSpec(8.0F, 1, 9, false, 7, 39, 0, 0, 0, 2.0F, 0.25F, 112, "rifle_round"));
 	}
 
 	/**
@@ -480,6 +483,9 @@ public final class JugcraftGuns {
 				"wooden_stock", "long_scope", "medium_scope", "reflex_sight", "laser_sight"));
 		ACCEPTS.put("hinterland_rifle", List.of("medium_scope", "reflex_sight"));
 		ACCEPTS.put("harrow", List.of("light_stock", "weighted_stock", "wooden_stock"));
+		ACCEPTS.put("old_grange_carbine", List.of("silencer", "baffled_silencer", "muzzle_brake", "extended_barrel",
+				"light_stock", "weighted_stock", "wooden_stock", "light_grip", "iron_bayonet", "steel_bayonet", "diamond_bayonet",
+				"netherite_bayonet", "long_scope", "medium_scope", "reflex_sight", "tactical_grip", "laser_sight"));
 	}
 
 	/** The rounds. */

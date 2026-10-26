@@ -855,6 +855,17 @@ GUNS = {
         "damage": 4.5, "pellets": 4, "interval": 11, "auto": False, "capacity": 8,
         "reload": 60, "spread": (3.5, 2.0), "range": 32, "ammo": "buckshot_shell",
     },
+    # Slice 14F, the last of the owner's treated-brass guns: the Grandle OG, an earlier make of slice 14B's Grandle with
+    # a barrel 3 px longer, loaded from the top with a stripper clip in place of a box magazine. The owner modelled it
+    # in GeckoLib (GEO_PARTS); its body is the Grandle's.
+    "old_grange_carbine": {
+        "display": "Old Grange Carbine",
+        "source": "grandle_og",
+        "tooltip": "The Grange Carbine's older make: a longer barrel, loaded from the top with a stripper clip of seven. "
+                   "Slower to fire, harder hitting and further reaching. Held in both hands. Fires rifle rounds.",
+        "damage": 8.0, "pellets": 1, "interval": 9, "auto": False, "capacity": 7,
+        "reload": 39, "spread": (2.0, 0.25), "range": 112, "ammo": "rifle_round",
+    },
 }
 
 # What a gun fires: bullets, or a slice 8C or 8D gun's "shot".
@@ -1112,6 +1123,9 @@ RECIPES = {
                                           "L": "minecraft:lever", "K": "minecraft:bucket"}),
     "harrow": (["SSS", "SFS", "BLB"], {"S": "#c:ingots/steel", "F": "minecraft:fire_charge", "B": "#c:ingots/brass",
                                        "L": "minecraft:lever"}),
+    # Slice 14F: the Grange Carbine's, with planks for the brass of its fore-end, as the owner's Grandle OG takes planks.
+    "old_grange_carbine": (["SSS", " LP", "  B"], {"S": "#c:ingots/steel", "L": "minecraft:lever",
+                                                   "P": "#minecraft:planks", "B": "#c:ingots/brass"}),
 }
 # The switches beyond "guns" a gun's recipe needs (separate load conditions, all of which must hold): the energy weapons
 # and their cells are useless without the Charging Station, so they need the machines too (as the leaf blower does).
@@ -2785,6 +2799,36 @@ BUILDS = {
         "sight": (8.0, 11.2, 4.0),
         "eye_relief": 3.0,
     },
+    # Slice 14F. The Grandle OG is the owner's GeckoLib model (GEO_PARTS), and its bones are the model's, with the
+    # model's pivots (geo_pivot(); check_geo()): its body, sights and bolt are the Grange Carbine's, its barrel 3 px longer.
+    # gun_body3 and gun_body2 hold nothing and tip the gun in the reload. It has no magazine: the reload brings in a
+    # stripper clip on the clip bone, which hangs under left_arm2 with the left arm, so the hand carries it; the idle
+    # turns left_arm2 as the Grange Carbine's idle turns its left arm, and the clip is hidden but in the reload. The
+    # hands are the Grange Carbine's, the left placed in left_arm2's frame so its idle brings it there (carry()); there
+    # it holds the clip, within a pixel, from the clip's showing to its going into the gun. The left arm's way is its
+    # own: the reload tips the gun and brings that hand over the receiver near the eye, where the Grange Carbine's way
+    # ran the arm up across the view; this one keeps it rising from below the screen there (first-person previews of
+    # the reload; docs/features/guns.md), and at the hip runs it down and to the left. The magazine and magazine_2
+    # bones hold nothing. Its sight is the ring at the back; a scope stands on the owner's rail ahead of the receiver
+    # (no_sights), and the clip goes in just behind it: a quarter pixel into the Long Scope's eyepiece, the longest.
+    "old_grange_carbine": {
+        "bones": [
+            ("gun_body3", None, [], (8.23125, 3.1, 9.0)),
+            ("gun_body2", "gun_body3", [], (8.23125, 3.1, 9.0)),
+            ("gun_body", "gun_body2", ["main", "stan_barrel", "sights"], (8.23125, 3.1, 9.0)),
+            ("bolt", "gun_body", ["bolt"], (9.35771, 4.79816, 12.38542)),
+            ("magazine", "gun_body", [], (8.23125, 0.68624, 11.8287)),
+            ("magazine_2", "gun_body", [], (8.23125, 0.68624, 11.8287)),
+            ("left_arm2", "gun_body", [], (2.23125, 6.5068, 15.00305)),
+            ("clip", "left_arm2", ["clip"], (8.23125, 3.5068, 15.00305)),
+        ],
+        "hands": {"right": (8.0, 2.4, 16.0), "left": (8.0, 2.6, 7.4)},
+        "arm_parents": {"left": "left_arm2"},
+        "arms": {"right": (0.0653, -0.4957, 0.866), "left": (0.8924, -0.2391, 0.3827)},
+        "muzzle": (8.0, 4.9, -3.32),
+        "sight": (8.0, 6.47, 15.15),
+        "eye_relief": 4.0,
+    },
 }
 
 # Props the animations move on bones that had no part ("@<name>" in a bone's parts): the rounds a reload carries in,
@@ -3094,10 +3138,17 @@ def attachment_part(gun, kind):
     if ATTACHMENTS[kind].get("mount"):
         return f"%{kind}" if takes_optics(gun) and gun not in ATTACHMENTS[kind].get("not_on", ()) else None
     for name in ATTACHMENTS[kind]["parts"]:
-        if (LIBRARY / "models" / "special" / GUNS[gun]["source"] / f"{name}.json").exists():
+        if has_part(gun, name):
             faces = [face for element in load_part(gun, name).get("elements", []) for face in element.get("faces", {}).values()]
             return name if faces and all(texture_file(face["_texture"]) for face in faces) else None
     return None
+
+
+def has_part(gun, name):
+    """Whether the owner made the gun a part of this name: a part file in its folder, or a bone of its GeckoLib model
+    (GEO_PARTS)."""
+    source = GUNS[gun]["source"]
+    return name in GEO_PARTS.get(source, {}) or (LIBRARY / "models" / "special" / source / f"{name}.json").exists()
 
 
 def fits(gun):
@@ -3108,8 +3159,7 @@ def fits(gun):
 def takes_optics(gun):
     """Whether the owner made the gun to take a scope: among its parts are iron sights and a "no_sights" stand-in (what
     shows under a scope: nothing, or a rail), and its bones carry the sights, so a scope can take their place."""
-    folder = LIBRARY / "models" / "special" / GUNS[gun]["source"]
-    return ((folder / "sights.json").exists() and (folder / "no_sights.json").exists()
+    return (has_part(gun, "sights") and has_part(gun, "no_sights")
             and any("sights" in parts for _, _, parts, _ in BUILDS[gun]["bones"]))
 
 
@@ -3324,6 +3374,8 @@ ZOOM = {
     "quarrel_carbine": 0.8, "hinterland_rifle": 0.85, "cloudburst_gun": 0.9,
     # Slice 14E: a flamethrower and a shotgun.
     "firedrake": 0.95, "harrow": 0.9,
+    # Slice 14F: a carbine, as the Grange Carbine.
+    "old_grange_carbine": 0.85,
 }
 
 
@@ -3573,6 +3625,8 @@ SHOT_SOUNDS = {
     # (the Coach Gun's, the Crackling's and the Waystation Shotgun's).
     "firedrake": "item/flamethrower/fire.ogg",
     "harrow": "item/brass_shotgun/fire.ogg",
+    # Slice 14F: the owner's Grandle OG fires with their new_rifle sound.
+    "old_grange_carbine": "item/new_rifle/fire.ogg",
 }
 SUBTITLES = {
     "fire": "Gun fires",
@@ -3946,6 +4000,8 @@ def load_part(gun, part):
     if part.startswith("%"):
         return optic_part(gun, part[1:])
     folder, name = part_source(gun, part)
+    if name in GEO_PARTS.get(folder, {}):
+        return geo_part(folder, GEO_PARTS[folder][name])
     data = json.loads((LIBRARY / "models" / "special" / folder / f"{name}.json").read_text())
     textures = data.get("textures", {})
     shift = PART_SHIFTS.get((folder, name))
@@ -3961,6 +4017,100 @@ def load_part(gun, part):
             if element.get("rotation"):
                 element["rotation"]["origin"] = [v + d for v, d in zip(element["rotation"].get("origin", [8, 8, 8]), shift)]
     return data
+
+
+# Slice 14F: guns the owner modelled whole in GeckoLib (geo/item/gun/<source>.geo.json), with no item-model parts: the
+# Grandle OG, whose clip and longer barrel are only there. Each part name the converter knows (BUILDS, the attachments'
+# "parts") is a bone of that model; its cubes are turned back into the item-model elements element_cube() would make
+# them from (geo_element()), so they go through the converter and its check face for face as every other part does.
+# The library's item-model parts in models/special/grandle_og are an earlier make: the Grandle's barrel and barrel
+# attachments moved 2 px forward where the model's stand 3 px forward, the barrel no longer than the Grandle's. The
+# model's are used.
+GEO = LIBRARY / "geo" / "item" / "gun"
+GEO_PARTS = {"grandle_og": {
+    "main": "gun_body", "bolt": "bolt", "sights": "sights", "no_sights": "no_sights", "stan_barrel": "standard_barrel",
+    "clip": "clip", "ext_barrel": "extended_barrel", "silencer": "silencer", "advanced_silencer": "advanced_silencer",
+    "muzzle_brake": "muzzle_brake", "light_stock": "light_stock", "heavy_stock": "weighted_stock",
+    "wooden_stock": "wooden_stock", "light_grip": "light_grip", "tact_grip": "vertical_grip",
+    "iron_bayonet": "iron_bayonet", "anthralite_bayonet": "anthralite_bayonet", "diamond_bayonet": "diamond_bayonet",
+    "netherite_bayonet": "netherite_bayonet"}}
+# Where each GeckoLib model stands from the item models' frame, in its own units (each cube's corners and pivot are
+# the item model's less this): the owner's Grandle OG model holds its Grandle's body, sights, bolt, stocks and grips
+# element for element at the same places less this, and its muzzle attachments and bayonets 3 px further forward on its
+# longer barrel (GEO_TWINS, check_geo()).
+GEO_OFFSETS = {"grandle_og": (0.00625, -8.15, -1.0)}
+# The bones of a GeckoLib model that are another of the owner's guns' item-model parts, moved by (x, y, z) px: the
+# converter must give back those parts' elements, face for face (check_geo()).
+GEO_TWINS = {"grandle_og": {
+    "gun_body": ("grandle/main", (0, 0, 0)), "sights": ("grandle/sights", (0, 0, 0)), "bolt": ("grandle/bolt", (0, 0, 0)),
+    "light_stock": ("grandle/light_stock", (0, 0, 0)), "weighted_stock": ("grandle/heavy_stock", (0, 0, 0)),
+    "wooden_stock": ("grandle/wooden_stock", (0, 0, 0)), "light_grip": ("grandle/light_grip", (0, 0, 0)),
+    "vertical_grip": ("grandle/tact_grip", (0, 0, 0)), "silencer": ("grandle/silencer", (0, 0, -3)),
+    "advanced_silencer": ("grandle/advanced_silencer", (0, 0, -3)), "muzzle_brake": ("grandle/muzzle_brake", (0, 0, -3)),
+    "anthralite_bayonet": ("grandle/anthralite_bayonet", (0, 0, -3)),
+    "diamond_bayonet": ("grandle/diamond_bayonet", (0, 0, -3)),
+    "netherite_bayonet": ("grandle/netherite_bayonet", (0, 0, -3))}}
+
+
+def geo_model(source):
+    return json.loads((GEO / f"{source}.geo.json").read_text())["minecraft:geometry"][0]
+
+
+def geo_part(source, bone):
+    """A bone of the owner's GeckoLib model as a part file: its cubes as elements, drawn from the model's texture."""
+    geo = geo_model(source)
+    size_px = (geo["description"]["texture_width"], geo["description"]["texture_height"])
+    cubes = next(b for b in geo["bones"] if b["name"] == bone).get("cubes", [])
+    return {"elements": [geo_element(cube, GEO_OFFSETS[source], size_px, f"scguns:item/{source}") for cube in cubes]}
+
+
+def geo_pivot(source, bone):
+    """A bone's pivot in the owner's GeckoLib model, in owner space."""
+    x, y, z = (c - d for c, d in zip(next(b for b in geo_model(source)["bones"] if b["name"] == bone)["pivot"],
+                                      GEO_OFFSETS[source]))
+    return (rnd(8.0 - x), rnd(y), rnd(z + 8.0))
+
+
+def geo_element(cube, offset, size_px, texture):
+    """One cube of an owner GeckoLib model -> the item-model element element_cube() makes the same cube from: its
+    corners less the model's offset (GEO_OFFSETS), its one-axis turn, and for each face the vanilla uv and rotation
+    giving each corner the UV GeckoLib gives it (java_face())."""
+    ox, oy, oz = (c - d for c, d in zip(cube["origin"], offset))
+    sx, sy, sz = cube["size"]
+    lo = [8.0 - ox - sx, oy, oz + 8.0]
+    element = {"from": [rnd(v) for v in lo], "to": [rnd(v + s) for v, s in zip(lo, (sx, sy, sz))]}
+    turn = cube.get("rotation", [0, 0, 0])
+    axes = [k for k in range(3) if turn[k]]
+    if len(axes) > 1:
+        raise ValueError(f"a cube turned about more than one axis: {turn}")
+    if axes:
+        k = axes[0]
+        px, py, pz = (c - d for c, d in zip(cube["pivot"], offset))
+        element["rotation"] = {"angle": rnd(turn[k] if k == 2 else -turn[k]), "axis": "xyz"[k],
+                               "origin": [rnd(8.0 - px), rnd(py), rnd(pz + 8.0)]}
+    element["faces"] = {}
+    for face in FACES:
+        data = cube.get("uv", {}).get(face)
+        if data is not None:
+            corners = gecko_corner_uvs(face, data["uv"][0], data["uv"][1], data["uv_size"][0], data["uv_size"][1],
+                                       data.get("uv_rotation", 0), size_px)
+            element["faces"][face] = {**java_face(face, corners), "_texture": texture}
+    return element
+
+
+def java_face(face, corners):
+    """The vanilla face {"uv", "rotation"} giving each corner the UV in corners ({corner pick: (u, v)} in 0..16):
+    java_corner_uvs() run backwards."""
+    for rotation in (0, 90, 180, 270):
+        uv = [0.0] * 4
+        for i, pick in enumerate(JAVA_CORNERS[face]):
+            j = (i + rotation // 90) % 4
+            uv[0 if j in (0, 1) else 2], uv[1 if j in (0, 3) else 3] = corners[pick]
+        uv = [rnd(v) for v in uv]
+        got = java_corner_uvs(face, uv, rotation)
+        if all(close(got[k], corners[k]) for k in corners):
+            return {"uv": uv, "rotation": rotation} if rotation else {"uv": uv}
+    raise ValueError(f"no vanilla UV reproduces the {face} face {corners}")
 
 
 def flat_face(direction, size):
@@ -3983,11 +4133,13 @@ def face_texture(textures, ref):
 
 
 def texture_file(texture):
-    """The library file a texture id ("scguns:item/<name>") names, or None if the library lacks it."""
+    """The library file a texture id ("scguns:item/<name>") names, or None if the library lacks it: item/<name>.png, or
+    for a texture the owner keeps only with their GeckoLib models, animated/gun/<name>.png (slice 14F)."""
     prefix = "scguns:item/"
     if texture and texture.startswith(prefix):
-        path = LIBRARY / "item" / f"{texture[len(prefix):]}.png"
-        return path if path.exists() else None
+        name = texture[len(prefix):]
+        return next((path for path in (LIBRARY / "item" / f"{name}.png", LIBRARY / "animated" / "gun" / f"{name}.png")
+                     if path.exists()), None)
     return None
 
 
@@ -4311,6 +4463,14 @@ def part_source(gun, part):
     return folder or GUNS[gun]["source"], name
 
 
+def part_path(gun, part):
+    """The library file (under Guns/) a bone's part entry comes from."""
+    folder, name = part_source(gun, part)
+    if name in GEO_PARTS.get(folder, {}):
+        return str((GEO / f"{folder}.geo.json").relative_to(LIBRARY))
+    return f"models/special/{folder}/{name}.json"
+
+
 def part_elements(gun, part):
     """The owner's elements a bone's part entry stands for, in the file's order."""
     elements = load_part(gun, part).get("elements", [])
@@ -4511,10 +4671,44 @@ def arm_offset(gun, side):
 
 def arm_pivot(gun, side):
     """Owner-space rest pivot of an arm bone: the hand point less the pose's offset (GeckoLib moves a bone by
-    (-x, y, z) of its "position", BoneSnapshot.translate)."""
-    hx, hy, hz = BUILDS[gun]["hands"][side]
+    (-x, y, z) of its "position", BoneSnapshot.translate), and for an arm under a bone the pose moves, less that
+    bone's move (carry())."""
+    hx, hy, hz = carry(gun, side, BUILDS[gun]["hands"][side], back=True)
     ox, oy, oz = arm_offset(gun, side)
     return (hx + ox, hy - oy, hz - oz)
+
+
+def turn_matrix(rotation):
+    """GeckoLib's turn of a bone by a "rotation" [x, y, z] in degrees, in owner space: (-x, -y, z) about x, then y, then
+    z (RenderUtil.prepMatrixForBone; GeckoLib takes x and y the other way round, as for cubes)."""
+    x, y, z = (math.radians(v) for v in (-rotation[0], -rotation[1], rotation[2]))
+    cx, sx, cy, sy, cz, sz = math.cos(x), math.sin(x), math.cos(y), math.sin(y), math.cos(z), math.sin(z)
+    rz = [[cz, -sz, 0.0], [sz, cz, 0.0], [0.0, 0.0, 1.0]]
+    ry = [[cy, 0.0, sy], [0.0, 1.0, 0.0], [-sy, 0.0, cy]]
+    rx = [[1.0, 0.0, 0.0], [0.0, cx, -sx], [0.0, sx, cx]]
+    product = lambda a, b: [[sum(a[i][k] * b[k][j] for k in range(3)) for j in range(3)] for i in range(3)]
+    return product(product(rz, ry), rx)
+
+
+def carry(gun, side, point, back=False):
+    """Where the pose an arm's hand point is given for (arm_offset()) brings a point of the rest frame of the bone the
+    arm hangs under: unmoved under gun_body (the hands are given in its frame), or turned and moved as GeckoLib poses
+    that bone (to t + p + R (point - p), p its pivot) under another the pose moves (slice 14F: the Old Grange Carbine's
+    left_arm2, which carries its left hand and its clip). back=True: the point that pose brings here."""
+    parent = BUILDS[gun].get("arm_parents", {}).get(side, "gun_body")
+    anim, time = BUILDS[gun].get("hand_pose", {}).get(side, ("idle", None))
+    channels = animations(gun)["animations"][anim]["bones"].get(parent, {}) if parent != "gun_body" else {}
+    if not channels:
+        return tuple(point)
+    pivot = next(bone[3] for bone in BUILDS[gun]["bones"] if bone[0] == parent)
+    mx, my, mz = key_value(channels["position"], time) if "position" in channels else (0.0, 0.0, 0.0)
+    moved = (-mx, my, mz)
+    r = turn_matrix(key_value(channels["rotation"], time) if "rotation" in channels else (0.0, 0.0, 0.0))
+    if back:
+        d = [q - m - p for q, m, p in zip(point, moved, pivot)]
+        return tuple(p + sum(r[k][i] * d[k] for k in range(3)) for i, p in enumerate(pivot))
+    d = [q - p for q, p in zip(point, pivot)]
+    return tuple(m + p + sum(r[i][k] * d[k] for k in range(3)) for i, (m, p) in enumerate(zip(moved, pivot)))
 
 
 ARM_REACH = 10.0
@@ -4627,6 +4821,50 @@ def same_corners(got, exp):
     return len(got) == len(exp) and all(any(close(p, q) and close(a, b) for q, b in exp) for p, a in got)
 
 
+def check_geo():
+    """Slice 14F: the converter run backwards on the owner's GeckoLib models (geo_element()) must give back, face for
+    face, the item-model parts those models share with the owner's other guns (GEO_TWINS); and a gun built from one
+    must turn its parts about the model's own pivots, where the model has the bone. Returns problems."""
+    problems = []
+    for source, twins in GEO_TWINS.items():
+        for bone, (part, shift) in twins.items():
+            folder, name = part.split("/")
+            data = json.loads((LIBRARY / "models" / "special" / folder / f"{name}.json").read_text())
+            textures = data.get("textures", {})
+            mine = geo_part(source, bone)["elements"]
+            if len(mine) != len(data["elements"]):
+                problems.append(f"{source}/{bone}: {len(mine)} cubes for {part}'s {len(data['elements'])} elements")
+                continue
+            for i, (got, want) in enumerate(zip(mine, data["elements"])):
+                lo = [min(a, b) + d for a, b, d in zip(want["from"], want["to"], shift)]
+                hi = [max(a, b) + d for a, b, d in zip(want["from"], want["to"], shift)]
+                turn = want.get("rotation") if want.get("rotation", {}).get("angle") else None
+                if not (close(got["from"], lo, 1e-4) and close(got["to"], hi, 1e-4)) or bool(turn) != ("rotation" in got) \
+                        or (turn and (turn["axis"] != got["rotation"]["axis"] or abs(turn["angle"] - got["rotation"]["angle"]) > 1e-4
+                                      or not close([v + d for v, d in zip(turn.get("origin", [8, 8, 8]), shift)],
+                                                   got["rotation"]["origin"], 1e-4))):
+                    problems.append(f"{source}/{bone} element {i}: not where {part}'s stands, or turned otherwise")
+                    continue
+                if set(got["faces"]) != set(want.get("faces", {})):
+                    problems.append(f"{source}/{bone} element {i}: faces differ from {part}'s")
+                    continue
+                for face, data_face in want["faces"].items():
+                    uv = data_face.get("uv") or default_uv(face, lo, hi)
+                    a = java_corner_uvs(face, got["faces"][face]["uv"], got["faces"][face].get("rotation", 0))
+                    b = java_corner_uvs(face, uv, int(data_face.get("rotation", 0)) % 360)
+                    if not all(close(a[k], b[k], 1e-4) for k in a) \
+                            or face_texture(textures, data_face.get("texture", "")) is None:
+                        problems.append(f"{source}/{bone} element {i} {face}: UVs differ from {part}'s")
+    for gun, spec in GUNS.items():
+        if spec["source"] not in GEO_PARTS:
+            continue
+        model = {b["name"] for b in geo_model(spec["source"])["bones"]}
+        for name, _, _, pivot in BUILDS[gun]["bones"]:
+            if name in model and not close(pivot, geo_pivot(spec["source"], name), 1e-4):
+                problems.append(f"{gun}: its {name} bone does not turn about the owner's model's {name} pivot")
+    return problems
+
+
 def check():
     """Every owner face must come back from the GeckoLib model at the same corners with the same UVs and the same turn
     about the same pivot; the arm bones and locators must be where BUILDS puts them. Returns problems."""
@@ -4685,7 +4923,7 @@ def check():
                 continue
             ox, oy, oz = arm_offset(gun, side)
             px, py, pz = 8.0 - bone["pivot"][0], bone["pivot"][1], bone["pivot"][2] + 8.0
-            if not close((px - ox, py + oy, pz + oz), BUILDS[gun]["hands"][side], 1e-3):
+            if not close(carry(gun, side, (px - ox, py + oy, pz + oz)), BUILDS[gun]["hands"][side], 1e-3):
                 problems.append(f"{gun}: the {side} hand is not where BUILDS puts it in its pose")
             sx, sy, sz = bone.get("locators", {}).get(f"{side}_shoulder", (8.0, 0.0, -8.0))
             reach = (8.0 - sx - px, sy - py, sz + 8.0 - pz)
@@ -4729,6 +4967,7 @@ def check():
                             u0, v0, u1, v1 = (c * s / 16.0 for c, s in zip(face["uv"], layout[1][own_texture(gun)][2:] * 2))
                             if min(u0, u1) < tu + bw and max(u0, u1) > tu and min(v0, v1) < tv + bh and max(v0, v1) > tv:
                                 problems.append(f"{gun}: the {prop_name} prop's corner overlaps part {part}'s texture")
+    problems += check_geo()
     from PIL import Image, ImageChops
     for gun, spec in GUNS.items():
         size, place = atlas_layout(gun)
@@ -4760,8 +4999,8 @@ def check():
         if not texture.exists():
             continue  # reported with the model
         if atlas is None:
-            if texture.read_bytes() != (LIBRARY / "item" / f"{spec['source']}.png").read_bytes():
-                problems.append(f"{gun}: its atlas is not the owner's {spec['source']}.png unchanged")
+            if texture.read_bytes() != texture_file(own_texture(gun)).read_bytes():
+                problems.append(f"{gun}: its atlas is not the owner's {texture_file(own_texture(gun)).name} unchanged")
         else:
             with Image.open(texture) as written:
                 if written.size != atlas.size or ImageChops.difference(written.convert("RGBA"), atlas).getbbox():
@@ -5031,7 +5270,7 @@ def write_files():
         if atlas is not None:
             atlas.save(texture)
         else:
-            shutil.copyfile(LIBRARY / "item" / f"{spec['source']}.png", texture)
+            shutil.copyfile(texture_file(own_texture(gun)), texture)
     for name, source in ATTACHMENT_TEXTURES.items():
         target = ASSETS / "textures" / "item" / "guns" / "attachments" / f"{name}.png"
         target.parent.mkdir(parents=True, exist_ok=True)
@@ -5068,8 +5307,7 @@ def provenance():
         paths = [f"models/item/{src}.json", str(texture_file(own_texture(gun)).relative_to(LIBRARY)),
                  f"item/{src}.animation.json"]
         for _, _, parts, _ in effective_bones(gun):
-            paths += ["models/special/{}/{}.json".format(*part_source(gun, p)) for p in parts
-                      if not p.startswith(("@", "%"))]
+            paths += [part_path(gun, p) for p in parts if not p.startswith(("@", "%"))]
         paths.append(f"sounds/{SHOT_SOUNDS[gun]}")
         # The shared textures its attachments draw on, merged into its atlas (slice 7).
         paths += [str(texture_file(t).relative_to(LIBRARY)) for t in atlas_layout(gun)[1] if t != own_texture(gun)]
