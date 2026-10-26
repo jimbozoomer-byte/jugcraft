@@ -56,7 +56,12 @@ No new dependencies or art.
 - **Java:** `menagerie/Menagerie.habitat` reads those tags for the landscape biomes (`landscape(c, habitat)`); vanilla's and Jugcraft's own biomes are decided as before.
 
 ## Verification
-- **Run locally:** see the pull request.
+- **Run locally (26 October 2026):**
+  - `python3 tools/generate_material_data.py`: wrote the 16 tags.
+  - `python3 tools/check_mod_data.py`: PASS (6240 material IDs).
+  - **Deliberate breaks:** seven, each in a scratch run of `check_landscape_habitats`, all caught: an arid biome with no habitats, an untagged habitat, a tag that differs from the table, a non-landscape biome in the table, a species habitat neither tagged nor ruled, Menagerie not reading the tags, and Menagerie missing a landscape rule.
+  - `python3 scripts/check_repository.py`: PASS. `python3 -m unittest discover -s scripts/tests`: 191 tests passed.
+  - **Java:** a syntax parse only: 0 errors. Compilation and the game test run in CI.
 - **Checks:** `tools/check_mod_data.py`'s new `check_landscape_habitats` checks that:
   - every landscape biome has its habitats, each one Menagerie reads from a tag;
   - the tags are written as `tools/landscape_habitats.py` says, and the landscape deep ocean is ocean too;
