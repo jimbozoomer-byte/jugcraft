@@ -138,6 +138,7 @@ KEY_HELP = {
     "concordance_journal": "Opens your Concordance Journal: research, stage, and Compose",
     "concordance_composer": "Opens the Spell Composer straight away (not bound at first)",
     "concordance_config": "Opens the Concordance's settings on this computer (not bound at first)",
+    "concordance_roster": "Opens your roster: pacts, agreements, familiars, spirits, constructs and courier requests, and what each waits for (not bound at first)",
     "party": "Opens the Party screen",
     "gem_abilities": "Opens worn Gem armor abilities (not bound at first)",
     "gem_night_vision": "Toggles active Gem helmet night vision (not bound at first)",

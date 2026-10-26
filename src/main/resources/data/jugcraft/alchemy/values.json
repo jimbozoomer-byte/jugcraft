@@ -30947,6 +30947,11 @@
       "denominator": 1,
       "source": "fallback (balance pending)"
     },
+    "jugcraft:pact_perch": {
+      "numerator": 74,
+      "denominator": 1,
+      "source": "recipe jugcraft:pact_perch"
+    },
     "jugcraft:pad_mount_transformer": {
       "numerator": 3005,
       "denominator": 24,

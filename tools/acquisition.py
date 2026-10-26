@@ -131,6 +131,19 @@ WORKSHOP = {"mendvetch": "recipe", "crucible": "recipe", "formula": "recipe", "l
 FACTORY = {"coal_generator": "recipe", "copper_cable": "recipe", "machine_casing": "recipe", "metal_press": "recipe",
            "electric_pump": "recipe", "bronze_fluid_pipe": "recipe"}
 CHUNK_C_ITEMS = ["rooted_thallite_foundation", "crucible_stand"]
+# Concordance Chunk D (D-09): the pact hall's route (tools/concordance_journey.py PACT). PACT_HALL: every Concordance thing
+# it makes or places, each made in survival as WORKSHOP's rows say ("recipe", "recipe:<file>", "working:<name>" or
+# "ritual:<name>"): the Verdant Bed and a Sunpetal (the cultivation Stolas's Regard asks), the Assayer's Scale (its assay),
+# the Orrery Observatory (the sky step, the resonance and the first obligation), the Astrolabe (the Open Hand Compact's
+# resonance and Star-reckoning's), the Pact Perch, and the Spirit Anchor, Courier Post and Porter Key of the workshop hand
+# it unlocks. CHUNK_D_ITEMS: every item Concordance Chunk D registered (the perch: tools/concordance_pacts.py BLOCKS;
+# Stolas and the hand are entities, the compact a cost and Star-reckoning a service), each a PACT_HALL row.
+# check_acquisition ties both to the files on disk and to the server test that loads their recipes
+# (ConcordanceJourneyGameTests.PACT_HALL_RECIPES).
+PACT_HALL = {"verdant_bed": "recipe", "sunpetal": "recipe", "assayers_scale": "recipe", "observatory": "recipe",
+             "astrolabe": "recipe", "pact_perch": "recipe", "spirit_anchor": "recipe", "courier_post": "recipe",
+             "porter_key": "recipe"}
+CHUNK_D_ITEMS = ["pact_perch"]
 
 
 def recipe_file(item, how):

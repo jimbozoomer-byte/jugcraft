@@ -34,6 +34,15 @@ Nothing here is generated into the game. tools/check_mod_data.py (check_journey)
   Concordance's; every thing named is a row of tools/acquisition.py WORKSHOP or FACTORY and every row is named; and each
   product is brewed by its named process, from things the same player has, over a heat whose degrees lie in the band it
   stirs at;
+- the pact hall (PACT, Concordance Chunk D) holds without Styx: one player alone, in the Overworld alone (the workshop
+  hand's step also in the Nether, which it needs), with no structure loot, nothing else mastered and nothing past the
+  Practitioner stage, reaches each step with the research it names (each step needing it) and makes every thing it
+  names; every thing named is a row of tools/acquisition.py
+  PACT_HALL, made under the Concordance's switch alone, and every row is named; the Open Hand Compact's materials and
+  resonance and one of Stolas's offerings are had by the route; the workshop hand is sealed as SpiritAnchorBlock seals it;
+  and every step names the server test that walks the whole route;
+- the routes' "served once by each kind of worker" is the Binding Arts' mastery, as many kinds as the workers have, the
+  workshop hand among the spirits;
 - every game test a step names exists;
 - the record's table is the one table() renders.
 
@@ -222,6 +231,85 @@ WORKSHOP = {
          "tests": ["theLivingWorkshopFromAManualStart", "aBedSaysWhatItsPlantNeedsAndHowFar",
                    "aMixedBedGrowsFasterOnlyForAnotherKind", "restCompostAndTendingEaseStrain",
                    "aGraftTakesOnceAndConsumesItsDonor"]},
+    ],
+}
+
+# Concordance Chunk D (D-03 to D-09; D-S1, D-S2, D-S3, D-S12): the pact hall, found through Styx or without him, to the
+# workshop hand it unlocks. Not a stage route: what one player alone does in the Overworld alone, with the research each
+# step names understood (its own needed: without it the step is out of reach), nothing else mastered, nothing past the
+# Practitioner stage and no structure loot (Styx's flowers are his gift, so a feather stands in, and an amethyst shard
+# keeps the pact); a step that names its dimensions may go there too (the workshop hand's Spirit Anchor takes a soul
+# lantern, from the Nether). Each step: the research it adds, what the player does, the Concordance things it makes or
+# places (tools/acquisition.py PACT_HALL), the graph nodes it reaches besides them and the server game tests that exercise it;
+# PACT_TEST walks every step, in order, on one survival player. The sky step is no research state: it is the invitation's
+# precondition, had through an observatory under an open night sky. The Open Hand Compact's resonance is had only from an
+# observatory its player keeps, which only a Starwatcher does (tools/concordance_progression.py RESONANCE_SOURCES), so the
+# route understands Celestial Attunement. The workshop hand is no research unlock (research unlocks name only
+# invocations, workings and rituals; D-P72): SpiritAnchorBlock seals it for one who has mastered Stolas's Regard
+# (tools/concordance_workers.py HAND_RESEARCH, which check_hand holds to the Java) and understands the Binding Arts, at a
+# Spirit Anchor a Porter Key bound to their Courier Post, so the walk adds that seal (HAND) as PACT["hand"] says.
+PACT_TEST = "thePactHallFromStyxToDeparture"
+HAND = f"worker:{rid('workshop_hand')}"
+PACT = {
+    "name": "The pact hall",
+    "hand": {"research": ["binding_arts"], "things": ["spirit_anchor", "porter_key", "courier_post"]},
+    "steps": [
+        {"research": ["first_light", "binding_arts"], "things": [],
+         "text": "With the Binding Arts understood, examine a feather (or a Stolas Starflower, Ravenquill Lupine or "
+                 "Amethyst Mourningbell, Styxhexenhammer's cuttings); Styx, where the world has him, tells each listener "
+                 "their own next step and teaches nothing, and the journal's pacts section names the same step without him",
+         "reaches": [f"research:{rid('stolas_regard')}@encountered"],
+         "tests": ["styxHintsByTheListenersOwnProgress", "talkingGrantsNoResearch", "notesNeverStandInForStolasEvidence",
+                   "thePactsSectionNamesTheSkyStep", PACT_TEST]},
+        {"research": ["verdant_husbandry"], "things": ["verdant_bed", "sunpetal"],
+         "text": "With Verdant Husbandry understood, lay a Verdant Bed, grow a Sunpetal (or any organism crop) and harvest "
+                 "it ripe by hand",
+         "reaches": [f"research:{rid('stolas_regard')}@observed"],
+         "tests": ["styxHintsByTheListenersOwnProgress", "stolasRegardIsReachable", PACT_TEST]},
+        {"research": ["assay"], "things": ["assayers_scale"],
+         "text": "With the Assay understood, dissolve a sample at an Assayer's Scale: Stolas's Regard is understood, and no "
+                 "research notes stand in for any of its evidence",
+         "reaches": [f"research:{rid('stolas_regard')}@understood"],
+         "tests": ["notesNeverStandInForStolasEvidence", "stolasRegardIsReachable", PACT_TEST]},
+        {"research": [], "things": ["observatory"],
+         "text": "Record a sky observation at an Orrery Observatory while a pattern is up and visible: the invitation's "
+                 "precondition, no research, which Styx and the journal name apart",
+         "reaches": ["encounter:night", "encounter:open_sky"],
+         "tests": ["styxNamesTheSkyStepUntilOneIsRecorded", "aRecordedObservationCountsWithoutAWindow",
+                   "aTurnedClockMakesNoNewClaim", "thePactsSectionNamesTheSkyStep", PACT_TEST]},
+        {"research": ["celestial_attunement"], "things": ["astrolabe"],
+         "text": "With Celestial Attunement understood, keep that observatory: it gathers Astral Resonance from each "
+                 "pattern's occurrence under the open night sky, and fills your Astrolabe",
+         "reaches": ["resource:astral_resonance"],
+         "tests": ["anObservatoryGathersEachOccurrenceOnce", PACT_TEST]},
+        {"research": [], "things": ["pact_perch"],
+         "text": "Build a Pact Perch where you may build and invite Stolas: he arrives and names every term before anything "
+                 "is spent; a refusal spends nothing and says why; accept, and the Open Hand Compact (its materials and "
+                 "your Astrolabe's resonance) is spent once, in the call that seals the pact",
+         "reaches": [],
+         "tests": ["stolasExplainsBeforeAgreeing", "aPerchIsPlacedOnlyWhereItsPlacerMayBuild", "aRefusalSpendsNothing",
+                   "acceptingSealsOnceAndSpendsOnce", PACT_TEST]},
+        {"research": [], "things": [],
+         "text": "Once a game day at the perch, Star-reckoning recalls a pattern you observed, paid from your Astrolabe, "
+                 "under the one claim a master's recall makes; record an observation while the pact is active (its first "
+                 "obligation): Stolas's Regard is mastered",
+         "reaches": [f"practice:{rid('pact_service')}", f"research:{rid('stolas_regard')}@mastered"],
+         "tests": ["stolasRecallsAnObservedPatternOncePerOccurrence", "aMastersRecallAndStolassShareOneClaim",
+                   "theObligationMastersTheEntryOnce", PACT_TEST]},
+        {"research": [], "things": ["spirit_anchor", "courier_post", "porter_key"], "dimensions": ["", "nether"],
+         "text": "With Stolas's Regard mastered, bind a Spirit Anchor to your Courier Post with a Porter Key and seal a "
+                 "workshop hand there: it carries the post's exact requests, a crucible's own shortage among them, as a "
+                 "spirit's service. The anchor's soul lantern is the Nether's: the one step that leaves the Overworld",
+         "reaches": [HAND],
+         "tests": ["theHandNeedsStolasRegardMastered", "aHandFillsACrucibleUntilItIsFull", "aHandsServiceIsASpiritsService",
+                   PACT_TEST]},
+        {"research": [], "things": [],
+         "text": "Keep the pact with one offering a week (an amethyst shard, or one of Styx's flowers): one missed is warned, "
+                 "graced a day and then suspends the service, nothing taken; an offering resumes it, and time away is never "
+                 "owed. End it at the perch or from the roster: what was paid ahead comes back once, and Stolas departs",
+         "reaches": ["item:minecraft:amethyst_shard"],
+         "tests": ["upkeepWarnsThenSuspendsAfterGraceAndResumes", "aReturnAfterAbsenceGetsTheFullGrace",
+                   "endingReturnsTheEscrowOnce", "endingAnOrphanReturnsItsEscrowOnce", PACT_TEST]},
     ],
 }
 
@@ -433,6 +521,127 @@ def workshop_problems(pg, research, invocations, rituals, at_hand):
     return found
 
 
+def _stolas():
+    """Stolas's offer as shipped (data/jugcraft/concordance/pact/stolas.json)."""
+    return json.loads((CONCORDANCE / "pact" / "stolas.json").read_text(encoding="utf-8"))
+
+
+def _offerings(definition):
+    """The items the tag {definition}'s upkeep takes holds (#jugcraft:stolas_offerings), or none."""
+    namespace, _, path = definition.get("upkeep", {}).get("offering", ":").partition(":")
+    tag = DATA / namespace / "tags" / "item" / f"{path}.json"
+    values = json.loads(tag.read_text(encoding="utf-8")).get("values", []) if path and tag.is_file() else []
+    return [value if isinstance(value, str) else value.get("id", "") for value in values]
+
+
+def pact_walk(pg, research, invocations, rituals, at_hand, understood, dimensions=None, blocked=()):
+    """What one player alone reaches in {dimensions} (the Overworld alone by default), with no structure loot and nothing
+    past the Practitioner stage, with only the research entries {understood} understood and nothing mastered, Stolas's
+    Regard aside (its states are what the route reaches): the graph, to which every thing the pact hall makes or places
+    (tools/acquisition.py PACT_HALL), the Open Hand Compact's materials, every offering Stolas takes and the workshop
+    hand's seal (HAND, as PACT["hand"] and tools/concordance_workers.py HAND_RESEARCH say) are added as a step needing
+    them would add them; the nodes {blocked} are taken away as well. Returns (reached, the graph's problems)."""
+    import acquisition
+    import concordance_workers as wk
+    problems = []
+    nodes = pg.graph(research, invocations, rituals, at_hand, problems)
+    definition = _stolas()
+    for item in [rid(item) for item in acquisition.PACT_HALL] + [cost["item"] for cost in definition["compact"]["items"]] \
+            + _offerings(definition):
+        pg.item_node(nodes, at_hand, item, problems)
+    hand = PACT["hand"]
+    nodes[HAND] = pg.node("", [pg.research_node(rid(key), "understood") for key in hand["research"]]
+                          + [pg.research_node(wk.HAND_RESEARCH, "mastered")]
+                          + [pg.item_node(nodes, at_hand, rid(item), problems) for item in hand["things"]], kind="worker")
+    without = {pg.research_node(rid(key), state) for key in research for state in pg.RESEARCH_STATES
+               if key != "stolas_regard" and (state == "mastered" or key not in understood)}
+    reached = pg.reachable(nodes, research, cap="practitioner", dimensions=set(dimensions or [""]), without=without | set(blocked))
+    return reached, problems
+
+
+def _pact_wants(step):
+    """The nodes a pact-hall step reaches: those it names and every Concordance thing it makes or places."""
+    return list(step["reaches"]) + [f"item:{rid(item)}" for item in step["things"]]
+
+
+def pact_problems(pg, research, invocations, rituals, at_hand):
+    """What is wrong with the pact hall's route (PACT): an empty list when it holds."""
+    import acquisition
+    found = []
+    steps = PACT["steps"]
+    named = [item for step in steps for item in step["things"]]
+    for item in sorted(set(named) - set(acquisition.PACT_HALL)):
+        found.append(f"journey pact: {item} is no row of tools/acquisition.py PACT_HALL")
+    for item in sorted(set(acquisition.PACT_HALL) - set(named)):
+        found.append(f"journey pact: tools/acquisition.py's {item} is named by no step")
+    for item, how in acquisition.PACT_HALL.items():
+        recipe = acquisition.recipe_file(item, how)
+        loads = _switches(recipe) if recipe else {"concordance"}
+        if loads != {"concordance"}:
+            found.append(f"journey pact: {item} must be made under the Concordance's switch alone, not {sorted(loads or [])}")
+    understood = []
+    for number, step in enumerate(steps, 1):
+        if PACT_TEST not in step["tests"]:
+            found.append(f"journey pact step {number}: {PACT_TEST} walks every step, so the step names it")
+        for key in step["research"]:
+            if key not in research:
+                found.append(f"journey pact step {number}: {key} is not a research entry")
+        understood = understood + [key for key in step["research"] if key not in understood]
+        dimensions = step.get("dimensions", [""])
+        where = " and ".join({"": "the Overworld", "nether": "the Nether", "end": "the End"}[d] for d in dimensions)
+        reached, graph_problems = pact_walk(pg, research, invocations, rituals, at_hand, understood, dimensions)
+        found.extend(f"journey pact step {number}: {problem}" for problem in graph_problems)
+        wants = _pact_wants(step)
+        for want in wants:
+            if want not in reached:
+                found.append(f"journey pact step {number}: one player alone in {where}, with {understood} understood, "
+                             f"nothing else mastered, no structure loot and nothing past the Practitioner stage, does not "
+                             f"reach {want}")
+        for key in step["research"]:
+            lost, _ = pact_walk(pg, research, invocations, rituals, at_hand, [k for k in understood if k != key], dimensions)
+            if all(want in lost for want in wants):
+                found.append(f"journey pact step {number}: nothing it reaches needs {key}")
+        if dimensions != [""]:
+            home, _ = pact_walk(pg, research, invocations, rituals, at_hand, understood)
+            if all(want in home for want in wants):
+                found.append(f"journey pact step {number}: nothing it reaches needs {where}; the Overworld alone serves")
+    final, _ = pact_walk(pg, research, invocations, rituals, at_hand, understood)
+    definition = _stolas()
+    for cost in definition["compact"]["items"]:
+        if f"item:{cost['item']}" not in final:
+            found.append(f"journey pact: the Open Hand Compact's {cost['item']} is not had in the Overworld by the route")
+    if definition["compact"].get("resonance", 0) > 0 and "resource:astral_resonance" not in final:
+        found.append("journey pact: the Open Hand Compact's resonance is not had by the route")
+    offerings = _offerings(definition)
+    if not any(f"item:{item}" in final for item in offerings):
+        found.append(f"journey pact: none of Stolas's offerings {offerings} is had in the Overworld by the route without Styx")
+    import concordance_workers as wk
+    unmastered, _ = pact_walk(pg, research, invocations, rituals, at_hand, understood, ["", "nether"],
+                              blocked={pg.research_node(wk.HAND_RESEARCH, "mastered")})
+    if HAND in unmastered:
+        found.append(f"journey pact: the workshop hand is sealed without {wk.HAND_RESEARCH} mastered, "
+                     "as SpiritAnchorBlock never seals it")
+    return found
+
+
+def worker_kinds_problems(research):
+    """The routes' "served once by each kind of worker" is the Binding Arts' mastery: the worker_service practice of as many
+    distinct kinds as the workers have (tools/concordance_workers.py WORKERS). The workshop hand (Concordance Chunk D,
+    D-P71) serves as a spirit, so the kinds stay three and no route's words change; a new kind would make the routes'
+    words and the Binding Arts' distinct count wrong together."""
+    import concordance_workers as wk
+    found = []
+    kinds = sorted({info["kind"] for info in wk.WORKERS.values()})
+    rules = research.get("binding_arts", {}).get("states", {}).get("mastered", {}).get("any", [])
+    if not any(rule.get("type") == "practice" and rule.get("activity") == rid("worker_service")
+               and rule.get("distinct") == len(kinds) for rule in rules):
+        found.append(f"journey: the Binding Arts are not mastered by being served once by each of the {len(kinds)} kinds of "
+                     f"worker {kinds}, as the routes that master them say")
+    if wk.WORKERS.get("workshop_hand", {}).get("kind") != "spirit":
+        found.append("journey: the workshop hand must serve as a spirit, one of the kinds the routes count")
+    return found
+
+
 def problems():
     """What is wrong with the journey: an empty list when every route holds (see the module's description)."""
     found = []
@@ -500,6 +709,9 @@ def problems():
                          "the Nether or the End")
     # The living workshop (Concordance Chunk C, C-10).
     found.extend(workshop_problems(pg, research, invocations, rituals, at_hand))
+    # The pact hall (Concordance Chunk D, D-03 to D-09), and the routes' three kinds of worker with the workshop hand among them.
+    found.extend(pact_problems(pg, research, invocations, rituals, at_hand))
+    found.extend(worker_kinds_problems(research))
     # Every game test named exists.
     tests = game_tests()
     named = list(FIRST_SUCCESS["tests"])
@@ -507,6 +719,8 @@ def problems():
         for _stage, _text, names in route["steps"]:
             named += names
     for step in WORKSHOP["steps"]:
+        named += step["tests"]
+    for step in PACT["steps"]:
         named += step["tests"]
     for _text, names in COOPERATIVE:
         named += names
@@ -560,6 +774,16 @@ def table():
                          if item in items)
         lines.append(f"| {number}. {step['text']} | {STAGE_NAMES[step['stage']]} | {names(step['research']) or 'nothing new'} "
                      f"| {', '.join(step['switches'])} | {made} | {tests(step['tests'])} |")
+    lines += ["", f"### {PACT['name']}", "",
+              "Stolas found through Styx or without him, his pact kept and ended, and the workshop hand it unlocks "
+              "(Concordance Chunk D). No stage route: one player alone does each step in the Overworld (the workshop hand's "
+              "goes to the Nether for its anchor's soul lantern), with the research understood so far, nothing else mastered "
+              "and no structure loot (a feather stands in for Styx's flowers, and an amethyst shard keeps the pact). "
+              f"`{PACT_TEST}` walks every step on one survival player.", "",
+              "| Step | Understands | Makes or places | Server game tests |", "|---|---|---|---|"]
+    for number, step in enumerate(PACT["steps"], 1):
+        made = ", ".join(thing(item) for item in step["things"]) or "nothing new"
+        lines.append(f"| {number}. {step['text']} | {names(step['research']) or 'nothing new'} | {made} | {tests(step['tests'])} |")
     lines += ["", "### Cooperative play", "", "| Shared, and what stays one player's | Server game tests |", "|---|---|"]
     for text, listed in COOPERATIVE:
         lines.append(f"| {text} | {tests(listed)} |")

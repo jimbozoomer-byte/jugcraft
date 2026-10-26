@@ -15,6 +15,8 @@ import io.github.jimbozoomer.jugcraft.concordance.garden.VerdantHeartBlockEntity
 import io.github.jimbozoomer.jugcraft.concordance.reliquary.ReliquaryShrineBlockEntity;
 import io.github.jimbozoomer.jugcraft.concordance.spire.SpireHeartBlockEntity;
 import io.github.jimbozoomer.jugcraft.concordance.sky.ObservatoryBlockEntity;
+import io.github.jimbozoomer.jugcraft.concordance.spirits.PactPerchBlockEntity;
+import io.github.jimbozoomer.jugcraft.concordance.spirits.SpiritAnchorBlockEntity;
 import io.github.jimbozoomer.jugcraft.concordance.spirits.WorkerEntity;
 import io.github.jimbozoomer.jugcraft.machine.MachineBlockEntity;
 import net.fabricmc.loader.api.FabricLoader;
@@ -43,6 +45,9 @@ public final class JugcraftJadePlugin implements IWailaPlugin {
 		registration.registerBlockDataProvider(ConcordanceDataProvider.GLEANER, GleanerBlockEntity.class);
 		registration.registerBlockDataProvider(ConcordanceDataProvider.OBSERVATORY, ObservatoryBlockEntity.class);
 		registration.registerEntityDataProvider(WorkerDataProvider.INSTANCE, WorkerEntity.class);
+		// Concordance Chunk D, D-06 (G11): the pact perch and the Spirit Anchor, each the agreement it keeps (PactReading, read only).
+		registration.registerBlockDataProvider(PactDataProvider.PERCH, PactPerchBlockEntity.class);
+		registration.registerBlockDataProvider(PactDataProvider.ANCHOR, SpiritAnchorBlockEntity.class);
 		registration.registerBlockDataProvider(CourierDataProvider.INSTANCE, CourierPostBlockEntity.class);
 		registration.registerBlockDataProvider(ShrineDataProvider.INSTANCE, ReliquaryShrineBlockEntity.class);
 		registration.registerBlockDataProvider(SpireDataProvider.INSTANCE, SpireHeartBlockEntity.class);
