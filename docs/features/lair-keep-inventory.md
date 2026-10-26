@@ -21,7 +21,9 @@ A boss fight is meant to be a fight you can try again, not one that costs your k
 - **Your visit ends**, as before. Your party can go on, and you can rejoin through the gate while it is open. When the fight ends, your share of the spoils is kept for you until you respawn, as before (`LairRewards`).
 - **Dying anywhere else is unchanged**: you still drop everything.
 
-**Grave Goods** remain as a safety net. Anything still dropped at your feet when you die in a lair is gathered at once and handed back when you respawn. Such drops would come from another mod's death drops, since the game itself now drops nothing.
+**No grave is ever placed in a lair.** The death graves ([owner-graves-aircraft-furniture.md](owner-graves-aircraft-furniture.md#death-graves), #475) skip lairs.
+
+**Grave Goods** remain as a safety net. Anything still dropped when you die in a lair is caught as it drops and handed back when you respawn. Such drops would come from another mod's death drops, since the game itself now drops nothing. The graves' exact death-stack capture (`DeathGraves`) catches them.
 
 ## Connections
 
@@ -54,6 +56,7 @@ A boss fight is meant to be a fight you can try again, not one that costs your k
     - `ServerPlayerKeepInventoryMixin` covers vanilla's own respawn restore, `ServerPlayer.restoreFrom`.
   - The respawn restore now asks about the player who died rather than the respawned one. They share a UUID, so the personal rule answers the same, but only the one who died is in the lair.
   - The world's keepInventory game rule is never changed.
+- **Graves (#475):** `DeathGraves.duringDeath` still turns its death-stack capture on in a lair, although the lair keeps everything. Anything still dropped therefore becomes Grave Goods (`Lairs.retainDeathItem`) and never lies in an instance that will close. Everywhere else, keep-inventory deaths still skip the capture as before.
 - **Logging out on the death screen:** a player who leaves while dead in a lair, or whose server restarts, comes back still dead where they fell.
   - `Lairs.joined` now leaves dead players alone, as `Lairs.check` already did. They are not sent home while dead, so their respawn still sees that they fell in a lair and keeps everything.
   - Their items are saved with them as with any player.
@@ -74,6 +77,8 @@ This adds no dependencies, assets or mixins. It reuses the shared keep-inventory
 | Compilation and headless server game tests (including `PlayerRulesGameTests`) | `./gradlew build` (CI job `mod`) | passed | CI run 39821173207, commit f836db854 |
 | Core without optional integrations | CI job `optional integrations absent` | passed | same run |
 | Rendered-client game tests | `./gradlew runClientGameTest` (CI job `client`, 16 shards) | passed: all 236 client test classes ran, because a shared mixin changed; `LairClientGameTests` ran in shard 10 | same run |
+
+Those CI results come from before main's death graves (#475) were merged in. The merged version changes `DeathGraves` and the lair checks in `OwnerBatchClientGameTests`. CI on that merge is the evidence for the combined behaviour, and it is not recorded here yet.
 
 The game is not compiled locally (its toolchain downloads are blocked there), so CI is the evidence for the three rows above. The first push, 182d143ee, failed to compile the test: in 26.3 the open screen is `client.gui.screen()`, not a field of `Minecraft`. f836db854 fixed that.
 
@@ -98,4 +103,4 @@ This applies in every lair dimension and nowhere else. It does not depend on sea
 ## Rollout and open questions
 
 - Known limit: a mod that moves items out of the inventory at death by some route other than `dropEquipment` (a grave mod, say) works as that mod decides.
-- Rollout is reversible: removing the lair line from `PlayerRules.keeps` restores the old Grave Goods behaviour, with no saved data to migrate.
+- Rollout is reversible: removing the lair line from `PlayerRules.keeps` restores #475's Grave Goods behaviour, with no saved data to migrate. Under that behaviour items come back into the inventory after respawn, armour unworn and most experience lost.

@@ -37,6 +37,7 @@ public class HouseholdBlock extends Block {
         BUILDING.set(d);
         try {
             String kind=d.get("kind").getAsString(), name=d.get("source").getAsString();
+            if(d.has("collection")&&d.get("collection").getAsString().equals("crafted"))return kind.equals("seat")?new CraftedBlock.Seat(p,d):kind.equals("storage")?new CraftedBlock.Storage(p,d):new CraftedBlock(p,d);
             if(kind.equals("cavern"))return CavernControl.CAVE.contains(name)||CavernDevice.KINDS.contains(name)
                     ?new CavernBlock.WithEntity(p,d):new CavernBlock(p,d);
             if(kind.equals("beast"))return CavernControl.BEAST.contains(name)||name.equals("capsid")
@@ -240,8 +241,12 @@ public class HouseholdBlock extends Block {
         l.setBlock(p,set(s,"water_level",Integer.toString(amount)),UPDATE_ALL);
         if(name.endsWith("bath")&&value(s,"type").equals("bottom")){var other=p.relative(facing(s));var partner=l.getBlockState(other);if(partner.is(this))l.setBlock(other,set(partner,"water_level",Integer.toString(amount)),UPDATE_ALL);}
     }
+    public boolean publicTownInteraction(){
+        return kind.equals("seat")||kind.equals("display")||kind.equals("switch")||kind.equals("bell")
+            ||kind.equals("workbench")||kind.equals("cutting")||name.endsWith("fence_gate");
+    }
     @Override protected InteractionResult useWithoutItem(BlockState s,Level l,BlockPos p,Player player,BlockHitResult hit){
-        if(!Menagerie.mayChange(l,player,p))return InteractionResult.FAIL;
+        if(!Menagerie.mayChange(l,player,p)&&!io.github.jimbozoomer.jugcraft.town.TownProtection.allowsPublicUse(player,l,p))return InteractionResult.FAIL;
         if(l.isClientSide()){if(name.equals("computer"))MenagerieItems.openGuide.run();return InteractionResult.SUCCESS;}
         if(kind.equals("spile")&&flag(s,"has_bucket")){
             boolean full=value(s,"fullness").equals("3");Block.popResource(l,p,new ItemStack(full?Menagerie.item("ecology_maple_sap_bucket"):Items.BUCKET));l.setBlock(p,set(set(s,"has_bucket","false"),"fullness","0"),UPDATE_ALL);return InteractionResult.SUCCESS;
