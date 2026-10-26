@@ -18327,8 +18327,10 @@ def check_pacts(co, root, lang, registered, research):
             or not re.search(r"boolean joinsRosterOnStatus\(\) \{\s*return false;", shade):
         err("spirits/GatheringShadeEntity.java: a shade joins its roster only by its seal, its recall or its own decision, never by a "
             "change of status (WorkerEntity.joinsRosterOnStatus false; the unit review's fix 2)")
-    # The same for Stolas (unit 2, at its merge): he joins only by his seal, his call again or his seating.
-    if not re.search(r"boolean joinsRosterOnStatus\(\) \{\s*return false;", java("spirits/StolasEntity.java")):
+    # The same for Stolas (unit 2, at its merge): he joins only by his seal, his call again or his seating. Since the garden
+    # cohort (GC-01a) the rule is every pact spirit's, in PactSpiritEntity, and no spirit overrides it.
+    if not re.search(r"boolean joinsRosterOnStatus\(\) \{\s*return false;", java("spirits/PactSpiritEntity.java")) \
+            or "joinsRosterOnStatus" in java("spirits/StolasEntity.java"):
         err("spirits/StolasEntity.java: Stolas joins his holder's roster only by his seal, his call again or his seating, never by a "
             "change of status (joinsRosterOnStatus false; unit 1's review fix 2)")
     # And for the workshop hand (D-08's As built, its last item; closed with D-07): one replaced, or loading while the
@@ -18450,7 +18452,8 @@ def check_pacts(co, root, lang, registered, research):
         if f"message.{MOD}.concordance.pact.{key}" not in lang:
             err(f"pacts: missing lang message.{MOD}.concordance.pact.{key}")
     prefix = f"message.{MOD}.concordance.pact."
-    for rel in ("spirits/PactMenu.java", "spirits/PactPerchBlock.java", "spirits/PactKeeping.java", "spirits/StolasEntity.java"):
+    for rel in ("spirits/PactMenu.java", "spirits/PactPerchBlock.java", "spirits/PactKeeping.java", "spirits/StolasEntity.java",
+                "spirits/PactSpiritEntity.java", "spirits/PactService.java"):
         source = java(rel)
         named = re.findall(r'\bline\("([a-z_.]+)"', source) + [k[len(prefix):] for k in re.findall(r'"(message\.jugcraft\.concordance\.pact\.[a-z_.]+)"', source)]
         for key in named:
@@ -18562,17 +18565,20 @@ def check_pacts(co, root, lang, registered, research):
     if 'entity("stolas", EntityType.Builder.<StolasEntity>of(StolasEntity::new, MobCategory.MISC)' not in java("spirits/Workers.java"):
         err("spirits/Workers.java: Stolas is MISC, so transport crates refuse him (D-S7)")
     stolas = java("spirits/StolasEntity.java")
-    if "extends WorkerEntity<StolasEntity> implements AgreementHolder.Presence" not in stolas:
+    # Concordance garden cohort, GC-01a (SG2): what Stolas does is the pact spirits' base's; he is a thin subclass of it.
+    base = java("spirits/PactSpiritEntity.java")
+    if "public abstract class PactSpiritEntity<T extends PactSpiritEntity<T>> extends WorkerEntity<T> implements AgreementHolder.Presence" not in base \
+            or "public class StolasEntity extends PactSpiritEntity<StolasEntity> {" not in stolas:
         err("spirits/StolasEntity.java: a worker (check_workers' bans) and a presence (AgreementHolder)")
-    if "source.is(DamageTypeTags.BYPASSES_INVULNERABILITY) && super.hurtServer(" not in _java_body(stolas, "public boolean hurtServer("):
+    if "source.is(DamageTypeTags.BYPASSES_INVULNERABILITY) && super.hurtServer(" not in _java_body(base, "public boolean hurtServer("):
         err("spirits/StolasEntity.java: only damage past invulnerability harms him (D-S7)")
-    decide = _java_body(stolas, "private Status decide(")
+    decide = _java_body(base, "private Status decide(")
     for needle in ("PactSessions.live(", "home.visitor()", "home.holder().verify(level, gameTime)", "leave(level, home, perch)",
                    "home.holder().state(level)"):
         if needle not in decide:
             err(f"StolasEntity.decide: he leaves without a record or a live conversation, and says his pact's state ({needle})")
     if not 0 <= decide.find("owner == null && record == null && !awaited(level, gameTime)") < decide.find("Workers.enabled()") \
-            or "PactSessions.live(" not in _java_body(stolas, "private boolean awaited("):
+            or "PactSessions.live(" not in _java_body(base, "private boolean awaited("):
         err("StolasEntity.decide: a visitor no live conversation waits on leaves before the switch is asked, so one loaded while it is off leaves (the unit review)")
     if f"message.{MOD}.concordance.workers.kind.pact" not in lang:
         err("pacts: missing lang for the roster kind pact")
@@ -18656,13 +18662,17 @@ def check_pacts(co, root, lang, registered, research):
                 err("sky/AstrolabeItem.java: the recall key and a recalled attunement are written once, in recallKey and recall")
         elif '"recall:"' in source or recalled:
             err(f"{relative}: a recall is made only by AstrolabeItem.recall (one claim, one cost, one duration; D-S1)")
+    # GC-01a (SG1, SG6): the menu and the page reach Star-reckoning through its PactService (StarReckoning.SERVICE).
     menu_recall = _java_body(menu, "private Answered recall(")
+    star_service = _java_body(star, "private static final class Service implements PactService")
     if "choice >= patternIds.size()" not in menu_recall \
-            or "StarReckoning.reckon(level, player, perch.holder(), id, Sky.time(level), now)" not in menu_recall \
-            or "AstrolabeItem.mayRecall(level, player, pattern, time, now)" not in _java_body(menu, "private View kept("):
+            or ".perform(level, player, perch.holder(), patternIds.get(choice), Sky.time(level), now)" not in menu_recall \
+            or "reckon(level, player, holder, choice, time, now)" not in star_service \
+            or "AstrolabeItem.mayRecall(level, player, pattern, time, now)" not in star_service:
         err("PactMenu: RECALL reckons the pattern this menu last offered; each offered pattern says whether it can be recalled")
     page = _java_body(keeping, "public static Page page(")
-    if "StarReckoning.choices(server, player.getUUID())" not in page or "StarReckoning.kept(player)" not in page:
+    if "StarReckoning.choices(level.getServer(), player.getUUID())" not in star_service or "kept(player)" not in star_service \
+            or any(needle not in page for needle in ("PactServices.get(service.work())", "work.serviceRows(", "work.obligationRows(", "work.choices(")):
         err("PactKeeping.page: offers the patterns the holder observed and names the first obligation (D-05)")
     observe = _java_body(java("sky/ObservatoryBlockEntity.java"), "public int observe(")
     if not 0 <= observe.find("ConcordanceProgress.record(player, new Evidence.Practiced(Sky.ACTIVITY") < observe.find("StarReckoning.observed(player)"):
@@ -18672,7 +18682,8 @@ def check_pacts(co, root, lang, registered, research):
             or not 0 <= obliged.find("AgreementHolder.stranded(server, record)") < obliged.find("ConcordanceProgress.record(") \
             or "kept(player)" not in obliged or "StolasRegard.ACTIVITY" not in obliged:
         err("StarReckoning.observed: switched on, the pact active and kept at its perch, never once kept, before pact_service is recorded (D-S12)")
-    for name in ("spirits/StarReckoning.java", "spirits/PactKeeping.java", "spirits/StolasEntity.java"):
+    for name in ("spirits/StarReckoning.java", "spirits/PactKeeping.java", "spirits/StolasEntity.java", "spirits/PactSpiritEntity.java",
+                 "spirits/PactService.java", "spirits/PactServices.java", "spirits/PactSpirits.java"):
         if "Workers.ACTIVITY" in java(name):
             err(f"concordance/{name}: Stolas's service never records worker_service (Don't 7)")
     for key in sorted(set(re.findall(r'"(message\.jugcraft\.concordance\.pact\.[a-z_.]*[a-z_])"', star))):
@@ -18686,20 +18697,21 @@ def check_pacts(co, root, lang, registered, research):
     for _, gid in re.findall(r'^\t\t([A-Z]+)\("([a-z]+)", \d+,', _java_body(stolas, "public enum Gesture"), re.M):
         if f"stolas.{gid}" not in pa.SOUND_EVENTS:
             err(f"StolasEntity.Gesture.{gid.upper()}: has no sound event (tools/concordance_pacts.py SOUND_EVENTS)")
-    if not re.search(rf"\bint CUE_TICKS = {pa.CUE_TICKS};", stolas):
+    if not re.search(rf"\bint CUE_TICKS = {pa.CUE_TICKS};", base):
         err(f"spirits/StolasEntity.java: CUE_TICKS must be {pa.CUE_TICKS} (tools/concordance_pacts.py)")
-    gesture = _java_body(stolas, "public void gesture(Gesture gesture)")
-    if not 0 <= gesture.find("cueing(level, gesture.id, gesture != Gesture.DEPART)") < gesture.find("triggerAnim(GESTURE_CONTROLLER, gesture.id);"):
+    gesture = _java_body(base, "public void gesture(Clip clip)")
+    if not 0 <= gesture.find("cueing(level, clip.id(), clip != body.depart())") < gesture.find("triggerAnim(GESTURE_CONTROLLER, clip.id());"):
         err("StolasEntity.gesture: shown (its sound, the switch, CUE_TICKS) before GeckoLib is told; his departure always")
-    cueing = _java_body(stolas, "private boolean cueing(")
+    cueing = _java_body(base, "private boolean cueing(")
     for needle in ("Workers.enabled()", "now - cued[kind] < CUE_TICKS", "level.playSound(null, this, sound, SoundSource.NEUTRAL, 1.0F, 1.0F)"):
         if needle not in cueing:
             err(f"StolasEntity.cueing: switched on, one of a kind every CUE_TICKS, its sound at him ({needle})")
-    listen = _java_body(stolas, "void listen()")
+    listen = _java_body(base, "void listen()")
     if "entityData.set(LISTENING, true)" not in listen or 'cueing(level, "listen", true)' not in listen:
         err("StolasEntity.listen: a conversation opening at his perch shows him listening, and is heard")
-    registered = _java_body(stolas, "public static void registerSounds()")
-    if 'Jugcraft.id("stolas." + id)' not in registered or "SoundEvent.createVariableRangeEvent(key)" not in registered \
+    registered = _java_body(base, "protected static void registerSounds(Body body)")
+    if 'Jugcraft.id(body.spirit() + "." + id)' not in registered or "SoundEvent.createVariableRangeEvent(key)" not in registered \
+            or "PactSpiritEntity.registerSounds(BODY);" not in _java_body(stolas, "public static void registerSounds()") \
             or "StolasEntity.registerSounds();" not in java("spirits/Workers.java"):
         err("spirits/StolasEntity.java: his sound events jugcraft:stolas.<id> are registered once (Workers.register)")
     reaction = _java_body(stolas, "public static @Nullable Gesture reaction(")
@@ -18710,7 +18722,7 @@ def check_pacts(co, root, lang, registered, research):
             err(f"StolasEntity.reaction: {needle}")
     for path in sorted(CLIENT_JAVA_ROOT.rglob("*.java")):
         text = path.read_text(encoding="utf-8")
-        if "StolasEntity" in text and re.search(r"\.gesture\(|triggerAnim\(", text):
+        if re.search(r"\b(StolasEntity|PactSpiritEntity)\b", text) and re.search(r"\.gesture\(|triggerAnim\(", text):
             err(f"client/{path.name}: his gestures are the server's to fire (a late joiner sees his state, never a replay)")
     receive = _java_body(menu, "public static @Nullable PactStatePayload receive(")
     if not 0 <= receive.find("menu.act(") < receive.find("menu.perch.react(level, request.action(), done.reason(), done.done())") \
@@ -18718,9 +18730,10 @@ def check_pacts(co, root, lang, registered, research):
         err("PactMenu.receive: once an action is answered, Stolas answers it too (PactPerchBlockEntity.react)")
     if "perch.heard(level)" not in _java_body(menu, "private void begin("):
         err("PactMenu.begin: he attends while a conversation is open (PactPerchBlockEntity.heard)")
-    if "stolas.gesture(gesture)" not in _java_body(perch, "void react(") or "stolas.listen()" not in _java_body(perch, "void heard(") \
-            or "stolas(level)" not in _java_body(perch, "void react(") or "stolas(level)" not in _java_body(perch, "void heard("):
-        err("spirits/PactPerchBlockEntity.java: it passes the screen's actions and openings to its own Stolas (react, heard: stolas(level), "
+    react, heard = _java_body(perch, "void react("), _java_body(perch, "void heard(")
+    if "spirit.gesture(clip)" not in react or "spirit.answer(action, reason, done)" not in react or "spirit.listen()" not in heard \
+            or "presence(level)" not in react or "presence(level)" not in heard:
+        err("spirits/PactPerchBlockEntity.java: it passes the screen's actions and openings to its own Stolas (react, heard: presence(level), "
             "so a copy moves nobody, critique 6)")
     played = load(ASSETS / "sounds.json") or {}
     for event, subtitle in pa.SOUND_EVENTS.items():
@@ -19059,32 +19072,34 @@ def check_stolas_body(co):
     if declared != wanted:
         err(f"spirits/StolasEntity.java: Gesture is {[g[1] for g in wanted]}, each its clip and its length in ticks "
             f"(concordance_pacts.GESTURES, GESTURE_TIMES): {declared}")
-    controllers = _java_body(stolas, "public void registerControllers(")
+    # Concordance garden cohort, GC-01a (SG2): his controllers, gestures, departure and sweep are the pact spirits' base's.
+    base = text(JAVA_ROOT / "concordance" / "spirits" / "PactSpiritEntity.java")
+    controllers = _java_body(base, "public void registerControllers(")
     for needle in ("super.registerControllers(controllers);",
-                   "new AnimationController<StolasEntity>(GESTURE_CONTROLLER, 0, test -> PlayState.STOP)",
-                   "gestures.triggerableAnim(gesture.id, gesture.animation);", "controllers.add(gestures);"):
+                   "new AnimationController<T>(GESTURE_CONTROLLER, 0, test -> PlayState.STOP)",
+                   "gestures.triggerableAnim(clip.id(), clip.animation());", "controllers.add(gestures);"):
         if needle not in controllers:
             err(f"spirits/StolasEntity.java registerControllers: the worker's main controller, then a gesture controller that "
                 f"only plays what the server triggers ({needle})")
     if controllers.find("super.registerControllers(controllers);") > controllers.find("controllers.add(gestures);"):
         err("spirits/StolasEntity.java registerControllers: his gestures' controller comes after the main one, so a gesture's "
             "bones win while it plays")
-    if 'public static final String GESTURE_CONTROLLER = "gesture";' not in stolas \
-            or "triggerAnim(GESTURE_CONTROLLER, gesture.id);" not in _java_body(stolas, "public void gesture(Gesture gesture)"):
+    if 'public static final String GESTURE_CONTROLLER = "gesture";' not in base \
+            or "triggerAnim(GESTURE_CONTROLLER, clip.id());" not in _java_body(base, "public void gesture(Clip clip)"):
         err("spirits/StolasEntity.java: a gesture is fired on the server through gesture(), on the gesture controller")
-    leave = _java_body(stolas, "public void leave(")
-    if "departAt = level.getGameTime() + Gesture.DEPART.ticks;" not in leave or "gesture(Gesture.DEPART);" not in leave \
+    leave = _java_body(base, "public void leave(")
+    if "departAt = level.getGameTime() + body.depart().ticks();" not in leave or "gesture(body.depart());" not in leave \
             or "discard()" in leave:
         err("spirits/StolasEntity.java leave: he makes his departing gesture and is discarded only when it ends (game time)")
-    if "departed(level.getGameTime());" not in _java_body(stolas, "protected void customServerAiStep(") \
-            or "discard();" not in _java_body(stolas, "private boolean departed(long gameTime)") \
-            or "return departAt == 0 && super.shouldBeSaved();" not in stolas:
+    if "departed(level.getGameTime());" not in _java_body(base, "protected void customServerAiStep(") \
+            or "discard();" not in _java_body(base, "private boolean departed(long gameTime)") \
+            or "return departAt == 0 && super.shouldBeSaved();" not in base:
         err("spirits/StolasEntity.java: a departing Stolas is discarded when his departure's game time comes, and never saved")
     # The unit review (G1): his departure ends on time where his entity does not tick (a chunk tracked but not ticking, or
     # unloaded around him, since an unsaved entity is not unloaded): a server-tick sweep of every Stolas leaving.
-    sweep = _java_body(stolas, "public static void registerSweep()")
+    sweep = _java_body(base, "public static void registerSweep()")
     if "LEAVING.add(this);" not in leave or "ServerTickEvents.END_SERVER_TICK.register(" not in sweep \
-            or "LEAVING.clear()" not in sweep or "StolasEntity.registerSweep();" not in text(JAVA_ROOT / "concordance" / "spirits" / "Workers.java"):
+            or "LEAVING.clear()" not in sweep or "PactSpiritEntity.registerSweep();" not in text(JAVA_ROOT / "concordance" / "spirits" / "Workers.java"):
         err("spirits/StolasEntity.java: each departure is swept at the end of every server tick, ticking or not (registerSweep, "
             "once in Workers.register; emptied at stop)")
     # The unit review (G2): leaving, he listens no more and his departure is synced; the client draws him leaving only where it
@@ -19092,15 +19107,15 @@ def check_stolas_body(co):
     if "entityData.set(LISTENING, false);" not in leave or "entityData.set(DEPARTING, true);" not in leave:
         err("spirits/StolasEntity.java leave: he listens no more, and his departure is synced (DEPARTING)")
     perch = text(JAVA_ROOT / "concordance" / "spirits" / "PactPerchBlockEntity.java")
-    summon = _java_body(perch, "private @Nullable StolasEntity summon(")
-    if summon.find("level.addFreshEntity(stolas)") < 0 \
-            or summon.find("stolas.gesture(StolasEntity.Gesture.ARRIVE);") < summon.find("level.addFreshEntity(stolas)"):
+    summon = _java_body(perch, "private @Nullable PactSpiritEntity<?> summon(")
+    if summon.find("level.addFreshEntity(summoned)") < 0 \
+            or summon.find("summoned.gesture(summoned.body().arrive());") < summon.find("level.addFreshEntity(summoned)"):
         err("spirits/PactPerchBlockEntity.java summon: a summoned Stolas arrives (his gesture, once he is in the world)")
-    found = _java_body(perch, "public @Nullable StolasEntity stolas(ServerLevel level)")
-    if "!guest.gone()" not in _java_body(perch, "private @Nullable StolasEntity unbound(") or "!presence.gone()" not in found:
-        err("spirits/PactPerchBlockEntity.java: a Stolas leaving is never its visitor or presence (unbound, stolas: gone())")
+    found = _java_body(perch, "public @Nullable PactSpiritEntity<?> presence(ServerLevel level)")
+    if "!guest.gone()" not in _java_body(perch, "public @Nullable PactSpiritEntity<?> visitor(ServerLevel level)") or "!presence.gone()" not in found:
+        err("spirits/PactPerchBlockEntity.java: a Stolas leaving is never its visitor or presence (visitor, presence: gone())")
     if "getBlockPos().equals(presence.perch())" not in found:
-        err("spirits/PactPerchBlockEntity.java stolas: a copy of a perch names the original's presence, who is perched there, "
+        err("spirits/PactPerchBlockEntity.java presence: a copy of a perch names the original's presence, who is perched there, "
             "never at the copy (getBlockPos().equals(presence.perch()))")
     workers = text(CLIENT_JAVA_ROOT / "WorkerClient.java")
     start = workers.find("EntityRendererRegistry.register(Workers.STOLAS,")

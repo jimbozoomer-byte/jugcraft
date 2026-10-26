@@ -111,6 +111,8 @@ public final class Workers {
 		STOLAS = entity("stolas", EntityType.Builder.<StolasEntity>of(StolasEntity::new, MobCategory.MISC).sized(0.7F, 1.45F).eyeHeight(1.2F)
 				.fireImmune().clientTrackingRange(8));
 		FabricDefaultAttributeRegistry.register(STOLAS, StolasEntity.createAttributes());
+		// Concordance garden cohort, GC-01 (SG3): the perch calls whichever pact spirit a counterpart names.
+		PactSpirits.register(StolasEntity.COUNTERPART, STOLAS, StolasEntity.SIGN);
 		ResourceKey<Block> perchKey = ResourceKey.create(Registries.BLOCK, Jugcraft.id("pact_perch"));
 		PACT_PERCH = Registry.register(BuiltInRegistries.BLOCK, perchKey, new PactPerchBlock(BlockBehaviour.Properties.of()
 				.mapColor(MapColor.WOOD).strength(1.5F, 3.0F).sound(SoundType.WOOD).noOcclusion().pushReaction(PushReaction.IMMOVEABLE).setId(perchKey)));
@@ -118,11 +120,14 @@ public final class Workers {
 				FabricBlockEntityTypeBuilder.create(PactPerchBlockEntity::new, PACT_PERCH).build());
 		PACT_PERCH_ITEM = item("pact_perch", properties -> new SkyItem(PACT_PERCH, properties), new Item.Properties().useBlockDescriptionPrefix());
 		PERCH_MENU = Registry.register(BuiltInRegistries.MENU, Jugcraft.id("pact_perch"), new ExtendedMenuType<>(PactMenu::new, PactMenu.Opening.STREAM_CODEC));
+		// GC-01 (SG1): one service a work, every work the parser accepts served, before any menu can ask.
+		PactServices.register(StarReckoning.SERVICE);
+		PactServices.verify();
 		PactMenu.register();
 		// Concordance Chunk D, D-06: Stolas's cues (jugcraft:stolas.*; sounds.json and subtitles are the generator's).
 		StolasEntity.registerSounds();
-		// The unit review: his departures end on time, his chunk ticking him or not.
-		StolasEntity.registerSweep();
+		// The unit review: every pact spirit's departure ends on time, its chunk ticking it or not (one sweep, GC-01).
+		PactSpiritEntity.registerSweep();
 		CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess, environment) -> command(dispatcher));
 		CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.FUNCTIONAL_BLOCKS).register(output -> {
 			output.accept(anchor);

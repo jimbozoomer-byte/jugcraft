@@ -5,14 +5,12 @@ import io.github.jimbozoomer.jugcraft.concordance.ComposeText;
 import io.github.jimbozoomer.jugcraft.concordance.ConcordanceData;
 import io.github.jimbozoomer.jugcraft.concordance.ConcordanceProgress;
 import io.github.jimbozoomer.jugcraft.concordance.RateGate;
-import io.github.jimbozoomer.jugcraft.concordance.celestial.Pattern;
 import io.github.jimbozoomer.jugcraft.concordance.diagnostic.Code;
 import io.github.jimbozoomer.jugcraft.concordance.diagnostic.Diagnostic;
 import io.github.jimbozoomer.jugcraft.concordance.resource.BoundWill;
 import io.github.jimbozoomer.jugcraft.concordance.rules.Definitions;
 import io.github.jimbozoomer.jugcraft.concordance.rules.ResearchState;
 import io.github.jimbozoomer.jugcraft.concordance.sky.AstralClaims;
-import io.github.jimbozoomer.jugcraft.concordance.sky.AstrolabeItem;
 import io.github.jimbozoomer.jugcraft.concordance.sky.Sky;
 import io.github.jimbozoomer.jugcraft.concordance.worker.PactDefinition;
 import io.github.jimbozoomer.jugcraft.concordance.worker.Pacts;
@@ -167,8 +165,9 @@ public class PactMenu extends AbstractContainerMenu {
 
 	private void begin(ServerLevel level, ServerPlayer player, long now) {
 		PactSessions.open(player, GlobalPos.of(level.dimension(), perch.getBlockPos()), containerId, now);
-		if (invitable(level, player, PactPerchBlockEntity.definition(), now)) {
-			perch.welcome(level);
+		PactDefinition offer = PactPerchBlockEntity.definition();
+		if (invitable(level, player, offer, now)) {
+			perch.welcome(level, player, offer.id());
 		}
 		// Concordance Chunk D, D-06: he attends while the conversation is open (his listening loop; its sound).
 		perch.heard(level);
@@ -178,7 +177,8 @@ public class PactMenu extends AbstractContainerMenu {
 	/** Switched on, his offer loaded, the perch keeping nothing, its owner (D-S8), Stolas's Regard understood, a star observed, no pact with him held. */
 	private boolean invitable(ServerLevel level, ServerPlayer player, @Nullable PactDefinition definition, long now) {
 		return Workers.enabled() && definition != null && perch.holder().verify(level, now) == AgreementHolder.Standing.NONE
-				&& perch.holder().maySeal(level, player, false) && knows(player, definition) && observed(level, player)
+				&& perch.holder().maySeal(level, player, false) && knows(player, definition) && PactServices.get(definition.work()) != null
+				&& PactServices.get(definition.work()).missing(level, player, perch, definition).isEmpty()
 				&& !Pacts.holds(BoundWills.of(level.getServer()).ledger(), player.getUUID(), definition.id());
 	}
 
@@ -287,8 +287,13 @@ public class PactMenu extends AbstractContainerMenu {
 		if (!knows(player, definition)) {
 			return new Answered(MISSING_EVIDENCE, false, line("answer.missing_evidence"));
 		}
-		if (!observed(level, player)) {
-			return new Answered(NO_OBSERVATION, false, line("missing.observation"));
+		PactService service = PactServices.get(definition.work());
+		if (service == null) {
+			return new Answered(NO_DEFINITION, false, line("unavailable"));
+		}
+		List<PactService.Missing> missing = service.missing(level, player, perch, definition);
+		if (!missing.isEmpty()) {
+			return new Answered(missing.getFirst().reason(), false, missing.getFirst().note());
 		}
 		List<PactCompact.Need> needs = PactCompact.needs(definition);
 		if (needs == null) {
@@ -328,11 +333,9 @@ public class PactMenu extends AbstractContainerMenu {
 		if (choice >= patternIds.size()) {
 			return notOffered();
 		}
-		String id = patternIds.get(choice);
-		Pacts.Reckoning reckoning = StarReckoning.reckon(level, player, perch.holder(), id, Sky.time(level), now);
-		BoundWill record = perch.holder().record(level);
-		BoundWill.Service service = record == null || record.pact() == null ? null : record.pact().service();
-		return new Answered(reckoning.id, reckoning == Pacts.Reckoning.RECALLED, StarReckoning.told(reckoning, Sky.catalog().pattern(id), service));
+		PactService service = PactServices.get(StarReckoning.WORK);
+		PactMenu.Answered done = service.perform(level, player, perch.holder(), patternIds.get(choice), Sky.time(level), now);
+		return done == null ? notOffered() : done;
 	}
 
 	private static Answered toggled(AgreementHolder.Toggle toggle) {
@@ -413,15 +416,7 @@ public class PactMenu extends AbstractContainerMenu {
 	private View kept(ServerLevel level, ServerPlayer player, BoundWill record, long now) {
 		PactKeeping.Page page = PactKeeping.page(level, player, perch.holder(), now);
 		BoundWill.Pact pact = record.pact();
-		List<PactStatePayload.Choice> patterns = new ArrayList<>();
-		long time = Sky.time(level);
-		for (String id : page.patterns()) {
-			Pattern pattern = Sky.catalog().pattern(id);
-			if (pattern != null) {
-				patterns.add(new PactStatePayload.Choice(id, Sky.patternName(id), pattern.recallCost(),
-						AstrolabeItem.mayRecall(level, player, pattern, time, now)));
-			}
-		}
+		List<PactStatePayload.Choice> patterns = page.choices();
 		List<String> ids = patterns.stream().map(PactStatePayload.Choice::id).toList();
 		List<PactStatePayload.Choice> offerings = new ArrayList<>();
 		boolean room = PactKeeping.room(level, record);
@@ -472,8 +467,13 @@ public class PactMenu extends AbstractContainerMenu {
 						Component.translatable("advancements." + advancement.getNamespace() + "." + advancement.getPath() + ".description")));
 			}
 		}
-		if (!observed(level, player)) {
-			notes.add(line("missing.observation"));
+		PactService service = PactServices.get(definition.work());
+		if (service == null) {
+			notes.add(line("unavailable"));
+		} else {
+			for (PactService.Missing missing : service.missing(level, player, perch, definition)) {
+				notes.add(missing.note());
+			}
 		}
 		if (Pacts.holds(BoundWills.of(level.getServer()).ledger(), player.getUUID(), definition.id())) {
 			notes.add(line("missing.held"));

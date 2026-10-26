@@ -4,9 +4,14 @@ import io.github.jimbozoomer.jugcraft.concordance.ConcordanceData;
 import io.github.jimbozoomer.jugcraft.concordance.Saved;
 import io.github.jimbozoomer.jugcraft.concordance.resource.BoundWill;
 import io.github.jimbozoomer.jugcraft.concordance.worker.PactDefinition;
+import io.github.jimbozoomer.jugcraft.concordance.worker.PactParser;
 import io.github.jimbozoomer.jugcraft.concordance.worker.Pacts;
 import io.github.jimbozoomer.jugcraft.party.UseMode;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Locale;
+import java.util.Map;
+import java.util.TreeSet;
 import java.util.UUID;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
@@ -27,7 +32,7 @@ import org.jspecify.annotations.Nullable;
  * no hopper, pipe, explosion or copied block reaches them, and a copy elsewhere is inert. Broken or blown up with the
  * Concordance on, its pact is left without its perch (OnBreak.UNSEAT). Once a second, spread by place, it looks at its
  * pact (PactKeeping.tick: the upkeep, and a lost presence called back while its holder is near). While a conversation is
- * open and nothing is kept here, one visiting Stolas waits on it; the visitor is never saved, so a perch read from its
+ * open and nothing is kept here, one visiting spirit waits on it; the visitor is never saved, so a perch read from its
  * save has none.
  */
 public class PactPerchBlockEntity extends BlockEntity implements AgreementHolder.Holds {
@@ -46,27 +51,63 @@ public class PactPerchBlockEntity extends BlockEntity implements AgreementHolder
 		return holder;
 	}
 
-	/** The visiting Stolas while a conversation is open here (never saved). */
+	/** The visiting spirit's id while a conversation is open here (never saved). */
 	public @Nullable UUID visitor() {
 		return visitor;
 	}
 
 	/**
-	 * Stolas at this perch now (D-06): the presence of the pact kept here if he is in the world and perched here, else the
-	 * visitor while one waits; null when neither is, or the one there is leaving (StolasEntity.gone). A copy of this perch
-	 * names the original's presence, who is perched at the original: never this perch's.
+	 * The pact spirit at this perch now (GC-01, SG3): the presence of the pact kept here if it is in the world and perched
+	 * here, else the visitor while one waits; null when neither is, or the one there is leaving (PactSpiritEntity.gone). A
+	 * copy of this perch names the original's presence, who is perched at the original: never this perch's.
 	 */
-	public @Nullable StolasEntity stolas(ServerLevel level) {
+	public @Nullable PactSpiritEntity<?> presence(ServerLevel level) {
 		UUID id = holder.spirit();
-		if (id != null && level.getEntity(id) instanceof StolasEntity presence && !presence.gone() && getBlockPos().equals(presence.perch())) {
+		if (id != null && level.getEntity(id) instanceof PactSpiritEntity<?> presence && !presence.gone() && getBlockPos().equals(presence.perch())) {
 			return presence;
 		}
-		return unbound(level);
+		return visitor(level);
 	}
 
-	/** Stolas's offer in force (data/jugcraft/concordance/pact/stolas.json), or null while it did not load. */
+	/** Stolas at this perch now, as {@link #presence} finds him (Chunk D's view of the perch, kept for his tests and evidence). */
+	public @Nullable StolasEntity stolas(ServerLevel level) {
+		return presence(level) instanceof StolasEntity stolas ? stolas : null;
+	}
+
+	/** The visitor waiting here: bound to no one, not leaving; null when none. */
+	public @Nullable PactSpiritEntity<?> visitor(ServerLevel level) {
+		return visitor != null && level.getEntity(visitor) instanceof PactSpiritEntity<?> guest && !guest.gone() && guest.owner() == null ? guest : null;
+	}
+
+	/** Stolas's offer in force (data/jugcraft/concordance/pact/stolas.json), or null while it did not load (Chunk D's; his tests read it). */
 	public static @Nullable PactDefinition definition() {
-		return ConcordanceData.rules().pacts().get(PactDefinition.STOLAS);
+		return definition(PactDefinition.STOLAS);
+	}
+
+	/** {@code counterpart}'s offer in force, or null while it did not load. */
+	public static @Nullable PactDefinition definition(String counterpart) {
+		return ConcordanceData.rules().pacts().get(Pacts.counterpart(counterpart));
+	}
+
+	/**
+	 * GC-01 (SG4, GC-P15): the offers a perch makes, in the order the game ships them (PactParser.REQUIRED), then any other
+	 * loaded offer by id; only those whose counterpart is a registered pact spirit (PactSpirits), since nothing else could come.
+	 */
+	public static List<PactDefinition> offered() {
+		Map<String, PactDefinition> loaded = ConcordanceData.rules().pacts().pacts();
+		List<PactDefinition> out = new ArrayList<>();
+		for (String id : PactParser.REQUIRED) {
+			PactDefinition offer = loaded.get(id);
+			if (offer != null && PactSpirits.knows(id)) {
+				out.add(offer);
+			}
+		}
+		for (String id : new TreeSet<>(loaded.keySet())) {
+			if (!PactParser.REQUIRED.contains(id) && PactSpirits.knows(id)) {
+				out.add(loaded.get(id));
+			}
+		}
+		return List.copyOf(out);
 	}
 
 	/** What the perch seals: {@code d}'s terms copied onto the record, one a holder, its owner alone (D-S8), the compact paid by the seal itself (D-S13). */
@@ -76,72 +117,83 @@ public class PactPerchBlockEntity extends BlockEntity implements AgreementHolder
 				true, false, affords, pay);
 	}
 
-	/** An invitation opened here: Stolas arrives, one visitor at a perch, none while a pact is kept here (D-S7). */
-	@Nullable StolasEntity welcome(ServerLevel level) {
+	/**
+	 * An invitation opened here: {@code counterpart} arrives, one visitor at a perch, none while a pact is kept here (D-S7); a
+	 * visitor of another spirit leaves first. GC-02 turns the new one to {@code inviter}.
+	 */
+	@Nullable PactSpiritEntity<?> welcome(ServerLevel level, ServerPlayer inviter, String counterpart) {
 		if (holder.agreement() != null) {
 			return null;
 		}
-		StolasEntity guest = unbound(level);
-		if (guest != null) {
+		PactSpirits.Spirit spirit = PactSpirits.get(counterpart);
+		if (spirit == null) {
+			return null;
+		}
+		PactSpiritEntity<?> guest = visitor(level);
+		if (guest != null && guest.getType() == spirit.type()) {
 			return guest;
 		}
-		guest = summon(level, null);
+		if (guest != null) {
+			guest.leave(level, null, getBlockPos());
+		}
+		guest = summon(level, spirit, null);
 		visitor = guest == null ? null : guest.getUUID();
 		return guest;
 	}
 
-	/** The pact's presence for {@code who}: the visitor, if one waits here, becomes it (D-S7); otherwise Stolas is called. */
+	/** The pact's presence for {@code who}: the visitor of that spirit, if one waits here, becomes it (D-S7); otherwise that spirit is called. */
 	@Override
 	public @Nullable WorkerEntity<?> call(ServerLevel level, UUID who, String counterpart) {
-		if (!PactDefinition.STOLAS.equals(Pacts.counterpart(counterpart))) {
+		PactSpirits.Spirit spirit = PactSpirits.get(counterpart);
+		if (spirit == null) {
 			return null;
 		}
-		StolasEntity guest = unbound(level);
-		if (guest != null) {
+		PactSpiritEntity<?> guest = visitor(level);
+		if (guest != null && guest.getType() == spirit.type()) {
 			visitor = null;
 			guest.setOwner(who);
 			return guest;
 		}
-		return summon(level, who);
+		if (guest != null) {
+			guest.leave(level, null, getBlockPos());
+			visitor = null;
+		}
+		return summon(level, spirit, who);
 	}
 
-	/** D-06: a conversation opens here: he attends (StolasEntity.listen); at a copy, nobody (stolas()). */
+	/** D-06: a conversation opens here: its spirit attends (PactSpiritEntity.listen); at a copy, nobody (presence()). */
 	void heard(ServerLevel level) {
-		StolasEntity stolas = stolas(level);
-		if (stolas != null) {
-			stolas.listen();
+		PactSpiritEntity<?> spirit = presence(level);
+		if (spirit != null) {
+			spirit.listen();
 		}
 	}
 
-	/** D-06: he answers a screen's action with its gesture and sound (StolasEntity.reaction), fired here, on the server. */
+	/** D-06: its spirit answers a screen's action with its gesture and sound (its own table, PactSpiritEntity.answer), fired here, on the server. */
 	void react(ServerLevel level, int action, String reason, boolean done) {
-		StolasEntity.Gesture gesture = StolasEntity.reaction(action, reason, done);
-		StolasEntity stolas = gesture == null ? null : stolas(level);
-		if (stolas != null) {
-			stolas.gesture(gesture);
+		PactSpiritEntity<?> spirit = presence(level);
+		PactSpiritEntity.Clip clip = spirit == null ? null : spirit.answer(action, reason, done);
+		if (clip != null) {
+			spirit.gesture(clip);
 		}
 	}
 
-	private @Nullable StolasEntity unbound(ServerLevel level) {
-		return visitor != null && level.getEntity(visitor) instanceof StolasEntity guest && !guest.gone() && guest.owner() == null ? guest : null;
-	}
-
-	private @Nullable StolasEntity summon(ServerLevel level, @Nullable UUID who) {
-		StolasEntity stolas = Workers.STOLAS.create(level, EntitySpawnReason.MOB_SUMMONED);
-		if (stolas == null) {
+	private @Nullable PactSpiritEntity<?> summon(ServerLevel level, PactSpirits.Spirit spirit, @Nullable UUID who) {
+		PactSpiritEntity<?> summoned = spirit.type().create(level, EntitySpawnReason.MOB_SUMMONED);
+		if (summoned == null) {
 			return null;
 		}
 		BlockPos pos = getBlockPos();
-		stolas.setOwner(who);
-		stolas.setPerch(pos);
-		stolas.snapTo(pos.getX() + 0.5, pos.getY() + 1.0, pos.getZ() + 0.5, 0.0F, 0.0F);
-		if (!level.addFreshEntity(stolas)) {
+		summoned.setOwner(who);
+		summoned.setPerch(pos);
+		summoned.snapTo(pos.getX() + 0.5, pos.getY() + 1.0, pos.getZ() + 0.5, 0.0F, 0.0F);
+		if (!level.addFreshEntity(summoned)) {
 			return null;
 		}
-		// D-06: he alights on the perch. Everyone in range already tracks him (ChunkMap pairs a new entity at once), so all of
-		// them see the whole arrival; one who comes later sees him perched.
-		stolas.gesture(StolasEntity.Gesture.ARRIVE);
-		return stolas;
+		// D-06: it arrives on the perch. Everyone in range already tracks it (ChunkMap pairs a new entity at once), so all of
+		// them see the whole arrival; one who comes later sees it perched.
+		summoned.gesture(summoned.body().arrive());
+		return summoned;
 	}
 
 	/** Its ticker (server only): its pact, once a second, spread by position. */
@@ -156,7 +208,7 @@ public class PactPerchBlockEntity extends BlockEntity implements AgreementHolder
 	public void preRemoveSideEffects(BlockPos pos, BlockState state) {
 		if (level instanceof ServerLevel server) {
 			holder.broken(server, server.getGameTime());
-			StolasEntity guest = unbound(server);
+			PactSpiritEntity<?> guest = visitor(server);
 			if (guest != null) {
 				guest.leave(server, null, pos);
 			}
