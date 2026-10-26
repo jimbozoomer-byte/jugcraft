@@ -8,6 +8,9 @@ Every change to Jugcraft, newest first, grouped by pull request. For what each t
 
 No numbered release yet. Entries on feature branches remain proposed until their pull requests merge.
 
+### Unmerged: A server load benchmark
+- A new server game test, `ServerLoadGameTests`, times what a tick of a representative load costs the server: a factory of 80 working processing machines and a crowd of 24 costumed villains. It logs the numbers ("Server load: ...") and fails if either load's tick grows past a whole server tick. Memory and client frame times are not measured yet. Record: [server-load-benchmark.md](docs/features/server-load-benchmark.md).
+
 ### Unmerged: The benches in the workshop look
 - The **Cooking Pot**, **Lampwright's Bench**, **Farm Stand**, **cave survey desk** and **Carving Knife** screens take the workshop machines' look: brass casing, orange glass, a status lamp by the title and keys that light up when they are on (the tool in use, Mirror, the candle, the crate being priced, a study you can cancel). The farm stand's owner is in a chip by the title; the survey desk's words are now translatable. Slots, buttons, button ids and labels are unchanged.
 - The blueprint table keeps its own drafting-sheet look.
