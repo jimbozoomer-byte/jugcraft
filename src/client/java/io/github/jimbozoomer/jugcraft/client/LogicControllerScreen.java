@@ -4,6 +4,7 @@ import io.github.jimbozoomer.jugcraft.control.Channels;
 import io.github.jimbozoomer.jugcraft.control.LogicControllerBlockEntity;
 import io.github.jimbozoomer.jugcraft.control.LogicControllerMenu;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.client.gui.navigation.ScreenRectangle;
 import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.network.chat.Component;
@@ -17,7 +18,7 @@ import net.minecraft.world.item.DyeColor;
  * its name); and a help strip. Each part of a rule is a key with a tooltip; the server keeps the rules
  * ({@link LogicControllerMenu}). The status lamp is lit while the controller has any channel on.
  */
-public class LogicControllerScreen extends AbstractContainerScreen<LogicControllerMenu> {
+public class LogicControllerScreen extends AbstractContainerScreen<LogicControllerMenu> implements ScreenKit.Fitted {
 	/** The channel colours, as drawn on the sensor and relay lamps (tools/control_electronics.py CHANNEL_COLORS). */
 	public static final int[] COLORS = {0xF0F0F0, 0xF9801D, 0xC74EBD, 0x3AB3DA, 0xFED83D, 0x80C71F, 0xF38BAA, 0x474F52,
 			0x9D9D97, 0x169C9C, 0x8932B8, 0x3C44AA, 0x835432, 0x5E7C16, 0xB02E26, 0x1D1D21};
@@ -66,7 +67,14 @@ public class LogicControllerScreen extends AbstractContainerScreen<LogicControll
 
 	@Override
 	public void extractRenderState(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float delta) {
+		int availableRows=LogicControllerBlockEntity.RULES;
+		if(minecraft!=null&&minecraft.level!=null) {
+			var state=minecraft.level.getBlockState(menu.pos);
+			if(state.getBlock() instanceof io.github.jimbozoomer.jugcraft.jimtafacts.industry.IndustrialAutomation.Gate gate)
+				availableRows=Math.max(1,gate.rows/(state.getValue(io.github.jimbozoomer.jugcraft.jimtafacts.industry.IndustrialAutomation.Gate.MODIFIER)>=2?2:1));
+		}
 		for (int rule = 0; rule < LogicControllerBlockEntity.RULES; rule++) {
+			for(var button:buttons[rule])button.active=rule<availableRows;
 			boolean enabled = menu.rule(rule, LogicControllerBlockEntity.ENABLED) == 1;
 			buttons[rule][0].setMessage(Component.literal(String.valueOf(rule + 1)));
 			buttons[rule][0].setSelected(enabled);
@@ -156,5 +164,10 @@ public class LogicControllerScreen extends AbstractContainerScreen<LogicControll
 	private void heading(GuiGraphicsExtractor graphics, String key, int x, int width) {
 		String text = Component.translatable("screen.jugcraft.logic_controller." + key).getString();
 		graphics.text(font, text, x + (width - font.width(text)) / 2, 16, theme.dim(), false);
+	}
+
+	@Override
+	public ScreenRectangle panelArea() {
+		return new ScreenRectangle(leftPos, topPos, imageWidth, imageHeight);
 	}
 }

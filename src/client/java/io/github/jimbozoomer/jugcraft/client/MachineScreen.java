@@ -23,6 +23,7 @@ import io.github.jimbozoomer.jugcraft.machine.SideConfig;
 import net.fabricmc.fabric.api.transfer.v1.fluid.FluidVariant;
 import net.fabricmc.fabric.api.transfer.v1.fluid.FluidVariantAttributes;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.client.gui.navigation.ScreenRectangle;
 import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.renderer.RenderPipelines;
@@ -44,7 +45,7 @@ import org.jspecify.annotations.Nullable;
  * pane into the machine's six faces, each clicked to change what it does, with the key in the help box. Hovering an
  * empty slot says what goes in it.
  */
-public class MachineScreen extends AbstractContainerScreen<MachineMenu> {
+public class MachineScreen extends AbstractContainerScreen<MachineMenu> implements ScreenKit.Fitted {
 	private static final int BAR_X = 10;
 	private static final int BAR_Y = 17;
 	private static final int BAR_WIDTH = 12;
@@ -477,6 +478,12 @@ public class MachineScreen extends AbstractContainerScreen<MachineMenu> {
 		int y = MachineSkin.wrap(graphics, font, Component.translatable("container.jugcraft.terminal." + status.key), STATUS_X, STATUS_Y,
 				STATUS_WIDTH, STATUS_BOTTOM, status.warning ? theme.warn() : theme.text());
 		y += 2;
+		if (kind == MachineKind.JIMTA_THERMAL_CENTRIFUGE) {
+			y = MachineSkin.wrap(graphics, font, Component.translatable("container.jugcraft.industrial_heat",
+					menu.data(MachineBlockEntity.DATA_INDUSTRIAL_HEAT), menu.data(MachineBlockEntity.DATA_INDUSTRIAL_HEAT_TARGET)),
+					STATUS_X, y, STATUS_WIDTH, STATUS_BOTTOM, theme.text());
+			y += 2;
+		}
 		if (kind == MachineKind.DEPOSIT_DRILL && menu.data(MachineBlockEntity.DATA_DRILL_STAGE) > 0) {
 			y = MachineSkin.wrap(graphics, font, Component.translatable(
 					menu.data(MachineBlockEntity.DATA_DRILL_STAGE) == 1 ? "container.jugcraft.drill.boring" : "container.jugcraft.drill.extracting",
@@ -636,5 +643,10 @@ public class MachineScreen extends AbstractContainerScreen<MachineMenu> {
 		}
 		int color = PetroFluids.gaugeColor(fluid);
 		return color != 0 ? color : 0xFF8090A8;
+	}
+
+	@Override
+	public ScreenRectangle panelArea() {
+		return new ScreenRectangle(leftPos, topPos, imageWidth, imageHeight);
 	}
 }
