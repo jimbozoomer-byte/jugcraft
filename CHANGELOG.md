@@ -174,6 +174,10 @@ No numbered release yet. Entries on feature branches remain proposed until their
 - **Halloween and autumn creatures reach them too:** wisps rise over the landscape swamps on Halloween nights. On full moons, werewolves stalk the landscape woods, snow werewolves its snowy land and shadow werewolves the Ominous Woods, where the Howling Totem rite also works. Squirrels and wild turkeys come to its woods and open country.
 - **Every Jugcraft biome now needs a seasons decision:** the data check fails on a new biome without one, so a future collection cannot miss the seasons. The audit of every seasonal system against the newer collections is in [seasonal-biome-audit.md](docs/features/seasonal-biome-audit.md).
 
+### Unmerged: Guns, no flash from a gun silenced by its build
+- The **Gallant Rifle**, silenced the length of its barrel, no longer shows a muzzle flash when fired, as a gun with a Silencer fitted shows none. The guns' client test checks it.
+- Record: [guns.md, the silenced-flash follow-up](docs/features/guns.md#follow-up-no-flash-from-a-gun-silenced-by-its-build).
+
 ### Unmerged: Guns, slice 15B (three diamond-steel sidearms)
 - **Three guns** from the owner's own GeckoLib models and animations, the next of their diamond-steel guns, each held in one hand, and in both with a stock fitted, as a carbine: the **Kreuzer Pistol**, a quick pistol of thirteen light rounds, its magazine ahead of its trigger; the **Psalm SMG**, a machine pistol of twenty-five light rounds, ten a second; and the **Jawbreaker**, a heavy magnum of four rifle rounds, 12 a shot. Each carries a wax seal and a strip of scripture that swing as it fires.
 - Made from stainless steel, a diamond and a lever; redstone for the Psalm. Each takes the barrel attachments and stocks; the Kreuzer and the Psalm the magazines, the Jawbreaker the scopes and the Laser Sight.

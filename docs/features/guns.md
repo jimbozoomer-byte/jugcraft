@@ -305,7 +305,7 @@ Slice 6 adds no items. It makes a shot look like one, and a gun look held, using
 - Each shot picks its frame and its turn about the barrel from its time, so a burst flickers.
 - The frame faces back down the barrel, so the shooter sees a star from the hip. Two copies cross along the barrel, so a player beside them sees the flash too.
 - **Size,** in the model's pixels, by the round: light 5, rifle 7, buckshot 8, paper cartridge 10 (black powder flares widest).
-- **Barrel attachments:** a Muzzle Brake or an Extended Barrel moves the flash to its own front (a `muzzle_<attachment>` locator, on the bore at the front of the part). A Silencer or a Baffled Silencer hides it.
+- **Barrel attachments:** a Muzzle Brake or an Extended Barrel moves the flash to its own front (a `muzzle_<attachment>` locator, on the bore at the front of the part). A Silencer or a Baffled Silencer hides it, as does a gun silenced by its own build (`SILENCED`: the Gallant Rifle; [follow-up](#follow-up-no-flash-from-a-gun-silenced-by-its-build)).
 - **Black powder:** a muzzle-loader's shot also blows a white cloud in front of the muzzle.
 - **Who sees it:** everyone near the shooter. The player's own shots show as they fire; other players' shots show when the server's `GunActionPayload` arrives.
 
@@ -2835,7 +2835,7 @@ The first three of the owner's diamond-steel guns, taken up after slice 14F (on 
 **Save compatibility:** new items `jugcraft:vesper_rifle`, `onrush_smg` and `gallant_rifle`; nothing saved changes. `guns.enabled=false` turns their recipes off; the items stay registered.
 
 **Known limits:**
-- **The Gallant is silent only by its sound:** its shot is the owner's silenced one; nothing else about it is quieter (a shot shows a muzzle flash, as CI's third-person screenshot shows), and the Silencer does not fit it.
+- **The Gallant is silent by its sound and shows no flash:** its shot is the owner's silenced one, and since the [silenced-flash follow-up](#follow-up-no-flash-from-a-gun-silenced-by-its-build) it shows no muzzle flash (CI's third-person screenshot of slice 15A showed one). Nothing else about it is quieter, and the Silencer does not fit it.
 - **The Vesper goes without the Medium Scope:** its atlas has no room for that scope's pieces.
 - **The Vesper's reload fills the right of the view:** the owner's animation tips it up toward the eye.
 - **The arms in the reloads and inspections** come large into the view in places, as on the guns before them; the hands and the arms' ways are chosen here.
@@ -2899,6 +2899,12 @@ The next three of the owner's diamond-steel guns, taken up after slice 15A (on 2
 - **No knockback or armour piercing:** the owner's Uppercut has both; the guns have neither yet.
 - **The arms in the reloads and inspections** come large into the view in places, as on the guns before them, the right arm most in the inspections.
 - **Not played:** none of it has been played yet. The numbers want play to set.
+
+## Follow-up: no flash from a gun silenced by its build
+Slice 15A's Gallant Rifle is silenced the length of its barrel and fires the owner's silenced shot, but in CI's third-person screenshot of that slice its shot still showed a muzzle flash: only a fitted Silencer or Baffled Silencer hid one. Offered as a fix after slice 15B, the owner chose it (26 October 2026).
+- **What changes:** a gun silenced by its own build (`tools/guns.py` `SILENCED`, `JugcraftGuns.SILENCED`; the Gallant Rifle alone so far) shows no muzzle flash when fired, in first or third person, as a gun with a fitted silencer shows none (`GunRenderer`). Its sound, its numbers and what fits it are unchanged.
+- **Checked:** `tools/check_mod_data.py` holds `JugcraftGuns.SILENCED` to `tools/guns.py`, and each gun in it to one that takes no barrel attachment (a silencer on a silenced gun would mean nothing). The guns' client test (`GunsClientGameTests`) now asserts that a silenced gun draws no flash frame when fired, where every other gun must draw one.
+- **Save compatibility:** nothing saved changes.
 
 ## Connections
 - **Existing input producers:** copper, iron and gunpowder (vanilla); lead nuggets (the lead switch's lead); brass nuggets (brass, from zinc); paper and planks.
