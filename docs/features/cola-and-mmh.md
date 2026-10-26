@@ -67,6 +67,13 @@ No new dependencies. The icons are drawn by the generator, and none is copied:
 - the MMH tank from `tools/item_icons/mmh_tank.txt` (the hydrazine tank's map with an olive band);
 - the MMH fluid's textures from its palette.
 
+Two generated tables gain the five new items by hand, since this machine has no Minecraft jar or game to rebuild them:
+- `data/jugcraft/alchemy/values.json`: every existing record is kept; the new items get the builder's own rules applied
+  to the local recipes. Cola syrup costs what its crafting ingredients cost (5); the rest take the labelled
+  one-essence fallback, as the other fluid-made chemicals do.
+- `docs/audits/survival-item-registry.json` (the registry snapshot the survival audit reads): the five new item IDs.
+  The snapshot game test's next export will confirm them.
+
 ## Verification
 
 Server game tests (`ColaAndMmhGameTests`):
@@ -81,7 +88,7 @@ Server game tests (`ColaAndMmhGameTests`):
 
 ### Results
 
-Local, without Gradle or a game: the generator, the data checks and the Java syntax parse; see the PR.
+Local, without Gradle or a game: the generator, the data checks, the Python unit tests and the Java syntax parse; see the PR.
 
 CI: see the PR.
 
