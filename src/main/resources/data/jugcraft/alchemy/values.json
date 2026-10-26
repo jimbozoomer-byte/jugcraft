@@ -44966,6 +44966,26 @@
       "numerator": 1,
       "denominator": 1,
       "source": "fallback (balance pending)"
+    },
+    "jugcraft:drowned_diver_helmet": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
+    "jugcraft:emerald_phantom_mask": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
+    "jugcraft:onyx_warden_helm": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
+    "jugcraft:spectral_cosmonaut_helmet": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
     }
   }
 }

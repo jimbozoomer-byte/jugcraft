@@ -676,6 +676,10 @@ Owner-requested 7 October 2026. Independent briefs: [industrial chemistry and fu
 - [ ] Deliver industrial fertilizers, refining and polymers before the new optional chemical drinks, preservatives, adhesives and medicine; preserve independently useful earlier agriculture, food and adhesive routes.
 - [ ] Document actual machine roles, recipes, consumer links and optional paths in the Encyclopedia; audit reachability, gas/element units, energy loops, pollution, bounded factory work and persistence before gameplay delivery.
 
+## Costumed villains — 26 October 2026
+
+- [x] Unmasking: a beaten villain reveals a named crook, drops its mask as a trophy and awards Mystery Solved ([costumed-villains-unmasking.md](features/costumed-villains-unmasking.md)). Implemented; CI pending, not yet played in a client.
+- [ ] Still ideas, if the owner wants them: traps, and village mysteries with clues before the chase.
 ## Trains — 26 October 2026
 
 - [x] The train framework: a diesel locomotive, a passenger coach, a cargo wagon and the Coupler, on any rails ([trains.md](features/trains.md)). Implemented; CI pending, not yet played in a client.

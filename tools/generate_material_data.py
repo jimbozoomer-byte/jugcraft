@@ -312,6 +312,8 @@ def assets():
     diagonal_connections.write_all(write, ASSETS, RES / "assets" / "minecraft")
     import scary_data
     scary_data.write_all(write, RES, lang)
+    import unmasking
+    unmasking.write_all(write, ASSETS, DATA / MOD, lang)
     import chima_data
     chima_data.write_all(write, RES, lang)
     import vanilla_logs

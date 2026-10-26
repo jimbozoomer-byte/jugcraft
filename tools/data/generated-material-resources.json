@@ -26275,5 +26275,14 @@
   "data/jugcraft/tags/worldgen/biome/landscape_habitat/plains.json",
   "data/jugcraft/tags/worldgen/biome/landscape_habitat/river.json",
   "data/jugcraft/tags/worldgen/biome/landscape_habitat/savanna.json",
-  "data/jugcraft/tags/worldgen/biome/landscape_habitat/swamp.json"
+  "data/jugcraft/tags/worldgen/biome/landscape_habitat/swamp.json",
+  "assets/jugcraft/items/drowned_diver_helmet.json",
+  "assets/jugcraft/items/emerald_phantom_mask.json",
+  "assets/jugcraft/items/onyx_warden_helm.json",
+  "assets/jugcraft/items/spectral_cosmonaut_helmet.json",
+  "assets/jugcraft/models/item/drowned_diver_helmet.json",
+  "assets/jugcraft/models/item/emerald_phantom_mask.json",
+  "assets/jugcraft/models/item/onyx_warden_helm.json",
+  "assets/jugcraft/models/item/spectral_cosmonaut_helmet.json",
+  "data/jugcraft/advancement/mystery_solved.json"
 ]
