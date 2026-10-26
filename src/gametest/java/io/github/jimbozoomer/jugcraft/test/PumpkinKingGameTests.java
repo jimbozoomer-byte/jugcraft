@@ -35,7 +35,7 @@ import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
-import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.EntityTypes;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.item.Item;
@@ -779,8 +779,8 @@ public class PumpkinKingGameTests {
 		shield(wielder);
 		ItemStack reap = new ItemStack(JugcraftPumpkinKing.hallowreap());
 		wielder.setItemInHand(InteractionHand.MAIN_HAND, reap);
-		var husk = helper.spawn(EntityType.HUSK, new BlockPos(34, 1, 53));
-		var cow = helper.spawn(EntityType.COW, new BlockPos(30, 1, 53));
+		var husk = helper.spawn(EntityTypes.HUSK, new BlockPos(34, 1, 53));
+		var cow = helper.spawn(EntityTypes.COW, new BlockPos(30, 1, 53));
 		helper.assertTrue(FrightBoon.frightens(husk) && !FrightBoon.frightens(king) && !FrightBoon.frightens(cow),
 				"The Fright boon would frighten a boss or a creature that is no monster, or not a monster");
 		husk.setTarget(wielder);
