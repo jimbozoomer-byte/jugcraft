@@ -6,6 +6,8 @@ Each lair is its own small pocket dimension, a void. A ritual opens an instance 
 SPACING blocks from the next, into which the lair's structure template is placed fresh. Players come in through the
 ritual's gate (their own choice), cannot build or break anything there, and go home to exactly where they stood.
 """
+import landscape_kinds
+
 FEATURE = "agriculture"
 
 # Server options in config/jugcraft.properties (JugcraftConfig.TEXT_OPTIONS), with their defaults and (for numbers) the
@@ -153,8 +155,10 @@ STONE = {
 }
 # What may be stood on instead of shallow water: mud, in it or on it.
 STONE_GROUND = ["minecraft:mud", "minecraft:muddy_mangrove_roots"]
-# The wetlands: every swamp (#c:is_swamp, Jugcraft's own and vanilla's), the Floodplain and the Muskeg.
-STONE_LANDS = ["#c:is_swamp", "minecraft:swamp", "minecraft:mangrove_swamp", "jugcraft:floodplain", "jugcraft:muskeg"]
+# The wetlands: every swamp (#c:is_swamp, Jugcraft's own and vanilla's), the Floodplain, the Muskeg, and the landscape
+# collection's swamps (tools/landscape_kinds.py).
+STONE_LANDS = ["#c:is_swamp", "minecraft:swamp", "minecraft:mangrove_swamp", "jugcraft:floodplain", "jugcraft:muskeg",
+               landscape_kinds.SWAMPS_TAG]
 
 # The Lantern Fen's lamps: lit, they burn at this light level; one gone out is lit again by using it.
 FEN_LAMP = {"light": 15}

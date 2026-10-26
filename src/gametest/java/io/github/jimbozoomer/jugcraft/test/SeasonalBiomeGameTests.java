@@ -5,6 +5,7 @@ import io.github.jimbozoomer.jugcraft.agriculture.Squirrels;
 import io.github.jimbozoomer.jugcraft.agriculture.Turkeys;
 import io.github.jimbozoomer.jugcraft.agriculture.Werewolves;
 import io.github.jimbozoomer.jugcraft.agriculture.Wisps;
+import io.github.jimbozoomer.jugcraft.lair.HagStoneRite;
 import io.github.jimbozoomer.jugcraft.season.JugcraftSeasons;
 import io.github.jimbozoomer.jugcraft.season.SeasonalBiome;
 import java.util.List;
@@ -22,13 +23,16 @@ import net.minecraft.tags.TagKey;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.Biomes;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.levelgen.GenerationStep;
+import net.minecraft.world.level.levelgen.placement.PlacedFeature;
 
 /**
  * The seasonal biome audit (docs/features/seasonal-biome-audit.md): the landscape collection's temperate biomes turn
  * with the seasons as Jugcraft's own do, its mild ones without winter snow; its frozen, tropical, arid, magic, coastal,
  * cave and other-dimension biomes, the caverns and the lairs' own biomes do not; across the whole biome registry every
  * seasonal biome rains and is neither frozen nor tropical. The werewolves, squirrels, turkeys and wisps find the
- * landscape collection's woods, open country, snowy land and swamps.
+ * landscape collection's woods, open country, snowy land and swamps; the fall's wild patches, the graveyard flowers and
+ * the Hag Stone reach them too, through the same kinds.
  */
 public class SeasonalBiomeGameTests {
 	/** Temperate landscape biomes: seasons and winter snow. */
@@ -132,6 +136,54 @@ public class SeasonalBiomeGameTests {
 		fill(helper, "jugcraft:landscape_field");
 		helper.assertTrue(!Wisps.canSpawnAt(level, spot), "A wisp may appear over a landscape field away from corn");
 		helper.succeed();
+	}
+
+	/**
+	 * The fall's wild patches and the graveyard flowers reach the landscape biomes of their kinds, and the other wild crops
+	 * do not; the Hag Stone's lands hold the landscape swamps. Fabric places the patches in the Overworld's biomes, so each
+	 * landscape biome is held to the vanilla biome of its kind: whenever the vanilla one has a fall patch, the landscape one
+	 * has it too, and a wild crop that is not a fall patch stays out of the landscape one (the log says which case this
+	 * test world showed).
+	 */
+	@GameTest
+	public void landscapeBiomesTakeTheFallsPatches(GameTestHelper helper) {
+		Registry<Biome> biomes = helper.getLevel().registryAccess().lookupOrThrow(Registries.BIOME);
+		Object[][] pairs = {
+				{Biomes.FOREST, "landscape_maple_woods", "chestnut_tree"},
+				{Biomes.FOREST, "landscape_woodland", "chanterelle"},
+				{Biomes.TAIGA, "landscape_siberian_taiga", "porcini"},
+				{Biomes.PLAINS, "landscape_pasture", "butternut_squash"},
+				{Biomes.SWAMP, "landscape_bog", "cranberry_bush"},
+				{Biomes.SWAMP, "landscape_bog", "spider_lily"}};
+		int placed = 0;
+		for (Object[] pair : pairs) {
+			@SuppressWarnings("unchecked")
+			Holder<Biome> vanilla = biomes.getOrThrow((ResourceKey<Biome>) pair[0]);
+			Holder<Biome> landscape = biome(biomes, (String) pair[1]);
+			String patch = "patch_" + pair[2];
+			if (hasPatch(vanilla, patch)) {
+				placed++;
+				helper.assertTrue(hasPatch(landscape, patch), pair[1] + " has no " + patch + ", though " + vanilla.getRegisteredName() + " has it");
+			}
+		}
+		// Wild rice is no fall patch: it keeps to the conventional swamps.
+		helper.assertTrue(!hasPatch(biome(biomes, "landscape_bog"), "patch_wild_rice"), "The landscape bog has wild rice, which is no fall patch");
+		org.slf4j.LoggerFactory.getLogger("SeasonalBiomeGameTests").info("[landscape patches] {} of {} vanilla biomes carry their fall patch in this test world; "
+				+ "each landscape counterpart did too", placed, pairs.length);
+		helper.assertTrue(biome(biomes, "landscape_bog").is(HagStoneRite.LANDS) && biome(biomes, "landscape_marsh").is(HagStoneRite.LANDS),
+				"The landscape swamps are not in #jugcraft:hag_stone_lands");
+		helper.assertTrue(!biome(biomes, "landscape_field").is(HagStoneRite.LANDS), "A landscape field is in #jugcraft:hag_stone_lands");
+		helper.assertTrue(biome(biomes, "landscape_ominous_woods").is(TagKey.create(Registries.BIOME, Jugcraft.id("landscape_kind/dark_woods"))),
+				"The Ominous Woods are not in #jugcraft:landscape_kind/dark_woods");
+		helper.succeed();
+	}
+
+	/** Whether {@code biome} lists {@code patch} (a Jugcraft placed feature) in its vegetation step. */
+	private static boolean hasPatch(Holder<Biome> biome, String patch) {
+		List<net.minecraft.core.HolderSet<PlacedFeature>> steps = biome.value().getGenerationSettings().features();
+		int step = GenerationStep.Decoration.VEGETAL_DECORATION.ordinal();
+		ResourceKey<PlacedFeature> key = ResourceKey.create(Registries.PLACED_FEATURE, Jugcraft.id(patch));
+		return step < steps.size() && steps.get(step).stream().anyMatch(holder -> holder.is(key));
 	}
 
 	/** Fills the test's area, and 5 blocks round it (a biome lookup blends neighbouring cells), with {@code biome}. */

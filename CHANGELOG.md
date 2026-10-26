@@ -72,6 +72,16 @@ No numbered release yet. Entries on feature branches remain proposed until their
 - The accessories' per-player check (`JimtaAbilities.tick`) read the block under every online player's feet, every time it ran, whatever they wore. Through an unloaded chunk that read loads, or even generates, the chunk on the spot. The game tests leave about 1,300 unticked mock players at the world origin, so the check ran every tick for each of them. Since the batch, the server's tick time has grown from about 10 ms to about 1 s over a test run, and CI's `mod` and `optional integrations absent` jobs have hit their 90-minute limit on main and on every pull request. This read is the only new per-player code that touches the world whatever is worn; that it caused the slowdown is the best-supported explanation, which CI's run of this change will confirm or refute.
 - The ground is now read only when snowshoes are worn, and only from a chunk that is already loaded. Snowshoes behave as before.
 
+### Unmerged: The fall's wild harvest in the landscape biomes (follow-up to the seasonal biome audit)
+- **The fall grows wild in the landscape biomes too.** The 19 fall and Halloween wild patches grow in the landscape biomes of their kinds: chestnut trees, chanterelles and acorn squash in its woods, cranberries in its swamps, butternut squash and Cinderella pumpkins in its fields, wild mandrake in the Ominous Woods. So do the graveyard flowers. The bottle gourd and the Jarrahdale pumpkin (savanna, jungle and windswept kinds) do not, and every other wild crop is as it was.
+- **The Hag Stone** opens the Lantern Fen from the landscape swamps (the Bayou, Bog, Marsh, Wetland and the rest).
+- Built on the seasonal biome audit's landscape kinds, with one more, the dark woods. Record: [seasonal-biome-audit.md](docs/features/seasonal-biome-audit.md#follow-up-the-falls-wild-patches-the-graveyard-flowers-and-the-hag-stone).
+
+### Unmerged: Seasonal biome audit
+- **The landscape biomes now have seasons:** in the 54 temperate landscape woods, fields, hills and swamps, grass and leaves turn with the year as in Jugcraft's own biomes. 47 of them take winter snow when `seasons.snow` is on; the 7 mild ones (Mediterranean, lavender, redwood, warm shrub, orchid swamp) do not.
+- **Halloween and autumn creatures reach them too:** wisps rise over the landscape swamps on Halloween nights. On full moons, werewolves stalk the landscape woods, snow werewolves its snowy land and shadow werewolves the Ominous Woods, where the Howling Totem rite also works. Squirrels and wild turkeys come to its woods and open country.
+- **Every Jugcraft biome now needs a seasons decision:** the data check fails on a new biome without one, so a future collection cannot miss the seasons. The audit of every seasonal system against the newer collections is in [seasonal-biome-audit.md](docs/features/seasonal-biome-audit.md).
+
 ### Unmerged: The benches in the workshop look
 - The **Cooking Pot**, **Lampwright's Bench**, **Farm Stand**, **cave survey desk** and **Carving Knife** screens take the workshop machines' look: brass casing, orange glass, a status lamp by the title and keys that light up when they are on (the tool in use, Mirror, the candle, the crate being priced, a study you can cancel). The farm stand's owner is in a chip by the title; the survey desk's words are now translatable. Slots, buttons, button ids and labels are unchanged.
 - The blueprint table keeps its own drafting-sheet look.
@@ -97,6 +107,7 @@ No numbered release yet. Entries on feature branches remain proposed until their
 - Each is made from steel, brass and a lever, with a crossbow, a magma block or a lightning rod. The Quarrel Carbine takes the magazines, the stocks and the four sights; the Hinterland Rifle the Medium Scope and the Reflex Sight; the Cloudburst Gun nothing.
 - **Fixed:** fired aimed, the Cloudburst Gun and the Borer play their shot from the hip (the owner made them no aimed shot). And guns held at the hip no longer swing an arm's sleeve across the left of the view as they fire: the guns' animations no longer ease into each other over a tick, an ease that could begin from the arms' rest pose.
 - Record: [guns.md, slice 14D](docs/features/guns.md#slice-14d-a-crossbow-gun-a-molten-rifle-and-a-drum-gun).
+
 
 ### Unmerged: The Exchange (bank, markets, land and shares, in Jugs)
 - Press **N** (or `/jugcraft exchange`) for the **Exchange**, a walnut-and-brass ledger with seven tabs. It deals only in **Jugs**, the town's credit: no new currency.
