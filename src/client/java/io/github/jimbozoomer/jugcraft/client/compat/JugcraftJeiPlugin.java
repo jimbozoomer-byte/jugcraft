@@ -48,7 +48,7 @@ public class JugcraftJeiPlugin implements IModPlugin {
 	private static final int TEXT = 0xFF404040;
 
 	/** One recipe: input slots (a tag shows all its items), the result, byproducts with chances, and time. */
-	public record ViewRecipe(List<List<ItemStack>> inputs, ItemStack output, List<ItemStack> extras, List<Float> chances, int ticks, int minimumHeat) {
+	public record ViewRecipe(List<List<ItemStack>> inputs, ItemStack output, List<ItemStack> extras, List<Float> chances, int ticks, int minimumHeat,int bladeHardness) {
 	}
 
 	private record Machine(Item block, IRecipeType<ViewRecipe> type, List<ViewRecipe> recipes) {
@@ -148,6 +148,7 @@ public class JugcraftJeiPlugin implements IModPlugin {
 			registration.addCraftingStation(mezz.jei.api.constants.RecipeTypes.CAMPFIRE_COOKING, item("jugcraft:" + block));
 		for (Machine machine : machines()) {
 			registration.addCraftingStation(machine.type(), machine.block());
+            if(machine.block()==item("jugcraft:sawmill"))registration.addCraftingStation(machine.type(),item("jugcraft:jimta_block_cutting_machine"));
 		}
 		for (FluidMachine machine : fluidMachines) {
 			registration.addCraftingStation(machine.type(), machine.block());
@@ -374,7 +375,7 @@ public class JugcraftJeiPlugin implements IModPlugin {
 			chances.add(values.get(2).getAsFloat());
 		}
 		return new ViewRecipe(inputs, output, extras, chances, row.get("ticks").getAsInt(),
-				row.has("minimum_heat") ? row.get("minimum_heat").getAsInt() : 0);
+				row.has("minimum_heat") ? row.get("minimum_heat").getAsInt() : 0, row.has("blade_hardness")?row.get("blade_hardness").getAsInt():0);
 	}
 
 	private static Item item(String id) {
@@ -425,7 +426,7 @@ public class JugcraftJeiPlugin implements IModPlugin {
 
 		@Override
 		public int getHeight() {
-			return machine.recipes().stream().anyMatch(r -> r.minimumHeat() > 0) ? 52 : 38;
+			return machine.recipes().stream().anyMatch(r -> r.minimumHeat() > 0||r.bladeHardness()>0) ? 52 : 38;
 		}
 
 		@Override
@@ -453,7 +454,8 @@ public class JugcraftJeiPlugin implements IModPlugin {
 		public void draw(ViewRecipe recipe, IRecipeSlotsView slots, GuiGraphicsExtractor graphics, double mouseX, double mouseY) {
 			var font = Minecraft.getInstance().font;
 			graphics.text(font, String.format(Locale.ROOT, "%.1f s", recipe.ticks() / 20.0), 0, 28, TEXT, false);
-			if (recipe.minimumHeat() > 0) graphics.text(font,
+			if(recipe.bladeHardness()>0) graphics.text(font,Component.literal(io.github.jimbozoomer.jugcraft.jimtafacts.industry.IndustrialCuttingBlade.requiredName(recipe.bladeHardness())+" blade in upgrade slot"),0,40,TEXT,false);
+            if (recipe.minimumHeat() > 0) graphics.text(font,
 					Component.translatable("jei.jugcraft.minimum_heat", recipe.minimumHeat()), 0, 40, TEXT, false);
 			for (int i = 0; i < recipe.chances().size(); i++) {
 				String chance = Math.round(recipe.chances().get(i) * 100) + "%";

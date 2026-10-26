@@ -47,6 +47,11 @@ def build():
     # retain their owner-authored industrial recipe catalog.
     import jimtafacts_industry
     industrial = jimtafacts_industry.recipes()
+    # Retained blade requirements are shared by the full sawmill and compact cutting mill.
+    sawmill = next(machine for machine in machines if machine['type']=='sawing')
+    sawmill['recipes'] += [{"in":[[r['ingredient'],r.get('input_count',1)]],
+        "out":[r['result']['id'],r['result'].get('count',1)],"extra":[],"ticks":r['time'],
+        "blade_hardness":r['blade_hardness']} for r in industrial.values() if r.get('blade_hardness',0)>0]
     for block, kind in {'jimta_compressor':'jimta_compressing',
                         'jimta_extractor':'jimta_extracting',
                         'jimta_recycler':'jimta_recycling',
@@ -55,7 +60,7 @@ def build():
         rows = [{"in":[[r['ingredient'],r.get('input_count',1)]],
                  "out":[r['result']['id'],r['result'].get('count',1)],
                  "extra":[[b['result']['id'],b['result'].get('count',1),b['chance']] for b in r.get('byproducts',[])],
-                 "ticks":r['time'], "minimum_heat":r.get('minimum_heat',0)}
+                 "ticks":r['time'], "minimum_heat":r.get('minimum_heat',0), "blade_hardness":r.get('blade_hardness',0)}
                 for r in industrial.values() if r['type']=='jugcraft:'+kind]
         machines.append({"block":"jugcraft:"+block,"type":kind,"recipes":rows})
     import petro

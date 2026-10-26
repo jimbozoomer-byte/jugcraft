@@ -11,6 +11,7 @@
       "io.github.jimbozoomer.jugcraft.test.TestForms"
     ],
     "fabric-gametest": [
+      "io.github.jimbozoomer.jugcraft.test.JimtaFactoryExpansionGameTests",
       "io.github.jimbozoomer.jugcraft.test.JimtafactsGameTests",
       "io.github.jimbozoomer.jugcraft.test.JimtaWardGameTests",
       "io.github.jimbozoomer.jugcraft.test.JimtaEncounterGameTests",
@@ -332,7 +333,17 @@
       "io.github.jimbozoomer.jugcraft.jimtafacts.network.DigitalSpatialGameTests",
       "io.github.jimbozoomer.jugcraft.test.JimtaHeatGameTests",
       "io.github.jimbozoomer.jugcraft.test.JimtaWorkshopTableGameTests",
-      "io.github.jimbozoomer.jugcraft.finance.ClaimCombatGameTests"
+      "io.github.jimbozoomer.jugcraft.finance.ClaimCombatGameTests",
+      "io.github.jimbozoomer.jugcraft.test.JimtaSurvivalGameTests",
+      "io.github.jimbozoomer.jugcraft.test.JimtaWireGameTests",
+      "io.github.jimbozoomer.jugcraft.test.JimtaVolumeGameTests",
+      "io.github.jimbozoomer.jugcraft.test.JimtaDiagnosticsGameTests",
+      "io.github.jimbozoomer.jugcraft.test.JimtaLuaGameTests",
+      "io.github.jimbozoomer.jugcraft.jimtafacts.network.LargeSpatialGameTests",
+      "io.github.jimbozoomer.jugcraft.test.JimtaCollectionCompletionGameTests",
+      "io.github.jimbozoomer.jugcraft.test.JimtaDynamiteGameTests",
+      "io.github.jimbozoomer.jugcraft.test.JimtaPaintbrushGameTests",
+      "io.github.jimbozoomer.jugcraft.test.JimtaTransitGameTests"
     ],
     "jei_mod_plugin": [
       "io.github.jimbozoomer.jugcraft.test.JeiStationClientGameTests$WithJei$Probe"
@@ -580,7 +591,9 @@
       "io.github.jimbozoomer.jugcraft.test.CydonianSanctumClientGameTests",
       "io.github.jimbozoomer.jugcraft.test.CydonianSentinelClientGameTests",
       "io.github.jimbozoomer.jugcraft.test.PackBrowserClientGameTests",
-      "io.github.jimbozoomer.jugcraft.test.ConvenienceTabletClientGameTests"
+      "io.github.jimbozoomer.jugcraft.test.ConvenienceTabletClientGameTests",
+      "io.github.jimbozoomer.jugcraft.test.AircraftFlightClientGameTests",
+      "io.github.jimbozoomer.jugcraft.test.JimtaPocketGuestClientGameTests"
     ]
   },
   "depends": {

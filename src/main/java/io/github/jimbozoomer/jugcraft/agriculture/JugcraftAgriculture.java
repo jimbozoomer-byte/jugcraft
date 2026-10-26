@@ -463,7 +463,7 @@ public final class JugcraftAgriculture {
 	public static DataComponentType<JarContents> JAR_CONTENTS;
 	/** The outfits of decorations batch 14, worn on the head and drawn over the whole body (the client's CostumeLayer). */
 	public static final List<String> OUTFITS = List.of("vampire_cape", "mummy_wraps", "skeleton_suit", "werewolf_mask", "cat_ears_and_tail",
-			"bat_wings");
+			"bat_wings", "chompa_costume");
 	/** The Dust Sheet: its item, and the block it becomes over what it covers. */
 	public static final String DUST_SHEET = "dust_sheet";
 	/** What a Dust Sheet may cover (block tag). */

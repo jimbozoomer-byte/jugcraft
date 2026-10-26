@@ -889,7 +889,7 @@ CONTEST = {"stand": "judging_stand", "stand_display": "Judging Stand", "places":
 COSTUMED_MOBS = {"mobs": ["zombie", "husk", "skeleton", "stray", "zombie_villager"], "chance": 0.15,
                  "costumes": ["jugcraft:witch_hat", "jugcraft:ghost_sheet", "jugcraft:scarecrow_hat", "minecraft:carved_pumpkin",
                               "jugcraft:vampire_cape", "jugcraft:mummy_wraps", "jugcraft:skeleton_suit", "jugcraft:werewolf_mask",
-                              "jugcraft:cat_ears_and_tail", "jugcraft:bat_wings"],
+                              "jugcraft:cat_ears_and_tail", "jugcraft:bat_wings", "jugcraft:chompa_costume"],
                  "tag": "jugcraft.costumed", "table": "entities/costumed_mob_candy",
                  # (item, weight, count)
                  "candy": [("jugcraft:candy_corn", 40, [1, 2]), ("jugcraft:caramel", 20, [1, 1]), ("jugcraft:glow_gum", 10, [1, 1]),
@@ -1535,7 +1535,7 @@ def decor13_items():
 # wearer while they sneak, the tails sway, and the bat wings spread and flap while their wearer is off the ground.
 OUTFITS = {"vampire_cape": {"display": "Vampire Cape"}, "mummy_wraps": {"display": "Mummy Wraps"},
            "skeleton_suit": {"display": "Skeleton Suit", "glow": True}, "werewolf_mask": {"display": "Werewolf Mask"},
-           "cat_ears_and_tail": {"display": "Cat Ears and Tail"}, "bat_wings": {"display": "Bat Wings"}}
+           "cat_ears_and_tail": {"display": "Cat Ears and Tail"}, "bat_wings": {"display": "Bat Wings"}, "chompa_costume": {"display": "Tony Tony Chompa Costume"}}
 # The Costume Trunk (CostumeTrunkBlock + entity): holds up to `slots` costumes (item tag COSTUME_TAG). A costume in hand
 # goes in; an empty hand changes into the next one (what you wore goes in at the back); sneaking with an empty hand takes
 # the last one out. Its lid opens for `open_ticks` when used.
@@ -2675,6 +2675,8 @@ SHAPED = [
     {"id": "werewolf_mask", "pattern": ["WLW", "WBW", "W W"], "key": {"W": "minecraft:brown_wool", "L": "minecraft:leather",
                                                                    "B": "minecraft:bone"},
      "result": "werewolf_mask", "count": 1, "category": "misc"},
+    {"id": "chompa_costume", "pattern": ["SPS", "LWL", "L L"], "key": {"S": "minecraft:stick", "P": "minecraft:pink_wool", "L": "minecraft:leather", "W": "minecraft:white_wool"},
+     "result": "chompa_costume", "count": 1, "category": "misc"},
     {"id": "bat_wings", "pattern": ["S S", "LDL", "L L"], "key": {"S": "minecraft:stick", "L": "minecraft:leather", "D": "minecraft:black_dye"},
      "result": "bat_wings", "count": 1, "category": "misc"},
     {"id": "costume_trunk", "pattern": ["PWP", "PCP", "PPP"], "key": {"P": "#minecraft:planks", "W": "minecraft:purple_wool",

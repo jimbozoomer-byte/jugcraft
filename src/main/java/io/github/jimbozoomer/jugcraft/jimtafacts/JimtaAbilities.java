@@ -90,7 +90,8 @@ public final class JimtaAbilities {
         if (mount != state.mount && state.mount != null) modifier(state.mount, MOUNT_SPEED, .25, false);
         state.mount = mount;if(mount!=null)modifier(mount,MOUNT_SPEED,.25,true);
         BlockPos under = p.blockPosition().below();
-        boolean snow=p.level().getBlockState(under).is(BlockTags.SNOW)||p.level().getBlockState(p.blockPosition()).is(Blocks.POWDER_SNOW);
+        boolean snow=worn.contains("snowshoes")&&p.level().hasChunkAt(under)
+                &&(p.level().getBlockState(under).is(BlockTags.SNOW)||p.level().getBlockState(p.blockPosition()).is(Blocks.POWDER_SNOW));
         modifier(p,SNOW_SPEED,.25,worn.contains("snowshoes")&&snow);
         if (worn.contains("kitty_slippers") && Jimtafacts.ready(p,"repel",20)) {
             var nearby = new ArrayList<Mob>();

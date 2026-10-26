@@ -3980,6 +3980,141 @@
             ]
           ],
           "ticks": 100
+        },
+        {
+          "in": [
+            [
+              "jugcraft:lead_block",
+              1
+            ]
+          ],
+          "out": [
+            "jugcraft:lead_plate",
+            9
+          ],
+          "extra": [],
+          "ticks": 450,
+          "blade_hardness": 2
+        },
+        {
+          "in": [
+            [
+              "minecraft:gold_block",
+              1
+            ]
+          ],
+          "out": [
+            "jugcraft:jimta_gold_plate",
+            9
+          ],
+          "extra": [],
+          "ticks": 450,
+          "blade_hardness": 2
+        },
+        {
+          "in": [
+            [
+              "jugcraft:bronze_block",
+              1
+            ]
+          ],
+          "out": [
+            "jugcraft:bronze_plate",
+            9
+          ],
+          "extra": [],
+          "ticks": 450,
+          "blade_hardness": 2
+        },
+        {
+          "in": [
+            [
+              "jugcraft:tin_block",
+              1
+            ]
+          ],
+          "out": [
+            "jugcraft:tin_plate",
+            9
+          ],
+          "extra": [],
+          "ticks": 450,
+          "blade_hardness": 2
+        },
+        {
+          "in": [
+            [
+              "minecraft:copper_block",
+              1
+            ]
+          ],
+          "out": [
+            "jugcraft:copper_plate",
+            9
+          ],
+          "extra": [],
+          "ticks": 450,
+          "blade_hardness": 2
+        },
+        {
+          "in": [
+            [
+              "minecraft:iron_block",
+              1
+            ]
+          ],
+          "out": [
+            "jugcraft:iron_plate",
+            9
+          ],
+          "extra": [],
+          "ticks": 450,
+          "blade_hardness": 5
+        },
+        {
+          "in": [
+            [
+              "jugcraft:steel_block",
+              1
+            ]
+          ],
+          "out": [
+            "jugcraft:steel_plate",
+            9
+          ],
+          "extra": [],
+          "ticks": 450,
+          "blade_hardness": 8
+        },
+        {
+          "in": [
+            [
+              "minecraft:obsidian",
+              4
+            ]
+          ],
+          "out": [
+            "jugcraft:jimta_obsidian_plate",
+            1
+          ],
+          "extra": [],
+          "ticks": 450,
+          "blade_hardness": 8
+        },
+        {
+          "in": [
+            [
+              "minecraft:lapis_block",
+              4
+            ]
+          ],
+          "out": [
+            "jugcraft:jimta_lapis_plate",
+            9
+          ],
+          "extra": [],
+          "ticks": 450,
+          "blade_hardness": 5
         }
       ]
     },
@@ -7254,6 +7389,54 @@
         {
           "in": [
             [
+              "jugcraft:jimta_bronze_dust",
+              1
+            ]
+          ],
+          "out": [
+            "jugcraft:bronze_ingot",
+            1
+          ],
+          "extra": [],
+          "ticks": 200,
+          "minimum_heat": 0,
+          "blade_hardness": 0
+        },
+        {
+          "in": [
+            [
+              "jugcraft:jimta_obsidian_dust",
+              4
+            ]
+          ],
+          "out": [
+            "jugcraft:jimta_obsidian_plate",
+            1
+          ],
+          "extra": [],
+          "ticks": 200,
+          "minimum_heat": 0,
+          "blade_hardness": 0
+        },
+        {
+          "in": [
+            [
+              "jugcraft:jimta_lapis_dust",
+              4
+            ]
+          ],
+          "out": [
+            "jugcraft:jimta_lapis_plate",
+            1
+          ],
+          "extra": [],
+          "ticks": 200,
+          "minimum_heat": 0,
+          "blade_hardness": 0
+        },
+        {
+          "in": [
+            [
               "minecraft:gold_ingot",
               1
             ]
@@ -7264,7 +7447,8 @@
           ],
           "extra": [],
           "ticks": 200,
-          "minimum_heat": 0
+          "minimum_heat": 0,
+          "blade_hardness": 0
         },
         {
           "in": [
@@ -7279,7 +7463,8 @@
           ],
           "extra": [],
           "ticks": 200,
-          "minimum_heat": 0
+          "minimum_heat": 0,
+          "blade_hardness": 0
         },
         {
           "in": [
@@ -7294,7 +7479,8 @@
           ],
           "extra": [],
           "ticks": 200,
-          "minimum_heat": 0
+          "minimum_heat": 0,
+          "blade_hardness": 0
         },
         {
           "in": [
@@ -7309,7 +7495,8 @@
           ],
           "extra": [],
           "ticks": 120,
-          "minimum_heat": 0
+          "minimum_heat": 0,
+          "blade_hardness": 0
         },
         {
           "in": [
@@ -7324,7 +7511,8 @@
           ],
           "extra": [],
           "ticks": 120,
-          "minimum_heat": 0
+          "minimum_heat": 0,
+          "blade_hardness": 0
         },
         {
           "in": [
@@ -7339,7 +7527,8 @@
           ],
           "extra": [],
           "ticks": 120,
-          "minimum_heat": 0
+          "minimum_heat": 0,
+          "blade_hardness": 0
         },
         {
           "in": [
@@ -7354,7 +7543,8 @@
           ],
           "extra": [],
           "ticks": 120,
-          "minimum_heat": 0
+          "minimum_heat": 0,
+          "blade_hardness": 0
         },
         {
           "in": [
@@ -7369,7 +7559,8 @@
           ],
           "extra": [],
           "ticks": 120,
-          "minimum_heat": 0
+          "minimum_heat": 0,
+          "blade_hardness": 0
         },
         {
           "in": [
@@ -7384,7 +7575,8 @@
           ],
           "extra": [],
           "ticks": 120,
-          "minimum_heat": 0
+          "minimum_heat": 0,
+          "blade_hardness": 0
         },
         {
           "in": [
@@ -7399,7 +7591,8 @@
           ],
           "extra": [],
           "ticks": 120,
-          "minimum_heat": 0
+          "minimum_heat": 0,
+          "blade_hardness": 0
         },
         {
           "in": [
@@ -7414,7 +7607,8 @@
           ],
           "extra": [],
           "ticks": 400,
-          "minimum_heat": 0
+          "minimum_heat": 0,
+          "blade_hardness": 0
         },
         {
           "in": [
@@ -7429,7 +7623,8 @@
           ],
           "extra": [],
           "ticks": 400,
-          "minimum_heat": 0
+          "minimum_heat": 0,
+          "blade_hardness": 0
         },
         {
           "in": [
@@ -7444,7 +7639,8 @@
           ],
           "extra": [],
           "ticks": 400,
-          "minimum_heat": 0
+          "minimum_heat": 0,
+          "blade_hardness": 0
         },
         {
           "in": [
@@ -7459,7 +7655,8 @@
           ],
           "extra": [],
           "ticks": 400,
-          "minimum_heat": 0
+          "minimum_heat": 0,
+          "blade_hardness": 0
         },
         {
           "in": [
@@ -7474,7 +7671,8 @@
           ],
           "extra": [],
           "ticks": 400,
-          "minimum_heat": 0
+          "minimum_heat": 0,
+          "blade_hardness": 0
         },
         {
           "in": [
@@ -7489,7 +7687,8 @@
           ],
           "extra": [],
           "ticks": 400,
-          "minimum_heat": 0
+          "minimum_heat": 0,
+          "blade_hardness": 0
         },
         {
           "in": [
@@ -7504,7 +7703,8 @@
           ],
           "extra": [],
           "ticks": 400,
-          "minimum_heat": 0
+          "minimum_heat": 0,
+          "blade_hardness": 0
         },
         {
           "in": [
@@ -7519,7 +7719,8 @@
           ],
           "extra": [],
           "ticks": 400,
-          "minimum_heat": 0
+          "minimum_heat": 0,
+          "blade_hardness": 0
         },
         {
           "in": [
@@ -7534,7 +7735,24 @@
           ],
           "extra": [],
           "ticks": 400,
-          "minimum_heat": 0
+          "minimum_heat": 0,
+          "blade_hardness": 0
+        },
+        {
+          "in": [
+            [
+              "jugcraft:jimta_mixed_metal_ingot",
+              1
+            ]
+          ],
+          "out": [
+            "jugcraft:jimta_advanced_alloy",
+            1
+          ],
+          "extra": [],
+          "ticks": 400,
+          "minimum_heat": 0,
+          "blade_hardness": 0
         },
         {
           "in": [
@@ -7549,7 +7767,8 @@
           ],
           "extra": [],
           "ticks": 200,
-          "minimum_heat": 0
+          "minimum_heat": 0,
+          "blade_hardness": 0
         },
         {
           "in": [
@@ -7564,7 +7783,8 @@
           ],
           "extra": [],
           "ticks": 200,
-          "minimum_heat": 0
+          "minimum_heat": 0,
+          "blade_hardness": 0
         },
         {
           "in": [
@@ -7579,7 +7799,8 @@
           ],
           "extra": [],
           "ticks": 200,
-          "minimum_heat": 0
+          "minimum_heat": 0,
+          "blade_hardness": 0
         },
         {
           "in": [
@@ -7594,7 +7815,8 @@
           ],
           "extra": [],
           "ticks": 200,
-          "minimum_heat": 0
+          "minimum_heat": 0,
+          "blade_hardness": 0
         },
         {
           "in": [
@@ -7609,7 +7831,8 @@
           ],
           "extra": [],
           "ticks": 200,
-          "minimum_heat": 0
+          "minimum_heat": 0,
+          "blade_hardness": 0
         },
         {
           "in": [
@@ -7624,7 +7847,8 @@
           ],
           "extra": [],
           "ticks": 200,
-          "minimum_heat": 0
+          "minimum_heat": 0,
+          "blade_hardness": 0
         },
         {
           "in": [
@@ -7639,7 +7863,8 @@
           ],
           "extra": [],
           "ticks": 200,
-          "minimum_heat": 0
+          "minimum_heat": 0,
+          "blade_hardness": 0
         },
         {
           "in": [
@@ -7654,7 +7879,8 @@
           ],
           "extra": [],
           "ticks": 200,
-          "minimum_heat": 0
+          "minimum_heat": 0,
+          "blade_hardness": 0
         },
         {
           "in": [
@@ -7669,7 +7895,8 @@
           ],
           "extra": [],
           "ticks": 200,
-          "minimum_heat": 0
+          "minimum_heat": 0,
+          "blade_hardness": 0
         },
         {
           "in": [
@@ -7684,7 +7911,8 @@
           ],
           "extra": [],
           "ticks": 200,
-          "minimum_heat": 0
+          "minimum_heat": 0,
+          "blade_hardness": 0
         },
         {
           "in": [
@@ -7699,7 +7927,8 @@
           ],
           "extra": [],
           "ticks": 200,
-          "minimum_heat": 0
+          "minimum_heat": 0,
+          "blade_hardness": 0
         },
         {
           "in": [
@@ -7714,7 +7943,8 @@
           ],
           "extra": [],
           "ticks": 200,
-          "minimum_heat": 0
+          "minimum_heat": 0,
+          "blade_hardness": 0
         },
         {
           "in": [
@@ -7729,7 +7959,8 @@
           ],
           "extra": [],
           "ticks": 200,
-          "minimum_heat": 0
+          "minimum_heat": 0,
+          "blade_hardness": 0
         },
         {
           "in": [
@@ -7744,7 +7975,8 @@
           ],
           "extra": [],
           "ticks": 200,
-          "minimum_heat": 0
+          "minimum_heat": 0,
+          "blade_hardness": 0
         },
         {
           "in": [
@@ -7759,7 +7991,8 @@
           ],
           "extra": [],
           "ticks": 200,
-          "minimum_heat": 0
+          "minimum_heat": 0,
+          "blade_hardness": 0
         },
         {
           "in": [
@@ -7774,7 +8007,8 @@
           ],
           "extra": [],
           "ticks": 200,
-          "minimum_heat": 0
+          "minimum_heat": 0,
+          "blade_hardness": 0
         },
         {
           "in": [
@@ -7789,7 +8023,8 @@
           ],
           "extra": [],
           "ticks": 200,
-          "minimum_heat": 0
+          "minimum_heat": 0,
+          "blade_hardness": 0
         },
         {
           "in": [
@@ -7804,7 +8039,8 @@
           ],
           "extra": [],
           "ticks": 200,
-          "minimum_heat": 0
+          "minimum_heat": 0,
+          "blade_hardness": 0
         },
         {
           "in": [
@@ -7819,7 +8055,8 @@
           ],
           "extra": [],
           "ticks": 800,
-          "minimum_heat": 0
+          "minimum_heat": 0,
+          "blade_hardness": 0
         }
       ]
     },
@@ -7840,7 +8077,8 @@
           ],
           "extra": [],
           "ticks": 200,
-          "minimum_heat": 0
+          "minimum_heat": 0,
+          "blade_hardness": 0
         },
         {
           "in": [
@@ -7855,7 +8093,8 @@
           ],
           "extra": [],
           "ticks": 200,
-          "minimum_heat": 0
+          "minimum_heat": 0,
+          "blade_hardness": 0
         },
         {
           "in": [
@@ -7870,7 +8109,8 @@
           ],
           "extra": [],
           "ticks": 200,
-          "minimum_heat": 0
+          "minimum_heat": 0,
+          "blade_hardness": 0
         },
         {
           "in": [
@@ -7885,7 +8125,8 @@
           ],
           "extra": [],
           "ticks": 200,
-          "minimum_heat": 0
+          "minimum_heat": 0,
+          "blade_hardness": 0
         },
         {
           "in": [
@@ -7900,7 +8141,8 @@
           ],
           "extra": [],
           "ticks": 200,
-          "minimum_heat": 0
+          "minimum_heat": 0,
+          "blade_hardness": 0
         },
         {
           "in": [
@@ -7915,7 +8157,8 @@
           ],
           "extra": [],
           "ticks": 200,
-          "minimum_heat": 0
+          "minimum_heat": 0,
+          "blade_hardness": 0
         },
         {
           "in": [
@@ -7930,7 +8173,8 @@
           ],
           "extra": [],
           "ticks": 200,
-          "minimum_heat": 0
+          "minimum_heat": 0,
+          "blade_hardness": 0
         },
         {
           "in": [
@@ -7951,7 +8195,8 @@
             ]
           ],
           "ticks": 200,
-          "minimum_heat": 0
+          "minimum_heat": 0,
+          "blade_hardness": 0
         },
         {
           "in": [
@@ -7966,7 +8211,8 @@
           ],
           "extra": [],
           "ticks": 200,
-          "minimum_heat": 0
+          "minimum_heat": 0,
+          "blade_hardness": 0
         },
         {
           "in": [
@@ -7981,7 +8227,8 @@
           ],
           "extra": [],
           "ticks": 200,
-          "minimum_heat": 0
+          "minimum_heat": 0,
+          "blade_hardness": 0
         },
         {
           "in": [
@@ -7996,7 +8243,8 @@
           ],
           "extra": [],
           "ticks": 200,
-          "minimum_heat": 0
+          "minimum_heat": 0,
+          "blade_hardness": 0
         },
         {
           "in": [
@@ -8011,7 +8259,8 @@
           ],
           "extra": [],
           "ticks": 200,
-          "minimum_heat": 0
+          "minimum_heat": 0,
+          "blade_hardness": 0
         },
         {
           "in": [
@@ -8026,7 +8275,8 @@
           ],
           "extra": [],
           "ticks": 200,
-          "minimum_heat": 0
+          "minimum_heat": 0,
+          "blade_hardness": 0
         },
         {
           "in": [
@@ -8041,7 +8291,8 @@
           ],
           "extra": [],
           "ticks": 200,
-          "minimum_heat": 0
+          "minimum_heat": 0,
+          "blade_hardness": 0
         },
         {
           "in": [
@@ -8056,7 +8307,8 @@
           ],
           "extra": [],
           "ticks": 200,
-          "minimum_heat": 0
+          "minimum_heat": 0,
+          "blade_hardness": 0
         },
         {
           "in": [
@@ -8071,7 +8323,8 @@
           ],
           "extra": [],
           "ticks": 200,
-          "minimum_heat": 0
+          "minimum_heat": 0,
+          "blade_hardness": 0
         },
         {
           "in": [
@@ -8086,7 +8339,8 @@
           ],
           "extra": [],
           "ticks": 200,
-          "minimum_heat": 0
+          "minimum_heat": 0,
+          "blade_hardness": 0
         },
         {
           "in": [
@@ -8101,7 +8355,8 @@
           ],
           "extra": [],
           "ticks": 200,
-          "minimum_heat": 0
+          "minimum_heat": 0,
+          "blade_hardness": 0
         },
         {
           "in": [
@@ -8116,7 +8371,8 @@
           ],
           "extra": [],
           "ticks": 200,
-          "minimum_heat": 0
+          "minimum_heat": 0,
+          "blade_hardness": 0
         },
         {
           "in": [
@@ -8131,7 +8387,8 @@
           ],
           "extra": [],
           "ticks": 200,
-          "minimum_heat": 0
+          "minimum_heat": 0,
+          "blade_hardness": 0
         },
         {
           "in": [
@@ -8146,7 +8403,8 @@
           ],
           "extra": [],
           "ticks": 200,
-          "minimum_heat": 0
+          "minimum_heat": 0,
+          "blade_hardness": 0
         },
         {
           "in": [
@@ -8161,7 +8419,8 @@
           ],
           "extra": [],
           "ticks": 200,
-          "minimum_heat": 0
+          "minimum_heat": 0,
+          "blade_hardness": 0
         },
         {
           "in": [
@@ -8176,7 +8435,8 @@
           ],
           "extra": [],
           "ticks": 200,
-          "minimum_heat": 0
+          "minimum_heat": 0,
+          "blade_hardness": 0
         }
       ]
     },
@@ -8197,7 +8457,8 @@
           ],
           "extra": [],
           "ticks": 120,
-          "minimum_heat": 0
+          "minimum_heat": 0,
+          "blade_hardness": 0
         }
       ]
     },
@@ -8218,7 +8479,8 @@
           ],
           "extra": [],
           "ticks": 120,
-          "minimum_heat": 0
+          "minimum_heat": 0,
+          "blade_hardness": 0
         },
         {
           "in": [
@@ -8233,7 +8495,8 @@
           ],
           "extra": [],
           "ticks": 120,
-          "minimum_heat": 0
+          "minimum_heat": 0,
+          "blade_hardness": 0
         },
         {
           "in": [
@@ -8248,7 +8511,8 @@
           ],
           "extra": [],
           "ticks": 120,
-          "minimum_heat": 0
+          "minimum_heat": 0,
+          "blade_hardness": 0
         },
         {
           "in": [
@@ -8263,7 +8527,8 @@
           ],
           "extra": [],
           "ticks": 120,
-          "minimum_heat": 0
+          "minimum_heat": 0,
+          "blade_hardness": 0
         },
         {
           "in": [
@@ -8278,7 +8543,8 @@
           ],
           "extra": [],
           "ticks": 120,
-          "minimum_heat": 0
+          "minimum_heat": 0,
+          "blade_hardness": 0
         },
         {
           "in": [
@@ -8293,7 +8559,8 @@
           ],
           "extra": [],
           "ticks": 120,
-          "minimum_heat": 0
+          "minimum_heat": 0,
+          "blade_hardness": 0
         },
         {
           "in": [
@@ -8308,7 +8575,8 @@
           ],
           "extra": [],
           "ticks": 120,
-          "minimum_heat": 0
+          "minimum_heat": 0,
+          "blade_hardness": 0
         },
         {
           "in": [
@@ -8323,7 +8591,8 @@
           ],
           "extra": [],
           "ticks": 400,
-          "minimum_heat": 0
+          "minimum_heat": 0,
+          "blade_hardness": 0
         },
         {
           "in": [
@@ -8338,7 +8607,8 @@
           ],
           "extra": [],
           "ticks": 400,
-          "minimum_heat": 0
+          "minimum_heat": 0,
+          "blade_hardness": 0
         },
         {
           "in": [
@@ -8353,7 +8623,8 @@
           ],
           "extra": [],
           "ticks": 400,
-          "minimum_heat": 0
+          "minimum_heat": 0,
+          "blade_hardness": 0
         },
         {
           "in": [
@@ -8368,7 +8639,8 @@
           ],
           "extra": [],
           "ticks": 400,
-          "minimum_heat": 0
+          "minimum_heat": 0,
+          "blade_hardness": 0
         },
         {
           "in": [
@@ -8383,7 +8655,8 @@
           ],
           "extra": [],
           "ticks": 400,
-          "minimum_heat": 0
+          "minimum_heat": 0,
+          "blade_hardness": 0
         },
         {
           "in": [
@@ -8398,7 +8671,8 @@
           ],
           "extra": [],
           "ticks": 400,
-          "minimum_heat": 0
+          "minimum_heat": 0,
+          "blade_hardness": 0
         },
         {
           "in": [
@@ -8413,7 +8687,8 @@
           ],
           "extra": [],
           "ticks": 400,
-          "minimum_heat": 0
+          "minimum_heat": 0,
+          "blade_hardness": 0
         },
         {
           "in": [
@@ -8428,7 +8703,8 @@
           ],
           "extra": [],
           "ticks": 400,
-          "minimum_heat": 0
+          "minimum_heat": 0,
+          "blade_hardness": 0
         },
         {
           "in": [
@@ -8443,7 +8719,8 @@
           ],
           "extra": [],
           "ticks": 400,
-          "minimum_heat": 0
+          "minimum_heat": 0,
+          "blade_hardness": 0
         },
         {
           "in": [
@@ -8458,7 +8735,8 @@
           ],
           "extra": [],
           "ticks": 160,
-          "minimum_heat": 0
+          "minimum_heat": 0,
+          "blade_hardness": 0
         }
       ]
     },
@@ -8466,6 +8744,72 @@
       "block": "jugcraft:jimta_thermal_centrifuge",
       "type": "jimta_thermal_centrifuging",
       "recipes": [
+        {
+          "in": [
+            [
+              "jugcraft:washed_uranium_ore",
+              9
+            ]
+          ],
+          "out": [
+            "jugcraft:uranium_dust",
+            8
+          ],
+          "extra": [
+            [
+              "jugcraft:jimta_iridium_shard",
+              1,
+              1
+            ]
+          ],
+          "ticks": 2400,
+          "minimum_heat": 2000,
+          "blade_hardness": 0
+        },
+        {
+          "in": [
+            [
+              "jugcraft:jimta_mixed_metal_ingot",
+              1
+            ]
+          ],
+          "out": [
+            "jugcraft:jimta_advanced_alloy",
+            1
+          ],
+          "extra": [
+            [
+              "jugcraft:jimta_slag",
+              1,
+              1
+            ]
+          ],
+          "ticks": 600,
+          "minimum_heat": 1500,
+          "blade_hardness": 0
+        },
+        {
+          "in": [
+            [
+              "jugcraft:jimta_slag",
+              9
+            ]
+          ],
+          "out": [
+            "jugcraft:jimta_stone_dust",
+            4
+          ],
+          "extra": [
+            [
+              "minecraft:iron_nugget",
+              1,
+              1
+            ]
+          ],
+          "ticks": 600,
+          "minimum_heat": 1500,
+          "blade_hardness": 0
+        },
         {
           "in": [
             [
@@ -8485,7 +8829,8 @@
             ]
           ],
           "ticks": 900,
-          "minimum_heat": 1500
+          "minimum_heat": 1500,
+          "blade_hardness": 0
         },
         {
           "in": [
@@ -8506,7 +8851,8 @@
             ]
           ],
           "ticks": 900,
-          "minimum_heat": 2000
+          "minimum_heat": 2000,
+          "blade_hardness": 0
         },
         {
           "in": [
@@ -8527,7 +8873,8 @@
             ]
           ],
           "ticks": 900,
-          "minimum_heat": 500
+          "minimum_heat": 500,
+          "blade_hardness": 0
         },
         {
           "in": [
@@ -8548,7 +8895,8 @@
             ]
           ],
           "ticks": 900,
-          "minimum_heat": 1000
+          "minimum_heat": 1000,
+          "blade_hardness": 0
         },
         {
           "in": [
@@ -8569,7 +8917,8 @@
             ]
           ],
           "ticks": 900,
-          "minimum_heat": 2000
+          "minimum_heat": 2000,
+          "blade_hardness": 0
         },
         {
           "in": [
@@ -8590,7 +8939,8 @@
             ]
           ],
           "ticks": 900,
-          "minimum_heat": 1000
+          "minimum_heat": 1000,
+          "blade_hardness": 0
         },
         {
           "in": [
@@ -8605,7 +8955,8 @@
           ],
           "extra": [],
           "ticks": 200,
-          "minimum_heat": 100
+          "minimum_heat": 100,
+          "blade_hardness": 0
         }
       ]
     }

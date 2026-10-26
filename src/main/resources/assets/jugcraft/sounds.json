@@ -15009,5 +15009,11 @@
     "sounds": [
       "jugcraft:jimtafacts/spellbooks/music/music_disc_whispers_of_ice"
     ]
+  },
+  "jimtafacts.rubber_trampoline": {
+    "subtitle": "subtitles.jugcraft.rubber_trampoline",
+    "sounds": [
+      "jugcraft:jimtafacts/industry/rubber_trampoline"
+    ]
   }
 }

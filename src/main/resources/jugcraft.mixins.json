@@ -4,6 +4,14 @@
   "package": "io.github.jimbozoomer.jugcraft.mixin",
   "compatibilityLevel": "JAVA_21",
   "mixins": [
+    "SpatialLevelReservationMixin",
+    "SpatialEntityReservationMixin",
+    "SpatialSpawnReservationMixin",
+    "SpatialResidentDamageMixin",
+    "SpatialBlockEntityTickMixin",
+    "SpatialHopperMixin",
+    "SpatialContainerAccess",
+    "SpatialMenuMixin",
     "ModonomiconResearchSnapshotMixin",
     "JimtaCreeperAccessor",
     "JimtaElectricBoatFluidMixin",
@@ -14,6 +22,7 @@
     "JimtaSpellStatusMixin",
     "JimtaRootDismountMixin",
     "JimtaSpiderDismountMixin",
+    "JimtaSpiderPreyLootMixin",
     "JimtaHeartstopMixin",
     "JimtaInvisibleTargetMixin",
     "RottenLightningMixin",
@@ -78,7 +87,8 @@
     "ClaimDisplayDamageMixin",
     "ClaimDispenserMixin",
     "DeathGraveMixin",
-    "AircraftArrowMixin"
+    "AircraftArrowMixin",
+    "JimtaSpiderLootSpawnMixin"
   ],
   "injectors": {
     "defaultRequire": 1

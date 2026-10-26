@@ -33,9 +33,10 @@ PAGES = {
     "beasts": "Creature Equipment",
     "caverns": "Cave Exploration",
     "jimta_network": "Digital Workshops",
+    "jimta_guides": "Workshop Guides",
     "keys": "Keys",
 }
-SERVER_PAGES = ["discover", "spellcraft", "expedition", "inspect", "nouveau", "menagerie", "woodland", "household", "habitats", "beasts", "caverns", "jimta_network"]
+SERVER_PAGES = ["discover", "spellcraft", "expedition", "inspect", "nouveau", "menagerie", "woodland", "household", "habitats", "beasts", "caverns", "jimta_network", "jimta_guides"]
 
 # Where a step of a route stands for a player (EncyclopediaPayload.StepState, NONE aside), in words.
 STATES = {

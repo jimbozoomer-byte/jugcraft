@@ -78,6 +78,15 @@ public final class Jugcraft implements ModInitializer {
 		io.github.jimbozoomer.jugcraft.jimtafacts.industry.IndustrialUpgrades.register();
 		io.github.jimbozoomer.jugcraft.jimtafacts.industry.IndustrialConstruction.register();
         io.github.jimbozoomer.jugcraft.jimtafacts.industry.IndustrialHeat.register();
+        io.github.jimbozoomer.jugcraft.jimtafacts.industry.FactoryHeatExchanger.register();
+        io.github.jimbozoomer.jugcraft.jimtafacts.industry.FactoryPlanning.register();
+        io.github.jimbozoomer.jugcraft.jimtafacts.industry.FactoryFieldTools.register();
+        io.github.jimbozoomer.jugcraft.jimtafacts.industry.FactoryWaterGel.register();
+        io.github.jimbozoomer.jugcraft.jimtafacts.industry.IndustrialObscurator.register();
+        io.github.jimbozoomer.jugcraft.jimtafacts.industry.IndustrialDynamite.register();
+        io.github.jimbozoomer.jugcraft.jimtafacts.industry.IndustrialNuclearCharge.register();
+        io.github.jimbozoomer.jugcraft.jimtafacts.industry.IndustrialMagnetizer.register();
+        io.github.jimbozoomer.jugcraft.jimtafacts.industry.IndustrialStorageUpgrade.register();
         io.github.jimbozoomer.jugcraft.jimtafacts.industry.WorkshopLaser.register();
         io.github.jimbozoomer.jugcraft.jimtafacts.industry.WorkshopTables.register();
         io.github.jimbozoomer.jugcraft.jimtafacts.industry.IndustrialUtilityItems.register();
