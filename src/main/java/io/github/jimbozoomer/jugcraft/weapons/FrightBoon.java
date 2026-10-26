@@ -62,7 +62,7 @@ public final class FrightBoon {
 
 	/** Whether the Fright boon can frighten {@code target}: a monster that walks, never a boss. */
 	public static boolean frightens(LivingEntity target) {
-		return target instanceof PathfinderMob && target instanceof Enemy && !target.getType().is(FRIGHTLESS);
+		return target instanceof PathfinderMob && target instanceof Enemy && !target.is(FRIGHTLESS);
 	}
 
 	/** Whether {@code target} is in a panic now. */

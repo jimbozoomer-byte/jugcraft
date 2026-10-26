@@ -38,7 +38,6 @@ import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.ai.attributes.Attributes;
-import net.minecraft.world.entity.monster.Husk;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.CraftingInput;
@@ -750,7 +749,7 @@ public class PumpkinKingGameTests {
 		ItemStack ember = new ItemStack(JugcraftPumpkinKing.KINGS_EMBER);
 		helper.assertTrue(ember.has(DataComponents.COOKING_FUEL), "The King's Ember does not burn");
 		CraftingInput grid = CraftingInput.of(2, 1, List.of(ember, new ItemStack(item("white_pumpkin"))));
-		ItemStack lantern = level.getServer().getRecipeManager().getRecipeFor(RecipeType.CRAFTING, grid, level)
+		ItemStack lantern = level.recipeAccess().getRecipeFor(RecipeType.CRAFTING, grid, level)
 				.orElseThrow(() -> helper.assertionException("An ember and an heirloom pumpkin make nothing")).value().assemble(grid);
 		helper.assertTrue(lantern.is(JugcraftPumpkinKing.KINGS_LANTERN_ITEM), "An ember and an heirloom pumpkin made " + lantern);
 		helper.assertTrue(JugcraftPumpkinKing.KINGS_LANTERN.defaultBlockState().getLightEmission() == JugcraftPumpkinKing.LANTERN_LIGHT,
@@ -780,7 +779,7 @@ public class PumpkinKingGameTests {
 		shield(wielder);
 		ItemStack reap = new ItemStack(JugcraftPumpkinKing.hallowreap());
 		wielder.setItemInHand(InteractionHand.MAIN_HAND, reap);
-		Husk husk = helper.spawn(EntityType.HUSK, new BlockPos(34, 1, 53));
+		var husk = helper.spawn(EntityType.HUSK, new BlockPos(34, 1, 53));
 		var cow = helper.spawn(EntityType.COW, new BlockPos(30, 1, 53));
 		helper.assertTrue(FrightBoon.frightens(husk) && !FrightBoon.frightens(king) && !FrightBoon.frightens(cow),
 				"The Fright boon would frighten a boss or a creature that is no monster, or not a monster");

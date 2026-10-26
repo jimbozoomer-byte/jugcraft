@@ -90,7 +90,7 @@ public final class JugcraftPumpkinKing {
 		ResourceKey<net.minecraft.world.level.block.Block> lanternKey = ResourceKey.create(Registries.BLOCK, Jugcraft.id("kings_lantern"));
 		KINGS_LANTERN = Registry.register(BuiltInRegistries.BLOCK, lanternKey, new KingsLanternBlock(BlockBehaviour.Properties.of()
 				.mapColor(MapColor.COLOR_ORANGE).strength(1.0F).sound(SoundType.WOOD).lightLevel(state -> LANTERN_LIGHT)
-				.pushReaction(PushReaction.DESTROY).setId(lanternKey)));
+				.pushReaction(PushReaction.POPPED).setId(lanternKey)));
 		ResourceKey<Item> lanternItemKey = ResourceKey.create(Registries.ITEM, Jugcraft.id("kings_lantern"));
 		KINGS_LANTERN_ITEM = Registry.register(BuiltInRegistries.ITEM, lanternItemKey,
 				new BlockItem(KINGS_LANTERN, new Item.Properties().useBlockDescriptionPrefix().setId(lanternItemKey)));

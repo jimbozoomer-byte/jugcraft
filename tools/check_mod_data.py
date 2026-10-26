@@ -13830,7 +13830,7 @@ def check_pumpkin_king():
                         ("lightLevel(state -> LANTERN_LIGHT)", "light the King's Lantern")):
         if needed not in registry:
             err(f"JugcraftPumpkinKing must {why} ({needed})")
-    if "target instanceof PathfinderMob && target instanceof Enemy && !target.getType().is(FRIGHTLESS)" not in fright \
+    if "target instanceof PathfinderMob && target instanceof Enemy && !target.is(FRIGHTLESS)" not in fright \
             or 'Jugcraft.id("frightless")' not in fright or "PANICKED.size() >= MAX" not in fright:
         err("FrightBoon must frighten only monsters that walk, never one in #jugcraft:frightless, and at most MAX at once")
     if "case FRIGHT -> FrightBoon.struck(level, target, attacker);" not in (JAVA_ROOT / "weapons" / "ArmItem.java").read_text(encoding="utf-8"):
