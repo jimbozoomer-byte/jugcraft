@@ -473,7 +473,16 @@
           "text": [
             "Make the two-block-wide bench with a crafting table, four planks and two cobblestone. A hammer needs two iron and a stick; cutters need two iron and two sticks; the soldering tool needs copper and a stick. Tools are reusable and never wear out.",
             "Choose a recipe on the left, follow the preview, insert ingredients and the matching tool, then click Start Work. Click Stop Work or leave the bench menu to pause; hoppers cannot work for you. One ingot makes one iron, copper, tin, zinc, lead, bronze or brass plate in 5 seconds. One copper ingot makes three wires in 5 seconds.",
-            "For a basic circuit, use existing silicon, three wires and one solder ingot with the soldering tool and fuel. A circuit takes 10 seconds. Work remains enabled until you click Stop Work or leave the menu. Powered machines keep the same yields and can run without a player at the bench. Silicon still comes from existing processing; a later batch will add the local quartz and upgraded-heat route."
+            "For a basic circuit, use existing silicon, three wires and one solder ingot with the soldering tool and fuel. A circuit takes 10 seconds. Work remains enabled until you click Stop Work or leave the menu. Powered machines keep the same yields and can run without a player at the bench. Mine Overworld quartz and use the upgraded crucible described on the next page for silicon."
+          ]
+        },
+        {
+          "title": "Quartz and starter silicon",
+          "icon": "jugcraft:quartz_ore",
+          "text": [
+            "Look beneath Highland, Shield, Basin, windswept hills, Stony Peaks and Stony Shore. Smaller veins occur beneath ordinary forests, birch forests, taigas, Woodland, Coniferous Forest, Maple Woods and Aspen Glade. Mine with a stone pickaxe or better; drops are ordinary quartz. Centers lie between Y -16 and 96, most often near 40. Rocky outcrops may mark a nearby vein.",
+            "Install a heat insert (two brick blocks and a fired lining) in the existing crucible. Make bellows from four planks, two leather and an iron shaft; place them on solid ground against the furnace lower block, with the nozzle touching it. Select silicon: one quartz and one charcoal make one silicon in ten seconds, plus separate furnace fuel.",
+            "Click Start Pumping once; click again or close the menu to stop. A rear shaft supplies 8 KE/t for unattended airflow, with the same yield and speed. Missing fuel or airflow and full output pause without wasting heating fuel. Parts never wear out. Alloys still work without airflow. The Blast Furnace fallback remains during preview review; the Arc Furnace gives two silicon per quartz."
           ]
         },
         {
@@ -481,7 +490,7 @@
           "icon": "jugcraft:copper_cable",
           "text": [
             "Six wires, a tin ingot and two fired insulators make eight copper cables. Two copper ingots and one tin make four directly; adding molded cable insulation makes sixteen. The bronze-blend recipe remains available. Starter ceramics need the machines feature, not drones.",
-            "Use these same alloys and components for existing casings, generators, shafts and powered machines. Nothing here requires a circuit just to make the first furnace, kiln or bench. Advanced ceramics, bellows and mechanical expansion remain separate."
+            "Use these same alloys and components for existing casings, generators, shafts and powered machines. Nothing here requires a circuit just to make the first furnace, kiln or bench. Advanced ceramics and mechanical expansion remain separate."
           ]
         }
       ]
@@ -784,6 +793,7 @@
             "Vanadium-bearing Iron: Y -48 to 32. Vanadiferous magnetite: richest below Shield and Volcano, with smaller, rarer pockets below Highland, Basin, Windswept Hills, Windswept Gravelly Hills, Windswept Forest and Stony Peaks. Centers peak near Y -8. Small stone outcrops sometimes mark pockets, except in Volcano. Needs an iron pickaxe; Fortune cannot increase the one raw feed per block. Crush one raw feed or intact ore into one Vanadium-bearing Iron Concentrate (200 ticks at 16 JE/t), then wash with 500 mB water into one Vanadium Oxide (200 ticks at 16 JE/t). Two bricks and the oxide make a reusable Vanadium Contact Bed, without acid. The prospector and ore drill work here; nine raw feeds compact into a storage block. Deposits never replenish. Ordinary iron shortcuts require the legacy configuration option.",
             "Chromite: Y -32 to 64.",
             "Cobaltite: Y -48 to 32.",
+            "Quartz: Y -16 to 96.",
             "Titanium-rich Mineral Sand: shallow beds in the Dune Beach, the Overgrown Beach and Beach. Look for surface streaks, then shovel the buried bed or use the prospector and powered Ore Drill. Each mineral-sand block is one finite feed unit; Fortune does not increase it. The Ore Drill leaves ordinary sand. Stockpile this feed for future separation/refining; the Deposit Drill and generic ore-doubling recipes do not process it.",
             "Zircon-rich Mineral Sand: shallow beds in the Outback, the Lush Desert, the Dry River, Desert and Badlands. Look for surface streaks, then shovel the buried bed or use the prospector and powered Ore Drill. Each mineral-sand block is one finite feed unit; Fortune does not increase it. The Ore Drill leaves ordinary sand. Stockpile this feed for future separation/refining; the Deposit Drill and generic ore-doubling recipes do not process it.",
             "Rare-earth-rich Mineral Sand: shallow beds in the Basin, the Lake District, the Lush River and River. Look for surface streaks, then shovel the buried bed or use the prospector and powered Ore Drill. Each mineral-sand block is one finite feed unit; Fortune does not increase it. The Ore Drill leaves ordinary sand. Stockpile this feed for future separation/refining; the Deposit Drill and generic ore-doubling recipes do not process it.",

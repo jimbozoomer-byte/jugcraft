@@ -1346,6 +1346,8 @@
     "jugcraft:jimta_mining_tip",
     "jugcraft:jimta_power_tester",
     "jugcraft:jimta_nuclear_charge",
-    "jugcraft:jimta_magnetizer"
+    "jugcraft:jimta_magnetizer",
+    "jugcraft:quartz_ore",
+    "jugcraft:deepslate_quartz_ore"
   ]
 }
