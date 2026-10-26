@@ -16,7 +16,8 @@ import net.minecraft.server.network.ServerCommonPacketListenerImpl;
  * every packet written to it until something reads it, and no test does. The players stay logged in for the whole
  * run, so every packet sent to each of them (its command tree and recipes on joining, then every later player's join
  * message and player-list entry) stayed in the heap until the server suite ran out of its 4 GB. Each tick this empties
- * those channels; a connection that is not an EmbeddedChannel (a real or integrated client's) is never touched.
+ * those channels, and every 2,400 ticks logs how many packets it has released and the heap in use; a connection that
+ * is not an EmbeddedChannel (a real or integrated client's) is never touched.
  */
 public final class MockPlayerChannels implements ModInitializer {
 	private static final Field CONNECTION = field(ServerCommonPacketListenerImpl.class, Connection.class);
@@ -34,8 +35,11 @@ public final class MockPlayerChannels implements ModInitializer {
 					embedded.releaseOutbound();
 				}
 			}
-			if (mock > 0 && server.getTickCount() % 2400 == 0) {
-				Jugcraft.LOGGER.info("[mock-player-channels] {} mock players online; {} packets to them released so far", mock, released);
+			if (server.getTickCount() % 2400 == 0) {
+				// The heap in use beside it shows whether anything else still grows over the run.
+				Runtime runtime = Runtime.getRuntime();
+				Jugcraft.LOGGER.info("[mock-player-channels] {} mock players online; {} packets to them released so far; heap {} of {} MB in use",
+						mock, released, (runtime.totalMemory() - runtime.freeMemory()) >> 20, runtime.maxMemory() >> 20);
 			}
 		});
 	}
