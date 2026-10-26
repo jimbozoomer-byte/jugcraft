@@ -22,7 +22,7 @@ import net.minecraft.world.level.storage.TagValueOutput;
 import net.minecraft.world.phys.Vec3;
 
 /**
- * The train framework (docs/features/trains.md), on a line of rails along z at x 3 in the rail yard: a place on the
+ * The train framework (docs/features/trains.md), on a line of rails along z at x 3 in an empty 48-block test arena: a place on the
  * line follows a curve and ends where the line does; a locomotive pulls its coupled wagon the same distance; a train
  * stops at the end of the line and short of another train; a car couples only just behind the train; breaking the rail under a car knocks it off
  * with its goods; the driver's keys work the throttle and brake; and a train's places and goods survive a save.
@@ -57,7 +57,7 @@ public class TrainGameTests {
 		return helper.absolutePos(BlockPos.ZERO).getZ() + relative;
 	}
 
-	@GameTest(structure = "jugcraft-test:rail_yard")
+	@GameTest(structure = "jugcraft-test:tatterlace_arena")
 	public void aPlaceOnTheLineFollowsCurvesAndEndsWithTheLine(GameTestHelper helper) {
 		ServerLevel level = helper.getLevel();
 		line(helper, 1, 11);
@@ -92,7 +92,7 @@ public class TrainGameTests {
 		helper.succeed();
 	}
 
-	@GameTest(structure = "jugcraft-test:rail_yard", maxTicks = 200)
+	@GameTest(structure = "jugcraft-test:tatterlace_arena", maxTicks = 200)
 	public void aLocomotivePullsItsCoupledWagon(GameTestHelper helper) {
 		ServerLevel level = helper.getLevel();
 		line(helper, 1, 46);
@@ -114,7 +114,7 @@ public class TrainGameTests {
 		});
 	}
 
-	@GameTest(structure = "jugcraft-test:rail_yard", maxTicks = 200)
+	@GameTest(structure = "jugcraft-test:tatterlace_arena", maxTicks = 200)
 	public void aTrainStopsAtTheEndOfTheLine(GameTestHelper helper) {
 		ServerLevel level = helper.getLevel();
 		line(helper, 1, 14);
@@ -128,7 +128,7 @@ public class TrainGameTests {
 		});
 	}
 
-	@GameTest(structure = "jugcraft-test:rail_yard", maxTicks = 300)
+	@GameTest(structure = "jugcraft-test:tatterlace_arena", maxTicks = 300)
 	public void aTrainStopsShortOfAnotherTrain(GameTestHelper helper) {
 		ServerLevel level = helper.getLevel();
 		line(helper, 1, 46);
@@ -145,7 +145,7 @@ public class TrainGameTests {
 		});
 	}
 
-	@GameTest(structure = "jugcraft-test:rail_yard")
+	@GameTest(structure = "jugcraft-test:tatterlace_arena")
 	public void aCarCouplesOnlyJustBehindTheTrain(GameTestHelper helper) {
 		ServerLevel level = helper.getLevel();
 		line(helper, 1, 40);
@@ -164,7 +164,7 @@ public class TrainGameTests {
 		helper.succeed();
 	}
 
-	@GameTest(structure = "jugcraft-test:rail_yard", maxTicks = 100)
+	@GameTest(structure = "jugcraft-test:tatterlace_arena", maxTicks = 100)
 	public void breakingTheRailKnocksTheCarOffWithItsGoods(GameTestHelper helper) {
 		ServerLevel level = helper.getLevel();
 		line(helper, 1, 10);
@@ -178,7 +178,7 @@ public class TrainGameTests {
 		});
 	}
 
-	@GameTest(structure = "jugcraft-test:rail_yard", maxTicks = 200)
+	@GameTest(structure = "jugcraft-test:tatterlace_arena", maxTicks = 200)
 	public void theDriverWorksTheThrottleAndBrake(GameTestHelper helper) {
 		ServerLevel level = helper.getLevel();
 		line(helper, 1, 46);
@@ -202,7 +202,7 @@ public class TrainGameTests {
 		});
 	}
 
-	@GameTest(structure = "jugcraft-test:rail_yard")
+	@GameTest(structure = "jugcraft-test:tatterlace_arena")
 	public void aTrainKeepsItsPlacesAndGoodsThroughASave(GameTestHelper helper) {
 		ServerLevel level = helper.getLevel();
 		line(helper, 1, 20);

@@ -77,7 +77,7 @@ Three vehicles and a tool, all running on **any rails**: plain, powered, detecto
 
 ## Verification
 
-Server game tests (`TrainGameTests`, in the `rail_yard` test structure):
+Server game tests (`TrainGameTests`, on a line of rails laid in the empty 48 × 48 `tatterlace_arena` test structure):
 
 | Test | What it checks |
 | --- | --- |
