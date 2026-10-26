@@ -13307,6 +13307,11 @@
       "denominator": 5,
       "source": "recipe jugcraft:harvest_balloon"
     },
+    "jugcraft:harvest_crown": {
+      "numerator": 4315,
+      "denominator": 1,
+      "source": "recipe jugcraft:harvest_crown"
+    },
     "jugcraft:harvest_effigy": {
       "numerator": 680,
       "denominator": 1,

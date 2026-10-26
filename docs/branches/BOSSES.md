@@ -1,6 +1,6 @@
 # Bosses branch (brainstorm)
 
-Status: **a brainstorm; eight bosses are built.** On 10 October 2026 the owner chose to build a new boss "the same way" as Madame Tatterlace ([features/tatterlace.md](../features/tatterlace.md)); the Yeti King is first, to the plan below. The same day the owner asked for "the next boss same way" as him: the Cinder Tyrant, to his plan below. Both are built. On 13 October 2026 the owner chose the next: the Mire Hag, to her plan below, who is built too; and after her, the same day, the Crypt Lich, to his plan below, who is built too. On 14 October 2026 the owner chose the Iron Dreadnought, to his plan below, who is built too. The same day the owner chose the Alpha Werewolf, to his plan below. On 4 October 2026 the owner asked for variant weapons, many of them "drops from bosses ill make later", themed around those bosses ("example: Yeti King"), and to "brainstorm bosses we could make". This page is that brainstorm. The bosses' weapons already exist: Arms VII ([features/arms-vii.md](../features/arms-vii.md)) adds two trophies for each of the first eight bosses below, and their loot tables are ready (`data/jugcraft/loot_table/bosses/<boss>.json`, one of the two per roll). Building a boss is a separate, reviewed feature each time, in the order the Yeti King was built in: [BOSS_PLAYBOOK.md](BOSS_PLAYBOOK.md). Everything here is a proposal for the owner to pick from, change or drop.
+Status: **a brainstorm; eight bosses are built.** On 10 October 2026 the owner chose to build a new boss "the same way" as Madame Tatterlace ([features/tatterlace.md](../features/tatterlace.md)); the Yeti King is first, to the plan below. The same day the owner asked for "the next boss same way" as him: the Cinder Tyrant, to his plan below. Both are built. On 13 October 2026 the owner chose the next: the Mire Hag, to her plan below, who is built too; and after her, the same day, the Crypt Lich, to his plan below, who is built too. On 14 October 2026 the owner chose the Iron Dreadnought, to his plan below, who is built too. The same day the owner chose the Alpha Werewolf, to his plan below. On 23 October 2026 the owner chose a Halloween boss, the Pumpkin King, to his plan below. On 4 October 2026 the owner asked for variant weapons, many of them "drops from bosses ill make later", themed around those bosses ("example: Yeti King"), and to "brainstorm bosses we could make". This page is that brainstorm. The bosses' weapons already exist: Arms VII ([features/arms-vii.md](../features/arms-vii.md)) adds two trophies for each of the first eight bosses below, and their loot tables are ready (`data/jugcraft/loot_table/bosses/<boss>.json`, one of the two per roll). Building a boss is a separate, reviewed feature each time, in the order the Yeti King was built in: [BOSS_PLAYBOOK.md](BOSS_PLAYBOOK.md). Everything here is a proposal for the owner to pick from, change or drop.
 
 The owner's Mars adventure, the Cydonian Sentinel, is also implemented: [feature record](../features/cydonian-sentinel.md).
 
@@ -27,6 +27,7 @@ From [CONTENT_BRANCHES.md](../CONTENT_BRANCHES.md) ("Caves, dungeons and bosses"
 | **The Crypt Lich** | The Archive of Last Names: the Writ of Exhumation | [crypt-archive.md](../features/crypt-archive.md), [crypt-lich.md](../features/crypt-lich.md) | #350 and #353, through #352 |
 | **The Iron Dreadnought** | The Foundry Trench: Sealed Orders | [foundry-trench.md](../features/foundry-trench.md), [iron-dreadnought.md](../features/iron-dreadnought.md) | Not yet |
 | **The Alpha Werewolf** | The Moonlit Ring: the Howling Totem | [moonlit-ring.md](../features/moonlit-ring.md), [alpha-werewolf.md](../features/alpha-werewolf.md) | Not yet |
+| **The Pumpkin King** | The Crowfield: the Harvest Crown | [crowfield.md](../features/crowfield.md) (part 2's record to come) | Not yet |
 
 The first two are the Witching Season's ([features/witching-season.md](../features/witching-season.md)); all six, the Iron Dreadnought's trench and the Alpha Werewolf's ring are on the shared lair framework (`lair/`). Vesperine and Madame Tatterlace roll their own loot table, `loot_table/entities/<boss>.json`, for each player who took part: their trophies, the Vesper Scythe and the Needle Rapier (Arms VII's), come at 15% a share and always on a player's first win. The Arms VII trophy tables `bosses/vesperine` and `bosses/tatterlace` are written by `tools/arms_variants.py` as the others' are, but nothing rolls them. The Yeti King and the Cinder Tyrant roll theirs the same way, a trophy always on a player's first win. Both have been on Concordance Chunk A's support credit since Chunk B ([lair-encounter-credit.md](../features/lair-encounter-credit.md)). JEI's information pages on their loot and the encyclopedia's lair dossiers cover the first four (the Yeti King and the Cinder Tyrant since Chunk B; [concordance-first-loadout.md](../features/concordance-first-loadout.md), [arcane-concordance-first-route.md](../features/arcane-concordance-first-route.md)).
 
@@ -872,9 +873,130 @@ It follows the rules every boss follows (above):
 
 Nothing a tier needs comes only from it. The valley in the Overworld is never an arena: nothing fights there, and nothing there is changed by the fight.
 
+## The Pumpkin King: the plan (being built)
+
+A Halloween boss, built by [the boss playbook](BOSS_PLAYBOOK.md) as the bosses before him were: first his field and the summoning that opens it, then the King himself, his Jacks and his loot, each its own pull request with tests and pictures. On 23 October 2026 the owner asked for the next Halloween work and chose him, after the seasonal biome audit.
+
+The design joins three sources:
+- this page's own idea for him (below, "More bosses to consider"): a giant scarecrow made of the harvest, summoned with heirloom pumpkins in a bounded field, tied to the giant pumpkins, the scarecrows and the Headless Horseman already in the world; never the only source of anything core, and his drops kept after the season;
+- the planning pack's later backlog ([chapter 05](../plans/concordance-expansion-2026-10-10/05-new-boss-compendium.md), section 5): "cooperative harvest preparation and protecting a bounded field", avoiding "seasonal-only core ingredients or crop destruction outside the instance";
+- the Halloween harvest already in the world ([features/halloween-harvest.md](../features/halloween-harvest.md), [features/halloween-nights.md](../features/halloween-nights.md)): the heirloom pumpkins, the scarecrows and their heads, the crows they keep off, and the Horseman's flaming pumpkins.
+
+**The season.** He is a Witching Season boss, as Vesperine and Madame Tatterlace are ([features/witching-season.md](../features/witching-season.md#multiplayer-persistence-and-seasons)): his crown works on any night of the year by default, and only during the Halloween event when the server sets `lairs.off_season=off`. During the event his kill adds the Witching Season's event loot (`lairs.event_loot`): a roll of seasonal candy and a better chance of his costume. Ending the event takes nothing away.
+
+The numbers here are the plan's. Each part's feature record says what changed in building it. Part 1, the field and the crown: [features/crowfield.md](../features/crowfield.md); part 2, the King, his Jacks and his loot, will have `features/pumpkin-king.md`.
+
+*A scarecrow three times the height of a man, stuffed with straw into a patched harvest coat of burlap and sacking, hands of twisted corn husk, a crown of dried vines and corn ears, and for a head a giant carved pumpkin with a fire inside that burns out through its eyes and grin.* He is the oldest scarecrow, the one the crows answer. His field is a pumpkin patch walled with corn under a dusk that never ends, where whatever is planted ripens for him.
+
+### The Crowfield
+
+A pumpkin field at dusk, walled all round with standing corn:
+- **The arrival:** the **farmyard**, at the field's south edge: a yard of trodden earth behind a split-rail fence with a farm gate open into the field, a hay cart, a lamp post, a water trough, a bench of pumpkins and a crow on its perch. Behind it a lane between the corn fills with Grey Mist: the way home. The yard is safe.
+- **The field, the arena:** a square of tilled earth 45 blocks across, its rows running north and south, ridges of rooted earth between furrows. Pumpkins lie along the ridges, heirlooms among them (white, Jarrahdale, Cinderella, red kuri and kabocha), with a few jack-o'-lanterns glowing; low cover from two stacks of hay bales and a tipped-over cart.
+- **The corn:** the field is walled by **Crowfield corn**, three blocks tall and too thick to pass, its tassels over the top.
+- **The King's hills:** eight hills of dark loam in a ring round the centre, in a three-by-three grid 13 blocks apart (the centre taken by his post), so each is 13 blocks from the next round the ring. On each grows a **King's Gourd**, a great green gourd on its vine. They are the field's fixtures (part 2 ripens them).
+- **The King's Post:** at the centre, a tall post with a crossbar on a mound of hay bales, where he hangs waiting like any scarecrow.
+- **The moon:** a vast harvest moon low over the north-western corn; the sky a deep violet, an ember haze along the horizon.
+
+The lair-only blocks are fixtures like the other lairs': unbreakable, no items, no drops. Only the King's Gourds can be used.
+
+### The summoning: the Harvest Crown
+
+1. Craft a **Harvest Crown**: three heirloom pumpkins (any) over two gold ingots and a hay bale.
+2. Use it on a **scarecrow** that wears a head (any pumpkin it can wear), **at night**, in the Overworld, with the scarecrow's head **under the open sky**, **among the harvest**: at least 8 pumpkins or gourds within 6 blocks of it (pumpkins carved or not, jack-o'-lanterns, the heirlooms, the squashes and gourds, giant pumpkins: `#jugcraft:crowfield_harvest`).
+3. The crown settles on the scarecrow's head, the crows burst up out of the field crying, and Grey Mist rises where the crowner stands: they come to in the Crowfield's farmyard. The crown is used up; the scarecrow and the crops are untouched. For 60 seconds anyone can walk into the mist and follow. Nobody is taken in by standing near it.
+4. By day, outside the Overworld, with the scarecrow bare-headed or roofed over, with too few pumpkins about, or off-season on a server that keeps the rituals to the Halloween event, the crown only says why, and nothing is used up; likewise if every field is taken.
+
+Heirloom pumpkins grow all year from seeds found wild or traded, so the crown is never seasonal.
+
+### The fight
+
+The Pumpkin King has 400 health, scaled for the party: half as much again for each player after the first, at most two and a half times. He has armour 6. Falls never harm him.
+
+**Straw burns:** fire (burning, a fire weapon, flaming arrows) hurts him half as much again. Fire is a help, never a need.
+
+He hangs on his post, arms out on the crossbar, his head dark. He wakes when a player who can fight him steps through the farm gate into the field, or strikes him: he tears free of the post (2.5 s, unhurt meanwhile), his head bursts into flame and the crows burst out of the corn. He keeps to the field: more than 26 blocks from its centre, he is set back.
+
+**His rule: the Harvest.** Every 22 seconds he calls the harvest:
+- **He calls it:** he raises his arms and the crows cry (1.5 s), and two King's Gourds start to ripen: the one nearest the player he is fighting, and its neighbour round the ring. A ripening gourd swells and turns from green to gold to orange over 10 seconds, glowing, crows circling over it.
+- **Pick a ripening gourd** (use it) before it ripens, and it comes off the vine. Its hill is bare until a new green gourd sprouts there 20 seconds later.
+- **A gourd that ripens** lights up with a burning face and splits open: a **Jack-o'-Straw** climbs out (at most four at a time; beyond that the gourd feeds him instead, healing 4% of his health).
+- **Pick every gourd of a harvest before any lights**, and he is **bereft**: his head's fire gutters, he sags on his straw legs (staggered 2 s), and for 8 seconds every blow does half as much again (fire twice), and his Jacks stand dazed.
+
+From anywhere in the field, a sprinting player reaches every gourd of a harvest well inside its 10 seconds, alone or not: part 1's audit walks the field round the cover, from every open cell to the three gourds of the longest harvest either way round the ring, and keeps that within 80% of the time.
+
+**Phase 1, "The Reaping"** (full to half health):
+
+| Attack | Read it by | What it does |
+| --- | --- | --- |
+| Scythe Sweep | He draws back his scythe of bound corn and a rusted blade (0.8 s) | A sweep across his front, 4.5 blocks: 8 damage. Step back |
+| Gourd Toss | He plucks a pumpkin from the rows and lifts it overhead; a ring of embers glows where it will land (1.0 s) | A flaming pumpkin (the Horseman's) at a player up to 20 blocks away: 7 damage within 3 blocks, and set alight for 3 s. Step off the ring |
+| Crow Storm | He flings his arms wide and the crows rise from the corn (1.2 s) | The crows stream along a line from him, 14 blocks long and 3 wide, for 2 s: 2 damage every half second and Blindness for 2 s. Step out of the line |
+| The Harvest | Arms raised, the crows' cry (1.5 s) | Above |
+
+**At half health, "The Crowning":** he climbs back onto his post and his head flares white (2 s, unhurt). Two Jacks climb out of the rows, and the fight changes.
+
+**Phase 2, "The Hallowed Harvest"** (half to a quarter): he keeps every attack, calls the harvest every 18 seconds, three gourds in a row round the ring from the one nearest his foe, and adds:
+
+| Attack | Read it by | What it does |
+| --- | --- | --- |
+| Vine Snare | He drives a hand into the earth and the vines ripple along a furrow toward a player (1.2 s) | Vines lash up where they stand: 5 damage, rooted for 1.5 s (Slowness IV). Step across the furrow |
+| Head Roll | He lifts his burning head from his shoulders and sets it rolling (1.5 s) | It rolls along a row, 18 blocks long and 2 wide: 10 damage, thrown aside. Step out of the row |
+
+**Below a quarter, "The Last Harvest":** he calls the harvest every 15 seconds, three gourds at a time; they still ripen in 10, and the bereft window and his tells stay as long as ever.
+
+**Left alone** for 10 seconds, he climbs back onto his post, healed. His Jacks crumble to straw, his gourds go green again, and who hurt him is forgotten.
+
+**His Jacks, the Jack-o'-Straws:** little straw men with carved gourds for heads, lit inside: 20 health, a 3-damage swipe, quick on their feet. Fire burns them twice as fast. At most four at a time. They drop nothing and give no experience, and crumble when he falls or resets.
+
+### His loot (per participant)
+
+A participant is a player who hurt him or his Jacks, or picked a gourd of a harvest that left him bereft, and is within 64 blocks of the field's centre when he falls.
+
+| Loot | Chance |
+| --- | --- |
+| **The King's Ember**, the coal of his head's fire | 1, always |
+| **A trophy:** one of two new Arms VII weapons for him, the **Hallowreap** (a scythe) or the **Crowbill** (a war pick), with a new boon, **Fright** (his `bosses/pumpkin_king` table, one of the two) | 15%; certain on a player's first kill |
+| **The Crowward Charm** | 25% |
+| **The Pumpkin King's Crown** | 20% |
+| 300 experience, shared out | always |
+| The advancement **Harvest Home** | always |
+
+- **The King's Ember:** for those who never fight, a fuel that burns as long as a block of coal (80 items), and with any heirloom pumpkin it makes a **King's Lantern**, a jack-o'-lantern whose fire never goes out. No loop: nothing makes an ember but him.
+- **The Crowward Charm:** held in the offhand, crows will not come down on crops within 12 blocks of its holder, as a lit scarecrow keeps them off (`CropGuard`).
+- **The Pumpkin King's Crown:** a costume worn on the head, his crown of dried vines and corn ears (in `#jugcraft:trick_or_treat_costumes`).
+- **The trophies** are new to Arms VII ([features/arms-vii.md](../features/arms-vii.md)), which made none for him: two weapons and the **Fright** boon (a struck monster, never a boss, panics and runs for 1.5 s, once every 6 s per target). They come with part 2, or a part of their own if they grow large.
+- During the Halloween event (and `lairs.event_loot=on`), a roll of seasonal candy and 10% more for the crown, as at Vesperine's and Madame Tatterlace's.
+- When he falls, his head drops from his shoulders and rolls to a stop, its fire going out; his straw collapses, the crows settle, and Grey Mist opens at his post, the way home.
+
+### The shared lair contract
+
+The planning pack's chapter 04 asks each lair to answer these:
+- **Arrival, staging, waking and return:** the farmyard is safe. He wakes when a player steps through the farm gate into the field, or strikes him. Grey Mist fills the lane behind the yard, and opens at his post when he falls.
+- **Fixtures:** the eight King's Gourds, which any player in the field may pick when one ripens, and the Grey Mist. Nothing else can be used, built or broken.
+- **The floor:** the field owns it. Only his gourds change (green, ripening, lit, picked), and all of them go back when he resets; each instance is placed fresh.
+- **Who fights:** players who may fight a lair's boss (`LairBosses`), with party health as above.
+- **Reset:** when no eligible player is left, or he is left alone for 10 seconds.
+- **Clean-up:** his Jacks are his, capped at four, and gone with him.
+- **Death, disconnect and restart:** as every lair. Grave Goods keep what a player falls with, and instances close on a restart. Each participant's loot is rolled once when he falls.
+- **An ordinary player** can do everything: a gourd is picked by using it, a ripening gourd glows with crows over it, every attack is read before it lands, and the bereft window opens him to any weapon. Alone, a player can pick both gourds of a harvest in time; fire only makes it easier.
+- **Outside the instance:** nothing. The crown is used up, but the scarecrow, its head and every crop round it are left as they were, and no crow of his comes out.
+
+### Rules kept
+
+He follows the rules every boss follows (above):
+- his field is his arena, and resets when everyone leaves;
+- every attack is read before it lands, and every harvest can be picked in time by one player;
+- dying there keeps everything as Grave Goods;
+- his health scales with the party, and every participant rolls his loot;
+- nothing in his field can be built or broken, and the only blocks that change are his own gourds;
+- every opening costs a Harvest Crown, and it works all year unless the server keeps it to Halloween.
+
+Nothing a tier needs comes only from him: heirloom pumpkins, gold and hay come without him, and so does every crop he guards.
+
 ## More bosses to consider (no trophies yet)
 
-- **The Pumpkin King** (Halloween nights): a giant scarecrow made of the harvest. It would be summoned with heirloom pumpkins in a bounded field, and it ties into the giant pumpkins, the scarecrows and the Headless Horseman already in the world. It must not be the only source of anything core, and what it drops must be kept after the season ends.
+- **The Pumpkin King** (Halloween nights): a giant scarecrow made of the harvest. It would be summoned with heirloom pumpkins in a bounded field, and it ties into the giant pumpkins, the scarecrows and the Headless Horseman already in the world. It must not be the only source of anything core, and what it drops must be kept after the season ends. *Now being built, to [his plan above](#the-pumpkin-king-the-plan-being-built).*
 - **The Headless Horseman, as a boss fight:** it already exists as a Halloween-night encounter ([features/halloween-nights.md](../features/halloween-nights.md)). It could gain a lair and a trophy, such as a lantern-headed flail.
 - **The Marrow Colossus** (Nether, Marrow Heap): a giant made of bones that sheds parts of itself as it is hurt. Bone-themed trophies would fit the bonecarved style.
 - **The Chorus Sovereign** (End, Chorus Reef and Phantom Garden): a crowned shulker-like being that teleports with its arena. It suits levitation or void boons.
