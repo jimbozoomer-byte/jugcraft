@@ -9357,6 +9357,16 @@
       "denominator": 1,
       "source": "recipe jugcraft:cross_gravestone_from_stonecutting"
     },
+    "jugcraft:crowbill": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
+    "jugcraft:crowward_charm": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
     "jugcraft:crucible": {
       "numerator": 2496,
       "denominator": 1,
@@ -13246,6 +13256,11 @@
       "numerator": 131,
       "denominator": 1,
       "source": "recipe jugcraft:halloween_bonfire"
+    },
+    "jugcraft:hallowreap": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
     },
     "jugcraft:ham": {
       "numerator": 128,
@@ -24147,6 +24162,16 @@
       "denominator": 1,
       "source": "fallback (balance pending)"
     },
+    "jugcraft:kings_ember": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
+    "jugcraft:kings_lantern": {
+      "numerator": 2,
+      "denominator": 1,
+      "source": "recipe jugcraft:kings_lantern"
+    },
     "jugcraft:kitchen_counter": {
       "numerator": 33,
       "denominator": 2,
@@ -32553,6 +32578,11 @@
       "source": "fallback (balance pending)"
     },
     "jugcraft:pumpkin_guts": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
+    "jugcraft:pumpkin_kings_crown": {
       "numerator": 1,
       "denominator": 1,
       "source": "fallback (balance pending)"

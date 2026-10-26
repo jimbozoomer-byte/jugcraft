@@ -1,6 +1,6 @@
 # The Crowfield
 
-Status: implemented in source; CI passes on commit `6d125baa7` (below). The client test's ten pictures are in that run's `client-screenshots-5` artifact only: this environment cannot download CI artifacts, so they are not yet in `docs/images/` and the field's look counts as **not verified** until someone looks at them. Part 1 of the Pumpkin King, in the [bosses plan](../branches/BOSSES.md#the-pumpkin-king-the-plan-being-built), built by [the boss playbook](../branches/BOSS_PLAYBOOK.md): the Crowfield, a lair on the shared framework ([hollow-acre.md](hollow-acre.md)), and the Harvest Crown that opens it. The Pumpkin King, his Jacks and his loot are part 2, in their own pull request. It has not been played by hand, and the two-client dedicated-server playtest is still to do.
+Status: implemented in source; CI passes on commit `6d125baa7` (below). The client test's ten pictures are in that run's `client-screenshots-5` artifact only: this environment cannot download CI artifacts, so they are not yet in `docs/images/` and the field's look counts as **not verified** until someone looks at them. Part 1 of the Pumpkin King, in the [bosses plan](../branches/BOSSES.md#the-pumpkin-king-the-plan-being-built), built by [the boss playbook](../branches/BOSS_PLAYBOOK.md): the Crowfield, a lair on the shared framework ([hollow-acre.md](hollow-acre.md)), and the Harvest Crown that opens it. The Pumpkin King, his Jacks and his loot are part 2, in their own pull request ([pumpkin-king.md](pumpkin-king.md)). It has not been played by hand, and the two-client dedicated-server playtest is still to do.
 Proposal issue: none. On 23 October 2026 the owner asked what Halloween work should come next and chose the Pumpkin King, after the seasonal biome audit ("yes"), on the branch they named ("yes use that branch").
 Owner: @jimbozoomer-byte
 Target milestone and tier: Discovery tier, as the Halloween harvest is ([halloween-harvest.md](halloween-harvest.md)). The crown takes heirloom pumpkins (grown from seeds), gold and hay; the scarecrow it is used on is the agriculture branch's.
@@ -35,10 +35,10 @@ A pumpkin field at dusk, walled all round with standing corn, 69 blocks across a
 - **The field:** a square of tilled earth 45 blocks across, its rows running north and south, ridges of rooted earth between furrows of coarse earth. Pumpkins lie along the ridges (91 of them), the heirlooms among them and a few jack-o'-lanterns glowing, with grass and dead bushes here and there. Two stacks of hay bales and a tipped-over cart give low cover. Nothing lies on the cross through the centre or along the ring between the hills, so the way from any hill to the next is always clear.
 - **The corn:** Crowfield corn, three blocks tall and too thick to pass, walls the field, the yard and the lane on every side, its tassels and ears along the top. It cannot be broken, and nothing grows or dies in it.
 - **The King's hills:** eight hills of dark loam in a ring round the centre, 13 blocks apart in a three-by-three grid, so each is 13 blocks from the next round the ring. On each grows a **King's Gourd**, a great ribbed green gourd on its vine, facing the post, moss over the hill for its leaves.
-- **The King's Post:** at the centre, a tall post of stripped dark oak with a crossbar, on a mound of hay bales, where the Pumpkin King will hang waiting (part 2).
+- **The King's Post:** at the centre, a tall post of stripped dark oak with a crossbar, on a mound of hay bales, where the Pumpkin King hangs waiting ([pumpkin-king.md](pumpkin-king.md)).
 - **The sky:** deep violet overhead, an ember haze along the horizon, and a vast harvest moon low over the north-western corn. Chaff drifts in the air; the music is the meadow's.
 
-The King's Gourds are the field's fixtures. A gourd is **green** at rest; it **ripens** (gold-green, then orange, glowing brighter) when the King calls the harvest (part 2); it is **lit** when it ripens through (its carved face burning); and **picked**, only its vine is left. Any player in the field may pick a ripening gourd by using it. A green gourd "is green yet", a lit one "burns too hot to pick", and a picked one has "only the vine left": using them changes nothing. In part 1 nothing ripens them, so they stay green.
+The King's Gourds are the field's fixtures. A gourd is **green** at rest; it **ripens** (gold-green, then orange, glowing brighter) when the King calls the harvest (part 2); it is **lit** when it ripens through (its carved face burning); and **picked**, only its vine is left. Any player in the field may pick a ripening gourd by using it. A green gourd "is green yet", a lit one "burns too hot to pick", and a picked one has "only the vine left": using them changes nothing. In part 1 nothing ripens them, so they stay green; part 2's King ripens them when he calls the harvest ([pumpkin-king.md](pumpkin-king.md#his-rule-the-harvest)).
 
 Lair rules as everywhere: nothing can be built or broken, only the gourds and the Grey Mist can be used, falling off the field throws you back to the farmyard for the mist's toll, and an instance nobody has been in for 30 seconds closes.
 
@@ -57,9 +57,9 @@ Written while building it, and the plan in [BOSSES.md](../branches/BOSSES.md#the
   - two gold ingots and a hay bale;
   - a scarecrow, and a pumpkin for its head, from the agriculture branch;
   - a patch of eight pumpkins or gourds round it, any of the harvest's.
-- **Outputs:** the way into the Crowfield, where the Pumpkin King will wait (part 2).
-- **Technology and magic:** none yet. Part 2 brings his trophies, two new Arms VII weapons.
-- **Ties to the Halloween content already in the world:** the scarecrows and their heads, the crows (his crown sets them crying), the heirloom pumpkins and giant pumpkins, and the Witching Season's calendar rules. The Headless Horseman's flaming pumpkins will be his to throw (part 2).
+- **Outputs:** the way into the Crowfield, where the Pumpkin King waits ([pumpkin-king.md](pumpkin-king.md)).
+- **Technology and magic:** none in part 1. Part 2 brings his trophies, two new Arms VII weapons.
+- **Ties to the Halloween content already in the world:** the scarecrows and their heads, the crows (his crown sets them crying), the heirloom pumpkins and giant pumpkins, and the Witching Season's calendar rules. In part 2 he tosses flaming pumpkins of his own.
 - **Reachable entry path:** every input grows or is mined without the field: heirloom pumpkins from the wild patches and their seeds, gold from the first days. No circular unlock.
 
 ## Balance and automation
@@ -172,10 +172,10 @@ The Crowfield is its own dimension, so nothing here changes the Overworld: a cro
 
 The shared framework's defaults hold: four players and eight instances, Grave Goods on death.
 
-Part 2, the Pumpkin King, adds:
+Part 2, the Pumpkin King ([pumpkin-king.md](pumpkin-king.md)), adds:
 - the fight in the field: his waking from the post, his straw that burns (fire hurts him half as much again), his Jack-o'-Straws;
 - the Harvest every 22 seconds: the gourds ripening from the one nearest his foe, picked in time to leave him bereft, or lighting to hatch a Jack or heal him;
 - his attacks: the Scythe Sweep, the Gourd Toss (the Horseman's flaming pumpkins) and the Crow Storm; the Crowning at half health; the Vine Snare and the Head Roll; the Last Harvest below a quarter;
 - his loot: the King's Ember, two new Arms VII trophies (the Hallowreap and the Crowbill, with the Fright boon), the Crowward Charm, the Pumpkin King's Crown, and the Witching Season's event loot during Halloween.
 
-Open, for the owner: whether the King's trophies come with part 2 or as a part of their own (two weapons, their art and a new boon are a sizeable piece).
+The owner chose for the King's trophies to come with part 2, not as a part of their own.
