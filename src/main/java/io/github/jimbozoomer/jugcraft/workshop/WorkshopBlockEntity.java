@@ -29,6 +29,7 @@ import org.jspecify.annotations.Nullable;
 /** Ordinary furnace fuel plus the shared durable work lane. Packets supply presence, never progress. */
 public final class WorkshopBlockEntity extends BaseContainerBlockEntity implements WorldlyContainer, ExtendedMenuProvider<WorkshopCatalog> {
     public static final int TOOL = 3, FUEL = 4, OUTPUT = 5, LINING = 6, CRUCIBLE = 7, INSERT = 8, SLOTS = 9, DATA_COUNT = 9;
+    public final local.peepo.WorkshopCompanion companion = new local.peepo.WorkshopCompanion(this);
     private NonNullList<ItemStack> items = NonNullList.withSize(SLOTS, ItemStack.EMPTY);
     private @Nullable WorkLane lane;
     private @Nullable Identifier selected;
@@ -71,6 +72,7 @@ public final class WorkshopBlockEntity extends BaseContainerBlockEntity implemen
         worker = player; heartbeat = now; return true;
     }
     public void release(Player player) { if (worker == player) { worker = null; heartbeat = Long.MIN_VALUE; } }
+    public boolean playerWorking() { return level != null && working(level.getGameTime()); }
     private boolean working(long now) {
         return worker != null && now >= heartbeat && now - heartbeat <= 2 && worker.level() == level
             && worker.containerMenu instanceof WorkshopMenu menu && menu.machine() == this && menu.currentCatalog() && mayOperate(worker);
@@ -87,7 +89,7 @@ public final class WorkshopBlockEntity extends BaseContainerBlockEntity implemen
     public boolean wantsShaftAir() { return needsAir() && !working(level.getGameTime()) && readiness()==0; }
     public int airflow() { return !needsAir() || bellows()==null ? 0 : working(level.getGameTime()) ? 1 : bellows().hasAir() ? 2 : 0; }
     private int displayedAirflow() { int ready=airflow(); var b=bellows(); return ready!=0 || !needsAir() || b==null ? ready : b.currentStroke(); }
-    private int displayedStatus() { int ready=status(); return ready==11 && displayedAirflow()!=0 ? 0 : ready; }
+    private int displayedStatus() { int ready=status(); return ready==11 && displayedAirflow()!=0 || ready==6 && companion.job.operating() ? 0 : ready; }
     private MachineInput inputs() { return new MachineInput(List.of(items.get(0), items.get(1), items.get(2))); }
     private boolean fits(int slot, ItemStack stack) {
         ItemStack current = items.get(slot);
@@ -149,7 +151,8 @@ public final class WorkshopBlockEntity extends BaseContainerBlockEntity implemen
             if(s.is(getBlockState().getBlock()) && s.getValue(WorkshopBlock.UPGRADED)!=upgraded)
                 server.setBlock(p,s.setValue(WorkshopBlock.UPGRADED,upgraded),Block.UPDATE_CLIENTS);
         }
-        boolean active = status() == 0;
+        int ready = status();
+        boolean active = ready == 0 || ready == 6 && companion.job.consumeWork();
         if (active) {
             if (lane == null) {
                 var choice = selection(); var recipe = choice.recipe(); int[] take = recipe.take(inputs());
@@ -163,7 +166,7 @@ public final class WorkshopBlockEntity extends BaseContainerBlockEntity implemen
                     server.playSound(null,p,SoundEvents.FIRE_EXTINGUISH,SoundSource.BLOCKS,0.5F,0.65F);
                 }
                 // One cue for each newly committed manual batch, never for resuming partial work.
-                if (station() == 0 && worker != null) {
+                if (station() == 0 && playerWorking()) {
                     boolean soldering = requiredTool.is(JugcraftWorkshop.ITEMS.get("soldering_tool"));
                     var sound = requiredTool.is(JugcraftWorkshop.ITEMS.get("wire_cutters")) ? SoundEvents.SHEEP_SHEAR
                         : soldering ? SoundEvents.FIRE_EXTINGUISH : SoundEvents.ANVIL_HIT;
@@ -243,19 +246,20 @@ public final class WorkshopBlockEntity extends BaseContainerBlockEntity implemen
     @Override public void preRemoveSideEffects(BlockPos pos, BlockState state) {
         super.preRemoveSideEffects(pos, state);
         if (level == null) return;
+        companion.job.removed();
         Containers.dropContents(level, pos, items); items.clear();
         if (lane != null) for (var part : lane.inputs()) Containers.dropItemStack(level, pos.getX(), pos.getY(), pos.getZ(), part.stack().copy());
         lane = null;
     }
     @Override protected void saveAdditional(ValueOutput out) {
-        super.saveAdditional(out); ContainerHelper.saveAllItems(out, items);
+        super.saveAdditional(out); ContainerHelper.saveAllItems(out, items); companion.filter.save(out);
         out.putInt("workshop_version", 1); out.putInt("heat", fuel); out.putBoolean("heated", heated); out.putBoolean("high_heat", highHeat);
         if (selected != null) out.store("selected", Identifier.CODEC, selected);
         if (lane != null) out.store("work_lane", WorkLane.CODEC, lane);
         if (!requiredTool.isEmpty()) out.store("required_tool", ItemStack.CODEC, requiredTool);
     }
     @Override protected void loadAdditional(ValueInput in) {
-        super.loadAdditional(in); items = NonNullList.withSize(SLOTS, ItemStack.EMPTY); ContainerHelper.loadAllItems(in, items);
+        super.loadAdditional(in); items = NonNullList.withSize(SLOTS, ItemStack.EMPTY); ContainerHelper.loadAllItems(in, items); companion.filter.load(in);
         fuel = Math.clamp(in.getIntOr("heat", 0), 0, 1_000_000); heated = in.getBooleanOr("heated", false); highHeat = in.getBooleanOr("high_heat", false);
         selected = in.read("selected", Identifier.CODEC).orElse(null);
         lane = in.read("work_lane", WorkLane.CODEC).orElse(null);
