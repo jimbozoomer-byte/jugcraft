@@ -8,6 +8,11 @@ Every change to Jugcraft, newest first, grouped by pull request. For what each t
 
 No numbered release yet. Entries on feature branches remain proposed until their pull requests merge.
 
+### Unmerged: The trade look
+- Every screen where Jugs or goods change hands has the Exchange's walnut and brass: the **town shops**, the **Jug Teller**, the **personal safe** and the **barter station** and **energy vendor**, with the Exchange and market chest. It has a brass-rimmed walnut panel, slate ledgers and slot trays, gold sums, and brass and walnut plates for keys. The shop's Buy and Sell are folder tabs; the Jug Teller's chosen name is in brass; a personal shop's state is green when ready and red when something is in the way. Every button id and slot is unchanged.
+- The **market chest** (332 wide) scales down to fit a narrower window.
+- The screen fit check opens all of them. Record: [trade-look.md](docs/features/trade-look.md).
+
 ### Unmerged: The workshop, aircraft and furniture screens in the looks
 - The screens PR #475 brought in take the machine looks: the **lathe**, **fluid services** and **aircraft** the industrial look; the **workshop engines**, **chute**, **robot programming table** and **equipment charger**, and the **artisan's workstation** the workshop look; the **transformer** and **computer** the electric look; the **compact reactor** the advanced look. Each has the look's casing, glass panes, a status lamp by the title and keys that light up when they are on (the transformer's mode, open chute outputs, the chosen robot program, a running reactor, the artisan's features). The gate parameters, heat and kinetic generators, civil and matter workshops keep the electric look, with keys in it in place of vanilla buttons. Every slot, button id and payload is unchanged.
 - The **computer** (360 × 288), **compact reactor**, **gate parameters** and the larger **aircraft** now scale down to fit a small window, slots and keys with them (a new `FittedContainerScreen`).

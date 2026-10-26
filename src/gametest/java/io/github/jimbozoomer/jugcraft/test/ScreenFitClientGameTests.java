@@ -10,6 +10,7 @@ import io.github.jimbozoomer.jugcraft.agriculture.OpenCarvingPayload;
 import io.github.jimbozoomer.jugcraft.agriculture.PumpkinCarving;
 import io.github.jimbozoomer.jugcraft.chemistry.FluidRecipes;
 import io.github.jimbozoomer.jugcraft.client.AircraftScreen;
+import io.github.jimbozoomer.jugcraft.client.AtmScreen;
 import io.github.jimbozoomer.jugcraft.client.ArtisanScreen;
 import io.github.jimbozoomer.jugcraft.client.CarvingScreen;
 import io.github.jimbozoomer.jugcraft.client.CivilWorkshopScreen;
@@ -17,6 +18,7 @@ import io.github.jimbozoomer.jugcraft.client.CompactReactorScreen;
 import io.github.jimbozoomer.jugcraft.client.CaveWorkshopScreen;
 import io.github.jimbozoomer.jugcraft.client.CookingPotScreen;
 import io.github.jimbozoomer.jugcraft.client.DroneTerminalScreen;
+import io.github.jimbozoomer.jugcraft.client.ExchangeGuideScreen;
 import io.github.jimbozoomer.jugcraft.client.FarmStandScreen;
 import io.github.jimbozoomer.jugcraft.client.FormMachineScreen;
 import io.github.jimbozoomer.jugcraft.client.IndustrialHeatScreen;
@@ -24,12 +26,14 @@ import io.github.jimbozoomer.jugcraft.client.LampwrightBenchScreen;
 import io.github.jimbozoomer.jugcraft.client.LogicControllerScreen;
 import io.github.jimbozoomer.jugcraft.client.MachineRecipeScreen;
 import io.github.jimbozoomer.jugcraft.client.MachineScreen;
+import io.github.jimbozoomer.jugcraft.client.MarketChestScreen;
 import io.github.jimbozoomer.jugcraft.client.MatterWorkshopScreen;
 import io.github.jimbozoomer.jugcraft.client.ProspectorScreen;
 import io.github.jimbozoomer.jugcraft.client.ReactorConsoleScreen;
 import io.github.jimbozoomer.jugcraft.client.RemoteShutdownScreen;
 import io.github.jimbozoomer.jugcraft.client.RocketPadScreen;
 import io.github.jimbozoomer.jugcraft.client.ScreenKit;
+import io.github.jimbozoomer.jugcraft.client.ShopScreen;
 import io.github.jimbozoomer.jugcraft.client.StorageTankScreen;
 import io.github.jimbozoomer.jugcraft.client.TowerScreen;
 import io.github.jimbozoomer.jugcraft.client.jimtafacts.ComputerScreen;
@@ -38,11 +42,13 @@ import io.github.jimbozoomer.jugcraft.client.jimtafacts.IndustrialFluidServiceSc
 import io.github.jimbozoomer.jugcraft.client.jimtafacts.IndustrialLatheScreen;
 import io.github.jimbozoomer.jugcraft.client.jimtafacts.IndustrialTransformerScreen;
 import io.github.jimbozoomer.jugcraft.client.jimtafacts.JimtaScribingScreen;
+import io.github.jimbozoomer.jugcraft.client.jimtafacts.PersonalWorkshopScreen;
 import io.github.jimbozoomer.jugcraft.client.jimtafacts.WorkshopChuteScreen;
 import io.github.jimbozoomer.jugcraft.client.jimtafacts.WorkshopEngineScreen;
 import io.github.jimbozoomer.jugcraft.client.jimtafacts.WorkshopTableScreen;
 import io.github.jimbozoomer.jugcraft.concordance.LampwrightBenchMenu;
 import io.github.jimbozoomer.jugcraft.control.LogicControllerMenu;
+import io.github.jimbozoomer.jugcraft.finance.MarketChestMenu;
 import io.github.jimbozoomer.jugcraft.jimtafacts.computers.ComputerTerminal;
 import io.github.jimbozoomer.jugcraft.jimtafacts.industry.CivilWorkshops;
 import io.github.jimbozoomer.jugcraft.jimtafacts.industry.CompactReactor;
@@ -52,6 +58,7 @@ import io.github.jimbozoomer.jugcraft.jimtafacts.industry.IndustrialHeat;
 import io.github.jimbozoomer.jugcraft.jimtafacts.industry.IndustrialLathe;
 import io.github.jimbozoomer.jugcraft.jimtafacts.industry.IndustrialTransformers;
 import io.github.jimbozoomer.jugcraft.jimtafacts.industry.MatterWorkshops;
+import io.github.jimbozoomer.jugcraft.jimtafacts.industry.PersonalWorkshops;
 import io.github.jimbozoomer.jugcraft.jimtafacts.industry.WorkshopChute;
 import io.github.jimbozoomer.jugcraft.jimtafacts.industry.WorkshopEngines;
 import io.github.jimbozoomer.jugcraft.jimtafacts.industry.WorkshopTables;
@@ -65,6 +72,8 @@ import io.github.jimbozoomer.jugcraft.machine.form.MachineForm;
 import io.github.jimbozoomer.jugcraft.menagerie.CaveWorkshop;
 import io.github.jimbozoomer.jugcraft.prospecting.OreSurvey;
 import io.github.jimbozoomer.jugcraft.rocketry.RocketPadMenu;
+import io.github.jimbozoomer.jugcraft.town.AtmMenu;
+import io.github.jimbozoomer.jugcraft.town.ShopMenu;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -88,7 +97,8 @@ import net.minecraft.world.entity.player.Inventory;
  * trip: only their size and layout are judged here; other tests show them working) and the workshop benches, checks that each one's panel
  * ({@link ScreenKit.Fitted}) lies inside the window, and photographs a few at that size. The workshop, aircraft and
  * furniture screens (docs/features/new-screen-styles.md) are checked too: the robot programming table reads the block it
- * stands on to choose its layout, so that block is placed above the player first. Then it puts the window back.
+ * stands on to choose its layout, so that block is placed above the player first (and so do the personal shops, in the
+ * trade look: docs/features/trade-look.md). Then it puts the window back.
  */
 public class ScreenFitClientGameTests implements FabricClientGameTest {
 	/** The window Fabric's client game tests run in, put back afterwards. */
@@ -128,6 +138,12 @@ public class ScreenFitClientGameTests implements FabricClientGameTest {
 			BlockPos programming = context.computeOnClient(client -> client.player.blockPosition().above(4));
 			singleplayer.getServer().runOnServer(server -> server.overworld().setBlockAndUpdate(programming,
 					WorkshopTables.BLOCKS.get("programming").defaultBlockState()));
+			// So do the personal shops' (docs/features/trade-look.md).
+			BlockPos barter = programming.east(), vendor = programming.west();
+			singleplayer.getServer().runOnServer(server -> {
+				server.overworld().setBlockAndUpdate(barter, PersonalWorkshops.BLOCKS.get("barter_station").defaultBlockState());
+				server.overworld().setBlockAndUpdate(vendor, PersonalWorkshops.BLOCKS.get("energy_vendor").defaultBlockState());
+			});
 			context.waitTicks(5);
 
 			int scale = context.computeOnClient(client -> client.options.guiScale().get());
@@ -220,6 +236,21 @@ public class ScreenFitClientGameTests implements FabricClientGameTest {
 							inventory -> new AircraftScreen(new AircraftMenu(0, inventory, spec), inventory, Component.literal(spec.name())));
 				}
 				check(context, faults, "artisan's workstation", "artisan", inventory -> new ArtisanScreen(BlockPos.ZERO));
+
+				// The trade look (docs/features/trade-look.md).
+				check(context, faults, "town shop", "shop", inventory -> new ShopScreen(new ShopMenu(0, inventory, new ShopMenu.Opening("general", "", 0)),
+						inventory, Component.literal("General Store")));
+				check(context, faults, "Jug Teller", "atm", inventory -> new AtmScreen(new AtmMenu(0, inventory, new AtmMenu.Opening(BlockPos.ZERO,
+						List.of("Alex", "Steve", "Ari", "Efe", "Kai", "Makena", "Noor", "Sunny"))), inventory, Component.literal("Jug Teller")));
+				check(context, faults, "market chest", "market_chest", inventory -> new MarketChestScreen(new MarketChestMenu(0, inventory, BlockPos.ZERO),
+						inventory, Component.literal("Market Chest")));
+				check(context, faults, "Exchange guide", null, inventory -> new ExchangeGuideScreen(null));
+				check(context, faults, "personal safe", null, inventory -> new PersonalWorkshopScreen(
+						new PersonalWorkshops.Menu(0, inventory, BlockPos.ZERO), inventory, Component.literal("Personal Safe")));
+				check(context, faults, "barter station", "barter_station", inventory -> new PersonalWorkshopScreen(
+						new PersonalWorkshops.Menu(0, inventory, barter), inventory, Component.literal("Barter Station")));
+				check(context, faults, "energy vendor", null, inventory -> new PersonalWorkshopScreen(
+						new PersonalWorkshops.Menu(0, inventory, vendor), inventory, Component.literal("Energy Vendor")));
 			} finally {
 				context.runOnClient(client -> {
 					client.player.containerMenu = client.player.inventoryMenu;
