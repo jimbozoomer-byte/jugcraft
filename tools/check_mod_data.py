@@ -1671,6 +1671,13 @@ def check_guns():
             err(f"tools/guns.py LEVITATING names {gun}, which is not a gun that fires bullets")
     if f"LIFT_TICKS = {guns.LIFT_TICKS};" not in shots_java:
         err(f"GunShots.LIFT_TICKS differs from tools/guns.py: expected {guns.LIFT_TICKS}")
+    # Guns silenced by their build: no muzzle flash, and no barrel attachment (a silencer) on them.
+    silenced = ", ".join(f'"{gun}"' for gun in guns.SILENCED)
+    if f"SILENCED = Set.of({silenced});" not in java:
+        err(f"JugcraftGuns.SILENCED differs from tools/guns.py: expected Set.of({silenced})")
+    for gun in guns.SILENCED:
+        if gun not in guns.GUNS or any(guns.ATTACHMENTS[kind]["slot"] == "barrel" for kind in guns.fits(gun)):
+            err(f"tools/guns.py SILENCED names {gun}, which is not a gun, or takes a barrel attachment")
     # Slice 8D: the energy weapons' charge a round, the arcs' leaps and the Energy Cell's capacity.
     charges = ", ".join(f'"{gun}", {spec["charge"]}' for gun, spec in guns.GUNS.items() if spec.get("charge"))
     if f"CHARGE = Map.of({charges});" not in java:

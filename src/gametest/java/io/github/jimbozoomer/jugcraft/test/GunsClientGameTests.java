@@ -150,8 +150,11 @@ public class GunsClientGameTests implements FabricClientGameTest {
 				}
 				long flashed = context.computeOnClient(client -> GunEffects.flashes()) - flashes;
 				Jugcraft.LOGGER.info("[guns] {} fired: {} muzzle flash frames drawn", gun, flashed);
-				if (flashed <= 0) {
-					throw new AssertionError("The " + gun + " showed no muzzle flash when fired");
+				// A gun silenced along its own barrel (JugcraftGuns.SILENCED) shows none, as a fitted silencer hides it.
+				boolean silenced = JugcraftGuns.SILENCED.contains(gun);
+				if (silenced ? flashed != 0 : flashed <= 0) {
+					throw new AssertionError("The " + gun + (silenced ? ", silenced, showed a muzzle flash" : " showed no muzzle flash")
+							+ " when fired");
 				}
 				context.waitTicks(11);
 				if (charge > 0) {

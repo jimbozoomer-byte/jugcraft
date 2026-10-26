@@ -281,6 +281,11 @@ public final class JugcraftGuns {
 	 * as a shulker's bullet does (tools/guns.py LEVITATING).
 	 */
 	public static final Set<String> LEVITATING = Set.of("chitin_smg", "hermit_rifle", "borer");
+	/**
+	 * Guns silenced along their own barrels, as a fitted silencer silences others: a shot shows no muzzle flash, and no
+	 * barrel attachment fits them (tools/guns.py SILENCED). Slice 15A's Gallant Rifle is the first.
+	 */
+	public static final Set<String> SILENCED = Set.of("gallant_rifle");
 
 	/** The attachments, in the order the creative tab shows them (tools/guns.py ATTACHMENTS). */
 	public static final Map<String, GunAttachment> ATTACHMENTS = new LinkedHashMap<>();
