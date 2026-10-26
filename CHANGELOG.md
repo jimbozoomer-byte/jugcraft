@@ -8,6 +8,12 @@ Every change to Jugcraft, newest first, grouped by pull request. For what each t
 
 No numbered release yet. Entries on feature branches remain proposed until their pull requests merge.
 
+### Unmerged: Trains
+- A **Diesel Locomotive**, a **Passenger Coach** (four seats) and a **Cargo Wagon** (27 slots) run on any rails, round curves and up slopes. Use one on a rail to set it on the line.
+- Ride in the locomotive's cab to drive: forwards and back work a four-notch throttle (two in reverse), jump brakes. It burns diesel or kerosene (a bucket refuels it).
+- The **Coupler** couples cars into a train, up to eight behind one locomotive, and uncouples them. The whole train moves as one and stops at the end of the line or at another train.
+- Breaking the rail under a car knocks it off as an item, with its goods. The Engineer's Handbook has a Railways chapter. Record: [trains.md](docs/features/trains.md).
+
 ### Unmerged: The benches in the workshop look
 - The **Cooking Pot**, **Lampwright's Bench**, **Farm Stand**, **cave survey desk** and **Carving Knife** screens take the workshop machines' look: brass casing, orange glass, a status lamp by the title and keys that light up when they are on (the tool in use, Mirror, the candle, the crate being priced, a study you can cancel). The farm stand's owner is in a chip by the title; the survey desk's words are now translatable. Slots, buttons, button ids and labels are unchanged.
 - The blueprint table keeps its own drafting-sheet look.

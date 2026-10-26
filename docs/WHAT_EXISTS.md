@@ -666,6 +666,14 @@ Each machine recipe is a normal Minecraft recipe file, so a data pack can add, r
 - Details: [features/drone-depot.md](features/drone-depot.md).
 - **Drone Tower (`tower/`):** `JugcraftTower` registers the building blocks, furniture (`FurnitureBlock`), the Tower Core (`TowerCoreBlock`, `TowerCoreBlockEntity`) and modules. `TowerData` loads `data/jugcraft/drone_tower/tower.json.gz` (made by `tools/drone_tower.py`). `TowerBuildJobs` is the `BuildJobs.Source` for tiers 2–9. `TowerUpgradePayload` is the screen's upgrade request, and `TowerScreen` is the client screen. The terminal links to the core, and the tower gives it hangars, pickups, capacity and the drone tier cap. Details: [features/drone-tower.md](features/drone-tower.md).
 
+### Trains (`train/`, `tools/trains.py`)
+
+- **`TrackPoint`** is a place on a rail line: the rail block, the way along it (from one end to the other) and how far. It reads any block with a `RailShape` property, follows curves and slopes, and `move` goes a distance along the line (backwards if negative), stopping at the end of the line and saying how far it got.
+- **`TrainCar`** is the base entity: its place on the line, the locomotive it is coupled to, and `place`, which stands it between two points in from its ends. Breaking the rail under it derails it as an item. **`Locomotive`** drives the train (`run` moves every car the same distance as far as the leading end can go), couples and uncouples cars, and burns fuel; **`PassengerCar`** and **`CargoWagon`** are the coach and the goods van.
+- `TrainItem` sets a vehicle on a rail; `CouplerItem` couples and uncouples; `TrainInputPayload` carries the driver's keys; `JugcraftTrains` registers it all.
+- **Client side:** `TrainRenderer` draws `train_quads.json` and turns the wheels; `TrainClient` sends the driver's keys.
+- Numbers live in `tools/trains.py`; the checker keeps them in sync. Details: [features/trains.md](features/trains.md).
+
 ### Alpine Spawn (`world/AlpineSpawn`, `tools/alpine.py`)
 
 - **Placement.** Through `mixin/OverworldBiomeBuilderMixin`:

@@ -69,6 +69,7 @@ import trenchworks
 import zeppelin
 import mech
 import landship
+import trains
 import artillery
 import tower_guns
 import guns
@@ -484,7 +485,7 @@ def item_units(ref):
     if path in NON_METAL:
         return {}
     if path in plastic.blocks() or path in exosuit.items() or path in grapple.items() or path in field_chemistry.items()\
-            or path in construction.items() or path in construction.blocks() or path in gas_storage.items() or path in control_electronics.blocks() or path in control_electronics.items() or path in rocketry.items() or path in rocketry.blocks() or path in dieselworks.blocks() or path in kaiserworks.blocks() or path in trenchworks.blocks() or path in fortifications.blocks() or path in bunkerworks.blocks() or path in aged_wood.blocks() or path in fire_control.blocks() or path in fire_control.items() or path in raiders.ITEMS or path in armoured_walker.ITEMS or path in howitzer_walker.ITEMS or path in zeppelin.ITEMS or path in mech.ITEMS or path in landship.ITEMS or path in artillery.ITEMS or path in tower_guns.items()\
+            or path in construction.items() or path in construction.blocks() or path in gas_storage.items() or path in control_electronics.blocks() or path in control_electronics.items() or path in rocketry.items() or path in rocketry.blocks() or path in dieselworks.blocks() or path in kaiserworks.blocks() or path in trenchworks.blocks() or path in fortifications.blocks() or path in bunkerworks.blocks() or path in aged_wood.blocks() or path in fire_control.blocks() or path in fire_control.items() or path in raiders.ITEMS or path in armoured_walker.ITEMS or path in howitzer_walker.ITEMS or path in zeppelin.ITEMS or path in mech.ITEMS or path in landship.ITEMS or path in trains.ITEMS or path in artillery.ITEMS or path in tower_guns.items()\
             or path in guns.items() or path in guns.blocks() or path in concordance.items() or path in concordance.blocks() or path in industrial_forms.blocks()\
             or path in exchange_poker.BLOCKS or path in exchange_casino.BLOCKS or path in exchange_casino.ITEMS:
         return {}
@@ -774,7 +775,7 @@ def check_tags():
                                                     + list(tank_display.BLOCKS) + seasons.BLOCKS + ph.blocks() + ph.items()
                                                     + arms.items() + arms_variants.items()
                                                     + gear.items() + plastic.blocks() + exosuit.items() + grapple.items()
-                                                    + field_chemistry.items() + construction.items() + construction.blocks() + gas_storage.items() + control_electronics.blocks() + control_electronics.items() + rocketry.items() + rocketry.blocks() + dieselworks.blocks() + kaiserworks.blocks() + trenchworks.blocks() + fortifications.blocks() + bunkerworks.blocks() + aged_wood.blocks() + fire_control.blocks() + fire_control.items() + list(raiders.ITEMS) + list(raiders.BLOCKS) + list(armoured_walker.ITEMS) + list(howitzer_walker.ITEMS) + list(zeppelin.ITEMS) + list(mech.ITEMS) + list(landship.ITEMS) + list(artillery.ITEMS) + tower_guns.items()
+                                                    + field_chemistry.items() + construction.items() + construction.blocks() + gas_storage.items() + control_electronics.blocks() + control_electronics.items() + rocketry.items() + rocketry.blocks() + dieselworks.blocks() + kaiserworks.blocks() + trenchworks.blocks() + fortifications.blocks() + bunkerworks.blocks() + aged_wood.blocks() + fire_control.blocks() + fire_control.items() + list(raiders.ITEMS) + list(raiders.BLOCKS) + list(armoured_walker.ITEMS) + list(howitzer_walker.ITEMS) + list(zeppelin.ITEMS) + list(mech.ITEMS) + list(landship.ITEMS) + list(trains.ITEMS) + list(artillery.ITEMS) + tower_guns.items()
                                                     + ag.all_blocks() + ag.all_items() + (town_assets.blocks() + styx.blocks())
                                                     + guns.items() + guns.blocks() + concordance.items() + concordance.blocks() + concordance.itemless_blocks())
         import nouveau_content
@@ -1547,6 +1548,45 @@ def check_landship():
             err(f"LandshipRenderer.{name} differs from tools/landship.py ({value})")
     if not (ASSETS / "landship_quads.json").is_file():
         err("assets/jugcraft/landship_quads.json is missing: run tools/generate_material_data.py")
+
+
+
+def check_trains():
+    """train/ against tools/trains.py: each vehicle's length, size and seats, the driving, fuel and coupling numbers, the
+    seat heights and exhaust, and the renderer's wheels and axles."""
+    folder = JAVA_ROOT / "train"
+    for cls, numbers in (("Locomotive", trains.LOCOMOTIVE), ("PassengerCar", trains.PASSENGER_CAR),
+                         ("CargoWagon", trains.CARGO_WAGON)):
+        java = (folder / f"{cls}.java").read_text(encoding="utf-8") if (folder / f"{cls}.java").is_file() else ""
+        for const, value in numbers.items():
+            literal = f"{value}F" if const in ("WIDTH", "HEIGHT") else str(value)
+            if f" {const} = {literal};" not in java:
+                err(f"{cls}.{const} differs from tools/trains.py ({literal})")
+        if cls != "CargoWagon" and f"new Vec3(0.3, {trains.SEAT_Y}, " not in java:
+            err(f"{cls}'s seats are not at tools/trains.py SEAT_Y ({trains.SEAT_Y})")
+    loco = (folder / "Locomotive.java").read_text(encoding="utf-8") if (folder / "Locomotive.java").is_file() else ""
+    for const in ("NOTCHES", "REVERSE_NOTCHES", "NOTCH_SPEED", "ACCELERATION", "BRAKING", "COASTING", "FUEL_TANK",
+                  "FUEL_PER_BUCKET", "FUEL_PER_NOTCH_SECOND", "MAX_CARS", "COUPLE_REACH"):
+        if f" {const} = {getattr(trains, const)};" not in loco:
+            err(f"Locomotive.{const} differs from tools/trains.py ({getattr(trains, const)})")
+    if f" HEALTH = {trains.LOCOMOTIVE_HEALTH}F;" not in loco:
+        err(f"Locomotive.HEALTH differs from tools/trains.py LOCOMOTIVE_HEALTH ({trains.LOCOMOTIVE_HEALTH})")
+    if "STACK = new Vec3(" + ", ".join(str(v) for v in trains.STACK) + ");" not in loco:
+        err(f"Locomotive.STACK differs from tools/trains.py ({trains.STACK})")
+    car = (folder / "TrainCar.java").read_text(encoding="utf-8") if (folder / "TrainCar.java").is_file() else ""
+    for const in ("BOGIE_INSET", "COUPLING_GAP"):
+        if f" {const} = {getattr(trains, const)};" not in car:
+            err(f"TrainCar.{const} differs from tools/trains.py ({getattr(trains, const)})")
+    renderer = _renderer("TrainRenderer")
+    for const in ("WHEEL_RADIUS", "WHEEL_X"):
+        if f" {const} = {float(getattr(trains, const))}F;" not in renderer:
+            err(f"TrainRenderer.{const} differs from tools/trains.py ({getattr(trains, const)})")
+    client = _renderer("JugcraftClient")
+    for name, axles in trains.AXLES.items():
+        if f'"train_{name}", ' not in client or ", ".join(f"{float(z)}F" for z in axles) + "));" not in client:
+            err(f"JugcraftClient's TrainRenderer for {name} lacks tools/trains.py AXLES {axles}")
+    if not (ASSETS / "train_quads.json").is_file():
+        err("assets/jugcraft/train_quads.json is missing: run tools/generate_material_data.py")
 
 
 def check_dieselworks():
@@ -17102,7 +17142,7 @@ def registered_items():
                   | set(deposits.all_blocks()) | set(guide_books.BOOKS) | set(tank_display.BLOCKS) | set(exchange_blocks.BLOCKS) | set(exchange_poker.BLOCKS) | set(exchange_casino.BLOCKS) | set(exchange_casino.ITEMS)
                   | set(arms.items()) | set(arms_variants.items())
                   | set(gear.items()) | set(plastic.blocks()) | set(exosuit.items()) | set(grapple.items())
-                  | set(field_chemistry.items()) | set(construction.items()) | set(construction.blocks()) | set(gas_storage.items()) | set(control_electronics.blocks()) | set(control_electronics.items()) | set(rocketry.items()) | set(rocketry.blocks()) | set(dieselworks.blocks()) | set(kaiserworks.blocks()) | set(trenchworks.blocks()) | set(fortifications.blocks()) | set(bunkerworks.blocks()) | set(aged_wood.blocks()) | set(fire_control.blocks()) | set(fire_control.items()) | set(raiders.ITEMS) | set(armoured_walker.ITEMS) | set(howitzer_walker.ITEMS) | set(zeppelin.ITEMS) | set(mech.ITEMS) | set(landship.ITEMS) | set(artillery.ITEMS) | set(tower_guns.items())
+                  | set(field_chemistry.items()) | set(construction.items()) | set(construction.blocks()) | set(gas_storage.items()) | set(control_electronics.blocks()) | set(control_electronics.items()) | set(rocketry.items()) | set(rocketry.blocks()) | set(dieselworks.blocks()) | set(kaiserworks.blocks()) | set(trenchworks.blocks()) | set(fortifications.blocks()) | set(bunkerworks.blocks()) | set(aged_wood.blocks()) | set(fire_control.blocks()) | set(fire_control.items()) | set(raiders.ITEMS) | set(armoured_walker.ITEMS) | set(howitzer_walker.ITEMS) | set(zeppelin.ITEMS) | set(mech.ITEMS) | set(landship.ITEMS) | set(trains.ITEMS) | set(artillery.ITEMS) | set(tower_guns.items())
                   | set(ph.blocks()) | set(ph.items()) | set((town_assets.blocks() + styx.blocks()))
                   | set(guns.items()) | set(guns.blocks()) | set(concordance.items()) | set(concordance.blocks()) | set(industrial_forms.blocks()))
     import starter_workshop
@@ -17175,6 +17215,7 @@ def main():
     check_armoured_walker()
     check_howitzer_walker()
     check_landship()
+    check_trains()
     check_artillery()
     check_tower_guns()
     check_gun_art()
