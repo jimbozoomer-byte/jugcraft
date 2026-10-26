@@ -8,6 +8,9 @@ Every change to Jugcraft, newest first, grouped by pull request. For what each t
 
 No numbered release yet. Entries on feature branches remain proposed until their pull requests merge.
 
+### Unmerged: Fixed: the tower cost check on Linux
+- `tools/tower_costs.py` reads the recipe files in name order. Where several crafting recipes make the same item and none is named after it, the check takes the first; the file system's own order differs between Windows and Linux, so since the Jimtafacts batch it worked out five drone tower blocks' values differently on Linux (CI) and failed `check_mod_data.py` there. The values themselves are unchanged.
+
 ### Unmerged: The benches in the workshop look
 - The **Cooking Pot**, **Lampwright's Bench**, **Farm Stand**, **cave survey desk** and **Carving Knife** screens take the workshop machines' look: brass casing, orange glass, a status lamp by the title and keys that light up when they are on (the tool in use, Mirror, the candle, the crate being priced, a study you can cancel). The farm stand's owner is in a chip by the title; the survey desk's words are now translatable. Slots, buttons, button ids and labels are unchanged.
 - The blueprint table keeps its own drafting-sheet look.
