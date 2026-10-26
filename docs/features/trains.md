@@ -90,6 +90,8 @@ Server game tests (`TrainGameTests`, on a line of rails laid in the empty 48 × 
 | `theDriverWorksTheThrottleAndBrake` | Holding forwards notches the throttle up to four; braking brings the train to a stand at idle. |
 | `aTrainKeepsItsPlacesAndGoodsThroughASave` | The locomotive's place, cars and fuel, and the wagon's place, coupling and goods, survive a save and load. |
 
+Client game test (`TrainClientGameTests`): a locomotive, a coach and a wagon coupled on rails over grass, photographed from the side (`jugcraft_train_side`), the front (`jugcraft_train_front`) and behind the wagon (`jugcraft_train_rear`). It fails if the coach and wagon do not both couple.
+
 ### Results
 
 Local, without Gradle or a game: the generator, the data checks, the Python unit tests and the Java syntax parse; see the PR. I reviewed offline renders of the three models and the icons.
