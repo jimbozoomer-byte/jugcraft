@@ -43,6 +43,7 @@
     "NetherBiomeBootstrapMixin",
     "OverworldBiomeBuilderMixin",
     "PoolElementStructurePieceMixin",
+    "RetroTraderJamMixin",
     "StructureTemplatePoolAccessor",
     "StructureTemplatePoolMixin",
     "TownEntityExplosionMixin",

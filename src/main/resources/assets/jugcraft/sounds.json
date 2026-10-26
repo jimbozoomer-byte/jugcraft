@@ -76,6 +76,40 @@
     ],
     "subtitle": "subtitles.jugcraft.entity.villager.work_retro_trader"
   },
+  "entity.retro_trader.stomp": {
+    "sounds": [
+      {
+        "name": "jugcraft:entity/retro_trader/stomp1",
+        "attenuation_distance": 24
+      },
+      {
+        "name": "jugcraft:entity/retro_trader/stomp2",
+        "attenuation_distance": 24
+      },
+      {
+        "name": "jugcraft:entity/retro_trader/stomp3",
+        "attenuation_distance": 24
+      }
+    ],
+    "subtitle": "subtitles.jugcraft.entity.retro_trader.stomp"
+  },
+  "entity.retro_trader.clap": {
+    "sounds": [
+      {
+        "name": "jugcraft:entity/retro_trader/clap1",
+        "attenuation_distance": 24
+      },
+      {
+        "name": "jugcraft:entity/retro_trader/clap2",
+        "attenuation_distance": 24
+      },
+      {
+        "name": "jugcraft:entity/retro_trader/clap3",
+        "attenuation_distance": 24
+      }
+    ],
+    "subtitle": "subtitles.jugcraft.entity.retro_trader.clap"
+  },
   "singing_pumpkin.bass": {
     "subtitle": "subtitles.jugcraft.singing_pumpkin.bass",
     "sounds": [

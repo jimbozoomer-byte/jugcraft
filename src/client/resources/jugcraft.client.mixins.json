@@ -28,7 +28,10 @@
     "HowitzerPilotRendererMixin",
     "NouveauScryPlayerMixin",
     "JugcraftKeyMappingMixin",
-    "AircraftCameraMixin"
+    "AircraftCameraMixin",
+    "RetroTraderModelMixin",
+    "RetroTraderRendererMixin",
+    "RetroTraderRenderStateMixin"
   ],
   "injectors": {
     "defaultRequire": 1

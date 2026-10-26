@@ -607,7 +607,8 @@
       "io.github.jimbozoomer.jugcraft.test.PackBrowserClientGameTests",
       "io.github.jimbozoomer.jugcraft.test.ConvenienceTabletClientGameTests",
       "io.github.jimbozoomer.jugcraft.test.AircraftFlightClientGameTests",
-      "io.github.jimbozoomer.jugcraft.test.JimtaPocketGuestClientGameTests"
+      "io.github.jimbozoomer.jugcraft.test.JimtaPocketGuestClientGameTests",
+      "io.github.jimbozoomer.jugcraft.test.RetroTraderClientGameTests"
     ]
   },
   "depends": {
