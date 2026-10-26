@@ -17167,6 +17167,7 @@ def main():
     check_diagonal_connections()
     check_aluminum_bootstrap()
     check_concordance(registered)
+    check_landscape_habitats()
     for path in RES.rglob("*.json"):
         load(path)
     if errors:
@@ -17937,6 +17938,51 @@ def check_delivery():
         block = re.search(rf"<!-- {marker}:start -->\n(.*?)\n<!-- {marker}:end -->", text, re.S)
         if not block or block.group(1).strip() != "\n".join(lines).strip():
             err(f"{name}: its {marker} tables are not tools/concordance_delivery.py's (run it and paste)")
+
+
+def check_landscape_habitats():
+    """The landscape collection's wildlife (docs/features/landscape-wildlife.md): every landscape biome has its habitats
+    (tools/landscape_habitats.py), each one Menagerie reads from a tag; the tags are written as tools/ says; every
+    habitat a menagerie species lives in is read from those tags or decided by Menagerie's own rule; and
+    Menagerie.habitat reads the tags."""
+    import landscape_habitats as lh
+    import landscape_kinds as lk
+    for biome, habitats in lh.HABITATS.items():
+        if habitats is None:
+            err(f"Landscape biome {MOD}:{biome} ({lk.KINDS[biome]}) has no habitats: give it an entry in "
+                "tools/landscape_habitats.py BIOMES")
+            continue
+        for habitat in habitats:
+            if habitat not in lh.TAGGED:
+                err(f"{MOD}:{biome}'s habitat {habitat} is not one Menagerie reads from a tag ({', '.join(lh.TAGGED)})")
+    for biome in lh.BIOMES:
+        if biome not in lk.KINDS:
+            err(f"tools/landscape_habitats.py BIOMES names {MOD}:{biome}, which is not a landscape biome")
+    tags = lh.habitat_tags()
+    for tag_id, biomes in tags.items():
+        ns, path = split(tag_id)
+        if (load(DATA / ns / "tags" / "worldgen" / "biome" / f"{path}.json") or {}).get("values") != [f"{MOD}:{b}" for b in biomes]:
+            err(f"#{tag_id} differs from tools/landscape_habitats.py")
+    if not set(tags[f"{lh.TAG}/deep_ocean"]) <= set(tags[f"{lh.TAG}/ocean"]):
+        err("Every landscape deep ocean must be ocean too, as vanilla's are")
+    java = (JAVA_ROOT / "menagerie" / "Menagerie.java").read_text(encoding="utf-8")
+    collections = re.search(r'for\(String collection:List\.of\(([^)]*)\)\)', java)
+    if not collections:
+        err("Menagerie.register's species collections were not found")
+    species = list(menagerie.CATALOG["species"])
+    for name in re.findall(r'"(\w+)"', collections.group(1)) if collections else []:
+        species += (load(RES / MOD / "menagerie" / f"{name}.json") or {}).get("species", [])
+    for habitat in sorted({s["habitat"] for s in species} - set(lh.TAGGED) - set(lh.BY_RULE)):
+        err(f"Menagerie species live in habitat {habitat}, which tools/landscape_habitats.py neither tags nor leaves "
+            "to Menagerie's rule")
+    landscape = java.split('if(landscape(c,"overworld"))', 1)
+    if len(landscape) < 2 or 'Jugcraft.id("landscape_habitat/"+habitat)' not in java:
+        err("Menagerie.habitat does not read #jugcraft:landscape_habitat/ for the landscape biomes")
+    else:
+        rules = landscape[1].split("if(!c.hasTag(BiomeTags.IS_OVERWORLD))", 1)[0]
+        for habitat in lh.BY_RULE:
+            if f'"{habitat}"' not in rules:
+                err(f"Menagerie.habitat has no rule for the landscape biomes' {habitat} habitat")
 
 
 if __name__ == "__main__":

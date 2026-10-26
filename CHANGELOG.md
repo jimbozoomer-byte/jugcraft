@@ -8,6 +8,10 @@ Every change to Jugcraft, newest first, grouped by pull request. For what each t
 
 No numbered release yet. Entries on feature branches remain proposed until their pull requests merge.
 
+### Unmerged: Wildlife in the landscape biomes (follow-up to the seasonal biome audit)
+- **The menagerie's creatures come to the landscape biomes.** Before, none of its 277 species reached any of the 159 landscape biomes: they carry none of vanilla's biome tags, and every species first asks for `#minecraft:is_overworld` (or the Nether's or End's). Now deer, bears and boars live in the landscape woods; alligators and capybaras in its swamps; lions, elephants and zebras on its savannas; scorpions in its deserts; tigers in its tropics; whales and rays in its ocean; mammoths and yetis in its snowy land; the landscape collection's own gob and garch in its caves; and the Nether's and End's creatures in its Nether and End biomes.
+- Each landscape biome's habitats come from its kind, and biome by biome for arid and magic land (`tools/landscape_habitats.py`, `#jugcraft:landscape_habitat/*`). Only the menagerie reads them: trees, crops and structures there are as they were. Record: [landscape-wildlife.md](docs/features/landscape-wildlife.md).
+
 ### Unmerged: Seasonal biome audit
 - **The landscape biomes now have seasons:** in the 54 temperate landscape woods, fields, hills and swamps, grass and leaves turn with the year as in Jugcraft's own biomes. 47 of them take winter snow when `seasons.snow` is on; the 7 mild ones (Mediterranean, lavender, redwood, warm shrub, orchid swamp) do not.
 - **Halloween and autumn creatures reach them too:** wisps rise over the landscape swamps on Halloween nights. On full moons, werewolves stalk the landscape woods, snow werewolves its snowy land and shadow werewolves the Ominous Woods, where the Howling Totem rite also works. Squirrels and wild turkeys come to its woods and open country.

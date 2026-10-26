@@ -120,5 +120,6 @@ No new dependencies or art.
   - which landscape biomes count as magic or one-season (no seasons);
   - the Pumpkin Patch having seasons (it is a field);
   - the Scarlet Mountains going without (snow falls there all year).
-- **Follow-up, not seasonal:** the landscape biomes have none of the vanilla or common biome-kind tags (`#minecraft:is_forest`, `#c:is_swamp` and the like). Wildlife (13 species read `#c:is_swamp` alone), wild crops and other mods' content therefore skip them. Giving them those tags is a separate change, because it alters spawns and new-chunk generation across those biomes.
+- **Follow-up, not seasonal:** the landscape biomes have none of the vanilla or common biome-kind tags (`#minecraft:is_forest`, `#c:is_swamp` and the like). Wild crops and other mods' content therefore skip them. Giving them those tags is a separate change, because it alters spawns and new-chunk generation across those biomes.
+  - **Wildlife:** the "13 species" counted here were tag files nothing reads. The menagerie's creatures in fact reached none of the landscape biomes, for want of `#minecraft:is_overworld`; they now do by their own habitat tags ([landscape-wildlife.md](landscape-wildlife.md)).
 - **Owner visual check:** a landscape wood in autumn and in winter.

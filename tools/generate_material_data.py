@@ -1629,6 +1629,9 @@ def tags():
     # The landscape collection's kinds, which the werewolves, squirrels, turkeys and wisps read (tools/landscape_kinds.py).
     import landscape_kinds
     landscape_kinds.tags(tags)
+    # The landscape collection's habitats, which the menagerie's creatures read (tools/landscape_habitats.py).
+    import landscape_habitats
+    landscape_habitats.tags(tags)
     import alpine_data
     alpine_data.tags(tags)
     import biomes_data
