@@ -26,6 +26,15 @@ Locally:
 
 The client tests a pull request skips still run on `main` after it merges. A break they catch there is fixed in a follow-up pull request.
 
+### When the server tests stall
+
+The game-test servers run a test-mod initializer, `TickWatchdog` (`src/gametest/.../test/TickWatchdog.java`). It only reads and logs, and never changes a test or the world.
+- **A tick that has run for thirty seconds:** the server thread's stack goes to the log as `[tick watchdog] tick N has run for S s`, then again every minute while the tick stays stuck, up to twelve dumps. A `mod` job cancelled at its time limit then still names the code it was stuck in.
+- **A tick slower than ten seconds:** the log gets the entities loaded by type.
+- **Every 6,000 ticks:** the same entity count is logged, so a leak shows as it grows.
+
+The log never names the test that is running. Server game tests run in the test mod's registration order (its `fabric-gametest` entrypoints, then each class's tests), fifty to a batch. A batch's position in the progress bar therefore maps back to a class.
+
 ## Gameplay PR evidence after bootstrap
 
 For framework/pack changes, also run `python scripts/package_modrinth.py check`, `python -m unittest discover -s scripts/tests -v`, `python scripts/package_modrinth.py verify`, and `python scripts/package_modrinth.py build` after compilation. Test `./gradlew build -PjugcraftOptionalIntegrations=false` and the corresponding client run. The [distribution guide](DISTRIBUTION.md) explains clean launcher import and client/server file flags. A generated `.mrpack` is not proof that importing or playing it passed.
