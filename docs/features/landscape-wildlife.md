@@ -69,7 +69,7 @@ No new dependencies or art.
   - `Menagerie.habitat` reads the tags and has a rule for each of those habitats in the landscape biomes.
 - **Game test** `LandscapeWildlifeGameTests.landscapeBiomesHoldTheirWildlife`: over the test, `/fillbiome` makes each of 14 biomes in turn, and the creatures that may spawn there (the biome's natural mob spawns) are read:
   - the Maple Woods: deer and the gob, not alligators or lions;
-  - the Sakura Grove, whose file lists no creatures: deer;
+  - the Sakura Grove: deer;
   - the Bayou: alligators, not deer;
   - the Lavender Field: rats and butterflies, not deer;
   - the White Mesa, the Lush Savanna and the Desert Canyon: vultures, lions and scorpions, each not the others';
