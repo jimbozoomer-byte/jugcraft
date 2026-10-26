@@ -262,7 +262,8 @@ DOSSIER = {
     "hollow_acre.leave": "The Grey Mist in the lych gate takes you home at any time, in or out of a fight",
     "spindle_loft.leave": "The Grey Mist in the needle's eye beside the arrival takes you home at any time, in or out of "
                           "a fight",
-    "grave_goods": "Dying in a lair costs no belongings: they come back to you as Grave Goods",
+    "grave_goods": "Dying in a lair costs nothing: you respawn with everything you carried, worn and held as it was, "
+                   "and all your experience",
     "owed": "A share of her spoils is kept for you",
     "share": "Damage %s, healing %s, warded %s, objectives %s",
     "share.qualifies": "This fight: your part already earns a share",

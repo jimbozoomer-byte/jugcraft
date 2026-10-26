@@ -9,7 +9,7 @@ The owner's Mars adventure, the Cydonian Sentinel, is also implemented: [feature
 From [CONTENT_BRANCHES.md](../CONTENT_BRANCHES.md) ("Caves, dungeons and bosses" and "Rare loot"):
 - **An arena with edges:** a lair, or a summoning that builds one. The boss does not wander out of it, and it resets when everyone leaves.
 - **Readable attacks:** every big attack is telegraphed (a wind-up, a sound, a shadow on the ground) and can be dodged or blocked.
-- **Recovery:** dying in the fight is not the end; gear can be fetched back, and the boss heals and resets rather than keeping its gains.
+- **Recovery:** dying in the fight is not the end; a player who falls in a lair keeps their whole inventory and experience, as keepInventory does there only, and the boss heals and resets rather than keeping its gains.
 - **Multiplayer:** its health scales with the players in the arena; every player who took part gets a roll of its loot table, not just the last hit. A blow to it, or to a creature that counts for it, is taking part; at Vesperine and Madame Tatterlace, since Concordance Chunk A, so is support: healing or warding another player against the fight, or one of its objectives ([lair encounter credit](../features/lair-encounter-credit.md)).
 - **No griefing:** a summoned boss cannot be called inside a town's protection or another player's claim, and its attacks do not break player builds.
 - **No farming loop:** a long respawn timer per lair (or a costly summoning item), so a trophy stays a trophy.
@@ -126,7 +126,7 @@ A participant is a player who hurt him or his whelps and is within 64 blocks of 
 
 ### Rules kept
 
-He follows the rules every boss follows (above): his hall is his arena and resets when everyone leaves; every big attack is read before it lands; dying there keeps everything as Grave Goods; his health scales with the party and every participant rolls his loot; nothing in his hall can be built or broken, and the only blocks he changes are his own lake's snow, which drifts back; every opening costs a Frost Horn. Nothing a tier needs comes only from him.
+He follows the rules every boss follows (above): his hall is his arena and resets when everyone leaves; every big attack is read before it lands; dying there keeps everything: nothing is dropped, and the player respawns with it all; his health scales with the party and every participant rolls his loot; nothing in his hall can be built or broken, and the only blocks he changes are his own lake's snow, which drifts back; every opening costs a Frost Horn. Nothing a tier needs comes only from him.
 
 ## The Cinder Tyrant: the plan (being built)
 
@@ -243,7 +243,7 @@ The planning pack's chapter 04 asks each lair to answer these:
 - **Who fights:** players who may fight a lair's boss (`LairBosses`), with party health as above.
 - **Reset:** when no eligible player is left, or he is left alone for 10 seconds.
 - **Clean-up:** his gobs, cinders, waves, fire patches and Cinderlings are his, capped, and gone with him.
-- **Death, disconnect and restart:** as every lair. Grave Goods keep what a player falls with, and instances close on a restart. Each participant's loot is rolled once when he falls.
+- **Death, disconnect and restart:** as every lair. A player who falls drops nothing and respawns with everything they carried, and instances close on a restart. Each participant's loot is rolled once when he falls.
 - **An ordinary player** can do everything: the sluices are turned by hand, the bait is standing in a trough, and a hot Tyrant still takes half damage from any weapon.
 
 ### Rules kept
@@ -251,7 +251,7 @@ The planning pack's chapter 04 asks each lair to answer these:
 He follows the rules every boss follows (above):
 - his kiln is his arena, and resets when everyone leaves;
 - every big attack is read before it lands;
-- dying there keeps everything as Grave Goods;
+- dying there keeps everything: nothing is dropped, and the player respawns with it all;
 - his health scales with the party, and every participant rolls his loot;
 - nothing in his kiln can be built or broken, and the only blocks that change are his own troughs and slag, which come back;
 - every opening costs a Kiln Seal.
@@ -356,7 +356,7 @@ The planning pack's chapter 04 asks each lair to answer these:
 - **Who fights:** players who may fight a lair's boss (`LairBosses`), with party health as above.
 - **Reset:** when no eligible player is left, or she is left alone for 10 seconds.
 - **Clean-up:** her Likenesses, the Root Knot, her brews' pools, roots and hands are hers, capped, and gone with her.
-- **Death, disconnect and restart:** as every lair. Grave Goods keep what a player falls with, and instances close on a restart. Each participant's loot is rolled once when she falls.
+- **Death, disconnect and restart:** as every lair. A player who falls drops nothing and respawns with everything they carried, and instances close on a restart. Each participant's loot is rolled once when she falls.
 - **An ordinary player** can do everything: a lamp is lit by hand, a Likeness bursts at any blow or anything thrown, her shadow shows with particles off, and her roots, pools and grasps are read before they land. Her poison never kills, and milk or the chemical reactor's Antidote cures it.
 
 Of the planning pack's magic links, Radiance's is already in the game: its Revelation makes a creature glow, so cast on her it shows her as a lamp does. The others (Verdance clearing a path through her roots, Tether cutting the knot, Tide thinning a pool) wait for spells of those schools. None of them will be needed.
@@ -366,7 +366,7 @@ Of the planning pack's magic links, Radiance's is already in the game: its Revel
 She follows the rules every boss follows (above):
 - her fen is her arena, and resets when everyone leaves;
 - every big attack is read before it lands;
-- dying there keeps everything as Grave Goods;
+- dying there keeps everything: nothing is dropped, and the player respawns with it all;
 - her health scales with the party, and every participant rolls her loot;
 - nothing in her fen can be built or broken, and the only blocks that change are her own lamps, which burn again;
 - every opening costs a Hag Stone.
@@ -474,7 +474,7 @@ The planning pack's chapter 04 asks each lair to answer these:
 - **Who fights:** players who may fight a lair's boss (`LairBosses`), with party health as above.
 - **Reset:** when no eligible player is left, or he is left alone for 10 seconds.
 - **Clean-up:** his dead, bolts, bone lanes and chains are his, capped, and gone with him.
-- **Death, disconnect and restart:** as every lair. Grave Goods keep what a player falls with, and instances close on a restart. Each participant's loot is rolled once when he falls.
+- **Death, disconnect and restart:** as every lair. A player who falls drops nothing and respawns with everything they carried, and instances close on a restart. Each participant's loot is rolled once when he falls.
 - **An ordinary player** can do everything: a seal is broken and a name read by using them, the lit name is shown by its rune, its glow and the words over the screen, his bolts are struck back with any weapon or arrow, and every attack is read before it lands. Alone, a player breaks two seals, reads the scraped name back, and breaks the third.
 
 Of the planning pack's magic links, Radiance's is already in the game: its Revelation makes him glow, though it does not break his ward. The others (Echo reading a scraped name back from afar, Hollow turning one of his bolts, the Circlewrights holding an alcove's chain) wait for spells of those schools. None of them will be needed.
@@ -484,7 +484,7 @@ Of the planning pack's magic links, Radiance's is already in the game: its Revel
 He follows the rules every boss follows (above):
 - his archive is his arena, and resets when everyone leaves;
 - every big attack is read before it lands, and he is never warded for good: every round of seals opens him;
-- dying there keeps everything as Grave Goods;
+- dying there keeps everything: nothing is dropped, and the player respawns with it all;
 - his health scales with the party, and every participant rolls his loot;
 - nothing in his archive can be built or broken, and the only blocks that change are his own seals, stones and phylactery, which are put back;
 - every opening costs a Writ of Exhumation.
@@ -593,7 +593,7 @@ The planning pack's chapter 04 asks each lair to answer these:
 - **Who fights:** players who may fight a lair's boss (`LairBosses`), with party health as above.
 - **Reset:** when no eligible player is left, or he is left alone for 10 seconds.
 - **Clean-up:** his Sparkers, rivets, shells and charges are his, capped, and gone with him.
-- **Death, disconnect and restart:** as every lair. Grave Goods keep what a player falls with, and instances close on a restart. Each participant's loot is rolled once when he falls.
+- **Death, disconnect and restart:** as every lair. A player who falls drops nothing and respawns with everything they carried, and instances close on a restart. Each participant's loot is rolled once when he falls.
 - **An ordinary player** can do everything: a breaker is thrown and cleared by using it, the live pylon is shown by its crackling crown, its amber lamp and the words over the screen, cover is there for anyone, and every attack is read before it lands. Alone, a player can reach the lit pylon in the charge's 3 seconds, since he picks the pylon nearest them.
 
 Of the planning pack's magic links (a Tempest spell priming a terminal, Strata bracing against a piston, Clockheart helpers working a breaker, Tide cooling a vent), none is in the game yet: they wait for spells of those schools. None of them will be needed.
@@ -603,7 +603,7 @@ Of the planning pack's magic links (a Tempest spell priming a terminal, Strata b
 He follows the rules every boss follows (above):
 - his trench is his arena, and resets when everyone leaves;
 - every big attack is read before it lands, and he is never plated for good: every routed discharge opens him, and so does a charge into cover;
-- dying there keeps everything as Grave Goods;
+- dying there keeps everything: nothing is dropped, and the player respawns with it all;
 - his health scales with the party, and every participant rolls his loot;
 - nothing in his trench can be built or broken, and the only blocks that change are his own pylons and breakers, which are put back;
 - every opening costs Sealed Orders.
@@ -714,7 +714,7 @@ The planning pack's chapter 04 asks each lair to answer these:
 - **Who fights:** players who may fight a lair's boss (`LairBosses`), with party health as above.
 - **Reset:** when no eligible player is left, or he is left alone for 10 seconds.
 - **Clean-up:** his Packmates are his, capped at three, and gone with him.
-- **Death, disconnect and restart:** as every lair. Grave Goods keep what a player falls with, and instances close on a restart. Each participant's loot is rolled once when he falls.
+- **Death, disconnect and restart:** as every lair. A player who falls drops nothing and respawns with everything they carried, and instances close on a restart. Each participant's loot is rolled once when he falls.
 - **An ordinary player** can do everything: a bell is rung by using it, his hiding place is shown by his trail and his eyes, every attack is read before it lands, and the flush opens him to any weapon. Alone, the quarry can reach his bell in time, and silver and wolfsbane only make it easier.
 
 Of the planning pack's magic links (Echo reading the hunt's target, a Verdance refuge, Tether interrupting a pack signal), none is in the game yet: they wait for spells of those schools. None of them will be needed. The planning pack's offered story of being turned into a werewolf is not part of this fight: no blow of his changes a player.
@@ -724,7 +724,7 @@ Of the planning pack's magic links (Echo reading the hunt's target, a Verdance r
 He follows the rules every boss follows (above):
 - his ring is his arena, and resets when everyone leaves;
 - every attack is read before it lands, and his hide is never his last word: every bell rung in time opens him to any weapon;
-- dying there keeps everything as Grave Goods;
+- dying there keeps everything: nothing is dropped, and the player respawns with it all;
 - his health scales with the party, and every participant rolls his loot;
 - nothing in his ring can be built or broken, and the only blocks that change are his own trail, which knits back;
 - every opening costs a Howling Totem, and a full moon is never required to make or use one.
@@ -857,7 +857,7 @@ A participant is a player who hurt it or its sentries, and is within 64 blocks o
 - **Who fights:** players who may fight a lair's boss (`LairBosses`), with party health as above.
 - **Reset:** when no eligible player is left, or it is left alone for 10 seconds.
 - **Clean-up:** its sentries, shards, spikes and meteors are its own, capped, and gone with it.
-- **Death, disconnect and restart:** as every lair. Grave Goods keep what a player falls with, and instances close on a restart. Each participant's loot is rolled once when it falls.
+- **Death, disconnect and restart:** as every lair. A player who falls drops nothing and respawns with everything they carried, and instances close on a restart. Each participant's loot is rolled once when it falls.
 - **An ordinary player** can do everything: dials are turned by using them, the storm's side is shown by the dust and the words over the screen, the stones are cover from it, its core is open to any weapon, and every attack is read before it lands.
 
 ### Rules kept
@@ -865,7 +865,7 @@ A participant is a player who hurt it or its sentries, and is within 64 blocks o
 It follows the rules every boss follows (above):
 - its crater is its arena, and resets when everyone leaves;
 - every big attack is read before it lands, and there is always shelter from its storm;
-- dying there keeps everything as Grave Goods;
+- dying there keeps everything: nothing is dropped, and the player respawns with it all;
 - its health scales with the party, and every participant rolls its loot;
 - nothing in the Sanctum can be built or broken;
 - every opening costs an Altar Keystone.

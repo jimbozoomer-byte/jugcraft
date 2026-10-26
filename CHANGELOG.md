@@ -8,6 +8,9 @@ Every change to Jugcraft, newest first, grouped by pull request. For what each t
 
 No numbered release yet. Entries on feature branches remain proposed until their pull requests merge.
 
+### Unmerged: Keep your inventory in boss fights
+- **Dying in a lair costs nothing:** as with the keepInventory rule, but only in lairs (every boss fight). No items or experience fall; you respawn outside with every slot as it was (armour and offhand worn), the same held slot and all your experience. Dying anywhere else is unchanged. No grave is ever placed in a lair; Grave Goods still catch anything another mod drops there. Record: [lair-keep-inventory.md](docs/features/lair-keep-inventory.md).
+
 ### Unmerged: Fixed: the server game tests slowing to a stop since the Jimtafacts batch
 - The accessories' per-player check (`JimtaAbilities.tick`) read the block under every online player's feet, every time it ran, whatever they wore. Through an unloaded chunk that read loads, or even generates, the chunk on the spot. The game tests leave about 1,300 unticked mock players at the world origin, so the check ran every tick for each of them. Since the batch, the server's tick time has grown from about 10 ms to about 1 s over a test run, and CI's `mod` and `optional integrations absent` jobs have hit their 90-minute limit on main and on every pull request. This read is the only new per-player code that touches the world whatever is worn; that it caused the slowdown is the best-supported explanation, which CI's run of this change will confirm or refute.
 - The ground is now read only when snowshoes are worn, and only from a chunk that is already loaded. Snowshoes behave as before.

@@ -267,4 +267,4 @@ The Cinder Kiln is its own dimension, so nothing here changes the Overworld or t
 
 ## Rollout and open questions
 
-The shared framework's defaults hold: four players and eight instances, Grave Goods on death. His settings are the shared boss settings above. Open: the two-client playtest, and whether the Tyrant's 440 health and the quench's 8 seconds feel right in play.
+The shared framework's defaults hold: four players and eight instances, nothing lost on death. His settings are the shared boss settings above. Open: the two-client playtest, and whether the Tyrant's 440 health and the quench's 8 seconds feel right in play.

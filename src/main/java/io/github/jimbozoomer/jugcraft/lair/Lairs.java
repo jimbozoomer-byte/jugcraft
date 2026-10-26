@@ -95,6 +95,11 @@ public final class Lairs {
 				died(player);
 			}
 		});
+		ServerPlayerEvents.AFTER_RESPAWN.register((oldPlayer, newPlayer, alive) -> {
+			if (!alive && keepsBelongings(oldPlayer)) {
+				newPlayer.sendSystemMessage(Component.translatable("message.jugcraft.lair.belongings_kept"));
+			}
+		});
 		// Fabric copies death-persistent attachments in AFTER_RESPAWN too. Returning goods in that
 		// event depends on initializer order; tick() returns them after every listener has finished.
 	}
@@ -398,6 +403,9 @@ public final class Lairs {
 	}
 
 	private static void joined(ServerPlayer player) {
+		if (!player.isAlive()) {
+			return; // logged out on the death screen: they respawn outside, keeping their belongings (keepsBelongings)
+		}
 		LairVisit visit = player.getAttached(VISIT);
 		if (!isLair(player.level())) {
 			if (visit != null) {
@@ -419,7 +427,19 @@ public final class Lairs {
 
 	// ---------------------------------------------------------------- death
 
-	/** Capture the exact native death stack before spawning it, including during chunk transitions. */
+	/**
+	 * Whether dying where the player is now costs nothing: in a lair (a boss fight) a death keeps everything, as the
+	 * keepInventory rule does, there only. The shared per-player rule (server/PlayerRules.keeps) asks this, so its
+	 * keep-inventory hooks drop nothing (items, experience or Trinkets slots) and the respawn restores it all.
+	 */
+	public static boolean keepsBelongings(Player player) {
+		return isLair(player.level());
+	}
+
+	/**
+	 * Anything still dropped dying in a lair (by another mod, say), caught as the exact native death stack before it
+	 * spawns (grave/DeathGraves), becomes Grave Goods instead of lying in an instance that will close.
+	 */
 	public static void retainDeathItem(ServerPlayer player, ItemStack stack) {
 		if (!isLair(player.level()) || stack.isEmpty()) return;
 		GraveGoods held = player.getAttached(GRAVE_GOODS);
@@ -427,7 +447,10 @@ public final class Lairs {
 		player.setAttached(GRAVE_GOODS, held == null ? new GraveGoods(items, 0) : held.plus(items, 0));
 	}
 
-	/** End the visit and retain experience; item stacks are captured directly by the native death hook. */
+	/**
+	 * A player has died in a lair. They keep what they carry (keepsBelongings); stray item stacks are caught by the
+	 * native death hook (retainDeathItem) and any experience orbs here. Their visit is over.
+	 */
 	public static void died(ServerPlayer player) {
 		if (!(player.level() instanceof ServerLevel level) || !isLair(level)) {
 			return;
