@@ -36,11 +36,15 @@ import org.jspecify.annotations.Nullable;
  * Trench ({@link OrdersRite#follow}); and where the Howling Totem howled, Grey Mist curling up out of the ground, pale
  * ash drifting in it like moonlit motes and a howl answering far off now and then, which closes round followers and
  * brings them to in the Moonlit Ring's camp ({@link HowlingTotemRite#follow}); and red mist over the Ancient Altar
- * leads to Mars ({@link AltarKeystoneRite#follow}).
+ * leads to Mars ({@link AltarKeystoneRite#follow}); and where the Thunder Vane was raised, Grey Mist torn by the wind,
+ * whirling round and crackling with sparks, thunder rolling in it now and then, which lifts followers and brings them
+ * down on the Crown of Thunder's terrace ({@link ThunderVaneRite#follow}).
  */
 public class MistGateEntity extends Entity {
 	/** How often a howl answers from far off through the Howling Totem's mist (ticks). */
 	private static final int HOWL_TICKS = 120;
+	/** How often thunder rolls in the Thunder Vane's mist (ticks). */
+	private static final int THUNDER_TICKS = 100;
 	/** The red mist's dust and its column of light (the Cydonian Sanctum's gate). */
 	private static final DustParticleOptions RED_MIST = new DustParticleOptions(0xC0402A, 1.6F);
 	private static final DustParticleOptions RED_LIGHT = new DustParticleOptions(0xFF5A2A, 2.4F);
@@ -95,6 +99,7 @@ public class MistGateEntity extends Entity {
 		boolean line = lair == Lair.FOUNDRY_TRENCH;
 		boolean howl = lair == Lair.MOONLIT_RING;
 		boolean mars = lair == Lair.CYDONIAN_SANCTUM;
+		boolean storm = lair == Lair.CROWN_OF_THUNDER;
 		if (instance() == null || level.getGameTime() >= until) {
 			if (mars) {
 				level.sendParticles(RED_MIST, getX(), getY() + 1.0, getZ(), 40, 0.6, 0.8, 0.6, 0.02);
@@ -108,6 +113,9 @@ public class MistGateEntity extends Entity {
 			}
 			if (snow) {
 				level.sendParticles(ParticleTypes.SNOWFLAKE, getX(), getY() + 0.6, getZ(), 30, 0.6, 0.5, 0.6, 0.05);
+			} else if (storm) {
+				// The wind drops: a last crackle in the mist.
+				level.sendParticles(ParticleTypes.ELECTRIC_SPARK, getX(), getY() + 1.0, getZ(), 16, 0.5, 0.8, 0.5, 0.1);
 			}
 			discard();
 			return;
@@ -127,6 +135,17 @@ public class MistGateEntity extends Entity {
 			double angle = tickCount * 0.08;
 			level.sendParticles(ParticleTypes.GLOW, getX() + Math.cos(angle) * 0.4, getY() + 1.3 + Math.sin(tickCount * 0.15) * 0.25,
 					getZ() + Math.sin(angle) * 0.4, 1, 0.0, 0.0, 0.0, 0.0);
+		} else if (storm) {
+			// Grey mist torn by the wind: whirling round, sparks crackling in it.
+			if (tickCount % 2 == 0) {
+				double angle = tickCount * 0.45;
+				level.sendParticles(ParticleTypes.CLOUD, getX() + Math.cos(angle) * 0.8, getY() + 0.2 + (tickCount % 20) / 10.0,
+						getZ() + Math.sin(angle) * 0.8, 1, 0.0, 0.0, 0.0, 0.02);
+				level.sendParticles(ParticleTypes.CLOUD, getX(), getY() + 0.6, getZ(), 1, 0.3, 0.5, 0.3, 0.01);
+			}
+			if (tickCount % 4 == 0) {
+				level.sendParticles(ParticleTypes.ELECTRIC_SPARK, getX(), getY() + 1.0, getZ(), 2, 0.4, 0.7, 0.4, 0.1);
+			}
 		} else if (mars) {
 			// The red mist over the altar, and a column of red light rising out of it into the sky.
 			if (tickCount % 2 == 0) {
@@ -182,6 +201,11 @@ public class MistGateEntity extends Entity {
 				level.playSound(null, blockPosition(), HowlingTotemRite.sound("entity.wolf.howl", SoundEvents.ZOMBIE_AMBIENT), SoundSource.AMBIENT,
 						0.6F, 0.5F);
 			}
+		} else if (storm) {
+			// Thunder rolls in it, far off, now and then.
+			if (tickCount % THUNDER_TICKS == 0) {
+				level.playSound(null, blockPosition(), SoundEvents.LIGHTNING_BOLT_THUNDER, SoundSource.WEATHER, 0.8F, 0.6F);
+			}
 		} else if (line) {
 			if (tickCount % OrdersRite.BELL_TICKS == 0) {
 				level.playSound(null, blockPosition().below(), SoundEvents.BELL_BLOCK, SoundSource.BLOCKS, 0.8F, 1.8F);
@@ -225,6 +249,8 @@ public class MistGateEntity extends Entity {
 			HowlingTotemRite.follow(server, open);
 		} else if (open.lair == Lair.CYDONIAN_SANCTUM) {
 			AltarKeystoneRite.follow(server, open);
+		} else if (open.lair == Lair.CROWN_OF_THUNDER) {
+			ThunderVaneRite.follow(server, open);
 		} else {
 			Lairs.enter(server, open);
 		}

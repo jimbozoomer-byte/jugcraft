@@ -24,7 +24,8 @@ EDGE_DAMAGE = 4.0     # the mist's toll for flying or falling off, never below h
 # The Hollow Acre's, the exit (every lair's), the Spindle Loft's (docs/features/spindle-loft.md), the Glacier Hall's
 # (docs/features/glacier-hall.md), the Cinder Kiln's (docs/features/cinder-kiln.md), the Lantern Fen's
 # (docs/features/lantern-fen.md), the Archive of Last Names' (docs/features/crypt-archive.md), the Foundry Trench's
-# (docs/features/foundry-trench.md), then the Moonlit Ring's (docs/features/moonlit-ring.md).
+# (docs/features/foundry-trench.md), the Moonlit Ring's (docs/features/moonlit-ring.md), the Cydonian Sanctum's
+# (docs/features/cydonian-sanctum.md), then the Crown of Thunder's (docs/features/crown-of-thunder.md).
 LAIR_BLOCKS = {
     "blighted_soil": "Blighted Soil",
     "black_wheat": "Black Wheat",
@@ -72,6 +73,9 @@ LAIR_BLOCKS = {
     "star_dial": "Star Dial",
     "star_door": "Star Door",
     "dust_vent": "Dust Vent",
+    "storm_rod": "Storm Rod",
+    "roc_nest": "Woven Branches",
+    "storm_cloud": "Storm Cloud",
 }
 # The colours of the Spindle Loft's thread: its four spools', and the white of the threads between them.
 THREAD_COLOURS = ("green", "blue", "beige", "red", "white")
@@ -226,6 +230,26 @@ KEYSTONE = {
 # Altar, and its half-width; the lowest first, the order they kindle in.
 KEYSTONE_ALTARS = ((3, 5), (2, 3), (1, 1))
 
+# The Thunder Vane (the Crown of Thunder's summoning, docs/features/crown-of-thunder.md): used in the Overworld under the
+# open sky while it rains or thunders, in the mountains (#jugcraft:thunder_vane_lands), standing at min_y or above.
+# Lightning strikes beside the user (only light and thunder: it hurts nobody and lights nothing), the vane spins wild and
+# is used up, and Grey Mist rises where it was used, the gate for lairs.gate_seconds; whoever goes in comes down on the
+# Crown's terrace. Not a Witching Season summoning: it works all year, whatever lairs.off_season says.
+VANE = {
+    "cooldown": 40,            # ticks between uses of one vane, answered or not
+    "mist_range": 3,           # how near another open mist into the Crown must not be (blocks)
+    "min_y": 120,              # the least height to stand at
+}
+# Where the vane is answered: the Highland, the Karst Pinnacles and the landscape's high country, and every mountain, peak
+# and hill biome vanilla tags.
+VANE_LANDS = ["jugcraft:highland", "jugcraft:karst_pinnacles", "jugcraft:landscape_alpine_highlands",
+              "jugcraft:landscape_emerald_peaks", "jugcraft:landscape_forested_highlands", "jugcraft:landscape_highland",
+              "jugcraft:landscape_highlands", "jugcraft:landscape_temperate_highlands", "#minecraft:is_mountain",
+              "#minecraft:is_hill"]
+# The Storm Rods' parts, from the plinth up (tools/crown_of_thunder.py ROD_PARTS), and the light a charged part gives.
+ROD_PARTS = ("base", "middle", "tip")
+ROD_LIGHT = {"base": 6, "middle": 9, "tip": 12}
+
 ITEMS = {
     "mourning_wreath": "Mourning Wreath",
     "death_knell": "Death Knell",
@@ -237,6 +261,7 @@ ITEMS = {
     "sealed_orders": "Sealed Orders",
     "howling_totem": "Howling Totem",
     "altar_keystone": "Altar Keystone",
+    "thunder_vane": "Thunder Vane",
 }
 GATE = {"entity": "mist_gate", "display": "Mist Gate", "width": 1.6, "height": 2.6}
 
@@ -290,6 +315,10 @@ RECIPES = {
         "D": "jugcraft:dreamglass", "A": "jugcraft:astrolabe", "R": "minecraft:redstone",
         "S": "minecraft:chiseled_stone_bricks"},
         "result": "altar_keystone", "features": ["adam_ondi_ahman", "concordance"]},
+    # A vane: an arrow of copper on a lightning rod, two feathers for its tail, a compass for its points. Used up by the
+    # storm it calls.
+    "thunder_vane": {"pattern": ["FLF", "CKC", " C "], "key": {
+        "F": "minecraft:feather", "L": "minecraft:lightning_rod", "C": "minecraft:copper_ingot", "K": "minecraft:compass"}},
 }
 # What counts as a werewolf's pelt for the totem: every kind's (tools/agriculture.py WEREWOLF kinds), and the Alpha's
 # own (tools/alpha_werewolf.py), one for one.
@@ -379,6 +408,15 @@ LAIRS = {
         "music": "minecraft:music.overworld.badlands",
         "ambient_light": 0.3,
         "motes": ("minecraft:crimson_spore", 0.004),
+    },
+    "crown_of_thunder": {
+        "display": "The Crown of Thunder",
+        "enter": "Lightning strikes, the wind takes you, and you come down on %s",
+        "sky": "#28303c", "fog": "#4c5664", "water_fog": "#26303a", "water": "#3c4a5a",
+        "ambient_light_color": "#46526a", "sky_light_color": "#6a7a96",
+        "music": "minecraft:music.overworld.jagged_peaks",
+        "ambient_light": 0.25,
+        "motes": ("minecraft:white_ash", 0.004),
     },
 }
 

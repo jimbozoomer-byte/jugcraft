@@ -46,6 +46,9 @@
     "jugcraft:star_stone",
     "jugcraft:star_dial",
     "jugcraft:star_door",
-    "jugcraft:dust_vent"
+    "jugcraft:dust_vent",
+    "jugcraft:storm_rod",
+    "jugcraft:roc_nest",
+    "jugcraft:storm_cloud"
   ]
 }
