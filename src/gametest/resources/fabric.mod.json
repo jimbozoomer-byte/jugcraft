@@ -9,7 +9,8 @@
   "entrypoints": {
     "main": [
       "io.github.jimbozoomer.jugcraft.test.TestForms",
-      "io.github.jimbozoomer.jugcraft.test.MockPlayerChannels"
+      "io.github.jimbozoomer.jugcraft.test.MockPlayerChannels",
+      "io.github.jimbozoomer.jugcraft.test.StorageCrateMultiplayerHarness"
     ],
     "fabric-gametest": [
       "io.github.jimbozoomer.jugcraft.test.JimtaFactoryExpansionGameTests",
@@ -351,7 +352,8 @@
       "io.github.jimbozoomer.jugcraft.test.JimtaCollectionCompletionGameTests",
       "io.github.jimbozoomer.jugcraft.test.JimtaDynamiteGameTests",
       "io.github.jimbozoomer.jugcraft.test.JimtaPaintbrushGameTests",
-      "io.github.jimbozoomer.jugcraft.test.JimtaTransitGameTests"
+      "io.github.jimbozoomer.jugcraft.test.JimtaTransitGameTests",
+      "io.github.jimbozoomer.jugcraft.test.StorageCrateGameTests"
     ],
     "jei_mod_plugin": [
       "io.github.jimbozoomer.jugcraft.test.JeiStationClientGameTests$WithJei$Probe"
@@ -616,7 +618,9 @@
       "io.github.jimbozoomer.jugcraft.test.ConvenienceTabletClientGameTests",
       "io.github.jimbozoomer.jugcraft.test.AircraftFlightClientGameTests",
       "io.github.jimbozoomer.jugcraft.test.JimtaPocketGuestClientGameTests",
-      "io.github.jimbozoomer.jugcraft.test.RetroTraderClientGameTests"
+      "io.github.jimbozoomer.jugcraft.test.RetroTraderClientGameTests",
+      "io.github.jimbozoomer.jugcraft.test.StorageCrateMultiplayerClientGameTests",
+      "io.github.jimbozoomer.jugcraft.test.StorageCrateClientGameTests"
     ]
   },
   "depends": {

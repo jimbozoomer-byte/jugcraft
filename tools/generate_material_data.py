@@ -1825,6 +1825,8 @@ def main():
     nouveau_data.write_all(write, ASSETS, DATA / MOD, language)
     import starter_workshop
     starter_workshop.write_all(write, ASSETS, DATA / MOD, language)
+    import storage_crates
+    storage_crates.write_all(write, ASSETS, DATA / MOD, language)
     write(ASSETS / "lang/en_us.json", language)
     import town
     for problem in town.write():

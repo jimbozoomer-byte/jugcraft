@@ -387,6 +387,11 @@
       "denominator": 1,
       "source": "recipe jugcraft:aluminum_cladding_stairs"
     },
+    "jugcraft:aluminum_crate": {
+      "numerator": 72,
+      "denominator": 1,
+      "source": "recipe jugcraft:storage_crates/aluminum_crate_direct"
+    },
     "jugcraft:aluminum_hydroxide": {
       "numerator": 1,
       "denominator": 1,
@@ -441,6 +446,11 @@
       "numerator": 165,
       "denominator": 1,
       "source": "recipe jugcraft:aluminum_rotor_assembly"
+    },
+    "jugcraft:aluminum_storage_crate_upgrade": {
+      "numerator": 292,
+      "denominator": 9,
+      "source": "recipe jugcraft:storage_crates/aluminum_crate_kit"
     },
     "jugcraft:aluminum_wire": {
       "numerator": 1,
@@ -3161,6 +3171,11 @@
       "numerator": 1280,
       "denominator": 1,
       "source": "recipe jugcraft:bronze_chestplate"
+    },
+    "jugcraft:bronze_crate": {
+      "numerator": 704,
+      "denominator": 1,
+      "source": "recipe jugcraft:storage_crates/bronze_crate"
     },
     "jugcraft:bronze_dagger": {
       "numerator": 641,
@@ -16732,6 +16747,11 @@
       "denominator": 1,
       "source": "recipe jugcraft:invar_block"
     },
+    "jugcraft:invar_crate": {
+      "numerator": 72,
+      "denominator": 1,
+      "source": "recipe jugcraft:storage_crates/invar_crate_direct"
+    },
     "jugcraft:invar_gear": {
       "numerator": 4,
       "denominator": 1,
@@ -16751,6 +16771,11 @@
       "numerator": 1,
       "denominator": 1,
       "source": "fallback (balance pending)"
+    },
+    "jugcraft:invar_storage_crate_upgrade": {
+      "numerator": 292,
+      "denominator": 9,
+      "source": "recipe jugcraft:storage_crates/invar_crate_kit"
     },
     "jugcraft:iodine": {
       "numerator": 1,
@@ -34882,6 +34907,11 @@
       "denominator": 1,
       "source": "recipe jugcraft:stainless_steel_block"
     },
+    "jugcraft:stainless_steel_crate": {
+      "numerator": 72,
+      "denominator": 1,
+      "source": "recipe jugcraft:storage_crates/stainless_steel_crate_direct"
+    },
     "jugcraft:stainless_steel_ingot": {
       "numerator": 1,
       "denominator": 1,
@@ -34896,6 +34926,11 @@
       "numerator": 1,
       "denominator": 1,
       "source": "fallback (balance pending)"
+    },
+    "jugcraft:stainless_steel_storage_crate_upgrade": {
+      "numerator": 292,
+      "denominator": 9,
+      "source": "recipe jugcraft:storage_crates/stainless_steel_crate_kit"
     },
     "jugcraft:stainless_valve_blank": {
       "numerator": 11,
@@ -35056,6 +35091,11 @@
       "numerator": 8,
       "denominator": 1,
       "source": "recipe jugcraft:steel_chestplate"
+    },
+    "jugcraft:steel_crate": {
+      "numerator": 72,
+      "denominator": 1,
+      "source": "recipe jugcraft:storage_crates/steel_crate_direct"
     },
     "jugcraft:steel_dagger": {
       "numerator": 5,
@@ -35301,6 +35341,11 @@
       "numerator": 9,
       "denominator": 1,
       "source": "recipe jugcraft:steel_spear"
+    },
+    "jugcraft:steel_storage_crate_upgrade": {
+      "numerator": 292,
+      "denominator": 9,
+      "source": "recipe jugcraft:storage_crates/steel_crate_kit"
     },
     "jugcraft:steel_sword": {
       "numerator": 6,
@@ -36472,6 +36517,11 @@
       "denominator": 3,
       "source": "recipe jugcraft:titanium_chlorinator"
     },
+    "jugcraft:titanium_crate": {
+      "numerator": 72,
+      "denominator": 1,
+      "source": "recipe jugcraft:storage_crates/titanium_crate_direct"
+    },
     "jugcraft:titanium_helmet": {
       "numerator": 5,
       "denominator": 1,
@@ -36536,6 +36586,11 @@
       "numerator": 1,
       "denominator": 1,
       "source": "fallback (balance pending)"
+    },
+    "jugcraft:titanium_storage_crate_upgrade": {
+      "numerator": 292,
+      "denominator": 9,
+      "source": "recipe jugcraft:storage_crates/titanium_crate_kit"
     },
     "jugcraft:titanium_sword": {
       "numerator": 6,
@@ -36767,6 +36822,11 @@
       "denominator": 1,
       "source": "recipe jugcraft:tungsten_block"
     },
+    "jugcraft:tungsten_crate": {
+      "numerator": 72,
+      "denominator": 1,
+      "source": "recipe jugcraft:storage_crates/tungsten_crate_direct"
+    },
     "jugcraft:tungsten_dust": {
       "numerator": 1,
       "denominator": 1,
@@ -36806,6 +36866,11 @@
       "numerator": 3,
       "denominator": 1,
       "source": "recipe jugcraft:tungsten_steel_frame_stairs"
+    },
+    "jugcraft:tungsten_storage_crate_upgrade": {
+      "numerator": 292,
+      "denominator": 9,
+      "source": "recipe jugcraft:storage_crates/tungsten_crate_kit"
     },
     "jugcraft:tuppence_pistol": {
       "numerator": 773,

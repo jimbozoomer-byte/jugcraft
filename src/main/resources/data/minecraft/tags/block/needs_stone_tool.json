@@ -341,6 +341,13 @@
     "jugcraft:jimta_water_kinetic_generator",
     "jugcraft:jimta_wind_kinetic_generator",
     "jugcraft:jimta_charging_table",
-    "jugcraft:jimta_programming_table"
+    "jugcraft:jimta_programming_table",
+    "jugcraft:bronze_crate",
+    "jugcraft:steel_crate",
+    "jugcraft:invar_crate",
+    "jugcraft:stainless_steel_crate",
+    "jugcraft:aluminum_crate",
+    "jugcraft:titanium_crate",
+    "jugcraft:tungsten_crate"
   ]
 }

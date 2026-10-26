@@ -281,12 +281,14 @@ def item_models(definition):
 def check_assets(registered):
     import vehicle_bays
     import starter_workshop
+    import storage_crates
+    crates = [metal + '_crate' for metal, _ in storage_crates.TIERS]
     lang = load(ASSETS / "lang" / "en_us.json") or {}
     for block in (all_blocks() + machine_blocks() + ag.all_blocks() + petro.petro_blocks() + deposits.all_blocks()
                   + list(tank_display.BLOCKS) + plastic.blocks() + ph.blocks() + (town_assets.blocks() + styx.blocks()) + seasons.BLOCKS
                   + construction.blocks() + control_electronics.blocks() + rocketry.blocks() + dieselworks.blocks() + kaiserworks.blocks() + trenchworks.blocks() + fortifications.blocks() + bunkerworks.blocks() + aged_wood.blocks() + fire_control.blocks()
                   + concordance.blocks() + guns.blocks() + industrial_forms.blocks() + list(vehicle_bays.BLOCKS) + menagerie.blocks() + starter_workshop.BLOCKS
-                  + sorted(jimtafacts_catalog.blocks() & jimtafacts_catalog.items())):
+                  + crates + sorted(jimtafacts_catalog.blocks() & jimtafacts_catalog.items())):
         state = load(ASSETS / "blockstates" / f"{block}.json")
         if state:
             for variant in state.get("variants", {}).values():
@@ -312,7 +314,7 @@ def check_assets(registered):
                         + list(tank_display.BLOCKS) + plastic.blocks() + ph.blocks() + (town_assets.blocks() + styx.blocks())
                         + construction.blocks() + control_electronics.blocks() + rocketry.blocks() + dieselworks.blocks() + kaiserworks.blocks() + trenchworks.blocks() + fortifications.blocks() + bunkerworks.blocks() + aged_wood.blocks() + fire_control.blocks()
                         + concordance.blocks() + guns.blocks() + industrial_forms.blocks() + list(vehicle_bays.BLOCKS) + menagerie.blocks() + starter_workshop.BLOCKS
-                        + exchange_blocks.BLOCKS + exchange_poker.BLOCKS + exchange_casino.BLOCKS + exchange_casino.ITEMS) and f"item.{MOD}.{item}" not in lang:
+                        + exchange_blocks.BLOCKS + exchange_poker.BLOCKS + exchange_casino.BLOCKS + exchange_casino.ITEMS + crates) and f"item.{MOD}.{item}" not in lang:
             err(f"Missing name for item {item}")
 
 
@@ -758,6 +760,7 @@ DIAGONAL_WALLS = {dg.DIAGONAL_WALL.format(name) for _, name in dg.all_walls()}
 def check_tags():
     import vehicle_bays
     import starter_workshop
+    import storage_crates
     # Shared generation must retain both kitchen tools and combat equipment.
     from kitchen import KNIVES
     for tag in ("enchantable/melee_weapon", "enchantable/durability"):
@@ -828,6 +831,8 @@ def check_tags():
         if registry == 'entity_type': known.update(jimtafacts_spellbooks.entities())
         if registry == 'item': known.update(jimtafacts_computers.items()); known.update(jimtafacts_computers.blocks())
         if registry == 'block': known.update(jimtafacts_computers.blocks())
+        if registry in {'item', 'block'}: known.update(metal + '_crate' for metal, _ in storage_crates.TIERS)
+        if registry == 'item': known.update(metal + '_storage_crate_upgrade' for metal, _ in storage_crates.TIERS[1:])
         if registry in {'item', 'block'}: known.update(vehicle_bays.BLOCKS)
         if registry in {'item','block'}:known.update(menagerie.entries())
         if registry == 'entity_type':known.update(menagerie.entities())
@@ -19381,6 +19386,7 @@ def registered_items():
                   | set(ph.blocks()) | set(ph.items()) | set((town_assets.blocks() + styx.blocks()))
                   | set(guns.items()) | set(guns.blocks()) | set(concordance.items()) | set(concordance.blocks()) | set(industrial_forms.blocks()))
     import starter_workshop
+    import storage_crates
     registered |= menagerie.entries() | set(vehicle_bays.BLOCKS) | set(starter_workshop.NAMES)
     registered |= set(jimtafacts.items()) | set(jimtafacts_catalog.items())
     registered |= set(jimtafacts_network.ids()) | set(jimtafacts_spellbooks.items()) | set(jimtafacts_industry.items())
@@ -19403,6 +19409,8 @@ def registered_items():
     registered |= jimtafacts_cables.items()
     registered |= jimtafacts_terraforming.items()
     registered |= set(jimtafacts_computers.items()) | set(jimtafacts_computers.blocks())
+    registered |= {metal + '_crate' for metal, _ in storage_crates.TIERS}
+    registered |= {metal + '_storage_crate_upgrade' for metal, _ in storage_crates.TIERS[1:]}
     return registered
 
 
