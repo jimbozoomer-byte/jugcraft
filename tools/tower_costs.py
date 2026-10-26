@@ -57,7 +57,7 @@ def family(block):
 # SIE per block placed (from check()'s computation; keep in step with the recipes).
 BLOCK_VALUE = {
     "access_floor_tile": 0.633, "acoustic_wall_panel": 0.275, "aluminum_cladding": 1.0, "armored_conduit": 0.75,
-    "blast_glass": 0.267, "cable_tray": 0.287, "carbon_composite_panel": 0.875, "cargo_exchange_port": 6.3,
+    "blast_glass": 0.267, "cable_tray": 0.287, "carbon_composite_panel": 0.5, "cargo_exchange_port": 6.3,
     "cargo_packager": 14.7, "carpet_tile": 0.2, "ceiling_light_panel": 0.525, "ceramic_insulator": 0.2,
     "chiseled_stone_bricks": 0.2, "concrete_column": 0.275, "console_desk": 4.9, "control_screen": 1.317, "cooling_fin": 1.75,
     "copper_busbar": 0.5, "depleted_uranium_armor": 4.75, "dock_plating": 0.35, "drone_depot_terminal": 16.333,
@@ -68,7 +68,7 @@ BLOCK_VALUE = {
     "supply_pickup": 1.056, "transformer_casing": 2.8, "tungsten_steel_frame": 4.0, "warning_light": 0.5,
 }
 # SIE per module crafted.
-MODULE_VALUE = {"structural_module": 47.88, "armor_module": 46.5, "hangar_module": 21.9, "avionics_module": 24.43}
+MODULE_VALUE = {"structural_module": 47.88, "armor_module": 46.5, "hangar_module": 21.9, "avionics_module": 20.93}
 
 
 def module_cost(tier, block_names):
