@@ -6425,7 +6425,16 @@
             "These are fictional game recipes. In the Bulk Chemical Reactor, one redstone, 500 mB ammonia and 250 mB nitrogen produce 250 mB hydrazine and one Propellant Process Residue. The N2O4 job uses one redstone and 500 mB nitric acid for 250 mB N2O4 and one residue.",
             "Both jobs use base 96 JE/t; hydrazine takes 400 ticks and N2O4 takes 320. The process outlet and solid output must both have room. Existing ammonia, nitrogen and acid production supplies this branch.",
             "Wash two residue with 500 mB water in the Mineral Conditioner to obtain 500 mB Process Recovery Concentrate. The existing clay stabilization and concrete-fill recipe then give it a construction use. Raw propellant residue is not fertilizer or fuel.",
-            "Hydrazine supplies the monopropellant thruster; N2O4 is only paired with hydrazine in the storable bipropellant assembly. MMH, orbital vehicles, destination progression and maneuvering simulation remain future work."
+            "Hydrazine supplies the monopropellant thruster; N2O4 is paired with hydrazine or MMH in the storable bipropellant assembly. Orbital vehicles, destination progression and maneuvering simulation remain future work."
+          ]
+        },
+        {
+          "title": "MMH: the second storable fuel",
+          "icon": "jugcraft:mmh_tank",
+          "text": [
+            "Also fictional: in the Bulk Chemical Reactor, one redstone, 250 mB hydrazine and 250 mB methyl chloride produce 250 mB monomethylhydrazine (MMH) and one Propellant Process Residue, in 320 ticks at base 96 JE/t. Methyl chloride comes from methane and chlorine in the compact Chemical Reactor.",
+            "The compact Chemical Reactor seals 1000 mB MMH into one Rocket Casing as a Sealed MMH Tank. In the Rocket Workshop, one MMH tank, one N2O4 tank and two nozzles yield four Storable Bipropellant Motors, one more than hydrazine gives: the reward for the extra methylation step.",
+            "MMH is not a monopropellant here: the Hydrazine Thruster still needs hydrazine. The motors are the same item whichever fuel made them, with the same payload and range. Wash the residue as before."
           ]
         },
         {
@@ -6522,7 +6531,17 @@
           "text": [
             "Condition two Gypsum-rich Residue with 500 mB water into one Washed Gypsum and 500 mB Spent Mineral Wash. The Industrial Oven prepares one washed gypsum into one existing Gypsum Binder. Keep the wash for the existing settling/recovery route; raw residue cannot be placed as a building block.",
             "Craft one binder with two sand into two Plaster blocks, or two binder, two paper and one Digestate Fiber into four Plasterboard blocks. Both have matching slabs and stairs. Existing calcium-sulfate binder and concrete recipes remain available.",
-            "The compact Chemical Reactor can also turn 250 mB Industrial Phosphoric Acid and 500 mB HF into one existing Fluorophosphate Precursor for the battery chain. The earlier direct phosphate route remains available. This industrial acid is not a food-grade cola ingredient."
+            "The compact Chemical Reactor can also turn 250 mB Industrial Phosphoric Acid and 500 mB HF into one existing Fluorophosphate Precursor for the battery chain. The earlier direct phosphate route remains available. This industrial acid is not a food-grade cola ingredient until it is purified: see Food-grade acid and cola."
+          ]
+        },
+        {
+          "title": "Food-grade acid and cola",
+          "icon": "jugcraft:cola",
+          "text": [
+            "Purify the acid before it goes near food. The compact Chemical Reactor dilutes 250 mB Industrial Phosphoric Acid with 250 mB water and passes it over one charcoal into one glass bottle: a vial of Food-grade Phosphoric Acid, in 200 ticks at base 48 JE/t. These are game batches, not real food-processing instructions.",
+            "Craft the vial with one Caramel, two sugar (or glucose syrup made into sugar), one Cinnamon, one Vanilla Pods and one Lemon into a bottle of Cola Syrup. The syrup is mixed in the vial, so no bottle is left over.",
+            "The Chemical Reactor carbonates one Cola Syrup with 500 mB water and 250 mB carbon dioxide into three bottles of Cola, filling the syrup bottle and two more glass bottles, in 120 ticks at base 32 JE/t. Carbon dioxide comes from calcite dissolved in hydrochloric acid in the same reactor, cement burnt with its CO2 captured, or the Biogas Cleaner.",
+            "Cola gives 3 hunger, a little saturation and Speed for 45 seconds, and leaves its glass bottle. Industrial acid itself is never an ingredient: only the purified vial."
           ]
         }
       ]
