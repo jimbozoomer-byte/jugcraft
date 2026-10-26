@@ -916,8 +916,8 @@ GUNS = {
     "jawbreaker": {
         "display": "Jawbreaker",
         "source": "uppercut",
-        "tooltip": "A heavy stainless steel magnum of four rounds: slow to fire and hard hitting. Held in one hand, or in "
-                   "both with a stock fitted. Fires rifle rounds.",
+        "tooltip": "A heavy stainless steel magnum of four rounds: slow to fire, hard hitting, knocking back what it hits "
+                   "and piercing armour. Held in one hand, or in both with a stock fitted. Fires rifle rounds.",
         "damage": 12.0, "pellets": 1, "interval": 8, "auto": False, "capacity": 4,
         "reload": 47, "spread": (2.5, 0.5), "range": 72, "ammo": "rifle_round",
     },
@@ -3995,6 +3995,16 @@ BURN_SECONDS = 4
 # It falls when it ends, and takes the fall's damage (JugcraftGuns.LEVITATING).
 LEVITATING = ("chitin_smg", "hermit_rifle", "borer")
 LIFT_TICKS = 20
+
+
+# ------------------------------------------------------------------ heavy bullets: knockback and armour piercing
+
+# A gun whose bullets knock back each creature they hurt (KNOCKBACK: the strength of a second push, after the 0.4 every
+# hit gives, as a sword's knockback is), and whose bullets pierce armour (PIERCING: a hit deals what it would if the target
+# wore that many points less armour; it deals no more to a creature without). The owner's data gives the Uppercut both
+# (knockbackStrength 0.6, armorPen 4.5): slice 15B's Jawbreaker is the first (JugcraftGuns.KNOCKBACK, PIERCING).
+KNOCKBACK = {"jawbreaker": 0.6}
+PIERCING = {"jawbreaker": 4.5}
 
 
 def cell_rack_model():

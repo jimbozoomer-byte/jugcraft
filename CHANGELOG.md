@@ -8,6 +8,10 @@ Every change to Jugcraft, newest first, grouped by pull request. For what each t
 
 No numbered release yet. Entries on feature branches remain proposed until their pull requests merge.
 
+### Unmerged: Guns, heavy bullets: knockback and armour piercing
+- A gun's bullets can now knock back what they hit further than a plain hit, and pass through some of its armour, as the owner's gun data asks. The **Jawbreaker** is the first: its shots push about twice as far as a plain hit (a second push of 0.6) and pass through 4.5 points of armour; a creature without armour takes its damage as before.
+- Record: [guns.md, the heavy-bullets follow-up](docs/features/guns.md#follow-up-heavy-bullets-knockback-and-armour-piercing).
+
 ### Unmerged: Guns, slice 15B (three diamond-steel sidearms)
 - **Three guns** from the owner's own GeckoLib models and animations, the next of their diamond-steel guns, each held in one hand, and in both with a stock fitted, as a carbine: the **Kreuzer Pistol**, a quick pistol of thirteen light rounds, its magazine ahead of its trigger; the **Psalm SMG**, a machine pistol of twenty-five light rounds, ten a second; and the **Jawbreaker**, a heavy magnum of four rifle rounds, 12 a shot. Each carries a wax seal and a strip of scripture that swing as it fires.
 - Made from stainless steel, a diamond and a lever; redstone for the Psalm. Each takes the barrel attachments and stocks; the Kreuzer and the Psalm the magazines, the Jawbreaker the scopes and the Laser Sight.
