@@ -1628,6 +1628,9 @@ def tags():
         tags.add("worldgen/biome", seasons.TAG, biome)
     for biome in seasons.WINTER_SNOW:
         tags.add("worldgen/biome", seasons.WINTER_SNOW_TAG, biome)
+    # The landscape collection's kinds, which the werewolves, squirrels, turkeys and wisps read (tools/landscape_kinds.py).
+    import landscape_kinds
+    landscape_kinds.tags(tags)
     import alpine_data
     alpine_data.tags(tags)
     import biomes_data

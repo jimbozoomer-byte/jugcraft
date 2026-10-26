@@ -7,6 +7,7 @@ See docs/branches/AGRICULTURE.md for the design.
 """
 
 import plants
+import landscape_kinds
 import graveyard
 import midway
 import ferris_wheel
@@ -945,10 +946,11 @@ CANDLE_SKULL = {"light": 12}
 
 # Will-o'-wisps (agriculture/WillOWisp.java, Wisps.java): on Halloween nights (the event running, overworld time
 # dusk to dawn), every spawn_ticks the server tries, spawn_chance of the time per player, one spot min..max
-# blocks away, open to the sky, over a swamp or within corn_radius of corn; at most near_cap within near_range of a
+# blocks away, open to the sky, over a swamp (biome tag haunts_tag) or within corn_radius of corn; at most near_cap within near_range of a
 # player and level_cap in the world. A wisp flees within flee (sneak_flee when sneaking); a glass bottle catches it.
 WISPS = {"spawn_ticks": 100, "spawn_chance": 0.5, "min": 10, "max": 32, "corn_radius": 2, "near_cap": 4, "near_range": 48,
-         "level_cap": 64, "flee": 6.0, "sneak_flee": 2.5, "jar": "wisp_in_a_jar", "jar_display": "Wisp in a Jar", "jar_light": 13}
+         "level_cap": 64, "flee": 6.0, "sneak_flee": 2.5, "jar": "wisp_in_a_jar", "jar_display": "Wisp in a Jar", "jar_light": 13,
+         "haunts_tag": "jugcraft:wisp_haunts", "haunts": ["#c:is_swamp", landscape_kinds.SWAMPS_TAG]}
 # The Harvest Moon (agriculture/HarvestMoon.java): the nights (dusk to dawn) of `day` (halloween.harvest_moon) while
 # the event runs; Jugcraft crops grow growth_bonus times as fast and giant pumpkins swell twice as fast.
 HARVEST_MOON = {"day": "10-31", "growth_bonus": 2.0, "dusk": 13000, "dawn": 23000, "check_ticks": 100}
@@ -1114,11 +1116,13 @@ BROOMSTICK = {"item": "flying_broomstick", "display": "Flying Broomstick", "char
 WEREWOLF = {"entity": "werewolf", "display": "Werewolf", "size": [0.9, 2.4], "hide_factor": 0.5, "silver_factor": 2.5,
             "regen_ticks": 40, "silver_wound_ticks": 100, "shun_ticks": 200, "spawn_ticks": 200, "spawn_chance": 0.3,
             "min_distance": 24, "max_distance": 40, "near_cap": 2, "level_cap": 8, "ward_reach": 6,
-            "haunts": ["#minecraft:is_forest", "#minecraft:is_taiga", "minecraft:grove"],
+            # The landscape collection's woods too, which lack vanilla's kind tags (tools/landscape_kinds.py).
+            "haunts": ["#minecraft:is_forest", "#minecraft:is_taiga", "minecraft:grove", landscape_kinds.WOODS_TAG],
             # Which kind comes out: a snow werewolf in snowy biomes; a shadow werewolf `shadow_haunt_chance` of the time
             # in its haunts and `shadow_chance` elsewhere; otherwise a brown one.
-            "snow_haunts": ["#c:is_snowy"],
-            "shadow_haunts": ["minecraft:dark_forest", "minecraft:pale_garden", "jugcraft:gloomweald", "jugcraft:ghost_forest"],
+            "snow_haunts": ["#c:is_snowy", landscape_kinds.SNOWY_TAG],
+            "shadow_haunts": ["minecraft:dark_forest", "minecraft:pale_garden", "jugcraft:gloomweald", "jugcraft:ghost_forest",
+                              "jugcraft:landscape_ominous_woods"],
             "shadow_chance": 0.08, "shadow_haunt_chance": 0.5,
             # Three kinds, three tiers of danger: their attributes, the experience they give and what they drop.
             "kinds": {
@@ -1162,7 +1166,7 @@ SQUIRRELS = {"entity": "squirrel", "display": "Squirrel", "health": 6, "speed": 
              "spawn_chance": 0.25, "min_distance": 20, "max_distance": 40, "near_cap": 6, "level_cap": 30, "seek_range": 10,
              "bury_ticks": 200, "sapling_chance": 0.25, "sapling_space": 3, "acorn_chance": 0.05,
              "acorn_leaves": ["oak_leaves", "dark_oak_leaves"], "acorn": "acorn", "acorn_display": "Acorn", "roasted": "roasted_acorns",
-             "habitat": ["#minecraft:is_forest", "#minecraft:is_taiga"],
+             "habitat": ["#minecraft:is_forest", "#minecraft:is_taiga", landscape_kinds.WOODS_TAG],
              "food": ["jugcraft:acorn", "jugcraft:chestnut", "jugcraft:roasted_chestnuts", "jugcraft:pine_nuts", "jugcraft:roasted_pine_nuts", "jugcraft:ecology_walnut", "jugcraft:roasted_walnuts"]}
 # The Pumpkling (Pumpkling): a hand-carved pumpkin woken by a spark into a pet; follows past `follow_start`, stops at
 # `follow_stop`, comes to its owner past `teleport`; treats heal `treat_heal`.
@@ -2018,7 +2022,8 @@ TURKEYS = {"entity": "turkey", "display": "Wild Turkey", "health": 8, "speed": 0
            "strut_range": 6, "strut_ticks": 80, "strut_chance": 200, "egg_min": 6000, "egg_max": 12000,
            "spawn_ticks": 400, "spawn_chance": 0.25, "min_distance": 24, "max_distance": 48, "flock": [3, 5], "near_cap": 10,
            "near_range": 64, "level_cap": 40, "habitat_tag": "jugcraft:turkey_habitat",
-           "habitat": ["#minecraft:is_forest", "#minecraft:is_taiga", "minecraft:plains", "minecraft:sunflower_plains", "minecraft:meadow"],
+           "habitat": ["#minecraft:is_forest", "#minecraft:is_taiga", "minecraft:plains", "minecraft:sunflower_plains", "minecraft:meadow",
+                       landscape_kinds.WOODS_TAG, landscape_kinds.GRASSLANDS_TAG],
            "table": "entities/turkey", "feathers": [1, 3], "raw": "raw_turkey", "raw_food": [3, 0.3], "roast": "roast_turkey",
            "roast_display": "Roast Turkey", "slice": "turkey_slice", "servings": 6, "serving": [3, 0.6]}
 

@@ -25,6 +25,11 @@ No numbered release yet. Entries on feature branches remain proposed until their
 - The **storage tank** screen (352 wide) now scales itself down to fit a narrower window, as the reactor console and remote shutdown panel do.
 - A new client game test, `ScreenFitClientGameTests`, opens every machine screen, form screen, the recipe page and the eight other machine screens at the smallest GUI Minecraft gives (320 × 240, a 640 × 480 window), checks that each fits the window, and photographs some. Record: [screen-fit-check.md](docs/features/screen-fit-check.md).
 
+### Unmerged: Seasonal biome audit
+- **The landscape biomes now have seasons:** in the 54 temperate landscape woods, fields, hills and swamps, grass and leaves turn with the year as in Jugcraft's own biomes. 47 of them take winter snow when `seasons.snow` is on; the 7 mild ones (Mediterranean, lavender, redwood, warm shrub, orchid swamp) do not.
+- **Halloween and autumn creatures reach them too:** wisps rise over the landscape swamps on Halloween nights. On full moons, werewolves stalk the landscape woods, snow werewolves its snowy land and shadow werewolves the Ominous Woods, where the Howling Totem rite also works. Squirrels and wild turkeys come to its woods and open country.
+- **Every Jugcraft biome now needs a seasons decision:** the data check fails on a new biome without one, so a future collection cannot miss the seasons. The audit of every seasonal system against the newer collections is in [seasonal-biome-audit.md](docs/features/seasonal-biome-audit.md).
+
 ### Unmerged: The Exchange (bank, markets, land and shares, in Jugs)
 - Press **N** (or `/jugcraft exchange`) for the **Exchange**, a walnut-and-brass ledger with seven tabs. It deals only in **Jugs**, the town's credit: no new currency.
 - **Banking and loans:** a one-time **starter loan** (100 Jugs) for new players, a flat 10% fee, due in 10 days. While you owe, a quarter of your market earnings repays the bank; overdue borrowers may sell but not buy. Paying off on time raises your credit limit.

@@ -2866,6 +2866,54 @@ def check_seasons():
                    "harvest_feast", "harvest_feast.days", "december"):
         if f'"{option}"' not in options:
             err(f"JugcraftConfig.TEXT_OPTIONS has no {option}")
+    check_seasonal_biomes()
+
+
+def check_seasonal_biomes():
+    """The seasonal biome audit (docs/features/seasonal-biome-audit.md): every Jugcraft biome is decided (tools/biomes.py's
+    "seasons" flag, its landscape kind or seasons.OTHER), the landscape decisions follow their rule against each biome's
+    own climate, every seasonal Jugcraft biome rains and is neither frozen nor tropical, winter snow falls only where it
+    rains, and the landscape kind tags and the wisps' haunts are written as tools/ says."""
+    import landscape_kinds as lk
+    root = DATA / MOD / "worldgen" / "biome"
+    files = {path.relative_to(root).with_suffix("").as_posix(): load(path) or {} for path in sorted(root.rglob("*.json"))}
+    for biome in files:
+        if biome not in bm.BIOMES and biome not in lk.KINDS and biome not in seasons.OTHER:
+            err(f"Biome {MOD}:{biome} has no seasons decision: give it a \"seasons\" flag (tools/biomes.py), a landscape "
+                "kind (tools/landscape_kinds.py) or an entry in seasons.OTHER")
+    for biome in list(lk.KINDS) + list(seasons.OTHER):
+        if biome not in files:
+            err(f"tools/ decides seasons for {MOD}:{biome}, which has no biome file")
+    climate = {biome: (data.get("temperature", 0.5), bool(data.get("has_precipitation"))) for biome, data in files.items()}
+    for name, rule, listed in (("SEASONS", lk.seasonal, lk.SEASONS), ("SNOWY", lk.snowy, lk.SNOWY)):
+        expected = sorted(b for b, kind in lk.KINDS.items() if b in climate and rule(kind, *climate[b]))
+        if expected != sorted(listed):
+            err(f"landscape_kinds.{name} differs from its rule: add {sorted(set(expected) - set(listed))}, "
+                f"drop {sorted(set(listed) - set(expected))}")
+    if not set(lk.MILD) <= set(lk.SEASONS):
+        err(f"landscape_kinds.MILD names biomes without seasons: {sorted(set(lk.MILD) - set(lk.SEASONS))}")
+    low, high = lk.SEASON_TEMPERATURE
+    for biome in seasons.BIOMES:
+        ns, path = split(biome)
+        if ns == MOD and path in climate:
+            temperature, rains = climate[path]
+            if not rains or not low <= temperature <= high:
+                err(f"{biome} has seasons but its climate is {temperature}, rain {rains} (seasons need rain and {low} to {high})")
+    for biome in seasons.WINTER_SNOW:
+        ns, path = split(biome)
+        if ns == MOD and path in climate and not climate[path][1]:
+            err(f"{biome} gets winter snow but has no precipitation")
+    for tag_id, biomes in lk.KIND_TAGS.items():
+        ns, path = split(tag_id)
+        values = (load(DATA / ns / "tags" / "worldgen" / "biome" / f"{path}.json") or {}).get("values")
+        if values != [f"{MOD}:{biome}" for biome in biomes]:
+            err(f"#{tag_id} differs from tools/landscape_kinds.py")
+    wisps = ag.WISPS
+    ns, path = split(wisps["haunts_tag"])
+    if (load(DATA / ns / "tags" / "worldgen" / "biome" / f"{path}.json") or {}).get("values") != wisps["haunts"]:
+        err(f"#{wisps['haunts_tag']} differs from tools/agriculture.py WISPS['haunts']")
+    if f'Jugcraft.id("{path}")' not in (JAVA_ROOT / "agriculture" / "Wisps.java").read_text(encoding="utf-8"):
+        err(f"Wisps does not read #{wisps['haunts_tag']}")
 
 
 def check_region_rules():
