@@ -90,6 +90,14 @@ No numbered release yet. Entries on feature branches remain proposed until their
 - The chunk's contract, decisions and evidence: [concordance-chunk-b.md](docs/features/concordance-chunk-b.md).
 - **The server game tests no longer run out of memory:** with main's #488 merged, all 2,575 of this branch's server tests ran, then the suite stopped with `OutOfMemoryError: Java heap space` on its last one (run 40414783975; main's 2,477 fit). A game-test mock player's connection ends in Netty's EmbeddedChannel, which keeps every packet written to it until something reads it; no test does, and the players stay logged in for the whole run, so their join packets and every later player's join message stayed in the heap. A test-only hook (`MockPlayerChannels`) now empties those channels each tick and logs how many packets it released; real and integrated-server connections are untouched. The game itself is unchanged.
 
+### Unmerged: The workshop, aircraft and furniture screens in the looks
+- The screens PR #475 brought in take the machine looks: the **lathe**, **fluid services** and **aircraft** the industrial look; the **workshop engines**, **chute**, **robot programming table** and **equipment charger**, and the **artisan's workstation** the workshop look; the **transformer** and **computer** the electric look; the **compact reactor** the advanced look. Each has the look's casing, glass panes, a status lamp by the title and keys that light up when they are on (the transformer's mode, open chute outputs, the chosen robot program, a running reactor, the artisan's features). The gate parameters, heat and kinetic generators, civil and matter workshops keep the electric look, with keys in it in place of vanilla buttons. Every slot, button id and payload is unchanged.
+- The **computer** (360 × 288), **compact reactor**, **gate parameters** and the larger **aircraft** now scale down to fit a small window, slots and keys with them (a new `FittedContainerScreen`).
+- The scribing desk keeps its scroll forge; the personal safe and shops keep their panels until the trade look.
+- The screen fit check now opens all 15 at the smallest GUI, every aircraft layout and both workshop table kinds. Record: [new-screen-styles.md](docs/features/new-screen-styles.md).
+
+### Changed: The benches in the workshop look
+
 ### Unmerged: Fixed: the tower cost check on Linux
 - `tools/tower_costs.py` reads the recipe files in name order. Where several crafting recipes make the same item and none is named after it, the check takes the first; the file system's own order differs between Windows and Linux, so since the Jimtafacts batch it worked out five drone tower blocks' values differently on Linux (CI) and failed `check_mod_data.py` there. The values themselves are unchanged.
 
@@ -121,7 +129,7 @@ No numbered release yet. Entries on feature branches remain proposed until their
 - The blueprint table keeps its own drafting-sheet look.
 - The screen fit check now opens the five benches at the smallest GUI too. Record: [bench-screens.md](docs/features/bench-screens.md).
 
-### Unmerged: The recipe page in its machine's look, and a screen fit check
+### Changed: The recipe page in its machine's look, and a screen fit check
 - The industrial forms' **recipe page** takes the forms' industrial look instead of its own teal. It has a status lamp by "<machine>: recipes" (green while a recipe is locked, amber when the recipes were reloaded), the list and the details in panes, and keys in the look: the chosen recipe, Automatic and the locked recipe's Lock key are lit. Every function and button id is unchanged.
 - The **storage tank** screen (352 wide) now scales itself down to fit a narrower window, as the reactor console and remote shutdown panel do.
 - A new client game test, `ScreenFitClientGameTests`, opens every machine screen, form screen, the recipe page and the eight other machine screens at the smallest GUI Minecraft gives (320 × 240, a 640 × 480 window), checks that each fits the window, and photographs some. Record: [screen-fit-check.md](docs/features/screen-fit-check.md).

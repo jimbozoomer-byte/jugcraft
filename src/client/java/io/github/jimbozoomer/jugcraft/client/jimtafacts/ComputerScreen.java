@@ -1,6 +1,9 @@
 package io.github.jimbozoomer.jugcraft.client.jimtafacts;
 
 import io.github.jimbozoomer.jugcraft.Jugcraft;
+import io.github.jimbozoomer.jugcraft.client.FittedContainerScreen;
+import io.github.jimbozoomer.jugcraft.client.ScreenKit;
+import io.github.jimbozoomer.jugcraft.client.MachineScreenThemes;
 import io.github.jimbozoomer.jugcraft.jimtafacts.computers.ComputerTerminal;
 import io.github.jimbozoomer.jugcraft.jimtafacts.computers.WorkshopComputers;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
@@ -14,8 +17,8 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Inventory;
 
 /** Original supplied computer surround, readable editable program, live output and ordinary inventory. */
-public final class ComputerScreen extends AbstractContainerScreen<ComputerTerminal.Menu> {
-    private float scale=1;
+public final class ComputerScreen extends FittedContainerScreen<ComputerTerminal.Menu> {
+    private final MachineScreenThemes.Theme theme=MachineScreenThemes.screen("computer");
     private MultiLineEditBox editor;
     private MultiLineEditBox log;
     private String accepted = "", lastOutput = "";
@@ -37,46 +40,44 @@ public final class ComputerScreen extends AbstractContainerScreen<ComputerTermin
     @Override protected void init() {
         String draft=editor==null?menu.program:editor.getValue();String name=fileName==null?"program":fileName.getValue();
         super.init(); titleLabelY = 10000; inventoryLabelY = 10000;
-        scale=Math.min(1F,Math.min((width-12F)/imageWidth,(height-12F)/imageHeight));
-        leftPos=Math.round((width/scale-imageWidth)/2);topPos=Math.round((height/scale-imageHeight)/2);
         editor = new MultiLineEditBox.Builder().setX(leftPos + 16).setY(topPos + 32)
-                .setShowBackground(false).setTextColor(0xFFE0EFE0).setCursorColor(0xFF96E4AE)
+                .setShowBackground(false).setTextColor(theme.text()).setCursorColor(theme.progress())
                 .setPlaceholder(Component.literal("print Hello, Jugcraft!\nstop"))
                 .build(font, 155, 125, Component.literal("Computer program"));
         editor.setCharacterLimit(WorkshopComputers.MAX_PROGRAM); editor.setValue(draft); addRenderableWidget(editor);
         log = new MultiLineEditBox.Builder().setX(leftPos + 190).setY(topPos + 32)
-                .setShowBackground(false).setTextColor(0xFFA1E7B3).setCursorColor(0xFFA1E7B3)
+                .setShowBackground(false).setTextColor(theme.ok()).setCursorColor(theme.ok())
                 .build(font, 155, 103, Component.literal("Computer output"));
         log.setCharacterLimit(8192); log.setValue(menu.output); addRenderableWidget(log);
         terminalInput=addRenderableWidget(new EditBox(font,leftPos+190,topPos+140,115,17,Component.literal("Input for running Lua program")));
         terminalInput.setMaxLength(256);
-        sendInput=addRenderableWidget(Button.builder(Component.literal("Send"),b->{ClientPlayNetworking.send(new ComputerTerminal.Edit(menu.containerId,9,terminalInput.getValue()));terminalInput.setValue("");}).bounds(leftPos+309,topPos+140,36,17).build());
+        sendInput=addRenderableWidget(new ScreenKit.TextButton(leftPos+309,topPos+140,36,17,theme,Component.literal("Send"),b->{ClientPlayNetworking.send(new ComputerTerminal.Edit(menu.containerId,9,terminalInput.getValue()));terminalInput.setValue("");}));
         actions.clear();
         String[] labels = {"Save", "Run", "Stop", "To disk", "From disk", "Refuel", "Help"};
         for (int i = 0; i < labels.length; i++) {
             int action = i;
-            actions.add(addRenderableWidget(Button.builder(Component.literal(labels[i]), button -> {
+            actions.add(addRenderableWidget(new ScreenKit.TextButton(leftPos + 9 + i * 49, topPos + 174, 47, 18,theme,Component.literal(labels[i]), button -> {
                 ClientPlayNetworking.send(new ComputerTerminal.Edit(menu.containerId, action, action == 0 ? editor.getValue() : ""));
                 if (action == 0) accepted = editor.getValue();
-            }).bounds(leftPos + 9 + i * 49, topPos + 174, 47, 18).build()));
+            })));
         }
-        previous=addRenderableWidget(Button.builder(Component.literal("Previous page"),b->ClientPlayNetworking.send(new ComputerTerminal.Edit(menu.containerId,7,""))).bounds(leftPos+16,topPos+174,145,18).build());
-        next=addRenderableWidget(Button.builder(Component.literal("Next page"),b->ClientPlayNetworking.send(new ComputerTerminal.Edit(menu.containerId,8,""))).bounds(leftPos+190,topPos+174,145,18).build());
-        luaExample=addRenderableWidget(Button.builder(Component.literal("ROM shell"),b->{if(!armed.equals("lua-template")){armed="lua-template";b.setMessage(Component.literal("Replace draft?"));return;}editor.setValue("--!lua\nshell.run('shell')");armed="";b.setMessage(Component.literal("ROM shell"));browsing=false;}).bounds(leftPos+190,topPos+4,90,16).build());
-        terminalToggle=addRenderableWidget(Button.builder(Component.literal("Terminal"),b->{menu.terminalView=!menu.terminalView;browsing=false;}).bounds(leftPos+105,topPos+4,78,16).build());
-        keyboardToggle=addRenderableWidget(Button.builder(Component.literal("Line input"),b->{rawKeyboard=!rawKeyboard;setFocused(null);}).bounds(leftPos+190,topPos+4,90,16).build());
-        programToggle=addRenderableWidget(Button.builder(Component.literal("Programs"),b->{browsing=!browsing;armed="";}).bounds(leftPos+286,topPos+4,66,16).build());
+        previous=addRenderableWidget(new ScreenKit.TextButton(leftPos+16,topPos+174,145,18,theme,Component.literal("Previous page"),b->ClientPlayNetworking.send(new ComputerTerminal.Edit(menu.containerId,7,""))));
+        next=addRenderableWidget(new ScreenKit.TextButton(leftPos+190,topPos+174,145,18,theme,Component.literal("Next page"),b->ClientPlayNetworking.send(new ComputerTerminal.Edit(menu.containerId,8,""))));
+        luaExample=addRenderableWidget(new ScreenKit.TextButton(leftPos+190,topPos+4,90,16,theme,Component.literal("ROM shell"),b->{if(!armed.equals("lua-template")){armed="lua-template";b.setMessage(Component.literal("Replace draft?"));return;}editor.setValue("--!lua\nshell.run('shell')");armed="";b.setMessage(Component.literal("ROM shell"));browsing=false;}));
+        terminalToggle=addRenderableWidget(new ScreenKit.TextButton(leftPos+105,topPos+4,78,16,theme,Component.literal("Terminal"),b->{menu.terminalView=!menu.terminalView;browsing=false;}));
+        keyboardToggle=addRenderableWidget(new ScreenKit.TextButton(leftPos+190,topPos+4,90,16,theme,Component.literal("Line input"),b->{rawKeyboard=!rawKeyboard;setFocused(null);}));
+        programToggle=addRenderableWidget(new ScreenKit.TextButton(leftPos+286,topPos+4,66,16,theme,Component.literal("Programs"),b->{browsing=!browsing;armed="";}));
         fileName=addRenderableWidget(new EditBox(font,leftPos+16,topPos+32,155,18,Component.literal("Saved program name")));
         fileName.setMaxLength(32);fileName.setValue(name);fileName.setResponder(v->armed="");
         fileRows.clear();
         for(int i=0;i<4;i++){
-            int row=i;fileRows.add(addRenderableWidget(Button.builder(Component.empty(),b->{int index=filePage*4+row;if(index<menu.files.size())fileName.setValue(menu.files.get(index));}).bounds(leftPos+16,topPos+55+i*19,155,17).build()));
+            int row=i;fileRows.add(addRenderableWidget(new ScreenKit.TextButton(leftPos+16,topPos+55+i*19,155,17,theme,Component.empty(),b->{int index=filePage*4+row;if(index<menu.files.size())fileName.setValue(menu.files.get(index));})));
         }
-        previousFiles=addRenderableWidget(Button.builder(Component.literal("<"),b->{filePage=Math.max(0,filePage-1);armed="";}).bounds(leftPos+16,topPos+132,24,16).build());
-        nextFiles=addRenderableWidget(Button.builder(Component.literal(">"),b->{filePage=Math.min(3,filePage+1);armed="";}).bounds(leftPos+147,topPos+132,24,16).build());
-        storeFile=addRenderableWidget(Button.builder(Component.literal("Store"),b->fileAction(0)).bounds(leftPos+16,topPos+151,49,17).build());
-        loadFile=addRenderableWidget(Button.builder(Component.literal("Load"),b->fileAction(1)).bounds(leftPos+69,topPos+151,49,17).build());
-        deleteFile=addRenderableWidget(Button.builder(Component.literal("Delete"),b->fileAction(2)).bounds(leftPos+122,topPos+151,49,17).build());
+        previousFiles=addRenderableWidget(new ScreenKit.TextButton(leftPos+16,topPos+132,24,16,theme,Component.literal("<"),b->{filePage=Math.max(0,filePage-1);armed="";}));
+        nextFiles=addRenderableWidget(new ScreenKit.TextButton(leftPos+147,topPos+132,24,16,theme,Component.literal(">"),b->{filePage=Math.min(3,filePage+1);armed="";}));
+        storeFile=addRenderableWidget(new ScreenKit.TextButton(leftPos+16,topPos+151,49,17,theme,Component.literal("Store"),b->fileAction(0)));
+        loadFile=addRenderableWidget(new ScreenKit.TextButton(leftPos+69,topPos+151,49,17,theme,Component.literal("Load"),b->fileAction(1)));
+        deleteFile=addRenderableWidget(new ScreenKit.TextButton(leftPos+122,topPos+151,49,17,theme,Component.literal("Delete"),b->fileAction(2)));
     }
     private void fileAction(int action){
         String name=fileName.getValue(),key=action+":"+name;
@@ -125,18 +126,10 @@ public final class ComputerScreen extends AbstractContainerScreen<ComputerTermin
             log.visible=true;actions.get(2).setX(leftPos+9+2*49);actions.get(2).setY(topPos+174);
             terminalInput.setX(leftPos+190);terminalInput.setY(topPos+140);terminalInput.setWidth(115);sendInput.setX(leftPos+309);sendInput.setY(topPos+140);
         }
-        extractBackground(g, x, y, delta);
-        g.pose().pushMatrix();g.pose().scale(scale,scale);
-        super.extractRenderState(g, Math.round(x/scale), Math.round(y/scale), delta);
-        extractTooltip(g, Math.round(x/scale), Math.round(y/scale));g.pose().popMatrix();
+        super.extractRenderState(g,x,y,delta);
     }
-    @Override public void extractBackground(GuiGraphicsExtractor g, int x, int y, float delta) {
-        g.pose().pushMatrix();g.pose().scale(scale,scale);
-        drawComputerBackground(g);g.pose().popMatrix();
-    }
-    private void drawComputerBackground(GuiGraphicsExtractor g) {
-        g.fill(leftPos, topPos, leftPos + imageWidth, topPos + imageHeight, 0xFF292C2B);
-        g.outline(leftPos, topPos, imageWidth, imageHeight, 0xFF848C88);
+    @Override protected void background(GuiGraphicsExtractor g,int x,int y,float delta) {
+        ScreenKit.frame(g,theme,leftPos,topPos,imageWidth,imageHeight,menu);
         if(menu.terminalView){
             g.text(font,Component.literal("Workshop OS"),leftPos+12,topPos+8,0xFFE4EAE6,false);
             g.fill(leftPos+12,topPos+26,leftPos+348,topPos+236,0xFF111713);
@@ -147,10 +140,10 @@ public final class ComputerScreen extends AbstractContainerScreen<ComputerTermin
                 g.fill(cx,cy,cx+6,cy+8,palette(back));
                 char letter=menu.canvasText.charAt(i);if(letter!=' '){g.pose().pushMatrix();g.pose().translate(cx,cy);g.pose().scale(.8F,.8F);g.text(font,String.valueOf(letter),0,0,palette(front),false);g.pose().popMatrix();}
             }
-            g.text(font,menu.energy+" JE · "+(menu.running?"Running":"Stopped"),leftPos+16,topPos+271,0xFFA1E7B3,false);return;
+            g.text(font,menu.energy+" JE · "+(menu.running?"Running":"Stopped"),leftPos+16,topPos+271,theme.ok(),false);return;
         }
-        g.blitSprite(RenderPipelines.GUI_TEXTURED, Jugcraft.id("jimtafacts/computer_border"), leftPos + 5, topPos + 21, 174, 146, -1);
-        g.blitSprite(RenderPipelines.GUI_TEXTURED, Jugcraft.id("jimtafacts/computer_border"), leftPos + 179, topPos + 21, 176, 146, -1);
+        ScreenKit.pane(g,theme,leftPos+5,topPos+26,174,141);
+        ScreenKit.pane(g,theme,leftPos+179,topPos+26,176,141);
         g.text(font, title, leftPos + 12, topPos + 8, 0xFFE4EAE6, false);
         g.text(font, menu.running ? "RUNNING" : "READY", leftPos + 190, topPos + 161, menu.running ? 0xFF93E3A8 : 0xFFABB5AD, false);
         if(browsing)g.text(font,(filePage+1)+" / "+Math.max(1,(menu.files.size()+3)/4)+" · "+menu.files.size()+" saved",leftPos+47,topPos+136,0xFFB3C5B8,false);
@@ -167,11 +160,6 @@ public final class ComputerScreen extends AbstractContainerScreen<ComputerTermin
     }
     private static int palette(int color){return 0xFF000000|net.minecraft.world.item.DyeColor.byId(Math.clamp(color,0,15)).getTextureDiffuseColor();}
     private void key(String kind,int code){ClientPlayNetworking.send(new ComputerTerminal.Edit(menu.containerId,10,kind+"\t"+code));}
-    private net.minecraft.client.input.MouseButtonEvent scaled(net.minecraft.client.input.MouseButtonEvent e){return new net.minecraft.client.input.MouseButtonEvent(e.x()/scale,e.y()/scale,e.buttonInfo());}
-    @Override public boolean mouseClicked(net.minecraft.client.input.MouseButtonEvent e,boolean twice){return super.mouseClicked(scaled(e),twice);}
-    @Override public boolean mouseReleased(net.minecraft.client.input.MouseButtonEvent e){return super.mouseReleased(scaled(e));}
-    @Override public boolean mouseDragged(net.minecraft.client.input.MouseButtonEvent e,double dx,double dy){return super.mouseDragged(scaled(e),dx/scale,dy/scale);}
-    @Override public boolean mouseScrolled(double x,double y,double dx,double dy){return super.mouseScrolled(x/scale,y/scale,dx,dy);}
     @Override public boolean keyPressed(net.minecraft.client.input.KeyEvent event){
         if(menu.terminalView&&rawKeyboard&&menu.running&&event.input()!=256){key("key",event.input());return true;}
         return super.keyPressed(event);

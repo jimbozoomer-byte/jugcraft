@@ -1,6 +1,6 @@
 # Machine screens: the recipe page's look and a fit check
 
-Status: implemented (pending CI and review). Follows [the other machine screens in their looks](other-machine-screens.md) and [machine screens: five looks by tech level](machine-screens.md).
+Status: merged (PR #469). Follows [the other machine screens in their looks](other-machine-screens.md) and [machine screens: five looks by tech level](machine-screens.md).
 Proposal issue: none. The owner, 23 October 2026, picked two of the suggested polish items ("do 1 and 2"):
 1. the form machines' recipe page, still in its own teal, takes its machine screen's look;
 2. a check, at a second GUI size, that the machine screens fit a small window, after the logic controller had been cut off at a 240-high GUI.
