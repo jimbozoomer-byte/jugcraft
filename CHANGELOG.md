@@ -18,6 +18,16 @@ No numbered release yet. Entries on feature branches remain proposed until their
 - **Halloween and autumn creatures reach them too:** wisps rise over the landscape swamps on Halloween nights. On full moons, werewolves stalk the landscape woods, snow werewolves its snowy land and shadow werewolves the Ominous Woods, where the Howling Totem rite also works. Squirrels and wild turkeys come to its woods and open country.
 - **Every Jugcraft biome now needs a seasons decision:** the data check fails on a new biome without one, so a future collection cannot miss the seasons. The audit of every seasonal system against the newer collections is in [seasonal-biome-audit.md](docs/features/seasonal-biome-audit.md).
 
+### Unmerged: The benches in the workshop look
+- The **Cooking Pot**, **Lampwright's Bench**, **Farm Stand**, **cave survey desk** and **Carving Knife** screens take the workshop machines' look: brass casing, orange glass, a status lamp by the title and keys that light up when they are on (the tool in use, Mirror, the candle, the crate being priced, a study you can cancel). The farm stand's owner is in a chip by the title; the survey desk's words are now translatable. Slots, buttons, button ids and labels are unchanged.
+- The blueprint table keeps its own drafting-sheet look.
+- The screen fit check now opens the five benches at the smallest GUI too. Record: [bench-screens.md](docs/features/bench-screens.md).
+
+### Unmerged: The recipe page in its machine's look, and a screen fit check
+- The industrial forms' **recipe page** takes the forms' industrial look instead of its own teal. It has a status lamp by "<machine>: recipes" (green while a recipe is locked, amber when the recipes were reloaded), the list and the details in panes, and keys in the look: the chosen recipe, Automatic and the locked recipe's Lock key are lit. Every function and button id is unchanged.
+- The **storage tank** screen (352 wide) now scales itself down to fit a narrower window, as the reactor console and remote shutdown panel do.
+- A new client game test, `ScreenFitClientGameTests`, opens every machine screen, form screen, the recipe page and the eight other machine screens at the smallest GUI Minecraft gives (320 × 240, a 640 × 480 window), checks that each fits the window, and photographs some. Record: [screen-fit-check.md](docs/features/screen-fit-check.md).
+
 ### Unmerged: The Exchange (bank, markets, land and shares, in Jugs)
 - Press **N** (or `/jugcraft exchange`) for the **Exchange**, a walnut-and-brass ledger with seven tabs. It deals only in **Jugs**, the town's credit: no new currency.
 - **Banking and loans:** a one-time **starter loan** (100 Jugs) for new players, a flat 10% fee, due in 10 days. While you owe, a quarter of your market earnings repays the bank; overdue borrowers may sell but not buy. Paying off on time raises your credit limit.
