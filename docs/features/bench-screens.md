@@ -1,6 +1,6 @@
 # The benches in the workshop look
 
-Status: implemented (pending CI and review). Follows [the other machine screens in their looks](other-machine-screens.md) and [the screen fit check](screen-fit-check.md), whose PR it is stacked on.
+Status: merged (PR #471). Follows [the other machine screens in their looks](other-machine-screens.md) and [the screen fit check](screen-fit-check.md), whose PR it is stacked on.
 Proposal issue: none. The owner, 23 October 2026, picked suggestion 4: "now do 4, restyle the crafting benches". The suggestion was the cooking pot, carving, lampwright bench, cave workshop, farm stand and blueprint table in the workshop look.
 
 Owner: jimbozoomer-byte
