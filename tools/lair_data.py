@@ -5,7 +5,8 @@ the Last Rites' Mourning Wreath and Death Knell, the Cursed Spindle, the Frost H
 Writ of Exhumation, Sealed Orders, the Howling Totem, the Mist Gate's name, the lairs' messages, and each lair's dimension
 (its dimension type, level stem and biome) and structure template (tools/hollow_acre.py, tools/spindle_loft.py,
 tools/glacier_hall.py, tools/cinder_kiln.py, tools/lantern_fen.py, tools/crypt_archive.py, tools/foundry_trench.py,
-tools/moonlit_ring.py, tools/cydonian_sanctum.py).
+tools/moonlit_ring.py, tools/cydonian_sanctum.py, tools/crown_of_thunder.py). Also the Crown of Thunder's blocks and the
+Thunder Vane (docs/features/crown-of-thunder.md).
 
 Called from tools/agriculture_data.py (assets, loot, recipes, tags, worldgen). Formats follow vanilla 26.3's own files:
 the dimension type copies the shape of vanilla's End (logged from the running game by LairGameTests), the level stem a
@@ -15,6 +16,7 @@ from decor_data import MOD, HORIZONTAL, rid, self_drop
 import alpha_werewolf as aw
 import cinder_kiln
 import crowfield
+import crown_of_thunder
 import crypt_archive
 import foundry_trench
 import cydonian_sanctum
@@ -25,15 +27,16 @@ import moonlit_ring
 import spindle_loft
 from lairs import (BELL_NAMES, CROWFIELD_HARVEST, HILL_NAMES, KINGS_GOURD, FIXTURES, GATE, HORN_GROUND, ICICLE_PARTS, ITEMS, LACE_PATTERNS, LAIR_BLOCKS, LAIRS,
                    MOURNING_FLOWERS, NAME_GLOWS, NAMES, RECIPES, RITE_CANDLES, SEAL_GROUND, SEAL_LANDS, SLUICE_FLOWS,
-                   SLUICE_PARTS, PYLON_NAMES, STONE_GROUND, STONE_LANDS, THREAD_COLOURS, TRENCH_WORKS, WEREWOLF_PELTS,
-                   WRIT_TOMBS)
+                   SLUICE_PARTS, PYLON_NAMES, ROD_PARTS, STONE_GROUND, STONE_LANDS, THREAD_COLOURS, TRENCH_WORKS,
+                   VANE_LANDS, WEREWOLF_PELTS, WRIT_TOMBS)
 from cydonian_sanctum import CONSTELLATIONS, DOOR_FIGURES
 
 # Each lair's template, by the lair's id.
 TEMPLATES = {"hollow_acre": hollow_acre, "spindle_loft": spindle_loft, "glacier_hall": glacier_hall,
              "cinder_kiln": cinder_kiln, "lantern_fen": lantern_fen, "crypt_archive": crypt_archive,
              "foundry_trench": foundry_trench, "moonlit_ring": moonlit_ring, "cydonian_sanctum": cydonian_sanctum,
-             "crowfield": crowfield}
+             "crowfield": crowfield,
+             "crown_of_thunder": crown_of_thunder}
 
 
 def cube(lo, hi, faces, texture, cull=None, shade=True, uvs=None):
@@ -671,6 +674,41 @@ def crowfield_assets(models, states, write):
         for facing in HORIZONTAL:
             variants[f"facing={facing},stage={stage}"] = turned(f"kings_gourd_{stage}", facing)
     write(states / "kings_gourd.json", {"variants": variants})
+# A Storm Rod's boxes, by part (half its width either side of the middle, its bottom and top): a rod six pixels across,
+# its tip drawn to a point.
+ROD_BOXES = {"base": ((3, 0, 16),), "middle": ((3, 0, 16),), "tip": ((3, 0, 10), (2, 10, 14), (1, 14, 16))}
+
+
+def storm_rod(part, charged):
+    """One part of a Storm Rod (tools/crown_of_thunder.py): weathered copper up the middle of the block; charged, it burns
+    storm-blue, unshaded, at its own light."""
+    elements = []
+    for half, y0, y1 in ROD_BOXES[part]:
+        lo, hi = 8 - half, 8 + half
+        side = {"texture": "#rod", "uv": [lo, 16 - y1, hi, 16 - y0]}
+        end = {"texture": "#rod", "uv": [lo, lo, hi, hi]}
+        element = {"from": [lo, y0, lo], "to": [hi, y1, hi], "faces": {
+            "north": side, "south": side, "east": side, "west": side, "up": end, "down": end}}
+        if charged:
+            element = {**element, "shade": False, "light_emission": 15}
+        elements.append(element)
+    texture = rid("block/storm_rod_charged" if charged else "block/storm_rod")
+    return {"parent": "minecraft:block/block", "textures": {"particle": texture, "rod": texture}, "elements": elements}
+
+
+def crown_of_thunder_assets(models, states, write, simple):
+    """The Crown of Thunder's lair-only blocks (tools/crown_of_thunder.py): the Storm Rods, the nest's woven branches and
+    the storm clouds."""
+    variants = {}
+    for part in ROD_PARTS:
+        for charged in (False, True):
+            name = f"storm_rod_{part}" + ("_charged" if charged else "")
+            write(models / f"{name}.json", storm_rod(part, charged))
+            variants[f"charged={str(charged).lower()},part={part}"] = {"model": rid(f"block/{name}")}
+    write(states / "storm_rod.json", {"variants": variants})
+    simple("roc_nest", {"parent": "minecraft:block/cube_column", "textures": {
+        "end": rid("block/roc_nest"), "side": rid("block/roc_nest_side")}})
+    simple("storm_cloud", {"parent": "minecraft:block/cube_all", "textures": {"all": rid("block/storm_cloud")}})
 
 
 def assets(root, write, lang):
@@ -704,6 +742,7 @@ def assets(root, write, lang):
     moonlit_ring_assets(models, states, write)
     cydonian_sanctum_assets(models, states, write, simple)
     crowfield_assets(models, states, write)
+    crown_of_thunder_assets(models, states, write, simple)
     for name, display in LAIR_BLOCKS.items():
         lang[f"block.{MOD}.{name}"] = display
 
@@ -726,6 +765,7 @@ def assets(root, write, lang):
     lang[f"item.{MOD}.howling_totem"] = ITEMS["howling_totem"]
     lang[f"item.{MOD}.altar_keystone"] = ITEMS["altar_keystone"]
     lang[f"item.{MOD}.harvest_crown"] = ITEMS["harvest_crown"]
+    lang[f"item.{MOD}.thunder_vane"] = ITEMS["thunder_vane"]
     lang[f"tooltip.{MOD}.death_knell"] = "Rung at a grave at night, among lit candles, with a wreath laid on it"
     lang[f"tooltip.{MOD}.cursed_spindle"] = "Used on a Spinning Wheel at night: prick your finger, and wake in the Spindle Loft"
     lang[f"tooltip.{MOD}.mourning_wreath"] = "Lay it on a grave for the Last Rites"
@@ -754,6 +794,10 @@ def assets(root, write, lang):
                                              "and the red mist opens onto Mars")
     for stars in CONSTELLATIONS:
         lang[f"lair.{MOD}.cydonian_sanctum.stars.{stars}"] = f"the {stars.capitalize()}"
+    for rod in crown_of_thunder.RODS:
+        lang[f"lair.{MOD}.crown_of_thunder.rod.{rod}"] = f"the {rod} rod"
+    lang[f"tooltip.{MOD}.thunder_vane"] = ("Raised high in the mountains under the open sky while it rains: lightning answers, "
+                                           "and the wind takes you to the Crown of Thunder")
     lang[f"entity.{MOD}.{GATE['entity']}"] = GATE["display"]
 
     for lair, info in LAIRS.items():
@@ -832,6 +876,13 @@ def assets(root, write, lang):
         f"message.{MOD}.lair.keystone.kindled": "The keystone crumbles, and the altars kindle with red fire one after another",
         f"message.{MOD}.lair.keystone.opened": "A column of red light rises, and the red mist opens over the altar",
         f"message.{MOD}.lair.keystone.not_altar": "Set the keystone into the Ancient Altar of Adam-ondi-Ahman",
+        f"message.{MOD}.lair.vane.not_overworld": "No storm here answers the vane",
+        f"message.{MOD}.lair.vane.fair": "The vane hangs still: raise it while it rains",
+        f"message.{MOD}.lair.vane.not_mountains": "The vane is answered only in the mountains",
+        f"message.{MOD}.lair.vane.low": "Climb higher: raise the vane at a height of %s or more",
+        f"message.{MOD}.lair.vane.roofed": "Raise the vane under the open sky",
+        f"message.{MOD}.lair.vane.misting": "The wind already tears at the mist here: use it to follow",
+        f"message.{MOD}.lair.vane.opened": "Lightning strikes the vane, it spins wild, and the wind tears the mist open",
         f"message.{MOD}.lair.dial.turned": "The dial turns to %s",
         f"message.{MOD}.lair.dial.matched": "%s lights on the Star Door",
         f"message.{MOD}.lair.door.opened": "The Star Door grinds open",
@@ -903,6 +954,8 @@ def tags(tags):
         tags.add("item", f"{MOD}:werewolf_pelts", pelt)
     for block in CROWFIELD_HARVEST:
         tags.add("block", f"{MOD}:crowfield_harvest", block)
+    for biome in VANE_LANDS:
+        tags.add("worldgen/biome", f"{MOD}:thunder_vane_lands", biome)
     # Blighted soil is earth: plants stand on it.
     tags.add("block", "minecraft:dirt", rid("blighted_soil"))
     tags.add("block", "minecraft:mineable/hoe", rid("mourning_wreath"))

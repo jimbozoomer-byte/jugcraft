@@ -27,6 +27,7 @@ From [CONTENT_BRANCHES.md](../CONTENT_BRANCHES.md) ("Caves, dungeons and bosses"
 | **The Crypt Lich** | The Archive of Last Names: the Writ of Exhumation | [crypt-archive.md](../features/crypt-archive.md), [crypt-lich.md](../features/crypt-lich.md) | #350 and #353, through #352 |
 | **The Iron Dreadnought** | The Foundry Trench: Sealed Orders | [foundry-trench.md](../features/foundry-trench.md), [iron-dreadnought.md](../features/iron-dreadnought.md) | Not yet |
 | **The Alpha Werewolf** | The Moonlit Ring: the Howling Totem | [moonlit-ring.md](../features/moonlit-ring.md), [alpha-werewolf.md](../features/alpha-werewolf.md) | Not yet |
+| **The Storm Roc** (part 1 so far) | The Crown of Thunder: the Thunder Vane | [crown-of-thunder.md](../features/crown-of-thunder.md) | Not yet |
 | **The Pumpkin King** | The Crowfield: the Harvest Crown | [crowfield.md](../features/crowfield.md), [pumpkin-king.md](../features/pumpkin-king.md) | Not yet |
 
 The first two are the Witching Season's ([features/witching-season.md](../features/witching-season.md)); all six, the Iron Dreadnought's trench and the Alpha Werewolf's ring are on the shared lair framework (`lair/`). Vesperine and Madame Tatterlace roll their own loot table, `loot_table/entities/<boss>.json`, for each player who took part: their trophies, the Vesper Scythe and the Needle Rapier (Arms VII's), come at 15% a share and always on a player's first win. The Arms VII trophy tables `bosses/vesperine` and `bosses/tatterlace` are written by `tools/arms_variants.py` as the others' are, but nothing rolls them. The Yeti King and the Cinder Tyrant roll theirs the same way, a trophy always on a player's first win. Both have been on Concordance Chunk A's support credit since Chunk B ([lair-encounter-credit.md](../features/lair-encounter-credit.md)). JEI's information pages on their loot and the encyclopedia's lair dossiers cover the first four (the Yeti King and the Cinder Tyrant since Chunk B; [concordance-first-loadout.md](../features/concordance-first-loadout.md), [arcane-concordance-first-route.md](../features/arcane-concordance-first-route.md)).
@@ -993,6 +994,142 @@ He follows the rules every boss follows (above):
 - every opening costs a Harvest Crown, and it works all year unless the server keeps it to Halloween.
 
 Nothing a tier needs comes only from him: heirloom pumpkins, gold and hay come without him, and so does every crop he guards.
+
+## The Storm Roc: the plan (being built)
+
+The seventh of the first eight, built by [the boss playbook](BOSS_PLAYBOOK.md): first his lair and the summoning that opens it, then the Roc himself, his fledglings and his loot, each its own pull request with tests and pictures. On 26 October 2026 the owner chose him as the next boss to build ("Storm Roc boss").
+
+The design joins two sources:
+- this page's own idea for him: a thunderbird nesting on the tallest pinnacle of the Highland and the Karst Pinnacles, who dives with lightning and gusts that throw players off the peak, and whose nest's lightning rods can be turned against him;
+- the planning pack's "Crown of Thunder" ([chapter 05](../plans/concordance-expansion-2026-10-10/05-new-boss-compendium.md#storm-roc--the-crown-of-thunder)):
+  - a sheltered summit ring with four rods, ledges and recovery routes;
+  - a fall that costs no belongings;
+  - a marked rod charged before a dive, which grounds him when his dive is lined up with it;
+  - a one-second wing cone, a two-second dive lane, wind strips with ground arrows that stay, and widely spaced lightning marks;
+  - flights short enough that melee players get regular openings, and no flight equipment needed.
+
+The numbers here are the plan's. Each part's feature record says what changed in building it. Part 1, the summit and the vane: [features/crown-of-thunder.md](../features/crown-of-thunder.md). Part 2, the Roc, his fledglings and his loot, will have `features/storm-roc.md`.
+
+*An eagle as big as a cart, slate-grey with a storm-blue sheen, his flight feathers tipped white like lightning, a hooked beak of dark horn and eyes that burn electric blue. When he spreads his wings the air crackles.* He nests on the highest crag of the highest peak, and the storms follow him.
+
+### The Crown of Thunder
+
+The summit of a pinnacle above the clouds, under a storm that never breaks:
+- **The arrival:** a **terrace** below the summit's south edge, a few steps down from it. Behind it, in an arch of grey stone, the **Grey Mist**: the way home. The terrace is safe.
+- **The summit, the arena:** a ring of weathered stone, calcite and turf about 36 blocks across, rimmed by **boulders** with gaps between them. The boulders give shelter from the wind, and the gaps are where a gust can throw a player off.
+- **The four Storm Rods:** at the summit's north, east, south and west, 13 blocks from its middle: tall copper rods on stone plinths. A rod charged by the storm crackles and glows blue (part 2).
+- **The ledges:** below the summit's east and west edges, five blocks down, two ledges catch a player thrown off. From each, steps climb back up the cliff to the summit: the recovery routes.
+- **The nest:** on a crag beyond the summit's north edge, four blocks higher, a great nest of woven branches, where he waits.
+- **Below:** only cloud and sky. A fall past the ledges is caught by the mist, which throws you back to the arrival for the lair's toll. It is never a death and never a loss of belongings.
+
+The lair-only blocks are fixtures like the other lairs': unbreakable, no items, no drops. These are the **Storm Rods** and the **nest's woven branches**. Nothing in the Crown can be used, built or broken. Only the storm charges the rods.
+
+### The summoning: the Thunder Vane
+
+1. Craft a **Thunder Vane** from two feathers, a lightning rod, three copper ingots and a compass.
+2. Use it **under the open sky, while it rains or thunders**:
+   - **in the mountains:** the Highland, the Karst Pinnacles, or a mountain, peak or hill biome (biome tag `jugcraft:thunder_vane_lands`);
+   - **high up:** standing at y 120 or above.
+3. Lightning strikes beside you and the vane spins wild, and the wind takes you to the Crown of Thunder's terrace. The vane is used up, and Grey Mist rises where you stood: for 60 seconds anyone can walk into the mist and follow.
+4. In fair weather, under a roof, below y 120, outside the mountains or outside the Overworld, the vane only says why, and nothing is used up. The same happens if every Crown is taken.
+
+The bolt is only light and thunder: it hurts nobody and lights nothing.
+
+### The fight
+
+The Storm Roc has 400 health, scaled for the party: half as much again for each player after the first, at most two and a half times. He has armour 8. Lightning and falls never harm him, and knockback hardly moves him.
+
+He perches on his nest, wings folded. He wakes when a player who can fight him steps onto the summit, or strikes him: he rises screeching as lightning splits the sky (2.5 s, unhurt meanwhile). He keeps to the summit: more than 30 blocks from its middle, he is set back.
+
+He flies, but never for long: no flight lasts more than 6 seconds before he lands to strike, so melee players always get their openings.
+
+**His rule: the Storm Rods.** Every 16 seconds he dives:
+- **A rod charges:** one of the four Storm Rods crackles and glows blue (2 s). The bar over the screen says which ("The north rod is charged").
+- **He marks his lane:** he climbs over the summit's edge and fixes on the player he was fighting. A line of sparks runs from him through that player and follows them for 2 seconds, then holds still.
+- **He dives** down the lane: 12 damage, and a heavy shove aside, to everyone within 1.5 blocks of it.
+- **If his lane passes within 2.5 blocks of the charged rod,** the rod grounds him as he passes it. A bolt arcs from the rod into him, he crashes onto the summit and lies there stunned for 6 seconds, wings spread. Every blow does half as much again, and he cannot fly.
+  - So the player he marks puts the charged rod between him and themselves while the lane follows them.
+  - Then they step out of the lane as he comes.
+- A rod he passed far from discharges harmlessly.
+
+From anywhere on the summit, a sprinting player can reach a place that lines the charged rod up between him and themselves inside the 4 seconds of the tell. The audit will walk the summit to keep that true.
+
+**Phase 1, "The Gathering Storm"** (full to half health):
+
+| Attack | Read it by | What it does |
+| --- | --- | --- |
+| Wing Buffet | He lands, rears back and spreads his wings wide (1.0 s) | A gust in a cone in front of him, 6 blocks deep: 7 damage, and thrown 3 blocks back. Step behind him or to the side |
+| Storm Dive | A rod charges, and a line of sparks marks his lane (2.0 s) | Above |
+| Lightning Marks | Three crackling rings on the summit, at least 6 blocks apart (1.5 s) | A bolt strikes each ring: 8 damage within 1.5 blocks. Step out of the ring |
+
+**At half health, "The Squall Rises":** he climbs high and circles screaming (3 s, unhurt). The wind rises, and his fledglings leave the nest.
+
+**Phase 2, "The Squall"** (half to a fifth): he keeps every attack, dives every 14 seconds, and adds:
+
+| Attack | Read it by | What it does |
+| --- | --- | --- |
+| Wind Strips | Arrows appear on the summit floor in two strips 3 blocks wide, pointing the way the wind will blow (1.5 s) | For 4 seconds the wind blows along each strip and pushes everyone in it the way its arrows point, toward the summit's edge. Behind a boulder you are sheltered. The arrows stay until the wind drops |
+| Fledglings | He screams to the nest | Up to three Gale Fledglings |
+
+**Below a fifth, "The Eye of the Storm":** he dives every 12 seconds and marks five rings, not three. His tells stay as long as ever.
+
+**Left alone** for 10 seconds, he flies back to his nest, healed. The rods go quiet, the wind drops, his fledglings return to the nest, and who hurt him is forgotten.
+
+**His fledglings, the Gale Fledglings:** half-grown rocs, 20 health, a 3-damage peck, quick fliers that dart at his foe. He has at most three at a time. They come at half health and again every 30 seconds while he has fewer than three. They drop nothing and give no experience.
+
+### His loot (per participant)
+
+A participant is a player who hurt him or his fledglings, or stood within 2.5 blocks of the rod that grounded him, and is within 64 blocks of the summit's middle when he falls.
+
+| Loot | Chance |
+| --- | --- |
+| **Roc Feathers**, two or three | 1, always |
+| **A trophy:** Stormcaller or Galefeather (his `bosses/storm_roc` table, one of the two) | 15%; certain on a player's first kill |
+| **The Weather-Vane Lens** | 25% |
+| **The Roc's Crest** | 20% |
+| 300 experience, shared out | always |
+| The advancement **Eye of the Storm** | always |
+
+- **Roc Feathers** are for those who never fight: each makes four feathers, and two make the next Thunder Vane without its lightning rod. Neither recipe gains anything.
+- **The Weather-Vane Lens,** held in the offhand, tells its holder the coming weather every few seconds: "Rain in about 6 minutes", "Thunder now". It is a convenience: vanilla's lightning rods and plain watching of the sky still do the same work.
+- **The Roc's Crest:** a costume worn on the head, his slate-and-storm-blue crest of feathers.
+- **The trophies** are Arms VII's ([features/arms-vii.md](../features/arms-vii.md)), with their Gale boon. Until now they were in the creative tab only.
+- When he falls, he crashes onto the summit with a last thunderclap, and Grey Mist opens on his nest's crag, the way home.
+
+### The shared lair contract
+
+The planning pack's chapter 04 asks each lair to answer these:
+- **Arrival, staging, waking and return:** the terrace is safe. He wakes when a player steps onto the summit or strikes him. The Grey Mist stands in the terrace's arch, and opens on the nest's crag when he falls.
+- **Fixtures:** the Storm Rods, which only the storm charges, and the Grey Mist. Nothing else can be used, built or broken.
+- **The floor:** the summit owns it, and his fight changes no block of it. His wind arrows are laid over it and lifted when the wind drops, and each instance is placed fresh.
+- **Who fights:** players who may fight a lair's boss (`LairBosses`), with party health as above.
+- **Reset:** when no eligible player is left, or he is left alone for 10 seconds.
+- **Clean-up:** his fledglings, lightning marks and wind arrows are his, capped, and gone with him.
+- **Death, disconnect and restart:** as every lair. A player who falls drops nothing and respawns with everything they carried, and instances close on a restart. Each participant's loot is rolled once when he falls.
+- **An ordinary player** can do everything without flying gear:
+  - every attack is read before it lands;
+  - the charged rod is named and glows;
+  - a fall off the summit lands on a ledge with steps back up, or is caught by the mist;
+  - the grounding opens him to any weapon.
+
+Of the planning pack's magic links, none is needed:
+- Tempest handling the rods' charge more easily;
+- Radiance showing the rod to use;
+- Strata's Brace easing the wind's shove.
+
+They wait for those schools' spells. The Iron Dreadnought's Grounding Strap halves his lightning, as it halves all electric harm.
+
+### Rules kept
+
+He follows the rules every boss follows (above):
+- the summit is his arena, and resets when everyone leaves;
+- every attack is read before it lands, and every dive can be turned against him;
+- dying there keeps everything: nothing is dropped, and the player respawns with it all;
+- his health scales with the party, and every participant rolls his loot;
+- nothing on the summit can be built or broken, and his fight changes no block of it;
+- every opening costs a Thunder Vane, made from things players already make.
+
+Nothing a tier needs comes only from him: feathers, copper and weather all come without him.
 
 ## More bosses to consider (no trophies yet)
 

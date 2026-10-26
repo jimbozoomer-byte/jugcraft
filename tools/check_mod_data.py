@@ -9474,6 +9474,7 @@ def check_lairs():
     import crowfield as cf
     import crypt_archive as ca
     import foundry_trench as ft
+    import crown_of_thunder as ct
     import cydonian_sanctum as cs
     import glacier_hall as gh
     import hollow_acre as ha
@@ -9491,7 +9492,8 @@ def check_lairs():
                                        ("crypt_archive", ca, ca.CENTRE, None), ("foundry_trench", ft, ft.CENTRE, None),
                                        ("moonlit_ring", mr, mr.CENTRE, (mr.MOON, mr.MOON_RADIUS)),
                                        ("cydonian_sanctum", cs, cs.CENTRE, None),
-                                       ("crowfield", cf, cf.CENTRE, (cf.MOON, cf.MOON_RADIUS))):
+                                       ("crowfield", cf, cf.CENTRE, (cf.MOON, cf.MOON_RADIUS)),
+                                       ("crown_of_thunder", ct, ct.CENTRE, None)):
         ax, ay, az, yaw = layout.ARRIVAL
         sky = "null, 0" if moon is None else "new BlockPos({}, {}, {}), {}".format(*moon[0], moon[1])
         expected = (f'{name.upper()}("{name}", {layout.SIZE[0]}, {layout.SIZE[1]}, {layout.SIZE[2]}, new Vec3({float(ax)}, '
@@ -9525,7 +9527,7 @@ def check_lairs():
         if f'fixture("{block}",' not in registry:
             err(f"JugcraftLairs does not register the lair block {block}")
     for name in ("mourning_wreath", "death_knell", "cursed_spindle", "frost_horn", "kiln_seal", "hag_stone", "exhumation_writ",
-                 "sealed_orders", "howling_totem", "altar_keystone", "harvest_crown", la.GATE["entity"]):
+                 "sealed_orders", "howling_totem", "altar_keystone", "harvest_crown", "thunder_vane", la.GATE["entity"]):
         if f'Jugcraft.id("{name}")' not in registry:
             err(f"JugcraftLairs does not register {name}")
     if f"float GLARE_FRICTION = {la.GLARE_FRICTION}F;" not in registry:
@@ -9740,6 +9742,37 @@ def check_lairs():
                  "output.accept(ALTAR_KEYSTONE);"):
         if line not in flat:
             err(f"JugcraftLairs does not have {line}")
+    # The Crown of Thunder's: the vane's rest, reach and height and the lands it is raised in, the Storm Rods' parts and
+    # light, the fixtures' registrations, the rods' names, and the gate's follow into the Crown.
+    vane = (folder / "ThunderVaneRite.java").read_text(encoding="utf-8")
+    for name, key in (("COOLDOWN", "cooldown"), ("MIST_RANGE", "mist_range"), ("MIN_Y", "min_y")):
+        if not java_number(vane, name, la.VANE[key]):
+            err(f"ThunderVaneRite.{name} is not tools/lairs.py VANE {key} ({la.VANE[key]})")
+    vane_lands = (load(DATA / MOD / "tags" / "worldgen" / "biome" / "thunder_vane_lands.json") or {}).get("values", [])
+    if sorted(vane_lands) != sorted(la.VANE_LANDS):
+        err(f"#jugcraft:thunder_vane_lands is not tools/lairs.py VANE_LANDS: {vane_lands}")
+    for land in la.VANE_LANDS:
+        ns, path = split(land.lstrip("#"))
+        found = tag_exists("worldgen/biome", land[1:]) if land.startswith("#") else \
+            ns == "minecraft" or (DATA / ns / "worldgen" / "biome" / f"{path}.json").is_file()
+        if not found:
+            err(f"tools/lairs.py VANE_LANDS names {land}, which is no biome or biome tag")
+    rod_java = re.sub(r"\s+", " ", (folder / "StormRodBlock.java").read_text(encoding="utf-8"))
+    rod_parts = ", ".join(f"{part.upper()}({la.ROD_LIGHT[part]})" for part in la.ROD_PARTS)
+    if f"enum Part implements StringRepresentable {{ {rod_parts};" not in rod_java:
+        err(f"StormRodBlock.Part is not tools/lairs.py ROD_PARTS with ROD_LIGHT: expected {rod_parts}")
+    if tuple(ct.ROD_PARTS) != la.ROD_PARTS:
+        err(f"tools/crown_of_thunder.py ROD_PARTS {ct.ROD_PARTS} are not tools/lairs.py ROD_PARTS {la.ROD_PARTS}")
+    for line in ('fixture("storm_rod", p -> new StormRodBlock(p.lightLevel(StormRodBlock::light))', 'fixture("roc_nest", Block::new',
+                 'fixture("storm_cloud", Block::new, MapColor.COLOR_GRAY, SoundType.WOOL, 0, Fit.PASSABLE)',
+                 "output.accept(THUNDER_VANE);"):
+        if line not in re.sub(r"\s+", " ", registry):
+            err(f"JugcraftLairs does not have {line}")
+    for name in ct.RODS:
+        if f"lair.{MOD}.crown_of_thunder.rod.{name}" not in (load(ASSETS / "lang" / "en_us.json") or {}):
+            err(f"No words for the Crown of Thunder's {name} rod")
+    if "open.lair == Lair.CROWN_OF_THUNDER) { ThunderVaneRite.follow(server, open);" not in gate:
+        err("MistGateEntity does not take followers into the Crown of Thunder by the vane's way (ThunderVaneRite.follow)")
     for name, recipe in la.RECIPES.items():
         data = load(DATA / MOD / "recipe" / f"{name}.json") or {}
         if data.get("result", {}).get("id") != f"{MOD}:{recipe.get('result', name)}":
@@ -9803,6 +9836,7 @@ def check_lairs():
     check_moonlit_ring(mr)
     check_cydonian_sanctum(cs)
     check_crowfield(cf)
+    check_crown_of_thunder(ct)
 
 
 def check_cydonian_sanctum(cs):
@@ -10238,6 +10272,154 @@ def check_cinder_kiln(ck):
     client = ROOT / "src" / "gametest" / "java" / "io" / "github" / "jimbozoomer" / "jugcraft" / "test" / "CinderKilnClientGameTests.java"
     if not java_number(client.read_text(encoding="utf-8"), "BOWL_LIGHT", ck.BOWL_LIGHT):
         err(f"CinderKilnClientGameTests does not read the bowl's light against BOWL_LIGHT {ck.BOWL_LIGHT}")
+
+
+def check_crown_of_thunder(ct):
+    """The Crown of Thunder as tools/crown_of_thunder.py builds it is the summit its record describes
+    (docs/features/crown-of-thunder.md), and where the Java looks for its parts (CrownOfThunder.java) is where the layout
+    puts them: the arrival stands on the terrace with room overhead, and the Grey Mist fills its arch; a walk from the
+    arrival, never stepping more than half a block (a stair is two half steps), reaches every open cell of the summit, of
+    both ledges (so a player thrown down onto one can climb back) and of the terrace; each Storm Rod stands whole and
+    uncharged, base to tip, on its plinth's chiseled middle, each where its bearing says, all ROD_RADIUS from the middle;
+    the nest is woven branches with room over it where the Roc waits; light flooded from the hidden lights and the mist,
+    as the game floods it, is at least SUMMIT_LIGHT on every one of those open cells; and nothing in it changes by itself
+    once placed."""
+    import math
+    from collections import deque
+    blocks = ct.build()
+    name = lambda pos: blocks[pos][0] if pos in blocks else None
+    props = lambda pos: dict(blocks[pos][1]) if pos in blocks else {}
+    java = re.sub(r"\s+", " ", (JAVA_ROOT / "lair" / "CrownOfThunder.java").read_text(encoding="utf-8"))
+    for jname, value in (("PAVE", ct.PAVE), ("STAND", ct.STAND), ("CENTRE_X", ct.CENTRE[0]), ("CENTRE_Z", ct.CENTRE[1]),
+                         ("SUMMIT", ct.SUMMIT), ("ROD_HEIGHT", ct.ROD_HEIGHT), ("LEDGE_TOP", ct.LEDGE_TOP),
+                         ("LEDGE_OUTER", ct.LEDGE_OUTER), ("LEDGE_HALF_ANGLE", ct.LEDGE_HALF_ANGLE),
+                         ("TERRACE_TOP", ct.TERRACE_TOP), ("TERRACE_WEST", ct.TERRACE["x"][0]),
+                         ("TERRACE_EAST", ct.TERRACE["x"][1]), ("TERRACE_NORTH", ct.TERRACE["z"][0]),
+                         ("TERRACE_SOUTH", ct.TERRACE["z"][1]), ("NEST_TOP", ct.NEST_TOP), ("WAIT_X", ct.WAIT[0]),
+                         ("WAIT_Y", float(ct.WAIT[1])), ("WAIT_Z", ct.WAIT[2]), ("EXIT_WEST", ct.EXIT["x"][0]),
+                         ("EXIT_EAST", ct.EXIT["x"][1]), ("EXIT_Z", ct.EXIT["z"])):
+        if not java_number(java, jname, value):
+            err(f"CrownOfThunder.{jname} is not tools/crown_of_thunder.py's {value}")
+    rods = ct.rod_cells()
+    expected = "RODS = {{{}}};".format(", ".join("new BlockPos({}, {}, {})".format(*rods[n][0][:3]) for n in ct.RODS))
+    if expected not in java:
+        err(f"CrownOfThunder.RODS is not tools/crown_of_thunder.py's, base by base: expected {expected}")
+    if f"enum Rod {{ {', '.join(n.upper() for n in ct.RODS)};" not in java:
+        err(f"CrownOfThunder.Rod is not tools/crown_of_thunder.py RODS {tuple(ct.RODS)} in order")
+    if set(ct.LEDGES.values()) != {90, 270}:
+        err(f"tools/crown_of_thunder.py's ledges {ct.LEDGES} are not due east and due west, as CrownOfThunder.onLedge takes them")
+    if len(ct.ROD_PARTS) != ct.ROD_HEIGHT:
+        err(f"tools/crown_of_thunder.py's rods are {ct.ROD_HEIGHT} high but have {len(ct.ROD_PARTS)} parts")
+
+    passable = {None, "minecraft:light", "jugcraft:lair_exit", "jugcraft:storm_cloud"}
+    free = lambda pos: name(pos) in passable
+    whole = {"minecraft:stone", "minecraft:andesite", "minecraft:tuff", "minecraft:calcite", "minecraft:gravel",
+             "minecraft:moss_block", "minecraft:polished_andesite", "minecraft:chiseled_stone_bricks",
+             "minecraft:stone_bricks", "minecraft:cracked_stone_bricks", "minecraft:mossy_cobblestone", "jugcraft:roc_nest"}
+    stair = "minecraft:stone_brick_stairs"
+    ax, ay, az, _ = ct.ARRIVAL
+    feet = (int(ax), int(ay), int(az))
+    if name((feet[0], feet[1] - 1, feet[2])) not in whole or ay != float(ct.TERRACE_TOP + 1) or not free(feet) \
+            or not free((feet[0], feet[1] + 1, feet[2])) or not ct.in_box(ct.TERRACE, feet[0], feet[2]):
+        err(f"The Crown's arrival at {ct.ARRIVAL[:3]} does not stand on the terrace with room overhead")
+    for pos in ct.exit_cells():
+        if name(pos) != "jugcraft:lair_exit":
+            err(f"No Grey Mist in the terrace's arch at {pos}")
+
+    # Where anyone can stand, column by column: on a whole block, or on a stair's step or its top.
+    stands = {}
+    for (x, y, z), state in blocks.items():
+        heights = (y + 1.0,) if state[0] in whole else (y + 0.5, y + 1.0) if state[0] == stair else ()
+        if heights and free((x, y + 1, z)) and free((x, y + 2, z)):
+            stands.setdefault((x, z), []).extend(heights)
+    start = (feet[0], feet[2], float(ay))
+    seen, queue = {start}, deque([start])
+    while queue:
+        x, z, h = queue.popleft()
+        for nx, nz in ((x + 1, z), (x - 1, z), (x, z + 1), (x, z - 1)):
+            for nh in stands.get((nx, nz), ()):
+                node = (nx, nz, nh)
+                if abs(nh - h) <= 0.5 + 1e-9 and node not in seen:
+                    seen.add(node)
+                    queue.append(node)
+    # The open cells of each part, as the client test counts them (CrownOfThunder.onSummit, onLedge and onTerrace): over its
+    # floor (the flights' cuts into the summit have none), with room to stand.
+    areas = (("summit", ct.STAND, ct.in_summit), ("ledges", ct.LEDGE_TOP + 1, lambda x, z: ct.in_ledge(x, z) is not None),
+             ("terrace", ct.TERRACE_TOP + 1, lambda x, z: ct.in_box(ct.TERRACE, x, z) and not ct.in_summit(x, z)))
+    open_cells = []
+    for area, height, inside in areas:
+        cells = [(x, height, z) for x in range(ct.SIZE[0]) for z in range(ct.SIZE[2]) if inside(x, z)
+                 and (x, height - 1, z) in blocks and free((x, height, z)) and free((x, height + 1, z))]
+        stranded = [cell for cell in cells if (cell[0], cell[2], float(height)) not in seen]
+        if not cells:
+            err(f"The Crown has no open cells on its {area}")
+        if stranded:
+            err(f"{len(stranded)} open cells of the Crown's {area} cannot be walked to from the arrival, e.g. {stranded[0]}")
+        open_cells += cells
+    for side in ct.LEDGES:
+        if not any(ct.in_ledge(x, z) == side for x, _, z in open_cells):
+            err(f"The Crown has no {side} ledge to stand on")
+
+    # The Storm Rods, whole and at rest on their plinths, each on its bearing, all ROD_RADIUS out.
+    bearings = {"north": (0, -1), "east": (1, 0), "south": (0, 1), "west": (-1, 0)}
+    for rod, cells in rods.items():
+        x0, y0, z0, _ = cells[0]
+        if name((x0, y0 - 1, z0)) != "minecraft:chiseled_stone_bricks" or y0 - 1 != ct.STAND:
+            err(f"The {rod} Storm Rod does not stand on its plinth's chiseled middle at {(x0, y0 - 1, z0)}")
+        for (x, y, z, part), want in zip(cells, ct.ROD_PARTS):
+            if name((x, y, z)) != "jugcraft:storm_rod" or props((x, y, z)) != {"part": want, "charged": "false"}:
+                err(f"No {want} of the {rod} Storm Rod at rest at {(x, y, z)}")
+        dx, dz = x0 + 0.5 - ct.CENTRE[0], z0 + 0.5 - ct.CENTRE[1]
+        wx, wz = bearings[rod]
+        if abs(math.hypot(dx, dz) - ct.ROD_RADIUS) > 1e-9 or (round(dx / ct.ROD_RADIUS), round(dz / ct.ROD_RADIUS)) != (wx, wz):
+            err(f"The {rod} Storm Rod at {(x0, z0)} is not {ct.ROD_RADIUS} {rod} of the summit's middle")
+        if not free((x0, y0 + ct.ROD_HEIGHT, z0)):
+            err(f"The {rod} Storm Rod's tip is covered at {(x0, y0 + ct.ROD_HEIGHT, z0)}")
+
+    # The nest: woven branches under where the Roc waits, and room over them.
+    wx_, wy_, wz_, _ = ct.WAIT
+    nest = (int(wx_), int(wy_) - 1, int(wz_))
+    if name(nest) != "jugcraft:roc_nest" or wy_ != ct.NEST_TOP + 1 \
+            or not all(free((nest[0], nest[1] + i, nest[2])) for i in range(1, 5)):
+        err(f"The Roc's nest is not woven branches with room over them at {ct.WAIT[:3]}")
+
+    # The light, flooded as the game floods block light: a level less a block, through anything but whole opaque blocks
+    # and the stairs.
+    opaque = whole | {stair}
+    emit = {"jugcraft:lair_exit": 6}
+    light, queue = {}, deque()
+    for pos, state in blocks.items():
+        level = int(dict(state[1])["level"]) if state[0] == "minecraft:light" else emit.get(state[0], 0)
+        if level:
+            light[pos] = level
+            queue.append(pos)
+    while queue:
+        x, y, z = queue.popleft()
+        level = light[(x, y, z)] - 1
+        for n in ((x + 1, y, z), (x - 1, y, z), (x, y + 1, z), (x, y - 1, z), (x, y, z + 1), (x, y, z - 1)):
+            if name(n) not in opaque and level > light.get(n, 0) and 0 <= n[1] < ct.SIZE[1]:
+                light[n] = level
+                queue.append(n)
+    lit = sorted((light.get(cell, 0), cell) for cell in open_cells)
+    if not lit or lit[0][0] < ct.SUMMIT_LIGHT:
+        dark = [cell for level, cell in lit if level < ct.SUMMIT_LIGHT]
+        err(f"{len(dark)} open cells of the Crown have less block light than SUMMIT_LIGHT {ct.SUMMIT_LIGHT}, the darkest "
+            f"{lit[0] if lit else None}")
+    client = ROOT / "src" / "gametest" / "java" / "io" / "github" / "jimbozoomer" / "jugcraft" / "test" / \
+        "CrownOfThunderClientGameTests.java"
+    source = client.read_text(encoding="utf-8") if client.is_file() else ""
+    if not java_number(source, "SUMMIT_LIGHT", ct.SUMMIT_LIGHT) or not java_number(source, "CROWN_CELLS", len(open_cells)):
+        err(f"CrownOfThunderClientGameTests does not read the light against SUMMIT_LIGHT {ct.SUMMIT_LIGHT} on the Crown's "
+            f"{len(open_cells)} open cells (CROWN_CELLS)")
+
+    # Nothing that changes by itself once placed: no grass to spread or die, nothing lit, nothing that flows or grows, and
+    # no gravel without a block under it.
+    for (x, y, z), state in blocks.items():
+        if state[0] in ("minecraft:grass_block", "minecraft:vine", "minecraft:lava", "minecraft:fire", "minecraft:water",
+                        "minecraft:snow", "minecraft:dirt") or state[0].endswith("_leaves") \
+                or state[0] == "minecraft:gravel" and (x, y - 1, z) not in blocks and y > 0:
+            err(f"The Crown has {state[0]} at {(x, y, z)}, which would change once placed")
+            break
 
 
 def java_number(source, name, value):
