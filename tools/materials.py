@@ -437,6 +437,9 @@ def feature_of(entry_id):
     import landship
     if entry_id in landship.ITEMS:
         return "machines"
+    import trains
+    if entry_id in trains.ITEMS:
+        return "machines"
     import artillery
     if entry_id in artillery.ITEMS:
         return "machines"

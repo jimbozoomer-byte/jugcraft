@@ -90,6 +90,12 @@ No numbered release yet. Entries on feature branches remain proposed until their
 - The chunk's contract, decisions and evidence: [concordance-chunk-b.md](docs/features/concordance-chunk-b.md).
 - **The server game tests no longer run out of memory:** with main's #488 merged, all 2,575 of this branch's server tests ran, then the suite stopped with `OutOfMemoryError: Java heap space` on its last one (run 40414783975; main's 2,477 fit). A game-test mock player's connection ends in Netty's EmbeddedChannel, which keeps every packet written to it until something reads it; no test does, and the players stay logged in for the whole run, so their join packets and every later player's join message stayed in the heap. A test-only hook (`MockPlayerChannels`) now empties those channels each tick and logs how many packets it released; real and integrated-server connections are untouched. The game itself is unchanged.
 
+### Unmerged: Trains
+- A **Diesel Locomotive**, a **Passenger Coach** (four seats) and a **Cargo Wagon** (27 slots) run on any rails, round curves and up slopes. Use one on a rail to set it on the line.
+- Ride in the locomotive's cab to drive: forwards and back work a four-notch throttle (two in reverse), jump brakes. It burns diesel or kerosene (a bucket refuels it).
+- The **Coupler** couples cars into a train, up to eight behind one locomotive, and uncouples them. The whole train moves as one and stops at the end of the line or at another train.
+- Breaking the rail under a car knocks it off as an item, with its goods. The Engineer's Handbook has a Railways chapter. Record: [trains.md](docs/features/trains.md).
+
 ### Unmerged: Cola and MMH
 - **Cola:** the Chemical Reactor purifies Industrial Phosphoric Acid over charcoal into a vial of **Food-grade Phosphoric Acid**. The vial crafts with caramel, sugar, cinnamon, vanilla and lemon into **Cola Syrup**. The reactor carbonates the syrup with water and carbon dioxide into three bottles of **Cola**, which give Speed for 45 seconds and leave the bottle.
 - **MMH:** the Bulk Chemical Reactor methylates hydrazine with methyl chloride into **Monomethylhydrazine (MMH)**. The reactor seals it into a **Sealed MMH Tank**, and the Rocket Workshop makes four Storable Bipropellant Motors from an MMH tank and an N2O4 tank (hydrazine makes three).

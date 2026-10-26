@@ -252,6 +252,8 @@ def assets():
     mech.write_all(write, ASSETS, DATA / MOD, lang, condition)
     import landship
     landship.write_all(write, ASSETS, DATA / MOD, lang, condition)
+    import trains
+    trains.write_all(write, ASSETS, DATA / MOD, lang, condition)
     import artillery
     artillery.write_all(write, ASSETS, DATA / MOD, lang, condition)
     import tower_guns

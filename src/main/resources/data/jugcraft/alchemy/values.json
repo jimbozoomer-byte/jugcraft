@@ -3727,6 +3727,11 @@
       "denominator": 9,
       "source": "recipe jugcraft:cargo_packager"
     },
+    "jugcraft:cargo_wagon": {
+      "numerator": 1346,
+      "denominator": 1,
+      "source": "recipe jugcraft:cargo_wagon"
+    },
     "jugcraft:cargo_winch": {
       "numerator": 2861,
       "denominator": 9,
@@ -7786,6 +7791,11 @@
       "numerator": 1,
       "denominator": 1,
       "source": "fallback (balance pending)"
+    },
+    "jugcraft:coupler": {
+      "numerator": 135,
+      "denominator": 1,
+      "source": "recipe jugcraft:coupler"
     },
     "jugcraft:courier_post": {
       "numerator": 721,
@@ -27477,6 +27487,11 @@
       "denominator": 1,
       "source": "recipe jugcraft:locker_security"
     },
+    "jugcraft:locomotive": {
+      "numerator": 10483,
+      "denominator": 8,
+      "source": "recipe jugcraft:locomotive"
+    },
     "jugcraft:logic_controller": {
       "numerator": 32851,
       "denominator": 12,
@@ -31111,6 +31126,11 @@
       "numerator": 16,
       "denominator": 1,
       "source": "recipe jugcraft:parsley_bundle"
+    },
+    "jugcraft:passenger_car": {
+      "numerator": 10659,
+      "denominator": 8,
+      "source": "recipe jugcraft:passenger_car"
     },
     "jugcraft:pasta_with_meatballs": {
       "numerator": 1,

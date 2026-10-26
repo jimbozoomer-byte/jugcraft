@@ -357,6 +357,16 @@
             "chapter": 25,
             "page": 0
           }
+        },
+        {
+          "title": "Railways",
+          "icon": "jugcraft:locomotive",
+          "text": "Trains, Coupling and fuel",
+          "link": {
+            "type": "handbook",
+            "chapter": 25,
+            "page": 0
+          }
         }
       ]
     },

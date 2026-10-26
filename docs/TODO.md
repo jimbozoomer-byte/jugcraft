@@ -676,6 +676,12 @@ Owner-requested 7 October 2026. Independent briefs: [industrial chemistry and fu
 - [ ] Deliver industrial fertilizers, refining and polymers before the new optional chemical drinks, preservatives, adhesives and medicine; preserve independently useful earlier agriculture, food and adhesive routes.
 - [ ] Document actual machine roles, recipes, consumer links and optional paths in the Encyclopedia; audit reachability, gas/element units, energy loops, pollution, bounded factory work and persistence before gameplay delivery.
 
+## Trains — 26 October 2026
+
+- [x] The train framework: a diesel locomotive, a passenger coach, a cargo wagon and the Coupler, on any rails ([trains.md](features/trains.md)). Implemented; CI pending, not yet played in a client.
+- [ ] The armoured train on the framework: an armoured locomotive and a turret car reusing the Landship's cannon ([raiders.md](features/raiders.md), idea 4).
+- [ ] Later, if wanted: signals and stations, timetables, a goods loader, longer curves.
+
 ## Reference gallery
 
 All ten original owner-attached UI screenshots are preserved unchanged. They are documentation/design references, not Jugcraft runtime textures. Descriptions and individual file links are in the [independent feature brief](features/jugcraft-encyclopedia.md#visual-references-and-provenance); provenance and integrity metadata are in [the manifest](images/jugcraft-encyclopedia/reference-manifest.json).

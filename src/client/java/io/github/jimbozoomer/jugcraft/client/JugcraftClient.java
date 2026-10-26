@@ -143,6 +143,14 @@ public final class JugcraftClient implements ClientModInitializer {
 		EntityRendererRegistry.register(io.github.jimbozoomer.jugcraft.landship.JugcraftLandships.LANDSHIP, LandshipRenderer::new);
 		EntityRendererRegistry.register(io.github.jimbozoomer.jugcraft.landship.JugcraftLandships.SHELL, ThrownItemRenderer::new);
 		LandshipClient.register();
+		// The trains (docs/features/trains.md): axle places in pixels, keep in step with tools/trains.py AXLES.
+		EntityRendererRegistry.register(io.github.jimbozoomer.jugcraft.train.JugcraftTrains.LOCOMOTIVE, context -> new TrainRenderer<>(context,
+				"train_locomotive", io.github.jimbozoomer.jugcraft.train.Locomotive.LENGTH, 22.0F, 8.0F, -8.0F, -22.0F));
+		EntityRendererRegistry.register(io.github.jimbozoomer.jugcraft.train.JugcraftTrains.PASSENGER_CAR, context -> new TrainRenderer<>(context,
+				"train_passenger_car", io.github.jimbozoomer.jugcraft.train.PassengerCar.LENGTH, 20.0F, 10.0F, -10.0F, -20.0F));
+		EntityRendererRegistry.register(io.github.jimbozoomer.jugcraft.train.JugcraftTrains.CARGO_WAGON, context -> new TrainRenderer<>(context,
+				"train_cargo_wagon", io.github.jimbozoomer.jugcraft.train.CargoWagon.LENGTH, 16.0F, -16.0F));
+		TrainClient.register();
 		EntityRendererRegistry.register(io.github.jimbozoomer.jugcraft.artillery.JugcraftArtillery.SIEGE_MORTAR, ArtilleryRenderers.Mortar::new);
 		EntityRendererRegistry.register(io.github.jimbozoomer.jugcraft.artillery.JugcraftArtillery.HOWITZER, ArtilleryRenderers.Howitzer::new);
 		EntityRendererRegistry.register(io.github.jimbozoomer.jugcraft.artillery.JugcraftArtillery.FLAK_GUN, ArtilleryRenderers.Flak::new);
