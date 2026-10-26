@@ -208,7 +208,7 @@ Run locally (26 October 2026):
 | Check | Result |
 | --- | --- |
 | `python3 scripts/check_repository.py` | Pass |
-| `python3 tools/check_mod_data.py`: now also checks him (`check_pumpkin_king`, below) | Fails only on the five `tower_costs.BLOCK_VALUE` lines that fail on `main` too (reported on #472); nothing of this part |
+| `python3 tools/check_mod_data.py`: now also checks him (`check_pumpkin_king`, below) | `check_pumpkin_king` passes. Five `tower_costs.BLOCK_VALUE` lines fail on this machine only: the solder ingot has two recipes, `tools/tower_costs.py` takes whichever the file system lists first, and CI lists them the other way and passes. Nothing of this part fails |
 | Deliberate breaks of his Java, the tables and the data, one at a time (below) | 13 of 13 failed it |
 | `python3 -m unittest discover -s scripts/tests` | Pass, 268 tests, once the survival audit's item snapshot listed the six new items (below) |
 | `python3 tools/check_icon_maps.py` on the three new item maps and the two trophy maps | Pass |
