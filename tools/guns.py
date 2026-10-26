@@ -894,6 +894,33 @@ GUNS = {
         "damage": 6.0, "pellets": 1, "interval": 5, "auto": True, "capacity": 17,
         "reload": 43, "spread": (3.0, 1.0), "range": 80, "ammo": "rifle_round",
     },
+    # Slice 15B, the next three of the owner's diamond-steel guns, again from their later GeckoLib models (GEO_PARTS):
+    # the Krauser, a pistol whose magazine stands ahead of its trigger; the Soul Drummer, a machine pistol; and the
+    # Uppercut, a four-shot magnum. Each is held in one hand, and in both with a stock fitted, as a carbine (CARBINES).
+    "kreuzer_pistol": {
+        "display": "Kreuzer Pistol",
+        "source": "krauser",
+        "tooltip": "A stainless steel pistol, its magazine ahead of the trigger and a wax seal on its side. Thirteen "
+                   "rounds, one a pull. Held in one hand, or in both with a stock fitted. Fires light rounds.",
+        "damage": 5.0, "pellets": 1, "interval": 4, "auto": False, "capacity": 13,
+        "reload": 50, "spread": (2.0, 0.5), "range": 64, "ammo": "light_round",
+    },
+    "psalm_smg": {
+        "display": "Psalm SMG",
+        "source": "soul_drummer",
+        "tooltip": "A stainless steel machine pistol: it fires as long as the trigger is held, ten rounds a second, and "
+                   "strays even aimed. Held in one hand, or in both with a stock fitted. Fires light rounds.",
+        "damage": 3.0, "pellets": 1, "interval": 2, "auto": True, "capacity": 25,
+        "reload": 55, "spread": (5.5, 3.0), "range": 40, "ammo": "light_round",
+    },
+    "jawbreaker": {
+        "display": "Jawbreaker",
+        "source": "uppercut",
+        "tooltip": "A heavy stainless steel magnum of four rounds: slow to fire and hard hitting. Held in one hand, or in "
+                   "both with a stock fitted. Fires rifle rounds.",
+        "damage": 12.0, "pellets": 1, "interval": 8, "auto": False, "capacity": 4,
+        "reload": 47, "spread": (2.5, 0.5), "range": 72, "ammo": "rifle_round",
+    },
 }
 
 # What a gun fires: bullets, or a slice 8C or 8D gun's "shot".
@@ -1163,6 +1190,14 @@ RECIPES = {
                                            "L": "minecraft:lever", "P": "#minecraft:planks"}),
     "gallant_rifle": (["BSS", "DL ", " S "], {"S": "#c:ingots/stainless_steel", "D": "minecraft:diamond",
                                               "L": "minecraft:lever", "B": f"{MOD}:baffled_silencer"}),
+    # Slice 15B, as slice 15A's: stainless steel, a diamond and a lever. The owner's recipes give the Soul Drummer a
+    # rapid firing unit (here redstone, as for the Bronco SMG's sear) and the Uppercut a heavy barrel and a frame (here
+    # more stainless steel).
+    "kreuzer_pistol": (["SSS", "DL "], {"S": "#c:ingots/stainless_steel", "D": "minecraft:diamond",
+                                        "L": "minecraft:lever"}),
+    "psalm_smg": (["SSS", "DLR"], {"S": "#c:ingots/stainless_steel", "D": "minecraft:diamond", "L": "minecraft:lever",
+                                   "R": "minecraft:redstone"}),
+    "jawbreaker": (["SSS", "SDL"], {"S": "#c:ingots/stainless_steel", "D": "minecraft:diamond", "L": "minecraft:lever"}),
 }
 # The switches beyond "guns" a gun's recipe needs (separate load conditions, all of which must hold): the energy weapons
 # and their cells are useless without the Charging Station, so they need the machines too (as the leaf blower does).
@@ -2919,6 +2954,62 @@ BUILDS = {
         "sight": (8.0, 6.1, 14.12),
         "eye_relief": 1.0,
     },
+    # Slice 15B. The Krauser, the Soul Drummer and the Uppercut are the owner's GeckoLib models, as slice 15A's, their
+    # bones the models' own about the models' pivots. Each is held in one hand: its idle hides the left arm, which hangs
+    # under the magazine in the owner's models (carry()), and each is a carbine (CARBINES), whose carbine_idle brings
+    # the left hand to the gun; the left hand point is given for that pose. The hands are placed from the owner's arm
+    # bones as slice 15A's are. The Krauser's gun_body3, which its animations move but its model lacks, holds nothing
+    # (so it moves nothing, as in the owner's model), as does its LeftArm. The Uppercut's shell holds a round that every
+    # one of its animations keeps hidden (its spent cases are the shots' casing cue, as every gun's); its Mag is its
+    # magazine.
+    "kreuzer_pistol": {
+        "bones": [
+            ("gun_body2", None, [], (8.4655, 2.875, 8.1384)),
+            ("gun_body", "gun_body2", ["main", "stan_barrel"], (8.4655, 2.875, 8.1384)),
+            ("bolt", "gun_body", ["bolt"], (9.59196, 4.57316, 11.52382)),
+            ("seal", "gun_body", ["seal"], (7.02497, 4.55, 10.6634)),
+            ("magazine", "gun_body", ["stan_mag"], (7.9905, 2.35, 10.6384)),
+            ("LeftArm", "gun_body", [], (3.4905, 1.475, 14.1384)),
+            ("gun_body3", "gun_body2", [], (8.4655, 2.875, 8.1384)),
+        ],
+        "hands": {"right": (7.47, 1.42, 14.45), "left": (9.08, 2.53, 8.15)},
+        "hand_pose": {"left": ("carbine_idle", None)},
+        "arm_parents": {"left": "magazine"},
+        "arms": {"right": (0.0653, -0.4957, 0.866), "left": (0.0, -0.7071, -0.7071)},
+        "muzzle": (7.97, 5.3, 3.21),
+        "sight": (8.0, 6.41, 14.75),
+    },
+    "psalm_smg": {
+        "bones": [
+            ("gun_body", None, ["main", "stan_barrel"], (8.4655, 2.825, 8.2)),
+            ("bolt", "gun_body", ["bolt"], (9.59196, 4.52316, 11.58542)),
+            ("seal", "gun_body", ["seal"], (7.17497, 4.65, 12.75)),
+            ("magazine", "gun_body", ["stan_mag"], (7.9655, 0.16124, 15.2787)),
+        ],
+        "hands": {"right": (7.37, 1.87, 15.51), "left": (7.93, 2.32, 9.6)},
+        "hand_pose": {"left": ("carbine_idle", None)},
+        "arm_parents": {"left": "magazine"},
+        "arms": {"right": (0.0653, -0.4957, 0.866), "left": (0.3044, -0.3967, 0.866)},
+        "muzzle": (7.97, 5.25, 5.71),
+        "sight": (8.0, 6.41, 15.75),
+        "eye_relief": 1.0,
+    },
+    "jawbreaker": {
+        "bones": [
+            ("gun_body", None, ["main", "stan_barrel", "sights", "stan_grip"], (8.4655, 3.275, 9.4)),
+            ("bolt", "gun_body", ["bolt"], (9.59196, 4.97316, 12.78542)),
+            ("seal", "gun_body", ["seal"], (7.03747, 4.85, 10.725)),
+            ("shell", "gun_body", ["shell"], (7.9905, 4.6568, 14.65305)),
+            ("Mag", "gun_body", ["stan_mag"], (7.9905, 1.025, 10.5375)),
+        ],
+        "hands": {"right": (7.47, 1.82, 15.96), "left": (7.81, 2.64, 6.75)},
+        "hand_pose": {"left": ("carbine_idle", None)},
+        "arm_parents": {"left": "Mag"},
+        "arms": {"right": (0.099, -0.3696, 0.9239), "left": (0.6871, -0.3967, 0.6088)},
+        "muzzle": (7.97, 5.38, 5.48),
+        "sight": (8.0, 6.42, 15.43),
+        "eye_relief": 1.0,
+    },
 }
 
 # Props the animations move on bones that had no part ("@<name>" in a bone's parts): the rounds a reload carries in,
@@ -3473,6 +3564,8 @@ ZOOM = {
     "old_grange_carbine": 0.85,
     # Slice 15A: a marksman's rifle, a submachine gun and a rifle.
     "vesper_rifle": 0.75, "onrush_smg": 0.9, "gallant_rifle": 0.85,
+    # Slice 15B: a pistol, a machine pistol and a magnum, as the pistols before them.
+    "kreuzer_pistol": 0.9, "psalm_smg": 0.9, "jawbreaker": 0.9,
 }
 
 
@@ -3729,6 +3822,11 @@ SHOT_SOUNDS = {
     "vesper_rifle": "item/heavier_rifle/fire.ogg",
     "onrush_smg": "item/greaser_smg/fire.ogg",
     "gallant_rifle": "item/bruiser/silenced_fire.ogg",
+    # Slice 15B: the shots the owner's data names: the brass pistol's for the Krauser and the Soul Drummer (the Holler
+    # Pistol's), the brass revolver's for the Uppercut (the Half-Crown Revolver's).
+    "kreuzer_pistol": "item/brass_pistol/fire.ogg",
+    "psalm_smg": "item/brass_pistol/fire.ogg",
+    "jawbreaker": "item/brass_revolver/fire.ogg",
 }
 SUBTITLES = {
     "fire": "Gun fires",
@@ -3866,8 +3964,9 @@ def one_handed():
 # Slice 13D: one-handed guns that, with a stock fitted, are held in both hands as carbines. Such a gun plays the owner's
 # carbine_ animations in place of its own (its draw, idle, shots, inspect and reload: client/guns/GunAnimations), its
 # holder's other arm comes up to it seen from outside (GunPose), and it is no longer one of two guns held at once
-# (JugcraftGuns.CARBINES, GunItem.carbine).
-CARBINES = ("parley_revolver", "half_crown_revolver")
+# (JugcraftGuns.CARBINES, GunItem.carbine). Slice 14A adds the Half-Crown Revolver, slice 15B the Kreuzer Pistol, the
+# Psalm SMG and the Jawbreaker, which the owner's data names one-handed carbines.
+CARBINES = ("parley_revolver", "half_crown_revolver", "kreuzer_pistol", "psalm_smg", "jawbreaker")
 CARBINE_ANIMATIONS = ("draw", "idle", "shoot", "aim_shoot", "inspect")
 
 
@@ -4149,12 +4248,27 @@ GEO_PARTS.update({source: {
     "light_grip": "light_grip", "tact_grip": "vertical_grip", "iron_bayonet": "iron_bayonet",
     "anthralite_bayonet": "anthralite_bayonet", "diamond_bayonet": "diamond_bayonet",
     "netherite_bayonet": "netherite_bayonet"} for source in ("mas_55", "prush_gun", "valora")})
+# Slice 15B: the Krauser, the Soul Drummer and the Uppercut, from the owner's later edits of them. Their standard
+# magazines are the bones the owner named standard_mag (on the Uppercut, Mag), and their muzzle attachments and stocks
+# bones of the same names as slice 15A's. The Uppercut's shell is a round its animations keep hidden throughout, and
+# its standard_grip the butt a stock takes the place of. The Krauser's and the Soul Drummer's sights and standard_grip
+# bones hold nothing (their sights are on their bodies, and they have no butt), so they are left out.
+GEO_PARTS.update({source: {
+    "main": "gun_body", "bolt": "bolt", "seal": "seal", "ext_mag": "extended_mag", "speed_mag": "speed_mag",
+    "stan_barrel": "standard_barrel", "ext_barrel": "extended_barrel", "silencer": "silencer",
+    "advanced_silencer": "advanced_silencer", "muzzle_brake": "muzzle_brake", "light_stock": "light_stock",
+    "heavy_stock": "weighted_stock", "wooden_stock": "wooden_stock", **more} for source, more in {
+    "krauser": {"stan_mag": "standard_mag"},
+    "soul_drummer": {"stan_mag": "standard_mag"},
+    "uppercut": {"stan_mag": "Mag", "sights": "sights", "no_sights": "no_sights", "shell": "shell",
+                 "stan_grip": "standard_grip"}}.items()})
 # Where each GeckoLib model stands from the item models' frame, in its own units (each cube's corners and pivot are
 # the item model's less this): the owner's Grandle OG model holds its Grandle's body, sights, bolt, stocks and grips
 # element for element at the same places less this, and its muzzle attachments and bayonets 3 px further forward on its
 # longer barrel (GEO_TWINS, check_geo()).
 GEO_OFFSETS = {"grandle_og": (0.00625, -8.15, -1.0), "mas_55": (0.0, -8.15, -0.8), "prush_gun": (-0.0095, -8.05, -1.25),
-               "valora": (0.0125, -8.2, -0.75)}
+               "valora": (0.0125, -8.2, -0.75), "krauser": (-0.0095, -8.1, -0.1384),
+               "soul_drummer": (-0.0095, -8.05, -0.2), "uppercut": (-0.0095, -8.5, -1.4)}
 # The bones of a GeckoLib model that are another of the owner's guns' item-model parts, moved by (x, y, z) px: the
 # converter must give back those parts' elements, face for face (check_geo()).
 GEO_TWINS = {"grandle_og": {
@@ -4183,7 +4297,15 @@ GEO_TWINS.update({source: {bone: (f"{source}/{part}", (0, 0, 0)) for bone, part 
     "valora": {"bolt": "bolt", "light_stock": "light_stock", "weighted_stock": "heavy_stock",
                "wooden_stock": "wooden_stock", "iron_bayonet": "iron_bayonet", "anthralite_bayonet": "anthralite_bayonet",
                "diamond_bayonet": "diamond_bayonet", "netherite_bayonet": "netherite_bayonet"}}.items()})
-GEO_RELAID = ("mas_55", "prush_gun", "valora")
+# Slice 15B: the same for the Krauser, the Soul Drummer and the Uppercut, whose textures the owner also laid out anew.
+GEO_TWINS.update({source: {bone: (f"{source}/{part}", (0, 0, 0)) for bone, part in twins.items()} for source, twins in {
+    "krauser": {"bolt": "receiver", "weighted_stock": "heavy_stock", "wooden_stock": "wooden_stock"},
+    "soul_drummer": {"bolt": "receiver", "standard_barrel": "stan_barrel", "muzzle_brake": "muzzle_brake",
+                     "advanced_silencer": "advanced_silencer", "silencer": "silencer"},
+    "uppercut": {"sights": "sights", "no_sights": "no_sights", "bolt": "receiver", "standard_barrel": "stan_barrel",
+                 "advanced_silencer": "advanced_silencer", "silencer": "silencer", "standard_grip": "stan_grip",
+                 "light_stock": "light_stock", "weighted_stock": "heavy_stock", "wooden_stock": "wooden_stock"}}.items()})
+GEO_RELAID = ("mas_55", "prush_gun", "valora", "krauser", "soul_drummer", "uppercut")
 
 
 def geo_model(source):

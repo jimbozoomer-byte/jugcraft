@@ -108,6 +108,9 @@ import net.minecraft.world.level.block.state.BlockBehaviour;
  * barrel, loaded from the top with a stripper clip of seven.</li>
  * <li>Slice 15A, the first diamond-steel guns: the Vesper Rifle, a heavy marksman's rifle; the Onrush SMG, a
  * submachine gun; and the Gallant Rifle, an automatic rifle silenced the length of its barrel.</li>
+ * <li>Slice 15B, the next diamond-steel guns, each held in one hand and in both with a stock fitted ({@link #CARBINES}):
+ * the Kreuzer Pistol, its magazine ahead of its trigger; the Psalm SMG, a machine pistol; and the Jawbreaker, a
+ * four-shot magnum.</li>
  * <li>Attachments ({@link #ATTACHMENTS}), one a slot, are fitted in a crafting grid ({@link GunAttachmentRecipe}) and
  * held in {@link #FITTED}; they change the gun's numbers ({@link GunItem#spec(ItemStack)}) and show on its model.
  * Slice 9E adds the Tactical Grip and the Laser Sight, whose red dot the client draws where the gun points.</li>
@@ -212,6 +215,9 @@ public final class JugcraftGuns {
 		SPECS.put("vesper_rifle", new GunSpec(13.0F, 1, 14, false, 8, 51, 0, 0, 0, 2.0F, 0.15F, 144, "rifle_round"));
 		SPECS.put("onrush_smg", new GunSpec(3.5F, 1, 2, true, 23, 51, 0, 0, 0, 5.0F, 2.5F, 48, "light_round"));
 		SPECS.put("gallant_rifle", new GunSpec(6.0F, 1, 5, true, 17, 43, 0, 0, 0, 3.0F, 1.0F, 80, "rifle_round"));
+		SPECS.put("kreuzer_pistol", new GunSpec(5.0F, 1, 4, false, 13, 50, 0, 0, 0, 2.0F, 0.5F, 64, "light_round"));
+		SPECS.put("psalm_smg", new GunSpec(3.0F, 1, 2, true, 25, 55, 0, 0, 0, 5.5F, 3.0F, 40, "light_round"));
+		SPECS.put("jawbreaker", new GunSpec(12.0F, 1, 8, false, 4, 47, 0, 0, 0, 2.5F, 0.5F, 72, "rifle_round"));
 	}
 
 	/**
@@ -254,13 +260,14 @@ public final class JugcraftGuns {
 	 * Slice 10G, two guns at once: the guns held in one hand (tools/guns.py one_handed()), of which a player may hold one
 	 * in each hand and fire both ({@link GunItem#dual}).
 	 */
-	public static final Set<String> ONE_HANDED = Set.of("warden_pistol", "haymaker", "duelling_pistol", "bulldog_pistol", "marshal_revolver", "sapper_revolver", "sentry_pistol", "beam_pistol", "rattler_pistol", "bronco_smg", "spikedriver", "caisson_pistol", "culverin", "ashfall_pistol", "penny_pistol", "tuppence_pistol", "goshawk_revolver", "tabby_revolver", "parley_revolver", "minuet_pistol", "half_crown_revolver");
+	public static final Set<String> ONE_HANDED = Set.of("warden_pistol", "haymaker", "duelling_pistol", "bulldog_pistol", "marshal_revolver", "sapper_revolver", "sentry_pistol", "beam_pistol", "rattler_pistol", "bronco_smg", "spikedriver", "caisson_pistol", "culverin", "ashfall_pistol", "penny_pistol", "tuppence_pistol", "goshawk_revolver", "tabby_revolver", "parley_revolver", "minuet_pistol", "half_crown_revolver", "kreuzer_pistol", "psalm_smg", "jawbreaker");
 	/**
 	 * Slice 13D: one-handed guns that, with a stock fitted, are held in both hands as carbines (tools/guns.py CARBINES):
 	 * they play the owner's carbine_ animations in place of their own, and are no longer one of two guns held at once
-	 * ({@link GunItem#carbine}). Slice 14A adds the Half-Crown Revolver.
+	 * ({@link GunItem#carbine}). Slice 14A adds the Half-Crown Revolver, slice 15B the Kreuzer Pistol, the Psalm SMG and the
+	 * Jawbreaker.
 	 */
-	public static final Set<String> CARBINES = Set.of("parley_revolver", "half_crown_revolver");
+	public static final Set<String> CARBINES = Set.of("parley_revolver", "half_crown_revolver", "kreuzer_pistol", "psalm_smg", "jawbreaker");
 	/** Slice 10G: how much further each of two guns strays from the hip than one held alone (tools/guns.py DUAL_SPREAD). */
 	public static final float DUAL_SPREAD = 1.5F;
 	/**
@@ -502,6 +509,12 @@ public final class JugcraftGuns {
 		ACCEPTS.put("gallant_rifle", List.of("extended_magazine", "speed_magazine", "light_stock", "weighted_stock",
 				"wooden_stock", "light_grip", "iron_bayonet", "steel_bayonet", "diamond_bayonet", "netherite_bayonet",
 				"long_scope", "medium_scope", "reflex_sight", "tactical_grip", "laser_sight"));
+		ACCEPTS.put("kreuzer_pistol", List.of("silencer", "baffled_silencer", "muzzle_brake", "extended_barrel",
+				"extended_magazine", "speed_magazine", "light_stock", "weighted_stock", "wooden_stock"));
+		ACCEPTS.put("psalm_smg", List.of("silencer", "baffled_silencer", "muzzle_brake", "extended_barrel",
+				"extended_magazine", "speed_magazine", "light_stock", "weighted_stock", "wooden_stock"));
+		ACCEPTS.put("jawbreaker", List.of("silencer", "baffled_silencer", "muzzle_brake", "extended_barrel", "light_stock",
+				"weighted_stock", "wooden_stock", "long_scope", "medium_scope", "reflex_sight", "laser_sight"));
 	}
 
 	/** The rounds. */
