@@ -1,6 +1,6 @@
 # Peepo and Jughead player guide
 
-Current controls and behavior on the `peepo-companion` branch, updated 23 October 2026. Peepo and Jughead share the same commands and jobs. Older feature records describe how individual features developed; use this guide for the current setup.
+Current controls and behavior on the `peepo-companion` branch, updated 25 October 2026. Peepo and Jughead share the same commands and jobs. Older feature records describe how individual features developed; use this guide for the current setup.
 
 ## Quick start
 
@@ -110,9 +110,35 @@ On a recipe-capable job row, click the **funnel icon** (hover label **Filter**) 
 - The grid is an allow-list, not a crafting pattern or priority order. Put real ingredients in linked Supply containers.
 - Workstation filters belong to the station and are shared by companions assigned to it. Some filter changes reset processing progress, but do not discard stored ingredients.
 
-Filters are available for Cooking Pots, supported standard processors, Hearth Ovens, Cutting Boards, Skillets, Kitchen Stoves, Cider Barrels, Candy Kettles, vanilla cooking/brewing stations, Beehives/Bee Nests and both Crafters. The Electroplating Bath accepts the tool/armor type as its output filter. Hearth Ovens accept whole raw or baked pies/cakes as filter icons and display the baked result. Cider Presses and Canning Kettles use their fixed workflows without this selector. Gardens have a separate single crop/seed selector.
+Filters are available for Cooking Pots, supported standard processors, Hearth Ovens, Cutting Boards, Skillets, Kitchen Stoves, Cider Presses/Barrels, Candy and Canning Kettles, Spinning Wheels, Punch Bowls, vanilla cooking/brewing stations, Beehives/Bee Nests and both Crafters. The Electroplating Bath accepts the tool/armor type as its output filter. Hearth Ovens accept whole raw or baked pies/cakes as filter icons and display the baked result. Canning Kettles display sealed preserve jars; Spinning Wheels accept the yarn color produced by the desired wool. Gardens have a separate single crop/seed selector.
+
+### Production stock targets
+
+Cooking Pot, Hearth Oven, Cutting Board, Skillet, Kitchen Stove, vanilla Furnace/Smoker/Blast Furnace/Campfires, all three starter workshops, standard item-recipe processors, the vanilla Crafter and Auto-Crafter can maintain finished-product stock. Open **Filter**, select a ghost product with an empty-hand left-click, and switch **Unlimited** to **Maintain stock**. Set **Target** and **Restock at**; arrows apply immediately, while typed values use **Apply quantities** or Enter. Values count items, not stacks. For example, Target 64 / Restock at 32 refills to 64, then waits until 32 or fewer remain. Right-click clears a ghost; empty filters still allow any available recipe (Crafters retain their configured pattern).
+
+Targets are separate for each product and shared by helpers at that workstation. The initial counted containers are the job's linked Outputs. **Use linked Outputs** adopts the current job links as the shared list; its chest names/coordinates appear below. Supply is not counted. Products waiting at the station, in transit and committed to cooking also count, preventing duplicate orders by helpers. Whole batches and uniform bonuses can produce a small surplus. Unavailable counted storage pauses new replenishment rather than being treated as empty. Finished products and already committed batches are still handled normally.
+
+New filters and existing saves remain Unlimited. These controls manage companion replenishment; manual/native external production keeps its existing behavior. See [production stock targets](features/companion-production-stock.md) for shared helpers, counting and limits.
+
+Standard processors include machines such as the Electric Furnace, Crusher, Alloy Smelter, Metal Press and Wire Drawer. They retain their normal recipe sizes, electricity use and helper effort. Workshop batches already crafting count even after their ingredients leave the input slots; needed tools, ceramics and fuel can still be supplied to finish them. Native byproducts are retained and delivered, but uncertain bonus yields are not promised in advance.
+
+Stock targets also cover **Cider Press, Cider Barrel, Candy Kettle, Canning Kettle, Punch Bowl, Spinning Wheel, Brewing Stand, Alchemy Crucible, Electroplating Bath and industrial recipes with item inputs and outputs**. All use the same Filter controls and linked Supply/Output. Generators, collection zones and serving/restocking-only jobs keep their existing controls.
+
+- Cider Press targets count sweet cider; pomace is still delivered. Cider Barrels count the selected Sparkling/Aged batch throughout aging. If both stages are allowed, the next empty batch favors the greater relative shortage.
+- Canning targets count sealed jars of the selected preserve; unsealed or spoiled jars do not satisfy them. Spinning targets distinguish yarn colors and keep the native four-yarn wool batch.
+- Punch and candy keep whole ingredient yields. Bottles, reusable trays and recipe leftovers still use normal transport; candy already cooking or setting finishes before a new batch starts.
+- Brewing targets distinguish potion types, including strength/duration and splash/lingering forms. Peepo fetches only the missing number of bottles (up to three) and completes all intermediate steps before delivering the final potion.
+- Alchemy keeps the written formula and native heat/water requirements. A whole formula can exceed a small target. Draught/Salve selection follows the Filter; when both are allowed, an idle batch favors the greater relative shortage. Water still uses the native fluid supply.
+- Electroplating counts plated tools/armor of the selected item type; unplated items do not count. Coating metal, acid, repairs and electricity retain their normal rules. Different coatings of the same item share its goal.
+- Industrial item goals include native work-lane results already committed. Native recipe locks, pause controls, stock caps, tools and fluids remain authoritative. Fluid-only products keep the machine's own fluid targets; their bucket ghosts show **Machine controls** in the companion Filter.
+
+For both Crafters, configure the real recipe grid first, then select its finished product in **Filter** and set a target. Peepo keeps that pattern and stops fetching ingredients when enough products are stored, queued or in transit. The Auto-Crafter's retained last item in each slot is its pattern and does not count as pending stock. The vanilla Crafter remembers its pattern after the grid empties, including for editing its Filter target. Keep supplying redstone pulses to the vanilla Crafter and normal power to the Auto-Crafter. Whole crafts may exceed a target (for example, a four-stick recipe with a target of one); container remainders still go to Output.
 
 ## Supported jobs
+
+The regular **Crafting Table** now supports companion work. Assign it with the Planner, link Supply/Output, and put desired finished products into **Filter**; its usual stock targets apply. No seeded crafting grid is required. Peepo or Jughead chooses an available ordinary shaped/shapeless recipe, works for **three seconds per craft at 240 JE** (**180 JE with Mechanic's Coveralls**), and delivers the products and container leftovers. An empty Filter allows any supported available recipe. Only one companion works at a table at a time; custom special recipes remain manual.
+
+Normal right-click still opens the player's vanilla crafting menu. **Shift-right-click with an empty hand** recovers the companion's buffered ingredients/results; anything that will not fit stays at the table. Its saved companion workspace means crafting tables can no longer be moved by pistons. See [crafting-table work](features/companion-crafting-table.md).
 
 | Assignment | What to provide and expect |
 | --- | --- |
@@ -128,6 +154,7 @@ Filters are available for Cooking Pots, supported standard processors, Hearth Ov
 | Campfire / Soul Campfire | Light it first. Supply brings up to four compatible cooking inputs and Output collects saved cooked results. Keep safe space beside the fire. |
 | Composter | Supply compostable items; Output takes ready bone meal. Normal compost yields and maturation apply. Use a dedicated supply to avoid composting wanted crops. |
 | Vanilla Crafter | Manually seed its complete grid, then assign and supply matching ingredients. Peepo remembers the pattern, refills it and collects results/remainders. A normal redstone clock is still required. |
+| Crafting Table | Choose finished products in Filter and supply their ingredients. One companion stands on the tabletop, gathers ingredients near its center, presses them together and inspects the result. Output receives results and every native container remainder. Uses companion energy and supports stock targets. |
 | Coal Generator / Steam Generator / Large Steam Engine | Supply the machine's accepted solid fuels. Boilers can also receive water buckets; Output returns empty buckets. Pipes/source-water operation still works. No production boost. |
 | Auto-Crafter | Seed the real 3Ã—3 grid with one item in each required slot. Supply replenishes that pattern; Output collects products and container remainders. Normal energy/redstone rules apply. |
 | Electroplating Bath | Supply a compatible damageable item and nickel, silver or gold ingots; pipe in sulfuric acid. Output takes the actual plated/repaired item, preserving its other components. |

@@ -75,6 +75,7 @@ public final class KitchenCompanionPort extends SnapshotParticipant<KitchenCompa
     public CompanionStatus kitchenStatus(PeepoEntity npc){
         if(!live())return CompanionStatus.MISSING;
         if(block instanceof CuttingBoardBlockEntity b){
+            if(b.item().isEmpty() && filter.stock.enabled()){var stockStatus=filter.stock.idleStatus(npc,block);if(stockStatus!=CompanionStatus.NO_INPUT)return stockStatus;}
             if(!npc.assignedHand().is(JugcraftAgriculture.KNIVES))return CompanionStatus.NO_TOOL;
             long now=block.getLevel().getGameTime();
             if(now<nextStatus && filterRevision==filter.revision() && ItemStack.matches(statusInput,b.item()) && ItemStack.matches(statusKnife,npc.assignedHand()))return boardStatus;

@@ -23,6 +23,7 @@ public final class PeepoRenderer extends MobRenderer<PeepoEntity,PeepoState,Peep
         addLayer(new UniformLayer(this));
         addLayer(new AnimalWorkLayer(this));
         addLayer(new ActionItemLayer(this));
+        addLayer(new CraftingLayer(this));
         addLayer(new PieLayer(this));
         addLayer(new SpoonLayer(this,new StirringSpoonModel(context.bakeLayer(PeepoClient.SPOON))));
         addLayer(new WorkPropsLayer(this,new WorkPropsModel(context.bakeLayer(PeepoClient.WORK_WOOD)),
@@ -221,9 +222,49 @@ public final class PeepoRenderer extends MobRenderer<PeepoEntity,PeepoState,Peep
         items.updateForLiving(state.knife,state.work==WorkAnimation.CHOP?entity.getMainHandItem():net.minecraft.world.item.ItemStack.EMPTY,ItemDisplayContext.NONE,entity);
         items.updateForLiving(state.hoe,state.work==WorkAnimation.HARVEST?entity.getMainHandItem():net.minecraft.world.item.ItemStack.EMPTY,ItemDisplayContext.NONE,entity);
         state.eatingTime=PeepoEntity.EAT_DURATION-entity.getEatingTicks()+partialTick;
+        extractCrafting(entity,state,partialTick);
         CompanionActionPose.extract(entity,state,partialTick,items);
         items.updateForLiving(state.held,!state.actionPose && !state.eating && !state.sleeping && (state.work==WorkAnimation.NONE || state.work==WorkAnimation.SLAUGHTER || state.work==WorkAnimation.INTERACT && local.peepo.CompanionGarden.cuttingTool(entity.getMainHandItem())) ? entity.getMainHandItem() : net.minecraft.world.item.ItemStack.EMPTY,state.holdingLight ? ItemDisplayContext.NONE : ItemDisplayContext.THIRD_PERSON_RIGHT_HAND,entity);
         items.updateForLiving(state.food,state.eating ? entity.getMainHandItem() : net.minecraft.world.item.ItemStack.EMPTY,ItemDisplayContext.FIXED,entity);
+    }
+    private void extractCrafting(PeepoEntity entity,PeepoState state,float partialTick){
+        if(state.work==WorkAnimation.CRAFT){
+            var target=entity.workTarget();
+            if(!entity.level().hasChunkAt(target) || !entity.level().getBlockState(target).is(net.minecraft.world.level.block.Blocks.CRAFTING_TABLE))state.work=WorkAnimation.NONE;
+        }
+        boolean crafting=state.work==WorkAnimation.CRAFT;
+        if(crafting){
+            state.bodyRot=entity.getYRot();state.yRot=state.xRot=0;
+            state.craftPose.evaluate(entity.level().getGameTime()-entity.craftingStarted()+partialTick,state.pumpkin);
+        }else state.craftPose.clear();
+        // Server snapshots identify only the current paid recipe; no client inventory or recipe scans.
+        var empty=net.minecraft.world.item.ItemStack.EMPTY;
+        var ingredient0=crafting?entity.craftingIngredient(0):empty;
+        var ingredient1=crafting?entity.craftingIngredient(1):empty;
+        state.craftIngredient0Block=ingredient0.getItem() instanceof net.minecraft.world.item.BlockItem;
+        state.craftIngredient1Block=ingredient1.getItem() instanceof net.minecraft.world.item.BlockItem;
+        items.updateForLiving(state.craftIngredient0,ingredient0,ItemDisplayContext.NONE,entity);
+        items.updateForLiving(state.craftIngredient1,ingredient1,ItemDisplayContext.NONE,entity);
+        items.updateForLiving(state.craftResult,crafting?entity.craftingResult():empty,ItemDisplayContext.NONE,entity);
+    }
+    private static final class CraftingLayer extends RenderLayer<PeepoState,PeepoModel>{
+        CraftingLayer(PeepoRenderer renderer){super(renderer);}
+        @Override public void submit(PoseStack pose,SubmitNodeCollector collector,int light,PeepoState s,float yaw,float pitch){
+            if(s.isInvisible || s.work!=WorkAnimation.CRAFT)return;
+            var p=s.craftPose;
+            // Cube ingredients retain their native orientation and sit above, not inside, the tabletop.
+            item(pose,collector,light,s,s.craftIngredient0,p.ingredient0X,p.ingredient0Y-(s.craftIngredient0Block?1.10F:0),p.ingredient0Z,p.ingredientScale,s.craftIngredient0Block?180:90);
+            item(pose,collector,light,s,s.craftIngredient1,p.ingredient1X,p.ingredient1Y-(s.craftIngredient1Block?1.10F:0),p.ingredient1Z,p.ingredientScale,s.craftIngredient1Block?180:90);
+            item(pose,collector,light,s,s.craftResult,p.resultX,p.resultY,p.resultZ,p.resultScale,180+p.resultTilt*net.minecraft.util.Mth.RAD_TO_DEG);
+        }
+        private static void item(PoseStack pose,SubmitNodeCollector collector,int light,PeepoState s,
+                                 net.minecraft.client.renderer.item.ItemStackRenderState item,
+                                 float x,float y,float z,float scale,float angle){
+            if(scale<=0 || item.isEmpty())return;
+            pose.pushPose();pose.translate(x/16,y/16,z/16);
+            pose.rotateDegrees(com.mojang.math.Axis.XP,angle);pose.scale(scale,scale,scale);
+            item.submit(pose,collector,light,OverlayTexture.NO_OVERLAY,s.outlineColor);pose.popPose();
+        }
     }
     private static final class ActionItemLayer extends RenderLayer<PeepoState,PeepoModel>{
         ActionItemLayer(PeepoRenderer renderer){super(renderer);}

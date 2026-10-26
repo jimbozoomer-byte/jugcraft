@@ -67,13 +67,16 @@ public class CookingPotBlockEntity extends BaseContainerBlockEntity implements W
 	public local.peepo.CompanionRecipeFilter filter(){companionFilter.initialize(supplyPlan().map(p->p.output().create()).orElse(ItemStack.EMPTY));return companionFilter;}
 	public void companionFilterChanged(){selectedRecipe=null;progress=0;assistHalf=0;recheck=true;loaded=false;setChanged();}
 	public void prepareCompanionRecipe(net.fabricmc.fabric.api.transfer.v1.storage.Storage<net.fabricmc.fabric.api.transfer.v1.item.ItemVariant> source){
+		prepareCompanionRecipe(source,stack->0);
+	}
+	public void prepareCompanionRecipe(net.fabricmc.fabric.api.transfer.v1.storage.Storage<net.fabricmc.fabric.api.transfer.v1.item.ItemVariant> source,java.util.function.ToDoubleFunction<ItemStack> priority){
 		if(!(level instanceof ServerLevel server))return;
 		var filter=filter();var available=local.peepo.RecipeSupplies.available(source);
 		var catalog=CookingPotRecipe.catalog(server.getServer());
 		var options=new java.util.ArrayList<>(catalog.entrySet());
-		options.sort(java.util.Comparator.comparingInt(e->e.getKey().equals(selectedRecipe)?0:1));
+		options.sort(java.util.Comparator.<java.util.Map.Entry<net.minecraft.resources.Identifier,CookingPotRecipe>>comparingDouble(e->-priority.applyAsDouble(e.getValue().output().create())).thenComparingInt(e->e.getKey().equals(selectedRecipe)?0:1));
 		int inspected=0;for(var entry:options){if(++inspected>256)break;var candidate=entry.getValue();
-			if(!filter.allows(candidate.output().create()))continue;
+			if(!filter.allows(candidate.output().create()) || priority.applyAsDouble(candidate.output().create())<=-2)continue;
 			var parts=candidate.parts().stream().map(p->new local.peepo.RecipeSupplies.Part(p.ingredient(),p.count())).toList();
 			if(local.peepo.RecipeSupplies.completes(parts,items.subList(0,INPUTS),available)){selectRecipe(entry.getKey());return;}
 		}
@@ -94,6 +97,7 @@ public class CookingPotBlockEntity extends BaseContainerBlockEntity implements W
 	private int assistHalf;
 	private long lastAssisted = -1000;
 	private ItemStack chefPending=ItemStack.EMPTY;
+	public ItemStack companionBonusPending(){return chefPending.copy();}
 
 	private static final int[] INPUT_SLOTS = {0, 1, 2, 3, 4, 5};
 	private static final int[] RESULT_SLOTS = {6, 7, 8, 9};

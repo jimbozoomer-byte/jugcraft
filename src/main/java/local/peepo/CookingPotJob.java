@@ -84,7 +84,12 @@ public final class CookingPotJob implements CompanionJob {
         if (!availableTo(npc)) return CompanionStatus.OCCUPIED;
         if (pot.isLocked() || !npc.orders.tamed() || !npc.assignments.assignedWork(stationPosition()) || !CompanionJobs.permitted(npc, stationPosition())) return CompanionStatus.FORBIDDEN;
         if (entrance == null || !roomFor(npc)) return CompanionStatus.BLOCKED;
-        return planning?CompanionReadiness.shared(pot,pot::cookingStatus):pot.cookingStatus();
+        var status=planning?CompanionReadiness.shared(pot,pot::cookingStatus):pot.cookingStatus();
+        if(status==CompanionStatus.NO_HEAT && pot.filter().stock.enabled()){
+            boolean empty=true;for(int i=0;i<CookingPotBlockEntity.INPUTS;i++)if(!pot.getItem(i).isEmpty()){empty=false;break;}
+            if(empty){var stocked=pot.filter().stock.idleStatus(npc,pot);if(stocked!=CompanionStatus.NO_INPUT)return stocked;}
+        }
+        return status==CompanionStatus.NO_INPUT?pot.filter().stock.idleStatus(npc,pot):status;
     }
     private boolean roomFor(PeepoEntity npc) {
         long now=npc.level().getGameTime();

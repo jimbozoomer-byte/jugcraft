@@ -41,6 +41,10 @@ public final class PeepoEntity extends PathfinderMob {
     private static final EntityDataAccessor<Long> WORK_STARTED=SynchedEntityData.defineId(PeepoEntity.class,EntityDataSerializers.LONG);
     private static final EntityDataAccessor<ItemStack> WORK_PIE=SynchedEntityData.defineId(PeepoEntity.class,EntityDataSerializers.ITEM_STACK);
     private static final EntityDataAccessor<Integer> WORK_ANIMAL=SynchedEntityData.defineId(PeepoEntity.class,EntityDataSerializers.INT);
+    private static final EntityDataAccessor<Long> CRAFT_STARTED=SynchedEntityData.defineId(PeepoEntity.class,EntityDataSerializers.LONG);
+    private static final EntityDataAccessor<ItemStack> CRAFT_FIRST=SynchedEntityData.defineId(PeepoEntity.class,EntityDataSerializers.ITEM_STACK);
+    private static final EntityDataAccessor<ItemStack> CRAFT_SECOND=SynchedEntityData.defineId(PeepoEntity.class,EntityDataSerializers.ITEM_STACK);
+    private static final EntityDataAccessor<ItemStack> CRAFT_RESULT=SynchedEntityData.defineId(PeepoEntity.class,EntityDataSerializers.ITEM_STACK);
     private static final EntityDataAccessor<Integer> GESTURE=SynchedEntityData.defineId(PeepoEntity.class,EntityDataSerializers.INT);
     private static final EntityDataAccessor<Long> GESTURE_STARTED=SynchedEntityData.defineId(PeepoEntity.class,EntityDataSerializers.LONG);
     private static final EntityDataAccessor<net.minecraft.core.BlockPos> GESTURE_TARGET=SynchedEntityData.defineId(PeepoEntity.class,EntityDataSerializers.BLOCK_POS);
@@ -67,6 +71,18 @@ public final class PeepoEntity extends PathfinderMob {
     public int workAnimal(){return entityData.get(WORK_ANIMAL);}
     void setWorkAnimal(int id){if(!level().isClientSide())entityData.set(WORK_ANIMAL,id);}
     public long workStarted(){return entityData.get(WORK_STARTED);}
+    public long craftingStarted(){return entityData.get(CRAFT_STARTED);}
+    public ItemStack craftingIngredient(int index){return entityData.get(index==0?CRAFT_FIRST:CRAFT_SECOND);}
+    public ItemStack craftingResult(){return entityData.get(CRAFT_RESULT);}
+    /** Render-only recipe previews; changed-only metadata, never inventory or client-side recipes. */
+    void setCraftingVisuals(ItemStack first,ItemStack second,ItemStack result,long started){
+        if(level().isClientSide())return;
+        entityData.set(CRAFT_STARTED,started);
+        setCraftingItem(CRAFT_FIRST,first);setCraftingItem(CRAFT_SECOND,second);setCraftingItem(CRAFT_RESULT,result);
+    }
+    private void setCraftingItem(EntityDataAccessor<ItemStack> field,ItemStack item){
+        if(!ItemStack.isSameItemSameComponents(entityData.get(field),item))entityData.set(field,item.copyWithCount(item.isEmpty()?0:1));
+    }
     public ItemStack workPie(){return entityData.get(WORK_PIE);}
     void setWorkPie(ItemStack stack){
         if(!level().isClientSide() && !ItemStack.isSameItemSameComponents(workPie(),stack))entityData.set(WORK_PIE,stack.copyWithCount(stack.isEmpty()?0:1));
@@ -86,6 +102,7 @@ public final class PeepoEntity extends PathfinderMob {
         if(level().isClientSide())return;
         if(!isAlive() || isEating() || getRestMode()!=CompanionEnergy.Rest.NONE)action=WorkAnimation.NONE;
         if(action!=workAnimation() || action!=WorkAnimation.NONE && !target.equals(workTarget()))entityData.set(WORK_STARTED,level().getGameTime());
+        if(action!=WorkAnimation.CRAFT)setCraftingVisuals(ItemStack.EMPTY,ItemStack.EMPTY,ItemStack.EMPTY,0L);
         if(!action.isPie() && action!=WorkAnimation.PLANT && action!=WorkAnimation.PICK && action!=WorkAnimation.WATER_FILL)setWorkPie(ItemStack.EMPTY);
         if(action!=WorkAnimation.SHEAR && action!=WorkAnimation.MILK)setWorkAnimal(-1);
         if(action!=WorkAnimation.NONE)entityData.set(WORK_TARGET,target.immutable());
@@ -124,10 +141,14 @@ public final class PeepoEntity extends PathfinderMob {
         var shown=busy || (!usingTool && (tool || action!=WorkAnimation.NONE))?ItemStack.EMPTY:item;
         if(!ItemStack.matches(getMainHandItem(),shown))setItemSlot(EquipmentSlot.MAINHAND,shown.copy());
     }
+    @Override public void remove(net.minecraft.world.entity.Entity.RemovalReason reason){
+        if(transport!=null && reason.shouldDestroy())transport.releaseStock();
+        super.remove(reason);
+    }
     @Override protected void dropCustomDeathLoot(ServerLevel server,DamageSource source,boolean playerKill){
         // The displayed hand is a copy; only the inventory owns the equipped item.
         if(!isEating())setItemSlot(EquipmentSlot.MAINHAND,ItemStack.EMPTY);
-        super.dropCustomDeathLoot(server,source,playerKill);fishing.dropPending(server);
+        transport.releaseStock();super.dropCustomDeathLoot(server,source,playerKill);fishing.dropPending(server);
         for(int i=0;i<belongings.getContainerSize();i++){
             var stack=belongings.removeItemNoUpdate(i);
             if(!stack.isEmpty())spawnAtLocation(server,stack);
@@ -301,6 +322,7 @@ public final class PeepoEntity extends PathfinderMob {
         builder.define(RECOVERING,false);
         builder.define(WORK_ANIMATION,0);builder.define(WORK_TARGET,net.minecraft.core.BlockPos.ZERO);
         builder.define(WORK_STARTED,0L);builder.define(WORK_PIE,ItemStack.EMPTY);builder.define(WORK_ANIMAL,-1);
+        builder.define(CRAFT_STARTED,0L);builder.define(CRAFT_FIRST,ItemStack.EMPTY);builder.define(CRAFT_SECOND,ItemStack.EMPTY);builder.define(CRAFT_RESULT,ItemStack.EMPTY);
         builder.define(GESTURE,0);builder.define(GESTURE_STARTED,0L);builder.define(GESTURE_TARGET,net.minecraft.core.BlockPos.ZERO);builder.define(GESTURE_ITEM,ItemStack.EMPTY);
     }
     public boolean isJughead() { return getType()==PeepoMod.JUGHEAD || getType()==PeepoMod.LEGACY_JUGHEAD; }
@@ -350,7 +372,7 @@ public final class PeepoEntity extends PathfinderMob {
             if(editingSettings())holdForSettings();
         }
         if (!level().isClientSide() && bedExit != null && getRestMode() == CompanionEnergy.Rest.NONE
-                && workAnimation()!=WorkAnimation.STIR && workAnimation()!=WorkAnimation.CHOP) leaveCompanionBed();
+                && workAnimation()!=WorkAnimation.STIR && workAnimation()!=WorkAnimation.CHOP && workAnimation()!=WorkAnimation.CRAFT) leaveCompanionBed();
         super.tick();
         if(!level().isClientSide()) {
             if(editingSettings())holdForSettings();

@@ -36,6 +36,7 @@ public final class PeepoMod implements ModInitializer {
         CompanionBudget.initialize();
         CompanionUniforms.initialize();
         VanillaCompanionPort.initialize();
+        CraftingTables.initialize();
         CompanionLivestock.initialize();
         GeneratorWheel.initialize();
         CompanionBeds.initialize();

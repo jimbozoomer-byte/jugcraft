@@ -22,6 +22,8 @@ public final class FormCompanionPort {
     private FluidRecipes.Entry selectedEntry;
     private List<FluidRecipes.Entry> selectedCatalog;
     private List<FluidRecipes.Entry> filteredSource, filteredRecipes;
+    private List<FluidRecipes.Entry> stockSource;
+    private Set<Item> stockProducts=Set.of();
     private int filteredRevision = -1;
     private Direction permissionFacing;
     private List<BlockPos> footprint = List.of(), claimChunks = List.of();
@@ -92,7 +94,7 @@ public final class FormCompanionPort {
         return npc.orders.tamed() && npc.assignments.assignedWork(machine.getBlockPos()) && permitted(npc)
             && machine.companionStatus() != CompanionStatus.UNLOADED && machine.companionStatus() != CompanionStatus.MACHINE_UNFORMED;
     }
-    private List<ItemStack> installed() {
+    public List<ItemStack> installed() {
         var items = new ArrayList<ItemStack>();
         for (int i = 0; i < machine.form().itemInputs(); i++) items.add(machine.container().getItem(i));
         return items;
@@ -114,6 +116,10 @@ public final class FormCompanionPort {
             if (recipe.tool().get().test(machine.container().getItem(i))) return true;
         return false;
     }
+    public FluidRecipes.Entry stockRecipe(){return machine.getLevel() instanceof ServerLevel l && selectedCatalog==machine.recipes(l.getServer())?selectedEntry:null;}
+    private void stockCatalog(){if(machine.getLevel() instanceof ServerLevel l){var source=machine.recipes(l.getServer());if(source!=stockSource){var products=new HashSet<Item>();for(var e:source)if(!e.recipe().items().isEmpty())for(var r:e.recipe().results())products.add(r.create().getItem());stockSource=source;stockProducts=Set.copyOf(products);}}}
+    public boolean stockTargets(){stockCatalog();return !stockProducts.isEmpty();}
+    public boolean stockProduct(ItemStack icon){stockCatalog();return stockProducts.contains(icon.getItem());}
     private int toolSlot(FluidRecipe recipe, ItemStack stack) {
         if (hasTool(recipe) || !recipe.tool().orElseThrow().test(stack)) return -1;
         for (int i = 0; i < machine.form().sockets().size(); i++) {
@@ -125,15 +131,19 @@ public final class FormCompanionPort {
     }
     /** Called only by the budgeted delivery planner; catalog matching never runs in helper ticks. */
     private void prepare(Storage<ItemVariant> source) {
+        prepare(source,null);
+    }
+    public void prepare(Storage<ItemVariant> source,java.util.function.ToDoubleFunction<ItemStack> priority) {
         var supplies = RecipeSupplies.available(source);
         var installed = installed();
         var choices = new ArrayList<>(choices());
-        choices.sort(Comparator.comparingInt(e -> e.id().equals(selected) ? 0 : 1));
+        java.util.function.ToDoubleFunction<FluidRecipes.Entry> score=e->priority==null?0:e.recipe().results().stream().map(r->r.create()).filter(filter::allows).mapToDouble(priority).max().orElse(-1);
+        choices.sort(Comparator.<FluidRecipes.Entry>comparingDouble(score).reversed().thenComparingInt(e -> e.id().equals(selected) ? 0 : 1));
         int inspected = 0;
         for (var e : choices) {
             if (++inspected > 256) break;
             var recipe = e.recipe();
-            if (machine.targetReached(e.id(), recipe) || !machine.consistent(recipe, installed)
+            if (score.applyAsDouble(e)<=-2 || machine.targetReached(e.id(), recipe) || !machine.consistent(recipe, installed)
                 || !recipe.fluidsMatch(machine.tanks())) continue;
             var parts = recipe.items().stream().map(p -> new RecipeSupplies.Part(p.ingredient(), p.count())).toList();
             if (RecipeSupplies.completes(parts, installed, supplies)
@@ -178,6 +188,7 @@ public final class FormCompanionPort {
         public void prepare(Storage<ItemVariant> source) { if (accessible(npc)) FormCompanionPort.this.prepare(source); }
         public Identifier plan() { var entry = choice(); return entry == null ? null : entry.id(); }
         public int needed(ItemStack stack) { return accessible(npc) ? Arrays.stream(needs(stack)).sum() : 0; }
+        public int stockAuxiliaryNeed(ItemStack stack){var e=choice();return e!=null && toolSlot(e.recipe(),stack)>=0?1:0;}
         public CompanionStatus status() { return accessible(npc) ? machine.companionStatus() : CompanionStatus.FORBIDDEN; }
         public Storage<ItemVariant> inputs() { return new InsertionOnlyStorage<>() {
             public long insert(ItemVariant item, long amount, TransactionContext tx) {
@@ -185,8 +196,13 @@ public final class FormCompanionPort {
                 if (!accessible(npc) || amount == 0) return 0;
                 var needs = needs(item.toStack(1)); var inventory = ContainerStorage.of(machine.container(), null);
                 long moved = 0;
-                for (int i = 0; i < needs.length && moved < amount; i++) if (needs[i] > 0)
-                    moved += inventory.getSlot(i).insert(item, Math.min(needs[i], amount - moved), tx);
+                var entry=choice();if(entry==null)return 0;
+                // Fill complete recipe layers first, including recipes that repeat an ingredient.
+                for(int layer=1;layer<=8 && moved<amount;layer++)for(int i=0;i<needs.length && moved<amount;i++)if(needs[i]>0){
+                    int cap=i<entry.recipe().items().size()?entry.recipe().items().get(i).count()*layer:1;
+                    int room=Math.min(needs[i],Math.max(0,cap-machine.container().getItem(i).getCount()));
+                    if(room>0){long n=inventory.getSlot(i).insert(item,Math.min(room,amount-moved),tx);needs[i]-=(int)n;moved+=n;}
+                }
                 return moved;
             }
         }; }

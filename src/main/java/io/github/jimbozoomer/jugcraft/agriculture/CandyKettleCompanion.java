@@ -56,19 +56,32 @@ public final class CandyKettleCompanion extends SnapshotParticipant<List<ItemSta
         int n=0;for(var s:stacks)if(match.test(s))n+=s.getCount();return n;
     }
     public void prepare(Storage<ItemVariant> source){
+        prepare(source,s->Integer.MAX_VALUE,s->0);
+    }
+    public ItemStack stockProduct(){var kind=trayTarget!=null?trayTarget:active!=null?active:planned;return kind==null?ItemStack.EMPTY:new ItemStack(kind.item());}
+    public boolean stockBusy(){return staged() || kettle.batch() || trayBatch()!=null;}
+    public int stockPending(List<ItemStack> incoming){
+        var batch=trayBatch();if(batch!=null)return batch.pieces();
+        int sugar=kettle.sugar()+items[SUGAR].getCount()+count(incoming,s->s.is(Items.SUGAR));
+        return sugar*CandyKettleBlockEntity.PIECES_PER_SUGAR;
+    }
+    public void prepare(Storage<ItemVariant> source,java.util.function.ToIntFunction<ItemStack> goal,java.util.function.ToDoubleFunction<ItemStack> priority){
         if(!live() || active!=null || trayBatch()!=null || hasOutputs())return;
         if(returnInputs){if(staged())return;returnInputs=false;}
         if(planned!=null && (staged() || kettle.batch()) && filter.allows(new ItemStack(planned.item())))return;
         var available=new ArrayList<>(RecipeSupplies.available(source));
         for(int i=0;i<OUTPUT;i++)if(!items[i].isEmpty())available.add(items[i]);
         planned=null;
-        for(var kind:PREFERENCE){
+        var choices=new ArrayList<>(List.of(PREFERENCE));choices.sort(Comparator.comparingDouble((CandyKind k)->priority.applyAsDouble(new ItemStack(k.item()))).reversed());
+        for(var kind:choices){
             if(!filter.allows(new ItemStack(kind.item())))continue;
+            int wanted=goal.applyAsInt(new ItemStack(kind.item()));if(wanted<=0)continue;
             var base=baseFor(kind);
             if(kettle.base()!=null && kettle.base()!=base)continue;
             if(kettle.base()==null && count(available,s->baseOf(s)==base)==0)continue;
             if(count(available,s->s.getItem() instanceof CandyTrayItem && CandyTrayItem.batch(s)==null)==0)continue;
             int sugar=kettle.batch()?kettle.sugar():Math.min(CandyKettleBlockEntity.MAX_SUGAR,kettle.sugar()+count(available,s->s.is(Items.SUGAR)));
+            if(wanted!=Integer.MAX_VALUE && !kettle.batch())sugar=Math.min(sugar,(wanted+CandyKettleBlockEntity.PIECES_PER_SUGAR-1)/CandyKettleBlockEntity.PIECES_PER_SUGAR);
             if(kind==CandyKind.LOLLIPOP)sugar=Math.min(sugar,count(available,s->s.is(Items.STICK))/CandyKettleBlockEntity.PIECES_PER_SUGAR);
             if(sugar<=0 || kettle.batch() && sugar<kettle.sugar())continue;
             planned=kind;sugarGoal=sugar;changed();break;

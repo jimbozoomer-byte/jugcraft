@@ -47,17 +47,24 @@ public final class WorkshopCompanion {
         var tool=recipe.toolStack();return tool.isEmpty() || ItemStack.isSameItemSameComponents(tool,station.getItem(WorkshopBlockEntity.TOOL))
             || supplies.stream().anyMatch(s->ItemStack.isSameItemSameComponents(s,tool));
     }
-    void prepareInstalled(){prepare(null);}
+    void prepareInstalled(){if(!filter.stock.enabled() || filter.stock.incoming().isEmpty() && installed().stream().anyMatch(s->!s.isEmpty()))prepare(null);}
     /** Called only by the existing budgeted route planner, never by a machine ticker. */
     private void prepare(Storage<ItemVariant> source){
+        prepare(source,s->0);
+    }
+    public void prepare(Storage<ItemVariant> source,java.util.function.ToDoubleFunction<ItemStack> priority){
         if(station.busy() || station.playerWorking())return;
         var supplies=RecipeSupplies.available(source);
         var current=choice();
-        if(current!=null && complete(current.recipe(),supplies) && toolAvailable(current.recipe(),supplies))return;
+        var entries=new ArrayList<>(station.catalog().entries());
+        entries.sort(Comparator.<WorkshopCatalog.Entry>comparingDouble(e->priority.applyAsDouble(e.recipe().result().create())).reversed()
+            .thenComparingInt(e->current!=null && current.id().equals(e.id())?0:1));
+        if(current!=null && !entries.isEmpty() && entries.getFirst().id().equals(current.id()) && priority.applyAsDouble(current.recipe().result().create())>-2
+            && complete(current.recipe(),supplies) && toolAvailable(current.recipe(),supplies))return;
         WorkshopCatalog.Entry fallback=null,needsTool=null;
-        for(var entry:station.catalog().entries()){
+        for(var entry:entries){
             var recipe=entry.recipe();
-            if(!filter.allows(recipe.result().create()))continue;
+            if(!filter.allows(recipe.result().create()) || priority.applyAsDouble(recipe.result().create())<=-2)continue;
             if(fallback==null)fallback=entry;
             if(!compatible(recipe))continue;
             if(complete(recipe,supplies)){
@@ -126,6 +133,19 @@ public final class WorkshopCompanion {
         public void prepare(Storage<ItemVariant> source){if(accessible(npc))WorkshopCompanion.this.prepare(source);}
         public Identifier plan(){var c=choice();return c==null?null:c.id();}
         public int needed(ItemStack stack){return accessible(npc)?Arrays.stream(needs(stack)).sum():0;}
+        public int stockAuxiliaryNeed(ItemStack stack){
+            if(!accessible(npc))return 0;var n=needs(stack);
+            var recipe=choice();int fuel=n[WorkshopBlockEntity.FUEL];
+            if(fuel>0 && recipe!=null){
+                int batches=CompanionStockRecipes.desiredBatches(npc,station,CompanionStockRecipes.recipe(station,ItemStack.EMPTY),filter.stock);
+                int ticks=recipe.recipe().time()*Math.min(8,Math.max(batches,CompanionStockRecipes.loadedBatches(station)));
+                if(station.lane()!=null)ticks+=station.lane().duration()-station.lane().progress();
+                ticks=Math.max(0,ticks-station.fuelCredit());
+                int duration=station.fuelTicks(stack);
+                fuel=Math.min(fuel,Math.max(0,(ticks+duration-1)/duration-station.getItem(WorkshopBlockEntity.FUEL).getCount()));
+            }
+            return n[WorkshopBlockEntity.TOOL]+fuel+n[WorkshopBlockEntity.LINING]+n[WorkshopBlockEntity.CRUCIBLE];
+        }
         public CompanionStatus status(){return accessible(npc)?WorkshopCompanion.this.status():CompanionStatus.FORBIDDEN;}
         public Storage<ItemVariant> inputs(){return new InsertionOnlyStorage<>(){
             public long insert(ItemVariant item,long amount,TransactionContext tx){

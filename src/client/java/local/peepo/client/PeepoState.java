@@ -10,6 +10,11 @@ public final class PeepoState extends LivingEntityRenderState { public final Ite
     public final ItemStackRenderState knife=new ItemStackRenderState();
     public final ItemStackRenderState hoe=new ItemStackRenderState();
     public final ItemStackRenderState animalTool=new ItemStackRenderState();
+    public final CraftingBenchPose craftPose=new CraftingBenchPose();
+    public final ItemStackRenderState craftIngredient0=new ItemStackRenderState();
+    public final ItemStackRenderState craftIngredient1=new ItemStackRenderState();
+    public final ItemStackRenderState craftResult=new ItemStackRenderState();
+    public boolean craftIngredient0Block,craftIngredient1Block;
     final ItemStackRenderState fishingRod=new ItemStackRenderState();
     float fishX,fishY,fishZ,fishTime;
     float bucketX,bucketY,bucketZ;

@@ -36,6 +36,7 @@
     "CompanionCampfireMixin",
     "CompanionVanillaDropMixin",
     "CompanionCrafterMixin",
+    "CompanionCraftingTableMixin",
     "AlchemyExperienceAccess",
     "NouveauBreedingMixin",
     "NouveauBrewingMixin",

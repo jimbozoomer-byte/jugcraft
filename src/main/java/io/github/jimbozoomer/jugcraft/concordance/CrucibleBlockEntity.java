@@ -597,6 +597,7 @@ public class CrucibleBlockEntity extends BlockEntity implements GeoBlockEntity, 
 		ContainerHelper.loadAllItems(input, items);
 		water.readValue(input);
 		companion.filter.load(input);
+		companion.loadStockForm(input);
 		temperature = input.getIntOr("temperature", Heat.AMBIENT);
 		int parts = Math.clamp(input.getIntOr("parts", 0), 0, Mixture.MAX_PARTS);
 		List<Operation> history = new ArrayList<>();
@@ -628,6 +629,7 @@ public class CrucibleBlockEntity extends BlockEntity implements GeoBlockEntity, 
 		ContainerHelper.saveAllItems(output, items);
 		water.writeValue(output);
 		companion.filter.save(output);
+		companion.saveStockForm(output);
 		output.putInt("temperature", temperature);
 		output.putInt("parts", mixture.parts());
 		if (!mixture.isEmpty()) {

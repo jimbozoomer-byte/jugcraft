@@ -16,6 +16,8 @@ public final class CompanionJobDetails {
         if(!CompanionJobs.permitted(npc,target.at().pos()) || status==CompanionStatus.FORBIDDEN)return "Access denied; check ownership, party access and protection.";
         String delivery=npc.transport.jobDetail(target);
         if(!delivery.isEmpty())return delivery;
+        var block=npc.level().getBlockEntity(target.at().pos());var stock=CompanionProductionStock.of(block);
+        if(stock!=null && stock.enabled() && (status==CompanionStatus.NO_INPUT || status==CompanionStatus.READY || status==CompanionStatus.STOCKED || status==CompanionStatus.STOCK_UNAVAILABLE)){String detail=stock.detail(npc,block);if(!detail.isEmpty())return detail;}
         if(target.fishing() && status==CompanionStatus.WORKING)return npc.fishing.detail(target);
         String source=containers(npc,target,false),output=containers(npc,target,true);
         String tool=npc.assignments.supplies.handLocked()?"Unlock Hand to fetch a tool, or equip it manually.":"Equip it or enable Tools on a stocked Supply.";
@@ -87,7 +89,10 @@ public final class CompanionJobDetails {
         if(target.block().getPath().equals("hand_crank"))return "No kinetic demand; connect the crank to a machine or flywheel that can accept power.";
         String missing="No complete allowed recipe is ready; check ingredients and Filter";
         var block=npc.level().getBlockEntity(target.at().pos());
-        if(block instanceof CookingPotBlockEntity pot && !pot.isLocked()){
+        if(block instanceof CraftingTableCompanionBlockEntity table){
+            var plan=table.plan();
+            if(plan!=null){String needs=missingIngredients(plan.parts(),table.installed());if(!needs.isEmpty())missing="Needs "+needs+" at the crafting table";}
+        }else if(block instanceof CookingPotBlockEntity pot && !pot.isLocked()){
             var plan=pot.supplyPlan().orElse(null);
             if(plan!=null){
                 var installed=new ArrayList<ItemStack>();for(int i=0;i<CookingPotBlockEntity.INPUTS;i++)installed.add(pot.getItem(i));

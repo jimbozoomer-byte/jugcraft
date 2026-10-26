@@ -19,6 +19,7 @@ public final class CompanionTransport extends Goal {
     private CompanionAssignments.Target workstation,store;
     private Identifier recipe;
     private ItemStack manifest=ItemStack.EMPTY;
+    private boolean stockTracked;
     private int cargoSlot=-1;
     private record Cargo(int slot,ItemStack stack){}
     private final List<Cargo> pending=new ArrayList<>(),unused=new ArrayList<>();
@@ -105,6 +106,29 @@ public final class CompanionTransport extends Goal {
         var held=npc.belongings.getItem(cargoSlot);
         return ItemStack.isSameItemSameComponents(held,manifest)?held.copyWithCount(Math.min(held.getCount(),manifest.getCount())):ItemStack.EMPTY;
     }
+    /** Exact physical cargo for one registered station; no entity or inventory search. */
+    CompanionProductionStock.Delivery stockDelivery(BlockPos at){
+        if(porter || tooling || returning || workstation==null || !workstation.at().pos().equals(at))return null;
+        var stacks=new ArrayList<ItemStack>();var first=carried();if(!first.isEmpty())stacks.add(first);
+        for(var c:pending){var held=npc.belongings.getItem(c.slot);if(ItemStack.isSameItemSameComponents(held,c.stack))stacks.add(held.copyWithCount(Math.min(held.getCount(),c.stack.getCount())));}
+        return stacks.isEmpty()?null:new CompanionProductionStock.Delivery(supply,List.copyOf(stacks));
+    }
+    private void stockChanged(){
+        if(workstation==null || !workstation.present(npc.level()))return;
+        var block=npc.level().getBlockEntity(workstation.at().pos());var stock=CompanionProductionStock.of(block);
+        if(stock!=null){stock.track(npc,block);stockTracked=stockDelivery(workstation.at().pos())!=null;}
+    }
+    void releaseStock(){
+        if(workstation==null || !(npc.level() instanceof net.minecraft.server.level.ServerLevel level))return;
+        if(!workstation.local(level) || !level.hasChunkAt(workstation.at().pos())){
+            if(stockTracked && !manifest.isEmpty())ProductionDeliveryCancellations.get(level.getServer()).cancel(workstation.at(),npc.getUUID());
+            stockTracked=false;
+            return;
+        }
+        var block=level.getBlockEntity(workstation.at().pos());var stock=CompanionProductionStock.of(block);
+        if(stock!=null)stock.forget(npc.getUUID(),block);
+        stockTracked=false;
+    }
     private boolean linked(){
         if(store==null || workstation==null)return false;
         if(porter)return npc.assignments.supplies.routeMatches(route,workstation,store) && !workstation.at().equals(store.at());
@@ -148,18 +172,18 @@ public final class CompanionTransport extends Goal {
         faceOven();piePose(action,stack);npc.getNavigation().stop();
         return now-pieActionStarted>=npc.uniforms.duration(CompanionUniforms.Type.BAKER,PIE_ACTION_TICKS);
     }
-    private void forget(){handoffUntil=0;releaseTending();clearPiePose();manifest=ItemStack.EMPTY;cargoSlot=-1;pending.clear();unused.clear();workstation=store=null;recipe=null;returning=porter=tooling=false;route=-1;approach=null;}
+    private void forget(){releaseStock();handoffUntil=0;releaseTending();clearPiePose();manifest=ItemStack.EMPTY;cargoSlot=-1;pending.clear();unused.clear();workstation=store=null;recipe=null;returning=porter=tooling=false;route=-1;approach=null;}
     private boolean advanceCargo(){
         clearPiePose();manifest=ItemStack.EMPTY;cargoSlot=-1;
         while(!pending.isEmpty()){
             var next=pending.removeFirst();cargoSlot=next.slot;manifest=next.stack;
-            if(!carried().isEmpty())return true;
+            if(!carried().isEmpty()){stockChanged();return true;}
         }
         if(!unused.isEmpty()){
             pending.addAll(unused);unused.clear();returning=true;approach=null;nextPath=0;
             return advanceCargo();
         }
-        manifest=ItemStack.EMPTY;cargoSlot=-1;return false;
+        manifest=ItemStack.EMPTY;cargoSlot=-1;stockChanged();return false;
     }
     private void finishCargo(){
         if(advanceCargo())return;
@@ -180,10 +204,14 @@ public final class CompanionTransport extends Goal {
     }
     private int emptySlot(){for(int i=0;i<8;i++)if(npc.belongings.getItem(i).isEmpty())return i;return -1;}
     /** A loaded hot pie has a deadline. One helper stays until it can take the result into real cargo. */
+    private boolean stockOutput(CompanionAssignments.Target work,CompanionAssignments.Target to){
+        var stock=work!=null && work.present(npc.level())?CompanionProductionStock.of(npc.level().getBlockEntity(work.at().pos())):null;
+        return stock==null || stock.countsOutput(npc,to);
+    }
     private boolean readyTending(CompanionAssignments.Target work,boolean here){
         if(!npc.assignments.transportAllowed(work,false))return false;
         var port=CompanionLogistics.resolve(npc,work);
-        var output=npc.assignments.supplies.containers(work,true).stream().filter(t->CompanionStorage.find(npc,t)!=null).findFirst().orElse(null);
+        var output=npc.assignments.supplies.containers(work,true).stream().filter(t->CompanionStorage.find(npc,t)!=null && stockOutput(work,t)).findFirst().orElse(null);
         int slot=emptySlot();
         if(port==null || slot<0 || CompanionStorage.find(npc,output)==null
             || !(npc.level().getBlockEntity(work.at().pos()) instanceof io.github.jimbozoomer.jugcraft.agriculture.HearthOvenBlockEntity oven)
@@ -202,6 +230,8 @@ public final class CompanionTransport extends Goal {
     private boolean readyRoute(CompanionAssignments.Target work,boolean supplying,CompanionAssignments.Target bound){
         if(!npc.assignments.transportAllowed(work,supplying))return false;
         var port=CompanionLogistics.resolve(npc,work);var storage=CompanionStorage.find(npc,bound);
+        var stock=work.present(npc.level())?CompanionProductionStock.of(npc.level().getBlockEntity(work.at().pos())):null;
+        if(!supplying && stock!=null && !stock.countsOutput(npc,bound))return false;
         if(port==null || storage==null)return false;
         if(supplying && port.plan()==null)return false;
         tooling=porter=false;route=-1;workstation=work;store=bound;supply=supplying;recipe=port.plan();returning=false;
@@ -247,7 +277,10 @@ public final class CompanionTransport extends Goal {
         var destinationCounts=limits!=null && limits.keep>0?counts(to):null;
         if(limits!=null && (limits.leave>0 && sourceCounts==null || limits.keep>0 && destinationCounts==null))return ItemStack.EMPTY;
         int views=0;boolean extractable=false;
-        for(var view:from){
+        var candidates=new ArrayList<net.fabricmc.fabric.api.transfer.v1.storage.StorageView<ItemVariant>>();
+        for(var view:from){if(candidates.size()>=128)break;candidates.add(view);}
+        if(supply)candidates.sort(Comparator.comparingDouble(v->v.isResourceBlank()?Double.MAX_VALUE:-port.supplyPriority(v.getResource().toStack(1))));
+        for(var view:candidates){
             if(++views>128)break;
             if(view.isResourceBlank() || view.getAmount()<=0)continue;
             var variant=view.getResource();var stack=variant.toStack(1);
@@ -275,10 +308,11 @@ public final class CompanionTransport extends Goal {
         if(!CompanionBudget.search(npc))return false;
         nextSearch=now+80+Math.floorMod(npc.getId(),20);
         if(!manifest.isEmpty()){
+            stockChanged();
             if(!linked() || carried().isEmpty() && !advanceCargo())forget();
             else {
                 if(!supply && !porter && loaded() && !outputRoom(store,carried())){
-                    for(var alternative:npc.assignments.supplies.containers(workstation,true))if(outputRoom(alternative,carried())){store=alternative;break;}
+                    for(var alternative:npc.assignments.supplies.containers(workstation,true))if(stockOutput(workstation,alternative) && outputRoom(alternative,carried())){store=alternative;break;}
                 }
                 return loaded();
             }
@@ -487,7 +521,7 @@ public final class CompanionTransport extends Goal {
             try(var tx=Transaction.openOuter()){
                 if(view.extract(variant,1,tx)!=1 || !npc.food.putCargo(slot,stack,tx))return;
                 if(npc.extractWorkEnergy(deliveryUniform(),16,tx)<=0){fail(CompanionStatus.RECOVERING);return;}
-                tx.commit();cargoSlot=slot;manifest=stack.copy();
+                tx.commit();cargoSlot=slot;manifest=stack.copy();stockChanged();
             }
             releaseTending();animatePie(WorkAnimation.PIE_TAKE,carried());approach=null;nextPath=0;deadline=now+600;return;
         }
@@ -505,13 +539,14 @@ public final class CompanionTransport extends Goal {
             if(!npc.food.putCargo(slot,stack,tx)){fail(CompanionStatus.FULL);return;}
             if(!porter && !supply && npc.level().getBlockEntity(workstation.at().pos()) instanceof io.github.jimbozoomer.jugcraft.agriculture.HearthOvenBlockEntity
                 && npc.extractWorkEnergy(deliveryUniform(),16,tx)<=0){fail(CompanionStatus.RECOVERING);return;}
-            tx.commit();cargoSlot=slot;manifest=stack.copy();
+            tx.commit();cargoSlot=slot;manifest=stack.copy();stockChanged();
         }
         approach=null;nextPath=0;deadline=npc.level().getGameTime()+600;
         if(hearthRoute() && !supply)animatePie(WorkAnimation.PIE_TAKE,carried());
         else transferGesture(true,carried());
     }
     private void pickupBatch(){
+        if(workstation!=null && workstation.present(npc.level())){var stock=CompanionProductionStock.of(npc.level().getBlockEntity(workstation.at().pos()));if(stock!=null)stock.invalidate();}
         var port=porter?null:CompanionLogistics.resolve(npc,workstation);
         if(!porter && (port==null || !npc.assignments.transportAllowed(workstation,supply)
                 || supply && !Objects.equals(recipe,port.plan()))){fail(CompanionStatus.NO_INPUT);return;}
@@ -559,7 +594,7 @@ public final class CompanionTransport extends Goal {
             tx.commit();
         }
         transferGesture(false,stack);
-        manifest.shrink(inserted);
+        manifest.shrink(inserted);stockChanged();
         clearPiePose();
         if(manifest.isEmpty())finishCargo();
         else if(supply && !returning)deferUnused();
@@ -666,17 +701,17 @@ public final class CompanionTransport extends Goal {
         if(workstation.livestock())npc.livestock.inputsChanged(workstation.at().pos());
         beginHandoff();
     }
-    private static void saveTarget(ValueOutput out,String name,CompanionAssignments.Target t){
+    static void saveTarget(ValueOutput out,String name,CompanionAssignments.Target t){
         var child=out.child(name);child.store("At",GlobalPos.CODEC,t.at());child.store("Block",Identifier.CODEC,t.block());child.putInt("Face",t.face().ordinal());
         if(t.fishingWater()!=null)child.store("FishingWater",BlockPos.CODEC,t.fishingWater());if(t.garden())child.store("Plot",BlockPos.CODEC.listOf(),t.plot());if(t.zone()!=null)t.zone().save(child);if(t.gardenZone()!=null)t.gardenZone().save(child);
     }
-    private static CompanionAssignments.Target loadTarget(ValueInput in,String name){
+    static CompanionAssignments.Target loadTarget(ValueInput in,String name){
         var c=in.child(name);if(c.isEmpty())return null;var at=c.get().read("At",GlobalPos.CODEC).orElse(null);var id=c.get().read("Block",Identifier.CODEC).orElse(null);
         return at==null || id==null?null:new CompanionAssignments.Target(at,id,Direction.values()[Math.clamp(c.get().getIntOr("Face",1),0,5)],c.get().read("Plot",BlockPos.CODEC.listOf()).orElse(List.of()),AnimalCareZone.load(c.get()),GardenZone.load(c.get()),c.get().read("FishingWater",BlockPos.CODEC).orElse(null));
     }
     public void save(ValueOutput out){
         if(manifest.isEmpty() || workstation==null || store==null)return;
-        var c=out.child("Transport");c.store("Manifest",ItemStack.CODEC,manifest);c.putInt("Slot",cargoSlot);c.putBoolean("Supply",supply);c.putBoolean("Returning",returning);
+        var c=out.child("Transport");c.store("Manifest",ItemStack.CODEC,manifest);c.putInt("Slot",cargoSlot);c.putBoolean("Supply",supply);c.putBoolean("Returning",returning);c.putBoolean("StockTracked",stockTracked);
         c.putBoolean("Porter",porter);c.putBoolean("Tool",tooling);c.putInt("Route",route);
         saveCargo(c,"Pending",pending);saveCargo(c,"Unused",unused);
         if(recipe!=null)c.store("Recipe",Identifier.CODEC,recipe);saveTarget(c,"Work",workstation);saveTarget(c,"Store",store);
@@ -684,11 +719,12 @@ public final class CompanionTransport extends Goal {
     public void load(ValueInput in){
         forget();var c=in.child("Transport");if(c.isEmpty())return;
         workstation=loadTarget(c.get(),"Work");store=loadTarget(c.get(),"Store");cargoSlot=c.get().getIntOr("Slot",-1);
+        stockTracked=c.get().getBooleanOr("StockTracked",workstation!=null && Set.of("cooking_pot","hearth_oven","cutting_board").contains(workstation.block().getPath()));
         manifest=c.get().read("Manifest",ItemStack.CODEC).orElse(ItemStack.EMPTY);supply=c.get().getBooleanOr("Supply",false);returning=c.get().getBooleanOr("Returning",false);recipe=c.get().read("Recipe",Identifier.CODEC).orElse(null);
         tooling=c.get().getBooleanOr("Tool",false);route=Math.clamp(c.get().getIntOr("Route",0),0,3);porter=c.get().getBooleanOr("Porter",false);if(porter){supply=returning=false;recipe=null;}
         var seen=new HashSet<Integer>();seen.add(cargoSlot);
         loadCargo(c.get(),"Pending",pending,seen);loadCargo(c.get(),"Unused",unused,seen);
-        if(workstation==null || store==null || carried().isEmpty() && !advanceCargo())forget();
+        if(workstation==null || store==null || carried().isEmpty() && !advanceCargo())forget();else stockChanged();
     }
     private static void saveCargo(ValueOutput out,String name,List<Cargo> entries){
         for(int i=0;i<entries.size();i++){var c=out.child(name+i);c.putInt("Slot",entries.get(i).slot);c.store("Stack",ItemStack.CODEC,entries.get(i).stack);}
