@@ -124,7 +124,7 @@ See [town release scope and evidence](features/town-updater-release-oct22.md).
 - [ ] Owner visual playtest, hosted multiplayer acceptance and existing-world upgrade rehearsal before the coordinated client/server update.
 - [ ] Review exact old-cave coordinates, claims/builds and a consistent backup; test any approved refresh on a copy first.
 - [ ] Design opt-in/progression triggers for player-directed raids later; do not restore equipment-blind random attacks.
-- [ ] Benchmark server tick time, memory and client frame times under representative player load.
+- [ ] Benchmark server tick time, memory and client frame times under representative player load. Started: `ServerLoadGameTests` measures what a tick of an 80-machine factory and a 24-mob crowd costs the server ([server-load-benchmark.md](features/server-load-benchmark.md)). Memory, client frame times and real players are still to do.
 
 
 ## Local transmutation economy follow-up — October 21
