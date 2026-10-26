@@ -612,6 +612,11 @@ Owner-requested 7 October 2026. Independent briefs: [industrial chemistry and fu
 - [ ] Deliver industrial fertilizers, refining and polymers before the new optional chemical drinks, preservatives, adhesives and medicine; preserve independently useful earlier agriculture, food and adhesive routes.
 - [ ] Document actual machine roles, recipes, consumer links and optional paths in the Encyclopedia; audit reachability, gas/element units, energy loops, pollution, bounded factory work and persistence before gameplay delivery.
 
+## Costumed villains — 26 October 2026
+
+- [x] Unmasking: a beaten villain reveals a named crook, drops its mask as a trophy and awards Mystery Solved ([costumed-villains-unmasking.md](features/costumed-villains-unmasking.md)). Implemented; CI pending, not yet played in a client.
+- [ ] Still ideas, if the owner wants them: traps, and village mysteries with clues before the chase.
+
 ## Reference gallery
 
 All ten original owner-attached UI screenshots are preserved unchanged. They are documentation/design references, not Jugcraft runtime textures. Descriptions and individual file links are in the [independent feature brief](features/jugcraft-encyclopedia.md#visual-references-and-provenance); provenance and integrity metadata are in [the manifest](images/jugcraft-encyclopedia/reference-manifest.json).

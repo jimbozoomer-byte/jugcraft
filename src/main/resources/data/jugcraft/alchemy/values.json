@@ -10132,6 +10132,11 @@
       "denominator": 4,
       "source": "recipe jugcraft:drover_rifle"
     },
+    "jugcraft:drowned_diver_helmet": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
     "jugcraft:dry_lead_cell": {
       "numerator": 3,
       "denominator": 1,
@@ -11076,6 +11081,11 @@
       "numerator": 18,
       "denominator": 1,
       "source": "recipe jugcraft:ember_bed"
+    },
+    "jugcraft:emerald_phantom_mask": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
     },
     "jugcraft:emergency_diesel_generator": {
       "numerator": 23779,
@@ -29867,6 +29877,11 @@
       "denominator": 1,
       "source": "recipe jugcraft:pot_cooking/onion_soup"
     },
+    "jugcraft:onyx_warden_helm": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
     "jugcraft:open_grave": {
       "numerator": 559,
       "denominator": 2,
@@ -33826,6 +33841,11 @@
       "numerator": 12136,
       "denominator": 9,
       "source": "recipe jugcraft:specimen_tank"
+    },
+    "jugcraft:spectral_cosmonaut_helmet": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
     },
     "jugcraft:speed_gate": {
       "numerator": 271,

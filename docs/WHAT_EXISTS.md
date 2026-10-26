@@ -259,6 +259,11 @@ The Agriculture branch ([branches/AGRICULTURE.md](branches/AGRICULTURE.md)). Eve
 | Tools | `flint_sickle` (3×3), `bronze_sickle` (5×5) | `SickleItem` | harvests and replants ripe crops, vanilla crops included |
 | Equipment | `trellis`, `cooking_pot` | `TrellisBlock`; `CookingPotBlock`, `CookingPotBlockEntity`, `CookingPotMenu`, `client/CookingPotScreen` | the pot cooks `jugcraft:pot_cooking` recipes over a block in `jugcraft:heat_sources` |
 
+### Costumed villains (`creatures/scary/`, `tools/unmasking.py`)
+
+- The four Halloween villains (`space_kook`, `captain_cutler`, `phantom_shadow`, `black_knight`, shown as the Spectral Cosmonaut, Drowned Diver, Emerald Phantom and Onyx Warden) are registered in `ScaryMod`; their drops are in `ScaryDrops`. Details: [features/scary-creatures.md](features/scary-creatures.md).
+- **Unmasking:** `Unmasking` hooks `AFTER_DEATH`. A villain a player beats leaves an `UnmaskedCrook` (entity `unmasked_crook`: named, invulnerable, led away after `CAUGHT_TICKS`) and drops its mask (`spectral_cosmonaut_helmet`, `drowned_diver_helmet`, `emerald_phantom_mask`, `onyx_warden_helm`), and the player earns `jugcraft:mystery_solved`. The client's `UnmaskedCrookRenderer` draws the crook in a town skin. The crooks' names and excuses live in `tools/unmasking.py`. Details: [features/costumed-villains-unmasking.md](features/costumed-villains-unmasking.md).
+
 ### World: Pixel Hollows and the Retro Trader (`world/`, `tools/pixel_hollows.py`)
 
 Records: [pixel-hollows.md](features/pixel-hollows.md), [retro-trader.md](features/retro-trader.md).

@@ -8,6 +8,10 @@ Every change to Jugcraft, newest first, grouped by pull request. For what each t
 
 No numbered release yet. Entries on feature branches remain proposed until their pull requests merge.
 
+### Unmerged: Costumed villains are unmasked
+- Beat a **Spectral Cosmonaut**, **Drowned Diver**, **Emerald Phantom** or **Onyx Warden** and the costume comes off: one of three crooks for each villain stands caught where it fell, named, with an excuse everyone near hears, until they are led away 10 seconds later.
+- The costume's mask drops as a trophy with the crook's name on it, and the player earns **Mystery Solved**. A villain that dies any other way keeps its secret. Record: [costumed-villains-unmasking.md](docs/features/costumed-villains-unmasking.md).
+
 ### Unmerged: The benches in the workshop look
 - The **Cooking Pot**, **Lampwright's Bench**, **Farm Stand**, **cave survey desk** and **Carving Knife** screens take the workshop machines' look: brass casing, orange glass, a status lamp by the title and keys that light up when they are on (the tool in use, Mirror, the candle, the crate being priced, a study you can cancel). The farm stand's owner is in a chip by the title; the survey desk's words are now translatable. Slots, buttons, button ids and labels are unchanged.
 - The blueprint table keeps its own drafting-sheet look.
