@@ -9,8 +9,11 @@ import java.util.Map;
 import java.util.Set;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.tags.BlockTags;
+import net.minecraft.tags.TagKey;
 import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.block.Block;
@@ -23,13 +26,16 @@ import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import org.jspecify.annotations.Nullable;
 
 /**
- * What Herobrine's marks would change, and the checks that keep them in untouched wilderness (docs/features/herobrine.md).
- * A plan is only made where every chunk of the site and a margin round it is loaded and unclaimed, no column is in the
- * town, and every block in the site and margin is natural ground, rock, plants or water, with no block entity at all, so
- * a mark never lands beside a build, a chest or a machine even on unclaimed land. Marks only build into air and plants;
- * the grove only takes leaves the world grew (never player-placed ones), and the tunnel only digs natural stone and
- * soil, stopping short of ores, fluids, loose sand and gravel. {@link HerobrineMarks} applies a plan a few blocks a tick,
- * checking each block again just before it changes.
+ * What Herobrine's marks would change, and the checks that keep them away from players' things
+ * (docs/features/herobrine.md). Before any block is read, every chunk a plan could read (the site, its floor and roof,
+ * and a margin) must already be loaded, so planning never loads a chunk. A plan is then only made where no chunk of the
+ * site and margin is claimed, no column is in the town, and every block in them looks natural (ground, rock, ore,
+ * plants, water) with no block entity at all, so a mark never lands beside a chest, a machine or anything plainly built.
+ * That is a heuristic, not proof: a build of plain stone or logs, or a tree a player grew, looks natural. So the marks
+ * that take blocks away, the grove and the tunnel, are only planned inside land an operator has approved for them
+ * ({@link HerobrineMarks#approved}), and fail closed everywhere else. The marks that only add (shrines, pyramids, signs)
+ * build only into air or plain ground cover. {@link HerobrineMarks} applies a plan a few blocks a tick, checking each
+ * block again just before it changes.
  */
 public final class HerobrineMarkPlans {
 	/** How far round a mark the land must be wild, in blocks. */
@@ -53,6 +59,10 @@ public final class HerobrineMarkPlans {
 			List.of("NOT YET", "", "", ""));
 	public static final List<String> BROUGHT_SOMEONE = List.of("YOU", "BROUGHT", "SOMEONE", "");
 
+	/** The common ores tag, which covers modded ores too: a mark never removes one. */
+	private static final TagKey<Block> ORES = TagKey.create(Registries.BLOCK, Identifier.fromNamespaceAndPath("c", "ores"));
+	/** Plain ground cover a built mark may stand in (never flowers or tall plants, which a player may have set). */
+	private static final Set<Block> GROUND_COVER = Set.of(Blocks.SHORT_GRASS, Blocks.FERN, Blocks.DEAD_BUSH, Blocks.SNOW);
 	private static final Set<Block> NATURAL = Set.of(Blocks.GRAVEL, Blocks.CLAY, Blocks.SNOW_BLOCK, Blocks.ICE, Blocks.PACKED_ICE,
 			Blocks.SANDSTONE, Blocks.RED_SANDSTONE, Blocks.TERRACOTTA, Blocks.CALCITE, Blocks.DRIPSTONE_BLOCK, Blocks.POINTED_DRIPSTONE,
 			Blocks.SWEET_BERRY_BUSH, Blocks.SUGAR_CANE, Blocks.CACTUS, Blocks.PUMPKIN, Blocks.MELON, Blocks.BROWN_MUSHROOM,
@@ -60,15 +70,15 @@ public final class HerobrineMarkPlans {
 
 	/** The kinds of mark. */
 	public enum Type {
-		SHRINE, MOSSY_PYRAMID, SAND_PYRAMID, SIGN, GROVE, TUNNEL
+		SHRINE, MOSSY_PYRAMID, SAND_PYRAMID, SIGN, GROVE, TUNNEL, PYRAMID
 	}
 
 	/** One block a mark changes: what it must still be when the time comes ({@code expect}), and what it becomes. */
 	public record Step(BlockPos pos, Block expect, BlockState state) {
 	}
 
-	/** A mark ready to build: its steps in order, and the text of any sign it places. */
-	public record Plan(Type type, BlockPos at, List<Step> steps, Map<BlockPos, List<String>> signs) {
+	/** A mark ready to build: its steps in order, the text of any sign it places, and any lectern to lay the journal on. */
+	public record Plan(Type type, BlockPos at, List<Step> steps, Map<BlockPos, List<String>> signs, List<BlockPos> lecterns) {
 	}
 
 	private HerobrineMarkPlans() {
@@ -91,14 +101,35 @@ public final class HerobrineMarkPlans {
 	}
 
 	private static boolean ore(BlockState state) {
-		return state.is(BlockTags.COAL_ORES) || state.is(BlockTags.IRON_ORES) || state.is(BlockTags.COPPER_ORES) || state.is(BlockTags.GOLD_ORES)
-				|| state.is(BlockTags.REDSTONE_ORES) || state.is(BlockTags.LAPIS_ORES) || state.is(BlockTags.DIAMOND_ORES)
-				|| state.is(BlockTags.EMERALD_ORES);
+		return state.is(ORES);
+	}
+
+	/** Whether a built mark may set a block here: air, or plain ground cover, with no fluid. */
+	public static boolean open(BlockState state) {
+		return (state.isAir() || GROUND_COVER.contains(state.getBlock())) && state.getFluidState().isEmpty();
 	}
 
 	/**
-	 * Whether the box from {@code min} to {@code max}, with {@value #MARGIN} blocks round it (two below), is untouched
-	 * wilderness: every chunk loaded and unclaimed, no column in the town, every block natural, no block entity.
+	 * Whether every chunk a plan from {@code min} to {@code max} could read is already loaded: the box, its
+	 * {@value #MARGIN}-block margin and one block more (neighbours, floors, roofs). Called before any block is read, so
+	 * planning never loads a chunk, even at the edge of the loaded world.
+	 */
+	public static boolean loaded(ServerLevel level, BlockPos min, BlockPos max) {
+		int pad = MARGIN + 1;
+		for (int cx = (Math.min(min.getX(), max.getX()) - pad) >> 4; cx <= (Math.max(min.getX(), max.getX()) + pad) >> 4; cx++) {
+			for (int cz = (Math.min(min.getZ(), max.getZ()) - pad) >> 4; cz <= (Math.max(min.getZ(), max.getZ()) + pad) >> 4; cz++) {
+				if (!level.hasChunkAt(new BlockPos(cx << 4, min.getY(), cz << 4))) {
+					return false;
+				}
+			}
+		}
+		return true;
+	}
+
+	/**
+	 * Whether the box from {@code min} to {@code max}, with {@value #MARGIN} blocks round it (two below), looks like wild
+	 * land: every chunk loaded and unclaimed, no column in the town, every block natural-looking, no block entity. Not
+	 * proof that no player built there (see the class comment).
 	 */
 	public static boolean wild(ServerLevel level, BlockPos min, BlockPos max) {
 		BlockPos lo = new BlockPos(Math.min(min.getX(), max.getX()) - MARGIN, Math.min(min.getY(), max.getY()) - 2,
@@ -131,6 +162,9 @@ public final class HerobrineMarkPlans {
 
 	/** A redstone-torch shrine on a 3x3 mossy base, a netherrack heart, and a sign facing {@code toward}. */
 	public static @Nullable Plan shrine(ServerLevel level, BlockPos feet, BlockPos toward, List<String> message) {
+		if (!loaded(level, feet.offset(-3, -2, -3), feet.offset(3, 3, 3))) {
+			return null;
+		}
 		List<Step> steps = new ArrayList<>();
 		for (int dx = -1; dx <= 1; dx++) {
 			for (int dz = -1; dz <= 1; dz++) {
@@ -146,6 +180,9 @@ public final class HerobrineMarkPlans {
 
 	/** A little stepped pyramid, 5x5, 3x3 and 1, of mossy cobblestone (or sandstone with a chiseled cap). */
 	public static @Nullable Plan pyramid(ServerLevel level, BlockPos feet, boolean sand, BlockPos toward, List<String> message) {
+		if (!loaded(level, feet.offset(-4, -2, -4), feet.offset(4, 4, 4))) {
+			return null;
+		}
 		BlockState body = (sand ? Blocks.SANDSTONE : Blocks.MOSSY_COBBLESTONE).defaultBlockState();
 		BlockState cap = (sand ? Blocks.CHISELED_SANDSTONE : Blocks.MOSSY_COBBLESTONE).defaultBlockState();
 		List<Step> steps = new ArrayList<>();
@@ -162,6 +199,9 @@ public final class HerobrineMarkPlans {
 
 	/** A lone sign where he stood, facing {@code toward}. */
 	public static @Nullable Plan sign(ServerLevel level, BlockPos feet, BlockPos toward, List<String> message) {
+		if (!loaded(level, feet.offset(-1, -2, -1), feet.offset(1, 2, 1))) {
+			return null;
+		}
 		return built(level, Type.SIGN, feet, new ArrayList<>(), toward, message, 0);
 	}
 
@@ -179,8 +219,7 @@ public final class HerobrineMarkPlans {
 		BlockPos max = feet;
 		List<BlockPos> planned = new ArrayList<>();
 		for (Step step : steps) {
-			BlockState here = level.getBlockState(step.pos());
-			if (!(here.isAir() || here.canBeReplaced()) || !here.getFluidState().isEmpty()) {
+			if (!open(level.getBlockState(step.pos()))) {
 				return null;
 			}
 			BlockPos below = step.pos().below();
@@ -196,7 +235,7 @@ public final class HerobrineMarkPlans {
 		}
 		Map<BlockPos, List<String>> signs = new LinkedHashMap<>();
 		signs.put(signPos, message);
-		return new Plan(type, feet, steps, signs);
+		return new Plan(type, feet, steps, signs, List.of());
 	}
 
 	/**
@@ -207,7 +246,8 @@ public final class HerobrineMarkPlans {
 	public static @Nullable Plan grove(ServerLevel level, BlockPos feet, BlockPos toward, List<String> message, RandomSource random) {
 		BlockPos min = feet.offset(-GROVE_RADIUS, -2, -GROVE_RADIUS);
 		BlockPos max = feet.offset(GROVE_RADIUS, 16, GROVE_RADIUS);
-		if (!wild(level, min, max)) {
+		// It takes blocks away, and a tree a player grew looks like any other: only where an operator approved it.
+		if (!HerobrineMarks.approved(level, min, max) || !loaded(level, min, max) || !wild(level, min, max)) {
 			return null;
 		}
 		List<Step> steps = new ArrayList<>();
@@ -233,13 +273,12 @@ public final class HerobrineMarkPlans {
 		}
 		Map<BlockPos, List<String>> signs = new LinkedHashMap<>();
 		BlockState here = level.getBlockState(feet);
-		if ((here.isAir() || here.canBeReplaced()) && here.getFluidState().isEmpty()
-				&& level.getBlockState(feet.below()).isFaceSturdy(level, feet.below(), Direction.UP)) {
+		if (open(here) && level.getBlockState(feet.below()).isFaceSturdy(level, feet.below(), Direction.UP)) {
 			steps.add(new Step(feet, here.getBlock(), Blocks.OAK_SIGN.defaultBlockState()
 					.setValue(BlockStateProperties.ROTATION_16, facing(feet, toward))));
 			signs.put(feet, message);
 		}
-		return new Plan(Type.GROVE, feet, steps, signs);
+		return new Plan(Type.GROVE, feet, steps, signs, List.of());
 	}
 
 	/**
@@ -249,6 +288,13 @@ public final class HerobrineMarkPlans {
 	 * blocks. A redstone torch stands every {@value #TORCH_EVERY} blocks, and a sign at the end.
 	 */
 	public static @Nullable Plan tunnel(ServerLevel level, BlockPos feet, Direction direction, BlockPos toward, List<String> message) {
+		// Everything it could read: from beside him to past the longest tunnel, a block either side, floor to above the roof.
+		BlockPos reachMin = lower(feet.offset(-2, -2, -2), feet.relative(direction, TUNNEL_MAX + 4).offset(-2, -2, -2));
+		BlockPos reachMax = upper(feet.offset(2, 4, 2), feet.relative(direction, TUNNEL_MAX + 4).offset(2, 4, 2));
+		// It digs, and a plain stone wall looks like a hillside: only where an operator approved it.
+		if (!HerobrineMarks.approved(level, reachMin, reachMax) || !loaded(level, reachMin, reachMax)) {
+			return null;
+		}
 		Direction side = direction.getClockWise();
 		int start = -1;
 		for (int k = 0; k <= 3 && start < 0; k++) {
@@ -296,7 +342,7 @@ public final class HerobrineMarkPlans {
 				.setValue(BlockStateProperties.ROTATION_16, facing(signPos, toward))));
 		Map<BlockPos, List<String>> signs = new LinkedHashMap<>();
 		signs.put(signPos, message);
-		return new Plan(Type.TUNNEL, feet, steps, signs);
+		return new Plan(Type.TUNNEL, feet, steps, signs, List.of());
 	}
 
 	/** Natural stone or soil, with no block entity: what a tunnel may dig. Never ore, sand, gravel or anything placed. */

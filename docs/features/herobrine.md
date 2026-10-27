@@ -1,6 +1,6 @@
 # Herobrine
 
-Status: part 1 (encounters) implemented on `claude/herobrine-haunting`, pending a real compile, CI and review. Not merged, not deployed. The schedule is a separate piece of work (below), and until it is installed he appears only on an operator's command.
+Status: parts 1–3 (encounters, wilderness marks, shoreline pyramids and the trail) and the Jugcraft connections are implemented on `claude/herobrine-haunting`, pending review. The encounters compiled and passed their game tests natively; the marks, pyramids and terrain safeguards are not yet compiled or run (see "Not yet verified" under Tests). Not merged, not deployed. The schedule (below) decides when he appears; without it he appears only on an operator's command.
 
 Owner: jimbozoomer-byte
 Target milestone and tier: the Halloween event, any tier
@@ -81,29 +81,63 @@ Every mark carries a waxed sign facing the player, with a cryptic line: "YOU TOO
 
 **Safeguards (`HerobrineMarkPlans`):**
 
-- **Wild land only.** A mark is planned only where the site and 6 blocks round it are untouched wilderness, because unclaimed does not mean untouched:
-  - every chunk is already loaded and unclaimed;
-  - no column is in the town;
-  - every block is natural ground, rock, ore, a plant the world grew, or water;
-  - there is no block entity, so no chest, machine, sign or spawner.
+- **Planning never loads a chunk.** Before any block is read, every chunk a plan could read (the site, its floor and roof, and 7 blocks round it) must already be loaded. At the edge of the loaded world the plan is simply refused.
+- **Wild-looking land only.** A mark is planned only where the site and 6 blocks round it look like wild land:
+  - unclaimed;
+  - no column in the town;
+  - every block natural-looking (ground, rock, ore, a plant, water);
+  - no block entity, so no chest, machine, sign or spawner.
 
-  A plank, a path, farmland, a placed leaf or a chest nearby keeps him away.
-- **Building only adds.** Built marks go only into air or plants (never fluid), and each block rests on solid ground or on the mark itself.
+  A plank, a path, farmland, a placed leaf or a chest nearby keeps him away. This is a heuristic, not proof: unclaimed does not mean untouched, and a plain stone or log build, or a tree a player grew, looks natural.
+- **Groves and tunnels fail closed.** The two marks that take blocks away are planned only where the whole site and margin lie inside land an operator has approved for them: `/jugcraft herobrine wilds approve <radius>` (16–256 blocks round where they stand, in the Overworld only), listed by `wilds` and withdrawn by `wilds revoke <number>`, saved with the world.
+  - Each block taken away is checked against the approval again, so withdrawing it stops a grove or tunnel half built.
+  - With nothing approved, there are no groves or tunnels at all. The trail begins with a shrine instead, and its signpost stands alone instead of at the end of a tunnel.
+- **Building only adds.** Shrines, pyramids and signs take nothing away. They go only into air or plain ground cover (short grass, fern, dead bush, snow), never flowers or other plants a player may have set, never fluid. Each block rests on solid ground or on the mark itself.
 - **The grove** takes only leaves that are not `persistent` (vanilla marks every leaf a player places persistent), and never one beside water. Logs stay.
-- **The tunnel** digs only natural stone and soil. It stops before any ore, any block touching a fluid, a roof of loose sand or gravel, or a missing floor. It runs 6–20 blocks, with a redstone torch every 5 blocks and a sign at the end.
-- **Bounded work.** Building is spread over ticks: 8 blocks a tick across all marks, at most 2 marks building, and at most 8 sites weighed per mark.
+- **The tunnel** digs only natural stone and soil. It stops before any ore (the common `c:ores` tag, modded ores included), any block touching a fluid, a roof of loose sand or gravel, or a missing floor. It runs 6–20 blocks, with a redstone torch every 5 blocks and a sign at the end.
+- **Bounded work.** Building is spread over ticks: 8 blocks a tick, shared fairly among the marks building (at most 2), so a pyramid never starves a shrine. At most 8 sites are weighed per mark.
 - **Rechecked before every block.** Just before each block changes it is checked again:
   - an unloaded chunk, or someone standing in the way, waits (up to 200 ticks);
-  - land that became claimed or town, a block that is no longer what was planned on, or a block entity, stops the mark there.
+  - land that became claimed or town, a removal whose approval was withdrawn, a block that is no longer what was planned on, or a block entity, stops the mark there.
 
   A mark never overwrites what a player did meanwhile.
 
 **Records and undo (`HerobrineMarks`, saved with the world):**
 
 - **Records.** Each mark has an id, its kind, where he stood and when, and every block it changed (before and after).
-- **Undo.** `/jugcraft herobrine marks undo <id>` puts back, newest first, every block still as the mark left it. A block a player changed since stays as they left it and is forgotten. A block in an unloaded chunk, or where someone stands, waits in the record for a later undo.
+- **Undo.** `/jugcraft herobrine marks undo <id>` puts back, newest first, every block still exactly as the mark left it.
+  - **Exact match.** It must be the same block in the same state, every property, and for a block that keeps contents, the same contents: a sign's lines, or the lectern's journal.
+  - **What the world changes on its own** is allowed, and listed: a redstone torch's light, a glass pane's sides joining neighbours, and a lectern's pulse when a page turns.
+  - **Anything else is a player's change**, and undo leaves it be and forgets it. That covers a block turned, waterlogged or replaced, a sign edited, or a book taken or swapped.
+  - **The journal goes with its pyramid.** A lectern still holding the pyramid's own journal is emptied just before it is taken away, so the book never drops loose. A lectern holding any other book stays, book and all.
+  - **Waiting.** A block in an unloaded chunk, or where someone stands, waits in the record for a later undo.
 - **Listing and forcing.** `/jugcraft herobrine marks` lists them. `/jugcraft herobrine mark <player> <kind>` leaves a mark of a given kind about 6 blocks in front of a player, for testing.
 - **Switch.** `herobrine.marks=off` stops new marks; undo works either way.
+
+### Shoreline pyramids and the trail (part 3)
+
+- **The pyramid** (`HerobrinePyramids`): a stepped brick pyramid 31 blocks across and 16 high, one block narrower each side each layer. It has a solid floor and walls two bricks thick, and is hollow inside.
+  - **Doorway:** on the landward side, at the floor and the step above.
+  - **Windows:** twelve, two panes deep. Eight are on the fifth layer and four on the ninth.
+  - **The chamber:** a netherrack altar ringed with redstone torches and topped with a skeleton skull, torches in the corners, cobwebs, two waxed signs ("COUNT THE WINDOWS", "I WAS HERE FIRST"), and a lectern holding one written journal. The journal is the only thing to take, once: five original pages of a surveyor's notes ("From the beach I counted twelve windows. From inside I count eleven."). No chest, nothing valuable, nothing that refills.
+- **Where one may stand:**
+  - all the land 6 blocks round the base is loaded;
+  - no other pyramid within 768 blocks;
+  - dry ground under all of the base, rising and falling at most 3 blocks (brick fills the dip);
+  - water at the surface within 12 blocks of its edge;
+  - every block it places is air or a plant, never water;
+  - the whole footprint, volume and margin are wild land.
+
+  The site is weighed up to 4 times, 24–56 blocks from where it is sought. It is reserved as soon as building starts: its record counts for the spacing at once. It is built through the same rechecked, recorded, undoable work as any mark, bottom up, and a block a player sets in its way stops it there. Window panes are placed already joined to the wall round them, so they look right whichever block was laid first.
+- **When:**
+  - very rarely after a sighting (3%), near where he stood;
+  - as the end of a trail;
+  - on `/jugcraft herobrine mark <player> pyramid`.
+- **The trail.** The trail sits ahead of ordinary marks, and its progress is saved per player:
+  1. A sighting across water (water at the surface somewhere between player and him) may begin it, half the time. He leaves a bare grove where he stood, or a shrine away from trees, with "YOU TOOK THE LONG WAY".
+  2. A later sighting may continue it, half the time. He leaves a torch-lit tunnel whose end sign reads "THE WATER / REMEMBERS / NORTH-WEST / 312 BLOCKS", the way and distance to the nearest pyramid within 1024 blocks. If there is none, he raises one by the nearest shore first.
+
+  Other sightings may leave unrelated marks, and some clues stay unresolved.
 
 ### Connections to the rest of Jugcraft
 
@@ -141,15 +175,23 @@ Mark game tests (`HerobrineMarksGameTests`, on a raised platform so each margin 
 - undo leaves a block a player changed;
 - planks nearby, a claim, or leaves a player placed keep a mark away;
 - a grove strips a wild tree's leaves and leaves its trunk;
-- a tunnel digs 2×2 through stone, stops short of ore, and fills back in on undo.
+- a tunnel digs 2×2 through stone, stops short of ore, and fills back in on undo;
+- undo keeps a replaced block and a merely turned sign;
+- a shoreline pyramid is built with its top brick, floor, 24 window panes and the journal on its lectern, and comes down completely, its journal not dropped loose;
+- a block set in a pyramid's way after it was planned stops the building there and is never overwritten;
+- groves and tunnels are refused without an operator's approval beside a plain stone and log hut and a grown tree, let through by an approval, and closed again when it is withdrawn;
+- planning far away, and just inside the loaded world's edge, is refused and loads no chunk;
+- on the real build queue, a block a player sets after building began stops the mark at that block, and undo leaves it.
 
-Not yet verified: a real compile and CI run, rendering in a client (the eyes layer), and real two-client play. The local structure parser checks syntax only.
+The small-mark tests run on the real build queue: they wait for a free slot and for their mark to finish. The pyramid tests build at once (`HerobrineMarks.buildNow`), through the same checks. Every marks test runs with sky access, because game tests otherwise roof each structure with barriers.
+
+Not yet verified, as of this checkpoint:
+
+- **Compile and tests.** The encounter tests compiled and passed natively on an earlier snapshot. The marks, pyramids, trail, approvals, chunk preflight and full-state undo have not been compiled or run: none of the mark game tests above has run yet. The local Java parser checks syntax only.
+- **Client.** Rendering (the player-style model, the eyes in daylight and darkness), syncing and removal in a real client are being checked separately (`HerobrineClientGameTests`). Footstep audibility and real two-client play are untested.
+- **CI.** Not yet run on this branch.
 
 ## Still to build (owner-approved plan, not implemented)
 
 - **Encounter refinements:** cave entrances as watcher places, and testing the variants in a real client: whether the footsteps are audible, and whether the eyes show down a dark tunnel.
-- **Linked investigations:** a sighting across a river leads to a leafless grove, then a torch-lined tunnel, then a sign pointing to a shoreline pyramid. The marks exist; linking them waits on the shoreline pyramids.
-- **Massive brick pyramids near shorelines (part 3):**
-  - explorable authored interiors with modest cosmetic, decor or journal rewards, and no farmable containers;
-  - fully checked reserved wilderness sites, built incrementally with revalidation.
 - **The Cursed Mirror call:** one line in the mirror calling `HerobrineEncounters.reflection` (when a player looks into it at night, rarely), once both branches are on main.

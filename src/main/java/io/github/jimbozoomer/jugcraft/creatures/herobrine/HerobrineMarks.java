@@ -1,6 +1,7 @@
 package io.github.jimbozoomer.jugcraft.creatures.herobrine;
 
 import com.mojang.brigadier.CommandDispatcher;
+import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
@@ -35,11 +36,19 @@ import net.minecraft.tags.BlockTags;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.DyeColor;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.LecternBlock;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.entity.LecternBlockEntity;
 import net.minecraft.world.level.block.entity.SignBlockEntity;
 import net.minecraft.world.level.block.entity.SignText;
 import net.minecraft.world.level.block.entity.SignTextSlot;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.properties.BlockStateProperties;
+import net.minecraft.world.level.block.state.properties.Property;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.saveddata.SavedData;
 import net.minecraft.world.level.saveddata.SavedDataType;
@@ -49,11 +58,11 @@ import org.jspecify.annotations.Nullable;
 /**
  * Herobrine's marks (docs/features/herobrine.md): what he leaves behind after a confirmed distant sighting, and the
  * saved record of every block a mark changed, so an operator can take any mark back. A mark is planned by
- * {@link HerobrineMarkPlans} only in untouched wilderness, then built {@value #BLOCKS_PER_TICK} blocks a tick (across
- * all marks), each block checked again just before it changes: if its chunk is not loaded it waits; if the land became
- * claimed or town, the block is no longer what was planned on, or it holds a block entity, the mark stops there and
- * never overwrites what changed. Undoing a mark restores only blocks still exactly as the mark left them; anything a
- * player changed since stays as they left it.
+ * {@link HerobrineMarkPlans} only in untouched wilderness, then built {@value #BLOCKS_PER_TICK} blocks a tick (shared
+ * fairly among the marks building), each block checked again just before it changes: if its chunk is not loaded it
+ * waits; if the land became claimed or town, the block is no longer what was planned on, or it holds a block entity,
+ * the mark stops there and never overwrites what changed. Undoing a mark restores only blocks still exactly as the mark left them, every
+ * property and their contents; anything a player changed since stays as they left it.
  */
 public final class HerobrineMarks extends SavedData {
 	/** How many blocks all marks together change in one tick. */
@@ -66,14 +75,27 @@ public final class HerobrineMarks extends SavedData {
 	public static final int MAX_WAITS = 200;
 	/** How many sites one mark may weigh before giving up (each is a bounded scan of loaded blocks). */
 	public static final int MAX_PLAN_TRIES = 8;
+	/** The chance a sighting moves a player along a trail, once one may begin or continue. */
+	public static final double TRAIL_CHANCE = 0.5;
+	/** The chance any other sighting near the shore raises a pyramid. */
+	public static final double PYRAMID_CHANCE = 0.03;
+	/** How far a trail's signpost may point to a pyramid, in blocks. */
+	public static final int POINT_RANGE = 1024;
 
-	/** One block a mark changed: what it was, and what the mark made it. */
-	public record Change(BlockPos pos, BlockState before, BlockState after) {
+	/**
+	 * One block a mark changed: what it was, what the mark made it, and (for a block that keeps contents) what it held
+	 * when the mark finished it: a sign's lines, or {@value #JOURNAL} for a lectern holding the journal.
+	 */
+	public record Change(BlockPos pos, BlockState before, BlockState after, String content) {
 		static final Codec<Change> CODEC = RecordCodecBuilder.create(instance -> instance.group(
 				BlockPos.CODEC.fieldOf("pos").forGetter(Change::pos),
 				BlockState.CODEC.fieldOf("before").forGetter(Change::before),
-				BlockState.CODEC.fieldOf("after").forGetter(Change::after)).apply(instance, Change::new));
+				BlockState.CODEC.fieldOf("after").forGetter(Change::after),
+				Codec.STRING.optionalFieldOf("content", "").forGetter(Change::content)).apply(instance, Change::new));
 	}
+
+	/** A lectern's recorded content: it holds the pyramid's journal. */
+	public static final String JOURNAL = "journal";
 
 	/** A mark's record: its kind, where he stood, when (game time), and every block it changed, in order. */
 	public record Mark(String type, BlockPos at, long time, List<Change> changes) {
@@ -88,8 +110,34 @@ public final class HerobrineMarks extends SavedData {
 		}
 	}
 
-	public static final Codec<HerobrineMarks> CODEC = Codec.unboundedMap(Codec.STRING, Mark.CODEC)
-			.xmap(HerobrineMarks::new, marks -> marks.marks);
+	/**
+	 * Land an operator approved for the marks that take blocks away (groves and tunnels): a circle of {@code radius}
+	 * blocks round {@code centre}, with who approved it and when (game time).
+	 */
+	public record Wild(BlockPos centre, int radius, String by, long time) {
+		static final Codec<Wild> CODEC = RecordCodecBuilder.create(instance -> instance.group(
+				BlockPos.CODEC.fieldOf("centre").forGetter(Wild::centre),
+				Codec.INT.fieldOf("radius").forGetter(Wild::radius),
+				Codec.STRING.fieldOf("by").forGetter(Wild::by),
+				Codec.LONG.fieldOf("time").forGetter(Wild::time)).apply(instance, Wild::new));
+
+		/** Whether a column lies inside this circle. */
+		public boolean covers(int x, int z) {
+			long dx = x - centre.getX();
+			long dz = z - centre.getZ();
+			return dx * dx + dz * dz <= (long) radius * radius;
+		}
+	}
+
+	/** The smallest and largest radius an operator may approve, in blocks. */
+	public static final int MIN_WILD_RADIUS = 16;
+	public static final int MAX_WILD_RADIUS = 256;
+
+	public static final Codec<HerobrineMarks> CODEC = RecordCodecBuilder.create(instance -> instance.group(
+			Codec.unboundedMap(Codec.STRING, Mark.CODEC).fieldOf("marks").forGetter(marks -> marks.marks),
+			Codec.unboundedMap(Codec.STRING, Codec.INT).optionalFieldOf("trails", Map.of()).forGetter(marks -> marks.trails),
+			Wild.CODEC.listOf().optionalFieldOf("wilds", List.of()).forGetter(marks -> marks.wilds))
+			.apply(instance, HerobrineMarks::new));
 	private static final SavedDataType<HerobrineMarks> TYPE = new SavedDataType<>(Jugcraft.id("herobrine_marks"),
 			HerobrineMarks::new, CODEC, null);
 
@@ -102,13 +150,15 @@ public final class HerobrineMarks extends SavedData {
 		final ServerLevel level;
 		final Deque<HerobrineMarkPlans.Step> steps;
 		final Map<BlockPos, List<String>> signs;
+		final List<BlockPos> lecterns;
 		int waits;
 
-		Job(String id, ServerLevel level, List<HerobrineMarkPlans.Step> steps, Map<BlockPos, List<String>> signs) {
+		Job(String id, ServerLevel level, HerobrineMarkPlans.Plan plan) {
 			this.id = id;
 			this.level = level;
-			this.steps = new ArrayDeque<>(steps);
-			this.signs = signs;
+			this.steps = new ArrayDeque<>(plan.steps());
+			this.signs = plan.signs();
+			this.lecterns = plan.lecterns();
 		}
 	}
 
@@ -118,13 +168,62 @@ public final class HerobrineMarks extends SavedData {
 
 	private static final List<Job> JOBS = new ArrayList<>();
 	private final Map<String, Mark> marks;
+	/** How far each player (by UUID) has followed a trail: 1 after the grove, 2 after the tunnel's signpost. */
+	private final Map<String, Integer> trails;
+
+	/** Land approved for groves and tunnels, oldest first. */
+	private final List<Wild> wilds;
 
 	public HerobrineMarks() {
-		this(Map.of());
+		this(Map.of(), Map.of(), List.of());
 	}
 
-	private HerobrineMarks(Map<String, Mark> marks) {
+	private HerobrineMarks(Map<String, Mark> marks, Map<String, Integer> trails, List<Wild> wilds) {
 		this.marks = new HashMap<>(marks);
+		this.trails = new HashMap<>(trails);
+		this.wilds = new ArrayList<>(wilds);
+	}
+
+	/** Land approved for groves and tunnels, oldest first. */
+	public List<Wild> wilds() {
+		return Collections.unmodifiableList(wilds);
+	}
+
+	/**
+	 * Whether the box from {@code min} to {@code max}, with the plans' margin round it, lies wholly inside one circle an
+	 * operator approved. Groves and tunnels fail closed without it: unclaimed land may still hold a plain stone or log
+	 * build, or trees a player grew, which look natural.
+	 */
+	public static boolean approved(ServerLevel level, BlockPos min, BlockPos max) {
+		int pad = HerobrineMarkPlans.MARGIN;
+		int x0 = Math.min(min.getX(), max.getX()) - pad;
+		int x1 = Math.max(min.getX(), max.getX()) + pad;
+		int z0 = Math.min(min.getZ(), max.getZ()) - pad;
+		int z1 = Math.max(min.getZ(), max.getZ()) + pad;
+		return get(level.getServer()).wilds.stream().anyMatch(wild -> wild.covers(x0, z0) && wild.covers(x0, z1)
+				&& wild.covers(x1, z0) && wild.covers(x1, z1));
+	}
+
+	/** Approves the circle of {@code radius} blocks (clamped) round {@code centre} for groves and tunnels. */
+	public static Wild approve(ServerLevel level, BlockPos centre, int radius, String by) {
+		HerobrineMarks marks = get(level.getServer());
+		Wild wild = new Wild(centre.immutable(), Math.clamp(radius, MIN_WILD_RADIUS, MAX_WILD_RADIUS), by, level.getGameTime());
+		marks.wilds.add(wild);
+		marks.setDirty();
+		return wild;
+	}
+
+	/** Withdraws an approval; marks already made stay until undone. Whether it was there. */
+	public static boolean revoke(ServerLevel level, Wild wild) {
+		HerobrineMarks marks = get(level.getServer());
+		boolean removed = marks.wilds.remove(wild);
+		marks.setDirty();
+		return removed;
+	}
+
+	/** How far {@code player} has followed a trail (0 if they have not begun one). */
+	public int trail(UUID player) {
+		return trails.getOrDefault(player.toString(), 0);
 	}
 
 	public static HerobrineMarks get(MinecraftServer server) {
@@ -152,15 +251,90 @@ public final class HerobrineMarks extends SavedData {
 		return JOBS.size();
 	}
 
+	/** Whether mark {@code id} is still being built. */
+	public static boolean building(String id) {
+		return JOBS.stream().anyMatch(job -> job.id.equals(id));
+	}
+
 	/**
 	 * After a confirmed distant sighting: now and then ({@value #MARK_CHANCE}) he leaves a mark where he stood. A sighting
 	 * several players shared may leave "you brought someone".
 	 */
 	static void afterSighting(ServerLevel level, BlockPos where, ServerPlayer player, int witnesses) {
 		RandomSource random = level.getRandom();
-		if (enabled() && JOBS.size() < MAX_JOBS && random.nextDouble() < MARK_CHANCE) {
-			leave(level, where, player, witnesses > 1, random, null);
+		if (!enabled() || JOBS.size() >= MAX_JOBS) {
+			return;
 		}
+		HerobrineMarks marks = get(level.getServer());
+		int trail = marks.trail(player.getUUID());
+		if (trail == 0 && acrossWater(level, player.blockPosition(), where) && random.nextDouble() < TRAIL_CHANCE) {
+			// A sighting across the water begins a trail: a bare grove (or, out of the trees, a shrine) where he stood.
+			String id = leave(level, where, player, witnesses > 1, random, HerobrineMarkPlans.Type.GROVE, HerobrineMarkPlans.MESSAGES.getFirst());
+			if (id == null) {
+				id = leave(level, where, player, witnesses > 1, random, HerobrineMarkPlans.Type.SHRINE, HerobrineMarkPlans.MESSAGES.getFirst());
+			}
+			if (id != null) {
+				marks.trails.put(player.getUUID().toString(), 1);
+				marks.setDirty();
+			}
+		} else if (trail == 1 && random.nextDouble() < TRAIL_CHANCE) {
+			// The trail's next mark is a torch-lit tunnel whose sign points to a shoreline pyramid, raised if none is near.
+			BlockPos pyramid = HerobrinePyramids.nearest(level, where, POINT_RANGE);
+			if (pyramid == null) {
+				HerobrineMarkPlans.Plan plan = HerobrinePyramids.near(level, player.blockPosition(), where, random);
+				if (plan != null && start(level, plan) != null) {
+					pyramid = plan.at();
+				}
+			}
+			if (pyramid != null && JOBS.size() < MAX_JOBS) {
+				// A torch-lit tunnel where the land is approved for digging; otherwise the signpost stands alone.
+				List<String> post = signpost(where, pyramid);
+				String id = leave(level, where, player, false, random, HerobrineMarkPlans.Type.TUNNEL, post);
+				if (id == null) {
+					id = leave(level, where, player, false, random, HerobrineMarkPlans.Type.SIGN, post);
+				}
+				if (id != null) {
+					marks.trails.put(player.getUUID().toString(), 2);
+					marks.setDirty();
+				}
+			}
+		} else if (random.nextDouble() < PYRAMID_CHANCE) {
+			HerobrineMarkPlans.Plan plan = HerobrinePyramids.near(level, where, player.blockPosition(), random);
+			if (plan != null) {
+				start(level, plan);
+			}
+		} else if (random.nextDouble() < MARK_CHANCE) {
+			leave(level, where, player, witnesses > 1, random, null, null);
+		}
+	}
+
+	/** Whether water lies at the surface somewhere on the straight way between {@code from} and {@code to}. */
+	static boolean acrossWater(ServerLevel level, BlockPos from, BlockPos to) {
+		int dx = to.getX() - from.getX();
+		int dz = to.getZ() - from.getZ();
+		int steps = (int) (Math.sqrt(dx * dx + dz * dz) / 2.0);
+		for (int step = 2; step < steps - 1; step++) {
+			int x = from.getX() + dx * step / steps;
+			int z = from.getZ() + dz * step / steps;
+			if (!level.hasChunkAt(new BlockPos(x, 0, z))) {
+				return false;
+			}
+			int y = level.getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, x, z);
+			if (!level.getBlockState(new BlockPos(x, y - 1, z)).getFluidState().isEmpty()) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	/** A trail's signpost: "the water remembers", the way to {@code pyramid} on the compass, and how far. */
+	static List<String> signpost(BlockPos from, BlockPos pyramid) {
+		int dx = pyramid.getX() - from.getX();
+		int dz = pyramid.getZ() - from.getZ();
+		String[] compass = {"EAST", "SOUTH-EAST", "SOUTH", "SOUTH-WEST", "WEST", "NORTH-WEST", "NORTH", "NORTH-EAST"};
+		int index = Math.floorMod((int) Math.round(Math.atan2(dz, dx) / (Math.PI / 4.0)), 8);
+		int distance = (int) Math.round(Math.sqrt((double) dx * dx + (double) dz * dz));
+		return List.of("THE WATER", "REMEMBERS", compass[index], distance + " BLOCKS");
 	}
 
 	/**
@@ -170,11 +344,11 @@ public final class HerobrineMarks extends SavedData {
 	 * {@value #MAX_PLAN_TRIES} sites are weighed. Returns the mark's id, or null if nowhere near was wild enough.
 	 */
 	public static @Nullable String leave(ServerLevel level, BlockPos where, ServerPlayer player, boolean company, RandomSource random,
-			HerobrineMarkPlans.@Nullable Type only) {
+			HerobrineMarkPlans.@Nullable Type only, @Nullable List<String> text) {
 		if (JOBS.size() >= MAX_JOBS || !level.hasChunkAt(where)) {
 			return null;
 		}
-		List<String> message = company ? HerobrineMarkPlans.BROUGHT_SOMEONE
+		List<String> message = text != null ? text : company ? HerobrineMarkPlans.BROUGHT_SOMEONE
 				: HerobrineMarkPlans.MESSAGES.get(random.nextInt(HerobrineMarkPlans.MESSAGES.size()));
 		BlockPos toward = player.blockPosition();
 		List<HerobrineMarkPlans.Type> kinds = new ArrayList<>();
@@ -200,7 +374,8 @@ public final class HerobrineMarks extends SavedData {
 		Direction away = HerobrineMarkPlans.toward(toward, where);
 		int tries = 0;
 		for (HerobrineMarkPlans.Type kind : kinds) {
-			boolean wide = kind == HerobrineMarkPlans.Type.GROVE || kind == HerobrineMarkPlans.Type.TUNNEL;
+			boolean wide = kind == HerobrineMarkPlans.Type.GROVE || kind == HerobrineMarkPlans.Type.TUNNEL
+					|| kind == HerobrineMarkPlans.Type.PYRAMID;
 			for (BlockPos feet : wide ? List.of(where) : near(level, where)) {
 				if (++tries > MAX_PLAN_TRIES) {
 					return null;
@@ -212,6 +387,7 @@ public final class HerobrineMarks extends SavedData {
 					case SIGN -> HerobrineMarkPlans.sign(level, feet, toward, message);
 					case GROVE -> HerobrineMarkPlans.grove(level, feet, toward, message, random);
 					case TUNNEL -> HerobrineMarkPlans.tunnel(level, feet, away, toward, message);
+					case PYRAMID -> HerobrinePyramids.near(level, feet, toward, random);
 				};
 				if (plan != null) {
 					return start(level, plan);
@@ -243,13 +419,43 @@ public final class HerobrineMarks extends SavedData {
 			return null;
 		}
 		HerobrineMarks marks = get(level.getServer());
+		String id = newId(marks);
+		marks.marks.put(id, new Mark(plan.type().name().toLowerCase(Locale.ROOT), plan.at(), level.getGameTime(), List.of()));
+		marks.setDirty();
+		JOBS.add(new Job(id, level, plan));
+		return id;
+	}
+
+	/**
+	 * Builds {@code plan} at once rather than over ticks, block by block through the same checks as any mark, recorded
+	 * and undoable the same way; it stops where a check stops it (an unloaded chunk or someone in the way stops it too,
+	 * rather than waiting). For game tests; it does not take a build slot. Returns the mark's id.
+	 */
+	public static String buildNow(ServerLevel level, HerobrineMarkPlans.Plan plan) {
+		HerobrineMarks marks = get(level.getServer());
+		String id = newId(marks);
+		Mark mark = new Mark(plan.type().name().toLowerCase(Locale.ROOT), plan.at(), level.getGameTime(), List.of());
+		marks.marks.put(id, mark);
+		marks.setDirty();
+		Job job = new Job(id, level, plan);
+		while (!job.steps.isEmpty()) {
+			Result result = apply(job, job.steps.peekFirst(), mark, marks);
+			if (result == Result.WAIT || result == Result.STOP) {
+				break;
+			}
+			job.steps.removeFirst();
+		}
+		if (mark.changes().isEmpty()) {
+			marks.marks.remove(id);
+		}
+		return id;
+	}
+
+	private static String newId(HerobrineMarks marks) {
 		String id;
 		do {
 			id = UUID.randomUUID().toString().substring(0, 8);
 		} while (marks.marks.containsKey(id));
-		marks.marks.put(id, new Mark(plan.type().name().toLowerCase(Locale.ROOT), plan.at(), level.getGameTime(), List.of()));
-		marks.setDirty();
-		JOBS.add(new Job(id, level, plan.steps(), plan.signs()));
 		return id;
 	}
 
@@ -258,9 +464,10 @@ public final class HerobrineMarks extends SavedData {
 			return;
 		}
 		HerobrineMarks marks = get(server);
-		int budget = BLOCKS_PER_TICK;
-		for (Iterator<Job> jobs = JOBS.iterator(); jobs.hasNext() && budget > 0; ) {
+		int share = Math.max(1, BLOCKS_PER_TICK / JOBS.size());
+		for (Iterator<Job> jobs = JOBS.iterator(); jobs.hasNext(); ) {
 			Job job = jobs.next();
+			int budget = share;
 			Mark mark = marks.marks.get(job.id);
 			boolean over = mark == null;
 			while (!over && budget > 0 && !job.steps.isEmpty()) {
@@ -295,6 +502,10 @@ public final class HerobrineMarks extends SavedData {
 		if (LandRegistry.isClaimed(level, pos) || Town.isProtected(level, pos)) {
 			return Result.STOP;
 		}
+		// Taking a block away still needs the operator's approval, block by block: a revoked approval stops a grove or tunnel.
+		if (step.state().isAir() && !approved(level, pos, pos)) {
+			return Result.STOP;
+		}
 		BlockState now = level.getBlockState(pos);
 		if (!now.is(step.expect()) || now.hasBlockEntity() || !HerobrineMarkPlans.natural(now)) {
 			return Result.STOP;
@@ -311,8 +522,7 @@ public final class HerobrineMarks extends SavedData {
 			return Result.WAIT;
 		}
 		level.setBlock(pos, step.state(), Block.UPDATE_ALL);
-		mark.changes().add(new Change(pos, now, step.state()));
-		marks.setDirty();
+		String content = "";
 		List<String> text = job.signs.get(pos);
 		if (text != null && level.getBlockEntity(pos) instanceof SignBlockEntity sign) {
 			List<Component> lines = text.stream().map(line -> (Component) Component.literal(line)).toList();
@@ -322,14 +532,22 @@ public final class HerobrineMarks extends SavedData {
 			sign.setWaxed(true);
 			sign.setChanged();
 			level.sendBlockUpdated(pos, sign.getBlockState(), sign.getBlockState(), Block.UPDATE_ALL);
+			content = signText(sign);
 		}
+		if (job.lecterns.contains(pos) && LecternBlock.tryPlaceBook(null, level, pos, level.getBlockState(pos),
+				HerobrinePyramids.journal())) {
+			content = JOURNAL;
+		}
+		// What the mark left, contents and all: undo puts back only what is still exactly this.
+		mark.changes().add(new Change(pos, now, level.getBlockState(pos), content));
+		marks.setDirty();
 		return Result.DONE;
 	}
 
 	/**
-	 * Takes mark {@code id} back, newest block first: a block still exactly as the mark left it is put back as it was; a
-	 * block a player changed since (now some other block) is left alone and forgotten; a block in an unloaded chunk, or with someone standing
-	 * where it would go back, waits in the record for another undo. Stops the mark building, if it still is. Null if
+	 * Takes mark {@code id} back, newest block first: a block still exactly as the mark left it ({@link #unchanged}) is
+	 * put back as it was; a block a player changed since, in any way, is left alone and forgotten; a block in an
+	 * unloaded chunk, or with someone standing where it would go back, waits in the record for another undo. Stops the mark building, if it still is. Null if
 	 * there is no such mark.
 	 */
 	public static @Nullable Undo undo(ServerLevel level, String id) {
@@ -348,8 +566,11 @@ public final class HerobrineMarks extends SavedData {
 			if (!level.hasChunkAt(change.pos())
 					|| !change.before().isAir() && !level.getEntitiesOfClass(LivingEntity.class, new AABB(change.pos())).isEmpty()) {
 				waiting.add(0, change);
-			} else if (level.getBlockState(change.pos()).is(change.after().getBlock())
-					|| change.after().isAir() && level.getBlockState(change.pos()).isAir()) {
+			} else if (unchanged(level, change)) {
+				if (change.content().equals(JOURNAL) && level.getBlockEntity(change.pos()) instanceof LecternBlockEntity lectern) {
+					// Still the pyramid's own journal: it goes with the pyramid, emptied first so the lectern cannot drop it.
+					lectern.clearContent();
+				}
 				level.setBlock(change.pos(), change.before(), Block.UPDATE_ALL);
 				restored++;
 			} else {
@@ -366,6 +587,54 @@ public final class HerobrineMarks extends SavedData {
 		return new Undo(restored, kept, waiting.size());
 	}
 
+	/**
+	 * Whether the block a mark changed is still exactly as the mark left it: the same block in the same state (every
+	 * property), holding the same contents. Only these changes the world makes by itself are allowed: a redstone torch
+	 * lit or unlit by power, a glass pane's sides joining its neighbours, and a lectern's pulse when a page is turned.
+	 * Anything else (a turned, waterlogged or swapped block, an edited sign, a taken or swapped book) is a player's
+	 * change, and undo leaves it be.
+	 */
+	static boolean unchanged(ServerLevel level, Change change) {
+		BlockState now = level.getBlockState(change.pos());
+		BlockState after = change.after();
+		if (after.isAir()) {
+			return now.isAir();
+		}
+		if (!now.is(after.getBlock())) {
+			return false;
+		}
+		for (Property<?> property : after.getProperties()) {
+			if (!settles(after, property) && !now.getValue(property).equals(after.getValue(property))) {
+				return false;
+			}
+		}
+		if (change.content().isEmpty()) {
+			return true;
+		}
+		BlockEntity entity = level.getBlockEntity(change.pos());
+		if (change.content().equals(JOURNAL)) {
+			return entity instanceof LecternBlockEntity lectern
+					&& ItemStack.isSameItemSameComponents(lectern.getBook(), HerobrinePyramids.journal());
+		}
+		return entity instanceof SignBlockEntity sign && signText(sign).equals(change.content());
+	}
+
+	/** The properties the world changes on its own, one block at a time: never a player's doing. */
+	private static boolean settles(BlockState state, Property<?> property) {
+		return state.is(Blocks.REDSTONE_TORCH) && property == BlockStateProperties.LIT
+				|| state.is(Blocks.GLASS_PANE) && (property == BlockStateProperties.NORTH || property == BlockStateProperties.EAST
+						|| property == BlockStateProperties.SOUTH || property == BlockStateProperties.WEST)
+				|| state.is(Blocks.LECTERN) && property == BlockStateProperties.POWERED;
+	}
+
+	private static String signText(SignBlockEntity sign) {
+		StringBuilder text = new StringBuilder();
+		for (int line = 0; line < 4; line++) {
+			text.append(sign.getText(SignTextSlot.FRONT).getMessages(false).get(line).getString()).append('\n');
+		}
+		return text.toString();
+	}
+
 	private static void commands(CommandDispatcher<CommandSourceStack> dispatcher) {
 		dispatcher.register(Commands.literal("jugcraft").then(Commands.literal("herobrine")
 				.requires(source -> Commands.LEVEL_GAMEMASTERS.check(source.permissions()))
@@ -374,12 +643,55 @@ public final class HerobrineMarks extends SavedData {
 								.suggests((context, builder) -> SharedSuggestionProvider.suggest(
 										get(context.getSource().getServer()).marks.keySet(), builder))
 								.executes(context -> undo(context.getSource(), StringArgumentType.getString(context, "id"))))))
+				.then(Commands.literal("wilds").executes(context -> listWilds(context.getSource()))
+						.then(Commands.literal("approve").then(Commands.argument("radius", IntegerArgumentType.integer(MIN_WILD_RADIUS, MAX_WILD_RADIUS))
+								.executes(context -> approveHere(context.getSource(), IntegerArgumentType.getInteger(context, "radius")))))
+						.then(Commands.literal("revoke").then(Commands.argument("number", IntegerArgumentType.integer(1))
+								.executes(context -> revoke(context.getSource(), IntegerArgumentType.getInteger(context, "number"))))))
 				.then(Commands.literal("mark").then(Commands.argument("player", EntityArgument.player())
 						.then(Commands.argument("kind", StringArgumentType.word())
 								.suggests((context, builder) -> SharedSuggestionProvider.suggest(java.util.Arrays.stream(
 										HerobrineMarkPlans.Type.values()).map(type -> type.name().toLowerCase(Locale.ROOT)), builder))
 								.executes(context -> force(context.getSource(), EntityArgument.getPlayer(context, "player"),
 										StringArgumentType.getString(context, "kind"))))))));
+	}
+
+	private static int listWilds(CommandSourceStack source) {
+		List<Wild> all = get(source.getServer()).wilds;
+		if (all.isEmpty()) {
+			source.sendSuccess(() -> Component.translatable("commands.jugcraft.herobrine.wilds.none"), false);
+		}
+		for (int i = 0; i < all.size(); i++) {
+			Wild wild = all.get(i);
+			int number = i + 1;
+			source.sendSuccess(() -> Component.translatable("commands.jugcraft.herobrine.wilds.entry", number, wild.radius(),
+					wild.centre().getX(), wild.centre().getY(), wild.centre().getZ(), wild.by()), false);
+		}
+		return all.size();
+	}
+
+	private static int approveHere(CommandSourceStack source, int radius) {
+		// Approvals are Overworld coordinates: he haunts and marks nowhere else.
+		if (source.getLevel().dimension() != Level.OVERWORLD) {
+			source.sendFailure(Component.translatable("commands.jugcraft.herobrine.wilds.overworld"));
+			return 0;
+		}
+		BlockPos centre = BlockPos.containing(source.getPosition());
+		Wild wild = approve(source.getServer().overworld(), centre, radius, source.getTextName());
+		source.sendSuccess(() -> Component.translatable("commands.jugcraft.herobrine.wilds.approved", wild.radius(),
+				centre.getX(), centre.getY(), centre.getZ()), true);
+		return 1;
+	}
+
+	private static int revoke(CommandSourceStack source, int number) {
+		List<Wild> all = get(source.getServer()).wilds;
+		if (number > all.size()) {
+			source.sendFailure(Component.translatable("commands.jugcraft.herobrine.wilds.unknown", number));
+			return 0;
+		}
+		revoke(source.getServer().overworld(), all.get(number - 1));
+		source.sendSuccess(() -> Component.translatable("commands.jugcraft.herobrine.wilds.revoked", number), true);
+		return 1;
 	}
 
 	private static int list(CommandSourceStack source) {
@@ -416,7 +728,7 @@ public final class HerobrineMarks extends SavedData {
 			return 0;
 		}
 		BlockPos ahead = player.blockPosition().relative(player.getDirection(), 6);
-		String id = leave(source.getServer().overworld(), ahead, player, false, player.getRandom(), type);
+		String id = leave(source.getServer().overworld(), ahead, player, false, player.getRandom(), type, null);
 		if (id == null) {
 			source.sendFailure(Component.translatable("commands.jugcraft.herobrine.marks.no_site", kind));
 			return 0;

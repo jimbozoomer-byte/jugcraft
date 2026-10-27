@@ -55,6 +55,16 @@ STYX_LINES = [
     "If he leaves you a message, do not answer it. I said nothing.",
 ]
 
+# /jugcraft herobrine wilds: the land an operator approves for the marks that take blocks away (groves and tunnels).
+WILD_MESSAGES = {
+    "none": "No land is approved for Herobrine's groves and tunnels; he leaves only shrines, pyramids and signs",
+    "entry": "%s: %s blocks round %s %s %s, approved by %s",
+    "approved": "Herobrine may strip leaves and dig tunnels within %s blocks of %s %s %s",
+    "revoked": "Approval %s withdrawn; marks already made stay until undone",
+    "unknown": "No approval %s",
+    "overworld": "Wild land can only be approved in the Overworld, where he walks",
+}
+
 
 def write_all(lang):
     lang[f"entity.{MOD}.{ENTITY}"] = NAME
@@ -69,6 +79,8 @@ def write_all(lang):
         lang[f"commands.{MOD}.herobrine.failed.{failure}"] = text
     for key, text in MARK_MESSAGES.items():
         lang[f"commands.{MOD}.herobrine.marks.{key}"] = text
+    for key, text in WILD_MESSAGES.items():
+        lang[f"commands.{MOD}.herobrine.wilds.{key}"] = text
     for i, line in enumerate(STYX_LINES):
         lang[f"message.{MOD}.styx.herobrine.{i}"] = "Styxhexenhammer: " + line
 
