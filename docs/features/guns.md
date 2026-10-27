@@ -3040,6 +3040,70 @@ Aim a little high at a long shot. Bullets fly straight, as before.
 
 **Save compatibility:** a new item, `jugcraft:dart`, and a new effect, `jugcraft:bleeding`. Quill Rifles already made keep their loaded count, now of darts; Light Rounds already in a player's inventory are unchanged. Nothing else saved changes.
 
+## Slice 15D: two barrels and a burst
+The next three of the owner's diamond-steel guns, taken up after slice 15C (on 27 October 2026, offered three next steps, the owner chose "Lets begin with those 3 you suggested"): the Drill, the Drill Conversion and the Lockewood. Each is held in both hands and built from the owner's own GeckoLib model of it, from the upload of 23 October 2026 ([the library record](../../art/owner-library/README.md#gun-geometry-23-october-2026)), as slices 15A's to 15C's are. The Drill and its Conversion are the first of these guns loaded a round at a time; the Lockewood fires a burst to a pull, which no gun did before.
+
+| | Auger Rifle | Auger Shotgun | Tumbler Rifle |
+|---|---|---|---|
+| The owner's gun | Drill | Drill Conversion | Lockewood |
+| What it is | a two-barrelled rifle, its barrels side by side on a stout stock; a wax seal with a strip of scripture hangs off its right side, and an aperture rear sight stands on its receiver | the Drill made over into a shotgun: shorter barrels, an open notch for a rear sight | a compact rifle with a curved magazine below, a pistol grip and a ring rear sight, a seal and scripture on its left side |
+| Held | in both hands: the right on the grip, the left under the barrels | the same | in both hands: the right on the grip, the left at the magazine |
+| What it fires | Paper Cartridges, a pull a shot | Buckshot Shells, a pull a barrel: eight pellets | Rifle Rounds, a burst of three to a pull |
+| Damage | 14 | 3.5 a pellet, 28 a pull | 5.5 |
+| Rate | two shots 6 ticks apart | two shots 6 ticks apart | three shots 3 ticks apart, then a rest of 5 ticks: a burst every 14 ticks at the quickest |
+| Holds | 2, loaded a round at a time | 2, loaded a shell at a time | 21 |
+| Reload | 0.6 s to open, 0.85 s a round, 0.8 s to close: 3.1 s for both | the same | 2.15 s |
+| Spread, hip / aimed | 2° / 0.4° | 7.5° / 7.5° | 2.5° / 0.5° |
+| Range | 96 blocks | 24 blocks | 96 blocks |
+| The view aimed | 0.8 | 0.9 | 0.85 |
+| Heavy bullets | none | knock back 0.65 further | pierce 3 points of armour |
+| Takes | the stocks, both grips (the Vertical Grip), the four bayonets, the three scopes and the Laser Sight; no barrel attachment or magazine | the same | the barrels' four, the magazines, the stocks, both grips (the Tactical Grip), the four bayonets, the three scopes and the Laser Sight |
+
+**Their numbers** start from the owner's own, in the gun data of the same upload, set beside the guns already built: the Drill is their two-shot powder-and-ball rifle (13.5 a shot, both shots quickly, loaded a ball at a time), the Drill Conversion its shotgun (23.5 a pull over its pellets, strays as far aimed as from the hip, `alwaysSpread`), the Lockewood their burst rifle (11 a round, three to a burst every third tick, a rest of 5 ticks after, 21 to a magazine). The reloads are the owner's animations'. The heavy bullets are the owner's too: the Drill Conversion's `knockbackStrength` (0.65) and the Lockewood's `armorPen` (3), through the [heavy-bullets follow-up](#follow-up-heavy-bullets-knockback-and-armour-piercing).
+
+**Crafting** (a crafting table; they switch with the guns): stainless steel, a diamond and a lever, as slices 15A's to 15C's.
+- **Auger Rifle:** three stainless steel ingots over a stainless steel ingot, a diamond and a lever, over two stainless steel ingots with planks between (the owner's recipe takes four gun barrels and a wooden part).
+- **Auger Shotgun:** three stainless steel ingots over a diamond, a lever and planks (two gun barrels and a wooden part).
+- **Tumbler Rifle:** three stainless steel ingots over a diamond, a lever and redstone, over planks and a stainless steel ingot (a rapid firing unit, heavy gun parts, two diamond steel ingots and a wooden part).
+
+**How they fire:** as the guns before them: each round flies along the look, strayed by the spread. The Auger Shotgun's eight pellets each fly their own way; those that strike one creature land as one hit, pushed back once.
+
+**Bursts** (`BURSTS` in `tools/guns.py`, `JugcraftGuns.BURSTS`): a pull of the Tumbler Rifle fires three rounds, one each interval, whether or not the trigger is still held; the next pull fires once the burst's rest has passed. The client fires the burst a shot at a time, as an automatic's (`GunsClient`); running dry, a reload or switching away ends it. The server, which alone fires, counts each shot against the shooter's trigger credit as for every gun (`GunShots.spend`): a burst gun's credit refills at a burst per cycle (three rounds every 14 ticks) and banks a whole burst, so a client that asks faster gains nothing.
+
+**What you see:** the owner's animations. The Augers' shot kicks the gun; to load, the gun rolls over and its barrels hinge down, then the left hand brings a ball (the Shotgun's a shell) to the breech for each round, and the barrels swing shut. The ball is the owner's own, carried by the left arm's bone (`left_arm2`, `ball2`, `ball`) and shown only while it is loaded. The Tumbler's reload takes the magazine out below and brings the full one back. Each is inspected in both hands. Sounds, as the owner's data names for each: the carabine's shot (new here) for the Auger Rifle, the black powder shot (the Line Musket's) for the Auger Shotgun and the iron rifle's (the Kestrel Rifle's) for the Tumbler.
+
+**How the models were built:**
+- **From the owner's GeckoLib models,** as slices 15A's to 15C's (`GEO_PARTS`): each gun's parts are the bones of its model, its standard magazine and barrel the bones the owner named `default_mag` and `standard_barrel`; none of the three has a standard stock bone. Their textures are the models' own (`Guns/animated/gun/`), laid out anew by the owner (`GEO_RELAID`). The owner's no-sights parts for all three are empty, so an empty bone stands in (`gun_body` on the Augers, `body` on the Tumbler).
+- **Two cubes turned about more than one axis:** a pin across the Drill's stock is turned (-90, 45, -90), the Drill Conversion's shell (180, 0, -45). An item-model element turns about one axis only, so the converter lays such a cube anew square to the axes (a whole-quarter turn about its pivot, its faces and their UVs carried over corner for corner) and then turns it about one axis by at most 45 degrees (`relaid_turn()`, `relaid()`): the pin lies across the gun, turned 45 degrees about its length; the shell is turned end for end and then 45 degrees. This follows GeckoLib's order of turns, z then y then x applied last (`RenderUtil.rotateMatrixAroundCube` in its public source; not checked in the pinned 5.5.7 jar).
+- **A shrunken cube:** the Drill Conversion's shell is drawn 0.1 px smaller on each side than its size (`inflate`); the converter moves its corners in by that, its UVs those of its size. The Zilk 45's model has one such cube too, shrunk 0.001 px, which slice 15C's converter left full size: the Quill Rifle's model now draws it 0.002 px smaller, as the owner's does. No other gun's files change.
+- **Checked against the earlier parts:** where a bone keeps its item-model part's shape, the converter must give back that part's elements corner for corner and turn for turn (`GEO_TWINS`): on the Drill 10 bones (its sights, grips, bayonets and stocks), on the Drill Conversion 9 (its bayonets, and the Drill's grips and stocks, which it shares), on the Lockewood 12 (its bolt, grips, three bayonets, muzzle attachments and stocks; the owner reshaped its steel bayonet).
+- **Bones:** the models' own, turning about the models' pivots (checked). On the Augers: `gun_body3`, `gun_body2` and `gun_body` (the reload turns all three); `barrel`, which swings open, with the grips and bayonets riding it (`"mounts"`); `left_arm2`, which carries the left arm and, under `ball2`, the ball; the `bolt` and `shell` their animations move, which their models lack, empty. On the Tumbler: `gun_body`, `bolt`, `seal` and `scriptures`, `magazine` (the left arm hangs under it, as on the Quill) and an empty `magazine_2`, never shown.
+- **Hands:** placed from the owner's own arm bones as slices 15A's to 15C's are. The Augers' left arm hangs under `left_arm2`, whose idle pose is the Old Grange Carbine's, and so takes its way; their idle leaves the left arm itself where it is (`arm_offset()` now allows that). The Tumbler's idle is the Zilk 45's, and its arms take the Quill's ways.
+- **Sights:** the owner's: the Auger Rifle's aperture, the Auger Shotgun's notch between two posts, the Tumbler's ring. Aimed, each is held 1 px further out (`"eye_relief"`), so that nothing comes within 2.3 px of the eye through the aimed shot: a fitted Long Scope came 1.8 to 1.9 px from it at the hip's depth; held out, every gun and sight keeps at least 2.7 px.
+- **Scopes:** where their iron sights stand.
+- **Checked** in first-person, aimed and orthographic previews: idle, fired, aimed, through each reload (the Augers' start, each round and close) and inspection, and with each attachment, the barrels swung open with a bayonet and grip fitted.
+
+**Connections:**
+- **Rounds:** the Paper Cartridge, the Buckshot Shell and the Rifle Round; nothing new.
+- **Parts:** stainless steel, a diamond and a lever; planks for all three, redstone for the Tumbler.
+- **Their place:** past stainless steel, beside slices 15A's to 15C's guns.
+
+**Balance:** starting numbers, at point blank with every shot landing, over a magazine and its reload.
+- **Auger Rifle:** 14 a shot, the hardest single shot of the diamond-steel guns (the Vesper Rifle's is 13); about 8.2 a second over its two shots and their reload. It reaches 96 blocks and strays 0.4° aimed, and fires the cheapest rounds.
+- **Auger Shotgun:** 28 a pull with every pellet landing; about 16.5 a second, beside the Coach Gun's 16.3 (two shells, from the first guns). It knocks back, but reaches less (24 blocks to the Coach Gun's 32) and strays 7.5° even aimed.
+- **Tumbler Rifle:** about 17.4 a second, beside the Onrush SMG's 16.9 and the Gallant Rifle's 16.6, passing 3 points of armour. A burst lands 16.5 in 6 ticks.
+- **Rounds:** each shot spends one; nothing converts back.
+
+**Save compatibility:** new items `jugcraft:auger_rifle`, `auger_shotgun` and `tumbler_rifle`; nothing saved changes. `guns.enabled=false` turns their recipes off; the items stay registered.
+
+**Known limits** (the first two are owner decisions):
+- **The Auger Shotgun fires Buckshot Shells:** the owner's data loads the Drill Conversion with powder and ball but fires a shotgun shell from it and throws out a spent case, and its reload carries a shell. This slice follows the shell; the owner may want paper cartridges instead.
+- **Names:** "Auger Rifle", "Auger Shotgun" and "Tumbler Rifle" are proposed.
+- **The Auger Shotgun does not push its shooter back** as the owner's data asks (`playerKnockBack`), as the Impetus does not.
+- **The Augers' load fills the lower view:** the owner's animation swings the gun low and brings the left arm across.
+- **The arms in the reloads and inspections** come large into the view in places, as on the guns before them.
+- **Not played:** none of it has been played yet. The numbers want play to set.
+
 ## Connections
 - **Existing input producers:** copper, iron and gunpowder (vanilla); lead nuggets (the lead switch's lead); brass nuggets (brass, from zinc); paper and planks.
 - **Existing output consumer:** combat. The guns kill what drops loot for every branch.
@@ -4820,6 +4884,36 @@ Slice 9E's files: the guns' tactical grip parts and the Laser Sight's textures m
 | quill_rifle | `Guns/item/relex_sight.png` | `c8a38dbce7c266b0` |
 | quill_rifle | `Guns/item/laser_sight.png` | `1e0a3342068bc5df` |
 | quill_rifle | `Guns/item/laser.png` | `aac5f06e892e350a` |
+| auger_rifle | `Guns/models/item/drill.json` | `32bd7b57a87b507c` |
+| auger_rifle | `Guns/animated/gun/drill.png` | `dd29b1c01310a9ba` |
+| auger_rifle | `Guns/item/drill.animation.json` | `01710173e7b56145` |
+| auger_rifle | `Guns/geo/item/gun/drill.geo.json` | `4d327fca83845c09` |
+| auger_rifle | `Guns/sounds/item/carabine/fire.ogg` | `eeed3dbb8a7871d3` |
+| auger_rifle | `Guns/item/long_scope_texture.png` | `e69191017eb081ad` |
+| auger_rifle | `Guns/item/medium_scope.png` | `543abecf859783be` |
+| auger_rifle | `Guns/item/relex_sight.png` | `c8a38dbce7c266b0` |
+| auger_rifle | `Guns/item/laser_sight.png` | `1e0a3342068bc5df` |
+| auger_rifle | `Guns/item/laser.png` | `aac5f06e892e350a` |
+| auger_shotgun | `Guns/models/item/drill_conversion.json` | `e06d855b9e42a38c` |
+| auger_shotgun | `Guns/animated/gun/drill_conversion.png` | `b053cbbfca1ac4b8` |
+| auger_shotgun | `Guns/item/drill_conversion.animation.json` | `cd868916ec90f759` |
+| auger_shotgun | `Guns/geo/item/gun/drill_conversion.geo.json` | `85d13718a8761ed0` |
+| auger_shotgun | `Guns/sounds/item/blackpowder/fire.ogg` | `a3d3d49a332d034f` |
+| auger_shotgun | `Guns/item/long_scope_texture.png` | `e69191017eb081ad` |
+| auger_shotgun | `Guns/item/medium_scope.png` | `543abecf859783be` |
+| auger_shotgun | `Guns/item/relex_sight.png` | `c8a38dbce7c266b0` |
+| auger_shotgun | `Guns/item/laser_sight.png` | `1e0a3342068bc5df` |
+| auger_shotgun | `Guns/item/laser.png` | `aac5f06e892e350a` |
+| tumbler_rifle | `Guns/models/item/lockewood.json` | `227b10816c7b40b8` |
+| tumbler_rifle | `Guns/animated/gun/lockewood.png` | `2ae21e68648f3f7b` |
+| tumbler_rifle | `Guns/item/lockewood.animation.json` | `22951713f7b9987f` |
+| tumbler_rifle | `Guns/geo/item/gun/lockewood.geo.json` | `a95f03e902e5d4ca` |
+| tumbler_rifle | `Guns/sounds/item/iron_rifle/fire.ogg` | `e4a92914502ffd1c` |
+| tumbler_rifle | `Guns/item/medium_scope.png` | `543abecf859783be` |
+| tumbler_rifle | `Guns/item/long_scope_texture.png` | `e69191017eb081ad` |
+| tumbler_rifle | `Guns/item/relex_sight.png` | `c8a38dbce7c266b0` |
+| tumbler_rifle | `Guns/item/laser_sight.png` | `1e0a3342068bc5df` |
+| tumbler_rifle | `Guns/item/laser.png` | `aac5f06e892e350a` |
 
 - **The bolt sound's tag:** `bolt.ogg` carries Vorbis tags naming another source ("All Epic Infantry Assault Rifle Reload Sounds (Fortnite)"). The owner, asked about the eight tagged sounds in the library, answered "I have the rights", so it is used like the rest. None of the other sounds used here carries such a tag.
 - **The scopes' reticles and lens rims (slice 7b):** the owner uploaded them on 8 October 2026 ("heres reticles and vignette"). Two files in that upload carry embedded Photoshop metadata:
@@ -5975,6 +6069,25 @@ Slice 9E's files: the guns' tactical grip parts and the Laser Sight's textures m
   - **The dart's fall:** worked out in Python from the same rule as `GunShots.flight`, for the table above and the game test's bounds.
   - **Alchemy value:** the Dart's record, priced from its recipe as `tools/build_alchemy_values.py` prices them (that tool needs a Minecraft jar, which isn't available here).
 - **Darts and bleeding game tests (not run yet; CI runs them):** `DartsAndBleedingGameTests` (above); `GunsGameTests` and `DiamondSteelGunsIIIGameTests` as changed.
+- **Slice 15D, run locally (27 October 2026):**
+  - `python3 tools/guns.py`: PASS. It wrote the three guns' models, animations and atlases and copied the carabine's shot. The converter check passes on the three models (`GEO_TWINS`: 31 bones, corner for corner) and holds every bone the models have to the models' pivots. Of every other gun's files, only the Quill Rifle's model changed: its one cube the owner shrank by 0.001 px, now drawn so.
+  - **Found and fixed while building:** two of the models' cubes are turned about more than one axis, which the converter refused; it now lays such a cube anew square to the axes and turns it about one (`relaid_turn()`, `relaid()`). The Conversion's shell is shrunk (`inflate`), which the converter had ignored. The Augers' idle moves the bone their left arm hangs under and not the arm, which `arm_offset()` had required.
+  - `python3 tools/generate_material_data.py`: wrote the guns' item models, definitions, recipes, names and sounds. (It also reordered `docs/features/jug-nouveau-content-map.json`, unrelated; that file is left as before.)
+  - `python3 tools/check_mod_data.py`: PASS (8029 material IDs).
+  - `python3 scripts/check_repository.py`: PASS. `python3 -m unittest discover -s scripts/tests`: 287 tests passed; `python3 scripts/package_modrinth.py check`: PASS.
+  - **Java:** a syntax parse only: 0 errors in the changed and new files.
+  - **Recipes:** every shaped recipe in the mod's data compared, mirrors included: no gun's grid matches another (the 29 groups of matching grids elsewhere in the mod's data are the same before and after).
+  - **Alchemy values:** the three guns' records, priced from their recipes as `tools/build_alchemy_values.py` prices them (that tool needs a Minecraft jar, which isn't available here): 8211, 8208 and 8273.
+  - **Eye clearance aimed** (the previews' measure, at 1 px further out): the nearest point of each gun through its aimed shot is 3.5 px before the eye (both Augers) and 3.2 px (Tumbler); with a sight fitted, at least 2.7 px (the Long Scope on each).
+- **Slice 15D game tests (not run yet; CI runs them):**
+  - `DiamondSteelGunsIVGameTests`:
+    - `diamondSteelGunsIVAreRegistered`: each is registered with its numbers and its recipe loads, held in both hands, firing plain bullets. The Auger Rifle is two paper cartridges loaded a round at a time; the Auger Shotgun two buckshot shells of eight pellets as wide aimed as from the hip, knocking back 0.65 further; neither takes a barrel attachment or a magazine, nor fires a burst. The Tumbler Rifle is twenty-one rifle rounds every third tick in bursts of three resting 5 ticks (a 14-tick cycle), piercing 3 points, taking what the Quill Rifle takes and the barrels' four.
+    - `augerRifleLoadsARoundAtATime`, `augerShotgunLoadsAShellAtATime`: an empty one with three rounds holds one after its first round's time and two after its reload's, leaving one, and then fires.
+    - `augerShotgunFiresBothBarrels`: a pull takes from the pig a whole number of 3.5-point pellets, at most eight; the second barrel fires on the next pull, and the empty gun does not.
+    - `tumblerRifleFiresInBursts`: three shots three ticks apart all fire, a fourth at the next interval is refused, and after the burst's rest three more fire; six rounds are spent.
+  - `HeavyBulletsGameTests.heavyBulletsAreTheOwners`: the tables with the Auger Shotgun's knockback and the Tumbler Rifle's piercing.
+  - `GunsGameTests` counts 102 guns; `TacticalAttachmentsGameTests` the forty guns the Tactical Grip fits, the Tumbler among them.
+  - The guns' client test (`GunsClientGameTests`) takes each new gun through its screenshots as every gun's. It fires each gun with one pull of the attack key; it now expects a burst gun's pull to spend its burst's three rounds, where it expected one.
 - **Not run:** the client by hand, a two-client dedicated server, and play.
 
 ## World and event applicability
@@ -5992,9 +6105,9 @@ No worldgen, structures, bosses or seasonal content. Guns, rounds and the Cell R
   - other mobs with guns: the owner's Scorched Guns 2-style gun mobs, once their models are in the library (slice 10F gives the raider gunners the service arms);
   - the Whizzbanger, which waits for the model its animations were made for ([above](#the-whizzbanger-waits));
   - the guns beyond these sets;
-  - the owner's other GeckoLib gun models from their upload of 23 October 2026: only the Grandle OG's and the nine diamond-steel guns' built so far (slices 15A to 15C) are in the library ([the library record](../../art/owner-library/README.md#gun-geometry-23-october-2026));
-  - the other six diamond-steel guns;
+  - the owner's other GeckoLib gun models from their upload of 23 October 2026: only the Grandle OG's and the twelve diamond-steel guns' built so far (slices 15A to 15D) are in the library ([the library record](../../art/owner-library/README.md#gun-geometry-23-october-2026));
+  - the other three diamond-steel guns: the Cyclone, the Minksy and the Shard Culler;
   - the owner's armour piercing and knockback for the guns before slice 15: their data gives 49 of them one or both ([above](#follow-up-armour-piercing-for-slices-15as-and-15bs-guns));
-  - a shotgun that pushes its shooter back (the owner's Inertial);
+  - a shotgun that pushes its shooter back (the owner's Inertial and Drill Conversion);
   - the owner's other hit effects: slowness, darkness and withering from the guns whose data names them, and bleeding from the Caisson Pistol (it fires an arc here, not the owner's darts) and from guns not built yet.
 - **Balance:** the numbers are starting points for the owner to set.

@@ -8,6 +8,12 @@ Every change to Jugcraft, newest first, grouped by pull request. For what each t
 
 No numbered release yet. Entries on feature branches remain proposed until their pull requests merge.
 
+### Unmerged: Guns, slice 15D (two barrels and a burst)
+- **Three guns** from the owner's own GeckoLib models and animations, the next of their diamond-steel guns, each held in both hands: the **Auger Rifle** (the owner's Drill), two barrels of 14 a shot whose barrels swing open to load a paper cartridge at a time; the **Auger Shotgun** (the Drill Conversion), the same made over to fire two buckshot shells of eight pellets that stray as far aimed as from the hip and knock back what they hit; and the **Tumbler Rifle** (the Lockewood), which fires a **burst of three** rounds to a pull, from a magazine of 21, piercing 3 points of armour.
+- **Bursts:** a burst gun fires its rounds one each interval after a pull, then rests before the next; the server lets a burst through each burst's time and no faster.
+- **Converter:** the owner's cubes turned about more than one axis, and shrunken cubes, now come through as the owner drew them. The Quill Rifle's one shrunken cube is now drawn 0.002 px smaller, as the owner's model has it.
+- Record: [guns.md, slice 15D](docs/features/guns.md#slice-15d-two-barrels-and-a-burst).
+
 ### Unmerged: Guns, darts and bleeding
 - A new round, the **Dart**: the owner's frog dart, a steel needle in a small iron case (two iron nuggets over gunpowder make six). The **Quill Rifle** fires it in place of Light Rounds. A dart falls as it flies, as an arrow does: under a block over 32 blocks, nearly four over 64.
 - A new effect, **Bleeding**: a point of damage every two seconds, through armour, for its length; it can kill, and milk stops it. Hits from the **Picket Rifle** (30%), **Spikedriver** (60%), **Harrow** (30%) and **Quill Rifle** (40%) may make a creature bleed for 15 seconds, as the owner's gun data gives them. Its icon is the owner's.

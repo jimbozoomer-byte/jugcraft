@@ -98,6 +98,9 @@ import org.jspecify.annotations.Nullable;
  * <li>Slice 12A, the End guns ({@link JugcraftGuns#LEVITATING}): each creature their bullets hurt floats up for
  * {@link #LIFT_TICKS}, as a shulker's bullet lifts it (the game's own Levitation, at its first level; a longer spell
  * already on it is kept). It falls when the spell ends.</li>
+ * <li>Slice 15D: a burst gun ({@link JugcraftGuns#BURSTS}) fires its burst a shot at a time as the client asks, each
+ * shot spending trigger credit as any gun's does; its credit refills at a burst per {@link JugcraftGuns.Burst#cycle},
+ * and banks a whole burst.</li>
  * </ul>
  */
 public final class GunShots {
@@ -192,7 +195,7 @@ public final class GunShots {
 		if (spinUp > 0 && !spunUp(player, spinUp, level.getGameTime())) {
 			return false; // the barrels are not up to speed
 		}
-		if (!spend(player, hand, spec, level.getGameTime())) {
+		if (!spend(player, hand, spec, JugcraftGuns.burst(gun), level.getGameTime())) {
 			return false;
 		}
 		boolean aiming = GunItem.aiming(player, stack);
@@ -506,11 +509,18 @@ public final class GunShots {
 		return taken;
 	}
 
-	/** Spends a shot of the player's trigger credit for this hand, if they have one (see the class comment). */
-	private static boolean spend(ServerPlayer player, InteractionHand hand, GunSpec spec, long now) {
+	/**
+	 * Spends a shot of the player's trigger credit for this hand, if they have one (see the class comment). A burst gun's
+	 * credit (slice 15D) refills at its burst's rounds per cycle and banks a whole burst, so its shots come a burst at a
+	 * time, at most a burst a cycle.
+	 */
+	private static boolean spend(ServerPlayer player, InteractionHand hand, GunSpec spec, JugcraftGuns.@Nullable Burst burst,
+			long now) {
 		Map<UUID, Trigger> triggers = hand == InteractionHand.OFF_HAND ? OFF_TRIGGERS : TRIGGERS;
 		Trigger trigger = triggers.computeIfAbsent(player.getUUID(), id -> new Trigger(now));
-		trigger.credit = Math.min(BURST, trigger.credit + Math.max(0, now - trigger.last) / (double) spec.interval());
+		double bank = burst == null ? BURST : Math.max(BURST, burst.rounds());
+		double rate = burst == null ? 1.0 / spec.interval() : burst.rounds() / (double) burst.cycle(spec);
+		trigger.credit = Math.min(bank, trigger.credit + Math.max(0, now - trigger.last) * rate);
 		trigger.last = now;
 		if (trigger.credit < 1.0) {
 			return false;

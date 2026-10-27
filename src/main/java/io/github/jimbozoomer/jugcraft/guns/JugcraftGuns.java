@@ -224,6 +224,11 @@ public final class JugcraftGuns {
 		SPECS.put("hawker_rifle", new GunSpec(9.0F, 1, 8, false, 12, 50, 0, 0, 0, 2.5F, 0.25F, 112, "rifle_round"));
 		SPECS.put("impetus_shotgun", new GunSpec(3.5F, 8, 13, false, 6, 48, 0, 0, 0, 6.0F, 4.5F, 28, "buckshot_shell"));
 		SPECS.put("quill_rifle", new GunSpec(5.0F, 1, 4, true, 13, 43, 0, 0, 0, 3.0F, 0.75F, 64, "dart"));
+		// Slice 15D: three more of the owner's diamond-steel guns: a two-barrelled rifle and its shotgun make-over, each
+		// loaded a round at a time, and a rifle that fires a burst of three to a pull (BURSTS).
+		SPECS.put("auger_rifle", new GunSpec(14.0F, 1, 6, false, 2, 0, 12, 17, 16, 2.0F, 0.4F, 96, "paper_cartridge"));
+		SPECS.put("auger_shotgun", new GunSpec(3.5F, 8, 6, false, 2, 0, 12, 17, 16, 7.5F, 7.5F, 24, "buckshot_shell"));
+		SPECS.put("tumbler_rifle", new GunSpec(5.5F, 1, 3, false, 21, 43, 0, 0, 0, 2.5F, 0.5F, 96, "rifle_round"));
 	}
 
 	/**
@@ -296,16 +301,34 @@ public final class JugcraftGuns {
 	/**
 	 * The guns whose bullets knock back each creature they hurt a second time, by this strength, after the 0.4 every hit
 	 * gives (tools/guns.py KNOCKBACK). Slice 15B's Jawbreaker is the first, from the owner's Uppercut; slice 15C's Impetus
-	 * Shotgun, from the owner's Inertial, the second.
+	 * Shotgun, from the owner's Inertial, the second; slice 15D's Auger Shotgun, from the owner's Drill Conversion, the
+	 * third.
 	 */
-	public static final Map<String, Float> KNOCKBACK = Map.of("jawbreaker", 0.6F, "impetus_shotgun", 0.65F);
+	public static final Map<String, Float> KNOCKBACK = Map.of("jawbreaker", 0.6F, "impetus_shotgun", 0.65F, "auger_shotgun", 0.65F);
 	/**
 	 * The guns whose bullets pierce armour: a hit deals what it would if the target wore this many points less armour
 	 * ({@link GunShots#pierced}; tools/guns.py PIERCING). Slice 15B's Jawbreaker is the first, from the owner's Uppercut;
 	 * slice 15C's Hawker Rifle and Quill Rifle, from the owner's MAS Peddler and Zilk 45, follow; then slices 15A's and
-	 * 15B's other guns, from the owner's MAS 55, Prush Gun, Krauser and Soul Drummer.
+	 * 15B's other guns, from the owner's MAS 55, Prush Gun, Krauser and Soul Drummer; and slice 15D's Tumbler Rifle, from
+	 * the owner's Lockewood.
 	 */
-	public static final Map<String, Float> PIERCING = Map.of("vesper_rifle", 4.5F, "onrush_smg", 3.0F, "kreuzer_pistol", 1.0F, "psalm_smg", 1.0F, "jawbreaker", 4.5F, "hawker_rifle", 1.0F, "quill_rifle", 1.5F);
+	public static final Map<String, Float> PIERCING = Map.of("vesper_rifle", 4.5F, "onrush_smg", 3.0F, "kreuzer_pistol", 1.0F, "psalm_smg", 1.0F, "jawbreaker", 4.5F, "hawker_rifle", 1.0F, "quill_rifle", 1.5F, "tumbler_rifle", 3.0F);
+	/**
+	 * Slice 15D: a gun that fires a burst to a pull, {@code rounds} shots its {@link GunSpec#interval} apart, then waits
+	 * {@code rest} ticks more before the next pull fires ({@link #BURSTS}).
+	 */
+	public record Burst(int rounds, int rest) {
+		/** Ticks from one burst's first shot to the next's at the quickest: the server's trigger allows a burst so often. */
+		public int cycle(GunSpec spec) {
+			return rounds * spec.interval() + rest;
+		}
+	}
+
+	/**
+	 * The guns that fire a burst to a pull (tools/guns.py BURSTS): slice 15D's Tumbler Rifle, three rounds and a rest of 5
+	 * ticks, as the owner's Lockewood.
+	 */
+	public static final Map<String, Burst> BURSTS = Map.of("tumbler_rifle", new Burst(3, 5));
 	/** The round that falls over its flight (the darts-and-bleeding follow-up; tools/guns.py AMMO "dart"). */
 	public static final String DART = "dart";
 	/** How far a dart flies a tick, in blocks (the owner's frog dart's speed; {@link GunShots#flight}). */
@@ -572,6 +595,16 @@ public final class JugcraftGuns {
 		ACCEPTS.put("quill_rifle", List.of("extended_magazine", "speed_magazine", "light_stock", "weighted_stock",
 				"wooden_stock", "light_grip", "iron_bayonet", "steel_bayonet", "diamond_bayonet", "netherite_bayonet",
 				"long_scope", "medium_scope", "reflex_sight", "tactical_grip", "laser_sight"));
+		ACCEPTS.put("auger_rifle", List.of("light_stock", "weighted_stock", "wooden_stock", "light_grip", "vertical_grip",
+				"iron_bayonet", "steel_bayonet", "diamond_bayonet", "netherite_bayonet", "long_scope", "medium_scope",
+				"reflex_sight", "laser_sight"));
+		ACCEPTS.put("auger_shotgun", List.of("light_stock", "weighted_stock", "wooden_stock", "light_grip", "vertical_grip",
+				"iron_bayonet", "steel_bayonet", "diamond_bayonet", "netherite_bayonet", "long_scope", "medium_scope",
+				"reflex_sight", "laser_sight"));
+		ACCEPTS.put("tumbler_rifle", List.of("silencer", "baffled_silencer", "muzzle_brake", "extended_barrel",
+				"extended_magazine", "speed_magazine", "light_stock", "weighted_stock", "wooden_stock", "light_grip",
+				"iron_bayonet", "steel_bayonet", "diamond_bayonet", "netherite_bayonet", "long_scope", "medium_scope",
+				"reflex_sight", "tactical_grip", "laser_sight"));
 	}
 
 	/** The rounds. */
@@ -783,6 +816,11 @@ public final class JugcraftGuns {
 	/** This gun's chance a hit to make a creature bleed, and for how long ({@link #BLEEDS}); null for most. */
 	public static @Nullable Bleed bleed(GunItem gun) {
 		return BLEEDS.get(gun.name());
+	}
+
+	/** The burst this gun fires to a pull (slice 15D, {@link #BURSTS}); null for a gun that fires one shot a pull. */
+	public static @Nullable Burst burst(GunItem gun) {
+		return BURSTS.get(gun.name());
 	}
 
 	/** JE a round of this energy weapon draws from Energy Cells (slice 8D, {@link #CHARGE}); 0 for a gun that loads rounds. */

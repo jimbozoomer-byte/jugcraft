@@ -1874,6 +1874,15 @@ def check_guns():
         if gun not in guns.GUNS or guns.GUNS[gun].get("shot", "bullet") not in ("bullet", "beam") or not 0 < chance <= 1 or ticks <= 0:
             err(f"tools/guns.py BLEEDS names {gun}, which is not a gun that fires bullets or a beam, or gives it {chance} a hit "
                 f"(more than 0, at most 1) for {ticks} ticks")
+    # Slice 15D: the guns that fire a burst to a pull, and how they rest between bursts.
+    bursts = ", ".join(f'"{gun}", new Burst({rounds}, {rest})' for gun, (rounds, rest) in guns.BURSTS.items())
+    if f"BURSTS = Map.of({bursts});" not in java:
+        err(f"JugcraftGuns.BURSTS differs from tools/guns.py: expected Map.of({bursts})")
+    for gun, (rounds, rest) in guns.BURSTS.items():
+        spec = guns.GUNS.get(gun, {})
+        if not spec or spec.get("auto") or not 1 < rounds <= spec.get("capacity", 0) or rest < 0:
+            err(f"tools/guns.py BURSTS names {gun}, which is not a gun of a pull a shot, or gives it a burst of {rounds} "
+                f"(more than one, at most its magazine) or a rest of {rest} ticks")
     # Slice 8D: the energy weapons' charge a round, the arcs' leaps and the Energy Cell's capacity.
     charges = ", ".join(f'"{gun}", {spec["charge"]}' for gun, spec in guns.GUNS.items() if spec.get("charge"))
     if f"CHARGE = Map.of({charges});" not in java:

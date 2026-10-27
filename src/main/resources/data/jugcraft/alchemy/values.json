@@ -762,6 +762,16 @@
       "denominator": 1,
       "source": "recipe jugcraft:survival_completion/atm"
     },
+    "jugcraft:auger_rifle": {
+      "numerator": 8211,
+      "denominator": 1,
+      "source": "recipe jugcraft:auger_rifle"
+    },
+    "jugcraft:auger_shotgun": {
+      "numerator": 8208,
+      "denominator": 1,
+      "source": "recipe jugcraft:auger_shotgun"
+    },
     "jugcraft:aura_candle": {
       "numerator": 1,
       "denominator": 1,
@@ -36986,6 +36996,11 @@
       "numerator": 82303,
       "denominator": 128,
       "source": "recipe jugcraft:tsc_video_wall"
+    },
+    "jugcraft:tumbler_rifle": {
+      "numerator": 8273,
+      "denominator": 1,
+      "source": "recipe jugcraft:tumbler_rifle"
     },
     "jugcraft:tungsten_block": {
       "numerator": 9,

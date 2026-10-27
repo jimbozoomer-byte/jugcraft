@@ -951,6 +951,35 @@ GUNS = {
         "damage": 5.0, "pellets": 1, "interval": 4, "auto": True, "capacity": 13,
         "reload": 43, "spread": (3.0, 0.75), "range": 64, "ammo": "dart",
     },
+    # Slice 15D, three more of the owner's diamond-steel guns from their later GeckoLib models (GEO_PARTS), each held
+    # in both hands: the Drill, a two-barrelled rifle whose barrels swing open to be loaded a ball at a time; the Drill
+    # Conversion, the Drill made over into a two-barrelled shotgun loaded a shell at a time; and the Lockewood, a rifle
+    # that fires a burst of three to a pull (BURSTS).
+    "auger_rifle": {
+        "display": "Auger Rifle",
+        "source": "drill",
+        "tooltip": "A two-barrelled stainless steel rifle: two heavy shots, then its barrels swing open and a ball is "
+                   "rammed into each in turn. Fires paper cartridges.",
+        "damage": 14.0, "pellets": 1, "interval": 6, "auto": False, "capacity": 2,
+        "reload": (12, 17, 16), "spread": (2.0, 0.4), "range": 96, "ammo": "paper_cartridge",
+    },
+    "auger_shotgun": {
+        "display": "Auger Shotgun",
+        "source": "drill_conversion",
+        "tooltip": "The Auger Rifle made over into a two-barrelled shotgun: eight pellets a barrel that spread as wide "
+                   "aimed as from the hip, knocking back what they hit. Its barrels swing open to load a shell at a "
+                   "time. Fires buckshot shells.",
+        "damage": 3.5, "pellets": 8, "interval": 6, "auto": False, "capacity": 2,
+        "reload": (12, 17, 16), "spread": (7.5, 7.5), "range": 24, "ammo": "buckshot_shell",
+    },
+    "tumbler_rifle": {
+        "display": "Tumbler Rifle",
+        "source": "lockewood",
+        "tooltip": "A stainless steel rifle that fires a burst of three rounds to a pull, from a magazine of twenty-one, "
+                   "piercing armour. Fires rifle rounds.",
+        "damage": 5.5, "pellets": 1, "interval": 3, "auto": False, "capacity": 21,
+        "reload": 43, "spread": (2.5, 0.5), "range": 96, "ammo": "rifle_round",
+    },
 }
 
 # What a gun fires: bullets, or a slice 8C or 8D gun's "shot".
@@ -1241,6 +1270,15 @@ RECIPES = {
                                                  "L": "minecraft:lever", "P": "#minecraft:planks"}),
     "quill_rifle": (["SSS", "DLR", " I "], {"S": "#c:ingots/stainless_steel", "D": "minecraft:diamond",
                                              "L": "minecraft:lever", "R": "minecraft:redstone", "I": "minecraft:iron_ingot"}),
+    # Slice 15D, as before. The owner's recipes give the Drill four gun barrels and the Conversion two (more stainless
+    # steel), each a wooden part (planks), and the Lockewood a rapid firing unit, heavy gun parts, two diamond steel
+    # ingots and a wooden part (redstone, more stainless steel, planks).
+    "auger_rifle": (["SSS", "SDL", "SPS"], {"S": "#c:ingots/stainless_steel", "D": "minecraft:diamond",
+                                             "L": "minecraft:lever", "P": "#minecraft:planks"}),
+    "auger_shotgun": (["SSS", "DLP"], {"S": "#c:ingots/stainless_steel", "D": "minecraft:diamond", "L": "minecraft:lever",
+                                       "P": "#minecraft:planks"}),
+    "tumbler_rifle": (["SSS", "DLR", "PS "], {"S": "#c:ingots/stainless_steel", "D": "minecraft:diamond",
+                                               "L": "minecraft:lever", "R": "minecraft:redstone", "P": "#minecraft:planks"}),
 }
 # The switches beyond "guns" a gun's recipe needs (separate load conditions, all of which must hold): the energy weapons
 # and their cells are useless without the Charging Station, so they need the machines too (as the leaf blower does).
@@ -3103,6 +3141,68 @@ BUILDS = {
         "muzzle": (8.0, 4.2, -1.12),
         "sight": (8.0, 5.75, 13.73),
     },
+    # Slice 15D. The Drill, the Drill Conversion and the Lockewood are the owner's GeckoLib models, as slice 15C's. The
+    # Drill's and the Conversion's bodies sit in gun_body under gun_body2 and gun_body3, which their reloads turn; their
+    # barrels (and the grips and bayonets under them, "mounts") swing open about the breech; the left arm hangs under
+    # left_arm2, which carries it and, under ball2, the ball (the Conversion's shell) its reload loop brings to the
+    # breech, shown only then. Their animations move a bolt and a shell their models lack: empty, they move nothing. The
+    # Lockewood's left arm hangs under its magazine, as the Quill's does; its magazine_2 is never shown.
+    "auger_rifle": {
+        "bones": [
+            ("gun_body3", None, [], (8.0, 1.75, 10.0)),
+            ("gun_body2", "gun_body3", [], (8.0, 1.75, 10.0)),
+            ("gun_body", "gun_body2", ["main", "sights", "seal", "scriptures"], (8.0, 1.75, 10.0)),
+            ("barrel", "gun_body", ["barrel"], (8.0, 1.725, 10.33439)),
+            ("bolt", "gun_body", [], (8.0, 1.75, 10.0)),
+            ("shell", "gun_body", [], (8.0, 1.75, 10.0)),
+            ("left_arm2", "gun_body", [], (2.0, 5.1568, 16.00305)),
+            ("ball2", "left_arm2", [], (2.0, 2.1568, 13.00305)),
+            ("ball", "ball2", ["ball"], (9.0, 2.1568, 13.00305)),
+        ],
+        "mounts": {"grip": "barrel"},
+        "hands": {"right": (7.56, 2.05, 17.25), "left": (8.65, 1.41, 7.54)},
+        "arm_parents": {"left": "left_arm2"},
+        "arms": {"right": (0.0653, -0.4957, 0.866), "left": (0.8924, -0.2391, 0.3827)},
+        "muzzle": (8.0, 4.33, -7.71),
+        "sight": (8.0, 5.75, 14.84),
+        "eye_relief": 1.0,
+    },
+    "auger_shotgun": {
+        "bones": [
+            ("gun_body3", None, [], (8.0, 1.75, 10.0)),
+            ("gun_body2", "gun_body3", [], (8.0, 1.75, 10.0)),
+            ("gun_body", "gun_body2", ["main", "sights", "seal", "scriptures"], (8.0, 1.75, 10.0)),
+            ("barrel", "gun_body", ["barrel"], (8.0, 1.725, 10.33439)),
+            ("bolt", "gun_body", [], (8.0, 1.75, 10.0)),
+            ("shell", "gun_body", [], (8.0, 1.75, 10.0)),
+            ("left_arm2", "gun_body", [], (2.0, 5.1568, 16.00305)),
+            ("ball2", "left_arm2", [], (2.0, 3.0, 12.0)),
+            ("ball", "ball2", ["ball"], (8.0, 3.1568, 12.00305)),
+        ],
+        "mounts": {"grip": "barrel"},
+        "hands": {"right": (7.56, 2.05, 17.25), "left": (8.65, 1.41, 7.54)},
+        "arm_parents": {"left": "left_arm2"},
+        "arms": {"right": (0.0653, -0.4957, 0.866), "left": (0.8924, -0.2391, 0.3827)},
+        "muzzle": (8.0, 4.33, -0.4),
+        "sight": (8.0, 5.74, 14.8),
+        "eye_relief": 1.0,
+    },
+    "tumbler_rifle": {
+        "bones": [
+            ("gun_body", None, ["main", "stan_barrel", "sights"], (8.489, 2.35, 9.25)),
+            ("bolt", "gun_body", ["bolt"], (9.61546, 4.04816, 12.63542)),
+            ("seal", "gun_body", ["seal"], (7.014, 3.4, 12.5)),
+            ("scriptures", "seal", ["scriptures"], (7.114, 3.9, 12.85)),
+            ("magazine", "gun_body", ["stan_mag"], (8.014, 2.2, 10.25)),
+            ("magazine_2", "gun_body", [], (8.489, -0.06376, 12.0787)),
+        ],
+        "hands": {"right": (7.54, 1.45, 15.86), "left": (8.09, 1.58, 7.95)},
+        "arm_parents": {"left": "magazine"},
+        "arms": {"right": (0.0653, -0.4957, 0.866), "left": (0.6871, -0.3967, 0.6088)},
+        "muzzle": (8.0, 3.53, -0.13),
+        "sight": (8.0, 6.0, 14.23),
+        "eye_relief": 1.0,
+    },
 }
 
 # Props the animations move on bones that had no part ("@<name>" in a bone's parts): the rounds a reload carries in,
@@ -3662,6 +3762,8 @@ ZOOM = {
     "kreuzer_pistol": 0.9, "psalm_smg": 0.9, "jawbreaker": 0.9,
     # Slice 15C: a rifle, a shotgun and a dart rifle.
     "hawker_rifle": 0.8, "impetus_shotgun": 0.9, "quill_rifle": 0.85,
+    # Slice 15D: a rifle, a shotgun and a burst rifle.
+    "auger_rifle": 0.8, "auger_shotgun": 0.9, "tumbler_rifle": 0.85,
 }
 
 
@@ -3931,6 +4033,11 @@ SHOT_SOUNDS = {
     "hawker_rifle": "item/bruiser/fire.ogg",
     "impetus_shotgun": "item/brass_shotgun/fire.ogg",
     "quill_rifle": "item/airgun/fire_2.ogg",
+    # Slice 15D: the shots the owner's data names: the carabine's for the Drill, the black powder shot (the Line
+    # Musket's) for the Drill Conversion and the iron rifle's (the Kestrel Rifle's) for the Lockewood.
+    "auger_rifle": "item/carabine/fire.ogg",
+    "auger_shotgun": "item/blackpowder/fire.ogg",
+    "tumbler_rifle": "item/iron_rifle/fire.ogg",
 }
 SUBTITLES = {
     "fire": "Gun fires",
@@ -4132,9 +4239,17 @@ SILENCED = ("gallant_rifle", "quill_rifle")
 # armour piercing (1.0, 1.5) to the Hawker Rifle and the Quill Rifle. The follow-up after it gives slices 15A's and
 # 15B's other guns the owner's armour piercing for them: the MAS 55's (4.5) to the Vesper Rifle, the Prush Gun's (3.0)
 # to the Onrush SMG, and the Krauser's and the Soul Drummer's (1.0 each) to the Kreuzer Pistol and the Psalm SMG.
-KNOCKBACK = {"jawbreaker": 0.6, "impetus_shotgun": 0.65}
+# Slice 15D gives the Drill Conversion's knockback (0.65) to the Auger Shotgun and the Lockewood's armour piercing (3.0)
+# to the Tumbler Rifle.
+KNOCKBACK = {"jawbreaker": 0.6, "impetus_shotgun": 0.65, "auger_shotgun": 0.65}
 PIERCING = {"vesper_rifle": 4.5, "onrush_smg": 3.0, "kreuzer_pistol": 1.0, "psalm_smg": 1.0, "jawbreaker": 4.5,
-            "hawker_rifle": 1.0, "quill_rifle": 1.5}
+            "hawker_rifle": 1.0, "quill_rifle": 1.5, "tumbler_rifle": 3.0}
+
+# Slice 15D: the guns that fire a burst to a pull, (rounds, rest): that many shots their interval apart, then a rest of
+# that many ticks more before the next pull fires (JugcraftGuns.BURSTS; the client fires the burst, the server's trigger
+# credit allows a burst each cycle, GunShots.spend). The owner's Lockewood fires bursts of three, resting five ticks
+# ("burstAmount" 3, "burstCooldown" 5): the Tumbler Rifle.
+BURSTS = {"tumbler_rifle": (3, 5)}
 
 
 # ------------------------------------------------------------------ darts and bleeding
@@ -4443,6 +4558,26 @@ GEO_PARTS.update({source: {
                  "ext_barrel": "extended_barrel", "silencer": "silencer", "advanced_silencer": "advanced_silencer",
                  "muzzle_brake": "muzzle_brake"},
     "zilk_45": {"no_sights": "body"}}.items()})
+# Slice 15D: the Drill, the Drill Conversion and the Lockewood, from the owner's later edits of them. The Drill and its
+# Conversion share their bones: a body with its seal and scriptures, the barrels as a bone of their own (they swing open
+# to load), the grips and bayonets under the barrels, and the ball the left hand loads, a bone of its own under the arm
+# (the Drill's a ball, the Conversion's a shell). Their stocks and grips are the Drill's, and their empty "gun_body"
+# stands in for "no_sights" (the owner's are empty). The Lockewood is as slice 15A's guns, with no standard stock: its
+# body is its gun_body, its empty "body" the "no_sights".
+GEO_PARTS.update({source: {
+    "main": "body", "sights": "sights", "no_sights": "gun_body", "seal": "seal", "scriptures": "scriptures",
+    "barrel": "barrel", "ball": "ball", "light_stock": "light_stock", "heavy_stock": "weighted_stock",
+    "wooden_stock": "wooden_stock", "light_grip": "light_grip", "vert_grip": "vertical_grip",
+    "iron_bayonet": "iron_bayonet", "anthralite_bayonet": "anthralite_bayonet", "diamond_bayonet": "diamond_bayonet",
+    "netherite_bayonet": "netherite_bayonet"} for source in ("drill", "drill_conversion")})
+GEO_PARTS["lockewood"] = {
+    "main": "gun_body", "bolt": "bolt", "sights": "sights", "no_sights": "body", "seal": "seal", "scriptures": "scriptures",
+    "stan_mag": "default_mag", "ext_mag": "extended_mag", "speed_mag": "speed_mag", "light_stock": "light_stock",
+    "heavy_stock": "weighted_stock", "wooden_stock": "wooden_stock", "light_grip": "light_grip",
+    "tact_grip": "vertical_grip", "iron_bayonet": "iron_bayonet", "anthralite_bayonet": "anthralite_bayonet",
+    "diamond_bayonet": "diamond_bayonet", "netherite_bayonet": "netherite_bayonet", "stan_barrel": "standard_barrel",
+    "ext_barrel": "extended_barrel", "silencer": "silencer", "advanced_silencer": "advanced_silencer",
+    "muzzle_brake": "muzzle_brake"}
 # Where each GeckoLib model stands from the item models' frame, in its own units (each cube's corners and pivot are
 # the item model's less this): the owner's Grandle OG model holds its Grandle's body, sights, bolt, stocks and grips
 # element for element at the same places less this, and its muzzle attachments and bayonets 3 px further forward on its
@@ -4450,7 +4585,8 @@ GEO_PARTS.update({source: {
 GEO_OFFSETS = {"grandle_og": (0.00625, -8.15, -1.0), "mas_55": (0.0, -8.15, -0.8), "prush_gun": (-0.0095, -8.05, -1.25),
                "valora": (0.0125, -8.2, -0.75), "krauser": (-0.0095, -8.1, -0.1384),
                "soul_drummer": (-0.0095, -8.05, -0.2), "uppercut": (-0.0095, -8.5, -1.4),
-               "mas_peddler": (0.0, -8.15, -0.8), "inertial": (-0.0095, -8.1, -1.0), "zilk_45": (0.0, -7.95, -0.75)}
+               "mas_peddler": (0.0, -8.15, -0.8), "inertial": (-0.0095, -8.1, -1.0), "zilk_45": (0.0, -7.95, -0.75),
+               "drill": (0.0, -8.0, -2.0), "drill_conversion": (0.0, -8.0, -2.0), "lockewood": (0.014, -8.2, -1.25)}
 # The bones of a GeckoLib model that are another of the owner's guns' item-model parts, moved by (x, y, z) px: the
 # converter must give back those parts' elements, face for face (check_geo()).
 GEO_TWINS = {"grandle_og": {
@@ -4499,7 +4635,25 @@ GEO_TWINS.update({source: {bone: (f"{source}/{part}", (0, 0, 0)) for bone, part 
                 "diamond_bayonet": "diamond_bayonet", "netherite_bayonet": "netherite_bayonet",
                 "weighted_stock": "heavy_stock", "wooden_stock": "wooden_stock", "light_stock": "light_stock",
                 "default_mag": "stan_mag", "extended_mag": "ext_mag", "speed_mag": "speed_mag"}}.items()})
-GEO_RELAID = ("mas_55", "prush_gun", "valora", "krauser", "soul_drummer", "uppercut", "mas_peddler", "inertial", "zilk_45")
+# Slice 15D: the same for the Drill and the Lockewood; the Drill Conversion's grips and stocks are the Drill's parts,
+# its bayonets its own. The Lockewood's anthralite bayonet the owner reshaped.
+GEO_TWINS.update({source: {bone: (part if "/" in part else f"{source}/{part}", (0, 0, 0)) for bone, part in twins.items()}
+                  for source, twins in {
+    "drill": {"sights": "sights", "vertical_grip": "vert_grip", "light_grip": "light_grip", "iron_bayonet": "iron_bayonet",
+              "anthralite_bayonet": "anthralite_bayonet", "diamond_bayonet": "diamond_bayonet",
+              "netherite_bayonet": "netherite_bayonet", "weighted_stock": "heavy_stock", "wooden_stock": "wooden_stock",
+              "light_stock": "light_stock"},
+    "drill_conversion": {"vertical_grip": "drill/vert_grip", "light_grip": "drill/light_grip",
+                         "iron_bayonet": "iron_bayonet", "anthralite_bayonet": "anthralite_bayonet",
+                         "diamond_bayonet": "diamond_bayonet", "netherite_bayonet": "netherite_bayonet",
+                         "weighted_stock": "drill/heavy_stock", "wooden_stock": "drill/wooden_stock",
+                         "light_stock": "drill/light_stock"},
+    "lockewood": {"bolt": "bolt", "vertical_grip": "tact_grip", "light_grip": "light_grip", "iron_bayonet": "iron_bayonet",
+                  "diamond_bayonet": "diamond_bayonet", "netherite_bayonet": "netherite_bayonet",
+                  "muzzle_brake": "muzzle_brake", "advanced_silencer": "advanced_silencer", "silencer": "silencer",
+                  "weighted_stock": "heavy_stock", "wooden_stock": "wooden_stock", "light_stock": "light_stock"}}.items()})
+GEO_RELAID = ("mas_55", "prush_gun", "valora", "krauser", "soul_drummer", "uppercut", "mas_peddler", "inertial", "zilk_45",
+              "drill", "drill_conversion", "lockewood")
 
 
 def geo_model(source):
@@ -4564,28 +4718,103 @@ def geo_pivot(source, bone):
 def geo_element(cube, offset, size_px, texture):
     """One cube of an owner GeckoLib model -> the item-model element element_cube() makes the same cube from: its
     corners less the model's offset (GEO_OFFSETS), its one-axis turn, and for each face the vanilla uv and rotation
-    giving each corner the UV GeckoLib gives it (java_face())."""
+    giving each corner the UV GeckoLib gives it (java_face()). A cube the owner turned about more than one axis is laid
+    anew as the same cube square to the axes, then turned about one (relaid_turn()); a cube the owner shrank or swelled
+    ("inflate", slice 15D) has its corners moved out by that much, its UVs those of its size."""
     ox, oy, oz = (c - d for c, d in zip(cube["origin"], offset))
     sx, sy, sz = cube["size"]
-    lo = [8.0 - ox - sx, oy, oz + 8.0]
-    element = {"from": [rnd(v) for v in lo], "to": [rnd(v + s) for v, s in zip(lo, (sx, sy, sz))]}
-    turn = cube.get("rotation", [0, 0, 0])
-    axes = [k for k in range(3) if turn[k]]
-    if len(axes) > 1:
-        raise ValueError(f"a cube turned about more than one axis: {turn}")
-    if axes:
-        k = axes[0]
-        px, py, pz = (c - d for c, d in zip(cube["pivot"], offset))
-        element["rotation"] = {"angle": rnd(turn[k] if k == 2 else -turn[k]), "axis": "xyz"[k],
-                               "origin": [rnd(8.0 - px), rnd(py), rnd(pz + 8.0)]}
-    element["faces"] = {}
+    swell = cube.get("inflate", 0.0)
+    lo = [8.0 - ox - sx - swell, oy - swell, oz + 8.0 - swell]
+    hi = [v + s + 2 * swell for v, s in zip(lo, (sx, sy, sz))]
+    corners = {}
     for face in FACES:
         data = cube.get("uv", {}).get(face)
         if data is not None:
-            corners = gecko_corner_uvs(face, data["uv"][0], data["uv"][1], data["uv_size"][0], data["uv_size"][1],
-                                       data.get("uv_rotation", 0), size_px)
-            element["faces"][face] = {**java_face(face, corners), "_texture": texture}
+            corners[face] = gecko_corner_uvs(face, data["uv"][0], data["uv"][1], data["uv_size"][0],
+                                             data["uv_size"][1], data.get("uv_rotation", 0), size_px)
+    turn = cube.get("rotation", [0, 0, 0])
+    axes = [k for k in range(3) if turn[k]]
+    rotation = None
+    if axes:
+        px, py, pz = (c - d for c, d in zip(cube["pivot"], offset))
+        pivot = [8.0 - px, py, pz + 8.0]
+        if len(axes) > 1:
+            square, k, angle = relaid_turn(turn)
+            lo, hi, corners = relaid(square, pivot, lo, hi, corners)
+        else:
+            k = axes[0]
+            angle = turn[k] if k == 2 else -turn[k]
+        rotation = {"angle": rnd(angle), "axis": "xyz"[k], "origin": [rnd(v) for v in pivot]}
+    element = {"from": [rnd(v) for v in lo], "to": [rnd(v) for v in hi]}
+    if rotation:
+        element["rotation"] = rotation
+    element["faces"] = {face: {**java_face(face, corners[face]), "_texture": texture}
+                        for face in FACES if face in corners}
     return element
+
+
+# The faces' outward axes, (axis, sign), and the turns square to the axes (the 24 whole-quarter turns), as
+# matrices acting on columns (x, y, z).
+FACE_AXES = {"west": (0, -1), "east": (0, 1), "down": (1, -1), "up": (1, 1), "north": (2, -1), "south": (2, 1)}
+SQUARE_TURNS = [m for m in (
+    [[s[r] if c == p[r] else 0 for c in range(3)] for r in range(3)]
+    for p in ((0, 1, 2), (0, 2, 1), (1, 0, 2), (1, 2, 0), (2, 0, 1), (2, 1, 0))
+    for s in ((1, 1, 1), (1, 1, -1), (1, -1, 1), (1, -1, -1), (-1, 1, 1), (-1, 1, -1), (-1, -1, 1), (-1, -1, -1)))
+    if m[0][0] * (m[1][1] * m[2][2] - m[1][2] * m[2][1]) - m[0][1] * (m[1][0] * m[2][2] - m[1][2] * m[2][0])
+    + m[0][2] * (m[1][0] * m[2][1] - m[1][1] * m[2][0]) == 1]
+
+
+def axis_turn(k, angle):
+    """The right-handed turn by `angle` degrees about axis k, as turned_corners() turns."""
+    a = math.radians(angle)
+    c, s = math.cos(a), math.sin(a)
+    return [[[1, 0, 0], [0, c, -s], [0, s, c]], [[c, 0, s], [0, 1, 0], [-s, 0, c]], [[c, -s, 0], [s, c, 0], [0, 0, 1]]][k]
+
+
+def mat_mul(a, b):
+    return [[sum(a[i][t] * b[t][j] for t in range(3)) for j in range(3)] for i in range(3)]
+
+
+def relaid_turn(turn):
+    """Slice 15D: a GeckoLib cube's turn about more than one axis, as a whole-quarter turn square to the axes (which
+    lays the same cube anew along them) and then a turn about one axis of at most 45 degrees. GeckoLib turns a cube by
+    its x, then its y, then its z (RenderUtil.rotateMatrixAroundCube multiplies in z, y, x), each of (-x, -y, z) in the
+    item models' frame (element_cube()): the whole turn is Rz(z) Ry(-y) Rx(-x). Returns (square turn, axis, angle),
+    the smallest angle where several fit."""
+    whole = mat_mul(axis_turn(2, turn[2]), mat_mul(axis_turn(1, -turn[1]), axis_turn(0, -turn[0])))
+    found = []
+    for square in SQUARE_TURNS:
+        rest = mat_mul(whole, [list(row) for row in zip(*square)])
+        for k in range(3):
+            i, j = [t for t in range(3) if t != k]
+            angle = math.degrees(math.atan2(rest[j][i], rest[i][i])) if k != 1 else \
+                math.degrees(math.atan2(rest[0][2], rest[0][0]))
+            if abs(angle) <= 45.0 + 1e-9 and close(sum(rest, []), sum(axis_turn(k, angle), []), 1e-9):
+                found.append((abs(angle), square, k, angle))
+    if not found:
+        raise ValueError(f"a cube's turn {turn} is no square turn and then one about a single axis")
+    return min(found, key=lambda f: f[0])[1:]
+
+
+def relaid(square, pivot, lo, hi, corners):
+    """The cube from lo to hi turned square to the axes (`square`) about `pivot`: its new corners, and on each new face
+    the UV the old face gave each corner at the corner it came to."""
+    def place(point):
+        rel = [point[t] - pivot[t] for t in range(3)]
+        return [pivot[r] + sum(square[r][t] * rel[t] for t in range(3)) for r in range(3)]
+    ends = [place(lo), place(hi)]
+    new_lo = [min(e[t] for e in ends) for t in range(3)]
+    new_hi = [max(e[t] for e in ends) for t in range(3)]
+    moved = {}
+    for face, uvs in corners.items():
+        k, sign = FACE_AXES[face]
+        normal = [square[r][k] * sign for r in range(3)]
+        new_face = next(f for f, (a, s) in FACE_AXES.items() if normal[a] == s)
+        moved[new_face] = {}
+        for pick, uv in uvs.items():
+            point = place([hi[t] if pick[t] else lo[t] for t in range(3)])
+            moved[new_face][tuple(int(abs(point[t] - new_hi[t]) < 1e-6) for t in range(3))] = uv
+    return new_lo, new_hi, moved
 
 
 def java_face(face, corners):
@@ -5169,9 +5398,11 @@ def key_value(channel, time=None):
 
 def arm_offset(gun, side):
     """The arm's animated position, in the file's units, in the pose its hand point is given for: the idle (constant),
-    or the "hand_pose" keyframe for an arm the idle hides."""
+    or the "hand_pose" keyframe for an arm the idle hides. An arm the pose leaves where it is (slice 15D: the Drill's
+    left arm, whose idle moves the left_arm2 it hangs under, carry()) is not moved."""
     anim, time = BUILDS[gun].get("hand_pose", {}).get(side, ("idle", None))
-    return key_value(animations(gun)["animations"][anim]["bones"][f"{side}_arm"]["position"], time)
+    channels = animations(gun)["animations"][anim]["bones"].get(f"{side}_arm", {})
+    return key_value(channels["position"], time) if "position" in channels else (0.0, 0.0, 0.0)
 
 
 def arm_pivot(gun, side):

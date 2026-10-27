@@ -74,4 +74,7 @@ Paths preserve the supplied collection. Follow the [reuse guide](../../README.md
 | [Guns/geo/item/gun/mas_peddler.geo.json](../../originals/Blocks/Guns/geo/item/gun/mas_peddler.geo.json) | model JSON | — | — |
 | [Guns/geo/item/gun/inertial.geo.json](../../originals/Blocks/Guns/geo/item/gun/inertial.geo.json) | model JSON | — | — |
 | [Guns/geo/item/gun/zilk_45.geo.json](../../originals/Blocks/Guns/geo/item/gun/zilk_45.geo.json) | model JSON | — | — |
+| [Guns/geo/item/gun/drill.geo.json](../../originals/Blocks/Guns/geo/item/gun/drill.geo.json) | model JSON | — | — |
+| [Guns/geo/item/gun/drill_conversion.geo.json](../../originals/Blocks/Guns/geo/item/gun/drill_conversion.geo.json) | model JSON | — | — |
+| [Guns/geo/item/gun/lockewood.geo.json](../../originals/Blocks/Guns/geo/item/gun/lockewood.geo.json) | model JSON | — | — |
 | [Guns/mob_effect/lacerated.png](../../originals/Blocks/Guns/mob_effect/lacerated.png) | texture | 20×20 | — |

@@ -35,12 +35,12 @@ public class TacticalAttachmentsGameTests {
 			"crackling", "conductor_carbine", "magpie_smg", "lookout_rifle", "fencepost_carbine", "waystation_shotgun",
 			"highball_rifle", "millstone_rifle", "holler_pistol", "grange_carbine", "sprocket_gun",
 			"navvy_shotgun", "old_grange_carbine", "vesper_rifle", "onrush_smg", "gallant_rifle", "hawker_rifle", "impetus_shotgun",
-			"quill_rifle");
+			"quill_rifle", "tumbler_rifle");
 	/** The guns that take the scopes but not the Laser Sight (tools/guns.py ATTACHMENTS laser_sight "not_on"). */
 	static final List<String> NO_LASER = List.of("breacher", "trench_lobber", "earthmover", "hinterland_rifle");
 
 	/**
-	 * Both recipes load. The Tactical Grip fits the thirty-nine guns the owner made tactical grip parts for and no other.
+	 * Both recipes load. The Tactical Grip fits the forty guns the owner made tactical grip parts for and no other.
 	 * The Laser Sight fits every gun that takes the scopes but the Breacher, the Trench Lobber, the Earthmover and the
 	 * Hinterland Rifle.
 	 */
