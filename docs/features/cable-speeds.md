@@ -42,7 +42,7 @@ No IDs, recipes or saved data change. Placed cables keep working at their new sp
 - New game test `JimtaWorkshopTableGameTests.industrialCablesCarryWhatTheirMetalDoes`: Industrial copper carries Jugcraft copper's rate, every iron cable carries 64, and tin < iron < copper.
 - The existing splitter and detector tests still use the copper and splitter cables.
 - Local: a tree-sitter parse of the changed Java found no syntax errors; `python tools/check_mod_data.py` (8,025 material IDs) and `python scripts/check_repository.py` passed.
-- CI: pending.
+- CI: fork [run 40461567672](https://github.com/mmme123-spec/jugcraftfork/actions/runs/40461567672) on b6f37957d (on main 5b8d6520c): green. The mod built, the generated-data and material checks passed, the server game tests passed (with and without optional integrations, including the new cable test), and all sixteen client shards passed.
 
 Not run: a human wiring machines with these cables.
 
