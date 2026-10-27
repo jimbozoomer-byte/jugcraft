@@ -485,19 +485,24 @@ public class HerobrineGameTests {
 			}
 		}
 		ServerPlayer player = player(helper, new BlockPos(24, 1, 24), 0.0F);
-		helper.assertTrue(!HerobrineEncounters.introduced(player.getUUID()), "A new player has not met him");
-		HerobrineEncounters.Attempt attempt = HerobrineEncounters.attempt(player,
-				new HerobrineDirector.Request(player.getUUID(), Herobrine.Kind.DISTANT, HerobrineDirector.FORCED));
-		helper.assertTrue(attempt.placed(), "There should be somewhere under the roof to stand: " + attempt.failure());
-		Herobrine herobrine = attempt.herobrine();
-		helper.assertTrue(herobrine.variant() == Herobrine.Variant.WATCHER, "A first encounter should be a watcher, not " + herobrine.variant());
-		float yaw = (float) Math.toDegrees(Math.atan2(herobrine.getZ() - player.getZ(), herobrine.getX() - player.getX())) - 90.0F;
-		player.snapTo(player.getX(), player.getY(), player.getZ(), yaw, 0.0F);
-		player.setYHeadRot(yaw);
-		helper.runAfterDelay(Herobrine.SEEN_TICKS + 4, () -> {
-			helper.assertTrue(HerobrineEncounters.introduced(player.getUUID()), "Seeing a watcher should introduce the player");
-			herobrine.discard();
-			helper.succeed();
+		// Wait for the newly placed roof to propagate skylight before choosing indoor distances.
+		helper.runAfterDelay(5, () -> {
+			helper.assertTrue(!player.level().canSeeSky(player.blockPosition().above()), "The roof fixture must be dark");
+			player.getRandom().setSeed(0);
+			helper.assertTrue(!HerobrineEncounters.introduced(player.getUUID()), "A new player has not met him");
+			HerobrineEncounters.Attempt attempt = HerobrineEncounters.attempt(player,
+					new HerobrineDirector.Request(player.getUUID(), Herobrine.Kind.DISTANT, HerobrineDirector.FORCED));
+			helper.assertTrue(attempt.placed(), "There should be somewhere under the roof to stand: " + attempt.failure());
+			Herobrine herobrine = attempt.herobrine();
+			helper.assertTrue(herobrine.variant() == Herobrine.Variant.WATCHER, "A first encounter should be a watcher, not " + herobrine.variant());
+			float yaw = (float) Math.toDegrees(Math.atan2(herobrine.getZ() - player.getZ(), herobrine.getX() - player.getX())) - 90.0F;
+			player.snapTo(player.getX(), player.getY(), player.getZ(), yaw, 0.0F);
+			player.setYHeadRot(yaw);
+			helper.runAfterDelay(Herobrine.SEEN_TICKS + 4, () -> {
+				helper.assertTrue(HerobrineEncounters.introduced(player.getUUID()), "Seeing a watcher should introduce the player");
+				herobrine.discard();
+				helper.succeed();
+			});
 		});
 	}
 

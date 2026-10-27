@@ -562,7 +562,7 @@ public class HerobrineMarksGameTests {
 		platform(helper);
 		ServerLevel level = helper.getLevel();
 		String[] edits = {"back", "style", "dye", "glow", "wax", "none"};
-		int[][] sites = {{8, 8}, {24, 8}, {40, 8}, {8, 40}, {24, 40}, {40, 40}};
+		int[][] sites = {{12, 12}, {24, 12}, {36, 12}, {12, 36}, {24, 36}, {36, 36}};
 		for (int i = 0; i < edits.length; i++) {
 			BlockPos feet = feet(helper, sites[i][0], sites[i][1]);
 			HerobrineMarkPlans.Plan plan = HerobrineMarkPlans.shrine(level, feet, feet.north(16), message());
@@ -572,11 +572,11 @@ public class HerobrineMarksGameTests {
 			helper.assertTrue(level.getBlockEntity(pos) instanceof SignBlockEntity, "The shrine's sign should stand");
 			SignBlockEntity sign = (SignBlockEntity) level.getBlockEntity(pos);
 			switch (edits[i]) {
-				case "back" -> sign.setText(sign.getText(SignTextSlot.BACK).setMessage(0, Component.literal("EDITED")), SignTextSlot.BACK);
-				case "style" -> sign.setText(sign.getText(SignTextSlot.FRONT).setMessage(0, Component.literal(FIRST[0]).withStyle(ChatFormatting.BOLD)),
+				case "back" -> sign.setText(sign.getText(SignTextSlot.BACK).asMutable().setLine(0, Component.literal("EDITED")).asImmutable(), SignTextSlot.BACK);
+				case "style" -> sign.setText(sign.getText(SignTextSlot.FRONT).asMutable().setLine(0, Component.literal(FIRST[0]).withStyle(ChatFormatting.BOLD)).asImmutable(),
 						SignTextSlot.FRONT);
-				case "dye" -> sign.setText(sign.getText(SignTextSlot.FRONT).setColor(DyeColor.RED), SignTextSlot.FRONT);
-				case "glow" -> sign.setText(sign.getText(SignTextSlot.FRONT).setHasGlowingText(true), SignTextSlot.FRONT);
+				case "dye" -> sign.setText(sign.getText(SignTextSlot.FRONT).withColor(DyeColor.RED), SignTextSlot.FRONT);
+				case "glow" -> sign.setText(sign.getText(SignTextSlot.FRONT).withGlowingText(true), SignTextSlot.FRONT);
 				case "wax" -> sign.setWaxed(false);
 				default -> {
 				}

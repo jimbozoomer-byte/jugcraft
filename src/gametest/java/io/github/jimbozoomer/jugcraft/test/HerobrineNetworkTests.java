@@ -66,6 +66,9 @@ public final class HerobrineNetworkTests implements FabricClientGameTest {
                 server.runCommand("tp OwnerPeer 2.5 220 0.5 0 0");
                 c.waitTicks(20);
                 connection.waitForChunksRender();
+                mark("positioned", "");
+                c.waitFor(mc -> marked("peer-ready") && mc.gui.screen() == null, 1200);
+                c.runOnClient(mc -> { if (!mc.gui.hud.isHidden()) mc.gui.hud.toggle(); });
                 server.runCommand("tick freeze");
                 int id = server.computeOnServer(s -> {
                     var player = s.getPlayerList().getPlayers().stream().filter(p -> !p.getName().getString().equals("OwnerPeer")).findFirst().orElseThrow();
@@ -147,6 +150,10 @@ public final class HerobrineNetworkTests implements FabricClientGameTest {
                 if (mc.gui.screen() instanceof net.minecraft.client.gui.screens.DisconnectedScreen) throw new AssertionError("Peer disconnected during login");
                 return mc.level != null && mc.player != null;
             }, 2400);
+            c.waitFor(mc -> marked("positioned") && mc.player.getY() > 219 && mc.gui.screen() == null, 1200);
+            c.waitTicks(20);
+            c.runOnClient(mc -> { if (!mc.gui.hud.isHidden()) mc.gui.hud.toggle(); });
+            mark("peer-ready", "");
             c.waitFor(mc -> marked("entity.txt"), 1200);
             int id = Integer.parseInt(Files.readString(coordination().resolve("entity.txt")));
             c.waitFor(mc -> mc.level.getEntity(id) instanceof Herobrine && Math.abs(mc.player.getYRot()) < 1, 400);
