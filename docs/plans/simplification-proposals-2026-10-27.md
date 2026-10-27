@@ -1,4 +1,4 @@
-# Simplification proposals: plastic, the first powered tool, currencies and overlap
+# Simplification proposals: plastic, the first powered tool, charges and overlap
 
 Status: proposal only. Nothing here is implemented. Written 27 October 2026 for the owner's decision.
 
@@ -49,63 +49,49 @@ Built from nothing, the pair is 47 crafted parts from 13 stations: about 88 clay
 
 Recommendation: (1) and (2). They add one item and one behavior, and leave the existing drill and station unchanged.
 
-## 11. About seventeen currencies
+## 11. Charges that could be Ley Charge
 
 ### Today
 
-| Branch | Currencies |
-| --- | --- |
-| Technology | Jugcraft Energy (JE), kinetic power, heat, steam, the fuels, UU-Matter |
-| Magic | Focus, Ley Charge, the ten Principle Essences, Vitae, Astral Resonance, Bound Will, alchemical essence (the Prima Materia ledger), Klein star charge, relic charge, Radiance, Verdance, broom ointment |
+Most of the magic resources are distinct on purpose: Focus is what you cast with; the ten Principle Essences (Radiance, Verdance and the rest), Vitae, Astral Resonance and Bound Will are research and ritual ingredients; and Klein stars only hold the alchemy tablet's essence. Those stay as they are.
 
-Conversions that exist:
+Two things are separate charges that only exist to power one kind of item:
 
-| From | To | Rate |
+| Item | What it runs on today | How you refill it |
 | --- | --- | --- |
-| Focus | Radiance | 6 : 2 |
-| Radiance | Ley Charge | 3 : 2 |
-| Verdance | Ley Charge | 3 : 2 |
-| JE | Ley Charge | 1,000 : 1 |
-| Ley Charge | relic charge | 1 : 4 |
-| JE | heat | 5 : 4 |
-| heat | JE or kinetic | 2 : 1 |
-| JE | kinetic | 80% |
+| The four relics: Wardlight Lantern, Hearthstone, Stormglass, Owlsight Circlet | relic charge, 4 per Ley Charge | install or use it at a Reliquary Shrine, which draws from Ley Pylons within reach |
+| Flying Broomstick | broom ointment | apply ointment |
 
-Ley Charge only goes one way: nothing turns it back into anything else. The Hearthstone, flight items and relics each want their own charge.
+Ley Charge itself only goes one way (JE, Radiance and Verdance turn into it; nothing turns it back), which is fine.
 
 ### Proposal
 
-Keep three currencies a player has to think about, and make the rest storage forms of them:
+1. **Relics show and spend Ley Charge** instead of relic charge, and recharge by using them on any Ley store: a Ley Pylon, a Source Jar, or the shrine as now. A saved relic's charge converts at the existing rate (4 relic charge to 1 Ley Charge), so nothing is lost.
+2. **The broom runs on Ley Charge,** refilled the same way; ointment stays as a portable refill worth a fixed amount of Ley Charge.
 
-1. **JE** for machines. Kinetic, heat and steam stay as physical forms with their existing conversions; fuels stay as items.
-2. **Focus** for casting, as now.
-3. **Ley Charge** for every placed magical device and every rechargeable magical item. Relic charge, Klein star charge, Radiance, Verdance and broom ointment become Ley Charge stored in the item, recharged from any Ley source (pylon, Source Jar, Sourcelink) or from JE at the existing 1,000 : 1.
-
-The Hearthstone, relics and flight items would then recharge from the same pylon or jar. The ten Principle Essences, Vitae, Astral Resonance and Bound Will stay as research and ritual ingredients, but are shown as materials, not as balances.
-
-This is the largest proposal; it changes item tooltips, saved charge components (with a migration that converts each item's charge at its current rate) and the codex. It should go in stages: first make relics and the Hearthstone accept Ley Charge, then fold the others in one at a time.
+Not changed: JE and the machine power forms, fuels, Focus, the Principle Essences, Vitae, Astral Resonance, Bound Will, the tablet's essence and Klein stars.
 
 ## 14. Overlapping systems
 
 ### Today
 
-- **Spells:** three systems share one Focus pool: Concordance (10 spells, unlocked by research), Jug Nouveau (82 glyphs) and Jimtafacts spellbooks (113 spells), with 24 spell books between them.
-- **Machines:** the Crusher (53 recipes) and Pulverizer (57) share 20 inputs. The Jimtafacts housings make a second Generator, Macerator and Electric Furnace beside Jugcraft's. There are 81 generator and engine names, 27 JE cable variants and 99 ME cables.
-- **Storage:** four networks: ME, the Storage Lectern, the alchemical chest and bags, and the Drone Depot.
-- **Flight:** nine personal flight sources using seven different fuels.
+- **Crusher and Pulverizer:** both are powered machines on a machine casing with similar recipes. They share 20 inputs, all ores: the Crusher turns one ore into 2 raw ore (for smelting), the Pulverizer into 2 dust. The Crusher has 26 other recipes and the Pulverizer 37.
+- **Jimtafacts copies of machines:** the Industrial Generator, Macerator, Electric Furnace, Industrial Solar and Geothermal Generators, Industrial Ore Washer, and the BatBox, CESU, MFE and MFSU batteries sit beside Jugcraft's Coal Generator, Crusher and Pulverizer, Electric Furnace, Solar Panel, Geothermal Generator, Ore Washer, and Battery Box, Energy Cell and Capacitor Bank.
+- **Power cables:** Jugcraft's copper, aluminum and silver cables, plus 14 Jimtafacts ones (copper, tin, gold, iron and glass fiber, with insulated, double- and quad-insulated, detector and splitter versions). The 90-odd coloured covered, smart and dense cables are the ME network's data cables and are not part of this.
+- **Storage:** four separate systems: the ME network (Jimtafacts), the Storage Lectern (Jug Nouveau), the alchemical chest and bags, and the Drone Depot.
+- **Spells:** three systems share one Focus pool: Concordance (10 spells), Jug Nouveau (82 glyphs) and Jimtafacts spellbooks (113 spells), with 24 spell books between them.
 
 ### Proposal
 
-Merge only where two things do the same job at the same tier; keep a specialty where it does something the others cannot.
+Merge only where two things do the same job at the same tier; keep anything that does something the others cannot. Nothing is deleted: IDs stay registered and saved items and machines keep working, as the repository rules require.
 
-1. **Crusher and Pulverizer:** make the Pulverizer the Crusher's powered upgrade. It keeps all 57 recipes; the Crusher keeps the early, unpowered ones. Where both list the same input, the Pulverizer gives the Crusher's output plus its byproduct.
-2. **Jimtafacts Generator, Macerator and Electric Furnace:** keep their models and IDs, but have their recipes make Jugcraft's machines (the Jimtafacts blocks become a cosmetic variant chosen at the workbench), so there is one generator, one grinder and one furnace line.
-3. **Cables:** group the 27 JE cables into four tiers by capacity (copper, aluminum, gold or HV, superconducting), with the other variants as dyed or insulated looks of the same tier.
-4. **Spell books:** one book item per system (Concordance wand, Nouveau spell book, Jimtafacts spell book) with tiers as upgrades, rather than 24 separate books.
-5. **Storage:** keep ME as the automation network and the Storage Lectern as the early, no-power one; let the Drone Depot and alchemical chest connect to ME rather than run their own catalogs.
-6. **Flight:** group flight sources into three: early (gliders), mid (rituals and brooms, Ley Charge) and late (jetpacks and wings, JE). Each item keeps its feel; the fuel follows its group.
+1. **Crusher and Pulverizer:** the Pulverizer is made from a Crusher and does all of both machines' recipes; for an ore it gives the dust plus a byproduct. Placed Crushers keep working.
+2. **Jimtafacts copies:** each copy gets the same recipes and numbers as the Jugcraft machine it matches, so the choice between them is only how it looks.
+3. **Cables:** four power tiers by capacity (copper, aluminum, gold or high-voltage, glass fiber). Every other power cable becomes a look of one of those tiers with that tier's capacity.
+4. **Storage:** the Storage Lectern, alchemical chest and Drone Depot get a connector the ME network can read and fill, so one terminal reaches all of them. Each keeps working on its own.
+5. **Spells:** left as three systems; the shared Focus pool already ties them together. Only the spell books could be reduced to one book per system with tiers as upgrades.
 
-Each of these is its own branch and its own owner decision. Nothing should be deleted: IDs stay registered and saved items keep working, as the repository rules require.
+Each of these is its own change and its own owner decision.
 
 ## AI attribution
 
