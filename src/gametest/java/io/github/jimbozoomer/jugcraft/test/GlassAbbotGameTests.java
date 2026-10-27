@@ -290,10 +290,11 @@ public class GlassAbbotGameTests {
 			target.setGameMode(GameType.SURVIVAL);
 			float before = target.getHealth();
 			abbot.shardFan(level, target.position().add(0.0, 1.0, 0.0));
-			int struck = 0;
+			int hits = 0;
 			for (int tick = 0; tick < GlassAbbotEntity.SHARD_LIFE && !abbot.shards().isEmpty(); tick++) {
-				struck += abbot.flyShards(level);
+				hits += abbot.flyShards(level);
 			}
+			int struck = hits;
 			boolean shards = struck >= 1 && target.getHealth() < before && abbot.shards().isEmpty();
 			target.setGameMode(GameType.CREATIVE);
 			helper.runAfterDelay(HURT_COOLDOWN, () -> {
