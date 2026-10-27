@@ -226,7 +226,7 @@ public class ConcordanceGardenPactClientGameTests implements FabricClientGameTes
 		player.getInventory().clearContent();
 	}
 
-	/** PG §5.3 (GC-03): a Sunpetal in hand; its tooltip says the garden's spirits regard it; hovered in the inventory. */
+	/** GC-03 (GC-P35): a Sunpetal in hand; its tooltip says the garden's spirits regard it; hovered in the inventory. */
 	private static void regardTooltip(ClientGameTestContext context, TestDedicatedServerContext server) {
 		server.runCommand("item replace entity @p hotbar.0 with jugcraft:sunpetal");
 		context.waitFor(client -> !client.player.getInventory().getItem(0).isEmpty(), WAIT);
@@ -278,7 +278,7 @@ public class ConcordanceGardenPactClientGameTests implements FabricClientGameTes
 	}
 
 	/**
-	 * GC-P18 (PP §6.6): an awake Verdant Bed of the holder's three blocks west of the perch, and both spirits ready; the
+	 * GC-P18 (GC-P10): an awake Verdant Bed of the holder's three blocks west of the perch, and both spirits ready; the
 	 * chooser at GUI scale 2, at GUI scale 4 in a 1920x1080 window and in a 320x180 window; Buer chosen by keyboard alone.
 	 */
 	private static void chooser(ClientGameTestContext context, TestDedicatedServerContext server, BlockPos perch, BlockPos bed) {
@@ -470,7 +470,10 @@ public class ConcordanceGardenPactClientGameTests implements FabricClientGameTes
 			Jugcraft.LOGGER.info("[garden-check] his think over a strained bed: status and strain = {}", worked);
 			check(worked.equals(Status.WORKING + " 1"), "By daylight he eases one strain from the bed: " + worked);
 			BuerEntity.Gesture work = BuerEntity.Gesture.WORK;
-			context.waitTicks(36);
+			// Two clocks (the unit review): his clip on the client, and his head then body turning after the server's think;
+			// wait for both rather than a fixed count, then freeze (the 1.4 to 2.2 s check below still bounds it).
+			context.waitFor(client -> clipTime(client, perch, work) >= 1.4
+					&& Mth.degreesDifferenceAbs(bodyYaw(client, perch), 90.0F) <= FACING_BODY_TOLERANCE, WAIT);
 			server.runCommand("tick freeze");
 			try {
 				context.waitTicks(5);
@@ -973,7 +976,7 @@ public class ConcordanceGardenPactClientGameTests implements FabricClientGameTes
 	}
 
 	/**
-	 * PP §6.6: Tab until the pact screen's focused control's words are {@code label}. The chooser's entries sit in the
+	 * GC-P18: Tab until the pact screen's focused control's words are {@code label}. The chooser's entries sit in the
 	 * screen's scrolling body, so the control is found by the screen's own focused key, not by its direct focus.
 	 */
 	private static void tabToNamed(ClientGameTestContext context, String label) {

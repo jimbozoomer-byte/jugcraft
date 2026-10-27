@@ -11,6 +11,7 @@ import io.github.jimbozoomer.jugcraft.concordance.worker.Pacts;
 import io.github.jimbozoomer.jugcraft.concordance.worker.Status;
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -29,8 +30,9 @@ import org.jspecify.annotations.Nullable;
  * (mayTendAt) that are not overworked, the most strained first (then the nearest), asks GardenPacts.target about at most
  * {@value #MAX_ASKED} of them in that order (whose bed it is now, the holder near, the holder's own hands), and eases one
  * strain from the first it may change through the bed's own tending, the call a Greenwarden's hand makes, so his tending
- * and theirs share each bed's 600-tick window. One bed a think at most; no nutrient, item or practice moves; the task is
- * counted on the record (its quota).
+ * and theirs share each bed's 600-tick window. A bed refused for itself is not asked again until the index is next read
+ * ({@link Memory#skip}), so beds he may not change never fill every place to ask. One bed a think at most; no nutrient,
+ * item or practice moves; the task is counted on the record (its quota).
  * <p>
  * The overworked bed (GC-P22, GC-P23): a bed he eased today that stands at Habitat.MAX_STRAIN again is overworked; he
  * does not tend it while it stays there, and says so on the kept page and in Jade. When it eases by its own rules (compost,
@@ -59,8 +61,8 @@ public final class StrainTending {
 	 * Buer's one step for {@code record}'s pact at world time {@code time} and game time {@code now} ({@code holder}: its
 	 * perch's). WORKING when he eased a bed; OUTSIDE_AGREEMENT outside his hours (he sleeps); FINISHED with the day's quota
 	 * spent; what GardenPacts.target answers for the whole pact (suspended, held, the quota spent, the holder not near);
-	 * else IDLE. Bounded: one index read (at most 64 beds, refreshed at most every 200 ticks), at most MAX_ASKED asked, at
-	 * most one bed changed.
+	 * else IDLE. Bounded: one index read (at most 64 beds, refreshed at most every 200 ticks), at most MAX_ASKED asked (a
+	 * bed refused for itself only once each time the index is read), at most one bed changed.
 	 */
 	static Status tend(ServerLevel level, BuerEntity buer, BoundWill record, AgreementHolder holder, long time, long now) {
 		Memory memory = buer.serviceMemory(Memory.class, Memory::new);
@@ -74,8 +76,8 @@ public final class StrainTending {
 			return Status.FINISHED;
 		}
 		List<VerdantBedBlockEntity> ready = new ArrayList<>();
-		for (VerdantBedBlockEntity bed : memory.reach(record).beds(level, now)) {
-			if (bed.mayTendAt(now) && !memory.overworked(bed.getBlockPos())) {
+		for (VerdantBedBlockEntity bed : memory.beds(level, record, now)) {
+			if (bed.mayTendAt(now) && !memory.overworked(bed.getBlockPos()) && !memory.skipped(bed.getBlockPos())) {
 				ready.add(bed);
 			}
 		}
@@ -86,7 +88,10 @@ public final class StrainTending {
 			BlockPos pos = bed.getBlockPos();
 			Status refused = GardenPacts.target(level, record, pos, bed.keeper(), time, now);
 			if (refused == Status.IDLE || refused == Status.BLOCKED_BY_ACCESS || refused == Status.OUTSIDE_AGREEMENT) {
-				// This bed's own answer: not a beneficiary's now, not the holder's to change, or outside the area.
+				// This bed's own answer: not a beneficiary's now, not the holder's to change, or outside the area. Skipped until
+				// the index is read again (the unit review): refused beds never crowd out the rest, and each protection a
+				// refusal asks (Authority.mayChange) is asked once a read, not each think.
+				memory.skip(pos);
 				continue;
 			}
 			if (refused != null) {
@@ -144,24 +149,55 @@ public final class StrainTending {
 	/**
 	 * What one Buer presence remembers between its thinks (PactSpiritEntity.serviceMemory: never saved, lost with the
 	 * entity): his bed index, the game day he speaks of, the beds he eased that day, and his complaints (overworked beds),
-	 * each oldest first, together at most MEMORY (the oldest eased forgotten first). Server thread only; each read and
-	 * change touches at most MEMORY beds, in loaded chunks only.
+	 * each oldest first, together at most MEMORY (the oldest eased forgotten first); and the beds refused for themselves
+	 * since the index was last read, at most GardenReach.MAX_BEDS, forgotten at its next read. Server thread only; each read
+	 * and change touches at most MEMORY beds, in loaded chunks only.
 	 */
 	public static final class Memory {
 		private @Nullable GardenReach reach;
 		private long day = Long.MIN_VALUE;
 		private final LinkedHashSet<BlockPos> eased = new LinkedHashSet<>();
 		private final LinkedHashSet<BlockPos> overworked = new LinkedHashSet<>();
+		private final HashSet<BlockPos> skipped = new HashSet<>();
+		private int skippedAt = -1;
 
 		public Memory() {
 		}
 
-		/** {@code record}'s bed index, made again when its perch or radius changed (GardenReach.covers). */
+		/** {@code record}'s bed index, made again (forgetting the beds skipped) when its perch or radius changed (GardenReach.covers). */
 		GardenReach reach(BoundWill record) {
 			if (reach == null || !reach.covers(record)) {
 				reach = GardenReach.of(record);
+				skipped.clear();
+				skippedAt = -1;
 			}
 			return reach;
+		}
+
+		/**
+		 * {@code record}'s indexed beds at game time {@code now} (GardenReach.beds). When that read refreshed the index, the
+		 * beds skipped since the last are forgotten, so a claim lifted or a keeper who joined the party is asked again.
+		 */
+		List<VerdantBedBlockEntity> beds(ServerLevel level, BoundWill record, long now) {
+			GardenReach index = reach(record);
+			List<VerdantBedBlockEntity> beds = index.beds(level, now);
+			if (index.refreshes() != skippedAt) {
+				skippedAt = index.refreshes();
+				skipped.clear();
+			}
+			return beds;
+		}
+
+		/** GardenPacts.target refused the bed at {@code pos} for itself: not asked again until the index is next read. */
+		void skip(BlockPos pos) {
+			if (skipped.size() < GardenReach.MAX_BEDS) {
+				skipped.add(pos.immutable());
+			}
+		}
+
+		/** Whether the bed at {@code pos} was refused for itself since the index was last read (tests and tend). */
+		public boolean skipped(BlockPos pos) {
+			return skipped.contains(pos);
 		}
 
 		/** A new game day (of game time {@code now}) forgets yesterday's eases; a complaint stands until its bed eases. */

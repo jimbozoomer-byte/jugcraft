@@ -248,11 +248,13 @@ public abstract class PactSpiritEntity<T extends PactSpiritEntity<T>> extends Wo
 	@Override
 	public Status think(ServerLevel level, long time, long gameTime) {
 		Status next = decide(level, gameTime);
-		if ((next == Status.IDLE || next == Status.UPKEEP_DUE) && owner != null && record != null && !gone()) {
+		if (owner != null && record != null && !gone() && (next == Status.IDLE
+				|| next == Status.UPKEEP_DUE && Authority.presentNear(level, owner, perch, Pacts.REACH) != null)) {
 			// GC-01 (SG1): its pact's service may take one step, only now: a presence verified at its own perch, its pact
-			// serving. GC-04 (GC-P27): an offering due serves on through its grace, as its terms, Jade and Pacts.serves say;
-			// the status stays UPKEEP_DUE so the warning is what is shown, and a garden service asks whether its holder is
-			// near at each change (GardenPacts.target), since decide asks it only after the pact's own state.
+			// serving. GC-04 (GC-P27): an offering due serves on through its grace, as its terms, Jade and Pacts.serves say,
+			// but only with its holder near (decide asks that only after the pact's own state; the unit review), so no
+			// service runs for an absent holder; the status stays UPKEEP_DUE so the warning is what is shown. A garden
+			// service still asks at each change (GardenPacts.target).
 			Status served = serve(level, time, gameTime);
 			next = next == Status.UPKEEP_DUE ? next : served;
 		}

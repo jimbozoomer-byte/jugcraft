@@ -11976,7 +11976,7 @@
   "message.jugcraft.concordance.pact.term.quota": "%s a game day",
   "message.jugcraft.concordance.pact.term.returns": "The offerings kept for it come back to you, once",
   "message.jugcraft.concordance.pact.term.service.star_reckoning": "Star-reckoning: once a game day at this perch you recall any sky pattern you have observed yourself, paying its recall cost in Astral Resonance from your astrolabe",
-  "message.jugcraft.concordance.pact.term.service.strain_tending": "Strain tending: by daylight Buer eases one harvest strain from one awake Verdant Bed of yours or your party's in his area at a time, each bed no sooner than its own tending allows (the 30 seconds a Greenwarden's hand waits, shared with yours). He moves no nutrients and no items",
+  "message.jugcraft.concordance.pact.term.service.strain_tending": "Strain tending: by daylight Buer eases one harvest strain from one awake Verdant Bed of yours or your party's in his area at a time, each bed no sooner than its own tending allows (the 30 seconds a Greenwarden's hand waits, shared with yours). He moves no nutrients and no items. He works only while you are within 64 blocks of the perch, and never on a bed you could not change by hand",
   "message.jugcraft.concordance.pact.term.suspension": "The service stops; nothing is taken, nothing is lost, nothing accrues; an offering resumes it. Time you are away never counts",
   "message.jugcraft.concordance.pact.term.upkeep": "%s \u00d7 %s every %s game days, paid ahead into the pact's keeping, at most %s periods; the Open Hand Compact pays the first",
   "message.jugcraft.concordance.pact.unavailable": "%s's terms could not be read on this server (the pact's definition did not load); nothing can be agreed until it does",

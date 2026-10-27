@@ -26,6 +26,9 @@ its own; Styx's words are tools/styx.py's; tools/check_mod_data.py (check_stolas
 check_spirit_bodies, check_garden_pacts) holds the Java and the data to them.
 """
 
+import concordance_ecology as ecology
+import concordance_workers as workers
+
 MOD = "jugcraft"
 
 
@@ -223,9 +226,14 @@ SPIRITS = {
             "price": "\"A Mendvetch each week, for my own mending. And when I call a bed overworked, feed it before you ask "
                      "me again.\"",
         },
+        # His numbers from the tables that hold the Java's (garden/Garden.TEND_TICKS, worker/Pacts.REACH); his service's
+        # two conditions, the holder near and only what the holder could change by hand, named before anything is spent
+        # (the unit review).
         "term": "Strain tending: by daylight Buer eases one harvest strain from one awake Verdant Bed of yours or your "
-                "party's in his area at a time, each bed no sooner than its own tending allows (the 30 seconds a "
-                "Greenwarden's hand waits, shared with yours). He moves no nutrients and no items",
+                "party's in his area at a time, each bed no sooner than its own tending allows (the "
+                f"{ecology.TEND_TICKS // 20} seconds a Greenwarden's hand waits, shared with yours). He moves no nutrients "
+                f"and no items. He works only while you are within {workers.PACT['REACH']} blocks of the perch, and never "
+                "on a bed you could not change by hand",
         # His cues, in BuerEntity.SOUND_IDS' order: (subtitle, runtime files). The art plan's mono files (GC-S13); two are
         # one recording, so a pitch tells listen, refuse and depart apart (GC-P26, "pitch" below).
         "cues": {
@@ -284,8 +292,8 @@ OFFERINGS_TAG = SPIRITS["stolas"]["pact"]["upkeep"]["offering"]
 OFFERINGS = SPIRITS["stolas"]["offerings"]["items"]
 BLOCKS = {"pact_perch": {"name": "Pact Perch"}}
 PERCH_TOOLTIP = ("Use: invite a pact spirit whose Regard you understand (Stolas also wants a star you observed yourself; "
-                 "Buer an awake Verdant Bed of yours within 8 blocks); or keep the pact seated here. Break it and the pact "
-                 "stays yours, without its perch.")
+                 f"Buer an awake Verdant Bed of yours within {SPIRITS['buer']['pact']['service']['radius']} blocks); or keep "
+                 "the pact seated here. Break it and the pact stays yours, without its perch.")
 # Polished deepslate, not a slab: the progression graph follows only listed vanilla items (a slab is not in
 # concordance_progression.VANILLA_SOURCES).
 RECIPE = {"type": "minecraft:crafting_shaped", "category": "misc", "pattern": ["SAS", " L ", " D "],

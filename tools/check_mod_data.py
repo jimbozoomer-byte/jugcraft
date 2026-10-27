@@ -12276,7 +12276,7 @@ def check_acquisition(registered):
         if spirit["pact"]["research"] != f"{MOD}:garden_regard":
             continue
         named = [cost["item"] for cost in spirit["pact"]["compact"]["items"]] + spirit["offerings"]["items"]
-        for item in named:
+        for item in sorted(set(named)):
             if item.startswith(f"{MOD}:") and split(item)[1] not in aq.GARDEN_PACTS:
                 err(f"tools/acquisition.py GARDEN_PACTS: {item}, in {name}'s compact or offerings, is no garden row")
     # The owner's armour tiers the record keeps creative-only: nothing gives them.
@@ -18953,10 +18953,11 @@ def check_pacts(co, root, lang, registered, research):
             or re.search(r"public String kind\(\) \{", base) or not re.search(r"public final String kind\(\) \{\s*return \"pact\";", base):
         err("spirits/PactSpiritEntity.java: every pact spirit saves perch and record here, and its roster kind is pact, final (Chunk D's keys)")
     think = _java_body(base, "public Status think(")
-    if not 0 <= think.find("decide(level, gameTime)") < think.find("(next == Status.IDLE || next == Status.UPKEEP_DUE) && owner != null && record != null && !gone()") \
+    if not 0 <= think.find("decide(level, gameTime)") < think.find("owner != null && record != null && !gone() && (next == Status.IDLE") \
+            < think.find("next == Status.UPKEEP_DUE && Authority.presentNear(level, owner, perch, Pacts.REACH) != null") \
             < think.find("serve(level, time, gameTime)") < think.find("next = next == Status.UPKEEP_DUE ? next : served;"):
         err("PactSpiritEntity.think: a service steps only after decide returned IDLE for a presence with its record (SG1, GC-S7); "
-            "an offering due serves on through its grace and keeps UPKEEP_DUE (GC-P27)")
+            "an offering due serves on through its grace, only with its holder near, and keeps UPKEEP_DUE (GC-P27)")
     # SG1: one service a work, each registered once, the list verified before any menu can ask.
     if set(pa.SERVICE_CLASSES) != set(pa.WORK):
         err("tools/concordance_pacts.py SERVICE_CLASSES names one service class for every work of WORK")
@@ -19002,9 +19003,11 @@ def check_pacts(co, root, lang, registered, research):
     # SG4: the chooser for the perch's owner only, an INVITE only on it, nothing summoned before its checks; the revision reads only.
     invite = _java_body(menu, "private Answered invite(")
     order = [invite.find(n) for n in ("lastMode != PactStatePayload.INVITE", "perch.holder().maySeal(level, player, false)",
-                                      "listed(level, player).contains(definition)", "chosen = definition.id();", "perch.welcome(level, player, definition.id())")]
+                                      "listed(level, player).contains(definition)", "chosen = definition.id();", "perch.welcome(level, player, definition.id())",
+                                      "perch.dismiss(level, definition.id());")]
     if -1 in order or order != sorted(order):
-        err("PactMenu.invite: only on the chooser, by its owner, a spirit they may still invite, before any visitor comes (GC-01)")
+        err("PactMenu.invite: only on the chooser, by its owner, a spirit they may still invite, before any visitor comes; one "
+            "that cannot come yet leaves no other spirit's visitor waiting (GC-01)")
     chooser = _java_body(menu, "private Offer offerFor(")
     if not 0 <= chooser.find("perch.holder().maySeal(level, player, false)") < chooser.find("perch.visitor(level)") < chooser.find("listed.size() >= 2"):
         err("PactMenu.offerFor: one who may not seal reads the visitor's offer; only the owner with two or more to invite sees the chooser (GC-P10)")
@@ -19369,13 +19372,14 @@ def check_garden_pacts(co, root, lang, registered, research):
     if pg.research_node(gp.REGARD, "understood") not in alone \
             or (pg.research_node(gp.REGARD, "mastered") in alone) != (shipped >= gp.MASTERY_SPIRITS):
         err(f"progression: The Garden's Regard is understood alone, and mastered exactly when {gp.MASTERY_SPIRITS} garden spirits ship (GB26)")
-    # GB26 held before enough garden spirits ship: with probe definitions (in memory, a probe work recording the first act),
-    # one fewer than MASTERY_SPIRITS reach the practice and not the mastered state; MASTERY_SPIRITS reach both.
+    # GB26 held before enough garden spirits ship: with probe definitions (in memory, a probe work recording the first act)
+    # added to those shipped up to each total (the unit review: the totals tested, not the probes added), one fewer than
+    # MASTERY_SPIRITS reach the practice and not the mastered state; MASTERY_SPIRITS reach both.
     kept_obligations = dict(gp.OBLIGATIONS)
     gp.OBLIGATIONS["gb26_probe"] = gp.ACTS[0]
     try:
         for count in (gp.MASTERY_SPIRITS - 1, gp.MASTERY_SPIRITS):
-            probes = {f"gb26_probe_{i}": {"service": {"work": "gb26_probe"}, "compact": {"items": []}} for i in range(count)}
+            probes = {f"gb26_probe_{i}": {"service": {"work": "gb26_probe"}, "compact": {"items": []}} for i in range(max(0, count - shipped))}
             probed = dict(at_hand, pacts={**at_hand.get("pacts", {}), **probes})
             reached = pg.reachable(pg.graph(research, invocations, rituals, probed), research)
             if f"practice:{gp.GARDEN_PACT_SERVICE}" not in reached \
@@ -19385,6 +19389,14 @@ def check_garden_pacts(co, root, lang, registered, research):
     finally:
         gp.OBLIGATIONS.clear()
         gp.OBLIGATIONS.update(kept_obligations)
+    # Every garden spirit's service term names its two conditions before anything is spent (GC-S7's "whose land"; the unit
+    # review): its holder within Pacts.REACH of the perch, and only what its holder could change by hand.
+    for name, spirit in co.pacts.SPIRITS.items():
+        if spirit["pact"]["research"] == gp.REGARD:
+            term = lang.get(f"message.{MOD}.concordance.pact.term.service.{spirit['pact']['service']['work']}", "")
+            if f"within {co.workers.PACT['REACH']} blocks of the perch" not in term or "could not change by hand" not in term:
+                err(f"tools/concordance_pacts.py SPIRITS[{name!r}]: its term names its holder within {co.workers.PACT['REACH']} "
+                    "blocks of the perch and only what its holder could change by hand (GC-S7)")
     # Words, advancements, tests.
     for key in [f"message.{MOD}.concordance.{k}" for k in gp.MESSAGES] + [f"tooltip.{MOD}.concordance.{k}" for k in gp.TOOLTIPS] \
             + [f"tag.item.{MOD}.{split(gp.SPECIMEN_TAG)[1]}", f"research.{MOD}.garden_regard"] \
@@ -19420,9 +19432,9 @@ def check_garden_pacts(co, root, lang, registered, research):
     step = _java_body(tending, "static Status tend(")
     order = [step.find(n) for n in (
         "memory.today(now);", "memory.judge(level);", "Pacts.inHours(service, time)", "Pacts.done(record.pact(), now) >= service.quota()",
-        "memory.reach(record).beds(level, now)", "bed.mayTendAt(now) && !memory.overworked(bed.getBlockPos())",
+        "memory.beds(level, record, now)", "bed.mayTendAt(now) && !memory.overworked(bed.getBlockPos()) && !memory.skipped(bed.getBlockPos())",
         "Comparator.comparingInt(VerdantBedBlockEntity::strainNow).reversed()", "Math.min(MAX_ASKED, ready.size())",
-        "GardenPacts.target(level, record, pos, bed.keeper(), time, now)", "if (!bed.tend(now)) {", "memory.eased(pos);",
+        "GardenPacts.target(level, record, pos, bed.keeper(), time, now)", "memory.skip(pos);", "if (!bed.tend(now)) {", "memory.eased(pos);",
         "holder.taskDone(level, now);", "buer.attendWork(pos, BuerEntity.Gesture.WORK.ticks, now);",
         "buer.gesture(BuerEntity.Gesture.WORK);", "return Status.WORKING;")]
     if -1 in order or order != sorted(order) or step.count("return Status.WORKING;") != 1:
@@ -19436,6 +19448,9 @@ def check_garden_pacts(co, root, lang, registered, research):
     memory = _java_body(tending, "public static final class Memory")
     if "while (eased.size() + overworked.size() > MEMORY)" not in memory or "buer.serviceMemory(Memory.class, Memory::new)" not in tending:
         err("StrainTending.Memory: at most MEMORY beds, kept as the presence's service memory, never saved (GC-P23)")
+    if "if (skipped.size() < GardenReach.MAX_BEDS) {" not in memory or "if (index.refreshes() != skippedAt) {" not in memory:
+        err("StrainTending.Memory: the beds refused for themselves, at most GardenReach.MAX_BEDS, forgotten at each read of the index "
+            "(the unit review)")
     if "new GardenReach(perch.getBlockPos(), definition.radius(), found -> own.equals(found.keeper()))" not in _java_body(tending, "public List<Missing> missing("):
         err("StrainTending.missing: an awake bed the inviter keeps within his radius, read from the loaded chunks (GardenReach)")
 
@@ -19511,7 +19526,10 @@ def check_pact_screen(co, lang):
         if f'"{name}"' not in shots:
             err(f"ConcordancePactClientGameTests: takes {name}")
     # GC-04 (GC-P30): the garden client class takes its shots, and none before the world is shown (26.3: LevelLoadingScreen).
-    garden = (TESTS_ROOT / "ConcordanceGardenPactClientGameTests.java").read_text(encoding="utf-8")         if (TESTS_ROOT / "ConcordanceGardenPactClientGameTests.java").exists() else ""
+    garden = (TESTS_ROOT / "ConcordanceGardenPactClientGameTests.java").read_text(encoding="utf-8") \
+        if (TESTS_ROOT / "ConcordanceGardenPactClientGameTests.java").exists() else ""
+    # Read without comments, so a step commented out no longer counts (the unit review).
+    garden = re.sub(r"//[^\n]*|/\*.*?\*/", " ", garden, flags=re.S)
     for name in pa.GARDEN_CLIENT_SHOTS:
         if f'"{name}"' not in garden:
             err(f"ConcordanceGardenPactClientGameTests: takes {name}")
@@ -19741,7 +19759,8 @@ def check_spirit_bodies(co):
         if f'"{pa.LOOPS[key]}"' not in shots:
             err(f"ConcordancePactClientGameTests: checks his {key} loop ({pa.LOOPS[key]})")
     posed = {key.lower(): (float(a), float(b)) for key, a, b in re.findall(
-        r'gesturePose\(context, server, perch, StolasEntity\.Gesture\.([A-Z]+), ([0-9.]+), ([0-9.]+), "jugcraft_stolas_[a-z]+"\);', shots)}
+        r'gesturePose\(context, server, perch, StolasEntity\.Gesture\.([A-Z]+), ([0-9.]+), ([0-9.]+), "jugcraft_stolas_[a-z]+"\);',
+        re.sub(r"//[^\n]*|/\*.*?\*/", " ", shots, flags=re.S))}
     if posed != {key: window for key, (_, window) in pa.GESTURE_TIMES.items()}:
         err(f"ConcordancePactClientGameTests: each gesture is frozen inside its telling pose (GESTURE_TIMES): {posed}")
     for needle in ("StolasEntity.Gesture.ARRIVE.animation.equals(", "StolasEntity.Gesture.DEPART.animation.equals("):
@@ -19799,16 +19818,22 @@ def check_spirit_bodies(co):
             got = runtime_bones[name]
             want = [stem] * (copies + 1) + bone["cubes"][1:] if name == "base" else bone.get("cubes", [])
             shift = 0 if name == "base" else rise
-            if [round(a - b, 4) for a, b in zip(got["pivot"], bone["pivot"])] != [0, shift, 0] or len(got.get("cubes", [])) != len(want):
-                err(f"buer.geo.json {name}: the owner's bone, raised {shift} above the stem")
+            # Every key but its pivot and cubes (its parent, rotation, ...) is the owner's (the unit review).
+            keys = lambda b: {k: v for k, v in b.items() if k not in ("pivot", "cubes")}
+            if [round(a - b, 4) for a, b in zip(got["pivot"], bone["pivot"])] != [0, shift, 0] or len(got.get("cubes", [])) != len(want) \
+                    or keys(got) != keys(bone):
+                err(f"buer.geo.json {name}: the owner's bone (its parent, rotation and every other key), raised {shift} above the stem")
                 continue
             for index, (cube, owner) in enumerate(zip(got.get("cubes", []), want)):
                 lift = round(stem["size"][1] * index, 4) if name == "base" and index <= copies else shift
                 gone = set(owner["uv"]) - set(cube["uv"]) if isinstance(owner.get("uv"), dict) and isinstance(cube.get("uv"), dict) else set()
                 rest = lambda c: {k: v for k, v in c.items() if k not in ("origin", "pivot", "uv")}
-                if [round(a - b, 4) for a, b in zip(cube["origin"], owner["origin"])] != [0, lift, 0] or rest(cube) != rest(owner) \
+                # Its pivot, where the owner's cube has one, raised as its origin is (the unit review).
+                pivot = ("pivot" in cube) == ("pivot" in owner) and ("pivot" not in cube
+                                                                     or [round(a - b, 4) for a, b in zip(cube["pivot"], owner["pivot"])] == [0, lift, 0])
+                if [round(a - b, 4) for a, b in zip(cube["origin"], owner["origin"])] != [0, lift, 0] or rest(cube) != rest(owner) or not pivot \
                         or len(gone) > 1 or (isinstance(cube.get("uv"), dict) and any(owner["uv"].get(f) != v for f, v in cube["uv"].items())):
-                    err(f"buer.geo.json {name} cube {index}: the owner's, raised {lift}, at most one face dropped")
+                    err(f"buer.geo.json {name} cube {index}: the owner's (its pivot too), raised {lift}, at most one face dropped")
                 if gone:
                     dropped[(name, index)] = gone.pop()
         if dropped != body["dropped"]:
@@ -19875,6 +19900,8 @@ def check_spirit_bodies(co):
     # His poses and shots, from his front, each gesture frozen inside its window; no picture before the world is shown.
     garden_client = text(ROOT / "src" / "gametest" / "java" / "io" / "github" / "jimbozoomer" / "jugcraft" / "test"
                          / "ConcordanceGardenPactClientGameTests.java")
+    # Read without comments, so a pose or shot commented out no longer counts (the unit review).
+    garden_client = re.sub(r"//[^\n]*|/\*.*?\*/", " ", garden_client, flags=re.S)
     posed = {key.lower(): (float(a), float(b)) for key, a, b in re.findall(
         r'gesturePose\(context, server, perch, BuerEntity\.Gesture\.([A-Z]+), ([0-9.]+), ([0-9.]+), "jugcraft_garden_buer_[a-z]+"\);', garden_client)}
     if posed != {key: window for key, (_, window) in body["gesture_times"].items()}:
@@ -22726,7 +22753,8 @@ GC01_TESTS = {
                                    "twoNegotiationsAtOnePerchSealOnceForEverySpirit", "anotherPlayerCannotAcceptForAnySpiritsHolder",
                                    "everySpiritsKeysSurviveASave",
                                    "aPerchOffersOnlyWhatThePlayerMayInvite", "anInviteIndexOutOfRangeIsDropped", "aNonOwnerNeverSeesTheChooser",
-                                   "aStaleChooserRevisionIsRefused", "theRosterPortraitsEachPactBySpirit"],
+                                   "aStaleChooserRevisionIsRefused", "aVisitorOfAnotherSpiritLeavesWhenTheChosenCannotCome",
+                                   "theRosterPortraitsEachPactBySpirit"],
     "ConcordanceJournalGameTests": ["theJournalNamesEachRegardsNextStep"],
 }
 # Concordance Chunk D, D-05's game tests (check_pacts), and unit 1's upkeep tests shown on Stolas's pact too.
@@ -22748,10 +22776,11 @@ GC02_TESTS = {"ConcordanceWorkerGameTests": ["aSpiritArrivesFacingItsInviter", "
                                              "aTeleportBackKeepsTheFacing", "aClosedConversationLeavesTheFacing",
                                              "theLookTargetIsDroppedOnlyWhenGoneElsewhereOrFar",
                                              "aWorkTargetOutranksTheSpeakerWhileItsGesturePlays"]}
-# The garden cohort, GC-04's game tests (Buer; check_pacts). PG's three obligation tests land with him (PG §5.2).
+# The garden cohort, GC-04's game tests (Buer; check_pacts). GC-03's three obligation tests (GC-P31) land with him.
 GC04_TESTS = {
     "ConcordanceWorkerGameTests": [
         "buerEasesOneStrainAtTheBedsOwnRate", "buerTendsOnlyBedsOfHisBeneficiaries", "buerNeverTouchesAClaimedOrDormantBed",
+        "buerSkipsBedsHeMayNotChange",
         "buerWaitsForAPresentHolder", "twoBuersShareOneBedsTendWindow", "buerSleepsOutsideHisHours", "buerStopsAtHisQuota",
         "buerChangesAtMostOneBedAThink", "anOverworkedBedWaitsForCompost", "anOverworkedComplaintIsForgottenOnRestart",
         "buerRefusesWithoutABedToMend", "buersFirstObligationIsATendingByHand", "buerFacesTheBedHeTends",

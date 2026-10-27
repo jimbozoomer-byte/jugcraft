@@ -493,8 +493,9 @@ public class PactMenu extends AbstractContainerMenu {
 
 	/**
 	 * GC-01 (SG4): INVITE, only on the chooser, by its owner: the spirit at {@code choice} in the list it last sent, if they
-	 * may still invite it. Its visit begins (its beats, then its terms; it comes now if nothing stands in the way). Nothing
-	 * is stored but this conversation's choice; to choose again, decline and reopen.
+	 * may still invite it. Its visit begins (its beats, then its terms; it comes now if nothing stands in the way, and
+	 * otherwise a visitor of another spirit still waiting here leaves, so no spirit waits on the perch while another's terms
+	 * are shown: the unit review). Nothing is stored but this conversation's choice; to choose again, decline and reopen.
 	 */
 	private Answered invite(ServerLevel level, ServerPlayer player, int choice, long now) {
 		if (lastMode != PactStatePayload.INVITE || choice >= patternIds.size() || !perch.holder().maySeal(level, player, false)) {
@@ -507,6 +508,8 @@ public class PactMenu extends AbstractContainerMenu {
 		chosen = definition.id();
 		if (invitable(level, player, definition, now)) {
 			perch.welcome(level, player, definition.id());
+		} else {
+			perch.dismiss(level, definition.id());
 		}
 		perch.heard(level);
 		return new Answered(INVITED, true, line("answer.invited", PactKeeping.name(definition.id())));

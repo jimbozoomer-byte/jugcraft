@@ -49,8 +49,9 @@ public final class GardenPacts {
 
 	/**
 	 * Why {@code record}'s garden service may not change the block at {@code pos} (in {@code level}, kept by {@code keeper}) at
-	 * world time {@code time} and game time {@code now}, or null when it may (GC-S7, S3, S7). Called only after the presence's
-	 * decide returned IDLE (PactSpiritEntity.think), and at each change, never from a cache. In this order, cheapest first:
+	 * world time {@code time} and game time {@code now}, or null when it may (GC-S7, S3, S7). Called from a service's step,
+	 * which PactSpiritEntity.think runs once the presence's decide returned IDLE, or UPKEEP_DUE through an offering's grace
+	 * with its holder near (GC-P27), and at each change, never from a cache. In this order, cheapest first:
 	 * its pact does not serve there now (Pacts.serves: no service or no perch, another level or outside its area, outside its
 	 * hours: OUTSIDE_AGREEMENT; suspended: SUSPENDED; held for upkeep: UPKEEP_HELD; its day's quota spent: FINISHED); the
 	 * keeper is nobody or no beneficiary at this moment (IDLE: skipped); its holder is not online, alive, in this level and

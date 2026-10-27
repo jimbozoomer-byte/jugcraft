@@ -1133,7 +1133,7 @@ public class ConcordanceJourneyGameTests {
 		helper.assertTrue(ConcordanceWorkerGameTests.answered(refused, Pacts.Outcome.CANNOT_AFFORD.id)
 				&& ConcordanceWorkerGameTests.said(refused).equals(ConcordanceWorkerGameTests.PACT_KEY + "answer.cannot_afford.items")
 				&& BoundWills.of(server).ledger().heldBy(id).isEmpty() && !buer.gone(), "Short of the compact: refused, nothing spent, he stays");
-		// The compact past the hotbar (critique 2): a use with the main hand below never touches it.
+		// The compact past the hotbar (main-inventory slots, not the hand): a use with the main hand below never touches it.
 		for (int i = 0; i < 3; i++) {
 			holder.getInventory().setItem(GARDEN_COMPACT_SLOT + i, craft(helper, Garden.MENDVETCH, 2, of(Items.WHEAT_SEEDS), of(Items.BONE_MEAL),
 					of(Items.AMETHYST_SHARD), null, null, null, null, null, null));
@@ -1151,7 +1151,9 @@ public class ConcordanceJourneyGameTests {
 
 		// Step 5: by daylight he eases one strain; the overworked bed; the holder's own tending, his first obligation.
 		VerdantBedBlockEntity bed = helper.getBlockEntity(BUER_BED_AT, VerdantBedBlockEntity.class);
-		long t = level.getGameTime();
+		// Early in a game day (the unit review): his memory of today's eases is cleared at a day's turn, so the overworked
+		// step must not cross one.
+		long t = ConcordanceWorkerGameTests.dayStart(level, 1);
 		bed.setStrain(2);
 		helper.assertValueEqual(buer.think(level, PACT_NOON, t), Status.WORKING, "By day he eases one strain");
 		helper.assertValueEqual(bed.strain(), 1, "2 to 1");

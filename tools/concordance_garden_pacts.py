@@ -18,6 +18,10 @@ data to them. Each spirit's unit adds its work to OBLIGATIONS and CONSTANTS and 
 and its row to DISTINCT.
 """
 
+import concordance_ecology as ecology
+import concordance_pacts as pacts
+import concordance_workers as workers
+
 MOD = "jugcraft"
 
 
@@ -90,28 +94,43 @@ MESSAGES = {
 # Under tooltip.jugcraft.concordance. (tools/concordance.py TOOLTIPS).
 TOOLTIPS = {"garden_regard_specimen": "The garden's spirits regard this: sneak and use it in the air to examine it"}
 
-# Each spirit's codex pages, in its unit: ("text", title, words, ("garden_regard", "understood")). GC-04: Buer's (Dossier 1).
+# Each spirit's codex pages, in its unit: ("text", title, words, ("garden_regard", "understood")). GC-04: Buer's (Dossier 1),
+# their numbers read from his offer (tools/concordance_pacts.py SPIRITS) and the tables that hold the Java's (the unit review).
+_BUER = pacts.SPIRITS["buer"]["pact"]
+_BUER_ITEMS = {rid("mendvetch"): "Mendvetch", "minecraft:bone_meal": "bone meal"}  # his compact's and offering's words
+_BUER_OFFERING = _BUER_ITEMS[pacts.SPIRITS["buer"]["offerings"]["items"][0]]
+
+
+def _count(n):
+    return "one" if n == 1 else str(n)
+
+
 PAGES = [
     ("text", "Buer",
      "Buer, a spirit of the old books, mends what a garden's harvests strain. Build a **Pact Perch** (its recipe is this "
-     "entry's third page) with an **awake Verdant Bed** of yours within 8 blocks, and use it: he comes rooted on the perch, "
-     "a great blossom, and names every term before anything is spent. Without a bed of yours there he will not come: "
-     "\"There is nothing here I could mend.\"", ("garden_regard", "understood")),
+     f"entry's third page) with an **awake Verdant Bed** of yours within {_BUER['service']['radius']} blocks, and use it: "
+     "he comes rooted on the perch, a great blossom, and names every term before anything is spent. Without a bed of yours "
+     "there he will not come: \"There is nothing here I could mend.\"", ("garden_regard", "understood")),
     ("text", "His Service",
-     "By daylight (06:00 to 18:00), while you are within 64 blocks of the perch, he eases **one harvest strain** from one "
-     "awake bed of yours or your party's in his area at a time, the most strained first, at most 16 a game day. Each bed "
-     "is eased no sooner than its own tending allows: the 30 seconds a Greenwarden's hand waits, shared with yours. He "
-     "moves no nutrients and no items, and never touches a bed you could not change by hand.", ("garden_regard", "understood")),
+     f"By daylight ({workers.clock(_BUER['service']['from'])} to {workers.clock(_BUER['service']['to'])}), while you are "
+     f"within {workers.PACT['REACH']} blocks of the perch, he eases **one harvest strain** from one awake bed of yours or "
+     f"your party's in his area at a time, the most strained first, at most {_BUER['service']['quota']} a game day. Each "
+     f"bed is eased no sooner than its own tending allows: the {ecology.TEND_TICKS // 20} seconds a Greenwarden's hand "
+     "waits, shared with yours. He moves no nutrients and no items, and never touches a bed you could not change by hand.",
+     ("garden_regard", "understood")),
     ("text", "The Overworked Bed",
      "A bed he mended today that is worked back to its worst strain is **overworked**: he will not mend it again until it "
      "eases by its own rules: fed with bone meal or fertilizer, a Mulch Maw's nutrient, or left fallow. The pact's page "
      "and Jade name it. Nothing is lost while it waits, and a restart forgets his complaint; nothing is ever owed.",
      ("garden_regard", "understood")),
     ("text", "His Price",
-     "The compact, paid as you accept (no astrolabe): **4 Mendvetch and 4 bone meal**. Then one Mendvetch every 7 game "
-     "days, up to 4 paid ahead; a missed one is warned and he works on through a day's grace, then the pact is suspended "
-     "with nothing lost. Your first obligation: tend a strained bed in his area yourself, with an empty hand, while the "
-     "pact is active.", ("garden_regard", "understood")),
+     "The compact, paid as you accept (no astrolabe): **"
+     + " and ".join(f"{cost['count']} {_BUER_ITEMS[cost['item']]}" for cost in _BUER["compact"]["items"])
+     + f"**. Then {_count(_BUER['upkeep']['count'])} {_BUER_OFFERING} every {_BUER['upkeep']['period_days']} game days, "
+     f"up to {_BUER['upkeep']['cap']} paid ahead; a missed one is warned and he works on through "
+     + ("a day's grace" if _BUER["upkeep"]["grace_days"] == 1 else f"{_BUER['upkeep']['grace_days']} days' grace")
+     + ", then the pact is suspended with nothing lost. Your first obligation: tend a strained bed in his area yourself, "
+     "with an empty hand, while the pact is active.", ("garden_regard", "understood")),
 ]
 
 

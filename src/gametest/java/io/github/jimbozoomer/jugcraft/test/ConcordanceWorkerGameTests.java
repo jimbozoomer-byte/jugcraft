@@ -3847,7 +3847,7 @@ public class ConcordanceWorkerGameTests {
 	@GameTest(maxTicks = 20)
 	public void aCompactWithoutResonanceNamesNoAstrolabe(GameTestHelper helper) {
 		// The words are read as the server renders them; without the mod's words a key would name neither, so the check would
-		// say nothing (the critique's correction 8): the server must have them.
+		// say nothing (GC-P29): the server must have them.
 		helper.assertTrue(Language.getInstance().has(PACT_KEY + "term.compact.items"), "the server reads the mod's words (Fabric's server translations)");
 		ServerLevel level = helper.getLevel();
 		ConcordanceRules was = ConcordanceData.rules();
@@ -5043,7 +5043,10 @@ public class ConcordanceWorkerGameTests {
 		helper.succeed();
 	}
 
-	/** GC-04 (GC-S7): a bed of the holder's that the holder could not change by hand (a claim), and a dormant bed, untouched. */
+	/**
+	 * GC-04 (GC-S7): a bed of the holder's that the holder could not change by hand (a claim), and a dormant bed, untouched.
+	 * The claim lifted, the bed is his to mend from his index's next read (a bed refused for itself is not asked before).
+	 */
 	@GameTest(maxTicks = 20)
 	public void buerNeverTouchesAClaimedOrDormantBed(GameTestHelper helper) {
 		ServerLevel level = helper.getLevel();
@@ -5060,8 +5063,52 @@ public class ConcordanceWorkerGameTests {
 			helper.assertValueEqual(buer.think(level, NOON, now), Status.IDLE, "A claimed bed and a dormant one: he waits");
 			helper.assertTrue(claimed.strain() == 3 && dormant.strain() == 3 && !dormant.awake(), "Neither is touched");
 		}
-		helper.assertValueEqual(buer.think(level, NOON, now + 20), Status.WORKING, "Unclaimed, the holder's bed is his to mend");
+		helper.assertTrue(memory(buer).skipped(claimed.getBlockPos()), "Refused for itself, the claimed bed is skipped until his index is read again");
+		helper.assertValueEqual(buer.think(level, NOON, now + GardenReach.REFRESH_TICKS), Status.WORKING,
+				"Unclaimed, the holder's bed is his to mend once his index is read again");
 		helper.assertTrue(claimed.strain() == 2 && dormant.strain() == 3, "The dormant bed stays as it was");
+		helper.succeed();
+	}
+
+	/**
+	 * GC-04 (GC-S7; the unit review): beds he may not change never crowd out those he may. Nine of the holder's beds, nearest
+	 * the perch and as strained as any, stand in a claim. His first think asks the eight nearest, is refused each and waits;
+	 * his next, inside the same read of his index, skips those eight, is refused the ninth and eases the holder's own bed
+	 * beyond them. Each refused bed is asked once a read of the index, not each think; at the next read he asks again, and a
+	 * claim lifted by then is his to mend.
+	 */
+	@GameTest(maxTicks = 20)
+	public void buerSkipsBedsHeMayNotChange(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		ServerPlayer keeper = gardenHolder(helper);
+		long now = dayStart(level, 1);
+		PactPerchBlockEntity perch = buerPact(helper, keeper, new BlockPos(2, 1, 2), now);
+		BuerEntity buer = buer(helper, perch);
+		List<VerdantBedBlockEntity> claimed = new ArrayList<>();
+		VerdantBedBlockEntity own = keptBed(helper, new BlockPos(8, 1, 8), keeper.getUUID(), 3);
+		try (TestClaims claims = TestClaims.open()) {
+			for (int x = 3; x <= 5; x++) {
+				for (int z = 3; z <= 5; z++) {
+					BlockPos at = new BlockPos(x, 1, z);
+					claimed.add(keptBed(helper, at, keeper.getUUID(), 3));
+					claims.block(helper.absolutePos(at), STRANGER);
+				}
+			}
+			helper.assertValueEqual(buer.think(level, NOON, now), Status.IDLE, "The eight nearest asked, each in a claim: refused, he waits");
+			helper.assertTrue(claimed.stream().filter(bed -> memory(buer).skipped(bed.getBlockPos())).count() == StrainTending.MAX_ASKED
+					&& !memory(buer).skipped(own.getBlockPos()), "Those eight are skipped until his index is read again; his own bed is not");
+			helper.assertValueEqual(buer.think(level, NOON, now + WorkerEntity.THINK_TICKS), Status.WORKING,
+					"His next think skips them and mends the holder's own bed beyond them");
+			helper.assertTrue(own.strain() == 2 && claimed.stream().allMatch(bed -> bed.strain() == 3 && memory(buer).skipped(bed.getBlockPos())),
+					"The holder's own bed eased once; every claimed bed untouched and skipped");
+			helper.assertValueEqual(buer.think(level, NOON, now + GardenReach.REFRESH_TICKS), Status.IDLE,
+					"His index read again, he asks the claimed beds again (his own bed waits out its window): refused");
+			helper.assertTrue(claimed.stream().filter(bed -> memory(buer).skipped(bed.getBlockPos())).count() == StrainTending.MAX_ASKED,
+					"asked once that read, eight skipped again");
+		}
+		helper.assertValueEqual(buer.think(level, NOON, now + 2L * GardenReach.REFRESH_TICKS), Status.WORKING,
+				"The claim lifted, at his index's next read the nearest is his to mend");
+		helper.assertTrue(claimed.getFirst().strain() == 2 && own.strain() == 2, "The nearest claimed bed eased once");
 		helper.succeed();
 	}
 
@@ -5276,7 +5323,7 @@ public class ConcordanceWorkerGameTests {
 	/** GC-04: no awake bed of the inviter's within 8 (a stranger's, a dormant one and one 9 off do not count): he does not come; nothing spent. */
 	@GameTest(structure = "jugcraft-test:drone_depot", maxTicks = 20)
 	public void buerRefusesWithoutABedToMend(GameTestHelper helper) {
-		// His words are read as the server renders them; without the mod's words the check would say nothing (critique 8).
+		// His words are read as the server renders them; without the mod's words the check would say nothing (GC-P29).
 		helper.assertTrue(Language.getInstance().has(TENDING_KEY + "missing"), "the server reads the mod's words (Fabric's server translations)");
 		ServerLevel level = helper.getLevel();
 		ServerPlayer keeper = gardenHolder(helper);
@@ -5331,7 +5378,12 @@ public class ConcordanceWorkerGameTests {
 		helper.succeed();
 	}
 
-	/** GC-04 (GC-S6): he looks at the bed he chose while his work plays (his yaw at once, his head within 40 ticks), then at no one. */
+	/**
+	 * GC-04 (GC-S6, GC-P8): spoken to from the south, he attends his speaker; his work outranks the speaker while it plays
+	 * (his yaw on the bed he chose at once, his head within 40 ticks, his body by 55); his work over, he turns back to his
+	 * speaker; the screen closed, he attends no one. His own thinks run between (by night they say he sleeps, and he still
+	 * attends whoever speaks: GC-P8).
+	 */
 	@GameTest(maxTicks = 120)
 	public void buerFacesTheBedHeTends(GameTestHelper helper) {
 		ServerLevel level = helper.getLevel();
@@ -5341,13 +5393,19 @@ public class ConcordanceWorkerGameTests {
 		PactPerchBlockEntity perch = buerPact(helper, keeper, at, g0);
 		BuerEntity buer = buer(helper, perch);
 		VerdantBedBlockEntity bed = keptBed(helper, at.east(3), keeper.getUUID(), 3);
+		standBy(helper, keeper, at, Direction.SOUTH);
+		open(helper, keeper, perch);
+		helper.assertTrue(attends(buer, keeper), "Spoken to from the south, he attends his speaker: " + yaws(buer));
 		helper.assertValueEqual(buer.think(level, NOON, level.getGameTime()), Status.WORKING, "He tends the bed east of him");
 		helper.assertTrue(buer.attending() instanceof BlockPosTracker tracked && tracked.currentBlockPosition().equals(bed.getBlockPos())
-				&& within(buer.getYRot(), EAST, 1.0F), "He attends the bed he chose, his yaw on it: " + yaws(buer));
+				&& within(buer.getYRot(), EAST, 1.0F), "His work outranks his speaker: he attends the bed he chose, his yaw on it: " + yaws(buer));
 		helper.runAfterDelay(40, () -> helper.assertTrue(within(buer.getYHeadRot(), EAST, HEAD_TOLERANCE), "His pistil has turned to it: " + yaws(buer)));
 		helper.runAfterDelay(55, () -> helper.assertTrue(within(buer.yBodyRot, EAST, BODY_TOLERANCE), "and his body: " + yaws(buer)));
-		helper.runAfterDelay(100, () -> {
-			helper.assertTrue(buer.attending() == null, "His work over and no one speaking, he attends no one");
+		helper.runAfterDelay(BuerEntity.Gesture.WORK.ticks + WorkerEntity.THINK_TICKS + 5, () -> {
+			helper.assertTrue(attends(buer, keeper) && within(buer.getYRot(), SOUTH, 1.0F), "His work over, he turns back to his speaker: " + yaws(buer));
+			keeper.closeContainer();
+			buer.think(level);
+			helper.assertTrue(buer.attending() == null, "The screen closed, he attends no one");
 			helper.succeed();
 		});
 	}
@@ -5483,7 +5541,7 @@ public class ConcordanceWorkerGameTests {
 	@GameTest(maxTicks = 20)
 	public void noGardenTermOrRefusalNamesAnAstrolabe(GameTestHelper helper) {
 		// The words are read as the server renders them; without the mod's words a key would name neither, so the check would
-		// say nothing (critique 8): the server must have them, and the compact's term must be the one without resonance.
+		// say nothing (GC-P29): the server must have them, and the compact's term must be the one without resonance.
 		helper.assertTrue(Language.getInstance().has(PACT_KEY + "term.compact.items"), "the server reads the mod's words (Fabric's server translations)");
 		List<PactDefinition> all = everySpirit(helper);
 		boolean any = false;
@@ -5517,7 +5575,7 @@ public class ConcordanceWorkerGameTests {
 		helper.succeed();
 	}
 
-	// GC-03's first obligation, shown with Buer's pact (part-groundwork §5.2): recorded once a player a spirit, never as
+	// GC-03's first obligation, shown with Buer's pact (GC-P31, GC-P38): recorded once a player a spirit, never as
 	// Stolas's, and only while the pact is active and in its area.
 
 	/**
@@ -5647,7 +5705,7 @@ public class ConcordanceWorkerGameTests {
 		helper.succeed();
 	}
 
-	// GC-01's chooser, journal and roster cases (part-perch §6.5), with a second spirit to choose.
+	// GC-01's chooser, journal and roster cases (GC-P10, GC-P16), with a second spirit to choose.
 
 	/** A survival owner ready to invite both Stolas and Buer at a perch at {@code at}: both Regards, a star, a bed within 8, one compact of each. */
 	static ServerPlayer chooserOwner(GameTestHelper helper, BlockPos at) {
@@ -5797,6 +5855,39 @@ public class ConcordanceWorkerGameTests {
 		} finally {
 			ConcordanceData.replace(was);
 		}
+		helper.succeed();
+	}
+
+	/**
+	 * GC-01 (SG4; the unit review): a visitor still awaited from a visit its owner declined, the conversation reopened before
+	 * its next think, leaves once its owner, back on the chooser, invites a spirit that cannot come yet, so no spirit waits on
+	 * the perch while another's terms are shown.
+	 */
+	@GameTest(maxTicks = 20)
+	public void aVisitorOfAnotherSpiritLeavesWhenTheChosenCannotCome(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		BlockPos at = perchFor(0);
+		ServerPlayer owner = TestPlayers.survivor(helper);
+		understand(owner, stolasOffer().research());
+		understand(owner, buerOffer().research());
+		FIXTURES.get(BuerEntity.COUNTERPART).meet(helper, owner, at);
+		RateGate.forget(owner.getUUID());
+		PactPerchBlockEntity perch = perch(helper, at, owner);
+		beside(helper, owner, at);
+		PactMenu menu = open(helper, owner, perch);
+		PactStatePayload chooser = menu.lastSent();
+		helper.assertTrue(chooser.mode() == PactStatePayload.INVITE && chooser.patterns().size() == 2 && !chooser.patterns().get(0).ready()
+				&& chooser.patterns().get(1).ready(), "The chooser: Stolas not ready (no star of theirs), Buer ready: " + chooser);
+		helper.assertTrue(answered(invite(owner, menu, 1), PactMenu.INVITED) && perch.visitor(level) instanceof BuerEntity, "INVITE(1): Buer comes");
+		helper.assertTrue(answered(send(owner, menu, PactRequestPayload.DECLINE, 0), PactMenu.DECLINED), "Its owner declines");
+		RateGate.forget(owner.getUUID());
+		PactMenu again = open(helper, owner, perch);
+		PactSpiritEntity<?> waiting = perch.visitor(level);
+		helper.assertTrue(again.lastSent().mode() == PactStatePayload.INVITE && waiting instanceof BuerEntity,
+				"Reopened before his next think: the chooser, and Buer still awaited on the perch");
+		PactStatePayload invited = invite(owner, again, 0);
+		helper.assertTrue(answered(invited, PactMenu.INVITED) && perch.visitor() == null && perch.visitor(level) == null && waiting.gone(),
+				"INVITE(0), Stolas, who cannot come yet: Buer leaves, and nobody waits on the perch while Stolas's terms are shown: " + invited);
 		helper.succeed();
 	}
 

@@ -38,8 +38,8 @@ Copied from the contract's
      remedy for a real illness. *No source quotation goes in game (GC-S14): his words are Jugcraft's.*
    - *Silhouette:* a rooted **corolla**: four broad petals round an upright pistil that leans like an arrow toward
      whatever he attends (Sagittary as a motif only, never a centaur or archer); legless, the only rooted spirit. Body:
-     the owner's Decor Blossom, its texture byte for byte and its geometry adapted (stem lengthened, the clear face of
-     each two-faced plane dropped; [below](#palette-and-body-files)). *At the planned scale 2.2: about 1.4 blocks
+     the owner's Decor Blossom, its texture byte for byte and its geometry adapted (stem lengthened, *the clear face of
+     each two-faced plane dropped*; [below](#palette-and-body-files)). *At the planned scale 2.2: about 1.4 blocks
      across shut (the 10-pixel leaf plate), about 1.7 open (the owner's `open` pose; an estimate here, held by
      `check_spirit_bodies` once built) and about 1.6 tall.*
      Not imported: the lion-headed wheel of five goat legs (de Plancy and Le Breton, 1863), Genshin Impact's Buer
@@ -53,7 +53,7 @@ Copied from the contract's
    journal's pacts section names the next step.
 3. **Service: strain tending** (`strain_tending`). Each think while serving: from the bed index, the awake beneficiary
    bed with the highest `strainNow()` (then nearest) that the bed's own rule allows tending now (`mayTendAt(now)`,
-   read-only, GC-03), is not overworked and that the present holder may change; `bed.tend(now)` eases one strain (it
+   *read-only, GC-03*), is not overworked and that the present holder may change; `bed.tend(now)` eases one strain (it
    first counts a harvest seen, as by hand); the task is counted on the record. The 600-tick rule belongs to the bed, so
    his tending and the holder's share it. No nutrients, items or practice for the holder.
 4. **Upkeep and suspension (GC-P21).** `#jugcraft:buer_offerings` (Mendvetch) ×1 every 7 game days, 1 day's grace, 4
@@ -73,7 +73,7 @@ Copied from the contract's
 7. **Interaction details.** (a) Outside his hours his petals fold shut and he sleeps (the `waiting` loop at night, with
    the kept page saying "asleep until dawn"). *Limit, planned: with an offering due his loop is the astir one (half
    open) by day and by night, since the pact's status stays "upkeep due"; the kept page and Jade still say "asleep
-   until dawn" at night (critique 11; recorded, not hidden).* (b) Before he unfurls over a bed, his pistil points at it
+   until dawn" at night (GC-P25, GC-P27; recorded, not hidden).* (b) Before he unfurls over a bed, his pistil points at it
    for a moment (attend, then the work gesture), so a watcher sees which bed he chose; *his work over, he turns back to
    whoever is speaking to him (GC-02).*
 8. **Evidence.** *Accessibility:* every cue subtitled and every gesture paired with words on the kept page, the roster
@@ -245,7 +245,7 @@ evidence named here (the contract's GE9), and each result is written from the ru
 |---|---|---|
 | 1. Identity | his body files from `tools/owner_art.py` (`--check`), `check_spirit_bodies` (bones, clips, scale, a box at least 20% unlike every other spirit's, the twin-face rule), `check_geckolib` per face; shots of his poses from his front (`jugcraft_garden_buer_idle` and the rest) and from below (`jugcraft_garden_buer_below`) | not run |
 | 2. Invitation and route | `ConcordanceJourneyGameTests.buerFromTheCodexToDeparture`; `aPerchOffersOnlyWhatThePlayerMayInvite`; `ConcordanceJournalGameTests.theJournalNamesEachRegardsNextStep`; `tools/concordance_journey.py --check` (his route); shot `jugcraft_garden_chooser` | not run |
-| 3. Service | `buerEasesOneStrainAtTheBedsOwnRate`, `buerTendsOnlyBedsOfHisBeneficiaries`, `buerNeverTouchesAClaimedOrDormantBed`, `buerWaitsForAPresentHolder`, `buerChangesAtMostOneBedAThink`, `buerStopsAtHisQuota`, `buerTendsThroughHisGrace`; shot `jugcraft_garden_buer_at_work` | not run |
+| 3. Service | `buerEasesOneStrainAtTheBedsOwnRate`, `buerTendsOnlyBedsOfHisBeneficiaries`, `buerNeverTouchesAClaimedOrDormantBed`, `buerSkipsBedsHeMayNotChange`, `buerWaitsForAPresentHolder`, `buerChangesAtMostOneBedAThink`, `buerStopsAtHisQuota`, `buerTendsThroughHisGrace`; shot `jugcraft_garden_buer_at_work` | not run |
 | 4. Upkeep and suspension | `everySpiritSealsOnceAndSpendsOnce`, `everySpiritsUpkeepWarnsGivesGraceSuspendsAndResumes`, `aSuspendedBuerTendsNothing`, `noGardenTermOrRefusalNamesAnAstrolabe`; `check_acquisition` (his compact and offering reachable); shots `jugcraft_garden_buer_terms` (three sizes) | not run |
 | 5. The overworked bed | `anOverworkedBedWaitsForCompost`, `anOverworkedComplaintIsForgottenOnRestart`, `buersReadingSaysItsNoteAndNamesNoPlayer`; shots `jugcraft_garden_buer_overworked`, `jugcraft_garden_buer_jade` | not run |
 | 6. Refusal and departure | `buerRefusesWithoutABedToMend`, `everySpiritsRefusalSpendsNothing`, `buerAnswersEachActionWithHisGesture`, the end of `buerFromTheCodexToDeparture` (escrow once); shots `jugcraft_garden_buer_nothing_to_mend`, `jugcraft_garden_buer_depart`, `jugcraft_garden_buer_ended` | not run |

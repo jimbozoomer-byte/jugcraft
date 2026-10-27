@@ -143,6 +143,19 @@ public class PactPerchBlockEntity extends BlockEntity implements AgreementHolder
 		return guest;
 	}
 
+	/**
+	 * GC-01 (the unit review): {@code counterpart} was chosen but cannot come yet, so a visitor of another spirit still
+	 * waiting here (a conversation reopened before its next think) leaves; one of that spirit stays, as welcome keeps it.
+	 */
+	void dismiss(ServerLevel level, String counterpart) {
+		PactSpirits.Spirit spirit = PactSpirits.get(counterpart);
+		PactSpiritEntity<?> guest = visitor(level);
+		if (guest != null && (spirit == null || guest.getType() != spirit.type())) {
+			guest.leave(level, null, getBlockPos());
+			visitor = null;
+		}
+	}
+
 	/** The pact's presence for {@code who}: the visitor of that spirit, if one waits here, becomes it (D-S7); otherwise that spirit is called. */
 	@Override
 	public @Nullable WorkerEntity<?> call(ServerLevel level, UUID who, String counterpart) {
