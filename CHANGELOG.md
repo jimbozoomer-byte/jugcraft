@@ -8,6 +8,9 @@ Every change to Jugcraft, newest first, grouped by pull request. For what each t
 
 No numbered release yet. Entries on feature branches remain proposed until their pull requests merge.
 
+### Unmerged: Graveyard Rising
+- **Wake a graveyard on a Halloween night:** every night of the season, ring a bell (every village has one) with at least six graves within 16 blocks, then ring it again, and the dead climb out of the graves in three waves (zombies; then skeletons with bows; then husks and a stray too), one more zombie a wave for each extra player. Lay the last wave to rest and everyone within 48 blocks gets the graves' thanks (sweets and bones, sometimes a Skeleton Suit or Mummy Wraps) and Graveyard Shift, once a night each. Dawn, an abandoned graveyard or walled-in graves send the dead back. The server's `halloween.graveyard_rising` (default `on`) turns it off. Record: [graveyard-rising.md](docs/features/graveyard-rising.md).
+
 ### Unmerged: Keep your inventory in boss fights
 - **Dying in a lair costs nothing:** as with the keepInventory rule, but only in lairs (every boss fight). No items or experience fall; you respawn outside with every slot as it was (armour and offhand worn), the same held slot and all your experience. Dying anywhere else is unchanged. No grave is ever placed in a lair; Grave Goods still catch anything another mod drops there. Record: [lair-keep-inventory.md](docs/features/lair-keep-inventory.md).
 

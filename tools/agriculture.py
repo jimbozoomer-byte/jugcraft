@@ -1772,6 +1772,41 @@ GHOSTS = {"lantern": "spirit_lantern", "lantern_display": "Spirit Lantern", "ect
           "haunt_radius": 6, "haunt_height": 3.0, "shy_radius": 3.0, "sneak_shy_radius": 1.5, "drift_speed": 0.04, "shy_speed": 0.12,
           "reveal_ticks": 40, "look_ticks": 10, "fade_ticks": 10}
 
+# ---------------------------------------------------------------- Graveyard Rising
+# Graveyard Rising (agriculture/GraveyardRising.java), every night of the Halloween season: in the Overworld, not in
+# peaceful, using a bell (any bell; every village has one) with at least `min_graves` graves (block tag `graves_tag`: the
+# gravestones, the grave mound and the headstones, a headstone of several blocks counted once) within `radius` blocks
+# across and `height` up or down stirs them, and using it again `confirm_min_ticks` to `confirm_ticks` later wakes the
+# dead (a player looks for graves at most once every `ring_cooldown` ticks). After `first_wave_ticks` they climb out of
+# the graves in `waves` (entity, count), `wave_gap_ticks` apart, plus `extra_per_player` more `extra` for each player
+# taking part after the first (at most `max_extra` a wave); `archers` carry bows. Taking part: alive, not spectating,
+# within `range` blocks of the bell. Nobody there for `abandon_ticks`, dawn, a wave the graves have no room for (fewer
+# than half of it), or the switch off, and the rising fails: the dead sink back. One of the risen (entity tag `tag`)
+# straying more than `leash` blocks from the bell sinks back and another climbs out in its place. Clear the last wave and
+# each player taking part not yet rewarded tonight (player attachment `attachment`, the night) gets the gift loot table
+# `table` and the advancement `advancement`. At most `max_risings` at once, none within `apart` blocks of another, each
+# bell once a night. The server checks every `check_ticks`; `option` (on or off) turns it off.
+GRAVEYARD_RISING = {"option": "halloween.graveyard_rising", "graves_tag": "jugcraft:graves",
+                    "graves": ["jugcraft:rounded_gravestone", "jugcraft:cross_gravestone", "jugcraft:obelisk_gravestone",
+                               "jugcraft:grave_mound", "#jugcraft:headstones"],
+                    "min_graves": 6, "radius": 16, "height": 6, "confirm_min_ticks": 20, "confirm_ticks": 200, "ring_cooldown": 20,
+                    "first_wave_ticks": 60, "wave_gap_ticks": 100, "range": 48, "abandon_ticks": 600, "leash": 40, "check_ticks": 20,
+                    "waves": [[("minecraft:zombie", 4)],
+                              [("minecraft:zombie", 3), ("minecraft:skeleton", 3)],
+                              [("minecraft:zombie", 3), ("minecraft:skeleton", 2), ("minecraft:husk", 2), ("minecraft:stray", 1)]],
+                    "archers": ["minecraft:skeleton", "minecraft:stray"],
+                    "extra": "minecraft:zombie", "extra_per_player": 1, "max_extra": 4, "max_risings": 4, "apart": 64,
+                    "tag": "jugcraft.risen", "attachment": "graveyard_rested", "table": "gameplay/graveyard_rising",
+                    "advancement": "graveyard_shift",
+                    # The gift: `rolls` of `treats` (item, weight, [min, max]), then one of `keepsakes` (weights; "" for nothing).
+                    "rolls": 3,
+                    "treats": [("jugcraft:candy_corn", 30, [2, 4]), ("jugcraft:caramel", 15, [1, 2]), ("jugcraft:ghost_taffy", 10, [1, 1]),
+                               ("jugcraft:glow_gum", 10, [1, 1]), ("jugcraft:fizz_rocks", 10, [1, 1]),
+                               ("jugcraft:witchs_licorice", 10, [1, 1]), ("minecraft:bone", 15, [2, 5])],
+                    "keepsakes": [("jugcraft:skeleton_suit", 5), ("jugcraft:mummy_wraps", 5), ("", 40)]}
+HALLOWEEN_ADVANCEMENTS["graveyard_shift"] = {"icon": "jugcraft:rounded_gravestone", "title": "Graveyard Shift",
+                                             "description": "Lay the dead of a Graveyard Rising back to rest", "frame": "challenge"}
+
 # ---------------------------------------------------------------- Fall additions 10: face paint
 # A Face Paint Kit (FacePaintKitItem) paints one of `designs` on a player's face (FacePaint: a Fabric data attachment,
 # saved and sent to every client that sees the player, drawn by the client's FacePaintLayer). Its dial (data component

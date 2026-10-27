@@ -6,7 +6,7 @@ Called from agriculture_data.py (assets, loot, tags). Formats follow vanilla Min
 blockstate (hanging), block model element rotation and light emission, the zombie's loot table, and the leather
 armor's equipment asset. Block model rotations are right-handed: about x, a positive angle tilts +y toward +z.
 """
-from agriculture import WISPS, TREBUCHET, CANDY_BAG, HORSEMAN
+from agriculture import WISPS, TREBUCHET, CANDY_BAG, HORSEMAN, GRAVEYARD_RISING
 
 MOD = "jugcraft"
 HORIZONTAL = ("north", "east", "south", "west")
@@ -162,6 +162,22 @@ TEXT = {
     "message.jugcraft.horseman.no_head": "The scarecrow needs a lit pumpkin for a head",
     "message.jugcraft.horseman.roofed": "He only rides under the open sky",
     "message.jugcraft.horseman.already_riding": "The Headless Horseman is already riding nearby",
+    # Graveyard Rising (GraveyardRising.Result and its ends).
+    "message.jugcraft.graveyard_rising.too_few_graves": "Too few graves here to wake the dead (%s of %s)",
+    "message.jugcraft.graveyard_rising.daytime": "The dead sleep while the sun is up",
+    "message.jugcraft.graveyard_rising.peaceful": "The dead rest in peace here (Peaceful)",
+    "message.jugcraft.graveyard_rising.already_risen": "These graves have already risen tonight",
+    "message.jugcraft.graveyard_rising.nearby": "Another graveyard nearby is already rising",
+    "message.jugcraft.graveyard_rising.too_many": "Too many graveyards are rising at once",
+    "message.jugcraft.graveyard_rising.stirred": "The graves stir... Ring the bell again to wake the dead",
+    "message.jugcraft.graveyard_rising.risen": "The dead are rising from their graves! Lay them back to rest",
+    "message.jugcraft.graveyard_rising.wave": "The dead rise: wave %s of %s",
+    "message.jugcraft.graveyard_rising.won": "The graveyard rests. The dead lie still, and leave you a token of thanks",
+    "message.jugcraft.graveyard_rising.rested_already": "The graveyard rests. You have had the graves' thanks already tonight",
+    "message.jugcraft.graveyard_rising.failed": "The dead sink back into their graves",
+    "message.jugcraft.graveyard_rising.dawn": "Dawn breaks, and the dead sink back into their graves",
+    "message.jugcraft.graveyard_rising.blocked": "The graves have no room to rise; the dead sink back",
+    "event.jugcraft.graveyard_rising.wave": "Graveyard Rising: wave %s of %s",
 }
 
 
@@ -221,6 +237,19 @@ def loot(out, write):
             entry["modifier"] = {"type": "minecraft:set_count", "count": {"type": "minecraft:uniform", "min": low, "max": high}}
         pools.append({"condition": {"type": "minecraft:killed_by_player"}, "entries": [entry], "rolls": 1})
     write(out.parent / f"{HORSEMAN['table']}.json", {"type": "minecraft:entity", "pools": pools, "random_sequence": rid(HORSEMAN["table"])})
+    # Graveyard Rising's gift to each player who lays the dead to rest: treats, then perhaps a keepsake.
+    rising = GRAVEYARD_RISING
+    treats = []
+    for item, weight, (low, high) in rising["treats"]:
+        entry = {"type": "minecraft:item", "name": item, "weight": weight}
+        if high > 1:
+            entry["modifier"] = {"type": "minecraft:set_count", "count": {"type": "minecraft:uniform", "min": low, "max": high}}
+        treats.append(entry)
+    keepsakes = [{"type": "minecraft:item", "name": item, "weight": weight} if item else {"type": "minecraft:empty", "weight": weight}
+                 for item, weight in rising["keepsakes"]]
+    write(out.parent / f"{rising['table']}.json", {"type": "minecraft:gift", "pools": [{"entries": treats, "rolls": rising["rolls"]},
+                                                                                     {"entries": keepsakes, "rolls": 1}],
+                                                   "random_sequence": rid(rising["table"])})
 
 
 def tags(tags):
@@ -230,6 +259,8 @@ def tags(tags):
         tags.add("item", CANDY_BAG["treat_tag"], item)
     tags.add("block", "minecraft:mineable/axe", rid(TREBUCHET["block"]))
     tags.add("block", "minecraft:mineable/pickaxe", rid(HORSEMAN["lantern"]))
+    for grave in GRAVEYARD_RISING["graves"]:
+        tags.add("block", GRAVEYARD_RISING["graves_tag"], grave)
     # Where wisps come out over a swamp (Wisps.canSpawnAt): the common swamps and the landscape collection's.
     for biome in WISPS["haunts"]:
         tags.add("worldgen/biome", WISPS["haunts_tag"], biome)

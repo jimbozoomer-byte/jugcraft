@@ -1400,6 +1400,7 @@ public final class JugcraftAgriculture {
 				.component(DataComponents.BUNDLE_CONTENTS, BundleContents.EMPTY), TOOL_TAB);
 		TrickOrTreat.register();
 		TrickOrTreaters.register();
+		GraveyardRising.register();
 	}
 
 	/**
