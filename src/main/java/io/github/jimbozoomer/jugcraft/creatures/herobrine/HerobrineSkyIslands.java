@@ -265,9 +265,16 @@ public final class HerobrineSkyIslands {
 			}
 		}
 		keep(s, -5, -8, 5, -2, BRICK);
-		// Weather: the walls' tops and the towers' battlements crumble; rubble lies in the courtyard.
-		s.crumble(-w, 5, -w, w, 6, w, 0.3);
-		s.crumble(-w - 2, 7, -w - 2, w + 2, 10, w + 2, 0.25);
+		// Weather: the curtain walls' tops and the battlements crumble (never what holds a ladder, stair or floor);
+		// rubble lies in the courtyard.
+		weatherCurtain(s, w, 5, 6, 0.3);
+		for (int sx = -1; sx <= 1; sx += 2) {
+			for (int sz = -1; sz <= 1; sz += 2) {
+				int top = sx < 0 && sz < 0 ? 6 : 9;
+				s.crumble(sx * w - 2, top + 1, sz * w - 2, sx * w + 2, top + 1, sz * w + 2, 0.35);
+			}
+		}
+		s.crumble(-5, 11, -8, 5, 11, -2, 0.3);
 		for (int i = 0; i < 16; i++) {
 			int x = s.random.nextInt(2 * w - 3) - (w - 2);
 			int z = s.random.nextInt(w + 1) - 1;
@@ -308,6 +315,10 @@ public final class HerobrineSkyIslands {
 		}
 		s.fill(-5, 5, -3, 5, 5, 3, TIMBER);
 		s.fill(-5, 9, -3, 5, 9, 3, TIMBER);
+		for (int x = -6; x <= 6; x++) {
+			s.set(x, 9, -4, log(Blocks.DARK_OAK_LOG, Direction.Axis.X));
+			s.set(x, 9, 4, log(Blocks.DARK_OAK_LOG, Direction.Axis.X));
+		}
 		gableRoof(s, -7, 7, 4, 9, Blocks.DARK_OAK_STAIRS, Blocks.DARK_OAK_PLANKS, Blocks.DARK_OAK_SLAB, -6, 6);
 		// The door, and windows of old glass, some broken.
 		s.clear(0, 1, 4, 0, 2, 4);
@@ -339,7 +350,7 @@ public final class HerobrineSkyIslands {
 		s.fill(5, 6, -3, 5, 7, -1, Palette.of(Blocks.BOOKSHELF));
 		for (int x = -3; x <= -1; x++) {
 			for (int z = 1; z <= 2; z++) {
-				s.fixture(x, 6, z, Blocks.GRAY_CARPET.defaultBlockState(), Direction.DOWN);
+				s.fixture(x, 6, z, Blocks.CARPET.gray().defaultBlockState(), Direction.DOWN);
 			}
 		}
 		s.fixture(3, 6, 2, skull(Direction.SOUTH), null);
@@ -384,6 +395,10 @@ public final class HerobrineSkyIslands {
 					s.set(x, y, z, log(Blocks.DARK_OAK_LOG, Direction.Axis.Y));
 				}
 			}
+		}
+		for (int x = -5; x <= 5; x++) {
+			s.set(x, 8, -4, log(Blocks.DARK_OAK_LOG, Direction.Axis.X));
+			s.set(x, 8, 4, log(Blocks.DARK_OAK_LOG, Direction.Axis.X));
 		}
 		gableRoof(s, -6, 6, 4, 8, Blocks.DARK_OAK_STAIRS, Blocks.DARK_OAK_PLANKS, Blocks.DARK_OAK_SLAB, -5, 5);
 		s.clear(0, 1, 4, 0, 2, 4);
@@ -482,7 +497,7 @@ public final class HerobrineSkyIslands {
 			s.late(x, 1, 5, Blocks.DARK_OAK_FENCE.defaultBlockState());
 			s.fixture(x, 2, 5, skull(Direction.SOUTH), null);
 		}
-		s.crumble(-w, 6, -w, w, 7, w, 0.2);
+		weatherCurtain(s, w, 6, 7, 0.2);
 		s.sign(0, 1, 6, Direction.SOUTH, List.of("THE MOUNTAIN", "FELL", "UPWARD", ""));
 	}
 
@@ -610,6 +625,14 @@ public final class HerobrineSkyIslands {
 		}
 	}
 
+	/** Weathers the top rows ({@code y0}–{@code y1}) of a square curtain wall {@code w} out from the middle, wall by wall. */
+	private static void weatherCurtain(Shape s, int w, int y0, int y1, double chance) {
+		s.crumble(-w, y0, -w, w, y1, -w, chance);
+		s.crumble(-w, y0, w, w, y1, w, chance);
+		s.crumble(-w, y0, -w + 1, -w, y1, w - 1, chance);
+		s.crumble(w, y0, -w + 1, w, y1, w - 1, chance);
+	}
+
 	/** Battlements: every other block round the box's edge, at height {@code y}. */
 	private static void crenels(Shape s, int x0, int z0, int x1, int z1, int y, Palette palette) {
 		for (int x = x0; x <= x1; x++) {
@@ -681,11 +704,9 @@ public final class HerobrineSkyIslands {
 				s.set(x, y + k, rows - k, stairs(stairBlock, Direction.NORTH));
 				s.set(x, y + k, -(rows - k), stairs(stairBlock, Direction.SOUTH));
 			}
-			if (k > 0) {
-				for (int z = -(rows - k) + 1; z <= rows - k - 1; z++) {
-					s.set(endA, y + k, z, fill.defaultBlockState());
-					s.set(endB, y + k, z, fill.defaultBlockState());
-				}
+			for (int z = -(rows - k) + 1; z <= rows - k - 1; z++) {
+				s.set(endA, y + k, z, fill.defaultBlockState());
+				s.set(endB, y + k, z, fill.defaultBlockState());
 			}
 		}
 		for (int x = x0; x <= x1; x++) {
@@ -769,7 +790,7 @@ public final class HerobrineSkyIslands {
 		}
 		s.fill(cx - 2, cy + 4, -2, cx + 2, cy + 4, 2, Palette.of(Blocks.DARK_OAK_SLAB.defaultBlockState()));
 		s.clear(cx + 2 * inward, cy + 1, 0, cx + 2 * inward, cy + 2, 0);
-		s.fixture(cx, cy + 1, 0, Blocks.BLACK_CARPET.defaultBlockState(), Direction.DOWN);
+		s.fixture(cx, cy + 1, 0, Blocks.CARPET.black().defaultBlockState(), Direction.DOWN);
 		s.fixture(cx - inward, cy + 1, 1, candles(1, false), Direction.DOWN);
 		s.set(cx - inward, cy + 3, -1, Blocks.COBWEB.defaultBlockState());
 		s.sign(cx - inward, cy + 1, -1, inward > 0 ? Direction.EAST : Direction.WEST, words);
@@ -1000,7 +1021,7 @@ public final class HerobrineSkyIslands {
 		 * {@code world} is read only next to the drawing, which must already be known to be loaded.
 		 */
 		LinkedHashMap<BlockPos, BlockState> finish(BlockGetter world) {
-			Comparator<BlockPos> upward = Comparator.comparingInt(BlockPos::getY).thenComparingInt(BlockPos::getX).thenComparingInt(BlockPos::getZ);
+			Comparator<BlockPos> upward = Comparator.<BlockPos>comparingInt(BlockPos::getY).thenComparingInt(BlockPos::getX).thenComparingInt(BlockPos::getZ);
 			LinkedHashMap<BlockPos, BlockState> out = new LinkedHashMap<>();
 			List<BlockPos> order = new ArrayList<>(solid.keySet());
 			order.sort(upward);
