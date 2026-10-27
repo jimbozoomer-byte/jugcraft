@@ -107,6 +107,8 @@ STATUSES = {
     # Concordance Chunk D, D-02: a pact's upkeep (appended; ids are saved).
     "upkeep_due": "an offering is due for its upkeep (it works on through its grace)",
     "upkeep_held": "suspended for its upkeep: nothing is taken or lost, and an offering resumes it",
+    # Concordance garden cohort, GC-05 (GB27): a pact spirit's choice waits on its holder's answer (appended; ids are saved).
+    "awaiting_answer": "awaiting your answer at its perch",
 }
 
 BINDING_SPECIMEN_TAG = f"{MOD}:binding_specimens"

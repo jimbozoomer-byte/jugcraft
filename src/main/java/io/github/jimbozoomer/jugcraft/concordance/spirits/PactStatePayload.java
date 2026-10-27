@@ -29,7 +29,8 @@ import net.minecraft.world.item.ItemStack;
  * @param compact   the Open Hand Compact's materials, for their icons (its term says them in words); resonance its resonance
  * @param actions   a bit for each action the mode offers now ({@link #offers}); the server decides when one is pressed
  * @param result    the answer to the request this state answers; empty for the opening, CHOOSE and a reload
- * @param spirit    the spirit this state is about: its sign and the work it keeps or offers (GC-01; NONE for the chooser)
+ * @param spirit    the spirit this state is about: its sign and the work it keeps or offers (GC-01; NONE for the chooser);
+ *                  GC-05: its matter and answers on the kept page
  */
 public record PactStatePayload(int containerId, int revision, int mode, Component speaker, List<Component> beats, List<Term> terms,
 		List<Component> notes, List<Choice> patterns, List<Choice> offerings, List<ItemStack> compact, int resonance, int actions,
@@ -45,6 +46,8 @@ public record PactStatePayload(int containerId, int revision, int mode, Componen
 	public static final int MAX_NOTES = 12;
 	public static final int MAX_CHOICES = 8;
 	public static final int MAX_COMPACT = 8;
+	/** GC-05: the most answers a matter offers (tools/concordance_pacts.py STATE_LIMITS). */
+	public static final int MAX_ANSWERS = 3;
 	public static final int MAX_KEY = 64;
 	/**
 	 * A choice's id: a pattern's or an offering's, both from data (the item tag, the pattern files), so bounded only as any
@@ -86,15 +89,29 @@ public record PactStatePayload(int containerId, int revision, int mode, Componen
 
 	/**
 	 * GC-01 (SG5): the spirit a state is about: its sign (an item id the screen draws by its name; PactSpirits, never derived
-	 * from an offering) and the work of the pact it keeps, offers or seats ("" when none). NONE for the chooser and for a
-	 * state built without one. Network only. Unit 2 appends its matter and answers here, never a fifteenth top-level field.
+	 * from an offering) and the work of the pact it keeps, offers or seats ("" when none). GC-05: on the kept page, the
+	 * matter its spirit raises (empty when none) and its answers, the safe course first (at most MAX_ANSWERS; each id an
+	 * accord, name its words, amount 1 for the answer kept now and 0 otherwise, ready when RESOLVE may choose it). NONE for
+	 * the chooser and a state built without one. Network only; never a fifteenth top-level field.
 	 */
-	public record Spirit(String sign, String work) {
-		public static final Spirit NONE = new Spirit("", "");
+	public record Spirit(String sign, String work, Component matter, List<Choice> answers) {
+		public static final Spirit NONE = new Spirit("", "", Component.empty(), List.of());
 		public static final StreamCodec<RegistryFriendlyByteBuf, Spirit> STREAM_CODEC = StreamCodec.composite(
 				ByteBufCodecs.stringUtf8(MAX_ID), Spirit::sign,
 				ByteBufCodecs.stringUtf8(MAX_ID), Spirit::work,
+				ComponentSerialization.TRUSTED_STREAM_CODEC, Spirit::matter,
+				Choice.STREAM_CODEC.apply(ByteBufCodecs.list(MAX_ANSWERS)), Spirit::answers,
 				Spirit::new);
+
+		public Spirit {
+			matter = matter == null ? Component.empty() : matter;
+			answers = answers == null ? List.of() : bounded(answers, MAX_ANSWERS);
+		}
+
+		/** A spirit with no matter (GC-01's two parts): no line, no answers. */
+		public Spirit(String sign, String work) {
+			this(sign, work, Component.empty(), List.of());
+		}
 	}
 
 	public static final StreamCodec<RegistryFriendlyByteBuf, PactStatePayload> CODEC = StreamCodec.composite(

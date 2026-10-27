@@ -35,7 +35,8 @@ import org.jspecify.annotations.Nullable;
  * Concordance on, its pact is left without its perch (OnBreak.UNSEAT). Once a second, spread by place, it looks at its
  * pact (PactKeeping.tick: the upkeep, and a lost presence called back while its holder is near). While a conversation is
  * open and nothing is kept here, one visiting spirit waits on it; the visitor is never saved, so a perch read from its
- * save has none.
+ * save has none. It keeps one more thing of its pact's (GC-05): its holder's answer to its spirit's matter, the accord,
+ * saved while that pact is kept here and gone with it.
  */
 public class PactPerchBlockEntity extends BlockEntity implements AgreementHolder.Holds {
 	/** How often the perch looks at its pact: once a second, spread by position (tools/concordance_pacts.py SESSION). */
@@ -43,6 +44,11 @@ public class PactPerchBlockEntity extends BlockEntity implements AgreementHolder
 
 	private final AgreementHolder holder = new AgreementHolder(this, AgreementHolder.OnBreak.UNSEAT, true);
 	private @Nullable UUID visitor;
+	/**
+	 * GC-05 (GC-P42, GC-P46): its pact's accord, its holder's answer to its spirit's matter (PactAccords), as saved; null
+	 * while unanswered. Readable and saved only while a pact is kept here; a pact sealed or seated here starts unanswered.
+	 */
+	private @Nullable String accord;
 
 	public PactPerchBlockEntity(BlockPos pos, BlockState state) {
 		super(Workers.PERCH_ENTITY, pos, state);
@@ -56,6 +62,19 @@ public class PactPerchBlockEntity extends BlockEntity implements AgreementHolder
 	/** The visiting spirit's id while a conversation is open here (never saved). */
 	public @Nullable UUID visitor() {
 		return visitor;
+	}
+
+	/** GC-05: the accord as kept here (raw; PactAccords.answer reads it against its service's answers); null while no pact is kept here. */
+	public @Nullable String accord() {
+		return holder.agreement() == null ? null : accord;
+	}
+
+	/** GC-05: its holder's answer is kept here. PactAccords.resolve alone calls this, after every check of its own. */
+	void keepAccord(String value) {
+		if (!value.equals(accord)) {
+			accord = value;
+			setChanged();
+		}
 	}
 
 	/**
@@ -146,6 +165,12 @@ public class PactPerchBlockEntity extends BlockEntity implements AgreementHolder
 	/** The pact's presence for {@code who}: the visitor of that spirit, if one waits here, becomes it (D-S7); otherwise that spirit is called. */
 	@Override
 	public @Nullable WorkerEntity<?> call(ServerLevel level, UUID who, String counterpart) {
+		// GC-05 (GC-P46): a pact sealed or seated here arrives through this call while nothing is kept here (a recall comes
+		// while one is): it starts unanswered, whatever an earlier pact here was told.
+		if (holder.agreement() == null && accord != null) {
+			accord = null;
+			setChanged();
+		}
 		PactSpirits.Spirit spirit = PactSpirits.get(counterpart);
 		if (spirit == null) {
 			return null;
@@ -226,6 +251,10 @@ public class PactPerchBlockEntity extends BlockEntity implements AgreementHolder
 	protected void loadAdditional(ValueInput input) {
 		super.loadAdditional(input);
 		holder.load(input);
+		// GC-05: an answer is read only with the pact it answers, and only as long as an accord may be; an unknown one is kept
+		// as written (PactAccords reads it as unanswered).
+		String read = input.getStringOr("accord", "");
+		accord = holder.agreement() != null && !read.isEmpty() && read.length() <= PactAccords.MAX_ACCORD ? read : null;
 		visitor = null;
 	}
 
@@ -234,5 +263,9 @@ public class PactPerchBlockEntity extends BlockEntity implements AgreementHolder
 		super.saveAdditional(output);
 		Saved.stamp(output, 1);
 		holder.save(output);
+		// GC-05: optional, and only while a pact is kept here; the stamp stays 1 (an older build reads past it).
+		if (accord != null && holder.agreement() != null) {
+			output.putString("accord", accord);
+		}
 	}
 }

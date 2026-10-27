@@ -115,6 +115,9 @@ HUB = 5  # a class this many test classes name is a shared registry, not one fea
 WIDE = 4  # a changed class shown by this share of the classes (a quarter) or more is picked by its changed lines
 ENDINGS = ("BlockEntityRenderer", "BlockEntity", "Renderer", "Block", "Item", "Entity", "Model", "Screen", "Menu",
            "Blocks", "Items")
+# And the accord machinery (Concordance garden cohort, GC-05), named by no client test: shown on Bathin's kept page and the
+# roster by the garden's client class (a class this selection keeps only while it is listed).
+SHOWN_BY["PactAccords"] = {"ConcordanceGardenPactClientGameTests"}
 # Files that change nothing a client test shows.
 NOTHING = (
     re.compile(r"^docs/"),

@@ -66,6 +66,9 @@ import org.jspecify.annotations.Nullable;
  * its holder present near (Authority.presentNear within Pacts.REACH). So a visitor, a copy, a duplicate, a suspended,
  * held or unattended pact never works. Stolas's service takes none.
  * <p>
+ * While a choice its service raises waits on its holder (GC-05; PactAccords), it says AWAITING_ANSWER instead of its
+ * step's status ({@link #serve}); it keeps to the safe course meanwhile, and an offering due is still what it says.
+ * <p>
  * Its body (its subclass's {@link Body}): the worker's main controller plays its loops for what the server synced; its
  * gestures play on a controller of their own over it, each fired by the server through {@link #gesture} (GeckoLib sends it
  * to those watching it then; one who starts watching later sees its state, never a replay). It arrives when it is
@@ -319,7 +322,9 @@ public abstract class PactSpiritEntity<T extends PactSpiritEntity<T>> extends Wo
 
 	/**
 	 * GC-01 (SG1): its pact's service's one autonomous step (PactService.work: at most one change; Stolas's takes none), for
-	 * the record its perch keeps; IDLE when its work is one this version does not know.
+	 * the record its perch keeps; IDLE when its work is one this version does not know. GC-05 (GC-P44, GC-P47): then
+	 * AWAITING_ANSWER, whatever the step returned, while a choice of its service's waits on its holder ({@link #answering}).
+	 * Its think steps it only where decide left nothing else to say, and keeps an offering due said over it.
 	 */
 	private Status serve(ServerLevel level, long time, long gameTime) {
 		if (!(level.getBlockEntity(perch) instanceof PactPerchBlockEntity home)) {
@@ -328,7 +333,18 @@ public abstract class PactSpiritEntity<T extends PactSpiritEntity<T>> extends Wo
 		BoundWill bound = home.holder().record(level);
 		BoundWill.Service terms = bound == null || bound.pact() == null ? null : bound.pact().service();
 		PactService service = terms == null ? null : PactServices.get(terms.work());
-		return service == null ? Status.IDLE : service.work(level, this, bound, home.holder(), time, gameTime);
+		Status served = service == null ? Status.IDLE : service.work(level, this, bound, home.holder(), time, gameTime);
+		// GC-05: while a choice waits that is what it says (the roster's "awaiting your answer"); its step, under the safe
+		// course, has run all the same.
+		return answering(level, home, bound, gameTime) ? Status.AWAITING_ANSWER : served;
+	}
+
+	/**
+	 * GC-05 (GC-P44): whether a choice of its service's waits on its holder at its perch now (PactAccords.awaiting): one
+	 * raised there and none answered. Asked only by {@link #serve}, after its step, for a presence with its record. Read only.
+	 */
+	private boolean answering(ServerLevel level, PactPerchBlockEntity home, @Nullable BoundWill bound, long gameTime) {
+		return bound != null && PactAccords.awaiting(level, home, bound, gameTime);
 	}
 
 	/** Whether a conversation still waits on this visitor: its perch loaded, it its visitor, a conversation there live. */

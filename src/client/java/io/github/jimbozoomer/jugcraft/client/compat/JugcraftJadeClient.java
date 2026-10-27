@@ -166,6 +166,17 @@ public final class JugcraftJadeClient implements JugcraftJadePlugin.ClientRegist
 				if (grace >= 0) {
 					tooltip.add(Component.translatable("tooltip.jugcraft.concordance.jade.pact.grace", grace));
 				}
+				// GC-05: the matter its spirit raises now and the answer kept for it, in its work's words; a choice still waiting
+				// is said by its presence's status (awaiting your answer at its perch).
+				String matter = data.getStringOr("matter", "");
+				if (!matter.isEmpty() && !service.isEmpty()) {
+					tooltip.add(Component.translatable("tooltip.jugcraft.concordance.jade.pact.matter." + service + "." + matter));
+				}
+				String accord = data.getStringOr("accord", "");
+				if (!accord.isEmpty() && !service.isEmpty()) {
+					tooltip.add(Component.translatable("tooltip.jugcraft.concordance.jade.pact.accord",
+							Component.translatableWithFallback("message.jugcraft.concordance.pact." + service + ".accord." + accord, accord)));
+				}
 				String waiting = data.getStringOr("waiting", "");
 				if (waiting.equals("lost")) {
 					tooltip.add(Component.translatable("tooltip.jugcraft.concordance.jade.pact.lost"));

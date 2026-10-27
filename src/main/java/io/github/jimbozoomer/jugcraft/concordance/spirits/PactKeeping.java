@@ -1,6 +1,7 @@
 package io.github.jimbozoomer.jugcraft.concordance.spirits;
 
 import io.github.jimbozoomer.jugcraft.concordance.Authority;
+import io.github.jimbozoomer.jugcraft.concordance.courier.Couriers;
 import io.github.jimbozoomer.jugcraft.concordance.resource.BoundWill;
 import io.github.jimbozoomer.jugcraft.concordance.worker.PactParser;
 import io.github.jimbozoomer.jugcraft.concordance.worker.Pacts;
@@ -184,6 +185,12 @@ public final class PactKeeping {
 		return at < 0 ? Integer.MAX_VALUE : at;
 	}
 
+	/** GC-05: the perch keeping {@code holder} (the block it is part of), or null when its block is not a perch or not loaded. Reads only. */
+	private static @Nullable PactPerchBlockEntity perchOf(ServerLevel level, AgreementHolder holder) {
+		BlockPos at = Couriers.pos(holder.place(level));
+		return level.isLoaded(at) && level.getBlockEntity(at) instanceof PactPerchBlockEntity perch && perch.holder() == holder ? perch : null;
+	}
+
 	/** How an end went, and the words for it. */
 	public record Ending(AgreementHolder.Ended ended, Component said) {
 	}
@@ -208,9 +215,17 @@ public final class PactKeeping {
 				Component.translatable("message.jugcraft.concordance.workers.departed.ended"), returned));
 	}
 
-	/** The pact page: rows (at most 9), its service's choices (Star-reckoning's: the patterns observed; GC-01) and the offering kinds a deposit offers. */
-	public record Page(List<Component> rows, List<PactStatePayload.Choice> choices, List<Item> offerings) {
-		public static final Page NONE = new Page(List.of(), List.of(), List.of());
+	/**
+	 * The pact page: rows (at most 11), its service's choices (Star-reckoning's: the patterns observed; GC-01), the offering
+	 * kinds a deposit offers, and the matter its spirit raises (GC-05; null for none).
+	 */
+	public record Page(List<Component> rows, List<PactStatePayload.Choice> choices, List<Item> offerings, PactAccords.@Nullable Matter matter) {
+		public static final Page NONE = new Page(List.of(), List.of(), List.of(), null);
+
+		/** A page with no matter (GC-01's three parts). */
+		public Page(List<Component> rows, List<PactStatePayload.Choice> choices, List<Item> offerings) {
+			this(rows, choices, offerings, null);
+		}
 	}
 
 	/** What the pact kept here shows its holder at game time {@code now}; NONE for anyone else, a copy, or switched off. Its service words its own rows (GC-01, SG6). */
@@ -241,6 +256,15 @@ public final class PactKeeping {
 		} else {
 			rows.add(Component.translatable("message.jugcraft.concordance.pact.row.state.active"));
 		}
+		// GC-05 (the matter row): the matter its spirit raises, second, so it is read before the rest; the question and its
+		// answers follow on the screen (PactMenu.kept). Awaiting: what he keeps to until then; answered: the answer kept.
+		PactPerchBlockEntity perch = perchOf(level, holder);
+		PactAccords.Matter matter = perch == null ? null : PactAccords.matter(level, perch, record, now);
+		if (matter != null) {
+			rows.add(matter.awaiting()
+					? Component.translatable("message.jugcraft.concordance.pact.row.matter.awaiting", name, PactAccords.answerName(matter.work(), matter.answers().getFirst()))
+					: Component.translatable("message.jugcraft.concordance.pact.row.matter.answered", name, PactAccords.answerName(matter.work(), matter.answer())));
+		}
 		if (holder.spiritLost(level)) {
 			rows.add(Component.translatable("message.jugcraft.concordance.pact.row.lost", name, WorkerRoster.MAX_PER_PLAYER));
 		}
@@ -264,6 +288,6 @@ public final class PactKeeping {
 				? Component.translatable("message.jugcraft.concordance.pact.row.area_any", service.radius())
 				: Component.translatable("message.jugcraft.concordance.pact.row.area", service.radius(), Workers.clock(service.from()), Workers.clock(service.to())));
 		rows.add(Component.translatable("message.jugcraft.concordance.pact.row.end", name));
-		return new Page(List.copyOf(rows), work == null ? List.of() : List.copyOf(work.choices(level, player, record, now)), offerings(player, record));
+		return new Page(List.copyOf(rows), work == null ? List.of() : List.copyOf(work.choices(level, player, record, now)), offerings(player, record), matter);
 	}
 }

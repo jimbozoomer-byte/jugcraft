@@ -77,6 +77,8 @@ public class PactMenu extends AbstractContainerMenu {
 	public static final String NOTHING_DEPOSITED = "nothing_deposited";
 	/** GC-01 (SG4): an INVITE answered: the chosen spirit's visit begins (tools/concordance_pacts.py ANSWERS). */
 	public static final String INVITED = "invited";
+	/** GC-05: a RESOLVE answered: the holder's answer is kept as the perch's accord (tools/concordance_pacts.py ANSWERS). */
+	public static final String RESOLVED = "resolved";
 
 	/** An action's answer: its reason (a stable id), whether it was done, and the words for it. */
 	public record Answered(String reason, boolean done, Component said) {
@@ -90,7 +92,16 @@ public class PactMenu extends AbstractContainerMenu {
 
 	private record View(int mode, List<Component> beats, List<PactStatePayload.Term> terms, List<Component> notes,
 			List<PactStatePayload.Choice> patterns, List<String> patternIds, List<PactStatePayload.Choice> offerings, List<Item> offeringItems,
-			List<ItemStack> compact, int resonance, int actions, @Nullable String counterpart, String work) {
+			List<ItemStack> compact, int resonance, int actions, @Nullable String counterpart, String work, Component matter,
+			List<PactStatePayload.Choice> answers, List<String> answerIds) {
+		/** GC-01's view, with no matter: no line and no answers (GC-05). */
+		View(int mode, List<Component> beats, List<PactStatePayload.Term> terms, List<Component> notes,
+				List<PactStatePayload.Choice> patterns, List<String> patternIds, List<PactStatePayload.Choice> offerings, List<Item> offeringItems,
+				List<ItemStack> compact, int resonance, int actions, @Nullable String counterpart, String work) {
+			this(mode, beats, terms, notes, patterns, patternIds, offerings, offeringItems, compact, resonance, actions, counterpart, work,
+					Component.empty(), List.of(), List.of());
+		}
+
 		static View closed(List<Component> notes, @Nullable String counterpart, String work) {
 			return new View(PactStatePayload.CLOSED, List.of(), List.of(), notes, List.of(), List.of(), List.of(), List.of(), List.of(), 0,
 					PactStatePayload.mask(PactRequestPayload.CHOOSE), counterpart, work);
@@ -119,6 +130,8 @@ public class PactMenu extends AbstractContainerMenu {
 	private int seatFocus;
 	/** GC-01: whose pact this conversation ended (ended_here names that spirit). */
 	private @Nullable String concludedWith;
+	/** GC-05: the answers the kept page last sent, by index (RESOLVE names one). */
+	private List<String> answerIds = List.of();
 
 	/** Client side: everything else arrives as PactStatePayload. */
 	public PactMenu(int containerId, Inventory inventory, Opening opening) {
@@ -349,6 +362,7 @@ public class PactMenu extends AbstractContainerMenu {
 			case PactRequestPayload.END -> end(level, player, choice, now);
 			case PactRequestPayload.SEAT -> seat(level, player, choice, now);
 			case PactRequestPayload.INVITE -> invite(level, player, choice, now);
+			case PactRequestPayload.RESOLVE -> resolve(level, player, choice, now);
 			default -> notOffered();
 		};
 	}
@@ -512,6 +526,23 @@ public class PactMenu extends AbstractContainerMenu {
 		return new Answered(INVITED, true, line("answer.invited", PactKeeping.name(definition.id())));
 	}
 
+	/**
+	 * GC-05 (GC-P43): RESOLVE, only on the kept page that sent answers, by its holder: the answer at {@code choice} in the
+	 * list it last sent, kept as the perch's accord (PactAccords.resolve: switched on, in person, the record kept here theirs,
+	 * the page's work, one of its service's answers). Nothing is spent; an answer may be changed at any time, and the same
+	 * answer again is answered as kept. The revision does not move: no term changed.
+	 */
+	private Answered resolve(ServerLevel level, ServerPlayer player, int choice, long now) {
+		if (lastMode != PactStatePayload.KEEP || choice >= answerIds.size()) {
+			return notOffered();
+		}
+		String value = answerIds.get(choice);
+		if (!PactAccords.resolve(level, player, perch, lastWork, value, now)) {
+			return notOffered();
+		}
+		return new Answered(RESOLVED, true, line("answer.resolved", PactAccords.answerName(lastWork, value)));
+	}
+
 	private static Answered notOffered() {
 		return new Answered(NOT_OFFERED, false, line("answer.not_offered"));
 	}
@@ -612,15 +643,22 @@ public class PactMenu extends AbstractContainerMenu {
 			offerings.add(new PactStatePayload.Choice(BuiltInRegistries.ITEM.getKey(item).toString(), new ItemStack(item).getHoverName(),
 					player.getInventory().countItem(item), room));
 		}
+		// GC-05 (GC-S11): the matter its spirit raises and its answers (RESOLVE indexes them), the one kept marked (amount 1).
+		PactAccords.Matter matter = page.matter();
+		List<PactStatePayload.Choice> answers = matter == null ? List.of() : matter.answers().stream()
+				.map(value -> new PactStatePayload.Choice(value, PactAccords.answerName(matter.work(), value), value.equals(matter.answer()) ? 1 : 0, true))
+				.toList();
 		boolean unheld = pact.hold() == BoundWill.Hold.NONE;
 		int actions = PactStatePayload.mask(PactRequestPayload.CHOOSE, PactRequestPayload.END)
 				| (unheld ? PactStatePayload.mask(PactRequestPayload.SUSPEND) : 0)
 				| (pact.hold() == BoundWill.Hold.HOLDER ? PactStatePayload.mask(PactRequestPayload.RESUME) : 0)
 				| (!offerings.isEmpty() ? PactStatePayload.mask(PactRequestPayload.DEPOSIT) : 0)
-				| (unheld && !patterns.isEmpty() ? PactStatePayload.mask(PactRequestPayload.RECALL) : 0);
+				| (unheld && !patterns.isEmpty() ? PactStatePayload.mask(PactRequestPayload.RECALL) : 0)
+				| (!answers.isEmpty() ? PactStatePayload.mask(PactRequestPayload.RESOLVE) : 0);
 		BoundWill.Service service = pact.service();
 		return new View(PactStatePayload.KEEP, List.of(), terms(record), page.rows(), patterns, ids, offerings, page.offerings(), List.of(), 0,
-				actions, Pacts.counterpart(record.counterpart()), service == null ? "" : service.work());
+				actions, Pacts.counterpart(record.counterpart()), service == null ? "" : service.work(),
+				matter == null ? Component.empty() : matter.line(), answers, answers.stream().map(PactStatePayload.Choice::id).toList());
 	}
 
 	/** GB4: the reader's pacts without their perch (at most MAX_CHOICES): the one in focus shown, each listed when there are two or more. */
@@ -777,10 +815,11 @@ public class PactMenu extends AbstractContainerMenu {
 		offeringItems = view.offeringItems();
 		lastMode = view.mode();
 		lastWork = view.work();
+		answerIds = view.answerIds();
 		// GC-01 (SG5): the speaker is the spirit the page is about (Chunk D: Stolas always), the perch itself for the chooser.
 		Component speaker = view.counterpart() == null ? Component.translatable("container.jugcraft.pact_perch") : PactKeeping.name(view.counterpart());
 		PactStatePayload.Spirit spirit = view.counterpart() == null ? PactStatePayload.Spirit.NONE
-				: new PactStatePayload.Spirit(PactSpirits.sign(view.counterpart()), view.work());
+				: new PactStatePayload.Spirit(PactSpirits.sign(view.counterpart()), view.work(), view.matter(), view.answers());
 		return new PactStatePayload(containerId, revision, view.mode(), speaker, view.beats(), view.terms(), view.notes(), view.patterns(),
 				view.offerings(), view.compact(), view.resonance(), view.actions(),
 				Optional.ofNullable(answered).map(done -> new PactStatePayload.Result(answering, done.reason(), done.done(), done.said())), spirit);

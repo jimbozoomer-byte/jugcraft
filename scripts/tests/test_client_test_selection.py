@@ -91,6 +91,14 @@ class ClientTestSelectionTests(unittest.TestCase):
         self.assertIn("ScreenFitClientGameTests", chosen)
         self.assertIn("ConcordanceRosterClientGameTests", selection.WEIGHTS)
 
+    def test_the_accord_machinery_selects_the_garden_client_test(self):
+        # Concordance garden cohort, GC-05: the accord is shown by the garden's client class (Bathin's matter, the roster).
+        # That class is listed from GC-04 on; until it is, it stands in here with nothing of its own to show.
+        tests = dict(self.tests)
+        tests.setdefault("ConcordanceGardenPactClientGameTests", {"classes": set(), "ids": set()})
+        chosen, _ = selection.select(["src/main/java/io/github/jimbozoomer/jugcraft/concordance/spirits/PactAccords.java"], tests, set())
+        self.assertIn("ConcordanceGardenPactClientGameTests", chosen)
+
     def test_pact_network_test_is_its_own_class_and_weighed(self):
         # Concordance Chunk D unit 5 (D-09): the two-client attempt is a client class of its own, with a running-time estimate.
         chosen, _ = selection.select(["src/gametest/java/io/github/jimbozoomer/jugcraft/test/ConcordancePactNetworkTests.java"], self.tests, set())

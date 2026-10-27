@@ -18008,6 +18008,9 @@ GC05_CARRYING_TESTS = {
     "ConcordanceGardenGameTests": ["theGardenReachCapsItsDevices", "aGleanerReceivesFromANamedHeartAtAnyDistance",
                                    "aHeartPoursIntoANamedPylonByItsOwnRule", "aHeartSaysWhetherItHasItsOwnRoad"],
 }
+# Concordance garden cohort, GC-05 (check_pacts): each work's answers as shipped, the safe course first. Append only: a
+# value saved in a perch's accord is never renamed, reordered or removed. Units 4 to 6 add theirs.
+GC05_ACCORDS = {"verdance_carrying": ["yield", "claim"]}
 
 
 def check_verdance_roads(root):
@@ -18562,7 +18565,7 @@ def check_pacts(co, root, lang, registered, research):
             err(f"pacts: missing lang message.{MOD}.concordance.pact.{key}")
     prefix = f"message.{MOD}.concordance.pact."
     for rel in ("spirits/PactMenu.java", "spirits/PactPerchBlock.java", "spirits/PactKeeping.java", "spirits/StolasEntity.java",
-                "spirits/PactSpiritEntity.java", "spirits/PactService.java"):
+                "spirits/PactSpiritEntity.java", "spirits/PactService.java", "spirits/PactAccords.java"):
         source = java(rel)
         named = re.findall(r'\bline\("([a-z_.]+)"', source) + [k[len(prefix):] for k in re.findall(r'"(message\.jugcraft\.concordance\.pact\.[a-z_.]+)"', source)]
         for key in named:
@@ -18965,6 +18968,128 @@ def check_pacts(co, root, lang, registered, research):
         for name in wanted:
             if f"public void {name}(GameTestHelper helper)" not in source:
                 err(f"{cls}: missing Concordance Chunk D unit 1 game test {name}")
+    # --- Concordance garden cohort, GC-05 (the accord machinery; docs/features/bathin-pact.md, "His matter") ---
+    # (Before GC-01's block, which GC-04's follows: each block reads only what Chunk D's above bound, and binds its own.)
+    accords_java = java("spirits/PactAccords.java")
+    perch_java = java("spirits/PactPerchBlockEntity.java")
+    service_java = java("spirits/PactService.java")
+    base_java = java("spirits/PactSpiritEntity.java")
+    service_words = getattr(pa, "SERVICE_WORDS", {})  # each work's own words (GC-04 on); none before a garden work ships
+    # (a) The wire appends: resolve (10), resolved, three answers at most, Jade's matter and accord after unit 1's keys.
+    if pa.ACTIONS[10:11] != ["resolve"] or "resolved" not in pa.ANSWERS or pa.STATE_LIMITS.get("MAX_ANSWERS") != 3 \
+            or pa.JADE_KEYS[-2:] != ["matter", "accord"] or len(pa.JADE_KEYS) < 12 or pa.ACCORD_MAX != 16:
+        err("tools/concordance_pacts.py: resolve is appended (10) and answered resolved; three answers at most; Jade's matter and "
+            "accord after unit 1's keys; an accord at most 16 characters (GC-P42, GC-P43)")
+    spirit_record = _java_body(state, "public record Spirit(String sign, String work, Component matter, List<Choice> answers)")
+    for needle in ("ComponentSerialization.TRUSTED_STREAM_CODEC, Spirit::matter", "Choice.STREAM_CODEC.apply(ByteBufCodecs.list(MAX_ANSWERS)), Spirit::answers",
+                   "answers = answers == null ? List.of() : bounded(answers, MAX_ANSWERS);", "this(sign, work, Component.empty(), List.of());"):
+        if needle not in spirit_record:
+            err(f"PactStatePayload.Spirit: its matter and at most MAX_ANSWERS answers, nested, never a fifteenth field ({needle}; GC-P43)")
+    # (b) RESOLVE only on the kept page that sent answers, through PactAccords.resolve; the answers it last sent are kept.
+    resolve = _java_body(menu, "private Answered resolve(")
+    if not 0 <= resolve.find("lastMode != PactStatePayload.KEEP || choice >= answerIds.size()") < resolve.find("String value = answerIds.get(choice);") \
+            < resolve.find("PactAccords.resolve(level, player, perch, lastWork, value, now)") \
+            or "case PactRequestPayload.RESOLVE -> resolve(level, player, choice, now);" not in menu \
+            or "answerIds = view.answerIds();" not in _java_body(menu, "private PactStatePayload state(") \
+            or "PactStatePayload.mask(PactRequestPayload.RESOLVE)" not in _java_body(menu, "private View kept("):
+        err("PactMenu: RESOLVE only on the kept page that offered it, an answer it last sent, kept through PactAccords.resolve (GC-P43)")
+    # (c) Only the holder, in person, with the Concordance on, for the page's work, one of its service's answers.
+    resolving = _java_body(accords_java, "public static boolean resolve(")
+    order = [resolving.find(n) for n in ("Workers.enabled()", "Authority.isStandIn(player)", "perch.holder().verify(level, now)",
+                                         "record.holder().equals(player.getUUID())", "terms.work().equals(work)", "known(service, value)",
+                                         "perch.keepAccord(value);")]
+    if -1 in order or order != sorted(order) or "value.length() > MAX_ACCORD" not in resolving:
+        err("PactAccords.resolve: switched on, never a stand-in, verified, the record's holder, the page's work, one of its "
+            "service's answers, before anything is kept (GC-P46)")
+    # (d) The accord is the perch's alone: kept only by PactAccords.resolve; saved by the perch only while a pact is kept there;
+    # a new pact there starts unanswered; read back bounded; and it counts only for the pact kept there now.
+    for path in sorted(root.rglob("*.java")):
+        source = path.read_text(encoding="utf-8")
+        name = path.relative_to(root).as_posix()
+        if "keepAccord(" in source and name not in ("spirits/PactAccords.java", "spirits/PactPerchBlockEntity.java"):
+            err(f"concordance/{name}: only PactAccords.resolve keeps an answer (keepAccord; GC-P46)")
+        if re.search(r'\b(?:output\.(?:putString|store)|input\.(?:getString|getStringOr|read))\("accord"', source) \
+                and name != "spirits/PactPerchBlockEntity.java":
+            err(f"concordance/{name}: the accord is the perch's saved key alone, never the Bound Will's or a spirit's (GC-P42)")
+    if not re.search(r"if \(accord != null && holder\.agreement\(\) != null\) \{\s*output\.putString\(\"accord\", accord\);",
+                     _java_body(perch_java, "protected void saveAdditional(")) \
+            or "read.length() <= PactAccords.MAX_ACCORD" not in _java_body(perch_java, "protected void loadAdditional(") \
+            or "holder.agreement() != null && !read.isEmpty()" not in _java_body(perch_java, "protected void loadAdditional(") \
+            or "Saved.stamp(output, 1)" not in perch_java:
+        err("spirits/PactPerchBlockEntity.java: its optional accord is saved and read only with the pact it answers, at most "
+            "MAX_ACCORD characters, the stamp still 1 (GC-P42)")
+    call = _java_body(perch_java, "public @Nullable WorkerEntity<?> call(")
+    if not 0 <= call.find("if (holder.agreement() == null && accord != null) {") < call.find("PactSpirits.get(counterpart)"):
+        err("PactPerchBlockEntity.call: a pact sealed or seated here starts unanswered (GC-P46)")
+    if f"int MAX_ACCORD = {pa.ACCORD_MAX};" not in accords_java:
+        err(f"spirits/PactAccords.java: MAX_ACCORD is tools/concordance_pacts.py ACCORD_MAX ({pa.ACCORD_MAX})")
+    # The unit's review (correction 2): a copied perch keeps its accord as written, so this one line is what reads it as
+    # unanswered there, and an ended record or an unknown value too.
+    answering = _java_body(accords_java, "public static @Nullable String answer(")
+    if "perch.holder().peek(level) != AgreementHolder.Standing.VALID" not in answering \
+            or "known(service(perch.holder().record(level)), kept)" not in answering or "verify(" in answering:
+        err("PactAccords.answer: an accord counts only for the pact its perch keeps now (peeked VALID, never verified) and only "
+            "if its service knows it: a copy, an ended record or an unknown value reads as unanswered (GC-P42; GE3)")
+    # (e) A waiting choice is said by the presence: serve says it after its step, and think, which steps it only once decide
+    # has nothing else to say, keeps an offering due said over it; appended, a reason, a sign.
+    serving = _java_body(base_java, "private Status serve(")
+    think = _java_body(base_java, "public Status think(")
+    if not 0 <= serving.find("Status served = service == null ? Status.IDLE : service.work(level, this, bound, home.holder(), time, gameTime);") \
+            < serving.find("return answering(level, home, bound, gameTime) ? Status.AWAITING_ANSWER : served;") \
+            or "PactAccords.awaiting(level, home, bound, gameTime)" not in _java_body(base_java, "private boolean answering(") \
+            or "AWAITING_ANSWER" in think \
+            or ("next = serve(level, time, gameTime);" not in think and "next = next == Status.UPKEEP_DUE ? next : served;" not in think):
+        err("PactSpiritEntity: AWAITING_ANSWER while a choice waits, after the step (serve), an offering due said first (think) "
+            "(GC-P44, GC-P47)")
+    if not re.search(r'UPKEEP_HELD\("upkeep_held", false\),\s*(?://[^\n]*\n\s*)*AWAITING_ANSWER\("awaiting_answer", false\);', java("worker/Status.java")) \
+            or list(co.workers.STATUSES)[-1] != "awaiting_answer":
+        err("worker/Status.java: AWAITING_ANSWER is appended last, a reason (GB27, GC-P44)")
+    if not re.search(r"UPKEEP_HELD,\s*AWAITING_ANSWER -> Sign\.WANT;", _java_body(java("spirits/WorkerEntity.java"), "public static @Nullable Sign sign(")):
+        err("WorkerEntity.sign: a waiting choice shows a sign of want, once (GC-P47)")
+    # (f) The service's members: none by default; a matter raised is one of its work's.
+    if not re.search(r"default @Nullable Complication complication\(ServerLevel level, BoundWill record, PactPerchBlockEntity perch, long now\) \{\s*return null;", service_java) \
+            or not re.search(r"default List<String> accords\(\) \{\s*return List\.of\(\);", service_java) \
+            or "record Complication(String id, Component line, @Nullable BlockPos pos, List<String> answers)" not in service_java:
+        err("spirits/PactService.java: complication() and accords() are none unless a service raises a choice (GC-05)")
+    for work, cls in pa.SERVICE_CLASSES.items():
+        source = java(f"spirits/{cls}.java")
+        words = service_words.get(work, {})
+        constants = dict(re.findall(r'String ([A-Z_]+) = "([a-z_]+)";', source))
+        # accords() lists its answers inline or returns a constant list (VerdanceCarrying.ACCORDS).
+        listed = re.search(r"public List<String> accords\(\) \{\s*return (?:List\.of\(([^)]*)\)|([A-Z_]+));", source)
+        if listed and listed.group(2):
+            listed = re.search(rf"List<String> {listed.group(2)} = List\.of\(([^)]*)\);", source)
+        named = [constants.get(t.strip(), t.strip().strip('"')) for t in listed.group(1).split(",") if t.strip()] if listed else []
+        accords = list(words.get("accords", {}))
+        if named != accords:
+            err(f"spirits/{cls}.java: accords() {named} is SERVICE_WORDS[{work!r}]['accords'] {accords}, in order")
+        if not accords:
+            continue
+        shipped = GC05_ACCORDS.get(work)
+        if shipped is None or accords[:len(shipped)] != shipped:
+            err(f"{work}: its accords {accords} keep the shipped {shipped} first and in order (append only; the safe course never "
+                "changes; GC05_ACCORDS)")
+        if len(accords) > 3 or any(not re.fullmatch(rf"[a-z_]{{1,{pa.ACCORD_MAX}}}", a) for a in accords):
+            err(f"{work}: at most 3 accords, each [a-z_] and at most {pa.ACCORD_MAX} characters: {accords}")
+        raised = {constants.get(t, t.strip('"')) for t in re.findall(r'new (?:PactService\.)?Complication\(([A-Z_]+|"[a-z_]+")', source)}
+        if not raised or not raised <= set(words.get("matters", {})):
+            err(f"spirits/{cls}.java: each matter it raises {sorted(raised)} has Jade's words in SERVICE_WORDS[{work!r}]['matters']")
+        for key in [f"message.{MOD}.concordance.pact.{work}.accord.{a}" for a in accords] + [f"message.{MOD}.concordance.pact.{work}.question"] \
+                + [f"tooltip.{MOD}.concordance.jade.pact.matter.{work}.{m}" for m in words.get("matters", {})]:
+            if key not in lang:
+                err(f"{work}: missing lang {key} (the accord's words)")
+    # (g) The kept page's matter row (second), both Jade readings, and Jade's words.
+    page = _java_body(keeping, "public static Page page(")
+    if not 0 <= page.find("row.state.active") < page.find("PactAccords.matter(level, perch, record, now)") < page.find("holder.spiritLost(level)") \
+            or '"message.jugcraft.concordance.pact.row.matter.awaiting"' not in page or '"message.jugcraft.concordance.pact.row.matter.answered"' not in page:
+        err("PactKeeping.page: the matter row second, awaiting or answered (GC-05)")
+    reading_java = java("spirits/PactReading.java")
+    if reading_java.count("matter(reading, level, ") != 2 or "PactAccords.matter(level, perch, record, now)" not in _java_body(reading_java, "private static void matter("):
+        err("PactReading: both readings carry the matter and the answer (GC-P48)")
+    jade_text = (CLIENT_JAVA_ROOT / "compat" / "JugcraftJadeClient.java").read_text(encoding="utf-8")
+    if '"tooltip.jugcraft.concordance.jade.pact.matter." + service + "." + matter' not in jade_text \
+            or '"tooltip.jugcraft.concordance.jade.pact.accord"' not in jade_text:
+        err("JugcraftJadeClient: the matter and the answer kept, in its work's words (GC-P48)")
     # --- Concordance garden cohort, GC-01 (SG1 to SG12; docs/features/concordance-garden-cohort.md) ---
     workers_java = java("spirits/Workers.java")
     base = java("spirits/PactSpiritEntity.java")
@@ -19041,7 +19166,7 @@ def check_pacts(co, root, lang, registered, research):
     getters = re.findall(r"PactStatePayload::(\w+),", codec)
     if len(getters) != 14 or getters[-1] != "spirit" or "Spirit.STREAM_CODEC, PactStatePayload::spirit," not in codec:
         err(f"spirits/PactStatePayload.java: fourteen top-level fields, the last the nested spirit; 26.3's composite takes no more (GB22): {getters}")
-    if _java_body(state, "public record Spirit(String sign, String work)").count("ByteBufCodecs.stringUtf8(MAX_ID)") != 2 \
+    if _java_body(state, "public record Spirit(String sign, String work, Component matter, List<Choice> answers)").count("ByteBufCodecs.stringUtf8(MAX_ID)") != 2 \
             or "this(containerId, revision, mode, speaker, beats, terms, notes, patterns, offerings, compact, resonance, actions, result, Spirit.NONE);" not in state:
         err("PactStatePayload.Spirit: sign and work bounded as any string (MAX_ID); Chunk D's thirteen-field constructor kept (Spirit.NONE)")
     # SG4: the chooser for the perch's owner only, an INVITE only on it, nothing summoned before its checks; the revision reads only.
@@ -19477,6 +19602,13 @@ def check_pact_screen(co, lang):
             for key in (f"screen.{MOD}.pact.service.{work}.heading", f"screen.{MOD}.pact.service.{work}.about"):
                 if key not in lang:
                     err(f"pact screen: missing lang {key} (the kept page's service section for {work})")
+    # GC-05: the kept page asks its spirit's matter, each answer a RESOLVE with its index, before its service.
+    keep_body = _java_body(screen, "private void keep(PactStatePayload state)")
+    matter_body = _java_body(screen, "private void matter(PactStatePayload state)")
+    if not 0 <= keep_body.find("matter(state);") < keep_body.find("if (reckons(state)) {") \
+            or "PactClient.request(menu, PactRequestPayload.RESOLVE, index)" not in matter_body or "state.spirit().answers()" not in matter_body \
+            or 'say(state.spirit().matter(), TEXT, "matter");' not in matter_body:
+        err("client/PactScreen.java: the kept page asks its spirit's matter (a narrated line), each answer a RESOLVE by its index (GC-05)")
     # The client class that shows it.
     entry = "io.github.jimbozoomer.jugcraft.test.ConcordancePactClientGameTests"
     mod = load(ROOT / "src" / "gametest" / "resources" / "fabric.mod.json") or {}
@@ -21704,6 +21836,13 @@ def check_roster(co, root, lang):
         name = lang.get(f"lair.{MOD}.{path.stem}")
         if name and ro.DIMENSIONS.get(dim, "").lower() != name.lower():
             err(f"tools/concordance_roster.py DIMENSIONS: {dim} is {name!r}, as lair.{MOD}.{path.stem} says")
+    # GC-05 (GB27): a choice waiting is a reason: its row's icon is the waiting one (icon's default), its words the status's.
+    if re.search(r"case [A-Z_, ]*\bAWAITING_ANSWER\b", _java_body(roster, "static int icon(")):
+        err("spirits/Roster.java icon: awaiting_answer is a reason, drawn with the waiting icon (its default; GC-P44)")
+    if "status(entry.status())" not in _java_body(roster, "private static RosterStatePayload.Row recordRow(") \
+            or "PactAccords" in roster:
+        err("spirits/Roster.java: a record's row says its presence's saved status (awaiting your answer among them) and reads no "
+            "perch or matter (it loads nothing; GC-05)")
     tests = ROOT / "src" / "gametest" / "java" / "io" / "github" / "jimbozoomer" / "jugcraft" / "test"
     for cls, names in D07_TESTS.items():
         source = text(tests / f"{cls}.java")

@@ -133,11 +133,13 @@ public abstract class WorkerEntity<T extends WorkerEntity<T>> extends Pathfinder
 	/**
 	 * What a change to {@code status} shows over the worker (roadmap step 27), once, when it happens: shortage when it
 	 * lacks something a player can give or mend (resources, access, a way there, repair, energy, room, a loaded
-	 * destination); success when it has finished. Other changes show only in its body's animation.
+	 * destination, or an answer at its perch (GC-05)); success when it has finished. Other changes show only in its body's
+	 * animation.
 	 */
 	public static @Nullable Sign sign(Status status) {
 		return switch (status) {
-			case WAITING_FOR_RESOURCES, BLOCKED_BY_ACCESS, CANNOT_NAVIGATE, NEEDS_REPAIR, NO_ENERGY, FULL, DESTINATION_UNLOADED, UPKEEP_DUE, UPKEEP_HELD -> Sign.WANT;
+			case WAITING_FOR_RESOURCES, BLOCKED_BY_ACCESS, CANNOT_NAVIGATE, NEEDS_REPAIR, NO_ENERGY, FULL, DESTINATION_UNLOADED, UPKEEP_DUE, UPKEEP_HELD,
+					AWAITING_ANSWER -> Sign.WANT;
 			case FINISHED -> Sign.DONE;
 			default -> null;
 		};

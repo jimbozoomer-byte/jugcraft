@@ -21,7 +21,7 @@ import org.jspecify.annotations.Nullable;
 public final class PactReading {
 	/** Every key a reading may carry (tools/concordance_pacts.py JADE_KEYS). */
 	public static final List<String> KEYS = List.of("standing", "visiting", "departing", "counterpart", "service", "state", "due_days",
-			"grace_days", "waiting", "visitor");
+			"grace_days", "waiting", "visitor", "matter", "accord");
 	public static final List<String> STANDINGS = List.of("none", "kept", "copy", "unreadable", "disabled");
 	public static final List<String> STATES = List.of("active", "suspended", "upkeep_due", "upkeep_held");
 	/** Waiting reason of a presence struck off its holder's roster (D-S18): its holder calls it back near its place. */
@@ -66,6 +66,8 @@ public final class PactReading {
 		if (waiting != null) {
 			reading.putString("waiting", waiting);
 		}
+		// GC-05: the matter its spirit raises and the answer kept (a choice still waiting is its presence's waiting, above).
+		matter(reading, level, holds instanceof PactPerchBlockEntity asked ? asked : null, record, now);
 		return reading;
 	}
 
@@ -101,6 +103,8 @@ public final class PactReading {
 			return reading;
 		}
 		reading.putString("standing", "kept");
+		// GC-05: the matter its spirit raises and the answer kept.
+		matter(reading, level, home, record, now);
 		terms(reading, record, home.holder().agreement(), now);
 		return reading;
 	}
@@ -161,5 +165,19 @@ public final class PactReading {
 	private static @Nullable String reason(Status status) {
 		return status.active || status == Status.IDLE || status == Status.SUSPENDED || status == Status.UPKEEP_DUE
 				|| status == Status.UPKEEP_HELD ? null : status.id;
+	}
+
+	/** GC-05: the matter its spirit raises now (its id) and the answer kept for it (PactAccords.matter). Read only. */
+	private static void matter(CompoundTag reading, ServerLevel level, @Nullable PactPerchBlockEntity perch, BoundWill record, long now) {
+		PactAccords.Matter matter = perch == null ? null : PactAccords.matter(level, perch, record, now);
+		if (matter == null) {
+			return;
+		}
+		if (matter.id() != null) {
+			reading.putString("matter", matter.id());
+		}
+		if (matter.answer() != null) {
+			reading.putString("accord", matter.answer());
+		}
 	}
 }

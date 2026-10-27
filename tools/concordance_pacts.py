@@ -616,6 +616,33 @@ SEQUENCE_SHOTS = ["jugcraft_stolas_refuse_seq_1", "jugcraft_stolas_refuse_seq_2"
                   "jugcraft_stolas_refuse_seq_4"]
 # What ConcordancePactNetworkTests' second client photographs (D-09, D-S22).
 NETWORK_SHOTS = ["jugcraft_pact_peer_arrival", "jugcraft_pact_peer_refused", "jugcraft_pact_peer_departure"]
+# ------------------------------------------------------------------------------------------- garden cohort, GC-05
+# The accord machinery (Java: spirits/PactAccords, PactPerchBlockEntity's "accord", PactMenu's RESOLVE, PactKeeping's matter
+# row, PactScreen's matter section, PactReading's "matter" and "accord"; GC-S11, GC-P42 to GC-P49). A work whose matter is a
+# choice names in its SERVICE_WORDS row its "accords" (value -> its words; the safe course first), its "question" and its
+# "matters" (id -> Jade's short line). check_pacts holds the Java to them and pins each shipped list (GC05_ACCORDS).
+# The wire's appends, each after unit 1's (append only): RESOLVE (10) and its answer, three answers at most, and Jade's
+# matter and accord after every earlier key. They are appended here rather than in the literals above so that each
+# literal stays as the units before this one wrote it.
+STATE_LIMITS["MAX_ANSWERS"] = 3  # Java: PactStatePayload.MAX_ANSWERS
+ACTIONS += ["resolve"]  # Java: PactRequestPayload.RESOLVE
+ANSWERS += ["resolved"]  # Java: PactMenu.RESOLVED
+JADE_KEYS += ["matter", "accord"]  # Java: PactReading.KEYS
+ACCORD_MAX = 16  # Java: PactAccords.MAX_ACCORD (the perch's saved string)
+# The shared words (every pronoun "he": GC-P12). Each work's own (its answers, its question, its matters' Jade lines) are
+# generated from its SERVICE_WORDS row, beside that table, by the first work that names "accords" (GC-05's Bathin).
+MESSAGES.update({
+    "pact.row.matter.awaiting": "%s raises a matter and awaits your answer below. Until you answer, he keeps to: %s",
+    "pact.row.matter.answered": "Your answer to %s's matter stands: %s. You may change it below at any time",
+    "pact.answer.resolved": "Your answer is kept at this perch: %s. Nothing was spent",
+})
+SCREEN.update({
+    "screen.jugcraft.pact.matter.heading": "A matter to settle",
+    "screen.jugcraft.pact.matter.kept": "Your answer: he keeps to this",
+    "screen.jugcraft.pact.matter.safe": "His course until you answer",
+    "screen.jugcraft.pact.matter.choose": "Answer this",
+})
+TOOLTIPS.update({"jade.pact.accord": "Your answer: %s"})
 # ------------------------------------------------------------------- garden cohort, GC-02: facing whoever speaks
 # ConcordancePactClientGameTests.facing: the holder speaks from two blocks east, south, west and north of the perch in
 # turn, north last (where every later picture of Stolas is taken from; D-P133 superseded), and Stolas's drawn body yaw is

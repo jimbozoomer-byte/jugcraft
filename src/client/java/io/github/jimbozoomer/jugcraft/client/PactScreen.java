@@ -39,7 +39,9 @@ import org.jspecify.annotations.Nullable;
  * <p>
  * For a kept pact it shows how the pact stands, then Star-reckoning (a pattern the holder observed, then Recall), the
  * offerings the holder carries (each paid into the pact's keeping), Suspend or Resume, and End, which asks first. A pact
- * without its perch can be seated here or ended.
+ * without its perch can be seated here or ended. When its spirit raises a matter (GC-05) the page asks it first: the matter
+ * in words and each answer as a button, the one kept marked; the answer is sent and kept at once and can be changed at any
+ * time.
  * <p>
  * The server's answer, a refusal with its reason included, is shown and read aloud. Each answer carries its mark (a tick
  * or a cross), and Stolas's subtitles draw over the screen (D-06); ending asks first, the keyboard on Keep it
@@ -168,6 +170,8 @@ public class PactScreen extends Screen implements MenuAccess<PactMenu> {
 		if (termsTab) {
 			terms(state);
 		} else {
+			// GC-05: the matter its spirit raises, asked before its service and offerings.
+			matter(state);
 			if (reckons(state)) {
 				service(state);
 			} else {
@@ -271,6 +275,30 @@ public class PactScreen extends Screen implements MenuAccess<PactMenu> {
 		String work = state.spirit().work();
 		say(Component.translatableWithFallback("screen.jugcraft.pact.service." + work + ".heading", work), GOLD, "");
 		say(Component.translatableWithFallback("screen.jugcraft.pact.service." + work + ".about", ""), DIM, "");
+	}
+
+	/**
+	 * GC-05 (GC-S11): the matter its spirit raises (the state's spirit.matter, a narrated line) and its answers
+	 * (spirit.answers, the safe course first), each a button sending RESOLVE with its index; the answer kept is marked
+	 * (selected, "Your answer"), and while none is, the first says it is his course until then. Nothing is spent, an answer
+	 * may be changed at any time, and the server decides.
+	 */
+	private void matter(PactStatePayload state) {
+		List<PactStatePayload.Choice> answers = state.spirit().answers();
+		if (answers.isEmpty()) {
+			return;
+		}
+		say(ui("matter.heading"), GOLD, "");
+		say(state.spirit().matter(), TEXT, "matter");
+		boolean answered = answers.stream().anyMatch(answer -> answer.amount() > 0);
+		boolean free = !PactClient.waiting();
+		for (int i = 0; i < answers.size(); i++) {
+			PactStatePayload.Choice answer = answers.get(i);
+			boolean kept = answer.amount() > 0;
+			int index = i;
+			inline("answer:" + i, answer.name(), kept ? ui("matter.kept") : !answered && i == 0 ? ui("matter.safe") : ui("matter.choose"),
+					free && answer.ready() && state.offers(PactRequestPayload.RESOLVE), () -> PactClient.request(menu, PactRequestPayload.RESOLVE, index), kept);
+		}
 	}
 
 	/** Upkeep (D-S3): each offering the holder carries, paid into the pact's keeping (a server action, never a slot: D-S6). */
