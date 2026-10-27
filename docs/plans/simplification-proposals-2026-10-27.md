@@ -76,7 +76,7 @@ Not changed: JE and the machine power forms, fuels, Focus, the Principle Essence
 ### Today
 
 - **Crusher and Pulverizer:** both are powered machines on a machine casing with similar recipes. They share 20 inputs, all ores: the Crusher turns one ore into 2 raw ore (for smelting), the Pulverizer into 2 dust. The Crusher has 26 other recipes and the Pulverizer 37.
-- **Jimtafacts copies of machines:** the Industrial Generator, Macerator, Electric Furnace, Industrial Solar and Geothermal Generators, Industrial Ore Washer, and the BatBox, CESU, MFE and MFSU batteries sit beside Jugcraft's Coal Generator, Crusher and Pulverizer, Electric Furnace, Solar Panel, Geothermal Generator, Ore Washer, and Battery Box, Energy Cell and Capacitor Bank.
+- **Jimtafacts copies of machines** are already handled: the Industrial Generator, Macerator, Electric Furnace, Industrial Solar and Geothermal Generators, Industrial Ore Washer, the BatBox, CESU, MFE and MFSU, and the rest of `tools/jimtafacts_industry.py`'s `MACHINES` with a Jugcraft equivalent are registered as that Jugcraft machine (the Macerator is a Crusher, the Industrial Generator a Coal Generator), with the same recipes and numbers. One Jugcraft machine crafts into its Jimtafacts look and back, one for one. Only the five with no Jugcraft equivalent (Compressor, Extractor, Thermal Centrifuge, Recycler, Metal Cutter) are machines of their own.
 - **Power cables:** Jugcraft's copper, aluminum and silver cables, plus 14 Jimtafacts ones (copper, tin, gold, iron and glass fiber, with insulated, double- and quad-insulated, detector and splitter versions). The 90-odd coloured covered, smart and dense cables are the ME network's data cables and are not part of this.
 - **Storage:** four separate systems: the ME network (Jimtafacts), the Storage Lectern (Jug Nouveau), the alchemical chest and bags, and the Drone Depot.
 - **Spells:** three systems share one Focus pool: Concordance (10 spells), Jug Nouveau (82 glyphs) and Jimtafacts spellbooks (113 spells), with 24 spell books between them.
@@ -86,10 +86,9 @@ Not changed: JE and the machine power forms, fuels, Focus, the Principle Essence
 Merge only where two things do the same job at the same tier; keep anything that does something the others cannot. Nothing is deleted: IDs stay registered and saved items and machines keep working, as the repository rules require.
 
 1. **Crusher and Pulverizer:** the Pulverizer is made from a Crusher and does all of both machines' recipes; for an ore it gives the dust plus a byproduct. Placed Crushers keep working.
-2. **Jimtafacts copies:** each copy gets the same recipes and numbers as the Jugcraft machine it matches, so the choice between them is only how it looks.
-3. **Cables:** four power tiers by capacity (copper, aluminum, gold or high-voltage, glass fiber). Every other power cable becomes a look of one of those tiers with that tier's capacity.
-4. **Storage:** the Storage Lectern, alchemical chest and Drone Depot get a connector the ME network can read and fill, so one terminal reaches all of them. Each keeps working on its own.
-5. **Spells:** left as three systems; the shared Focus pool already ties them together. Only the spell books could be reduced to one book per system with tiers as upgrades.
+2. **Cables:** four power tiers by capacity (copper, aluminum, gold or high-voltage, glass fiber). Every other power cable becomes a look of one of those tiers with that tier's capacity.
+3. **Storage:** the Storage Lectern, alchemical chest and Drone Depot get a connector the ME network can read and fill, so one terminal reaches all of them. Each keeps working on its own.
+4. **Spells:** left as three systems; the shared Focus pool already ties them together. Only the spell books could be reduced to one book per system with tiers as upgrades.
 
 Each of these is its own change and its own owner decision.
 
