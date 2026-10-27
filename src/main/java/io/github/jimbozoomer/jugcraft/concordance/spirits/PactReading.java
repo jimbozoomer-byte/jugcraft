@@ -21,7 +21,7 @@ import org.jspecify.annotations.Nullable;
 public final class PactReading {
 	/** Every key a reading may carry (tools/concordance_pacts.py JADE_KEYS). */
 	public static final List<String> KEYS = List.of("standing", "visiting", "departing", "counterpart", "service", "state", "due_days",
-			"grace_days", "waiting", "visitor");
+			"grace_days", "waiting", "visitor", "note", "note_count");
 	public static final List<String> STANDINGS = List.of("none", "kept", "copy", "unreadable", "disabled");
 	public static final List<String> STATES = List.of("active", "suspended", "upkeep_due", "upkeep_held");
 	/** Waiting reason of a presence struck off its holder's roster (D-S18): its holder calls it back near its place. */
@@ -62,6 +62,7 @@ public final class PactReading {
 		BoundWill record = holder.record(level);
 		reading.putString("counterpart", Pacts.counterpart(record.counterpart()));
 		terms(reading, record, holder.agreement(), now);
+		note(reading, level, holds instanceof PactPerchBlockEntity kept ? kept.presence(level) : null, record, now);
 		String waiting = waiting(level, holder, record);
 		if (waiting != null) {
 			reading.putString("waiting", waiting);
@@ -102,6 +103,7 @@ public final class PactReading {
 		}
 		reading.putString("standing", "kept");
 		terms(reading, record, home.holder().agreement(), now);
+		note(reading, level, spirit, record, now);
 		return reading;
 	}
 
@@ -135,6 +137,18 @@ public final class PactReading {
 			} else {
 				reading.putInt("due_days", (int) AgreementHolder.days(upkeep.due() - now));
 			}
+		}
+	}
+
+	/** GC-04: its service's note (PactService.note) for the presence kept at its perch, by the world's clock: the id and its count. */
+	private static void note(CompoundTag reading, ServerLevel level, @Nullable PactSpiritEntity<?> spirit, BoundWill record, long now) {
+		BoundWill.Service terms = record.pact() == null ? null : record.pact().service();
+		PactService service = terms == null ? null : PactServices.get(terms.work());
+		PactService.Note note = service == null || spirit == null || spirit.gone() ? null
+				: service.note(level, spirit, record, level.getOverworldClockTime(), now);
+		if (note != null) {
+			reading.putString("note", note.id());
+			reading.putInt("note_count", note.count());
 		}
 	}
 

@@ -31,6 +31,7 @@ SERVICES = {
     "gather": "Gathers what it finds in its area into its anchor",
     "courier": "Carries its Courier Post's requests",
     "star_reckoning": "Star-reckoning: once a game day, a sky pattern you observed, recalled",
+    "strain_tending": "Strain tending: by daylight, one harvest strain eased on your beds at a time",
 }
 # Ars Nouveau's helpers on the roster (G13; Java: nouveau/NouveauHelper.kind is "nouveau_" + its species,
 # NouveauHelpers.register lists them).

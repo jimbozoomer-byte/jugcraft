@@ -30,6 +30,9 @@ final class PactSpiritRenderers {
 	static void register() {
 		// Stolas (D-S5, D-06): the owner's Flashjack rig drawn larger, his spread wings and his arrival from above inside his box.
 		register(Workers.STOLAS, new Row(1.4F, 0.4F, 1.2, 0.1, 2.0, true));
+		// Buer (GC-04): the Decor Blossom drawn 2.2 times its block size (the bud 1.4 blocks across, open about 1.7 across its
+		// sides); his culling box reaches 1 block below for his sinking departure, 0.5 above for his raised pistil; his pistil lit.
+		register(Workers.BUER, new Row(2.2F, 0.6F, 0.4, 1.0, 0.5, true));
 	}
 
 	static <T extends PactSpiritEntity<T>> void register(EntityType<T> type, Row row) {

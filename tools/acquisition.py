@@ -150,7 +150,8 @@ CHUNK_D_ITEMS = ["pact_perch"]
 # spirit's unit adds its rows (GC-04: the Pact Perch and Mendvetch). The cohort registers no item (GC-S22).
 # check_acquisition ties them to the files on disk and to the server test that loads their recipes
 # (ConcordanceJourneyGameTests.GARDEN_RECIPES).
-GARDEN_PACTS = {"sunpetal": "recipe", "verdant_bed": "recipe", "bonding_charm": "recipe"}
+GARDEN_PACTS = {"sunpetal": "recipe", "verdant_bed": "recipe", "bonding_charm": "recipe", "pact_perch": "recipe",
+                "mendvetch": "recipe"}
 
 
 def recipe_file(item, how):

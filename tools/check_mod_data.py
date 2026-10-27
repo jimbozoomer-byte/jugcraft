@@ -132,6 +132,7 @@ ASSETS = RES / "assets" / MOD
 DATA = RES / "data"
 JAVA_ROOT = ROOT / "src" / "main" / "java" / "io" / "github" / "jimbozoomer" / "jugcraft"
 CLIENT_JAVA_ROOT = ROOT / "src" / "client" / "java" / "io" / "github" / "jimbozoomer" / "jugcraft" / "client"
+TESTS_ROOT = ROOT / "src" / "gametest" / "java" / "io" / "github" / "jimbozoomer" / "jugcraft" / "test"
 JAVA = JAVA_ROOT / "materials" / "JugcraftMaterials.java"
 CONFIG = JAVA_ROOT / "config" / "JugcraftConfig.java"
 SEASON_JAVA = JAVA_ROOT / "season"
@@ -12270,6 +12271,14 @@ def check_acquisition(registered):
         err("ConcordanceJourneyGameTests.theGardenPactsRecipesLoad must load the recipe of every garden row "
             f"(GARDEN_RECIPES: {sorted(wanted)})")
     made_as(aq.GARDEN_PACTS, "the garden pacts")
+    # GC-04: every Jugcraft item a garden pact's compact or offerings name is a garden row, so the journey makes it.
+    for name, spirit in concordance.pacts.SPIRITS.items():
+        if spirit["pact"]["research"] != f"{MOD}:garden_regard":
+            continue
+        named = [cost["item"] for cost in spirit["pact"]["compact"]["items"]] + spirit["offerings"]["items"]
+        for item in named:
+            if item.startswith(f"{MOD}:") and split(item)[1] not in aq.GARDEN_PACTS:
+                err(f"tools/acquisition.py GARDEN_PACTS: {item}, in {name}'s compact or offerings, is no garden row")
     # The owner's armour tiers the record keeps creative-only: nothing gives them.
     for tier in aq.CREATIVE_ONLY:
         for piece in gear.ARMOR:
@@ -17528,7 +17537,7 @@ def check_geckolib(name, java_text, uvs, sizes, kind="block", faces=False):
     """A GeckoLib block's (or entity's) assets agree: every animation the Java names (a loop, a clip played once or played
     and held: a triggerable clip is pinned through the RawAnimation that names it) exists, every animated bone exists, and every cube's box-UV region lies inside the sheet without overlapping another's;
     the sheet is the size the model says. With faces (an owner's rig copied as drawn: Stolas's, Concordance Chunk D,
-    D-S5), two cubes clash only where faces they draw share texels."""
+    D-S5), two cubes clash only where faces they draw share texels; a per-face cube's faces are each a rectangle (GC-04)."""
     geo = load(ASSETS / "geckolib" / "models" / kind / f"{name}.geo.json") or {}
     animations = load(ASSETS / "geckolib" / "animations" / kind / f"{name}.animation.json") or {}
     clips = set(animations.get("animations", {}))
@@ -17547,6 +17556,20 @@ def check_geckolib(name, java_text, uvs, sizes, kind="block", faces=False):
     for bone in definition.get("bones", []):
         for cube in bone.get("cubes", []):
             w, h, d = cube["size"]
+            if isinstance(cube["uv"], dict):
+                # GC-04 (GB15): per-face UV (the Decor Blossom's): each face drawn is its own rectangle (a negative size reads
+                # backwards); a zero-size face is never drawn (GeckoLib GeometryCube.isZeroSizeFace), so it maps nothing.
+                drawn = []
+                for face, mapping in sorted(cube["uv"].items()):
+                    (fu, fv), (fw, fh) = mapping["uv"], mapping["uv_size"]
+                    rect = (min(fu, fu + fw), min(fv, fv + fh), max(fu, fu + fw), max(fv, fv + fh))
+                    if rect[0] < 0 or rect[1] < 0 or rect[2] > width or rect[3] > height:
+                        err(f"{name}.geo.json: {bone['name']}'s {face} face maps outside the {width}x{height} sheet")
+                    if rect[2] > rect[0] and rect[3] > rect[1]:
+                        drawn.append(rect)
+                for rect in drawn:
+                    regions.append((rect, [rect]))
+                continue
             u, v = cube["uv"]
             region = (u, v, u + 2 * (w + d), v + d + h)
             if region[2] > width or region[3] > height:
@@ -17717,8 +17740,9 @@ def check_ecology(co, root, lang, registered, research):
             tenders.add(path.name)
     if callers["compost"] != {"MulchMawBlockEntity.java", "OrganismCropBlock.java", "VerdantBedBlock.java"}:
         err(f"garden: strain is eased by compost only at bone meal on a bed, bone meal or fertilizer on a crop and a Maw's nutrient, not {sorted(callers['compost'])}")
-    if callers["tend"] != {"VerdantBedBlock.java"} or callers["setStrain"]:
-        err(f"garden: only a Greenwarden's use tends a bed, and no game code sets a strain ({sorted(callers['tend'])}, {sorted(callers['setStrain'])})")
+    if callers["tend"] != {"VerdantBedBlock.java", "StrainTending.java"} or callers["setStrain"]:
+        err(f"garden: only a Greenwarden's use and Buer's strain tending (GC-04) tend a bed, and no game code sets a strain "
+            f"({sorted(callers['tend'])}, {sorted(callers['setStrain'])})")
     if tenders != {"OrganismCropBlock.java", "VerdantBedBlock.java"}:
         err(f"garden: only the bed's use and its crop's tend a bed through VerdantBedBlock.tendBy, not {sorted(tenders)}")
     # A crop covers its bed from above, so an empty hand on a growing crop tends the bed beneath by the bed's rule (the
@@ -18307,7 +18331,10 @@ def check_pacts(co, root, lang, registered, research):
     before an absence keeps the grace left (D-P50); a perch that records no owner seals for nobody; a choice's id is
     bounded only as any string; a work that serves its holder alone is personal; a stranded pact keeps no obligation; a
     visitor no conversation waits on leaves whether or not the switch is on; and a decline is answered on the action
-    bar, never as a state for a closed menu."""
+    bar, never as a state for a closed menu. The garden cohort (GC-01 to GC-04): one row a spirit, each a thin subclass
+    registered as its row says; a service steps after decide (an offering due included, GC-P27); each garden work's words,
+    notes and reasons are its own (SERVICE_WORDS); Jade's note is read by the world's clock; a garden spirit's cues play
+    only its art plan's files, pitched as SOUND_PITCH says; and the cohort's game tests exist."""
     wk = co.workers
     def java(relative):
         path = root / relative
@@ -18926,8 +18953,10 @@ def check_pacts(co, root, lang, registered, research):
             or re.search(r"public String kind\(\) \{", base) or not re.search(r"public final String kind\(\) \{\s*return \"pact\";", base):
         err("spirits/PactSpiritEntity.java: every pact spirit saves perch and record here, and its roster kind is pact, final (Chunk D's keys)")
     think = _java_body(base, "public Status think(")
-    if not 0 <= think.find("decide(level, gameTime)") < think.find("next == Status.IDLE && owner != null && record != null && !gone()") < think.find("serve(level, time, gameTime)"):
-        err("PactSpiritEntity.think: a service steps only after decide returned IDLE for a presence with its record (SG1, GC-S7)")
+    if not 0 <= think.find("decide(level, gameTime)") < think.find("(next == Status.IDLE || next == Status.UPKEEP_DUE) && owner != null && record != null && !gone()") \
+            < think.find("serve(level, time, gameTime)") < think.find("next = next == Status.UPKEEP_DUE ? next : served;"):
+        err("PactSpiritEntity.think: a service steps only after decide returned IDLE for a presence with its record (SG1, GC-S7); "
+            "an offering due serves on through its grace and keeps UPKEEP_DUE (GC-P27)")
     # SG1: one service a work, each registered once, the list verified before any menu can ask.
     if set(pa.SERVICE_CLASSES) != set(pa.WORK):
         err("tools/concordance_pacts.py SERVICE_CLASSES names one service class for every work of WORK")
@@ -19018,6 +19047,58 @@ def check_pacts(co, root, lang, registered, research):
         for name in names:
             if f"public void {name}(GameTestHelper helper)" not in source:
                 err(f"{cls}: missing the garden cohort's GC-01 game test {name}")
+    # --- Concordance garden cohort, GC-04 (Buer; docs/features/buer-pact.md) ---
+    # Each work's own words (SERVICE_WORDS): every key in lang, every key its class names one of them, its notes and
+    # reason ids its class's, no reason id one of PactMenu's ANSWERS.
+    for work, words in pa.SERVICE_WORDS.items():
+        cls = pa.SERVICE_CLASSES.get(work)
+        source = java(f"spirits/{cls}.java") if cls else ""
+        if work not in pa.WORK or work == pa.RECKONING_WORK or not source:
+            err(f"tools/concordance_pacts.py SERVICE_WORDS: {work} is a work with its own service class (not Star-reckoning)")
+            continue
+        keys = [f"message.{MOD}.concordance.pact.{work}.{k}" for k in words["messages"]] \
+            + [f"screen.{MOD}.pact.service.{work}.{k}" for k in words["screen"]] \
+            + [f"tooltip.{MOD}.concordance.jade.pact.note.{work}.{k}" for k in words["notes"]]
+        for key in keys:
+            if key not in lang:
+                err(f"{work}: missing lang {key} (SERVICE_WORDS)")
+        named = set(re.findall(r'KEY \+ "([a-z_.]+)"', source))
+        if named != set(words["messages"]):
+            err(f"spirits/{cls}.java names words {sorted(named)}; SERVICE_WORDS[{work!r}] has {sorted(words['messages'])}")
+        if set(re.findall(r'new PactService\.Note\("([a-z_]+)"', source)) != set(words["notes"]):
+            err(f"spirits/{cls}.java: its Jade notes are SERVICE_WORDS[{work!r}]['notes'] ({sorted(words['notes'])})")
+        for answer in words["answers"]:
+            if answer in pa.ANSWERS or not re.search(rf'public static final String [A-Z_]+ = "{answer}";', source):
+                err(f"spirits/{cls}.java: its reason {answer} is its own constant, never one of PactMenu's ANSWERS")
+    # Jade's note: two keys appended, both readings carry it by the world's clock, the client words it by its work.
+    reading = java("spirits/PactReading.java")
+    jade = (CLIENT_JAVA_ROOT / "compat" / "JugcraftJadeClient.java").read_text(encoding="utf-8")
+    if pa.JADE_KEYS[-2:] != ["note", "note_count"] or reading.count("note(reading, level, ") != 2 \
+            or "level.getOverworldClockTime()" not in _java_body(reading, "private static void note(") \
+            or '"tooltip.jugcraft.concordance.jade.pact.note." + service + "." + note' not in jade:
+        err("PactReading/JugcraftJadeClient: a service's note in both readings and worded by its work (GC-04)")
+    if not re.search(r"default @Nullable Note note\(ServerLevel level, PactSpiritEntity<\?> spirit, BoundWill record, long time, long now\) \{\s*return null;",
+                     java("spirits/PactService.java")):
+        err("spirits/PactService.java: note() is null unless a service has one (GC-04)")
+    # Cues: a garden spirit's play only its art plan's files, none of Stolas's; each pitch as SOUND_PITCH says, and no
+    # other pact cue pitched.
+    sounds = load(ASSETS / "sounds.json") or {}
+    stolas_files = {f for _, files in pa.SPIRITS["stolas"]["cues"].values() for f in files}
+    for name, files in pa.ART_SOUNDS.items():
+        used = {f for _, cue_files in pa.SPIRITS[name]["cues"].values() for f in cue_files}
+        if not used <= set(files) or used & stolas_files:
+            err(f"{name}'s cues play only the art plan's files {files}, never Stolas's: {sorted(used)}")
+    for name in pa.SPIRITS:
+        for cue in pa.SPIRITS[name]["cues"]:
+            event = f"{name}.{cue}"
+            pitches = {entry.get("pitch") for entry in sounds.get(event, {}).get("sounds", []) if isinstance(entry, dict)}
+            if pitches != {pa.SOUND_PITCH.get(event)}:
+                err(f"sounds.json {event}: pitch {sorted(pitches, key=str)}, SOUND_PITCH says {pa.SOUND_PITCH.get(event)}")
+    for cls, names in GC04_TESTS.items():
+        source = (tests / f"{cls}.java").read_text(encoding="utf-8") if (tests / f"{cls}.java").exists() else ""
+        for name in names:
+            if not re.search(rf"public void {name}\(GameTestHelper \w+\)", source):
+                err(f"{cls}: missing the garden cohort's GC-04 game test {name}")
 
 
 def check_stolas_regard(co, root, lang, research):
@@ -19132,7 +19213,10 @@ def check_garden_pacts(co, root, lang, registered, research):
     the Binding Arts' or cultivation's practice. Whose land a garden service touches is asked as GC-S7 says: serves, then
     beneficiary, then the holder near (never a stand-in), then the holder's hands. The bed index reads loaded chunks' maps
     only, capped, and never Garden.nearest or a sample; no spirit samples or scans positions. The bed's two new reads only
-    read. Every word has its text, and the ticket's game tests exist."""
+    read. Every word has its text, and the ticket's game tests exist. GC-04: each garden work has its distinct row
+    (DISTINCT: GE8), its call made once by its own class; Buer's step asks in order (today, his complaints, his hours, his
+    quota, the index, the bed's own rule, the most strained first, at most MAX_ASKED asked whose land it is, one tend,
+    remembered, counted, faced, shown) and moves no item, nutrient or practice, saves nothing and scans nothing."""
     gp = co.garden_pacts
     pg = co.progression
 
@@ -19316,6 +19400,44 @@ def check_garden_pacts(co, root, lang, registered, research):
         for name in names:
             if not re.search(rf"public void {name}\(GameTestHelper \w+\)", source):
                 err(f"{cls}: missing the garden cohort's GC-03 game test {name}")
+    # GC-04 (GE8): each garden work's distinct row; its call made only by its own class, once.
+    if set(gp.DISTINCT) != set(gp.OBLIGATIONS):
+        err(f"tools/concordance_garden_pacts.py DISTINCT names every garden work: {sorted(gp.DISTINCT)} vs {sorted(gp.OBLIGATIONS)}")
+    for field in ("verb", "state", "call"):
+        values = [row[field] for row in gp.DISTINCT.values()]
+        if len(values) != len(set(values)):
+            err(f"tools/concordance_garden_pacts.py DISTINCT: two works share a {field} (GE8: mechanically distinct services)")
+    for work, row in gp.DISTINCT.items():
+        source = text(spirits / f"{row['class']}.java")
+        if co.pacts.SERVICE_CLASSES.get(work) != row["class"] or source.count(row["call"]) != 1:
+            err(f"spirits/{row['class']}.java: the service of {work} makes {row['call']} once (DISTINCT)")
+        for other, theirs in gp.DISTINCT.items():
+            if other != work and theirs["call"] in source:
+                err(f"spirits/{row['class']}.java: {theirs['call']} is {other}'s alone (GE8)")
+    # GC-04: Buer's step, in order: today, his complaints, his hours, his quota, the index, the bed's own rule, the most
+    # strained first, at most MAX_ASKED asked, whose land, one tend, remembered, counted, faced, shown.
+    tending = text(spirits / "StrainTending.java")
+    step = _java_body(tending, "static Status tend(")
+    order = [step.find(n) for n in (
+        "memory.today(now);", "memory.judge(level);", "Pacts.inHours(service, time)", "Pacts.done(record.pact(), now) >= service.quota()",
+        "memory.reach(record).beds(level, now)", "bed.mayTendAt(now) && !memory.overworked(bed.getBlockPos())",
+        "Comparator.comparingInt(VerdantBedBlockEntity::strainNow).reversed()", "Math.min(MAX_ASKED, ready.size())",
+        "GardenPacts.target(level, record, pos, bed.keeper(), time, now)", "if (!bed.tend(now)) {", "memory.eased(pos);",
+        "holder.taskDone(level, now);", "buer.attendWork(pos, BuerEntity.Gesture.WORK.ticks, now);",
+        "buer.gesture(BuerEntity.Gesture.WORK);", "return Status.WORKING;")]
+    if -1 in order or order != sorted(order) or step.count("return Status.WORKING;") != 1:
+        err("StrainTending.tend: today, judged, his hours, his quota, the index, the bed's own rule, the most strained first, "
+            "at most MAX_ASKED asked whose land it is, one bed tended, remembered, counted, attended and shown (GC-04)")
+    for banned in (".give(", ".take(", "setNutrients(", "setStrain(", ".compost(", ".rest(", "ConcordanceProgress.record(",
+                   "Evidence.", "ItemEntity", "spawnAtLocation(", "getInventory()", "ValueOutput", "output.store(",
+                   "getChunk(", "betweenClosed(", "Authority.present(", "mayChangeFor("):
+        if banned in tending:
+            err(f"spirits/StrainTending.java: never {banned} (strain only, no item, nutrient or practice; nothing saved; no scan)")
+    memory = _java_body(tending, "public static final class Memory")
+    if "while (eased.size() + overworked.size() > MEMORY)" not in memory or "buer.serviceMemory(Memory.class, Memory::new)" not in tending:
+        err("StrainTending.Memory: at most MEMORY beds, kept as the presence's service memory, never saved (GC-P23)")
+    if "new GardenReach(perch.getBlockPos(), definition.radius(), found -> own.equals(found.keeper()))" not in _java_body(tending, "public List<Missing> missing("):
+        err("StrainTending.missing: an awake bed the inviter keeps within his radius, read from the loaded chunks (GardenReach)")
 
 
 def check_pact_screen(co, lang):
@@ -19388,6 +19510,15 @@ def check_pact_screen(co, lang):
     for name in pa.CLIENT_SHOTS + pa.FACING_SHOTS:
         if f'"{name}"' not in shots:
             err(f"ConcordancePactClientGameTests: takes {name}")
+    # GC-04 (GC-P30): the garden client class takes its shots, and none before the world is shown (26.3: LevelLoadingScreen).
+    garden = (TESTS_ROOT / "ConcordanceGardenPactClientGameTests.java").read_text(encoding="utf-8")         if (TESTS_ROOT / "ConcordanceGardenPactClientGameTests.java").exists() else ""
+    for name in pa.GARDEN_CLIENT_SHOTS:
+        if f'"{name}"' not in garden:
+            err(f"ConcordanceGardenPactClientGameTests: takes {name}")
+    if not 0 <= garden.find("context.waitForScreen(null);") < garden.find("takeScreenshot("):
+        err("ConcordanceGardenPactClientGameTests: waits for no screen (the level loaded) before its first picture")
+    if '"io.github.jimbozoomer.jugcraft.test.ConcordanceGardenPactClientGameTests"' not in (ROOT / "src" / "gametest" / "resources" / "fabric.mod.json").read_text(encoding="utf-8"):
+        err("src/gametest/resources/fabric.mod.json: ConcordanceGardenPactClientGameTests is a fabric-client-gametest entrypoint")
 
 
 def check_spirit_facing(co):
@@ -19474,7 +19605,11 @@ def check_spirit_bodies(co):
     a gesture controller registered after it, each named as the generator names it and as long; his departure lasts its
     gesture, discarding him only when it ends; a summoned Stolas arrives; a perch's Stolas is never one leaving, nor, at a
     copy, the original's presence. He is drawn at BODY_SCALE with his eyes lit, and his glowmask is his eyes alone. The
-    pact's client test catches each gesture inside its telling pose and checks his real arrival and departure."""
+    pact's client test catches each gesture inside its telling pose and checks his real arrival and departure. The garden
+    cohort's GC-04: Buer's body is the owner's Decor Blossom, its texture copied and its geometry, glowmask and clips adapted
+    by tools/garden_bodies.py; his geometry is the owner's but for the stem's copy and the clear face of each twin pair
+    (pinned); no spirit's zero-thickness cube draws both faces of its plane but Stolas's recorded six (GB24); his glowmask is
+    his pistil's heart; his clips, Java, size and the garden client class's poses and shots agree."""
     pa = co.pacts
     flash = "assets/ars_jymbaumental/"
 
@@ -19631,6 +19766,125 @@ def check_spirit_bodies(co):
     for name in pa.SEQUENCE_SHOTS:
         if f'"{name}"' not in shots:
             err(f"ConcordancePactClientGameTests: takes {name}")
+    # --- GC-04: Buer's body, the owner's Decor Blossom (GC-S12, GC-P24, GC-P25) ---
+    blossom = pa.BLOSSOM
+    body = pa.SPIRITS["buer"]["body"]
+    library = ROOT / "art" / "owner-library" / "originals" / "Magic" / blossom
+    if body["owner_files"] != {"textures/entity/buer.png": blossom + "textures/block/decor_blossom.png"}:
+        err("tools/concordance_pacts.py SPIRITS['buer']: his texture is the owner's Decor Blossom's, copied unchanged, and only it")
+    buer_adapted = {
+        "geckolib/models/entity/buer.geo.json": (blossom + "geo/decor_blossom.geo.json", "garden_bodies.buer_model"),
+        "textures/entity/buer_glowmask.png": (blossom + "textures/block/decor_blossom.png", "garden_bodies.buer_glowmask"),
+        "geckolib/animations/entity/buer.animation.json": (blossom + "animations/decor_blossom_animations.json", "garden_bodies.buer_animations")}
+    if {t: v for t, v in pa.ADAPTED.items() if "/buer" in t} != buer_adapted \
+            or not set(buer_adapted) <= {target for target, _, _ in owner_art.adaptations()} \
+            or not set(body["owner_files"]) <= {target for target, _ in owner_art.magic_imports()}:
+        err("tools/owner_art.py: Buer's texture copied and his geometry, glowmask and clips adapted by tools/garden_bodies.py (GC-04)")
+    skin = ASSETS / "textures" / "entity" / "buer.png"
+    if not skin.is_file() or hashlib.sha256(skin.read_bytes()).hexdigest() != "2334749d3e11db8e6880bc60fb5d76081c24f11fe14e4e26ad02b330a263a68b":
+        err("textures/entity/buer.png: the Decor Blossom's texture byte for byte (catalog files.csv:20417)")
+    # His geometry is the owner's but for the stem's copies (and everything above raised by them) and one clear face of
+    # each twin pair, pinned (the generator computes it; this says which).
+    owner_geo = ((load(library / "geo" / "decor_blossom.geo.json") or {}).get("minecraft:geometry") or [{}])[0]
+    runtime_geo = ((load(ASSETS / "geckolib" / "models" / "entity" / "buer.geo.json") or {}).get("minecraft:geometry") or [{}])[0]
+    owner_bones = {bone["name"]: bone for bone in owner_geo.get("bones", [])}
+    runtime_bones = {bone["name"]: bone for bone in runtime_geo.get("bones", [])}
+    if not owner_bones or set(owner_bones) != set(runtime_bones) or owner_geo.get("description") != runtime_geo.get("description"):
+        err("buer.geo.json: the Decor Blossom's own bones and description, none added or lost")
+    else:
+        copies, stem = body["stem_copies"], owner_bones["base"]["cubes"][0]
+        rise = round(stem["size"][1] * copies, 4)
+        dropped = {}
+        for name, bone in owner_bones.items():
+            got = runtime_bones[name]
+            want = [stem] * (copies + 1) + bone["cubes"][1:] if name == "base" else bone.get("cubes", [])
+            shift = 0 if name == "base" else rise
+            if [round(a - b, 4) for a, b in zip(got["pivot"], bone["pivot"])] != [0, shift, 0] or len(got.get("cubes", [])) != len(want):
+                err(f"buer.geo.json {name}: the owner's bone, raised {shift} above the stem")
+                continue
+            for index, (cube, owner) in enumerate(zip(got.get("cubes", []), want)):
+                lift = round(stem["size"][1] * index, 4) if name == "base" and index <= copies else shift
+                gone = set(owner["uv"]) - set(cube["uv"]) if isinstance(owner.get("uv"), dict) and isinstance(cube.get("uv"), dict) else set()
+                rest = lambda c: {k: v for k, v in c.items() if k not in ("origin", "pivot", "uv")}
+                if [round(a - b, 4) for a, b in zip(cube["origin"], owner["origin"])] != [0, lift, 0] or rest(cube) != rest(owner) \
+                        or len(gone) > 1 or (isinstance(cube.get("uv"), dict) and any(owner["uv"].get(f) != v for f, v in cube["uv"].items())):
+                    err(f"buer.geo.json {name} cube {index}: the owner's, raised {lift}, at most one face dropped")
+                if gone:
+                    dropped[(name, index)] = gone.pop()
+        if dropped != body["dropped"]:
+            err(f"buer.geo.json: the faces dropped are {dropped}, not the clear twins tools/concordance_pacts.py pins {body['dropped']}")
+    # GB24: no spirit's zero-thickness cube draws both faces of its plane, Stolas's recorded six aside.
+    twins = set()
+    for name in pa.SPIRITS:
+        model = ((load(ASSETS / "geckolib" / "models" / "entity" / f"{name}.geo.json") or {}).get("minecraft:geometry") or [{}])[0]
+        for bone in model.get("bones", []):
+            for index, cube in enumerate(bone.get("cubes", [])):
+                flat = [axis for axis, size in enumerate(cube["size"]) if size == 0]
+                uv = cube.get("uv")
+                if len(flat) == 1 and (not isinstance(uv, dict) or all(face in uv for face in FLAT_FACES[flat[0]])):
+                    twins.add((name, bone["name"], index))
+    if twins != STOLAS_TWINS:
+        err(f"zero-thickness cubes draw both faces on one plane (docs/ART_DIRECTION.md): {sorted(twins - STOLAS_TWINS)}; "
+            f"Stolas's recorded ones gone: {sorted(STOLAS_TWINS - twins)}")
+    # His glowmask: the pistil's heart alone, as his skin draws it.
+    mask = ASSETS / "textures" / "entity" / "buer_glowmask.png"
+    if skin.is_file() and mask.is_file():
+        with Image.open(skin) as a, Image.open(mask) as b:
+            sheet, glow = a.convert("RGBA"), b.convert("RGBA")
+            lit = {(x, y) for y in range(glow.height) for x in range(glow.width) if glow.getpixel((x, y))[3]}
+            if glow.size != sheet.size or any(glow.getpixel(p) != sheet.getpixel(p) for p in lit) or lit != set(body["glow_texels"]):
+                err(f"textures/entity/buer_glowmask.png: his pistil's heart alone, as his skin draws it ({body['glow_texels']}): {sorted(lit)}")
+    else:
+        err("textures/entity/buer.png and buer_glowmask.png: run tools/owner_art.py (Buer's body)")
+    # His clips: the owner's three kept as made; his loops loop; each gesture as long as its row says, depart held.
+    clips = (load(ASSETS / "geckolib" / "animations" / "entity" / "buer.animation.json") or {}).get("animations", {})
+    for name, clip in (load(library / "animations" / "decor_blossom_animations.json") or {}).get("animations", {}).items():
+        if clips.get(name) != clip:
+            err(f"buer.animation.json: the Decor Blossom's {name} is kept as the owner made it")
+    for key, name in body["loops"].items():
+        if clips.get(name, {}).get("loop") is not True \
+                or name.startswith("animation.buer.") and clips[name].get("animation_length") != body["loop_lengths"][key]:
+            err(f"buer.animation.json: his {key} loop {name} loops, {body['loop_lengths'].get(key, 'the owner')}'s length")
+    for key, (length, (start, end)) in body["gesture_times"].items():
+        clip = clips.get(body["gestures"][key], {})
+        held = "hold_on_last_frame" if key == "depart" else False
+        if clip.get("animation_length") != length or clip.get("loop") != held or not 0 < start < end < length or end - start < 0.5:
+            err(f"buer.animation.json: his {key} is {length} s, {'held' if held else 'played once'}, its telling pose inside it")
+    buer_java = text(JAVA_ROOT / "concordance" / "spirits" / "BuerEntity.java")
+    for key, name in body["loops"].items():
+        if f'RawAnimation.begin().thenLoop("{name}")' not in buer_java:
+            err(f"spirits/BuerEntity.java: his {key} loop plays {name}")
+    declared = re.findall(r'^\t\t([A-Z]+)\("([a-z]+)", (\d+), RawAnimation\.begin\(\)\.then(Play|PlayAndHold)\("([a-z.]+)"\)\)[,;]$',
+                          buer_java, re.M)
+    wanted = [(key.upper(), key, str(round(length * 20)), "PlayAndHold" if key == "depart" else "Play", body["gestures"][key])
+              for key, (length, _) in body["gesture_times"].items()]
+    if declared != wanted:
+        err(f"spirits/BuerEntity.java: Gesture is {[g[1] for g in wanted]}, each its clip and its length in ticks: {declared}")
+    check_geckolib("buer", buer_java, None, None, kind="entity", faces=True)
+    # His size: his entity box within a fifth of the model he is drawn as, and his culling box holding it.
+    cubes = [cube for bone in runtime_geo.get("bones", []) for cube in bone.get("cubes", [])]
+    if cubes:
+        low = [min(c["origin"][a] for c in cubes) for a in range(3)]
+        high = [max(c["origin"][a] + c["size"][a] for c in cubes) for a in range(3)]
+        across = max(high[0] - low[0], high[2] - low[2]) / 16 * body["scale"]
+        tall = (high[1] - low[1]) / 16 * body["scale"]
+        size, r = pa.SPIRITS["buer"]["entity"], body["render"]
+        if abs(size["width"] - across) > 0.2 * across or abs(size["height"] - tall) > 0.2 * tall \
+                or across > size["width"] + 2 * r["wide"] or tall > size["height"] + r["above"]:
+            err(f"Buer's box {size['width']} x {size['height']} and culling box hold his model ({across:.2f} across, {tall:.2f} tall)")
+    # His poses and shots, from his front, each gesture frozen inside its window; no picture before the world is shown.
+    garden_client = text(ROOT / "src" / "gametest" / "java" / "io" / "github" / "jimbozoomer" / "jugcraft" / "test"
+                         / "ConcordanceGardenPactClientGameTests.java")
+    posed = {key.lower(): (float(a), float(b)) for key, a, b in re.findall(
+        r'gesturePose\(context, server, perch, BuerEntity\.Gesture\.([A-Z]+), ([0-9.]+), ([0-9.]+), "jugcraft_garden_buer_[a-z]+"\);', garden_client)}
+    if posed != {key: window for key, (_, window) in body["gesture_times"].items()}:
+        err(f"ConcordanceGardenPactClientGameTests: each of Buer's gestures frozen inside its telling pose: {posed}")
+    for name in body["shots"]:
+        if f'"{name}"' not in garden_client:
+            err(f"ConcordanceGardenPactClientGameTests: takes {name}")
+    for key in ("idle", "listen", "waiting", "suspended"):
+        if f'"{body["loops"][key]}"' not in garden_client:
+            err(f"ConcordanceGardenPactClientGameTests: checks his {key} loop ({body['loops'][key]})")
 
 
 def check_pact_network(co):
@@ -22458,8 +22712,8 @@ STOLAS_OWN_LINES = {
     "screen.jugcraft.pact.end.hint": "He leaves; what you paid ahead comes back to you once",
     "screen.jugcraft.pact.help": "Tab and Shift+Tab move between his words and the choices; Enter or Space chooses; Esc closes. Closing before you accept agrees to nothing.",
 }
-# Concordance garden cohort, GC-01's game tests (check_pacts). GC-04 appends the chooser's, the journal's and the roster's,
-# which need a second spirit.
+# Concordance garden cohort, GC-01's game tests (check_pacts). GC-04 appended the chooser's, the journal's and the roster's,
+# which need a second spirit (and the second half of aStrandedPactOfAnySpiritIsSeatedOrEnded).
 GC01_TESTS = {
     "ConcordanceWorkerGameTests": ["theChooserIsSkippedWithOneSpirit", "anInviteOutsideTheInviteModeIsDropped", "aRecordWithAnUnknownWorkStillEnds",
                                    "aStrandedPactOfAnySpiritIsSeatedOrEnded", "stolasLinesRenderAsBefore", "aCompactWithoutResonanceNamesNoAstrolabe",
@@ -22470,7 +22724,10 @@ GC01_TESTS = {
                                    "aRemovedPresenceNeverEndsAnySpiritsPact", "endingAnySpiritsPactReturnsTheEscrowOnce",
                                    "aCopiedPerchIsInertForEverySpirit", "onePresencePerPactForEverySpirit", "everySpiritWaitsForANearHolder",
                                    "twoNegotiationsAtOnePerchSealOnceForEverySpirit", "anotherPlayerCannotAcceptForAnySpiritsHolder",
-                                   "everySpiritsKeysSurviveASave"],
+                                   "everySpiritsKeysSurviveASave",
+                                   "aPerchOffersOnlyWhatThePlayerMayInvite", "anInviteIndexOutOfRangeIsDropped", "aNonOwnerNeverSeesTheChooser",
+                                   "aStaleChooserRevisionIsRefused", "theRosterPortraitsEachPactBySpirit"],
+    "ConcordanceJournalGameTests": ["theJournalNamesEachRegardsNextStep"],
 }
 # Concordance Chunk D, D-05's game tests (check_pacts), and unit 1's upkeep tests shown on Stolas's pact too.
 D05_TESTS = {
@@ -22491,6 +22748,26 @@ GC02_TESTS = {"ConcordanceWorkerGameTests": ["aSpiritArrivesFacingItsInviter", "
                                              "aTeleportBackKeepsTheFacing", "aClosedConversationLeavesTheFacing",
                                              "theLookTargetIsDroppedOnlyWhenGoneElsewhereOrFar",
                                              "aWorkTargetOutranksTheSpeakerWhileItsGesturePlays"]}
+# The garden cohort, GC-04's game tests (Buer; check_pacts). PG's three obligation tests land with him (PG §5.2).
+GC04_TESTS = {
+    "ConcordanceWorkerGameTests": [
+        "buerEasesOneStrainAtTheBedsOwnRate", "buerTendsOnlyBedsOfHisBeneficiaries", "buerNeverTouchesAClaimedOrDormantBed",
+        "buerWaitsForAPresentHolder", "twoBuersShareOneBedsTendWindow", "buerSleepsOutsideHisHours", "buerStopsAtHisQuota",
+        "buerChangesAtMostOneBedAThink", "anOverworkedBedWaitsForCompost", "anOverworkedComplaintIsForgottenOnRestart",
+        "buerRefusesWithoutABedToMend", "buersFirstObligationIsATendingByHand", "buerFacesTheBedHeTends",
+        "aSuspendedBuerTendsNothing", "buerTendsThroughHisGrace", "aDuplicateBuerTendsNothing",
+        "buersReadingSaysItsNoteAndNamesNoPlayer", "buerAnswersEachActionWithHisGesture", "noGardenTermOrRefusalNamesAnAstrolabe",
+        "anObligationIsRecordedOncePerPlayerAndSpirit", "anObligationNeverMastersStolassRegard",
+        "anObligationOutsideTheAreaOrWhileSuspendedCountsNothing"],
+    "ConcordanceJourneyGameTests": ["buerFromTheCodexToDeparture"],
+}
+# GC-04 (GB24): Stolas's Flashjack draws these six zero-thickness box-UV cubes on both faces, as the owner made them (D-D3
+# keeps his geometry byte for byte); the twin rule allows exactly these, so a seventh, in any spirit, fails. Recorded as a
+# question for the cohort checkpoint, not changed here.
+STOLAS_TWINS = {("stolas", "head", 2), ("stolas", "head", 3), ("stolas", "legs", 2), ("stolas", "legs", 3),
+                ("stolas", "feets", 0), ("stolas", "feets", 1)}
+# The two faces a zero-thickness cube draws on one plane, by the axis it is flat across (tools/garden_bodies.py OPPOSITE).
+FLAT_FACES = {0: ("east", "west"), 1: ("up", "down"), 2: ("north", "south")}
 # The garden cohort, GC-03's game tests (check_garden_pacts). The obligation's three land with Buer (GC-04's commit adds them).
 GC03_TESTS = {
     "ConcordanceGardenGameTests": ["theGardenReachNeverLoadsAChunk", "theGardenReachIsCappedAndCached", "aCachedHabitatNeverSamples",

@@ -496,6 +496,7 @@
       "io.github.jimbozoomer.jugcraft.test.ConcordancePactClientGameTests",
       "io.github.jimbozoomer.jugcraft.test.ConcordanceRosterClientGameTests",
       "io.github.jimbozoomer.jugcraft.test.ConcordancePactNetworkTests",
+      "io.github.jimbozoomer.jugcraft.test.ConcordanceGardenPactClientGameTests",
       "io.github.jimbozoomer.jugcraft.test.ArmorTiersClientGameTests",
       "io.github.jimbozoomer.jugcraft.test.StyxClientGameTests",
       "io.github.jimbozoomer.jugcraft.test.StyxTownClientGameTests",

@@ -553,6 +553,72 @@
       }
     ]
   },
+  "buer.arrive": {
+    "subtitle": "subtitles.jugcraft.buer.arrive",
+    "sounds": [
+      {
+        "name": "jugcraft:menagerie/fable/butterfly_heal",
+        "attenuation_distance": 16
+      }
+    ]
+  },
+  "buer.listen": {
+    "subtitle": "subtitles.jugcraft.buer.listen",
+    "sounds": [
+      {
+        "name": "jugcraft:alchemy/peheal",
+        "attenuation_distance": 16,
+        "pitch": 1.25
+      }
+    ]
+  },
+  "buer.inspect": {
+    "subtitle": "subtitles.jugcraft.buer.inspect",
+    "sounds": [
+      {
+        "name": "jugcraft:alchemy/peheal",
+        "attenuation_distance": 16
+      }
+    ]
+  },
+  "buer.assent": {
+    "subtitle": "subtitles.jugcraft.buer.assent",
+    "sounds": [
+      {
+        "name": "jugcraft:menagerie/grove/entity/cactem/entity.cactem.heal",
+        "attenuation_distance": 16
+      }
+    ]
+  },
+  "buer.refuse": {
+    "subtitle": "subtitles.jugcraft.buer.refuse",
+    "sounds": [
+      {
+        "name": "jugcraft:alchemy/peheal",
+        "attenuation_distance": 16,
+        "pitch": 0.6
+      }
+    ]
+  },
+  "buer.depart": {
+    "subtitle": "subtitles.jugcraft.buer.depart",
+    "sounds": [
+      {
+        "name": "jugcraft:menagerie/fable/butterfly_heal",
+        "attenuation_distance": 16,
+        "pitch": 0.7
+      }
+    ]
+  },
+  "buer.work": {
+    "subtitle": "subtitles.jugcraft.buer.work",
+    "sounds": [
+      {
+        "name": "jugcraft:menagerie/grove/item/item.heal_spell_book.player_heal",
+        "attenuation_distance": 16
+      }
+    ]
+  },
   "alchemy_chargetick": {
     "sounds": [
       "jugcraft:alchemy/chargetick"

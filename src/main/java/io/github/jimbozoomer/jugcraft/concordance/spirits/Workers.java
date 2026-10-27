@@ -48,7 +48,8 @@ import net.minecraft.world.level.material.PushReaction;
  * says what it is doing or why not; the {@code workers} command lists a player's workers from the saved roster,
  * loaded or not, without loading anything. Since Concordance Chunk D (D-08) a second spirit, the Workshop Hand, is sealed
  * at a Spirit Anchor bound to its holder's Courier Post and carries that post's requests. Concordance Chunk D adds Stolas,
- * the pact perch and its screen.
+ * the pact perch and its screen. The garden cohort adds Buer (GC-04), whose strain tending eases a strain from his holder's
+ * beds by daylight.
  */
 public final class Workers {
 	public static final String RESEARCH = "jugcraft:binding_arts";
@@ -71,6 +72,8 @@ public final class Workers {
 	public static DataComponentType<ClockworkPorterEntity.Route> PORTER_ROUTE;
 	/** Concordance Chunk D, D-04: Stolas (a pact's presence, or a visitor during a conversation), the pact perch and its screen. */
 	public static EntityType<StolasEntity> STOLAS;
+	/** Concordance garden cohort, GC-04 (Dossier 1): Buer, rooted on his perch (strain tending). */
+	public static EntityType<BuerEntity> BUER;
 	public static Block PACT_PERCH;
 	public static BlockEntityType<PactPerchBlockEntity> PERCH_ENTITY;
 	public static Item PACT_PERCH_ITEM;
@@ -113,6 +116,11 @@ public final class Workers {
 		FabricDefaultAttributeRegistry.register(STOLAS, StolasEntity.createAttributes());
 		// Concordance garden cohort, GC-01 (SG3): the perch calls whichever pact spirit a counterpart names.
 		PactSpirits.register(StolasEntity.COUNTERPART, STOLAS, StolasEntity.SIGN);
+		// Concordance garden cohort, GC-04: Buer, MISC as every worker is (a transport crate refuses him), rooted on his perch.
+		BUER = entity("buer", EntityType.Builder.<BuerEntity>of(BuerEntity::new, MobCategory.MISC).sized(1.2F, 1.6F).eyeHeight(1.4F)
+				.fireImmune().clientTrackingRange(8));
+		FabricDefaultAttributeRegistry.register(BUER, BuerEntity.createAttributes());
+		PactSpirits.register(BuerEntity.COUNTERPART, BUER, BuerEntity.SIGN);
 		ResourceKey<Block> perchKey = ResourceKey.create(Registries.BLOCK, Jugcraft.id("pact_perch"));
 		PACT_PERCH = Registry.register(BuiltInRegistries.BLOCK, perchKey, new PactPerchBlock(BlockBehaviour.Properties.of()
 				.mapColor(MapColor.WOOD).strength(1.5F, 3.0F).sound(SoundType.WOOD).noOcclusion().pushReaction(PushReaction.IMMOVEABLE).setId(perchKey)));
@@ -122,10 +130,13 @@ public final class Workers {
 		PERCH_MENU = Registry.register(BuiltInRegistries.MENU, Jugcraft.id("pact_perch"), new ExtendedMenuType<>(PactMenu::new, PactMenu.Opening.STREAM_CODEC));
 		// GC-01 (SG1): one service a work, every work the parser accepts served, before any menu can ask.
 		PactServices.register(StarReckoning.SERVICE);
+		PactServices.register(StrainTending.SERVICE);
 		PactServices.verify();
 		PactMenu.register();
 		// Concordance Chunk D, D-06: Stolas's cues (jugcraft:stolas.*; sounds.json and subtitles are the generator's).
 		StolasEntity.registerSounds();
+		// GC-04: Buer's cues (jugcraft:buer.*).
+		BuerEntity.registerSounds();
 		// The unit review: every pact spirit's departure ends on time, its chunk ticking it or not (one sweep, GC-01).
 		PactSpiritEntity.registerSweep();
 		CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess, environment) -> command(dispatcher));

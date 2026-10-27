@@ -64,7 +64,9 @@ import org.jspecify.annotations.Nullable;
  * Its pact's service (PactServices, by the record's work) takes one autonomous step a think, and only after {@link #decide}
  * has returned IDLE for a presence with a record: its UUID and record verified against its perch, its pact's state read,
  * its holder present near (Authority.presentNear within Pacts.REACH). So a visitor, a copy, a duplicate, a suspended,
- * held or unattended pact never works. Stolas's service takes none.
+ * held or unattended pact never works. Since GC-04 (GC-P27) it steps under UPKEEP_DUE too, an offering due serving on
+ * through its grace, the status kept; a garden service then asks its holder's presence at the change itself. Stolas's
+ * service takes none.
  * <p>
  * Its body (its subclass's {@link Body}): the worker's main controller plays its loops for what the server synced; its
  * gestures play on a controller of their own over it, each fired by the server through {@link #gesture} (GeckoLib sends it
@@ -246,10 +248,13 @@ public abstract class PactSpiritEntity<T extends PactSpiritEntity<T>> extends Wo
 	@Override
 	public Status think(ServerLevel level, long time, long gameTime) {
 		Status next = decide(level, gameTime);
-		if (next == Status.IDLE && owner != null && record != null && !gone()) {
+		if ((next == Status.IDLE || next == Status.UPKEEP_DUE) && owner != null && record != null && !gone()) {
 			// GC-01 (SG1): its pact's service may take one step, only now: a presence verified at its own perch, its pact
-			// serving and its holder near.
-			next = serve(level, time, gameTime);
+			// serving. GC-04 (GC-P27): an offering due serves on through its grace, as its terms, Jade and Pacts.serves say;
+			// the status stays UPKEEP_DUE so the warning is what is shown, and a garden service asks whether its holder is
+			// near at each change (GardenPacts.target), since decide asks it only after the pact's own state.
+			Status served = serve(level, time, gameTime);
+			next = next == Status.UPKEEP_DUE ? next : served;
 		}
 		if (!gone()) {
 			// Leaving, it keeps its last status, as it did when it left at once: no sign over it, no roster entry touched.

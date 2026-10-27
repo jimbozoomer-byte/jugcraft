@@ -235,9 +235,11 @@ public class ConcordanceResourceGameTests {
 				 "beats": ["greeting", "service", "price"]}""";
 		PactCatalog read = PactCatalog.parse(Map.of(PactDefinition.STOLAS, JsonParser.parseString(valid)), research);
 		PactDefinition stolas = read.get(PactDefinition.STOLAS);
-		helper.assertTrue(read.problems().isEmpty() && stolas != null && stolas.period() == 7 * Pacts.DAY && stolas.grace() == Pacts.DAY && stolas.cap() == 4
+		helper.assertTrue(read.problems().stream().allMatch(p -> p.contains("no definition loaded") && !p.startsWith("pact jugcraft:stolas"))
+				&& stolas != null && stolas.period() == 7 * Pacts.DAY && stolas.grace() == Pacts.DAY && stolas.cap() == 4
 				&& stolas.resonance() == 8 && stolas.compact().equals(List.of(new PactDefinition.Cost("minecraft:amethyst_shard", 2))) && stolas.beats().size() == 3,
-				"A definition within bounds reads exactly: " + read.problems());
+				"A definition within bounds reads exactly: only the other shipped definitions, not given here, are reported missing (GC-04): "
+						+ read.problems());
 		Map<String, String> faults = Map.of(
 				"an unknown field", valid.replace("\"beats\"", "\"surprise\": 1, \"beats\""),
 				"a newer schema", valid.replace("\"schema\": 1", "\"schema\": 99"),

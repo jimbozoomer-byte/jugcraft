@@ -129,8 +129,9 @@ public final class JugcraftJadeClient implements JugcraftJadePlugin.ClientRegist
 
 	/**
 	 * Concordance Chunk D, D-06: a pact's or agreement's reading (spirits/PactReading, read on the server), in words: whether
-	 * one is kept and with whom, its service, its state, the next offering or the grace, why its presence waits; a visit or a
-	 * departure. It names no player and shows nothing of the escrow, because the reading carries neither.
+	 * one is kept and with whom, its service, its state, the next offering or the grace, why its presence waits, its service's
+	 * note (GC-04); a visit or a departure. It names no player and shows nothing of the escrow, because the reading carries
+	 * neither.
 	 */
 	private static void pactLines(ITooltip tooltip, CompoundTag data) {
 		if (data.getBooleanOr("departing", false)) {
@@ -172,6 +173,12 @@ public final class JugcraftJadeClient implements JugcraftJadePlugin.ClientRegist
 				} else if (!waiting.isEmpty()) {
 					tooltip.add(Component.translatable("tooltip.jugcraft.concordance.jade.pact.waiting",
 							Component.translatable("compose.jugcraft.worker.status." + waiting)));
+				}
+				// GC-04: its service's note (Buer's overworked beds, his sleep), in its work's words.
+				String note = data.getStringOr("note", "");
+				if (!note.isEmpty() && !service.isEmpty()) {
+					tooltip.add(Component.translatable("tooltip.jugcraft.concordance.jade.pact.note." + service + "." + note,
+							data.getIntOr("note_count", 0)));
 				}
 			}
 			default -> {

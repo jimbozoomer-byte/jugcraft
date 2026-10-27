@@ -12,8 +12,10 @@ and the travel kit's icons, worn sheets and heavy model (tools/concordance_rime_
 unit 3 adds the Crucible Stand's treated iron and copper coil from the Blocks folder (tools/concordance_alchemy.py
 OWNER_BLOCKS_FILES). Concordance Chunk D adds Stolas's body: the owner's Flashjack model copied unchanged under his name
 (tools/concordance_pacts.py OWNER_FILES), and (unit 3, D-06) his skin, glowmask and animations adapted from the rig's own
-files by tools/stolas_body.py (concordance_pacts.ADAPTED), written and checked here like the recolourings. Two tables may
-not import different files to one path.
+files by tools/stolas_body.py (concordance_pacts.ADAPTED), written and checked here like the recolourings. The garden
+cohort (GC-04) adds Buer's body: the owner's Decor Blossom texture copied unchanged (concordance_pacts.OWNER_FILES), its
+geometry, glowmask and animations adapted by tools/garden_bodies.py (ADAPTED). Two tables may not import different files
+to one path.
 
 On 7 October 2026 the owner asked for their farming and food textures to be used ("I have already made a ton of custom
 textures and food ... I made all of the textures in there myself its all mine"). Each imported texture is a byte-for-byte
@@ -31,7 +33,8 @@ from what this import would write.
     python3 tools/owner_art.py --provenance   the magic imports' sources and SHA-256, for the feature record
     python3 tools/owner_art.py --provenance trinkets   the same for one slice's files (a tools/concordance_<slice>.py,
                                                        or another module with OWNER_FILES, such as encyclopedia)
-    python3 tools/owner_art.py --provenance pacts    Stolas's body: the copied model and the adapted files, marked
+    python3 tools/owner_art.py --provenance pacts    the pact spirits' bodies (Stolas's, Buer's): the copied files and the
+                                                     adapted ones, each marked with its adapter
 """
 import hashlib
 import io
@@ -66,6 +69,7 @@ import concordance_trinkets  # noqa: E402
 import encyclopedia  # noqa: E402
 import feasts  # noqa: E402
 import garden  # noqa: E402
+import garden_bodies  # noqa: E402
 import kitchen  # noqa: E402
 import menu  # noqa: E402
 import rice  # noqa: E402
@@ -77,6 +81,14 @@ FOOD = "farming and food textures"
 TEXTURES = os.path.join(ROOT, "src", "main", "resources", "assets", "jugcraft", "textures")
 MAGIC = os.path.join(ROOT, "art", "owner-library", "originals", "Magic")
 ASSETS = os.path.join(ROOT, "src", "main", "resources", "assets", "jugcraft")
+# Adapter modules by name (tools/concordance_pacts.py SPIRITS[...]["body"]["adapted"]: a bare name is tools/stolas_body.py's,
+# Chunk D's; "garden_bodies.<name>" is the garden cohort's, GC-04 on).
+ADAPTERS = {"stolas_body": stolas_body, "garden_bodies": garden_bodies}
+
+
+def _adapter(name):
+    module, _, attr = name.rpartition(".")
+    return getattr(ADAPTERS[module or "stolas_body"], attr)
 
 
 def imports():
@@ -130,14 +142,15 @@ def block_asset_imports():
 
 def adaptations():
     """(runtime path under assets/jugcraft, library path under Magic/, adapter) for every magic-collection file adapted
-    rather than copied: Stolas's skin, glowmask and animations (tools/concordance_pacts.py ADAPTED, made by
-    tools/stolas_body.py; Concordance Chunk D, D-06). None may share a path with a copied file."""
+    rather than copied: Stolas's skin, glowmask and animations (tools/stolas_body.py; Concordance Chunk D, D-06) and the
+    garden spirits' bodies (tools/garden_bodies.py; the garden cohort, GC-04), from tools/concordance_pacts.py ADAPTED.
+    None may share a path with a copied file."""
     copied = dict(magic_imports())
     out = []
     for target, (source, adapter) in sorted(concordance_pacts.ADAPTED.items()):
         if target in copied:
             raise SystemExit(f"tools/owner_art.py: {target} is both copied and adapted")
-        out.append((target, source, getattr(stolas_body, adapter)))
+        out.append((target, source, _adapter(adapter)))
     return out
 
 
@@ -237,7 +250,8 @@ def expected():
             # sounds are copied as they are.
             files[os.path.join(ASSETS, target)] = data.replace(b"\r\n", b"\n") if target.endswith((".json", ".mcmeta")) else data
     for target, _, adapter in adaptations():
-        # Stolas's body (D-06): adapted from the owner's Flashjack files, never drawn over by hand.
+        # The pact spirits' bodies (Stolas's, D-06; the garden cohort's, GC-04): adapted from the owner's files, never drawn over
+        # by hand.
         files[os.path.join(ASSETS, target)] = adapt(adapter)
     return files
 
@@ -252,7 +266,8 @@ def provenance():
             with open(os.path.join(root, source), "rb") as handle:
                 out.append((target, f"originals/{name}/{source}", hashlib.sha256(handle.read()).hexdigest(), None))
     for target, source, adapter in adaptations():
-        out.append((target, f"originals/Magic/{source}", hashlib.sha256(_read_magic(source)).hexdigest(), adapter.__name__))
+        out.append((target, f"originals/Magic/{source}", hashlib.sha256(_read_magic(source)).hexdigest(),
+                    f"{adapter.__module__}.{adapter.__name__}"))
     return out
 
 
@@ -307,7 +322,7 @@ if __name__ == "__main__":
                 | set(getattr(module, "ADAPTED", {}))
         for target, source, digest, adapter in provenance():
             if only is None or target in only:
-                adapted = f" adapted by `tools/stolas_body.py` ({adapter}) |" if adapter else ""
+                adapted = f" adapted by `tools/{adapter.split('.')[0]}.py` ({adapter.split('.')[1]}) |" if adapter else ""
                 print(f"| `{target}` | `{source}` | `{digest}` |" + adapted)
         sys.exit(0)
     if "--check" in sys.argv:
