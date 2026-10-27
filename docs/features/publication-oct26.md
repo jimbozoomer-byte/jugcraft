@@ -77,3 +77,10 @@ zero surface outcrops in that expanded sample. Production rarity, placement and
 terrain are unchanged. The full focused client test passed, including two natural-world surveys and
 save/reopen persistence. Remaining release CI must still pass before deployment.
 
+The same main run passed both server builds and release assembly. Its aircraft
+client check hit an unresolved-sound NPE when the headless sound engine skipped
+playback without an audio device. The test explicitly calls the 26.3
+`getOrResolve` API before reading volume and rejects missing/empty resources;
+the engine-loop, steering and both F5 camera assertions remain intact. The full
+aircraft client test passes locally in 2m38s. Runtime aircraft code is unchanged.
+
