@@ -11737,6 +11737,7 @@
   "message.jugcraft.electric_motor": "Electric motor: %s / %s JE",
   "message.jugcraft.enchanted_broom.anointed": "The broom stirs and twitches its bristles: it will sweep for three days.",
   "message.jugcraft.enchanted_broom.full": "The broom is still wide awake.",
+  "message.jugcraft.encyclopedia.welcome": "Welcome to Jugcraft! Press %s, or the scroll button in your inventory, to open the Encyclopedia: your first steps, the machinery and magic routes, and every key.",
   "message.jugcraft.epitaph.engraved": "The epitaph is cut",
   "message.jugcraft.epitaph.invalid": "An epitaph has at most 4 lines of 24 characters",
   "message.jugcraft.epitaph.no_chisel": "You need the Stonemason's Chisel in hand",

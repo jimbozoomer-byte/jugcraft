@@ -173,3 +173,17 @@ no research or items. Modonomicon and the journal retain their own server-unlock
 The community prototype was authored with Claude; reconciliation and testing fixes use OpenAI Codex (GPT-6).
 Combined verification is recorded in the October 13 integration record. Route canvas, quests, and human multiplayer
 acceptance remain future work.
+
+## First-join welcome (27 October 2026)
+
+Before this, the first thing a new player read on joining was the Exchange's starter-loan offer and its guide book;
+nothing mentioned the encyclopedia. Now, the first time a player joins with Jugcraft's client, chat says:
+"Welcome to Jugcraft! Press **B**, or the scroll button in your inventory, to open the Encyclopedia: your first steps,
+the machinery and magic routes, and every key." The key is shown as the player's own binding, so a remapped key reads
+correctly. It comes before the Exchange's greeting, which is unchanged. A `jugcraft.encyclopedia_welcome` tag on the
+player keeps it to the first join; stand-in test players and clients without Jugcraft get nothing.
+
+Implemented with Claude Opus 5.5 (Claude Code) for a contributor, on the fork. Verification: the client game test
+`EncyclopediaClientGameTests` checks that the joined player carries the welcome tag. Local
+`python tools/generate_material_data.py`, `python tools/check_mod_data.py` and `python scripts/check_repository.py`:
+both passed (7,797 material IDs). CI: pending. Not run: a human joining a fresh world.

@@ -11,6 +11,7 @@ import io.github.jimbozoomer.jugcraft.concordance.ConcordanceProgress;
 import io.github.jimbozoomer.jugcraft.concordance.JugcraftConcordance;
 import io.github.jimbozoomer.jugcraft.concordance.rules.Evidence;
 import io.github.jimbozoomer.jugcraft.concordance.rules.ResearchState;
+import io.github.jimbozoomer.jugcraft.guide.encyclopedia.Encyclopedia;
 import io.github.jimbozoomer.jugcraft.guide.encyclopedia.EncyclopediaPayload;
 import io.github.jimbozoomer.jugcraft.lair.JugcraftLairs;
 import java.util.ArrayList;
@@ -50,6 +51,7 @@ import net.minecraft.world.level.block.Blocks;
  * Concordance Chunk A (A-04) in a real client on a dedicated server, so every encyclopedia request and answer is encoded,
  * sent and decoded. Results are logged with the prefix "[encyclopedia-check]". One client.
  * <ul>
+ * <li><b>The welcome.</b> The first join is greeted with the encyclopedia's key (a tag keeps it to the first).</li>
  * <li><b>The key.</b> No other loaded key shares its default (F3 debug combinations aside, A-D7). From the game it
  * opens on Discover, where finding something that glows is next (screenshot {@code jugcraft_encyclopedia_discover_new});
  * the key again, or Esc, closes it; typing its letter in chat does not open it.</li>
@@ -80,6 +82,7 @@ public class EncyclopediaClientGameTests implements FabricClientGameTest {
 				server.runCommand("gamerule minecraft:spawn_mobs false");
 				server.runCommand("gamemode survival @a");
 				context.waitTicks(20);
+				welcome(server);
 				theKey(context);
 				theInventoryButton(context, server);
 				theRoute(context, server);
@@ -89,6 +92,13 @@ public class EncyclopediaClientGameTests implements FabricClientGameTest {
 				sizes(context);
 			}
 		}
+	}
+
+	/** A first join is welcomed, pointing at the encyclopedia's key, and tagged so it is not repeated. */
+	private static void welcome(TestDedicatedServerContext server) {
+		boolean welcomed = server.computeOnServer(minecraft -> first(minecraft).entityTags().contains(Encyclopedia.WELCOMED_TAG));
+		Jugcraft.LOGGER.info("[encyclopedia-check] welcomed on first join: {}", welcomed);
+		check(welcomed, "A first join should be welcomed with the encyclopedia's key");
 	}
 
 	private static void theKey(ClientGameTestContext context) {

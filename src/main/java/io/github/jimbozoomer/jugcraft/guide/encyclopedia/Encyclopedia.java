@@ -19,7 +19,9 @@ import net.fabricmc.fabric.api.entity.event.v1.ServerPlayerEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
+import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
+import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
@@ -40,6 +42,8 @@ public final class Encyclopedia {
 	/** How often a player may ask for their encyclopedia (ticks). */
 	public static final int REQUEST_TICKS = 10;
 	public static final String RATE_ACTION = "encyclopedia";
+	/** Tag on a player who has had the welcome, so it is shown once. */
+	public static final String WELCOMED_TAG = "jugcraft.encyclopedia_welcome";
 	private static final List<Contributor> PAGES = new ArrayList<>();
 	/** Requests that came too soon, newest only, by player. */
 	private static final Map<UUID, EncyclopediaRequestPayload> WAITING = new HashMap<>();
@@ -77,10 +81,25 @@ public final class Encyclopedia {
 		PayloadTypeRegistry.serverboundPlay().register(EncyclopediaRequestPayload.TYPE, EncyclopediaRequestPayload.CODEC);
 		PayloadTypeRegistry.clientboundPlay().register(EncyclopediaPayload.TYPE, EncyclopediaPayload.CODEC);
 		ServerPlayNetworking.registerGlobalReceiver(EncyclopediaRequestPayload.TYPE, (payload, context) -> receive(context.player(), payload));
+		// Before the Exchange's own greeting (JugcraftFinance registers after the guides).
+		ServerPlayConnectionEvents.JOIN.register((handler, sender, server) -> welcome(handler.getPlayer()));
 		ServerTickEvents.END_SERVER_TICK.register(Encyclopedia::tick);
 		// On the server thread, as the player leaves (not on the network thread that reports a disconnect).
 		ServerPlayerEvents.LEAVE.register(player -> WAITING.remove(player.getUUID()));
 		ServerLifecycleEvents.SERVER_STOPPED.register(server -> WAITING.clear());
+	}
+
+	/**
+	 * The first time a player joins with Jugcraft's client: where to start, with the key that opens this encyclopedia as
+	 * their game binds it. Stand-in test players and clients without Jugcraft get nothing.
+	 */
+	public static void welcome(ServerPlayer player) {
+		if (!ServerPlayNetworking.canSend(player, EncyclopediaPayload.TYPE) || player.entityTags().contains(WELCOMED_TAG)) {
+			return;
+		}
+		player.addTag(WELCOMED_TAG);
+		player.sendSystemMessage(Component.translatable("message.jugcraft.encyclopedia.welcome",
+				Component.keybind("key.jugcraft.encyclopedia").withStyle(ChatFormatting.YELLOW)).withStyle(ChatFormatting.GOLD));
 	}
 
 	/** Adds a page, in the order pages are shown (each feature at its registration). */
