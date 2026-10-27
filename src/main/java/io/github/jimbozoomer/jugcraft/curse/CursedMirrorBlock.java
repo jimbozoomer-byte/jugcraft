@@ -34,9 +34,6 @@ public class CursedMirrorBlock extends HorizontalDirectionalBlock {
 	public static final int CURSE_DAYS = 7;
 	/** The Bad Luck duration, in ticks ({@value #CURSE_DAYS} days of 24000 ticks). */
 	public static final int CURSE_TICKS = CURSE_DAYS * 24000;
-	/** Dusk and dawn in the overworld day: the face only flickers between them. */
-	private static final long NIGHT_START = 13000;
-	private static final long NIGHT_END = 23000;
 	private static final VoxelShape NORTH = Block.box(0.0, 0.0, 13.0, 16.0, 16.0, 16.0);
 	private static final VoxelShape SOUTH = Block.box(0.0, 0.0, 0.0, 16.0, 16.0, 3.0);
 	private static final VoxelShape WEST = Block.box(13.0, 0.0, 0.0, 16.0, 16.0, 16.0);
@@ -81,11 +78,10 @@ public class CursedMirrorBlock extends HorizontalDirectionalBlock {
 		return super.playerWillDestroy(level, pos, state, player);
 	}
 
-	/** Client only: at night a pale wisp of a face sometimes shows just in front of the pane, then is gone. */
+	/** Client only: in the dark a pale wisp of a face sometimes shows just in front of the pane, then is gone. */
 	@Override
 	public void animateTick(BlockState state, Level level, BlockPos pos, RandomSource random) {
-		long day = level.getDayTime() % 24000;
-		if (day < NIGHT_START || day > NIGHT_END || random.nextInt(40) != 0) {
+		if (level.isBrightOutside() || random.nextInt(40) != 0) {
 			return;
 		}
 		Direction facing = state.getValue(FACING);

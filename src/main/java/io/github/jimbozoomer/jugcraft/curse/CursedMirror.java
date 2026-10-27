@@ -31,7 +31,7 @@ public final class CursedMirror {
 		var blockKey = ResourceKey.create(Registries.BLOCK, Jugcraft.id(ID));
 		BLOCK = Registry.register(BuiltInRegistries.BLOCK, blockKey, new CursedMirrorBlock(
 				BlockBehaviour.Properties.ofFullCopy(Blocks.GLASS).setId(blockKey).strength(1.0F).noOcclusion()
-						.pushReaction(PushReaction.DESTROY)));
+						.pushReaction(PushReaction.POPPED)));
 		var itemKey = ResourceKey.create(Registries.ITEM, Jugcraft.id(ID));
 		ITEM = Registry.register(BuiltInRegistries.ITEM, itemKey,
 				new BlockItem(BLOCK, new Item.Properties().setId(itemKey).useBlockDescriptionPrefix()));
