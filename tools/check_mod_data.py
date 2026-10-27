@@ -285,7 +285,7 @@ def check_assets(registered):
     for block in (all_blocks() + machine_blocks() + ag.all_blocks() + petro.petro_blocks() + deposits.all_blocks()
                   + list(tank_display.BLOCKS) + plastic.blocks() + ph.blocks() + (town_assets.blocks() + styx.blocks()) + seasons.BLOCKS
                   + construction.blocks() + control_electronics.blocks() + rocketry.blocks() + dieselworks.blocks() + kaiserworks.blocks() + trenchworks.blocks() + fortifications.blocks() + bunkerworks.blocks() + aged_wood.blocks() + fire_control.blocks()
-                  + concordance.blocks() + guns.blocks() + industrial_forms.blocks() + list(vehicle_bays.BLOCKS) + menagerie.blocks() + starter_workshop.STATIONS
+                  + concordance.blocks() + guns.blocks() + industrial_forms.blocks() + list(vehicle_bays.BLOCKS) + menagerie.blocks() + starter_workshop.STATIONS + ["cursed_mirror"]
                   + sorted(jimtafacts_catalog.blocks() & jimtafacts_catalog.items())):
         state = load(ASSETS / "blockstates" / f"{block}.json")
         if state:
@@ -311,7 +311,7 @@ def check_assets(registered):
         if item not in jimtafacts_catalog.blocks() and item not in (all_blocks() + machine_blocks() + ag.all_blocks() + petro.petro_blocks() + deposits.all_blocks()
                         + list(tank_display.BLOCKS) + plastic.blocks() + ph.blocks() + (town_assets.blocks() + styx.blocks())
                         + construction.blocks() + control_electronics.blocks() + rocketry.blocks() + dieselworks.blocks() + kaiserworks.blocks() + trenchworks.blocks() + fortifications.blocks() + bunkerworks.blocks() + aged_wood.blocks() + fire_control.blocks()
-                        + concordance.blocks() + guns.blocks() + industrial_forms.blocks() + list(vehicle_bays.BLOCKS) + menagerie.blocks() + starter_workshop.STATIONS
+                        + concordance.blocks() + guns.blocks() + industrial_forms.blocks() + list(vehicle_bays.BLOCKS) + menagerie.blocks() + starter_workshop.STATIONS + ["cursed_mirror"]
                         + exchange_blocks.BLOCKS + exchange_poker.BLOCKS + exchange_casino.BLOCKS + exchange_casino.ITEMS) and f"item.{MOD}.{item}" not in lang:
             err(f"Missing name for item {item}")
 
@@ -410,7 +410,7 @@ import guide_books
 import exchange_blocks
 import exchange_poker
 import exchange_casino
-NON_METAL = set(guide_books.BOOKS) | {"sawdust"} | set(MINERALS) | set(ITEMS) | set(machine_blocks()) | set(machine_items()) | set(CIRCUITS) | {b for m in MINERALS for b in (f"{m}_ore", f"deepslate_{m}_ore", f"{m}_block")} | {"oil_sand"} | set(petro.petro_items()) | set(ag.all_blocks()) | set(ag.all_items()) | set(petro.petro_blocks()) | set(tank_display.BLOCKS) | set(ph.blocks()) | set(ph.items()) | set((town_assets.blocks() + styx.blocks()))
+NON_METAL = {"cursed_mirror"} | set(guide_books.BOOKS) | {"sawdust"} | set(MINERALS) | set(ITEMS) | set(machine_blocks()) | set(machine_items()) | set(CIRCUITS) | {b for m in MINERALS for b in (f"{m}_ore", f"deepslate_{m}_ore", f"{m}_block")} | {"oil_sand"} | set(petro.petro_items()) | set(ag.all_blocks()) | set(ag.all_items()) | set(petro.petro_blocks()) | set(tank_display.BLOCKS) | set(ph.blocks()) | set(ph.items()) | set((town_assets.blocks() + styx.blocks()))
 
 
 def item_units(ref):
@@ -779,6 +779,7 @@ def check_tags():
                                                     + guns.items() + guns.blocks() + concordance.items() + concordance.blocks() + concordance.itemless_blocks())
         import nouveau_content
         known = set(known)
+        if registry == 'block': known.add("cursed_mirror")
         if registry == 'block': known.update(starter_workshop.STATIONS)
         if registry == 'item': known.update(starter_workshop.NAMES)
         if registry == 'item': known.update(jimtafacts.items())
@@ -17128,7 +17129,24 @@ def registered_items():
     registered |= jimtafacts_cables.items()
     registered |= jimtafacts_terraforming.items()
     registered |= set(jimtafacts_computers.items()) | set(jimtafacts_computers.blocks())
+    import cursed_mirror
+    registered |= {cursed_mirror.BLOCK, cursed_mirror.ITEM}
     return registered
+
+
+def check_cursed_mirror():
+    """curse/CursedMirrorBlock and curse/CursedMirror against tools/cursed_mirror.py: the curse length, that breaking
+    gives vanilla Bad Luck, and that the block/item id match."""
+    import cursed_mirror
+    folder = JAVA_ROOT / "curse"
+    block = (folder / "CursedMirrorBlock.java").read_text(encoding="utf-8") if (folder / "CursedMirrorBlock.java").is_file() else ""
+    reg = (folder / "CursedMirror.java").read_text(encoding="utf-8") if (folder / "CursedMirror.java").is_file() else ""
+    if f" CURSE_DAYS = {cursed_mirror.CURSE_DAYS};" not in block:
+        err(f"CursedMirrorBlock.CURSE_DAYS differs from tools/cursed_mirror.py ({cursed_mirror.CURSE_DAYS})")
+    if "MobEffects.UNLUCK" not in block:
+        err("CursedMirrorBlock should give vanilla Bad Luck (MobEffects.UNLUCK) when a player breaks it")
+    if f'ID = "{cursed_mirror.BLOCK}";' not in reg:
+        err(f"CursedMirror.ID differs from tools/cursed_mirror.py ({cursed_mirror.BLOCK})")
 
 
 def main():
@@ -17183,6 +17201,7 @@ def main():
     check_bunkerworks()
     check_fire_control()
     check_raiders()
+    check_cursed_mirror()
     check_plastic()
     check_seasons()
     check_alpine()

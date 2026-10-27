@@ -9377,6 +9377,11 @@
       "denominator": 36,
       "source": "recipe jugcraft:curiosity_cabinet"
     },
+    "jugcraft:cursed_mirror": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
     "jugcraft:cursed_spindle": {
       "numerator": 25273,
       "denominator": 9,

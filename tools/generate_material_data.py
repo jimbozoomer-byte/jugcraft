@@ -310,6 +310,8 @@ def assets():
     diagonal_connections.write_all(write, ASSETS, RES / "assets" / "minecraft")
     import scary_data
     scary_data.write_all(write, RES, lang)
+    import cursed_mirror
+    cursed_mirror.write_all(write, ASSETS, DATA / MOD, lang, self_drop)
     import chima_data
     chima_data.write_all(write, RES, lang)
     import vanilla_logs
@@ -1462,6 +1464,8 @@ def tags():
     tags = Tags()
     import wall_runs
     wall_runs.write_tags(tags, rid)
+    import cursed_mirror
+    tags.add("block", "minecraft:mineable/pickaxe", rid(cursed_mirror.BLOCK))
     # The Exchange's Market Chest is a wooden counter (tools/exchange_blocks.py).
     tags.add("block", "minecraft:mineable/axe", rid("market_chest"))
     import exchange_poker
