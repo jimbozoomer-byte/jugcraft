@@ -792,6 +792,8 @@ HALLOWEEN_ADVANCEMENTS = {
                         "description": "Throw a pumpkin 50 blocks or more with a trebuchet", "frame": "goal"},
     "headless_horseman": {"icon": "jugcraft:horseman_lantern", "title": "Lost His Head",
                           "description": "Send the Headless Horseman back into the night", "frame": "challenge"},
+    "sleepy_hollow": {"icon": "jugcraft:horseman_cloak", "title": "Sleepy Hollow",
+                      "description": "See the Headless Horseman ride out of the dark in the Halloween season", "frame": "task"},
     "lantern_festival": {"icon": "jugcraft:sky_lantern", "title": "A Sky Full of Wishes",
                          "description": "Be there when eight sky lanterns are let go together", "frame": "goal"},
     "harvest_home": {"icon": "jugcraft:feast_table", "title": "Harvest Home",
@@ -980,6 +982,19 @@ HORSEMAN = {"health": 160, "arena_radius": 32, "leave_range": 48, "lonely_ticks"
             # (item, count range) dropped when a player defeats him
             "loot": [("jugcraft:horseman_lantern", [1, 1]), ("jugcraft:horseman_cloak", [1, 1]), ("jugcraft:king_size_candy_bar", [1, 2]),
                      ("jugcraft:candy_corn", [3, 6])]}
+# Sightings of the Horseman in the season (agriculture/HorsemanSightings.java, HorsemanRider.java; FlamingPumpkin's
+# harmless burst): every check_ticks on a passing night, a player due a sighting (their first night of the season, then
+# every min_gap_days to max_gap_days, and Halloween itself), out under the sky, settle_ticks in the game, is sent the
+# rider start_chance of the time; none with a rider or the Horseman within one_at_a_time blocks. He comes from
+# start_distance blocks in front of them, at most climb above or below; gallops at approach_speed (blocks a tick, at most
+# approach_ticks) to circle_radius off; swings half round them over circle_ticks, flinging his pumpkin at throw_at; rides
+# off at leave_speed and vanishes leave_ticks later, max_ticks at most. The pumpkin only blinds (fright_ticks) and pushes
+# (fright_push); everyone within witness_range when it is flung has seen him.
+HORSEMAN_SIGHTINGS = {"check_ticks": 20, "settle_ticks": 600, "start_chance": 0.02, "min_gap_days": 2, "max_gap_days": 3,
+                      "one_at_a_time": 128, "witness_range": 48, "start_distance": 26.0, "climb": 10, "approach_speed": 0.55,
+                      "approach_ticks": 80, "circle_radius": 6.0, "circle_ticks": 30, "throw_at": 12, "leave_speed": 0.6,
+                      "leave_ticks": 50, "max_ticks": 240, "fright_ticks": 30, "fright_push": 0.6,
+                      "option": "halloween.horseman_sightings", "advancement": "sleepy_hollow"}
 
 
 # ---------------------------------------------------------------- Halloween decorations, batch 1

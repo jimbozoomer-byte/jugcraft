@@ -8,6 +8,10 @@ Every change to Jugcraft, newest first, grouped by pull request. For what each t
 
 No numbered release yet. Entries on feature branches remain proposed until their pull requests merge.
 
+### Unmerged: Headless Horseman sightings
+- **Everyone sees the Headless Horseman** a few times each Halloween season: on a night out under the sky he bursts out of the dark in front of you, gallops at you through the mist, swings round you, flings a flaming pumpkin at your feet and rides off into the night. The pumpkin only blinds you for a moment and pushes you back; nobody is hurt, and he can't be fought (call him at midnight with a lit scarecrow head for that).
+- He comes on your first night of the season, then every 2 or 3 days, and again on Halloween; everyone near sees him together and earns **Sleepy Hollow**. Only on nights that pass, never while time is stopped. Switch: `halloween.horseman_sightings` (on by default). Record: [horseman-sightings.md](docs/features/horseman-sightings.md).
+
 ### Unmerged: Keep your inventory in boss fights
 - **Dying in a lair costs nothing:** as with the keepInventory rule, but only in lairs (every boss fight). No items or experience fall; you respawn outside with every slot as it was (armour and offhand worn), the same held slot and all your experience. Dying anywhere else is unchanged. No grave is ever placed in a lair; Grave Goods still catch anything another mod drops there. Record: [lair-keep-inventory.md](docs/features/lair-keep-inventory.md).
 

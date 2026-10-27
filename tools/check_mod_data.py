@@ -6050,6 +6050,50 @@ def check_night(java, main):
     for (source, name), value in expected.items():
         if number(source, name) != value:
             err(f"{source}.{name} = {number(source, name)} differs from tools/agriculture.py ({value})")
+    # His sightings in the season: the rider's and the director's numbers are the table's; he is never saved, harms
+    # nobody (his pumpkin is the harmless kind), is drawn as the Horseman is, can be switched off, and is seen with words.
+    sight = ag.HORSEMAN_SIGHTINGS
+    for (source, name), key in {("HorsemanSightings", "CHECK_TICKS"): "check_ticks", ("HorsemanSightings", "SETTLE_TICKS"): "settle_ticks",
+                                ("HorsemanSightings", "START_CHANCE"): "start_chance", ("HorsemanSightings", "MIN_GAP_DAYS"): "min_gap_days",
+                                ("HorsemanSightings", "MAX_GAP_DAYS"): "max_gap_days", ("HorsemanSightings", "ONE_AT_A_TIME"): "one_at_a_time",
+                                ("HorsemanSightings", "WITNESS_RANGE"): "witness_range", ("HorsemanSightings", "START_DISTANCE"): "start_distance",
+                                ("HorsemanSightings", "CLIMB"): "climb", ("HorsemanRider", "APPROACH_SPEED"): "approach_speed",
+                                ("HorsemanRider", "APPROACH_TICKS"): "approach_ticks", ("HorsemanRider", "CIRCLE_RADIUS"): "circle_radius",
+                                ("HorsemanRider", "CIRCLE_TICKS"): "circle_ticks", ("HorsemanRider", "THROW_AT"): "throw_at",
+                                ("HorsemanRider", "LEAVE_SPEED"): "leave_speed", ("HorsemanRider", "LEAVE_TICKS"): "leave_ticks",
+                                ("HorsemanRider", "MAX_TICKS"): "max_ticks", ("FlamingPumpkin", "FRIGHT_TICKS"): "fright_ticks",
+                                ("FlamingPumpkin", "FRIGHT_PUSH"): "fright_push"}.items():
+        if number(source, name) != sight[key]:
+            err(f"{source}.{name} = {number(source, name)} differs from tools/agriculture.py HORSEMAN_SIGHTINGS ({sight[key]})")
+    if not 0 < sight["min_gap_days"] <= sight["max_gap_days"] or not 0 < sight["throw_at"] < sight["circle_ticks"] \
+            or sight["approach_ticks"] + sight["circle_ticks"] + sight["leave_ticks"] > sight["max_ticks"] \
+            or not sight["circle_radius"] < sight["start_distance"] <= sight["witness_range"] < sight["one_at_a_time"]:
+        err("tools/agriculture.py HORSEMAN_SIGHTINGS: the gaps must be in order, he must fling his pumpkin while he circles, "
+            "his whole ride must fit in max_ticks, and he must start nearer than witness_range, which is inside one_at_a_time")
+    sightings, rider = java.get("HorsemanSightings", ""), java.get("HorsemanRider", "")
+    for needed, why in (('OPTION = "' + sight["option"] + '";', "be switched by halloween.horseman_sightings"),
+                        ('ADVANCEMENT = "' + sight["advancement"] + '";', "award Sleepy Hollow"),
+                        ("!passing || !Wisps.night(clock) || !enabled()", "come only on passing Halloween nights, when switched on"),
+                        ("level.isPositionEntityTicking(column)", "never read a chunk that is not loaded and ticking")):
+        if needed not in sightings:
+            err(f"HorsemanSightings must {why} ({needed})")
+    if "FlamingPumpkin.harmless(level, this)" not in rider or "return false;" not in rider.split("hurtServer", 1)[-1][:120]:
+        err("HorsemanRider must fling only harmless pumpkins and take no harm")
+    agriculture = java.get("JugcraftAgriculture", "")
+    if not re.search(r'entity\("horseman_rider", EntityType\.Builder\.<HorsemanRider>of\(HorsemanRider::new, MobCategory\.MISC\)[^;]*\.noSave\(\)', agriculture):
+        err("JugcraftAgriculture must register horseman_rider as a never-saved creature (MobCategory.MISC, noSave)")
+    client = (CLIENT_JAVA_ROOT / "JugcraftClient.java").read_text(encoding="utf-8")
+    if "EntityRendererRegistry.register(JugcraftAgriculture.HORSEMAN_RIDER, HorsemanRenderer::new);" not in client:
+        err("JugcraftClient must draw the rider as the Horseman (HorsemanRenderer)")
+    config = (JAVA_ROOT / "config" / "JugcraftConfig.java").read_text(encoding="utf-8")
+    if f'Map.entry("{sight["option"]}", "on")' not in config:
+        err(f"JugcraftConfig must default {sight['option']} to on")
+    if sight["advancement"] not in ag.HALLOWEEN_ADVANCEMENTS:
+        err(f"tools/agriculture.py HALLOWEEN_ADVANCEMENTS has no {sight['advancement']}")
+    lang = load(ASSETS / "lang" / "en_us.json") or {}
+    for key in ("entity.jugcraft.horseman_rider", "message.jugcraft.horseman.hoofbeats", "message.jugcraft.horseman.sighting_gone"):
+        if key not in lang:
+            err(f"en_us.json has no words for {key}")
     if treb["board"] != ag.HARVEST_SCALE["board"] or "BOARD = HarvestScaleBlockEntity.BOARD;" not in java.get("TrebuchetBlockEntity", ""):
         err("The trebuchet's board must hand out the Harvest Scale's ribbons, one per place")
     if not treb["min_angle"] <= treb["default_angle"] <= treb["max_angle"] or (treb["default_angle"] - treb["min_angle"]) % treb["angle_step"]:

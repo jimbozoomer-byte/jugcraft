@@ -5,6 +5,8 @@ import io.github.jimbozoomer.jugcraft.agriculture.CarvingTemplates;
 import io.github.jimbozoomer.jugcraft.agriculture.HalloweenSeason;
 import io.github.jimbozoomer.jugcraft.agriculture.HarvestMoon;
 import io.github.jimbozoomer.jugcraft.agriculture.HeadlessHorseman;
+import io.github.jimbozoomer.jugcraft.agriculture.HorsemanRider;
+import io.github.jimbozoomer.jugcraft.agriculture.HorsemanSightings;
 import io.github.jimbozoomer.jugcraft.agriculture.JugcraftAgriculture;
 import io.github.jimbozoomer.jugcraft.agriculture.PumpkinCarving;
 import io.github.jimbozoomer.jugcraft.agriculture.ScarecrowBlockEntity;
@@ -31,6 +33,7 @@ import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.EquipmentSlot;
@@ -44,13 +47,15 @@ import net.minecraft.world.level.block.LanternBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.block.state.properties.DoubleBlockHalf;
+import net.minecraft.world.phys.AABB;
 
 /**
  * Client game test for Halloween nights: a cornfield, three trebuchets (loaded, ready, just thrown) with a landing
  * marker, Wisps in Jars and Horseman's Lanterns standing and hanging, an armor stand in the Horseman's Cloak, and lit
  * carvings on a scarecrow; photographed at noon, then at midnight on Halloween (the event on a fixed server clock)
  * with posed will-o'-wisps over the corn and the Headless Horseman (CI job {@code client}). The creatures are posed
- * (no AI); the server tests check how they behave.
+ * (no AI); the server tests check how they behave. Last, a sighting: the Horseman sent riding at the player out of the
+ * dark (HorsemanSightings), caught as he comes.
  */
 public class NightClientGameTests implements FabricClientGameTest {
 	@Override
@@ -82,6 +87,8 @@ public class NightClientGameTests implements FabricClientGameTest {
 			shoot(context, singleplayer, x + 13, y + 1, z - 3, 180, 14, "jugcraft_trebuchets");
 			shoot(context, singleplayer, x + 25, y + 1, z - 4, 180, 12, "jugcraft_wisp_jars_and_lanterns");
 
+			// The night stands still for the pictures, so the Horseman comes only when he is sent (HorsemanSightings).
+			server.runCommand("gamerule minecraft:advance_time false");
 			server.runCommand("time set midnight");
 			server.runOnServer(minecraft -> creatures(minecraft.overworld(), origin));
 			context.waitTicks(20);
@@ -93,6 +100,19 @@ public class NightClientGameTests implements FabricClientGameTest {
 					+ context.computeOnClient(client -> client.level.getEntitiesOfClass(WillOWisp.class,
 							client.player.getBoundingBox().inflate(64.0)).size()));
 			shoot(context, singleplayer, x + 8, y + 1, z - 7, 180, 10, "jugcraft_harvest_moon_sparks");
+
+			// A sighting: sent at the player, the Horseman rides out of the dark at them, caught as he comes.
+			server.runCommand(String.format(Locale.ROOT, "tp @p %.1f %d %.1f 180 2", x + 14.5, y, z + 8.5));
+			context.waitTicks(20);
+			server.runOnServer(minecraft -> {
+				ServerPlayer player = minecraft.getPlayerList().getPlayers().get(0);
+				HorsemanRider rider = HorsemanSightings.send(minecraft.overworld(), player);
+				System.out.println("[nights test] Horseman sighting: " + (rider == null ? "no ground for him" : rider.distanceTo(player) + " blocks off"));
+			});
+			context.waitTicks(22);
+			context.takeScreenshot("jugcraft_horseman_sighting");
+			server.runOnServer(minecraft -> minecraft.overworld().getEntitiesOfClass(HorsemanRider.class, new AABB(origin).inflate(96.0), rider -> true)
+					.forEach(Entity::discard));
 			server.runOnServer(minecraft -> HalloweenSeason.reset());
 		}
 	}
