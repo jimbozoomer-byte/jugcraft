@@ -6,6 +6,8 @@ Each lair is its own small pocket dimension, a void. A ritual opens an instance 
 SPACING blocks from the next, into which the lair's structure template is placed fresh. Players come in through the
 ritual's gate (their own choice), cannot build or break anything there, and go home to exactly where they stood.
 """
+import landscape_kinds
+
 FEATURE = "agriculture"
 
 # Server options in config/jugcraft.properties (JugcraftConfig.TEXT_OPTIONS), with their defaults and (for numbers) the
@@ -25,6 +27,7 @@ EDGE_DAMAGE = 4.0     # the mist's toll for flying or falling off, never below h
 # (docs/features/glacier-hall.md), the Cinder Kiln's (docs/features/cinder-kiln.md), the Lantern Fen's
 # (docs/features/lantern-fen.md), the Archive of Last Names' (docs/features/crypt-archive.md), the Foundry Trench's
 # (docs/features/foundry-trench.md), the Moonlit Ring's (docs/features/moonlit-ring.md), the Cydonian Sanctum's
+# (docs/features/cydonian-sanctum.md), then the Crowfield's (docs/features/crowfield.md).
 # (docs/features/cydonian-sanctum.md), then the Crown of Thunder's (docs/features/crown-of-thunder.md).
 LAIR_BLOCKS = {
     "blighted_soil": "Blighted Soil",
@@ -73,6 +76,8 @@ LAIR_BLOCKS = {
     "star_dial": "Star Dial",
     "star_door": "Star Door",
     "dust_vent": "Dust Vent",
+    "crowfield_corn": "Crowfield Corn",
+    "kings_gourd": "King's Gourd",
     "storm_rod": "Storm Rod",
     "roc_nest": "Woven Branches",
     "storm_cloud": "Storm Cloud",
@@ -100,9 +105,10 @@ SLUICE_PARTS = ("frame", "panel", "wheel")
 SLUICE_FLOWS = ("ready", "open", "filling", "choked")   # choked: by the Cinder Tyrant's slag
 # Fixtures a player in a lair may use (everything else is refused): the exits, the braziers Vesperine's fight lights, the
 # Cinder Kiln's sluice gates, the Lantern Fen's lamps, the Archive of Last Names' grave seals and lectern, the Foundry
-# Trench's breakers, and the Moonlit Ring's Warden Bells.
+# Trench's breakers, the Moonlit Ring's Warden Bells, the Cydonian Sanctum's red mist and star dials, and the Crowfield's
+# King's Gourds.
 FIXTURES = ("lair_exit", "lair_brazier", "sluice_gate", "fen_lamp", "grave_seal", "archive_lectern", "discharge_breaker",
-            "warden_bell", "red_mist", "star_dial")
+            "warden_bell", "red_mist", "star_dial", "kings_gourd")
 
 # The Last Rites (the Hollow Acre's ritual): a grave in the Overworld at night, lit candles round it, a Mourning Wreath
 # laid on it and the Death Knell rung beside it.
@@ -157,8 +163,10 @@ STONE = {
 }
 # What may be stood on instead of shallow water: mud, in it or on it.
 STONE_GROUND = ["minecraft:mud", "minecraft:muddy_mangrove_roots"]
-# The wetlands: every swamp (#c:is_swamp, Jugcraft's own and vanilla's), the Floodplain and the Muskeg.
-STONE_LANDS = ["#c:is_swamp", "minecraft:swamp", "minecraft:mangrove_swamp", "jugcraft:floodplain", "jugcraft:muskeg"]
+# The wetlands: every swamp (#c:is_swamp, Jugcraft's own and vanilla's), the Floodplain, the Muskeg, and the landscape
+# collection's swamps (tools/landscape_kinds.py).
+STONE_LANDS = ["#c:is_swamp", "minecraft:swamp", "minecraft:mangrove_swamp", "jugcraft:floodplain", "jugcraft:muskeg",
+               landscape_kinds.SWAMPS_TAG]
 
 # The Lantern Fen's lamps: lit, they burn at this light level; one gone out is lit again by using it.
 FEN_LAMP = {"light": 15}
@@ -229,6 +237,31 @@ KEYSTONE = {
 # The altars under the Ancient Altar, as tools/adam_ondi_ahman.py stacks them: each one's top, blocks under the Ancient
 # Altar, and its half-width; the lowest first, the order they kindle in.
 KEYSTONE_ALTARS = ((3, 5), (2, 3), (1, 1))
+# The Harvest Crown (the Crowfield's ritual, docs/features/crowfield.md): used on a scarecrow that wears a head, at night
+# in the Overworld, the scarecrow's head under the open sky, among the harvest: at least harvest_min blocks of
+# #jugcraft:crowfield_harvest within harvest_reach blocks of it (across; harvest_rise up or down). A Witching Season
+# ritual: all year at night, or only during the Halloween event when lairs.off_season is off. The crown settles on the
+# scarecrow's head and the crows burst up; it is used up, the scarecrow and the crops are left as they were, and Grey
+# Mist rises where the crowner stands, the gate for lairs.gate_seconds; whoever goes in comes to in the farmyard.
+CROWN = {
+    "cooldown": 40,            # ticks between uses of one crown, answered or not
+    "mist_range": 3,           # how near another open mist into the Crowfield must not be (blocks)
+    "harvest_reach": 6,
+    "harvest_rise": 2,
+    "harvest_min": 8,
+}
+# The harvest round the scarecrow: pumpkins, carved or not, lit or not, the heirlooms (carved by hand or not), the squashes
+# and gourds, and giant pumpkins (each of whose blocks counts).
+CROWFIELD_HARVEST = (["minecraft:pumpkin", "minecraft:carved_pumpkin", "minecraft:jack_o_lantern", "jugcraft:hand_carved_pumpkin",
+                      "jugcraft:butternut_squash", "jugcraft:acorn_squash", "jugcraft:warty_gourd", "jugcraft:bottle_gourd",
+                      "jugcraft:giant_pumpkin"]
+                     + [f"jugcraft:{kind}_pumpkin" for kind in ("white", "jarrahdale", "cinderella", "red_kuri", "kabocha")]
+                     + [f"jugcraft:hand_carved_{kind}_pumpkin" for kind in ("white", "jarrahdale", "cinderella", "red_kuri", "kabocha")])
+# The King's Gourds (the Crowfield's fixtures): green (0), ripening (1, 2), lit (3) and picked (4), with the light of each.
+# A ripening gourd may be picked by any player; a green, lit or picked one says why not. The Pumpkin King ripens them
+# (part 2). The hills they grow on, in ring order (tools/crowfield.py HILLS).
+KINGS_GOURD = {"stages": 5, "light": (0, 4, 8, 13, 0), "ripening": (1, 2), "lit": 3, "picked": 4}
+HILL_NAMES = ("north_west", "north", "north_east", "east", "south_east", "south", "south_west", "west")
 
 # The Thunder Vane (the Crown of Thunder's summoning, docs/features/crown-of-thunder.md): used in the Overworld under the
 # open sky while it rains or thunders, in the mountains (#jugcraft:thunder_vane_lands), standing at min_y or above.
@@ -261,6 +294,7 @@ ITEMS = {
     "sealed_orders": "Sealed Orders",
     "howling_totem": "Howling Totem",
     "altar_keystone": "Altar Keystone",
+    "harvest_crown": "Harvest Crown",
     "thunder_vane": "Thunder Vane",
 }
 GATE = {"entity": "mist_gate", "display": "Mist Gate", "width": 1.6, "height": 2.6}
@@ -315,6 +349,9 @@ RECIPES = {
         "D": "jugcraft:dreamglass", "A": "jugcraft:astrolabe", "R": "minecraft:redstone",
         "S": "minecraft:chiseled_stone_bricks"},
         "result": "altar_keystone", "features": ["adam_ondi_ahman", "concordance"]},
+    # A crown: three heirloom pumpkins (any) over two gold ingots and a hay bale. Used up by its crowning.
+    "harvest_crown": {"pattern": ["PPP", "GHG"], "key": {
+        "P": "#jugcraft:heirloom_pumpkins", "G": "minecraft:gold_ingot", "H": "minecraft:hay_block"}},
     # A vane: an arrow of copper on a lightning rod, two feathers for its tail, a compass for its points. Used up by the
     # storm it calls.
     "thunder_vane": {"pattern": ["FLF", "CKC", " C "], "key": {
@@ -409,6 +446,15 @@ LAIRS = {
         "ambient_light": 0.3,
         "motes": ("minecraft:crimson_spore", 0.004),
     },
+    "crowfield": {
+        "display": "The Crowfield",
+        "enter": "The crows burst up crying, and you come to in %s",
+        "sky": "#2a1630", "fog": "#7a3a22", "water_fog": "#3a2418", "water": "#4a3a2a",
+        "ambient_light_color": "#5a3a2a", "sky_light_color": "#8a5a3a",
+        "music": "minecraft:music.overworld.meadow",
+        "ambient_light": 0.25,
+        "motes": ("minecraft:white_ash", 0.002),
+    },
     "crown_of_thunder": {
         "display": "The Crown of Thunder",
         "enter": "Lightning strikes, the wind takes you, and you come down on %s",
@@ -423,7 +469,8 @@ LAIRS = {
 
 def blocks():
     """Every block the lairs register: the lair-only blocks and the Mourning Wreath (the Cursed Spindle, the Frost Horn, the
-    Kiln Seal, the Hag Stone, the Writ of Exhumation, Sealed Orders and the Howling Totem are items)."""
+    Kiln Seal, the Hag Stone, the Writ of Exhumation, Sealed Orders, the Howling Totem, the Altar Keystone and the Harvest
+    Crown are items)."""
     return list(LAIR_BLOCKS) + ["mourning_wreath"]
 
 
