@@ -99,6 +99,9 @@ CANOPY_REACH = 3.0
 # The arrival and the way home: the road's south end. ARRIVAL: x, y, z and yaw (facing north up the road).
 ARRIVAL = (36.5, STAND, 77.5, 180.0)
 EXIT = {"x": (35, 37), "z": 82}    # the Grey Mist's columns and row, three blocks high from the road
+# Where Grey Mist opens on the covered bridge when the Horseman falls (part 2): across its deck over the brook, three
+# blocks high (the deck's air between the walls).
+BRIDGE_EXIT = {"x": (35, 37), "z": 25}
 # Where the Horseman waits (part 2): mounted at the bridge's south foot, facing south over the hollow. x, y, z and yaw.
 WAIT = (36.5, STAND, 31.5, 0.0)
 # The moon's centre and radius, beyond the template's north edge (Lairs places it; it faces south).

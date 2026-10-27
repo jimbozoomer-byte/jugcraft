@@ -32,7 +32,7 @@ Every use on a lantern on a post rests the bridle for 2 seconds, answered or not
 A wooded hollow at night under a full moon, the old church to the north.
 - **The wood road (the arrival):** you come to on a dirt road between old trees, facing north up it into the hollow. Grey Mist fills the road's end behind you: the way home.
 - **The hollow, the arena:** a clearing about 41 blocks across. Its floor is podzol, moss and coarse and rooted earth in patches. The road runs north through it between split-rail fences with gaps in them, and two fallen trunks give low cover.
-- **The Soul Braziers:** eight of the lairs' braziers stand in a ring round the hollow's middle, 13 blocks out, lit, none on the road. Each is named for its compass point, from the north-north-east one clockwise. They are fixtures: a dark one is lit again by using it. Part 2 has the Horseman snuff them.
+- **The Soul Braziers:** eight of the lairs' braziers stand in a ring round the hollow's middle, 13 blocks out, lit, none on the road. Each is named for its compass point, from the north-north-east one clockwise. They are fixtures: a dark one is lit again by using it. In part 2 the Horseman snuffs them ([hessian-horseman.md](hessian-horseman.md)).
 - **The brook and the covered bridge:** a brook runs west to east across the hollow's north edge, its water flush with the ground and two deep. The road crosses it by a covered bridge with a spruce deck, plank walls with windows on stripped spruce posts, and a shingled dark oak roof.
 - **The church and its yard:** across the brook stands the old church, with fieldstone walls, a steep dark oak roof and a white wooden belfry over its door with a bell hanging in it. The door and an arch beyond it lead into the church. Its churchyard runs down to the brook inside a low cobblestone wall, with rows of old stone markers in it.
 - **The wood:** everything else is old dark oak trunks with a thicket of Moonwood Leaves between them (the Moonlit Ring's own), too thick to pass, and a canopy over the wood and the hollow's rim.
@@ -49,7 +49,7 @@ In the hollow a player cannot build or break anything. They can use the braziers
 ## Connections
 
 - **Input producer:** leather (cows, trading), iron and a jack-o'-lantern (a carved pumpkin and a torch): all year.
-- **Output consumer:** the Horseman's lair fight and his loot (part 2). Until then the hollow is a place to visit and nothing more.
+- **Output consumer:** the Horseman's lair fight and his loot ([hessian-horseman.md](hessian-horseman.md)).
 - **Required vs optional:** optional. No progression needs the hollow.
 - **The season:** the hollow is the off-season way to meet the Horseman; in the season he is summoned in the Overworld. Neither is the only way to meet him, and the season gates nothing core.
 - **Trade and solo routes:** the bridle is crafted alone; a party of up to `lairs.party_size` can follow through the mist.
@@ -137,5 +137,4 @@ The bridle works only out of the Halloween season (20 October to 3 November by d
 
 ## Rollout and open questions
 
-- **Next:** part 2, the Horseman's lair fight (the Dark Road, his attacks, the bridge he never crosses) and his loot (the trophies, the Hessian's Spur and Tricorn), to the plan.
-- **Empty until then:** with part 1 alone the hollow can be visited but holds no boss.
+- **Part 2:** the Horseman's lair fight (the Dark Road, his attacks, the bridge he never crosses) and his loot (the trophies, the Hessian's Spur and Tricorn): [hessian-horseman.md](hessian-horseman.md).

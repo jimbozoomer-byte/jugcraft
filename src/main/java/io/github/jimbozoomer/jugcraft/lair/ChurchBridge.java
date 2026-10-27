@@ -47,6 +47,13 @@ public final class ChurchBridge {
 	public static final int EXIT_WEST = 35;
 	public static final int EXIT_EAST = 37;
 	public static final int EXIT_Z = 82;
+	/** The Grey Mist that opens on the covered bridge when the Horseman falls (part 2): across its deck, over the brook. */
+	public static final int BRIDGE_EXIT_WEST = 35;
+	public static final int BRIDGE_EXIT_EAST = 37;
+	public static final int BRIDGE_EXIT_Z = 25;
+	/** The template's footprint (x and z), where everyone in an instance is. */
+	public static final int SIZE_X = 72;
+	public static final int SIZE_Z = 86;
 
 	/**
 	 * The eight braziers, clockwise round the hollow from north-north-east, each named for its compass point (NORTH_EAST:
@@ -72,6 +79,17 @@ public final class ChurchBridge {
 		/** Its neighbour clockwise round the ring. */
 		public Brazier next() {
 			return values()[(ordinal() + 1) % values().length];
+		}
+
+		/** Its neighbour anticlockwise round the ring. */
+		public Brazier previous() {
+			return values()[(ordinal() + values().length - 1) % values().length];
+		}
+
+		/** How far (flat) it stands from (x, z), in the template. */
+		public double distance(double x, double z) {
+			BlockPos at = BRAZIERS[ordinal()];
+			return Math.hypot(at.getX() + 0.5 - x, at.getZ() + 0.5 - z);
 		}
 	}
 
@@ -115,6 +133,43 @@ public final class ChurchBridge {
 		for (Brazier brazier : Brazier.values()) {
 			if (lit(level, origin, brazier)) {
 				out.add(brazier);
+			}
+		}
+		return out;
+	}
+
+	/**
+	 * The run of {@code count} braziers nearest (x, z) (in the template): the nearest, then on round the ring toward
+	 * whichever of its two neighbours is nearer.
+	 */
+	public static List<Brazier> run(double x, double z, int count) {
+		Brazier first = Brazier.NORTH_EAST;
+		for (Brazier brazier : Brazier.values()) {
+			if (brazier.distance(x, z) < first.distance(x, z)) {
+				first = brazier;
+			}
+		}
+		boolean clockwise = first.next().distance(x, z) <= first.previous().distance(x, z);
+		List<Brazier> out = new ArrayList<>();
+		Brazier at = first;
+		for (int i = 0; i < Math.min(count, Brazier.values().length); i++) {
+			out.add(at);
+			at = clockwise ? at.next() : at.previous();
+		}
+		return out;
+	}
+
+	/** Whether (x, z) (in the template) is inside the template's footprint. */
+	public static boolean inside(double x, double z) {
+		return x >= 0.0 && x < SIZE_X && z >= 0.0 && z < SIZE_Z;
+	}
+
+	/** The cells of the Grey Mist that opens on the bridge: across its deck, three high. */
+	public static List<BlockPos> bridgeExitCells() {
+		List<BlockPos> out = new ArrayList<>();
+		for (int y = STAND; y <= STAND + 2; y++) {
+			for (int x = BRIDGE_EXIT_WEST; x <= BRIDGE_EXIT_EAST; x++) {
+				out.add(new BlockPos(x, y, BRIDGE_EXIT_Z));
 			}
 		}
 		return out;

@@ -10,7 +10,9 @@ own look, in three kinds of line:
   CinderTyrantLoot); and of Vesperine, the Last Reaper
   (docs/features/vesperine.md), whose Vesper Scythe she drops (VesperineLoot; her trophy table lists it as theirs do),
   and of Madame Tatterlace (docs/features/tatterlace.md), whose Needle Rapier she drops (TatterlaceLoot), and of the
-  Pumpkin King (docs/features/pumpkin-king.md), whose Hallowreap and Crowbill he drops (PumpkinKingLoot);
+  Pumpkin King (docs/features/pumpkin-king.md), whose Hallowreap and Crowbill he drops (PumpkinKingLoot), and of the
+  Headless Horseman in his lair (docs/features/hessian-horseman.md), whose Hollowflail and Hessian Sabre he drops
+  (HorsemanLoot);
 - the arms of the owner's armor sets, each in its set's look (the Hades Armor's scythe): no recipe and, until the owner
   settles how a set is won, no loot table either; creative only for now. Like a trophy, epic and twice as hard-wearing.
   A set may have a shield of its own shape too (SET_SHIELDS: the Sentinel's four-pointed star), which blocks as the
@@ -84,6 +86,9 @@ BOSSES = {
     # Its third (docs/features/pumpkin-king.md), fought in the Crowfield; Arms VII made none for him, so his two were made
     # with him, with a boon of their own (Fright).
     "pumpkin_king": {"display": "the Pumpkin King", "lair": "crowfield"},
+    # The Headless Horseman out of the Halloween season (docs/features/hessian-horseman.md), fought by the Church Bridge;
+    # his two were made with his lair fight, with a boon of their own (Dread).
+    "hessian_horseman": {"display": "the Headless Horseman", "lair": "church_bridge"},
 }
 # The owner's armor sets with an arm of their own ("I also want the scythe from my Hades Armor set", 7 October 2026).
 # How a set is won (a boss's drop, a recipe) is still the owner's to decide, so a set's arm has neither a recipe nor a
@@ -121,6 +126,8 @@ BOONS = {
     "stitch": "Stitch: three hits on one foe within 4 s stitch it, slowing it (Slowness II, 2 s).",
     "rust": "Rust: a hit rusts the foe's armor, which counts for 30% less (Rusted, 4 s).",
     "fright": "Fright: a hit sends a monster (never a boss) running in panic (1.5 s; once every 6 s each).",
+    "dread": "Dread: a hit fills a monster (never a boss) with dread: it takes a fifth more damage from everything (4 s; "
+             "once every 8 s each).",
 }
 FROST = (60, 1)        # Slowness: ticks, amplifier
 EMBER_SECONDS = 3
@@ -133,11 +140,16 @@ RUST_ARMOR = 0.3       # the share of its armor a Rusted foe loses
 FRIGHT = (30, 120)     # a monster's panic, and how soon it can be frightened again (ticks)
 FRIGHT_RUN = 8.0       # how far it runs from the one who struck it (blocks)
 FRIGHT_MAX = 256       # the most creatures in a panic at once
-# The creatures Fright never frightens (#jugcraft:frightless, written by tools/pumpkin_king_data.py): the conventional
-# bosses, every lair boss (tools/check_mod_data.py checks each one with a boss bar is here) and the Headless Horseman.
+DREAD = (80, 160)      # Dread (jugcraft:dread): ticks, and how soon a foe can be filled with dread again
+DREAD_SHARE = 0.2      # the share more of every blow a foe in dread takes
+DREAD_MAX = 256        # the most foes remembered as lately filled with dread
+# The creatures Fright never frightens and Dread never fills (#jugcraft:frightless, written by tools/pumpkin_king_data.py):
+# the conventional bosses, every lair boss (tools/check_mod_data.py checks each one with a boss bar is here) and the
+# Headless Horseman, summoned or in his lair.
 FRIGHTLESS = ("#c:bosses", "jugcraft:vesperine", "jugcraft:tatterlace", "jugcraft:yeti_king", "jugcraft:cinder_tyrant",
               "jugcraft:mire_hag", "jugcraft:crypt_lich", "jugcraft:iron_dreadnought", "jugcraft:alpha_werewolf",
-              "jugcraft:cydonian_sentinel", "jugcraft:pumpkin_king", "jugcraft:headless_horseman")
+              "jugcraft:cydonian_sentinel", "jugcraft:pumpkin_king", "jugcraft:headless_horseman",
+              "jugcraft:hessian_horseman")
 DRAIN_HEAL = 1.0
 SHOCK_SHARE = 0.3
 SHOCK_RANGE = 4.0
@@ -189,6 +201,8 @@ VARIANTS = [
     ("needle_rapier", "rapier", "tatterlace", "stitch", "Needle Rapier"),
     ("hallowreap", "scythe", "pumpkin_king", "fright", "Hallowreap"),
     ("crowbill", "war_pick", "pumpkin_king", "fright", "Crowbill"),
+    ("hollowflail", "flail", "hessian_horseman", "dread", "Hollowflail"),
+    ("hessian_sabre", "sabre", "hessian_horseman", "dread", "Hessian Sabre"),
     ("hades_scythe", "scythe", "hades", "wither", "Hades Scythe"),
     ("sentinel_longsword", "longsword", "sentinel", "mark", "Sentinel Longsword"),
     ("frost_knight_greatsword", "greatsword", "frost_knight", "frost", "Frost Knight Greatsword"),
