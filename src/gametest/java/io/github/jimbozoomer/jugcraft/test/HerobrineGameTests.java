@@ -378,7 +378,7 @@ public class HerobrineGameTests {
 		});
 	}
 
-	@GameTest(structure = ARENA, padding = 48, maxTicks = 30, skyAccess = true)
+	@GameTest(structure = ARENA, padding = 48, maxTicks = 200, skyAccess = true)
 	public void tunnelEyesWaitAtTheFarEndOfATunnelBehind(GameTestHelper helper) {
 		floor(helper);
 		for (int z = 1; z <= 31; z++) {
@@ -390,8 +390,8 @@ public class HerobrineGameTests {
 			}
 		}
 		ServerPlayer player = player(helper, new BlockPos(24, 1, 30), 0.0F);
-		// Let skylight settle after building the roof before asking whether this is a covered tunnel.
-		helper.runAfterDelay(5, () -> {
+		// Lighting is asynchronous: wait for the actual covered condition, not a fixed tick count.
+		waitForRoof(helper, player, 160, () -> {
 			HerobrineEncounters.Attempt attempt = HerobrineEncounters.attemptVariant(player,
 					new HerobrineDirector.Request(player.getUUID(), Herobrine.Kind.DISTANT, HerobrineDirector.FORCED), Herobrine.Variant.TUNNEL);
 			helper.assertTrue(attempt.placed(), "He should wait down the tunnel: " + attempt.failure()
@@ -476,7 +476,7 @@ public class HerobrineGameTests {
 	}
 
 	/** A newcomer's natural distant encounter is a plain watcher; seeing one introduces them to everything else. */
-	@GameTest(structure = ARENA, padding = 48, maxTicks = 60)
+	@GameTest(structure = ARENA, padding = 48, maxTicks = 200)
 	public void aNewcomerFirstMeetsAPlainWatcher(GameTestHelper helper) {
 		floor(helper);
 		for (int x = 0; x < 48; x++) {
@@ -485,8 +485,8 @@ public class HerobrineGameTests {
 			}
 		}
 		ServerPlayer player = player(helper, new BlockPos(24, 1, 24), 0.0F);
-		// Wait for the newly placed roof to propagate skylight before choosing indoor distances.
-		helper.runAfterDelay(5, () -> {
+		// The full parallel suite can leave roof lighting pending well beyond five ticks.
+		waitForRoof(helper, player, 160, () -> {
 			helper.assertTrue(!player.level().canSeeSky(player.blockPosition().above()), "The roof fixture must be dark");
 			player.getRandom().setSeed(0);
 			helper.assertTrue(!HerobrineEncounters.introduced(player.getUUID()), "A new player has not met him");
@@ -504,6 +504,15 @@ public class HerobrineGameTests {
 				helper.succeed();
 			});
 		});
+	}
+
+	private static void waitForRoof(GameTestHelper helper, ServerPlayer player, int remainingTicks, Runnable ready) {
+		if (!player.level().canSeeSky(player.blockPosition().above())) {
+			ready.run();
+			return;
+		}
+		helper.assertTrue(remainingTicks > 0, "Roof skylight did not settle within 160 ticks");
+		helper.runAfterDelay(1, () -> waitForRoof(helper, player, remainingTicks - 1, ready));
 	}
 
 	/** A guard turns to look at him for a moment, and never makes him a target (he is no monster and no enemy). */
