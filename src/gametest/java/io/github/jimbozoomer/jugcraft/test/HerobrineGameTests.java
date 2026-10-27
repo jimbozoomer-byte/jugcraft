@@ -1,0 +1,275 @@
+package io.github.jimbozoomer.jugcraft.test;
+
+import io.github.jimbozoomer.jugcraft.creatures.herobrine.Herobrine;
+import io.github.jimbozoomer.jugcraft.creatures.herobrine.HerobrineDirector;
+import io.github.jimbozoomer.jugcraft.creatures.herobrine.HerobrineEncounters;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
+import java.util.UUID;
+import net.fabricmc.fabric.api.gametest.v1.GameTest;
+import net.minecraft.core.BlockPos;
+import net.minecraft.gametest.framework.GameTestHelper;
+import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.effect.MobEffects;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.phys.Vec3;
+
+/**
+ * Herobrine's encounters (docs/features/herobrine.md): he goes when someone comes close, stares him down or hits him,
+ * and hurts nobody; a close encounter only darkens the screen; he is never saved; only attentive players who really see
+ * him are reported as witnesses; a player has one encounter at a time, and their first close one must follow a distant
+ * one; and a distant encounter is placed where the player could see him, or reported as failed with nothing placed.
+ * The schedule is not tested here: it is a separate {@link HerobrineDirector}, and these tests listen through one that
+ * passes everything on to whichever director was installed.
+ */
+public class HerobrineGameTests {
+	private static final String ARENA = "jugcraft-test:tatterlace_arena";
+
+	/** What the director heard about one encounter or request. */
+	private record Event(String what, UUID player, UUID encounter, Object detail) {
+	}
+
+	/** Records every report, and passes everything on to the director that was installed before it. */
+	private static final class Recorder implements HerobrineDirector {
+		private final HerobrineDirector next;
+		private final List<Event> events = new ArrayList<>();
+
+		private Recorder(HerobrineDirector next) {
+			this.next = next;
+		}
+
+		@Override
+		public List<Request> due(MinecraftServer server, List<Candidate> candidates) {
+			return next.due(server, candidates);
+		}
+
+		@Override
+		public void placed(Request request, UUID encounter) {
+			events.add(new Event("placed", request.player(), encounter, request.kind()));
+			next.placed(request, encounter);
+		}
+
+		@Override
+		public void failed(Request request, Failure failure) {
+			events.add(new Event("failed", request.player(), null, failure));
+			next.failed(request, failure);
+		}
+
+		@Override
+		public void seen(Request request, UUID encounter, UUID player) {
+			events.add(new Event("seen", request.player(), encounter, player));
+			next.seen(request, encounter, player);
+		}
+
+		@Override
+		public void ended(Request request, UUID encounter, Herobrine.Outcome outcome, Set<UUID> witnesses) {
+			events.add(new Event("ended", request.player(), encounter, List.of(outcome, Set.copyOf(witnesses))));
+			next.ended(request, encounter, outcome, witnesses);
+		}
+
+		List<Event> about(UUID encounter) {
+			return events.stream().filter(e -> encounter.equals(e.encounter())).toList();
+		}
+
+		List<Event> failuresFor(UUID player) {
+			return events.stream().filter(e -> e.what().equals("failed") && e.player().equals(player)).toList();
+		}
+	}
+
+	private static Recorder recorder() {
+		if (!(HerobrineEncounters.director() instanceof Recorder recorder)) {
+			recorder = new Recorder(HerobrineEncounters.director());
+			HerobrineEncounters.setDirector(recorder);
+		}
+		return recorder;
+	}
+
+	private static void floor(GameTestHelper helper) {
+		for (int x = 0; x < 48; x++) {
+			for (int z = 0; z < 48; z++) {
+				helper.setBlock(new BlockPos(x, 0, z), Blocks.STONE);
+			}
+		}
+	}
+
+	/** A mock player standing at {@code at} (relative), facing {@code yaw} (0 is south, +z), looking level. */
+	private static ServerPlayer player(GameTestHelper helper, BlockPos at, float yaw) {
+		ServerPlayer player = helper.makeMockServerPlayerInLevel();
+		BlockPos pos = helper.absolutePos(at);
+		player.snapTo(pos.getX() + 0.5, pos.getY(), pos.getZ() + 0.5, yaw, 0.0F);
+		player.setYHeadRot(yaw);
+		return player;
+	}
+
+	private static Herobrine place(GameTestHelper helper, ServerPlayer player, BlockPos at, Herobrine.Kind kind) {
+		HerobrineEncounters.Attempt attempt = HerobrineEncounters.attemptAt(player,
+				new HerobrineDirector.Request(player.getUUID(), kind, HerobrineDirector.FORCED), Vec3.atBottomCenterOf(helper.absolutePos(at)));
+		helper.assertTrue(attempt.placed(), "He could not be placed: " + attempt.failure());
+		return attempt.herobrine();
+	}
+
+	private static Object ending(Recorder recorder, Herobrine herobrine) {
+		return recorder.about(herobrine.encounter()).stream().filter(e -> e.what().equals("ended")).map(Event::detail)
+				.findFirst().orElse(null);
+	}
+
+	@GameTest(structure = ARENA, padding = 48, maxTicks = 120)
+	public void heVanishesWhenSomeoneComesClose(GameTestHelper helper) {
+		floor(helper);
+		Recorder recorder = recorder();
+		ServerPlayer player = player(helper, new BlockPos(24, 1, 4), 180.0F);
+		Herobrine herobrine = place(helper, player, new BlockPos(24, 1, 40), Herobrine.Kind.DISTANT);
+		helper.runAfterDelay(30, () -> {
+			helper.assertTrue(herobrine.isAlive(), "He should still stand while nobody is near");
+			BlockPos near = helper.absolutePos(new BlockPos(24, 1, 32));
+			player.snapTo(near.getX() + 0.5, near.getY(), near.getZ() + 0.5, 180.0F, 0.0F);
+			helper.runAfterDelay(5, () -> {
+				helper.assertTrue(herobrine.isRemoved(), "He should be gone once someone is within " + Herobrine.VANISH_DISTANCE + " blocks");
+				helper.assertTrue(List.of(Herobrine.Outcome.APPROACHED, Set.of()).equals(ending(recorder, herobrine)),
+						"The encounter should end approached and unseen, not " + ending(recorder, herobrine));
+				helper.succeed();
+			});
+		});
+	}
+
+	@GameTest(structure = ARENA, padding = 48, maxTicks = 120)
+	public void staringHimDownEndsTheSightingAndCountsAsSeen(GameTestHelper helper) {
+		floor(helper);
+		Recorder recorder = recorder();
+		ServerPlayer player = player(helper, new BlockPos(24, 1, 4), 0.0F);
+		Herobrine herobrine = place(helper, player, new BlockPos(24, 1, 40), Herobrine.Kind.DISTANT);
+		helper.runAfterDelay(Herobrine.STARE_TICKS + 10, () -> {
+			helper.assertTrue(herobrine.isRemoved(), "He should go once stared at for " + Herobrine.STARE_TICKS + " ticks");
+			helper.assertTrue(List.of(Herobrine.Outcome.STARED_DOWN, Set.of(player.getUUID())).equals(ending(recorder, herobrine)),
+					"The encounter should end stared down, seen by the player, not " + ending(recorder, herobrine));
+			helper.assertTrue(recorder.about(herobrine.encounter()).stream().filter(e -> e.what().equals("seen")).count() == 1,
+					"The player should be reported as seeing him once");
+			helper.succeed();
+		});
+	}
+
+	@GameTest(structure = ARENA, padding = 48, maxTicks = 60)
+	public void aBlowMakesHimVanishAndHurtsNobody(GameTestHelper helper) {
+		floor(helper);
+		Recorder recorder = recorder();
+		ServerLevel level = helper.getLevel();
+		ServerPlayer player = player(helper, new BlockPos(24, 1, 20), 0.0F);
+		Herobrine herobrine = place(helper, player, new BlockPos(24, 1, 22), Herobrine.Kind.CLOSE);
+		helper.assertFalse(herobrine.hurtServer(level, level.damageSources().playerAttack(player), 10.0F), "A blow should not land");
+		helper.assertTrue(herobrine.isRemoved(), "He should be gone when struck");
+		helper.assertTrue(player.getHealth() == player.getMaxHealth(), "Nobody should be hurt");
+		helper.assertTrue(List.of(Herobrine.Outcome.HIT, Set.of(player.getUUID())).equals(ending(recorder, herobrine)),
+				"Whoever struck him saw him: " + ending(recorder, herobrine));
+		helper.succeed();
+	}
+
+	@GameTest(structure = ARENA, padding = 48, maxTicks = Herobrine.CLOSE_TICKS + 40)
+	public void aCloseEncounterDarkensButNeverHurtsAndUnseenIsNotCredited(GameTestHelper helper) {
+		floor(helper);
+		Recorder recorder = recorder();
+		ServerPlayer player = player(helper, new BlockPos(24, 1, 24), 0.0F);
+		HerobrineEncounters.Attempt attempt = HerobrineEncounters.attempt(player,
+				new HerobrineDirector.Request(player.getUUID(), Herobrine.Kind.CLOSE, HerobrineDirector.FORCED));
+		helper.assertTrue(attempt.placed(), "A forced close encounter should be placed: " + attempt.failure());
+		Herobrine herobrine = attempt.herobrine();
+		helper.assertTrue(herobrine.distanceTo(player) < 2.5 && herobrine.getZ() < player.getZ(), "He should stand right behind the player");
+		helper.assertTrue(player.hasEffect(MobEffects.DARKNESS), "The player should be given a moment of Darkness");
+		helper.runAfterDelay(Herobrine.CLOSE_TICKS + 10, () -> {
+			helper.assertTrue(herobrine.isRemoved(), "He should be gone after " + Herobrine.CLOSE_TICKS + " ticks");
+			helper.assertTrue(player.getHealth() == player.getMaxHealth(), "Nobody should be hurt");
+			helper.assertTrue(List.of(Herobrine.Outcome.EXPIRED, Set.of()).equals(ending(recorder, herobrine)),
+					"Behind a player who never turned round, he should go unseen: " + ending(recorder, herobrine));
+			helper.succeed();
+		});
+	}
+
+	@GameTest(structure = ARENA, padding = 48, maxTicks = 40)
+	public void aCloseEncounterMustFollowADistantOneAndOneAtATime(GameTestHelper helper) {
+		floor(helper);
+		Recorder recorder = recorder();
+		ServerPlayer player = player(helper, new BlockPos(24, 1, 4), 180.0F);
+		HerobrineEncounters.Attempt close = HerobrineEncounters.attempt(player,
+				new HerobrineDirector.Request(player.getUUID(), Herobrine.Kind.CLOSE, 7L));
+		helper.assertTrue(!close.placed() && close.failure() == HerobrineDirector.Failure.TARGET_UNSAFE,
+				"A first encounter should never be a close one: " + close.failure());
+		Herobrine herobrine = place(helper, player, new BlockPos(24, 1, 40), Herobrine.Kind.DISTANT);
+		HerobrineEncounters.Attempt second = HerobrineEncounters.attempt(player,
+				new HerobrineDirector.Request(player.getUUID(), Herobrine.Kind.DISTANT, 8L));
+		helper.assertTrue(!second.placed() && second.failure() == HerobrineDirector.Failure.ALREADY_HAUNTED,
+				"A second encounter at once should fail: " + second.failure());
+		helper.assertTrue(recorder.failuresFor(player.getUUID()).size() == 2, "Both failures should be reported to the director");
+		herobrine.discard();
+		helper.assertTrue(List.of(Herobrine.Outcome.REMOVED, Set.of()).equals(ending(recorder, herobrine)),
+				"Removing him should end the encounter: " + ending(recorder, herobrine));
+		helper.succeed();
+	}
+
+	@GameTest(structure = ARENA, padding = 48, maxTicks = 80)
+	public void onlyAttentiveWitnessesAreCredited(GameTestHelper helper) {
+		floor(helper);
+		Recorder recorder = recorder();
+		ServerPlayer target = player(helper, new BlockPos(20, 1, 4), 0.0F);
+		ServerPlayer hurt = player(helper, new BlockPos(28, 1, 4), 0.0F);
+		hurt.setHealth(4.0F);
+		Herobrine herobrine = place(helper, target, new BlockPos(24, 1, 40), Herobrine.Kind.DISTANT);
+		helper.runAfterDelay(Herobrine.SEEN_TICKS + 10, () -> {
+			helper.assertTrue(herobrine.witnesses().equals(Set.of(target.getUUID())),
+					"Only the attentive player should have seen him, not " + herobrine.witnesses());
+			helper.assertTrue(!HerobrineEncounters.attentive(hurt, helper.getLevel().getServer().getTickCount()),
+					"A badly hurt player is not attentive");
+			herobrine.discard();
+			helper.assertTrue(recorder.about(herobrine.encounter()).stream().noneMatch(e -> e.what().equals("seen")
+					&& hurt.getUUID().equals(e.detail())), "The hurt player should never be reported as seeing him");
+			helper.succeed();
+		});
+	}
+
+	@GameTest(structure = ARENA, padding = 48, maxTicks = 20)
+	public void aSightingStandsWhereThePlayerCouldSeeHim(GameTestHelper helper) {
+		floor(helper);
+		ServerLevel level = helper.getLevel();
+		ServerPlayer player = player(helper, new BlockPos(24, 1, 6), 0.0F);
+		Vec3 spot = HerobrineEncounters.spot(level, player, 14, 20, false);
+		helper.assertTrue(spot != null, "There should be a place to stand in an open arena");
+		double distance = Math.sqrt(Math.pow(spot.x - player.getX(), 2) + Math.pow(spot.z - player.getZ(), 2));
+		helper.assertTrue(distance >= 13.0 && distance <= 21.5, "He should stand 14 to 20 blocks away, not " + distance);
+		helper.assertTrue(spot.z > player.getZ(), "He should stand ahead of the player, not behind");
+		helper.assertTrue(HerobrineEncounters.standable(level, BlockPos.containing(spot)), "He should stand on solid ground with room");
+		helper.succeed();
+	}
+
+	@GameTest(structure = ARENA, padding = 48, maxTicks = 20)
+	public void aWalledInPlayerGetsAFailureAndNothingIsPlaced(GameTestHelper helper) {
+		floor(helper);
+		Recorder recorder = recorder();
+		for (int x = 22; x <= 26; x++) {
+			for (int y = 1; y <= 4; y++) {
+				for (int z = 22; z <= 26; z++) {
+					boolean inside = x > 22 && x < 26 && z > 22 && z < 26 && y < 4;
+					helper.setBlock(new BlockPos(x, y, z), inside ? Blocks.AIR : Blocks.STONE);
+				}
+			}
+		}
+		ServerPlayer player = player(helper, new BlockPos(24, 1, 24), 0.0F);
+		int before = HerobrineEncounters.live();
+		HerobrineEncounters.Attempt attempt = HerobrineEncounters.attempt(player,
+				new HerobrineDirector.Request(player.getUUID(), Herobrine.Kind.DISTANT, 9L));
+		helper.assertTrue(!attempt.placed() && attempt.failure() == HerobrineDirector.Failure.NO_VISIBLE_SPOT,
+				"A walled-in player cannot see him anywhere: " + attempt.failure());
+		helper.assertTrue(HerobrineEncounters.live() == before, "Nothing should be placed");
+		helper.assertTrue(recorder.failuresFor(player.getUUID()).size() == 1, "The failure should be reported to the director");
+		helper.succeed();
+	}
+
+	@GameTest(structure = ARENA, padding = 48, maxTicks = 20)
+	public void heIsNeverSavedAndMockPlayersAreNotActive(GameTestHelper helper) {
+		helper.assertTrue(!HerobrineEncounters.HEROBRINE.canSerialize(), "Herobrine should never be saved with the world");
+		ServerPlayer player = player(helper, new BlockPos(24, 1, 24), 0.0F);
+		helper.assertTrue(!HerobrineEncounters.active(player, helper.getLevel().getServer().getTickCount()),
+				"A player who has not been in the world a minute is not active");
+		helper.succeed();
+	}
+}

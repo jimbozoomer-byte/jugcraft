@@ -12,6 +12,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+import java.util.function.Supplier;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
@@ -193,6 +194,20 @@ public final class HerobrineEncounters {
 	 * started, so nobody's first sight of him is a jump-scare.
 	 */
 	public static Attempt attempt(ServerPlayer player, HerobrineDirector.Request request) {
+		return attempt(player, request, () -> request.kind() == Herobrine.Kind.CLOSE ? behind(player) : distant(player));
+	}
+
+	/**
+	 * Places him exactly at {@code at} for {@code request}, with the same checks, bookkeeping and reports as
+	 * {@link #attempt}: for encounters whose place is chosen elsewhere (and for tests). Fails with
+	 * {@link HerobrineDirector.Failure#NO_VISIBLE_SPOT} if there is no room to stand there.
+	 */
+	public static Attempt attemptAt(ServerPlayer player, HerobrineDirector.Request request, Vec3 at) {
+		return attempt(player, request, () -> standable(player.level(), BlockPos.containing(at))
+				? spawn(player.level(), at, request.kind(), player) : null);
+	}
+
+	private static Attempt attempt(ServerPlayer player, HerobrineDirector.Request request, Supplier<@Nullable Herobrine> placement) {
 		HerobrineDirector.Failure failure = null;
 		Herobrine herobrine = null;
 		if (!player.isAlive() || player.isSpectator() || player.level().dimension() != Level.OVERWORLD) {
@@ -203,7 +218,7 @@ public final class HerobrineEncounters {
 				&& (!calm(player) || !INTRODUCED.contains(player.getUUID()))) {
 			failure = HerobrineDirector.Failure.TARGET_UNSAFE;
 		} else {
-			herobrine = request.kind() == Herobrine.Kind.CLOSE ? behind(player) : distant(player);
+			herobrine = placement.get();
 			if (herobrine == null) {
 				failure = HerobrineDirector.Failure.NO_VISIBLE_SPOT;
 			}
