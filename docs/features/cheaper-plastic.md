@@ -43,7 +43,8 @@ Two new recipes (`jugcraft:polymerization/naphtha`, `jugcraft:chemical_reaction/
 - New server game test `PetroGameTests.reactorMakesPlasticPelletsFromNaphtha`: a bucket of naphtha gives four pellets and empties the tank.
 - `PolymerGameTests.everyLoadedRecipePaysItsLedgerAndRetainsItsTool` runs every Monomer Preparation Unit recipe, the new naphtha cracking included; its count of new process and molding recipes goes from 23 to 24.
 - Local: `python3 tools/generate_material_data.py`, then `python3 tools/check_mod_data.py` passed (8025 material IDs, data files and recipe audit) and `python3 scripts/check_repository.py` passed.
-- CI on the fork, run 40543159045 (27 October 2026): every client shard passed; the server tests failed in one test, `everyLoadedRecipePaysItsLedgerAndRetainsItsTool`, which found 24 recipes where it counted 23. The new recipe ran and passed its own checks; the count was raised to 24. A new run is pending.
+- CI on the fork, run 40543159045 (27 October 2026): every client shard passed; the server tests failed in one test, `everyLoadedRecipePaysItsLedgerAndRetainsItsTool`, which found 24 recipes where it counted 23. The new recipe ran and passed its own checks; the count was raised to 24.
+- CI on the fork, run 40556438022 (27 October 2026, after the fix): passed. The server game tests passed with and without the optional integrations, and all 16 client shards passed. One shard first failed while installing its graphics packages, before any test ran ("Unable to fetch required signed graphics packages from either Ubuntu mirror"); it passed when re-run once.
 
 Not run: a human running a plastic line.
 
