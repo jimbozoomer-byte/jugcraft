@@ -45,6 +45,8 @@ public class HitEffectsGameTests {
 	 * {@link GunShots#afflict} gives the effect at its chance, for its ticks and at its amplifier: a sure effect always
 	 * lands, at the level and length it names; one of no chance and a gun with none never do. The Lament Rifle's lands
 	 * just when the shooter's next roll is under its chance, as the same roll from a twin of the shooter's random shows.
+	 * The twins' seeds are drawn from a seeded source: the first roll of sources seeded 0, 1, 2 and on is nearly the same
+	 * (about 0.73 for each of the first forty), so near seeds would never roll under a quarter.
 	 */
 	@GameTest(structure = GunsGameTests.ARENA)
 	public void afflictGivesItsChance(GameTestHelper helper) {
@@ -61,7 +63,9 @@ public class HitEffectsGameTests {
 		JugcraftGuns.HitEffect lament = JugcraftGuns.HIT_EFFECTS.get("lament_rifle");
 		boolean landed = false;
 		boolean missed = false;
-		for (long seed = 0; seed < 40 && !(landed && missed); seed++) {
+		RandomSource seeds = RandomSource.create(42L);
+		for (int draw = 0; draw < 40 && !(landed && missed); draw++) {
+			long seed = seeds.nextLong();
 			boolean under = RandomSource.create(seed).nextFloat() < lament.chance();
 			if (under ? landed : missed) {
 				continue;
