@@ -173,3 +173,29 @@ no research or items. Modonomicon and the journal retain their own server-unlock
 The community prototype was authored with Claude; reconciliation and testing fixes use OpenAI Codex (GPT-6).
 Combined verification is recorded in the October 13 integration record. Route canvas, quests, and human multiplayer
 acceptance remain future work.
+
+## Fixes (27 October 2026)
+
+A contributor reported the encyclopedia (B) as "bugged and broken in general". CI screenshots of `main` (fork run
+40422697487, shards 11 and 12) and the code showed five faults, fixed here without changing the book's look:
+
+- **Most chapters could not be opened by clicking.** The contents spread listed six fixed chapters, but the server
+  sends up to twelve pages (Jug Nouveau, Menagerie, Woodland, Household, Habitats, Beasts, Caverns, the digital network,
+  Inspect); those were reachable only with the Left and Right keys, which nothing on screen mentions. The contents now
+  lists the two guides and then every page the server sent, with the Keys page last, in the same tabs; the list scrolls
+  when there are more than six.
+- **A chapter chosen before the server answered stayed empty.** Clicking a chapter in the moment after opening showed
+  "Nothing to show yet" and kept showing it after the pages came. It now opens once they arrive.
+- **Discover's first topic was empty.** A page's heading followed by a step became a topic of its own with only its
+  title ("From a glow to your first spell", 1 of 13). Headings now lead the topic that follows them, so Discover opens
+  on its first step.
+- **Backspace went to the contents,** though the help says it goes back a page, and a followed link had no way back.
+  It now returns to the page read before, and to the contents from the first.
+- **B did nothing in the Technology & Magic guides,** while it closes the encyclopedia itself. It now closes the guides
+  too (to the game, or to the inventory the encyclopedia was opened from).
+
+Implemented with Claude Opus 5.5 (Claude Code) for the contributor, on the fork. Verification: new checks in
+`EncyclopediaClientGameTests` (every page has a chapter; Discover's first topic is its first step; Backspace from Keys
+returns to Expeditions) and `EncyclopediaRoutesClientGameTests` (B closes the guides). Local: a tree-sitter parse of the
+changed Java found no syntax errors; `python tools/check_mod_data.py` and `python scripts/check_repository.py` passed. CI:
+pending. Not run: a human clicking through the encyclopedia.

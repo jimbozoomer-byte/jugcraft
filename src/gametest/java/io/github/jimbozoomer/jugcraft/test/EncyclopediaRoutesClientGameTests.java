@@ -107,6 +107,14 @@ public class EncyclopediaRoutesClientGameTests implements FabricClientGameTest {
 			context.waitForScreen(EncyclopediaScreen.class);
 			context.getInput().pressKey(ESCAPE);
 			context.waitForScreen(null);
+
+			// The encyclopedia's key closes the guides too, as it closes the encyclopedia.
+			context.getInput().pressKey(EncyclopediaClient.key());
+			context.waitForScreen(EncyclopediaScreen.class);
+			context.clickScreenButton("ui.jugcraft.book.technology");
+			context.waitForScreen(EncyclopediaRoutesScreen.class);
+			context.getInput().pressKey(EncyclopediaClient.key());
+			context.waitForScreen(null);
 		}
 	}
 }
