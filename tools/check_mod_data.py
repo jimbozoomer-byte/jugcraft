@@ -1697,6 +1697,20 @@ def check_guns():
             if gun not in guns.GUNS or guns.GUNS[gun].get("shot", "bullet") != "bullet" or not 0 < value <= 8:
                 err(f"tools/guns.py {name} names {gun}, which is not a gun that fires bullets, or gives it {value} "
                     "(more than 0, at most 8)")
+    # The darts-and-bleeding follow-up: how a dart flies, how bleeding hurts, and which guns' hits make a creature bleed.
+    for line in (f"DART_SPEED = {guns.DART_SPEED};", f"DART_DROP = {guns.DART_DROP};", f"BLEED_TICKS = {guns.BLEED_TICKS};",
+                 f"BLEED_DAMAGE = {guns.BLEED_DAMAGE}F;", f'DART = "dart";'):
+        if line not in java:
+            err(f"JugcraftGuns differs from tools/guns.py: expected {line}")
+    if "dart" not in guns.AMMO or "dart" not in guns.CASINGS:
+        err("tools/guns.py has no Dart round, or it leaves no case")
+    bleeds = ", ".join(f'"{gun}", new Bleed({chance}F, {ticks})' for gun, (chance, ticks) in guns.BLEEDS.items())
+    if f"BLEEDS = Map.of({bleeds});" not in java:
+        err(f"JugcraftGuns.BLEEDS differs from tools/guns.py: expected Map.of({bleeds})")
+    for gun, (chance, ticks) in guns.BLEEDS.items():
+        if gun not in guns.GUNS or guns.GUNS[gun].get("shot", "bullet") not in ("bullet", "beam") or not 0 < chance <= 1 or ticks <= 0:
+            err(f"tools/guns.py BLEEDS names {gun}, which is not a gun that fires bullets or a beam, or gives it {chance} a hit "
+                f"(more than 0, at most 1) for {ticks} ticks")
     # Slice 8D: the energy weapons' charge a round, the arcs' leaps and the Energy Cell's capacity.
     charges = ", ".join(f'"{gun}", {spec["charge"]}' for gun, spec in guns.GUNS.items() if spec.get("charge"))
     if f"CHARGE = Map.of({charges});" not in java:

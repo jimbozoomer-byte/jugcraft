@@ -270,8 +270,8 @@ GUNS = {
     "picket_rifle": {
         "display": "Picket Rifle",
         "source": "m3_marksman",
-        "tooltip": "A steel marksman's rifle with a peep sight: one steady shot each pull, true at long range. Fires rifle "
-                   "rounds.",
+        "tooltip": "A steel marksman's rifle with a peep sight: one steady shot each pull, true at long range, and what it "
+                   "hits may bleed. Fires rifle rounds.",
         "damage": 8.0, "pellets": 1, "interval": 8, "auto": False, "capacity": 10,
         "reload": 43, "spread": (2.0, 0.1), "range": 128, "ammo": "rifle_round",
     },
@@ -322,8 +322,8 @@ GUNS = {
     "spikedriver": {
         "display": "Spikedriver",
         "source": "railworker",
-        "tooltip": "A rail pistol held in one hand: each heavy shot drives through every creature in its line. Its side "
-                   "magazine is changed and its lever worked to reload. Runs on Energy Cells.",
+        "tooltip": "A rail pistol held in one hand: each heavy shot drives through every creature in its line, and may make "
+                   "them bleed. Its side magazine is changed and its lever worked to reload. Runs on Energy Cells.",
         "damage": 12.0, "pellets": 1, "interval": 16, "auto": False, "capacity": 6,
         "reload": 67, "spread": (1.5, 0.3), "range": 64, "ammo": "energy_cell", "shot": "beam", "charge": 800,
     },
@@ -851,7 +851,7 @@ GUNS = {
         "display": "Harrow",
         "source": "scratches",
         "tooltip": "Four barrels before a drum: each pull throws four pellets in a close group with a burst of flame, "
-                   "and what they hit is set alight. Fed from a can of eight. Fires buckshot shells.",
+                   "and what they hit is set alight and may bleed. Fed from a can of eight. Fires buckshot shells.",
         "damage": 4.5, "pellets": 4, "interval": 11, "auto": False, "capacity": 8,
         "reload": 60, "spread": (3.5, 2.0), "range": 32, "ammo": "buckshot_shell",
     },
@@ -947,9 +947,9 @@ GUNS = {
         "display": "Quill Rifle",
         "source": "zilk_45",
         "tooltip": "A stainless steel dart rifle, silenced along its whole length: it fires as long as the trigger is "
-                   "held, from a magazine of thirteen, piercing armour. Fires light rounds.",
+                   "held, from a magazine of thirteen, piercing armour and making what it hits bleed. Fires darts.",
         "damage": 5.0, "pellets": 1, "interval": 4, "auto": True, "capacity": 13,
-        "reload": 43, "spread": (3.0, 0.75), "range": 64, "ammo": "light_round",
+        "reload": 43, "spread": (3.0, 0.75), "range": 64, "ammo": "dart",
     },
 }
 
@@ -995,6 +995,10 @@ AMMO = {
                                                 "B": "#c:nuggets/brass"}, 4)),
     "paper_cartridge": ("Paper Cartridge", "A lead ball and its powder, wrapped in paper for a muzzle-loader.",
                         (["P", "L", "G"], {"P": "minecraft:paper", "L": "#c:nuggets/lead", "G": "minecraft:gunpowder"}, 4)),
+    # The darts follow-up: the owner's frog dart (Guns/item/frog_dart.png; their recipe presses a needle and gunpowder
+    # into a small iron case), for the Quill Rifle. A dart falls over its flight (DART_SPEED, DART_DROP).
+    "dart": ("Dart", "A steel needle in a small iron case, for a dart rifle. It falls a little over a long shot.",
+             (["N", "N", "G"], {"N": "minecraft:iron_nugget", "G": "minecraft:gunpowder"}, 6)),
 }
 
 # Gun recipes: crafted at a crafting table from early metal (the iron set adds brass); the owner's art carries the look.
@@ -3680,7 +3684,8 @@ def tilt(gun):
 # the start of shoot and aim_shoot; the Coach Gun's as it breaks open to reload). The owner's casing art
 # (Guns/item/<file>.png) is copied to textures/particle/<round>_casing.png for the particle jugcraft:<round>_casing
 # (JugcraftGuns.CASINGS). A paper cartridge leaves no case: its cue puffs smoke from the lock instead.
-CASINGS = {"light_round": "small_copper_casing", "rifle_round": "large_brass_casing", "buckshot_shell": "shotgun_shell"}
+CASINGS = {"light_round": "small_copper_casing", "rifle_round": "large_brass_casing", "buckshot_shell": "shotgun_shell",
+           "dart": "small_iron_casing"}
 # The Laser Sight's dot (slice 9E), the particle jugcraft:laser_dot (JugcraftGuns.LASER_DOT, client/guns/GunLaser): the
 # owner's red dot (Guns/effect/red_dot_reticle.png, the Reflex Sight's), copied to textures/particle/laser_dot.png.
 LASER_DOT = "red_dot_reticle"
@@ -3704,7 +3709,9 @@ FLASH_SOURCE = BLOCKS / "Big Cannons and Mounted Guns" / "textures"
 FLASH_SIZE = {"light_round": 5.0, "rifle_round": 7.0, "buckshot_shell": 8.0, "paper_cartridge": 10.0, "grenade": 9.0,
               "minecraft:blaze_powder": 8.0, "energy_cell": 6.0,
               # Slice 10A: a rocket's launch flares as wide as black powder.
-              "he_rocket": 10.0}
+              "he_rocket": 10.0,
+              # The darts-and-bleeding follow-up: a dart's small charge flashes narrower than a light round's.
+              "dart": 4.0}
 # The flash's tint, by the round, where it is not the owner's frames' own white-gold (client/guns/GunLooks
 # FLASH_TINTS, multiplied into the frames): an energy weapon's discharge is cyan-white.
 FLASH_TINT = {"energy_cell": 0x9FF4FF}
@@ -3999,6 +4006,10 @@ DAMAGE_TYPES = {
     # gun's quick shots keep their mark in reach.
     "zap": {"effects": None, "tags": ("no_knockback", "bypasses_cooldown"),
             "death": ("%1$s was zapped by %2$s", "%1$s was zapped by %2$s using %3$s", "%1$s was zapped while fighting %2$s")},
+    # Bleeding (the darts-and-bleeding follow-up): through armour, and each tick of it counts however soon after a hit.
+    # It has no attacker, so its message is the plain one, or the last with whoever last hurt the creature.
+    "bleeding": {"effects": None, "tags": ("bypasses_armor", "bypasses_cooldown"),
+                 "death": ("%1$s bled out", "%1$s bled out", "%1$s bled out while fighting %2$s")},
 }
 
 
@@ -4124,6 +4135,28 @@ SILENCED = ("gallant_rifle", "quill_rifle")
 KNOCKBACK = {"jawbreaker": 0.6, "impetus_shotgun": 0.65}
 PIERCING = {"vesper_rifle": 4.5, "onrush_smg": 3.0, "kreuzer_pistol": 1.0, "psalm_smg": 1.0, "jawbreaker": 4.5,
             "hawker_rifle": 1.0, "quill_rifle": 1.5}
+
+
+# ------------------------------------------------------------------ darts and bleeding
+
+# The darts-and-bleeding follow-up after slice 15C, from the owner's Zilk 45 (frog darts that fall, and laceration).
+# A dart (AMMO "dart") flies DART_SPEED blocks a tick, the owner's speed, and falls DART_DROP blocks a tick faster each
+# tick, as an arrow falls (GunShots.flight()): over 32 blocks it has fallen about 0.9 of a block, over 64 about 3.8. A
+# bullet flies straight. Both fly the gun's range at once, as every gun's shots do.
+DART_SPEED = 5.0
+DART_DROP = 0.05
+# Bleeding, the mob effect jugcraft:bleeding (JugcraftGuns.BLEEDING; the owner's "lacerated", its icon theirs): a
+# creature bleeding loses BLEED_DAMAGE every BLEED_TICKS (twice as often at each level above the first) through its
+# armour (the damage type "bleeding"), and can bleed to death; milk stops it, as any effect does. BLEEDS are the guns
+# whose hits may make a creature bleed, each (the chance a hit, ticks), from the owner's data (impactEffect
+# scguns:lacerated, its chance and duration): the M3 Marksman's for the Picket Rifle, the Railworker's for the
+# Spikedriver (its beam), the Scratches' for the Harrow and the Zilk 45's for the Quill Rifle. A shotgun's pellets on
+# one creature land as one hit: one chance a pull. The Caisson Pistol fires an arc here, not the owner's Hyperbaria's
+# darts, and does not bleed.
+BLEED_TICKS = 40
+BLEED_DAMAGE = 1.0
+BLEEDS = {"picket_rifle": (0.3, 300), "spikedriver": (0.6, 300), "harrow": (0.3, 300), "quill_rifle": (0.4, 300)}
+BLEEDING_ICON = "lacerated"
 
 
 def cell_rack_model():
@@ -4268,6 +4301,7 @@ def write_all(write, assets, data, lang, condition):
     for ammo in CASINGS:
         write(assets / "particles" / f"{ammo}_casing.json", {"textures": [f"{MOD}:{ammo}_casing"]})
     write(assets / "particles" / "laser_dot.json", {"textures": [f"{MOD}:laser_dot"]})
+    lang[f"effect.{MOD}.bleeding"] = "Bleeding"
     lang[f"key.{MOD}.reload"] = "Reload gun"
     lang[f"key.{MOD}.inspect"] = "Inspect gun"
     lang[f"tooltip.{MOD}.guns.ammo"] = "Loaded: %s / %s"
@@ -5566,6 +5600,9 @@ def check():
     target = ASSETS / "textures" / "particle" / "laser_dot.png"
     if not target.exists() or target.read_bytes() != (LIBRARY / "effect" / f"{LASER_DOT}.png").read_bytes():
         problems.append(f"the laser dot: {target.relative_to(ROOT)} is not the library's {LASER_DOT}.png unchanged")
+    target = ASSETS / "textures" / "mob_effect" / "bleeding.png"
+    if not target.exists() or target.read_bytes() != (LIBRARY / "mob_effect" / f"{BLEEDING_ICON}.png").read_bytes():
+        problems.append(f"bleeding: {target.relative_to(ROOT)} is not the library's {BLEEDING_ICON}.png unchanged")
     for n, frame in enumerate(FLASH_FRAMES):
         target = ASSETS / "textures" / "item" / "guns" / "flash" / f"flash_{n}.png"
         if not target.exists() or target.read_bytes() != (FLASH_SOURCE / f"{frame}.png").read_bytes():
@@ -5758,6 +5795,9 @@ def write_files():
         target.parent.mkdir(parents=True, exist_ok=True)
         shutil.copyfile(LIBRARY / "item" / f"{casing}.png", target)
     shutil.copyfile(LIBRARY / "effect" / f"{LASER_DOT}.png", ASSETS / "textures" / "particle" / "laser_dot.png")
+    target = ASSETS / "textures" / "mob_effect" / "bleeding.png"
+    target.parent.mkdir(parents=True, exist_ok=True)
+    shutil.copyfile(LIBRARY / "mob_effect" / f"{BLEEDING_ICON}.png", target)
     for n, frame in enumerate(FLASH_FRAMES):
         target = ASSETS / "textures" / "item" / "guns" / "flash" / f"flash_{n}.png"
         target.parent.mkdir(parents=True, exist_ok=True)
@@ -5797,6 +5837,7 @@ def provenance():
     rows += [(name, f"effect/{name}.png") for name in OPTIC_TEXTURES]
     rows += [(f"{ammo}_casing", f"item/{casing}.png") for ammo, casing in CASINGS.items()]
     rows.append(("laser_dot", f"effect/{LASER_DOT}.png"))
+    rows.append(("bleeding", f"mob_effect/{BLEEDING_ICON}.png"))
     rows += [(name, f"item/{source}.png") for name, source in CELL_ART.items()]
     rows = [(owner, LIBRARY / path) for owner, path in rows]
     rows += [(f"flash_{n}", FLASH_SOURCE / f"{frame}.png") for n, frame in enumerate(FLASH_FRAMES)]

@@ -7967,6 +7967,11 @@
       "denominator": 1,
       "source": "recipe jugcraft:dark_oak_cabinet"
     },
+    "jugcraft:dart": {
+      "numerator": 1120,
+      "denominator": 27,
+      "source": "recipe jugcraft:dart"
+    },
     "jugcraft:data_cable": {
       "numerator": 1,
       "denominator": 2,

@@ -2923,7 +2923,7 @@ The next three of the owner's diamond-steel guns, taken up after slice 15B (on 2
 | The owner's gun | MAS Peddler | Inertial | Zilk 45 |
 | What it is | the MAS 55 made over: a rifle whose magazine stands slanting up out of its side, a wax seal with a strip of scripture on its left side | a shotgun fed from a box of six shells below, a wax seal on its receiver | a dart rifle silenced the length of its barrel, a magazine below |
 | Held | in both hands: the right on the grip, the left under the barrel | in both hands: the right on the grip, the left under the fore-end | in both hands: the right on the grip, the left at the magazine |
-| What it fires | Rifle Rounds, a pull a shot | Buckshot Shells, a shell a pull: eight pellets | Light Rounds, as long as the trigger is held |
+| What it fires | Rifle Rounds, a pull a shot | Buckshot Shells, a shell a pull: eight pellets | Darts (Light Rounds in this slice, until the [darts-and-bleeding follow-up](#follow-up-darts-and-bleeding)), as long as the trigger is held |
 | Damage | 9 | 3.5 a pellet, 28 a pull | 5 |
 | Rate | 2.5 a second (every 8 ticks) | about 1.5 a second (every 13 ticks) | 5 a second (every 4 ticks) |
 | Holds | 12 | 6 | 13 |
@@ -2957,7 +2957,7 @@ The next three of the owner's diamond-steel guns, taken up after slice 15B (on 2
 - **Checked** in first-person, aimed and orthographic previews: idle, fired, aimed, through each reload and inspection, and with each attachment.
 
 **Connections:**
-- **Rounds:** the Rifle Round, the Buckshot Shell and the Light Round; nothing new.
+- **Rounds:** the Rifle Round, the Buckshot Shell and the Light Round; nothing new. Since the [darts-and-bleeding follow-up](#follow-up-darts-and-bleeding) the Quill fires the Dart.
 - **Parts:** stainless steel, a diamond and a lever; planks for the Hawker and the Impetus, redstone and an iron ingot for the Quill.
 - **Their place:** past stainless steel, beside slices 15A's and 15B's guns: the diamond-steel long guns.
 
@@ -2970,7 +2970,7 @@ The next three of the owner's diamond-steel guns, taken up after slice 15B (on 2
 **Save compatibility:** new items `jugcraft:hawker_rifle`, `impetus_shotgun` and `quill_rifle`; nothing saved changes. `guns.enabled=false` turns their recipes off; the items stay registered.
 
 **Known limits:**
-- **The Quill fires Light Rounds, not darts:** the owner's Zilk 45 fires frog darts that fall over their flight and may make what they hit bleed (`lacerated`); Jugcraft has no darts and no bleeding, so its rounds fly straight along the look as the other guns' do.
+- **The Quill fired Light Rounds in this slice:** the owner's Zilk 45 fires frog darts that fall over their flight and may make what they hit bleed (`lacerated`); the [darts-and-bleeding follow-up](#follow-up-darts-and-bleeding) gives the Quill both.
 - **The Impetus does not push its shooter back:** the owner's Inertial does (`playerKnockBack`); no gun does that yet.
 - **The Impetus has no inspection,** as the owner's Inertial has none.
 - **The Impetus's atlas is 256 px,** twice the rule's 128, to keep the owner's texture whole; the owner may prefer it repainted at 128.
@@ -2994,6 +2994,51 @@ The owner's data gives four more of their diamond-steel guns armour piercing (`a
 - **Tooltips:** each of the four says it pierces armour.
 - **Save compatibility:** nothing saved changes.
 - **Not in this follow-up:** the guns before slice 15. The owner's data gives 49 of them armour piercing, knockback or both (27 each, 5 both); they stay plain for now.
+
+## Follow-up: darts and bleeding
+The owner's Zilk 45 (slice 15C's Quill Rifle) fires frog darts that fall over their flight, and its hits may lacerate, as the owner's M3 Marksman's, Railworker's and Scratches' do. Offered after slice 15C, the owner chose it (27 October 2026, "Lets begin with those 3 you suggested"), as its own pull request.
+
+**The Dart** (`jugcraft:dart`), a round:
+- **What it is:** the owner's frog dart, a steel needle in a small iron case. Its icon is a map (`tools/item_icons/dart.txt`) drawn after the owner's `Guns/item/frog_dart.png`; its spent case is the owner's `small_iron_casing.png`.
+- **Crafting:** two iron nuggets over gunpowder make six (the owner's recipe presses a needle and gunpowder into a case).
+- **Price:** 1120/27 essence a dart, about 41.5, against a Light Round's 47.1.
+- **The Quill Rifle fires darts,** its numbers otherwise as in slice 15C.
+
+**How a dart flies:** five blocks a tick, the owner's speed, falling 0.05 of a block a tick faster each tick, as an arrow falls (`GunShots.flight`). The whole flight is worked out the moment the gun fires, as every gun's shot is, and the dart strikes the first block or creature along it. Fired level, it has fallen:
+
+| Out to | 16 blocks | 32 blocks | 48 blocks | 64 blocks (the Quill's range) |
+|---|---|---|---|---|
+| Fallen | 0.18 | 0.87 | 2.07 | about 3.8 |
+
+Aim a little high at a long shot. Bullets fly straight, as before.
+
+**Bleeding** (`jugcraft:bleeding`), a mob effect, the owner's "lacerated" and its icon (`Guns/mob_effect/lacerated.png`, taken into the [library](../../art/owner-library/README.md#gun-geometry-23-october-2026)):
+- **What it does:** one point of damage every two seconds (40 ticks; twice as often at each level above the first), through armour, until it ends; a creature can bleed to death ("bled out"). Milk stops it, as any effect.
+- **Which guns, from the owner's data** (`impactEffect` `scguns:lacerated`, its chance and duration; `BLEEDS`):
+
+| | Picket Rifle | Spikedriver | Harrow | Quill Rifle |
+|---|---|---|---|---|
+| The owner's gun | M3 Marksman | Railworker | Scratches | Zilk 45 |
+| Chance a hit | 30% | 60% | 30% | 40% |
+| How long | 15 s | 15 s | 15 s | 15 s |
+
+- **One chance a hit:** a shotgun's pellets on one creature land as one hit, so the Harrow has one chance a pull for each creature it strikes; the Spikedriver's beam has one for each creature in its line.
+- **Fifteen seconds of bleeding** take seven points, through any armour.
+- **Raider gunners** (slice 10F) fire through the same code; none of their service arms bleeds.
+- **Not given:** the Caisson Pistol (the owner's Hyperbaria) fires an arc here, not the owner's darts, so it does not bleed. The owner's other hit effects (slowness, darkness, withering on some of their guns) are not carried over.
+
+**Tooltips:** the Quill's says it fires darts and makes what it hits bleed; the Picket Rifle's, the Spikedriver's and the Harrow's that what they hit may bleed.
+
+**Checked:**
+- `tools/check_mod_data.py` holds the Java to `tools/guns.py`: the dart's speed and fall, bleeding's interval and damage, and the guns that bleed, each a gun that fires bullets or a beam, its chance above 0 and at most 1. `tools/guns.py --check` holds the copied icon and spent case to the library's.
+- `DartsAndBleedingGameTests`:
+  - `dartsAndBleedingAreTheOwners`: the Dart, its recipe and its spent case; the Quill fires it; the guns that bleed at the owner's numbers; the effect registered.
+  - `dartsFallAsTheyFly`: a bullet's flight is one straight leg; a dart's falls 0.75 of a block over its first 30 blocks, and between 3.6 and 3.9 by the end of 64 blocks of flight.
+  - `bleedingGoesThroughArmour`: a sturdy pig in 20 points of armour, bleeding, loses one whole point at the effect's first turn, to the bleeding damage type.
+  - `quillDartsMakeTheirMarkBleed`: thirty of the Quill's darts at a pig three blocks off land and make it bleed (all thirty miss their 40% about once in four million).
+- `GunsGameTests` counts five rounds; `DiamondSteelGunsIIIGameTests` holds the Quill to darts.
+
+**Save compatibility:** a new item, `jugcraft:dart`, and a new effect, `jugcraft:bleeding`. Quill Rifles already made keep their loaded count, now of darts; Light Rounds already in a player's inventory are unchanged. Nothing else saved changes.
 
 ## Connections
 - **Existing input producers:** copper, iron and gunpowder (vanilla); lead nuggets (the lead switch's lead); brass nuggets (brass, from zinc); paper and planks.
@@ -3665,6 +3710,7 @@ Slice 5's files: each gun's attachment parts, and each attachment's item model a
 | light_round_casing | `Guns/item/small_copper_casing.png` | `534d4d0375da46cc` |
 | rifle_round_casing | `Guns/item/large_brass_casing.png` | `2b43b9961479bdbb` |
 | buckshot_shell_casing | `Guns/item/shotgun_shell.png` | `89657710d20d041d` |
+| dart_casing | `Guns/item/small_iron_casing.png` | `3a48a2cd96b9e75d` |
 | flash_0 | `Big Cannons and Mounted Guns/textures/muzzleflash.png` | `9e6b36b22790ec34` |
 | flash_1 | `Big Cannons and Mounted Guns/textures/muzzleflash2.png` | `31029be6554ebd9f` |
 | flash_2 | `Big Cannons and Mounted Guns/textures/muzzleflash3.png` | `5c695fc1d9c5b365` |
@@ -3801,6 +3847,7 @@ Slice 9E's files: the guns' tactical grip parts and the Laser Sight's textures m
 | laser_sight | `Guns/item/laser_sight.png` | `1e0a3342068bc5df` |
 | laser_beam | `Guns/item/laser.png` | `aac5f06e892e350a` |
 | laser_dot | `Guns/effect/red_dot_reticle.png` | `8ebc215134886a8f` |
+| bleeding | `Guns/mob_effect/lacerated.png` | `82f240ad3c80cfc3` |
 | earthmover | `Guns/models/item/dozier_rl.json` | `63d00eb0a827fb67` |
 | earthmover | `Guns/item/dozier_rl.png` | `5657bbdc3a8a3439` |
 | earthmover | `Guns/item/dozier_rl.animation.json` | `693ac6d3023f7fdb` |
@@ -4781,7 +4828,7 @@ Slice 9E's files: the guns' tactical grip parts and the Laser Sight's textures m
 
   Shown this and asked what the scopes should use, the owner answered that they made these files and to use them. Asked the same day whether the "Big Cannons and Mounted Guns" folder is theirs (slice 6's flash frames come from it, and it holds a `wariumlogo.png`), they confirmed it is. The [library README](../../art/owner-library/README.md#effect-textures-8-october-2026) records both.
 - **Names:** Jugcraft's own, under the license policy's fan-homage rules. No `scguns:` reference reaches the game: the converter writes its own files with `jugcraft:` paths, and the animations name no resources.
-- **Drawn here:** the round icons, as maps (`tools/item_icons/light_round.txt`, `rifle_round.txt`, `buckshot_shell.txt`, `paper_cartridge.txt`), and the props' pixels in the atlas copies (the Thunderpipe's and the Highwayman's shells, the Longhorn's cartridge, slice 4's muzzle-loaders' balls, ramrods and flashes, the Stoker's fuel can, the Linesman's and the Glowmouth's cells, the Skylark Rifle's rocket, the Bullfrog's grenade, the Fowler's balls, ramrod and flash, and the Culverin's ball and flash). The Stoker's flame is the owner's pilot flame, copied pixel for pixel into its atlas corner.
+- **Drawn here:** the round icons, as maps (`tools/item_icons/light_round.txt`, `rifle_round.txt`, `buckshot_shell.txt`, `paper_cartridge.txt`, and `dart.txt` after the owner's frog dart, `Guns/item/frog_dart.png`), and the props' pixels in the atlas copies (the Thunderpipe's and the Highwayman's shells, the Longhorn's cartridge, slice 4's muzzle-loaders' balls, ramrods and flashes, the Stoker's fuel can, the Linesman's and the Glowmouth's cells, the Skylark Rifle's rocket, the Bullfrog's grenade, the Fowler's balls, ramrod and flash, and the Culverin's ball and flash). The Stoker's flame is the owner's pilot flame, copied pixel for pixel into its atlas corner.
 - **The Cell Rack (slice 10E):** its block model is built here from boxes (`cell_rack_model()` in `tools/guns.py`) on the power gear's electric-look textures, the Charging Station's. Nothing new is drawn, and no owner file is used; the cells in it are the Energy Cell's own icons.
 
 ## Verification
@@ -5916,13 +5963,25 @@ Slice 9E's files: the guns' tactical grip parts and the Laser Sight's textures m
   - `GunsGameTests` counts 99 guns; `TacticalAttachmentsGameTests` the thirty-nine guns the Tactical Grip fits, these three among them.
   - The guns' client test (`GunsClientGameTests`) takes each new gun through its screenshots as every gun's: the Impetus's inspect screenshot should show it held as at rest.
 - **Armour piercing for slices 15A's and 15B's guns, run locally (27 October 2026):** `python3 tools/generate_material_data.py` rewrote the four tooltips. `python3 tools/check_mod_data.py`: PASS. `python3 tools/guns.py --check`: PASS. `python3 scripts/check_repository.py`: PASS. **Java:** a syntax parse only: 0 errors in the changed files. Game test (not run yet; CI runs it): `HeavyBulletsGameTests.heavyBulletsAreTheOwners`, with the four added.
+- **Darts and bleeding, run locally (27 October 2026):**
+  - `python3 tools/guns.py`: PASS. It copied the owner's small iron case and Lacerated icon; every gun's files came out unchanged.
+  - `python3 tools/check_icon_maps.py tools/item_icons/dart.txt`: PASS, no warnings; previewed beside the Rifle Round and the Light Round.
+  - `python3 tools/generate_material_data.py`: wrote the Dart's item, model, recipe and name, the bleeding damage type and its messages, the effect's name and the four tooltips. (It also reordered `docs/features/jug-nouveau-content-map.json`, unrelated; that file is left as before.)
+  - `python3 tools/generate_textures.py`: drew the Dart's icon from its map. It also wrote 605 unrelated textures over with other bytes; those were put back, and only `textures/item/dart.png` is new.
+  - `python3 tools/check_mod_data.py`: PASS (6256 material IDs).
+  - `python3 scripts/check_repository.py`: PASS. `python3 -m unittest discover -s scripts/tests`: 191 tests passed; `python3 scripts/package_modrinth.py check`: PASS.
+  - **Java:** a syntax parse only: 0 errors in the changed and new files.
+  - **Recipes:** every shaped recipe in the mod's data compared, mirrors included: the Dart's grid matches no other.
+  - **The dart's fall:** worked out in Python from the same rule as `GunShots.flight`, for the table above and the game test's bounds.
+  - **Alchemy value:** the Dart's record, priced from its recipe as `tools/build_alchemy_values.py` prices them (that tool needs a Minecraft jar, which isn't available here).
+- **Darts and bleeding game tests (not run yet; CI runs them):** `DartsAndBleedingGameTests` (above); `GunsGameTests` and `DiamondSteelGunsIIIGameTests` as changed.
 - **Not run:** the client by hand, a two-client dedicated server, and play.
 
 ## World and event applicability
 No worldgen, structures, bosses or seasonal content. Guns, rounds and the Cell Rack come from crafting (and the creative tab). The one loot is slice 10F's: raider gunners, in raids and raider camps, may drop their service arms (their equipment's drop chance) and rounds (the mob loot table `jugcraft:entities/raider_gunner`).
 
 ## Rollout and open questions
-- **Names:** proposed here (Rust Midge, Patchwork Carbine, Thunderpipe, Warden Pistol, Riveter SMG, Haymaker, Longhorn Rifle, Drover Rifle, Coach Gun, Duelling Pistol, Line Musket, Bellmouth, Bulldog Pistol, Marshal Revolver, Sapper Revolver, Sentry Pistol, Garrison Rifle, Breacher, Trench Lobber, Thresher, Stoker, Beam Pistol, Stormlock Rifle, Linesman, Picket Rifle, Ranger Rifle, Kestrel Rifle, Rattler Pistol, Bronco SMG, Squall Rifle, Spikedriver, Seam Cutter, Caisson Pistol, Sledge, Highwayman, Throttle, Earthmover, Skylark Rifle, Bullfrog, Solenoid Rifle, Votive Rifle, Glowmouth, Mule, Fowler, Culverin, Undertone Rifle, Murmur SMG, Reverb, Tusker, Cinder Repeater, Bastion Rifle, Ashfall Pistol, Goldbristle Carbine, Crackling, Chitin SMG, Hermit Rifle, Borer, Penny Pistol, Conductor Carbine, Magpie SMG, Tuppence Pistol, Goshawk Revolver, Lament Rifle, Tabby Revolver, Lookout Rifle, Ammonite Carbine, Fencepost Carbine, Waystation Shotgun, Highball Rifle, Flatboat Gun, Windlass Musket, Millstone Rifle, Fencepost Thumper, Parley Revolver, Lantern Musket, Holler Pistol, Minuet Pistol, Half-Crown Revolver, Holler Carbine, Minuet Carbine, Grange Carbine, Sprocket Gun, Navvy Shotgun, Freeholder Rifle, Quarrel Carbine, Hinterland Rifle, Cloudburst Gun, Firedrake, Harrow, Old Grange Carbine, Vesper Rifle, Onrush SMG, Gallant Rifle, Kreuzer Pistol, Psalm SMG, Jawbreaker, Hawker Rifle, Impetus Shotgun, Quill Rifle, Light Round, Rifle Round, Buckshot Shell, Paper Cartridge, Energy Cell, Cell Rack, Raider Gunner; the attachments keep plain names: Silencer, Baffled Silencer, Muzzle Brake, Extended Barrel, Extended Magazine, Speed Magazine, Light Stock, Weighted Stock, Wooden Stock, Light Grip, Vertical Grip, the four bayonets, Long Scope, Medium Scope, Reflex Sight, Tactical Grip, Laser Sight). The owner may rename them before release; IDs are stable only after release.
+- **Names:** proposed here (Rust Midge, Patchwork Carbine, Thunderpipe, Warden Pistol, Riveter SMG, Haymaker, Longhorn Rifle, Drover Rifle, Coach Gun, Duelling Pistol, Line Musket, Bellmouth, Bulldog Pistol, Marshal Revolver, Sapper Revolver, Sentry Pistol, Garrison Rifle, Breacher, Trench Lobber, Thresher, Stoker, Beam Pistol, Stormlock Rifle, Linesman, Picket Rifle, Ranger Rifle, Kestrel Rifle, Rattler Pistol, Bronco SMG, Squall Rifle, Spikedriver, Seam Cutter, Caisson Pistol, Sledge, Highwayman, Throttle, Earthmover, Skylark Rifle, Bullfrog, Solenoid Rifle, Votive Rifle, Glowmouth, Mule, Fowler, Culverin, Undertone Rifle, Murmur SMG, Reverb, Tusker, Cinder Repeater, Bastion Rifle, Ashfall Pistol, Goldbristle Carbine, Crackling, Chitin SMG, Hermit Rifle, Borer, Penny Pistol, Conductor Carbine, Magpie SMG, Tuppence Pistol, Goshawk Revolver, Lament Rifle, Tabby Revolver, Lookout Rifle, Ammonite Carbine, Fencepost Carbine, Waystation Shotgun, Highball Rifle, Flatboat Gun, Windlass Musket, Millstone Rifle, Fencepost Thumper, Parley Revolver, Lantern Musket, Holler Pistol, Minuet Pistol, Half-Crown Revolver, Holler Carbine, Minuet Carbine, Grange Carbine, Sprocket Gun, Navvy Shotgun, Freeholder Rifle, Quarrel Carbine, Hinterland Rifle, Cloudburst Gun, Firedrake, Harrow, Old Grange Carbine, Vesper Rifle, Onrush SMG, Gallant Rifle, Kreuzer Pistol, Psalm SMG, Jawbreaker, Hawker Rifle, Impetus Shotgun, Quill Rifle, Light Round, Rifle Round, Buckshot Shell, Paper Cartridge, Dart, Bleeding, Energy Cell, Cell Rack, Raider Gunner; the attachments keep plain names: Silencer, Baffled Silencer, Muzzle Brake, Extended Barrel, Extended Magazine, Speed Magazine, Light Stock, Weighted Stock, Wooden Stock, Light Grip, Vertical Grip, the four bayonets, Long Scope, Medium Scope, Reflex Sight, Tactical Grip, Laser Sight). The owner may rename them before release; IDs are stable only after release.
 - **The arms:** placed from the animations' own evidence, without the models they were made for. The CI screenshots show where they sit; the rest points and arm directions above are the knobs.
 - **The gun sets the owner chose on 8 October 2026** are all built: the revolvers (slice 8), the service arms (slice 8B), the heavy weapons (slice 8C) and the energy weapons (slice 8D).
 - **The gun sets the owner chose on 10 October 2026** are all built, each its own pull request: the marksman rifles (slice 9A), the automatic weapons (slice 9B), the second energy weapons (slice 9C) and the pump shotguns (slice 9D).
@@ -5936,5 +5995,6 @@ No worldgen, structures, bosses or seasonal content. Guns, rounds and the Cell R
   - the owner's other GeckoLib gun models from their upload of 23 October 2026: only the Grandle OG's and the nine diamond-steel guns' built so far (slices 15A to 15C) are in the library ([the library record](../../art/owner-library/README.md#gun-geometry-23-october-2026));
   - the other six diamond-steel guns;
   - the owner's armour piercing and knockback for the guns before slice 15: their data gives 49 of them one or both ([above](#follow-up-armour-piercing-for-slices-15as-and-15bs-guns));
-  - darts that fall and make what they hit bleed (the owner's Zilk 45), and a shotgun that pushes its shooter back (the owner's Inertial).
+  - a shotgun that pushes its shooter back (the owner's Inertial);
+  - the owner's other hit effects: slowness, darkness and withering from the guns whose data names them, and bleeding from the Caisson Pistol (it fires an arc here, not the owner's darts) and from guns not built yet.
 - **Balance:** the numbers are starting points for the owner to set.

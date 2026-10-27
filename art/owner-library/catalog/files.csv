@@ -6808,6 +6808,7 @@ Guns,originals/Blocks/Guns/geo/item/gun/uppercut.geo.json,model JSON,46862,,,,31
 Guns,originals/Blocks/Guns/geo/item/gun/mas_peddler.geo.json,model JSON,70696,,,,5c51ab04026ce22d2ef01c95ab8214f4ef6cb4285fcc369506f7860ac12686a6
 Guns,originals/Blocks/Guns/geo/item/gun/inertial.geo.json,model JSON,75351,,,,8a3272b54cfdebaa1565a9ca0c6d2f8529900cc4795b72422961c51c165b1c71
 Guns,originals/Blocks/Guns/geo/item/gun/zilk_45.geo.json,model JSON,51939,,,,aca06aad8bb01edbc22dcc793a124e953558b72832496285deb0d201ba50cc3a
+Guns,originals/Blocks/Guns/mob_effect/lacerated.png,texture,398,20,20,,82f240ad3c80cfc364d9158ecf4c83b69bcbc4313f0133fb1c85cfa0dcc4b78b
 "General blocks, ores, metals, machinery and items",originals/Blocks/hardened tungsten textures.jpg,reference sheet,45683,957,704,,acd48c265f4fa5278b5e842efe49f9a4da4dc7d8dce95057a6743b4ba03beb84
 "General blocks, ores, metals, machinery and items",originals/Blocks/hashicon.png,texture,954,5,5,,df870a17cad7fef619af5d7966ff708391de19b6ab15ca03400b1a59aade9ced
 "General blocks, ores, metals, machinery and items",originals/Blocks/hatch_front.png,texture,322,16,16,,38284ce35dabaab3cd703508c44c0e17dc0690a342ce53c0e6a13aa51811ec06

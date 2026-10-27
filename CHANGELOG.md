@@ -8,6 +8,11 @@ Every change to Jugcraft, newest first, grouped by pull request. For what each t
 
 No numbered release yet. Entries on feature branches remain proposed until their pull requests merge.
 
+### Unmerged: Guns, darts and bleeding
+- A new round, the **Dart**: the owner's frog dart, a steel needle in a small iron case (two iron nuggets over gunpowder make six). The **Quill Rifle** fires it in place of Light Rounds. A dart falls as it flies, as an arrow does: under a block over 32 blocks, nearly four over 64.
+- A new effect, **Bleeding**: a point of damage every two seconds, through armour, for its length; it can kill, and milk stops it. Hits from the **Picket Rifle** (30%), **Spikedriver** (60%), **Harrow** (30%) and **Quill Rifle** (40%) may make a creature bleed for 15 seconds, as the owner's gun data gives them. Its icon is the owner's.
+- Record: [guns.md, the darts-and-bleeding follow-up](docs/features/guns.md#follow-up-darts-and-bleeding).
+
 ### Unmerged: Guns, armour piercing for slices 15A's and 15B's guns
 - The **Vesper Rifle**, **Onrush SMG**, **Kreuzer Pistol** and **Psalm SMG** now pass through some of a target's armour, as the owner's gun data gives them: 4.5, 3, 1 and 1 points. A creature without armour takes the same damage as before. Their tooltips say so.
 - Record: [guns.md, the armour-piercing follow-up](docs/features/guns.md#follow-up-armour-piercing-for-slices-15as-and-15bs-guns).

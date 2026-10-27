@@ -14,6 +14,7 @@ import java.util.Set;
 import net.fabricmc.fabric.api.creativetab.v1.CreativeModeTabEvents;
 import net.fabricmc.fabric.api.object.builder.v1.block.entity.FabricBlockEntityTypeBuilder;
 import net.fabricmc.fabric.api.particle.v1.FabricParticleTypes;
+import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
 import net.minecraft.core.component.DataComponentType;
 import net.minecraft.core.component.DataComponents;
@@ -25,6 +26,7 @@ import net.minecraft.resources.Identifier;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.world.damagesource.DamageType;
+import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.CreativeModeTabs;
 import net.minecraft.world.item.Item;
@@ -37,6 +39,7 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockBehaviour;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Guns (docs/features/guns.md): the owner's guns, built from the owner's models and played with the owner's animations
@@ -220,7 +223,7 @@ public final class JugcraftGuns {
 		SPECS.put("jawbreaker", new GunSpec(12.0F, 1, 8, false, 4, 47, 0, 0, 0, 2.5F, 0.5F, 72, "rifle_round"));
 		SPECS.put("hawker_rifle", new GunSpec(9.0F, 1, 8, false, 12, 50, 0, 0, 0, 2.5F, 0.25F, 112, "rifle_round"));
 		SPECS.put("impetus_shotgun", new GunSpec(3.5F, 8, 13, false, 6, 48, 0, 0, 0, 6.0F, 4.5F, 28, "buckshot_shell"));
-		SPECS.put("quill_rifle", new GunSpec(5.0F, 1, 4, true, 13, 43, 0, 0, 0, 3.0F, 0.75F, 64, "light_round"));
+		SPECS.put("quill_rifle", new GunSpec(5.0F, 1, 4, true, 13, 43, 0, 0, 0, 3.0F, 0.75F, 64, "dart"));
 	}
 
 	/**
@@ -303,6 +306,27 @@ public final class JugcraftGuns {
 	 * 15B's other guns, from the owner's MAS 55, Prush Gun, Krauser and Soul Drummer.
 	 */
 	public static final Map<String, Float> PIERCING = Map.of("vesper_rifle", 4.5F, "onrush_smg", 3.0F, "kreuzer_pistol", 1.0F, "psalm_smg", 1.0F, "jawbreaker", 4.5F, "hawker_rifle", 1.0F, "quill_rifle", 1.5F);
+	/** The round that falls over its flight (the darts-and-bleeding follow-up; tools/guns.py AMMO "dart"). */
+	public static final String DART = "dart";
+	/** How far a dart flies a tick, in blocks (the owner's frog dart's speed; {@link GunShots#flight}). */
+	public static final double DART_SPEED = 5.0;
+	/** How much faster a dart falls each tick it flies, in blocks a tick, as an arrow falls. */
+	public static final double DART_DROP = 0.05;
+	/** Every how many ticks a creature bleeding loses {@link #BLEED_DAMAGE} (twice as often at each level above the first). */
+	public static final int BLEED_TICKS = 40;
+	/** What a creature bleeding loses each time, through its armour. */
+	public static final float BLEED_DAMAGE = 1.0F;
+
+	/** A gun's chance a hit to make a creature bleed, and for how many ticks ({@link #BLEEDS}). */
+	public record Bleed(float chance, int ticks) {
+	}
+
+	/**
+	 * The guns whose hits may make a creature bleed (the darts-and-bleeding follow-up; tools/guns.py BLEEDS), from the
+	 * owner's data (their "lacerated", its chance and duration): the M3 Marksman's for the Picket Rifle, the Railworker's
+	 * for the Spikedriver, the Scratches' for the Harrow and the Zilk 45's for the Quill Rifle.
+	 */
+	public static final Map<String, Bleed> BLEEDS = Map.of("picket_rifle", new Bleed(0.3F, 300), "spikedriver", new Bleed(0.6F, 300), "harrow", new Bleed(0.3F, 300), "quill_rifle", new Bleed(0.4F, 300));
 
 	/** The attachments, in the order the creative tab shows them (tools/guns.py ATTACHMENTS). */
 	public static final Map<String, GunAttachment> ATTACHMENTS = new LinkedHashMap<>();
@@ -551,13 +575,13 @@ public final class JugcraftGuns {
 	}
 
 	/** The rounds. */
-	public static final List<String> AMMO = List.of("light_round", "rifle_round", "buckshot_shell", "paper_cartridge");
+	public static final List<String> AMMO = List.of("light_round", "rifle_round", "buckshot_shell", "paper_cartridge", "dart");
 	/** The sound events the animations and the guns play (assets/jugcraft/sounds.json, written by tools/guns.py). */
 	public static final List<String> SOUND_EVENTS = List.of("bolt", "bolt_pull", "bolt_release", "clank", "dry_fire",
 			"gun_rustle", "insert", "jam", "lever", "metal", "pump", "pump_half", "rack", "reload_end", "reload_mag_in",
 			"reload_mag_out", "shell_in", "slap");
 	/** The rounds that leave a spent case, each with its particle jugcraft:&lt;round&gt;_casing (tools/guns.py CASINGS). */
-	public static final List<String> CASING_AMMO = List.of("light_round", "rifle_round", "buckshot_shell");
+	public static final List<String> CASING_AMMO = List.of("light_round", "rifle_round", "buckshot_shell", "dart");
 	/** Walking speed while aiming down the sights (vanilla's using an item is 0.2). */
 	public static final float AIM_SPEED = 0.6F;
 
@@ -579,6 +603,10 @@ public final class JugcraftGuns {
 	public static final ResourceKey<DamageType> FLAME_DAMAGE = ResourceKey.create(Registries.DAMAGE_TYPE, Jugcraft.id("flame"));
 	/** The energy weapons' beams and arcs (slice 8D): neither projectile nor fire, and they push nothing back. */
 	public static final ResourceKey<DamageType> ZAP_DAMAGE = ResourceKey.create(Registries.DAMAGE_TYPE, Jugcraft.id("zap"));
+	/** Bleeding's damage (the darts-and-bleeding follow-up): through armour, and every tick of it counts. */
+	public static final ResourceKey<DamageType> BLEED_TYPE = ResourceKey.create(Registries.DAMAGE_TYPE, Jugcraft.id("bleeding"));
+	/** Bleeding, the mob effect some guns' hits give ({@link #BLEEDS}, {@link BleedingEffect}). */
+	public static Holder<MobEffect> BLEEDING;
 	/** The energy weapons' ammunition (slice 8D): charge, filled at the Charging Station. */
 	public static Item ENERGY_CELL;
 	/** Rounds loaded in a gun. */
@@ -641,6 +669,7 @@ public final class JugcraftGuns {
 					FabricParticleTypes.simple()));
 		}
 		LASER_DOT = Registry.register(BuiltInRegistries.PARTICLE_TYPE, Jugcraft.id("laser_dot"), FabricParticleTypes.simple(true));
+		BLEEDING = Registry.registerForHolder(BuiltInRegistries.MOB_EFFECT, Jugcraft.id("bleeding"), new BleedingEffect());
 		SPECS.forEach((name, spec) -> GUNS.put(name, (GunItem) JugcraftRegistry.item(name, properties -> new GunItem(name, spec,
 				properties.stacksTo(1).rarity(Rarity.UNCOMMON).component(LOADED, 0)
 						.component(DataComponents.USE_EFFECTS, new UseEffects(false, true, AIM_SPEED))))));
@@ -749,6 +778,11 @@ public final class JugcraftGuns {
 	/** How many points of armour this gun's bullets pass through ({@link #PIERCING}); 0 for most. */
 	public static float piercing(GunItem gun) {
 		return PIERCING.getOrDefault(gun.name(), 0.0F);
+	}
+
+	/** This gun's chance a hit to make a creature bleed, and for how long ({@link #BLEEDS}); null for most. */
+	public static @Nullable Bleed bleed(GunItem gun) {
+		return BLEEDS.get(gun.name());
 	}
 
 	/** JE a round of this energy weapon draws from Energy Cells (slice 8D, {@link #CHARGE}); 0 for a gun that loads rounds. */

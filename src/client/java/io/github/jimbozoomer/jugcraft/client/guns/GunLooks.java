@@ -16,7 +16,8 @@ public final class GunLooks {
 	static final Map<String, Look> LOOKS = new HashMap<>();
 	/** How big a shot's muzzle flash is, across, in the gun model's pixels, by the round it fires (or grenade or fuel). */
 	static final Map<String, Float> FLASH_SIZES = Map.of("light_round", 5.0F, "rifle_round", 7.0F, "buckshot_shell", 8.0F,
-			"paper_cartridge", 10.0F, "grenade", 9.0F, "minecraft:blaze_powder", 8.0F, "energy_cell", 6.0F, "he_rocket", 10.0F);
+			"paper_cartridge", 10.0F, "grenade", 9.0F, "minecraft:blaze_powder", 8.0F, "energy_cell", 6.0F, "he_rocket", 10.0F,
+			"dart", 4.0F);
 	/**
 	 * The flash's tint, RGB, multiplied into the owner's white-gold frames, by the round, where it has one (tools/guns.py
 	 * FLASH_TINT): an energy weapon's discharge is cyan-white (slice 8D).

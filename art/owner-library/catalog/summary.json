@@ -1,8 +1,8 @@
 {
   "source": "Project owner uploads, 2026-10-06, 2026-10-07, 2026-10-08 and 2026-10-23",
-  "source_files": 26975,
-  "source_bytes": 60851919,
-  "unique_source_contents": 24843,
+  "source_files": 26976,
+  "source_bytes": 60852317,
+  "unique_source_contents": 24844,
   "uploads": [
     {
       "date": "2026-10-06",
@@ -39,6 +39,13 @@
       "path": "originals/Blocks/Guns/geo",
       "files": 10,
       "bytes": 582562
+    },
+    {
+      "date": "2026-10-23",
+      "description": "The Lacerated effect icon, from the owner's re-sent gun collection (taken in on 27 October 2026)",
+      "path": "originals/Blocks/Guns/mob_effect",
+      "files": 1,
+      "bytes": 398
     }
   ],
   "extensions": {
@@ -51,7 +58,7 @@
     ".mcmeta": 364,
     ".nbt": 7,
     ".ogg": 354,
-    ".png": 18508,
+    ".png": 18509,
     ".properties": 1,
     ".scmeta": 8,
     ".vsh": 3
@@ -71,7 +78,7 @@
     "reference sheet": 30,
     "sound": 354,
     "structure NBT": 7,
-    "texture": 18148,
+    "texture": 18149,
     "texture metadata": 364,
     "vertex shader": 3
   },
@@ -166,8 +173,8 @@
     },
     {
       "name": "Guns",
-      "files": 3818,
-      "bytes": 23238712,
+      "files": 3819,
+      "bytes": 23239110,
       "catalog": "guns/README.md",
       "source": "originals/Blocks/Guns",
       "pages": 16

@@ -201,7 +201,7 @@ public final class GunShots {
 		switch (JugcraftGuns.shot(gun)) {
 			case JugcraftGuns.GRENADE -> lob(level, player, stack, spec, spread);
 			case JugcraftGuns.FLAME -> burn(level, player, spec, spread);
-			case JugcraftGuns.BEAM -> beam(level, player, spec, spread, hand);
+			case JugcraftGuns.BEAM -> beam(level, player, spec, spread, hand, JugcraftGuns.bleed(gun));
 			case JugcraftGuns.ARC -> arc(level, player, spec, spread, hand);
 			case JugcraftGuns.ROCKET -> rocket(level, player, gun, spec, spread);
 			default -> shoot(level, player, gun, spec, spread);
@@ -522,8 +522,8 @@ public final class GunShots {
 	/** Fires every pellet of one shot and deals what hit. */
 	private static void shoot(ServerLevel level, ServerPlayer player, GunItem gun, GunSpec spec, float spread) {
 		bullets(level, player, player.getEyePosition(), player.getLookAngle(), spec, spread, spec.damage(), JugcraftGuns.ignites(gun),
-				JugcraftGuns.levitates(gun), JugcraftGuns.knockback(gun), JugcraftGuns.piercing(gun), candidate -> target(player, candidate),
-				candidate -> allowed(player, level, candidate));
+				JugcraftGuns.levitates(gun), JugcraftGuns.knockback(gun), JugcraftGuns.piercing(gun), JugcraftGuns.bleed(gun),
+				candidate -> target(player, candidate), candidate -> allowed(player, level, candidate));
 	}
 
 	/**
@@ -534,38 +534,49 @@ public final class GunShots {
 	 * When {@code ignites} (slice 11A, a Nether gun), each creature the hit hurts is set alight for {@link #BURN_SECONDS};
 	 * when {@code lifts} (slice 12A, an End gun), it floats for {@link #LIFT_TICKS}. Each creature the hit hurts is knocked
 	 * back again by {@code knockback} after a hit's own push, and the hit passes through {@code pierce} points of its armour
-	 * ({@link #pierced}; the Jawbreaker's, {@link JugcraftGuns#KNOCKBACK} and {@link JugcraftGuns#PIERCING}).
+	 * ({@link #pierced}; the Jawbreaker's, {@link JugcraftGuns#KNOCKBACK} and {@link JugcraftGuns#PIERCING}). With a
+	 * {@code bleed} (the darts-and-bleeding follow-up, {@link JugcraftGuns#BLEEDS}), each creature the hit hurts may bleed.
+	 * A gun that fires darts ({@link JugcraftGuns#DART}) fires them along a falling flight ({@link #flight}).
 	 */
 	static void bullets(ServerLevel level, LivingEntity shooter, Vec3 eye, Vec3 look, GunSpec spec, float spread, float damage,
-			boolean ignites, boolean lifts, float knockback, float pierce, Predicate<LivingEntity> hittable,
-			Predicate<LivingEntity> allowed) {
+			boolean ignites, boolean lifts, float knockback, float pierce, JugcraftGuns.@Nullable Bleed bleed,
+			Predicate<LivingEntity> hittable, Predicate<LivingEntity> allowed) {
 		RandomSource random = shooter.getRandom();
 		Map<LivingEntity, Float> hits = new LinkedHashMap<>();
+		boolean falls = JugcraftGuns.DART.equals(spec.ammo());
 		for (int i = 0; i < spec.pellets(); i++) {
-			Vec3 direction = stray(look, spread, random);
-			Vec3 end = eye.add(direction.scale(spec.range()));
-			BlockHitResult block = level.clip(new ClipContext(eye, end, ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, shooter));
-			if (block.getType() != HitResult.Type.MISS) {
-				end = block.getLocation();
-			}
-			LivingEntity target = null;
-			double nearest = Double.MAX_VALUE;
-			for (LivingEntity candidate : level.getEntitiesOfClass(LivingEntity.class, new AABB(eye, end).inflate(1.0), hittable)) {
-				var clip = candidate.getBoundingBox().inflate(HIT_MARGIN).clip(eye, end);
-				if (clip.isPresent() && clip.get().distanceToSqr(eye) < nearest) {
-					nearest = clip.get().distanceToSqr(eye);
-					target = candidate;
+			List<Vec3> path = flight(eye, stray(look, spread, random), spec.range(), falls);
+			// Each leg of the flight in turn, to the first block or creature: a bullet's one leg, a dart's one a tick.
+			for (int leg = 1; leg < path.size(); leg++) {
+				Vec3 from = path.get(leg - 1);
+				Vec3 end = path.get(leg);
+				BlockHitResult block = level.clip(new ClipContext(from, end, ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, shooter));
+				if (block.getType() != HitResult.Type.MISS) {
+					end = block.getLocation();
 				}
-			}
-			if (target != null && allowed.test(target)) {
-				hits.merge(target, damage, Float::sum);
-				Vec3 at = eye.add(direction.scale(Math.sqrt(nearest)));
-				level.sendParticles(ParticleTypes.CRIT, at.x, at.y, at.z, 2, 0.05, 0.05, 0.05, 0.1);
-			} else if (block.getType() != HitResult.Type.MISS) {
-				Vec3 at = block.getLocation();
-				level.sendParticles(new BlockParticleOption(ParticleTypes.BLOCK, level.getBlockState(block.getBlockPos())), at.x, at.y,
-						at.z, 4, 0.05, 0.05, 0.05, 0.1);
-				level.sendParticles(ParticleTypes.SMOKE, at.x, at.y, at.z, 1, 0.02, 0.02, 0.02, 0.01);
+				LivingEntity target = null;
+				Vec3 at = null;
+				double nearest = Double.MAX_VALUE;
+				for (LivingEntity candidate : level.getEntitiesOfClass(LivingEntity.class, new AABB(from, end).inflate(1.0), hittable)) {
+					var clip = candidate.getBoundingBox().inflate(HIT_MARGIN).clip(from, end);
+					if (clip.isPresent() && clip.get().distanceToSqr(from) < nearest) {
+						nearest = clip.get().distanceToSqr(from);
+						target = candidate;
+						at = clip.get();
+					}
+				}
+				if (target != null && allowed.test(target)) {
+					hits.merge(target, damage, Float::sum);
+					level.sendParticles(ParticleTypes.CRIT, at.x, at.y, at.z, 2, 0.05, 0.05, 0.05, 0.1);
+				} else if (block.getType() != HitResult.Type.MISS) {
+					Vec3 struck = block.getLocation();
+					level.sendParticles(new BlockParticleOption(ParticleTypes.BLOCK, level.getBlockState(block.getBlockPos())), struck.x,
+							struck.y, struck.z, 4, 0.05, 0.05, 0.05, 0.1);
+					level.sendParticles(ParticleTypes.SMOKE, struck.x, struck.y, struck.z, 1, 0.02, 0.02, 0.02, 0.01);
+				}
+				if (target != null || block.getType() != HitResult.Type.MISS) {
+					break;
+				}
 			}
 		}
 		DamageSource source = new DamageSource(level.registryAccess().lookupOrThrow(Registries.DAMAGE_TYPE)
@@ -583,9 +594,34 @@ public final class GunShots {
 				if (lifts) {
 					target.addEffect(new MobEffectInstance(MobEffects.LEVITATION, LIFT_TICKS, 0), shooter);
 				}
+				bleed(target, bleed, shooter, random);
 			}
 		});
 		smoke(level, eye, look);
+	}
+
+	/**
+	 * The points a pellet flies through, from {@code eye} along {@code direction}, until it has flown {@code range} blocks:
+	 * a bullet's straight line in one leg; a dart's ({@code falls}; the darts-and-bleeding follow-up) one leg a tick,
+	 * {@link JugcraftGuns#DART_SPEED} blocks at first and falling {@link JugcraftGuns#DART_DROP} blocks a tick faster
+	 * each tick, as an arrow falls. The whole flight is found at once, as every gun's shot is.
+	 */
+	public static List<Vec3> flight(Vec3 eye, Vec3 direction, double range, boolean falls) {
+		List<Vec3> path = new ArrayList<>(List.of(eye));
+		Vec3 step = direction.normalize().scale(falls ? JugcraftGuns.DART_SPEED : range);
+		for (double left = range; left > 1.0E-6; step = step.add(0.0, -JugcraftGuns.DART_DROP, 0.0)) {
+			double length = step.length();
+			path.add(path.getLast().add(step.scale(Math.min(1.0, left / length))));
+			left -= length;
+		}
+		return path;
+	}
+
+	/** Makes {@code target} bleed, at {@code bleed}'s chance, for its ticks (the darts-and-bleeding follow-up); none for null. */
+	private static void bleed(LivingEntity target, JugcraftGuns.@Nullable Bleed bleed, LivingEntity shooter, RandomSource random) {
+		if (bleed != null && random.nextFloat() < bleed.chance()) {
+			target.addEffect(new MobEffectInstance(JugcraftGuns.BLEEDING, bleed.ticks(), 0), shooter);
+		}
 	}
 
 	/**
@@ -692,7 +728,8 @@ public final class GunShots {
 	 * in its line that the shooter may strike takes the shot's damage ({@link JugcraftGuns#ZAP_DAMAGE}); it passes through
 	 * them all. No block is touched.
 	 */
-	private static void beam(ServerLevel level, ServerPlayer player, GunSpec spec, float spread, InteractionHand hand) {
+	private static void beam(ServerLevel level, ServerPlayer player, GunSpec spec, float spread, InteractionHand hand,
+			JugcraftGuns.@Nullable Bleed bleed) {
 		Vec3 eye = player.getEyePosition();
 		Vec3 direction = stray(player.getLookAngle(), spread, player.getRandom());
 		Vec3 end = eye.add(direction.scale(spec.range()));
@@ -703,8 +740,9 @@ public final class GunShots {
 		DamageSource source = zap(level, player);
 		for (LivingEntity foe : level.getEntitiesOfClass(LivingEntity.class, new AABB(eye, end).inflate(1.0),
 				candidate -> target(player, candidate))) {
-			if (foe.getBoundingBox().inflate(HIT_MARGIN).clip(eye, end).isPresent() && allowed(player, level, foe)) {
-				foe.hurtServer(level, source, spec.damage());
+			if (foe.getBoundingBox().inflate(HIT_MARGIN).clip(eye, end).isPresent() && allowed(player, level, foe)
+					&& foe.hurtServer(level, source, spec.damage())) {
+				bleed(foe, bleed, player, player.getRandom());
 			}
 		}
 		trace(player, GunTracePayload.BEAM, List.of(end), hand);
