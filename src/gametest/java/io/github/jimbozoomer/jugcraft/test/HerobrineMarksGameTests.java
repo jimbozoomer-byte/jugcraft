@@ -330,21 +330,22 @@ public class HerobrineMarksGameTests {
 				}
 			}
 		}
-		tree(helper, 12, 12, false);
-		BlockPos groveAt = feet(helper, 12, 15);
+		tree(helper, 18, 16, false);
+		// Keep the grove and its wilderness margin inside the arena; the outer floor is not wilderness.
+		BlockPos groveAt = feet(helper, 18, 19);
 		BlockPos tunnelAt = feet(helper, 24, 24);
-		helper.assertTrue(HerobrineMarkPlans.grove(level, groveAt, feet(helper, 12, 2), message(), level.getRandom()) == null,
+		helper.assertTrue(HerobrineMarkPlans.grove(level, groveAt, feet(helper, 18, 3), message(), level.getRandom()) == null,
 				"Without approval a grown tree is left alone");
 		helper.assertTrue(HerobrineMarkPlans.tunnel(level, tunnelAt, Direction.SOUTH, feet(helper, 24, 8), message()) == null,
 				"Without approval a stone wall is not dug, however natural it looks");
 		HerobrineMarks.Wild wild = HerobrineMarks.approve(level, feet(helper, 18, 22), 40, "test");
 		try {
-			helper.assertTrue(HerobrineMarkPlans.grove(level, groveAt, feet(helper, 12, 2), message(), level.getRandom()) != null,
+			helper.assertTrue(HerobrineMarkPlans.grove(level, groveAt, feet(helper, 18, 3), message(), level.getRandom()) != null,
 					"An operator's approval is what lets a grove through");
 		} finally {
 			HerobrineMarks.revoke(level, wild);
 		}
-		helper.assertTrue(HerobrineMarkPlans.grove(level, groveAt, feet(helper, 12, 2), message(), level.getRandom()) == null,
+		helper.assertTrue(HerobrineMarkPlans.grove(level, groveAt, feet(helper, 18, 3), message(), level.getRandom()) == null,
 				"Withdrawing the approval closes it again");
 		helper.succeed();
 	}
