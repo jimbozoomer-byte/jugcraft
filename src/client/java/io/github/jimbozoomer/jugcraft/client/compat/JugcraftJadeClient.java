@@ -64,6 +64,7 @@ public final class JugcraftJadeClient implements JugcraftJadePlugin.ClientRegist
 	@Override
 	public void register(IWailaClientRegistration registration) {
 		registration.registerBlockComponent(MachineTooltip.INSTANCE, MachineBlock.class);
+		registration.registerBlockComponent(StorageCrateTooltip.INSTANCE, io.github.jimbozoomer.jugcraft.storage.StorageCrateBlock.class);
 		registration.registerBlockComponent(ConcordanceTooltip.BENCH, LampwrightBenchBlock.class);
 		registration.registerBlockComponent(ConcordanceTooltip.SCONCE, LumenSconceBlock.class);
 		registration.registerBlockComponent(ConcordanceTooltip.ANCHOR, CircleAnchorBlock.class);
@@ -84,6 +85,17 @@ public final class JugcraftJadeClient implements JugcraftJadePlugin.ClientRegist
 		// Concordance Chunk D, D-06 (G11): the pact perch and the Spirit Anchor.
 		registration.registerBlockComponent(AgreementTooltip.PERCH, PactPerchBlock.class);
 		registration.registerBlockComponent(AgreementTooltip.ANCHOR, SpiritAnchorBlock.class);
+	}
+
+	/** Occupied slots only, supplied after the server checks crate access. */
+	private enum StorageCrateTooltip implements IBlockComponentProvider {
+		INSTANCE;
+		@Override public Identifier getUid() { return io.github.jimbozoomer.jugcraft.compat.jade.StorageCrateDataProvider.ID; }
+		@Override public void appendTooltip(ITooltip tooltip, BlockAccessor accessor, IPluginConfig config) {
+			var data = accessor.getServerData();
+			if (data.getIntOr("crate_capacity", 0) > 0) tooltip.add(Component.translatable("screen.jugcraft.storage_crate.used",
+				data.getIntOr("crate_used", 0), data.getIntOr("crate_capacity", 0)));
+		}
 	}
 
 	/** A growth word as the server noted it: a pace, dormant, or waiting for a reading. */

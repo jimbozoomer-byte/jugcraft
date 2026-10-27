@@ -165,6 +165,7 @@ public final class Authority {
 	 * nobody behind it at all (sourceless magic), protection has nobody to judge.
 	 */
 	public static boolean mayStrike(ServerLevel level, @Nullable Entity actor, @Nullable UUID behind, LivingEntity target) {
+        if(actor instanceof Player player && io.github.jimbozoomer.jugcraft.jimtafacts.spellbooks.JimtaPocketRooms.readOnlyGuest(player))return false;
 		if (target instanceof Player || target instanceof Enemy) {
 			return true;
 		}

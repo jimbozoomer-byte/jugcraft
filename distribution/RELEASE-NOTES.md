@@ -1,17 +1,17 @@
-JUGCRAFT workshops, spellbooks, aircraft, furniture and protected graves — release candidate.
+JUGCRAFT October 27 Herobrine update — release candidate.
 
-- Adds the current Jimtafacts implementations: accessories and wearable models; digital item/fluid storage and crafting; transport pipes, gates, robots and industrial equipment; native workshop computers and peripherals; spellbooks, magical equipment and encounters using the supplied art and animations.
-- Adds seven aircraft with flight, fuel, equipment, cargo and retained models; 267 furniture blocks, 18 associated items, 28 paintings and 317 furniture recipes.
-- Adds owner-recoverable graves. Personal/global keep-inventory and boss-lair recovery keep their existing behavior; recovery preserves item components, refuses other players and cannot duplicate previously recovered contents.
-- Includes the integrated crafting/economy, projectile targeting, visitor combat and pet/multipart claim-protection fixes from the predecessor PRs, plus the latest workshop and machine interfaces already on main.
-- Repairs recipe collisions with vanilla sticks and conduits, composes spell defenses with existing equipment, and gives digital machinery its intended item/fluid automation ports.
+- Adds classic Herobrine encounters: distant watchers, followers, second looks, tunnel eyes and rare close encounters. Only players who actually witness him receive sighting credit; groups can share an encounter.
+- Gives every eligible active player their own encounter schedule. Activity stays high through November 3 inclusive, then becomes rarer from November 4 at midnight America/New_York. Unsafe or blocked locations delay an encounter rather than count as a sighting.
+- Adds permanent wilderness clues, leafless groves, tunnels, signs, shrines, pyramids and shoreline pyramid trails. Town guards and Styx respond to encounters. The Cursed Mirror connection is an API seam for its separate feature, not a completed mirror release.
+- Adds nine underground layouts, four underwater glowstone patterns, six floating islands with haunted buildings, and three surface ruins. Underground discoveries vary by depth and happen more often across different cave levels.
+- Buildings and clues persist when approached and after the event ends. Only Herobrine vanishes. Claims and towns are protected; destructive excavation requires operator-approved wilderness. Explicit operator undo preserves player modifications and adopted containers.
 
-The full source collections are not completely ported. Larger spatial storage/entity migration, Lua/CraftOS, remaining factory mappings and some encounter presentation remain follow-up work. Nine preview items still have explicitly deferred survival acquisition. See docs/features/jimtafacts-remaining.md and the individual feature records for exact boundaries; do not advertise full source-mod compatibility.
+Local validation: 70 native Herobrine GameTests, 393 scheduler assertions, rendered galleries for all 22 new structural variants, and earlier automated two-client encounter checks passed. Exact-source GitHub Build/Foundation checks gate release assembly. Human atmosphere/traversal and public-server performance testing remain separate.
 
-Existing towns, inventories and worlds are preserved. Added natural structures require new chunks; this candidate does not reset the Nether or regenerate occupied terrain. Back up the world, player data and configs before upgrading; restoring that backup with the previous artifacts is the rollback for newly saved content.
+This update does not require world regeneration: encounters and event builders work in eligible loaded terrain. Back up world/player data/configs and existing managed mods before upgrading. Rollback restores the matching backup and previous release files.
 
-Existing players: accept the update in JUGCRAFT's title-menu updater, apply and quit, wait for completion, then relaunch the same Modrinth profile. Settings, keybinds, saves and extra mods stay in place. No new launcher profile or public Modrinth pack listing is required.
+Existing players: use JUGCRAFT Updates in the title menu after the owner promotes this release. Download, apply and quit, wait for completion, then relaunch the same Modrinth profile. Settings, keybinds, saves and extra mods stay in place. No new profile or public Modrinth listing is required.
 
-Local validation passed 268 Python tests, 389 combined server regressions, 79 updater assertions, the complete model/data audit and six rendered-client test classes. The corrected statue/equipped-model gallery, companion automation/population checks and three framework server tests also passed. The full GitHub Build/Foundation checks remain the release gates; no hosted two-account playtest is claimed. Publication alone does not activate the player channel: obtain owner restart confirmation, give players a full 30-second warning, back up and update the hosted server, verify startup/join, and only then promote the matching client update.
+Preparation does not restart the server or activate client prompts. Obtain owner restart confirmation, warn players and wait the full 30 seconds, install matching server files, verify startup/join, then promote the client channel.
 
-AI assistance: OpenAI Codex (user-selected Astra High).
+AI assistance: OpenAI Codex and Claude, coordinated by the repository owner.

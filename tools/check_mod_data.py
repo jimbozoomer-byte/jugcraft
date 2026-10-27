@@ -69,6 +69,9 @@ import trenchworks
 import zeppelin
 import mech
 import landship
+import unmasking
+import herobrine
+import trains
 import artillery
 import tower_guns
 import guns
@@ -219,8 +222,18 @@ def texture(ref):
         if animated and not (width in (16, 32, 48, 64) and height % width == 0 and height >= width):
             err(f"Animated texture {ref} is {img.size}, expected a strip of 16x16, 32x32, 48x48 or 64x64 frames")
         elif not animated and not (ref in {"jugcraft:nouveau/entity/signs/archwood", "jugcraft:nouveau/entity/signs/hanging/archwood"} and img.size == (64,32)) and img.size not in ((16, 16), (32, 32), (48, 48), (64, 64), (128, 128)) \
-                and not (img.size in ((256, 256), (512, 512), (1024, 1024)) and _sharp(png.stem)):
+                and not (img.size in ((256, 256), (512, 512), (1024, 1024)) and _sharp(png.stem)) \
+                and img.size != (_owner_sized_gun_atlases().get(ref),) * 2:
             err(f"Texture {ref} is {img.size}, expected 16x16, 32x32, 48x48, 64x64 or 128x128")
+
+
+@cache
+def _owner_sized_gun_atlases():
+    """Gun atlases as big as the owner's own texture for the gun, where the owner painted it larger than 128: slice 15C's
+    Impetus Shotgun keeps the owner's 256 px Inertial texture, whose pieces halving would run together
+    (tools/guns.py atlas_limit())."""
+    import guns
+    return {f"{MOD}:item/guns/{gun}": guns.atlas_limit(gun) for gun in guns.GUNS if guns.atlas_limit(gun) > 128}
 
 
 # The special item renderers registered by client/StructureItemRenderers.java.
@@ -282,12 +295,14 @@ def item_models(definition):
 def check_assets(registered):
     import vehicle_bays
     import starter_workshop
+    import storage_crates
+    crates = [metal + '_crate' for metal, _ in storage_crates.TIERS]
     lang = load(ASSETS / "lang" / "en_us.json") or {}
     for block in (all_blocks() + machine_blocks() + ag.all_blocks() + petro.petro_blocks() + deposits.all_blocks()
                   + list(tank_display.BLOCKS) + plastic.blocks() + ph.blocks() + (town_assets.blocks() + styx.blocks()) + seasons.BLOCKS
                   + construction.blocks() + control_electronics.blocks() + rocketry.blocks() + dieselworks.blocks() + kaiserworks.blocks() + trenchworks.blocks() + fortifications.blocks() + bunkerworks.blocks() + aged_wood.blocks() + fire_control.blocks()
-                  + concordance.blocks() + guns.blocks() + industrial_forms.blocks() + list(vehicle_bays.BLOCKS) + menagerie.blocks() + starter_workshop.STATIONS
-                  + sorted(jimtafacts_catalog.blocks() & jimtafacts_catalog.items())):
+                  + concordance.blocks() + guns.blocks() + industrial_forms.blocks() + list(vehicle_bays.BLOCKS) + menagerie.blocks() + starter_workshop.BLOCKS
+                  + crates + sorted(jimtafacts_catalog.blocks() & jimtafacts_catalog.items())):
         state = load(ASSETS / "blockstates" / f"{block}.json")
         if state:
             for variant in state.get("variants", {}).values():
@@ -312,8 +327,8 @@ def check_assets(registered):
         if item not in jimtafacts_catalog.blocks() and item not in (all_blocks() + machine_blocks() + ag.all_blocks() + petro.petro_blocks() + deposits.all_blocks()
                         + list(tank_display.BLOCKS) + plastic.blocks() + ph.blocks() + (town_assets.blocks() + styx.blocks())
                         + construction.blocks() + control_electronics.blocks() + rocketry.blocks() + dieselworks.blocks() + kaiserworks.blocks() + trenchworks.blocks() + fortifications.blocks() + bunkerworks.blocks() + aged_wood.blocks() + fire_control.blocks()
-                        + concordance.blocks() + guns.blocks() + industrial_forms.blocks() + list(vehicle_bays.BLOCKS) + menagerie.blocks() + starter_workshop.STATIONS
-                        + exchange_blocks.BLOCKS + exchange_poker.BLOCKS + exchange_casino.BLOCKS + exchange_casino.ITEMS) and f"item.{MOD}.{item}" not in lang:
+                        + concordance.blocks() + guns.blocks() + industrial_forms.blocks() + list(vehicle_bays.BLOCKS) + menagerie.blocks() + starter_workshop.BLOCKS
+                        + exchange_blocks.BLOCKS + exchange_poker.BLOCKS + exchange_casino.BLOCKS + exchange_casino.ITEMS + crates) and f"item.{MOD}.{item}" not in lang:
             err(f"Missing name for item {item}")
 
 
@@ -485,7 +500,7 @@ def item_units(ref):
     if path in NON_METAL:
         return {}
     if path in plastic.blocks() or path in exosuit.items() or path in grapple.items() or path in field_chemistry.items()\
-            or path in construction.items() or path in construction.blocks() or path in gas_storage.items() or path in control_electronics.blocks() or path in control_electronics.items() or path in rocketry.items() or path in rocketry.blocks() or path in dieselworks.blocks() or path in kaiserworks.blocks() or path in trenchworks.blocks() or path in fortifications.blocks() or path in bunkerworks.blocks() or path in aged_wood.blocks() or path in fire_control.blocks() or path in fire_control.items() or path in raiders.ITEMS or path in armoured_walker.ITEMS or path in howitzer_walker.ITEMS or path in zeppelin.ITEMS or path in mech.ITEMS or path in landship.ITEMS or path in artillery.ITEMS or path in tower_guns.items()\
+            or path in construction.items() or path in construction.blocks() or path in gas_storage.items() or path in control_electronics.blocks() or path in control_electronics.items() or path in rocketry.items() or path in rocketry.blocks() or path in dieselworks.blocks() or path in kaiserworks.blocks() or path in trenchworks.blocks() or path in fortifications.blocks() or path in bunkerworks.blocks() or path in aged_wood.blocks() or path in fire_control.blocks() or path in fire_control.items() or path in raiders.ITEMS or path in armoured_walker.ITEMS or path in howitzer_walker.ITEMS or path in zeppelin.ITEMS or path in mech.ITEMS or path in landship.ITEMS or path in unmasking.ITEMS or path in trains.ITEMS or path in artillery.ITEMS or path in tower_guns.items()\
             or path in guns.items() or path in guns.blocks() or path in concordance.items() or path in concordance.blocks() or path in industrial_forms.blocks()\
             or path in exchange_poker.BLOCKS or path in exchange_casino.BLOCKS or path in exchange_casino.ITEMS:
         return {}
@@ -759,6 +774,7 @@ DIAGONAL_WALLS = {dg.DIAGONAL_WALL.format(name) for _, name in dg.all_walls()}
 def check_tags():
     import vehicle_bays
     import starter_workshop
+    import storage_crates
     # Shared generation must retain both kitchen tools and combat equipment.
     from kitchen import KNIVES
     for tag in ("enchantable/melee_weapon", "enchantable/durability"):
@@ -775,18 +791,20 @@ def check_tags():
                                                     + list(tank_display.BLOCKS) + seasons.BLOCKS + ph.blocks() + ph.items()
                                                     + arms.items() + arms_variants.items()
                                                     + gear.items() + plastic.blocks() + exosuit.items() + grapple.items()
-                                                    + field_chemistry.items() + construction.items() + construction.blocks() + gas_storage.items() + control_electronics.blocks() + control_electronics.items() + rocketry.items() + rocketry.blocks() + dieselworks.blocks() + kaiserworks.blocks() + trenchworks.blocks() + fortifications.blocks() + bunkerworks.blocks() + aged_wood.blocks() + fire_control.blocks() + fire_control.items() + list(raiders.ITEMS) + list(raiders.BLOCKS) + list(armoured_walker.ITEMS) + list(howitzer_walker.ITEMS) + list(zeppelin.ITEMS) + list(mech.ITEMS) + list(landship.ITEMS) + list(artillery.ITEMS) + tower_guns.items()
+                                                    + field_chemistry.items() + construction.items() + construction.blocks() + gas_storage.items() + control_electronics.blocks() + control_electronics.items() + rocketry.items() + rocketry.blocks() + dieselworks.blocks() + kaiserworks.blocks() + trenchworks.blocks() + fortifications.blocks() + bunkerworks.blocks() + aged_wood.blocks() + fire_control.blocks() + fire_control.items() + list(raiders.ITEMS) + list(raiders.BLOCKS) + list(armoured_walker.ITEMS) + list(howitzer_walker.ITEMS) + list(zeppelin.ITEMS) + list(mech.ITEMS) + list(landship.ITEMS) + list(unmasking.ITEMS) + list(trains.ITEMS) + list(artillery.ITEMS) + tower_guns.items()
                                                     + ag.all_blocks() + ag.all_items() + (town_assets.blocks() + styx.blocks())
                                                     + guns.items() + guns.blocks() + concordance.items() + concordance.blocks() + concordance.itemless_blocks())
         import nouveau_content
         known = set(known)
-        if registry == 'block': known.update(starter_workshop.STATIONS)
+        if registry == 'block': known.update(starter_workshop.BLOCKS)
         if registry == 'item': known.update(starter_workshop.NAMES)
         if registry == 'item': known.update(jimtafacts.items())
         if registry == 'item': known.update(jimtafacts_network.ids()); known.update(jimtafacts_spellbooks.items()); known.update(jimtafacts_industry.items())
         if registry == 'block': known.update('jimta_' + n for n in jimtafacts_network.BLOCKS); known.update(jimtafacts_spellbooks.blocks()); known.update(jimtafacts_industry.blocks())
         if registry == 'entity_type': known.update({'jimta_mimic', 'jimta_tiny_tnt'})
-        if registry == 'entity_type': known.add('jimta_workshop_robot')
+        if registry == 'entity_type': known.update({'jimta_workshop_robot','jimta_dynamite'})
+        if registry == 'block': known.update({'jimta_dynamite_charge','jimta_nuclear_charge'})
+        if registry == 'item': known.add('jimta_nuclear_charge')
         if registry == 'entity_type': known.update('jimta_'+kind+'_boat' for kind in ('rubber','carbon','electric'))
         if registry == 'item': known.update(jimtafacts_robots.items())
         if registry == 'item': known.update(jimtafacts_gear.items()); known.update(jimtafacts_crops.items()); known.update(jimtafacts_production.items())
@@ -827,6 +845,8 @@ def check_tags():
         if registry == 'entity_type': known.update(jimtafacts_spellbooks.entities())
         if registry == 'item': known.update(jimtafacts_computers.items()); known.update(jimtafacts_computers.blocks())
         if registry == 'block': known.update(jimtafacts_computers.blocks())
+        if registry in {'item', 'block'}: known.update(metal + '_crate' for metal, _ in storage_crates.TIERS)
+        if registry == 'item': known.update(metal + '_storage_crate_upgrade' for metal, _ in storage_crates.TIERS[1:])
         if registry in {'item', 'block'}: known.update(vehicle_bays.BLOCKS)
         if registry in {'item','block'}:known.update(menagerie.entries())
         if registry == 'entity_type':known.update(menagerie.entities())
@@ -843,10 +863,9 @@ def check_tags():
             # These entity IDs have no same-named item. Derive them from actual registrations.
             scary = (JAVA_ROOT / "creatures" / "scary" / "ScaryMod.java").read_text(encoding="utf-8")
             known |= set(re.findall(r'Registry\.register\(BuiltInRegistries\.ENTITY_TYPE,\s*id\("([a-z_]+)"\)', scary))
-            # The lair keepers and their summons (lair/<keeper>/Jugcraft<Keeper>.java entity(...)): Concordance Chunk B
-            # puts the Yeti King and the Cinder Tyrant in #jugcraft:concordance/resistant (B-P8).
-            for keeper in sorted((JAVA_ROOT / "lair").glob("*/Jugcraft*.java")):
-                known |= set(re.findall(r'\bentity\("([a-z_]+)",\s*EntityType\.Builder', keeper.read_text(encoding="utf-8")))
+            # The lairs' bosses and creatures, and the agriculture branch's (the Headless Horseman): their registrations name them.
+            for java in [*(JAVA_ROOT / "lair").rglob("*.java"), JAVA_ROOT / "agriculture" / "JugcraftAgriculture.java"]:
+                known |= set(re.findall(r'entity\("([a-z_]+)",\s*EntityType\.Builder', java.read_text(encoding="utf-8")))
         # A worldgen tag's registry is two folders deep (worldgen/biome): a tag it names lives beside it there.
         tag_registry = "/".join(path.relative_to(DATA).parts[2:4]) if registry == "worldgen" else registry
         for value in (load(path) or {}).get("values", []):
@@ -1554,6 +1573,99 @@ def check_landship():
         err("assets/jugcraft/landship_quads.json is missing: run tools/generate_material_data.py")
 
 
+
+def check_unmasking():
+    """creatures/scary/Unmasking and UnmaskedCrook against tools/unmasking.py: the crooks per villain, how long one stands
+    caught, each villain's mask and the advancement; and every crook has a name and an excuse."""
+    folder = JAVA_ROOT / "creatures" / "scary"
+    java = (folder / "Unmasking.java").read_text(encoding="utf-8") if (folder / "Unmasking.java").is_file() else ""
+    crook = (folder / "UnmaskedCrook.java").read_text(encoding="utf-8") if (folder / "UnmaskedCrook.java").is_file() else ""
+    if f" CROOKS = {unmasking.CROOKS};" not in java:
+        err(f"Unmasking.CROOKS differs from tools/unmasking.py ({unmasking.CROOKS})")
+    if f' ADVANCEMENT = "{unmasking.ADVANCEMENT}";' not in java:
+        err(f"Unmasking.ADVANCEMENT differs from tools/unmasking.py ({unmasking.ADVANCEMENT})")
+    if f" CAUGHT_TICKS = {unmasking.CAUGHT_TICKS};" not in crook:
+        err(f"UnmaskedCrook.CAUGHT_TICKS differs from tools/unmasking.py ({unmasking.CAUGHT_TICKS})")
+    for villain, ((mask, _), crooks) in unmasking.VILLAINS.items():
+        if f'"{villain}", "{mask}");' not in java:
+            err(f"Unmasking does not give {villain} the mask {mask} (tools/unmasking.py)")
+        if len(crooks) != unmasking.CROOKS or not all(name and excuse for name, excuse in crooks):
+            err(f"tools/unmasking.py: {villain} needs {unmasking.CROOKS} crooks, each with a name and an excuse")
+def check_herobrine():
+    """creatures/herobrine against tools/herobrine.py: his timings and distances, the server option, his name, and his
+    eyes texture (clear but for the four eye pixels). His body is the game's own default player texture, read at run
+    time: the renderer must name DefaultPlayerSkin, and no copied skin may ship."""
+    folder = JAVA_ROOT / "creatures" / "herobrine"
+    def read(path):
+        return path.read_text(encoding="utf-8") if path.is_file() else ""
+    entity = read(folder / "Herobrine.java")
+    encounters = read(folder / "HerobrineEncounters.java")
+    for const in ("VANISH_DISTANCE", "STARE_TICKS", "DISTANT_TICKS", "CLOSE_TICKS", "CLOSE_STARE_TICKS", "SEEN_TICKS"):
+        if f" {const} = {getattr(herobrine, const)};" not in entity:
+            err(f"Herobrine.{const} differs from tools/herobrine.py ({getattr(herobrine, const)})")
+    for const in ("GRACE_TICKS", "IDLE_TICKS", "CLOSE_DARKNESS_TICKS"):
+        if f" {const} = {getattr(herobrine, const)};" not in encounters:
+            err(f"HerobrineEncounters.{const} differs from tools/herobrine.py ({getattr(herobrine, const)})")
+    if f' ID = "{herobrine.ENTITY}";' not in encounters:
+        err(f"HerobrineEncounters.ID differs from tools/herobrine.py ({herobrine.ENTITY})")
+    config = (JAVA_ROOT / "config" / "JugcraftConfig.java").read_text(encoding="utf-8")
+    for key, default in herobrine.OPTIONS.items():
+        if f'Map.entry("{key}", "{default}")' not in config:
+            err(f"JugcraftConfig.TEXT_OPTIONS lacks {key} (default {default})")
+    renderer = read(CLIENT_JAVA_ROOT / "HerobrineRenderer.java")
+    if "DefaultPlayerSkin.getDefaultTexture()" not in renderer or f'"textures/entity/{herobrine.ENTITY}_eyes.png"' not in renderer:
+        err("HerobrineRenderer must draw the game's default player texture with textures/entity/herobrine_eyes.png over it")
+    if (ASSETS / "textures" / "entity" / f"{herobrine.ENTITY}.png").is_file():
+        err(f"textures/entity/{herobrine.ENTITY}.png must not exist: Herobrine's body is the game's own player texture")
+    eyes = ASSETS / "textures" / "entity" / f"{herobrine.ENTITY}_eyes.png"
+    if not eyes.is_file():
+        err(f"textures/entity/{herobrine.ENTITY}_eyes.png is missing: run tools/generate_textures.py")
+    else:
+        img = Image.open(eyes).convert("RGBA")
+        lit = {(x, y) for y in range(img.height) for x in range(img.width) if img.getpixel((x, y))[3]}
+        if img.size != (64, 64) or lit != set(herobrine.EYES):
+            err(f"textures/entity/{herobrine.ENTITY}_eyes.png should be 64x64 and clear but for {herobrine.EYES}")
+    lang = load(ASSETS / "lang" / "en_us.json") or {}
+    if lang.get(f"entity.{MOD}.{herobrine.ENTITY}") != herobrine.NAME:
+        err(f"entity.{MOD}.{herobrine.ENTITY} is not named {herobrine.NAME}: run tools/generate_material_data.py")
+def check_trains():
+    """train/ against tools/trains.py: each vehicle's length, size and seats, the driving, fuel and coupling numbers, the
+    seat heights and exhaust, and the renderer's wheels and axles."""
+    folder = JAVA_ROOT / "train"
+    for cls, numbers in (("Locomotive", trains.LOCOMOTIVE), ("PassengerCar", trains.PASSENGER_CAR),
+                         ("CargoWagon", trains.CARGO_WAGON)):
+        java = (folder / f"{cls}.java").read_text(encoding="utf-8") if (folder / f"{cls}.java").is_file() else ""
+        for const, value in numbers.items():
+            literal = f"{value}F" if const in ("WIDTH", "HEIGHT") else str(value)
+            if f" {const} = {literal};" not in java:
+                err(f"{cls}.{const} differs from tools/trains.py ({literal})")
+        if cls != "CargoWagon" and f"new Vec3(0.3, {trains.SEAT_Y}, " not in java:
+            err(f"{cls}'s seats are not at tools/trains.py SEAT_Y ({trains.SEAT_Y})")
+    loco = (folder / "Locomotive.java").read_text(encoding="utf-8") if (folder / "Locomotive.java").is_file() else ""
+    for const in ("NOTCHES", "REVERSE_NOTCHES", "NOTCH_SPEED", "ACCELERATION", "BRAKING", "COASTING", "FUEL_TANK",
+                  "FUEL_PER_BUCKET", "FUEL_PER_NOTCH_SECOND", "MAX_CARS", "COUPLE_REACH"):
+        if f" {const} = {getattr(trains, const)};" not in loco:
+            err(f"Locomotive.{const} differs from tools/trains.py ({getattr(trains, const)})")
+    if f" HEALTH = {trains.LOCOMOTIVE_HEALTH}F;" not in loco:
+        err(f"Locomotive.HEALTH differs from tools/trains.py LOCOMOTIVE_HEALTH ({trains.LOCOMOTIVE_HEALTH})")
+    if "STACK = new Vec3(" + ", ".join(str(v) for v in trains.STACK) + ");" not in loco:
+        err(f"Locomotive.STACK differs from tools/trains.py ({trains.STACK})")
+    car = (folder / "TrainCar.java").read_text(encoding="utf-8") if (folder / "TrainCar.java").is_file() else ""
+    for const in ("BOGIE_INSET", "COUPLING_GAP"):
+        if f" {const} = {getattr(trains, const)};" not in car:
+            err(f"TrainCar.{const} differs from tools/trains.py ({getattr(trains, const)})")
+    renderer = _renderer("TrainRenderer")
+    for const in ("WHEEL_RADIUS", "WHEEL_X"):
+        if f" {const} = {float(getattr(trains, const))}F;" not in renderer:
+            err(f"TrainRenderer.{const} differs from tools/trains.py ({getattr(trains, const)})")
+    client = _renderer("JugcraftClient")
+    for name, axles in trains.AXLES.items():
+        if f'"train_{name}", ' not in client or ", ".join(f"{float(z)}F" for z in axles) + "));" not in client:
+            err(f"JugcraftClient's TrainRenderer for {name} lacks tools/trains.py AXLES {axles}")
+    if not (ASSETS / "train_quads.json").is_file():
+        err("assets/jugcraft/train_quads.json is missing: run tools/generate_material_data.py")
+
+
 def check_dieselworks():
     """building/Dieselworks.java against tools/dieselworks.py: every block, its kind and its strength."""
     java = (JAVA_ROOT / "building" / "Dieselworks.java").read_text(encoding="utf-8")
@@ -1771,6 +1883,22 @@ def check_guns():
             err(f"tools/guns.py LEVITATING names {gun}, which is not a gun that fires bullets")
     if f"LIFT_TICKS = {guns.LIFT_TICKS};" not in shots_java:
         err(f"GunShots.LIFT_TICKS differs from tools/guns.py: expected {guns.LIFT_TICKS}")
+    # Guns silenced by their build: no muzzle flash, and no barrel attachment (a silencer) on them.
+    silenced = ", ".join(f'"{gun}"' for gun in guns.SILENCED)
+    if f"SILENCED = Set.of({silenced});" not in java:
+        err(f"JugcraftGuns.SILENCED differs from tools/guns.py: expected Set.of({silenced})")
+    for gun in guns.SILENCED:
+        if gun not in guns.GUNS or any(guns.ATTACHMENTS[kind]["slot"] == "barrel" for kind in guns.fits(gun)):
+            err(f"tools/guns.py SILENCED names {gun}, which is not a gun, or takes a barrel attachment")
+    # Heavy bullets: how much further they knock back, and how many points of armour they pass through.
+    for name, table in (("KNOCKBACK", guns.KNOCKBACK), ("PIERCING", guns.PIERCING)):
+        entries = ", ".join(f'"{gun}", {value}F' for gun, value in table.items())
+        if f"{name} = Map.of({entries});" not in java:
+            err(f"JugcraftGuns.{name} differs from tools/guns.py: expected Map.of({entries})")
+        for gun, value in table.items():
+            if gun not in guns.GUNS or guns.GUNS[gun].get("shot", "bullet") != "bullet" or not 0 < value <= 8:
+                err(f"tools/guns.py {name} names {gun}, which is not a gun that fires bullets, or gives it {value} "
+                    "(more than 0, at most 8)")
     # Slice 8D: the energy weapons' charge a round, the arcs' leaps and the Energy Cell's capacity.
     charges = ", ".join(f'"{gun}", {spec["charge"]}' for gun, spec in guns.GUNS.items() if spec.get("charge"))
     if f"CHARGE = Map.of({charges});" not in java:
@@ -1891,6 +2019,14 @@ def check_guns():
         err(f"GunRenderer.PROPS does not list every prop bone of tools/guns.py PROPS: {sorted(own_bones)}")
     if f'EJECT_CUE = "{guns.EJECT_CUE}";' not in animations:
         err(f"GunAnimations.EJECT_CUE differs from tools/guns.py ({guns.EJECT_CUE})")
+    # Slice 14D: the guns without an aim_shoot play their shoot aimed.
+    aimed = ", ".join(f'"{gun}"' for gun in guns.shoot_aimed())
+    if f"SHOOT_AIMED = Set.of({aimed});" not in animations:
+        err(f"GunAnimations.SHOOT_AIMED differs from tools/guns.py shoot_aimed(): expected Set.of({aimed})")
+    # Slice 15C: the inspect key does nothing with a gun the owner made no inspect for.
+    bare = ", ".join(f'"{gun}"' for gun in guns.no_inspect())
+    if f"NO_INSPECT = Set.of({bare});" not in animations:
+        err(f"GunAnimations.NO_INSPECT differs from tools/guns.py no_inspect(): expected Set.of({bare})")
     client_mixins = load(ROOT / "src" / "client" / "resources" / f"{MOD}.client.mixins.json") or {}
     if "GunFovMixin" not in client_mixins.get("client", []):
         err(f"{MOD}.client.mixins.json does not list GunFovMixin (no zoom aimed down the sights)")
@@ -2869,6 +3005,91 @@ def check_seasons():
                    "harvest_feast", "harvest_feast.days", "december"):
         if f'"{option}"' not in options:
             err(f"JugcraftConfig.TEXT_OPTIONS has no {option}")
+    check_seasonal_biomes()
+    check_landscape_patches()
+
+
+def check_landscape_patches():
+    """The fall's wild patches, the graveyard flowers and the Hag Stone reach the landscape biomes through their kinds
+    (docs/features/seasonal-biome-audit.md, tools/landscape_kinds.py BESIDE and FALL_PATCHES): the Java reads the same
+    kind beside each conventional tag, every fall patch and only they go through it, every graveyard flower's patch has a
+    landscape kind, and the Hag Stone's lands hold the landscape swamps."""
+    import landscape_kinds as lk
+    import lairs as la
+    agriculture = (JAVA_ROOT / "agriculture" / "JugcraftAgriculture.java").read_text(encoding="utf-8")
+    pairs = dict(re.findall(r'ConventionalBiomeTags\.(IS_[A-Z_]+), landscapeKind\("([a-z_]+)"\)', agriculture))
+    if {field: f"#{MOD}:landscape_kind/{kind}" for field, kind in pairs.items()} != lk.BESIDE:
+        err(f"JugcraftAgriculture.LANDSCAPE_KINDS {pairs} is not tools/landscape_kinds.py BESIDE")
+    for tag in set(lk.BESIDE.values()):
+        if tag.removeprefix("#") not in lk.KIND_TAGS:
+            err(f"tools/landscape_kinds.py BESIDE names {tag}, which is no landscape kind tag")
+    for name in lk.FALL_PATCHES:
+        if f'fallPatch("{name}",' not in agriculture:
+            err(f"JugcraftAgriculture must place the {name} patch with fallPatch, so the landscape biomes of its kinds get it")
+    if len(re.findall(r'fallPatch\("', agriculture)) != len(lk.FALL_PATCHES):
+        err("JugcraftAgriculture's fallPatch calls are not tools/landscape_kinds.py FALL_PATCHES")
+    for method, parts in (("fallPatch(String name, TagKey<Biome>... biomes)", ("withLandscape(biomes[0])", "selector.or(withLandscape(biomes[i]))",
+                                                                              "placePatch(name, selector)")),
+                          ("withLandscape(TagKey<Biome> conventional)", ("LANDSCAPE_KINDS.get(conventional)",
+                                                                         "BiomeSelectors.tag(conventional).or(BiomeSelectors.tag(kind))"))):
+        body = re.search(r"private static \S+(?:<[^>]*>)? " + re.escape(method) + r" \{(.*?)\n\t\}", agriculture, re.S)
+        if not body or any(part not in body.group(1) for part in parts):
+            err(f"JugcraftAgriculture.{method.split('(')[0]} must read each conventional tag and its landscape kind together")
+    if "selector = selector.or(withLandscape(biomes));" not in agriculture:
+        err("JugcraftAgriculture: the graveyard flowers' patches must reach the landscape biomes of their kinds (withLandscape)")
+    for name, info in plants.PLANTS.items():
+        for field in info.get("patch", {}).get("biomes", []):
+            if field not in lk.BESIDE:
+                err(f"tools/plants.py {name} patches into c:{field.lower()}, which has no landscape kind (tools/landscape_kinds.py BESIDE)")
+    if lk.SWAMPS_TAG not in la.STONE_LANDS:
+        err(f"tools/lairs.py STONE_LANDS must hold the landscape swamps ({lk.SWAMPS_TAG})")
+
+
+def check_seasonal_biomes():
+    """The seasonal biome audit (docs/features/seasonal-biome-audit.md): every Jugcraft biome is decided (tools/biomes.py's
+    "seasons" flag, its landscape kind or seasons.OTHER), the landscape decisions follow their rule against each biome's
+    own climate, every seasonal Jugcraft biome rains and is neither frozen nor tropical, winter snow falls only where it
+    rains, and the landscape kind tags and the wisps' haunts are written as tools/ says."""
+    import landscape_kinds as lk
+    root = DATA / MOD / "worldgen" / "biome"
+    files = {path.relative_to(root).with_suffix("").as_posix(): load(path) or {} for path in sorted(root.rglob("*.json"))}
+    for biome in files:
+        if biome not in bm.BIOMES and biome not in lk.KINDS and biome not in seasons.OTHER:
+            err(f"Biome {MOD}:{biome} has no seasons decision: give it a \"seasons\" flag (tools/biomes.py), a landscape "
+                "kind (tools/landscape_kinds.py) or an entry in seasons.OTHER")
+    for biome in list(lk.KINDS) + list(seasons.OTHER):
+        if biome not in files:
+            err(f"tools/ decides seasons for {MOD}:{biome}, which has no biome file")
+    climate = {biome: (data.get("temperature", 0.5), bool(data.get("has_precipitation"))) for biome, data in files.items()}
+    for name, rule, listed in (("SEASONS", lk.seasonal, lk.SEASONS), ("SNOWY", lk.snowy, lk.SNOWY)):
+        expected = sorted(b for b, kind in lk.KINDS.items() if b in climate and rule(kind, *climate[b]))
+        if expected != sorted(listed):
+            err(f"landscape_kinds.{name} differs from its rule: add {sorted(set(expected) - set(listed))}, "
+                f"drop {sorted(set(listed) - set(expected))}")
+    if not set(lk.MILD) <= set(lk.SEASONS):
+        err(f"landscape_kinds.MILD names biomes without seasons: {sorted(set(lk.MILD) - set(lk.SEASONS))}")
+    low, high = lk.SEASON_TEMPERATURE
+    for biome in seasons.BIOMES:
+        ns, path = split(biome)
+        if ns == MOD and path in climate:
+            temperature, rains = climate[path]
+            if not rains or not low <= temperature <= high:
+                err(f"{biome} has seasons but its climate is {temperature}, rain {rains} (seasons need rain and {low} to {high})")
+    for biome in seasons.WINTER_SNOW:
+        ns, path = split(biome)
+        if ns == MOD and path in climate and not climate[path][1]:
+            err(f"{biome} gets winter snow but has no precipitation")
+    for tag_id, biomes in lk.KIND_TAGS.items():
+        ns, path = split(tag_id)
+        values = (load(DATA / ns / "tags" / "worldgen" / "biome" / f"{path}.json") or {}).get("values")
+        if values != [f"{MOD}:{biome}" for biome in biomes]:
+            err(f"#{tag_id} differs from tools/landscape_kinds.py")
+    wisps = ag.WISPS
+    ns, path = split(wisps["haunts_tag"])
+    if (load(DATA / ns / "tags" / "worldgen" / "biome" / f"{path}.json") or {}).get("values") != wisps["haunts"]:
+        err(f"#{wisps['haunts_tag']} differs from tools/agriculture.py WISPS['haunts']")
+    if f'Jugcraft.id("{path}")' not in (JAVA_ROOT / "agriculture" / "Wisps.java").read_text(encoding="utf-8"):
+        err(f"Wisps does not read #{wisps['haunts_tag']}")
 
 
 def check_region_rules():
@@ -3026,8 +3247,8 @@ def check_wood_switches():
                       r"(.*?)\n\t\}\n", agriculture, re.S)
     if not gated:
         err("JugcraftAgriculture.registerWorldgen() not found, or not gated by the agriculture switch first")
-    inside = set(re.findall(r'wildPatch\("([a-z_]+)"', gated.group(1))) if gated else set()
-    for name in re.findall(r'wildPatch\("([a-z_]+)"', agriculture):
+    inside = set(re.findall(r'(?:wildPatch|fallPatch)\("([a-z_]+)"', gated.group(1))) if gated else set()
+    for name in re.findall(r'(?:wildPatch|fallPatch)\("([a-z_]+)"', agriculture):
         patch = load(DATA / MOD / "worldgen" / "placed_feature" / f"patch_{name}.json")
         if patch is not None:
             placed_by(patch["feature"], ag.FEATURE if name in inside else f"(patch_{name}, outside registerWorldgen)")
@@ -4281,7 +4502,7 @@ def check_agriculture():
         if not feature.is_file() or not patch.is_file():
             err(f"{wild}: registered wild crop must retain its generated feature and placed patch")
     patches = {name: re.findall(r"ConventionalBiomeTags\.(\w+)", biomes)
-               for name, biomes in re.findall(r'wildPatch\("([a-z_]+)", ([^;]*)\);', main)}
+               for name, biomes in re.findall(r'(?:wildPatch|fallPatch)\("([a-z_]+)", ([^;]*)\);', main)}
     expected = {name: info["biomes"] for name, info in ag.WILD_CROPS.items()}
     expected.update({name: info["biomes"] for name, info in ag.FOUND_WILD.items()})
     expected["chestnut_tree"] = ag.CHESTNUT_TREES["biomes"]
@@ -9301,10 +9522,12 @@ def check_lairs():
     Moonlit Ring's bells are the tables', every server option has its default, every message the Java sends has its
     words, and the Glacier Hall, the Cinder Kiln, the Lantern Fen, the Archive of Last Names, the Foundry Trench and the
     Moonlit Ring are laid out as their records say (check_glacier_hall, check_cinder_kiln, check_lantern_fen,
-    check_crypt_archive, check_foundry_trench, check_moonlit_ring)."""
+    check_crypt_archive, check_foundry_trench, check_moonlit_ring, check_crowfield)."""
     import cinder_kiln as ck
+    import crowfield as cf
     import crypt_archive as ca
     import foundry_trench as ft
+    import crown_of_thunder as ct
     import cydonian_sanctum as cs
     import glacier_hall as gh
     import hollow_acre as ha
@@ -9321,7 +9544,9 @@ def check_lairs():
                                        ("cinder_kiln", ck, ck.CENTRE, None), ("lantern_fen", lf, lf.CENTRE, None),
                                        ("crypt_archive", ca, ca.CENTRE, None), ("foundry_trench", ft, ft.CENTRE, None),
                                        ("moonlit_ring", mr, mr.CENTRE, (mr.MOON, mr.MOON_RADIUS)),
-                                       ("cydonian_sanctum", cs, cs.CENTRE, None)):
+                                       ("cydonian_sanctum", cs, cs.CENTRE, None),
+                                       ("crowfield", cf, cf.CENTRE, (cf.MOON, cf.MOON_RADIUS)),
+                                       ("crown_of_thunder", ct, ct.CENTRE, None)):
         ax, ay, az, yaw = layout.ARRIVAL
         sky = "null, 0" if moon is None else "new BlockPos({}, {}, {}), {}".format(*moon[0], moon[1])
         expected = (f'{name.upper()}("{name}", {layout.SIZE[0]}, {layout.SIZE[1]}, {layout.SIZE[2]}, new Vec3({float(ax)}, '
@@ -9355,7 +9580,7 @@ def check_lairs():
         if f'fixture("{block}",' not in registry:
             err(f"JugcraftLairs does not register the lair block {block}")
     for name in ("mourning_wreath", "death_knell", "cursed_spindle", "frost_horn", "kiln_seal", "hag_stone", "exhumation_writ",
-                 "sealed_orders", "howling_totem", "altar_keystone", la.GATE["entity"]):
+                 "sealed_orders", "howling_totem", "altar_keystone", "harvest_crown", "thunder_vane", la.GATE["entity"]):
         if f'Jugcraft.id("{name}")' not in registry:
             err(f"JugcraftLairs does not register {name}")
     if f"float GLARE_FRICTION = {la.GLARE_FRICTION}F;" not in registry:
@@ -9510,6 +9735,44 @@ def check_lairs():
     gate = re.sub(r"\s+", " ", (folder / "MistGateEntity.java").read_text(encoding="utf-8"))
     if "open.lair == Lair.MOONLIT_RING) { HowlingTotemRite.follow(server, open);" not in gate:
         err("MistGateEntity does not take followers into the Moonlit Ring by the totem's way (HowlingTotemRite.follow)")
+    # The Crowfield's: the crown's rest, reach and harvest, the harvest it counts, the gourds' stages and light, the
+    # fixtures' registrations, the hills' names, and the gate's follow into the field.
+    crown = (folder / "HarvestCrownRite.java").read_text(encoding="utf-8")
+    for name, key in (("COOLDOWN", "cooldown"), ("MIST_RANGE", "mist_range"), ("HARVEST_REACH", "harvest_reach"),
+                      ("HARVEST_RISE", "harvest_rise"), ("HARVEST_MIN", "harvest_min")):
+        if not java_number(crown, name, la.CROWN[key]):
+            err(f"HarvestCrownRite.{name} is not tools/lairs.py CROWN {key} ({la.CROWN[key]})")
+    if 'Jugcraft.id("crowfield_harvest")' not in crown:
+        err("HarvestCrownRite does not count #jugcraft:crowfield_harvest")
+    harvest = (load(DATA / MOD / "tags" / "block" / "crowfield_harvest.json") or {}).get("values", [])
+    if harvest != la.CROWFIELD_HARVEST:
+        err(f"#jugcraft:crowfield_harvest is not tools/lairs.py CROWFIELD_HARVEST: {harvest}")
+    for block in la.CROWFIELD_HARVEST:
+        ns, path = split(block)
+        if ns == MOD and not (ASSETS / "blockstates" / f"{path}.json").is_file():
+            err(f"tools/lairs.py CROWFIELD_HARVEST names {block}, which is no block")
+    gourd = re.sub(r"\s+", " ", (folder / "KingsGourdBlock.java").read_text(encoding="utf-8"))
+    stages = {"GREEN": 0, "SWELLING": la.KINGS_GOURD["ripening"][0], "RIPENING": la.KINGS_GOURD["ripening"][1],
+              "LIT": la.KINGS_GOURD["lit"], "PICKED": la.KINGS_GOURD["picked"]}
+    for name, value in stages.items():
+        if not java_number(gourd, name, value):
+            err(f"KingsGourdBlock.{name} is not tools/lairs.py KINGS_GOURD's stage {value}")
+    if la.KINGS_GOURD["stages"] != la.KINGS_GOURD["picked"] + 1 or "IntegerProperty.create(\"stage\", GREEN, PICKED)" not in gourd:
+        err("KingsGourdBlock.STAGE does not run from GREEN to PICKED, tools/lairs.py KINGS_GOURD's stages")
+    lights = "LIGHT = {{{}}};".format(", ".join(str(v) for v in la.KINGS_GOURD["light"]))
+    if lights not in gourd:
+        err(f"KingsGourdBlock.LIGHT is not tools/lairs.py KINGS_GOURD light: expected {lights}")
+    for line in ('fixture("crowfield_corn", CrowfieldCornBlock::new, MapColor.COLOR_YELLOW, SoundType.CROP, 0, Fit.SEE_THROUGH)',
+                 'fixture("kings_gourd", p -> new KingsGourdBlock(p.lightLevel(KingsGourdBlock::light))'):
+        if line not in re.sub(r"\s+", " ", registry):
+            err(f"JugcraftLairs does not register {line}")
+    for name in la.HILL_NAMES:
+        if f"lair.{MOD}.crowfield.hill.{name}" not in (load(ASSETS / "lang" / "en_us.json") or {}):
+            err(f"No words for the Crowfield's {name} hill")
+    if "output.accept(HARVEST_CROWN);" not in registry:
+        err("JugcraftLairs does not put the Harvest Crown in the creative tab")
+    if "open.lair == Lair.CROWFIELD) { HarvestCrownRite.follow(server, open);" not in gate:
+        err("MistGateEntity does not take followers into the Crowfield by the crown's way (HarvestCrownRite.follow)")
     # The Cydonian Sanctum's: the keystone's rest, reach and kindling, the altars it kindles (as part 1's knoll stacks
     # them), its recipes, and the fixtures' registrations.
     keystone = (folder / "AltarKeystoneRite.java").read_text(encoding="utf-8")
@@ -9532,6 +9795,37 @@ def check_lairs():
                  "output.accept(ALTAR_KEYSTONE);"):
         if line not in flat:
             err(f"JugcraftLairs does not have {line}")
+    # The Crown of Thunder's: the vane's rest, reach and height and the lands it is raised in, the Storm Rods' parts and
+    # light, the fixtures' registrations, the rods' names, and the gate's follow into the Crown.
+    vane = (folder / "ThunderVaneRite.java").read_text(encoding="utf-8")
+    for name, key in (("COOLDOWN", "cooldown"), ("MIST_RANGE", "mist_range"), ("MIN_Y", "min_y")):
+        if not java_number(vane, name, la.VANE[key]):
+            err(f"ThunderVaneRite.{name} is not tools/lairs.py VANE {key} ({la.VANE[key]})")
+    vane_lands = (load(DATA / MOD / "tags" / "worldgen" / "biome" / "thunder_vane_lands.json") or {}).get("values", [])
+    if sorted(vane_lands) != sorted(la.VANE_LANDS):
+        err(f"#jugcraft:thunder_vane_lands is not tools/lairs.py VANE_LANDS: {vane_lands}")
+    for land in la.VANE_LANDS:
+        ns, path = split(land.lstrip("#"))
+        found = tag_exists("worldgen/biome", land[1:]) if land.startswith("#") else \
+            ns == "minecraft" or (DATA / ns / "worldgen" / "biome" / f"{path}.json").is_file()
+        if not found:
+            err(f"tools/lairs.py VANE_LANDS names {land}, which is no biome or biome tag")
+    rod_java = re.sub(r"\s+", " ", (folder / "StormRodBlock.java").read_text(encoding="utf-8"))
+    rod_parts = ", ".join(f"{part.upper()}({la.ROD_LIGHT[part]})" for part in la.ROD_PARTS)
+    if f"enum Part implements StringRepresentable {{ {rod_parts};" not in rod_java:
+        err(f"StormRodBlock.Part is not tools/lairs.py ROD_PARTS with ROD_LIGHT: expected {rod_parts}")
+    if tuple(ct.ROD_PARTS) != la.ROD_PARTS:
+        err(f"tools/crown_of_thunder.py ROD_PARTS {ct.ROD_PARTS} are not tools/lairs.py ROD_PARTS {la.ROD_PARTS}")
+    for line in ('fixture("storm_rod", p -> new StormRodBlock(p.lightLevel(StormRodBlock::light))', 'fixture("roc_nest", Block::new',
+                 'fixture("storm_cloud", Block::new, MapColor.COLOR_GRAY, SoundType.WOOL, 0, Fit.PASSABLE)',
+                 "output.accept(THUNDER_VANE);"):
+        if line not in re.sub(r"\s+", " ", registry):
+            err(f"JugcraftLairs does not have {line}")
+    for name in ct.RODS:
+        if f"lair.{MOD}.crown_of_thunder.rod.{name}" not in (load(ASSETS / "lang" / "en_us.json") or {}):
+            err(f"No words for the Crown of Thunder's {name} rod")
+    if "open.lair == Lair.CROWN_OF_THUNDER) { ThunderVaneRite.follow(server, open);" not in gate:
+        err("MistGateEntity does not take followers into the Crown of Thunder by the vane's way (ThunderVaneRite.follow)")
     for name, recipe in la.RECIPES.items():
         data = load(DATA / MOD / "recipe" / f"{name}.json") or {}
         if data.get("result", {}).get("id") != f"{MOD}:{recipe.get('result', name)}":
@@ -9594,6 +9888,8 @@ def check_lairs():
     check_foundry_trench(ft)
     check_moonlit_ring(mr)
     check_cydonian_sanctum(cs)
+    check_crowfield(cf)
+    check_crown_of_thunder(ct)
 
 
 def check_cydonian_sanctum(cs):
@@ -10029,6 +10325,154 @@ def check_cinder_kiln(ck):
     client = ROOT / "src" / "gametest" / "java" / "io" / "github" / "jimbozoomer" / "jugcraft" / "test" / "CinderKilnClientGameTests.java"
     if not java_number(client.read_text(encoding="utf-8"), "BOWL_LIGHT", ck.BOWL_LIGHT):
         err(f"CinderKilnClientGameTests does not read the bowl's light against BOWL_LIGHT {ck.BOWL_LIGHT}")
+
+
+def check_crown_of_thunder(ct):
+    """The Crown of Thunder as tools/crown_of_thunder.py builds it is the summit its record describes
+    (docs/features/crown-of-thunder.md), and where the Java looks for its parts (CrownOfThunder.java) is where the layout
+    puts them: the arrival stands on the terrace with room overhead, and the Grey Mist fills its arch; a walk from the
+    arrival, never stepping more than half a block (a stair is two half steps), reaches every open cell of the summit, of
+    both ledges (so a player thrown down onto one can climb back) and of the terrace; each Storm Rod stands whole and
+    uncharged, base to tip, on its plinth's chiseled middle, each where its bearing says, all ROD_RADIUS from the middle;
+    the nest is woven branches with room over it where the Roc waits; light flooded from the hidden lights and the mist,
+    as the game floods it, is at least SUMMIT_LIGHT on every one of those open cells; and nothing in it changes by itself
+    once placed."""
+    import math
+    from collections import deque
+    blocks = ct.build()
+    name = lambda pos: blocks[pos][0] if pos in blocks else None
+    props = lambda pos: dict(blocks[pos][1]) if pos in blocks else {}
+    java = re.sub(r"\s+", " ", (JAVA_ROOT / "lair" / "CrownOfThunder.java").read_text(encoding="utf-8"))
+    for jname, value in (("PAVE", ct.PAVE), ("STAND", ct.STAND), ("CENTRE_X", ct.CENTRE[0]), ("CENTRE_Z", ct.CENTRE[1]),
+                         ("SUMMIT", ct.SUMMIT), ("ROD_HEIGHT", ct.ROD_HEIGHT), ("LEDGE_TOP", ct.LEDGE_TOP),
+                         ("LEDGE_OUTER", ct.LEDGE_OUTER), ("LEDGE_HALF_ANGLE", ct.LEDGE_HALF_ANGLE),
+                         ("TERRACE_TOP", ct.TERRACE_TOP), ("TERRACE_WEST", ct.TERRACE["x"][0]),
+                         ("TERRACE_EAST", ct.TERRACE["x"][1]), ("TERRACE_NORTH", ct.TERRACE["z"][0]),
+                         ("TERRACE_SOUTH", ct.TERRACE["z"][1]), ("NEST_TOP", ct.NEST_TOP), ("WAIT_X", ct.WAIT[0]),
+                         ("WAIT_Y", float(ct.WAIT[1])), ("WAIT_Z", ct.WAIT[2]), ("EXIT_WEST", ct.EXIT["x"][0]),
+                         ("EXIT_EAST", ct.EXIT["x"][1]), ("EXIT_Z", ct.EXIT["z"])):
+        if not java_number(java, jname, value):
+            err(f"CrownOfThunder.{jname} is not tools/crown_of_thunder.py's {value}")
+    rods = ct.rod_cells()
+    expected = "RODS = {{{}}};".format(", ".join("new BlockPos({}, {}, {})".format(*rods[n][0][:3]) for n in ct.RODS))
+    if expected not in java:
+        err(f"CrownOfThunder.RODS is not tools/crown_of_thunder.py's, base by base: expected {expected}")
+    if f"enum Rod {{ {', '.join(n.upper() for n in ct.RODS)};" not in java:
+        err(f"CrownOfThunder.Rod is not tools/crown_of_thunder.py RODS {tuple(ct.RODS)} in order")
+    if set(ct.LEDGES.values()) != {90, 270}:
+        err(f"tools/crown_of_thunder.py's ledges {ct.LEDGES} are not due east and due west, as CrownOfThunder.onLedge takes them")
+    if len(ct.ROD_PARTS) != ct.ROD_HEIGHT:
+        err(f"tools/crown_of_thunder.py's rods are {ct.ROD_HEIGHT} high but have {len(ct.ROD_PARTS)} parts")
+
+    passable = {None, "minecraft:light", "jugcraft:lair_exit", "jugcraft:storm_cloud"}
+    free = lambda pos: name(pos) in passable
+    whole = {"minecraft:stone", "minecraft:andesite", "minecraft:tuff", "minecraft:calcite", "minecraft:gravel",
+             "minecraft:moss_block", "minecraft:polished_andesite", "minecraft:chiseled_stone_bricks",
+             "minecraft:stone_bricks", "minecraft:cracked_stone_bricks", "minecraft:mossy_cobblestone", "jugcraft:roc_nest"}
+    stair = "minecraft:stone_brick_stairs"
+    ax, ay, az, _ = ct.ARRIVAL
+    feet = (int(ax), int(ay), int(az))
+    if name((feet[0], feet[1] - 1, feet[2])) not in whole or ay != float(ct.TERRACE_TOP + 1) or not free(feet) \
+            or not free((feet[0], feet[1] + 1, feet[2])) or not ct.in_box(ct.TERRACE, feet[0], feet[2]):
+        err(f"The Crown's arrival at {ct.ARRIVAL[:3]} does not stand on the terrace with room overhead")
+    for pos in ct.exit_cells():
+        if name(pos) != "jugcraft:lair_exit":
+            err(f"No Grey Mist in the terrace's arch at {pos}")
+
+    # Where anyone can stand, column by column: on a whole block, or on a stair's step or its top.
+    stands = {}
+    for (x, y, z), state in blocks.items():
+        heights = (y + 1.0,) if state[0] in whole else (y + 0.5, y + 1.0) if state[0] == stair else ()
+        if heights and free((x, y + 1, z)) and free((x, y + 2, z)):
+            stands.setdefault((x, z), []).extend(heights)
+    start = (feet[0], feet[2], float(ay))
+    seen, queue = {start}, deque([start])
+    while queue:
+        x, z, h = queue.popleft()
+        for nx, nz in ((x + 1, z), (x - 1, z), (x, z + 1), (x, z - 1)):
+            for nh in stands.get((nx, nz), ()):
+                node = (nx, nz, nh)
+                if abs(nh - h) <= 0.5 + 1e-9 and node not in seen:
+                    seen.add(node)
+                    queue.append(node)
+    # The open cells of each part, as the client test counts them (CrownOfThunder.onSummit, onLedge and onTerrace): over its
+    # floor (the flights' cuts into the summit have none), with room to stand.
+    areas = (("summit", ct.STAND, ct.in_summit), ("ledges", ct.LEDGE_TOP + 1, lambda x, z: ct.in_ledge(x, z) is not None),
+             ("terrace", ct.TERRACE_TOP + 1, lambda x, z: ct.in_box(ct.TERRACE, x, z) and not ct.in_summit(x, z)))
+    open_cells = []
+    for area, height, inside in areas:
+        cells = [(x, height, z) for x in range(ct.SIZE[0]) for z in range(ct.SIZE[2]) if inside(x, z)
+                 and (x, height - 1, z) in blocks and free((x, height, z)) and free((x, height + 1, z))]
+        stranded = [cell for cell in cells if (cell[0], cell[2], float(height)) not in seen]
+        if not cells:
+            err(f"The Crown has no open cells on its {area}")
+        if stranded:
+            err(f"{len(stranded)} open cells of the Crown's {area} cannot be walked to from the arrival, e.g. {stranded[0]}")
+        open_cells += cells
+    for side in ct.LEDGES:
+        if not any(ct.in_ledge(x, z) == side for x, _, z in open_cells):
+            err(f"The Crown has no {side} ledge to stand on")
+
+    # The Storm Rods, whole and at rest on their plinths, each on its bearing, all ROD_RADIUS out.
+    bearings = {"north": (0, -1), "east": (1, 0), "south": (0, 1), "west": (-1, 0)}
+    for rod, cells in rods.items():
+        x0, y0, z0, _ = cells[0]
+        if name((x0, y0 - 1, z0)) != "minecraft:chiseled_stone_bricks" or y0 - 1 != ct.STAND:
+            err(f"The {rod} Storm Rod does not stand on its plinth's chiseled middle at {(x0, y0 - 1, z0)}")
+        for (x, y, z, part), want in zip(cells, ct.ROD_PARTS):
+            if name((x, y, z)) != "jugcraft:storm_rod" or props((x, y, z)) != {"part": want, "charged": "false"}:
+                err(f"No {want} of the {rod} Storm Rod at rest at {(x, y, z)}")
+        dx, dz = x0 + 0.5 - ct.CENTRE[0], z0 + 0.5 - ct.CENTRE[1]
+        wx, wz = bearings[rod]
+        if abs(math.hypot(dx, dz) - ct.ROD_RADIUS) > 1e-9 or (round(dx / ct.ROD_RADIUS), round(dz / ct.ROD_RADIUS)) != (wx, wz):
+            err(f"The {rod} Storm Rod at {(x0, z0)} is not {ct.ROD_RADIUS} {rod} of the summit's middle")
+        if not free((x0, y0 + ct.ROD_HEIGHT, z0)):
+            err(f"The {rod} Storm Rod's tip is covered at {(x0, y0 + ct.ROD_HEIGHT, z0)}")
+
+    # The nest: woven branches under where the Roc waits, and room over them.
+    wx_, wy_, wz_, _ = ct.WAIT
+    nest = (int(wx_), int(wy_) - 1, int(wz_))
+    if name(nest) != "jugcraft:roc_nest" or wy_ != ct.NEST_TOP + 1 \
+            or not all(free((nest[0], nest[1] + i, nest[2])) for i in range(1, 5)):
+        err(f"The Roc's nest is not woven branches with room over them at {ct.WAIT[:3]}")
+
+    # The light, flooded as the game floods block light: a level less a block, through anything but whole opaque blocks
+    # and the stairs.
+    opaque = whole | {stair}
+    emit = {"jugcraft:lair_exit": 6}
+    light, queue = {}, deque()
+    for pos, state in blocks.items():
+        level = int(dict(state[1])["level"]) if state[0] == "minecraft:light" else emit.get(state[0], 0)
+        if level:
+            light[pos] = level
+            queue.append(pos)
+    while queue:
+        x, y, z = queue.popleft()
+        level = light[(x, y, z)] - 1
+        for n in ((x + 1, y, z), (x - 1, y, z), (x, y + 1, z), (x, y - 1, z), (x, y, z + 1), (x, y, z - 1)):
+            if name(n) not in opaque and level > light.get(n, 0) and 0 <= n[1] < ct.SIZE[1]:
+                light[n] = level
+                queue.append(n)
+    lit = sorted((light.get(cell, 0), cell) for cell in open_cells)
+    if not lit or lit[0][0] < ct.SUMMIT_LIGHT:
+        dark = [cell for level, cell in lit if level < ct.SUMMIT_LIGHT]
+        err(f"{len(dark)} open cells of the Crown have less block light than SUMMIT_LIGHT {ct.SUMMIT_LIGHT}, the darkest "
+            f"{lit[0] if lit else None}")
+    client = ROOT / "src" / "gametest" / "java" / "io" / "github" / "jimbozoomer" / "jugcraft" / "test" / \
+        "CrownOfThunderClientGameTests.java"
+    source = client.read_text(encoding="utf-8") if client.is_file() else ""
+    if not java_number(source, "SUMMIT_LIGHT", ct.SUMMIT_LIGHT) or not java_number(source, "CROWN_CELLS", len(open_cells)):
+        err(f"CrownOfThunderClientGameTests does not read the light against SUMMIT_LIGHT {ct.SUMMIT_LIGHT} on the Crown's "
+            f"{len(open_cells)} open cells (CROWN_CELLS)")
+
+    # Nothing that changes by itself once placed: no grass to spread or die, nothing lit, nothing that flows or grows, and
+    # no gravel without a block under it.
+    for (x, y, z), state in blocks.items():
+        if state[0] in ("minecraft:grass_block", "minecraft:vine", "minecraft:lava", "minecraft:fire", "minecraft:water",
+                        "minecraft:snow", "minecraft:dirt") or state[0].endswith("_leaves") \
+                or state[0] == "minecraft:gravel" and (x, y - 1, z) not in blocks and y > 0:
+            err(f"The Crown has {state[0]} at {(x, y, z)}, which would change once placed")
+            break
 
 
 def java_number(source, name, value):
@@ -10526,6 +10970,230 @@ def check_foundry_trench(ft):
                                                         "minecraft:soul_fire", "minecraft:grass_block", "minecraft:magma_block"):
             err(f"The trench has {state[0]} at {(x, y, z)}, which would change once placed")
             break
+
+def check_crowfield(cf):
+    """The Crowfield as tools/crowfield.py builds it is the field its record describes (docs/features/crowfield.md), and
+    where the Java looks for its parts (Crowfield.java) is where the layout puts them: the arrival stands on the
+    farmyard's floor with room overhead, and the Grey Mist fills the end of the lane behind it; the fence runs between
+    the field and the yard with the farm gate open in it; a walk from the arrival, never stepping more than half a block,
+    goes through the gate and reaches every open cell of the field and the yard, and comes within reach of each King's
+    Gourd; the eight gourds grow green on their hills in ring order, each facing the post; from every open cell of the
+    field a sprinting player reaches the three gourds of any harvest in time (RIPEN_SECONDS, HARVEST_SHARE); the King's
+    Post stands on its mound with room in front of it where he hangs, and from there the moon is seen over the northern
+    corn; the corn walls the field all round; light flooded from the hidden lights, the jack-o'-lanterns, the lantern and
+    the mist, as the game floods it, is at least FIELD_LIGHT on every open cell of the field; and nothing in it changes by
+    itself once placed."""
+    import heapq
+    import math
+    from collections import deque
+    import lairs as la
+    blocks = cf.build()
+    name = lambda pos: blocks[pos][0] if pos in blocks else None
+    props = lambda pos: dict(blocks[pos][1]) if pos in blocks else {}
+    java = re.sub(r"\s+", " ", (JAVA_ROOT / "lair" / "Crowfield.java").read_text(encoding="utf-8"))
+    for jname, value in (("SOIL", cf.SOIL), ("STAND", cf.STAND), ("CENTRE_X", cf.CENTRE[0]), ("CENTRE_Z", cf.CENTRE[1]),
+                         ("FIELD_WEST", cf.FIELD["x"][0]), ("FIELD_EAST", cf.FIELD["x"][1]), ("FIELD_NORTH", cf.FIELD["z"][0]),
+                         ("FIELD_SOUTH", cf.FIELD["z"][1]), ("HILL_SPACING", cf.HILL_SPACING), ("YARD_WEST", cf.YARD["x"][0]),
+                         ("YARD_EAST", cf.YARD["x"][1]), ("YARD_NORTH", cf.YARD["z"][0]), ("YARD_SOUTH", cf.YARD["z"][1]),
+                         ("FENCE_Z", cf.FENCE_Z), ("GATE_WEST", cf.GATE[0]), ("GATE_EAST", cf.GATE[1]), ("WAIT_X", cf.WAIT[0]),
+                         ("WAIT_Y", float(cf.WAIT[1])), ("WAIT_Z", cf.WAIT[2]), ("EXIT_WEST", cf.EXIT["x"][0]),
+                         ("EXIT_EAST", cf.EXIT["x"][1]), ("EXIT_Z", cf.EXIT["z"]), ("POST_EXIT_WEST", cf.POST_EXIT["x"][0]),
+                         ("POST_EXIT_EAST", cf.POST_EXIT["x"][1]), ("POST_EXIT_Y", cf.POST_EXIT["y"]),
+                         ("POST_EXIT_Z", cf.POST_EXIT["z"])):
+        if not java_number(java, jname, value):
+            err(f"Crowfield.{jname} is not tools/crowfield.py's {value}")
+    if tuple(cf.HILLS) != la.HILL_NAMES:
+        err(f"tools/crowfield.py's HILLS {tuple(cf.HILLS)} are not tools/lairs.py HILL_NAMES {la.HILL_NAMES}")
+    cells = cf.hill_cells()
+    expected = "HILLS = {{{}}};".format(", ".join("new BlockPos({}, {}, {})".format(*cells[n]) for n in la.HILL_NAMES))
+    if expected not in java:
+        err(f"Crowfield.HILLS is not tools/crowfield.py's, in the order of tools/lairs.py HILL_NAMES: expected {expected}")
+    grid = ", ".join("{}({}, {})".format(n.upper(), *cf.HILLS[n]) for n in la.HILL_NAMES)
+    if f"enum Hill {{ {grid};" not in java:
+        err(f"Crowfield.Hill is not tools/lairs.py HILL_NAMES with tools/crowfield.py's grid: expected {grid}")
+    # Ring order: each hill is HILL_SPACING from the next, all the way round.
+    ring = [cells[n] for n in la.HILL_NAMES]
+    for i, (x, _, z) in enumerate(ring):
+        nx, _, nz = ring[(i + 1) % len(ring)]
+        if abs(x - nx) + abs(z - nz) != cf.HILL_SPACING:
+            err(f"The hills {la.HILL_NAMES[i]} and the next round the ring are not {cf.HILL_SPACING} apart")
+
+    passable = {None, "minecraft:light", "minecraft:short_grass", "minecraft:dead_bush", "minecraft:moss_carpet",
+                "jugcraft:lair_exit", "minecraft:spruce_fence_gate"}
+    free = lambda pos: name(pos) in passable and (name(pos) != "minecraft:spruce_fence_gate" or props(pos).get("open") == "true")
+    ax, ay, az, _ = cf.ARRIVAL
+    feet = (int(ax), int(ay), int(az))
+    whole = {"minecraft:dirt", "minecraft:coarse_dirt", "minecraft:podzol", "minecraft:rooted_dirt", "minecraft:hay_block",
+             "minecraft:spruce_planks"}
+    if name((feet[0], feet[1] - 1, feet[2])) not in whole | {"minecraft:dirt_path"} or ay != float(cf.STAND) or not free(feet) \
+            or not free((feet[0], feet[1] + 1, feet[2])) or not cf.in_yard(feet[0], feet[2]):
+        err(f"The Crowfield's arrival at {cf.ARRIVAL[:3]} does not stand on the farmyard's floor with room overhead")
+    for pos in cf.exit_cells():
+        if name(pos) != "jugcraft:lair_exit":
+            err(f"No Grey Mist at the end of the lane behind the farmyard at {pos}")
+    for x in range(cf.FENCE_X[0], cf.FENCE_X[1] + 1):
+        state = name((x, cf.STAND, cf.FENCE_Z))
+        wanted = "minecraft:spruce_fence_gate" if cf.GATE[0] <= x <= cf.GATE[1] else "minecraft:spruce_fence"
+        if state != wanted or wanted.endswith("gate") and props((x, cf.STAND, cf.FENCE_Z)).get("open") != "true":
+            err(f"The farmyard's fence at x {x} is {state}, not {wanted}{' (open)' if wanted.endswith('gate') else ''}")
+
+    # Where anyone can stand, column by column: on a whole block or on trodden earth (a sixteenth lower).
+    stands = {}
+    for (x, y, z), state in blocks.items():
+        height = y + 1.0 if state[0] in whole else y + 15 / 16 if state[0] == "minecraft:dirt_path" else None
+        if height is not None and free((x, y + 1, z)) and free((x, y + 2, z)):
+            stands.setdefault((x, z), []).append(height)
+    start = (feet[0], feet[2], float(ay))
+    seen, queue = {start}, deque([start])
+    while queue:
+        x, z, h = queue.popleft()
+        for nx, nz in ((x + 1, z), (x - 1, z), (x, z + 1), (x, z - 1)):
+            for nh in stands.get((nx, nz), ()):
+                node = (nx, nz, nh)
+                if abs(nh - h) <= 0.5 + 1e-9 and node not in seen:
+                    seen.add(node)
+                    queue.append(node)
+    walked = {(x, z) for x, z, h in seen if cf.SOIL < h <= cf.STAND}
+    field_cells = sorted((x, z) for x in range(cf.SIZE[0]) for z in range(cf.SIZE[2]) if cf.in_field(x, z)
+                         and free((x, cf.STAND, z)) and free((x, cf.STAND + 1, z)))
+    open_cells = field_cells + sorted((x, z) for x in range(cf.SIZE[0]) for z in range(cf.SIZE[2]) if cf.in_yard(x, z)
+                                      and free((x, cf.STAND, z)) and free((x, cf.STAND + 1, z)))
+    stranded = [cell for cell in open_cells if cell not in walked]
+    if stranded:
+        err(f"{len(stranded)} open cells of the field and the farmyard cannot be walked to from the arrival, e.g. {stranded[0]}")
+
+    def near(cell, target, reach):
+        x, z = cell
+        tx, ty, tz = (c + 0.5 for c in target)
+        return ((x + 0.5 - tx) ** 2 + (cf.STAND + 1.62 - ty) ** 2 + (z + 0.5 - tz) ** 2) ** 0.5 <= reach
+
+    # The gourds: green on their hills, facing the post (their faces turned toward it), each within reach of the walk.
+    toward = {"north": (0, -1), "south": (0, 1), "east": (1, 0), "west": (-1, 0)}
+    for hill, (x, y, z) in cells.items():
+        state = props((x, y, z))
+        fx, fz = toward.get(state.get("facing"), (0, 0))
+        if name((x, y, z)) != "jugcraft:kings_gourd" or state.get("stage") != "0" or fx * (cf.CX - x) + fz * (cf.CZ - z) <= 0:
+            err(f"No green King's Gourd facing the post on the {hill} hill at {(x, y, z)}: {state}")
+        if name((x, y - 1, z)) != "minecraft:podzol":
+            err(f"The {hill} hill's gourd does not grow on its dark loam")
+        if not any(near(cell, (x, y, z), cf.REACH) for cell in walked):
+            err(f"No walk from the Crowfield's arrival comes within reach of the {hill} hill's gourd at {(x, y, z)}")
+
+    # The harvest's walk: from every open cell of the field, round the cover, to within reach of each of the three gourds
+    # called round the ring from the nearest, either way round, in time.
+    def distances(sources):
+        """Walking distance (eight ways, a diagonal step only where both its sides are open) from any of `sources`."""
+        best = {cell: 0.0 for cell in sources}
+        heap = [(0.0, cell) for cell in sources]
+        while heap:
+            d, (x, z) = heapq.heappop(heap)
+            if d > best.get((x, z), math.inf):
+                continue
+            for dx, dz in ((1, 0), (-1, 0), (0, 1), (0, -1), (1, 1), (1, -1), (-1, 1), (-1, -1)):
+                n = (x + dx, z + dz)
+                if n not in walked or not cf.in_field(*n) or dx and dz and ((x + dx, z) not in walked or (x, z + dz) not in walked):
+                    continue
+                nd = d + (1.4142 if dx and dz else 1.0)
+                if nd < best.get(n, math.inf):
+                    best[n] = nd
+                    heapq.heappush(heap, (nd, n))
+        return best
+
+    field_walked = [cell for cell in field_cells if cell in walked]
+    reach_of = {hill: [cell for cell in field_walked if near(cell, cells[hill], cf.REACH)] for hill in la.HILL_NAMES}
+    from_hill = {hill: distances(reach_of[hill]) for hill in la.HILL_NAMES}
+    hop = {}
+    for i, hill in enumerate(la.HILL_NAMES):
+        for step in (1, -1):
+            other = la.HILL_NAMES[(i + step) % len(la.HILL_NAMES)]
+            hop[(hill, other)] = min((from_hill[other].get(cell, math.inf) for cell in reach_of[hill]), default=math.inf)
+    limit = cf.SPRINT * cf.RIPEN_SECONDS * cf.HARVEST_SHARE
+    worst = (0.0, None)
+    for cell in field_walked:
+        first = min(la.HILL_NAMES, key=lambda hill: math.hypot(cell[0] + 0.5 - cells[hill][0] - 0.5, cell[1] + 0.5 - cells[hill][2] - 0.5))
+        i = la.HILL_NAMES.index(first)
+        for step in (1, -1):
+            route = [la.HILL_NAMES[(i + k * step) % len(la.HILL_NAMES)] for k in range(cf.CALLED)]
+            walk = from_hill[first].get(cell, math.inf) + sum(hop[(a, b)] for a, b in zip(route, route[1:]))
+            if walk > worst[0]:
+                worst = (walk, cell)
+    if worst[0] > limit:
+        err(f"From {worst[1]} a harvest of {cf.CALLED} gourds is a walk of {worst[0]:.1f} blocks, more than a sprint of "
+            f"{cf.SPRINT} a second covers in {cf.HARVEST_SHARE} of {cf.RIPEN_SECONDS} s ({limit:.1f})")
+
+    # The King's Post: on its mound, the post and crossbar, and room in front of it where he hangs (six high); and the moon
+    # over the northern corn, seen from the arrival looking north into the field.
+    wx_, wy_, wz_, _ = cf.WAIT
+    mound = (int(wx_), int(wy_) - 1, int(wz_))
+    if name(mound) != "minecraft:hay_block" or wy_ != cf.STAND + 1 or not cf.on_mound(mound[0], mound[2]):
+        err(f"The King does not hang over the hay mound at {cf.WAIT[:3]}")
+    if any(not free((mound[0], y, mound[2])) for y in range(cf.STAND + 1, cf.STAND + 7)):
+        err(f"No room six high in front of the post where the King hangs at {cf.WAIT[:3]}")
+    if any(name((cf.CX, y, cf.CZ)) != "minecraft:stripped_dark_oak_log" for y in range(cf.STAND + 1, cf.POST_TOP + 1)) \
+            or name((cf.CX - 1, cf.CROSSBAR_Y, cf.CZ)) != "minecraft:stripped_dark_oak_log":
+        err("The King's Post does not stand on its mound with its crossbar")
+    for pos in cf.post_exit_cells():
+        if not free(pos) or pos[1] == cf.STAND and (pos[0], pos[2]) not in walked:
+            err(f"The Grey Mist's place at the post, {pos}, is not open floor")
+    eye = (ax, ay + 1.62, az)
+    moon = tuple(c + 0.5 for c in cf.MOON)
+    if cf.MOON[2] >= 0:
+        err(f"The moon at {cf.MOON} is not north of the field")
+    for i in range(1, 400):
+        t = i / 400
+        q = tuple(eye[k] + (moon[k] - eye[k]) * t for k in range(3))
+        cell = tuple(int(c // 1) for c in q)
+        if 0 <= cell[0] < cf.SIZE[0] and 0 <= cell[1] < cf.SIZE[1] and 0 <= cell[2] < cf.SIZE[2] and not free(cell):
+            err(f"From the farmyard's arrival the moon is hidden by {name(cell)} at {cell}")
+            break
+
+    # The corn walls the field: every cell next to the field that is not the field or the gate is corn (or the fence).
+    for x in range(cf.FIELD["x"][0] - 1, cf.FIELD["x"][1] + 2):
+        for z in range(cf.FIELD["z"][0] - 1, cf.FIELD["z"][1] + 2):
+            if cf.in_field(x, z) or cf.on_fence(x, z):
+                continue
+            if any(name((x, y, z)) != "jugcraft:crowfield_corn" for y in range(cf.STAND, cf.STAND + cf.CORN_HIGH)):
+                err(f"The corn does not wall the field at {(x, z)}")
+                break
+
+    # The light, flooded as the game floods block light: a level less a block, through anything but whole opaque blocks
+    # (the corn, the plants, the fences, the gourds, the cauldrons and the lantern let it through).
+    opaque = whole | {"minecraft:dirt_path", "minecraft:stripped_dark_oak_log", "minecraft:spruce_slab", "minecraft:pumpkin",
+                      "minecraft:carved_pumpkin", "minecraft:jack_o_lantern"} | {f"jugcraft:{h}" for h in cf.HEIRLOOMS}
+    emit = {"minecraft:lantern": 15, "minecraft:jack_o_lantern": 15, "jugcraft:lair_exit": 6}
+    light, queue = {}, deque()
+    for pos, state in blocks.items():
+        level = int(dict(state[1])["level"]) if state[0] == "minecraft:light" else emit.get(state[0], 0)
+        if level:
+            light[pos] = level
+            queue.append(pos)
+    while queue:
+        x, y, z = queue.popleft()
+        level = light[(x, y, z)] - 1
+        for n in ((x + 1, y, z), (x - 1, y, z), (x, y + 1, z), (x, y - 1, z), (x, y, z + 1), (x, y, z - 1)):
+            if name(n) not in opaque and level > light.get(n, 0) and 0 <= n[1] < cf.SIZE[1]:
+                light[n] = level
+                queue.append(n)
+    lit = sorted((light.get((x, cf.STAND, z), 0), (x, cf.STAND, z)) for x, z in field_cells)
+    if not lit or lit[0][0] < cf.FIELD_LIGHT:
+        dark = [cell for level, cell in lit if level < cf.FIELD_LIGHT]
+        err(f"{len(dark)} open cells of the field have less block light than FIELD_LIGHT {cf.FIELD_LIGHT}, the darkest "
+            f"{lit[0] if lit else None}")
+    client = ROOT / "src" / "gametest" / "java" / "io" / "github" / "jimbozoomer" / "jugcraft" / "test" / "CrowfieldClientGameTests.java"
+    source = client.read_text(encoding="utf-8") if client.is_file() else ""
+    if not java_number(source, "FIELD_LIGHT", cf.FIELD_LIGHT) or not java_number(source, "FIELD_CELLS", len(field_cells)):
+        err(f"CrowfieldClientGameTests does not read the light against FIELD_LIGHT {cf.FIELD_LIGHT} on the field's "
+            f"{len(field_cells)} open cells (FIELD_CELLS)")
+
+    # Nothing that changes by itself once placed: no farmland, crops, stems, grass or vanilla leaves, nothing that burns
+    # or flows; the corn and the gourds are lair blocks.
+    for (x, y, z), state in blocks.items():
+        if state[0].endswith("_leaves") or state[0].endswith("_stem") or state[0] in (
+                "minecraft:farmland", "minecraft:wheat", "minecraft:carrots", "minecraft:potatoes", "minecraft:grass_block",
+                "minecraft:vine", "minecraft:lava", "minecraft:fire", "minecraft:water", "minecraft:snow", "minecraft:campfire"):
+            err(f"The Crowfield has {state[0]} at {(x, y, z)}, which would change once placed")
+            break
+
 
 def check_moonlit_ring(mr):
     """The Moonlit Ring as tools/moonlit_ring.py builds it is the ring its record describes (docs/features/moonlit-ring.md),
@@ -13634,6 +14302,341 @@ def check_alpha_werewolf():
     for key in aw.MESSAGES:
         if f'"message.jugcraft.alpha_werewolf.{key}"' not in sent:
             err(f"tools/alpha_werewolf.py MESSAGES has {key}, which the Java never sends")
+    for cls, text in sources_all.items():
+        for key in re.findall(r'"((?:message|tooltip|entity)\.jugcraft\.[a-z_.]+[a-z_])"', text):
+            if key not in lang:
+                err(f"{cls}.java sends {key}, which has no words in en_us.json")
+        for banned, why in (("setChunkForced", "loads a chunk"), ("addRegionTicket", "loads a chunk"),
+                            ("TicketType", "loads a chunk"), ("changeDimension", "crosses dimensions"),
+                            ("TeleportTransition", "crosses dimensions")):
+            if banned in text:
+                err(f"{cls}.java {why} ({banned})")
+
+
+def check_pumpkin_king():
+    """The Pumpkin King (tools/pumpkin_king.py, docs/features/pumpkin-king.md): every number the Java uses is the table's
+    (his, his Jacks', his loot's, the Fright boon's and the Crowward Charm's); his attacks are the table's, and his rule can
+    be played (the Crowning before the Last Harvest; fire bites deeper, and bereft deeper still; a harvest is called,
+    ripens, lights and splits before the next is due, and his harvests come sooner as he weakens; he calls no more gourds
+    than the field's harvest walk proves one player can pick in time, and they ripen in the time that walk is measured
+    against; his stagger is shorter than his bereft spell; each attack's reach is its range); his clips last as long as the
+    Java waits on them; his model stands as tall as his box, and hanging, his shoulders meet the crossbar; where his fight
+    looks for the field's parts (Crowfield.java) is where tools/crowfield.py builds them: he steps down off his mound onto
+    open floor with room for him, and his Jacks climb out of the rows and out of each gourd onto open floor with room for
+    them; the harvest's picks, the bereft spell, his deeds and his fire are wired as the record says; every entity is
+    registered, named and drawn; his GeckoLib bodies have their models, clips (every clip the Java names) and sheets, their
+    box-UV regions inside the sheet without overlapping, their sheets and glowmasks TEXTURE_SCALE times the size each model
+    declares and cut out; no bone is animated by two of his controllers; his loot table is the table's and his trophies are
+    Arms VII's; the King's Lantern, its recipe (and none that makes an ember), the tags (the costume, the crow wards, the
+    creatures Fright spares: every lair boss with a bar among them) and his advancement are there; every message he sends
+    has its words; and nothing of his loads a chunk or leaves its dimension."""
+    import math
+    import arms_variants
+    import crowfield as cf
+    import pumpkin_king as pk
+    import pumpkin_king_models as pm
+    folder = JAVA_ROOT / "lair" / "king"
+    sources = {path.stem: path.read_text(encoding="utf-8") for path in folder.glob("*.java")}
+    if not sources:
+        err("lair/king: no Java")
+        return
+    fright = (JAVA_ROOT / "weapons" / "FrightBoon.java").read_text(encoding="utf-8")
+    scarecrows = (JAVA_ROOT / "agriculture" / "Scarecrows.java").read_text(encoding="utf-8")
+    sources_all = {**sources, "FrightBoon": fright, "Scarecrows": scarecrows}
+    king = sources.get("PumpkinKingEntity", "")
+    jack = sources.get("JackOStrawEntity", "")
+    registry = sources.get("JugcraftPumpkinKing", "")
+    loot_java = sources.get("PumpkinKingLoot", "")
+    d = pk.PUMPKIN_KING
+    for cls, table in (("PumpkinKingEntity", d), ("JackOStrawEntity", pk.JACK), ("JugcraftPumpkinKing", pk.CHARM),
+                       ("JugcraftPumpkinKing", {"EMBER_BURN": pk.EMBER_BURN, "LANTERN_LIGHT": pk.LANTERN_LIGHT}),
+                       ("PumpkinKingLoot", {"EVENT_CROWN_CHANCE": pk.EVENT_CROWN_CHANCE}),
+                       ("FrightBoon", {"PANIC_TICKS": arms_variants.FRIGHT[0], "COOLDOWN": arms_variants.FRIGHT[1],
+                                       "RUN": arms_variants.FRIGHT_RUN, "MAX": arms_variants.FRIGHT_MAX}),
+                       ("Scarecrows", {"LIT": pk.CHARM["CHARM_REACH"]})):
+        for name, value in table.items():
+            if not java_number(sources_all.get(cls, ""), name, value):
+                err(f"{cls}.{name} is not tools/pumpkin_king.py's {value}")
+    spots = "CROWN_JACK_SPOTS = {" + ", ".join("{" + f"{float(x)}, {float(z)}" + "}" for x, z in pk.CROWN_JACK_SPOTS) + "};"
+    if spots not in king:
+        err(f"PumpkinKingEntity.CROWN_JACK_SPOTS is not tools/pumpkin_king.py's: expected {spots}")
+    for attack, (windup, active, recovery, cooldown, near, far, reaping, hallowed) in pk.ATTACKS.items():
+        expected = (f"{attack}({windup}, {active}, {recovery}, {cooldown}, {float(near)}, {float(far)}, "
+                    f"{str(reaping).lower()}, {str(hallowed).lower()})")
+        if expected not in king:
+            err(f"PumpkinKingEntity.Attack: expected {expected}")
+    for call in ("LairBosses.damage(base)", "LairBosses.partyScale(players, PARTY_STEP, PARTY_MAX)"):
+        if call not in king:
+            err(f"PumpkinKingEntity does not scale as every lair boss does ({call})")
+    # His rule can be played.
+    if not 0.0 < d["LAST_AT"] < d["CROWN_AT"] < 1.0:
+        err("tools/pumpkin_king.py: the Last Harvest (LAST_AT) must come after the Crowning (CROWN_AT)")
+    if not 1.0 < d["FIRE"] <= d["BEREFT_FIRE"] or not 1.0 < d["BEREFT"] <= d["BEREFT_FIRE"]:
+        err("tools/pumpkin_king.py: fire must bite deeper than a plain blow, and bereft, every blow deeper, fire most of all")
+    harvest = d["CALL_TICKS"] + d["RIPEN_TICKS"] + d["SPLIT_TICKS"]
+    if not harvest < d["LAST_EVERY"] < d["HALLOWED_EVERY"] < d["HARVEST_EVERY"]:
+        err("tools/pumpkin_king.py: his harvests must come sooner as he weakens, and each must ripen and split before the next "
+            f"is due (CALL_TICKS + RIPEN_TICKS + SPLIT_TICKS {harvest} < LAST_EVERY < HALLOWED_EVERY < HARVEST_EVERY)")
+    if not 0 < d["SWELL_TICKS"] < d["RIPEN_TICKS"]:
+        err("tools/pumpkin_king.py: a gourd must swell before it ripens (0 < SWELL_TICKS < RIPEN_TICKS)")
+    if not 0 < d["REAPING_GOURDS"] <= d["HALLOWED_GOURDS"] <= cf.CALLED or d["RIPEN_TICKS"] != cf.RIPEN_SECONDS * 20:
+        err(f"tools/pumpkin_king.py: he may call at most the {cf.CALLED} gourds the field's harvest walk proves one player can "
+            f"pick, and they must ripen in its {cf.RIPEN_SECONDS} seconds (tools/crowfield.py CALLED, RIPEN_SECONDS)")
+    if not 0 < d["STAGGER_TICKS"] < d["BEREFT_TICKS"]:
+        err("tools/pumpkin_king.py: his bereft spell must outlast his stagger")
+    if len(pk.CROWN_JACK_SPOTS) != d["CROWN_JACKS"] or d["CROWN_JACKS"] > d["JACKS_MAX"] or not 0.0 < d["FEED"] < 0.25:
+        err("tools/pumpkin_king.py: CROWN_JACK_SPOTS must give each of the Crowning's Jacks a place, within JACKS_MAX, and a "
+            "gourd's fire may feed him only a little")
+    for attack, reach in (("SCYTHE_SWEEP", d["SWEEP_REACH"]), ("GOURD_TOSS", d["TOSS_RANGE"]), ("CROW_STORM", d["STORM_LENGTH"]),
+                          ("HEAD_ROLL", d["ROLL_LENGTH"])):
+        if pk.ATTACKS[attack][5] != reach:
+            err(f"tools/pumpkin_king.py: he must use {attack} only on a foe within its reach ({reach})")
+    if pk.ATTACKS["GOURD_TOSS"][1] != d["TOSS_FLIGHT"] or pk.ATTACKS["CROW_STORM"][1] < d["STORM_EVERY"]:
+        err("tools/pumpkin_king.py: the Gourd Toss's active ticks must be its pumpkin's flight, and the Crow Storm must last a beat")
+    if d["DOWN_AT"] >= d["LEASH"]:
+        err("tools/pumpkin_king.py: where he steps down (DOWN_AT) must be within his leash")
+    clips = pm.pumpkin_king_animations()["animations"]
+    for clip, ticks in (("tear_free", d["WAKE_TICKS"]), ("crown", d["CROWNING_TICKS"]), ("call", d["CALL_TICKS"]),
+                        ("sweep_windup", pk.ATTACKS["SCYTHE_SWEEP"][0]), ("toss_windup", pk.ATTACKS["GOURD_TOSS"][0]),
+                        ("storm_windup", pk.ATTACKS["CROW_STORM"][0]), ("snare_windup", pk.ATTACKS["VINE_SNARE"][0]),
+                        ("roll_windup", pk.ATTACKS["HEAD_ROLL"][0])):
+        length = clips.get(f"animation.pumpkin_king.{clip}", {}).get("animation_length", 0)
+        if round(length * 20) != ticks:
+            err(f"tools/pumpkin_king_models.py: his {clip} clip ({length} s) must last {ticks} ticks, as the Java waits on it")
+    climb = pm.jack_o_straw_animations()["animations"].get("animation.jack_o_straw.climb", {}).get("animation_length", 0)
+    if not java_number(jack, "CLIMB_TICKS", round(climb * 20)):
+        err(f"JackOStrawEntity.CLIMB_TICKS must be its climb clip's {climb} s")
+    sizes = {entity: re.search(rf'entity\("{entity}".*?sized\(([\d.]+)F, ([\d.]+)F\)', registry, re.S) for entity in pk.ENTITIES}
+    for entity, stands in pm.STANDS.items():
+        size = sizes.get(entity)
+        if not size or abs(stands / 16.0 - float(size.group(2))) > 0.25:
+            err(f"JugcraftPumpkinKing: the {entity}'s box must be as tall as its model ({stands / 16.0} blocks)")
+    shoulders = (pm.SHOULDER_Y + pm.HANG_LIFT) / 16.0
+    if abs(cf.WAIT[1] + shoulders - (cf.CROSSBAR_Y + 0.5)) > 0.15:
+        err(f"tools/pumpkin_king_models.py: hanging, his shoulders ({cf.WAIT[1] + shoulders}) must meet the crossbar "
+            f"({cf.CROSSBAR_Y + 0.5})")
+
+    # Where his fight looks for the field's parts is where tools/crowfield.py builds them.
+    blocks = cf.build()
+    name = lambda pos: blocks[pos][0] if pos in blocks else None
+    passable = {None, "minecraft:light", "minecraft:short_grass", "minecraft:dead_bush", "minecraft:moss_carpet", "jugcraft:lair_exit"}
+    whole = {"minecraft:dirt", "minecraft:coarse_dirt", "minecraft:podzol", "minecraft:rooted_dirt", "minecraft:farmland",
+             "minecraft:moss_block", "minecraft:mud", "minecraft:packed_mud"}
+    free = lambda pos: name(pos) in passable
+
+    def room(x, z, wide, high):
+        """Whether a box `wide` across and `high` tall fits standing at (x, z) on the field's floor."""
+        for bx in range(math.floor(x - wide / 2), math.floor(x + wide / 2 - 1.0E-6) + 1):
+            for bz in range(math.floor(z - wide / 2), math.floor(z + wide / 2 - 1.0E-6) + 1):
+                if name((bx, cf.SOIL, bz)) is None or name((bx, cf.SOIL, bz)) in passable \
+                        or not all(free((bx, cf.STAND + dy, bz)) for dy in range(math.ceil(high))):
+                    return False
+        return cf.in_field(x, z)
+    king_size, jack_size = sizes.get("pumpkin_king"), sizes.get("jack_o_straw")
+    kw, kh = (float(king_size.group(1)), float(king_size.group(2))) if king_size else (0.0, 0.0)
+    jw, jh = (float(jack_size.group(1)), float(jack_size.group(2))) if jack_size else (0.0, 0.0)
+    cx, cz = cf.CENTRE
+    for x, z in ((0, 1), (0, -1), (1, 0), (-1, 0)):
+        down = (cx + x * d["DOWN_AT"], cz + z * d["DOWN_AT"])
+        if not room(*down, kw, kh):
+            err(f"Where he steps down off his mound, {down}, is not open floor in the field with room for him")
+    for spot in pk.CROWN_JACK_SPOTS:
+        if not room(*spot, jw, jh):
+            err(f"Where a Jack climbs out of the rows at the Crowning, {spot}, is not open floor with room for it")
+    steps = {"north": (0, -1), "south": (0, 1), "east": (1, 0), "west": (-1, 0)}
+    for hill, (hx, hy, hz) in cf.hill_cells().items():
+        facing = dict(blocks.get((hx, hy, hz), (None, ()))[1]).get("facing")
+        sx, sz = steps.get(facing, (0, 0))
+        if not facing or not room(hx + sx + 0.5, hz + sz + 0.5, jw, jh):
+            err(f"A Jack climbing out of the {hill} hill's gourd ({facing}) would not stand on open floor before it")
+    # His rule, as the record says: a picked gourd of the harvest counts toward bereaving him only before any has lit; the
+    # pickers of a harvest that left him bereft take part; fire bites deeper, bereft deeper still; waking and crowned he is
+    # unhurt; his Jacks burn twice as fast, take part for him, stand dazed while he is bereft and crumble without him.
+    for needed, why in (("if (picked.containsAll(harvest)) { if (!burnt) { bereave(level); }", "be bereft only when a whole harvest is picked before any lights"),
+                        ('encounter.deed(picker, "bereft:" + harvests + ":" + id)', "count the pickers of a harvest that left him bereft as taking part"),
+                        ("float dealt = amount * (bereft() ? (fire ? BEREFT_FIRE : BEREFT) : (fire ? FIRE : 1.0F));", "let fire bite deeper, and bereft deeper still"),
+                        ("if (phase == Phase.WAKING || phase == Phase.CROWNING) { return false; }", "be unhurt waking and crowned"),
+                        ("KingsGourdBlock.setStage(level, hill.at(origin), KingsGourdBlock.SWELLING);", "ripen the gourds he calls"),
+                        ("if (jacks.size() >= JACKS_MAX) { return null; }", "keep his Jacks to JACKS_MAX"),
+                        ("LairRewards.pay(level, PumpkinKingLoot.BOSS, encounter, position(), centre(), EXPERIENCE);", "pay his fall as every Witching Season boss's is paid")):
+        if needed not in re.sub(r"\s+", " ", king):
+            err(f"PumpkinKingEntity must {why} ({needed})")
+    for needed, why in (("PumpkinKingEntity.fiery(source) ? amount * FIRE : amount", "burn twice as fast"),
+                        ("master.took(player, dealt)", "take part for him"), ("master.bereft()", "stand dazed while he is bereft"),
+                        ("crumble(level)", "crumble without him")):
+        if needed not in jack:
+            err(f"JackOStrawEntity must {why} ({needed})")
+    for needed, why in (("Lairs.onPlaced(Lair.CROWFIELD, PumpkinKingEntity::summon)", "hang him on the post of every Crowfield"),
+                        ("KingsGourdBlock.onPicked(JugcraftPumpkinKing::gourdPicked)", "hear the gourds picked"),
+                        ("king.gourdPicked(level, pos, player)", "tell him who picked which gourd"),
+                        ("LairRewards.payer(PumpkinKingLoot.BOSS, PumpkinKingLoot::pay)", "let his rewards wait for a player"),
+                        ("FrightBoon.register()", "run the Fright boon"),
+                        ("lightLevel(state -> LANTERN_LIGHT)", "light the King's Lantern")):
+        if needed not in registry:
+            err(f"JugcraftPumpkinKing must {why} ({needed})")
+    if "target instanceof PathfinderMob && target instanceof Enemy && !target.is(FRIGHTLESS)" not in fright \
+            or 'Jugcraft.id("frightless")' not in fright or "PANICKED.size() >= MAX" not in fright:
+        err("FrightBoon must frighten only monsters that walk, never one in #jugcraft:frightless, and at most MAX at once")
+    if "case FRIGHT -> FrightBoon.struck(level, target, attacker);" not in (JAVA_ROOT / "weapons" / "ArmItem.java").read_text(encoding="utf-8"):
+        err("ArmItem must work the Fright boon (FrightBoon.struck)")
+    if '"crow_wards"' not in scarecrows or "(entity instanceof CropGuard || wardsCrows(entity))" not in scarecrows:
+        err("Scarecrows.guarded must count anyone holding a crow ward (#jugcraft:crow_wards) as a lit scarecrow")
+    client = (CLIENT_JAVA_ROOT / "PumpkinKingClient.java").read_text(encoding="utf-8")
+    if "PumpkinKingClient.register();" not in (CLIENT_JAVA_ROOT / "JugcraftClient.java").read_text(encoding="utf-8"):
+        err("JugcraftClient must register PumpkinKingClient")
+    if "lair.king.JugcraftPumpkinKing.register();" not in (JAVA_ROOT / "Jugcraft.java").read_text(encoding="utf-8"):
+        err("Jugcraft must register JugcraftPumpkinKing")
+
+    def drawn(entity):
+        start = client.find(f"register(JugcraftPumpkinKing.{entity.upper()},")
+        end = client.find("EntityRendererRegistry.register(", start + 1)
+        return client[start:end if end >= 0 else len(client)] if start >= 0 else ""
+    if f'ADVANCEMENT = "{pk.ADVANCEMENT["key"]}";' not in loot_java:
+        err("PumpkinKingLoot's advancement differs from tools/pumpkin_king.py")
+    lang = load(ASSETS / "lang" / "en_us.json") or {}
+    for entity in pk.ENTITIES:
+        if f'entity("{entity}"' not in registry:
+            err(f"JugcraftPumpkinKing does not register the {entity} entity")
+        if lang.get(f"entity.{MOD}.{entity}") != pk.ENTITIES[entity]:
+            err(f"The {entity} entity is not named {pk.ENTITIES[entity]!r}")
+        if not drawn(entity):
+            err(f"PumpkinKingClient draws no {entity}")
+    for item in pk.items():
+        if f'"{item}"' not in registry:
+            err(f"JugcraftPumpkinKing does not register {item}")
+    for block in pk.BLOCKS:
+        for path in (ASSETS / "blockstates" / f"{block}.json", ASSETS / "models" / "block" / f"{block}.json",
+                     DATA / MOD / "loot_table" / "blocks" / f"{block}.json"):
+            if not path.is_file():
+                err(f"{block}: missing {path.relative_to(ROOT)}")
+    # His GeckoLib bodies.
+    gecko = ASSETS / "geckolib"
+    clips_named = {}
+    for text in sources.values():
+        for clip in re.findall(r'"(animation\.[a-z_]+\.[a-z_]+)"', text):
+            clips_named.setdefault(clip.split(".")[1], set()).add(clip)
+    for cls, body in (("PumpkinKingEntity", "pumpkin_king"), ("JackOStrawEntity", "jack_o_straw")):
+        for clip in re.findall(r'prefix \+ "([a-z_]+)"', sources.get(cls, "")):
+            clips_named.setdefault(body, set()).add(f"animation.{body}.{clip}")
+    for entity, body in pk.GECKO.items():
+        geo = load(gecko / "models" / "entity" / f"{entity}.geo.json") or {}
+        animations = load(gecko / "animations" / "entity" / f"{entity}.animation.json") or {}
+        definition = (geo.get("minecraft:geometry") or [{}])[0]
+        if not definition:
+            err(f"{entity}: no GeckoLib model")
+            continue
+        body_clips = animations.get("animations", {})
+        for clip in clips_named.get(body, set()):
+            if clip not in body_clips:
+                err(f"{entity}: the Java plays {clip}, which is not in {entity}.animation.json")
+        for clip in pm.CLIPS[body]:
+            if f"animation.{body}.{clip}" not in body_clips:
+                err(f"{entity}.animation.json: missing animation.{body}.{clip}")
+        sheet_w = definition.get("description", {}).get("texture_width", 0)
+        sheet_h = definition.get("description", {}).get("texture_height", 0)
+        bones = {bone["name"] for bone in definition.get("bones", [])}
+        for clip in body_clips.values():
+            for bone in clip.get("bones", {}):
+                if bone not in bones:
+                    err(f"{entity}.animation.json: animates unknown bone {bone}")
+        regions = set()
+        for bone in definition.get("bones", []):
+            for cube in bone.get("cubes", []):
+                w, h_, dd = cube["size"]
+                u, v = cube["uv"]
+                region = (u, v, u + 2 * (w + dd), v + dd + h_)
+                if region[2] > sheet_w or region[3] > sheet_h:
+                    err(f"{entity}.geo.json: a cube in {bone['name']} maps outside the {sheet_w}x{sheet_h} sheet")
+                regions.add(region)
+        regions = sorted(regions)
+        for i, a in enumerate(regions):
+            for b in regions[i + 1:]:
+                if a[0] < b[2] and b[0] < a[2] and a[1] < b[3] and b[1] < a[3]:
+                    err(f"{entity}.geo.json: UV regions {a} and {b} overlap")
+        glows = entity in pk.GLOWING
+        part = drawn(entity)
+        if not part or ("AutoGlowingGeoLayer" in part) != glows:
+            err(f"PumpkinKingClient: the {entity}'s glow layer must match tools/pumpkin_king.py GLOWING")
+        for name_ in (entity, f"{entity}_glowmask") if glows else (entity,):
+            sheet = ASSETS / "textures" / "entity" / f"{name_}.png"
+            if not sheet.is_file():
+                err(f"{entity}: missing textures/entity/{name_}.png")
+                continue
+            with Image.open(sheet) as image:
+                if image.size != (sheet_w * pm.TEXTURE_SCALE, sheet_h * pm.TEXTURE_SCALE):
+                    err(f"textures/entity/{name_}.png must be {sheet_w * pm.TEXTURE_SCALE}x{sheet_h * pm.TEXTURE_SCALE}")
+                if any(image.convert("RGBA").getchannel("A").histogram()[1:255]):
+                    err(f"textures/entity/{name_}.png has half-transparent pixels (it is drawn cut out)")
+    # His controllers own their bones: no bone is animated by two.
+    owned = {bone: controller for controller, bones in pm.CONTROLLERS.items() for bone in bones}
+    for clip_name, clip in clips.items():
+        controller = pm.owner(clip_name.split(".")[-1])
+        for bone in clip.get("bones", {}):
+            if owned.get(bone, "body") != controller:
+                err(f"pumpkin_king: {clip_name} ({controller}) animates {bone}, which the {owned.get(bone, 'body')} controller owns")
+    for controller in ("body", *pm.CONTROLLERS):
+        if f'new AnimationController<PumpkinKingEntity>("{controller}"' not in king:
+            err(f"PumpkinKingEntity has no {controller} controller (tools/pumpkin_king_models.py CONTROLLERS)")
+    # His loot, and his trophies: Arms VII's, as his bosses/pumpkin_king table holds them.
+    table = load(DATA / MOD / "loot_table" / "entities" / "pumpkin_king.json") or {}
+    if table.get("type") != "minecraft:gift":
+        err("loot_table/entities/pumpkin_king.json must be a gift table (rolled for each player paid)")
+    found_loot = {}
+    for pool in table.get("pools", []):
+        for entry in pool.get("entries", []):
+            found_loot[entry.get("name", "").split(":")[-1]] = pool.get("condition", {}).get("chance", 1.0)
+    expected = {"kings_ember": 1.0, **{item: pk.TROPHY_CHANCE for item in pk.TROPHIES}, **pk.CHANCES}
+    if found_loot != expected:
+        err(f"loot_table/entities/pumpkin_king.json gives {found_loot}, not tools/pumpkin_king.py's {expected}")
+    if tuple(arms_variants.trophies("pumpkin_king")) != tuple(pk.TROPHIES):
+        err(f"tools/pumpkin_king.py TROPHIES {pk.TROPHIES} are not Arms VII's: {arms_variants.trophies('pumpkin_king')}")
+    if any(arms_variants.BY_ID[t][2] != "fright" for t in pk.TROPHIES if t in arms_variants.BY_ID):
+        err("The Pumpkin King's trophies must carry the Fright boon")
+    trophies = load(DATA / MOD / "loot_table" / "bosses" / "pumpkin_king.json") or {}
+    held_items = [entry.get("name") for pool in trophies.get("pools", []) for entry in pool.get("entries", [])]
+    if held_items != [f"{MOD}:{item}" for item in pk.TROPHIES]:
+        err(f"loot_table/bosses/pumpkin_king.json holds {held_items}, not his trophies {pk.TROPHIES}")
+    for table_id in ("entities/pumpkin_king", "bosses/pumpkin_king"):
+        if f'Jugcraft.id("{table_id}")' not in loot_java:
+            err(f"PumpkinKingLoot must roll loot_table/{table_id}.json")
+    for trophy in pk.TROPHIES:
+        if f'Jugcraft.id("{trophy}")' not in registry:
+            err(f"JugcraftPumpkinKing must find the {trophy} (Arms VII registers it)")
+    for key in pk.RECIPES:
+        if not (DATA / MOD / "recipe" / f"{key}.json").is_file():
+            err(f"recipe/{key}.json is missing")
+    # The King's Ember comes only from him: no recipe makes it, so nothing turns back into it.
+    for path in (DATA / MOD / "recipe").glob("*.json"):
+        result = (load(path) or {}).get("result", {})
+        if isinstance(result, dict) and result.get("id") == f"{MOD}:kings_ember":
+            err(f"recipe/{path.name} makes the King's Ember, which only the Pumpkin King gives")
+    costumes = json.dumps(load(DATA / MOD / "tags" / "item" / "trick_or_treat_costumes.json") or {})
+    for item in pk.COSTUMES:
+        if f"{MOD}:{item}" not in costumes:
+            err(f"{item} must count as a costume (tags/item/trick_or_treat_costumes.json)")
+    if f"{MOD}:crowward_charm" not in (load(DATA / MOD / "tags" / "item" / "crow_wards.json") or {}).get("values", []):
+        err("The Crowward Charm must be a crow ward (tags/item/crow_wards.json)")
+    frightless = (load(DATA / MOD / "tags" / "entity_type" / "frightless.json") or {}).get("values", [])
+    if tuple(frightless) != tuple(arms_variants.FRIGHTLESS):
+        err(f"tags/entity_type/frightless.json is not tools/arms_variants.py FRIGHTLESS: {frightless}")
+    # Every lair boss with a bar is spared by Fright, in the table and in the tag.
+    spared = set(frightless) & set(arms_variants.FRIGHTLESS)
+    lair_sources = {java.stem: java.read_text(encoding="utf-8") for java in (JAVA_ROOT / "lair").rglob("*.java")}
+    registrations = "".join(lair_sources.values())
+    for stem, text in lair_sources.items():
+        if "new ServerBossEvent(" not in text:
+            continue
+        for found in re.finditer(rf'entity\("([a-z_]+)",\s*EntityType\.Builder\.<{stem}>of', registrations):
+            if f"{MOD}:{found.group(1)}" not in spared:
+                err(f"{stem} ({found.group(1)}) is a boss with a bar, but Fright does not spare it (tools/arms_variants.py FRIGHTLESS)")
+    advancement = load(DATA / MOD / "advancement" / f"{pk.ADVANCEMENT['key']}.json") or {}
+    if advancement.get("criteria", {}).get("done", {}).get("trigger") != "minecraft:impossible" \
+            or advancement.get("display", {}).get("icon", {}).get("id") != pk.ADVANCEMENT["icon"]:
+        err(f"advancement/{pk.ADVANCEMENT['key']}.json must be his, granted from code (an impossible \"done\")")
+    sent = "".join(sources.values())
+    for key in pk.MESSAGES:
+        if f'"message.jugcraft.pumpkin_king.{key}"' not in sent:
+            err(f"tools/pumpkin_king.py MESSAGES has {key}, which the Java never sends")
     for cls, text in sources_all.items():
         for key in re.findall(r'"((?:message|tooltip|entity)\.jugcraft\.[a-z_.]+[a-z_])"', text):
             if key not in lang:
@@ -21479,12 +22482,13 @@ def registered_items():
                   | set(deposits.all_blocks()) | set(guide_books.BOOKS) | set(tank_display.BLOCKS) | set(exchange_blocks.BLOCKS) | set(exchange_poker.BLOCKS) | set(exchange_casino.BLOCKS) | set(exchange_casino.ITEMS)
                   | set(arms.items()) | set(arms_variants.items())
                   | set(gear.items()) | set(plastic.blocks()) | set(exosuit.items()) | set(grapple.items())
-                  | set(field_chemistry.items()) | set(construction.items()) | set(construction.blocks()) | set(gas_storage.items()) | set(control_electronics.blocks()) | set(control_electronics.items()) | set(rocketry.items()) | set(rocketry.blocks()) | set(dieselworks.blocks()) | set(kaiserworks.blocks()) | set(trenchworks.blocks()) | set(fortifications.blocks()) | set(bunkerworks.blocks()) | set(aged_wood.blocks()) | set(fire_control.blocks()) | set(fire_control.items()) | set(raiders.ITEMS) | set(armoured_walker.ITEMS) | set(howitzer_walker.ITEMS) | set(zeppelin.ITEMS) | set(mech.ITEMS) | set(landship.ITEMS) | set(artillery.ITEMS) | set(tower_guns.items())
+                  | set(field_chemistry.items()) | set(construction.items()) | set(construction.blocks()) | set(gas_storage.items()) | set(control_electronics.blocks()) | set(control_electronics.items()) | set(rocketry.items()) | set(rocketry.blocks()) | set(dieselworks.blocks()) | set(kaiserworks.blocks()) | set(trenchworks.blocks()) | set(fortifications.blocks()) | set(bunkerworks.blocks()) | set(aged_wood.blocks()) | set(fire_control.blocks()) | set(fire_control.items()) | set(raiders.ITEMS) | set(armoured_walker.ITEMS) | set(howitzer_walker.ITEMS) | set(zeppelin.ITEMS) | set(mech.ITEMS) | set(landship.ITEMS) | set(unmasking.ITEMS) | set(trains.ITEMS) | set(artillery.ITEMS) | set(tower_guns.items())
                   | set(ph.blocks()) | set(ph.items()) | set((town_assets.blocks() + styx.blocks()))
                   | set(guns.items()) | set(guns.blocks()) | set(concordance.items()) | set(concordance.blocks()) | set(industrial_forms.blocks()))
     import starter_workshop
+    import storage_crates
     registered |= menagerie.entries() | set(vehicle_bays.BLOCKS) | set(starter_workshop.NAMES)
-    registered |= set(jimtafacts.items())
+    registered |= set(jimtafacts.items()) | set(jimtafacts_catalog.items())
     registered |= set(jimtafacts_network.ids()) | set(jimtafacts_spellbooks.items()) | set(jimtafacts_industry.items())
     registered |= set(jimtafacts_robots.items())
     registered |= set(jimtafacts_gear.items()) | set(jimtafacts_crops.items()) | set(jimtafacts_production.items())
@@ -21505,6 +22509,8 @@ def registered_items():
     registered |= jimtafacts_cables.items()
     registered |= jimtafacts_terraforming.items()
     registered |= set(jimtafacts_computers.items()) | set(jimtafacts_computers.blocks())
+    registered |= {metal + '_crate' for metal, _ in storage_crates.TIERS}
+    registered |= {metal + '_storage_crate_upgrade' for metal, _ in storage_crates.TIERS[1:]}
     return registered
 
 
@@ -21552,6 +22558,9 @@ def main():
     check_armoured_walker()
     check_howitzer_walker()
     check_landship()
+    check_unmasking()
+    check_herobrine()
+    check_trains()
     check_artillery()
     check_tower_guns()
     check_gun_art()
@@ -21605,6 +22614,7 @@ def main():
     check_crypt_lich()
     check_iron_dreadnought()
     check_alpha_werewolf()
+    check_pumpkin_king()
     check_cydonian_sentinel()
     check_material_sets()
     check_art()
@@ -21613,6 +22623,7 @@ def main():
     check_diagonal_connections()
     check_aluminum_bootstrap()
     check_concordance(registered)
+    check_landscape_habitats()
     for path in RES.rglob("*.json"):
         load(path)
     if errors:
@@ -22894,6 +23905,65 @@ def check_delivery():
         block = re.search(rf"<!-- {marker}:start -->\n(.*?)\n<!-- {marker}:end -->", text, re.S)
         if not block or block.group(1).strip() != "\n".join(lines).strip():
             err(f"{name}: its {marker} tables are not tools/concordance_delivery.py's (run it and paste)")
+
+
+def check_landscape_habitats():
+    """The landscape collection's wildlife (docs/features/landscape-wildlife.md): every landscape biome has its habitats
+    (tools/landscape_habitats.py), each one Menagerie reads from a tag; the tags are written as tools/ says; every
+    habitat a menagerie species lives in is read from those tags or decided by Menagerie's own rule; and
+    Menagerie.habitat reads the tags."""
+    import landscape_habitats as lh
+    import landscape_kinds as lk
+    for biome, habitats in lh.HABITATS.items():
+        if habitats is None:
+            err(f"Landscape biome {MOD}:{biome} ({lk.KINDS[biome]}) has no habitats: give it an entry in "
+                "tools/landscape_habitats.py BIOMES")
+            continue
+        for habitat in habitats:
+            if habitat not in lh.TAGGED:
+                err(f"{MOD}:{biome}'s habitat {habitat} is not one Menagerie reads from a tag ({', '.join(lh.TAGGED)})")
+    for biome in lh.BIOMES:
+        if biome not in lk.KINDS:
+            err(f"tools/landscape_habitats.py BIOMES names {MOD}:{biome}, which is not a landscape biome")
+    tags = lh.habitat_tags()
+    for tag_id, biomes in tags.items():
+        ns, path = split(tag_id)
+        if (load(DATA / ns / "tags" / "worldgen" / "biome" / f"{path}.json") or {}).get("values") != [f"{MOD}:{b}" for b in biomes]:
+            err(f"#{tag_id} differs from tools/landscape_habitats.py")
+    if not set(tags[f"{lh.TAG}/deep_ocean"]) <= set(tags[f"{lh.TAG}/ocean"]):
+        err("Every landscape deep ocean must be ocean too, as vanilla's are")
+    java = (JAVA_ROOT / "menagerie" / "Menagerie.java").read_text(encoding="utf-8")
+    collections = re.search(r'for\(String collection:List\.of\(([^)]*)\)\)', java)
+    if not collections:
+        err("Menagerie.register's species collections were not found")
+    species = list(menagerie.CATALOG["species"])
+    for name in re.findall(r'"(\w+)"', collections.group(1)) if collections else []:
+        species += (load(RES / MOD / "menagerie" / f"{name}.json") or {}).get("species", [])
+    for habitat in sorted({s["habitat"] for s in species} - set(lh.TAGGED) - set(lh.BY_RULE)):
+        err(f"Menagerie species live in habitat {habitat}, which tools/landscape_habitats.py neither tags nor leaves "
+            "to Menagerie's rule")
+    landscape = java.split('if(landscape(c,"overworld"))', 1)
+    if len(landscape) < 2 or 'Jugcraft.id("landscape_habitat/"+habitat)' not in java:
+        err("Menagerie.habitat does not read #jugcraft:landscape_habitat/ for the landscape biomes")
+    else:
+        rules = landscape[1].split("if(!c.hasTag(BiomeTags.IS_OVERWORLD))", 1)[0]
+        for habitat in lh.BY_RULE:
+            if f'"{habitat}"' not in rules:
+                err(f"Menagerie.habitat has no rule for the landscape biomes' {habitat} habitat")
+    # The naturalist data's biome spawn tags (#jugcraft:wildlife_has_*, blacklist/wildlife_blacklist_*) came with the
+    # wildlife, but nothing read them; tools/menagerie_content.py no longer copies them.
+    biome_tags = DATA / MOD / "tags" / "worldgen" / "biome"
+    for stray in sorted([*biome_tags.glob("wildlife_has_*.json"), *biome_tags.glob("blacklist/wildlife_blacklist_*.json")]):
+        err(f"{stray.relative_to(RES).as_posix()} is a naturalist spawn tag nothing reads: Menagerie places each species by "
+            "its habitat")
+    # Every landscape biome lists its own natural spawns, in either form the game reads: the attribute's value, or a
+    # modifier's argument.
+    for biome in lk.KINDS:
+        attribute = ((load(DATA / MOD / "worldgen" / "biome" / f"{biome}.json") or {}).get("attributes", {})
+                     .get("minecraft:gameplay/natural_mob_spawns"))
+        value = attribute.get("argument", attribute) if isinstance(attribute, dict) else None
+        if not isinstance(value, dict) or not isinstance(value.get("spawns_by_category"), dict):
+            err(f"Landscape biome {MOD}:{biome} lists no natural spawns (minecraft:gameplay/natural_mob_spawns)")
 
 
 if __name__ == "__main__":

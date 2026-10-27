@@ -8,6 +8,22 @@ Every change to Jugcraft, newest first, grouped by pull request. For what each t
 
 No numbered release yet. Entries on feature branches remain proposed until their pull requests merge.
 
+### Unmerged: Herobrine (encounters, marks, shoreline pyramids, schedule)
+- **Herobrine:** a still, staring figure with glowing white eyes. He appears to a player 28–52 blocks off (14–28 underground), where they could see him if they turned their head. He is gone when anyone comes within 12 blocks, when they stare him down for 2 seconds, or when he is hit. Now and then he stands right behind them, with a heartbeat only they hear and 3 seconds of Darkness, and is gone once they turn and see him. The apparition never directly damages players or blocks, speaks, wears a name tag or is saved; the separate mark builder leaves the structures described below. Record: [herobrine.md](docs/features/herobrine.md).
+- **Four ways to be seen at a distance:** a watcher on a ridge, in a clearing or just inside a cave mouth in a hillside (placed so a group can share the sighting); a follower who walks the player's own path, freezes while watched, and whose faint footsteps stop when they stop; a second look that finds him gone or moved; and eyes at the far end of a tunnel behind an underground player.
+- **He leaves marks, and they can be taken back:** after a sighting the player really saw, sometimes (35% on the surface, 75% underground) a mark where he stood: a redstone-torch shrine, a little mossy or sand pyramid, a leafless grove (only leaves the world grew), a straight 2×2 tunnel (natural stone and soil only, stopping short of ore and water) or a lone sign, each with a cryptic message. Marks go only onto wild-looking land: loaded, unclaimed, outside the town, nothing plainly built and no block entity within 6 blocks. Planning reads no block until every chunk it could read is loaded. That is a heuristic, not proof, so groves and tunnels (the marks that take blocks away) fail closed: they happen only inside land an operator approved with `/jugcraft herobrine wilds approve <radius>`. Shrines, pyramids and signs only add, into air or plain ground cover. They are built a few blocks a tick, each block rechecked so a mark never overwrites a player's work, and every change is saved so `/jugcraft herobrine marks undo <id>` restores only blocks still as he left them. `herobrine.marks=off` stops new ones.
+- **Shoreline pyramids and a trail to them:** rarely, a hollow stepped brick pyramid, 31 across and 16 high, rises on level wild land by the water. It has a landward doorway, twelve windows, and a chamber with an altar, signs and a lectern holding one surveyor's journal: nothing valuable, nothing that refills. A sighting across water may begin a trail: a bare grove, then a torch-lit tunnel whose sign gives the way and distance to the nearest finished pyramid. Each step counts only once its mark is finished, and a pyramid stopped part-built is never pointed to. Pyramids are built bottom up through the same rechecked, undoable work. Undo now restores only blocks still exactly as he left them, every property and contents included (a sign's both sides, style, dye, glow and wax), with a short list of changes the world makes on its own.
+- **Sky islands and surface ruins:** rare floating landmarks, each a rock of weathered stone carrying a haunted building with rooms and a way through: a ruined castle, a manor in a dead forest, a hanging monastery whose two cells sit on islands joined by chained bridges with a shrine hung beneath, a fortress on an upside-down mountain, a castle shattered into five drifting pieces, and a watching keep. They are lit only by a few soul lanterns and candles. Each goes only into a sky that is loaded, unclaimed, outside the town and empty, with 6 blocks of margin. It must be at least 24 blocks above anything below, well under the top of the world, and 1024 blocks from another. On the ground he may leave a watching hut whose window faces you, an unfinished house like a village house, or a ritual circle in a clearing. Everything he builds persists through approach and the end of the event; you can explore, mine and change it. Explicit operator undo preserves player edits. Record: [herobrine-sky.md](docs/features/herobrine-sky.md).
+- **Underground and underwater discoveries:** nine cave layouts include torch trails, shelters, watching rooms, sealed stairs, pillar grids, broken bridges, balconies, shrines and empty halls. Four source-water glowstone patterns add rings, crosses, pyramids and trails. A depth-aware exploration director attempts discoveries more often underground, with vertical spacing for different cave levels; quiet-season attempts are six times farther apart. Structures persist, claims and towns are protected, and excavation requires approved wilderness. Combined validation passed 70 native tests, 393 scheduler assertions and two rendered galleries covering all 22 new variants. Record: [herobrine-depths.md](docs/features/herobrine-depths.md).
+- **Jugcraft notices him:** town guards turn to look at him for a moment and never target him. Styxhexenhammer, to anyone who has seen him, makes it plain he knows what they saw and will not explain it. A quiet Cursed Mirror reflection (`HerobrineEncounters.reflection`) waits for the mirror's branch to call it.
+- **Only real sightings count:** a witness must have had him on screen, unobstructed, while attentive (no menu, not idle, asleep or in danger), and anyone who really saw him counts. A player's first encounter is never a close one, and each player has one encounter at a time.
+- **The schedule:** OpenAI Codex/Astra's `HerobrineScheduleDirector`, by the owner's plan, implements the `HerobrineDirector` seam and is installed at server start. It keeps high activity through 3 November inclusive and is rarer from 4 November. Operators also have `/jugcraft herobrine status|sighting|scare`, and `herobrine.haunting=off` stops scheduled encounters.
+- **Checked:** all 40 Herobrine game tests and 393 scheduler assertions pass natively, and automated rendered and two-client tests pass. CI and a human playtest have not run yet.
+- **His look:** the game's own default player texture, read at run time, under a full-bright eyes layer of four white pixels. No game asset is copied.
+
+### Unmerged: Keep your inventory in boss fights
+- **Dying in a lair costs nothing:** as with the keepInventory rule, but only in lairs (every boss fight). No items or experience fall; you respawn outside with every slot as it was (armour and offhand worn), the same held slot and all your experience. Dying anywhere else is unchanged. No grave is ever placed in a lair; Grave Goods still catch anything another mod drops there. Record: [lair-keep-inventory.md](docs/features/lair-keep-inventory.md).
+
 ### Unmerged: Arcane Concordance, Chunk D (pact hall)
 - **A killed Gathering Shade keeps its holder's things:** what it carried goes into its Spirit Anchor once (or drops where it fell, even with block drops turned off, if the anchor is not loaded or keeps someone else's agreement), it leaves its holder's roster, and the anchor says it was lost. Its holder's next use of the anchor calls another shade under the same agreement and Bound Will, at no cost; a full roster refuses and says so. A shade called again while the old one was only unloaded makes the old one, when it loads, leave its load in the anchor once and depart. Record: [arcane-concordance-workers.md](docs/features/arcane-concordance-workers.md).
 - **A seal says why it failed:** not yours or your party's (or not where you may build), already kept, 32 Bound Wills, or a full roster (counted before anything is made); nothing is recorded, spent or called. A newly sealed shade is on the roster at once; one replaced, or loading while switched off, takes no room on it.
@@ -87,6 +103,87 @@ No numbered release yet. Entries on feature branches remain proposed until their
 - The chunk's contract, decisions and evidence: [concordance-chunk-b.md](docs/features/concordance-chunk-b.md).
 - **The server game tests no longer run out of memory:** with main's #488 merged, all 2,575 of this branch's server tests ran, then the suite stopped with `OutOfMemoryError: Java heap space` on its last one (run 40414783975; main's 2,477 fit). A game-test mock player's connection ends in Netty's EmbeddedChannel, which keeps every packet written to it until something reads it; no test does, and the players stay logged in for the whole run, so their join packets and every later player's join message stayed in the heap. A test-only hook (`MockPlayerChannels`) now empties those channels each tick and logs how many packets it released; real and integrated-server connections are untouched. The game itself is unchanged.
 
+### Unmerged: Costumed villains are unmasked
+- Beat a **Spectral Cosmonaut**, **Drowned Diver**, **Emerald Phantom** or **Onyx Warden** and the costume comes off: one of three crooks for each villain stands caught where it fell, named, with an excuse everyone near hears, until they are led away 10 seconds later.
+- The costume's mask drops as a trophy with the crook's name on it, and the player earns **Mystery Solved**. A villain that dies any other way keeps its secret. Record: [costumed-villains-unmasking.md](docs/features/costumed-villains-unmasking.md).
+
+### Unmerged: A server load benchmark
+- A new server game test, `ServerLoadGameTests`, times what a tick of a representative load costs the server: a factory of 80 working processing machines and a crowd of 24 costumed villains. It logs the numbers ("Server load: ...") and fails if either load's tick grows past a whole server tick. Memory and client frame times are not measured yet. Record: [server-load-benchmark.md](docs/features/server-load-benchmark.md).
+
+### Unmerged: Trains
+- A **Diesel Locomotive**, a **Passenger Coach** (four seats) and a **Cargo Wagon** (27 slots) run on any rails, round curves and up slopes. Use one on a rail to set it on the line.
+- Ride in the locomotive's cab to drive: forwards and back work a four-notch throttle (two in reverse), jump brakes. It burns diesel or kerosene (a bucket refuels it).
+- The **Coupler** couples cars into a train, up to eight behind one locomotive, and uncouples them. The whole train moves as one and stops at the end of the line or at another train.
+- Breaking the rail under a car knocks it off as an item, with its goods. The Engineer's Handbook has a Railways chapter. Record: [trains.md](docs/features/trains.md).
+
+### Unmerged: Cola and MMH
+- **Cola:** the Chemical Reactor purifies Industrial Phosphoric Acid over charcoal into a vial of **Food-grade Phosphoric Acid**. The vial crafts with caramel, sugar, cinnamon, vanilla and lemon into **Cola Syrup**. The reactor carbonates the syrup with water and carbon dioxide into three bottles of **Cola**, which give Speed for 45 seconds and leave the bottle.
+- **MMH:** the Bulk Chemical Reactor methylates hydrazine with methyl chloride into **Monomethylhydrazine (MMH)**. The reactor seals it into a **Sealed MMH Tank**, and the Rocket Workshop makes four Storable Bipropellant Motors from an MMH tank and an N2O4 tank (hydrazine makes three).
+- Two new handbook pages. Quantities await review. Record: [cola-and-mmh.md](docs/features/cola-and-mmh.md).
+
+### Unmerged: The drone depot terminal in the language file
+- Every word on the **Drone Depot Terminal**'s screen (title, tabs, every readout and warning, the mode key) now comes from the language file (`screen.jugcraft.terminal.*`), so it can be translated. In English it reads as before, except that the FLEET tab names each tier by its drone ("T1 Courier Quad Drone"), the JOBS tab names missing materials by their item names, and the mode key reads PERSONAL or PARTY from the start. Record: [drone-terminal-lang.md](docs/features/drone-terminal-lang.md).
+
+### Unmerged: The trade look
+- Every screen where Jugs or goods change hands has the Exchange's walnut and brass: the **town shops**, the **Jug Teller**, the **personal safe** and the **barter station** and **energy vendor**, with the Exchange and market chest. It has a brass-rimmed walnut panel, slate ledgers and slot trays, gold sums, and brass and walnut plates for keys. The shop's Buy and Sell are folder tabs; the Jug Teller's chosen name is in brass; a personal shop's state is green when ready and red when something is in the way. Every button id and slot is unchanged.
+- The **market chest** (332 wide) scales down to fit a narrower window.
+- The screen fit check opens all of them. Record: [trade-look.md](docs/features/trade-look.md).
+
+### Unmerged: The blueprint table fits a small window
+- The **blueprint table**'s drafting board (410 or 440 × 250) scales down to fit a small window, as the reactor console and storage tank do. Its tabs, register, turning preview, stamps, paste box and the mouse scale with it. Before, it ran off the edges of the smallest GUI (320 × 240). Its look is unchanged.
+- The screen fit check opens it too. Record: [blueprint-table-fit.md](docs/features/blueprint-table-fit.md).
+
+### Unmerged: The workshop, aircraft and furniture screens in the looks
+- The screens PR #475 brought in take the machine looks: the **lathe**, **fluid services** and **aircraft** the industrial look; the **workshop engines**, **chute**, **robot programming table** and **equipment charger**, and the **artisan's workstation** the workshop look; the **transformer** and **computer** the electric look; the **compact reactor** the advanced look. Each has the look's casing, glass panes, a status lamp by the title and keys that light up when they are on (the transformer's mode, open chute outputs, the chosen robot program, a running reactor, the artisan's features). The gate parameters, heat and kinetic generators, civil and matter workshops keep the electric look, with keys in it in place of vanilla buttons. Every slot, button id and payload is unchanged.
+- The **computer** (360 × 288), **compact reactor**, **gate parameters** and the larger **aircraft** now scale down to fit a small window, slots and keys with them (a new `FittedContainerScreen`).
+- The scribing desk keeps its scroll forge; the personal safe and shops keep their panels until the trade look.
+- The screen fit check now opens all 15 at the smallest GUI, every aircraft layout and both workshop table kinds. Record: [new-screen-styles.md](docs/features/new-screen-styles.md).
+
+### Changed: The benches in the workshop look
+
+### Unmerged: Fixed: the tower cost check on Linux
+- `tools/tower_costs.py` reads the recipe files in name order. Where several crafting recipes make the same item and none is named after it, the check takes the first; the file system's own order differs between Windows and Linux, so since the Jimtafacts batch it worked out five drone tower blocks' values differently on Linux (CI) and failed `check_mod_data.py` there. The values themselves are unchanged.
+
+### Unmerged: The Crown of Thunder and the Thunder Vane (the Storm Roc, part 1)
+- **The Thunder Vane:** two feathers, a lightning rod, three copper ingots and a compass. Raise it in the Overworld in a storm, in the mountains (the Highland, the Karst Pinnacles, the high country, any mountain, peak or hill), standing at 120 or higher under the open sky: lightning strikes it (only light and thunder), it is used up, and the wind takes you to the Crown of Thunder. Grey Mist tears open where you stood, and for 60 seconds anyone can follow through it. Anywhere else it only says why, and nothing is spent.
+- **The Crown of Thunder,** a lair above the clouds under a storm that never breaks: a terrace with the Grey Mist home, a summit 36 blocks across rimmed by boulders, four copper Storm Rods on plinths (charged, they burn storm-blue), two ledges below its east and west edges with stairs back up, and the Roc's nest of woven branches on a crag to the north. A fall past the ledges is caught by the mist and costs the lair's toll, never belongings.
+- The summit is empty for now: the Storm Roc, his fledglings and his loot are part 2. Record: [crown-of-thunder.md](docs/features/crown-of-thunder.md).
+
+### Unmerged: Fixed: the server game tests slowing to a stop since the Jimtafacts batch
+- The accessories' per-player check (`JimtaAbilities.tick`) read the block under every online player's feet, every time it ran, whatever they wore. Through an unloaded chunk that read loads, or even generates, the chunk on the spot. The game tests leave about 1,300 unticked mock players at the world origin, so the check ran every tick for each of them. Since the batch, the server's tick time has grown from about 10 ms to about 1 s over a test run, and CI's `mod` and `optional integrations absent` jobs have hit their 90-minute limit on main and on every pull request. This read is the only new per-player code that touches the world whatever is worn; that it caused the slowdown is the best-supported explanation, which CI's run of this change will confirm or refute.
+- The ground is now read only when snowshoes are worn, and only from a chunk that is already loaded. Snowshoes behave as before.
+
+
+### Unmerged: The fall's wild harvest in the landscape biomes (follow-up to the seasonal biome audit)
+- **The fall grows wild in the landscape biomes too.** The 19 fall and Halloween wild patches grow in the landscape biomes of their kinds: chestnut trees, chanterelles and acorn squash in its woods, cranberries in its swamps, butternut squash and Cinderella pumpkins in its fields, wild mandrake in the Ominous Woods. So do the graveyard flowers. The bottle gourd and the Jarrahdale pumpkin (savanna, jungle and windswept kinds) do not, and every other wild crop is as it was.
+- **The Hag Stone** opens the Lantern Fen from the landscape swamps (the Bayou, Bog, Marsh, Wetland and the rest).
+- Built on the seasonal biome audit's landscape kinds, with one more, the dark woods. Record: [seasonal-biome-audit.md](docs/features/seasonal-biome-audit.md#follow-up-the-falls-wild-patches-the-graveyard-flowers-and-the-hag-stone).
+
+### Unmerged: Wildlife tidy-up (landscape biomes)
+- **Removed** the 107 `#jugcraft:wildlife_has_*` and `blacklist/wildlife_blacklist_*` biome tags copied from the owner's naturalist data, which nothing read; `tools/menagerie_content.py` no longer copies them. Creatures are placed as before.
+- **Corrected** the wildlife record: every landscape biome lists its own spawns (the "95 with none" was a miscount), so no spawns were added. A data check now holds both.
+- Record: [landscape-wildlife.md, the tidy-up](docs/features/landscape-wildlife.md#follow-up-the-tidy-up).
+
+### Unmerged: Wildlife in the landscape biomes (follow-up to the seasonal biome audit)
+- **The menagerie's creatures come to the landscape biomes.** Before, none of its 277 species reached any of the 159 landscape biomes: they carry none of vanilla's biome tags, and every species first asks for `#minecraft:is_overworld` (or the Nether's or End's). Now deer, bears and boars live in the landscape woods; alligators and capybaras in its swamps; lions, elephants and zebras on its savannas; scorpions in its deserts; tigers in its tropics; whales and rays in its ocean; mammoths and yetis in its snowy land; the landscape collection's own gob and garch in its caves; and the Nether's and End's creatures in its Nether and End biomes.
+- Each landscape biome's habitats come from its kind, and biome by biome for arid and magic land (`tools/landscape_habitats.py`, `#jugcraft:landscape_habitat/*`). Only the menagerie reads them: trees, crops and structures there are as they were. Record: [landscape-wildlife.md](docs/features/landscape-wildlife.md).
+
+### Unmerged: Seasonal biome audit
+- **The landscape biomes now have seasons:** in the 54 temperate landscape woods, fields, hills and swamps, grass and leaves turn with the year as in Jugcraft's own biomes. 47 of them take winter snow when `seasons.snow` is on; the 7 mild ones (Mediterranean, lavender, redwood, warm shrub, orchid swamp) do not.
+- **Halloween and autumn creatures reach them too:** wisps rise over the landscape swamps on Halloween nights. On full moons, werewolves stalk the landscape woods, snow werewolves its snowy land and shadow werewolves the Ominous Woods, where the Howling Totem rite also works. Squirrels and wild turkeys come to its woods and open country.
+- **Every Jugcraft biome now needs a seasons decision:** the data check fails on a new biome without one, so a future collection cannot miss the seasons. The audit of every seasonal system against the newer collections is in [seasonal-biome-audit.md](docs/features/seasonal-biome-audit.md).
+
+### Unmerged: The Pumpkin King, his Jack-o'-Straws and his loot (part 2)
+- **The Pumpkin King** hangs on his post in every Crowfield and tears free when a player steps into the field. Straw burns: fire hurts him half as much again. His health scales with the party (400, up to 1000), and he fights with a Scythe Sweep, a Gourd Toss onto a ring of embers and a Crow Storm; at half health the Crowning puts him back on his post and two Jack-o'-Straws climb out of the rows, and he adds the Vine Snare and the Head Roll; below a quarter, the Last Harvest. Every attack has a wind-up to read.
+- **His rule, the Harvest:** every 22 seconds (then 18, then 15) he calls two or three King's Gourds round his foe, which ripen in 10 seconds. Pick them all in time and he is bereft for 8 seconds: every blow does half as much again, fire twice, and his Jacks stand dazed. A gourd that ripens through lights and splits, and a Jack-o'-Straw climbs out (at most four; beyond that its fire heals him a little).
+- **His loot,** rolled for each participant: the King's Ember (a long fuel, and with an heirloom pumpkin a King's Lantern that never goes out), a chance of one of his two new Arms VII trophies (the Hallowreap scythe and the Crowbill war pick, with the new **Fright** boon: a struck monster, never a boss, runs in panic; certain on a player's first win), the Crowward Charm (crows leave crops alone near whoever holds it in the offhand), the Pumpkin King's Crown (a costume), 300 experience shared out and the advancement Uncrowned. During Halloween, a roll of candy and a better chance of the crown; everything is kept after the event. Record: [pumpkin-king.md](docs/features/pumpkin-king.md).
+
+
+### Unmerged: The Crowfield and the Harvest Crown (the Pumpkin King, part 1)
+- **The Harvest Crown:** three heirloom pumpkins over two gold ingots and a hay bale. Use it at night on a scarecrow that wears a head, out under the sky, with at least 8 pumpkins or gourds growing round it: the crows burst up crying and Grey Mist takes you to the Crowfield. The scarecrow and the crops are left as they were. Like the Witching Season's rituals it works any night of the year, unless the server keeps it to Halloween (`lairs.off_season=off`).
+- **The Crowfield:** a pumpkin field at dusk, walled all round with corn too thick to pass, under a vast harvest moon. Arrive in a farmyard behind a fence and farm gate; rows of pumpkins and heirlooms lie across the field, with hay stacks and a tipped cart for cover, and eight King's Gourds grow on hills in a ring round the King's Post, where the Pumpkin King will hang (part 2).
+- **King's Gourds:** green until the King ripens them (part 2); any player may pick one while it ripens. Record: [crowfield.md](docs/features/crowfield.md); his plan is in [BOSSES.md](docs/branches/BOSSES.md#the-pumpkin-king-the-plan-being-built).
+
 ### Unmerged: Fixed: the server game tests slowing to a stop since the Jimtafacts batch
 - The accessories' per-player check (`JimtaAbilities.tick`) read the block under every online player's feet, every time it ran, whatever they wore. Through an unloaded chunk that read loads, or even generates, the chunk on the spot. The game tests leave about 1,300 unticked mock players at the world origin, so the check ran every tick for each of them. Since the batch, the server's tick time has grown from about 10 ms to about 1 s over a test run, and CI's `mod` and `optional integrations absent` jobs have hit their 90-minute limit on main and on every pull request. This read is the only new per-player code that touches the world whatever is worn; that it caused the slowdown is the best-supported explanation, which CI's run of this change will confirm or refute.
 - The ground is now read only when snowshoes are worn, and only from a chunk that is already loaded. Snowshoes behave as before.
@@ -96,10 +193,60 @@ No numbered release yet. Entries on feature branches remain proposed until their
 - The blueprint table keeps its own drafting-sheet look.
 - The screen fit check now opens the five benches at the smallest GUI too. Record: [bench-screens.md](docs/features/bench-screens.md).
 
-### Unmerged: The recipe page in its machine's look, and a screen fit check
+### Changed: The recipe page in its machine's look, and a screen fit check
 - The industrial forms' **recipe page** takes the forms' industrial look instead of its own teal. It has a status lamp by "<machine>: recipes" (green while a recipe is locked, amber when the recipes were reloaded), the list and the details in panes, and keys in the look: the chosen recipe, Automatic and the locked recipe's Lock key are lit. Every function and button id is unchanged.
 - The **storage tank** screen (352 wide) now scales itself down to fit a narrower window, as the reactor console and remote shutdown panel do.
 - A new client game test, `ScreenFitClientGameTests`, opens every machine screen, form screen, the recipe page and the eight other machine screens at the smallest GUI Minecraft gives (320 × 240, a 640 × 480 window), checks that each fits the window, and photographs some. Record: [screen-fit-check.md](docs/features/screen-fit-check.md).
+
+### Unmerged: Seasonal biome audit
+- **The landscape biomes now have seasons:** in the 54 temperate landscape woods, fields, hills and swamps, grass and leaves turn with the year as in Jugcraft's own biomes. 47 of them take winter snow when `seasons.snow` is on; the 7 mild ones (Mediterranean, lavender, redwood, warm shrub, orchid swamp) do not.
+- **Halloween and autumn creatures reach them too:** wisps rise over the landscape swamps on Halloween nights. On full moons, werewolves stalk the landscape woods, snow werewolves its snowy land and shadow werewolves the Ominous Woods, where the Howling Totem rite also works. Squirrels and wild turkeys come to its woods and open country.
+- **Every Jugcraft biome now needs a seasons decision:** the data check fails on a new biome without one, so a future collection cannot miss the seasons. The audit of every seasonal system against the newer collections is in [seasonal-biome-audit.md](docs/features/seasonal-biome-audit.md).
+
+### Unmerged: Guns, slice 15C (three diamond-steel long guns)
+- **Three guns** from the owner's own GeckoLib models and animations, the next of their diamond-steel guns, each held in both hands and fed from a box magazine: the **Hawker Rifle**, a rifle of twelve rifle rounds whose magazine stands out of its side, passing a point of armour; the **Impetus Shotgun**, fed from a box of six shells, eight pellets a pull, knocking back what it hits; and the **Quill Rifle**, an automatic of thirteen light rounds, silenced the length of its barrel (no muzzle flash), passing 1.5 points of armour.
+- Made from stainless steel, a diamond and a lever; planks for the Hawker and the Impetus, redstone and an iron ingot for the Quill. Each takes the magazines, stocks, grips, bayonets and scopes the owner made for it; the Quill no barrel attachment, the Hawker no Medium Scope.
+- The inspect key does nothing with the Impetus, whose owner's model has no inspection.
+- The owner's GeckoLib models of the three are added to the library. The guns' converter now reads bones the owner turned as a whole, and keyframes written as `{"vector": [...]}`; a gun whose owner's texture is larger than 128 px keeps its size.
+- Record: [guns.md, slice 15C](docs/features/guns.md#slice-15c-three-diamond-steel-long-guns).
+
+### Unmerged: Guns, heavy bullets: knockback and armour piercing
+- A gun's bullets can now knock back what they hit further than a plain hit, and pass through some of its armour, as the owner's gun data asks. The **Jawbreaker** is the first: its shots push about twice as far as a plain hit (a second push of 0.6) and pass through 4.5 points of armour; a creature without armour takes its damage as before.
+- Record: [guns.md, the heavy-bullets follow-up](docs/features/guns.md#follow-up-heavy-bullets-knockback-and-armour-piercing).
+
+### Unmerged: Guns, no flash from a gun silenced by its build
+- The **Gallant Rifle**, silenced the length of its barrel, no longer shows a muzzle flash when fired, as a gun with a Silencer fitted shows none. The guns' client test checks it.
+- Record: [guns.md, the silenced-flash follow-up](docs/features/guns.md#follow-up-no-flash-from-a-gun-silenced-by-its-build).
+
+### Unmerged: Guns, slice 15B (three diamond-steel sidearms)
+- **Three guns** from the owner's own GeckoLib models and animations, the next of their diamond-steel guns, each held in one hand, and in both with a stock fitted, as a carbine: the **Kreuzer Pistol**, a quick pistol of thirteen light rounds, its magazine ahead of its trigger; the **Psalm SMG**, a machine pistol of twenty-five light rounds, ten a second; and the **Jawbreaker**, a heavy magnum of four rifle rounds, 12 a shot. Each carries a wax seal and a strip of scripture that swing as it fires.
+- Made from stainless steel, a diamond and a lever; redstone for the Psalm. Each takes the barrel attachments and stocks; the Kreuzer and the Psalm the magazines, the Jawbreaker the scopes and the Laser Sight.
+- The owner's GeckoLib models of the three are added to the library.
+- Record: [guns.md, slice 15B](docs/features/guns.md#slice-15b-three-diamond-steel-sidearms).
+
+### Unmerged: Guns, slice 15A (the first diamond-steel guns)
+- **Three guns** from the owner's own GeckoLib models and animations, the first of their diamond-steel guns, each held in both hands and fed from a box magazine: the **Vesper Rifle**, a heavy marksman's rifle of eight rifle rounds that hits hard and reaches 144 blocks; the **Onrush SMG**, a submachine gun of twenty-three light rounds, ten a second; and the **Gallant Rifle**, an automatic rifle of seventeen, silenced the length of its barrel. The Vesper and the Gallant carry a wax seal and a strip of scripture that swing as they fire.
+- Made from stainless steel, a diamond and a lever (Jugcraft has no diamond steel); planks for the Vesper and the Onrush, a Baffled Silencer for the Gallant. Each takes the magazines, stocks, grips, bayonets and scopes the owner made for it; the Gallant no barrel attachment, the Vesper no Medium Scope.
+- The owner's GeckoLib models of the three are added to the library. The guns' converter now draws a GeckoLib model's parts from that model's own texture.
+- Record: [guns.md, slice 15A](docs/features/guns.md#slice-15a-the-first-diamond-steel-guns).
+
+### Unmerged: Guns, slice 14F (the Old Grange Carbine)
+- **One gun** from the owner's own GeckoLib model and animations, the last of their treated-brass guns: the **Old Grange Carbine**, the Grange Carbine's older make, with a longer barrel, loaded from the top with a stripper clip of seven rifle rounds. Slower than the Grange Carbine, it hits harder, reaches further and aims straighter. Held in both hands.
+- Made from steel, brass, a lever and planks. It takes the Grange Carbine's attachments but the magazines; its scopes stand on its own rail ahead of the receiver.
+- The guns' converter now reads a gun the owner modelled in GeckoLib, checked against the item-model parts it shares with their Grandle. The owner's model is added to the library (`Guns/geo/item/gun/grandle_og.geo.json`).
+- Record: [guns.md, slice 14F](docs/features/guns.md#slice-14f-the-old-grange-carbine).
+
+### Unmerged: Guns, slice 14E (a flamethrower and a fire shotgun)
+- **Two guns** from the owner's models and animations, the last of their treated-brass guns but an earlier make of the Grange Carbine, each held in both hands: the **Firedrake**, a short flamethrower with two fuel tanks slung under it and a pilot flame always lit, whose wide, close jet burns blaze powder and sets creatures alight; and the **Harrow**, four barrels before a drum, whose four buckshot pellets and burst of flame set what they hit alight.
+- Each is made from steel, brass, a lever and a fire charge; the Firedrake two buckets for its tanks. The Harrow takes the three stocks; the Firedrake nothing.
+- Record: [guns.md, slice 14E](docs/features/guns.md#slice-14e-a-flamethrower-and-a-fire-shotgun).
+
+### Unmerged: Guns, slice 14D (a crossbow-gun, a molten rifle and a drum gun)
+- **Three guns** from the owner's models and animations, more of their treated-brass guns, each held in both hands: the **Quarrel Carbine**, a repeating crossbow-gun of eight rifle rounds whose strings snap forward with each shot; the **Hinterland Rifle**, a two-pronged rifle of molten stone whose shots set what they hit alight and whose two top lids flick open as it fires; and the **Cloudburst Gun**, a drum-fed automatic of thirty rifle rounds, held and aimed at the hip as the Thresher is.
+- Each is made from steel, brass and a lever, with a crossbow, a magma block or a lightning rod. The Quarrel Carbine takes the magazines, the stocks and the four sights; the Hinterland Rifle the Medium Scope and the Reflex Sight; the Cloudburst Gun nothing.
+- **Fixed:** fired aimed, the Cloudburst Gun and the Borer play their shot from the hip (the owner made them no aimed shot). And guns held at the hip no longer swing an arm's sleeve across the left of the view as they fire: the guns' animations no longer ease into each other over a tick, an ease that could begin from the arms' rest pose.
+- Record: [guns.md, slice 14D](docs/features/guns.md#slice-14d-a-crossbow-gun-a-molten-rifle-and-a-drum-gun).
+
 
 ### Unmerged: The Exchange (bank, markets, land and shares, in Jugs)
 - Press **N** (or `/jugcraft exchange`) for the **Exchange**, a walnut-and-brass ledger with seven tabs. It deals only in **Jugs**, the town's credit: no new currency.

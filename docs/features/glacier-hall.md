@@ -39,7 +39,7 @@ A vast cavern in the heart of a glacier, 80 blocks across, 44 high and 88 long, 
 - **Overhead:** **giant icicles** hang from the vault, some in clusters, none lower than 15 blocks above the lake. A crack runs across the vault's crown, open to the pale sky.
 - **The light:** hidden light blocks, as if the daylight soaked through the ice: brightest under the crack and at the arrival. Snowflakes drift in the air.
 
-Everything else is the shared framework ([hollow-acre.md](hollow-acre.md#lairs-the-shared-rules)): an instance per opening, at most eight; at most four players; nothing can be built or broken; the mist's toll at the edges; Grave Goods on death; closing after 30 seconds empty.
+Everything else is the shared framework ([hollow-acre.md](hollow-acre.md#lairs-the-shared-rules)): an instance per opening, at most eight; at most four players; nothing can be built or broken; the mist's toll at the edges; nothing lost on death; closing after 30 seconds empty.
 
 ## Changes from the plan
 
@@ -172,7 +172,7 @@ The Glacier Hall is its own dimension, so nothing here changes the Overworld but
 
 ## Rollout and open questions
 
-The shared framework's defaults hold: four players and eight instances, Grave Goods on death.
+The shared framework's defaults hold: four players and eight instances, nothing lost on death.
 
 On Peaceful the horn is used up and opens the hall empty, since the Yeti King is a monster and Peaceful has none (proposed, B-P37 in [the Chunk B contract](concordance-chunk-b.md#decisions)). The alternative is to refuse the horn on Peaceful and keep it.
 

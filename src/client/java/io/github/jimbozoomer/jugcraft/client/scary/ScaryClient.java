@@ -19,5 +19,8 @@ public final class ScaryClient implements ClientModInitializer {
         EntityRendererRegistry.register(ScaryMod.SPACE_KOOK, SpaceKookRenderer::new);
         ModelLayerRegistry.registerModelLayer(CUTLER, CaptainCutlerGeometry::create);
         EntityRendererRegistry.register(ScaryMod.CAPTAIN_CUTLER, CaptainCutlerRenderer::new);
+        EntityRendererRegistry.register(ScaryMod.UNMASKED_CROOK, io.github.jimbozoomer.jugcraft.client.UnmaskedCrookRenderer::new);
+        EntityRendererRegistry.register(io.github.jimbozoomer.jugcraft.creatures.herobrine.HerobrineEncounters.HEROBRINE,
+            io.github.jimbozoomer.jugcraft.client.HerobrineRenderer::new);
     }
 }
