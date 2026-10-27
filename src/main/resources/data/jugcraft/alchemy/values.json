@@ -2,6 +2,16 @@
   "schema": 1,
   "fallback": 1,
   "items": {
+    "jugcraft:abbey_glass": {
+      "numerator": 5,
+      "denominator": 4,
+      "source": "recipe jugcraft:abbey_glass"
+    },
+    "jugcraft:abbots_cowl": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
     "jugcraft:abrasive_head": {
       "numerator": 8451,
       "denominator": 1,
@@ -12653,9 +12663,9 @@
       "source": "fallback (balance pending)"
     },
     "jugcraft:glass_accord": {
-      "numerator": 4421,
+      "numerator": 259,
       "denominator": 1,
-      "source": "recipe jugcraft:glass_accord"
+      "source": "recipe jugcraft:glass_accord_from_prism_shards"
     },
     "jugcraft:glass_coffee_table": {
       "numerator": 4177,
@@ -12671,6 +12681,11 @@
       "numerator": 2075,
       "denominator": 72,
       "source": "recipe jugcraft:glass_door"
+    },
+    "jugcraft:glass_reliquary": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
     },
     "jugcraft:glass_tank": {
       "numerator": 10,
@@ -27072,6 +27087,11 @@
       "denominator": 288,
       "source": "recipe jugcraft:landship"
     },
+    "jugcraft:lantern_lens": {
+      "numerator": 11,
+      "denominator": 8,
+      "source": "recipe jugcraft:lantern_lens"
+    },
     "jugcraft:lantern_musket": {
       "numerator": 58565,
       "denominator": 36,
@@ -28101,6 +28121,11 @@
       "numerator": 397,
       "denominator": 2,
       "source": "recipe jugcraft:minuet_pistol"
+    },
+    "jugcraft:mirror_inscription": {
+      "numerator": 33,
+      "denominator": 1,
+      "source": "recipe jugcraft:mirror_inscription"
     },
     "jugcraft:mixed_farm_blend": {
       "numerator": 3,
@@ -32476,6 +32501,11 @@
       "numerator": 8707,
       "denominator": 4,
       "source": "recipe jugcraft:printer"
+    },
+    "jugcraft:prism_shard": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
     },
     "jugcraft:prize_wheel": {
       "numerator": 22585,

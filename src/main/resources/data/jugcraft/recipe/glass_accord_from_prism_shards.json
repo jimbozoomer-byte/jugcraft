@@ -1,0 +1,19 @@
+{
+  "fabric:load_conditions": [
+    {
+      "condition": "jugcraft:feature_enabled",
+      "feature": "agriculture"
+    }
+  ],
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    "jugcraft:prism_shard",
+    "jugcraft:prism_shard",
+    "minecraft:spyglass"
+  ],
+  "result": {
+    "id": "jugcraft:glass_accord",
+    "count": 1
+  }
+}
