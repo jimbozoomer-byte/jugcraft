@@ -6287,7 +6287,7 @@ Slice 9E's files: the guns' tactical grip parts and the Laser Sight's textures m
   - `python3 tools/check_mod_data.py`: PASS (8033 material IDs). Its new hit-effects check, run alone against broken tables, reported each: a changed Lament chance, an entry that is no gun with a chance of 1.5, 0 ticks and level 9, an effect `HitEffect.holder()` does not map (poison), and bleeding on the Trench Lobber.
   - `python3 tools/guns.py --check`: PASS. `python3 scripts/check_repository.py`: PASS. `python3 -m unittest discover -s scripts/tests`: 287 tests passed; `python3 scripts/package_modrinth.py check`: PASS. `git diff --check`: clean.
   - **Java:** a syntax parse only: 0 errors in the changed and new files.
-- **Hit effects, game tests (not run yet; CI runs them):**
+- **Hit effects, game tests (passed in CI run 40586405989 on 328b93128):** every job passed: both server test jobs (`mod` and `optional integrations absent`, each "All 2988 required tests passed", the five new ones on top of the 2,983 of the beam-mining run) and all 16 client shards.
   - `HitEffectsGameTests`:
     - `hitEffectsAreTheOwners`: the table is the owner's four, naming vanilla's Slowness and Darkness; the Linesman and the Stormlock fire arcs, the Geode Cutter a beam, the Lament Rifle bullets; the Picket Rifle and the Caisson Pistol give none.
     - `afflictGivesItsChance`: a sure darkness lands at its second level for 100 ticks; an effect of no chance, and none, never land. The Lament Rifle's darkness lands on a seeded roll under its chance and not on one over it, as a twin of the same random shows. The twins' seeds are drawn from a seeded source.
