@@ -402,8 +402,8 @@ public final class GunsClient {
 		ClientPlayNetworking.send(GunReloadPayload.of(hand));
 		held(hand).burstLeft = 0;
 		if (rounds > 0) {
-			GunAnimations.trigger(player, hand, GunAnimations.reloadName(spec, rounds));
-			reloadingUntil = now + spec.reloadTicks(rounds);
+			GunAnimations.trigger(player, hand, GunAnimations.reloadName(gun, spec, rounds));
+			reloadingUntil = now + spec.reloadTicks(rounds, JugcraftGuns.loadStep(gun));
 			reloadByShell = spec.byShell();
 			reloadingHand = hand;
 		}
@@ -447,7 +447,7 @@ public final class GunsClient {
 				GunAnimations.trigger(holder, hand, "aim_shoot");
 				GunEffects.shot(holder, hand);
 			}
-			case GunActionPayload.RELOAD -> GunAnimations.trigger(holder, hand, GunAnimations.reloadName(gun.spec(), payload.rounds()));
+			case GunActionPayload.RELOAD -> GunAnimations.trigger(holder, hand, GunAnimations.reloadName(gun, gun.spec(), payload.rounds()));
 			case GunActionPayload.STAB -> GunEffects.stabbed(holder);
 			case GunActionPayload.SPIN -> GunEffects.spun(holder, JugcraftGuns.spinUp(gun));
 			default -> GunAnimations.trigger(holder, hand, "idle");

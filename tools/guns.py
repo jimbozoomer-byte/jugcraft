@@ -980,6 +980,34 @@ GUNS = {
         "damage": 5.5, "pellets": 1, "interval": 3, "auto": False, "capacity": 21,
         "reload": 43, "spread": (2.5, 0.5), "range": 96, "ammo": "rifle_round",
     },
+    # Slice 15E: the owner's last three diamond-steel guns, each from their own GeckoLib model and animations: the
+    # Cyclone, a heavy gun carried at the hip that fires microjets from nine tubes as long as the trigger is held, its
+    # drum loaded three at a time (LOAD_STEPS); the Minksy, a lever-action beam rifle; and the Shard Culler, a cutting beam
+    # carried at the hip that pierces armour.
+    "maelstrom_gun": {
+        "display": "Maelstrom Gun",
+        "source": "cyclone",
+        "tooltip": "A heavy stainless steel gun carried at the hip: as long as the trigger is held its nine tubes fire "
+                   "microjets, loaded three at a time. Fires microjets.",
+        "damage": 7.5, "pellets": 1, "interval": 6, "auto": True, "capacity": 24,
+        "reload": (10, 17, 20), "spread": (3.0, 1.5), "range": 64, "ammo": "microjet",
+    },
+    "ermine_rifle": {
+        "display": "Ermine Rifle",
+        "source": "minksy",
+        "tooltip": "A lever-action beam rifle: each pull of the lever sends a beam through every creature in its line. "
+                   "Its core is drawn out to reload. Runs on Energy Cells.",
+        "damage": 10.0, "pellets": 1, "interval": 12, "auto": False, "capacity": 15,
+        "reload": 53, "spread": (1.5, 0.2), "range": 80, "ammo": "energy_cell", "shot": "beam", "charge": 400,
+    },
+    "geode_cutter": {
+        "display": "Geode Cutter",
+        "source": "shard_culler",
+        "tooltip": "A crystal-lensed cutting beam carried at the hip: as long as the trigger is held it burns through "
+                   "every creature in front of it, and through armour. Runs on Energy Cells.",
+        "damage": 3.0, "pellets": 1, "interval": 3, "auto": True, "capacity": 50,
+        "reload": 59, "spread": (3.0, 1.5), "range": 24, "ammo": "energy_cell", "shot": "beam", "charge": 120,
+    },
 }
 
 # What a gun fires: bullets, or a slice 8C or 8D gun's "shot".
@@ -1028,6 +1056,10 @@ AMMO = {
     # into a small iron case), for the Quill Rifle. A dart falls over its flight (DART_SPEED, DART_DROP).
     "dart": ("Dart", "A steel needle in a small iron case, for a dart rifle. It falls a little over a long shot.",
              (["N", "N", "G"], {"N": "minecraft:iron_nugget", "G": "minecraft:gunpowder"}, 6)),
+    # Slice 15E: the owner's microjet (Guns/item/microjet.png; their recipe presses gunpowder and a bullet tip into a
+    # small iron case), a little rocket that drives itself, for the Maelstrom Gun.
+    "microjet": ("Microjet", "A little iron rocket that drives itself, its lead tip over a charge of gunpowder.",
+                 (["L", "G", "N"], {"L": "#c:nuggets/lead", "G": "minecraft:gunpowder", "N": "minecraft:iron_nugget"}, 4)),
 }
 
 # Gun recipes: crafted at a crafting table from early metal (the iron set adds brass); the owner's art carries the look.
@@ -1279,6 +1311,18 @@ RECIPES = {
                                        "P": "#minecraft:planks"}),
     "tumbler_rifle": (["SSS", "DLR", "PS "], {"S": "#c:ingots/stainless_steel", "D": "minecraft:diamond",
                                                "L": "minecraft:lever", "R": "minecraft:redstone", "P": "#minecraft:planks"}),
+    # Slice 15E, as before. The owner's recipes give the Cyclone two heavy gun barrels, heavy gun parts and a rapid
+    # firing unit (more stainless steel, redstone); the Minksy and the Shard Culler an energy core and heavy gun parts
+    # (the energy guns' copper cable and advanced circuit), the Minksy a wooden part (planks) and the Shard Culler an
+    # amethyst shard.
+    "maelstrom_gun": (["SSS", "SDS", "RL "], {"S": "#c:ingots/stainless_steel", "D": "minecraft:diamond",
+                                               "R": "minecraft:redstone", "L": "minecraft:lever"}),
+    "ermine_rifle": (["SSS", "DAC", "P  "], {"S": "#c:ingots/stainless_steel", "D": "minecraft:diamond",
+                                              "A": "jugcraft:advanced_circuit", "C": "jugcraft:copper_cable",
+                                              "P": "#minecraft:planks"}),
+    "geode_cutter": (["SSM", "DAC", "S S"], {"S": "#c:ingots/stainless_steel", "M": "minecraft:amethyst_shard",
+                                              "D": "minecraft:diamond", "A": "jugcraft:advanced_circuit",
+                                              "C": "jugcraft:copper_cable"}),
 }
 # The switches beyond "guns" a gun's recipe needs (separate load conditions, all of which must hold): the energy weapons
 # and their cells are useless without the Charging Station, so they need the machines too (as the leaf blower does).
@@ -3203,6 +3247,65 @@ BUILDS = {
         "sight": (8.0, 6.0, 14.23),
         "eye_relief": 1.0,
     },
+    # Slice 15E, from the owner's GeckoLib models; each bone where the owner's stands, so their animations work it.
+    # The Cyclone is carried at the hip as the Thresher is, without sights. Its barrel (the block of nine tubes, with the
+    # drum the owner named magazine and the seal on its side) drives back as it fires; its reload slides the drum out,
+    # and each loop brings it a microjet (the owner's "rocket", under the body). The hands are where the owner's arms
+    # hold it in its idle: the right on the rear grip, the left on the handle at its left side.
+    "maelstrom_gun": {
+        "bones": [
+            ("gun_body", None, ["main"], (7.9798, 3.35, 9.2)),
+            ("body", "gun_body", [], (7.9798, 3.35, 9.2)),
+            ("bolt", "body", ["bolt"], (8.60626, 5.04816, 12.58542)),
+            ("rocket", "body", ["rocket"], (7.9798, 1.1, 12.2)),
+            ("barrel", "gun_body", ["barrel"], (7.9798, 3.35, 9.2)),
+            ("magazine", "barrel", ["drum"], (7.93748, 0.70875, 3.1625)),
+            ("seal", "barrel", ["seal"], (5.02498, 1.35, 6.95)),
+            ("scriptures", "seal", ["scriptures"], (5.02498, 2.6, 6.2)),
+        ],
+        "hands": {"right": (7.29, 3.41, 18.59), "left": (2.25, 4.97, 12.91)},
+        "arms": {"right": (-0.2164, -0.21, 0.9535), "left": (-0.2131, -0.5144, 0.8306)},
+        "muzzle": (8.0, 2.86, -2.08),
+        "sight": None,
+    },
+    # The Minksy: its shot works the lever under the grip and the hammer above it; its reload draws the energy core
+    # (in the barrel, turned a quarter as the owner turned it) out of the left side and back. The hands are the
+    # owner's arms' in its idle: the right on the grip, the left under the barrel. Its sights are the notch at the back
+    # of the receiver and the post at the muzzle.
+    "ermine_rifle": {
+        "bones": [
+            ("gun_body", None, [], (8.0, 4.25, 10.775)),
+            ("gun_body2", "gun_body", ["no_sights"], (8.0, 4.0, 3.0)),
+            ("main", "gun_body2", ["main", "sights"], (8.0, 4.25, 10.75)),
+            ("hammer", "main", ["hammer"], (8.0, 4.9, 13.9)),
+            ("lever", "main", ["lever"], (8.0, 2.75, 12.0)),
+            ("barrel", "gun_body2", ["barrel"], (8.0, 4.0, 3.0)),
+            ("core", "barrel", ["core"], (7.9985, 4.95451, 7.19723)),
+        ],
+        "hands": {"right": (8.13, 2.02, 15.05), "left": (6.96, 1.59, 6.98)},
+        "arms": {"right": (-0.2057, -0.8997, 0.3851), "left": (0.5877, -0.6813, 0.4364)},
+        "muzzle": (8.0, 5.5, -6.75),
+        "sight": (7.99, 6.9, 10.73),
+    },
+    # The Shard Culler is carried at the hip as the Seam Cutter is, without sights: one body, with its seal and
+    # scriptures, and the energy core on its left side that its reload draws out, the left hand holding it (the
+    # owner's left arm hangs under the core). Its "grip", which the reload works, is empty in the owner's model.
+    "geode_cutter": {
+        "bones": [
+            ("gun_body2", None, [], (8.025, 1.65, 7.0)),
+            ("gun_body", "gun_body2", ["main"], (8.025, 1.65, 7.0)),
+            ("body", "gun_body", [], (8.025, 1.65, 7.0)),
+            ("seal", "body", ["seal"], (7.125, 3.25, 10.75)),
+            ("scriptures", "seal", ["scriptures"], (4.95, 1.85, 9.2)),
+            ("grip", "body", [], (3.3875, 3.85, 8.75)),
+            ("core", "body", ["core"], (5.26753, 0.65325, 11.65)),
+        ],
+        "hands": {"right": (9.72, 4.49, 17.66), "left": (2.38, 3.86, 11.91)},
+        "arm_parents": {"left": "core"},
+        "arms": {"right": (-0.2164, -0.21, 0.9535), "left": (-0.1791, -0.7172, 0.6735)},
+        "muzzle": (8.0, 1.94, -0.19),
+        "sight": None,
+    },
 }
 
 # Props the animations move on bones that had no part ("@<name>" in a bone's parts): the rounds a reload carries in,
@@ -3764,6 +3867,9 @@ ZOOM = {
     "hawker_rifle": 0.8, "impetus_shotgun": 0.9, "quill_rifle": 0.85,
     # Slice 15D: a rifle, a shotgun and a burst rifle.
     "auger_rifle": 0.8, "auger_shotgun": 0.9, "tumbler_rifle": 0.85,
+    # Slice 15E: two heavy guns carried at the hip, as the Thresher and the Seam Cutter, and a beam rifle (the owner's
+    # zoom for the Minksy, 0.6, is a scope's; its iron sights narrow the view as the Spikedriver's).
+    "maelstrom_gun": 0.95, "ermine_rifle": 0.85, "geode_cutter": 0.95,
 }
 
 
@@ -3787,7 +3893,7 @@ def tilt(gun):
 # (Guns/item/<file>.png) is copied to textures/particle/<round>_casing.png for the particle jugcraft:<round>_casing
 # (JugcraftGuns.CASINGS). A paper cartridge leaves no case: its cue puffs smoke from the lock instead.
 CASINGS = {"light_round": "small_copper_casing", "rifle_round": "large_brass_casing", "buckshot_shell": "shotgun_shell",
-           "dart": "small_iron_casing"}
+           "dart": "small_iron_casing", "microjet": "small_iron_casing"}
 # The Laser Sight's dot (slice 9E), the particle jugcraft:laser_dot (JugcraftGuns.LASER_DOT, client/guns/GunLaser): the
 # owner's red dot (Guns/effect/red_dot_reticle.png, the Reflex Sight's), copied to textures/particle/laser_dot.png.
 LASER_DOT = "red_dot_reticle"
@@ -3813,7 +3919,9 @@ FLASH_SIZE = {"light_round": 5.0, "rifle_round": 7.0, "buckshot_shell": 8.0, "pa
               # Slice 10A: a rocket's launch flares as wide as black powder.
               "he_rocket": 10.0,
               # The darts-and-bleeding follow-up: a dart's small charge flashes narrower than a light round's.
-              "dart": 4.0}
+              "dart": 4.0,
+              # Slice 15E: a microjet's motor flares as wide as a rifle round's charge.
+              "microjet": 7.0}
 # The flash's tint, by the round, where it is not the owner's frames' own white-gold (client/guns/GunLooks
 # FLASH_TINTS, multiplied into the frames): an energy weapon's discharge is cyan-white.
 FLASH_TINT = {"energy_cell": 0x9FF4FF}
@@ -4038,6 +4146,11 @@ SHOT_SOUNDS = {
     "auger_rifle": "item/carabine/fire.ogg",
     "auger_shotgun": "item/blackpowder/fire.ogg",
     "tumbler_rifle": "item/iron_rifle/fire.ogg",
+    # Slice 15E: the shots the owner's data names: the gyrojet's for the Cyclone (new to the mod), the laser's second
+    # (the Seam Cutter's) for the Minksy and the beam's (the Murmur SMG's) for the Shard Culler.
+    "maelstrom_gun": "item/gyrojet/fire.ogg",
+    "ermine_rifle": "item/laser/fire_2.ogg",
+    "geode_cutter": "item/beam/fire.ogg",
 }
 SUBTITLES = {
     "fire": "Gun fires",
@@ -4243,13 +4356,21 @@ SILENCED = ("gallant_rifle", "quill_rifle")
 # to the Tumbler Rifle.
 KNOCKBACK = {"jawbreaker": 0.6, "impetus_shotgun": 0.65, "auger_shotgun": 0.65}
 PIERCING = {"vesper_rifle": 4.5, "onrush_smg": 3.0, "kreuzer_pistol": 1.0, "psalm_smg": 1.0, "jawbreaker": 4.5,
-            "hawker_rifle": 1.0, "quill_rifle": 1.5, "tumbler_rifle": 3.0}
+            "hawker_rifle": 1.0, "quill_rifle": 1.5, "tumbler_rifle": 3.0,
+            # Slice 15E: the Shard Culler's "armorPen" (4).
+            "geode_cutter": 4.0}
 
 # Slice 15D: the guns that fire a burst to a pull, (rounds, rest): that many shots their interval apart, then a rest of
 # that many ticks more before the next pull fires (JugcraftGuns.BURSTS; the client fires the burst, the server's trigger
 # credit allows a burst each cycle, GunShots.spend). The owner's Lockewood fires bursts of three, resting five ticks
 # ("burstAmount" 3, "burstCooldown" 5): the Tumbler Rifle.
 BURSTS = {"tumbler_rifle": (3, 5)}
+
+# Slice 15E: the guns loaded a shell at a time that load several rounds a step: each step of their reload (shellEach
+# ticks, one reload_loop of their animation) loads this many, the last step what is left (JugcraftGuns.LOAD_STEPS,
+# GunShots' reload, GunAnimations' loops). The owner's Cyclone loads its microjets three at a time ("reloadAmount" 3):
+# the Maelstrom Gun.
+LOAD_STEPS = {"maelstrom_gun": 3}
 
 
 # ------------------------------------------------------------------ darts and bleeding
@@ -4582,11 +4703,27 @@ GEO_PARTS["lockewood"] = {
 # the item model's less this): the owner's Grandle OG model holds its Grandle's body, sights, bolt, stocks and grips
 # element for element at the same places less this, and its muzzle attachments and bayonets 3 px further forward on its
 # longer barrel (GEO_TWINS, check_geo()).
+# Slice 15E: the Cyclone, the Minksy and the Shard Culler, from the owner's later edits of them. The Cyclone is a body
+# and a barrel the reload's loop works, with the microjet ("rocket") its loading carries and a drum (the owner's
+# "magazine") on the barrel; its grips, stocks and bayonets are empty bones (it takes none). The Minksy's main part is
+# split into its body, the hammer and lever its shot works, and the barrel holding its energy core (the owner's "core",
+# turned a quarter about the barrel, its cubes about their own uprights: geo_part()); its empty no_sights part is the
+# empty gun_body2. The Shard Culler is one body with its seal, scriptures and core.
+GEO_PARTS["cyclone"] = {"main": "gun_body", "bolt": "bolt", "rocket": "rocket", "barrel": "barrel", "drum": "magazine",
+                        "seal": "seal", "scriptures": "scriptures"}
+GEO_PARTS["minksy"] = {
+    "main": "main", "hammer": "hammer", "lever": "lever", "sights": "sights", "no_sights": "gun_body2", "barrel": "barrel",
+    "core": "core", "light_stock": "light_stock", "heavy_stock": "weighted_stock", "wooden_stock": "wooden_stock",
+    "light_grip": "light_grip", "vert_grip": "vertical_grip", "iron_bayonet": "iron_bayonet",
+    "anthralite_bayonet": "anthralite_bayonet", "diamond_bayonet": "diamond_bayonet",
+    "netherite_bayonet": "netherite_bayonet"}
+GEO_PARTS["shard_culler"] = {"main": "gun_body", "seal": "seal", "scriptures": "scriptures", "core": "core"}
 GEO_OFFSETS = {"grandle_og": (0.00625, -8.15, -1.0), "mas_55": (0.0, -8.15, -0.8), "prush_gun": (-0.0095, -8.05, -1.25),
                "valora": (0.0125, -8.2, -0.75), "krauser": (-0.0095, -8.1, -0.1384),
                "soul_drummer": (-0.0095, -8.05, -0.2), "uppercut": (-0.0095, -8.5, -1.4),
                "mas_peddler": (0.0, -8.15, -0.8), "inertial": (-0.0095, -8.1, -1.0), "zilk_45": (0.0, -7.95, -0.75),
-               "drill": (0.0, -8.0, -2.0), "drill_conversion": (0.0, -8.0, -2.0), "lockewood": (0.014, -8.2, -1.25)}
+               "drill": (0.0, -8.0, -2.0), "drill_conversion": (0.0, -8.0, -2.0), "lockewood": (0.014, -8.2, -1.25),
+               "cyclone": (-0.0202, -8.7, -1.2), "minksy": (0.0, -8.0, 0.0), "shard_culler": (0.025, -7.0, 1.0)}
 # The bones of a GeckoLib model that are another of the owner's guns' item-model parts, moved by (x, y, z) px: the
 # converter must give back those parts' elements, face for face (check_geo()).
 GEO_TWINS = {"grandle_og": {
@@ -4652,8 +4789,16 @@ GEO_TWINS.update({source: {bone: (part if "/" in part else f"{source}/{part}", (
                   "diamond_bayonet": "diamond_bayonet", "netherite_bayonet": "netherite_bayonet",
                   "muzzle_brake": "muzzle_brake", "advanced_silencer": "advanced_silencer", "silencer": "silencer",
                   "weighted_stock": "heavy_stock", "wooden_stock": "wooden_stock", "light_stock": "light_stock"}}.items()})
+# Slice 15E: the same for the Cyclone's body and the Minksy's sights and attachments; none of the Shard Culler's bones
+# keeps its earlier part's shape.
+GEO_TWINS.update({source: {bone: (f"{source}/{part}", (0, 0, 0)) for bone, part in twins.items()} for source, twins in {
+    "cyclone": {"gun_body": "main"},
+    "minksy": {"sights": "sights", "vertical_grip": "vert_grip", "light_grip": "light_grip", "light_stock": "light_stock",
+               "weighted_stock": "heavy_stock", "wooden_stock": "wooden_stock", "iron_bayonet": "iron_bayonet",
+               "anthralite_bayonet": "anthralite_bayonet", "diamond_bayonet": "diamond_bayonet",
+               "netherite_bayonet": "netherite_bayonet"}}.items()})
 GEO_RELAID = ("mas_55", "prush_gun", "valora", "krauser", "soul_drummer", "uppercut", "mas_peddler", "inertial", "zilk_45",
-              "drill", "drill_conversion", "lockewood")
+              "drill", "drill_conversion", "lockewood", "cyclone", "minksy", "shard_culler")
 
 
 def geo_model(source):
@@ -4667,12 +4812,20 @@ def geo_part(source, bone):
     geo = geo_model(source)
     size_px = (geo["description"]["texture_width"], geo["description"]["texture_height"])
     data = next(b for b in geo["bones"] if b["name"] == bone)
-    elements = [geo_element(cube, GEO_OFFSETS[source], size_px, f"scguns:animated/gun/{source}")
-                for cube in data.get("cubes", [])]
+    texture = f"scguns:animated/gun/{source}"
+    elements = [geo_element(cube, GEO_OFFSETS[source], size_px, texture) for cube in data.get("cubes", [])]
     if any(data.get("rotation", [0, 0, 0])):
         turn = geo_element({"origin": [0, 0, 0], "size": [0, 0, 0], "rotation": data["rotation"], "pivot": data["pivot"]},
                            GEO_OFFSETS[source], size_px, "")["rotation"]
-        elements = [dict(element, rotation=bone_turn(element.get("rotation"), turn)) for element in elements]
+        if any(e.get("rotation", {}).get("axis") not in (None, turn["axis"]) for e in elements) \
+                and abs(math.remainder(turn["angle"], 90.0)) < 1e-9:
+            # Slice 15E: the Minksy's core, turned a quarter about x, holds cubes turned about y: each is laid anew by
+            # the bone's square turn, its own turn following (geo_element()'s outer).
+            square = [[round(v) for v in row] for row in axis_turn("xyz".index(turn["axis"]), turn["angle"])]
+            elements = [geo_element(cube, GEO_OFFSETS[source], size_px, texture, (square, turn["origin"]))
+                        for cube in data.get("cubes", [])]
+        else:
+            elements = [dict(element, rotation=bone_turn(element.get("rotation"), turn)) for element in elements]
     return {"elements": elements}
 
 
@@ -4715,12 +4868,14 @@ def geo_pivot(source, bone):
     return (rnd(8.0 - x), rnd(y), rnd(z + 8.0))
 
 
-def geo_element(cube, offset, size_px, texture):
+def geo_element(cube, offset, size_px, texture, outer=None):
     """One cube of an owner GeckoLib model -> the item-model element element_cube() makes the same cube from: its
     corners less the model's offset (GEO_OFFSETS), its one-axis turn, and for each face the vanilla uv and rotation
     giving each corner the UV GeckoLib gives it (java_face()). A cube the owner turned about more than one axis is laid
     anew as the same cube square to the axes, then turned about one (relaid_turn()); a cube the owner shrank or swelled
-    ("inflate", slice 15D) has its corners moved out by that much, its UVs those of its size."""
+    ("inflate", slice 15D) has its corners moved out by that much, its UVs those of its size. `outer` (slice 15E), a
+    whole-quarter turn and its centre, is the turn of a bone the owner turned square as a whole: the cube is laid anew
+    by it, and its own turn is then about the axis that turn takes its own axis to, about where it takes its centre."""
     ox, oy, oz = (c - d for c, d in zip(cube["origin"], offset))
     sx, sy, sz = cube["size"]
     swell = cube.get("inflate", 0.0)
@@ -4744,6 +4899,18 @@ def geo_element(cube, offset, size_px, texture):
         else:
             k = axes[0]
             angle = turn[k] if k == 2 else -turn[k]
+        rotation = (k, angle, pivot)
+    if outer:
+        square, centre = outer
+        lo, hi, corners = relaid(square, centre, lo, hi, corners)
+        if rotation:
+            # S R_k(a) S^-1 is the turn by a about S e_k: about axis m, by -a where S takes e_k to -e_m.
+            k, angle, pivot = rotation
+            m = next(r for r in range(3) if square[r][k])
+            rotation = (m, angle * square[m][k],
+                        [centre[r] + sum(square[r][t] * (pivot[t] - centre[t]) for t in range(3)) for r in range(3)])
+    if rotation:
+        k, angle, pivot = rotation
         rotation = {"angle": rnd(angle), "axis": "xyz"[k], "origin": [rnd(v) for v in pivot]}
     element = {"from": [rnd(v) for v in lo], "to": [rnd(v) for v in hi]}
     if rotation:
@@ -4798,13 +4965,16 @@ def relaid_turn(turn):
 
 def relaid(square, pivot, lo, hi, corners):
     """The cube from lo to hi turned square to the axes (`square`) about `pivot`: its new corners, and on each new face
-    the UV the old face gave each corner at the corner it came to."""
+    the UV the old face gave each corner at the corner it came to. Which corner that is follows from the turn itself
+    (new axis r takes old axis k's side, or the other side where the turn reverses it), so a flat cube, whose two
+    sides along an axis meet, keeps its corners apart (slice 15E: the Minksy's core)."""
     def place(point):
         rel = [point[t] - pivot[t] for t in range(3)]
         return [pivot[r] + sum(square[r][t] * rel[t] for t in range(3)) for r in range(3)]
     ends = [place(lo), place(hi)]
     new_lo = [min(e[t] for e in ends) for t in range(3)]
     new_hi = [max(e[t] for e in ends) for t in range(3)]
+    source = [next(k for k in range(3) if square[r][k]) for r in range(3)]
     moved = {}
     for face, uvs in corners.items():
         k, sign = FACE_AXES[face]
@@ -4812,8 +4982,8 @@ def relaid(square, pivot, lo, hi, corners):
         new_face = next(f for f, (a, s) in FACE_AXES.items() if normal[a] == s)
         moved[new_face] = {}
         for pick, uv in uvs.items():
-            point = place([hi[t] if pick[t] else lo[t] for t in range(3)])
-            moved[new_face][tuple(int(abs(point[t] - new_hi[t]) < 1e-6) for t in range(3))] = uv
+            moved[new_face][tuple(pick[source[r]] if square[r][source[r]] > 0 else 1 - pick[source[r]]
+                                  for r in range(3))] = uv
     return new_lo, new_hi, moved
 
 

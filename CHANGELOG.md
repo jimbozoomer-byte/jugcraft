@@ -8,6 +8,12 @@ Every change to Jugcraft, newest first, grouped by pull request. For what each t
 
 No numbered release yet. Entries on feature branches remain proposed until their pull requests merge.
 
+### Unmerged: Guns, slice 15E (a microjet gun and two beams)
+- **Three guns** from the owner's own GeckoLib models and animations, the last of their diamond-steel guns, each held in both hands: the **Maelstrom Gun** (the owner's Cyclone), carried at the hip, firing **Microjets** from nine tubes as long as the trigger is held, 24 to a load; the **Ermine Rifle** (the Minksy), a lever-action rifle whose beam passes through every creature in its line, on Energy Cells; and the **Geode Cutter** (the Shard Culler), a cutting beam carried at the hip, as long as the trigger is held, that passes through 4 points of armour.
+- A new round, the **Microjet**: the owner's little iron rocket (a lead nugget over gunpowder over an iron nugget make four). The Maelstrom Gun loads **three at a time**, a step each three.
+- **Beams can pierce armour** now; only the Geode Cutter's does.
+- Record: [guns.md, slice 15E](docs/features/guns.md#slice-15e-a-microjet-gun-and-two-beams).
+
 ### Unmerged: Guns, slice 15D (two barrels and a burst)
 - **Three guns** from the owner's own GeckoLib models and animations, the next of their diamond-steel guns, each held in both hands: the **Auger Rifle** (the owner's Drill), two barrels of 14 a shot whose barrels swing open to load a paper cartridge at a time; the **Auger Shotgun** (the Drill Conversion), the same made over to fire two buckshot shells of eight pellets that stray as far aimed as from the hip and knock back what they hit; and the **Tumbler Rifle** (the Lockewood), which fires a **burst of three** rounds to a pull, from a magazine of 21, piercing 3 points of armour.
 - **Bursts:** a burst gun fires its rounds one each interval after a pull, then rests before the next; the server lets a burst through each burst's time and no faster.

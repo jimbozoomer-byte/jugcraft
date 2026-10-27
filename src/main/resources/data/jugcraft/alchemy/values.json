@@ -11257,6 +11257,11 @@
       "denominator": 1,
       "source": "recipe jugcraft:equipment_rack"
     },
+    "jugcraft:ermine_rifle": {
+      "numerator": 57181,
+      "denominator": 6,
+      "source": "recipe jugcraft:ermine_rifle"
+    },
     "jugcraft:esf_control_board": {
       "numerator": 246223,
       "denominator": 40,
@@ -12531,6 +12536,11 @@
       "numerator": 2690,
       "denominator": 1,
       "source": "recipe jugcraft:electronics_pattern"
+    },
+    "jugcraft:geode_cutter": {
+      "numerator": 57331,
+      "denominator": 6,
+      "source": "recipe jugcraft:geode_cutter"
     },
     "jugcraft:geothermal_generator": {
       "numerator": 3978,
@@ -27652,6 +27662,11 @@
       "denominator": 1,
       "source": "recipe jugcraft:housing_casing"
     },
+    "jugcraft:maelstrom_gun": {
+      "numerator": 8266,
+      "denominator": 1,
+      "source": "recipe jugcraft:maelstrom_gun"
+    },
     "jugcraft:magenta_alchemical_bag": {
       "numerator": 6515,
       "denominator": 2,
@@ -28046,6 +28061,11 @@
       "numerator": 1,
       "denominator": 1,
       "source": "fallback (balance pending)"
+    },
+    "jugcraft:microjet": {
+      "numerator": 208,
+      "denominator": 3,
+      "source": "recipe jugcraft:microjet"
     },
     "jugcraft:microwave_counter": {
       "numerator": 281,

@@ -17,7 +17,7 @@ public final class GunLooks {
 	/** How big a shot's muzzle flash is, across, in the gun model's pixels, by the round it fires (or grenade or fuel). */
 	static final Map<String, Float> FLASH_SIZES = Map.of("light_round", 5.0F, "rifle_round", 7.0F, "buckshot_shell", 8.0F,
 			"paper_cartridge", 10.0F, "grenade", 9.0F, "minecraft:blaze_powder", 8.0F, "energy_cell", 6.0F, "he_rocket", 10.0F,
-			"dart", 4.0F);
+			"dart", 4.0F, "microjet", 7.0F);
 	/**
 	 * The flash's tint, RGB, multiplied into the owner's white-gold frames, by the round, where it has one (tools/guns.py
 	 * FLASH_TINT): an energy weapon's discharge is cyan-white (slice 8D).
@@ -62,7 +62,7 @@ public final class GunLooks {
 	 * Cutter, slice 9C) is made the same way, and the Weevil's (the Borer, slice 12A); the Thunderhead's (the Cloudburst
 	 * Gun, slice 14D) and the Spitfire's (the Firedrake, slice 14E) are the Gattaler's own.
 	 */
-	static final Map<String, Float> TILT = Map.of("thresher", 68.25F, "seam_cutter", 72.75F, "borer", 66.75F, "cloudburst_gun", 68.25F, "firedrake", 68.25F);
+	static final Map<String, Float> TILT = Map.of("thresher", 68.25F, "seam_cutter", 72.75F, "borer", 66.75F, "cloudburst_gun", 68.25F, "firedrake", 68.25F, "maelstrom_gun", 67.25F, "geode_cutter", 66.75F);
 	private static final Look DEFAULT = new Look(true, 1.0F);
 
 	static {
@@ -168,6 +168,9 @@ public final class GunLooks {
 		LOOKS.put("auger_rifle", new Look(true, 0.8F));
 		LOOKS.put("auger_shotgun", new Look(true, 0.9F));
 		LOOKS.put("tumbler_rifle", new Look(true, 0.85F));
+		LOOKS.put("maelstrom_gun", new Look(true, 0.95F));
+		LOOKS.put("ermine_rifle", new Look(true, 0.85F));
+		LOOKS.put("geode_cutter", new Look(true, 0.95F));
 		OPTICS.put("long_scope", new Optic(0.3F, "long_scope_reticle2", "scope_vignette", null));
 		OPTICS.put("medium_scope", new Optic(0.5F, "long_scope_reticle2", "scope_vignette", null));
 		OPTICS.put("reflex_sight", new Optic(0.85F, null, null, "red_dot_reticle"));

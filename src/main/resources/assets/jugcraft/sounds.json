@@ -1739,6 +1739,33 @@
       }
     ]
   },
+  "guns.maelstrom_gun.fire": {
+    "subtitle": "subtitles.jugcraft.guns.fire",
+    "sounds": [
+      {
+        "name": "jugcraft:guns/gyrojet_fire",
+        "attenuation_distance": 64
+      }
+    ]
+  },
+  "guns.ermine_rifle.fire": {
+    "subtitle": "subtitles.jugcraft.guns.fire",
+    "sounds": [
+      {
+        "name": "jugcraft:guns/laser_fire_2",
+        "attenuation_distance": 64
+      }
+    ]
+  },
+  "guns.geode_cutter.fire": {
+    "subtitle": "subtitles.jugcraft.guns.fire",
+    "sounds": [
+      {
+        "name": "jugcraft:guns/beam_fire",
+        "attenuation_distance": 64
+      }
+    ]
+  },
   "nouveau.empty": {
     "sounds": []
   },

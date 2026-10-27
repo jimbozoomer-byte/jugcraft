@@ -216,7 +216,7 @@ public final class MobGuns {
 				return;
 			}
 			if (rounds <= 0) {
-				reloading = Math.max(1, spec.reloadTicks(spec.capacity()));
+				reloading = Math.max(1, spec.reloadTicks(spec.capacity(), JugcraftGuns.loadStep(gun)));
 				burst = 0;
 				announce(mob, GunActionPayload.RELOAD, spec.capacity());
 				return;

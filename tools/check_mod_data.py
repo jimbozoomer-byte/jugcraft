@@ -1851,15 +1851,16 @@ def check_guns():
     for gun in guns.SILENCED:
         if gun not in guns.GUNS or any(guns.ATTACHMENTS[kind]["slot"] == "barrel" for kind in guns.fits(gun)):
             err(f"tools/guns.py SILENCED names {gun}, which is not a gun, or takes a barrel attachment")
-    # Heavy bullets: how much further they knock back, and how many points of armour they pass through.
-    for name, table in (("KNOCKBACK", guns.KNOCKBACK), ("PIERCING", guns.PIERCING)):
+    # Heavy bullets: how much further they knock back, and how many points of armour they (or, from slice 15E, a beam)
+    # pass through.
+    for name, table, shots in (("KNOCKBACK", guns.KNOCKBACK, ("bullet",)), ("PIERCING", guns.PIERCING, ("bullet", "beam"))):
         entries = ", ".join(f'"{gun}", {value}F' for gun, value in table.items())
         if f"{name} = Map.of({entries});" not in java:
             err(f"JugcraftGuns.{name} differs from tools/guns.py: expected Map.of({entries})")
         for gun, value in table.items():
-            if gun not in guns.GUNS or guns.GUNS[gun].get("shot", "bullet") != "bullet" or not 0 < value <= 8:
-                err(f"tools/guns.py {name} names {gun}, which is not a gun that fires bullets, or gives it {value} "
-                    "(more than 0, at most 8)")
+            if gun not in guns.GUNS or guns.GUNS[gun].get("shot", "bullet") not in shots or not 0 < value <= 8:
+                err(f"tools/guns.py {name} names {gun}, which is not a gun that fires {' or '.join(shots)}s, or gives it "
+                    f"{value} (more than 0, at most 8)")
     # The darts-and-bleeding follow-up: how a dart flies, how bleeding hurts, and which guns' hits make a creature bleed.
     for line in (f"DART_SPEED = {guns.DART_SPEED};", f"DART_DROP = {guns.DART_DROP};", f"BLEED_TICKS = {guns.BLEED_TICKS};",
                  f"BLEED_DAMAGE = {guns.BLEED_DAMAGE}F;", f'DART = "dart";'):
@@ -1883,10 +1884,19 @@ def check_guns():
         if not spec or spec.get("auto") or not 1 < rounds <= spec.get("capacity", 0) or rest < 0:
             err(f"tools/guns.py BURSTS names {gun}, which is not a gun of a pull a shot, or gives it a burst of {rounds} "
                 f"(more than one, at most its magazine) or a rest of {rest} ticks")
+    # Slice 15E: the guns loaded a shell at a time that load several rounds a step.
+    steps = ", ".join(f'"{gun}", {step}' for gun, step in guns.LOAD_STEPS.items())
+    if f"LOAD_STEPS = Map.of({steps});" not in java:
+        err(f"JugcraftGuns.LOAD_STEPS differs from tools/guns.py: expected Map.of({steps})")
+    for gun, step in guns.LOAD_STEPS.items():
+        spec = guns.GUNS.get(gun, {})
+        if not spec or not isinstance(spec.get("reload"), tuple) or not 1 < step <= spec.get("capacity", 0):
+            err(f"tools/guns.py LOAD_STEPS names {gun}, which is not a gun loaded a shell at a time, or loads {step} a "
+                f"step (more than one, at most its magazine)")
     # Slice 8D: the energy weapons' charge a round, the arcs' leaps and the Energy Cell's capacity.
-    charges = ", ".join(f'"{gun}", {spec["charge"]}' for gun, spec in guns.GUNS.items() if spec.get("charge"))
-    if f"CHARGE = Map.of({charges});" not in java:
-        err(f"JugcraftGuns.CHARGE differs from tools/guns.py GUNS charge: expected Map.of({charges})")
+    charges = ", ".join(f'Map.entry("{gun}", {spec["charge"]})' for gun, spec in guns.GUNS.items() if spec.get("charge"))
+    if f"CHARGE = Map.ofEntries({charges});" not in java:
+        err(f"JugcraftGuns.CHARGE differs from tools/guns.py GUNS charge: expected Map.ofEntries({charges})")
     for line in (f"ARC_HOPS = {guns.ARC_HOPS};", f"ARC_REACH = {guns.ARC_REACH};", f"ARC_SHARE = {guns.ARC_SHARE}F;"):
         if line not in java:
             err(f"JugcraftGuns differs from tools/guns.py: expected {line}")

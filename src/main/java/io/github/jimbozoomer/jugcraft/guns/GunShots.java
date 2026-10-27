@@ -204,7 +204,7 @@ public final class GunShots {
 		switch (JugcraftGuns.shot(gun)) {
 			case JugcraftGuns.GRENADE -> lob(level, player, stack, spec, spread);
 			case JugcraftGuns.FLAME -> burn(level, player, spec, spread);
-			case JugcraftGuns.BEAM -> beam(level, player, spec, spread, hand, JugcraftGuns.bleed(gun));
+			case JugcraftGuns.BEAM -> beam(level, player, spec, spread, hand, JugcraftGuns.bleed(gun), JugcraftGuns.piercing(gun));
 			case JugcraftGuns.ARC -> arc(level, player, spec, spread, hand);
 			case JugcraftGuns.ROCKET -> rocket(level, player, gun, spec, spread);
 			default -> shoot(level, player, gun, spec, spread);
@@ -348,15 +348,19 @@ public final class GunShots {
 			long elapsed = ((ServerLevel) player.level()).getGameTime() - reload.start;
 			GunSpec spec = reload.spec;
 			if (spec.byShell()) {
-				// One shell lands at the end of each shell's time; the gun closes after the last.
-				while (reload.done < reload.rounds && elapsed >= spec.shellStart() + (long) spec.shellEach() * (reload.done + 1)) {
-					if (load(player, reload.stack, spec, 1, reload.ammo) == 0) {
+				// One shell lands at the end of each shell's time (slice 15E: or a step of several, LOAD_STEPS); the gun
+				// closes after the last.
+				int step = reload.stack.getItem() instanceof GunItem gun ? JugcraftGuns.loadStep(gun) : 1;
+				while (reload.done < reload.rounds && elapsed >= spec.shellStart() + (long) spec.shellEach() * (reload.done / step + 1)) {
+					int wanted = Math.min(step, reload.rounds - reload.done);
+					int loaded = load(player, reload.stack, spec, wanted, reload.ammo);
+					reload.done += loaded;
+					if (loaded < wanted) {
 						reload.rounds = reload.done; // ran out (or the gun is full)
 						break;
 					}
-					reload.done++;
 				}
-				if (elapsed >= spec.reloadTicks(reload.rounds)) {
+				if (elapsed >= spec.reloadTicks(reload.rounds, step)) {
 					it.remove();
 				}
 			} else if (elapsed >= spec.reload()) {
@@ -735,11 +739,11 @@ public final class GunShots {
 
 	/**
 	 * A beam (slice 8D): from the eye along the look, strayed by the spread, to the first block within range. Every creature
-	 * in its line that the shooter may strike takes the shot's damage ({@link JugcraftGuns#ZAP_DAMAGE}); it passes through
-	 * them all. No block is touched.
+	 * in its line that the shooter may strike takes the shot's damage ({@link JugcraftGuns#ZAP_DAMAGE}), through
+	 * {@code pierce} points less armour (slice 15E, {@link #pierced}); it passes through them all. No block is touched.
 	 */
 	private static void beam(ServerLevel level, ServerPlayer player, GunSpec spec, float spread, InteractionHand hand,
-			JugcraftGuns.@Nullable Bleed bleed) {
+			JugcraftGuns.@Nullable Bleed bleed, float pierce) {
 		Vec3 eye = player.getEyePosition();
 		Vec3 direction = stray(player.getLookAngle(), spread, player.getRandom());
 		Vec3 end = eye.add(direction.scale(spec.range()));
@@ -751,7 +755,7 @@ public final class GunShots {
 		for (LivingEntity foe : level.getEntitiesOfClass(LivingEntity.class, new AABB(eye, end).inflate(1.0),
 				candidate -> target(player, candidate))) {
 			if (foe.getBoundingBox().inflate(HIT_MARGIN).clip(eye, end).isPresent() && allowed(player, level, foe)
-					&& foe.hurtServer(level, source, spec.damage())) {
+					&& foe.hurtServer(level, source, pierced(foe, spec.damage(), pierce))) {
 				bleed(foe, bleed, player, player.getRandom());
 			}
 		}

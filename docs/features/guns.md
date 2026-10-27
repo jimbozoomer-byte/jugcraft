@@ -3104,6 +3104,70 @@ The next three of the owner's diamond-steel guns, taken up after slice 15C (on 2
 - **The arms in the reloads and inspections** come large into the view in places, as on the guns before them.
 - **Not played:** none of it has been played yet. The numbers want play to set.
 
+## Slice 15E: a microjet gun and two beams
+The owner's last three diamond-steel guns, taken up after slice 15D (on 27 October 2026 the owner wrote "Lets do slice 15E"): the Cyclone, the Minksy and the Shard Culler. Each is held in both hands and built from the owner's own GeckoLib model of it, from the upload of 23 October 2026 ([the library record](../../art/owner-library/README.md#gun-geometry-23-october-2026)), as slices 15A's to 15D's are. The Cyclone fires a round the mod did not have, the Microjet, and loads three of them at a time; the Minksy and the Shard Culler run on Energy Cells, and the Shard Culler's is the first beam that pierces armour.
+
+| | Maelstrom Gun | Ermine Rifle | Geode Cutter |
+|---|---|---|---|
+| The owner's gun | Cyclone | Minksy | Shard Culler |
+| What it is | a heavy gun carried at the hip: a block of nine launch tubes, a drum at its side and a microjet under its body; a seal and scripture on its left side | a lever-action rifle with an energy core in its barrel, a notch sight on the receiver and a post at the muzzle | a cutting beam carried at the hip as the Seam Cutter is: a crystal lens before its body, its energy core on the left side, a seal and scripture |
+| Held | in both hands: the right on the rear grip, the left on the handle at its left side | in both hands: the right on the grip, the left under the barrel | in both hands: the right on the grip, the left holding the core |
+| What it fires | Microjets, as long as the trigger is held | a beam a pull, through every creature in its line | a beam as long as the trigger is held, through every creature in its line |
+| Damage | 7.5 | 10 | 3, through 4 points less armour |
+| Rate | every 6 ticks | every 12 ticks | every 3 ticks |
+| Holds | 24, loaded three at a time | 15 charges of 400 JE | 50 charges of 120 JE |
+| Reload | 0.5 s to open, 0.85 s each three, 1 s to close: 8.3 s for all 24 | 2.65 s | 2.95 s |
+| Spread, hip / aimed | 3° / 1.5° | 1.5° / 0.2° | 3° / 1.5° |
+| Range | 64 blocks | 80 blocks | 24 blocks |
+| The view aimed | 0.95 (no sights: it stays at the hip) | 0.85 | 0.95 (no sights) |
+| Takes | nothing | the stocks, both grips (the Vertical Grip), the four bayonets, the three scopes and the Laser Sight | nothing |
+
+**Their numbers** start from the owner's own, in the gun data of the same upload, set beside the guns already built: the Cyclone is their automatic microjet gun (15.5 a microjet every 6 ticks, 24 to a load, `reloadAmount` 3 a step), the Minksy their lever-action beam rifle (16 a pull every 10 ticks, 15 to a core, reaching 150 blocks), the Shard Culler their cutting beam (6 every 3 ticks, 50 to a core, `armorPen` 4). The Ermine reaches 80 blocks, short of the Lantern Musket's 96 and the Solenoid Rifle's 128, which stay the longest-reaching energy guns. The reloads are the owner's animations'.
+
+**The Microjet** (`jugcraft:microjet`, `tools/guns.py` `AMMO`): a new round, the owner's own: a little iron rocket, its lead tip over a charge of gunpowder. A lead nugget over gunpowder over an iron nugget makes four, in a crafting table (they switch with the guns). Its icon is a map (`tools/item_icons/microjet.txt`) drawn after the owner's `Guns/item/microjet.png`; its spent case is the owner's `small_iron_casing.png`, as the owner's data names it. It flies as the other rounds do: along the look at once, strayed by the spread.
+
+**Crafting** (a crafting table; they switch with the guns, and the two beam guns with the machines too, for their circuit and cable, as the energy guns before them):
+- **Maelstrom Gun:** three stainless steel ingots over a stainless steel ingot, a diamond and a stainless steel ingot, over redstone and a lever.
+- **Ermine Rifle:** three stainless steel ingots over a diamond, an Advanced Circuit and Copper Cable, over planks.
+- **Geode Cutter:** two stainless steel ingots and an amethyst shard over a diamond, an Advanced Circuit and Copper Cable, over two stainless steel ingots.
+
+**Loading several rounds a step** (`LOAD_STEPS` in `tools/guns.py`, `JugcraftGuns.LOAD_STEPS`): the Maelstrom Gun is loaded a step at a time as the guns loaded a shell at a time are (`GunSpec.byShell`), but each step's time loads up to three microjets: seven load as three, three and one, in three steps' time (`GunSpec.reloadTicks(rounds, step)`). The server alone loads (`GunShots`), taking each step's microjets from the inventory at the end of its time; a shot cuts the loading short, as for the other guns loaded a round at a time. The client plays the owner's loop once a step (`GunAnimations.reloadName`), and the HUD's reload time and a raider gunner's (none carries it) count the steps too. `tools/check_mod_data.py` holds the Java table to `tools/guns.py`, each to a gun loaded a step at a time, more than one and at most its magazine a step.
+
+**A beam that pierces armour:** `GunShots.beam` now deals each creature in its line what it would through the gun's `PIERCING` less armour (`GunShots.pierced`, as the heavy bullets do); `tools/check_mod_data.py` allows `PIERCING` on a gun that fires a beam. The Geode Cutter's is the owner's 4 points: its 3 against 10 points of armour deals about 2.5 where a plain zap deals about 2. No other beam gun has any.
+
+**What you see:** the owner's animations. The Maelstrom's shot drives its tubes back; to load, its drum slides out to the side, the left hand brings it a microjet (the owner's `rocket`) once a step, and the drum slides back. The Ermine's shot works the lever under the grip and the hammer above it; its reload draws the core, turned a quarter as the owner turned it, out of the left side and back. The Geode Cutter's reload draws its core out of the left side, the left hand with it. Each is inspected in both hands. Sounds, as the owner's data names for each: the gyrojet's shot (new here) for the Maelstrom, the laser's second shot (the Seam Cutter's) for the Ermine and the beam's (the Murmur SMG's) for the Geode Cutter.
+
+**How the models were built:**
+- **From the owner's GeckoLib models,** as slices 15A's to 15D's (`GEO_PARTS`): each gun's parts are the bones of its model; their textures are the models' own (`Guns/animated/gun/`), laid out anew by the owner (`GEO_RELAID`). The Minksy's no-sights part is its `gun_body2`; the Cyclone and the Shard Culler have no sights.
+- **A bone turned a quarter about one axis holding cubes turned about another:** the Minksy's core. An item-model element turns about one axis only, so the converter lays the cubes anew by the bone's quarter turn (their faces and UVs carried over corner for corner), and turns each about the axis its own turn now lies along (`geo_part`, `geo_element`, `relaid()`).
+- **Checked against the earlier parts:** where a bone keeps its item-model part's shape, the converter must give back that part's elements corner for corner and turn for turn (`GEO_TWINS`): on the Cyclone its body, on the Minksy 10 bones (its sights, grips, stocks and bayonets).
+- **Bones:** the models' own, turning about the models' pivots (checked). On the Maelstrom: `gun_body`, `bolt`, `rocket` (the microjet), `barrel`, `magazine` (the drum, on the barrel), `seal` and `scriptures`. On the Ermine: `gun_body`, `gun_body2`, `main` (with the sights), `hammer`, `lever`, `barrel` and `core`. On the Geode Cutter: `gun_body2`, `gun_body`, `seal`, `scriptures`, `core` (the left arm hangs under it) and the owner's empty `grip`, which its reload works.
+- **Hands:** placed from the owner's own arm bones as slices 15A's to 15D's are. Each arm's way from the hand was searched for the one that keeps the most of the view clear through the idle, the shots, the reload and the inspection: the Ermine's right sleeve had covered most of the view aimed, and now runs down out of it.
+- **Sights:** the Ermine's own, the notch on its receiver and the post at its muzzle; scopes where its notch stands. The Maelstrom and the Geode Cutter have none and stay at the hip aimed, the view narrowing a little, as the Seam Cutter's does.
+- **Checked** in first-person previews: idle, fired, aimed, through each reload (the Maelstrom's start, each step and close) and inspection.
+
+**Connections:**
+- **Rounds:** the new Microjet, from lead, gunpowder and iron; the Energy Cell, charged at the Charging Station or the Cell Rack.
+- **Parts:** stainless steel and a diamond, as slices 15A's to 15D's; redstone and a lever for the Maelstrom; an Advanced Circuit and Copper Cable for the two beams, an amethyst shard for the Geode Cutter's lens, planks for the Ermine's stock.
+- **Their place:** past stainless steel, beside slices 15A's to 15D's guns; the two beams past the machines, as the energy guns before them.
+
+**Balance:** starting numbers, at point blank with every shot landing, over a magazine and its reload.
+- **Maelstrom Gun:** 25 a second while it fires; about 11.6 a second over its 24 microjets and their 8.3 s reload, the long load its price. Each microjet costs about as much as a rifle round.
+- **Ermine Rifle:** about 16.7 a second while it fires, 12.9 over its charges and their reload; a beam through every creature in its line, 400 JE a shot (a full cell is 25 shots).
+- **Geode Cutter:** 20 a second while it fires, about 14.4 over its charges and their reload, through every creature in front of it and 4 points of their armour, out to 24 blocks; 120 JE a shot.
+- **Rounds and charge:** each shot spends one; nothing converts back.
+
+**Save compatibility:** new items `jugcraft:maelstrom_gun`, `ermine_rifle`, `geode_cutter` and `microjet`, and the particle `jugcraft:microjet_casing`; nothing saved changes. `guns.enabled=false` turns their recipes off; the items stay registered.
+
+**Known limits** (the first two are owner decisions):
+- **Names:** "Maelstrom Gun", "Ermine Rifle", "Geode Cutter" and "Microjet" are proposed.
+- **The Geode Cutter does not mine:** the owner's data lets the Shard Culler's beam break blocks (`enableMining`); here, as the Seam Cutter's, it touches no block. Mining by beam could come for both as a follow-up.
+- **No slowness on a hit:** the owner's data slows what the Shard Culler hits (`impactEffect`), as the other hit effects not yet built (below).
+- **Energy Cells, not the owner's cores:** the owner's beam guns load an energy core, which leaves a spent core behind; here they draw charge from Energy Cells as the energy guns before them.
+- **A microjet does not fly:** the owner's microjets are rockets that fly 1.5 blocks a tick; here it strikes at once along the look, as a round does. The Maelstrom does not slow its carrier as the owner's data asks (`speedModifier`).
+- **The arms in the reloads and inspections** come large into the view in places, as on the guns before them.
+- **Not played:** none of it has been played yet. The numbers want play to set.
+
 ## Connections
 - **Existing input producers:** copper, iron and gunpowder (vanilla); lead nuggets (the lead switch's lead); brass nuggets (brass, from zinc); paper and planks.
 - **Existing output consumer:** combat. The guns kill what drops loot for every branch.
@@ -3775,6 +3839,7 @@ Slice 5's files: each gun's attachment parts, and each attachment's item model a
 | rifle_round_casing | `Guns/item/large_brass_casing.png` | `2b43b9961479bdbb` |
 | buckshot_shell_casing | `Guns/item/shotgun_shell.png` | `89657710d20d041d` |
 | dart_casing | `Guns/item/small_iron_casing.png` | `3a48a2cd96b9e75d` |
+| microjet_casing | `Guns/item/small_iron_casing.png` | `3a48a2cd96b9e75d` |
 | flash_0 | `Big Cannons and Mounted Guns/textures/muzzleflash.png` | `9e6b36b22790ec34` |
 | flash_1 | `Big Cannons and Mounted Guns/textures/muzzleflash2.png` | `31029be6554ebd9f` |
 | flash_2 | `Big Cannons and Mounted Guns/textures/muzzleflash3.png` | `5c695fc1d9c5b365` |
@@ -4914,6 +4979,26 @@ Slice 9E's files: the guns' tactical grip parts and the Laser Sight's textures m
 | tumbler_rifle | `Guns/item/relex_sight.png` | `c8a38dbce7c266b0` |
 | tumbler_rifle | `Guns/item/laser_sight.png` | `1e0a3342068bc5df` |
 | tumbler_rifle | `Guns/item/laser.png` | `aac5f06e892e350a` |
+| maelstrom_gun | `Guns/models/item/cyclone.json` | `4a9bfc1346356f81` |
+| maelstrom_gun | `Guns/animated/gun/cyclone.png` | `e4b9fecffd5001de` |
+| maelstrom_gun | `Guns/item/cyclone.animation.json` | `1a36782f698844e9` |
+| maelstrom_gun | `Guns/geo/item/gun/cyclone.geo.json` | `e6de5491b29da4bd` |
+| maelstrom_gun | `Guns/sounds/item/gyrojet/fire.ogg` | `5dd4318907faf231` |
+| ermine_rifle | `Guns/models/item/minksy.json` | `3e955ab4f660724c` |
+| ermine_rifle | `Guns/animated/gun/minksy.png` | `f7e2fc7a932cfa2b` |
+| ermine_rifle | `Guns/item/minksy.animation.json` | `978813a0779a5add` |
+| ermine_rifle | `Guns/geo/item/gun/minksy.geo.json` | `44c1328030613ad3` |
+| ermine_rifle | `Guns/sounds/item/laser/fire_2.ogg` | `a585dc4d697303f0` |
+| ermine_rifle | `Guns/item/long_scope_texture.png` | `e69191017eb081ad` |
+| ermine_rifle | `Guns/item/medium_scope.png` | `543abecf859783be` |
+| ermine_rifle | `Guns/item/relex_sight.png` | `c8a38dbce7c266b0` |
+| ermine_rifle | `Guns/item/laser_sight.png` | `1e0a3342068bc5df` |
+| ermine_rifle | `Guns/item/laser.png` | `aac5f06e892e350a` |
+| geode_cutter | `Guns/models/item/shard_culler.json` | `179cce980f2238ae` |
+| geode_cutter | `Guns/animated/gun/shard_culler.png` | `1c70f7dd638eaaed` |
+| geode_cutter | `Guns/item/shard_culler.animation.json` | `88cae86c74c8617f` |
+| geode_cutter | `Guns/geo/item/gun/shard_culler.geo.json` | `16a99498e48e2c15` |
+| geode_cutter | `Guns/sounds/item/beam/fire.ogg` | `d91dc843b166ee89` |
 
 - **The bolt sound's tag:** `bolt.ogg` carries Vorbis tags naming another source ("All Epic Infantry Assault Rifle Reload Sounds (Fortnite)"). The owner, asked about the eight tagged sounds in the library, answered "I have the rights", so it is used like the rest. None of the other sounds used here carries such a tag.
 - **The scopes' reticles and lens rims (slice 7b):** the owner uploaded them on 8 October 2026 ("heres reticles and vignette"). Two files in that upload carry embedded Photoshop metadata:
@@ -4922,7 +5007,7 @@ Slice 9E's files: the guns' tactical grip parts and the Laser Sight's textures m
 
   Shown this and asked what the scopes should use, the owner answered that they made these files and to use them. Asked the same day whether the "Big Cannons and Mounted Guns" folder is theirs (slice 6's flash frames come from it, and it holds a `wariumlogo.png`), they confirmed it is. The [library README](../../art/owner-library/README.md#effect-textures-8-october-2026) records both.
 - **Names:** Jugcraft's own, under the license policy's fan-homage rules. No `scguns:` reference reaches the game: the converter writes its own files with `jugcraft:` paths, and the animations name no resources.
-- **Drawn here:** the round icons, as maps (`tools/item_icons/light_round.txt`, `rifle_round.txt`, `buckshot_shell.txt`, `paper_cartridge.txt`, and `dart.txt` after the owner's frog dart, `Guns/item/frog_dart.png`), and the props' pixels in the atlas copies (the Thunderpipe's and the Highwayman's shells, the Longhorn's cartridge, slice 4's muzzle-loaders' balls, ramrods and flashes, the Stoker's fuel can, the Linesman's and the Glowmouth's cells, the Skylark Rifle's rocket, the Bullfrog's grenade, the Fowler's balls, ramrod and flash, and the Culverin's ball and flash). The Stoker's flame is the owner's pilot flame, copied pixel for pixel into its atlas corner.
+- **Drawn here:** the round icons, as maps (`tools/item_icons/light_round.txt`, `rifle_round.txt`, `buckshot_shell.txt`, `paper_cartridge.txt`, `dart.txt` after the owner's frog dart, `Guns/item/frog_dart.png`, and `microjet.txt` after the owner's `Guns/item/microjet.png`), and the props' pixels in the atlas copies (the Thunderpipe's and the Highwayman's shells, the Longhorn's cartridge, slice 4's muzzle-loaders' balls, ramrods and flashes, the Stoker's fuel can, the Linesman's and the Glowmouth's cells, the Skylark Rifle's rocket, the Bullfrog's grenade, the Fowler's balls, ramrod and flash, and the Culverin's ball and flash). The Stoker's flame is the owner's pilot flame, copied pixel for pixel into its atlas corner.
 - **The Cell Rack (slice 10E):** its block model is built here from boxes (`cell_rack_model()` in `tools/guns.py`) on the power gear's electric-look textures, the Charging Station's. Nothing new is drawn, and no owner file is used; the cells in it are the Energy Cell's own icons.
 
 ## Verification
@@ -6089,13 +6174,34 @@ Slice 9E's files: the guns' tactical grip parts and the Laser Sight's textures m
   - `GunsGameTests` counts 102 guns; `TacticalAttachmentsGameTests` the forty guns the Tactical Grip fits, the Tumbler among them.
   - `BrassQuickFirersGameTests.brassQuickFirersAreRegistered` holds that no gun firing rifle rounds a pull at a time is pulled as often as the Freeholder Rifle (every 5 ticks). A burst gun's next pull comes a whole cycle later, so it counts that cycle: 14 ticks for the Tumbler. CI's first run on fed2bf354 failed this check, which had counted the Tumbler's 3 ticks between the shots of a burst. (Over a cycle the Tumbler spends 3 rounds in 14 ticks, a little more than the Freeholder's 1 in 5: it is a burst gun, compared above with the Onrush SMG and Gallant Rifle.)
   - The guns' client test (`GunsClientGameTests`) takes each new gun through its screenshots as every gun's. It fires each gun with one pull of the attack key; it now expects a burst gun's pull to spend its burst's three rounds, where it expected one.
+- **Slice 15E, run locally (27 October 2026):**
+  - `python3 tools/guns.py`, then `--check`: PASS. It wrote the three guns' models, animations and atlases and copied the gyrojet's shot and the Microjet's case; every other gun's files came out unchanged. The converter check passes on the three models (`GEO_TWINS`: 11 bones, corner for corner) and holds every bone the models have to the models' pivots.
+  - **Found and fixed while building:** the Minksy's core is a bone turned a quarter about one axis holding cubes turned about another, which the converter refused (`bone_turn`); it now lays the cubes anew by the bone's turn and turns each about the axis its turn then lies along. A flat cube there showed that `relaid()` picked its corners for one turn only; it now picks them from the turn. The Ermine Rifle's range, first the owner's longer reach (128), would have broken the order of the energy guns the earlier tests hold (`FrontierGunsIVGameTests`, `CoilPlasmaGunsGameTests`: the Lantern Musket reaches further than all but the Solenoid Rifle): it is 80.
+  - `python3 tools/generate_material_data.py`: wrote the guns' and the Microjet's item models, definitions, recipes, names and sounds. (It also reordered `docs/features/jug-nouveau-content-map.json` and rewrote the line ends of some Jimtafacts GeckoLib files, unrelated; those are left as before.)
+  - `python3 tools/generate_textures.py`: drew the Microjet's icon; the other textures it rewrote are left as before.
+  - `python3 tools/check_icon_maps.py tools/item_icons/microjet.txt`: PASS, no warnings; previewed beside the Dart and the Rifle Round.
+  - `python3 tools/check_mod_data.py`: PASS (8033 material IDs).
+  - `python3 scripts/check_repository.py`: PASS. `python3 -m unittest discover -s scripts/tests`: 287 tests passed; `python3 scripts/package_modrinth.py check`: PASS. `git diff --check`: clean.
+  - **Java:** a syntax parse only: 0 errors in the changed and new files.
+  - **Recipes:** every shaped recipe in the mod's data compared, mirrors included: none of the four new grids matches another (the 8 groups of matching grids elsewhere in the mod's data are the same before and after).
+  - **Alchemy values:** the four records, priced from their recipes as `tools/build_alchemy_values.py` prices them (that tool needs a Minecraft jar, which isn't available here): 8266 (Maelstrom), 57181/6 (Ermine, about 9530), 57331/6 (Geode Cutter, about 9555) and 208/3 for a Microjet (about 69; a Rifle Round is about 65).
+  - **Previews:** first-person, idle, fired, aimed, through each reload (the Maelstrom's start, each step and close) and inspection. The arms' ways were searched as above; through the reloads the sleeves cover at most about a tenth of the view (the Ermine's left at the core's draw), and the Ermine's right sleeve no longer covers it aimed.
+- **Slice 15E game tests (not run yet; CI runs them):**
+  - `DiamondSteelGunsVGameTests`:
+    - `diamondSteelGunsVAreRegistered`: each is registered with its numbers and its recipe loads, held in both hands, none setting alight, lifting, bleeding, bursting or knocking back. The Maelstrom Gun is twenty-four Microjets as long as the trigger is held, loaded three a step (24 in eight steps' time; 7 in the time of 9), the Microjet a round with a case and a recipe; the Ermine Rifle a beam a pull on Energy Cells, 400 JE a charge, fifteen a magazine, no piercing, reaching short of the Lantern Musket and taking what the Auger Rifle takes; the Geode Cutter a beam as long as the trigger is held, 120 JE a charge, fifty a magazine, piercing 4 points. Neither the Maelstrom nor the Geode Cutter takes an attachment.
+    - `maelstromGunLoadsThreeAStep`: an empty Maelstrom with seven Microjets holds none two ticks before its first step's time, three after it, six after the second step, and all seven after its reload's time, none left in the inventory and the reload over; a shot then takes its damage from the pig.
+    - `geodeCutterBeamPiercesArmour`: of four pigs in 10 points of armour, one shot by the Geode Cutter takes more than another takes from a plain zap of the Cutter's damage, and no more than that damage; one shot by the Ermine Rifle takes what a plain zap of its damage takes. Each spends a round.
+  - `HeavyBulletsGameTests.heavyBulletsAreTheOwners`: the piercing table with the Geode Cutter's 4.
+  - `GunsGameTests` counts 105 guns and 6 rounds.
+  - Held by the earlier tests and expected to pass with the new guns: each energy gun's magazine fits a cell (`EnergyGunsGameTests`); the Lantern Musket and the Solenoid Rifle reach furthest (`FrontierGunsIVGameTests`, `CoilPlasmaGunsGameTests`); the Laser Sight on the Ermine and no Tactical Grip on any of the three (`TacticalAttachmentsGameTests`).
+  - The guns' client test (`GunsClientGameTests`) takes each new gun through its screenshots as every gun's; its reload of one spent Microjet is one step.
 - **Not run:** the client by hand, a two-client dedicated server, and play.
 
 ## World and event applicability
 No worldgen, structures, bosses or seasonal content. Guns, rounds and the Cell Rack come from crafting (and the creative tab). The one loot is slice 10F's: raider gunners, in raids and raider camps, may drop their service arms (their equipment's drop chance) and rounds (the mob loot table `jugcraft:entities/raider_gunner`).
 
 ## Rollout and open questions
-- **Names:** proposed here (Rust Midge, Patchwork Carbine, Thunderpipe, Warden Pistol, Riveter SMG, Haymaker, Longhorn Rifle, Drover Rifle, Coach Gun, Duelling Pistol, Line Musket, Bellmouth, Bulldog Pistol, Marshal Revolver, Sapper Revolver, Sentry Pistol, Garrison Rifle, Breacher, Trench Lobber, Thresher, Stoker, Beam Pistol, Stormlock Rifle, Linesman, Picket Rifle, Ranger Rifle, Kestrel Rifle, Rattler Pistol, Bronco SMG, Squall Rifle, Spikedriver, Seam Cutter, Caisson Pistol, Sledge, Highwayman, Throttle, Earthmover, Skylark Rifle, Bullfrog, Solenoid Rifle, Votive Rifle, Glowmouth, Mule, Fowler, Culverin, Undertone Rifle, Murmur SMG, Reverb, Tusker, Cinder Repeater, Bastion Rifle, Ashfall Pistol, Goldbristle Carbine, Crackling, Chitin SMG, Hermit Rifle, Borer, Penny Pistol, Conductor Carbine, Magpie SMG, Tuppence Pistol, Goshawk Revolver, Lament Rifle, Tabby Revolver, Lookout Rifle, Ammonite Carbine, Fencepost Carbine, Waystation Shotgun, Highball Rifle, Flatboat Gun, Windlass Musket, Millstone Rifle, Fencepost Thumper, Parley Revolver, Lantern Musket, Holler Pistol, Minuet Pistol, Half-Crown Revolver, Holler Carbine, Minuet Carbine, Grange Carbine, Sprocket Gun, Navvy Shotgun, Freeholder Rifle, Quarrel Carbine, Hinterland Rifle, Cloudburst Gun, Firedrake, Harrow, Old Grange Carbine, Vesper Rifle, Onrush SMG, Gallant Rifle, Kreuzer Pistol, Psalm SMG, Jawbreaker, Hawker Rifle, Impetus Shotgun, Quill Rifle, Light Round, Rifle Round, Buckshot Shell, Paper Cartridge, Dart, Bleeding, Energy Cell, Cell Rack, Raider Gunner; the attachments keep plain names: Silencer, Baffled Silencer, Muzzle Brake, Extended Barrel, Extended Magazine, Speed Magazine, Light Stock, Weighted Stock, Wooden Stock, Light Grip, Vertical Grip, the four bayonets, Long Scope, Medium Scope, Reflex Sight, Tactical Grip, Laser Sight). The owner may rename them before release; IDs are stable only after release.
+- **Names:** proposed here (Rust Midge, Patchwork Carbine, Thunderpipe, Warden Pistol, Riveter SMG, Haymaker, Longhorn Rifle, Drover Rifle, Coach Gun, Duelling Pistol, Line Musket, Bellmouth, Bulldog Pistol, Marshal Revolver, Sapper Revolver, Sentry Pistol, Garrison Rifle, Breacher, Trench Lobber, Thresher, Stoker, Beam Pistol, Stormlock Rifle, Linesman, Picket Rifle, Ranger Rifle, Kestrel Rifle, Rattler Pistol, Bronco SMG, Squall Rifle, Spikedriver, Seam Cutter, Caisson Pistol, Sledge, Highwayman, Throttle, Earthmover, Skylark Rifle, Bullfrog, Solenoid Rifle, Votive Rifle, Glowmouth, Mule, Fowler, Culverin, Undertone Rifle, Murmur SMG, Reverb, Tusker, Cinder Repeater, Bastion Rifle, Ashfall Pistol, Goldbristle Carbine, Crackling, Chitin SMG, Hermit Rifle, Borer, Penny Pistol, Conductor Carbine, Magpie SMG, Tuppence Pistol, Goshawk Revolver, Lament Rifle, Tabby Revolver, Lookout Rifle, Ammonite Carbine, Fencepost Carbine, Waystation Shotgun, Highball Rifle, Flatboat Gun, Windlass Musket, Millstone Rifle, Fencepost Thumper, Parley Revolver, Lantern Musket, Holler Pistol, Minuet Pistol, Half-Crown Revolver, Holler Carbine, Minuet Carbine, Grange Carbine, Sprocket Gun, Navvy Shotgun, Freeholder Rifle, Quarrel Carbine, Hinterland Rifle, Cloudburst Gun, Firedrake, Harrow, Old Grange Carbine, Vesper Rifle, Onrush SMG, Gallant Rifle, Kreuzer Pistol, Psalm SMG, Jawbreaker, Hawker Rifle, Impetus Shotgun, Quill Rifle, Auger Rifle, Auger Shotgun, Tumbler Rifle, Maelstrom Gun, Ermine Rifle, Geode Cutter, Light Round, Rifle Round, Buckshot Shell, Paper Cartridge, Dart, Microjet, Bleeding, Energy Cell, Cell Rack, Raider Gunner; the attachments keep plain names: Silencer, Baffled Silencer, Muzzle Brake, Extended Barrel, Extended Magazine, Speed Magazine, Light Stock, Weighted Stock, Wooden Stock, Light Grip, Vertical Grip, the four bayonets, Long Scope, Medium Scope, Reflex Sight, Tactical Grip, Laser Sight). The owner may rename them before release; IDs are stable only after release.
 - **The arms:** placed from the animations' own evidence, without the models they were made for. The CI screenshots show where they sit; the rest points and arm directions above are the knobs.
 - **The gun sets the owner chose on 8 October 2026** are all built: the revolvers (slice 8), the service arms (slice 8B), the heavy weapons (slice 8C) and the energy weapons (slice 8D).
 - **The gun sets the owner chose on 10 October 2026** are all built, each its own pull request: the marksman rifles (slice 9A), the automatic weapons (slice 9B), the second energy weapons (slice 9C) and the pump shotguns (slice 9D).
@@ -6106,8 +6212,8 @@ No worldgen, structures, bosses or seasonal content. Guns, rounds and the Cell R
   - other mobs with guns: the owner's Scorched Guns 2-style gun mobs, once their models are in the library (slice 10F gives the raider gunners the service arms);
   - the Whizzbanger, which waits for the model its animations were made for ([above](#the-whizzbanger-waits));
   - the guns beyond these sets;
-  - the owner's other GeckoLib gun models from their upload of 23 October 2026: only the Grandle OG's and the twelve diamond-steel guns' built so far (slices 15A to 15D) are in the library ([the library record](../../art/owner-library/README.md#gun-geometry-23-october-2026));
-  - the other three diamond-steel guns: the Cyclone, the Minksy and the Shard Culler;
+  - the owner's other GeckoLib gun models from their upload of 23 October 2026: only the Grandle OG's and the fifteen diamond-steel guns' (slices 15A to 15E) are in the library ([the library record](../../art/owner-library/README.md#gun-geometry-23-october-2026));
+  - beams that mine (the owner's Shard Culler, and the CR4K Mining Laser the Seam Cutter is made from);
   - the owner's armour piercing and knockback for the guns before slice 15: their data gives 49 of them one or both ([above](#follow-up-armour-piercing-for-slices-15as-and-15bs-guns));
   - a shotgun that pushes its shooter back (the owner's Inertial and Drill Conversion);
   - the owner's other hit effects: slowness, darkness and withering from the guns whose data names them, and bleeding from the Caisson Pistol (it fires an arc here, not the owner's darts) and from guns not built yet.

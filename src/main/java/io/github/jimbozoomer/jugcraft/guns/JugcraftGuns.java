@@ -229,6 +229,11 @@ public final class JugcraftGuns {
 		SPECS.put("auger_rifle", new GunSpec(14.0F, 1, 6, false, 2, 0, 12, 17, 16, 2.0F, 0.4F, 96, "paper_cartridge"));
 		SPECS.put("auger_shotgun", new GunSpec(3.5F, 8, 6, false, 2, 0, 12, 17, 16, 7.5F, 7.5F, 24, "buckshot_shell"));
 		SPECS.put("tumbler_rifle", new GunSpec(5.5F, 1, 3, false, 21, 43, 0, 0, 0, 2.5F, 0.5F, 96, "rifle_round"));
+		// Slice 15E: the owner's last three diamond-steel guns: an automatic gun of little rockets loaded three at a time
+		// (LOAD_STEPS), and two energy weapons, a rifle's beam and a cutter's beam through armour (PIERCING).
+		SPECS.put("maelstrom_gun", new GunSpec(7.5F, 1, 6, true, 24, 0, 10, 17, 20, 3.0F, 1.5F, 64, "microjet"));
+		SPECS.put("ermine_rifle", new GunSpec(10.0F, 1, 12, false, 15, 53, 0, 0, 0, 1.5F, 0.2F, 80, "energy_cell"));
+		SPECS.put("geode_cutter", new GunSpec(3.0F, 1, 3, true, 50, 59, 0, 0, 0, 3.0F, 1.5F, 24, "energy_cell"));
 	}
 
 	/**
@@ -237,7 +242,7 @@ public final class JugcraftGuns {
 	 * line; {@link #ARC}, a bolt that leaps from creature to creature; {@link #ROCKET} (slice 10A), a High-Explosive Rocket
 	 * ({@link GunShots}).
 	 */
-	public static final Map<String, String> SHOTS = Map.ofEntries(Map.entry("trench_lobber", "grenade"), Map.entry("stoker", "flame"), Map.entry("beam_pistol", "beam"), Map.entry("stormlock_rifle", "arc"), Map.entry("linesman", "arc"), Map.entry("spikedriver", "beam"), Map.entry("seam_cutter", "beam"), Map.entry("caisson_pistol", "arc"), Map.entry("earthmover", "rocket"), Map.entry("skylark_rifle", "rocket"), Map.entry("bullfrog", "grenade"), Map.entry("solenoid_rifle", "beam"), Map.entry("votive_rifle", "beam"), Map.entry("glowmouth", "arc"), Map.entry("fencepost_thumper", "grenade"), Map.entry("lantern_musket", "beam"), Map.entry("firedrake", "flame"));
+	public static final Map<String, String> SHOTS = Map.ofEntries(Map.entry("trench_lobber", "grenade"), Map.entry("stoker", "flame"), Map.entry("beam_pistol", "beam"), Map.entry("stormlock_rifle", "arc"), Map.entry("linesman", "arc"), Map.entry("spikedriver", "beam"), Map.entry("seam_cutter", "beam"), Map.entry("caisson_pistol", "arc"), Map.entry("earthmover", "rocket"), Map.entry("skylark_rifle", "rocket"), Map.entry("bullfrog", "grenade"), Map.entry("solenoid_rifle", "beam"), Map.entry("votive_rifle", "beam"), Map.entry("glowmouth", "arc"), Map.entry("fencepost_thumper", "grenade"), Map.entry("lantern_musket", "beam"), Map.entry("firedrake", "flame"), Map.entry("ermine_rifle", "beam"), Map.entry("geode_cutter", "beam"));
 	public static final String GRENADE = "grenade";
 	public static final String FLAME = "flame";
 	public static final String BEAM = "beam";
@@ -252,7 +257,7 @@ public final class JugcraftGuns {
 	 * Slice 8D: the JE each round of an energy weapon draws from the Energy Cells in the inventory as it loads
 	 * (tools/guns.py GUNS "charge"); a gun not listed loads rounds of its ammunition.
 	 */
-	public static final Map<String, Integer> CHARGE = Map.of("beam_pistol", 400, "stormlock_rifle", 750, "linesman", 250, "spikedriver", 800, "seam_cutter", 100, "caisson_pistol", 300, "solenoid_rifle", 1100, "votive_rifle", 200, "glowmouth", 750, "lantern_musket", 900);
+	public static final Map<String, Integer> CHARGE = Map.ofEntries(Map.entry("beam_pistol", 400), Map.entry("stormlock_rifle", 750), Map.entry("linesman", 250), Map.entry("spikedriver", 800), Map.entry("seam_cutter", 100), Map.entry("caisson_pistol", 300), Map.entry("solenoid_rifle", 1100), Map.entry("votive_rifle", 200), Map.entry("glowmouth", 750), Map.entry("lantern_musket", 900), Map.entry("ermine_rifle", 400), Map.entry("geode_cutter", 120));
 	/**
 	 * An arc leaps on from its first creature to at most {@link #ARC_HOPS} more, each the nearest within {@link #ARC_REACH}
 	 * blocks of the last, each taking {@link #ARC_SHARE} of the damage before it (tools/guns.py).
@@ -309,10 +314,10 @@ public final class JugcraftGuns {
 	 * The guns whose bullets pierce armour: a hit deals what it would if the target wore this many points less armour
 	 * ({@link GunShots#pierced}; tools/guns.py PIERCING). Slice 15B's Jawbreaker is the first, from the owner's Uppercut;
 	 * slice 15C's Hawker Rifle and Quill Rifle, from the owner's MAS Peddler and Zilk 45, follow; then slices 15A's and
-	 * 15B's other guns, from the owner's MAS 55, Prush Gun, Krauser and Soul Drummer; and slice 15D's Tumbler Rifle, from
-	 * the owner's Lockewood.
+	 * 15B's other guns, from the owner's MAS 55, Prush Gun, Krauser and Soul Drummer; slice 15D's Tumbler Rifle, from the
+	 * owner's Lockewood; and slice 15E's Geode Cutter, from the owner's Shard Culler, the first whose beam pierces armour.
 	 */
-	public static final Map<String, Float> PIERCING = Map.of("vesper_rifle", 4.5F, "onrush_smg", 3.0F, "kreuzer_pistol", 1.0F, "psalm_smg", 1.0F, "jawbreaker", 4.5F, "hawker_rifle", 1.0F, "quill_rifle", 1.5F, "tumbler_rifle", 3.0F);
+	public static final Map<String, Float> PIERCING = Map.of("vesper_rifle", 4.5F, "onrush_smg", 3.0F, "kreuzer_pistol", 1.0F, "psalm_smg", 1.0F, "jawbreaker", 4.5F, "hawker_rifle", 1.0F, "quill_rifle", 1.5F, "tumbler_rifle", 3.0F, "geode_cutter", 4.0F);
 	/**
 	 * Slice 15D: a gun that fires a burst to a pull, {@code rounds} shots its {@link GunSpec#interval} apart, then waits
 	 * {@code rest} ticks more before the next pull fires ({@link #BURSTS}).
@@ -329,6 +334,11 @@ public final class JugcraftGuns {
 	 * ticks, as the owner's Lockewood.
 	 */
 	public static final Map<String, Burst> BURSTS = Map.of("tumbler_rifle", new Burst(3, 5));
+	/**
+	 * Slice 15E: the guns loaded a shell at a time that load several rounds at each shell's time (tools/guns.py LOAD_STEPS):
+	 * the Maelstrom Gun, from the owner's Cyclone, three microjets a step.
+	 */
+	public static final Map<String, Integer> LOAD_STEPS = Map.of("maelstrom_gun", 3);
 	/** The round that falls over its flight (the darts-and-bleeding follow-up; tools/guns.py AMMO "dart"). */
 	public static final String DART = "dart";
 	/** How far a dart flies a tick, in blocks (the owner's frog dart's speed; {@link GunShots#flight}). */
@@ -605,16 +615,19 @@ public final class JugcraftGuns {
 				"extended_magazine", "speed_magazine", "light_stock", "weighted_stock", "wooden_stock", "light_grip",
 				"iron_bayonet", "steel_bayonet", "diamond_bayonet", "netherite_bayonet", "long_scope", "medium_scope",
 				"reflex_sight", "tactical_grip", "laser_sight"));
+		ACCEPTS.put("ermine_rifle", List.of("light_stock", "weighted_stock", "wooden_stock", "light_grip", "vertical_grip",
+				"iron_bayonet", "steel_bayonet", "diamond_bayonet", "netherite_bayonet", "long_scope", "medium_scope",
+				"reflex_sight", "laser_sight"));
 	}
 
 	/** The rounds. */
-	public static final List<String> AMMO = List.of("light_round", "rifle_round", "buckshot_shell", "paper_cartridge", "dart");
+	public static final List<String> AMMO = List.of("light_round", "rifle_round", "buckshot_shell", "paper_cartridge", "dart", "microjet");
 	/** The sound events the animations and the guns play (assets/jugcraft/sounds.json, written by tools/guns.py). */
 	public static final List<String> SOUND_EVENTS = List.of("bolt", "bolt_pull", "bolt_release", "clank", "dry_fire",
 			"gun_rustle", "insert", "jam", "lever", "metal", "pump", "pump_half", "rack", "reload_end", "reload_mag_in",
 			"reload_mag_out", "shell_in", "slap");
 	/** The rounds that leave a spent case, each with its particle jugcraft:&lt;round&gt;_casing (tools/guns.py CASINGS). */
-	public static final List<String> CASING_AMMO = List.of("light_round", "rifle_round", "buckshot_shell", "dart");
+	public static final List<String> CASING_AMMO = List.of("light_round", "rifle_round", "buckshot_shell", "dart", "microjet");
 	/** Walking speed while aiming down the sights (vanilla's using an item is 0.2). */
 	public static final float AIM_SPEED = 0.6F;
 
@@ -808,7 +821,7 @@ public final class JugcraftGuns {
 		return KNOCKBACK.getOrDefault(gun.name(), 0.0F);
 	}
 
-	/** How many points of armour this gun's bullets pass through ({@link #PIERCING}); 0 for most. */
+	/** How many points of armour this gun's bullets (or, slice 15E, its beam) pass through ({@link #PIERCING}); 0 for most. */
 	public static float piercing(GunItem gun) {
 		return PIERCING.getOrDefault(gun.name(), 0.0F);
 	}
@@ -821,6 +834,11 @@ public final class JugcraftGuns {
 	/** The burst this gun fires to a pull (slice 15D, {@link #BURSTS}); null for a gun that fires one shot a pull. */
 	public static @Nullable Burst burst(GunItem gun) {
 		return BURSTS.get(gun.name());
+	}
+
+	/** Rounds this gun loads at each shell's time (slice 15E, {@link #LOAD_STEPS}); 1 for most. */
+	public static int loadStep(GunItem gun) {
+		return LOAD_STEPS.getOrDefault(gun.name(), 1);
 	}
 
 	/** JE a round of this energy weapon draws from Energy Cells (slice 8D, {@link #CHARGE}); 0 for a gun that loads rounds. */
