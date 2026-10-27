@@ -119,7 +119,10 @@ public final class HerobrineEncounters {
 	private static final Map<UUID, Live> LIVE = new HashMap<>();
 	private static final Map<UUID, UUID> BY_PLAYER = new HashMap<>();
 	private static final Map<UUID, Pose> POSES = new HashMap<>();
-	/** Players who have seen him at a distance since the server started: only they may be given a close encounter. */
+	/**
+	 * Players who have seen a watcher since the server started: only they are shown the other variants, or given a close
+	 * encounter. (The schedule's saved progress may be stricter; this is the encounters' own floor.)
+	 */
 	private static final Set<UUID> INTRODUCED = new HashSet<>();
 
 	private HerobrineEncounters() {
@@ -210,10 +213,11 @@ public final class HerobrineEncounters {
 
 	/**
 	 * Tries {@code request} for {@code player}, tells the director whether he was placed, and returns what happened. A
-	 * distant encounter picks its own {@link Herobrine.Variant}: down a dark tunnel when the player is underground and
-	 * one runs behind them, otherwise a follower, a second look or a watcher, falling back to a watcher. Unless an
-	 * operator forced it, a close encounter needs a calm player who has already seen him at a distance since the server
-	 * started, so nobody's first sight of him is a jump-scare.
+	 * player's first distant encounters (until they have seen one, since the server started) are plain watchers, so they
+	 * recognise him; after that a distant encounter picks its own {@link Herobrine.Variant}: down a dark tunnel when the
+	 * player is underground and one runs behind them, otherwise a follower, a second look or a watcher, falling back to
+	 * a watcher. Unless an operator forced it, a close encounter needs a calm player who has already seen a watcher, so
+	 * nobody's first sight of him is a jump-scare.
 	 */
 	public static Attempt attempt(ServerPlayer player, HerobrineDirector.Request request) {
 		return attempt(player, request, () -> request.kind() == Herobrine.Kind.CLOSE ? behind(player) : distant(player));
@@ -267,8 +271,8 @@ public final class HerobrineEncounters {
 	}
 
 	/** Called by {@link Herobrine} the first time {@code player} really sees him. */
-	static void seen(Herobrine herobrine, UUID player, Herobrine.Kind kind) {
-		if (kind == Herobrine.Kind.DISTANT) {
+	static void seen(Herobrine herobrine, UUID player, Herobrine.Variant variant) {
+		if (variant == Herobrine.Variant.WATCHER) {
 			INTRODUCED.add(player);
 		}
 		Live live = LIVE.get(herobrine.encounter());
@@ -287,6 +291,11 @@ public final class HerobrineEncounters {
 		director.ended(live.request(), herobrine.encounter(), outcome, herobrine.witnesses());
 	}
 
+	/** Whether {@code player} has seen a watcher since the server started (and so may be shown anything else). */
+	public static boolean introduced(UUID player) {
+		return INTRODUCED.contains(player);
+	}
+
 	/** Encounters under way. */
 	public static int live() {
 		return LIVE.size();
@@ -298,6 +307,10 @@ public final class HerobrineEncounters {
 	}
 
 	private static @Nullable Herobrine distant(ServerPlayer player) {
+		// Until a player has seen him plainly (a watcher, since the server started), that is all they are shown.
+		if (!INTRODUCED.contains(player.getUUID())) {
+			return distant(player, Herobrine.Variant.WATCHER);
+		}
 		RandomSource random = player.getRandom();
 		List<Herobrine.Variant> tries = new ArrayList<>();
 		if (!outdoors(player) && random.nextDouble() < TUNNEL_CHANCE) {

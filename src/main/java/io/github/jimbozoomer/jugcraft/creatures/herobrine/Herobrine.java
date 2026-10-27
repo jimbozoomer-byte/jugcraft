@@ -289,7 +289,7 @@ public final class Herobrine extends PathfinderMob {
 
 	private void witness(Player player) {
 		if (witnesses.add(player.getUUID())) {
-			HerobrineEncounters.seen(this, player.getUUID(), variant.kind);
+			HerobrineEncounters.seen(this, player.getUUID(), variant);
 		}
 	}
 

@@ -428,4 +428,30 @@ public class HerobrineGameTests {
 		helper.assertTrue(!level.hasChunkAt(farChunk), "Checking the line should not have loaded the far chunk");
 		helper.succeed();
 	}
+
+	/** A newcomer's natural distant encounter is a plain watcher; seeing one introduces them to everything else. */
+	@GameTest(structure = ARENA, padding = 48, maxTicks = 60)
+	public void aNewcomerFirstMeetsAPlainWatcher(GameTestHelper helper) {
+		floor(helper);
+		for (int x = 0; x < 48; x++) {
+			for (int z = 0; z < 48; z++) {
+				helper.setBlock(new BlockPos(x, 5, z), Blocks.STONE);
+			}
+		}
+		ServerPlayer player = player(helper, new BlockPos(24, 1, 24), 0.0F);
+		helper.assertTrue(!HerobrineEncounters.introduced(player.getUUID()), "A new player has not met him");
+		HerobrineEncounters.Attempt attempt = HerobrineEncounters.attempt(player,
+				new HerobrineDirector.Request(player.getUUID(), Herobrine.Kind.DISTANT, HerobrineDirector.FORCED));
+		helper.assertTrue(attempt.placed(), "There should be somewhere under the roof to stand: " + attempt.failure());
+		Herobrine herobrine = attempt.herobrine();
+		helper.assertTrue(herobrine.variant() == Herobrine.Variant.WATCHER, "A first encounter should be a watcher, not " + herobrine.variant());
+		float yaw = (float) Math.toDegrees(Math.atan2(herobrine.getZ() - player.getZ(), herobrine.getX() - player.getX())) - 90.0F;
+		player.snapTo(player.getX(), player.getY(), player.getZ(), yaw, 0.0F);
+		player.setYHeadRot(yaw);
+		helper.runAfterDelay(Herobrine.SEEN_TICKS + 4, () -> {
+			helper.assertTrue(HerobrineEncounters.introduced(player.getUUID()), "Seeing a watcher should introduce the player");
+			herobrine.discard();
+			helper.succeed();
+		});
+	}
 }
