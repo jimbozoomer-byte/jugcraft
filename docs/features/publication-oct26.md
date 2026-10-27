@@ -84,3 +84,11 @@ playback without an audio device. The test explicitly calls the 26.3
 the engine-loop, steering and both F5 camera assertions remain intact. The full
 aircraft client test passes locally in 2m38s. Runtime aircraft code is unchanged.
 
+The Pumpkin King client fixture also assumed its harvest and crowning could
+interrupt an active attack. Bounded waits now cover the longest attack plus
+the call/transition, and its artificial ripening clock crosses the actual
+swelling boundary instead of skipping over it. The complete encounter passes
+locally in 3m26s, including hand-picked gourds, all phases, loot, cleanup and a
+fresh instance. Production encounter timing is unchanged. These three client
+repairs are tracked in PR #500; no deployment has occurred.
+
