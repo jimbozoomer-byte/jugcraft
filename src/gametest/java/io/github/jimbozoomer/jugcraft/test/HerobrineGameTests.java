@@ -82,10 +82,9 @@ public class HerobrineGameTests {
 	}
 
 	private static Recorder recorder() {
-		if (!(HerobrineEncounters.director() instanceof Recorder recorder)) {
-			recorder = new Recorder(HerobrineEncounters.director());
-			HerobrineEncounters.setDirector(recorder);
-		}
+		if (HerobrineEncounters.director() instanceof Recorder recorder) return recorder;
+		Recorder recorder = new Recorder(HerobrineEncounters.director());
+		HerobrineEncounters.setDirector(recorder);
 		return recorder;
 	}
 
