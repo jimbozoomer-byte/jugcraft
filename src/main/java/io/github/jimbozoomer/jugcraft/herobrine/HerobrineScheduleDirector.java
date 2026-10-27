@@ -55,6 +55,11 @@ public final class HerobrineScheduleDirector implements HerobrineDirector {
 		return new HerobrineSchedule.Request(request.player(), request.kind() == Herobrine.Kind.CLOSE
 				? HerobrineSchedule.Kind.CLOSE : HerobrineSchedule.Kind.WATCHER, request.reservation());
 	}
+	/** Persistent narrative eligibility; also implements the forthcoming director narrative seam. */
+	public boolean hasSeen(UUID player) {
+		var progress = data.schedule().progress(player);
+		return progress != null && progress.sightings() > 0;
+	}
 	@Override public void placed(Request request, UUID encounter) { data.schedule().placed(core(request), encounter); }
 	@Override public void failed(Request request, Failure failure) {
 		data.schedule().failed(core(request)); data.flushChanges();
