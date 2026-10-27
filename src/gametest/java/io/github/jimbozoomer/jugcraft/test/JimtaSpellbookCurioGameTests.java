@@ -19,7 +19,11 @@ import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.EntityTypes;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.item.crafting.CraftingInput;
+import net.minecraft.world.item.crafting.RecipeType;
 import net.minecraft.world.level.GameType;
+import java.util.List;
 import java.util.UUID;
 
 /** Deferred combined-run tests use actual Trinkets inventories and native effects/Focus. */
@@ -33,6 +37,14 @@ public final class JimtaSpellbookCurioGameTests {
     }
     private static void remove(ServerPlayer player, String name) {
         var item = JimtaSpellbookCurios.ITEMS.get(name); TrinketsApi.getAttachment(player).getInventory(item.slot).setItem(0, ItemStack.EMPTY);
+    }
+    @GameTest(maxTicks = 20) public void blankRunesCraftFromStoneWithoutSpendingARune(GameTestHelper h) {
+        // Every school rune and most scrolls start from a blank rune; uninscribing alone would need one to begin with.
+        var input = CraftingInput.of(2, 1, List.of(new ItemStack(Items.STONE), new ItemStack(JimtaSpellbooks.ITEMS.get("arcane_essence"))));
+        var recipe = h.getLevel().recipeAccess().getRecipeFor(RecipeType.CRAFTING, input, h.getLevel());
+        h.assertTrue(recipe.isPresent(), "Stone and arcane essence make blank runes");
+        var out = recipe.get().value().assemble(input);
+        h.assertTrue(out.is(JimtaSpellbooks.ITEMS.get("blank_rune")) && out.getCount() == 2, "Two blank runes per craft"); h.succeed();
     }
     @GameTest public void everySourceCurioFitsNativeSlotsWithoutKnowledgeRequirements(GameTestHelper h) {
         var p = player(h); h.assertTrue(JimtaSpellbookCurios.ITEMS.size() == 21, "Exact source curio set");
