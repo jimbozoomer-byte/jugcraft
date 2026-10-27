@@ -9491,6 +9491,7 @@ def check_lairs():
     import crown_of_thunder as ct
     import cydonian_sanctum as cs
     import glacier_hall as gh
+    import glass_chapel as gc
     import hollow_acre as ha
     import lair_data as ld
     import lairs as la
@@ -9507,7 +9508,8 @@ def check_lairs():
                                        ("moonlit_ring", mr, mr.CENTRE, (mr.MOON, mr.MOON_RADIUS)),
                                        ("cydonian_sanctum", cs, cs.CENTRE, None),
                                        ("crowfield", cf, cf.CENTRE, (cf.MOON, cf.MOON_RADIUS)),
-                                       ("crown_of_thunder", ct, ct.CENTRE, None)):
+                                       ("crown_of_thunder", ct, ct.CENTRE, None),
+                                       ("glass_chapel", gc, gc.CENTRE, None)):
         ax, ay, az, yaw = layout.ARRIVAL
         sky = "null, 0" if moon is None else "new BlockPos({}, {}, {}), {}".format(*moon[0], moon[1])
         expected = (f'{name.upper()}("{name}", {layout.SIZE[0]}, {layout.SIZE[1]}, {layout.SIZE[2]}, new Vec3({float(ax)}, '
@@ -9541,7 +9543,8 @@ def check_lairs():
         if f'fixture("{block}",' not in registry:
             err(f"JugcraftLairs does not register the lair block {block}")
     for name in ("mourning_wreath", "death_knell", "cursed_spindle", "frost_horn", "kiln_seal", "hag_stone", "exhumation_writ",
-                 "sealed_orders", "howling_totem", "altar_keystone", "harvest_crown", "thunder_vane", la.GATE["entity"]):
+                 "sealed_orders", "howling_totem", "altar_keystone", "harvest_crown", "thunder_vane", "glass_accord",
+                 la.GATE["entity"]):
         if f'Jugcraft.id("{name}")' not in registry:
             err(f"JugcraftLairs does not register {name}")
     if f"float GLARE_FRICTION = {la.GLARE_FRICTION}F;" not in registry:
@@ -9787,6 +9790,31 @@ def check_lairs():
             err(f"No words for the Crown of Thunder's {name} rod")
     if "open.lair == Lair.CROWN_OF_THUNDER) { ThunderVaneRite.follow(server, open);" not in gate:
         err("MistGateEntity does not take followers into the Crown of Thunder by the vane's way (ThunderVaneRite.follow)")
+    # The Glass Chapel's: the Accord's rest, reach and glass, the mirrors' halves, stops and light, the fixtures'
+    # registrations, the mirrors' names, and the gate's follow into the chapel.
+    accord = (folder / "GlassAccordRite.java").read_text(encoding="utf-8")
+    for name, key in (("COOLDOWN", "cooldown"), ("MIST_RANGE", "mist_range"), ("GLASS_REACH", "glass_reach")):
+        if not java_number(accord, name, la.ACCORD[key]):
+            err(f"GlassAccordRite.{name} is not tools/lairs.py ACCORD {key} ({la.ACCORD[key]})")
+    accord_glass = (load(DATA / MOD / "tags" / "block" / "glass_accord_glass.json") or {}).get("values", [])
+    if accord_glass != la.ACCORD_GLASS:
+        err(f"#jugcraft:glass_accord_glass is not tools/lairs.py ACCORD_GLASS: {accord_glass}")
+    if any("tinted" in str(glass) for glass in la.ACCORD_GLASS):
+        err("tools/lairs.py ACCORD_GLASS counts tinted glass, which keeps the sun out")
+    mirror_java = re.sub(r"\s+", " ", (folder / "ChapelMirrorBlock.java").read_text(encoding="utf-8"))
+    if tuple(gc.MIRROR_PARTS) != la.MIRROR_HALVES or not java_number(mirror_java, "MARKED_LIGHT", la.MIRROR_MARKED_LIGHT):
+        err(f"ChapelMirrorBlock's halves or MARKED_LIGHT are not tools/lairs.py MIRROR_HALVES {la.MIRROR_HALVES} and "
+            f"MIRROR_MARKED_LIGHT {la.MIRROR_MARKED_LIGHT}")
+    for line in ('fixture("chapel_mirror", p -> new ChapelMirrorBlock(p.lightLevel(ChapelMirrorBlock::light))',
+                 'fixture("abbot_lectern", AbbotLecternBlock::new', 'fixture("lancet_glass", p -> new TransparentBlock(p)',
+                 'fixture("rose_glass", p -> new TransparentBlock(p)', "output.accept(GLASS_ACCORD);"):
+        if line not in re.sub(r"\s+", " ", registry):
+            err(f"JugcraftLairs does not have {line}")
+    for name in gc.MIRRORS:
+        if f"lair.{MOD}.glass_chapel.mirror.{name}" not in (load(ASSETS / "lang" / "en_us.json") or {}):
+            err(f"No words for the Glass Chapel's {name} mirror")
+    if "open.lair == Lair.GLASS_CHAPEL) { GlassAccordRite.follow(server, open);" not in gate:
+        err("MistGateEntity does not take followers into the Glass Chapel by the Accord's way (GlassAccordRite.follow)")
     for name, recipe in la.RECIPES.items():
         data = load(DATA / MOD / "recipe" / f"{name}.json") or {}
         if data.get("result", {}).get("id") != f"{MOD}:{recipe.get('result', name)}":
@@ -9851,6 +9879,7 @@ def check_lairs():
     check_cydonian_sanctum(cs)
     check_crowfield(cf)
     check_crown_of_thunder(ct)
+    check_glass_chapel(gc)
 
 
 def check_cydonian_sanctum(cs):
@@ -10433,6 +10462,201 @@ def check_crown_of_thunder(ct):
                         "minecraft:snow", "minecraft:dirt") or state[0].endswith("_leaves") \
                 or state[0] == "minecraft:gravel" and (x, y - 1, z) not in blocks and y > 0:
             err(f"The Crown has {state[0]} at {(x, y, z)}, which would change once placed")
+            break
+
+
+def check_glass_chapel(gc):
+    """The Glass Chapel as tools/glass_chapel.py builds it is the chapel its record describes
+    (docs/features/glass-chapel.md), and where the Java looks for its parts (GlassChapel.java) is where the layout puts
+    them: the arrival stands in the narthex with room overhead, and the Grey Mist fills the south door; a walk from the
+    arrival, never stepping more than half a block, reaches every open cell of the nave, the apse and the narthex; each
+    mirror stands whole and at rest, both halves, where MIRRORS says, and the lectern before the Abbot's place with room
+    for him; the beam's geometry works: for each pair of mirrors, at each one's stop for that pair the beam aimed at either
+    strikes both and comes home, and of every setting of the three mirrors (4^3 for each pair) only those do, none at
+    rest; every line it runs along keeps CLEARANCE from the pillars and the third mirror; the Java's mirrors, stops, beam
+    reach and pillars are these, and its trace() is this one's, case by case (GlassChapelGameTests runs the Java's);
+    from every open cell of the nave a player alone reaches both mirrors of any pair, sprinting, within FAIR_SECONDS;
+    light flooded from the hidden lights and the mist is at least NAVE_LIGHT on every open cell; and nothing in it changes
+    by itself once placed."""
+    import itertools
+    import math
+    from collections import deque
+    blocks = gc.build()
+    name = lambda pos: blocks[pos][0] if pos in blocks else None
+    props = lambda pos: dict(blocks[pos][1]) if pos in blocks else {}
+    java = re.sub(r"\s+", " ", (JAVA_ROOT / "lair" / "GlassChapel.java").read_text(encoding="utf-8"))
+    for jname, value in (("PAVE", gc.PAVE), ("STAND", gc.STAND), ("CENTRE_X", gc.CENTRE[0]), ("CENTRE_Z", gc.CENTRE[1]),
+                         ("NAVE_WEST", gc.WALLS[0] + 1), ("NAVE_EAST", gc.WALLS[1] - 1), ("NAVE_NORTH", gc.NAVE_Z[0]),
+                         ("NAVE_SOUTH", gc.NAVE_Z[1]), ("ROOD_Z", gc.ROOD_Z), ("NARTHEX_NORTH", gc.NARTHEX_Z[0]),
+                         ("NARTHEX_SOUTH", gc.NARTHEX_Z[1]), ("APSE_WEST", gc.APSE_X[0]), ("APSE_EAST", gc.APSE_X[1]),
+                         ("APSE_NORTH", gc.APSE_Z[0]), ("APSE_SOUTH", gc.APSE_Z[1]), ("APSE_CHAMFER", gc.APSE_CHAMFER),
+                         ("ABBOT_X", gc.ABBOT[0]), ("ABBOT_Z", gc.ABBOT[1]),
+                         ("EXIT_WEST", gc.EXIT["x"][0]), ("EXIT_EAST", gc.EXIT["x"][1]), ("EXIT_Z", gc.EXIT["z"]),
+                         ("PILLAR", gc.PILLAR), ("ANGLE_STEP", gc.ANGLE_STEP), ("HIT", gc.HIT), ("BOUNCES", gc.BOUNCES)):
+        if not java_number(java, jname, value):
+            err(f"GlassChapel.{jname} is not tools/glass_chapel.py's {value}")
+    if "LECTERN = new BlockPos({}, STAND, {});".format(*gc.LECTERN) not in java:
+        err(f"GlassChapel.LECTERN is not tools/glass_chapel.py's {gc.LECTERN}")
+    if "PILLARS = {{{}}};".format(", ".join("{{{}, {}}}".format(*p) for p in gc.PILLARS)) not in java:
+        err(f"GlassChapel.PILLARS is not tools/glass_chapel.py's {gc.PILLARS}")
+    if "REACH = {{{}}};".format(", ".join(str(float(r)) for r in gc.REACH)) not in java:
+        err(f"GlassChapel.REACH is not tools/glass_chapel.py's {gc.REACH}")
+    enum = ", ".join("{}({}, {}, {})".format(n.upper(), *gc.MIRRORS[n], ", ".join(map(str, gc.STOPS[n]))) for n in gc.MIRRORS)
+    if f"enum Mirror implements StringRepresentable {{ {enum};" not in java:
+        err(f"GlassChapel.Mirror is not tools/glass_chapel.py MIRRORS and STOPS: expected {enum}")
+    if f"int REST = {gc.REST};" not in java:
+        err(f"GlassChapel.Mirror.REST is not tools/glass_chapel.py REST {gc.REST}")
+    # The trace's rules: an unmarked mirror stops it, as one already struck does, and it comes home only past the Abbot.
+    for line in ("if (mirror != null && marked.contains(mirror) && !struck.contains(mirror)) {",
+                 "return new Beam(points, struck, abbot && !pillar);", "if (!struck.isEmpty()) {"):
+        if line not in java:
+            err(f"GlassChapel.trace does not have {line}, as tools/glass_chapel.py trace works")
+
+    # The geometry: each pair's stops send it home, and no other setting does, none at rest.
+    steps = gc.pair_steps()
+    names = list(gc.MIRRORS)
+    for mirror, pairs in steps.items():
+        for pair, step in pairs.items():
+            if step not in gc.STOPS[mirror] or gc.STOPS[mirror][gc.REST] == step:
+                err(f"The {mirror} mirror has no stop for {pair} (step {step}), or rests at it: {gc.STOPS[mirror]}")
+        if len(set(gc.STOPS[mirror])) != len(gc.STOPS[mirror]):
+            err(f"The {mirror} mirror's stops repeat: {gc.STOPS[mirror]}")
+    for pair in gc.PAIRS:
+        a, b = pair.split("+")
+        for combo in itertools.product(range(len(gc.STOPS[names[0]])), repeat=len(names)):
+            stops = dict(zip(names, combo))
+            want = gc.STOPS[a][stops[a]] == steps[a][pair] and gc.STOPS[b][stops[b]] == steps[b][pair]
+            if gc.comes_home(stops, pair) != want:
+                err(f"The beam for {pair} {'does not come' if want else 'comes'} home with the mirrors at {stops}")
+                break
+    for a, b, p, q in gc.routes():
+        for corner in gc.PILLARS:
+            x0, z0, x1, z1 = gc.pillar_box(corner)
+            edges = [((x0, z0), (x1, z0)), ((x1, z0), (x1, z1)), ((x1, z1), (x0, z1)), ((x0, z1), (x0, z0))]
+            near = min(min(gc.segment_distance(c, p, q) for c in edge) for edge in edges)
+            near = min(near, *(gc.segment_distance(p, *edge) for edge in edges), *(gc.segment_distance(q, *edge) for edge in edges))
+            if near < gc.CLEARANCE:
+                err(f"The beam's line from {a} to {b} passes {near:.2f} from the pillar at {corner} (CLEARANCE {gc.CLEARANCE})")
+        for other in gc.MIRRORS:
+            if other not in (a, b) and gc.segment_distance(gc.middle(other), p, q) < gc.CLEARANCE:
+                err(f"The beam's line from {a} to {b} passes the {other} mirror")
+
+    passable = {None, "minecraft:light", "jugcraft:lair_exit", "minecraft:cobweb", "minecraft:candle"}
+    free = lambda pos: name(pos) in passable
+    whole = {"minecraft:stone", "minecraft:polished_andesite", "minecraft:stone_bricks", "minecraft:andesite",
+             "minecraft:cracked_stone_bricks", "minecraft:mossy_stone_bricks", "minecraft:chiseled_stone_bricks",
+             "minecraft:calcite", "minecraft:waxed_cut_copper"}
+    ax, ay, az, _ = gc.ARRIVAL
+    feet = (int(ax), int(ay), int(az))
+    if name((feet[0], feet[1] - 1, feet[2])) not in whole or ay != float(gc.STAND) or not free(feet) \
+            or not free((feet[0], feet[1] + 1, feet[2])) or not gc.in_narthex(feet[0], feet[2]):
+        err(f"The chapel's arrival at {gc.ARRIVAL[:3]} does not stand in the narthex with room overhead")
+    for pos in gc.exit_cells():
+        if name(pos) != "jugcraft:lair_exit":
+            err(f"No Grey Mist in the chapel's south door at {pos}")
+    for mirror, (x, z) in gc.MIRRORS.items():
+        for i, part in enumerate(gc.MIRROR_PARTS):
+            pos = (x, gc.STAND + i, z)
+            if name(pos) != "jugcraft:chapel_mirror" or props(pos) != {"half": part, "mirror": mirror, "stop": str(gc.REST),
+                                                                         "marked": "false", "veiled": "false"}:
+                err(f"No {part} half of the {mirror} mirror at rest at {pos}")
+        if name((x, gc.PAVE, z)) not in whole or not free((x, gc.STAND + 2, z)):
+            err(f"The {mirror} mirror at {(x, z)} does not stand on the floor with room over it")
+    lx, lz = gc.LECTERN
+    if name((lx, gc.STAND, lz)) != "jugcraft:abbot_lectern":
+        err(f"No Abbot's Lectern at {(lx, gc.STAND, lz)}")
+    wx, wy, wz, _ = gc.WAIT
+    if (wx, wz) != gc.ABBOT or not all(free((int(wx), int(wy) + i, int(wz))) for i in range(3)) \
+            or name((int(wx), int(wy) - 1, int(wz))) not in whole:
+        err(f"The Abbot's place at {gc.WAIT[:3]} is not open floor with room for him")
+
+    # The walk: from the arrival over the floor, a step at most half a block (there are no steps: a block is a wall).
+    stands = {}
+    for (x, y, z), state in blocks.items():
+        if state[0] in whole and free((x, y + 1, z)) and free((x, y + 2, z)):
+            stands.setdefault((x, z), []).append(y + 1.0)
+    start = (feet[0], feet[2], float(ay))
+    seen, queue = {start}, deque([start])
+    while queue:
+        x, z, h = queue.popleft()
+        for nx, nz in ((x + 1, z), (x - 1, z), (x, z + 1), (x, z - 1)):
+            for nh in stands.get((nx, nz), ()):
+                node = (nx, nz, nh)
+                if abs(nh - h) <= 0.5 + 1e-9 and node not in seen:
+                    seen.add(node)
+                    queue.append(node)
+    open_cells = [(x, gc.STAND, z) for x in range(gc.SIZE[0]) for z in range(gc.SIZE[2]) if gc.inside(x, z)
+                  and (x, gc.PAVE, z) in blocks and free((x, gc.STAND, z)) and free((x, gc.STAND + 1, z))]
+    stranded = [cell for cell in open_cells if (cell[0], cell[2], float(gc.STAND)) not in seen]
+    if not open_cells or stranded:
+        err(f"{len(stranded)} open cells of the chapel cannot be walked to from the arrival, e.g. {stranded[:1]}")
+
+    # Fair to a player alone: from every open cell of the nave, sprinting (FAIR_SPRINT blocks a second), reach within
+    # FAIR_REACH of one marked mirror and then the other, either order, in FAIR_SECONDS (the Abbot's mark to his beam).
+    nave = {(x, z) for x, _, z in open_cells if gc.in_nave(x, z) or gc.in_apse(x, z)}
+
+    def walk(sources):
+        dist, queue = {cell: 0.0 for cell in sources}, deque(sources)
+        while queue:
+            x, z = queue.popleft()
+            for dx, dz in ((1, 0), (-1, 0), (0, 1), (0, -1), (1, 1), (1, -1), (-1, 1), (-1, -1)):
+                n = (x + dx, z + dz)
+                if n not in nave or (dx and dz and ((x + dx, z) not in nave or (x, z + dz) not in nave)):
+                    continue
+                d = dist[(x, z)] + (math.sqrt(2) if dx and dz else 1.0)
+                if d < dist.get(n, math.inf) - 1e-9:
+                    dist[n] = d
+                    queue.append(n)
+        return dist
+    reach = {m: walk([c for c in nave if math.hypot(c[0] + 0.5 - gc.middle(m)[0], c[1] + 0.5 - gc.middle(m)[1])
+                      <= gc.FAIR_REACH]) for m in gc.MIRRORS}
+    worst = (0.0, None)
+    for pair in gc.PAIRS:
+        a, b = pair.split("+")
+        a_to_b = min(reach[b].get(c, math.inf) for c in reach[a] if reach[a][c] == 0.0)
+        b_to_a = min(reach[a].get(c, math.inf) for c in reach[b] if reach[b][c] == 0.0)
+        for cell in nave:
+            d = min(reach[a].get(cell, math.inf) + a_to_b, reach[b].get(cell, math.inf) + b_to_a)
+            if d > worst[0]:
+                worst = (d, (cell, pair))
+    if worst[0] > gc.FAIR_SECONDS * gc.FAIR_SPRINT:
+        err(f"The chapel is unfair alone: from {worst[1]} both mirrors are {worst[0]:.1f} blocks away, past "
+            f"{gc.FAIR_SECONDS} s of sprinting ({gc.FAIR_SECONDS * gc.FAIR_SPRINT:.1f})")
+
+    # The light, flooded as the game floods block light, through anything but whole opaque blocks.
+    opaque = whole | {"minecraft:stone_brick_slab"}
+    emit = {"jugcraft:lair_exit": 6, "minecraft:candle": 3}
+    light, queue = {}, deque()
+    for pos, state in blocks.items():
+        level = int(dict(state[1])["level"]) if state[0] == "minecraft:light" else emit.get(state[0], 0)
+        if level:
+            light[pos] = level
+            queue.append(pos)
+    while queue:
+        x, y, z = queue.popleft()
+        level = light[(x, y, z)] - 1
+        for n in ((x + 1, y, z), (x - 1, y, z), (x, y + 1, z), (x, y - 1, z), (x, y, z + 1), (x, y, z - 1)):
+            if name(n) not in opaque and level > light.get(n, 0) and 0 <= n[1] < gc.SIZE[1]:
+                light[n] = level
+                queue.append(n)
+    lit = sorted((light.get(cell, 0), cell) for cell in open_cells)
+    if not lit or lit[0][0] < gc.NAVE_LIGHT:
+        dark = [cell for level, cell in lit if level < gc.NAVE_LIGHT]
+        err(f"{len(dark)} open cells of the chapel have less block light than NAVE_LIGHT {gc.NAVE_LIGHT}, the darkest "
+            f"{lit[0] if lit else None}")
+    client = ROOT / "src" / "gametest" / "java" / "io" / "github" / "jimbozoomer" / "jugcraft" / "test" / \
+        "GlassChapelClientGameTests.java"
+    source = client.read_text(encoding="utf-8") if client.is_file() else ""
+    if not java_number(source, "NAVE_LIGHT", gc.NAVE_LIGHT) or not java_number(source, "CHAPEL_CELLS", len(open_cells)):
+        err(f"GlassChapelClientGameTests does not read the light against NAVE_LIGHT {gc.NAVE_LIGHT} on the chapel's "
+            f"{len(open_cells)} open cells (CHAPEL_CELLS)")
+
+    # Nothing that changes by itself once placed.
+    for (x, y, z), state in blocks.items():
+        if state[0] in ("minecraft:grass_block", "minecraft:vine", "minecraft:lava", "minecraft:fire", "minecraft:water",
+                        "minecraft:snow", "minecraft:dirt", "minecraft:gravel", "minecraft:sand") \
+                or state[0].endswith("_leaves") or state[0].endswith("_copper") and "waxed" not in state[0]:
+            err(f"The chapel has {state[0]} at {(x, y, z)}, which would change once placed")
             break
 
 

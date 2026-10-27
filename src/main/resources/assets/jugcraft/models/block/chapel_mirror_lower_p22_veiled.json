@@ -1,0 +1,7 @@
+{
+  "parent": "jugcraft:block/chapel_mirror_lower_p22",
+  "textures": {
+    "frame": "jugcraft:block/chapel_mirror_frame",
+    "glass": "jugcraft:block/chapel_mirror_veiled"
+  }
+}

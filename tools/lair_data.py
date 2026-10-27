@@ -6,7 +6,8 @@ Writ of Exhumation, Sealed Orders, the Howling Totem, the Mist Gate's name, the 
 (its dimension type, level stem and biome) and structure template (tools/hollow_acre.py, tools/spindle_loft.py,
 tools/glacier_hall.py, tools/cinder_kiln.py, tools/lantern_fen.py, tools/crypt_archive.py, tools/foundry_trench.py,
 tools/moonlit_ring.py, tools/cydonian_sanctum.py, tools/crown_of_thunder.py). Also the Crown of Thunder's blocks and the
-Thunder Vane (docs/features/crown-of-thunder.md).
+Thunder Vane (docs/features/crown-of-thunder.md), and the Glass Chapel's blocks and the Glass Accord
+(docs/features/glass-chapel.md, tools/glass_chapel.py).
 
 Called from tools/agriculture_data.py (assets, loot, recipes, tags, worldgen). Formats follow vanilla 26.3's own files:
 the dimension type copies the shape of vanilla's End (logged from the running game by LairGameTests), the level stem a
@@ -19,13 +20,14 @@ import crowfield
 import crown_of_thunder
 import crypt_archive
 import foundry_trench
+import glass_chapel
 import cydonian_sanctum
 import glacier_hall
 import hollow_acre
 import lantern_fen
 import moonlit_ring
 import spindle_loft
-from lairs import (BELL_NAMES, CROWFIELD_HARVEST, HILL_NAMES, KINGS_GOURD, FIXTURES, GATE, HORN_GROUND, ICICLE_PARTS, ITEMS, LACE_PATTERNS, LAIR_BLOCKS, LAIRS,
+from lairs import (ACCORD_GLASS, BELL_NAMES, CROWFIELD_HARVEST, HILL_NAMES, KINGS_GOURD, FIXTURES, GATE, HORN_GROUND, ICICLE_PARTS, ITEMS, LACE_PATTERNS, LAIR_BLOCKS, LAIRS,
                    MOURNING_FLOWERS, NAME_GLOWS, NAMES, RECIPES, RITE_CANDLES, SEAL_GROUND, SEAL_LANDS, SLUICE_FLOWS,
                    SLUICE_PARTS, PYLON_NAMES, ROD_PARTS, STONE_GROUND, STONE_LANDS, THREAD_COLOURS, TRENCH_WORKS,
                    VANE_LANDS, WEREWOLF_PELTS, WRIT_TOMBS)
@@ -36,7 +38,7 @@ TEMPLATES = {"hollow_acre": hollow_acre, "spindle_loft": spindle_loft, "glacier_
              "cinder_kiln": cinder_kiln, "lantern_fen": lantern_fen, "crypt_archive": crypt_archive,
              "foundry_trench": foundry_trench, "moonlit_ring": moonlit_ring, "cydonian_sanctum": cydonian_sanctum,
              "crowfield": crowfield,
-             "crown_of_thunder": crown_of_thunder}
+             "crown_of_thunder": crown_of_thunder, "glass_chapel": glass_chapel}
 
 
 def cube(lo, hi, faces, texture, cull=None, shade=True, uvs=None):
@@ -711,6 +713,86 @@ def crown_of_thunder_assets(models, states, write, simple):
     simple("storm_cloud", {"parent": "minecraft:block/cube_all", "textures": {"all": rid("block/storm_cloud")}})
 
 
+# How a Chapel Mirror's model is turned to face each angle step (tools/glass_chapel.py ANGLE_STEP): the blockstate's turn
+# (clockwise from above) and its boxes' own turn about the block's middle (vanilla's sense: counterclockwise from above),
+# so the glass faces step * 22.5 degrees clockwise from north, either way round.
+MIRROR_TURNS = {0: (0, 0.0), 1: (0, -22.5), 2: (90, 45.0), 3: (90, 22.5), 4: (90, 0.0), 5: (90, -22.5), 6: (180, 45.0),
+                7: (0, 22.5)}
+# A mirror's boxes, by half: (name, from, to, texture of its broad faces); the frame takes the rest. The glass faces north
+# and south.
+MIRROR_BOXES = {
+    "lower": (("turntable", [2, 0, 2], [14, 2, 14], "#frame"), ("pointer", [7.5, 2, 1], [8.5, 2.5, 15], "#frame"),
+              ("post_west", [1, 2, 7], [2.5, 16, 9], "#frame"), ("post_east", [13.5, 2, 7], [15, 16, 9], "#frame"),
+              ("rail", [2.5, 2, 7], [13.5, 3, 9], "#frame"), ("glass", [2.5, 3, 7.6], [13.5, 16, 8.4], "#glass")),
+    "upper": (("post_west", [1, 0, 7], [2.5, 12, 9], "#frame"), ("post_east", [13.5, 0, 7], [15, 12, 9], "#frame"),
+              ("glass", [2.5, 0, 7.6], [13.5, 12, 8.4], "#glass"), ("arch", [1, 12, 7], [15, 14, 9], "#frame"),
+              ("finial", [7, 14, 7.5], [9, 16, 8.5], "#frame")),
+}
+
+
+def mirror_code(angle):
+    return {0.0: "0", 22.5: "p22", -22.5: "m22", 45.0: "p45"}[angle]
+
+
+def chapel_mirror(half, angle):
+    """One half of a Chapel Mirror, drawn facing north with its boxes turned angle degrees about the block's middle:
+    a brass turntable with a pointer along the way the glass faces (the lower half), brass posts, and the silvered glass
+    between them, an arch and a finial over it (the upper)."""
+    elements = []
+    for _, lo, hi, texture in MIRROR_BOXES[half]:
+        faces = {face: {"texture": texture if face in ("north", "south") or texture == "#frame" else "#frame"} for face in ALL}
+        if half == "lower" and lo[1] == 0:
+            faces["down"]["cullface"] = "down"
+        element = {"from": lo, "to": hi, "faces": faces}
+        if angle:
+            element["rotation"] = {"origin": [8, 8, 8], "axis": "y", "angle": angle}
+        elements.append(element)
+    return {"parent": "minecraft:block/block", "textures": {"particle": "#frame"}, "elements": elements}
+
+
+def abbot_lectern():
+    """The Abbot's Lectern, drawn facing north: a stone foot, a column, and a sloped desk with an open book of glass on it."""
+    return {"parent": "minecraft:block/block", "textures": {
+        "particle": rid("block/abbot_lectern"), "stone": rid("block/abbot_lectern"), "top": rid("block/abbot_lectern_top")},
+        "elements": [cube([3, 0, 3], [13, 2, 13], ALL, "#stone", cull=("down",)), cube([5, 2, 5], [11, 12, 11], ALL, "#stone"),
+                     {**cube([1, 12, 1], [15, 15, 15], ALL, "#stone"),
+                      "faces": {**cube([1, 12, 1], [15, 15, 15], ALL, "#stone")["faces"], "up": {"texture": "#top"}}}]}
+
+
+def glass_chapel_assets(models, states, write):
+    """The Glass Chapel's lair-only blocks (tools/glass_chapel.py): the mirrors in every half, turn, mark and veil, the
+    Abbot's Lectern, and the stained glass of the lancets and the rose window."""
+    for half in glass_chapel.MIRROR_PARTS:
+        for angle in sorted({turn for _, turn in MIRROR_TURNS.values()}):
+            base = f"chapel_mirror_{half}_{mirror_code(angle)}"
+            write(models / f"{base}.json", chapel_mirror(half, angle))
+            for marked in (False, True):
+                for veiled in (False, True):
+                    write(models / f"{base}{'_marked' if marked else ''}{'_veiled' if veiled else ''}.json", {
+                        "parent": rid(f"block/{base}"), "textures": {
+                            "frame": rid("block/chapel_mirror_frame_lit" if marked else "block/chapel_mirror_frame"),
+                            "glass": rid("block/chapel_mirror_veiled" if veiled else "block/chapel_mirror_glass")}})
+    variants = {}
+    for half in glass_chapel.MIRROR_PARTS:
+        for name, stops in glass_chapel.STOPS.items():
+            for stop, step in enumerate(stops):
+                turn, angle = MIRROR_TURNS[step]
+                for marked in (False, True):
+                    for veiled in (False, True):
+                        model = (f"chapel_mirror_{half}_{mirror_code(angle)}{'_marked' if marked else ''}"
+                                 f"{'_veiled' if veiled else ''}")
+                        key = (f"half={half},marked={str(marked).lower()},mirror={name},stop={stop},"
+                               f"veiled={str(veiled).lower()}")
+                        variants[key] = {"model": rid(f"block/{model}"), **({"y": turn} if turn else {})}
+    write(states / "chapel_mirror.json", {"variants": variants})
+    write(models / "abbot_lectern.json", abbot_lectern())
+    write(states / "abbot_lectern.json", {"variants": {f"facing={f}": turned("abbot_lectern", f) for f in HORIZONTAL}})
+    for name in ("lancet_glass", "rose_glass"):
+        texture = {"force_translucent": True, "sprite": rid(f"block/{name}")}
+        write(models / f"{name}.json", {"parent": "minecraft:block/cube_all", "textures": {"all": texture, "particle": texture}})
+        write(states / f"{name}.json", {"variants": {"": {"model": rid(f"block/{name}")}}})
+
+
 def assets(root, write, lang):
     models, states, items = root / "models" / "block", root / "blockstates", root / "items"
 
@@ -743,6 +825,7 @@ def assets(root, write, lang):
     cydonian_sanctum_assets(models, states, write, simple)
     crowfield_assets(models, states, write)
     crown_of_thunder_assets(models, states, write, simple)
+    glass_chapel_assets(models, states, write)
     for name, display in LAIR_BLOCKS.items():
         lang[f"block.{MOD}.{name}"] = display
 
@@ -766,6 +849,7 @@ def assets(root, write, lang):
     lang[f"item.{MOD}.altar_keystone"] = ITEMS["altar_keystone"]
     lang[f"item.{MOD}.harvest_crown"] = ITEMS["harvest_crown"]
     lang[f"item.{MOD}.thunder_vane"] = ITEMS["thunder_vane"]
+    lang[f"item.{MOD}.glass_accord"] = ITEMS["glass_accord"]
     lang[f"tooltip.{MOD}.death_knell"] = "Rung at a grave at night, among lit candles, with a wreath laid on it"
     lang[f"tooltip.{MOD}.cursed_spindle"] = "Used on a Spinning Wheel at night: prick your finger, and wake in the Spindle Loft"
     lang[f"tooltip.{MOD}.mourning_wreath"] = "Lay it on a grave for the Last Rites"
@@ -798,6 +882,10 @@ def assets(root, write, lang):
         lang[f"lair.{MOD}.crown_of_thunder.rod.{rod}"] = f"the {rod} rod"
     lang[f"tooltip.{MOD}.thunder_vane"] = ("Raised high in the mountains under the open sky while it rains: lightning answers, "
                                            "and the wind takes you to the Crown of Thunder")
+    for mirror in glass_chapel.MIRRORS:
+        lang[f"lair.{MOD}.glass_chapel.mirror.{mirror}"] = f"the {mirror} mirror"
+    lang[f"tooltip.{MOD}.glass_accord"] = ("Held up by day in clear weather, in sunlight that falls through glass: the light "
+                                           "gathers in it and takes you to the Glass Chapel")
     lang[f"entity.{MOD}.{GATE['entity']}"] = GATE["display"]
 
     for lair, info in LAIRS.items():
@@ -883,6 +971,13 @@ def assets(root, write, lang):
         f"message.{MOD}.lair.vane.roofed": "Raise the vane under the open sky",
         f"message.{MOD}.lair.vane.misting": "The wind already tears at the mist here: use it to follow",
         f"message.{MOD}.lair.vane.opened": "Lightning strikes the vane, it spins wild, and the wind tears the mist open",
+        f"message.{MOD}.lair.accord.not_overworld": "No sun here fills the Accord",
+        f"message.{MOD}.lair.accord.night": "The Accord stays dark: hold it up by day",
+        f"message.{MOD}.lair.accord.clouded": "The clouds dull the Accord: hold it up in clear weather",
+        f"message.{MOD}.lair.accord.shaded": "Stand where the sun can reach you",
+        f"message.{MOD}.lair.accord.no_glass": "Hold it up where the sun falls through glass: a window or skylight within %s blocks over you",
+        f"message.{MOD}.lair.accord.misting": "The light already gathers in the mist here: use it to follow",
+        f"message.{MOD}.lair.accord.opened": "The sunlight gathers in the Accord until it blazes, and the mist rises full of light",
         f"message.{MOD}.lair.dial.turned": "The dial turns to %s",
         f"message.{MOD}.lair.dial.matched": "%s lights on the Star Door",
         f"message.{MOD}.lair.door.opened": "The Star Door grinds open",
@@ -956,6 +1051,8 @@ def tags(tags):
         tags.add("block", f"{MOD}:crowfield_harvest", block)
     for biome in VANE_LANDS:
         tags.add("worldgen/biome", f"{MOD}:thunder_vane_lands", biome)
+    for glass in ACCORD_GLASS:
+        tags.add("block", f"{MOD}:glass_accord_glass", glass)
     # Blighted soil is earth: plants stand on it.
     tags.add("block", "minecraft:dirt", rid("blighted_soil"))
     tags.add("block", "minecraft:mineable/hoe", rid("mourning_wreath"))
