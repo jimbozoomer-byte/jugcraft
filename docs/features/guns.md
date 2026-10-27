@@ -5974,7 +5974,7 @@ Slice 9E's files: the guns' tactical grip parts and the Laser Sight's textures m
   - **Recipes:** every shaped recipe in the mod's data compared, mirrors included: the Dart's grid matches no other.
   - **The dart's fall:** worked out in Python from the same rule as `GunShots.flight`, for the table above and the game test's bounds.
   - **Alchemy value:** the Dart's record, priced from its recipe as `tools/build_alchemy_values.py` prices them (that tool needs a Minecraft jar, which isn't available here).
-- **Darts and bleeding game tests (not run yet; CI runs them):** `DartsAndBleedingGameTests` (above); `GunsGameTests` and `DiamondSteelGunsIIIGameTests` as changed.
+- **Darts and bleeding game tests (not run yet; CI runs them):** `DartsAndBleedingGameTests` (above); `GunsGameTests` and `DiamondSteelGunsIIIGameTests` as changed. `MarksmanGunsGameTests.marksmanRiflesLandAndLoad` now stanches the Picket Rifle's bleeding after its shot: in CI (slice 15D's run on fed2bf354) the pig bled 1 between the Picket's shot and the Kestrel's, 24 ticks on, and lost 28 where 27 was due.
 - **Not run:** the client by hand, a two-client dedicated server, and play.
 
 ## World and event applicability

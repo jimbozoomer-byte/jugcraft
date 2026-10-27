@@ -122,5 +122,8 @@ public class MarksmanGunsGameTests {
 		helper.assertTrue(Math.abs(200.0F - pig.getHealth() - expected) < 1.0E-3F,
 				"After the " + name + "'s shot the pig had lost " + (200.0F - pig.getHealth()) + ", not " + expected);
 		helper.assertTrue(GunItem.loaded(shooter.getMainHandItem()) == spec.capacity() - 1, "The " + name + " did not spend a round");
+		// The Picket Rifle's hit may make the pig bleed (the darts-and-bleeding follow-up), which would hurt it before the
+		// next rifle's shot: stanch it, so each shot's loss is its own.
+		pig.removeEffect(JugcraftGuns.BLEEDING);
 	}
 }
