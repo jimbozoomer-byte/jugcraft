@@ -1488,6 +1488,7 @@ public final class JugcraftAgriculture {
 		registerItem("horseman_cloak", Item::new, new Item.Properties().stacksTo(1).rarity(Rarity.EPIC).component(DataComponents.EQUIPPABLE, cloak),
 				TOOL_TAB);
 		HarvestMoon.register();
+		BloodMoon.register();
 	}
 
 	/**

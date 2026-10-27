@@ -164,6 +164,8 @@ TEXT = {
     "message.jugcraft.horseman.roofed": "He only rides under the open sky",
     "message.jugcraft.horseman.already_riding": "The Headless Horseman is already riding nearby",
     "message.jugcraft.horseman.hoofbeats": "Hoofbeats in the dark...",
+    "message.jugcraft.blood_moon.rises": "A Blood Moon rises: the dead walk thick tonight, and the Horseman rides",
+    "message.jugcraft.blood_moon.sets": "The Blood Moon sets",
     "message.jugcraft.horseman.sighting_gone": "The Headless Horseman rides off into the night. You'll see him again before the season is out.",
 }
 

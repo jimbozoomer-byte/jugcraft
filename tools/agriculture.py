@@ -794,6 +794,8 @@ HALLOWEEN_ADVANCEMENTS = {
                           "description": "Send the Headless Horseman back into the night", "frame": "challenge"},
     "sleepy_hollow": {"icon": "jugcraft:horseman_cloak", "title": "Sleepy Hollow",
                       "description": "See the Headless Horseman ride out of the dark in the Halloween season", "frame": "task"},
+    "bad_moon_rising": {"icon": "minecraft:redstone", "title": "Bad Moon Rising",
+                        "description": "Be out in the Overworld when a Blood Moon rises", "frame": "task"},
     "lantern_festival": {"icon": "jugcraft:sky_lantern", "title": "A Sky Full of Wishes",
                          "description": "Be there when eight sky lanterns are let go together", "frame": "goal"},
     "harvest_home": {"icon": "jugcraft:feast_table", "title": "Harvest Home",
@@ -995,6 +997,13 @@ HORSEMAN_SIGHTINGS = {"check_ticks": 20, "settle_ticks": 600, "start_chance": 0.
                       "approach_ticks": 80, "circle_radius": 6.0, "circle_ticks": 30, "throw_at": 12, "leave_speed": 0.6,
                       "leave_ticks": 50, "max_ticks": 240, "fright_ticks": 30, "fright_push": 0.6,
                       "option": "halloween.horseman_sightings", "advancement": "sleepy_hollow"}
+# The Blood Moon (agriculture/BloodMoon.java): in the season, every `every`th night by the overworld's day count and the
+# nights of Halloween. Worked out every check_ticks. Under it costumed mobs dress costume_chance of the time (instead of
+# COSTUMED_MOBS' chance) and drop candy_rolls rolls of candy; wisps spawn wisp_chance of the tries, wisp_near_cap to a
+# player; a red haze of haze_count motes within haze_radius of each player out under it, every haze_ticks; and the
+# Horseman rides by everyone not yet seeing him that day (HORSEMAN_SIGHTINGS).
+BLOOD_MOON = {"every": 4, "check_ticks": 100, "costume_chance": 0.4, "candy_rolls": 2, "wisp_chance": 1.0, "wisp_near_cap": 8,
+              "haze_ticks": 40, "haze_count": 6, "haze_radius": 10.0, "option": "halloween.blood_moon", "advancement": "bad_moon_rising"}
 
 
 # ---------------------------------------------------------------- Halloween decorations, batch 1

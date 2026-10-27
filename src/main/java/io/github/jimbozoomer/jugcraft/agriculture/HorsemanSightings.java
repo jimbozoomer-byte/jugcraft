@@ -32,7 +32,8 @@ import org.jspecify.annotations.Nullable;
  *
  * <p>A player is due a sighting on their first night of the season, then once {@value #MIN_GAP_DAYS} to
  * {@value #MAX_GAP_DAYS} days (the server's dates, as the season's) have passed since the last one, and again on
- * Halloween itself ({@link HalloweenSeason#harvestMoon()}) if they have not yet seen him that day. Every
+ * Halloween itself ({@link HalloweenSeason#harvestMoon()}) if they have not yet seen him that day, and on any night of
+ * a Blood Moon ({@link BloodMoon}) if they have not yet seen him that day. Every
  * {@value #CHECK_TICKS} ticks, on a night that is passing (the overworld's clock moving: never while time stands still),
  * each player due who is out under the open sky in the overworld, has been in the game {@value #SETTLE_TICKS} ticks or
  * more and is not asleep is sent him {@value #START_CHANCE} of the time, so he comes at an unforeseen moment; never
@@ -87,7 +88,8 @@ public final class HorsemanSightings {
 		LocalDate today = HalloweenSeason.date();
 		long halloween = HalloweenSeason.harvestMoon().atYear(today.getYear()).toEpochDay();
 		for (ServerPlayer player : List.copyOf(level.players())) {
-			if (ready(level, player) && due(seen(player), today.toEpochDay(), halloween, player.getUUID())
+			long last = seen(player);
+			if (ready(level, player) && (due(last, today.toEpochDay(), halloween, player.getUUID()) || BloodMoon.active() && last != today.toEpochDay())
 					&& level.getRandom().nextFloat() < START_CHANCE && !riding(level, player.position())) {
 				send(level, player);
 			}

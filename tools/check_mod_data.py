@@ -6094,6 +6094,38 @@ def check_night(java, main):
     for key in ("entity.jugcraft.horseman_rider", "message.jugcraft.horseman.hoofbeats", "message.jugcraft.horseman.sighting_gone"):
         if key not in lang:
             err(f"en_us.json has no words for {key}")
+    # The Blood Moon: its numbers are the table's, it only adds to what the season already brings, and it is wired into
+    # the costumes, the candy, the wisps, the sightings and the client's sky.
+    blood = ag.BLOOD_MOON
+    for name, key in (("EVERY", "every"), ("CHECK_TICKS", "check_ticks"), ("COSTUME_CHANCE", "costume_chance"), ("CANDY_ROLLS", "candy_rolls"),
+                      ("WISP_CHANCE", "wisp_chance"), ("WISP_NEAR_CAP", "wisp_near_cap"), ("HAZE_TICKS", "haze_ticks"),
+                      ("HAZE_COUNT", "haze_count"), ("HAZE_RADIUS", "haze_radius")):
+        if number("BloodMoon", name) != blood[key]:
+            err(f"BloodMoon.{name} = {number('BloodMoon', name)} differs from tools/agriculture.py BLOOD_MOON ({blood[key]})")
+    if not (blood["every"] >= 2 and ag.COSTUMED_MOBS["chance"] < blood["costume_chance"] <= 1.0 and blood["candy_rolls"] >= 1
+            and wisps["spawn_chance"] <= blood["wisp_chance"] <= 1.0 and wisps["near_cap"] <= blood["wisp_near_cap"] <= wisps["level_cap"]):
+        err("tools/agriculture.py BLOOD_MOON: it rises at most every other night and only adds: more costumes, candy and wisps, "
+            "never past the wisps' cap for the world")
+    for source, needed, why in (("BloodMoon", 'OPTION = "' + blood["option"] + '";', "be switched by halloween.blood_moon"),
+                                ("BloodMoon", 'ADVANCEMENT = "' + blood["advancement"] + '";', "award Bad Moon Rising"),
+                                ("CostumedMobs", "random.nextFloat() >= chance()", "dress more mobs under it"),
+                                ("CostumedMobs", "BloodMoon.active() ? BloodMoon.CANDY_ROLLS : 1", "roll the candy more under it"),
+                                ("Wisps", "BloodMoon.active() ? BloodMoon.WISP_CHANCE : SPAWN_CHANCE", "bring more wisps under it"),
+                                ("Wisps", "BloodMoon.active() ? BloodMoon.WISP_NEAR_CAP : NEAR_CAP", "let more wisps gather under it"),
+                                ("HorsemanSightings", "BloodMoon.active() && last != today.toEpochDay()", "send the Horseman by under it"),
+                                ("JugcraftAgriculture", "BloodMoon.register();", "run it")):
+        if needed not in java.get(source, ""):
+            err(f"{source} must {why} ({needed})")
+    if "BloodMoon.clientActive = payload.active()" not in client or '"BloodMoonSkyMixin"' not in (ROOT / "src" / "client" / "resources"
+            / "jugcraft.client.mixins.json").read_text(encoding="utf-8"):
+        err("The client must hear the Blood Moon and turn its sky (BloodMoonSkyMixin)")
+    if f'Map.entry("{blood["option"]}", "on")' not in config:
+        err(f"JugcraftConfig must default {blood['option']} to on")
+    if blood["advancement"] not in ag.HALLOWEEN_ADVANCEMENTS:
+        err(f"tools/agriculture.py HALLOWEEN_ADVANCEMENTS has no {blood['advancement']}")
+    for key in ("message.jugcraft.blood_moon.rises", "message.jugcraft.blood_moon.sets"):
+        if key not in lang:
+            err(f"en_us.json has no words for {key}")
     if treb["board"] != ag.HARVEST_SCALE["board"] or "BOARD = HarvestScaleBlockEntity.BOARD;" not in java.get("TrebuchetBlockEntity", ""):
         err("The trebuchet's board must hand out the Harvest Scale's ribbons, one per place")
     if not treb["min_angle"] <= treb["default_angle"] <= treb["max_angle"] or (treb["default_angle"] - treb["min_angle"]) % treb["angle_step"]:

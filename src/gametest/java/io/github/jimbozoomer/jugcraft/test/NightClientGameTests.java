@@ -1,5 +1,6 @@
 package io.github.jimbozoomer.jugcraft.test;
 
+import io.github.jimbozoomer.jugcraft.agriculture.BloodMoon;
 import io.github.jimbozoomer.jugcraft.agriculture.CarvedPumpkinBlock;
 import io.github.jimbozoomer.jugcraft.agriculture.CarvingTemplates;
 import io.github.jimbozoomer.jugcraft.agriculture.HalloweenSeason;
@@ -54,8 +55,9 @@ import net.minecraft.world.phys.AABB;
  * marker, Wisps in Jars and Horseman's Lanterns standing and hanging, an armor stand in the Horseman's Cloak, and lit
  * carvings on a scarecrow; photographed at noon, then at midnight on Halloween (the event on a fixed server clock)
  * with posed will-o'-wisps over the corn and the Headless Horseman (CI job {@code client}). The creatures are posed
- * (no AI); the server tests check how they behave. Last, a sighting: the Horseman sent riding at the player out of the
- * dark (HorsemanSightings), caught as he comes.
+ * (no AI); the server tests check how they behave. Halloween night is a Blood Moon's, so its sky is red (BloodMoon),
+ * photographed looking up. Last, a sighting: the Horseman sent riding at the player out of the dark
+ * (HorsemanSightings), caught as he comes.
  */
 public class NightClientGameTests implements FabricClientGameTest {
 	@Override
@@ -100,6 +102,10 @@ public class NightClientGameTests implements FabricClientGameTest {
 					+ context.computeOnClient(client -> client.level.getEntitiesOfClass(WillOWisp.class,
 							client.player.getBoundingBox().inflate(64.0)).size()));
 			shoot(context, singleplayer, x + 8, y + 1, z - 7, 180, 10, "jugcraft_harvest_moon_sparks");
+
+			// Halloween night is a Blood Moon's: the night sky turned blood red, looked up at.
+			shoot(context, singleplayer, x + 14, y + 1, z + 8, 180, -35, "jugcraft_blood_moon");
+			System.out.println("[nights test] Blood Moon on the client: " + BloodMoon.clientActive);
 
 			// A sighting: sent at the player, the Horseman rides out of the dark at them, caught as he comes.
 			server.runCommand(String.format(Locale.ROOT, "tp @p %.1f %d %.1f 180 2", x + 14.5, y, z + 8.5));

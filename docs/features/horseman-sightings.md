@@ -23,6 +23,7 @@ Everyone within 48 blocks when he flings his pumpkin has seen him too, so a grou
 
 **When he comes:**
 - **Your first night of the season**, then again every **2 or 3 days** (the server's dates, as the season's; the gap is fixed for each sighting), and once more on **Halloween** itself, if you have not seen him yet that day. Over the season from 20 October to 3 November, that is about five or six sightings each.
+- **On a Blood Moon night** too, if you have not seen him yet that day ([blood-moon.md](blood-moon.md)).
 - Only at night (dusk to dawn), in the season, out under the open sky in the Overworld, awake, and once you have been in the game for half a minute. While you are due he comes at an unforeseen moment (about once a minute of being out at night, on average), never with another rider or the summoned Horseman within 128 blocks.
 - **Only on nights that pass.** If the server has stopped time (`/gamerule advance_time false`), he never comes on his own.
 - He comes only from ground that is loaded and not water, no more than 10 blocks above or below you; if there is none in front of you, he tries again later.
