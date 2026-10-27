@@ -34,7 +34,7 @@ The numbers follow the existing ones: the thread gave 2 per level, and the other
 
 ## Multiplayer and persistence
 
-Six new potion IDs (`jugcraft:nouveau_immolate`, `_long`, `_strong`, and the same for `nouveau_looting`) and 36 brewing recipes. The Immolation thread's state used to be lost on logout; as a status it now saves with the player. No existing IDs change.
+Six new potion IDs (`jugcraft:nouveau_immolate`, `_long`, `_strong`, and the same for `nouveau_looting`) and 30 brewing recipes. The Immolation thread's state used to be lost on logout; as a status it now saves with the player. No existing IDs change.
 
 ## Verification
 
