@@ -8,6 +8,10 @@ Every change to Jugcraft, newest first, grouped by pull request. For what each t
 
 No numbered release yet. Entries on feature branches remain proposed until their pull requests merge.
 
+### Unmerged: Guns, armour piercing for slices 15A's and 15B's guns
+- The **Vesper Rifle**, **Onrush SMG**, **Kreuzer Pistol** and **Psalm SMG** now pass through some of a target's armour, as the owner's gun data gives them: 4.5, 3, 1 and 1 points. A creature without armour takes the same damage as before. Their tooltips say so.
+- Record: [guns.md, the armour-piercing follow-up](docs/features/guns.md#follow-up-armour-piercing-for-slices-15as-and-15bs-guns).
+
 ### Unmerged: Guns, slice 15C (three diamond-steel long guns)
 - **Three guns** from the owner's own GeckoLib models and animations, the next of their diamond-steel guns, each held in both hands and fed from a box magazine: the **Hawker Rifle**, a rifle of twelve rifle rounds whose magazine stands out of its side, passing a point of armour; the **Impetus Shotgun**, fed from a box of six shells, eight pellets a pull, knocking back what it hits; and the **Quill Rifle**, an automatic of thirteen light rounds, silenced the length of its barrel (no muzzle flash), passing 1.5 points of armour.
 - Made from stainless steel, a diamond and a lever; planks for the Hawker and the Impetus, redstone and an iron ingot for the Quill. Each takes the magazines, stocks, grips, bayonets and scopes the owner made for it; the Quill no barrel attachment, the Hawker no Medium Scope.

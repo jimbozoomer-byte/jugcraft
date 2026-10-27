@@ -2979,6 +2979,22 @@ The next three of the owner's diamond-steel guns, taken up after slice 15B (on 2
 - **The arms in the reloads and inspections** come large into the view in places, as on the guns before them.
 - **Not played:** none of it has been played yet. The numbers want play to set.
 
+## Follow-up: armour piercing for slices 15A's and 15B's guns
+The owner's data gives four more of their diamond-steel guns armour piercing (`armorPen`), which the [heavy-bullets follow-up](#follow-up-heavy-bullets-knockback-and-armour-piercing) took only for the Uppercut. Offered after slice 15C, the owner chose it (27 October 2026, "Lets begin with those 3 you suggested"), as its own pull request.
+
+| | Vesper Rifle | Onrush SMG | Kreuzer Pistol | Psalm SMG |
+|---|---|---|---|---|
+| The owner's gun | MAS 55 | Prush Gun | Krauser | Soul Drummer |
+| Points of armour passed through | 4.5 | 3 | 1 | 1 |
+| A hit against 10 points of armour, before → now | about 11.2 → 12.4 | about 2.35 → 2.77 | 3.5 → 3.7 | about 1.98 → 2.1 |
+
+- **What changes:** the four are added to `PIERCING` (`tools/guns.py`, `JugcraftGuns`); each hit works out as the [heavy bullets](#follow-up-heavy-bullets-knockback-and-armour-piercing) already do (`GunShots.pierced`). A creature without armour takes each gun's damage as before. None of the four has knockback in the owner's data; the Gallant Rifle (the Valora) has neither.
+- **The numbers above** are worked by hand from the game's armour rule (no toughness), as the Jawbreaker's were; they were not measured in the game.
+- **Checked:** `tools/check_mod_data.py` holds the Java table to `tools/guns.py`, as before. `HeavyBulletsGameTests.heavyBulletsAreTheOwners` holds the full tables to the owner's numbers, and the Gallant Rifle's bullets to plain ones.
+- **Tooltips:** each of the four says it pierces armour.
+- **Save compatibility:** nothing saved changes.
+- **Not in this follow-up:** the guns before slice 15. The owner's data gives 49 of them armour piercing, knockback or both (27 each, 5 both); they stay plain for now.
+
 ## Connections
 - **Existing input producers:** copper, iron and gunpowder (vanilla); lead nuggets (the lead switch's lead); brass nuggets (brass, from zinc); paper and planks.
 - **Existing output consumer:** combat. The guns kill what drops loot for every branch.
@@ -5899,6 +5915,7 @@ Slice 9E's files: the guns' tactical grip parts and the Laser Sight's textures m
   - `HeavyBulletsGameTests.heavyBulletsAreTheOwners` (was `heavyBulletsAreTheJawbreakers`): the knockback and piercing tables are the owner's numbers for the Jawbreaker and slice 15C's three, and no others.
   - `GunsGameTests` counts 99 guns; `TacticalAttachmentsGameTests` the thirty-nine guns the Tactical Grip fits, these three among them.
   - The guns' client test (`GunsClientGameTests`) takes each new gun through its screenshots as every gun's: the Impetus's inspect screenshot should show it held as at rest.
+- **Armour piercing for slices 15A's and 15B's guns, run locally (27 October 2026):** `python3 tools/generate_material_data.py` rewrote the four tooltips. `python3 tools/check_mod_data.py`: PASS. `python3 tools/guns.py --check`: PASS. `python3 scripts/check_repository.py`: PASS. **Java:** a syntax parse only: 0 errors in the changed files. Game test (not run yet; CI runs it): `HeavyBulletsGameTests.heavyBulletsAreTheOwners`, with the four added.
 - **Not run:** the client by hand, a two-client dedicated server, and play.
 
 ## World and event applicability
@@ -5918,6 +5935,6 @@ No worldgen, structures, bosses or seasonal content. Guns, rounds and the Cell R
   - the guns beyond these sets;
   - the owner's other GeckoLib gun models from their upload of 23 October 2026: only the Grandle OG's and the nine diamond-steel guns' built so far (slices 15A to 15C) are in the library ([the library record](../../art/owner-library/README.md#gun-geometry-23-october-2026));
   - the other six diamond-steel guns;
-  - armour piercing for slices 15A's and 15B's other guns, whose owner's data gives it too (the MAS 55 4.5 points, the Prush Gun 3, the Krauser and the Soul Drummer 1 each); the heavy-bullets follow-up took only the Uppercut's;
+  - the owner's armour piercing and knockback for the guns before slice 15: their data gives 49 of them one or both ([above](#follow-up-armour-piercing-for-slices-15as-and-15bs-guns));
   - darts that fall and make what they hit bleed (the owner's Zilk 45), and a shotgun that pushes its shooter back (the owner's Inertial).
 - **Balance:** the numbers are starting points for the owner to set.

@@ -874,7 +874,8 @@ GUNS = {
         "display": "Vesper Rifle",
         "source": "mas_55",
         "tooltip": "A heavy marksman's rifle of stainless steel, a wax seal and a strip of scripture on its side. Eight "
-                   "rounds a magazine, one a pull: slow, hard hitting and far reaching. Fires rifle rounds.",
+                   "rounds a magazine, one a pull: slow, hard hitting and far reaching, piercing armour. Fires rifle "
+                   "rounds.",
         "damage": 13.0, "pellets": 1, "interval": 14, "auto": False, "capacity": 8,
         "reload": 51, "spread": (2.0, 0.15), "range": 144, "ammo": "rifle_round",
     },
@@ -882,7 +883,7 @@ GUNS = {
         "display": "Onrush SMG",
         "source": "prush_gun",
         "tooltip": "A submachine gun of stainless steel with a long magazine below: it fires as long as the trigger is "
-                   "held, ten rounds a second. Fires light rounds.",
+                   "held, ten rounds a second, piercing armour. Fires light rounds.",
         "damage": 3.5, "pellets": 1, "interval": 2, "auto": True, "capacity": 23,
         "reload": 51, "spread": (5.0, 2.5), "range": 48, "ammo": "light_round",
     },
@@ -901,7 +902,8 @@ GUNS = {
         "display": "Kreuzer Pistol",
         "source": "krauser",
         "tooltip": "A stainless steel pistol, its magazine ahead of the trigger and a wax seal on its side. Thirteen "
-                   "rounds, one a pull. Held in one hand, or in both with a stock fitted. Fires light rounds.",
+                   "rounds, one a pull, piercing armour. Held in one hand, or in both with a stock fitted. Fires light "
+                   "rounds.",
         "damage": 5.0, "pellets": 1, "interval": 4, "auto": False, "capacity": 13,
         "reload": 50, "spread": (2.0, 0.5), "range": 64, "ammo": "light_round",
     },
@@ -909,7 +911,8 @@ GUNS = {
         "display": "Psalm SMG",
         "source": "soul_drummer",
         "tooltip": "A stainless steel machine pistol: it fires as long as the trigger is held, ten rounds a second, and "
-                   "strays even aimed. Held in one hand, or in both with a stock fitted. Fires light rounds.",
+                   "strays even aimed, piercing armour. Held in one hand, or in both with a stock fitted. Fires light "
+                   "rounds.",
         "damage": 3.0, "pellets": 1, "interval": 2, "auto": True, "capacity": 25,
         "reload": 55, "spread": (5.5, 3.0), "range": 40, "ammo": "light_round",
     },
@@ -4115,9 +4118,12 @@ SILENCED = ("gallant_rifle", "quill_rifle")
 # wore that many points less armour; it deals no more to a creature without). The owner's data gives the Uppercut both
 # (knockbackStrength 0.6, armorPen 4.5): slice 15B's Jawbreaker is the first (JugcraftGuns.KNOCKBACK, PIERCING).
 # Slice 15C gives the Inertial's knockback (0.65) to the Impetus Shotgun, and the MAS Peddler's and the Zilk 45's
-# armour piercing (1.0, 1.5) to the Hawker Rifle and the Quill Rifle.
+# armour piercing (1.0, 1.5) to the Hawker Rifle and the Quill Rifle. The follow-up after it gives slices 15A's and
+# 15B's other guns the owner's armour piercing for them: the MAS 55's (4.5) to the Vesper Rifle, the Prush Gun's (3.0)
+# to the Onrush SMG, and the Krauser's and the Soul Drummer's (1.0 each) to the Kreuzer Pistol and the Psalm SMG.
 KNOCKBACK = {"jawbreaker": 0.6, "impetus_shotgun": 0.65}
-PIERCING = {"jawbreaker": 4.5, "hawker_rifle": 1.0, "quill_rifle": 1.5}
+PIERCING = {"vesper_rifle": 4.5, "onrush_smg": 3.0, "kreuzer_pistol": 1.0, "psalm_smg": 1.0, "jawbreaker": 4.5,
+            "hawker_rifle": 1.0, "quill_rifle": 1.5}
 
 
 def cell_rack_model():
