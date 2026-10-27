@@ -21,9 +21,11 @@ public final class HerobrineScheduleDirector implements HerobrineDirector {
 	private final MinecraftServer server;
 	private final HerobrineProgress data;
 	private final Clock clock;
+	private final io.github.jimbozoomer.jugcraft.creatures.herobrine.HerobrineDiscoveries discoveries;
 	public HerobrineScheduleDirector(MinecraftServer server, Clock clock, HerobrineSeason season) {
 		this.server = server;
 		this.clock = clock;
+		this.discoveries = new io.github.jimbozoomer.jugcraft.creatures.herobrine.HerobrineDiscoveries(server, season);
 		data = HerobrineProgress.get(server);
 		data.schedule().season(season);
 	}
@@ -44,6 +46,7 @@ public final class HerobrineScheduleDirector implements HerobrineDirector {
 	}
 	@Override public List<Request> due(MinecraftServer server, List<Candidate> candidates) {
 		if (server != this.server) return List.of();
+		discoveries.tick(candidates, clock.instant());
 		var requests = data.schedule().step(clock.instant(), candidates.stream().map(c ->
 				new HerobrineSchedule.Candidate(c.player().getUUID(), c.active() && c.player().containerMenu == c.player().inventoryMenu,
 						c.calm())).toList());

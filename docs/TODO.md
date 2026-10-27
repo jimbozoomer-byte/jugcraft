@@ -813,3 +813,9 @@ Recipe conflict and recipe-viewer regressions pass after repairs. Actual-registr
 survival audit, combined server/client checks and packaged runtime checks remain.
 Do not publish or alter the personal profile/server. Explicit native compatibility
 limits and exact results belong in features/jimtafacts-b-h-local.md.
+
+### Permanent world-building expansion — owner approved 27 October
+
+- [ ] Codex underground/underwater half: nine cave layouts, four submerged glowstone patterns, depth-aware discovery cadence, permanent 3D spacing, excavation protections and combined native/rendered checks. Implementation prepared; validation pending ([herobrine-depths.md](features/herobrine-depths.md)).
+- [ ] Claude sky/surface half: six floating-island castle/manor/monastery variants with interiors and three surface ruins; integrate shared queue/commands and validate together.
+- [ ] Preserve all world structures indefinitely: no proximity/seasonal cleanup or resetting player modifications; only Herobrine disappears. Explicit operator undo remains a maintenance tool.

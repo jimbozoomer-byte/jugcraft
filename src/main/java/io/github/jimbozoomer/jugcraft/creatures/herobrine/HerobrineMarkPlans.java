@@ -70,7 +70,8 @@ public final class HerobrineMarkPlans {
 
 	/** The kinds of mark. */
 	public enum Type {
-		SHRINE, MOSSY_PYRAMID, SAND_PYRAMID, SIGN, GROVE, TUNNEL, PYRAMID
+		SHRINE, MOSSY_PYRAMID, SAND_PYRAMID, SIGN, GROVE, TUNNEL, PYRAMID,
+		UNDERGROUND, UNDERWATER, SKY_ISLAND, SURFACE_RUIN
 	}
 
 	/** One block a mark changes: what it must still be when the time comes ({@code expect}), and what it becomes. */

@@ -287,7 +287,8 @@ public final class HerobrineMarks extends SavedData {
 			if (plan != null) {
 				start(level, plan);
 			}
-		} else if (random.nextDouble() < MARK_CHANCE) {
+		} else if (random.nextDouble() < (level.getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES,
+				where.getX(), where.getZ()) > where.getY() + 8 ? 0.75 : MARK_CHANCE)) {
 			leave(level, where, player, witnesses > 1, random, null, null);
 		}
 	}
@@ -392,6 +393,7 @@ public final class HerobrineMarks extends SavedData {
 			boolean underground = level.getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, where.getX(), where.getZ()) > where.getY() + 1;
 			boolean underTrees = !underground && !level.canSeeSky(where.above());
 			if (underground) {
+				kinds.add(HerobrineMarkPlans.Type.UNDERGROUND);
 				kinds.add(HerobrineMarkPlans.Type.TUNNEL);
 			} else if (level.getBlockState(where.below()).is(BlockTags.SAND)) {
 				kinds.add(HerobrineMarkPlans.Type.SAND_PYRAMID);
@@ -409,7 +411,9 @@ public final class HerobrineMarks extends SavedData {
 		int tries = 0;
 		for (HerobrineMarkPlans.Type kind : kinds) {
 			boolean wide = kind == HerobrineMarkPlans.Type.GROVE || kind == HerobrineMarkPlans.Type.TUNNEL
-					|| kind == HerobrineMarkPlans.Type.PYRAMID;
+					|| kind == HerobrineMarkPlans.Type.PYRAMID || kind == HerobrineMarkPlans.Type.UNDERGROUND
+					|| kind == HerobrineMarkPlans.Type.UNDERWATER || kind == HerobrineMarkPlans.Type.SKY_ISLAND
+					|| kind == HerobrineMarkPlans.Type.SURFACE_RUIN;
 			for (BlockPos feet : wide ? List.of(where) : near(level, where)) {
 				if (++tries > MAX_PLAN_TRIES) {
 					return null;
@@ -422,6 +426,10 @@ public final class HerobrineMarks extends SavedData {
 					case GROVE -> HerobrineMarkPlans.grove(level, feet, toward, message, random);
 					case TUNNEL -> HerobrineMarkPlans.tunnel(level, feet, away, toward, message);
 					case PYRAMID -> HerobrinePyramids.near(level, feet, toward, random);
+					case UNDERGROUND -> HerobrineDepths.find(level, feet, false);
+					case UNDERWATER -> HerobrineDepths.find(level, feet, true);
+					case SKY_ISLAND -> HerobrineSkyIslands.find(level, feet);
+					case SURFACE_RUIN -> HerobrineSurfacePlans.find(level, feet);
 				};
 				if (plan != null) {
 					return start(level, plan);
@@ -555,6 +563,10 @@ public final class HerobrineMarks extends SavedData {
 			return Result.STOP;
 		}
 		BlockState now = level.getBlockState(pos);
+		// Source-water formations never consume lava or a later flowing-water state.
+		if (mark.type().equals("underwater") && (!now.is(Blocks.WATER) || !now.getFluidState().isSource())) return Result.STOP;
+		// New excavation/lining plans may replace natural stone only inside approved wilderness, rechecked at apply time.
+		if (mark.type().equals("underground") && !HerobrineMarkPlans.open(now) && !approved(level, pos, pos)) return Result.STOP;
 		if (!now.is(step.expect()) || now.hasBlockEntity() || !HerobrineMarkPlans.natural(now)) {
 			return Result.STOP;
 		}
@@ -657,7 +669,8 @@ public final class HerobrineMarks extends SavedData {
 			}
 		}
 		if (change.content().isEmpty()) {
-			return true;
+			// A visitor may adopt an empty shelter furnace: never remove containers through generic undo.
+			return !(level.getBlockEntity(change.pos()) instanceof net.minecraft.world.Container);
 		}
 		BlockEntity entity = level.getBlockEntity(change.pos());
 		if (change.content().equals(JOURNAL)) {
@@ -729,8 +742,7 @@ public final class HerobrineMarks extends SavedData {
 								.executes(context -> revoke(context.getSource(), IntegerArgumentType.getInteger(context, "number"))))))
 				.then(Commands.literal("mark").then(Commands.argument("player", EntityArgument.player())
 						.then(Commands.argument("kind", StringArgumentType.word())
-								.suggests((context, builder) -> SharedSuggestionProvider.suggest(java.util.Arrays.stream(
-										HerobrineMarkPlans.Type.values()).map(type -> type.name().toLowerCase(Locale.ROOT)), builder))
+								.suggests((context, builder) -> SharedSuggestionProvider.suggest(markNames(), builder))
 								.executes(context -> force(context.getSource(), EntityArgument.getPlayer(context, "player"),
 										StringArgumentType.getString(context, "kind"))))))));
 	}
@@ -799,6 +811,17 @@ public final class HerobrineMarks extends SavedData {
 
 	/** An operator's mark: a fixed kind, about six blocks in front of {@code player}. */
 	private static int force(CommandSourceStack source, ServerPlayer player, String kind) {
+		if (player.level().dimension() != Level.OVERWORLD) {
+			source.sendFailure(Component.literal("Herobrine landmarks are Overworld-only."));
+			return 0;
+		}
+		if (HerobrineDepths.CAVES.contains(kind) || HerobrineDepths.WATER.contains(kind)) {
+			var plan = HerobrineDepths.plan(source.getServer().overworld(), player.blockPosition().relative(player.getDirection(), 6), kind);
+			String id = plan == null ? null : start(source.getServer().overworld(), plan);
+			if (id == null) { source.sendFailure(Component.translatable("commands.jugcraft.herobrine.marks.no_site", kind)); return 0; }
+			source.sendSuccess(() -> Component.translatable("commands.jugcraft.herobrine.marks.left", kind, id), true);
+			return 1;
+		}
 		HerobrineMarkPlans.Type type;
 		try {
 			type = HerobrineMarkPlans.Type.valueOf(kind.toUpperCase(Locale.ROOT));
@@ -814,5 +837,13 @@ public final class HerobrineMarks extends SavedData {
 		}
 		source.sendSuccess(() -> Component.translatable("commands.jugcraft.herobrine.marks.left", kind, id), true);
 		return 1;
+	}
+
+	private static List<String> markNames() {
+		List<String> names = new ArrayList<>(java.util.Arrays.stream(HerobrineMarkPlans.Type.values())
+				.map(type -> type.name().toLowerCase(Locale.ROOT)).toList());
+		names.addAll(HerobrineDepths.CAVES);
+		names.addAll(HerobrineDepths.WATER);
+		return names;
 	}
 }
