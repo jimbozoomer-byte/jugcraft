@@ -252,6 +252,41 @@ public class HerobrineGameTests {
 		helper.succeed();
 	}
 
+	/** Under the open sky a watcher may wait just inside a cave mouth: roofed by natural ground, in the player's clear view. */
+	@GameTest(structure = ARENA, padding = 48, maxTicks = 20, skyAccess = true)
+	public void aWatcherMayWaitInACaveMouth(GameTestHelper helper) {
+		floor(helper);
+		// A hill of stone four blocks thick over a hollow two blocks high, open towards the player.
+		for (int x = 0; x < 48; x++) {
+			for (int z = 7; z < 25; z++) {
+				for (int y = 3; y <= 6; y++) {
+					helper.setBlock(new BlockPos(x, y, z), Blocks.STONE);
+				}
+			}
+		}
+		ServerLevel level = helper.getLevel();
+		ServerPlayer player = player(helper, new BlockPos(24, 1, 4), 0.0F);
+		BlockPos hollow = helper.absolutePos(new BlockPos(20, 1, 15));
+		BlockPos open = helper.absolutePos(new BlockPos(24, 1, 30));
+		helper.assertTrue(HerobrineEncounters.caveMouth(level, hollow.getX(), hollow.getZ(), player.getBlockY()) != null,
+				"The hollow under the hill should be a cave mouth");
+		helper.assertTrue(HerobrineEncounters.caveMouth(level, open.getX(), open.getZ(), player.getBlockY()) == null,
+				"Open ground should not be a cave mouth");
+		// Every try at 14 to 20 blocks lands under the hill, where a cave mouth beats the hilltop.
+		Vec3 spot = HerobrineEncounters.spot(level, player, 14, 20, true, 20, 75, List.of(), true);
+		helper.assertTrue(spot != null && BlockPos.containing(spot).getY() == hollow.getY(), "He should wait in the mouth, not on the hill: " + spot);
+		double z = spot.z - helper.absolutePos(BlockPos.ZERO).getZ();
+		helper.assertTrue(z >= 7 && z < 25, "He should stand under the hill, not " + z);
+		Vec3 plain = HerobrineEncounters.spot(level, player, 14, 20, true, 20, 75, List.of());
+		helper.assertTrue(plain == null || BlockPos.containing(plain).getY() != hollow.getY(), "Without mouths he never stands in one: " + plain);
+		// A roof a player built (planks over his head) is not a cave mouth.
+		helper.setBlock(new BlockPos(10, 3, 20), Blocks.OAK_PLANKS);
+		BlockPos planked = helper.absolutePos(new BlockPos(10, 1, 20));
+		helper.assertTrue(HerobrineEncounters.caveMouth(level, planked.getX(), planked.getZ(), player.getBlockY()) == null,
+				"Under planks should not be a cave mouth");
+		helper.succeed();
+	}
+
 	@GameTest(structure = ARENA, padding = 48, maxTicks = 20)
 	public void aWalledInPlayerGetsAFailureAndNothingIsPlaced(GameTestHelper helper) {
 		floor(helper);

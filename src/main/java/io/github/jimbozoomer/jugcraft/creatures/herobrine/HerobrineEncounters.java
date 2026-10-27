@@ -82,6 +82,8 @@ public final class HerobrineEncounters {
 	public static final int MAX_RISE = 24;
 	/** How many places are tried for one distant encounter; the best is used. */
 	public static final int SPOT_ATTEMPTS = 16;
+	/** How much ground lies over a cave mouth he waits in, above his head, at the least, in blocks. */
+	public static final int MOUTH_ROOF = 3;
 	/** How far behind the player a follower starts (and stays), in blocks. */
 	public static final int FOLLOW_NEAR = 18;
 	public static final int FOLLOW_FAR = 22;
@@ -374,7 +376,7 @@ public final class HerobrineEncounters {
 		Vec3 spot = switch (variant) {
 			case TUNNEL -> tunnel(level, player);
 			case FOLLOWER -> spot(level, player, FOLLOW_NEAR, FOLLOW_FAR, outdoors, 150, 180, List.of());
-			case WATCHER, SECOND_LOOK -> spot(level, player, near, far, outdoors, 20, 75, audience(player));
+			case WATCHER, SECOND_LOOK -> spot(level, player, near, far, outdoors, 20, 75, audience(player), true);
 			case BEHIND -> null;
 		};
 		return spot == null ? null : spawn(level, spot, variant, player);
@@ -398,14 +400,22 @@ public final class HerobrineEncounters {
 		return spot(level, player, near, far, surface, 20, 75, List.of());
 	}
 
+	/** {@link #spot(ServerLevel, ServerPlayer, int, int, boolean, int, int, List, boolean)}, never in a cave mouth. */
+	public static @Nullable Vec3 spot(ServerLevel level, ServerPlayer player, int near, int far, boolean surface, int fromDegrees,
+			int toDegrees, List<ServerPlayer> others) {
+		return spot(level, player, near, far, surface, fromDegrees, toDegrees, others, false);
+	}
+
 	/**
 	 * The best of {@value #SPOT_ATTEMPTS} tries at a place {@code near} to {@code far} blocks from {@code player},
 	 * {@code fromDegrees} to {@code toDegrees} off where they face, either side; each must be loaded, have room to stand,
 	 * no player within {@value Herobrine#VANISH_DISTANCE} blocks and a clear line from the player's eyes. Better is higher
-	 * than the player (a ridge), open to the sky (a clearing), and in clear view of more of {@code others}.
+	 * than the player (a ridge), open to the sky (a clearing), and in clear view of more of {@code others}. With
+	 * {@code mouths}, on the surface each try also weighs a cave mouth near the player's height ({@link #caveMouth}),
+	 * which beats a ridge in a clearing: he waits just inside the dark of a hillside.
 	 */
 	public static @Nullable Vec3 spot(ServerLevel level, ServerPlayer player, int near, int far, boolean surface, int fromDegrees,
-			int toDegrees, List<ServerPlayer> others) {
+			int toDegrees, List<ServerPlayer> others, boolean mouths) {
 		RandomSource random = player.getRandom();
 		Vec3 eye = player.getEyePosition();
 		Vec3 best = null;
@@ -416,24 +426,47 @@ public final class HerobrineEncounters {
 			double distance = near + random.nextDouble() * (far - near);
 			int x = Mth.floor(player.getX() - Math.sin(angle) * distance);
 			int z = Mth.floor(player.getZ() + Math.cos(angle) * distance);
-			BlockPos feet = surface ? surfaceFeet(level, x, z) : caveFeet(level, x, player.getBlockY(), z);
-			if (feet == null || Math.abs(feet.getY() - player.getBlockY()) > MAX_RISE) {
-				continue;
-			}
-			Vec3 at = Vec3.atBottomCenterOf(feet);
-			if (Herobrine.someoneClose(level, at) || !inClearView(level, eye, at, player)) {
-				continue;
-			}
-			int score = (feet.getY() >= player.getBlockY() + 3 ? 2 : 0) + (surface && level.canSeeSky(feet.above()) ? 1 : 0);
-			for (ServerPlayer other : others) {
-				score += inClearView(level, other.getEyePosition(), at, other) ? 3 : 0;
-			}
-			if (score > bestScore) {
-				best = at;
-				bestScore = score;
+			BlockPos ground = surface ? surfaceFeet(level, x, z) : caveFeet(level, x, player.getBlockY(), z);
+			BlockPos mouth = surface && mouths ? caveMouth(level, x, z, player.getBlockY()) : null;
+			for (BlockPos feet : new BlockPos[] {ground, mouth}) {
+				if (feet == null || Math.abs(feet.getY() - player.getBlockY()) > MAX_RISE) {
+					continue;
+				}
+				Vec3 at = Vec3.atBottomCenterOf(feet);
+				if (Herobrine.someoneClose(level, at) || !inClearView(level, eye, at, player)) {
+					continue;
+				}
+				// A cave mouth (4) beats a ridge (2) in a clearing (1); another player who would see him too counts for more.
+				int score = feet == mouth ? 4
+						: (feet.getY() >= player.getBlockY() + 3 ? 2 : 0) + (surface && level.canSeeSky(feet.above()) ? 1 : 0);
+				for (ServerPlayer other : others) {
+					score += inClearView(level, other.getEyePosition(), at, other) ? 3 : 0;
+				}
+				if (score > bestScore) {
+					best = at;
+					bestScore = score;
+				}
 			}
 		}
 		return best;
+	}
+
+	/**
+	 * A cave mouth in column {@code x}, {@code z}: room to stand within three blocks of height {@code y}, under a solid
+	 * roof of natural ground with at least {@value #MOUTH_ROOF} blocks over his head, so he waits in the dark under a hill.
+	 * Whether the opening faces the player is the clear line {@link #spot} checks. Reads only loaded chunks; null if none.
+	 */
+	public static @Nullable BlockPos caveMouth(ServerLevel level, int x, int z, int y) {
+		if (!level.hasChunkAt(new BlockPos(x, 0, z))) {
+			return null;
+		}
+		BlockPos feet = caveFeet(level, x, y, z);
+		if (feet == null || level.getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, x, z) < feet.getY() + 2 + MOUTH_ROOF) {
+			return null;
+		}
+		BlockPos roof = feet.above(2);
+		BlockState state = level.getBlockState(roof);
+		return state.isFaceSturdy(level, roof, Direction.DOWN) && HerobrineMarkPlans.natural(state) ? feet : null;
 	}
 
 	private static boolean inClearView(ServerLevel level, Vec3 eye, Vec3 feet, ServerPlayer viewer) {
