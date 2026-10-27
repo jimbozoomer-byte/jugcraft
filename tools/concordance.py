@@ -237,7 +237,7 @@ RESEARCH = {
         },
         "unlocks": {"understood": {"invocations": [f"{MOD}:kindle", f"{MOD}:aegis", f"{MOD}:revelation"],
                                    "workings": [f"{MOD}:kindle_lantern", f"{MOD}:infuse_lantern",
-                                                f"{MOD}:channel_lantern"]},
+                                                f"{MOD}:channel_lantern", f"{MOD}:glass_accord"]},
                     "mastered": {"invocations": [f"{MOD}:lance", f"{MOD}:flashstep", f"{MOD}:lanternward"]}},
     },
 }
@@ -341,6 +341,10 @@ WORKINGS = {
                        "result": f"{MOD}:kindled_lantern", "radiance": LANTERN_START},
     "infuse_lantern": {"type": "infuse", "work": f"{MOD}:kindled_lantern", "specimens": SPECIMENS},
     "channel_lantern": {"type": "channel", "work": f"{MOD}:kindled_lantern", "conversion": f"{MOD}:focus_to_radiance"},
+    # The Glass Chapel's summoning (docs/features/glass-chapel.md), cheaper here than at a crafting table (tools/lairs.py
+    # RECIPES glass_accord): a spyglass's lens and a block of glass, bound with Radiance instead of gold and amethyst.
+    "glass_accord": {"type": "craft", "work": "minecraft:spyglass", "specimen": "minecraft:glass",
+                     "result": f"{MOD}:glass_accord", "radiance": 8},
 }
 
 # Explicit conversions between resource types (Java: resource/Conversion, ConversionTable). Nothing converts without

@@ -12652,6 +12652,11 @@
       "denominator": 1,
       "source": "fallback (balance pending)"
     },
+    "jugcraft:glass_accord": {
+      "numerator": 4421,
+      "denominator": 1,
+      "source": "recipe jugcraft:glass_accord"
+    },
     "jugcraft:glass_coffee_table": {
       "numerator": 4177,
       "denominator": 72,

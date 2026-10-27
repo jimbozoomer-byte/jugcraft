@@ -50,8 +50,8 @@ OTHER = {
     "pixel_hollows": "cave",
     # The lairs' and pocket dimensions' own biomes: closed arenas with fixed looks (lair/, nouveau/).
     **{name: "dimension" for name in (
-        "cinder_kiln", "crowfield", "crown_of_thunder", "crypt_archive", "cydonian_sanctum", "foundry_trench", "glacier_hall", "hollow_acre",
-        "lantern_fen", "moonlit_ring", "nouveau_jar", "spindle_loft")},
+        "cinder_kiln", "crowfield", "crown_of_thunder", "crypt_archive", "cydonian_sanctum", "foundry_trench", "glacier_hall", "glass_chapel",
+        "hollow_acre", "lantern_fen", "moonlit_ring", "nouveau_jar", "spindle_loft")},
 }
 
 # The seasonal snow block: vanilla snow layers' looks (its models) and drops (a snowball per layer), its own block

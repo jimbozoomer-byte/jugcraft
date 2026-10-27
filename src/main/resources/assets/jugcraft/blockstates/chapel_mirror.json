@@ -1,0 +1,356 @@
+{
+  "variants": {
+    "half=lower,marked=false,mirror=east,stop=0,veiled=false": {
+      "model": "jugcraft:block/chapel_mirror_lower_p45",
+      "y": 90
+    },
+    "half=lower,marked=false,mirror=east,stop=0,veiled=true": {
+      "model": "jugcraft:block/chapel_mirror_lower_p45_veiled",
+      "y": 90
+    },
+    "half=lower,marked=true,mirror=east,stop=0,veiled=false": {
+      "model": "jugcraft:block/chapel_mirror_lower_p45_marked",
+      "y": 90
+    },
+    "half=lower,marked=true,mirror=east,stop=0,veiled=true": {
+      "model": "jugcraft:block/chapel_mirror_lower_p45_marked_veiled",
+      "y": 90
+    },
+    "half=lower,marked=false,mirror=east,stop=1,veiled=false": {
+      "model": "jugcraft:block/chapel_mirror_lower_0",
+      "y": 90
+    },
+    "half=lower,marked=false,mirror=east,stop=1,veiled=true": {
+      "model": "jugcraft:block/chapel_mirror_lower_0_veiled",
+      "y": 90
+    },
+    "half=lower,marked=true,mirror=east,stop=1,veiled=false": {
+      "model": "jugcraft:block/chapel_mirror_lower_0_marked",
+      "y": 90
+    },
+    "half=lower,marked=true,mirror=east,stop=1,veiled=true": {
+      "model": "jugcraft:block/chapel_mirror_lower_0_marked_veiled",
+      "y": 90
+    },
+    "half=lower,marked=false,mirror=east,stop=2,veiled=false": {
+      "model": "jugcraft:block/chapel_mirror_lower_m22",
+      "y": 90
+    },
+    "half=lower,marked=false,mirror=east,stop=2,veiled=true": {
+      "model": "jugcraft:block/chapel_mirror_lower_m22_veiled",
+      "y": 90
+    },
+    "half=lower,marked=true,mirror=east,stop=2,veiled=false": {
+      "model": "jugcraft:block/chapel_mirror_lower_m22_marked",
+      "y": 90
+    },
+    "half=lower,marked=true,mirror=east,stop=2,veiled=true": {
+      "model": "jugcraft:block/chapel_mirror_lower_m22_marked_veiled",
+      "y": 90
+    },
+    "half=lower,marked=false,mirror=east,stop=3,veiled=false": {
+      "model": "jugcraft:block/chapel_mirror_lower_p22"
+    },
+    "half=lower,marked=false,mirror=east,stop=3,veiled=true": {
+      "model": "jugcraft:block/chapel_mirror_lower_p22_veiled"
+    },
+    "half=lower,marked=true,mirror=east,stop=3,veiled=false": {
+      "model": "jugcraft:block/chapel_mirror_lower_p22_marked"
+    },
+    "half=lower,marked=true,mirror=east,stop=3,veiled=true": {
+      "model": "jugcraft:block/chapel_mirror_lower_p22_marked_veiled"
+    },
+    "half=lower,marked=false,mirror=south,stop=0,veiled=false": {
+      "model": "jugcraft:block/chapel_mirror_lower_p22",
+      "y": 90
+    },
+    "half=lower,marked=false,mirror=south,stop=0,veiled=true": {
+      "model": "jugcraft:block/chapel_mirror_lower_p22_veiled",
+      "y": 90
+    },
+    "half=lower,marked=true,mirror=south,stop=0,veiled=false": {
+      "model": "jugcraft:block/chapel_mirror_lower_p22_marked",
+      "y": 90
+    },
+    "half=lower,marked=true,mirror=south,stop=0,veiled=true": {
+      "model": "jugcraft:block/chapel_mirror_lower_p22_marked_veiled",
+      "y": 90
+    },
+    "half=lower,marked=false,mirror=south,stop=1,veiled=false": {
+      "model": "jugcraft:block/chapel_mirror_lower_m22",
+      "y": 90
+    },
+    "half=lower,marked=false,mirror=south,stop=1,veiled=true": {
+      "model": "jugcraft:block/chapel_mirror_lower_m22_veiled",
+      "y": 90
+    },
+    "half=lower,marked=true,mirror=south,stop=1,veiled=false": {
+      "model": "jugcraft:block/chapel_mirror_lower_m22_marked",
+      "y": 90
+    },
+    "half=lower,marked=true,mirror=south,stop=1,veiled=true": {
+      "model": "jugcraft:block/chapel_mirror_lower_m22_marked_veiled",
+      "y": 90
+    },
+    "half=lower,marked=false,mirror=south,stop=2,veiled=false": {
+      "model": "jugcraft:block/chapel_mirror_lower_p22"
+    },
+    "half=lower,marked=false,mirror=south,stop=2,veiled=true": {
+      "model": "jugcraft:block/chapel_mirror_lower_p22_veiled"
+    },
+    "half=lower,marked=true,mirror=south,stop=2,veiled=false": {
+      "model": "jugcraft:block/chapel_mirror_lower_p22_marked"
+    },
+    "half=lower,marked=true,mirror=south,stop=2,veiled=true": {
+      "model": "jugcraft:block/chapel_mirror_lower_p22_marked_veiled"
+    },
+    "half=lower,marked=false,mirror=south,stop=3,veiled=false": {
+      "model": "jugcraft:block/chapel_mirror_lower_m22"
+    },
+    "half=lower,marked=false,mirror=south,stop=3,veiled=true": {
+      "model": "jugcraft:block/chapel_mirror_lower_m22_veiled"
+    },
+    "half=lower,marked=true,mirror=south,stop=3,veiled=false": {
+      "model": "jugcraft:block/chapel_mirror_lower_m22_marked"
+    },
+    "half=lower,marked=true,mirror=south,stop=3,veiled=true": {
+      "model": "jugcraft:block/chapel_mirror_lower_m22_marked_veiled"
+    },
+    "half=lower,marked=false,mirror=west,stop=0,veiled=false": {
+      "model": "jugcraft:block/chapel_mirror_lower_0"
+    },
+    "half=lower,marked=false,mirror=west,stop=0,veiled=true": {
+      "model": "jugcraft:block/chapel_mirror_lower_0_veiled"
+    },
+    "half=lower,marked=true,mirror=west,stop=0,veiled=false": {
+      "model": "jugcraft:block/chapel_mirror_lower_0_marked"
+    },
+    "half=lower,marked=true,mirror=west,stop=0,veiled=true": {
+      "model": "jugcraft:block/chapel_mirror_lower_0_marked_veiled"
+    },
+    "half=lower,marked=false,mirror=west,stop=1,veiled=false": {
+      "model": "jugcraft:block/chapel_mirror_lower_p22",
+      "y": 90
+    },
+    "half=lower,marked=false,mirror=west,stop=1,veiled=true": {
+      "model": "jugcraft:block/chapel_mirror_lower_p22_veiled",
+      "y": 90
+    },
+    "half=lower,marked=true,mirror=west,stop=1,veiled=false": {
+      "model": "jugcraft:block/chapel_mirror_lower_p22_marked",
+      "y": 90
+    },
+    "half=lower,marked=true,mirror=west,stop=1,veiled=true": {
+      "model": "jugcraft:block/chapel_mirror_lower_p22_marked_veiled",
+      "y": 90
+    },
+    "half=lower,marked=false,mirror=west,stop=2,veiled=false": {
+      "model": "jugcraft:block/chapel_mirror_lower_0",
+      "y": 90
+    },
+    "half=lower,marked=false,mirror=west,stop=2,veiled=true": {
+      "model": "jugcraft:block/chapel_mirror_lower_0_veiled",
+      "y": 90
+    },
+    "half=lower,marked=true,mirror=west,stop=2,veiled=false": {
+      "model": "jugcraft:block/chapel_mirror_lower_0_marked",
+      "y": 90
+    },
+    "half=lower,marked=true,mirror=west,stop=2,veiled=true": {
+      "model": "jugcraft:block/chapel_mirror_lower_0_marked_veiled",
+      "y": 90
+    },
+    "half=lower,marked=false,mirror=west,stop=3,veiled=false": {
+      "model": "jugcraft:block/chapel_mirror_lower_p45",
+      "y": 180
+    },
+    "half=lower,marked=false,mirror=west,stop=3,veiled=true": {
+      "model": "jugcraft:block/chapel_mirror_lower_p45_veiled",
+      "y": 180
+    },
+    "half=lower,marked=true,mirror=west,stop=3,veiled=false": {
+      "model": "jugcraft:block/chapel_mirror_lower_p45_marked",
+      "y": 180
+    },
+    "half=lower,marked=true,mirror=west,stop=3,veiled=true": {
+      "model": "jugcraft:block/chapel_mirror_lower_p45_marked_veiled",
+      "y": 180
+    },
+    "half=upper,marked=false,mirror=east,stop=0,veiled=false": {
+      "model": "jugcraft:block/chapel_mirror_upper_p45",
+      "y": 90
+    },
+    "half=upper,marked=false,mirror=east,stop=0,veiled=true": {
+      "model": "jugcraft:block/chapel_mirror_upper_p45_veiled",
+      "y": 90
+    },
+    "half=upper,marked=true,mirror=east,stop=0,veiled=false": {
+      "model": "jugcraft:block/chapel_mirror_upper_p45_marked",
+      "y": 90
+    },
+    "half=upper,marked=true,mirror=east,stop=0,veiled=true": {
+      "model": "jugcraft:block/chapel_mirror_upper_p45_marked_veiled",
+      "y": 90
+    },
+    "half=upper,marked=false,mirror=east,stop=1,veiled=false": {
+      "model": "jugcraft:block/chapel_mirror_upper_0",
+      "y": 90
+    },
+    "half=upper,marked=false,mirror=east,stop=1,veiled=true": {
+      "model": "jugcraft:block/chapel_mirror_upper_0_veiled",
+      "y": 90
+    },
+    "half=upper,marked=true,mirror=east,stop=1,veiled=false": {
+      "model": "jugcraft:block/chapel_mirror_upper_0_marked",
+      "y": 90
+    },
+    "half=upper,marked=true,mirror=east,stop=1,veiled=true": {
+      "model": "jugcraft:block/chapel_mirror_upper_0_marked_veiled",
+      "y": 90
+    },
+    "half=upper,marked=false,mirror=east,stop=2,veiled=false": {
+      "model": "jugcraft:block/chapel_mirror_upper_m22",
+      "y": 90
+    },
+    "half=upper,marked=false,mirror=east,stop=2,veiled=true": {
+      "model": "jugcraft:block/chapel_mirror_upper_m22_veiled",
+      "y": 90
+    },
+    "half=upper,marked=true,mirror=east,stop=2,veiled=false": {
+      "model": "jugcraft:block/chapel_mirror_upper_m22_marked",
+      "y": 90
+    },
+    "half=upper,marked=true,mirror=east,stop=2,veiled=true": {
+      "model": "jugcraft:block/chapel_mirror_upper_m22_marked_veiled",
+      "y": 90
+    },
+    "half=upper,marked=false,mirror=east,stop=3,veiled=false": {
+      "model": "jugcraft:block/chapel_mirror_upper_p22"
+    },
+    "half=upper,marked=false,mirror=east,stop=3,veiled=true": {
+      "model": "jugcraft:block/chapel_mirror_upper_p22_veiled"
+    },
+    "half=upper,marked=true,mirror=east,stop=3,veiled=false": {
+      "model": "jugcraft:block/chapel_mirror_upper_p22_marked"
+    },
+    "half=upper,marked=true,mirror=east,stop=3,veiled=true": {
+      "model": "jugcraft:block/chapel_mirror_upper_p22_marked_veiled"
+    },
+    "half=upper,marked=false,mirror=south,stop=0,veiled=false": {
+      "model": "jugcraft:block/chapel_mirror_upper_p22",
+      "y": 90
+    },
+    "half=upper,marked=false,mirror=south,stop=0,veiled=true": {
+      "model": "jugcraft:block/chapel_mirror_upper_p22_veiled",
+      "y": 90
+    },
+    "half=upper,marked=true,mirror=south,stop=0,veiled=false": {
+      "model": "jugcraft:block/chapel_mirror_upper_p22_marked",
+      "y": 90
+    },
+    "half=upper,marked=true,mirror=south,stop=0,veiled=true": {
+      "model": "jugcraft:block/chapel_mirror_upper_p22_marked_veiled",
+      "y": 90
+    },
+    "half=upper,marked=false,mirror=south,stop=1,veiled=false": {
+      "model": "jugcraft:block/chapel_mirror_upper_m22",
+      "y": 90
+    },
+    "half=upper,marked=false,mirror=south,stop=1,veiled=true": {
+      "model": "jugcraft:block/chapel_mirror_upper_m22_veiled",
+      "y": 90
+    },
+    "half=upper,marked=true,mirror=south,stop=1,veiled=false": {
+      "model": "jugcraft:block/chapel_mirror_upper_m22_marked",
+      "y": 90
+    },
+    "half=upper,marked=true,mirror=south,stop=1,veiled=true": {
+      "model": "jugcraft:block/chapel_mirror_upper_m22_marked_veiled",
+      "y": 90
+    },
+    "half=upper,marked=false,mirror=south,stop=2,veiled=false": {
+      "model": "jugcraft:block/chapel_mirror_upper_p22"
+    },
+    "half=upper,marked=false,mirror=south,stop=2,veiled=true": {
+      "model": "jugcraft:block/chapel_mirror_upper_p22_veiled"
+    },
+    "half=upper,marked=true,mirror=south,stop=2,veiled=false": {
+      "model": "jugcraft:block/chapel_mirror_upper_p22_marked"
+    },
+    "half=upper,marked=true,mirror=south,stop=2,veiled=true": {
+      "model": "jugcraft:block/chapel_mirror_upper_p22_marked_veiled"
+    },
+    "half=upper,marked=false,mirror=south,stop=3,veiled=false": {
+      "model": "jugcraft:block/chapel_mirror_upper_m22"
+    },
+    "half=upper,marked=false,mirror=south,stop=3,veiled=true": {
+      "model": "jugcraft:block/chapel_mirror_upper_m22_veiled"
+    },
+    "half=upper,marked=true,mirror=south,stop=3,veiled=false": {
+      "model": "jugcraft:block/chapel_mirror_upper_m22_marked"
+    },
+    "half=upper,marked=true,mirror=south,stop=3,veiled=true": {
+      "model": "jugcraft:block/chapel_mirror_upper_m22_marked_veiled"
+    },
+    "half=upper,marked=false,mirror=west,stop=0,veiled=false": {
+      "model": "jugcraft:block/chapel_mirror_upper_0"
+    },
+    "half=upper,marked=false,mirror=west,stop=0,veiled=true": {
+      "model": "jugcraft:block/chapel_mirror_upper_0_veiled"
+    },
+    "half=upper,marked=true,mirror=west,stop=0,veiled=false": {
+      "model": "jugcraft:block/chapel_mirror_upper_0_marked"
+    },
+    "half=upper,marked=true,mirror=west,stop=0,veiled=true": {
+      "model": "jugcraft:block/chapel_mirror_upper_0_marked_veiled"
+    },
+    "half=upper,marked=false,mirror=west,stop=1,veiled=false": {
+      "model": "jugcraft:block/chapel_mirror_upper_p22",
+      "y": 90
+    },
+    "half=upper,marked=false,mirror=west,stop=1,veiled=true": {
+      "model": "jugcraft:block/chapel_mirror_upper_p22_veiled",
+      "y": 90
+    },
+    "half=upper,marked=true,mirror=west,stop=1,veiled=false": {
+      "model": "jugcraft:block/chapel_mirror_upper_p22_marked",
+      "y": 90
+    },
+    "half=upper,marked=true,mirror=west,stop=1,veiled=true": {
+      "model": "jugcraft:block/chapel_mirror_upper_p22_marked_veiled",
+      "y": 90
+    },
+    "half=upper,marked=false,mirror=west,stop=2,veiled=false": {
+      "model": "jugcraft:block/chapel_mirror_upper_0",
+      "y": 90
+    },
+    "half=upper,marked=false,mirror=west,stop=2,veiled=true": {
+      "model": "jugcraft:block/chapel_mirror_upper_0_veiled",
+      "y": 90
+    },
+    "half=upper,marked=true,mirror=west,stop=2,veiled=false": {
+      "model": "jugcraft:block/chapel_mirror_upper_0_marked",
+      "y": 90
+    },
+    "half=upper,marked=true,mirror=west,stop=2,veiled=true": {
+      "model": "jugcraft:block/chapel_mirror_upper_0_marked_veiled",
+      "y": 90
+    },
+    "half=upper,marked=false,mirror=west,stop=3,veiled=false": {
+      "model": "jugcraft:block/chapel_mirror_upper_p45",
+      "y": 180
+    },
+    "half=upper,marked=false,mirror=west,stop=3,veiled=true": {
+      "model": "jugcraft:block/chapel_mirror_upper_p45_veiled",
+      "y": 180
+    },
+    "half=upper,marked=true,mirror=west,stop=3,veiled=false": {
+      "model": "jugcraft:block/chapel_mirror_upper_p45_marked",
+      "y": 180
+    },
+    "half=upper,marked=true,mirror=west,stop=3,veiled=true": {
+      "model": "jugcraft:block/chapel_mirror_upper_p45_marked_veiled",
+      "y": 180
+    }
+  }
+}

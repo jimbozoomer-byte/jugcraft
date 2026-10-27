@@ -8,6 +8,10 @@ Every change to Jugcraft, newest first, grouped by pull request. For what each t
 
 No numbered release yet. Entries on feature branches remain proposed until their pull requests merge.
 
+### Unmerged: The Glass Chapel and the Glass Accord (the Glass Abbot, part 1)
+- **The Glass Accord:** a disc of leaded glass round a spyglass's lens, from four glass, two amethyst shards, two gold ingots and a spyglass (or, for one who understands First Light, from a spyglass and a block of glass at the Lampwright's Bench for 8 Radiance). Held up by day, in clear weather, standing in sunlight that falls through glass, it opens the Glass Chapel and raises a Grey Mist full of light that others can follow for a minute. Refused, it says why and is kept.
+- **The Glass Chapel,** the Glass Abbot's lair: an abandoned chapel of pale stone with a narthex, a rood screen, a 31-wide nave, an apse with the Abbot's Lectern under a rose window, stained-glass lancets, four pillars and three **Chapel Mirrors** on turntables that any player turns with a use. The mirrors' angles and the copper lines in the floor are laid out for the Abbot's beam (part 2): for each pair of mirrors, one setting sends it home. Record: [glass-chapel.md](docs/features/glass-chapel.md).
+
 ### Unmerged: Keep your inventory in boss fights
 - **Dying in a lair costs nothing:** as with the keepInventory rule, but only in lairs (every boss fight). No items or experience fall; you respawn outside with every slot as it was (armour and offhand worn), the same held slot and all your experience. Dying anywhere else is unchanged. No grave is ever placed in a lair; Grave Goods still catch anything another mod drops there. Record: [lair-keep-inventory.md](docs/features/lair-keep-inventory.md).
 

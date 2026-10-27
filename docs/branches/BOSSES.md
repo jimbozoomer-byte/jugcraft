@@ -1,6 +1,6 @@
 # Bosses branch (brainstorm)
 
-Status: **a brainstorm; nine bosses are built.** On 10 October 2026 the owner chose to build a new boss "the same way" as Madame Tatterlace ([features/tatterlace.md](../features/tatterlace.md)); the Yeti King is first, to the plan below. The same day the owner asked for "the next boss same way" as him: the Cinder Tyrant, to his plan below. Both are built. On 13 October 2026 the owner chose the next: the Mire Hag, to her plan below, who is built too; and after her, the same day, the Crypt Lich, to his plan below, who is built too. On 14 October 2026 the owner chose the Iron Dreadnought, to his plan below, who is built too. The same day the owner chose the Alpha Werewolf, to his plan below. On 23 October 2026 the owner chose a Halloween boss, the Pumpkin King, to his plan below, who is built too. On 4 October 2026 the owner asked for variant weapons, many of them "drops from bosses ill make later", themed around those bosses ("example: Yeti King"), and to "brainstorm bosses we could make". This page is that brainstorm. The bosses' weapons already exist: Arms VII ([features/arms-vii.md](../features/arms-vii.md)) adds two trophies for each of the first eight bosses below, and their loot tables are ready (`data/jugcraft/loot_table/bosses/<boss>.json`, one of the two per roll). Building a boss is a separate, reviewed feature each time, in the order the Yeti King was built in: [BOSS_PLAYBOOK.md](BOSS_PLAYBOOK.md). Everything here is a proposal for the owner to pick from, change or drop.
+Status: **a brainstorm; nine bosses are built.** On 10 October 2026 the owner chose to build a new boss "the same way" as Madame Tatterlace ([features/tatterlace.md](../features/tatterlace.md)); the Yeti King is first, to the plan below. The same day the owner asked for "the next boss same way" as him: the Cinder Tyrant, to his plan below. Both are built. On 13 October 2026 the owner chose the next: the Mire Hag, to her plan below, who is built too; and after her, the same day, the Crypt Lich, to his plan below, who is built too. On 14 October 2026 the owner chose the Iron Dreadnought, to his plan below, who is built too. The same day the owner chose the Alpha Werewolf, to his plan below. On 23 October 2026 the owner chose a Halloween boss, the Pumpkin King, to his plan below, who is built too. On 27 October 2026 the owner chose the planning pack's first wholly new boss, the Glass Abbot, to his plan below. On 4 October 2026 the owner asked for variant weapons, many of them "drops from bosses ill make later", themed around those bosses ("example: Yeti King"), and to "brainstorm bosses we could make". This page is that brainstorm. The bosses' weapons already exist: Arms VII ([features/arms-vii.md](../features/arms-vii.md)) adds two trophies for each of the first eight bosses below, and their loot tables are ready (`data/jugcraft/loot_table/bosses/<boss>.json`, one of the two per roll). Building a boss is a separate, reviewed feature each time, in the order the Yeti King was built in: [BOSS_PLAYBOOK.md](BOSS_PLAYBOOK.md). Everything here is a proposal for the owner to pick from, change or drop.
 
 The owner's Mars adventure, the Cydonian Sentinel, is also implemented: [feature record](../features/cydonian-sentinel.md).
 
@@ -1130,6 +1130,146 @@ He follows the rules every boss follows (above):
 - every opening costs a Thunder Vane, made from things players already make.
 
 Nothing a tier needs comes only from him: feathers, copper and weather all come without him.
+
+## The Glass Abbot: the plan (being built)
+
+The planning pack's first wholly new boss ([chapter 05, N1](../plans/concordance-expansion-2026-10-10/05-new-boss-compendium.md#n1-the-glass-abbot--revelation-and-reflection)), and the first of its Chunk E, the expedition season ([chapter 09](../plans/concordance-expansion-2026-10-10/09-claude-delivery-chunks.md#e1-glass-abbot)). On 27 October 2026 the owner chose him as the next thing to build ("Glass Abbot"). He is built by [the boss playbook](BOSS_PLAYBOOK.md): first his chapel and the Glass Accord that opens it, then the Abbot himself, his images and his loot, each its own pull request with tests and pictures.
+
+The pack's design is kept:
+- an abandoned optical chapel with a 36-block nave, three turning mirrors and four pillars;
+- a glass mantle that refracts blows;
+- a three-second announced beam that must strike two marked mirrors and return to him;
+- an eight-second opening when it does;
+- a 0.8-second shard fan, a one-second prism line and a 1.5-second false image whose real figure alone casts a patterned shadow.
+
+The numbers here are the plan's. Each part's feature record says what changed in building it. Part 1, the chapel and the Accord: [features/glass-chapel.md](../features/glass-chapel.md).
+
+*A tall, faceless figure in a monk's habit of grey wool, over which hangs a mantle of leaded glass panes, clear and amber and rose. Where his face should be, a round window of glass glows like the sun through a rose window.* He keeps the light of a chapel that no one prays in any more.
+
+### The Glass Chapel
+
+An abandoned chapel of pale stone, lit through tall windows, its pews long gone:
+- **The narthex, the arrival:** a porch at the chapel's south end. Behind it, in the south door's arch, the **Grey Mist**: the way home. A low rood screen with a gap in its middle parts the narthex from the nave. The narthex is safe.
+- **The nave, the arena:** 36 blocks long and 31 wide, floored with worn stone. At its north end, in the apse under a great **rose window**, the **Abbot's Lectern**, where he kneels and where he casts his beam.
+- **The three Chapel Mirrors:** tall mirrors in brass frames on turntables, standing east, west and south of the nave's middle. Around the lectern they make a diamond, 12 blocks from the middle each. Each turns through four set angles, and turning one is a plain use of it. Each turntable has a pointer, so the way a mirror faces always shows. The floor round each mirror is inlaid with lines that point to the lectern and the other two mirrors.
+- **The four pillars:** stone columns in the nave's four corners, clear of every line between the lectern and the mirrors. They give cover from his shards.
+- **The windows:** tall lancets of stained glass down both walls. The chapel's light comes through them and from the candles in their sills.
+
+The lair-only blocks are fixtures like the other lairs': unbreakable, no items, no drops. These are the **Chapel Mirrors**, the **Abbot's Lectern**, the **rose window** and the **lancet glass**. Nothing in the chapel can be built or broken. The mirrors are the only things in it a player can use.
+
+**The geometry is fixed and checked.** For each of the three pairs of mirrors, one angle of each makes a closed path: from the lectern to one mirror, on to the other, and back to the lectern. Each mirror therefore has two working angles, one for each of its pairs. Its other two angles are decoys that send the beam into a wall. The audit traces every setting of the three mirrors for every pair. It checks that the beam comes home only when both marked mirrors stand at that pair's angles, and that no pillar or mirror stands in any path. Every angle falls on a step of 22.5°, so a mirror is drawn as it is.
+
+### The summoning: the Glass Accord
+
+1. Make a **Glass Accord**, a disc of leaded glass round a lens. There are two routes:
+   - at a crafting table, from four glass, two gold ingots, two amethyst shards and a spyglass, whose lens it borrows;
+   - or, for a player who understands First Light, at a **Lampwright's Bench** from a spyglass and a glass block, for 8 Radiance. This is the cheaper route.
+2. Use it **by day, in clear weather, in the Overworld, standing in sunlight that falls through glass**: the sun must reach you (full sky light), and there must be glass or a pane above you, within 16 blocks, under a skylight or a window roof.
+3. The sunlight through the glass gathers in the Accord until it shines, then the Accord dissolves into light and the light takes you to the chapel's narthex. The Accord is used up, and Grey Mist rises where you stood: for 60 seconds anyone can walk into the mist and follow.
+4. At night, in rain, under a roof that keeps the sun out, with no glass between you and the sky, or outside the Overworld, the Accord only says why, and nothing is used up. The same happens if every chapel is taken.
+
+### The fight
+
+The Glass Abbot has 340 health, scaled for the party: half as much again for each player after the first, at most two and a half times. He has armour 6. Falls and drowning never harm him, and knockback hardly moves him.
+
+He kneels at his lectern. He wakes when a player who can fight him steps through the rood screen into the nave, or strikes him: he rises as the rose window floods with light (2.5 s, unhurt meanwhile). He keeps to the nave: more than 26 blocks from its middle, he is set back.
+
+**His mantle.** While his glass mantle is whole it refracts what strikes him: blows and shots do a quarter of their damage. It is whole except in the openings his own beam makes.
+
+**His rule: the Beam.** Every 20 seconds:
+- **He marks two mirrors:** the frames of two of the three mirrors light gold, and the bar names them ("The east and south mirrors"). They stay marked until the beam.
+- **10 seconds later he returns to his lectern** and gathers the sun (3 s). Light pours down from the rose window onto him.
+- **The beam:** from his mantle to the first marked mirror, and on wherever the mirrors send it.
+  - **Sent home:** if it strikes both marked mirrors and returns to him, his mantle cracks. For 8 seconds he kneels dazed at the lectern, and every blow does its full damage and a quarter more.
+  - **Lost:** if it misses, it burns along its whole path for a second, for 6 damage to anyone standing in it, and his mantle holds.
+- So players read which mirrors are marked, turn each to the angle that serves that pair, and keep out of the beam's path.
+
+From anywhere in the nave, a sprinting player can reach both marked mirrors and turn them inside the 13 seconds before the beam. The audit will walk the nave to keep that true for a player alone.
+
+**Phase 1, "Vespers"** (full to half health):
+
+| Attack | Read it by | What it does |
+| --- | --- | --- |
+| Shard Fan | He raises one hand and three shards glint above it (0.8 s) | Three glass shards in a fan at his foe, each 6 damage and a push of a block and a half. A pillar or a mirror stops them |
+| Prism Line | A line of light is drawn on the floor from him toward his foe, 18 blocks long (1.0 s) | A lance of light along the line: 8 damage to anyone on it. Step off the line |
+| The Beam | Two mirrors light gold; 10 s later he gathers the sun at his lectern (3 s) | Above |
+
+**At half health, "The Veil":** he folds his hands and the windows dim (2 s, unhurt), and three figures stand where he stood.
+
+**Phase 2, "Compline"** (half to a fifth): he keeps every attack, marks his mirrors every 18 seconds, and adds:
+
+| Attack | Read it by | What it does |
+| --- | --- | --- |
+| False Images | His mantle flashes and he seems to step apart (1.5 s) | Two Glass Images stand with him and move as he does, for 10 seconds or until struck. Only the real Abbot casts a patterned shadow, the rose window's tracery on the floor under him. A struck image shatters harmlessly |
+| A Turned Mirror | A mirror shudders in its frame and chimes (1.5 s) | Every 12 seconds he turns one mirror one angle round himself |
+| A Veiled Mirror | When he marks his mirrors, one of the two clouds over | For 4 seconds its glass is clouded. Its turntable's pointer still shows the way it faces, and the floor's lines still show where it should |
+
+**Below a fifth, "The Breaking":** he marks his mirrors every 15 seconds and calls three images, not two. His tells stay as long as ever, and the time between marking and the beam stays 13 seconds.
+
+**Left alone** for 10 seconds, he returns to his lectern and kneels, healed. His images fade, the mirrors turn back to rest, and who hurt him is forgotten.
+
+**His images, the Glass Images:** his likeness in glass, without the patterned shadow. He has at most three. They do not attack, drop nothing and give no experience.
+
+### His loot (per participant)
+
+A participant is someone who:
+- hurt him;
+- or turned a marked mirror to its angle for a beam that came home;
+- or healed or warded another player in the fight (the Concordance's support credit, [lair-encounter-credit.md](../features/lair-encounter-credit.md));
+
+and is within 64 blocks of the nave's middle when he falls.
+
+| Loot | Chance |
+| --- | --- |
+| **Prism Shards**, two or three | 1, always |
+| **The Glass Reliquary** | 15%; certain on a player's first kill |
+| **The Abbot's Cowl** | 20% |
+| 300 experience, shared out | always |
+| The advancement **Seen Clearly** | always |
+
+- **Prism Shards** are for those who never fight. One shard and four glass make four **Abbey Glass**, a stained glass that glows faintly, his chapel's ornament. Two shards and a spyglass make the next Glass Accord. Neither recipe gains anything.
+- **The Glass Reliquary** is the first-win choice the pack asks for, made without a screen. Crafted with a glass pane it becomes the **Lantern Lens**; with an amethyst shard, the **Mirror Inscription**. Neither turns back. He has no Arms VII trophies, so the reliquary is his trophy.
+  - **The Lantern Lens,** held in the offhand, shows its holder (and only them) any invisible creature within 12 blocks, outlined in light. In his own fight it marks the real Abbot among his images. It is a convenience: a splash of any potion or a struck image shows the same, and the patterned shadow always does.
+  - **The Mirror Inscription,** held in the offhand by a player who has a ward's protection (absorption), turns the next arrow or small projectile that would strike them back at its shooter. It works once every 30 seconds. Ordinary wards and armour keep their worth.
+- **The Abbot's Cowl:** a costume worn on the head, his grey hood with its rose-window face.
+- When he falls, his mantle shatters into light, and Grey Mist opens in the apse behind the lectern, the way home.
+
+### The Concordance
+
+None of it is needed to win. Each piece only helps with timing, cost or recovery:
+- **Radiance:** a player who understands First Light sees, while the mirrors are marked, the path the beam would take with the mirrors as they stand, traced faintly from mirror to mirror. Only they see it.
+- **Strata:** Brace halves a shard's push, as it lessens the Yeti King's throws.
+- **Resistance:** he is resistant to the Concordance's control, as the Yeti King and the Cinder Tyrant are (`concordance/resistant`).
+- **Support:** healing or warding another player in his fight earns a participant's share. Turning a marked mirror into place for a beam that comes home is a deed of the fight.
+- **Echo** keeping the last good setting, and **Tether** holding a mirror against his turn, wait for those principles' invocations. Neither exists yet.
+
+### The shared lair contract
+
+The planning pack's chapter 04 asks each lair to answer these:
+- **Arrival, staging, waking and return:** the narthex is safe. He wakes when a player steps through the rood screen or strikes him. The Grey Mist stands in the south door, and opens in the apse when he falls.
+- **Fixtures:** the three mirrors, which any player in the chapel may turn, and the Grey Mist. Nothing else can be used, built or broken.
+- **The floor:** the chapel owns it, and his fight changes no block of it. The mirrors turn back to rest when he resets, and each instance is placed fresh.
+- **Who fights:** players who may fight a lair's boss (`LairBosses`), with party health as above.
+- **Reset:** when no eligible player is left, or he is left alone for 10 seconds.
+- **Clean-up:** his images, shards and the beam's light are his, capped, and gone with him.
+- **Death, disconnect and restart:** as every lair. A player who falls drops nothing and respawns with everything they carried, and instances close on a restart. Each participant's loot is rolled once when he falls.
+- **An ordinary player** can do everything with ordinary weapons and a use of a mirror:
+  - every attack is read before it lands;
+  - the marked mirrors are named and glow, and the floor shows where each should face;
+  - two players turning the same mirror at once turn it one angle each, in order, on the server;
+  - the beam's path is worked out on the server, from the mirrors' angles alone, and never reaches outside the chapel.
+
+### Rules kept
+
+He follows the rules every boss follows (above):
+- the chapel is his arena, and resets when everyone leaves;
+- every attack is read before it lands, and every beam can be sent home with plain hands;
+- dying there keeps everything: nothing is dropped, and the player respawns with it all;
+- his health scales with the party, and every participant rolls his loot;
+- nothing in the chapel can be built or broken, and his fight changes no block of it;
+- every opening costs a Glass Accord, made from things players already make.
+
+Nothing a tier needs comes only from him: glass, gold, amethyst and spyglasses all come without him.
 
 ## More bosses to consider (no trophies yet)
 
