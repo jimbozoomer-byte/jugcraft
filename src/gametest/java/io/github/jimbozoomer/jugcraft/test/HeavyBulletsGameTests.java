@@ -18,12 +18,16 @@ import net.minecraft.world.entity.ai.attributes.Attributes;
  * owner's Uppercut data has them. Shooters face south (+z).
  */
 public class HeavyBulletsGameTests {
-	/** Only the Jawbreaker's bullets knock back further and pierce armour so far, by the owner's Uppercut's numbers. */
+	/**
+	 * The heavy bullets are the owner's, at the owner's numbers: the Jawbreaker's (the Uppercut's) knock back 0.6 further
+	 * and pierce 4.5 points of armour; slice 15C's Impetus Shotgun's (the Inertial's) knock back 0.65 further, and the
+	 * Hawker Rifle's and the Quill Rifle's (the MAS Peddler's and the Zilk 45's) pierce 1 and 1.5 points.
+	 */
 	@GameTest
-	public void heavyBulletsAreTheJawbreakers(GameTestHelper helper) {
-		helper.assertTrue(JugcraftGuns.KNOCKBACK.equals(Map.of("jawbreaker", 0.6F)) && JugcraftGuns.PIERCING.equals(Map.of("jawbreaker", 4.5F)),
-				"Not the Jawbreaker alone knocking back 0.6 further and piercing 4.5 points of armour: " + JugcraftGuns.KNOCKBACK + ", "
-						+ JugcraftGuns.PIERCING);
+	public void heavyBulletsAreTheOwners(GameTestHelper helper) {
+		helper.assertTrue(JugcraftGuns.KNOCKBACK.equals(Map.of("jawbreaker", 0.6F, "impetus_shotgun", 0.65F))
+				&& JugcraftGuns.PIERCING.equals(Map.of("jawbreaker", 4.5F, "hawker_rifle", 1.0F, "quill_rifle", 1.5F)),
+				"The heavy bullets are not the owner's: " + JugcraftGuns.KNOCKBACK + ", " + JugcraftGuns.PIERCING);
 		helper.assertTrue(JugcraftGuns.knockback(JugcraftGuns.GUNS.get("kreuzer_pistol")) == 0.0F
 				&& JugcraftGuns.piercing(JugcraftGuns.GUNS.get("kreuzer_pistol")) == 0.0F, "The Kreuzer Pistol's bullets are heavy too");
 		helper.succeed();

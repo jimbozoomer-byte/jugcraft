@@ -11742,6 +11742,11 @@
       "denominator": 27,
       "source": "recipe jugcraft:pot_cooking/haw_jelly"
     },
+    "jugcraft:hawker_rifle": {
+      "numerator": 8209,
+      "denominator": 1,
+      "source": "recipe jugcraft:hawker_rifle"
+    },
     "jugcraft:haws": {
       "numerator": 1,
       "denominator": 1,
@@ -15046,6 +15051,11 @@
       "numerator": 70669,
       "denominator": 72,
       "source": "recipe jugcraft:imperial_gas_lamp"
+    },
+    "jugcraft:impetus_shotgun": {
+      "numerator": 8210,
+      "denominator": 1,
+      "source": "recipe jugcraft:impetus_shotgun"
     },
     "jugcraft:industrial_fermenter": {
       "numerator": 6059,
@@ -24016,6 +24026,11 @@
       "numerator": 1251,
       "denominator": 2,
       "source": "recipe jugcraft:quarrel_carbine"
+    },
+    "jugcraft:quill_rifle": {
+      "numerator": 8520,
+      "denominator": 1,
+      "source": "recipe jugcraft:quill_rifle"
     },
     "jugcraft:radiation_control_board": {
       "numerator": 49247,

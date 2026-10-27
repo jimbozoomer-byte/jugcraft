@@ -6805,6 +6805,9 @@ Guns,originals/Blocks/Guns/geo/item/gun/valora.geo.json,model JSON,47491,,,,2e55
 Guns,originals/Blocks/Guns/geo/item/gun/krauser.geo.json,model JSON,46219,,,,7fb800e0313868d4ab6145630ddb8741bef798efa282dbe19486432c716f54b2
 Guns,originals/Blocks/Guns/geo/item/gun/soul_drummer.geo.json,model JSON,46752,,,,a5b24e90849dc1b6584cd21e87861a0a5880022e23abf67891b9c08c6e7816ab
 Guns,originals/Blocks/Guns/geo/item/gun/uppercut.geo.json,model JSON,46862,,,,3186043f8738987758274d9d68fcf1247a35f8d09f0440f1051102face176612
+Guns,originals/Blocks/Guns/geo/item/gun/mas_peddler.geo.json,model JSON,70696,,,,5c51ab04026ce22d2ef01c95ab8214f4ef6cb4285fcc369506f7860ac12686a6
+Guns,originals/Blocks/Guns/geo/item/gun/inertial.geo.json,model JSON,75351,,,,8a3272b54cfdebaa1565a9ca0c6d2f8529900cc4795b72422961c51c165b1c71
+Guns,originals/Blocks/Guns/geo/item/gun/zilk_45.geo.json,model JSON,51939,,,,aca06aad8bb01edbc22dcc793a124e953558b72832496285deb0d201ba50cc3a
 "General blocks, ores, metals, machinery and items",originals/Blocks/hardened tungsten textures.jpg,reference sheet,45683,957,704,,acd48c265f4fa5278b5e842efe49f9a4da4dc7d8dce95057a6743b4ba03beb84
 "General blocks, ores, metals, machinery and items",originals/Blocks/hashicon.png,texture,954,5,5,,df870a17cad7fef619af5d7966ff708391de19b6ab15ca03400b1a59aade9ced
 "General blocks, ores, metals, machinery and items",originals/Blocks/hatch_front.png,texture,322,16,16,,38284ce35dabaab3cd703508c44c0e17dc0690a342ce53c0e6a13aa51811ec06

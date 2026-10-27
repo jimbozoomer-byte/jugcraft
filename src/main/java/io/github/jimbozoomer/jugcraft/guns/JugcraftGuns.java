@@ -218,6 +218,9 @@ public final class JugcraftGuns {
 		SPECS.put("kreuzer_pistol", new GunSpec(5.0F, 1, 4, false, 13, 50, 0, 0, 0, 2.0F, 0.5F, 64, "light_round"));
 		SPECS.put("psalm_smg", new GunSpec(3.0F, 1, 2, true, 25, 55, 0, 0, 0, 5.5F, 3.0F, 40, "light_round"));
 		SPECS.put("jawbreaker", new GunSpec(12.0F, 1, 8, false, 4, 47, 0, 0, 0, 2.5F, 0.5F, 72, "rifle_round"));
+		SPECS.put("hawker_rifle", new GunSpec(9.0F, 1, 8, false, 12, 50, 0, 0, 0, 2.5F, 0.25F, 112, "rifle_round"));
+		SPECS.put("impetus_shotgun", new GunSpec(3.5F, 8, 13, false, 6, 48, 0, 0, 0, 6.0F, 4.5F, 28, "buckshot_shell"));
+		SPECS.put("quill_rifle", new GunSpec(5.0F, 1, 4, true, 13, 43, 0, 0, 0, 3.0F, 0.75F, 64, "light_round"));
 	}
 
 	/**
@@ -283,19 +286,22 @@ public final class JugcraftGuns {
 	public static final Set<String> LEVITATING = Set.of("chitin_smg", "hermit_rifle", "borer");
 	/**
 	 * Guns silenced along their own barrels, as a fitted silencer silences others: a shot shows no muzzle flash, and no
-	 * barrel attachment fits them (tools/guns.py SILENCED). Slice 15A's Gallant Rifle is the first.
+	 * barrel attachment fits them (tools/guns.py SILENCED). Slice 15A's Gallant Rifle is the first, slice 15C's Quill Rifle
+	 * the second.
 	 */
-	public static final Set<String> SILENCED = Set.of("gallant_rifle");
+	public static final Set<String> SILENCED = Set.of("gallant_rifle", "quill_rifle");
 	/**
 	 * The guns whose bullets knock back each creature they hurt a second time, by this strength, after the 0.4 every hit
-	 * gives (tools/guns.py KNOCKBACK). Slice 15B's Jawbreaker is the first, from the owner's Uppercut.
+	 * gives (tools/guns.py KNOCKBACK). Slice 15B's Jawbreaker is the first, from the owner's Uppercut; slice 15C's Impetus
+	 * Shotgun, from the owner's Inertial, the second.
 	 */
-	public static final Map<String, Float> KNOCKBACK = Map.of("jawbreaker", 0.6F);
+	public static final Map<String, Float> KNOCKBACK = Map.of("jawbreaker", 0.6F, "impetus_shotgun", 0.65F);
 	/**
 	 * The guns whose bullets pierce armour: a hit deals what it would if the target wore this many points less armour
-	 * ({@link GunShots#pierced}; tools/guns.py PIERCING). Slice 15B's Jawbreaker is the first, from the owner's Uppercut.
+	 * ({@link GunShots#pierced}; tools/guns.py PIERCING). Slice 15B's Jawbreaker is the first, from the owner's Uppercut;
+	 * slice 15C's Hawker Rifle and Quill Rifle, from the owner's MAS Peddler and Zilk 45, follow.
 	 */
-	public static final Map<String, Float> PIERCING = Map.of("jawbreaker", 4.5F);
+	public static final Map<String, Float> PIERCING = Map.of("jawbreaker", 4.5F, "hawker_rifle", 1.0F, "quill_rifle", 1.5F);
 
 	/** The attachments, in the order the creative tab shows them (tools/guns.py ATTACHMENTS). */
 	public static final Map<String, GunAttachment> ATTACHMENTS = new LinkedHashMap<>();
@@ -530,6 +536,17 @@ public final class JugcraftGuns {
 				"extended_magazine", "speed_magazine", "light_stock", "weighted_stock", "wooden_stock"));
 		ACCEPTS.put("jawbreaker", List.of("silencer", "baffled_silencer", "muzzle_brake", "extended_barrel", "light_stock",
 				"weighted_stock", "wooden_stock", "long_scope", "medium_scope", "reflex_sight", "laser_sight"));
+		ACCEPTS.put("hawker_rifle", List.of("silencer", "baffled_silencer", "muzzle_brake", "extended_barrel",
+				"extended_magazine", "speed_magazine", "light_stock", "weighted_stock", "wooden_stock", "light_grip",
+				"iron_bayonet", "steel_bayonet", "netherite_bayonet", "long_scope", "reflex_sight", "tactical_grip",
+				"laser_sight"));
+		ACCEPTS.put("impetus_shotgun", List.of("silencer", "baffled_silencer", "muzzle_brake", "extended_barrel",
+				"extended_magazine", "speed_magazine", "light_stock", "weighted_stock", "wooden_stock", "light_grip",
+				"iron_bayonet", "steel_bayonet", "diamond_bayonet", "netherite_bayonet", "long_scope", "medium_scope",
+				"reflex_sight", "tactical_grip", "laser_sight"));
+		ACCEPTS.put("quill_rifle", List.of("extended_magazine", "speed_magazine", "light_stock", "weighted_stock",
+				"wooden_stock", "light_grip", "iron_bayonet", "steel_bayonet", "diamond_bayonet", "netherite_bayonet",
+				"long_scope", "medium_scope", "reflex_sight", "tactical_grip", "laser_sight"));
 	}
 
 	/** The rounds. */

@@ -71,3 +71,6 @@ Paths preserve the supplied collection. Follow the [reuse guide](../../README.md
 | [Guns/geo/item/gun/krauser.geo.json](../../originals/Blocks/Guns/geo/item/gun/krauser.geo.json) | model JSON | — | — |
 | [Guns/geo/item/gun/soul_drummer.geo.json](../../originals/Blocks/Guns/geo/item/gun/soul_drummer.geo.json) | model JSON | — | — |
 | [Guns/geo/item/gun/uppercut.geo.json](../../originals/Blocks/Guns/geo/item/gun/uppercut.geo.json) | model JSON | — | — |
+| [Guns/geo/item/gun/mas_peddler.geo.json](../../originals/Blocks/Guns/geo/item/gun/mas_peddler.geo.json) | model JSON | — | — |
+| [Guns/geo/item/gun/inertial.geo.json](../../originals/Blocks/Guns/geo/item/gun/inertial.geo.json) | model JSON | — | — |
+| [Guns/geo/item/gun/zilk_45.geo.json](../../originals/Blocks/Guns/geo/item/gun/zilk_45.geo.json) | model JSON | — | — |

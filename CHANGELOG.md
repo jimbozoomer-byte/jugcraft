@@ -8,6 +8,13 @@ Every change to Jugcraft, newest first, grouped by pull request. For what each t
 
 No numbered release yet. Entries on feature branches remain proposed until their pull requests merge.
 
+### Unmerged: Guns, slice 15C (three diamond-steel long guns)
+- **Three guns** from the owner's own GeckoLib models and animations, the next of their diamond-steel guns, each held in both hands and fed from a box magazine: the **Hawker Rifle**, a rifle of twelve rifle rounds whose magazine stands out of its side, passing a point of armour; the **Impetus Shotgun**, fed from a box of six shells, eight pellets a pull, knocking back what it hits; and the **Quill Rifle**, an automatic of thirteen light rounds, silenced the length of its barrel (no muzzle flash), passing 1.5 points of armour.
+- Made from stainless steel, a diamond and a lever; planks for the Hawker and the Impetus, redstone and an iron ingot for the Quill. Each takes the magazines, stocks, grips, bayonets and scopes the owner made for it; the Quill no barrel attachment, the Hawker no Medium Scope.
+- The inspect key does nothing with the Impetus, whose owner's model has no inspection.
+- The owner's GeckoLib models of the three are added to the library. The guns' converter now reads bones the owner turned as a whole, and keyframes written as `{"vector": [...]}`; a gun whose owner's texture is larger than 128 px keeps its size.
+- Record: [guns.md, slice 15C](docs/features/guns.md#slice-15c-three-diamond-steel-long-guns).
+
 ### Unmerged: Guns, heavy bullets: knockback and armour piercing
 - A gun's bullets can now knock back what they hit further than a plain hit, and pass through some of its armour, as the owner's gun data asks. The **Jawbreaker** is the first: its shots push about twice as far as a plain hit (a second push of 0.6) and pass through 4.5 points of armour; a creature without armour takes its damage as before.
 - Record: [guns.md, the heavy-bullets follow-up](docs/features/guns.md#follow-up-heavy-bullets-knockback-and-armour-piercing).
