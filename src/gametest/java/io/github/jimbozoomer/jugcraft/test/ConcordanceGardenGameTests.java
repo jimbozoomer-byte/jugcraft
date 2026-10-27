@@ -639,6 +639,161 @@ public class ConcordanceGardenGameTests {
 		helper.succeed();
 	}
 
+	// ---------------------------------------------------------------- a Heart's two roads, named at a distance (the garden cohort, GC-05)
+
+	/**
+	 * The garden cohort, GC-05: a Gleaner receives Verdance from a Heart it is given, however far, by its own draw's rule:
+	 * only as an actor both devices trust, never more than its draw of 8, its room or what the Heart holds, and never while
+	 * dormant. The Heart falls by what the Gleaner gains, in the same call.
+	 */
+	@GameTest(maxTicks = 20)
+	public void aGleanerReceivesFromANamedHeartAtAnyDistance(GameTestHelper helper) {
+		ServerLevel level = level(helper);
+		UUID stranger = new UUID(14L, 9L);
+		BlockPos heartAt = new BlockPos(0, 1, 0);
+		helper.setBlock(heartAt, Garden.VERDANT_HEART);
+		VerdantHeartBlockEntity heart = entity(helper, heartAt);
+		heart.awaken(KEEPER);
+		heart.setVerdance(10);
+		BlockPos at = new BlockPos(7, 1, 7);
+		helper.setBlock(at, Garden.GLEANER);
+		GleanerBlockEntity gleaner = entity(helper, at);
+		gleaner.awaken(KEEPER);
+		helper.assertTrue(!gleaner.reaches(heart.getBlockPos()), "7 away: beyond its own draw");
+		helper.assertTrue(gleaner.receiveFrom(heart, stranger, 8, level) == 0 && heart.verdance() == 10 && gleaner.verdance() == 0,
+				"A stranger may not move it: " + heart.verdance() + ", " + gleaner.verdance());
+		helper.assertTrue(gleaner.receiveFrom(heart, KEEPER, 20, level) == 8 && heart.verdance() == 2 && gleaner.verdance() == 8,
+				"Its keeper may, never more than its draw of 8: " + heart.verdance() + ", " + gleaner.verdance());
+		helper.assertTrue(gleaner.receiveFrom(heart, KEEPER, 8, level) == 2 && heart.verdance() == 0 && gleaner.verdance() == 10,
+				"What the Heart held, and no more: " + heart.verdance() + ", " + gleaner.verdance());
+		heart.setVerdance(5);
+		gleaner.setVerdance(GleanerBlockEntity.CAPACITY);
+		helper.assertTrue(gleaner.receiveFrom(heart, KEEPER, 8, level) == 0 && heart.verdance() == 5
+				&& gleaner.verdance() == GleanerBlockEntity.CAPACITY, "Full, it receives nothing: " + heart.verdance());
+		BlockPos theirsAt = new BlockPos(7, 1, 0);
+		helper.setBlock(theirsAt, Garden.GLEANER);
+		GleanerBlockEntity theirs = entity(helper, theirsAt);
+		theirs.awaken(stranger);
+		helper.assertTrue(theirs.receiveFrom(heart, KEEPER, 8, level) == 0 && heart.verdance() == 5 && theirs.verdance() == 0,
+				"Not into a Gleaner its keeper does not share: " + heart.verdance());
+		BlockPos dormantAt = new BlockPos(0, 1, 7);
+		helper.setBlock(dormantAt, Garden.GLEANER);
+		GleanerBlockEntity dormant = entity(helper, dormantAt);
+		helper.assertTrue(!dormant.awake() && dormant.receiveFrom(heart, KEEPER, 8, level) == 0 && heart.verdance() == 5
+				&& dormant.verdance() == 0, "Not into a dormant Gleaner: " + heart.verdance());
+		BlockPos nearAt = new BlockPos(2, 1, 2);
+		helper.setBlock(nearAt, Garden.GLEANER);
+		GleanerBlockEntity near = entity(helper, nearAt);
+		helper.assertTrue(near.reaches(heart.getBlockPos()), "2 away: within its own draw, where it draws by itself");
+		helper.succeed();
+	}
+
+	/**
+	 * GC-05: {@code heart} pours at most {@code batches} into {@code pylon}; asserts that the Verdance it spent is the Ley
+	 * Charge it made, three for two, adds the Verdance to {@code spent} and returns the Ley Charge.
+	 */
+	private static long poured(GameTestHelper helper, VerdantHeartBlockEntity heart, LeyPylonBlockEntity pylon, long batches, long[] spent) {
+		long before = heart.verdance();
+		long made = heart.pourInto(pylon, level(helper), batches);
+		long gone = before - heart.verdance();
+		helper.assertTrue(3 * made == 2 * gone, "Three Verdance for two Ley Charge: " + gone + " spent for " + made);
+		spent[0] += gone;
+		return made;
+	}
+
+	/**
+	 * GC-05: a Heart pours into a Ley Pylon it is given, away from it, by its pour's own rule beside it: whole batches of the
+	 * data conversion (3 Verdance for 2 Ley Charge), never more batches than asked or than fit, and only into a pylon its
+	 * keeper's party owns or no one does. Every Verdance it spends is Ley Charge made, at three for two.
+	 */
+	@GameTest(maxTicks = 20)
+	public void aHeartPoursIntoANamedPylonByItsOwnRule(GameTestHelper helper) {
+		ServerLevel level = level(helper);
+		BlockPos heartAt = new BlockPos(0, 1, 0);
+		helper.setBlock(heartAt, Garden.VERDANT_HEART);
+		VerdantHeartBlockEntity heart = entity(helper, heartAt);
+		heart.awaken(KEEPER);
+		heart.setVerdance(10);
+		BlockPos mineAt = new BlockPos(7, 1, 7);
+		helper.setBlock(mineAt, JugcraftConcordance.LEY_PYLON);
+		LeyPylonBlockEntity mine = entity(helper, mineAt);
+		mine.setOwner(KEEPER);
+		long[] spent = {0L};
+		long made = 0L;
+		helper.assertTrue(!heart.beside(mine.getBlockPos()) && heart.mayPourInto(mine), "Away from it, its keeper's pylon may take a batch");
+		long ley = poured(helper, heart, mine, 1, spent);
+		made += ley;
+		helper.assertTrue(ley == 2 && heart.verdance() == 7 && mine.ley() == 2,
+				"One batch asked, one poured: " + heart.verdance() + ", " + mine.ley());
+		ley = poured(helper, heart, mine, 3, spent);
+		made += ley;
+		helper.assertTrue(ley == 4 && heart.verdance() == 1 && mine.ley() == 6,
+				"Two more whole batches; the 1 left is not a batch: " + heart.verdance() + ", " + mine.ley());
+		helper.assertTrue(!heart.mayPourInto(mine) && poured(helper, heart, mine, 3, spent) == 0 && heart.verdance() == 1 && mine.ley() == 6,
+				"Less than a batch left: nothing poured");
+		heart.setVerdance(10);
+		BlockPos theirsAt = new BlockPos(7, 1, 0);
+		helper.setBlock(theirsAt, JugcraftConcordance.LEY_PYLON);
+		LeyPylonBlockEntity theirs = entity(helper, theirsAt);
+		theirs.setOwner(new UUID(14L, 9L));
+		helper.assertTrue(!heart.mayPourInto(theirs) && poured(helper, heart, theirs, 3, spent) == 0 && theirs.ley() == 0
+				&& heart.verdance() == 10, "Never into a stranger's pylon, as beside it");
+		BlockPos nobodysAt = new BlockPos(0, 1, 7);
+		helper.setBlock(nobodysAt, JugcraftConcordance.LEY_PYLON);
+		LeyPylonBlockEntity nobodys = entity(helper, nobodysAt);
+		helper.assertTrue(nobodys.owner() == null && heart.mayPourInto(nobodys), "A pylon no one owns may take a batch");
+		ley = poured(helper, heart, nobodys, 3, spent);
+		made += ley;
+		helper.assertTrue(ley == 6 && heart.verdance() == 1 && nobodys.ley() == 6,
+				"Three batches into no one's pylon: " + heart.verdance() + ", " + nobodys.ley());
+		mine.setLey(level, 63);
+		heart.setVerdance(10);
+		helper.assertTrue(!heart.mayPourInto(mine) && poured(helper, heart, mine, 3, spent) == 0 && heart.verdance() == 10 && mine.ley() == 63,
+				"Room for less than a batch: nothing poured");
+		helper.assertTrue(heart.pourInto(mine, level, 0) == 0 && heart.verdance() == 10, "No batch asked: nothing poured");
+		helper.assertTrue(made == 12 && spent[0] == 18 && 3 * made == 2 * spent[0],
+				"Throughout, 18 Verdance spent made 12 Ley Charge: " + spent[0] + " for " + made);
+		helper.succeed();
+	}
+
+	/**
+	 * GC-05 (the two roads): a Heart has its own road while a Ley Pylon on one of its six faces is one its own pour feeds (its
+	 * keeper's party's or no one's), full or not; its keeper's pylon two blocks off, or a stranger's beside it, is none.
+	 */
+	@GameTest(maxTicks = 20)
+	public void aHeartSaysWhetherItHasItsOwnRoad(GameTestHelper helper) {
+		ServerLevel level = level(helper);
+		BlockPos heartAt = new BlockPos(3, 1, 3);
+		helper.setBlock(heartAt, Garden.VERDANT_HEART);
+		VerdantHeartBlockEntity heart = entity(helper, heartAt);
+		heart.awaken(KEEPER);
+		helper.assertTrue(!heart.feedsAPylonBeside(level), "No pylon: no road of its own");
+		BlockPos farAt = new BlockPos(5, 1, 3);
+		helper.setBlock(farAt, JugcraftConcordance.LEY_PYLON);
+		LeyPylonBlockEntity far = entity(helper, farAt);
+		far.setOwner(KEEPER);
+		helper.assertTrue(!heart.beside(far.getBlockPos()) && !heart.feedsAPylonBeside(level), "Its keeper's pylon two blocks off is not beside it");
+		BlockPos pylonAt = new BlockPos(4, 1, 3);
+		helper.setBlock(pylonAt, JugcraftConcordance.LEY_PYLON);
+		LeyPylonBlockEntity pylon = entity(helper, pylonAt);
+		pylon.setOwner(new UUID(14L, 9L));
+		helper.assertTrue(heart.beside(pylon.getBlockPos()) && !heart.feedsAPylonBeside(level), "A stranger's pylon beside it is no road of its own");
+		pylon.setOwner(KEEPER);
+		helper.assertTrue(heart.feedsAPylonBeside(level), "Its keeper's pylon beside it is its own road");
+		pylon.setOwner(null);
+		helper.assertTrue(heart.feedsAPylonBeside(level), "and so is a pylon no one owns");
+		pylon.setLey(level, LeyPylonBlockEntity.CAPACITY);
+		helper.assertTrue(heart.feedsAPylonBeside(level), "full or not");
+		helper.setBlock(pylonAt, Blocks.AIR);
+		helper.assertTrue(!heart.feedsAPylonBeside(level), "That pylon broken, the road is gone");
+		BlockPos aboveAt = heartAt.above();
+		helper.setBlock(aboveAt, JugcraftConcordance.LEY_PYLON);
+		LeyPylonBlockEntity above = entity(helper, aboveAt);
+		above.setOwner(KEEPER);
+		helper.assertTrue(heart.beside(above.getBlockPos()) && heart.feedsAPylonBeside(level), "A pylon of its keeper's on any face is its own road");
+		helper.succeed();
+	}
+
 	// ---------------------------------------------------------------- budget and saving
 
 	/**
