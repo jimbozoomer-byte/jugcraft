@@ -97,6 +97,8 @@ public final class HerobrineEncounters {
 	public static final int AUDIENCE_RANGE = 48;
 	/** How many other players a place is judged for. */
 	public static final int MAX_AUDIENCE = 4;
+	/** The most chunk columns a line of sight may cross; 96 blocks cross at most 14. */
+	public static final int MAX_CORRIDOR_CHUNKS = 24;
 
 	public static EntityType<Herobrine> HEROBRINE;
 
@@ -393,8 +395,57 @@ public final class HerobrineEncounters {
 	}
 
 	private static boolean inClearView(ServerLevel level, Vec3 eye, Vec3 feet, ServerPlayer viewer) {
-		return level.clip(new ClipContext(eye, feet.add(0.0, 1.62, 0.0), ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, viewer))
-				.getType() == HitResult.Type.MISS;
+		Vec3 eyes = feet.add(0.0, 1.62, 0.0);
+		return corridorLoaded(level, eye, eyes) && level.clip(new ClipContext(eye, eyes, ClipContext.Block.COLLIDER,
+				ClipContext.Fluid.NONE, viewer)).getType() == HitResult.Type.MISS;
+	}
+
+	/**
+	 * Whether every chunk the straight segment from {@code from} to {@code to} passes over is already loaded, so that a
+	 * ray cast along it reads no unloaded chunk (reading one would load it). Walks the chunk columns the segment crosses,
+	 * both neighbours where it passes exactly through a corner; at most {@value #MAX_CORRIDOR_CHUNKS} columns, and a
+	 * longer segment is refused.
+	 */
+	public static boolean corridorLoaded(Level level, Vec3 from, Vec3 to) {
+		double x0 = from.x / 16.0;
+		double z0 = from.z / 16.0;
+		double dx = to.x / 16.0 - x0;
+		double dz = to.z / 16.0 - z0;
+		int cx = Mth.floor(x0);
+		int cz = Mth.floor(z0);
+		int endX = Mth.floor(to.x / 16.0);
+		int endZ = Mth.floor(to.z / 16.0);
+		int stepX = dx > 0 ? 1 : -1;
+		int stepZ = dz > 0 ? 1 : -1;
+		double nextX = dx == 0 ? Double.POSITIVE_INFINITY : (dx > 0 ? cx + 1 - x0 : x0 - cx) / Math.abs(dx);
+		double nextZ = dz == 0 ? Double.POSITIVE_INFINITY : (dz > 0 ? cz + 1 - z0 : z0 - cz) / Math.abs(dz);
+		double deltaX = dx == 0 ? Double.POSITIVE_INFINITY : 1.0 / Math.abs(dx);
+		double deltaZ = dz == 0 ? Double.POSITIVE_INFINITY : 1.0 / Math.abs(dz);
+		for (int visited = 0; visited < MAX_CORRIDOR_CHUNKS; visited++) {
+			if (!level.hasChunkAt(new BlockPos(cx << 4, 0, cz << 4))) {
+				return false;
+			}
+			if (cx == endX && cz == endZ) {
+				return true;
+			}
+			if (Math.abs(nextX - nextZ) < 1.0E-9) {
+				// Exactly through a corner: a ray may touch either side, so both must be loaded.
+				if (!level.hasChunkAt(new BlockPos((cx + stepX) << 4, 0, cz << 4)) || !level.hasChunkAt(new BlockPos(cx << 4, 0, (cz + stepZ) << 4))) {
+					return false;
+				}
+				nextX += deltaX;
+				nextZ += deltaZ;
+				cx += stepX;
+				cz += stepZ;
+			} else if (nextX < nextZ) {
+				nextX += deltaX;
+				cx += stepX;
+			} else {
+				nextZ += deltaZ;
+				cz += stepZ;
+			}
+		}
+		return false;
 	}
 
 	/**
