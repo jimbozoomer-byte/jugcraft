@@ -137,3 +137,8 @@ MESSAGES = {
 def items():
     """Every item the Glass Abbot's fight adds."""
     return list(ITEMS) + list(COSTUMES) + list(BLOCKS)
+
+
+def blocks():
+    """Every block the Glass Abbot's fight adds (each with its item)."""
+    return list(BLOCKS)

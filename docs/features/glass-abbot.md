@@ -139,7 +139,11 @@ A participant is anyone who hurt him or one of his images, turned a marked mirro
 - Not run: play by hand, a dedicated server, two clients, performance measurements.
 
 ### Results
-- Local, on this branch: to be recorded with the push.
+- Local, on this branch (no Minecraft toolchain here, so neither the build nor the game tests ran locally; CI runs them):
+  - `python3 tools/check_mod_data.py`: the whole audit ran; its one error, Abbey Glass's item having no name in the asset check (its block was missing from `agriculture.all_blocks()`), is fixed, and `check_assets` and `check_glass_abbot` were rerun clean.
+  - Deliberate breaks, each put back: `GlassAbbotEntity.HEALTH`, the Prism Line's cooldown in `GlassAbbotEntity.Attack`, an image's credit to its striker (`GlassImageEntity`), the Mirror Inscription's check that its holder may harm the shooter, and `LanternLens.EVERY`; the audit named every one.
+  - `python3 scripts/check_repository.py` passed; `python3 -m unittest discover -s scripts/tests` passed (287 tests); `tools/check_icon_maps.py` passed for the five maps; every changed Java file parses.
+- `./gradlew build` and `./gradlew runClientGameTest`: CI's results go on the pull request.
 
 ## World and event applicability
 

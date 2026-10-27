@@ -2797,7 +2797,7 @@ def all_blocks():
             + decor4_blocks() + decor5_blocks() + decor6_blocks() + decor7_blocks() + decor8_blocks() + decor9_blocks() + decor10_blocks()
             + decor11_blocks() + decor12_blocks() + decor13_blocks() + decor14_blocks() + chandlery_blocks() + cider_blocks() + pantry_blocks()
             + firework_blocks() + feast_blocks() + maze_blocks() + candy_blocks() + foraging_blocks() + bat_blocks() + [KNITTING["wheel"]] + pie_blocks() + [SPIRIT_BOARD["block"], TURKEYS["roast"], THEREMIN["block"], OFRENDA["block"]] + list(OFRENDA["decor"]) + graveyard.blocks() + [WOLFSBANE["block"], potted(WOLFSBANE["block"])] + WEREWOLF_RUGS + midway.blocks() + ferris_wheel.blocks() + hot_air_balloon.blocks() + plants.blocks() + decor15.blocks() + decor16.blocks() + decor17.blocks() + decor18.blocks() + decor19.blocks() + decor20.blocks() + kitchen.blocks() + feasts.blocks() + menu.blocks() + rice.blocks() + soil.blocks() + orchard.blocks() + cakes.blocks() + pies_and_tarts.blocks() + milkshakes.blocks() + garden.blocks()
-            + herbs.blocks() + spices.blocks() + lairs.blocks() + vesperine.blocks() + pumpkin_king.blocks()
+            + herbs.blocks() + spices.blocks() + lairs.blocks() + vesperine.blocks() + pumpkin_king.blocks() + glass_abbot.blocks()
             + adam_ondi_ahman.blocks_registered())
 
 
