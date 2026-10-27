@@ -31,6 +31,7 @@ import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.CreativeModeTabs;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.item.Rarity;
 import net.minecraft.world.item.component.UseEffects;
 import net.minecraft.world.item.crafting.RecipeSerializer;
@@ -339,6 +340,35 @@ public final class JugcraftGuns {
 	 * the Maelstrom Gun, from the owner's Cyclone, three microjets a step.
 	 */
 	public static final Map<String, Integer> LOAD_STEPS = Map.of("maelstrom_gun", 3);
+
+	/**
+	 * The beam-mining follow-up: a beam gun whose beam cuts the block at its end as a tool of this mining speed would,
+	 * and cuts only what a pickaxe of this tier ({@code iron} or {@code diamond}) may harvest, or what needs no tool
+	 * ({@link #MINING}; GunShots.cut).
+	 */
+	public record Mining(float speed, String tier) {
+		/** The pickaxe whose harvest the beam's is. */
+		public ItemStack pickaxe() {
+			return new ItemStack(tier.equals("diamond") ? Items.DIAMOND_PICKAXE : Items.IRON_PICKAXE);
+		}
+
+		/**
+		 * How far through a block of this hardness one shot cuts (1 is through), from a gun firing every {@code interval}
+		 * ticks: as vanilla's correct tool, hardness × 30 ticks over the speed, and a block of no hardness at once.
+		 */
+		public float cut(float hardness, int interval) {
+			return hardness <= 0.0F ? 1.0F : speed * interval / (hardness * 30.0F);
+		}
+	}
+
+	/**
+	 * The beams that mine (tools/guns.py MINING), at the owner's mining speeds: the Seam Cutter, from the owner's CR4K
+	 * Mining Laser, 14, an iron pickaxe's harvest; the Geode Cutter, from the owner's Shard Culler, 1, a diamond
+	 * pickaxe's. The server option {@code guns.beam_mining} turns it off.
+	 */
+	public static final Map<String, Mining> MINING = Map.of("seam_cutter", new Mining(14.0F, "iron"), "geode_cutter", new Mining(1.0F, "diamond"));
+	/** A pause of more than this many ticks between a mining beam's shots on a block starts its cut over. */
+	public static final int MINE_GAP = 10;
 	/** The round that falls over its flight (the darts-and-bleeding follow-up; tools/guns.py AMMO "dart"). */
 	public static final String DART = "dart";
 	/** How far a dart flies a tick, in blocks (the owner's frog dart's speed; {@link GunShots#flight}). */
@@ -834,6 +864,11 @@ public final class JugcraftGuns {
 	/** The burst this gun fires to a pull (slice 15D, {@link #BURSTS}); null for a gun that fires one shot a pull. */
 	public static @Nullable Burst burst(GunItem gun) {
 		return BURSTS.get(gun.name());
+	}
+
+	/** How this gun's beam mines (the beam-mining follow-up, {@link #MINING}); null for a gun whose shot cuts no block. */
+	public static @Nullable Mining mining(GunItem gun) {
+		return MINING.get(gun.name());
 	}
 
 	/** Rounds this gun loads at each shell's time (slice 15E, {@link #LOAD_STEPS}); 1 for most. */

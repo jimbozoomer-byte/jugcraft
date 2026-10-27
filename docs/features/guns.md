@@ -907,7 +907,7 @@ The third of the gun sets the owner chose on 10 October 2026: three more energy 
 - **Seam Cutter:** two copper ingots (its copper body) and an amethyst shard (its lens) over a steel ingot, an advanced circuit and a brass ingot.
 - **Caisson Pistol:** a lightning rod (its arc's emitter) and two steel ingots over an advanced circuit and a brass ingot.
 
-**How they fire:** as slice 8D's (above): the beam passes through every creature in its line that the shooter may strike and stops at the first block; the arc leaps from the creature nearest the aim within the cone to the nearest within 4 blocks, twice, each taking 60% of the damage before it. Neither touches a block. Each shot is `jugcraft:zap` damage, which pushes nothing back and counts every shot, so each of the Seam Cutter's ten a second lands.
+**How they fire:** as slice 8D's (above): the beam passes through every creature in its line that the shooter may strike and stops at the first block; the arc leaps from the creature nearest the aim within the cone to the nearest within 4 blocks, twice, each taking 60% of the damage before it. Neither touches a block (until the [beam-mining follow-up](#follow-up-beams-that-mine), which lets the Seam Cutter's beam cut the block it ends at). Each shot is `jugcraft:zap` damage, which pushes nothing back and counts every shot, so each of the Seam Cutter's ten a second lands.
 
 **What you see:** the owner's animations.
 - **Spikedriver:** each shot drives the rings at the back of its right side back and the tip of its muzzle recoils. To reload, the magazine swings down and out of its left side and a new one swings in under the left hand; then the left hand takes the lever on its left side and swings it back and round, 145°, to charge the rails, and returns it.
@@ -954,7 +954,7 @@ The third of the gun sets the owner chose on 10 October 2026: three more energy 
 **Save compatibility:** new items `jugcraft:spikedriver`, `seam_cutter` and `caisson_pistol`; nothing saved changes. `guns.enabled=false` or `machines.enabled=false` turns their recipes off; the items stay registered.
 
 **Known limits:**
-- **The Seam Cutter cuts no blocks.** The owner's gun is a mining laser, but no beam touches a block (slice 8D's rule). Mining with it would want its own design: protected land, drops and tool tiers.
+- **The Seam Cutter cut no blocks** in this slice. The owner's gun is a mining laser, but no beam touched a block (slice 8D's rule). Mining wanted its own design (protected land, drops and tool tiers), which the [beam-mining follow-up](#follow-up-beams-that-mine) gives it.
 - **The Caisson Pistol's inspection** brings the left hand to its bolt near the eye, and in the preview the left sleeve covers the right third of the view for about a second and a half. A search over the arm's direction found none that keeps it much smaller.
 - **Not played:** none of it has been played yet. The cones, the JE costs and the Seam Cutter's rate want play to set.
 
@@ -3161,12 +3161,41 @@ The owner's last three diamond-steel guns, taken up after slice 15D (on 27 Octob
 
 **Known limits** (the first two are owner decisions):
 - **Names:** "Maelstrom Gun", "Ermine Rifle", "Geode Cutter" and "Microjet" are proposed.
-- **The Geode Cutter does not mine:** the owner's data lets the Shard Culler's beam break blocks (`enableMining`); here, as the Seam Cutter's, it touches no block. Mining by beam could come for both as a follow-up.
+- **The Geode Cutter did not mine** in this slice: the owner's data lets the Shard Culler's beam break blocks (`enableMining`), as the Seam Cutter's could not. The [beam-mining follow-up](#follow-up-beams-that-mine) gives both their mining.
 - **No slowness on a hit:** the owner's data slows what the Shard Culler hits (`impactEffect`), as the other hit effects not yet built (below).
 - **Energy Cells, not the owner's cores:** the owner's beam guns load an energy core, which leaves a spent core behind; here they draw charge from Energy Cells as the energy guns before them.
 - **A microjet does not fly:** the owner's microjets are rockets that fly 1.5 blocks a tick; here it strikes at once along the look, as a round does. The Maelstrom does not slow its carrier as the owner's data asks (`speedModifier`).
 - **The arms in the reloads and inspections** come large into the view in places, as on the guns before them.
 - **Not played:** none of it has been played yet. The numbers want play to set.
+
+## Follow-up: beams that mine
+The owner's data lets two of their beam guns cut blocks (`enableMining`): the CR4K Mining Laser (slice 9C's Seam Cutter) and the Shard Culler (slice 15E's Geode Cutter), which the guns had left out. Offered after slice 15E, the owner chose it on 27 October 2026 ("Lets do the beams that mine"), as its own pull request.
+- **How a beam cuts** (`MINING` and `MINE_GAP` in `tools/guns.py`, `JugcraftGuns.MINING`, `GunShots.cut`): each shot cuts into the block where the beam ends, the first block in its line past every creature, as much as a tool of the gun's mining speed would in the gun's interval. As with vanilla's correct tool, a block of hardness h takes h × 30 ticks over the speed; a block of no hardness goes at once. The block's cracks show to everyone near while it is cut. When the cut is through, the block breaks as its shooter breaking it would: its drops are an unenchanted break's (stone gives cobblestone, an ore its raw ore), none in creative, and the block-break events other mods watch are called. Another block, or a pause of more than 10 ticks (half a second), starts the cut over. Each shot spends its charge as before, so cutting costs JE.
+- **Speeds**, the owner's `miningSpeed`:
+  - **Seam Cutter, 14:** faster than a netherite pickaxe's 9. Stone goes in 2 shots (a fifth of a second), deepslate or an iron ore in 4.
+  - **Geode Cutter, 1:** a bare hand's speed. Stone takes 15 shots (2.25 s), netherrack 4.
+- **What it may cut:** what a pickaxe of its tier may harvest, or what needs no tool.
+  - **Seam Cutter:** an iron pickaxe's harvest, so not obsidian, crying obsidian or ancient debris.
+  - **Geode Cutter:** a diamond pickaxe's, everything a pickaxe mines.
+  - **Neither:** snow and cobwebs, which want a shovel or shears; a block with a block entity (a chest, a furnace, a machine, a sign), so a beam never empties a container; an unbreakable block.
+  - **Passed through, as before:** what has no collision (a torch, a flower, tall grass); the beam ends at the first solid block.
+- **Protection** (`Authority.mayChange`, as the Cavern Burrowing Arrow and the Dark Matter tools use): only where the shooter may break blocks by hand. Not in adventure mode, not under spawn protection, not in the protected town, not where a protection mod's block-break check refuses. Each shot asks again.
+- **Server option:** `guns.beam_mining` in `config/jugcraft.properties`, on by default. False leaves every block whole; the beams still burn creatures.
+- **Raider gunners** carry no mining beam and cut nothing.
+- **Tooltips:** both say the beam cuts the block at its end; the Geode Cutter's says slowly.
+- **Checked:** `tools/check_mod_data.py` holds `JugcraftGuns.MINING` and `MINE_GAP` to `tools/guns.py`: each a gun that fires a beam, its speed above 0 and at most 20, its tier iron or diamond. It also checks the option is in `JugcraftConfig` and that `GunShots` reads it. Game tests: `BeamMiningGameTests` ([Verification](#verification)).
+
+**Balance:**
+- **Seam Cutter:** 100 JE a shot, so a full Energy Cell is 100 shots: about 50 stone or 25 deepslate. It is a mining tool that costs charge where a pickaxe costs durability.
+- **Geode Cutter:** 120 JE a shot, so a cell cuts about 5 stone. It stays a weapon that can cut, slowly, as the owner's data has it.
+- **Conversions:** nothing converts back.
+
+**Save compatibility:** nothing saved changes. A cut in progress is not saved; it is let go when its shooter leaves.
+
+**Known limits:**
+- **Drops are an unenchanted break's:** no Fortune or Silk Touch.
+- **It does not count as mining for statistics:** a cut block is not in the "mined" statistic and costs no hunger.
+- **Not played:** none of it has been played yet. The speeds and charge want play to set.
 
 ## Connections
 - **Existing input producers:** copper, iron and gunpowder (vanilla); lead nuggets (the lead switch's lead); brass nuggets (brass, from zinc); paper and planks.
@@ -6195,6 +6224,19 @@ Slice 9E's files: the guns' tactical grip parts and the Laser Sight's textures m
   - `GunsGameTests` counts 105 guns and 6 rounds.
   - Held by the earlier tests and expected to pass with the new guns: each energy gun's magazine fits a cell (`EnergyGunsGameTests`); the Lantern Musket and the Solenoid Rifle reach furthest (`FrontierGunsIVGameTests`, `CoilPlasmaGunsGameTests`); the Laser Sight on the Ermine and no Tactical Grip on any of the three (`TacticalAttachmentsGameTests`).
   - The guns' client test (`GunsClientGameTests`) takes each new gun through its screenshots as every gun's; its reload of one spent Microjet is one step.
+- **Beams that mine, run locally (27 October 2026):**
+  - `python3 tools/check_mod_data.py`: PASS (8033 material IDs). Its new beam-mining check was tried against a changed gap and a bad entry (an Ermine Rifle of speed 0 and tier "gold"), and reported both.
+  - `python3 tools/guns.py --check`: PASS. `python3 scripts/check_repository.py`: PASS. `python3 -m unittest discover -s scripts/tests`: 287 tests passed; `python3 scripts/package_modrinth.py check`: PASS. `git diff --check`: clean.
+  - **Java:** a syntax parse only: 0 errors in the changed and new files.
+  - **The cuts worked by hand** from the speeds, in the game's own float arithmetic: the Seam Cutter's shot on stone cuts 0.622 (through in 2), the Geode Cutter's on netherrack 0.25 exactly (through in 4).
+- **Beams that mine, game tests (not run yet; CI runs them):**
+  - `BeamMiningGameTests`:
+    - `miningBeamsAreTheOwners`: the table is the owner's two (14 and an iron pickaxe's harvest, 1 and a diamond pickaxe's), both beam guns; the Beam Pistol and the Ermine Rifle cut nothing; the Seam Cutter is through stone in two shots and the Geode Cutter through netherrack in four; a block of no hardness goes at once; the option is on by default.
+    - `seamCutterCutsStone`: the first shot leaves the stone, the second breaks it and it drops cobblestone; two rounds are spent.
+    - `geodeCutterCutsSlowly`: three shots leave netherrack standing, the fourth breaks it and it drops itself.
+    - `beamsLeaveWhatTheyMayNotCut`: eight Seam Cutter shots each leave obsidian (beyond an iron pickaxe), a chest (a block entity) and stone before a shooter in adventure mode.
+    - `beamMiningCanBeTurnedOff`: with `guns.beam_mining` off, a shot leaves a slime block; with it on again, the next shot breaks it.
+  - Earlier tests that fire these beams: the Seam Cutter's (`SecondEnergyGunsGameTests.seamCutterBurnsWhileHeld`) aims over its pigs' stone pillars, and its beam ends beyond them; the Geode Cutter's (`DiamondSteelGunsVGameTests.geodeCutterBeamPiercesArmour`) fires once, cutting a floor block by a fifteenth. The guns' client test fires each gun once at its husk: a Seam Cutter shot cuts the stone-brick wall behind it 62% of the way, so it cracks but stands.
 - **Not run:** the client by hand, a two-client dedicated server, and play.
 
 ## World and event applicability
@@ -6213,7 +6255,6 @@ No worldgen, structures, bosses or seasonal content. Guns, rounds and the Cell R
   - the Whizzbanger, which waits for the model its animations were made for ([above](#the-whizzbanger-waits));
   - the guns beyond these sets;
   - the owner's other GeckoLib gun models from their upload of 23 October 2026: only the Grandle OG's and the fifteen diamond-steel guns' (slices 15A to 15E) are in the library ([the library record](../../art/owner-library/README.md#gun-geometry-23-october-2026));
-  - beams that mine (the owner's Shard Culler, and the CR4K Mining Laser the Seam Cutter is made from);
   - the owner's armour piercing and knockback for the guns before slice 15: their data gives 49 of them one or both ([above](#follow-up-armour-piercing-for-slices-15as-and-15bs-guns));
   - a shotgun that pushes its shooter back (the owner's Inertial and Drill Conversion);
   - the owner's other hit effects: slowness, darkness and withering from the guns whose data names them, and bleeding from the Caisson Pistol (it fires an arc here, not the owner's darts) and from guns not built yet.

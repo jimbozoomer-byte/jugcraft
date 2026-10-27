@@ -32,9 +32,11 @@ public final class JugcraftConfig {
 	 * {@code concordance.absent_owner_authority}: a Concordance device or worker whose owner is away (offline or in
 	 * another dimension) still acts, as a stand-in with the owner's identity (Fabric's fake player) that towns, spawn
 	 * protection and protection mods judge as that owner; false (the default) makes it wait for its owner
-	 * (concordance/Authority).
+	 * (concordance/Authority). {@code guns.beam_mining}: the mining beams (the Seam Cutter's and the Geode Cutter's) cut
+	 * the blocks they reach, where their shooter may break blocks; false leaves every block whole (guns/GunShots).
 	 */
-	public static final Map<String, Boolean> OPTIONS = Map.of("carving.free_draw", true, "concordance.absent_owner_authority", false, "vanadium.legacy_iron_recipes", false);
+	public static final Map<String, Boolean> OPTIONS = Map.of("carving.free_draw", true, "concordance.absent_owner_authority", false, "vanadium.legacy_iron_recipes", false,
+			"guns.beam_mining", true);
 
 	/**
 	 * Text options, with their defaults.
@@ -178,7 +180,7 @@ public final class JugcraftConfig {
 			properties.store(writer, "Jugcraft feature switches (false stops new worldgen and recipes; existing items and blocks stay)"
 					+ " and server options (carving.free_draw=false allows only the starter pumpkin faces;"
 					+ " concordance.absent_owner_authority=true lets Concordance devices act while their owner is away, as a stand-in"
-					+ " that protection judges as that owner; halloween.* sets when"
+					+ " that protection judges as that owner; guns.beam_mining=false stops the mining beams cutting blocks; halloween.* sets when"
 					+ " the Halloween event runs: start and end as MM-DD, a timezone, mode auto, on or off, and the Harvest Moon's day;"
 					+ " seasons.*: seasonal colours follow the server's date; mode auto, spring, summer, autumn, winter or off,"
 					+ " hemisphere north or south, a timezone, and opt-in winter snow; harvest_feast us, canada or off;"

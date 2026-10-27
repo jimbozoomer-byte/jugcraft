@@ -8,6 +8,12 @@ Every change to Jugcraft, newest first, grouped by pull request. For what each t
 
 No numbered release yet. Entries on feature branches remain proposed until their pull requests merge.
 
+### Unmerged: Guns, beams that mine
+- The **Seam Cutter** and the **Geode Cutter** now cut the block their beam ends at, as the owner's mining lasers do. The Seam Cutter goes through stone in two shots (the owner's mining speed of 14, faster than a netherite pickaxe); the Geode Cutter cuts slowly (speed 1, a bare hand's). Cracks show while it cuts, and the block drops what it would broken by hand. The Seam Cutter harvests what an iron pickaxe can; the Geode Cutter what a diamond one can.
+- A beam only cuts where its shooter may break blocks: not in adventure mode, under spawn protection, in the protected town, or where a protection mod refuses. It never cuts a block holding a block entity, such as a chest or a machine. Each shot costs its charge as before.
+- Server option `guns.beam_mining` (on by default) in `config/jugcraft.properties` turns it off.
+- Record: [guns.md, beams that mine](docs/features/guns.md#follow-up-beams-that-mine).
+
 ### Unmerged: Guns, slice 15E (a microjet gun and two beams)
 - **Three guns** from the owner's own GeckoLib models and animations, the last of their diamond-steel guns, each held in both hands: the **Maelstrom Gun** (the owner's Cyclone), carried at the hip, firing **Microjets** from nine tubes as long as the trigger is held, 24 to a load; the **Ermine Rifle** (the Minksy), a lever-action rifle whose beam passes through every creature in its line, on Energy Cells; and the **Geode Cutter** (the Shard Culler), a cutting beam carried at the hip, as long as the trigger is held, that passes through 4 points of armour.
 - A new round, the **Microjet**: the owner's little iron rocket (a lead nugget over gunpowder over an iron nugget make four). The Maelstrom Gun loads **three at a time**, a step each three.

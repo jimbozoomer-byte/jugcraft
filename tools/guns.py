@@ -331,7 +331,8 @@ GUNS = {
         "display": "Seam Cutter",
         "source": "cr4k_mining_laser",
         "tooltip": "A cutting laser carried at the hip: for as long as the trigger is held, its short beam burns through "
-                   "every creature in front of it. Its core is drawn out to change. Runs on Energy Cells.",
+                   "every creature in front of it and cuts the block at its end. Its core is drawn out to change. Runs on "
+                   "Energy Cells.",
         "damage": 1.5, "pellets": 1, "interval": 2, "auto": True, "capacity": 60,
         "reload": 60, "spread": (2.0, 1.0), "range": 16, "ammo": "energy_cell", "shot": "beam", "charge": 100,
     },
@@ -1004,7 +1005,8 @@ GUNS = {
         "display": "Geode Cutter",
         "source": "shard_culler",
         "tooltip": "A crystal-lensed cutting beam carried at the hip: as long as the trigger is held it burns through "
-                   "every creature in front of it, and through armour. Runs on Energy Cells.",
+                   "every creature in front of it, and through armour, and slowly cuts the block at its end. Runs on "
+                   "Energy Cells.",
         "damage": 3.0, "pellets": 1, "interval": 3, "auto": True, "capacity": 50,
         "reload": 59, "spread": (3.0, 1.5), "range": 24, "ammo": "energy_cell", "shot": "beam", "charge": 120,
     },
@@ -4371,6 +4373,16 @@ BURSTS = {"tumbler_rifle": (3, 5)}
 # GunShots' reload, GunAnimations' loops). The owner's Cyclone loads its microjets three at a time ("reloadAmount" 3):
 # the Maelstrom Gun.
 LOAD_STEPS = {"maelstrom_gun": 3}
+
+# The beam-mining follow-up after slice 15E: the beam guns whose beam cuts the block at its end, (speed, tier). Each shot
+# adds what a tool of that mining speed would cut in the gun's interval (a block of hardness h takes h x 30 ticks over
+# the speed, as vanilla's correct tool; hardness 0 at once), and the block breaks as the shooter breaking it would, its
+# drops a pickaxe of that tier's (iron or diamond). The speeds are the owner's "miningSpeed": the CR4K Mining Laser's 14
+# (the Seam Cutter), the Shard Culler's 1 (the Geode Cutter); the tiers are set beside the guns' materials, the Seam
+# Cutter's steel and the Geode Cutter's diamond. A pause of more than MINE_GAP ticks, or another block, starts the cut
+# over (JugcraftGuns.MINING, MINE_GAP; GunShots.cut). The server option guns.beam_mining turns it off.
+MINING = {"seam_cutter": (14.0, "iron"), "geode_cutter": (1.0, "diamond")}
+MINE_GAP = 10
 
 
 # ------------------------------------------------------------------ darts and bleeding

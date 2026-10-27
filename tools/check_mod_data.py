@@ -1893,6 +1893,18 @@ def check_guns():
         if not spec or not isinstance(spec.get("reload"), tuple) or not 1 < step <= spec.get("capacity", 0):
             err(f"tools/guns.py LOAD_STEPS names {gun}, which is not a gun loaded a shell at a time, or loads {step} a "
                 f"step (more than one, at most its magazine)")
+    # The beam-mining follow-up: the beams that cut the block they reach, at what speed and to what pickaxe's harvest;
+    # the server option that turns it off.
+    mining = ", ".join(f'"{gun}", new Mining({speed}F, "{tier}")' for gun, (speed, tier) in guns.MINING.items())
+    if f"MINING = Map.of({mining});" not in java or f"MINE_GAP = {guns.MINE_GAP};" not in java:
+        err(f"JugcraftGuns.MINING or MINE_GAP differs from tools/guns.py: expected Map.of({mining}) and {guns.MINE_GAP}")
+    for gun, (speed, tier) in guns.MINING.items():
+        if guns.GUNS.get(gun, {}).get("shot") != "beam" or not 0 < speed <= 20 or tier not in ("iron", "diamond"):
+            err(f"tools/guns.py MINING names {gun}, which is not a gun that fires a beam, or gives it speed {speed} "
+                f"(more than 0, at most 20) or tier {tier} (iron or diamond)")
+    config = (JAVA_ROOT / "config" / "JugcraftConfig.java").read_text(encoding="utf-8")
+    if '"guns.beam_mining", true' not in config or 'JugcraftConfig.option("guns.beam_mining")' not in shots_java:
+        err("JugcraftConfig must hold the server option guns.beam_mining (on by default), and GunShots read it before a beam cuts")
     # Slice 8D: the energy weapons' charge a round, the arcs' leaps and the Energy Cell's capacity.
     charges = ", ".join(f'Map.entry("{gun}", {spec["charge"]})' for gun, spec in guns.GUNS.items() if spec.get("charge"))
     if f"CHARGE = Map.ofEntries({charges});" not in java:

@@ -1,5 +1,7 @@
 package io.github.jimbozoomer.jugcraft.guns;
 
+import io.github.jimbozoomer.jugcraft.concordance.Authority;
+import io.github.jimbozoomer.jugcraft.config.JugcraftConfig;
 import io.github.jimbozoomer.jugcraft.rocketry.CombatRocket;
 import io.github.jimbozoomer.jugcraft.rocketry.JugcraftRocketry;
 import io.github.jimbozoomer.jugcraft.tools.Chargeable;
@@ -18,10 +20,12 @@ import java.util.UUID;
 import java.util.function.Predicate;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.fabricmc.fabric.api.event.player.AttackEntityCallback;
+import net.fabricmc.fabric.api.event.player.PlayerBlockBreakEvents;
 import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
 import net.fabricmc.fabric.api.networking.v1.PlayerLookup;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
+import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.BlockParticleOption;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.core.registries.Registries;
@@ -49,6 +53,7 @@ import net.minecraft.world.entity.projectile.Projectile;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.ClipContext;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.BlockHitResult;
@@ -137,6 +142,8 @@ public final class GunShots {
 	private static final Map<UUID, Long> STABS = new HashMap<>();
 	/** Each player's spinning barrels (slice 8C). */
 	private static final Map<UUID, Spin> SPINS = new HashMap<>();
+	/** Each player's mining beam's cut into a block (the beam-mining follow-up, {@link #cut}). */
+	private static final Map<UUID, Cut> CUTS = new HashMap<>();
 
 	private GunShots() {
 	}
@@ -204,7 +211,7 @@ public final class GunShots {
 		switch (JugcraftGuns.shot(gun)) {
 			case JugcraftGuns.GRENADE -> lob(level, player, stack, spec, spread);
 			case JugcraftGuns.FLAME -> burn(level, player, spec, spread);
-			case JugcraftGuns.BEAM -> beam(level, player, spec, spread, hand, JugcraftGuns.bleed(gun), JugcraftGuns.piercing(gun));
+			case JugcraftGuns.BEAM -> beam(level, player, spec, spread, hand, JugcraftGuns.bleed(gun), JugcraftGuns.piercing(gun), JugcraftGuns.mining(gun));
 			case JugcraftGuns.ARC -> arc(level, player, spec, spread, hand);
 			case JugcraftGuns.ROCKET -> rocket(level, player, gun, spec, spread);
 			default -> shoot(level, player, gun, spec, spread);
@@ -331,6 +338,15 @@ public final class GunShots {
 	}
 
 	private static void tick(MinecraftServer server) {
+		// The beam-mining follow-up: a cut no shot has reached for MINE_GAP ticks is let go, its cracks cleared.
+		Iterator<Map.Entry<UUID, Cut>> cuts = CUTS.entrySet().iterator();
+		while (cuts.hasNext()) {
+			Cut cut = cuts.next().getValue();
+			if (cut.level.getGameTime() - cut.last > JugcraftGuns.MINE_GAP) {
+				cut.clear();
+				cuts.remove();
+			}
+		}
 		Iterator<Map.Entry<UUID, Reload>> it = RELOADS.entrySet().iterator();
 		while (it.hasNext()) {
 			Map.Entry<UUID, Reload> entry = it.next();
@@ -740,10 +756,11 @@ public final class GunShots {
 	/**
 	 * A beam (slice 8D): from the eye along the look, strayed by the spread, to the first block within range. Every creature
 	 * in its line that the shooter may strike takes the shot's damage ({@link JugcraftGuns#ZAP_DAMAGE}), through
-	 * {@code pierce} points less armour (slice 15E, {@link #pierced}); it passes through them all. No block is touched.
+	 * {@code pierce} points less armour (slice 15E, {@link #pierced}); it passes through them all. A mining beam cuts the
+	 * block it ends at (the beam-mining follow-up, {@link #cut}); no other beam touches a block.
 	 */
 	private static void beam(ServerLevel level, ServerPlayer player, GunSpec spec, float spread, InteractionHand hand,
-			JugcraftGuns.@Nullable Bleed bleed, float pierce) {
+			JugcraftGuns.@Nullable Bleed bleed, float pierce, JugcraftGuns.@Nullable Mining mining) {
 		Vec3 eye = player.getEyePosition();
 		Vec3 direction = stray(player.getLookAngle(), spread, player.getRandom());
 		Vec3 end = eye.add(direction.scale(spec.range()));
@@ -760,6 +777,47 @@ public final class GunShots {
 			}
 		}
 		trace(player, GunTracePayload.BEAM, List.of(end), hand);
+		if (mining != null && block.getType() == HitResult.Type.BLOCK && JugcraftConfig.option("guns.beam_mining")) {
+			cut(level, player, block.getBlockPos(), mining, spec.interval());
+		}
+	}
+
+	/**
+	 * A mining beam's shot cuts into the block it ends at (the beam-mining follow-up): it adds what its {@link
+	 * JugcraftGuns.Mining} cuts in the gun's interval, the block's cracks showing to everyone near, and when the cut is
+	 * through the block breaks as the shooter breaking it by hand would, with its drops (none in creative). It cuts only
+	 * a block the shooter may change ({@link Authority#mayChange}: claims, spawn and town protection, adventure mode), not
+	 * one that holds a block entity (a chest, a machine), not an unbreakable one, and only what a pickaxe of its tier may
+	 * harvest, or what needs no tool. Another block, or a pause of more than {@link JugcraftGuns#MINE_GAP} ticks, starts
+	 * the cut over.
+	 */
+	private static void cut(ServerLevel level, ServerPlayer player, BlockPos pos, JugcraftGuns.Mining mining, int interval) {
+		BlockState state = level.getBlockState(pos);
+		float hardness = state.getDestroySpeed(level, pos);
+		if (state.isAir() || hardness < 0.0F || state.hasBlockEntity()
+				|| state.requiresCorrectToolForDrops() && !mining.pickaxe().isCorrectToolForDrops(state)
+				|| !Authority.mayChange(level, player, pos)) {
+			return;
+		}
+		long now = level.getGameTime();
+		Cut cut = CUTS.get(player.getUUID());
+		if (cut == null || cut.level != level || !cut.pos.equals(pos) || now - cut.last > JugcraftGuns.MINE_GAP) {
+			if (cut != null) {
+				cut.clear();
+			}
+			cut = new Cut(level, pos.immutable(), -1 - player.getId());
+			CUTS.put(player.getUUID(), cut);
+		}
+		cut.last = now;
+		cut.done += mining.cut(hardness, interval);
+		if (cut.done < 1.0F) {
+			level.destroyBlockProgress(cut.crack, pos, Math.min(9, (int) (cut.done * 10.0F)));
+			return;
+		}
+		cut.clear();
+		CUTS.remove(player.getUUID());
+		level.destroyBlock(pos, !player.hasInfiniteMaterials(), player);
+		PlayerBlockBreakEvents.AFTER.invoker().afterBlockBreak(level, player, pos, state, null);
 	}
 
 	/**
@@ -911,6 +969,32 @@ public final class GunShots {
 		RELOADS.remove(player.getUUID());
 		STABS.remove(player.getUUID());
 		SPINS.remove(player.getUUID());
+		Cut cut = CUTS.remove(player.getUUID());
+		if (cut != null) {
+			cut.clear();
+		}
+	}
+
+	/**
+	 * A mining beam's cut into one block (the beam-mining follow-up): where, how far through (1 is through), when a shot
+	 * last reached it, and the id its cracks are shown under (never an entity's, so the shooter sees them too).
+	 */
+	private static final class Cut {
+		final ServerLevel level;
+		final BlockPos pos;
+		final int crack;
+		float done;
+		long last;
+
+		Cut(ServerLevel level, BlockPos pos, int crack) {
+			this.level = level;
+			this.pos = pos;
+			this.crack = crack;
+		}
+
+		void clear() {
+			level.destroyBlockProgress(crack, pos, -1);
+		}
 	}
 
 	private static final class Trigger {
