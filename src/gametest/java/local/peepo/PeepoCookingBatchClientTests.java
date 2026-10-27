@@ -39,7 +39,7 @@ public final class PeepoCookingBatchClientTests implements FabricClientGameTest 
         npc=(jughead?PeepoMod.JUGHEAD:PeepoMod.PEEPO).create(level,EntitySpawnReason.COMMAND);
         npc.setNoAi(true);npc.snapTo(base.getX()-3.5,base.getY(),base.getZ()-2.5,0,0);npc.setOnGround(true);level.addFreshEntity(npc);
         var owner=level.getServer().getPlayerList().getPlayers().getFirst();npc.orders.tame(owner);npc.orders.command(owner,3);
-        npc.preferences.social=false;npc.preferences.carryMeals=0;
+        npc.preferences.social=false;npc.preferences.carryMeals=0;npc.preferences.feedback=CompanionFeedbackRules.EXPRESSIVE;
         npc.assignments.assign(level,base);
         npc.assignments.assignContainer(level,base.west(6),Direction.UP,false);npc.assignments.assignContainer(level,base.east(6),Direction.UP,true);
     }

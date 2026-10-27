@@ -30,7 +30,7 @@ final class CompanionRoutine extends Goal {
             || !npc.preferences.canWork() || !npc.orders.station(station))return false;
         if(station instanceof CompanionFishing.Job && npc.fishing.deferOutput(npc.assignments.get(npc.assignments.workPriority(station.stationPosition()))))
             return npc.assignments.workPriority(pos)>=npc.assignments.workPriority(station.stationPosition());
-        if(station instanceof CookingPotJob && job.planningStatus(npc)==CompanionStatus.READY)
+        if((station instanceof CookingPotJob || station instanceof CuttingBoardJob) && job.planningStatus(npc)==CompanionStatus.READY)
             return npc.assignments.workPriority(pos)>=npc.assignments.workPriority(station.stationPosition());
         if(npc.level().getGameTime()>=sessionUntil)return false;
         if(state!=CompanionStatus.WORKING && state!=CompanionStatus.TRAVELLING && state!=CompanionStatus.IDLE && state!=CompanionStatus.WAITING)return false;
@@ -116,7 +116,7 @@ final class CompanionRoutine extends Goal {
         }
     }
     @Override public boolean canUse(){
-        if(!npc.orders.routineAllowed() || npc.isEating() || npc.isWheelRunning() || npc.getRestMode()!=CompanionEnergy.Rest.NONE)return false;
+        if(!npc.orders.routineAllowed() || npc.isEating() || npc.isWheelRunning() || npc.restMotion.holdingExit() || npc.getRestMode()!=CompanionEnergy.Rest.NONE)return false;
         search();return station!=null || npc.isRecovering() || !npc.preferences.onShift();
     }
     @Override public boolean canContinueToUse(){return npc.orders.routineAllowed() && !npc.isEating()
@@ -170,6 +170,7 @@ final class CompanionRoutine extends Goal {
     }
     @Override public void tick(){
         long now=npc.level().getGameTime();
+        if(npc.restMotion.holdingExit()){npc.getNavigation().stop();state=CompanionStatus.RESTING;return;}
         if(station!=null && station.kind()==CompanionStation.Kind.CHAIR && !npc.isRecovering() && npc.preferences.onShift() && now>=chairUntil){nextLeisure=now+600;release();}
         if(station!=null && (!npc.level().hasChunkAt(station.stationPosition()) || block!=null && (block.isRemoved() || npc.level().getBlockEntity(block.getBlockPos())!=block)))release();
         if(station instanceof CompanionJob job){
@@ -186,6 +187,7 @@ final class CompanionRoutine extends Goal {
             if(now>=resumeUntil || !npc.preferences.canWork()){release();return;}
             if(!npc.onGround()){npc.getNavigation().stop();state=CompanionStatus.WAITING;return;}
         }
+        if(npc.restMotion.holdingExit()){npc.getNavigation().stop();state=CompanionStatus.RESTING;return;}
         if(station==null)search();
         reconsiderWork();
         if(station==null){npc.getNavigation().stop();return;}

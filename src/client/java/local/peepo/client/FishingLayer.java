@@ -14,14 +14,17 @@ import net.minecraft.util.Mth;
 final class FishingLayer extends RenderLayer<PeepoState,PeepoModel> {
     FishingLayer(PeepoRenderer parent){super(parent);}
     @Override public void submit(PoseStack pose,SubmitNodeCollector collector,int light,PeepoState s,float yaw,float pitch){
-        if(s.isInvisible || !s.work.isFishing() || s.fishingRod.isEmpty())return;
+        if(s.isInvisible || s.toolHandling || !s.work.isFishing() || s.fishingRod.isEmpty())return;
         var p=s.toolPose;
+        // Roll the rod outward around its grip so the one-handed catch remains readable.
+        float roll=s.reaction==local.peepo.CompanionFeedbackRules.Reaction.CATCH?-.5F*FinishingPose.amount(s.reactionTime):0;
         pose.pushPose();pose.translate(p.x/16,p.y/16,p.z/16);
         pose.scale(FishingPose.ROD_SCALE,FishingPose.ROD_SCALE,FishingPose.ROD_SCALE);
+        pose.rotateDegrees(Axis.ZP,roll*Mth.RAD_TO_DEG);
         pose.rotateDegrees(Axis.XP,p.xRot*Mth.RAD_TO_DEG);pose.rotateDegrees(Axis.YP,90);pose.rotateDegrees(Axis.ZP,-45);pose.rotateDegrees(Axis.XP,180);pose.translate(.25,.25,0);
         s.fishingRod.submit(pose,collector,light,OverlayTexture.NO_OVERLAY,s.outlineColor);pose.popPose();
         float tip=11.31F*FishingPose.ROD_SCALE;
-        float tx=p.x/16,ty=(p.y-tip*Mth.cos(p.xRot))/16,tz=(p.z-tip*Mth.sin(p.xRot))/16;
+        float tx=(p.x+tip*Mth.cos(p.xRot)*Mth.sin(roll))/16,ty=(p.y-tip*Mth.cos(p.xRot)*Mth.cos(roll))/16,tz=(p.z-tip*Mth.sin(p.xRot))/16;
         float travel=s.work==WorkAnimation.FISH_CAST?FishingPose.smooth((s.fishTime-8)/12):s.work==WorkAnimation.FISH_REEL?1-FishingPose.smooth(s.fishTime/20):1;
         float bx=Mth.lerp(travel,tx,s.fishX/16),by=Mth.lerp(travel,ty,s.fishY/16),bz=Mth.lerp(travel,tz,s.fishZ/16);
         if(s.work==WorkAnimation.FISH_CAST)by-=Mth.sin(travel*Mth.PI)*.5F;

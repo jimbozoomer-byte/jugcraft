@@ -189,8 +189,10 @@ public final class CompanionSeats {
                 CLAIMS.get(level).put(pos,claim);if(rail())CLAIMS.get(level).put(other(),claim);
             }
             if(!npc.setRestMode(CompanionEnergy.Rest.SITTING))return false;
-            mounted=true;npc.setNoGravity(true);npc.setBedExit(BlockPos.containing(entrance()));
+            npc.setNoGravity(true);npc.setBedExit(BlockPos.containing(entrance()));
             Vec3 at=seatPosition();float yaw=rail()?(float)Math.toDegrees(Math.atan2(-normal.x,normal.z)):facing.toYRot();
+            if(!mounted){npc.restMotion.enter(false,pos,entrance(),at,yaw);npc.restMotion.secondary(rail()?other():null);}
+            mounted=true;
             CompanionMotion.position(npc,at,yaw);npc.setDeltaMovement(Vec3.ZERO);npc.resetFallDistance();npc.getNavigation().stop();return true;
         }
         public void release(PeepoEntity npc) {
