@@ -133,6 +133,7 @@ A participant is a player who hurt him or his fledglings, or stood by the rod th
   - `python3 tools/check_icon_maps.py` on the three maps: PASS.
   - `javac`, syntax only, on the new and changed Java: no parse errors (the game compiles only in CI).
   - `values.json` was edited by hand to match what `tools/build_alchemy_values.py` gives, since that needs the Minecraft jar, which is not here. `scripts/tests/test_alchemy_values.py`: PASS.
+  - `python3 -m unittest discover -s scripts/tests`: 268 of 269 passed; the survival graph did not know the Roc Feather. The four new items were added to `docs/audits/survival-item-registry.json` by hand (the game test that exports it was not run here), and `test_survival_recipes.py` then passed.
 
 ## World and event applicability
 
