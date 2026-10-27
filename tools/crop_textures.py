@@ -814,6 +814,8 @@ def crop_textures():
     out.update(alpha_werewolf_textures())
     from cydonian_sentinel_art import cydonian_sentinel_textures  # and the Cydonian Sentinel, its sentries, shards,
     out.update(cydonian_sentinel_textures())                      # spikes and meteors, and its loot
+    from storm_roc_art import storm_roc_textures  # and the Storm Roc, his fledglings, and his loot
+    out.update(storm_roc_textures())
     from orchard_textures import orchard_textures  # and the orchards' fruit trees
     out.update(orchard_textures())
     from cake_art import cake_textures  # and the cakes, rebuilt from the owner's drawing of them

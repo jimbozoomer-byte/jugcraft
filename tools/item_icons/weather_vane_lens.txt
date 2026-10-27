@@ -1,0 +1,20 @@
+# Weather-Vane Lens: a round lens of storm-blue glass in a copper rim, a small iron weather vane's arrow etched across it.
+# Lit from the top left.
+# materials: main=copper second=iron stone=storm_light
+# family: compact
+................
+.....OOOOOO.....
+...OOLLLLMMOO...
+..OLLaaaaaaMDO..
+..OLaAAaaaaaDO..
+.OLaAAaaaaaaaDO.
+.OLaAaaggaaaaDO.
+.OLagggYYggaaDO.
+.OMagYYYYYYgaDO.
+.OMaaggggYgaaDO.
+.OMaaaaaggaaaDO.
+..OMaaaaaaaaDO..
+..OMDaaaaaaDDO..
+...OODDDDDDOO...
+.....OOOOOO.....
+................

@@ -27,7 +27,7 @@ From [CONTENT_BRANCHES.md](../CONTENT_BRANCHES.md) ("Caves, dungeons and bosses"
 | **The Crypt Lich** | The Archive of Last Names: the Writ of Exhumation | [crypt-archive.md](../features/crypt-archive.md), [crypt-lich.md](../features/crypt-lich.md) | #350 and #353, through #352 |
 | **The Iron Dreadnought** | The Foundry Trench: Sealed Orders | [foundry-trench.md](../features/foundry-trench.md), [iron-dreadnought.md](../features/iron-dreadnought.md) | Not yet |
 | **The Alpha Werewolf** | The Moonlit Ring: the Howling Totem | [moonlit-ring.md](../features/moonlit-ring.md), [alpha-werewolf.md](../features/alpha-werewolf.md) | Not yet |
-| **The Storm Roc** (part 1 so far) | The Crown of Thunder: the Thunder Vane | [crown-of-thunder.md](../features/crown-of-thunder.md) | Not yet |
+| **The Storm Roc** | The Crown of Thunder: the Thunder Vane | [crown-of-thunder.md](../features/crown-of-thunder.md), [storm-roc.md](../features/storm-roc.md) | Not yet |
 
 The first two are the Witching Season's ([features/witching-season.md](../features/witching-season.md)); all six, the Iron Dreadnought's trench and the Alpha Werewolf's ring are on the shared lair framework (`lair/`). Vesperine and Madame Tatterlace roll their own loot table, `loot_table/entities/<boss>.json`, for each player who took part: their trophies, the Vesper Scythe and the Needle Rapier (Arms VII's), come at 15% a share and always on a player's first win. The Arms VII trophy tables `bosses/vesperine` and `bosses/tatterlace` are written by `tools/arms_variants.py` as the others' are, but nothing rolls them. The Yeti King and the Cinder Tyrant roll theirs the same way, a trophy always on a player's first win; they still credit damage alone, without Concordance Chunk A's support credit ([lair-encounter-credit.md](../features/lair-encounter-credit.md)).
 
@@ -886,7 +886,7 @@ The design joins two sources:
   - a one-second wing cone, a two-second dive lane, wind strips with ground arrows that stay, and widely spaced lightning marks;
   - flights short enough that melee players get regular openings, and no flight equipment needed.
 
-The numbers here are the plan's. Each part's feature record says what changed in building it. Part 1, the summit and the vane: [features/crown-of-thunder.md](../features/crown-of-thunder.md). Part 2, the Roc, his fledglings and his loot, will have `features/storm-roc.md`.
+The numbers here are the plan's. Each part's feature record says what changed in building it. Part 1, the summit and the vane: [features/crown-of-thunder.md](../features/crown-of-thunder.md). Part 2, the Roc, his fledglings and his loot: [features/storm-roc.md](../features/storm-roc.md).
 
 *An eagle as big as a cart, slate-grey with a storm-blue sheen, his flight feathers tipped white like lightning, a hooked beak of dark horn and eyes that burn electric blue. When he spreads his wings the air crackles.* He nests on the highest crag of the highest peak, and the storms follow him.
 
