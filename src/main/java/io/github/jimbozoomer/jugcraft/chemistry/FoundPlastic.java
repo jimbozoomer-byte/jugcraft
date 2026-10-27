@@ -21,7 +21,7 @@ public final class FoundPlastic {
 			"minecraft:chests/underwater_ruin_small", "minecraft:chests/underwater_ruin_big",
 			"minecraft:chests/abandoned_mineshaft", "minecraft:chests/simple_dungeon", "minecraft:chests/ruined_portal",
 			"minecraft:chests/pillager_outpost",
-			"jugcraft:chests/raider_camp", "jugcraft:chests/landscape_desert_outpost",
+			"jugcraft:chests/raider_camp", "jugcraft:landscape_desert_outpost",
 			"jugcraft:chests/landscape_camp_loot_table", "jugcraft:chests/menagerie_campsite",
 			"jugcraft:chests/menagerie_ruins", "jugcraft:chests/cavern_abyssal_ruins",
 			"jugcraft:chests/cavern_forlorn_ruins", "jugcraft:chests/cavern_magnetic_ruins",

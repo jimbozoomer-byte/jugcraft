@@ -56,7 +56,7 @@ Three new item IDs: `jugcraft:old_plastic_bottle`, `jugcraft:plastic_duck` and `
   - `foundPlasticBreaksDownIntoPellets`: each item crafts into its 1, 2 or 4 pellets.
   - `foundPlasticIsInTheListedChestsOnly`: every listed chest table loads; 200 rolls of the shipwreck supply chest and of the raider camp chest each give found plastic; 200 rolls of an end city chest, which is not listed, give none.
 - Local: `python3 tools/generate_material_data.py`, the three icons written with `tools/generate_textures.py`'s `save`, then `python3 tools/check_mod_data.py` passed (8028 material IDs, data files and recipe audit, including the icon map checks) and `python3 scripts/check_repository.py` passed. The Java files parse (tree-sitter); they were not compiled locally.
-- CI on the fork: pending.
+- CI on the fork, run 40548021745 (27 October 2026): the mod compiled and every finished client shard passed; the server tests failed in `foundPlasticIsInTheListedChestsOnly`, which found that `jugcraft:chests/landscape_desert_outpost` does not exist. The desert outpost's table is `jugcraft:landscape_desert_outpost`, outside `chests/`; the list was corrected. A new run is pending.
 
 Not run: a human opening chests in a world, or the icons seen in the game.
 
