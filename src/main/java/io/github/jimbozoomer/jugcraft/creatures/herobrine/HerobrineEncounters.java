@@ -136,6 +136,7 @@ public final class HerobrineEncounters {
 		ServerTickEvents.END_SERVER_TICK.register(HerobrineEncounters::tick);
 		ServerLifecycleEvents.SERVER_STOPPED.register(server -> reset());
 		CommandRegistrationCallback.EVENT.register((dispatcher, access, environment) -> commands(dispatcher));
+		HerobrineMarks.register();
 	}
 
 	/** Installs the schedule ({@link HerobrineDirector#NONE} to remove it). */
@@ -289,6 +290,14 @@ public final class HerobrineEncounters {
 		}
 		BY_PLAYER.remove(live.request().player(), herobrine.encounter());
 		director.ended(live.request(), herobrine.encounter(), outcome, herobrine.witnesses());
+		// A distant encounter his player really saw may leave something behind where he stood.
+		if (herobrine.kind() == Herobrine.Kind.DISTANT && outcome != Herobrine.Outcome.TARGET_LOST && outcome != Herobrine.Outcome.REMOVED
+				&& herobrine.witnesses().contains(live.request().player()) && herobrine.level() instanceof ServerLevel level) {
+			ServerPlayer player = level.getServer().getPlayerList().getPlayer(live.request().player());
+			if (player != null && player.level() == level) {
+				HerobrineMarks.afterSighting(level, herobrine.blockPosition(), player, herobrine.witnesses().size());
+			}
+		}
 	}
 
 	/** Whether {@code player} has seen a watcher since the server started (and so may be shown anything else). */
