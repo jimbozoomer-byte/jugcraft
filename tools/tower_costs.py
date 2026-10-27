@@ -88,8 +88,8 @@ def module_cost(tier, block_names):
 
 def _recipes():
     out = {}
-    # Sorted: an item with two crafting recipes (the solder ingot: from nuggets or from its block) is valued by the
-    # same one on every machine, not by whichever file the filesystem lists first.
+    # In name order: where several recipes make an item and none is named after it, the first one counts, and the
+    # file system's own order differs between Windows and Linux.
     for f in sorted(RECIPES.glob("**/*.json")):
         d = json.loads(f.read_text(encoding="utf-8"))
         res = d.get("result")
