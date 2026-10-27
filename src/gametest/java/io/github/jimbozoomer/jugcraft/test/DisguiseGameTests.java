@@ -13,6 +13,14 @@ import net.minecraft.world.item.ItemStack;
 
 /** Costume disguises (docs/features/costume-disguises.md): who is fooled, by what, and when it stops. */
 public final class DisguiseGameTests {
+	/**
+	 * A survival player (the vanilla mock player always reports creative, and monsters never take a creative player as a
+	 * target), placed in the game as JimtaRobotGameTests' fixture is.
+	 */
+	private static ServerPlayer player(GameTestHelper helper) {
+		return JimtaRobotGameTests.player(helper);
+	}
+
 	private static ItemStack costume(String name) {
 		return new ItemStack(BuiltInRegistries.ITEM.getValue(Jugcraft.id(name)));
 	}
@@ -20,7 +28,7 @@ public final class DisguiseGameTests {
 	/** A zombie never picks a player in Mummy Wraps as its target, and picks one without them. */
 	@GameTest
 	public void mummyWrapsFoolTheWalkingDead(GameTestHelper helper) {
-		ServerPlayer player = helper.makeMockServerPlayerInLevel();
+		ServerPlayer player = player(helper);
 		var zombie = helper.spawn(EntityTypes.ZOMBIE, 2, 2, 2);
 		zombie.setTarget(player);
 		helper.assertTrue(zombie.getTarget() == player, "Without a costume the zombie should target the player");
@@ -35,7 +43,7 @@ public final class DisguiseGameTests {
 	/** Hurting a fooled monster ends the disguise for it: it fights back. */
 	@GameTest
 	public void aStruckMonsterFightsBack(GameTestHelper helper) {
-		ServerPlayer player = helper.makeMockServerPlayerInLevel();
+		ServerPlayer player = player(helper);
 		player.setItemSlot(EquipmentSlot.HEAD, costume("mummy_wraps"));
 		var zombie = helper.spawn(EntityTypes.ZOMBIE, 2, 2, 2);
 		zombie.hurtServer(helper.getLevel(), helper.getLevel().damageSources().playerAttack(player), 1.0F);
@@ -48,7 +56,7 @@ public final class DisguiseGameTests {
 	/** Each costume fools only its own kind: cat ears fool a creeper, not a skeleton. */
 	@GameTest
 	public void aCostumeFoolsOnlyItsKind(GameTestHelper helper) {
-		ServerPlayer player = helper.makeMockServerPlayerInLevel();
+		ServerPlayer player = player(helper);
 		player.setItemSlot(EquipmentSlot.HEAD, costume("cat_ears_and_tail"));
 		var creeper = helper.spawn(EntityTypes.CREEPER, 2, 2, 2);
 		var skeleton = helper.spawn(EntityTypes.SKELETON, 4, 2, 2);
@@ -66,7 +74,7 @@ public final class DisguiseGameTests {
 	/** The server's costumes.disguises off turns disguises off. */
 	@GameTest
 	public void disguisesCanBeTurnedOff(GameTestHelper helper) {
-		ServerPlayer player = helper.makeMockServerPlayerInLevel();
+		ServerPlayer player = player(helper);
 		player.setItemSlot(EquipmentSlot.HEAD, costume("mummy_wraps"));
 		var zombie = helper.spawn(EntityTypes.ZOMBIE, 2, 2, 2);
 		JugcraftConfig.setTextOption(Disguises.OPTION, "off");
