@@ -367,6 +367,8 @@ public final class TrickOrTreaters {
 			level.sendParticles(ParticleTypes.HAPPY_VILLAGER, visit.bowl.getX() + 0.5, visit.bowl.getY() + 1.0, visit.bowl.getZ() + 0.5, 8, 0.6, 0.4,
 					0.6, 0.0);
 			tell(level, visit.door, Component.translatable("message.jugcraft.trick_or_treaters.thanks"));
+			// The children judge the haunted house of whoever keeps the bowl.
+			HauntedHouseContest.judge(level, visit.door, bowl == null ? null : bowl.owner());
 		}
 		if (visit.pranked) {
 			ToiletPaperStreamerBlock.drape(level, visit.door, PRANK_REACH, STREAMERS, level.getRandom());

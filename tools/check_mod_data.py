@@ -4498,6 +4498,7 @@ def check_agriculture():
     check_regatta(java, main)
     check_festivities(java, main)
     check_night(java, main)
+    check_haunted_house(java, main)
     check_decor(java)
     check_decor2(java)
     check_decor3(java)
@@ -6014,6 +6015,64 @@ def check_festivities(java, main):
         model = load(ASSETS / "models" / "block" / f"{stone}.json") or {}
         if [tuple(e["from"] + e["to"]) for e in model.get("elements", [])] != [tuple(b) for b in info["boxes"]]:
             err(f"{stone}: model boxes differ from its shape")
+
+
+def check_haunted_house(java, main):
+    """The Haunted House contest: HauntedHouseContest.java's numbers and names are tools/agriculture.py's HAUNTED_HOUSE,
+    it is registered and on by default, trick-or-treaters judge a house only when answered with a treat, only in the
+    season and only for an owner on the server, it reads no unloaded chunk, the bowl shows a house's standing, the prizes
+    are the Harvest Scale's ribbons, and its props tag (real blocks, never the bowl itself), advancements and words are
+    written."""
+    house = ag.HAUNTED_HOUSE
+    source = java.get("HauntedHouseContest", "")
+    for key, name in (("reach", "REACH"), ("below", "BELOW"), ("above", "ABOVE"), ("per_kind", "PER_KIND"), ("variety", "VARIETY"),
+                      ("shriek", "SHRIEK"), ("places", "PLACES"), ("check_ticks", "CHECK_TICKS"),
+                      ("max_entrants", "MAX_ENTRANTS"), ("max_contests", "MAX_CONTESTS")):
+        match = re.search(rf"\b{name} = (\d+);", source)
+        if not match or int(match.group(1)) != house[key]:
+            err(f"HauntedHouseContest.{name} differs from tools/agriculture.py HAUNTED_HOUSE[{key!r}] ({house[key]})")
+    for key, name in (("option", "OPTION"), ("advancement", "ADVANCEMENT"), ("winner_advancement", "WINNER_ADVANCEMENT")):
+        if f'{name} = "{house[key]}";' not in source:
+            err(f"HauntedHouseContest.{name} is not {house[key]!r}")
+    if f'Jugcraft.id("{house["props_tag"].split(":")[1]}")' not in source:
+        err("HauntedHouseContest.PROPS is not the table's props tag")
+    ribbons = re.search(r"RIBBONS = List\.of\(([^)]*)\)", java.get("HarvestScaleBlockEntity", ""))
+    if not ribbons or len(re.findall(r'"([a-z_]+)"', ribbons.group(1))) < house["places"]:
+        err("HAUNTED_HOUSE: more places than the Harvest Scale has ribbons")
+    for part, why in (("if (host == null || !enabled() || !HalloweenSeason.active())", "judges only in the season, switched on, for an owner on the server"),
+                      ("if (!level.isLoaded(pos))", "reads no unloaded chunk"),
+                      ("Math.min(count, PER_KIND)", "counts at most PER_KIND of a kind"),
+                      ("if (!contest.awarded && (!running || entry.getKey() < year))", "awards a contest once, when its season is over"),
+                      ("if (old == null && entries.size() >= MAX_ENTRANTS)", "keeps at most MAX_ENTRANTS entrants")):
+        if part not in source:
+            err(f"HauntedHouseContest no longer {why}")
+    visits = java.get("TrickOrTreaters", "")
+    answered = re.search(r"if \(visit\.treated > 0\) \{(.*?)\n\t\t\}", visits, re.S)
+    if not answered or "HauntedHouseContest.judge(level, visit.door, bowl == null ? null : bowl.owner());" not in answered.group(1):
+        err("TrickOrTreaters.answer must have the children judge the house when they took a treat")
+    if "HauntedHouseContest.tellStanding(looking, bowl.owner());" not in java.get("CandyBowlBlock", ""):
+        err("CandyBowlBlock: sneak-using a bowl should tell its house's standing")
+    if "HauntedHouseContest.register();" not in main:
+        err("JugcraftAgriculture doesn't register HauntedHouseContest")
+    if f'Map.entry("{house["option"]}", "on")' not in CONFIG.read_text(encoding="utf-8"):
+        err(f"JugcraftConfig: {house['option']} should default to on")
+
+    props = house["props"]
+    if len(set(props)) != len(props) or f"{MOD}:{ag.CANDY_BOWL['block']}" in props:
+        err("HAUNTED_HOUSE props: a prop twice, or the Candy Bowl itself")
+    for prop in props:
+        if prop.startswith(f"{MOD}:") and not (ASSETS / "blockstates" / f"{prop.split(':')[1]}.json").exists():
+            err(f"HAUNTED_HOUSE props: {prop} is not a block")
+    namespace, path = house["props_tag"].split(":")
+    if (load(DATA / namespace / "tags" / "block" / f"{path}.json") or {}).get("values") != props:
+        err(f"{house['props_tag']} block tag differs from HAUNTED_HOUSE['props']")
+    for advancement in (house["advancement"], house["winner_advancement"]):
+        if not (DATA / MOD / "advancement" / f"{advancement}.json").exists():
+            err(f"advancement {advancement} is not written")
+    lang = load(ASSETS / "lang" / "en_us.json") or {}
+    used = set(re.findall(r'"(message\.jugcraft\.haunted_house\.[a-z_]+)"', source))
+    if not used or used - set(lang):
+        err(f"The Haunted House contest's words are missing: {sorted(used - set(lang)) or 'none used'}")
 
 
 def check_night(java, main):

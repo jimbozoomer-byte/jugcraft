@@ -1,0 +1,22 @@
+{
+  "parent": "minecraft:husbandry/root",
+  "display": {
+    "icon": {
+      "id": "jugcraft:first_prize_ribbon"
+    },
+    "title": {
+      "translate": "advancements.jugcraft.scariest_house_on_the_block.title"
+    },
+    "description": {
+      "translate": "advancements.jugcraft.scariest_house_on_the_block.description"
+    },
+    "frame": "challenge",
+    "show_toast": true,
+    "announce_to_chat": true
+  },
+  "criteria": {
+    "done": {
+      "trigger": "minecraft:impossible"
+    }
+  }
+}

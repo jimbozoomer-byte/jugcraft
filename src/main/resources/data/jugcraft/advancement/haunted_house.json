@@ -1,0 +1,22 @@
+{
+  "parent": "minecraft:husbandry/root",
+  "display": {
+    "icon": {
+      "id": "jugcraft:haunted_portrait"
+    },
+    "title": {
+      "translate": "advancements.jugcraft.haunted_house.title"
+    },
+    "description": {
+      "translate": "advancements.jugcraft.haunted_house.description"
+    },
+    "frame": "task",
+    "show_toast": true,
+    "announce_to_chat": false
+  },
+  "criteria": {
+    "done": {
+      "trigger": "minecraft:impossible"
+    }
+  }
+}

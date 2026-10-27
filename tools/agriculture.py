@@ -1555,6 +1555,34 @@ def decor14_items():
     return decor14_blocks() + list(OUTFITS)
 
 
+# The Haunted House contest (agriculture/HauntedHouseContest.java), all through the Halloween season: when trick-or-
+# treaters are answered at a Candy Bowl (they took at least one treat) and the bowl's owner is on the server, the
+# children judge the owner's haunted house by the props (block tag `props_tag`) within `reach` blocks across of the door,
+# `below` down and `above` up: a point for each prop, at most `per_kind` of a kind, and `variety` more for each kind. At
+# `shriek` points or more they shriek. Each owner's best score of the season is their entry (at most `max_entrants`
+# a year; the world keeps the latest `max_contests` years); when the season ends the `places` best get the Harvest
+# Scale's ribbons (offline winners on their next visit), checked every `check_ticks`. The first judging earns
+# `advancement`; first place earns `winner_advancement`. The server's `option` (on or off) turns judging off.
+HAUNTED_PROPS_VANILLA = ["minecraft:carved_pumpkin", "minecraft:jack_o_lantern", "minecraft:cobweb", "minecraft:skeleton_skull",
+                         "minecraft:skeleton_wall_skull", "minecraft:wither_skeleton_skull", "minecraft:wither_skeleton_wall_skull",
+                         "minecraft:zombie_head", "minecraft:zombie_wall_head", "minecraft:soul_lantern"]
+HAUNTED_HOUSE = {"option": "halloween.haunted_house", "props_tag": "jugcraft:haunted_props",
+                 "props": HAUNTED_PROPS_VANILLA
+                 + ["jugcraft:" + b for b in decor1_blocks() if b != CANDY_BOWL["block"]]
+                 + ["jugcraft:" + b for b in decor2_blocks() + decor3_blocks() + decor4_blocks() + decor6_blocks() + decor7_blocks()
+                    + decor8_blocks() + decor9_blocks() + decor10_blocks()]
+                 + ["jugcraft:jump_scare_trap", "jugcraft:ghost_bell", "jugcraft:fortune_teller_table", "jugcraft:halloween_bonfire"]
+                 + ["jugcraft:" + b for b in GRAVESTONES]
+                 + ["jugcraft:scarecrow", "jugcraft:" + CARVING["block"]] + ["jugcraft:" + b for b in CARVED_VARIETIES.values()]
+                 + ["jugcraft:" + WISPS["jar"], "jugcraft:" + HORSEMAN["lantern"], "#jugcraft:headstones"],
+                 "reach": 12, "below": 4, "above": 10, "per_kind": 4, "variety": 2, "shriek": 40, "places": 3, "check_ticks": 200,
+                 "max_entrants": 4096, "max_contests": 8, "advancement": "haunted_house", "winner_advancement": "scariest_house_on_the_block"}
+HALLOWEEN_ADVANCEMENTS["haunted_house"] = {"icon": "jugcraft:haunted_portrait", "title": "Haunted House",
+                                           "description": "Have trick-or-treaters judge your haunted house", "frame": "task"}
+HALLOWEEN_ADVANCEMENTS["scariest_house_on_the_block"] = {"icon": "jugcraft:first_prize_ribbon", "title": "Scariest House on the Block",
+                                                         "description": "Win first place in the Haunted House contest", "frame": "challenge"}
+
+
 # ---------------------------------------------------------------- Fall additions 1: the chandlery
 # The Wax Melting Pot (WaxPotBlock + entity) holds up to `capacity` measures of one wax (`waxes`: what puts it in, as an
 # item tag, how many measures an item gives, how long a candle burns for each layer of it, and its natural colour). Over

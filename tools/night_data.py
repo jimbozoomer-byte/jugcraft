@@ -6,7 +6,7 @@ Called from agriculture_data.py (assets, loot, tags). Formats follow vanilla Min
 blockstate (hanging), block model element rotation and light emission, the zombie's loot table, and the leather
 armor's equipment asset. Block model rotations are right-handed: about x, a positive angle tilts +y toward +z.
 """
-from agriculture import WISPS, TREBUCHET, CANDY_BAG, HORSEMAN
+from agriculture import WISPS, TREBUCHET, CANDY_BAG, HORSEMAN, HAUNTED_HOUSE
 
 MOD = "jugcraft"
 HORIZONTAL = ("north", "east", "south", "west")
@@ -162,6 +162,13 @@ TEXT = {
     "message.jugcraft.horseman.no_head": "The scarecrow needs a lit pumpkin for a head",
     "message.jugcraft.horseman.roofed": "He only rides under the open sky",
     "message.jugcraft.horseman.already_riding": "The Headless Horseman is already riding nearby",
+    # The Haunted House contest (HauntedHouseContest).
+    "message.jugcraft.haunted_house.judged": "The trick-or-treaters rate %s's haunted house: %s points (%s props of %s kinds). Best this season: %s",
+    "message.jugcraft.haunted_house.shriek": "The children shriek and run giggling from the door!",
+    "message.jugcraft.haunted_house.standing": "%s's haunted house: best score %s, place %s of %s this season",
+    "message.jugcraft.haunted_house.prize": "Your haunted house won a prize: %s",
+    "message.jugcraft.haunted_house.over": "The Haunted House contest of %s is over!",
+    "message.jugcraft.haunted_house.place": "%s. %s's haunted house: %s points",
 }
 
 
@@ -230,6 +237,9 @@ def tags(tags):
         tags.add("item", CANDY_BAG["treat_tag"], item)
     tags.add("block", "minecraft:mineable/axe", rid(TREBUCHET["block"]))
     tags.add("block", "minecraft:mineable/pickaxe", rid(HORSEMAN["lantern"]))
+    # What trick-or-treaters count when they judge a haunted house (HauntedHouseContest).
+    for prop in HAUNTED_HOUSE["props"]:
+        tags.add("block", HAUNTED_HOUSE["props_tag"], prop)
     # Where wisps come out over a swamp (Wisps.canSpawnAt): the common swamps and the landscape collection's.
     for biome in WISPS["haunts"]:
         tags.add("worldgen/biome", WISPS["haunts_tag"], biome)

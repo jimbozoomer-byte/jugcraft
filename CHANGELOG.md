@@ -8,6 +8,9 @@ Every change to Jugcraft, newest first, grouped by pull request. For what each t
 
 No numbered release yet. Entries on feature branches remain proposed until their pull requests merge.
 
+### Unmerged: Haunted House contest
+- **Trick-or-treaters judge your haunted house, all season:** when they take a treat from your Candy Bowl, the children score the Halloween props within 12 blocks of the door (a point a prop, at most four of a kind, two more a kind) and tell everyone near; your best score of the season is your entry, shown by sneak-using the bowl. When the season ends the three best houses win the Harvest Scale's First, Second and Third Prize Ribbons (offline winners on their next visit), and first place earns Scariest House on the Block. The server's `halloween.haunted_house` (default `on`) turns judging off. Record: [haunted-house-contest.md](docs/features/haunted-house-contest.md).
+
 ### Unmerged: Keep your inventory in boss fights
 - **Dying in a lair costs nothing:** as with the keepInventory rule, but only in lairs (every boss fight). No items or experience fall; you respawn outside with every slot as it was (armour and offhand worn), the same held slot and all your experience. Dying anywhere else is unchanged. No grave is ever placed in a lair; Grave Goods still catch anything another mod drops there. Record: [lair-keep-inventory.md](docs/features/lair-keep-inventory.md).
 

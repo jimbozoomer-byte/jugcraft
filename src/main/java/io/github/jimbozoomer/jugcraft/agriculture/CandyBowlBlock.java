@@ -5,6 +5,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.InteractionHand;
@@ -97,6 +98,9 @@ public class CandyBowlBlock extends BaseEntityBlock {
 		}
 		if (player.isSecondaryUseActive()) {
 			player.sendOverlayMessage(Component.translatable(messages() + "count", bowl.count(), CandyBowlBlockEntity.CAPACITY));
+			if (player instanceof ServerPlayer looking) {
+				HauntedHouseContest.tellStanding(looking, bowl.owner());
+			}
 			return InteractionResult.SUCCESS;
 		}
 		CandyBowlBlockEntity.Taken taken = bowl.take(player, TrickOrTreat.night(server.getOverworldClockTime()));
