@@ -41,7 +41,7 @@ public final class HerobrineDepths {
     /** At most six local candidates, each examining a 25-block vertical band; never loads chunks. */
     public static HerobrineMarkPlans.@Nullable Plan find(ServerLevel level, BlockPos near, boolean water) {
         for (int attempt = 0; attempt < 6; attempt++) {
-            int dx = level.random.nextInt(49) - 24, dz = level.random.nextInt(49) - 24;
+            int dx = level.getRandom().nextInt(49) - 24, dz = level.getRandom().nextInt(49) - 24;
             BlockPos column = near.offset(dx, 0, dz);
             if (!HerobrineMarkPlans.loaded(level, column.offset(-8, -16, -8), column.offset(8, 16, 16))) continue;
             if (water && attempt < 3) column = new BlockPos(column.getX(),
@@ -54,8 +54,10 @@ public final class HerobrineDepths {
                 if (!water && level.getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, feet.getX(), feet.getZ()) < feet.getY() + 8) continue;
                 if (!spaced(level, feet, water)) continue;
                 List<String> variants = water ? WATER : variantsAt(feet.getY(), level.getMinY());
-                HerobrineMarkPlans.Plan plan = plan(level, feet, variants.get(level.random.nextInt(variants.size())),
-                        Rotation.values()[level.random.nextInt(4)]);
+                HerobrineMarkPlans.Plan plan = plan(level, feet, variants.get(level.getRandom().nextInt(variants.size())),
+                        Rotation.values()[level.getRandom().nextInt(4)]);
+                if (plan == null && !water) plan = plan(level, feet, "torch_trail",
+                        Rotation.values()[level.getRandom().nextInt(4)]);
                 if (plan != null) return plan;
                 break;
             }
@@ -132,6 +134,7 @@ public final class HerobrineDepths {
             default -> throw new IllegalArgumentException(variant);
         }
         b.rotate(rotation);
+        if (variant.equals("torch_trail") && !b.followFloor(level)) return null;
         return b.finish(level, water);
     }
 
@@ -164,6 +167,28 @@ public final class HerobrineDepths {
             Map<BlockPos, BlockState> rotated = new LinkedHashMap<>();
             blocks.forEach((p, state) -> rotated.put(at.offset(p.subtract(at).rotate(rotation)), state.rotate(rotation)));
             blocks.clear(); blocks.putAll(rotated);
+        }
+        boolean followFloor(ServerLevel level) {
+            // A small trail follows uneven cave ground; it must not need a perfectly flat thirteen-block corridor.
+            Map<BlockPos, Integer> offsets = new LinkedHashMap<>();
+            Map<BlockPos, BlockState> adjusted = new LinkedHashMap<>();
+            for (var entry : blocks.entrySet()) {
+                BlockPos column = new BlockPos(entry.getKey().getX(), at.getY(), entry.getKey().getZ());
+                if (!HerobrineMarkPlans.loaded(level, column.below(3), column.above(4))) return false;
+                if (!offsets.containsKey(column)) {
+                    Integer found = null;
+                    for (int dy = 2; dy >= -2; dy--) {
+                        BlockPos base = column.above(dy);
+                        if (HerobrineMarkPlans.open(level.getBlockState(base))
+                                && level.getBlockState(base.below()).isFaceSturdy(level, base.below(), Direction.UP)) { found = dy; break; }
+                    }
+                    if (found == null) return false;
+                    offsets.put(column, found);
+                }
+                adjusted.put(entry.getKey().above(offsets.get(column)), entry.getValue());
+            }
+            blocks.clear(); blocks.putAll(adjusted);
+            return true;
         }
         void room(int half, int length, int height) {
             for (int x = -half; x <= half; x++) for (int z = 0; z <= length; z++) for (int y = -1; y <= height; y++) {

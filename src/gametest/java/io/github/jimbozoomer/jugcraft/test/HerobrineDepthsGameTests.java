@@ -8,12 +8,10 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.entity.FurnaceBlockEntity;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
-import net.minecraft.core.component.DataComponents;
 import net.minecraft.nbt.NbtOps;
 import io.github.jimbozoomer.jugcraft.finance.LandRegistry;
 import io.github.jimbozoomer.jugcraft.finance.Ledger;
 import java.util.UUID;
-import java.util.List;
 
 /** Real world placement, persistence, fluid and player-edit regression tests for permanent discoveries. */
 public class HerobrineDepthsGameTests {
@@ -70,6 +68,19 @@ public class HerobrineDepthsGameTests {
         level.setBlock(at.above(),Blocks.CHEST.defaultBlockState(),3);
         h.assertTrue(HerobrineDepths.plan(level,at,"glowstone_cross") == null,"A player's container blocks the whole site");
         h.assertTrue(HerobrineDepths.plan(level,new BlockPos(20000000,0,20000000),"empty_hall") == null,"Never load distant chunks");
+        h.succeed();
+    }
+    @GameTest(structure=ARENA, padding=48, skyAccess=true)
+    public void changedWaterStopsTheQueuedPattern(GameTestHelper h) {
+        var at=fixture(h,true); var level=h.getLevel();
+        var plan=HerobrineDepths.plan(level,at,"glowstone_ring");
+        h.assertTrue(plan!=null,"Ring fixture");
+        BlockPos first=plan.steps().getFirst().pos();
+        var flowing=Blocks.WATER.defaultBlockState().setValue(net.minecraft.world.level.block.LiquidBlock.LEVEL,1);
+        level.setBlock(first,flowing,3);
+        String id=HerobrineMarks.buildNow(level,plan);
+        h.assertTrue(level.getBlockState(first).equals(flowing),"Apply must reject changed source-water state");
+        h.assertTrue(!HerobrineMarks.get(level.getServer()).marks().containsKey(id),"No blocks changed on refusal");
         h.succeed();
     }
     @GameTest(structure=ARENA, padding=48, skyAccess=true)
