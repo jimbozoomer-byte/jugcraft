@@ -12,7 +12,8 @@ import net.minecraft.server.level.ServerLevel;
 import org.jspecify.annotations.Nullable;
 
 /**
- * Concordance Chunk D, D-06 (G11): how an agreement kept at a block stands, and Stolas's pact, as Jade shows them. Read only
+ * Concordance Chunk D, D-06 (G11): how an agreement kept at a block stands, and a pact spirit's pact (the garden cohort,
+ * GC-01: any spirit's), as Jade shows them. Read only
  * (AgreementHolder.peek: nothing verified, claimed, forgotten, written or called); naming no player (no holder, owner or
  * id); nothing of the escrow but when the next offering falls due. Built on the server for the one block or entity looked
  * at; compat/jade's providers send it and the client words it (tooltip.jugcraft.concordance.jade.pact.*). No Jade type here.
@@ -20,7 +21,7 @@ import org.jspecify.annotations.Nullable;
 public final class PactReading {
 	/** Every key a reading may carry (tools/concordance_pacts.py JADE_KEYS). */
 	public static final List<String> KEYS = List.of("standing", "visiting", "departing", "counterpart", "service", "state", "due_days",
-			"grace_days", "waiting");
+			"grace_days", "waiting", "visitor");
 	public static final List<String> STANDINGS = List.of("none", "kept", "copy", "unreadable", "disabled");
 	public static final List<String> STATES = List.of("active", "suspended", "upkeep_due", "upkeep_held");
 	/** Waiting reason of a presence struck off its holder's roster (D-S18): its holder calls it back near its place. */
@@ -48,9 +49,11 @@ public final class PactReading {
 			case UNREADABLE -> "unreadable";
 		});
 		if (standing == AgreementHolder.Standing.NONE && holds instanceof PactPerchBlockEntity perch && perch.visitor() != null) {
-			StolasEntity visiting = perch.stolas(level);
+			PactSpiritEntity<?> visiting = perch.presence(level);
 			if (visiting != null && visiting.getUUID().equals(perch.visitor())) {
 				reading.putBoolean("visiting", true);
+				// GC-01 (SG8): who visits, so Jade names that spirit.
+				reading.putString("visitor", visiting.counterpart());
 			}
 		}
 		if (standing != AgreementHolder.Standing.VALID) {
@@ -66,36 +69,45 @@ public final class PactReading {
 		return reading;
 	}
 
-	/** Stolas: departing, visiting, or his pact as his perch keeps it (his own status is Jade's first line, so no "waiting"). */
-	public static CompoundTag stolas(ServerLevel level, StolasEntity stolas, long now) {
+	/**
+	 * A pact spirit (GC-01, SG8: any of them): departing, visiting, or its pact as its perch keeps it (its own status is Jade's
+	 * first line, so no "waiting").
+	 */
+	public static CompoundTag presence(ServerLevel level, PactSpiritEntity<?> spirit, long now) {
 		CompoundTag reading = new CompoundTag();
 		if (!Workers.enabled()) {
 			reading.putString("standing", "disabled");
 			return reading;
 		}
-		if (stolas.gone()) {
+		if (spirit.gone()) {
 			reading.putString("standing", "none");
 			reading.putBoolean("departing", true);
 			return reading;
 		}
-		BlockPos at = stolas.perch();
+		BlockPos at = spirit.perch();
 		PactPerchBlockEntity home = at != null && level.isLoaded(at) && level.getBlockEntity(at) instanceof PactPerchBlockEntity found ? found : null;
-		if (home == null || stolas.owner() == null) {
+		if (home == null || spirit.owner() == null) {
 			reading.putString("standing", "none");
-			if (home != null && stolas.getUUID().equals(home.visitor())) {
+			if (home != null && spirit.getUUID().equals(home.visitor())) {
 				reading.putBoolean("visiting", true);
+				reading.putString("visitor", spirit.counterpart());
 			}
 			return reading;
 		}
 		AgreementHolder.Standing standing = home.holder().peek(level);
 		BoundWill record = standing == AgreementHolder.Standing.VALID ? home.holder().record(level) : null;
-		if (record == null || !stolas.getUUID().equals(presence(record, home.holder()))) {
+		if (record == null || !spirit.getUUID().equals(presence(record, home.holder()))) {
 			reading.putString("standing", standing == AgreementHolder.Standing.UNREADABLE ? "unreadable" : "none");
 			return reading;
 		}
 		reading.putString("standing", "kept");
 		terms(reading, record, home.holder().agreement(), now);
 		return reading;
+	}
+
+	/** Stolas's reading (Chunk D's; his tests read it): {@link #presence(ServerLevel, PactSpiritEntity, long)}. */
+	public static CompoundTag stolas(ServerLevel level, StolasEntity stolas, long now) {
+		return presence(level, stolas, now);
 	}
 
 	/** Its presence: the one its Bound Will names, else the block's (a record from before Chunk D, not yet claimed). */

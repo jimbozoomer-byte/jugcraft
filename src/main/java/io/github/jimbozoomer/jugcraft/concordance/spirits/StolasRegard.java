@@ -133,11 +133,10 @@ public final class StolasRegard {
 	}
 
 	/**
-	 * The journal's pacts section (D-03 begins it; D-07 adds the pacts): Stolas's Regard's next step with its state, and the
-	 * sky step apart, with the number of patterns observed (none of these when the rules hold no Stolas's Regard); then each
-	 * pact and agreement the player holds with its next obligation, and their departures (Roster.report, Concordance Chunk D, D-07).
+	 * Stolas's lines of the journal's pacts section (D-03): his Regard's next step with its state, and the sky step apart,
+	 * with the number of patterns observed; none when the rules hold no Stolas's Regard. PactRegards.report calls it first.
 	 */
-	public static void report(ServerPlayer player, Journal.Report out) {
+	public static void regard(ServerPlayer player, Journal.Report out) {
 		if (ConcordanceData.rules().research(RESEARCH) != null) {
 			Step step = step(player);
 			if (step != null) {
@@ -148,6 +147,5 @@ public final class StolasRegard {
 			out.line(Component.translatable(seen.isEmpty() ? "journal.jugcraft.pacts.sky_needed" : "journal.jugcraft.pacts.sky_recorded"),
 					Component.translatable("journal.jugcraft.pacts.sky_count", seen.size()));
 		}
-		Roster.report(player, out);
 	}
 }

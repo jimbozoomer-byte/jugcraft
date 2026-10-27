@@ -138,8 +138,9 @@ public final class JugcraftJadeClient implements JugcraftJadePlugin.ClientRegist
 		}
 		switch (data.getStringOr("standing", "")) {
 			case "disabled" -> tooltip.add(Component.translatable("message.jugcraft.concordance.disabled"));
-			case "none" -> tooltip.add(Component.translatable(data.getBooleanOr("visiting", false) ? "tooltip.jugcraft.concordance.jade.pact.visiting"
-					: "tooltip.jugcraft.concordance.jade.pact.none"));
+			case "none" -> tooltip.add(data.getBooleanOr("visiting", false)
+					? Component.translatable("tooltip.jugcraft.concordance.jade.pact.visiting", entityName(data.getStringOr("visitor", "")))
+					: Component.translatable("tooltip.jugcraft.concordance.jade.pact.none"));
 			// The diagnostic's own words, named, not worked out here (this client works out no diagnostic: check_signs, C-01).
 			case "copy" -> tooltip.add(ComposeText.show(Text.of(Diagnostic.PREFIX + Code.CONFLICTING_AGREEMENT.id)));
 			case "unreadable" -> tooltip.add(Component.translatable("tooltip.jugcraft.concordance.jade.pact.unreadable"));
@@ -176,6 +177,12 @@ public final class JugcraftJadeClient implements JugcraftJadePlugin.ClientRegist
 			default -> {
 			}
 		}
+	}
+
+	/** GC-01 (SG8): an entity's name from the id a reading carries; nothing for none (never the raw key entity.minecraft.). */
+	private static Component entityName(String named) {
+		Identifier id = named.isEmpty() ? null : Identifier.tryParse(named);
+		return id == null ? Component.empty() : Component.translatable("entity." + id.getNamespace() + "." + id.getPath());
 	}
 
 	/** Concordance Chunk D, D-06 (G11): a pact perch or a Spirit Anchor: the agreement it keeps and how it stands; no player, no escrow. */

@@ -75,6 +75,15 @@ class ClientTestSelectionTests(unittest.TestCase):
                 chosen, _ = selection.select([path], self.tests, set())
                 self.assertIn("ConcordancePactClientGameTests", chosen)
 
+    def test_pact_spirit_base_and_renderers_select_the_pact_client_test(self):
+        # Concordance garden cohort, GC-01: the pact spirits' renderer table and base, named by no client test, are shown
+        # by the pact's client class (Stolas through them).
+        for path in ("src/client/java/io/github/jimbozoomer/jugcraft/client/PactSpiritRenderers.java",
+                     "src/main/java/io/github/jimbozoomer/jugcraft/concordance/spirits/PactSpiritEntity.java"):
+            with self.subTest(path=path):
+                chosen, _ = selection.select([path], self.tests, set())
+                self.assertIn("ConcordancePactClientGameTests", chosen)
+
     def test_roster_screen_selects_the_roster_client_test(self):
         # Concordance Chunk D unit 3 (D-07): the roster screen is shown by its own client class and by the screen fit check.
         chosen, _ = selection.select(["src/client/java/io/github/jimbozoomer/jugcraft/client/RosterScreen.java"], self.tests, set())

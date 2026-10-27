@@ -251,7 +251,8 @@ public final class ConcordancePactNetworkTests implements FabricClientGameTest {
 		shot(context, "jugcraft_pact_peer_arrival");
 		mark("saw-arrival", "");
 		context.waitFor(client -> client.gui.screen() instanceof PactScreen && PactClient.state() != null, PEER_WAIT);
-		String owner = context.computeOnClient(client -> Component.translatable("message.jugcraft.concordance.pact.missing.owner").getString());
+		String owner = context.computeOnClient(client -> Component.translatable("message.jugcraft.concordance.pact.missing.owner",
+				Component.translatable("entity.jugcraft.stolas")).getString());
 		String shown = context.computeOnClient(client -> PactClient.state().mode() + " " + PactClient.state().offers(PactRequestPayload.ACCEPT) + " "
 				+ PactClient.state().notes().stream().anyMatch(note -> note.getString().equals(owner)));
 		check(shown.equals(PactStatePayload.NEGOTIATE + " false true"),

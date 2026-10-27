@@ -15,13 +15,14 @@ Styxhexenhammer's hints or, without him, through the codex's Binding category an
 D-04 (D-S6, D-S7, D-S8, D-S13 to D-S15, D-S19, D-S23): the pact perch, Stolas's offer as data, the Open Hand Compact
 and the pact menu's protocol. D-05 (D-S1, D-S3, D-S6, D-S12, D-S16): Star-reckoning, the first obligation and keeping.
 
-Java: concordance/spirits/StolasRegard.java, PactPerchBlock(Entity), PactMenu, PactRequestPayload, PactStatePayload,
-PactSessions, PactCompact, PactKeeping, StarReckoning, StolasEntity; concordance/worker/PactDefinition, PactParser,
-PactCatalog; client/PactClient, PactScreen and WorkerClient (Stolas's raven body, D-06 (D-S5): the Flashjack rig's
-geometry copied by tools/owner_art.py from OWNER_FILES, its skin, glowmask and animations adapted by tools/stolas_body.py
-from ADAPTED). tools/concordance.py merges these tables into its own; Styx's words are tools/styx.py's;
-tools/check_mod_data.py (check_stolas_regard, check_pacts, check_pact_screen, check_stolas_body) holds the Java and the
-data to them.
+Java: concordance/spirits/StolasRegard.java, PactRegards, PactPerchBlock(Entity), PactMenu, PactRequestPayload,
+PactStatePayload, PactSessions, PactCompact, PactKeeping, PactSpiritEntity (every pact spirit's shared body: the garden
+cohort, GC-01), PactSpirits, PactService, PactServices, StarReckoning, StolasEntity; concordance/worker/PactDefinition,
+PactParser, PactCatalog; client/PactClient, PactScreen and PactSpiritRenderers (each spirit's renderer from its SPIRITS
+row; Stolas's raven body, D-06 (D-S5): the Flashjack rig's geometry copied by tools/owner_art.py from OWNER_FILES, its
+skin, glowmask and animations adapted by tools/stolas_body.py from ADAPTED). tools/concordance.py merges these tables into
+its own; Styx's words are tools/styx.py's; tools/check_mod_data.py (check_stolas_regard, check_pacts, check_pact_screen,
+check_spirit_bodies) holds the Java and the data to them.
 """
 
 MOD = "jugcraft"
@@ -93,41 +94,113 @@ PARSER = {"MAX_COMPACT_ITEMS": 4, "MAX_COMPACT_COUNT": 64, "MAX_RESONANCE": 32, 
 WORK = ["star_reckoning"]
 # The works that serve only their holder (Java: PactParser.HOLDER_ONLY): a definition with one must be "personal".
 HOLDER_ONLY = ["star_reckoning"]
+# Each work's service class (Java: spirits/<class>.java implements PactService, its WORK constant; registered once in
+# Workers.register). Append with each work (GC-04: "strain_tending": "StrainTending").
+SERVICE_CLASSES = {"star_reckoning": "StarReckoning"}
 # Java: spirits/PactStatePayload.java (MAX_*), PactSessions.java (TIMEOUT_TICKS), PactMenu.java (RATE_TICKS),
 # PactPerchBlockEntity.java (LOOK_TICKS), PactKeeping.java (MAX_OFFERINGS).
 STATE_LIMITS = {"MAX_BEATS": 3, "MAX_TERMS": 16, "MAX_NOTES": 12, "MAX_CHOICES": 8, "MAX_COMPACT": 8, "MAX_KEY": 64,
                 "MAX_ID": 32767}
 SESSION = {"TIMEOUT_TICKS": 6000, "RATE_TICKS": 4, "LOOK_TICKS": 20, "MAX_OFFERINGS": 8}
 # Sent as numbers or ids (PactRequestPayload.ACTIONS, PactStatePayload's modes and TERMS, PactMenu's own reasons): append only.
-ACTIONS = ["choose", "accept", "decline", "recall", "deposit", "suspend", "resume", "end", "seat"]
-MODES = ["negotiate", "keep", "seat", "closed"]
+ACTIONS = ["choose", "accept", "decline", "recall", "deposit", "suspend", "resume", "end", "seat", "invite"]
+MODES = ["negotiate", "keep", "seat", "closed", "invite"]
 TERMS = ["service", "hours", "area", "quota", "upkeep", "grace", "suspension", "duration", "breach", "ending", "returns", "perch",
          "beneficiaries", "compact"]
 ANSWERS = ["changed", "too_fast", "not_offered", "sealed", "declined", "disabled", "no_definition", "missing_evidence",
-           "no_observation", "deposited", "nothing_deposited"]
-# The offerings (D-S3): the three Styx flowers and, reachable without Styx, an amethyst shard. The tag ships with the
-# definition (D-04); D-05's upkeep consumes it.
-OFFERINGS_TAG = rid("stolas_offerings")
-OFFERINGS = [rid("stolas_starflower"), rid("ravenquill_lupine"), rid("amethyst_mourningbell"), "minecraft:amethyst_shard"]
+           "no_observation", "deposited", "nothing_deposited", "invited"]
+FLASHJACK = "assets/ars_jymbaumental/"
+# Concordance garden cohort, GC-01 (SG11; docs/features/concordance-garden-cohort.md): one row a pact spirit. Its offer
+# (data/jugcraft/concordance/pact/<name>.json), offerings tag, three beats, service term, cues and body are written from
+# here; PACTS, ENTITY_NAMES, OFFERINGS, SOUND_EVENTS, SOUND_FILES, OWNER_FILES, ADAPTED and Stolas's body tables below are
+# derived from it, so with Stolas's row alone every generated file is as Chunk D left it. Java: Workers (the entity's size,
+# MISC, fire immune, tracking 8), spirits/PactSpirits (its sign), spirits/<java> (its cues and gestures),
+# client/PactSpiritRenderers (its render row); worker/PactParser.REQUIRED lists the rows in order. check_pacts and
+# check_spirit_bodies hold them together. A row's key is its entity path and its counterpart jugcraft:<key>.
 # Stolas's offer (data/jugcraft/concordance/pact/stolas.json; Java: worker/PactParser.java). Starting values, recorded in the
 # As built note: 8 blocks round the perch, any hour, once a game day; one offering every 7 game days, a day of grace, up to
 # four ahead (D-S3); the Open Hand Compact two amethyst shards, three feathers and 8 Astral Resonance (D-S13). Ending a
 # pact and sealing it anew could give a second Star-reckoning in one game day, but only for a whole new compact (its
 # materials and resonance) each time, which makes nothing: no positive-gain loop (critique 10; the balance note says so).
-PACTS = {
+SPIRITS = {
     "stolas": {
-        "agreement": rid("stolas_pact"),
-        "research": rid("stolas_regard"),
-        "service": {"work": "star_reckoning", "radius": 8, "from": 0, "to": 24000, "quota": 1},
-        "upkeep": {"offering": OFFERINGS_TAG, "count": 1, "period_days": 7, "grace_days": 1, "cap": 4},
-        "beneficiaries": "personal",
-        "compact": {"items": [{"item": "minecraft:amethyst_shard", "count": 2}, {"item": "minecraft:feather", "count": 3}],
-                    "resonance": 8},
-        "beats": ["greeting", "service", "price"],
+        "name": "Stolas",
+        "java": "StolasEntity",
+        "entity": {"width": 0.7, "height": 1.45, "eye": 1.2},
+        "station": "perch",
+        "sign": rid("stolas_starflower"),
+        # His offer, as PACTS["stolas"] was (its beats are the keys of "beats" below, in order).
+        "pact": {
+            "agreement": rid("stolas_pact"),
+            "research": rid("stolas_regard"),
+            "service": {"work": "star_reckoning", "radius": 8, "from": 0, "to": 24000, "quota": 1},
+            "upkeep": {"offering": rid("stolas_offerings"), "count": 1, "period_days": 7, "grace_days": 1, "cap": 4},
+            "beneficiaries": "personal",
+            "compact": {"items": [{"item": "minecraft:amethyst_shard", "count": 2}, {"item": "minecraft:feather", "count": 3}],
+                        "resonance": 8},
+        },
+        # The offerings (D-S3): the three Styx flowers and, reachable without Styx, an amethyst shard. The tag ships with
+        # the definition (D-04); D-05's upkeep consumes it.
+        "offerings": {"name": "Stolas's Offerings",
+                      "items": [rid("stolas_starflower"), rid("ravenquill_lupine"), rid("amethyst_mourningbell"),
+                                "minecraft:amethyst_shard"]},
+        # His three beats (provisional words; his character is a checkpoint question): moved from MESSAGES, verbatim.
+        "beats": {
+            "greeting": "A raven settles on the perch and studies you with one bright eye. \"You have watched the sky "
+                        "and asked the flowers. I am Stolas. I teach the stars to those who keep their word.\"",
+            "service": "\"Once a day, at this perch, I will turn the heavens back for you: any pattern you have seen "
+                       "with your own eyes, recalled through your astrolabe.\"",
+            "price": "\"In return, an offering every seven days, kept for me ahead. Miss one and I wait; I do not "
+                     "punish. And now, the compact: an open hand.\"",
+        },
+        # Its service's term (D-S15): moved from MESSAGES "pact.term.service.star_reckoning", verbatim.
+        "term": "Star-reckoning: once a game day at this perch you recall any sky pattern you have "
+                "observed yourself, paying its recall cost in Astral Resonance from your astrolabe",
+        # Its cues, in StolasEntity.SOUND_IDS' order: (subtitle, runtime files): moved from SOUND_EVENTS and SOUND_FILES.
+        "cues": {
+            "arrive": ("Stolas alights", [f"menagerie/beast/flutter_flap_{n}" for n in range(3)]),
+            "listen": ("Stolas listens", ["menagerie/cavern/block/spelunkery_table/spelunkery_table_paper_insert"]),
+            "inspect": ("Stolas inspects", ["menagerie/cavern/block/spelunkery_table/spelunkery_table_paper_remove"]),
+            "assent": ("Stolas assents", ["household/block/doorbell/chime"]),
+            "refuse": ("Stolas refuses", [f"menagerie/beast/crow_idle_{n}" for n in range(4)]),
+            "depart": ("Stolas departs", [f"menagerie/cavern/mob/vesper/vesper_flap_{n}" for n in range(4)]),
+        },
+        # His body (D-S5, D-06): moved from OWNER_FILES, ADAPTED, BODY_SCALE, LOOPS, GESTURES, GESTURE_TIMES, LOOP_LENGTHS,
+        # ATTEND, EYE_TEXELS and BODY_SHOTS verbatim, with the renderer's numbers Chunk D's client/WorkerClient.java drew him
+        # with (scale, shadow, culling box, glowmask).
+        "body": {
+            "owner_files": {"geckolib/models/entity/stolas.geo.json": FLASHJACK + "geo/flashjack.geo.json"},
+            "adapted": {
+                "textures/entity/stolas.png": (FLASHJACK + "textures/entity/flashjack.png", "skin"),
+                "textures/entity/stolas_glowmask.png": (FLASHJACK + "textures/entity/flashjack.png", "glowmask"),
+                "geckolib/animations/entity/stolas.animation.json": (FLASHJACK + "animations/flashjack.animation.json", "animations"),
+            },
+            "scale": 1.4,
+            "render": {"shadow": 0.4, "wide": 1.2, "low": 0.1, "above": 2.0, "glow": True},
+            "loops": {"idle": "animation.stolas.idle", "listen": "animation.stolas.listen", "waiting": "animation.stolas.waiting",
+                      "suspended": "animation.stolas.suspended", "astir": "idle.flapping"},
+            "gestures": {"arrive": "animation.stolas.arrive", "inspect": "animation.stolas.inspect", "assent": "animation.stolas.assent",
+                         "refuse": "animation.stolas.refuse", "depart": "animation.stolas.depart"},
+            "gesture_times": {"arrive": (2.0, (0.70, 1.20)), "inspect": (2.5, (0.40, 1.10)), "assent": (2.0, (0.45, 1.25)),
+                              "refuse": (2.0, (0.50, 1.30)), "depart": (2.0, (0.30, 0.80))},
+            "loop_lengths": {"idle": 4.0, "listen": 3.0, "waiting": 4.0, "suspended": 6.0},
+            "attend": {"head": (6, 8, -16), "head_position": (0, 0, -0.5), "body": (4, 0, 0), "wing": (0, 0, -6)},
+            "eye_texels": ((9, 10), (9, 11), (14, 10), (14, 11)),
+            "shots": ["jugcraft_stolas_idle", "jugcraft_stolas_listen", "jugcraft_stolas_suspended", "jugcraft_stolas_waiting",
+                      "jugcraft_stolas_inspect", "jugcraft_stolas_assent", "jugcraft_stolas_refuse", "jugcraft_stolas_depart",
+                      "jugcraft_stolas_arrive"],
+        },
     },
 }
+# Derived (keep these names: tools/concordance.py, tools/owner_art.py, tools/stolas_body.py and check_mod_data read them).
+PACTS = {name: dict(spirit["pact"], beats=list(spirit["beats"])) for name, spirit in SPIRITS.items()}
+ENTITY_NAMES = {name: spirit["name"] for name, spirit in SPIRITS.items()}
+# The order worker/PactParser.REQUIRED lists the shipped definitions in (the perch offers them in this order; GC-P15).
+REQUIRED = [rid(name) for name in SPIRITS]
+# Stolas's offerings tag and items, by their Chunk D names (each spirit's tag is its pact's upkeep offering).
+OFFERINGS_TAG = SPIRITS["stolas"]["pact"]["upkeep"]["offering"]
+OFFERINGS = SPIRITS["stolas"]["offerings"]["items"]
 BLOCKS = {"pact_perch": {"name": "Pact Perch"}}
-ENTITY_NAMES = {"stolas": "Stolas"}
 PERCH_TOOLTIP = ("Use: invite Stolas, once you understand Stolas's Regard and have observed a star; or keep the pact seated "
                  "here. Break it and the pact stays yours, without its perch.")
 # Polished deepslate, not a slab: the progression graph follows only listed vanilla items (a slab is not in
@@ -152,16 +225,10 @@ PERCH_MODEL = {"parent": "minecraft:block/block",
 
 MESSAGES.update({
     "pact.perch_refused": "A pact perch stands only where you may build, placed by your own hand, and never in Styx's home",
-    # Stolas's three beats (provisional words; his character is a checkpoint question).
-    "pact.stolas.beat.greeting": "A raven settles on the perch and studies you with one bright eye. \"You have watched the sky "
-                                 "and asked the flowers. I am Stolas. I teach the stars to those who keep their word.\"",
-    "pact.stolas.beat.service": "\"Once a day, at this perch, I will turn the heavens back for you: any pattern you have seen "
-                                "with your own eyes, recalled through your astrolabe.\"",
-    "pact.stolas.beat.price": "\"In return, an offering every seven days, kept for me ahead. Miss one and I wait; I do not "
-                              "punish. And now, the compact: an open hand.\"",
+    # Each spirit's three beats and its service's term (SPIRITS; GC-01).
+    **{f"pact.{name}.beat.{beat}": text for name, spirit in SPIRITS.items() for beat, text in spirit["beats"].items()},
+    **{f"pact.term.service.{spirit['pact']['service']['work']}": spirit["term"] for spirit in SPIRITS.values()},
     # Each term's value (D-S15); the screen labels them (screen.jugcraft.pact.term.<key>).
-    "pact.term.service.star_reckoning": "Star-reckoning: once a game day at this perch you recall any sky pattern you have "
-                                        "observed yourself, paying its recall cost in Astral Resonance from your astrolabe",
     "pact.term.hours.any": "Any hour of the day or night",
     "pact.term.hours": "From %s to %s",
     "pact.term.area": "Within %s blocks of the perch",
@@ -181,27 +248,27 @@ MESSAGES.update({
     "pact.term.compact": "Paid as you accept: %s Astral Resonance from your astrolabe, and %s",
     "pact.term.compact_item": "%s × %s",
     "pact.term.compact_paid": "Paid when the pact was sealed",
-    # What is missing.
-    "pact.missing.owner": "Only this perch's owner may invite Stolas here",
+    # What is missing. GC-01 (SG10, GC-P12): the shared lines that named Stolas take the spirit's name (%s).
+    "pact.missing.owner": "Only this perch's owner may invite %s here",
     "pact.missing.prerequisite": "Not yet: first understand %s",
     "pact.missing.step": "Not yet: %s, %s: %s",
     "pact.missing.observation": "Not yet: Stolas wants a star you have seen yourself. Record one at an observatory while a "
                                 "pattern is up",
-    "pact.missing.held": "You already keep a pact with Stolas",
+    "pact.missing.held": "You already keep a pact with %s",
     # Readings.
     "pact.reading.taken": "This perch keeps another's pact",
     "pact.reading.unreadable": "This perch's pact cannot be read by this version; it is kept as it was",
-    "pact.seat.offer": "Your pact with Stolas is without its perch: seat it here, or end it",
-    "pact.unavailable": "Stolas's terms could not be read on this server (the pact's definition did not load); nothing can be "
+    "pact.seat.offer": "Your pact with %s is without its perch: seat it here, or end it",
+    "pact.unavailable": "%s's terms could not be read on this server (the pact's definition did not load); nothing can be "
                         "agreed until it does",
-    "pact.ended_here": "The pact is ended. Use the perch again to invite Stolas anew",
+    "pact.ended_here": "The pact is ended. Use the perch again to invite %s anew",
     # Answers.
-    "pact.answer.sealed": "The pact is sealed: Stolas keeps this perch",
-    "pact.answer.declined": "You decline; Stolas leaves. Nothing was spent",
+    "pact.answer.sealed": "The pact is sealed: %s keeps this perch",
+    "pact.answer.declined": "You decline; %s leaves. Nothing was spent",
     "pact.answer.changed": "The terms changed since you read them; read them again. Nothing was agreed or spent",
     "pact.answer.too_fast": "One moment",
     "pact.answer.not_offered": "That cannot be done here now",
-    "pact.answer.missing_evidence": "Stolas will not agree yet: see what is missing. Nothing was spent",
+    "pact.answer.missing_evidence": "%s will not agree yet: see what is missing. Nothing was spent",
     "pact.answer.cannot_afford": "The Open Hand Compact asks for the materials listed and %s Astral Resonance in one astrolabe; you "
                                  "are short. Nothing was spent",
     # Keeping (PactKeeping).
@@ -218,7 +285,27 @@ MESSAGES.update({
     "pact.row.escrow": "Paid ahead: %s of at most %s periods",
     "pact.row.area": "At this perch, within %s blocks, from %s to %s",
     "pact.row.area_any": "At this perch, within %s blocks, at any hour",
-    "pact.row.end": "Ending returns what is paid ahead to you, once, and Stolas departs; breaking the perch ends nothing",
+    "pact.row.end": "Ending returns what is paid ahead to you, once, and %s departs; breaking the perch ends nothing",
+})
+# Concordance garden cohort, GC-01 (SG4, SG6, GB23; GC-P4): the chooser, a compact without resonance, a work this version
+# does not know.
+MESSAGES.update({
+    # GC-01 (SG4): the chooser and its answer.
+    "pact.invite.missing": "%s: %s",
+    "pact.answer.invited": "You invite %s to the perch. Nothing is spent or agreed until you accept",
+    # GB23 (GC-P4): a compact without resonance names no astrolabe.
+    "pact.term.compact.items": "Paid as you accept: %s",
+    "pact.answer.cannot_afford.items": "The Open Hand Compact asks for the materials listed; you are short. Nothing was spent",
+    # SG6: a pact whose work this version does not know.
+    "pact.row.state.suspended.serves": "Suspended by you: %s does no work and nothing falls due until you resume it",
+    "pact.row.service_unknown": "Its service (%s) is not known to this version: the pact is kept as it was, and may be suspended or ended",
+})
+JOURNAL.update({
+    # GC-01 (SG7, GB17): the journal's pacts lines of every other research a perch's offers need (spirits/PactRegards).
+    "pacts.research.needs": "%s: first understand %s",
+    "pacts.research.next": "%s: %s",
+    "pacts.research.complete": "%s is mastered",
+    "pacts.research.invite": "%s is understood: invite %s at a pact perch",
 })
 
 
@@ -230,7 +317,8 @@ def lang_entries(lang):
         lang[f"entity.{MOD}.{key}"] = name
     lang[f"container.{MOD}.pact_perch"] = BLOCKS["pact_perch"]["name"]
     lang[f"tooltip.{MOD}.pact_perch"] = PERCH_TOOLTIP
-    lang[f"tag.item.{OFFERINGS_TAG.replace(':', '.')}"] = "Stolas's Offerings"
+    for spirit in SPIRITS.values():
+        lang[f"tag.item.{spirit['pact']['upkeep']['offering'].replace(':', '.')}"] = spirit["offerings"]["name"]
     screen_lang(lang)
     presence_lang(lang)
 
@@ -295,8 +383,9 @@ def codex():
 def tags(tags):
     for ref in {**STYX_SPECIMENS, **PLAIN_SPECIMENS}:
         tags.add("item", STOLAS_SPECIMEN_TAG, ref)
-    for ref in OFFERINGS:
-        tags.add("item", OFFERINGS_TAG, ref)
+    for spirit in SPIRITS.values():
+        for ref in spirit["offerings"]["items"]:
+            tags.add("item", spirit["pact"]["upkeep"]["offering"], ref)
     tags.add("block", "minecraft:mineable/axe", rid("pact_perch"))
 
 
@@ -381,37 +470,20 @@ SCREEN = {
 # Its folder's leftover metadata labels it Ars Elemental by Alexthw, "GNU Lesser General Public License v3.0"
 # (ports/jug-nouveau/ars_jymbaumental-1.21.1-0.7.10.4/META-INF/neoforge.mods.toml:7, 15, 25); the owner's declaration is
 # art/owner-library/PROVENANCE.md:3-7. Not imported: flashjack.bbmodel, flapjack.png, bluejay.png; attack and idle.air
-# stay in his animation file, unused. check_stolas_body holds the Java, the client test and the files to these tables.
-FLASHJACK = "assets/ars_jymbaumental/"
-OWNER_FILES = {"geckolib/models/entity/stolas.geo.json": FLASHJACK + "geo/flashjack.geo.json"}
-ADAPTED = {
-    "textures/entity/stolas.png": (FLASHJACK + "textures/entity/flashjack.png", "skin"),
-    "textures/entity/stolas_glowmask.png": (FLASHJACK + "textures/entity/flashjack.png", "glowmask"),
-    "geckolib/animations/entity/stolas.animation.json": (FLASHJACK + "animations/flashjack.animation.json", "animations"),
-}
-BODY_SCALE = 1.4  # client/WorkerClient.STOLAS_SCALE: the owner's rig is about a block tall, so he stands 1.45 (Workers.STOLAS)
-# His loops (Java: StolasEntity.Loop on the worker's main controller, for what the server synced) and gestures
-# (StolasEntity.Gesture on its "gesture" controller, each fired by the server's action). "astir" is the owner's idle.flapping.
-LOOPS = {"idle": "animation.stolas.idle", "listen": "animation.stolas.listen", "waiting": "animation.stolas.waiting",
-         "suspended": "animation.stolas.suspended", "astir": "idle.flapping"}
-GESTURES = {"arrive": "animation.stolas.arrive", "inspect": "animation.stolas.inspect", "assent": "animation.stolas.assent",
-            "refuse": "animation.stolas.refuse", "depart": "animation.stolas.depart"}
-# Each gesture's length (seconds; Java: Gesture's ticks) and the stretch that holds its telling pose (seconds):
-# ConcordancePactClientGameTests freezes the world inside it. Depart holds its last frame (he is gone by then).
-GESTURE_TIMES = {"arrive": (2.0, (0.70, 1.20)), "inspect": (2.5, (0.40, 1.10)), "assent": (2.0, (0.45, 1.25)),
-                 "refuse": (2.0, (0.50, 1.30)), "depart": (2.0, (0.30, 0.80))}
-LOOP_LENGTHS = {"idle": 4.0, "listen": 3.0, "waiting": 4.0, "suspended": 6.0}
-# His listening pose, as offsets from the perched one (degrees; the head's position in pixels): every gesture starts
-# and ends on it.
-ATTEND = {"head": (6, 8, -16), "head_position": (0, 0, -0.5), "body": (4, 0, 0), "wing": (0, 0, -6)}
-EYE_TEXELS = ((9, 10), (9, 11), (14, 10), (14, 11))  # his skin's eyes: all his glowmask lights (measured)
-# What ConcordancePactClientGameTests.poses photographs (D-06): each of his four loops of his own and his five gestures.
-# Not his astir loop (the owner's idle.flapping, played while an offering is due): posing it would need an offering due
-# in the client test, which would change the pact's upkeep that its later steps read (a recorded deviation from D-06's
-# "a frozen-tick pose for each clip"; check_geckolib still holds the clip to his animation file).
-BODY_SHOTS = ["jugcraft_stolas_idle", "jugcraft_stolas_listen", "jugcraft_stolas_suspended", "jugcraft_stolas_waiting",
-              "jugcraft_stolas_inspect", "jugcraft_stolas_assent", "jugcraft_stolas_refuse", "jugcraft_stolas_depart",
-              "jugcraft_stolas_arrive"]
+# stay in his animation file, unused. check_spirit_bodies holds the Java, the client test and the files to these tables.
+# Derived from SPIRITS["stolas"]["body"] (GC-01): every spirit's owner files and adaptations; Stolas's own tables by
+# their Chunk D names.
+OWNER_FILES = {target: source for spirit in SPIRITS.values() for target, source in spirit["body"].get("owner_files", {}).items()}
+ADAPTED = {target: entry for spirit in SPIRITS.values() for target, entry in spirit["body"].get("adapted", {}).items()}
+_STOLAS = SPIRITS["stolas"]["body"]
+BODY_SCALE = _STOLAS["scale"]  # client/PactSpiritRenderers: Stolas's row
+LOOPS = _STOLAS["loops"]
+GESTURES = _STOLAS["gestures"]
+GESTURE_TIMES = _STOLAS["gesture_times"]
+LOOP_LENGTHS = _STOLAS["loop_lengths"]
+ATTEND = _STOLAS["attend"]
+EYE_TEXELS = _STOLAS["eye_texels"]
+BODY_SHOTS = _STOLAS["shots"]
 # What ConcordancePactClientGameTests photographs (D-05 appends its own).
 CLIENT_SHOTS = ["jugcraft_pact_conversation", "jugcraft_pact_terms", "jugcraft_pact_terms_scale4", "jugcraft_pact_conversation_scale4",
                 "jugcraft_pact_terms_small", "jugcraft_pact_conversation_small", "jugcraft_pact_refused", "jugcraft_pact_kept",
@@ -482,30 +554,16 @@ def pact_pages():
 # ------------------------------------------------------------------------------------------- D-06: Stolas's presence
 # Java: spirits/StolasEntity.CUE_TICKS (the least time between two of his cues of one kind).
 CUE_TICKS = 10
-# His cues, in StolasEntity.SOUND_IDS' order: jugcraft:stolas.<cue>, each with its subtitle (D-S5), bound to .ogg files
-# already in runtime (no new audio, no voice; the raven's call is beast_crow's too). Being in SOUND_FILES, none is drawn
-# by tools/concordance_sounds.py. Every file is mono, since OpenAL places only a mono source, so each is heard from him and
-# fades with distance (check_pacts reads each file's channels; the unit review, D1): the leaves of a spelunkery table's
-# paper for listening and inspecting, and a vesper's wing beats for his going (the cave book's pages and the ghost's weep
-# that were first bound are stereo).
-SOUND_EVENTS = {
-    "stolas.arrive": "Stolas alights",
-    "stolas.listen": "Stolas listens",
-    "stolas.inspect": "Stolas inspects",
-    "stolas.assent": "Stolas assents",
-    "stolas.refuse": "Stolas refuses",
-    "stolas.depart": "Stolas departs",
-}
-SOUND_FILES = {
-    "stolas.arrive": [f"menagerie/beast/flutter_flap_{n}" for n in range(3)],
-    "stolas.listen": ["menagerie/cavern/block/spelunkery_table/spelunkery_table_paper_insert"],
-    "stolas.inspect": ["menagerie/cavern/block/spelunkery_table/spelunkery_table_paper_remove"],
-    "stolas.assent": ["household/block/doorbell/chime"],
-    "stolas.refuse": [f"menagerie/beast/crow_idle_{n}" for n in range(4)],
-    "stolas.depart": [f"menagerie/cavern/mob/vesper/vesper_flap_{n}" for n in range(4)],
-}
+# Every spirit's cues, derived from SPIRITS (GC-01), Stolas's first. His, in StolasEntity.SOUND_IDS' order:
+# jugcraft:stolas.<cue>, each with its subtitle (D-S5), bound to .ogg files already in runtime (no new audio, no voice;
+# the raven's call is beast_crow's too). Being in SOUND_FILES, none is drawn by tools/concordance_sounds.py. Every file
+# is mono, since OpenAL places only a mono source, so each is heard from him and fades with distance (check_pacts reads
+# each file's channels; the unit review, D1): the leaves of a spelunkery table's paper for listening and inspecting, and
+# a vesper's wing beats for his going (the cave book's pages and the ghost's weep that were first bound are stereo).
+SOUND_EVENTS = {f"{name}.{cue}": subtitle for name, spirit in SPIRITS.items() for cue, (subtitle, _) in spirit["cues"].items()}
+SOUND_FILES = {f"{name}.{cue}": files for name, spirit in SPIRITS.items() for cue, (_, files) in spirit["cues"].items()}
 # What Jade shows (Java: spirits/PactReading; client/compat/JugcraftJadeClient). Sent as ids; worded on the client.
-JADE_KEYS = ["standing", "visiting", "departing", "counterpart", "service", "state", "due_days", "grace_days", "waiting"]
+JADE_KEYS = ["standing", "visiting", "departing", "counterpart", "service", "state", "due_days", "grace_days", "waiting", "visitor"]
 JADE_STANDINGS = ["none", "kept", "copy", "unreadable", "disabled"]
 JADE_STATES = ["active", "suspended", "upkeep_due", "upkeep_held"]
 # Every work's short name (concordance_workers.WORK and WORK here; check_pacts holds the tables together).
@@ -513,7 +571,7 @@ SERVICE_NAMES = {"gather": "Gathering", "courier": "Carrying its post's requests
 JADE_PROVIDERS = {"pact_perch": "Pact Perch", "spirit_anchor": "Spirit Anchor"}
 TOOLTIPS.update({
     "jade.pact.none": "Keeps no agreement",
-    "jade.pact.visiting": "Stolas is visiting: he waits for an answer",
+    "jade.pact.visiting": "%s is visiting: he waits for an answer",
     "jade.pact.departing": "Departing",
     "jade.pact.unreadable": "Its agreement cannot be read by this version; it is kept as it was",
     "jade.pact.keeps": "Keeps an agreement with %s",
@@ -532,6 +590,14 @@ TOOLTIPS.update({
 SCREEN.update({
     "screen.jugcraft.pact.result.done": "Done: %s",
     "screen.jugcraft.pact.result.refused": "Refused: %s",
+})
+# Concordance garden cohort, GC-01 (SG4, GB4): the chooser and the seat page's list (client/PactScreen.java).
+SCREEN.update({
+    "screen.jugcraft.pact.invite.heading": "Whom will you invite?",
+    "screen.jugcraft.pact.invite.ready": "Ready to hear you",
+    "screen.jugcraft.pact.invite.not_ready": "Not yet: see what is missing below",
+    "screen.jugcraft.pact.invite.in_the_way": "Still missing:",
+    "screen.jugcraft.pact.stranded.heading": "Your pacts without their perch:",
 })
 CLIENT_SHOTS += ["jugcraft_pact_perch_jade", "jugcraft_pact_stolas_jade"]
 

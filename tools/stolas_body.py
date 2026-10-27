@@ -137,7 +137,7 @@ def glowmask(read):
 
 # ------------------------------------------------------------------------------------------------- the animations
 # His clips' names, lengths and poses are tools/concordance_pacts.py's (LOOPS, GESTURES, GESTURE_TIMES, LOOP_LENGTHS,
-# ATTEND): the Java plays them by name (spirits/StolasEntity) and check_stolas_body holds the two together.
+# ATTEND): the Java plays them by name (spirits/StolasEntity) and check_spirit_bodies holds the two together.
 
 def _key(seconds):
     return str(round(float(seconds), 4))

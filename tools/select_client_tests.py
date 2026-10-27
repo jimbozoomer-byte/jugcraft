@@ -105,8 +105,10 @@ WEIGHTS = {
 }
 # Classes a client test shows without naming them (registered by another class, or reached through an optional
 # integration), by the classes that show them: Stolas's renderer (his glowmask layer, scale, culling and departure) and
-# his perch's and anchor's Jade provider (the unit review, D2).
-SHOWN_BY = {"WorkerClient": {"ConcordancePactClientGameTests"}, "PactDataProvider": {"ConcordancePactClientGameTests"}}
+# his perch's and anchor's Jade provider (the unit review, D2), and since the garden cohort, the pact spirits' renderer table
+# and base (GC-01).
+SHOWN_BY = {"WorkerClient": {"ConcordancePactClientGameTests"}, "PactDataProvider": {"ConcordancePactClientGameTests"},
+            "PactSpiritRenderers": {"ConcordancePactClientGameTests"}, "PactSpiritEntity": {"ConcordancePactClientGameTests"}}
 HUB = 5  # a class this many test classes name is a shared registry, not one feature
 WIDE = 4  # a changed class shown by this share of the classes (a quarter) or more is picked by its changed lines
 ENDINGS = ("BlockEntityRenderer", "BlockEntity", "Renderer", "Block", "Item", "Entity", "Model", "Screen", "Menu",

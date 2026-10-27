@@ -2,9 +2,11 @@ package io.github.jimbozoomer.jugcraft.concordance.spirits;
 
 import io.github.jimbozoomer.jugcraft.concordance.Authority;
 import io.github.jimbozoomer.jugcraft.concordance.resource.BoundWill;
+import io.github.jimbozoomer.jugcraft.concordance.worker.PactParser;
 import io.github.jimbozoomer.jugcraft.concordance.worker.Pacts;
 import io.github.jimbozoomer.jugcraft.concordance.worker.Status;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.TreeMap;
 import java.util.function.Predicate;
@@ -12,6 +14,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Inventory;
@@ -156,6 +159,31 @@ public final class PactKeeping {
 		return record != null && AgreementHolder.stranded(level.getServer(), record) ? record : null;
 	}
 
+	/**
+	 * GC-01 (GB4): {@code player}'s own pacts with a pact spirit (PactSpirits) that no holder block keeps
+	 * (AgreementHolder.stranded), in the perch's order (PactParser.REQUIRED, then by counterpart), at most
+	 * PactStatePayload.MAX_CHOICES. Nothing for a stand-in, or with the Concordance off.
+	 */
+	public static List<BoundWill> strandedPacts(ServerLevel level, ServerPlayer player) {
+		if (!Workers.enabled() || Authority.isStandIn(player)) {
+			return List.of();
+		}
+		MinecraftServer server = level.getServer();
+		List<BoundWill> out = new ArrayList<>();
+		for (BoundWill record : BoundWills.of(server).ledger().heldBy(player.getUUID())) {
+			if (record.pact() != null && PactSpirits.knows(record.counterpart()) && AgreementHolder.stranded(server, record)) {
+				out.add(record);
+			}
+		}
+		out.sort(Comparator.comparingInt((BoundWill record) -> order(record.counterpart())).thenComparing(record -> Pacts.counterpart(record.counterpart())));
+		return List.copyOf(out.subList(0, Math.min(out.size(), PactStatePayload.MAX_CHOICES)));
+	}
+
+	private static int order(String counterpart) {
+		int at = PactParser.REQUIRED.indexOf(Pacts.counterpart(counterpart));
+		return at < 0 ? Integer.MAX_VALUE : at;
+	}
+
 	/** How an end went, and the words for it. */
 	public record Ending(AgreementHolder.Ended ended, Component said) {
 	}
@@ -203,7 +231,8 @@ public final class PactKeeping {
 		List<Component> rows = new ArrayList<>();
 		Status status = Pacts.status(record);
 		if (status == Status.SUSPENDED) {
-			rows.add(work == null ? Component.translatable("message.jugcraft.concordance.pact.row.state.suspended") : work.suspendedRow(name));
+			// GC-01 (SG6): a work this version does not know words its suspension with its spirit's name.
+			rows.add(work == null ? Component.translatable("message.jugcraft.concordance.pact.row.state.suspended.serves", name) : work.suspendedRow(name));
 		} else if (status == Status.UPKEEP_HELD && upkeep != null) {
 			rows.add(Component.translatable("message.jugcraft.concordance.pact.row.state.upkeep_held", upkeep.count(), offering));
 		} else if (status == Status.UPKEEP_DUE && upkeep != null) {
@@ -217,6 +246,9 @@ public final class PactKeeping {
 		}
 		if (work != null) {
 			rows.addAll(work.serviceRows(level, player, record, now));
+		} else {
+			// GC-01 (SG6): kept as it was, listed, suspended and ended, but no service row or action of its own.
+			rows.add(Component.translatable("message.jugcraft.concordance.pact.row.service_unknown", service.work()));
 		}
 		if (upkeep != null) {
 			if (!Pacts.held(record)) {
@@ -231,7 +263,7 @@ public final class PactKeeping {
 		rows.add(service.from() == 0 && service.to() == Pacts.DAY
 				? Component.translatable("message.jugcraft.concordance.pact.row.area_any", service.radius())
 				: Component.translatable("message.jugcraft.concordance.pact.row.area", service.radius(), Workers.clock(service.from()), Workers.clock(service.to())));
-		rows.add(Component.translatable("message.jugcraft.concordance.pact.row.end"));
+		rows.add(Component.translatable("message.jugcraft.concordance.pact.row.end", name));
 		return new Page(List.copyOf(rows), work == null ? List.of() : List.copyOf(work.choices(level, player, record, now)), offerings(player, record));
 	}
 }

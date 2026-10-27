@@ -46,10 +46,11 @@ KIND_SERVICES = {
 }
 # The portrait of a worker that is not loaded, by kind (Java: Roster.KIND_PORTRAITS); any other kind is jugcraft:<kind>,
 # which names the Ars Nouveau helpers' and the starbuncle's entity types. A spirit has none ("": the client draws the Spirit
-# Anchor), since a Gathering Shade's kind and a Workshop Hand's are both spirit (the unit's critique 8). A loaded worker is
-# drawn as its own entity type, and a record's row as its counterpart.
+# Anchor), since a Gathering Shade's kind and a Workshop Hand's are both spirit (the unit's critique 8). A pact presence has
+# none either (GC-01, GB6): every pact spirit's kind is pact, so the client draws the Spirit Anchor rather than the wrong
+# spirit. A loaded worker is drawn as its own entity type, and a record's row as its counterpart.
 KIND_PORTRAITS = {"familiar": "jugcraft:hearthling", "spirit": "", "construct": "jugcraft:clockwork_porter",
-                  "pact": "jugcraft:stolas"}
+                  "pact": ""}
 # A place's dimension in words (Java: Roster.place; any other is its id): vanilla's three, each lair by its own name
 # (tools/lairs.py LAIRS' display, as lair.jugcraft.<lair> says it, its "The" lower-cased mid-sentence) and a Planarium's
 # cells by the block's name (block.jugcraft.nouveau_planarium; the unit review, D8). check_roster holds it to

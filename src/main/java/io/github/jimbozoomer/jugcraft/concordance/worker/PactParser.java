@@ -34,7 +34,10 @@ public final class PactParser {
 	/** An astrolabe's capacity (sky/AstrolabeItem.CAPACITY; check_pacts compares). */
 	public static final int MAX_RESONANCE = 32;
 	public static final int MAX_BEATS = 3;
-	/** The pacts the game offers in play: the pact perch offers Stolas. */
+	/**
+	 * Every pact the game ships, in the order a perch offers them (tools/concordance_pacts.py SPIRITS; GC-01, GC-P15): each
+	 * missing one is reported. Strings, so this parser stays free of game classes; append only.
+	 */
 	public static final List<String> REQUIRED = List.of(PactDefinition.STOLAS);
 
 	private final List<String> problems = new ArrayList<>();

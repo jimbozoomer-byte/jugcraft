@@ -56,7 +56,7 @@ public final class PactCatalog {
 		if (!research.isEmpty()) {
 			for (String required : PactParser.REQUIRED) {
 				if (!pacts.containsKey(required)) {
-					problems.add("pact " + required + ": no definition loaded; the pact perch refuses new invitations until one does");
+					problems.add("pact " + required + ": no definition loaded; the pact perch offers it to no one until one does");
 				}
 			}
 		}

@@ -3,6 +3,7 @@ package io.github.jimbozoomer.jugcraft.client;
 import io.github.jimbozoomer.jugcraft.concordance.spirits.PactMenu;
 import io.github.jimbozoomer.jugcraft.concordance.spirits.PactRequestPayload;
 import io.github.jimbozoomer.jugcraft.concordance.spirits.PactStatePayload;
+import io.github.jimbozoomer.jugcraft.concordance.spirits.StarReckoning;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
@@ -30,8 +31,9 @@ import org.jspecify.annotations.Nullable;
 /**
  * Concordance Chunk D (D-04, D-05; D-S14, D-S15): the pact perch's screen, native and narrated.
  * <p>
- * While Stolas visits, it gives his three beats, a page each, then his terms: every term D-S15 lists, the Open Hand
- * Compact's materials drawn, and what stands in the way, as the server says it. Accept and Decline sit under them; Accept
+ * While a spirit visits, it gives its three beats, a page each, then its terms: every term D-S15 lists, the Open Hand
+ * Compact's materials drawn, and what stands in the way, as the server says it. At an empty perch whose owner may invite two
+ * or more spirits it first lists them (each spirit's sign, name, and ready or what is missing) (GC-01). Accept and Decline sit under them; Accept
  * is offered only when nothing stands in the way. Nothing is spent or agreed until Accept, and the keyboard lands on the
  * terms' first line, never on Accept.
  * <p>
@@ -58,8 +60,8 @@ public class PactScreen extends Screen implements MenuAccess<PactMenu> {
 	private static final int MAX_HEIGHT = 260;
 	private static final int TOP = 26;
 	private static final int FOOT = 20;
-	/** The sign by his name, the Styx flower named for him (unit 3 gives him a portrait). */
-	private static final String SIGN = "jugcraft:stolas_starflower";
+	/** The sign by the speaker's name when a state names none (the chooser) or before the first state: the perch. */
+	private static final String PERCH = "jugcraft:pact_perch";
 	private final PactMenu menu;
 	private final Runnable listener = () -> dirty = true;
 	private final Map<String, AbstractWidget> controls = new LinkedHashMap<>();
@@ -113,7 +115,7 @@ public class PactScreen extends Screen implements MenuAccess<PactMenu> {
 			asked = false;
 			pattern = -1;
 			scroll = 0;
-			focus = mode == PactStatePayload.NEGOTIATE ? "beat" : state.result().isPresent() ? "result" : "note:0";
+			focus = mode == PactStatePayload.NEGOTIATE ? "beat" : mode == PactStatePayload.INVITE ? "invite:0" : state.result().isPresent() ? "result" : "note:0";
 		}
 		if (state != null && PactClient.takeChanged()) {
 			// His terms changed under the screen: they are shown again, from their first line, before anything is accepted.
@@ -131,6 +133,7 @@ public class PactScreen extends Screen implements MenuAccess<PactMenu> {
 				case PactStatePayload.NEGOTIATE -> negotiate(state);
 				case PactStatePayload.KEEP -> keep(state);
 				case PactStatePayload.SEAT -> seat(state);
+				case PactStatePayload.INVITE -> invite(state);
 				default -> closed(state);
 			}
 		}
@@ -165,7 +168,11 @@ public class PactScreen extends Screen implements MenuAccess<PactMenu> {
 		if (termsTab) {
 			terms(state);
 		} else {
-			service(state);
+			if (reckons(state)) {
+				service(state);
+			} else {
+				workService(state);
+			}
 			offerings(state);
 			boolean free = !PactClient.waiting();
 			if (state.offers(PactRequestPayload.RESUME)) {
@@ -183,12 +190,43 @@ public class PactScreen extends Screen implements MenuAccess<PactMenu> {
 	private void seat(PactStatePayload state) {
 		notes(state, ui("without_perch"), WARN);
 		result(state);
+		// GC-01 (GB4): with two or more pacts without their perch, which one these terms are; choosing another reads its terms (CHOOSE).
+		if (state.patterns().size() > 1) {
+			say(ui("stranded.heading"), GOLD, "");
+			pattern = Math.max(0, Math.min(pattern, state.patterns().size() - 1));
+			for (int i = 0; i < state.patterns().size(); i++) {
+				PactStatePayload.Choice choice = state.patterns().get(i);
+				int index = i;
+				inline("stranded:" + i, choice.name(), Component.empty(), choice.id(), true, () -> {
+					pattern = index;
+					PactClient.request(menu, PactRequestPayload.CHOOSE, index);
+				}, i == pattern);
+			}
+		}
 		terms(state);
 		boolean free = !PactClient.waiting();
 		footer(button("seat", ui("seat"), ui("seat.hint"), free && state.offers(PactRequestPayload.SEAT),
-						() -> PactClient.request(menu, PactRequestPayload.SEAT, 0), false),
+						() -> PactClient.request(menu, PactRequestPayload.SEAT, endChoice()), false),
 				button("end", ui("end"), ui("end.hint"), free && state.offers(PactRequestPayload.END), this::confirmEnd, false),
 				button("close", ui("close"), Component.empty(), true, this::onClose, false));
+	}
+
+	/**
+	 * GC-01 (SG4): the chooser: each spirit its owner may invite, by its sign and name, ready or not yet (the notes under it
+	 * say what is missing); choosing one sends INVITE with its index, and its visit begins: its beats, then its terms.
+	 */
+	private void invite(PactStatePayload state) {
+		say(ui("invite.heading"), GOLD, "");
+		boolean free = !PactClient.waiting();
+		for (int i = 0; i < state.patterns().size(); i++) {
+			PactStatePayload.Choice choice = state.patterns().get(i);
+			int index = i;
+			inline("invite:" + i, choice.name(), choice.ready() ? ui("invite.ready") : ui("invite.not_ready"), choice.id(),
+					free && state.offers(PactRequestPayload.INVITE), () -> PactClient.request(menu, PactRequestPayload.INVITE, index), false);
+		}
+		notes(state, ui("invite.in_the_way"), WARN);
+		result(state);
+		footer(button("close", ui("close"), Component.empty(), true, this::onClose, false));
 	}
 
 	private void closed(PactStatePayload state) {
@@ -220,6 +258,19 @@ public class PactScreen extends Screen implements MenuAccess<PactMenu> {
 				chosen == null ? Component.empty() : ui("pattern.cost", chosen.amount()),
 				chosen != null && chosen.ready() && !PactClient.waiting() && state.offers(PactRequestPayload.RECALL),
 				() -> PactClient.request(menu, PactRequestPayload.RECALL, pattern), false);
+	}
+
+	/** Whether a kept pact's service is Star-reckoning (its section as built; a state that names no work is one from before GC-01). */
+	private static boolean reckons(PactStatePayload state) {
+		String work = state.spirit().work();
+		return work.isEmpty() || StarReckoning.WORK.equals(work);
+	}
+
+	/** GC-01 (SG5): another work's service section: its heading and what it does by itself (screen.jugcraft.pact.service.<work>.*). */
+	private void workService(PactStatePayload state) {
+		String work = state.spirit().work();
+		say(Component.translatableWithFallback("screen.jugcraft.pact.service." + work + ".heading", work), GOLD, "");
+		say(Component.translatableWithFallback("screen.jugcraft.pact.service." + work + ".about", ""), DIM, "");
 	}
 
 	/** Upkeep (D-S3): each offering the holder carries, paid into the pact's keeping (a server action, never a slot: D-S6). */
@@ -316,9 +367,14 @@ public class PactScreen extends Screen implements MenuAccess<PactMenu> {
 		minecraft.gui.setScreen(new KeepFirstConfirmScreen(yes -> {
 			minecraft.gui.setScreen(this);
 			if (yes) {
-				PactClient.request(menu, PactRequestPayload.END, 0);
+				PactClient.request(menu, PactRequestPayload.END, endChoice());
 			}
 		}, ui("end.title", speaker), ui("end.confirm", speaker), ui("end.yes"), ui("end.no")));
+	}
+
+	/** The pact END and SEAT name: on the seat page the one chosen there (0 with one); 0 elsewhere. */
+	private int endChoice() {
+		return mode == PactStatePayload.SEAT ? Math.max(0, pattern) : 0;
 	}
 
 	private void say(Component text, int colour, String key) {
@@ -332,7 +388,11 @@ public class PactScreen extends Screen implements MenuAccess<PactMenu> {
 	}
 
 	private void inline(String key, Component label, Component hint, boolean active, Runnable action, boolean selected) {
-		BookArt.Tab tab = new BookArt.Tab(body.getX() + 3, 0, body.getWidth() - 8, 20, label, hint, "", selected, true, unused -> action.run());
+		inline(key, label, hint, "", active, action, selected);
+	}
+
+	private void inline(String key, Component label, Component hint, String icon, boolean active, Runnable action, boolean selected) {
+		BookArt.Tab tab = new BookArt.Tab(body.getX() + 3, 0, body.getWidth() - 8, 20, label, hint, icon, selected, true, unused -> action.run());
 		tab.active = active;
 		body.add(tab, at);
 		at += tab.getHeight() + 3;
@@ -406,6 +466,7 @@ public class PactScreen extends Screen implements MenuAccess<PactMenu> {
 			case PactStatePayload.NEGOTIATE -> page < state.beats().size() ? ui("page", page + 1, state.beats().size()) : ui("terms");
 			case PactStatePayload.KEEP -> termsTab ? ui("terms") : ui("kept");
 			case PactStatePayload.SEAT -> ui("without_perch");
+			case PactStatePayload.INVITE -> ui("invite.heading");
 			default -> Component.empty();
 		};
 	}
@@ -427,12 +488,17 @@ public class PactScreen extends Screen implements MenuAccess<PactMenu> {
 		PactStatePayload state = PactClient.state(menu);
 		Component heading = state == null ? Component.empty() : heading(state);
 		int right = font.width(heading);
-		BookArt.icon(g, SIGN, x + 8, y + 5);
+		BookArt.icon(g, sign(state), x + 8, y + 5);
 		g.text(font, BookArt.fit(font, (state == null ? title : state.speaker()).getString(), w - 44 - right), x + 28, y + 10, GOLD, false);
 		g.text(font, heading, x + w - 10 - right, y + 10, DIM, false);
 		g.fill(x + 8, y + TOP - 3, x + w - 8, y + TOP - 2, 0xFF344158);
 		// D-06 (03:159): his sounds' subtitles over this screen (deferred to here, as vanilla's Screen.extractBackground does).
 		minecraft.gui.hud.extractDeferredSubtitles();
+	}
+
+	/** GC-01 (GB8, SG5): the spirit's own sign, as the server sent it (PactSpirits); the perch's when it sent none. */
+	private static String sign(@Nullable PactStatePayload state) {
+		return state == null || state.spirit().sign().isEmpty() ? PERCH : state.spirit().sign();
 	}
 
 	@Override

@@ -1,0 +1,73 @@
+package io.github.jimbozoomer.jugcraft.client;
+
+import com.geckolib.animatable.manager.AnimatableManager;
+import com.geckolib.animation.AnimationController;
+import com.geckolib.renderer.GeoEntityRenderer;
+import com.geckolib.renderer.layer.builtin.AutoGlowingGeoLayer;
+import io.github.jimbozoomer.jugcraft.concordance.spirits.PactSpiritEntity;
+import io.github.jimbozoomer.jugcraft.concordance.spirits.Workers;
+import net.fabricmc.fabric.api.client.rendering.v1.EntityRendererRegistry;
+import net.minecraft.client.renderer.culling.Frustum;
+import net.minecraft.client.renderer.entity.state.EntityRenderState;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.phys.AABB;
+
+/**
+ * Concordance garden cohort, GC-01 (SG11): every pact spirit's renderer from one row (tools/concordance_pacts.py SPIRITS
+ * "body"."render"): GeckoLib draws it from its own model at its scale, its glowmask lit when it has one; its culling box
+ * reaches as far as its gestures carry it; one leaving is drawn only where its departing gesture was fired, so one who
+ * began watching it after sees it already gone. Chunk D's Stolas renderer (WorkerClient), unchanged in what it draws, is
+ * the first row. Nothing here decides anything.
+ */
+final class PactSpiritRenderers {
+	/** One spirit's drawing: its scale, its shadow's radius, its culling box widened sideways and below and reaching above, its glowmask. */
+	record Row(float scale, float shadow, double wide, double low, double above, boolean glow) {
+	}
+
+	private PactSpiritRenderers() {
+	}
+
+	static void register() {
+		// Stolas (D-S5, D-06): the owner's Flashjack rig drawn larger, his spread wings and his arrival from above inside his box.
+		register(Workers.STOLAS, new Row(1.4F, 0.4F, 1.2, 0.1, 2.0, true));
+	}
+
+	static <T extends PactSpiritEntity<T>> void register(EntityType<T> type, Row row) {
+		EntityRendererRegistry.register(type, context -> {
+			GeoEntityRenderer<T, EntityRenderState> renderer = new GeoEntityRenderer<T, EntityRenderState>(context, type) {
+				{
+					shadowRadius = row.shadow();
+				}
+
+				@Override
+				protected AABB getBoundingBoxForCulling(T spirit, float partialTick) {
+					// Its gestures reach past its box (Stolas's spread wings, his arrival from above and his leaving upwards): it
+					// stays drawn while any of it can be on screen.
+					return spirit.getBoundingBox().inflate(row.wide(), row.low(), row.wide()).expandTowards(0.0, row.above(), 0.0);
+				}
+
+				@Override
+				public boolean shouldRender(T spirit, Frustum culler, double camX, double camY, double camZ, float partialTicks) {
+					// Leaving, it is drawn only where its departing gesture was fired: one who began watching it after sees it
+					// already gone, never perched until it vanishes (Chunk D's unit review).
+					return (!spirit.leaving() || departs(spirit)) && super.shouldRender(spirit, culler, camX, camY, camZ, partialTicks);
+				}
+			};
+			if (row.glow()) {
+				renderer.withRenderLayer(AutoGlowingGeoLayer::new);
+			}
+			return renderer.withScale(row.scale());
+		});
+	}
+
+	/**
+	 * Whether this client was sent its departing gesture: its gesture controller was triggered with it, and keeps it once it
+	 * has played (it holds its last frame). Read from the trigger, not from the clip drawn, since a clip starts only when it
+	 * is drawn.
+	 */
+	static boolean departs(PactSpiritEntity<?> spirit) {
+		AnimatableManager<PactSpiritEntity<?>> manager = spirit.getAnimatableInstanceCache().getManagerForId(spirit.getId());
+		AnimationController<?> gestures = manager.getAnimationControllers().get(PactSpiritEntity.GESTURE_CONTROLLER);
+		return gestures != null && spirit.body().depart().animation().equals(gestures.getCurrentRawAnimation());
+	}
+}
