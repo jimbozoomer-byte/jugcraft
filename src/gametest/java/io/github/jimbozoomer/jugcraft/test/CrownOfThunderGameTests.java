@@ -207,7 +207,7 @@ public class CrownOfThunderGameTests {
 		ServerLevel level = helper.getLevel();
 		ItemStack feather = new ItemStack(Items.FEATHER);
 		ItemStack copper = new ItemStack(Items.COPPER_INGOT);
-		CraftingInput grid = CraftingInput.of(3, 3, List.of(feather, new ItemStack(Items.LIGHTNING_ROD), feather.copy(),
+		CraftingInput grid = CraftingInput.of(3, 3, List.of(feather, new ItemStack(net.minecraft.core.registries.BuiltInRegistries.ITEM.getValue(Identifier.withDefaultNamespace("lightning_rod"))), feather.copy(),
 				copper, new ItemStack(Items.COMPASS), copper.copy(), ItemStack.EMPTY, copper.copy(), ItemStack.EMPTY));
 		ItemStack made = level.getServer().getRecipeManager().getRecipeFor(RecipeType.CRAFTING, grid, level)
 				.orElseThrow(() -> helper.assertionException("Feathers, a lightning rod, copper and a compass craft nothing")).value().assemble(grid);

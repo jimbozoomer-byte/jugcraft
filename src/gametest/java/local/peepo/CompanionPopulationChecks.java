@@ -39,15 +39,6 @@ final class CompanionPopulationChecks {
     void tasks(PeepoEntity p,int mask){for(int bit:new int[]{1,2,4,8,16})if(p.assignments.get(1).task(bit)!=((mask&bit)!=0))p.assignments.toggleAnimalTask(1,bit);}
     List<Animal> animals(ServerLevel level,Identifier type){return level.getEntitiesOfClass(Animal.class,npc.assignments.get(1).animalBox(),a->a.isAlive() && BuiltInRegistries.ENTITY_TYPE.getKey(a.getType()).equals(type));}
     void clearAnimals(ServerLevel level){for(var a:level.getEntitiesOfClass(Animal.class,npc.assignments.get(1).animalBox()))a.discard();}
-    void breedingPen(ServerLevel level,boolean closed){
-        // Free-roaming parents must remain within vanilla's eight-block mate search.
-        // The full slaughter fixture is wider: opposite corners exceed that range.
-        for(int n=0;n<=7;n++)for(int y=0;y<3;y++){
-            level.setBlockAndUpdate(base.offset(6,y,n),closed?Blocks.GLASS.defaultBlockState():Blocks.AIR.defaultBlockState());
-            // Preserve the output barrel at (0, 0, 6).
-            if(n!=0 || y!=0)level.setBlockAndUpdate(base.offset(n,y,6),closed?Blocks.GLASS.defaultBlockState():Blocks.AIR.defaultBlockState());
-        }
-    }
     void click(ClientGameTestContext context,String label){
         context.waitFor(c->c.gui.screen() instanceof CompanionScreen && c.gui.screen().children().stream().anyMatch(w->w instanceof Button b && b.visible && b.active && b.getMessage().getString().equals(label)),100);
         context.runOnClient(c->c.gui.screen().children().stream().filter(w->w instanceof Button b && b.visible && b.active && b.getMessage().getString().equals(label)).map(w->(Button)w).findFirst().orElseThrow(()->new AssertionError("Missing button: "+label)).onPress(null));context.waitTicks(2);
