@@ -274,30 +274,34 @@ public class HerobrineGameTests {
 		helper.succeed();
 	}
 
-	@GameTest(structure = ARENA, padding = 48, maxTicks = 60)
+	@GameTest(structure = ARENA, padding = 48, maxTicks = 70, skyAccess = true)
 	public void aFollowerWalksThePlayersPathAndStopsWhenTheyStop(GameTestHelper helper) {
 		floor(helper);
 		ServerPlayer player = player(helper, new BlockPos(24, 1, 30), 0.0F);
-		HerobrineEncounters.Attempt attempt = HerobrineEncounters.attemptVariant(player,
-				new HerobrineDirector.Request(player.getUUID(), Herobrine.Kind.DISTANT, HerobrineDirector.FORCED), Herobrine.Variant.FOLLOWER);
-		helper.assertTrue(attempt.placed(), "A follower should find a place behind the player: " + attempt.failure());
-		Herobrine herobrine = attempt.herobrine();
-		Vec3 start = herobrine.position();
-		double keep = start.distanceTo(player.position());
-		helper.assertTrue(start.z < player.getZ() && keep >= HerobrineEncounters.FOLLOW_NEAR - 1.0, "He should start behind, not at " + start);
-		for (int tick = 1; tick <= 16; tick++) {
-			double z = player.getZ() + tick * 0.5;
-			helper.runAfterDelay(tick, () -> player.snapTo(player.getX(), player.getY(), z, 0.0F, 0.0F));
-		}
-		helper.runAfterDelay(22, () -> {
-			Vec3 now = herobrine.position();
-			helper.assertTrue(herobrine.isAlive() && now.z > start.z + 4.0, "He should have followed, not stayed at " + now);
-			helper.assertTrue(Math.abs(now.distanceTo(player.position()) - keep) < 1.5, "He should keep his distance, "
-					+ keep + ", not " + now.distanceTo(player.position()));
-			helper.runAfterDelay(15, () -> {
-				helper.assertTrue(herobrine.position().distanceTo(now) < 0.01, "He should stop when the player stops");
-				herobrine.discard();
-				helper.succeed();
+		// Surface searches must see the floor, not GameTest's default barrier roof.
+		helper.runAfterDelay(5, () -> {
+			HerobrineEncounters.Attempt attempt = HerobrineEncounters.attemptVariant(player,
+					new HerobrineDirector.Request(player.getUUID(), Herobrine.Kind.DISTANT, HerobrineDirector.FORCED), Herobrine.Variant.FOLLOWER);
+			helper.assertTrue(attempt.placed(), "A follower should find a place behind the player: " + attempt.failure()
+					+ placementDetails(helper, player, new BlockPos(24, 1, 10)));
+			Herobrine herobrine = attempt.herobrine();
+			Vec3 start = herobrine.position();
+			double keep = start.distanceTo(player.position());
+			helper.assertTrue(start.z < player.getZ() && keep >= HerobrineEncounters.FOLLOW_NEAR - 1.0, "He should start behind, not at " + start);
+			for (int tick = 1; tick <= 16; tick++) {
+				double z = player.getZ() + tick * 0.5;
+				helper.runAfterDelay(tick, () -> player.snapTo(player.getX(), player.getY(), z, 0.0F, 0.0F));
+			}
+			helper.runAfterDelay(22, () -> {
+				Vec3 now = herobrine.position();
+				helper.assertTrue(herobrine.isAlive() && now.z > start.z + 4.0, "He should have followed, not stayed at " + now);
+				helper.assertTrue(Math.abs(now.distanceTo(player.position()) - keep) < 1.5, "He should keep his distance, "
+						+ keep + ", not " + now.distanceTo(player.position()));
+				helper.runAfterDelay(15, () -> {
+					helper.assertTrue(herobrine.position().distanceTo(now) < 0.01, "He should stop when the player stops");
+					herobrine.discard();
+					helper.succeed();
+				});
 			});
 		});
 	}
@@ -328,7 +332,7 @@ public class HerobrineGameTests {
 		});
 	}
 
-	@GameTest(structure = ARENA, padding = 48, maxTicks = 20)
+	@GameTest(structure = ARENA, padding = 48, maxTicks = 30, skyAccess = true)
 	public void tunnelEyesWaitAtTheFarEndOfATunnelBehind(GameTestHelper helper) {
 		floor(helper);
 		for (int z = 1; z <= 31; z++) {
@@ -340,15 +344,31 @@ public class HerobrineGameTests {
 			}
 		}
 		ServerPlayer player = player(helper, new BlockPos(24, 1, 30), 0.0F);
-		HerobrineEncounters.Attempt attempt = HerobrineEncounters.attemptVariant(player,
-				new HerobrineDirector.Request(player.getUUID(), Herobrine.Kind.DISTANT, HerobrineDirector.FORCED), Herobrine.Variant.TUNNEL);
-		helper.assertTrue(attempt.placed(), "He should wait down the tunnel: " + attempt.failure());
-		Herobrine herobrine = attempt.herobrine();
-		BlockPos end = helper.absolutePos(new BlockPos(24, 1, 2));
-		helper.assertTrue(herobrine.blockPosition().equals(end), "He should stand at the tunnel's far end, " + end + ", not "
-				+ herobrine.blockPosition());
-		herobrine.discard();
-		helper.succeed();
+		// Let skylight settle after building the roof before asking whether this is a covered tunnel.
+		helper.runAfterDelay(5, () -> {
+			HerobrineEncounters.Attempt attempt = HerobrineEncounters.attemptVariant(player,
+					new HerobrineDirector.Request(player.getUUID(), Herobrine.Kind.DISTANT, HerobrineDirector.FORCED), Herobrine.Variant.TUNNEL);
+			helper.assertTrue(attempt.placed(), "He should wait down the tunnel: " + attempt.failure()
+					+ placementDetails(helper, player, new BlockPos(24, 1, 2)));
+			Herobrine herobrine = attempt.herobrine();
+			BlockPos end = helper.absolutePos(new BlockPos(24, 1, 2));
+			helper.assertTrue(herobrine.blockPosition().equals(end), "He should stand at the tunnel's far end, " + end + ", not "
+					+ herobrine.blockPosition());
+			herobrine.discard();
+			helper.succeed();
+		});
+	}
+
+	private static String placementDetails(GameTestHelper helper, ServerPlayer player, BlockPos relative) {
+		ServerLevel level = helper.getLevel();
+		BlockPos feet = helper.absolutePos(relative);
+		Vec3 eyes = Vec3.atBottomCenterOf(feet).add(0, 1.62, 0);
+		return " player=" + player.position() + " direction=" + player.getDirection() + " feet=" + feet
+				+ " standable=" + HerobrineEncounters.standable(level, feet) + " sky=" + level.canSeeSky(feet)
+				+ " height=" + level.getHeight(net.minecraft.world.level.levelgen.Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, feet.getX(), feet.getZ())
+				+ " corridor=" + HerobrineEncounters.corridorLoaded(level, player.getEyePosition(), eyes)
+				+ " ray=" + level.clip(new net.minecraft.world.level.ClipContext(player.getEyePosition(), eyes,
+						net.minecraft.world.level.ClipContext.Block.COLLIDER, net.minecraft.world.level.ClipContext.Fluid.NONE, player)).getType();
 	}
 
 	@GameTest(structure = ARENA, padding = 48, maxTicks = 60)

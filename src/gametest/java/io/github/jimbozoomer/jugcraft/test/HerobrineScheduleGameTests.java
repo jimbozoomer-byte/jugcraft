@@ -3,6 +3,7 @@ package io.github.jimbozoomer.jugcraft.test;
 import com.mojang.serialization.JsonOps;
 import io.github.jimbozoomer.jugcraft.herobrine.HerobrineProgress;
 import io.github.jimbozoomer.jugcraft.herobrine.HerobrineSchedule;
+import io.github.jimbozoomer.jugcraft.herobrine.HerobrineScheduleDirector;
 import io.github.jimbozoomer.jugcraft.herobrine.HerobrineSeason;
 import java.time.Instant;
 import java.util.List;
@@ -34,6 +35,9 @@ public final class HerobrineScheduleGameTests {
 		h.assertTrue(restored.schedule().progress(first).sightings() == 1, "Only visible first player is seen");
 		h.assertTrue(restored.schedule().progress(second).sightings() == 0, "Unseen second player remains prioritized");
 		h.assertTrue(restored.schedule().liveCount() == 0, "No dead reservations after restart");
+		var director = new HerobrineScheduleDirector(h.getLevel().getServer(), java.time.Clock.fixed(NOW, java.time.ZoneOffset.UTC), HerobrineSeason.DEFAULT);
+		h.assertTrue(director.hasSeen(first) && !director.hasSeen(second) && !director.hasSeen(UUID.randomUUID()),
+				"Narrative eligibility reads saved sightings, not introductions this session");
 		h.succeed();
 	}
 	@GameTest(maxTicks=20)
