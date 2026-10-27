@@ -201,5 +201,9 @@ changed Java found no syntax errors; `python tools/check_mod_data.py` and `pytho
 The first CI run ([40430018384](https://github.com/mmme123-spec/jugcraftfork/actions/runs/40430018384), on `e6a34dbd1`)
 failed in both encyclopedia client tests: the test framework's `clickScreenButton` does not look inside the scrolling
 chapter list, so it could not find "Technology" or "First steps". The tests now press a chapter with
-`EncyclopediaScreen.pressChapter`, which runs the same tab's action. CI on that change: pending. Not run: a human
-clicking through the encyclopedia.
+`EncyclopediaScreen.pressChapter`, which runs the same tab's action. CI on that change, fork
+[run 40442426943](https://github.com/mmme123-spec/jugcraftfork/actions/runs/40442426943) on `889304c2a`: green, every
+job and all sixteen client shards. Its shots show the contents listing Technology, Magic, First steps, Jug Nouveau,
+Wildlife & Companions and Woodland & Fable Creatures with a scroll bar for the rest (pages with nothing to show, such
+as a newcomer's Spellcraft, are not sent and so not listed), and First steps opening on "Find something that glows"
+(1 of 12) with the page's heading above it. Not run: a human clicking through the encyclopedia.
