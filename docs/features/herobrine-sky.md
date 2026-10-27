@@ -126,7 +126,7 @@ Every finished island and ruin stays in the world and in the saved records indef
 `HerobrineSkyGameTests` (not yet registered or run; OpenAI Codex registers and runs it with the combined Herobrine suite):
 
 - each of the six sky islands is planned over the arena:
-  - every block at least 24 above the arena and 32 under the world's top;
+  - every block at least 24 above the ground under its own column (measured before building) and 32 under the world's top;
   - only into empty air, between a lower bound and 15000 blocks;
   - no fences or bars side by side;
   - built whole, every block exactly as planned, its sign written;
