@@ -211,8 +211,9 @@ public final class GunShots {
 		switch (JugcraftGuns.shot(gun)) {
 			case JugcraftGuns.GRENADE -> lob(level, player, stack, spec, spread);
 			case JugcraftGuns.FLAME -> burn(level, player, spec, spread);
-			case JugcraftGuns.BEAM -> beam(level, player, spec, spread, hand, JugcraftGuns.bleed(gun), JugcraftGuns.piercing(gun), JugcraftGuns.mining(gun));
-			case JugcraftGuns.ARC -> arc(level, player, spec, spread, hand);
+			case JugcraftGuns.BEAM -> beam(level, player, spec, spread, hand, JugcraftGuns.bleed(gun), JugcraftGuns.hitEffect(gun),
+					JugcraftGuns.piercing(gun), JugcraftGuns.mining(gun));
+			case JugcraftGuns.ARC -> arc(level, player, spec, spread, hand, JugcraftGuns.bleed(gun), JugcraftGuns.hitEffect(gun));
 			case JugcraftGuns.ROCKET -> rocket(level, player, gun, spec, spread);
 			default -> shoot(level, player, gun, spec, spread);
 		}
@@ -553,7 +554,7 @@ public final class GunShots {
 	private static void shoot(ServerLevel level, ServerPlayer player, GunItem gun, GunSpec spec, float spread) {
 		bullets(level, player, player.getEyePosition(), player.getLookAngle(), spec, spread, spec.damage(), JugcraftGuns.ignites(gun),
 				JugcraftGuns.levitates(gun), JugcraftGuns.knockback(gun), JugcraftGuns.piercing(gun), JugcraftGuns.bleed(gun),
-				candidate -> target(player, candidate), candidate -> allowed(player, level, candidate));
+				JugcraftGuns.hitEffect(gun), candidate -> target(player, candidate), candidate -> allowed(player, level, candidate));
 	}
 
 	/**
@@ -565,12 +566,13 @@ public final class GunShots {
 	 * when {@code lifts} (slice 12A, an End gun), it floats for {@link #LIFT_TICKS}. Each creature the hit hurts is knocked
 	 * back again by {@code knockback} after a hit's own push, and the hit passes through {@code pierce} points of its armour
 	 * ({@link #pierced}; the Jawbreaker's, {@link JugcraftGuns#KNOCKBACK} and {@link JugcraftGuns#PIERCING}). With a
-	 * {@code bleed} (the darts-and-bleeding follow-up, {@link JugcraftGuns#BLEEDS}), each creature the hit hurts may bleed.
+	 * {@code bleed} (the darts-and-bleeding follow-up, {@link JugcraftGuns#BLEEDS}), each creature the hit hurts may bleed;
+	 * with an {@code effect} (the hit-effects follow-up, {@link JugcraftGuns#HIT_EFFECTS}), it may be slowed or darkened.
 	 * A gun that fires darts ({@link JugcraftGuns#DART}) fires them along a falling flight ({@link #flight}).
 	 */
 	static void bullets(ServerLevel level, LivingEntity shooter, Vec3 eye, Vec3 look, GunSpec spec, float spread, float damage,
 			boolean ignites, boolean lifts, float knockback, float pierce, JugcraftGuns.@Nullable Bleed bleed,
-			Predicate<LivingEntity> hittable, Predicate<LivingEntity> allowed) {
+			JugcraftGuns.@Nullable HitEffect effect, Predicate<LivingEntity> hittable, Predicate<LivingEntity> allowed) {
 		RandomSource random = shooter.getRandom();
 		Map<LivingEntity, Float> hits = new LinkedHashMap<>();
 		boolean falls = JugcraftGuns.DART.equals(spec.ammo());
@@ -625,6 +627,7 @@ public final class GunShots {
 					target.addEffect(new MobEffectInstance(MobEffects.LEVITATION, LIFT_TICKS, 0), shooter);
 				}
 				bleed(target, bleed, shooter, random);
+				afflict(target, effect, shooter, random);
 			}
 		});
 		smoke(level, eye, look);
@@ -651,6 +654,17 @@ public final class GunShots {
 	private static void bleed(LivingEntity target, JugcraftGuns.@Nullable Bleed bleed, LivingEntity shooter, RandomSource random) {
 		if (bleed != null && random.nextFloat() < bleed.chance()) {
 			target.addEffect(new MobEffectInstance(JugcraftGuns.BLEEDING, bleed.ticks(), 0), shooter);
+		}
+	}
+
+	/**
+	 * Gives {@code target} {@code effect}'s vanilla effect, at its chance, for its ticks and at its amplifier (the
+	 * hit-effects follow-up, {@link JugcraftGuns#HIT_EFFECTS}); none for null. A longer or stronger effect already on the
+	 * creature stays, as the game's own effects do.
+	 */
+	public static void afflict(LivingEntity target, JugcraftGuns.@Nullable HitEffect effect, LivingEntity shooter, RandomSource random) {
+		if (effect != null && random.nextFloat() < effect.chance()) {
+			target.addEffect(new MobEffectInstance(effect.holder(), effect.ticks(), effect.amplifier()), shooter);
 		}
 	}
 
@@ -756,11 +770,12 @@ public final class GunShots {
 	/**
 	 * A beam (slice 8D): from the eye along the look, strayed by the spread, to the first block within range. Every creature
 	 * in its line that the shooter may strike takes the shot's damage ({@link JugcraftGuns#ZAP_DAMAGE}), through
-	 * {@code pierce} points less armour (slice 15E, {@link #pierced}); it passes through them all. A mining beam cuts the
-	 * block it ends at (the beam-mining follow-up, {@link #cut}); no other beam touches a block.
+	 * {@code pierce} points less armour (slice 15E, {@link #pierced}); it passes through them all, and each it hurts may
+	 * bleed or take the gun's hit effect ({@link #afflict}). A mining beam cuts the block it ends at (the beam-mining
+	 * follow-up, {@link #cut}); no other beam touches a block.
 	 */
 	private static void beam(ServerLevel level, ServerPlayer player, GunSpec spec, float spread, InteractionHand hand,
-			JugcraftGuns.@Nullable Bleed bleed, float pierce, JugcraftGuns.@Nullable Mining mining) {
+			JugcraftGuns.@Nullable Bleed bleed, JugcraftGuns.@Nullable HitEffect effect, float pierce, JugcraftGuns.@Nullable Mining mining) {
 		Vec3 eye = player.getEyePosition();
 		Vec3 direction = stray(player.getLookAngle(), spread, player.getRandom());
 		Vec3 end = eye.add(direction.scale(spec.range()));
@@ -774,6 +789,7 @@ public final class GunShots {
 			if (foe.getBoundingBox().inflate(HIT_MARGIN).clip(eye, end).isPresent() && allowed(player, level, foe)
 					&& foe.hurtServer(level, source, pierced(foe, spec.damage(), pierce))) {
 				bleed(foe, bleed, player, player.getRandom());
+				afflict(foe, effect, player, player.getRandom());
 			}
 		}
 		trace(player, GunTracePayload.BEAM, List.of(end), hand);
@@ -825,9 +841,11 @@ public final class GunShots {
 	 * at most the spread off the look, with no block between it and the eye (the nearer of two equally near the aim).
 	 * From each creature it strikes it leaps on to the nearest other within {@link JugcraftGuns#ARC_REACH} blocks with no
 	 * block between them, at most {@link JugcraftGuns#ARC_HOPS} times, each taking {@link JugcraftGuns#ARC_SHARE} of the
-	 * damage before it. Finding none, it strikes the first block along the look within range, harmlessly.
+	 * damage before it; each it hurts may bleed or take the gun's hit effect (the hit-effects follow-up, {@link #afflict}).
+	 * Finding none, it strikes the first block along the look within range, harmlessly.
 	 */
-	private static void arc(ServerLevel level, ServerPlayer player, GunSpec spec, float spread, InteractionHand hand) {
+	private static void arc(ServerLevel level, ServerPlayer player, GunSpec spec, float spread, InteractionHand hand,
+			JugcraftGuns.@Nullable Bleed bleed, JugcraftGuns.@Nullable HitEffect effect) {
 		Vec3 eye = player.getEyePosition();
 		Vec3 look = player.getLookAngle();
 		double reach = spec.range();
@@ -861,7 +879,10 @@ public final class GunShots {
 		for (LivingEntity foe = mark; foe != null; foe = struck.size() > JugcraftGuns.ARC_HOPS ? null : leap(level, player, foe, struck)) {
 			struck.add(foe);
 			points.add(foe.getBoundingBox().getCenter());
-			foe.hurtServer(level, source, damage);
+			if (foe.hurtServer(level, source, damage)) {
+				bleed(foe, bleed, player, player.getRandom());
+				afflict(foe, effect, player, player.getRandom());
+			}
 			damage *= JugcraftGuns.ARC_SHARE;
 		}
 		trace(player, GunTracePayload.ARC, points, hand);

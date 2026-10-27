@@ -8,6 +8,12 @@ Every change to Jugcraft, newest first, grouped by pull request. For what each t
 
 No numbered release yet. Entries on feature branches remain proposed until their pull requests merge.
 
+### Unmerged: Guns, hit effects
+- The owner's other hit effects come to the guns built, each a chance on every creature a hit hurts, at the owner's numbers: the **Linesman's** and the **Stormlock Rifle's** arcs may slow what they strike (40%, 10 s), the **Geode Cutter's** beam may slow what it burns (75%, 5 s), and the **Lament Rifle's** bullets may darken a player's view (25%, 5 s, Darkness II).
+- **Bleeding for two more guns:** the **Cloudburst Gun** (30%, 15 s), which the darts follow-up missed, and the **Caisson Pistol** (50%, 10 s), whose arc now carries hit effects to each creature it leaps to.
+- Their tooltips say so. The owner's withering waits for the Flayed God, which is not built.
+- Record: [guns.md, hit effects](docs/features/guns.md#follow-up-hit-effects).
+
 ### Unmerged: Guns, beams that mine
 - The **Seam Cutter** and the **Geode Cutter** now cut the block their beam ends at, as the owner's mining lasers do. The Seam Cutter goes through stone in two shots (the owner's mining speed of 14, faster than a netherite pickaxe); the Geode Cutter cuts slowly (speed 1, a bare hand's). Cracks show while it cuts, and the block drops what it would broken by hand. The Seam Cutter harvests what an iron pickaxe can; the Geode Cutter what a diamond one can.
 - A beam only cuts where its shooter may break blocks: not in adventure mode, under spawn protection, in the protected town, or where a protection mod refuses. It never cuts a block holding a block entity, such as a chest or a machine. Each shot costs its charge as before.

@@ -1871,10 +1871,25 @@ def check_guns():
     bleeds = ", ".join(f'"{gun}", new Bleed({chance}F, {ticks})' for gun, (chance, ticks) in guns.BLEEDS.items())
     if f"BLEEDS = Map.of({bleeds});" not in java:
         err(f"JugcraftGuns.BLEEDS differs from tools/guns.py: expected Map.of({bleeds})")
+    # The hit-effects follow-up: an arc's hits may bleed too, and some guns' hits give a vanilla effect.
+    hurts = ("bullet", "beam", "arc")
     for gun, (chance, ticks) in guns.BLEEDS.items():
-        if gun not in guns.GUNS or guns.GUNS[gun].get("shot", "bullet") not in ("bullet", "beam") or not 0 < chance <= 1 or ticks <= 0:
-            err(f"tools/guns.py BLEEDS names {gun}, which is not a gun that fires bullets or a beam, or gives it {chance} a hit "
-                f"(more than 0, at most 1) for {ticks} ticks")
+        if gun not in guns.GUNS or guns.GUNS[gun].get("shot", "bullet") not in hurts or not 0 < chance <= 1 or ticks <= 0:
+            err(f"tools/guns.py BLEEDS names {gun}, which is not a gun that fires bullets, a beam or an arc, or gives it {chance} "
+                f"a hit (more than 0, at most 1) for {ticks} ticks")
+    effects = ", ".join(f'"{gun}", new HitEffect("{effect}", {chance}F, {ticks}, {amplifier})'
+                        for gun, (effect, chance, ticks, amplifier) in guns.HIT_EFFECTS.items())
+    if f"HIT_EFFECTS = Map.of({effects});" not in java:
+        err(f"JugcraftGuns.HIT_EFFECTS differs from tools/guns.py: expected Map.of({effects})")
+    for gun, (effect, chance, ticks, amplifier) in guns.HIT_EFFECTS.items():
+        if (gun not in guns.GUNS or guns.GUNS[gun].get("shot", "bullet") not in hurts or not 0 < chance <= 1 or ticks <= 0
+                or not 0 <= amplifier <= 4):
+            err(f"tools/guns.py HIT_EFFECTS names {gun}, which is not a gun that fires bullets, a beam or an arc, or gives it "
+                f"{chance} a hit (more than 0, at most 1) for {ticks} ticks at amplifier {amplifier} (0 to 4)")
+        if f'case "{effect}" -> MobEffects.{effect.upper()};' not in java:
+            err(f"tools/guns.py HIT_EFFECTS gives {gun} {effect}, which JugcraftGuns.HitEffect.holder() does not name")
+    if "afflict(foe, effect, player, player.getRandom());" not in shots_java or "afflict(target, effect, shooter, random);" not in shots_java:
+        err("GunShots must give each creature a bullet, beam or arc hurts its gun's hit effect (afflict)")
     # Slice 15D: the guns that fire a burst to a pull, and how they rest between bursts.
     bursts = ", ".join(f'"{gun}", new Burst({rounds}, {rest})' for gun, (rounds, rest) in guns.BURSTS.items())
     if f"BURSTS = Map.of({bursts});" not in java:

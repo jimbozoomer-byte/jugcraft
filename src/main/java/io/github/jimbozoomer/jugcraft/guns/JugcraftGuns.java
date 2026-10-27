@@ -27,6 +27,7 @@ import net.minecraft.resources.ResourceKey;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.world.damagesource.DamageType;
 import net.minecraft.world.effect.MobEffect;
+import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.CreativeModeTabs;
 import net.minecraft.world.item.Item;
@@ -387,9 +388,33 @@ public final class JugcraftGuns {
 	/**
 	 * The guns whose hits may make a creature bleed (the darts-and-bleeding follow-up; tools/guns.py BLEEDS), from the
 	 * owner's data (their "lacerated", its chance and duration): the M3 Marksman's for the Picket Rifle, the Railworker's
-	 * for the Spikedriver, the Scratches' for the Harrow and the Zilk 45's for the Quill Rifle.
+	 * for the Spikedriver, the Scratches' for the Harrow and the Zilk 45's for the Quill Rifle; and (the hit-effects
+	 * follow-up) the Thunderhead's for the Cloudburst Gun and the Hyperbaria's for the Caisson Pistol, whose arc now
+	 * carries it.
 	 */
-	public static final Map<String, Bleed> BLEEDS = Map.of("picket_rifle", new Bleed(0.3F, 300), "spikedriver", new Bleed(0.6F, 300), "harrow", new Bleed(0.3F, 300), "quill_rifle", new Bleed(0.4F, 300));
+	public static final Map<String, Bleed> BLEEDS = Map.of("picket_rifle", new Bleed(0.3F, 300), "spikedriver", new Bleed(0.6F, 300), "harrow", new Bleed(0.3F, 300), "quill_rifle", new Bleed(0.4F, 300), "cloudburst_gun", new Bleed(0.3F, 300), "caisson_pistol", new Bleed(0.5F, 200));
+
+	/**
+	 * A vanilla effect a gun's hit may give (the hit-effects follow-up, {@link #HIT_EFFECTS}): its name, the chance a hit
+	 * gives it, for how many ticks and at what amplifier.
+	 */
+	public record HitEffect(String effect, float chance, int ticks, int amplifier) {
+		/** The vanilla effect this names. */
+		public Holder<MobEffect> holder() {
+			return switch (effect) {
+				case "slowness" -> MobEffects.SLOWNESS;
+				case "darkness" -> MobEffects.DARKNESS;
+				default -> throw new IllegalStateException("No hit effect " + effect);
+			};
+		}
+	}
+
+	/**
+	 * The guns whose hits may give a vanilla effect (the hit-effects follow-up; tools/guns.py HIT_EFFECTS), from the owner's
+	 * data (its effect, chance, duration and amplifier): slowness from the Linesman, Stormlock Rifle and Geode Cutter, and
+	 * darkness from the Lament Rifle.
+	 */
+	public static final Map<String, HitEffect> HIT_EFFECTS = Map.of("linesman", new HitEffect("slowness", 0.4F, 200, 0), "stormlock_rifle", new HitEffect("slowness", 0.4F, 200, 0), "geode_cutter", new HitEffect("slowness", 0.75F, 100, 0), "lament_rifle", new HitEffect("darkness", 0.25F, 100, 1));
 
 	/** The attachments, in the order the creative tab shows them (tools/guns.py ATTACHMENTS). */
 	public static final Map<String, GunAttachment> ATTACHMENTS = new LinkedHashMap<>();
@@ -859,6 +884,11 @@ public final class JugcraftGuns {
 	/** This gun's chance a hit to make a creature bleed, and for how long ({@link #BLEEDS}); null for most. */
 	public static @Nullable Bleed bleed(GunItem gun) {
 		return BLEEDS.get(gun.name());
+	}
+
+	/** The vanilla effect this gun's hits may give ({@link #HIT_EFFECTS}); null for most. */
+	public static @Nullable HitEffect hitEffect(GunItem gun) {
+		return HIT_EFFECTS.get(gun.name());
 	}
 
 	/** The burst this gun fires to a pull (slice 15D, {@link #BURSTS}); null for a gun that fires one shot a pull. */

@@ -26,7 +26,8 @@ public class DartsAndBleedingGameTests {
 	/**
 	 * The Dart is registered, with its recipe and its spent case, and the Quill Rifle fires it. The guns that may make a
 	 * creature bleed are the owner's, at the owner's chances and lengths (their "lacerated"): the Picket Rifle's, the
-	 * Spikedriver's, the Harrow's and the Quill Rifle's. The Bleeding effect is registered.
+	 * Spikedriver's, the Harrow's and the Quill Rifle's, and (the hit-effects follow-up) the Cloudburst Gun's and the
+	 * Caisson Pistol's. The Bleeding effect is registered.
 	 */
 	@GameTest
 	public void dartsAndBleedingAreTheOwners(GameTestHelper helper) {
@@ -36,7 +37,8 @@ public class DartsAndBleedingGameTests {
 				"The Dart's recipe does not load");
 		helper.assertTrue(JugcraftGuns.SPECS.get("quill_rifle").ammo().equals(JugcraftGuns.DART), "The Quill Rifle does not fire darts");
 		helper.assertTrue(JugcraftGuns.BLEEDS.equals(Map.of("picket_rifle", new JugcraftGuns.Bleed(0.3F, 300), "spikedriver",
-				new JugcraftGuns.Bleed(0.6F, 300), "harrow", new JugcraftGuns.Bleed(0.3F, 300), "quill_rifle", new JugcraftGuns.Bleed(0.4F, 300))),
+				new JugcraftGuns.Bleed(0.6F, 300), "harrow", new JugcraftGuns.Bleed(0.3F, 300), "quill_rifle", new JugcraftGuns.Bleed(0.4F, 300),
+				"cloudburst_gun", new JugcraftGuns.Bleed(0.3F, 300), "caisson_pistol", new JugcraftGuns.Bleed(0.5F, 200))),
 				"The guns that make a creature bleed are not the owner's: " + JugcraftGuns.BLEEDS);
 		helper.assertTrue(JugcraftGuns.BLEEDING != null && JugcraftGuns.BLEEDING.isBound(), "Bleeding is not registered");
 		helper.succeed();

@@ -250,16 +250,16 @@ GUNS = {
     "stormlock_rifle": {
         "display": "Stormlock Rifle",
         "source": "teslock_rifle",
-        "tooltip": "A coil rifle whose bolt leaps from its mark to two more creatures close by. Loaded a charge at a "
-                   "time. Runs on Energy Cells.",
+        "tooltip": "A coil rifle whose bolt leaps from its mark to two more creatures close by, and may slow them. "
+                   "Loaded a charge at a time. Runs on Energy Cells.",
         "damage": 9.0, "pellets": 1, "interval": 14, "auto": False, "capacity": 5,
         "reload": (18, 17, 20), "spread": (2.0, 0.5), "range": 64, "ammo": "energy_cell", "shot": "arc", "charge": 750,
     },
     "linesman": {
         "display": "Linesman",
         "source": "arc_worker",
-        "tooltip": "A short-range arc thrower. Hold the trigger: its arcs find the creatures in front of it and leap "
-                   "between them. Loaded a cell at a time. Runs on Energy Cells.",
+        "tooltip": "A short-range arc thrower. Hold the trigger: its arcs find the creatures in front of it, leap "
+                   "between them and may slow them. Loaded a cell at a time. Runs on Energy Cells.",
         "damage": 4.0, "pellets": 1, "interval": 6, "auto": True, "capacity": 6,
         "reload": (8, 13, 12), "spread": (15.0, 10.0), "range": 12, "ammo": "energy_cell", "shot": "arc", "charge": 250,
     },
@@ -339,8 +339,8 @@ GUNS = {
     "caisson_pistol": {
         "display": "Caisson Pistol",
         "source": "hyperbaria",
-        "tooltip": "A pressure pistol held in one hand: its bolt leaps from its mark to two more creatures close by. The "
-                   "tall tank on top is changed to reload. Runs on Energy Cells.",
+        "tooltip": "A pressure pistol held in one hand: its bolt leaps from its mark to two more creatures close "
+                   "by, and may make them bleed. The tall tank on top is changed to reload. Runs on Energy Cells.",
         "damage": 5.0, "pellets": 1, "interval": 8, "auto": False, "capacity": 10,
         "reload": 57, "spread": (6.0, 3.0), "range": 24, "ammo": "energy_cell", "shot": "arc", "charge": 300,
     },
@@ -612,8 +612,9 @@ GUNS = {
     "lament_rifle": {
         "display": "Lament Rifle",
         "source": "forlorn_hope",
-        "tooltip": "A sculk-grown bolt-action rifle, its bolt worked after every shot: one heavy, true shot at long range "
-                   "from a magazine of five. Fires rifle rounds.",
+        "tooltip": "A sculk-grown bolt-action rifle, its bolt worked after every shot: one heavy, true shot at long "
+                   "range from a magazine of five, and what it hits may lose its sight for a while. Fires rifle "
+                   "rounds.",
         "damage": 16.0, "pellets": 1, "interval": 19, "auto": False, "capacity": 5,
         "reload": 53, "spread": (2.0, 0.05), "range": 160, "ammo": "rifle_round",
     },
@@ -831,7 +832,7 @@ GUNS = {
         "display": "Cloudburst Gun",
         "source": "thunderhead",
         "tooltip": "A twin-barrelled automatic fed from a drum of thirty, cocked by the lever-handle on its top: it "
-                   "fires as long as the trigger is held. Fires rifle rounds.",
+                   "fires as long as the trigger is held, and what it hits may bleed. Fires rifle rounds.",
         "damage": 5.0, "pellets": 1, "interval": 4, "auto": True, "capacity": 30,
         "reload": 78, "spread": (4.5, 2.0), "range": 72, "ammo": "rifle_round",
     },
@@ -1004,9 +1005,9 @@ GUNS = {
     "geode_cutter": {
         "display": "Geode Cutter",
         "source": "shard_culler",
-        "tooltip": "A crystal-lensed cutting beam carried at the hip: as long as the trigger is held it burns through "
-                   "every creature in front of it, and through armour, and slowly cuts the block at its end. Runs on "
-                   "Energy Cells.",
+        "tooltip": "A crystal-lensed cutting beam carried at the hip: as long as the trigger is held it burns "
+                   "through every creature in front of it, and through armour, and may slow them; it slowly cuts "
+                   "the block at its end. Runs on Energy Cells.",
         "damage": 3.0, "pellets": 1, "interval": 3, "auto": True, "capacity": 50,
         "reload": 59, "spread": (3.0, 1.5), "range": 24, "ammo": "energy_cell", "shot": "beam", "charge": 120,
     },
@@ -4399,12 +4400,22 @@ DART_DROP = 0.05
 # whose hits may make a creature bleed, each (the chance a hit, ticks), from the owner's data (impactEffect
 # scguns:lacerated, its chance and duration): the M3 Marksman's for the Picket Rifle, the Railworker's for the
 # Spikedriver (its beam), the Scratches' for the Harrow and the Zilk 45's for the Quill Rifle. A shotgun's pellets on
-# one creature land as one hit: one chance a pull. The Caisson Pistol fires an arc here, not the owner's Hyperbaria's
-# darts, and does not bleed.
+# one creature land as one hit: one chance a pull. The hit-effects follow-up adds the Thunderhead's for the Cloudburst
+# Gun, which the darts follow-up missed, and the Hyperbaria's for the Caisson Pistol, whose arc now carries it (each
+# creature the arc strikes has its chance).
 BLEED_TICKS = 40
 BLEED_DAMAGE = 1.0
-BLEEDS = {"picket_rifle": (0.3, 300), "spikedriver": (0.6, 300), "harrow": (0.3, 300), "quill_rifle": (0.4, 300)}
+BLEEDS = {"picket_rifle": (0.3, 300), "spikedriver": (0.6, 300), "harrow": (0.3, 300), "quill_rifle": (0.4, 300),
+          "cloudburst_gun": (0.3, 300), "caisson_pistol": (0.5, 200)}
 BLEEDING_ICON = "lacerated"
+
+# The hit-effects follow-up: the owner's other hit effects (impactEffect, its chance a hit, its ticks and its amplifier)
+# on the guns built, as vanilla's own effects, each creature a hit hurts having its chance (JugcraftGuns.HIT_EFFECTS,
+# GunShots.afflict): slowness from the Arc Worker's arcs (the Linesman), the Teslock Rifle's (the Stormlock Rifle) and
+# the Shard Culler's beam (the Geode Cutter); darkness, at its second level, from the Forlorn Hope (the Lament Rifle).
+# The owner's withering is on the Flayed God, not built; the levitation of the End guns is slice 12A's (LEVITATING).
+HIT_EFFECTS = {"linesman": ("slowness", 0.4, 200, 0), "stormlock_rifle": ("slowness", 0.4, 200, 0),
+               "geode_cutter": ("slowness", 0.75, 100, 0), "lament_rifle": ("darkness", 0.25, 100, 1)}
 
 
 def cell_rack_model():

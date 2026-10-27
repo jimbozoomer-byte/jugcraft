@@ -3025,7 +3025,7 @@ Aim a little high at a long shot. Bullets fly straight, as before.
 - **One chance a hit:** a shotgun's pellets on one creature land as one hit, so the Harrow has one chance a pull for each creature it strikes; the Spikedriver's beam has one for each creature in its line.
 - **Fifteen seconds of bleeding** take seven points, through any armour.
 - **Raider gunners** (slice 10F) fire through the same code; none of their service arms bleeds.
-- **Not given:** the Caisson Pistol (the owner's Hyperbaria) fires an arc here, not the owner's darts, so it does not bleed. The owner's other hit effects (slowness, darkness, withering on some of their guns) are not carried over.
+- **Not given** in this follow-up: the Caisson Pistol (the owner's Hyperbaria) fires an arc here, not the owner's darts, and an arc carried no hit effect; the Cloudburst Gun (the Thunderhead) was missed. The owner's other hit effects (slowness, darkness, withering on some of their guns) were not carried over. The [hit-effects follow-up](#follow-up-hit-effects) gives both guns their bleeding, and the slowness and darkness of the guns built.
 
 **Tooltips:** the Quill's says it fires darts and makes what it hits bleed; the Picket Rifle's, the Spikedriver's and the Harrow's that what they hit may bleed.
 
@@ -3162,7 +3162,7 @@ The owner's last three diamond-steel guns, taken up after slice 15D (on 27 Octob
 **Known limits** (the first two are owner decisions):
 - **Names:** "Maelstrom Gun", "Ermine Rifle", "Geode Cutter" and "Microjet" are proposed.
 - **The Geode Cutter did not mine** in this slice: the owner's data lets the Shard Culler's beam break blocks (`enableMining`), as the Seam Cutter's could not. The [beam-mining follow-up](#follow-up-beams-that-mine) gives both their mining.
-- **No slowness on a hit:** the owner's data slows what the Shard Culler hits (`impactEffect`), as the other hit effects not yet built (below).
+- **No slowness on a hit** in this slice: the owner's data slows what the Shard Culler hits (`impactEffect`). The [hit-effects follow-up](#follow-up-hit-effects) gives it.
 - **Energy Cells, not the owner's cores:** the owner's beam guns load an energy core, which leaves a spent core behind; here they draw charge from Energy Cells as the energy guns before them.
 - **A microjet does not fly:** the owner's microjets are rockets that fly 1.5 blocks a tick; here it strikes at once along the look, as a round does. The Maelstrom does not slow its carrier as the owner's data asks (`speedModifier`).
 - **The arms in the reloads and inspections** come large into the view in places, as on the guns before them.
@@ -3196,6 +3196,52 @@ The owner's data lets two of their beam guns cut blocks (`enableMining`): the CR
 - **Drops are an unenchanted break's:** no Fortune or Silk Touch.
 - **It does not count as mining for statistics:** a cut block is not in the "mined" statistic and costs no hunger.
 - **Not played:** none of it has been played yet. The speeds and charge want play to set.
+
+## Follow-up: hit effects
+The owner's data gives some of their guns a chance, at each hit, of an effect on what they hit (`impactEffect`, with its chance, duration and level). The guns had carried over only bleeding ([darts and bleeding](#follow-up-darts-and-bleeding)). Offered after the beams that mine, the owner chose it on 27 October 2026 ("Lets do the hit effects"), as its own pull request.
+
+**Slowness and darkness** (`HIT_EFFECTS` in `tools/guns.py`, `JugcraftGuns.HIT_EFFECTS`, `GunShots.afflict`): vanilla's own effects, at the owner's numbers.
+
+| | Linesman | Stormlock Rifle | Geode Cutter | Lament Rifle |
+|---|---|---|---|---|
+| The owner's gun | Arc Worker | Teslock Rifle | Shard Culler | Forlorn Hope |
+| Shot | arc | arc | beam | bullet |
+| Effect | Slowness | Slowness | Slowness | Darkness, its second level |
+| Chance a hit | 40% | 40% | 75% | 25% |
+| How long | 10 s | 10 s | 5 s | 5 s |
+
+**Bleeding for two more guns** (`BLEEDS`):
+- **Cloudburst Gun** (the owner's Thunderhead): 30% a hit, for 15 s. The darts-and-bleeding follow-up missed it.
+- **Caisson Pistol** (the owner's Hyperbaria): 50% a hit, for 10 s. The owner's gun fires darts; here it fires an arc, which now carries hit effects.
+
+**How they land:**
+- **Each creature a hit hurts has its own chance:** a bullet's (a shotgun's pellets on one creature are one hit), each in a beam's line, and each an arc strikes as it leaps. An arc gave no effect before; it now gives them as bullets and beams do.
+- **A hit that does no harm gives nothing:** a creature shielded, or one other code protects.
+- **As the game's own effects:** a longer or stronger effect already on a creature stays, and milk ends them. A creature that refuses an effect (as the Yeti King refuses Levitation) refuses it here too.
+- **Slowness** at its first level takes 15% off a creature's speed. **Darkness** dims a player's view in pulses; it does nothing to a mob.
+- **Raider gunners** (slice 10F) fire through the same code; none of their service arms has an effect.
+
+**Tooltips:** each of the six says what its hits may do.
+
+**Checked:** `tools/check_mod_data.py` holds `JugcraftGuns.HIT_EFFECTS` and `BLEEDS` to `tools/guns.py`.
+- Each entry is a gun that fires bullets, a beam or an arc, its chance above 0 and at most 1, its ticks above 0, its level 0 to 4.
+- Each effect named is one `HitEffect.holder()` maps.
+- `GunShots` gives the effect on bullets' and beams' or arcs' hits.
+- Game tests: `HitEffectsGameTests` ([Verification](#verification)).
+
+**Balance:** the effects add no damage of their own.
+- **Slowness** keeps a foe in reach of the short arc guns and the Geode Cutter's 24 blocks.
+- **Darkness** costs a player their view for five seconds, a quarter of the Lament Rifle's hits.
+- **Bleeding:** fifteen seconds take seven points, ten seconds five, through any armour. The Cloudburst fires five times a second, so a creature it keeps hitting soon bleeds.
+- **Conversions:** none.
+
+**Save compatibility:** nothing saved changes. Effects on creatures are saved as the game saves any effect.
+
+**Known limits:**
+- **Withering waits for the Flayed God,** which is not built. The other effects in the owner's data are on guns not built either: the Crusader's healing, the slowness of Dark Matter, the Lone Wonder and the Pulsar, and the Nailer's and RG Jigsaw's bleeding.
+- **Levitation stays slice 12A's:** the owner's End guns lift what they hit 23% to 30% of the time, for 5 s. Here every hit lifts, for a second (`LIFT_TICKS`), as slice 12A chose; this follow-up leaves it.
+- **Darkness only matters to players.**
+- **Not played:** none of it has been played yet. The chances want play to set.
 
 ## Connections
 - **Existing input producers:** copper, iron and gunpowder (vanilla); lead nuggets (the lead switch's lead); brass nuggets (brass, from zinc); paper and planks.
@@ -6237,6 +6283,18 @@ Slice 9E's files: the guns' tactical grip parts and the Laser Sight's textures m
     - `beamsLeaveWhatTheyMayNotCut`: eight Seam Cutter shots each leave obsidian (beyond an iron pickaxe), a chest (a block entity) and stone before a shooter in adventure mode.
     - `beamMiningCanBeTurnedOff`: with `guns.beam_mining` off, a shot leaves a slime block; with it on again, the next shot breaks it.
   - Earlier tests that fire these beams: the Seam Cutter's (`SecondEnergyGunsGameTests.seamCutterBurnsWhileHeld`) aims over its pigs' stone pillars, and its beam ends beyond them; the Geode Cutter's (`DiamondSteelGunsVGameTests.geodeCutterBeamPiercesArmour`) fires once, cutting a floor block by a fifteenth. The guns' client test fires each gun once at its husk: a Seam Cutter shot cuts the stone-brick wall behind it 62% of the way, so it cracks but stands.
+- **Hit effects, run locally (27 October 2026):**
+  - `python3 tools/check_mod_data.py`: PASS (8033 material IDs). Its new hit-effects check, run alone against broken tables, reported each: a changed Lament chance, an entry that is no gun with a chance of 1.5, 0 ticks and level 9, an effect `HitEffect.holder()` does not map (poison), and bleeding on the Trench Lobber.
+  - `python3 tools/guns.py --check`: PASS. `python3 scripts/check_repository.py`: PASS. `python3 -m unittest discover -s scripts/tests`: 287 tests passed; `python3 scripts/package_modrinth.py check`: PASS. `git diff --check`: clean.
+  - **Java:** a syntax parse only: 0 errors in the changed and new files.
+- **Hit effects, game tests (not run yet; CI runs them):**
+  - `HitEffectsGameTests`:
+    - `hitEffectsAreTheOwners`: the table is the owner's four, naming vanilla's Slowness and Darkness; the Linesman and the Stormlock fire arcs, the Geode Cutter a beam, the Lament Rifle bullets; the Picket Rifle and the Caisson Pistol give none.
+    - `afflictGivesItsChance`: a sure darkness lands at its second level for 100 ticks; an effect of no chance, and none, never land. The Lament Rifle's darkness lands on a seeded roll under its chance and not on one over it, as a twin of the same random shows.
+    - `geodeCutterBeamSlows`: twelve shots through two pigs in a line hurt and slow both (slowness at its first level, at most 100 ticks); the bedrock behind them stands. All twelve hits missing one pig is about one in seventeen million.
+    - `linesmanArcSlows`: thirty arcs at a pig slow it (all thirty missing is about one in four million).
+    - `caissonArcBleeds`: twenty shots at a pig with two more beside it, two blocks apart, hurt all three and make all three bleed (a pig all twenty miss is about one in a million).
+  - `DartsAndBleedingGameTests.dartsAndBleedingAreTheOwners`: the bleeding table with the Cloudburst Gun's and the Caisson Pistol's.
 - **Not run:** the client by hand, a two-client dedicated server, and play.
 
 ## World and event applicability
@@ -6257,5 +6315,5 @@ No worldgen, structures, bosses or seasonal content. Guns, rounds and the Cell R
   - the owner's other GeckoLib gun models from their upload of 23 October 2026: only the Grandle OG's and the fifteen diamond-steel guns' (slices 15A to 15E) are in the library ([the library record](../../art/owner-library/README.md#gun-geometry-23-october-2026));
   - the owner's armour piercing and knockback for the guns before slice 15: their data gives 49 of them one or both ([above](#follow-up-armour-piercing-for-slices-15as-and-15bs-guns));
   - a shotgun that pushes its shooter back (the owner's Inertial and Drill Conversion);
-  - the owner's other hit effects: slowness, darkness and withering from the guns whose data names them, and bleeding from the Caisson Pistol (it fires an arc here, not the owner's darts) and from guns not built yet.
+  - the owner's withering (the Flayed God's) and the other hit effects of guns not built yet ([above](#follow-up-hit-effects)).
 - **Balance:** the numbers are starting points for the owner to set.

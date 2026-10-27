@@ -235,6 +235,7 @@
       "io.github.jimbozoomer.jugcraft.test.DiamondSteelGunsIVGameTests",
       "io.github.jimbozoomer.jugcraft.test.DiamondSteelGunsVGameTests",
       "io.github.jimbozoomer.jugcraft.test.BeamMiningGameTests",
+      "io.github.jimbozoomer.jugcraft.test.HitEffectsGameTests",
       "io.github.jimbozoomer.jugcraft.test.HeavyBulletsGameTests",
       "io.github.jimbozoomer.jugcraft.test.ArmorSetsGameTests",
       "io.github.jimbozoomer.jugcraft.test.TitaniumGearGameTests",
