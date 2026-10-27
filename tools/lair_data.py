@@ -765,11 +765,12 @@ def glass_chapel_assets(models, states, write):
     for half in glass_chapel.MIRROR_PARTS:
         for angle in sorted({turn for _, turn in MIRROR_TURNS.values()}):
             base = f"chapel_mirror_{half}_{mirror_code(angle)}"
-            write(models / f"{base}.json", chapel_mirror(half, angle))
+            # The boxes, once; each look (plain, marked, veiled) gives them its textures.
+            write(models / f"{base}_base.json", chapel_mirror(half, angle))
             for marked in (False, True):
                 for veiled in (False, True):
                     write(models / f"{base}{'_marked' if marked else ''}{'_veiled' if veiled else ''}.json", {
-                        "parent": rid(f"block/{base}"), "textures": {
+                        "parent": rid(f"block/{base}_base"), "textures": {
                             "frame": rid("block/chapel_mirror_frame_lit" if marked else "block/chapel_mirror_frame"),
                             "glass": rid("block/chapel_mirror_veiled" if veiled else "block/chapel_mirror_glass")}})
     variants = {}

@@ -113,7 +113,11 @@ The beam is part 2's, but the chapel is built for it, and the audit holds it to 
 - Not run: play by hand, a dedicated server, two clients, performance measurements.
 
 ### Results
-- Local, on this branch: to be recorded with the push.
+- Local, on this branch (no Minecraft toolchain here, so neither the build nor the game tests ran locally; CI runs them):
+  - `python3 tools/check_mod_data.py`: the whole audit ran; its one error, the chapel's biome missing from `tools/seasons.py` OTHER, is fixed, and `check_seasonal_biomes` and `check_glass_chapel` were rerun clean.
+  - Deliberate breaks, each put back: a mirror's stop in `GlassChapel.Mirror`, `GlassChapel.BOUNCES`, `ChapelMirrorBlock.MARKED_LIGHT` and `GlassAccordRite.COOLDOWN`, each changed by one; the audit named every one.
+  - `python3 scripts/check_repository.py` passed; `python3 -m unittest discover -s scripts/tests` passed (287 tests); `tools/check_icon_maps.py` passed for the Glass Accord's map; every changed Java file parses.
+- `./gradlew build` and `./gradlew runClientGameTest`: CI's results go on the pull request.
 
 ## World and event applicability
 

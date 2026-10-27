@@ -1,5 +1,5 @@
 {
-  "parent": "jugcraft:block/chapel_mirror_upper_m22",
+  "parent": "jugcraft:block/chapel_mirror_upper_m22_base",
   "textures": {
     "frame": "jugcraft:block/chapel_mirror_frame",
     "glass": "jugcraft:block/chapel_mirror_glass"
