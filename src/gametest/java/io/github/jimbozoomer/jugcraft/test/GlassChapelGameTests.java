@@ -19,6 +19,7 @@ import net.fabricmc.fabric.api.gametest.v1.GameTest;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Vec3i;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.nbt.CompoundTag;
@@ -141,7 +142,9 @@ public class GlassChapelGameTests {
 					+ GlassAccordRite.check(level, feet, true, true));
 			helper.assertTrue(GlassAccordRite.check(level, feet, false, true) == GlassAccordRite.Missing.NIGHT, "At night the Accord was not refused");
 			helper.assertTrue(GlassAccordRite.check(level, feet, true, false) == GlassAccordRite.Missing.CLOUDED, "In rain the Accord was not refused");
-			level.setBlock(glass, Blocks.BLUE_STAINED_GLASS.defaultBlockState(), Block.UPDATE_ALL);
+			// Stained glass, looked up by its name: 26.3's Blocks has no BLUE_STAINED_GLASS field.
+			level.setBlock(glass, BuiltInRegistries.BLOCK.getValue(Identifier.withDefaultNamespace("blue_stained_glass")).defaultBlockState(),
+					Block.UPDATE_ALL);
 			helper.assertTrue(GlassAccordRite.check(level, feet, true, true) == null, "Under stained glass the Accord was refused");
 			level.setBlock(glass, Blocks.AIR.defaultBlockState(), Block.UPDATE_ALL);
 			BlockPos far = feet.above(GlassAccordRite.GLASS_REACH + 2);
