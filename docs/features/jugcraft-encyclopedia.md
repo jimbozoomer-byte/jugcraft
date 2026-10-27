@@ -204,6 +204,7 @@ CI's 427×240 GUI it leaves 134 pixels for a title, so "Magic: the Arcane Concor
 will be cut there.
 
 ## Fixes (27 October 2026)
+After merging main (5b8d6520c): fork [run 40464332925](https://github.com/mmme123-spec/jugcraftfork/actions/runs/40464332925) on `dde00ce56`, green, every job and all sixteen client shards.
 
 A contributor reported the encyclopedia (B) as "bugged and broken in general". CI screenshots of `main` (fork run
 40422697487, shards 11 and 12) and the code showed five faults, fixed here without changing the book's look:
