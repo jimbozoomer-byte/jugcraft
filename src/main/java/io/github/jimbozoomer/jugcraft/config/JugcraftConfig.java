@@ -94,7 +94,8 @@ public final class JugcraftConfig {
 			Map.entry("lairs.event_loot", "on"),
 			Map.entry("adam_ondi_ahman.start", "on"), Map.entry("adam_ondi_ahman.spacing", "3072"),
 			Map.entry("adam_ondi_ahman.chance", "0.5"),
-			Map.entry("herobrine.haunting", "on"));
+			Map.entry("herobrine.haunting", "on"), Map.entry("herobrine.event_last_day", "2026-11-03"),
+			Map.entry("herobrine.timezone", "America/New_York"));
 
 	private static final String FILE_NAME = "jugcraft.properties";
 	private static final Map<String, Boolean> ENABLED = new LinkedHashMap<>();
