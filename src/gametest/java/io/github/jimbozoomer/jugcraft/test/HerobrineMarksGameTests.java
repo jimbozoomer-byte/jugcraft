@@ -502,9 +502,13 @@ public class HerobrineMarksGameTests {
 		ServerLevel level = helper.getLevel();
 		HerobrineMarks marks = HerobrineMarks.get(level.getServer());
 		BlockPos centre = feet(helper, 24, 24);
-		// The signpost's place, its margin clear of the pyramid's base (which starts 9 blocks in).
-		BlockPos where = feet(helper, 1, 24);
-		ServerPlayer player = witness(helper, 1, 30);
+		// The signpost's place: on a natural stone pillar beside the pyramid, six high, so its margin (6 blocks round,
+		// 2 below) clears both the arena's walls and the pyramid's lowest steps, the only ones that near the edge.
+		for (int y = GROUND + 1; y <= GROUND + 6; y++) {
+			helper.setBlock(new BlockPos(6, y, 24), Blocks.STONE);
+		}
+		BlockPos where = feet(helper, 6, 24).above(6);
+		ServerPlayer player = witness(helper, 6, 30);
 		whenLeft(helper, () -> HerobrineMarks.beginTrail(level, centre, player, level.getRandom()), 300, first -> untilBuilt(helper, first, 300, built -> {
 			helper.assertTrue(marks.trail(player.getUUID()) == 1, "The trail's first mark should be finished");
 			HerobrineMarks.undo(level, built);
@@ -539,8 +543,8 @@ public class HerobrineMarksGameTests {
 							helper.assertTrue(marks.trail(player.getUUID()) == 2, "The finished signpost should move the trail on");
 							String[] lines = signLines(level, marks.marks().get(signpost));
 							helper.assertTrue(lines != null && lines[0].equals("THE WATER") && lines[1].equals("REMEMBERS")
-									&& lines[2].equals("EAST") && lines[3].equals("23 BLOCKS"),
-									"The signpost should point east, 23 blocks, to the pyramid: " + java.util.Arrays.toString(lines));
+									&& lines[2].equals("EAST") && lines[3].equals("18 BLOCKS"),
+									"The signpost should point east, 18 blocks, to the pyramid: " + java.util.Arrays.toString(lines));
 							HerobrineMarks.undo(level, signpost);
 							HerobrineMarks.undo(level, pyramid);
 							helper.succeed();

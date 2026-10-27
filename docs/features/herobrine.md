@@ -186,7 +186,7 @@ Mark game tests (`HerobrineMarksGameTests`, on a raised platform so each margin 
 - planning far away, and just inside the loaded world's edge, is refused and loads no chunk;
 - on the real build queue, a block a player sets after building began stops the mark at that block, and undo leaves it;
 - a trail moves on only when its mark is finished, never when it is queued or stopped by a claim;
-- a pyramid stopped part-built by a player's block is never pointed to. While it rises and after it stops, a trail sighting leaves no signpost and the trail waits. Once a pyramid there is finished, the next sighting's signpost points to it (east, 23 blocks) and the trail moves on when the signpost is finished.
+- a pyramid stopped part-built by a player's block is never pointed to. While it rises and after it stops, a trail sighting leaves no signpost and the trail waits. Once a pyramid there is finished, the next sighting's signpost points to it (east, 18 blocks) and the trail moves on when the signpost is finished.
 
 The small-mark tests run on the real build queue: they wait for a free slot and for their mark to finish. The pyramid tests build at once (`HerobrineMarks.buildNow`), through the same checks. Every marks test runs with sky access, because game tests otherwise roof each structure with barriers.
 
