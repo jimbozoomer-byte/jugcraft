@@ -8,6 +8,9 @@ Every change to Jugcraft, newest first, grouped by pull request. For what each t
 
 No numbered release yet. Entries on feature branches remain proposed until their pull requests merge.
 
+### Unmerged: The Church Bridge and the Hessian's Bridle (the Headless Horseman's lair, part 1)
+- **The Horseman's off-season lair:** a Hessian's Bridle (three leather, two iron ingots and a jack-o'-lantern) used at night, out of the Halloween season, on a jack-o'-lantern standing on a fence or wall post under the open sky raises Grey Mist that takes you to the Church Bridge: a wooded hollow under a full moon, the wood road running through it past eight Soul Braziers to a covered bridge over a brook, and the old church and its churchyard beyond. In the season the bridle says he rides the world instead (call him at midnight with a lit scarecrow head). The hollow stands empty until part 2 brings his lair fight and loot; the plan is in [BOSSES.md](docs/branches/BOSSES.md#the-headless-horseman-in-his-lair-the-plan-being-built). Record: [church-bridge.md](docs/features/church-bridge.md).
+
 ### Unmerged: Keep your inventory in boss fights
 - **Dying in a lair costs nothing:** as with the keepInventory rule, but only in lairs (every boss fight). No items or experience fall; you respawn outside with every slot as it was (armour and offhand worn), the same held slot and all your experience. Dying anywhere else is unchanged. No grave is ever placed in a lair; Grave Goods still catch anything another mod drops there. Record: [lair-keep-inventory.md](docs/features/lair-keep-inventory.md).
 

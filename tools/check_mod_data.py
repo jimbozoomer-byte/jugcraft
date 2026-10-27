@@ -9489,6 +9489,7 @@ def check_lairs():
     import crypt_archive as ca
     import foundry_trench as ft
     import crown_of_thunder as ct
+    import church_bridge as cb
     import cydonian_sanctum as cs
     import glacier_hall as gh
     import hollow_acre as ha
@@ -9507,7 +9508,8 @@ def check_lairs():
                                        ("moonlit_ring", mr, mr.CENTRE, (mr.MOON, mr.MOON_RADIUS)),
                                        ("cydonian_sanctum", cs, cs.CENTRE, None),
                                        ("crowfield", cf, cf.CENTRE, (cf.MOON, cf.MOON_RADIUS)),
-                                       ("crown_of_thunder", ct, ct.CENTRE, None)):
+                                       ("crown_of_thunder", ct, ct.CENTRE, None),
+                                       ("church_bridge", cb, cb.CENTRE, (cb.MOON, cb.MOON_RADIUS))):
         ax, ay, az, yaw = layout.ARRIVAL
         sky = "null, 0" if moon is None else "new BlockPos({}, {}, {}), {}".format(*moon[0], moon[1])
         expected = (f'{name.upper()}("{name}", {layout.SIZE[0]}, {layout.SIZE[1]}, {layout.SIZE[2]}, new Vec3({float(ax)}, '
@@ -9541,7 +9543,8 @@ def check_lairs():
         if f'fixture("{block}",' not in registry:
             err(f"JugcraftLairs does not register the lair block {block}")
     for name in ("mourning_wreath", "death_knell", "cursed_spindle", "frost_horn", "kiln_seal", "hag_stone", "exhumation_writ",
-                 "sealed_orders", "howling_totem", "altar_keystone", "harvest_crown", "thunder_vane", la.GATE["entity"]):
+                 "sealed_orders", "howling_totem", "altar_keystone", "harvest_crown", "thunder_vane", "hessians_bridle",
+                 la.GATE["entity"]):
         if f'Jugcraft.id("{name}")' not in registry:
             err(f"JugcraftLairs does not register {name}")
     if f"float GLARE_FRICTION = {la.GLARE_FRICTION}F;" not in registry:
@@ -9787,6 +9790,26 @@ def check_lairs():
             err(f"No words for the Crown of Thunder's {name} rod")
     if "open.lair == Lair.CROWN_OF_THUNDER) { ThunderVaneRite.follow(server, open);" not in gate:
         err("MistGateEntity does not take followers into the Crown of Thunder by the vane's way (ThunderVaneRite.follow)")
+    # The Church Bridge's: the bridle's rest and reach, that it opens only out of the season on a lantern on a post at
+    # night, its registration, the braziers' names, and the gate's follow into the hollow.
+    bridle = (folder / "HessiansBridleRite.java").read_text(encoding="utf-8")
+    for name, key in (("COOLDOWN", "cooldown"), ("MIST_RANGE", "mist_range")):
+        if not java_number(bridle, name, la.BRIDLE[key]):
+            err(f"HessiansBridleRite.{name} is not tools/lairs.py BRIDLE {key} ({la.BRIDLE[key]})")
+    for part, why in (("if (inSeason) {\n\t\t\treturn Missing.IN_SEASON;", "refuses the Halloween season"),
+                      ("if (!night) {\n\t\t\treturn Missing.NOT_NIGHT;", "refuses the day"),
+                      ("post.is(BlockTags.FENCES) || post.is(BlockTags.WALLS)", "wants its lantern on a fence or wall post"),
+                      ("state.is(Blocks.JACK_O_LANTERN)", "takes a jack-o'-lantern"),
+                      ("Lairs.open(level.getServer(), Lair.CHURCH_BRIDGE)", "opens the Church Bridge")):
+        if part not in bridle:
+            err(f"HessiansBridleRite no longer {why}")
+    if "output.accept(HESSIANS_BRIDLE);" not in registry:
+        err("JugcraftLairs does not put the Hessian's Bridle in the creative tab")
+    for name in cb.BRAZIER_NAMES:
+        if f"lair.{MOD}.church_bridge.brazier.{name}" not in (load(ASSETS / "lang" / "en_us.json") or {}):
+            err(f"No words for the Church Bridge's {name} brazier")
+    if "open.lair == Lair.CHURCH_BRIDGE) { HessiansBridleRite.follow(server, open);" not in gate:
+        err("MistGateEntity does not take followers into the Church Bridge by the bridle's way (HessiansBridleRite.follow)")
     for name, recipe in la.RECIPES.items():
         data = load(DATA / MOD / "recipe" / f"{name}.json") or {}
         if data.get("result", {}).get("id") != f"{MOD}:{recipe.get('result', name)}":
@@ -9851,6 +9874,7 @@ def check_lairs():
     check_cydonian_sanctum(cs)
     check_crowfield(cf)
     check_crown_of_thunder(ct)
+    check_church_bridge(cb)
 
 
 def check_cydonian_sanctum(cs):
@@ -10286,6 +10310,98 @@ def check_cinder_kiln(ck):
     client = ROOT / "src" / "gametest" / "java" / "io" / "github" / "jimbozoomer" / "jugcraft" / "test" / "CinderKilnClientGameTests.java"
     if not java_number(client.read_text(encoding="utf-8"), "BOWL_LIGHT", ck.BOWL_LIGHT):
         err(f"CinderKilnClientGameTests does not read the bowl's light against BOWL_LIGHT {ck.BOWL_LIGHT}")
+
+
+def check_church_bridge(cb):
+    """The Church Bridge as tools/church_bridge.py builds it is the hollow its record describes
+    (docs/features/church-bridge.md), and where the Java looks for its parts (ChurchBridge.java) is where the layout puts
+    them: the arrival stands on the wood road with room overhead, and the Grey Mist fills the road's end; a walk from the
+    arrival, never stepping more than half a block, reaches every brazier, the bridge's deck end to end and the belfry's
+    door; each brazier stands lit on the floor of the hollow, off the road; the brook's water is held in on every side;
+    and nothing in it changes by itself once placed (no vanilla leaves, grass blocks, farmland or flowing water)."""
+    from collections import deque
+    blocks = cb.build()
+    name = lambda pos: blocks[pos][0] if pos in blocks else None
+    props = lambda pos: dict(blocks[pos][1]) if pos in blocks else {}
+    java = re.sub(r"\s+", " ", (JAVA_ROOT / "lair" / "ChurchBridge.java").read_text(encoding="utf-8"))
+    for jname, value in (("SOIL", cb.SOIL), ("STAND", cb.STAND), ("CENTRE_X", cb.CENTRE[0]), ("CENTRE_Z", cb.CENTRE[1]),
+                         ("HOLLOW", cb.HOLLOW), ("ROAD_WEST", cb.ROAD[0]), ("ROAD_EAST", cb.ROAD[1]),
+                         ("ROAD_NORTH", cb.ROAD_NORTH), ("ROAD_SOUTH", cb.ROAD_SOUTH), ("BRIDGE_NORTH", cb.BRIDGE["z"][0]),
+                         ("BRIDGE_SOUTH", cb.BRIDGE["z"][1]), ("BRIDGE_WEST", cb.BRIDGE_WALLS[0]),
+                         ("BRIDGE_EAST", cb.BRIDGE_WALLS[1]), ("BROOK_NORTH", cb.BROOK["z"][0]), ("BROOK_SOUTH", cb.BROOK["z"][1]),
+                         ("WAIT_X", cb.WAIT[0]), ("WAIT_Y", float(cb.WAIT[1])), ("WAIT_Z", cb.WAIT[2]),
+                         ("EXIT_WEST", cb.EXIT["x"][0]), ("EXIT_EAST", cb.EXIT["x"][1]), ("EXIT_Z", cb.EXIT["z"])):
+        if not java_number(java, jname, value):
+            err(f"ChurchBridge.{jname} is not tools/church_bridge.py's {value}")
+    if f"float WAIT_YAW = {cb.WAIT[3]}F;" not in java:
+        err(f"ChurchBridge.WAIT_YAW is not tools/church_bridge.py's {cb.WAIT[3]}")
+    braziers = cb.braziers()
+    expected = "BRAZIERS = {{{}}};".format(", ".join(f"new BlockPos({x}, {cb.STAND}, {z})" for x, z in braziers.values()))
+    if expected not in java:
+        err(f"ChurchBridge.BRAZIERS is not tools/church_bridge.py's, in ring order: expected {expected}")
+    if f"enum Brazier {{ {', '.join(n.upper() for n in cb.BRAZIER_NAMES)};" not in java:
+        err(f"ChurchBridge.Brazier is not tools/church_bridge.py BRAZIER_NAMES {cb.BRAZIER_NAMES} in order")
+
+    names = {state[0] for state in blocks.values()}
+    for banned in sorted(n for n in names if (n.startswith("minecraft:") and n.endswith("_leaves"))
+                         or n in ("minecraft:grass_block", "minecraft:farmland", "minecraft:short_grass", "minecraft:vine")):
+        err(f"tools/church_bridge.py places {banned}, which would change once placed")
+    for (x, y, z), state in blocks.items():
+        if state[0] != "minecraft:water":
+            continue
+        if dict(state[1]).get("level") != "0":
+            err(f"The Church Bridge's brook has flowing water at {(x, y, z)}")
+            break
+        leak = [n for n in ((x + 1, y, z), (x - 1, y, z), (x, y, z + 1), (x, y, z - 1), (x, y - 1, z)) if n not in blocks]
+        if leak:
+            err(f"The Church Bridge's brook would run out at {leak[0]}")
+            break
+
+    ax, ay, az, _ = cb.ARRIVAL
+    arrival = (int(ax), ay, int(az))
+    if name((arrival[0], ay - 1, arrival[2])) != "minecraft:dirt_path" \
+            or any(name((arrival[0], ay + dy, arrival[2])) not in (None, "minecraft:light") for dy in (0, 1, 2)):
+        err(f"The Church Bridge's arrival at {cb.ARRIVAL[:3]} does not stand on the wood road with room overhead")
+    for cell in cb.exit_cells():
+        if name(cell) != "jugcraft:lair_exit":
+            err(f"The Church Bridge's Grey Mist is missing at {cell}")
+    for brazier, (x, z) in braziers.items():
+        if name((x, cb.STAND, z)) != "jugcraft:lair_brazier" or props((x, cb.STAND, z)) != {"lit": "true"}:
+            err(f"The Church Bridge's {brazier} brazier is not lit at {(x, cb.STAND, z)}")
+        if not cb.in_hollow(x, z) or cb.on_road(x, z):
+            err(f"The Church Bridge's {brazier} brazier is not in the hollow, off the road")
+
+    # A walk from the arrival: a cell can be stood in when its floor (the block under it, or a bridge deck) holds and the
+    # cell and the one over it are free; steps of a block up or down are not taken (no stairs in the hollow's way).
+    passable = {None, "minecraft:light", "jugcraft:lair_exit"}
+    free = lambda pos: name(pos) in passable
+    def standable(x, y, z):
+        under = name((x, y - 1, z))
+        return free((x, y, z)) and free((x, y + 1, z)) and under not in passable and under != "minecraft:water"
+    start = (arrival[0], cb.STAND, arrival[2])
+    seen, queue = {start}, deque([start])
+    while queue:
+        x, y, z = queue.popleft()
+        for dx, dz in ((1, 0), (-1, 0), (0, 1), (0, -1)):
+            nxt = (x + dx, y, z + dz)
+            if nxt not in seen and 0 <= nxt[0] < cb.SIZE[0] and 0 <= nxt[2] < cb.SIZE[2] and standable(*nxt):
+                seen.add(nxt)
+                queue.append(nxt)
+    for brazier, (x, z) in braziers.items():
+        if not any((x + dx, cb.STAND, z + dz) in seen for dx, dz in ((1, 0), (-1, 0), (0, 1), (0, -1))):
+            err(f"No walk from the Church Bridge's arrival comes beside the {brazier} brazier")
+    for z in range(cb.BRIDGE["z"][0], cb.BRIDGE["z"][1] + 1):
+        if (cb.ROAD[0] + 1, cb.STAND, z) not in seen:
+            err(f"No walk from the Church Bridge's arrival crosses the bridge at row {z}")
+            break
+    door = ((cb.DOOR["x"][0] + cb.DOOR["x"][1]) // 2, cb.STAND, cb.DOOR["z"])
+    if door not in seen:
+        err(f"No walk from the Church Bridge's arrival reaches the belfry's door at {door}")
+    wx, wy, wz, _ = cb.WAIT
+    if (int(wx), wy, int(wz)) not in seen or not cb.in_hollow(int(wx), int(wz)) or not cb.on_road(int(wx), int(wz)) \
+            or cb.on_bridge(int(wx), int(wz)):
+        err(f"Where the Horseman waits, {cb.WAIT[:3]}, is not on the road in the hollow at the bridge's foot, where the walk "
+            "reaches")
 
 
 def check_crown_of_thunder(ct):
