@@ -186,4 +186,4 @@ player keeps it to the first join; stand-in test players and clients without Jug
 Implemented with Claude Opus 5.5 (Claude Code) for a contributor, on the fork. Verification: the client game test
 `EncyclopediaClientGameTests` checks that the joined player carries the welcome tag. Local
 `python tools/generate_material_data.py`, `python tools/check_mod_data.py` and `python scripts/check_repository.py`:
-both passed (7,797 material IDs). CI: pending. Not run: a human joining a fresh world.
+both passed (7,797 material IDs). CI: fork [run 40427541933](https://github.com/mmme123-spec/jugcraftfork/actions/runs/40427541933) on e9086350b: green. The mod built, the generated-data and material checks passed, the server game tests passed (with and without optional integrations), and all sixteen client shards passed. Not run: a human joining a fresh world.
