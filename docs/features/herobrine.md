@@ -28,7 +28,7 @@ The owner approved a plan shared between this branch and OpenAI Codex/Astra (coo
 ### The encounter
 
 - **Distant.** Placement picks one of four variants, falling back to a watcher. Every variant stands on solid ground in a loaded chunk, with a clear line from the player's eyes to his, and turns to face the player.
-  - **Watcher:** 28–52 blocks away under the open sky (14–28 underground), 20°–75° off where the player faces. Of 16 tries the best place wins: higher than the player (a ridge), open to the sky (a clearing), and in clear view of the other attentive players within 48 blocks, so friends together share one sighting.
+  - **Watcher:** 28–52 blocks away under the open sky (14–28 underground), 20°–75° off where the player faces. Of 16 tries the best place wins: higher than the player (a ridge), open to the sky (a clearing), and in clear view of the other attentive players within 48 blocks, so friends together share one sighting. Under the open sky each try also weighs a cave mouth near the player's height: room to stand under a solid roof of natural ground, at least 3 blocks thick over his head, with a clear line to the player. A cave mouth beats a ridge in a clearing, so where a hillside opening faces the player he waits just inside its dark. A roof a player built (planks, say) is not a cave mouth.
   - **Follower** (a quarter of the time when the player is alone): he starts 18–22 blocks behind and walks the player's own path, keeping that distance. He freezes while on their screen. Every 6 ticks he walks, a faint step sounds for that player only, from 8 blocks behind them towards him (quiet sounds carry 16 blocks). When they stop, he and his steps stop.
   - **Second look** (a quarter of the time): once the player has seen him and then looked away for half a second, he is gone, or half the time standing somewhere else they could see.
   - **Tunnel** (tried first 60% of the time when the player is not under the open sky): he stands at the far end of the longest straight, covered, walkable run, 14–48 blocks, in a direction the player is not facing. The eyes wait down the tunnel behind them.
@@ -156,6 +156,7 @@ Server game tests (`HerobrineGameTests`, in the 48-block arena with padding) cov
 - a first close encounter is refused and one encounter runs at a time, with both failures reported;
 - only attentive witnesses are credited (a badly hurt player facing him is not);
 - a sighting spot is ahead of the player, at the right distance, on solid ground;
+- under the open sky a watcher waits in a cave mouth facing the player rather than on the hill above it; open ground and a plank roof are not cave mouths;
 - a walled-in player gets `NO_VISIBLE_SPOT` and nothing is placed;
 - he is never saved, and players under a minute in are not active;
 - scattered glimpses (6 ticks looking, 3 away, three times) are not a sighting, and a steady look is;
@@ -187,11 +188,11 @@ The small-mark tests run on the real build queue: they wait for a free slot and 
 
 Not yet verified, as of this checkpoint:
 
-- **Compile and tests.** The encounter tests compiled and passed natively on an earlier snapshot. The marks, pyramids, trail, approvals, chunk preflight and full-state undo have not been compiled or run: none of the mark game tests above has run yet. The local Java parser checks syntax only.
+- **Compile and tests.** The encounter tests compiled and passed natively on an earlier snapshot. The marks, pyramids, trail, approvals, chunk preflight, full-state undo and the cave-mouth watcher have not been compiled or run: none of the mark game tests above, nor the cave-mouth test, has run yet. The local Java parser checks syntax only.
 - **Client.** Rendering (the player-style model, the eyes in daylight and darkness), syncing and removal in a real client are being checked separately (`HerobrineClientGameTests`). Footstep audibility and real two-client play are untested.
 - **CI.** Not yet run on this branch.
 
 ## Still to build (owner-approved plan, not implemented)
 
-- **Encounter refinements:** cave entrances as watcher places, and testing the variants in a real client: whether the footsteps are audible, and whether the eyes show down a dark tunnel.
+- **Encounter refinements:** testing the variants in a real client: whether the footsteps are audible, and whether the eyes show in a dark tunnel or cave mouth.
 - **The Cursed Mirror call:** one line in the mirror calling `HerobrineEncounters.reflection` (when a player looks into it at night, rarely), once both branches are on main.
