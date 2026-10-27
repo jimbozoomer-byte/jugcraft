@@ -94,7 +94,7 @@ public final class HerobrineDepths {
                     b.put(2, 0, 5, Blocks.SPRUCE_STAIRS.defaultBlockState().setValue(BlockStateProperties.HORIZONTAL_FACING, Direction.WEST));
                     b.put(2, 0, 6, Blocks.SPRUCE_SLAB.defaultBlockState());
                 } else if (variant.equals("watching_room")) {
-                    b.put(0, 0, 5, Blocks.SPRUCE_STAIRS.defaultBlockState().setValue(BlockStateProperties.HORIZONTAL_FACING, Direction.SOUTH));
+                    b.put(0, 0, 5, Blocks.SPRUCE_STAIRS.defaultBlockState().setValue(BlockStateProperties.HORIZONTAL_FACING, Direction.NORTH));
                     b.put(0, 2, 8, Blocks.GLASS.defaultBlockState());
                 } else if (variant.equals("buried_shrine")) {
                     for (int x = -1; x <= 1; x++) b.put(x, 0, 5, Blocks.CHISELED_DEEPSLATE.defaultBlockState());
@@ -104,7 +104,7 @@ public final class HerobrineDepths {
                 } else {
                     for (int z = 3; z < length; z += 4) for (int x : new int[]{-3, 3})
                         for (int y = 0; y < 6; y++) b.put(x, y, z, Blocks.POLISHED_DEEPSLATE.defaultBlockState());
-                    b.put(0, 0, length - 2, Blocks.SPRUCE_STAIRS.defaultBlockState().setValue(BlockStateProperties.HORIZONTAL_FACING, Direction.SOUTH));
+                    b.put(0, 0, length - 2, Blocks.SPRUCE_STAIRS.defaultBlockState().setValue(BlockStateProperties.HORIZONTAL_FACING, Direction.NORTH));
                 }
             }
             case "pillar_grid" -> {

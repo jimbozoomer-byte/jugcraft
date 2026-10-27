@@ -555,7 +555,8 @@ public final class HerobrineMarks extends SavedData {
 		if (!level.hasChunkAt(pos)) {
 			return Result.WAIT;
 		}
-		if (LandRegistry.isClaimed(level, pos) || Town.isProtected(level, pos)) {
+		if (LandRegistry.isClaimed(level, pos) || Town.isProtected(level, pos)
+                || mark.type().equals("sky_island") && HerobrineSkyIslands.protectedTownColumn(level, pos)) {
 			return Result.STOP;
 		}
 		// Taking a block away still needs the operator's approval, block by block: a revoked approval stops a grove or tunnel.
@@ -815,8 +816,19 @@ public final class HerobrineMarks extends SavedData {
 			source.sendFailure(Component.literal("Herobrine landmarks are Overworld-only."));
 			return 0;
 		}
-		if (HerobrineDepths.CAVES.contains(kind) || HerobrineDepths.WATER.contains(kind)) {
-			var plan = HerobrineDepths.plan(source.getServer().overworld(), player.blockPosition().relative(player.getDirection(), 6), kind);
+		if (HerobrineDepths.CAVES.contains(kind) || HerobrineDepths.WATER.contains(kind)
+				|| HerobrineSkyIslands.VARIANTS.contains(kind) || HerobrineSurfacePlans.VARIANTS.contains(kind)) {
+			var level = source.getServer().overworld();
+			BlockPos site = player.blockPosition().relative(player.getDirection(), 6);
+			HerobrineMarkPlans.Plan plan;
+			if (HerobrineSkyIslands.VARIANTS.contains(kind)) {
+				Integer top = HerobrineSkyIslands.lowestTop(level, site.getX(), site.getZ(), kind);
+				plan = top == null ? null : HerobrineSkyIslands.plan(level, new BlockPos(site.getX(), top + 8, site.getZ()), kind);
+			} else if (HerobrineSurfacePlans.VARIANTS.contains(kind)) {
+				plan = HerobrineSurfacePlans.plan(level, site, kind);
+			} else {
+				plan = HerobrineDepths.plan(level, site, kind);
+			}
 			String id = plan == null ? null : start(source.getServer().overworld(), plan);
 			if (id == null) { source.sendFailure(Component.translatable("commands.jugcraft.herobrine.marks.no_site", kind)); return 0; }
 			source.sendSuccess(() -> Component.translatable("commands.jugcraft.herobrine.marks.left", kind, id), true);
@@ -844,6 +856,8 @@ public final class HerobrineMarks extends SavedData {
 				.map(type -> type.name().toLowerCase(Locale.ROOT)).toList());
 		names.addAll(HerobrineDepths.CAVES);
 		names.addAll(HerobrineDepths.WATER);
+		names.addAll(HerobrineSkyIslands.VARIANTS);
+		names.addAll(HerobrineSurfacePlans.VARIANTS);
 		return names;
 	}
 }
