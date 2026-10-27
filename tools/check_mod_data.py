@@ -18976,6 +18976,8 @@ def check_pacts(co, root, lang, registered, research):
     base_java = java("spirits/PactSpiritEntity.java")
     service_words = getattr(pa, "SERVICE_WORDS", {})  # each work's own words (GC-04 on); none before a garden work ships
     # (a) The wire appends: resolve (10), resolved, three answers at most, Jade's matter and accord after unit 1's keys.
+    # (Deviation: PA section 4.1 reads JADE_KEYS[12:14], which holds only once GC-04's note and note_count come first; until
+    # that merge the keys are the last two, and the merge turns this to [12:14] and drops the length test.)
     if pa.ACTIONS[10:11] != ["resolve"] or "resolved" not in pa.ANSWERS or pa.STATE_LIMITS.get("MAX_ANSWERS") != 3 \
             or pa.JADE_KEYS[-2:] != ["matter", "accord"] or len(pa.JADE_KEYS) < 12 or pa.ACCORD_MAX != 16:
         err("tools/concordance_pacts.py: resolve is appended (10) and answered resolved; three answers at most; Jade's matter and "
@@ -18993,14 +18995,15 @@ def check_pacts(co, root, lang, registered, research):
             or "answerIds = view.answerIds();" not in _java_body(menu, "private PactStatePayload state(") \
             or "PactStatePayload.mask(PactRequestPayload.RESOLVE)" not in _java_body(menu, "private View kept("):
         err("PactMenu: RESOLVE only on the kept page that offered it, an answer it last sent, kept through PactAccords.resolve (GC-P43)")
-    # (c) Only the holder, in person, with the Concordance on, for the page's work, one of its service's answers.
+    # (c) Only the holder, in person and alive, with the Concordance on, for the page's work, one of its service's answers
+    # (a dead holder's menu stays open until respawn, so its client could still send RESOLVE; AgreementHolder.end's rule).
     resolving = _java_body(accords_java, "public static boolean resolve(")
-    order = [resolving.find(n) for n in ("Workers.enabled()", "Authority.isStandIn(player)", "perch.holder().verify(level, now)",
-                                         "record.holder().equals(player.getUUID())", "terms.work().equals(work)", "known(service, value)",
-                                         "perch.keepAccord(value);")]
+    order = [resolving.find(n) for n in ("Workers.enabled()", "Authority.isStandIn(player)", "player.isAlive()",
+                                         "perch.holder().verify(level, now)", "record.holder().equals(player.getUUID())",
+                                         "terms.work().equals(work)", "known(service, value)", "perch.keepAccord(value);")]
     if -1 in order or order != sorted(order) or "value.length() > MAX_ACCORD" not in resolving:
-        err("PactAccords.resolve: switched on, never a stand-in, verified, the record's holder, the page's work, one of its "
-            "service's answers, before anything is kept (GC-P46)")
+        err("PactAccords.resolve: switched on, never a stand-in, a living player, verified, the record's holder, the page's work, "
+            "one of its service's answers, before anything is kept (GC-P46)")
     # (d) The accord is the perch's alone: kept only by PactAccords.resolve; saved by the perch only while a pact is kept there;
     # a new pact there starts unanswered; read back bounded; and it counts only for the pact kept there now.
     for path in sorted(root.rglob("*.java")):

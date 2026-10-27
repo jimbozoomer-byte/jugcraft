@@ -642,7 +642,9 @@ SCREEN.update({
     "screen.jugcraft.pact.matter.safe": "His course until you answer",
     "screen.jugcraft.pact.matter.choose": "Answer this",
 })
-TOOLTIPS.update({"jade.pact.accord": "Your answer: %s"})
+# Jade shows a reading to whoever looks, so its accord line is in the third person like every Jade pact line (the
+# devices and accord review; PA section 3.1's "Your answer: %s" amended).
+TOOLTIPS.update({"jade.pact.accord": "Its holder's answer: %s"})
 # ------------------------------------------------------------------- garden cohort, GC-02: facing whoever speaks
 # ConcordancePactClientGameTests.facing: the holder speaks from two blocks east, south, west and north of the perch in
 # turn, north last (where every later picture of Stolas is taken from; D-P133 superseded), and Stolas's drawn body yaw is

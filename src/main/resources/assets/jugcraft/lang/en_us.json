@@ -14675,7 +14675,7 @@
   "tooltip.jugcraft.concordance.jade.notes": "Notes waiting for their owner",
   "tooltip.jugcraft.concordance.jade.nutrients": "Nutrients: %s / %s",
   "tooltip.jugcraft.concordance.jade.offering": "Offering: %s x%s",
-  "tooltip.jugcraft.concordance.jade.pact.accord": "Your answer: %s",
+  "tooltip.jugcraft.concordance.jade.pact.accord": "Its holder's answer: %s",
   "tooltip.jugcraft.concordance.jade.pact.departing": "Departing",
   "tooltip.jugcraft.concordance.jade.pact.grace": "Grace: %s game days left",
   "tooltip.jugcraft.concordance.jade.pact.keeps": "Keeps an agreement with %s",
