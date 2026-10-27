@@ -8,8 +8,8 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.network.chat.Component;
-import net.minecraft.server.network.Filterable;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.network.Filterable;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
@@ -240,18 +240,33 @@ public final class HerobrinePyramids {
 		return false;
 	}
 
-	/** Whether a pyramid already stands (or is building) within {@value #SPACING} blocks. */
+	/**
+	 * Whether a pyramid already stands (finished) or is rising within {@value #SPACING} blocks. One stopped part-built does
+	 * not count: it stays recorded for undo, and another may be raised instead.
+	 */
 	private static boolean tooNear(ServerLevel level, int cx, int cz) {
-		return HerobrineMarks.get(level.getServer()).marks().values().stream()
-				.anyMatch(mark -> mark.type().equals("pyramid") && Math.abs(mark.at().getX() - cx) < SPACING && Math.abs(mark.at().getZ() - cz) < SPACING);
+		return HerobrineMarks.get(level.getServer()).marks().entrySet().stream()
+				.anyMatch(entry -> entry.getValue().type().equals("pyramid") && (entry.getValue().finished() || HerobrineMarks.building(entry.getKey()))
+						&& Math.abs(entry.getValue().at().getX() - cx) < SPACING && Math.abs(entry.getValue().at().getZ() - cz) < SPACING);
 	}
 
-	/** The nearest pyramid to {@code from}, within {@code range} blocks, or null. */
+	/**
+	 * The nearest finished pyramid to {@code from}, within {@code range} blocks on each axis, or null. One still being
+	 * built, stopped part-built or partly undone is never pointed to.
+	 */
 	public static @Nullable BlockPos nearest(ServerLevel level, BlockPos from, int range) {
-		return HerobrineMarks.get(level.getServer()).marks().values().stream().filter(mark -> mark.type().equals("pyramid"))
-				.map(HerobrineMarks.Mark::at).filter(at -> at.distManhattan(from) <= range * 2 && Math.abs(at.getX() - from.getX()) <= range
-						&& Math.abs(at.getZ() - from.getZ()) <= range)
+		return HerobrineMarks.get(level.getServer()).marks().values().stream()
+				.filter(mark -> mark.type().equals("pyramid") && mark.finished()).map(HerobrineMarks.Mark::at)
+				.filter(at -> Math.abs(at.getX() - from.getX()) <= range && Math.abs(at.getZ() - from.getZ()) <= range)
 				.min(java.util.Comparator.comparingDouble(at -> at.distSqr(from))).orElse(null);
+	}
+
+	/** Whether a pyramid is being built within {@code range} blocks of {@code from} on each axis. */
+	public static boolean rising(ServerLevel level, BlockPos from, int range) {
+		return HerobrineMarks.get(level.getServer()).marks().entrySet().stream()
+				.anyMatch(entry -> entry.getValue().type().equals("pyramid") && HerobrineMarks.building(entry.getKey())
+						&& Math.abs(entry.getValue().at().getX() - from.getX()) <= range
+						&& Math.abs(entry.getValue().at().getZ() - from.getZ()) <= range);
 	}
 
 	private static HerobrineMarkPlans.Step place(ServerLevel level, BlockPos pos, BlockState state) {

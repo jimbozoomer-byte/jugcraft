@@ -9,6 +9,7 @@ import io.github.jimbozoomer.jugcraft.town.Townsfolk;
 import io.github.jimbozoomer.jugcraft.creatures.herobrine.Herobrine;
 import io.github.jimbozoomer.jugcraft.creatures.herobrine.HerobrineDirector;
 import io.github.jimbozoomer.jugcraft.creatures.herobrine.HerobrineEncounters;
+import io.github.jimbozoomer.jugcraft.creatures.herobrine.HerobrineGlanceGoal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -525,6 +526,32 @@ public class HerobrineGameTests {
 	}
 
 	/** A Cursed Mirror's reflection keeps the close-encounter rules, and is quiet: no Darkness. */
+	/** A glance lasts two seconds of game time, however often the goal is ticked (here, never). */
+	@GameTest(structure = ARENA, padding = 48, maxTicks = HerobrineGlanceGoal.GLANCE_TICKS + 20)
+	public void aGuardsGlanceLastsTwoSecondsHoweverOftenItIsTicked(GameTestHelper helper) {
+		floor(helper);
+		ServerLevel level = helper.getLevel();
+		ServerPlayer player = player(helper, new BlockPos(24, 1, 4), 180.0F);
+		Herobrine herobrine = place(helper, player, new BlockPos(24, 1, 40), Herobrine.Kind.DISTANT);
+		BlockPos post = helper.absolutePos(new BlockPos(10, 1, 30));
+		Townsfolk guard = new Townsfolk(JugcraftTown.TOWNSFOLK, level);
+		guard.setUp(new TownData.Spot(-1, "guard", null, "Test guard", "guard_blue", BlockPos.ZERO), post);
+		guard.snapTo(post.getX() + 0.5, post.getY(), post.getZ() + 0.5, 0.0F, 0.0F);
+		level.addFreshEntity(guard);
+		HerobrineGlanceGoal glance = new HerobrineGlanceGoal(guard, () -> true);
+		helper.assertTrue(glance.canUse(), "The guard should notice him");
+		glance.start();
+		helper.assertTrue(glance.requiresUpdateEveryTick(), "The look should turn every tick");
+		helper.runAfterDelay(HerobrineGlanceGoal.GLANCE_TICKS - 4, () -> helper.assertTrue(glance.canContinueToUse(),
+				"The glance should still be on just before two seconds"));
+		helper.runAfterDelay(HerobrineGlanceGoal.GLANCE_TICKS + 2, () -> {
+			helper.assertTrue(!glance.canContinueToUse(), "The glance should be over after two seconds of game time");
+			guard.discard();
+			herobrine.discard();
+			helper.succeed();
+		});
+	}
+
 	@GameTest(structure = ARENA, padding = 48, maxTicks = 60)
 	public void aMirrorReflectionIsQuietAndKeepsTheRules(GameTestHelper helper) {
 		floor(helper);
