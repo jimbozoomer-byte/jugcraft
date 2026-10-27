@@ -26,8 +26,23 @@ Jimtafacts adaptation limits remain in jimtafacts-remaining.md.
 
 ## Validation and deployment status
 
-Combined validation is in progress. Earlier Jimtafacts results do not certify this
-larger batch. Local evidence is under build/release-*-oct26.log.
+Combined local server validation: all 2,962 required tests passed after repairing
+companion crafting-table state leaking onto smithing tables. A regression test
+keeps ordinary crafting tables functional and smithing tables free of that state.
+Main/client/test compilation passes. Python: 285/286 initially; the sole missing
+Thunder Vane essence value was repaired and all 12 alchemy checks then passed.
+World Designer: 12/12. Repository links and 26 dependency pins pass. The actual
+built JAR passes four mixin-config/124-class checks and embedded-runtime integrity.
+Full data/model audit found only two missing arena season classifications; both
+were repaired and the focused season audit passed. The art audit covered 24,511
+block/item models, 3,733 quad parts and 180 combined model layouts. Refreshed
+survival graph: zero invalid ingredient diagnostics.
+
+Linux CI exposed Pillow/zlib PNG encoding drift in twelve unchanged atlas crops.
+Those two importers now preserve existing bytes when exact RGBA pixels match;
+changed pixels and corrupt outputs still regenerate. The regression test passes.
+Rendered-client and required GitHub checks remain in progress. Earlier
+Jimtafacts-only results are separate. Local evidence: build/release-*-oct26.log.
 No server restart or client channel promotion has occurred for this candidate.
 The live world and player settings must be retained. Obtain owner confirmation,
 warn connected players and wait 30 seconds before a live stop/restart. Promote

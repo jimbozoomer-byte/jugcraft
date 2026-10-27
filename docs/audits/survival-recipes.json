@@ -1,7 +1,7 @@
 {
   "schema": 1,
   "scope": "All registered Jugcraft items from the game-test snapshot.",
-  "registry_snapshot": "docs\\audits\\survival-item-registry.json",
+  "registry_snapshot": "docs/audits/survival-item-registry.json",
   "unregistered_model_definitions": [
     "jugcraft:arcane_concordance",
     "jugcraft:companion_roly_pack",
@@ -20,16 +20,16 @@
     "Reachability is qualitative; energy, quantities, research and encounter difficulty require playtesting."
   ],
   "summary": {
-    "chain_with_acquisition_evidence": 3653,
-    "recipe_chain_reachable": 2713,
-    "natural_or_interaction_source": 573,
-    "loot_only": 372,
+    "chain_with_acquisition_evidence": 3691,
+    "recipe_chain_reachable": 2732,
+    "natural_or_interaction_source": 579,
+    "loot_only": 377,
     "deferred_acquisition_design": 78,
     "intentional_noncraftable": 349
   },
   "recipe_types": {
-    "minecraft:crafting_shaped": 3312,
-    "minecraft:crafting_shapeless": 2122,
+    "minecraft:crafting_shaped": 3378,
+    "minecraft:crafting_shapeless": 2126,
     "minecraft:crafting_dye": 12,
     "jugcraft:alloying": 10,
     "minecraft:blasting": 43,
@@ -43,12 +43,12 @@
     "minecraft:smithing_transform": 123,
     "minecraft:brewing": 128,
     "jugcraft:catalytic_cracking": 4,
-    "jugcraft:chemical_reaction": 244,
+    "jugcraft:chemical_reaction": 248,
     "jugcraft:chilling": 3,
     "minecraft:stonecutting": 264,
     "jugcraft:circuit_assembly": 23,
     "jugcraft:coking": 1,
-    "jugcraft:crushing": 60,
+    "jugcraft:crushing": 62,
     "jugcraft:cutting": 83,
     "jugcraft:distillation": 9,
     "jugcraft:electrolysis": 9,
@@ -86,9 +86,9 @@
     "jugcraft:pot_cooking": 82,
     "jugcraft:pressing": 26,
     "jugcraft:pulverizing": 57,
-    "jugcraft:rocket_assembly": 22,
+    "jugcraft:rocket_assembly": 23,
     "jugcraft:sifting": 3,
-    "jugcraft:starter_working": 15,
+    "jugcraft:starter_working": 16,
     "jugcraft:steelmaking": 1,
     "jugcraft:tree_growing": 50,
     "jugcraft:water_treatment": 4,
@@ -1137,6 +1137,18 @@
       "blocked_by": []
     },
     {
+      "item": "jugcraft:aluminum_crate",
+      "status": "chain_with_acquisition_evidence",
+      "reason": "",
+      "route_count": 2,
+      "routes": [
+        "src/main/resources/data/jugcraft/recipe/storage_crates/aluminum_crate_direct.json",
+        "src/main/resources/data/jugcraft/recipe/storage_crates/aluminum_crate_upgrade.json"
+      ],
+      "evidence": [],
+      "blocked_by": []
+    },
+    {
       "item": "jugcraft:aluminum_hydroxide",
       "status": "chain_with_acquisition_evidence",
       "reason": "",
@@ -1261,6 +1273,17 @@
       "route_count": 1,
       "routes": [
         "src/main/resources/data/jugcraft/recipe/aluminum_rotor_assembly.json"
+      ],
+      "evidence": [],
+      "blocked_by": []
+    },
+    {
+      "item": "jugcraft:aluminum_storage_crate_upgrade",
+      "status": "chain_with_acquisition_evidence",
+      "reason": "",
+      "route_count": 1,
+      "routes": [
+        "src/main/resources/data/jugcraft/recipe/storage_crates/aluminum_crate_kit.json"
       ],
       "evidence": [],
       "blocked_by": []
@@ -1550,6 +1573,50 @@
       "route_count": 1,
       "routes": [
         "src/main/resources/data/jugcraft/recipe/apple_seeds.json"
+      ],
+      "evidence": [],
+      "blocked_by": []
+    },
+    {
+      "item": "jugcraft:aquamancers_boots",
+      "status": "recipe_chain_reachable",
+      "reason": "",
+      "route_count": 1,
+      "routes": [
+        "src/main/resources/data/jugcraft/recipe/aquamancers_boots.json"
+      ],
+      "evidence": [],
+      "blocked_by": []
+    },
+    {
+      "item": "jugcraft:aquamancers_hat",
+      "status": "recipe_chain_reachable",
+      "reason": "",
+      "route_count": 1,
+      "routes": [
+        "src/main/resources/data/jugcraft/recipe/aquamancers_hat.json"
+      ],
+      "evidence": [],
+      "blocked_by": []
+    },
+    {
+      "item": "jugcraft:aquamancers_leggings",
+      "status": "recipe_chain_reachable",
+      "reason": "",
+      "route_count": 1,
+      "routes": [
+        "src/main/resources/data/jugcraft/recipe/aquamancers_leggings.json"
+      ],
+      "evidence": [],
+      "blocked_by": []
+    },
+    {
+      "item": "jugcraft:aquamancers_robes",
+      "status": "recipe_chain_reachable",
+      "reason": "",
+      "route_count": 1,
+      "routes": [
+        "src/main/resources/data/jugcraft/recipe/aquamancers_robes.json"
       ],
       "evidence": [],
       "blocked_by": []
@@ -7474,6 +7541,17 @@
       "blocked_by": []
     },
     {
+      "item": "jugcraft:bronze_crate",
+      "status": "chain_with_acquisition_evidence",
+      "reason": "",
+      "route_count": 1,
+      "routes": [
+        "src/main/resources/data/jugcraft/recipe/storage_crates/bronze_crate.json"
+      ],
+      "evidence": [],
+      "blocked_by": []
+    },
+    {
       "item": "jugcraft:bronze_dagger",
       "status": "chain_with_acquisition_evidence",
       "reason": "",
@@ -8767,6 +8845,17 @@
       "route_count": 1,
       "routes": [
         "src/main/resources/data/jugcraft/recipe/cargo_packager.json"
+      ],
+      "evidence": [],
+      "blocked_by": []
+    },
+    {
+      "item": "jugcraft:cargo_wagon",
+      "status": "chain_with_acquisition_evidence",
+      "reason": "",
+      "route_count": 1,
+      "routes": [
+        "src/main/resources/data/jugcraft/recipe/cargo_wagon.json"
       ],
       "evidence": [],
       "blocked_by": []
@@ -22308,6 +22397,17 @@
       "blocked_by": []
     },
     {
+      "item": "jugcraft:cloudburst_gun",
+      "status": "chain_with_acquisition_evidence",
+      "reason": "",
+      "route_count": 1,
+      "routes": [
+        "src/main/resources/data/jugcraft/recipe/cloudburst_gun.json"
+      ],
+      "evidence": [],
+      "blocked_by": []
+    },
+    {
       "item": "jugcraft:clover",
       "status": "natural_or_interaction_source",
       "reason": "",
@@ -22662,6 +22762,28 @@
       "route_count": 1,
       "routes": [
         "src/main/resources/data/jugcraft/recipe/coke_oven.json"
+      ],
+      "evidence": [],
+      "blocked_by": []
+    },
+    {
+      "item": "jugcraft:cola",
+      "status": "chain_with_acquisition_evidence",
+      "reason": "",
+      "route_count": 1,
+      "routes": [
+        "src/main/resources/data/jugcraft/recipe/chemical_reaction/phosphate_cola.json"
+      ],
+      "evidence": [],
+      "blocked_by": []
+    },
+    {
+      "item": "jugcraft:cola_syrup",
+      "status": "chain_with_acquisition_evidence",
+      "reason": "",
+      "route_count": 1,
+      "routes": [
+        "src/main/resources/data/jugcraft/recipe/phosphate_cola_syrup.json"
       ],
       "evidence": [],
       "blocked_by": []
@@ -24113,6 +24235,17 @@
       "routes": [
         "src/main/resources/data/jugcraft/recipe/hydroponics/cotton_seeds.json",
         "src/main/resources/data/jugcraft/recipe/sifting/coarse_dirt.json"
+      ],
+      "evidence": [],
+      "blocked_by": []
+    },
+    {
+      "item": "jugcraft:coupler",
+      "status": "chain_with_acquisition_evidence",
+      "reason": "",
+      "route_count": 1,
+      "routes": [
+        "src/main/resources/data/jugcraft/recipe/coupler.json"
       ],
       "evidence": [],
       "blocked_by": []
@@ -27578,12 +27711,77 @@
       "blocked_by": []
     },
     {
+      "item": "jugcraft:crowbill",
+      "status": "loot_only",
+      "reason": "",
+      "route_count": 0,
+      "routes": [],
+      "evidence": [
+        {
+          "kind": "loot",
+          "source": "src/main/resources/data/jugcraft/loot_table/bosses/pumpkin_king.json"
+        },
+        {
+          "kind": "loot",
+          "source": "src/main/resources/data/jugcraft/loot_table/entities/pumpkin_king.json"
+        }
+      ],
+      "blocked_by": []
+    },
+    {
+      "item": "jugcraft:crowward_charm",
+      "status": "loot_only",
+      "reason": "",
+      "route_count": 0,
+      "routes": [],
+      "evidence": [
+        {
+          "kind": "loot",
+          "source": "src/main/resources/data/jugcraft/loot_table/entities/pumpkin_king.json"
+        }
+      ],
+      "blocked_by": []
+    },
+    {
       "item": "jugcraft:crucible",
       "status": "recipe_chain_reachable",
       "reason": "",
       "route_count": 1,
       "routes": [
         "src/main/resources/data/jugcraft/recipe/crucible.json"
+      ],
+      "evidence": [],
+      "blocked_by": []
+    },
+    {
+      "item": "jugcraft:crucible_bellows",
+      "status": "recipe_chain_reachable",
+      "reason": "",
+      "route_count": 1,
+      "routes": [
+        "src/main/resources/data/jugcraft/recipe/starter_workshop/crucible_bellows.json"
+      ],
+      "evidence": [],
+      "blocked_by": []
+    },
+    {
+      "item": "jugcraft:crucible_heat_insert",
+      "status": "recipe_chain_reachable",
+      "reason": "",
+      "route_count": 1,
+      "routes": [
+        "src/main/resources/data/jugcraft/recipe/starter_workshop/crucible_heat_insert.json"
+      ],
+      "evidence": [],
+      "blocked_by": []
+    },
+    {
+      "item": "jugcraft:crucible_stand",
+      "status": "chain_with_acquisition_evidence",
+      "reason": "",
+      "route_count": 1,
+      "routes": [
+        "src/main/resources/data/jugcraft/recipe/crucible_stand.json"
       ],
       "evidence": [],
       "blocked_by": []
@@ -28545,6 +28743,24 @@
         {
           "kind": "worldgen_reference",
           "source": "src/main/resources/data/jugcraft/worldgen/feature/ore_phosphate.json"
+        }
+      ],
+      "blocked_by": []
+    },
+    {
+      "item": "jugcraft:deepslate_quartz_ore",
+      "status": "natural_or_interaction_source",
+      "reason": "",
+      "route_count": 0,
+      "routes": [],
+      "evidence": [
+        {
+          "kind": "worldgen_reference",
+          "source": "src/main/resources/data/jugcraft/worldgen/feature/ore_quartz.json"
+        },
+        {
+          "kind": "worldgen_reference",
+          "source": "src/main/resources/data/jugcraft/worldgen/feature/ore_quartz_secondary.json"
         }
       ],
       "blocked_by": []
@@ -29543,6 +29759,21 @@
         "src/main/resources/data/jugcraft/recipe/drover_rifle.json"
       ],
       "evidence": [],
+      "blocked_by": []
+    },
+    {
+      "item": "jugcraft:drowned_diver_helmet",
+      "status": "natural_or_interaction_source",
+      "reason": "",
+      "route_count": 0,
+      "routes": [],
+      "evidence": [
+        {
+          "kind": "native_acquisition",
+          "source": "src/main/java/io/github/jimbozoomer/jugcraft/creatures/scary/Unmasking.java",
+          "note": "A costumed villain beaten by a player is unmasked and drops its mask (when mobs drop loot); the villains spawn at night in the Halloween season."
+        }
+      ],
       "blocked_by": []
     },
     {
@@ -31762,6 +31993,21 @@
       "blocked_by": []
     },
     {
+      "item": "jugcraft:emerald_phantom_mask",
+      "status": "natural_or_interaction_source",
+      "reason": "",
+      "route_count": 0,
+      "routes": [],
+      "evidence": [
+        {
+          "kind": "native_acquisition",
+          "source": "src/main/java/io/github/jimbozoomer/jugcraft/creatures/scary/Unmasking.java",
+          "note": "A costumed villain beaten by a player is unmasked and drops its mask (when mobs drop loot); the villains spawn at night in the Halloween season."
+        }
+      ],
+      "blocked_by": []
+    },
+    {
       "item": "jugcraft:emergency_diesel_generator",
       "status": "chain_with_acquisition_evidence",
       "reason": "",
@@ -33480,6 +33726,17 @@
       "blocked_by": []
     },
     {
+      "item": "jugcraft:firedrake",
+      "status": "chain_with_acquisition_evidence",
+      "reason": "",
+      "route_count": 1,
+      "routes": [
+        "src/main/resources/data/jugcraft/recipe/firedrake.json"
+      ],
+      "evidence": [],
+      "blocked_by": []
+    },
+    {
       "item": "jugcraft:first_aid_kit",
       "status": "chain_with_acquisition_evidence",
       "reason": "",
@@ -34046,6 +34303,17 @@
       "blocked_by": []
     },
     {
+      "item": "jugcraft:food_grade_phosphoric_acid",
+      "status": "chain_with_acquisition_evidence",
+      "reason": "",
+      "route_count": 1,
+      "routes": [
+        "src/main/resources/data/jugcraft/recipe/chemical_reaction/phosphate_food_grade_acid.json"
+      ],
+      "evidence": [],
+      "blocked_by": []
+    },
+    {
       "item": "jugcraft:foragers_stew",
       "status": "chain_with_acquisition_evidence",
       "reason": "",
@@ -34540,6 +34808,17 @@
       "route_count": 1,
       "routes": [
         "src/main/resources/data/jugcraft/recipe/chemical_reaction/battery_galena.json"
+      ],
+      "evidence": [],
+      "blocked_by": []
+    },
+    {
+      "item": "jugcraft:gallant_rifle",
+      "status": "chain_with_acquisition_evidence",
+      "reason": "",
+      "route_count": 1,
+      "routes": [
+        "src/main/resources/data/jugcraft/recipe/gallant_rifle.json"
       ],
       "evidence": [],
       "blocked_by": []
@@ -36733,6 +37012,24 @@
       "blocked_by": []
     },
     {
+      "item": "jugcraft:hallowreap",
+      "status": "loot_only",
+      "reason": "",
+      "route_count": 0,
+      "routes": [],
+      "evidence": [
+        {
+          "kind": "loot",
+          "source": "src/main/resources/data/jugcraft/loot_table/bosses/pumpkin_king.json"
+        },
+        {
+          "kind": "loot",
+          "source": "src/main/resources/data/jugcraft/loot_table/entities/pumpkin_king.json"
+        }
+      ],
+      "blocked_by": []
+    },
+    {
       "item": "jugcraft:ham",
       "status": "recipe_chain_reachable",
       "reason": "",
@@ -36935,12 +37232,34 @@
       "blocked_by": []
     },
     {
+      "item": "jugcraft:harrow",
+      "status": "chain_with_acquisition_evidence",
+      "reason": "",
+      "route_count": 1,
+      "routes": [
+        "src/main/resources/data/jugcraft/recipe/harrow.json"
+      ],
+      "evidence": [],
+      "blocked_by": []
+    },
+    {
       "item": "jugcraft:harvest_balloon",
       "status": "recipe_chain_reachable",
       "reason": "",
       "route_count": 1,
       "routes": [
         "src/main/resources/data/jugcraft/recipe/harvest_balloon.json"
+      ],
+      "evidence": [],
+      "blocked_by": []
+    },
+    {
+      "item": "jugcraft:harvest_crown",
+      "status": "chain_with_acquisition_evidence",
+      "reason": "",
+      "route_count": 1,
+      "routes": [
+        "src/main/resources/data/jugcraft/recipe/harvest_crown.json"
       ],
       "evidence": [],
       "blocked_by": []
@@ -37884,6 +38203,17 @@
       "route_count": 1,
       "routes": [
         "src/main/resources/data/jugcraft/recipe/highwayman.json"
+      ],
+      "evidence": [],
+      "blocked_by": []
+    },
+    {
+      "item": "jugcraft:hinterland_rifle",
+      "status": "chain_with_acquisition_evidence",
+      "reason": "",
+      "route_count": 1,
+      "routes": [
+        "src/main/resources/data/jugcraft/recipe/hinterland_rifle.json"
       ],
       "evidence": [],
       "blocked_by": []
@@ -44768,6 +45098,18 @@
       "blocked_by": []
     },
     {
+      "item": "jugcraft:invar_crate",
+      "status": "chain_with_acquisition_evidence",
+      "reason": "",
+      "route_count": 2,
+      "routes": [
+        "src/main/resources/data/jugcraft/recipe/storage_crates/invar_crate_direct.json",
+        "src/main/resources/data/jugcraft/recipe/storage_crates/invar_crate_upgrade.json"
+      ],
+      "evidence": [],
+      "blocked_by": []
+    },
+    {
       "item": "jugcraft:invar_gear",
       "status": "chain_with_acquisition_evidence",
       "reason": "",
@@ -44809,6 +45151,17 @@
       "route_count": 1,
       "routes": [
         "src/main/resources/data/jugcraft/recipe/pressing/invar_ingot.json"
+      ],
+      "evidence": [],
+      "blocked_by": []
+    },
+    {
+      "item": "jugcraft:invar_storage_crate_upgrade",
+      "status": "chain_with_acquisition_evidence",
+      "reason": "",
+      "route_count": 1,
+      "routes": [
+        "src/main/resources/data/jugcraft/recipe/storage_crates/invar_crate_kit.json"
       ],
       "evidence": [],
       "blocked_by": []
@@ -45249,6 +45602,17 @@
           "source": "src/main/resources/data/jugcraft/loot_table/carve/jarrahdale_pumpkin.json"
         }
       ],
+      "blocked_by": []
+    },
+    {
+      "item": "jugcraft:jawbreaker",
+      "status": "chain_with_acquisition_evidence",
+      "reason": "",
+      "route_count": 1,
+      "routes": [
+        "src/main/resources/data/jugcraft/recipe/jawbreaker.json"
+      ],
+      "evidence": [],
       "blocked_by": []
     },
     {
@@ -63280,6 +63644,31 @@
       "blocked_by": []
     },
     {
+      "item": "jugcraft:kings_ember",
+      "status": "loot_only",
+      "reason": "",
+      "route_count": 0,
+      "routes": [],
+      "evidence": [
+        {
+          "kind": "loot",
+          "source": "src/main/resources/data/jugcraft/loot_table/entities/pumpkin_king.json"
+        }
+      ],
+      "blocked_by": []
+    },
+    {
+      "item": "jugcraft:kings_lantern",
+      "status": "chain_with_acquisition_evidence",
+      "reason": "",
+      "route_count": 1,
+      "routes": [
+        "src/main/resources/data/jugcraft/recipe/kings_lantern.json"
+      ],
+      "evidence": [],
+      "blocked_by": []
+    },
+    {
       "item": "jugcraft:kitchen_counter",
       "status": "recipe_chain_reachable",
       "reason": "",
@@ -63420,6 +63809,17 @@
       "route_count": 1,
       "routes": [
         "src/main/resources/data/jugcraft/recipe/kraken_shell.json"
+      ],
+      "evidence": [],
+      "blocked_by": []
+    },
+    {
+      "item": "jugcraft:kreuzer_pistol",
+      "status": "chain_with_acquisition_evidence",
+      "reason": "",
+      "route_count": 1,
+      "routes": [
+        "src/main/resources/data/jugcraft/recipe/kreuzer_pistol.json"
       ],
       "evidence": [],
       "blocked_by": []
@@ -71462,6 +71862,17 @@
       "blocked_by": []
     },
     {
+      "item": "jugcraft:lesser_water_focus",
+      "status": "recipe_chain_reachable",
+      "reason": "",
+      "route_count": 1,
+      "routes": [
+        "src/main/resources/data/jugcraft/recipe/lesser_water_focus.json"
+      ],
+      "evidence": [],
+      "blocked_by": []
+    },
+    {
       "item": "jugcraft:lettuce",
       "status": "chain_with_acquisition_evidence",
       "reason": "",
@@ -71917,6 +72328,17 @@
       "route_count": 1,
       "routes": [
         "src/main/resources/data/jugcraft/recipe/locker_security.json"
+      ],
+      "evidence": [],
+      "blocked_by": []
+    },
+    {
+      "item": "jugcraft:locomotive",
+      "status": "chain_with_acquisition_evidence",
+      "reason": "",
+      "route_count": 1,
+      "routes": [
+        "src/main/resources/data/jugcraft/recipe/locomotive.json"
       ],
       "evidence": [],
       "blocked_by": []
@@ -73258,6 +73680,17 @@
       "blocked_by": []
     },
     {
+      "item": "jugcraft:mmh_tank",
+      "status": "chain_with_acquisition_evidence",
+      "reason": "",
+      "route_count": 1,
+      "routes": [
+        "src/main/resources/data/jugcraft/recipe/chemical_reaction/cryo_mmh_tank.json"
+      ],
+      "evidence": [],
+      "blocked_by": []
+    },
+    {
       "item": "jugcraft:mobius_fuel",
       "status": "recipe_chain_reachable",
       "reason": "",
@@ -73347,6 +73780,17 @@
       "route_count": 1,
       "routes": [
         "src/main/resources/data/jugcraft/recipe/monomer_preparation_unit.json"
+      ],
+      "evidence": [],
+      "blocked_by": []
+    },
+    {
+      "item": "jugcraft:monomethylhydrazine_bucket",
+      "status": "chain_with_acquisition_evidence",
+      "reason": "",
+      "route_count": 1,
+      "routes": [
+        "src/main/java/io/github/jimbozoomer/jugcraft/chemistry/PetroFluids.java"
       ],
       "evidence": [],
       "blocked_by": []
@@ -74191,6 +74635,50 @@
       "routes": [
         "src/main/resources/data/jugcraft/recipe/alloying/neodymium_magnet.json",
         "src/main/resources/data/jugcraft/recipe/alloying/neodymium_magnet_from_ferroboron.json"
+      ],
+      "evidence": [],
+      "blocked_by": []
+    },
+    {
+      "item": "jugcraft:nereids_hood",
+      "status": "recipe_chain_reachable",
+      "reason": "",
+      "route_count": 1,
+      "routes": [
+        "src/main/resources/data/jugcraft/recipe/nereids_hood.json"
+      ],
+      "evidence": [],
+      "blocked_by": []
+    },
+    {
+      "item": "jugcraft:nereids_pants",
+      "status": "recipe_chain_reachable",
+      "reason": "",
+      "route_count": 1,
+      "routes": [
+        "src/main/resources/data/jugcraft/recipe/nereids_pants.json"
+      ],
+      "evidence": [],
+      "blocked_by": []
+    },
+    {
+      "item": "jugcraft:nereids_shoes",
+      "status": "recipe_chain_reachable",
+      "reason": "",
+      "route_count": 1,
+      "routes": [
+        "src/main/resources/data/jugcraft/recipe/nereids_shoes.json"
+      ],
+      "evidence": [],
+      "blocked_by": []
+    },
+    {
+      "item": "jugcraft:nereids_tunic",
+      "status": "recipe_chain_reachable",
+      "reason": "",
+      "route_count": 1,
+      "routes": [
+        "src/main/resources/data/jugcraft/recipe/nereids_tunic.json"
       ],
       "evidence": [],
       "blocked_by": []
@@ -79584,6 +80072,17 @@
       "blocked_by": []
     },
     {
+      "item": "jugcraft:old_grange_carbine",
+      "status": "chain_with_acquisition_evidence",
+      "reason": "",
+      "route_count": 1,
+      "routes": [
+        "src/main/resources/data/jugcraft/recipe/old_grange_carbine.json"
+      ],
+      "evidence": [],
+      "blocked_by": []
+    },
+    {
       "item": "jugcraft:olive_bush_sapling",
       "status": "chain_with_acquisition_evidence",
       "reason": "",
@@ -79783,6 +80282,32 @@
         "src/main/resources/data/jugcraft/recipe/pot_cooking/onion_soup.json"
       ],
       "evidence": [],
+      "blocked_by": []
+    },
+    {
+      "item": "jugcraft:onrush_smg",
+      "status": "chain_with_acquisition_evidence",
+      "reason": "",
+      "route_count": 1,
+      "routes": [
+        "src/main/resources/data/jugcraft/recipe/onrush_smg.json"
+      ],
+      "evidence": [],
+      "blocked_by": []
+    },
+    {
+      "item": "jugcraft:onyx_warden_helm",
+      "status": "natural_or_interaction_source",
+      "reason": "",
+      "route_count": 0,
+      "routes": [],
+      "evidence": [
+        {
+          "kind": "native_acquisition",
+          "source": "src/main/java/io/github/jimbozoomer/jugcraft/creatures/scary/Unmasking.java",
+          "note": "A costumed villain beaten by a player is unmasked and drops its mask (when mobs drop loot); the villains spawn at night in the Halloween season."
+        }
+      ],
       "blocked_by": []
     },
     {
@@ -80191,6 +80716,17 @@
       "blocked_by": []
     },
     {
+      "item": "jugcraft:pact_perch",
+      "status": "recipe_chain_reachable",
+      "reason": "",
+      "route_count": 1,
+      "routes": [
+        "src/main/resources/data/jugcraft/recipe/pact_perch.json"
+      ],
+      "evidence": [],
+      "blocked_by": []
+    },
+    {
       "item": "jugcraft:pad_mount_transformer",
       "status": "chain_with_acquisition_evidence",
       "reason": "",
@@ -80504,6 +81040,17 @@
       "route_count": 1,
       "routes": [
         "src/main/resources/data/jugcraft/recipe/parsley_bundle.json"
+      ],
+      "evidence": [],
+      "blocked_by": []
+    },
+    {
+      "item": "jugcraft:passenger_car",
+      "status": "chain_with_acquisition_evidence",
+      "reason": "",
+      "route_count": 1,
+      "routes": [
+        "src/main/resources/data/jugcraft/recipe/passenger_car.json"
       ],
       "evidence": [],
       "blocked_by": []
@@ -83494,9 +84041,10 @@
       "item": "jugcraft:propellant_residue",
       "status": "chain_with_acquisition_evidence",
       "reason": "",
-      "route_count": 2,
+      "route_count": 3,
       "routes": [
         "src/main/resources/data/jugcraft/recipe/chemical_reaction/cryo_hydrazine.json",
+        "src/main/resources/data/jugcraft/recipe/chemical_reaction/cryo_mmh.json",
         "src/main/resources/data/jugcraft/recipe/chemical_reaction/cryo_n2o4.json"
       ],
       "evidence": [],
@@ -83520,6 +84068,17 @@
       "route_count": 1,
       "routes": [
         "src/main/resources/data/jugcraft/recipe/protection_rack.json"
+      ],
+      "evidence": [],
+      "blocked_by": []
+    },
+    {
+      "item": "jugcraft:psalm_smg",
+      "status": "chain_with_acquisition_evidence",
+      "reason": "",
+      "route_count": 1,
+      "routes": [
+        "src/main/resources/data/jugcraft/recipe/psalm_smg.json"
       ],
       "evidence": [],
       "blocked_by": []
@@ -83811,6 +84370,20 @@
         {
           "kind": "loot",
           "source": "src/main/resources/data/jugcraft/loot_table/gameplay/scoop_pumpkin.json"
+        }
+      ],
+      "blocked_by": []
+    },
+    {
+      "item": "jugcraft:pumpkin_kings_crown",
+      "status": "loot_only",
+      "reason": "",
+      "route_count": 0,
+      "routes": [],
+      "evidence": [
+        {
+          "kind": "loot",
+          "source": "src/main/resources/data/jugcraft/loot_table/entities/pumpkin_king.json"
         }
       ],
       "blocked_by": []
@@ -84135,6 +84708,35 @@
         "src/main/resources/data/jugcraft/recipe/pyromaniacs_tunic.json"
       ],
       "evidence": [],
+      "blocked_by": []
+    },
+    {
+      "item": "jugcraft:quarrel_carbine",
+      "status": "chain_with_acquisition_evidence",
+      "reason": "",
+      "route_count": 1,
+      "routes": [
+        "src/main/resources/data/jugcraft/recipe/quarrel_carbine.json"
+      ],
+      "evidence": [],
+      "blocked_by": []
+    },
+    {
+      "item": "jugcraft:quartz_ore",
+      "status": "natural_or_interaction_source",
+      "reason": "",
+      "route_count": 0,
+      "routes": [],
+      "evidence": [
+        {
+          "kind": "worldgen_reference",
+          "source": "src/main/resources/data/jugcraft/worldgen/feature/ore_quartz.json"
+        },
+        {
+          "kind": "worldgen_reference",
+          "source": "src/main/resources/data/jugcraft/worldgen/feature/ore_quartz_secondary.json"
+        }
+      ],
       "blocked_by": []
     },
     {
@@ -86415,6 +87017,17 @@
       "blocked_by": []
     },
     {
+      "item": "jugcraft:rooted_thallite_foundation",
+      "status": "chain_with_acquisition_evidence",
+      "reason": "",
+      "route_count": 1,
+      "routes": [
+        "src/main/resources/data/jugcraft/concordance/ritual/root_and_rivet.json"
+      ],
+      "evidence": [],
+      "blocked_by": []
+    },
+    {
       "item": "jugcraft:rosemary",
       "status": "chain_with_acquisition_evidence",
       "reason": "",
@@ -88068,10 +88681,11 @@
       "item": "jugcraft:silicon",
       "status": "recipe_chain_reachable",
       "reason": "",
-      "route_count": 2,
+      "route_count": 3,
       "routes": [
         "src/main/resources/data/jugcraft/recipe/arc_smelting/quartz.json",
-        "src/main/resources/data/jugcraft/recipe/silicon_from_blasting_quartz.json"
+        "src/main/resources/data/jugcraft/recipe/silicon_from_blasting_quartz.json",
+        "src/main/resources/data/jugcraft/recipe/starter_workshop/silicon.json"
       ],
       "evidence": [],
       "blocked_by": []
@@ -89013,6 +89627,21 @@
       "blocked_by": []
     },
     {
+      "item": "jugcraft:spectral_cosmonaut_helmet",
+      "status": "natural_or_interaction_source",
+      "reason": "",
+      "route_count": 0,
+      "routes": [],
+      "evidence": [
+        {
+          "kind": "native_acquisition",
+          "source": "src/main/java/io/github/jimbozoomer/jugcraft/creatures/scary/Unmasking.java",
+          "note": "A costumed villain beaten by a player is unmasked and drops its mask (when mobs drop loot); the villains spawn at night in the Halloween season."
+        }
+      ],
+      "blocked_by": []
+    },
+    {
       "item": "jugcraft:speed_gate",
       "status": "chain_with_acquisition_evidence",
       "reason": "",
@@ -89456,6 +90085,18 @@
       "blocked_by": []
     },
     {
+      "item": "jugcraft:stainless_steel_crate",
+      "status": "chain_with_acquisition_evidence",
+      "reason": "",
+      "route_count": 2,
+      "routes": [
+        "src/main/resources/data/jugcraft/recipe/storage_crates/stainless_steel_crate_direct.json",
+        "src/main/resources/data/jugcraft/recipe/storage_crates/stainless_steel_crate_upgrade.json"
+      ],
+      "evidence": [],
+      "blocked_by": []
+    },
+    {
       "item": "jugcraft:stainless_steel_ingot",
       "status": "chain_with_acquisition_evidence",
       "reason": "",
@@ -89486,6 +90127,17 @@
       "route_count": 1,
       "routes": [
         "src/main/resources/data/jugcraft/recipe/pressing/stainless_steel_ingot.json"
+      ],
+      "evidence": [],
+      "blocked_by": []
+    },
+    {
+      "item": "jugcraft:stainless_steel_storage_crate_upgrade",
+      "status": "chain_with_acquisition_evidence",
+      "reason": "",
+      "route_count": 1,
+      "routes": [
+        "src/main/resources/data/jugcraft/recipe/storage_crates/stainless_steel_crate_kit.json"
       ],
       "evidence": [],
       "blocked_by": []
@@ -89842,6 +90494,18 @@
       "routes": [
         "src/main/resources/data/jugcraft/recipe/steel_chestplate.json",
         "src/main/resources/data/jugcraft/recipe/steel_chestplate_from_kaiser_chestplate.json"
+      ],
+      "evidence": [],
+      "blocked_by": []
+    },
+    {
+      "item": "jugcraft:steel_crate",
+      "status": "chain_with_acquisition_evidence",
+      "reason": "",
+      "route_count": 2,
+      "routes": [
+        "src/main/resources/data/jugcraft/recipe/storage_crates/steel_crate_direct.json",
+        "src/main/resources/data/jugcraft/recipe/storage_crates/steel_crate_upgrade.json"
       ],
       "evidence": [],
       "blocked_by": []
@@ -90411,6 +91075,17 @@
       "blocked_by": []
     },
     {
+      "item": "jugcraft:steel_storage_crate_upgrade",
+      "status": "chain_with_acquisition_evidence",
+      "reason": "",
+      "route_count": 1,
+      "routes": [
+        "src/main/resources/data/jugcraft/recipe/storage_crates/steel_crate_kit.json"
+      ],
+      "evidence": [],
+      "blocked_by": []
+    },
+    {
       "item": "jugcraft:steel_sword",
       "status": "recipe_chain_reachable",
       "reason": "",
@@ -90639,8 +91314,9 @@
       "item": "jugcraft:storable_bipropellant_motor",
       "status": "chain_with_acquisition_evidence",
       "reason": "",
-      "route_count": 1,
+      "route_count": 2,
       "routes": [
+        "src/main/resources/data/jugcraft/recipe/rocket_assembly/cryo_mmh_bipropellant_motor.json",
         "src/main/resources/data/jugcraft/recipe/rocket_assembly/cryo_storable_bipropellant_motor.json"
       ],
       "evidence": [],
@@ -92805,6 +93481,17 @@
       "blocked_by": []
     },
     {
+      "item": "jugcraft:thunder_vane",
+      "status": "recipe_chain_reachable",
+      "reason": "",
+      "route_count": 1,
+      "routes": [
+        "src/main/resources/data/jugcraft/recipe/thunder_vane.json"
+      ],
+      "evidence": [],
+      "blocked_by": []
+    },
+    {
       "item": "jugcraft:thunderpipe",
       "status": "recipe_chain_reachable",
       "reason": "",
@@ -93084,6 +93771,18 @@
       "blocked_by": []
     },
     {
+      "item": "jugcraft:titanium_crate",
+      "status": "chain_with_acquisition_evidence",
+      "reason": "",
+      "route_count": 2,
+      "routes": [
+        "src/main/resources/data/jugcraft/recipe/storage_crates/titanium_crate_direct.json",
+        "src/main/resources/data/jugcraft/recipe/storage_crates/titanium_crate_upgrade.json"
+      ],
+      "evidence": [],
+      "blocked_by": []
+    },
+    {
       "item": "jugcraft:titanium_helmet",
       "status": "chain_with_acquisition_evidence",
       "reason": "",
@@ -93231,6 +93930,17 @@
       "routes": [
         "src/main/resources/data/jugcraft/recipe/chemical_reaction/titanium_sponge.json",
         "src/main/resources/data/jugcraft/recipe/electrolysis/reduce_and_clean_titanium_sponge.json"
+      ],
+      "evidence": [],
+      "blocked_by": []
+    },
+    {
+      "item": "jugcraft:titanium_storage_crate_upgrade",
+      "status": "chain_with_acquisition_evidence",
+      "reason": "",
+      "route_count": 1,
+      "routes": [
+        "src/main/resources/data/jugcraft/recipe/storage_crates/titanium_crate_kit.json"
       ],
       "evidence": [],
       "blocked_by": []
@@ -93752,6 +94462,18 @@
       "blocked_by": []
     },
     {
+      "item": "jugcraft:tungsten_crate",
+      "status": "chain_with_acquisition_evidence",
+      "reason": "",
+      "route_count": 2,
+      "routes": [
+        "src/main/resources/data/jugcraft/recipe/storage_crates/tungsten_crate_direct.json",
+        "src/main/resources/data/jugcraft/recipe/storage_crates/tungsten_crate_upgrade.json"
+      ],
+      "evidence": [],
+      "blocked_by": []
+    },
+    {
       "item": "jugcraft:tungsten_dust",
       "status": "chain_with_acquisition_evidence",
       "reason": "",
@@ -93851,6 +94573,17 @@
       "route_count": 1,
       "routes": [
         "src/main/resources/data/jugcraft/recipe/tungsten_steel_frame_stairs.json"
+      ],
+      "evidence": [],
+      "blocked_by": []
+    },
+    {
+      "item": "jugcraft:tungsten_storage_crate_upgrade",
+      "status": "chain_with_acquisition_evidence",
+      "reason": "",
+      "route_count": 1,
+      "routes": [
+        "src/main/resources/data/jugcraft/recipe/storage_crates/tungsten_crate_kit.json"
       ],
       "evidence": [],
       "blocked_by": []
@@ -94411,6 +95144,17 @@
       "route_count": 1,
       "routes": [
         "src/main/resources/data/jugcraft/recipe/vertical_grip.json"
+      ],
+      "evidence": [],
+      "blocked_by": []
+    },
+    {
+      "item": "jugcraft:vesper_rifle",
+      "status": "chain_with_acquisition_evidence",
+      "reason": "",
+      "route_count": 1,
+      "routes": [
+        "src/main/resources/data/jugcraft/recipe/vesper_rifle.json"
       ],
       "evidence": [],
       "blocked_by": []
@@ -95016,12 +95760,34 @@
       "blocked_by": []
     },
     {
+      "item": "jugcraft:water_bangle",
+      "status": "recipe_chain_reachable",
+      "reason": "",
+      "route_count": 1,
+      "routes": [
+        "src/main/resources/data/jugcraft/recipe/water_bangle.json"
+      ],
+      "evidence": [],
+      "blocked_by": []
+    },
+    {
       "item": "jugcraft:water_cooler",
       "status": "recipe_chain_reachable",
       "reason": "",
       "route_count": 1,
       "routes": [
         "src/main/resources/data/jugcraft/recipe/water_cooler.json"
+      ],
+      "evidence": [],
+      "blocked_by": []
+    },
+    {
+      "item": "jugcraft:water_focus",
+      "status": "recipe_chain_reachable",
+      "reason": "",
+      "route_count": 1,
+      "routes": [
+        "src/main/resources/data/jugcraft/recipe/water_focus.json"
       ],
       "evidence": [],
       "blocked_by": []
@@ -98121,6 +98887,50 @@
       "route_count": 1,
       "routes": [
         "src/main/resources/data/jugcraft/recipe/winged_skull_headstone_from_stonecutting.json"
+      ],
+      "evidence": [],
+      "blocked_by": []
+    },
+    {
+      "item": "jugcraft:winterguards_boots",
+      "status": "recipe_chain_reachable",
+      "reason": "",
+      "route_count": 1,
+      "routes": [
+        "src/main/resources/data/jugcraft/recipe/winterguards_boots.json"
+      ],
+      "evidence": [],
+      "blocked_by": []
+    },
+    {
+      "item": "jugcraft:winterguards_chestplate",
+      "status": "recipe_chain_reachable",
+      "reason": "",
+      "route_count": 1,
+      "routes": [
+        "src/main/resources/data/jugcraft/recipe/winterguards_chestplate.json"
+      ],
+      "evidence": [],
+      "blocked_by": []
+    },
+    {
+      "item": "jugcraft:winterguards_helmet",
+      "status": "recipe_chain_reachable",
+      "reason": "",
+      "route_count": 1,
+      "routes": [
+        "src/main/resources/data/jugcraft/recipe/winterguards_helmet.json"
+      ],
+      "evidence": [],
+      "blocked_by": []
+    },
+    {
+      "item": "jugcraft:winterguards_leggings",
+      "status": "recipe_chain_reachable",
+      "reason": "",
+      "route_count": 1,
+      "routes": [
+        "src/main/resources/data/jugcraft/recipe/winterguards_leggings.json"
       ],
       "evidence": [],
       "blocked_by": []
@@ -103465,6 +104275,399 @@
       ],
       "outputs": [
         "jugcraft:apple_seeds"
+      ]
+    },
+    {
+      "source": "src/main/resources/data/jugcraft/recipe/aquamancers_boots.json",
+      "type": "minecraft:crafting_shaped",
+      "inputs": [
+        [
+          "minecraft:black_wool",
+          "minecraft:blue_wool",
+          "minecraft:brown_wool",
+          "minecraft:cyan_wool",
+          "minecraft:gray_wool",
+          "minecraft:green_wool",
+          "minecraft:light_blue_wool",
+          "minecraft:light_gray_wool",
+          "minecraft:lime_wool",
+          "minecraft:magenta_wool",
+          "minecraft:orange_wool",
+          "minecraft:pink_wool",
+          "minecraft:purple_wool",
+          "minecraft:red_wool",
+          "minecraft:white_wool",
+          "minecraft:yellow_wool"
+        ],
+        [
+          "minecraft:black_wool",
+          "minecraft:blue_wool",
+          "minecraft:brown_wool",
+          "minecraft:cyan_wool",
+          "minecraft:gray_wool",
+          "minecraft:green_wool",
+          "minecraft:light_blue_wool",
+          "minecraft:light_gray_wool",
+          "minecraft:lime_wool",
+          "minecraft:magenta_wool",
+          "minecraft:orange_wool",
+          "minecraft:pink_wool",
+          "minecraft:purple_wool",
+          "minecraft:red_wool",
+          "minecraft:white_wool",
+          "minecraft:yellow_wool"
+        ],
+        [
+          "minecraft:lapis_lazuli"
+        ],
+        [
+          "minecraft:lapis_lazuli"
+        ]
+      ],
+      "outputs": [
+        "jugcraft:aquamancers_boots"
+      ]
+    },
+    {
+      "source": "src/main/resources/data/jugcraft/recipe/aquamancers_hat.json",
+      "type": "minecraft:crafting_shaped",
+      "inputs": [
+        [
+          "minecraft:black_wool",
+          "minecraft:blue_wool",
+          "minecraft:brown_wool",
+          "minecraft:cyan_wool",
+          "minecraft:gray_wool",
+          "minecraft:green_wool",
+          "minecraft:light_blue_wool",
+          "minecraft:light_gray_wool",
+          "minecraft:lime_wool",
+          "minecraft:magenta_wool",
+          "minecraft:orange_wool",
+          "minecraft:pink_wool",
+          "minecraft:purple_wool",
+          "minecraft:red_wool",
+          "minecraft:white_wool",
+          "minecraft:yellow_wool"
+        ],
+        [
+          "minecraft:lapis_lazuli"
+        ],
+        [
+          "minecraft:black_wool",
+          "minecraft:blue_wool",
+          "minecraft:brown_wool",
+          "minecraft:cyan_wool",
+          "minecraft:gray_wool",
+          "minecraft:green_wool",
+          "minecraft:light_blue_wool",
+          "minecraft:light_gray_wool",
+          "minecraft:lime_wool",
+          "minecraft:magenta_wool",
+          "minecraft:orange_wool",
+          "minecraft:pink_wool",
+          "minecraft:purple_wool",
+          "minecraft:red_wool",
+          "minecraft:white_wool",
+          "minecraft:yellow_wool"
+        ],
+        [
+          "minecraft:black_wool",
+          "minecraft:blue_wool",
+          "minecraft:brown_wool",
+          "minecraft:cyan_wool",
+          "minecraft:gray_wool",
+          "minecraft:green_wool",
+          "minecraft:light_blue_wool",
+          "minecraft:light_gray_wool",
+          "minecraft:lime_wool",
+          "minecraft:magenta_wool",
+          "minecraft:orange_wool",
+          "minecraft:pink_wool",
+          "minecraft:purple_wool",
+          "minecraft:red_wool",
+          "minecraft:white_wool",
+          "minecraft:yellow_wool"
+        ],
+        [
+          "minecraft:black_wool",
+          "minecraft:blue_wool",
+          "minecraft:brown_wool",
+          "minecraft:cyan_wool",
+          "minecraft:gray_wool",
+          "minecraft:green_wool",
+          "minecraft:light_blue_wool",
+          "minecraft:light_gray_wool",
+          "minecraft:lime_wool",
+          "minecraft:magenta_wool",
+          "minecraft:orange_wool",
+          "minecraft:pink_wool",
+          "minecraft:purple_wool",
+          "minecraft:red_wool",
+          "minecraft:white_wool",
+          "minecraft:yellow_wool"
+        ]
+      ],
+      "outputs": [
+        "jugcraft:aquamancers_hat"
+      ]
+    },
+    {
+      "source": "src/main/resources/data/jugcraft/recipe/aquamancers_leggings.json",
+      "type": "minecraft:crafting_shaped",
+      "inputs": [
+        [
+          "minecraft:black_wool",
+          "minecraft:blue_wool",
+          "minecraft:brown_wool",
+          "minecraft:cyan_wool",
+          "minecraft:gray_wool",
+          "minecraft:green_wool",
+          "minecraft:light_blue_wool",
+          "minecraft:light_gray_wool",
+          "minecraft:lime_wool",
+          "minecraft:magenta_wool",
+          "minecraft:orange_wool",
+          "minecraft:pink_wool",
+          "minecraft:purple_wool",
+          "minecraft:red_wool",
+          "minecraft:white_wool",
+          "minecraft:yellow_wool"
+        ],
+        [
+          "minecraft:lapis_lazuli"
+        ],
+        [
+          "minecraft:black_wool",
+          "minecraft:blue_wool",
+          "minecraft:brown_wool",
+          "minecraft:cyan_wool",
+          "minecraft:gray_wool",
+          "minecraft:green_wool",
+          "minecraft:light_blue_wool",
+          "minecraft:light_gray_wool",
+          "minecraft:lime_wool",
+          "minecraft:magenta_wool",
+          "minecraft:orange_wool",
+          "minecraft:pink_wool",
+          "minecraft:purple_wool",
+          "minecraft:red_wool",
+          "minecraft:white_wool",
+          "minecraft:yellow_wool"
+        ],
+        [
+          "minecraft:black_wool",
+          "minecraft:blue_wool",
+          "minecraft:brown_wool",
+          "minecraft:cyan_wool",
+          "minecraft:gray_wool",
+          "minecraft:green_wool",
+          "minecraft:light_blue_wool",
+          "minecraft:light_gray_wool",
+          "minecraft:lime_wool",
+          "minecraft:magenta_wool",
+          "minecraft:orange_wool",
+          "minecraft:pink_wool",
+          "minecraft:purple_wool",
+          "minecraft:red_wool",
+          "minecraft:white_wool",
+          "minecraft:yellow_wool"
+        ],
+        [
+          "minecraft:black_wool",
+          "minecraft:blue_wool",
+          "minecraft:brown_wool",
+          "minecraft:cyan_wool",
+          "minecraft:gray_wool",
+          "minecraft:green_wool",
+          "minecraft:light_blue_wool",
+          "minecraft:light_gray_wool",
+          "minecraft:lime_wool",
+          "minecraft:magenta_wool",
+          "minecraft:orange_wool",
+          "minecraft:pink_wool",
+          "minecraft:purple_wool",
+          "minecraft:red_wool",
+          "minecraft:white_wool",
+          "minecraft:yellow_wool"
+        ],
+        [
+          "minecraft:black_wool",
+          "minecraft:blue_wool",
+          "minecraft:brown_wool",
+          "minecraft:cyan_wool",
+          "minecraft:gray_wool",
+          "minecraft:green_wool",
+          "minecraft:light_blue_wool",
+          "minecraft:light_gray_wool",
+          "minecraft:lime_wool",
+          "minecraft:magenta_wool",
+          "minecraft:orange_wool",
+          "minecraft:pink_wool",
+          "minecraft:purple_wool",
+          "minecraft:red_wool",
+          "minecraft:white_wool",
+          "minecraft:yellow_wool"
+        ],
+        [
+          "minecraft:black_wool",
+          "minecraft:blue_wool",
+          "minecraft:brown_wool",
+          "minecraft:cyan_wool",
+          "minecraft:gray_wool",
+          "minecraft:green_wool",
+          "minecraft:light_blue_wool",
+          "minecraft:light_gray_wool",
+          "minecraft:lime_wool",
+          "minecraft:magenta_wool",
+          "minecraft:orange_wool",
+          "minecraft:pink_wool",
+          "minecraft:purple_wool",
+          "minecraft:red_wool",
+          "minecraft:white_wool",
+          "minecraft:yellow_wool"
+        ]
+      ],
+      "outputs": [
+        "jugcraft:aquamancers_leggings"
+      ]
+    },
+    {
+      "source": "src/main/resources/data/jugcraft/recipe/aquamancers_robes.json",
+      "type": "minecraft:crafting_shaped",
+      "inputs": [
+        [
+          "minecraft:black_wool",
+          "minecraft:blue_wool",
+          "minecraft:brown_wool",
+          "minecraft:cyan_wool",
+          "minecraft:gray_wool",
+          "minecraft:green_wool",
+          "minecraft:light_blue_wool",
+          "minecraft:light_gray_wool",
+          "minecraft:lime_wool",
+          "minecraft:magenta_wool",
+          "minecraft:orange_wool",
+          "minecraft:pink_wool",
+          "minecraft:purple_wool",
+          "minecraft:red_wool",
+          "minecraft:white_wool",
+          "minecraft:yellow_wool"
+        ],
+        [
+          "minecraft:black_wool",
+          "minecraft:blue_wool",
+          "minecraft:brown_wool",
+          "minecraft:cyan_wool",
+          "minecraft:gray_wool",
+          "minecraft:green_wool",
+          "minecraft:light_blue_wool",
+          "minecraft:light_gray_wool",
+          "minecraft:lime_wool",
+          "minecraft:magenta_wool",
+          "minecraft:orange_wool",
+          "minecraft:pink_wool",
+          "minecraft:purple_wool",
+          "minecraft:red_wool",
+          "minecraft:white_wool",
+          "minecraft:yellow_wool"
+        ],
+        [
+          "minecraft:black_wool",
+          "minecraft:blue_wool",
+          "minecraft:brown_wool",
+          "minecraft:cyan_wool",
+          "minecraft:gray_wool",
+          "minecraft:green_wool",
+          "minecraft:light_blue_wool",
+          "minecraft:light_gray_wool",
+          "minecraft:lime_wool",
+          "minecraft:magenta_wool",
+          "minecraft:orange_wool",
+          "minecraft:pink_wool",
+          "minecraft:purple_wool",
+          "minecraft:red_wool",
+          "minecraft:white_wool",
+          "minecraft:yellow_wool"
+        ],
+        [
+          "minecraft:lapis_lazuli"
+        ],
+        [
+          "minecraft:black_wool",
+          "minecraft:blue_wool",
+          "minecraft:brown_wool",
+          "minecraft:cyan_wool",
+          "minecraft:gray_wool",
+          "minecraft:green_wool",
+          "minecraft:light_blue_wool",
+          "minecraft:light_gray_wool",
+          "minecraft:lime_wool",
+          "minecraft:magenta_wool",
+          "minecraft:orange_wool",
+          "minecraft:pink_wool",
+          "minecraft:purple_wool",
+          "minecraft:red_wool",
+          "minecraft:white_wool",
+          "minecraft:yellow_wool"
+        ],
+        [
+          "minecraft:black_wool",
+          "minecraft:blue_wool",
+          "minecraft:brown_wool",
+          "minecraft:cyan_wool",
+          "minecraft:gray_wool",
+          "minecraft:green_wool",
+          "minecraft:light_blue_wool",
+          "minecraft:light_gray_wool",
+          "minecraft:lime_wool",
+          "minecraft:magenta_wool",
+          "minecraft:orange_wool",
+          "minecraft:pink_wool",
+          "minecraft:purple_wool",
+          "minecraft:red_wool",
+          "minecraft:white_wool",
+          "minecraft:yellow_wool"
+        ],
+        [
+          "minecraft:black_wool",
+          "minecraft:blue_wool",
+          "minecraft:brown_wool",
+          "minecraft:cyan_wool",
+          "minecraft:gray_wool",
+          "minecraft:green_wool",
+          "minecraft:light_blue_wool",
+          "minecraft:light_gray_wool",
+          "minecraft:lime_wool",
+          "minecraft:magenta_wool",
+          "minecraft:orange_wool",
+          "minecraft:pink_wool",
+          "minecraft:purple_wool",
+          "minecraft:red_wool",
+          "minecraft:white_wool",
+          "minecraft:yellow_wool"
+        ],
+        [
+          "minecraft:black_wool",
+          "minecraft:blue_wool",
+          "minecraft:brown_wool",
+          "minecraft:cyan_wool",
+          "minecraft:gray_wool",
+          "minecraft:green_wool",
+          "minecraft:light_blue_wool",
+          "minecraft:light_gray_wool",
+          "minecraft:lime_wool",
+          "minecraft:magenta_wool",
+          "minecraft:orange_wool",
+          "minecraft:pink_wool",
+          "minecraft:purple_wool",
+          "minecraft:red_wool",
+          "minecraft:white_wool",
+          "minecraft:yellow_wool"
+        ]
+      ],
+      "outputs": [
+        "jugcraft:aquamancers_robes"
       ]
     },
     {
@@ -116633,6 +117836,27 @@
       ],
       "outputs": [
         "jugcraft:cargo_packager"
+      ]
+    },
+    {
+      "source": "src/main/resources/data/jugcraft/recipe/cargo_wagon.json",
+      "type": "minecraft:crafting_shaped",
+      "inputs": [
+        [
+          "jugcraft:steel_plate"
+        ],
+        [
+          "minecraft:chest"
+        ],
+        [
+          "jugcraft:steel_plate"
+        ],
+        [
+          "minecraft:minecart"
+        ]
+      ],
+      "outputs": [
+        "jugcraft:cargo_wagon"
       ]
     },
     {
@@ -133307,6 +134531,46 @@
       ]
     },
     {
+      "source": "src/main/resources/data/jugcraft/recipe/chemical_reaction/cryo_mmh.json",
+      "type": "jugcraft:chemical_reaction",
+      "inputs": [
+        [
+          "minecraft:redstone"
+        ],
+        [
+          "jugcraft:bulk_chemical_reactor"
+        ],
+        [
+          "fluid:jugcraft:hydrazine"
+        ],
+        [
+          "fluid:jugcraft:methyl_chloride"
+        ]
+      ],
+      "outputs": [
+        "fluid:jugcraft:monomethylhydrazine",
+        "jugcraft:propellant_residue"
+      ]
+    },
+    {
+      "source": "src/main/resources/data/jugcraft/recipe/chemical_reaction/cryo_mmh_tank.json",
+      "type": "jugcraft:chemical_reaction",
+      "inputs": [
+        [
+          "jugcraft:rocket_casing"
+        ],
+        [
+          "jugcraft:chemical_reactor"
+        ],
+        [
+          "fluid:jugcraft:monomethylhydrazine"
+        ]
+      ],
+      "outputs": [
+        "jugcraft:mmh_tank"
+      ]
+    },
+    {
       "source": "src/main/resources/data/jugcraft/recipe/chemical_reaction/cryo_n2o4.json",
       "type": "jugcraft:chemical_reaction",
       "inputs": [
@@ -135188,6 +136452,30 @@
       ]
     },
     {
+      "source": "src/main/resources/data/jugcraft/recipe/chemical_reaction/phosphate_cola.json",
+      "type": "jugcraft:chemical_reaction",
+      "inputs": [
+        [
+          "jugcraft:cola_syrup"
+        ],
+        [
+          "minecraft:glass_bottle"
+        ],
+        [
+          "jugcraft:chemical_reactor"
+        ],
+        [
+          "fluid:minecraft:water"
+        ],
+        [
+          "fluid:jugcraft:carbon_dioxide"
+        ]
+      ],
+      "outputs": [
+        "jugcraft:cola"
+      ]
+    },
+    {
       "source": "src/main/resources/data/jugcraft/recipe/chemical_reaction/phosphate_compost_carrier.json",
       "type": "jugcraft:chemical_reaction",
       "inputs": [
@@ -135272,6 +136560,30 @@
         "fluid:jugcraft:phosphoric_acid",
         "fluid:minecraft:water",
         "jugcraft:gypsum_rich_residue"
+      ]
+    },
+    {
+      "source": "src/main/resources/data/jugcraft/recipe/chemical_reaction/phosphate_food_grade_acid.json",
+      "type": "jugcraft:chemical_reaction",
+      "inputs": [
+        [
+          "minecraft:charcoal"
+        ],
+        [
+          "minecraft:glass_bottle"
+        ],
+        [
+          "jugcraft:chemical_reactor"
+        ],
+        [
+          "fluid:jugcraft:phosphoric_acid"
+        ],
+        [
+          "fluid:minecraft:water"
+        ]
+      ],
+      "outputs": [
+        "jugcraft:food_grade_phosphoric_acid"
       ]
     },
     {
@@ -137635,6 +138947,39 @@
       ],
       "outputs": [
         "jugcraft:clockwork_porter"
+      ]
+    },
+    {
+      "source": "src/main/resources/data/jugcraft/recipe/cloudburst_gun.json",
+      "type": "minecraft:crafting_shaped",
+      "inputs": [
+        [
+          "jugcraft:steel_ingot"
+        ],
+        [
+          "jugcraft:steel_ingot"
+        ],
+        [
+          "jugcraft:steel_ingot"
+        ],
+        [
+          "jugcraft:steel_ingot"
+        ],
+        [
+          "minecraft:lever"
+        ],
+        [
+          "minecraft:lightning_rod"
+        ],
+        [
+          "jugcraft:brass_ingot"
+        ],
+        [
+          "jugcraft:brass_ingot"
+        ]
+      ],
+      "outputs": [
+        "jugcraft:cloudburst_gun"
       ]
     },
     {
@@ -141130,6 +142475,21 @@
       ],
       "outputs": [
         "jugcraft:costume_trunk"
+      ]
+    },
+    {
+      "source": "src/main/resources/data/jugcraft/recipe/coupler.json",
+      "type": "minecraft:crafting_shaped",
+      "inputs": [
+        [
+          "minecraft:tripwire_hook"
+        ],
+        [
+          "jugcraft:steel_plate"
+        ]
+      ],
+      "outputs": [
+        "jugcraft:coupler"
       ]
     },
     {
@@ -157297,6 +158657,42 @@
       ]
     },
     {
+      "source": "src/main/resources/data/jugcraft/recipe/crucible_stand.json",
+      "type": "minecraft:crafting_shaped",
+      "inputs": [
+        [
+          "minecraft:iron_ingot"
+        ],
+        [
+          "minecraft:copper_ingot"
+        ],
+        [
+          "minecraft:iron_ingot"
+        ],
+        [
+          "minecraft:iron_ingot"
+        ],
+        [
+          "minecraft:copper_ingot"
+        ],
+        [
+          "minecraft:iron_ingot"
+        ],
+        [
+          "minecraft:iron_ingot"
+        ],
+        [
+          "jugcraft:rooted_thallite_foundation"
+        ],
+        [
+          "minecraft:iron_ingot"
+        ]
+      ],
+      "outputs": [
+        "jugcraft:crucible_stand"
+      ]
+    },
+    {
       "source": "src/main/resources/data/jugcraft/recipe/crusher.json",
       "type": "minecraft:crafting_shaped",
       "inputs": [
@@ -157540,6 +158936,21 @@
       ],
       "outputs": [
         "jugcraft:phosphate"
+      ]
+    },
+    {
+      "source": "src/main/resources/data/jugcraft/recipe/crushing/deepslate_quartz_ore.json",
+      "type": "jugcraft:crushing",
+      "inputs": [
+        [
+          "jugcraft:deepslate_quartz_ore"
+        ],
+        [
+          "jugcraft:crusher"
+        ]
+      ],
+      "outputs": [
+        "minecraft:quartz"
       ]
     },
     {
@@ -157840,6 +159251,21 @@
       ],
       "outputs": [
         "jugcraft:phosphate"
+      ]
+    },
+    {
+      "source": "src/main/resources/data/jugcraft/recipe/crushing/quartz_ore.json",
+      "type": "jugcraft:crushing",
+      "inputs": [
+        [
+          "jugcraft:quartz_ore"
+        ],
+        [
+          "jugcraft:crusher"
+        ]
+      ],
+      "outputs": [
+        "minecraft:quartz"
       ]
     },
     {
@@ -171187,6 +172613,39 @@
       ]
     },
     {
+      "source": "src/main/resources/data/jugcraft/recipe/firedrake.json",
+      "type": "minecraft:crafting_shaped",
+      "inputs": [
+        [
+          "jugcraft:steel_ingot"
+        ],
+        [
+          "jugcraft:steel_ingot"
+        ],
+        [
+          "minecraft:fire_charge"
+        ],
+        [
+          "jugcraft:brass_ingot"
+        ],
+        [
+          "minecraft:lever"
+        ],
+        [
+          "jugcraft:brass_ingot"
+        ],
+        [
+          "minecraft:bucket"
+        ],
+        [
+          "minecraft:bucket"
+        ]
+      ],
+      "outputs": [
+        "jugcraft:firedrake"
+      ]
+    },
+    {
       "source": "src/main/resources/data/jugcraft/recipe/fitting_mold.json",
       "type": "minecraft:crafting_shaped",
       "inputs": [
@@ -173918,6 +175377,33 @@
       ],
       "outputs": [
         "jugcraft:furniture_material"
+      ]
+    },
+    {
+      "source": "src/main/resources/data/jugcraft/recipe/gallant_rifle.json",
+      "type": "minecraft:crafting_shaped",
+      "inputs": [
+        [
+          "jugcraft:baffled_silencer"
+        ],
+        [
+          "jugcraft:stainless_steel_ingot"
+        ],
+        [
+          "jugcraft:stainless_steel_ingot"
+        ],
+        [
+          "minecraft:diamond"
+        ],
+        [
+          "minecraft:lever"
+        ],
+        [
+          "jugcraft:stainless_steel_ingot"
+        ]
+      ],
+      "outputs": [
+        "jugcraft:gallant_rifle"
       ]
     },
     {
@@ -178304,6 +179790,42 @@
       ]
     },
     {
+      "source": "src/main/resources/data/jugcraft/recipe/harrow.json",
+      "type": "minecraft:crafting_shaped",
+      "inputs": [
+        [
+          "jugcraft:steel_ingot"
+        ],
+        [
+          "jugcraft:steel_ingot"
+        ],
+        [
+          "jugcraft:steel_ingot"
+        ],
+        [
+          "jugcraft:steel_ingot"
+        ],
+        [
+          "minecraft:fire_charge"
+        ],
+        [
+          "jugcraft:steel_ingot"
+        ],
+        [
+          "jugcraft:brass_ingot"
+        ],
+        [
+          "minecraft:lever"
+        ],
+        [
+          "jugcraft:brass_ingot"
+        ]
+      ],
+      "outputs": [
+        "jugcraft:harrow"
+      ]
+    },
+    {
       "source": "src/main/resources/data/jugcraft/recipe/harvest_balloon.json",
       "type": "minecraft:crafting_shaped",
       "inputs": [
@@ -178397,6 +179919,45 @@
       ],
       "outputs": [
         "jugcraft:harvest_balloon"
+      ]
+    },
+    {
+      "source": "src/main/resources/data/jugcraft/recipe/harvest_crown.json",
+      "type": "minecraft:crafting_shaped",
+      "inputs": [
+        [
+          "jugcraft:cinderella_pumpkin",
+          "jugcraft:jarrahdale_pumpkin",
+          "jugcraft:kabocha_pumpkin",
+          "jugcraft:red_kuri_pumpkin",
+          "jugcraft:white_pumpkin"
+        ],
+        [
+          "jugcraft:cinderella_pumpkin",
+          "jugcraft:jarrahdale_pumpkin",
+          "jugcraft:kabocha_pumpkin",
+          "jugcraft:red_kuri_pumpkin",
+          "jugcraft:white_pumpkin"
+        ],
+        [
+          "jugcraft:cinderella_pumpkin",
+          "jugcraft:jarrahdale_pumpkin",
+          "jugcraft:kabocha_pumpkin",
+          "jugcraft:red_kuri_pumpkin",
+          "jugcraft:white_pumpkin"
+        ],
+        [
+          "minecraft:gold_ingot"
+        ],
+        [
+          "minecraft:hay_block"
+        ],
+        [
+          "minecraft:gold_ingot"
+        ]
+      ],
+      "outputs": [
+        "jugcraft:harvest_crown"
       ]
     },
     {
@@ -180593,6 +182154,33 @@
       ],
       "outputs": [
         "jugcraft:highwayman"
+      ]
+    },
+    {
+      "source": "src/main/resources/data/jugcraft/recipe/hinterland_rifle.json",
+      "type": "minecraft:crafting_shaped",
+      "inputs": [
+        [
+          "jugcraft:steel_ingot"
+        ],
+        [
+          "jugcraft:steel_ingot"
+        ],
+        [
+          "jugcraft:steel_ingot"
+        ],
+        [
+          "minecraft:magma_block"
+        ],
+        [
+          "minecraft:lever"
+        ],
+        [
+          "jugcraft:brass_ingot"
+        ]
+      ],
+      "outputs": [
+        "jugcraft:hinterland_rifle"
       ]
     },
     {
@@ -205865,6 +207453,33 @@
       ],
       "outputs": [
         "jugcraft:jarrahdale_pumpkin_seeds"
+      ]
+    },
+    {
+      "source": "src/main/resources/data/jugcraft/recipe/jawbreaker.json",
+      "type": "minecraft:crafting_shaped",
+      "inputs": [
+        [
+          "jugcraft:stainless_steel_ingot"
+        ],
+        [
+          "jugcraft:stainless_steel_ingot"
+        ],
+        [
+          "jugcraft:stainless_steel_ingot"
+        ],
+        [
+          "jugcraft:stainless_steel_ingot"
+        ],
+        [
+          "minecraft:diamond"
+        ],
+        [
+          "minecraft:lever"
+        ]
+      ],
+      "outputs": [
+        "jugcraft:jawbreaker"
       ]
     },
     {
@@ -238597,6 +240212,25 @@
       ]
     },
     {
+      "source": "src/main/resources/data/jugcraft/recipe/kings_lantern.json",
+      "type": "minecraft:crafting_shapeless",
+      "inputs": [
+        [
+          "jugcraft:kings_ember"
+        ],
+        [
+          "jugcraft:cinderella_pumpkin",
+          "jugcraft:jarrahdale_pumpkin",
+          "jugcraft:kabocha_pumpkin",
+          "jugcraft:red_kuri_pumpkin",
+          "jugcraft:white_pumpkin"
+        ]
+      ],
+      "outputs": [
+        "jugcraft:kings_lantern"
+      ]
+    },
+    {
       "source": "src/main/resources/data/jugcraft/recipe/kitchen_counter.json",
       "type": "minecraft:crafting_shaped",
       "inputs": [
@@ -239341,6 +240975,30 @@
       ],
       "outputs": [
         "jugcraft:kraken_shell"
+      ]
+    },
+    {
+      "source": "src/main/resources/data/jugcraft/recipe/kreuzer_pistol.json",
+      "type": "minecraft:crafting_shaped",
+      "inputs": [
+        [
+          "jugcraft:stainless_steel_ingot"
+        ],
+        [
+          "jugcraft:stainless_steel_ingot"
+        ],
+        [
+          "jugcraft:stainless_steel_ingot"
+        ],
+        [
+          "minecraft:diamond"
+        ],
+        [
+          "minecraft:lever"
+        ]
+      ],
+      "outputs": [
+        "jugcraft:kreuzer_pistol"
       ]
     },
     {
@@ -248795,6 +250453,36 @@
       ]
     },
     {
+      "source": "src/main/resources/data/jugcraft/recipe/lesser_water_focus.json",
+      "type": "minecraft:crafting_shaped",
+      "inputs": [
+        [
+          "minecraft:string"
+        ],
+        [
+          "minecraft:gold_ingot"
+        ],
+        [
+          "minecraft:string"
+        ],
+        [
+          "minecraft:snowball"
+        ],
+        [
+          "minecraft:amethyst_shard"
+        ],
+        [
+          "minecraft:snowball"
+        ],
+        [
+          "minecraft:gold_ingot"
+        ]
+      ],
+      "outputs": [
+        "jugcraft:lesser_water_focus"
+      ]
+    },
+    {
       "source": "src/main/resources/data/jugcraft/recipe/ley_pylon.json",
       "type": "minecraft:crafting_shaped",
       "inputs": [
@@ -249731,6 +251419,42 @@
       ],
       "outputs": [
         "jugcraft:locker_security"
+      ]
+    },
+    {
+      "source": "src/main/resources/data/jugcraft/recipe/locomotive.json",
+      "type": "minecraft:crafting_shaped",
+      "inputs": [
+        [
+          "jugcraft:steel_plate"
+        ],
+        [
+          "minecraft:glass_pane"
+        ],
+        [
+          "jugcraft:steel_plate"
+        ],
+        [
+          "jugcraft:steel_plate"
+        ],
+        [
+          "jugcraft:diesel_engine"
+        ],
+        [
+          "jugcraft:steel_plate"
+        ],
+        [
+          "jugcraft:steel_gear"
+        ],
+        [
+          "minecraft:minecart"
+        ],
+        [
+          "jugcraft:steel_gear"
+        ]
+      ],
+      "outputs": [
+        "jugcraft:locomotive"
       ]
     },
     {
@@ -253424,6 +255148,399 @@
       ],
       "outputs": [
         "jugcraft:neodymium_drone_motor"
+      ]
+    },
+    {
+      "source": "src/main/resources/data/jugcraft/recipe/nereids_hood.json",
+      "type": "minecraft:crafting_shaped",
+      "inputs": [
+        [
+          "minecraft:black_wool",
+          "minecraft:blue_wool",
+          "minecraft:brown_wool",
+          "minecraft:cyan_wool",
+          "minecraft:gray_wool",
+          "minecraft:green_wool",
+          "minecraft:light_blue_wool",
+          "minecraft:light_gray_wool",
+          "minecraft:lime_wool",
+          "minecraft:magenta_wool",
+          "minecraft:orange_wool",
+          "minecraft:pink_wool",
+          "minecraft:purple_wool",
+          "minecraft:red_wool",
+          "minecraft:white_wool",
+          "minecraft:yellow_wool"
+        ],
+        [
+          "minecraft:snowball"
+        ],
+        [
+          "minecraft:black_wool",
+          "minecraft:blue_wool",
+          "minecraft:brown_wool",
+          "minecraft:cyan_wool",
+          "minecraft:gray_wool",
+          "minecraft:green_wool",
+          "minecraft:light_blue_wool",
+          "minecraft:light_gray_wool",
+          "minecraft:lime_wool",
+          "minecraft:magenta_wool",
+          "minecraft:orange_wool",
+          "minecraft:pink_wool",
+          "minecraft:purple_wool",
+          "minecraft:red_wool",
+          "minecraft:white_wool",
+          "minecraft:yellow_wool"
+        ],
+        [
+          "minecraft:black_wool",
+          "minecraft:blue_wool",
+          "minecraft:brown_wool",
+          "minecraft:cyan_wool",
+          "minecraft:gray_wool",
+          "minecraft:green_wool",
+          "minecraft:light_blue_wool",
+          "minecraft:light_gray_wool",
+          "minecraft:lime_wool",
+          "minecraft:magenta_wool",
+          "minecraft:orange_wool",
+          "minecraft:pink_wool",
+          "minecraft:purple_wool",
+          "minecraft:red_wool",
+          "minecraft:white_wool",
+          "minecraft:yellow_wool"
+        ],
+        [
+          "minecraft:black_wool",
+          "minecraft:blue_wool",
+          "minecraft:brown_wool",
+          "minecraft:cyan_wool",
+          "minecraft:gray_wool",
+          "minecraft:green_wool",
+          "minecraft:light_blue_wool",
+          "minecraft:light_gray_wool",
+          "minecraft:lime_wool",
+          "minecraft:magenta_wool",
+          "minecraft:orange_wool",
+          "minecraft:pink_wool",
+          "minecraft:purple_wool",
+          "minecraft:red_wool",
+          "minecraft:white_wool",
+          "minecraft:yellow_wool"
+        ]
+      ],
+      "outputs": [
+        "jugcraft:nereids_hood"
+      ]
+    },
+    {
+      "source": "src/main/resources/data/jugcraft/recipe/nereids_pants.json",
+      "type": "minecraft:crafting_shaped",
+      "inputs": [
+        [
+          "minecraft:black_wool",
+          "minecraft:blue_wool",
+          "minecraft:brown_wool",
+          "minecraft:cyan_wool",
+          "minecraft:gray_wool",
+          "minecraft:green_wool",
+          "minecraft:light_blue_wool",
+          "minecraft:light_gray_wool",
+          "minecraft:lime_wool",
+          "minecraft:magenta_wool",
+          "minecraft:orange_wool",
+          "minecraft:pink_wool",
+          "minecraft:purple_wool",
+          "minecraft:red_wool",
+          "minecraft:white_wool",
+          "minecraft:yellow_wool"
+        ],
+        [
+          "minecraft:snowball"
+        ],
+        [
+          "minecraft:black_wool",
+          "minecraft:blue_wool",
+          "minecraft:brown_wool",
+          "minecraft:cyan_wool",
+          "minecraft:gray_wool",
+          "minecraft:green_wool",
+          "minecraft:light_blue_wool",
+          "minecraft:light_gray_wool",
+          "minecraft:lime_wool",
+          "minecraft:magenta_wool",
+          "minecraft:orange_wool",
+          "minecraft:pink_wool",
+          "minecraft:purple_wool",
+          "minecraft:red_wool",
+          "minecraft:white_wool",
+          "minecraft:yellow_wool"
+        ],
+        [
+          "minecraft:black_wool",
+          "minecraft:blue_wool",
+          "minecraft:brown_wool",
+          "minecraft:cyan_wool",
+          "minecraft:gray_wool",
+          "minecraft:green_wool",
+          "minecraft:light_blue_wool",
+          "minecraft:light_gray_wool",
+          "minecraft:lime_wool",
+          "minecraft:magenta_wool",
+          "minecraft:orange_wool",
+          "minecraft:pink_wool",
+          "minecraft:purple_wool",
+          "minecraft:red_wool",
+          "minecraft:white_wool",
+          "minecraft:yellow_wool"
+        ],
+        [
+          "minecraft:black_wool",
+          "minecraft:blue_wool",
+          "minecraft:brown_wool",
+          "minecraft:cyan_wool",
+          "minecraft:gray_wool",
+          "minecraft:green_wool",
+          "minecraft:light_blue_wool",
+          "minecraft:light_gray_wool",
+          "minecraft:lime_wool",
+          "minecraft:magenta_wool",
+          "minecraft:orange_wool",
+          "minecraft:pink_wool",
+          "minecraft:purple_wool",
+          "minecraft:red_wool",
+          "minecraft:white_wool",
+          "minecraft:yellow_wool"
+        ],
+        [
+          "minecraft:black_wool",
+          "minecraft:blue_wool",
+          "minecraft:brown_wool",
+          "minecraft:cyan_wool",
+          "minecraft:gray_wool",
+          "minecraft:green_wool",
+          "minecraft:light_blue_wool",
+          "minecraft:light_gray_wool",
+          "minecraft:lime_wool",
+          "minecraft:magenta_wool",
+          "minecraft:orange_wool",
+          "minecraft:pink_wool",
+          "minecraft:purple_wool",
+          "minecraft:red_wool",
+          "minecraft:white_wool",
+          "minecraft:yellow_wool"
+        ],
+        [
+          "minecraft:black_wool",
+          "minecraft:blue_wool",
+          "minecraft:brown_wool",
+          "minecraft:cyan_wool",
+          "minecraft:gray_wool",
+          "minecraft:green_wool",
+          "minecraft:light_blue_wool",
+          "minecraft:light_gray_wool",
+          "minecraft:lime_wool",
+          "minecraft:magenta_wool",
+          "minecraft:orange_wool",
+          "minecraft:pink_wool",
+          "minecraft:purple_wool",
+          "minecraft:red_wool",
+          "minecraft:white_wool",
+          "minecraft:yellow_wool"
+        ]
+      ],
+      "outputs": [
+        "jugcraft:nereids_pants"
+      ]
+    },
+    {
+      "source": "src/main/resources/data/jugcraft/recipe/nereids_shoes.json",
+      "type": "minecraft:crafting_shaped",
+      "inputs": [
+        [
+          "minecraft:black_wool",
+          "minecraft:blue_wool",
+          "minecraft:brown_wool",
+          "minecraft:cyan_wool",
+          "minecraft:gray_wool",
+          "minecraft:green_wool",
+          "minecraft:light_blue_wool",
+          "minecraft:light_gray_wool",
+          "minecraft:lime_wool",
+          "minecraft:magenta_wool",
+          "minecraft:orange_wool",
+          "minecraft:pink_wool",
+          "minecraft:purple_wool",
+          "minecraft:red_wool",
+          "minecraft:white_wool",
+          "minecraft:yellow_wool"
+        ],
+        [
+          "minecraft:black_wool",
+          "minecraft:blue_wool",
+          "minecraft:brown_wool",
+          "minecraft:cyan_wool",
+          "minecraft:gray_wool",
+          "minecraft:green_wool",
+          "minecraft:light_blue_wool",
+          "minecraft:light_gray_wool",
+          "minecraft:lime_wool",
+          "minecraft:magenta_wool",
+          "minecraft:orange_wool",
+          "minecraft:pink_wool",
+          "minecraft:purple_wool",
+          "minecraft:red_wool",
+          "minecraft:white_wool",
+          "minecraft:yellow_wool"
+        ],
+        [
+          "minecraft:snowball"
+        ],
+        [
+          "minecraft:snowball"
+        ]
+      ],
+      "outputs": [
+        "jugcraft:nereids_shoes"
+      ]
+    },
+    {
+      "source": "src/main/resources/data/jugcraft/recipe/nereids_tunic.json",
+      "type": "minecraft:crafting_shaped",
+      "inputs": [
+        [
+          "minecraft:black_wool",
+          "minecraft:blue_wool",
+          "minecraft:brown_wool",
+          "minecraft:cyan_wool",
+          "minecraft:gray_wool",
+          "minecraft:green_wool",
+          "minecraft:light_blue_wool",
+          "minecraft:light_gray_wool",
+          "minecraft:lime_wool",
+          "minecraft:magenta_wool",
+          "minecraft:orange_wool",
+          "minecraft:pink_wool",
+          "minecraft:purple_wool",
+          "minecraft:red_wool",
+          "minecraft:white_wool",
+          "minecraft:yellow_wool"
+        ],
+        [
+          "minecraft:black_wool",
+          "minecraft:blue_wool",
+          "minecraft:brown_wool",
+          "minecraft:cyan_wool",
+          "minecraft:gray_wool",
+          "minecraft:green_wool",
+          "minecraft:light_blue_wool",
+          "minecraft:light_gray_wool",
+          "minecraft:lime_wool",
+          "minecraft:magenta_wool",
+          "minecraft:orange_wool",
+          "minecraft:pink_wool",
+          "minecraft:purple_wool",
+          "minecraft:red_wool",
+          "minecraft:white_wool",
+          "minecraft:yellow_wool"
+        ],
+        [
+          "minecraft:black_wool",
+          "minecraft:blue_wool",
+          "minecraft:brown_wool",
+          "minecraft:cyan_wool",
+          "minecraft:gray_wool",
+          "minecraft:green_wool",
+          "minecraft:light_blue_wool",
+          "minecraft:light_gray_wool",
+          "minecraft:lime_wool",
+          "minecraft:magenta_wool",
+          "minecraft:orange_wool",
+          "minecraft:pink_wool",
+          "minecraft:purple_wool",
+          "minecraft:red_wool",
+          "minecraft:white_wool",
+          "minecraft:yellow_wool"
+        ],
+        [
+          "minecraft:snowball"
+        ],
+        [
+          "minecraft:black_wool",
+          "minecraft:blue_wool",
+          "minecraft:brown_wool",
+          "minecraft:cyan_wool",
+          "minecraft:gray_wool",
+          "minecraft:green_wool",
+          "minecraft:light_blue_wool",
+          "minecraft:light_gray_wool",
+          "minecraft:lime_wool",
+          "minecraft:magenta_wool",
+          "minecraft:orange_wool",
+          "minecraft:pink_wool",
+          "minecraft:purple_wool",
+          "minecraft:red_wool",
+          "minecraft:white_wool",
+          "minecraft:yellow_wool"
+        ],
+        [
+          "minecraft:black_wool",
+          "minecraft:blue_wool",
+          "minecraft:brown_wool",
+          "minecraft:cyan_wool",
+          "minecraft:gray_wool",
+          "minecraft:green_wool",
+          "minecraft:light_blue_wool",
+          "minecraft:light_gray_wool",
+          "minecraft:lime_wool",
+          "minecraft:magenta_wool",
+          "minecraft:orange_wool",
+          "minecraft:pink_wool",
+          "minecraft:purple_wool",
+          "minecraft:red_wool",
+          "minecraft:white_wool",
+          "minecraft:yellow_wool"
+        ],
+        [
+          "minecraft:black_wool",
+          "minecraft:blue_wool",
+          "minecraft:brown_wool",
+          "minecraft:cyan_wool",
+          "minecraft:gray_wool",
+          "minecraft:green_wool",
+          "minecraft:light_blue_wool",
+          "minecraft:light_gray_wool",
+          "minecraft:lime_wool",
+          "minecraft:magenta_wool",
+          "minecraft:orange_wool",
+          "minecraft:pink_wool",
+          "minecraft:purple_wool",
+          "minecraft:red_wool",
+          "minecraft:white_wool",
+          "minecraft:yellow_wool"
+        ],
+        [
+          "minecraft:black_wool",
+          "minecraft:blue_wool",
+          "minecraft:brown_wool",
+          "minecraft:cyan_wool",
+          "minecraft:gray_wool",
+          "minecraft:green_wool",
+          "minecraft:light_blue_wool",
+          "minecraft:light_gray_wool",
+          "minecraft:lime_wool",
+          "minecraft:magenta_wool",
+          "minecraft:orange_wool",
+          "minecraft:pink_wool",
+          "minecraft:purple_wool",
+          "minecraft:red_wool",
+          "minecraft:white_wool",
+          "minecraft:yellow_wool"
+        ]
+      ],
+      "outputs": [
+        "jugcraft:nereids_tunic"
       ]
     },
     {
@@ -262545,6 +264662,79 @@
       ]
     },
     {
+      "source": "src/main/resources/data/jugcraft/recipe/old_grange_carbine.json",
+      "type": "minecraft:crafting_shaped",
+      "inputs": [
+        [
+          "jugcraft:steel_ingot"
+        ],
+        [
+          "jugcraft:steel_ingot"
+        ],
+        [
+          "jugcraft:steel_ingot"
+        ],
+        [
+          "minecraft:lever"
+        ],
+        [
+          "jugcraft:aged_maple_planks",
+          "jugcraft:aged_pine_planks",
+          "jugcraft:aspen_planks",
+          "jugcraft:bald_cypress_planks",
+          "jugcraft:baobab_planks",
+          "jugcraft:cedar_planks",
+          "jugcraft:chestnut_planks",
+          "jugcraft:cypress_planks",
+          "jugcraft:dead_planks",
+          "jugcraft:dragonblood_planks",
+          "jugcraft:ecology_walnut_planks",
+          "jugcraft:eucalyptus_planks",
+          "jugcraft:fig_planks",
+          "jugcraft:fir_planks",
+          "jugcraft:fruitwood_planks",
+          "jugcraft:holly_planks",
+          "jugcraft:jacaranda_planks",
+          "jugcraft:juniper_planks",
+          "jugcraft:larch_planks",
+          "jugcraft:magnolia_planks",
+          "jugcraft:mahogany_planks",
+          "jugcraft:mango_planks",
+          "jugcraft:maple_planks",
+          "jugcraft:nouveau_archwood_planks",
+          "jugcraft:olive_planks",
+          "jugcraft:palm_planks",
+          "jugcraft:persimmon_planks",
+          "jugcraft:pine_planks",
+          "jugcraft:redwood_planks",
+          "jugcraft:tamarisk_planks",
+          "jugcraft:walnut_planks",
+          "jugcraft:willow_planks",
+          "jugcraft:yew_planks",
+          "jugcraft:yucca_planks",
+          "minecraft:acacia_planks",
+          "minecraft:bamboo_planks",
+          "minecraft:birch_planks",
+          "minecraft:cherry_planks",
+          "minecraft:crimson_planks",
+          "minecraft:dark_oak_planks",
+          "minecraft:jungle_planks",
+          "minecraft:mangrove_planks",
+          "minecraft:oak_planks",
+          "minecraft:pale_oak_planks",
+          "minecraft:poplar_planks",
+          "minecraft:spruce_planks",
+          "minecraft:warped_planks"
+        ],
+        [
+          "jugcraft:brass_ingot"
+        ]
+      ],
+      "outputs": [
+        "jugcraft:old_grange_carbine"
+      ]
+    },
+    {
       "source": "src/main/resources/data/jugcraft/recipe/olive_fence.json",
       "type": "minecraft:crafting_shaped",
       "inputs": [
@@ -262755,6 +264945,79 @@
       ],
       "outputs": [
         "jugcraft:onion"
+      ]
+    },
+    {
+      "source": "src/main/resources/data/jugcraft/recipe/onrush_smg.json",
+      "type": "minecraft:crafting_shaped",
+      "inputs": [
+        [
+          "jugcraft:stainless_steel_ingot"
+        ],
+        [
+          "jugcraft:stainless_steel_ingot"
+        ],
+        [
+          "minecraft:diamond"
+        ],
+        [
+          "minecraft:lever"
+        ],
+        [
+          "jugcraft:aged_maple_planks",
+          "jugcraft:aged_pine_planks",
+          "jugcraft:aspen_planks",
+          "jugcraft:bald_cypress_planks",
+          "jugcraft:baobab_planks",
+          "jugcraft:cedar_planks",
+          "jugcraft:chestnut_planks",
+          "jugcraft:cypress_planks",
+          "jugcraft:dead_planks",
+          "jugcraft:dragonblood_planks",
+          "jugcraft:ecology_walnut_planks",
+          "jugcraft:eucalyptus_planks",
+          "jugcraft:fig_planks",
+          "jugcraft:fir_planks",
+          "jugcraft:fruitwood_planks",
+          "jugcraft:holly_planks",
+          "jugcraft:jacaranda_planks",
+          "jugcraft:juniper_planks",
+          "jugcraft:larch_planks",
+          "jugcraft:magnolia_planks",
+          "jugcraft:mahogany_planks",
+          "jugcraft:mango_planks",
+          "jugcraft:maple_planks",
+          "jugcraft:nouveau_archwood_planks",
+          "jugcraft:olive_planks",
+          "jugcraft:palm_planks",
+          "jugcraft:persimmon_planks",
+          "jugcraft:pine_planks",
+          "jugcraft:redwood_planks",
+          "jugcraft:tamarisk_planks",
+          "jugcraft:walnut_planks",
+          "jugcraft:willow_planks",
+          "jugcraft:yew_planks",
+          "jugcraft:yucca_planks",
+          "minecraft:acacia_planks",
+          "minecraft:bamboo_planks",
+          "minecraft:birch_planks",
+          "minecraft:cherry_planks",
+          "minecraft:crimson_planks",
+          "minecraft:dark_oak_planks",
+          "minecraft:jungle_planks",
+          "minecraft:mangrove_planks",
+          "minecraft:oak_planks",
+          "minecraft:pale_oak_planks",
+          "minecraft:poplar_planks",
+          "minecraft:spruce_planks",
+          "minecraft:warped_planks"
+        ],
+        [
+          "jugcraft:stainless_steel_ingot"
+        ]
+      ],
+      "outputs": [
+        "jugcraft:onrush_smg"
       ]
     },
     {
@@ -263956,6 +266219,30 @@
       ]
     },
     {
+      "source": "src/main/resources/data/jugcraft/recipe/pact_perch.json",
+      "type": "minecraft:crafting_shaped",
+      "inputs": [
+        [
+          "minecraft:stick"
+        ],
+        [
+          "minecraft:amethyst_shard"
+        ],
+        [
+          "minecraft:stick"
+        ],
+        [
+          "minecraft:dark_oak_log"
+        ],
+        [
+          "minecraft:polished_deepslate"
+        ]
+      ],
+      "outputs": [
+        "jugcraft:pact_perch"
+      ]
+    },
+    {
       "source": "src/main/resources/data/jugcraft/recipe/pad_mount_transformer.json",
       "type": "minecraft:crafting_shaped",
       "inputs": [
@@ -264822,6 +267109,51 @@
       ]
     },
     {
+      "source": "src/main/resources/data/jugcraft/recipe/passenger_car.json",
+      "type": "minecraft:crafting_shaped",
+      "inputs": [
+        [
+          "jugcraft:steel_plate"
+        ],
+        [
+          "minecraft:glass_pane"
+        ],
+        [
+          "jugcraft:steel_plate"
+        ],
+        [
+          "jugcraft:steel_plate"
+        ],
+        [
+          "minecraft:black_wool",
+          "minecraft:blue_wool",
+          "minecraft:brown_wool",
+          "minecraft:cyan_wool",
+          "minecraft:gray_wool",
+          "minecraft:green_wool",
+          "minecraft:light_blue_wool",
+          "minecraft:light_gray_wool",
+          "minecraft:lime_wool",
+          "minecraft:magenta_wool",
+          "minecraft:orange_wool",
+          "minecraft:pink_wool",
+          "minecraft:purple_wool",
+          "minecraft:red_wool",
+          "minecraft:white_wool",
+          "minecraft:yellow_wool"
+        ],
+        [
+          "jugcraft:steel_plate"
+        ],
+        [
+          "minecraft:minecart"
+        ]
+      ],
+      "outputs": [
+        "jugcraft:passenger_car"
+      ]
+    },
+    {
       "source": "src/main/resources/data/jugcraft/recipe/pastry_dough.json",
       "type": "minecraft:crafting_shapeless",
       "inputs": [
@@ -265459,6 +267791,36 @@
       ],
       "outputs": [
         "jugcraft:phosphate_block"
+      ]
+    },
+    {
+      "source": "src/main/resources/data/jugcraft/recipe/phosphate_cola_syrup.json",
+      "type": "minecraft:crafting_shapeless",
+      "inputs": [
+        [
+          "jugcraft:food_grade_phosphoric_acid"
+        ],
+        [
+          "jugcraft:caramel"
+        ],
+        [
+          "minecraft:sugar"
+        ],
+        [
+          "minecraft:sugar"
+        ],
+        [
+          "jugcraft:cinnamon"
+        ],
+        [
+          "jugcraft:vanilla_pods"
+        ],
+        [
+          "jugcraft:lemon"
+        ]
+      ],
+      "outputs": [
+        "jugcraft:cola_syrup"
       ]
     },
     {
@@ -275123,6 +277485,33 @@
       ]
     },
     {
+      "source": "src/main/resources/data/jugcraft/recipe/psalm_smg.json",
+      "type": "minecraft:crafting_shaped",
+      "inputs": [
+        [
+          "jugcraft:stainless_steel_ingot"
+        ],
+        [
+          "jugcraft:stainless_steel_ingot"
+        ],
+        [
+          "jugcraft:stainless_steel_ingot"
+        ],
+        [
+          "minecraft:diamond"
+        ],
+        [
+          "minecraft:lever"
+        ],
+        [
+          "minecraft:redstone"
+        ]
+      ],
+      "outputs": [
+        "jugcraft:psalm_smg"
+      ]
+    },
+    {
       "source": "src/main/resources/data/jugcraft/recipe/ptfe_process_insert.json",
       "type": "minecraft:crafting_shapeless",
       "inputs": [
@@ -277797,6 +280186,33 @@
       ],
       "outputs": [
         "jugcraft:pyromaniacs_tunic"
+      ]
+    },
+    {
+      "source": "src/main/resources/data/jugcraft/recipe/quarrel_carbine.json",
+      "type": "minecraft:crafting_shaped",
+      "inputs": [
+        [
+          "jugcraft:steel_ingot"
+        ],
+        [
+          "jugcraft:steel_ingot"
+        ],
+        [
+          "minecraft:crossbow"
+        ],
+        [
+          "jugcraft:brass_ingot"
+        ],
+        [
+          "minecraft:lever"
+        ],
+        [
+          "jugcraft:brass_ingot"
+        ]
+      ],
+      "outputs": [
+        "jugcraft:quarrel_carbine"
       ]
     },
     {
@@ -282794,6 +285210,27 @@
       ],
       "outputs": [
         "jugcraft:methalox_motor"
+      ]
+    },
+    {
+      "source": "src/main/resources/data/jugcraft/recipe/rocket_assembly/cryo_mmh_bipropellant_motor.json",
+      "type": "jugcraft:rocket_assembly",
+      "inputs": [
+        [
+          "jugcraft:mmh_tank"
+        ],
+        [
+          "jugcraft:n2o4_tank"
+        ],
+        [
+          "jugcraft:rocket_nozzle"
+        ],
+        [
+          "jugcraft:rocket_workshop"
+        ]
+      ],
+      "outputs": [
+        "jugcraft:storable_bipropellant_motor"
       ]
     },
     {
@@ -290737,6 +293174,238 @@
       ]
     },
     {
+      "source": "src/main/resources/data/jugcraft/recipe/starter_workshop/crucible_bellows.json",
+      "type": "minecraft:crafting_shapeless",
+      "inputs": [
+        [
+          "jugcraft:aged_maple_planks",
+          "jugcraft:aged_pine_planks",
+          "jugcraft:aspen_planks",
+          "jugcraft:bald_cypress_planks",
+          "jugcraft:baobab_planks",
+          "jugcraft:cedar_planks",
+          "jugcraft:chestnut_planks",
+          "jugcraft:cypress_planks",
+          "jugcraft:dead_planks",
+          "jugcraft:dragonblood_planks",
+          "jugcraft:ecology_walnut_planks",
+          "jugcraft:eucalyptus_planks",
+          "jugcraft:fig_planks",
+          "jugcraft:fir_planks",
+          "jugcraft:fruitwood_planks",
+          "jugcraft:holly_planks",
+          "jugcraft:jacaranda_planks",
+          "jugcraft:juniper_planks",
+          "jugcraft:larch_planks",
+          "jugcraft:magnolia_planks",
+          "jugcraft:mahogany_planks",
+          "jugcraft:mango_planks",
+          "jugcraft:maple_planks",
+          "jugcraft:nouveau_archwood_planks",
+          "jugcraft:olive_planks",
+          "jugcraft:palm_planks",
+          "jugcraft:persimmon_planks",
+          "jugcraft:pine_planks",
+          "jugcraft:redwood_planks",
+          "jugcraft:tamarisk_planks",
+          "jugcraft:walnut_planks",
+          "jugcraft:willow_planks",
+          "jugcraft:yew_planks",
+          "jugcraft:yucca_planks",
+          "minecraft:acacia_planks",
+          "minecraft:bamboo_planks",
+          "minecraft:birch_planks",
+          "minecraft:cherry_planks",
+          "minecraft:crimson_planks",
+          "minecraft:dark_oak_planks",
+          "minecraft:jungle_planks",
+          "minecraft:mangrove_planks",
+          "minecraft:oak_planks",
+          "minecraft:pale_oak_planks",
+          "minecraft:poplar_planks",
+          "minecraft:spruce_planks",
+          "minecraft:warped_planks"
+        ],
+        [
+          "jugcraft:aged_maple_planks",
+          "jugcraft:aged_pine_planks",
+          "jugcraft:aspen_planks",
+          "jugcraft:bald_cypress_planks",
+          "jugcraft:baobab_planks",
+          "jugcraft:cedar_planks",
+          "jugcraft:chestnut_planks",
+          "jugcraft:cypress_planks",
+          "jugcraft:dead_planks",
+          "jugcraft:dragonblood_planks",
+          "jugcraft:ecology_walnut_planks",
+          "jugcraft:eucalyptus_planks",
+          "jugcraft:fig_planks",
+          "jugcraft:fir_planks",
+          "jugcraft:fruitwood_planks",
+          "jugcraft:holly_planks",
+          "jugcraft:jacaranda_planks",
+          "jugcraft:juniper_planks",
+          "jugcraft:larch_planks",
+          "jugcraft:magnolia_planks",
+          "jugcraft:mahogany_planks",
+          "jugcraft:mango_planks",
+          "jugcraft:maple_planks",
+          "jugcraft:nouveau_archwood_planks",
+          "jugcraft:olive_planks",
+          "jugcraft:palm_planks",
+          "jugcraft:persimmon_planks",
+          "jugcraft:pine_planks",
+          "jugcraft:redwood_planks",
+          "jugcraft:tamarisk_planks",
+          "jugcraft:walnut_planks",
+          "jugcraft:willow_planks",
+          "jugcraft:yew_planks",
+          "jugcraft:yucca_planks",
+          "minecraft:acacia_planks",
+          "minecraft:bamboo_planks",
+          "minecraft:birch_planks",
+          "minecraft:cherry_planks",
+          "minecraft:crimson_planks",
+          "minecraft:dark_oak_planks",
+          "minecraft:jungle_planks",
+          "minecraft:mangrove_planks",
+          "minecraft:oak_planks",
+          "minecraft:pale_oak_planks",
+          "minecraft:poplar_planks",
+          "minecraft:spruce_planks",
+          "minecraft:warped_planks"
+        ],
+        [
+          "jugcraft:aged_maple_planks",
+          "jugcraft:aged_pine_planks",
+          "jugcraft:aspen_planks",
+          "jugcraft:bald_cypress_planks",
+          "jugcraft:baobab_planks",
+          "jugcraft:cedar_planks",
+          "jugcraft:chestnut_planks",
+          "jugcraft:cypress_planks",
+          "jugcraft:dead_planks",
+          "jugcraft:dragonblood_planks",
+          "jugcraft:ecology_walnut_planks",
+          "jugcraft:eucalyptus_planks",
+          "jugcraft:fig_planks",
+          "jugcraft:fir_planks",
+          "jugcraft:fruitwood_planks",
+          "jugcraft:holly_planks",
+          "jugcraft:jacaranda_planks",
+          "jugcraft:juniper_planks",
+          "jugcraft:larch_planks",
+          "jugcraft:magnolia_planks",
+          "jugcraft:mahogany_planks",
+          "jugcraft:mango_planks",
+          "jugcraft:maple_planks",
+          "jugcraft:nouveau_archwood_planks",
+          "jugcraft:olive_planks",
+          "jugcraft:palm_planks",
+          "jugcraft:persimmon_planks",
+          "jugcraft:pine_planks",
+          "jugcraft:redwood_planks",
+          "jugcraft:tamarisk_planks",
+          "jugcraft:walnut_planks",
+          "jugcraft:willow_planks",
+          "jugcraft:yew_planks",
+          "jugcraft:yucca_planks",
+          "minecraft:acacia_planks",
+          "minecraft:bamboo_planks",
+          "minecraft:birch_planks",
+          "minecraft:cherry_planks",
+          "minecraft:crimson_planks",
+          "minecraft:dark_oak_planks",
+          "minecraft:jungle_planks",
+          "minecraft:mangrove_planks",
+          "minecraft:oak_planks",
+          "minecraft:pale_oak_planks",
+          "minecraft:poplar_planks",
+          "minecraft:spruce_planks",
+          "minecraft:warped_planks"
+        ],
+        [
+          "jugcraft:aged_maple_planks",
+          "jugcraft:aged_pine_planks",
+          "jugcraft:aspen_planks",
+          "jugcraft:bald_cypress_planks",
+          "jugcraft:baobab_planks",
+          "jugcraft:cedar_planks",
+          "jugcraft:chestnut_planks",
+          "jugcraft:cypress_planks",
+          "jugcraft:dead_planks",
+          "jugcraft:dragonblood_planks",
+          "jugcraft:ecology_walnut_planks",
+          "jugcraft:eucalyptus_planks",
+          "jugcraft:fig_planks",
+          "jugcraft:fir_planks",
+          "jugcraft:fruitwood_planks",
+          "jugcraft:holly_planks",
+          "jugcraft:jacaranda_planks",
+          "jugcraft:juniper_planks",
+          "jugcraft:larch_planks",
+          "jugcraft:magnolia_planks",
+          "jugcraft:mahogany_planks",
+          "jugcraft:mango_planks",
+          "jugcraft:maple_planks",
+          "jugcraft:nouveau_archwood_planks",
+          "jugcraft:olive_planks",
+          "jugcraft:palm_planks",
+          "jugcraft:persimmon_planks",
+          "jugcraft:pine_planks",
+          "jugcraft:redwood_planks",
+          "jugcraft:tamarisk_planks",
+          "jugcraft:walnut_planks",
+          "jugcraft:willow_planks",
+          "jugcraft:yew_planks",
+          "jugcraft:yucca_planks",
+          "minecraft:acacia_planks",
+          "minecraft:bamboo_planks",
+          "minecraft:birch_planks",
+          "minecraft:cherry_planks",
+          "minecraft:crimson_planks",
+          "minecraft:dark_oak_planks",
+          "minecraft:jungle_planks",
+          "minecraft:mangrove_planks",
+          "minecraft:oak_planks",
+          "minecraft:pale_oak_planks",
+          "minecraft:poplar_planks",
+          "minecraft:spruce_planks",
+          "minecraft:warped_planks"
+        ],
+        [
+          "minecraft:leather"
+        ],
+        [
+          "minecraft:leather"
+        ],
+        [
+          "jugcraft:iron_shaft"
+        ]
+      ],
+      "outputs": [
+        "jugcraft:crucible_bellows"
+      ]
+    },
+    {
+      "source": "src/main/resources/data/jugcraft/recipe/starter_workshop/crucible_heat_insert.json",
+      "type": "minecraft:crafting_shapeless",
+      "inputs": [
+        [
+          "minecraft:bricks"
+        ],
+        [
+          "minecraft:bricks"
+        ],
+        [
+          "jugcraft:basic_ceramic_lining"
+        ]
+      ],
+      "outputs": [
+        "jugcraft:crucible_heat_insert"
+      ]
+    },
+    {
       "source": "src/main/resources/data/jugcraft/recipe/starter_workshop/fire_crucible.json",
       "type": "jugcraft:starter_working",
       "inputs": [
@@ -290851,6 +293520,36 @@
       ],
       "outputs": [
         "jugcraft:lead_plate"
+      ]
+    },
+    {
+      "source": "src/main/resources/data/jugcraft/recipe/starter_workshop/silicon.json",
+      "type": "jugcraft:starter_working",
+      "inputs": [
+        [
+          "minecraft:quartz"
+        ],
+        [
+          "minecraft:charcoal"
+        ],
+        [
+          "jugcraft:small_crucible_furnace"
+        ],
+        [
+          "jugcraft:basic_ceramic_lining"
+        ],
+        [
+          "jugcraft:ceramic_crucible"
+        ],
+        [
+          "jugcraft:crucible_heat_insert"
+        ],
+        [
+          "jugcraft:crucible_bellows"
+        ]
+      ],
+      "outputs": [
+        "jugcraft:silicon"
       ]
     },
     {
@@ -294863,6 +297562,534 @@
       ],
       "outputs": [
         "jugcraft:stonemasons_chisel"
+      ]
+    },
+    {
+      "source": "src/main/resources/data/jugcraft/recipe/storage_crates/aluminum_crate_direct.json",
+      "type": "minecraft:crafting_shaped",
+      "inputs": [
+        [
+          "jugcraft:aluminum_plate"
+        ],
+        [
+          "jugcraft:aluminum_plate"
+        ],
+        [
+          "jugcraft:aluminum_plate"
+        ],
+        [
+          "jugcraft:aluminum_plate"
+        ],
+        [
+          "minecraft:chest"
+        ],
+        [
+          "jugcraft:aluminum_plate"
+        ],
+        [
+          "jugcraft:aluminum_plate"
+        ],
+        [
+          "jugcraft:aluminum_plate"
+        ],
+        [
+          "jugcraft:aluminum_plate"
+        ]
+      ],
+      "outputs": [
+        "jugcraft:aluminum_crate"
+      ]
+    },
+    {
+      "source": "src/main/resources/data/jugcraft/recipe/storage_crates/aluminum_crate_kit.json",
+      "type": "minecraft:crafting_shaped",
+      "inputs": [
+        [
+          "jugcraft:aluminum_plate"
+        ],
+        [
+          "jugcraft:aluminum_plate"
+        ],
+        [
+          "minecraft:iron_nugget"
+        ],
+        [
+          "jugcraft:aluminum_plate"
+        ],
+        [
+          "jugcraft:aluminum_plate"
+        ]
+      ],
+      "outputs": [
+        "jugcraft:aluminum_storage_crate_upgrade"
+      ]
+    },
+    {
+      "source": "src/main/resources/data/jugcraft/recipe/storage_crates/aluminum_crate_upgrade.json",
+      "type": "minecraft:crafting_shaped",
+      "inputs": [
+        [
+          "jugcraft:aluminum_plate"
+        ],
+        [
+          "jugcraft:aluminum_plate"
+        ],
+        [
+          "jugcraft:stainless_steel_crate"
+        ],
+        [
+          "jugcraft:aluminum_plate"
+        ],
+        [
+          "jugcraft:aluminum_plate"
+        ]
+      ],
+      "outputs": [
+        "jugcraft:aluminum_crate"
+      ]
+    },
+    {
+      "source": "src/main/resources/data/jugcraft/recipe/storage_crates/bronze_crate.json",
+      "type": "minecraft:crafting_shaped",
+      "inputs": [
+        [
+          "jugcraft:bronze_plate"
+        ],
+        [
+          "jugcraft:bronze_plate"
+        ],
+        [
+          "minecraft:chest"
+        ],
+        [
+          "jugcraft:bronze_plate"
+        ],
+        [
+          "jugcraft:bronze_plate"
+        ]
+      ],
+      "outputs": [
+        "jugcraft:bronze_crate"
+      ]
+    },
+    {
+      "source": "src/main/resources/data/jugcraft/recipe/storage_crates/invar_crate_direct.json",
+      "type": "minecraft:crafting_shaped",
+      "inputs": [
+        [
+          "jugcraft:invar_plate"
+        ],
+        [
+          "jugcraft:invar_plate"
+        ],
+        [
+          "jugcraft:invar_plate"
+        ],
+        [
+          "jugcraft:invar_plate"
+        ],
+        [
+          "minecraft:chest"
+        ],
+        [
+          "jugcraft:invar_plate"
+        ],
+        [
+          "jugcraft:invar_plate"
+        ],
+        [
+          "jugcraft:invar_plate"
+        ],
+        [
+          "jugcraft:invar_plate"
+        ]
+      ],
+      "outputs": [
+        "jugcraft:invar_crate"
+      ]
+    },
+    {
+      "source": "src/main/resources/data/jugcraft/recipe/storage_crates/invar_crate_kit.json",
+      "type": "minecraft:crafting_shaped",
+      "inputs": [
+        [
+          "jugcraft:invar_plate"
+        ],
+        [
+          "jugcraft:invar_plate"
+        ],
+        [
+          "minecraft:iron_nugget"
+        ],
+        [
+          "jugcraft:invar_plate"
+        ],
+        [
+          "jugcraft:invar_plate"
+        ]
+      ],
+      "outputs": [
+        "jugcraft:invar_storage_crate_upgrade"
+      ]
+    },
+    {
+      "source": "src/main/resources/data/jugcraft/recipe/storage_crates/invar_crate_upgrade.json",
+      "type": "minecraft:crafting_shaped",
+      "inputs": [
+        [
+          "jugcraft:invar_plate"
+        ],
+        [
+          "jugcraft:invar_plate"
+        ],
+        [
+          "jugcraft:steel_crate"
+        ],
+        [
+          "jugcraft:invar_plate"
+        ],
+        [
+          "jugcraft:invar_plate"
+        ]
+      ],
+      "outputs": [
+        "jugcraft:invar_crate"
+      ]
+    },
+    {
+      "source": "src/main/resources/data/jugcraft/recipe/storage_crates/stainless_steel_crate_direct.json",
+      "type": "minecraft:crafting_shaped",
+      "inputs": [
+        [
+          "jugcraft:stainless_steel_plate"
+        ],
+        [
+          "jugcraft:stainless_steel_plate"
+        ],
+        [
+          "jugcraft:stainless_steel_plate"
+        ],
+        [
+          "jugcraft:stainless_steel_plate"
+        ],
+        [
+          "minecraft:chest"
+        ],
+        [
+          "jugcraft:stainless_steel_plate"
+        ],
+        [
+          "jugcraft:stainless_steel_plate"
+        ],
+        [
+          "jugcraft:stainless_steel_plate"
+        ],
+        [
+          "jugcraft:stainless_steel_plate"
+        ]
+      ],
+      "outputs": [
+        "jugcraft:stainless_steel_crate"
+      ]
+    },
+    {
+      "source": "src/main/resources/data/jugcraft/recipe/storage_crates/stainless_steel_crate_kit.json",
+      "type": "minecraft:crafting_shaped",
+      "inputs": [
+        [
+          "jugcraft:stainless_steel_plate"
+        ],
+        [
+          "jugcraft:stainless_steel_plate"
+        ],
+        [
+          "minecraft:iron_nugget"
+        ],
+        [
+          "jugcraft:stainless_steel_plate"
+        ],
+        [
+          "jugcraft:stainless_steel_plate"
+        ]
+      ],
+      "outputs": [
+        "jugcraft:stainless_steel_storage_crate_upgrade"
+      ]
+    },
+    {
+      "source": "src/main/resources/data/jugcraft/recipe/storage_crates/stainless_steel_crate_upgrade.json",
+      "type": "minecraft:crafting_shaped",
+      "inputs": [
+        [
+          "jugcraft:stainless_steel_plate"
+        ],
+        [
+          "jugcraft:stainless_steel_plate"
+        ],
+        [
+          "jugcraft:invar_crate"
+        ],
+        [
+          "jugcraft:stainless_steel_plate"
+        ],
+        [
+          "jugcraft:stainless_steel_plate"
+        ]
+      ],
+      "outputs": [
+        "jugcraft:stainless_steel_crate"
+      ]
+    },
+    {
+      "source": "src/main/resources/data/jugcraft/recipe/storage_crates/steel_crate_direct.json",
+      "type": "minecraft:crafting_shaped",
+      "inputs": [
+        [
+          "jugcraft:steel_plate"
+        ],
+        [
+          "jugcraft:steel_plate"
+        ],
+        [
+          "jugcraft:steel_plate"
+        ],
+        [
+          "jugcraft:steel_plate"
+        ],
+        [
+          "minecraft:chest"
+        ],
+        [
+          "jugcraft:steel_plate"
+        ],
+        [
+          "jugcraft:steel_plate"
+        ],
+        [
+          "jugcraft:steel_plate"
+        ],
+        [
+          "jugcraft:steel_plate"
+        ]
+      ],
+      "outputs": [
+        "jugcraft:steel_crate"
+      ]
+    },
+    {
+      "source": "src/main/resources/data/jugcraft/recipe/storage_crates/steel_crate_kit.json",
+      "type": "minecraft:crafting_shaped",
+      "inputs": [
+        [
+          "jugcraft:steel_plate"
+        ],
+        [
+          "jugcraft:steel_plate"
+        ],
+        [
+          "minecraft:iron_nugget"
+        ],
+        [
+          "jugcraft:steel_plate"
+        ],
+        [
+          "jugcraft:steel_plate"
+        ]
+      ],
+      "outputs": [
+        "jugcraft:steel_storage_crate_upgrade"
+      ]
+    },
+    {
+      "source": "src/main/resources/data/jugcraft/recipe/storage_crates/steel_crate_upgrade.json",
+      "type": "minecraft:crafting_shaped",
+      "inputs": [
+        [
+          "jugcraft:steel_plate"
+        ],
+        [
+          "jugcraft:steel_plate"
+        ],
+        [
+          "jugcraft:bronze_crate"
+        ],
+        [
+          "jugcraft:steel_plate"
+        ],
+        [
+          "jugcraft:steel_plate"
+        ]
+      ],
+      "outputs": [
+        "jugcraft:steel_crate"
+      ]
+    },
+    {
+      "source": "src/main/resources/data/jugcraft/recipe/storage_crates/titanium_crate_direct.json",
+      "type": "minecraft:crafting_shaped",
+      "inputs": [
+        [
+          "jugcraft:titanium_plate"
+        ],
+        [
+          "jugcraft:titanium_plate"
+        ],
+        [
+          "jugcraft:titanium_plate"
+        ],
+        [
+          "jugcraft:titanium_plate"
+        ],
+        [
+          "minecraft:chest"
+        ],
+        [
+          "jugcraft:titanium_plate"
+        ],
+        [
+          "jugcraft:titanium_plate"
+        ],
+        [
+          "jugcraft:titanium_plate"
+        ],
+        [
+          "jugcraft:titanium_plate"
+        ]
+      ],
+      "outputs": [
+        "jugcraft:titanium_crate"
+      ]
+    },
+    {
+      "source": "src/main/resources/data/jugcraft/recipe/storage_crates/titanium_crate_kit.json",
+      "type": "minecraft:crafting_shaped",
+      "inputs": [
+        [
+          "jugcraft:titanium_plate"
+        ],
+        [
+          "jugcraft:titanium_plate"
+        ],
+        [
+          "minecraft:iron_nugget"
+        ],
+        [
+          "jugcraft:titanium_plate"
+        ],
+        [
+          "jugcraft:titanium_plate"
+        ]
+      ],
+      "outputs": [
+        "jugcraft:titanium_storage_crate_upgrade"
+      ]
+    },
+    {
+      "source": "src/main/resources/data/jugcraft/recipe/storage_crates/titanium_crate_upgrade.json",
+      "type": "minecraft:crafting_shaped",
+      "inputs": [
+        [
+          "jugcraft:titanium_plate"
+        ],
+        [
+          "jugcraft:titanium_plate"
+        ],
+        [
+          "jugcraft:aluminum_crate"
+        ],
+        [
+          "jugcraft:titanium_plate"
+        ],
+        [
+          "jugcraft:titanium_plate"
+        ]
+      ],
+      "outputs": [
+        "jugcraft:titanium_crate"
+      ]
+    },
+    {
+      "source": "src/main/resources/data/jugcraft/recipe/storage_crates/tungsten_crate_direct.json",
+      "type": "minecraft:crafting_shaped",
+      "inputs": [
+        [
+          "jugcraft:tungsten_plate"
+        ],
+        [
+          "jugcraft:tungsten_plate"
+        ],
+        [
+          "jugcraft:tungsten_plate"
+        ],
+        [
+          "jugcraft:tungsten_plate"
+        ],
+        [
+          "minecraft:chest"
+        ],
+        [
+          "jugcraft:tungsten_plate"
+        ],
+        [
+          "jugcraft:tungsten_plate"
+        ],
+        [
+          "jugcraft:tungsten_plate"
+        ],
+        [
+          "jugcraft:tungsten_plate"
+        ]
+      ],
+      "outputs": [
+        "jugcraft:tungsten_crate"
+      ]
+    },
+    {
+      "source": "src/main/resources/data/jugcraft/recipe/storage_crates/tungsten_crate_kit.json",
+      "type": "minecraft:crafting_shaped",
+      "inputs": [
+        [
+          "jugcraft:tungsten_plate"
+        ],
+        [
+          "jugcraft:tungsten_plate"
+        ],
+        [
+          "minecraft:iron_nugget"
+        ],
+        [
+          "jugcraft:tungsten_plate"
+        ],
+        [
+          "jugcraft:tungsten_plate"
+        ]
+      ],
+      "outputs": [
+        "jugcraft:tungsten_storage_crate_upgrade"
+      ]
+    },
+    {
+      "source": "src/main/resources/data/jugcraft/recipe/storage_crates/tungsten_crate_upgrade.json",
+      "type": "minecraft:crafting_shaped",
+      "inputs": [
+        [
+          "jugcraft:tungsten_plate"
+        ],
+        [
+          "jugcraft:tungsten_plate"
+        ],
+        [
+          "jugcraft:titanium_crate"
+        ],
+        [
+          "jugcraft:tungsten_plate"
+        ],
+        [
+          "jugcraft:tungsten_plate"
+        ]
+      ],
+      "outputs": [
+        "jugcraft:tungsten_crate"
       ]
     },
     {
@@ -301357,6 +304584,36 @@
       ]
     },
     {
+      "source": "src/main/resources/data/jugcraft/recipe/thunder_vane.json",
+      "type": "minecraft:crafting_shaped",
+      "inputs": [
+        [
+          "minecraft:feather"
+        ],
+        [
+          "minecraft:lightning_rod"
+        ],
+        [
+          "minecraft:feather"
+        ],
+        [
+          "minecraft:copper_ingot"
+        ],
+        [
+          "minecraft:compass"
+        ],
+        [
+          "minecraft:copper_ingot"
+        ],
+        [
+          "minecraft:copper_ingot"
+        ]
+      ],
+      "outputs": [
+        "jugcraft:thunder_vane"
+      ]
+    },
+    {
       "source": "src/main/resources/data/jugcraft/recipe/thunderpipe.json",
       "type": "minecraft:crafting_shaped",
       "inputs": [
@@ -306075,6 +309332,82 @@
       ]
     },
     {
+      "source": "src/main/resources/data/jugcraft/recipe/vesper_rifle.json",
+      "type": "minecraft:crafting_shaped",
+      "inputs": [
+        [
+          "jugcraft:stainless_steel_ingot"
+        ],
+        [
+          "jugcraft:stainless_steel_ingot"
+        ],
+        [
+          "jugcraft:stainless_steel_ingot"
+        ],
+        [
+          "minecraft:diamond"
+        ],
+        [
+          "minecraft:lever"
+        ],
+        [
+          "jugcraft:aged_maple_planks",
+          "jugcraft:aged_pine_planks",
+          "jugcraft:aspen_planks",
+          "jugcraft:bald_cypress_planks",
+          "jugcraft:baobab_planks",
+          "jugcraft:cedar_planks",
+          "jugcraft:chestnut_planks",
+          "jugcraft:cypress_planks",
+          "jugcraft:dead_planks",
+          "jugcraft:dragonblood_planks",
+          "jugcraft:ecology_walnut_planks",
+          "jugcraft:eucalyptus_planks",
+          "jugcraft:fig_planks",
+          "jugcraft:fir_planks",
+          "jugcraft:fruitwood_planks",
+          "jugcraft:holly_planks",
+          "jugcraft:jacaranda_planks",
+          "jugcraft:juniper_planks",
+          "jugcraft:larch_planks",
+          "jugcraft:magnolia_planks",
+          "jugcraft:mahogany_planks",
+          "jugcraft:mango_planks",
+          "jugcraft:maple_planks",
+          "jugcraft:nouveau_archwood_planks",
+          "jugcraft:olive_planks",
+          "jugcraft:palm_planks",
+          "jugcraft:persimmon_planks",
+          "jugcraft:pine_planks",
+          "jugcraft:redwood_planks",
+          "jugcraft:tamarisk_planks",
+          "jugcraft:walnut_planks",
+          "jugcraft:willow_planks",
+          "jugcraft:yew_planks",
+          "jugcraft:yucca_planks",
+          "minecraft:acacia_planks",
+          "minecraft:bamboo_planks",
+          "minecraft:birch_planks",
+          "minecraft:cherry_planks",
+          "minecraft:crimson_planks",
+          "minecraft:dark_oak_planks",
+          "minecraft:jungle_planks",
+          "minecraft:mangrove_planks",
+          "minecraft:oak_planks",
+          "minecraft:pale_oak_planks",
+          "minecraft:poplar_planks",
+          "minecraft:spruce_planks",
+          "minecraft:warped_planks"
+        ],
+        [
+          "jugcraft:stainless_steel_ingot"
+        ]
+      ],
+      "outputs": [
+        "jugcraft:vesper_rifle"
+      ]
+    },
+    {
       "source": "src/main/resources/data/jugcraft/recipe/vinyl_floor.json",
       "type": "minecraft:crafting_shaped",
       "inputs": [
@@ -306890,6 +310223,33 @@
       ]
     },
     {
+      "source": "src/main/resources/data/jugcraft/recipe/water_bangle.json",
+      "type": "minecraft:crafting_shaped",
+      "inputs": [
+        [
+          "minecraft:gold_ingot"
+        ],
+        [
+          "minecraft:snow_block"
+        ],
+        [
+          "minecraft:gold_ingot"
+        ],
+        [
+          "minecraft:gold_ingot"
+        ],
+        [
+          "minecraft:gold_ingot"
+        ],
+        [
+          "minecraft:amethyst_shard"
+        ]
+      ],
+      "outputs": [
+        "jugcraft:water_bangle"
+      ]
+    },
+    {
       "source": "src/main/resources/data/jugcraft/recipe/water_cooler.json",
       "type": "minecraft:crafting_shaped",
       "inputs": [
@@ -306905,6 +310265,30 @@
       ],
       "outputs": [
         "jugcraft:water_cooler"
+      ]
+    },
+    {
+      "source": "src/main/resources/data/jugcraft/recipe/water_focus.json",
+      "type": "minecraft:crafting_shaped",
+      "inputs": [
+        [
+          "minecraft:diamond"
+        ],
+        [
+          "minecraft:gold_ingot"
+        ],
+        [
+          "jugcraft:lesser_water_focus"
+        ],
+        [
+          "minecraft:gold_ingot"
+        ],
+        [
+          "minecraft:diamond"
+        ]
+      ],
+      "outputs": [
+        "jugcraft:water_focus"
       ]
     },
     {
@@ -309685,6 +313069,126 @@
       ]
     },
     {
+      "source": "src/main/resources/data/jugcraft/recipe/winterguards_boots.json",
+      "type": "minecraft:crafting_shaped",
+      "inputs": [
+        [
+          "minecraft:iron_ingot"
+        ],
+        [
+          "minecraft:snow_block"
+        ],
+        [
+          "minecraft:iron_ingot"
+        ],
+        [
+          "minecraft:iron_ingot"
+        ],
+        [
+          "minecraft:iron_ingot"
+        ]
+      ],
+      "outputs": [
+        "jugcraft:winterguards_boots"
+      ]
+    },
+    {
+      "source": "src/main/resources/data/jugcraft/recipe/winterguards_chestplate.json",
+      "type": "minecraft:crafting_shaped",
+      "inputs": [
+        [
+          "minecraft:iron_ingot"
+        ],
+        [
+          "minecraft:snow_block"
+        ],
+        [
+          "minecraft:iron_ingot"
+        ],
+        [
+          "minecraft:iron_ingot"
+        ],
+        [
+          "minecraft:iron_ingot"
+        ],
+        [
+          "minecraft:iron_ingot"
+        ],
+        [
+          "minecraft:iron_ingot"
+        ],
+        [
+          "minecraft:iron_ingot"
+        ],
+        [
+          "minecraft:iron_ingot"
+        ]
+      ],
+      "outputs": [
+        "jugcraft:winterguards_chestplate"
+      ]
+    },
+    {
+      "source": "src/main/resources/data/jugcraft/recipe/winterguards_helmet.json",
+      "type": "minecraft:crafting_shaped",
+      "inputs": [
+        [
+          "minecraft:iron_ingot"
+        ],
+        [
+          "minecraft:iron_ingot"
+        ],
+        [
+          "minecraft:iron_ingot"
+        ],
+        [
+          "minecraft:iron_ingot"
+        ],
+        [
+          "minecraft:snow_block"
+        ],
+        [
+          "minecraft:iron_ingot"
+        ]
+      ],
+      "outputs": [
+        "jugcraft:winterguards_helmet"
+      ]
+    },
+    {
+      "source": "src/main/resources/data/jugcraft/recipe/winterguards_leggings.json",
+      "type": "minecraft:crafting_shaped",
+      "inputs": [
+        [
+          "minecraft:iron_ingot"
+        ],
+        [
+          "minecraft:iron_ingot"
+        ],
+        [
+          "minecraft:iron_ingot"
+        ],
+        [
+          "minecraft:iron_ingot"
+        ],
+        [
+          "minecraft:snow_block"
+        ],
+        [
+          "minecraft:iron_ingot"
+        ],
+        [
+          "minecraft:iron_ingot"
+        ],
+        [
+          "minecraft:iron_ingot"
+        ]
+      ],
+      "outputs": [
+        "jugcraft:winterguards_leggings"
+      ]
+    },
+    {
       "source": "src/main/resources/data/jugcraft/recipe/wire_drawer.json",
       "type": "minecraft:crafting_shaped",
       "inputs": [
@@ -311737,6 +315241,96 @@
       ]
     },
     {
+      "source": "src/main/resources/data/peepo_companion/recipe/alchemist_uniform.json",
+      "type": "minecraft:crafting_shaped",
+      "inputs": [
+        [
+          "minecraft:string"
+        ],
+        [
+          "minecraft:glass_bottle"
+        ],
+        [
+          "minecraft:string"
+        ],
+        [
+          "minecraft:purple_wool"
+        ],
+        [
+          "minecraft:leather"
+        ],
+        [
+          "minecraft:purple_wool"
+        ],
+        [
+          "minecraft:purple_wool"
+        ]
+      ],
+      "outputs": [
+        "peepo_companion:alchemist_uniform"
+      ]
+    },
+    {
+      "source": "src/main/resources/data/peepo_companion/recipe/baker_uniform.json",
+      "type": "minecraft:crafting_shaped",
+      "inputs": [
+        [
+          "minecraft:string"
+        ],
+        [
+          "minecraft:bread"
+        ],
+        [
+          "minecraft:string"
+        ],
+        [
+          "minecraft:white_wool"
+        ],
+        [
+          "minecraft:leather"
+        ],
+        [
+          "minecraft:white_wool"
+        ],
+        [
+          "minecraft:white_wool"
+        ]
+      ],
+      "outputs": [
+        "peepo_companion:baker_uniform"
+      ]
+    },
+    {
+      "source": "src/main/resources/data/peepo_companion/recipe/beekeeper_uniform.json",
+      "type": "minecraft:crafting_shaped",
+      "inputs": [
+        [
+          "minecraft:string"
+        ],
+        [
+          "minecraft:honeycomb"
+        ],
+        [
+          "minecraft:string"
+        ],
+        [
+          "minecraft:yellow_wool"
+        ],
+        [
+          "minecraft:leather"
+        ],
+        [
+          "minecraft:yellow_wool"
+        ],
+        [
+          "minecraft:yellow_wool"
+        ]
+      ],
+      "outputs": [
+        "peepo_companion:beekeeper_uniform"
+      ]
+    },
+    {
       "source": "src/main/resources/data/peepo_companion/recipe/black_companion_bed.json",
       "type": "minecraft:crafting_shaped",
       "inputs": [
@@ -312166,6 +315760,36 @@
       ]
     },
     {
+      "source": "src/main/resources/data/peepo_companion/recipe/chef_uniform.json",
+      "type": "minecraft:crafting_shaped",
+      "inputs": [
+        [
+          "minecraft:string"
+        ],
+        [
+          "minecraft:bowl"
+        ],
+        [
+          "minecraft:string"
+        ],
+        [
+          "minecraft:white_wool"
+        ],
+        [
+          "minecraft:leather"
+        ],
+        [
+          "minecraft:white_wool"
+        ],
+        [
+          "minecraft:white_wool"
+        ]
+      ],
+      "outputs": [
+        "peepo_companion:chef_uniform"
+      ]
+    },
+    {
       "source": "src/main/resources/data/peepo_companion/recipe/companion_planner.json",
       "type": "minecraft:crafting_shaped",
       "inputs": [
@@ -312330,6 +315954,66 @@
       ],
       "outputs": [
         "peepo_companion:cyan_companion_bed"
+      ]
+    },
+    {
+      "source": "src/main/resources/data/peepo_companion/recipe/farmer_uniform.json",
+      "type": "minecraft:crafting_shaped",
+      "inputs": [
+        [
+          "minecraft:string"
+        ],
+        [
+          "minecraft:wheat"
+        ],
+        [
+          "minecraft:string"
+        ],
+        [
+          "minecraft:blue_wool"
+        ],
+        [
+          "minecraft:leather"
+        ],
+        [
+          "minecraft:blue_wool"
+        ],
+        [
+          "minecraft:blue_wool"
+        ]
+      ],
+      "outputs": [
+        "peepo_companion:farmer_uniform"
+      ]
+    },
+    {
+      "source": "src/main/resources/data/peepo_companion/recipe/fisherman_uniform.json",
+      "type": "minecraft:crafting_shaped",
+      "inputs": [
+        [
+          "minecraft:string"
+        ],
+        [
+          "minecraft:cod"
+        ],
+        [
+          "minecraft:string"
+        ],
+        [
+          "minecraft:brown_wool"
+        ],
+        [
+          "minecraft:leather"
+        ],
+        [
+          "minecraft:brown_wool"
+        ],
+        [
+          "minecraft:brown_wool"
+        ]
+      ],
+      "outputs": [
+        "peepo_companion:fisherman_uniform"
       ]
     },
     {
@@ -312836,6 +316520,36 @@
       ],
       "outputs": [
         "peepo_companion:green_companion_bed"
+      ]
+    },
+    {
+      "source": "src/main/resources/data/peepo_companion/recipe/groundskeeper_uniform.json",
+      "type": "minecraft:crafting_shaped",
+      "inputs": [
+        [
+          "minecraft:string"
+        ],
+        [
+          "minecraft:water_bucket"
+        ],
+        [
+          "minecraft:string"
+        ],
+        [
+          "minecraft:green_wool"
+        ],
+        [
+          "minecraft:leather"
+        ],
+        [
+          "minecraft:green_wool"
+        ],
+        [
+          "minecraft:green_wool"
+        ]
+      ],
+      "outputs": [
+        "peepo_companion:groundskeeper_uniform"
       ]
     },
     {
@@ -313881,6 +317595,36 @@
       ]
     },
     {
+      "source": "src/main/resources/data/peepo_companion/recipe/mechanic_uniform.json",
+      "type": "minecraft:crafting_shaped",
+      "inputs": [
+        [
+          "minecraft:string"
+        ],
+        [
+          "minecraft:copper_ingot"
+        ],
+        [
+          "minecraft:string"
+        ],
+        [
+          "minecraft:blue_wool"
+        ],
+        [
+          "minecraft:leather"
+        ],
+        [
+          "minecraft:blue_wool"
+        ],
+        [
+          "minecraft:blue_wool"
+        ]
+      ],
+      "outputs": [
+        "peepo_companion:mechanic_uniform"
+      ]
+    },
+    {
       "source": "src/main/resources/data/peepo_companion/recipe/mob_transport_crate.json",
       "type": "minecraft:crafting_shaped",
       "inputs": [
@@ -314287,6 +318031,36 @@
       ]
     },
     {
+      "source": "src/main/resources/data/peepo_companion/recipe/orchard_keeper_uniform.json",
+      "type": "minecraft:crafting_shaped",
+      "inputs": [
+        [
+          "minecraft:string"
+        ],
+        [
+          "minecraft:apple"
+        ],
+        [
+          "minecraft:string"
+        ],
+        [
+          "minecraft:green_wool"
+        ],
+        [
+          "minecraft:leather"
+        ],
+        [
+          "minecraft:green_wool"
+        ],
+        [
+          "minecraft:green_wool"
+        ]
+      ],
+      "outputs": [
+        "peepo_companion:orchard_keeper_uniform"
+      ]
+    },
+    {
       "source": "src/main/resources/data/peepo_companion/recipe/pink_companion_bed.json",
       "type": "minecraft:crafting_shaped",
       "inputs": [
@@ -314427,6 +318201,36 @@
       ],
       "outputs": [
         "peepo_companion:pink_companion_bed"
+      ]
+    },
+    {
+      "source": "src/main/resources/data/peepo_companion/recipe/porter_uniform.json",
+      "type": "minecraft:crafting_shaped",
+      "inputs": [
+        [
+          "minecraft:string"
+        ],
+        [
+          "minecraft:chest"
+        ],
+        [
+          "minecraft:string"
+        ],
+        [
+          "minecraft:green_wool"
+        ],
+        [
+          "minecraft:leather"
+        ],
+        [
+          "minecraft:green_wool"
+        ],
+        [
+          "minecraft:green_wool"
+        ]
+      ],
+      "outputs": [
+        "peepo_companion:porter_uniform"
       ]
     },
     {
@@ -314573,6 +318377,36 @@
       ]
     },
     {
+      "source": "src/main/resources/data/peepo_companion/recipe/ranch_hand_uniform.json",
+      "type": "minecraft:crafting_shaped",
+      "inputs": [
+        [
+          "minecraft:string"
+        ],
+        [
+          "minecraft:shears"
+        ],
+        [
+          "minecraft:string"
+        ],
+        [
+          "minecraft:brown_wool"
+        ],
+        [
+          "minecraft:leather"
+        ],
+        [
+          "minecraft:brown_wool"
+        ],
+        [
+          "minecraft:brown_wool"
+        ]
+      ],
+      "outputs": [
+        "peepo_companion:ranch_hand_uniform"
+      ]
+    },
+    {
       "source": "src/main/resources/data/peepo_companion/recipe/red_companion_bed.json",
       "type": "minecraft:crafting_shaped",
       "inputs": [
@@ -314713,6 +318547,36 @@
       ],
       "outputs": [
         "peepo_companion:red_companion_bed"
+      ]
+    },
+    {
+      "source": "src/main/resources/data/peepo_companion/recipe/runner_uniform.json",
+      "type": "minecraft:crafting_shaped",
+      "inputs": [
+        [
+          "minecraft:string"
+        ],
+        [
+          "minecraft:sugar"
+        ],
+        [
+          "minecraft:string"
+        ],
+        [
+          "minecraft:red_wool"
+        ],
+        [
+          "minecraft:leather"
+        ],
+        [
+          "minecraft:red_wool"
+        ],
+        [
+          "minecraft:red_wool"
+        ]
+      ],
+      "outputs": [
+        "peepo_companion:runner_uniform"
       ]
     },
     {
@@ -323720,6 +327584,18 @@
       ]
     },
     {
+      "source": "src/main/resources/data/jugcraft/loot_table/blocks/aluminum_crate.json",
+      "type": "block_drop",
+      "inputs": [
+        [
+          "jugcraft:aluminum_crate"
+        ]
+      ],
+      "outputs": [
+        "jugcraft:aluminum_crate"
+      ]
+    },
+    {
       "source": "src/main/resources/data/jugcraft/loot_table/blocks/aluminum_magnesium_block.json",
       "type": "block_drop",
       "inputs": [
@@ -326105,6 +329981,18 @@
       ],
       "outputs": [
         "jugcraft:bronze_block"
+      ]
+    },
+    {
+      "source": "src/main/resources/data/jugcraft/loot_table/blocks/bronze_crate.json",
+      "type": "block_drop",
+      "inputs": [
+        [
+          "jugcraft:bronze_crate"
+        ]
+      ],
+      "outputs": [
+        "jugcraft:bronze_crate"
       ]
     },
     {
@@ -336071,6 +339959,30 @@
       ]
     },
     {
+      "source": "src/main/resources/data/jugcraft/loot_table/blocks/crucible_bellows.json",
+      "type": "block_drop",
+      "inputs": [
+        [
+          "jugcraft:crucible_bellows"
+        ]
+      ],
+      "outputs": [
+        "jugcraft:crucible_bellows"
+      ]
+    },
+    {
+      "source": "src/main/resources/data/jugcraft/loot_table/blocks/crucible_stand.json",
+      "type": "block_drop",
+      "inputs": [
+        [
+          "jugcraft:crucible_stand"
+        ]
+      ],
+      "outputs": [
+        "jugcraft:crucible_stand"
+      ]
+    },
+    {
       "source": "src/main/resources/data/jugcraft/loot_table/blocks/crusher.json",
       "type": "block_drop",
       "inputs": [
@@ -336777,6 +340689,19 @@
       "outputs": [
         "jugcraft:deepslate_phosphate_ore",
         "jugcraft:phosphate"
+      ]
+    },
+    {
+      "source": "src/main/resources/data/jugcraft/loot_table/blocks/deepslate_quartz_ore.json",
+      "type": "block_drop",
+      "inputs": [
+        [
+          "jugcraft:deepslate_quartz_ore"
+        ]
+      ],
+      "outputs": [
+        "jugcraft:deepslate_quartz_ore",
+        "minecraft:quartz"
       ]
     },
     {
@@ -348595,6 +352520,18 @@
       ]
     },
     {
+      "source": "src/main/resources/data/jugcraft/loot_table/blocks/invar_crate.json",
+      "type": "block_drop",
+      "inputs": [
+        [
+          "jugcraft:invar_crate"
+        ]
+      ],
+      "outputs": [
+        "jugcraft:invar_crate"
+      ]
+    },
+    {
       "source": "src/main/resources/data/jugcraft/loot_table/blocks/iron_bound_coffin.json",
       "type": "block_drop",
       "inputs": [
@@ -354991,6 +358928,18 @@
       ],
       "outputs": [
         "jugcraft:kerbed_grave"
+      ]
+    },
+    {
+      "source": "src/main/resources/data/jugcraft/loot_table/blocks/kings_lantern.json",
+      "type": "block_drop",
+      "inputs": [
+        [
+          "jugcraft:kings_lantern"
+        ]
+      ],
+      "outputs": [
+        "jugcraft:kings_lantern"
       ]
     },
     {
@@ -366107,6 +370056,18 @@
       ]
     },
     {
+      "source": "src/main/resources/data/jugcraft/loot_table/blocks/pact_perch.json",
+      "type": "block_drop",
+      "inputs": [
+        [
+          "jugcraft:pact_perch"
+        ]
+      ],
+      "outputs": [
+        "jugcraft:pact_perch"
+      ]
+    },
+    {
       "source": "src/main/resources/data/jugcraft/loot_table/blocks/pad_mount_transformer.json",
       "type": "block_drop",
       "inputs": [
@@ -367982,6 +371943,19 @@
       ],
       "outputs": [
         "jugcraft:purple_plastic"
+      ]
+    },
+    {
+      "source": "src/main/resources/data/jugcraft/loot_table/blocks/quartz_ore.json",
+      "type": "block_drop",
+      "inputs": [
+        [
+          "jugcraft:quartz_ore"
+        ]
+      ],
+      "outputs": [
+        "jugcraft:quartz_ore",
+        "minecraft:quartz"
       ]
     },
     {
@@ -370651,6 +374625,18 @@
       ]
     },
     {
+      "source": "src/main/resources/data/jugcraft/loot_table/blocks/stainless_steel_crate.json",
+      "type": "block_drop",
+      "inputs": [
+        [
+          "jugcraft:stainless_steel_crate"
+        ]
+      ],
+      "outputs": [
+        "jugcraft:stainless_steel_crate"
+      ]
+    },
+    {
       "source": "src/main/resources/data/jugcraft/loot_table/blocks/station_battery.json",
       "type": "block_drop",
       "inputs": [
@@ -370804,6 +374790,18 @@
       ],
       "outputs": [
         "jugcraft:steel_block"
+      ]
+    },
+    {
+      "source": "src/main/resources/data/jugcraft/loot_table/blocks/steel_crate.json",
+      "type": "block_drop",
+      "inputs": [
+        [
+          "jugcraft:steel_crate"
+        ]
+      ],
+      "outputs": [
+        "jugcraft:steel_crate"
       ]
     },
     {
@@ -372595,6 +376593,18 @@
       ]
     },
     {
+      "source": "src/main/resources/data/jugcraft/loot_table/blocks/titanium_crate.json",
+      "type": "block_drop",
+      "inputs": [
+        [
+          "jugcraft:titanium_crate"
+        ]
+      ],
+      "outputs": [
+        "jugcraft:titanium_crate"
+      ]
+    },
+    {
       "source": "src/main/resources/data/jugcraft/loot_table/blocks/titanium_ore.json",
       "type": "block_drop",
       "inputs": [
@@ -372993,6 +377003,18 @@
       ],
       "outputs": [
         "jugcraft:tungsten_block"
+      ]
+    },
+    {
+      "source": "src/main/resources/data/jugcraft/loot_table/blocks/tungsten_crate.json",
+      "type": "block_drop",
+      "inputs": [
+        [
+          "jugcraft:tungsten_crate"
+        ]
+      ],
+      "outputs": [
+        "jugcraft:tungsten_crate"
       ]
     },
     {
@@ -379393,31 +383415,7 @@
         ]
       ],
       "outputs": [
-        "jugcraft:burnt_sugar"
-      ]
-    },
-    {
-      "source": "tools/agriculture.py:CANDY/syrup",
-      "type": "candy_temperature",
-      "inputs": [
-        [
-          "jugcraft:candy_kettle"
-        ],
-        [
-          "jugcraft:candy_tray"
-        ],
-        [
-          "minecraft:sugar"
-        ],
-        [
-          "minecraft:water_bucket"
-        ],
-        [
-          "minecraft:campfire"
-        ]
-      ],
-      "outputs": [
-        "jugcraft:salt_water_taffy"
+        "jugcraft:candy_corn"
       ]
     },
     {
@@ -379465,7 +383463,7 @@
         ]
       ],
       "outputs": [
-        "jugcraft:candy_corn"
+        "jugcraft:rock_candy"
       ]
     },
     {
@@ -379489,7 +383487,31 @@
         ]
       ],
       "outputs": [
-        "jugcraft:rock_candy"
+        "jugcraft:burnt_sugar"
+      ]
+    },
+    {
+      "source": "tools/agriculture.py:CANDY/syrup",
+      "type": "candy_temperature",
+      "inputs": [
+        [
+          "jugcraft:candy_kettle"
+        ],
+        [
+          "jugcraft:candy_tray"
+        ],
+        [
+          "minecraft:sugar"
+        ],
+        [
+          "minecraft:water_bucket"
+        ],
+        [
+          "minecraft:campfire"
+        ]
+      ],
+      "outputs": [
+        "jugcraft:salt_water_taffy"
       ]
     },
     {
@@ -379517,33 +383539,6 @@
       ],
       "outputs": [
         "jugcraft:fudge"
-      ]
-    },
-    {
-      "source": "tools/agriculture.py:CANDY/cream",
-      "type": "candy_temperature",
-      "inputs": [
-        [
-          "jugcraft:candy_kettle"
-        ],
-        [
-          "jugcraft:candy_tray"
-        ],
-        [
-          "minecraft:sugar"
-        ],
-        [
-          "minecraft:water_bucket"
-        ],
-        [
-          "minecraft:campfire"
-        ],
-        [
-          "minecraft:milk_bucket"
-        ]
-      ],
-      "outputs": [
-        "jugcraft:burnt_sugar"
       ]
     },
     {
@@ -379598,6 +383593,33 @@
       ],
       "outputs": [
         "jugcraft:toffee"
+      ]
+    },
+    {
+      "source": "tools/agriculture.py:CANDY/cream",
+      "type": "candy_temperature",
+      "inputs": [
+        [
+          "jugcraft:candy_kettle"
+        ],
+        [
+          "jugcraft:candy_tray"
+        ],
+        [
+          "minecraft:sugar"
+        ],
+        [
+          "minecraft:water_bucket"
+        ],
+        [
+          "minecraft:campfire"
+        ],
+        [
+          "minecraft:milk_bucket"
+        ]
+      ],
+      "outputs": [
+        "jugcraft:burnt_sugar"
       ]
     },
     {
@@ -379781,6 +383803,33 @@
       ],
       "outputs": [
         "jugcraft:adept_wand"
+      ]
+    },
+    {
+      "source": "src/main/resources/data/jugcraft/concordance/ritual/root_and_rivet.json",
+      "type": "ritual",
+      "inputs": [
+        [
+          "jugcraft:thallite_plate"
+        ],
+        [
+          "minecraft:copper_ingot"
+        ],
+        [
+          "jugcraft:mendvetch"
+        ],
+        [
+          "jugcraft:circle_anchor"
+        ],
+        [
+          "jugcraft:ley_pylon"
+        ],
+        [
+          "jugcraft:warding_stone"
+        ]
+      ],
+      "outputs": [
+        "jugcraft:rooted_thallite_foundation"
       ]
     },
     {
@@ -380652,6 +384701,21 @@
       ],
       "outputs": [
         "jugcraft:dinitrogen_tetroxide_bucket"
+      ]
+    },
+    {
+      "source": "src/main/java/io/github/jimbozoomer/jugcraft/chemistry/PetroFluids.java",
+      "type": "fluid_filling",
+      "inputs": [
+        [
+          "fluid:jugcraft:monomethylhydrazine"
+        ],
+        [
+          "minecraft:bucket"
+        ]
+      ],
+      "outputs": [
+        "jugcraft:monomethylhydrazine_bucket"
       ]
     },
     {

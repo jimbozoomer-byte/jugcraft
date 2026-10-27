@@ -1,12 +1,13 @@
 """Original magnetic fence elevator housing; native bounded JE lift."""
 import hashlib,json
 from PIL import Image
+from asset_png import save_rgba
 from jimtafacts_construction import ROOT,RES,SOURCE,dump
 
 def generate(shared=True):
  ident='jimta_magnetizer';src=SOURCE/'textures/blocks/machine/blockMagnetizer.png';im=Image.open(src).convert('RGBA');tile=im.height;manifest=[];textures={}
  for face,index in {'down':0,'up':1,'north':3,'south':5,'west':4,'east':2}.items():
-  target=RES/f'assets/jugcraft/textures/jimtafacts/magnetizer/{face}.png';target.parent.mkdir(parents=True,exist_ok=True);im.crop((index*tile,0,(index+1)*tile,tile)).save(target)
+  target=RES/f'assets/jugcraft/textures/jimtafacts/magnetizer/{face}.png';target.parent.mkdir(parents=True,exist_ok=True);save_rgba(im.crop((index*tile,0,(index+1)*tile,tile)),target)
   textures[face]=f'jugcraft:jimtafacts/magnetizer/{face}'
   manifest.append({'source':src.relative_to(ROOT).as_posix(),'runtime':target.relative_to(ROOT).as_posix(),'source_sha256':hashlib.sha256(src.read_bytes()).hexdigest(),'adaptation':f'Original atlas tile {index}'})
  textures['particle']=textures['north'];dump(RES/f'assets/jugcraft/models/block/{ident}.json',{'parent':'minecraft:block/cube','textures':textures})
