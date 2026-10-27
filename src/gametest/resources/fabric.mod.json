@@ -644,7 +644,8 @@
       "io.github.jimbozoomer.jugcraft.test.JimtaPocketGuestClientGameTests",
       "io.github.jimbozoomer.jugcraft.test.RetroTraderClientGameTests",
       "io.github.jimbozoomer.jugcraft.test.StorageCrateMultiplayerClientGameTests",
-      "io.github.jimbozoomer.jugcraft.test.StorageCrateClientGameTests"
+      "io.github.jimbozoomer.jugcraft.test.StorageCrateClientGameTests",
+      "io.github.jimbozoomer.jugcraft.test.HerobrineClientGameTests"
     ]
   },
   "depends": {
