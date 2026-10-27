@@ -1,6 +1,6 @@
 # Simplification proposals: plastic, the first powered tool, charges and overlap
 
-Status: proposal only. Nothing here is implemented. Written 27 October 2026 for the owner's decision.
+Status: proposals for the owner's decision, written 27 October 2026. Item 6 (plastic) has since been built on its own branches, `claude/cheaper-plastic` and `claude/found-plastic`; items 9, 11 and 14 are proposals only.
 
 Proposal issue: none. The contributor asked for the most convoluted parts of the pack to be found (26 October 2026). Some were fixed on their own branches (blank runes, dead Nouveau effects, the first-join welcome, shared item names, boilerplate tooltips and codex text, and the encyclopedia). These four change balance or remove content, so they are written up for the owner to choose instead.
 
@@ -12,22 +12,19 @@ All figures come from the recipe files on `main` at e05b0091e. "Machine" counts 
 
 | Route | Steps | Cost per sheet | Notes |
 | --- | --- | --- | --- |
-| Crude oil | pump crude, Distillation Tower, Polymerization Vat, Metal Press | 2.5 buckets of crude | 1,000 mB crude gives 100 mB refinery gas; 1,000 mB refinery gas gives 4 pellets; the press makes 1 sheet per pellet |
-| Ethylene (HDPE) | ethylene source, Polymerization Reactor with its insert, Polymer Extruder with its die | 0.125 bucket of ethylene | 1,000 mB ethylene gives 4 HDPE pellets; 4 pellets extrude to 8 sheets |
+| Crude oil | pump crude, Distillation Tower, Polymerization Reactor, Metal Press | 2.5 buckets of crude | 1,000 mB crude gives 100 mB refinery gas; 1,000 mB refinery gas gives 4 pellets; the press makes 1 sheet per pellet |
+| Ethylene (HDPE) | ethylene source, Polymerization Kettle with its insert, Polymer Extruder with its die | 0.125 bucket of ethylene | 1,000 mB ethylene gives 4 HDPE pellets; 4 pellets extrude to 8 sheets |
 | PVC | vinyl chloride from the Synthesis Converter (needs titanium), polymerization, press or extruder | 0.06 bucket of vinyl chloride | 500 mB gives 4 resin; the press makes 2 sheets per resin, the extruder 8 per 4 |
 | Bio | potatoes and salt through five machines | 4 potatoes and half a salt | the earlier audit route: 32 potatoes and 4 salt give 8 sheets |
 
 The first route a player meets, crude oil, is the worst by far: 2.5 buckets per sheet, when the other 90% of the barrel goes to fuels. Most early plastic recipes take 2 to 8 sheets.
 
-### Proposal
+### Built instead
 
-1. **Refinery gas polymerizes four times better:** 1,000 mB refinery gas gives 16 pellets instead of 4. Crude oil then costs 0.625 bucket per sheet, about the bio route's cost, and still more than ethylene. Ethylene and the extruder stay the better, later route.
-2. **The Metal Press presses 2 sheets per pellet**, matching what it already does for PVC resin. With (1) a bucket of crude gives 3.2 sheets.
-3. Optional: **naphtha also polymerizes**, at 1,000 mB to 8 pellets, so the 250 mB of naphtha in each bucket of crude has an early use.
+Making refinery gas give 16 pellets would have made the first route four times better than the later HDPE route, which also makes 4 sheets from a bucket of refinery gas. So the change uses naphtha, which every bucket of crude gives 2.5 times more of than refinery gas:
 
-(1) alone brings crude to 0.625 bucket per sheet, (2) alone to 1.25, and both together to 0.31. One of them is enough; (1) is the closer match to the other routes.
-
-Checks to run when implementing: the recipe audit's no-gain loop check (pellets and sheets do not burn or reclaim into more crude), and the polymer game tests' per-batch counts.
+- **Cheaper plastic** (`claude/cheaper-plastic`, `docs/features/cheaper-plastic.md`): the Polymerization Reactor takes naphtha as well as refinery gas, 4 pellets a bucket; the Monomer Preparation Unit cracks naphtha to 750 mB of ethylene for the HDPE line. A sheet drops from 2.5 buckets of crude to 0.71 on the first route and 0.53 on the HDPE route, so the later route stays ahead.
+- **Found plastic** (`claude/found-plastic`, `docs/features/found-plastic.md`), asked for by the contributor: old plastic bottles, ducks and crates in the chests of wrecks, ruins, mines and camps, broken down by hand into 1, 2 or 4 pellets. About one sheet per chest opened, before any refinery; chest loot only, so it cannot be farmed.
 
 ## 9. The first powered tool is a long way off
 
