@@ -1,6 +1,6 @@
 # Herobrine
 
-Status: parts 1–3 (encounters, wilderness marks, shoreline pyramids and the trail) and the Jugcraft connections are implemented on `claude/herobrine-haunting`, pending review. The encounters compiled and passed their game tests natively; the marks, pyramids and terrain safeguards are not yet compiled or run (see "Not yet verified" under Tests). Not merged, not deployed. The schedule (below) decides when he appears; without it he appears only on an operator's command.
+Status: parts 1–3 (encounters, wilderness marks, shoreline pyramids and the trail), the Jugcraft connections and OpenAI Codex's schedule are implemented on `claude/herobrine-haunting`, pending review. All 40 native Herobrine game tests, the 393 scheduler assertions, and the rendered and two-client tests pass. CI and a human playtest have not run yet (see "Verification" under Tests). Not merged, not deployed. The schedule, installed at server start, decides when he appears. Operators can also show him on command.
 
 Owner: jimbozoomer-byte
 Target milestone and tier: the Halloween event, any tier
@@ -21,7 +21,7 @@ The owner approved a plan shared between this branch and OpenAI Codex/Astra (coo
 
 - **Codex: the schedule and per-player progress.** This covers `io.github.jimbozoomer.jugcraft.herobrine.HerobrineSchedule` and `HerobrineScheduleDirector`, with versioned Overworld saved data. It owns the deterministic calendar (event mode through 3 November, quiet mode after), active-time accumulation, priority to unseen and oldest-overdue players, persistence across reconnect and restart, short retries after failed placement, reservations, rate caps, and crediting only confirmed sightings. Proposed pacing: in event mode, a first sighting within 5–10 active minutes, then roughly every 10–20; in quiet mode, a first sighting within 45–90 active minutes, then every 1–3 active hours; close encounters on their own long cooldown. These are targets, not guarantees: when there is nowhere visible to stand, nothing is shown.
 - **This branch: everything else.** That is the entity and renderer, the live tick hook, placement, encounter content, terrain marks, structures and the links into the rest of Jugcraft.
-- **The boundary is `creatures/herobrine/HerobrineDirector`.** Neither side builds a competing schedule. The installation line (`HerobrineEncounters.setDirector(...)`) is agreed before wiring.
+- **The boundary is `creatures/herobrine/HerobrineDirector`.** Neither side builds a competing schedule. `HerobrineScheduleDirector` installs the schedule with `HerobrineEncounters.setDirector(...)` when the server starts, and removes it when the server stops.
 
 ## Part 1, implemented here
 
@@ -190,13 +190,26 @@ Mark game tests (`HerobrineMarksGameTests`, on a raised platform so each margin 
 
 The small-mark tests run on the real build queue: they wait for a free slot and for their mark to finish. The pyramid tests build at once (`HerobrineMarks.buildNow`), through the same checks. Every marks test runs with sky access, because game tests otherwise roof each structure with barriers.
 
-Not yet verified, as of this checkpoint:
+Verification (27 October 2026):
 
-- **Compile and tests.** The encounter tests compiled and passed natively on an earlier snapshot. The marks, pyramids, trail, approvals, chunk preflight, full-state undo and the cave mouth are in OpenAI Codex's native run; until it reports, none of the mark tests above, nor the cave-mouth test, has run. The finished-only trail, the full sign comparison and the glance timing are newer still, and not yet compiled. The local Java parser checks syntax only.
-- **Client.** `HerobrineClientGameTests` (OpenAI Codex) passed in a rendered client on a disposable development world. It covers entity sync, the renderer and eye texture, credit for a sustained look, and his disappearance on approach. Its screenshots show the player silhouette in daylight and the white eyes in a dark tunnel ([herobrine-scheduling.md](herobrine-scheduling.md)). `HerobrineNetworkTests` passed with two real clients on one PC: both saw the same encounter, each was credited only once it looked, and both saw him go. Footstep audibility is untested, as are the cave mouth, marks and pyramids in a client, and a human multiplayer playtest.
-- **CI.** Not yet run on this branch.
+- **Native game tests: all pass.** OpenAI Codex ran all 40 Herobrine game tests and the 393 scheduler assertions with `herobrineScheduleTest runGameTest`, filtered to `jugcraft-test:herobrine*`: build successful in 2 min 2 s. That run covered this branch's content through `49ae6532d` plus Codex's fixture and API corrections (`2ead9bce18`, `9f46697bfd`), now on this branch. It covers every test listed above: encounters, terrain planning, approved wilderness, building and undo, sign edits, finished-only trails and the guard's timing.
+- **Rendered clients: pass.** `HerobrineClientGameTests` and `HerobrineNetworkTests` passed together in 3 min 29 s: two client JVMs on loopback, disposable profiles. The inspected screenshots show:
+  - the player silhouette in daylight;
+  - the white eyes in a dark tunnel;
+  - the second client seeing the shared apparition in the world.
+
+  Commands, logs and evidence paths: [herobrine-scheduling.md](herobrine-scheduling.md).
+- **One line differs from the tested copy.** `HerobrineMarkPlans` builds the `c:ores` identifier with `Identifier.fromNamespaceAndPath("c", "ores")`, where the tested copy used `Identifier.parse("c:ores")`. Both name the same tag, and `Jugcraft.id` uses the same call.
+- **Not yet verified:**
+  - CI on this branch;
+  - a human playtest of the atmosphere and sound (whether the footsteps are audible);
+  - the marks, pyramids and cave mouth seen in a rendered client;
+  - a public-server load test.
+- **Known limits:**
+  - a finished pyramid is not rechecked if players later mine it;
+  - the Cursed Mirror's call waits for https://github.com/jimbozoomer-byte/jugcraft/pull/498.
 
 ## Still to build (owner-approved plan, not implemented)
 
-- **Encounter refinements:** testing the variants in a real client: whether the footsteps are audible, and whether the eyes show in a dark tunnel or cave mouth.
+- **A human playtest:** whether the follower's footsteps are audible, and how the cave mouth, the marks and the pyramids look and feel in play. The automated client tests already show the eyes in a dark tunnel.
 - **The Cursed Mirror call:** one line in the mirror calling `HerobrineEncounters.reflection` (when a player looks into it at night, rarely), once both branches are on main.

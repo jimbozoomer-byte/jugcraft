@@ -682,13 +682,13 @@ Owner-requested 7 October 2026. Independent briefs: [industrial chemistry and fu
 - [ ] Still ideas, if the owner wants them: traps, and village mysteries with clues before the chase.
 ## Herobrine — 27 October 2026
 
-- [x] Part 1, encounters: the entity, distant and close encounters, attentive witnesses, the `HerobrineDirector` seam and operator commands ([herobrine.md](features/herobrine.md)). Implemented on `claude/herobrine-haunting`; compile, CI and client play pending.
-- [ ] The schedule (OpenAI Codex/Astra, owner-approved split): event mode through 3 November inclusive, quiet mode from 4 November 00:00 America/New_York, active-time pacing and persistence; then install it with `HerobrineEncounters.setDirector`.
-- [x] Encounter variants: ridge, clearing and cave-mouth watcher, restrained follower, second-look reposition, eyes at the end of a tunnel, and a shared group sighting. Implemented; the cave mouth's compile and tests, and client play, pending.
-- [x] Part 2, world clues with terrain safeguards and reversible placement records: leafless groves, 2×2 tunnels, sand and mossy pyramids, torch shrines and cryptic signs (`HerobrineMarks`, `HerobrineMarkPlans`). Implemented; compile, CI and client play pending.
-- [x] Linked investigations: a sighting across water, then a grove, then a torch tunnel whose sign points to a shoreline pyramid (raised if none is near). Implemented; compile, CI and client play pending.
-- [x] Part 3, massive shoreline brick pyramids: checked sites, incremental building with revalidation, an authored interior and a modest journal (`HerobrinePyramids`). Implemented; compile, CI and client play pending.
-- [x] Jugcraft connections: guards glancing at him (never targeting), Styx's lines, and the Cursed Mirror reflection seam (`HerobrineEncounters.reflection`). Implemented; compile, CI and client play pending.
+- [x] Part 1, encounters: the entity, distant and close encounters, attentive witnesses, the `HerobrineDirector` seam and operator commands ([herobrine.md](features/herobrine.md)). Implemented on `claude/herobrine-haunting`; native game tests and automated rendered and two-client tests pass; CI and a human playtest pending.
+- [x] The schedule (OpenAI Codex/Astra, owner-approved split): event mode through 3 November inclusive, quiet mode from 4 November 00:00 America/New_York, active-time pacing and persistence. Implemented and installed at server start (`HerobrineScheduleDirector`); 393 scheduler assertions pass ([herobrine-scheduling.md](features/herobrine-scheduling.md)).
+- [x] Encounter variants: ridge, clearing and cave-mouth watcher, restrained follower, second-look reposition, eyes at the end of a tunnel, and a shared group sighting. Implemented; native game tests pass; the cave mouth in a rendered client and a human playtest pending.
+- [x] Part 2, world clues with terrain safeguards and reversible placement records: leafless groves, 2×2 tunnels, sand and mossy pyramids, torch shrines and cryptic signs (`HerobrineMarks`, `HerobrineMarkPlans`). Implemented; native game tests pass; CI and a human playtest pending.
+- [x] Linked investigations: a sighting across water, then a grove, then a torch tunnel whose sign points to a shoreline pyramid (raised if none is near). Implemented; native game tests pass; CI and a human playtest pending.
+- [x] Part 3, massive shoreline brick pyramids: checked sites, incremental building with revalidation, an authored interior and a modest journal (`HerobrinePyramids`). Implemented; native game tests pass; CI and a human playtest pending.
+- [x] Jugcraft connections: guards glancing at him (never targeting), Styx's lines, and the Cursed Mirror reflection seam (`HerobrineEncounters.reflection`). Implemented; native game tests pass; CI and a human playtest pending.
 - [ ] Wire the Cursed Mirror to call `HerobrineEncounters.reflection` once the mirror (https://github.com/jimbozoomer-byte/jugcraft/pull/498) and Herobrine are both on main.
 
 ## Trains — 26 October 2026
