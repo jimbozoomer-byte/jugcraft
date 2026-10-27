@@ -14416,6 +14416,7 @@ def check_concordance(registered):
     check_crucible_stand(co, root, lang)
     check_ecology(co, root, lang, registered, research)
     check_graft(co, root, lang)
+    check_verdance_roads(root)
     check_celestial(co, root, lang, registered, research)
     check_crimson(co, root, lang, registered, research)
     check_workers(co, root, lang, registered, research)
@@ -17987,6 +17988,80 @@ def check_graft(co, root, lang):
             f"message.{MOD}.concordance.garden.graft_held", f"compose.{MOD}.ecology.graft", f"compose.{MOD}.ecology.graft.range"]:
         if key not in lang:
             err(f"graft: missing lang {key}")
+
+
+# The garden cohort, GC-05's game tests for Verdance carrying and the bed index's devices. The garden side's three land
+# first (check_verdance_roads); theGardenReachCapsItsDevices joins this row with the bed index's devices, and Bathin's
+# worker and economy tests add their rows.
+GC05_CARRYING_TESTS = {
+    "ConcordanceGardenGameTests": ["aGleanerReceivesFromANamedHeartAtAnyDistance", "aHeartPoursIntoANamedPylonByItsOwnRule",
+                                   "aHeartSaysWhetherItHasItsOwnRoad"],
+}
+
+
+def check_verdance_roads(root):
+    """The garden cohort, GC-05 (docs/features/concordance-garden-cohort.md; Bathin's service): Verdance leaves a Verdant
+    Heart only by its own two roads, each one body that a pact spirit may also name at a distance. The Gleaner's draw goes
+    through receiveFrom, which moves at most its draw through the Heart's drawInto; the Heart's pour beside it and into a
+    named pylon are one body (a pylon its keeper's party or no one owns, whole batches of the data conversion, the Verdance
+    spent as the Ley Charge made); within concordance/ only the Gleaner calls drawInto, only the Heart fills a pylon, and only
+    Bathin's service names receiveFrom or pourInto; the pylon road loses Verdance and nothing converts into it; and the
+    garden side's game tests exist."""
+
+    def strip(source):
+        return re.sub(r"//[^\n]*|/\*.*?\*/", " ", source, flags=re.S)
+
+    def text(path):
+        return path.read_text(encoding="utf-8") if path.exists() else ""
+
+    heart_java = strip(text(root / "garden" / "VerdantHeartBlockEntity.java"))
+    gleaner_java = strip(text(root / "garden" / "GleanerBlockEntity.java"))
+    # The garden side: the Gleaner's draw and the Heart's pour, each one body shared with its own use.
+    receive = _java_body(gleaner_java, "public long receiveFrom(")
+    draw = _java_body(gleaner_java, "private void draw(ServerLevel level)")
+    if "Math.min(Math.min(max, DRAW), CAPACITY - verdance)" not in receive \
+            or "heart.drawInto(reservoir(), ownership(), actor, want, level)" not in receive \
+            or "receiveFrom(heart, actor, want, level);" not in draw or "drawInto(" in draw:
+        err("GleanerBlockEntity: its draw goes through receiveFrom, which moves at most DRAW through the Heart's drawInto (GC-05)")
+    order = [receive.find(n) for n in ("long want = Math.min(Math.min(max, DRAW), CAPACITY - verdance);",
+                                       "heart.drawInto(reservoir(), ownership(), actor, want, level)",
+                                       "if (!transfer.outcome().moved())", "verdance = transfer.target().amount();",
+                                       "return transfer.received();")]
+    if -1 in order or order != sorted(order):
+        err("GleanerBlockEntity.receiveFrom: the Heart's Verdance falls and its own rises from one transfer, in that one call, "
+            "and it returns what arrived (GC-05: nothing in transit)")
+    pour = _java_body(heart_java, "private long pourBatches(")
+    order = [pour.find(n) for n in ("if (!mayFeed(pylon.owner()))",
+                                    "conversion.batches(verdance, LeyPylonBlockEntity.CAPACITY - pylon.ley(), maxBatches)",
+                                    "pylon.fill(level, batches * conversion.toAmount())",
+                                    "verdance -= made / conversion.toAmount() * conversion.fromAmount();")]
+    if -1 in order or order != sorted(order) or heart_java.count("pylon.fill(") != 1 \
+            or "pourBatches(level, conversion, pylon, Long.MAX_VALUE);" not in _java_body(heart_java, "private void pour(ServerLevel level)") \
+            or "pourBatches(level, conversion, pylon, maxBatches);" not in _java_body(heart_java, "public long pourInto(") \
+            or "Garden.CONVERSION" not in _java_body(heart_java, "private static @Nullable Conversion conversion()"):
+        err("VerdantHeartBlockEntity: the pour beside it and a named pylon's are one body: its keeper's party or no one, whole "
+            "batches of the data conversion, the Verdance spent as the Ley Charge made (GC-05)")
+    for path in sorted(root.rglob("*.java")):
+        relative = path.relative_to(root).as_posix()
+        source = strip(path.read_text(encoding="utf-8"))
+        for call, allowed in ((".drawInto(", "garden/GleanerBlockEntity.java"), ("pylon.fill(", "garden/VerdantHeartBlockEntity.java"),
+                              (".receiveFrom(", "spirits/VerdanceCarrying.java"), (".pourInto(", "spirits/VerdanceCarrying.java")):
+            if call in source and relative != allowed:
+                err(f"concordance/{relative}: {call} is {allowed}'s alone (GC-05: Verdance leaves a Heart only by its own rules)")
+    # The economy: the pylon road is the existing losing conversion; nothing makes Verdance.
+    conversion = load(DATA / MOD / "concordance" / "conversion" / "verdance_to_ley.json") or {}
+    if conversion.get("from", {}).get("resource") != "essence/verdance" or conversion.get("to", {}).get("resource") != "ley_charge" \
+            or not 0 < conversion.get("to", {}).get("amount", 0) < conversion.get("from", {}).get("amount", 0):
+        err("conversion verdance_to_ley must turn Verdance into less Ley Charge (Bathin's pylon road is a loss)")
+    for path in sorted((DATA / MOD / "concordance" / "conversion").glob("*.json")):
+        if (load(path) or {}).get("to", {}).get("resource") == "essence/verdance":
+            err(f"{path.relative_to(DATA)}: nothing converts into Verdance (GC-05; no gaining road through a carrier)")
+    tests = ROOT / "src" / "gametest" / "java" / "io" / "github" / "jimbozoomer" / "jugcraft" / "test"
+    for cls, names in GC05_CARRYING_TESTS.items():
+        source = text(tests / f"{cls}.java")
+        for name in names:
+            if not re.search(rf"public void {name}\(GameTestHelper \w+\)", source):
+                err(f"{cls}: missing the garden cohort's GC-05 game test {name}")
 
 
 def check_celestial(co, root, lang, registered, research):
