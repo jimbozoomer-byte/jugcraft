@@ -4931,11 +4931,16 @@ public class ConcordanceWorkerGameTests {
 		return offer;
 	}
 
-	/** A survival player who understands The Garden's Regard (so the Binding Arts and Verdant Husbandry: a Greenwarden). */
+	/**
+	 * A survival player who understands The Garden's Regard (so the Binding Arts and Verdant Husbandry: a Greenwarden), carrying
+	 * nothing. A test survivor joins in the test server's default creative mode, so join listeners hand it welcome items (the
+	 * Creative Quick Start, in its main hand, where an empty-hand use would destroy it); each test sets what its player carries.
+	 */
 	static ServerPlayer gardenHolder(GameTestHelper helper) {
 		ServerPlayer player = TestPlayers.survivor(helper);
 		understand(player, GardenPacts.RESEARCH);
 		RateGate.forget(player.getUUID());
+		player.getInventory().clearContent();
 		return player;
 	}
 
