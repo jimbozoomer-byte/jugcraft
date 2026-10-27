@@ -13752,6 +13752,11 @@
       "denominator": 1,
       "source": "recipe jugcraft:hermit_rifle"
     },
+    "jugcraft:hessians_bridle": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
     "jugcraft:hibiscus": {
       "numerator": 16,
       "denominator": 1,
