@@ -1,9 +1,17 @@
-JUGCRAFT release candidate: matched player pack and server upload bundle built from the exact main commit whose Build and Foundation checks passed. The source SHA, platform pins and SHA-512 checksums are in `release-manifest.json`.
+JUGCRAFT October 26 community and Jimtafacts update — release candidate.
 
-- New players: import the versioned `.mrpack` once in Modrinth App. Existing players: accept the update offered in Minecraft's title menu, quit to apply it, then relaunch the same JUGCRAFT instance. No EXE, folder selection, launch hook or public Modrinth listing is needed. Settings, saves, keybinds and resource packs stay in place.
-- Owner: the server ZIP contains only server-compatible mods and default configuration. Select Minecraft 26.3 / Fabric Loader 0.19.5 / Java 25 in the host panel; follow `START-HERE.txt`. It is an upload bundle, not a standalone server launcher.
-- Ongoing updates: after deploying and verifying the matching server, explicitly promote this release's `stable.json` to the GitHub `player-channel` release. A main commit or release publication alone does not update players. See `docs/features/direct-player-updater.md` for installation, promotion and recovery.
+- Completes the documented native Jimtafacts collection: survival sources, transport/gates, industrial equipment, digital storage and spatial transfers, bounded Lua/CraftOS computers and peripherals, spellbook equipment and encounter presentation using supplied models/animations. Includes the Chompa costume and aircraft texture, flight, sound and camera repairs.
+- Adds companion jobs and uniforms, Overworld quartz and starter silicon upgrades, seven storage-crate tiers, trains and coupling, seasonal wildlife and harvest, and refined workshop/trade interfaces.
+- Adds Concordance winter/stone content, living workshops and the pact hall; the Pumpkin King encounter, villain unmasking, Frostward College work and new gun families.
+- Adds Crown of Thunder arena and Thunder Vane rite groundwork only. The Storm Roc boss itself remains a future addition.
+- Preserves full native computer controls in the fitted machine-screen style and reconciles shared recipes, tags, registrations and essence values across the community branches.
 
-This batch adds city-focused raiders, protected flak crews and guard mechas, a usable bank Ender Chest, viewer claims and per-player inventory rules, longer days and shorter nights, convenience-only transmutation outputs, repaired Candy Cavity generation for new terrain, an in-game resource-pack browser and pinned performance mods. Existing town changes use the explicit preview/apply migration; existing caves are not erased or regenerated.
+Native adaptation boundaries remain explicit in docs/features/jimtafacts-remaining.md: spatial transfer supports bounded approved payloads; computers expose bounded in-game APIs, not arbitrary host access or every original-mod API. This is not a claim of unrestricted source-mod compatibility. Owner visual/survival playtesting remains separate from automated tests.
 
-Candidate publication does not itself deploy the server or promote the client channel. Deployment evidence and remaining human multiplayer checks are recorded separately. The custom JUGCRAFT title screen and server Play button remain deferred. AI assistance: OpenAI Codex (GPT-6).
+Existing towns, inventories and worlds are preserved. Added natural structures require new chunks; this update does not reset the Nether or regenerate occupied terrain. Back up world/player data/configs before upgrading; restore that backup and the previous artifacts for rollback of newly saved content.
+
+Existing players: accept the update in JUGCRAFT's title-menu updater, apply and quit, wait for completion, then relaunch the same Modrinth profile. Settings, keybinds, saves and extra mods stay in place. No new profile or public Modrinth pack listing is required.
+
+The exact-source Build/Foundation checks gate release assembly. Local combined evidence and limitations are recorded in docs/features/publication-oct26.md. Publication alone does not activate the player channel: obtain owner restart confirmation, give players the full 30-second warning, back up/update the server, verify startup/join, then promote the matching client update.
+
+AI assistance: OpenAI Codex.

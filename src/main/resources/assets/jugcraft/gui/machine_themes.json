@@ -249,7 +249,12 @@
     "wind_turbine": "workshop",
     "lead_acid_battery_bank": "electric",
     "flow_tank_module": "electric",
-    "flow_stack_module": "electric"
+    "flow_stack_module": "electric",
+    "jimta_compressor": "industrial",
+    "jimta_extractor": "industrial",
+    "jimta_thermal_centrifuge": "industrial",
+    "jimta_recycler": "industrial",
+    "jimta_metal_cutter": "industrial"
   },
   "forms": "industrial",
   "screens": {
@@ -260,6 +265,21 @@
     "reactor_console": "advanced",
     "remote_shutdown": "advanced",
     "drone_terminal": "drone",
-    "drone_tower": "drone"
+    "drone_tower": "drone",
+    "cooking_pot": "workshop",
+    "lampwright_bench": "workshop",
+    "farm_stand": "workshop",
+    "cave_survey": "workshop",
+    "carving": "workshop",
+    "workshop_engine": "workshop",
+    "workshop_chute": "workshop",
+    "workshop_table": "workshop",
+    "artisan": "workshop",
+    "industrial_lathe": "industrial",
+    "industrial_fluid_service": "industrial",
+    "aircraft": "industrial",
+    "industrial_transformer": "electric",
+    "computer": "electric",
+    "compact_reactor": "advanced"
   }
 }

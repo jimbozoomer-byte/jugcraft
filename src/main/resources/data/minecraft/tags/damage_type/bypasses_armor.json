@@ -11,6 +11,7 @@
     {
       "id": "jugcraft:nouveau_windshear",
       "required": false
-    }
+    },
+    "jugcraft:jimtafacts_heartstop"
   ]
 }

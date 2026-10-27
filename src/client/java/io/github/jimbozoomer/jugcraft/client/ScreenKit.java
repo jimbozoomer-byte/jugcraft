@@ -5,10 +5,14 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.Button;
+import net.minecraft.client.gui.navigation.ScreenRectangle;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 import net.minecraft.util.FormattedCharSequence;
+import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraft.world.inventory.Slot;
 
 /**
  * The parts the other machine screens are drawn with (docs/features/machine-screens.md): the prospector, rocket pad,
@@ -25,7 +29,19 @@ public final class ScreenKit {
 	/** Where the title strip puts the lamp and the title, from the body's corner; panes start under it. */
 	public static final int TITLE_HEIGHT = 13;
 
+	/** The smallest GUI Minecraft's automatic scale gives (a 640 x 480 window at scale 2): every machine screen fits it. */
+	public static final int SMALLEST_GUI_WIDTH = 320;
+	public static final int SMALLEST_GUI_HEIGHT = 240;
+
 	private ScreenKit() {
+	}
+
+	/**
+	 * A machine screen that says where it draws its panel, in GUI pixels after any scaling to fit, so the screen fit test
+	 * (ScreenFitClientGameTests) can check that it fits the window at the smallest GUI.
+	 */
+	public interface Fitted {
+		ScreenRectangle panelArea();
 	}
 
 	// ------------------------------------------------------------------ bodies and panes
@@ -138,6 +154,40 @@ public final class ScreenKit {
 		g.outline(x, y, w, h, theme.frame().outline());
 	}
 
+	/** Where a menu's player inventory starts (its top slot's y), or -1 if it has none. */
+	public static int inventoryTop(AbstractContainerMenu menu) {
+		int top = Integer.MAX_VALUE;
+		for (Slot slot : menu.slots) {
+			if (slot.container instanceof Inventory) {
+				top = Math.min(top, slot.y);
+			}
+		}
+		return top == Integer.MAX_VALUE ? -1 : top;
+	}
+
+	/**
+	 * A container screen's frame from its menu: the casing over the machine's part, and the tray under the player's
+	 * inventory (or the casing over everything, if the menu has no inventory).
+	 */
+	public static void frame(GuiGraphicsExtractor g, MachineScreenThemes.Theme theme, int x, int y, int w, int h, AbstractContainerMenu menu) {
+		int inventory = inventoryTop(menu);
+		if (inventory < 0) {
+			body(g, theme, x, y, w, h);
+			return;
+		}
+		body(g, theme, x, y, w, inventory - 5);
+		tray(g, theme, x, y + inventory - 4, w, h - inventory + 4);
+	}
+
+	/** A frame in the look for every slot of the menu that is in use, at its place in the screen at (x, y). */
+	public static void slots(GuiGraphicsExtractor g, MachineScreenThemes.Theme theme, int x, int y, AbstractContainerMenu menu) {
+		for (Slot slot : menu.slots) {
+			if (slot.isActive()) {
+				MachineSkin.slot(g, theme, x + slot.x, y + slot.y);
+			}
+		}
+	}
+
 	/** The player's inventory slots, with the menu's usual top-left corner at (x, y) (8, 84 in a 166-high screen). */
 	public static void inventory(GuiGraphicsExtractor g, MachineScreenThemes.Theme theme, int x, int y) {
 		for (int row = 0; row < 3; row++) {
@@ -185,6 +235,19 @@ public final class ScreenKit {
 		}
 	}
 
+	/**
+	 * A progress arrow pointing right from (x, middle), {@code width} long: a shaft and a head, lit for its first
+	 * {@code lit} pixels, the rest a faint copy of the colour (so it shows on any glass).
+	 */
+	public static void arrow(GuiGraphicsExtractor g, int x, int middle, int width, int lit, int color) {
+		int unlit = (color & 0x00FFFFFF) | 0x40000000;
+		int head = Math.min(5, width / 4);
+		for (int column = 0; column < width; column++) {
+			int half = column < width - head ? 1 : width - column;
+			g.fill(x + column, middle - half, x + column + 1, middle + half + 1, column < lit ? color : unlit);
+		}
+	}
+
 	/** A label on the left and its value on the right of a row {@code w} wide; the label is cut short to leave room. */
 	public static void row(GuiGraphicsExtractor g, Font font, MachineScreenThemes.Theme theme, int x, int y, int w, String label, String value,
 			int color) {
@@ -195,6 +258,12 @@ public final class ScreenKit {
 
 	/** A help strip over (x, y, w, h): the look's help box with its text wrapped inside. */
 	public static void help(GuiGraphicsExtractor g, Font font, MachineScreenThemes.Theme theme, int x, int y, int w, int h, Component text) {
+		help(g, font, theme, x, y, w, h, text, theme.help());
+	}
+
+	/** A help strip with its text in {@code color} (a warning, say, in place of the usual help). */
+	public static void help(GuiGraphicsExtractor g, Font font, MachineScreenThemes.Theme theme, int x, int y, int w, int h, Component text,
+			int color) {
 		if (theme.outlined() && !"lab".equals(theme.shape())) {
 			chamfer(g, x, y, w, h, 3, theme.frame().helpBox(), theme.frame().rim());
 		} else {
@@ -206,7 +275,7 @@ public final class ScreenKit {
 			if (line + 9 > y + h - 1) {
 				break;
 			}
-			g.text(font, part, x + 5, line, theme.help(), false);
+			g.text(font, part, x + 5, line, color, false);
 			line += 9;
 		}
 	}
@@ -278,6 +347,11 @@ public final class ScreenKit {
 		return font.plainSubstrByWidth(text, Math.max(0, width - font.width("…"))) + "…";
 	}
 
+	/** How bright a colour looks, 0 to 255. */
+	static int luminance(int color) {
+		return (((color >> 16) & 0xFF) * 299 + ((color >> 8) & 0xFF) * 587 + (color & 0xFF) * 114) / 1000;
+	}
+
 	/** A colour faded towards black by {@code amount} (0 to 255). */
 	static int darken(int color, int amount) {
 		int r = Math.max(0, ((color >> 16) & 0xFF) - amount);
@@ -315,12 +389,14 @@ public final class ScreenKit {
 			int h = height;
 			boolean hover = active && (isHovered() || isFocused());
 			int face = theme.buttonFace();
+			// A lit key darkens a light face (the industrial look's green) and lightens a dark one, so its label stays clear.
+			boolean light = luminance(face) > 96;
 			if (selected) {
-				face = MachineSkin.lighten(face, 40);
+				face = light ? darken(face, 45) : MachineSkin.lighten(face, 40);
 			} else if (hover) {
-				face = MachineSkin.lighten(face, 24);
+				face = MachineSkin.lighten(face, light ? 16 : 24);
 			} else if (!active) {
-				face = darken(face, 20);
+				face = darken(face, 50);
 			}
 			if (theme.outlined() && !"lab".equals(theme.shape())) {
 				int edge = selected || hover ? theme.buttonLight() : active ? theme.buttonEdge() : theme.dim();
@@ -330,11 +406,18 @@ public final class ScreenKit {
 				g.fill(x, y, x + w, y + h, rim);
 				g.fill(x + 1, y + 1, x + w - 1, y + h - 1, face);
 				g.fill(x + 1, y + 1, x + w - 1, y + 2, "lab".equals(theme.shape()) ? MachineSkin.lighten(face, 60) : theme.buttonLight());
+				if (selected && !"lab".equals(theme.shape())) {
+					g.outline(x + 1, y + 1, w - 2, h - 2, theme.buttonLight());
+				}
 			}
 			if (selected) {
 				g.fill(x + 3, y + h - 3, x + w - 3, y + h - 2, theme.ok());
 			}
-			int color = !active ? theme.dim() : "lab".equals(theme.shape()) ? 0xFFF0F0F0 : theme.buttonIcon();
+			// A key that cannot be pressed has its label half faded; one that is lit (the state it is in) keeps it whole.
+			int color = "lab".equals(theme.shape()) ? 0xFFF0F0F0 : theme.buttonIcon();
+			if (!active && !selected) {
+				color = (color & 0x00FFFFFF) | 0x80000000;
+			}
 			String text = fit(font, getMessage().getString(), w - 4);
 			Component shown = text.equals(getMessage().getString()) ? getMessage() : Component.literal(text).setStyle(getMessage().getStyle());
 			g.text(font, shown, x + (w - font.width(text)) / 2, y + (h - 8) / 2, color, false);

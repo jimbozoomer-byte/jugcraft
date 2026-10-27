@@ -48,6 +48,18 @@ public final class JugcraftClient implements ClientModInitializer {
 	@Override
 	public void onInitializeClient() {
 		io.github.jimbozoomer.jugcraft.client.update.JugcraftUpdates.register();
+		JimtafactsClient.register();
+		JimtaMimicClient.register();
+		io.github.jimbozoomer.jugcraft.client.jimtafacts.JimtafactsWearables.register();
+		io.github.jimbozoomer.jugcraft.client.jimtafacts.DigitalStorageClient.register();
+		io.github.jimbozoomer.jugcraft.client.jimtafacts.DigitalEquipmentClient.register();
+		io.github.jimbozoomer.jugcraft.client.jimtafacts.DigitalStorageRenderer.register();
+        io.github.jimbozoomer.jugcraft.client.jimtafacts.CivilWorkshopRenderer.register();
+        io.github.jimbozoomer.jugcraft.client.jimtafacts.WorkshopLaserRenderer.register();
+        io.github.jimbozoomer.jugcraft.client.jimtafacts.IndustrialRotorRenderer.register();
+		io.github.jimbozoomer.jugcraft.client.jimtafacts.ComputerClient.register();
+		WorkshopRobotRenderer.register();
+		io.github.jimbozoomer.jugcraft.client.jimtafacts.JimtaSpellbooksClient.register();
 		AcademyAtmosphere.register();
 		MeshItemModels.register();
 		StructureItemRenderers.register();
@@ -72,6 +84,7 @@ public final class JugcraftClient implements ClientModInitializer {
 		BlockEntityRendererRegistry.register(io.github.jimbozoomer.jugcraft.nuclear.StorageTanks.HATCH_ENTITY, StorageTankHatchRenderer::new);
 		MenuScreens.register(io.github.jimbozoomer.jugcraft.machine.form.JugcraftForms.MENU, FormMachineScreen::new);
 		MenuScreens.register(io.github.jimbozoomer.jugcraft.workshop.JugcraftWorkshop.MENU, WorkshopScreen::new);
+		MenuScreens.register(io.github.jimbozoomer.jugcraft.storage.JugcraftStorage.STORAGE_CRATE_MENU, StorageCrateScreen::new);
 		WorkshopScreen.registerOverlayCompatibility();
 		MenuScreens.register(io.github.jimbozoomer.jugcraft.vehiclebay.VehicleBays.MENU, VehicleBayScreen::new);
 		BlockEntityRenderers.register(io.github.jimbozoomer.jugcraft.vehiclebay.VehicleBays.ENTITY, VehicleBayRenderer::new);
@@ -93,6 +106,7 @@ public final class JugcraftClient implements ClientModInitializer {
 		CryptLichClient.register();
 		IronDreadnoughtClient.register();
 		AlphaWerewolfClient.register();
+		PumpkinKingClient.register();
 		CydonianSentinelClient.register();
 		BlockEntityRendererRegistry.register(JugcraftMachines.MACHINE_ENTITY, WindTurbineRenderer::new);
 		BlockEntityRendererRegistry.register(JugcraftKinetics.BELT_PULLEY_ENTITY, BeltRenderer::new);
@@ -120,6 +134,9 @@ public final class JugcraftClient implements ClientModInitializer {
 		EntityRendererRegistry.register(io.github.jimbozoomer.jugcraft.raiders.JugcraftRaiders.BOMB, ThrownItemRenderer::new);
 		net.fabricmc.fabric.api.client.rendering.v1.ModelLayerRegistry.registerModelLayer(RaiderModel.LAYER, TownsfolkModel::createLayer);
 		ZeppelinClient.register();
+		AircraftClient.register();
+        io.github.jimbozoomer.jugcraft.furniture.ArtisanFurniture.openEditor = pos -> net.minecraft.client.Minecraft.getInstance().gui.setScreen(new ArtisanScreen(pos));
+        net.fabricmc.fabric.api.client.rendering.v1.BlockEntityRendererRegistry.register(io.github.jimbozoomer.jugcraft.furniture.ArtisanFurniture.ENTITY, DesignedFurnitureRenderer::new);
 		EntityRendererRegistry.register(io.github.jimbozoomer.jugcraft.walker.JugcraftWalkers.DIESEL_WALKER, DieselWalkerRenderer::new);
 		EntityRendererRegistry.register(io.github.jimbozoomer.jugcraft.walker.JugcraftWalkers.ARMOURED_WALKER, ArmouredWalkerRenderer::new);
 		EntityRendererRegistry.register(io.github.jimbozoomer.jugcraft.walker.JugcraftWalkers.HOWITZER_WALKER, HowitzerWalkerRenderer::new);
@@ -127,6 +144,14 @@ public final class JugcraftClient implements ClientModInitializer {
 		EntityRendererRegistry.register(io.github.jimbozoomer.jugcraft.landship.JugcraftLandships.LANDSHIP, LandshipRenderer::new);
 		EntityRendererRegistry.register(io.github.jimbozoomer.jugcraft.landship.JugcraftLandships.SHELL, ThrownItemRenderer::new);
 		LandshipClient.register();
+		// The trains (docs/features/trains.md): axle places in pixels, keep in step with tools/trains.py AXLES.
+		EntityRendererRegistry.register(io.github.jimbozoomer.jugcraft.train.JugcraftTrains.LOCOMOTIVE, context -> new TrainRenderer<>(context,
+				"train_locomotive", io.github.jimbozoomer.jugcraft.train.Locomotive.LENGTH, 22.0F, 8.0F, -8.0F, -22.0F));
+		EntityRendererRegistry.register(io.github.jimbozoomer.jugcraft.train.JugcraftTrains.PASSENGER_CAR, context -> new TrainRenderer<>(context,
+				"train_passenger_car", io.github.jimbozoomer.jugcraft.train.PassengerCar.LENGTH, 20.0F, 10.0F, -10.0F, -20.0F));
+		EntityRendererRegistry.register(io.github.jimbozoomer.jugcraft.train.JugcraftTrains.CARGO_WAGON, context -> new TrainRenderer<>(context,
+				"train_cargo_wagon", io.github.jimbozoomer.jugcraft.train.CargoWagon.LENGTH, 16.0F, -16.0F));
+		TrainClient.register();
 		EntityRendererRegistry.register(io.github.jimbozoomer.jugcraft.artillery.JugcraftArtillery.SIEGE_MORTAR, ArtilleryRenderers.Mortar::new);
 		EntityRendererRegistry.register(io.github.jimbozoomer.jugcraft.artillery.JugcraftArtillery.HOWITZER, ArtilleryRenderers.Howitzer::new);
 		EntityRendererRegistry.register(io.github.jimbozoomer.jugcraft.artillery.JugcraftArtillery.FLAK_GUN, ArtilleryRenderers.Flak::new);
@@ -145,6 +170,7 @@ public final class JugcraftClient implements ClientModInitializer {
 		TwoHandedInput.register();
 		ClientPlayNetworking.registerGlobalReceiver(WeaponArtPayload.TYPE, (payload, context) -> ArmsMotion.receive(payload));
 		EntityRendererRegistry.register(JugcraftWeapons.GRENADE, ThrownItemRenderer::new);
+        EntityRendererRegistry.register(io.github.jimbozoomer.jugcraft.jimtafacts.industry.IndustrialDynamite.THROWN,ThrownItemRenderer::new);
 		EntityRendererRegistry.register(io.github.jimbozoomer.jugcraft.weapons.JugcraftArms.THROWN_ARM,
 				io.github.jimbozoomer.jugcraft.client.arms.ThrownArmRenderer::new);
 		PetroFluidsClient.register();
@@ -156,11 +182,14 @@ public final class JugcraftClient implements ClientModInitializer {
 		GhostSheetLayer.register();
 		CostumeLayer.register();
 		FacePaintLayer.register();
+		RetroTraderLayer.register();
+		RetroTraderClient.register();
 		WornModelLayer.register();
 		BlockEntityRendererRegistry.register(JugcraftKinetics.HAND_CRANK_ENTITY, KineticRotorRenderer::new);
 		BlockEntityRendererRegistry.register(JugcraftKinetics.ELECTRIC_MOTOR_ENTITY, KineticRotorRenderer::new);
 		BlockEntityRendererRegistry.register(JugcraftKinetics.FLYWHEEL_ENTITY, KineticRotorRenderer::new);
 		BlockEntityRendererRegistry.register(JugcraftFluids.TANK_ENTITY, GlassTankRenderer::new);
+        BlockEntityRenderers.register(JugcraftFluids.PUMP_ENTITY,FactoryPumpRenderer::new);
 		BlockEntityRendererRegistry.register(JugcraftSolar.SOLAR_TRACKER_ENTITY, KineticRotorRenderer::new);
 		BlockEntityRendererRegistry.register(JugcraftSolar.HELIOSTAT_ENTITY, KineticRotorRenderer::new);
 		BlockEntityRendererRegistry.register(JugcraftKinetics.STEAM_ENGINE_ENTITY, KineticRotorRenderer::new);
@@ -287,6 +316,7 @@ public final class JugcraftClient implements ClientModInitializer {
 		BlockEntityRendererRegistry.register(JugcraftAgriculture.SPICE_RACK_ENTITY, SpiceRackRenderer::new);
 		ParticleProviderRegistry.getInstance().register(JugcraftAgriculture.FOG, FogParticle::provider);
 		ParticleProviderRegistry.getInstance().register(JugcraftAgriculture.SNOWPETAL, net.minecraft.client.particle.FallingLeavesParticle.CherryProvider::new);
+		ParticleProviderRegistry.getInstance().register(JugcraftAgriculture.ACADEMY_LEAF, AcademyLeafParticle::provider);
 		ParticleProviderRegistry.getInstance().register(JugcraftAgriculture.SPOOKY_SPARK, SpookySparkParticle::provider);
 		BlockEntityRendererRegistry.register(JugcraftAgriculture.SHOW_LAUNCHER_ENTITY, ShowLauncherRenderer::new);
 		EntityRendererRegistry.register(JugcraftAgriculture.SPOOKY_ROCKET, context -> new ThrownItemRenderer<>(context, 1.0F, true));
@@ -366,6 +396,25 @@ public final class JugcraftClient implements ClientModInitializer {
 		MenuScreens.register(io.github.jimbozoomer.jugcraft.town.JugcraftTown.SHOP_MENU, ShopScreen::new);
 		MenuScreens.register(io.github.jimbozoomer.jugcraft.town.JugcraftTown.ATM_MENU, AtmScreen::new);
 		MenuScreens.register(io.github.jimbozoomer.jugcraft.control.JugcraftControl.CONTROLLER_MENU, LogicControllerScreen::new);
+		MenuScreens.register(io.github.jimbozoomer.jugcraft.jimtafacts.industry.IndustrialGateParameters.TYPE, io.github.jimbozoomer.jugcraft.client.jimtafacts.GateParametersScreen::new);
+		MenuScreens.register(io.github.jimbozoomer.jugcraft.jimtafacts.industry.CompactReactor.MENU, CompactReactorScreen::new);
+		MenuScreens.register(io.github.jimbozoomer.jugcraft.jimtafacts.industry.MatterWorkshops.MENU, MatterWorkshopScreen::new);
+		MenuScreens.register(io.github.jimbozoomer.jugcraft.jimtafacts.industry.WorkshopTables.MENU, io.github.jimbozoomer.jugcraft.client.jimtafacts.WorkshopTableScreen::new);
+        MenuScreens.register(io.github.jimbozoomer.jugcraft.jimtafacts.industry.IndustrialLathe.MENU, io.github.jimbozoomer.jugcraft.client.jimtafacts.IndustrialLatheScreen::new);
+        MenuScreens.register(io.github.jimbozoomer.jugcraft.jimtafacts.industry.IndustrialContainment.MENU, io.github.jimbozoomer.jugcraft.client.jimtafacts.IndustrialContainmentScreen::new);
+        MenuScreens.register(io.github.jimbozoomer.jugcraft.jimtafacts.industry.IndustrialNuclearCharge.MENU, io.github.jimbozoomer.jugcraft.client.jimtafacts.IndustrialNuclearChargeScreen::new);
+        MenuScreens.register(io.github.jimbozoomer.jugcraft.jimtafacts.industry.IndustrialFluidServices.MENU, io.github.jimbozoomer.jugcraft.client.jimtafacts.IndustrialFluidServiceScreen::new);
+        MenuScreens.register(io.github.jimbozoomer.jugcraft.jimtafacts.industry.IndustrialTransformers.MENU, io.github.jimbozoomer.jugcraft.client.jimtafacts.IndustrialTransformerScreen::new);
+        MenuScreens.register(io.github.jimbozoomer.jugcraft.jimtafacts.industry.PersonalWorkshops.MENU, io.github.jimbozoomer.jugcraft.client.jimtafacts.PersonalWorkshopScreen::new);
+        io.github.jimbozoomer.jugcraft.client.jimtafacts.PersonalSafeRenderer.register();
+        MenuScreens.register(io.github.jimbozoomer.jugcraft.jimtafacts.industry.WorkshopEngines.MENU, io.github.jimbozoomer.jugcraft.client.jimtafacts.WorkshopEngineScreen::new);
+        io.github.jimbozoomer.jugcraft.client.jimtafacts.WorkshopEngineRenderer.register();
+        MenuScreens.register(io.github.jimbozoomer.jugcraft.jimtafacts.industry.WorkshopChute.MENU, io.github.jimbozoomer.jugcraft.client.jimtafacts.WorkshopChuteScreen::new);
+        io.github.jimbozoomer.jugcraft.client.jimtafacts.IndustrialBoatRenderer.register();
+        MenuScreens.register(io.github.jimbozoomer.jugcraft.jimtafacts.industry.IndustrialHeat.MENU, IndustrialHeatScreen::new);
+        MenuScreens.register(io.github.jimbozoomer.jugcraft.jimtafacts.industry.FactoryHeatExchanger.MENU, FactoryHeatScreen::new);
+        MenuScreens.register(io.github.jimbozoomer.jugcraft.jimtafacts.industry.FactoryPlanning.MENU, FactoryPlannerScreen::new);
+		MenuScreens.register(io.github.jimbozoomer.jugcraft.jimtafacts.industry.CivilWorkshops.MENU, CivilWorkshopScreen::new);
 		BlockEntityRenderers.register(io.github.jimbozoomer.jugcraft.control.JugcraftControl.MONITOR_ENTITY, ControlMonitorRenderer::new);
 		io.github.jimbozoomer.jugcraft.drone.GuideBooks.openScreen = book -> Minecraft.getInstance().gui.setScreen(new GuideBookScreen(book));
 		DroneTerminalBlock.openScreen = pos -> Minecraft.getInstance().gui.setScreen(new DroneTerminalScreen(pos));

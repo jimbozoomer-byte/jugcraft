@@ -1,0 +1,12 @@
+{
+  "parent": "minecraft:block/cube",
+  "textures": {
+    "down": "jugcraft:jimtafacts/magnetizer/down",
+    "up": "jugcraft:jimtafacts/magnetizer/up",
+    "north": "jugcraft:jimtafacts/magnetizer/north",
+    "south": "jugcraft:jimtafacts/magnetizer/south",
+    "west": "jugcraft:jimtafacts/magnetizer/west",
+    "east": "jugcraft:jimtafacts/magnetizer/east",
+    "particle": "jugcraft:jimtafacts/magnetizer/north"
+  }
+}

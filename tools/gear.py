@@ -418,6 +418,10 @@ def write_all(write, assets, data, lang, condition):
     import concordance_ember
     for item, piece in concordance_ember.ARMOR.items():
         by_tag[ITEM_TAGS[piece]].append(f"{MOD}:{item}")
+    # Rime's travel kit (tools/concordance_rime_kit.py ARMOR): the three water sets, armour of their slots as well.
+    import concordance_rime_kit
+    for item, piece in concordance_rime_kit.ARMOR.items():
+        by_tag[ITEM_TAGS[piece]].append(f"{MOD}:{item}")
     by_tag["swords"].append(f"{MOD}:power_katana")
     # Fall addition 23's silver dagger is a sword too. It is added here, not by tools/werewolf_data.py's tags, because
     # the shared tag writer replaces a whole file and would drop every sword above.
@@ -442,8 +446,8 @@ def write_all(write, assets, data, lang, condition):
     for tag, values in concordance_dark_matter.item_tags().items():
         by_tag.setdefault(tag, []).extend(values)
     import concordance_ee_equipment, concordance_ee_artifacts
-    import nouveau_content
-    for module in (concordance_ee_equipment, concordance_ee_artifacts, nouveau_content):
+    import nouveau_content, jimtafacts_gear
+    for module in (concordance_ee_equipment, concordance_ee_artifacts, nouveau_content, jimtafacts_gear):
         for tag, values in module.item_tags().items():
             by_tag.setdefault(tag, []).extend(values)
     for tag, values in by_tag.items():
