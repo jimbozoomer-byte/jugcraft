@@ -61,7 +61,6 @@ public final class HerobrineMarkPlans {
 	public static final List<String> BROUGHT_SOMEONE = List.of("YOU", "BROUGHT", "SOMEONE", "");
 
 	/** The common ores tag, which covers modded ores too: a mark never removes one. */
-	private static final TagKey<Block> ORES = TagKey.create(Registries.BLOCK, Identifier.fromNamespaceAndPath("c", "ores"));
 	/** Plain ground cover a built mark may stand in (never flowers or tall plants, which a player may have set). */
 	private static final Set<Block> GROUND_COVER = Set.of(Blocks.SHORT_GRASS, Blocks.FERN, Blocks.DEAD_BUSH, Blocks.SNOW);
 	private static final Set<Block> NATURAL = Set.of(Blocks.GRAVEL, Blocks.CLAY, Blocks.SNOW_BLOCK, Blocks.ICE, Blocks.PACKED_ICE,
