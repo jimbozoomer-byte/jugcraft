@@ -12,6 +12,9 @@ What the graph leaves to things at hand (specimens, stations, offerings, the dev
 availability(): every specimen tag holds something craftable or renewable, every station, offering and device can be
 made from obtainable things (the generated recipes, recursively), and every vanilla item a required step needs is in
 VANILLA_SOURCES with how it is obtained and, for finite world materials, a recovery route.
+
+Since the garden cohort (GC-03, GB26) the garden practice's distinct is honoured as distinct shipped garden spirits
+(GARDEN_PRACTICE); audit() expects what it masters to stay out of reach until enough ship.
 """
 
 MOD = "jugcraft"
@@ -82,6 +85,10 @@ PRACTICES = {
     # Concordance Chunk D, D-03 (D-S12, critique 11): a pact's first obligation, a sky observation while it holds (recorded
     # by the pact alone, D-05). Its gate ships with Stolas's Regard; D-04 adds the perch to its graph (graph()).
     "pact_service": ("spiritbinders", "stolas_regard", ["observatory"], ["night", "open_sky"]),
+    # The garden cohort, GC-03: a garden pact's first obligation, an act by hand inside its area while it is active (recorded
+    # by spirits/PactObligations alone). Its gate ships with The Garden's Regard; graph() gives it one way for each garden
+    # spirit that ships (its perch, a bed and its compact), none while none does.
+    "garden_pact_service": ("spiritbinders", "garden_regard", ["pact_perch", "verdant_bed"], []),
 }
 
 # Milestones features record (roadmap step 25), each with what it needs (its gate: research, and a stage reached first)
@@ -105,6 +112,9 @@ PRODUCERS = {
     rid("adept_wand"): (f"ritual:{rid('adept_attunement')}", "the Adept's Attunement ritual transforms an Initiate's Wand"),
     rid("rooted_thallite_foundation"): (f"ritual:{rid('root_and_rivet')}", "the Root and Rivet ritual roots a Thallite plate"),
     rid("dreamglass"): (f"practice:{rid('dream')}", "dream wisps caught in a dream"),
+    # The garden cohort, GC-03: what a ripe organism crop's harvest leaves beside its produce (OrganismCropBlock's drops,
+    # whoever takes it); The Garden's Regard's specimens hold it.
+    rid("verdant_chaff"): (f"practice:{rid('cultivation')}", "a ripe organism crop's harvest leaves it beside its produce"),
 }
 
 # Where Ley Charge comes from (rituals draw it from their pylons; a pylon is filled by pouring a Kindled Lantern's
@@ -295,6 +305,56 @@ VANILLA_TAGS = {
 
 RECIPE_TYPES = ("minecraft:crafting_shaped", "minecraft:crafting_shapeless", "minecraft:smelting", "minecraft:blasting",
                 "minecraft:smoking", "minecraft:campfire_cooking", "minecraft:stonecutting", "minecraft:smithing_transform")
+
+# The garden cohort, GC-03 (GB26): The Garden's Regard is mastered by its practice kept with three different garden spirits
+# (one evidence key a spirit). graph() honours a practice rule's distinct for this practice alone: it needs that many shipped
+# garden pact definitions (garden_spirits), each its own way to the practice, and audit() expects what it masters to stay out
+# of reach (garden_unreached) until they ship. Every other practice reads as before (Verdant Husbandry's cultivation, distinct
+# 4, among them). Java's ProgressionGraph reads every practice through its gate alone, this one too.
+GARDEN_PRACTICE = "garden_pact_service"
+
+
+def garden_spirits(at_hand):
+    """The garden pact definitions that ship, by name: data/jugcraft/concordance/pact/*.json whose work records a garden first
+    obligation (tools/concordance_garden_pacts.py OBLIGATIONS). None without things at hand."""
+    import concordance_garden_pacts as garden
+    pacts = (at_hand or {}).get("pacts", {})
+    return {name: pact for name, pact in sorted(pacts.items()) if pact.get("service", {}).get("work") in garden.OBLIGATIONS}
+
+
+def garden_unreached(research, at_hand):
+    """GB26: what too few shipped garden spirits leave out of reach, which audit() expects: the garden practice while none
+    ships, and each research state whose every rule is the garden practice with more distinct spirits than ship (with the
+    entry's states after it). Nothing without things at hand (the graph then reads every practice through its gate alone,
+    as Java's does)."""
+    if at_hand is None:
+        return set()
+    shipped = len(garden_spirits(at_hand))
+    out = set() if shipped else {f"practice:{rid(GARDEN_PRACTICE)}"}
+    for key, info in research.items():
+        blocked = False
+        for state in RESEARCH_STATES:
+            if state not in info["states"]:
+                continue
+            rules = _rules(info["states"][state])
+            blocked = blocked or (bool(rules) and all(rule.get("type") == "practice" and rule.get("activity") == rid(GARDEN_PRACTICE)
+                                                      and rule.get("distinct", 1) > shipped for rule in rules))
+            if blocked:
+                out.add(research_node(rid(key), state))
+    return out
+
+
+def _garden_distinct(nodes, stage, distinct, at_hand):
+    """GB26: the garden practice kept with {distinct} different garden spirits: the practice, and {distinct} of the shipped
+    garden spirits' ways to it (pact:<spirit>, graph()'s practice branch)."""
+    if at_hand is None:
+        return f"practice:{rid(GARDEN_PRACTICE)}"
+    key = f"practice:{rid(GARDEN_PRACTICE)}*{distinct}"
+    if key not in nodes:
+        spirits = garden_spirits(at_hand)
+        nodes[key] = node(stage, [f"practice:{rid(GARDEN_PRACTICE)}"] + ([] if spirits else [f"missing:{rid('garden_pact')}"]),
+                          [[f"pact:{rid(name)}"] for name in spirits], kind="distinct", at_least=distinct)
+    return key
 
 
 def stage_json(info):
@@ -531,7 +591,10 @@ def graph(research, invocations, rituals, at_hand=None, problems=None):
                 elif kind == "invoke":
                     alternatives.append([f"invocation:{rule['invocation']}"])
                 elif kind == "practice":
-                    alternatives.append([f"practice:{rule['activity']}"])
+                    if rule["activity"] == rid(GARDEN_PRACTICE) and rule.get("distinct", 1) > 1:
+                        alternatives.append([_garden_distinct(nodes, info["stage"], rule["distinct"], at_hand)])
+                    else:
+                        alternatives.append([f"practice:{rule['activity']}"])
                 elif kind == "notes":
                     alternatives.append(["social:notes"])
             nodes[research_node(entry, state)] = node(info["stage"], needs, alternatives, kind="research")
@@ -586,6 +649,16 @@ def graph(research, invocations, rituals, at_hand=None, problems=None):
                 if compact.get("resonance", 0) > 0:
                     group.append(items.resonance())
                 alternatives = [group] if stolas else [[f"missing:{rid('stolas')}"]]
+            elif key == GARDEN_PRACTICE:
+                # The garden cohort, GC-03: kept only by a garden pact, sealed at a pact perch beside the holder's beds with its
+                # compact (data/jugcraft/concordance/pact/<spirit>.json): one way for each that ships (pact:<spirit>, which
+                # _garden_distinct counts), none while none does.
+                spirits = garden_spirits(at_hand)
+                for name, pact in spirits.items():
+                    nodes[f"pact:{rid(name)}"] = node("", [items.item(rid("pact_perch")), items.item(rid("verdant_bed"))]
+                                                      + [items.item(cost["item"]) for cost in pact.get("compact", {}).get("items", [])],
+                                                      kind="pact")
+                alternatives = [[f"pact:{rid(name)}"] for name in spirits] or [[f"missing:{rid('garden_pact')}"]]
             for encounter in encounters:
                 nodes.setdefault(f"encounter:{encounter}", node("", kind="encounter"))
                 needs.append(f"encounter:{encounter}")
@@ -764,10 +837,14 @@ def audit(research, invocations, rituals, at_hand=None):
         if info["stage"] not in STAGES:
             problems.append(f"research {key}: its stage {info['stage']} is not a defined stage")
     alone = reachable(nodes, research)
+    expected = garden_unreached(research, at_hand)
     for key, info in nodes.items():
         if info["kind"] in ("research", "invocation", "practice", "rank", "project", "commission") and key not in alone \
-                and not info["social"]:
+                and not info["social"] and key not in expected:
             problems.append(f"{key} cannot be reached by one player alone from a fresh world")
+    for key in sorted(expected):
+        if key in alone:
+            problems.append(f"{key} is reached with fewer garden spirits shipped than its rule counts (GB26)")
     for stage in STAGES:
         if f"stage:{stage}" not in alone:
             problems.append(f"stage {stage} cannot be reached by one player alone from a fresh world")

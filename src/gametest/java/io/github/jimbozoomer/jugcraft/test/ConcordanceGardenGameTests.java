@@ -8,7 +8,9 @@ import io.github.jimbozoomer.jugcraft.chemistry.FertilizerItem;
 import io.github.jimbozoomer.jugcraft.compat.jade.ConcordanceDataProvider;
 import io.github.jimbozoomer.jugcraft.concordance.Alchemy;
 import io.github.jimbozoomer.jugcraft.concordance.Authority;
+import io.github.jimbozoomer.jugcraft.concordance.ConcordanceData;
 import io.github.jimbozoomer.jugcraft.concordance.ConcordanceProgress;
+import io.github.jimbozoomer.jugcraft.concordance.Examination;
 import io.github.jimbozoomer.jugcraft.concordance.JugcraftConcordance;
 import io.github.jimbozoomer.jugcraft.concordance.LeyPylonBlockEntity;
 import io.github.jimbozoomer.jugcraft.concordance.RateGate;
@@ -35,7 +37,17 @@ import io.github.jimbozoomer.jugcraft.concordance.garden.OrganismCropBlock;
 import io.github.jimbozoomer.jugcraft.concordance.garden.VerdantBedBlock;
 import io.github.jimbozoomer.jugcraft.concordance.garden.VerdantBedBlockEntity;
 import io.github.jimbozoomer.jugcraft.concordance.garden.VerdantHeartBlockEntity;
+import io.github.jimbozoomer.jugcraft.concordance.rules.Definitions;
+import io.github.jimbozoomer.jugcraft.concordance.rules.Evidence;
+import io.github.jimbozoomer.jugcraft.concordance.rules.EvidenceRule;
+import io.github.jimbozoomer.jugcraft.concordance.rules.Knowledge;
+import io.github.jimbozoomer.jugcraft.concordance.rules.ResearchEngine;
 import io.github.jimbozoomer.jugcraft.concordance.rules.ResearchState;
+import io.github.jimbozoomer.jugcraft.concordance.spirits.GardenPacts;
+import io.github.jimbozoomer.jugcraft.concordance.spirits.GardenReach;
+import io.github.jimbozoomer.jugcraft.concordance.spirits.StolasRegard;
+import io.github.jimbozoomer.jugcraft.concordance.spirits.Workers;
+import io.github.jimbozoomer.jugcraft.concordance.worker.WorkerParser;
 import io.github.jimbozoomer.jugcraft.config.JugcraftConfig;
 import io.github.jimbozoomer.jugcraft.energy.EnergyStorage;
 import io.github.jimbozoomer.jugcraft.energy.SimpleEnergyStorage;
@@ -45,6 +57,7 @@ import io.github.jimbozoomer.jugcraft.machine.MachineBlock;
 import io.github.jimbozoomer.jugcraft.machine.MachineKind;
 import io.github.jimbozoomer.jugcraft.weapons.ArmItem;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.Set;
@@ -54,18 +67,22 @@ import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.gametest.framework.GameTestHelper;
+import net.minecraft.locale.Language;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.ProblemReporter;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.LightLayer;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.storage.TagValueInput;
 import net.minecraft.world.phys.BlockHitResult;
@@ -141,7 +158,7 @@ public class ConcordanceGardenGameTests {
 	 * {@code player} uses {@code held}, put in the main hand, on the top of the block at {@code at} by the server's own path
 	 * (ServerPlayerGameMode.useItemOn), plainly or sneaking, its rate limit forgotten first.
 	 */
-	private static InteractionResult handUse(GameTestHelper helper, ServerPlayer player, BlockPos at, ItemStack held, boolean sneaking) {
+	static InteractionResult handUse(GameTestHelper helper, ServerPlayer player, BlockPos at, ItemStack held, boolean sneaking) {
 		RateGate.forget(player.getUUID());
 		player.setItemInHand(InteractionHand.MAIN_HAND, held);
 		player.setShiftKeyDown(sneaking);
@@ -1788,5 +1805,279 @@ public class ConcordanceGardenGameTests {
 		helper.assertTrue(bed.graft().equals("jugcraft:gone") && bed.niche(petal).equals(petal.niche()) && Garden.catalog().graftLines(bed.graft()).isEmpty(),
 				"A graft the rules no longer know is kept by another plant's growth, and read by nothing");
 		helper.succeed();
+	}
+
+	// ---------------------------------------------------------------- the garden cohort, GC-03: the groundwork garden pacts share
+
+	/** An awake, wet bed at {@code at} kept by {@code keeper} (not KEEPER: a test of its own index). */
+	private static VerdantBedBlockEntity bedOf(GameTestHelper helper, BlockPos at, UUID keeper) {
+		helper.setBlock(at, Garden.VERDANT_BED.defaultBlockState().setValue(VerdantBedBlock.MOISTURE, VerdantBedBlock.WET));
+		VerdantBedBlockEntity bed = (VerdantBedBlockEntity) level(helper).getBlockEntity(helper.absolutePos(at));
+		bed.awaken(keeper);
+		return bed;
+	}
+
+	/** Whether no chunk the largest garden area round {@code centre} (WorkerParser.MAX_RADIUS) overlaps is held by the server. */
+	private static boolean noneLoaded(ServerLevel level, BlockPos centre) {
+		for (int cx = (centre.getX() - WorkerParser.MAX_RADIUS) >> 4; cx <= (centre.getX() + WorkerParser.MAX_RADIUS) >> 4; cx++) {
+			for (int cz = (centre.getZ() - WorkerParser.MAX_RADIUS) >> 4; cz <= (centre.getZ() + WorkerParser.MAX_RADIUS) >> 4; cz++) {
+				if (level.getChunkSource().hasChunk(cx, cz)) {
+					return false;
+				}
+			}
+		}
+		return true;
+	}
+
+	private static List<BlockPos> positions(List<VerdantBedBlockEntity> beds) {
+		return beds.stream().map(BlockEntity::getBlockPos).toList();
+	}
+
+	/**
+	 * The garden cohort, GC-03 (GC-P2, GB12): the bed index never loads a chunk. Far from anything loaded, a refresh finds
+	 * nothing, examines nothing and leaves every chunk of the area unloaded (its radius clamped to WorkerParser.MAX_RADIUS, so
+	 * at most 9 chunks are asked); near, it finds the bed its keeper keeps.
+	 */
+	@GameTest(maxTicks = 20)
+	public void theGardenReachNeverLoadsAChunk(GameTestHelper helper) {
+		ServerLevel level = level(helper);
+		BlockPos far = helper.absolutePos(new BlockPos(1, 1, 1)).offset(200_000, 0, 200_000);
+		helper.assertTrue(noneLoaded(level, far), "The far area is not loaded");
+		GardenReach reach = new GardenReach(far, WorkerParser.MAX_RADIUS + 4, bed -> true);
+		helper.assertTrue(reach.beds(level, level.getGameTime()).isEmpty() && reach.refreshes() == 1 && reach.scanned() == 0,
+				"Nothing loaded, nothing found, nothing examined (the radius clamped to 12, so 9 chunks at most): " + reach.scanned());
+		helper.assertTrue(noneLoaded(level, far), "and none of its chunks was loaded");
+		UUID own = new UUID(0x6C03L, 1L);
+		VerdantBedBlockEntity bed = bedOf(helper, new BlockPos(1, 1, 1), own);
+		GardenReach near = new GardenReach(helper.absolutePos(new BlockPos(2, 2, 2)), 8, found -> own.equals(found.keeper()));
+		helper.assertTrue(near.beds(level, level.getGameTime()).equals(List.of(bed)), "Near, it finds the bed its keeper keeps");
+		helper.succeed();
+	}
+
+	/**
+	 * The garden cohort, GC-03 (GC-P2, GC-P32): the index keeps the 64 nearest awake beds whose keeper it indexes, nearest
+	 * first (distance, then y, x and z); a dormant bed and a stranger's are never indexed. A bed broken since is gone at the
+	 * next read, with nothing scanned again; a new one waits for the refresh REFRESH_TICKS on; a clock run back, or forgetting
+	 * it, refreshes it.
+	 */
+	@GameTest(maxTicks = 20)
+	public void theGardenReachIsCappedAndCached(GameTestHelper helper) {
+		ServerLevel level = level(helper);
+		UUID keeper = new UUID(0x6C03L, 2L);
+		BlockPos centre = helper.absolutePos(new BlockPos(4, 2, 4));
+		List<BlockPos> placed = new ArrayList<>();
+		for (int x = 0; x < 8; x++) {
+			for (int z = 0; z < 8; z++) {
+				bedOf(helper, new BlockPos(x, 1, z), keeper);
+				placed.add(helper.absolutePos(new BlockPos(x, 1, z)));
+			}
+		}
+		for (int x = 0; x < 3; x++) {
+			for (int z = 0; z < 2; z++) {
+				bedOf(helper, new BlockPos(x, 3, z), keeper);
+				placed.add(helper.absolutePos(new BlockPos(x, 3, z)));
+			}
+		}
+		helper.setBlock(new BlockPos(5, 3, 5), Garden.VERDANT_BED.defaultBlockState());
+		bedOf(helper, new BlockPos(6, 3, 6), new UUID(0x6C03L, 3L));
+		Comparator<BlockPos> nearest = Comparator.<BlockPos>comparingDouble(pos -> pos.distSqr(centre)).thenComparingInt(BlockPos::getY)
+				.thenComparingInt(BlockPos::getX).thenComparingInt(BlockPos::getZ);
+		List<BlockPos> expected = placed.stream().sorted(nearest).limit(GardenReach.MAX_BEDS).toList();
+		GardenReach reach = new GardenReach(centre, 8, bed -> keeper.equals(bed.keeper()));
+		long now = level.getGameTime();
+		helper.assertTrue(positions(reach.beds(level, now)).equals(expected) && reach.refreshes() == 1 && reach.scanned() >= 72,
+				"64 of 70, nearest first; the dormant bed and the stranger's never indexed: " + reach.scanned());
+		helper.setBlock(helper.relativePos(expected.getFirst()), Blocks.AIR);
+		helper.assertTrue(positions(reach.beds(level, now + 1)).equals(expected.subList(1, GardenReach.MAX_BEDS)) && reach.refreshes() == 1,
+				"The nearest broken, it is gone at once, and nothing is scanned again");
+		bedOf(helper, new BlockPos(4, 2, 4), keeper);
+		helper.assertTrue(!positions(reach.beds(level, now + GardenReach.REFRESH_TICKS - 1)).contains(centre) && reach.refreshes() == 1,
+				"A new bed waits for the next refresh");
+		List<BlockPos> refreshed = positions(reach.beds(level, now + GardenReach.REFRESH_TICKS));
+		helper.assertTrue(refreshed.getFirst().equals(centre) && refreshed.size() == GardenReach.MAX_BEDS && reach.refreshes() == 2,
+				"and joins it at the refresh, nearest first: " + refreshed.size());
+		reach.beds(level, now);
+		helper.assertValueEqual(reach.refreshes(), 3, "A clock run back refreshes it");
+		reach.forget();
+		reach.beds(level, now);
+		helper.assertValueEqual(reach.refreshes(), 4, "and so does forgetting it");
+		helper.succeed();
+	}
+
+	/**
+	 * The garden cohort, GC-03 (GB11): a cached habitat never takes a sample. Without one it reads nothing; with a fresh one it
+	 * reads the same habitat as habitat() does, the bed's own nutrients read now; forgotten, it reads nothing again. The level's
+	 * allowance (Garden.budget) is never spent by it.
+	 */
+	@GameTest(maxTicks = 60)
+	public void aCachedHabitatNeverSamples(GameTestHelper helper) {
+		BlockPos at = new BlockPos(1, 1, 1);
+		VerdantBedBlockEntity bed = bed(helper, at, 10);
+		crop(helper, at.above(), Garden.SUNPETAL_CROP, 1);
+		helper.runAtTickTime(5, () -> {
+			ServerLevel level = level(helper);
+			long now = level.getGameTime();
+			// Forgotten here, not at the start: a random tick before now may have read it.
+			bed.forgetSample();
+			int used = Garden.budget(level).used(now);
+			helper.assertTrue(bed.cachedHabitat(level) == null && Garden.budget(level).used(now) == used,
+					"Without a sample it reads nothing and takes none");
+		});
+		prefetch(helper, bed);
+		helper.runAtTickTime(40, () -> {
+			ServerLevel level = level(helper);
+			long now = level.getGameTime();
+			int used = Garden.budget(level).used(now);
+			Habitat cached = bed.cachedHabitat(level);
+			helper.assertTrue(cached != null && cached.equals(bed.cachedHabitat(level)) && Garden.budget(level).used(now) == used,
+					"With a sample it reads the habitat, and takes none: " + cached);
+			helper.assertTrue(cached.equals(bed.habitat(level)) && Garden.budget(level).used(now) == used,
+					"The sample fresh, habitat reads the same and takes none either");
+			bed.setNutrients(12);
+			helper.assertTrue(bed.cachedHabitat(level).nutrients() == 12 && Garden.budget(level).used(now) == used,
+					"The bed's own nutrients are read now");
+			bed.forgetSample();
+			helper.assertTrue(bed.cachedHabitat(level) == null && Garden.budget(level).used(now) == used,
+					"Its sample forgotten, it reads nothing and takes none");
+			helper.succeed();
+		});
+	}
+
+	/**
+	 * The garden cohort, GC-03 (GC-P39): a bed says whether a tending would ease a strain without changing it. Not without a
+	 * strain; strained, yes, and asking changes nothing; within TEND_TICKS of its last tending, whoever tended it, no; after
+	 * it, or with the clock run back, yes. A harvest it saw counts as growth would count it, and asking counts nothing. A
+	 * dormant bed, and any bed while the Concordance is switched off, may not be tended.
+	 */
+	@GameTest(maxTicks = 20)
+	public void aBedSaysWhetherItMayBeTendedWithoutChangingIt(GameTestHelper helper) {
+		ServerLevel level = level(helper);
+		long now = level.getGameTime() + 10_000L;
+		VerdantBedBlockEntity bed = bed(helper, new BlockPos(1, 1, 1), 10);
+		bed.setStrain(0);
+		helper.assertTrue(!bed.mayTendAt(now) && !bed.tend(now), "Without a strain there is nothing to tend");
+		bed.setStrain(2);
+		helper.assertTrue(bed.mayTendAt(now) && bed.strain() == 2, "Strained, it may be tended, and asking changed nothing");
+		helper.assertTrue(bed.tend(now) && bed.strain() == 1, "Tended, one strain eases");
+		helper.assertTrue(!bed.mayTendAt(now + Garden.TEND_TICKS - 1) && !bed.tend(now + Garden.TEND_TICKS - 1) && bed.strain() == 1,
+				"Within its window it may not be tended again, whoever asks");
+		helper.assertTrue(bed.mayTendAt(now + Garden.TEND_TICKS) && bed.strain() == 1, "After it, it may");
+		helper.assertTrue(bed.mayTendAt(now - 1), "A clock run back opens the window again, as tend reads it");
+		BlockPos ripeAt = new BlockPos(3, 1, 1);
+		VerdantBedBlockEntity ripe = bed(helper, ripeAt, 10);
+		ripen(helper, ripeAt.above(), ripe);
+		level.destroyBlock(helper.absolutePos(ripeAt.above()), false);
+		helper.assertTrue(ripe.strain() == 0 && ripe.ripened() && ripe.mayTendAt(now) && ripe.strain() == 0 && ripe.ripened(),
+				"A harvest seen counts, and asking counted nothing");
+		helper.assertTrue(ripe.tend(now) && ripe.strain() == 0 && !ripe.ripened(), "Tending counts the harvest, then eases it");
+		BlockPos dormantAt = new BlockPos(5, 1, 1);
+		helper.setBlock(dormantAt, Garden.VERDANT_BED.defaultBlockState());
+		VerdantBedBlockEntity dormant = entity(helper, dormantAt);
+		dormant.setStrain(2);
+		helper.assertTrue(!dormant.awake() && !dormant.mayTendAt(now) && dormant.strain() == 2, "A dormant bed may not be tended");
+		boolean on = JugcraftConfig.isFeatureEnabled(JugcraftConcordance.FEATURE);
+		JugcraftConfig.setFeatureEnabled(JugcraftConcordance.FEATURE, false);
+		try {
+			bed.setStrain(2);
+			helper.assertTrue(!bed.mayTendAt(now + 2L * Garden.TEND_TICKS), "Switched off, no bed may be tended");
+		} finally {
+			JugcraftConfig.setFeatureEnabled(JugcraftConcordance.FEATURE, on);
+		}
+		helper.succeed();
+	}
+
+	/**
+	 * The garden cohort, GC-03 (GC-P35): The Garden's Regard's specimens, the four organism crops' produce and Verdant Chaff,
+	 * are examinable. Not before Verdant Husbandry is understood; then a Sunpetal begins it and its codex page opens, and another
+	 * specimen teaches nothing more. A feather adds nothing to it, nor a Sunpetal to Stolas's Regard. The examine line and the
+	 * tooltip are the generator's words.
+	 */
+	@GameTest(maxTicks = 20)
+	public void theGardensRegardSpecimensSayWhatTheyTeach(GameTestHelper helper) {
+		helper.assertTrue(Language.getInstance().has("message.jugcraft.concordance.examine.garden_regard")
+				&& Language.getInstance().has("tooltip.jugcraft.concordance.garden_regard_specimen"),
+				"the server reads the mod's words (Fabric's server translations)");
+		ServerLevel level = level(helper);
+		for (Item item : List.of(Garden.SUNPETAL, Garden.DEWMOSS, Garden.GLOAMCAP, Garden.MENDVETCH, Garden.VERDANT_CHAFF)) {
+			ItemStack stack = new ItemStack(item);
+			helper.assertTrue(stack.is(GardenPacts.SPECIMENS) && stack.is(JugcraftConcordance.SPECIMENS), item + " is a garden specimen, and examinable");
+		}
+		ServerPlayer player = TestPlayers.survivor(helper);
+		ConcordanceProgress.grant(player, "jugcraft:first_light", ResearchState.UNDERSTOOD);
+		ConcordanceProgress.grant(player, Workers.RESEARCH, ResearchState.UNDERSTOOD);
+		Examination.forget(player.getUUID());
+		Examination.examine(player, level, new ItemStack(Garden.SUNPETAL));
+		Knowledge.Progress early = ConcordanceProgress.knowledge(player).progress(GardenPacts.RESEARCH);
+		helper.assertTrue(early.state() == ResearchState.NONE && early.evidence().isEmpty(), "Not before Verdant Husbandry: " + early);
+		ConcordanceProgress.grant(player, Garden.RESEARCH, ResearchState.UNDERSTOOD);
+		Examination.forget(player.getUUID());
+		ResearchEngine.Result begun = Examination.examine(player, level, new ItemStack(Garden.SUNPETAL));
+		helper.assertTrue(begun != null && begun.transitions().contains(new ResearchEngine.Transition(GardenPacts.RESEARCH, ResearchState.NONE,
+				ResearchState.ENCOUNTERED)) && ConcordanceProgress.knowledge(player).state(GardenPacts.RESEARCH) == ResearchState.ENCOUNTERED,
+				"A Sunpetal examined begins it: " + (begun == null ? "refused" : begun.transitions()));
+		helper.assertTrue(ConcordanceWorkerGameTests.earned(player, ConcordanceProgress.advancementFor(GardenPacts.RESEARCH, ResearchState.ENCOUNTERED)),
+				"and its codex page opens");
+		Examination.forget(player.getUUID());
+		ResearchEngine.Result again = Examination.examine(player, level, new ItemStack(Garden.VERDANT_CHAFF));
+		helper.assertTrue(again != null && again.transitions().isEmpty() && !again.recorded()
+				&& !ConcordanceProgress.knowledge(player).progress(GardenPacts.RESEARCH).evidence().containsKey("examine:jugcraft:verdant_chaff"),
+				"Examining another specimen teaches nothing more");
+		Examination.forget(player.getUUID());
+		Examination.examine(player, level, new ItemStack(Items.FEATHER));
+		helper.assertTrue(ConcordanceProgress.knowledge(player).progress(GardenPacts.RESEARCH).evidence().keySet().stream()
+				.noneMatch(key -> key.contains("feather")), "A feather adds nothing to The Garden's Regard");
+		helper.assertTrue(ConcordanceProgress.knowledge(player).progress(StolasRegard.RESEARCH).evidence().keySet().stream()
+				.noneMatch(key -> key.contains("sunpetal") || key.contains("verdant_chaff")), "nor a garden specimen to Stolas's Regard");
+		helper.assertValueEqual(Component.translatable("message.jugcraft.concordance.examine.garden_regard", "Sunpetal").getString(),
+				"You look at the Sunpetal as the garden's spirits would: for what its bed gave it", "The examine line");
+		helper.assertValueEqual(Component.translatable("tooltip.jugcraft.concordance.garden_regard_specimen").getString(),
+				"The garden's spirits regard this: sneak and use it in the air to examine it", "The tooltip");
+		helper.succeed();
+	}
+
+	/**
+	 * The garden cohort, GC-03 (GC-P6): The Garden's Regard advances by the player's own hands and a bound worker. A ripe
+	 * Sunpetal harvested by hand is kept for a later state; examining a Sunpetal then begins it and observes it at once; a bound
+	 * familiar's mending understands it. No state takes notes, and nothing yet masters it.
+	 */
+	@GameTest(maxTicks = 40)
+	public void theGardensRegardAdvancesByHandAndByAWorker(GameTestHelper helper) {
+		BlockPos at = new BlockPos(1, 1, 1);
+		BlockPos cropAt = at.above();
+		ServerPlayer player = TestPlayers.survivor(helper);
+		ConcordanceProgress.grant(player, "jugcraft:first_light", ResearchState.UNDERSTOOD);
+		ConcordanceProgress.grant(player, Workers.RESEARCH, ResearchState.UNDERSTOOD);
+		ConcordanceProgress.grant(player, Garden.RESEARCH, ResearchState.UNDERSTOOD);
+		VerdantBedBlockEntity bed = bedOf(helper, at, player.getUUID());
+		bed.setNutrients(10);
+		crop(helper, cropAt, Garden.SUNPETAL_CROP, 1);
+		helper.setBlock(cropAt.south(), Blocks.GLOWSTONE);
+		prefetch(helper, bed);
+		helper.runAtTickTime(35, () -> {
+			ServerLevel level = level(helper);
+			ripen(helper, cropAt, bed);
+			helper.assertTrue(handUse(helper, player, cropAt, ItemStack.EMPTY, false).consumesAction() && age(helper, cropAt) == 1,
+					"The ripe Sunpetal is harvested by hand");
+			Knowledge.Progress kept = ConcordanceProgress.knowledge(player).progress(GardenPacts.RESEARCH);
+			helper.assertTrue(kept.state() == ResearchState.NONE && kept.evidence().containsKey("practice:" + Garden.ACTIVITY + ":jugcraft:sunpetal"),
+					"The harvest is kept for a later state: " + kept);
+			Examination.forget(player.getUUID());
+			ResearchEngine.Result result = Examination.examine(player, level, new ItemStack(Garden.SUNPETAL));
+			helper.assertTrue(result != null && result.transitions().equals(List.of(
+					new ResearchEngine.Transition(GardenPacts.RESEARCH, ResearchState.NONE, ResearchState.ENCOUNTERED),
+					new ResearchEngine.Transition(GardenPacts.RESEARCH, ResearchState.ENCOUNTERED, ResearchState.OBSERVED))),
+					"A Sunpetal examined begins it, and the harvest already held observes it: " + (result == null ? "refused" : result.transitions()));
+			ConcordanceProgress.record(player, new Evidence.Practiced(Workers.ACTIVITY, "familiar"));
+			helper.assertTrue(ConcordanceProgress.knowledge(player).state(GardenPacts.RESEARCH) == ResearchState.UNDERSTOOD
+					&& ConcordanceWorkerGameTests.earned(player, ConcordanceProgress.advancementFor(GardenPacts.RESEARCH, ResearchState.UNDERSTOOD)),
+					"A bound familiar's mending understands it, and its codex page opens");
+			Definitions.Research regard = ConcordanceData.rules().research(GardenPacts.RESEARCH);
+			helper.assertTrue(regard != null && regard.states().values().stream().flatMap(List::stream).noneMatch(rule -> rule.kind() == EvidenceRule.Kind.NOTES),
+					"Research notes never stand in for its evidence");
+			Knowledge.Progress after = ConcordanceProgress.knowledge(player).progress(GardenPacts.RESEARCH);
+			helper.assertTrue(after.state() != ResearchState.MASTERED && after.evidence().keySet().stream().noneMatch(key -> key.startsWith("practice:" + GardenPacts.ACTIVITY)),
+					"Nothing masters it yet: no garden pact's obligation was kept");
+			helper.succeed();
+		});
 	}
 }

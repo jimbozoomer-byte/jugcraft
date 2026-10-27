@@ -1,0 +1,140 @@
+package io.github.jimbozoomer.jugcraft.concordance.spirits;
+
+import io.github.jimbozoomer.jugcraft.concordance.courier.Couriers;
+import io.github.jimbozoomer.jugcraft.concordance.garden.VerdantBedBlockEntity;
+import io.github.jimbozoomer.jugcraft.concordance.resource.BoundWill;
+import io.github.jimbozoomer.jugcraft.concordance.worker.WorkerParser;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
+import java.util.PriorityQueue;
+import java.util.function.Predicate;
+import net.minecraft.core.BlockPos;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.chunk.LevelChunk;
+
+/**
+ * Concordance garden cohort, GC-03 (GC-P2, GB12): the bed index a garden spirit takes its targets from, one for each
+ * presence (its service memory, PactSpiritEntity.serviceMemory; never saved). It holds the places of the awake Verdant Beds in
+ * its pact's area (the cube of the service's radius round the perch, as Pacts.serves reads it) whose keeper it indexes, at
+ * most {@value #MAX_BEDS}, nearest the perch first (Garden.nearest's order: distance, then y, x and z), and reads them again
+ * at most every {@value #REFRESH_TICKS} ticks. A refresh reads only the block-entity maps of the chunks the area overlaps
+ * that are loaded now (CourierWork.reserve's scan: at most 9 chunks, the radius never past WorkerParser.MAX_RADIUS); it never
+ * builds or sorts the area's positions (Garden.nearest built 867 at reach 8), never loads a chunk and never samples a
+ * habitat. Each read resolves the places again, in loaded chunks only, so a bed broken or asleep since is gone at once and a
+ * new one waits for the next refresh. Unit 2 adds Hearts, Gleaners and Ley Pylons to the same pass (16 of each), unit 4 the
+ * plain containers touching the perch (16).
+ */
+public final class GardenReach {
+	/** The most beds one index holds. Keep equal to tools/concordance_garden_pacts.py REACH. */
+	public static final int MAX_BEDS = 64;
+	/** How long an index serves before it is read again (ticks). Keep equal to tools/concordance_garden_pacts.py REACH. */
+	public static final int REFRESH_TICKS = 200;
+
+	private final BlockPos centre;
+	private final int radius;
+	private final Predicate<VerdantBedBlockEntity> indexes;
+	private List<BlockPos> beds = List.of();
+	private long refreshedAt = Long.MIN_VALUE;
+	private int refreshes;
+	private int scanned;
+
+	/** An index of the cube of {@code radius} (at most WorkerParser.MAX_RADIUS) round {@code centre}, of the awake beds {@code indexes} accepts. */
+	public GardenReach(BlockPos centre, int radius, Predicate<VerdantBedBlockEntity> indexes) {
+		this.centre = centre.immutable();
+		this.radius = Math.clamp(radius, 0, WorkerParser.MAX_RADIUS);
+		this.indexes = indexes;
+	}
+
+	/**
+	 * {@code record}'s index: its perch's area, indexing the beds whose keeper its pact benefits at each refresh (GC-P32;
+	 * GardenPacts.target asks again at each change). The pact is seated with a service: its presence's decide saw to it.
+	 */
+	public static GardenReach of(BoundWill record) {
+		BoundWill.Pact pact = record.pact();
+		return new GardenReach(Couriers.pos(pact.place()), pact.service().radius(), bed -> GardenPacts.benefits(record, bed.keeper()));
+	}
+
+	/** Whether this index is still {@code record}'s area (its perch and radius), so a service memory may keep it. */
+	public boolean covers(BoundWill record) {
+		BoundWill.Pact pact = record.pact();
+		return pact != null && pact.place() != null && pact.service() != null && centre.equals(Couriers.pos(pact.place()))
+				&& radius == Math.clamp(pact.service().radius(), 0, WorkerParser.MAX_RADIUS);
+	}
+
+	/**
+	 * The indexed beds that are still there, loaded and awake, nearest first; read again first when the index is
+	 * {@value #REFRESH_TICKS} ticks old at game time {@code now} or more, or the clock ran back. Server thread only.
+	 */
+	public List<VerdantBedBlockEntity> beds(ServerLevel level, long now) {
+		if (refreshedAt == Long.MIN_VALUE || now < refreshedAt || now - refreshedAt >= REFRESH_TICKS) {
+			refresh(level, now);
+		}
+		List<VerdantBedBlockEntity> out = new ArrayList<>(beds.size());
+		for (BlockPos pos : beds) {
+			if (level.isLoaded(pos) && level.getBlockEntity(pos) instanceof VerdantBedBlockEntity bed && !bed.isRemoved() && bed.awake()) {
+				out.add(bed);
+			}
+		}
+		return out;
+	}
+
+	/** Forgets the index, so the next read refreshes it. */
+	public void forget() {
+		refreshedAt = Long.MIN_VALUE;
+		beds = List.of();
+	}
+
+	/** How many times it has been read from the chunks (tests and the load card). */
+	public int refreshes() {
+		return refreshes;
+	}
+
+	/** How many block entities its last refresh looked at (tests and the load card). */
+	public int scanned() {
+		return scanned;
+	}
+
+	/** The order an index keeps (Garden.nearest's): nearest {@code centre} first, then the lowest, then by x and by z. */
+	public static Comparator<BlockPos> nearest(BlockPos centre) {
+		return Comparator.<BlockPos>comparingDouble(pos -> pos.distSqr(centre)).thenComparingInt(BlockPos::getY)
+				.thenComparingInt(BlockPos::getX).thenComparingInt(BlockPos::getZ);
+	}
+
+	private void refresh(ServerLevel level, long now) {
+		Comparator<BlockPos> order = nearest(centre);
+		// The farthest first, so the 65th nearest is the one let go: O(n log MAX_BEDS), whatever the area holds.
+		PriorityQueue<BlockPos> kept = new PriorityQueue<>(MAX_BEDS + 1, order.reversed());
+		int examined = 0;
+		for (int cx = (centre.getX() - radius) >> 4; cx <= (centre.getX() + radius) >> 4; cx++) {
+			for (int cz = (centre.getZ() - radius) >> 4; cz <= (centre.getZ() + radius) >> 4; cz++) {
+				LevelChunk chunk = level.getChunkSource().getChunkNow(cx, cz);
+				if (chunk == null) {
+					continue;
+				}
+				for (BlockEntity entity : chunk.getBlockEntities().values()) {
+					examined++;
+					BlockPos pos = entity.getBlockPos();
+					if (entity instanceof VerdantBedBlockEntity bed && !bed.isRemoved() && bed.awake() && within(pos) && indexes.test(bed)) {
+						kept.add(pos);
+						if (kept.size() > MAX_BEDS) {
+							kept.poll();
+						}
+					}
+				}
+			}
+		}
+		List<BlockPos> sorted = new ArrayList<>(kept);
+		sorted.sort(order);
+		beds = List.copyOf(sorted);
+		refreshedAt = now;
+		refreshes++;
+		scanned = examined;
+	}
+
+	private boolean within(BlockPos pos) {
+		return Math.abs(pos.getX() - centre.getX()) <= radius && Math.abs(pos.getY() - centre.getY()) <= radius
+				&& Math.abs(pos.getZ() - centre.getZ()) <= radius;
+	}
+}

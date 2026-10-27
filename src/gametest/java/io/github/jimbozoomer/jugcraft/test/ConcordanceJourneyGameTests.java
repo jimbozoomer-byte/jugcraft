@@ -663,6 +663,8 @@ public class ConcordanceJourneyGameTests {
 	 */
 	private static final List<String> PACT_HALL_RECIPES = List.of("verdant_bed", "sunpetal", "assayers_scale", "observatory", "astrolabe",
 			"pact_perch", "spirit_anchor", "courier_post", "porter_key");
+	/** The garden cohort, GC-03: the recipes of tools/acquisition.py GARDEN_PACTS (check_acquisition holds the two equal). */
+	private static final List<String> GARDEN_RECIPES = List.of("sunpetal", "verdant_bed", "bonding_charm");
 
 	// The pact hall in the yard (jugcraft-test:drone_depot, its floor laid first). WorkshopHands' corner (x 1 to 3, z 2 to 5)
 	// keeps the workshop hand's post, chest, crucible and anchor, as the hand's own tests place them.
@@ -717,6 +719,20 @@ public class ConcordanceJourneyGameTests {
 			}
 		}
 		helper.assertTrue(missing.isEmpty(), "These pact-hall recipes did not load: " + missing);
+		helper.succeed();
+	}
+
+	/** The garden cohort, GC-03: every recipe the garden route's rows name loads (check_acquisition holds GARDEN_RECIPES to tools/acquisition.py GARDEN_PACTS). */
+	@GameTest(maxTicks = 20)
+	public void theGardenPactsRecipesLoad(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		List<String> missing = new ArrayList<>();
+		for (String name : GARDEN_RECIPES) {
+			if (level.recipeAccess().byKey(ResourceKey.create(Registries.RECIPE, Jugcraft.id(name))).isEmpty()) {
+				missing.add(name);
+			}
+		}
+		helper.assertTrue(missing.isEmpty(), "These garden recipes did not load: " + missing);
 		helper.succeed();
 	}
 

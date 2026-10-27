@@ -11974,7 +11974,8 @@ def check_acquisition(registered):
     recipe of their own result, a bench working, or a rite RITUALS pages), every item Chunk C registered is a WORKSHOP
     row, and the journey's server test loads every recipe they name; the pact hall's rows (PACT_HALL; Concordance Chunk D,
     D-09) likewise, every item Chunk D registered (CHUNK_D_ITEMS, which is tools/concordance_pacts.py's BLOCKS) a PACT_HALL
-    row, and the same test class loads their recipes (PACT_HALL_RECIPES). Only data is read, and
+    row, and the same test class loads their recipes (PACT_HALL_RECIPES); the garden route's rows (GARDEN_PACTS; the garden
+    cohort) likewise. Only data is read, and
     the loot classes' few lines named above: what Java alone gives (a creature's drops coded in its class) is not seen.
     (check_arms_variants forbids the trophies' recipes on its own; nothing here relaxes it.)"""
     import acquisition as aq
@@ -12260,6 +12261,15 @@ def check_acquisition(registered):
         err("ConcordanceJourneyGameTests.thePactHallsRecipesLoad must load the recipe of every pact-hall row "
             f"(PACT_HALL_RECIPES: {sorted(wanted)})")
     made_as(aq.PACT_HALL, "the pact hall")
+    # The garden cohort, GC-03: the garden route's rows (tools/acquisition.py GARDEN_PACTS) likewise, and the journey's server
+    # test loads every recipe they name (GARDEN_RECIPES).
+    listed = re.search(r"GARDEN_RECIPES = List\.of\(([^)]*)\)", journey)
+    wanted = {aq.recipe_file(item, how) for item, how in aq.GARDEN_PACTS.items()} - {None}
+    if "public void theGardenPactsRecipesLoad(" not in journey or not listed \
+            or set(re.findall(r'"([a-z_]+)"', listed.group(1))) != wanted:
+        err("ConcordanceJourneyGameTests.theGardenPactsRecipesLoad must load the recipe of every garden row "
+            f"(GARDEN_RECIPES: {sorted(wanted)})")
+    made_as(aq.GARDEN_PACTS, "the garden pacts")
     # The owner's armour tiers the record keeps creative-only: nothing gives them.
     for tier in aq.CREATIVE_ONLY:
         for piece in gear.ARMOR:
@@ -14421,6 +14431,7 @@ def check_concordance(registered):
     check_workers(co, root, lang, registered, research)
     check_pacts(co, root, lang, registered, research)
     check_stolas_regard(co, root, lang, research)
+    check_garden_pacts(co, root, lang, registered, research)
     check_pact_screen(co, lang)
     check_spirit_facing(co)
     check_spirit_bodies(co)
@@ -19111,6 +19122,202 @@ def check_stolas_regard(co, root, lang, research):
                 err(f"{cls}: missing Concordance Chunk D, D-03 game test {name}")
 
 
+def check_garden_pacts(co, root, lang, registered, research):
+    """The garden cohort (docs/features/concordance-garden-cohort.md), GC-03: the groundwork every garden pact shares. The
+    Java names the generator's ids and numbers. The Garden's Regard is the generator's: the Spiritbinders' practitioner entry
+    after the Binding Arts and Verdant Husbandry, one way to each state, mastered by MASTERY_SPIRITS distinct garden spirits'
+    first obligations, no notes; its specimens are registered and examinable; its gate ships; its codex entry opens with the
+    Binding Arts and names every specimen, and holds no page one player cannot reach. A garden obligation is recorded only by
+    PactObligations, after its checks, once a spirit, from one hook a act in its gesture on success, and never as Stolas's,
+    the Binding Arts' or cultivation's practice. Whose land a garden service touches is asked as GC-S7 says: serves, then
+    beneficiary, then the holder near (never a stand-in), then the holder's hands. The bed index reads loaded chunks' maps
+    only, capped, and never Garden.nearest or a sample; no spirit samples or scans positions. The bed's two new reads only
+    read. Every word has its text, and the ticket's game tests exist."""
+    gp = co.garden_pacts
+    pg = co.progression
+
+    def text(path):
+        return path.read_text(encoding="utf-8") if path.exists() else ""
+    spirits = root / "spirits"
+    pacts_java = text(spirits / "GardenPacts.java")
+    reach_java = text(spirits / "GardenReach.java")
+    duties_java = text(spirits / "PactObligations.java")
+    # The Java names the generator's ids and numbers.
+    for needle in (f'String RESEARCH = "{gp.REGARD}";', f'String ACTIVITY = "{gp.GARDEN_PACT_SERVICE}";',
+                   f'Jugcraft.id("{split(gp.SPECIMEN_TAG)[1]}")', f"int MASTERY_SPIRITS = {gp.MASTERY_SPIRITS};"):
+        if needle not in pacts_java:
+            err(f"spirits/GardenPacts.java: {needle} (tools/concordance_garden_pacts.py)")
+    for const, value in gp.REACH.items():
+        if not re.search(rf"\bint {const} = {value};", reach_java):
+            err(f"spirits/GardenReach.java: {const} differs from tools/concordance_garden_pacts.py REACH ({value})")
+    acts = re.findall(r'^\t\t([A-Z_]+)\("([a-z_]+)"\)[,;]', _java_body(duties_java, "public enum Act"), re.M)
+    if [sid for _, sid in acts] != gp.ACTS or any(name.lower() != sid for name, sid in acts):
+        err(f"PactObligations.Act {acts} differs from tools/concordance_garden_pacts.py ACTS (same order, append only)")
+    # The research, its specimens and its gate.
+    regard = research.get("garden_regard", {})
+    if regard != co.research_json("garden_regard", gp.RESEARCH["garden_regard"]):
+        err("concordance/research/garden_regard.json differs from tools/concordance_garden_pacts.py: run tools/generate_material_data.py")
+    if regard.get("requires") != [{"research": f"{MOD}:binding_arts", "state": "understood"},
+                                  {"research": f"{MOD}:verdant_husbandry", "state": "understood"}] \
+            or (regard.get("tradition"), regard.get("stage"), regard.get("principle")) != ("spiritbinders", "practitioner", "tether"):
+        err("research garden_regard: the Spiritbinders' practitioner entry, after the Binding Arts and Verdant Husbandry understood (GC-S9)")
+    wanted = {"encountered": ("examine", f"#{gp.SPECIMEN_TAG}", 1), "observed": ("practice", gp.CULTIVATION, 1),
+              "understood": ("practice", gp.WORKER_SERVICE, 1), "mastered": ("practice", gp.GARDEN_PACT_SERVICE, gp.MASTERY_SPIRITS)}
+    for state, (kind, what, distinct) in wanted.items():
+        rules = regard.get("states", {}).get(state, {}).get("any", [])
+        if [(r.get("type"), r.get("specimens") or r.get("activity"), r.get("distinct", 1)) for r in rules] != [(kind, what, distinct)]:
+            err(f"research garden_regard/{state}: one way only, {kind} {what} (distinct {distinct}): {rules}")
+    tag = (load(DATA / MOD / "tags" / "item" / "garden_regard_specimens.json") or {}).get("values", [])
+    if tag != list(gp.SPECIMENS) or any(split(ref)[1] not in registered for ref in tag):
+        err(f"tags/item/garden_regard_specimens.json {tag} is not tools/concordance_garden_pacts.py's registered specimens")
+    if f"#{gp.SPECIMEN_TAG}" not in (load(DATA / MOD / "tags" / "item" / "concordance_specimens.json") or {}).get("values", []):
+        err("#jugcraft:concordance_specimens must hold #jugcraft:garden_regard_specimens, or examination never sees them")
+    if pg.PRACTICES.get(pg.GARDEN_PRACTICE, (None, None))[:2] != ("spiritbinders", "garden_regard"):
+        err("tools/concordance_progression.py PRACTICES: garden_pact_service is gated on The Garden's Regard (GC-03)")
+    # GB5 and Don'ts 6-7: the garden practice is recorded only by PactObligations, which records no other practice.
+    for path in sorted(JAVA_ROOT.rglob("*.java")):
+        relative = path.relative_to(JAVA_ROOT).as_posix()
+        source = path.read_text(encoding="utf-8")
+        if ("GardenPacts.ACTIVITY" in source or f'"{gp.GARDEN_PACT_SERVICE}"' in source) \
+                and relative not in ("concordance/spirits/GardenPacts.java", "concordance/spirits/PactObligations.java"):
+            err(f"{relative}: {gp.GARDEN_PACT_SERVICE} is recorded by PactObligations alone (GC-03)")
+        if "PactObligations.performed(" in source and relative not in ["concordance/" + hook[0] for hook in gp.HOOKS.values()]:
+            err(f"{relative}: a garden obligation is reported only from its act's hook (HOOKS)")
+    if re.search(r"StolasRegard\.ACTIVITY|Workers\.ACTIVITY|Garden\.ACTIVITY|\"jugcraft:(pact_service|worker_service|cultivation)\"", duties_java):
+        err("spirits/PactObligations.java: records only jugcraft:garden_pact_service (GB5; Don'ts 6 and 7)")
+    performed = _java_body(duties_java, "public static boolean performed(")
+    order = [performed.find(n) for n in ("Workers.enabled()", "Authority.isStandIn(player)", "PactServices.get(service.work())",
+                                         "work.obligation() != act", "Pacts.serving(record)", ".within(at, service.radius())",
+                                         "AgreementHolder.stranded(server, record)", "kept(player, counterpart)",
+                                         "ConcordanceProgress.record(player, new Evidence.Practiced(GardenPacts.ACTIVITY, counterpart))")]
+    if -1 in order or order != sorted(order):
+        err("PactObligations.performed: nothing for a stand-in or switched off; only a pact whose service names the act, active, "
+            "in its area, kept by its perch; a kept obligation never recorded again; then the record (GC-03)")
+    # Each act's one hook, in its gesture, on success; each obligation an act, each act one work.
+    for act in gp.ACTS:
+        file, member, line, after, before = gp.HOOKS[act]
+        body = _java_body(text(root / file), member)
+        if body.count(line) != 1 or not 0 <= body.find(after) < body.find(line) < body.find(before):
+            err(f"{file} {member.strip()}: the {act} obligation's hook is one line, after the act succeeded ({line})")
+    if set(gp.OBLIGATIONS.values()) - set(gp.ACTS) or len(set(gp.OBLIGATIONS.values())) != len(gp.OBLIGATIONS):
+        err(f"tools/concordance_garden_pacts.py OBLIGATIONS {gp.OBLIGATIONS}: each work an act of ACTS, each act one work (GC-P7)")
+    service_java = text(spirits / "PactService.java")
+    if not re.search(r"default PactObligations\.@Nullable Act obligation\(\) \{\s*return null;", service_java):
+        err("spirits/PactService.java: obligation() is null unless a garden service names its act (GC-03)")
+    for work, cls in co.pacts.SERVICE_CLASSES.items():
+        source = text(spirits / f"{cls}.java")
+        act = gp.OBLIGATIONS.get(work)
+        names = re.search(r"public PactObligations\.@Nullable Act obligation\(\) \{\s*return PactObligations\.Act\.([A-Z_]+);", source)
+        if (act is None) != (names is None) or (names and names.group(1).lower() != act):
+            err(f"spirits/{cls}.java: obligation() is {act or 'not overridden'} as OBLIGATIONS says")
+        for file, constants in gp.CONSTANTS.get(work, {}).items():
+            java_text = text(root / file)
+            for const, value in constants.items():
+                if not re.search(rf"\b(int|long) {const} = {value}L?;", java_text):
+                    err(f"{file}: {const} differs from tools/concordance_garden_pacts.py CONSTANTS[{work!r}] ({value})")
+    # GC-S7: whose land, in order, never a stand-in.
+    target = _java_body(pacts_java, "public static @Nullable Status target(")
+    order = [target.find(n) for n in ("Pacts.serves(record, Couriers.place(level, pos), time, now)", "benefits(record, keeper)",
+                                      "Authority.presentNear(level, record.holder(), Couriers.pos(record.pact().place()), Pacts.REACH)",
+                                      "Authority.mayChange(level, holder, pos)")]
+    if -1 in order or order != sorted(order):
+        err("GardenPacts.target: serves there now, then a beneficiary's, then the holder within Pacts.REACH, then the holder's own hands (GC-S7)")
+    garden_services = [text(spirits / f"{co.pacts.SERVICE_CLASSES[work]}.java") for work in gp.OBLIGATIONS if work in co.pacts.SERVICE_CLASSES]
+    for name, source in [("GardenPacts", pacts_java), ("GardenReach", reach_java), ("PactObligations", duties_java)] \
+            + [(f"service {i}", s) for i, s in enumerate(garden_services)]:
+        if re.search(r"Authority\.answering\(|mayChangeFor\(|FakePlayer|absentOwnersAct\(|Authority\.present\(", source):
+            err(f"{name}: a garden service never asks a stand-in or a holder who is not near (GC-S7; no answering, present or mayChangeFor)")
+    # The bed index: loaded chunks' maps, capped; no position scan, no chunk load, no sample.
+    for needle in ("getChunkNow(cx, cz)", "level.isLoaded(pos) && level.getBlockEntity(pos)", "WorkerParser.MAX_RADIUS",
+                   "kept.size() > MAX_BEDS", "now - refreshedAt >= REFRESH_TICKS"):
+        if needle not in reach_java:
+            err(f"spirits/GardenReach.java: {needle} (loaded chunks' maps, capped, refreshed every REFRESH_TICKS; GC-P2)")
+    for banned in ("getChunk(", "getChunkAt(", "betweenClosed(", "Garden.nearest(", "Garden.bedsAround(", "Garden.sample(",
+                   ".habitat(", "cachedHabitat(", "setChunkForced"):
+        if banned in reach_java:
+            err(f"spirits/GardenReach.java: never {banned} (GB12: no position scan, no chunk load, no sample)")
+    for path in sorted(spirits.glob("*.java")):
+        if re.search(r"Garden\.(nearest|sample|bedsAround)\(|\.forgetSample\(", path.read_text(encoding="utf-8")):
+            err(f"spirits/{path.name}: no spirit scans a box of positions or takes a sample (Don't 10; GB12)")
+    # The bed's two reads only read; tend and mayTendAt share one window.
+    bed = text(root / "garden" / "VerdantBedBlockEntity.java")
+    may = _java_body(bed, "public boolean mayTendAt(long now)")
+    if not all(n in may for n in ("awake", "Garden.enabled()", "strainNow() > 0", "!tendedLately(now)")) \
+            or re.search(r"settle\(|ease\(|changed\(|tendedAt =|setChanged\(|sync\(", may) \
+            or "tendedLately(now)" not in _java_body(bed, "public boolean tend(long now)"):
+        err("VerdantBedBlockEntity.mayTendAt: awake, on, strained (as growth counts) and outside tend's own window; it only reads")
+    cached = _java_body(bed, "public @Nullable Habitat cachedHabitat(ServerLevel level)")
+    if "if (area == null) {" not in cached or "Sampler.habitat(" not in cached \
+            or re.search(r"Garden\.sample\(|habitat\(level\)|\barea =[^=]|sampledAt =|setChanged\(|sync\(|note\(", cached) \
+            or "return cachedHabitat(level);" not in _java_body(bed, "public @Nullable Habitat habitat(ServerLevel level)"):
+        err("VerdantBedBlockEntity.cachedHabitat: the last sample only, never a new one; habitat reads through it (GB11)")
+    base = text(spirits / "PactSpiritEntity.java")
+    if "serviceMemory" in _java_body(base, "protected void addAdditionalSaveData(") or "private @Nullable Object serviceMemory;" not in base:
+        err("spirits/PactSpiritEntity.java: a service's memory is the presence's, never saved (GC-03; S6)")
+    # Examination and the tooltip say what the specimens teach.
+    examination = text(root / "Examination.java")
+    at = examination.find("stack.is(GardenPacts.SPECIMENS)")
+    if at < 0 or not examination.find("stack.is(StolasRegard.SPECIMENS)") < at < examination.find("} else if (!stack.is(JugcraftConcordance.LUMINOUS))") \
+            or '"message.jugcraft.concordance.examine.garden_regard"' not in examination:
+        err("Examination.java: The Garden's Regard's specimens have their own line, after Stolas's, before Circle Lore's form line")
+    if 'stack.is(GardenPacts.SPECIMENS)' not in text(CLIENT_JAVA_ROOT / "ConcordanceClient.java") \
+            or '"tooltip.jugcraft.concordance.garden_regard_specimen"' not in text(CLIENT_JAVA_ROOT / "ConcordanceClient.java"):
+        err("client/ConcordanceClient.java: The Garden's Regard's specimens say they can be examined")
+    # The codex entry: opens with the Binding Arts, names every specimen, at its place, no page out of reach.
+    entry = load(DATA / MOD / "modonomicon" / "books" / co.BOOK / "entries" / "binding" / "garden_regard.json") or {}
+    if entry.get("condition", {}).get("node_id") != f"{MOD}:concordance/binding_arts_understood" \
+            or (entry.get("x"), entry.get("y")) != gp.CODEX_PLACE:
+        err(f"codex binding/garden_regard: opens with the Binding Arts understood, at {gp.CODEX_PLACE}")
+    first = lang.get(f"book.{MOD}.{co.BOOK}.binding.garden_regard.p0.text", "")
+    for name in gp.SPECIMENS.values():
+        if name not in first:
+            err(f"codex binding/garden_regard: its first page names {name}")
+    at_hand = pg.load_at_hand(DATA)
+    shipped = len(pg.garden_spirits(at_hand))
+    for page in entry.get("pages", []):
+        if page.get("condition", {}).get("node_id") == f"{MOD}:concordance/garden_regard_mastered" and shipped < gp.MASTERY_SPIRITS:
+            err(f"codex binding/garden_regard: no mastered page while {shipped} of {gp.MASTERY_SPIRITS} garden spirits ship (GB26)")
+    folder = DATA / MOD / "concordance"
+    invocations = {p.stem: load(p) or {} for p in (folder / "invocation").glob("*.json")}
+    rituals = {p.stem: load(p) or {} for p in (folder / "ritual").glob("*.json")}
+    nodes = pg.graph(research, invocations, rituals, at_hand)
+    alone = pg.reachable(nodes, research)
+    if pg.research_node(gp.REGARD, "understood") not in alone \
+            or (pg.research_node(gp.REGARD, "mastered") in alone) != (shipped >= gp.MASTERY_SPIRITS):
+        err(f"progression: The Garden's Regard is understood alone, and mastered exactly when {gp.MASTERY_SPIRITS} garden spirits ship (GB26)")
+    # GB26 held before enough garden spirits ship: with probe definitions (in memory, a probe work recording the first act),
+    # one fewer than MASTERY_SPIRITS reach the practice and not the mastered state; MASTERY_SPIRITS reach both.
+    kept_obligations = dict(gp.OBLIGATIONS)
+    gp.OBLIGATIONS["gb26_probe"] = gp.ACTS[0]
+    try:
+        for count in (gp.MASTERY_SPIRITS - 1, gp.MASTERY_SPIRITS):
+            probes = {f"gb26_probe_{i}": {"service": {"work": "gb26_probe"}, "compact": {"items": []}} for i in range(count)}
+            probed = dict(at_hand, pacts={**at_hand.get("pacts", {}), **probes})
+            reached = pg.reachable(pg.graph(research, invocations, rituals, probed), research)
+            if f"practice:{gp.GARDEN_PACT_SERVICE}" not in reached \
+                    or (pg.research_node(gp.REGARD, "mastered") in reached) != (len(pg.garden_spirits(probed)) >= gp.MASTERY_SPIRITS):
+                err(f"progression: with {len(pg.garden_spirits(probed))} garden spirits shipped, The Garden's Regard's practice is "
+                    f"reached and it is mastered exactly when {gp.MASTERY_SPIRITS} ship (GB26)")
+    finally:
+        gp.OBLIGATIONS.clear()
+        gp.OBLIGATIONS.update(kept_obligations)
+    # Words, advancements, tests.
+    for key in [f"message.{MOD}.concordance.{k}" for k in gp.MESSAGES] + [f"tooltip.{MOD}.concordance.{k}" for k in gp.TOOLTIPS] \
+            + [f"tag.item.{MOD}.{split(gp.SPECIMEN_TAG)[1]}", f"research.{MOD}.garden_regard"] \
+            + [f"message.{MOD}.concordance.garden_pact.act.{act}" for act in gp.ACTS]:
+        if key not in lang:
+            err(f"The Garden's Regard: missing lang {key}")
+    for state in co.RESEARCH_STAGES:
+        if not (DATA / MOD / "advancement" / f"concordance_garden_regard_{state}.json").is_file():
+            err(f"advancement concordance_garden_regard_{state}: missing (run tools/generate_material_data.py)")
+    tests = ROOT / "src" / "gametest" / "java" / "io" / "github" / "jimbozoomer" / "jugcraft" / "test"
+    for cls, names in GC03_TESTS.items():
+        source = text(tests / f"{cls}.java")
+        for name in names:
+            if not re.search(rf"public void {name}\(GameTestHelper \w+\)", source):
+                err(f"{cls}: missing the garden cohort's GC-03 game test {name}")
+
+
 def check_pact_screen(co, lang):
     """Concordance Chunk D, unit 2 (D-04 client, D-05; D-S5, D-S14, D-S15, D-S21): the pact perch's screen (the payloads
     are check_pacts'). Only PactClient sends, only for the open menu, and it drops a state for any other. The screen is
@@ -22284,6 +22491,18 @@ GC02_TESTS = {"ConcordanceWorkerGameTests": ["aSpiritArrivesFacingItsInviter", "
                                              "aTeleportBackKeepsTheFacing", "aClosedConversationLeavesTheFacing",
                                              "theLookTargetIsDroppedOnlyWhenGoneElsewhereOrFar",
                                              "aWorkTargetOutranksTheSpeakerWhileItsGesturePlays"]}
+# The garden cohort, GC-03's game tests (check_garden_pacts). The obligation's three land with Buer (GC-04's commit adds them).
+GC03_TESTS = {
+    "ConcordanceGardenGameTests": ["theGardenReachNeverLoadsAChunk", "theGardenReachIsCappedAndCached", "aCachedHabitatNeverSamples",
+                                   "aBedSaysWhetherItMayBeTendedWithoutChangingIt", "theGardensRegardSpecimensSayWhatTheyTeach",
+                                   "theGardensRegardAdvancesByHandAndByAWorker"],
+    "ConcordanceWorkerGameTests": ["aGardenPactActsOnlyForABeneficiaryWhileItsHolderIsNear", "talkingTeachesNothing"],
+    "ConcordanceProgressionGameTests": ["theGardensRegardIsReachable"],
+    "ConcordanceJourneyGameTests": ["theGardenPactsRecipesLoad"],
+    # The validation plan's named suites (GE6): notes never stand in, and the groundwork saves nothing.
+    "ConcordanceSharingGameTests": ["notesNeverStandInForTheGardensRegard"],
+    "ConcordancePersistenceGameTests": ["theGardenGroundworkSavesNothing"],
+}
 # Concordance Chunk D, D-06's game tests (check_pacts).
 D06_TESTS = {"ConcordanceWorkerGameTests": ["stolasGesturesAndSoundsFollowTheirTable", "stolasAnswersEachActionWithItsGesture",
                                             "aDepartingStolasIsNeverAVisitorAgain", "aRemovedStolasNeverEndsThePact", "onePresencePerPact",

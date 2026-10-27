@@ -521,6 +521,9 @@ ember.SLOT_ITEMS.update(rime_kit.TRINKETS)
 import concordance_pacts as pacts  # noqa: E402
 RESEARCH.update(pacts.RESEARCH)
 BLOCKS.update(pacts.BLOCKS)
+# The garden cohort (tools/concordance_garden_pacts.py; docs/features/concordance-garden-cohort.md): The Garden's Regard (GC-03).
+import concordance_garden_pacts as garden_pacts  # noqa: E402
+RESEARCH.update(garden_pacts.RESEARCH)
 # Concordance Chunk D, D-07 (tools/concordance_roster.py): the roster's words, limits and icons, the journal's pacts lines
 # and the Ars Nouveau helpers' roster kinds (G13).
 import concordance_roster as roster  # noqa: E402
@@ -529,7 +532,8 @@ SPECIMEN_TAGS = [SPECIMEN_TAG, rituals.CIRCLE_SPECIMEN_TAG, alchemy.ALCHEMY_SPEC
                  celestial.CELESTIAL_SPECIMEN_TAG, crimson.CRIMSON_SPECIMEN_TAG, workers.BINDING_SPECIMEN_TAG,
                  artifice.ARTIFICE_SPECIMEN_TAG, relics.RELIC_SPECIMEN_TAG, equivalence.ASSAY_SPECIMEN_TAG,
                  hexes.SYMPATHY_SPECIMEN_TAG, hexes.DREAM_SPECIMEN_TAG, ember.EMBER_SPECIMEN_TAG,
-                 rime.RIME_SPECIMEN_TAG, strata.STRATA_SPECIMEN_TAG, pacts.STOLAS_SPECIMEN_TAG]
+                 rime.RIME_SPECIMEN_TAG, strata.STRATA_SPECIMEN_TAG, pacts.STOLAS_SPECIMEN_TAG,
+                 garden_pacts.SPECIMEN_TAG]
 ALL_SPECIMENS_TAG = f"{MOD}:concordance_specimens"
 
 _UNDERSTOOD = {"research": f"{MOD}:first_light", "state": "understood"}
@@ -1070,6 +1074,7 @@ def codex():
         **crimson.codex(),
         **workers.codex(),
         **pacts.codex(),
+        **garden_pacts.codex(),
         **jug_nouveau.codex(),
         **logistics.codex(),
         **artifice.codex(),
@@ -1643,6 +1648,7 @@ MESSAGES = {
     **rime.MESSAGES,
     **strata.MESSAGES,
     **pacts.MESSAGES,
+    **garden_pacts.MESSAGES,
     **conclave.MESSAGES,
     **progression.MESSAGES,
     **spire.MESSAGES,
@@ -1696,6 +1702,7 @@ TOOLTIPS = {
     **spire.TOOLTIPS,
     **rime.TOOLTIPS,
     **pacts.TOOLTIPS,
+    **garden_pacts.TOOLTIPS,
 }
 
 
@@ -1906,6 +1913,7 @@ def write_all(write, assets, data, lang, condition, self_drop):
     signs.lang_entries(lang)
     diagnostics.lang_entries(lang)
     pacts.lang_entries(lang)
+    garden_pacts.lang_entries(lang)
     roster.lang_entries(lang)
     # Items.
     write(assets / "models" / "item" / "initiate_wand.json",
@@ -2081,6 +2089,7 @@ def tags(tags):
     rime_kit.tags(tags)
     strata.tags(tags)
     pacts.tags(tags)
+    garden_pacts.tags(tags)
     hexes.tags(tags)
     conclave.tags(tags)
     spire.tags(tags)

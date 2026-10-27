@@ -41,6 +41,10 @@ Nothing here is generated into the game. tools/check_mod_data.py (check_journey)
   PACT_HALL, made under the Concordance's switch alone, and every row is named; the Open Hand Compact's materials and
   resonance and one of Stolas's offerings are had by the route; the workshop hand is sealed as SpiritAnchorBlock seals it;
   and every step names the server test that walks the whole route;
+- the garden pacts (GARDEN, the garden cohort) hold without Styx or Stolas: one player alone, in the Overworld alone, with
+  no structure loot, nothing mastered and nothing past the Practitioner stage, reaches each step with the research it names
+  (each step needing it) and makes every thing it names, each a row of tools/acquisition.py GARDEN_PACTS; The Garden's
+  Regard is mastered by the route exactly when three garden spirits ship (GB26);
 - the routes' "served once by each kind of worker" is the Binding Arts' mastery, as many kinds as the workers have, the
   workshop hand among the spirits;
 - every game test a step names exists;
@@ -310,6 +314,36 @@ PACT = {
          "reaches": ["item:minecraft:amethyst_shard"],
          "tests": ["upkeepWarnsThenSuspendsAfterGraceAndResumes", "aReturnAfterAbsenceGetsTheFullGrace",
                    "endingReturnsTheEscrowOnce", "endingAnOrphanReturnsItsEscrowOnce", PACT_TEST]},
+    ],
+}
+
+# The garden cohort (docs/features/concordance-garden-cohort.md; GC-03 begins it and each spirit's unit appends its steps,
+# GC-04 Buer's first): The Garden's Regard without Styx or Stolas, then each garden spirit's pact. One player alone, in the
+# Overworld alone, with no structure loot, nothing mastered and nothing past the Practitioner stage, reaches each step with
+# the research it names (each step needing it) and makes every Concordance thing it names (tools/acquisition.py
+# GARDEN_PACTS, made under the Concordance's switch alone, every row named). The Regard is mastered only through three
+# different garden spirits' first obligations (GB26), so while fewer ship the route reaches no mastery of it. Unit 7's
+# GARDEN_TEST will walk every step; until then each step names the tests that exercise it.
+GARDEN = {
+    "name": "The garden pacts",
+    "steps": [
+        {"research": ["first_light", "binding_arts", "verdant_husbandry"], "things": ["sunpetal"],
+         "text": "With the Binding Arts and Verdant Husbandry understood, craft a Sunpetal (or take any garden specimen: a "
+                 "Dewmoss, Gloamcap, Mendvetch or Verdant Chaff) and examine it, sneaking and using it in the air; its tooltip "
+                 "and the codex's Binding category say what it teaches",
+         "reaches": [f"research:{rid('garden_regard')}@encountered"],
+         "tests": ["theGardensRegardSpecimensSayWhatTheyTeach", "theGardensRegardIsReachable"]},
+        {"research": [], "things": ["verdant_bed"],
+         "text": "Lay a Verdant Bed, grow a Sunpetal (or any organism crop) on it and harvest it ripe by hand",
+         "reaches": [f"research:{rid('garden_regard')}@observed"],
+         "tests": ["theGardensRegardAdvancesByHandAndByAWorker", "theGardensRegardIsReachable"]},
+        {"research": [], "things": ["bonding_charm"],
+         "text": "Keep a bound worker at its work: a familiar's mending, a spirit's delivery or a construct's trip (a Hearthling "
+                 "bound with a Bonding Charm is one). The Garden's Regard is understood, and no research notes stand in for any "
+                 "of its evidence",
+         "reaches": [f"research:{rid('garden_regard')}@understood"],
+         "tests": ["theGardensRegardAdvancesByHandAndByAWorker", "notesNeverStandInForTheGardensRegard",
+                   "theGardensRegardIsReachable"]},
     ],
 }
 
@@ -624,6 +658,66 @@ def pact_problems(pg, research, invocations, rituals, at_hand):
     return found
 
 
+def garden_walk(pg, research, invocations, rituals, at_hand, understood, dimensions=None, blocked=()):
+    """What one player alone reaches in {dimensions} (the Overworld alone by default), with no structure loot and nothing
+    past the Practitioner stage, with only the research entries {understood} understood and nothing mastered, The Garden's
+    Regard aside (its states are what the route reaches): the graph, to which every thing the garden route makes or places
+    (tools/acquisition.py GARDEN_PACTS) is added as a step needing it would add it; the nodes {blocked} are taken away as
+    well. Returns (reached, the graph's problems)."""
+    import acquisition
+    problems = []
+    nodes = pg.graph(research, invocations, rituals, at_hand, problems)
+    for item in acquisition.GARDEN_PACTS:
+        pg.item_node(nodes, at_hand, rid(item), problems)
+    without = {pg.research_node(rid(key), state) for key in research for state in pg.RESEARCH_STATES
+               if key != "garden_regard" and (state == "mastered" or key not in understood)}
+    reached = pg.reachable(nodes, research, cap="practitioner", dimensions=set(dimensions or [""]), without=without | set(blocked))
+    return reached, problems
+
+
+def garden_problems(pg, research, invocations, rituals, at_hand):
+    """What is wrong with the garden route (GARDEN): an empty list when it holds."""
+    import acquisition
+    import concordance_garden_pacts as garden
+    found = []
+    steps = GARDEN["steps"]
+    named = [item for step in steps for item in step["things"]]
+    for item in sorted(set(named) - set(acquisition.GARDEN_PACTS)):
+        found.append(f"journey garden: {item} is no row of tools/acquisition.py GARDEN_PACTS")
+    for item in sorted(set(acquisition.GARDEN_PACTS) - set(named)):
+        found.append(f"journey garden: tools/acquisition.py's {item} is named by no step")
+    for item, how in acquisition.GARDEN_PACTS.items():
+        recipe = acquisition.recipe_file(item, how)
+        loads = _switches(recipe) if recipe else {"concordance"}
+        if loads != {"concordance"}:
+            found.append(f"journey garden: {item} must be made under the Concordance's switch alone, not {sorted(loads or [])}")
+    understood = []
+    for number, step in enumerate(steps, 1):
+        if not step["tests"]:
+            found.append(f"journey garden step {number}: name the server tests that exercise it")
+        for key in step["research"]:
+            if key not in research:
+                found.append(f"journey garden step {number}: {key} is not a research entry")
+        understood = understood + [key for key in step["research"] if key not in understood]
+        reached, graph_problems = garden_walk(pg, research, invocations, rituals, at_hand, understood)
+        found.extend(f"journey garden step {number}: {problem}" for problem in graph_problems)
+        wants = list(step["reaches"]) + [f"item:{rid(item)}" for item in step["things"]]
+        for want in wants:
+            if want not in reached:
+                found.append(f"journey garden step {number}: one player alone in the Overworld, with {understood} understood, "
+                             f"nothing else mastered, no structure loot and nothing past the Practitioner stage, does not "
+                             f"reach {want}")
+        for key in step["research"]:
+            lost, _ = garden_walk(pg, research, invocations, rituals, at_hand, [k for k in understood if k != key])
+            if all(want in lost for want in wants):
+                found.append(f"journey garden step {number}: nothing it reaches needs {key}")
+    final, _ = garden_walk(pg, research, invocations, rituals, at_hand, understood)
+    if (pg.research_node(garden.REGARD, "mastered") in final) != (len(pg.garden_spirits(at_hand)) >= garden.MASTERY_SPIRITS):
+        found.append(f"journey garden: The Garden's Regard is mastered by the route exactly when {garden.MASTERY_SPIRITS} "
+                     "garden spirits ship (GB26)")
+    return found
+
+
 def worker_kinds_problems(research):
     """The routes' "served once by each kind of worker" is the Binding Arts' mastery: the worker_service practice of as many
     distinct kinds as the workers have (tools/concordance_workers.py WORKERS). The workshop hand (Concordance Chunk D,
@@ -711,6 +805,7 @@ def problems():
     found.extend(workshop_problems(pg, research, invocations, rituals, at_hand))
     # The pact hall (Concordance Chunk D, D-03 to D-09), and the routes' three kinds of worker with the workshop hand among them.
     found.extend(pact_problems(pg, research, invocations, rituals, at_hand))
+    found.extend(garden_problems(pg, research, invocations, rituals, at_hand))
     found.extend(worker_kinds_problems(research))
     # Every game test named exists.
     tests = game_tests()
@@ -721,6 +816,8 @@ def problems():
     for step in WORKSHOP["steps"]:
         named += step["tests"]
     for step in PACT["steps"]:
+        named += step["tests"]
+    for step in GARDEN["steps"]:
         named += step["tests"]
     for _text, names in COOPERATIVE:
         named += names
@@ -782,6 +879,15 @@ def table():
               f"`{PACT_TEST}` walks every step on one survival player.", "",
               "| Step | Understands | Makes or places | Server game tests |", "|---|---|---|---|"]
     for number, step in enumerate(PACT["steps"], 1):
+        made = ", ".join(thing(item) for item in step["things"]) or "nothing new"
+        lines.append(f"| {number}. {step['text']} | {names(step['research']) or 'nothing new'} | {made} | {tests(step['tests'])} |")
+    lines += ["", f"### {GARDEN['name']}", "",
+              "The Garden's Regard found without Styx or Stolas, then each garden spirit's pact as its unit adds it (the garden "
+              "cohort). No stage route: one player alone does each step in the Overworld, with the research understood so far, "
+              "nothing mastered and no structure loot. Its mastery needs three garden spirits' first obligations, so no step "
+              "reaches it until three ship.", "",
+              "| Step | Understands | Makes or places | Server game tests |", "|---|---|---|---|"]
+    for number, step in enumerate(GARDEN["steps"], 1):
         made = ", ".join(thing(item) for item in step["things"]) or "nothing new"
         lines.append(f"| {number}. {step['text']} | {names(step['research']) or 'nothing new'} | {made} | {tests(step['tests'])} |")
     lines += ["", "### Cooperative play", "", "| Shared, and what stays one player's | Server game tests |", "|---|---|"]

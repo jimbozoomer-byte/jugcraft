@@ -26,6 +26,7 @@ import io.github.jimbozoomer.jugcraft.concordance.resource.BoundWillLedger;
 import io.github.jimbozoomer.jugcraft.concordance.rules.ConcordanceRules;
 import io.github.jimbozoomer.jugcraft.concordance.rules.Definitions;
 import io.github.jimbozoomer.jugcraft.concordance.rules.Evidence;
+import io.github.jimbozoomer.jugcraft.concordance.rules.Knowledge;
 import io.github.jimbozoomer.jugcraft.concordance.rules.ResearchState;
 import io.github.jimbozoomer.jugcraft.concordance.sign.Sign;
 import io.github.jimbozoomer.jugcraft.concordance.sky.AstralClaims;
@@ -36,6 +37,7 @@ import io.github.jimbozoomer.jugcraft.concordance.spirits.AgreementHolder;
 import io.github.jimbozoomer.jugcraft.concordance.spirits.BondingCharmItem;
 import io.github.jimbozoomer.jugcraft.concordance.spirits.BoundWills;
 import io.github.jimbozoomer.jugcraft.concordance.spirits.ClockworkPorterEntity;
+import io.github.jimbozoomer.jugcraft.concordance.spirits.GardenPacts;
 import io.github.jimbozoomer.jugcraft.concordance.spirits.GatheringShadeEntity;
 import io.github.jimbozoomer.jugcraft.concordance.spirits.HearthlingEntity;
 import io.github.jimbozoomer.jugcraft.concordance.spirits.PactHistory;
@@ -1884,6 +1886,20 @@ public class ConcordanceWorkerGameTests {
 
 	static int served(ServerPlayer player) {
 		return SERVED.getOrDefault(player.getUUID(), 0);
+	}
+
+	/** GC-03: how often each player's garden pacts recorded a first obligation, every record heard (as SERVED for Stolas's). */
+	private static final Map<UUID, Integer> GARDEN_SERVED = new ConcurrentHashMap<>();
+	/** GC-03: every piece of evidence recorded for each player, repeats included (talkingTeachesNothing). */
+	private static final Map<UUID, Integer> HEARD = new ConcurrentHashMap<>();
+
+	static {
+		ConcordanceProgress.listen((player, evidence, result) -> {
+			HEARD.merge(player.getUUID(), 1, Integer::sum);
+			if (evidence instanceof Evidence.Practiced practiced && GardenPacts.ACTIVITY.equals(practiced.activity())) {
+				GARDEN_SERVED.merge(player.getUUID(), 1, Integer::sum);
+			}
+		});
 	}
 
 	static ResearchState regard(ServerPlayer player) {
@@ -4723,6 +4739,109 @@ public class ConcordanceWorkerGameTests {
 		stolas.think(level, time, now + 2L * ticks);
 		helper.assertTrue(stolas.attending() == null && within(stolas.getYRot(), stolas.yBodyRot, 1.0F),
 				"His work over and nobody speaking, he attends no one, his yaw on his body's facing: " + yaws(stolas));
+		helper.succeed();
+	}
+
+	// ---------------------------------------------------------------- Concordance garden cohort, GC-03: the groundwork garden pacts share
+
+	/**
+	 * GC-03 (GC-S7, GC-P34): whose land a garden service may touch, asked of a record alone. Only where its pact serves now (its
+	 * area, its hours, its day's quota; neither suspended nor held for upkeep; seated, in this level); only for a beneficiary at
+	 * that moment (its holder, and their party only under party and only while they are one); only while its holder is online
+	 * and within Pacts.REACH of the perch, never a stand-in whatever the absent-owner option; and only where the holder could
+	 * change the block by hand. Each refusal is a status.
+	 */
+	@GameTest(maxTicks = 20)
+	public void aGardenPactActsOnlyForABeneficiaryWhileItsHolderIsNear(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		ServerPlayer holder = TestPlayers.survivor(helper);
+		ServerPlayer member = TestPlayers.survivor(helper);
+		UUID stranger = new UUID(0x6C03L, 9L);
+		BlockPos perchAt = new BlockPos(3, 1, 3);
+		BlockPos perch = helper.absolutePos(perchAt);
+		BlockPos own = helper.absolutePos(new BlockPos(1, 1, 1));
+		BlockPos far = perch.east(9);
+		long now = dayStart(level, 1);
+		long noon = 6000L;
+		long night = 13000L;
+		BoundWill record = new BoundWill(UUID.randomUUID(), "jugcraft:test_pact", "jugcraft:test_spirit", holder.getUUID(), now, false,
+				Pacts.sealed(Couriers.place(level, perch), Pacts.PARTY, null, new BoundWill.Service("strain_tending", 8, 0, 12000, 16), null, now));
+		beside(helper, holder, perchAt);
+		helper.assertTrue(GardenPacts.target(level, record, own, holder.getUUID(), noon, now) == null,
+				"Its holder's own bed, by day, in its area, the holder near: it may");
+		helper.assertTrue(GardenPacts.target(level, record, own, stranger, noon, now) == Status.IDLE
+				&& GardenPacts.target(level, record, own, null, noon, now) == Status.IDLE
+				&& GardenPacts.target(level, record, own, member.getUUID(), noon, now) == Status.IDLE,
+				"A stranger's bed, nobody's and someone's outside the holder's party: skipped");
+		PartyManager parties = JugcraftParties.manager();
+		long ms = System.currentTimeMillis();
+		try {
+			helper.assertTrue(parties.invite(holder.getUUID(), member.getUUID(), ms) == PartyManager.Result.OK
+					&& parties.accept(member.getUUID(), ms) == PartyManager.Result.OK, "The holder and a member form a party");
+			helper.assertTrue(GardenPacts.target(level, record, own, member.getUUID(), noon, now) == null, "Under party, a member's bed: it may");
+			BoundWill personal = record.with(Pacts.sealed(record.pact().place(), Pacts.PERSONAL, null, record.pact().service(), null, now));
+			helper.assertTrue(GardenPacts.target(level, personal, own, member.getUUID(), noon, now) == Status.IDLE,
+					"A personal pact skips even a member's bed");
+		} finally {
+			parties.adminDisband(holder.getUUID());
+		}
+		helper.assertTrue(GardenPacts.target(level, record, own, member.getUUID(), noon, now) == Status.IDLE,
+				"The party gone, the member's bed is skipped again");
+		helper.assertTrue(GardenPacts.target(level, record, far, holder.getUUID(), noon, now) == Status.OUTSIDE_AGREEMENT, "Outside its area");
+		helper.assertTrue(GardenPacts.target(level, record, own, holder.getUUID(), night, now) == Status.OUTSIDE_AGREEMENT, "Outside its hours");
+		helper.assertTrue(GardenPacts.target(level, record.with(record.pact().counted(Math.floorDiv(now, Pacts.DAY), 16)), own, holder.getUUID(), noon, now)
+				== Status.FINISHED, "Its day's quota spent");
+		helper.assertTrue(GardenPacts.target(level, Pacts.suspend(record, now), own, holder.getUUID(), noon, now) == Status.SUSPENDED, "Suspended by its holder");
+		helper.assertTrue(GardenPacts.target(level, record.with(record.pact().held(BoundWill.Hold.UPKEEP, now)), own, holder.getUUID(), noon, now)
+				== Status.UPKEEP_HELD, "Held for its upkeep");
+		helper.assertTrue(GardenPacts.target(level, Pacts.unseat(record), own, holder.getUUID(), noon, now) == Status.OUTSIDE_AGREEMENT, "Without its perch");
+		helper.assertTrue(GardenPacts.target(level, record.with(record.pact().at(new Place("minecraft:the_nether", perch.getX(), perch.getY(), perch.getZ()))),
+				own, holder.getUUID(), noon, now) == Status.OUTSIDE_AGREEMENT, "Seated in another level");
+		holder.snapTo(perch.getX() + 100.5, perch.getY(), perch.getZ() + 0.5, 0.0F, 0.0F);
+		helper.assertTrue(GardenPacts.target(level, record, own, holder.getUUID(), noon, now) == Status.OWNER_OFFLINE,
+				"Its holder far from the perch: it waits");
+		boolean answering = JugcraftConfig.option(Authority.ABSENT_OPTION);
+		JugcraftConfig.setOption(Authority.ABSENT_OPTION, true);
+		try {
+			helper.assertTrue(GardenPacts.target(level, record, own, holder.getUUID(), noon, now) == Status.OWNER_OFFLINE,
+					"whatever the absent-owner option: no stand-in answers for a garden pact");
+		} finally {
+			JugcraftConfig.setOption(Authority.ABSENT_OPTION, answering);
+		}
+		beside(helper, holder, perchAt);
+		try (TestClaims claims = TestClaims.open()) {
+			claims.block(own, stranger);
+			helper.assertTrue(GardenPacts.target(level, record, own, holder.getUUID(), noon, now) == Status.BLOCKED_BY_ACCESS,
+					"A block its holder could not change by hand: blocked by access");
+		}
+		helper.assertTrue(GardenPacts.target(level, record, own, holder.getUUID(), noon, now) == null, "Its claim lifted, it may again");
+		TestPlayers.leave(holder);
+		helper.assertTrue(GardenPacts.target(level, record, own, holder.getUUID(), noon, now) == Status.OWNER_OFFLINE, "Its holder gone: it waits");
+		helper.succeed();
+	}
+
+	/**
+	 * GC-03 (R10): talking teaches nothing, with every spirit a perch offers. Invited, its owner turns to the terms (CHOOSE: the
+	 * state alone, no result) and declines; their knowledge is exactly as it was, and no evidence at all was recorded for them.
+	 */
+	@GameTest(maxTicks = 20)
+	public void talkingTeachesNothing(GameTestHelper helper) {
+		List<PactDefinition> all = everySpirit(helper);
+		for (int i = 0; i < all.size(); i++) {
+			PactDefinition d = all.get(i);
+			BlockPos at = perchFor(i);
+			ServerPlayer player = invitee(helper, d, at, 1);
+			PactPerchBlockEntity perch = perch(helper, at, player);
+			beside(helper, player, at);
+			Knowledge before = ConcordanceProgress.knowledge(player);
+			int heard = HEARD.getOrDefault(player.getUUID(), 0);
+			PactMenu menu = open(helper, player, perch);
+			PactStatePayload terms = send(player, menu, PactRequestPayload.CHOOSE, 0);
+			helper.assertTrue(terms != null && terms.result().isEmpty(), d.id() + ": turning to the terms answers with the state alone");
+			helper.assertTrue(answered(send(player, menu, PactRequestPayload.DECLINE, 0), PactMenu.DECLINED), d.id() + ": declined");
+			helper.assertTrue(ConcordanceProgress.knowledge(player).equals(before) && HEARD.getOrDefault(player.getUUID(), 0) == heard,
+					d.id() + ": talking taught nothing and recorded no evidence (" + (HEARD.getOrDefault(player.getUUID(), 0) - heard) + " heard)");
+		}
 		helper.succeed();
 	}
 }

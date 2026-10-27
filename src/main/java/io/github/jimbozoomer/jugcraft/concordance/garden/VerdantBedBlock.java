@@ -7,6 +7,7 @@ import io.github.jimbozoomer.jugcraft.concordance.RateGate;
 import io.github.jimbozoomer.jugcraft.concordance.diagnostic.Code;
 import io.github.jimbozoomer.jugcraft.concordance.diagnostic.Diagnostic;
 import io.github.jimbozoomer.jugcraft.concordance.ecology.Habitat;
+import io.github.jimbozoomer.jugcraft.concordance.spirits.PactObligations;
 import io.github.jimbozoomer.jugcraft.farming.SprinklerBlock;
 import java.util.ArrayDeque;
 import java.util.HashSet;
@@ -203,7 +204,8 @@ public class VerdantBedBlock extends BaseEntityBlock {
 	 * Concordance Chunk C (C-08, C-P61): a Greenwarden's empty hand tends an awake, strained bed they may change (Authority),
 	 * easing one strain at most once every {@value Garden#TEND_TICKS} ticks a bed; anyone else's touch only reads it. Reached
 	 * from the bed's own use and, since a crop covers its bed from above, from an empty hand on its growing crop
-	 * ({@link OrganismCropBlock}, the unit review), each after its rate gate; {@code pos} is the bed's.
+	 * ({@link OrganismCropBlock}, the unit review), each after its rate gate; {@code pos} is the bed's. A tending that eases a
+	 * strain is also a garden pact's first obligation when one is due (PactObligations, the garden cohort).
 	 */
 	static void tendBy(ServerLevel level, BlockPos pos, ServerPlayer player, VerdantBedBlockEntity bed) {
 		if (!bed.awake() || !Garden.enabled() || !Garden.knows(player) || bed.strainNow() == 0
@@ -212,6 +214,9 @@ public class VerdantBedBlock extends BaseEntityBlock {
 		}
 		if (bed.tend(level.getGameTime())) {
 			Garden.tell(player, "garden.tended", bed.strain(), Habitat.MAX_STRAIN);
+			// The garden cohort, GC-03: a tending by hand inside a garden pact's area while it is active keeps that pact's first
+			// obligation (PactObligations: once a player a spirit; nothing for anyone without such a pact).
+			PactObligations.performed(level, player, PactObligations.Act.TEND, pos);
 		} else {
 			Garden.tell(player, "garden.tended_lately", Garden.TEND_TICKS / 20);
 		}

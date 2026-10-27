@@ -50,6 +50,15 @@ public interface PactService {
 	Component suspendedRow(Component name);
 
 	/**
+	 * Concordance garden cohort, GC-03 (GC-P7): the act by hand that is this service's first obligation, which
+	 * PactObligations records as the practice jugcraft:garden_pact_service keyed by its spirit; null when it has none there
+	 * (Star-reckoning's stays at the observatory: StarReckoning.observed). Each garden service names its own act.
+	 */
+	default PactObligations.@Nullable Act obligation() {
+		return null;
+	}
+
+	/**
 	 * One autonomous step for {@code spirit}'s pact, run only after its decide returned IDLE (a verified presence at its
 	 * perch, its pact serving, its holder near): at most one change; the status it leaves. Default: none (Stolas).
 	 */

@@ -40,6 +40,7 @@ import io.github.jimbozoomer.jugcraft.concordance.sky.AstrolabeItem;
 import io.github.jimbozoomer.jugcraft.concordance.spire.SpireRecord;
 import io.github.jimbozoomer.jugcraft.concordance.spirits.AgreementHolder;
 import io.github.jimbozoomer.jugcraft.concordance.spirits.BoundWills;
+import io.github.jimbozoomer.jugcraft.concordance.spirits.GardenReach;
 import io.github.jimbozoomer.jugcraft.concordance.spirits.GatheringShadeEntity;
 import io.github.jimbozoomer.jugcraft.concordance.spirits.PactHistory;
 import io.github.jimbozoomer.jugcraft.concordance.spirits.PactKeeping;
@@ -59,6 +60,7 @@ import io.github.jimbozoomer.jugcraft.config.JugcraftConfig;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 import java.util.function.Predicate;
 import java.util.function.UnaryOperator;
@@ -117,7 +119,8 @@ import org.jspecify.annotations.Nullable;
  * suspension onto its Bound Will once (D-02); a pact perch keeps its owner and pact through a save, and holds nothing a
  * hopper, an explosion or the switch can take (D-04); and a pact, its escrow and the day's reckoning survive a restart, a
  * suspended or upkeep-held pact staying held with its clock (D-05). D-08: a workshop hand saves only its claim's id and its
- * anchor, the anchor its post, and a claim in progress survives a restart.
+ * anchor, the anchor its post, and a claim in progress survives a restart. The garden cohort, GC-03: a bed's tending window
+ * and a pact presence's service memory are never saved.
  */
 public class ConcordancePersistenceGameTests {
 	private static JsonElement json(String text) {
@@ -719,6 +722,47 @@ public class ConcordancePersistenceGameTests {
 		copy.load(TagValueInput.create(ProblemReporter.DISCARDING, level.registryAccess(), body));
 		helper.assertTrue(body.getIntOr(Saved.VERSION, 0) == 1 && presence.perch().equals(copy.perch()) && presence.record().equals(copy.record())
 				&& owner.getUUID().equals(copy.owner()), "Stolas saves his perch, record and holder at version 1");
+		helper.succeed();
+	}
+
+	/**
+	 * The garden cohort, GC-03 (GB14, S6): the groundwork saves nothing. A bed's tending window is memory only: tended, its save
+	 * holds no key it did not hold before, and read back it may be tended again at once. A pact presence's service memory (a
+	 * garden spirit's bed index) is never written: read back, the presence keeps its record and makes its memory afresh.
+	 */
+	@GameTest(maxTicks = 20)
+	public void theGardenGroundworkSavesNothing(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		BlockPos bedAt = new BlockPos(5, 1, 5);
+		helper.setBlock(bedAt, Garden.VERDANT_BED);
+		VerdantBedBlockEntity bed = (VerdantBedBlockEntity) level.getBlockEntity(helper.absolutePos(bedAt));
+		bed.awaken(new UUID(30L, 9L));
+		bed.setStrain(2);
+		long now = level.getGameTime() + 10_000L;
+		Set<String> keys = Set.copyOf(bed.saveWithoutMetadata(level.registryAccess()).keySet());
+		helper.assertTrue(bed.tend(now) && bed.strain() == 1 && !bed.mayTendAt(now + 1), "Tended, its window is open, in memory");
+		CompoundTag saved = bed.saveWithoutMetadata(level.registryAccess());
+		helper.assertTrue(saved.keySet().equals(keys) && loadBed(level, bed, saved).mayTendAt(now + 1),
+				"Its save holds no new key, and read back it may be tended again at once (GB14): " + saved.keySet());
+		ServerPlayer owner = ConcordanceWorkerGameTests.ready(level, TestPlayers.mock(helper));
+		BlockPos at = new BlockPos(2, 1, 2);
+		ConcordanceWorkerGameTests.acceptedAt(helper, owner, at);
+		owner.closeContainer();
+		PactPerchBlockEntity perch = helper.getBlockEntity(at, PactPerchBlockEntity.class);
+		StolasEntity presence = (StolasEntity) level.getEntity(perch.holder().spirit());
+		BlockPos centre = helper.absolutePos(bedAt);
+		GardenReach kept = new GardenReach(centre, 8, found -> false);
+		helper.assertTrue(presence.serviceMemory(GardenReach.class, () -> kept) == kept
+				&& presence.serviceMemory(GardenReach.class, () -> new GardenReach(centre, 8, found -> true)) == kept,
+				"A presence keeps its service's memory between asks");
+		TagValueOutput out = TagValueOutput.createWithContext(ProblemReporter.DISCARDING, level.registryAccess());
+		presence.saveWithoutId(out);
+		CompoundTag body = out.buildResult();
+		StolasEntity copy = Workers.STOLAS.create(level, EntitySpawnReason.LOAD);
+		copy.load(TagValueInput.create(ProblemReporter.DISCARDING, level.registryAccess(), body));
+		GardenReach fresh = new GardenReach(centre, 8, found -> false);
+		helper.assertTrue(presence.record().equals(copy.record()) && copy.serviceMemory(GardenReach.class, () -> fresh) == fresh,
+				"Read back, it keeps its record and makes its memory afresh: nothing of it was saved");
 		helper.succeed();
 	}
 

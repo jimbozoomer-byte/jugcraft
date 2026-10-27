@@ -18,6 +18,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+import java.util.function.Supplier;
 import java.util.function.ToLongFunction;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
@@ -134,6 +135,12 @@ public abstract class PactSpiritEntity<T extends PactSpiritEntity<T>> extends Wo
 	/** GC-02: what a service's step has it look at (a bed, a reservoir), and until when (game time); memory only, never saved. */
 	private @Nullable BlockPos working;
 	private long workingUntil;
+	/**
+	 * Concordance garden cohort, GC-03: what this presence's service keeps between its thinks (a garden spirit's bed index
+	 * and what it remembers today), made the first time it is asked; never saved and lost with the entity, so nothing is owed
+	 * or held across a restart or an unload (S6).
+	 */
+	private @Nullable Object serviceMemory;
 
 	protected PactSpiritEntity(EntityType<? extends PathfinderMob> type, Level level, Body body) {
 		super(type, level);
@@ -141,6 +148,14 @@ public abstract class PactSpiritEntity<T extends PactSpiritEntity<T>> extends Wo
 		this.cued = new long[body.cues().size()];
 		setNoGravity(true);
 		Arrays.fill(cued, Long.MIN_VALUE / 2);
+	}
+
+	/** {@code type}'s memory for this presence, made by {@code fresh} the first time it is asked (or when another type was kept). */
+	public final <M> M serviceMemory(Class<M> type, Supplier<M> fresh) {
+		if (!type.isInstance(serviceMemory)) {
+			serviceMemory = fresh.get();
+		}
+		return type.cast(serviceMemory);
 	}
 
 	public static AttributeSupplier.Builder createAttributes() {

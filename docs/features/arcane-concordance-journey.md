@@ -151,6 +151,16 @@ Stolas found through Styx or without him, his pact kept and ended, and the works
 | 8. With Stolas's Regard mastered, bind a Spirit Anchor to your Courier Post with a Porter Key and seal a workshop hand there: it carries the post's exact requests, a crucible's own shortage among them, as a spirit's service. The anchor's soul lantern is the Nether's: the one step that leaves the Overworld | nothing new | Spirit Anchor, Courier Post, Porter Key | `theHandNeedsStolasRegardMastered`, `aHandFillsACrucibleUntilItIsFull`, `aHandsServiceIsASpiritsService`, `thePactHallFromStyxToDeparture` |
 | 9. Keep the pact with one offering a week (an amethyst shard, or one of Styx's flowers): one missed is warned, graced a day and then suspends the service, nothing taken; an offering resumes it, and time away is never owed. End it at the perch or from the roster: what was paid ahead comes back once, and Stolas departs | nothing new | nothing new | `upkeepWarnsThenSuspendsAfterGraceAndResumes`, `aReturnAfterAbsenceGetsTheFullGrace`, `endingReturnsTheEscrowOnce`, `endingAnOrphanReturnsItsEscrowOnce`, `thePactHallFromStyxToDeparture` |
 
+### The garden pacts
+
+The Garden's Regard found without Styx or Stolas, then each garden spirit's pact as its unit adds it (the garden cohort). No stage route: one player alone does each step in the Overworld, with the research understood so far, nothing mastered and no structure loot. Its mastery needs three garden spirits' first obligations, so no step reaches it until three ship.
+
+| Step | Understands | Makes or places | Server game tests |
+|---|---|---|---|
+| 1. With the Binding Arts and Verdant Husbandry understood, craft a Sunpetal (or take any garden specimen: a Dewmoss, Gloamcap, Mendvetch or Verdant Chaff) and examine it, sneaking and using it in the air; its tooltip and the codex's Binding category say what it teaches | First Light, Binding Arts, Verdant Husbandry | Sunpetal | `theGardensRegardSpecimensSayWhatTheyTeach`, `theGardensRegardIsReachable` |
+| 2. Lay a Verdant Bed, grow a Sunpetal (or any organism crop) on it and harvest it ripe by hand | nothing new | Verdant Bed | `theGardensRegardAdvancesByHandAndByAWorker`, `theGardensRegardIsReachable` |
+| 3. Keep a bound worker at its work: a familiar's mending, a spirit's delivery or a construct's trip (a Hearthling bound with a Bonding Charm is one). The Garden's Regard is understood, and no research notes stand in for any of its evidence | nothing new | Bonding Charm | `theGardensRegardAdvancesByHandAndByAWorker`, `notesNeverStandInForTheGardensRegard`, `theGardensRegardIsReachable` |
+
 ### Cooperative play
 
 | Shared, and what stays one player's | Server game tests |

@@ -1,0 +1,53 @@
+{
+  "schema": 1,
+  "principle": "tether",
+  "tradition": "spiritbinders",
+  "stage": "practitioner",
+  "icon": "jugcraft:verdant_bed",
+  "requires": [
+    {
+      "research": "jugcraft:binding_arts",
+      "state": "understood"
+    },
+    {
+      "research": "jugcraft:verdant_husbandry",
+      "state": "understood"
+    }
+  ],
+  "states": {
+    "encountered": {
+      "any": [
+        {
+          "type": "examine",
+          "specimens": "#jugcraft:garden_regard_specimens"
+        }
+      ]
+    },
+    "observed": {
+      "any": [
+        {
+          "type": "practice",
+          "activity": "jugcraft:cultivation"
+        }
+      ]
+    },
+    "understood": {
+      "any": [
+        {
+          "type": "practice",
+          "activity": "jugcraft:worker_service"
+        }
+      ]
+    },
+    "mastered": {
+      "any": [
+        {
+          "type": "practice",
+          "activity": "jugcraft:garden_pact_service",
+          "distinct": 3
+        }
+      ]
+    }
+  },
+  "unlocks": {}
+}
