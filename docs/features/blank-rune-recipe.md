@@ -36,6 +36,7 @@ One recipe file is added back. No IDs, saved data or items change.
 - New game test `JimtaSpellbookCurioGameTests.blankRunesCraftFromStoneWithoutSpendingARune`: stone and arcane essence find a crafting recipe that makes two blank runes.
 - Local: `python tools/generate_material_data.py` restored `data/jugcraft/recipe/jimta_spellbooks_blank_rune.json`. `python tools/check_mod_data.py` passed (7,797 material IDs, data files and recipe audit) and `python scripts/check_repository.py` passed.
 - CI: fork [run 40424498934](https://github.com/mmme123-spec/jugcraftfork/actions/runs/40424498934) on 23fa9dc18: green. The mod built, the generated-data and material checks passed, the server game tests passed (with and without optional integrations), and all sixteen client shards passed.
+- After merging main (5b8d6520c): fork [run 40464336073](https://github.com/mmme123-spec/jugcraftfork/actions/runs/40464336073) on b1650fa32, green, every job and all sixteen client shards.
 
 Not run: a human crafting runes in game.
 
