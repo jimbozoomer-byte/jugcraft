@@ -17131,9 +17131,18 @@ def registered_items():
     return registered
 
 
+def check_display_names():
+    """No two registered items share an English name (tools/display_names.py renames the supplied collections' copies)."""
+    import display_names
+    lang = load(ASSETS / "lang" / "en_us.json") or {}
+    for name, ids in sorted(display_names.duplicates(lang, display_names.registered(ASSETS)).items()):
+        err(f"{len(ids)} items share the name {name!r}: {', '.join(sorted(ids))}; give them names of their own in tools/display_names.py")
+
+
 def main():
     registered=registered_items()
     check_assets(sorted(registered))
+    check_display_names()
     check_model_textures()
     check_petro()
     check_loot(registered)

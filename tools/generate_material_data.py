@@ -1897,6 +1897,9 @@ def main():
     diagonal_connections.write_all(write, ASSETS, RES / 'assets/minecraft')
     import walnut_data
     walnut_data.reconcile(write)
+    # Last of the names: no two items may share one, whichever collection wrote it.
+    import display_names
+    display_names.apply(write, ASSETS)
     from generated_resource_cleanup import prune
     prune(RES, previous, WRITTEN_RESOURCES)
     # Include finished server recipes after removing obsolete generated recipes.
