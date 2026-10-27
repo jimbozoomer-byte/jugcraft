@@ -51,6 +51,7 @@ No IDs change; saved items keep working. An item renamed with an anvil keeps its
 - `python tools/generate_material_data.py` twice: the second run left the language file byte-identical (CI checks generated files are up to date).
 - `python tools/check_mod_data.py` with the new duplicate-name check passed (7,797 material IDs); on `main`'s language file the same check finds the 163 shared names. `python scripts/check_repository.py` and `python -m unittest discover -s scripts/tests` passed.
 - CI: fork [run 40428945415](https://github.com/mmme123-spec/jugcraftfork/actions/runs/40428945415) on b4dca49b3: green. The mod built, the generated-data and material checks passed, the server game tests passed (with and without optional integrations), and all sixteen client shards passed.
+- After merging main (5b8d6520c): fork [run 40465638863](https://github.com/mmme123-spec/jugcraftfork/actions/runs/40465638863) on e1c14b945, green, every job and all sixteen client shards.
 - No game test reads these display names.
 
 Not run: a human reading the names in game or in a recipe viewer.
