@@ -134,7 +134,7 @@ Every finished island and ruin stays in the world and in the saved records indef
 - a sky island is refused by a block in its margin, too little clearance, the top of the world, or a claim;
 - a sky island is refused over the town even far above the town's own 96-block protection. The test places a town for a moment and forgets it before returning; a town another test placed is checked by column only. Planning in unloaded land is refused (for sky islands and surface ruins) and loads nothing;
 - a standing sky island keeps another away, and once it is undone the place is free again;
-- the three surface ruins build whole and come down the same way, and a hut turned to the south has its window in the south wall;
+- the three surface ruins, on a field of grass blocks (survival terrain), build whole and come down the same way, and a hut turned to the south has its window in the south wall;
 - a surface ruin is refused by a player's build in its margin or a bump in its floor. A circle is refused under leaves. A standing ruin keeps another away.
 
 Not yet verified: compilation, any test run, rendering in a client (a gallery is planned by OpenAI Codex), and play.

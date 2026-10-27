@@ -258,10 +258,11 @@ public class HerobrineSkyGameTests {
 
 	// Surface ruins.
 
+	/** Survival ground for the surface ruins: a level field of grass blocks. */
 	private static void platform(GameTestHelper helper) {
 		for (int x = 0; x < 48; x++) {
 			for (int z = 0; z < 48; z++) {
-				helper.setBlock(new BlockPos(x, GROUND, z), Blocks.STONE);
+				helper.setBlock(new BlockPos(x, GROUND, z), Blocks.GRASS_BLOCK);
 			}
 		}
 	}
@@ -270,7 +271,7 @@ public class HerobrineSkyGameTests {
 		return helper.absolutePos(new BlockPos(x, GROUND + 1, z));
 	}
 
-	/** Each surface ruin, on open stone, built whole facing who it was turned to, and taken back. */
+	/** Each surface ruin, on open grassland, built whole facing who it was turned to, and taken back. */
 	@GameTest(structure = ARENA, padding = 48, skyAccess = true, maxTicks = 20)
 	public void surfaceRuinsBuildWholeAndComeDown(GameTestHelper helper) {
 		platform(helper);
@@ -280,7 +281,7 @@ public class HerobrineSkyGameTests {
 			String variant = HerobrineSurfacePlans.VARIANTS.get(i);
 			BlockPos feet = feet(helper, sites[i][0], sites[i][1]);
 			HerobrineMarkPlans.Plan plan = HerobrineSurfacePlans.plan(level, feet, variant, feet.south(10), false);
-			helper.assertTrue(plan != null, "Open, level stone should take a " + variant);
+			helper.assertTrue(plan != null, "Open, level grassland should take a " + variant);
 			helper.assertTrue(plan.type() == HerobrineMarkPlans.Type.SURFACE_RUIN, "It is a surface ruin");
 			if (variant.equals(HerobrineSurfacePlans.WATCHING_HUT)) {
 				// Turned to the south, its window (one block up in the south wall) looks that way.
@@ -300,7 +301,7 @@ public class HerobrineSkyGameTests {
 		ServerLevel level = helper.getLevel();
 		BlockPos feet = feet(helper, 24, 24);
 		String hut = HerobrineSurfacePlans.WATCHING_HUT;
-		helper.assertTrue(HerobrineSurfacePlans.plan(level, feet, hut, null, false) != null, "Open stone should take a hut");
+		helper.assertTrue(HerobrineSurfacePlans.plan(level, feet, hut, null, false) != null, "Open grassland should take a hut");
 		level.setBlockAndUpdate(feet.east(6), Blocks.OAK_PLANKS.defaultBlockState());
 		helper.assertTrue(HerobrineSurfacePlans.plan(level, feet, hut, null, false) == null, "Planks within its margin should refuse it");
 		level.setBlockAndUpdate(feet.east(6), Blocks.AIR.defaultBlockState());
@@ -309,7 +310,7 @@ public class HerobrineSkyGameTests {
 		level.setBlockAndUpdate(feet.offset(1, 0, 1), Blocks.AIR.defaultBlockState());
 		// Leaves over the middle: a circle needs a clearing.
 		String circle = HerobrineSurfacePlans.RITUAL_CIRCLE;
-		helper.assertTrue(HerobrineSurfacePlans.plan(level, feet, circle, null, false) != null, "Open stone should take a circle");
+		helper.assertTrue(HerobrineSurfacePlans.plan(level, feet, circle, null, false) != null, "Open grassland should take a circle");
 		for (int dx = -1; dx <= 1; dx++) {
 			for (int dz = -1; dz <= 1; dz++) {
 				level.setBlockAndUpdate(feet.offset(dx, 5, dz), Blocks.OAK_LEAVES.defaultBlockState());
