@@ -367,4 +367,46 @@ public class HerobrineGameTests {
 			helper.succeed();
 		});
 	}
+
+	/** Regression: a player's count of ticks seeing him restarts whenever they look away, so glimpses never add up. */
+	@GameTest(structure = ARENA, padding = 48, maxTicks = 80)
+	public void scatteredGlimpsesDoNotAddUpToASighting(GameTestHelper helper) {
+		floor(helper);
+		ServerPlayer player = player(helper, new BlockPos(24, 1, 4), 0.0F);
+		Herobrine herobrine = place(helper, player, new BlockPos(24, 1, 40), Herobrine.Kind.DISTANT);
+		// Three rounds of 6 ticks looking and 3 looking away: 18 ticks of glimpses, never 10 in a row.
+		for (int tick = 1; tick <= 27; tick++) {
+			float yaw = (tick - 1) % 9 < 6 ? 0.0F : 180.0F;
+			helper.runAfterDelay(tick, () -> {
+				player.snapTo(player.getX(), player.getY(), player.getZ(), yaw, 0.0F);
+				player.setYHeadRot(yaw);
+			});
+		}
+		helper.runAfterDelay(29, () -> {
+			helper.assertTrue(herobrine.isAlive() && herobrine.witnesses().isEmpty(),
+					"Scattered glimpses should not count as seeing him: " + herobrine.witnesses());
+			player.snapTo(player.getX(), player.getY(), player.getZ(), 0.0F, 0.0F);
+			player.setYHeadRot(0.0F);
+			helper.runAfterDelay(Herobrine.SEEN_TICKS + 3, () -> {
+				helper.assertTrue(herobrine.witnesses().contains(player.getUUID()), "A steady look should count as seeing him");
+				herobrine.discard();
+				helper.succeed();
+			});
+		});
+	}
+
+	/** Regression: a line of sight is only cast over loaded chunks, and checking one never loads a chunk. */
+	@GameTest(structure = ARENA, padding = 48, maxTicks = 20)
+	public void aLineOfSightNeverLoadsAChunk(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		Vec3 here = helper.absoluteVec(new Vec3(4.5, 2.0, 4.5));
+		Vec3 across = helper.absoluteVec(new Vec3(43.5, 2.0, 43.5));
+		helper.assertTrue(HerobrineEncounters.corridorLoaded(level, here, across), "A line across the loaded arena should be clear to cast");
+		Vec3 far = here.add(30000.0, 0.0, 70.0);
+		BlockPos farChunk = BlockPos.containing(far);
+		helper.assertTrue(!level.hasChunkAt(farChunk), "The far point should start unloaded");
+		helper.assertTrue(!HerobrineEncounters.corridorLoaded(level, here, far), "A line into unloaded land should not be cast");
+		helper.assertTrue(!level.hasChunkAt(farChunk), "Checking the line should not have loaded the far chunk");
+		helper.succeed();
+	}
 }

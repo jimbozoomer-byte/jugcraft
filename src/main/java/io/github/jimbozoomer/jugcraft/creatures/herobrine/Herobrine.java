@@ -4,6 +4,7 @@ import java.util.ArrayDeque;
 import java.util.Collections;
 import java.util.Deque;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
@@ -264,7 +265,13 @@ public final class Herobrine extends PathfinderMob {
 		return true;
 	}
 
+	/**
+	 * Counts, for each player, the ticks in a row he has been on their screen while they were attentive; any other tick
+	 * (looking away, something in the way, distracted, out of range) starts their count again. {@value #SEEN_TICKS} in
+	 * a row makes them a witness: scattered glimpses never add up to a sighting.
+	 */
 	private void noteWitnesses(ServerLevel level) {
+		Set<UUID> watchingNow = new HashSet<>();
 		for (Player player : level.getEntitiesOfClass(Player.class, getBoundingBox().inflate(WITNESS_RANGE),
 				p -> !p.isSpectator() && p.isAlive())) {
 			// Only someone paying attention can see him: not idle, asleep, in a menu or in danger.
@@ -272,11 +279,12 @@ public final class Herobrine extends PathfinderMob {
 					|| !HerobrineEncounters.attentive(watcher, level.getServer().getTickCount()) || !isOnScreenOf(player)) {
 				continue;
 			}
-			int ticks = watching.merge(player.getUUID(), 1, Integer::sum);
-			if (ticks >= SEEN_TICKS) {
+			watchingNow.add(player.getUUID());
+			if (watching.merge(player.getUUID(), 1, Integer::sum) >= SEEN_TICKS) {
 				witness(player);
 			}
 		}
+		watching.keySet().retainAll(watchingNow);
 	}
 
 	private void witness(Player player) {
@@ -293,12 +301,17 @@ public final class Herobrine extends PathfinderMob {
 
 	/** Whether he is on {@code player}'s screen, in range, with nothing in the way. */
 	public boolean isOnScreenOf(Player player) {
-		return within(player, ON_SCREEN_COSINE) && distanceToSqr(player) <= WITNESS_RANGE * WITNESS_RANGE && player.hasLineOfSight(this);
+		return within(player, ON_SCREEN_COSINE) && distanceToSqr(player) <= WITNESS_RANGE * WITNESS_RANGE && clearSight(player);
 	}
 
 	/** Whether {@code player} is looking straight at him, with nothing in the way. */
 	public boolean isStaredAtBy(Player player) {
-		return within(player, variant.kind == Kind.CLOSE ? CLOSE_STARE_COSINE : DISTANT_STARE_COSINE) && player.hasLineOfSight(this);
+		return within(player, variant.kind == Kind.CLOSE ? CLOSE_STARE_COSINE : DISTANT_STARE_COSINE) && clearSight(player);
+	}
+
+	/** A line of sight, cast only when every chunk along it is already loaded: a look never loads the world. */
+	private boolean clearSight(Player player) {
+		return HerobrineEncounters.corridorLoaded(level(), player.getEyePosition(), getEyePosition()) && player.hasLineOfSight(this);
 	}
 
 	private boolean within(Player player, double cosine) {
