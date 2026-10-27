@@ -33,9 +33,10 @@ public final class IndustrialCables {
     public static final BooleanProperty ACTIVE=BlockStateProperties.POWERED;
     public static BlockEntityType<DetectorNode> TYPE;
     static {
-        SPECS.put("copper",new Spec(4,128,false));SPECS.put("insulated_copper",new Spec(6,128,true));
+        // Copper carries what Jugcraft copper does; iron, a poor conductor, sits just above tin. Insulation only changes the look.
+        SPECS.put("copper",new Spec(4,256,false));SPECS.put("insulated_copper",new Spec(6,256,true));
         SPECS.put("gold",new Spec(3,512,false));SPECS.put("insulated_gold",new Spec(6,512,true));SPECS.put("double_insulated_gold",new Spec(6,512,true));
-        SPECS.put("iron",new Spec(6,2048,false));SPECS.put("insulated_iron",new Spec(10,2048,true));SPECS.put("double_insulated_iron",new Spec(10,2048,true));SPECS.put("quad_insulated_iron",new Spec(12,2048,true));
+        SPECS.put("iron",new Spec(6,64,false));SPECS.put("insulated_iron",new Spec(10,64,true));SPECS.put("double_insulated_iron",new Spec(10,64,true));SPECS.put("quad_insulated_iron",new Spec(12,64,true));
         SPECS.put("glass",new Spec(4,8192,true));SPECS.put("tin",new Spec(4,32,false));SPECS.put("insulated_tin",new Spec(6,32,true));
         SPECS.put("detector",new Spec(8,8192,false));SPECS.put("splitter",new Spec(8,8192,false));
     }
