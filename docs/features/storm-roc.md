@@ -82,6 +82,7 @@ A participant is a player who hurt him or his fledglings, or stood by the rod th
 - His numbers keep to the playbook's envelope: health 400, ×2.5 cap, armour 8, tells of 1.0 to 1.5 s for his attacks and 4 s for his dive (an arena action).
 - A Thunder Vane is spent each time; his loot is rolled once per participant per kill.
 - No conversion loop: a Roc Feather makes four feathers, and nothing makes Roc Feathers (the audit checks every recipe). Two Roc Feathers make a vane, and a vane makes nothing.
+- Essence: since any item can be formed from essence, a Roc Feather is valued at its four feathers (192), not the fallback of 1, so forming one and breaking it gains nothing (`tools/build_alchemy_values.py`, tested in `scripts/tests/test_alchemy_values.py`). The Thunder Vane takes its cheaper recipe's value (1856, by Roc Feathers). The lens and the crest, which nothing makes or breaks down, have the fallback.
 
 ## Multiplayer and persistence
 - **Server authority.** His phases, dives, the lane, grounding, attacks, fledglings and loot all run on the server; the lane's sparks, the rings and the wind's arrows are the server's particles.
@@ -131,6 +132,7 @@ A participant is a player who hurt him or his fledglings, or stood by the rod th
   - Breaking the Java on purpose failed `check_storm_roc` 6 times out of 6: an attack's wind-up, where he lands, the grounding's reach, the grounded multiplier, the lens's registration and the fledgling's glow layer. Each file was restored afterwards.
   - `python3 tools/check_icon_maps.py` on the three maps: PASS.
   - `javac`, syntax only, on the new and changed Java: no parse errors (the game compiles only in CI).
+  - `values.json` was edited by hand to match what `tools/build_alchemy_values.py` gives, since that needs the Minecraft jar, which is not here. `scripts/tests/test_alchemy_values.py`: PASS.
 
 ## World and event applicability
 
