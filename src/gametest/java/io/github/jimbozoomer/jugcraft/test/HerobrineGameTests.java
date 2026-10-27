@@ -1,5 +1,11 @@
 package io.github.jimbozoomer.jugcraft.test;
 
+import io.github.jimbozoomer.jugcraft.artillery.AutomatedDefense;
+import io.github.jimbozoomer.jugcraft.styx.JugcraftStyx;
+import io.github.jimbozoomer.jugcraft.styx.Styxhexenhammer;
+import io.github.jimbozoomer.jugcraft.town.JugcraftTown;
+import io.github.jimbozoomer.jugcraft.town.TownData;
+import io.github.jimbozoomer.jugcraft.town.Townsfolk;
 import io.github.jimbozoomer.jugcraft.creatures.herobrine.Herobrine;
 import io.github.jimbozoomer.jugcraft.creatures.herobrine.HerobrineDirector;
 import io.github.jimbozoomer.jugcraft.creatures.herobrine.HerobrineEncounters;
@@ -10,10 +16,14 @@ import java.util.UUID;
 import net.fabricmc.fabric.api.gametest.v1.GameTest;
 import net.minecraft.core.BlockPos;
 import net.minecraft.gametest.framework.GameTestHelper;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.contents.TranslatableContents;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.util.Mth;
 import net.minecraft.world.effect.MobEffects;
+import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.phys.Vec3;
 
@@ -434,5 +444,72 @@ public class HerobrineGameTests {
 			herobrine.discard();
 			helper.succeed();
 		});
+	}
+
+	/** A guard turns to look at him for a moment, and never makes him a target (he is no monster and no enemy). */
+	@GameTest(structure = ARENA, padding = 48, maxTicks = 80)
+	public void aGuardGlancesButNeverTargetsHim(GameTestHelper helper) {
+		floor(helper);
+		ServerLevel level = helper.getLevel();
+		ServerPlayer player = player(helper, new BlockPos(24, 1, 4), 180.0F);
+		Herobrine herobrine = place(helper, player, new BlockPos(24, 1, 40), Herobrine.Kind.DISTANT);
+		helper.assertTrue(!AutomatedDefense.hostile(herobrine), "No defence should count him hostile");
+		BlockPos post = helper.absolutePos(new BlockPos(10, 1, 30));
+		Townsfolk guard = new Townsfolk(JugcraftTown.TOWNSFOLK, level);
+		guard.setUp(new TownData.Spot(-1, "guard", null, "Test guard", "guard_blue", BlockPos.ZERO), post);
+		guard.snapTo(post.getX() + 0.5, post.getY(), post.getZ() + 0.5, 0.0F, 0.0F);
+		level.addFreshEntity(guard);
+		helper.runAfterDelay(30, () -> {
+			double want = Math.toDegrees(Math.atan2(herobrine.getZ() - guard.getZ(), herobrine.getX() - guard.getX())) - 90.0;
+			helper.assertTrue(guard.getTarget() == null, "The guard should not make him a target");
+			helper.assertTrue(Math.abs(Mth.wrapDegrees(guard.getYHeadRot() - want)) < 30.0,
+					"The guard should look his way: head " + guard.getYHeadRot() + ", towards him " + want);
+			guard.discard();
+			herobrine.discard();
+			helper.succeed();
+		});
+	}
+
+	/** A Cursed Mirror's reflection keeps the close-encounter rules, and is quiet: no Darkness. */
+	@GameTest(structure = ARENA, padding = 48, maxTicks = 60)
+	public void aMirrorReflectionIsQuietAndKeepsTheRules(GameTestHelper helper) {
+		floor(helper);
+		ServerPlayer player = player(helper, new BlockPos(24, 1, 24), 0.0F);
+		HerobrineEncounters.Attempt early = HerobrineEncounters.reflection(player);
+		helper.assertTrue(!early.placed() && early.failure() == HerobrineDirector.Failure.TARGET_UNSAFE,
+				"A newcomer should not see a reflection first: " + early.failure());
+		Herobrine watcher = place(helper, player, new BlockPos(24, 1, 44), Herobrine.Kind.DISTANT);
+		helper.runAfterDelay(Herobrine.SEEN_TICKS + 4, () -> {
+			helper.assertTrue(HerobrineEncounters.introduced(player.getUUID()), "The player should have seen the watcher");
+			watcher.discard();
+			HerobrineEncounters.Attempt reflection = HerobrineEncounters.reflection(player);
+			helper.assertTrue(reflection.placed() && reflection.herobrine().variant() == Herobrine.Variant.BEHIND,
+					"Now the mirror may show him behind them: " + reflection.failure());
+			helper.assertTrue(!player.hasEffect(MobEffects.DARKNESS), "A reflection brings no Darkness");
+			reflection.herobrine().discard();
+			helper.succeed();
+		});
+	}
+
+	/** Styxhexenhammer recognises what a player has seen, and only then says so. */
+	@GameTest(structure = ARENA, padding = 48, maxTicks = 60)
+	public void styxKnowsWhatYouSaw(GameTestHelper helper) {
+		floor(helper);
+		ServerLevel level = helper.getLevel();
+		ServerPlayer player = player(helper, new BlockPos(24, 1, 4), 0.0F);
+		Styxhexenhammer styx = JugcraftStyx.WIZARD.create(level, EntitySpawnReason.EVENT);
+		helper.assertTrue(styx != null, "Styx should exist");
+		helper.assertTrue(styx.says(player).stream().noneMatch(HerobrineGameTests::aboutHim), "He should say nothing of it before");
+		Herobrine herobrine = place(helper, player, new BlockPos(24, 1, 40), Herobrine.Kind.DISTANT);
+		helper.runAfterDelay(Herobrine.SEEN_TICKS + 4, () -> {
+			helper.assertTrue(HerobrineEncounters.hasSeen(player.getUUID()), "The player should have seen him");
+			helper.assertTrue(styx.says(player).stream().anyMatch(HerobrineGameTests::aboutHim), "Styx should recognise it now");
+			herobrine.discard();
+			helper.succeed();
+		});
+	}
+
+	private static boolean aboutHim(Component line) {
+		return line.getContents() instanceof TranslatableContents told && told.getKey().startsWith("message.jugcraft.styx.herobrine.");
 	}
 }

@@ -36,6 +36,9 @@ public interface HerobrineDirector {
 	/** The reservation of an encounter an operator forced with a command. */
 	long FORCED = -1L;
 
+	/** The reservation of a Cursed Mirror's reflection ({@link HerobrineEncounters#reflection}); the schedule did not ask. */
+	long MIRROR = -2L;
+
 	/** Why nothing was placed. Nothing was shown, so nothing should count as seen; the schedule may retry. */
 	enum Failure {
 		/** The player is not online, alive and in the Overworld. */
@@ -69,5 +72,13 @@ public interface HerobrineDirector {
 
 	/** Encounter {@code encounter} is over, for {@code outcome}; {@code witnesses} are everyone {@link #seen} named. */
 	default void ended(Request request, UUID encounter, Herobrine.Outcome outcome, Set<UUID> witnesses) {
+	}
+
+	/**
+	 * Whether {@code player} has ever really seen him, by the schedule's saved record (other parts of Jugcraft, such as
+	 * Styx's lines, ask through {@link HerobrineEncounters#hasSeen}). By default nobody, beyond this session's sightings.
+	 */
+	default boolean hasSeen(UUID player) {
+		return false;
 	}
 }

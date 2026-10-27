@@ -47,6 +47,14 @@ MARK_MESSAGES = {
     "left": "Herobrine is leaving a %s (mark %s)",
 }
 
+# What Styxhexenhammer says to someone who has seen Herobrine: he recognises it, and will not explain it.
+STYX_LINES = [
+    "You have the look of someone who has been watched. I know the look. I will not tell you what watched you.",
+    "White eyes at the edge of the trees? The observatory's oldest logs have a word for that. I am not going to say it.",
+    "Some things are studied. Some are only endured. Let us both pretend you did not ask.",
+    "If he leaves you a message, do not answer it. I said nothing.",
+]
+
 
 def write_all(lang):
     lang[f"entity.{MOD}.{ENTITY}"] = NAME
@@ -61,6 +69,8 @@ def write_all(lang):
         lang[f"commands.{MOD}.herobrine.failed.{failure}"] = text
     for key, text in MARK_MESSAGES.items():
         lang[f"commands.{MOD}.herobrine.marks.{key}"] = text
+    for i, line in enumerate(STYX_LINES):
+        lang[f"message.{MOD}.styx.herobrine.{i}"] = "Styxhexenhammer: " + line
 
 
 def eyes_texture():
