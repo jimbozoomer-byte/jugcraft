@@ -6087,6 +6087,7 @@ Slice 9E's files: the guns' tactical grip parts and the Laser Sight's textures m
     - `tumblerRifleFiresInBursts`: three shots three ticks apart all fire, a fourth at the next interval is refused, and after the burst's rest three more fire; six rounds are spent.
   - `HeavyBulletsGameTests.heavyBulletsAreTheOwners`: the tables with the Auger Shotgun's knockback and the Tumbler Rifle's piercing.
   - `GunsGameTests` counts 102 guns; `TacticalAttachmentsGameTests` the forty guns the Tactical Grip fits, the Tumbler among them.
+  - `BrassQuickFirersGameTests.brassQuickFirersAreRegistered` holds that no gun firing rifle rounds a pull at a time is pulled as often as the Freeholder Rifle (every 5 ticks). A burst gun's next pull comes a whole cycle later, so it counts that cycle: 14 ticks for the Tumbler. CI's first run on fed2bf354 failed this check, which had counted the Tumbler's 3 ticks between the shots of a burst. (Over a cycle the Tumbler spends 3 rounds in 14 ticks, a little more than the Freeholder's 1 in 5: it is a burst gun, compared above with the Onrush SMG and Gallant Rifle.)
   - The guns' client test (`GunsClientGameTests`) takes each new gun through its screenshots as every gun's. It fires each gun with one pull of the attack key; it now expects a burst gun's pull to spend its burst's three rounds, where it expected one.
 - **Not run:** the client by hand, a two-client dedicated server, and play.
 
