@@ -53,3 +53,64 @@ No server restart or client channel promotion has occurred for this candidate.
 The live world and player settings must be retained. Obtain owner confirmation,
 warn connected players and wait 30 seconds before a live stop/restart. Promote
 clients only after the matching server is verified healthy.
+
+## Publication and release follow-up
+
+PR #494 was squash-merged as `46bac6b349490801b3296df21ddcf2b19c778a2a`,
+following the repository's required linear history. Its tree exactly matches
+the locally tested integration. The 33 source PRs were closed as incorporated,
+not individually marked merged. PRs #496–#499 arrived during validation and are
+outside this release batch. The late #493 lightning-rod/value fixes match the
+equivalent tested fixes already integrated.
+
+The final local Python suite passes all 287 tests. All 13 diamond-steel gun tests
+and 79 updater assertions pass. Local release preflight verifies all six artifact
+hashes and identical client/server Jugcraft JARs; the server patch contains only
+`mods/jugcraft.jar`. These are preparation results, not deployment evidence.
+
+Exact-main CI passed the server suite without optional integrations, but its
+VanadiumIron client test found no ore in the 64-chunk designed volcano sample.
+The test now expands to a bounded 256-chunk sample wholly inside that painted
+volcano if necessary, retaining both natural-ore presence and zero-outcrop
+assertions. Local reproduction found 3,973 natural underground ore blocks and
+zero surface outcrops in that expanded sample. Production rarity, placement and
+terrain are unchanged. The full focused client test passed, including two natural-world surveys and
+save/reopen persistence. Remaining release CI must still pass before deployment.
+
+The same main run passed both server builds and release assembly. Its aircraft
+client check hit an unresolved-sound NPE when the headless sound engine skipped
+playback without an audio device. The test explicitly calls the 26.3
+`getOrResolve` API before reading volume and rejects missing/empty resources;
+the engine-loop, steering and both F5 camera assertions remain intact. The full
+aircraft client test passes locally in 2m38s. Runtime aircraft code is unchanged.
+
+The Pumpkin King client fixture also assumed its harvest and crowning could
+interrupt an active attack. Bounded waits now cover the longest attack plus
+the call/transition, and its artificial ripening clock crosses the actual
+swelling boundary instead of skipping over it. The complete encounter passes
+locally in 3m26s, including hand-picked gourds, all phases, loot, cleanup and a
+fresh instance. Production encounter timing is unchanged. These three client
+repairs are tracked in PR #500; no deployment has occurred.
+
+The next exact-main run passed those repaired client groups and both server
+builds, but exposed an intermittent Peepo crucible-output delivery stall.
+The inset upper crucible shell inherited a walkable-passage classification;
+the reported carrier position was against that shell's collision face.
+Workshop blocks now explicitly reject pathfinding through their parts, as the
+Hearth Oven already does. A regression checks every workshop footprint part;
+the existing full stock/delivery test still checks physical deliveries, exact
+output quantities and released reservations. The unchanged test passed locally
+(173 assertions), so this is not a claim of a reliable local reproduction.
+The repaired test and final release checks are pending. No server deployment
+or client channel promotion has occurred.
+
+PR #507 merged the workshop shell classification after all 178 local stock
+station assertions passed. Its main run then caught the same class of delivery
+stall at the Cider Press in the remaining-stock suite. Ground navigation now
+extends its existing bench/wheel/tap exclusion to every workshop, Cider Press
+and Canning Kettle, including the cell above each mechanism. Press and canning
+shells also explicitly reject walk-through paths. Tests require a reachable
+exterior route whose nodes do not cross or climb the equipment, followed by
+the real production/delivery cycles. Combined validation is pending; the live
+server and client channel remain unchanged.
+
