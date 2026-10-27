@@ -24,7 +24,8 @@ GRACE_TICKS = 1200
 IDLE_TICKS = 1800
 CLOSE_DARKNESS_TICKS = 60
 # The server option (config/jugcraft.properties) that switches the scheduled encounters off; commands work either way.
-OPTIONS = {"herobrine.haunting": "on"}
+OPTIONS = {"herobrine.haunting": "on", "herobrine.event_last_day": "2026-11-03",
+           "herobrine.timezone": "America/New_York"}
 # His eyes: the two pixels of each eye on the face (the head's front is u 8-15, v 8-15 in the player skin layout).
 EYES = ((9, 12), (10, 12), (13, 12), (14, 12))
 
