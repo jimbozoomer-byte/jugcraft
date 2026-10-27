@@ -1570,10 +1570,11 @@ SOUND_FILES = {**ember.SOUND_FILES, **strata.SOUND_FILES, **pacts.SOUND_FILES}
 def sounds():
     """Each event plays its drawn cue (tools/concordance_sounds.py), or the owner's recordings it is given instead
     (SOUND_FILES: tools/concordance_ember.py's and tools/concordance_strata.py's), or, for Stolas's cues, runtime files
-    (tools/concordance_pacts.py's), one picked at random. The Exchange artifacts' events are
-    tools/concordance_ee_artifacts.py's."""
+    (tools/concordance_pacts.py's), one picked at random; a pact cue the generator pitches (tools/concordance_pacts.py
+    SOUND_PITCH) carries its pitch. The Exchange artifacts' events are tools/concordance_ee_artifacts.py's."""
     return {**{event: {"subtitle": f"subtitles.{MOD}.{event}",
-                       "sounds": [{"name": f"{MOD}:{name}", "attenuation_distance": 16}
+                       "sounds": [dict({"name": f"{MOD}:{name}", "attenuation_distance": 16},
+                                       **({"pitch": pacts.SOUND_PITCH[event]} if event in pacts.SOUND_PITCH else {}))
                                   for name in SOUND_FILES.get(event, [f"concordance/{event.split('.', 1)[1]}"])]}
                for event in SOUND_EVENTS}, **ee_artifacts.sounds()}
 

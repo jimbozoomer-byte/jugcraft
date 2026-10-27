@@ -16,6 +16,9 @@ import io.github.jimbozoomer.jugcraft.concordance.celestial.Pattern;
 import io.github.jimbozoomer.jugcraft.concordance.courier.CourierLedger;
 import io.github.jimbozoomer.jugcraft.concordance.courier.CourierPostBlockEntity;
 import io.github.jimbozoomer.jugcraft.concordance.courier.Couriers;
+import io.github.jimbozoomer.jugcraft.concordance.garden.Garden;
+import io.github.jimbozoomer.jugcraft.concordance.garden.VerdantBedBlock;
+import io.github.jimbozoomer.jugcraft.concordance.garden.VerdantBedBlockEntity;
 import io.github.jimbozoomer.jugcraft.concordance.journal.Journal;
 import io.github.jimbozoomer.jugcraft.concordance.journal.JournalSection;
 import io.github.jimbozoomer.jugcraft.concordance.logistics.Logistics;
@@ -36,13 +39,16 @@ import io.github.jimbozoomer.jugcraft.concordance.sky.Sky;
 import io.github.jimbozoomer.jugcraft.concordance.spirits.AgreementHolder;
 import io.github.jimbozoomer.jugcraft.concordance.spirits.BondingCharmItem;
 import io.github.jimbozoomer.jugcraft.concordance.spirits.BoundWills;
+import io.github.jimbozoomer.jugcraft.concordance.spirits.BuerEntity;
 import io.github.jimbozoomer.jugcraft.concordance.spirits.ClockworkPorterEntity;
 import io.github.jimbozoomer.jugcraft.concordance.spirits.GardenPacts;
+import io.github.jimbozoomer.jugcraft.concordance.spirits.GardenReach;
 import io.github.jimbozoomer.jugcraft.concordance.spirits.GatheringShadeEntity;
 import io.github.jimbozoomer.jugcraft.concordance.spirits.HearthlingEntity;
 import io.github.jimbozoomer.jugcraft.concordance.spirits.PactHistory;
 import io.github.jimbozoomer.jugcraft.concordance.spirits.PactKeeping;
 import io.github.jimbozoomer.jugcraft.concordance.spirits.PactMenu;
+import io.github.jimbozoomer.jugcraft.concordance.spirits.PactObligations;
 import io.github.jimbozoomer.jugcraft.concordance.spirits.PactPerchBlockEntity;
 import io.github.jimbozoomer.jugcraft.concordance.spirits.PactReading;
 import io.github.jimbozoomer.jugcraft.concordance.spirits.PactRequestPayload;
@@ -61,6 +67,7 @@ import io.github.jimbozoomer.jugcraft.concordance.spirits.SpiritAnchorBlockEntit
 import io.github.jimbozoomer.jugcraft.concordance.spirits.StarReckoning;
 import io.github.jimbozoomer.jugcraft.concordance.spirits.StolasEntity;
 import io.github.jimbozoomer.jugcraft.concordance.spirits.StolasRegard;
+import io.github.jimbozoomer.jugcraft.concordance.spirits.StrainTending;
 import io.github.jimbozoomer.jugcraft.concordance.spirits.WorkerEntity;
 import io.github.jimbozoomer.jugcraft.concordance.spirits.WorkerRoster;
 import io.github.jimbozoomer.jugcraft.concordance.spirits.Workers;
@@ -3676,7 +3683,12 @@ public class ConcordanceWorkerGameTests {
 		helper.succeed();
 	}
 
-	/** GC-01 (GB4): one pact without its perch: the seat page shows it, lists nothing, names its spirit; an END past the one-entry list is not offered; SEAT seats it at the new perch, its spirit called there. GC-04 adds the two-spirit half. */
+	/**
+	 * GC-01 (GB4): one pact without its perch: the seat page shows it, lists nothing, names its spirit; an END past the one-entry
+	 * list is not offered; SEAT seats it at the new perch, its spirit called there. GC-04's half, with a second spirit: two
+	 * pacts without their perch are both listed by sign and name, the first's terms shown; CHOOSE (the state alone) shows the
+	 * other's; SEAT seats the one chosen; another empty perch then shows the one left alone, and END ends it with its escrow once.
+	 */
 	@GameTest(maxTicks = 20)
 	public void aStrandedPactOfAnySpiritIsSeatedOrEnded(GameTestHelper helper) {
 		ServerLevel level = helper.getLevel();
@@ -3699,6 +3711,52 @@ public class ConcordanceWorkerGameTests {
 		helper.assertTrue(answered(seated, AgreementHolder.Seat.SEATED.id) && seated.mode() == PactStatePayload.KEEP
 				&& Couriers.place(level, helper.absolutePos(second)).equals(BoundWills.of(level.getServer()).ledger().get(record).pact().place())
 				&& stolas(level, perch) != null, "SEAT seats it here, and Stolas is called to the new perch");
+		keeper.closeContainer();
+		// GC-04's half: two pacts without their perch, Stolas's (an offering paid ahead) and Buer's.
+		ServerPlayer both = regarded(helper);
+		long g1 = level.getGameTime();
+		BlockPos stolasAt = new BlockPos(1, 1, 5);
+		PactPerchBlockEntity stolasPerch = stolasPact(helper, both, stolasAt, g1);
+		UUID stolasRecord = stolasPerch.holder().agreement().record();
+		give(both, new ItemStack(Items.AMETHYST_SHARD, 1));
+		helper.assertValueEqual(PactKeeping.deposit(level, both, stolasPerch.holder(), Items.AMETHYST_SHARD, g1), 1, "One offering paid ahead into Stolas's pact");
+		BlockPos buerAt = new BlockPos(3, 1, 5);
+		buerPact(helper, both, buerAt, g1);
+		helper.setBlock(stolasAt, Blocks.AIR);
+		helper.setBlock(buerAt, Blocks.AIR);
+		BlockPos third = new BlockPos(5, 1, 5);
+		PactPerchBlockEntity seat = perch(helper, third, both);
+		beside(helper, both, third);
+		PactMenu page = open(helper, both, seat);
+		PactStatePayload listed = page.lastSent();
+		helper.assertTrue(listed.mode() == PactStatePayload.SEAT
+				&& listed.patterns().stream().map(PactStatePayload.Choice::id).toList().equals(List.of(StolasEntity.SIGN, BuerEntity.SIGN))
+				&& keys(listed.patterns().stream().map(PactStatePayload.Choice::name).toList()).equals(List.of("entity.jugcraft.stolas", "entity.jugcraft.buer"))
+				&& key(term(listed, "service")).equals(PACT_KEY + "term.service.star_reckoning") && listed.spirit().sign().equals(StolasEntity.SIGN),
+				"Two pacts without their perch: both listed by sign and name, the first's terms shown: " + listed);
+		PactStatePayload focused = send(both, page, PactRequestPayload.CHOOSE, 1);
+		helper.assertTrue(focused != null && focused.result().isEmpty() && focused.mode() == PactStatePayload.SEAT
+				&& key(term(focused, "service")).equals(PACT_KEY + "term.service.strain_tending") && focused.spirit().sign().equals(BuerEntity.SIGN),
+				"CHOOSE(1) answers with the state alone, Buer's terms shown: " + focused);
+		PactStatePayload seatedBuer = send(both, page, PactRequestPayload.SEAT, 1);
+		helper.assertTrue(answered(seatedBuer, AgreementHolder.Seat.SEATED.id) && seatedBuer.mode() == PactStatePayload.KEEP
+				&& presenceAt(level, seat) instanceof BuerEntity && BuerEntity.COUNTERPART.equals(Pacts.counterpart(pactOf(level, seat).counterpart())),
+				"SEAT(1) seats Buer's pact here, Buer called to it");
+		both.closeContainer();
+		BlockPos fourth = new BlockPos(7, 1, 5);
+		PactPerchBlockEntity last = perch(helper, fourth, both);
+		beside(helper, both, fourth);
+		PactMenu alone = open(helper, both, last);
+		helper.assertTrue(alone.lastSent().mode() == PactStatePayload.SEAT && alone.lastSent().patterns().isEmpty()
+				&& alone.lastSent().spirit().sign().equals(StolasEntity.SIGN), "Another empty perch shows Stolas's pact alone, listing nothing");
+		PactStatePayload ended = send(both, alone, PactRequestPayload.END, 0);
+		helper.assertTrue(answered(ended, "ended") && ended.result().get().done() && shards(both) == 1
+				&& BoundWills.of(level.getServer()).ledger().get(stolasRecord) == null && PactHistory.of(level.getServer()).history(both.getUUID()).size() == 1,
+				"END(0) ends Stolas's pact there, its offering back once");
+		PactStatePayload again = send(both, alone, PactRequestPayload.END, 0);
+		helper.assertTrue(again != null && !again.result().map(PactStatePayload.Result::done).orElse(false) && shards(both) == 1,
+				"Ending again returns nothing more");
+		both.closeContainer();
 		helper.succeed();
 	}
 
@@ -3789,7 +3847,7 @@ public class ConcordanceWorkerGameTests {
 	@GameTest(maxTicks = 20)
 	public void aCompactWithoutResonanceNamesNoAstrolabe(GameTestHelper helper) {
 		// The words are read as the server renders them; without the mod's words a key would name neither, so the check would
-		// say nothing (the critique's correction 8): the server must have them.
+		// say nothing (GC-P29): the server must have them.
 		helper.assertTrue(Language.getInstance().has(PACT_KEY + "term.compact.items"), "the server reads the mod's words (Fabric's server translations)");
 		ServerLevel level = helper.getLevel();
 		ConcordanceRules was = ConcordanceData.rules();
@@ -4842,6 +4900,1024 @@ public class ConcordanceWorkerGameTests {
 			helper.assertTrue(ConcordanceProgress.knowledge(player).equals(before) && HEARD.getOrDefault(player.getUUID(), 0) == heard,
 					d.id() + ": talking taught nothing and recorded no evidence (" + (HEARD.getOrDefault(player.getUUID(), 0) - heard) + " heard)");
 		}
+		helper.succeed();
+	}
+
+	// ---------------------------------------------------------------- Concordance garden cohort, GC-04: Buer, strain tending
+
+	/** GC-04: his service's words (tools/concordance_pacts.py SERVICE_WORDS). */
+	static final String TENDING_KEY = "message.jugcraft.concordance.pact.strain_tending.";
+	/** Outside his hours by the world's clock (0 to 12,000 ticks: 06:00 to 18:00); inside them, NOON (above). */
+	static final long MIDNIGHT = 18_000L;
+	/** A stranger to every pact here. */
+	static final UUID STRANGER = new UUID(0x6C04L, 9L);
+
+	static {
+		// GC-04 (SG12): Buer comes where an awake bed the inviter keeps lies within 8 of the perch: one in the floor beside the
+		// perch's grid cell (perchFor leaves x - 1 free), so every shared case runs for him with no edit.
+		FIXTURES.put(BuerEntity.COUNTERPART, (helper, player, perch) -> {
+			BlockPos at = perch.offset(-1, -1, 0);
+			keptBed(helper, at, player.getUUID(), 0);
+			return List.of(at);
+		});
+	}
+
+	/** Buer's offer as the server loaded it (data/jugcraft/concordance/pact/buer.json). */
+	static PactDefinition buerOffer() {
+		PactDefinition offer = PactPerchBlockEntity.definition(BuerEntity.COUNTERPART);
+		if (offer == null) {
+			throw new AssertionError("Buer's offer is loaded");
+		}
+		return offer;
+	}
+
+	/** A survival player who understands The Garden's Regard (so the Binding Arts and Verdant Husbandry: a Greenwarden). */
+	static ServerPlayer gardenHolder(GameTestHelper helper) {
+		ServerPlayer player = TestPlayers.survivor(helper);
+		understand(player, GardenPacts.RESEARCH);
+		RateGate.forget(player.getUUID());
+		return player;
+	}
+
+	/** An awake, wet Verdant Bed at {@code at} kept by {@code keeper}, at {@code strain}, holding 4 nutrients (room for compost). */
+	static VerdantBedBlockEntity keptBed(GameTestHelper helper, BlockPos at, UUID keeper, int strain) {
+		helper.setBlock(at, Garden.VERDANT_BED.defaultBlockState().setValue(VerdantBedBlock.MOISTURE, VerdantBedBlock.WET));
+		VerdantBedBlockEntity bed = helper.getBlockEntity(at, VerdantBedBlockEntity.class);
+		bed.awaken(keeper);
+		bed.setNutrients(4);
+		bed.setStrain(strain);
+		return bed;
+	}
+
+	/** Buer's pact sealed for {@code holder} at a perch they placed at {@code at}, at game time {@code now}; they stand beside it. */
+	static PactPerchBlockEntity buerPact(GameTestHelper helper, ServerPlayer holder, BlockPos at, long now) {
+		PactPerchBlockEntity perch = perch(helper, at, holder);
+		beside(helper, holder, at);
+		helper.assertValueEqual(perch.holder().seal(helper.getLevel(), holder, PactPerchBlockEntity.sealing(buerOffer(), null, null), now).outcome(),
+				Pacts.Outcome.DONE, "Buer's pact is sealed at the perch");
+		return perch;
+	}
+
+	/** The Buer kept at {@code perch} (its presence), asserted there. */
+	static BuerEntity buer(GameTestHelper helper, PactPerchBlockEntity perch) {
+		PactSpiritEntity<?> found = perch.presence(helper.getLevel());
+		helper.assertTrue(found instanceof BuerEntity, "Buer is on his perch: " + found);
+		return (BuerEntity) found;
+	}
+
+	static StrainTending.Memory memory(BuerEntity buer) {
+		return buer.serviceMemory(StrainTending.Memory.class, StrainTending.Memory::new);
+	}
+
+	/** Every loose item in the test's bounds (none should appear: he moves no item). */
+	static int loose(GameTestHelper helper) {
+		return helper.getLevel().getEntitiesOfClass(ItemEntity.class, helper.getBounds(), Entity::isAlive).size();
+	}
+
+	/** How many items {@code player} carries, all kinds. */
+	static int carried(ServerPlayer player) {
+		int count = 0;
+		for (int slot = 0; slot < player.getInventory().getContainerSize(); slot++) {
+			count += player.getInventory().getItem(slot).getCount();
+		}
+		return count;
+	}
+
+	/** GC-04: one strain eased, at the bed's own rate (the window a hand shares), nothing else moved; counted on the record. */
+	@GameTest(maxTicks = 20)
+	public void buerEasesOneStrainAtTheBedsOwnRate(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		ServerPlayer keeper = gardenHolder(helper);
+		long g0 = level.getGameTime();
+		PactPerchBlockEntity perch = buerPact(helper, keeper, new BlockPos(2, 1, 2), g0);
+		BuerEntity buer = buer(helper, perch);
+		BlockPos bedAt = new BlockPos(4, 1, 4);
+		VerdantBedBlockEntity bed = keptBed(helper, bedAt, keeper.getUUID(), 3);
+		int nutrients = bed.nutrients(), items = carried(keeper);
+		helper.assertValueEqual(buer.think(level, NOON, g0), Status.WORKING, "By day he eases the strained bed");
+		helper.assertTrue(bed.strain() == 2 && bed.nutrients() == nutrients && carried(keeper) == items && loose(helper) == 0,
+				"One strain eased, 3 to 2; no nutrient and no item moved");
+		helper.assertTrue(Pacts.done(pactOf(level, perch).pact(), g0) == 1 && "work".equals(buer.cues().getLast())
+				&& memory(buer).easedToday().equals(List.of(bed.getBlockPos())), "Counted once on the record; his work cue; he remembers it");
+		helper.assertValueEqual(buer.think(level, NOON, g0 + Garden.TEND_TICKS - 1), Status.IDLE, "Within the bed's 600 ticks he waits");
+		helper.assertTrue(bed.strain() == 2 && !bed.mayTendAt(g0), "The bed's own rule holds it for anyone");
+		ConcordanceGardenGameTests.handUse(helper, keeper, bedAt, ItemStack.EMPTY, false);
+		helper.assertTrue(bed.strain() == 2, "A Greenwarden's empty hand in his window is told it was tended lately: nothing eased");
+		helper.assertValueEqual(buer.think(level, NOON, g0 + Garden.TEND_TICKS), Status.WORKING, "600 ticks on, he eases it again");
+		// The quota counts game days: a day boundary between g0 and g0 + 600 (real game time) leaves one in the new day.
+		int counted = Math.floorDiv(g0, Pacts.DAY) == Math.floorDiv(g0 + Garden.TEND_TICKS, Pacts.DAY) ? 2 : 1;
+		helper.assertTrue(bed.strain() == 1 && bed.nutrients() == nutrients && carried(keeper) == items && loose(helper) == 0
+				&& Pacts.done(pactOf(level, perch).pact(), g0 + Garden.TEND_TICKS) == counted, "2 to 1, still nothing else moved, counted again");
+		helper.succeed();
+	}
+
+	/** GC-04 (GC-S7): a stranger's bed never; a party member's under party while in it (from the index's next refresh), never after. */
+	@GameTest(maxTicks = 20)
+	public void buerTendsOnlyBedsOfHisBeneficiaries(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		ServerPlayer keeper = gardenHolder(helper);
+		ServerPlayer member = TestPlayers.survivor(helper);
+		long now = dayStart(level, 1);
+		PactPerchBlockEntity perch = buerPact(helper, keeper, new BlockPos(2, 1, 2), now);
+		BuerEntity buer = buer(helper, perch);
+		VerdantBedBlockEntity strangers = keptBed(helper, new BlockPos(3, 1, 5), STRANGER, 3);
+		VerdantBedBlockEntity members = keptBed(helper, new BlockPos(5, 1, 3), member.getUUID(), 2);
+		helper.assertValueEqual(buer.think(level, NOON, now), Status.IDLE, "No bed here is a beneficiary's: he waits");
+		helper.assertTrue(strangers.strain() == 3 && members.strain() == 2, "A stranger's and a non-member's beds are untouched");
+		PartyManager parties = JugcraftParties.manager();
+		long ms = System.currentTimeMillis();
+		try {
+			helper.assertTrue(parties.invite(keeper.getUUID(), member.getUUID(), ms) == PartyManager.Result.OK
+					&& parties.accept(member.getUUID(), ms) == PartyManager.Result.OK, "The holder and a member form a party");
+			long refreshed = now + GardenReach.REFRESH_TICKS;
+			helper.assertValueEqual(buer.think(level, NOON, refreshed), Status.WORKING, "Under party, the member's bed is his to mend");
+			helper.assertTrue(members.strain() == 1 && strangers.strain() == 3, "The member's bed eased once; the stranger's untouched");
+			helper.assertTrue(parties.leave(member.getUUID()) == PartyManager.Result.OK, "The member leaves the party");
+			members.setStrain(2);
+			helper.assertValueEqual(buer.think(level, NOON, refreshed + Garden.TEND_TICKS), Status.IDLE,
+					"Their bed is refused at once (asked at each change), indexed or not");
+			helper.assertTrue(members.strain() == 2 && strangers.strain() == 3, "Nothing more eased");
+		} finally {
+			parties.adminDisband(keeper.getUUID());
+		}
+		helper.succeed();
+	}
+
+	/**
+	 * GC-04 (GC-S7): a bed of the holder's that the holder could not change by hand (a claim), and a dormant bed, untouched.
+	 * The claim lifted, the bed is his to mend from his index's next read (a bed refused for itself is not asked before).
+	 */
+	@GameTest(maxTicks = 20)
+	public void buerNeverTouchesAClaimedOrDormantBed(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		ServerPlayer keeper = gardenHolder(helper);
+		long now = dayStart(level, 1);
+		PactPerchBlockEntity perch = buerPact(helper, keeper, new BlockPos(2, 1, 2), now);
+		BuerEntity buer = buer(helper, perch);
+		BlockPos claimedAt = new BlockPos(4, 1, 2);
+		VerdantBedBlockEntity claimed = keptBed(helper, claimedAt, keeper.getUUID(), 3);
+		helper.setBlock(new BlockPos(2, 1, 4), Garden.VERDANT_BED.defaultBlockState());
+		VerdantBedBlockEntity dormant = helper.getBlockEntity(new BlockPos(2, 1, 4), VerdantBedBlockEntity.class);
+		dormant.setStrain(3);
+		try (TestClaims claims = TestClaims.open().block(helper.absolutePos(claimedAt), STRANGER)) {
+			helper.assertValueEqual(buer.think(level, NOON, now), Status.IDLE, "A claimed bed and a dormant one: he waits");
+			helper.assertTrue(claimed.strain() == 3 && dormant.strain() == 3 && !dormant.awake(), "Neither is touched");
+		}
+		helper.assertTrue(memory(buer).skipped(claimed.getBlockPos()), "Refused for itself, the claimed bed is skipped until his index is read again");
+		helper.assertValueEqual(buer.think(level, NOON, now + GardenReach.REFRESH_TICKS), Status.WORKING,
+				"Unclaimed, the holder's bed is his to mend once his index is read again");
+		helper.assertTrue(claimed.strain() == 2 && dormant.strain() == 3, "The dormant bed stays as it was");
+		helper.succeed();
+	}
+
+	/**
+	 * GC-04 (GC-S7; the unit review): beds he may not change never crowd out those he may. Nine of the holder's beds, nearest
+	 * the perch and as strained as any, stand in a claim. His first think asks the eight nearest, is refused each and waits;
+	 * his next, inside the same read of his index, skips those eight, is refused the ninth and eases the holder's own bed
+	 * beyond them. Each refused bed is asked once a read of the index, not each think; at the next read he asks again, and a
+	 * claim lifted by then is his to mend.
+	 */
+	@GameTest(maxTicks = 20)
+	public void buerSkipsBedsHeMayNotChange(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		ServerPlayer keeper = gardenHolder(helper);
+		long now = dayStart(level, 1);
+		PactPerchBlockEntity perch = buerPact(helper, keeper, new BlockPos(2, 1, 2), now);
+		BuerEntity buer = buer(helper, perch);
+		List<VerdantBedBlockEntity> claimed = new ArrayList<>();
+		VerdantBedBlockEntity own = keptBed(helper, new BlockPos(8, 1, 8), keeper.getUUID(), 3);
+		try (TestClaims claims = TestClaims.open()) {
+			for (int x = 3; x <= 5; x++) {
+				for (int z = 3; z <= 5; z++) {
+					BlockPos at = new BlockPos(x, 1, z);
+					claimed.add(keptBed(helper, at, keeper.getUUID(), 3));
+					claims.block(helper.absolutePos(at), STRANGER);
+				}
+			}
+			helper.assertValueEqual(buer.think(level, NOON, now), Status.IDLE, "The eight nearest asked, each in a claim: refused, he waits");
+			helper.assertTrue(claimed.stream().filter(bed -> memory(buer).skipped(bed.getBlockPos())).count() == StrainTending.MAX_ASKED
+					&& !memory(buer).skipped(own.getBlockPos()), "Those eight are skipped until his index is read again; his own bed is not");
+			helper.assertValueEqual(buer.think(level, NOON, now + WorkerEntity.THINK_TICKS), Status.WORKING,
+					"His next think skips them and mends the holder's own bed beyond them");
+			helper.assertTrue(own.strain() == 2 && claimed.stream().allMatch(bed -> bed.strain() == 3 && memory(buer).skipped(bed.getBlockPos())),
+					"The holder's own bed eased once; every claimed bed untouched and skipped");
+			helper.assertValueEqual(buer.think(level, NOON, now + GardenReach.REFRESH_TICKS), Status.IDLE,
+					"His index read again, he asks the claimed beds again (his own bed waits out its window): refused");
+			helper.assertTrue(claimed.stream().filter(bed -> memory(buer).skipped(bed.getBlockPos())).count() == StrainTending.MAX_ASKED,
+					"asked once that read, eight skipped again");
+		}
+		helper.assertValueEqual(buer.think(level, NOON, now + 2L * GardenReach.REFRESH_TICKS), Status.WORKING,
+				"The claim lifted, at his index's next read the nearest is his to mend");
+		helper.assertTrue(claimed.getFirst().strain() == 2 && own.strain() == 2, "The nearest claimed bed eased once");
+		helper.succeed();
+	}
+
+	/** GC-04: far, dead, in another level or offline, the holder is not near: he waits (owner_offline), absent-owner option or not. */
+	@GameTest(maxTicks = 20)
+	public void buerWaitsForAPresentHolder(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		ServerPlayer keeper = gardenHolder(helper);
+		long now = dayStart(level, 1);
+		BlockPos at = new BlockPos(2, 1, 2);
+		PactPerchBlockEntity perch = buerPact(helper, keeper, at, now);
+		BuerEntity buer = buer(helper, perch);
+		VerdantBedBlockEntity bed = keptBed(helper, new BlockPos(4, 1, 4), keeper.getUUID(), 3);
+		BlockPos home = helper.absolutePos(at);
+		keeper.snapTo(home.getX() + 100.5, home.getY(), home.getZ() + 0.5, 0.0F, 0.0F);
+		helper.assertValueEqual(buer.think(level, NOON, now), Status.OWNER_OFFLINE, "100 blocks off in this level: not near");
+		boolean answering = JugcraftConfig.option(Authority.ABSENT_OPTION);
+		JugcraftConfig.setOption(Authority.ABSENT_OPTION, true);
+		try {
+			helper.assertValueEqual(buer.think(level, NOON, now + 20), Status.OWNER_OFFLINE, "With absent owners' devices allowed, still no stand-in");
+		} finally {
+			JugcraftConfig.setOption(Authority.ABSENT_OPTION, answering);
+		}
+		beside(helper, keeper, at);
+		keeper.setHealth(0.0F);
+		helper.assertValueEqual(buer.think(level, NOON, now + 40), Status.OWNER_OFFLINE, "Dead beside the perch: not present");
+		keeper.setHealth(keeper.getMaxHealth());
+		ServerLevel nether = level.getServer().getLevel(Level.NETHER);
+		helper.assertTrue(nether != null, "The test server has a Nether");
+		keeper.teleport(new TeleportTransition(nether, new Vec3(0.5, 64.0, 0.5), Vec3.ZERO, 0.0F, 0.0F, TeleportTransition.DO_NOTHING));
+		helper.assertValueEqual(buer.think(level, NOON, now + 60), Status.OWNER_OFFLINE, "In another level: not present");
+		helper.assertTrue(bed.strain() == 3 && Pacts.done(pactOf(level, perch).pact(), now) == 0, "Nothing was tended or counted meanwhile");
+		keeper.teleport(new TeleportTransition(level, helper.absoluteVec(new Vec3(2.5, 1.0, 4.5)), Vec3.ZERO, 0.0F, 0.0F, TeleportTransition.DO_NOTHING));
+		helper.assertValueEqual(buer.think(level, NOON, now + 80), Status.WORKING, "Back beside the perch, he mends");
+		helper.assertValueEqual(bed.strain(), 2, "one strain");
+		TestPlayers.leave(keeper);
+		bed.setStrain(3);
+		helper.assertValueEqual(buer.think(level, NOON, now + 80 + Garden.TEND_TICKS), Status.OWNER_OFFLINE, "Logged out: he waits");
+		helper.assertValueEqual(bed.strain(), 3, "and tends nothing for them");
+		helper.succeed();
+	}
+
+	/** GC-04: two holders' Buers (a party) over one party bed ease it once a window, as does a hand; each counts only its own. */
+	@GameTest(maxTicks = 20)
+	public void twoBuersShareOneBedsTendWindow(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		ServerPlayer first = gardenHolder(helper);
+		ServerPlayer second = gardenHolder(helper);
+		PartyManager parties = JugcraftParties.manager();
+		long ms = System.currentTimeMillis();
+		try {
+			helper.assertTrue(parties.invite(first.getUUID(), second.getUUID(), ms) == PartyManager.Result.OK
+					&& parties.accept(second.getUUID(), ms) == PartyManager.Result.OK, "Two holders in one party");
+			long g0 = level.getGameTime();
+			PactPerchBlockEntity a = buerPact(helper, first, new BlockPos(2, 1, 2), g0);
+			PactPerchBlockEntity b = buerPact(helper, second, new BlockPos(6, 1, 2), g0);
+			BuerEntity one = buer(helper, a), other = buer(helper, b);
+			BlockPos bedAt = new BlockPos(4, 1, 4);
+			VerdantBedBlockEntity bed = keptBed(helper, bedAt, first.getUUID(), 3);
+			helper.assertValueEqual(one.think(level, NOON, g0), Status.WORKING, "The first Buer eases the party's bed");
+			helper.assertValueEqual(other.think(level, NOON, g0), Status.IDLE, "The second finds it tended lately: the bed's one window");
+			helper.assertValueEqual(other.think(level, NOON, g0 + Garden.TEND_TICKS - 1), Status.IDLE, "still inside it");
+			ConcordanceGardenGameTests.handUse(helper, second, bedAt, ItemStack.EMPTY, false);
+			helper.assertValueEqual(bed.strain(), 2, "Eased once, whoever asked: two spirits and a hand");
+			helper.assertValueEqual(other.think(level, NOON, g0 + Garden.TEND_TICKS), Status.WORKING, "The window over, the second eases it");
+			helper.assertValueEqual(one.think(level, NOON, g0 + Garden.TEND_TICKS), Status.IDLE, "and the first may not in the same window");
+			helper.assertTrue(bed.strain() == 1 && Pacts.done(pactOf(level, a).pact(), g0) == 1
+					&& Pacts.done(pactOf(level, b).pact(), g0 + Garden.TEND_TICKS) == 1, "Each pact counted its own one");
+		} finally {
+			parties.adminDisband(first.getUUID());
+		}
+		helper.succeed();
+	}
+
+	/** GC-04: by night his petals shut and he sleeps; the kept page and Jade say asleep until dawn; at 06:00 he mends. */
+	@GameTest(maxTicks = 20)
+	public void buerSleepsOutsideHisHours(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		ServerPlayer keeper = gardenHolder(helper);
+		long now = dayStart(level, 1);
+		PactPerchBlockEntity perch = buerPact(helper, keeper, new BlockPos(2, 1, 2), now);
+		BuerEntity buer = buer(helper, perch);
+		VerdantBedBlockEntity bed = keptBed(helper, new BlockPos(4, 1, 4), keeper.getUUID(), 3);
+		helper.assertValueEqual(buer.think(level, MIDNIGHT, now), Status.OUTSIDE_AGREEMENT, "At midnight he sleeps");
+		helper.assertTrue(bed.strain() == 3 && buer.status() == Status.OUTSIDE_AGREEMENT
+				&& BuerEntity.loop(buer.status(), false) == BuerEntity.Loop.WAITING, "His petals shut; nothing tended");
+		List<Component> rows = StrainTending.rows(level, pactOf(level, perch), MIDNIGHT, now);
+		helper.assertTrue(keys(rows).equals(List.of(TENDING_KEY + "row.asleep")) && "06:00".equals(arg(rows.getFirst(), 0))
+				&& "18:00".equals(arg(rows.getFirst(), 1)), "The kept page: asleep until dawn, his hours named: " + keys(rows));
+		helper.assertTrue(new PactService.Note("asleep", 0).equals(StrainTending.SERVICE.note(level, buer, pactOf(level, perch), MIDNIGHT, now)),
+				"Jade's note: asleep");
+		helper.assertValueEqual(buer.think(level, 12_000L, now + 20), Status.OUTSIDE_AGREEMENT, "18:00 is past his hours");
+		helper.assertValueEqual(buer.think(level, 0L, now + 40), Status.WORKING, "At 06:00 he wakes and mends");
+		helper.assertTrue(bed.strain() == 2 && keys(StrainTending.rows(level, pactOf(level, perch), NOON, now + 40))
+				.equals(List.of(TENDING_KEY + "row.service")), "One strain; by day his row counts today's eases");
+		helper.succeed();
+	}
+
+	/**
+	 * GC-04: 16 beds eased a game day and no more; his quota spent, he still turns to and listens to whoever speaks once his
+	 * last work gesture is over (amendment A-07; the work window is counted in the think's game time); the next day he goes on.
+	 */
+	@GameTest(structure = "jugcraft-test:drone_depot", maxTicks = 20)
+	public void buerStopsAtHisQuota(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		ServerPlayer keeper = gardenHolder(helper);
+		long now = dayStart(level, 1);
+		PactPerchBlockEntity perch = buerPact(helper, keeper, new BlockPos(8, 1, 8), now);
+		BuerEntity buer = buer(helper, perch);
+		List<VerdantBedBlockEntity> beds = new ArrayList<>();
+		for (int i = 0; i < 17; i++) {
+			beds.add(keptBed(helper, new BlockPos(4 + i % 9, 1, 4 + i / 9), keeper.getUUID(), 3));
+		}
+		for (int k = 0; k < 16; k++) {
+			helper.assertValueEqual(buer.think(level, NOON, now + 20L * k), Status.WORKING, "Bed " + k + " of his 16 a day");
+		}
+		helper.assertValueEqual(buer.think(level, NOON, now + 20L * 16), Status.FINISHED, "His day's quota spent, he stops");
+		helper.assertTrue(beds.stream().mapToInt(VerdantBedBlockEntity::strain).sum() == 17 * 3 - 16
+				&& beds.stream().filter(bed -> bed.strain() == 3).count() == 1 && Pacts.done(pactOf(level, perch).pact(), now) == 16,
+				"Sixteen eased once each, the seventeenth untouched");
+		helper.assertValueEqual(buer.think(level, NOON, now + 20L * 16 + BuerEntity.Gesture.WORK.ticks), Status.FINISHED,
+				"Past his last work gesture, his quota still spent");
+		open(helper, keeper, perch);
+		helper.assertTrue(attends(buer, keeper) && BuerEntity.loop(buer.status(), buer.listening()) == BuerEntity.Loop.LISTEN,
+				"His quota spent, he still turns to and listens to whoever speaks (GC-P8, GC-P25): " + yaws(buer));
+		keeper.closeContainer();
+		helper.assertValueEqual(buer.think(level, NOON, dayStart(level, 2)), Status.WORKING, "The next game day he mends again");
+		helper.succeed();
+	}
+
+	/** GC-04: one bed a think: the most strained first, the nearest among equals; one task a think. */
+	@GameTest(maxTicks = 20)
+	public void buerChangesAtMostOneBedAThink(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		ServerPlayer keeper = gardenHolder(helper);
+		long now = dayStart(level, 1);
+		PactPerchBlockEntity perch = buerPact(helper, keeper, new BlockPos(2, 1, 2), now);
+		BuerEntity buer = buer(helper, perch);
+		VerdantBedBlockEntity near = keptBed(helper, new BlockPos(3, 1, 2), keeper.getUUID(), 2);
+		VerdantBedBlockEntity far = keptBed(helper, new BlockPos(6, 1, 2), keeper.getUUID(), 3);
+		VerdantBedBlockEntity middle = keptBed(helper, new BlockPos(2, 1, 5), keeper.getUUID(), 3);
+		helper.assertValueEqual(buer.think(level, NOON, now), Status.WORKING, "A think");
+		helper.assertTrue(middle.strain() == 2 && far.strain() == 3 && near.strain() == 2, "The most strained, and of those the nearest");
+		helper.assertValueEqual(buer.think(level, NOON, now + 20), Status.WORKING, "The next think");
+		helper.assertTrue(far.strain() == 2 && middle.strain() == 2 && near.strain() == 2, "the other at 3");
+		helper.assertValueEqual(buer.think(level, NOON, now + 40), Status.WORKING, "The next");
+		helper.assertTrue(near.strain() == 1 && far.strain() == 2 && middle.strain() == 2, "the nearest at 2 not tended lately");
+		helper.assertTrue(buer.cues().stream().filter("work"::equals).count() == 1 && Pacts.done(pactOf(level, perch).pact(), now) == 3,
+				"One task a think; his work cue at most once every CUE_TICKS (the three thinks share one tick here): " + buer.cues());
+		helper.succeed();
+	}
+
+	/** GC-04: eased today and worked back to 3, a bed is overworked: refused, named, until compost by hand eases it; others go on. */
+	@GameTest(maxTicks = 20)
+	public void anOverworkedBedWaitsForCompost(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		ServerPlayer keeper = gardenHolder(helper);
+		long now = dayStart(level, 1);
+		PactPerchBlockEntity perch = buerPact(helper, keeper, new BlockPos(2, 1, 2), now);
+		BuerEntity buer = buer(helper, perch);
+		BlockPos bedAt = new BlockPos(4, 1, 4);
+		VerdantBedBlockEntity bed = keptBed(helper, bedAt, keeper.getUUID(), 3);
+		VerdantBedBlockEntity other = keptBed(helper, new BlockPos(5, 1, 2), keeper.getUUID(), 3);
+		helper.assertValueEqual(buer.think(level, NOON, now), Status.WORKING, "He eases the nearer of two at 3");
+		helper.assertTrue(bed.strain() == 2 && other.strain() == 3, "the nearer");
+		// Worked back to its worst (a harvest's own counting is Chunk C's to test; the tests' setter stands in for it).
+		bed.setStrain(3);
+		helper.assertValueEqual(buer.think(level, NOON, now + Garden.TEND_TICKS), Status.WORKING, "He goes on with the other bed");
+		helper.assertTrue(bed.strain() == 3 && other.strain() == 2 && memory(buer).overworked(bed.getBlockPos()),
+				"and refuses the overworked one, though its window is over");
+		BoundWill record = pactOf(level, perch);
+		List<Component> rows = StrainTending.rows(level, record, NOON, now + Garden.TEND_TICKS);
+		helper.assertTrue(keys(rows).equals(List.of(TENDING_KEY + "row.service", TENDING_KEY + "row.overworked"))
+				&& bed.getBlockPos().toShortString().equals(arg(rows.get(1), 0)), "The kept page names it and its remedies: " + keys(rows));
+		helper.assertTrue(new PactService.Note("overworked", 1).equals(StrainTending.SERVICE.note(level, buer, record, NOON, now)),
+				"Jade's note: one overworked bed");
+		ConcordanceGardenGameTests.handUse(helper, keeper, bedAt, new ItemStack(Items.BONE_MEAL), false);
+		helper.assertTrue(bed.strain() == 2 && bed.nutrients() == 4 + Garden.BONE_MEAL_NUTRIENTS, "Bone meal by hand: compost eases one strain by the bed's own rule");
+		helper.assertValueEqual(buer.think(level, NOON, now + 2L * Garden.TEND_TICKS), Status.WORKING, "At 2 he takes it back");
+		helper.assertTrue(bed.strain() == 1 && !memory(buer).overworked(bed.getBlockPos())
+				&& keys(StrainTending.rows(level, pactOf(level, perch), NOON, now)).equals(List.of(TENDING_KEY + "row.service")),
+				"Mended again; no complaint left");
+		helper.succeed();
+	}
+
+	/** GC-04: his memory is never saved: a reloaded Buer has no complaint, and nothing is owed. */
+	@GameTest(maxTicks = 20)
+	public void anOverworkedComplaintIsForgottenOnRestart(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		ServerPlayer keeper = gardenHolder(helper);
+		long now = dayStart(level, 1);
+		PactPerchBlockEntity perch = buerPact(helper, keeper, new BlockPos(2, 1, 2), now);
+		BuerEntity buer = buer(helper, perch);
+		VerdantBedBlockEntity bed = keptBed(helper, new BlockPos(4, 1, 4), keeper.getUUID(), 3);
+		buer.think(level, NOON, now);
+		bed.setStrain(3);
+		helper.assertValueEqual(buer.think(level, NOON, now + Garden.TEND_TICKS), Status.IDLE, "Overworked: refused");
+		TagValueOutput saved = TagValueOutput.createWithContext(ProblemReporter.DISCARDING, level.registryAccess());
+		buer.saveWithoutId(saved);
+		CompoundTag tag = saved.buildResult();
+		helper.assertTrue(tag.keySet().stream().noneMatch(key -> key.contains("eased") || key.contains("overworked") || key.contains("memory"))
+				&& tag.contains("perch") && tag.contains("record"), "His save holds his perch and record, never his memory: " + tag.keySet());
+		buer.discard();
+		BuerEntity back = Workers.BUER.create(level, EntitySpawnReason.LOAD);
+		back.load(TagValueInput.create(ProblemReporter.DISCARDING, level.registryAccess(), tag));
+		helper.assertTrue(memory(back).remembered() == 0, "Reloaded, he remembers nothing");
+		helper.assertValueEqual(back.think(level, NOON, now + Garden.TEND_TICKS + 20), Status.WORKING, "and mends the bed again: no debt");
+		helper.assertValueEqual(bed.strain(), 2, "one strain");
+		helper.succeed();
+	}
+
+	/** GC-04: no awake bed of the inviter's within 8 (a stranger's, a dormant one and one 9 off do not count): he does not come; nothing spent. */
+	@GameTest(structure = "jugcraft-test:drone_depot", maxTicks = 20)
+	public void buerRefusesWithoutABedToMend(GameTestHelper helper) {
+		// His words are read as the server renders them; without the mod's words the check would say nothing (GC-P29).
+		helper.assertTrue(Language.getInstance().has(TENDING_KEY + "missing"), "the server reads the mod's words (Fabric's server translations)");
+		ServerLevel level = helper.getLevel();
+		ServerPlayer keeper = gardenHolder(helper);
+		pocketFor(keeper, buerOffer(), 1);
+		BlockPos at = new BlockPos(2, 1, 2);
+		PactPerchBlockEntity perch = perch(helper, at, keeper);
+		beside(helper, keeper, at);
+		keptBed(helper, new BlockPos(4, 1, 4), STRANGER, 0);
+		keptBed(helper, new BlockPos(11, 1, 2), keeper.getUUID(), 0);
+		helper.setBlock(new BlockPos(3, 1, 4), Garden.VERDANT_BED.defaultBlockState());
+		PactMenu menu = open(helper, keeper, perch);
+		PactStatePayload state = menu.lastSent();
+		Component note = state.notes().stream().filter(line -> key(line).equals(TENDING_KEY + "missing")).findFirst().orElse(null);
+		helper.assertTrue(state.mode() == PactStatePayload.NEGOTIATE && note != null && Integer.valueOf(8).equals(arg(note, 0))
+				&& perch.visitor() == null, "His offer says why he does not come, and he does not: " + keys(state.notes()));
+		PactStatePayload refused = send(keeper, menu, PactRequestPayload.ACCEPT, 0);
+		helper.assertTrue(answered(refused, StrainTending.NOTHING_TO_MEND) && !refused.result().get().done()
+				&& said(refused).equals(TENDING_KEY + "missing") && pocketed(keeper, 1, buerOffer()) && recordOf(level, keeper) == null,
+				"Accepting is refused with his reason; nothing spent, nothing held");
+		helper.assertTrue(refused.result().get().message().getString().startsWith("\"There is nothing here I could mend.\""),
+				"His words: " + refused.result().get().message().getString());
+		keeper.closeContainer();
+		keptBed(helper, new BlockPos(3, 1, 4), keeper.getUUID(), 0);
+		RateGate.forget(keeper.getUUID());
+		PactStatePayload invited = open(helper, keeper, perch).lastSent();
+		helper.assertTrue(invited.notes().isEmpty() && invited.offers(PactRequestPayload.ACCEPT)
+				&& perch.visitor() != null && level.getEntity(perch.visitor()) instanceof BuerEntity, "With a bed of theirs awake within 8, he comes");
+		helper.succeed();
+	}
+
+	/** GC-04: his first obligation is the holder's own tending by hand (PactObligations), never his; his kept page says which. */
+	@GameTest(maxTicks = 20)
+	public void buersFirstObligationIsATendingByHand(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		ServerPlayer keeper = gardenHolder(helper);
+		long g0 = level.getGameTime();
+		PactPerchBlockEntity perch = buerPact(helper, keeper, new BlockPos(2, 1, 2), g0);
+		BuerEntity buer = buer(helper, perch);
+		keptBed(helper, new BlockPos(4, 1, 4), keeper.getUUID(), 3);
+		helper.assertTrue(StrainTending.SERVICE.obligation() == PactObligations.Act.TEND
+				&& keys(StrainTending.SERVICE.obligationRows(level, keeper, pactOf(level, perch), g0))
+						.equals(List.of("message.jugcraft.concordance.garden_pact.obligation")), "His page names the act: a tending by hand");
+		int heard = GARDEN_SERVED.getOrDefault(keeper.getUUID(), 0);
+		helper.assertValueEqual(buer.think(level, NOON, g0), Status.WORKING, "He tends");
+		helper.assertTrue(!PactObligations.kept(keeper, BuerEntity.COUNTERPART) && GARDEN_SERVED.getOrDefault(keeper.getUUID(), 0) == heard,
+				"His own tending keeps nothing of the holder's");
+		keptBed(helper, new BlockPos(5, 1, 2), keeper.getUUID(), 2);
+		ConcordanceGardenGameTests.handUse(helper, keeper, new BlockPos(5, 1, 2), ItemStack.EMPTY, false);
+		helper.assertTrue(PactObligations.kept(keeper, BuerEntity.COUNTERPART) && GARDEN_SERVED.getOrDefault(keeper.getUUID(), 0) == heard + 1
+				&& keys(StrainTending.SERVICE.obligationRows(level, keeper, pactOf(level, perch), g0))
+						.equals(List.of("message.jugcraft.concordance.garden_pact.obligation_kept")), "Their own tending in his area keeps it, once");
+		helper.succeed();
+	}
+
+	/**
+	 * GC-04 (GC-S6, GC-P8): spoken to from the south, he attends his speaker; his work outranks the speaker while it plays
+	 * (his yaw on the bed he chose at once, his head within 40 ticks, his body by 55); his work over, he turns back to his
+	 * speaker; the screen closed, he attends no one. His own thinks run between (by night they say he sleeps, and he still
+	 * attends whoever speaks: GC-P8).
+	 */
+	@GameTest(maxTicks = 120)
+	public void buerFacesTheBedHeTends(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		ServerPlayer keeper = gardenHolder(helper);
+		BlockPos at = new BlockPos(3, 1, 3);
+		long g0 = level.getGameTime();
+		PactPerchBlockEntity perch = buerPact(helper, keeper, at, g0);
+		BuerEntity buer = buer(helper, perch);
+		VerdantBedBlockEntity bed = keptBed(helper, at.east(3), keeper.getUUID(), 3);
+		standBy(helper, keeper, at, Direction.SOUTH);
+		open(helper, keeper, perch);
+		helper.assertTrue(attends(buer, keeper), "Spoken to from the south, he attends his speaker: " + yaws(buer));
+		helper.assertValueEqual(buer.think(level, NOON, level.getGameTime()), Status.WORKING, "He tends the bed east of him");
+		helper.assertTrue(buer.attending() instanceof BlockPosTracker tracked && tracked.currentBlockPosition().equals(bed.getBlockPos())
+				&& within(buer.getYRot(), EAST, 1.0F), "His work outranks his speaker: he attends the bed he chose, his yaw on it: " + yaws(buer));
+		helper.runAfterDelay(40, () -> helper.assertTrue(within(buer.getYHeadRot(), EAST, HEAD_TOLERANCE), "His pistil has turned to it: " + yaws(buer)));
+		helper.runAfterDelay(55, () -> helper.assertTrue(within(buer.yBodyRot, EAST, BODY_TOLERANCE), "and his body: " + yaws(buer)));
+		helper.runAfterDelay(BuerEntity.Gesture.WORK.ticks + WorkerEntity.THINK_TICKS + 5, () -> {
+			helper.assertTrue(attends(buer, keeper) && within(buer.getYRot(), SOUTH, 1.0F), "His work over, he turns back to his speaker: " + yaws(buer));
+			keeper.closeContainer();
+			buer.think(level);
+			helper.assertTrue(buer.attending() == null, "The screen closed, he attends no one");
+			helper.succeed();
+		});
+	}
+
+	/** GC-04: suspended by its holder he tends nothing and his page says so by name; resumed, he mends. */
+	@GameTest(maxTicks = 20)
+	public void aSuspendedBuerTendsNothing(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		ServerPlayer keeper = gardenHolder(helper);
+		long now = dayStart(level, 1);
+		PactPerchBlockEntity perch = buerPact(helper, keeper, new BlockPos(2, 1, 2), now);
+		BuerEntity buer = buer(helper, perch);
+		VerdantBedBlockEntity bed = keptBed(helper, new BlockPos(4, 1, 4), keeper.getUUID(), 3);
+		helper.assertTrue(PactKeeping.suspend(level, keeper, perch.holder(), now) == AgreementHolder.Toggle.SUSPENDED, "Its holder suspends it");
+		helper.assertValueEqual(buer.think(level, NOON, now + 20), Status.SUSPENDED, "Suspended, he waits");
+		Component row = StrainTending.SERVICE.suspendedRow(PactKeeping.name(BuerEntity.COUNTERPART));
+		helper.assertTrue(bed.strain() == 3 && Pacts.done(pactOf(level, perch).pact(), now) == 0
+				&& key(row).equals("message.jugcraft.concordance.pact.row.state.suspended.serves")
+				&& BuerEntity.loop(buer.status(), false) == BuerEntity.Loop.SUSPENDED, "Nothing tended or counted; his page and his droop say so");
+		helper.assertTrue(PactKeeping.resume(level, keeper, perch.holder(), now + 40) == AgreementHolder.Toggle.RESUMED, "Resumed");
+		helper.assertValueEqual(buer.think(level, NOON, now + 60), Status.WORKING, "He mends again");
+		helper.assertValueEqual(bed.strain(), 2, "one strain");
+		helper.succeed();
+	}
+
+	/**
+	 * GC-04 (GC-P27): an offering due, he works on through his day's grace (astir), never for an absent holder; past it, held,
+	 * nothing. Its holder looks at the pact every 1,000 ticks through the grace (stay), as one present does: a longer gap is an
+	 * absence, which would warn again with the grace moved on (Pacts.ABSENT_TICKS).
+	 */
+	@GameTest(maxTicks = 20)
+	public void buerTendsThroughHisGrace(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		ServerPlayer keeper = gardenHolder(helper);
+		long g0 = dayStart(level, 1);
+		BlockPos at = new BlockPos(2, 1, 2);
+		PactPerchBlockEntity perch = buerPact(helper, keeper, at, g0);
+		BuerEntity buer = buer(helper, perch);
+		VerdantBedBlockEntity bed = keptBed(helper, new BlockPos(4, 1, 4), keeper.getUUID(), 3);
+		long due = pactOf(level, perch).pact().upkeep().due();
+		helper.assertTrue(stay(level, perch.holder(), g0 + 1_000L, due - 1_000L).isEmpty() && perch.holder().look(level, due) == Pacts.Event.WARNED
+				&& Pacts.status(pactOf(level, perch)) == Status.UPKEEP_DUE, "Due with nothing paid ahead: warned, a day's grace");
+		long inGrace = due + 1_000L;
+		helper.assertValueEqual(buer.think(level, NOON, inGrace), Status.UPKEEP_DUE, "Through his grace he works on, and says an offering is due");
+		helper.assertTrue(bed.strain() == 2 && Pacts.done(pactOf(level, perch).pact(), inGrace) == 1
+				&& BuerEntity.loop(buer.status(), false) == BuerEntity.Loop.ASTIR, "One strain eased and counted; astir");
+		BlockPos home = helper.absolutePos(at);
+		keeper.snapTo(home.getX() + 100.5, home.getY(), home.getZ() + 0.5, 0.0F, 0.0F);
+		helper.assertValueEqual(buer.think(level, NOON, inGrace + Garden.TEND_TICKS), Status.UPKEEP_DUE, "Its holder away, still due");
+		helper.assertValueEqual(bed.strain(), 2, "and nothing tended for one not near (GC-S7: asked at the change)");
+		beside(helper, keeper, at);
+		helper.assertTrue(stay(level, perch.holder(), due + 1_000L, due + Pacts.DAY - 1_000L).isEmpty()
+				&& perch.holder().look(level, due + Pacts.DAY) == Pacts.Event.SUSPENDED, "Unpaid past the grace: held for upkeep");
+		helper.assertValueEqual(buer.think(level, NOON, due + Pacts.DAY + 20), Status.UPKEEP_HELD, "Held, he tends nothing");
+		helper.assertValueEqual(bed.strain(), 2, "untouched");
+		helper.succeed();
+	}
+
+	/** GC-04: a second Buer at the perch, or a copy of his save, is no presence: it leaves at once and tends nothing; his own tends once. */
+	@GameTest(maxTicks = 20)
+	public void aDuplicateBuerTendsNothing(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		ServerPlayer keeper = gardenHolder(helper);
+		long now = dayStart(level, 1);
+		PactPerchBlockEntity perch = buerPact(helper, keeper, new BlockPos(2, 1, 2), now);
+		BuerEntity buer = buer(helper, perch);
+		VerdantBedBlockEntity bed = keptBed(helper, new BlockPos(4, 1, 4), keeper.getUUID(), 3);
+		BuerEntity stranger = Workers.BUER.create(level, EntitySpawnReason.MOB_SUMMONED);
+		stranger.setOwner(keeper.getUUID());
+		stranger.setPerch(perch.getBlockPos());
+		helper.assertValueEqual(stranger.think(level, NOON, now), Status.FINISHED, "A Buer not the perch's presence leaves");
+		TagValueOutput saved = TagValueOutput.createWithContext(ProblemReporter.DISCARDING, level.registryAccess());
+		buer.saveWithoutId(saved);
+		BuerEntity twin = Workers.BUER.create(level, EntitySpawnReason.LOAD);
+		twin.load(TagValueInput.create(ProblemReporter.DISCARDING, level.registryAccess(), saved.buildResult()));
+		twin.setUUID(UUID.randomUUID());
+		helper.assertValueEqual(twin.think(level, NOON, now), Status.FINISHED, "A copy of his save, under another id, leaves");
+		helper.assertTrue(bed.strain() == 3 && Pacts.done(pactOf(level, perch).pact(), now) == 0 && stranger.gone() && twin.gone(),
+				"Neither tended or counted anything");
+		helper.assertValueEqual(buer.think(level, NOON, now), Status.WORKING, "The presence tends, once");
+		helper.assertValueEqual(bed.strain(), 2, "one strain");
+		helper.succeed();
+	}
+
+	/** GC-04: Jade's readings of his perch and of him carry his overworked note and its count, his work, and no player. */
+	@GameTest(maxTicks = 20)
+	public void buersReadingSaysItsNoteAndNamesNoPlayer(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		ServerPlayer keeper = gardenHolder(helper);
+		long now = dayStart(level, 1);
+		PactPerchBlockEntity perch = buerPact(helper, keeper, new BlockPos(2, 1, 2), now);
+		BuerEntity buer = buer(helper, perch);
+		VerdantBedBlockEntity bed = keptBed(helper, new BlockPos(4, 1, 4), keeper.getUUID(), 3);
+		buer.think(level, NOON, now);
+		bed.setStrain(3);
+		buer.think(level, NOON, now + Garden.TEND_TICKS);
+		CompoundTag ofPerch = PactReading.holder(level, perch, now + Garden.TEND_TICKS);
+		CompoundTag ofHim = PactReading.presence(level, buer, now + Garden.TEND_TICKS);
+		String both = ofPerch + " " + ofHim;
+		for (CompoundTag reading : List.of(ofPerch, ofHim)) {
+			helper.assertTrue("kept".equals(reading.getStringOr("standing", "")) && StrainTending.WORK.equals(reading.getStringOr("service", ""))
+					&& "overworked".equals(reading.getStringOr("note", "")) && reading.getIntOr("note_count", 0) == 1
+					&& PactReading.KEYS.containsAll(reading.keySet()), "The reading: his work and one overworked bed: " + reading);
+		}
+		helper.assertTrue(BuerEntity.COUNTERPART.equals(ofPerch.getStringOr("counterpart", "")) && !ofHim.contains("counterpart")
+				&& !both.contains(keeper.getUUID().toString()) && !both.contains(keeper.getName().getString()), "and names no player: " + both);
+		helper.succeed();
+	}
+
+	/** GC-04: which gesture answers which action, which loop each state shows, every cue's sound registered. */
+	@GameTest(maxTicks = 20)
+	public void buerAnswersEachActionWithHisGesture(GameTestHelper helper) {
+		helper.assertTrue(BuerEntity.reaction(PactRequestPayload.ACCEPT, PactMenu.SEALED, true) == BuerEntity.Gesture.ASSENT
+				&& BuerEntity.reaction(PactRequestPayload.ACCEPT, StrainTending.NOTHING_TO_MEND, false) == BuerEntity.Gesture.REFUSE
+				&& BuerEntity.reaction(PactRequestPayload.DEPOSIT, PactMenu.DEPOSITED, true) == BuerEntity.Gesture.INSPECT
+				&& BuerEntity.reaction(PactRequestPayload.DEPOSIT, PactMenu.NOTHING_DEPOSITED, false) == null
+				&& BuerEntity.reaction(PactRequestPayload.RESUME, "resumed", true) == BuerEntity.Gesture.ASSENT
+				&& BuerEntity.reaction(PactRequestPayload.RECALL, "recalled", true) == null
+				&& BuerEntity.reaction(PactRequestPayload.ACCEPT, PactMenu.NOT_OFFERED, false) == null, "His answers");
+		helper.assertTrue(BuerEntity.loop(Status.WORKING, false) == BuerEntity.Loop.IDLE && BuerEntity.loop(Status.IDLE, true) == BuerEntity.Loop.LISTEN
+				&& BuerEntity.loop(Status.OUTSIDE_AGREEMENT, false) == BuerEntity.Loop.WAITING
+				&& BuerEntity.loop(Status.UPKEEP_DUE, false) == BuerEntity.Loop.ASTIR && BuerEntity.loop(Status.UPKEEP_HELD, true) == BuerEntity.Loop.LISTEN
+				&& BuerEntity.loop(Status.SUSPENDED, false) == BuerEntity.Loop.SUSPENDED && BuerEntity.loop(Status.DISABLED, true) == BuerEntity.Loop.WAITING
+				&& BuerEntity.loop(Status.FINISHED, true) == BuerEntity.Loop.LISTEN && BuerEntity.loop(Status.FINISHED, false) == BuerEntity.Loop.WAITING,
+				"His loops (A-06: listening over all but switched off; his quota spent, shut only while nobody speaks)");
+		for (String cue : BuerEntity.SOUND_IDS) {
+			helper.assertTrue(BuiltInRegistries.SOUND_EVENT.containsKey(Jugcraft.id("buer." + cue)), "jugcraft:buer." + cue + " is registered");
+		}
+		helper.succeed();
+	}
+
+	/** GC-04 (GB23): every offered pact asking no resonance names no astrolabe or resonance in its terms, notes or cannot-afford refusal. */
+	@GameTest(maxTicks = 20)
+	public void noGardenTermOrRefusalNamesAnAstrolabe(GameTestHelper helper) {
+		// The words are read as the server renders them; without the mod's words a key would name neither, so the check would
+		// say nothing (GC-P29): the server must have them, and the compact's term must be the one without resonance.
+		helper.assertTrue(Language.getInstance().has(PACT_KEY + "term.compact.items"), "the server reads the mod's words (Fabric's server translations)");
+		List<PactDefinition> all = everySpirit(helper);
+		boolean any = false;
+		for (int i = 0; i < all.size(); i++) {
+			PactDefinition d = all.get(i);
+			if (d.resonance() > 0) {
+				continue;
+			}
+			any = true;
+			BlockPos at = perchFor(i);
+			ServerPlayer player = invitee(helper, d, at, 0);
+			PactPerchBlockEntity perch = perch(helper, at, player);
+			beside(helper, player, at);
+			PactMenu menu = open(helper, player, perch);
+			helper.assertTrue(key(term(menu.lastSent(), "compact")).equals(PACT_KEY + "term.compact.items"),
+					d.id() + ": its compact's term is the one without resonance");
+			List<String> words = new ArrayList<>();
+			menu.lastSent().terms().forEach(term -> words.add(term.value().getString()));
+			menu.lastSent().notes().forEach(note -> words.add(note.getString()));
+			PactStatePayload refused = send(player, menu, PactRequestPayload.ACCEPT, 0);
+			helper.assertTrue(answered(refused, Pacts.Outcome.CANNOT_AFFORD.id) && said(refused).equals(PACT_KEY + "answer.cannot_afford.items"),
+					d.id() + ": without its compact, refused as cannot_afford (items)");
+			words.add(refused.result().get().message().getString());
+			for (String line : words) {
+				String lower = line.toLowerCase(Locale.ROOT);
+				helper.assertTrue(!lower.contains("astrolabe") && !lower.contains("resonance"), d.id() + " names no astrolabe or resonance: " + line);
+			}
+			player.closeContainer();
+		}
+		helper.assertTrue(any, "Some offered pact asks no resonance (Buer's)");
+		helper.succeed();
+	}
+
+	// GC-03's first obligation, shown with Buer's pact (GC-P31, GC-P38): recorded once a player a spirit, never as
+	// Stolas's, and only while the pact is active and in its area.
+
+	/**
+	 * GC-03 (GC-P31, GC-P38): a tending by hand in Buer's area while his pact is active records his first obligation once
+	 * (the Conclave hears it once); a second tending, or one told "tended lately", records nothing more; another holder's own
+	 * pact records theirs.
+	 */
+	@GameTest(structure = "jugcraft-test:drone_depot", maxTicks = 40)
+	public void anObligationIsRecordedOncePerPlayerAndSpirit(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		ServerPlayer keeper = gardenHolder(helper);
+		long g0 = level.getGameTime();
+		PactPerchBlockEntity perch = buerPact(helper, keeper, new BlockPos(2, 1, 2), g0);
+		helper.assertTrue(!PactObligations.kept(keeper, BuerEntity.COUNTERPART) && GARDEN_SERVED.getOrDefault(keeper.getUUID(), 0) == 0,
+				"Before: nothing kept, nothing heard");
+		BlockPos first = new BlockPos(4, 1, 4);
+		VerdantBedBlockEntity bed = keptBed(helper, first, keeper.getUUID(), 2);
+		ConcordanceGardenGameTests.handUse(helper, keeper, first, ItemStack.EMPTY, false);
+		Knowledge.Progress progress = ConcordanceProgress.knowledge(keeper).progress(GardenPacts.RESEARCH);
+		helper.assertTrue(bed.strain() == 1 && GARDEN_SERVED.getOrDefault(keeper.getUUID(), 0) == 1
+				&& progress.evidence().containsKey(PactObligations.key(BuerEntity.COUNTERPART)) && PactObligations.kept(keeper, BuerEntity.COUNTERPART)
+				&& PactObligations.spiritsKept(keeper) == 1 && progress.state() == ResearchState.UNDERSTOOD,
+				"A tending by hand in his area keeps his first obligation, once; the Regard stays understood: " + progress);
+		helper.assertTrue(keys(PactObligations.rows(keeper, pactOf(level, perch), PactObligations.Act.TEND))
+				.equals(List.of("message.jugcraft.concordance.garden_pact.obligation_kept")), "The kept page says it is kept");
+		BlockPos second = new BlockPos(5, 1, 4);
+		VerdantBedBlockEntity other = keptBed(helper, second, keeper.getUUID(), 2);
+		ConcordanceGardenGameTests.handUse(helper, keeper, second, ItemStack.EMPTY, false);
+		helper.assertTrue(other.strain() == 1 && GARDEN_SERVED.getOrDefault(keeper.getUUID(), 0) == 1,
+				"A second tending eases its bed and records nothing again");
+		ConcordanceGardenGameTests.handUse(helper, keeper, first, ItemStack.EMPTY, false);
+		helper.assertTrue(bed.strain() == 1 && GARDEN_SERVED.getOrDefault(keeper.getUUID(), 0) == 1, "One told it was tended lately records nothing");
+		ServerPlayer another = gardenHolder(helper);
+		buerPact(helper, another, new BlockPos(10, 1, 10), g0);
+		BlockPos theirs = new BlockPos(12, 1, 12);
+		keptBed(helper, theirs, another.getUUID(), 2);
+		ConcordanceGardenGameTests.handUse(helper, another, theirs, ItemStack.EMPTY, false);
+		helper.assertTrue(GARDEN_SERVED.getOrDefault(another.getUUID(), 0) == 1 && GARDEN_SERVED.getOrDefault(keeper.getUUID(), 0) == 1,
+				"Another holder's own tending in their own pact's area records theirs, once");
+		helper.succeed();
+	}
+
+	/** GC-03 (GB5): a garden obligation kept beside Stolas's pact records only the garden practice: Stolas's Regard is not mastered by it. */
+	@GameTest(maxTicks = 40)
+	public void anObligationNeverMastersStolassRegard(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		ServerPlayer keeper = gardenHolder(helper);
+		understand(keeper, StolasRegard.RESEARCH);
+		long g0 = level.getGameTime();
+		buerPact(helper, keeper, new BlockPos(2, 1, 2), g0);
+		stolasPact(helper, keeper, new BlockPos(6, 1, 2), g0);
+		int served = served(keeper);
+		BlockPos at = new BlockPos(4, 1, 4);
+		keptBed(helper, at, keeper.getUUID(), 2);
+		ConcordanceGardenGameTests.handUse(helper, keeper, at, ItemStack.EMPTY, false);
+		Set<String> stolas = ConcordanceProgress.knowledge(keeper).progress(StolasRegard.RESEARCH).evidence().keySet();
+		helper.assertTrue(PactObligations.kept(keeper, BuerEntity.COUNTERPART) && regard(keeper) == ResearchState.UNDERSTOOD && served(keeper) == served
+				&& stolas.stream().noneMatch(key -> key.startsWith("practice:" + GardenPacts.ACTIVITY + ":")) && !StarReckoning.kept(keeper),
+				"The garden key is recorded; Stolas's Regard is untouched and his obligation unkept: " + stolas);
+		helper.succeed();
+	}
+
+	/**
+	 * GC-03 (GC-P31): nothing is recorded for a tending outside the area, while the pact is suspended (by its holder) or held
+	 * for its upkeep, or without its perch, nor with the Concordance off, nor for a player without such a pact; resumed, a
+	 * tending records it whatever the hour (the obligation reads Pacts.serving, never the hours).
+	 */
+	@GameTest(structure = "jugcraft-test:drone_depot", maxTicks = 40)
+	public void anObligationOutsideTheAreaOrWhileSuspendedCountsNothing(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		ServerPlayer keeper = gardenHolder(helper);
+		long g0 = level.getGameTime();
+		PactPerchBlockEntity perch = buerPact(helper, keeper, new BlockPos(2, 1, 2), g0);
+		BlockPos outside = new BlockPos(13, 1, 13);
+		VerdantBedBlockEntity far = keptBed(helper, outside, keeper.getUUID(), 2);
+		ConcordanceGardenGameTests.handUse(helper, keeper, outside, ItemStack.EMPTY, false);
+		helper.assertTrue(far.strain() == 1 && GARDEN_SERVED.getOrDefault(keeper.getUUID(), 0) == 0 && !PactObligations.kept(keeper, BuerEntity.COUNTERPART),
+				"Tended 11 blocks from the perch, outside his area: nothing recorded");
+		helper.assertTrue(PactKeeping.suspend(level, keeper, perch.holder(), g0) == AgreementHolder.Toggle.SUSPENDED, "Its holder suspends the pact");
+		BlockPos inside = new BlockPos(4, 1, 4);
+		VerdantBedBlockEntity near = keptBed(helper, inside, keeper.getUUID(), 2);
+		ConcordanceGardenGameTests.handUse(helper, keeper, inside, ItemStack.EMPTY, false);
+		helper.assertTrue(near.strain() == 1 && GARDEN_SERVED.getOrDefault(keeper.getUUID(), 0) == 0, "Suspended: a tending in his area records nothing");
+		helper.assertTrue(PactKeeping.resume(level, keeper, perch.holder(), g0) == AgreementHolder.Toggle.RESUMED, "Resumed");
+		BlockPos again = new BlockPos(5, 1, 4);
+		keptBed(helper, again, keeper.getUUID(), 2);
+		ConcordanceGardenGameTests.handUse(helper, keeper, again, ItemStack.EMPTY, false);
+		helper.assertTrue(GARDEN_SERVED.getOrDefault(keeper.getUUID(), 0) == 1 && PactObligations.kept(keeper, BuerEntity.COUNTERPART),
+				"Resumed, whatever the hour, a tending records it");
+		// A second keeper's pact held for its upkeep.
+		ServerPlayer held = gardenHolder(helper);
+		BlockPos heldAt = new BlockPos(10, 1, 2);
+		long h0 = dayStart(level, 1);
+		PactPerchBlockEntity heldPerch = buerPact(helper, held, heldAt, h0);
+		long due = pactOf(level, heldPerch).pact().upkeep().due();
+		helper.assertTrue(stay(level, heldPerch.holder(), h0 + 1_000L, due - 1_000L).isEmpty() && heldPerch.holder().look(level, due) == Pacts.Event.WARNED
+				&& stay(level, heldPerch.holder(), due + 1_000L, due + Pacts.DAY - 1_000L).isEmpty()
+				&& heldPerch.holder().look(level, due + Pacts.DAY) == Pacts.Event.SUSPENDED, "Unpaid past its grace: held for upkeep");
+		BlockPos heldBed = new BlockPos(12, 1, 2);
+		keptBed(helper, heldBed, held.getUUID(), 2);
+		ConcordanceGardenGameTests.handUse(helper, held, heldBed, ItemStack.EMPTY, false);
+		helper.assertTrue(GARDEN_SERVED.getOrDefault(held.getUUID(), 0) == 0, "Held for upkeep: nothing recorded");
+		// A third whose perch was broken while switched off: the pact stays seated there and cannot be kept.
+		ServerPlayer stranded = gardenHolder(helper);
+		BlockPos strandedAt = new BlockPos(2, 1, 10);
+		buerPact(helper, stranded, strandedAt, g0);
+		off(() -> helper.setBlock(strandedAt, Blocks.AIR));
+		BlockPos strandedBed = new BlockPos(4, 1, 10);
+		keptBed(helper, strandedBed, stranded.getUUID(), 2);
+		ConcordanceGardenGameTests.handUse(helper, stranded, strandedBed, ItemStack.EMPTY, false);
+		helper.assertTrue(GARDEN_SERVED.getOrDefault(stranded.getUUID(), 0) == 0, "Its perch gone: nothing recorded");
+		// The Concordance switched off.
+		ServerPlayer switched = gardenHolder(helper);
+		BlockPos switchedAt = new BlockPos(10, 1, 10);
+		buerPact(helper, switched, switchedAt, g0);
+		BlockPos switchedBed = new BlockPos(12, 1, 10);
+		keptBed(helper, switchedBed, switched.getUUID(), 2);
+		off(() -> ConcordanceGardenGameTests.handUse(helper, switched, switchedBed, ItemStack.EMPTY, false));
+		helper.assertTrue(GARDEN_SERVED.getOrDefault(switched.getUUID(), 0) == 0, "Switched off: nothing recorded");
+		// A player with no pact tending inside Buer's area.
+		ServerPlayer passer = gardenHolder(helper);
+		BlockPos passerBed = new BlockPos(3, 1, 5);
+		keptBed(helper, passerBed, passer.getUUID(), 2);
+		ConcordanceGardenGameTests.handUse(helper, passer, passerBed, ItemStack.EMPTY, false);
+		helper.assertTrue(GARDEN_SERVED.getOrDefault(passer.getUUID(), 0) == 0 && GARDEN_SERVED.getOrDefault(keeper.getUUID(), 0) == 1,
+				"A player with no pact records nothing, for anyone");
+		helper.succeed();
+	}
+
+	// GC-01's chooser, journal and roster cases (GC-P10, GC-P16), with a second spirit to choose.
+
+	/** A survival owner ready to invite both Stolas and Buer at a perch at {@code at}: both Regards, a star, a bed within 8, one compact of each. */
+	static ServerPlayer chooserOwner(GameTestHelper helper, BlockPos at) {
+		ServerPlayer owner = TestPlayers.survivor(helper);
+		for (PactDefinition d : List.of(stolasOffer(), buerOffer())) {
+			understand(owner, d.research());
+			pocketFor(owner, d, 1);
+			FIXTURES.get(d.id()).meet(helper, owner, at);
+		}
+		RateGate.forget(owner.getUUID());
+		return owner;
+	}
+
+	/**
+	 * GC-01 (SG4, GC-P10): an owner who may invite two spirits is shown the chooser (both, in the perch's order, by sign,
+	 * ready); without Buer's bed his entry says what is missing; with one spirit to invite there is no chooser. INVITE(1)
+	 * begins Buer's visit; accepting seals his pact and spends nothing of Stolas's compact.
+	 */
+	@GameTest(maxTicks = 20)
+	public void aPerchOffersOnlyWhatThePlayerMayInvite(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		PactDefinition stolasD = stolasOffer();
+		PactDefinition buerD = buerOffer();
+		BlockPos at = perchFor(0);
+		ServerPlayer owner = chooserOwner(helper, at);
+		PactPerchBlockEntity perch = perch(helper, at, owner);
+		beside(helper, owner, at);
+		PactMenu menu = open(helper, owner, perch);
+		PactStatePayload chooser = menu.lastSent();
+		helper.assertTrue(chooser.mode() == PactStatePayload.INVITE
+				&& chooser.patterns().stream().map(PactStatePayload.Choice::id).toList().equals(List.of(StolasEntity.SIGN, BuerEntity.SIGN))
+				&& chooser.patterns().stream().allMatch(choice -> choice.ready() && choice.amount() == 0) && chooser.notes().isEmpty()
+				&& chooser.spirit().equals(PactStatePayload.Spirit.NONE) && key(chooser.speaker()).equals("container.jugcraft.pact_perch")
+				&& chooser.actions() == PactStatePayload.mask(PactRequestPayload.CHOOSE, PactRequestPayload.INVITE) && perch.visitor() == null,
+				"Both Regards understood, a star and a bed: the chooser, Stolas then Buer by their signs, both ready, no visitor: " + chooser);
+		// Without Buer's bed his entry says what is still missing.
+		BlockPos bare = perchFor(2);
+		ServerPlayer bedless = TestPlayers.survivor(helper);
+		understand(bedless, stolasD.research());
+		understand(bedless, buerD.research());
+		FIXTURES.get(stolasD.id()).meet(helper, bedless, bare);
+		RateGate.forget(bedless.getUUID());
+		PactPerchBlockEntity barePerch = perch(helper, bare, bedless);
+		beside(helper, bedless, bare);
+		PactStatePayload missing = open(helper, bedless, barePerch).lastSent();
+		helper.assertTrue(missing.mode() == PactStatePayload.INVITE && missing.patterns().size() == 2 && missing.patterns().get(0).ready()
+				&& !missing.patterns().get(1).ready() && missing.patterns().get(1).amount() == 1 && note(missing, "invite.missing") != null,
+				"Without a bed of theirs within 8, Buer is listed not ready, what is missing named: " + missing);
+		bedless.closeContainer();
+		// One who understands only the Garden's Regard: no chooser, Buer's offer.
+		BlockPos gardenAt = perchFor(3);
+		ServerPlayer gardener = invitee(helper, buerD, gardenAt, 0);
+		PactPerchBlockEntity gardenPerch = perch(helper, gardenAt, gardener);
+		beside(helper, gardener, gardenAt);
+		PactStatePayload one = open(helper, gardener, gardenPerch).lastSent();
+		helper.assertTrue(one.mode() == PactStatePayload.NEGOTIATE && one.spirit().sign().equals(BuerEntity.SIGN),
+				"Only the Garden's Regard understood: no chooser, Buer's offer: " + one);
+		gardener.closeContainer();
+		// One already holding Stolas's pact: one to invite, no chooser.
+		BlockPos heldAt = perchFor(4);
+		ServerPlayer holding = chooserOwner(helper, heldAt);
+		stolasPact(helper, holding, perchFor(5), level.getGameTime());
+		PactPerchBlockEntity heldPerch = perch(helper, heldAt, holding);
+		beside(helper, holding, heldAt);
+		PactStatePayload rest = open(helper, holding, heldPerch).lastSent();
+		helper.assertTrue(rest.mode() == PactStatePayload.NEGOTIATE && rest.spirit().sign().equals(BuerEntity.SIGN),
+				"Holding Stolas's pact, one is left to invite: no chooser, Buer's offer: " + rest);
+		holding.closeContainer();
+		// Back on the chooser: INVITE(1) begins Buer's visit; accepting seals his pact alone.
+		PactStatePayload invited = invite(owner, menu, 1);
+		helper.assertTrue(answered(invited, PactMenu.INVITED) && invited.result().get().done() && invited.mode() == PactStatePayload.NEGOTIATE
+				&& keys(invited.beats()).equals(buerD.beats().stream().map(beat -> PACT_KEY + "buer.beat." + beat).toList())
+				&& invited.spirit().sign().equals(BuerEntity.SIGN) && perch.visitor(level) instanceof BuerEntity, "INVITE(1): Buer comes, his beats and sign: " + invited);
+		PactStatePayload sealed = send(owner, menu, PactRequestPayload.ACCEPT, 0);
+		BoundWill record = recordOf(level, owner);
+		helper.assertTrue(answered(sealed, PactMenu.SEALED) && record != null && BuerEntity.COUNTERPART.equals(Pacts.counterpart(record.counterpart()))
+				&& pocketed(owner, 0, buerD) && pocketed(owner, 1, stolasD) && resonance(owner) == resonanceFor(stolasD),
+				"Accepting seals Buer's pact, his compact spent once, nothing of Stolas's");
+		helper.succeed();
+	}
+
+	/** GC-01 (SG4): on the chooser, an INVITE past its list is not offered and summons nothing; past the screen's bound it is dropped. */
+	@GameTest(maxTicks = 20)
+	public void anInviteIndexOutOfRangeIsDropped(GameTestHelper helper) {
+		BlockPos at = perchFor(0);
+		ServerPlayer owner = chooserOwner(helper, at);
+		PactPerchBlockEntity perch = perch(helper, at, owner);
+		beside(helper, owner, at);
+		PactMenu menu = open(helper, owner, perch);
+		helper.assertValueEqual(menu.lastSent().mode(), PactStatePayload.INVITE, "The chooser");
+		PactStatePayload past = invite(owner, menu, 2);
+		helper.assertTrue(answered(past, PactMenu.NOT_OFFERED) && past.mode() == PactStatePayload.INVITE && perch.visitor() == null
+				&& spiritsOf(helper, buerOffer()).isEmpty() && spiritsOf(helper, stolasOffer()).isEmpty(),
+				"INVITE(2) past the two listed: not offered, still the chooser, nobody comes");
+		helper.assertTrue(request(owner, menu.containerId, menu.lastSequence() + 1, PactRequestPayload.INVITE, PactStatePayload.MAX_CHOICES,
+				menu.lastSent().revision()) == null, "INVITE(8), past the screen's bound: dropped before anything");
+		helper.succeed();
+	}
+
+	/** GC-01 (SG4, GC-P10): a reader who is not the perch's owner never sees the chooser: the visitor's offer, else the first they may invite, each with missing.owner. */
+	@GameTest(maxTicks = 20)
+	public void aNonOwnerNeverSeesTheChooser(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		BlockPos at = perchFor(0);
+		ServerPlayer owner = chooserOwner(helper, at);
+		PactPerchBlockEntity perch = perch(helper, at, owner);
+		beside(helper, owner, at);
+		PactMenu mine = open(helper, owner, perch);
+		helper.assertTrue(answered(invite(owner, mine, 1), PactMenu.INVITED) && perch.visitor(level) instanceof BuerEntity, "Its owner invites Buer");
+		ServerPlayer other = chooserOwner(helper, perchFor(1));
+		beside(helper, other, at);
+		PactMenu theirs = open(helper, other, perch);
+		PactStatePayload visiting = theirs.lastSent();
+		helper.assertTrue(visiting.mode() == PactStatePayload.NEGOTIATE && visiting.spirit().sign().equals(BuerEntity.SIGN)
+				&& note(visiting, "missing.owner") != null, "With the owner's Buer waiting: his offer, and only the owner may invite him: " + visiting);
+		helper.assertTrue(answered(invite(other, theirs, 0), PactMenu.NOT_OFFERED), "INVITE is not offered to them");
+		other.closeContainer();
+		helper.assertTrue(answered(send(owner, mine, PactRequestPayload.DECLINE, 0), PactMenu.DECLINED), "Its owner declines");
+		PactSpiritEntity<?> guest = perch.visitor(level);
+		helper.assertTrue(guest == null || guest.think(level, 0L, level.getGameTime()) == Status.FINISHED, "No conversation waits: the visitor leaves");
+		PactStatePayload none = open(helper, other, perch).lastSent();
+		helper.assertTrue(none.mode() == PactStatePayload.NEGOTIATE && none.spirit().sign().equals(StolasEntity.SIGN)
+				&& note(none, "missing.owner") != null && perch.visitor(level) == null,
+				"With none waiting: the first they may invite, Stolas, and only the owner may: " + none);
+		helper.assertTrue(answered(invite(other, open(helper, other, perch), 0), PactMenu.NOT_OFFERED), "never the chooser");
+		helper.succeed();
+	}
+
+	/** GC-01 (SG4): a reload that removes a listed spirit's offer: INVITE at the chooser's revision answers changed, the one left offered. */
+	@GameTest(maxTicks = 20)
+	public void aStaleChooserRevisionIsRefused(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		BlockPos at = perchFor(0);
+		ServerPlayer owner = chooserOwner(helper, at);
+		PactPerchBlockEntity perch = perch(helper, at, owner);
+		beside(helper, owner, at);
+		PactMenu menu = open(helper, owner, perch);
+		int revision = menu.lastSent().revision();
+		helper.assertValueEqual(menu.lastSent().mode(), PactStatePayload.INVITE, "The chooser at revision " + revision);
+		ConcordanceRules was = ConcordanceData.rules();
+		try {
+			ConcordanceData.replace(was.withPacts(PactCatalog.parse(Map.of(PactDefinition.STOLAS, shipped(level)), was.research().keySet())));
+			PactStatePayload stale = request(owner, menu.containerId, menu.lastSequence() + 1, PactRequestPayload.INVITE, 1, revision);
+			helper.assertTrue(answered(stale, PactMenu.CHANGED) && stale.revision() != revision && stale.mode() == PactStatePayload.NEGOTIATE
+					&& stale.spirit().sign().equals(StolasEntity.SIGN) && perch.visitor() == null,
+					"Buer's offer gone, INVITE at the old revision: changed, Stolas's offer alone, no chooser: " + stale);
+		} finally {
+			ConcordanceData.replace(was);
+		}
+		helper.succeed();
+	}
+
+	/**
+	 * GC-01 (SG4; the unit review): a visitor still awaited from a visit its owner declined, the conversation reopened before
+	 * its next think, leaves once its owner, back on the chooser, invites a spirit that cannot come yet, so no spirit waits on
+	 * the perch while another's terms are shown.
+	 */
+	@GameTest(maxTicks = 20)
+	public void aVisitorOfAnotherSpiritLeavesWhenTheChosenCannotCome(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		BlockPos at = perchFor(0);
+		ServerPlayer owner = TestPlayers.survivor(helper);
+		understand(owner, stolasOffer().research());
+		understand(owner, buerOffer().research());
+		FIXTURES.get(BuerEntity.COUNTERPART).meet(helper, owner, at);
+		RateGate.forget(owner.getUUID());
+		PactPerchBlockEntity perch = perch(helper, at, owner);
+		beside(helper, owner, at);
+		PactMenu menu = open(helper, owner, perch);
+		PactStatePayload chooser = menu.lastSent();
+		helper.assertTrue(chooser.mode() == PactStatePayload.INVITE && chooser.patterns().size() == 2 && !chooser.patterns().get(0).ready()
+				&& chooser.patterns().get(1).ready(), "The chooser: Stolas not ready (no star of theirs), Buer ready: " + chooser);
+		helper.assertTrue(answered(invite(owner, menu, 1), PactMenu.INVITED) && perch.visitor(level) instanceof BuerEntity, "INVITE(1): Buer comes");
+		helper.assertTrue(answered(send(owner, menu, PactRequestPayload.DECLINE, 0), PactMenu.DECLINED), "Its owner declines");
+		RateGate.forget(owner.getUUID());
+		PactMenu again = open(helper, owner, perch);
+		PactSpiritEntity<?> waiting = perch.visitor(level);
+		helper.assertTrue(again.lastSent().mode() == PactStatePayload.INVITE && waiting instanceof BuerEntity,
+				"Reopened before his next think: the chooser, and Buer still awaited on the perch");
+		PactStatePayload invited = invite(owner, again, 0);
+		helper.assertTrue(answered(invited, PactMenu.INVITED) && perch.visitor() == null && perch.visitor(level) == null && waiting.gone(),
+				"INVITE(0), Stolas, who cannot come yet: Buer leaves, and nobody waits on the perch while Stolas's terms are shown: " + invited);
+		helper.succeed();
+	}
+
+	/** GC-01 (GB6, SG9): each pact's roster row is portrayed by its spirit; a pact worker with no record has no portrait; a record whose counterpart is no spirit is a spirit's row. */
+	@GameTest(maxTicks = 20)
+	public void theRosterPortraitsEachPactBySpirit(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		ServerPlayer holder = gardenHolder(helper);
+		long now = level.getGameTime();
+		UUID stolasRecord = stolasPact(helper, holder, new BlockPos(2, 1, 2), now).holder().agreement().record();
+		UUID buerRecord = buerPact(helper, holder, new BlockPos(6, 1, 2), now).holder().agreement().record();
+		RosterStatePayload both = roster(holder);
+		RosterStatePayload.Row stolasRow = rowOf(both, stolasRecord);
+		RosterStatePayload.Row buerRow = rowOf(both, buerRecord);
+		helper.assertTrue(stolasRow != null && buerRow != null && key(stolasRow.kind()).equals("message.jugcraft.concordance.workers.kind.pact")
+				&& key(buerRow.kind()).equals("message.jugcraft.concordance.workers.kind.pact") && "jugcraft:stolas".equals(stolasRow.portrait())
+				&& "jugcraft:buer".equals(buerRow.portrait()), "Two pacts, each a pact row portrayed by its own spirit: " + stolasRow + " " + buerRow);
+		UUID noted = UUID.randomUUID();
+		WorkerRoster.of(level.getServer()).note(holder.getUUID(), noted, "pact", Status.IDLE, level.dimension().identifier().toString(),
+				helper.absolutePos(new BlockPos(4, 1, 4)));
+		UUID odd = UUID.randomUUID();
+		helper.assertValueEqual(BoundWills.of(level.getServer()).seal(new BoundWill(odd, "jugcraft:no_such_pact", "jugcraft:no_such_spirit",
+				holder.getUUID(), now + 1, false)).outcome(), BoundWillLedger.Outcome.DONE, "A record whose counterpart is no spirit");
+		RosterStatePayload after = roster(holder);
+		RosterStatePayload.Row worker = rowOf(after, noted);
+		RosterStatePayload.Row spirit = rowOf(after, odd);
+		helper.assertTrue(worker != null && "".equals(worker.portrait()) && key(worker.kind()).equals("message.jugcraft.concordance.workers.kind.pact"),
+				"A pact worker noted with no record: no portrait of its own (the Spirit Anchor): " + worker);
+		helper.assertTrue(spirit != null && key(spirit.kind()).equals("message.jugcraft.concordance.workers.kind.spirit"),
+				"A record whose counterpart is no spirit: a spirit's row: " + spirit);
 		helper.succeed();
 	}
 }

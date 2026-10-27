@@ -344,6 +344,30 @@ GARDEN = {
          "reaches": [f"research:{rid('garden_regard')}@understood"],
          "tests": ["theGardensRegardAdvancesByHandAndByAWorker", "notesNeverStandInForTheGardensRegard",
                    "theGardensRegardIsReachable"]},
+        # GC-04: Buer, from his perch to his departure (Dossier 1). buerFromTheCodexToDeparture walks steps 1 to 6 on one
+        # survival player.
+        {"research": [], "things": ["pact_perch", "mendvetch"],
+         "text": "Build a Pact Perch where you may build, with an awake Verdant Bed of yours within 8 blocks, and use it: "
+                 "Buer comes rooted on the perch and names every term before anything is spent (without the bed he does "
+                 "not come: \"There is nothing here I could mend\"); accept, and his compact (4 Mendvetch, 4 bone meal) "
+                 "is spent once",
+         "reaches": [f"pact:{rid('buer')}"],
+         "tests": ["buerRefusesWithoutABedToMend", "everySpiritSealsOnceAndSpendsOnce", "buerFromTheCodexToDeparture"]},
+        {"research": [], "things": [],
+         "text": "By daylight, while you are near, Buer eases one harvest strain from one of your beds at a time, each by "
+                 "its own tending rule; a bed he mended that is worked back to its worst is overworked until it is fed or "
+                 "rests. Tend a strained bed in his area yourself, with an empty hand: his first obligation",
+         "reaches": [f"practice:{rid('garden_pact_service')}"],
+         "tests": ["buerEasesOneStrainAtTheBedsOwnRate", "anOverworkedBedWaitsForCompost",
+                   "buersFirstObligationIsATendingByHand", "anObligationIsRecordedOncePerPlayerAndSpirit",
+                   "buerFromTheCodexToDeparture"]},
+        {"research": [], "things": [],
+         "text": "Keep the pact with one Mendvetch a week (a missed one is warned and worked through a day's grace, then "
+                 "the service is suspended with nothing taken; an offering resumes it). End it at the perch: what was "
+                 "paid ahead comes back once, and Buer closes and sinks into the perch",
+         "reaches": [],
+         "tests": ["buerTendsThroughHisGrace", "everySpiritsUpkeepWarnsGivesGraceSuspendsAndResumes",
+                   "endingAnySpiritsPactReturnsTheEscrowOnce", "buerFromTheCodexToDeparture"]},
     ],
 }
 
@@ -669,6 +693,10 @@ def garden_walk(pg, research, invocations, rituals, at_hand, understood, dimensi
     nodes = pg.graph(research, invocations, rituals, at_hand, problems)
     for item in acquisition.GARDEN_PACTS:
         pg.item_node(nodes, at_hand, rid(item), problems)
+    # GC-04: each shipped garden pact's compact and offerings (vanilla bone meal among them), as a step needing them would add them.
+    for pact in pg.garden_spirits(at_hand).values():
+        for item in [cost["item"] for cost in pact.get("compact", {}).get("items", [])] + _offerings(pact):
+            pg.item_node(nodes, at_hand, item, problems)
     without = {pg.research_node(rid(key), state) for key in research for state in pg.RESEARCH_STATES
                if key != "garden_regard" and (state == "mastered" or key not in understood)}
     reached = pg.reachable(nodes, research, cap="practitioner", dimensions=set(dimensions or [""]), without=without | set(blocked))
@@ -712,6 +740,17 @@ def garden_problems(pg, research, invocations, rituals, at_hand):
             if all(want in lost for want in wants):
                 found.append(f"journey garden step {number}: nothing it reaches needs {key}")
     final, _ = garden_walk(pg, research, invocations, rituals, at_hand, understood)
+    # GC-04: each shipped garden pact asks no resonance (GC-S10), and the route alone has its compact, an offering and its pact.
+    for name, pact in pg.garden_spirits(at_hand).items():
+        if pact.get("compact", {}).get("resonance", 0) != 0:
+            found.append(f"journey garden {name}: a garden compact asks no Astral Resonance (GC-S10)")
+        short = [cost["item"] for cost in pact.get("compact", {}).get("items", []) if f"item:{cost['item']}" not in final]
+        if short:
+            found.append(f"journey garden {name}: its compact's {short} are not had by one player alone in the Overworld")
+        if not any(f"item:{item}" in final for item in _offerings(pact)):
+            found.append(f"journey garden {name}: none of its offerings {_offerings(pact)} is had by the route")
+        if f"pact:{rid(name)}" not in final:
+            found.append(f"journey garden {name}: its pact (perch, bed and compact) is not reached by the route")
     if (pg.research_node(garden.REGARD, "mastered") in final) != (len(pg.garden_spirits(at_hand)) >= garden.MASTERY_SPIRITS):
         found.append(f"journey garden: The Garden's Regard is mastered by the route exactly when {garden.MASTERY_SPIRITS} "
                      "garden spirits ship (GB26)")

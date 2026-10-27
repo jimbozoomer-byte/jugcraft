@@ -89,6 +89,11 @@ WEIGHTS = {
     # OwnerCollectionsNetworkTests does), and the stranger's steps at the holder's perch with three shots: an estimate,
     # not a measurement.
     "ConcordancePactNetworkTests": 300,
+    # Concordance garden cohort, GC-04 (GC-P30): a dedicated server's start, the perch refused for want of a bed, the
+    # chooser and Buer's conversation by keyboard at three sizes, a refused and a sealed acceptance, his work on a bed,
+    # the overworked row, Jade, ten poses frozen, his underside, four bearings and the ending: about 35 shots and their
+    # waits, about 330 s at the pace the Winter entry implies (an estimate, not a measurement).
+    "ConcordanceGardenPactClientGameTests": 330,
     "JugcraftServerClientGameTests": 90,
     # Companion suites exercise timed AI, inventory trips and cooking, not just
     # showrooms. Allow CI headroom over the focused local runtime measurements.
@@ -108,9 +113,12 @@ WEIGHTS = {
 # Classes a client test shows without naming them (registered by another class, or reached through an optional
 # integration), by the classes that show them: Stolas's renderer (his glowmask layer, scale, culling and departure) and
 # his perch's and anchor's Jade provider (the unit review, D2), and since the garden cohort, the pact spirits' renderer table
-# and base (GC-01).
+# and base (GC-01), and Buer's service and the garden reads it shows at work (GC-04).
 SHOWN_BY = {"WorkerClient": {"ConcordancePactClientGameTests"}, "PactDataProvider": {"ConcordancePactClientGameTests"},
-            "PactSpiritRenderers": {"ConcordancePactClientGameTests"}, "PactSpiritEntity": {"ConcordancePactClientGameTests"}}
+            "PactSpiritRenderers": {"ConcordancePactClientGameTests", "ConcordanceGardenPactClientGameTests"},
+            "PactSpiritEntity": {"ConcordancePactClientGameTests", "ConcordanceGardenPactClientGameTests"},
+            "StrainTending": {"ConcordanceGardenPactClientGameTests"}, "GardenReach": {"ConcordanceGardenPactClientGameTests"},
+            "GardenPacts": {"ConcordanceGardenPactClientGameTests"}}
 HUB = 5  # a class this many test classes name is a shared registry, not one feature
 WIDE = 4  # a changed class shown by this share of the classes (a quarter) or more is picked by its changed lines
 ENDINGS = ("BlockEntityRenderer", "BlockEntity", "Renderer", "Block", "Item", "Entity", "Model", "Screen", "Menu",

@@ -16,10 +16,13 @@ import org.jspecify.annotations.Nullable;
  * interpreter); PactServices registers each once and refuses to start without one for every work the parser accepts. A
  * record whose work has none (a newer save read by an older build) still loads, lists, suspends and ends: its page says
  * its service is not known and offers no service action. Later members land with their first user: the first
- * obligation's act (GC-03), a complication and its accords (GC-05).
+ * obligation's act (GC-03), Jade's note (GC-04), a complication and its accords (GC-05).
  */
 public interface PactService {
-	/** Why an invitation waits beyond research, ownership and a pact already held: a reason id (one of PactMenu's ANSWERS) and its words. */
+	/**
+	 * Why an invitation waits beyond research, ownership and a pact already held: a reason id (one of PactMenu's ANSWERS, or
+	 * the service's own: tools/concordance_pacts.py SERVICE_WORDS answers) and its words.
+	 */
 	record Missing(String reason, Component note) {
 	}
 
@@ -59,9 +62,23 @@ public interface PactService {
 		return null;
 	}
 
+	/** GC-04: a service's short note for Jade's reading of its pact: tooltip.jugcraft.concordance.jade.pact.note.<work>.<id>, given {@code count}. */
+	record Note(String id, int count) {
+	}
+
+	/**
+	 * GC-04: the note Jade shows for {@code spirit}'s pact at world time {@code time} and game time {@code now}, or null
+	 * (default: none; Stolas's). Reads only; names no player.
+	 */
+	default @Nullable Note note(ServerLevel level, PactSpiritEntity<?> spirit, BoundWill record, long time, long now) {
+		return null;
+	}
+
 	/**
 	 * One autonomous step for {@code spirit}'s pact, run only after its decide returned IDLE (a verified presence at its
-	 * perch, its pact serving, its holder near): at most one change; the status it leaves. Default: none (Stolas).
+	 * perch, its pact serving, its holder near) or, since GC-04 (GC-P27), UPKEEP_DUE (an offering due serves on through its
+	 * grace; decide then asked the pact's state before its holder's presence, so a service asks that again at each change):
+	 * at most one change; the status it leaves. Default: none (Stolas).
 	 */
 	default Status work(ServerLevel level, PactSpiritEntity<?> spirit, BoundWill record, AgreementHolder holder, long time, long now) {
 		return Status.IDLE;

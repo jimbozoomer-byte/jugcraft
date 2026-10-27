@@ -34,9 +34,10 @@ PAGES = {
     "beasts": "Creature Equipment",
     "caverns": "Cave Exploration",
     "jimta_network": "Digital Workshops",
+    "jimta_guides": "Workshop Guides",
     "keys": "Keys",
 }
-SERVER_PAGES = ["discover", "spellcraft", "expedition", "inspect", "nouveau", "menagerie", "woodland", "household", "habitats", "beasts", "caverns", "jimta_network"]
+SERVER_PAGES = ["discover", "spellcraft", "expedition", "inspect", "nouveau", "menagerie", "woodland", "household", "habitats", "beasts", "caverns", "jimta_network", "jimta_guides"]
 
 # Where a step of a route stands for a player (EncyclopediaPayload.StepState, NONE aside), in words.
 STATES = {
@@ -342,7 +343,8 @@ DOSSIER = {
                           "of a fight; when he falls, Grey Mist stands in the middle of the lake too",
     "cinder_kiln.leave": "The Grey Mist in the arch of kiln brick behind the arrival takes you home at any time, in or "
                          "out of a fight; when he falls, Grey Mist stands in the middle of the bowl too",
-    "grave_goods": "Dying in a lair costs no belongings: they come back to you as Grave Goods",
+    "grave_goods": "Dying in a lair costs nothing: you respawn with everything you carried, worn and held as it was, "
+                   "and all your experience",
     "owed": "A share of the keeper's spoils is kept for you",
     "share": "Damage %s, healing %s, warded %s, objectives %s",
     "share.qualifies": "This fight: your part already earns a share",

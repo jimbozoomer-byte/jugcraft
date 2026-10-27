@@ -297,7 +297,7 @@ The Cinder Kiln is its own dimension, so nothing here changes the Overworld or t
 
 ## Rollout and open questions
 
-The shared framework's defaults hold: four players and eight instances, Grave Goods on death. His settings are the shared boss settings above. Open: the two-client playtest, and whether the Tyrant's 440 health and the quench's 8 seconds feel right in play.
+The shared framework's defaults hold: four players and eight instances, nothing lost on death. His settings are the shared boss settings above. Open: the two-client playtest, and whether the Tyrant's 440 health and the quench's 8 seconds feel right in play.
 
 Proposed in Concordance Chunk B ([the contract](concordance-chunk-b.md)), for the owner:
 - **B-P4, no objective of his own.** Nothing records who turned a sluice (the gate keeps only its flow and its trough's flood, and the quench reads only the flood), so baiting his slam into a flooded trough is no deed in his fight. A deed would need the turner noted as the wheel turns, keyed for each turn, and given only to a player already in the fight.

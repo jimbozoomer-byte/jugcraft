@@ -14,8 +14,13 @@ GC-03 (GC-S9, GC-P6, GC-P7): The Garden's Regard, the cohort's one research, and
 - The bed index (Java: spirits/GardenReach; REACH here).
 
 tools/concordance.py merges these tables into its own; tools/check_mod_data.py (check_garden_pacts) holds the Java and the
-data to them. Each spirit's unit adds its work to OBLIGATIONS and CONSTANTS and its codex page to PAGES (GC-04: Buer's).
+data to them. Each spirit's unit adds its work to OBLIGATIONS and CONSTANTS and its codex page to PAGES (GC-04: Buer's),
+and its row to DISTINCT.
 """
+
+import concordance_ecology as ecology
+import concordance_pacts as pacts
+import concordance_workers as workers
 
 MOD = "jugcraft"
 
@@ -38,9 +43,18 @@ ACTS = ["tend"]
 HOOKS = {"tend": ("garden/VerdantBedBlock.java", "static void tendBy(",
                   "PactObligations.performed(level, player, PactObligations.Act.TEND, pos);",
                   "if (bed.tend(level.getGameTime())) {", "} else {")}
-OBLIGATIONS = {}  # work -> act (each act at most one work). GC-04: "strain_tending": "tend"
-CONSTANTS = {}  # work -> {Java file under concordance/: {constant: value}}; each spirit's unit adds its own (check_garden_pacts)
+OBLIGATIONS = {"strain_tending": "tend"}  # work -> act (each act at most one work); GC-04: Buer's
+# work -> {Java file under concordance/: {constant: value}}; each spirit's unit adds its own (check_garden_pacts).
+# GC-04: Buer remembers today's eases of at most 16 beds, and asks GardenPacts.target about at most 8 beds a think.
+CONSTANTS = {"strain_tending": {"spirits/StrainTending.java": {"MEMORY": 16, "MAX_ASKED": 8}}}
 REACH = {"MAX_BEDS": 64, "REFRESH_TICKS": 200}  # Java: spirits/GardenReach (GC-P2)
+# GE8: mechanically distinct services. Each garden work changes one kind of state through one call that only its service
+# class makes, under its own verb; check_garden_pacts holds the classes to the rows and no two rows alike. Each spirit's
+# unit adds its row (GC-04: Buer's).
+DISTINCT = {
+    "strain_tending": {"verb": "ease", "state": "a Verdant Bed's harvest strain", "call": "bed.tend(now)",
+                       "class": "StrainTending"},
+}
 CODEX_PLACE = (6, 4)  # the Binding category's map: (0..6, 0..4) holds eleven entries; (6, 4) is free (check_concordance)
 # GC-05 (GC-P45, GC-P54): a device index (GardenReach.devices) holds at most this many Hearts, Gleaners and Ley Pylons, each.
 REACH["MAX_DEVICES"] = 16  # Java: spirits/GardenReach
@@ -82,8 +96,44 @@ MESSAGES = {
 # Under tooltip.jugcraft.concordance. (tools/concordance.py TOOLTIPS).
 TOOLTIPS = {"garden_regard_specimen": "The garden's spirits regard this: sneak and use it in the air to examine it"}
 
-# Each spirit's codex page, in its unit (GC-04 appends Buer's): ("text", name, words, ("garden_regard", "understood")).
-PAGES = []
+# Each spirit's codex pages, in its unit: ("text", title, words, ("garden_regard", "understood")). GC-04: Buer's (Dossier 1),
+# their numbers read from his offer (tools/concordance_pacts.py SPIRITS) and the tables that hold the Java's (the unit review).
+_BUER = pacts.SPIRITS["buer"]["pact"]
+_BUER_ITEMS = {rid("mendvetch"): "Mendvetch", "minecraft:bone_meal": "bone meal"}  # his compact's and offering's words
+_BUER_OFFERING = _BUER_ITEMS[pacts.SPIRITS["buer"]["offerings"]["items"][0]]
+
+
+def _count(n):
+    return "one" if n == 1 else str(n)
+
+
+PAGES = [
+    ("text", "Buer",
+     "Buer, a spirit of the old books, mends what a garden's harvests strain. Build a **Pact Perch** (its recipe is this "
+     f"entry's third page) with an **awake Verdant Bed** of yours within {_BUER['service']['radius']} blocks, and use it: "
+     "he comes rooted on the perch, a great blossom, and names every term before anything is spent. Without a bed of yours "
+     "there he will not come: \"There is nothing here I could mend.\"", ("garden_regard", "understood")),
+    ("text", "His Service",
+     f"By daylight ({workers.clock(_BUER['service']['from'])} to {workers.clock(_BUER['service']['to'])}), while you are "
+     f"within {workers.PACT['REACH']} blocks of the perch, he eases **one harvest strain** from one awake bed of yours or "
+     f"your party's in his area at a time, the most strained first, at most {_BUER['service']['quota']} a game day. Each "
+     f"bed is eased no sooner than its own tending allows: the {ecology.TEND_TICKS // 20} seconds a Greenwarden's hand "
+     "waits, shared with yours. He moves no nutrients and no items, and never touches a bed you could not change by hand.",
+     ("garden_regard", "understood")),
+    ("text", "The Overworked Bed",
+     "A bed he mended today that is worked back to its worst strain is **overworked**: he will not mend it again until it "
+     "eases by its own rules: fed with bone meal or fertilizer, a Mulch Maw's nutrient, or left fallow. The pact's page "
+     "and Jade name it. Nothing is lost while it waits, and a restart forgets his complaint; nothing is ever owed.",
+     ("garden_regard", "understood")),
+    ("text", "His Price",
+     "The compact, paid as you accept (no astrolabe): **"
+     + " and ".join(f"{cost['count']} {_BUER_ITEMS[cost['item']]}" for cost in _BUER["compact"]["items"])
+     + f"**. Then {_count(_BUER['upkeep']['count'])} {_BUER_OFFERING} every {_BUER['upkeep']['period_days']} game days, "
+     f"up to {_BUER['upkeep']['cap']} paid ahead; a missed one is warned and he works on through "
+     + ("a day's grace" if _BUER["upkeep"]["grace_days"] == 1 else f"{_BUER['upkeep']['grace_days']} days' grace")
+     + ", then the pact is suspended with nothing lost. Your first obligation: tend a strained bed in his area yourself, "
+     "with an empty hand, while the pact is active.", ("garden_regard", "understood")),
+]
 
 
 def codex():

@@ -750,6 +750,9 @@ public class ConcordancePersistenceGameTests {
 		owner.closeContainer();
 		PactPerchBlockEntity perch = helper.getBlockEntity(at, PactPerchBlockEntity.class);
 		StolasEntity presence = (StolasEntity) level.getEntity(perch.holder().spirit());
+		// A presence learns its record on its first think (PactSpiritEntity.record), as aPerchKeepsItsOwnerAndPact reads it.
+		presence.think(level, 0L, level.getGameTime());
+		helper.assertTrue(presence.record() != null, "The presence knows its record once it has thought");
 		BlockPos centre = helper.absolutePos(bedAt);
 		GardenReach kept = new GardenReach(centre, 8, found -> false);
 		helper.assertTrue(presence.serviceMemory(GardenReach.class, () -> kept) == kept

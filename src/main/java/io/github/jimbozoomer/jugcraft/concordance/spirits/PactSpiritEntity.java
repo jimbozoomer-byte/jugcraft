@@ -64,7 +64,9 @@ import org.jspecify.annotations.Nullable;
  * Its pact's service (PactServices, by the record's work) takes one autonomous step a think, and only after {@link #decide}
  * has returned IDLE for a presence with a record: its UUID and record verified against its perch, its pact's state read,
  * its holder present near (Authority.presentNear within Pacts.REACH). So a visitor, a copy, a duplicate, a suspended,
- * held or unattended pact never works. Stolas's service takes none.
+ * held or unattended pact never works. Since GC-04 (GC-P27) it steps under UPKEEP_DUE too, an offering due serving on
+ * through its grace, the status kept; a garden service then asks its holder's presence at the change itself. Stolas's
+ * service takes none.
  * <p>
  * While a choice its service raises waits on its holder (GC-05; PactAccords), it says AWAITING_ANSWER instead of its
  * step's status ({@link #serve}); it keeps to the safe course meanwhile, and an offering due is still what it says.
@@ -249,10 +251,15 @@ public abstract class PactSpiritEntity<T extends PactSpiritEntity<T>> extends Wo
 	@Override
 	public Status think(ServerLevel level, long time, long gameTime) {
 		Status next = decide(level, gameTime);
-		if (next == Status.IDLE && owner != null && record != null && !gone()) {
+		if (owner != null && record != null && !gone() && (next == Status.IDLE
+				|| next == Status.UPKEEP_DUE && Authority.presentNear(level, owner, perch, Pacts.REACH) != null)) {
 			// GC-01 (SG1): its pact's service may take one step, only now: a presence verified at its own perch, its pact
-			// serving and its holder near.
-			next = serve(level, time, gameTime);
+			// serving. GC-04 (GC-P27): an offering due serves on through its grace, as its terms, Jade and Pacts.serves say,
+			// but only with its holder near (decide asks that only after the pact's own state; the unit review), so no
+			// service runs for an absent holder; the status stays UPKEEP_DUE so the warning is what is shown. A garden
+			// service still asks at each change (GardenPacts.target).
+			Status served = serve(level, time, gameTime);
+			next = next == Status.UPKEEP_DUE ? next : served;
 		}
 		if (!gone()) {
 			// Leaving, it keeps its last status, as it did when it left at once: no sign over it, no roster entry touched.
@@ -324,7 +331,7 @@ public abstract class PactSpiritEntity<T extends PactSpiritEntity<T>> extends Wo
 	 * GC-01 (SG1): its pact's service's one autonomous step (PactService.work: at most one change; Stolas's takes none), for
 	 * the record its perch keeps; IDLE when its work is one this version does not know. GC-05 (GC-P44, GC-P47): then
 	 * AWAITING_ANSWER, whatever the step returned, while a choice of its service's waits on its holder ({@link #answering}).
-	 * Its think steps it only where decide left nothing else to say, and keeps an offering due said over it.
+	 * Its think steps it where decide returned IDLE or (GC-04, GC-P27) UPKEEP_DUE, and keeps an offering due said over it.
 	 */
 	private Status serve(ServerLevel level, long time, long gameTime) {
 		if (!(level.getBlockEntity(perch) instanceof PactPerchBlockEntity home)) {

@@ -2164,9 +2164,10 @@ public class ConcordanceGardenGameTests {
 	 * The garden cohort, GC-03 (GC-P39): a bed says whether a tending would ease a strain without changing it. Not without a
 	 * strain; strained, yes, and asking changes nothing; within TEND_TICKS of its last tending, whoever tended it, no; after
 	 * it, or with the clock run back, yes. A harvest it saw counts as growth would count it, and asking counts nothing. A
-	 * dormant bed, and any bed while the Concordance is switched off, may not be tended.
+	 * dormant bed, and any bed while the Concordance is switched off, may not be tended. The ripe crop grows by the bed's own
+	 * rules, so it is lit and its area read early (prefetch), as every harvest test here does.
 	 */
-	@GameTest(maxTicks = 20)
+	@GameTest(maxTicks = 60)
 	public void aBedSaysWhetherItMayBeTendedWithoutChangingIt(GameTestHelper helper) {
 		ServerLevel level = level(helper);
 		long now = level.getGameTime() + 10_000L;
@@ -2180,13 +2181,6 @@ public class ConcordanceGardenGameTests {
 				"Within its window it may not be tended again, whoever asks");
 		helper.assertTrue(bed.mayTendAt(now + Garden.TEND_TICKS) && bed.strain() == 1, "After it, it may");
 		helper.assertTrue(bed.mayTendAt(now - 1), "A clock run back opens the window again, as tend reads it");
-		BlockPos ripeAt = new BlockPos(3, 1, 1);
-		VerdantBedBlockEntity ripe = bed(helper, ripeAt, 10);
-		ripen(helper, ripeAt.above(), ripe);
-		level.destroyBlock(helper.absolutePos(ripeAt.above()), false);
-		helper.assertTrue(ripe.strain() == 0 && ripe.ripened() && ripe.mayTendAt(now) && ripe.strain() == 0 && ripe.ripened(),
-				"A harvest seen counts, and asking counted nothing");
-		helper.assertTrue(ripe.tend(now) && ripe.strain() == 0 && !ripe.ripened(), "Tending counts the harvest, then eases it");
 		BlockPos dormantAt = new BlockPos(5, 1, 1);
 		helper.setBlock(dormantAt, Garden.VERDANT_BED.defaultBlockState());
 		VerdantBedBlockEntity dormant = entity(helper, dormantAt);
@@ -2200,7 +2194,19 @@ public class ConcordanceGardenGameTests {
 		} finally {
 			JugcraftConfig.setFeatureEnabled(JugcraftConcordance.FEATURE, on);
 		}
-		helper.succeed();
+		BlockPos ripeAt = new BlockPos(3, 1, 1);
+		VerdantBedBlockEntity ripe = bed(helper, ripeAt, 10);
+		crop(helper, ripeAt.above(), Garden.SUNPETAL_CROP, 1);
+		helper.setBlock(ripeAt.above().south(), Blocks.GLOWSTONE);
+		prefetch(helper, ripe);
+		helper.runAtTickTime(40, () -> {
+			ripen(helper, ripeAt.above(), ripe);
+			level.destroyBlock(helper.absolutePos(ripeAt.above()), false);
+			helper.assertTrue(ripe.strain() == 0 && ripe.ripened() && ripe.mayTendAt(now) && ripe.strain() == 0 && ripe.ripened(),
+					"A harvest seen counts, and asking counted nothing");
+			helper.assertTrue(ripe.tend(now) && ripe.strain() == 0 && !ripe.ripened(), "Tending counts the harvest, then eases it");
+			helper.succeed();
+		});
 	}
 
 	/**

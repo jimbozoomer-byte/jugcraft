@@ -1,5 +1,6 @@
 package io.github.jimbozoomer.jugcraft.test;
 
+import eu.pb4.trinkets.api.TrinketsApi;
 import io.github.jimbozoomer.jugcraft.Jugcraft;
 import io.github.jimbozoomer.jugcraft.agriculture.HeadstoneBlock;
 import io.github.jimbozoomer.jugcraft.config.JugcraftConfig;
@@ -25,6 +26,7 @@ import net.fabricmc.fabric.api.client.gametest.v1.FabricClientGameTest;
 import net.fabricmc.fabric.api.client.gametest.v1.context.ClientGameTestContext;
 import net.fabricmc.fabric.api.client.gametest.v1.context.TestServerContext;
 import net.fabricmc.fabric.api.client.gametest.v1.context.TestSingleplayerContext;
+import net.minecraft.client.gui.screens.DeathScreen;
 import net.fabricmc.fabric.api.client.gametest.v1.world.TestWorldSave;
 import net.minecraft.client.gui.screens.worldselection.WorldCreationUiState;
 import net.minecraft.core.BlockPos;
@@ -35,6 +37,7 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
+import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.ExperienceOrb;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.item.ItemStack;
@@ -129,7 +132,9 @@ public class LairClientGameTests implements FabricClientGameTest {
 	 * over the grave and takes the ringer in, unable to build;</li>
 	 * <li>building and using blocks are refused, the lair's exit is not;</li>
 	 * <li>straying past the edge throws the player back for 4 damage, never below half a heart;</li>
-	 * <li>dying there gathers what was dropped as Grave Goods, handed back on respawning;</li>
+	 * <li>dying there drops nothing: the player respawns outside with every slot as it was (armour, offhand and a
+	 * Trinkets slot worn), the same held slot and all their experience, and goes back in; anything still dropped (by
+	 * another mod, say) is gathered as Grave Goods, handed back on respawning;</li>
 	 * <li>the gate takes the player back in, and leaving takes them back to exactly where they stood, facing the same
 	 * way, able to build again;</li>
 	 * <li>a full party lets nobody else in;</li>
@@ -208,7 +213,65 @@ public class LairClientGameTests implements FabricClientGameTest {
 			player.setHealth(20.0F);
 		});
 
-		// 4. Grave Goods: what was dropped dying is gathered at once and handed back on respawning (outside).
+		// 4. A real death in the lair costs nothing: no items or experience fall, and the player respawns outside with
+		// every slot as it was, the same held slot and all their experience.
+		AtomicReference<ServerPlayer> fallen = new AtomicReference<>();
+		AtomicReference<float[]> experience = new AtomicReference<>();
+		server.runOnServer(minecraft -> {
+			ServerPlayer player = player(minecraft);
+			ServerLevel lair = minecraft.getLevel(ACRE.dimension);
+			check(Lairs.keepsBelongings(player), "A death in a lair would cost belongings");
+			player.getInventory().clearContent();
+			player.setItemSlot(EquipmentSlot.HEAD, new ItemStack(Items.IRON_HELMET));
+			player.setItemSlot(EquipmentSlot.OFFHAND, new ItemStack(Items.SHIELD));
+			player.getInventory().setItem(4, new ItemStack(Items.EMERALD, 9));
+			player.getInventory().setItem(20, new ItemStack(Items.BREAD, 5));
+			player.getInventory().setSelectedSlot(4);
+			TrinketsApi.getAttachment(player).getInventory("chest/spell_focus").setItem(0, new ItemStack(Items.AMETHYST_SHARD));
+			player.giveExperiencePoints(500);
+			experience.set(new float[] {player.experienceLevel, player.experienceProgress, player.totalExperience});
+			check(player.experienceLevel > 0, "No experience to keep");
+			fallen.set(player);
+			player.hurtServer(lair, lair.damageSources().genericKill(), Float.MAX_VALUE);
+			check(player.isDeadOrDying(), "The player did not die");
+			AABB around = player.getBoundingBox().inflate(8.0);
+			check(lair.getEntitiesOfClass(ItemEntity.class, around).isEmpty(), "A death in a lair dropped items");
+			check(lair.getEntitiesOfClass(ExperienceOrb.class, around).isEmpty(), "A death in a lair dropped experience");
+			check(player.getAttached(Lairs.GRAVE_GOODS) == null, "Nothing was dropped, yet there are Grave Goods");
+			check(player.getAttached(Lairs.VISIT) == null, "A death in a lair ends the visit");
+		});
+		context.waitTicks(10);
+		context.runOnClient(client -> client.player.respawn());
+		server.waitFor(minecraft -> player(minecraft) != fallen.get() && player(minecraft).isAlive(), 200);
+		context.waitTicks(40);
+		context.runOnClient(client -> {
+			if (client.gui.screen() instanceof DeathScreen) {
+				client.gui.setScreen(null);
+			}
+		});
+		server.runOnServer(minecraft -> {
+			ServerPlayer player = player(minecraft);
+			check(!Lairs.isLair(player.level()), "The player respawned in the lair: " + player.level().dimension());
+			check(player.getItemBySlot(EquipmentSlot.HEAD).is(Items.IRON_HELMET)
+					&& player.getItemBySlot(EquipmentSlot.OFFHAND).is(Items.SHIELD), "The armour and offhand were not kept worn");
+			check(player.getInventory().getItem(4).is(Items.EMERALD) && player.getInventory().getItem(4).getCount() == 9
+					&& player.getInventory().getItem(20).is(Items.BREAD) && player.getInventory().getItem(20).getCount() == 5,
+					"The inventory did not come back slot for slot");
+			check(player.getInventory().getSelectedSlot() == 4, "The held slot was not kept: " + player.getInventory().getSelectedSlot());
+			check(TrinketsApi.getAttachment(player).getInventory("chest/spell_focus").getItem(0).is(Items.AMETHYST_SHARD),
+					"The worn Trinkets slot was not kept");
+			float[] kept = experience.get();
+			check(player.experienceLevel == (int) kept[0] && player.experienceProgress == kept[1] && player.totalExperience == (int) kept[2],
+					"The experience was not kept: level " + player.experienceLevel + ", total " + player.totalExperience);
+			check(player.getAttached(Lairs.GRAVE_GOODS) == null, "Grave Goods were left over");
+			check(!Lairs.keepsBelongings(player), "Outside a lair, death would keep belongings");
+			player.getInventory().clearContent();
+			check(Lairs.enter(player, first.get()), "The player could not go back in");
+		});
+		context.waitTicks(40);
+
+		// 4 (continued). Grave Goods: anything still dropped dying (by another mod, say) is caught as it drops, even
+		// though the lair keeps everything else, and handed back on respawning (outside).
 		server.runOnServer(minecraft -> {
 			ServerPlayer player = player(minecraft);
 			ServerLevel lair = minecraft.getLevel(ACRE.dimension);

@@ -19,11 +19,15 @@ public final class CrucibleCompanion implements CompanionLogistics.Port {
     public final CompanionRecipeFilter filter=new CompanionRecipeFilter();
     private Formula cachedFormula;
     private Identifier cachedPlan;
+    private int stockForm;
     public CrucibleCompanion(CrucibleBlockEntity crucible){this.crucible=crucible;}
     private boolean live(){return !crucible.isRemoved() && crucible.getLevel() instanceof ServerLevel;}
     private boolean enabled(){return live() && JugcraftConfig.isFeatureEnabled(JugcraftConcordance.FEATURE);}
     public static boolean acceptsFilter(ItemStack stack){return stack.isEmpty() || stack.is(JugcraftConcordance.DRAUGHT) || stack.is(JugcraftConcordance.SALVE);}
-    public boolean salve(){return !filter.allows(new ItemStack(JugcraftConcordance.DRAUGHT)) && filter.allows(new ItemStack(JugcraftConcordance.SALVE));}
+    public boolean salve(){return stockForm==2 && filter.allows(new ItemStack(JugcraftConcordance.SALVE)) || !filter.allows(new ItemStack(JugcraftConcordance.DRAUGHT)) && filter.allows(new ItemStack(JugcraftConcordance.SALVE));}
+    public void stockForm(boolean salve){if(!stockBusy() && stockForm!=(salve?2:1)){stockForm=salve?2:1;crucible.setChanged();}}
+    public void saveStockForm(net.minecraft.world.level.storage.ValueOutput out){out.putInt("CompanionStockForm",stockForm);}
+    public void loadStockForm(net.minecraft.world.level.storage.ValueInput in){stockForm=Math.clamp(in.getIntOr("CompanionStockForm",0),0,2);}
     public void selectSalve(boolean salve){for(int i=0;i<9;i++)filter.set(i,ItemStack.EMPTY);filter.set(0,new ItemStack(salve?JugcraftConcordance.SALVE:JugcraftConcordance.DRAUGHT));crucible.setChanged();CompanionReadiness.invalidate(crucible);}
     private Item container(){return salve()?Items.BOWL:Items.GLASS_BOTTLE;}
     public Identifier plan(){
@@ -35,6 +39,13 @@ public final class CrucibleCompanion implements CompanionLogistics.Port {
     }
     private List<Operation> remaining(){var formula=crucible.program();return formula==null?List.of():formula.operations().subList(crucible.step(),formula.operations().size());}
     private int containers(){int parts=crucible.mixture().parts();for(var op:remaining())if(op instanceof Operation.Water water)parts+=water.parts();return Math.min(Mixture.MAX_PARTS,parts);}
+    public ItemStack stockProduct(){return new ItemStack(salve()?JugcraftConcordance.SALVE:JugcraftConcordance.DRAUGHT);}
+    public boolean stockBusy(){
+        if(crucible.mixture().history().stream().anyMatch(op->op instanceof Operation.Add))return true;
+        for(int i=0;i<=CrucibleBlockEntity.BOTTLE_SLOT;i++)if(!crucible.getItem(i).isEmpty())return true;
+        return false;
+    }
+    public int stockPending(List<ItemStack> incoming){return stockBusy() || !incoming.isEmpty()?containers():0;}
     public int needed(ItemStack stack){
         if(!enabled() || crucible.program()==null || crucible.incompatibility()!=null || stack.isEmpty())return 0; // C-01: an incompatible formula asks for nothing
         if(stack.is(container())){
