@@ -179,9 +179,9 @@ public final class HerobrineSkyIslands {
 
 	/**
 	 * Whether the sky from {@code min} to {@code max}, with {@value #MARGIN} blocks round it on every side, may take an
-	 * island: inside the world's height with {@value #HEADROOM} to spare, every chunk unclaimed, no column in the town,
-	 * the ground and anything built on it {@value #CLEARANCE} blocks below, and every block empty air. The chunks must
-	 * already be known to be loaded.
+	 * island: inside the world's height with {@value #HEADROOM} to spare, every chunk unclaimed, no column the town's at
+	 * any height ({@link #protectedTownColumn}), the ground and anything built on it {@value #CLEARANCE} blocks below,
+	 * and every block empty air. The chunks must already be known to be loaded.
 	 */
 	static boolean clearSky(ServerLevel level, BlockPos min, BlockPos max) {
 		int x0 = min.getX() - MARGIN;
@@ -202,7 +202,7 @@ public final class HerobrineSkyIslands {
 		}
 		for (int x = x0; x <= x1; x++) {
 			for (int z = z0; z <= z1; z++) {
-				if (Town.isProtected(level, new BlockPos(x, y0, z))
+				if (protectedTownColumn(level, new BlockPos(x, y0, z))
 						|| level.getHeight(Heightmap.Types.MOTION_BLOCKING, x, z) > min.getY() - CLEARANCE) {
 					return false;
 				}
@@ -219,6 +219,17 @@ public final class HerobrineSkyIslands {
 			}
 		}
 		return true;
+	}
+
+	/**
+	 * Whether the column of {@code pos} (its x and z; its height is ignored) is the town's protected ground, at any
+	 * height. The town's own protection reaches only from {@value Town#PROTECT_BELOW} below to {@value Town#PROTECT_ABOVE}
+	 * above its ground, so the sky over it is asked at the town's height: no sky island stands over the town, however
+	 * high. False when there is no town.
+	 */
+	public static boolean protectedTownColumn(ServerLevel level, BlockPos pos) {
+		BlockPos origin = Town.origin(level);
+		return origin != null && Town.isProtected(level, new BlockPos(pos.getX(), origin.getY(), pos.getZ()));
 	}
 
 	/** Whether a sky island stands (finished) or is rising within {@value #SPACING} blocks of {@code centre}. */
