@@ -66,6 +66,7 @@ Each island is a floating rock: moss, coarse and rooted dirt on top, stone, ande
   - empty air throughout.
 
   A player's block hanging in the sky inside that margin refuses it.
+- **Never over the town, however high.** The town's own protection reaches only from 12 below to 96 above its ground. So each column of the volume and margin is asked at the town's height (`protectedTownColumn`). OpenAI Codex's queue asks the same before placing each sky-island block, so a town placed while one is building stops it.
 - **High over the ground:** its lowest block at least 24 blocks above anything below it or its margin (the ground, trees or a player's tower).
 - **Well below the top of the world:** its margin at least 32 blocks below.
 - **Spacing:** no other sky island, finished or rising, within 1024 blocks on either axis. Spacing comes from the saved mark records.
@@ -130,7 +131,8 @@ Every finished island and ruin stays in the world and in the saved records indef
   - no fences or bars side by side;
   - built whole, every block exactly as planned, its sign written;
   - undone with nothing kept and every block back as it was;
-- a sky island is refused by a block in its margin, too little clearance, the top of the world, or a claim. Planning in unloaded land is refused (for sky islands and surface ruins) and loads nothing;
+- a sky island is refused by a block in its margin, too little clearance, the top of the world, or a claim;
+- a sky island is refused over the town even far above the town's own 96-block protection. The test places a town for a moment and forgets it before returning; a town another test placed is checked by column only. Planning in unloaded land is refused (for sky islands and surface ruins) and loads nothing;
 - a standing sky island keeps another away, and once it is undone the place is free again;
 - the three surface ruins build whole and come down the same way, and a hut turned to the south has its window in the south wall;
 - a surface ruin is refused by a player's build in its margin or a bump in its floor. A circle is refused under leaves. A standing ruin keeps another away.

@@ -7,6 +7,9 @@ import io.github.jimbozoomer.jugcraft.creatures.herobrine.HerobrineSurfacePlans;
 import io.github.jimbozoomer.jugcraft.finance.FinanceBook;
 import io.github.jimbozoomer.jugcraft.finance.LandRegistry;
 import io.github.jimbozoomer.jugcraft.finance.Ledger;
+import io.github.jimbozoomer.jugcraft.town.Town;
+import io.github.jimbozoomer.jugcraft.town.TownData;
+import io.github.jimbozoomer.jugcraft.town.TownState;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -28,7 +31,7 @@ import net.minecraft.world.level.block.state.BlockState;
  * the arena: high above the ground, under the world's roof, every block in its place exactly as planned once built (so
  * nothing shifts as later blocks arrive and undo can tell his blocks from a player's), with its sign, and taken back
  * completely by undo. A stray block in its margin, too little clearance, the top of the world, a claim or unloaded land
- * refuses one, and planning far away loads nothing; sky islands and surface ruins keep their distance from their own
+ * refuses one, and so does the town's ground below it however high it is; planning far away loads nothing; sky islands and surface ruins keep their distance from their own
  * kind. The three surface ruins build whole and come down the same way, and keep off a player's build, uneven ground
  * and (the ritual circle) ground under leaves. Everything is built at once ({@code HerobrineMarks.buildNow}), through
  * the same checks as the build queue, and taken back in the same tick.
@@ -174,6 +177,59 @@ public class HerobrineSkyGameTests {
 				&& HerobrineSkyIslands.plan(level, far, variant, false) == null && HerobrineSkyIslands.find(level, far) == null
 				&& HerobrineSurfacePlans.find(level, far) == null, "Nothing can be planned in unloaded land");
 		helper.assertTrue(!level.hasChunkAt(far), "Planning should not have loaded the far chunk");
+		helper.succeed();
+	}
+
+	/** The town column nearest the middle of the town's data that lies inside its wall. */
+	private static int[] insideColumn(TownData data) {
+		int[] best = null;
+		long bestDistance = Long.MAX_VALUE;
+		for (int x = 0; x < data.size; x++) {
+			for (int z = 0; z < data.size; z++) {
+				long dx = x - data.size / 2;
+				long dz = z - data.size / 2;
+				if (data.mask(x, z) == TownData.INSIDE && dx * dx + dz * dz < bestDistance) {
+					best = new int[] {x, z};
+					bestDistance = dx * dx + dz * dz;
+				}
+			}
+		}
+		return best;
+	}
+
+	/**
+	 * No sky island over the town, however high: the town's own protection reaches only {@value Town#PROTECT_ABOVE}
+	 * blocks above its ground, so the sky is checked by column. With no town in the world, one is placed for a moment
+	 * with its inside under the arena and its ground far below the island, and forgotten again before the test returns;
+	 * a town already placed (by another test) is only checked by column.
+	 */
+	@GameTest(structure = ARENA, padding = 48, skyAccess = true, maxTicks = 20)
+	public void aSkyIslandNeverStandsOverTheTown(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		TownState state = TownState.get(level);
+		int[] inside = insideColumn(TownData.get());
+		helper.assertTrue(inside != null, "The town's data should have an inside");
+		BlockPos existing = state.origin();
+		if (existing != null) {
+			BlockPos high = existing.offset(inside[0], Town.PROTECT_ABOVE + 40, inside[1]);
+			helper.assertTrue(!Town.isProtected(level, high) && HerobrineSkyIslands.protectedTownColumn(level, high),
+					"High over the town is beyond its own protection, but still its column");
+			helper.succeed();
+			return;
+		}
+		String variant = HerobrineSkyIslands.WATCHING_KEEP;
+		BlockPos centre = skyCentre(helper, variant);
+		helper.assertTrue(HerobrineSkyIslands.plan(level, centre, variant, false) != null, "With no town, open sky should take a keep");
+		BlockPos middle = helper.absolutePos(new BlockPos(24, 0, 24));
+		state.place(new BlockPos(middle.getX() - inside[0], centre.getY() - Town.PROTECT_ABOVE - 30, middle.getZ() - inside[1]));
+		try {
+			helper.assertTrue(!Town.isProtected(level, centre) && HerobrineSkyIslands.protectedTownColumn(level, centre),
+					"The island's height is beyond the town's own protection, but its column is the town's");
+			helper.assertTrue(HerobrineSkyIslands.plan(level, centre, variant, false) == null, "No sky island over the town, however high");
+		} finally {
+			state.forget();
+		}
+		helper.assertTrue(HerobrineSkyIslands.plan(level, centre, variant, false) != null, "With the town gone, the sky should take it again");
 		helper.succeed();
 	}
 
