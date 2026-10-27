@@ -1,6 +1,6 @@
 # Herobrine: sky islands and surface ruins
 
-Status: implemented on `claude/herobrine-haunting`, pending review. Not yet compiled or run (see Validation). Not merged, not deployed.
+Status: implemented on `claude/herobrine-haunting` and integrated on `feature/herobrine-player-schedule`. Combined compilation, native tests and rendered galleries passed on 27 October 2026 (see Validation). Not merged to main, not deployed.
 
 Owner: jimbozoomer-byte
 Target milestone and tier: the Halloween event, any tier
@@ -123,7 +123,7 @@ Every finished island and ruin stays in the world and in the saved records indef
 
 ## Validation
 
-`HerobrineSkyGameTests` (not yet registered or run; OpenAI Codex registers and runs it with the combined Herobrine suite):
+`HerobrineSkyGameTests` is registered and passed with the combined Herobrine suite. It checks:
 
 - each of the six sky islands is planned over the arena:
   - every block at least 24 above the ground under its own column (measured before building) and 32 under the world's top;
@@ -137,4 +137,6 @@ Every finished island and ruin stays in the world and in the saved records indef
 - the three surface ruins, on a field of grass blocks (survival terrain), build whole and come down the same way, and a hut turned to the south has its window in the south wall;
 - a surface ruin is refused by a player's build in its margin or a bump in its floor. A circle is refused under leaves. A standing ruin keeps another away.
 
-Not yet verified: compilation, any test run, rendering in a client (a gallery is planned by OpenAI Codex), and play.
+Validated by OpenAI Codex on the combined implementation at `96097d3027`: compilation, all 70 native Herobrine GameTests and 393 scheduler assertions passed. Both client galleries passed together and produced 32 screenshots covering all 22 new cave/water/sky/surface variants. All six island silhouettes and undersides and all three surface ruins were inspected in the rendered gallery. Surface tests use grass blocks, guarding against the 26.3 natural-soil tag mismatch fixed during integration. Full state/sign/undo checks passed for every island.
+
+Exact commands and local evidence paths are in [herobrine-depths.md](herobrine-depths.md#validation). The gallery uses disposable controlled terrain. Human traversal, natural-world placement distribution, multiplayer load/performance and live deployment have not been verified. Neither the owner's personal playtest nor live server was controlled.

@@ -23,4 +23,13 @@ Atmospheric exploration only, no research prerequisite, currency, loot chest, re
 
 ## Validation
 
-Implementation in progress. Added native tests for every layout, real construction, SavedData round trips, 3D spacing, water/lava and container refusal, unloaded-chunk refusal, approval revocation/ore protection, approach permanence and adopted furnace inventory preservation. Added an isolated rendered gallery for every cave/water layout. Results must be recorded after the combined run; no passing result is claimed here yet.
+Combined validation completed on 27 October 2026 at implementation commit `96097d3027`, including Claude's sky/surface planners:
+
+- Compilation passed. `herobrineScheduleTest` passed all 393 assertions; the filtered native Herobrine suite passed all 70 required GameTests (49.97 seconds of server testing).
+- Native coverage includes every layout's construction, SavedData round trips, 3D spacing, water/lava and container refusal, unloaded-chunk refusal, approval revocation/ore protection, approach permanence and adopted furnace inventory preservation. It also checks all six sky islands' full block states, signs and undo, all three surface ruins on grass, and claim/town protection.
+- Both rendered client galleries passed together: `HerobrineDepthsClientTests` and `HerobrineLandmarksClientTests`. Their 32 screenshots cover all 22 new variants, cave interiors, ravine spans and island undersides. Reviewed the rendered layouts, including corrected chair direction, proper bridge/balcony gaps and surface placement on grass.
+- Combined testing caught and fixed the 26.3 natural-soil tag mismatch, an undersized delayed-test timeout, and test assumptions about the arena heightmap. The final reruns are green.
+
+Local evidence is retained under `build/reports/herobrine-coordination/`: `combined-native-2.log`, `combined-gallery-2.log`, and `gallery/`. Commands: `gradlew herobrineScheduleTest runGameTest --offline --no-daemon` with `JAVA_TOOL_OPTIONS=-Dfabric-api.gametest.filter=jugcraft-test:herobrine*`; then `gradlew runClientGameTest -PclientTests=HerobrineDepthsClientTests,HerobrineLandmarksClientTests -I scripts/owner-network.init.gradle --offline --no-daemon` without that environment variable.
+
+The gallery uses controlled disposable terrain, not natural-world distribution or multiplayer load testing. Human traversal, live-server performance and deployment remain unverified. No personal Modrinth profile or live world was changed. All named variants are available through the operator mark command; a surface variant uses the player's height six blocks ahead and safely refuses unsuitable/sloping terrain.
