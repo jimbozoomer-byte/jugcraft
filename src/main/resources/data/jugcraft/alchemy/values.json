@@ -6987,6 +6987,11 @@
       "denominator": 1,
       "source": "recipe jugcraft:rocket_assembly/cloud_seeding_rocket"
     },
+    "jugcraft:cloudburst_gun": {
+      "numerator": 1171,
+      "denominator": 2,
+      "source": "recipe jugcraft:cloudburst_gun"
+    },
     "jugcraft:clover": {
       "numerator": 1,
       "denominator": 1,
@@ -9382,6 +9387,11 @@
       "denominator": 1,
       "source": "recipe jugcraft:starter_workshop/crucible_heat_insert"
     },
+    "jugcraft:crucible_stand": {
+      "numerator": 1793,
+      "denominator": 1,
+      "source": "recipe jugcraft:crucible_stand"
+    },
     "jugcraft:crude_oil_bucket": {
       "numerator": 776,
       "denominator": 1,
@@ -10216,6 +10226,11 @@
       "numerator": 2485,
       "denominator": 4,
       "source": "recipe jugcraft:drover_rifle"
+    },
+    "jugcraft:drowned_diver_helmet": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
     },
     "jugcraft:dry_lead_cell": {
       "numerator": 3,
@@ -11161,6 +11176,11 @@
       "numerator": 18,
       "denominator": 1,
       "source": "recipe jugcraft:ember_bed"
+    },
+    "jugcraft:emerald_phantom_mask": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
     },
     "jugcraft:emergency_diesel_generator": {
       "numerator": 23779,
@@ -13776,6 +13796,11 @@
       "numerator": 417,
       "denominator": 2,
       "source": "recipe jugcraft:highwayman"
+    },
+    "jugcraft:hinterland_rifle": {
+      "numerator": 929,
+      "denominator": 4,
+      "source": "recipe jugcraft:hinterland_rifle"
     },
     "jugcraft:holler_carbine": {
       "numerator": 401,
@@ -17001,6 +17026,11 @@
       "numerator": 1,
       "denominator": 4,
       "source": "recipe jugcraft:jarrahdale_pumpkin_seeds"
+    },
+    "jugcraft:jawbreaker": {
+      "numerator": 8201,
+      "denominator": 1,
+      "source": "recipe jugcraft:jawbreaker"
     },
     "jugcraft:jimta_16k_crafting_storage": {
       "numerator": 363973,
@@ -24237,6 +24267,11 @@
       "denominator": 1,
       "source": "recipe jugcraft:kraken_shell"
     },
+    "jugcraft:kreuzer_pistol": {
+      "numerator": 8200,
+      "denominator": 1,
+      "source": "recipe jugcraft:kreuzer_pistol"
+    },
     "jugcraft:lab_analyzer": {
       "numerator": 5659,
       "denominator": 4,
@@ -30837,6 +30872,11 @@
       "denominator": 1,
       "source": "recipe jugcraft:onrush_smg"
     },
+    "jugcraft:onyx_warden_helm": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
     "jugcraft:open_grave": {
       "numerator": 559,
       "denominator": 2,
@@ -32462,6 +32502,11 @@
       "denominator": 8,
       "source": "recipe jugcraft:protection_rack"
     },
+    "jugcraft:psalm_smg": {
+      "numerator": 8264,
+      "denominator": 1,
+      "source": "recipe jugcraft:psalm_smg"
+    },
     "jugcraft:ptfe_fitting": {
       "numerator": 1,
       "denominator": 1,
@@ -32726,6 +32771,11 @@
       "numerator": 368,
       "denominator": 1,
       "source": "recipe jugcraft:pyromaniacs_tunic"
+    },
+    "jugcraft:quarrel_carbine": {
+      "numerator": 1251,
+      "denominator": 2,
+      "source": "recipe jugcraft:quarrel_carbine"
     },
     "jugcraft:quartz_ore": {
       "numerator": 1024,
@@ -33711,6 +33761,11 @@
       "numerator": 513,
       "denominator": 8,
       "source": "recipe jugcraft:room_sign"
+    },
+    "jugcraft:rooted_thallite_foundation": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
     },
     "jugcraft:rosemary": {
       "numerator": 1,
@@ -34817,6 +34872,11 @@
       "denominator": 9,
       "source": "recipe jugcraft:specimen_tank"
     },
+    "jugcraft:spectral_cosmonaut_helmet": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
     "jugcraft:speed_gate": {
       "numerator": 271,
       "denominator": 4,
@@ -35543,9 +35603,9 @@
       "source": "recipe jugcraft:stonemasons_chisel"
     },
     "jugcraft:storable_bipropellant_motor": {
-      "numerator": 4,
-      "denominator": 3,
-      "source": "recipe jugcraft:rocket_assembly/cryo_storable_bipropellant_motor"
+      "numerator": 1,
+      "denominator": 1,
+      "source": "recipe jugcraft:rocket_assembly/cryo_mmh_bipropellant_motor"
     },
     "jugcraft:storage_rack": {
       "numerator": 1704,
@@ -36506,6 +36566,11 @@
       "numerator": 957,
       "denominator": 4,
       "source": "recipe jugcraft:throttle"
+    },
+    "jugcraft:thunder_vane": {
+      "numerator": 1952,
+      "denominator": 1,
+      "source": "recipe jugcraft:thunder_vane"
     },
     "jugcraft:thunderpipe": {
       "numerator": 533,
@@ -44857,6 +44922,16 @@
       "denominator": 4,
       "source": "recipe jugcraft:arcane_concordance"
     },
+    "peepo_companion:alchemist_uniform": {
+      "numerator": 677,
+      "denominator": 4,
+      "source": "recipe peepo_companion:alchemist_uniform"
+    },
+    "peepo_companion:baker_uniform": {
+      "numerator": 961,
+      "denominator": 4,
+      "source": "recipe peepo_companion:baker_uniform"
+    },
     "peepo_companion:black_companion_bed": {
       "numerator": 112,
       "denominator": 1,
@@ -44872,6 +44947,11 @@
       "denominator": 1,
       "source": "recipe peepo_companion:brown_companion_bed"
     },
+    "peepo_companion:chef_uniform": {
+      "numerator": 697,
+      "denominator": 4,
+      "source": "recipe peepo_companion:chef_uniform"
+    },
     "peepo_companion:companion_planner": {
       "numerator": 400,
       "denominator": 9,
@@ -44881,6 +44961,16 @@
       "numerator": 112,
       "denominator": 1,
       "source": "recipe peepo_companion:cyan_companion_bed"
+    },
+    "peepo_companion:farmer_uniform": {
+      "numerator": 769,
+      "denominator": 4,
+      "source": "recipe peepo_companion:farmer_uniform"
+    },
+    "peepo_companion:fisherman_uniform": {
+      "numerator": 929,
+      "denominator": 4,
+      "source": "recipe peepo_companion:fisherman_uniform"
     },
     "peepo_companion:generator_wheel": {
       "numerator": 1330,
@@ -44927,6 +45017,11 @@
       "denominator": 1,
       "source": "recipe peepo_companion:magenta_companion_bed"
     },
+    "peepo_companion:mechanic_uniform": {
+      "numerator": 1185,
+      "denominator": 4,
+      "source": "recipe peepo_companion:mechanic_uniform"
+    },
     "peepo_companion:mob_transport_crate": {
       "numerator": 78,
       "denominator": 1,
@@ -44937,20 +45032,40 @@
       "denominator": 1,
       "source": "recipe peepo_companion:orange_companion_bed"
     },
+    "peepo_companion:orchard_keeper_uniform": {
+      "numerator": 1185,
+      "denominator": 4,
+      "source": "recipe peepo_companion:orchard_keeper_uniform"
+    },
     "peepo_companion:pink_companion_bed": {
       "numerator": 112,
       "denominator": 1,
       "source": "recipe peepo_companion:pink_companion_bed"
+    },
+    "peepo_companion:porter_uniform": {
+      "numerator": 929,
+      "denominator": 4,
+      "source": "recipe peepo_companion:porter_uniform"
     },
     "peepo_companion:purple_companion_bed": {
       "numerator": 112,
       "denominator": 1,
       "source": "recipe peepo_companion:purple_companion_bed"
     },
+    "peepo_companion:ranch_hand_uniform": {
+      "numerator": 2721,
+      "denominator": 4,
+      "source": "recipe peepo_companion:ranch_hand_uniform"
+    },
     "peepo_companion:red_companion_bed": {
       "numerator": 112,
       "denominator": 1,
       "source": "recipe peepo_companion:red_companion_bed"
+    },
+    "peepo_companion:runner_uniform": {
+      "numerator": 2023,
+      "denominator": 12,
+      "source": "recipe peepo_companion:runner_uniform"
     },
     "peepo_companion:tiki_torch": {
       "numerator": 136,
@@ -44971,66 +45086,6 @@
       "numerator": 112,
       "denominator": 1,
       "source": "recipe peepo_companion:yellow_companion_bed"
-    },
-    "jugcraft:cloudburst_gun": {
-      "numerator": 1171,
-      "denominator": 2,
-      "source": "recipe jugcraft:cloudburst_gun"
-    },
-    "jugcraft:hinterland_rifle": {
-      "numerator": 929,
-      "denominator": 4,
-      "source": "recipe jugcraft:hinterland_rifle"
-    },
-    "jugcraft:quarrel_carbine": {
-      "numerator": 1251,
-      "denominator": 2,
-      "source": "recipe jugcraft:quarrel_carbine"
-    },
-    "jugcraft:crucible_stand": {
-      "numerator": 1793,
-      "denominator": 1,
-      "source": "recipe jugcraft:crucible_stand"
-    },
-    "jugcraft:rooted_thallite_foundation": {
-      "numerator": 1,
-      "denominator": 1,
-      "source": "fallback (balance pending)"
-    },
-    "jugcraft:drowned_diver_helmet": {
-      "numerator": 1,
-      "denominator": 1,
-      "source": "fallback (balance pending)"
-    },
-    "jugcraft:emerald_phantom_mask": {
-      "numerator": 1,
-      "denominator": 1,
-      "source": "fallback (balance pending)"
-    },
-    "jugcraft:onyx_warden_helm": {
-      "numerator": 1,
-      "denominator": 1,
-      "source": "fallback (balance pending)"
-    },
-    "jugcraft:spectral_cosmonaut_helmet": {
-      "numerator": 1,
-      "denominator": 1,
-      "source": "fallback (balance pending)"
-    },
-    "jugcraft:jawbreaker": {
-      "numerator": 8201,
-      "denominator": 1,
-      "source": "recipe jugcraft:jawbreaker"
-    },
-    "jugcraft:kreuzer_pistol": {
-      "numerator": 8200,
-      "denominator": 1,
-      "source": "recipe jugcraft:kreuzer_pistol"
-    },
-    "jugcraft:psalm_smg": {
-      "numerator": 8264,
-      "denominator": 1,
-      "source": "recipe jugcraft:psalm_smg"
     }
   }
 }

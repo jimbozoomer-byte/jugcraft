@@ -15217,6 +15217,12 @@
       "jugcraft:jimtafacts/fart2"
     ]
   },
+  "jimtafacts.rubber_trampoline": {
+    "subtitle": "subtitles.jugcraft.rubber_trampoline",
+    "sounds": [
+      "jugcraft:jimtafacts/industry/rubber_trampoline"
+    ]
+  },
   "jimtafacts.ice_spider_howl": {
     "sounds": [
       "jugcraft:jimtafacts/spellbooks/spider_howl"
@@ -15293,12 +15299,6 @@
   "jimtafacts.spellbooks.music.whispers_of_ice": {
     "sounds": [
       "jugcraft:jimtafacts/spellbooks/music/music_disc_whispers_of_ice"
-    ]
-  },
-  "jimtafacts.rubber_trampoline": {
-    "subtitle": "subtitles.jugcraft.rubber_trampoline",
-    "sounds": [
-      "jugcraft:jimtafacts/industry/rubber_trampoline"
     ]
   }
 }

@@ -1,4 +1,6 @@
 [
+  "jimta_oil_glob",
+  "jimta_iron_coin",
   "jimta_chipset_red",
   "jimta_chipset_iron",
   "jimta_chipset_gold",
@@ -68,7 +70,5 @@
   "jimta_grin_powder",
   "jimta_iron_cutting_blade",
   "jimta_steel_cutting_blade",
-  "jimta_diamond_cutting_blade",
-  "jimta_iron_coin",
-  "jimta_oil_glob"
+  "jimta_diamond_cutting_blade"
 ]

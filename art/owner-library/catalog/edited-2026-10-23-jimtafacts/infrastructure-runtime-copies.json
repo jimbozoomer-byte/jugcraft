@@ -30,11 +30,6 @@
     "sha256": "ca4354e72cd4668c133463d64c49ebc44b51b1a73a6d6550e6930373edad631f"
   },
   {
-    "source": "art/owner-library/originals/Oct23/Jimtafacts/industrialcraft reborn by jimbo/assets/ic2/textures/blocks/machine/blockMagnetizer.png",
-    "runtime": "src/main/resources/assets/jugcraft/textures/block/jimtafacts/infrastructure/jimta_magnetizer.png",
-    "sha256": "2de9ced69977640a91e7e320fc64340f1c12537f45cf9821c53be56a6a8fdfc6"
-  },
-  {
     "source": "art/owner-library/originals/Oct23/Jimtafacts/industrialcraft reborn by jimbo/assets/ic2/textures/blocks/machine/blockCropmatron.png",
     "runtime": "src/main/resources/assets/jugcraft/textures/block/jimtafacts/infrastructure/jimta_cropmatron.png",
     "sha256": "55fc205849c6aba69d9972b8b3b2530031067f39aa9481190c9906c76ab558f2"

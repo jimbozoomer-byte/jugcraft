@@ -200,6 +200,16 @@
     "sha256": "eebda8b2d0d4d0be80973d3bbdd6a63d93209f1b52be3b52823b0380d1dbef75"
   },
   {
+    "source": "art/owner-library/originals/Oct23/Jimtafacts/buildcraft reborn by jimbo/assets/buildcraftenergy/textures/items/glob_oil.png",
+    "runtime": "src/main/resources/assets/jugcraft/textures/item/jimtafacts/industry/jimta_oil_glob.png",
+    "sha256": "6194374945aebd3a3eb02c8a95e9fd73be9d22a228b43b418d8f3d99747dd2c1"
+  },
+  {
+    "source": "art/owner-library/originals/Oct23/Jimtafacts/industrialcraft reborn by jimbo/assets/ic2/textures/items/itemCoin.png",
+    "runtime": "src/main/resources/assets/jugcraft/textures/item/jimtafacts/industry/jimta_iron_coin.png",
+    "sha256": "7ae732ed4e75f6baab07721dd36c05e65f05ff62d791ed17bf94d376f603b773"
+  },
+  {
     "source": "art/owner-library/originals/Oct23/Jimtafacts/buildcraft reborn by jimbo/assets/buildcraftsilicon/textures/items/redstone_chipset/red.png",
     "runtime": "src/main/resources/assets/jugcraft/textures/item/jimtafacts/industry/jimta_chipset_red.png",
     "sha256": "dbeae0545f2c1a96e76a12610febeb3875a5d6e42514bb43b21989fc947cd151"
