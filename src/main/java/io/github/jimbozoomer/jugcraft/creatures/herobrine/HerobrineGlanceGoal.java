@@ -10,13 +10,15 @@ import org.jspecify.annotations.Nullable;
 
 /**
  * A guard's glance (docs/features/herobrine.md): a guard who sees Herobrine within {@value #RANGE} blocks turns to look at
- * him for {@value #GLANCE_TICKS} ticks, once per encounter, and then goes back to what it was doing. It is a look only:
+ * him for {@value #GLANCE_TICKS} game ticks (two seconds), once per encounter, and then goes back to what it was doing.
+ * The glance is timed by the guard's own tick count, not by counting calls: goals are weighed only every other tick, and
+ * a goal is ticked every tick only when it asks to be. It is a look only:
  * the goal never sets a target, never moves the guard, and gives way to any fight (it will not start while the guard
  * has a target). Herobrine is neither a monster nor an enemy, so no guard's attack goal or gun ever picks him. Lines of
  * sight are only cast over loaded chunks.
  */
 public final class HerobrineGlanceGoal extends Goal {
-	/** How long a guard looks, in ticks. */
+	/** How long a guard looks, in game ticks. */
 	public static final int GLANCE_TICKS = 40;
 	/** How far away a guard notices him, in blocks. */
 	public static final double RANGE = 32.0;
@@ -25,7 +27,7 @@ public final class HerobrineGlanceGoal extends Goal {
 	private final BooleanSupplier onDuty;
 	private @Nullable Herobrine seen;
 	private @Nullable UUID lastEncounter;
-	private int ticks;
+	private int until;
 	private int nextScan;
 
 	/** A glance for {@code guard}, while {@code onDuty} says it is a guard. */
@@ -52,18 +54,23 @@ public final class HerobrineGlanceGoal extends Goal {
 
 	@Override
 	public void start() {
-		ticks = GLANCE_TICKS;
+		until = guard.tickCount + GLANCE_TICKS;
 		lastEncounter = seen.encounter();
 	}
 
 	@Override
 	public boolean canContinueToUse() {
-		return ticks > 0 && seen != null && seen.isAlive() && guard.getTarget() == null;
+		return guard.tickCount < until && seen != null && seen.isAlive() && guard.getTarget() == null;
+	}
+
+	/** Turn the head every tick, so the look is smooth. */
+	@Override
+	public boolean requiresUpdateEveryTick() {
+		return true;
 	}
 
 	@Override
 	public void tick() {
-		ticks--;
 		if (seen != null) {
 			guard.getLookControl().setLookAt(seen, 30.0F, 30.0F);
 		}

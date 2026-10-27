@@ -9,13 +9,17 @@ import io.github.jimbozoomer.jugcraft.finance.Ledger;
 import java.util.List;
 import java.util.UUID;
 import java.util.function.Consumer;
+import java.util.function.Supplier;
 import net.fabricmc.fabric.api.gametest.v1.GameTest;
+import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.gametest.framework.GameTestHelper;
+import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.item.ItemEntity;
+import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.LeavesBlock;
@@ -31,7 +35,9 @@ import net.minecraft.world.phys.AABB;
  * a chunk, even at the loaded world's edge; a grove takes only leaves the world grew and leaves the logs; a tunnel digs
  * natural stone and stops short of ore; a block set mid-build stops a mark on the real build queue; undo leaves any block a player changed (even
  * only turned) as they left it; a shoreline pyramid is built with its windows and journal and undone; and a block a
- * player sets in its way stops the building rather than being overwritten. Everything stands on a raised stone
+ * player sets in its way stops the building rather than being overwritten; a sign edited in any way (back, style, dye,
+ * glow, wax) is kept by undo; a trail moves on only when its mark is finished, never points to a pyramid still rising or
+ * stopped part-built, and waits for a finished one. Everything stands on a raised stone
  * platform so the margin a mark checks stays in the test arena. Marks share the server's build slots, so each test
  * waits for a free one and for its mark to finish; the pyramids are built at once (buildNow), through the same checks.
  */
@@ -415,5 +421,166 @@ public class HerobrineMarksGameTests {
 		} else {
 			then.accept(id);
 		}
+	}
+
+	/** Calls {@code leave} until it leaves a mark (other tests may hold the build slots), then hands over its id at once. */
+	private static void whenLeft(GameTestHelper helper, Supplier<String> leave, int patience, Consumer<String> then) {
+		String id = leave.get();
+		if (id == null) {
+			helper.assertTrue(patience > 0, "No mark could be left");
+			helper.runAfterDelay(1, () -> whenLeft(helper, leave, patience - 1, then));
+		} else {
+			then.accept(id);
+		}
+	}
+
+	private static ServerPlayer witness(GameTestHelper helper, int x, int z) {
+		ServerPlayer player = helper.makeMockServerPlayerInLevel();
+		BlockPos at = feet(helper, x, z);
+		player.snapTo(at.getX() + 0.5, at.getY(), at.getZ() + 0.5, 0.0F, 0.0F);
+		return player;
+	}
+
+	/** A trail moves on when its mark is finished, not when it is queued; a mark stopped part-built never moves it. */
+	@GameTest(structure = ARENA, padding = 48, skyAccess = true, maxTicks = 600)
+	public void aTrailMovesOnOnlyWhenItsMarkIsFinished(GameTestHelper helper) {
+		platform(helper);
+		ServerLevel level = helper.getLevel();
+		HerobrineMarks marks = HerobrineMarks.get(level.getServer());
+		BlockPos where = feet(helper, 24, 24);
+		ServerPlayer finisher = witness(helper, 24, 8);
+		// No land is approved, so the trail begins with a shrine rather than a grove.
+		whenLeft(helper, () -> HerobrineMarks.beginTrail(level, where, finisher, level.getRandom()), 300, first -> {
+			helper.assertTrue(marks.trail(finisher.getUUID()) == 0, "Queued is not finished: the trail should not move yet");
+			untilBuilt(helper, first, 300, built -> {
+				helper.assertTrue(marks.marks().get(built).finished(), "The shrine should be recorded finished");
+				helper.assertTrue(marks.trail(finisher.getUUID()) == 1, "Finished, it should move the trail on");
+				HerobrineMarks.undo(level, built);
+				ServerPlayer stopped = witness(helper, 24, 8);
+				whenLeft(helper, () -> HerobrineMarks.beginTrail(level, where, stopped, level.getRandom()), 300, second -> {
+					// The land is claimed before a block is laid: the mark stops, unfinished.
+					ServerPlayer admin = helper.makeMockServerPlayerInLevel();
+					LandRegistry land = LandRegistry.get(level.getServer());
+					FinanceBook book = Ledger.get(level.getServer()).book();
+					long key = LandRegistry.keyOf(where);
+					helper.assertTrue(land.assign(book, key, book.account(UUID.randomUUID(), "HerobrineTrailOwner"), 0).ok(), "The claim fixture");
+					untilBuilt(helper, second, 300, over -> {
+						land.abandon(admin, book, key, true, 0);
+						HerobrineMarks.Mark mark = marks.marks().get(over);
+						helper.assertTrue(mark == null || !mark.finished(), "A stopped mark is never finished");
+						helper.assertTrue(marks.trail(stopped.getUUID()) == 0, "A stopped mark should never move the trail");
+						if (mark != null) {
+							HerobrineMarks.undo(level, over);
+						}
+						helper.succeed();
+					});
+				});
+			});
+		});
+	}
+
+	/** The four lines of the sign a mark left, front side, or null. */
+	private static String[] signLines(ServerLevel level, HerobrineMarks.Mark mark) {
+		for (HerobrineMarks.Change change : mark.changes()) {
+			if (level.getBlockEntity(change.pos()) instanceof SignBlockEntity sign) {
+				List<Component> messages = sign.getText(SignTextSlot.FRONT).getMessages(false);
+				return messages.stream().map(Component::getString).toArray(String[]::new);
+			}
+		}
+		return null;
+	}
+
+	/**
+	 * A pyramid stopped part-built by a player's block is never pointed to: while it rises and after it stops, a trail
+	 * sighting leaves no signpost and the trail stays put. Once a pyramid on that shore is finished, the next sighting
+	 * leaves the signpost, pointing to it, and the trail moves on when the signpost is finished.
+	 */
+	@GameTest(structure = ARENA, padding = 48, skyAccess = true, maxTicks = 1200)
+	public void anAbortedPyramidIsNeverPointedToAndTheTrailWaitsForAFinishedOne(GameTestHelper helper) {
+		platform(helper);
+		pool(helper);
+		ServerLevel level = helper.getLevel();
+		HerobrineMarks marks = HerobrineMarks.get(level.getServer());
+		BlockPos centre = feet(helper, 24, 24);
+		// The signpost's place, its margin clear of the pyramid's base (which starts 9 blocks in).
+		BlockPos where = feet(helper, 1, 24);
+		ServerPlayer player = witness(helper, 1, 30);
+		whenLeft(helper, () -> HerobrineMarks.beginTrail(level, centre, player, level.getRandom()), 300, first -> untilBuilt(helper, first, 300, built -> {
+			helper.assertTrue(marks.trail(player.getUUID()) == 1, "The trail's first mark should be finished");
+			HerobrineMarks.undo(level, built);
+			HerobrineMarkPlans.Plan plan = HerobrinePyramids.plan(level, centre.getX(), centre.getZ(), feet(helper, 24, 0), false);
+			helper.assertTrue(plan != null, "Level, wild land by the water should take a pyramid");
+			startThen(helper, plan, 300, id -> {
+				// A player's block in its floor, a few rows in: the pyramid will stop there, part-built.
+				BlockPos inTheWay = centre.offset(-HerobrinePyramids.HALF + 2, 0, 0);
+				level.setBlockAndUpdate(inTheWay, Blocks.OAK_PLANKS.defaultBlockState());
+				helper.assertTrue(HerobrineMarks.continueTrail(level, where, player, level.getRandom()) == null,
+						"While the pyramid rises a sighting should leave no signpost");
+				helper.assertTrue(HerobrinePyramids.nearest(level, centre, 64) == null, "A rising pyramid is never pointed to");
+				helper.assertTrue(marks.trail(player.getUUID()) == 1, "The trail should wait");
+				untilBuilt(helper, id, 900, stopped -> {
+					HerobrineMarks.Mark mark = marks.marks().get(stopped);
+					helper.assertTrue(mark != null && !mark.finished() && !mark.changes().isEmpty(),
+							"It should stop part-built: recorded, undoable, unfinished");
+					helper.assertTrue(level.getBlockState(inTheWay).is(Blocks.OAK_PLANKS), "The player's block should stand");
+					helper.assertTrue(HerobrinePyramids.nearest(level, centre, 64) == null, "A pyramid stopped part-built is never pointed to");
+					helper.assertTrue(marks.trail(player.getUUID()) == 1, "The trail should still wait");
+					// Later the ruin is undone and a pyramid on the same shore is finished.
+					HerobrineMarks.undo(level, stopped);
+					level.setBlockAndUpdate(inTheWay, Blocks.AIR.defaultBlockState());
+					HerobrineMarkPlans.Plan again = HerobrinePyramids.plan(level, centre.getX(), centre.getZ(), feet(helper, 24, 0), false);
+					helper.assertTrue(again != null, "The cleared shore should take a pyramid again");
+					String pyramid = HerobrineMarks.buildNow(level, again);
+					helper.assertTrue(marks.marks().get(pyramid).finished() && centre.equals(HerobrinePyramids.nearest(level, centre, 64)),
+							"A finished pyramid is pointed to");
+					whenLeft(helper, () -> HerobrineMarks.continueTrail(level, where, player, level.getRandom()), 300, post -> {
+						helper.assertTrue(marks.trail(player.getUUID()) == 1, "Queued is not finished: the trail should not move yet");
+						untilBuilt(helper, post, 300, signpost -> {
+							helper.assertTrue(marks.trail(player.getUUID()) == 2, "The finished signpost should move the trail on");
+							String[] lines = signLines(level, marks.marks().get(signpost));
+							helper.assertTrue(lines != null && lines[0].equals("THE WATER") && lines[1].equals("REMEMBERS")
+									&& lines[2].equals("EAST") && lines[3].equals("23 BLOCKS"),
+									"The signpost should point east, 23 blocks, to the pyramid: " + java.util.Arrays.toString(lines));
+							HerobrineMarks.undo(level, signpost);
+							HerobrineMarks.undo(level, pyramid);
+							helper.succeed();
+						});
+					});
+				});
+			});
+		}));
+	}
+
+	/** Undo keeps a mark's sign edited in any way: its back, a line's style, its dye, glow ink or wax. */
+	@GameTest(structure = ARENA, padding = 48, skyAccess = true, maxTicks = 40)
+	public void undoKeepsASignEditedInAnyWay(GameTestHelper helper) {
+		platform(helper);
+		ServerLevel level = helper.getLevel();
+		String[] edits = {"back", "style", "dye", "glow", "wax", "none"};
+		int[][] sites = {{8, 8}, {24, 8}, {40, 8}, {8, 40}, {24, 40}, {40, 40}};
+		for (int i = 0; i < edits.length; i++) {
+			BlockPos feet = feet(helper, sites[i][0], sites[i][1]);
+			HerobrineMarkPlans.Plan plan = HerobrineMarkPlans.shrine(level, feet, feet.north(16), message());
+			helper.assertTrue(plan != null, "Open ground should take a shrine at " + feet);
+			String id = HerobrineMarks.buildNow(level, plan);
+			BlockPos pos = plan.signs().keySet().iterator().next();
+			helper.assertTrue(level.getBlockEntity(pos) instanceof SignBlockEntity, "The shrine's sign should stand");
+			SignBlockEntity sign = (SignBlockEntity) level.getBlockEntity(pos);
+			switch (edits[i]) {
+				case "back" -> sign.setText(sign.getText(SignTextSlot.BACK).setMessage(0, Component.literal("EDITED")), SignTextSlot.BACK);
+				case "style" -> sign.setText(sign.getText(SignTextSlot.FRONT).setMessage(0, Component.literal(FIRST[0]).withStyle(ChatFormatting.BOLD)),
+						SignTextSlot.FRONT);
+				case "dye" -> sign.setText(sign.getText(SignTextSlot.FRONT).setColor(DyeColor.RED), SignTextSlot.FRONT);
+				case "glow" -> sign.setText(sign.getText(SignTextSlot.FRONT).setHasGlowingText(true), SignTextSlot.FRONT);
+				case "wax" -> sign.setWaxed(false);
+				default -> {
+				}
+			}
+			HerobrineMarks.Undo undo = HerobrineMarks.undo(level, id);
+			boolean edited = !edits[i].equals("none");
+			helper.assertTrue(undo != null && undo.kept() == (edited ? 1 : 0) && level.getBlockState(pos).is(Blocks.OAK_SIGN) == edited,
+					edited ? "A sign edited (" + edits[i] + ") should be kept: " + undo : "An untouched sign should be taken back: " + undo);
+		}
+		helper.succeed();
 	}
 }

@@ -84,7 +84,8 @@ public final class HerobrineMarks extends SavedData {
 
 	/**
 	 * One block a mark changed: what it was, what the mark made it, and (for a block that keeps contents) what it held
-	 * when the mark finished it: a sign's lines, or {@value #JOURNAL} for a lectern holding the journal.
+	 * when the mark finished it: the lines it wrote on a sign ({@link #asWritten} checks both sides, style, dye, glow and
+	 * wax against them), or {@value #JOURNAL} for a lectern holding the journal.
 	 */
 	public record Change(BlockPos pos, BlockState before, BlockState after, String content) {
 		static final Codec<Change> CODEC = RecordCodecBuilder.create(instance -> instance.group(
@@ -97,13 +98,18 @@ public final class HerobrineMarks extends SavedData {
 	/** A lectern's recorded content: it holds the pyramid's journal. */
 	public static final String JOURNAL = "journal";
 
-	/** A mark's record: its kind, where he stood, when (game time), and every block it changed, in order. */
-	public record Mark(String type, BlockPos at, long time, List<Change> changes) {
+	/**
+	 * A mark's record: its kind, where he stood, when (game time), every block it changed, in order, and whether it was
+	 * {@code finished}: built to its last block. A mark stopped part-built (by a claim, a player's block, a long wait or
+	 * an undo) or partly undone is not finished; a trail never counts it and never points to it.
+	 */
+	public record Mark(String type, BlockPos at, long time, List<Change> changes, boolean finished) {
 		static final Codec<Mark> CODEC = RecordCodecBuilder.create(instance -> instance.group(
 				Codec.STRING.fieldOf("type").forGetter(Mark::type),
 				BlockPos.CODEC.fieldOf("at").forGetter(Mark::at),
 				Codec.LONG.fieldOf("time").forGetter(Mark::time),
-				Change.CODEC.listOf().fieldOf("changes").forGetter(Mark::changes)).apply(instance, Mark::new));
+				Change.CODEC.listOf().fieldOf("changes").forGetter(Mark::changes),
+				Codec.BOOL.optionalFieldOf("finished", false).forGetter(Mark::finished)).apply(instance, Mark::new));
 
 		public Mark {
 			changes = new ArrayList<>(changes);
@@ -152,6 +158,9 @@ public final class HerobrineMarks extends SavedData {
 		final Map<BlockPos, List<String>> signs;
 		final List<BlockPos> lecterns;
 		int waits;
+		/** The player whose trail this mark moves on, to {@link #trailStep}, once it is finished; or null. */
+		@Nullable UUID trailPlayer;
+		int trailStep;
 
 		Job(String id, ServerLevel level, HerobrineMarkPlans.Plan plan) {
 			this.id = id;
@@ -267,37 +276,12 @@ public final class HerobrineMarks extends SavedData {
 		}
 		HerobrineMarks marks = get(level.getServer());
 		int trail = marks.trail(player.getUUID());
-		if (trail == 0 && acrossWater(level, player.blockPosition(), where) && random.nextDouble() < TRAIL_CHANCE) {
-			// A sighting across the water begins a trail: a bare grove (or, out of the trees, a shrine) where he stood.
-			String id = leave(level, where, player, witnesses > 1, random, HerobrineMarkPlans.Type.GROVE, HerobrineMarkPlans.MESSAGES.getFirst());
-			if (id == null) {
-				id = leave(level, where, player, witnesses > 1, random, HerobrineMarkPlans.Type.SHRINE, HerobrineMarkPlans.MESSAGES.getFirst());
-			}
-			if (id != null) {
-				marks.trails.put(player.getUUID().toString(), 1);
-				marks.setDirty();
-			}
-		} else if (trail == 1 && random.nextDouble() < TRAIL_CHANCE) {
-			// The trail's next mark is a torch-lit tunnel whose sign points to a shoreline pyramid, raised if none is near.
-			BlockPos pyramid = HerobrinePyramids.nearest(level, where, POINT_RANGE);
-			if (pyramid == null) {
-				HerobrineMarkPlans.Plan plan = HerobrinePyramids.near(level, player.blockPosition(), where, random);
-				if (plan != null && start(level, plan) != null) {
-					pyramid = plan.at();
-				}
-			}
-			if (pyramid != null && JOBS.size() < MAX_JOBS) {
-				// A torch-lit tunnel where the land is approved for digging; otherwise the signpost stands alone.
-				List<String> post = signpost(where, pyramid);
-				String id = leave(level, where, player, false, random, HerobrineMarkPlans.Type.TUNNEL, post);
-				if (id == null) {
-					id = leave(level, where, player, false, random, HerobrineMarkPlans.Type.SIGN, post);
-				}
-				if (id != null) {
-					marks.trails.put(player.getUUID().toString(), 2);
-					marks.setDirty();
-				}
-			}
+		// One trail mark at a time: while one is building, its step is not yet the player's.
+		boolean trailing = JOBS.stream().anyMatch(job -> player.getUUID().equals(job.trailPlayer));
+		if (!trailing && trail == 0 && acrossWater(level, player.blockPosition(), where) && random.nextDouble() < TRAIL_CHANCE) {
+			beginTrail(level, where, player, random);
+		} else if (!trailing && trail == 1 && random.nextDouble() < TRAIL_CHANCE) {
+			continueTrail(level, where, player, random);
 		} else if (random.nextDouble() < PYRAMID_CHANCE) {
 			HerobrineMarkPlans.Plan plan = HerobrinePyramids.near(level, where, player.blockPosition(), random);
 			if (plan != null) {
@@ -306,6 +290,56 @@ public final class HerobrineMarks extends SavedData {
 		} else if (random.nextDouble() < MARK_CHANCE) {
 			leave(level, where, player, witnesses > 1, random, null, null);
 		}
+	}
+
+	/**
+	 * A trail's first mark: a bare grove where he stood (or, out of the trees or without approved land, a shrine) reading
+	 * "YOU TOOK THE LONG WAY". The player's trail moves to 1 only once it is finished. Returns the mark's id, or null.
+	 */
+	public static @Nullable String beginTrail(ServerLevel level, BlockPos where, ServerPlayer player, RandomSource random) {
+		List<String> text = HerobrineMarkPlans.MESSAGES.getFirst();
+		String id = leave(level, where, player, false, random, HerobrineMarkPlans.Type.GROVE, text);
+		if (id == null) {
+			id = leave(level, where, player, false, random, HerobrineMarkPlans.Type.SHRINE, text);
+		}
+		return id == null ? null : onTrail(id, player, 1);
+	}
+
+	/**
+	 * A trail's second mark: a torch-lit tunnel (or, without approved land, a lone signpost) whose sign gives the way and
+	 * distance to the nearest finished pyramid within {@value #POINT_RANGE} blocks. With none finished it leaves no
+	 * signpost: it raises a pyramid by the shore (unless one is already rising) and the trail waits for a later sighting,
+	 * when that pyramid is finished (one stopped part-built is never pointed to; another is raised then). The player's
+	 * trail moves to 2 only once the signpost is finished. Returns the signpost mark's id, or null.
+	 */
+	public static @Nullable String continueTrail(ServerLevel level, BlockPos where, ServerPlayer player, RandomSource random) {
+		BlockPos pyramid = HerobrinePyramids.nearest(level, where, POINT_RANGE);
+		if (pyramid == null) {
+			if (!HerobrinePyramids.rising(level, where, POINT_RANGE)) {
+				HerobrineMarkPlans.Plan plan = HerobrinePyramids.near(level, player.blockPosition(), where, random);
+				if (plan != null) {
+					start(level, plan);
+				}
+			}
+			return null;
+		}
+		List<String> post = signpost(where, pyramid);
+		String id = leave(level, where, player, false, random, HerobrineMarkPlans.Type.TUNNEL, post);
+		if (id == null) {
+			id = leave(level, where, player, false, random, HerobrineMarkPlans.Type.SIGN, post);
+		}
+		return id == null ? null : onTrail(id, player, 2);
+	}
+
+	/** Has the building mark {@code id} move {@code player}'s trail to {@code step} once it is finished. */
+	private static String onTrail(String id, ServerPlayer player, int step) {
+		for (Job job : JOBS) {
+			if (job.id.equals(id)) {
+				job.trailPlayer = player.getUUID();
+				job.trailStep = step;
+			}
+		}
+		return id;
 	}
 
 	/** Whether water lies at the surface somewhere on the straight way between {@code from} and {@code to}. */
@@ -420,7 +454,7 @@ public final class HerobrineMarks extends SavedData {
 		}
 		HerobrineMarks marks = get(level.getServer());
 		String id = newId(marks);
-		marks.marks.put(id, new Mark(plan.type().name().toLowerCase(Locale.ROOT), plan.at(), level.getGameTime(), List.of()));
+		marks.marks.put(id, new Mark(plan.type().name().toLowerCase(Locale.ROOT), plan.at(), level.getGameTime(), List.of(), false));
 		marks.setDirty();
 		JOBS.add(new Job(id, level, plan));
 		return id;
@@ -434,7 +468,7 @@ public final class HerobrineMarks extends SavedData {
 	public static String buildNow(ServerLevel level, HerobrineMarkPlans.Plan plan) {
 		HerobrineMarks marks = get(level.getServer());
 		String id = newId(marks);
-		Mark mark = new Mark(plan.type().name().toLowerCase(Locale.ROOT), plan.at(), level.getGameTime(), List.of());
+		Mark mark = new Mark(plan.type().name().toLowerCase(Locale.ROOT), plan.at(), level.getGameTime(), List.of(), false);
 		marks.marks.put(id, mark);
 		marks.setDirty();
 		Job job = new Job(id, level, plan);
@@ -445,9 +479,7 @@ public final class HerobrineMarks extends SavedData {
 			}
 			job.steps.removeFirst();
 		}
-		if (mark.changes().isEmpty()) {
-			marks.marks.remove(id);
-		}
+		done(marks, job, mark, job.steps.isEmpty());
 		return id;
 	}
 
@@ -485,12 +517,28 @@ public final class HerobrineMarks extends SavedData {
 			}
 			if (over || job.steps.isEmpty()) {
 				jobs.remove();
-				if (mark != null && mark.changes().isEmpty()) {
-					marks.marks.remove(job.id);
-					marks.setDirty();
-				}
+				done(marks, job, mark, !over);
 			}
 		}
+	}
+
+	/**
+	 * A job is over: a mark that changed nothing is forgotten; one built to its last block ({@code whole}) is recorded
+	 * finished and moves on the trail it carries. One stopped part-built stays recorded and undoable, unfinished.
+	 */
+	private static void done(HerobrineMarks marks, Job job, @Nullable Mark mark, boolean whole) {
+		if (mark == null) {
+			return;
+		}
+		if (mark.changes().isEmpty()) {
+			marks.marks.remove(job.id);
+		} else if (whole) {
+			marks.marks.put(job.id, new Mark(mark.type(), mark.at(), mark.time(), mark.changes(), true));
+			if (job.trailPlayer != null) {
+				marks.trails.merge(job.trailPlayer.toString(), job.trailStep, Math::max);
+			}
+		}
+		marks.setDirty();
 	}
 
 	private static Result apply(Job job, HerobrineMarkPlans.Step step, Mark mark, HerobrineMarks marks) {
@@ -532,7 +580,7 @@ public final class HerobrineMarks extends SavedData {
 			sign.setWaxed(true);
 			sign.setChanged();
 			level.sendBlockUpdated(pos, sign.getBlockState(), sign.getBlockState(), Block.UPDATE_ALL);
-			content = signText(sign);
+			content = written(text);
 		}
 		if (job.lecterns.contains(pos) && LecternBlock.tryPlaceBook(null, level, pos, level.getBlockState(pos),
 				HerobrinePyramids.journal())) {
@@ -580,8 +628,8 @@ public final class HerobrineMarks extends SavedData {
 		if (waiting.isEmpty()) {
 			marks.marks.remove(id);
 		} else {
-			changes.clear();
-			changes.addAll(waiting);
+			// What is left waits for a later undo, and is no longer a finished mark.
+			marks.marks.put(id, new Mark(mark.type(), mark.at(), mark.time(), waiting, false));
 		}
 		marks.setDirty();
 		return new Undo(restored, kept, waiting.size());
@@ -616,7 +664,7 @@ public final class HerobrineMarks extends SavedData {
 			return entity instanceof LecternBlockEntity lectern
 					&& ItemStack.isSameItemSameComponents(lectern.getBook(), HerobrinePyramids.journal());
 		}
-		return entity instanceof SignBlockEntity sign && signText(sign).equals(change.content());
+		return entity instanceof SignBlockEntity sign && asWritten(sign, change.content());
 	}
 
 	/** The properties the world changes on its own, one block at a time: never a player's doing. */
@@ -627,12 +675,43 @@ public final class HerobrineMarks extends SavedData {
 				|| state.is(Blocks.LECTERN) && property == BlockStateProperties.POWERED;
 	}
 
-	private static String signText(SignBlockEntity sign) {
-		StringBuilder text = new StringBuilder();
-		for (int line = 0; line < 4; line++) {
-			text.append(sign.getText(SignTextSlot.FRONT).getMessages(false).get(line).getString()).append('\n');
+	/** A sign's recorded content: the four lines a mark wrote on it, each ended by a newline. */
+	private static String written(List<String> text) {
+		StringBuilder content = new StringBuilder();
+		for (String line : text) {
+			content.append(line).append('\n');
 		}
-		return text.toString();
+		return content.toString();
+	}
+
+	/**
+	 * Whether a sign is still exactly as a mark wrote it ({@link #written}): on both sides, filtered and not, the same
+	 * plain unstyled lines, in black, without glow, and still waxed. Any other difference (a line, its style, the back,
+	 * the dye, glow ink, the wax) is someone's edit, and undo keeps the sign.
+	 */
+	private static boolean asWritten(SignBlockEntity sign, String content) {
+		String[] lines = content.split("\n", -1);
+		if (!sign.isWaxed() || lines.length < 4) {
+			return false;
+		}
+		for (SignTextSlot slot : SignTextSlot.values()) {
+			SignText text = sign.getText(slot);
+			if (text.getColor() != DyeColor.BLACK || text.hasGlowingText()) {
+				return false;
+			}
+			for (boolean filtered : new boolean[] {false, true}) {
+				List<Component> messages = text.getMessages(filtered);
+				if (messages.size() < 4) {
+					return false;
+				}
+				for (int line = 0; line < 4; line++) {
+					if (!messages.get(line).equals(Component.literal(lines[line]))) {
+						return false;
+					}
+				}
+			}
+		}
+		return true;
 	}
 
 	private static void commands(CommandDispatcher<CommandSourceStack> dispatcher) {

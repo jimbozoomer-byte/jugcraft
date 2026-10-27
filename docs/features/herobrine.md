@@ -106,9 +106,9 @@ Every mark carries a waxed sign facing the player, with a cryptic line: "YOU TOO
 
 - **Records.** Each mark has an id, its kind, where he stood and when, and every block it changed (before and after).
 - **Undo.** `/jugcraft herobrine marks undo <id>` puts back, newest first, every block still exactly as the mark left it.
-  - **Exact match.** It must be the same block in the same state, every property, and for a block that keeps contents, the same contents: a sign's lines, or the lectern's journal.
+  - **Exact match.** It must be the same block in the same state, every property, and for a block that keeps contents, the same contents. A sign must hold the lines he wrote on both sides, filtered and not, plain and unstyled, in black, without glow ink, and still waxed. A lectern must hold the journal.
   - **What the world changes on its own** is allowed, and listed: a redstone torch's light, a glass pane's sides joining neighbours, and a lectern's pulse when a page turns.
-  - **Anything else is a player's change**, and undo leaves it be and forgets it. That covers a block turned, waterlogged or replaced, a sign edited, or a book taken or swapped.
+  - **Anything else is a player's change**, and undo leaves it be and forgets it. That covers a block turned, waterlogged or replaced; a sign with any line, its back, a style, the dye, glow or wax changed; or a book taken or swapped.
   - **The journal goes with its pyramid.** A lectern still holding the pyramid's own journal is emptied just before it is taken away, so the book never drops loose. A lectern holding any other book stays, book and all.
   - **Waiting.** A block in an unloaded chunk, or where someone stands, waits in the record for a later undo.
 - **Listing and forcing.** `/jugcraft herobrine marks` lists them. `/jugcraft herobrine mark <player> <kind>` leaves a mark of a given kind about 6 blocks in front of a player, for testing.
@@ -128,14 +128,16 @@ Every mark carries a waxed sign facing the player, with a cryptic line: "YOU TOO
   - every block it places is air or a plant, never water;
   - the whole footprint, volume and margin are wild land.
 
-  The site is weighed up to 4 times, 24–56 blocks from where it is sought. It is reserved as soon as building starts: its record counts for the spacing at once. It is built through the same rechecked, recorded, undoable work as any mark, bottom up, and a block a player sets in its way stops it there. Window panes are placed already joined to the wall round them, so they look right whichever block was laid first.
+  The site is weighed up to 4 times, 24–56 blocks from where it is sought. It is reserved as soon as building starts: while it rises, and once finished, its record counts for the spacing. A pyramid stopped part-built (by a claim, a player's block or an undo) stays recorded and undoable, but no longer counts, so another may be raised instead. It is built through the same rechecked, recorded, undoable work as any mark, bottom up, and a block a player sets in its way stops it there. Window panes are placed already joined to the wall round them, so they look right whichever block was laid first.
 - **When:**
   - very rarely after a sighting (3%), near where he stood;
   - as the end of a trail;
   - on `/jugcraft herobrine mark <player> pyramid`.
-- **The trail.** The trail sits ahead of ordinary marks, and its progress is saved per player:
+- **The trail.** The trail sits ahead of ordinary marks, and its progress is saved per player. A step counts only once its mark is finished, built to its last block. A mark stopped part-built never moves the trail on, and while a trail mark is building no other is begun for that player.
   1. A sighting across water (water at the surface somewhere between player and him) may begin it, half the time. He leaves a bare grove where he stood, or a shrine away from trees, with "YOU TOOK THE LONG WAY".
-  2. A later sighting may continue it, half the time. He leaves a torch-lit tunnel whose end sign reads "THE WATER / REMEMBERS / NORTH-WEST / 312 BLOCKS", the way and distance to the nearest pyramid within 1024 blocks. If there is none, he raises one by the nearest shore first.
+  2. A later sighting may continue it, half the time. He leaves a torch-lit tunnel whose end sign reads "THE WATER / REMEMBERS / NORTH-WEST / 312 BLOCKS", the way and distance to the nearest finished pyramid within 1024 blocks.
+     - **Only finished pyramids.** A signpost never points to a pyramid still rising, stopped part-built or partly undone.
+     - **None finished.** The sighting leaves no signpost. He raises a pyramid by the shore, unless one is already rising, and the trail waits. A later sighting points to it once it is finished, or raises another if it was stopped.
 
   Other sightings may leave unrelated marks, and some clues stay unresolved.
 
@@ -162,7 +164,7 @@ Server game tests (`HerobrineGameTests`, in the 48-block arena with padding) cov
 - scattered glimpses (6 ticks looking, 3 away, three times) are not a sighting, and a steady look is;
 - a line of sight into unloaded land is refused and loads nothing;
 - a newcomer's natural distant encounter is a watcher, and seeing it introduces them;
-- a guard looks his way and never targets him;
+- a guard looks his way and never targets him, and its glance lasts two seconds of game time however often the goal is ticked;
 - a mirror reflection is refused to a newcomer, then placed behind them without Darkness;
 - Styx says nothing of him before a sighting, and recognises it after;
 - a follower walks the player's own path at its distance, and stops when they stop;
@@ -177,19 +179,21 @@ Mark game tests (`HerobrineMarksGameTests`, on a raised platform so each margin 
 - planks nearby, a claim, or leaves a player placed keep a mark away;
 - a grove strips a wild tree's leaves and leaves its trunk;
 - a tunnel digs 2×2 through stone, stops short of ore, and fills back in on undo;
-- undo keeps a replaced block and a merely turned sign;
+- undo keeps a replaced block and a merely turned sign, and a sign whose back, style, dye, glow or wax was changed; an untouched sign is taken back;
 - a shoreline pyramid is built with its top brick, floor, 24 window panes and the journal on its lectern, and comes down completely, its journal not dropped loose;
 - a block set in a pyramid's way after it was planned stops the building there and is never overwritten;
 - groves and tunnels are refused without an operator's approval beside a plain stone and log hut and a grown tree, let through by an approval, and closed again when it is withdrawn;
 - planning far away, and just inside the loaded world's edge, is refused and loads no chunk;
-- on the real build queue, a block a player sets after building began stops the mark at that block, and undo leaves it.
+- on the real build queue, a block a player sets after building began stops the mark at that block, and undo leaves it;
+- a trail moves on only when its mark is finished, never when it is queued or stopped by a claim;
+- a pyramid stopped part-built by a player's block is never pointed to. While it rises and after it stops, a trail sighting leaves no signpost and the trail waits. Once a pyramid there is finished, the next sighting's signpost points to it (east, 23 blocks) and the trail moves on when the signpost is finished.
 
 The small-mark tests run on the real build queue: they wait for a free slot and for their mark to finish. The pyramid tests build at once (`HerobrineMarks.buildNow`), through the same checks. Every marks test runs with sky access, because game tests otherwise roof each structure with barriers.
 
 Not yet verified, as of this checkpoint:
 
-- **Compile and tests.** The encounter tests compiled and passed natively on an earlier snapshot. The marks, pyramids, trail, approvals, chunk preflight, full-state undo and the cave-mouth watcher have not been compiled or run: none of the mark game tests above, nor the cave-mouth test, has run yet. The local Java parser checks syntax only.
-- **Client.** `HerobrineClientGameTests` (OpenAI Codex) passed in a rendered client on a disposable development world. It covers entity sync, the renderer and eye texture, credit for a sustained look, and his disappearance on approach. Its screenshots show the player silhouette in daylight and the white eyes in a dark tunnel ([herobrine-scheduling.md](herobrine-scheduling.md)). Two real clients together (`HerobrineNetworkTests`, in progress) and footstep audibility are untested, as are the cave mouth, marks and pyramids in a client.
+- **Compile and tests.** The encounter tests compiled and passed natively on an earlier snapshot. The marks, pyramids, trail, approvals, chunk preflight, full-state undo and the cave mouth are in OpenAI Codex's native run; until it reports, none of the mark tests above, nor the cave-mouth test, has run. The finished-only trail, the full sign comparison and the glance timing are newer still, and not yet compiled. The local Java parser checks syntax only.
+- **Client.** `HerobrineClientGameTests` (OpenAI Codex) passed in a rendered client on a disposable development world. It covers entity sync, the renderer and eye texture, credit for a sustained look, and his disappearance on approach. Its screenshots show the player silhouette in daylight and the white eyes in a dark tunnel ([herobrine-scheduling.md](herobrine-scheduling.md)). `HerobrineNetworkTests` passed with two real clients on one PC: both saw the same encounter, each was credited only once it looked, and both saw him go. Footstep audibility is untested, as are the cave mouth, marks and pyramids in a client, and a human multiplayer playtest.
 - **CI.** Not yet run on this branch.
 
 ## Still to build (owner-approved plan, not implemented)
