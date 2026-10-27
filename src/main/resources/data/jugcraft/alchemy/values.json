@@ -35497,6 +35497,11 @@
       "denominator": 4,
       "source": "recipe jugcraft:throttle"
     },
+    "jugcraft:thunder_vane": {
+      "numerator": 1952,
+      "denominator": 1,
+      "source": "recipe jugcraft:thunder_vane"
+    },
     "jugcraft:thunderpipe": {
       "numerator": 533,
       "denominator": 1,
