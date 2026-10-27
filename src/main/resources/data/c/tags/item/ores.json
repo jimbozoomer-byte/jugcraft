@@ -18,6 +18,8 @@
     "#c:ores/spodumene",
     "#c:ores/vanadium_iron",
     "#c:ores/chromite",
-    "#c:ores/cobaltite"
+    "#c:ores/cobaltite",
+    "#c:ores/quartz",
+    "#c:ores/mithril"
   ]
 }

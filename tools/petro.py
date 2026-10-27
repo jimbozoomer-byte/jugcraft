@@ -215,6 +215,11 @@ ITEMS = {
     # hydrochloric acid into a bottle of glucose syrup that crafts into sugar.
     "citric_acid": "Citric Acid",
     "glucose_syrup": "Glucose Syrup",
+    # Cola (docs/features/cola-and-mmh.md): industrial phosphoric acid purified over charcoal into a food-grade vial, a
+    # cola syrup crafted from it, and the bottled drink the Chemical Reactor carbonates (tools/phosphate_processing.py).
+    "food_grade_phosphoric_acid": "Food-grade Phosphoric Acid",
+    "cola_syrup": "Cola Syrup",
+    "cola": "Cola",
     # PVAc (docs/features/pvac-glue.md): vinyl acetate polymerized into a pot of white wood glue, which binds paper into
     # a book without leather and makes a piston sticky without slime.
     "pvac_glue": "PVAc Wood Glue",
@@ -530,9 +535,9 @@ FLUID_RECIPES = {
         {"name": "vanadium_electrolyte", "items": [("jugcraft:asphalt_binder", 2)],
          "fluids": [("jugcraft:sulfuric_acid", 1000)], "fluid_results": [("jugcraft:vanadium_electrolyte", 1000)],
          "ticks": 160, "features": ["crude_oil", "sulfur"]},
-        # Fermentation (batch 26, after Mekanism's bio-generator): eight crops (#jugcraft:fermentable) in a bucket of
+        # Fermentation (batch 26, after Mekanism's bio-generator): eight non-citrus crops (#jugcraft:compact_fermentable) in a bucket of
         # water make 250 mB of bioethanol for the gas turbine or the advanced engine.
-        {"name": "bioethanol", "items": [("#jugcraft:fermentable", 8)], "fluids": [("minecraft:water", 1000)],
+        {"name": "bioethanol", "items": [("#jugcraft:compact_fermentable", 8)], "fluids": [("minecraft:water", 1000)],
          "fluid_results": [("jugcraft:bioethanol", 250)], "source": 0, "ticks": 100, "features": ["machines"]},
         # Sulfur recovery (batch 29, the Claus process): hydrogen sulfide from the hydrotreater partly burnt, and the
         # rest reacted over a catalyst into sulfur: a renewable source of sulfur for the acid recipes.

@@ -128,12 +128,38 @@ class PackagingTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "must not bundle"):
             packaging.build_pack(self.lock, self.jar(nested=True), self.root / "output", root=self.root)
 
+    def test_pinned_embedded_runtime_rejects_changed_code_and_metadata(self):
+        def runtime(code=b'original', extra=False):
+            result = io.BytesIO()
+            with zipfile.ZipFile(result, 'w') as archive:
+                archive.writestr('example/Runtime.class', code)
+                metadata = {'schemaVersion': 1, 'id': 'example_runtime', 'version': '1',
+                            'name': 'runtime', 'custom': {'fabric-loom:generated': True}}
+                if extra:
+                    metadata['entrypoints'] = {'main': ['example.Unreviewed']}
+                archive.writestr('fabric.mod.json', json.dumps(metadata))
+            return result.getvalue()
+        with zipfile.ZipFile(io.BytesIO(runtime())) as archive:
+            digest = packaging.embedded_content_hash(archive)
+        self.lock['embeddedLibraries'] = [{'nestedPath': 'META-INF/jars/runtime-1.jar',
+            'contentSha256': digest, 'modId': 'example_runtime', 'version': '1', 'maven': 'example:runtime:1'}]
+        for code, extra, valid in [(b'original', False, True), (b'changed', False, False), (b'original', True, False)]:
+            jar = self.jar()
+            with zipfile.ZipFile(jar, 'a') as archive:
+                archive.writestr('META-INF/jars/runtime-1.jar', runtime(code, extra))
+            if valid:
+                packaging.inspect_jugcraft_jar(jar, self.lock)
+            else:
+                with self.assertRaises(ValueError):
+                    packaging.inspect_jugcraft_jar(jar, self.lock)
+
     def test_game_updater_baseline_matches_initial_pack_without_circular_hash(self):
         jar = self.jar()
         helper = io.BytesIO()
         with zipfile.ZipFile(helper, 'w') as z:
             z.writestr('META-INF/MANIFEST.MF', 'Main-Class: io.github.jimbozoomer.jugcraft.update.UpdateApplier\n')
             z.writestr('io/github/jimbozoomer/jugcraft/update/UpdateApplier.class', b'fixture')
+            z.writestr('io/github/jimbozoomer/jugcraft/update/UpdateApplier$StartupLease.class', b'fixture')
         with zipfile.ZipFile(jar, 'a') as z:
             z.writestr('jugcraft/updater-helper.jar', helper.getvalue())
         result = packaging.build_pack(self.lock, jar, self.root / 'game-update', root=self.root)
@@ -144,6 +170,17 @@ class PackagingTests(unittest.TestCase):
             self.assertEqual(own['sha512'], hashlib.sha512(jar.read_bytes()).hexdigest())
             self.assertEqual(len(baseline['files']), len(self.lock['dependencies']) + 1)
             self.assertNotIn('pack', baseline)
+
+    def test_unexpected_helper_classes_are_still_rejected(self):
+        jar = self.jar()
+        helper = io.BytesIO()
+        with zipfile.ZipFile(helper, 'w') as z:
+            z.writestr('io/github/jimbozoomer/jugcraft/update/UpdateApplier.class', b'fixture')
+            z.writestr('io/github/jimbozoomer/jugcraft/update/UpdateApplier$Unexpected.class', b'fixture')
+        with zipfile.ZipFile(jar, 'a') as z:
+            z.writestr('jugcraft/updater-helper.jar', helper.getvalue())
+        with self.assertRaisesRegex(ValueError, 'Unexpected code'):
+            packaging.inspect_jugcraft_jar(jar, self.lock)
 
     def test_jade_remains_optional_in_standalone_publication(self):
         jade = next(x for x in self.lock["dependencies"] if x["key"] == "jade")

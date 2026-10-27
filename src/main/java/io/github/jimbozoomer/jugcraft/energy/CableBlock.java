@@ -45,6 +45,12 @@ public class CableBlock extends PipeBlock implements EnergyConnectable {
 	public long transferRate() {
 		return rate;
 	}
+	public long transferRate(BlockState state){return transferRate();}
+
+	/** A closed switch is a network boundary, not a zero-rate member that stalls its entire neighboring bus. */
+	public boolean conducts(BlockState state) { return transferRate(state) > 0; }
+	public boolean observesTransfers() { return false; }
+	public void onEnergyTransferred(Level level, BlockPos pos, long amount) {}
 
 	@Override
 	protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) {
@@ -106,6 +112,7 @@ public class CableBlock extends PipeBlock implements EnergyConnectable {
 	 * World generation has no full level to query, so there only the marker interface counts.
 	 */
 	public static boolean connectsTo(BlockGetter level, BlockPos pos, Direction direction, BlockState neighbor) {
+        if(!io.github.jimbozoomer.jugcraft.jimtafacts.industry.TransportAttachments.openEnergyEdge(level,pos,direction))return false;
 		if (neighbor.getBlock() instanceof MachineBlock machine) {
 			// Only faces that really take power: a machine's power socket, never an unpowered machine.
 			return machine.acceptsPower(neighbor, direction.getOpposite());

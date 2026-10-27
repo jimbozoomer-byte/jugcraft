@@ -299,6 +299,8 @@ public final class PetroFluids {
 		LIQUID_HYDROGEN = fluid("liquid_hydrogen", 8, 3, 1, 0xFF51607C, MapColor.COLOR_LIGHT_GRAY);
 		HYDRAZINE = fluid("hydrazine", 8, 3, 1, 0xFF606749, MapColor.COLOR_LIGHT_GRAY);
 		DINITROGEN_TETROXIDE = fluid("dinitrogen_tetroxide", 8, 3, 1, 0xFF734830, MapColor.COLOR_LIGHT_GRAY);
+		// Hydrazine methylated with methyl chloride (docs/features/cola-and-mmh.md).
+		MONOMETHYLHYDRAZINE = fluid("monomethylhydrazine", 8, 3, 1, 0xFF5A6A58, MapColor.COLOR_LIGHT_GRAY);
 		METHYL_CHLORIDE = gas("methyl_chloride", 0xFF9ABA98);
 
 		CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.TOOLS_AND_UTILITIES).register(output -> {
@@ -312,6 +314,7 @@ public final class PetroFluids {
 	public static Entry LIQUID_HYDROGEN;
 	public static Entry HYDRAZINE;
 	public static Entry DINITROGEN_TETROXIDE;
+	public static Entry MONOMETHYLHYDRAZINE;
 	public static Entry SYNTHETIC_CRUDE;
 	public static Entry TREATED_PROCESS_WATER;
 	public static Entry RECOVERY_CONCENTRATE;
@@ -336,6 +339,12 @@ public final class PetroFluids {
 	public static Entry registerOwnerLiquid(String id, int gauge) {
 		if (FLUIDS.containsKey(id)) throw new IllegalStateException("Duplicate liquid " + id);
 		return fluid(id, 5, 4, 1, gauge, MapColor.WATER);
+	}
+
+	/** Additional contained owner-library gas; shared pipes, cylinders and tank gauges. */
+	public static Gas registerOwnerGas(String id, int color) {
+		if (GASES.containsKey(id)) throw new IllegalStateException("Duplicate gas " + id);
+		return gas(id, color);
 	}
 
 	private static Entry fluid(String id, int tickDelay, int slope, int dropOff, int gauge, MapColor color) {

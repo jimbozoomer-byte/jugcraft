@@ -17,6 +17,7 @@ import net.minecraft.world.entity.monster.Enemy;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.phys.Vec3;
 import org.jspecify.annotations.Nullable;
 
 /**
@@ -65,6 +66,15 @@ public final class Authority {
 	}
 
 	/**
+	 * The person behind a place, present (online, alive, in this level) and within {@code reach} blocks of it; never a
+	 * stand-in (Concordance Chunk D, D-S3: a pact's upkeep is looked at only then).
+	 */
+	public static @Nullable ServerPlayer presentNear(ServerLevel level, @Nullable UUID owner, BlockPos at, int reach) {
+		ServerPlayer here = present(level, owner);
+		return here != null && here.distanceToSqr(Vec3.atCenterOf(at)) <= (double) reach * reach ? here : null;
+	}
+
+	/**
 	 * Who answers for a change made for {@code owner} now: the owner, if they are here; when they are away, a stand-in
 	 * with their identity if the server lets absent owners' devices act; otherwise nobody (null), and the device waits.
 	 * Only for permission questions: never give the stand-in anything or record anything as it.
@@ -103,6 +113,19 @@ public final class Authority {
 	}
 
 	/** A stand-in may answer protection questions but must not acquire personal progression or payment state. */
+	public static ServerPlayer remoteModemActor(ServerLevel target, ServerPlayer sender) {
+		if (target.getServer() != sender.level().getServer()) throw new IllegalArgumentException("Modem cannot cross servers");
+		if (sender.level() == target) return sender;
+		// Used only to authorize delivery to loaded computers, never to execute a program or issue commands.
+		return FakePlayer.get(target, new GameProfile(sender.getUUID(), "[Workshop modem]"));
+	}
+
+	/** Unowned TNT can query protection as an unprivileged identity; it gains no claim or town exemption. */
+	public static ServerPlayer unownedTinyTntActor(ServerLevel level) {
+		return FakePlayer.get(level, new GameProfile(new UUID(0, 46123), "[Tiny TNT]"));
+	}
+
+	/** A stand-in may answer protection questions but must not acquire personal progression or payment state. */
 	public static boolean isStandIn(Player actor) {
 		return actor instanceof FakePlayer;
 	}
@@ -120,6 +143,14 @@ public final class Authority {
 		return PlayerBlockBreakEvents.BEFORE.invoker().beforeBlockBreak(level, player, pos, state, level.getBlockEntity(pos));
 	}
 
+	/** Shared item/block hooks may run on both sides. Client approval only predicts the interaction;
+	 * the server always performs the complete claim/event checks above before changing anything. */
+	public static boolean mayChange(net.minecraft.world.level.Level level, @Nullable Player player, BlockPos pos) {
+		if (level instanceof ServerLevel server) return mayChange(server, player, pos);
+		return player != null && player.isAlive() && !player.isSpectator() && level.isInWorldBounds(pos)
+				&& level.getWorldBorder().isWithinBounds(pos);
+	}
+
 	/** Whether a device of {@code owner} may change the block at {@code pos} now, as whoever answers for them. */
 	public static boolean mayChangeFor(ServerLevel level, @Nullable UUID owner, BlockPos pos) {
 		return mayChange(level, answering(level, owner), pos);
@@ -134,6 +165,7 @@ public final class Authority {
 	 * nobody behind it at all (sourceless magic), protection has nobody to judge.
 	 */
 	public static boolean mayStrike(ServerLevel level, @Nullable Entity actor, @Nullable UUID behind, LivingEntity target) {
+        if(actor instanceof Player player && io.github.jimbozoomer.jugcraft.jimtafacts.spellbooks.JimtaPocketRooms.readOnlyGuest(player))return false;
 		if (target instanceof Player || target instanceof Enemy) {
 			return true;
 		}

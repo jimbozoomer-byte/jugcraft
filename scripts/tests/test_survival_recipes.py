@@ -36,9 +36,21 @@ class SurvivalGraphTests(unittest.TestCase):
         self.assertEqual([], report['invalid_ingredients'])
         self.assertEqual([], report['invalid_template_loot_links'])
         rows = {r['item']: r for r in report['items']}
+        for tier, metal in enumerate(('bronze', 'steel', 'invar', 'stainless_steel', 'aluminum', 'titanium', 'tungsten')):
+            names = [metal + '_crate'] + ([metal + '_storage_crate_upgrade'] if tier else [])
+            for name in names:
+                row = rows['jugcraft:' + name]
+                # Metal processing depends on natural acquisition evidence in this audit.
+                self.assertIn(row['status'], ('recipe_chain_reachable', 'chain_with_acquisition_evidence'), name)
+                self.assertTrue(any('/recipe/storage_crates/' in route for route in row['routes']), name)
+                self.assertEqual([], row['blocked_by'], name)
+                self.assertNotIn('jugcraft:' + name, report['unregistered_model_definitions'])
         unresolved = [r['item'] for r in report['items'] if r['status'] in ('no_documented_route','recipe_chain_needs_review')]
         self.assertEqual([], unresolved, 'Every active survival chain needs a real source')
-        self.assertEqual(78, report['summary']['deferred_acquisition_design'])
+        from survival_jimtafacts_routes import DEFERRED_ACQUISITION
+        self.assertEqual(78+len(DEFERRED_ACQUISITION), report['summary']['deferred_acquisition_design'])
+        for name in DEFERRED_ACQUISITION:
+            self.assertEqual('deferred_acquisition_design', rows['jugcraft:jimta_spellbooks_'+name]['status'])
         for table in ('landscape_keep_loot_table','landscape_camp_loot_table','cavern_caveman_house','cavern_underground_cabin','cavern_gingerbread_town'):
             self.assertNotIn('jugcraft:chests/'+table, report['unbound_chest_tables'])
         for name in ('household_light_freezer', 'household_dark_freezer', 'household_package',

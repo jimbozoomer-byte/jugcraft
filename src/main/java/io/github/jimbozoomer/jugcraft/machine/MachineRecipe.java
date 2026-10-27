@@ -33,6 +33,9 @@ import net.minecraft.world.item.crafting.SingleItemRecipe;
 public class MachineRecipe extends SingleItemRecipe {
 	private final MachineKind machine;
 	private final int time;
+	private final int inputCount;
+	private final int minimumHeat;
+    private final int bladeHardness;
 	private final int companionEffort;
 	private final List<Byproduct> byproducts;
 
@@ -43,9 +46,25 @@ public class MachineRecipe extends SingleItemRecipe {
 
 	public MachineRecipe(MachineKind machine, Recipe.CommonInfo commonInfo, Ingredient ingredient, ItemStackTemplate result, int time,
 			List<Byproduct> byproducts, int companionEffort) {
-		super(commonInfo, ingredient, result);
+		this(machine, commonInfo, ingredient, result, time, byproducts, companionEffort, 1);
+	}
+
+	public MachineRecipe(MachineKind machine, Recipe.CommonInfo commonInfo, Ingredient ingredient, ItemStackTemplate result, int time,
+			List<Byproduct> byproducts, int companionEffort, int inputCount) {
+		this(machine, commonInfo, ingredient, result, time, byproducts, companionEffort, inputCount, 0);
+	}
+	public MachineRecipe(MachineKind machine, Recipe.CommonInfo commonInfo, Ingredient ingredient, ItemStackTemplate result, int time,
+			List<Byproduct> byproducts, int companionEffort, int inputCount, int minimumHeat) {
+        this(machine,commonInfo,ingredient,result,time,byproducts,companionEffort,inputCount,minimumHeat,0);
+    }
+    public MachineRecipe(MachineKind machine,Recipe.CommonInfo commonInfo,Ingredient ingredient,ItemStackTemplate result,int time,
+            List<Byproduct> byproducts,int companionEffort,int inputCount,int minimumHeat,int bladeHardness){
+        super(commonInfo, ingredient, result);
 		this.machine = machine;
 		this.time = time;
+		this.inputCount = Math.clamp(inputCount, 1, 64);
+		this.minimumHeat = Math.clamp(minimumHeat, 0, 5000);
+        this.bladeHardness=Math.clamp(bladeHardness,0,8);
 		this.companionEffort = Math.clamp(companionEffort, 0, MachineCompanionEffort.MAX_PER_QUARTER);
 		this.byproducts = List.copyOf(byproducts);
 	}
@@ -78,6 +97,14 @@ public class MachineRecipe extends SingleItemRecipe {
 	}
 
 	public int companionEffort() { return companionEffort; }
+	public int inputCount() { return inputCount; }
+	public int minimumHeat() { return minimumHeat; }
+    public int bladeHardness(){return bladeHardness;}
+
+	@Override
+	public boolean matches(net.minecraft.world.item.crafting.SingleRecipeInput input, net.minecraft.world.level.Level level) {
+		return input.item().getCount() >= inputCount && super.matches(input, level);
+	}
 
 	/** Extra results rolled once per operation. */
 	public List<Byproduct> byproducts() {
@@ -116,8 +143,11 @@ public class MachineRecipe extends SingleItemRecipe {
 				ItemStackTemplate.CODEC.fieldOf("result").forGetter(MachineRecipe::output),
 				ExtraCodecs.POSITIVE_INT.optionalFieldOf("time", 200).forGetter(MachineRecipe::time),
 				Byproduct.CODEC.listOf().optionalFieldOf("byproducts", List.of()).forGetter(MachineRecipe::byproducts),
-				MachineCompanionEffort.CODEC.optionalFieldOf("companion_effort_per_quarter", 0).forGetter(MachineRecipe::companionEffort)
-		).apply(i, (info, ingredient, result, time, byproducts, effort) -> new MachineRecipe(machine, info, ingredient, result, time, byproducts, effort)));
+				MachineCompanionEffort.CODEC.optionalFieldOf("companion_effort_per_quarter", 0).forGetter(MachineRecipe::companionEffort),
+				Codec.intRange(1, 64).optionalFieldOf("input_count", 1).forGetter(MachineRecipe::inputCount),
+				Codec.intRange(0, 5000).optionalFieldOf("minimum_heat", 0).forGetter(MachineRecipe::minimumHeat),
+                Codec.intRange(0,8).optionalFieldOf("blade_hardness",0).forGetter(MachineRecipe::bladeHardness)
+		).apply(i, (info, ingredient, result, time, byproducts, effort, count, heat, hardness) -> new MachineRecipe(machine, info, ingredient, result, time, byproducts, effort, count, heat, hardness)));
 		StreamCodec<RegistryFriendlyByteBuf, MachineRecipe> stream = StreamCodec.composite(
 				Recipe.CommonInfo.STREAM_CODEC, recipe -> recipe.commonInfo,
 				Ingredient.CONTENTS_STREAM_CODEC, SingleItemRecipe::input,
@@ -125,7 +155,14 @@ public class MachineRecipe extends SingleItemRecipe {
 				ByteBufCodecs.VAR_INT, MachineRecipe::time,
 				Byproduct.STREAM_CODEC.apply(ByteBufCodecs.list()), MachineRecipe::byproducts,
 				ByteBufCodecs.VAR_INT, MachineRecipe::companionEffort,
-				(info, ingredient, result, time, byproducts, effort) -> new MachineRecipe(machine, info, ingredient, result, time, byproducts, effort));
-		return new RecipeSerializer<>(codec, stream);
+				ByteBufCodecs.VAR_INT, MachineRecipe::inputCount,
+				ByteBufCodecs.VAR_INT, MachineRecipe::minimumHeat,
+				(info, ingredient, result, time, byproducts, effort, count, heat) -> new MachineRecipe(machine, info, ingredient, result, time, byproducts, effort, count, heat));
+		return new RecipeSerializer<>(codec,new StreamCodec<RegistryFriendlyByteBuf,MachineRecipe>(){
+            @Override public void encode(RegistryFriendlyByteBuf buf,MachineRecipe r){stream.encode(buf,r);buf.writeVarInt(r.bladeHardness);}
+            @Override public MachineRecipe decode(RegistryFriendlyByteBuf buf){var r=stream.decode(buf);int hardness=buf.readVarInt();
+                if(hardness<0||hardness>8)throw new IllegalArgumentException("Invalid blade hardness");
+                return new MachineRecipe(machine,r.commonInfo,r.input(),r.output(),r.time,r.byproducts,r.companionEffort,r.inputCount,r.minimumHeat,hardness);}
+        });
 	}
 }
