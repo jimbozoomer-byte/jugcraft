@@ -32,7 +32,8 @@ import net.minecraft.world.level.block.Blocks;
  * everyone near has seen him and nobody far; and that a player just come into the game is left to settle.
  *
  * <p>Sightings come on their own only on passing nights in the season; these tests send him, so the server's date and
- * clock do not matter. The ride runs in a field-sized arena of air over a floor the test lays.
+ * clock do not matter. The ride runs in a field-sized arena of air over a floor the test lays, open to the sky (a
+ * barrier roof would be the ground he looks for, too high above the player).
  */
 public class HorsemanSightingsGameTests {
 	/** An arena of air 69 by 76 blocks: room for his whole ride. */
@@ -91,7 +92,7 @@ public class HorsemanSightingsGameTests {
 	 * swings round them, flings his pumpkin and rides off, gone before {@value HorsemanRider#MAX_TICKS} ticks; the player
 	 * is never hurt, has seen him and earns Sleepy Hollow, and nothing hurts him.
 	 */
-	@GameTest(structure = FIELD, padding = 8, maxTicks = CHUNK_WAIT + HorsemanRider.MAX_TICKS + 60)
+	@GameTest(structure = FIELD, padding = 8, skyAccess = true, maxTicks = CHUNK_WAIT + HorsemanRider.MAX_TICKS + 60)
 	public void theHorsemanRidesAtAPlayerAndOnlyFrightensThem(GameTestHelper helper) {
 		ServerLevel level = helper.getLevel();
 		floor(helper, 69, 76);
