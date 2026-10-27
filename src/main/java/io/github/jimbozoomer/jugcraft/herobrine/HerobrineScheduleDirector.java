@@ -55,8 +55,8 @@ public final class HerobrineScheduleDirector implements HerobrineDirector {
 		return new HerobrineSchedule.Request(request.player(), request.kind() == Herobrine.Kind.CLOSE
 				? HerobrineSchedule.Kind.CLOSE : HerobrineSchedule.Kind.WATCHER, request.reservation());
 	}
-	/** Persistent narrative eligibility; also implements the forthcoming director narrative seam. */
-	public boolean hasSeen(UUID player) {
+	/** Persistent narrative eligibility (HerobrineDirector.hasSeen): saved sightings, not this session's introductions. */
+	@Override public boolean hasSeen(UUID player) {
 		var progress = data.schedule().progress(player);
 		return progress != null && progress.sightings() > 0;
 	}
