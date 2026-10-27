@@ -63,7 +63,9 @@ public final class HerobrineMarkPlans {
 	private static final TagKey<Block> ORES = TagKey.create(Registries.BLOCK, Identifier.fromNamespaceAndPath("c", "ores"));
 	/** Plain ground cover a built mark may stand in (never flowers or tall plants, which a player may have set). */
 	private static final Set<Block> GROUND_COVER = Set.of(Blocks.SHORT_GRASS, Blocks.FERN, Blocks.DEAD_BUSH, Blocks.SNOW);
-	private static final Set<Block> NATURAL = Set.of(Blocks.GRAVEL, Blocks.CLAY, Blocks.SNOW_BLOCK, Blocks.ICE, Blocks.PACKED_ICE,
+	// In 26.3 the dirt tag excludes grassy/forest soils. They remain natural terrain, never excavation permission.
+	private static final Set<Block> NATURAL = Set.of(Blocks.GRASS_BLOCK, Blocks.PODZOL, Blocks.MYCELIUM, Blocks.MOSS_BLOCK,
+			Blocks.PALE_MOSS_BLOCK, Blocks.GRAVEL, Blocks.CLAY, Blocks.SNOW_BLOCK, Blocks.ICE, Blocks.PACKED_ICE,
 			Blocks.SANDSTONE, Blocks.RED_SANDSTONE, Blocks.TERRACOTTA, Blocks.CALCITE, Blocks.DRIPSTONE_BLOCK, Blocks.POINTED_DRIPSTONE,
 			Blocks.SWEET_BERRY_BUSH, Blocks.SUGAR_CANE, Blocks.CACTUS, Blocks.PUMPKIN, Blocks.MELON, Blocks.BROWN_MUSHROOM,
 			Blocks.RED_MUSHROOM, Blocks.BAMBOO, Blocks.LILY_PAD, Blocks.KELP, Blocks.KELP_PLANT, Blocks.MOSS_CARPET);

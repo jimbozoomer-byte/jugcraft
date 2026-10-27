@@ -27,12 +27,20 @@ public class HerobrineDepthsGameTests {
     private static void build(GameTestHelper h, String variant, boolean water) {
         var level = h.getLevel();
         var at = fixture(h, water);
+        if (variant.equals("broken_bridge") || variant.equals("balcony")) {
+            for (int x=-5;x<=5;x++) for(int z=2;z<=8;z++) for(int y=-2;y<0;y++)
+                level.setBlock(at.offset(x,y,z),Blocks.AIR.defaultBlockState(),3);
+        }
         var plan = HerobrineDepths.plan(level, at, variant);
         h.assertTrue(plan != null, variant + " must have a valid layout");
         String id = HerobrineMarks.buildNow(level, plan);
         var mark = HerobrineMarks.get(level.getServer()).marks().get(id);
         h.assertTrue(mark != null && mark.finished(), variant + " must finish all placements");
         h.assertTrue(!mark.changes().isEmpty(), "Must construct actual world blocks");
+        if(variant.equals("broken_bridge")||variant.equals("balcony")) {
+            h.assertTrue(level.getBlockState(at.offset(0,-1,3)).is(Blocks.CRACKED_STONE_BRICKS),"Deck spans the ravine");
+            h.assertTrue(level.getBlockState(at.offset(0,-2,3)).isAir(),"Span remains above open air");
+        }
         h.assertTrue(!HerobrineDepths.spaced(level, at, water), "Saved site prevents duplicate placement");
         h.assertTrue(HerobrineDepths.spaced(level, at.below(40), water), "A separate cave depth remains eligible");
         var ops = level.registryAccess().createSerializationContext(NbtOps.INSTANCE);
@@ -43,6 +51,14 @@ public class HerobrineDepthsGameTests {
         level.setBlock(changed, Blocks.DIAMOND_BLOCK.defaultBlockState(), 3);
         HerobrineMarks.undo(level, id);
         h.assertTrue(level.getBlockState(changed).is(Blocks.DIAMOND_BLOCK), "Explicit operator undo preserves player edits");
+        h.succeed();
+    }
+    @GameTest(structure=ARENA, padding=48, skyAccess=true)
+    public void naturalSoilsRemainWildWithoutAcceptingFarmland(GameTestHelper h) {
+        for(var block:java.util.List.of(Blocks.GRASS_BLOCK,Blocks.PODZOL,Blocks.MYCELIUM,Blocks.MOSS_BLOCK,Blocks.PALE_MOSS_BLOCK))
+            h.assertTrue(HerobrineMarkPlans.natural(block.defaultBlockState()),"Natural surface soil: "+block);
+        h.assertTrue(!HerobrineMarkPlans.natural(Blocks.FARMLAND.defaultBlockState()),"Player farmland is still protected");
+        h.assertTrue(!HerobrineMarkPlans.natural(Blocks.OAK_PLANKS.defaultBlockState()),"Player building materials stay protected");
         h.succeed();
     }
     @GameTest(structure=ARENA, padding=48, skyAccess=true) public void torchTrail(GameTestHelper h) { build(h,"torch_trail",false); }
@@ -121,7 +137,7 @@ public class HerobrineDepthsGameTests {
         } finally { HerobrineMarks.revoke(level,approval); }
         h.succeed();
     }
-    @GameTest(structure=ARENA, padding=48, skyAccess=true)
+    @GameTest(structure=ARENA, padding=48, skyAccess=true, maxTicks=100)
     public void noAutomaticExpiryOrInventoryRemoval(GameTestHelper h) {
         var at=fixture(h,false); var level=h.getLevel();
         var plan=HerobrineDepths.plan(level,at,"shelter");

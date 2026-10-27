@@ -52,6 +52,7 @@
       "io.github.jimbozoomer.jugcraft.test.HerobrineGameTests",
       "io.github.jimbozoomer.jugcraft.test.HerobrineMarksGameTests",
       "io.github.jimbozoomer.jugcraft.test.HerobrineDepthsGameTests",
+      "io.github.jimbozoomer.jugcraft.test.HerobrineSkyGameTests",
       "io.github.jimbozoomer.jugcraft.test.ServerLoadGameTests",
       "io.github.jimbozoomer.jugcraft.test.TrainGameTests",
       "io.github.jimbozoomer.jugcraft.test.SurvivalRecipeGameTests",
@@ -648,6 +649,7 @@
       "io.github.jimbozoomer.jugcraft.test.StorageCrateClientGameTests",
       "io.github.jimbozoomer.jugcraft.test.HerobrineClientGameTests",
       "io.github.jimbozoomer.jugcraft.test.HerobrineDepthsClientTests",
+      "io.github.jimbozoomer.jugcraft.test.HerobrineLandmarksClientTests",
     "io.github.jimbozoomer.jugcraft.test.HerobrineNetworkTests"
     ]
   },
