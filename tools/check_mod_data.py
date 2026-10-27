@@ -14116,6 +14116,293 @@ def check_cydonian_sentinel():
 
 
 
+def check_glass_abbot():
+    """The Glass Abbot (tools/glass_abbot.py, docs/features/glass-abbot.md): every number the Java uses is the table's;
+    his attacks are the table's, and his fight can be played (the Veil before the Breaking; his beam comes no less often as
+    the fight goes on, and a marking, the gathering and his rest fit between beams; a lone player has the marking and the
+    gathering to reach both marked mirrors (tools/glass_chapel.py FAIR_SECONDS); the veil lifts and his own turns end
+    before he gathers; his mantle turns most of a blow and cracked lets more through; his shards reach his farthest foe
+    within their life, his line reaches whoever it is drawn at, and he keeps nearer his foe than either reaches); his beam
+    is the chapel's (GlassChapel.trace), comes home only off both marked mirrors, and its path is shown ahead only to those
+    who understand First Light; where his fight looks for the chapel's parts is where tools/glass_chapel.py builds them: he
+    kneels at his place before the lectern, every cell of the nave and the apse lies within his leash, and the Grey Mist he
+    leaves opens on open apse floor three high; he is unhurt while he wakes and while the Veil falls; whoever turns a
+    marked mirror into place for a beam sent home has done a deed; his images take one blow, shatter, and fade with him;
+    every entity is registered, named and drawn; each GeckoLib body has its model, clips (every clip the Java names) and
+    sheet, its box-UV regions inside the sheet without overlapping, its sheet and glowmask TEXTURE_SCALE times the size
+    the model declares and cut out; his loot table is the table's and a first win brings the reliquary; his recipes (none
+    of which makes Prism Shards), tags and advancement are there; Abbey Glass glows and lets the sun through to a Glass
+    Accord; the Lantern Lens shows its holder alone, and the Mirror Inscription turns back only small shots, only under a
+    ward, and only at those its holder may harm; every message he sends has its words; and nothing of his loads a chunk or
+    leaves its dimension."""
+    import math
+    import glass_abbot as ga
+    import glass_abbot_models as am
+    import glass_chapel as gc
+    import lairs as la
+    folder = JAVA_ROOT / "lair" / "abbot"
+    sources = {path.stem: path.read_text(encoding="utf-8") for path in folder.glob("*.java")}
+    if not sources:
+        err("lair/abbot: no Java")
+        return
+    lens = {"EVERY": ga.LENS_EVERY, "RANGE": ga.LENS_RANGE}
+    inscription = {"MAX": ga.INSCRIPTION_MAX, "REST": ga.INSCRIPTION_REST}
+    fall = {"FALL_EXIT_WEST": ga.FALL_EXIT["x"][0], "FALL_EXIT_EAST": ga.FALL_EXIT["x"][1], "FALL_EXIT_Z": ga.FALL_EXIT["z"]}
+    for cls, table in (("GlassAbbotEntity", {**ga.ABBOT, **fall}), ("GlassImageEntity", ga.IMAGE), ("LanternLens", lens),
+                       ("MirrorInscription", inscription), ("JugcraftAbbot", {"ABBEY_GLASS_LIGHT": ga.ABBEY_GLASS_LIGHT})):
+        for name, value in table.items():
+            if not java_number(sources.get(cls, ""), name, value):
+                err(f"{cls}.{name} is not tools/glass_abbot.py's {value}")
+    boss = sources.get("GlassAbbotEntity", "")
+    flat = re.sub(r"\s+", " ", boss)
+    for attack, (windup, active, recovery, cooldown, near, far, vespers, veil) in ga.ATTACKS.items():
+        expected = (f"{attack}({windup}, {active}, {recovery}, {cooldown}, {float(near)}, {float(far)}, "
+                    f"{str(vespers).lower()}, {str(veil).lower()})")
+        if expected not in boss:
+            err(f"GlassAbbotEntity.Attack: expected {expected}")
+    for call in ("LairBosses.damage(base)", "LairBosses.partyScale(players, PARTY_STEP, PARTY_MAX)"):
+        if call not in boss:
+            err(f"GlassAbbotEntity does not scale as every lair boss does ({call})")
+    s = ga.ABBOT
+    a = {name: dict(zip(("windup", "active", "recovery", "cooldown", "near", "far"), row)) for name, row in ga.ATTACKS.items()}
+    if not 0.0 < s["BREAKING_AT"] < s["VEIL_AT"] < 1.0:
+        err("tools/glass_abbot.py: the Veil, then the Breaking (0 < BREAKING_AT < VEIL_AT < 1)")
+    if not s["BEAM_EVERY"] >= s["BEAM_EVERY_VEIL"] >= s["BEAM_EVERY_BREAKING"]:
+        err("tools/glass_abbot.py: his beam comes no less often as the fight goes on")
+    for every in ("BEAM_EVERY", "BEAM_EVERY_VEIL", "BEAM_EVERY_BREAKING"):
+        if s[every] < s["MARK_TICKS"] + s["GATHER_TICKS"] + s["BEAM_REST"]:
+            err(f"tools/glass_abbot.py: a marking, the gathering and his rest must fit between beams ({every})")
+    if gc.FAIR_SECONDS * 20 > s["MARK_TICKS"] + s["GATHER_TICKS"]:
+        err("tools/glass_abbot.py: a player alone must have the marking and the gathering to reach both marked mirrors "
+            "(tools/glass_chapel.py FAIR_SECONDS)")
+    if not 0 < s["VEILED_TICKS"] < s["MARK_TICKS"]:
+        err("tools/glass_abbot.py: a veiled mirror clears before he gathers (VEILED_TICKS < MARK_TICKS)")
+    if not 0 < s["TURN_TELL"] < s["TURN_EVERY"] or s["TURN_GRACE"] + s["TURN_TELL"] >= s["MARK_TICKS"]:
+        err("tools/glass_abbot.py: his own turns are told before they come, and end TURN_GRACE before he gathers")
+    if not 0.0 < s["MANTLE"] < 1.0 < s["CRACKED_MULTIPLIER"] or s["CRACK_TICKS"] <= 0:
+        err("tools/glass_abbot.py: his mantle turns most of a blow (0 < MANTLE < 1), and cracked lets more through")
+    if a["SHARD_FAN"]["far"] / s["SHARD_SPEED"] >= s["SHARD_LIFE"]:
+        err("tools/glass_abbot.py: his shards must reach the Shard Fan's farthest foe within SHARD_LIFE")
+    if a["PRISM_LINE"]["far"] > s["PRISM_LENGTH"]:
+        err("tools/glass_abbot.py: the Prism Line reaches whoever it is drawn at (far <= PRISM_LENGTH)")
+    if s["KEEP_DISTANCE"] + 2.0 > min(a["SHARD_FAN"]["far"], a["PRISM_LINE"]["far"]):
+        err("tools/glass_abbot.py: he keeps near enough to his foe for his shards and his line to reach them")
+    if not 0 < s["IMAGES_VEIL"] <= s["IMAGES_BREAKING"] or ga.IMAGE["HEALTH"] != 1.0:
+        err("tools/glass_abbot.py: his images are no fewer in the Breaking, and one blow shatters one")
+    # His beam is the chapel's: traced from the mirrors as they stand, home only off both marked mirrors.
+    for needed, why in (("GlassChapel.Beam traced = GlassChapel.trace(GlassChapel.stops(level, origin), List.of(a, b), aim);",
+                         "trace his beam from the mirrors as they stand"),
+                        ("boolean home = traced.home() && traced.struck().contains(a) && traced.struck().contains(b);",
+                         "send it home only off both marked mirrors"),
+                        ("ConcordanceProgress.knowledge(player).state(FIRST_LIGHT).atLeast(ResearchState.UNDERSTOOD)",
+                         "show its path ahead only to those who understand First Light"),
+                        ("trail(level, path, ROSE, reader);", "show that path to each such reader alone"),
+                        ('encounter.deed(player, "beam " + beams + " " + turned.getKey().getSerializedName());',
+                         "count whoever turned a marked mirror into place for a beam sent home"),
+                        ("float dealt = amount * mantle();", "let his mantle turn a share of every blow"),
+                        ("return beam == Beam.CRACKED ? CRACKED_MULTIPLIER : MANTLE;", "let more through once it is cracked"),
+                        ("return GlassChapel.abbot().add(origin.getX(), origin.getY(), origin.getZ());",
+                         "kneel at the chapel's place for him"),
+                        ("for (int y = GlassChapel.STAND; y < GlassChapel.STAND + 3; y++)", "open the Grey Mist three high from the floor")):
+        if needed not in flat:
+            err(f"GlassAbbotEntity must {why} ({needed})")
+    if f'FIRST_LIGHT = "{MOD}:first_light";' not in boss or not (DATA / MOD / "concordance" / "research" / "first_light.json").is_file():
+        err("GlassAbbotEntity.FIRST_LIGHT must be the First Light research (concordance/research/first_light.json)")
+    if not re.search(r"if \(phase == Phase\.WAKING \|\| phase == Phase\.VEILING\) \{\s*return false;", boss):
+        err("GlassAbbotEntity.hurtServer: he is unhurt while he wakes and while the Veil falls")
+    if "case VEIL, VEILING -> BEAM_EVERY_VEIL;" not in boss or "case BREAKING -> BEAM_EVERY_BREAKING;" not in boss:
+        err("GlassAbbotEntity.beamEvery must use the table's BEAM_EVERY_* for each phase")
+    # Where his fight looks for the chapel's parts is where tools/glass_chapel.py builds them.
+    if ga.FALL_EXIT["z"] < gc.APSE_Z[0] or ga.FALL_EXIT["z"] > gc.APSE_Z[1]:
+        err("tools/glass_abbot.py FALL_EXIT must lie in the apse (tools/glass_chapel.py APSE_Z)")
+    blocks = gc.build()
+    name = lambda pos: blocks[pos][0] if pos in blocks else None
+    free = lambda pos: name(pos) in (None, "minecraft:light", "minecraft:cave_air", "minecraft:air")
+    for x in range(ga.FALL_EXIT["x"][0], ga.FALL_EXIT["x"][1] + 1):
+        z = ga.FALL_EXIT["z"]
+        if not gc.in_apse(x, z) or free((x, gc.PAVE, z)) or not all(free((x, gc.STAND + dy, z)) for dy in range(3)):
+            err(f"The Grey Mist he leaves at ({x}, {z}) would not stand on open apse floor")
+    ax, az = gc.ABBOT
+    if not all(free((math.floor(ax) + dx, gc.STAND + dy, math.floor(az) + dz)) for dx in (-1, 0, 1) for dz in (0, 1)
+               for dy in range(3)):
+        err(f"His place {gc.ABBOT} has no room for him, three high")
+    for x in range(gc.SIZE[0]):
+        for z in range(gc.SIZE[2]):
+            if (gc.in_nave(x, z) or gc.in_apse(x, z)) and math.hypot(x + 0.5 - gc.CENTRE[0], z + 0.5 - gc.CENTRE[1]) > s["LEASH"]:
+                err(f"The chapel's floor at ({x}, {z}) lies beyond his leash")
+    # His images: one blow of anything shatters one (its striker takes part), and they fade with him.
+    image = sources.get("GlassImageEntity", "")
+    for needed in ("found.took(player, Math.max(amount, 1.0F))", "shatter(level);", "tickCount >= GlassAbbotEntity.IMAGE_TICKS",
+                   "found.calls(getUUID())"):
+        if needed not in image:
+            err(f"GlassImageEntity: whoever strikes one takes part, it shatters, and it fades with him ({needed})")
+    if "image.fade(level);" not in boss:
+        err("GlassAbbotEntity: his images fade when he falls, kneels again or leaves (dismiss)")
+    registry = sources.get("JugcraftAbbot", "")
+    for needed, why in (("Lairs.onPlaced(Lair.GLASS_CHAPEL, GlassAbbotEntity::summon)", "kneel him at every chapel's lectern"),
+                        ("ChapelMirrorBlock.onTurned(JugcraftAbbot::mirrorTurned)", "hear of the mirrors players turn"),
+                        ("LairRewards.payer(AbbotLoot.BOSS, AbbotLoot::pay)", "pay his rewards, now or later"),
+                        ("LanternLens.register();", "look at the Lantern Lens"),
+                        ("MirrorInscription.register();", "listen for the Mirror Inscription"),
+                        (".lightLevel(state -> ABBEY_GLASS_LIGHT)", "let Abbey Glass glow")):
+        if needed not in registry:
+            err(f"JugcraftAbbot must {why} ({needed})")
+    mirror_java = (JAVA_ROOT / "lair" / "ChapelMirrorBlock.java").read_text(encoding="utf-8")
+    if "if (player instanceof ServerPlayer turner)" not in mirror_java or "listener.turned(level, base, mirror, stop, turner);" not in mirror_java:
+        err("ChapelMirrorBlock.turn must tell its listeners of a player's turn (and only a player's)")
+    lens_java = sources.get("LanternLens", "")
+    if "getOffhandItem().is(JugcraftAbbot.LANTERN_LENS)" not in lens_java or "ServerTickEvents.END_SERVER_TICK" not in lens_java \
+            or "level.sendParticles(holder," not in lens_java or "addEffect" in lens_java:
+        err("LanternLens must look at each player's offhand on the server's tick and show its holder alone, changing nothing")
+    mirror_ins = re.sub(r"\s+", " ", sources.get("MirrorInscription", ""))
+    for needed in ("ServerLivingEntityEvents.ALLOW_DAMAGE", "source.is(DamageTypeTags.IS_PROJECTILE)",
+                   "player.getAbsorptionAmount() <= 0.0F", "amount > MAX", "player.getCooldowns().addCooldown(offhand, REST);",
+                   "ConcordanceEffects.mayHarm(player, shooter)", "Authority.mayStrike(level, player, null, shooter)"):
+        if needed not in mirror_ins:
+            err(f"MirrorInscription must turn back only small shots, only under a ward, only at those its holder may harm ({needed})")
+    tag = json.dumps(load(DATA / MOD / "tags" / "block" / "glass_accord_glass.json") or {})
+    if f"{MOD}:abbey_glass" not in tag or f"{MOD}:abbey_glass" not in json.dumps(la.ACCORD_GLASS):
+        err("Abbey Glass must let the sun through to a Glass Accord (tools/lairs.py ACCORD_GLASS, tags/block/glass_accord_glass.json)")
+    lang = load(ASSETS / "lang" / "en_us.json") or {}
+    client = (CLIENT_JAVA_ROOT / "GlassAbbotClient.java").read_text(encoding="utf-8")
+    if "GlassAbbotClient.register();" not in (CLIENT_JAVA_ROOT / "JugcraftClient.java").read_text(encoding="utf-8"):
+        err("JugcraftClient must register GlassAbbotClient")
+    if "lair.abbot.JugcraftAbbot.register();" not in (JAVA_ROOT / "Jugcraft.java").read_text(encoding="utf-8"):
+        err("Jugcraft must register JugcraftAbbot")
+
+    def drawn(entity):
+        start = client.find(f"register(JugcraftAbbot.{entity.upper()},")
+        end = client.find("EntityRendererRegistry.register(", start + 1)
+        return client[start:end if end >= 0 else len(client)] if start >= 0 else ""
+    loot_java = sources.get("AbbotLoot", "")
+    if f'ADVANCEMENT = "{ga.ADVANCEMENT["key"]}";' not in loot_java or 'BOSS = "glass_abbot";' not in loot_java:
+        err("AbbotLoot's advancement or boss name differs from tools/glass_abbot.py")
+    if "firstKill(player) && loot.stream().noneMatch(stack -> stack.is(JugcraftAbbot.GLASS_RELIQUARY))" not in loot_java:
+        err("AbbotLoot: a player's first win must bring the Glass Reliquary")
+    if 'Jugcraft.id("entities/glass_abbot")' not in loot_java:
+        err("AbbotLoot must roll loot_table/entities/glass_abbot.json")
+    for entity in ga.ENTITIES:
+        if f'entity("{entity}"' not in registry:
+            err(f"JugcraftAbbot does not register the {entity} entity")
+        if lang.get(f"entity.{MOD}.{entity}") != ga.ENTITIES[entity]:
+            err(f"The {entity} entity is not named {ga.ENTITIES[entity]!r}")
+        if not drawn(entity):
+            err(f"GlassAbbotClient draws no {entity}")
+    for item in ga.items():
+        if f'"{item}"' not in registry:
+            err(f"JugcraftAbbot does not register {item}")
+    # The GeckoLib bodies: his, which his images share.
+    gecko = ASSETS / "geckolib"
+    clips_named = {}
+    for text in sources.values():
+        for clip in re.findall(r'"(animation\.[a-z_]+\.[a-z_]+)"', text):
+            clips_named.setdefault(clip.split(".")[1], set()).add(clip)
+    for clip in re.findall(r'prefix \+ "([a-z_]+)"', boss):
+        clips_named.setdefault("glass_abbot", set()).add(f"animation.glass_abbot.{clip}")
+    for entity, body in ga.GECKO.items():
+        geo = load(gecko / "models" / "entity" / f"{entity}.geo.json") or {}
+        animations = load(gecko / "animations" / "entity" / f"{entity}.animation.json") or {}
+        definition = (geo.get("minecraft:geometry") or [{}])[0]
+        if not definition:
+            err(f"{entity}: no GeckoLib model")
+            continue
+        clips = animations.get("animations", {})
+        for clip in clips_named.get(body, set()):
+            if clip not in clips:
+                err(f"{entity}: the Java plays {clip}, which is not in {entity}.animation.json")
+        for clip in am.CLIPS[body]:
+            if f"animation.{body}.{clip}" not in clips:
+                err(f"{entity}.animation.json: missing animation.{body}.{clip}")
+        width = definition.get("description", {}).get("texture_width", 0)
+        height = definition.get("description", {}).get("texture_height", 0)
+        bones = {bone["name"] for bone in definition.get("bones", [])}
+        for clip in clips.values():
+            for bone in clip.get("bones", {}):
+                if bone not in bones:
+                    err(f"{entity}.animation.json: animates unknown bone {bone}")
+        regions = set()
+        for bone in definition.get("bones", []):
+            for cube in bone.get("cubes", []):
+                w, h_, d = cube["size"]
+                u, v = cube["uv"]
+                region = (u, v, u + 2 * (w + d), v + d + h_)
+                if region[2] > width or region[3] > height:
+                    err(f"{entity}.geo.json: a cube in {bone['name']} maps outside the {width}x{height} sheet")
+                regions.add(region)
+        regions = sorted(regions)
+        for i, first in enumerate(regions):
+            for second in regions[i + 1:]:
+                if first[0] < second[2] and second[0] < first[2] and first[1] < second[3] and second[1] < first[3]:
+                    err(f"{entity}.geo.json: UV regions {first} and {second} overlap")
+        glows = entity in ga.GLOWING
+        part = drawn(entity)
+        if not part or ("AutoGlowingGeoLayer" in part) != glows:
+            err(f"GlassAbbotClient: the {entity}'s glow layer must match tools/glass_abbot.py GLOWING")
+        for name_ in (entity, f"{entity}_glowmask") if glows else (entity,):
+            sheet = ASSETS / "textures" / "entity" / f"{name_}.png"
+            if not sheet.is_file():
+                err(f"{entity}: missing textures/entity/{name_}.png")
+                continue
+            with Image.open(sheet) as picture:
+                if picture.size != (width * am.TEXTURE_SCALE, height * am.TEXTURE_SCALE):
+                    err(f"textures/entity/{name_}.png must be {width * am.TEXTURE_SCALE}x{height * am.TEXTURE_SCALE}")
+                if any(picture.convert("RGBA").getchannel("A").histogram()[1:255]):
+                    err(f"textures/entity/{name_}.png has half-transparent pixels (it is drawn cut out)")
+    for cls in ("GlassAbbotEntity", "GlassImageEntity"):
+        if f'new AnimationController<{cls}>("body"' not in sources.get(cls, ""):
+            err(f"{cls} has no body controller")
+    # His loot.
+    table = load(DATA / MOD / "loot_table" / "entities" / "glass_abbot.json") or {}
+    if table.get("type") != "minecraft:gift":
+        err("loot_table/entities/glass_abbot.json must be a gift table (rolled for each participant)")
+    found_loot = {}
+    for pool in table.get("pools", []):
+        for entry in pool.get("entries", []):
+            item = entry.get("name", "").split(":")[-1]
+            chance = pool.get("condition", {}).get("chance")
+            count = entry.get("modifier", {}).get("count", {})
+            found_loot[item] = chance if chance is not None else (count.get("min"), count.get("max"))
+    expected = {"prism_shard": ga.SHARDS_DROPPED, "glass_reliquary": ga.RELIQUARY_CHANCE, **ga.CHANCES}
+    if found_loot != expected:
+        err(f"loot_table/entities/glass_abbot.json gives {found_loot}, not tools/glass_abbot.py's {expected}")
+    for key in ga.RECIPES:
+        if not (DATA / MOD / "recipe" / f"{key}.json").is_file():
+            err(f"recipe/{key}.json is missing")
+    # Prism Shards come only from him: no recipe makes them.
+    for path in (DATA / MOD / "recipe").rglob("*.json"):
+        result = (load(path) or {}).get("result", {})
+        if isinstance(result, dict) and result.get("id") == f"{MOD}:prism_shard":
+            err(f"recipe/{path.relative_to(DATA / MOD / 'recipe')} makes Prism Shards, which only the Glass Abbot gives")
+    costumes = json.dumps(load(DATA / MOD / "tags" / "item" / "trick_or_treat_costumes.json") or {})
+    for item in ga.COSTUMES:
+        if f"{MOD}:{item}" not in costumes:
+            err(f"{item} must count as a costume (tags/item/trick_or_treat_costumes.json)")
+    advancement = load(DATA / MOD / "advancement" / f"{ga.ADVANCEMENT['key']}.json") or {}
+    if advancement.get("criteria", {}).get("done", {}).get("trigger") != "minecraft:impossible":
+        err(f"advancement/{ga.ADVANCEMENT['key']}.json must be granted from code (an impossible \"done\")")
+    sent = "".join(sources.values())
+    for key in ga.MESSAGES:
+        if f'"message.jugcraft.glass_abbot.{key}"' not in sent:
+            err(f"tools/glass_abbot.py MESSAGES has {key}, which the Java never sends")
+    for cls, text in sources.items():
+        for key in re.findall(r'"((?:message|tooltip|entity)\.jugcraft\.[a-z_.]+[a-z_])"', text):
+            if key not in lang:
+                err(f"{cls}.java sends {key}, which has no words in en_us.json")
+        for banned, why in (("setChunkForced", "loads a chunk"), ("addRegionTicket", "loads a chunk"),
+                            ("TicketType", "loads a chunk"), ("changeDimension", "crosses dimensions"),
+                            ("TeleportTransition", "crosses dimensions")):
+            if banned in text:
+                err(f"{cls}.java {why} ({banned})")
+    for item in list(ga.ITEMS) + list(ga.COSTUMES):
+        if f"tooltip.{MOD}.{item}" not in lang:
+            err(f"{item} has no grey line (tooltip.{MOD}.{item})")
+    import concordance as concordance_tables
+    resistant = json.dumps(load(DATA / MOD / "tags" / "entity_type" / "concordance" / "resistant.json") or {})
+    if f"{MOD}:glass_abbot" not in concordance_tables.EFFECT_RESISTANT or f"{MOD}:glass_abbot" not in resistant:
+        err("The Glass Abbot must bear the Concordance's harmful control as resistant, as his plan says "
+            "(tools/concordance.py EFFECT_RESISTANT, tags/entity_type/concordance/resistant.json)")
+
+
 def check_alpha_werewolf():
     """The Alpha Werewolf (tools/alpha_werewolf.py, docs/features/alpha-werewolf.md): every number the Java uses is the
     table's; his attacks are the table's, and his rule can be played (the Pack Gathers before the Last Hunt; his hide
@@ -22044,6 +22331,7 @@ def main():
     check_alpha_werewolf()
     check_pumpkin_king()
     check_cydonian_sentinel()
+    check_glass_abbot()
     check_material_sets()
     check_art()
     check_pixel_hollows()

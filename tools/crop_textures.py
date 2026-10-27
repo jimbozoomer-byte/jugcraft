@@ -816,6 +816,8 @@ def crop_textures():
     out.update(pumpkin_king_textures())
     from cydonian_sentinel_art import cydonian_sentinel_textures  # and the Cydonian Sentinel, its sentries, shards,
     out.update(cydonian_sentinel_textures())                      # spikes and meteors, and its loot
+    from glass_abbot_art import glass_abbot_textures  # and the Glass Abbot, his images, and his loot
+    out.update(glass_abbot_textures())
     from orchard_textures import orchard_textures  # and the orchards' fruit trees
     out.update(orchard_textures())
     from cake_art import cake_textures  # and the cakes, rebuilt from the owner's drawing of them

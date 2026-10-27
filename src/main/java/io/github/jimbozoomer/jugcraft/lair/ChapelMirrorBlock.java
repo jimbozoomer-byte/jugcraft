@@ -1,9 +1,12 @@
 package io.github.jimbozoomer.jugcraft.lair;
 
 import io.github.jimbozoomer.jugcraft.lair.GlassChapel.Mirror;
+import java.util.ArrayList;
+import java.util.List;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.InteractionResult;
@@ -29,8 +32,9 @@ import org.jspecify.annotations.Nullable;
  * ({@link #HALF}), one of the Glass Chapel's three ({@link #MIRROR}). A lair fixture: any player in the chapel turns it
  * by using either block of it, to its next {@link #STOP stop}, round; the angle each stop faces is the mirror's own
  * ({@link Mirror#step}). The Abbot (part 2) marks two mirrors before his beam ({@link #MARKED}: their frames burn gold)
- * and veils one ({@link #VEILED}: its glass clouds over, its turntable's pointer still showing where it faces). Both
- * blocks always carry the same state but their half; everything happens on the server.
+ * and veils one ({@link #VEILED}: its glass clouds over, its turntable's pointer still showing where it faces), and listens
+ * ({@link #onTurned}) for the mirrors players turn. Both blocks always carry the same state but their half; everything
+ * happens on the server.
  */
 public class ChapelMirrorBlock extends Block {
 	public static final EnumProperty<DoubleBlockHalf> HALF = BlockStateProperties.DOUBLE_BLOCK_HALF;
@@ -42,6 +46,18 @@ public class ChapelMirrorBlock extends Block {
 	public static final int MARKED_LIGHT = 7;
 	// The turntable, frame and glass stand in the middle of the block, whichever way it faces.
 	private static final VoxelShape SHAPE = Block.box(2, 0, 2, 14, 16, 14);
+	private static final List<Turned> TURNED_BY = new ArrayList<>();
+
+	/** Told when a player turns a mirror: its lower block, which mirror it is and its new stop. */
+	@FunctionalInterface
+	public interface Turned {
+		void turned(ServerLevel level, BlockPos base, Mirror mirror, int stop, ServerPlayer player);
+	}
+
+	/** Listens for the mirrors players turn (at registration). */
+	public static void onTurned(Turned listener) {
+		TURNED_BY.add(listener);
+	}
 
 	public ChapelMirrorBlock(Properties properties) {
 		super(properties);
@@ -92,6 +108,12 @@ public class ChapelMirrorBlock extends Block {
 		level.playSound(null, base.above(), SoundEvents.GRINDSTONE_USE, SoundSource.BLOCKS, 0.5F, 1.6F);
 		level.playSound(null, base.above(), SoundEvents.AMETHYST_BLOCK_CHIME, SoundSource.BLOCKS, 0.8F, 1.2F);
 		level.sendParticles(ParticleTypes.END_ROD, base.getX() + 0.5, base.getY() + 1.4, base.getZ() + 0.5, 4, 0.2, 0.5, 0.2, 0.01);
+		if (player instanceof ServerPlayer turner) {
+			Mirror mirror = level.getBlockState(base).getValue(MIRROR);
+			for (Turned listener : TURNED_BY) {
+				listener.turned(level, base, mirror, stop, turner);
+			}
+		}
 		return stop;
 	}
 

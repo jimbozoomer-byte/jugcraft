@@ -1,0 +1,22 @@
+{
+  "parent": "minecraft:adventure/root",
+  "display": {
+    "icon": {
+      "id": "jugcraft:glass_reliquary"
+    },
+    "title": {
+      "translate": "advancements.jugcraft.seen_clearly.title"
+    },
+    "description": {
+      "translate": "advancements.jugcraft.seen_clearly.description"
+    },
+    "frame": "challenge",
+    "show_toast": true,
+    "announce_to_chat": true
+  },
+  "criteria": {
+    "done": {
+      "trigger": "minecraft:impossible"
+    }
+  }
+}

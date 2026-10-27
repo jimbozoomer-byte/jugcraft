@@ -35,6 +35,7 @@
     "minecraft:green_stained_glass_pane",
     "minecraft:red_stained_glass_pane",
     "minecraft:black_stained_glass_pane",
+    "jugcraft:abbey_glass",
     {
       "id": "#c:glass_panes",
       "required": false

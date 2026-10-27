@@ -375,7 +375,8 @@ EFFECT_KINDS = {
 # Creatures that harmful control (pushes and statuses) does not move or slow, and those it reaches at half strength.
 EFFECT_IMMUNE = ["minecraft:ender_dragon", "minecraft:wither", "minecraft:warden", "minecraft:elder_guardian"]
 EFFECT_RESISTANT = ["minecraft:iron_golem", "minecraft:ravager", "minecraft:piglin_brute",
-                    f"{MOD}:yeti_king", f"{MOD}:cinder_tyrant"]  # B-P8: only these two lair keepers
+                    f"{MOD}:yeti_king", f"{MOD}:cinder_tyrant",  # B-P8: only these two of the first six lair keepers
+                    f"{MOD}:glass_abbot"]  # his own plan (docs/branches/BOSSES.md, "The Glass Abbot: the plan")
 # Blocks an interaction effect may use as a player would, and plants a harvesting effect may gather (besides ripe
 # crops, which are always gathered and replanted).
 # Vanilla tags are optional entries, so a renamed tag in a later version empties the entry instead of breaking the list.

@@ -306,7 +306,7 @@ DYES = ("white", "orange", "magenta", "light_blue", "yellow", "lime", "pink", "g
 ACCORD_GLASS = (["minecraft:glass", "minecraft:glass_pane"]
                 + [f"minecraft:{colour}_stained_glass" for colour in DYES]
                 + [f"minecraft:{colour}_stained_glass_pane" for colour in DYES]
-                + [{"id": "#c:glass_panes", "required": False}])
+                + ["jugcraft:abbey_glass", {"id": "#c:glass_panes", "required": False}])
 # The Chapel Mirrors' halves (tools/glass_chapel.py MIRROR_PARTS) and the light a marked one's frame gives.
 MIRROR_HALVES = ("lower", "upper")
 MIRROR_MARKED_LIGHT = 7
