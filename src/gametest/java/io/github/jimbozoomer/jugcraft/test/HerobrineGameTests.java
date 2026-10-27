@@ -528,9 +528,15 @@ public class HerobrineGameTests {
 		guard.setUp(new TownData.Spot(-1, "guard", null, "Test guard", "guard_blue", BlockPos.ZERO), post);
 		guard.snapTo(post.getX() + 0.5, post.getY(), post.getZ() + 0.5, 0.0F, 0.0F);
 		level.addFreshEntity(guard);
+		// An existing patrol must not turn the body/head away during the glance.
+		// snapTo does not update grounding until the first entity tick; the fixture is on its stone floor.
+		guard.setOnGround(true);
+		helper.assertTrue(guard.getNavigation().moveTo(post.getX() + 8.5, post.getY(), post.getZ() + 0.5, 0.6),
+				"The fixture should begin with an active patrol path");
 		helper.runAfterDelay(30, () -> {
 			double want = Math.toDegrees(Math.atan2(herobrine.getZ() - guard.getZ(), herobrine.getX() - guard.getX())) - 90.0;
 			helper.assertTrue(guard.getTarget() == null, "The guard should not make him a target");
+			helper.assertTrue(guard.getNavigation().isDone(), "The guard should pause its patrol while looking");
 			helper.assertTrue(Math.abs(Mth.wrapDegrees(guard.getYHeadRot() - want)) < 30.0,
 					"The guard should look his way: head " + guard.getYHeadRot() + ", towards him " + want);
 			guard.discard();
