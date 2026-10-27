@@ -688,7 +688,8 @@ Owner-requested 7 October 2026. Independent briefs: [industrial chemistry and fu
 - [x] Part 2, world clues with terrain safeguards and reversible placement records: leafless groves, 2×2 tunnels, sand and mossy pyramids, torch shrines and cryptic signs (`HerobrineMarks`, `HerobrineMarkPlans`). Implemented; compile, CI and client play pending.
 - [ ] Linked investigations (river sighting, then grove, then torch tunnel, then a sign to a shoreline pyramid), once part 3 exists.
 - [ ] Part 3, massive shoreline brick pyramids: reserved sites, incremental building with revalidation, authored interiors and modest rewards.
-- [ ] Jugcraft connections: a Cursed Mirror reflection, guards glancing at him, and Styx's observatory clue.
+- [x] Jugcraft connections: guards glancing at him (never targeting), Styx's lines, and the Cursed Mirror reflection seam (`HerobrineEncounters.reflection`). Implemented; compile, CI and client play pending.
+- [ ] Wire the Cursed Mirror to call `HerobrineEncounters.reflection` once the mirror (https://github.com/jimbozoomer-byte/jugcraft/pull/498) and Herobrine are both on main.
 
 ## Trains — 26 October 2026
 

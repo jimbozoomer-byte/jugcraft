@@ -105,6 +105,12 @@ Every mark carries a waxed sign facing the player, with a cryptic line: "YOU TOO
 - **Listing and forcing.** `/jugcraft herobrine marks` lists them. `/jugcraft herobrine mark <player> <kind>` leaves a mark of a given kind about 6 blocks in front of a player, for testing.
 - **Switch.** `herobrine.marks=off` stops new marks; undo works either way.
 
+### Connections to the rest of Jugcraft
+
+- **Guards glance.** A town guard (any guard role, the mecha guard included) that sees him within 32 blocks turns to look at him for 2 seconds, once per encounter, then goes back to its rounds (`HerobrineGlanceGoal`, one line in `Townsfolk`). It is a look only. He is neither a monster nor an enemy, so no guard's attack goal and no automated gun ever takes him as a target.
+- **Styxhexenhammer knows.** To anyone who has seen Herobrine, Styx adds one of four lines that show he recognises it and will not explain it ("White eyes at the edge of the trees? The observatory's oldest logs have a word for that. I am not going to say it."). Whether someone has seen him is this session's record, or the schedule's saved one through `HerobrineDirector.hasSeen`.
+- **The Cursed Mirror's reflection.** `HerobrineEncounters.reflection(player)` stands him quietly right behind a player who looks into the mirror: a faint sigh and no Darkness. It keeps the close-encounter rules (calm, already introduced, one at a time) under reservation `MIRROR`. The mirror is on its own branch (https://github.com/jimbozoomer-byte/jugcraft/pull/498), so the one call from `CursedMirrorBlock` is left for whichever of the two merges second; it is not wired on this branch.
+
 ## Tests
 
 Server game tests (`HerobrineGameTests`, in the 48-block arena with padding) cover:
@@ -121,6 +127,9 @@ Server game tests (`HerobrineGameTests`, in the 48-block arena with padding) cov
 - scattered glimpses (6 ticks looking, 3 away, three times) are not a sighting, and a steady look is;
 - a line of sight into unloaded land is refused and loads nothing;
 - a newcomer's natural distant encounter is a watcher, and seeing it introduces them;
+- a guard looks his way and never targets him;
+- a mirror reflection is refused to a newcomer, then placed behind them without Darkness;
+- Styx says nothing of him before a sighting, and recognises it after;
 - a follower walks the player's own path at its distance, and stops when they stop;
 - a second look finds him gone or moved;
 - a tunnel encounter stands at the far end of a tunnel behind the player;
@@ -143,7 +152,4 @@ Not yet verified: a real compile and CI run, rendering in a client (the eyes lay
 - **Massive brick pyramids near shorelines (part 3):**
   - explorable authored interiors with modest cosmetic, decor or journal rewards, and no farmable containers;
   - fully checked reserved wilderness sites, built incrementally with revalidation.
-- **Jugcraft connections:**
-  - a rare Cursed Mirror reflection, through a narrow seam with the Cursed Mirror (https://github.com/jimbozoomer-byte/jugcraft/pull/498);
-  - guards briefly looking toward him without targeting or firing;
-  - a Styx observatory clue where Styx recognises the phenomenon but refuses to explain it.
+- **The Cursed Mirror call:** one line in the mirror calling `HerobrineEncounters.reflection` (when a player looks into it at night, rarely), once both branches are on main.

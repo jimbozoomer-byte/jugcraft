@@ -124,6 +124,8 @@ public final class HerobrineEncounters {
 	 * encounter. (The schedule's saved progress may be stricter; this is the encounters' own floor.)
 	 */
 	private static final Set<UUID> INTRODUCED = new HashSet<>();
+	/** Players who have really seen him, any way, since the server started. */
+	private static final Set<UUID> SEEN = new HashSet<>();
 
 	private HerobrineEncounters() {
 	}
@@ -221,13 +223,13 @@ public final class HerobrineEncounters {
 	 * nobody's first sight of him is a jump-scare.
 	 */
 	public static Attempt attempt(ServerPlayer player, HerobrineDirector.Request request) {
-		return attempt(player, request, () -> request.kind() == Herobrine.Kind.CLOSE ? behind(player) : distant(player));
+		return attempt(player, request, () -> request.kind() == Herobrine.Kind.CLOSE ? behind(player, true) : distant(player));
 	}
 
 	/** Tries {@code request} as one particular variant only (an operator's choice, and tests). */
 	public static Attempt attemptVariant(ServerPlayer player, HerobrineDirector.Request request, Herobrine.Variant variant) {
 		return attempt(player, request, () -> variant.kind != request.kind() ? null
-				: variant == Herobrine.Variant.BEHIND ? behind(player) : distant(player, variant));
+				: variant == Herobrine.Variant.BEHIND ? behind(player, true) : distant(player, variant));
 	}
 
 	/**
@@ -273,6 +275,7 @@ public final class HerobrineEncounters {
 
 	/** Called by {@link Herobrine} the first time {@code player} really sees him. */
 	static void seen(Herobrine herobrine, UUID player, Herobrine.Variant variant) {
+		SEEN.add(player);
 		if (variant == Herobrine.Variant.WATCHER) {
 			INTRODUCED.add(player);
 		}
@@ -298,6 +301,23 @@ public final class HerobrineEncounters {
 				HerobrineMarks.afterSighting(level, herobrine.blockPosition(), player, herobrine.witnesses().size());
 			}
 		}
+	}
+
+	/** Whether {@code player} has ever really seen him: this session's sightings, or the schedule's saved record. */
+	public static boolean hasSeen(UUID player) {
+		return SEEN.contains(player) || director.hasSeen(player);
+	}
+
+	/**
+	 * A Cursed Mirror's reflection: called by the mirror when a player looks into it (the mirror decides when, and how
+	 * rarely). He stands right behind them for a moment, as a close encounter but quiet: a faint sigh only they hear, no
+	 * Darkness. The same rules hold as for any close encounter the schedule did not force: the player must be calm and
+	 * must already have seen a watcher, and only one encounter runs at a time. The director hears of it with reservation
+	 * {@link HerobrineDirector#MIRROR}.
+	 */
+	public static Attempt reflection(ServerPlayer player) {
+		return attempt(player, new HerobrineDirector.Request(player.getUUID(), Herobrine.Kind.CLOSE, HerobrineDirector.MIRROR),
+				() -> behind(player, false));
 	}
 
 	/** Whether {@code player} has seen a watcher since the server started (and so may be shown anything else). */
@@ -549,10 +569,11 @@ public final class HerobrineEncounters {
 	}
 
 	/**
-	 * Stands Herobrine right behind {@code player} ({@value #CLOSE_DISTANCE} blocks), with a moment of Darkness and a
-	 * heartbeat only they hear. Null if there is no room behind them. It never hurts: Darkness only dims the screen.
+	 * Stands Herobrine right behind {@code player} ({@value #CLOSE_DISTANCE} blocks). As a scare, with a moment of Darkness
+	 * and a heartbeat only they hear; otherwise (a reflection) just a faint sigh. Null if there is no room behind them. It
+	 * never hurts: Darkness only dims the screen.
 	 */
-	private static @Nullable Herobrine behind(ServerPlayer player) {
+	private static @Nullable Herobrine behind(ServerPlayer player, boolean scare) {
 		ServerLevel level = player.level();
 		double yaw = Math.toRadians(player.getYRot());
 		BlockPos feet = BlockPos.containing(player.getX() + Math.sin(yaw) * CLOSE_DISTANCE, player.getY(),
@@ -564,12 +585,14 @@ public final class HerobrineEncounters {
 		if (herobrine == null) {
 			return null;
 		}
-		player.addEffect(new MobEffectInstance(MobEffects.DARKNESS, CLOSE_DARKNESS_TICKS, 0));
 		long seed = level.getRandom().nextLong();
-		player.connection.send(new ClientboundSoundPacket(BuiltInRegistries.SOUND_EVENT.wrapAsHolder(SoundEvents.WARDEN_HEARTBEAT),
-				SoundSource.HOSTILE, herobrine.getX(), herobrine.getEyeY(), herobrine.getZ(), 1.0F, 0.7F, seed));
+		if (scare) {
+			player.addEffect(new MobEffectInstance(MobEffects.DARKNESS, CLOSE_DARKNESS_TICKS, 0));
+			player.connection.send(new ClientboundSoundPacket(BuiltInRegistries.SOUND_EVENT.wrapAsHolder(SoundEvents.WARDEN_HEARTBEAT),
+					SoundSource.HOSTILE, herobrine.getX(), herobrine.getEyeY(), herobrine.getZ(), 1.0F, 0.7F, seed));
+		}
 		player.connection.send(new ClientboundSoundPacket(BuiltInRegistries.SOUND_EVENT.wrapAsHolder(SoundEvents.SOUL_ESCAPE.value()),
-				SoundSource.HOSTILE, herobrine.getX(), herobrine.getEyeY(), herobrine.getZ(), 1.0F, 0.5F, seed));
+				SoundSource.HOSTILE, herobrine.getX(), herobrine.getEyeY(), herobrine.getZ(), scare ? 1.0F : 0.4F, 0.5F, seed));
 		return herobrine;
 	}
 
@@ -589,6 +612,7 @@ public final class HerobrineEncounters {
 		BY_PLAYER.clear();
 		POSES.clear();
 		INTRODUCED.clear();
+		SEEN.clear();
 	}
 
 	private static void commands(CommandDispatcher<CommandSourceStack> dispatcher) {
