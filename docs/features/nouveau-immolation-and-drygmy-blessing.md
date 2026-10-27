@@ -44,7 +44,7 @@ New server game tests in `NouveauStatusSourcesGameTests`:
 
 Local: `python tools/generate_material_data.py` wrote the brewing recipes and names. `python tools/check_mod_data.py` passed (7,797 material IDs, data files and recipe audit) and `python scripts/check_repository.py` passed.
 
-CI: pending.
+CI: fork [run 40426167694](https://github.com/mmme123-spec/jugcraftfork/actions/runs/40426167694) on 06e42ff62: green. The mod built, the generated-data and material checks passed, the server game tests passed (with and without optional integrations), and all sixteen client shards passed.
 
 Not run: a human brewing the potions or casting under them in game.
 
