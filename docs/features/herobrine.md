@@ -189,7 +189,7 @@ The small-mark tests run on the real build queue: they wait for a free slot and 
 Not yet verified, as of this checkpoint:
 
 - **Compile and tests.** The encounter tests compiled and passed natively on an earlier snapshot. The marks, pyramids, trail, approvals, chunk preflight, full-state undo and the cave-mouth watcher have not been compiled or run: none of the mark game tests above, nor the cave-mouth test, has run yet. The local Java parser checks syntax only.
-- **Client.** Rendering (the player-style model, the eyes in daylight and darkness), syncing and removal in a real client are being checked separately (`HerobrineClientGameTests`). Footstep audibility and real two-client play are untested.
+- **Client.** `HerobrineClientGameTests` (OpenAI Codex) passed in a rendered client on a disposable development world. It covers entity sync, the renderer and eye texture, credit for a sustained look, and his disappearance on approach. Its screenshots show the player silhouette in daylight and the white eyes in a dark tunnel ([herobrine-scheduling.md](herobrine-scheduling.md)). Two real clients together (`HerobrineNetworkTests`, in progress) and footstep audibility are untested, as are the cave mouth, marks and pyramids in a client.
 - **CI.** Not yet run on this branch.
 
 ## Still to build (owner-approved plan, not implemented)
