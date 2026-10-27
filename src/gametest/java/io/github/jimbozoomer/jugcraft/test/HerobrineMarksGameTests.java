@@ -59,7 +59,7 @@ public class HerobrineMarksGameTests {
 			helper.assertTrue(level.getBlockState(feet.above().north()).is(Blocks.REDSTONE_TORCH), "Redstone torches should stand round it");
 			BlockPos sign = plan.signs().keySet().iterator().next();
 			helper.assertTrue(level.getBlockEntity(sign) instanceof SignBlockEntity entity
-					&& entity.getFrontText().getMessage(0, false).getString().equals(FIRST[0]), "Its sign should carry the message");
+					&& entity.getText(net.minecraft.world.level.block.entity.SignTextSlot.FRONT).getMessages(false).getFirst().getString().equals(FIRST[0]), "Its sign should carry the message");
 			HerobrineMarks.Undo undo = HerobrineMarks.undo(level, id);
 			helper.assertTrue(undo != null && undo.kept() == 0 && undo.waiting() == 0, "The whole shrine should come back: " + undo);
 			helper.assertTrue(level.getBlockState(feet).isAir() && level.getBlockState(feet.above()).isAir() && level.getBlockState(sign).isAir(),

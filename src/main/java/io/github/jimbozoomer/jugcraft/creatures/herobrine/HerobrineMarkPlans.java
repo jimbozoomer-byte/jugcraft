@@ -9,8 +9,11 @@ import java.util.Map;
 import java.util.Set;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.tags.BlockTags;
+import net.minecraft.tags.TagKey;
 import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.block.Block;
@@ -32,6 +35,7 @@ import org.jspecify.annotations.Nullable;
  * checking each block again just before it changes.
  */
 public final class HerobrineMarkPlans {
+	private static final TagKey<Block> ORES = TagKey.create(Registries.BLOCK, Identifier.parse("c:ores"));
 	/** How far round a mark the land must be wild, in blocks. */
 	public static final int MARGIN = 6;
 	/** How far round where he stood a grove loses its leaves, in blocks, and the fewest and most leaves it takes. */
@@ -91,9 +95,7 @@ public final class HerobrineMarkPlans {
 	}
 
 	private static boolean ore(BlockState state) {
-		return state.is(BlockTags.COAL_ORES) || state.is(BlockTags.IRON_ORES) || state.is(BlockTags.COPPER_ORES) || state.is(BlockTags.GOLD_ORES)
-				|| state.is(BlockTags.REDSTONE_ORES) || state.is(BlockTags.LAPIS_ORES) || state.is(BlockTags.DIAMOND_ORES)
-				|| state.is(BlockTags.EMERALD_ORES);
+		return state.is(ORES);
 	}
 
 	/**
