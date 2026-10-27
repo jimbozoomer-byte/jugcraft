@@ -6,7 +6,7 @@ and preparing matching server/client updates. Work performed with OpenAI Codex.
 ## Integrated scope
 
 The integration branch preserves the original commit ancestry for PRs #448, #449,
-#452-#455, #458-#459, #465-#468, #470, #472-#474, #476-#486, #489-#493.
+#452-#455, #458-#459, #465-#468, #470, #472-#474, #476-#486, #489-#493 and the subsequently submitted #495.
 This includes Jimtafacts/native computers and transport, aircraft repairs, Chompa,
 Frostward College, starter quartz/silicon, companion jobs, seasonal wildlife,
 Concordance winter/stone/workshops/pacts, crates, guns, trains, town traders,
@@ -41,7 +41,13 @@ survival graph: zero invalid ingredient diagnostics.
 Linux CI exposed Pillow/zlib PNG encoding drift in twelve unchanged atlas crops.
 Those two importers now preserve existing bytes when exact RGBA pixels match;
 changed pixels and corrupt outputs still regenerate. The regression test passes.
-Rendered-client and required GitHub checks remain in progress. Earlier
+Six combined rendered-client classes passed: ScreenFitClientGameTests,
+JimtafactsComputersClientGameTests, AircraftFlightClientGameTests,
+TrainClientGameTests, CrownOfThunderClientGameTests and RetroTraderClientGameTests.
+63 screenshots are retained in build/release-client-evidence-oct26; the fitted
+computer screen was inspected. These results precede the final three long guns
+from #495; that addition receives separate focused checks and combined CI.
+Required exact-commit GitHub checks remain in progress. Earlier
 Jimtafacts-only results are separate. Local evidence: build/release-*-oct26.log.
 No server restart or client channel promotion has occurred for this candidate.
 The live world and player settings must be retained. Obtain owner confirmation,
