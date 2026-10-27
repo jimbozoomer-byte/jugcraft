@@ -378,9 +378,12 @@ FLUID_RECIPES = {
          "fluid_results": [("jugcraft:vinyl_chloride", 250, 0), ("jugcraft:hydrogen_chloride", 250, 1)], "source": 0,
          "ticks": 80, "features": ["salt", "machines"]},
     ],
-    # Refinery gas polymerizes into plastic: a bucket of gas gives four pellets.
+    # Refinery gas polymerizes into plastic: a bucket of gas gives four pellets. Naphtha, a quarter of every bucket
+    # of crude, does the same (docs/features/cheaper-plastic.md).
     "polymerization_reactor": [
         {"name": "refinery_gas", "fluids": [("jugcraft:refinery_gas", 1000)], "fluid_results": [],
+         "results": [("jugcraft:plastic_pellets", 4)], "source": 0, "ticks": 100, "features": ["crude_oil"]},
+        {"name": "naphtha", "fluids": [("jugcraft:naphtha", 1000)], "fluid_results": [],
          "results": [("jugcraft:plastic_pellets", 4)], "source": 0, "ticks": 100, "features": ["crude_oil"]},
         # PVC (batch 15): vinyl chloride polymerized into resin.
         {"name": "vinyl_chloride", "fluids": [("jugcraft:vinyl_chloride", 500)], "fluid_results": [],
