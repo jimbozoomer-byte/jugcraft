@@ -9,6 +9,7 @@ import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
 import net.minecraft.core.GlobalPos;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Concordance Chunk D, D-04 (D-S7, D-S9): the open conversations at pact perches, one a player, in memory only (invited
@@ -21,8 +22,13 @@ public final class PactSessions {
 	/** An open conversation ends after this many ticks without a request (five minutes). */
 	public static final long TIMEOUT_TICKS = 6000L;
 	private static final Map<UUID, Session> SESSIONS = new HashMap<>();
+	/**
+	 * GC-02: how many times anyone has spoken at a perch (opened its screen or sent a request) since this server started;
+	 * orders the speakers (memory only).
+	 */
+	private static long spoken;
 
-	private record Session(GlobalPos perch, int containerId, long until) {
+	private record Session(GlobalPos perch, int containerId, long until, long order) {
 	}
 
 	private PactSessions() {
@@ -37,13 +43,13 @@ public final class PactSessions {
 	}
 
 	static void open(ServerPlayer player, GlobalPos perch, int containerId, long now) {
-		SESSIONS.put(player.getUUID(), new Session(perch, containerId, now + TIMEOUT_TICKS));
+		SESSIONS.put(player.getUUID(), new Session(perch, containerId, now + TIMEOUT_TICKS, ++spoken));
 	}
 
 	static void touch(UUID player, int containerId, long now) {
 		Session session = SESSIONS.get(player);
 		if (session != null && session.containerId() == containerId) {
-			SESSIONS.put(player, new Session(session.perch(), containerId, now + TIMEOUT_TICKS));
+			SESSIONS.put(player, new Session(session.perch(), containerId, now + TIMEOUT_TICKS, ++spoken));
 		}
 	}
 
@@ -71,5 +77,24 @@ public final class PactSessions {
 			}
 		}
 		return false;
+	}
+
+	/**
+	 * Concordance garden cohort, GC-02 (GC-S6): the player of the live conversation at {@code perch} who spoke last (opened
+	 * its screen or sent a request), or null when none is live there (exactly when {@link #live} is false: the same tests).
+	 */
+	public static @Nullable ServerPlayer speaker(MinecraftServer server, GlobalPos perch, long now) {
+		ServerPlayer latest = null;
+		long order = Long.MIN_VALUE;
+		for (Map.Entry<UUID, Session> entry : SESSIONS.entrySet()) {
+			Session session = entry.getValue();
+			if (session.order() > order && session.perch().equals(perch) && now <= session.until()
+					&& server.getPlayerList().getPlayer(entry.getKey()) instanceof ServerPlayer player
+					&& player.containerMenu instanceof PactMenu menu && menu.containerId == session.containerId()) {
+				latest = player;
+				order = session.order();
+			}
+		}
+		return latest;
 	}
 }

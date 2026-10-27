@@ -23,10 +23,15 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.PathfinderMob;
 import net.minecraft.world.entity.ai.Brain;
 import net.minecraft.world.entity.ai.behavior.BehaviorControl;
+import net.minecraft.world.entity.ai.behavior.BlockPosTracker;
+import net.minecraft.world.entity.ai.behavior.EntityTracker;
+import net.minecraft.world.entity.ai.behavior.PositionTracker;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.ai.memory.WalkTarget;
 import net.minecraft.world.entity.player.Player;
@@ -59,6 +64,11 @@ public abstract class WorkerEntity<T extends WorkerEntity<T>> extends Pathfinder
 	public static final int THINK_TICKS = 20;
 	/** The least time between two signs from one worker, so one that wavers between two states cannot flood its watchers. */
 	public static final int SIGN_TICKS = 200;
+	/**
+	 * Concordance garden cohort, GC-02 (GC-P9): how far a worker keeps its eyes on someone it attends; beyond it the look
+	 * target is dropped (tools/concordance_workers.py LOOK_REACH).
+	 */
+	public static final int LOOK_REACH = 32;
 	private static final EntityDataAccessor<String> STATUS = SynchedEntityData.defineId(WorkerEntity.class, EntityDataSerializers.STRING);
 
 	private final AnimatableInstanceCache cache = GeckoLibUtil.createInstanceCache(this);
@@ -190,7 +200,18 @@ public abstract class WorkerEntity<T extends WorkerEntity<T>> extends Pathfinder
 
 	@Override
 	public List<? extends BehaviorControl<?>> getAlwaysRunningBehaviours(T owner) {
-		return List.of(new LookAtTarget<T>(), new MoveToWalkTarget<T>());
+		// GC-02 (GB21): LookAtTarget's own test asks the vanilla visible-entities memory, which no worker's sensor fills, and
+		// so would refuse every entity target before it starts; this one drops only a target gone, elsewhere or far.
+		return List.of(new LookAtTarget<T>().invalidateTargetIf(WorkerEntity::unseen), new MoveToWalkTarget<T>());
+	}
+
+	/**
+	 * GC-02 (GC-P9): whether a look target is no longer worth facing: an entity dead or removed, in another level or more
+	 * than LOOK_REACH blocks away; a block (a bed, a reservoir) never. Public for its game test.
+	 */
+	public static boolean unseen(LivingEntity body, PositionTracker target) {
+		return target instanceof EntityTracker tracked && (!tracked.getEntity().isAlive() || tracked.getEntity().level() != body.level()
+				|| body.distanceToSqr(tracked.getEntity()) > (double) LOOK_REACH * LOOK_REACH);
 	}
 
 	@Override
@@ -199,6 +220,31 @@ public abstract class WorkerEntity<T extends WorkerEntity<T>> extends Pathfinder
 			think(level);
 		}
 		super.customServerAiStep(level);
+	}
+
+	// ---------------------------------------------------------------- looking, through SmartBrainLib (GC-02)
+
+	/**
+	 * Concordance garden cohort, GC-02 (GC-S6): the brain's look target, {@code target}'s eyes, or with null none.
+	 * SmartBrainLib's LookAtTarget, always running, turns the head toward it at vanilla's pace (10° a tick) and vanilla's
+	 * body control turns the body after it. Memory only, never saved; only this class touches the brain (check_workers).
+	 */
+	protected void attend(@Nullable Entity target) {
+		if (target == null) {
+			getBrain().eraseMemory(MemoryModuleType.LOOK_TARGET);
+		} else {
+			getBrain().setMemory(MemoryModuleType.LOOK_TARGET, new EntityTracker(target, true));
+		}
+	}
+
+	/** GC-02: the brain's look target is the middle of block {@code target} (a bed or reservoir a spirit works on). */
+	protected void attend(BlockPos target) {
+		getBrain().setMemory(MemoryModuleType.LOOK_TARGET, new BlockPosTracker(target));
+	}
+
+	/** GC-02: what the brain looks at now, or null (server side; tests read it). */
+	public @Nullable PositionTracker attending() {
+		return getBrain().getMemory(MemoryModuleType.LOOK_TARGET).orElse(null);
 	}
 
 	// ---------------------------------------------------------------- talking to players

@@ -78,7 +78,9 @@ WEIGHTS = {
     # measurement). Unit 3 (D-06) adds his nine poses: four loops waited out and five gestures frozen, about 50 s; and
     # subtitles listened for at the refusal and the acceptance, the answers' marks and Jade's two shots, about 30 s more;
     # estimates. Unit 5 (D-09) adds a timed sequence through his refusal, four frozen frames, about 10 s; an estimate.
-    "ConcordancePactClientGameTests": 240,
+    # The garden cohort's GC-02 adds his turning to the holder on each side of the perch: four turns of up to about three
+    # seconds, four shots and his being sent anew, about 20 s more; an estimate, not a measurement.
+    "ConcordancePactClientGameTests": 260,
     # Concordance Chunk D unit 3 (D-07): a dedicated server's start, the roster walked by keyboard (suspend and resume, an
     # end asked first, a recovery and a cancel), 64 rows paged, and ten shots at three sizes: an estimate, not a measurement.
     # Unit 5 (D-09): the workshop hand carrying one request across the yard, about 30 s more; an estimate.

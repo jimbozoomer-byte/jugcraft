@@ -14422,6 +14422,7 @@ def check_concordance(registered):
     check_pacts(co, root, lang, registered, research)
     check_stolas_regard(co, root, lang, research)
     check_pact_screen(co, lang)
+    check_spirit_facing(co)
     check_spirit_bodies(co)
     check_pact_network(co)
     check_roster_screen(co, lang)
@@ -18127,7 +18128,7 @@ def check_workers(co, root, lang, registered, research):
         "worker/Navigation.java": {"GIVE_UP": wk.GIVE_UP, "RETRY_TICKS": wk.RETRY_TICKS},
         "worker/WorkerParser.java": {"MAX_RADIUS": wk.MAX_RADIUS, "MAX_CARRY": wk.MAX_CARRY, "MAX_QUOTA": wk.MAX_QUOTA,
                                      "MAX_SUPPORT_TICKS": wk.MAX_SUPPORT_TICKS},
-        "spirits/WorkerEntity.java": {"THINK_TICKS": wk.THINK_TICKS},
+        "spirits/WorkerEntity.java": {"THINK_TICKS": wk.THINK_TICKS, "LOOK_REACH": wk.LOOK_REACH},
         "spirits/WorkerRoster.java": {"MAX_PER_PLAYER": wk.ROSTER_MAX},
     }
     for name, values in constants.items():
@@ -18194,6 +18195,29 @@ def check_workers(co, root, lang, registered, research):
                 err(f"spirits/{path.name}: a worker only hops within its own level (teleportTo(x, y, z))")
         if "MemoryModuleType" in text and path.name != "WorkerEntity.java":
             err(f"spirits/{path.name}: only WorkerEntity talks to the brain; a worker's model never lives in its memories")
+        if "getBrain()" in text and path.name != "WorkerEntity.java":
+            err(f"spirits/{path.name}: only WorkerEntity reaches the brain (getBrain); others call attend (GC-02)")
+    # Concordance garden cohort, GC-02 (GB21, GC-P9): LookAtTarget is registered once, with WorkerEntity.unseen as its
+    # target test (its own asks the vanilla visible-entities memory, which no worker's sensor fills), and the brains keep
+    # one sensor, the nearby players' (no living-entities sensor is added for facing).
+    worker = java("WorkerEntity.java", spirits)
+    behaviours = _java_body(worker, "public List<? extends BehaviorControl<?>> getAlwaysRunningBehaviours(")
+    if "new LookAtTarget<T>().invalidateTargetIf(WorkerEntity::unseen)" not in behaviours or worker.count("new LookAtTarget<") != 1:
+        err("spirits/WorkerEntity.java: LookAtTarget is registered once, with WorkerEntity::unseen as its target test (GC-02, GB21)")
+    unseen = _java_body(worker, "public static boolean unseen(LivingEntity body, PositionTracker target)")
+    for needle in ("target instanceof EntityTracker tracked", "!tracked.getEntity().isAlive()", "tracked.getEntity().level() != body.level()",
+                   "body.distanceToSqr(tracked.getEntity()) > (double) LOOK_REACH * LOOK_REACH"):
+        if needle not in unseen:
+            err(f"spirits/WorkerEntity.java: unseen drops an entity target only when gone, elsewhere or beyond LOOK_REACH ({needle})")
+    if "isVisibleBy" in unseen:
+        err("spirits/WorkerEntity.java: unseen never asks isVisibleBy (the visible-entities memory is never filled, GB21)")
+    sensors = _java_body(worker, "public List<? extends ExtendedSensor<?>> getSensors(")
+    if re.findall(r"new (\w+)<", sensors) != ["NearbyPlayersSensor"]:
+        err("spirits/WorkerEntity.java: the brains keep one sensor, the nearby players' (GC-02 adds none; don't 10)")
+    for needle in ("protected void attend(@Nullable Entity target)", "protected void attend(BlockPos target)",
+                   "new EntityTracker(target, true)", "new BlockPosTracker(target)", "eraseMemory(MemoryModuleType.LOOK_TARGET)"):
+        if needle not in worker:
+            err(f"spirits/WorkerEntity.java: attend sets or erases the look target, an entity's eyes or a block's middle ({needle})")
     # Concordance Chunk D, D-01 (D-S18): a worker that carries things leaves them once and is struck off its holder's roster
     # when killed or discarded; unloading is not that.
     for path in sorted(spirits.glob("*.java")):
@@ -19154,9 +19178,84 @@ def check_pact_screen(co, lang):
     if entry not in mod.get("entrypoints", {}).get("fabric-client-gametest", []):
         err(f"src/gametest/resources/fabric.mod.json: {entry} is a registered client game test")
     shots = text(ROOT / "src" / "gametest" / "java" / "io" / "github" / "jimbozoomer" / "jugcraft" / "test" / "ConcordancePactClientGameTests.java")
-    for name in pa.CLIENT_SHOTS:
+    for name in pa.CLIENT_SHOTS + pa.FACING_SHOTS:
         if f'"{name}"' not in shots:
             err(f"ConcordancePactClientGameTests: takes {name}")
+
+
+def check_spirit_facing(co):
+    """Concordance garden cohort, GC-02 (GC-S6, GC-S23, GC-P8, GC-P9): a pact spirit faces whoever speaks to it. The
+    perch summons it facing whoever it comes for; the sessions order their speakers; the base faces its work, then its
+    latest speaker, then no one, at each think and when a screen opens, keeping its yaw on what it faces; no client class
+    turns a head bone; the server and client tests hold the bearings and tolerances of tools/concordance_pacts.py."""
+    import math
+    pa = co.pacts
+    spirits = JAVA_ROOT / "concordance" / "spirits"
+    tests = ROOT / "src" / "gametest" / "java" / "io" / "github" / "jimbozoomer" / "jugcraft" / "test"
+
+    def text(path):
+        return path.read_text(encoding="utf-8") if path.exists() else ""
+    sessions = text(spirits / "PactSessions.java")
+    speaker = _java_body(sessions, "public static @Nullable ServerPlayer speaker(")
+    for needle in ("session.order() > order", "session.perch().equals(perch)", "now <= session.until()",
+                   "player.containerMenu instanceof PactMenu menu && menu.containerId == session.containerId()"):
+        if needle not in speaker:
+            err(f"spirits/PactSessions.java: speaker is the live session at that perch that spoke last ({needle})")
+    if sessions.count("++spoken") != 2 or "record Session(GlobalPos perch, int containerId, long until, long order)" not in sessions:
+        err("spirits/PactSessions.java: an open and a request each count as speaking, in order (GC-02)")
+    base = text(spirits / "PactSpiritEntity.java")
+    face = _java_body(base, "private void face(ServerLevel level, long gameTime, Status next)")
+    for needle in ("gameTime < workingUntil", "attend(working)", "PactSessions.speaker(", "attend(speaker)",
+                   "setYRot(bearing(position(), speaker.position(), getYRot()))", "attend((Entity) null)", "setYRot(yBodyRot)"):
+        if needle not in face:
+            err(f"PactSpiritEntity.face: his work, else his latest speaker, else no one; his yaw kept on what he faces ({needle})")
+    # Amendment A-03 (garden cohort unit 1): a spent quota (FINISHED) does not stop a spirit facing whoever speaks to it.
+    if "next != Status.DISABLED" not in face or "Status.FINISHED" in face:
+        err("PactSpiritEntity.face: faces whoever speaks unless switched off, a spent quota (FINISHED) included (GC-P8)")
+    if not 0 <= face.find("attend(working)") < face.find("PactSessions.speaker(") < face.find("attend((Entity) null)"):
+        err("PactSpiritEntity.face: a work target outranks the speaker, who outranks no one (GC-02)")
+    if "face(level, gameTime, next);" not in _java_body(base, "public Status think(ServerLevel level, long time, long gameTime)") \
+            or "face(level, level.getGameTime(), status());" not in _java_body(base, "void listen()"):
+        err("PactSpiritEntity: he faces at every think and at once when a screen opens (think, listen)")
+    if "getBrain()" in base or "MemoryModuleType" in base:
+        err("PactSpiritEntity: the brain is WorkerEntity's alone; the base calls attend")
+    perch = text(spirits / "PactPerchBlockEntity.java")
+    if "PactSpiritEntity.bearing(" not in perch or ".turnTo(yaw);" not in perch or re.search(r"snapTo\([^;]*,\s*0\.0F,\s*0\.0F\);", perch):
+        err("spirits/PactPerchBlockEntity.java: a summoned spirit faces whoever it comes for, yaw, head and body (GC-02)")
+    # No client class turns a head bone, and no pact spirit's clip reads the head's yaw (GeckoLib 5.5.7 draws the body's).
+    for path in sorted(CLIENT_JAVA_ROOT.rglob("*.java")):
+        if "hardcodedHeadRotation" in text(path):
+            err(f"client/{path.name}: no head bone is turned for facing (GC-02; a head turn ahead of the body is deferred)")
+    for spirit in getattr(pa, "SPIRITS", {"stolas": None}):
+        clip = text(ASSETS / "geckolib" / "animations" / "entity" / f"{spirit}.animation.json")
+        if "query.head_y_rotation" in clip or "query.head_x_rotation" in clip:
+            err(f"{spirit}.animation.json: no clip turns the head by the entity's look (GC-02: the body's yaw is drawn)")
+    # The tables: each side's bearing in Minecraft's yaw, its shot, and the tolerances, held to the tests.
+    if list(pa.FACINGS) != ["east", "south", "west", "north"] or pa.FACING_SHOTS != [f"jugcraft_pact_stolas_faces_{s}" for s in pa.FACINGS]:
+        err("tools/concordance_pacts.py: FACINGS east, south, west, north (north last) and one shot each (GC-02)")
+    client = re.sub(r"//[^\n]*|/\*.*?\*/", " ", text(tests / "ConcordancePactClientGameTests.java"), flags=re.S)
+    found = re.findall(r'new Facing\("([a-z]+)", (-?\d), (-?\d), (-?[0-9.]+)F, (-?[0-9.]+)F, "([a-z_]+)"\)', client)
+    wanted = []
+    for side, (dx, dz) in pa.FACINGS.items():
+        yaw = (math.degrees(math.atan2(dz, dx)) - 90.0 + 180.0) % 360.0 - 180.0
+        wanted.append((side, dx, dz, yaw, f"jugcraft_pact_stolas_faces_{side}"))
+    got = [(s, int(dx), int(dz), float(yaw), shot) for s, dx, dz, look, yaw, shot in found]
+    looks_ok = all(abs(((float(look) - float(yaw)) % 360.0) - 180.0) < 1e-6 for _, _, _, look, yaw, _ in found)
+    if len(got) != len(wanted) or not looks_ok or any(g[:3] != w[:3] or g[4] != w[4] or (g[3] - w[3]) % 360.0 != 0.0
+                                                      for g, w in zip(got, wanted)):
+        err(f"ConcordancePactClientGameTests: FACINGS as tools/concordance_pacts.py says, the speaker's look opposite the bearing: {found}")
+    if f"private static final float FACING_BODY_TOLERANCE = {pa.FACING_BODY_TOLERANCE}.0F;" not in client \
+            or "facing(context, server, perch);" not in client or "getChunkSource().removeEntity(" not in client:
+        err("ConcordancePactClientGameTests: the drawn body held to FACING_BODY_TOLERANCE at each side, and seen anew (GC-02)")
+    worker_tests = text(tests / "ConcordanceWorkerGameTests.java")
+    if f"static final float HEAD_TOLERANCE = {pa.FACING_HEAD_TOLERANCE}.0F;" not in worker_tests \
+            or f"static final float BODY_TOLERANCE = {pa.FACING_BODY_TOLERANCE}.0F;" not in worker_tests:
+        err("ConcordanceWorkerGameTests: the facing tolerances are tools/concordance_pacts.py's (GC-P8)")
+    for cls, names in GC02_TESTS.items():
+        source = text(tests / f"{cls}.java")
+        for name in names:
+            if f"public void {name}(GameTestHelper helper)" not in source:
+                err(f"{cls}: missing garden cohort GC-02 game test {name}")
 
 
 def check_spirit_bodies(co):
@@ -19306,13 +19405,15 @@ def check_spirit_bodies(co):
     for needle in ("StolasEntity.Gesture.ARRIVE.animation.equals(", "StolasEntity.Gesture.DEPART.animation.equals("):
         if needle not in shots:
             err(f"ConcordancePactClientGameTests: his real arrival and departure play their gestures ({needle})")
-    # D-09: photographed from his front, and a timed sequence through his refusal, rising inside its clip. The camera stands
-    # south of his perch facing north (yaw 180), in the body's shots and in Jade's (at least twice; the unit 5 critique).
-    # Read without comments, so a step commented out no longer counts (the unit 5 review).
-    front = '"tp @a %.1f %d %.1f 180 0", perch.getX() + 0.5, perch.getY(), perch.getZ() + 3.0)'
+    # D-09, since the garden cohort's GC-02 (GC-S6; D-P133 superseded): photographed from his front, which faces his
+    # speaker: the camera for his body, poses, sequence and Jade stands where his holder spoke from, north of his perch
+    # facing south (yaw 0), through one helper the body's, facing and Jade steps use; the south camera is gone. Read without
+    # comments, so a step commented out no longer counts (the unit 5 review).
+    front = 'String.format(Locale.ROOT, "tp @a %.1f %d %.1f 0 0", perch.getX() + 0.5, perch.getY(), perch.getZ() - 2.0)'
     code = re.sub(r"//[^\n]*|/\*.*?\*/", " ", shots, flags=re.S)
-    if code.count(front) < 2 or "perch.getZ() - 2.5" in code:
-        err("ConcordancePactClientGameTests: Stolas is photographed from his front, south of his perch, facing him (D-P133)")
+    if front not in _java_body(code, "private static void standNorth(") or code.count("standNorth(server, perch);") < 3 \
+            or "perch.getZ() + 3.0" in code:
+        err("ConcordancePactClientGameTests: Stolas is photographed from his front, where his speaker stands, north of his perch (GC-02; D-P133 superseded)")
     length = pa.GESTURE_TIMES["refuse"][0]
     times = list(pa.REFUSAL_SEQUENCE)
     if times != sorted(set(times)) or not all(0 < t < length for t in times) or len(times) != len(pa.SEQUENCE_SHOTS):
@@ -22178,6 +22279,11 @@ D05_TESTS = {
 }
 D05_ON_STOLAS = ["upkeepWarnsThenSuspendsAfterGraceAndResumes", "aReturnAfterAbsenceGetsTheFullGrace",
                  "absentAndUnloadedTimeIsNeverOwed", "theConcordanceOffHoldsEveryClock"]
+# Concordance garden cohort, GC-02's game tests (check_spirit_facing).
+GC02_TESTS = {"ConcordanceWorkerGameTests": ["aSpiritArrivesFacingItsInviter", "aSpiritFacesWhoeverSpeaksToIt", "theLatestSpeakerIsFaced",
+                                             "aTeleportBackKeepsTheFacing", "aClosedConversationLeavesTheFacing",
+                                             "theLookTargetIsDroppedOnlyWhenGoneElsewhereOrFar",
+                                             "aWorkTargetOutranksTheSpeakerWhileItsGesturePlays"]}
 # Concordance Chunk D, D-06's game tests (check_pacts).
 D06_TESTS = {"ConcordanceWorkerGameTests": ["stolasGesturesAndSoundsFollowTheirTable", "stolasAnswersEachActionWithItsGesture",
                                             "aDepartingStolasIsNeverAVisitorAgain", "aRemovedStolasNeverEndsThePact", "onePresencePerPact",

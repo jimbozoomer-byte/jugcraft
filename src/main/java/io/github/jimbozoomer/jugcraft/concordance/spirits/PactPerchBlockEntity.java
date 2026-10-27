@@ -18,12 +18,14 @@ import java.util.function.Predicate;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.storage.ValueInput;
 import net.minecraft.world.level.storage.ValueOutput;
+import net.minecraft.world.phys.Vec3;
 import org.jspecify.annotations.Nullable;
 
 /**
@@ -136,7 +138,7 @@ public class PactPerchBlockEntity extends BlockEntity implements AgreementHolder
 		if (guest != null) {
 			guest.leave(level, null, getBlockPos());
 		}
-		guest = summon(level, spirit, null);
+		guest = summon(level, spirit, null, inviter);
 		visitor = guest == null ? null : guest.getUUID();
 		return guest;
 	}
@@ -158,7 +160,7 @@ public class PactPerchBlockEntity extends BlockEntity implements AgreementHolder
 			guest.leave(level, null, getBlockPos());
 			visitor = null;
 		}
-		return summon(level, spirit, who);
+		return summon(level, spirit, who, level.getServer().getPlayerList().getPlayer(who));
 	}
 
 	/** D-06: a conversation opens here: its spirit attends (PactSpiritEntity.listen); at a copy, nobody (presence()). */
@@ -178,7 +180,7 @@ public class PactPerchBlockEntity extends BlockEntity implements AgreementHolder
 		}
 	}
 
-	private @Nullable PactSpiritEntity<?> summon(ServerLevel level, PactSpirits.Spirit spirit, @Nullable UUID who) {
+	private @Nullable PactSpiritEntity<?> summon(ServerLevel level, PactSpirits.Spirit spirit, @Nullable UUID who, @Nullable Entity facing) {
 		PactSpiritEntity<?> summoned = spirit.type().create(level, EntitySpawnReason.MOB_SUMMONED);
 		if (summoned == null) {
 			return null;
@@ -186,7 +188,11 @@ public class PactPerchBlockEntity extends BlockEntity implements AgreementHolder
 		BlockPos pos = getBlockPos();
 		summoned.setOwner(who);
 		summoned.setPerch(pos);
-		summoned.snapTo(pos.getX() + 0.5, pos.getY() + 1.0, pos.getZ() + 0.5, 0.0F, 0.0F);
+		Vec3 station = new Vec3(pos.getX() + 0.5, pos.getY() + 1.0, pos.getZ() + 0.5);
+		// GC-02 (GC-S6): it arrives facing whoever it comes for; south (yaw 0, as before) with nobody in this level to face.
+		float yaw = facing != null && facing.level() == level ? PactSpiritEntity.bearing(station, facing.position(), 0.0F) : 0.0F;
+		summoned.snapTo(station.x, station.y, station.z, yaw, 0.0F);
+		summoned.turnTo(yaw);
 		if (!level.addFreshEntity(summoned)) {
 			return null;
 		}

@@ -31,10 +31,13 @@ import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.tags.DamageTypeTags;
+import net.minecraft.util.Mth;
 import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.PathfinderMob;
@@ -43,6 +46,7 @@ import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.storage.ValueInput;
 import net.minecraft.world.level.storage.ValueOutput;
+import net.minecraft.world.phys.Vec3;
 import org.jspecify.annotations.Nullable;
 
 /**
@@ -127,6 +131,9 @@ public abstract class PactSpiritEntity<T extends PactSpiritEntity<T>> extends Wo
 	private final long[] cued;
 	/** Its recent cues, oldest first; never saved. */
 	private final ArrayDeque<String> shown = new ArrayDeque<>(SHOWN);
+	/** GC-02: what a service's step has it look at (a bed, a reservoir), and until when (game time); memory only, never saved. */
+	private @Nullable BlockPos working;
+	private long workingUntil;
 
 	protected PactSpiritEntity(EntityType<? extends PathfinderMob> type, Level level, Body body) {
 		super(type, level);
@@ -235,6 +242,8 @@ public abstract class PactSpiritEntity<T extends PactSpiritEntity<T>> extends Wo
 			// D-06: it listens while a conversation is open at its perch (its screen open, its time not past).
 			entityData.set(LISTENING, perch != null && next != Status.DISABLED
 					&& PactSessions.live(level.getServer(), GlobalPos.of(level.dimension(), perch), gameTime));
+			// GC-02 (GC-S6): whom it faces, once a think: its work, its speaker, or no one (its body keeps its facing).
+			face(level, gameTime, next);
 		}
 		return next;
 	}
@@ -437,8 +446,70 @@ public abstract class PactSpiritEntity<T extends PactSpiritEntity<T>> extends Wo
 			return;
 		}
 		entityData.set(LISTENING, true);
+		// GC-02: it turns to whoever opened the screen at once, not at its next think.
+		face(level, level.getGameTime(), status());
 		if (level.getGameTime() - cued[body.cues().indexOf(body.arrive().id())] >= CUE_TICKS) {
 			cueing(level, "listen", true);
+		}
+	}
+
+	// ---------------------------------------------------------------- facing (Concordance garden cohort, GC-02; GC-S6)
+
+	/**
+	 * GC-02: the yaw that faces {@code to} from {@code from}, in Minecraft's convention (0 south, 90 west, 180 north, -90
+	 * east; LookControl.getYRotD's formula), or {@code otherwise} when {@code to} is straight above or below.
+	 */
+	public static float bearing(Vec3 from, Vec3 to, float otherwise) {
+		double dx = to.x - from.x;
+		double dz = to.z - from.z;
+		if (Math.abs(dx) < 1.0E-5 && Math.abs(dz) < 1.0E-5) {
+			return otherwise;
+		}
+		return Mth.wrapDegrees((float) (Mth.atan2(dz, dx) * Mth.RAD_TO_DEG) - 90.0F);
+	}
+
+	/**
+	 * GC-02: yaw, head and body set to {@code yaw} at once, before it enters the world (PactPerchBlockEntity's summon):
+	 * snapTo sets only the yaw, and each client gives its body the head's yaw it is sent.
+	 */
+	void turnTo(float yaw) {
+		setYRot(yaw);
+		setYHeadRot(yaw);
+		setYBodyRot(yaw);
+	}
+
+	/**
+	 * GC-02 (for a garden service's step, GC-04 onward): it looks at {@code target} while its work gesture plays
+	 * ({@code ticks} from {@code gameTime}), then at its speaker again if one is live; {@link #face}, later in the same
+	 * think, applies it. Public for its game test.
+	 */
+	public void attendWork(BlockPos target, int ticks, long gameTime) {
+		working = target.immutable();
+		workingUntil = gameTime + ticks;
+	}
+
+	/**
+	 * GC-02 (GC-S6, GC-P8): whom it faces. Its work while its gesture plays, else whoever spoke last in a live conversation
+	 * at its perch, else no one: the brain's look target is set or erased (WorkerEntity.attend), and its yaw is set to what
+	 * it faces, or with no one to its body's own facing, so a hop back onto its station (stay(): teleportTo keeps the yaw),
+	 * which a client draws as a move that turns the body to the yaw, never snaps it away from it. Switched off, it faces no
+	 * one; a spirit whose day's quota is spent (FINISHED) still faces whoever speaks to it. One session lookup; no scan.
+	 */
+	private void face(ServerLevel level, long gameTime, Status next) {
+		boolean attending = perch != null && next != Status.DISABLED;
+		if (attending && working != null && gameTime < workingUntil) {
+			attend(working);
+			setYRot(bearing(position(), Vec3.atCenterOf(working), getYRot()));
+			return;
+		}
+		working = null;
+		ServerPlayer speaker = attending ? PactSessions.speaker(level.getServer(), GlobalPos.of(level.dimension(), perch), gameTime) : null;
+		if (speaker != null && speaker.level() == level) {
+			attend(speaker);
+			setYRot(bearing(position(), speaker.position(), getYRot()));
+		} else {
+			attend((Entity) null);
+			setYRot(yBodyRot);
 		}
 	}
 

@@ -100,6 +100,7 @@ import net.fabricmc.fabric.api.entity.FakePlayer;
 import net.fabricmc.fabric.api.gametest.v1.GameTest;
 import net.minecraft.advancements.AdvancementHolder;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.core.GlobalPos;
 import net.minecraft.core.Holder;
 import net.minecraft.core.RegistryAccess;
@@ -116,6 +117,7 @@ import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.tags.TagKey;
+import net.minecraft.util.Mth;
 import net.minecraft.util.ProblemReporter;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
@@ -125,7 +127,10 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.EntityTypes;
 import net.minecraft.world.entity.ExperienceOrb;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.MobCategory;
+import net.minecraft.world.entity.ai.behavior.BlockPosTracker;
+import net.minecraft.world.entity.ai.behavior.EntityTracker;
 import net.minecraft.world.entity.animal.cow.Cow;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Inventory;
@@ -4456,6 +4461,268 @@ public class ConcordanceWorkerGameTests {
 			helper.assertTrue(another != null && !another.getUUID().equals(loaded.getUUID()) && loaded.think(level, 0L, g0 + 60) == Status.FINISHED
 					&& loaded.gone(), d.id() + ": another called in its place (the original struck off), the loaded one departs");
 		}
+		helper.succeed();
+	}
+
+	// ---------------------------------------------------------------- Concordance garden cohort, GC-02: a spirit faces whoever speaks to it
+
+	/** GC-P8: the head within this of its bearing once turned (vanilla's 10° a tick; tools/concordance_pacts.py FACING_HEAD_TOLERANCE). */
+	static final float HEAD_TOLERANCE = 10.0F;
+	/** GC-P8: the body within this of its bearing once vanilla's body control has followed (FACING_BODY_TOLERANCE). */
+	static final float BODY_TOLERANCE = 15.0F;
+	/** A spirit's yaw facing a speaker on each side of its perch (Minecraft's: 0 south, 90 west, 180 north, -90 east). */
+	static final float SOUTH = 0.0F;
+	static final float WEST = 90.0F;
+	static final float NORTH = 180.0F;
+	static final float EAST = -90.0F;
+
+	/** {@code player} stands two blocks {@code side} of the perch at {@code at} (relative), level with it. */
+	static void standBy(GameTestHelper helper, ServerPlayer player, BlockPos at, Direction side) {
+		Vec3 to = helper.absoluteVec(new Vec3(at.getX() + 0.5 + 2 * side.getStepX(), at.getY(), at.getZ() + 0.5 + 2 * side.getStepZ()));
+		player.snapTo(to.x, to.y, to.z, 0.0F, 0.0F);
+	}
+
+	static boolean within(float yaw, float expected, float tolerance) {
+		return Mth.degreesDifferenceAbs(yaw, expected) <= tolerance;
+	}
+
+	static String yaws(LivingEntity spirit) {
+		return "yaw " + spirit.getYRot() + ", head " + spirit.getYHeadRot() + ", body " + spirit.yBodyRot;
+	}
+
+	/** {@code spirit} attends {@code who} (its brain's look target is that entity). */
+	static boolean attends(WorkerEntity<?> spirit, Entity who) {
+		return spirit.attending() instanceof EntityTracker tracked && tracked.getEntity() == who;
+	}
+
+	/**
+	 * GC-02 (GC-S6): summoned, a spirit arrives facing whoever it comes for, yaw, head and body alike, before any tick: an
+	 * invitation's visitor faces its inviter (west here), and a presence called back faces its holder (north here).
+	 */
+	@GameTest(maxTicks = 20)
+	public void aSpiritArrivesFacingItsInviter(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		ServerPlayer guest = ready(level, TestPlayers.survivor(helper));
+		BlockPos west = new BlockPos(2, 1, 4);
+		PactPerchBlockEntity perch = perch(helper, west, guest);
+		standBy(helper, guest, west, Direction.WEST);
+		open(helper, guest, perch);
+		StolasEntity visitor = (StolasEntity) level.getEntity(perch.visitor());
+		helper.assertTrue(visitor != null && within(visitor.getYRot(), WEST, 1.0F) && within(visitor.getYHeadRot(), WEST, 1.0F)
+				&& within(visitor.yBodyRot, WEST, 1.0F), "Invited from the west, he arrives facing west: " + (visitor == null ? "none" : yaws(visitor)));
+		guest.closeContainer();
+		ServerPlayer keeper = ready(level, TestPlayers.survivor(helper));
+		BlockPos north = new BlockPos(5, 1, 2);
+		long now = level.getGameTime();
+		PactPerchBlockEntity home = stolasPact(helper, keeper, north, now);
+		StolasEntity first = stolas(level, home);
+		helper.assertTrue(first != null && within(first.yBodyRot, SOUTH, 1.0F), "Sealed with his holder south of the perch, he faces south: "
+				+ (first == null ? "none" : yaws(first)));
+		first.discard();
+		standBy(helper, keeper, north, Direction.NORTH);
+		PactKeeping.tick(level, home.holder(), home.getBlockPos(), now + 20);
+		StolasEntity back = stolas(level, home);
+		helper.assertTrue(back != null && !back.getUUID().equals(first.getUUID()) && within(back.getYRot(), NORTH, 1.0F)
+				&& within(back.getYHeadRot(), NORTH, 1.0F) && within(back.yBodyRot, NORTH, 1.0F),
+				"Called back with his holder north of the perch, he arrives facing north: " + (back == null ? "none" : yaws(back)));
+		helper.succeed();
+	}
+
+	/**
+	 * GC-02 (GC-S6, GC-P8, GB21): while a conversation is open at his perch he attends whoever opened it. SmartBrainLib's
+	 * LookAtTarget starts under WorkerEntity.unseen (its own test refused every entity target), so within five ticks his
+	 * head has turned toward his speaker; within 40 it faces her, and within 60 his body does too. His holder, south when
+	 * the pact was sealed, speaks from the east.
+	 */
+	@GameTest(maxTicks = 80)
+	public void aSpiritFacesWhoeverSpeaksToIt(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		ServerPlayer keeper = ready(level, TestPlayers.survivor(helper));
+		BlockPos at = new BlockPos(3, 1, 3);
+		PactPerchBlockEntity perch = stolasPact(helper, keeper, at, level.getGameTime());
+		StolasEntity stolas = stolas(level, perch);
+		helper.assertTrue(stolas != null && within(stolas.yBodyRot, SOUTH, 1.0F) && stolas.attending() == null,
+				"Sealed with his holder south of the perch, he faces south and attends no one");
+		standBy(helper, keeper, at, Direction.EAST);
+		open(helper, keeper, perch);
+		helper.assertTrue(attends(stolas, keeper) && within(stolas.getYRot(), EAST, 1.0F),
+				"The screen opened, he attends its speaker at once, his yaw on her bearing: " + yaws(stolas));
+		helper.runAfterDelay(5, () -> helper.assertTrue(attends(stolas, keeper) && within(stolas.getYHeadRot(), EAST, 60.0F),
+				"Five ticks on the look target is kept and his head has turned at least 30° toward her (GB21): " + yaws(stolas)));
+		helper.runAfterDelay(40, () -> helper.assertTrue(within(stolas.getYHeadRot(), EAST, HEAD_TOLERANCE),
+				"Within 40 ticks his head faces her: " + yaws(stolas)));
+		helper.runAfterDelay(60, () -> {
+			helper.assertTrue(within(stolas.yBodyRot, EAST, BODY_TOLERANCE) && stolas.listening() && attends(stolas, keeper),
+					"Within 60 ticks his body faces her too, listening: " + yaws(stolas));
+			helper.succeed();
+		});
+	}
+
+	/**
+	 * GC-02 (GC-S6): two players at one perch; he attends whoever spoke last. The owner invites him from the south; a second
+	 * player opens the screen from the east and he turns to her; the owner sends a request and at his next think he turns
+	 * back, head then body.
+	 */
+	@GameTest(maxTicks = 120)
+	public void theLatestSpeakerIsFaced(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		ServerPlayer first = ready(level, TestPlayers.survivor(helper));
+		ServerPlayer second = ready(level, TestPlayers.survivor(helper));
+		BlockPos at = new BlockPos(3, 1, 3);
+		PactPerchBlockEntity perch = perch(helper, at, first);
+		standBy(helper, first, at, Direction.SOUTH);
+		standBy(helper, second, at, Direction.EAST);
+		PactMenu one = open(helper, first, perch);
+		StolasEntity visitor = (StolasEntity) level.getEntity(perch.visitor());
+		helper.assertTrue(visitor != null && within(visitor.yBodyRot, SOUTH, 1.0F) && attends(visitor, first), "Invited from the south, he faces south");
+		open(helper, second, perch);
+		GlobalPos place = GlobalPos.of(level.dimension(), perch.getBlockPos());
+		helper.assertTrue(PactSessions.speaker(level.getServer(), place, level.getGameTime()) == second && attends(visitor, second),
+				"A second player opens the screen: she spoke last, and he attends her");
+		helper.runAfterDelay(40, () -> {
+			helper.assertTrue(within(visitor.getYHeadRot(), EAST, HEAD_TOLERANCE), "He has turned his head to her: " + yaws(visitor));
+			send(first, one, PactRequestPayload.CHOOSE, 0);
+			helper.assertTrue(PactSessions.speaker(level.getServer(), place, level.getGameTime()) == first, "The owner's request makes him the latest speaker");
+			visitor.think(level);
+			helper.assertTrue(attends(visitor, first), "At his next think he attends the owner");
+		});
+		helper.runAfterDelay(80, () -> helper.assertTrue(within(visitor.getYHeadRot(), SOUTH, HEAD_TOLERANCE), "His head is back on the owner: " + yaws(visitor)));
+		helper.runAfterDelay(100, () -> {
+			helper.assertTrue(within(visitor.yBodyRot, SOUTH, BODY_TOLERANCE), "and his body: " + yaws(visitor));
+			first.closeContainer();
+			second.closeContainer();
+			helper.succeed();
+		});
+	}
+
+	/**
+	 * GC-02: moved off his perch he hops back on it (stay(); teleportTo keeps the yaw) still facing as before: at each think
+	 * his yaw is set to the bearing of whoever he attends, or with no one to his body's own facing, so a client drawing the
+	 * hop (vanilla's body control turns a moving body to the yaw) never snaps him back to the south.
+	 */
+	@GameTest(maxTicks = 80)
+	public void aTeleportBackKeepsTheFacing(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		ServerPlayer keeper = ready(level, TestPlayers.survivor(helper));
+		BlockPos at = new BlockPos(3, 1, 3);
+		PactPerchBlockEntity perch = stolasPact(helper, keeper, at, level.getGameTime());
+		StolasEntity stolas = stolas(level, perch);
+		standBy(helper, keeper, at, Direction.EAST);
+		open(helper, keeper, perch);
+		helper.runAfterDelay(60, () -> {
+			helper.assertTrue(within(stolas.yBodyRot, EAST, BODY_TOLERANCE), "Spoken to from the east, he faces east: " + yaws(stolas));
+			Vec3 home = stolas.position();
+			stolas.setPos(home.x - 3.0, home.y, home.z);
+			stolas.think(level);
+			helper.assertTrue(stolas.position().distanceToSqr(home) < 1.0E-6 && within(stolas.getYRot(), EAST, 1.0F)
+					&& within(stolas.yBodyRot, EAST, BODY_TOLERANCE), "Moved off, he hops back with his yaw on his speaker: " + yaws(stolas));
+			keeper.closeContainer();
+			stolas.think(level);
+			float facing = stolas.yBodyRot;
+			stolas.setPos(home.x, home.y, home.z + 3.0);
+			stolas.think(level);
+			helper.assertTrue(stolas.position().distanceToSqr(home) < 1.0E-6 && stolas.attending() == null && within(stolas.getYRot(), facing, 1.0F)
+					&& within(stolas.yBodyRot, EAST, BODY_TOLERANCE), "Spoken to by no one, he hops back with his yaw on his body's facing: " + yaws(stolas));
+			helper.succeed();
+		});
+	}
+
+	/**
+	 * GC-02: when the screen closes he attends no one: his head eases back to his body, which keeps its facing, and he does
+	 * not follow his holder, who walks round to the north afterwards.
+	 */
+	@GameTest(maxTicks = 100)
+	public void aClosedConversationLeavesTheFacing(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		ServerPlayer keeper = ready(level, TestPlayers.survivor(helper));
+		BlockPos at = new BlockPos(3, 1, 3);
+		PactPerchBlockEntity perch = stolasPact(helper, keeper, at, level.getGameTime());
+		StolasEntity stolas = stolas(level, perch);
+		standBy(helper, keeper, at, Direction.EAST);
+		open(helper, keeper, perch);
+		helper.runAfterDelay(60, () -> {
+			helper.assertTrue(within(stolas.yBodyRot, EAST, BODY_TOLERANCE), "Spoken to from the east, he faces east: " + yaws(stolas));
+			keeper.closeContainer();
+			stolas.think(level);
+			helper.assertTrue(stolas.attending() == null && !stolas.listening(), "The screen closed, he attends no one and listens no more");
+			standBy(helper, keeper, at, Direction.NORTH);
+		});
+		helper.runAfterDelay(90, () -> {
+			helper.assertTrue(within(stolas.yBodyRot, EAST, BODY_TOLERANCE) && within(stolas.getYHeadRot(), stolas.yBodyRot, HEAD_TOLERANCE),
+					"His head has eased back to his body, which keeps its facing; he did not follow his holder north: " + yaws(stolas));
+			helper.succeed();
+		});
+	}
+
+	/**
+	 * GC-02 (GC-P9, GB21): WorkerEntity.unseen keeps a living target in his level within 32 blocks and drops one beyond, gone
+	 * or in another level; a block is never dropped. SmartBrainLib's own test would have refused even his near speaker:
+	 * nothing of his fills the visible-entities memory.
+	 */
+	@GameTest(maxTicks = 20)
+	public void theLookTargetIsDroppedOnlyWhenGoneElsewhereOrFar(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		ServerPlayer keeper = ready(level, TestPlayers.survivor(helper));
+		PactPerchBlockEntity perch = stolasPact(helper, keeper, new BlockPos(3, 1, 3), level.getGameTime());
+		StolasEntity stolas = stolas(level, perch);
+		Vec3 home = stolas.position();
+		Cow near = EntityTypes.COW.create(level, EntitySpawnReason.MOB_SUMMONED);
+		Cow far = EntityTypes.COW.create(level, EntitySpawnReason.MOB_SUMMONED);
+		Cow gone = EntityTypes.COW.create(level, EntitySpawnReason.MOB_SUMMONED);
+		Cow elsewhere = EntityTypes.COW.create(level.getServer().getLevel(Level.NETHER), EntitySpawnReason.MOB_SUMMONED);
+		near.snapTo(home.x + WorkerEntity.LOOK_REACH - 1.0, home.y, home.z, 0.0F, 0.0F);
+		far.snapTo(home.x + WorkerEntity.LOOK_REACH + 1.0, home.y, home.z, 0.0F, 0.0F);
+		gone.snapTo(home.x + 2.0, home.y, home.z, 0.0F, 0.0F);
+		gone.discard();
+		elsewhere.snapTo(home.x + 2.0, home.y, home.z, 0.0F, 0.0F);
+		helper.assertTrue(!WorkerEntity.unseen(stolas, new EntityTracker(keeper, true)) && !WorkerEntity.unseen(stolas, new EntityTracker(near, true)),
+				"A living target in his level within 32 blocks is kept");
+		helper.assertTrue(WorkerEntity.unseen(stolas, new EntityTracker(far, true)) && WorkerEntity.unseen(stolas, new EntityTracker(gone, true))
+				&& WorkerEntity.unseen(stolas, new EntityTracker(elsewhere, true)), "Beyond 32 blocks, gone, or in another level, it is dropped");
+		helper.assertTrue(!WorkerEntity.unseen(stolas, new BlockPosTracker(stolas.blockPosition().offset(100, 0, 0))), "A block is never dropped");
+		helper.assertTrue(!new EntityTracker(keeper, true).isVisibleBy(stolas),
+				"SmartBrainLib's own test would refuse his near speaker: no sensor of his fills the visible-entities memory (GB21)");
+		helper.succeed();
+	}
+
+	/**
+	 * GC-02 (GC-P8): a work target outranks the speaker while its work gesture plays; then the speaker again; with nobody
+	 * speaking, the work while it plays and then no one. Stolas has no work of his own (Star-reckoning takes no step), so the
+	 * hook a garden service calls (attendWork, GC-04 onward) is called here, for a bed three blocks east of his perch and a
+	 * work gesture of 16 ticks. The window is counted in the think's game time.
+	 */
+	@GameTest(maxTicks = 20)
+	public void aWorkTargetOutranksTheSpeakerWhileItsGesturePlays(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		ServerPlayer keeper = ready(level, TestPlayers.survivor(helper));
+		BlockPos at = new BlockPos(3, 1, 3);
+		PactPerchBlockEntity perch = stolasPact(helper, keeper, at, level.getGameTime());
+		StolasEntity stolas = stolas(level, perch);
+		standBy(helper, keeper, at, Direction.SOUTH);
+		open(helper, keeper, perch);
+		helper.assertTrue(attends(stolas, keeper) && within(stolas.getYRot(), SOUTH, 1.0F), "Spoken to from the south, he attends his speaker: " + yaws(stolas));
+		BlockPos bed = helper.absolutePos(at.east(3));
+		int ticks = 16;
+		long now = level.getGameTime();
+		long time = level.getOverworldClockTime();
+		stolas.attendWork(bed, ticks, now);
+		stolas.think(level, time, now);
+		helper.assertTrue(stolas.attending() instanceof BlockPosTracker tracked && tracked.currentBlockPosition().equals(bed)
+				&& within(stolas.getYRot(), EAST, 1.0F) && stolas.listening(),
+				"While his work gesture plays he looks at the bed he works, east, over his speaker, still listening: " + yaws(stolas));
+		stolas.think(level, time, now + ticks - 1);
+		helper.assertTrue(stolas.attending() instanceof BlockPosTracker, "A tick before his gesture ends he still looks at his work: " + yaws(stolas));
+		stolas.think(level, time, now + ticks);
+		helper.assertTrue(attends(stolas, keeper) && within(stolas.getYRot(), SOUTH, 1.0F),
+				"His work gesture over, he turns back to his speaker: " + yaws(stolas));
+		keeper.closeContainer();
+		stolas.attendWork(bed, ticks, now + ticks);
+		stolas.think(level, time, now + ticks + 1);
+		helper.assertTrue(stolas.attending() instanceof BlockPosTracker tracked && tracked.currentBlockPosition().equals(bed)
+				&& within(stolas.getYRot(), EAST, 1.0F) && !stolas.listening(), "Nobody speaking, he still looks at his work while it plays: " + yaws(stolas));
+		stolas.think(level, time, now + 2L * ticks);
+		helper.assertTrue(stolas.attending() == null && within(stolas.getYRot(), stolas.yBodyRot, 1.0F),
+				"His work over and nobody speaking, he attends no one, his yaw on his body's facing: " + yaws(stolas));
 		helper.succeed();
 	}
 }

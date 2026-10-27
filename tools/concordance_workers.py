@@ -53,6 +53,7 @@ def rid(path):
 THINK_TICKS = 20
 GIVE_UP = 3
 RETRY_TICKS = 600
+LOOK_REACH = 32  # GC-02 (GC-P9): a worker's look target is dropped beyond this many blocks (WorkerEntity.LOOK_REACH)
 # The familiar's bond (Java: worker/Bond.java).
 BOND_MAX = 100
 BOND_GAIN = 1

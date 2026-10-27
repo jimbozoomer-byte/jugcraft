@@ -55,8 +55,10 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
+import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
@@ -79,7 +81,8 @@ import org.jspecify.annotations.Nullable;
  * <li><b>Acceptance by keyboard</b>: Accept without the compact's materials is refused as cannot_afford and spends nothing
  * ({@code jugcraft_pact_refused}); given them, Accept seals once and spends once ({@code jugcraft_pact_kept}).</li>
  * <li><b>His body</b>: the screen closed and the pact kept; Stolas on his perch drawn by GeckoLib ({@code jugcraft_pact_stolas}).</li>
- * <li>(D-06) <b>His body</b>: each loop as the server's state drives it and each gesture as the server fires it, frozen inside its telling pose ({@code jugcraft_stolas_*}); his real arrival and departure play their gestures. (D-09) A timed sequence through his refusal ({@code jugcraft_stolas_refuse_seq_1} to {@code _4}); every body shot is taken from his front, south of his perch (D-P133).</li>
+ * <li>(D-06) <b>His body</b>: each loop as the server's state drives it and each gesture as the server fires it, frozen inside its telling pose ({@code jugcraft_stolas_*}); his real arrival and departure play their gestures. (D-09) A timed sequence through his refusal ({@code jugcraft_stolas_refuse_seq_1} to {@code _4}); every body shot is taken from his front, which faces his speaker: north of his perch, where its holder spoke from (GC-02; D-P133 superseded).</li>
+ * <li>(GC-02) <b>He faces whoever speaks</b>: invited from the north he arrives facing north; the holder opens the perch from each side in turn and he turns to face them, frozen and photographed from the speaker's side ({@code jugcraft_pact_stolas_faces_*}, with {@code [pact-check] facing} lines of the drawn body yaw against the bearing); sent to this client anew, he is drawn facing north at once.</li>
  * <li>(D-06) <b>His cues</b>: his refusal and assent are fired by the server with their subtitles (seen only on a machine
  * with a sound device), each answer marked with a tick or a cross; Jade's readings of him and his perch, and their overlays
  * with Jade loaded ({@code jugcraft_pact_perch_jade}, {@code jugcraft_pact_stolas_jade}).</li>
@@ -93,6 +96,19 @@ import org.jspecify.annotations.Nullable;
  */
 public class ConcordancePactClientGameTests implements FabricClientGameTest {
 	private static final int WAIT = 200;
+	// GC-02 (GC-P8): his drawn body within this of the speaker's bearing (tools/concordance_pacts.py FACING_BODY_TOLERANCE).
+	private static final float FACING_BODY_TOLERANCE = 15.0F;
+
+	/** GC-02: a side of the perch the holder speaks from, his look at Stolas, Stolas's bearing to him, and its shot. */
+	private record Facing(String name, int dx, int dz, float look, float yaw, String shot) {
+	}
+
+	/** GC-02: two blocks east, south, west and north of the perch in turn (tools/concordance_pacts.py FACINGS), north last. */
+	private static final List<Facing> FACINGS = List.of(
+			new Facing("east", 1, 0, 90.0F, -90.0F, "jugcraft_pact_stolas_faces_east"),
+			new Facing("south", 0, 1, 180.0F, 0.0F, "jugcraft_pact_stolas_faces_south"),
+			new Facing("west", -1, 0, -90.0F, 90.0F, "jugcraft_pact_stolas_faces_west"),
+			new Facing("north", 0, -1, 0.0F, 180.0F, "jugcraft_pact_stolas_faces_north"));
 	private static final String STOLAS = "jugcraft:stolas";
 	private static final String PERCH = "jugcraft:pact_perch";
 	private static final String REGARD = "jugcraft:stolas_regard";
@@ -139,6 +155,7 @@ public class ConcordancePactClientGameTests implements FabricClientGameTest {
 				acceptance(context, server);
 				heard(context, server, hearing, perch); // D-06
 				body(context, server, connection, perch);
+				facing(context, server, perch); // GC-02
 				poses(context, server, perch); // D-06
 				jade(context, server, perch); // D-06
 				service(context, server, perch); // D-05
@@ -186,6 +203,11 @@ public class ConcordancePactClientGameTests implements FabricClientGameTest {
 				&& stolas(client, perch) != null, WAIT);
 		check(StolasEntity.Gesture.ARRIVE.animation.equals(context.computeOnClient(client -> gestured(client, perch))),
 				"Invited, he arrives at the perch with his gesture (D-06)");
+		// GC-02: invited from the north, he arrives facing north (the add-entity packet carries his head's yaw, which the
+		// client gives his body).
+		float arrived = context.computeOnClient(client -> bodyYaw(client, perch));
+		Jugcraft.LOGGER.info("[pact-check] facing on arrival: drawn body yaw {}, inviter's bearing {}", arrived, 180.0F);
+		check(Mth.degreesDifferenceAbs(arrived, 180.0F) <= FACING_BODY_TOLERANCE, "Invited from the north, he arrives facing north: " + arrived);
 		String shown = context.computeOnClient(client -> describe(PactClient.state()));
 		Jugcraft.LOGGER.info("[pact-check] invited: {}", shown);
 		check(context.computeOnClient(client -> PactClient.state().beats().size() == 3 && PactClient.state().notes().isEmpty()
@@ -290,7 +312,7 @@ public class ConcordancePactClientGameTests implements FabricClientGameTest {
 				client.gui.hud.toggle();
 			}
 		});
-		server.runCommand(String.format(Locale.ROOT, "tp @a %.1f %d %.1f 180 0", perch.getX() + 0.5, perch.getY(), perch.getZ() + 3.0));
+		standNorth(server, perch);
 		context.waitTicks(30);
 		connection.waitForChunksRender();
 		server.runCommand("tick freeze");
@@ -301,6 +323,84 @@ public class ConcordancePactClientGameTests implements FabricClientGameTest {
 				client.gui.hud.toggle();
 			}
 		});
+	}
+
+	/** GC-02 (D-P133 superseded): the camera for his body stands where his speaker spoke from, 2.5 blocks north of the perch, facing south. */
+	private static void standNorth(TestDedicatedServerContext server, BlockPos perch) {
+		server.runCommand(String.format(Locale.ROOT, "tp @a %.1f %d %.1f 0 0", perch.getX() + 0.5, perch.getY(), perch.getZ() - 2.0));
+	}
+
+	// GC-02
+	/**
+	 * Garden cohort GC-02 (GC-S6, GC-S23): he faces whoever speaks to him. The holder opens the perch from two blocks east,
+	 * south, west and north of it in turn (north last, the side every later picture of him is taken from); each time the
+	 * screen is closed once his drawn body yaw is within FACING_BODY_TOLERANCE of the holder's bearing, the world is frozen,
+	 * the drawn yaw logged and he is photographed from where his speaker stood. Then he is sent to this client anew, as to one
+	 * who starts watching him now, and is drawn facing north at once.
+	 */
+	private static void facing(ClientGameTestContext context, TestDedicatedServerContext server, BlockPos perch) {
+		boolean hidden = context.computeOnClient(client -> client.gui.hud.isHidden());
+		context.runOnClient(client -> {
+			if (!client.gui.hud.isHidden()) {
+				client.gui.hud.toggle();
+			}
+		});
+		try {
+			for (Facing side : FACINGS) {
+				server.runCommand(String.format(Locale.ROOT, "tp @a %.1f %d %.1f %.1f 0", perch.getX() + 0.5 + 2 * side.dx(), perch.getY(),
+						perch.getZ() + 0.5 + 2 * side.dz(), side.look()));
+				context.waitTicks(10);
+				open(context, server, perch);
+				context.waitFor(client -> Mth.degreesDifferenceAbs(bodyYaw(client, perch), side.yaw()) <= FACING_BODY_TOLERANCE, WAIT);
+				context.getInput().pressKey(InputConstants.KEY_ESCAPE);
+				context.waitForScreen(null);
+				context.getInput().lookAt(perch.above());
+				context.waitTicks(5);
+				server.runCommand("tick freeze");
+				try {
+					context.waitTicks(5);
+					float body = context.computeOnClient(client -> bodyYaw(client, perch));
+					float head = context.computeOnClient(client -> headYaw(client, perch));
+					Jugcraft.LOGGER.info("[pact-check] facing {}: speaker's bearing {}, drawn body yaw {}, head yaw {}", side.name(), side.yaw(), body, head);
+					check(Mth.degreesDifferenceAbs(body, side.yaw()) <= FACING_BODY_TOLERANCE,
+							"Spoken to from the " + side.name() + ", he is drawn facing his speaker: body " + body + " against " + side.yaw());
+					shot(context, side.shot());
+				} finally {
+					server.runCommand("tick unfreeze");
+				}
+			}
+			// A late watcher: the server stops and starts tracking him for this client, which is sent him anew (the add-entity
+			// packet, as anyone who starts watching him is), and must draw him facing north at once.
+			Entity before = context.computeOnClient(client -> stolas(client, perch));
+			server.runOnServer(minecraft -> {
+				ServerLevel level = minecraft.overworld();
+				StolasEntity him = presence(minecraft, perch);
+				level.getChunkSource().removeEntity(him);
+				level.getChunkSource().addEntity(him);
+			});
+			context.waitFor(client -> stolas(client, perch) instanceof LivingEntity anew && anew != before, WAIT);
+			float anew = context.computeOnClient(client -> bodyYaw(client, perch));
+			Jugcraft.LOGGER.info("[pact-check] facing seen anew (sent to this client again, as to a late watcher): drawn body yaw {}, bearing {}", anew, 180.0F);
+			check(Mth.degreesDifferenceAbs(anew, 180.0F) <= FACING_BODY_TOLERANCE, "One who starts watching him now sees him facing north: " + anew);
+			standNorth(server, perch);
+			context.waitTicks(10);
+		} finally {
+			context.runOnClient(client -> {
+				if (client.gui.hud.isHidden() != hidden) {
+					client.gui.hud.toggle();
+				}
+			});
+		}
+	}
+
+	// GC-02
+	private static float bodyYaw(Minecraft client, BlockPos perch) {
+		return stolas(client, perch) instanceof LivingEntity him ? him.yBodyRot : Float.NaN;
+	}
+
+	// GC-02
+	private static float headYaw(Minecraft client, BlockPos perch) {
+		return stolas(client, perch) instanceof LivingEntity him ? him.getYHeadRot() : Float.NaN;
 	}
 
 	/**
@@ -372,10 +472,11 @@ public class ConcordancePactClientGameTests implements FabricClientGameTest {
 
 	// D-06
 	/**
-	 * His body (D-06, D-S5), the pact kept and its holder before him, two and a half blocks south of his perch (he is
-	 * summoned facing south, so each pose shows his face: D-P133): each loop as the server's
-	 * state drives it (perched; listening while his perch's screen is open; hunched while the pact is suspended; standing
-	 * and waiting while the Concordance is off), and each gesture as the server fires it, caught inside its telling pose.
+	 * His body (D-06, D-S5), the pact kept and its holder before him, two and a half blocks north of his perch, where they
+	 * spoke from (he faces whoever speaks to him, so each pose shows his face: GC-02, D-P133 superseded): each loop as the
+	 * server's state drives it (perched; listening while his perch's screen is open; hunched while the pact is suspended;
+	 * standing and waiting while the Concordance is off), and each gesture as the server fires it, caught inside its telling
+	 * pose.
 	 * Each is checked on the client's own animation controller with the world frozen there (CinderTyrantClientGameTests'
 	 * pattern), and photographed with the HUD hidden. His gestures change nothing. His astir loop (the owner's
 	 * idle.flapping, while an offering is due) is not posed: making one due here would change the upkeep the later steps
@@ -613,7 +714,7 @@ public class ConcordancePactClientGameTests implements FabricClientGameTest {
 				}
 			});
 			try {
-				server.runCommand(String.format(Locale.ROOT, "tp @a %.1f %d %.1f 180 0", perch.getX() + 0.5, perch.getY(), perch.getZ() + 3.0));
+				standNorth(server, perch);
 				context.waitTicks(10);
 				context.getInput().lookAt(perch);
 				context.waitTicks(20);

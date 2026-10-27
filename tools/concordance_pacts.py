@@ -616,3 +616,13 @@ SEQUENCE_SHOTS = ["jugcraft_stolas_refuse_seq_1", "jugcraft_stolas_refuse_seq_2"
                   "jugcraft_stolas_refuse_seq_4"]
 # What ConcordancePactNetworkTests' second client photographs (D-09, D-S22).
 NETWORK_SHOTS = ["jugcraft_pact_peer_arrival", "jugcraft_pact_peer_refused", "jugcraft_pact_peer_departure"]
+# ------------------------------------------------------------------- garden cohort, GC-02: facing whoever speaks
+# ConcordancePactClientGameTests.facing: the holder speaks from two blocks east, south, west and north of the perch in
+# turn, north last (where every later picture of Stolas is taken from; D-P133 superseded), and Stolas's drawn body yaw is
+# held to the speaker's bearing (Minecraft's yaw: 0 south, 90 west, 180 north, -90 east). The server tests hold the head
+# to FACING_HEAD_TOLERANCE 40 ticks after a screen opens and the body to FACING_BODY_TOLERANCE 60 ticks after (GC-P8).
+FACINGS = {"east": (1, 0), "south": (0, 1), "west": (-1, 0), "north": (0, -1)}
+FACING_SHOTS = ["jugcraft_pact_stolas_faces_east", "jugcraft_pact_stolas_faces_south", "jugcraft_pact_stolas_faces_west",
+                "jugcraft_pact_stolas_faces_north"]
+FACING_HEAD_TOLERANCE = 10
+FACING_BODY_TOLERANCE = 15
