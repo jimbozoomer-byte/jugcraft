@@ -193,6 +193,20 @@ public class EncyclopediaScreen extends Screen {
         return "minecraft:book";
     }
 
+    /**
+     * Presses a contents chapter's tab as a click does. Tests use it: the tabs sit in the scrolling chapter list, inside
+     * which the test framework's search for a button by name does not look.
+     */
+    public void pressChapter(String id) {
+        for (var control : keys.entrySet()) {
+            if (control.getValue().equals("chapter:" + id) && control.getKey() instanceof Button button) {
+                button.onPress(null);
+                return;
+            }
+        }
+        throw new IllegalArgumentException("No chapter " + id + " on the contents spread");
+    }
+
     /** The chapters the contents spread lists, in order (tests read them). */
     public List<String> chapters() {
         return List.copyOf(chapters);

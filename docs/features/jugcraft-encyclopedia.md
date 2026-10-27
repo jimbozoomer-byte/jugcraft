@@ -197,5 +197,9 @@ A contributor reported the encyclopedia (B) as "bugged and broken in general". C
 Implemented with Claude Opus 5.5 (Claude Code) for the contributor, on the fork. Verification: new checks in
 `EncyclopediaClientGameTests` (every page has a chapter; Discover's first topic is its first step; Backspace from Keys
 returns to Expeditions) and `EncyclopediaRoutesClientGameTests` (B closes the guides). Local: a tree-sitter parse of the
-changed Java found no syntax errors; `python tools/check_mod_data.py` and `python scripts/check_repository.py` passed. CI:
-pending. Not run: a human clicking through the encyclopedia.
+changed Java found no syntax errors; `python tools/check_mod_data.py` and `python scripts/check_repository.py` passed.
+The first CI run ([40430018384](https://github.com/mmme123-spec/jugcraftfork/actions/runs/40430018384), on `e6a34dbd1`)
+failed in both encyclopedia client tests: the test framework's `clickScreenButton` does not look inside the scrolling
+chapter list, so it could not find "Technology" or "First steps". The tests now press a chapter with
+`EncyclopediaScreen.pressChapter`, which runs the same tab's action. CI on that change: pending. Not run: a human
+clicking through the encyclopedia.

@@ -117,7 +117,7 @@ public class EncyclopediaClientGameTests implements FabricClientGameTest {
                 context.waitTicks(2);
                 context.takeScreenshot("jugcraft_encyclopedia_discover_new");
         check(context.computeOnClient(client -> ((EncyclopediaScreen) client.gui.screen()).isHome()), "The guide should open on the simple contents spread");
-        context.clickScreenButton("ui.jugcraft.book.discover");
+        context.runOnClient(client -> ((EncyclopediaScreen) client.gui.screen()).pressChapter("discover"));
         context.waitTicks(3);
         check(context.computeOnClient(client -> !((EncyclopediaScreen) client.gui.screen()).isHome()), "First steps should open the topic directory");
 		List<String> unlisted = context.computeOnClient(client -> {
