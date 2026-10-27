@@ -56,7 +56,6 @@ public class HorsemanRider extends Mob {
 
 	public HorsemanRider(EntityType<? extends HorsemanRider> type, Level level) {
 		super(type, level);
-		setInvulnerable(true);
 		setNoGravity(true);
 		noPhysics = true;
 	}
