@@ -50,6 +50,7 @@
       "io.github.jimbozoomer.jugcraft.test.VehicleBayGameTests",
       "io.github.jimbozoomer.jugcraft.test.UnmaskingGameTests",
       "io.github.jimbozoomer.jugcraft.test.HerobrineGameTests",
+      "io.github.jimbozoomer.jugcraft.test.HerobrineMarksGameTests",
       "io.github.jimbozoomer.jugcraft.test.ServerLoadGameTests",
       "io.github.jimbozoomer.jugcraft.test.TrainGameTests",
       "io.github.jimbozoomer.jugcraft.test.SurvivalRecipeGameTests",

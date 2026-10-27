@@ -71,7 +71,9 @@ public final class JugcraftConfig {
 	 * every new world a valley near its start; elsewhere one cell in {@code adam_ondi_ahman.chance} (0 to 1) of every
 	 * {@code adam_ondi_ahman.spacing} blocks square (1024 to 16384) may hold one.</li>
 	 * <li>{@code herobrine.haunting} ({@code on} or {@code off}): whether Herobrine's encounters are scheduled (see
-	 * {@code creatures/herobrine/HerobrineEncounters}); operators' {@code /jugcraft herobrine} commands work either way.</li>
+	 * {@code creatures/herobrine/HerobrineEncounters}); operators' {@code /jugcraft herobrine} commands work either way.
+	 * {@code herobrine.marks} ({@code on} or {@code off}): whether a sighting may leave a mark in untouched wilderness
+	 * ({@code creatures/herobrine/HerobrineMarks}); marks already made can be undone either way.</li>
 	 * </ul>
 	 */
     public static final Map<String, String> TEXT_OPTIONS = Map.ofEntries(
@@ -95,7 +97,7 @@ public final class JugcraftConfig {
 			Map.entry("adam_ondi_ahman.start", "on"), Map.entry("adam_ondi_ahman.spacing", "3072"),
 			Map.entry("adam_ondi_ahman.chance", "0.5"),
 			Map.entry("herobrine.haunting", "on"), Map.entry("herobrine.event_last_day", "2026-11-03"),
-			Map.entry("herobrine.timezone", "America/New_York"));
+			Map.entry("herobrine.timezone", "America/New_York"), Map.entry("herobrine.marks", "on"));
 
 	private static final String FILE_NAME = "jugcraft.properties";
 	private static final Map<String, Boolean> ENABLED = new LinkedHashMap<>();
@@ -192,7 +194,7 @@ public final class JugcraftConfig {
 					+ " town.protection on or off; raiders.raids on or off, raiders.grace_days and raiders.interval_days in game days,"
 					+ " raiders.walkers and raiders.blimps on or off; adam_ondi_ahman.start on or off: a valley near each new world's start;"
 					+ " adam_ondi_ahman.spacing in blocks and adam_ondi_ahman.chance from 0 to 1: the rare valleys elsewhere;"
-					+ " herobrine.haunting on or off: Herobrine's scheduled encounters).");
+					+ " herobrine.haunting on or off: Herobrine's scheduled encounters; herobrine.marks on or off: the marks he leaves).");
 		} catch (IOException e) {
 			Jugcraft.LOGGER.warn("Could not write {}", path, e);
 		}

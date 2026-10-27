@@ -67,6 +67,44 @@ Once a second, with `herobrine.haunting=on`, the hook calls `due(server, candida
 
 The owner's upload is the default player's skin with white eyes: its palette is the default skin's colour for colour. The repository's licence policy forbids copying or recolouring game textures, so no skin was copied. `HerobrineRenderer` draws the game's own default player texture (`DefaultPlayerSkin.getDefaultTexture()`), read from each player's installed game at run time. Over it goes `textures/entity/herobrine_eyes.png`, drawn by `tools/herobrine.py`: clear except the four eye pixels, white and full-bright, so the eyes glow in the dark. The result looks like the upload. `tools/check_mod_data.py` fails if a `herobrine.png` skin is ever added.
 
+### Marks he leaves (part 2)
+
+After a distant encounter that his player really saw (any ending but losing the player or being removed), there is a 35% chance he leaves a mark where he stood. The kind suits the place:
+
+- **Underground:** a straight 2×2 tunnel dug away from the player.
+- **On sand:** a little sandstone pyramid with a chiseled cap.
+- **Under trees:** a leafless grove, where every leaf the world grew within 8 blocks is taken and the trunks stand bare.
+- **Open ground:** a redstone-torch shrine (a 3×3 mossy base, a netherrack heart and four redstone torches), a little mossy pyramid (5×5, 3×3 and 1), or a tunnel into a hillside.
+- **Otherwise:** a lone sign.
+
+Every mark carries a waxed sign facing the player, with a cryptic line: "YOU TOOK THE LONG WAY", "I WAS HERE FIRST", "COUNT THE WINDOWS", "STILL HERE", "THE WATER REMEMBERS" or "NOT YET". A sighting several players shared leaves "YOU BROUGHT SOMEONE". There is no fire, and nothing valuable is placed: no gold, no loot.
+
+**Safeguards (`HerobrineMarkPlans`):**
+
+- **Wild land only.** A mark is planned only where the site and 6 blocks round it are untouched wilderness, because unclaimed does not mean untouched:
+  - every chunk is already loaded and unclaimed;
+  - no column is in the town;
+  - every block is natural ground, rock, ore, a plant the world grew, or water;
+  - there is no block entity, so no chest, machine, sign or spawner.
+
+  A plank, a path, farmland, a placed leaf or a chest nearby keeps him away.
+- **Building only adds.** Built marks go only into air or plants (never fluid), and each block rests on solid ground or on the mark itself.
+- **The grove** takes only leaves that are not `persistent` (vanilla marks every leaf a player places persistent), and never one beside water. Logs stay.
+- **The tunnel** digs only natural stone and soil. It stops before any ore, any block touching a fluid, a roof of loose sand or gravel, or a missing floor. It runs 6–20 blocks, with a redstone torch every 5 blocks and a sign at the end.
+- **Bounded work.** Building is spread over ticks: 8 blocks a tick across all marks, at most 2 marks building, and at most 8 sites weighed per mark.
+- **Rechecked before every block.** Just before each block changes it is checked again:
+  - an unloaded chunk, or someone standing in the way, waits (up to 200 ticks);
+  - land that became claimed or town, a block that is no longer what was planned on, or a block entity, stops the mark there.
+
+  A mark never overwrites what a player did meanwhile.
+
+**Records and undo (`HerobrineMarks`, saved with the world):**
+
+- **Records.** Each mark has an id, its kind, where he stood and when, and every block it changed (before and after).
+- **Undo.** `/jugcraft herobrine marks undo <id>` puts back, newest first, every block still as the mark left it. A block a player changed since stays as they left it and is forgotten. A block in an unloaded chunk, or where someone stands, waits in the record for a later undo.
+- **Listing and forcing.** `/jugcraft herobrine marks` lists them. `/jugcraft herobrine mark <player> <kind>` leaves a mark of a given kind about 6 blocks in front of a player, for testing.
+- **Switch.** `herobrine.marks=off` stops new marks; undo works either way.
+
 ## Tests
 
 Server game tests (`HerobrineGameTests`, in the 48-block arena with padding) cover:
@@ -80,27 +118,31 @@ Server game tests (`HerobrineGameTests`, in the 48-block arena with padding) cov
 - a sighting spot is ahead of the player, at the right distance, on solid ground;
 - a walled-in player gets `NO_VISIBLE_SPOT` and nothing is placed;
 - he is never saved, and players under a minute in are not active;
+- scattered glimpses (6 ticks looking, 3 away, three times) are not a sighting, and a steady look is;
+- a line of sight into unloaded land is refused and loads nothing;
+- a newcomer's natural distant encounter is a watcher, and seeing it introduces them;
 - a follower walks the player's own path at its distance, and stops when they stop;
 - a second look finds him gone or moved;
 - a tunnel encounter stands at the far end of a tunnel behind the player;
 - a shared sighting credits both players who saw him, and not the one facing away.
+
+Mark game tests (`HerobrineMarksGameTests`, on a raised platform so each margin stays in the arena) cover:
+
+- a shrine is built with its sign's message and undone cleanly, with no record left;
+- undo leaves a block a player changed;
+- planks nearby, a claim, or leaves a player placed keep a mark away;
+- a grove strips a wild tree's leaves and leaves its trunk;
+- a tunnel digs 2×2 through stone, stops short of ore, and fills back in on undo.
 
 Not yet verified: a real compile and CI run, rendering in a client (the eyes layer), and real two-client play. The local structure parser checks syntax only.
 
 ## Still to build (owner-approved plan, not implemented)
 
 - **Encounter refinements:** cave entrances as watcher places, and testing the variants in a real client: whether the footsteps are audible, and whether the eyes show down a dark tunnel.
-- **World clues (part 2):**
-  - leafless natural groves, straight 2×2 tunnels, sand and mossy pyramids, redstone-torch shrines, and cryptic signs ("YOU TOOK THE LONG WAY", "I WAS HERE FIRST", "COUNT THE WINDOWS", "YOU BROUGHT SOMEONE");
-  - some linked into short investigations: a sighting across a river leads to a leafless grove, then a torch-lined tunnel, then a sign pointing to a shoreline pyramid.
+- **Linked investigations:** a sighting across a river leads to a leafless grove, then a torch-lined tunnel, then a sign pointing to a shoreline pyramid. The marks exist; linking them waits on the shoreline pyramids.
 - **Massive brick pyramids near shorelines (part 3):**
   - explorable authored interiors with modest cosmetic, decor or journal rewards, and no farmable containers;
   - fully checked reserved wilderness sites, built incrementally with revalidation.
-- **Terrain safeguards:**
-  - unclaimed does not mean untouched;
-  - protect claims, towns, unclaimed builds, player-placed vegetation where tracked, containers, machines, valuable blocks, fluids, bedrock and players;
-  - bounded work in already-loaded chunks only;
-  - event IDs and reversible placement records, where undo only touches blocks still as placed.
 - **Jugcraft connections:**
   - a rare Cursed Mirror reflection, through a narrow seam with the Cursed Mirror (https://github.com/jimbozoomer-byte/jugcraft/pull/498);
   - guards briefly looking toward him without targeting or firing;

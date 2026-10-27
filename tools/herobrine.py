@@ -25,7 +25,7 @@ IDLE_TICKS = 1800
 CLOSE_DARKNESS_TICKS = 60
 # The server option (config/jugcraft.properties) that switches the scheduled encounters off; commands work either way.
 OPTIONS = {"herobrine.haunting": "on", "herobrine.event_last_day": "2026-11-03",
-           "herobrine.timezone": "America/New_York"}
+           "herobrine.timezone": "America/New_York", "herobrine.marks": "on"}
 # His eyes: the two pixels of each eye on the face (the head's front is u 8-15, v 8-15 in the player skin layout).
 EYES = ((9, 12), (10, 12), (13, 12), (14, 12))
 
@@ -34,6 +34,17 @@ FAILURES = {
     "target_unsafe": "%s is not calm enough for a close encounter",
     "already_haunted": "Herobrine is already out for %s",
     "no_visible_spot": "Herobrine found nowhere %s could see him",
+}
+
+# /jugcraft herobrine marks|mark: listing, undoing and forcing the marks he leaves (creatures/herobrine/HerobrineMarks).
+MARK_MESSAGES = {
+    "none": "Herobrine has left no marks",
+    "entry": "%s: %s at %s %s %s, %s blocks changed",
+    "unknown": "No mark %s",
+    "undone": "Mark %s taken back: %s blocks restored, %s left as players changed them, %s waiting on unloaded land",
+    "unknown_kind": "No such mark: %s (shrine, mossy_pyramid, sand_pyramid, sign, grove or tunnel)",
+    "no_site": "Nowhere near is wild enough for a %s",
+    "left": "Herobrine is leaving a %s (mark %s)",
 }
 
 
@@ -48,6 +59,8 @@ def write_all(lang):
     lang[f"commands.{MOD}.herobrine.unknown_variant"] = "No such encounter: %s (watcher, follower, second_look or tunnel)"
     for failure, text in FAILURES.items():
         lang[f"commands.{MOD}.herobrine.failed.{failure}"] = text
+    for key, text in MARK_MESSAGES.items():
+        lang[f"commands.{MOD}.herobrine.marks.{key}"] = text
 
 
 def eyes_texture():
