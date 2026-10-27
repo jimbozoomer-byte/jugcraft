@@ -86,6 +86,10 @@ SOUL_FIRE = Material((8, 30, 44), (12, 48, 68), (18, 92, 132), (38, 152, 204), (
 # icon's outline darkened from 303f12 (53 luma) to 263410 (44) so it stays at most 45 (ITEM_ICONS.md, rule 4); 303f12 is
 # kept as the lit-side outline. check_concordance holds its four tones to the metal's.
 THALLITE = Material((38, 52, 16), (48, 63, 18), (78, 97, 29), (124, 138, 55), (170, 176, 83), (219, 221, 133))
+# the Storm Roc's loot: his slate feathers with their storm-blue sheen, and the storm's light
+ROC_SLATE = Material((14, 16, 22), (30, 34, 44), (52, 60, 76), (78, 90, 110), (112, 126, 150), (162, 176, 200), shine=False)
+STORM_LIGHT = Material((14, 28, 76), (26, 52, 130), (40, 84, 196), (72, 132, 240), (132, 186, 255), (212, 234, 255),
+                       shine=False)
 PAPER = Material((80, 64, 40), (124, 104, 74), (170, 152, 116), (214, 200, 166), (236, 226, 198), (250, 246, 230),
                  shine=False)
 # The Greenwardens' garden (roadmap step 14; tools/item_icons/: the four crops, Verdant Chaff and the living devices).
@@ -143,6 +147,8 @@ MATERIALS = {
     "old_bone": OLD_BONE, "soul_fire": SOUL_FIRE,
     # the Earth school's metal (Concordance Chunk C)
     "thallite": THALLITE,
+    # the Storm Roc's loot
+    "roc_slate": ROC_SLATE, "storm_light": STORM_LIGHT,
 }
 
 # Materials meant to be vanilla's own metal: the distance test against copper, iron and gold is skipped for them.

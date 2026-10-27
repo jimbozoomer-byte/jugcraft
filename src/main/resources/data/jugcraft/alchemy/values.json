@@ -33677,6 +33677,11 @@
       "denominator": 1,
       "source": "recipe jugcraft:roasted_walnuts"
     },
+    "jugcraft:roc_feather": {
+      "numerator": 192,
+      "denominator": 1,
+      "source": "local roc feather accounting"
+    },
     "jugcraft:rock_candy": {
       "numerator": 1,
       "denominator": 1,
@@ -33721,6 +33726,11 @@
       "numerator": 80,
       "denominator": 1,
       "source": "recipe jugcraft:rocking_chair"
+    },
+    "jugcraft:rocs_crest": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
     },
     "jugcraft:roller_door": {
       "numerator": 256,
@@ -36568,9 +36578,9 @@
       "source": "recipe jugcraft:throttle"
     },
     "jugcraft:thunder_vane": {
-      "numerator": 1952,
+      "numerator": 1856,
       "denominator": 1,
-      "source": "recipe jugcraft:thunder_vane"
+      "source": "recipe jugcraft:thunder_vane_from_roc_feathers"
     },
     "jugcraft:thunderpipe": {
       "numerator": 533,
@@ -37576,6 +37586,11 @@
       "numerator": 3509,
       "denominator": 4,
       "source": "recipe jugcraft:waystation_shotgun"
+    },
+    "jugcraft:weather_vane_lens": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
     },
     "jugcraft:web_drape": {
       "numerator": 48,

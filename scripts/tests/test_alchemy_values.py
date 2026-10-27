@@ -75,6 +75,9 @@ class AlchemyValueTests(unittest.TestCase):
         for stock in ('plastic_pellets','pvc_resin','hdpe_pellets'):
             self.assertGreaterEqual(value('jugcraft:'+stock),2*value('jugcraft:plastic_sheet'))
 
+    def test_boss_drops_that_break_down_do_not_create_essence(self):
+        self.assertGreaterEqual(value('jugcraft:roc_feather'),4*value('minecraft:feather'))
+
     def test_aged_wood_has_consistent_shaped_values(self):
         for wood in ('pine','maple'):
             plank=value('jugcraft:aged_'+wood+'_planks')

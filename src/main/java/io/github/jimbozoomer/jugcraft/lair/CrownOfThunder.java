@@ -45,6 +45,16 @@ public final class CrownOfThunder {
 	public static final double WAIT_X = 32.5;
 	public static final double WAIT_Y = 35.0;
 	public static final double WAIT_Z = 8.5;
+	/** Where the Roc comes down on the summit as he wakes, south of the north rod (tools/storm_roc.py WOKE). */
+	public static final double WOKE_X = 32.5;
+	public static final double WOKE_Z = 24.5;
+	/**
+	 * The Grey Mist the Roc leaves when he falls, at the foot of his nest's crag: three columns, three high from the
+	 * summit's floor (tools/storm_roc.py FALL_EXIT).
+	 */
+	public static final int FALL_EXIT_WEST = 31;
+	public static final int FALL_EXIT_EAST = 33;
+	public static final int FALL_EXIT_Z = 15;
 	/** The Grey Mist in its arch on the terrace's south edge, the way home: three columns, three high from the terrace. */
 	public static final int EXIT_WEST = 31;
 	public static final int EXIT_EAST = 33;
@@ -140,6 +150,17 @@ public final class CrownOfThunder {
 			}
 		}
 		return null;
+	}
+
+	/** The cells of the Grey Mist the Roc leaves when he falls, at the foot of his nest's crag. */
+	public static List<BlockPos> fallExitCells() {
+		List<BlockPos> out = new ArrayList<>();
+		for (int y = STAND; y < STAND + 3; y++) {
+			for (int x = FALL_EXIT_WEST; x <= FALL_EXIT_EAST; x++) {
+				out.add(new BlockPos(x, y, FALL_EXIT_Z));
+			}
+		}
+		return out;
 	}
 
 	/** The cells of the Grey Mist on the terrace. */

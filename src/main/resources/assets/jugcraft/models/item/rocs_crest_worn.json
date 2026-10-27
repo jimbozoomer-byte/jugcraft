@@ -1,0 +1,418 @@
+{
+  "textures": {
+    "particle": "jugcraft:item/rocs_crest_feathers",
+    "feathers": "jugcraft:item/rocs_crest_feathers"
+  },
+  "elements": [
+    {
+      "from": [
+        7.0,
+        14.4,
+        3.0
+      ],
+      "to": [
+        9.0,
+        21.0,
+        15.0
+      ],
+      "faces": {
+        "north": {
+          "uv": [
+            0,
+            0,
+            2.0,
+            6.6
+          ],
+          "texture": "#feathers"
+        },
+        "south": {
+          "uv": [
+            0,
+            0,
+            2.0,
+            6.6
+          ],
+          "texture": "#feathers"
+        },
+        "east": {
+          "uv": [
+            0,
+            0,
+            12.0,
+            6.6
+          ],
+          "texture": "#feathers"
+        },
+        "west": {
+          "uv": [
+            0,
+            0,
+            12.0,
+            6.6
+          ],
+          "texture": "#feathers"
+        },
+        "up": {
+          "uv": [
+            0,
+            0,
+            2.0,
+            12.0
+          ],
+          "texture": "#feathers"
+        },
+        "down": {
+          "uv": [
+            0,
+            0,
+            2.0,
+            12.0
+          ],
+          "texture": "#feathers"
+        }
+      }
+    },
+    {
+      "from": [
+        4.0,
+        14.4,
+        5.0
+      ],
+      "to": [
+        6.0,
+        19.0,
+        15.0
+      ],
+      "faces": {
+        "north": {
+          "uv": [
+            0,
+            0,
+            2.0,
+            4.6
+          ],
+          "texture": "#feathers"
+        },
+        "south": {
+          "uv": [
+            0,
+            0,
+            2.0,
+            4.6
+          ],
+          "texture": "#feathers"
+        },
+        "east": {
+          "uv": [
+            0,
+            0,
+            10.0,
+            4.6
+          ],
+          "texture": "#feathers"
+        },
+        "west": {
+          "uv": [
+            0,
+            0,
+            10.0,
+            4.6
+          ],
+          "texture": "#feathers"
+        },
+        "up": {
+          "uv": [
+            0,
+            0,
+            2.0,
+            10.0
+          ],
+          "texture": "#feathers"
+        },
+        "down": {
+          "uv": [
+            0,
+            0,
+            2.0,
+            10.0
+          ],
+          "texture": "#feathers"
+        }
+      }
+    },
+    {
+      "from": [
+        10.0,
+        14.4,
+        5.0
+      ],
+      "to": [
+        12.0,
+        19.0,
+        15.0
+      ],
+      "faces": {
+        "north": {
+          "uv": [
+            0,
+            0,
+            2.0,
+            4.6
+          ],
+          "texture": "#feathers"
+        },
+        "south": {
+          "uv": [
+            0,
+            0,
+            2.0,
+            4.6
+          ],
+          "texture": "#feathers"
+        },
+        "east": {
+          "uv": [
+            0,
+            0,
+            10.0,
+            4.6
+          ],
+          "texture": "#feathers"
+        },
+        "west": {
+          "uv": [
+            0,
+            0,
+            10.0,
+            4.6
+          ],
+          "texture": "#feathers"
+        },
+        "up": {
+          "uv": [
+            0,
+            0,
+            2.0,
+            10.0
+          ],
+          "texture": "#feathers"
+        },
+        "down": {
+          "uv": [
+            0,
+            0,
+            2.0,
+            10.0
+          ],
+          "texture": "#feathers"
+        }
+      }
+    },
+    {
+      "from": [
+        5.0,
+        9.0,
+        14.4
+      ],
+      "to": [
+        11.0,
+        15.0,
+        15.6
+      ],
+      "faces": {
+        "north": {
+          "uv": [
+            0,
+            0,
+            6.0,
+            6.0
+          ],
+          "texture": "#feathers"
+        },
+        "south": {
+          "uv": [
+            0,
+            0,
+            6.0,
+            6.0
+          ],
+          "texture": "#feathers"
+        },
+        "east": {
+          "uv": [
+            0,
+            0,
+            1.2,
+            6.0
+          ],
+          "texture": "#feathers"
+        },
+        "west": {
+          "uv": [
+            0,
+            0,
+            1.2,
+            6.0
+          ],
+          "texture": "#feathers"
+        },
+        "up": {
+          "uv": [
+            0,
+            0,
+            6.0,
+            1.2
+          ],
+          "texture": "#feathers"
+        },
+        "down": {
+          "uv": [
+            0,
+            0,
+            6.0,
+            1.2
+          ],
+          "texture": "#feathers"
+        }
+      }
+    }
+  ],
+  "display": {
+    "head": {
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "translation": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        1,
+        1,
+        1
+      ]
+    },
+    "gui": {
+      "rotation": [
+        30,
+        225,
+        0
+      ],
+      "translation": [
+        0,
+        -6,
+        0
+      ],
+      "scale": [
+        0.55,
+        0.55,
+        0.55
+      ]
+    },
+    "fixed": {
+      "rotation": [
+        0,
+        180,
+        0
+      ],
+      "translation": [
+        0,
+        -6,
+        0
+      ],
+      "scale": [
+        0.55,
+        0.55,
+        0.55
+      ]
+    },
+    "ground": {
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "translation": [
+        0,
+        -3.5999999999999996,
+        0
+      ],
+      "scale": [
+        0.35,
+        0.35,
+        0.35
+      ]
+    },
+    "thirdperson_righthand": {
+      "rotation": [
+        75,
+        45,
+        0
+      ],
+      "translation": [
+        0,
+        2.5,
+        0
+      ],
+      "scale": [
+        0.35,
+        0.35,
+        0.35
+      ]
+    },
+    "thirdperson_lefthand": {
+      "rotation": [
+        75,
+        45,
+        0
+      ],
+      "translation": [
+        0,
+        2.5,
+        0
+      ],
+      "scale": [
+        0.35,
+        0.35,
+        0.35
+      ]
+    },
+    "firstperson_righthand": {
+      "rotation": [
+        0,
+        45,
+        0
+      ],
+      "translation": [
+        0,
+        -3.5999999999999996,
+        0
+      ],
+      "scale": [
+        0.4,
+        0.4,
+        0.4
+      ]
+    },
+    "firstperson_lefthand": {
+      "rotation": [
+        0,
+        225,
+        0
+      ],
+      "translation": [
+        0,
+        -3.5999999999999996,
+        0
+      ],
+      "scale": [
+        0.4,
+        0.4,
+        0.4
+      ]
+    }
+  }
+}

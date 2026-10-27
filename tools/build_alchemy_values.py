@@ -62,6 +62,10 @@ def build(jar):
     # A consumed husk replaces one brown dye; keep the established dye value.
     values['jugcraft:walnut_husk'] = Fraction(64)
     origins['jugcraft:walnut_husk'] = 'local walnut dye accounting'
+    # A Roc Feather breaks into four feathers. It must cost what they do, or forming
+    # one and breaking it would create essence.
+    values['jugcraft:roc_feather'] = 4*values['minecraft:feather']
+    origins['jugcraft:roc_feather'] = 'local roc feather accounting'
     # Selected chemistry/production integration: include returned bottles and
     # account for the existing presses' two-sheets-per-stock yield. Fluid processing
     # has no general derivation below, so record these explicit local budgets.

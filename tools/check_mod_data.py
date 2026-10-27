@@ -13892,6 +13892,357 @@ def check_cydonian_sentinel():
 
 
 
+def check_storm_roc():
+    """The Storm Roc (tools/storm_roc.py, docs/features/storm-roc.md): every number the Java uses is the table's; his
+    attacks are the table's, and his fight can be played (the Squall before the Eye; his dives come no less often as he
+    weakens, and a whole dive, grounding and all, fits between two; no flight of his outlasts FLIGHT_MAX; each tell is
+    long enough to read; the Wing Buffet reaches whoever it is used on; his marks' rings never overlap); where his fight
+    looks for the Crown's parts (CrownOfThunder.java) is where tools/crown_of_thunder.py builds them: he waits in his nest
+    with room for his body, comes down to open floor with room for it, every place he dives from is open air within his
+    leash, and the Grey Mist he leaves opens on open floor at the foot of his crag; his rule is fair: whichever rod
+    charges and wherever he dives from, from every open cell of the summit a sprinting player reaches a place that puts
+    the charged rod between him and themselves before his lane holds; the grounding doubles as the rule says and lightning
+    never harms him; every entity is registered, named and drawn; each GeckoLib body has its model, clips (every clip the
+    Java names) and sheet, its box-UV regions inside the sheet without overlapping, its sheet and glowmask TEXTURE_SCALE
+    times the size the model declares and cut out; no bone is animated by both his controllers; his loot table is the
+    table's and his trophies are Arms VII's; his recipes (none of which makes Roc Feathers), tags and advancement are
+    there; the Weather-Vane Lens is held in the offhand and looked at on the server; his cry is the owner's eagle's; every
+    message he sends has its words; and nothing of his loads a chunk or leaves its dimension."""
+    import heapq
+    import math
+    import arms_variants
+    import crown_of_thunder as ct
+    import storm_roc as sr
+    import storm_roc_models as rm
+    folder = JAVA_ROOT / "lair" / "roc"
+    sources = {path.stem: path.read_text(encoding="utf-8") for path in folder.glob("*.java")}
+    if not sources:
+        err("lair/roc: no Java")
+        return
+    for cls, table in (("StormRocEntity", sr.ROC), ("GaleFledglingEntity", sr.FLEDGLING),
+                       ("WeatherVaneLens", {"EVERY": sr.LENS_EVERY})):
+        for name, value in table.items():
+            if not java_number(sources.get(cls, ""), name, value):
+                err(f"{cls}.{name} is not tools/storm_roc.py's {value}")
+    boss = sources.get("StormRocEntity", "")
+    for attack, (windup, active, recovery, cooldown, near, far, gathering, squall) in sr.ATTACKS.items():
+        expected = (f"{attack}({windup}, {active}, {recovery}, {cooldown}, {float(near)}, {float(far)}, "
+                    f"{str(gathering).lower()}, {str(squall).lower()})")
+        if expected not in boss:
+            err(f"StormRocEntity.Attack: expected {expected}")
+    for call in ("LairBosses.damage(base)", "LairBosses.partyScale(players, PARTY_STEP, PARTY_MAX)"):
+        if call not in boss:
+            err(f"StormRocEntity does not scale as every lair boss does ({call})")
+    s = sr.ROC
+    a = {name: dict(zip(("windup", "active", "recovery", "cooldown", "near", "far"), row)) for name, row in sr.ATTACKS.items()}
+    if not 0.0 < s["EYE_AT"] < s["SQUALL_AT"] < 1.0:
+        err("tools/storm_roc.py: the Squall Rises, then the Eye of the Storm (0 < EYE_AT < SQUALL_AT < 1)")
+    if not s["DIVE_EVERY"] >= s["DIVE_EVERY_SQUALL"] >= s["DIVE_EVERY_EYE"]:
+        err("tools/storm_roc.py: his dives come no less often as the fight goes on")
+    # The longest dive: from where he dives from, across the summit to its far side, inside its edge.
+    longest = math.ceil((s["PERCH_OUT"] + ct.SUMMIT) / s["DIVE_SPEED"])
+    if s["CHARGE_TICKS"] + s["LANE_TICKS"] + longest > s["FLIGHT_MAX"]:
+        err(f"tools/storm_roc.py: a dive's climb, lane and flight ({s['CHARGE_TICKS']} + {s['LANE_TICKS']} + {longest}) "
+            f"must not outlast FLIGHT_MAX ({s['FLIGHT_MAX']})")
+    # His dive clock runs only while he is on foot and between attacks, so between two dives he always has time for his
+    # longest attack.
+    if min(s["DIVE_FIRST"], s["DIVE_EVERY_EYE"]) <= max(row["windup"] + row["active"] + row["recovery"] for row in a.values()):
+        err("tools/storm_roc.py: between two dives he must have time for his longest attack")
+    for name in sr.ATTACKS:
+        if not 12 <= a[name]["windup"] <= 60:
+            err(f"tools/storm_roc.py: the {name}'s wind-up ({a[name]['windup']} ticks) must be long enough to read and no "
+                "longer than an arena action's (0.6 to 3 seconds)")
+    if a["WING_BUFFET"]["far"] > s["BUFFET_DEPTH"]:
+        err("tools/storm_roc.py: the Wing Buffet reaches whoever it is used on (far <= BUFFET_DEPTH)")
+    if s["MARK_APART"] < 2 * s["MARK_RADIUS"] or s["EYE_MARKS"] <= s["MARKS"]:
+        err("tools/storm_roc.py: his marks' rings never overlap, and the Eye marks more of them")
+    if not s["SQUALL_HEIGHT"] > s["PERCH_UP"] / 2 or s["SQUALL_CIRCLE"] > ct.SUMMIT:
+        err("tools/storm_roc.py: in the Squall he circles high over the summit, inside its edge")
+    if sr.ATTACKS["FLEDGLING_CALL"][3] < 200 or s["FLEDGLING_CAP"] < 1:
+        err("tools/storm_roc.py: his fledglings come at most every 10 seconds, and he has some")
+    # Where his fight looks for the Crown's parts is where tools/crown_of_thunder.py builds them.
+    crown = re.sub(r"\s+", " ", (JAVA_ROOT / "lair" / "CrownOfThunder.java").read_text(encoding="utf-8"))
+    for name, value in (("WOKE_X", float(sr.WOKE[0])), ("WOKE_Z", float(sr.WOKE[1])), ("FALL_EXIT_WEST", sr.FALL_EXIT["x"][0]),
+                        ("FALL_EXIT_EAST", sr.FALL_EXIT["x"][1]), ("FALL_EXIT_Z", sr.FALL_EXIT["z"])):
+        if not java_number(crown, name, value):
+            err(f"CrownOfThunder.{name} is not tools/storm_roc.py's {value}")
+    if not re.search(r"fallExitCells\(\) \{ List<BlockPos> out = new ArrayList<>\(\); for \(int y = STAND; y < STAND \+ 3; y\+\+\)", crown):
+        err("CrownOfThunder.fallExitCells: the Grey Mist he leaves is three high, from the summit's floor (STAND)")
+    blocks = ct.build()
+    name = lambda pos: blocks[pos][0] if pos in blocks else None
+    passable = {None, "minecraft:light"}
+    free = lambda pos: name(pos) in passable
+    wx, wy, wz, _ = ct.WAIT
+    nest = [(x, z) for x in range(math.floor(wx) - 1, math.floor(wx) + 2) for z in range(math.floor(wz) - 1, math.floor(wz) + 2)]
+    if any(name((x, int(wy) - 1, z)) != "jugcraft:roc_nest" or not all(free((x, int(wy) + dy, z)) for dy in range(3)) for x, z in nest):
+        err(f"His nest at {ct.WAIT[:3]} is not woven branches under him with room for his body, three high")
+    woke = [(x, z) for x in range(math.floor(sr.WOKE[0]) - 1, math.floor(sr.WOKE[0]) + 2)
+            for z in range(math.floor(sr.WOKE[1]) - 1, math.floor(sr.WOKE[1]) + 2)]
+    if any(not ct.in_summit(x, z) or free((x, ct.PAVE, z)) or not all(free((x, ct.STAND + dy, z)) for dy in range(3)) for x, z in woke):
+        err(f"Where he comes down, {sr.WOKE}, is not open summit floor with room for his body, three high")
+    for x in range(sr.FALL_EXIT["x"][0], sr.FALL_EXIT["x"][1] + 1):
+        z = sr.FALL_EXIT["z"]
+        if not ct.in_summit(x, z) or free((x, ct.PAVE, z)) or not all(free((x, ct.STAND + dy, z)) for dy in range(3)):
+            err(f"The Grey Mist he leaves at ({x}, {z}) would not stand on open summit floor")
+    cx, cz = ct.CENTRE
+
+    def perch(rod, offset):
+        rx, rz = ct.RODS[rod]
+        bearing = math.atan2(rx + 0.5 - cx, -(rz + 0.5 - cz)) + math.radians(offset)
+        return cx + math.sin(bearing) * s["PERCH_OUT"], cz - math.cos(bearing) * s["PERCH_OUT"]
+
+    offsets = [o for o in range(-int(s["PERCH_SPREAD"]), int(s["PERCH_SPREAD"]) + 1, 10)]
+    for rod in ct.RODS:
+        for offset in offsets:
+            px, pz = perch(rod, offset)
+            if math.hypot(px - cx, pz - cz) > s["LEASH"]:
+                err(f"Where he dives from for the {rod} rod ({offset} degrees round) lies beyond his leash")
+            y = ct.STAND + int(s["PERCH_UP"])
+            if any(not free((math.floor(px) + dx, y + dy, math.floor(pz) + dz)) for dx in (-1, 0, 1) for dz in (-1, 0, 1) for dy in range(3)):
+                err(f"Where he dives from for the {rod} rod ({offset} degrees round) is not open air")
+    # His rule is fair. The summit's open cells, and a walk between them (eight ways, never through a boulder or a
+    # plinth's corner).
+    cells = {(x, z) for x in range(ct.SIZE[0]) for z in range(ct.SIZE[2]) if ct.in_summit(x, z) and not free((x, ct.PAVE, z))
+             and free((x, ct.STAND, z)) and free((x, ct.STAND + 1, z))}
+    reach = s["SPRINT"] * (s["CHARGE_TICKS"] + s["LANE_TICKS"]) / 20.0 * 5.0 / 6.0
+    span = ct.SUMMIT - 2.0   # Java's LAND_IN: he lands this far inside the edge
+
+    def inside(x, z, margin):
+        dx, dz = x - cx, z - cz
+        d = math.hypot(dx, dz)
+        most = ct.SUMMIT - margin
+        return (cx + dx * most / d, cz + dz * most / d) if d > most else (x, z)
+
+    def grounds(px, pz, gx, gz, rx, rz):
+        """Java's lane through (gx, gz) from (px, pz), grounding at the rod before the player: the rod between them."""
+        tx, tz = inside(gx, gz, 1.0)
+        dx, dz = tx - px, tz - pz
+        length = math.hypot(dx, dz)
+        if length < 1e-6:
+            return False
+        ux, uz = dx / length, dz / length
+        sx, sz = rx - px, rz - pz
+        along = sx * ux + sz * uz
+        off = abs(sx * uz - sz * ux)
+        return 0.0 < along <= length and off <= s["GROUND_RADIUS"]
+
+    for rod, (rx0, rz0) in ct.RODS.items():
+        rx, rz = rx0 + 0.5, rz0 + 0.5
+        for offset in offsets:
+            px, pz = perch(rod, offset)
+            good = [c for c in cells if grounds(px, pz, c[0] + 0.5, c[1] + 0.5, rx, rz)]
+            if not good:
+                err(f"No place on the summit lines the {rod} rod up between him and a player, diving from {offset} degrees round")
+                continue
+            best = {c: 0.0 for c in good}
+            queue = [(0.0, c) for c in good]
+            heapq.heapify(queue)
+            while queue:
+                d, (x, z) = heapq.heappop(queue)
+                if d > best.get((x, z), math.inf):
+                    continue
+                for dx, dz in ((1, 0), (-1, 0), (0, 1), (0, -1), (1, 1), (1, -1), (-1, 1), (-1, -1)):
+                    n = (x + dx, z + dz)
+                    if n not in cells or (dx and dz and ((x + dx, z) not in cells or (x, z + dz) not in cells)):
+                        continue
+                    nd = d + (math.sqrt(2) if dx and dz else 1.0)
+                    if nd < best.get(n, math.inf):
+                        best[n] = nd
+                        heapq.heappush(queue, (nd, n))
+            worst = max(cells, key=lambda c: best.get(c, math.inf))
+            if best.get(worst, math.inf) > reach:
+                err(f"From {worst} on the summit a sprinting player cannot line the {rod} rod up in time, diving from {offset} "
+                    f"degrees round ({best.get(worst, math.inf):.1f} blocks, at most {reach:.1f})")
+                break
+    if "public static double groundingAt(Vec3 from, Vec3 end, Vec3 rod)" not in boss \
+            or "return s > 0.0 && s <= length && off <= GROUND_RADIUS ? s : -1.0;" not in boss:
+        err("StormRocEntity.groundingAt must ground him where his lane passes within GROUND_RADIUS of the rod, before its end")
+    if "Math.atan2(at.x - centre.x, -(at.z - centre.z)) + Math.toRadians(offset)" not in boss \
+            or "centre.x + Math.sin(bearing) * PERCH_OUT, floorY() + PERCH_UP, centre.z - Math.cos(bearing) * PERCH_OUT" not in boss:
+        err("StormRocEntity.perch must lie PERCH_OUT from the summit's middle, round from the rod's bearing, as the audit takes it")
+    if "laneTo = inside(through, 1.0);" not in boss:
+        err("StormRocEntity.lane must draw his foe's place onto the summit as the audit does (inside(through, 1.0))")
+    # His grounding, his immunities and his pauses.
+    if "float dealt = dive == Dive.GROUNDED ? amount * GROUNDED_MULTIPLIER : amount;" not in boss:
+        err("StormRocEntity.hurtServer: every blow does GROUNDED_MULTIPLIER as much while he is grounded")
+    if "phase == Phase.WAKING || phase == Phase.RISING || source.is(DamageTypeTags.IS_LIGHTNING) || source.is(GroundingStrap.ELECTRIC)" not in boss:
+        err("StormRocEntity.hurtServer: he is unhurt while he wakes or the Squall rises, and lightning and arcs never harm him")
+    if "player.hurtServer(level, GroundingStrap.arc(level, this, this), damage(MARK_DAMAGE))" not in boss:
+        err("StormRocEntity: his Lightning Marks must be an electric arc (jugcraft:arc), which the Grounding Strap halves")
+    if "if (!onSummit(at) || at.distanceTo(centre()) > CrownOfThunder.SUMMIT - LAND_IN)" not in boss:
+        err("StormRocEntity.lane must end where it would leave the summit, so he lands on it")
+    registry = sources.get("JugcraftRoc", "")
+    for needed, why in (("Lairs.onPlaced(Lair.CROWN_OF_THUNDER, StormRocEntity::summon)", "set him in the nest of every Crown"),
+                        ("WeatherVaneLens.register();", "look at the Weather-Vane Lens")):
+        if needed not in registry:
+            err(f"JugcraftRoc must {why} ({needed})")
+    fledgling = sources.get("GaleFledglingEntity", "")
+    if "master.took(player, amount)" not in fledgling or "leave(level)" not in fledgling:
+        err("GaleFledglingEntity: whoever hurts one takes part, and it flies off when the Roc is gone")
+    lens = sources.get("WeatherVaneLens", "")
+    if "getOffhandItem().is(JugcraftRoc.WEATHER_VANE_LENS)" not in lens or "ServerTickEvents.END_SERVER_TICK" not in lens:
+        err("WeatherVaneLens must look at each player's offhand on the server's tick")
+    sounds = load(ASSETS / "sounds.json") or {}
+    for event in ("beast.bald_eagle_idle", "beast.bald_eagle_hurt"):
+        if event not in sounds or f'Jugcraft.id("{event}")' not in boss:
+            err(f"His cry must be the owner's eagle's, jugcraft:{event} (sounds.json and StormRocEntity)")
+    lang = load(ASSETS / "lang" / "en_us.json") or {}
+    for rod in ct.RODS:
+        if lang.get(f"message.{MOD}.storm_roc.charged.{rod}") != sr.CHARGED.get(rod):
+            err(f"The bar has no words for the {rod} rod charged (message.{MOD}.storm_roc.charged.{rod})")
+    if '"message.jugcraft.storm_roc.charged." + rod.title()' not in boss:
+        err("StormRocEntity must name the charged rod on his bar (message.jugcraft.storm_roc.charged.<rod>)")
+    client = (CLIENT_JAVA_ROOT / "StormRocClient.java").read_text(encoding="utf-8") if (CLIENT_JAVA_ROOT / "StormRocClient.java").is_file() else ""
+    if "StormRocClient.register();" not in (CLIENT_JAVA_ROOT / "JugcraftClient.java").read_text(encoding="utf-8"):
+        err("JugcraftClient must register StormRocClient")
+    if "lair.roc.JugcraftRoc.register();" not in (JAVA_ROOT / "Jugcraft.java").read_text(encoding="utf-8"):
+        err("Jugcraft must register JugcraftRoc")
+
+    def drawn(entity):
+        start = client.find(f"register(JugcraftRoc.{entity.upper()},")
+        end = client.find("EntityRendererRegistry.register(", start + 1)
+        return client[start:end if end >= 0 else len(client)] if start >= 0 else ""
+    loot_java = sources.get("RocLoot", "")
+    if f'ADVANCEMENT = "{sr.ADVANCEMENT["key"]}";' not in loot_java:
+        err("RocLoot's advancement differs from tools/storm_roc.py")
+    for entity in sr.ENTITIES:
+        if f'entity("{entity}"' not in registry:
+            err(f"JugcraftRoc does not register the {entity} entity")
+        if lang.get(f"entity.{MOD}.{entity}") != sr.ENTITIES[entity]:
+            err(f"The {entity} entity is not named {sr.ENTITIES[entity]!r}")
+        if not drawn(entity):
+            err(f"StormRocClient draws no {entity}")
+    for item in sr.items():
+        if f'"{item}"' not in registry:
+            err(f"JugcraftRoc does not register {item}")
+    # The GeckoLib bodies.
+    gecko = ASSETS / "geckolib"
+    clips_named = {}
+    for text in sources.values():
+        for clip in re.findall(r'"(animation\.[a-z_]+\.[a-z_]+)"', text):
+            clips_named.setdefault(clip.split(".")[1], set()).add(clip)
+    for clip in re.findall(r'prefix \+ "([a-z_]+)"', boss):
+        clips_named.setdefault("storm_roc", set()).add(f"animation.storm_roc.{clip}")
+    for entity, body in sr.GECKO.items():
+        geo = load(gecko / "models" / "entity" / f"{entity}.geo.json") or {}
+        animations = load(gecko / "animations" / "entity" / f"{entity}.animation.json") or {}
+        definition = (geo.get("minecraft:geometry") or [{}])[0]
+        if not definition:
+            err(f"{entity}: no GeckoLib model")
+            continue
+        clips = animations.get("animations", {})
+        for clip in clips_named.get(body, set()):
+            if clip not in clips:
+                err(f"{entity}: the Java plays {clip}, which is not in {entity}.animation.json")
+        for clip in rm.CLIPS[body]:
+            if f"animation.{body}.{clip}" not in clips:
+                err(f"{entity}.animation.json: missing animation.{body}.{clip}")
+        width = definition.get("description", {}).get("texture_width", 0)
+        height = definition.get("description", {}).get("texture_height", 0)
+        bones = {bone["name"] for bone in definition.get("bones", [])}
+        for clip in clips.values():
+            for bone in clip.get("bones", {}):
+                if bone not in bones:
+                    err(f"{entity}.animation.json: animates unknown bone {bone}")
+        regions = set()
+        for bone in definition.get("bones", []):
+            for cube in bone.get("cubes", []):
+                w, h_, d = cube["size"]
+                u, v = cube["uv"]
+                region = (u, v, u + 2 * (w + d), v + d + h_)
+                if region[2] > width or region[3] > height:
+                    err(f"{entity}.geo.json: a cube in {bone['name']} maps outside the {width}x{height} sheet")
+                regions.add(region)
+        regions = sorted(regions)
+        for i, first in enumerate(regions):
+            for second in regions[i + 1:]:
+                if first[0] < second[2] and second[0] < first[2] and first[1] < second[3] and second[1] < first[3]:
+                    err(f"{entity}.geo.json: UV regions {first} and {second} overlap")
+        glows = entity in sr.GLOWING
+        part = drawn(entity)
+        if not part or ("AutoGlowingGeoLayer" in part) != glows:
+            err(f"StormRocClient: the {entity}'s glow layer must match tools/storm_roc.py GLOWING")
+        for name_ in (entity, f"{entity}_glowmask") if glows else (entity,):
+            sheet = ASSETS / "textures" / "entity" / f"{name_}.png"
+            if not sheet.is_file():
+                err(f"{entity}: missing textures/entity/{name_}.png")
+                continue
+            with Image.open(sheet) as image:
+                if image.size != (width * rm.TEXTURE_SCALE, height * rm.TEXTURE_SCALE):
+                    err(f"textures/entity/{name_}.png must be {width * rm.TEXTURE_SCALE}x{height * rm.TEXTURE_SCALE}")
+                if any(image.convert("RGBA").getchannel("A").histogram()[1:255]):
+                    err(f"textures/entity/{name_}.png has half-transparent pixels (it is drawn cut out)")
+    # His controllers own their bones: the body's clips never key which wings show.
+    owned = {bone: controller for controller, bones in rm.CONTROLLERS.items() for bone in bones}
+    for clip_name, clip in rm.ANIMATIONS["storm_roc"]()["animations"].items():
+        controller = rm.controller_of(clip_name)
+        for bone in clip.get("bones", {}):
+            if owned.get(bone, "body") != controller:
+                err(f"storm_roc: {clip_name} ({controller}) animates {bone}, which the {owned.get(bone, 'body')} controller owns")
+    for controller in ("body", *rm.CONTROLLERS):
+        if f'new AnimationController<StormRocEntity>("{controller}"' not in boss:
+            err(f"StormRocEntity has no {controller} controller (tools/storm_roc_models.py CONTROLLERS)")
+    # His loot, and his trophies: Arms VII's, as his bosses/storm_roc table holds them.
+    table = load(DATA / MOD / "loot_table" / "entities" / "storm_roc.json") or {}
+    if table.get("type") != "minecraft:gift":
+        err("loot_table/entities/storm_roc.json must be a gift table (rolled for each participant)")
+    found_loot = {}
+    for pool in table.get("pools", []):
+        for entry in pool.get("entries", []):
+            item = entry.get("name", "").split(":")[-1]
+            chance = pool.get("condition", {}).get("chance")
+            count = entry.get("modifier", {}).get("count", {})
+            found_loot[item] = chance if chance is not None else (count.get("min"), count.get("max"))
+    expected = {"roc_feather": sr.FEATHERS, **{item: sr.TROPHY_CHANCE for item in sr.TROPHIES}, **sr.CHANCES}
+    if found_loot != expected:
+        err(f"loot_table/entities/storm_roc.json gives {found_loot}, not tools/storm_roc.py's {expected}")
+    if tuple(arms_variants.trophies("storm_roc")) != tuple(sr.TROPHIES):
+        err(f"tools/storm_roc.py TROPHIES {sr.TROPHIES} are not Arms VII's: {arms_variants.trophies('storm_roc')}")
+    trophies = load(DATA / MOD / "loot_table" / "bosses" / "storm_roc.json") or {}
+    held_items = [entry.get("name") for pool in trophies.get("pools", []) for entry in pool.get("entries", [])]
+    if held_items != [f"{MOD}:{item}" for item in sr.TROPHIES]:
+        err(f"loot_table/bosses/storm_roc.json holds {held_items}, not his trophies {sr.TROPHIES}")
+    for table_id in ("entities/storm_roc", "bosses/storm_roc"):
+        if f'Jugcraft.id("{table_id}")' not in loot_java:
+            err(f"RocLoot must roll loot_table/{table_id}.json")
+    for trophy in sr.TROPHIES:
+        if f'Jugcraft.id("{trophy}")' not in registry:
+            err(f"JugcraftRoc must find the {trophy} (Arms VII registers it)")
+    for key, recipe in sr.RECIPES.items():
+        data = load(DATA / MOD / "recipe" / f"{key}.json") or {}
+        result = recipe["result"] if ":" in recipe["result"] else f"{MOD}:{recipe['result']}"
+        if data.get("result", {}).get("id") != result or data.get("result", {}).get("count", 1) != recipe.get("count", 1):
+            err(f"recipe/{key}.json must make {recipe.get('count', 1)} {result}")
+    vane = load(DATA / MOD / "recipe" / "thunder_vane_from_roc_feathers.json") or {}
+    if "minecraft:lightning_rod" in json.dumps(vane.get("key", {})):
+        err("Two Roc Feathers make a Thunder Vane without its lightning rod")
+    # Roc Feathers come only from him: no recipe makes them, so nothing turns back into them.
+    for path in (DATA / MOD / "recipe").rglob("*.json"):
+        result = (load(path) or {}).get("result", {})
+        if isinstance(result, dict) and result.get("id") == f"{MOD}:roc_feather":
+            err(f"recipe/{path.relative_to(DATA / MOD / 'recipe')} makes Roc Feathers, which only the Storm Roc gives")
+    costumes = json.dumps(load(DATA / MOD / "tags" / "item" / "trick_or_treat_costumes.json") or {})
+    for item in sr.COSTUMES:
+        if f"{MOD}:{item}" not in costumes:
+            err(f"{item} must count as a costume (tags/item/trick_or_treat_costumes.json)")
+    advancement = load(DATA / MOD / "advancement" / f"{sr.ADVANCEMENT['key']}.json") or {}
+    if advancement.get("criteria", {}).get("done", {}).get("trigger") != "minecraft:impossible":
+        err(f"advancement/{sr.ADVANCEMENT['key']}.json must be granted from code (an impossible \"done\")")
+    sent = "".join(sources.values())
+    for key in sr.MESSAGES:
+        if f'"message.jugcraft.storm_roc.{key}"' not in sent:
+            err(f"tools/storm_roc.py MESSAGES has {key}, which the Java never sends")
+    for cls, text in sources.items():
+        for key in re.findall(r'"((?:message|tooltip|entity)\.jugcraft\.[a-z_.]+[a-z_])"', text):
+            if key not in lang:
+                err(f"{cls}.java sends {key}, which has no words in en_us.json")
+        for banned, why in (("setChunkForced", "loads a chunk"), ("addRegionTicket", "loads a chunk"),
+                            ("TicketType", "loads a chunk"), ("changeDimension", "crosses dimensions"),
+                            ("TeleportTransition", "crosses dimensions")):
+            if banned in text:
+                err(f"{cls}.java {why} ({banned})")
+
+
 def check_alpha_werewolf():
     """The Alpha Werewolf (tools/alpha_werewolf.py, docs/features/alpha-werewolf.md): every number the Java uses is the
     table's; his attacks are the table's, and his rule can be played (the Pack Gathers before the Last Hunt; his hide
@@ -21820,6 +22171,7 @@ def main():
     check_alpha_werewolf()
     check_pumpkin_king()
     check_cydonian_sentinel()
+    check_storm_roc()
     check_material_sets()
     check_art()
     check_pixel_hollows()
