@@ -5781,6 +5781,12 @@ Slice 9E's files: the guns' tactical grip parts and the Laser Sight's textures m
     - `diamondSteelSidearmsPairUntilStocked`: without a stock each pairs with a Minuet Pistol; with a Wooden Stock it is a carbine held in both hands and the other hand's gun does not fire; without it again it is one-handed.
     - `kreuzerPistolChangesItsMagazine`, `psalmSmgChangesItsMagazine`, `jawbreakerChangesItsMagazine`: as slice 15A's (`DiamondSteelGunsGameTests.changesItsMagazine`).
   - `GunsGameTests` counts 96 guns; `DualGunsGameTests` 24 one-handed guns.
+- **Slice 15B in CI** ([run 40395759839](https://github.com/jimbozoomer-byte/jugcraft/actions/runs/40395759839), on b0f9e866f): every check passed on its first run: the `mod` job (the build and every server game test, `DiamondSteelGunsIIGameTests` among them), the job without the optional integrations, the repository check and all sixteen client shards.
+  - **Kreuzer Pistol** (first person, from the guns shard's log): held at the lower right, its red seal at the back; aimed and fired, it looks along its back with the husk at the crosshair just above it, the hand below, as the previews have it. Reloading, turned toward the left with the hand under it; inspected, turned up at the right.
+  - **Psalm SMG:** held at the lower right; aimed and fired, as the Kreuzer, a round spent. Reloading, turned toward the left at the lower right; inspected, turned up at the right.
+  - **Jawbreaker:** held larger at the lower right, the hand under its grip; aimed and fired, it looks along its back with the husk at the crosshair. Reloading, tipped at the lower right; inspected, turned up at the right.
+  - **Fitted:** each with each set it takes any of, held and aimed. The first three sets each carry a stock, so each is held as a carbine, the left hand at its front. The Extended Magazine takes the counts to 20 and 38; aimed, the Psalm's shows under its back. The Jawbreaker's fourth set is the Laser Sight alone: held one-handed, the housing on its rail; aimed, beside the line of sight, as on the guns before it. Aimed, no stock shows: the test's check that a fitted stock is left out aimed (slice 9F) passed for all three.
+  - **Third person:** each held up before the chest, pointing ahead; fired, a flash at its muzzle.
 - **Not run:** the client by hand, a two-client dedicated server, and play.
 
 ## World and event applicability
