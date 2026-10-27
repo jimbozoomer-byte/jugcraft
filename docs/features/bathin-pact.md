@@ -14,7 +14,7 @@ added to the contract's Decisions when the unit lands), and the palette files ma
 (the contract's art plan). The rest of the record (player experience, record fields, connections, costs, failure
 behaviour, the pact screen, his service and his matter) is added with the code.
 Proposal issue: none; the owner's selected scope ([the cohort's contract](concordance-garden-cohort.md), GC-D1 to GC-D3).
-AI-assisted implementation with Claude Code; the model is named in the commit trailers.
+Owner: @jimbozoomer-byte. AI-assisted implementation with Claude Code; the model is named in the commit trailers.
 
 ## Bathin's character
 
@@ -63,10 +63,12 @@ Sounds (each mono, 96 kHz; subtitles to be defined in `tools/concordance_pacts.p
 
 (The owner's "jims caves" folder of the second edited part: the library files are
 `art/owner-library/originals/Edited-2026-10-18-Part2/jims caves/sounds/item/magic_conch/` and `.../sea_staff/`, entries
-counted from 0; runtime copies, already in the repository, listed in `cavern-runtime.json` `copies[1907]`, `[1908]`,
-`[1933]` to `[1935]`, each runtime file's SHA-256 equal to its catalog entry. The summon lasts 5.06 s, the cast 1.81 s,
-the three bubbles 1.53, 1.33 and 1.38 s.) Provenance as the owner declared it: `art/owner-library/PROVENANCE.md`; the
-library is unchanged and nothing in it is executed.
+counted from 0; runtime copies, already in the repository, listed in
+`art/owner-library/catalog/edited-2026-10-18-part2/cavern-runtime.json` `copies[1907]`, `[1908]`, `[1933]` to `[1935]`,
+each runtime file's SHA-256 equal to its catalog entry. The summon lasts 5.06 s, the cast 1.81 s, the three bubbles 1.53,
+1.33 and 1.38 s.) Provenance as the owner declared it: for the sounds,
+`art/owner-library/catalog/edited-2026-10-18-part2/README.md` (18 October 2026; `files.json` `ownerDeclaration`); for
+the paintings, `art/owner-library/PROVENANCE.md`; the library is unchanged and nothing in it is executed.
 
 ## Verification
 

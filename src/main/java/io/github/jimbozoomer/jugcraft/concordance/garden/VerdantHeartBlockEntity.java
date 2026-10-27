@@ -160,7 +160,10 @@ public class VerdantHeartBlockEntity extends LivingDeviceBlockEntity implements 
 		return pourBatches(level, conversion, pylon, maxBatches);
 	}
 
-	/** GC-05: whether {@link #pourInto} would pour at least one batch into {@code pylon} now (its owner and both amounts). Reads only. */
+	/**
+	 * GC-05: whether {@link #pourInto} may pour at least one batch into {@code pylon} by its owner and both amounts alone
+	 * (not whether this Heart is awake or the garden switched on; pourInto checks those). Reads only.
+	 */
 	public boolean mayPourInto(LeyPylonBlockEntity pylon) {
 		Conversion conversion = conversion();
 		return conversion != null && mayFeed(pylon.owner()) && conversion.batches(verdance, LeyPylonBlockEntity.CAPACITY - pylon.ley(), 1L) > 0;
