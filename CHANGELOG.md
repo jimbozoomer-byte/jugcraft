@@ -8,6 +8,9 @@ Every change to Jugcraft, newest first, grouped by pull request. For what each t
 
 No numbered release yet. Entries on feature branches remain proposed until their pull requests merge.
 
+### Unmerged: Costume disguises
+- **Monsters take a costumed player for one of their own, all year:** in a Skeleton Suit skeletons, strays and bogged never pick you as a target; in Mummy Wraps zombies, husks, zombie villagers and drowned; in a Witch Hat witches; in a Werewolf Mask or The Alpha's Hood werewolves; in a Ghost Sheet vexes; in Cat Ears and Tail creepers; in Bat Wings or a Vampire Cape phantoms. Hurt one and it fights back. No boss is ever fooled. The server's `costumes.disguises` (default `on`) turns them off; which costumes fool which monsters is data (`#jugcraft:disguises/<kind>`, item and entity type tags). Record: [costume-disguises.md](docs/features/costume-disguises.md).
+
 ### Unmerged: Keep your inventory in boss fights
 - **Dying in a lair costs nothing:** as with the keepInventory rule, but only in lairs (every boss fight). No items or experience fall; you respawn outside with every slot as it was (armour and offhand worn), the same held slot and all your experience. Dying anywhere else is unchanged. No grave is ever placed in a lair; Grave Goods still catch anything another mod drops there. Record: [lair-keep-inventory.md](docs/features/lair-keep-inventory.md).
 
