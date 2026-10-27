@@ -6,9 +6,12 @@ import io.github.jimbozoomer.jugcraft.agriculture.HalloweenSeason;
 import io.github.jimbozoomer.jugcraft.agriculture.HorsemanRider;
 import io.github.jimbozoomer.jugcraft.agriculture.HorsemanSightings;
 import io.github.jimbozoomer.jugcraft.agriculture.JugcraftAgriculture;
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.atomic.AtomicReference;
 import net.fabricmc.fabric.api.gametest.v1.GameTest;
 import net.minecraft.advancements.AdvancementHolder;
 import net.minecraft.core.BlockPos;
@@ -17,6 +20,7 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.EntityTypes;
+import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
@@ -89,31 +93,52 @@ public class HorsemanSightingsGameTests {
 	public void theHorsemanRidesAtAPlayerAndOnlyFrightensThem(GameTestHelper helper) {
 		ServerLevel level = helper.getLevel();
 		floor(helper, 69, 76);
+		// He comes only from ticking chunks, as a real player's own are: the arena's are forced for the ride, and the
+		// test waits for them to start ticking before he is sent.
+		List<ChunkPos> arena = new ArrayList<>();
+		ChunkPos from = ChunkPos.containing(helper.absolutePos(BlockPos.ZERO));
+		ChunkPos to = ChunkPos.containing(helper.absolutePos(new BlockPos(68, 0, 75)));
+		for (int cx = Math.min(from.x(), to.x()); cx <= Math.max(from.x(), to.x()); cx++) {
+			for (int cz = Math.min(from.z(), to.z()); cz <= Math.max(from.z(), to.z()); cz++) {
+				level.setChunkForced(cx, cz, true);
+				arena.add(new ChunkPos(cx, cz));
+			}
+		}
 		ServerPlayer player = player(helper, 34.5, 40.5, 0.0F);
-		HorsemanRider rider = HorsemanSightings.send(level, player);
-		helper.assertTrue(rider != null, "He comes");
-		double start = rider.distanceTo(player);
-		helper.assertTrue(start >= HorsemanSightings.START_DISTANCE - 2.0, "from far off: " + start);
-		helper.assertTrue(rider.getZ() > player.getZ(), "in front of the player, who looks south");
-		helper.assertFalse(rider.hurtServer(level, level.damageSources().generic(), 10.0F), "Nothing hurts him");
-		helper.assertFalse(rider.isPickable(), "nor can he be struck");
-		float health = player.getHealth();
-		double[] closest = {start};
+		AtomicReference<HorsemanRider> sent = new AtomicReference<>();
+		double[] closest = {Double.MAX_VALUE};
 		boolean[] hurt = {false};
+		float health = player.getHealth();
+		helper.runAfterDelay(5, () -> {
+			HorsemanRider rider = HorsemanSightings.send(level, player);
+			helper.assertTrue(rider != null, "He comes");
+			double start = rider.distanceTo(player);
+			helper.assertTrue(start >= HorsemanSightings.START_DISTANCE - 2.0, "from far off: " + start);
+			helper.assertTrue(rider.getZ() > player.getZ(), "in front of the player, who looks south");
+			helper.assertFalse(rider.hurtServer(level, level.damageSources().generic(), 10.0F), "Nothing hurts him");
+			helper.assertFalse(rider.isPickable(), "nor can he be struck");
+			sent.set(rider);
+		});
 		helper.onEachTick(() -> {
-			if (!rider.isRemoved()) {
+			HorsemanRider rider = sent.get();
+			if (rider != null && !rider.isRemoved()) {
 				closest[0] = Math.min(closest[0], Math.hypot(rider.getX() - player.getX(), rider.getZ() - player.getZ()));
 			}
 			hurt[0] |= player.getHealth() < health;
 		});
 		long today = HalloweenSeason.date().toEpochDay();
 		helper.succeedWhen(() -> {
+			HorsemanRider rider = sent.get();
+			helper.assertTrue(rider != null, "He comes");
 			helper.assertTrue(rider.thrown(), "He flings his pumpkin");
 			helper.assertTrue(rider.isRemoved(), "and rides off, gone: " + rider.phase());
 			helper.assertTrue(closest[0] <= HorsemanRider.CIRCLE_RADIUS + 1.5, "having come close: " + closest[0]);
 			helper.assertFalse(hurt[0], "The player is never hurt");
 			helper.assertTrue(HorsemanSightings.seen(player) == today, "and has seen him today: " + HorsemanSightings.seen(player));
 			helper.assertTrue(earned(player, HorsemanSightings.ADVANCEMENT), "Sleepy Hollow");
+			for (ChunkPos chunk : arena) {
+				level.setChunkForced(chunk.x(), chunk.z(), false);
+			}
 		});
 	}
 
@@ -156,7 +181,10 @@ public class HorsemanSightingsGameTests {
 	@GameTest(skyAccess = true)
 	public void aPlayerJustComeIntoTheGameIsLeftToSettle(GameTestHelper helper) {
 		ServerLevel level = helper.getLevel();
-		ServerPlayer player = player(helper, 3.5, 3.5, 0.0F);
+		// A player who can become a spectator (the vanilla mock player always reports creative).
+		ServerPlayer player = JimtaRobotGameTests.player(helper);
+		BlockPos at = helper.absolutePos(BlockPos.ZERO);
+		player.snapTo(at.getX() + 3.5, at.getY() + 1, at.getZ() + 3.5, 0.0F, 0.0F);
 		helper.assertFalse(HorsemanSightings.ready(level, player), "Not straight away");
 		player.tickCount = HorsemanSightings.SETTLE_TICKS;
 		helper.assertTrue(level.canSeeSky(player.blockPosition()) == HorsemanSightings.ready(level, player),
