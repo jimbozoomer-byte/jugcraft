@@ -21,7 +21,9 @@ import net.minecraft.world.phys.Vec3;
  * Herobrine's encounters (docs/features/herobrine.md): he goes when someone comes close, stares him down or hits him,
  * and hurts nobody; a close encounter only darkens the screen; he is never saved; only attentive players who really see
  * him are reported as witnesses; a player has one encounter at a time, and their first close one must follow a distant
- * one; and a distant encounter is placed where the player could see him, or reported as failed with nothing placed.
+ * one; a distant encounter is placed where the player could see him, or reported as failed with nothing placed; a
+ * follower walks the player's own path and stops when they stop; a second look finds him gone or moved; a tunnel's
+ * eyes wait at the far end of a tunnel behind the player; and a shared sighting credits everyone who really saw him.
  * The schedule is not tested here: it is a separate {@link HerobrineDirector}, and these tests listen through one that
  * passes everything on to whichever director was installed.
  */
@@ -271,5 +273,98 @@ public class HerobrineGameTests {
 		helper.assertTrue(!HerobrineEncounters.active(player, helper.getLevel().getServer().getTickCount()),
 				"A player who has not been in the world a minute is not active");
 		helper.succeed();
+	}
+
+	@GameTest(structure = ARENA, padding = 48, maxTicks = 60)
+	public void aFollowerWalksThePlayersPathAndStopsWhenTheyStop(GameTestHelper helper) {
+		floor(helper);
+		ServerPlayer player = player(helper, new BlockPos(24, 1, 30), 0.0F);
+		HerobrineEncounters.Attempt attempt = HerobrineEncounters.attemptVariant(player,
+				new HerobrineDirector.Request(player.getUUID(), Herobrine.Kind.DISTANT, HerobrineDirector.FORCED), Herobrine.Variant.FOLLOWER);
+		helper.assertTrue(attempt.placed(), "A follower should find a place behind the player: " + attempt.failure());
+		Herobrine herobrine = attempt.herobrine();
+		Vec3 start = herobrine.position();
+		double keep = start.distanceTo(player.position());
+		helper.assertTrue(start.z < player.getZ() && keep >= HerobrineEncounters.FOLLOW_NEAR - 1.0, "He should start behind, not at " + start);
+		for (int tick = 1; tick <= 16; tick++) {
+			double z = player.getZ() + tick * 0.5;
+			helper.runAfterDelay(tick, () -> player.snapTo(player.getX(), player.getY(), z, 0.0F, 0.0F));
+		}
+		helper.runAfterDelay(22, () -> {
+			Vec3 now = herobrine.position();
+			helper.assertTrue(herobrine.isAlive() && now.z > start.z + 4.0, "He should have followed, not stayed at " + now);
+			helper.assertTrue(Math.abs(now.distanceTo(player.position()) - keep) < 1.5, "He should keep his distance, "
+					+ keep + ", not " + now.distanceTo(player.position()));
+			helper.runAfterDelay(15, () -> {
+				helper.assertTrue(herobrine.position().distanceTo(now) < 0.01, "He should stop when the player stops");
+				herobrine.discard();
+				helper.succeed();
+			});
+		});
+	}
+
+	@GameTest(structure = ARENA, padding = 48, maxTicks = 80)
+	public void aSecondLookFindsHimGoneOrMoved(GameTestHelper helper) {
+		floor(helper);
+		Recorder recorder = recorder();
+		ServerPlayer player = player(helper, new BlockPos(24, 1, 4), 0.0F);
+		HerobrineEncounters.Attempt attempt = HerobrineEncounters.attemptAt(player,
+				new HerobrineDirector.Request(player.getUUID(), Herobrine.Kind.DISTANT, HerobrineDirector.FORCED),
+				Vec3.atBottomCenterOf(helper.absolutePos(new BlockPos(24, 1, 30))), Herobrine.Variant.SECOND_LOOK);
+		helper.assertTrue(attempt.placed(), "He could not be placed: " + attempt.failure());
+		Herobrine herobrine = attempt.herobrine();
+		Vec3 first = herobrine.position();
+		helper.runAfterDelay(Herobrine.SEEN_TICKS + 4, () -> {
+			helper.assertTrue(herobrine.witnesses().contains(player.getUUID()), "The player should have seen him first");
+			player.snapTo(player.getX(), player.getY(), player.getZ(), 180.0F, 0.0F);
+			player.setYHeadRot(180.0F);
+			helper.runAfterDelay(Herobrine.LOOK_AWAY_TICKS + 5, () -> {
+				helper.assertTrue(herobrine.isRemoved() || herobrine.position().distanceTo(first) >= 6.0,
+						"Looking back, he should be gone or somewhere else, not still at " + herobrine.position());
+				herobrine.discard();
+				helper.assertTrue(recorder.about(herobrine.encounter()).stream().anyMatch(e -> e.what().equals("ended")),
+						"The encounter should have ended");
+				helper.succeed();
+			});
+		});
+	}
+
+	@GameTest(structure = ARENA, padding = 48, maxTicks = 20)
+	public void tunnelEyesWaitAtTheFarEndOfATunnelBehind(GameTestHelper helper) {
+		floor(helper);
+		for (int z = 1; z <= 31; z++) {
+			for (int y = 1; y <= 3; y++) {
+				for (int x = 23; x <= 25; x++) {
+					boolean inside = x == 24 && y < 3 && z > 1;
+					helper.setBlock(new BlockPos(x, y, z), inside ? Blocks.AIR : Blocks.STONE);
+				}
+			}
+		}
+		ServerPlayer player = player(helper, new BlockPos(24, 1, 30), 0.0F);
+		HerobrineEncounters.Attempt attempt = HerobrineEncounters.attemptVariant(player,
+				new HerobrineDirector.Request(player.getUUID(), Herobrine.Kind.DISTANT, HerobrineDirector.FORCED), Herobrine.Variant.TUNNEL);
+		helper.assertTrue(attempt.placed(), "He should wait down the tunnel: " + attempt.failure());
+		Herobrine herobrine = attempt.herobrine();
+		BlockPos end = helper.absolutePos(new BlockPos(24, 1, 2));
+		helper.assertTrue(herobrine.blockPosition().equals(end), "He should stand at the tunnel's far end, " + end + ", not "
+				+ herobrine.blockPosition());
+		herobrine.discard();
+		helper.succeed();
+	}
+
+	@GameTest(structure = ARENA, padding = 48, maxTicks = 60)
+	public void aSharedSightingCreditsEveryoneWhoSawHim(GameTestHelper helper) {
+		floor(helper);
+		ServerPlayer target = player(helper, new BlockPos(20, 1, 4), 0.0F);
+		ServerPlayer friend = player(helper, new BlockPos(28, 1, 4), 0.0F);
+		ServerPlayer elsewhere = player(helper, new BlockPos(24, 1, 8), 180.0F);
+		Herobrine herobrine = place(helper, target, new BlockPos(24, 1, 40), Herobrine.Kind.DISTANT);
+		helper.runAfterDelay(Herobrine.SEEN_TICKS + 10, () -> {
+			helper.assertTrue(herobrine.witnesses().equals(Set.of(target.getUUID(), friend.getUUID())),
+					"Both players who saw him should be witnesses, and the one looking away should not: " + herobrine.witnesses());
+			helper.assertTrue(!herobrine.witnesses().contains(elsewhere.getUUID()), "Facing away is not seeing");
+			herobrine.discard();
+			helper.succeed();
+		});
 	}
 }

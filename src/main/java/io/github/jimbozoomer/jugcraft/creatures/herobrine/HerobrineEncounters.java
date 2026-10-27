@@ -1,9 +1,11 @@
 package io.github.jimbozoomer.jugcraft.creatures.herobrine;
 
 import com.mojang.brigadier.CommandDispatcher;
+import com.mojang.brigadier.arguments.StringArgumentType;
 import io.github.jimbozoomer.jugcraft.Jugcraft;
 import io.github.jimbozoomer.jugcraft.config.JugcraftConfig;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -19,6 +21,7 @@ import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.fabricmc.fabric.api.object.builder.v1.entity.FabricDefaultAttributeRegistry;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
+import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.commands.arguments.EntityArgument;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -77,8 +80,23 @@ public final class HerobrineEncounters {
 	public static final int UNDERGROUND_FAR = 28;
 	/** How far above or below the player a distant encounter may stand, in blocks. */
 	public static final int MAX_RISE = 24;
-	/** How many places are tried for one distant encounter. */
+	/** How many places are tried for one distant encounter; the best is used. */
 	public static final int SPOT_ATTEMPTS = 16;
+	/** How far behind the player a follower starts (and stays), in blocks. */
+	public static final int FOLLOW_NEAR = 18;
+	public static final int FOLLOW_FAR = 22;
+	/** The shortest straight tunnel he waits at the end of, and how far down one is looked, in blocks. */
+	public static final int TUNNEL_MIN = 14;
+	public static final int TUNNEL_MAX = 48;
+	/** The chance an underground player's distant encounter is tried down a tunnel first. */
+	public static final double TUNNEL_CHANCE = 0.6;
+	/** The chances a distant encounter is a follower or a second look (otherwise a watcher). */
+	public static final double FOLLOWER_CHANCE = 0.25;
+	public static final double SECOND_LOOK_CHANCE = 0.25;
+	/** Other players within this many blocks may share a sighting, and the place is chosen for them too. */
+	public static final int AUDIENCE_RANGE = 48;
+	/** How many other players a place is judged for. */
+	public static final int MAX_AUDIENCE = 4;
 
 	public static EntityType<Herobrine> HEROBRINE;
 
@@ -189,12 +207,20 @@ public final class HerobrineEncounters {
 	}
 
 	/**
-	 * Tries {@code request} for {@code player}, tells the director whether he was placed, and returns what happened. Unless
-	 * an operator forced it, a close encounter needs a calm player who has already seen him at a distance since the server
+	 * Tries {@code request} for {@code player}, tells the director whether he was placed, and returns what happened. A
+	 * distant encounter picks its own {@link Herobrine.Variant}: down a dark tunnel when the player is underground and
+	 * one runs behind them, otherwise a follower, a second look or a watcher, falling back to a watcher. Unless an
+	 * operator forced it, a close encounter needs a calm player who has already seen him at a distance since the server
 	 * started, so nobody's first sight of him is a jump-scare.
 	 */
 	public static Attempt attempt(ServerPlayer player, HerobrineDirector.Request request) {
 		return attempt(player, request, () -> request.kind() == Herobrine.Kind.CLOSE ? behind(player) : distant(player));
+	}
+
+	/** Tries {@code request} as one particular variant only (an operator's choice, and tests). */
+	public static Attempt attemptVariant(ServerPlayer player, HerobrineDirector.Request request, Herobrine.Variant variant) {
+		return attempt(player, request, () -> variant.kind != request.kind() ? null
+				: variant == Herobrine.Variant.BEHIND ? behind(player) : distant(player, variant));
 	}
 
 	/**
@@ -202,9 +228,14 @@ public final class HerobrineEncounters {
 	 * {@link #attempt}: for encounters whose place is chosen elsewhere (and for tests). Fails with
 	 * {@link HerobrineDirector.Failure#NO_VISIBLE_SPOT} if there is no room to stand there.
 	 */
+	public static Attempt attemptAt(ServerPlayer player, HerobrineDirector.Request request, Vec3 at, Herobrine.Variant variant) {
+		return attempt(player, request, () -> variant.kind == request.kind() && standable(player.level(), BlockPos.containing(at))
+				? spawn(player.level(), at, variant, player) : null);
+	}
+
+	/** {@link #attemptAt} as a watcher (distant) or behind (close). */
 	public static Attempt attemptAt(ServerPlayer player, HerobrineDirector.Request request, Vec3 at) {
-		return attempt(player, request, () -> standable(player.level(), BlockPos.containing(at))
-				? spawn(player.level(), at, request.kind(), player) : null);
+		return attemptAt(player, request, at, request.kind() == Herobrine.Kind.CLOSE ? Herobrine.Variant.BEHIND : Herobrine.Variant.WATCHER);
 	}
 
 	private static Attempt attempt(ServerPlayer player, HerobrineDirector.Request request, Supplier<@Nullable Herobrine> placement) {
@@ -259,20 +290,58 @@ public final class HerobrineEncounters {
 		return LIVE.size();
 	}
 
-	/**
-	 * Places Herobrine at a distance from {@code player}: ahead of them but off to one side, on solid ground in the open
-	 * where they would see him if they turned their head. Null if there was no such place in the loaded world.
-	 */
+	/** Whether {@code player} is under the open sky (otherwise underground, indoors or under trees). */
+	private static boolean outdoors(ServerPlayer player) {
+		return player.level().canSeeSky(player.blockPosition().above());
+	}
+
 	private static @Nullable Herobrine distant(ServerPlayer player) {
+		RandomSource random = player.getRandom();
+		List<Herobrine.Variant> tries = new ArrayList<>();
+		if (!outdoors(player) && random.nextDouble() < TUNNEL_CHANCE) {
+			tries.add(Herobrine.Variant.TUNNEL);
+		}
+		double roll = random.nextDouble();
+		// With other players about, he shows himself to the group rather than following one of them.
+		if (roll < FOLLOWER_CHANCE && audience(player).isEmpty()) {
+			tries.add(Herobrine.Variant.FOLLOWER);
+		} else if (roll < FOLLOWER_CHANCE + SECOND_LOOK_CHANCE) {
+			tries.add(Herobrine.Variant.SECOND_LOOK);
+		}
+		tries.add(Herobrine.Variant.WATCHER);
+		for (Herobrine.Variant variant : tries) {
+			Herobrine herobrine = distant(player, variant);
+			if (herobrine != null) {
+				return herobrine;
+			}
+		}
+		return null;
+	}
+
+	/** Places a distant encounter of {@code variant}, or returns null if it has no place here. */
+	private static @Nullable Herobrine distant(ServerPlayer player, Herobrine.Variant variant) {
 		ServerLevel level = player.level();
 		if (!level.hasChunkAt(player.blockPosition())) {
 			return null;
 		}
-		int surface = level.getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, player.getBlockX(), player.getBlockZ());
-		boolean outdoors = player.getBlockY() >= surface - 4;
-		Vec3 spot = outdoors ? spot(level, player, OUTDOOR_NEAR, OUTDOOR_FAR, true)
-				: spot(level, player, UNDERGROUND_NEAR, UNDERGROUND_FAR, false);
-		return spot == null ? null : spawn(level, spot, Herobrine.Kind.DISTANT, player);
+		boolean outdoors = outdoors(player);
+		int near = outdoors ? OUTDOOR_NEAR : UNDERGROUND_NEAR;
+		int far = outdoors ? OUTDOOR_FAR : UNDERGROUND_FAR;
+		Vec3 spot = switch (variant) {
+			case TUNNEL -> tunnel(level, player);
+			case FOLLOWER -> spot(level, player, FOLLOW_NEAR, FOLLOW_FAR, outdoors, 150, 180, List.of());
+			case WATCHER, SECOND_LOOK -> spot(level, player, near, far, outdoors, 20, 75, audience(player));
+			case BEHIND -> null;
+		};
+		return spot == null ? null : spawn(level, spot, variant, player);
+	}
+
+	/** Other attentive players near {@code player}, who might see him too (at most {@value #MAX_AUDIENCE}). */
+	private static List<ServerPlayer> audience(ServerPlayer player) {
+		ServerLevel level = player.level();
+		long now = level.getServer().getTickCount();
+		return level.getEntitiesOfClass(ServerPlayer.class, player.getBoundingBox().inflate(AUDIENCE_RANGE),
+				p -> p != player && !p.isSpectator() && attentive(p, now)).stream().limit(MAX_AUDIENCE).toList();
 	}
 
 	/**
@@ -282,10 +351,24 @@ public final class HerobrineEncounters {
 	 * {@value #SPOT_ATTEMPTS} tries finds one.
 	 */
 	public static @Nullable Vec3 spot(ServerLevel level, ServerPlayer player, int near, int far, boolean surface) {
+		return spot(level, player, near, far, surface, 20, 75, List.of());
+	}
+
+	/**
+	 * The best of {@value #SPOT_ATTEMPTS} tries at a place {@code near} to {@code far} blocks from {@code player},
+	 * {@code fromDegrees} to {@code toDegrees} off where they face, either side; each must be loaded, have room to stand,
+	 * no player within {@value Herobrine#VANISH_DISTANCE} blocks and a clear line from the player's eyes. Better is higher
+	 * than the player (a ridge), open to the sky (a clearing), and in clear view of more of {@code others}.
+	 */
+	public static @Nullable Vec3 spot(ServerLevel level, ServerPlayer player, int near, int far, boolean surface, int fromDegrees,
+			int toDegrees, List<ServerPlayer> others) {
 		RandomSource random = player.getRandom();
 		Vec3 eye = player.getEyePosition();
+		Vec3 best = null;
+		int bestScore = -1;
 		for (int attempt = 0; attempt < SPOT_ATTEMPTS; attempt++) {
-			double angle = Math.toRadians(player.getYRot() + (random.nextBoolean() ? 1 : -1) * (20 + random.nextInt(56)));
+			double offset = fromDegrees + random.nextDouble() * (toDegrees - fromDegrees);
+			double angle = Math.toRadians(player.getYRot() + (random.nextBoolean() ? 1 : -1) * offset);
 			double distance = near + random.nextDouble() * (far - near);
 			int x = Mth.floor(player.getX() - Math.sin(angle) * distance);
 			int z = Mth.floor(player.getZ() + Math.cos(angle) * distance);
@@ -294,12 +377,67 @@ public final class HerobrineEncounters {
 				continue;
 			}
 			Vec3 at = Vec3.atBottomCenterOf(feet);
-			if (Herobrine.someoneClose(level, at)) {
+			if (Herobrine.someoneClose(level, at) || !inClearView(level, eye, at, player)) {
 				continue;
 			}
-			if (level.clip(new ClipContext(eye, at.add(0.0, 1.62, 0.0), ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, player))
-					.getType() == HitResult.Type.MISS) {
-				return at;
+			int score = (feet.getY() >= player.getBlockY() + 3 ? 2 : 0) + (surface && level.canSeeSky(feet.above()) ? 1 : 0);
+			for (ServerPlayer other : others) {
+				score += inClearView(level, other.getEyePosition(), at, other) ? 3 : 0;
+			}
+			if (score > bestScore) {
+				best = at;
+				bestScore = score;
+			}
+		}
+		return best;
+	}
+
+	private static boolean inClearView(ServerLevel level, Vec3 eye, Vec3 feet, ServerPlayer viewer) {
+		return level.clip(new ClipContext(eye, feet.add(0.0, 1.62, 0.0), ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, viewer))
+				.getType() == HitResult.Type.MISS;
+	}
+
+	/**
+	 * The far end of the longest straight, covered, walkable run from {@code player} in a direction they are not facing,
+	 * at least {@value #TUNNEL_MIN} blocks long (at most {@value #TUNNEL_MAX} are walked), with no player near it and a
+	 * clear line down it. Null if there is none: a tunnel's eyes only appear in a tunnel.
+	 */
+	public static @Nullable Vec3 tunnel(ServerLevel level, ServerPlayer player) {
+		BlockPos start = player.blockPosition();
+		Vec3 best = null;
+		int bestLength = TUNNEL_MIN - 1;
+		for (Direction direction : Direction.Plane.HORIZONTAL) {
+			if (direction == player.getDirection()) {
+				continue;
+			}
+			int length = 0;
+			for (int step = 1; step <= TUNNEL_MAX; step++) {
+				BlockPos pos = start.relative(direction, step);
+				if (!standable(level, pos) || level.canSeeSky(pos)) {
+					break;
+				}
+				length = step;
+			}
+			if (length <= bestLength) {
+				continue;
+			}
+			Vec3 at = Vec3.atBottomCenterOf(start.relative(direction, length));
+			if (!Herobrine.someoneClose(level, at) && inClearView(level, player.getEyePosition(), at, player)) {
+				best = at;
+				bestLength = length;
+			}
+		}
+		return best;
+	}
+
+	/** Where a second look moves him: another place the player could see, at least 6 blocks from {@code from}. */
+	static @Nullable Vec3 relocation(ServerLevel level, ServerPlayer player, Vec3 from) {
+		boolean outdoors = outdoors(player);
+		for (int tries = 0; tries < 2; tries++) {
+			Vec3 spot = spot(level, player, outdoors ? OUTDOOR_NEAR : UNDERGROUND_NEAR, outdoors ? OUTDOOR_FAR : UNDERGROUND_FAR,
+					outdoors, 20, 75, List.of());
+			if (spot != null && spot.distanceToSqr(from) >= 36.0) {
+				return spot;
 			}
 		}
 		return null;
@@ -349,7 +487,7 @@ public final class HerobrineEncounters {
 		if (!standable(level, feet)) {
 			return null;
 		}
-		Herobrine herobrine = spawn(level, Vec3.atBottomCenterOf(feet), Herobrine.Kind.CLOSE, player);
+		Herobrine herobrine = spawn(level, Vec3.atBottomCenterOf(feet), Herobrine.Variant.BEHIND, player);
 		if (herobrine == null) {
 			return null;
 		}
@@ -362,13 +500,13 @@ public final class HerobrineEncounters {
 		return herobrine;
 	}
 
-	private static @Nullable Herobrine spawn(ServerLevel level, Vec3 at, Herobrine.Kind kind, ServerPlayer player) {
+	private static @Nullable Herobrine spawn(ServerLevel level, Vec3 at, Herobrine.Variant variant, ServerPlayer player) {
 		Herobrine herobrine = HEROBRINE.create(level, EntitySpawnReason.EVENT);
 		if (herobrine == null) {
 			return null;
 		}
 		herobrine.snapTo(at.x, at.y, at.z, 0.0F, 0.0F);
-		herobrine.haunt(kind, player, UUID.randomUUID());
+		herobrine.haunt(variant, player, UUID.randomUUID());
 		return level.addFreshEntity(herobrine) ? herobrine : null;
 	}
 
@@ -385,9 +523,14 @@ public final class HerobrineEncounters {
 				.requires(source -> Commands.LEVEL_GAMEMASTERS.check(source.permissions()))
 				.then(Commands.literal("status").executes(context -> status(context.getSource())))
 				.then(Commands.literal("sighting").then(Commands.argument("players", EntityArgument.players())
-						.executes(context -> force(context.getSource(), EntityArgument.getPlayers(context, "players"), Herobrine.Kind.DISTANT))))
+						.executes(context -> force(context.getSource(), EntityArgument.getPlayers(context, "players"), null))
+						.then(Commands.argument("variant", StringArgumentType.word())
+								.suggests((context, builder) -> SharedSuggestionProvider.suggest(Arrays.stream(Herobrine.Variant.values())
+										.filter(v -> v.kind == Herobrine.Kind.DISTANT).map(v -> v.name().toLowerCase(Locale.ROOT)), builder))
+								.executes(context -> force(context.getSource(), EntityArgument.getPlayers(context, "players"),
+										StringArgumentType.getString(context, "variant"))))))
 				.then(Commands.literal("scare").then(Commands.argument("players", EntityArgument.players())
-						.executes(context -> force(context.getSource(), EntityArgument.getPlayers(context, "players"), Herobrine.Kind.CLOSE))))));
+						.executes(context -> force(context.getSource(), EntityArgument.getPlayers(context, "players"), "behind"))))));
 	}
 
 	private static int status(CommandSourceStack source) {
@@ -403,10 +546,22 @@ public final class HerobrineEncounters {
 		return live();
 	}
 
-	private static int force(CommandSourceStack source, Collection<ServerPlayer> players, Herobrine.Kind kind) {
+	/** Forces an encounter for each of {@code players}: a distant one of any variant ({@code null}), or the named one. */
+	private static int force(CommandSourceStack source, Collection<ServerPlayer> players, @Nullable String name) {
+		Herobrine.Variant variant = null;
+		if (name != null) {
+			try {
+				variant = Herobrine.Variant.valueOf(name.toUpperCase(Locale.ROOT));
+			} catch (IllegalArgumentException e) {
+				source.sendFailure(Component.translatable("commands.jugcraft.herobrine.unknown_variant", name));
+				return 0;
+			}
+		}
+		Herobrine.Kind kind = variant == null ? Herobrine.Kind.DISTANT : variant.kind;
 		int placed = 0;
 		for (ServerPlayer player : players) {
-			Attempt attempt = attempt(player, new HerobrineDirector.Request(player.getUUID(), kind, HerobrineDirector.FORCED));
+			HerobrineDirector.Request request = new HerobrineDirector.Request(player.getUUID(), kind, HerobrineDirector.FORCED);
+			Attempt attempt = variant == null ? attempt(player, request) : attemptVariant(player, request, variant);
 			if (attempt.placed()) {
 				placed++;
 				source.sendSuccess(() -> Component.translatable("commands.jugcraft.herobrine." + (kind == Herobrine.Kind.CLOSE ? "scare" : "sighting"),

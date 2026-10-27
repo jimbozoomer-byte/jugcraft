@@ -1,14 +1,21 @@
 package io.github.jimbozoomer.jugcraft.creatures.herobrine;
 
+import java.util.ArrayDeque;
 import java.util.Collections;
+import java.util.Deque;
 import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.network.protocol.game.ClientboundSoundPacket;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.sounds.SoundEvent;
+import net.minecraft.sounds.SoundSource;
 import net.minecraft.tags.DamageTypeTags;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.EntityType;
@@ -22,11 +29,12 @@ import net.minecraft.world.phys.Vec3;
 import org.jspecify.annotations.Nullable;
 
 /**
- * Herobrine (docs/features/herobrine.md): a figure who stands still, stares at the one player he came for, and is gone
- * the moment anyone comes within {@value #VANISH_DISTANCE} blocks, stares back too long, or hits him. He never attacks,
- * breaks a block, carries a name tag or is saved with the world: {@link HerobrineEncounters} places him for one
- * encounter and he removes himself. While he stands he notes every attentive player who really sees him (on their
- * screen, nothing in the way, for {@value #SEEN_TICKS} ticks); when he goes, the encounter ends with those witnesses.
+ * Herobrine (docs/features/herobrine.md): a figure who stares at the one player he came for, and is gone the moment
+ * anyone comes within {@value #VANISH_DISTANCE} blocks, stares back too long, or hits him. He never attacks, breaks a
+ * block, carries a name tag or is saved with the world: {@link HerobrineEncounters} places him for one encounter, as one
+ * of the {@link Variant}s, and he removes himself. While he stands he notes every attentive player who really sees him
+ * (on their screen, nothing in the way, for {@value #SEEN_TICKS} ticks); when he goes, the encounter ends with those
+ * witnesses.
  */
 public final class Herobrine extends PathfinderMob {
 	/** A distant encounter ends when any player comes this close, in blocks. */
@@ -43,6 +51,16 @@ public final class Herobrine extends PathfinderMob {
 	public static final int SEEN_TICKS = 10;
 	/** Players further than this cannot see him, and his target going further ends the encounter, in blocks. */
 	public static final double WITNESS_RANGE = 96.0;
+	/** A second look: once seen, he moves or goes after his player has looked away this many ticks. */
+	public static final int LOOK_AWAY_TICKS = 10;
+	/** A follower sends one footstep for this many ticks of walking. */
+	public static final int FOOTSTEP_EVERY = 6;
+	/** How loud a follower's footsteps are: quiet, and only his player hears them. */
+	public static final float FOOTSTEP_VOLUME = 0.3F;
+	/** A follower's footsteps sound this far behind the player, towards him, in blocks (quiet sounds carry 16). */
+	public static final double FOOTSTEP_FROM = 8.0;
+	/** How much of his player's path a follower remembers, in points. */
+	private static final int MAX_TRAIL = 400;
 	/** How near the middle of a player's view he must be to count as on their screen: the cosine of the angle. */
 	private static final double ON_SCREEN_COSINE = 0.6;
 	/** How directly a player must look at him to count as staring: the cosine of the angle off their aim. */
@@ -54,6 +72,26 @@ public final class Herobrine extends PathfinderMob {
 		DISTANT, CLOSE
 	}
 
+	/** How he goes about it. Every variant but {@link #BEHIND} is a distant encounter. */
+	public enum Variant {
+		/** He stands and watches, on a ridge or in a clearing where he can be seen, by several players if they are together. */
+		WATCHER(Kind.DISTANT),
+		/** He walks the player's own path behind them, keeping his distance, freezing while watched; his steps are faint. */
+		FOLLOWER(Kind.DISTANT),
+		/** He watches; once seen, the next time the player looks away he is gone, or standing somewhere else. */
+		SECOND_LOOK(Kind.DISTANT),
+		/** He stands at the far, dark end of a straight tunnel the player is not facing. */
+		TUNNEL(Kind.DISTANT),
+		/** He stands right behind the player. */
+		BEHIND(Kind.CLOSE);
+
+		public final Kind kind;
+
+		Variant(Kind kind) {
+			this.kind = kind;
+		}
+	}
+
 	/** Why he went. */
 	public enum Outcome {
 		/** His player looked straight at him long enough. */
@@ -62,7 +100,7 @@ public final class Herobrine extends PathfinderMob {
 		APPROACHED,
 		/** A player hit him. */
 		HIT,
-		/** His time ran out. */
+		/** His time ran out (or, on a second look, he was simply gone when they looked back). */
 		EXPIRED,
 		/** His player logged out, died, left the dimension or went out of range. */
 		TARGET_LOST,
@@ -70,7 +108,7 @@ public final class Herobrine extends PathfinderMob {
 		REMOVED
 	}
 
-	private Kind kind = Kind.DISTANT;
+	private Variant variant = Variant.WATCHER;
 	private @Nullable UUID target;
 	private UUID encounter = UUID.randomUUID();
 	private int life = DISTANT_TICKS;
@@ -78,6 +116,11 @@ public final class Herobrine extends PathfinderMob {
 	private @Nullable Outcome outcome;
 	private final Map<UUID, Integer> watching = new HashMap<>();
 	private final Set<UUID> witnesses = new LinkedHashSet<>();
+	private final Deque<Vec3> trail = new ArrayDeque<>();
+	private double followDistance;
+	private int steps;
+	private int away;
+	private boolean relocated;
 
 	public Herobrine(EntityType<? extends Herobrine> type, Level level) {
 		super(type, level);
@@ -89,18 +132,32 @@ public final class Herobrine extends PathfinderMob {
 				.add(Attributes.KNOCKBACK_RESISTANCE, 1.0);
 	}
 
-	/** Sends him for {@code player} as encounter {@code id}, and turns him their way. */
-	public void haunt(Kind kind, Player player, UUID id) {
-		this.kind = kind;
+	/**
+	 * Sends him, where he already stands, for {@code player} as encounter {@code id}, and turns him their way. A follower
+	 * keeps the distance he starts at, and walks the straight line to the player before following their own steps.
+	 */
+	public void haunt(Variant variant, Player player, UUID id) {
+		this.variant = variant;
 		target = player.getUUID();
 		encounter = id;
-		life = kind == Kind.CLOSE ? CLOSE_TICKS : DISTANT_TICKS;
+		life = variant.kind == Kind.CLOSE ? CLOSE_TICKS : DISTANT_TICKS;
 		stared = 0;
+		trail.clear();
+		if (variant == Variant.FOLLOWER) {
+			followDistance = position().distanceTo(player.position());
+			for (double d = 0.5; d < followDistance; d += 0.5) {
+				trail.addLast(position().lerp(player.position(), d / followDistance));
+			}
+		}
 		face(player);
 	}
 
 	public Kind kind() {
-		return kind;
+		return variant.kind;
+	}
+
+	public Variant variant() {
+		return variant;
 	}
 
 	public @Nullable UUID target() {
@@ -127,18 +184,84 @@ public final class Herobrine extends PathfinderMob {
 			end(level, Outcome.TARGET_LOST);
 			return;
 		}
+		if (variant == Variant.FOLLOWER) {
+			follow(level, player);
+		}
 		face(player);
 		noteWitnesses(level);
-		if (kind == Kind.DISTANT && someoneClose(level, position())) {
+		if (variant.kind == Kind.DISTANT && someoneClose(level, position())) {
 			end(level, Outcome.APPROACHED);
 			return;
 		}
+		if (variant == Variant.SECOND_LOOK && secondLook(level, player)) {
+			return;
+		}
 		stared = isStaredAtBy(player) ? stared + 1 : 0;
-		if (stared >= (kind == Kind.CLOSE ? CLOSE_STARE_TICKS : STARE_TICKS)) {
+		if (stared >= (variant.kind == Kind.CLOSE ? CLOSE_STARE_TICKS : STARE_TICKS)) {
 			end(level, Outcome.STARED_DOWN);
 		} else if (--life <= 0) {
 			end(level, Outcome.EXPIRED);
 		}
+	}
+
+	/**
+	 * A follower remembers where his player walks, and while they are not looking at him walks there himself, as far
+	 * behind as he started; a step sounds faintly for them every {@value #FOOTSTEP_EVERY} ticks he walks. When they
+	 * stop, he stops, and so do his steps.
+	 */
+	private void follow(ServerLevel level, Player player) {
+		Vec3 at = player.position();
+		if (trail.isEmpty() || trail.peekLast().distanceToSqr(at) > 0.09) {
+			trail.addLast(at);
+			if (trail.size() > MAX_TRAIL) {
+				trail.removeFirst();
+			}
+		}
+		if (isOnScreenOf(player)) {
+			return;
+		}
+		boolean moved = false;
+		while (!trail.isEmpty() && trail.peekFirst().distanceToSqr(at) > followDistance * followDistance) {
+			Vec3 next = trail.removeFirst();
+			BlockPos feet = BlockPos.containing(next);
+			if (HerobrineEncounters.standable(level, feet)) {
+				setPos(next.x, feet.getY(), next.z);
+				moved = true;
+			}
+		}
+		if (moved && ++steps % FOOTSTEP_EVERY == 0 && player instanceof ServerPlayer listener) {
+			SoundEvent step = level.getBlockState(blockPosition().below()).getSoundType().getStepSound();
+			Vec3 from = at.add(position().subtract(at).normalize().scale(FOOTSTEP_FROM));
+			listener.connection.send(new ClientboundSoundPacket(BuiltInRegistries.SOUND_EVENT.wrapAsHolder(step), SoundSource.HOSTILE,
+					from.x, from.y, from.z, FOOTSTEP_VOLUME, 0.85F, level.getRandom().nextLong()));
+		}
+	}
+
+	/**
+	 * A second look: once his player has seen him and then looked away for {@value #LOOK_AWAY_TICKS} ticks, he is gone,
+	 * or (half the time, if there is a place) standing somewhere else they could see him. Once only. Returns whether he
+	 * moved or went this tick.
+	 */
+	private boolean secondLook(ServerLevel level, Player player) {
+		if (relocated || !witnesses.contains(player.getUUID())) {
+			return false;
+		}
+		away = isOnScreenOf(player) ? 0 : away + 1;
+		if (away < LOOK_AWAY_TICKS) {
+			return false;
+		}
+		relocated = true;
+		Vec3 next = player instanceof ServerPlayer moved && level.getRandom().nextBoolean()
+				? HerobrineEncounters.relocation(level, moved, position()) : null;
+		if (next == null) {
+			outcome = Outcome.EXPIRED;
+			discard();
+			return true;
+		}
+		snapTo(next.x, next.y, next.z, getYRot(), getXRot());
+		stared = 0;
+		life = Math.max(life, DISTANT_TICKS / 2);
+		return true;
 	}
 
 	private void noteWitnesses(ServerLevel level) {
@@ -158,7 +281,7 @@ public final class Herobrine extends PathfinderMob {
 
 	private void witness(Player player) {
 		if (witnesses.add(player.getUUID())) {
-			HerobrineEncounters.seen(this, player.getUUID(), kind);
+			HerobrineEncounters.seen(this, player.getUUID(), variant.kind);
 		}
 	}
 
@@ -175,7 +298,7 @@ public final class Herobrine extends PathfinderMob {
 
 	/** Whether {@code player} is looking straight at him, with nothing in the way. */
 	public boolean isStaredAtBy(Player player) {
-		return within(player, kind == Kind.CLOSE ? CLOSE_STARE_COSINE : DISTANT_STARE_COSINE) && player.hasLineOfSight(this);
+		return within(player, variant.kind == Kind.CLOSE ? CLOSE_STARE_COSINE : DISTANT_STARE_COSINE) && player.hasLineOfSight(this);
 	}
 
 	private boolean within(Player player, double cosine) {

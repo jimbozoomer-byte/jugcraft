@@ -27,7 +27,13 @@ The owner approved a plan shared between this branch and OpenAI Codex/Astra (coo
 
 ### The encounter
 
-- **Distant (the watcher).** He stands 28–52 blocks away under the open sky, or 14–28 underground, 20°–75° off where the player faces. He stands on solid ground in a loaded chunk with a clear line from the player's eyes to his. He turns to face them and does nothing else. He goes when anyone comes within 12 blocks, after the player has looked straight at him for 2 seconds (long enough to know what they saw), after 30 seconds, if he is hit, or if his player leaves.
+- **Distant.** Placement picks one of four variants, falling back to a watcher. Every variant stands on solid ground in a loaded chunk, with a clear line from the player's eyes to his, and turns to face the player.
+  - **Watcher:** 28–52 blocks away under the open sky (14–28 underground), 20°–75° off where the player faces. Of 16 tries the best place wins: higher than the player (a ridge), open to the sky (a clearing), and in clear view of the other attentive players within 48 blocks, so friends together share one sighting.
+  - **Follower** (a quarter of the time when the player is alone): he starts 18–22 blocks behind and walks the player's own path, keeping that distance. He freezes while on their screen. Every 6 ticks he walks, a faint step sounds for that player only, from 8 blocks behind them towards him (quiet sounds carry 16 blocks). When they stop, he and his steps stop.
+  - **Second look** (a quarter of the time): once the player has seen him and then looked away for half a second, he is gone, or half the time standing somewhere else they could see.
+  - **Tunnel** (tried first 60% of the time when the player is not under the open sky): he stands at the far end of the longest straight, covered, walkable run, 14–48 blocks, in a direction the player is not facing. The eyes wait down the tunnel behind them.
+
+  He goes when anyone comes within 12 blocks, after the player has looked straight at him for 2 seconds (long enough to know what they saw), after 30 seconds, if he is hit, or if his player leaves. Operators can name a variant: `/jugcraft herobrine sighting <players> [watcher|follower|second_look|tunnel]`.
 - **Close.** He stands 1.6 blocks behind the player. Only that player hears a heartbeat and a soul's sigh and gets 3 seconds of Darkness, which dims the screen and does nothing else. He goes once they have turned and looked at him for 0.6 seconds, or after 3 seconds.
 - **Never harmful.** No attack, no damage, no loot, no world change. A blow or an arrow meets nothing and he is gone. He has no name tag or boss bar, is never saved with the world (`noSave`), and removes himself.
 
@@ -49,12 +55,12 @@ Once a second, with `herobrine.haunting=on`, the hook calls `due(server, candida
 - `seen(request, encounter, player)`, once per player per encounter.
 - `ended(request, encounter, outcome, witnesses)`, with `STARED_DOWN`, `APPROACHED`, `HIT`, `EXPIRED`, `TARGET_LOST` or `REMOVED` (including chunk unload).
 
-`HerobrineEncounters.attempt` and `attemptAt` are the placement calls. An operator's forced encounter uses reservation `FORCED` (-1).
+`HerobrineEncounters.attempt` (any variant of the kind), `attemptVariant` and `attemptAt` (a chosen place) are the placement calls. An operator's forced encounter uses reservation `FORCED` (-1).
 
 ### Operators and settings
 
 - `/jugcraft herobrine status` shows whether the haunting is on, encounters under way and players online. It also says when no schedule is installed.
-- `/jugcraft herobrine sighting <players>` and `/jugcraft herobrine scare <players>` force an encounter, reporting where none could be placed.
+- `/jugcraft herobrine sighting <players> [variant]` and `/jugcraft herobrine scare <players>` force an encounter, reporting where none could be placed.
 - `herobrine.haunting` in `config/jugcraft.properties` (`on` by default; `off` stops scheduled encounters, and the commands still work).
 
 ### His look
@@ -73,19 +79,17 @@ Server game tests (`HerobrineGameTests`, in the 48-block arena with padding) cov
 - only attentive witnesses are credited (a badly hurt player facing him is not);
 - a sighting spot is ahead of the player, at the right distance, on solid ground;
 - a walled-in player gets `NO_VISIBLE_SPOT` and nothing is placed;
-- he is never saved, and players under a minute in are not active.
+- he is never saved, and players under a minute in are not active;
+- a follower walks the player's own path at its distance, and stops when they stop;
+- a second look finds him gone or moved;
+- a tunnel encounter stands at the far end of a tunnel behind the player;
+- a shared sighting credits both players who saw him, and not the one facing away.
 
 Not yet verified: a real compile and CI run, rendering in a client (the eyes layer), and real two-client play. The local structure parser checks syntax only.
 
 ## Still to build (owner-approved plan, not implemented)
 
-- **Encounter variants:**
-  - a watcher on ridges, clearings and cave entrances;
-  - a follower whose restrained footsteps stop when the player stops;
-  - a second-look disappearance and reposition;
-  - white eyes at the end of a straight tunnel;
-  - a genuinely shared group sighting;
-  - a rare close encounter followed by disappearance.
+- **Encounter refinements:** cave entrances as watcher places, and testing the variants in a real client: whether the footsteps are audible, and whether the eyes show down a dark tunnel.
 - **World clues (part 2):**
   - leafless natural groves, straight 2×2 tunnels, sand and mossy pyramids, redstone-torch shrines, and cryptic signs ("YOU TOOK THE LONG WAY", "I WAS HERE FIRST", "COUNT THE WINDOWS", "YOU BROUGHT SOMEONE");
   - some linked into short investigations: a sighting across a river leads to a leafless grove, then a torch-lined tunnel, then a sign pointing to a shoreline pyramid.

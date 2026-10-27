@@ -7767,6 +7767,7 @@
   "commands.jugcraft.herobrine.status.no_schedule": "No schedule is installed: Herobrine appears only by /jugcraft herobrine sighting or scare",
   "commands.jugcraft.herobrine.status.off": "Herobrine's haunting is off (herobrine.haunting=off)",
   "commands.jugcraft.herobrine.status.on": "Herobrine's haunting is on: %s encounters under way, %s players online",
+  "commands.jugcraft.herobrine.unknown_variant": "No such encounter: %s (watcher, follower, second_look or tunnel)",
   "commands.jugcraft.lair.close.done": "Closed %s, slot %s",
   "commands.jugcraft.lair.close.none": "%s has no open slot %s",
   "commands.jugcraft.lair.list.entry": "%s, slot %s: %s inside, open %s seconds",

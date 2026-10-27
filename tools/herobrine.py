@@ -44,6 +44,7 @@ def write_all(lang):
         "No schedule is installed: Herobrine appears only by /jugcraft herobrine sighting or scare"
     lang[f"commands.{MOD}.herobrine.sighting"] = "Herobrine is watching %s from a distance"
     lang[f"commands.{MOD}.herobrine.scare"] = "Herobrine stands behind %s"
+    lang[f"commands.{MOD}.herobrine.unknown_variant"] = "No such encounter: %s (watcher, follower, second_look or tunnel)"
     for failure, text in FAILURES.items():
         lang[f"commands.{MOD}.herobrine.failed.{failure}"] = text
 
