@@ -25,6 +25,7 @@ import net.minecraft.world.level.block.FenceBlock;
 import net.minecraft.world.level.block.entity.SignBlockEntity;
 import net.minecraft.world.level.block.entity.SignTextSlot;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.levelgen.Heightmap;
 
 /**
  * Herobrine's sky islands and surface ruins (docs/features/herobrine-sky.md). Each of the six sky islands is planned over
@@ -103,9 +104,11 @@ public class HerobrineSkyGameTests {
 		helper.assertTrue(plan.type() == HerobrineMarkPlans.Type.SKY_ISLAND && plan.at().equals(centre), "It is a sky island at its centre");
 		int count = plan.steps().size();
 		helper.assertTrue(count >= fewest && count <= HerobrineSkyIslands.MAX_STEPS, variant + " places " + count + " blocks");
-		int arenaTop = helper.absolutePos(new BlockPos(0, 8, 0)).getY();
+		// Measured before building: the ground (and anything standing on it) under each block's own column.
 		for (HerobrineMarkPlans.Step step : plan.steps()) {
-			helper.assertTrue(step.pos().getY() >= arenaTop + HerobrineSkyIslands.CLEARANCE, variant + " should float clear: " + step.pos());
+			int ground = level.getHeight(Heightmap.Types.MOTION_BLOCKING, step.pos().getX(), step.pos().getZ());
+			helper.assertTrue(step.pos().getY() >= ground + HerobrineSkyIslands.CLEARANCE,
+					variant + " should float " + HerobrineSkyIslands.CLEARANCE + " clear of the ground under " + step.pos() + " (ground " + ground + ")");
 			helper.assertTrue(step.pos().getY() <= level.getMaxY() - HerobrineSkyIslands.HEADROOM, variant + " should stay under the roof");
 			helper.assertTrue(step.expect() == Blocks.AIR, variant + " only fills empty sky");
 		}
