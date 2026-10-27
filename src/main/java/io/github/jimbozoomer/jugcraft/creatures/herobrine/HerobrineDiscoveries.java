@@ -44,7 +44,7 @@ public final class HerobrineDiscoveries {
         boolean underground = level.getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, at.getX(), at.getZ()) >= at.getY() + 8;
         HerobrineMarkPlans.Plan plan = underground ? HerobrineDepths.find(level, at, false) : null;
         if (plan == null) plan = HerobrineDepths.find(level, at, true);
-        if (plan == null && !underground) plan = level.random.nextInt(4) == 0
+        if (plan == null && !underground) plan = level.getRandom().nextInt(4) == 0
                 ? HerobrineSkyIslands.find(level, at) : HerobrineSurfacePlans.find(level, at);
         // Failed searches wait a minute before retrying. Restart/reconnect resets conservatively; saved 3D spacing persists.
         int interval = (underground ? 180 : 900) * (season.eventActive(now) ? 1 : 6);
