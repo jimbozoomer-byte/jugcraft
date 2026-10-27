@@ -294,6 +294,7 @@
       "io.github.jimbozoomer.jugcraft.test.ConnectedAlchemyGameTests",
       "io.github.jimbozoomer.jugcraft.test.AlchemyPlayabilityGameTests",
       "io.github.jimbozoomer.jugcraft.test.JugNouveauGameTests",
+      "io.github.jimbozoomer.jugcraft.test.NouveauStatusSourcesGameTests",
       "io.github.jimbozoomer.jugcraft.test.StarbuncleGameTests",
       "io.github.jimbozoomer.jugcraft.test.NouveauExpansionGameTests",
       "io.github.jimbozoomer.jugcraft.test.MenagerieGameTests",

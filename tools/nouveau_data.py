@@ -51,6 +51,8 @@ def write_all(write, assets, data, lang):
         lang[target] = text.replace('Ars Nouveau', 'Jug Nouveau')
         if source_key.startswith('item.ars_jimbaux.ritual_'): lang[target] = 'Ritual of ' + lang[target]
         if source_key.startswith('item.ars_jimbaux.music_disc_') and not source_key.endswith('.desc'): lang[target] = 'Music Disc — ' + LANG.get(source_key+'.desc', source_key.rsplit('.',1)[-1].replace('music_disc_','').replace('_',' ').title())
+    # The source thread text calls this status Immolation; the Jimtafacts burning status keeps the name Immolate.
+    lang['effect.jugcraft.nouveau_immolate'] = 'Immolation'
     for folder in ('damage_type', 'banner_pattern', 'enchantment', 'advancement'):
         for path in sorted((DATA / folder).rglob('*.json')):
             value = walk(read(path), registry)
@@ -158,7 +160,9 @@ def write_all(write, assets, data, lang):
     write(data / 'tags/banner_pattern/nouveau_pattern_item/nouveau.json', {'values':['jugcraft:nouveau_'+p.stem for p in sorted((DATA/'banner_pattern').glob('*.json'))]})
     write(data.parent/'minecraft/tags/banner_pattern/no_item_required.json', {'replace':False,'values':[]})
     # Potions use native 26.3 brewing recipes, including every bottle form and both duration/power upgrades.
-    for effect, reagent in {'shielding':'bastion_pod','recovery':'mendosteen_pod','freezing':'frostaya_pod','blasting':'bombegranate_pod','mana_regen':'sourceberry_bush'}.items():
+    # Immolation (the thread's fire-spell boost) and Drygmy's Blessing (extra looting) had no source of their own; they brew from fire essence and a drygmy token.
+    potion_names = {'immolate':'Immolation','looting':"Drygmy's Blessing"}
+    for effect, reagent in {'shielding':'bastion_pod','recovery':'mendosteen_pod','freezing':'frostaya_pod','blasting':'bombegranate_pod','mana_regen':'sourceberry_bush','immolate':'fire_essence','looting':'drygmy_shard'}.items():
         for form in ('potion','splash_potion','lingering_potion'):
             def brew(name, base, result, ingredient):
                 write(data / f'recipe/nouveau/brewing/{form}_{name}.json', {'type':'minecraft:brewing','input':{'item':'minecraft:'+form,'potion_contents':{'potions':base}},'output':{'id':'minecraft:'+form,'components':{'minecraft:potion_contents':{'potion':result}}},'reagent':{'item':ingredient}})
@@ -170,7 +174,7 @@ def write_all(write, assets, data, lang):
             potion='jugcraft:nouveau_'+effect+suffix
             for form,out,reagent_item in [('potion','splash_potion','gunpowder'),('splash_potion','lingering_potion','dragon_breath')]:
                 write(data/f'recipe/nouveau/brewing/{effect}{suffix}_{out}.json',{'type':'minecraft:brewing','input':{'item':'minecraft:'+form,'potion_contents':{'potions':potion}},'output':{'id':'minecraft:'+out,'components':{'minecraft:potion_contents':{'potion':potion}}},'reagent':{'item':'minecraft:'+reagent_item}})
-            for form in ('potion','splash_potion','lingering_potion','tipped_arrow'): lang[f'item.minecraft.{form}.effect.nouveau_{effect}{suffix}'] = ('Arrow of ' if form=='tipped_arrow' else ('Lingering ' if form=='lingering_potion' else 'Splash ' if form=='splash_potion' else '')+'Potion of ') + effect.replace('_',' ').title()
+            for form in ('potion','splash_potion','lingering_potion','tipped_arrow'): lang[f'item.minecraft.{form}.effect.nouveau_{effect}{suffix}'] = ('Arrow of ' if form=='tipped_arrow' else ('Lingering ' if form=='lingering_potion' else 'Splash ' if form=='splash_potion' else '')+'Potion of ') + potion_names.get(effect, effect.replace('_',' ').title())
     write(assets.parents[1]/'jugcraft/nouveau/particles.json',[p.stem for p in sorted((ASSET/'particles').glob('*.json'))])
     # Translate the supplied NeoForge loot injection into a small Fabric-readable table specification.
     injections=[]

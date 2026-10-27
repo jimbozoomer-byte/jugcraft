@@ -23,7 +23,6 @@ import net.minecraft.world.item.*;
 /** Thread levels come from their armor sockets; bonuses use the existing Focus and combat boundary. */
 public final class NouveauThreads {
     private static AttachmentType<Boolean> UNDYING_SPENT;
-    private static final Map<Player,Integer> IMMOLATION=new WeakHashMap<>();
     private NouveauThreads(){}
     public static void register(){
         UNDYING_SPENT=AttachmentRegistry.<Boolean>builder().persistent(Codec.BOOL).copyOnDeath().buildAndRegister(Jugcraft.id("nouveau_undying_spent"));
@@ -61,7 +60,6 @@ public final class NouveauThreads {
         if(level(p,"depths")>=3&&p.isUnderWater())p.setAirSupply(p.getMaxAirSupply());
         if(level(p,"heights")>0)p.addEffect(new MobEffectInstance(MobEffects.JUMP_BOOST,40,level(p,"heights")-1,true,false));
         if(p.isSleeping()&&p.getSleepTimer()>=100)p.setAttached(UNDYING_SPENT,false);
-        if(IMMOLATION.containsKey(p)){int left=IMMOLATION.get(p)-20;if(left<=0)IMMOLATION.remove(p);else IMMOLATION.put(p,left);}
         int repair=level(p,"repairing");if(repair>0&&p.tickCount%Math.max(20,100-repair*20)==0){
             var equipment=new ArrayList<ItemStack>();for(var slot:EquipmentSlot.VALUES)equipment.add(p.getItemBySlot(slot));
             for(var stack:equipment)if(stack.isDamaged()&&(stack.getItem() instanceof NouveauGear.Armor||stack.getItem() instanceof NouveauInstruments.Visual)&&ConcordanceProgress.spendFocus(p,1)){stack.setDamageValue(Math.max(0,stack.getDamageValue()-repair));break;}
@@ -85,8 +83,8 @@ public final class NouveauThreads {
         var p=ConcordanceEffects.person(context);if(p==null||!damaging(effect)||context.cause().origin()!=Cause.Origin.SPELL&&context.cause().origin()!=Cause.Origin.INVOCATION)return effect;
         int fire=level(p,"kindling"),cold=level(p,"chilling");
         if(fire>0)target.igniteForSeconds(5*fire);if(cold>0){target.setTicksFrozen(Math.max(target.getTicksFrozen(),200*cold));target.addEffect(new MobEffectInstance(MobEffects.SLOWNESS,200*cold,cold==3?1:0),p);}
-        if(p.isOnFire()&&level(p,"immolation")>0){p.clearFire();IMMOLATION.put(p,200*level(p,"immolation"));}
-        int added=level(p,"spellpower")+(IMMOLATION.containsKey(p)&&(effect.school()!=null&&effect.school().contains("fire")||effect.status()!=null&&(effect.status().endsWith("/flare")||effect.status().endsWith("/ignite")))?level(p,"immolation")*2:0);
+        if(p.isOnFire()&&level(p,"immolation")>0){p.clearFire();NouveauStatuses.give(p,"immolate",200*level(p,"immolation"),level(p,"immolation")-1,p);}
+        int added=level(p,"spellpower")+(NouveauStatuses.has(p,"immolate")&&(effect.school()!=null&&effect.school().contains("fire")||effect.status()!=null&&(effect.status().endsWith("/flare")||effect.status().endsWith("/ignite")))?NouveauStatuses.strength(p,"immolate")*2:0);
         if(NouveauFamiliars.active(p).equals("drygmy")&&earth(effect))added+=2;
         var spellDamage=p.getEffect(NouveauStatuses.EFFECTS.get("spell_damage"));if(spellDamage!=null)added+=spellDamage.getAmplifier()+1;
         return added==0?effect:effect.withMagnitude(Math.min(EffectSpec.MAX_MAGNITUDE,effect.magnitude()+added));
