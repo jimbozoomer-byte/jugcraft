@@ -23,6 +23,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.level.GameType;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 
@@ -144,10 +145,17 @@ public class GlassAbbotClientGameTests implements FabricClientGameTest {
 			server.runCommand("tick unfreeze");
 			context.waitTicks(GlassAbbotEntity.CRACK_TICKS + 5);
 
-			// The Veil, at half his health: he folds his hands, unhurt, and his images stand up round him.
-			pose(context, server, at, (abbot, level, player) -> abbot.setHealth(abbot.getMaxHealth() * GlassAbbotEntity.VEIL_AT - 1.0F), 4);
-			server.runOnServer(minecraft -> check(abbot(minecraft).phase() == GlassAbbotEntity.Phase.VEILING,
-					"The Veil did not fall: " + abbot(minecraft).phase()));
+			// The Veil, at half his health: he folds his hands, unhurt, and his images stand up round him. The Veil waits for an
+			// attack under way to end, so the player stands out of the fight (in creative): with no foe he breaks off at once.
+			pose(context, server, at, (abbot, level, player) -> {
+				player.setGameMode(GameType.CREATIVE);
+				abbot.setHealth(abbot.getMaxHealth() * GlassAbbotEntity.VEIL_AT - 1.0F);
+			}, 4);
+			server.runOnServer(minecraft -> {
+				GlassAbbotEntity abbot = abbot(minecraft);
+				check(abbot.phase() == GlassAbbotEntity.Phase.VEILING, "The Veil did not fall: " + abbot.phase() + " (attack " + abbot.attack()
+						+ ", beam " + abbot.beam() + ")");
+			});
 			server.runCommand("tick unfreeze");
 			context.waitTicks(GlassAbbotEntity.VEIL_TICKS + 4);
 			server.runCommand("tick freeze");
