@@ -1594,6 +1594,8 @@ def main():
     phosphate_processing.draw_all(save)
     import cryogenic_fuels
     cryogenic_fuels.draw_all(save)
+    import found_plastic
+    found_plastic.draw_all(save)
     import synthetic_fuels
     synthetic_fuels.draw_all(save)
     import walnut_furniture
