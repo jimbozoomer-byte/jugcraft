@@ -204,6 +204,7 @@ CI's 427×240 GUI it leaves 134 pixels for a title, so "Magic: the Arcane Concor
 will be cut there.
 
 ## First-join welcome (27 October 2026)
+After merging main (5b8d6520c): fork [run 40463073693](https://github.com/mmme123-spec/jugcraftfork/actions/runs/40463073693) on `a99ede0c6`, green, every job and all sixteen client shards.
 
 Before this, the first thing a new player read on joining was the Exchange's starter-loan offer and its guide book;
 nothing mentioned the encyclopedia. Now, the first time a player joins with Jugcraft's client, chat says:
