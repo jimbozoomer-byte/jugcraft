@@ -794,6 +794,68 @@ public class ConcordanceGardenGameTests {
 		helper.succeed();
 	}
 
+	/**
+	 * The garden cohort, GC-05 (GC-P45, GC-P54): a device index holds the 16 nearest awake Hearts and Gleaners its keepers
+	 * keep and the 16 nearest Ley Pylons they or no one own, from one pass, and no bed; a dormant Heart and a stranger's
+	 * Gleaner and pylon are never indexed. A Heart broken since is gone at the next read, with nothing scanned again. An index
+	 * of beds alone holds no device, and far from anything loaded a device index finds nothing and loads no chunk.
+	 */
+	@GameTest(structure = "jugcraft-test:drone_depot", maxTicks = 20)
+	public void theGardenReachCapsItsDevices(GameTestHelper helper) {
+		ServerLevel level = level(helper);
+		UUID keeper = new UUID(0x6C05L, 1L);
+		UUID stranger = new UUID(0x6C05L, 2L);
+		BlockPos centre = helper.absolutePos(new BlockPos(8, 2, 8));
+		List<BlockPos> hearts = new ArrayList<>();
+		List<BlockPos> gleaners = new ArrayList<>();
+		List<BlockPos> pylons = new ArrayList<>();
+		for (int i = 0; i < 20; i++) {
+			BlockPos h = new BlockPos(i % 16, 1, 1 + i / 16);
+			helper.setBlock(h, Garden.VERDANT_HEART);
+			((VerdantHeartBlockEntity) entity(helper, h)).awaken(keeper);
+			hearts.add(helper.absolutePos(h));
+			BlockPos g = new BlockPos(i % 16, 3, 14 - i / 16);
+			helper.setBlock(g, Garden.GLEANER);
+			((GleanerBlockEntity) entity(helper, g)).awaken(keeper);
+			gleaners.add(helper.absolutePos(g));
+			BlockPos p = new BlockPos(i % 16, 5, 8 + i / 16);
+			helper.setBlock(p, JugcraftConcordance.LEY_PYLON);
+			((LeyPylonBlockEntity) entity(helper, p)).setOwner(i % 2 == 0 ? keeper : null);
+			pylons.add(helper.absolutePos(p));
+		}
+		helper.setBlock(new BlockPos(7, 2, 7), Garden.VERDANT_HEART); // dormant
+		helper.setBlock(new BlockPos(9, 2, 9), Garden.GLEANER);
+		((GleanerBlockEntity) entity(helper, new BlockPos(9, 2, 9))).awaken(stranger);
+		helper.setBlock(new BlockPos(9, 2, 7), JugcraftConcordance.LEY_PYLON);
+		((LeyPylonBlockEntity) entity(helper, new BlockPos(9, 2, 7))).setOwner(stranger);
+		Comparator<BlockPos> nearest = Comparator.<BlockPos>comparingDouble(pos -> pos.distSqr(centre)).thenComparingInt(BlockPos::getY)
+				.thenComparingInt(BlockPos::getX).thenComparingInt(BlockPos::getZ);
+		GardenReach reach = new GardenReach(centre, 10, bed -> false, keeper::equals);
+		long now = level.getGameTime();
+		List<BlockPos> expectedHearts = hearts.stream().sorted(nearest).limit(GardenReach.MAX_DEVICES).toList();
+		helper.assertTrue(reach.hearts(level, now).stream().map(BlockEntity::getBlockPos).toList().equals(expectedHearts)
+				&& reach.gleaners(level, now).stream().map(BlockEntity::getBlockPos).toList()
+						.equals(gleaners.stream().sorted(nearest).limit(GardenReach.MAX_DEVICES).toList())
+				&& reach.pylons(level, now).stream().map(BlockEntity::getBlockPos).toList()
+						.equals(pylons.stream().sorted(nearest).limit(GardenReach.MAX_DEVICES).toList()),
+				"16 of each, nearest first; the dormant Heart and the stranger's Gleaner and pylon never indexed; no one's pylons kept");
+		helper.assertTrue(reach.refreshes() == 1 && reach.beds(level, now).isEmpty(), "One pass for all; a device index holds no beds");
+		BlockPos gone = expectedHearts.getFirst();
+		level.setBlock(gone, Blocks.AIR.defaultBlockState(), Block.UPDATE_ALL);
+		helper.assertTrue(reach.hearts(level, now + 1).stream().map(BlockEntity::getBlockPos).toList()
+				.equals(expectedHearts.subList(1, GardenReach.MAX_DEVICES)) && reach.refreshes() == 1,
+				"A Heart broken is gone at once, nothing scanned again");
+		GardenReach beds = new GardenReach(centre, 10, bed -> true);
+		helper.assertTrue(beds.hearts(level, now).isEmpty() && beds.gleaners(level, now).isEmpty() && beds.pylons(level, now).isEmpty(),
+				"An index of beds alone holds no device");
+		BlockPos far = helper.absolutePos(new BlockPos(1, 1, 1)).offset(200_000, 0, 200_000);
+		GardenReach away = new GardenReach(far, WorkerParser.MAX_RADIUS, bed -> true, any -> true);
+		helper.assertTrue(away.hearts(level, now).isEmpty() && away.gleaners(level, now).isEmpty() && away.pylons(level, now).isEmpty()
+				&& away.scanned() == 0, "Nothing loaded far off: nothing found, nothing examined");
+		helper.assertTrue(noneLoaded(level, far), "and no chunk of it was loaded");
+		helper.succeed();
+	}
+
 	// ---------------------------------------------------------------- budget and saving
 
 	/**

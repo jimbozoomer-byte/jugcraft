@@ -42,6 +42,8 @@ OBLIGATIONS = {}  # work -> act (each act at most one work). GC-04: "strain_tend
 CONSTANTS = {}  # work -> {Java file under concordance/: {constant: value}}; each spirit's unit adds its own (check_garden_pacts)
 REACH = {"MAX_BEDS": 64, "REFRESH_TICKS": 200}  # Java: spirits/GardenReach (GC-P2)
 CODEX_PLACE = (6, 4)  # the Binding category's map: (0..6, 0..4) holds eleven entries; (6, 4) is free (check_concordance)
+# GC-05 (GC-P45, GC-P54): a device index (GardenReach.devices) holds at most this many Hearts, Gleaners and Ley Pylons, each.
+REACH["MAX_DEVICES"] = 16  # Java: spirits/GardenReach
 
 RESEARCH = {"garden_regard": {
     "name": "The Garden's Regard", "principle": "tether", "tradition": "spiritbinders", "stage": "practitioner",

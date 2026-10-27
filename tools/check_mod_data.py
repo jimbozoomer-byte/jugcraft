@@ -18002,12 +18002,11 @@ def check_graft(co, root, lang):
             err(f"graft: missing lang {key}")
 
 
-# The garden cohort, GC-05's game tests for Verdance carrying and the bed index's devices. The garden side's three land
-# first (check_verdance_roads); theGardenReachCapsItsDevices joins this row with the bed index's devices, and Bathin's
-# worker and economy tests add their rows.
+# The garden cohort, GC-05's game tests for Verdance carrying and the bed index's devices (check_verdance_roads holds the
+# list). The garden row: the garden side's three and the bed index's devices; Bathin's worker and economy tests add their rows.
 GC05_CARRYING_TESTS = {
-    "ConcordanceGardenGameTests": ["aGleanerReceivesFromANamedHeartAtAnyDistance", "aHeartPoursIntoANamedPylonByItsOwnRule",
-                                   "aHeartSaysWhetherItHasItsOwnRoad"],
+    "ConcordanceGardenGameTests": ["theGardenReachCapsItsDevices", "aGleanerReceivesFromANamedHeartAtAnyDistance",
+                                   "aHeartPoursIntoANamedPylonByItsOwnRule", "aHeartSaysWhetherItHasItsOwnRoad"],
 }
 
 
@@ -18018,7 +18017,7 @@ def check_verdance_roads(root):
     named pylon are one body (a pylon its keeper's party or no one owns, whole batches of the data conversion, the Verdance
     spent as the Ley Charge made); within concordance/ only the Gleaner calls drawInto, only the Heart fills a pylon, and only
     Bathin's service names receiveFrom or pourInto; the pylon road loses Verdance and nothing converts into it; and the
-    garden side's game tests exist."""
+    garden side's game tests exist, with the bed index's devices' (whose Java check_garden_pacts holds)."""
 
     def strip(source):
         return re.sub(r"//[^\n]*|/\*.*?\*/", " ", source, flags=re.S)
@@ -19311,6 +19310,30 @@ def check_garden_pacts(co, root, lang, registered, research):
                    ".habitat(", "cachedHabitat(", "setChunkForced"):
         if banned in reach_java:
             err(f"spirits/GardenReach.java: never {banned} (GB12: no position scan, no chunk load, no sample)")
+    # GC-05 (GC-P45, GC-P54): the bed index's devices. In the beds' one pass, at most MAX_DEVICES of each kind: awake Hearts and
+    # Gleaners of the keepers it keeps, pylons theirs or no one's, read back in loaded chunks only. A device index holds no
+    # beds, and an index of beds alone (of, the three-argument constructor: Buer's) reads no device.
+    refresh = _java_body(reach_java, "private void refresh(ServerLevel level, long now)")
+    for needle in ("heart.awake() && keeps.test(heart.keeper())", "keptHearts.size() > MAX_DEVICES",
+                   "gleaner.awake() && keeps.test(gleaner.keeper())", "keptGleaners.size() > MAX_DEVICES",
+                   "pylon.owner() == null || keeps.test(pylon.owner())", "keptPylons.size() > MAX_DEVICES"):
+        if needle not in refresh:
+            err(f"GardenReach.refresh: {needle} (GC-05: devices in the bed index's one pass, at most {gp.REACH['MAX_DEVICES']} of each)")
+    for member, kind in (("public List<VerdantHeartBlockEntity> hearts(", "VerdantHeartBlockEntity heart"),
+                         ("public List<GleanerBlockEntity> gleaners(", "GleanerBlockEntity gleaner"),
+                         ("public List<LeyPylonBlockEntity> pylons(", "LeyPylonBlockEntity pylon")):
+        body = _java_body(reach_java, member)
+        if "fresh(level, now);" not in body or f"level.isLoaded(pos) && level.getBlockEntity(pos) instanceof {kind}" not in body:
+            err(f"GardenReach {member.strip()}: read again at most every REFRESH_TICKS and resolved in loaded chunks only (GC-05)")
+    devices = _java_body(reach_java, "public static GardenReach devices(BoundWill record)")
+    if "bed -> false, keeper -> GardenPacts.benefits(record, keeper)" not in devices:
+        err("GardenReach.devices: the devices of the keepers the pact benefits, and no beds (GC-05)")
+    if "bed -> false" not in devices:
+        err("GardenReach.devices: a device index holds no beds (GC-P54)")
+    if "this(centre, radius, indexes, NO_DEVICES);" not in reach_java or "boolean devices = keeps != NO_DEVICES;" not in refresh \
+            or "} else if (devices && " not in refresh \
+            or "bed -> GardenPacts.benefits(record, bed.keeper()));" not in _java_body(reach_java, "public static GardenReach of(BoundWill record)"):
+        err("GardenReach: an index of beds alone (of, the three-argument constructor) reads no device (GC-05: Buer's cost unchanged)")
     for path in sorted(spirits.glob("*.java")):
         if re.search(r"Garden\.(nearest|sample|bedsAround)\(|\.forgetSample\(", path.read_text(encoding="utf-8")):
             err(f"spirits/{path.name}: no spirit scans a box of positions or takes a sample (Don't 10; GB12)")
