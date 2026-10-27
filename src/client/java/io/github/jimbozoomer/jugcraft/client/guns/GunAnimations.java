@@ -48,6 +48,11 @@ public final class GunAnimations {
 	 */
 	static final Set<String> SHOOT_AIMED = Set.of("borer", "cloudburst_gun");
 	/**
+	 * Slice 15C: the guns the owner made no inspect for (tools/guns.py no_inspect()). The inspect key does nothing with
+	 * them: GeckoLib would play only the idle for an inspect it cannot find, and the arms ease toward their rest pose.
+	 */
+	static final Set<String> NO_INSPECT = Set.of("impetus_shotgun");
+	/**
 	 * How long a gun eases from one animation into the next, in ticks: not at all. The owner's animations begin and end
 	 * at the gun's idle pose, so an ease has nothing to smooth; and an ease GeckoLib begins with no animation point to
 	 * come from runs from the bones' rest pose, where the arms stand away from the gun. On a gun held at the hip, for
@@ -159,11 +164,12 @@ public final class GunAnimations {
 
 	/**
 	 * Plays this gun animation on the gun in this hand of this entity (slice 10G: a gun in each hand; this client only); a
-	 * carbine's, as a carbine, with a stock fitted (slice 13D).
+	 * carbine's, as a carbine, with a stock fitted (slice 13D). An inspect the owner did not make plays nothing
+	 * (NO_INSPECT).
 	 */
 	public static void trigger(LivingEntity holder, InteractionHand hand, String animation) {
 		ItemStack stack = holder.getItemInHand(hand);
-		if (stack.getItem() instanceof GunItem gun) {
+		if (stack.getItem() instanceof GunItem gun && !(animation.equals("inspect") && NO_INSPECT.contains(gun.name()))) {
 			long id = GeoItem.getId(stack);
 			AnimatableManager<GunItem> manager = gun.getAnimatableInstanceCache().getManagerForId(id);
 			AnimationController<GunItem> controller = manager.getAnimationControllers().get(CONTROLLER);

@@ -26350,5 +26350,14 @@
   "resourcepacks/fusion_textures/assets/jugcraft/models/block/verdant_bed.json",
   "resourcepacks/fusion_textures/assets/jugcraft/models/block/verdant_bed_wet.json",
   "resourcepacks/fusion_textures/assets/jugcraft/models/block/warding_stone.json",
-  "resourcepacks/fusion_textures/pack.mcmeta"
+  "resourcepacks/fusion_textures/pack.mcmeta",
+  "assets/jugcraft/items/hawker_rifle.json",
+  "assets/jugcraft/items/impetus_shotgun.json",
+  "assets/jugcraft/items/quill_rifle.json",
+  "assets/jugcraft/models/item/hawker_rifle.json",
+  "assets/jugcraft/models/item/impetus_shotgun.json",
+  "assets/jugcraft/models/item/quill_rifle.json",
+  "data/jugcraft/recipe/hawker_rifle.json",
+  "data/jugcraft/recipe/impetus_shotgun.json",
+  "data/jugcraft/recipe/quill_rifle.json"
 ]

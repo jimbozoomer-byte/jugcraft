@@ -45086,6 +45086,21 @@
       "numerator": 112,
       "denominator": 1,
       "source": "recipe peepo_companion:yellow_companion_bed"
+    },
+    "jugcraft:hawker_rifle": {
+      "numerator": 8209,
+      "denominator": 1,
+      "source": "recipe jugcraft:hawker_rifle"
+    },
+    "jugcraft:impetus_shotgun": {
+      "numerator": 8210,
+      "denominator": 1,
+      "source": "recipe jugcraft:impetus_shotgun"
+    },
+    "jugcraft:quill_rifle": {
+      "numerator": 8520,
+      "denominator": 1,
+      "source": "recipe jugcraft:quill_rifle"
     }
   }
 }

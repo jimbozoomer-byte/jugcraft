@@ -220,8 +220,18 @@ def texture(ref):
         if animated and not (width in (16, 32, 48, 64) and height % width == 0 and height >= width):
             err(f"Animated texture {ref} is {img.size}, expected a strip of 16x16, 32x32, 48x48 or 64x64 frames")
         elif not animated and not (ref in {"jugcraft:nouveau/entity/signs/archwood", "jugcraft:nouveau/entity/signs/hanging/archwood"} and img.size == (64,32)) and img.size not in ((16, 16), (32, 32), (48, 48), (64, 64), (128, 128)) \
-                and not (img.size in ((256, 256), (512, 512), (1024, 1024)) and _sharp(png.stem)):
+                and not (img.size in ((256, 256), (512, 512), (1024, 1024)) and _sharp(png.stem)) \
+                and img.size != (_owner_sized_gun_atlases().get(ref),) * 2:
             err(f"Texture {ref} is {img.size}, expected 16x16, 32x32, 48x48, 64x64 or 128x128")
+
+
+@cache
+def _owner_sized_gun_atlases():
+    """Gun atlases as big as the owner's own texture for the gun, where the owner painted it larger than 128: slice 15C's
+    Impetus Shotgun keeps the owner's 256 px Inertial texture, whose pieces halving would run together
+    (tools/guns.py atlas_limit())."""
+    import guns
+    return {f"{MOD}:item/guns/{gun}": guns.atlas_limit(gun) for gun in guns.GUNS if guns.atlas_limit(gun) > 128}
 
 
 # The special item renderers registered by client/StructureItemRenderers.java.
@@ -1974,6 +1984,10 @@ def check_guns():
     aimed = ", ".join(f'"{gun}"' for gun in guns.shoot_aimed())
     if f"SHOOT_AIMED = Set.of({aimed});" not in animations:
         err(f"GunAnimations.SHOOT_AIMED differs from tools/guns.py shoot_aimed(): expected Set.of({aimed})")
+    # Slice 15C: the inspect key does nothing with a gun the owner made no inspect for.
+    bare = ", ".join(f'"{gun}"' for gun in guns.no_inspect())
+    if f"NO_INSPECT = Set.of({bare});" not in animations:
+        err(f"GunAnimations.NO_INSPECT differs from tools/guns.py no_inspect(): expected Set.of({bare})")
     client_mixins = load(ROOT / "src" / "client" / "resources" / f"{MOD}.client.mixins.json") or {}
     if "GunFovMixin" not in client_mixins.get("client", []):
         err(f"{MOD}.client.mixins.json does not list GunFovMixin (no zoom aimed down the sights)")

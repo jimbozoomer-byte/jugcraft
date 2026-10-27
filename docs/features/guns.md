@@ -2902,7 +2902,7 @@ The next three of the owner's diamond-steel guns, taken up after slice 15A (on 2
 
 ## Follow-up: no flash from a gun silenced by its build
 Slice 15A's Gallant Rifle is silenced the length of its barrel and fires the owner's silenced shot, but in CI's third-person screenshot of that slice its shot still showed a muzzle flash: only a fitted Silencer or Baffled Silencer hid one. Offered as a fix after slice 15B, the owner chose it (26 October 2026).
-- **What changes:** a gun silenced by its own build (`tools/guns.py` `SILENCED`, `JugcraftGuns.SILENCED`; the Gallant Rifle alone so far) shows no muzzle flash when fired, in first or third person, as a gun with a fitted silencer shows none (`GunRenderer`). Its sound, its numbers and what fits it are unchanged.
+- **What changes:** a gun silenced by its own build (`tools/guns.py` `SILENCED`, `JugcraftGuns.SILENCED`; the Gallant Rifle, and since slice 15C the Quill Rifle) shows no muzzle flash when fired, in first or third person, as a gun with a fitted silencer shows none (`GunRenderer`). Its sound, its numbers and what fits it are unchanged.
 - **Checked:** `tools/check_mod_data.py` holds `JugcraftGuns.SILENCED` to `tools/guns.py`, and each gun in it to one that takes no barrel attachment (a silencer on a silenced gun would mean nothing). The guns' client test (`GunsClientGameTests`) now asserts that a silenced gun draws no flash frame when fired, where every other gun must draw one.
 
 ## Follow-up: heavy bullets, knockback and armour piercing
@@ -2910,9 +2910,74 @@ The owner's data for the Uppercut (slice 15B's Jawbreaker) gives its shots knock
 - **Knockback** (`tools/guns.py` `KNOCKBACK`, `JugcraftGuns.KNOCKBACK`): each creature a gun's bullet hurts is given a second push of this strength, away from the shooter, after the 0.4 every hit gives (a sword's), as the guns' bayonet stab pushes (`GunShots.bullets`). The game halves a creature's motion before each push, so from standing the two come to about 0.8 against a plain hit's 0.4. The Jawbreaker's is the owner's 0.6.
 - **Armour piercing** (`PIERCING`): a hit deals what it would if the target wore this many points less armour (`GunShots.pierced`). The game's own armour keeps off a share of each hit, 4% a point, between a fifth of the armour and 20 points' worth, less as the hit grows against the armour's toughness; the hit is raised, before the armour, until the full armour lets through what the lighter would. A creature without armour takes the gun's damage, no more. The Jawbreaker's is the owner's 4.5 points: its 12 against 10 points of armour deals about 11.5 where a plain bullet's deals about 10.1.
 - **Raider gunners** (slice 10F) fire their guns the same way; none of their service arms has either.
-- **Checked:** `tools/check_mod_data.py` holds the Java tables to `tools/guns.py`, each to a gun that fires bullets, each value above 0 and at most 8. `HeavyBulletsGameTests`: only the Jawbreaker has either, at the owner's numbers; side by side, a pig in 10 points of armour shot by the Jawbreaker is knocked away faster than one shot by the Kreuzer Pistol, and takes more through its armour than a third such pig takes from a plain bullet hit of the Jawbreaker's damage, and no more than that damage. The Jawbreaker's magazine test (slice 15B) still takes exactly its damage from an unarmoured pig.
-- **Tooltip:** the Jawbreaker's says it knocks back what it hits and pierces armour.
+- **Slice 15C** gives the Impetus Shotgun the owner's Inertial's knockback (0.65) and the Hawker Rifle and the Quill Rifle the MAS Peddler's and the Zilk 45's armour piercing (1 and 1.5 points). The Impetus's pellets that strike one creature land as one hit, so it is pushed once a pull.
+- **Checked:** `tools/check_mod_data.py` holds the Java tables to `tools/guns.py`, each to a gun that fires bullets, each value above 0 and at most 8. `HeavyBulletsGameTests`: the guns with either are those the owner's data gives them, at its numbers (the Jawbreaker alone until slice 15C); side by side, a pig in 10 points of armour shot by the Jawbreaker is knocked away faster than one shot by the Kreuzer Pistol, and takes more through its armour than a third such pig takes from a plain bullet hit of the Jawbreaker's damage, and no more than that damage. The Jawbreaker's magazine test (slice 15B) still takes exactly its damage from an unarmoured pig.
+- **Tooltip:** the Jawbreaker's says it knocks back what it hits and pierces armour; slice 15C's say the same of theirs.
 - **Save compatibility:** nothing saved changes.
+
+## Slice 15C: three diamond-steel long guns
+The next three of the owner's diamond-steel guns, taken up after slice 15B (on 26 October 2026, offered what to work on while CI ran, the owner chose "Slice 15C guns (Recommended)"): the MAS Peddler, the Inertial and the Zilk 45. Each is held in both hands, fed from a box magazine, and built from the owner's own GeckoLib model of it, from the upload of 23 October 2026 ([the library record](../../art/owner-library/README.md#gun-geometry-23-october-2026)), as slices 15A's and 15B's are. They use both follow-ups above: the Quill Rifle is silenced by its build, the Impetus Shotgun's shells knock back, and the Hawker Rifle's and the Quill Rifle's bullets pierce armour.
+
+| | Hawker Rifle | Impetus Shotgun | Quill Rifle |
+|---|---|---|---|
+| The owner's gun | MAS Peddler | Inertial | Zilk 45 |
+| What it is | the MAS 55 made over: a rifle whose magazine stands slanting up out of its side, a wax seal with a strip of scripture on its left side | a shotgun fed from a box of six shells below, a wax seal on its receiver | a dart rifle silenced the length of its barrel, a magazine below |
+| Held | in both hands: the right on the grip, the left under the barrel | in both hands: the right on the grip, the left under the fore-end | in both hands: the right on the grip, the left at the magazine |
+| What it fires | Rifle Rounds, a pull a shot | Buckshot Shells, a shell a pull: eight pellets | Light Rounds, as long as the trigger is held |
+| Damage | 9 | 3.5 a pellet, 28 a pull | 5 |
+| Rate | 2.5 a second (every 8 ticks) | about 1.5 a second (every 13 ticks) | 5 a second (every 4 ticks) |
+| Holds | 12 | 6 | 13 |
+| Reload | 2.5 s | 2.4 s | 2.15 s |
+| Spread, hip / aimed | 2.5° / 0.25° | 6° / 4.5° | 3° / 0.75° |
+| Range | 112 blocks | 28 blocks | 64 blocks |
+| The view aimed | 0.8 | 0.9 | 0.85 |
+| Heavy bullets | pierce 1 point of armour | knock back 0.65 further | pierce 1.5 points of armour |
+| Takes | the barrels' four, the magazines, the stocks, both grips, three bayonets (the owner's model's diamond one holds nothing), the Long Scope, the Reflex Sight and the Laser Sight | the barrels' four, the magazines, the stocks, both grips, the four bayonets, the three scopes and the Laser Sight | the magazines, the stocks, both grips, the four bayonets, the three scopes and the Laser Sight; no barrel attachment: it is silenced its length |
+
+**Their numbers** start from the owner's own, in the gun data of the same upload, set beside the guns already built: the MAS Peddler is their quicker marksman's rifle of twelve (16.5 a shot, every 8 ticks, against the MAS 55's 20 every 11), the Inertial their heaviest shotgun fed a box at a time (28.5 a pull, every 13 ticks, against the Combat Shotgun's 22.5) that strays even aimed (`alwaysSpread`), the Zilk 45 their silenced automatic of thirteen darts (13 a dart, every 4 ticks). The reloads are the owner's animations'. The heavy bullets are the owner's too: the MAS Peddler's and the Zilk 45's `armorPen` (1 and 1.5) and the Inertial's `knockbackStrength` (0.65), through the [heavy-bullets follow-up](#follow-up-heavy-bullets-knockback-and-armour-piercing).
+
+**Crafting** (a crafting table; they switch with the guns): stainless steel, a diamond and a lever, as slices 15A's and 15B's.
+- **Hawker Rifle:** three stainless steel ingots over a stainless steel ingot, a diamond and a lever, over planks (the owner's recipe takes a heavy barrel and a wooden part).
+- **Impetus Shotgun:** three stainless steel ingots over a stainless steel ingot, a diamond and a lever, over a stainless steel ingot and planks (two heavy barrels and a wooden part).
+- **Quill Rifle:** three stainless steel ingots over a diamond, a lever and redstone, over an iron ingot (a rapid firing unit and treated iron: redstone for the firing unit, as in the Psalm SMG's).
+
+**How they fire:** as the guns before them: each round flies along the look, strayed by the spread. The Impetus's eight pellets each fly their own way; those that strike one creature land as one hit, pushed back once.
+
+**What you see:** the owner's animations. Each shot kicks the gun and works the bolt; the strip of scripture under the Hawker's seal swings, and the Impetus's seal. To reload, the magazine comes out and the full one goes in: on the Hawker out of its side, the right arm hanging under the magazine in the owner's model so the right hand carries it (`carry()`, slice 14F); on the Quill below, the left hand carrying it the same way; on the Impetus the box below. The Hawker and the Quill are inspected turned up in both hands; the owner made the Inertial no inspection, so the inspect key does nothing with the Impetus (`GunAnimations.NO_INSPECT`, from `tools/guns.py` `no_inspect()`: an inspect GeckoLib cannot find would play only the idle, and the arms ease toward their rest pose, as slice 14D found of an aimed shot). Sounds, as the owner's data names for each: the Bruiser's shot (the Haymaker's) for the Hawker, the brass shotgun's (the Coach Gun's) for the Impetus and the air gun's second (the Bullfrog's) for the Quill; the Quill shows no muzzle flash (`SILENCED`).
+
+**How the models were built:**
+- **From the owner's GeckoLib models,** as slices 15A's and 15B's (`GEO_PARTS`): each gun's parts are the bones of its model, its standard magazine, butt and barrel the bones the owner named `default_mag`, `standard_grip` and `standard_barrel`. Their textures are the models' own (`Guns/animated/gun/`), laid out anew by the owner (`GEO_RELAID`). The Inertial and the Zilk 45 have no `no_sights` bone, the owner's no-sights parts for them being empty: under a scope nothing stands in for their sights.
+- **Turned bones:** the MAS Peddler's magazines are bones the owner turned 135° about the barrel as a whole. The converter passes a bone's turn on to each of its cubes (`bone_turn()`): one turn about the same axis, the sum of the cube's and the bone's, about the point both leave where it is. Checked against the library's Java parts of its magazines: the extents match exactly, the centres by one shift throughout (the owner moved the magazine later). Its animations give some keyframes as `{"post": {"vector": [x, y, z]}}`, which the converter now reads as GeckoLib does (`key_value()`; GeckoLib's `extractBedrockKeyframe` in its public source, not checked in the pinned 5.5.7 jar).
+- **Checked against the earlier parts:** where a bone keeps its item-model part's shape, the converter must give back that part's elements corner for corner and turn for turn (`GEO_TWINS`): on the Inertial 13 bones (50 elements: its sights, bolt, grips, bayonets, barrels and muzzle attachments), on the Zilk 45 14 (76: its sights, bolt, grips, bayonets, stocks and magazines). None of the MAS Peddler's bones keeps its earlier part's shape: its Java parts are a body and magazines only, and it has taken barrel attachments, scopes, stocks, grips and bayonets since.
+- **The Impetus's atlas is 256 px:** the owner painted the Inertial's texture at 256 px, with pieces as small as a pixel, which halved would run into each other. Where the owner's own texture is larger than the 128 px rule, the gun keeps its size (`atlas_limit()`; `tools/check_mod_data.py` allows that size for that gun's texture alone).
+- **Bones:** the models' own, turning about the models' pivots (checked): `gun_body`; `bolt`; `seal` (and `scriptures` under it on the Hawker; the Zilk 45's animations move a `scriptures` its model lacks, empty here); `magazine`; on the Impetus and the Quill an empty `magazine_2`, the box a reload brings in, as slice 15A's.
+- **Hands:** placed from the owner's own arm bones as slices 15A's and 15B's are. The arms' ways were chosen in first-person previews, to cover as little of the screen as they can through the hold, shot, reload and inspection.
+- **Sights:** the owner's, at the back of each receiver. Aimed, the Hawker and the Impetus are held 1 px further out (`"eye_relief"`), so that nothing comes within 2.3 px of the eye through the aimed shot: the Hawker's Long Scope came 1.4 px from it at the hip's depth, the Impetus's own back 1.9 px. The Quill needs none (2.8 px).
+- **Scopes:** where their iron sights stand. The Hawker's texture, the Vesper's made over, has room for three of the four sights' pieces: it goes without the Medium Scope, as the Vesper does (the medium scope's `"not_on"`).
+- **Checked** in first-person, aimed and orthographic previews: idle, fired, aimed, through each reload and inspection, and with each attachment.
+
+**Connections:**
+- **Rounds:** the Rifle Round, the Buckshot Shell and the Light Round; nothing new.
+- **Parts:** stainless steel, a diamond and a lever; planks for the Hawker and the Impetus, redstone and an iron ingot for the Quill.
+- **Their place:** past stainless steel, beside slices 15A's and 15B's guns: the diamond-steel long guns.
+
+**Balance:** starting numbers, at point blank with every shot landing, over a magazine and its reload.
+- **Hawker Rifle:** about 15.7 a second, beside the Vesper Rifle's 14.0: lighter shots than the Vesper's, quicker and twelve to a magazine. It reaches 112 blocks and strays 0.25° aimed, and passes a point of armour.
+- **Impetus Shotgun:** 28 a pull with every pellet landing, the hardest of the shotguns fed a box at a time; about 29.7 a second, against the Mule's 23.3, the Navvy Shotgun's 22.2 and the Breacher's 21.8. It reaches only 28 blocks and strays 4.5° even aimed.
+- **Quill Rifle:** about 14.3 a second, under the Gallant Rifle's 16.6, near-silent and passing 1.5 points of armour.
+- **Rounds:** each shot spends one; nothing converts back.
+
+**Save compatibility:** new items `jugcraft:hawker_rifle`, `impetus_shotgun` and `quill_rifle`; nothing saved changes. `guns.enabled=false` turns their recipes off; the items stay registered.
+
+**Known limits:**
+- **The Quill fires Light Rounds, not darts:** the owner's Zilk 45 fires frog darts that fall over their flight and may make what they hit bleed (`lacerated`); Jugcraft has no darts and no bleeding, so its rounds fly straight along the look as the other guns' do.
+- **The Impetus does not push its shooter back:** the owner's Inertial does (`playerKnockBack`); no gun does that yet.
+- **The Impetus has no inspection,** as the owner's Inertial has none.
+- **The Impetus's atlas is 256 px,** twice the rule's 128, to keep the owner's texture whole; the owner may prefer it repainted at 128.
+- **The Hawker goes without the Medium Scope:** its atlas has no room for that scope's pieces.
+- **The Hawker's magazine stands up at the right of the view aimed,** slanting out of its side as the owner's model has it.
+- **The arms in the reloads and inspections** come large into the view in places, as on the guns before them.
+- **Not played:** none of it has been played yet. The numbers want play to set.
 
 ## Connections
 - **Existing input producers:** copper, iron and gunpowder (vanilla); lead nuggets (the lead switch's lead); brass nuggets (brass, from zinc); paper and planks.
@@ -3020,7 +3085,7 @@ The owner supplied each gun's parts as Blockbench Java item models (`Guns/models
    - **Gun body:** turns about the right hand's grip.
 3. **Copies the files unchanged:** the atlases (the Thunderpipe's with the shell added), the animations (byte for byte) and the sounds. One part is moved as it is read: the Whistler's light stock, which stands off the gun ([slice 9A](#slice-9a-the-marksman-rifles)).
 4. **Checks the result:** it re-bakes every model the way GeckoLib 5.5.7 does (`GeometryCube`, `VertexSet`, `GeometryQuadUvs`) and compares each face with the owner's. Run `python3 tools/guns.py --check`; `tools/check_mod_data.py` runs it too. It was shown to fail on a flipped UV, a moved cube and a turned face.
-5. **Reads a gun the owner modelled in GeckoLib** (slice 14F, the Old Grange Carbine; slice 15A's three and slice 15B's): its parts are the bones of the owner's own model (`Guns/geo/item/gun/`), turned back into item-model elements by step 1 run backwards (`geo_element()`), drawn from the model's own texture (`Guns/animated/gun/`), and built and checked as above. The check also converts the model's bones that are item-model parts and compares them element for element (`GEO_TWINS`; corner for corner only where the owner laid the texture out anew, `GEO_RELAID`), and holds the gun's bones to the model's pivots ([slice 14F](#slice-14f-the-old-grange-carbine), [slice 15A](#slice-15a-the-first-diamond-steel-guns)).
+5. **Reads a gun the owner modelled in GeckoLib** (slice 14F, the Old Grange Carbine; slices 15A's, 15B's and 15C's three each): its parts are the bones of the owner's own model (`Guns/geo/item/gun/`), turned back into item-model elements by step 1 run backwards (`geo_element()`), drawn from the model's own texture (`Guns/animated/gun/`), and built and checked as above. The check also converts the model's bones that are item-model parts and compares them element for element (`GEO_TWINS`; corner for corner only where the owner laid the texture out anew, `GEO_RELAID`), and holds the gun's bones to the model's pivots ([slice 14F](#slice-14f-the-old-grange-carbine), [slice 15A](#slice-15a-the-first-diamond-steel-guns)).
 
 The animations' sound cues map to the library's sounds as follows:
 - `gun_rustle` and `rustle`: gun_rustle
@@ -4663,6 +4728,35 @@ Slice 9E's files: the guns' tactical grip parts and the Laser Sight's textures m
 | jawbreaker | `Guns/item/relex_sight.png` | `c8a38dbce7c266b0` |
 | jawbreaker | `Guns/item/laser_sight.png` | `1e0a3342068bc5df` |
 | jawbreaker | `Guns/item/laser.png` | `aac5f06e892e350a` |
+| hawker_rifle | `Guns/models/item/mas_peddler.json` | `78366bcbcca6fbb7` |
+| hawker_rifle | `Guns/animated/gun/mas_peddler.png` | `1bcc70cdd2f01d4e` |
+| hawker_rifle | `Guns/item/mas_peddler.animation.json` | `7d482dfa56dfa01f` |
+| hawker_rifle | `Guns/geo/item/gun/mas_peddler.geo.json` | `5c51ab04026ce22d` |
+| hawker_rifle | `Guns/sounds/item/bruiser/fire.ogg` | `b965c68e659f88e3` |
+| hawker_rifle | `Guns/item/long_scope_texture.png` | `e69191017eb081ad` |
+| hawker_rifle | `Guns/item/relex_sight.png` | `c8a38dbce7c266b0` |
+| hawker_rifle | `Guns/item/laser_sight.png` | `1e0a3342068bc5df` |
+| hawker_rifle | `Guns/item/laser.png` | `aac5f06e892e350a` |
+| impetus_shotgun | `Guns/models/item/inertial.json` | `3e955ab4f660724c` |
+| impetus_shotgun | `Guns/animated/gun/inertial.png` | `4a1d874fe9d81090` |
+| impetus_shotgun | `Guns/item/inertial.animation.json` | `ae0fcbf04e807183` |
+| impetus_shotgun | `Guns/geo/item/gun/inertial.geo.json` | `8a3272b54cfdebaa` |
+| impetus_shotgun | `Guns/sounds/item/brass_shotgun/fire.ogg` | `95eee6d27b87d35a` |
+| impetus_shotgun | `Guns/item/long_scope_texture.png` | `e69191017eb081ad` |
+| impetus_shotgun | `Guns/item/medium_scope.png` | `543abecf859783be` |
+| impetus_shotgun | `Guns/item/relex_sight.png` | `c8a38dbce7c266b0` |
+| impetus_shotgun | `Guns/item/laser_sight.png` | `1e0a3342068bc5df` |
+| impetus_shotgun | `Guns/item/laser.png` | `aac5f06e892e350a` |
+| quill_rifle | `Guns/models/item/zilk_45.json` | `227b10816c7b40b8` |
+| quill_rifle | `Guns/animated/gun/zilk_45.png` | `dbf8f5a62904feaa` |
+| quill_rifle | `Guns/item/zilk_45.animation.json` | `a2bee99e29ea41f6` |
+| quill_rifle | `Guns/geo/item/gun/zilk_45.geo.json` | `aca06aad8bb01edb` |
+| quill_rifle | `Guns/sounds/item/airgun/fire_2.ogg` | `bea9865e81d9d5ff` |
+| quill_rifle | `Guns/item/long_scope_texture.png` | `e69191017eb081ad` |
+| quill_rifle | `Guns/item/medium_scope.png` | `543abecf859783be` |
+| quill_rifle | `Guns/item/relex_sight.png` | `c8a38dbce7c266b0` |
+| quill_rifle | `Guns/item/laser_sight.png` | `1e0a3342068bc5df` |
+| quill_rifle | `Guns/item/laser.png` | `aac5f06e892e350a` |
 
 - **The bolt sound's tag:** `bolt.ogg` carries Vorbis tags naming another source ("All Epic Infantry Assault Rifle Reload Sounds (Fortnite)"). The owner, asked about the eight tagged sounds in the library, answered "I have the rights", so it is used like the rest. None of the other sounds used here carries such a tag.
 - **The scopes' reticles and lens rims (slice 7b):** the owner uploaded them on 8 October 2026 ("heres reticles and vignette"). Two files in that upload carry embedded Photoshop metadata:
@@ -5787,13 +5881,31 @@ Slice 9E's files: the guns' tactical grip parts and the Laser Sight's textures m
   - **Jawbreaker:** held larger at the lower right, the hand under its grip; aimed and fired, it looks along its back with the husk at the crosshair. Reloading, tipped at the lower right; inspected, turned up at the right.
   - **Fitted:** each with each set it takes any of, held and aimed. The first three sets each carry a stock, so each is held as a carbine, the left hand at its front. The Extended Magazine takes the counts to 20 and 38; aimed, the Psalm's shows under its back. The Jawbreaker's fourth set is the Laser Sight alone: held one-handed, the housing on its rail; aimed, beside the line of sight, as on the guns before it. Aimed, no stock shows: the test's check that a fitted stock is left out aimed (slice 9F) passed for all three.
   - **Third person:** each held up before the chest, pointing ahead; fired, a flash at its muzzle.
+- **Slice 15C, run locally (26 and 27 October 2026):**
+  - `python3 tools/guns.py`: PASS. It wrote the three guns' models, animations and atlases; every other gun's files came out unchanged. The converter check passes on the three models (`GEO_TWINS`: 27 bones, 126 elements, corner for corner) and holds every bone the models have to the models' pivots.
+  - **Found and fixed while building:** the MAS Peddler's animations give some keyframes as `{"post": {"vector": [...]}}`, which the converter and the previews could not read; both now read it as GeckoLib does. Its magazines are bones the owner turned as a whole, which the converter had dropped: it now passes a bone's turn on to its cubes (`bone_turn()`). The Hawker's scope pieces did not fit its 128 px atlas: it goes without the Medium Scope, as the Vesper does. The Inertial's 256 px texture did not fit 128 at all: `atlas_limit()`.
+  - `python3 tools/generate_material_data.py`: wrote the guns' item models, definitions, recipes, names and sounds. (It also reordered `docs/features/jug-nouveau-content-map.json`, unrelated; that file is left as before.)
+  - `python3 tools/check_mod_data.py`: PASS (6255 material IDs).
+  - `python3 scripts/check_repository.py`: PASS. `python3 -m unittest discover -s scripts/tests`: 191 tests passed; `python3 scripts/package_modrinth.py check`: PASS.
+  - **Java:** a syntax parse only: 0 errors in the changed files.
+  - **Recipes:** every shaped recipe in the mod's data compared, mirrors included: no gun's grid matches another (the 29 groups of matching grids elsewhere in the mod's data are the same before and after).
+  - **Alchemy values:** the three guns' records, priced from their recipes as `tools/build_alchemy_values.py` prices them (that tool needs a Minecraft jar, which isn't available here): 8209, 8210 and 8520.
+  - **Eye clearance aimed** (the previews' measure): the nearest point of each gun through its aimed shot is 3.2 px before the eye (Hawker, 1 px further out), 2.8 px (Impetus, 1 px further out) and 2.8 px (Quill, at the hip's depth). With a sight fitted, at least 2.35 px: the Long Scope on the Hawker and on the Quill.
+- **Slice 15C game tests (not run yet; CI runs them):**
+  - `DiamondSteelGunsIIIGameTests`:
+    - `diamondSteelLongGunsAreRegistered`: each is registered with its numbers and its recipe loads, held in both hands, firing plain bullets a magazine at a time. The Hawker Rifle is twelve rifle rounds, a pull a shot, piercing a point of armour, taking what the Vesper Rifle takes; the Impetus Shotgun six buckshot shells, eight pellets a pull, knocking back 0.65 further, taking what the Onrush SMG takes; the Quill Rifle thirteen light rounds as long as the trigger is held, every fourth tick, piercing 1.5 points, silenced by its build, taking what the Gallant Rifle takes and no barrel attachment.
+    - `hawkerRifleChangesItsMagazine`, `quillRifleChangesItsMagazine`: as slice 15A's (`DiamondSteelGunsGameTests.changesItsMagazine`).
+    - `impetusShotgunChangesItsBox`: an empty one with nine shells loads nothing before its reload's time and six after it, leaving three; a pull takes from the pig a whole number of 3.5-point pellets, at most eight; a second pull at once fires too, leaving four.
+  - `HeavyBulletsGameTests.heavyBulletsAreTheOwners` (was `heavyBulletsAreTheJawbreakers`): the knockback and piercing tables are the owner's numbers for the Jawbreaker and slice 15C's three, and no others.
+  - `GunsGameTests` counts 99 guns; `TacticalAttachmentsGameTests` the thirty-nine guns the Tactical Grip fits, these three among them.
+  - The guns' client test (`GunsClientGameTests`) takes each new gun through its screenshots as every gun's: the Impetus's inspect screenshot should show it held as at rest.
 - **Not run:** the client by hand, a two-client dedicated server, and play.
 
 ## World and event applicability
 No worldgen, structures, bosses or seasonal content. Guns, rounds and the Cell Rack come from crafting (and the creative tab). The one loot is slice 10F's: raider gunners, in raids and raider camps, may drop their service arms (their equipment's drop chance) and rounds (the mob loot table `jugcraft:entities/raider_gunner`).
 
 ## Rollout and open questions
-- **Names:** proposed here (Rust Midge, Patchwork Carbine, Thunderpipe, Warden Pistol, Riveter SMG, Haymaker, Longhorn Rifle, Drover Rifle, Coach Gun, Duelling Pistol, Line Musket, Bellmouth, Bulldog Pistol, Marshal Revolver, Sapper Revolver, Sentry Pistol, Garrison Rifle, Breacher, Trench Lobber, Thresher, Stoker, Beam Pistol, Stormlock Rifle, Linesman, Picket Rifle, Ranger Rifle, Kestrel Rifle, Rattler Pistol, Bronco SMG, Squall Rifle, Spikedriver, Seam Cutter, Caisson Pistol, Sledge, Highwayman, Throttle, Earthmover, Skylark Rifle, Bullfrog, Solenoid Rifle, Votive Rifle, Glowmouth, Mule, Fowler, Culverin, Undertone Rifle, Murmur SMG, Reverb, Tusker, Cinder Repeater, Bastion Rifle, Ashfall Pistol, Goldbristle Carbine, Crackling, Chitin SMG, Hermit Rifle, Borer, Penny Pistol, Conductor Carbine, Magpie SMG, Tuppence Pistol, Goshawk Revolver, Lament Rifle, Tabby Revolver, Lookout Rifle, Ammonite Carbine, Fencepost Carbine, Waystation Shotgun, Highball Rifle, Flatboat Gun, Windlass Musket, Millstone Rifle, Fencepost Thumper, Parley Revolver, Lantern Musket, Holler Pistol, Minuet Pistol, Half-Crown Revolver, Holler Carbine, Minuet Carbine, Grange Carbine, Sprocket Gun, Navvy Shotgun, Freeholder Rifle, Quarrel Carbine, Hinterland Rifle, Cloudburst Gun, Firedrake, Harrow, Old Grange Carbine, Vesper Rifle, Onrush SMG, Gallant Rifle, Kreuzer Pistol, Psalm SMG, Jawbreaker, Light Round, Rifle Round, Buckshot Shell, Paper Cartridge, Energy Cell, Cell Rack, Raider Gunner; the attachments keep plain names: Silencer, Baffled Silencer, Muzzle Brake, Extended Barrel, Extended Magazine, Speed Magazine, Light Stock, Weighted Stock, Wooden Stock, Light Grip, Vertical Grip, the four bayonets, Long Scope, Medium Scope, Reflex Sight, Tactical Grip, Laser Sight). The owner may rename them before release; IDs are stable only after release.
+- **Names:** proposed here (Rust Midge, Patchwork Carbine, Thunderpipe, Warden Pistol, Riveter SMG, Haymaker, Longhorn Rifle, Drover Rifle, Coach Gun, Duelling Pistol, Line Musket, Bellmouth, Bulldog Pistol, Marshal Revolver, Sapper Revolver, Sentry Pistol, Garrison Rifle, Breacher, Trench Lobber, Thresher, Stoker, Beam Pistol, Stormlock Rifle, Linesman, Picket Rifle, Ranger Rifle, Kestrel Rifle, Rattler Pistol, Bronco SMG, Squall Rifle, Spikedriver, Seam Cutter, Caisson Pistol, Sledge, Highwayman, Throttle, Earthmover, Skylark Rifle, Bullfrog, Solenoid Rifle, Votive Rifle, Glowmouth, Mule, Fowler, Culverin, Undertone Rifle, Murmur SMG, Reverb, Tusker, Cinder Repeater, Bastion Rifle, Ashfall Pistol, Goldbristle Carbine, Crackling, Chitin SMG, Hermit Rifle, Borer, Penny Pistol, Conductor Carbine, Magpie SMG, Tuppence Pistol, Goshawk Revolver, Lament Rifle, Tabby Revolver, Lookout Rifle, Ammonite Carbine, Fencepost Carbine, Waystation Shotgun, Highball Rifle, Flatboat Gun, Windlass Musket, Millstone Rifle, Fencepost Thumper, Parley Revolver, Lantern Musket, Holler Pistol, Minuet Pistol, Half-Crown Revolver, Holler Carbine, Minuet Carbine, Grange Carbine, Sprocket Gun, Navvy Shotgun, Freeholder Rifle, Quarrel Carbine, Hinterland Rifle, Cloudburst Gun, Firedrake, Harrow, Old Grange Carbine, Vesper Rifle, Onrush SMG, Gallant Rifle, Kreuzer Pistol, Psalm SMG, Jawbreaker, Hawker Rifle, Impetus Shotgun, Quill Rifle, Light Round, Rifle Round, Buckshot Shell, Paper Cartridge, Energy Cell, Cell Rack, Raider Gunner; the attachments keep plain names: Silencer, Baffled Silencer, Muzzle Brake, Extended Barrel, Extended Magazine, Speed Magazine, Light Stock, Weighted Stock, Wooden Stock, Light Grip, Vertical Grip, the four bayonets, Long Scope, Medium Scope, Reflex Sight, Tactical Grip, Laser Sight). The owner may rename them before release; IDs are stable only after release.
 - **The arms:** placed from the animations' own evidence, without the models they were made for. The CI screenshots show where they sit; the rest points and arm directions above are the knobs.
 - **The gun sets the owner chose on 8 October 2026** are all built: the revolvers (slice 8), the service arms (slice 8B), the heavy weapons (slice 8C) and the energy weapons (slice 8D).
 - **The gun sets the owner chose on 10 October 2026** are all built, each its own pull request: the marksman rifles (slice 9A), the automatic weapons (slice 9B), the second energy weapons (slice 9C) and the pump shotguns (slice 9D).
@@ -5804,6 +5916,8 @@ No worldgen, structures, bosses or seasonal content. Guns, rounds and the Cell R
   - other mobs with guns: the owner's Scorched Guns 2-style gun mobs, once their models are in the library (slice 10F gives the raider gunners the service arms);
   - the Whizzbanger, which waits for the model its animations were made for ([above](#the-whizzbanger-waits));
   - the guns beyond these sets;
-  - the owner's other GeckoLib gun models from their upload of 23 October 2026: only the Grandle OG's, the MAS 55's, the Prush Gun's and the Valora's are in the library so far ([the library record](../../art/owner-library/README.md#gun-geometry-23-october-2026));
-  - the other nine diamond-steel guns.
+  - the owner's other GeckoLib gun models from their upload of 23 October 2026: only the Grandle OG's and the nine diamond-steel guns' built so far (slices 15A to 15C) are in the library ([the library record](../../art/owner-library/README.md#gun-geometry-23-october-2026));
+  - the other six diamond-steel guns;
+  - armour piercing for slices 15A's and 15B's other guns, whose owner's data gives it too (the MAS 55 4.5 points, the Prush Gun 3, the Krauser and the Soul Drummer 1 each); the heavy-bullets follow-up took only the Uppercut's;
+  - darts that fall and make what they hit bleed (the owner's Zilk 45), and a shotgun that pushes its shooter back (the owner's Inertial).
 - **Balance:** the numbers are starting points for the owner to set.
