@@ -41,9 +41,9 @@ Two new recipes (`jugcraft:polymerization/naphtha`, `jugcraft:chemical_reaction/
 ## Verification
 
 - New server game test `PetroGameTests.reactorMakesPlasticPelletsFromNaphtha`: a bucket of naphtha gives four pellets and empties the tank.
-- `PolymerGameTests.everyLoadedRecipePaysItsLedgerAndRetainsItsTool` runs every Monomer Preparation Unit recipe, the new naphtha cracking included.
+- `PolymerGameTests.everyLoadedRecipePaysItsLedgerAndRetainsItsTool` runs every Monomer Preparation Unit recipe, the new naphtha cracking included; its count of new process and molding recipes goes from 23 to 24.
 - Local: `python3 tools/generate_material_data.py`, then `python3 tools/check_mod_data.py` passed (8025 material IDs, data files and recipe audit) and `python3 scripts/check_repository.py` passed.
-- CI on the fork: pending.
+- CI on the fork, run 40543159045 (27 October 2026): every client shard passed; the server tests failed in one test, `everyLoadedRecipePaysItsLedgerAndRetainsItsTool`, which found 24 recipes where it counted 23. The new recipe ran and passed its own checks; the count was raised to 24. A new run is pending.
 
 Not run: a human running a plastic line.
 
