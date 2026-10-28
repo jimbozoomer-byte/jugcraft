@@ -38,6 +38,7 @@ import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.damagesource.DamageSources;
 import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.EntityTypes;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.animal.Animal;
 import net.minecraft.world.entity.item.ItemEntity;
@@ -69,6 +70,8 @@ public class LineageGameTests {
 	private static final long NIGHT_ZERO = 18000L;
 	private static final String FULL_MOON = "jugcraft:full_moon";
 	private static final String ECHO_COMET = "jugcraft:echo_comet";
+	private static final net.minecraft.world.item.Item BROWN_WOOL = net.minecraft.core.registries.BuiltInRegistries.ITEM
+			.getValue(Identifier.withDefaultNamespace("brown_wool"));
 
 	private static Line line(int grade, Map<String, Integer> gifts) {
 		int[] grades = new int[Line.GRADES];
@@ -125,12 +128,12 @@ public class LineageGameTests {
 	@GameTest
 	public void aWildLineIsTheSameEveryTime(GameTestHelper helper) {
 		UUID id = UUID.randomUUID();
-		helper.assertTrue(Lineage.wild(id, EntityType.COW).equals(Lineage.wild(id, EntityType.COW)), "A wild line is the same each time");
+		helper.assertTrue(Lineage.wild(id, EntityTypes.COW).equals(Lineage.wild(id, EntityTypes.COW)), "A wild line is the same each time");
 		int carriers = 0;
 		int animals = 1200;
 		int[] seen = new int[Line.MAX_GRADE + 1];
 		for (int i = 0; i < animals; i++) {
-			Line line = Lineage.wild(UUID.randomUUID(), EntityType.CHICKEN);
+			Line line = Lineage.wild(UUID.randomUUID(), EntityTypes.CHICKEN);
 			for (int grade : line.grades()) {
 				seen[grade]++;
 			}
@@ -143,7 +146,7 @@ public class LineageGameTests {
 		helper.assertTrue(seen[4] == 0 && seen[5] == 0, "No wild copy is graded 4 or 5");
 		helper.assertTrue(seen[0] > 0 && seen[1] > 0 && seen[2] > 0 && seen[3] > 0, "Every wild grade 0 to 3 occurs");
 		helper.assertTrue(carriers > animals / 12 && carriers < animals / 3, "About 1 in 6 wild animals carries a gift: " + carriers + " of " + animals);
-		helper.assertTrue(Lineage.wild(UUID.randomUUID(), EntityType.WOLF).gifts().isEmpty(), "A kind with no gifts carries none");
+		helper.assertTrue(Lineage.wild(UUID.randomUUID(), EntityTypes.WOLF).gifts().isEmpty(), "A kind with no gifts carries none");
 		helper.succeed();
 	}
 
@@ -184,18 +187,18 @@ public class LineageGameTests {
 		helper.assertTrue(Lineage.sign(NIGHT_ZERO, pattern -> "no_sky") == null, "Under a roof, no sign");
 		Line plain = line(3, Map.of());
 		RandomSource random = RandomSource.create(3L);
-		Line moonborn = Lineage.signed(plain, moon, EntityType.SHEEP, random);
+		Line moonborn = Lineage.signed(plain, moon, EntityTypes.SHEEP, random);
 		helper.assertTrue(moonborn.sign().equals(FULL_MOON) && moonborn.value(Trait.YIELD) == 7 && moonborn.grade(Trait.YIELD, 0) == 4
 				&& moonborn.value(Trait.VIGOUR) == 6, "The Full Moon raises the weaker Yield copy (3+3 to 4+3), and nothing else: " + moonborn);
-		Line again = Lineage.signed(moonborn, moon, EntityType.SHEEP, random);
+		Line again = Lineage.signed(moonborn, moon, EntityTypes.SHEEP, random);
 		helper.assertTrue(again.grade(Trait.YIELD, 0) == 4 && again.grade(Trait.YIELD, 1) == 4, "The weaker copy rises: 4+3 to 4+4");
-		Line top = Lineage.signed(line(Line.MAX_GRADE, Map.of()), moon, EntityType.SHEEP, random);
+		Line top = Lineage.signed(line(Line.MAX_GRADE, Map.of()), moon, EntityTypes.SHEEP, random);
 		helper.assertTrue(top.value(Trait.YIELD) == 10, "A grade never passes 5");
 		Pattern comet = pattern(ECHO_COMET);
-		Line cometborn = Lineage.signed(plain, comet, EntityType.COW, random);
+		Line cometborn = Lineage.signed(plain, comet, EntityTypes.COW, random);
 		helper.assertTrue(cometborn.value(Trait.HARDINESS) == 7 && cometborn.copies(Gift.HEAVY_HIDE) == 1,
 				"The Echo Comet raises Hardiness and wakes a copy of the cow's gift: " + cometborn);
-		helper.assertTrue(Lineage.signed(plain, comet, EntityType.WOLF, random).gifts().isEmpty(), "Nothing to wake in a kind with no gifts");
+		helper.assertTrue(Lineage.signed(plain, comet, EntityTypes.WOLF, random).gifts().isEmpty(), "Nothing to wake in a kind with no gifts");
 		for (Map.Entry<String, Pattern> entry : Sky.catalog().patterns().entrySet()) {
 			helper.assertTrue(Lineage.SIGNS.containsKey(entry.getKey()), "Every pattern's sign raises a trait: " + entry.getKey());
 		}
@@ -211,13 +214,13 @@ public class LineageGameTests {
 	public void breedingGivesTheBabyItsLine(GameTestHelper helper) {
 		ServerLevel level = helper.getLevel();
 		Line best = line(Line.MAX_GRADE, Map.of(Gift.HEAVY_HIDE.id, 2));
-		Animal mother = animal(helper, EntityType.COW, new BlockPos(1, 2, 1), best);
-		Animal father = animal(helper, EntityType.COW, new BlockPos(2, 2, 1), best);
+		Animal mother = animal(helper, EntityTypes.COW, new BlockPos(1, 2, 1), best);
+		Animal father = animal(helper, EntityTypes.COW, new BlockPos(2, 2, 1), best);
 		mother.setAge(0);
 		father.setAge(0);
 		mother.spawnChildFromBreeding(level, father);
 		List<Animal> calves = level.getEntitiesOfClass(Animal.class, new AABB(helper.absolutePos(BlockPos.ZERO)).inflate(6),
-				animal -> animal.getType() == EntityType.COW && animal.isBaby());
+				animal -> animal.getType() == EntityTypes.COW && animal.isBaby());
 		helper.assertTrue(calves.size() == 1, "One calf: " + calves.size());
 		Animal calf = calves.get(0);
 		Line line = calf.getAttached(Lineage.LINE);
@@ -235,11 +238,11 @@ public class LineageGameTests {
 	public void aLineIsKeptThroughASave(GameTestHelper helper) {
 		ServerLevel level = helper.getLevel();
 		Line kept = Line.of(new int[] {5, 4, 3, 2, 1, 0, 5, 5}, Map.of(Gift.MOONFLEECE.id, 1), FULL_MOON, 4);
-		Animal sheep = animal(helper, EntityType.SHEEP, new BlockPos(1, 2, 1), kept);
+		Animal sheep = animal(helper, EntityTypes.SHEEP, new BlockPos(1, 2, 1), kept);
 		TagValueOutput out = TagValueOutput.createWithContext(ProblemReporter.DISCARDING, level.registryAccess());
 		sheep.saveWithoutId(out);
 		CompoundTag saved = out.buildResult();
-		Animal copy = EntityType.SHEEP.create(level, EntitySpawnReason.LOAD);
+		Animal copy = EntityTypes.SHEEP.create(level, EntitySpawnReason.LOAD);
 		copy.load(TagValueInput.create(ProblemReporter.DISCARDING, level.registryAccess(), saved));
 		helper.assertTrue(kept.equals(copy.getAttached(Lineage.LINE)), "The line is kept through a save: " + copy.getAttached(Lineage.LINE));
 		helper.succeed();
@@ -251,7 +254,7 @@ public class LineageGameTests {
 	 */
 	@GameTest
 	public void eachTraitDoesWhatItSays(GameTestHelper helper) {
-		Animal cow = animal(helper, EntityType.COW, new BlockPos(1, 2, 1), line(2, Map.of()));
+		Animal cow = animal(helper, EntityTypes.COW, new BlockPos(1, 2, 1), line(2, Map.of()));
 		double baseSpeed = cow.getAttributeBaseValue(Attributes.MOVEMENT_SPEED);
 		helper.assertTrue(Math.abs(cow.getMaxHealth() - 10.0F) < 0.01F && Math.abs(cow.getAttributeValue(Attributes.MOVEMENT_SPEED) - baseSpeed) < 1e-6,
 				"Vigour 4 is vanilla");
@@ -301,8 +304,8 @@ public class LineageGameTests {
 	@GameTest
 	public void yieldAndTheGiftsAddToTheDrops(GameTestHelper helper) {
 		ServerLevel level = helper.getLevel();
-		Animal rich = animal(helper, EntityType.COW, new BlockPos(1, 2, 1), line(Line.MAX_GRADE, Map.of(Gift.HEAVY_HIDE.id, 2)));
-		Animal plain = animal(helper, EntityType.COW, new BlockPos(3, 2, 1), line(0, Map.of()));
+		Animal rich = animal(helper, EntityTypes.COW, new BlockPos(1, 2, 1), line(Line.MAX_GRADE, Map.of(Gift.HEAVY_HIDE.id, 2)));
+		Animal plain = animal(helper, EntityTypes.COW, new BlockPos(3, 2, 1), line(0, Map.of()));
 		int most = 0;
 		for (int roll = 0; roll < 40; roll++) {
 			List<ItemStack> richDrops = death(level, rich);
@@ -314,12 +317,12 @@ public class LineageGameTests {
 		}
 		helper.assertTrue(most > 3, "Yield 10 gives more beef than vanilla's most: " + most);
 
-		Animal lucky = animal(helper, EntityType.RABBIT, new BlockPos(5, 2, 1), line(0, Map.of(Gift.LUCKY_FOOT.id, 2)));
+		Animal lucky = animal(helper, EntityTypes.RABBIT, new BlockPos(5, 2, 1), line(0, Map.of(Gift.LUCKY_FOOT.id, 2)));
 		for (int roll = 0; roll < 10; roll++) {
 			helper.assertTrue(count(death(level, lucky), Items.RABBIT_FOOT) == 1, "Lucky Foot: always one foot");
 		}
 
-		Animal sheep = animal(helper, EntityType.SHEEP, new BlockPos(1, 2, 3), line(Line.MAX_GRADE, Map.of()));
+		Animal sheep = animal(helper, EntityTypes.SHEEP, new BlockPos(1, 2, 3), line(Line.MAX_GRADE, Map.of()));
 		for (int shear = 0; shear < 8; shear++) {
 			List<ItemStack> wool = new ArrayList<>();
 			((CompanionShearingInvoker) sheep).jugcraft$collectShearing(level, BuiltInLootTables.SHEAR_SHEEP, new ItemStack(Items.SHEARS),
@@ -331,8 +334,8 @@ public class LineageGameTests {
 		LootTable laying = level.getServer().reloadableRegistries().getLootTable(ResourceKey.create(Registries.LOOT_TABLE,
 				Identifier.withDefaultNamespace("gameplay/chicken_lay")));
 		helper.assertTrue(laying != LootTable.EMPTY, "Vanilla's chicken laying table is gameplay/chicken_lay");
-		Animal hen = animal(helper, EntityType.CHICKEN, new BlockPos(3, 2, 3), line(Line.MAX_GRADE, Map.of(Gift.DOUBLE_YOLK.id, 2)));
-		Animal plainHen = animal(helper, EntityType.CHICKEN, new BlockPos(5, 2, 3), line(0, Map.of()));
+		Animal hen = animal(helper, EntityTypes.CHICKEN, new BlockPos(3, 2, 3), line(Line.MAX_GRADE, Map.of(Gift.DOUBLE_YOLK.id, 2)));
+		Animal plainHen = animal(helper, EntityTypes.CHICKEN, new BlockPos(5, 2, 3), line(0, Map.of()));
 		int twos = 0;
 		for (int lay = 0; lay < 60; lay++) {
 			LootParams params = new LootParams.Builder(level).withParameter(LootContextParams.ORIGIN, hen.position())
@@ -347,12 +350,12 @@ public class LineageGameTests {
 		helper.assertTrue(twos > 15, "Yield 10 and Double Yolk: a laying often comes as more than one egg: " + twos + " of 60");
 
 		// The rules themselves, without the dice: what a line adds to each kind of drops.
-		List<ItemStack> drops = new ArrayList<>(List.of(new ItemStack(Items.WHITE_WOOL)));
+		List<ItemStack> drops = new ArrayList<>(List.of(new ItemStack(Items.WOOL.white())));
 		Lineage.more(Lineage.Drops.SHEARING, line(new int[] {3, 3, 0, 0, 0, 0, 0, 0}, Map.of(Gift.MOONFLEECE.id, 2)), drops, RandomSource.create(1L), true);
-		helper.assertTrue(count(drops, Items.WHITE_WOOL) == 3, "Yield 6 and Moonfleece on an open night: one wool and two more");
-		drops = new ArrayList<>(List.of(new ItemStack(Items.WHITE_WOOL)));
+		helper.assertTrue(count(drops, Items.WOOL.white()) == 3, "Yield 6 and Moonfleece on an open night: one wool and two more");
+		drops = new ArrayList<>(List.of(new ItemStack(Items.WOOL.white())));
 		Lineage.more(Lineage.Drops.SHEARING, line(new int[] {3, 3, 0, 0, 0, 0, 0, 0}, Map.of(Gift.MOONFLEECE.id, 2)), drops, RandomSource.create(1L), false);
-		helper.assertTrue(count(drops, Items.WHITE_WOOL) == 2, "By day, Moonfleece gives nothing more");
+		helper.assertTrue(count(drops, Items.WOOL.white()) == 2, "By day, Moonfleece gives nothing more");
 		ResourceKey<LootTable> dungeon = ResourceKey.create(Registries.LOOT_TABLE, Identifier.withDefaultNamespace("chests/simple_dungeon"));
 		helper.assertTrue(Lineage.kind(rich, rich.getLootTable().orElseThrow()) == Lineage.Drops.DEATH
 				&& Lineage.kind(sheep, BuiltInLootTables.SHEAR_SHEEP) == Lineage.Drops.SHEARING
@@ -381,10 +384,10 @@ public class LineageGameTests {
 		ServerPlayer player = TestPlayers.mock(helper);
 		player.setGameMode(GameType.SURVIVAL);
 		player.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(Items.SHEARS));
-		Animal goat = animal(helper, EntityType.GOAT, new BlockPos(1, 2, 1), line(0, Map.of(Gift.ANGORA.id, 2)));
-		Animal carrier = animal(helper, EntityType.GOAT, new BlockPos(4, 2, 1), line(0, Map.of(Gift.ANGORA.id, 1)));
-		Animal pig = animal(helper, EntityType.PIG, new BlockPos(1, 2, 4), line(0, Map.of(Gift.WOOLLY_COAT.id, 2)));
-		Animal piglet = animal(helper, EntityType.PIG, new BlockPos(4, 2, 4), line(0, Map.of(Gift.WOOLLY_COAT.id, 2)));
+		Animal goat = animal(helper, EntityTypes.GOAT, new BlockPos(1, 2, 1), line(0, Map.of(Gift.ANGORA.id, 2)));
+		Animal carrier = animal(helper, EntityTypes.GOAT, new BlockPos(4, 2, 1), line(0, Map.of(Gift.ANGORA.id, 1)));
+		Animal pig = animal(helper, EntityTypes.PIG, new BlockPos(1, 2, 4), line(0, Map.of(Gift.WOOLLY_COAT.id, 2)));
+		Animal piglet = animal(helper, EntityTypes.PIG, new BlockPos(4, 2, 4), line(0, Map.of(Gift.WOOLLY_COAT.id, 2)));
 		piglet.setAge(-24000);
 		InteractionResult first = shear(player, level, goat);
 		helper.assertTrue(first == InteractionResult.SUCCESS && player.getMainHandItem().getDamageValue() == 1, "An Angora goat is shorn, and the shears wear");
@@ -394,8 +397,8 @@ public class LineageGameTests {
 		helper.assertTrue(shear(player, level, pig) == InteractionResult.SUCCESS, "A Woolly Coat pig is shorn");
 		helper.assertTrue(Lineage.grown(goat, level.getGameTime() + Lineage.REGROW_TICKS), "Its coat has grown back a day later");
 		helper.runAfterDelay(2, () -> {
-			List<ItemEntity> white = level.getEntitiesOfClass(ItemEntity.class, goat.getBoundingBox().inflate(3), drop -> drop.getItem().is(Items.WHITE_WOOL));
-			List<ItemEntity> brown = level.getEntitiesOfClass(ItemEntity.class, pig.getBoundingBox().inflate(3), drop -> drop.getItem().is(Items.BROWN_WOOL));
+			List<ItemEntity> white = level.getEntitiesOfClass(ItemEntity.class, goat.getBoundingBox().inflate(3), drop -> drop.getItem().is(Items.WOOL.white()));
+			List<ItemEntity> brown = level.getEntitiesOfClass(ItemEntity.class, pig.getBoundingBox().inflate(3), drop -> drop.getItem().is(BROWN_WOOL));
 			int whiteCount = white.stream().mapToInt(drop -> drop.getItem().getCount()).sum();
 			int brownCount = brown.stream().mapToInt(drop -> drop.getItem().getCount()).sum();
 			helper.assertTrue(whiteCount >= 1 && whiteCount <= 2 && brownCount >= 1 && brownCount <= 2,
@@ -428,12 +431,12 @@ public class LineageGameTests {
 		List<String> mastered = keys(Lineage.reading(name, line, ResearchState.MASTERED));
 		helper.assertTrue(mastered.contains("message.jugcraft.lineage.unseen") && !mastered.contains("lineage.jugcraft.gift.double_yolk"),
 				"Mastered: it carries something unseen, never named: " + mastered);
-		List<String> wild = keys(Lineage.reading(name, Lineage.wild(UUID.randomUUID(), EntityType.SHEEP), ResearchState.NONE));
+		List<String> wild = keys(Lineage.reading(name, Lineage.wild(UUID.randomUUID(), EntityTypes.SHEEP), ResearchState.NONE));
 		helper.assertTrue(wild.contains("message.jugcraft.lineage.wild") && wild.contains("message.jugcraft.lineage.no_sign"), "A wild animal reads as wild: " + wild);
 
 		ServerPlayer player = TestPlayers.mock(helper);
 		RateGate.forget(player.getUUID());
-		Animal cow = helper.spawn(EntityType.COW, new BlockPos(1, 2, 1));
+		Animal cow = helper.spawn(EntityTypes.COW, new BlockPos(1, 2, 1));
 		ItemStack wand = new ItemStack(Lineage.ASTRAWAND);
 		player.setItemInHand(InteractionHand.MAIN_HAND, wand);
 		helper.assertTrue(wand.interactLivingEntity(player, cow, InteractionHand.MAIN_HAND) == InteractionResult.SUCCESS

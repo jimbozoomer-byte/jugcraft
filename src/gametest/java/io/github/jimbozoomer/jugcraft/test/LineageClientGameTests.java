@@ -16,6 +16,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.EntityTypes;
 import net.minecraft.world.entity.animal.Animal;
 
 /**
@@ -111,10 +112,10 @@ public class LineageClientGameTests implements FabricClientGameTest {
 		int z = origin.getZ();
 		Line moonborn = Line.of(new int[] {5, 4, 3, 3, 2, 2, 3, 1}, Map.of(Gift.MOONFLEECE.id, 2), "jugcraft:full_moon", 3);
 		// The ewe two blocks ahead of the camera, the rest of the pen behind her.
-		animal(level, EntityType.SHEEP, x + 0.5, y, z - 0.5, moonborn);
-		animal(level, EntityType.COW, x - 2.5, y, z - 4.5, Line.of(new int[] {3, 3, 5, 5, 4, 3, 2, 2}, Map.of(Gift.HEAVY_HIDE.id, 1), "", 2));
-		animal(level, EntityType.GOAT, x + 3.0, y, z - 4.0, Line.of(new int[] {2, 2, 2, 2, 2, 2, 5, 5}, Map.of(Gift.ANGORA.id, 2), "jugcraft:echo_comet", 1));
-		animal(level, EntityType.CHICKEN, x - 1.0, y, z - 2.5, Line.of(new int[] {4, 4, 1, 1, 3, 3, 2, 2}, Map.of(Gift.DOUBLE_YOLK.id, 2), "", 1));
+		animal(level, EntityTypes.SHEEP, x + 0.5, y, z - 0.5, moonborn);
+		animal(level, EntityTypes.COW, x - 2.5, y, z - 4.5, Line.of(new int[] {3, 3, 5, 5, 4, 3, 2, 2}, Map.of(Gift.HEAVY_HIDE.id, 1), "", 2));
+		animal(level, EntityTypes.GOAT, x + 3.0, y, z - 4.0, Line.of(new int[] {2, 2, 2, 2, 2, 2, 5, 5}, Map.of(Gift.ANGORA.id, 2), "jugcraft:echo_comet", 1));
+		animal(level, EntityTypes.CHICKEN, x - 1.0, y, z - 2.5, Line.of(new int[] {4, 4, 1, 1, 3, 3, 2, 2}, Map.of(Gift.DOUBLE_YOLK.id, 2), "", 1));
 		animal(level, JugcraftAgriculture.TURKEY, x + 1.8, y, z - 2.8, Line.of(new int[] {2, 1, 2, 1, 2, 1, 2, 1}, Map.of(), "", 0));
 	}
 }
