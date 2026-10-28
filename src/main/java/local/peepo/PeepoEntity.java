@@ -610,8 +610,8 @@ public final class PeepoEntity extends PathfinderMob {
     }
     private final class RestGoal extends Goal {
         RestGoal() { setFlags(EnumSet.of(Flag.MOVE,Flag.JUMP,Flag.LOOK)); }
-        @Override public boolean canUse() { return restMotion.holdingExit() || (routine==null || !routine.isActive())
-            && (getRestMode()!=CompanionEnergy.Rest.NONE || isWheelRunning()); }
+        @Override public boolean canUse() { return (routine==null || !routine.isActive())
+            && (restMotion.holdingExit() || getRestMode()!=CompanionEnergy.Rest.NONE || isWheelRunning()); }
         @Override public void tick() { getNavigation().stop(); }
     }
     private final class FindFoodGoal extends Goal {

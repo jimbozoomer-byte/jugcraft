@@ -120,7 +120,7 @@ final class CompanionRoutine extends Goal {
         search();return station!=null || npc.isRecovering() || !npc.preferences.onShift();
     }
     @Override public boolean canContinueToUse(){return npc.orders.routineAllowed() && !npc.isEating()
-        && (station!=null || npc.isRecovering() || !npc.preferences.onShift()
+        && (station!=null || npc.isRecovering() || !npc.preferences.onShift() || npc.restMotion.holdingExit()
             || resumeUntil>npc.level().getGameTime() && npc.preferences.canWork());}
     @Override public void start(){active=true;}
     private void release(){
@@ -170,7 +170,12 @@ final class CompanionRoutine extends Goal {
     }
     @Override public void tick(){
         long now=npc.level().getGameTime();
-        if(npc.restMotion.holdingExit()){npc.getNavigation().stop();state=CompanionStatus.RESTING;return;}
+        if(npc.restMotion.holdingExit()){
+            // Keep the ready-job handoff across standing up and longer bunk descents.
+            // Its short landing/search budget starts after the departure, not during it.
+            if(resumeUntil!=0)resumeUntil=now+40;
+            npc.getNavigation().stop();state=CompanionStatus.RESTING;return;
+        }
         if(station!=null && station.kind()==CompanionStation.Kind.CHAIR && !npc.isRecovering() && npc.preferences.onShift() && now>=chairUntil){nextLeisure=now+600;release();}
         if(station!=null && (!npc.level().hasChunkAt(station.stationPosition()) || block!=null && (block.isRemoved() || npc.level().getBlockEntity(block.getBlockPos())!=block)))release();
         if(station instanceof CompanionJob job){
