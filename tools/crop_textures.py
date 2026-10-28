@@ -676,6 +676,8 @@ def crop_textures():
     out.update(kitchen_textures())
     from festival_textures import festival_textures  # so do the festival crops
     out.update(festival_textures())
+    from pumpkin_patch_textures import pumpkin_patch_textures  # and the Pumpkin Patch Market's squashes and gourds
+    out.update(pumpkin_patch_textures())
     from larch_textures import larch_textures  # and Alpine Spawn's larch
     out.update(larch_textures())
     from forest_textures import forest_textures  # and the biomes branch's seasonal-forest trees

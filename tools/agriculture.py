@@ -188,6 +188,8 @@ GRASS_SEEDS = ["corn_kernels", "sunflower_seeds", "beans", "sweet_potato", "flax
                "butternut_squash_seeds", "acorn_squash_seeds", "warty_gourd_seeds", "turnip", "cranberries", "chestnut",
                "giant_pumpkin_seeds", "white_pumpkin_seeds", "jarrahdale_pumpkin_seeds", "cinderella_pumpkin_seeds", "red_kuri_pumpkin_seeds",
                "kabocha_pumpkin_seeds", "bottle_gourd_seeds",
+               "turban_squash_seeds", "blue_hubbard_squash_seeds", "sweet_dumpling_squash_seeds", "long_island_cheese_pumpkin_seeds",
+               "spoon_gourd_seeds", "swan_gourd_seeds",
                "ornamental_corn_kernels", "mandrake_root"]
 GRASS_SEED_CHANCE = 0.125
 
@@ -320,6 +322,19 @@ ITEMS = {
     "kabocha_tempura": {"display": "Kabocha Tempura", "food": [6, 0.8], "compost": "medium_high", "tags": ["c:foods"]},
     "bottle_gourd_seeds": {"display": "Bottle Gourd Seeds", "plants": "bottle_gourd_stem", "compost": "low",
                            "tags": ["c:seeds/bottle_gourd", "minecraft:chicken_food", "minecraft:parrot_food"]},
+    # The Pumpkin Patch Market's squashes and gourds (tools/pumpkin_patch.py, docs/features/pumpkin-patch-market.md).
+    "turban_squash_seeds": {"display": "Turban Squash Seeds", "plants": "turban_squash_stem", "compost": "low",
+                            "tags": ["c:seeds/turban_squash", "minecraft:chicken_food", "minecraft:parrot_food"]},
+    "blue_hubbard_squash_seeds": {"display": "Blue Hubbard Squash Seeds", "plants": "blue_hubbard_squash_stem", "compost": "low",
+                                  "tags": ["c:seeds/blue_hubbard_squash", "minecraft:chicken_food", "minecraft:parrot_food"]},
+    "sweet_dumpling_squash_seeds": {"display": "Sweet Dumpling Squash Seeds", "plants": "sweet_dumpling_squash_stem", "compost": "low",
+                                    "tags": ["c:seeds/sweet_dumpling_squash", "minecraft:chicken_food", "minecraft:parrot_food"]},
+    "long_island_cheese_pumpkin_seeds": {"display": "Long Island Cheese Pumpkin Seeds", "plants": "long_island_cheese_pumpkin_stem", "compost": "low",
+                                         "tags": ["c:seeds/long_island_cheese_pumpkin", "minecraft:chicken_food", "minecraft:parrot_food"]},
+    "spoon_gourd_seeds": {"display": "Spoon Gourd Seeds", "plants": "spoon_gourd_stem", "compost": "low",
+                          "tags": ["c:seeds/spoon_gourd", "minecraft:chicken_food", "minecraft:parrot_food"]},
+    "swan_gourd_seeds": {"display": "Swan Gourd Seeds", "plants": "swan_gourd_stem", "compost": "low",
+                         "tags": ["c:seeds/swan_gourd", "minecraft:chicken_food", "minecraft:parrot_food"]},
     "dried_bottle_gourd": {"display": "Dried Bottle Gourd", "compost": "medium", "tags": []},
     "ornamental_corn": {"display": "Ornamental Corn", "compost": "medium", "tags": ["c:crops/ornamental_corn"]},
     "ornamental_corn_kernels": {"display": "Ornamental Corn Kernels", "plants": "ornamental_corn_crop", "compost": "low",
@@ -403,6 +418,20 @@ GOURDS = {
                         "compost": "medium", "tags": ["c:crops/pumpkin", "c:crops/kabocha_pumpkin", "jugcraft:heirloom_pumpkins"]},
     "bottle_gourd": {"display": "Bottle Gourd", "seed": "bottle_gourd_seeds", "growth_time": 1.0,
                      "compost": "medium", "tags": ["c:crops/gourd", "c:crops/bottle_gourd"]},
+    # The Pumpkin Patch Market (tools/pumpkin_patch.py): three squashes for the table, a pie pumpkin and two gourds for show.
+    "turban_squash": {"display": "Turban Squash", "seed": "turban_squash_seeds", "growth_time": 1.0,
+                      "compost": "medium", "tags": ["c:crops/squash", "c:crops/turban_squash", "c:foods/vegetable"]},
+    "blue_hubbard_squash": {"display": "Blue Hubbard Squash", "seed": "blue_hubbard_squash_seeds", "growth_time": 1.25,
+                            "compost": "medium", "tags": ["c:crops/squash", "c:crops/blue_hubbard_squash", "c:foods/vegetable"]},
+    "sweet_dumpling_squash": {"display": "Sweet Dumpling Squash", "seed": "sweet_dumpling_squash_seeds", "growth_time": 0.85,
+                              "compost": "medium", "tags": ["c:crops/squash", "c:crops/sweet_dumpling_squash", "c:foods/vegetable"]},
+    "long_island_cheese_pumpkin": {"display": "Long Island Cheese Pumpkin", "seed": "long_island_cheese_pumpkin_seeds",
+                                   "growth_time": 1.0, "compost": "medium",
+                                   "tags": ["c:crops/pumpkin", "c:crops/long_island_cheese_pumpkin"]},
+    "spoon_gourd": {"display": "Spoon Gourd", "seed": "spoon_gourd_seeds", "growth_time": 0.85,
+                    "compost": "medium", "tags": ["c:crops/gourd", "c:crops/spoon_gourd"]},
+    "swan_gourd": {"display": "Swan Gourd", "seed": "swan_gourd_seeds", "growth_time": 1.0,
+                   "compost": "medium", "tags": ["c:crops/gourd", "c:crops/swan_gourd"]},
 }
 STEM_TEXTURES = ["gourd_stem", "gourd_stem_attached", "gourd_stalk"]
 
@@ -640,6 +669,12 @@ FOUND_WILD = {
     "red_kuri_pumpkin": {"biomes": ["IS_TAIGA", "IS_SPOOKY"], "on": "grass"},
     "kabocha_pumpkin": {"biomes": ["IS_FOREST", "IS_JUNGLE"], "on": "grass"},
     "bottle_gourd": {"biomes": ["IS_JUNGLE", "IS_SAVANNA"], "on": "grass"},
+    "turban_squash": {"biomes": ["IS_PLAINS", "IS_FOREST"], "on": "grass"},
+    "blue_hubbard_squash": {"biomes": ["IS_TAIGA", "IS_SNOWY"], "on": "grass"},
+    "sweet_dumpling_squash": {"biomes": ["IS_FLORAL", "IS_BIRCH_FOREST"], "on": "grass"},
+    "long_island_cheese_pumpkin": {"biomes": ["IS_PLAINS", "IS_BEACH"], "on": "grass"},
+    "spoon_gourd": {"biomes": ["IS_SAVANNA", "IS_JUNGLE"], "on": "grass"},
+    "swan_gourd": {"biomes": ["IS_SWAMP", "IS_JUNGLE"], "on": "grass"},
 }
 GOURD_PATCH = {"rarity": 32, "tries": 8, "spread_xz": 4, "spread_y": 2}
 CRANBERRY_PATCH = {"rarity": 4, "tries": 32, "spread_xz": 6}
@@ -2351,6 +2386,15 @@ SHAPELESS = [
     {"id": "red_kuri_pumpkin_seeds", "inputs": ["jugcraft:red_kuri_pumpkin"], "result": "red_kuri_pumpkin_seeds", "count": 4},
     {"id": "kabocha_pumpkin_seeds", "inputs": ["jugcraft:kabocha_pumpkin"], "result": "kabocha_pumpkin_seeds", "count": 4},
     {"id": "bottle_gourd_seeds", "inputs": ["jugcraft:bottle_gourd"], "result": "bottle_gourd_seeds", "count": 4},
+    {"id": "turban_squash_seeds", "inputs": ["jugcraft:turban_squash"], "result": "turban_squash_seeds", "count": 4},
+    {"id": "blue_hubbard_squash_seeds", "inputs": ["jugcraft:blue_hubbard_squash"], "result": "blue_hubbard_squash_seeds", "count": 4},
+    {"id": "sweet_dumpling_squash_seeds", "inputs": ["jugcraft:sweet_dumpling_squash"], "result": "sweet_dumpling_squash_seeds", "count": 4},
+    {"id": "long_island_cheese_pumpkin_seeds", "inputs": ["jugcraft:long_island_cheese_pumpkin"], "result": "long_island_cheese_pumpkin_seeds", "count": 4},
+    {"id": "spoon_gourd_seeds", "inputs": ["jugcraft:spoon_gourd"], "result": "spoon_gourd_seeds", "count": 4},
+    {"id": "swan_gourd_seeds", "inputs": ["jugcraft:swan_gourd"], "result": "swan_gourd_seeds", "count": 4},
+    # The Long Island Cheese is the old pie pumpkin: it bakes a pumpkin pie as a pumpkin does.
+    {"id": "pumpkin_pie_from_long_island_cheese_pumpkin", "inputs": ["jugcraft:long_island_cheese_pumpkin", "minecraft:sugar",
+                                                                      "#minecraft:eggs"], "result": "minecraft:pumpkin_pie", "count": 1},
     {"id": "pumpkin_pie_from_heirloom_pumpkins", "inputs": ["#jugcraft:heirloom_pumpkins", "minecraft:sugar", "#minecraft:eggs"],
      "result": "minecraft:pumpkin_pie", "count": 1},
     {"id": "ornamental_corn_kernels", "inputs": ["jugcraft:ornamental_corn"], "result": "ornamental_corn_kernels", "count": 2},

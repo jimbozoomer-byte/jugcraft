@@ -8,6 +8,13 @@ Every change to Jugcraft, newest first, grouped by pull request. For what each t
 
 No numbered release yet. Entries on feature branches remain proposed until their pull requests merge.
 
+### Unmerged: The Pumpkin Patch Market, part 1 (six squashes and gourds)
+- **Six new squashes and gourds** for fall displays and kitchens, each grown from its seeds on a stem like every gourd: the **Turban Squash** (red-orange, wearing a striped green and cream turban), the **Blue Hubbard Squash** (big, slate blue, warty, lying on its side), the **Sweet Dumpling Squash** (small, cream, striped green along its ribs), the **Long Island Cheese Pumpkin** (a flat buff wheel that bakes a pumpkin pie), the **Spoon Gourd** (a yellow bowl on a green handle) and the **Swan Gourd** (speckled green, its long neck arched like a swan's).
+- **Where they come from:** short grass (sharing the grass-seed chance), wild patches in their own biomes, and four seeds from each fruit in a crafting grid.
+- **What they are for:** Pumpkin Crates and Farm Stands, the Crowfield's harvest, compost, and (the three squashes) any recipe that takes a vegetable.
+- **Drawn by the owner's rules:** shaped models, skins in the vanilla manner (one colour stepped into tones, regular grooves, warts and specks on an even lattice, no noise or gradient), and 16×16 seed icons drawn from maps. Record: [pumpkin-patch-market.md](docs/features/pumpkin-patch-market.md).
+- **Checked:** see the record's Verification. The game tests and client screenshots run in CI only; not played by hand.
+
 ### Unmerged: Herobrine (encounters, marks, shoreline pyramids, schedule)
 - **Herobrine:** a still, staring figure with glowing white eyes. He appears to a player 28–52 blocks off (14–28 underground), where they could see him if they turned their head. He is gone when anyone comes within 12 blocks, when they stare him down for 2 seconds, or when he is hit. Now and then he stands right behind them, with a heartbeat only they hear and 3 seconds of Darkness, and is gone once they turn and see him. The apparition never directly damages players or blocks, speaks, wears a name tag or is saved; the separate mark builder leaves the structures described below. Record: [herobrine.md](docs/features/herobrine.md).
 - **Four ways to be seen at a distance:** a watcher on a ridge, in a clearing or just inside a cave mouth in a hillside (placed so a group can share the sighting); a follower who walks the player's own path, freezes while watched, and whose faint footsteps stop when they stop; a second look that finds him gone or moved; and eyes at the far end of a tunnel behind an underground player.

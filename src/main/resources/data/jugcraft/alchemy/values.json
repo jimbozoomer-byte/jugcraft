@@ -2812,6 +2812,16 @@
       "denominator": 2,
       "source": "recipe jugcraft:blue_alchemical_bag"
     },
+    "jugcraft:blue_hubbard_squash": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
+    "jugcraft:blue_hubbard_squash_seeds": {
+      "numerator": 1,
+      "denominator": 4,
+      "source": "recipe jugcraft:blue_hubbard_squash_seeds"
+    },
     "jugcraft:blue_plastic": {
       "numerator": 5,
       "denominator": 2,
@@ -27562,6 +27572,16 @@
       "denominator": 1,
       "source": "fallback (balance pending)"
     },
+    "jugcraft:long_island_cheese_pumpkin": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
+    "jugcraft:long_island_cheese_pumpkin_seeds": {
+      "numerator": 1,
+      "denominator": 4,
+      "source": "recipe jugcraft:long_island_cheese_pumpkin_seeds"
+    },
     "jugcraft:long_scope": {
       "numerator": 899,
       "denominator": 2,
@@ -35002,6 +35022,16 @@
       "denominator": 2,
       "source": "recipe jugcraft:spooky_sign"
     },
+    "jugcraft:spoon_gourd": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
+    "jugcraft:spoon_gourd_seeds": {
+      "numerator": 1,
+      "denominator": 4,
+      "source": "recipe jugcraft:spoon_gourd_seeds"
+    },
     "jugcraft:sprinkler": {
       "numerator": 13901,
       "denominator": 4,
@@ -36152,6 +36182,16 @@
       "denominator": 1,
       "source": "recipe jugcraft:survey_stake"
     },
+    "jugcraft:swan_gourd": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
+    "jugcraft:swan_gourd_seeds": {
+      "numerator": 1,
+      "denominator": 4,
+      "source": "recipe jugcraft:swan_gourd_seeds"
+    },
     "jugcraft:sweet_berry_cheesecake": {
       "numerator": 1,
       "denominator": 1,
@@ -36186,6 +36226,16 @@
       "numerator": 1,
       "denominator": 1,
       "source": "fallback (balance pending)"
+    },
+    "jugcraft:sweet_dumpling_squash": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
+    "jugcraft:sweet_dumpling_squash_seeds": {
+      "numerator": 1,
+      "denominator": 4,
+      "source": "recipe jugcraft:sweet_dumpling_squash_seeds"
     },
     "jugcraft:sweet_potato": {
       "numerator": 1,
@@ -37041,6 +37091,16 @@
       "numerator": 773,
       "denominator": 1,
       "source": "recipe jugcraft:tuppence_pistol"
+    },
+    "jugcraft:turban_squash": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
+    "jugcraft:turban_squash_seeds": {
+      "numerator": 1,
+      "denominator": 4,
+      "source": "recipe jugcraft:turban_squash_seeds"
     },
     "jugcraft:turbine_control_board": {
       "numerator": 49247,

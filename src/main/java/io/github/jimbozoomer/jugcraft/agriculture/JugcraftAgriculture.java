@@ -144,6 +144,8 @@ public final class JugcraftAgriculture {
 			"butternut_squash_seeds", "acorn_squash_seeds", "warty_gourd_seeds", "turnip", "cranberries", "chestnut",
 			"giant_pumpkin_seeds", "white_pumpkin_seeds", "jarrahdale_pumpkin_seeds", "cinderella_pumpkin_seeds", "red_kuri_pumpkin_seeds",
 			"kabocha_pumpkin_seeds", "bottle_gourd_seeds",
+			"turban_squash_seeds", "blue_hubbard_squash_seeds", "sweet_dumpling_squash_seeds", "long_island_cheese_pumpkin_seeds",
+			"spoon_gourd_seeds", "swan_gourd_seeds",
 			"ornamental_corn_kernels", "mandrake_root", "rice", "strawberry_seeds", "blueberry_seeds", "coffee_seeds",
 			"lettuce_seeds", "spinach_seeds", "radish", "peas", "cucumber_seeds", "eggplant_seeds", "zucchini_seeds");
 	/** The chestnut tree's feature (data/jugcraft/worldgen/feature/chestnut.json), grown by its sapling. */
@@ -549,6 +551,13 @@ public final class JugcraftAgriculture {
 		gourd("red_kuri_pumpkin", "red_kuri_pumpkin_seeds", 1.0F, MapColor.COLOR_ORANGE);
 		gourd("kabocha_pumpkin", "kabocha_pumpkin_seeds", 1.0F, MapColor.COLOR_GREEN);
 		gourd("bottle_gourd", "bottle_gourd_seeds", 1.0F, MapColor.COLOR_LIGHT_GREEN);
+		// The Pumpkin Patch Market (tools/pumpkin_patch.py): three squashes, a pie pumpkin and two gourds for show.
+		gourd("turban_squash", "turban_squash_seeds", 1.0F, MapColor.COLOR_RED);
+		gourd("blue_hubbard_squash", "blue_hubbard_squash_seeds", 1.25F, MapColor.COLOR_LIGHT_BLUE);
+		gourd("sweet_dumpling_squash", "sweet_dumpling_squash_seeds", 0.85F, MapColor.SAND);
+		gourd("long_island_cheese_pumpkin", "long_island_cheese_pumpkin_seeds", 1.0F, MapColor.TERRACOTTA_WHITE);
+		gourd("spoon_gourd", "spoon_gourd_seeds", 0.85F, MapColor.COLOR_YELLOW);
+		gourd("swan_gourd", "swan_gourd_seeds", 1.0F, MapColor.COLOR_GREEN);
 		registerGiantPumpkin();
 		registerBlock("cranberry_bush", CranberryBushBlock::new, BlockBehaviour.Properties.ofFullCopy(Blocks.SWEET_BERRY_BUSH)
 				.sound(SoundType.WET_GRASS));
@@ -771,6 +780,13 @@ public final class JugcraftAgriculture {
 		stew("red_kuri_soup", 9, 0.7F);
 		food("kabocha_tempura", 6, 0.8F, COMPOST_MEDIUM_HIGH);
 		seeds("bottle_gourd_seeds", "bottle_gourd_stem", COMPOST_LOW);
+		// The Pumpkin Patch Market's squashes and gourds (tools/pumpkin_patch.py).
+		seeds("turban_squash_seeds", "turban_squash_stem", COMPOST_LOW);
+		seeds("blue_hubbard_squash_seeds", "blue_hubbard_squash_stem", COMPOST_LOW);
+		seeds("sweet_dumpling_squash_seeds", "sweet_dumpling_squash_stem", COMPOST_LOW);
+		seeds("long_island_cheese_pumpkin_seeds", "long_island_cheese_pumpkin_stem", COMPOST_LOW);
+		seeds("spoon_gourd_seeds", "spoon_gourd_stem", COMPOST_LOW);
+		seeds("swan_gourd_seeds", "swan_gourd_stem", COMPOST_LOW);
 		plain("dried_bottle_gourd", COMPOST_MEDIUM);
 		plain("ornamental_corn", COMPOST_MEDIUM);
 		seeds("ornamental_corn_kernels", "ornamental_corn_crop", COMPOST_LOW);
@@ -3455,6 +3471,12 @@ public final class JugcraftAgriculture {
 		fallPatch("red_kuri_pumpkin", ConventionalBiomeTags.IS_TAIGA, ConventionalBiomeTags.IS_SPOOKY);
 		fallPatch("kabocha_pumpkin", ConventionalBiomeTags.IS_FOREST, ConventionalBiomeTags.IS_JUNGLE);
 		fallPatch("bottle_gourd", ConventionalBiomeTags.IS_JUNGLE, ConventionalBiomeTags.IS_SAVANNA);
+		fallPatch("turban_squash", ConventionalBiomeTags.IS_PLAINS, ConventionalBiomeTags.IS_FOREST);
+		fallPatch("blue_hubbard_squash", ConventionalBiomeTags.IS_TAIGA, ConventionalBiomeTags.IS_SNOWY);
+		fallPatch("sweet_dumpling_squash", ConventionalBiomeTags.IS_FLORAL, ConventionalBiomeTags.IS_BIRCH_FOREST);
+		fallPatch("long_island_cheese_pumpkin", ConventionalBiomeTags.IS_PLAINS, ConventionalBiomeTags.IS_BEACH);
+		fallPatch("spoon_gourd", ConventionalBiomeTags.IS_SAVANNA, ConventionalBiomeTags.IS_JUNGLE);
+		fallPatch("swan_gourd", ConventionalBiomeTags.IS_SWAMP, ConventionalBiomeTags.IS_JUNGLE);
 		fallPatch("mums", ConventionalBiomeTags.IS_FLORAL, ConventionalBiomeTags.IS_FOREST);
 		// Autumn foraging: wild mushrooms on forest floors.
 		fallPatch("chanterelle", ConventionalBiomeTags.IS_FOREST, ConventionalBiomeTags.IS_BIRCH_FOREST);
@@ -3528,16 +3550,23 @@ public final class JugcraftAgriculture {
 	}
 
 	/** Shapes of each gourd facing north or south, then east or west (models: tools/festival_data.py). */
-	private static final Map<String, VoxelShape[]> GOURD_SHAPES = Map.of(
-			"butternut_squash", new VoxelShape[] {Block.box(4.0, 0.0, 1.0, 12.0, 8.0, 15.0), Block.box(1.0, 0.0, 4.0, 15.0, 8.0, 12.0)},
-			"acorn_squash", new VoxelShape[] {Block.box(3.0, 0.0, 3.0, 13.0, 11.0, 13.0), Block.box(3.0, 0.0, 3.0, 13.0, 11.0, 13.0)},
-			"warty_gourd", new VoxelShape[] {Block.box(4.0, 0.0, 4.0, 12.0, 14.0, 12.0), Block.box(4.0, 0.0, 4.0, 12.0, 14.0, 12.0)},
-			"white_pumpkin", new VoxelShape[] {Shapes.block(), Shapes.block()},
-			"jarrahdale_pumpkin", new VoxelShape[] {Shapes.block(), Shapes.block()},
-			"cinderella_pumpkin", new VoxelShape[] {Shapes.block(), Shapes.block()},
-			"red_kuri_pumpkin", new VoxelShape[] {Shapes.block(), Shapes.block()},
-			"kabocha_pumpkin", new VoxelShape[] {Shapes.block(), Shapes.block()},
-			"bottle_gourd", new VoxelShape[] {Block.box(4.0, 0.0, 4.0, 12.0, 15.0, 12.0), Block.box(4.0, 0.0, 4.0, 12.0, 15.0, 12.0)});
+	private static final Map<String, VoxelShape[]> GOURD_SHAPES = Map.ofEntries(
+			Map.entry("butternut_squash", new VoxelShape[] {Block.box(4.0, 0.0, 1.0, 12.0, 8.0, 15.0), Block.box(1.0, 0.0, 4.0, 15.0, 8.0, 12.0)}),
+			Map.entry("acorn_squash", new VoxelShape[] {Block.box(3.0, 0.0, 3.0, 13.0, 11.0, 13.0), Block.box(3.0, 0.0, 3.0, 13.0, 11.0, 13.0)}),
+			Map.entry("warty_gourd", new VoxelShape[] {Block.box(4.0, 0.0, 4.0, 12.0, 14.0, 12.0), Block.box(4.0, 0.0, 4.0, 12.0, 14.0, 12.0)}),
+			Map.entry("white_pumpkin", new VoxelShape[] {Shapes.block(), Shapes.block()}),
+			Map.entry("jarrahdale_pumpkin", new VoxelShape[] {Shapes.block(), Shapes.block()}),
+			Map.entry("cinderella_pumpkin", new VoxelShape[] {Shapes.block(), Shapes.block()}),
+			Map.entry("red_kuri_pumpkin", new VoxelShape[] {Shapes.block(), Shapes.block()}),
+			Map.entry("kabocha_pumpkin", new VoxelShape[] {Shapes.block(), Shapes.block()}),
+			Map.entry("bottle_gourd", new VoxelShape[] {Block.box(4.0, 0.0, 4.0, 12.0, 15.0, 12.0), Block.box(4.0, 0.0, 4.0, 12.0, 15.0, 12.0)}),
+			// The Pumpkin Patch Market (tools/pumpkin_patch.py SHAPES): each shape holds the model whichever way it lies.
+			Map.entry("turban_squash", new VoxelShape[] {Block.box(2.0, 0.0, 2.0, 14.0, 11.5, 14.0), Block.box(2.0, 0.0, 2.0, 14.0, 11.5, 14.0)}),
+			Map.entry("blue_hubbard_squash", new VoxelShape[] {Block.box(3.0, 0.0, 0.0, 13.0, 9.0, 16.0), Block.box(0.0, 0.0, 3.0, 16.0, 9.0, 13.0)}),
+			Map.entry("sweet_dumpling_squash", new VoxelShape[] {Block.box(4.0, 0.0, 4.0, 12.0, 7.5, 12.0), Block.box(4.0, 0.0, 4.0, 12.0, 7.5, 12.0)}),
+			Map.entry("long_island_cheese_pumpkin", new VoxelShape[] {Block.box(1.0, 0.0, 1.0, 15.0, 9.0, 15.0), Block.box(1.0, 0.0, 1.0, 15.0, 9.0, 15.0)}),
+			Map.entry("spoon_gourd", new VoxelShape[] {Block.box(5.0, 0.0, 0.5, 11.0, 7.0, 15.5), Block.box(0.5, 0.0, 5.0, 15.5, 7.0, 11.0)}),
+			Map.entry("swan_gourd", new VoxelShape[] {Block.box(4.0, 0.0, 1.0, 12.0, 14.0, 15.0), Block.box(1.0, 0.0, 4.0, 15.0, 14.0, 12.0)}));
 
 	/** A squash or gourd block (with its item), its stem and its attached stem. The seeds are registered with the other items. */
 	private static void gourd(String id, String seedId, float growthTime, MapColor color) {

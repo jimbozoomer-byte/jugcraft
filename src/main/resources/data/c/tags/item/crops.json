@@ -60,6 +60,12 @@
     "#c:crops/red_kuri_pumpkin",
     "#c:crops/kabocha_pumpkin",
     "#c:crops/bottle_gourd",
+    "#c:crops/turban_squash",
+    "#c:crops/blue_hubbard_squash",
+    "#c:crops/sweet_dumpling_squash",
+    "#c:crops/long_island_cheese_pumpkin",
+    "#c:crops/spoon_gourd",
+    "#c:crops/swan_gourd",
     "jugcraft:nouveau_magebloom"
   ]
 }
