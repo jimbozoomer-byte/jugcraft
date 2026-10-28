@@ -5990,8 +5990,8 @@ public class ConcordanceWorkerGameTests {
 	static {
 		// GC-05 (SG12): Bathin comes where an awake Verdant Heart and an awake Gleaner the inviter keeps lie within 10 of the
 		// perch: the Heart beside the perch's grid cell (perchFor leaves x - 1 free) and the Gleaner at x - 1, z - 1 (clear of
-		// every case's second and copied perches, which stand south). The Heart holds no Verdance and stands on no bed, so it
-		// makes none and nothing is ever carried: every shared case reads him idle.
+		// every case's second and copied perches, which stand north of the perch at x, z - 1). The Heart holds no Verdance and
+		// stands on no bed, so it makes none and nothing is ever carried: every shared case reads him idle.
 		FIXTURES.put(BathinEntity.COUNTERPART, (helper, player, perch) -> {
 			BlockPos heart = perch.offset(-1, 0, 0);
 			BlockPos gleaner = perch.offset(-1, 0, -1);
