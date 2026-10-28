@@ -120,7 +120,7 @@ public abstract class PartyServingBlock extends FacingDecorationBlock {
 			server.setBlock(pos, state.setValue(servings(), held - 1), Block.UPDATE_ALL);
 			ItemStack one = new ItemStack(serves());
 			if (!player.getInventory().add(one)) {
-				player.drop(one, false);
+				Block.popResource(server, pos, one);
 			}
 			server.playSound(null, pos, SoundEvents.BUNDLE_REMOVE_ONE, SoundSource.BLOCKS, 0.6F, 1.3F);
 			server.gameEvent(player, GameEvent.BLOCK_CHANGE, pos);
