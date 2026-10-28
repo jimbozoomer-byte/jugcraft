@@ -14692,7 +14692,8 @@ def check_barn_tools():
     capacity, reach, growth odds and cooldown and the Seed Pouch's kinds and reach are the table's; the can's water
     component is bounded by its capacity; their recipes exist and the tooltips have their text. Part 2: the Quern's
     capacity, turns and turn time and the Butter Churn's strokes, butter and stroke time are the table's; each one's
-    runner variants name its moving part's model; the flour and pancake recipes exist; the messages have their text."""
+    runner variants name its moving part's model; the flour and pancake recipes exist; the messages have their text.
+    Part 3: the Drying Rack's bunch and drying time and the Corn Crib's capacity, stages and sizes are the table's."""
     import barn_tools as bt
     agri = JAVA_ROOT / "agriculture"
     can = (agri / "WateringCanItem.java").read_text(encoding="utf-8") if (agri / "WateringCanItem.java").is_file() else ""
@@ -14711,7 +14712,7 @@ def check_barn_tools():
             err(f"{recipe['id']}: tools/barn_tools.py's recipe was not generated")
     lang = load(ASSETS / "lang" / "en_us.json") or {}
     for key in ("item.jugcraft.watering_can.water", "item.jugcraft.seed_pouch.contents", "message.jugcraft.quern.full",
-                "message.jugcraft.quern.other", "message.jugcraft.butter_churn.full"):
+                "message.jugcraft.quern.other", "message.jugcraft.butter_churn.full", "message.jugcraft.drying_rack.full"):
         if key not in lang:
             err(f"{key}: the text is missing")
     # Part 2: the Quern's and the Butter Churn's numbers, their moving parts' models, and their recipes.
@@ -14723,7 +14724,7 @@ def check_barn_tools():
     for name, key in (("STROKES", "strokes"), ("BUTTER", "butter"), ("STROKE_TICKS", "stroke_ticks")):
         if f"int {name} = {bt.CHURN[key]};" not in churn:
             err(f"ButterChurnBlock.{name} is not tools/barn_tools.py CHURN's {bt.CHURN[key]}")
-    for block in bt.blocks():
+    for block in (bt.QUERN["block"], bt.CHURN["block"]):
         states = load(ASSETS / "blockstates" / f"{block}.json") or {}
         runners = [k for k in states.get("variants", {}) if "runner=true" in k]
         if not runners or any(states["variants"][k]["model"] == f"jugcraft:block/{block}" for k in runners):
@@ -14731,6 +14732,22 @@ def check_barn_tools():
     for recipe in bt.SHAPELESS:
         if not (DATA / MOD / "recipe" / f"{recipe['id']}.json").is_file():
             err(f"{recipe['id']}: tools/barn_tools.py's recipe was not generated")
+    # Part 3: the Drying Rack's and the Corn Crib's numbers and sizes.
+    rack = (agri / "DryingRackBlock.java").read_text(encoding="utf-8") if (agri / "DryingRackBlock.java").is_file() else ""
+    for name, value in (("BUNCH", bt.RACK["bunch"]), ("DRY_TICKS", bt.RACK["dry_ticks"])):
+        if f"int {name} = {value};" not in rack:
+            err(f"DryingRackBlock.{name} is not tools/barn_tools.py RACK's {value}")
+    crib = (agri / "CornCribBlock.java").read_text(encoding="utf-8") if (agri / "CornCribBlock.java").is_file() else ""
+    if f"int CAPACITY = {bt.CRIB['capacity']};" not in crib:
+        err(f"CornCribBlock.CAPACITY is not tools/barn_tools.py CRIB's {bt.CRIB['capacity']}")
+    bins = (agri / "FruitBinBlock.java").read_text(encoding="utf-8") if (agri / "FruitBinBlock.java").is_file() else ""
+    if f"int STAGES = {bt.CRIB['stages']};" not in bins:
+        err(f"the Corn Crib shows FruitBinBlock.STAGES, not tools/barn_tools.py CRIB's {bt.CRIB['stages']} stages")
+    for cls, spec in (("DryingRackBlock", bt.RACK), (None, bt.CRIB)):
+        java = rack if cls else crib
+        w, h, d = spec["size"]
+        if f"box({w}, {h}, {d})" not in java:
+            err(f"{spec['block']} is not {w} x {h} x {d} blocks as tools/barn_tools.py says")
 
 
 def check_orchard_harvest():

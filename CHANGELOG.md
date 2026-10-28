@@ -8,6 +8,12 @@ Every change to Jugcraft, newest first, grouped by pull request. For what each t
 
 No numbered release yet. Entries on feature branches remain proposed until their pull requests merge.
 
+### Unmerged: Barn & Harvest Tools, part 3 (the Drying Rack and the Corn Crib)
+- **Drying Rack**: a freestanding two-block frame with four hooks. Hang bunches of four herb sprigs or peppers; each dries in two minutes into Dried Herbs or Dried Chili, one for one, shown on its hook, and comes down with an empty hand.
+- **Corn Crib**: a slatted crib on posts under a tin gable roof (two across, two up). It holds 256 corn, the ears showing through the slats as it fills.
+- Record: [barn-and-harvest-tools.md](docs/features/barn-and-harvest-tools.md).
+- **Checked:** the record's Verification. Game tests and screenshots run in CI only; not played by hand.
+
 ### Unmerged: Barn & Harvest Tools, part 2 (the Quern and the Butter Churn)
 - **Quern**: hand millstones in a flour tray on a wooden stand. Fill its eye with wheat or dried chili, then turn the upper stone with an empty hand; it turns once round, and every two turns grind a piece out of the spout (wheat into Flour, a chili into two Paprika).
 - **Butter Churn**: a stave dash churn with iron hoops. Pour in a bucket of milk (the bucket comes back) and work the dasher; the eighth stroke churns two Butter.

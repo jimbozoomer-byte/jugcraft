@@ -1497,7 +1497,7 @@ Hand tools and farmstead blocks, made from wood, stone and early metals. None ne
 | Bushel Basket | Small produce storage for markets | Discovery |
 | Compost Bin | Turns scraps into Compost, an organic fertilizer that makes farmland *fertile* for a while (faster growth); the no-chemistry route | Discovery |
 | **Quern (hand mill)** ✅ | Grinds wheat into Flour (wheat dough, Pancakes) and dried chili into paprika; see [Barn & Harvest Tools](../features/barn-and-harvest-tools.md). Corn into cornmeal waits | Discovery |
-| Drying Rack | Retts flax into linen fibre, dries herbs and fruit, makes jerky | Workshops |
+| **Drying Rack** ✅ (herbs and peppers) | Dries herbs into Dried Herbs and peppers into Dried Chili (Discovery; see [Barn & Harvest Tools](../features/barn-and-harvest-tools.md)); retting flax into linen fibre, drying fruit and making jerky wait for their items | Workshops |
 | Fruit and Seed Press (apples ✅) | Apples into cider (built: the **Cider Press**, a Discovery-tier hand press; see [the cider mill](#the-cider-mill)); grapes into juice, and **sunflower or flax seeds into plant oil at a low hand-press yield**, so engineers can buy early lubricant from farmers (planned) | Workshops |
 | **Butter Churn** ✅ / Cheese Press | The churn turns a bucket of milk into Butter (Discovery; see [Barn & Harvest Tools](../features/barn-and-harvest-tools.md)); the cheese press waits for the husbandry slice | Workshops |
 | **Cooking Pot** ✅ | Multi-ingredient meals over a campfire (expedition rations later) | Discovery (iron and a campfire; planned for Workshops, moved earlier because it needs no workshop) |

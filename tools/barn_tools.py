@@ -1,9 +1,10 @@
 """Barn & Harvest Tools, decor set 3 (docs/features/barn-and-harvest-tools.md): the farm equipment
 docs/branches/AGRICULTURE.md planned but never built, and a barn's gear. Part 1: the planned hand tools, the Steel Sickle
 (in tools/agriculture.py SICKLES, beside the flint and bronze ones), the Watering Can and the Seed Pouch. Part 2: the mill
-and the dairy, the Quern and the Butter Churn, and the Flour, Butter and Pancakes they lead to. The numbers here are what
-the Java (agriculture/WateringCanItem, SeedPouchItem, QuernBlock, ButterChurnBlock) uses; tools/check_mod_data.py
-compares them.
+and the dairy, the Quern and the Butter Churn, and the Flour, Butter and Pancakes they lead to. Part 3: drying and keeping
+the harvest, the Drying Rack and the Corn Crib. The numbers here are what the Java (agriculture/WateringCanItem,
+SeedPouchItem, QuernBlock, ButterChurnBlock, DryingRackBlock, CornCribBlock) uses; tools/check_mod_data.py compares
+them.
 tools/barn_tools_data.py writes their files; their icons are maps in tools/item_icons/.
 """
 
@@ -33,6 +34,19 @@ QUERN = {"block": "quern", "display": "Quern", "capacity": 16, "turns": 2, "spin
 # in it, the milk is spilt: the bucket came back when it went in, so nothing else comes out.
 CHURN = {"block": "butter_churn", "display": "Butter Churn", "strokes": 8, "butter": 2, "stroke_ticks": 10}
 
+# ---------------------------------------------------------------- part 3: drying and keeping the harvest
+
+# The Drying Rack: a freestanding frame, two uprights on splayed feet joined by two rails, one block across and two up.
+# Each rail has two hooks, and a bunch of up to `bunch` herb sprigs (jugcraft:herbs) or peppers hangs from each. A bunch
+# dries in `dry_ticks` ticks whether anyone is near or not: herbs into Dried Herbs and peppers into Dried Chili, one for
+# one (the Herb Bundle's yield without its string, the furnace's without its fuel, and slower than either). An empty
+# hand takes down a dried bunch, or the last fresh one if none has dried.
+RACK = {"block": "drying_rack", "display": "Drying Rack", "size": (1, 2, 1), "bunch": 4, "dry_ticks": 2400}
+# The Corn Crib: a slatted crib on posts under a tin gable roof, two blocks across, two up and one deep. It holds
+# `capacity` ears of corn (anything tagged c:crops/corn), taken in and given back as the Apple Bin takes fruit, and the
+# ears show through its slats, rising through `stages` stages as it fills.
+CRIB = {"block": "corn_crib", "display": "Corn Crib", "size": (2, 2, 1), "capacity": 256, "stages": 4}
+
 # What they make: plain ingredients, and a food that needs both (tools/agriculture.py ITEMS).
 ITEMS = {
     "flour": {"display": "Flour", "compost": "low", "tags": []},
@@ -50,6 +64,12 @@ RECIPES = [
      "result": "quern", "count": 1, "category": "misc"},
     {"id": "butter_churn", "pattern": [" S ", "PNP", "PPP"], "key": {"S": "minecraft:stick", "N": "minecraft:iron_nugget", "P": "#minecraft:planks"},
      "result": "butter_churn", "count": 1, "category": "misc"},
+    # Part 3.
+    {"id": "drying_rack", "pattern": ["STS", "S S", "S S"], "key": {"S": "minecraft:stick", "T": "minecraft:string"},
+     "result": "drying_rack", "count": 1, "category": "misc"},
+    {"id": "corn_crib", "pattern": ["LLL", "SCS", "P P"], "key": {"L": "#minecraft:wooden_slabs", "S": "minecraft:stick",
+                                                                 "C": "minecraft:chest", "P": "#minecraft:planks"},
+     "result": "corn_crib", "count": 1, "category": "misc"},
 ]
 
 # Flour makes Wheat Dough as wheat does (three and a bucket of water make three), and Pancakes with butter and an egg.
@@ -67,4 +87,4 @@ def items():
 
 
 def blocks():
-    return [QUERN["block"], CHURN["block"]]
+    return [QUERN["block"], CHURN["block"], RACK["block"], CRIB["block"]]

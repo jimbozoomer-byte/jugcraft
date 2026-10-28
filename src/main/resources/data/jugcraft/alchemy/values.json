@@ -7737,6 +7737,11 @@
       "denominator": 1,
       "source": "recipe jugcraft:corn_crate"
     },
+    "jugcraft:corn_crib": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
     "jugcraft:corn_dog": {
       "numerator": 69,
       "denominator": 1,
@@ -10293,6 +10298,11 @@
       "source": "fallback (balance pending)"
     },
     "jugcraft:dry_storage_cask": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
+    "jugcraft:drying_rack": {
       "numerator": 1,
       "denominator": 1,
       "source": "fallback (balance pending)"

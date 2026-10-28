@@ -2,6 +2,11 @@ package io.github.jimbozoomer.jugcraft.test;
 
 import io.github.jimbozoomer.jugcraft.agriculture.ButterChurnBlock;
 import io.github.jimbozoomer.jugcraft.agriculture.ButterChurnBlockEntity;
+import io.github.jimbozoomer.jugcraft.agriculture.CornCribBlock;
+import io.github.jimbozoomer.jugcraft.agriculture.DryingRackBlock;
+import io.github.jimbozoomer.jugcraft.agriculture.DryingRackBlockEntity;
+import io.github.jimbozoomer.jugcraft.agriculture.FruitBinBlock;
+import io.github.jimbozoomer.jugcraft.agriculture.FruitStoreBlockEntity;
 import io.github.jimbozoomer.jugcraft.agriculture.JugcraftAgriculture;
 import io.github.jimbozoomer.jugcraft.agriculture.QuernBlock;
 import io.github.jimbozoomer.jugcraft.agriculture.QuernBlockEntity;
@@ -19,6 +24,7 @@ import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
@@ -37,7 +43,11 @@ import net.minecraft.world.phys.Vec3;
  * Part 2: the Quern takes grain and refuses anything else, grinds a piece every two turns (wheat into flour, a dried
  * chili into two paprika), won't turn again before a turn is done, gives its grain back to a sneaking empty hand and
  * spills it when broken; the Butter Churn takes a bucket of milk and gives the bucket back, refuses a second, churns
- * butter on the eighth stroke, won't stroke again before a stroke is done, and spills its milk when broken.
+ * butter on the eighth stroke, won't stroke again before a stroke is done, and spills its milk when broken. Part 3: the
+ * Drying Rack stands whole, hangs bunches of four peppers and herbs on its hooks and refuses anything else, shows them,
+ * gives back a fresh bunch, waits to show them dry and gives them back dried, and gives back its bunches when broken; the
+ * Corn Crib stands whole, takes corn up to its capacity and nothing else, shows it on every block, gives back a stack and
+ * spills its corn when broken.
  */
 public class BarnToolsGameTests {
 	private static Item item(String id) {
@@ -269,6 +279,100 @@ public class BarnToolsGameTests {
 						&& dropped(helper, Items.BUCKET) == 0, "Broken, it drops itself and spills its milk");
 				helper.succeed();
 			});
+		});
+	}
+
+	// ---------------------------------------------------------------- part 3
+
+	/** Places the prop in the player's hand on the floor at {@code at}, as they would (facing them: north). */
+	private static void place(GameTestHelper helper, ServerPlayer player, BlockPos at) {
+		player.getMainHandItem().useOn(new UseOnContext(player, InteractionHand.MAIN_HAND, hit(helper, at.below(), Direction.UP)));
+	}
+
+	private static void stone(GameTestHelper helper) {
+		for (int x = 0; x < 8; x++) {
+			for (int z = 0; z < 8; z++) {
+				helper.setBlock(new BlockPos(x, 1, z), Blocks.STONE);
+			}
+		}
+	}
+
+	@GameTest(maxTicks = 40)
+	public void theRackDriesItsBunches(GameTestHelper helper) {
+		stone(helper);
+		BlockPos pos = new BlockPos(3, 2, 3);
+		ServerPlayer player = standing(helper, new BlockPos(3, 2, 1), new ItemStack(item("drying_rack")));
+		place(helper, player, pos);
+		helper.assertTrue(helper.getBlockState(pos).is(JugcraftAgriculture.block("drying_rack"))
+				&& helper.getBlockState(pos.above()).is(JugcraftAgriculture.block("drying_rack")), "It stands whole, two blocks up");
+		DryingRackBlockEntity rack = helper.getBlockEntity(pos, DryingRackBlockEntity.class);
+		player.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(Items.STICK));
+		useOn(helper, player, pos);
+		helper.assertTrue(rack.bunch(0).isEmpty() && player.getMainHandItem().getCount() == 1, "A stick doesn't hang");
+		player.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(item("pepper"), 6));
+		useOn(helper, player, pos);
+		player.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(item("sage"), 4));
+		useOn(helper, player, pos.above());
+		helper.assertTrue(rack.bunch(0).getCount() == DryingRackBlock.BUNCH && rack.bunch(1).is(item("sage")),
+				"A bunch of four peppers and one of sage hang: " + rack.bunch(0) + ", " + rack.bunch(1));
+		helper.assertTrue(helper.getBlockState(pos).getValue(DryingRackBlock.RIGHT) == DryingRackBlock.Bunch.CHILI
+				&& helper.getBlockState(pos).getValue(DryingRackBlock.LEFT) == DryingRackBlock.Bunch.HERBS, "They show on the lower rail");
+		helper.assertTrue(helper.getLevel().getBlockTicks().hasScheduledTick(helper.absolutePos(pos), JugcraftAgriculture.block("drying_rack")),
+				"It waits to show them dry");
+		// Before they dry, an empty hand takes down the last hung, fresh.
+		player.setItemInHand(InteractionHand.MAIN_HAND, ItemStack.EMPTY);
+		useOn(helper, player, pos);
+		helper.assertTrue(player.getInventory().countItem(item("sage")) == 4 && rack.bunch(1).isEmpty()
+				&& helper.getBlockState(pos).getValue(DryingRackBlock.LEFT) == DryingRackBlock.Bunch.EMPTY, "The fresh sage comes back down");
+		// Once dry, the peppers come down as dried chili, one for one.
+		long now = helper.getLevel().getGameTime();
+		helper.assertTrue(!rack.dried(0, now) && rack.dried(0, now + DryingRackBlock.DRY_TICKS), "They dry in their time");
+		ItemStack dried = rack.takeDown(now + DryingRackBlock.DRY_TICKS);
+		helper.assertTrue(dried.is(item("dried_chili")) && dried.getCount() == DryingRackBlock.BUNCH, "Four dried chilies: " + dried);
+		// Broken, it gives back what hangs on it.
+		player.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(item("pepper"), 2));
+		useOn(helper, player, pos);
+		helper.getLevel().destroyBlock(helper.absolutePos(pos.above()), true);
+		helper.runAfterDelay(3, () -> {
+			helper.assertTrue(dropped(helper, item("pepper")) == 2 && dropped(helper, item("drying_rack")) == 1,
+					"Broken, it gives back its peppers and drops once");
+			helper.succeed();
+		});
+	}
+
+	@GameTest(maxTicks = 40)
+	public void theCribKeepsCorn(GameTestHelper helper) {
+		stone(helper);
+		BlockPos pos = new BlockPos(4, 2, 3);
+		ServerPlayer player = standing(helper, new BlockPos(4, 2, 1), new ItemStack(item("corn_crib")));
+		place(helper, player, pos);
+		CornCribBlock crib = (CornCribBlock) JugcraftAgriculture.block("corn_crib");
+		BlockPos master = helper.absolutePos(pos);
+		for (int part = 0; part < crib.cells().length; part++) {
+			helper.assertTrue(helper.getLevel().getBlockState(crib.partPos(master, Direction.NORTH, part)).is(crib), "Its block " + part + " is there");
+		}
+		FruitStoreBlockEntity store = helper.getBlockEntity(pos, FruitStoreBlockEntity.class);
+		player.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(Items.APPLE, 10));
+		useOn(helper, player, pos);
+		helper.assertTrue(store.count() == 0 && player.getMainHandItem().getCount() == 10, "Apples don't go in");
+		for (int i = 0; i < 5; i++) {
+			player.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(item("corn"), 60));
+			useOn(helper, player, pos.above());
+		}
+		helper.assertTrue(store.count() == CornCribBlock.CAPACITY, "It takes corn up to its capacity: " + store.count());
+		for (int part = 0; part < crib.cells().length; part++) {
+			BlockState there = helper.getLevel().getBlockState(crib.partPos(master, Direction.NORTH, part));
+			helper.assertTrue(there.getValue(FruitBinBlock.FILL) == FruitBinBlock.STAGES, "Full, shown on block " + part + ": " + there);
+		}
+		player.setItemInHand(InteractionHand.MAIN_HAND, ItemStack.EMPTY);
+		useOn(helper, player, pos);
+		helper.assertTrue(store.count() < CornCribBlock.CAPACITY && player.getInventory().countItem(item("corn")) > 0, "An empty hand takes a stack back");
+		int left = store.count();
+		helper.getLevel().destroyBlock(crib.partPos(master, Direction.NORTH, 3), true);
+		helper.runAfterDelay(3, () -> {
+			helper.assertTrue(dropped(helper, item("corn")) == left && dropped(helper, item("corn_crib")) == 1,
+					"Broken, it spills its corn and drops once: " + dropped(helper, item("corn")) + " of " + left);
+			helper.succeed();
 		});
 	}
 }

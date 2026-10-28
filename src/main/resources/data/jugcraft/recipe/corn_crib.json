@@ -1,0 +1,25 @@
+{
+  "fabric:load_conditions": [
+    {
+      "condition": "jugcraft:feature_enabled",
+      "feature": "agriculture"
+    }
+  ],
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    "LLL",
+    "SCS",
+    "P P"
+  ],
+  "key": {
+    "L": "#minecraft:wooden_slabs",
+    "S": "minecraft:stick",
+    "C": "minecraft:chest",
+    "P": "#minecraft:planks"
+  },
+  "result": {
+    "id": "jugcraft:corn_crib",
+    "count": 1
+  }
+}

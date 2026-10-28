@@ -6,6 +6,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.world.Containers;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.storage.ValueInput;
 import net.minecraft.world.level.storage.ValueOutput;
@@ -19,7 +20,12 @@ public class FruitStoreBlockEntity extends BlockEntity {
 	private final List<ItemStack> fruit = new ArrayList<>();
 
 	public FruitStoreBlockEntity(BlockPos pos, BlockState state) {
-		super(JugcraftAgriculture.FRUIT_STORE_ENTITY, pos, state);
+		this(JugcraftAgriculture.FRUIT_STORE_ENTITY, pos, state);
+	}
+
+	/** A store of its own type (the Corn Crib's), kept the same way. */
+	public FruitStoreBlockEntity(BlockEntityType<?> type, BlockPos pos, BlockState state) {
+		super(type, pos, state);
 	}
 
 	/** How many fruit it holds when full. */
@@ -40,10 +46,10 @@ public class FruitStoreBlockEntity extends BlockEntity {
 		return fruit.stream().map(ItemStack::copy).toList();
 	}
 
-	/** Takes as much of {@code stack} as fits, if it is fruit, out of it; returns how many it took. */
+	/** Takes as much of {@code stack} as fits, if it is what its block takes, out of it; returns how many it took. */
 	public int add(ItemStack stack) {
 		int taken = Math.min(stack.getCount(), capacity() - count());
-		if (!stack.is(FruitStore.FRUIT) || taken <= 0) {
+		if (!stack.is(FruitStore.takes(this)) || taken <= 0) {
 			return 0;
 		}
 		ItemStack moving = stack.split(taken);

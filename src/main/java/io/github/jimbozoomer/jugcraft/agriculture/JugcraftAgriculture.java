@@ -389,6 +389,8 @@ public final class JugcraftAgriculture {
 	public static BlockEntityType<FruitStoreBlockEntity> FRUIT_STORE_ENTITY;
 	public static BlockEntityType<QuernBlockEntity> QUERN_ENTITY;
 	public static BlockEntityType<ButterChurnBlockEntity> BUTTER_CHURN_ENTITY;
+	public static BlockEntityType<DryingRackBlockEntity> DRYING_RACK_ENTITY;
+	public static BlockEntityType<FruitStoreBlockEntity> CORN_CRIB_ENTITY;
 	public static BlockEntityType<CaramelAppleStandBlockEntity> CARAMEL_APPLE_STAND_ENTITY;
 	public static ExtendedMenuType<FarmStandMenu, FarmStandMenu.Opening> FARM_STAND_MENU;
 	/** The Harvest Effigy catching (assets/jugcraft/sounds/effigy, made by tools/choir_sounds.py). */
@@ -2799,7 +2801,8 @@ public final class JugcraftAgriculture {
 	/**
 	 * Barn & Harvest Tools (decor set 3; tools/barn_tools.py), part 1: the planned hand tools, the Watering Can and the Seed
 	 * Pouch (the Steel Sickle is registered with the other sickles); part 2: the Quern and the Butter Churn, and the Flour,
-	 * Butter and Pancakes they lead to.
+	 * Butter and Pancakes they lead to; part 3: the Drying Rack and the Corn Crib (whose corn is kept as the Apple Bin keeps
+	 * fruit, by a FruitStoreBlockEntity of its own type).
 	 */
 	private static void registerBarnTools() {
 		WATERING_CAN_WATER = Registry.register(BuiltInRegistries.DATA_COMPONENT_TYPE, Jugcraft.id("watering_can_water"),
@@ -2823,6 +2826,19 @@ public final class JugcraftAgriculture {
 		plain("flour", COMPOST_LOW);
 		registerItem("butter", Item::new, new Item.Properties(), INGREDIENT_TAB);
 		food("pancakes", 5, 0.6F, COMPOST_MEDIUM_HIGH);
+		// Part 3: the Drying Rack and the Corn Crib.
+		Block rack = registerBlock("drying_rack", DryingRackBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.WOOD).strength(1.0F)
+				.sound(SoundType.WOOD).noOcclusion().ignitedByLava().pushReaction(PushReaction.IMMOVEABLE));
+		DRYING_RACK_ENTITY = Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, Jugcraft.id("drying_rack"),
+				FabricBlockEntityTypeBuilder.create(DryingRackBlockEntity::new, rack).build());
+		Block crib = registerBlock("corn_crib", CornCribBlock::new, displayProperties());
+		CORN_CRIB_ENTITY = Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, Jugcraft.id("corn_crib"),
+				FabricBlockEntityTypeBuilder.<FruitStoreBlockEntity>create((pos, state) -> new FruitStoreBlockEntity(CORN_CRIB_ENTITY, pos, state), crib)
+						.build());
+		for (Block block : List.of(rack, crib)) {
+			registerItem(BuiltInRegistries.BLOCK.getKey(block).getPath(), props -> new BlockItem(block, props),
+					new Item.Properties().useBlockDescriptionPrefix(), BUILDING_TAB);
+		}
 	}
 
 	private static BlockBehaviour.Properties displayProperties() {

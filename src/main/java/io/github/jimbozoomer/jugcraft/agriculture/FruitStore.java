@@ -44,6 +44,16 @@ public interface FruitStore {
 	/** How many fruit it holds when full. */
 	int capacity();
 
+	/** What it takes: the Cider Press's fruit, unless it keeps something else (the Corn Crib its corn). */
+	default TagKey<Item> takes() {
+		return FRUIT;
+	}
+
+	/** What {@code store}'s block takes. */
+	static TagKey<Item> takes(FruitStoreBlockEntity store) {
+		return store.getBlockState().getBlock() instanceof FruitStore kind ? kind.takes() : FRUIT;
+	}
+
 	/** How many steps its heap rises through, empty not counted. */
 	int stages();
 
@@ -55,9 +65,9 @@ public interface FruitStore {
 		return count <= 0 ? 0 : Math.max(1, Math.min(stages, (count * stages + capacity - 1) / capacity));
 	}
 
-	/** Puts all the fruit in {@code stack} that fits into {@code store} (on the server; the client only predicts). */
+	/** Puts all of {@code stack} that fits, if it is what {@code store} takes, into it (on the server; the client only predicts). */
 	static InteractionResult putIn(FruitStoreBlockEntity store, ItemStack stack, Level level, BlockPos pos, Player player) {
-		if (!stack.is(FRUIT)) {
+		if (!stack.is(takes(store))) {
 			// Only an empty hand goes on to take a stack back; anything else does what it would on any block.
 			return stack.isEmpty() ? InteractionResult.TRY_WITH_EMPTY_HAND : InteractionResult.PASS;
 		}

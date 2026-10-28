@@ -15,12 +15,14 @@ Everything is drawn here by code; no Mojang texture is read, traced or copied.
 """
 
 import barn_tools as bt
+import decor17_data as d17d
 import decor20_data as d20d
 import flora_art as fa
 import item_icons
 import pumpkin_patch_data as ppd
 from flora_art import Sculpt, pal, shade
-from pumpkin_patch_data import IRON, WOOD, flat, lengthwise, panel, planks
+from flora_art import rotation
+from pumpkin_patch_data import GREY_WOOD, IRON, WOOD, flat, lengthwise, panel, planks
 
 MOD = "jugcraft"
 FACINGS = ppd.FACINGS
@@ -29,6 +31,11 @@ FACINGS = ppd.FACINGS
 STONE = pal("4a4640", "625d55", "7a746a", "928b80", "aaa396")
 FLOUR = pal("c6bca4", "dcd3bd", "eee7d6")
 GRAIN = pal("7e5e1e", "a8862e", "c8a644", "e0c464")
+# Part 3: herbs fresh and dried, chilies fresh and dried, the string they hang by, and ear corn.
+HERBS = {"herbs": pal("243e18", "345a22", "4a7a2e", "64983c"), "dried_herbs": pal("3e3e26", "5a5836", "767248", "908a5a")}
+CHILI = {"chili": pal("520e08", "801a0e", "ac2814", "cc4424"), "dried_chili": pal("340c08", "52140c", "702014", "8a321c")}
+STRING = pal("847456", "aa9a76", "cabc96")
+CORN = pal("6a4a0e", "a07818", "d0a828", "e8c440", "f4dc70")
 
 
 def rid(path):
@@ -122,15 +129,139 @@ def churn():
     return sc
 
 
+# ---------------------------------------------------------------- part 3: the Drying Rack
+
+def sprigs(palette):
+    """A bunch of sprigs hung head down: strands one texel wide along it in two tones by turns, the top row (under the
+    tie) a tone darker."""
+    def paint(p):
+        for y in range(p.h):
+            for x in range(p.w):
+                p.put(x, y, shade(palette, 1 if y == 0 and p.h > 2 else 3 if x % 2 == 0 else 2))
+    paint.tag = repr(("sprigs", palette))
+    return paint
+
+
+# The hooks, as (slot, x, the rail's underside): slot 0 and 1 on the lower rail, 2 and 3 on the upper; 0 and 2 at the
+# viewer's right as they face the rack (the frame's low x), 1 and 3 at the left.
+HOOKS = ((0, 5.0, 15.0), (1, 11.0, 15.0), (2, 5.0, 29.0), (3, 11.0, 29.0))
+BUNCHES = ("herbs", "dried_herbs", "chili", "dried_chili")
+
+
+def bunch(sc, kind, cx, top):
+    """A bunch hung from a hook at (cx, top), its middle at z 8: herbs (tied, stems up, the leaves spreading below), or a
+    ristra of five chilies along a string, by turns either side of it."""
+    if kind in HERBS:
+        pal_ = HERBS[kind]
+        return [panel(sc, "tie", flat(STRING), (cx - 0.75, top - 1.0, 7.25), (cx + 0.75, top, 8.75)),
+                panel(sc, f"{kind}_stems", flat(pal_), (cx - 0.5, top - 2.5, 7.5), (cx + 0.5, top - 1.0, 8.5)),
+                panel(sc, f"{kind}_leaves", sprigs(pal_), (cx - 1.25, top - 5.0, 6.75), (cx + 1.25, top - 2.5, 9.25)),
+                panel(sc, f"{kind}_leaves", sprigs(pal_), (cx - 1.75, top - 6.5, 6.5), (cx + 1.75, top - 5.0, 9.5))]
+    pal_ = CHILI[kind]
+    out = [panel(sc, "string", flat(STRING), (cx - 0.25, top - 8.0, 7.75), (cx + 0.25, top, 8.25))]
+    for k in range(5):
+        x = cx + (0.75 if k % 2 == 0 else -0.75)
+        y = top - 1.0 - 1.5 * k
+        out.append(panel(sc, f"{kind}_pepper", flat(pal_), (x - 0.5, y - 2.0, 7.5), (x + 0.5, y, 8.5)))
+    return out
+
+
+def rack():
+    """The Drying Rack, facing north: two uprights on splayed feet, a lower rail between them and a top rail across them,
+    an iron hook under each rail at each slot; and each slot's bunch of each kind (`overlays`, keyed slot and kind)."""
+    spec = bt.RACK
+    sc = Sculpt(spec["block"], 2303, 64)
+    el = []
+    for x in (1.0, 13.0):
+        el.append(panel(sc, "foot", lengthwise(WOOD), (x, 0.0, 3.0), (x + 2.0, 1.0, 13.0)))
+        el.append(panel(sc, "upright", lengthwise(WOOD), (x + 0.5, 1.0, 7.5), (x + 1.5, 30.0, 8.5)))
+    el.append(panel(sc, "rail", lengthwise(WOOD), (2.5, 15.0, 7.5), (13.5, 16.0, 8.5)))
+    el.append(panel(sc, "rail", lengthwise(WOOD), (1.0, 30.0, 7.25), (15.0, 31.0, 8.75)))
+    for _, cx, top in HOOKS:
+        el.append(panel(sc, "hook", flat(IRON), (cx - 0.25, top - 0.5, 7.75), (cx + 0.25, top, 8.25)))
+    sc.models["whole"] = el
+    sc.overlays = {(slot, kind): bunch(sc, kind, cx, top) for slot, cx, top in HOOKS for kind in BUNCHES}
+    return sc
+
+
+# ---------------------------------------------------------------- part 3: the Corn Crib
+
+def ear_corn():
+    """Ear corn heaped lengthwise: rows of ears two texels high, each six long with a dark texel between ears, every row
+    set half an ear along from the last; the kernels in a checker of two tones, lit along each ear's top row."""
+    def paint(p):
+        for y in range(p.h):
+            row = y // 2
+            for x in range(p.w):
+                at = (x + 3 * row) % 7
+                if at == 6:
+                    k = 0
+                else:
+                    k = (4 if (x + y) % 2 == 0 else 3) if y % 2 == 0 else (3 if (x + y) % 2 == 0 else 2)
+                p.put(x, y, shade(CORN, k))
+    paint.tag = repr(("ear_corn",))
+    return paint
+
+
+# The crib roof's pitch, the north half's turn about x (the south half's is the opposite): 22.5 degrees, the most a model
+# turns a box short of 45; negative lifts the north half's ridge end.
+ROOF = -22.5
+
+
+def crib():
+    """The Corn Crib, facing north, two blocks across and two up: four short posts, a plank floor, corner posts, walls of
+    horizontal slats with a gap between each (so the corn shows), a top plate, gable ends stepped up to the ridge, and a
+    tin roof in two turned halves a side; and the ears inside at each stage (`heap_<stage>`)."""
+    spec = bt.CRIB
+    sc = Sculpt(spec["block"], 2304, 128)
+    slat = planks(GREY_WOOD, board=2, nails=False)
+    el = []
+    for x in (1.0, 29.0):
+        for z in (2.0, 12.0):
+            el.append(panel(sc, "post", lengthwise(GREY_WOOD), (x, 0.0, z), (x + 2.0, 5.0, z + 2.0)))
+            el.append(panel(sc, "corner", lengthwise(GREY_WOOD), (x + 0.25, 5.0, z + 0.25), (x + 1.75, 28.0, z + 1.75)))
+    el.append(panel(sc, "floor", planks(GREY_WOOD, board=4, nails=False), (1.0, 4.0, 2.0), (31.0, 5.0, 14.0)))
+    # The slats: 1.5 pixels high with a pixel's gap, from the floor to the plate, front and back, then the ends.
+    y = 5.5
+    while y + 1.5 <= 28.0:
+        el.append(panel(sc, "slat", slat, (2.75, y, 2.25), (29.25, y + 1.5, 3.0)))
+        el.append(panel(sc, "slat", slat, (2.75, y, 13.0), (29.25, y + 1.5, 13.75)))
+        el.append(panel(sc, "slat", slat, (1.25, y, 3.75), (2.0, y + 1.5, 12.25)))
+        el.append(panel(sc, "slat", slat, (30.0, y, 3.75), (30.75, y + 1.5, 12.25)))
+        y += 2.5
+    el.append(panel(sc, "plate", lengthwise(GREY_WOOD), (1.0, 28.0, 2.0), (31.0, 29.0, 14.0)))
+    # The gable ends, stepped up under the roof to its ridge.
+    for x0, x1 in ((1.25, 2.25), (29.75, 30.75)):
+        for z0, z1, y0, y1 in ((3.0, 13.0, 29.0, 30.5), (5.0, 11.0, 30.5, 31.25), (7.0, 9.0, 31.25, 32.0)):
+            el.append(panel(sc, "gable", slat, (x0, y0, z0), (x1, y1, z1)))
+    # The roof: corrugated tin, each side in two halves (one a block), each turned 22.5 degrees up about its eave over the
+    # plate (just inside the frame, so the cut gives it to its block) to meet the other at the ridge.
+    tin = lengthwise(IRON)
+    for x0, x1 in ((0.0, 16.0), (16.0, 32.0)):
+        mid = (x0 + x1) / 2
+        el.append(panel(sc, "roof", tin, (x0, 29.0, -0.75), (x1, 29.75, 8.35), rot=rotation((mid, 29.0, 0.25), "x", ROOF)))
+        el.append(panel(sc, "roof", tin, (x0, 29.0, 7.65), (x1, 29.75, 16.75), rot=rotation((mid, 29.0, 15.75), "x", -ROOF)))
+    # A tin cap along the ridge, over the halves' meeting.
+    el.append(panel(sc, "ridge", flat(IRON), (0.0, 32.25, 7.0), (32.0, 33.0, 9.0)))
+    sc.models["whole"] = el
+    inside = 28.0 - 5.0
+    for stage in range(1, spec["stages"] + 1):
+        top = 5.0 + inside * stage / spec["stages"]
+        sc.models[f"heap_{stage}"] = [panel(sc, "corn", ear_corn(), (3.0, 5.0, 3.25), (29.0, top, 12.75))]
+    return sc
+
+
 # ---------------------------------------------------------------- building and files
 
 _built = {}
-BUILDERS = {bt.QUERN["block"]: quern, bt.CHURN["block"]: churn}
+BUILDERS = {bt.QUERN["block"]: (quern, 64), bt.CHURN["block"]: (churn, 64), bt.RACK["block"]: (rack, 64),
+            bt.CRIB["block"]: (crib, 128)}
 
 
 def build(block):
     if block not in _built:
-        _built[block] = ppd.planned(BUILDERS[block], 64)
+        builder, size = BUILDERS[block]
+        _built[block] = ppd.planned(builder, size)
     return _built[block]
 
 
@@ -172,14 +303,92 @@ def part2_assets(root, write, lang):
     lang[f"message.{MOD}.quern.full"] = "The quern is full"
     lang[f"message.{MOD}.quern.other"] = "The quern holds other grain: take it out first"
     lang[f"message.{MOD}.butter_churn.full"] = "The churn is full"
+    lang[f"message.{MOD}.drying_rack.full"] = "Every hook has a bunch on it"
+    part3_assets(root, write, lang)
+
+
+# The rack's slots: which block (part) each hangs in and which of its sides, as DryingRackBlock names them.
+RACK_SLOTS = {0: (0, "right"), 1: (0, "left"), 2: (1, "right"), 3: (1, "left")}
+ITEM_DISPLAY = {"gui": {"rotation": [25, 225, 0], "translation": [0, 0, 0], "scale": [0.625, 0.625, 0.625]},
+                "ground": {"rotation": [0, 0, 0], "translation": [0, 2, 0], "scale": [0.3, 0.3, 0.3]},
+                "fixed": {"rotation": [0, 0, 0], "translation": [0, 0, 0], "scale": [0.6, 0.6, 0.6]},
+                "thirdperson_righthand": {"rotation": [75, 45, 0], "translation": [0, 2, 0], "scale": [0.35, 0.35, 0.35]},
+                "firstperson_righthand": {"rotation": [0, 45, 0], "translation": [0, 0, 0], "scale": [0.35, 0.35, 0.35]}}
+
+
+def item_model(elements, size, scale):
+    """The whole prop scaled into one block about its middle."""
+    return fa.transformed(d17d.pinned(elements), scale, (8 - 8 * size[0] * scale, 0, 8 - 8 * size[2] * scale), (0, 0, 0))
+
+
+def part3_assets(root, write, lang):
+    """The Drying Rack's two blocks' models, each bunch's model moved into the block it hangs in, and a multipart
+    blockstate adding them by each block's `left` and `right`; and the Corn Crib's four blocks' models at each stage, cut
+    from the whole, with a variant for each (`fill`; its `fruit` and `lit`, from the store and the prop it shares code
+    with, draw nothing). Their items show them whole: the rack hung with one bunch of each, the crib half full."""
+    models = root / "models" / "block"
+    states = root / "blockstates"
+
+    spec = bt.RACK
+    block = spec["block"]
+    lang[f"block.{MOD}.{block}"] = spec["display"]
+    sc = build(block)
+    n = len(d17d.cells(spec["size"]))
+    for part, elements in enumerate(ppd.cut(sc.models["whole"], spec["size"])):
+        write(models / f"{block}_{part}.json", fa.model(block, elements))
+    for (slot, kind), elements in sc.overlays.items():
+        part, side = RACK_SLOTS[slot]
+        write(models / f"{block}_{part}_{side}_{kind}.json", fa.model(block, ppd.cut(elements, spec["size"])[part]))
+    multipart = []
+    for f, y in FACINGS.items():
+        turn = {"y": y} if y else {}
+        for p in range(n):
+            multipart.append({"when": {"facing": f, "part": str(p)}, "apply": {"model": rid(f"block/{block}_{p}"), **turn}})
+        for slot, (p, side) in RACK_SLOTS.items():
+            for kind in BUNCHES:
+                multipart.append({"when": {"facing": f, "part": str(p), side: kind},
+                                  "apply": {"model": rid(f"block/{block}_{p}_{side}_{kind}"), **turn}})
+    write(states / f"{block}.json", {"multipart": multipart})
+    hung = sc.models["whole"] + [e for slot, kind in zip(range(4), BUNCHES) for e in sc.overlays[(slot, kind)]]
+    write(root / "models" / "item" / f"{block}.json", fa.model(block, item_model(hung, spec["size"], 0.5), ITEM_DISPLAY))
+    write(root / "items" / f"{block}.json", {"model": {"type": "minecraft:model", "model": rid(f"item/{block}")}})
+
+    spec = bt.CRIB
+    block = spec["block"]
+    lang[f"block.{MOD}.{block}"] = spec["display"]
+    sc = build(block)
+    n = len(d17d.cells(spec["size"]))
+    for stage in range(spec["stages"] + 1):
+        elements = sc.models["whole"] + (sc.models[f"heap_{stage}"] if stage else [])
+        for part, cut in enumerate(ppd.cut(elements, spec["size"])):
+            write(models / (f"{block}_{part}" + (f"_{stage}" if stage else "") + ".json"), fa.model(block, cut))
+    variants = {}
+    for f, y in FACINGS.items():
+        turn = {"y": y} if y else {}
+        for stage in range(spec["stages"] + 1):
+            for p in range(n):
+                model = f"{block}_{p}" + (f"_{stage}" if stage else "")
+                for fruit in ("apple", "pear"):
+                    for lit in ("false", "true"):
+                        variants[f"facing={f},fill={stage},fruit={fruit},lit={lit},part={p}"] = {"model": rid(f"block/{model}"), **turn}
+    write(states / f"{block}.json", {"variants": variants})
+    half = sc.models["whole"] + sc.models[f"heap_{spec['stages'] // 2}"]
+    write(root / "models" / "item" / f"{block}.json", fa.model(block, item_model(half, spec["size"], 0.5), ITEM_DISPLAY))
+    write(root / "items" / f"{block}.json", {"model": {"type": "minecraft:model", "model": rid(f"item/{block}")}})
 
 
 def loot(out, write):
-    """The quern and the churn drop themselves; the quern spills its grain (QuernBlockEntity), the churn its milk."""
-    for block in bt.blocks():
+    """The quern and the churn drop themselves; the quern spills its grain (QuernBlockEntity), the churn its milk. The
+    rack and the crib drop once, from their first block; the rack gives back its bunches, the crib spills its corn."""
+    for block in (bt.QUERN["block"], bt.CHURN["block"]):
         write(out / f"{block}.json", {"type": "minecraft:block", "pools": [{
             "condition": {"type": "minecraft:survives_explosion"}, "entries": [{"type": "minecraft:item", "name": rid(block)}], "rolls": 1}],
             "random_sequence": rid(f"blocks/{block}")})
+    for block in (bt.RACK["block"], bt.CRIB["block"]):
+        write(out / f"{block}.json", {"type": "minecraft:block", "pools": [{
+            "condition": {"type": "minecraft:all_of", "terms": [{"type": "minecraft:survives_explosion"},
+                                                                {"type": "minecraft:match_block", "blocks": rid(block), "state": {"part": "0"}}]},
+            "entries": [{"type": "minecraft:item", "name": rid(block)}], "rolls": 1}], "random_sequence": rid(f"blocks/{block}")})
 
 
 def tags(tags):
