@@ -1,0 +1,9 @@
+{
+  "model": {
+    "type": "minecraft:special",
+    "base": "jugcraft:item/auger_rifle",
+    "model": {
+      "type": "geckolib:geckolib"
+    }
+  }
+}

@@ -57,7 +57,7 @@ nowhere else in Chunks A to D: tickets **GC-01** to **GC-10**; completion eviden
 
 The plan's bar (03:167-177; 09:16): six spirits whose services differ in what they do, each with a discoverable
 invitation, transparent upkeep, one conflict, a refusal and a clean departure, two memorable details and evidence; the
-first complete before the rest multiply; no universal scripting language. With the session's decisions GC-S1 to GC-S24,
+first complete before the rest multiply; no universal scripting language. With the session's decisions GC-S1 to GC-S25,
 a survival player who understands the Binding Arts and Verdant Husbandry can:
 
 - **Discover (unit 1):** learn **The Garden's Regard** in the codex's Binding category (examine a garden specimen, whose
@@ -399,7 +399,8 @@ source's words; where the game goes beyond the text it says "Jugcraft adaptation
    Heart, moving up to 8 through the Heart's `drawInto` (both ownerships checked by `Transfers`), or a Ley Pylon owned by
    the holder's party (or no one) that is not beside that Heart, through the existing `verdance_to_ley` conversion (3
    for 2), at most 3 batches. One server step: the source falls and the target rises in the same tick; nothing is held by
-   Bathin (S1). No new conversion.
+   Bathin (S1). No new conversion. *(Amended unit 2, GC-S25: a Heart still beating is his source only once it holds a
+   whole move of 8; one that makes no more, whatever it holds.)*
 4. **Upkeep (GC-P41).** `#jugcraft:bathin_offerings` (Verdant Chaff) ×4 every 7 game days; compact: 2 ender pearls, 8
    Verdant Chaff. Terms: radius 10, any hour, 12 moves a day, `party`.
 5. **Conflict: two roads from one Heart** (choice). A Heart beside its own pylon already pours into it. Until the holder
@@ -1757,6 +1758,7 @@ proposals (GC-P, numbered in the reserved blocks). Chunk A to D decisions are un
 | GC-S22 | 26 October 2026 | No new item, block or block entity type; ids added are entities, data, tags, sounds, lang, research, practice, advancements, codex, one perch key, one roster status and the wire additions | Decided by the session | every unit |
 | GC-S23 | 26 October 2026 | Chunk D's recommendation to turn Stolas toward whoever speaks to him and to give later spirits their own silhouettes was not answered separately by "keep stolas" (CD:2780); the cohort carries both as the session's decision (don't 18): "a spirit faces whoever speaks to it" as shared groundwork Stolas also uses (GC-02), and each spirit's own silhouette in its brief | Decided by the session | GC-02, every dossier |
 | GC-S24 | 26 October 2026 | The build runs in CI only (no local game build); unit 1's first push is a compile-only slice; every vanilla, GeckoLib and SmartBrainLib call is checked against the reference sources before it is written and the check recorded in its ticket | Decided by the session | every unit |
+| GC-S25 | 28 October 2026 | Bathin takes from a Verdant Heart only when it holds a whole move (`MOVE_MAX`, 8) or makes no more Verdance (its status is not `working`: full, starved, stalled, on no bed), and then whatever it holds, so a nearly empty, idle Heart is still emptied into a Gleaner with room for a whole move (a pylon takes whole batches of 3, so 1 or 2 may stay, as before). A Heart beating on its bed makes 1 or 2 a beat every 200 ticks and he thinks every 20, so before this each of his 12 moves a day carried a beat's 1 or 2 (12 to 24 a day); now a beating Heart gives a whole move each time (8 into a Gleaner, up to 96 a day; usually 2 whole batches a move into a pylon, 6 Verdance for 4 Ley Charge, so 72 Verdance a day by that road at that rate, 3 only when it held 9 or more). A Heart answered "take from it" whose own pylon takes each beat's whole batches never gathers 8 while it beats, so he takes only what its road cannot (its pylon full) or what is left once it stops. Option (a) of unit 2's review finding 4, which the review left to the owner; the session chose it under the standing instruction, and it is reviewable at the checkpoint. The term ("up to 8 at a time") and his Jade note ("hold no Verdance he may take") are unchanged; the note is what he shows while a beating Heart gathers its move. The codex's "His Service" page says so: from a Heart still beating he waits for a whole move, from one that has stopped he takes what is left. Evidence: `bathinCarriesWholeMovesFromABeatingHeart` (written, not yet run) and its audit needles in `check_garden_pacts` (the source rule; `working` left only by a beat that made Verdance and set nowhere else in the Heart or its base class) | Decided by the session | GC-05 |
 | GC-P1 | 26 October 2026 | Work ids: `strain_tending`, `verdance_carrying`, `habitat_reading` (holder only), `graft_keeping`, `root_running`, `canopy_shelter` | Proposed (unit 1) | all |
 | GC-P2 | 26 October 2026 | `GardenReach`: 64 beds, nearest first, refreshed every 200 ticks, loaded chunks only | Proposed (unit 1) | GC-03 |
 | GC-P3 | 26 October 2026 | Wire in unit 1: `invite` action 9, mode `invite` 4; one nested payload field `spirit` (`sign`, `work`), the payload at 14 top-level fields | Proposed (unit 1) | GC-01 |

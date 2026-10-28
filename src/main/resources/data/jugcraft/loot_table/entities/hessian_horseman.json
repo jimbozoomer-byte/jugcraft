@@ -1,0 +1,58 @@
+{
+  "type": "minecraft:gift",
+  "random_sequence": "jugcraft:entities/hessian_horseman",
+  "pools": [
+    {
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "jugcraft:horseman_lantern"
+        }
+      ],
+      "rolls": 1
+    },
+    {
+      "condition": {
+        "type": "minecraft:random_chance",
+        "chance": 0.15
+      },
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "jugcraft:hollowflail"
+        },
+        {
+          "type": "minecraft:item",
+          "name": "jugcraft:hessian_sabre"
+        }
+      ],
+      "rolls": 1
+    },
+    {
+      "condition": {
+        "type": "minecraft:random_chance",
+        "chance": 0.25
+      },
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "jugcraft:hessians_spur"
+        }
+      ],
+      "rolls": 1
+    },
+    {
+      "condition": {
+        "type": "minecraft:random_chance",
+        "chance": 0.2
+      },
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "jugcraft:hessians_tricorn"
+        }
+      ],
+      "rolls": 1
+    }
+  ]
+}

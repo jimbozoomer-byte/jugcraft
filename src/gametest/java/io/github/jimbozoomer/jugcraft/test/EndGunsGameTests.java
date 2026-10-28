@@ -17,11 +17,14 @@ import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.Mob;
+import net.minecraft.world.entity.ai.attributes.Attributes;
+import net.minecraft.world.level.GameType;
 
 /**
  * In-game tests for the End guns (slice 12A, docs/features/guns.md), through the server's entry points as
  * {@link GunsGameTests} does: the Chitin SMG, the Hermit Rifle and the Borer are automatics loaded a magazine at a time;
- * each lands its shot on what it aims at and makes it float. Shooters face south (+z).
+ * each lands its shot on what it aims at and may make it float (at the owner's chances since the levitation follow-up).
+ * Shooters face south (+z).
  */
 public class EndGunsGameTests {
 	/** The End guns, in the order the creative tab shows them. */
@@ -30,8 +33,8 @@ public class EndGunsGameTests {
 	static final List<String> OPTICS = List.of("long_scope", "medium_scope", "reflex_sight", "laser_sight");
 
 	/**
-	 * Each is registered with its numbers and its recipe loads, and fires bullets that make what they hurt float; no other
-	 * gun's do, and none of them sets what it hits alight. The Chitin SMG fires light rounds for as long as the trigger is
+	 * Each is registered with its numbers and its recipe loads, and fires bullets that may make what they hurt float, its
+	 * hit effect levitation; no other gun's do, and none of them sets what it hits alight. The Chitin SMG fires light rounds for as long as the trigger is
 	 * held, from a magazine of twenty-four; the Hermit Rifle rifle rounds from twenty; the Borer rifle rounds from forty.
 	 * The Chitin SMG takes the scopes and the Laser Sight; the Hermit Rifle the stocks too; the Borer, carried at the hip,
 	 * nothing.
@@ -44,6 +47,8 @@ public class EndGunsGameTests {
 			helper.assertTrue(spec != null && gun != null && gun.spec() == spec, name + " is not registered with its numbers");
 			helper.assertTrue(JugcraftGuns.shot(gun).equals("bullet") && JugcraftGuns.levitates(gun) && !JugcraftGuns.ignites(gun),
 					name + " does not fire bullets that make what they hit float, and only that");
+			helper.assertTrue(JugcraftGuns.hitEffect(gun) != null && JugcraftGuns.hitEffect(gun).effect().equals("levitation"),
+					name + "'s hit effect is not levitation: " + JugcraftGuns.hitEffect(gun));
 			helper.assertTrue(spec.auto() && spec.pellets() == 1 && !spec.byShell() && !JugcraftGuns.ONE_HANDED.contains(name),
 					name + " is not an automatic held in both hands, one bullet a shot, loaded a magazine at a time");
 			helper.assertTrue(helper.getLevel().recipeAccess().byKey(ResourceKey.create(Registries.RECIPE, Jugcraft.id(name))).isPresent(),
@@ -80,47 +85,65 @@ public class EndGunsGameTests {
 	}
 
 	/**
-	 * Each End gun's shot makes its pig float, and it rises off the floor; an Undertone Rifle's shot (slice 10D) leaves its
-	 * pig standing. When the spell ends each pig comes down again and stands on the floor, unhurt by so short a fall.
+	 * Each End gun, fired from creative at a sturdy pig until a hit makes it float (at most {@value #SHOTS} shots, its
+	 * interval and a tick apart; the Borer's 23% missing sixty times running is about one in seven million), lifts it at
+	 * the first level for the owner's 100 ticks, and it rises; the gun fires no more once its pig floats. An Undertone
+	 * Rifle's shot (slice 10D) leaves its pig standing. When the spell ends each lifted pig comes down to the floor again.
 	 */
-	@GameTest(structure = GunsGameTests.ARENA, maxTicks = 120)
+	@GameTest(structure = GunsGameTests.ARENA, maxTicks = 600)
 	public void endGunsMakeWhatTheyHitFloat(GameTestHelper helper) {
 		GunsGameTests.floor(helper);
 		List<String> fired = new ArrayList<>(GUNS);
 		fired.add("undertone_rifle");
 		Mob[] pigs = new Mob[fired.size()];
 		double[] floor = new double[fired.size()];
-		float[] afterShot = new float[fired.size()];
+		double[] rose = new double[fired.size()];
+		boolean[] lifted = new boolean[fired.size()];
 		for (int i = 0; i < fired.size(); i++) {
 			String name = fired.get(i);
-			pigs[i] = NetherGunsGameTests.sturdyPig(helper, new BlockPos(1 + 4 * i, 2, 4));
-			floor[i] = pigs[i].getY();
-			ServerPlayer shooter = NetherGunsGameTests.shooter(helper, name, new BlockPos(1 + 4 * i, 2, 1), pigs[i]);
-			helper.assertTrue(GunShots.fire(shooter), "The " + name + " did not fire");
-			afterShot[i] = pigs[i].getHealth();
-			helper.assertTrue(afterShot[i] < 200.0F, "The " + name + "'s shot missed its pig");
-			boolean end = JugcraftGuns.LEVITATING.contains(name);
-			helper.assertTrue(pigs[i].hasEffect(MobEffects.LEVITATION) == end,
-					"The " + name + "'s shot " + (end ? "did not make" : "made") + " its pig float");
+			Mob pig = NetherGunsGameTests.sturdyPig(helper, new BlockPos(1 + 4 * i, 2, 4));
+			pig.getAttribute(Attributes.MAX_HEALTH).setBaseValue(1000.0);   // sixty shots and a fall
+			pig.setHealth(1000.0F);
+			pigs[i] = pig;
+			floor[i] = pig.getY();
+			ServerPlayer shooter = NetherGunsGameTests.shooter(helper, name, new BlockPos(1 + 4 * i, 2, 1), pig);
+			shooter.setGameMode(GameType.CREATIVE);   // no rounds spent
+			int every = JugcraftGuns.SPECS.get(name).interval() + 1;
+			int shots = JugcraftGuns.LEVITATING.contains(name) ? SHOTS : 1;
+			int index = i;
+			for (int shot = 0; shot < shots; shot++) {
+				helper.runAfterDelay(1 + (long) every * shot, () -> {
+					if (lifted[index]) {
+						return;
+					}
+					helper.assertTrue(GunShots.fire(shooter), "The " + name + " did not fire");
+					helper.assertTrue(pig.getHealth() < 1000.0F, "The " + name + "'s shot missed its pig");
+					lifted[index] = pig.hasEffect(MobEffects.LEVITATION);
+					helper.assertTrue(!lifted[index] || pig.getEffect(MobEffects.LEVITATION).getAmplifier() == 0
+							&& pig.getEffect(MobEffects.LEVITATION).getDuration() == 100,
+							"The " + name + " did not lift its pig at the first level for 100 ticks");
+				});
+			}
 		}
-		// Floating at the first level, a creature rises about half a block in its first three quarters of a second.
-		helper.runAfterDelay(15, () -> {
-			for (int i = 0; i < fired.size(); i++) {
-				boolean end = JugcraftGuns.LEVITATING.contains(fired.get(i));
-				double risen = pigs[i].getY() - floor[i];
-				helper.assertTrue(end ? risen > 0.2 : Math.abs(risen) < 0.01, "The " + fired.get(i) + "'s pig rose " + risen + " blocks");
+		helper.onEachTick(() -> {
+			for (int i = 0; i < pigs.length; i++) {
+				rose[i] = Math.max(rose[i], pigs[i].getY() - floor[i]);
 			}
 		});
-		helper.runAfterDelay(GunShots.LIFT_TICKS + 60, () -> {
+		helper.succeedWhen(() -> {
 			for (int i = 0; i < fired.size(); i++) {
 				String name = fired.get(i);
-				helper.assertFalse(pigs[i].hasEffect(MobEffects.LEVITATION), "The " + name + "'s pig was still floating");
-				helper.assertTrue(pigs[i].onGround() && Math.abs(pigs[i].getY() - floor[i]) < 0.01,
-						"The " + name + "'s pig had not come down to the floor: " + (pigs[i].getY() - floor[i]) + " blocks up");
-				helper.assertTrue(Math.abs(pigs[i].getHealth() - afterShot[i]) < 1.0E-3F,
-						"The " + name + "'s pig went from " + afterShot[i] + " to " + pigs[i].getHealth() + " after the shot");
+				if (JugcraftGuns.LEVITATING.contains(name)) {
+					helper.assertTrue(lifted[i] && rose[i] > 0.5, "The " + name + "'s pig has not floated up: it rose " + rose[i]);
+				} else {
+					helper.assertTrue(!lifted[i] && rose[i] < 0.01, "The " + name + "'s pig rose " + rose[i] + " blocks");
+				}
+				helper.assertTrue(!pigs[i].hasEffect(MobEffects.LEVITATION) && pigs[i].onGround()
+						&& Math.abs(pigs[i].getY() - floor[i]) < 0.01, "The " + name + "'s pig is not back on the floor");
 			}
-			helper.succeed();
 		});
 	}
+
+	/** How many shots each End gun has to make its pig float. */
+	private static final int SHOTS = 60;
 }

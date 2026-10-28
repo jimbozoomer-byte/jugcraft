@@ -49,10 +49,11 @@ public final class ArmVariants {
 	 * strikes harder at a foe in water or rain; GRAVEBANE strikes the undead harder; MARK makes the foe glow; HARVEST heals
 	 * the wielder on a kill and charges a crescent ({@link HarvestBoon}); STITCH slows a foe struck three times in a short
 	 * while ({@link StitchBoon}); RUST rusts the foe's armor, which counts for less ({@link #RUSTED}); FRIGHT sends a
-	 * monster (never a boss) running in panic ({@link FrightBoon}).
+	 * monster (never a boss) running in panic ({@link FrightBoon}); DREAD fills a monster (never a boss) with dread, so that
+	 * everything hurts it more ({@link DreadBoon}).
 	 */
 	public enum Boon {
-		FROST, EMBER, VENOM, DRAIN, WITHER, SHOCK, GALE, HOWL, TIDE, GRAVEBANE, MARK, HARVEST, STITCH, RUST, FRIGHT
+		FROST, EMBER, VENOM, DRAIN, WITHER, SHOCK, GALE, HOWL, TIDE, GRAVEBANE, MARK, HARVEST, STITCH, RUST, FRIGHT, DREAD
 	}
 
 	/**
@@ -107,6 +108,8 @@ public final class ArmVariants {
 			new Variant("needle_rapier", "rapier", "tatterlace", Boon.STITCH),
 			new Variant("hallowreap", "scythe", "pumpkin_king", Boon.FRIGHT),
 			new Variant("crowbill", "war_pick", "pumpkin_king", Boon.FRIGHT),
+			new Variant("hollowflail", "flail", "hessian_horseman", Boon.DREAD),
+			new Variant("hessian_sabre", "sabre", "hessian_horseman", Boon.DREAD),
 			new Variant("hades_scythe", "scythe", "hades", Boon.WITHER),
 			new Variant("sentinel_longsword", "longsword", "sentinel", Boon.MARK),
 			new Variant("frost_knight_greatsword", "greatsword", "frost_knight", Boon.FROST),

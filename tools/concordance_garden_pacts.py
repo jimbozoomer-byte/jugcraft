@@ -193,8 +193,10 @@ PAGES = [
      f"yours or your party's and sets it down at once: up to {ecology.GLEANER_DRAW} into a **Gleaner** beyond that Heart's "
      f"own reach (more than {ecology.HEART_REACH} blocks from it), or into a **Ley Pylon** your party or no one owns that is "
      "not beside it, at the Heart's own 3 for 2. One move at a time, at most "
-     f"{_BATHIN['service']['quota']} a game day. Nothing is ever on the way: the Heart and its target shimmer in the same "
-     "moment, and he holds none.", ("garden_regard", "understood")),
+     f"{_BATHIN['service']['quota']} a game day. "
+     f"From a Heart still beating he waits until it holds a whole move of {ecology.GLEANER_DRAW}; from one that has stopped "
+     "he takes whatever is left (into a pylon, whole batches of 3 only). Nothing is ever on the way: the Heart and its "
+     "target shimmer in the same moment, and he holds none.", ("garden_regard", "understood")),
     ("text", "Two Roads from One Heart",
      "A Heart with a Ley Pylon of its own beside it already pours into it. Bathin leaves such a Heart alone and asks once, "
      "on the pact's page at the perch: **Leave it**, or **Take from it**. Until you answer, the roster says \"awaiting your "

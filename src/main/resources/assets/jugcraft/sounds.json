@@ -1845,6 +1845,60 @@
       }
     ]
   },
+  "guns.auger_rifle.fire": {
+    "subtitle": "subtitles.jugcraft.guns.fire",
+    "sounds": [
+      {
+        "name": "jugcraft:guns/carabine_fire",
+        "attenuation_distance": 64
+      }
+    ]
+  },
+  "guns.auger_shotgun.fire": {
+    "subtitle": "subtitles.jugcraft.guns.fire",
+    "sounds": [
+      {
+        "name": "jugcraft:guns/blackpowder_fire",
+        "attenuation_distance": 64
+      }
+    ]
+  },
+  "guns.tumbler_rifle.fire": {
+    "subtitle": "subtitles.jugcraft.guns.fire",
+    "sounds": [
+      {
+        "name": "jugcraft:guns/iron_rifle_fire",
+        "attenuation_distance": 64
+      }
+    ]
+  },
+  "guns.maelstrom_gun.fire": {
+    "subtitle": "subtitles.jugcraft.guns.fire",
+    "sounds": [
+      {
+        "name": "jugcraft:guns/gyrojet_fire",
+        "attenuation_distance": 64
+      }
+    ]
+  },
+  "guns.ermine_rifle.fire": {
+    "subtitle": "subtitles.jugcraft.guns.fire",
+    "sounds": [
+      {
+        "name": "jugcraft:guns/laser_fire_2",
+        "attenuation_distance": 64
+      }
+    ]
+  },
+  "guns.geode_cutter.fire": {
+    "subtitle": "subtitles.jugcraft.guns.fire",
+    "sounds": [
+      {
+        "name": "jugcraft:guns/beam_fire",
+        "attenuation_distance": 64
+      }
+    ]
+  },
   "nouveau.empty": {
     "sounds": []
   },

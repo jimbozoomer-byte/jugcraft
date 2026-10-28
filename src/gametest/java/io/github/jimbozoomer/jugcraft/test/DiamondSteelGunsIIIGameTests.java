@@ -30,9 +30,10 @@ public class DiamondSteelGunsIIIGameTests {
 	 * Each is registered with its numbers and its recipe loads, held in both hands, firing plain bullets a magazine at a
 	 * time. The Hawker Rifle is twelve rifle rounds, a pull a shot, piercing a point of armour; it takes what the Vesper
 	 * Rifle takes, the owner's model it was made over from. The Impetus Shotgun is a box of six buckshot shells, eight
-	 * pellets a pull, knocking back what it hits; it takes what the Onrush SMG takes. The Quill Rifle is thirteen light
-	 * rounds as long as the trigger is held, every fourth tick, piercing a point and a half of armour; it is silenced by
-	 * its build, so it takes no barrel attachment, and otherwise takes what the Gallant Rifle takes.
+	 * pellets a pull, knocking back what it hits; it takes what the Onrush SMG takes. The Quill Rifle is thirteen darts
+	 * (the darts-and-bleeding follow-up) as long as the trigger is held, every fourth tick, piercing a point and a half of
+	 * armour; it is silenced by its build, so it takes no barrel attachment, and otherwise takes what the Gallant Rifle
+	 * takes.
 	 */
 	@GameTest
 	public void diamondSteelLongGunsAreRegistered(GameTestHelper helper) {
@@ -63,8 +64,8 @@ public class DiamondSteelGunsIIIGameTests {
 		helper.assertTrue(JugcraftGuns.ACCEPTS.get("impetus_shotgun").equals(JugcraftGuns.ACCEPTS.get("onrush_smg")),
 				"The Impetus Shotgun takes " + JugcraftGuns.ACCEPTS.get("impetus_shotgun"));
 		GunSpec quill = JugcraftGuns.SPECS.get("quill_rifle");
-		helper.assertTrue(quill.ammo().equals("light_round") && quill.capacity() == 13 && quill.auto() && quill.interval() == 4,
-				"The Quill Rifle is not an automatic of thirteen light rounds, every fourth tick");
+		helper.assertTrue(quill.ammo().equals(JugcraftGuns.DART) && quill.capacity() == 13 && quill.auto() && quill.interval() == 4,
+				"The Quill Rifle is not an automatic of thirteen darts, every fourth tick");
 		helper.assertTrue(JugcraftGuns.piercing(JugcraftGuns.GUNS.get("quill_rifle")) == 1.5F && JugcraftGuns.SILENCED.contains("quill_rifle"),
 				"The Quill Rifle does not pierce a point and a half of armour, silenced by its build");
 		List<String> quillTakes = JugcraftGuns.ACCEPTS.get("quill_rifle");
@@ -80,7 +81,7 @@ public class DiamondSteelGunsIIIGameTests {
 	}
 
 	/**
-	 * An empty Quill Rifle with twenty light rounds loads thirteen and leaves seven; it fires as long as the trigger is
+	 * An empty Quill Rifle with twenty darts loads thirteen and leaves seven; it fires as long as the trigger is
 	 * held: two shots at once (the trigger's bank) and another each interval.
 	 */
 	@GameTest(structure = GunsGameTests.ARENA, maxTicks = 120)

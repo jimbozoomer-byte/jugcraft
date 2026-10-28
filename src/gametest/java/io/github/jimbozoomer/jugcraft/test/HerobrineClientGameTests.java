@@ -2,6 +2,7 @@ package io.github.jimbozoomer.jugcraft.test;
 
 import io.github.jimbozoomer.jugcraft.Jugcraft;
 import io.github.jimbozoomer.jugcraft.client.HerobrineRenderer;
+import io.github.jimbozoomer.jugcraft.config.JugcraftConfig;
 import io.github.jimbozoomer.jugcraft.creatures.herobrine.Herobrine;
 import io.github.jimbozoomer.jugcraft.creatures.herobrine.HerobrineDirector;
 import io.github.jimbozoomer.jugcraft.creatures.herobrine.HerobrineEncounters;
@@ -18,6 +19,10 @@ import net.minecraft.world.phys.Vec3;
 public final class HerobrineClientGameTests implements FabricClientGameTest {
 	@Override
 	public void runTest(ClientGameTestContext context) {
+		// A sighting he was seen in may leave a mark where he stood (HerobrineMarks.afterSighting, MARK_CHANCE), and the
+		// tunnel below stands him on that same spot: marks are off for this test, so the spot stays clear.
+		String marks = JugcraftConfig.textOption("herobrine.marks");
+		JugcraftConfig.setTextOption("herobrine.marks", "off");
 		try (var world = context.worldBuilder()
 				.adjustSettings(s -> s.setGameMode(WorldCreationUiState.SelectedGameMode.CREATIVE)).create()) {
 			var server = world.getServer();
@@ -64,6 +69,10 @@ public final class HerobrineClientGameTests implements FabricClientGameTest {
 			context.waitTicks(20);
 			world.getConnection().waitForChunksRender();
 			server.runCommand("tick freeze");
+			// The witnessed daylight encounter can leave a sign/shrine at this same spot.
+			// Rebuild the dark render fixture while frozen, after those world changes.
+			server.runCommand("fill %d %d %d %d %d %d minecraft:stone".formatted(x - 1, y - 1, z - 20, x + 1, y - 1, z + 2));
+			server.runCommand("fill %d %d %d %d %d %d minecraft:air".formatted(x - 1, y, z - 20, x + 1, y + 2, z + 2));
 			int darkness = spawn(context, world, origin.offset(0, 0, -16), Herobrine.Variant.TUNNEL);
 			context.waitTicks(20);
 			context.takeScreenshot("jugcraft_herobrine_tunnel_eyes");
@@ -72,6 +81,8 @@ public final class HerobrineClientGameTests implements FabricClientGameTest {
 				if (entity != null) entity.discard();
 			});
 			server.runCommand("tick unfreeze");
+		} finally {
+			JugcraftConfig.setTextOption("herobrine.marks", marks);
 		}
 	}
 
