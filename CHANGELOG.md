@@ -8,6 +8,13 @@ Every change to Jugcraft, newest first, grouped by pull request. For what each t
 
 No numbered release yet. Entries on feature branches remain proposed until their pull requests merge.
 
+### Unmerged: Halloween Party Table, part 1 (the Candy Corn Dispenser)
+- **Candy Corn Dispenser**: a jumbo gumball machine 86 cm high, its glass globe 41 cm across on a black cast-iron pedestal banded in orange, with a brass crank and chute flap.
+- Candy corn used on it pours in, up to 64 pieces, and its globe shows how full it is. An empty hand turns the crank once round, and one piece drops out of the chute as the flap swings open.
+- Recipe: five glass over two iron ingots and black dye.
+- Record: [halloween-party-table.md](docs/features/halloween-party-table.md). Decor set 8's first part.
+- **Checked:** the record's Verification. Game tests and screenshots run in CI only; not played by hand.
+
 ### Unmerged: Front-Yard Haunt Scenes, part 5 (the Trick-or-Treat Candy Chute)
 - **Trick-or-Treat Candy Chute**: a paper chute 2.5 m long wrapped in orange and black, from a funnel at porch-rail height down to a mouth at a child's hand height, three blocks long and two high.
 - Use a treat on it (anything a Candy Bag takes) and it slides down the chute, tumbling, and drops into the Candy Bag of whoever waits at the mouth, or out onto the path. One at a time, up to eight in the chute; what is sliding is saved, and drops if the chute is broken.

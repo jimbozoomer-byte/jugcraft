@@ -15376,6 +15376,68 @@ def check_front_yard():
         err(f"blockstates/{cc['block']}.json: it must show each of its {cells} blocks at every facing")
 
 
+def check_party_table():
+    """Halloween Party Table (tools/party_table.py, docs/features/halloween-party-table.md), part 1: the Candy Corn
+    Dispenser's Java is the table's; it is registered with its block entity, which saves what it holds and drops it when
+    broken; its renderer turns the crank by `crank` and swings the flap by `flap`; its blockstate shows it at runner 0, the
+    candy by `fill` there, and its crank and flap alone at runners 1 and 2; its candy stands higher at each level, within
+    the globe; its globe is see-through; and its name has its text."""
+    import party_table as pt
+    import party_table_data as ptd
+
+    def read(path):
+        return path.read_text(encoding="utf-8") if path.is_file() else ""
+
+    java_main = read(JAVA_ROOT / "agriculture" / "JugcraftAgriculture.java")
+    client = read(CLIENT_JAVA_ROOT / "JugcraftClient.java")
+    lang = load(ASSETS / "lang" / "en_us.json") or {}
+    dp = pt.DISPENSER
+    block = dp["block"]
+    java = read(JAVA_ROOT / "agriculture" / "CandyCornDispenserBlock.java")
+    (cy, cz), (hy, hz) = dp["crank"], dp["hinge"]
+    for item in (f"CAPACITY = {dp['capacity']};", f"LEVELS = {dp['levels']};", f"CRANK_TICKS = {dp['crank_ticks']};", f"CRANK_Y = {cy}F;",
+                 f"CRANK_Z = {cz}F;", f"FLAP = {dp['flap']}F;", f"FLAP_TICKS = {dp['flap_ticks']};", f"HINGE_Y = {hy}F;", f"HINGE_Z = {hz}F;",
+                 'IntegerProperty.create("fill", 0, LEVELS)', "extends FacingDecorationBlock implements EntityBlock"):
+        if item not in java:
+            err(f"CandyCornDispenserBlock: missing {item} (tools/party_table.py DISPENSER)")
+    held = read(JAVA_ROOT / "agriculture" / "CandyCornDispenserBlockEntity.java")
+    if any(call not in held for call in ('output.putInt("count", count)', 'input.getIntOr("count", 0)', "preRemoveSideEffects")):
+        err("CandyCornDispenserBlockEntity: it must save what it holds and drop it when broken")
+    if f'registerBlock("{block}", CandyCornDispenserBlock::new' not in java_main \
+            or f'CANDY_CORN_DISPENSER_ENTITY = Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, Jugcraft.id("{block}")' not in java_main:
+        err(f"JugcraftAgriculture: {block} must be a CandyCornDispenserBlock with its own block entity")
+    drawn = read(CLIENT_JAVA_ROOT / "CandyCornDispenserRenderer.java")
+    if "BlockEntityRendererRegistry.register(JugcraftAgriculture.CANDY_CORN_DISPENSER_ENTITY, CandyCornDispenserRenderer::new);" not in client \
+            or any(call not in drawn for call in ("CandyCornDispenserBlock.crank(", "CandyCornDispenserBlock.flap(")):
+        err("CandyCornDispenserRenderer: registered, it must turn the crank by crank and swing the flap by flap")
+    if f"block.{MOD}.{block}" not in lang:
+        err(f"block.{MOD}.{block}: the text is missing")
+    parts = (load(ASSETS / "blockstates" / f"{block}.json") or {}).get("multipart", [])
+    want = []
+    for face in ("north", "east", "south", "west"):
+        want.append(((face, "0", None), f"{MOD}:block/{block}"))
+        want += [((face, "0", str(n)), f"{MOD}:block/{block}_fill_{n}") for n in range(1, dp["levels"] + 1)]
+        want += [((face, "1", None), f"{MOD}:block/{block}_crank"), ((face, "2", None), f"{MOD}:block/{block}_flap")]
+    shown = [((p["when"].get("facing"), p["when"].get("runner"), p["when"].get("fill")), p["apply"]["model"]) for p in parts]
+    if sorted(map(str, shown)) != sorted(map(str, want)):
+        err(f"blockstates/{block}.json: it must show itself at runner 0, its candy by fill there, and its crank and flap alone at runners 1 and 2")
+    tops = []
+    for n in range(1, dp["levels"] + 1):
+        elements = (load(ASSETS / "models" / "block" / f"{block}_fill_{n}.json") or {}).get("elements", [])
+        tops.append(max((e["to"][1] for e in elements), default=0.0))
+    lid = ptd.GLOBE[-1][1]
+    if tops != sorted(tops) or len(set(tops)) != len(tops) or tops[-1] > lid:
+        err(f"models/block/{block}_fill_*.json: its candy must stand higher at each level, within the globe (below {lid}): {tops}")
+    png = ASSETS / "textures" / "block" / f"{block}.png"
+    if png.is_file():
+        with Image.open(png) as img:
+            counts = img.convert("RGBA").getchannel("A").histogram()
+        if not any(counts[1:255]):
+            err(f"textures/block/{block}.png: its globe must be see-through glass")
+    else:
+        err(f"textures/block/{block}.png: missing")
+
+
 def check_hearth():
     """Cozy Fall Hearth (tools/hearth.py, docs/features/cozy-fall-hearth.md), part 1: the Stone Fireplace's Java block is
     the table's size and light, its firebox gives it, and its registration names its light; its fire is a full-bright,
@@ -23531,6 +23593,7 @@ def main():
     check_hearth()
     check_haunted_midway()
     check_front_yard()
+    check_party_table()
     check_hessian_horseman()
     check_cydonian_sentinel()
     check_material_sets()

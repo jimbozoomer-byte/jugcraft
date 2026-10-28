@@ -3722,6 +3722,11 @@
       "denominator": 1,
       "source": "fallback (balance pending)"
     },
+    "jugcraft:candy_corn_dispenser": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
     "jugcraft:candy_kettle": {
       "numerator": 7171,
       "denominator": 8,

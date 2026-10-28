@@ -412,6 +412,7 @@ public final class JugcraftAgriculture {
 	public static BlockEntityType<DecorationBlockEntity> GARGOYLE_KNOCKER_ENTITY;
 	public static BlockEntityType<DecorationBlockEntity> CRASHED_WITCH_ENTITY;
 	public static BlockEntityType<CandyChuteBlockEntity> CANDY_CHUTE_ENTITY;
+	public static BlockEntityType<CandyCornDispenserBlockEntity> CANDY_CORN_DISPENSER_ENTITY;
 	public static BlockEntityType<FirewoodRackBlockEntity> FIREWOOD_RACK_ENTITY;
 	public static BlockEntityType<DecorationBlockEntity> CHOPPING_BLOCK_ENTITY;
 	public static BlockEntityType<BlanketLadderBlockEntity> BLANKET_LADDER_ENTITY;
@@ -2424,6 +2425,7 @@ public final class JugcraftAgriculture {
 		registerHearth();
 		registerHauntedMidway();
 		registerFrontYard();
+		registerPartyTable();
 	}
 
 	/**
@@ -3115,6 +3117,19 @@ public final class JugcraftAgriculture {
 		FlammableBlockRegistry.getDefaultInstance().add(doormat, 30, 60);
 		FlammableBlockRegistry.getDefaultInstance().add(witch, 30, 60);
 		FlammableBlockRegistry.getDefaultInstance().add(chute, 30, 60);
+	}
+
+	/** The Halloween Party Table (decor set 8, tools/party_table.py; docs/features/halloween-party-table.md). */
+	private static void registerPartyTable() {
+		// Part 1: the Candy Corn Dispenser, a cast-iron and glass gumball machine.
+		Block dispenser = registerBlock("candy_corn_dispenser", CandyCornDispenserBlock::new, BlockBehaviour.Properties.of()
+				.mapColor(MapColor.COLOR_BLACK).strength(1.5F).sound(SoundType.METAL).noOcclusion().pushReaction(PushReaction.IMMOVEABLE));
+		CANDY_CORN_DISPENSER_ENTITY = Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, Jugcraft.id("candy_corn_dispenser"),
+				FabricBlockEntityTypeBuilder.create(CandyCornDispenserBlockEntity::new, dispenser).build());
+		for (Block block : List.of(dispenser)) {
+			registerItem(BuiltInRegistries.BLOCK.getKey(block).getPath(), props -> new BlockItem(block, props),
+					new Item.Properties().useBlockDescriptionPrefix(), BUILDING_TAB);
+		}
 	}
 
 	/** Bleached bones: they come away easily, and a piston pops them off. */
