@@ -15381,7 +15381,11 @@ def check_party_table():
     Dispenser's Java is the table's; it is registered with its block entity, which saves what it holds and drops it when
     broken; its renderer turns the crank by `crank` and swings the flap by `flap`; its blockstate shows it at runner 0, the
     candy by `fill` there, and its crank and flap alone at runners 1 and 2; its candy stands higher at each level, within
-    the globe; its globe is see-through; and its name has its text."""
+    the globe; its globe is see-through; and its name has its text. Part 2: the tower's and the platter's capacities and
+    foods are the table's, each has a place for every serving, and both are registered; their blockstates add each
+    serving while they hold more than that many, on a Feast Table and off it; each `_table` model is the table's drop
+    lower, and the drop is the Feast Table's own (its top's height); their loot drops what they hold; and the Ghost
+    Meringue is the table's food, a candy a Candy Bag takes."""
     import party_table as pt
     import party_table_data as ptd
 
@@ -15436,6 +15440,51 @@ def check_party_table():
             err(f"textures/block/{block}.png: its globe must be see-through glass")
     else:
         err(f"textures/block/{block}.png: missing")
+    # Part 2: the cake stands and the Ghost Meringue.
+    drop = pt.TABLE["table_drop"]
+    serving = read(JAVA_ROOT / "agriculture" / "PartyServingBlock.java")
+    feast = read(JAVA_ROOT / "agriculture" / "FeastTableBlock.java")
+    if f"TABLE_DROP = {drop}F;" not in serving or "instanceof FeastTableBlock" not in serving:
+        err(f"PartyServingBlock: it must be set down {drop} pixels onto a Feast Table (tools/party_table.py TABLE)")
+    if f"Block.box(0.0, 0.0, 0.0, 16.0, {pt.TABLE['table_top']}, 16.0)" not in feast or pt.TABLE["table_top"] + drop != 16.0:
+        err(f"tools/party_table.py TABLE: the drop must bring a piece down onto the Feast Table's top ({pt.TABLE['table_top']})")
+    for spec, cls, slots in ((pt.CUPCAKE_TOWER, "SpiderCupcakeTowerBlock", ptd.tower_slots()),
+                             (pt.MERINGUE_PLATTER, "GhostMeringuePlatterBlock", ptd.platter_slots())):
+        block, cap = spec["block"], spec["capacity"]
+        java = read(JAVA_ROOT / "agriculture" / f"{cls}.java")
+        if f"CAPACITY = {cap};" not in java or f'"{spec["serves"]}"' not in java or "extends PartyServingBlock" not in java:
+            err(f"{cls}: it must hold {cap} of {spec['serves']} (tools/party_table.py)")
+        if len(slots) != cap:
+            err(f"tools/party_table_data.py: {block} has {len(slots)} places for {cap} servings")
+        if f'registerBlock("{block}", {cls}::new' not in java_main:
+            err(f"JugcraftAgriculture: {block} must be a {cls}")
+        if f"block.{MOD}.{block}" not in lang:
+            err(f"block.{MOD}.{block}: the text is missing")
+        parts = (load(ASSETS / "blockstates" / f"{block}.json") or {}).get("multipart", [])
+        for face in ("north", "east", "south", "west"):
+            for on, suffix in (("false", ""), ("true", "_table")):
+                for k in range(cap):
+                    want = {"facing": face, "on_table": on, "servings": "|".join(str(n) for n in range(k + 1, cap + 1))}
+                    if not any(p.get("when") == want and p["apply"]["model"] == f"{MOD}:block/{block}_slot_{k}{suffix}" for p in parts):
+                        err(f"blockstates/{block}.json: serving {k} must show while it holds more than {k}, facing {face}, on_table {on}")
+                        break
+        for name in [block] + [f"{block}_slot_{k}" for k in range(cap)]:
+            up = (load(ASSETS / "models" / "block" / f"{name}.json") or {}).get("elements", [])
+            down = (load(ASSETS / "models" / "block" / f"{name}_table.json") or {}).get("elements", [])
+            if not up or len(up) != len(down) or any(abs(a["from"][1] - b["from"][1] - drop) > 0.01 for a, b in zip(up, down)):
+                err(f"models/block/{name}_table.json: it must be {name} set {drop} pixels lower")
+                break
+        pools = (load(DATA / MOD / "loot_table" / "blocks" / f"{block}.json") or {}).get("pools", [])
+        counts = sorted(p["entries"][0]["modifier"][0]["count"] for p in pools if p["entries"][0]["name"] == f"{MOD}:{spec['serves']}")
+        if counts != list(range(1, cap + 1)):
+            err(f"loot_table/blocks/{block}.json: broken, it must drop what it holds (1 to {cap})")
+    mg = pt.MERINGUE
+    nutrition, saturation = mg["meringue"]
+    if f'food("{mg["item"]}", {nutrition}, {saturation}F' not in java_main:
+        err(f"JugcraftAgriculture: {mg['item']} must be a food of {nutrition} and {saturation} (tools/party_table.py MERINGUE)")
+    candy = load(DATA / "c" / "tags" / "item" / "foods" / "candy.json") or {}
+    if f"{MOD}:{mg['item']}" not in candy.get("values", []):
+        err(f"c:foods/candy: {mg['item']} must be candy, so a Candy Bag takes it")
 
 
 def check_hearth():

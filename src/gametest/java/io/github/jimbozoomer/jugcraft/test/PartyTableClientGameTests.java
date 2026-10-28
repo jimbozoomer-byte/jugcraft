@@ -5,6 +5,7 @@ import io.github.jimbozoomer.jugcraft.agriculture.CandyCornDispenserBlockEntity;
 import io.github.jimbozoomer.jugcraft.agriculture.FacingDecorationBlock;
 import io.github.jimbozoomer.jugcraft.agriculture.FeastTableBlock;
 import io.github.jimbozoomer.jugcraft.agriculture.JugcraftAgriculture;
+import io.github.jimbozoomer.jugcraft.agriculture.PartyServingBlock;
 import java.util.Locale;
 import net.fabricmc.fabric.api.client.gametest.v1.FabricClientGameTest;
 import net.fabricmc.fabric.api.client.gametest.v1.context.ClientGameTestContext;
@@ -22,11 +23,13 @@ import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec3;
 
 /**
- * Client game test for the Halloween Party Table, part 1 (decor set 8): a party corner on a dark oak floor, a Feast Table
- * along its back, and three Candy Corn Dispensers standing before it, full, half full and empty (their globes by
- * {@code fill}). Photographed close by at their height; then with the full one's crank set turning ten ticks before the
- * shot, half way round, and the half-full one's set turning twenty-six ticks before, its piece dropped and its flap swung
- * out (client/CandyCornDispenserRenderer) (CI job {@code client}). They go into docs/features/halloween-party-table.md.
+ * Client game test for the Halloween Party Table, parts 1 and 2 (decor set 8): a party corner on a dark oak floor, a
+ * Feast Table along its back with a full Spider Cupcake Tower and a full Ghost Meringue Platter set down on its top, and
+ * three Candy Corn Dispensers standing before it, full, half full and empty (their globes by {@code fill}). Photographed
+ * close by at the dispensers' height; then with the full one's crank set turning ten ticks before the shot, half way
+ * round, and the half-full one's set turning twenty-six ticks before, its piece dropped and its flap swung out
+ * (client/CandyCornDispenserRenderer); and from above the dispensers, looking down on the table's cake stands (CI job
+ * {@code client}). They go into docs/features/halloween-party-table.md.
  */
 public class PartyTableClientGameTests implements FabricClientGameTest {
 	@Override
@@ -57,6 +60,8 @@ public class PartyTableClientGameTests implements FabricClientGameTest {
 			server.runOnServer(minecraft -> turn(minecraft, origin.offset(1, 0, 0)));
 			context.waitTicks(10);
 			context.takeScreenshot("jugcraft_party_table_crank");
+			// From above the dispensers, looking down on the cake stands on the table.
+			shoot(context, singleplayer, x + 1, y + 1, z - 1, 0, 35, "jugcraft_party_table_stands");
 		}
 	}
 
@@ -80,6 +85,13 @@ public class PartyTableClientGameTests implements FabricClientGameTest {
 		for (int dx = -1; dx <= 2; dx++) {
 			BlockPos at = origin.offset(dx, 0, 2);
 			level.setBlock(at, Block.updateFromNeighbourShapes(level.getBlockState(at), level, at), Block.UPDATE_ALL);
+		}
+		// On the table, set down onto its top and full: the cupcake tower and the meringue platter.
+		for (String id : new String[] {"spider_cupcake_tower", "ghost_meringue_platter"}) {
+			BlockPos at = origin.offset(id.startsWith("spider") ? 0 : 1, 1, 2);
+			PartyServingBlock stand = (PartyServingBlock) JugcraftAgriculture.block(id);
+			level.setBlock(at, stand.defaultBlockState().setValue(FacingDecorationBlock.FACING, Direction.NORTH)
+					.setValue(PartyServingBlock.ON_TABLE, true).setValue(stand.servings(), stand.capacity()), Block.UPDATE_ALL);
 		}
 		// Before it, facing the camera to the north: half full, full and empty, from west to east.
 		int[] counts = {CandyCornDispenserBlock.CAPACITY / 2, CandyCornDispenserBlock.CAPACITY, 0};

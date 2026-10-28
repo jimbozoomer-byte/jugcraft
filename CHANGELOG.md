@@ -8,6 +8,14 @@ Every change to Jugcraft, newest first, grouped by pull request. For what each t
 
 No numbered release yet. Entries on feature branches remain proposed until their pull requests merge.
 
+### Unmerged: Halloween Party Table, part 2 (the cake stands)
+- **Spider Cupcake Tower**: a black three-tier stand 50 cm high holding 13 Spiderweb Cupcakes, every third with a licorice spider on it. Use a cupcake to put one on; an empty hand takes one off.
+- **Ghost Meringue Platter**: an oval black-glazed platter holding 9 Ghost Meringues in three rows, put on and taken off the same way.
+- **Ghost Meringue**: a new candy, a piped meringue ghost with cocoa eyes. Six from an egg, two sugar and a cocoa bean; a Candy Bag takes it.
+- On a Feast Table both stands are set down onto its top instead of floating above it.
+- Record: [halloween-party-table.md](docs/features/halloween-party-table.md). Decor set 8's second part.
+- **Checked:** the record's Verification. Game tests and screenshots run in CI only; not played by hand.
+
 ### Unmerged: Halloween Party Table, part 1 (the Candy Corn Dispenser)
 - **Candy Corn Dispenser**: a jumbo gumball machine 86 cm high, its glass globe 41 cm across on a black cast-iron pedestal banded in orange, with a brass crank and chute flap.
 - Candy corn used on it pours in, up to 64 pieces, and its globe shows how full it is. An empty hand turns the crank once round, and one piece drops out of the chute as the flap swings open.

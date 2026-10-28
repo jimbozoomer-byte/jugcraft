@@ -16,11 +16,15 @@ import party_table as pt
 import pumpkin_patch_data as ppd
 from flora_art import Sculpt, cube, pal, shade
 from haunted_midway_data import BLACK, GOLD, ORANGE
-from pumpkin_patch_data import panel
+from pumpkin_patch_data import panel, walls
 
 MOD = "jugcraft"
 FACINGS = ppd.FACINGS
 GLASS = (214, 232, 236)
+CHOCOLATE = pal("2a160c", "3e2214", "56321e", "6e4428")
+ICING = (244, 244, 240)
+MERINGUE = pal("b0a898", "d0c8b8", "e4ddd0", "f2eee4", "fbf9f3")
+COCOA = (74, 44, 24)
 CANDY = {"tip": (246, 238, 220), "middle": (236, 124, 28), "foot": (250, 196, 54)}
 
 
@@ -93,6 +97,90 @@ def candy_corn(phase=0):
     return paint
 
 
+def liner():
+    """A cupcake's paper case: pleats a texel wide, orange and black by turns."""
+    def paint(p):
+        for y in range(p.h):
+            for x in range(p.w):
+                p.put(x, y, shade(ORANGE, 3) if x % 2 == 0 else shade(BLACK, 2))
+    paint.tag = repr(("liner",))
+    return paint
+
+
+def frosting():
+    """Chocolate frosting, lit along its top row."""
+    def paint(p):
+        for y in range(p.h):
+            for x in range(p.w):
+                p.put(x, y, shade(CHOCOLATE, 3 if y == 0 and p.h > 1 else 2))
+    paint.tag = repr(("frosting",))
+    return paint
+
+
+def web_top():
+    """The frosting's top under its white web: chocolate, a strand of white across it from one corner (and from both on
+    a top three texels across or more)."""
+    def paint(p):
+        for y in range(p.h):
+            for x in range(p.w):
+                strand = x == y and (p.w >= 3 or x == 0) or (p.w >= 3 and x == p.w - 1 - y)
+                p.put(x, y, ICING if strand else shade(CHOCOLATE, 2 if (x + y) % 2 else 3))
+    paint.tag = repr(("web_top",))
+    return paint
+
+
+def licorice():
+    """Black licorice, for a spider: the black's middle tone, lit along its top row."""
+    def paint(p):
+        for y in range(p.h):
+            for x in range(p.w):
+                p.put(x, y, shade(BLACK, 3 if y == 0 and p.h > 1 else 1))
+    paint.tag = repr(("licorice",))
+    return paint
+
+
+def enamel():
+    """Black enamelled steel, lit along its top row."""
+    def paint(p):
+        for y in range(p.h):
+            for x in range(p.w):
+                p.put(x, y, shade(BLACK, 3 if y == 0 and p.h > 1 else 2))
+    paint.tag = repr(("enamel",))
+    return paint
+
+
+def glaze():
+    """Black glaze on earthenware: deep black, a glint of light along its top row."""
+    def paint(p):
+        for y in range(p.h):
+            for x in range(p.w):
+                p.put(x, y, shade(BLACK, 3) if y == 0 and x % 3 == 1 else shade(BLACK, 1))
+    paint.tag = repr(("glaze",))
+    return paint
+
+
+def piped():
+    """Meringue piped from a star nozzle: ridges a texel wide down it, cream and white by turns, its top row the
+    brightest."""
+    def paint(p):
+        for y in range(p.h):
+            for x in range(p.w):
+                k = 4 if y == 0 and p.h > 1 else 3 if x % 2 == 0 else 2
+                p.put(x, y, shade(MERINGUE, k))
+    paint.tag = repr(("piped",))
+    return paint
+
+
+def cocoa():
+    """A cocoa eye: one dark brown texel."""
+    def paint(p):
+        for y in range(p.h):
+            for x in range(p.w):
+                p.put(x, y, COCOA)
+    paint.tag = repr(("cocoa",))
+    return paint
+
+
 # ---------------------------------------------------------------- the Candy Corn Dispenser
 
 # The globe's rings: (bottom, top, half-width), from the collar up.
@@ -155,10 +243,106 @@ def candy_corn_dispenser():
     return sc
 
 
+# ---------------------------------------------------------------- part 2: the cake stands
+
+def round_plate(sc, name, painter, w, y0, y1, cx=8.0, cz=8.0):
+    """A round plate `w` across, from y0 to y1: two boxes crossed, each a sixth shorter at its ends, so its corners are
+    cut off."""
+    c = w / 6.0
+    return [panel(sc, name, painter, (cx - w / 2 + c, y0, cz - w / 2), (cx + w / 2 - c, y1, cz + w / 2)),
+            panel(sc, name, painter, (cx - w / 2, y0, cz - w / 2 + c), (cx + w / 2, y1, cz + w / 2 - c))]
+
+
+def tower_slots():
+    """Where each cupcake sits on the tower, in the order they go on: (x, z, the tier's top): the bottom tier's four
+    sides and four corners, the middle tier's four corners, and the top's middle."""
+    (w1, y1, _), (w2, y2, _), (w3, y3, _) = pt.CUPCAKE_TOWER["tiers"]
+    out = [(8.0 + dx, 8.0 + dz, y1 + 0.25) for dx, dz in ((0, -2.25), (2.25, 0), (0, 2.25), (-2.25, 0),
+                                                         (-1.75, -1.75), (1.75, -1.75), (1.75, 1.75), (-1.75, 1.75))]
+    out += [(8.0 + dx, 8.0 + dz, y2 + 0.25) for dx, dz in ((-1.1, -1.1), (1.1, -1.1), (1.1, 1.1), (-1.1, 1.1))]
+    out.append((8.0, 8.0, y3 + 0.25))
+    return out
+
+
+def cupcake(sc, cx, cz, y, spider):
+    """A jumbo spiderweb cupcake 9 cm across: its pleated case, its chocolate frosting under a white web and a swirl on
+    top; with `spider`, a licorice spider sitting on it, its legs crossed in an X."""
+    choc, web = frosting(), web_top()
+    el = [panel(sc, "liner", liner(), (cx - 0.75, y, cz - 0.75), (cx + 0.75, y + 0.75, cz + 0.75)),
+          panel(sc, "frosting", choc, (cx - 0.625, y + 0.75, cz - 0.625), (cx + 0.625, y + 1.25, cz + 0.625), up=web),
+          panel(sc, "swirl", choc, (cx - 0.375, y + 1.25, cz - 0.375), (cx + 0.375, y + 1.5, cz + 0.375), up=web)]
+    if spider:
+        black = licorice()
+        el.append(panel(sc, "spider", black, (cx - 0.25, y + 1.5, cz - 0.375), (cx + 0.25, y + 1.875, cz + 0.375)))
+        for angle in (45, -45):
+            el.append(panel(sc, "spider_legs", black, (cx - 0.75, y + 1.5, cz - 0.125), (cx + 0.75, y + 1.625, cz + 0.125),
+                            rot=fa.rotation((cx, y + 1.5, cz), "y", angle)))
+    return el
+
+
+def spider_cupcake_tower():
+    """The Spider Cupcake Tower, facing north: a round foot, a centre rod, three round tiers of black enamelled steel
+    (`tiers`: across, height), their edges lit. Models: `whole` (the empty stand) and `slot_0` up to
+    the last (each cupcake, shown while the tower holds more than that many)."""
+    spec = pt.CUPCAKE_TOWER
+    sc = Sculpt(spec["block"], 2802, 128)
+    steel = enamel()
+    el = round_plate(sc, "foot", steel, 3.0, 0.0, 0.5)
+    top = spec["tiers"][-1][1]
+    el.append(panel(sc, "rod", steel, (7.75, 0.5, 7.75), (8.25, top, 8.25)))
+    for w, y, _ in spec["tiers"]:
+        el += round_plate(sc, "tier", steel, w, y, y + 0.25)
+    sc.models["whole"] = el
+    for k, (x, z, y) in enumerate(tower_slots()):
+        sc.models[f"slot_{k}"] = cupcake(sc, x, z, y, k % 3 == 0)
+    return sc
+
+
+def platter_slots():
+    """Where each meringue sits on the platter, in the order they go on: three rows of three, front to back."""
+    return [(x, z) for z in (6.75, 8.0, 9.25) for x in (6.5, 8.0, 9.5)]
+
+
+def ghost(sc, cx, cz, y):
+    """A meringue ghost 9 cm high, piped in a cone of four steps: a broad foot, its body, its shoulders and its peak,
+    curled over to its left; two cocoa eyes on its front."""
+    cream = piped()
+    eye = cocoa()
+    return [panel(sc, "ghost_foot", cream, (cx - 0.6, y, cz - 0.6), (cx + 0.6, y + 0.4, cz + 0.6)),
+            panel(sc, "ghost_body", cream, (cx - 0.45, y + 0.4, cz - 0.45), (cx + 0.45, y + 0.85, cz + 0.45)),
+            panel(sc, "ghost_shoulders", cream, (cx - 0.3, y + 0.85, cz - 0.3), (cx + 0.3, y + 1.2, cz + 0.3)),
+            panel(sc, "ghost_peak", cream, (cx - 0.05, y + 1.2, cz - 0.15), (cx + 0.3, y + 1.5, cz + 0.15)),
+            panel(sc, "ghost_eye", eye, (cx - 0.3, y + 0.55, cz - 0.5), (cx - 0.1, y + 0.75, cz - 0.45)),
+            panel(sc, "ghost_eye", eye, (cx + 0.1, y + 0.55, cz - 0.5), (cx + 0.3, y + 0.75, cz - 0.45))]
+
+
+def ghost_meringue_platter():
+    """The Ghost Meringue Platter, facing north: an oval platter of black-glazed earthenware 35 cm long (two crossed
+    boxes, their ends cut), a low raised rim, on a low foot. Models: `whole` (the empty platter) and `slot_0` up to the
+    last (each meringue, shown while the platter holds more than that many)."""
+    spec = pt.MERINGUE_PLATTER
+    sc = Sculpt(spec["block"], 2803, 128)
+    black = glaze()
+    el = [panel(sc, "platter_foot", black, (6.5, 0.0, 6.75), (9.5, 0.5, 9.25)),
+          panel(sc, "platter", black, (5.25, 0.5, 6.5), (10.75, 0.75, 9.5)),
+          panel(sc, "platter", black, (5.75, 0.5, 6.0), (10.25, 0.75, 10.0))]
+    el += walls(sc, "platter_rim", black, 5.75, 6.0, 10.25, 10.0, 0.125, 0.75, 1.0)
+    sc.models["whole"] = el
+    for k, (x, z) in enumerate(platter_slots()):
+        sc.models[f"slot_{k}"] = ghost(sc, x, z, 0.75)
+    return sc
+
+
+def lowered(elements):
+    """`elements` set down onto a Feast Table: `table_drop` pixels lower."""
+    return fa.transformed(elements, 1.0, (0.0, -pt.TABLE["table_drop"], 0.0))
+
+
 # ---------------------------------------------------------------- building and files
 
 _built = {}
-BUILDERS = {pt.DISPENSER["block"]: candy_corn_dispenser}
+BUILDERS = {pt.DISPENSER["block"]: candy_corn_dispenser, pt.CUPCAKE_TOWER["block"]: spider_cupcake_tower,
+            pt.MERINGUE_PLATTER["block"]: ghost_meringue_platter}
 
 
 def build(block):
@@ -195,19 +379,63 @@ def assets(root, write, lang):
     shown = sc.models["whole"] + sc.models["fill_2"] + sc.models["crank"] + sc.models["flap"]
     write(root / "models" / "item" / f"{block}.json", fa.model(block, d20d.separated(shown)))
     write(root / "items" / f"{block}.json", {"model": {"type": "minecraft:model", "model": rid(f"item/{block}")}})
+    for spec in pt.serving():
+        serving_assets(root, write, lang, spec)
+
+
+def serving_assets(root, write, lang, spec):
+    """A table piece that holds a food: the empty stand and each serving's model, each again set down onto a Feast
+    Table (`_table`); a multipart blockstate adding each serving while it holds more than that many (`servings`), on the
+    table or off it (`on_table`); and its item (the stand full)."""
+    models = root / "models" / "block"
+    block = spec["block"]
+    lang[f"block.{MOD}.{block}"] = spec["display"]
+    sc = build(block)
+    names = ["whole"] + [f"slot_{k}" for k in range(spec["capacity"])]
+    for name in names:
+        model = block if name == "whole" else f"{block}_{name}"
+        write(models / f"{model}.json", fa.model(block, d20d.separated(sc.models[name])))
+        write(models / f"{model}_table.json", fa.model(block, d20d.separated(lowered(sc.models[name]))))
+    multipart = []
+    for f, y in FACINGS.items():
+        turn = {"y": y} if y else {}
+        for on, suffix in (("false", ""), ("true", "_table")):
+            multipart.append({"when": {"facing": f, "on_table": on}, "apply": {"model": rid(f"block/{block}{suffix}"), **turn}})
+            for k in range(spec["capacity"]):
+                more = "|".join(str(n) for n in range(k + 1, spec["capacity"] + 1))
+                multipart.append({"when": {"facing": f, "on_table": on, "servings": more},
+                                  "apply": {"model": rid(f"block/{block}_slot_{k}{suffix}"), **turn}})
+    write(root / "blockstates" / f"{block}.json", {"multipart": multipart})
+    shown = [e for name in names for e in sc.models[name]]
+    write(root / "models" / "item" / f"{block}.json", fa.model(block, d20d.separated(shown)))
+    write(root / "items" / f"{block}.json", {"model": {"type": "minecraft:model", "model": rid(f"item/{block}")}})
 
 
 def loot(out, write):
-    """The dispenser drops itself (what it holds drops from its block entity)."""
+    """Each piece drops itself. The dispenser's candy drops from its block entity; a table piece's servings drop with
+    it, as many as its `servings` says (a pool for each count)."""
     for block in pt.blocks():
-        write(out / f"{block}.json", {"type": "minecraft:block", "pools": [{
-            "condition": {"type": "minecraft:survives_explosion"}, "entries": [{"type": "minecraft:item", "name": rid(block)}],
-            "rolls": 1}], "random_sequence": rid(f"blocks/{block}")})
+        pools = [{"condition": {"type": "minecraft:survives_explosion"}, "entries": [{"type": "minecraft:item", "name": rid(block)}],
+                  "rolls": 1}]
+        for spec in pt.serving():
+            if spec["block"] == block:
+                for n in range(1, spec["capacity"] + 1):
+                    pools.append({"condition": {"type": "minecraft:all_of", "terms": [
+                        {"type": "minecraft:survives_explosion"},
+                        {"type": "minecraft:match_block", "blocks": rid(block), "state": {"servings": str(n)}}]},
+                        "entries": [{"type": "minecraft:item", "name": rid(spec["serves"]),
+                                     "modifier": [{"type": "minecraft:set_count", "count": n}]}], "rolls": 1})
+        write(out / f"{block}.json", {"type": "minecraft:block", "pools": pools, "random_sequence": rid(f"blocks/{block}")})
 
 
 def tags(tags):
-    tags.add("block", "minecraft:mineable/pickaxe", rid(pt.DISPENSER["block"]))
+    for block in pt.blocks():
+        tags.add("block", "minecraft:mineable/pickaxe", rid(block))
 
 
 def textures():
-    return {("block", block): build(block).atlas.img for block in pt.blocks()}
+    """Each piece's block texture, and the Ghost Meringue's icon, drawn from its map (tools/item_icons/ghost_meringue.txt)."""
+    import item_icons
+    out = {("block", block): build(block).atlas.img for block in pt.blocks()}
+    out[("item", pt.MERINGUE["item"])] = item_icons.draw(pt.MERINGUE["item"])
+    return out

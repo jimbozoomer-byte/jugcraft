@@ -12712,6 +12712,16 @@
       "denominator": 3,
       "source": "recipe jugcraft:ghost_firework_1"
     },
+    "jugcraft:ghost_meringue": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
+    "jugcraft:ghost_meringue_platter": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
     "jugcraft:ghost_pipe": {
       "numerator": 16,
       "denominator": 1,
@@ -35341,6 +35351,11 @@
       "numerator": 36,
       "denominator": 1,
       "source": "recipe jugcraft:spice_rack"
+    },
+    "jugcraft:spider_cupcake_tower": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
     },
     "jugcraft:spider_lily": {
       "numerator": 16,

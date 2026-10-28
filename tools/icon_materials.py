@@ -121,6 +121,10 @@ FLOSS = Material((92, 34, 58), (140, 64, 96), (196, 106, 144), (228, 146, 180), 
 # saturated than copper so it can't read as metal. Card, not metal: flat.
 TICKET = Material((70, 30, 4), (120, 56, 8), (200, 98, 8), (238, 142, 22), (250, 182, 48), (254, 220, 124),
                   shine=False)
+# The Halloween Party Table's Ghost Meringue (tools/item_icons/ghost_meringue.txt): baked meringue, a warm cream white.
+# A food: flat (no shine); a pale material, so its outline may be a third of its mid tone's luma.
+MERINGUE = Material((70, 62, 54), (118, 108, 96), (176, 168, 154), (216, 208, 192), (238, 233, 222), (251, 249, 243),
+                    shine=False)
 
 MATERIALS = {
     "tech_clay": Material((48, 22, 22), (78, 38, 38), (124, 57, 57), (168, 83, 83), (201, 116, 111), (228, 158, 146),
@@ -137,6 +141,8 @@ MATERIALS = {
     "butter": BUTTER, "pancake": PANCAKE,
     # Haunted Midway's cotton candy and ticket
     "floss": FLOSS, "ticket": TICKET,
+    # the Halloween Party Table's meringue
+    "meringue": MERINGUE,
     # the approved metals ("I like the alternate versions for steel and bronze")
     "bronze": px.BRONZE, "steel": px.STEEL,
     # the arms' other materials (leather, rubber and cloth are wraps: their own outline and dark tones are never drawn,

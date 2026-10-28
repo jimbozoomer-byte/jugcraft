@@ -1,10 +1,12 @@
 package io.github.jimbozoomer.jugcraft.test;
 
 import io.github.jimbozoomer.jugcraft.Jugcraft;
+import io.github.jimbozoomer.jugcraft.agriculture.CandyBagItem;
 import io.github.jimbozoomer.jugcraft.agriculture.CandyCornDispenserBlock;
 import io.github.jimbozoomer.jugcraft.agriculture.CandyCornDispenserBlockEntity;
 import io.github.jimbozoomer.jugcraft.agriculture.FacingDecorationBlock;
 import io.github.jimbozoomer.jugcraft.agriculture.JugcraftAgriculture;
+import io.github.jimbozoomer.jugcraft.agriculture.PartyServingBlock;
 import net.fabricmc.fabric.api.gametest.v1.GameTest;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -32,7 +34,11 @@ import net.minecraft.world.phys.Vec3;
  * in, as much as fits, up to {@value CandyCornDispenserBlock#CAPACITY}, its globe filling by level; full, it takes no more.
  * An empty hand sets its crank turning, and a second use while it turns does nothing; as the crank comes round one piece
  * drops out of its chute. Its crank turns once round, easing in and out, and its flap swings out and back once it has.
- * Broken, it drops itself and all it held. Its recipe and loot load.
+ * Broken, it drops itself and all it held. Part 2: the Spider Cupcake Tower and the Ghost Meringue Platter each stand
+ * facing whoever places it, empty and off any table; their food goes on one at a time up to their capacity, anything else
+ * changing nothing; an empty hand takes one off into the player's inventory; broken, each drops itself and what it held.
+ * On a Feast Table each is set down onto its top, and stands back up when the table goes. The Ghost Meringue is candy, so
+ * a Candy Bag takes it. Their recipes and loot load.
  */
 public class PartyTableGameTests {
 	private static Item item(String id) {
@@ -135,10 +141,78 @@ public class PartyTableGameTests {
 		helper.succeed();
 	}
 
+	private static int carried(ServerPlayer player, Item item) {
+		int count = 0;
+		for (int slot = 0; slot < player.getInventory().getContainerSize(); slot++) {
+			if (player.getInventory().getItem(slot).is(item)) {
+				count += player.getInventory().getItem(slot).getCount();
+			}
+		}
+		return count;
+	}
+
+	@GameTest(maxTicks = 40)
+	public void theCakeStandsServeTheirFood(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		floor(helper);
+		ServerPlayer player = standing(helper, new BlockPos(3, 2, 1));
+		String[][] stands = {{"spider_cupcake_tower", "spiderweb_cupcake"}, {"ghost_meringue_platter", "ghost_meringue"}};
+		for (int k = 0; k < stands.length; k++) {
+			BlockPos rel = new BlockPos(2 + 2 * k, 2, 3);
+			BlockPos at = helper.absolutePos(rel);
+			Item food = item(stands[k][1]);
+			place(player, helper, rel, new ItemStack(item(stands[k][0])));
+			BlockState placed = level.getBlockState(at);
+			if (!(placed.getBlock() instanceof PartyServingBlock stand)) {
+				throw helper.assertionException(stands[k][0] + " stands where it was placed");
+			}
+			int capacity = stand.capacity();
+			helper.assertTrue(placed.getValue(FacingDecorationBlock.FACING) == Direction.NORTH && placed.getValue(stand.servings()) == 0
+					&& !placed.getValue(PartyServingBlock.ON_TABLE), stands[k][0] + " faces the player, empty, off any table");
+			use(player, level, at, new ItemStack(item("candy_corn"), 4));
+			helper.assertTrue(level.getBlockState(at).getValue(stand.servings()) == 0 && player.getMainHandItem().getCount() == 4,
+					"Anything but its food changes nothing");
+			use(player, level, at, new ItemStack(food, capacity + 3));
+			for (int n = 1; n < capacity + 2; n++) {
+				use(player, level, at, player.getMainHandItem());
+			}
+			helper.assertTrue(level.getBlockState(at).getValue(stand.servings()) == capacity && player.getMainHandItem().getCount() == 3,
+					"Its food goes on one at a time, up to " + capacity + ": " + level.getBlockState(at).getValue(stand.servings()));
+			player.getInventory().clearContent();
+			use(player, level, at, ItemStack.EMPTY);
+			helper.assertTrue(level.getBlockState(at).getValue(stand.servings()) == capacity - 1 && carried(player, food) == 1,
+					"An empty hand takes one off, into the player's inventory");
+			level.destroyBlock(at, true);
+			helper.assertTrue(level.getBlockState(at).isAir() && dropped(helper, item(stands[k][0])) == 1 && dropped(helper, food) == capacity - 1,
+					"Broken, " + stands[k][0] + " drops itself and what it held, not " + dropped(helper, food));
+		}
+		helper.assertTrue(new ItemStack(item("ghost_meringue")).is(CandyBagItem.TREATS), "The Ghost Meringue is candy, so a Candy Bag takes it");
+		helper.succeed();
+	}
+
+	@GameTest(maxTicks = 40)
+	public void theCakeStandsStandOnAFeastTable(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		floor(helper);
+		ServerPlayer player = standing(helper, new BlockPos(3, 2, 1));
+		helper.setBlock(new BlockPos(3, 2, 3), JugcraftAgriculture.block("feast_table"));
+		BlockPos at = helper.absolutePos(new BlockPos(3, 3, 3));
+		place(player, helper, new BlockPos(3, 3, 3), new ItemStack(item("ghost_meringue_platter")));
+		BlockState placed = level.getBlockState(at);
+		helper.assertTrue(placed.getBlock() instanceof PartyServingBlock && placed.getValue(PartyServingBlock.ON_TABLE)
+				&& placed.getShape(level, at).min(Direction.Axis.Y) < 0.0, "On a Feast Table it is set down onto the table's top");
+		helper.setBlock(new BlockPos(3, 2, 3), Blocks.STONE);
+		helper.assertTrue(!level.getBlockState(at).getValue(PartyServingBlock.ON_TABLE) && level.getBlockState(at).getShape(level, at).min(Direction.Axis.Y) == 0.0,
+				"and stands back up when the table goes");
+		helper.succeed();
+	}
+
 	@GameTest
 	public void partyTableDataLoads(GameTestHelper helper) {
 		ServerLevel level = helper.getLevel();
-		for (String id : new String[] {"candy_corn_dispenser"}) {
+		helper.assertTrue(level.recipeAccess().byKey(ResourceKey.create(Registries.RECIPE, Jugcraft.id("ghost_meringue"))).isPresent(),
+				"ghost_meringue has a recipe");
+		for (String id : new String[] {"candy_corn_dispenser", "spider_cupcake_tower", "ghost_meringue_platter"}) {
 			helper.assertTrue(level.recipeAccess().byKey(ResourceKey.create(Registries.RECIPE, Jugcraft.id(id))).isPresent(), id + " has a recipe");
 			helper.assertTrue(level.getServer().reloadableRegistries().getLootTable(ResourceKey.create(Registries.LOOT_TABLE,
 					Jugcraft.id("blocks/" + id))) != LootTable.EMPTY, id + "'s loot loads");

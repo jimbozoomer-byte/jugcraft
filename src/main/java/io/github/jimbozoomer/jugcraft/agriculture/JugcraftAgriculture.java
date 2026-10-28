@@ -3126,10 +3126,16 @@ public final class JugcraftAgriculture {
 				.mapColor(MapColor.COLOR_BLACK).strength(1.5F).sound(SoundType.METAL).noOcclusion().pushReaction(PushReaction.IMMOVEABLE));
 		CANDY_CORN_DISPENSER_ENTITY = Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, Jugcraft.id("candy_corn_dispenser"),
 				FabricBlockEntityTypeBuilder.create(CandyCornDispenserBlockEntity::new, dispenser).build());
-		for (Block block : List.of(dispenser)) {
+		// Part 2: the cake stands, each holding a food, and the Ghost Meringue.
+		Block tower = registerBlock("spider_cupcake_tower", SpiderCupcakeTowerBlock::new, BlockBehaviour.Properties.of()
+				.mapColor(MapColor.COLOR_BLACK).strength(0.8F).sound(SoundType.METAL).noOcclusion().pushReaction(PushReaction.POPPED));
+		Block platter = registerBlock("ghost_meringue_platter", GhostMeringuePlatterBlock::new, BlockBehaviour.Properties.of()
+				.mapColor(MapColor.COLOR_BLACK).strength(0.5F).sound(SoundType.DECORATED_POT).noOcclusion().pushReaction(PushReaction.POPPED));
+		for (Block block : List.of(dispenser, tower, platter)) {
 			registerItem(BuiltInRegistries.BLOCK.getKey(block).getPath(), props -> new BlockItem(block, props),
 					new Item.Properties().useBlockDescriptionPrefix(), BUILDING_TAB);
 		}
+		food("ghost_meringue", 1, 0.1F, COMPOST_MEDIUM_HIGH);
 	}
 
 	/** Bleached bones: they come away easily, and a piston pops them off. */
