@@ -139,6 +139,7 @@ TEXT = {
     "entity.jugcraft.throw_marker.distance": "%s blocks",
     "entity.jugcraft.headless_horseman": "Headless Horseman",
     "entity.jugcraft.flaming_pumpkin": "Flaming Pumpkin",
+    "entity.jugcraft.horseman_rider": "Headless Horseman",
     "item.jugcraft.candy_bag.homes": "Homes visited tonight: %s (%s fill the bag)",
     "item.jugcraft.candy_bag.no_homes": "No homes visited tonight",
     "message.jugcraft.harvest_moon.rises": "The Harvest Moon rises: crops grow fast tonight",
@@ -162,6 +163,8 @@ TEXT = {
     "message.jugcraft.horseman.no_head": "The scarecrow needs a lit pumpkin for a head",
     "message.jugcraft.horseman.roofed": "He only rides under the open sky",
     "message.jugcraft.horseman.already_riding": "The Headless Horseman is already riding nearby",
+    "message.jugcraft.horseman.hoofbeats": "Hoofbeats in the dark...",
+    "message.jugcraft.horseman.sighting_gone": "The Headless Horseman rides off into the night. You'll see him again before the season is out.",
 }
 
 

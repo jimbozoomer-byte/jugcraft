@@ -8,6 +8,10 @@ Every change to Jugcraft, newest first, grouped by pull request. For what each t
 
 No numbered release yet. Entries on feature branches remain proposed until their pull requests merge.
 
+### Unmerged: Headless Horseman sightings
+- **Everyone sees the Headless Horseman** a few times each Halloween season: on a night out under the sky he bursts out of the dark in front of you, gallops at you through the mist, swings round you, flings a flaming pumpkin at your feet and rides off into the night. The pumpkin only blinds you for a moment and pushes you back; nobody is hurt, and he can't be fought (call him at midnight with a lit scarecrow head for that).
+- He comes on your first night of the season, then every 2 or 3 days, and again on Halloween; everyone near sees him together and earns **Sleepy Hollow**. Only on nights that pass, never while time is stopped. Switch: `halloween.horseman_sightings` (on by default). Record: [horseman-sightings.md](docs/features/horseman-sightings.md).
+
 ### Unmerged: Herobrine (encounters, marks, shoreline pyramids, schedule)
 - **Herobrine:** a still, staring figure with glowing white eyes. He appears to a player 28–52 blocks off (14–28 underground), where they could see him if they turned their head. He is gone when anyone comes within 12 blocks, when they stare him down for 2 seconds, or when he is hit. Now and then he stands right behind them, with a heartbeat only they hear and 3 seconds of Darkness, and is gone once they turn and see him. The apparition never directly damages players or blocks, speaks, wears a name tag or is saved; the separate mark builder leaves the structures described below. Record: [herobrine.md](docs/features/herobrine.md).
 - **Four ways to be seen at a distance:** a watcher on a ridge, in a clearing or just inside a cave mouth in a hillside (placed so a group can share the sighting); a follower who walks the player's own path, freezes while watched, and whose faint footsteps stop when they stop; a second look that finds him gone or moved; and eyes at the far end of a tunnel behind an underground player.

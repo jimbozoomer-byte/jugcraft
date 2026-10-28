@@ -1,0 +1,22 @@
+{
+  "parent": "minecraft:husbandry/root",
+  "display": {
+    "icon": {
+      "id": "jugcraft:horseman_cloak"
+    },
+    "title": {
+      "translate": "advancements.jugcraft.sleepy_hollow.title"
+    },
+    "description": {
+      "translate": "advancements.jugcraft.sleepy_hollow.description"
+    },
+    "frame": "task",
+    "show_toast": true,
+    "announce_to_chat": false
+  },
+  "criteria": {
+    "done": {
+      "trigger": "minecraft:impossible"
+    }
+  }
+}
