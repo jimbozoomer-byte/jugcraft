@@ -242,6 +242,12 @@ public final class JugcraftGuns {
 		SPECS.put("maelstrom_gun", new GunSpec(7.5F, 1, 6, true, 24, 0, 10, 17, 20, 3.0F, 1.5F, 64, "microjet"));
 		SPECS.put("ermine_rifle", new GunSpec(10.0F, 1, 12, false, 15, 53, 0, 0, 0, 1.5F, 0.2F, 80, "energy_cell"));
 		SPECS.put("geode_cutter", new GunSpec(3.0F, 1, 3, true, 50, 59, 0, 0, 0, 3.0F, 1.5F, 24, "energy_cell"));
+		// Slice 16A: three iron guns from the owner's 23 October upload: a pistol silenced the length of its barrel, held
+		// in one hand (SILENCED); a rifle that fires a burst of three to a pull (BURSTS); and the Highball Rifle made over
+		// into a repeater loaded a round at a time, piercing armour (PIERCING).
+		SPECS.put("hush_pistol", new GunSpec(4.0F, 1, 5, false, 8, 47, 0, 0, 0, 2.5F, 0.75F, 48, "light_round"));
+		SPECS.put("salvo_rifle", new GunSpec(3.5F, 1, 3, false, 18, 49, 0, 0, 0, 3.0F, 0.75F, 80, "rifle_round"));
+		SPECS.put("highball_repeater", new GunSpec(12.0F, 1, 33, false, 6, 0, 11, 12, 16, 1.6F, 1.6F, 120, "rifle_round"));
 	}
 
 	/**
@@ -291,7 +297,7 @@ public final class JugcraftGuns {
 	 * Slice 10G, two guns at once: the guns held in one hand (tools/guns.py one_handed()), of which a player may hold one
 	 * in each hand and fire both ({@link GunItem#dual}).
 	 */
-	public static final Set<String> ONE_HANDED = Set.of("warden_pistol", "haymaker", "duelling_pistol", "bulldog_pistol", "marshal_revolver", "sapper_revolver", "sentry_pistol", "beam_pistol", "rattler_pistol", "bronco_smg", "spikedriver", "caisson_pistol", "culverin", "ashfall_pistol", "penny_pistol", "tuppence_pistol", "goshawk_revolver", "tabby_revolver", "parley_revolver", "minuet_pistol", "half_crown_revolver", "kreuzer_pistol", "psalm_smg", "jawbreaker");
+	public static final Set<String> ONE_HANDED = Set.of("warden_pistol", "haymaker", "duelling_pistol", "bulldog_pistol", "marshal_revolver", "sapper_revolver", "sentry_pistol", "beam_pistol", "rattler_pistol", "bronco_smg", "spikedriver", "caisson_pistol", "culverin", "ashfall_pistol", "penny_pistol", "tuppence_pistol", "goshawk_revolver", "tabby_revolver", "parley_revolver", "minuet_pistol", "half_crown_revolver", "kreuzer_pistol", "psalm_smg", "jawbreaker", "hush_pistol");
 	/**
 	 * Slice 13D: one-handed guns that, with a stock fitted, are held in both hands as carbines (tools/guns.py CARBINES):
 	 * they play the owner's carbine_ animations in place of their own, and are no longer one of two guns held at once
@@ -316,9 +322,9 @@ public final class JugcraftGuns {
 	/**
 	 * Guns silenced along their own barrels, as a fitted silencer silences others: a shot shows no muzzle flash, and no
 	 * barrel attachment fits them (tools/guns.py SILENCED). Slice 15A's Gallant Rifle is the first, slice 15C's Quill Rifle
-	 * the second.
+	 * the second, slice 16A's Hush Pistol the third.
 	 */
-	public static final Set<String> SILENCED = Set.of("gallant_rifle", "quill_rifle");
+	public static final Set<String> SILENCED = Set.of("gallant_rifle", "quill_rifle", "hush_pistol");
 	/**
 	 * The guns whose bullets knock back each creature they hurt a second time, by this strength, after the 0.4 every hit
 	 * gives (tools/guns.py KNOCKBACK). Slice 15B's Jawbreaker is the first, from the owner's Uppercut; slice 15C's Impetus
@@ -334,7 +340,7 @@ public final class JugcraftGuns {
 	 * owner's Lockewood; and slice 15E's Geode Cutter, from the owner's Shard Culler, the first whose beam pierces armour.
 	 * The older guns follow-up gives 27 of the guns before slice 15 theirs, the Caisson Pistol's on its arc.
 	 */
-	public static final Map<String, Float> PIERCING = Map.ofEntries(Map.entry("vesper_rifle", 4.5F), Map.entry("onrush_smg", 3.0F), Map.entry("kreuzer_pistol", 1.0F), Map.entry("psalm_smg", 1.0F), Map.entry("jawbreaker", 4.5F), Map.entry("hawker_rifle", 1.0F), Map.entry("quill_rifle", 1.5F), Map.entry("tumbler_rifle", 3.0F), Map.entry("geode_cutter", 4.0F), Map.entry("patchwork_carbine", 2.0F), Map.entry("warden_pistol", 1.0F), Map.entry("riveter_smg", 1.0F), Map.entry("longhorn_rifle", 3.5F), Map.entry("sapper_revolver", 2.5F), Map.entry("garrison_rifle", 2.0F), Map.entry("thresher", 1.0F), Map.entry("kestrel_rifle", 3.0F), Map.entry("caisson_pistol", 1.0F), Map.entry("highwayman", 2.5F), Map.entry("undertone_rifle", 6.5F), Map.entry("murmur_smg", 7.0F), Map.entry("reverb", 7.0F), Map.entry("cinder_repeater", 2.0F), Map.entry("ashfall_pistol", 2.0F), Map.entry("conductor_carbine", 2.5F), Map.entry("lament_rifle", 7.0F), Map.entry("ammonite_carbine", 2.0F), Map.entry("highball_rifle", 2.5F), Map.entry("flatboat_gun", 2.0F), Map.entry("millstone_rifle", 1.5F), Map.entry("holler_pistol", 5.0F), Map.entry("half_crown_revolver", 4.0F), Map.entry("holler_carbine", 5.0F), Map.entry("grange_carbine", 2.0F), Map.entry("sprocket_gun", 3.0F), Map.entry("old_grange_carbine", 2.5F));
+	public static final Map<String, Float> PIERCING = Map.ofEntries(Map.entry("vesper_rifle", 4.5F), Map.entry("onrush_smg", 3.0F), Map.entry("kreuzer_pistol", 1.0F), Map.entry("psalm_smg", 1.0F), Map.entry("jawbreaker", 4.5F), Map.entry("hawker_rifle", 1.0F), Map.entry("quill_rifle", 1.5F), Map.entry("tumbler_rifle", 3.0F), Map.entry("geode_cutter", 4.0F), Map.entry("highball_repeater", 2.0F), Map.entry("patchwork_carbine", 2.0F), Map.entry("warden_pistol", 1.0F), Map.entry("riveter_smg", 1.0F), Map.entry("longhorn_rifle", 3.5F), Map.entry("sapper_revolver", 2.5F), Map.entry("garrison_rifle", 2.0F), Map.entry("thresher", 1.0F), Map.entry("kestrel_rifle", 3.0F), Map.entry("caisson_pistol", 1.0F), Map.entry("highwayman", 2.5F), Map.entry("undertone_rifle", 6.5F), Map.entry("murmur_smg", 7.0F), Map.entry("reverb", 7.0F), Map.entry("cinder_repeater", 2.0F), Map.entry("ashfall_pistol", 2.0F), Map.entry("conductor_carbine", 2.5F), Map.entry("lament_rifle", 7.0F), Map.entry("ammonite_carbine", 2.0F), Map.entry("highball_rifle", 2.5F), Map.entry("flatboat_gun", 2.0F), Map.entry("millstone_rifle", 1.5F), Map.entry("holler_pistol", 5.0F), Map.entry("half_crown_revolver", 4.0F), Map.entry("holler_carbine", 5.0F), Map.entry("grange_carbine", 2.0F), Map.entry("sprocket_gun", 3.0F), Map.entry("old_grange_carbine", 2.5F));
 	/**
 	 * The guns whose shot pushes their shooter back, by this strength in blocks a tick (the recoil-push follow-up, the
 	 * owner's playerKnockBack; tools/guns.py KICK; {@link GunShots#kick}). The Flatboat Gun's and the Goshawk Revolver's
@@ -362,9 +368,9 @@ public final class JugcraftGuns {
 
 	/**
 	 * The guns that fire a burst to a pull (tools/guns.py BURSTS): slice 15D's Tumbler Rifle, three rounds and a rest of 5
-	 * ticks, as the owner's Lockewood.
+	 * ticks, as the owner's Lockewood, and slice 16A's Salvo Rifle, the same, as the owner's Kalaskah.
 	 */
-	public static final Map<String, Burst> BURSTS = Map.of("tumbler_rifle", new Burst(3, 5));
+	public static final Map<String, Burst> BURSTS = Map.of("tumbler_rifle", new Burst(3, 5), "salvo_rifle", new Burst(3, 5));
 	/**
 	 * Slice 15E: the guns loaded a shell at a time that load several rounds at each shell's time (tools/guns.py LOAD_STEPS):
 	 * the Maelstrom Gun, from the owner's Cyclone, three microjets a step.
@@ -703,6 +709,15 @@ public final class JugcraftGuns {
 		ACCEPTS.put("ermine_rifle", List.of("light_stock", "weighted_stock", "wooden_stock", "light_grip", "vertical_grip",
 				"iron_bayonet", "steel_bayonet", "diamond_bayonet", "netherite_bayonet", "long_scope", "medium_scope",
 				"reflex_sight", "laser_sight"));
+		ACCEPTS.put("hush_pistol", List.of("extended_magazine", "speed_magazine"));
+		ACCEPTS.put("salvo_rifle", List.of("silencer", "baffled_silencer", "muzzle_brake", "extended_barrel",
+				"extended_magazine", "speed_magazine", "light_stock", "weighted_stock", "wooden_stock", "light_grip",
+				"iron_bayonet", "steel_bayonet", "diamond_bayonet", "netherite_bayonet", "long_scope", "medium_scope",
+				"reflex_sight", "tactical_grip", "laser_sight"));
+		ACCEPTS.put("highball_repeater", List.of("silencer", "baffled_silencer", "muzzle_brake", "extended_barrel",
+				"light_stock", "weighted_stock", "wooden_stock", "light_grip", "iron_bayonet", "steel_bayonet",
+				"diamond_bayonet", "netherite_bayonet", "long_scope", "medium_scope", "reflex_sight", "tactical_grip",
+				"laser_sight"));
 	}
 
 	/** The rounds. */

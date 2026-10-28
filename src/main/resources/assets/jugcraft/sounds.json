@@ -1766,6 +1766,33 @@
       }
     ]
   },
+  "guns.hush_pistol.fire": {
+    "subtitle": "subtitles.jugcraft.guns.fire",
+    "sounds": [
+      {
+        "name": "jugcraft:guns/bruiser_silenced_fire",
+        "attenuation_distance": 64
+      }
+    ]
+  },
+  "guns.salvo_rifle.fire": {
+    "subtitle": "subtitles.jugcraft.guns.fire",
+    "sounds": [
+      {
+        "name": "jugcraft:guns/iron_rifle_fire",
+        "attenuation_distance": 64
+      }
+    ]
+  },
+  "guns.highball_repeater.fire": {
+    "subtitle": "subtitles.jugcraft.guns.fire",
+    "sounds": [
+      {
+        "name": "jugcraft:guns/blackpowder_fire",
+        "attenuation_distance": 64
+      }
+    ]
+  },
   "nouveau.empty": {
     "sounds": []
   },

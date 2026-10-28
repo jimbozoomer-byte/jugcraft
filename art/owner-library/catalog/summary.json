@@ -1,8 +1,8 @@
 {
   "source": "Project owner uploads, 2026-10-06, 2026-10-07, 2026-10-08 and 2026-10-23",
-  "source_files": 26982,
-  "source_bytes": 61104340,
-  "unique_source_contents": 24850,
+  "source_files": 26985,
+  "source_bytes": 61250182,
+  "unique_source_contents": 24853,
   "uploads": [
     {
       "date": "2026-10-06",
@@ -35,10 +35,10 @@
     },
     {
       "date": "2026-10-23",
-      "description": "GeckoLib geometry of sixteen guns (Grandle OG, MAS 55, Prush Gun, Valora, Krauser, Soul Drummer, Uppercut, MAS Peddler, Inertial, Zilk 45, Drill, Drill Conversion, Lockewood, Cyclone, Minksy, Shard Culler), from the owner's re-sent gun collection",
+      "description": "GeckoLib geometry of nineteen guns (Grandle OG, MAS 55, Prush Gun, Valora, Krauser, Soul Drummer, Uppercut, MAS Peddler, Inertial, Zilk 45, Drill, Drill Conversion, Lockewood, Cyclone, Minksy, Shard Culler, Mokova, Kalaskah, Saketini Ironport), from the owner's re-sent gun collection",
       "path": "originals/Blocks/Guns/geo",
-      "files": 16,
-      "bytes": 834585
+      "files": 19,
+      "bytes": 980427
     },
     {
       "date": "2026-10-23",
@@ -54,7 +54,7 @@
     ".fsh": 3,
     ".gif": 3,
     ".jpg": 30,
-    ".json": 7687,
+    ".json": 7690,
     ".mcmeta": 364,
     ".nbt": 7,
     ".ogg": 354,
@@ -73,7 +73,7 @@
     "blockstate JSON": 315,
     "fragment shader": 3,
     "language JSON": 82,
-    "model JSON": 4435,
+    "model JSON": 4438,
     "properties": 1,
     "reference sheet": 30,
     "sound": 354,
@@ -173,8 +173,8 @@
     },
     {
       "name": "Guns",
-      "files": 3825,
-      "bytes": 23491133,
+      "files": 3828,
+      "bytes": 23636975,
       "catalog": "guns/README.md",
       "source": "originals/Blocks/Guns",
       "pages": 16

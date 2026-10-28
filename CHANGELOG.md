@@ -8,6 +8,11 @@ Every change to Jugcraft, newest first, grouped by pull request. For what each t
 
 No numbered release yet. Entries on feature branches remain proposed until their pull requests merge.
 
+### Unmerged: Guns, slice 16A (a silenced pistol, a burst rifle and a repeater)
+- **Three iron guns** from the owner's own GeckoLib models and animations, from their upload of 23 October: the **Hush Pistol** (the owner's Mokova), held in one hand and silenced the length of its barrel, eight muffled light rounds a magazine; the **Salvo Rifle** (the Kalaskah), which fires a **burst of three** rifle rounds to a pull from a magazine of 18; and the **Highball Repeater** (the Saketini Ironport), the Highball Rifle made over into a repeater of six heavy rounds loaded through a lid a round at a time, as true from the hip as aimed, piercing 2 points of armour.
+- **Converter:** a bone the owner turned that an animation turns about another axis keeps its turn, so the Repeater's cap flips open about its own hinge as the owner made it. The check of the owner's parts compares a turn's origin only where it moves anything.
+- Record: [guns.md, slice 16A](docs/features/guns.md#slice-16a-a-silenced-pistol-a-burst-rifle-and-a-repeater).
+
 ### Unmerged: Guns, flying microjets and heavy guns that slow their holder
 - The **Maelstrom Gun**'s microjets now fly to their mark as little rockets, at the owner's 1.5 blocks a tick, instead of striking at once. Each stops at the first creature or block in its way or at the end of the gun's range, and hits as a bullet does; none breaks a block.
 - Eight heavy guns slow whoever holds them in their main hand, at the owner's numbers: the **Stoker**, **Borer** and **Cloudburst Gun** to 0.8 of their speed, the **Thresher** to 0.85, the **Maelstrom Gun** and **Geode Cutter** to 0.9, and the **Earthmover** and **Harrow** to 0.95. The tooltip shows it.

@@ -1042,6 +1042,36 @@ GUNS = {
         "damage": 3.0, "pellets": 1, "interval": 3, "auto": True, "capacity": 50,
         "reload": 59, "spread": (3.0, 1.5), "range": 24, "ammo": "energy_cell", "shot": "beam", "charge": 120,
     },
+    # Slice 16A: three of the owner's guns from their 23 October upload, each built from their own GeckoLib model and
+    # animations: the Mokova, a pistol silenced the length of its barrel (SILENCED), held in one hand; the Kalaskah, a
+    # rifle that fires a burst of three to a pull (BURSTS); and the Saketini Ironport, the Saketini (slice 13B's Highball
+    # Rifle) made over into a repeater, its barrel swinging aside after each shot and its magazine loaded through a lid a
+    # round at a time.
+    "hush_pistol": {
+        "display": "Hush Pistol",
+        "source": "mokova",
+        "tooltip": "An iron pistol silenced the length of its barrel, held in one hand: eight muffled shots from a "
+                   "magazine. Fires light rounds.",
+        "damage": 4.0, "pellets": 1, "interval": 5, "auto": False, "capacity": 8,
+        "reload": 47, "spread": (2.5, 0.75), "range": 48, "ammo": "light_round",
+    },
+    "salvo_rifle": {
+        "display": "Salvo Rifle",
+        "source": "kalaskah",
+        "tooltip": "An iron rifle that fires a burst of three rounds to a pull, from a magazine of eighteen. Fires rifle "
+                   "rounds.",
+        "damage": 3.5, "pellets": 1, "interval": 3, "auto": False, "capacity": 18,
+        "reload": 49, "spread": (3.0, 0.75), "range": 80, "ammo": "rifle_round",
+    },
+    "highball_repeater": {
+        "display": "Highball Repeater",
+        "source": "saketini_ironport",
+        "tooltip": "The Highball Rifle made over into a repeater: six heavy rounds, its barrel swinging aside after each "
+                   "shot, as true from the hip as aimed. Its lid opens to load a round at a time. Its shots pierce "
+                   "armour. Fires rifle rounds.",
+        "damage": 12.0, "pellets": 1, "interval": 33, "auto": False, "capacity": 6,
+        "reload": (11, 12, 16), "spread": (1.6, 1.6), "range": 120, "ammo": "rifle_round",
+    },
 }
 
 # What a gun fires: bullets, or a slice 8C or 8D gun's "shot". The flying-microjets follow-up's "jet": each shot fires a
@@ -1363,6 +1393,14 @@ RECIPES = {
     "geode_cutter": (["SSM", "DAC", "S S"], {"S": "#c:ingots/stainless_steel", "M": "minecraft:amethyst_shard",
                                               "D": "minecraft:diamond", "A": "jugcraft:advanced_circuit",
                                               "C": "jugcraft:copper_cable"}),
+    # Slice 16A: iron and a lever, as the iron set's. The owner's recipes give the Mokova treated iron, a gun barrel
+    # and wool (its silencer), the Kalaskah a rapid firing unit (redstone, as for the Bronco SMG's sear) and a wooden part
+    # (planks), and the Saketini Ironport two gun barrels, iron and two wooden parts (more iron, planks).
+    "hush_pistol": (["IIW", " LP"], {"I": "minecraft:iron_ingot", "W": "#minecraft:wool", "L": "minecraft:lever",
+                                     "P": "#minecraft:planks"}),
+    "salvo_rifle": (["III", "LRP", "I  "], {"I": "minecraft:iron_ingot", "L": "minecraft:lever", "R": "minecraft:redstone",
+                                            "P": "#minecraft:planks"}),
+    "highball_repeater": (["III", "ILP"], {"I": "minecraft:iron_ingot", "L": "minecraft:lever", "P": "#minecraft:planks"}),
 }
 # The switches beyond "guns" a gun's recipe needs (separate load conditions, all of which must hold): the energy weapons
 # and their cells are useless without the Charging Station, so they need the machines too (as the leaf blower does).
@@ -3346,6 +3384,62 @@ BUILDS = {
         "muzzle": (8.0, 1.94, -0.19),
         "sight": None,
     },
+    # Slice 16A. The Mokova, the Kalaskah and the Saketini Ironport are the owner's GeckoLib models, as slice 15D's. The
+    # Mokova's reload drops its magazine and brings a new one in on magazine_2, as the Warden Pistol's; held in one hand,
+    # its left hand shows only then. The Kalaskah's left arm hangs under its magazine, as the Tumbler Rifle's; its
+    # magazine_2 is never shown. The Saketini Ironport's barrel (with the grips and bayonets under it, "mounts") swings
+    # aside after each shot, its hammer falls, the cap at the bottom of its magazine flips open and the button behind it
+    # is pressed; its reload opens the lid on the magazine's top, and its inspection works the lever. The cap's bone is
+    # turned in the owner's model (GEO_KEPT_TURNS). Its draw moves a bolt the model lacks: empty, it moves nothing.
+    "hush_pistol": {
+        "bones": [
+            ("gun_body2", None, [], (8.4625, 3.225, 8.6)),
+            ("gun_body", "gun_body2", ["main"], (8.4625, 3.225, 8.6)),
+            ("bolt", "gun_body", ["bolt"], (9.58896, 4.92316, 11.98542)),
+            ("magazine", "gun_body", ["stan_mag"], (7.9625, 0.56124, 15.6787)),
+            ("magazine_2", "gun_body", ["stan_mag"], (7.9875, 0.575, 15.6)),
+        ],
+        "hands": {"right": (7.47, 2.27, 15.01), "left": (7.2, 1.82, 12.84)},
+        "hand_pose": {"left": ("reload", "1.75")},
+        "arms": {"right": (0.0653, -0.4957, 0.866), "left": (0.5084, -0.6137, 0.6041)},
+        "muzzle": (8.1, 5.03, 3.6),
+        "sight": (8.0, 6.15, 12.1),
+    },
+    "salvo_rifle": {
+        "bones": [
+            ("gun_body2", None, [], (7.9905, 2.35, 9.3)),
+            ("gun_body", "gun_body2", ["main", "sights", "stan_barrel"], (7.9905, 2.35, 9.3)),
+            ("bolt", "gun_body", ["bolt"], (8.61696, 4.04816, 12.68542)),
+            ("magazine", "gun_body", ["stan_mag"], (7.9905, -0.06376, 12.1287)),
+            ("magazine_2", "gun_body", [], (7.9905, -0.06376, 12.1287)),
+        ],
+        "hands": {"right": (8.77, 1.65, 14.09), "left": (8.04, 2.85, 7.36)},
+        "arm_parents": {"left": "magazine"},
+        "arms": {"right": (0.0653, -0.4957, 0.866), "left": (0.6871, -0.3967, 0.6088)},
+        "muzzle": (7.97, 5.13, 3.73),
+        "sight": (8.0, 6.44, 11.875),
+        "eye_relief": 1.0,
+    },
+    "highball_repeater": {
+        "bones": [
+            ("gun_body2", None, [], (8.0, 2.125, 9.5)),
+            ("gun_body", "gun_body2", ["main", "sights"], (8.0, 2.125, 9.5)),
+            ("mag", "gun_body", ["mag"], (8.0, 2.125, 9.5)),
+            ("Lid", "mag", ["lid"], (6.6, 5.15, 13.25)),
+            ("Cap", "mag", ["cap"], (5.26386, 1.38886, 12.85)),
+            ("button", "mag", ["button"], (5.75, 1.87322, 15.85)),
+            ("hammer", "gun_body", ["hammer"], (8.95, 3.41004, 13.71817)),
+            ("lever", "gun_body", ["lever"], (8.0, 1.83804, 12.43938)),
+            ("barrel", "gun_body", ["forend", "stan_barrel"], (8.0, 1.87795, 11.74921)),
+            ("bolt", "gun_body", [], (8.0, 2.125, 9.5)),
+        ],
+        "mounts": {"grip": "barrel"},
+        "hands": {"right": (7.56, 1.42, 15.81), "left": (8.47, 1.62, 6.65)},
+        "arms": {"right": (0.0653, -0.4957, 0.866), "left": (0.5609, -0.1503, 0.8141)},
+        "muzzle": (8.07, 4.08, -1.97),
+        "sight": (8.0, 5.25, 12.25),
+        "eye_relief": 3.0,
+    },
 }
 
 # Props the animations move on bones that had no part ("@<name>" in a bone's parts): the rounds a reload carries in,
@@ -3910,6 +4004,8 @@ ZOOM = {
     # Slice 15E: two heavy guns carried at the hip, as the Thresher and the Seam Cutter, and a beam rifle (the owner's
     # zoom for the Minksy, 0.6, is a scope's; its iron sights narrow the view as the Spikedriver's).
     "maelstrom_gun": 0.95, "ermine_rifle": 0.85, "geode_cutter": 0.95,
+    # Slice 16A: a pistol, a burst rifle and a repeater (the Highball Rifle's).
+    "hush_pistol": 0.9, "salvo_rifle": 0.85, "highball_repeater": 0.75,
 }
 
 
@@ -4191,6 +4287,12 @@ SHOT_SOUNDS = {
     "maelstrom_gun": "item/gyrojet/fire.ogg",
     "ermine_rifle": "item/laser/fire_2.ogg",
     "geode_cutter": "item/beam/fire.ogg",
+    # Slice 16A: the shots the owner's data names: the bruiser's silenced shot (the Gallant Rifle's) for the Mokova, the
+    # iron rifle's (the Tumbler Rifle's) for the Kalaskah and the black powder shot (the Auger Shotgun's) for the
+    # Saketini Ironport.
+    "hush_pistol": "item/bruiser/silenced_fire.ogg",
+    "salvo_rifle": "item/iron_rifle/fire.ogg",
+    "highball_repeater": "item/blackpowder/fire.ogg",
 }
 SUBTITLES = {
     "fire": "Gun fires",
@@ -4379,8 +4481,8 @@ BURN_SECONDS = 4
 # guns/GunRenderer, as for the "hides_flash" attachments), and no barrel attachment fits them (JugcraftGuns.SILENCED).
 # Slice 15A's Gallant Rifle, which fires the owner's silenced shot, is the first: in CI's third-person screenshot of
 # 23 October 2026 its shot still showed a flash.
-# Slice 15C's Quill Rifle, the owner's Zilk 45 ("isSilenced"), is the second.
-SILENCED = ("gallant_rifle", "quill_rifle")
+# Slice 15C's Quill Rifle, the owner's Zilk 45 ("isSilenced"), is the second; slice 16A's Hush Pistol, the Mokova, the third.
+SILENCED = ("gallant_rifle", "quill_rifle", "hush_pistol")
 
 
 # ------------------------------------------------------------------ heavy bullets: knockback and armour piercing
@@ -4410,6 +4512,8 @@ PIERCING = {"vesper_rifle": 4.5, "onrush_smg": 3.0, "kreuzer_pistol": 1.0, "psal
             "hawker_rifle": 1.0, "quill_rifle": 1.5, "tumbler_rifle": 3.0,
             # Slice 15E: the Shard Culler's "armorPen" (4).
             "geode_cutter": 4.0,
+            # Slice 16A: the Saketini Ironport's (2).
+            "highball_repeater": 2.0,
             # The older guns follow-up: the owner's armorPen for the guns before slice 15 (the Caisson Pistol's on its arc).
             "patchwork_carbine": 2.0, "warden_pistol": 1.0, "riveter_smg": 1.0, "longhorn_rifle": 3.5,
             "sapper_revolver": 2.5, "garrison_rifle": 2.0, "thresher": 1.0, "kestrel_rifle": 3.0, "caisson_pistol": 1.0,
@@ -4440,8 +4544,8 @@ CARRY_SPEED = {"thresher": 0.85, "stoker": 0.8, "earthmover": 0.95, "borer": 0.8
 # Slice 15D: the guns that fire a burst to a pull, (rounds, rest): that many shots their interval apart, then a rest of
 # that many ticks more before the next pull fires (JugcraftGuns.BURSTS; the client fires the burst, the server's trigger
 # credit allows a burst each cycle, GunShots.spend). The owner's Lockewood fires bursts of three, resting five ticks
-# ("burstAmount" 3, "burstCooldown" 5): the Tumbler Rifle.
-BURSTS = {"tumbler_rifle": (3, 5)}
+# ("burstAmount" 3, "burstCooldown" 5): the Tumbler Rifle. Slice 16A's Kalaskah fires the same: the Salvo Rifle.
+BURSTS = {"tumbler_rifle": (3, 5), "salvo_rifle": (3, 5)}
 
 # Slice 15E: the guns loaded a shell at a time that load several rounds a step: each step of their reload (shellEach
 # ticks, one reload_loop of their animation) loads this many, the last step what is left (JugcraftGuns.LOAD_STEPS,
@@ -4821,12 +4925,44 @@ GEO_PARTS["minksy"] = {
     "anthralite_bayonet": "anthralite_bayonet", "diamond_bayonet": "diamond_bayonet",
     "netherite_bayonet": "netherite_bayonet"}
 GEO_PARTS["shard_culler"] = {"main": "gun_body", "seal": "seal", "scriptures": "scriptures", "core": "core"}
+# Slice 16A: the Mokova, the Kalaskah and the Saketini Ironport, from the owner's GeckoLib models. The Mokova is a body
+# (its sights on it), a slide (the bolt) and its magazines; its barrel attachments' bones hold nothing (it is silenced
+# along its barrel), so it takes only magazines. The Kalaskah's body is the owner's "bodyy", its empty "body" the
+# "no_sights", with the standard barrel and magazine of slice 15A's guns, and no standard stock. The Saketini Ironport's
+# body is its gun_body; its magazine, the lid on its top, the cap at its bottom and the button behind it are bones of
+# their own, as are its hammer and lever; its "barrel" is the forend the shot swings aside (named "forend" here, as the
+# barrel slot's attachments do not replace it), carrying the barrel, the grips and the bayonets.
+GEO_PARTS["mokova"] = {"main": "main", "bolt": "bolt", "stan_mag": "standard_mag", "ext_mag": "extended_mag",
+                       "speed_mag": "speed_mag"}
+GEO_PARTS["kalaskah"] = {
+    "main": "bodyy", "sights": "sights", "no_sights": "body", "bolt": "bolt", "stan_mag": "default_mag",
+    "ext_mag": "extended_mag", "speed_mag": "speed_mag", "stan_barrel": "standard_barrel", "ext_barrel": "extended_barrel",
+    "silencer": "silencer", "advanced_silencer": "advanced_silencer", "muzzle_brake": "muzzle_brake",
+    "light_stock": "light_stock", "heavy_stock": "weighted_stock", "wooden_stock": "wooden_stock",
+    "light_grip": "light_grip", "tact_grip": "vertical_grip", "iron_bayonet": "iron_bayonet",
+    "anthralite_bayonet": "anthralite_bayonet", "diamond_bayonet": "diamond_bayonet",
+    "netherite_bayonet": "netherite_bayonet"}
+GEO_PARTS["saketini_ironport"] = {
+    "main": "gun_body", "sights": "sights", "no_sights": "body", "mag": "mag", "lid": "Lid", "cap": "Cap",
+    "button": "button", "hammer": "hammer", "lever": "lever", "forend": "barrel", "stan_barrel": "standard_barrel",
+    "ext_barrel": "extended_barrel", "silencer": "silencer", "advanced_silencer": "advanced_silencer",
+    "muzzle_brake": "muzzle_brake", "light_stock": "light_stock", "heavy_stock": "weighted_stock",
+    "wooden_stock": "wooden_stock", "light_grip": "light_grip", "tact_grip": "vertical_grip",
+    "iron_bayonet": "iron_bayonet", "anthralite_bayonet": "anthralite_bayonet", "diamond_bayonet": "diamond_bayonet",
+    "netherite_bayonet": "netherite_bayonet"}
+# Bones the owner turned whose turn the built model keeps on the bone, its cubes left square to it (geo_part(),
+# build_geo()), where an animation turns the bone about another axis: GeckoLib adds the two turns and turns the bone by
+# their sum, so the turn must stay the bone's for the swing to be the owner's. Slice 16A: the Saketini Ironport's cap,
+# turned 45 degrees about z, which the shot flips open about x.
+GEO_KEPT_TURNS = {"saketini_ironport": ("Cap",)}
 GEO_OFFSETS = {"grandle_og": (0.00625, -8.15, -1.0), "mas_55": (0.0, -8.15, -0.8), "prush_gun": (-0.0095, -8.05, -1.25),
                "valora": (0.0125, -8.2, -0.75), "krauser": (-0.0095, -8.1, -0.1384),
                "soul_drummer": (-0.0095, -8.05, -0.2), "uppercut": (-0.0095, -8.5, -1.4),
                "mas_peddler": (0.0, -8.15, -0.8), "inertial": (-0.0095, -8.1, -1.0), "zilk_45": (0.0, -7.95, -0.75),
                "drill": (0.0, -8.0, -2.0), "drill_conversion": (0.0, -8.0, -2.0), "lockewood": (0.014, -8.2, -1.25),
-               "cyclone": (-0.0202, -8.7, -1.2), "minksy": (0.0, -8.0, 0.0), "shard_culler": (0.025, -7.0, 1.0)}
+               "cyclone": (-0.0202, -8.7, -1.2), "minksy": (0.0, -8.0, 0.0), "shard_culler": (0.025, -7.0, 1.0),
+               "mokova": (-0.0125, -8.25, -0.6), "kalaskah": (-0.0095, -8.1, -0.9),
+               "saketini_ironport": (0.0, -8.175, -1.5)}
 # The bones of a GeckoLib model that are another of the owner's guns' item-model parts, moved by (x, y, z) px: the
 # converter must give back those parts' elements, face for face (check_geo()).
 GEO_TWINS = {"grandle_og": {
@@ -4900,8 +5036,24 @@ GEO_TWINS.update({source: {bone: (f"{source}/{part}", (0, 0, 0)) for bone, part 
                "weighted_stock": "heavy_stock", "wooden_stock": "wooden_stock", "iron_bayonet": "iron_bayonet",
                "anthralite_bayonet": "anthralite_bayonet", "diamond_bayonet": "diamond_bayonet",
                "netherite_bayonet": "netherite_bayonet"}}.items()})
+# Slice 16A: the same for the Mokova and the Kalaskah, whose item-model parts the library has; the Saketini Ironport's
+# hammer and attachments are the Saketini's parts (slice 13B's Highball Rifle), its vertical grip too, in another order.
+GEO_TWINS.update({source: {bone: (part if "/" in part else f"{source}/{part}", (0, 0, 0)) for bone, part in twins.items()}
+                  for source, twins in {
+    "mokova": {"main": "main", "bolt": "bolt", "standard_mag": "stan_mag", "extended_mag": "ext_mag",
+               "speed_mag": "speed_mag"},
+    "kalaskah": {"bolt": "bolt", "vertical_grip": "tact_grip", "light_grip": "light_grip", "iron_bayonet": "iron_bayonet",
+                 "anthralite_bayonet": "anthralite_bayonet", "diamond_bayonet": "diamond_bayonet",
+                 "netherite_bayonet": "netherite_bayonet", "standard_barrel": "stan_barrel",
+                 "extended_barrel": "ext_barrel", "muzzle_brake": "muzzle_brake", "advanced_silencer": "advanced_silencer",
+                 "silencer": "silencer", "weighted_stock": "heavy_stock", "wooden_stock": "wooden_stock",
+                 "light_stock": "light_stock", "default_mag": "stan_mag", "extended_mag": "ext_mag", "speed_mag": "speed_mag"},
+    "saketini_ironport": {"hammer": "saketini/hammer", "iron_bayonet": "saketini/iron_bayonet",
+                          "anthralite_bayonet": "saketini/anthralite_bayonet", "diamond_bayonet": "saketini/diamond_bayonet",
+                          "netherite_bayonet": "saketini/netherite_bayonet", "muzzle_brake": "saketini/muzzle_brake",
+                          "advanced_silencer": "saketini/advanced_silencer", "silencer": "saketini/silencer"}}.items()})
 GEO_RELAID = ("mas_55", "prush_gun", "valora", "krauser", "soul_drummer", "uppercut", "mas_peddler", "inertial", "zilk_45",
-              "drill", "drill_conversion", "lockewood", "cyclone", "minksy", "shard_culler")
+              "drill", "drill_conversion", "lockewood", "cyclone", "minksy", "shard_culler", "saketini_ironport")
 
 
 def geo_model(source):
@@ -4911,13 +5063,13 @@ def geo_model(source):
 def geo_part(source, bone):
     """A bone of the owner's GeckoLib model as a part file: its cubes as elements, drawn from the model's texture. A
     bone the owner turned as a whole (slice 15C: the MAS Peddler's magazines, 135 degrees about the barrel) passes its
-    turn on to each of its cubes (bone_turn())."""
+    turn on to each of its cubes (bone_turn()), unless the built model keeps it on the bone (GEO_KEPT_TURNS)."""
     geo = geo_model(source)
     size_px = (geo["description"]["texture_width"], geo["description"]["texture_height"])
     data = next(b for b in geo["bones"] if b["name"] == bone)
     texture = f"scguns:animated/gun/{source}"
     elements = [geo_element(cube, GEO_OFFSETS[source], size_px, texture) for cube in data.get("cubes", [])]
-    if any(data.get("rotation", [0, 0, 0])):
+    if any(data.get("rotation", [0, 0, 0])) and bone not in GEO_KEPT_TURNS.get(source, ()):
         turn = geo_element({"origin": [0, 0, 0], "size": [0, 0, 0], "rotation": data["rotation"], "pivot": data["pivot"]},
                            GEO_OFFSETS[source], size_px, "")["rotation"]
         if any(e.get("rotation", {}).get("axis") not in (None, turn["axis"]) for e in elements) \
@@ -5736,10 +5888,14 @@ def build_geo(gun):
     layout = atlas_layout(gun)
     size_px = layout[0]
     bones = []
+    kept = GEO_KEPT_TURNS.get(GUNS[gun]["source"], ())
     for name, parent, parts, pivot in effective_bones(gun):
         bone = {"name": name, "pivot": geo_point(pivot)}
         if parent:
             bone["parent"] = parent
+        if name in kept:
+            # The owner's turn of the bone, its cubes square to it (geo_part()).
+            bone["rotation"] = next(b["rotation"] for b in geo_model(GUNS[gun]["source"])["bones"] if b["name"] == name)
         cubes = []
         for part in parts:
             if part.startswith("@"):
@@ -5830,6 +5986,12 @@ def same_corners(got, exp):
     return len(got) == len(exp) and all(any(close(p, q) and close(a, b) for q, b in exp) for p, a in got)
 
 
+def off_axis(point, axis):
+    """A turn's origin less its place along the turn's axis, which moves nothing (slice 16A: the Kalaskah turns its bolt
+    and barrels about z about points a pixel further back than its item-model parts do)."""
+    return [v for k, v in enumerate(point) if "xyz"[k] != axis]
+
+
 def check_geo():
     """Slice 14F: the converter run backwards on the owner's GeckoLib models (geo_element()) must give back, face for
     face, the item-model parts those models share with the owner's other guns (GEO_TWINS; corner for corner and turn
@@ -5851,8 +6013,9 @@ def check_geo():
                 turn = want.get("rotation") if want.get("rotation", {}).get("angle") else None
                 if not (close(got["from"], lo, 1e-4) and close(got["to"], hi, 1e-4)) or bool(turn) != ("rotation" in got) \
                         or (turn and (turn["axis"] != got["rotation"]["axis"] or abs(turn["angle"] - got["rotation"]["angle"]) > 1e-4
-                                      or not close([v + d for v, d in zip(turn.get("origin", [8, 8, 8]), shift)],
-                                                   got["rotation"]["origin"], 1e-4))):
+                                      or not close(off_axis([v + d for v, d in zip(turn.get("origin", [8, 8, 8]), shift)],
+                                                            turn["axis"]),
+                                                   off_axis(got["rotation"]["origin"], turn["axis"]), 1e-4))):
                     problems.append(f"{source}/{bone} element {i}: not where {part}'s stands, or turned otherwise")
                     continue
                 if set(got["faces"]) != set(want.get("faces", {})):

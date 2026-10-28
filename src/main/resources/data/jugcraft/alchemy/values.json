@@ -13812,6 +13812,11 @@
       "denominator": 1,
       "source": "fallback (balance pending)"
     },
+    "jugcraft:highball_repeater": {
+      "numerator": 1037,
+      "denominator": 1,
+      "source": "recipe jugcraft:highball_repeater"
+    },
     "jugcraft:highball_rifle": {
       "numerator": 16,
       "denominator": 1,
@@ -16421,6 +16426,11 @@
       "numerator": 1457,
       "denominator": 1,
       "source": "recipe jugcraft:howling_totem"
+    },
+    "jugcraft:hush_pistol": {
+      "numerator": 573,
+      "denominator": 1,
+      "source": "recipe jugcraft:hush_pistol"
     },
     "jugcraft:hv_chem_feeder": {
       "numerator": 2566,
@@ -34141,6 +34151,11 @@
       "numerator": 1,
       "denominator": 1,
       "source": "fallback (balance pending)"
+    },
+    "jugcraft:salvo_rifle": {
+      "numerator": 1101,
+      "denominator": 1,
+      "source": "recipe jugcraft:salvo_rifle"
     },
     "jugcraft:sampling_spoon": {
       "numerator": 132,

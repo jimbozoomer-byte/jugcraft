@@ -6814,6 +6814,9 @@ Guns,originals/Blocks/Guns/geo/item/gun/lockewood.geo.json,model JSON,78718,,,,a
 Guns,originals/Blocks/Guns/geo/item/gun/cyclone.geo.json,model JSON,22327,,,,e6de5491b29da4bd7d156ea7674276655997b4c216b39fd3f397bd7df75957d0
 Guns,originals/Blocks/Guns/geo/item/gun/minksy.geo.json,model JSON,32929,,,,44c1328030613ad3c7e2c99ab28a48c41f4828cff2ba0b8ad28579b12d0d17af
 Guns,originals/Blocks/Guns/geo/item/gun/shard_culler.geo.json,model JSON,30898,,,,16a99498e48e2c15c2141dd35f29e2b93e181c3d00297f4c9ee585342088a656
+Guns,originals/Blocks/Guns/geo/item/gun/mokova.geo.json,model JSON,22529,,,,03225b00e62416c250b1db7d71f56fe56d30b10185198671b2765d24d9905cc8
+Guns,originals/Blocks/Guns/geo/item/gun/kalaskah.geo.json,model JSON,68126,,,,bbc6c132ab0a4a4d4512b5fe5f896ed02c79915ee200f022d59dc3e5ae3facb2
+Guns,originals/Blocks/Guns/geo/item/gun/saketini_ironport.geo.json,model JSON,55187,,,,13e02b0dd118e6659c511e59e1ebb1f3dc58f0da94768435042624b4f21419f2
 Guns,originals/Blocks/Guns/mob_effect/lacerated.png,texture,398,20,20,,82f240ad3c80cfc364d9158ecf4c83b69bcbc4313f0133fb1c85cfa0dcc4b78b
 "General blocks, ores, metals, machinery and items",originals/Blocks/hardened tungsten textures.jpg,reference sheet,45683,957,704,,acd48c265f4fa5278b5e842efe49f9a4da4dc7d8dce95057a6743b4ba03beb84
 "General blocks, ores, metals, machinery and items",originals/Blocks/hashicon.png,texture,954,5,5,,df870a17cad7fef619af5d7966ff708391de19b6ab15ca03400b1a59aade9ced

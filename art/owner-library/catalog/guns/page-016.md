@@ -80,4 +80,7 @@ Paths preserve the supplied collection. Follow the [reuse guide](../../README.md
 | [Guns/geo/item/gun/cyclone.geo.json](../../originals/Blocks/Guns/geo/item/gun/cyclone.geo.json) | model JSON | — | — |
 | [Guns/geo/item/gun/minksy.geo.json](../../originals/Blocks/Guns/geo/item/gun/minksy.geo.json) | model JSON | — | — |
 | [Guns/geo/item/gun/shard_culler.geo.json](../../originals/Blocks/Guns/geo/item/gun/shard_culler.geo.json) | model JSON | — | — |
+| [Guns/geo/item/gun/mokova.geo.json](../../originals/Blocks/Guns/geo/item/gun/mokova.geo.json) | model JSON | — | — |
+| [Guns/geo/item/gun/kalaskah.geo.json](../../originals/Blocks/Guns/geo/item/gun/kalaskah.geo.json) | model JSON | — | — |
+| [Guns/geo/item/gun/saketini_ironport.geo.json](../../originals/Blocks/Guns/geo/item/gun/saketini_ironport.geo.json) | model JSON | — | — |
 | [Guns/mob_effect/lacerated.png](../../originals/Blocks/Guns/mob_effect/lacerated.png) | texture | 20×20 | — |
