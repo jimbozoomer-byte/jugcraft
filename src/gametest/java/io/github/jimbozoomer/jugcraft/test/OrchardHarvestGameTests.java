@@ -1,11 +1,15 @@
 package io.github.jimbozoomer.jugcraft.test;
 
 import io.github.jimbozoomer.jugcraft.agriculture.AppleBinBlock;
+import io.github.jimbozoomer.jugcraft.agriculture.AppleCrateBlock;
+import io.github.jimbozoomer.jugcraft.agriculture.FruitBinBlock;
 import io.github.jimbozoomer.jugcraft.agriculture.FruitStore;
 import io.github.jimbozoomer.jugcraft.agriculture.FruitStoreBlockEntity;
 import io.github.jimbozoomer.jugcraft.agriculture.JugcraftAgriculture;
 import io.github.jimbozoomer.jugcraft.agriculture.MultiDecorationBlock;
+import io.github.jimbozoomer.jugcraft.agriculture.OrchardHandcartBlock;
 import io.github.jimbozoomer.jugcraft.agriculture.PickingBagBlock;
+import io.github.jimbozoomer.jugcraft.agriculture.WindfallApplesBlock;
 import net.fabricmc.fabric.api.gametest.v1.GameTest;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -36,7 +40,9 @@ import net.minecraft.world.phys.Vec3;
  * where it is placed, facing its maker, climbable in every block, and breaks whole, dropping once; the Apple Bin takes
  * fruit from any of its blocks up to its capacity, showing its fill and the fruit on top on every block, refuses what
  * is not fruit, gives back the last stack to an empty hand, remembers what it holds and spills it when broken; the
- * Picking Bag hangs only on a wall, takes what fits, shows it, and comes off spilling its fruit when the wall goes.
+ * Picking Bag hangs only on a wall, takes what fits, shows it, and comes off spilling its fruit when the wall goes. Part 2:
+ * apple crates stack three to a block and drop each crate; windfall apples gather four to a block, are walked through,
+ * won't go on nothing and give back their apples when their ground goes; the Orchard Handcart holds two stacks and spills them.
  */
 public class OrchardHarvestGameTests {
 	private static Item item(String id) {
@@ -147,14 +153,14 @@ public class OrchardHarvestGameTests {
 		helper.assertTrue(store.count() == 64 && player.getMainHandItem().isEmpty(), "A stack of apples goes in: " + store.count());
 		for (int part = 0; part < 4; part++) {
 			BlockState there = level.getBlockState(bin.partPos(first, Direction.NORTH, part));
-			helper.assertTrue(there.getValue(AppleBinBlock.FILL) == 1 && there.getValue(FruitStore.KIND) == FruitStore.Kind.APPLE,
+			helper.assertTrue(there.getValue(FruitBinBlock.FILL) == 1 && there.getValue(FruitStore.KIND) == FruitStore.Kind.APPLE,
 					"Every block shows it a quarter full of apples: " + there);
 		}
 		// Pears on top: half full, pears showing.
 		player.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(item("pear"), 64));
 		use(helper, player, master, Direction.UP);
 		BlockState state = level.getBlockState(first);
-		helper.assertTrue(store.count() == 128 && state.getValue(AppleBinBlock.FILL) == 2 && state.getValue(FruitStore.KIND) == FruitStore.Kind.PEAR,
+		helper.assertTrue(store.count() == 128 && state.getValue(FruitBinBlock.FILL) == 2 && state.getValue(FruitStore.KIND) == FruitStore.Kind.PEAR,
 				"Pears go in on top: " + state);
 		// What is not fruit is not taken.
 		player.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(Items.STICK, 8));
@@ -171,7 +177,7 @@ public class OrchardHarvestGameTests {
 			use(helper, player, master, Direction.UP);
 			player.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(Items.APPLE, 64));
 		}
-		helper.assertTrue(store.count() == AppleBinBlock.CAPACITY && level.getBlockState(first).getValue(AppleBinBlock.FILL) == AppleBinBlock.STAGES,
+		helper.assertTrue(store.count() == AppleBinBlock.CAPACITY && level.getBlockState(first).getValue(FruitBinBlock.FILL) == FruitBinBlock.STAGES,
 				"Four stacks fill it: " + store.count());
 		use(helper, player, master, Direction.UP);
 		helper.assertTrue(store.count() == AppleBinBlock.CAPACITY && player.getMainHandItem().getCount() == 64, "Full, it takes no more");
@@ -221,6 +227,96 @@ public class OrchardHarvestGameTests {
 		helper.runAfterDelay(3, () -> {
 			helper.assertTrue(dropped(helper, item("picking_bag")) == 1 && dropped(helper, Items.APPLE) == 5,
 					"Without its wall it comes off, spilling its apples: " + dropped(helper, item("picking_bag")) + ", " + dropped(helper, Items.APPLE));
+			helper.succeed();
+		});
+	}
+
+	// ---------------------------------------------------------------- part 2
+
+	private static void useOn(GameTestHelper helper, ServerPlayer player, BlockPos pos, Direction side) {
+		player.getMainHandItem().useOn(new UseOnContext(player, InteractionHand.MAIN_HAND, hit(helper, pos, side)));
+	}
+
+	@GameTest(maxTicks = 40)
+	public void cratesStackThreeHigh(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		floor(helper);
+		BlockPos pos = new BlockPos(3, 2, 3);
+		ServerPlayer player = standing(helper, new BlockPos(3, 2, 1), new ItemStack(item("red_apple_crate"), 5));
+		useOn(helper, player, pos.below(), Direction.UP);
+		useOn(helper, player, pos, Direction.UP);
+		useOn(helper, player, pos, Direction.UP);
+		BlockState state = helper.getBlockState(pos);
+		BlockPos absolute = helper.absolutePos(pos);
+		helper.assertTrue(state.getValue(AppleCrateBlock.CRATES) == AppleCrateBlock.MAX && state.getValue(AppleCrateBlock.FACING) == Direction.NORTH
+				&& player.getMainHandItem().getCount() == 2, "Three crates stack in the block, facing the player: " + state);
+		helper.assertTrue(Math.abs(state.getShape(level, absolute).max(Direction.Axis.Y) - 3 * AppleCrateBlock.CRATE_HEIGHT / 16) < 1e-6,
+				"The stack's shape is three crates high");
+		// A fourth goes on top, in the block above.
+		useOn(helper, player, pos, Direction.UP);
+		helper.assertTrue(helper.getBlockState(pos.above()).is(block("red_apple_crate")) && helper.getBlockState(pos.above()).getValue(AppleCrateBlock.CRATES) == 1,
+				"A fourth crate starts a stack in the block above");
+		// Another kind doesn't join the stack.
+		player.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(item("golden_apple_crate")));
+		useOn(helper, player, pos.above(), Direction.UP);
+		helper.assertTrue(helper.getBlockState(pos.above()).getValue(AppleCrateBlock.CRATES) == 1, "A golden crate doesn't join a red stack");
+		level.destroyBlock(absolute, true);
+		helper.runAfterDelay(3, () -> {
+			helper.assertTrue(dropped(helper, item("red_apple_crate")) == 3, "Broken, the stack drops its three crates: " + dropped(helper, item("red_apple_crate")));
+			helper.succeed();
+		});
+	}
+
+	@GameTest(maxTicks = 40)
+	public void windfallApplesLieInTheGrass(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		floor(helper);
+		BlockPos pos = new BlockPos(3, 2, 3);
+		ServerPlayer player = standing(helper, new BlockPos(3, 2, 1), new ItemStack(item("windfall_apples"), 5));
+		useOn(helper, player, pos.below(), Direction.UP);
+		for (int i = 0; i < 4; i++) {
+			useOn(helper, player, pos, Direction.UP);
+		}
+		BlockState state = helper.getBlockState(pos);
+		BlockPos absolute = helper.absolutePos(pos);
+		helper.assertTrue(state.getValue(WindfallApplesBlock.APPLES) == WindfallApplesBlock.MAX && player.getMainHandItem().getCount() == 1,
+				"Four gather in a block, and a fifth won't go on them: " + state + ", " + player.getMainHandItem().getCount() + " left");
+		helper.assertTrue(state.getCollisionShape(level, absolute).isEmpty(), "They are walked through");
+		helper.setBlock(pos.below(), Blocks.AIR);
+		helper.assertBlockNotPresent(block("windfall_apples"), pos);
+		helper.runAfterDelay(3, () -> {
+			helper.assertTrue(dropped(helper, Items.APPLE) == 4, "Without their ground they come off, giving back four apples: " + dropped(helper, Items.APPLE));
+			helper.succeed();
+		});
+	}
+
+	@GameTest(maxTicks = 40)
+	public void theHandcartHoldsTwoStacks(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		floor(helper);
+		BlockPos master = new BlockPos(3, 2, 2);
+		ServerPlayer player = standing(helper, master.north(), new ItemStack(item("orchard_handcart")));
+		place(helper, player, master);
+		OrchardHandcartBlock cart = (OrchardHandcartBlock) block("orchard_handcart");
+		BlockPos first = helper.absolutePos(master);
+		assertWhole(helper, cart, first, 2, "orchard_handcart");
+		FruitStoreBlockEntity store = cart.store(level, first, level.getBlockState(first));
+		helper.assertTrue(store != null && store.capacity() == OrchardHandcartBlock.CAPACITY, "Its first block keeps its fruit, up to 128");
+		BlockPos back = new BlockPos(3, 2, 3);
+		for (int i = 0; i < 3; i++) {
+			player.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(Items.APPLE, 64));
+			use(helper, player, back, Direction.UP);
+		}
+		helper.assertTrue(store.count() == OrchardHandcartBlock.CAPACITY && player.getMainHandItem().getCount() == 64,
+				"Two stacks fill it, and a third isn't taken: " + store.count());
+		for (int part = 0; part < 2; part++) {
+			BlockState there = level.getBlockState(cart.partPos(first, Direction.NORTH, part));
+			helper.assertTrue(there.getValue(FruitBinBlock.FILL) == FruitBinBlock.STAGES, "Both its blocks show it full: " + there);
+		}
+		level.destroyBlock(cart.partPos(first, Direction.NORTH, 1), true);
+		helper.runAfterDelay(3, () -> {
+			helper.assertTrue(dropped(helper, item("orchard_handcart")) == 1 && dropped(helper, Items.APPLE) == OrchardHandcartBlock.CAPACITY,
+					"It drops once and spills its apples: " + dropped(helper, item("orchard_handcart")) + ", " + dropped(helper, Items.APPLE));
 			helper.succeed();
 		});
 	}

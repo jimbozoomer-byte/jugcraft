@@ -8,6 +8,13 @@ Every change to Jugcraft, newest first, grouped by pull request. For what each t
 
 No numbered release yet. Entries on feature branches remain proposed until their pull requests merge.
 
+### Unmerged: Orchard & Apple Harvest, part 2 (crates, windfalls and the handcart)
+- **Apple crates**: wooden field crates heaped with red, green or golden apples. Each has slatted sides and labelled end boards; stack three to a block.
+- **Windfall Apples**: one to four apples lying in the grass. Two apples make two; broken, they give the apples back.
+- **Orchard Handcart**: a two-wheeled handcart that holds 128 apples and pears, its load showing in four stages.
+- Record: [orchard-apple-harvest.md](docs/features/orchard-apple-harvest.md).
+- **Checked:** the record's Verification. Game tests and screenshots run in CI only; not played by hand.
+
 ### Unmerged: Orchard & Apple Harvest, part 1 (the ladder, the bin and the bag)
 - **Orchard Ladder**: a nine-foot three-legged orchard ladder (one across, three up, two deep). Its rails taper to a cap, with flat steps, and a pole is hinged at the top leaning back to the ground. Climb it like a ladder.
 - **Apple Bin**: a 1.2 m slatted bulk bin on a pallet (two by two). It holds 256 apples and pears, the heap inside rising through four stages and showing the fruit that went in last.

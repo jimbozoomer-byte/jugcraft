@@ -3032,6 +3032,7 @@ SHAPED += pumpkin_patch.EXTRA_RECIPES
 SHAPELESS += pumpkin_patch.EXTRA_SHAPELESS
 # Orchard & Apple Harvest, decor set 2 (tools/orchard_harvest.py).
 SHAPED += orchard_harvest.RECIPES
+SHAPELESS += orchard_harvest.SHAPELESS
 SHAPELESS += decor20.SHAPELESS
 
 # Kitchen and cooking expansion, slice 1: the Farmhouse Kitchen (tools/kitchen.py).

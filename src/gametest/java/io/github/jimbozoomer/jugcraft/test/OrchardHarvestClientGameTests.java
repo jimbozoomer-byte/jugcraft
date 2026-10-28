@@ -1,10 +1,12 @@
 package io.github.jimbozoomer.jugcraft.test;
 
-import io.github.jimbozoomer.jugcraft.agriculture.AppleBinBlock;
+import io.github.jimbozoomer.jugcraft.agriculture.AppleCrateBlock;
+import io.github.jimbozoomer.jugcraft.agriculture.FruitBinBlock;
 import io.github.jimbozoomer.jugcraft.agriculture.FruitStoreBlockEntity;
 import io.github.jimbozoomer.jugcraft.agriculture.JugcraftAgriculture;
 import io.github.jimbozoomer.jugcraft.agriculture.MultiDecorationBlock;
 import io.github.jimbozoomer.jugcraft.agriculture.PickingBagBlock;
+import io.github.jimbozoomer.jugcraft.agriculture.WindfallApplesBlock;
 import java.util.Locale;
 import net.fabricmc.fabric.api.client.gametest.v1.FabricClientGameTest;
 import net.fabricmc.fabric.api.client.gametest.v1.context.ClientGameTestContext;
@@ -23,9 +25,10 @@ import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 
 /**
  * Client game test for Orchard & Apple Harvest, part 1 (decor set 2): an apple tree with the Orchard Ladder against it,
- * an Apple Bin full of apples, another half full of pears, and a Picking Bag of apples hung on the trunk, built in a real
- * client and photographed from the front and the side by day (CI job {@code client}). The pictures go into
- * docs/features/orchard-apple-harvest.md.
+ * an Apple Bin full of apples, another half full of pears, and a Picking Bag of apples hung on the trunk; and part 2's
+ * stacks of red, green and golden apple crates, windfall apples under the tree and a laden Orchard Handcart; built in a
+ * real client and photographed from the front, the side and close by the crates, by day (CI job {@code client}). The
+ * pictures go into docs/features/orchard-apple-harvest.md.
  */
 public class OrchardHarvestClientGameTests implements FabricClientGameTest {
 	@Override
@@ -48,6 +51,7 @@ public class OrchardHarvestClientGameTests implements FabricClientGameTest {
 			singleplayer.getConnection().waitForChunksRender();
 			shoot(context, singleplayer, x + 6, y + 2, z + 12, 180, 15, "jugcraft_orchard_harvest");
 			shoot(context, singleplayer, x + 15, y + 3, z + 2, 90, 20, "jugcraft_orchard_harvest_side");
+			shoot(context, singleplayer, x + 6, y + 1, z + 12, 180, 20, "jugcraft_orchard_harvest_crates");
 		}
 	}
 
@@ -99,6 +103,20 @@ public class OrchardHarvestClientGameTests implements FabricClientGameTest {
 		prop(level, "apple_bin", origin.offset(10, 0, 4));
 		fill(level, origin.offset(1, 0, 4), new ItemStack(Items.APPLE, 64), 4);
 		fill(level, origin.offset(10, 0, 4), new ItemStack(JugcraftAgriculture.item("pear"), 64), 2);
+		// Part 2: stacks of crates in front, windfall apples under the tree and a laden handcart beside it.
+		String[] kinds = {"red", "green", "golden"};
+		for (int i = 0; i < kinds.length; i++) {
+			BlockState crate = JugcraftAgriculture.block(kinds[i] + "_apple_crate").defaultBlockState().setValue(AppleCrateBlock.FACING, Direction.SOUTH);
+			set(level, origin.offset(4 + i, 0, 8), crate.setValue(AppleCrateBlock.CRATES, 3 - i));
+			set(level, origin.offset(4 + i, 0, 9), crate.setValue(AppleCrateBlock.CRATES, 1 + i));
+		}
+		BlockState windfall = JugcraftAgriculture.block("windfall_apples").defaultBlockState();
+		int[][] fallen = {{4, -3, 2}, {5, 1, 4}, {7, 0, 1}, {8, -2, 3}, {4, 0, 4}};
+		for (int[] spot : fallen) {
+			set(level, trunk.offset(spot[0] - 6, 0, spot[1]), windfall.setValue(WindfallApplesBlock.APPLES, spot[2]));
+		}
+		prop(level, "orchard_handcart", origin.offset(13, 0, 7));
+		fill(level, origin.offset(13, 0, 7), new ItemStack(Items.APPLE, 64), 2);
 		// The picking bag on the trunk's east side, a few apples in it.
 		BlockPos bag = trunk.offset(1, 1, 0);
 		set(level, bag, JugcraftAgriculture.block("picking_bag").defaultBlockState().setValue(PickingBagBlock.FACING, Direction.EAST));
@@ -108,7 +126,7 @@ public class OrchardHarvestClientGameTests implements FabricClientGameTest {
 	}
 
 	private static void fill(ServerLevel level, BlockPos master, ItemStack stack, int stacks) {
-		AppleBinBlock bin = (AppleBinBlock) JugcraftAgriculture.block("apple_bin");
+		FruitBinBlock bin = (FruitBinBlock) level.getBlockState(master).getBlock();
 		FruitStoreBlockEntity store = bin.store(level, master, level.getBlockState(master));
 		for (int i = 0; store != null && i < stacks; i++) {
 			store.add(stack.copy());

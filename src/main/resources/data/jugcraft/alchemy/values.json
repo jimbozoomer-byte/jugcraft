@@ -12797,6 +12797,11 @@
       "denominator": 1,
       "source": "fallback (balance pending)"
     },
+    "jugcraft:golden_apple_crate": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
     "jugcraft:golden_knife": {
       "numerator": 2052,
       "denominator": 1,
@@ -12936,6 +12941,11 @@
       "numerator": 6515,
       "denominator": 2,
       "source": "recipe jugcraft:green_alchemical_bag"
+    },
+    "jugcraft:green_apple_crate": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
     },
     "jugcraft:green_plastic": {
       "numerator": 5,
@@ -31047,6 +31057,11 @@
       "denominator": 1,
       "source": "recipe jugcraft:orange_seeds"
     },
+    "jugcraft:orchard_handcart": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
     "jugcraft:orchard_ladder": {
       "numerator": 1,
       "denominator": 1,
@@ -33321,6 +33336,11 @@
       "numerator": 6515,
       "denominator": 2,
       "source": "recipe jugcraft:red_alchemical_bag"
+    },
+    "jugcraft:red_apple_crate": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
     },
     "jugcraft:red_bean_mooncake": {
       "numerator": 247,
@@ -38866,6 +38886,11 @@
       "numerator": 9907,
       "denominator": 6,
       "source": "recipe jugcraft:wind_turbine"
+    },
+    "jugcraft:windfall_apples": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
     },
     "jugcraft:windlass_musket": {
       "numerator": 2501,

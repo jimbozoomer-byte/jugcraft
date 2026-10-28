@@ -14688,9 +14688,10 @@ def check_pumpkin_patch():
 
 
 def check_orchard_harvest():
-    """Orchard & Apple Harvest (tools/orchard_harvest.py, docs/features/orchard-apple-harvest.md): the ladder's and the
-    bin's Java blocks are the table's size; the bin's and the bag's capacities and stages are the table's; the ladder is
-    climbable; the fruit they take is the Cider Press's; and the full message has its text."""
+    """Orchard & Apple Harvest (tools/orchard_harvest.py, docs/features/orchard-apple-harvest.md): the ladder's, the
+    bin's and the cart's Java blocks are the table's size; the bin's, cart's and bag's capacities and stages, the crates'
+    and windfall apples' most to a block and a crate's height are the table's; the ladder is climbable; the fruit they
+    take is the Cider Press's; and the full message has its text."""
     import orchard_harvest as oh
     agri = JAVA_ROOT / "agriculture"
     for cls, spec in (("OrchardLadderBlock", oh.LADDER), ("AppleBinBlock", oh.BIN)):
@@ -14698,11 +14699,26 @@ def check_orchard_harvest():
         w, h, d = spec["size"]
         if f"box({w}, {h}, {d})" not in java:
             err(f"{cls} is not {w} x {h} x {d} blocks as tools/orchard_harvest.py says")
-    for cls, spec in (("AppleBinBlock", oh.BIN), ("PickingBagBlock", oh.BAG)):
+    for cls, spec in (("OrchardHandcartBlock", oh.CART),):
         java = (agri / f"{cls}.java").read_text(encoding="utf-8") if (agri / f"{cls}.java").is_file() else ""
-        for name, value in (("CAPACITY", spec["capacity"]), ("STAGES", spec["stages"])):
-            if f"int {name} = {value};" not in java:
-                err(f"{cls}.{name} is not tools/orchard_harvest.py's {value}")
+        w, h, d = spec["size"]
+        if f"box({w}, {h}, {d})" not in java:
+            err(f"{cls} is not {w} x {h} x {d} blocks as tools/orchard_harvest.py says")
+    for cls, spec, staged in (("AppleBinBlock", oh.BIN, "FruitBinBlock"), ("OrchardHandcartBlock", oh.CART, "FruitBinBlock"),
+                              ("PickingBagBlock", oh.BAG, "PickingBagBlock")):
+        java = (agri / f"{cls}.java").read_text(encoding="utf-8") if (agri / f"{cls}.java").is_file() else ""
+        stages = (agri / f"{staged}.java").read_text(encoding="utf-8") if (agri / f"{staged}.java").is_file() else ""
+        if f"int CAPACITY = {spec['capacity']};" not in java:
+            err(f"{cls}.CAPACITY is not tools/orchard_harvest.py's {spec['capacity']}")
+        if f"int STAGES = {spec['stages']};" not in stages:
+            err(f"{staged}.STAGES is not tools/orchard_harvest.py's {spec['stages']} (for {cls})")
+    for cls, name, value in (("AppleCrateBlock", "MAX", oh.CRATE["max"]), ("WindfallApplesBlock", "MAX", oh.WINDFALL["max"])):
+        java = (agri / f"{cls}.java").read_text(encoding="utf-8") if (agri / f"{cls}.java").is_file() else ""
+        if f"int {name} = {value};" not in java:
+            err(f"{cls}.{name} is not tools/orchard_harvest.py's {value}")
+    crate = (agri / "AppleCrateBlock.java").read_text(encoding="utf-8") if (agri / "AppleCrateBlock.java").is_file() else ""
+    if f"CRATE_HEIGHT = {oh.CRATE['height']};" not in crate:
+        err(f"AppleCrateBlock.CRATE_HEIGHT is not tools/orchard_harvest.py CRATE's {oh.CRATE['height']}")
     store = (agri / "FruitStore.java").read_text(encoding="utf-8") if (agri / "FruitStore.java").is_file() else ""
     if "FRUIT = CiderPressBlock.APPLES" not in store or oh.FRUIT_TAG != "jugcraft:cider_apples":
         err("FruitStore.FRUIT is not the Cider Press's fruit (tools/orchard_harvest.py FRUIT_TAG)")

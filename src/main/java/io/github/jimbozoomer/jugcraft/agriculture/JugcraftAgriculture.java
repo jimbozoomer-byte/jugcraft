@@ -2757,8 +2757,9 @@ public final class JugcraftAgriculture {
 	}
 
 	/**
-	 * Orchard & Apple Harvest (decor set 2; tools/orchard_harvest.py), part 1: the Orchard Ladder, the Apple Bin and the
-	 * Picking Bag, the bin and the bag sharing one block entity for the fruit they hold.
+	 * Orchard & Apple Harvest (decor set 2; tools/orchard_harvest.py): part 1's Orchard Ladder, Apple Bin and Picking Bag,
+	 * and part 2's Orchard Handcart, apple crates and windfall apples; the bin, the bag and the cart share one block entity
+	 * for the fruit they hold.
 	 */
 	private static void registerOrchardHarvest() {
 		Block ladder = registerBlock("orchard_ladder", OrchardLadderBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.WOOD)
@@ -2766,9 +2767,18 @@ public final class JugcraftAgriculture {
 		Block bin = registerBlock("apple_bin", AppleBinBlock::new, displayProperties());
 		Block bag = registerBlock("picking_bag", PickingBagBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.WOOL).strength(0.8F)
 				.sound(SoundType.WOOL).noOcclusion().ignitedByLava().pushReaction(PushReaction.POPPED));
+		Block cart = registerBlock("orchard_handcart", OrchardHandcartBlock::new, displayProperties());
 		FRUIT_STORE_ENTITY = Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, Jugcraft.id("fruit_store"),
-				FabricBlockEntityTypeBuilder.create(FruitStoreBlockEntity::new, bin, bag).build());
-		for (Block block : new Block[] {ladder, bin, bag}) {
+				FabricBlockEntityTypeBuilder.create(FruitStoreBlockEntity::new, bin, bag, cart).build());
+		List<Block> gear = new ArrayList<>(List.of(ladder, bin, bag, cart));
+		// Part 2: the apple crates and the windfall apples.
+		for (String kind : new String[] {"red", "green", "golden"}) {
+			gear.add(registerBlock(kind + "_apple_crate", AppleCrateBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.WOOD)
+					.strength(1.0F).sound(SoundType.WOOD).noOcclusion().ignitedByLava().pushReaction(PushReaction.POPPED)));
+		}
+		gear.add(registerBlock("windfall_apples", WindfallApplesBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_RED)
+				.instabreak().sound(SoundType.GRASS).noCollision().noOcclusion().pushReaction(PushReaction.POPPED)));
+		for (Block block : gear) {
 			registerItem(BuiltInRegistries.BLOCK.getKey(block).getPath(), props -> new BlockItem(block, props),
 					new Item.Properties().useBlockDescriptionPrefix(), BUILDING_TAB);
 		}

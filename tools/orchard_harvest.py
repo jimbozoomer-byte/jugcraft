@@ -1,6 +1,7 @@
 """Orchard & Apple Harvest, decor set 2 (docs/features/orchard-apple-harvest.md): the gear of an apple harvest, to stand
-beside the Cider Press (tools/agriculture.py CIDER). Part 1: the Orchard Ladder, the Apple Bin and the Picking Bag. The
-numbers here are what agriculture/OrchardLadderBlock, AppleBinBlock, PickingBagBlock and FruitStoreBlockEntity use;
+beside the Cider Press (tools/agriculture.py CIDER). Part 1: the Orchard Ladder, the Apple Bin and the Picking Bag. Part
+2: apple crates, windfall apples and the Orchard Handcart. The numbers here are what agriculture/OrchardLadderBlock,
+AppleBinBlock, PickingBagBlock, FruitStoreBlockEntity, AppleCrateBlock, WindfallApplesBlock and OrchardHandcartBlock use;
 tools/check_mod_data.py compares them. tools/orchard_harvest_data.py draws them and writes their files.
 
 Each is real-life sized (docs/ART_DIRECTION.md). A prop of several blocks (agriculture/MultiDecorationBlock) is `size`
@@ -47,5 +48,42 @@ RECIPES = [
 ]
 
 
+# Part 2. Apple crates: old wooden field crates of apples, 50 by 37 cm and 30 cm deep (8 by 6 by 4.75 pixels), up to
+# `max` stacked in a block (use another crate of the same kind on it to stack it). Each kind holds a variety, its apples
+# heaped flush with the rim and its name on a paper label on each end board; the dye in its recipe picks it.
+CRATES = {"red": {"block": "red_apple_crate", "display": "Red Apple Crate", "dye": "minecraft:red_dye"},
+          "green": {"block": "green_apple_crate", "display": "Green Apple Crate", "dye": "minecraft:lime_dye"},
+          "golden": {"block": "golden_apple_crate", "display": "Golden Apple Crate", "dye": "minecraft:yellow_dye"}}
+CRATE = {"max": 3, "box": (4.0, 5.0, 12.0, 11.0), "height": 4.75}
+# Windfall apples: one to `max` apples fallen on the ground (use another to add one), at fixed places a block, the block
+# placed at one of four turns at random. Two apples make two windfall apples; broken, they give back their apples, one
+# for each (no recipe turns them back, so no recipe loop).
+WINDFALL = {"block": "windfall_apples", "display": "Windfall Apples", "max": 4,
+            "spots": [(5.0, 5.0), (10.0, 9.0), (5.5, 11.0), (11.0, 3.5)], "size": 2.0}
+# The Orchard Handcart: a two-wheeled wooden handcart, its box 75 cm by 1 m on spoked wheels 62 cm across, two handles
+# forward and a rest under them. One block across, one up, two deep (the handles towards the placer). It holds up to
+# `capacity` fruit (two stacks) as the bin does, the load rising through `stages`.
+CART = {"block": "orchard_handcart", "display": "Orchard Handcart", "size": (1, 1, 2), "capacity": 128, "stages": 4,
+        "box": (2.0, 6.5, 14.0, 14.0, 11.5, 30.0), "wheel": {"r": 5.0, "axle": (5.25, 22.0)}}
+
+RECIPES += [
+    {"id": spec["block"], "pattern": ["ADA", "SPS"], "key": {"A": "minecraft:apple", "D": spec["dye"], "S": "minecraft:stick",
+                                                              "P": "#minecraft:planks"},
+     "result": spec["block"], "count": 1, "category": "building"} for spec in CRATES.values()
+] + [
+    {"id": "orchard_handcart", "pattern": ["S  ", "PPP", "W W"], "key": {"S": "minecraft:stick", "P": "#minecraft:planks",
+                                                                        "W": "minecraft:iron_ingot"},
+     "result": "orchard_handcart", "count": 1, "category": "building"},
+]
+SHAPELESS = [
+    {"id": "windfall_apples", "inputs": ["minecraft:apple", "minecraft:apple"], "result": "windfall_apples", "count": 2,
+     "category": "building"},
+]
+
+
 def blocks():
-    return [LADDER["block"], BIN["block"], BAG["block"]]
+    return [LADDER["block"], BIN["block"], BAG["block"]] + part2_blocks()
+
+
+def part2_blocks():
+    return [spec["block"] for spec in CRATES.values()] + [WINDFALL["block"], CART["block"]]

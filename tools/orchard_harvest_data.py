@@ -32,7 +32,13 @@ rid = ppd.rid
 CANVAS = pal("8a7a58", "a2916a", "b8a67c", "cbb98e", "dccaa0")
 # The fruit in a heap, darkest first: red apples, gold-green pears; the stalk a dark brown.
 FRUIT = {"apple": pal("4a1210", "741d17", "9c2a1e", "bf3d26", "d9623a"),
-         "pear": pal("3e4214", "6b7a24", "9aa636", "bcc24e", "dcd978")}
+         "pear": pal("3e4214", "6b7a24", "9aa636", "bcc24e", "dcd978"),
+         # Part 2's crates: red, green (a Granny Smith's) and golden (a Golden Delicious's) apples.
+         "red": pal("4a1210", "741d17", "9c2a1e", "bf3d26", "d9623a"),
+         "green": pal("2c4a14", "4a7020", "6a9a2c", "8cbc40", "b0d862"),
+         "golden": pal("6a5214", "967820", "c4a032", "dcbe4a", "eed878")}
+# A crate's paper label: cream paper with a band of the variety's own colour and its fruit in the middle.
+PAPER = pal("b8ab88", "d8ccaa", "ece2c4")
 STALK = pal("2e2014", "4a3420")
 
 
@@ -213,10 +219,123 @@ def picking_bag():
     return sc
 
 
+# ---------------------------------------------------------------- part 2: apple crates
+
+def end_board(kind):
+    """A crate's end board seen from outside: the wood's boards, a dark hand-hold slot across its top, and under it the
+    paper label (cream, a band of the variety's colour along its top and bottom, its apple in the middle)."""
+    wood = planks(WOOD, board=2, nails=False)
+    tones = FRUIT[kind]
+
+    def paint(p):
+        wood(p)
+        for x in range(1, p.w - 1):
+            p.put(x, 0, shade(WOOD, 0))
+        for y in range(1, p.h):
+            for x in range(p.w):
+                if 0 < x < p.w - 1:
+                    band = y in (1, p.h - 1)
+                    p.put(x, y, shade(tones, 2) if band else shade(PAPER, 1))
+        cx, cy = p.w // 2, (p.h + 1) // 2
+        if 0 < cy < p.h - 1:
+            p.put(cx, cy, shade(tones, 3))
+            if cx - 1 > 0:
+                p.put(cx - 1, cy, shade(tones, 4))
+    paint.tag = repr(("end_board", kind))
+    return paint
+
+
+def crate(kind):
+    """A stack of one to three apple crates of `kind`, facing north (long side across x): four corner posts, two slats a
+    side with a gap between, solid end boards (each labelled outside), a floor, and the apples heaped flush with the rim."""
+    spec = oh.CRATES[kind]
+    sc = Sculpt(spec["block"], 2210, 64)
+    x0, z0, x1, z1 = oh.CRATE["box"]
+    h = oh.CRATE["height"]
+    t = 0.75
+    one = []
+    for x, z in ((x0, z0), (x1 - t, z0), (x0, z1 - t), (x1 - t, z1 - t)):
+        one.append(panel(sc, "post", lengthwise(WOOD), (x, 0.0, z), (x + t, h, z + t)))
+    for ya, yb in ((0.25, 2.0), (2.75, 4.5)):
+        one.append(panel(sc, "slat", planks(WOOD, board=2, nails=True), (x0 + t, ya, z0), (x1 - t, yb, z0 + 0.5)))
+        one.append(panel(sc, "slat", planks(WOOD, board=2, nails=True), (x0 + t, ya, z1 - 0.5), (x1 - t, yb, z1)))
+    one.append(panel(sc, "end", planks(WOOD, board=2, nails=False), (x0, 0.0, z0 + t), (x0 + t, h, z1 - t), west=end_board(kind)))
+    one.append(panel(sc, "end", planks(WOOD, board=2, nails=False), (x1 - t, 0.0, z0 + t), (x1, h, z1 - t), east=end_board(kind)))
+    one.append(panel(sc, "floor", planks(WOOD, board=3, nails=False), (x0 + t, 0.0, z0 + 0.5), (x1 - t, 0.5, z1 - 0.5)))
+    one.append(panel(sc, f"heap_{kind}", heap(kind), (x0 + t + 0.05, 0.5, z0 + 0.55), (x1 - t - 0.05, h - 0.25, z1 - 0.55),
+                     sides=("north", "south", "east", "west", "up")))
+    for n in range(1, oh.CRATE["max"] + 1):
+        sc.models[f"crates_{n}"] = [e for k in range(n) for e in ppd.shifted(one, 0.0, k * h, 0.0)]
+    return sc
+
+
+# ---------------------------------------------------------------- part 2: windfall apples
+
+def apple_side():
+    """An apple's side two texels square: lit at its top left, shaded at its bottom right."""
+    def paint(p):
+        tones = FRUIT["apple"]
+        for y in range(p.h):
+            for x in range(p.w):
+                p.put(x, y, shade(tones, 4 if (x, y) == (0, 0) else 2 if (x, y) == (p.w - 1, p.h - 1) else 3))
+    paint.tag = repr(("apple_side",))
+    return paint
+
+
+def windfall():
+    """One to four windfall apples, each two pixels across with its stalk, lying at fixed places."""
+    spec = oh.WINDFALL
+    sc = Sculpt(spec["block"], 2211, 16)
+    d = spec["size"]
+    apples = []
+    for x, z in spec["spots"]:
+        apples.append([panel(sc, "apple", apple_side(), (x, 0.0, z), (x + d, d, z + d)),
+                       panel(sc, "stalk", flat(STALK), (x + 0.75, d, z + 0.75), (x + 1.25, d + 0.75, z + 1.25))])
+    for n in range(1, spec["max"] + 1):
+        sc.models[f"apples_{n}"] = [e for apple in apples[:n] for e in apple]
+    return sc
+
+
+# ---------------------------------------------------------------- part 2: the Orchard Handcart
+
+def handcart():
+    """The Orchard Handcart, facing north (its handles towards the placer): a plank box (walls round a floor) on two
+    long side beams that run forward as the handles, grips wrapped at their ends, a rest under them, an iron axle under
+    the box and a spoked wheel either side; its load (`heaps`, by stage and fruit) drawn separately."""
+    spec = oh.CART
+    sc = Sculpt(spec["block"], 2212, 128)
+    x0, y0, z0, x1, y1, z1 = spec["box"]
+    r = spec["wheel"]["r"]
+    cy, cz = spec["wheel"]["axle"]
+    el = []
+    for x in (3.0, 12.0):
+        el.append(panel(sc, "beam", lengthwise(WOOD), (x, y0 - 1.0, 1.5), (x + 1.0, y0, z1)))
+        el.append(panel(sc, "grip", ppd.wrapped(), (x - 0.15, y0 - 1.15, 0.75), (x + 1.15, y0 + 0.15, 4.0)))
+        el.append(panel(sc, "rest", lengthwise(WOOD), (x + 0.1, 0.0, 6.5), (x + 0.9, y0 - 1.0, 7.5)))
+    el.append(panel(sc, "axle", flat(IRON), (1.5, cy - 0.5, cz - 0.5), (14.5, cy + 0.5, cz + 0.5)))
+    el += ppd.walls(sc, "box", planks(WOOD, board=2, nails=True), x0, z0, x1, z1, 0.75, y0, y1)
+    el.append(panel(sc, "floor", planks(WOOD, board=3, nails=False), (x0 + 0.75, y0, z0 + 0.75), (x1 - 0.75, y0 + 0.5, z1 - 0.75)))
+    el += ppd.wheel(sc, "wheel", cy, cz, r, 0.25, 1.5)
+    el += ppd.wheel(sc, "wheel", cy, cz, r, 14.5, 15.75)
+    sc.models["whole"] = el
+    for fruit in oh.FRUITS:
+        for stage in range(1, spec["stages"] + 1):
+            top_y = y0 + 0.5 + stage * (y1 - 0.25 - (y0 + 0.5)) / spec["stages"]
+            boxes = [panel(sc, f"heap_{fruit}", heap(fruit), (x0 + 0.8, y0 + 0.5, z0 + 0.8), (x1 - 0.8, top_y, z1 - 0.8),
+                           sides=("north", "south", "east", "west", "up"))]
+            if stage == spec["stages"]:
+                boxes.append(panel(sc, f"heap_{fruit}", heap(fruit), (x0 + 3.0, top_y, z0 + 3.0), (x1 - 3.0, top_y + 1.5, z1 - 3.0),
+                                   sides=("north", "south", "east", "west", "up")))
+            sc.models[f"heap_{fruit}_{stage}"] = boxes
+    return sc
+
+
 # ---------------------------------------------------------------- building and files
 
 _built = {}
-BUILDERS = {"orchard_ladder": (ladder, 64), "apple_bin": (apple_bin, 128), "picking_bag": (picking_bag, 64)}
+BUILDERS = {"orchard_ladder": (ladder, 64), "apple_bin": (apple_bin, 128), "picking_bag": (picking_bag, 64),
+            "windfall_apples": (windfall, 16), "orchard_handcart": (handcart, 128)}
+BUILDERS.update({spec["block"]: ((lambda kind: lambda: crate(kind))(kind), 64) for kind, spec in oh.CRATES.items()})
 
 
 def build(block):
@@ -308,11 +427,87 @@ def assets(root, write, lang):
     write(items / f"{block}.json", fa.model(block, sc.models["whole"], DISPLAY))
     write(root / "items" / f"{block}.json", {"model": {"type": "minecraft:model", "model": rid(f"item/{block}")}})
     lang[f"message.{MOD}.fruit_store.full"] = "It's full"
+    part2_assets(root, write, lang)
+
+
+SMALL_DISPLAY = {"gui": {"rotation": [25, 225, 0], "translation": [0, 2, 0], "scale": [1.1, 1.1, 1.1]},
+                 "ground": {"rotation": [0, 0, 0], "translation": [0, 3, 0], "scale": [0.6, 0.6, 0.6]},
+                 "fixed": {"rotation": [0, 0, 0], "translation": [0, 2, 0], "scale": [1.0, 1.0, 1.0]},
+                 "thirdperson_righthand": {"rotation": [0, 45, 0], "translation": [0, 3, 1], "scale": [0.6, 0.6, 0.6]},
+                 "firstperson_righthand": {"rotation": [0, 45, 0], "translation": [0, 3, 0], "scale": [0.6, 0.6, 0.6]}}
+
+
+def part2_assets(root, write, lang):
+    """Part 2's files: each crate kind's stacks of one to three (turned by facing), the windfall apples (one to four, at
+    four random turns), and the handcart cut into its blocks with its load by stage and fruit."""
+    models = root / "models" / "block"
+    states = root / "blockstates"
+    items = root / "models" / "item"
+    for kind, spec in oh.CRATES.items():
+        block = spec["block"]
+        lang[f"block.{MOD}.{block}"] = spec["display"]
+        sc = build(block)
+        for n in range(1, oh.CRATE["max"] + 1):
+            write(models / f"{block}_{n}.json", fa.model(block, sc.models[f"crates_{n}"]))
+        write(states / f"{block}.json", {"variants": {
+            f"crates={n},facing={f}": {"model": rid(f"block/{block}_{n}"), **({"y": FACINGS[f]} if FACINGS[f] else {})}
+            for f in FACINGS for n in range(1, oh.CRATE["max"] + 1)}})
+        write(items / f"{block}.json", fa.model(block, sc.models["crates_2"], DISPLAY))
+        write(root / "items" / f"{block}.json", {"model": {"type": "minecraft:model", "model": rid(f"item/{block}")}})
+
+    spec = oh.WINDFALL
+    block = spec["block"]
+    lang[f"block.{MOD}.{block}"] = spec["display"]
+    sc = build(block)
+    for n in range(1, spec["max"] + 1):
+        write(models / f"{block}_{n}.json", fa.model(block, sc.models[f"apples_{n}"]))
+    write(states / f"{block}.json", {"variants": {
+        f"apples={n}": [{"model": rid(f"block/{block}_{n}"), **({"y": y} if y else {})} for y in (0, 90, 180, 270)]
+        for n in range(1, spec["max"] + 1)}})
+    write(items / f"{block}.json", fa.model(block, sc.models["apples_3"], SMALL_DISPLAY))
+    write(root / "items" / f"{block}.json", {"model": {"type": "minecraft:model", "model": rid(f"item/{block}")}})
+
+    spec = oh.CART
+    block = spec["block"]
+    lang[f"block.{MOD}.{block}"] = spec["display"]
+    sc = build(block)
+    n = len(d17d.cells(spec["size"]))
+    for part, elements in enumerate(ppd.cut(sc.models["whole"], spec["size"])):
+        write(models / f"{block}_{part}.json", fa.model(block, elements))
+    for fruit in oh.FRUITS:
+        for stage in range(1, spec["stages"] + 1):
+            for part, elements in enumerate(ppd.cut(sc.models["whole"] + sc.models[f"heap_{fruit}_{stage}"], spec["size"])):
+                write(models / f"{block}_{part}_{fruit}_{stage}.json", fa.model(block, elements))
+    variants = {}
+    for f in FACINGS:
+        turn = {"y": FACINGS[f]} if FACINGS[f] else {}
+        for fruit in oh.FRUITS:
+            for stage in range(spec["stages"] + 1):
+                for p in range(n):
+                    model = f"{block}_{p}" if stage == 0 else f"{block}_{p}_{fruit}_{stage}"
+                    for lit in ("false", "true"):
+                        variants[f"facing={f},fill={stage},fruit={fruit},lit={lit},part={p}"] = {"model": rid(f"block/{model}"), **turn}
+    write(states / f"{block}.json", {"variants": variants})
+    write(items / f"{block}.json", fa.model(block, item_model(block, sc.models["whole"] + sc.models[f"heap_apple_{spec['stages'] - 1}"],
+                                                             spec["size"], 0.5), DISPLAY))
+    write(root / "items" / f"{block}.json", {"model": {"type": "minecraft:model", "model": rid(f"item/{block}")}})
+
+
+def counted_drop(block, prop, most, item=None):
+    """A block that drops `item` (itself by default) once for each of its `prop` (1 to `most`), as a sea pickle does."""
+    return {"type": "minecraft:block", "pools": [{
+        "condition": {"type": "minecraft:survives_explosion"},
+        "entries": [{"type": "minecraft:item", "name": rid(item or block), "modifier": [
+            {"type": "minecraft:set_count", "count": n, "add": False,
+             "condition": {"type": "minecraft:match_block", "blocks": rid(block), "state": {prop: str(n)}}}
+            for n in range(2, most + 1)]}],
+        "rolls": 1}], "random_sequence": rid(f"blocks/{block}")}
 
 
 def loot(out, write):
-    """The ladder and the bin drop once, from their first block; the bag drops itself."""
-    for block in (oh.LADDER["block"], oh.BIN["block"]):
+    """The ladder, the bin and the cart drop once, from their first block; the bag drops itself; a stack of crates drops
+    each of its crates, and windfall apples give back an apple for each."""
+    for block in (oh.LADDER["block"], oh.BIN["block"], oh.CART["block"]):
         write(out / f"{block}.json", {"type": "minecraft:block", "pools": [{
             "condition": {"type": "minecraft:all_of", "terms": [{"type": "minecraft:survives_explosion"},
                                                                 {"type": "minecraft:match_block", "blocks": rid(block), "state": {"part": "0"}}]},
@@ -321,11 +516,15 @@ def loot(out, write):
     write(out / f"{block}.json", {"type": "minecraft:block", "pools": [{
         "condition": {"type": "minecraft:survives_explosion"}, "entries": [{"type": "minecraft:item", "name": rid(block)}], "rolls": 1}],
         "random_sequence": rid(f"blocks/{block}")})
+    for spec in oh.CRATES.values():
+        write(out / f"{spec['block']}.json", counted_drop(spec["block"], "crates", oh.CRATE["max"]))
+    write(out / f"{oh.WINDFALL['block']}.json", counted_drop(oh.WINDFALL["block"], "apples", oh.WINDFALL["max"], "minecraft:apple"))
 
 
 def tags(tags):
     for block in oh.blocks():
-        tags.add("block", "minecraft:mineable/axe", rid(block))
+        if block != oh.WINDFALL["block"]:
+            tags.add("block", "minecraft:mineable/axe", rid(block))
     tags.add("block", "minecraft:climbable", rid(oh.LADDER["block"]))
 
 
