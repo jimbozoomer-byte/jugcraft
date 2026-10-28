@@ -40,6 +40,7 @@ import io.github.jimbozoomer.jugcraft.concordance.worker.Pacts;
 import io.github.jimbozoomer.jugcraft.concordance.worker.Status;
 import io.github.jimbozoomer.jugcraft.config.JugcraftConfig;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
 import java.util.UUID;
@@ -50,6 +51,7 @@ import net.fabricmc.fabric.api.client.gametest.v1.context.ClientGameTestContext;
 import net.fabricmc.fabric.api.client.gametest.v1.context.TestDedicatedServerConnection;
 import net.fabricmc.fabric.api.client.gametest.v1.context.TestDedicatedServerContext;
 import net.fabricmc.loader.api.FabricLoader;
+import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.MouseHandler;
 import net.minecraft.client.gui.components.AbstractWidget;
@@ -131,6 +133,8 @@ public class ConcordanceGardenPactClientGameTests implements FabricClientGameTes
 	// GC-02 (GC-P8): his drawn body within this of the speaker's bearing (tools/concordance_pacts.py FACING_BODY_TOLERANCE).
 	private static final float FACING_BODY_TOLERANCE = 15.0F;
 	private static final long NOON = 6000L;
+	/** The roster's key has no default (RosterClient): bound to this for one look, as ConcordanceRosterClientGameTests does. */
+	private static final int ROSTER_TEST_KEY = InputConstants.KEY_F7;
 
 	/** GC-02: a side of the perch the holder speaks from, their look at him, his bearing to them, and its shot. */
 	private record Facing(String name, int dx, int dz, float look, float yaw, String shot) {
@@ -1584,20 +1588,36 @@ public class ConcordanceGardenPactClientGameTests implements FabricClientGameTes
 	private static void rosterAwaiting(ClientGameTestContext context, TestDedicatedServerContext server, BlockPos perch, BlockPos at) {
 		String raised = server.computeOnServer(minecraft -> raise(minecraft, perch, at));
 		check("awaiting_answer".equals(raised), "His matter waits on the player: " + raised);
-		context.getInput().pressKey(RosterClient.key());
-		context.waitForScreen(RosterScreen.class);
-		context.waitFor(client -> RosterClient.state() != null, WAIT);
-		context.waitTicks(3);
-		String awaiting = context.computeOnClient(client -> Component.translatable("compose.jugcraft.worker.status.awaiting_answer").getString());
-		String rows = context.computeOnClient(client -> RosterClient.state().rows().stream()
-				.map(row -> row.name().getString() + ": " + row.waiting().getString() + " (icon " + row.icon() + ")").toList().toString());
-		Jugcraft.LOGGER.info("[garden-check] roster while his matter waits: {}", rows);
-		boolean says = context.computeOnClient(client -> RosterClient.state().rows().stream()
-				.anyMatch(row -> row.waiting().getString().equals(awaiting) && row.icon() == RosterStatePayload.WAITING));
-		check(says && awaiting.contains("awaiting your answer"), "Bathin's row says awaiting your answer, with the waiting icon: " + rows);
-		shot(context, "jugcraft_garden_roster_awaiting");
-		context.getInput().pressKey(InputConstants.KEY_ESCAPE);
-		context.waitForScreen(null);
+		// The roster's key is unbound by default, so it is bound for this one look and put back whatever fails.
+		KeyMapping key = RosterClient.key();
+		context.runOnClient(client -> {
+			key.setKey(InputConstants.Type.KEYBOARD.getOrCreate(ROSTER_TEST_KEY));
+			KeyMapping.resetMapping();
+		});
+		try {
+			String clash = context.computeOnClient(client -> Arrays.stream(client.options.keyMappings)
+					.filter(other -> other != key && other.same(key)).map(KeyMapping::getName).toList().toString());
+			check(clash.equals("[]"), "The test's binding for the roster shares no other key: " + clash);
+			context.getInput().pressKey(key);
+			context.waitForScreen(RosterScreen.class);
+			context.waitFor(client -> RosterClient.state() != null, WAIT);
+			context.waitTicks(3);
+			String awaiting = context.computeOnClient(client -> Component.translatable("compose.jugcraft.worker.status.awaiting_answer").getString());
+			String rows = context.computeOnClient(client -> RosterClient.state().rows().stream()
+					.map(row -> row.name().getString() + ": " + row.waiting().getString() + " (icon " + row.icon() + ")").toList().toString());
+			Jugcraft.LOGGER.info("[garden-check] roster while his matter waits: {}", rows);
+			boolean says = context.computeOnClient(client -> RosterClient.state().rows().stream()
+					.anyMatch(row -> row.waiting().getString().equals(awaiting) && row.icon() == RosterStatePayload.WAITING));
+			check(says && awaiting.contains("awaiting your answer"), "Bathin's row says awaiting your answer, with the waiting icon: " + rows);
+			shot(context, "jugcraft_garden_roster_awaiting");
+			context.getInput().pressKey(InputConstants.KEY_ESCAPE);
+			context.waitForScreen(null);
+		} finally {
+			context.runOnClient(client -> {
+				key.setKey(key.getDefaultKey());
+				KeyMapping.resetMapping();
+			});
+		}
 		String reading = server.computeOnServer(minecraft -> {
 			ServerLevel level = minecraft.overworld();
 			return PactReading.holder(level, (PactPerchBlockEntity) level.getBlockEntity(perch), level.getGameTime()).toString();
