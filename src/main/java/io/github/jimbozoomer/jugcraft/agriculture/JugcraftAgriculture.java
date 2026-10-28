@@ -2401,6 +2401,7 @@ public final class JugcraftAgriculture {
 		registerOrchardHarvest();
 		registerBarnTools();
 		registerFallGarden();
+		registerHearth();
 	}
 
 	/**
@@ -2922,6 +2923,14 @@ public final class JugcraftAgriculture {
 		// Part 4: café lights, strung between String Light Hooks, which light the air along their length.
 		registerItem("cafe_string_lights", props -> new StringLightsItem(props, StringLightHookBlockEntity.Strand.CAFE), new Item.Properties(),
 				BUILDING_TAB);
+	}
+
+	/** Cozy Fall Hearth, decor set 5 (tools/hearth.py): part 1's Stone Fireplace and Mantel Garland. */
+	private static void registerHearth() {
+		Block fireplace = registerBlock("stone_fireplace", StoneFireplaceBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.STONE)
+				.strength(2.0F, 6.0F).sound(SoundType.STONE).noOcclusion().lightLevel(StoneFireplaceBlock::light).pushReaction(PushReaction.IMMOVEABLE));
+		registerItem("stone_fireplace", props -> new BlockItem(fireplace, props), new Item.Properties().useBlockDescriptionPrefix(), BUILDING_TAB);
+		registerItem("mantel_garland", Item::new, new Item.Properties(), BUILDING_TAB);
 	}
 
 	private static BlockBehaviour.Properties displayProperties() {

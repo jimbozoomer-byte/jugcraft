@@ -1,0 +1,527 @@
+{
+  "multipart": [
+    {
+      "when": {
+        "facing": "north",
+        "part": "0"
+      },
+      "apply": {
+        "model": "jugcraft:block/stone_fireplace_0"
+      }
+    },
+    {
+      "when": {
+        "facing": "north",
+        "part": "1"
+      },
+      "apply": {
+        "model": "jugcraft:block/stone_fireplace_1"
+      }
+    },
+    {
+      "when": {
+        "facing": "north",
+        "part": "1",
+        "lit": "true"
+      },
+      "apply": {
+        "model": "jugcraft:block/stone_fireplace_1_fire"
+      }
+    },
+    {
+      "when": {
+        "facing": "north",
+        "part": "2"
+      },
+      "apply": {
+        "model": "jugcraft:block/stone_fireplace_2"
+      }
+    },
+    {
+      "when": {
+        "facing": "north",
+        "part": "3"
+      },
+      "apply": {
+        "model": "jugcraft:block/stone_fireplace_3"
+      }
+    },
+    {
+      "when": {
+        "facing": "north",
+        "part": "3",
+        "garland": "true"
+      },
+      "apply": {
+        "model": "jugcraft:block/stone_fireplace_3_garland"
+      }
+    },
+    {
+      "when": {
+        "facing": "north",
+        "part": "4"
+      },
+      "apply": {
+        "model": "jugcraft:block/stone_fireplace_4"
+      }
+    },
+    {
+      "when": {
+        "facing": "north",
+        "part": "4",
+        "garland": "true"
+      },
+      "apply": {
+        "model": "jugcraft:block/stone_fireplace_4_garland"
+      }
+    },
+    {
+      "when": {
+        "facing": "north",
+        "part": "5"
+      },
+      "apply": {
+        "model": "jugcraft:block/stone_fireplace_5"
+      }
+    },
+    {
+      "when": {
+        "facing": "north",
+        "part": "5",
+        "garland": "true"
+      },
+      "apply": {
+        "model": "jugcraft:block/stone_fireplace_5_garland"
+      }
+    },
+    {
+      "when": {
+        "facing": "north",
+        "part": "6"
+      },
+      "apply": {
+        "model": "jugcraft:block/stone_fireplace_6"
+      }
+    },
+    {
+      "when": {
+        "facing": "north",
+        "part": "7"
+      },
+      "apply": {
+        "model": "jugcraft:block/stone_fireplace_7"
+      }
+    },
+    {
+      "when": {
+        "facing": "north",
+        "part": "8"
+      },
+      "apply": {
+        "model": "jugcraft:block/stone_fireplace_8"
+      }
+    },
+    {
+      "when": {
+        "facing": "east",
+        "part": "0"
+      },
+      "apply": {
+        "model": "jugcraft:block/stone_fireplace_0",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "facing": "east",
+        "part": "1"
+      },
+      "apply": {
+        "model": "jugcraft:block/stone_fireplace_1",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "facing": "east",
+        "part": "1",
+        "lit": "true"
+      },
+      "apply": {
+        "model": "jugcraft:block/stone_fireplace_1_fire",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "facing": "east",
+        "part": "2"
+      },
+      "apply": {
+        "model": "jugcraft:block/stone_fireplace_2",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "facing": "east",
+        "part": "3"
+      },
+      "apply": {
+        "model": "jugcraft:block/stone_fireplace_3",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "facing": "east",
+        "part": "3",
+        "garland": "true"
+      },
+      "apply": {
+        "model": "jugcraft:block/stone_fireplace_3_garland",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "facing": "east",
+        "part": "4"
+      },
+      "apply": {
+        "model": "jugcraft:block/stone_fireplace_4",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "facing": "east",
+        "part": "4",
+        "garland": "true"
+      },
+      "apply": {
+        "model": "jugcraft:block/stone_fireplace_4_garland",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "facing": "east",
+        "part": "5"
+      },
+      "apply": {
+        "model": "jugcraft:block/stone_fireplace_5",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "facing": "east",
+        "part": "5",
+        "garland": "true"
+      },
+      "apply": {
+        "model": "jugcraft:block/stone_fireplace_5_garland",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "facing": "east",
+        "part": "6"
+      },
+      "apply": {
+        "model": "jugcraft:block/stone_fireplace_6",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "facing": "east",
+        "part": "7"
+      },
+      "apply": {
+        "model": "jugcraft:block/stone_fireplace_7",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "facing": "east",
+        "part": "8"
+      },
+      "apply": {
+        "model": "jugcraft:block/stone_fireplace_8",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "facing": "south",
+        "part": "0"
+      },
+      "apply": {
+        "model": "jugcraft:block/stone_fireplace_0",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "facing": "south",
+        "part": "1"
+      },
+      "apply": {
+        "model": "jugcraft:block/stone_fireplace_1",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "facing": "south",
+        "part": "1",
+        "lit": "true"
+      },
+      "apply": {
+        "model": "jugcraft:block/stone_fireplace_1_fire",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "facing": "south",
+        "part": "2"
+      },
+      "apply": {
+        "model": "jugcraft:block/stone_fireplace_2",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "facing": "south",
+        "part": "3"
+      },
+      "apply": {
+        "model": "jugcraft:block/stone_fireplace_3",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "facing": "south",
+        "part": "3",
+        "garland": "true"
+      },
+      "apply": {
+        "model": "jugcraft:block/stone_fireplace_3_garland",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "facing": "south",
+        "part": "4"
+      },
+      "apply": {
+        "model": "jugcraft:block/stone_fireplace_4",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "facing": "south",
+        "part": "4",
+        "garland": "true"
+      },
+      "apply": {
+        "model": "jugcraft:block/stone_fireplace_4_garland",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "facing": "south",
+        "part": "5"
+      },
+      "apply": {
+        "model": "jugcraft:block/stone_fireplace_5",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "facing": "south",
+        "part": "5",
+        "garland": "true"
+      },
+      "apply": {
+        "model": "jugcraft:block/stone_fireplace_5_garland",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "facing": "south",
+        "part": "6"
+      },
+      "apply": {
+        "model": "jugcraft:block/stone_fireplace_6",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "facing": "south",
+        "part": "7"
+      },
+      "apply": {
+        "model": "jugcraft:block/stone_fireplace_7",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "facing": "south",
+        "part": "8"
+      },
+      "apply": {
+        "model": "jugcraft:block/stone_fireplace_8",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "facing": "west",
+        "part": "0"
+      },
+      "apply": {
+        "model": "jugcraft:block/stone_fireplace_0",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "facing": "west",
+        "part": "1"
+      },
+      "apply": {
+        "model": "jugcraft:block/stone_fireplace_1",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "facing": "west",
+        "part": "1",
+        "lit": "true"
+      },
+      "apply": {
+        "model": "jugcraft:block/stone_fireplace_1_fire",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "facing": "west",
+        "part": "2"
+      },
+      "apply": {
+        "model": "jugcraft:block/stone_fireplace_2",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "facing": "west",
+        "part": "3"
+      },
+      "apply": {
+        "model": "jugcraft:block/stone_fireplace_3",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "facing": "west",
+        "part": "3",
+        "garland": "true"
+      },
+      "apply": {
+        "model": "jugcraft:block/stone_fireplace_3_garland",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "facing": "west",
+        "part": "4"
+      },
+      "apply": {
+        "model": "jugcraft:block/stone_fireplace_4",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "facing": "west",
+        "part": "4",
+        "garland": "true"
+      },
+      "apply": {
+        "model": "jugcraft:block/stone_fireplace_4_garland",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "facing": "west",
+        "part": "5"
+      },
+      "apply": {
+        "model": "jugcraft:block/stone_fireplace_5",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "facing": "west",
+        "part": "5",
+        "garland": "true"
+      },
+      "apply": {
+        "model": "jugcraft:block/stone_fireplace_5_garland",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "facing": "west",
+        "part": "6"
+      },
+      "apply": {
+        "model": "jugcraft:block/stone_fireplace_6",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "facing": "west",
+        "part": "7"
+      },
+      "apply": {
+        "model": "jugcraft:block/stone_fireplace_7",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "facing": "west",
+        "part": "8"
+      },
+      "apply": {
+        "model": "jugcraft:block/stone_fireplace_8",
+        "y": 270
+      }
+    }
+  ]
+}

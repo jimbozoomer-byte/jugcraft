@@ -8,6 +8,13 @@ Every change to Jugcraft, newest first, grouped by pull request. For what each t
 
 No numbered release yet. Entries on feature branches remain proposed until their pull requests merge.
 
+### Unmerged: Cozy Fall Hearth, part 1 (the hearth)
+- **Stone Fireplace**: a fieldstone chimney breast three blocks across and three up, on a flagstone hearth, with an oak mantel at 1.4 m. Flint and steel or a fire charge lights it and a shovel puts it out; lit, a fire burns in its firebox in smooth bands and gives light 15. A decoration: it burns no fuel and makes nothing.
+- **Mantel Garland**: autumn leaves, little pumpkins and pine cones, draped along a fireplace's mantel; sneak with an empty hand to take it back.
+- Recipes: cobblestone, planks, a campfire and a smooth stone slab; two leaves, a pumpkin and a string.
+- Record: [cozy-fall-hearth.md](docs/features/cozy-fall-hearth.md).
+- **Checked:** the record's Verification. Game tests and screenshots run in CI only; not played by hand.
+
 ### Unmerged: Fall Garden & Porch, part 4 (café lights)
 - **Café String Lights**: warm Edison bulbs on a black cord, strung between String Light Hooks and lit by redstone or electricity like the other strands. While lit they light the air along their length (light 12 about every two blocks), and put those lights out when they go dark or come down.
 - Recipe: two string, glowstone dust, a glass pane and black dye.

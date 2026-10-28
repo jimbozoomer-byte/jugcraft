@@ -14882,6 +14882,45 @@ def check_fall_garden():
         err(f"item.{MOD}.{cafe['item']}: the text is missing")
 
 
+def check_hearth():
+    """Cozy Fall Hearth (tools/hearth.py, docs/features/cozy-fall-hearth.md), part 1: the Stone Fireplace's Java block is
+    the table's size and light, its firebox gives it, and its registration names its light; its fire is a full-bright,
+    unshaded model of the fire texture alone, animated in smooth bands; the fireplace's and the garland's recipes were
+    generated; and the light message has its text."""
+    import hearth as hh
+    fp = hh.FIREPLACE
+    java = (JAVA_ROOT / "agriculture" / "StoneFireplaceBlock.java").read_text(encoding="utf-8") \
+        if (JAVA_ROOT / "agriculture" / "StoneFireplaceBlock.java").is_file() else ""
+    w, h, d = fp["size"]
+    for needed in (f"box({w}, {h}, {d})", f"LIGHT = {fp['light']};", "state.getValue(PART) == FIREBOX ? LIGHT : 0"):
+        if needed not in java:
+            err(f"StoneFireplaceBlock: missing {needed} (tools/hearth.py FIREPLACE)")
+    java_main = (JAVA_ROOT / "agriculture" / "JugcraftAgriculture.java").read_text(encoding="utf-8") \
+        if (JAVA_ROOT / "agriculture" / "JugcraftAgriculture.java").is_file() else ""
+    if f'registerBlock("{fp["block"]}", StoneFireplaceBlock::new' not in java_main or ".lightLevel(StoneFireplaceBlock::light)" not in java_main:
+        err(f"JugcraftAgriculture: {fp['block']} must be a StoneFireplaceBlock lit by StoneFireplaceBlock::light")
+    meta = load(ASSETS / "textures" / "block" / f"{fp['block']}_fire.png.mcmeta") or {}
+    if meta.get("animation", {}).get("interpolate") is not True or meta["animation"].get("frametime") != fp["frametime"]:
+        err(f"textures/block/{fp['block']}_fire.png.mcmeta: the fire must move in smooth bands (interpolated, frametime {fp['frametime']})")
+    fires = sorted((ASSETS / "models" / "block").glob(f"{fp['block']}_*_fire.json"))
+    if not fires:
+        err(f"{fp['block']}: no fire model was generated")
+    for path in fires:
+        model = load(path) or {}
+        textures = set(model.get("textures", {}).values())
+        elements = model.get("elements", [])
+        if textures != {f"{MOD}:block/{fp['block']}_fire"} or any(e.get("light_emission") != 15 or e.get("shade") is not False for e in elements):
+            err(f"{path.name}: the fire must be full-bright and unshaded, in its own texture alone")
+    for recipe in hh.RECIPES + hh.SHAPELESS:
+        made = load(DATA / MOD / "recipe" / f"{recipe['id']}.json") or {}
+        if made.get("result", {}).get("id") != f"{MOD}:{recipe['result']}":
+            err(f"recipe/{recipe['id']}.json: tools/hearth.py's recipe for {recipe['result']} was not generated")
+    lang = load(ASSETS / "lang" / "en_us.json") or {}
+    for key in (f"block.{MOD}.{fp['block']}", f"item.{MOD}.{hh.GARLAND['item']}", f"message.{MOD}.{fp['block']}.light"):
+        if key not in lang:
+            err(f"{key}: the text is missing")
+
+
 def check_orchard_harvest():
     """Orchard & Apple Harvest (tools/orchard_harvest.py, docs/features/orchard-apple-harvest.md): the ladder's, the
     bin's and the cart's Java blocks are the table's size; the bin's, cart's and bag's capacities and stages, the crates'
@@ -22855,6 +22894,7 @@ def main():
     check_orchard_harvest()
     check_barn_tools()
     check_fall_garden()
+    check_hearth()
     check_hessian_horseman()
     check_cydonian_sentinel()
     check_material_sets()

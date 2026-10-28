@@ -28052,6 +28052,11 @@
       "denominator": 1,
       "source": "recipe jugcraft:mangrove_cabinet"
     },
+    "jugcraft:mantel_garland": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
     "jugcraft:map_table": {
       "numerator": 10480,
       "denominator": 9,
@@ -35886,6 +35891,11 @@
       "numerator": 358,
       "denominator": 1,
       "source": "recipe jugcraft:stone_brick_sarcophagus"
+    },
+    "jugcraft:stone_fireplace": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
     },
     "jugcraft:stone_paxel": {
       "numerator": 31,

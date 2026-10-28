@@ -73,6 +73,7 @@ import decor20_data
 import orchard_harvest_data
 import barn_tools_data
 import fall_garden_data
+import hearth_data
 import pumpkin_patch_data
 import ofrenda_data
 import graveyard_data
@@ -316,6 +317,7 @@ def assets(root, write, lang):
     orchard_harvest_data.assets(root, write, lang)
     barn_tools_data.assets(root, write, lang)
     fall_garden_data.assets(root, write, lang)
+    hearth_data.assets(root, write, lang)
     lair_data.assets(root, write, lang)
     adam_ondi_ahman_data.assets(root, write, lang)
     vesperine_data.assets(root, write, lang)
@@ -487,6 +489,7 @@ def loot(data, write):
     orchard_harvest_data.loot(out, write)
     barn_tools_data.loot(out, write)
     fall_garden_data.loot(out, write)
+    hearth_data.loot(out, write)
     lair_data.loot(out, write)
     adam_ondi_ahman_data.loot(out, write)
     vesperine_data.loot(out, write)
@@ -633,6 +636,7 @@ def tags(tags):
     orchard_harvest_data.tags(tags)
     barn_tools_data.tags(tags)
     fall_garden_data.tags(tags)
+    hearth_data.tags(tags)
     lair_data.tags(tags)
     adam_ondi_ahman_data.tags(tags)
     vesperine_data.tags(tags)
