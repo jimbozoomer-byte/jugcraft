@@ -1,0 +1,21 @@
+# Hessian's Bridle: a black bridle seen face-on, its crown piece over the top and its cheek straps down either side to
+# the iron bit across their feet, and the cut reins hanging below. Lit from the top left; the right-hand strap in shade.
+# materials: main=lacquer second=iron
+# family: compact
+# allow: pinhole - inside the bridle's straps, where the horse's head goes
+................
+....OOOOOOOO....
+...OHHLLLLLMO...
+..OHLLLLLLLMDO..
+..OLLOOOOOOMDO..
+..OLLO....OMDO..
+..OLMO....OMDO..
+..OLMO....OMDO..
+..OLMO....ODDO..
+..gggggggggggg..
+.gYFFFFFFFFFFfg.
+.gFfffffffffffg.
+..gggggggggggg..
+...OMMO..OMMO...
+...OMDO..ODDO...
+....OO....OO....

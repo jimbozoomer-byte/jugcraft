@@ -1,0 +1,22 @@
+{
+  "parent": "minecraft:adventure/root",
+  "display": {
+    "icon": {
+      "id": "jugcraft:hessian_sabre"
+    },
+    "title": {
+      "translate": "advancements.jugcraft.laid_to_rest.title"
+    },
+    "description": {
+      "translate": "advancements.jugcraft.laid_to_rest.description"
+    },
+    "frame": "challenge",
+    "show_toast": true,
+    "announce_to_chat": true
+  },
+  "criteria": {
+    "done": {
+      "trigger": "minecraft:impossible"
+    }
+  }
+}
