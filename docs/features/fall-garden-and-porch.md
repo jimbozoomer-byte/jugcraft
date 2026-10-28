@@ -161,14 +161,14 @@ Local checks run on this branch, and their results:
   - `python3 -m unittest discover -s scripts/tests`: 287 tests, OK.
   - `python3 tools/check_icon_maps.py`: PASS (no new map; the porch's items are 3D).
   - `javac` parse (syntax only) of the new and changed Java: OK.
-
-Game tests (CI only, not run locally), `FallGardenGameTests`:
 - Part 4:
   - `python3 tools/check_mod_data.py`: PASS (8,114 material IDs). `check_fall_garden` now checks the café strand, its lamps' light and spacing against `tools/fall_garden.py`, its texture, its renderer and its item.
   - `python3 scripts/check_repository.py`: PASS.
   - `python3 -m unittest discover -s scripts/tests`: 287 tests, OK.
   - `python3 tools/check_icon_maps.py`: PASS (274 maps, with the café lights'; no new warning). Its first drafts failed the lint (doubled outlines and pinholes where the bulbs crowded the cord), and one passing draft was warned for standing on the wrong rows; the bulbs now hang five apart, in the compact family.
   - `javac` parse (syntax only) of the new and changed Java: OK.
+
+Game tests (CI only, not run locally), `FallGardenGameTests`:
 - Every plant has its block and item:
   - the four small flowers are small flowers with potted forms;
   - pampas grass is a tall flower, and the dried sunflower a two-block plant;
