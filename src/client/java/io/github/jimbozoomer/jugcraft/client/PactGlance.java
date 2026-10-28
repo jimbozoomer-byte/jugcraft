@@ -17,13 +17,22 @@ import org.jspecify.annotations.Nullable;
  * with its arguments (numbers kept as numbers over the network); a glance is a client key beside it,
  * screen.jugcraft.pact.glance.&lt;server key&gt; (the roster's under screen.jugcraft.roster.glance.), fed the same arguments by
  * position. The whole sentence stays the message, the narration and the tip. Anything unknown (an older server, a new
- * term, a glance naming more arguments than were sent, a bare %s) falls back to the whole sentence. tools/magic_ui.py
- * generates every glance and renders each with the server's real argument order (check_magic_ui); a garden spirit's unit
- * adds its rows there and nothing here.
+ * term, a glance naming more arguments than were sent, a bare %s) falls back to the whole sentence. An argument that is
+ * itself a sentence with a glance (a first task's act, a research step's description) is drawn by that glance too. The
+ * conflicting-agreement diagnostic, the one answer from outside the Concordance's messages, has its glance under
+ * "diagnostic.". tools/magic_ui.py generates every glance and renders each with the server's real argument order and with
+ * every act and step its nested arguments can be (check_magic_ui). A garden spirit's unit adds its work's row there
+ * (WORK_GLANCES: its service line and name, rows, blockers, chooser reason and icon) and its icon's line in
+ * {@link #WORK_ICONS} here, which check_magic_ui holds equal.
  */
 final class PactGlance {
 	/** Where every server sentence the glances read lives. */
 	static final String SERVER = "message.jugcraft.concordance.";
+	/** The diagnostics a pact answer can be (AgreementHolder's conflicting agreement), read as "diagnostic.&lt;code&gt;". */
+	static final String DIAGNOSTIC = "compose.jugcraft.diagnostic.";
+	/** A research step's description (pact.missing.step's third argument), drawn by its glance under "step.". */
+	private static final String STEP = "advancements.jugcraft.";
+	private static final String DESCRIPTION = ".description";
 
 	/**
 	 * A glance: the state mark it draws (null: none), the words it draws and the whole sentence (its message).
@@ -80,16 +89,16 @@ final class PactGlance {
 
 	private static final List<IconRule> ICONS = List.of(
 			new IconRule("contains", ".row.overworked", "work"),
-			new IconRule("suffix", ".row.poured", "item:jugcraft:ley_pylon"),
-			new IconRule("suffix", ".row.moved", "item:jugcraft:gleaner"),
-			new IconRule("suffix", ".row.leaving", "item:jugcraft:verdant_heart"),
+			new IconRule("exact", "pact.verdance_carrying.row.poured", "item:jugcraft:ley_pylon"),
+			new IconRule("exact", "pact.verdance_carrying.row.moved", "item:jugcraft:gleaner"),
+			new IconRule("exact", "pact.verdance_carrying.row.leaving", "item:jugcraft:verdant_heart"),
 			new IconRule("suffix", "obligation", "glyph:pin"),
 			new IconRule("exact", "pact.ended_here", "glyph:pin"),
 			new IconRule("exact", "pact.departed", "glyph:spiral"));
 
 	/**
-	 * Each work's own item: its service line's and its "work" rows' icon (tools/magic_ui.py WORK_GLANCES[work]["icon"]); a
-	 * work not here draws its spirit's sign.
+	 * Each work's own item: its service line's and its "work" rows' icon (tools/magic_ui.py WORK_GLANCES[work]["icon"], one
+	 * line here a work, held equal by check_magic_ui); a work not here draws its spirit's sign.
 	 */
 	static final Map<String, String> WORK_ICONS = Map.of(
 			"star_reckoning", "jugcraft:astrolabe",
@@ -106,8 +115,8 @@ final class PactGlance {
 
 	/** {@code full}'s glance with {@code suffix}: a second glance of one sentence (the upkeep's cap: "cap"). */
 	static Glance of(Component full, String suffix) {
-		if (full.getContents() instanceof TranslatableContents contents && contents.getKey().startsWith(SERVER)) {
-			String server = contents.getKey().substring(SERVER.length());
+		String server = server(full);
+		if (!server.isEmpty() && full.getContents() instanceof TranslatableContents contents) {
 			Component shown = shorten(key(server, suffix), contents.getArgs());
 			return new Glance(mark(server), shown == null ? full : shown, full);
 		}
@@ -161,10 +170,35 @@ final class PactGlance {
 		};
 	}
 
-	/** {@code full}'s server key under message.jugcraft.concordance. (pact.row.next), or "" when it is not a server sentence. */
+	/**
+	 * {@code full}'s server key under message.jugcraft.concordance. (pact.row.next), "diagnostic.&lt;code&gt;" for a
+	 * diagnostic, or "" when it is neither.
+	 */
 	static String server(Component full) {
-		return full.getContents() instanceof TranslatableContents contents && contents.getKey().startsWith(SERVER)
-				? contents.getKey().substring(SERVER.length()) : "";
+		if (full.getContents() instanceof TranslatableContents contents) {
+			String key = contents.getKey();
+			if (key.startsWith(SERVER)) {
+				return key.substring(SERVER.length());
+			}
+			if (key.startsWith(DIAGNOSTIC)) {
+				return "diagnostic." + key.substring(DIAGNOSTIC.length());
+			}
+		}
+		return "";
+	}
+
+	/**
+	 * The glance key an argument's own sentence is drawn by when it is nested in another's (tools/magic_ui.py nested_key): a
+	 * server sentence's glance, or a research step description's under screen.jugcraft.pact.glance.step.; null for others.
+	 */
+	static @Nullable String nestedKey(String key) {
+		if (key.startsWith(SERVER)) {
+			return key(key.substring(SERVER.length()), "");
+		}
+		if (key.startsWith(STEP) && key.endsWith(DESCRIPTION)) {
+			return "screen.jugcraft.pact.glance.step." + key.substring(STEP.length(), key.length() - DESCRIPTION.length());
+		}
+		return null;
 	}
 
 	/** The icon the row {@code server} draws, for a pact whose work is {@code work} and whose spirit's sign is {@code sign}. */
@@ -205,14 +239,32 @@ final class PactGlance {
 		return null;
 	}
 
-	/** The glance under {@code key} fed {@code args}, or null when there is none or it does not fit them. */
+	/**
+	 * The glance under {@code key} fed {@code args}, or null when there is none or it does not fit them; each argument that
+	 * is a sentence with a glance of its own (nestedKey) is given as that glance.
+	 */
 	private static @Nullable Component shorten(String key, Object[] args) {
 		Language language = Language.getInstance();
 		if (!language.has(key)) {
 			return null;
 		}
 		int top = highest(language.getOrDefault(key));
-		return top < 0 || top > args.length ? null : Component.translatable(key, args);
+		if (top < 0 || top > args.length) {
+			return null;
+		}
+		Object[] shown = args.clone();
+		for (int i = 0; i < shown.length; i++) {
+			if (shown[i] instanceof Component part && part.getContents() instanceof TranslatableContents inner) {
+				String nested = nestedKey(inner.getKey());
+				if (nested != null && language.has(nested)) {
+					int needs = highest(language.getOrDefault(nested));
+					if (needs >= 0 && needs <= inner.getArgs().length) {
+						shown[i] = Component.translatable(nested, inner.getArgs());
+					}
+				}
+			}
+		}
+		return Component.translatable(key, shown);
 	}
 
 	/**

@@ -8,7 +8,9 @@ import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.narration.NarratedElementType;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
 import net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipPositioner;
+import net.minecraft.locale.Language;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.FormattedText;
 import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.util.Util;
 import net.minecraft.world.item.ItemStack;
@@ -19,7 +21,7 @@ import org.jspecify.annotations.Nullable;
  * short value (a glance). Its <b>message is the server's whole sentence</b>: its narration and, in the gold frame, its
  * tip on hover or keyboard focus; it keeps its key on the screen (term:&lt;key&gt;, note:N). A stack cycles through its
  * items once a second (an offering tag's), still under reduced motion; a chip may be boxed in red when it is short (the
- * resonance chip's "6/8 resonance").
+ * resonance chip's "6/8 resonance"). Held to a width, its words are cut with "…" (its tip stays whole).
  */
 final class MagicChip extends AbstractWidget implements MagicScreen.Drawn {
 	private static final int GAP = 3;
@@ -38,6 +40,10 @@ final class MagicChip extends AbstractWidget implements MagicScreen.Drawn {
 	private int box;
 	private List<FormattedCharSequence> tip;
 	private @Nullable ClientTooltipPositioner positioner;
+	private int fit = Integer.MAX_VALUE;
+	private FormattedCharSequence line = FormattedCharSequence.EMPTY;
+	private String drawn = "";
+	private Component usage = Component.empty();
 
 	/** A chip whose message is {@code full} and which draws {@code shown}, in {@code inks}' {@code colour}. */
 	MagicChip(Component full, Component shown, Font font, int colour, MagicTheme.Inks inks) {
@@ -117,6 +123,19 @@ final class MagicChip extends AbstractWidget implements MagicScreen.Drawn {
 		return this;
 	}
 
+	/** At most {@code width} wide, its icon included: words that would run past it are cut with "…" (the header's service line). */
+	MagicChip fit(int width) {
+		this.fit = width;
+		size();
+		return this;
+	}
+
+	/** What narration adds after its sentence (the price before Accept: what is short, spec 2.6). */
+	MagicChip usage(Component usage) {
+		this.usage = usage;
+		return this;
+	}
+
 	/** Places its tip (clear of the other chips, where the screen has room); null: vanilla's placement. */
 	MagicChip at(@Nullable ClientTooltipPositioner positioner) {
 		this.positioner = positioner;
@@ -129,7 +148,16 @@ final class MagicChip extends AbstractWidget implements MagicScreen.Drawn {
 
 	private void size() {
 		int icon = iconWidth();
-		setWidth(icon + (icon > 0 ? GAP : 0) + font.width(shown));
+		int room = fit - icon - (icon > 0 ? GAP : 0);
+		if (font.width(shown) > room) {
+			FormattedText cut = font.substrByWidth(shown, Math.max(0, room - font.width("…")));
+			line = Language.getInstance().getVisualOrder(FormattedText.composite(cut, FormattedText.of("…")));
+			drawn = cut.getString() + "…";
+		} else {
+			line = shown.getVisualOrderText();
+			drawn = shown.getString();
+		}
+		setWidth(icon + (icon > 0 ? GAP : 0) + font.width(line));
 		setHeight(!items.isEmpty() ? 16 : Math.max(font.lineHeight, mark != null ? MagicArt.Mark.HEIGHT : MagicArt.Glyph.HEIGHT));
 	}
 
@@ -150,12 +178,12 @@ final class MagicChip extends AbstractWidget implements MagicScreen.Drawn {
 			MagicArt.mark(g, mark, x, mid - MagicArt.Mark.HEIGHT / 2 - 1);
 		}
 		int tx = x + iconWidth() + (iconWidth() > 0 ? GAP : 0);
-		g.text(font, shown, tx, mid - 4, colour, shadow);
+		g.text(font, line, tx, mid - 4, colour, shadow);
 		if (box != 0) {
-			g.outline(tx - 2, mid - 6, font.width(shown) + 4, 12, box);
+			g.outline(tx - 2, mid - 6, font.width(line) + 4, 12, box);
 		}
 		if (isFocused()) {
-			g.fill(tx, getY() + getHeight(), tx + font.width(shown), getY() + getHeight() + 1, focusColour);
+			g.fill(tx, getY() + getHeight(), tx + font.width(line), getY() + getHeight() + 1, focusColour);
 		}
 	}
 
@@ -167,10 +195,13 @@ final class MagicChip extends AbstractWidget implements MagicScreen.Drawn {
 	@Override
 	protected void updateWidgetNarration(NarrationElementOutput output) {
 		output.add(NarratedElementType.TITLE, getMessage());
+		if (!usage.getString().isEmpty()) {
+			output.add(NarratedElementType.USAGE, usage);
+		}
 	}
 
 	@Override
 	public String drawnText() {
-		return corner.isEmpty() ? shown.getString() : corner + " " + shown.getString();
+		return corner.isEmpty() ? drawn : corner + " " + drawn;
 	}
 }

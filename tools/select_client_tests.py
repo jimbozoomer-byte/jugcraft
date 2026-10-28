@@ -10,7 +10,8 @@ How a changed file picks classes (src/gametest/resources/fabric.mod.json lists t
 - docs, Markdown, the generators and checks in tools/ and scripts/ (their output is committed and judged below),
   the art sources in art/ (what the game loads is copied into the assets and judged there), data under
   src/main/resources/data, the language file, the optional resource packs no client test turns on, unit tests,
-  server-only game tests and Claude's settings: nothing;
+  server-only game tests and Claude's settings: nothing (except a language change to the magic screens' words, which
+  selects the classes that open them: MAGIC_WORDS);
 - a Java class under src/main or src/client that only gained code (a feature registering itself in a registry, one
   more entry in a list): the classes matching the names and IDs it gained; comments do not count;
 - a Java class whose existing code changed: every class that shows it (names it, or whose IDs match it with "Block",
@@ -146,6 +147,12 @@ for _name in ("MagicArt", "MagicTheme", "MagicLayout", "MagicScreen", "MagicButt
               "ConcordanceClientOptions"):
     SHOWN_BY[_name] = SHOWN_BY.get(_name, set()) | MAGIC_SHOWN
 MAGIC_ASSETS = re.compile(r"^src/main/resources/assets/jugcraft/textures/gui/(?:sprites/(?:magic|tooltip)/|magic/)")
+# The language file is otherwise judged by nothing (its words are judged by the generators' checks), but the magic screens'
+# whole-screen word budgets are judged only by their client tests: a change to a key they draw or narrate (a glance, a
+# short label, a pact or roster screen's words, or a server sentence of the pacts, garden pacts or workers) selects them.
+LANG_FILE = re.compile(r"^src/main/resources/assets/jugcraft/lang/[a-z_]+\.json$")
+MAGIC_WORDS = re.compile(r'^[-+]\s*"(?:screen\.jugcraft\.pact\.|screen\.jugcraft\.roster\.glance\.'
+                         r'|message\.jugcraft\.concordance\.(?:pact|garden_pact|workers)\.)')
 # Files that change nothing a client test shows.
 NOTHING = (
     re.compile(r"^docs/"),
@@ -280,6 +287,12 @@ def changed_code(base, head, path):
     return lines
 
 
+def magic_words(base, head, path):
+    """Whether a language file's change touches a key the magic screens draw or narrate (MAGIC_WORDS)."""
+    return any(MAGIC_WORDS.match(line) for line in git("diff", "-U0", base, head, "--", path).splitlines()
+               if not line.startswith(("---", "+++")))
+
+
 def by_names(lines, tests):
     """The classes naming the Jugcraft classes and IDs these code lines name (a registry many tests use aside)."""
     classes, ids = names_in("\n".join(lines))
@@ -299,6 +312,10 @@ def select(changed, tests, newly_listed, base=None, head=None):
         test = CLIENT_TEST.match(path)
         if test and test.group(1) in tests:
             chosen.add(test.group(1))
+            continue
+        if base and LANG_FILE.match(path) and magic_words(base, head, path):
+            chosen |= MAGIC_SHOWN & tests.keys()
+            reasons.append(f"{path}: the magic screens' words changed")
             continue
         if any(rule.search(path) for rule in NOTHING):
             continue

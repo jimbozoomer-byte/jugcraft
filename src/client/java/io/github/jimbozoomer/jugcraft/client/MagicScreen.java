@@ -34,6 +34,8 @@ public abstract class MagicScreen extends Screen implements ScreenKit.Fitted {
 
 	protected final Map<String, AbstractWidget> controls = new LinkedHashMap<>();
 	protected final Set<String> footer = new LinkedHashSet<>();
+	/** The area a control placed in the header or pinned to the body must stay inside (outside() names any past it). */
+	private final Map<String, ScreenRectangle> within = new LinkedHashMap<>();
 	private final List<AbstractWidget> parts = new ArrayList<>();
 	private final List<String> drewChrome = new ArrayList<>();
 	protected @Nullable ComposerScroll body;
@@ -72,6 +74,7 @@ public abstract class MagicScreen extends Screen implements ScreenKit.Fitted {
 		double scroll = body == null ? 0 : body.scrollAmount();
 		controls.clear();
 		footer.clear();
+		within.clear();
 		parts.clear();
 		drewChrome.clear();
 		body = null;
@@ -121,6 +124,14 @@ public abstract class MagicScreen extends Screen implements ScreenKit.Fitted {
 		return keep(key, widget);
 	}
 
+	/** Adds {@code widget} to the screen under {@code key}, held to {@code area} (the header's room, the body's pinned top or foot). */
+	protected <T extends AbstractWidget> T onScreen(String key, T widget, ScreenRectangle area) {
+		if (!key.isEmpty()) {
+			within.put(key, area);
+		}
+		return onScreen(key, widget);
+	}
+
 	private <T extends AbstractWidget> T keep(String key, T widget) {
 		parts.add(widget);
 		if (!key.isEmpty()) {
@@ -131,7 +142,7 @@ public abstract class MagicScreen extends Screen implements ScreenKit.Fitted {
 
 	/**
 	 * One row of footer buttons, centred: each as wide as its label needs (MagicButton.labelWidth) and the row's spare
-	 * room shared out, up to {@code widest} each (a plate with an icon alone, the narrow footer's page arrow, keeps its
+	 * room shared out, up to {@code widest} each (a plate with an icon alone, the narrow footer's paging plate, keeps its
 	 * own width); their tips open below the footer or beside the button, never over the
 	 * body (spec 2.8). A row that cannot hold every label keeps equal widths, and outside() names the cut label.
 	 */
@@ -276,7 +287,8 @@ public abstract class MagicScreen extends Screen implements ScreenKit.Fitted {
 
 	/**
 	 * What does not fit (tests: none): the panel off screen; the body over the footer or under 24 tall; any control
-	 * outside the screen (one in the body outside the body's width); a footer button cutting its label.
+	 * outside the screen (one in the body outside the body's width, one in the header or pinned to the body outside the
+	 * area it was held to); a caption past the screen's edge; a footer button cutting its label.
 	 */
 	public List<String> outside() {
 		List<String> out = new ArrayList<>();
@@ -289,10 +301,15 @@ public abstract class MagicScreen extends Screen implements ScreenKit.Fitted {
 		for (Map.Entry<String, AbstractWidget> entry : controls.entrySet()) {
 			AbstractWidget widget = entry.getValue();
 			boolean inside = body != null && body.children().contains(widget);
+			ScreenRectangle area = inside ? null : within.getOrDefault(entry.getKey(), new ScreenRectangle(0, 0, width, height));
 			boolean off = inside ? widget.getX() < body.getX() || widget.getX() + widget.getWidth() > body.getX() + body.getWidth()
-					: widget.getX() < 0 || widget.getY() < 0 || widget.getX() + widget.getWidth() > width || widget.getY() + widget.getHeight() > height;
+					: widget.getX() < area.left() || widget.getY() < area.top() || widget.getX() + widget.getWidth() > area.right()
+							|| widget.getY() + widget.getHeight() > area.bottom();
+			ScreenRectangle caption = widget instanceof MagicButton button ? button.captionArea(font) : null;
 			if (off) {
 				out.add(entry.getKey());
+			} else if (caption != null && (caption.left() < 0 || caption.right() > width || caption.bottom() > height)) {
+				out.add(entry.getKey() + " (caption)");
 			} else if (footer.contains(entry.getKey()) && widget instanceof MagicButton button && button.labelWidth(font) > button.getWidth()) {
 				out.add(entry.getKey() + " (label cut)");
 			}

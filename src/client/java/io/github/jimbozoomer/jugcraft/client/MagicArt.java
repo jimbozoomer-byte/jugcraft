@@ -54,7 +54,7 @@ final class MagicArt {
 	static final Identifier DOC_ARROW_DOWN = sprite("doc/arrow_down");
 	static final Identifier MARKER_COLLAPSED = sprite("marker/collapsed");
 	static final Identifier MARKER_EXPANDED = sprite("marker/expanded");
-	/** The documentation's small page arrows (14x8): the paging arrows on small plates in a narrow footer. */
+	/** The documentation's small page arrows (14x8), for the book's pages (variant A); the narrow footer's plates draw glyphs. */
 	static final Identifier PAGE_LEFT = sprite("doc/page_left");
 	static final Identifier PAGE_RIGHT = sprite("doc/page_right");
 	/** The tooltip style jugcraft:magic: vanilla draws its sprites tooltip/magic_background and tooltip/magic_frame. */
@@ -85,7 +85,7 @@ final class MagicArt {
 	/** The glyph family of spec 2.5: white, seven rows, each at its own width (tools/magic_ui.py GLYPHS, in order). */
 	enum Glyph {
 		INF(11), SPIRAL(7), SPARKLE(7), MOON(8), KEY(10), SUN(7), CLOCK(7), RING(7), CALENDAR(7), HOURGLASS(7), PERSON(7),
-		PARTY(12), SCROLL(7), PAUSE(5), CROSS(7), LOCK(7), TICK(7), PIN(7), ARROW(7), ASK(5), BED(7);
+		PARTY(12), SCROLL(7), PAUSE(5), CROSS(7), LOCK(7), TICK(7), PIN(7), ARROW(7), ASK(5), BED(7), BACK(7);
 
 		static final int HEIGHT = 7;
 		final int width;
@@ -253,6 +253,9 @@ final class MagicArt {
 		ClientTooltipPositioner place = at != null ? at
 				: !widget.isHovered() ? new BelowOrAboveWidgetTooltipPositioner(widget.getRectangle()) : new MenuTooltipPositioner(widget.getRectangle());
 		g.setTooltipForNextFrame(Minecraft.getInstance().font, lines, Optional.empty(), place, mouseX, mouseY, keyboard, TOOLTIP);
-		tipping = widget;
+		// As vanilla keeps it: the keyboard's tip replaces one already set this frame, a hovered one only fills an empty place.
+		if (keyboard || tipping == null) {
+			tipping = widget;
+		}
 	}
 }

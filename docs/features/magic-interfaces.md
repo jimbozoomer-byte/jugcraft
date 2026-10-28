@@ -2,7 +2,7 @@
 
 Status: **unit 1 built, not merged**: its first commit imports the owner's magic interface kit as runtime art and adds
 the shared Magic layer; its second moves the pact screen onto the layer in every mode, with the shortened beats, the
-amended D-S15 and their checks. Unit 1 ends with an evidence checkpoint (the client shots of every pact state beside the
+amended D-S15 and their checks; its third applies the pact screens' review (see "What the review's fixes change"). Unit 1 ends with an evidence checkpoint (the client shots of every pact state beside the
 design's pictures). **Nothing of it has been compiled or run in Minecraft yet** (see Known limits). Built on the garden cohort's line (draft pull request
 [#526](https://github.com/jimbozoomer-byte/jugcraft/pull/526): units 1 and 2, unit 3's shared prefix, merged with main).
 Proposal issue: none; the owner's request of 28 October 2026 is the scope.
@@ -34,6 +34,7 @@ mockups (kept with the session's design notes, not in the repository). Its answe
 | **D-S15 amended:** before Accept every term is a chip, each narrated and hovered with its full sentence; the six standing terms share one chip, "Standing terms", whose hover says they are the same for every spirit, whose narration reads all six sentences, and whose More toggle shows their six lines in place of the chips; every blocker is drawn above the terms; the price stays in view | **Decided by the session, in answer to the owner's request for far less reading; reviewable at the checkpoint.** Not owner-accepted. The first commit added the words (the standing lines are the glances of `term.suspension` to `term.perch`, "Standing terms" and its hint); the screen commit applies it, with `check_pact_screen` changed with it |
 | **The beats shortened** (spec 1.5: at most 18 words a line, a stage direction of at most 8), a `Terms` skip on beats 1 and 2, and a spirit's beats once heard not shown again (the next visit opens on his terms; a client-only set in Jugcraft's client options) | **Decided by the session, in answer to the owner's request for far less reading; reviewable at the checkpoint.** Not owner-accepted. Applied in the screen commit to Stolas's, Buer's and Bathin's beats (their records quote the new words) |
 | The service sentences (`term.service.<work>`) stay as shipped; GC-S7's two phrases stay in them | Spec 1.6 (a rewrite saved four to six words) |
+| **A kept page that draws both a pending first task and its spirit's matter may draw that task's row** (at most 12 words, its act drawn short) beyond the kept page's budget of 45 (48 compact); its client shots allow that row's words (`firstTask()` in the garden client test). The spec measured the matter page without a first task; with Bathin's row cut from 18 words to 10 the page still draws about 55 in the composed picture | **Decided by the session, in answer to the owner's request for far less reading; reviewable at the checkpoint.** Not owner-accepted (the pact screens' review asked for the allowance to be dropped once the row was shorter; it cannot be without cutting the matter's or the last carry's words) |
 
 ## What the first commit adds
 
@@ -138,13 +139,15 @@ word counts are from screens composed from the generated files at 427x240 (spec 
 - **Consumers:** the magic screens as each moves onto the layer (`tools/magic_ui.py` `MAGIC_SCREENS`), in the order of
   the design's units: the pact screen, the roster and chooser, the composer and Field Guide, the alchemy and Nouveau
   family.
-- **Garden units 4 to 6** (Marax, Foras, Bifrons, Amdusias) add each work's row to `WORK_GLANCES` (its service line,
-  kept-page rows, blockers and chooser reason); `check_magic_ui` names any row the server can send without one. Marks
-  follow the shape of the server key (`MARK_RULES`), so a work's `missing`, `row.overworked`-like and `matter.*`
-  sentences get theirs with no Java change. A work's icon is `WORK_GLANCES[work]["icon"]` and one line in
-  `PactGlance.WORK_ICONS` (`check_magic_ui` names a work missing there; until it is added, the header shows the spirit's
-  sign). Its beats and stage direction live in `tools/concordance_pacts.py` beside its other words, held to spec 1.5's
-  limits.
+- **Garden units 4 to 6** (Marax, Foras, Bifrons, Amdusias) add each work's row to `WORK_GLANCES` (its name, service
+  line, icon, kept-page rows, blockers and chooser reason; its gauge row, if any, "%1$s/%2$s today"); `check_magic_ui`
+  names any row the server can send without one, and a row missing its name or line. A first task whose act runs its
+  row past 12 words needs an act glance (`garden_pact.act.<act>`; the row is rendered with every act). Marks follow the
+  shape of the server key (`MARK_RULES`), so a work's `missing`, `row.overworked`-like and `matter.*` sentences get
+  theirs with no Java change; row icons other than the work's own are keyed by exact keys (`ICON_RULES`). A work's icon
+  is `WORK_GLANCES[work]["icon"]` and one line in `PactGlance.WORK_ICONS` (`check_magic_ui` holds the two equal; until
+  it is added, the header shows the spirit's sign). Its beats and stage direction live in `tools/concordance_pacts.py`
+  beside its other words, held to spec 1.5's limits.
 
 ## Multiplayer, server authority and persistence
 
@@ -174,116 +177,126 @@ is painted out of the runtime copy and checked; the Discord tab, the Starbuncle 
 Waystones icons that copy vanilla faces and blocks are not imported (`magic_ui.NEVER`). The originals are unchanged and
 nothing in the library is executed.
 
-Every runtime file, its library source, the source's SHA-256 and what changed (`python3 tools/owner_art.py --provenance
-magic_ui` prints the same rows with the adapter's name; `check_magic_ui` holds this table to the files):
+Every runtime file, each library file it is made from (a lit state's outline drawn over a copy has its own row), that
+file's SHA-256 and what changed in that runtime file (`python3 tools/owner_art.py --provenance magic_ui` prints these
+rows from `magic_ui.change`; `check_magic_ui` holds this table to the files, row for row):
 
 | Runtime file (under `assets/jugcraft/`) | Library source (under `art/owner-library/`) | SHA-256 | Change |
 |---|---|---|---|
 | `textures/gui/magic/cosmos.png` | `originals/Magic/assets/jymbelics/textures/gui/description/general/background.png` | `4c4a88ffe3fd5878b3212a3e064ece5eed8bdde00a4cba01a66e25bbcb4905d2` | every other frame of sixteen, each cut to the blob's alpha box (4,14 407x234), stacked |
-| `textures/gui/sprites/magic/action/end.png` | `originals/Magic/assets/jymbelics/textures/gui/description/ability/upgrade_button_active.png` | `4f2b06d9979e76fcc7ca1c2ed1b1e399ef51bbb669ddf92c2d15e8b7c022276f` | the upgrade frame's arrow covered (x 3-10, y 3-9) and a cross or two bars set in it; highlighted: the kit's outline |
-| `textures/gui/sprites/magic/action/end_highlighted.png` | `originals/Magic/assets/jymbelics/textures/gui/description/ability/upgrade_button_active.png` | `4f2b06d9979e76fcc7ca1c2ed1b1e399ef51bbb669ddf92c2d15e8b7c022276f` | the upgrade frame's arrow covered (x 3-10, y 3-9) and a cross or two bars set in it; highlighted: the kit's outline |
-| `textures/gui/sprites/magic/action/end_inactive.png` | `originals/Magic/assets/jymbelics/textures/gui/description/ability/upgrade_button_inactive.png` | `1448f0a53421bf1c62a8a70db7c224fcba05ecc983efcd91e0fa78cbc1eef41d` | the upgrade frame's arrow covered (x 3-10, y 3-9) and a cross or two bars set in it; highlighted: the kit's outline |
-| `textures/gui/sprites/magic/action/offer.png` | `originals/Magic/assets/jymbelics/textures/gui/description/ability/upgrade_button_active.png` | `4f2b06d9979e76fcc7ca1c2ed1b1e399ef51bbb669ddf92c2d15e8b7c022276f` | none: written as RGBA |
-| `textures/gui/sprites/magic/action/offer_highlighted.png` | `originals/Magic/assets/jymbelics/textures/gui/description/ability/upgrade_button_active.png` | `4f2b06d9979e76fcc7ca1c2ed1b1e399ef51bbb669ddf92c2d15e8b7c022276f` | the kit's action outline over it |
-| `textures/gui/sprites/magic/action/offer_inactive.png` | `originals/Magic/assets/jymbelics/textures/gui/description/ability/upgrade_button_inactive.png` | `1448f0a53421bf1c62a8a70db7c224fcba05ecc983efcd91e0fa78cbc1eef41d` | none: written as RGBA |
-| `textures/gui/sprites/magic/action/refresh.png` | `originals/Magic/assets/jymbelics/textures/gui/description/ability/reroll_button_active.png` | `a59b016ab74310cc15b8f45a681ac43ef857e92f268435ffe25fe4f278b96aa7` | none: written as RGBA |
-| `textures/gui/sprites/magic/action/refresh_highlighted.png` | `originals/Magic/assets/jymbelics/textures/gui/description/ability/reroll_button_active.png` | `a59b016ab74310cc15b8f45a681ac43ef857e92f268435ffe25fe4f278b96aa7` | the kit's action outline over it |
-| `textures/gui/sprites/magic/action/refresh_inactive.png` | `originals/Magic/assets/jymbelics/textures/gui/description/ability/reroll_button_inactive.png` | `e0e5d428474a577d2a54743aaccbdd21b2892f31abbf8e948d260b47e5a6f279` | none: written as RGBA |
-| `textures/gui/sprites/magic/action/suspend.png` | `originals/Magic/assets/jymbelics/textures/gui/description/ability/upgrade_button_active.png` | `4f2b06d9979e76fcc7ca1c2ed1b1e399ef51bbb669ddf92c2d15e8b7c022276f` | the upgrade frame's arrow covered (x 3-10, y 3-9) and a cross or two bars set in it; highlighted: the kit's outline |
-| `textures/gui/sprites/magic/action/suspend_highlighted.png` | `originals/Magic/assets/jymbelics/textures/gui/description/ability/upgrade_button_active.png` | `4f2b06d9979e76fcc7ca1c2ed1b1e399ef51bbb669ddf92c2d15e8b7c022276f` | the upgrade frame's arrow covered (x 3-10, y 3-9) and a cross or two bars set in it; highlighted: the kit's outline |
-| `textures/gui/sprites/magic/action/suspend_inactive.png` | `originals/Magic/assets/jymbelics/textures/gui/description/ability/upgrade_button_inactive.png` | `1448f0a53421bf1c62a8a70db7c224fcba05ecc983efcd91e0fa78cbc1eef41d` | the upgrade frame's arrow covered (x 3-10, y 3-9) and a cross or two bars set in it; highlighted: the kit's outline |
-| `textures/gui/sprites/magic/arrow/left.png` | `originals/Magic/assets/jymbelics/textures/hud/abilities/arrow_left.png` | `5286f4dbf1bfda3dab3e3d4d508eaf7812b2fde91ac06bda0e47a53694f4a844` | set 1 in on 13x32; highlighted: the kit's outline over it; disabled: desaturated and halved |
-| `textures/gui/sprites/magic/arrow/left_disabled.png` | `originals/Magic/assets/jymbelics/textures/hud/abilities/arrow_left.png` | `5286f4dbf1bfda3dab3e3d4d508eaf7812b2fde91ac06bda0e47a53694f4a844` | set 1 in on 13x32; highlighted: the kit's outline over it; disabled: desaturated and halved |
-| `textures/gui/sprites/magic/arrow/left_highlighted.png` | `originals/Magic/assets/jymbelics/textures/hud/abilities/arrow_left.png` | `5286f4dbf1bfda3dab3e3d4d508eaf7812b2fde91ac06bda0e47a53694f4a844` | set 1 in on 13x32; highlighted: the kit's outline over it; disabled: desaturated and halved |
-| `textures/gui/sprites/magic/arrow/right.png` | `originals/Magic/assets/jymbelics/textures/hud/abilities/arrow_right.png` | `cb1b558ea763316ac7c1970ea10cf84b857dac3b062ba9d6fc320a354595d96c` | set 1 in on 13x32; highlighted: the kit's outline over it; disabled: desaturated and halved |
-| `textures/gui/sprites/magic/arrow/right_disabled.png` | `originals/Magic/assets/jymbelics/textures/hud/abilities/arrow_right.png` | `cb1b558ea763316ac7c1970ea10cf84b857dac3b062ba9d6fc320a354595d96c` | set 1 in on 13x32; highlighted: the kit's outline over it; disabled: desaturated and halved |
-| `textures/gui/sprites/magic/arrow/right_highlighted.png` | `originals/Magic/assets/jymbelics/textures/hud/abilities/arrow_right.png` | `cb1b558ea763316ac7c1970ea10cf84b857dac3b062ba9d6fc320a354595d96c` | set 1 in on 13x32; highlighted: the kit's outline over it; disabled: desaturated and halved |
-| `textures/gui/sprites/magic/bookmark/documentation.png` | `originals/Magic/assets/ars_jimbaux/textures/gui/documentation_tab.png` | `54a7d00dd8673fe1a40a2d09b2424d8fc320e3e33b8e151796032cab54fddc21` | none: written as RGBA |
+| `textures/gui/sprites/magic/action/end.png` | `originals/Magic/assets/jymbelics/textures/gui/description/ability/upgrade_button_active.png` | `4f2b06d9979e76fcc7ca1c2ed1b1e399ef51bbb669ddf92c2d15e8b7c022276f` | the upgrade frame's arrow covered (x 3-10, y 3-9) and a cross set in it |
+| `textures/gui/sprites/magic/action/end_highlighted.png` | `originals/Magic/assets/jymbelics/textures/gui/description/ability/upgrade_button_active.png` | `4f2b06d9979e76fcc7ca1c2ed1b1e399ef51bbb669ddf92c2d15e8b7c022276f` | the upgrade frame's arrow covered (x 3-10, y 3-9) and a cross set in it, the kit's action outline drawn over it |
+| `textures/gui/sprites/magic/action/end_highlighted.png` | `originals/Magic/assets/jymbelics/textures/gui/description/ability/action_button_outline.png` | `733909e2f675286434d935046fe247199ddbd1500ae86145021f3cf4ab935cd1` | its lit outline: this file drawn over the copy |
+| `textures/gui/sprites/magic/action/end_inactive.png` | `originals/Magic/assets/jymbelics/textures/gui/description/ability/upgrade_button_inactive.png` | `1448f0a53421bf1c62a8a70db7c224fcba05ecc983efcd91e0fa78cbc1eef41d` | the inactive upgrade frame's arrow covered (x 3-10, y 3-9) and a cross set in it |
+| `textures/gui/sprites/magic/action/offer.png` | `originals/Magic/assets/jymbelics/textures/gui/description/ability/upgrade_button_active.png` | `4f2b06d9979e76fcc7ca1c2ed1b1e399ef51bbb669ddf92c2d15e8b7c022276f` | none: copied, written as RGBA |
+| `textures/gui/sprites/magic/action/offer_highlighted.png` | `originals/Magic/assets/jymbelics/textures/gui/description/ability/upgrade_button_active.png` | `4f2b06d9979e76fcc7ca1c2ed1b1e399ef51bbb669ddf92c2d15e8b7c022276f` | the kit's action outline drawn over it |
+| `textures/gui/sprites/magic/action/offer_highlighted.png` | `originals/Magic/assets/jymbelics/textures/gui/description/ability/action_button_outline.png` | `733909e2f675286434d935046fe247199ddbd1500ae86145021f3cf4ab935cd1` | its lit outline: this file drawn over the copy |
+| `textures/gui/sprites/magic/action/offer_inactive.png` | `originals/Magic/assets/jymbelics/textures/gui/description/ability/upgrade_button_inactive.png` | `1448f0a53421bf1c62a8a70db7c224fcba05ecc983efcd91e0fa78cbc1eef41d` | none: copied, written as RGBA |
+| `textures/gui/sprites/magic/action/refresh.png` | `originals/Magic/assets/jymbelics/textures/gui/description/ability/reroll_button_active.png` | `a59b016ab74310cc15b8f45a681ac43ef857e92f268435ffe25fe4f278b96aa7` | none: copied, written as RGBA |
+| `textures/gui/sprites/magic/action/refresh_highlighted.png` | `originals/Magic/assets/jymbelics/textures/gui/description/ability/reroll_button_active.png` | `a59b016ab74310cc15b8f45a681ac43ef857e92f268435ffe25fe4f278b96aa7` | the kit's action outline drawn over it |
+| `textures/gui/sprites/magic/action/refresh_highlighted.png` | `originals/Magic/assets/jymbelics/textures/gui/description/ability/action_button_outline.png` | `733909e2f675286434d935046fe247199ddbd1500ae86145021f3cf4ab935cd1` | its lit outline: this file drawn over the copy |
+| `textures/gui/sprites/magic/action/refresh_inactive.png` | `originals/Magic/assets/jymbelics/textures/gui/description/ability/reroll_button_inactive.png` | `e0e5d428474a577d2a54743aaccbdd21b2892f31abbf8e948d260b47e5a6f279` | none: copied, written as RGBA |
+| `textures/gui/sprites/magic/action/suspend.png` | `originals/Magic/assets/jymbelics/textures/gui/description/ability/upgrade_button_active.png` | `4f2b06d9979e76fcc7ca1c2ed1b1e399ef51bbb669ddf92c2d15e8b7c022276f` | the upgrade frame's arrow covered (x 3-10, y 3-9) and two bars set in it |
+| `textures/gui/sprites/magic/action/suspend_highlighted.png` | `originals/Magic/assets/jymbelics/textures/gui/description/ability/upgrade_button_active.png` | `4f2b06d9979e76fcc7ca1c2ed1b1e399ef51bbb669ddf92c2d15e8b7c022276f` | the upgrade frame's arrow covered (x 3-10, y 3-9) and two bars set in it, the kit's action outline drawn over it |
+| `textures/gui/sprites/magic/action/suspend_highlighted.png` | `originals/Magic/assets/jymbelics/textures/gui/description/ability/action_button_outline.png` | `733909e2f675286434d935046fe247199ddbd1500ae86145021f3cf4ab935cd1` | its lit outline: this file drawn over the copy |
+| `textures/gui/sprites/magic/action/suspend_inactive.png` | `originals/Magic/assets/jymbelics/textures/gui/description/ability/upgrade_button_inactive.png` | `1448f0a53421bf1c62a8a70db7c224fcba05ecc983efcd91e0fa78cbc1eef41d` | the inactive upgrade frame's arrow covered (x 3-10, y 3-9) and two bars set in it |
+| `textures/gui/sprites/magic/arrow/left.png` | `originals/Magic/assets/jymbelics/textures/hud/abilities/arrow_left.png` | `5286f4dbf1bfda3dab3e3d4d508eaf7812b2fde91ac06bda0e47a53694f4a844` | set 1 in on a 13x32 canvas |
+| `textures/gui/sprites/magic/arrow/left_disabled.png` | `originals/Magic/assets/jymbelics/textures/hud/abilities/arrow_left.png` | `5286f4dbf1bfda3dab3e3d4d508eaf7812b2fde91ac06bda0e47a53694f4a844` | set 1 in on a 13x32 canvas, desaturated to a fifth and darkened to half |
+| `textures/gui/sprites/magic/arrow/left_highlighted.png` | `originals/Magic/assets/jymbelics/textures/hud/abilities/arrow_left.png` | `5286f4dbf1bfda3dab3e3d4d508eaf7812b2fde91ac06bda0e47a53694f4a844` | set 1 in on a 13x32 canvas, the kit's arrow outline drawn over it |
+| `textures/gui/sprites/magic/arrow/left_highlighted.png` | `originals/Magic/assets/jymbelics/textures/hud/abilities/arrow_left_outline.png` | `3aa6f5ba3d32cabf26406e2e3212480cacb3fc80809e6dae5a22dfd6973e85f2` | its lit outline: this file drawn over the copy |
+| `textures/gui/sprites/magic/arrow/right.png` | `originals/Magic/assets/jymbelics/textures/hud/abilities/arrow_right.png` | `cb1b558ea763316ac7c1970ea10cf84b857dac3b062ba9d6fc320a354595d96c` | set 1 in on a 13x32 canvas |
+| `textures/gui/sprites/magic/arrow/right_disabled.png` | `originals/Magic/assets/jymbelics/textures/hud/abilities/arrow_right.png` | `cb1b558ea763316ac7c1970ea10cf84b857dac3b062ba9d6fc320a354595d96c` | set 1 in on a 13x32 canvas, desaturated to a fifth and darkened to half |
+| `textures/gui/sprites/magic/arrow/right_highlighted.png` | `originals/Magic/assets/jymbelics/textures/hud/abilities/arrow_right.png` | `cb1b558ea763316ac7c1970ea10cf84b857dac3b062ba9d6fc320a354595d96c` | set 1 in on a 13x32 canvas, the kit's arrow outline drawn over it |
+| `textures/gui/sprites/magic/arrow/right_highlighted.png` | `originals/Magic/assets/jymbelics/textures/hud/abilities/arrow_right_outline.png` | `95e46562a54b85638ac8a538ffc1da2b9fc311847dac009acb2e3a578c83cd0f` | its lit outline: this file drawn over the copy |
+| `textures/gui/sprites/magic/bookmark/documentation.png` | `originals/Magic/assets/ars_jimbaux/textures/gui/documentation_tab.png` | `54a7d00dd8673fe1a40a2d09b2424d8fc320e3e33b8e151796032cab54fddc21` | none: copied, written as RGBA |
 | `textures/gui/sprites/magic/bookmark/documentation_selected.png` | `originals/Magic/assets/ars_jimbaux/textures/gui/documentation_tab.png` | `54a7d00dd8673fe1a40a2d09b2424d8fc320e3e33b8e151796032cab54fddc21` | the ribbon's four purples swapped for the filter tabs' selected pinks |
-| `textures/gui/sprites/magic/bookmark/familiar.png` | `originals/Magic/assets/ars_jimbaux/textures/gui/familiar_tab.png` | `4ea8acb92ee31778c918cb11dd9d2c76755b3e48638119fd5202b9ecb3da5020` | none: written as RGBA |
+| `textures/gui/sprites/magic/bookmark/familiar.png` | `originals/Magic/assets/ars_jimbaux/textures/gui/familiar_tab.png` | `4ea8acb92ee31778c918cb11dd9d2c76755b3e48638119fd5202b9ecb3da5020` | none: copied, written as RGBA |
 | `textures/gui/sprites/magic/bookmark/familiar_selected.png` | `originals/Magic/assets/ars_jimbaux/textures/gui/familiar_tab.png` | `4ea8acb92ee31778c918cb11dd9d2c76755b3e48638119fd5202b9ecb3da5020` | the ribbon's four purples swapped for the filter tabs' selected pinks |
-| `textures/gui/sprites/magic/bookmark/settings.png` | `originals/Magic/assets/ars_jimbaux/textures/gui/settings_tab.png` | `25265a745ea7e9c7b7f847ed7c999034ababab83ef3043572128b14579f6ae87` | none: written as RGBA |
+| `textures/gui/sprites/magic/bookmark/settings.png` | `originals/Magic/assets/ars_jimbaux/textures/gui/settings_tab.png` | `25265a745ea7e9c7b7f847ed7c999034ababab83ef3043572128b14579f6ae87` | none: copied, written as RGBA |
 | `textures/gui/sprites/magic/bookmark/settings_selected.png` | `originals/Magic/assets/ars_jimbaux/textures/gui/settings_tab.png` | `25265a745ea7e9c7b7f847ed7c999034ababab83ef3043572128b14579f6ae87` | the ribbon's four purples swapped for the filter tabs' selected pinks |
-| `textures/gui/sprites/magic/bookmark/spell_style.png` | `originals/Magic/assets/ars_jimbaux/textures/gui/spell_style_tab.png` | `5431015695114f41c1be510c1d4d6cb749873f3c8f609ee4a23a110d06f2825f` | none: written as RGBA |
+| `textures/gui/sprites/magic/bookmark/spell_style.png` | `originals/Magic/assets/ars_jimbaux/textures/gui/spell_style_tab.png` | `5431015695114f41c1be510c1d4d6cb749873f3c8f609ee4a23a110d06f2825f` | none: copied, written as RGBA |
 | `textures/gui/sprites/magic/bookmark/spell_style_selected.png` | `originals/Magic/assets/ars_jimbaux/textures/gui/spell_style_tab.png` | `5431015695114f41c1be510c1d4d6cb749873f3c8f609ee4a23a110d06f2825f` | the ribbon's four purples swapped for the filter tabs' selected pinks |
-| `textures/gui/sprites/magic/bookmark/summon_circle.png` | `originals/Magic/assets/ars_jimbaux/textures/gui/summon_circle_bookmark.png` | `3d557b985120f1a757bd81578afcc988c50041ab76098dbf203b18c6ca2eb556` | none: written as RGBA |
+| `textures/gui/sprites/magic/bookmark/summon_circle.png` | `originals/Magic/assets/ars_jimbaux/textures/gui/summon_circle_bookmark.png` | `3d557b985120f1a757bd81578afcc988c50041ab76098dbf203b18c6ca2eb556` | none: copied, written as RGBA |
 | `textures/gui/sprites/magic/bookmark/summon_circle_selected.png` | `originals/Magic/assets/ars_jimbaux/textures/gui/summon_circle_bookmark.png` | `3d557b985120f1a757bd81578afcc988c50041ab76098dbf203b18c6ca2eb556` | the ribbon's four purples swapped for the filter tabs' selected pinks |
-| `textures/gui/sprites/magic/card/chains.png` | `originals/Magic/assets/jymbelics/textures/gui/description/relic/chains.png` | `586c6a63bc5d638a819f7e75c4b7550277f411c41e44f9027282d202d31aed20` | none: written as RGBA |
-| `textures/gui/sprites/magic/card/completed.png` | `originals/Magic/assets/jymbelics/textures/gui/description/icons/completed.png` | `bbdbb802c760715a0bc614e9db3627370f2629846ce0274dbe55431cc0bd5555` | none: written as RGBA |
-| `textures/gui/sprites/magic/card/frame_active.png` | `originals/Magic/assets/jymbelics/textures/hud/abilities/card_frame_active.png` | `bff42cd877afcd5180741919fc9bf036d4de27ab130ddfb1d47d4308dbdcaa0f` | none: written as RGBA |
-| `textures/gui/sprites/magic/card/frame_inactive.png` | `originals/Magic/assets/jymbelics/textures/hud/abilities/card_frame_inactive.png` | `6ffb0230545c0e52ff4dc4e4638056e0f02f4ea0091f2b536409772205dc2694` | none: written as RGBA |
-| `textures/gui/sprites/magic/card/lock.png` | `originals/Magic/assets/jymbelics/textures/gui/description/relic/icons/lock_inactive.png` | `146efe3d7cb59bd00e0a366c94fae6f8671ceba36ec73f5b6dad178f5df400ba` | none: written as RGBA |
-| `textures/gui/sprites/magic/doc/arrow_down.png` | `originals/Magic/assets/ars_jimbaux/textures/gui/documentation/doc_detail_arrow_down.png` | `7936be447352b05ea4b955e71d2a9722ee167b43949e26cb11961de817e4d3ab` | none: written as RGBA |
-| `textures/gui/sprites/magic/doc/frame_image.png` | `originals/Magic/assets/ars_jimbaux/textures/gui/documentation/doc_frame_image.png` | `dbb9df4fec35f4acb3702c4edac132bff785f4d25fcb9b14097eefa2ab716391` | none: written as RGBA |
-| `textures/gui/sprites/magic/doc/frame_item.png` | `originals/Magic/assets/ars_jimbaux/textures/gui/documentation/doc_detail_frame_item.png` | `15bf2ff13610b5998bc7cb523cc66529714b7d3df8c5bc6a87e4e93365a851ac` | none: written as RGBA |
-| `textures/gui/sprites/magic/doc/frame_pedestal.png` | `originals/Magic/assets/ars_jimbaux/textures/gui/documentation/doc_detail_frame_pedestal.png` | `53520917d83ccc177f5293c656f667756f9527b676f8b2c5a89b291fc0dd36ab` | none: written as RGBA |
-| `textures/gui/sprites/magic/doc/page_left.png` | `originals/Magic/assets/ars_jimbaux/textures/gui/documentation/doc_button_next_page_left.png` | `5549bc1f481708d689b4d944aee27654b843edf4c2dbe9b1ba5911c211850ca7` | none: written as RGBA |
-| `textures/gui/sprites/magic/doc/page_left_hover.png` | `originals/Magic/assets/ars_jimbaux/textures/gui/documentation/doc_button_next_page_left_hover.png` | `89064dbd2d3c90128c9bdac421ed796eaaa342b0e45fdbdc3624d1ce1f4ee64a` | none: written as RGBA |
-| `textures/gui/sprites/magic/doc/page_right.png` | `originals/Magic/assets/ars_jimbaux/textures/gui/documentation/doc_button_next_page_right.png` | `2b2bac00890c75a95f9e5a0b91e3b107f9cd6d6a9c582c6fe843feb7536cdf21` | none: written as RGBA |
-| `textures/gui/sprites/magic/doc/page_right_hover.png` | `originals/Magic/assets/ars_jimbaux/textures/gui/documentation/doc_button_next_page_right_hover.png` | `a7f275738f46a32ba8e4059a8cbea56ac295858abb7631da5adf19927d09da75` | none: written as RGBA |
-| `textures/gui/sprites/magic/doc/underline.png` | `originals/Magic/assets/ars_jimbaux/textures/gui/documentation/doc_detail_underline.png` | `97309f60953f1c42a853ad42fdc5ef9fa4a286889ed06da2287ab5e64d263ff0` | none: written as RGBA |
-| `textures/gui/sprites/magic/glyph/inf.png` | `originals/Magic/assets/ars_jimbaux/textures/gui/bookwyrm_storage_tabs.png` | `810ebc84c8dfe4227c9891b228164dd6134207edf5c87904ca6ee8d2f9c10129` | one glyph cut from the strip (rows 3-9) and made white |
-| `textures/gui/sprites/magic/glyph/key.png` | `originals/Magic/assets/ars_jimbaux/textures/gui/bookwyrm_storage_tabs.png` | `810ebc84c8dfe4227c9891b228164dd6134207edf5c87904ca6ee8d2f9c10129` | one glyph cut from the strip (rows 3-9) and made white |
-| `textures/gui/sprites/magic/glyph/moon.png` | `originals/Magic/assets/ars_jimbaux/textures/gui/bookwyrm_storage_tabs.png` | `810ebc84c8dfe4227c9891b228164dd6134207edf5c87904ca6ee8d2f9c10129` | one glyph cut from the strip (rows 3-9) and made white |
-| `textures/gui/sprites/magic/glyph/sparkle.png` | `originals/Magic/assets/ars_jimbaux/textures/gui/bookwyrm_storage_tabs.png` | `810ebc84c8dfe4227c9891b228164dd6134207edf5c87904ca6ee8d2f9c10129` | one glyph cut from the strip (rows 3-9) and made white |
-| `textures/gui/sprites/magic/glyph/spiral.png` | `originals/Magic/assets/ars_jimbaux/textures/gui/bookwyrm_storage_tabs.png` | `810ebc84c8dfe4227c9891b228164dd6134207edf5c87904ca6ee8d2f9c10129` | one glyph cut from the strip (rows 3-9) and made white |
-| `textures/gui/sprites/magic/glyph/sun.png` | `originals/Magic/assets/ars_jimbaux/textures/gui/bookwyrm_storage_tabs.png` | `810ebc84c8dfe4227c9891b228164dd6134207edf5c87904ca6ee8d2f9c10129` | one glyph cut from the strip (rows 3-9) and made white |
-| `textures/gui/sprites/magic/gold_frame.png` | `originals/Magic/assets/ars_jimbaux/textures/gui/manabar_gui_border.png` | `f258a8e68494ccc30d475a3e304068e9ddf9bf4205e02749d69b634cfc82c13a` | cut out (socket: 4,63 8x8; gold frame: 6,6 102x12) |
-| `textures/gui/sprites/magic/mana.png` | `originals/Magic/assets/ars_jimbaux/textures/gui/manabar_gui_mana.png` | `009f1eb8178086ddb23e568bd3f38a38b78bd97a397d461653c3174ab07255f6` | none: written as RGBA |
-| `textures/gui/sprites/magic/mark/moon.png` | `originals/Magic/assets/ars_jimbaux/textures/gui/bookwyrm_storage_tabs.png` | `810ebc84c8dfe4227c9891b228164dd6134207edf5c87904ca6ee8d2f9c10129` | the strip's moon in colour with a one-pixel dark edge |
-| `textures/gui/sprites/magic/marker/collapsed.png` | `originals/Magic/assets/ars_jimbaux/textures/gui/collapsed_marker.png` | `6ed03d0dc02b400b39a2406b6bd802fd9a30ebafcb9c61320360e7a6f9aa63c4` | none: written as RGBA |
-| `textures/gui/sprites/magic/marker/expanded.png` | `originals/Magic/assets/ars_jimbaux/textures/gui/expanded_marker.png` | `633a679180fb66a36e83f53824c960e0e22ac48391e5a5ff77ec72831b9f1047` | none: written as RGBA |
+| `textures/gui/sprites/magic/card/chains.png` | `originals/Magic/assets/jymbelics/textures/gui/description/relic/chains.png` | `586c6a63bc5d638a819f7e75c4b7550277f411c41e44f9027282d202d31aed20` | none: copied, written as RGBA |
+| `textures/gui/sprites/magic/card/completed.png` | `originals/Magic/assets/jymbelics/textures/gui/description/icons/completed.png` | `bbdbb802c760715a0bc614e9db3627370f2629846ce0274dbe55431cc0bd5555` | none: copied, written as RGBA |
+| `textures/gui/sprites/magic/card/frame_active.png` | `originals/Magic/assets/jymbelics/textures/hud/abilities/card_frame_active.png` | `bff42cd877afcd5180741919fc9bf036d4de27ab130ddfb1d47d4308dbdcaa0f` | none: copied, written as RGBA |
+| `textures/gui/sprites/magic/card/frame_inactive.png` | `originals/Magic/assets/jymbelics/textures/hud/abilities/card_frame_inactive.png` | `6ffb0230545c0e52ff4dc4e4638056e0f02f4ea0091f2b536409772205dc2694` | none: copied, written as RGBA |
+| `textures/gui/sprites/magic/card/lock.png` | `originals/Magic/assets/jymbelics/textures/gui/description/relic/icons/lock_inactive.png` | `146efe3d7cb59bd00e0a366c94fae6f8671ceba36ec73f5b6dad178f5df400ba` | none: copied, written as RGBA |
+| `textures/gui/sprites/magic/doc/arrow_down.png` | `originals/Magic/assets/ars_jimbaux/textures/gui/documentation/doc_detail_arrow_down.png` | `7936be447352b05ea4b955e71d2a9722ee167b43949e26cb11961de817e4d3ab` | none: copied, written as RGBA |
+| `textures/gui/sprites/magic/doc/frame_image.png` | `originals/Magic/assets/ars_jimbaux/textures/gui/documentation/doc_frame_image.png` | `dbb9df4fec35f4acb3702c4edac132bff785f4d25fcb9b14097eefa2ab716391` | none: copied, written as RGBA |
+| `textures/gui/sprites/magic/doc/frame_item.png` | `originals/Magic/assets/ars_jimbaux/textures/gui/documentation/doc_detail_frame_item.png` | `15bf2ff13610b5998bc7cb523cc66529714b7d3df8c5bc6a87e4e93365a851ac` | none: copied, written as RGBA |
+| `textures/gui/sprites/magic/doc/frame_pedestal.png` | `originals/Magic/assets/ars_jimbaux/textures/gui/documentation/doc_detail_frame_pedestal.png` | `53520917d83ccc177f5293c656f667756f9527b676f8b2c5a89b291fc0dd36ab` | none: copied, written as RGBA |
+| `textures/gui/sprites/magic/doc/page_left.png` | `originals/Magic/assets/ars_jimbaux/textures/gui/documentation/doc_button_next_page_left.png` | `5549bc1f481708d689b4d944aee27654b843edf4c2dbe9b1ba5911c211850ca7` | none: copied, written as RGBA |
+| `textures/gui/sprites/magic/doc/page_left_hover.png` | `originals/Magic/assets/ars_jimbaux/textures/gui/documentation/doc_button_next_page_left_hover.png` | `89064dbd2d3c90128c9bdac421ed796eaaa342b0e45fdbdc3624d1ce1f4ee64a` | none: copied, written as RGBA |
+| `textures/gui/sprites/magic/doc/page_right.png` | `originals/Magic/assets/ars_jimbaux/textures/gui/documentation/doc_button_next_page_right.png` | `2b2bac00890c75a95f9e5a0b91e3b107f9cd6d6a9c582c6fe843feb7536cdf21` | none: copied, written as RGBA |
+| `textures/gui/sprites/magic/doc/page_right_hover.png` | `originals/Magic/assets/ars_jimbaux/textures/gui/documentation/doc_button_next_page_right_hover.png` | `a7f275738f46a32ba8e4059a8cbea56ac295858abb7631da5adf19927d09da75` | none: copied, written as RGBA |
+| `textures/gui/sprites/magic/doc/underline.png` | `originals/Magic/assets/ars_jimbaux/textures/gui/documentation/doc_detail_underline.png` | `97309f60953f1c42a853ad42fdc5ef9fa4a286889ed06da2287ab5e64d263ff0` | none: copied, written as RGBA |
+| `textures/gui/sprites/magic/glyph/inf.png` | `originals/Magic/assets/ars_jimbaux/textures/gui/bookwyrm_storage_tabs.png` | `810ebc84c8dfe4227c9891b228164dd6134207edf5c87904ca6ee8d2f9c10129` | the inf glyph cut from the strip (x 4-14, rows 3-9) and made white |
+| `textures/gui/sprites/magic/glyph/key.png` | `originals/Magic/assets/ars_jimbaux/textures/gui/bookwyrm_storage_tabs.png` | `810ebc84c8dfe4227c9891b228164dd6134207edf5c87904ca6ee8d2f9c10129` | the key glyph cut from the strip (x 95-104, rows 3-9) and made white |
+| `textures/gui/sprites/magic/glyph/moon.png` | `originals/Magic/assets/ars_jimbaux/textures/gui/bookwyrm_storage_tabs.png` | `810ebc84c8dfe4227c9891b228164dd6134207edf5c87904ca6ee8d2f9c10129` | the moon glyph cut from the strip (x 59-66, rows 3-9) and made white |
+| `textures/gui/sprites/magic/glyph/sparkle.png` | `originals/Magic/assets/ars_jimbaux/textures/gui/bookwyrm_storage_tabs.png` | `810ebc84c8dfe4227c9891b228164dd6134207edf5c87904ca6ee8d2f9c10129` | the sparkle glyph cut from the strip (x 42-48, rows 3-9) and made white |
+| `textures/gui/sprites/magic/glyph/spiral.png` | `originals/Magic/assets/ars_jimbaux/textures/gui/bookwyrm_storage_tabs.png` | `810ebc84c8dfe4227c9891b228164dd6134207edf5c87904ca6ee8d2f9c10129` | the spiral glyph cut from the strip (x 24-30, rows 3-9) and made white |
+| `textures/gui/sprites/magic/glyph/sun.png` | `originals/Magic/assets/ars_jimbaux/textures/gui/bookwyrm_storage_tabs.png` | `810ebc84c8dfe4227c9891b228164dd6134207edf5c87904ca6ee8d2f9c10129` | the sun glyph cut from the strip (x 114-120, rows 3-9) and made white |
+| `textures/gui/sprites/magic/gold_frame.png` | `originals/Magic/assets/ars_jimbaux/textures/gui/manabar_gui_border.png` | `f258a8e68494ccc30d475a3e304068e9ddf9bf4205e02749d69b634cfc82c13a` | cut out: 102x12 at 6,6 |
+| `textures/gui/sprites/magic/mana.png` | `originals/Magic/assets/ars_jimbaux/textures/gui/manabar_gui_mana.png` | `009f1eb8178086ddb23e568bd3f38a38b78bd97a397d461653c3174ab07255f6` | none: copied, written as RGBA |
+| `textures/gui/sprites/magic/mark/moon.png` | `originals/Magic/assets/ars_jimbaux/textures/gui/bookwyrm_storage_tabs.png` | `810ebc84c8dfe4227c9891b228164dd6134207edf5c87904ca6ee8d2f9c10129` | the strip's moon (x 59-66, rows 3-9) in colour with a one-pixel dark edge |
+| `textures/gui/sprites/magic/marker/collapsed.png` | `originals/Magic/assets/ars_jimbaux/textures/gui/collapsed_marker.png` | `6ed03d0dc02b400b39a2406b6bd802fd9a30ebafcb9c61320360e7a6f9aa63c4` | none: copied, written as RGBA |
+| `textures/gui/sprites/magic/marker/expanded.png` | `originals/Magic/assets/ars_jimbaux/textures/gui/expanded_marker.png` | `633a679180fb66a36e83f53824c960e0e22ac48391e5a5ff77ec72831b9f1047` | none: copied, written as RGBA |
 | `textures/gui/sprites/magic/page_title_frame.png` | `originals/Magic/assets/ars_jimbaux/textures/gui/documentation/doc_frame_splash_page.png` | `3904cd9cedab27e2b53f0f94fef0bb5f2c3372a421cef0bff6c30c060f4407c1` | the "ARS NOUVEAU" lettering (x 32-91, y 11-15) cleared to transparency |
-| `textures/gui/sprites/magic/paper/accept.png` | `originals/Magic/assets/ars_jimbaux/textures/gui/save_bar.png` | `56fdafb178281b2396bb0aec82de7b027ceb77b4debb07b2db15b906ae923a10` | the grey tick or cross (#bfb391, x < 16) inked #2f5a1a or #8f2a17; highlighted: a tenth brighter in a gold rim |
-| `textures/gui/sprites/magic/paper/accept_highlighted.png` | `originals/Magic/assets/ars_jimbaux/textures/gui/save_bar.png` | `56fdafb178281b2396bb0aec82de7b027ceb77b4debb07b2db15b906ae923a10` | the grey tick or cross (#bfb391, x < 16) inked #2f5a1a or #8f2a17; highlighted: a tenth brighter in a gold rim |
-| `textures/gui/sprites/magic/paper/decline.png` | `originals/Magic/assets/ars_jimbaux/textures/gui/clear_bar.png` | `28d9983e2b8defd89295f639612a38fe4bbe26e651bcad0fbb4ea8f02d50eedd` | the grey tick or cross (#bfb391, x < 16) inked #2f5a1a or #8f2a17; highlighted: a tenth brighter in a gold rim |
-| `textures/gui/sprites/magic/paper/decline_highlighted.png` | `originals/Magic/assets/ars_jimbaux/textures/gui/clear_bar.png` | `28d9983e2b8defd89295f639612a38fe4bbe26e651bcad0fbb4ea8f02d50eedd` | the grey tick or cross (#bfb391, x < 16) inked #2f5a1a or #8f2a17; highlighted: a tenth brighter in a gold rim |
-| `textures/gui/sprites/magic/plate.png` | `originals/Magic/assets/jymbelics/textures/gui/description/general/plate_background.png` | `e675c0939bd9bf6e91e31f20157ce42f10110b4b36daf5302ad17f1d89516389` | darkened to 70% / verdigris with the gold rim at 86% / desaturated and halved; highlighted: the kit's outline over it |
-| `textures/gui/sprites/magic/plate_disabled.png` | `originals/Magic/assets/jymbelics/textures/gui/description/general/plate_background.png` | `e675c0939bd9bf6e91e31f20157ce42f10110b4b36daf5302ad17f1d89516389` | darkened to 70% / verdigris with the gold rim at 86% / desaturated and halved; highlighted: the kit's outline over it |
-| `textures/gui/sprites/magic/plate_highlighted.png` | `originals/Magic/assets/jymbelics/textures/gui/description/general/plate_background.png` | `e675c0939bd9bf6e91e31f20157ce42f10110b4b36daf5302ad17f1d89516389` | darkened to 70% / verdigris with the gold rim at 86% / desaturated and halved; highlighted: the kit's outline over it |
-| `textures/gui/sprites/magic/plate_outline.png` | `originals/Magic/assets/jymbelics/textures/gui/description/general/plate_outline.png` | `fa52c3490e12d9ea3a2f97b68785535ddd735fb7bdece9f32f193ae6dba166ba` | none: written as RGBA |
-| `textures/gui/sprites/magic/plate_primary.png` | `originals/Magic/assets/jymbelics/textures/gui/description/general/plate_background.png` | `e675c0939bd9bf6e91e31f20157ce42f10110b4b36daf5302ad17f1d89516389` | darkened to 70% / verdigris with the gold rim at 86% / desaturated and halved; highlighted: the kit's outline over it |
-| `textures/gui/sprites/magic/plate_primary_highlighted.png` | `originals/Magic/assets/jymbelics/textures/gui/description/general/plate_background.png` | `e675c0939bd9bf6e91e31f20157ce42f10110b4b36daf5302ad17f1d89516389` | darkened to 70% / verdigris with the gold rim at 86% / desaturated and halved; highlighted: the kit's outline over it |
-| `textures/gui/sprites/magic/portrait_card.png` | `originals/Magic/assets/jymbelics/textures/gui/description/ability/ability_background.png` | `dd88b9fcd517cb54c91770b418eb0405907e1a4f693e2664ef5e5da95f80aeaa` | the cleaned header's first 48 columns |
-| `textures/gui/sprites/magic/relic_header.png` | `originals/Magic/assets/jymbelics/textures/gui/description/ability/ability_background.png` | `dd88b9fcd517cb54c91770b418eb0405907e1a4f693e2664ef5e5da95f80aeaa` | five painted sockets (x 4-43, y 63-70) given the frame's wood (rows 60-62) |
-| `textures/gui/sprites/magic/school/abjuration.png` | `originals/Magic/assets/ars_jimbaux/textures/gui/schools/abjuration_tooltip.png` | `9eacd06f84d97db89f3421d1c6af7e6120906748376369b56334b5d86f8492f4` | none: written as RGBA |
-| `textures/gui/sprites/magic/school/air.png` | `originals/Magic/assets/ars_jimbaux/textures/gui/schools/air_tooltip.png` | `e046f56dc51e366c7f77b2b918b5f88f659699a0b72e4e0294c279a9cebc2cff` | none: written as RGBA |
-| `textures/gui/sprites/magic/school/conjuration.png` | `originals/Magic/assets/ars_jimbaux/textures/gui/schools/conjuration_tooltip.png` | `6f30fe1debfd57192d8fa79fa3168542cc427b9c9060a60879389b6839869d85` | none: written as RGBA |
-| `textures/gui/sprites/magic/school/earth.png` | `originals/Magic/assets/ars_jimbaux/textures/gui/schools/earth_tooltip.png` | `b9fbc26b0e40f8d217fb3e222e5a93968a48e37433a2376126af58852db3b8ed` | none: written as RGBA |
-| `textures/gui/sprites/magic/school/fire.png` | `originals/Magic/assets/ars_jimbaux/textures/gui/schools/fire_tooltip.png` | `e1aa459814b3bb14b5e97eb0c4dd95de324bc3e1e4fafb07b4c0d01062421428` | none: written as RGBA |
-| `textures/gui/sprites/magic/school/manipulation.png` | `originals/Magic/assets/ars_jimbaux/textures/gui/schools/manipulation_tooltip.png` | `0ea211faec58e5850181db379d9bd9c19804818c7791e64f33181744b631ff96` | none: written as RGBA |
-| `textures/gui/sprites/magic/school/water.png` | `originals/Magic/assets/ars_jimbaux/textures/gui/schools/water_tooltip.png` | `4f0fa7d8ca1492004edf9a23c6aff506be1ba83b3564260d4e2dec30b09e0ae8` | none: written as RGBA |
-| `textures/gui/sprites/magic/scroll_ball.png` | `originals/Magic/assets/ars_jimbaux/textures/gui/scroll_ball.png` | `c32f80fc55a541317431670bdc542a8f4bedc8fd06192c14c7ab0af42273738d` | none: written as RGBA |
-| `textures/gui/sprites/magic/scroll_plain.png` | `originals/Magic/assets/jymbelics/textures/gui/description/relic/abilities_background.png` | `ff2eb02d7e3ec22cb403c4f13a5fe454ff0ce5df6884f0766415c8e28f1786c6` | torn notches in the tiled middle given a clean neighbour's columns (x 50-53, 168-173 rows 6-17; 104-108 rows 64-82; 24-35 rows 74-80) |
-| `textures/gui/sprites/magic/scroll_ruled.png` | `originals/Magic/assets/jymbelics/textures/gui/description/ability/stats_background.png` | `6238fd8cc3f39758c9a8563fe5101bf2405768a64231283546a0a8147f6b86d9` | torn notches in the tiled middle given a clean neighbour's columns (x 50-53, 168-173 rows 6-17; 104-108 rows 64-82; 24-35 rows 74-80) |
-| `textures/gui/sprites/magic/socket.png` | `originals/Magic/assets/jymbelics/textures/gui/description/ability/ability_background.png` | `dd88b9fcd517cb54c91770b418eb0405907e1a4f693e2664ef5e5da95f80aeaa` | cut out (socket: 4,63 8x8; gold frame: 6,6 102x12) |
-| `textures/gui/sprites/magic/spell_book.png` | `originals/Magic/assets/ars_jimbaux/textures/gui/spell_book_template.png` | `4a9bf3be143691a293f7e52d4c0fc396a738a6594047e4ea0532880582d7e326` | none: written as RGBA |
-| `textures/gui/sprites/magic/star/big_active.png` | `originals/Magic/assets/jymbelics/textures/gui/description/general/big_star_active.png` | `29e14520838bd0f3d988419a065ee3316145043f980db2aad6729cb12eeab73d` | none: written as RGBA |
-| `textures/gui/sprites/magic/star/big_inactive.png` | `originals/Magic/assets/jymbelics/textures/gui/description/general/big_star_inactive.png` | `5c5b543f0c25cee69eb14ff6e337e437b6026b01f3ca5af91c5fdc4cb5d7cfe6` | none: written as RGBA |
-| `textures/gui/sprites/magic/star/small_active.png` | `originals/Magic/assets/jymbelics/textures/gui/description/general/small_star_active.png` | `52ac8b4e9289901eefec6ed959734a5ebb5da72681ffdccf4c11000a4b6a43cb` | none: written as RGBA |
-| `textures/gui/sprites/magic/star/small_hole.png` | `originals/Magic/assets/jymbelics/textures/gui/description/general/small_star_hole.png` | `a4b71b9ddb2ad2986bbf69eec53b9ca0bf1495bdfc1e9c14f65136d48cbf6b3d` | none: written as RGBA |
-| `textures/gui/sprites/tooltip/magic_background.png` | `originals/Magic/assets/ars_jimbaux/textures/gui/manabar_gui_border.png` | `f258a8e68494ccc30d475a3e304068e9ddf9bf4205e02749d69b634cfc82c13a` | the gold frame set 7 in on a 116x26 canvas (frame: its well cleared) |
-| `textures/gui/sprites/tooltip/magic_frame.png` | `originals/Magic/assets/ars_jimbaux/textures/gui/manabar_gui_border.png` | `f258a8e68494ccc30d475a3e304068e9ddf9bf4205e02749d69b634cfc82c13a` | the gold frame set 7 in on a 116x26 canvas (frame: its well cleared) |
-| `textures/gui/sprites/magic/glyph/arrow.png` | drawn for Jugcraft |  | drawn for Jugcraft (no library file) |
-| `textures/gui/sprites/magic/glyph/ask.png` | drawn for Jugcraft |  | drawn for Jugcraft (no library file) |
-| `textures/gui/sprites/magic/glyph/bed.png` | drawn for Jugcraft |  | drawn for Jugcraft (no library file) |
-| `textures/gui/sprites/magic/glyph/calendar.png` | drawn for Jugcraft |  | drawn for Jugcraft (no library file) |
-| `textures/gui/sprites/magic/glyph/clock.png` | drawn for Jugcraft |  | drawn for Jugcraft (no library file) |
-| `textures/gui/sprites/magic/glyph/cross.png` | drawn for Jugcraft |  | drawn for Jugcraft (no library file) |
-| `textures/gui/sprites/magic/glyph/hourglass.png` | drawn for Jugcraft |  | drawn for Jugcraft (no library file) |
-| `textures/gui/sprites/magic/glyph/lock.png` | drawn for Jugcraft |  | drawn for Jugcraft (no library file) |
-| `textures/gui/sprites/magic/glyph/party.png` | drawn for Jugcraft |  | drawn for Jugcraft (no library file) |
-| `textures/gui/sprites/magic/glyph/pause.png` | drawn for Jugcraft |  | drawn for Jugcraft (no library file) |
-| `textures/gui/sprites/magic/glyph/person.png` | drawn for Jugcraft |  | drawn for Jugcraft (no library file) |
-| `textures/gui/sprites/magic/glyph/pin.png` | drawn for Jugcraft |  | drawn for Jugcraft (no library file) |
-| `textures/gui/sprites/magic/glyph/ring.png` | drawn for Jugcraft |  | drawn for Jugcraft (no library file) |
-| `textures/gui/sprites/magic/glyph/scroll.png` | drawn for Jugcraft |  | drawn for Jugcraft (no library file) |
-| `textures/gui/sprites/magic/glyph/tick.png` | drawn for Jugcraft |  | drawn for Jugcraft (no library file) |
-| `textures/gui/sprites/magic/mark/ask.png` | drawn for Jugcraft |  | drawn for Jugcraft (no library file) |
-| `textures/gui/sprites/magic/mark/cross.png` | drawn for Jugcraft |  | drawn for Jugcraft (no library file) |
-| `textures/gui/sprites/magic/mark/hourglass.png` | drawn for Jugcraft |  | drawn for Jugcraft (no library file) |
-| `textures/gui/sprites/magic/mark/lock.png` | drawn for Jugcraft |  | drawn for Jugcraft (no library file) |
-| `textures/gui/sprites/magic/mark/tick.png` | drawn for Jugcraft |  | drawn for Jugcraft (no library file) |
+| `textures/gui/sprites/magic/paper/accept.png` | `originals/Magic/assets/ars_jimbaux/textures/gui/save_bar.png` | `56fdafb178281b2396bb0aec82de7b027ceb77b4debb07b2db15b906ae923a10` | the grey tick (#bfb391, x < 16) inked green #2f5a1a |
+| `textures/gui/sprites/magic/paper/accept_highlighted.png` | `originals/Magic/assets/ars_jimbaux/textures/gui/save_bar.png` | `56fdafb178281b2396bb0aec82de7b027ceb77b4debb07b2db15b906ae923a10` | the grey tick (#bfb391, x < 16) inked green #2f5a1a, a tenth brighter, in a one-pixel gold rim |
+| `textures/gui/sprites/magic/paper/decline.png` | `originals/Magic/assets/ars_jimbaux/textures/gui/clear_bar.png` | `28d9983e2b8defd89295f639612a38fe4bbe26e651bcad0fbb4ea8f02d50eedd` | the grey cross (#bfb391, x < 16) inked red #8f2a17 |
+| `textures/gui/sprites/magic/paper/decline_highlighted.png` | `originals/Magic/assets/ars_jimbaux/textures/gui/clear_bar.png` | `28d9983e2b8defd89295f639612a38fe4bbe26e651bcad0fbb4ea8f02d50eedd` | the grey cross (#bfb391, x < 16) inked red #8f2a17, a tenth brighter, in a one-pixel gold rim |
+| `textures/gui/sprites/magic/plate.png` | `originals/Magic/assets/jymbelics/textures/gui/description/general/plate_background.png` | `e675c0939bd9bf6e91e31f20157ce42f10110b4b36daf5302ad17f1d89516389` | darkened to 70% |
+| `textures/gui/sprites/magic/plate_disabled.png` | `originals/Magic/assets/jymbelics/textures/gui/description/general/plate_background.png` | `e675c0939bd9bf6e91e31f20157ce42f10110b4b36daf5302ad17f1d89516389` | desaturated to a quarter and darkened to half |
+| `textures/gui/sprites/magic/plate_highlighted.png` | `originals/Magic/assets/jymbelics/textures/gui/description/general/plate_background.png` | `e675c0939bd9bf6e91e31f20157ce42f10110b4b36daf5302ad17f1d89516389` | darkened to 70%, the kit's plate outline drawn over it |
+| `textures/gui/sprites/magic/plate_highlighted.png` | `originals/Magic/assets/jymbelics/textures/gui/description/general/plate_outline.png` | `fa52c3490e12d9ea3a2f97b68785535ddd735fb7bdece9f32f193ae6dba166ba` | its lit outline: this file drawn over the copy |
+| `textures/gui/sprites/magic/plate_outline.png` | `originals/Magic/assets/jymbelics/textures/gui/description/general/plate_outline.png` | `fa52c3490e12d9ea3a2f97b68785535ddd735fb7bdece9f32f193ae6dba166ba` | none: copied, written as RGBA |
+| `textures/gui/sprites/magic/plate_primary.png` | `originals/Magic/assets/jymbelics/textures/gui/description/general/plate_background.png` | `e675c0939bd9bf6e91e31f20157ce42f10110b4b36daf5302ad17f1d89516389` | a verdigris tint at 86%, the gold rim kept |
+| `textures/gui/sprites/magic/plate_primary_highlighted.png` | `originals/Magic/assets/jymbelics/textures/gui/description/general/plate_background.png` | `e675c0939bd9bf6e91e31f20157ce42f10110b4b36daf5302ad17f1d89516389` | a verdigris tint at 86%, the gold rim kept, the kit's plate outline drawn over it |
+| `textures/gui/sprites/magic/plate_primary_highlighted.png` | `originals/Magic/assets/jymbelics/textures/gui/description/general/plate_outline.png` | `fa52c3490e12d9ea3a2f97b68785535ddd735fb7bdece9f32f193ae6dba166ba` | its lit outline: this file drawn over the copy |
+| `textures/gui/sprites/magic/portrait_card.png` | `originals/Magic/assets/jymbelics/textures/gui/description/ability/ability_background.png` | `dd88b9fcd517cb54c91770b418eb0405907e1a4f693e2664ef5e5da95f80aeaa` | the painted sockets cleared (x 4-43, y 63-70) and its first 48 columns cut out (the gilded frame, 48x77) |
+| `textures/gui/sprites/magic/relic_header.png` | `originals/Magic/assets/jymbelics/textures/gui/description/ability/ability_background.png` | `dd88b9fcd517cb54c91770b418eb0405907e1a4f693e2664ef5e5da95f80aeaa` | the five painted sockets (x 4-43, y 63-70) given the frame's wood (rows 60-62) |
+| `textures/gui/sprites/magic/school/abjuration.png` | `originals/Magic/assets/ars_jimbaux/textures/gui/schools/abjuration_tooltip.png` | `9eacd06f84d97db89f3421d1c6af7e6120906748376369b56334b5d86f8492f4` | none: copied, written as RGBA |
+| `textures/gui/sprites/magic/school/air.png` | `originals/Magic/assets/ars_jimbaux/textures/gui/schools/air_tooltip.png` | `e046f56dc51e366c7f77b2b918b5f88f659699a0b72e4e0294c279a9cebc2cff` | none: copied, written as RGBA |
+| `textures/gui/sprites/magic/school/conjuration.png` | `originals/Magic/assets/ars_jimbaux/textures/gui/schools/conjuration_tooltip.png` | `6f30fe1debfd57192d8fa79fa3168542cc427b9c9060a60879389b6839869d85` | none: copied, written as RGBA |
+| `textures/gui/sprites/magic/school/earth.png` | `originals/Magic/assets/ars_jimbaux/textures/gui/schools/earth_tooltip.png` | `b9fbc26b0e40f8d217fb3e222e5a93968a48e37433a2376126af58852db3b8ed` | none: copied, written as RGBA |
+| `textures/gui/sprites/magic/school/fire.png` | `originals/Magic/assets/ars_jimbaux/textures/gui/schools/fire_tooltip.png` | `e1aa459814b3bb14b5e97eb0c4dd95de324bc3e1e4fafb07b4c0d01062421428` | none: copied, written as RGBA |
+| `textures/gui/sprites/magic/school/manipulation.png` | `originals/Magic/assets/ars_jimbaux/textures/gui/schools/manipulation_tooltip.png` | `0ea211faec58e5850181db379d9bd9c19804818c7791e64f33181744b631ff96` | none: copied, written as RGBA |
+| `textures/gui/sprites/magic/school/water.png` | `originals/Magic/assets/ars_jimbaux/textures/gui/schools/water_tooltip.png` | `4f0fa7d8ca1492004edf9a23c6aff506be1ba83b3564260d4e2dec30b09e0ae8` | none: copied, written as RGBA |
+| `textures/gui/sprites/magic/scroll_ball.png` | `originals/Magic/assets/ars_jimbaux/textures/gui/scroll_ball.png` | `c32f80fc55a541317431670bdc542a8f4bedc8fd06192c14c7ab0af42273738d` | none: copied, written as RGBA |
+| `textures/gui/sprites/magic/scroll_plain.png` | `originals/Magic/assets/jymbelics/textures/gui/description/relic/abilities_background.png` | `ff2eb02d7e3ec22cb403c4f13a5fe454ff0ce5df6884f0766415c8e28f1786c6` | the torn notches in the tiled middle given a clean neighbour's columns (x 50-53 and 168-173, rows 6-17; 104-108, rows 64-82; 24-35, rows 74-80) |
+| `textures/gui/sprites/magic/scroll_ruled.png` | `originals/Magic/assets/jymbelics/textures/gui/description/ability/stats_background.png` | `6238fd8cc3f39758c9a8563fe5101bf2405768a64231283546a0a8147f6b86d9` | the torn notches in the tiled middle given a clean neighbour's columns (x 50-53 and 168-173, rows 6-17; 104-108, rows 64-82; 24-35, rows 74-80) |
+| `textures/gui/sprites/magic/socket.png` | `originals/Magic/assets/jymbelics/textures/gui/description/ability/ability_background.png` | `dd88b9fcd517cb54c91770b418eb0405907e1a4f693e2664ef5e5da95f80aeaa` | cut out: 8x8 at 4,63 |
+| `textures/gui/sprites/magic/spell_book.png` | `originals/Magic/assets/ars_jimbaux/textures/gui/spell_book_template.png` | `4a9bf3be143691a293f7e52d4c0fc396a738a6594047e4ea0532880582d7e326` | none: copied, written as RGBA |
+| `textures/gui/sprites/magic/star/big_active.png` | `originals/Magic/assets/jymbelics/textures/gui/description/general/big_star_active.png` | `29e14520838bd0f3d988419a065ee3316145043f980db2aad6729cb12eeab73d` | none: copied, written as RGBA |
+| `textures/gui/sprites/magic/star/big_inactive.png` | `originals/Magic/assets/jymbelics/textures/gui/description/general/big_star_inactive.png` | `5c5b543f0c25cee69eb14ff6e337e437b6026b01f3ca5af91c5fdc4cb5d7cfe6` | none: copied, written as RGBA |
+| `textures/gui/sprites/magic/star/small_active.png` | `originals/Magic/assets/jymbelics/textures/gui/description/general/small_star_active.png` | `52ac8b4e9289901eefec6ed959734a5ebb5da72681ffdccf4c11000a4b6a43cb` | none: copied, written as RGBA |
+| `textures/gui/sprites/magic/star/small_hole.png` | `originals/Magic/assets/jymbelics/textures/gui/description/general/small_star_hole.png` | `a4b71b9ddb2ad2986bbf69eec53b9ca0bf1495bdfc1e9c14f65136d48cbf6b3d` | none: copied, written as RGBA |
+| `textures/gui/sprites/tooltip/magic_background.png` | `originals/Magic/assets/ars_jimbaux/textures/gui/manabar_gui_border.png` | `f258a8e68494ccc30d475a3e304068e9ddf9bf4205e02749d69b634cfc82c13a` | the gauge frame (102x12 at 6,6) set 7 in on a 116x26 canvas: its gold rim and purple well |
+| `textures/gui/sprites/tooltip/magic_frame.png` | `originals/Magic/assets/ars_jimbaux/textures/gui/manabar_gui_border.png` | `f258a8e68494ccc30d475a3e304068e9ddf9bf4205e02749d69b634cfc82c13a` | the gauge frame (102x12 at 6,6) set 7 in on a 116x26 canvas: its gold rim alone, the purple well cleared |
+| `textures/gui/sprites/magic/glyph/arrow.png` | drawn for Jugcraft |  | the arrow glyph, drawn for Jugcraft in the strip's one-pixel style, white (no library file) |
+| `textures/gui/sprites/magic/glyph/ask.png` | drawn for Jugcraft |  | the ask glyph, drawn for Jugcraft in the strip's one-pixel style, white (no library file) |
+| `textures/gui/sprites/magic/glyph/back.png` | drawn for Jugcraft |  | the back glyph, drawn for Jugcraft in the strip's one-pixel style, white (no library file) |
+| `textures/gui/sprites/magic/glyph/bed.png` | drawn for Jugcraft |  | the bed glyph, drawn for Jugcraft in the strip's one-pixel style, white (no library file) |
+| `textures/gui/sprites/magic/glyph/calendar.png` | drawn for Jugcraft |  | the calendar glyph, drawn for Jugcraft in the strip's one-pixel style, white (no library file) |
+| `textures/gui/sprites/magic/glyph/clock.png` | drawn for Jugcraft |  | the clock glyph, drawn for Jugcraft in the strip's one-pixel style, white (no library file) |
+| `textures/gui/sprites/magic/glyph/cross.png` | drawn for Jugcraft |  | the cross glyph, drawn for Jugcraft in the strip's one-pixel style, white (no library file) |
+| `textures/gui/sprites/magic/glyph/hourglass.png` | drawn for Jugcraft |  | the hourglass glyph, drawn for Jugcraft in the strip's one-pixel style, white (no library file) |
+| `textures/gui/sprites/magic/glyph/lock.png` | drawn for Jugcraft |  | the lock glyph, drawn for Jugcraft in the strip's one-pixel style, white (no library file) |
+| `textures/gui/sprites/magic/glyph/party.png` | drawn for Jugcraft |  | the party glyph, drawn for Jugcraft in the strip's one-pixel style, white (no library file) |
+| `textures/gui/sprites/magic/glyph/pause.png` | drawn for Jugcraft |  | the pause glyph, drawn for Jugcraft in the strip's one-pixel style, white (no library file) |
+| `textures/gui/sprites/magic/glyph/person.png` | drawn for Jugcraft |  | the person glyph, drawn for Jugcraft in the strip's one-pixel style, white (no library file) |
+| `textures/gui/sprites/magic/glyph/pin.png` | drawn for Jugcraft |  | the pin glyph, drawn for Jugcraft in the strip's one-pixel style, white (no library file) |
+| `textures/gui/sprites/magic/glyph/ring.png` | drawn for Jugcraft |  | the ring glyph, drawn for Jugcraft in the strip's one-pixel style, white (no library file) |
+| `textures/gui/sprites/magic/glyph/scroll.png` | drawn for Jugcraft |  | the scroll glyph, drawn for Jugcraft in the strip's one-pixel style, white (no library file) |
+| `textures/gui/sprites/magic/glyph/tick.png` | drawn for Jugcraft |  | the tick glyph, drawn for Jugcraft in the strip's one-pixel style, white (no library file) |
+| `textures/gui/sprites/magic/mark/ask.png` | drawn for Jugcraft |  | the drawn ask glyph in colour with a one-pixel dark edge (no library file) |
+| `textures/gui/sprites/magic/mark/cross.png` | drawn for Jugcraft |  | the drawn cross glyph in colour with a one-pixel dark edge (no library file) |
+| `textures/gui/sprites/magic/mark/hourglass.png` | drawn for Jugcraft |  | the drawn hourglass glyph in colour with a one-pixel dark edge (no library file) |
+| `textures/gui/sprites/magic/mark/lock.png` | drawn for Jugcraft |  | the drawn lock glyph in colour with a one-pixel dark edge (no library file) |
+| `textures/gui/sprites/magic/mark/tick.png` | drawn for Jugcraft |  | the drawn tick glyph in colour with a one-pixel dark edge (no library file) |
 
 ## Deviations from the spec in the first commit
 
@@ -326,10 +339,69 @@ magic_ui` prints the same rows with the adapter's name; `check_magic_ui` holds t
 - **Glances and short labels beyond the spec's tables:** `answer.resolved` ("Answer kept": the kept answer's plate already
   carries the tick), `deposited`, `reckoning.recalled`, each service's name (`term.service.<work>.name`), and the short
   labels `used`, `resonance` (the spec's "6/8 resonance") and `any_of` (the upkeep chip's hover).
-- **Bathin's matter page while his first task waits** draws that task's row (13 words) above the matter: the spec
-  measured the kept page from a picture without it. Its client test allows the kept budget plus that row's words; where the
-  full layout cannot hold the page (with his last carry's row too, in the composed picture at 427x240), it is drawn
-  compact and the header becomes the plate row.
+- **Bathin's matter page while his first task waits** draws that task's row above the matter (13 words in this commit,
+  10 after the review's fixes): the spec measured the kept page from a picture without it. Its client test allows the
+  kept budget plus that row's words (a session decision, now recorded under Decisions); where the full layout cannot hold
+  the page (with his last carry's row too, in the composed picture at 427x240), it is drawn compact and the header
+  becomes the plate row.
+
+## What the review's fixes change
+
+The pact screens' review (31 findings confirmed, 13 rejected) found two errors that stopped the build and places where the
+screens still read long or ran off their parts. What a player sees first:
+
+- **Every answer is a few words.** A refusal or a done answer at the body's top is now one short line with its mark
+  ("You may not seal here", "Roster full (16): release one", "Done for today"), never the whole sentence in bold: 45 new
+  glances cover everything the perch can answer (PactMenu's own answers, sealing, suspending, ending and seating, the
+  deposits, Star-reckoning and the closed page's notes, the conflicting-agreement diagnostic among them). The whole
+  sentence stays the line's narration and tip. `check_magic_ui` reads those answers from the Java and names any without a
+  glance.
+- **A first task and a research step read short.** Bathin's first task draws its act short ("First task: use an awake
+  living device by hand here", 10 words, was 18), and The Garden's Regard's specimen step draws "Examine a garden
+  specimen: sneak and use it in the air" (11, was 19 and cut mid-action). A glance's argument that is itself a sentence
+  with a glance is drawn by that glance (`PactGlance.nestedKey`); `check_magic_ui` renders the first-task row with every
+  act and the missing-step blocker with every pact research's steps, in words and in lines at the narrowest scroll.
+- **Nothing runs off its part.** Today's gauge shortens, or takes the line under the state, when the state is long
+  ("Offering due: 2 days left", "Suspended: an offering resumes it"), and "0/4 ahead" moves to a line with room; the
+  header's service line is held to its room (cut with "…" in a longer language). `outside()` now holds header and
+  pinned controls to their own areas and counts a caption, and the wide layout starts at 368 so beat 3's "Terms" caption
+  stays on screen at 360 to 367.
+- **The smallest screen shows every blocker.** At 320x180 a spirit's three blockers show whole above the price: his service
+  line moves into the scroll after them while any stand, and every scroll ends on a whole line.
+- **Clearer marks.** More's marker takes the heading ink (it was 1.12:1 on the scroll); the narrow footer's paging plates
+  draw cream arrows (a new drawn glyph, `back`, and `arrow`; the documentation's dark page arrows read 1.3 to 1.9:1 on
+  the wood); a disabled plate's label is `#c8bcac` (5.0 to 5.6:1; `plate_disabled` joins the contrast check); the compact
+  header's "Ended" is cream.
+- **The seat page keeps his portrait:** it draws only his first chip row (hours, area, quota), so it no longer falls back to
+  the compact layout.
+- **Star-reckoning's first recallable pattern is chosen**, so Recall is ready at once.
+- **Detail stays one hover away:** each chooser card's tip and narration are the server's whole sentence of what is
+  missing; End's hover adds the server's own sentence of what ending does; the price narrates what is short ("Short: Ender
+  Pearl 1/2, 6/8 resonance") while the marks are drawn; a creative player's resonance is never marked short.
+- **The portraits move:** the chooser's, the stranded cards' and the departed spirit's cached portraits are drawn at the
+  frame's partial tick (GeckoLib advances an animation only when it is not 1), so they play their idle pose; under reduced
+  motion they hold still. The cache is cleared on leaving a world.
+- **Records and checks:** every runtime file now names each library file it is made from (the lit states' outlines have
+  rows of their own) and its own change; the four lit copies whose tone changes everywhere keep their shape outside their
+  outline; an empty contrast box is reported, not raised; every pact-screen shot asserts its budget (`check_pact_screen`
+  reads each shot's stretch of the test), and the two-client refusal shot now does; `check_pacts` reads `isInGameUi`
+  from the class that declares it; a work's gauge row must read "%1$s/%2$s today"; a change to the magic screens' words
+  alone now selects their client tests (`tools/select_client_tests.py` `MAGIC_WORDS`).
+- **Units 4 to 6 add data, not code paths:** a work's name and service line live in its `WORK_GLANCES` row (a row without
+  them is reported, not a failure to load the module), Bathin's row icons are keyed by their exact keys, and the comments
+  and GC-S26 now name everything a new work adds (its row, an act glance when its first task runs long, and its icon's
+  line in `PactGlance.WORK_ICONS`).
+
+Deviations from the spec in this commit:
+
+- **Wide from 368, not 360** (spec 2.11): at 360 to 367 beat 3's captioned arrow ran off the screen.
+- **In the compact layout, while blockers stand, the service line is in the scroll after them** (the design's 320x180
+  picture keeps it pinned): the compact text area (102 tall at 320x180) cannot hold the service line, three two-line
+  blockers, the price row and a scroll of at least 24.
+- **The narrow footer's paging plates draw drawn glyphs** (`back`, `arrow`), not the documentation's page arrows (spec 2.1).
+- **Answer glances beyond spec 1.7's table** (45, listed in `tools/magic_ui.py` `GLANCES` and `ANSWERS`), an act glance
+  (`garden_pact.act.device`), a step glance (`step.concordance_garden_regard_encountered`) and two short labels for the
+  price's narration (`short.have`, `short.short_of`).
 
 ## Known limits
 
@@ -341,12 +413,44 @@ magic_ui` prints the same rows with the adapter's name; `check_magic_ui` holds t
   rows than the design's pictures (Bathin's first task beside his matter, above) can draw more.
 - At 320x180 a kept page with a matter, its answers and a first task scrolls: the answers sit below the fold, with the
   scroll's gold ball showing there is more.
-- A blocker drawn from an advancement's description keeps that description's words: The Garden's Regard's first
-  ("Examine a garden specimen: ...") is 19 words, over the blockers' 14. Shortening it is the research's own text
-  (also its advancement), left for the checkpoint.
+- A research step's blocker draws its own short glance only where the advancement's description runs long (The
+  Garden's Regard's first, 19 words: "Examine a garden specimen: sneak and use it in the air"); the advancement's own text is
+  unchanged and is the blocker's tip and narration.
+- The pixel limits `check_magic_ui` holds (two lines for a blocker or a row at the narrowest scroll, the header's room for a
+  service line) use the default font's advances for English; another language or Force Unicode reflows at runtime, and a
+  service line too long for the header is cut with "…", its whole sentence in its tip.
 - Stains still repeat on scrolls drawn much wider than their 243 pixels; the pact panel is 320.
 
 ## Verification
+
+**The review's fixes**, run locally, all passing (none of it in CI, and nothing in Minecraft):
+
+- The generators, one at a time: `python3 -B tools/generate_material_data.py` (the 45 answer glances, the act and step
+  glances and two short labels) and `python3 tools/owner_art.py` (the drawn `back` glyph); `python3 tools/owner_art.py
+  --check`: every imported owner file matches its source; `python3 tools/magic_ui.py`: art, glances and short labels hold.
+- `python3 -B tools/check_mod_data.py` (with `check_magic_ui`, `check_pact_screen` and `check_pacts` as changed): PASS.
+- `python3 -m unittest discover -s scripts/tests` (`test_magic_ui.py` now 37 tests, `test_client_test_selection.py` 17),
+  `python3 scripts/check_repository.py`, `python3 tools/concordance_journey.py --check`, `python3
+  tools/concordance_economy.py` (gaining cycles: none), `python3 tools/check_icon_maps.py`, `node --test
+  tools/world-designer/model.test.cjs` (12), `git diff --check`.
+- Every changed Java file parses (15 files); every vanilla and GeckoLib call added was read in the decompiled 26.3
+  sources, GeckoLib 5.5.7 or the repository's own uses (`EntityRenderDispatcher.extractEntity`, `GuiGraphicsExtractor.entity`
+  and `blitSprite` with a colour, `Font.substrByWidth`, `Language.getVisualOrder`, `NarrationElementOutput.narrationTrigger`,
+  GeckoLib's `AnimationController` partial-tick rule). Nothing compiled.
+- The audits' mutations, each on a scratch copy of the tree: 20 made, 20 caught (PactScreen declaring itself no in-game
+  screen; the two-client refusal shot and Buer's overworked shot without their budgets; the skip not held to the header;
+  a seal refusal the Java sends without a glance; an answer's glance dropped; a refusal glance over six words; Bathin's
+  act and the specimen step drawn whole; a gauge row naming its arguments another way; a service line wider than the
+  header; a blocker running to three lines; a provenance row's change not the file's own; an outline's row dropped; a
+  lit plate's shape changed outside its outline; a contrast box with no opaque fill; the disabled grey back to #a89c8c;
+  Bathin's row icons by suffix on the Java side; the `back` glyph's width wrong in Java; the language rule dropped from
+  the client-test selection). Two of them first missed because the mutated words were not long enough to break the
+  limit; written longer, both were caught.
+- Every pact page composed again from the generated files (a port of the screen's geometry with these fixes) at 427x240,
+  320x180, 480x270 and 360x240, with three new states (Buer's offering due and held for upkeep, Bathin's matter with his
+  last carry to a Gleaner), and the changed sprites at GUI scale 2, looked at beside the design's pictures. Each page's
+  `outside()` (with its header and pinned areas and the caption) was empty in the port at all four sizes. Bathin's matter
+  page with his first task draws 55 words in the port (the session decision above).
 
 **The screen commit**, run locally, all passing (none of it in CI, and nothing in Minecraft):
 

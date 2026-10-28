@@ -19,8 +19,10 @@ RosterGlance; the common counting is concordance/spirits/PactAfford.java):
 
 tools/owner_art.py writes and checks the art (OWNER_FILES and ADAPTED as adaptations, BUILT as builds, MCMETA beside
 them); tools/concordance.py calls lang_entries(). Nothing in the library is executed; the originals are never written.
-Future garden spirits add their own rows to WORK_GLANCES (their service line, kept-page rows, blockers and chooser
-reason) and nothing else here.
+A future garden spirit's unit adds its work's row to WORK_GLANCES (its service line and name, icon, kept-page rows,
+blockers and chooser reason), a glance for its first task's act when the row would run long (ACT_GLANCES), and its
+icon's line in client/PactGlance.WORK_ICONS, which check_magic_ui holds equal to WORK_GLANCES; its marks and rows' icons
+follow the shape of their keys (MARK_RULES, ICON_RULES).
 """
 import io
 import json
@@ -91,7 +93,7 @@ NEVER = ("discord_tab", "starbuncle", "lily", "nook", "waystones", "/groups/play
 PALETTE = {
     "ink": 0x403527, "dim": 0x64523C, "heading": 0x7C281C, "name": 0x5B2216, "green": 0x2F5A1A, "need": 0x704808,
     "red": 0x8F2A17, "cream": 0xFFFAEE, "lavender": 0xB6A8D8, "gold": 0xFFC43B, "good": 0xB9E05A, "warn": 0xFFA53B,
-    "bad": 0xFF7466, "grey": 0xA89C8C,
+    "bad": 0xFF7466, "grey": 0xC8BCAC,
 }
 # Each sprite's main fill (the most common opaque colour inside the box) against every ink drawn on it: 4.5:1 or more
 # (spec 2.3; critique 6). The stain ratio (the second fill) is reported by contrast_rows(), not held.
@@ -101,6 +103,8 @@ CONTRAST = {
     S + "relic_header.png": ((60, 20, 220, 60), ("ink", "dim", "name", "heading", "green", "need")),
     S + "plate.png": ((3, 3, 47, 16), ("cream",)),
     S + "plate_primary.png": ((3, 3, 47, 16), ("cream",)),
+    # A disabled plate's label (spec 2.3's rule; WCAG itself exempts disabled controls).
+    S + "plate_disabled.png": ((3, 3, 47, 16), ("grey",)),
     S + "gold_frame.png": ((3, 3, 99, 9), ("cream", "gold", "lavender", "good", "warn", "bad")),
     S + "spell_book.png": ((30, 100, 120, 140), ("ink", "dim", "heading", "red", "green")),
     S + "paper/accept.png": ((18, 3, 50, 12), ("ink",)),
@@ -144,6 +148,9 @@ DRAWN = {
     "arrow": [".......", "...#...", "....#..", "######.", "....#..", "...#...", "......."],
     "ask": [".###.", "#...#", "....#", "..##.", "..#..", ".....", "..#.."],
     "bed": [".......", "#......", "#.#####", "#######", "#.....#", ".......", "......."],
+    # The narrow footer's back plate (the arrow's mirror): cream on the plate, as the documentation's dark page arrows
+    # could not be (1.3 to 1.9:1).
+    "back": [".......", "...#...", "..#....", ".######", "..#....", "...#...", "......."],
 }
 GLYPHS = tuple(WYRM) + tuple(DRAWN)  # Java: MagicArt.Glyph, in this order
 # The state marks (spec 2.5): a glyph in colour with a one-pixel dark edge, nine rows tall and its glyph's width and two
@@ -186,18 +193,19 @@ ADAPTED = {
                                "region": {"all": True, "alpha": True}},
     S + "plate_highlighted.png": {"source": JB + "general/plate_background.png", "adapter": "plate", "kind": "normal",
                                   "outline": JB + "general/plate_outline.png",
-                                  "region": {"all": True, "overlay": JB + "general/plate_outline.png"}},
+                                  "region": {"all": True, "alpha": True, "overlay": JB + "general/plate_outline.png"}},
     S + "plate_primary_highlighted.png": {"source": JB + "general/plate_background.png", "adapter": "plate",
                                           "kind": "primary", "outline": JB + "general/plate_outline.png",
-                                          "region": {"all": True, "overlay": JB + "general/plate_outline.png"}},
+                                          "region": {"all": True, "alpha": True,
+                                                     "overlay": JB + "general/plate_outline.png"}},
     S + "paper/accept.png": {"source": AJ + "save_bar.png", "adapter": "ink_paper", "ink": PALETTE["green"],
                              "region": {"colours": [GREY_INK], "boxes": [(0, 0, 15, 14)], "both": True}},
     S + "paper/accept_highlighted.png": {"source": AJ + "save_bar.png", "adapter": "ink_paper", "ink": PALETTE["green"],
-                                         "lit": True, "region": {"all": True}},
+                                         "lit": True, "region": {"all": True, "alpha": True}},
     S + "paper/decline.png": {"source": AJ + "clear_bar.png", "adapter": "ink_paper", "ink": PALETTE["red"],
                               "region": {"colours": [GREY_INK], "boxes": [(0, 0, 15, 14)], "both": True}},
     S + "paper/decline_highlighted.png": {"source": AJ + "clear_bar.png", "adapter": "ink_paper", "ink": PALETTE["red"],
-                                          "lit": True, "region": {"all": True}},
+                                          "lit": True, "region": {"all": True, "alpha": True}},
     **{S + f"bookmark/{name}_selected.png": {"source": AJ + source, "adapter": "pink",
                                              "region": {"colours": list(PINK)}} for name, source in (
         ("familiar", "familiar_tab.png"), ("documentation", "documentation_tab.png"),
@@ -511,29 +519,84 @@ def drawn_mark(read, entry):
     return _mark(_glyph_rows(glyph), fill, edge)
 
 
-# What each adapter or builder changes, for the provenance table (docs/features/magic-interfaces.md, which
-# check_magic_ui holds to every runtime file and its source's SHA-256).
-CHANGES = {
-    "rgba_copy": "none: written as RGBA",
-    "clean_notches": "torn notches in the tiled middle given a clean neighbour's columns (x 50-53, 168-173 rows 6-17; "
-                     "104-108 rows 64-82; 24-35 rows 74-80)",
-    "clear_sockets": "five painted sockets (x 4-43, y 63-70) given the frame's wood (rows 60-62)",
-    "crop": "cut out (socket: 4,63 8x8; gold frame: 6,6 102x12)",
-    "portrait_card": "the cleaned header's first 48 columns",
-    "tooltip": "the gold frame set 7 in on a 116x26 canvas (frame: its well cleared)",
-    "plate": "darkened to 70% / verdigris with the gold rim at 86% / desaturated and halved; highlighted: the kit's outline over it",
-    "ink_paper": "the grey tick or cross (#bfb391, x < 16) inked #2f5a1a or #8f2a17; highlighted: a tenth brighter in a gold rim",
-    "pink": "the ribbon's four purples swapped for the filter tabs' selected pinks",
-    "arrow": "set 1 in on 13x32; highlighted: the kit's outline over it; disabled: desaturated and halved",
-    "action": "the upgrade frame's arrow covered (x 3-10, y 3-9) and a cross or two bars set in it; highlighted: the kit's outline",
-    "outlined": "the kit's action outline over it",
-    "wyrm_glyph": "one glyph cut from the strip (rows 3-9) and made white",
-    "wyrm_mark": "the strip's moon in colour with a one-pixel dark edge",
-    "paint_out": "the \"ARS NOUVEAU\" lettering (x 32-91, y 11-15) cleared to transparency",
-    "cosmos": "every other frame of sixteen, each cut to the blob's alpha box (4,14 407x234), stacked",
-    "drawn_glyph": "drawn for Jugcraft (no library file)",
-    "drawn_mark": "drawn for Jugcraft (no library file)",
-}
+# What each runtime file changes from its library file, for the provenance table (docs/features/magic-interfaces.md, which
+# check_magic_ui holds to every runtime file, every library file it is made from and their SHA-256s): each file its own
+# change, by its adapter, kind and state; a file composited over a copy (an outline) has its own row.
+def extra_sources(target):
+    """The library files an adapted copy is made from besides its source: the outline its region lets cover it."""
+    entry = ADAPTED.get(target)
+    overlay = entry and entry["region"].get("overlay")
+    return [overlay] if overlay else []
+
+
+def change(target, source=None):
+    """What {target} changes from its library file {source} (its main source when None or the same)."""
+    if target in BUILT:
+        entry = BUILT[target]
+        if entry["builder"] == "drawn_glyph":
+            return f"the {entry['glyph']} glyph, drawn for Jugcraft in the strip's one-pixel style, white (no library file)"
+        return f"the drawn {MARKS[entry['mark']][0]} glyph in colour with a one-pixel dark edge (no library file)"
+    if target in OWNER_FILES:
+        return "none: copied, written as RGBA"
+    entry = ADAPTED[target]
+    if source is not None and source != entry["source"]:
+        return "its lit outline: this file drawn over the copy"
+    kind = entry["adapter"]
+    outline = {"plate": ", the kit's plate outline drawn over it", "arrow": ", the kit's arrow outline drawn over it",
+               "action": ", the kit's action outline drawn over it"}
+    if kind == "clean_notches":
+        return ("the torn notches in the tiled middle given a clean neighbour's columns (x 50-53 and 168-173, rows 6-17; "
+                "104-108, rows 64-82; 24-35, rows 74-80)")
+    if kind == "clear_sockets":
+        return "the five painted sockets (x 4-43, y 63-70) given the frame's wood (rows 60-62)"
+    if kind == "crop":
+        x, y, w, h = entry["box"]
+        return f"cut out: {w}x{h} at {x},{y}"
+    if kind == "portrait_card":
+        return "the painted sockets cleared (x 4-43, y 63-70) and its first 48 columns cut out (the gilded frame, 48x77)"
+    if kind == "tooltip":
+        return ("the gauge frame (102x12 at 6,6) set 7 in on a 116x26 canvas: "
+                + ("its gold rim alone, the purple well cleared" if entry["frame_only"] else "its gold rim and purple well"))
+    if kind == "plate":
+        tone = {"normal": "darkened to 70%", "primary": "a verdigris tint at 86%, the gold rim kept",
+                "disabled": "desaturated to a quarter and darkened to half"}[entry["kind"]]
+        return tone + (outline["plate"] if "outline" in entry else "")
+    if kind == "ink_paper":
+        mark, colour = ("tick", "green") if entry["ink"] == PALETTE["green"] else ("cross", "red")
+        return (f"the grey {mark} (#bfb391, x < 16) inked {colour} #{entry['ink']:06x}"
+                + (", a tenth brighter, in a one-pixel gold rim" if entry.get("lit") else ""))
+    if kind == "pink":
+        return "the ribbon's four purples swapped for the filter tabs' selected pinks"
+    if kind == "arrow":
+        return "set 1 in on a 13x32 canvas" + {"": "", "_highlighted": outline["arrow"],
+                                               "_disabled": ", desaturated to a fifth and darkened to half"}[entry["state"]]
+    if kind == "action":
+        frame = "the inactive upgrade frame's" if entry["state"] == "_inactive" else "the upgrade frame's"
+        mark = "a cross" if entry["glyph"] == "cross" else "two bars"
+        return (f"{frame} arrow covered (x 3-10, y 3-9) and {mark} set in it"
+                + (outline["action"] if entry["state"] == "_highlighted" else ""))
+    if kind == "outlined":
+        return "the kit's action outline drawn over it"
+    if kind == "wyrm_glyph":
+        x0, x1 = WYRM[entry["glyph"]]
+        return f"the {entry['glyph']} glyph cut from the strip (x {x0}-{x1}, rows 3-9) and made white"
+    if kind == "wyrm_mark":
+        x0, x1 = WYRM["moon"]
+        return f"the strip's moon (x {x0}-{x1}, rows 3-9) in colour with a one-pixel dark edge"
+    if kind == "paint_out":
+        return "the \"ARS NOUVEAU\" lettering (x 32-91, y 11-15) cleared to transparency"
+    if kind == "cosmos":
+        return "every other frame of sixteen, each cut to the blob's alpha box (4,14 407x234), stacked"
+    raise KeyError(f"{target}: no change written for its adapter {kind}")
+
+
+def provenance_row(target, source, digest):
+    """{target}'s row of the provenance table for its library file {source} (under art/owner-library/; "" when built)."""
+    if not source:
+        return f"| `{target}` | drawn for Jugcraft |  | {change(target)} |"
+    library = source[len("originals/Magic/"):] if source.startswith("originals/Magic/") else source
+    return f"| `{target}` | `{source}` | `{digest}` | {change(target, library)} |"
+
 
 ADAPTERS = {f.__name__: f for f in (rgba_copy, clean_notches, clear_sockets, crop, portrait_card, tooltip, plate,
                                     ink_paper, pink, arrow, action, outlined, wyrm_glyph, wyrm_mark, paint_out, cosmos,
@@ -582,7 +645,19 @@ def sprite_id(target):
 _WORD = re.compile(r"[A-Za-z0-9]")
 _PLACE = re.compile(r"%(?:(\d+)\$)?s")
 LIMITS = {"chip": 3, "service": 10, "row": 12, "blocker": 14, "answer": 6, "standing": 12, "card": 4, "button": 2,
-          "label": 3, "tip": 20, "fact": 4, "beat": 18, "stage": 8}
+          "label": 3, "tip": 20, "fact": 4, "beat": 18, "stage": 8, "act": 6}
+# The default font's advances in pixels (Minecraft's Font.width: each character's advance, 6 unless named here; measured
+# from the game's ASCII sheet: a table of numbers, no glyph copied). The pixel limits below use them for English; the
+# client measures at runtime, so other languages and Force Unicode reflow (and a header line too long is cut with "…").
+ADVANCE = {"!": 2, "'": 2, ",": 2, ".": 2, ":": 2, ";": 2, "i": 2, "|": 2, "`": 3, "·": 3, " ": 4, '"': 4, "(": 4, ")": 4,
+           "I": 4, "[": 4, "]": 4, "l": 4, "t": 4, "{": 4, "}": 4, "*": 5, "/": 5, "<": 5, ">": 5, "\\": 5, "f": 5, "k": 5,
+           "$": 7, "%": 7, "@": 7, "~": 7}
+# The narrowest room a line has (the pact screen at 320 wide: its scroll's text 262 wide): a blocker after its lock mark
+# (12) and a row after its item (19), each two lines at most (MagicText.maxLines(2), spec 1.1); the header's service line
+# after its item (19) in the full layout's 230 (320 - 8 wide less the header's portrait and roll).
+BLOCKER_WIDTH = 262 - 12 - 2
+ROW_WIDTH = 262 - 19 - 2
+SERVICE_ROOM = 312 - 56 - 26 - 19
 # Rows the server sends that are drawn by another element (spec 1.7), never as their own glance.
 FOLDED = ("pact.row.area", "pact.row.area_any", "pact.row.end", "pact.row.matter.awaiting", "pact.row.matter.answered",
           # A compact without resonance is the price row alone: "Price" and its stacks, the sentence its message.
@@ -597,6 +672,23 @@ MAGIC_SCREENS = ["PactScreen"]
 
 def nwords(text):
     return sum(1 for token in text.split() if _WORD.search(token))
+
+
+def width(text):
+    """{text}'s width in the default font (Font.width), in pixels."""
+    return sum(ADVANCE.get(c, 6) for c in text)
+
+
+def lines(text, room):
+    """How many lines {text} wraps to in {room} pixels (Font.split: words kept whole, broken at spaces)."""
+    count, line = 1, ""
+    for word in text.split(" "):
+        wider = word if not line else line + " " + word
+        if width(wider) <= room or not line:
+            line = wider
+        else:
+            count, line = count + 1, word
+    return count
 
 
 def render(pattern, args):
@@ -625,17 +717,37 @@ def glance_key(server, suffix=""):
     return base + ("." + suffix if suffix else "")
 
 
+SERVER_PREFIX = "message.jugcraft.concordance."
+# The one answer from outside the Concordance's messages (AgreementHolder's conflicting agreement): read as
+# "diagnostic.<code>" (Java: PactGlance.server and DIAGNOSTIC).
+DIAGNOSTIC_PREFIX = "compose.jugcraft.diagnostic."
+STEP_PREFIX = "advancements.jugcraft."
+
+
+def full_key(server):
+    """The language key of the server sentence {server} names (a diagnostic's under compose.jugcraft.diagnostic.)."""
+    if server.startswith("diagnostic."):
+        return DIAGNOSTIC_PREFIX + server[len("diagnostic."):]
+    return SERVER_PREFIX + server
+
+
+def nested_key(key):
+    """The glance an argument's own sentence ({key}) is drawn by when nested in another's (Java: PactGlance.nestedKey): a
+    server sentence's glance, or a research step description's (screen.jugcraft.pact.glance.step.<advancement>); None
+    for others."""
+    if key.startswith(SERVER_PREFIX):
+        return glance_key(key[len(SERVER_PREFIX):])
+    if key.startswith(STEP_PREFIX) and key.endswith(".description"):
+        return "screen.jugcraft.pact.glance.step." + key[len(STEP_PREFIX):-len(".description")]
+    return None
+
+
 def card_key(server):
     """A chooser card's reason (Java: PactGlance.card): screen.jugcraft.pact.glance.card.<server key after pact.>."""
     family, _, rest = server.partition(".")
     return "screen.jugcraft.pact.glance.card." + (rest if family == "pact" else server)
 
 
-# The service line of each work (the header's line; the service chip's glance), at most 10 words, and its name (the
-# beats' and the ended page's header, a second glance of the same sentence: screen.jugcraft.pact.glance.term.service.<work>.name).
-SERVICE_NAMES = {"star_reckoning": "Star-reckoning", "strain_tending": "Strain tending", "verdance_carrying": "Verdance carrying"}
-SERVICE_LINES = {"star_reckoning": "Recalls a star you have seen", "strain_tending": "Eases strained beds, one at a time",
-                 "verdance_carrying": "Carries your Hearts' Verdance, instantly"}
 _BUER = ("06:00", "18:00", 5, 16)
 # glance: server key -> [(suffix, pattern, sample arguments in the server's order, expected English, kind)]. Every
 # argument list is the Java's (PactMenu, PactKeeping, PactObligations, StrainTending, VerdanceCarrying), checked by
@@ -697,6 +809,59 @@ GLANCES = {
     "pact.answer.resolved": [("", "Answer kept", ("Leave it",), "Answer kept", "answer")],
     "pact.deposited": [("", "%1$s %2$s paid ahead", (1, "Amethyst Shard", 1, 4), "1 Amethyst Shard paid ahead", "answer")],
     "pact.reckoning.recalled": [("", "Recalled: %1$s", ("Lantern Star",), "Recalled: Lantern Star", "answer")],
+    # Every other answer the pact screen can show (spec 1.1: a refusal one line of at most 6 words; ANSWERS lists them by
+    # the Java that sends them, and check_magic_ui reads that Java): PactMenu's own, AgreementHolder.told's (sealing,
+    # suspending, ending, seating), the deposits and Star-reckoning's.
+    **{server: [("", pattern, args, expected, kind)] for server, (pattern, args, expected, kind) in {
+        "pact.answer.too_fast": ("One moment", (), "One moment", "answer"),
+        "pact.answer.declined": ("Declined: %1$s leaves", ("Buer",), "Declined: Buer leaves", "answer"),
+        "pact.answer.invited": ("%1$s comes to the perch", ("Buer",), "Buer comes to the perch", "answer"),
+        "pact.answer.not_offered": ("Not possible here now", (), "Not possible here now", "answer"),
+        "pact.deposit_none": ("Nothing taken: full or none carried", (), "Nothing taken: full or none carried", "answer"),
+        "pact.unavailable": ("%1$s's terms cannot be read here", ("Bathin",), "Bathin's terms cannot be read here", "answer"),
+        "pact.reading.unreadable": ("Unreadable here; kept as it was", (), "Unreadable here; kept as it was", "row"),
+        "pact.reading.taken": ("Another's pact is kept here", (), "Another's pact is kept here", "row"),
+        "disabled": ("The Concordance is off here", (), "The Concordance is off here", "answer"),
+        "diagnostic.conflicting_agreement": ("A copy: another agreement covers it", (),
+                                             "A copy: another agreement covers it", "answer"),
+        "workers.seal_done": ("Sealed", (), "Sealed", "answer"),
+        "workers.seal_not_permitted": ("You may not seal here", (), "You may not seal here", "answer"),
+        "workers.seal_taken": ("This perch is already taken", (), "This perch is already taken", "answer"),
+        "workers.seal_already_held": ("You already keep this spirit", (), "You already keep this spirit", "answer"),
+        "workers.seal_holder_full": ("%1$s Bound Wills held: end one", (16,), "16 Bound Wills held: end one", "answer"),
+        "workers.seal_roster_full": ("Roster full (%1$s): release one", (16,), "Roster full (16): release one", "answer"),
+        "workers.seal_unavailable": ("No spirit answers now", (), "No spirit answers now", "answer"),
+        "workers.seal_cannot_afford": ("Short of the price", (), "Short of the price", "answer"),
+        "workers.suspended": ("Suspended", (), "Suspended", "answer"),
+        "workers.resumed": ("Resumed", (), "Resumed", "answer"),
+        "workers.held_for_upkeep": ("Only an offering resumes it", (), "Only an offering resumes it", "answer"),
+        "workers.no_agreement": ("No pact is kept here", (), "No pact is kept here", "answer"),
+        "workers.not_holder": ("Only its holder may", (), "Only its holder may", "answer"),
+        "workers.ended": ("Ended: the spirit departs", (), "Ended: the spirit departs", "answer"),
+        "workers.end_not_permitted": ("Only its holder, in person", (), "Only its holder, in person", "answer"),
+        "workers.seat_seated": ("Seated here", (), "Seated here", "answer"),
+        "workers.seat_not_holder": ("Only its holder may seat it", (), "Only its holder may seat it", "answer"),
+        "workers.seat_nothing": ("No pact to seat here", (), "No pact to seat here", "answer"),
+        "workers.seat_not_permitted": ("Only this perch's owner may", (), "Only this perch's owner may", "answer"),
+        "workers.seat_taken": ("This perch is already taken", (), "This perch is already taken", "answer"),
+        "workers.seat_roster_full": ("Roster full (%1$s): release one", (16,), "Roster full (16): release one", "answer"),
+        "workers.seat_unavailable": ("No spirit answers now", (), "No spirit answers now", "answer"),
+        "pact.reckoning.nothing": ("No pact with Stolas here", (), "No pact with Stolas here", "answer"),
+        "pact.reckoning.not_holder": ("Only its holder may ask", (), "Only its holder may ask", "answer"),
+        "pact.reckoning.suspended": ("Suspended: resume it first", (), "Suspended: resume it first", "answer"),
+        "pact.reckoning.upkeep_held": ("Suspended: an offering resumes it", (), "Suspended: an offering resumes it", "answer"),
+        "pact.reckoning.outside_area": ("Stand within %1$s blocks", (8,), "Stand within 8 blocks", "answer"),
+        "pact.reckoning.outside_hours": ("Only %1$s–%2$s", ("18:00", "06:00"), "Only 18:00–06:00", "answer"),
+        "pact.reckoning.quota_spent": ("Done for today", (), "Done for today", "answer"),
+        "pact.reckoning.not_observed": ("Only a pattern you observed", (), "Only a pattern you observed", "answer"),
+        "pact.reckoning.no_astrolabe": ("Carry an astrolabe", (), "Carry an astrolabe", "answer"),
+        "pact.reckoning.too_little": ("Needs %1$s resonance", (6, "Lantern Star"), "Needs 6 resonance", "answer"),
+        "pact.reckoning.recalled_already": ("Already recalled: %1$s", ("Lantern Star",), "Already recalled: Lantern Star",
+                                            "answer"),
+    }.items()},
+    # A first task's act, as its row draws it (garden_pact.obligation's argument; spec 1.1: the row at most 12 words). An
+    # act short enough as the server words it needs none (ACT_GLANCES' acts are the long ones).
+    "garden_pact.act.device": [("", "use an awake living device", (), "use an awake living device", "act")],
     # Blockers (every one drawn above the terms as a lock line, keeping its action).
     "pact.missing.owner": [("", "Only the perch's owner may invite %1$s", ("Bathin",),
                             "Only the perch's owner may invite Bathin", "blocker")],
@@ -714,12 +879,30 @@ GLANCES = {
     "pact.departed": [("", "%1$s departs; %3$s offerings came back", ("Buer", "ended by its holder", 4),
                        "Buer departs; 4 offerings came back", "row")],
 }
-# Each work's own glances (a garden spirit's unit adds its row): its service line, its kept-page rows, its blockers and
-# its chooser card's reason. Keys are under message.jugcraft.concordance.pact.<work>. (SERVICE_WORDS' messages).
+# The answers the pact screen can show at its body's top (D-06), each a glance above (check_magic_ui reads the Java that
+# sends them and names any sentence it can send that is not here): PactMenu.java's own lines and its disabled answer,
+# AgreementHolder.told (Outcome, Toggle, Ended, Seat, with the conflicting-agreement diagnostic), PactKeeping.deposited
+# and .end, and StarReckoning.told. The closed page's notes (the reading, the Concordance off) are among them.
+ANSWERS = tuple(key for key in GLANCES if key.startswith(("pact.answer.", "pact.reckoning.", "workers.", "pact.reading."))) + (
+    "pact.deposited", "pact.deposit_none", "pact.unavailable", "pact.departed", "pact.ended_here", "disabled",
+    "diagnostic.conflicting_agreement")
+# A research step's own description, drawn short where pact.missing.step names it (its third argument; spec 1.1: a blocker
+# at most 14 words and two lines, keeping its action): screen.jugcraft.pact.glance.step.<advancement>. A step whose
+# description already fits needs none.
+STEP_GLANCES = {
+    "concordance_garden_regard_encountered": "Examine a garden specimen: sneak and use it in the air",
+}
+# Each work's own row (a garden spirit's unit adds its own): its service line ("line": the header's line and the service
+# chip's glance, at most 10 words and one header line), its name ("name": the beats' and the ended page's header, a second
+# glance of the same sentence, screen.jugcraft.pact.glance.term.service.<work>.name), its icon (the item its service line
+# and its own rows draw; one line in client/PactGlance.WORK_ICONS too), its kept-page rows, its blockers and its chooser
+# card's reason. Row keys are under message.jugcraft.concordance.pact.<work>. (SERVICE_WORDS' messages); a work's
+# "row.service" is today's gauge, "%1$s/%2$s today" (done, then the day's quota), and nothing else.
 WORK_GLANCES = {
-    "star_reckoning": {"card": None, "icon": "jugcraft:astrolabe"},
+    "star_reckoning": {"card": None, "icon": "jugcraft:astrolabe", "name": "Star-reckoning",
+                       "line": "Recalls a star you have seen"},
     "strain_tending": {
-        "icon": "jugcraft:verdant_bed",
+        "icon": "jugcraft:verdant_bed", "name": "Strain tending", "line": "Eases strained beds, one at a time",
         "row.service": [("", "%1$s/%2$s today", (5, 16), "5/16 today", "chip")],
         "row.asleep": [("", "Asleep until %1$s · %3$s/%4$s today", _BUER, "Asleep until 06:00 · 5/16 today", "row")],
         "row.overworked": [("", "Overworked at %1$s: feed it or let it rest", ("102, 64, -18",),
@@ -731,7 +914,7 @@ WORK_GLANCES = {
         "card": ("Needs a bed near", (8,), "Needs a bed near"),
     },
     "verdance_carrying": {
-        "icon": "jugcraft:verdant_heart",
+        "icon": "jugcraft:verdant_heart", "name": "Verdance carrying", "line": "Carries your Hearts' Verdance, instantly",
         "row.service": [("", "%1$s/%2$s today", (3, 12), "3/12 today", "chip")],
         "row.moved": [("", "Last: %1$s Verdance to the Gleaner at %3$s", (8, "12, 64, -30", "40, 63, -2"),
                        "Last: 8 Verdance to the Gleaner at 40, 63, -2", "row")],
@@ -745,11 +928,13 @@ WORK_GLANCES = {
         "card": ("Needs Heart and Gleaner", (10, 10), "Needs Heart and Gleaner"),
     },
 }
-# A work's row that is not a glance: its chooser reason and its icon (the item its service line and its own rows draw).
-WORK_FIELDS = ("card", "icon")
+# A work's fields that are not its rows' glances: its chooser reason, its icon, its name and its service line.
+WORK_FIELDS = ("card", "icon", "name", "line")
 for _work, _rows in WORK_GLANCES.items():
-    GLANCES[f"pact.term.service.{_work}"] = [("", SERVICE_LINES[_work], (), SERVICE_LINES[_work], "service"),
-                                              ("name", SERVICE_NAMES[_work], (), SERVICE_NAMES[_work], "label")]
+    # A row without its name or line is reported by problems(), not a failure to load this module.
+    if _rows.get("line"):
+        GLANCES[f"pact.term.service.{_work}"] = [("", _rows["line"], (), _rows["line"], "service")] + (
+            [("name", _rows["name"], (), _rows["name"], "label")] if _rows.get("name") else [])
     for _key, _glances in _rows.items():
         if _key not in WORK_FIELDS:
             GLANCES[f"pact.{_work}.{_key}"] = _glances
@@ -811,9 +996,10 @@ def mark(server):
 # change here.
 ICON_RULES = (
     ("contains", ".row.overworked", "work"),
-    ("suffix", ".row.poured", "item:jugcraft:ley_pylon"),
-    ("suffix", ".row.moved", "item:jugcraft:gleaner"),
-    ("suffix", ".row.leaving", "item:jugcraft:verdant_heart"),
+    # Bathin's own rows, by their exact keys (a later work's rows of the same names draw their own icons, or none).
+    ("exact", "pact.verdance_carrying.row.poured", "item:jugcraft:ley_pylon"),
+    ("exact", "pact.verdance_carrying.row.moved", "item:jugcraft:gleaner"),
+    ("exact", "pact.verdance_carrying.row.leaving", "item:jugcraft:verdant_heart"),
     ("suffix", "obligation", "glyph:pin"),
     ("exact", "pact.ended_here", "glyph:pin"),
     ("exact", "pact.departed", "glyph:spiral"),
@@ -841,8 +1027,11 @@ SHORT = {
     "accept.narration": ("Nothing is spent before this", "tip"), "skip.hint": ("Skip to his terms", "tip"),
     "end.leaves": ("He leaves; offerings paid ahead come back once.", "tip"),
     "end.undone": ("This cannot be undone.", "tip"),
+    # The price chip's narration before Accept when anything is short (spec 2.6; the marks drawn are display only).
+    "have": ("%1$s %2$s/%3$s", "tip"), "short_of": ("Short: %1$s", "tip"),
 }
-SHORT_SAMPLES = {"carried": (12,), "resonance": (6, 8), "any_of": ("Stolas Starflower, Amethyst Shard",)}
+SHORT_SAMPLES = {"carried": (12,), "resonance": (6, 8), "any_of": ("Stolas Starflower, Amethyst Shard",),
+                 "have": ("Ender Pearl", 1, 2), "short_of": ("Ender Pearl 1/2, 6/8 resonance",)}
 
 
 def lang_entries(lang):
@@ -852,6 +1041,8 @@ def lang_entries(lang):
             lang[glance_key(server, suffix)] = pattern
     for server, (pattern, _, _) in CARDS.items():
         lang[card_key(server)] = pattern
+    for step, text in STEP_GLANCES.items():
+        lang[f"screen.jugcraft.pact.glance.step.{step}"] = text
     for name, (text, _) in SHORT.items():
         lang[f"screen.jugcraft.pact.short.{name}"] = text
 
@@ -880,10 +1071,14 @@ def fills(img, box):
 
 
 def contrast_rows(load):
-    """(sprite, ink, main fill, ratio on it, ratio on its second fill) for every pair CONTRAST holds."""
+    """(sprite, ink, main fill, ratio on it, ratio on its second fill) for every pair CONTRAST holds; a box with no opaque
+    pixel gives (sprite, ink, None, None, None), which problems() reports."""
     rows = []
     for target, (box, inks) in CONTRAST.items():
         found = fills(load(target), box)
+        if not found:
+            rows.extend((target, ink, None, None, None) for ink in inks)
+            continue
         for ink in inks:
             colour = _rgb(PALETTE[ink])
             rows.append((target, ink, found[0], contrast(colour, found[0]),
@@ -919,13 +1114,14 @@ def region_problems(target, entry, made, read=read_library):
             m, b = mp[x, y], bp[x, y]
             if m == b or not m[3] and not b[3]:
                 continue  # a clear pixel is clear, whatever colour it carries
+            by_overlay = overlay is not None and overlay.getpixel((x, y))[3] > 0
             if region.get("all"):
-                if region.get("alpha") and m[3] != b[3]:
+                # A change of tone everywhere; with "alpha", the shape kept, except where an overlay's opaque pixels lie.
+                if region.get("alpha") and m[3] != b[3] and not by_overlay:
                     bad += 1
                 continue
             in_box = any(x0 <= x <= x1 and y0 <= y <= y1 for x0, y0, x1, y1 in region.get("boxes", ()))
             by_colour = b[3] and b[:3] in colours
-            by_overlay = overlay is not None and overlay.getpixel((x, y))[3] > 0
             allowed = (in_box and by_colour) if region.get("both") else (in_box or by_colour or by_overlay)
             if not allowed:
                 bad += 1
@@ -996,18 +1192,32 @@ def problems(lang=None, load=None, read=read_library):
         pass
     try:
         for target, ink, fill, ratio, _ in contrast_rows(lambda t: load(t).convert("RGBA")):
-            if ratio < 4.5:
+            if fill is None:
+                out.append(f"{target}: no opaque fill inside its contrast box, so {ink} cannot be measured (spec 2.3)")
+            elif ratio < 4.5:
                 out.append(f"{target}: {ink} on its fill #{'%02x%02x%02x' % fill} is {ratio:.2f}:1, under 4.5:1 (spec 2.3)")
     except (OSError, ValueError):
         pass
 
     # The words: every glance renders its expected English from the server's real arguments by position, names a real
-    # server sentence with that many arguments, and keeps to its limit.
+    # server sentence with that many arguments, and keeps to its limit (in words, and for blockers, rows and the service
+    # line in the pixels the narrowest pact screen gives them, in the default font's English).
     keys = {}
+
+    def fits(key, got, kind):
+        found = []
+        if nwords(got) > LIMITS[kind]:
+            found.append(f"{key}: {nwords(got)} words, over the {kind} limit of {LIMITS[kind]} (spec 1.1): {got!r}")
+        room = {"blocker": BLOCKER_WIDTH, "row": ROW_WIDTH}.get(kind)
+        if room and lines(got, room) > 2:
+            found.append(f"{key}: {lines(got, room)} lines at {room} px, over a {kind}'s two (spec 1.1): {got!r}")
+        if kind == "service" and width(got) > SERVICE_ROOM:
+            found.append(f"{key}: {width(got)} px, over the header's {SERVICE_ROOM} for its service line: {got!r}")
+        return found
     for server, glances in GLANCES.items():
-        full = lang.get(f"message.jugcraft.concordance.{server}")
+        full = lang.get(full_key(server))
         if full is None:
-            out.append(f"glance {server}: no server sentence message.jugcraft.concordance.{server}")
+            out.append(f"glance {server}: no server sentence {full_key(server)}")
             continue
         arity = len(_PLACE.findall(full.replace("%%", "")))
         for suffix, pattern, args, expected, kind in glances:
@@ -1030,15 +1240,49 @@ def problems(lang=None, load=None, read=read_library):
                 continue
             if got != expected:
                 out.append(f"{key}: renders {got!r}, expected {expected!r}")
-            if nwords(got) > LIMITS[kind]:
-                out.append(f"{key}: {nwords(got)} words, over the {kind} limit of {LIMITS[kind]} (spec 1.1)")
-    servers = {k[len("message.jugcraft.concordance."):] for k in lang if k.startswith("message.jugcraft.concordance.")}
+            out.extend(fits(key, got, kind))
+    # A glance whose argument is another sentence of the server's (a first task's act, a research step's description) is
+    # also rendered with every one that argument can be, each drawn as the client draws it: by its own glance when it has
+    # one (nested_key), else whole.
+    import concordance_pacts as pacts
+    import concordance_garden_pacts as garden
+    steps = []
+    for name, spirit in pacts.SPIRITS.items():
+        research = spirit["pact"]["research"].split(":", 1)[-1].replace("/", "_")
+        steps += [f"{STEP_PREFIX}concordance_{research}_{state}.description" for state in ("encountered", "observed", "understood")]
+    nested = {"garden_pact.obligation": (1, [full_key(f"garden_pact.act.{act}") for act in garden.ACTS]),
+              "pact.missing.step": (3, sorted(set(steps)))}
+    for server, (position, options) in nested.items():
+        for suffix, pattern, args, _, kind in GLANCES.get(server, ()):
+            for option in options:
+                if option not in lang:
+                    out.append(f"{glance_key(server, suffix)}: {option}, which it can be given, has no language entry")
+                    continue
+                inner = nested_key(option)
+                drawn = lang[inner] if inner in lang else lang[option]
+                if placeholders(drawn) != (0, False):
+                    out.append(f"{inner or option}: drawn inside {server}, so it takes no arguments of its own")
+                    continue
+                given = list(args)
+                given[position - 1] = drawn
+                out.extend(fits(f"{glance_key(server, suffix)} with {option}", render(pattern, given), kind))
+    for step, text in STEP_GLANCES.items():
+        key = f"screen.jugcraft.pact.glance.step.{step}"
+        keys[key] = step
+        if f"{STEP_PREFIX}{step}.description" not in lang:
+            out.append(f"{key}: no advancement description {STEP_PREFIX}{step}.description")
+        if lang.get(key) != text:
+            out.append(f"{key}: the language file is not tools/magic_ui.py's (run tools/generate_material_data.py)")
+        if placeholders(text) != (0, False):
+            out.append(f"{key}: a step's glance takes no arguments")
+        out.extend(fits(key, text, "blocker"))
+    servers = {k[len(SERVER_PREFIX):] for k in lang if k.startswith(SERVER_PREFIX)}
     for server in servers:
         if glance_key(server) in keys and keys[glance_key(server)] != server:
             out.append(f"{glance_key(server)}: a glance key that is also a server sentence's own")
     for server, (pattern, args, expected) in CARDS.items():
         key = card_key(server)
-        full = lang.get(f"message.jugcraft.concordance.{server}")
+        full = lang.get(full_key(server))
         if full is None:
             out.append(f"card {server}: no server sentence")
             continue
@@ -1059,14 +1303,13 @@ def problems(lang=None, load=None, read=read_library):
         if key.startswith(("screen.jugcraft.pact.glance.", "screen.jugcraft.roster.glance.")) and key not in keys \
                 and key not in {card_key(s) for s in CARDS}:
             out.append(f"{key}: a glance tools/magic_ui.py does not hold")
-    # Every row, blocker and term sentence the server can send has a glance or is folded into another element (spec 1.7).
-    import concordance_pacts as pacts
-    import concordance_garden_pacts as garden
+    # Every row, blocker, term and answer the server can send has a glance or is folded into another element (spec 1.7).
     sent = [f"pact.term.{term}" for term in ("hours", "hours.any", "area", "quota", "upkeep", "grace", "suspension",
                                              "duration", "breach", "ending", "returns", "perch", "beneficiaries.personal",
                                              "beneficiaries.party", "compact", "compact.items", "compact_paid")]
-    sent += [k for k in pacts.MESSAGES if k.startswith(("pact.row.", "pact.missing."))]
+    sent += [k for k in pacts.MESSAGES if k.startswith(("pact.row.", "pact.missing.", "pact.answer.", "pact.reckoning."))]
     sent += [k for k in garden.MESSAGES if k.startswith("garden_pact.obligation")]
+    sent += list(ANSWERS)
     for work, words in pacts.SERVICE_WORDS.items():
         if work not in WORK_GLANCES:
             out.append(f"{work}: no WORK_GLANCES row in tools/magic_ui.py (its service line, rows, blockers and card)")
@@ -1082,8 +1325,13 @@ def problems(lang=None, load=None, read=read_library):
             out.append(f"{work}: no chooser card reason")
         if not re.fullmatch(r"[a-z0-9_.-]+:[a-z0-9_/.-]+", rows.get("icon") or ""):
             out.append(f"{work}: no icon (an item id) in WORK_GLANCES (its service line's and its own rows' item)")
-        if work not in SERVICE_NAMES or work not in SERVICE_LINES:
-            out.append(f"{work}: no SERVICE_NAMES or SERVICE_LINES entry (the beats' header and the service line)")
+        if not rows.get("name") or not rows.get("line"):
+            out.append(f"{work}: no name or line in WORK_GLANCES (the beats' header and the service line)")
+        # Today's gauge reads its first two arguments as done of quota (PactScreen.work), so its row says exactly that.
+        for suffix, pattern, *_ in rows.get("row.service", ()):
+            if suffix == "" and pattern != "%1$s/%2$s today":
+                out.append(f"pact.{work}.row.service: {pattern!r}, but the gauge draws \"%1$s/%2$s today\" (done, then the "
+                           "day's quota) and nothing else")
     for kind, text, name in ICON_RULES:
         if kind not in ("prefix", "suffix", "exact", "contains") or not (
                 name == "work" or name.startswith("glyph:") and name[6:] in GLYPHS

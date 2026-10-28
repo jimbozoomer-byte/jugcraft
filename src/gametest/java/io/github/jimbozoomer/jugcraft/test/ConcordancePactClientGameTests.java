@@ -46,6 +46,7 @@ import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.narration.NarratedElementType;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
 import net.minecraft.client.gui.narration.NarrationThunk;
+import net.minecraft.client.gui.narration.NarrationTrigger;
 import net.minecraft.client.gui.navigation.ScreenRectangle;
 import net.minecraft.client.gui.screens.ConfirmScreen;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
@@ -249,6 +250,8 @@ public class ConcordancePactClientGameTests implements FabricClientGameTest {
 		List<String> drawn = context.computeOnClient(client -> screen(client).drawn());
 		check(drawn.stream().anyMatch(words -> words.matches("(.* )?0/\\d+( .*)?")), "Short of his compact, its materials are marked before Accept: " + drawn);
 		// A tip shows on keyboard focus, and Accept's opens clear of the body, its narration saying nothing is spent before it.
+		// The cursor off the panel first, so no tip of a control under it is drawn (the keyboard's replaces one anyway).
+		context.getInput().setCursorPos(0.0, 0.0);
 		tabTo(context, "term:area");
 		context.waitTicks(3);
 		String tipped = context.computeOnClient(client -> screen(client).tipped());
@@ -912,6 +915,11 @@ public class ConcordancePactClientGameTests implements FabricClientGameTest {
 			@Override
 			public NarrationElementOutput nest() {
 				return this;
+			}
+
+			@Override
+			public NarrationTrigger narrationTrigger() {
+				return NarrationTrigger.SYSTEM;
 			}
 		});
 		return out.toString();

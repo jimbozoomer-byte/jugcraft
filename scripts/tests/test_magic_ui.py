@@ -68,7 +68,7 @@ class WordsTests(unittest.TestCase):
         self.assertEqual(lang["screen.jugcraft.pact.glance.card.missing.observation"], "Observe a star first")
         self.assertEqual(lang["screen.jugcraft.pact.short.standing.hint"], "The same for every spirit")
         self.assertEqual(lang["screen.jugcraft.roster.glance.task.none"], "Nothing now")
-        count = sum(len(glances) for glances in mu.GLANCES.values()) + len(mu.CARDS) + len(mu.SHORT)
+        count = sum(len(glances) for glances in mu.GLANCES.values()) + len(mu.CARDS) + len(mu.SHORT) + len(mu.STEP_GLANCES)
         self.assertEqual(len(lang), count)
 
     def test_marks_follow_the_shape_of_the_server_key(self):
@@ -150,6 +150,32 @@ class ArtTests(unittest.TestCase):
                 self.assertGreaterEqual(ratio, 4.5)
         self.assertAlmostEqual(mu.contrast((0, 0, 0), (255, 255, 255)), 21.0, places=3)
 
+    def test_a_contrast_box_with_no_opaque_fill_is_reported_not_raised(self):
+        def clear(target):
+            image = made(target)
+            return Image.new("RGBA", image.size) if target == mu.S + "plate.png" else image
+        rows = mu.contrast_rows(clear)
+        self.assertTrue(any(target == mu.S + "plate.png" and fill is None for target, _, fill, _, _ in rows))
+
+    def test_a_lit_copy_keeps_its_shape_outside_its_outline(self):
+        # The unit review: the lit plates and paper strips may change tone everywhere, never their alpha (bar the outline's).
+        for name in ("plate_highlighted", "paper/accept_highlighted"):
+            with self.subTest(name=name):
+                target = mu.S + name + ".png"
+                image = made(target)
+                image.putpixel((0, 0), (255, 255, 255, 128 if image.getpixel((0, 0))[3] != 128 else 255))
+                image.putpixel((image.width // 2, image.height - 1), (0, 0, 0, 0))
+                self.assertTrue(mu.region_problems(target, mu.ADAPTED[target], image))
+
+    def test_each_runtime_file_has_its_own_change_and_outline_row(self):
+        rows = [mu.provenance_row(t, s, d) for t, s, d, _ in owner_art.provenance() if t in mu.ADAPTED or t in mu.OWNER_FILES]
+        lit = [row for row in rows if "plate_highlighted.png` | `originals/Magic/" in row]
+        self.assertEqual(len(lit), 2)
+        self.assertTrue(any("plate_outline.png" in row and "lit outline" in row for row in lit))
+        self.assertNotEqual(mu.change(mu.S + "plate.png"), mu.change(mu.S + "plate_disabled.png"))
+        self.assertIn("a cross", mu.change(mu.S + "action/end_inactive.png"))
+        self.assertIn("two bars", mu.change(mu.S + "action/suspend_highlighted.png"))
+
     def test_nothing_never_imported_is_imported(self):
         for target in list(mu.OWNER_FILES) + list(mu.ADAPTED):
             with self.subTest(target=target):
@@ -206,6 +232,45 @@ class CheckTests(unittest.TestCase):
         lang["message.jugcraft.concordance.pact.stolas.beat.greeting.stage"] = "A raven lands."
         self.assertTrue(any("stolas.beat.greeting: does not begin" in problem for problem in mu.problems(lang=lang)))
 
+    def test_a_long_act_or_step_inside_its_row_is_reported(self):
+        # The unit review: a first task is rendered with every act, a missing step with every step's description, each drawn
+        # as the client draws it (by its own glance when it has one).
+        saved_glances, saved_steps = copy.deepcopy(mu.GLANCES), dict(mu.STEP_GLANCES)
+        try:
+            del mu.GLANCES["garden_pact.act.device"]
+            mu.STEP_GLANCES.clear()
+            lang = dict(LANG)
+            for key in [k for k in lang if k.startswith(("screen.jugcraft.pact.glance.step.", "screen.jugcraft.pact.glance.garden_pact.act."))]:
+                del lang[key]
+            found = mu.problems(lang=lang)
+            self.assertTrue(any("garden_pact.obligation with" in p and "act.device" in p and "row limit" in p for p in found))
+            self.assertTrue(any("missing.step with" in p and "garden_regard_encountered" in p for p in found))
+        finally:
+            mu.GLANCES.clear()
+            mu.GLANCES.update(saved_glances)
+            mu.STEP_GLANCES.clear()
+            mu.STEP_GLANCES.update(saved_steps)
+
+    def test_an_answer_the_server_sends_without_a_glance_is_reported(self):
+        saved = copy.deepcopy(mu.GLANCES)
+        try:
+            del mu.GLANCES["workers.seal_not_permitted"]
+            lang = dict(LANG)
+            del lang["screen.jugcraft.pact.glance.workers.seal_not_permitted"]
+            found = mu.problems(lang=lang)
+            self.assertTrue(any("workers.seal_not_permitted: the server can send it" in p for p in found))
+        finally:
+            mu.GLANCES.clear()
+            mu.GLANCES.update(saved)
+
+    def test_the_glances_nest_as_the_client_reads_them(self):
+        self.assertEqual(mu.nested_key("message.jugcraft.concordance.garden_pact.act.device"),
+                         "screen.jugcraft.pact.glance.garden_pact.act.device")
+        self.assertEqual(mu.nested_key("advancements.jugcraft.concordance_garden_regard_encountered.description"),
+                         "screen.jugcraft.pact.glance.step.concordance_garden_regard_encountered")
+        self.assertIsNone(mu.nested_key("item.jugcraft.gleaner"))
+        self.assertEqual(mu.full_key("diagnostic.conflicting_agreement"), "compose.jugcraft.diagnostic.conflicting_agreement")
+
     def test_every_beat_line_and_stage_keeps_to_its_limit(self):
         import concordance_pacts as pacts
         for name, spirit in pacts.SPIRITS.items():
@@ -230,9 +295,33 @@ class IconTests(unittest.TestCase):
         for work, rows in mu.WORK_GLANCES.items():
             with self.subTest(work=work):
                 self.assertRegex(rows["icon"], r"^[a-z0-9_]+:[a-z0-9_/]+$")
-                self.assertLessEqual(mu.nwords(mu.SERVICE_NAMES[work]), mu.LIMITS["label"])
-                self.assertLessEqual(mu.nwords(mu.SERVICE_LINES[work]), mu.LIMITS["service"])
-                self.assertEqual(LANG.get(mu.glance_key(f"pact.term.service.{work}", "name")), mu.SERVICE_NAMES[work])
+                self.assertLessEqual(mu.nwords(rows["name"]), mu.LIMITS["label"])
+                self.assertLessEqual(mu.nwords(rows["line"]), mu.LIMITS["service"])
+                self.assertLessEqual(mu.width(rows["line"]), mu.SERVICE_ROOM)
+                self.assertEqual(LANG.get(mu.glance_key(f"pact.term.service.{work}", "name")), rows["name"])
+
+    def test_bathins_rows_draw_their_icons_by_their_own_keys(self):
+        # The unit review: a later work's row.moved draws no Gleaner.
+        self.assertEqual(mu.icon("pact.verdance_carrying.row.moved"), "item:jugcraft:gleaner")
+        self.assertIsNone(mu.icon("pact.root_running.row.moved"))
+
+    def test_a_work_without_its_line_is_reported_not_a_failure_to_load(self):
+        saved = copy.deepcopy(mu.WORK_GLANCES)
+        try:
+            mu.WORK_GLANCES["verdance_carrying"].pop("line")
+            self.assertTrue(any("verdance_carrying: no name or line" in problem for problem in mu.problems()))
+        finally:
+            mu.WORK_GLANCES.clear()
+            mu.WORK_GLANCES.update(saved)
+
+    def test_a_gauge_row_that_is_not_done_of_quota_is_reported(self):
+        saved = copy.deepcopy(mu.WORK_GLANCES)
+        try:
+            mu.WORK_GLANCES["strain_tending"]["row.service"] = [("", "%2$s left of %1$s", (5, 16), "16 left of 5", "chip")]
+            self.assertTrue(any("pact.strain_tending.row.service" in problem and "gauge" in problem for problem in mu.problems()))
+        finally:
+            mu.WORK_GLANCES.clear()
+            mu.WORK_GLANCES.update(saved)
 
     def test_an_icon_naming_no_glyph_is_reported(self):
         saved = mu.ICON_RULES

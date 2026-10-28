@@ -31,8 +31,8 @@ record MagicTheme(String name, Inks body, Inks chrome, @Nullable Identifier pane
 	static final int GOOD = 0xFFB9E05A;
 	static final int WARN = 0xFFFFA53B;
 	static final int BAD = 0xFFFF7466;
-	/** A disabled plate's label. */
-	static final int GREY = 0xFFA89C8C;
+	/** A disabled plate's label: 5.0 to 5.6:1 on the disabled plate's grain (spec 2.3's rule; WCAG exempts disabled controls). */
+	static final int GREY = 0xFFC8BCAC;
 
 	/** One surface's inks: body text, secondary, headings, names, good, needs action, refused; with or without shadow. */
 	record Inks(int text, int secondary, int heading, int name, int good, int needs, int refused, boolean shadow) {

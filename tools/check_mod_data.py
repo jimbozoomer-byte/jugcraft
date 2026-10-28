@@ -20615,15 +20615,16 @@ def check_pacts(co, root, lang, registered, research):
         err("tools/concordance.py: SOUND_EVENTS and SOUND_FILES take all of Stolas's, each playing runtime files")
     screen_path = CLIENT_JAVA_ROOT / "PactScreen.java"
     screen = screen_path.read_text(encoding="utf-8") if screen_path.is_file() else ""
-    # The magic interfaces: a screen on the magic layer draws its background, and is an in-game screen, through MagicScreen.
-    backdrop = screen
-    if "extends MagicScreen" in screen and "public void extractBackground(" not in screen:
-        magic_path = CLIENT_JAVA_ROOT / "MagicScreen.java"
-        backdrop = magic_path.read_text(encoding="utf-8") if magic_path.is_file() else ""
+    # The magic interfaces: a screen on the magic layer draws its background, and is an in-game screen, through MagicScreen,
+    # each read from PactScreen when it declares its own and from MagicScreen otherwise (an override of either counts).
+    magic_path = CLIENT_JAVA_ROOT / "MagicScreen.java"
+    magic = magic_path.read_text(encoding="utf-8") if magic_path.is_file() and "extends MagicScreen" in screen else ""
+    backdrop = screen if "public void extractBackground(" in screen or not magic else magic
+    in_game = screen if "public boolean isInGameUi(" in screen or not magic else magic
     if "public static final class Verdict extends AbstractWidget" not in screen \
             or "verdict(result.message(), result.done())" not in _java_body(screen, "private void result(") \
             or "minecraft.gui.hud.extractDeferredSubtitles();" not in _java_body(backdrop, "public void extractBackground(") \
-            or "return true;" not in _java_body(backdrop, "public boolean isInGameUi("):
+            or "return true;" not in _java_body(in_game, "public boolean isInGameUi("):
         err("client/PactScreen.java: each answer has its mark, done or refused (never colour alone), and his subtitles draw over it")
     reading = java("spirits/PactReading.java")
     for const, table in (("KEYS", pa.JADE_KEYS), ("STANDINGS", pa.JADE_STANDINGS), ("STATES", pa.JADE_STATES)):
@@ -21714,8 +21715,8 @@ def check_pact_screen(co, lang):
     if "for (String key : STANDING)" not in standing_body or 'ui("short.standing.hint")' not in standing_body \
             or "all.append(term.value())" not in standing_body:
         err("client/PactScreen.standing: one chip narrating all six standing sentences, its tip \"The same for every spirit\" (D-S15 amended)")
-    for needle in ('onScreen("more", toggle);', "more = !more;", "notes(state, MagicTheme.NEED, PRICE_FOOT)", "priceRow(state, false);",
-                   "ConcordanceClientOptions.heardBeats(", "ConcordanceClientOptions.hearBeats(", 'onScreen("skip", skip);',
+    for needle in ('onScreen("more", toggle, text);', "more = !more;", "notes(state, MagicTheme.NEED, PRICE_FOOT)", "priceRow(state, false);",
+                   "ConcordanceClientOptions.heardBeats(", "ConcordanceClientOptions.hearBeats(", 'onScreen("skip", skip, headerRoom());',
                    'ui("short.accept.narration")'):
         if needle not in screen:
             err(f"client/PactScreen.java: More, the blockers and the price pinned, the beats' skip and memory, Accept's narration ({needle})")
@@ -21743,6 +21744,22 @@ def check_pact_screen(co, lang):
                        if cls == "ConcordancePactClientGameTests" else "screen(client).more()"):
             if needle not in source:
                 err(f"{cls}: starts with no beats heard and holds its shots to their word budgets (spec 4.5: {needle})")
+    # Spec 4.5: every shot of a pact screen asserts its budget first. A shot shows one when, since the shot before it, the
+    # test last worked the screen (fits, named, a control pressed or read, the screen awaited) rather than closed it; a
+    # budget(...) or confirmBudget(...) call must stand in that stretch (comments read as nothing).
+    opened = re.compile(r"fits\(context|named\(context\)|screen\(client\)|instanceof PactScreen|waitForScreen\(PactScreen\.class\)"
+                        r"|KeepFirstConfirmScreen|tabTo\(context|press\(context")
+    closed = re.compile(r"waitForScreen\(null\)|KEY_ESCAPE|setScreen\(null\)")
+    for cls in ("ConcordancePactClientGameTests", "ConcordanceGardenPactClientGameTests", "ConcordancePactNetworkTests"):
+        source = re.sub(r"//[^\n]*|/\*.*?\*/", " ", text(TESTS_ROOT / f"{cls}.java"), flags=re.S)
+        before = 0
+        for shot in re.finditer(r'\bshot\(context, "([a-z0-9_]+)"\)', source):
+            stretch = source[before:shot.start()]
+            before = shot.end()
+            worked = max((m.end() for m in opened.finditer(stretch)), default=-1)
+            left = max((m.end() for m in closed.finditer(stretch)), default=-1)
+            if worked > left and not re.search(r"\b(?:budget|confirmBudget)\(context", stretch):
+                err(f"{cls}: {shot.group(1)} shows a pact screen but asserts no word budget before it (spec 4.5)")
     if "new PactScreen(" not in text(TESTS_ROOT / "ScreenFitClientGameTests.java"):
         err("ScreenFitClientGameTests: the pact perch's screen is checked at the smallest GUI (ScreenKit.Fitted, through MagicScreen)")
     # The client class that shows it.
@@ -22313,6 +22330,36 @@ def check_magic_ui(lang):
     import magic_ui as mu
     for problem in mu.problems(lang=lang):
         err(f"check_magic_ui: {problem}")
+    # Spec 1.1, 1.7 (the unit review): every answer the pact screen can show at its body's top is drawn by a glance of at
+    # most six words, never whole and bold. Read from the Java that sends them: AgreementHolder.told (sealing, suspending,
+    # ending, seating), StarReckoning.told, PactKeeping's deposits and ending, and PactMenu's own answers and closed notes.
+    spirits = JAVA_ROOT / "concordance" / "spirits"
+
+    def source(name):
+        path = spirits / name
+        return path.read_text(encoding="utf-8") if path.exists() else ""
+    holder, reckoning, keeping, menu = (source(name) for name in ("AgreementHolder.java", "StarReckoning.java", "PactKeeping.java",
+                                                                   "PactMenu.java"))
+    bodies = [_java_body(holder, f"public static Component told({kind} ") for kind in ("Pacts.Outcome", "Toggle", "Ended", "Seat")]
+    bodies += [_java_body(reckoning, "public static Component told(Pacts.Reckoning "), _java_body(keeping, "public static Component deposited(")]
+    answers = set()
+    for body in bodies:
+        answers.update(re.findall(r'"message\.jugcraft\.concordance\.([a-z_.]+)"', body))
+        if "conflicting()" in body or "CONFLICTING_AGREEMENT" in body:
+            answers.add("diagnostic.conflicting_agreement")
+    # An ending's answer is the sentence the Ending is made with (its second argument names why, drawn by no glance).
+    answers.update(re.findall(r'new Ending\([^,]+,\s*Component\.translatable\("message\.jugcraft\.concordance\.([a-z_.]+)"',
+                              _java_body(keeping, "public static Ending end(")))
+    answers.update("pact." + key for key in re.findall(r'\bline\("((?:answer|reading)\.[a-z_.]+|unavailable|ended_here)"', menu))
+    answers.update(re.findall(r'"message\.jugcraft\.concordance\.(disabled)"', menu))
+    if "CONFLICTING_AGREEMENT" in menu:
+        answers.add("diagnostic.conflicting_agreement")
+    if len(answers) < 30:
+        err(f"check_magic_ui: the pact screen's answers could not be read from the Java (found {len(answers)})")
+    for key in sorted(answers):
+        if key not in mu.ANSWERS or key not in mu.GLANCES:
+            err(f"check_magic_ui: the pact screen can answer {key}, which tools/magic_ui.py's ANSWERS and GLANCES do not hold "
+                "(an answer is drawn by a glance of at most six words, spec 1.1)")
     adapted = {target for target, _, _ in owner_art.adaptations()}
     if not (set(mu.OWNER_FILES) | set(mu.ADAPTED)) <= adapted:
         err("tools/owner_art.py: writes and checks the magic interface kit (magic_ui.OWNER_FILES and ADAPTED in adaptations())")
@@ -22403,12 +22450,14 @@ def check_magic_ui(lang):
             if key not in lang:
                 err(f"client/{name}.java: missing lang {key}")
     record = ROOT / "docs" / "features" / "magic-interfaces.md"
-    rows = record.read_text(encoding="utf-8") if record.exists() else ""
+    rows = record.read_text(encoding="utf-8").splitlines() if record.exists() else []
     only = set(mu.OWNER_FILES) | set(mu.ADAPTED) | set(mu.BUILT)
     for target, source, digest, _ in owner_art.provenance():
-        if target in only and f"| `{target}` | " + (f"`{source}` | `{digest}` |" if source else "drawn for Jugcraft |") not in rows:
-            err(f"docs/features/magic-interfaces.md: no provenance row for {target} with its source and SHA-256 "
-                "(python3 tools/owner_art.py --provenance magic_ui)")
+        # Every runtime file, every library file it is made from (an outline drawn over it has its own row), the SHA-256
+        # and that file's own change.
+        if target in only and mu.provenance_row(target, source, digest) not in rows:
+            err(f"docs/features/magic-interfaces.md: no provenance row for {target} from {source or 'code alone'} with its "
+                "SHA-256 and its own change (python3 tools/owner_art.py --provenance magic_ui)")
 
 
 def check_roster_screen(co, lang):

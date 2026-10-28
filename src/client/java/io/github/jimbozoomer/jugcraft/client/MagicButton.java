@@ -1,5 +1,6 @@
 package io.github.jimbozoomer.jugcraft.client;
 
+import java.util.ArrayList;
 import java.util.List;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
@@ -153,7 +154,7 @@ class MagicButton extends Button implements MagicScreen.Drawn {
 		return this;
 	}
 
-	/** A sprite as its icon, at its own size (the narrow footer's page arrows, the price row's More marker). */
+	/** A sprite as its icon, at its own size (the price row's More marker, in its words' ink). */
 	MagicButton icon(Identifier sprite, int width, int height) {
 		this.sprite = sprite;
 		this.spriteWidth = width;
@@ -187,12 +188,31 @@ class MagicButton extends Button implements MagicScreen.Drawn {
 		return this;
 	}
 
+	/** A line added under its tip (End's: the server's own sentence of what ending does, spec 1.7). */
+	MagicButton tipLine(Component line) {
+		if (!line.getString().isEmpty()) {
+			List<FormattedCharSequence> lines = new ArrayList<>(tip);
+			lines.addAll(Minecraft.getInstance().font.split(line, 200));
+			this.tip = List.copyOf(lines);
+		}
+		return this;
+	}
+
+	/** Where its caption is drawn (null for none): under it, centred, a line tall (MagicScreen.outside counts it). */
+	@Nullable ScreenRectangle captionArea(Font font) {
+		if (caption.getString().isEmpty()) {
+			return null;
+		}
+		int width = font.width(caption);
+		return new ScreenRectangle(getX() + (getWidth() - width) / 2, getY() + getHeight() + 2, width, font.lineHeight);
+	}
+
 	/** Places its tip for the footer row {@code band}: below it when there is room, else beside the button on the band. */
 	void footer(ScreenRectangle band) {
 		positioner = new FooterTip(band, this);
 	}
 
-	/** Whether it draws an icon and no words (the narrow footer's page arrows). */
+	/** Whether it draws an icon and no words (the narrow footer's paging plates, a glyph alone). */
 	boolean iconOnly() {
 		return label.getString().isEmpty();
 	}
@@ -244,7 +264,12 @@ class MagicButton extends Button implements MagicScreen.Drawn {
 			g.item(icon, x, mid - 8);
 			x += 16 + GAP;
 		} else if (sprite != null) {
-			g.blitSprite(RenderPipelines.GUI_TEXTURED, sprite, x, mid - spriteHeight / 2, spriteWidth, spriteHeight);
+			if (look == Look.LINK) {
+				// Words alone on the scroll: the marker takes their ink (untinted, its pale gold is 1.12:1 on the scroll).
+				g.blitSprite(RenderPipelines.GUI_TEXTURED, sprite, x, mid - spriteHeight / 2, spriteWidth, spriteHeight, active ? ink() : MagicTheme.GREY);
+			} else {
+				g.blitSprite(RenderPipelines.GUI_TEXTURED, sprite, x, mid - spriteHeight / 2, spriteWidth, spriteHeight);
+			}
 			x += spriteWidth + GAP;
 		} else if (glyph != null && !glyphAfter) {
 			MagicArt.glyph(g, glyph, x, mid - MagicArt.Glyph.HEIGHT / 2 - 1, active ? ink() : MagicTheme.GREY);

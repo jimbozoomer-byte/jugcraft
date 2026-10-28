@@ -1106,8 +1106,9 @@ public class ConcordanceGardenPactClientGameTests implements FabricClientGameTes
 	}
 
 	/**
-	 * The words of a pending first task's row: the spec's kept-page budget was measured without one beside a matter (its
-	 * mockup), so a matter's shots allow that row too (docs/features/magic-interfaces.md, known limits).
+	 * The words of a pending first task's row (at most 12, its act drawn short: check_magic_ui renders it with every act):
+	 * the spec's kept-page budget was measured without one beside a matter, so a matter's shots allow that row's words too,
+	 * a session decision recorded in docs/features/magic-interfaces.md (Decisions), reviewable at the checkpoint.
 	 */
 	private static int firstTask(ClientGameTestContext context) {
 		return context.computeOnClient(client -> screen(client).drawn().stream().filter(line -> line.startsWith("First task"))

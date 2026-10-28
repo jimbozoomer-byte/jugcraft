@@ -62,6 +62,33 @@ final class ComposerScroll extends AbstractContainerWidget {
 		return this;
 	}
 
+	/**
+	 * While it scrolls, shortens it to the lowest line no child straddles, at least {@code least} tall, so no line shows cut
+	 * through at its foot (the pact screen's rows and blockers, a whole row at a time); nothing when all of it shows.
+	 */
+	void snap(int least) {
+		if (content <= height) {
+			return;
+		}
+		int best = -1;
+		for (int i = 0; i < children.size(); i++) {
+			int bottom = offsets.get(i) + children.get(i).getHeight();
+			if (bottom > height || bottom < least || bottom <= best) {
+				continue;
+			}
+			boolean clear = true;
+			for (int j = 0; j < children.size() && clear; j++) {
+				clear = offsets.get(j) >= bottom || offsets.get(j) + children.get(j).getHeight() <= bottom;
+			}
+			if (clear) {
+				best = bottom;
+			}
+		}
+		if (best > 0) {
+			setHeight(best);
+		}
+	}
+
 	/** Places the children once all are added, scrolled to {@code amount} (kept within range). */
 	void arrange(double amount) {
 		refreshScrollAmount();

@@ -333,6 +333,10 @@ def provenance():
     for target, source, adapter in adaptations():
         out.append((target, f"originals/Magic/{source}", hashlib.sha256(_read_magic(source)).hexdigest(),
                     f"{adapter.__module__}.{adapter.__name__}"))
+        # A magic interface copy made from a second library file (an outline drawn over it) has that file's row too.
+        for extra in magic_ui.extra_sources(target):
+            out.append((target, f"originals/Magic/{extra}", hashlib.sha256(_read_magic(extra)).hexdigest(),
+                        f"{adapter.__module__}.{adapter.__name__}"))
     for target, sources, builder in builds():
         name = f"{builder.__module__}.{builder.__name__}"
         if not sources:
@@ -400,7 +404,10 @@ if __name__ == "__main__":
             only = set(getattr(module, "OWNER_FILES", {})) | set(getattr(module, "OWNER_BLOCKS_FILES", {})) \
                 | set(getattr(module, "ADAPTED", {})) | set(getattr(module, "BUILT", {}))
         for target, source, digest, adapter in provenance():
-            if only is None or target in only:
+            if (only is None or target in only) and rest and rest[0] == "magic_ui":
+                # The magic interfaces' table as docs/features/magic-interfaces.md holds it: each file's own change.
+                print(magic_ui.provenance_row(target, source, digest))
+            elif only is None or target in only:
                 verb = ("built" if target in concordance_pacts.BUILT or target in magic_ui.BUILT
                         else "copied as RGBA" if target in magic_ui.OWNER_FILES else "adapted")
                 made = f" {verb} by `tools/{adapter.split('.')[0]}.py` ({adapter.split('.')[1]}) |" if adapter else ""

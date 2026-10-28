@@ -8,6 +8,7 @@ import io.github.jimbozoomer.jugcraft.concordance.spirits.StarReckoning;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
+import java.util.function.Function;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
@@ -53,7 +54,7 @@ import org.jspecify.annotations.Nullable;
  * the body's top with its mark (a tick or a cross) and read aloud; Stolas's subtitles draw over the screen (D-06); ending
  * asks first, the keyboard on Keep it (KeepFirstConfirmScreen). Tab and Shift+Tab move, Enter or Space presses, Esc
  * leaves. The screen fits any window down to 320x180 scaled pixels (a compact layout under 240 tall, a narrow one under
- * 360 wide), every label whole, and scrolls its body between its pinned top and foot. Nothing in it decides: each button
+ * 368 wide), every label whole, and scrolls its body between its pinned top and foot. Nothing in it decides: each button
  * sends one bounded request through {@link PactClient}. No text box, chat command, vanilla Dialog or GuiLib.
  */
 public class PactScreen extends MagicScreen implements MenuAccess<PactMenu> {
@@ -71,6 +72,10 @@ public class PactScreen extends MagicScreen implements MenuAccess<PactMenu> {
 	/** Rows drawn by another element (tools/magic_ui.py FOLDED): narrated there, never a row of their own. */
 	private static final Set<String> FOLDED = Set.of("pact.row.area", "pact.row.area_any", "pact.row.end", "pact.row.matter.awaiting",
 			"pact.row.matter.answered", "pact.term.compact.items");
+	/** His first chip row (spec 2.12: the seat page draws only it). */
+	private static final List<String> FIRST_ROW = List.of("hours", "area", "quota");
+	/** The narrowest today's gauge is drawn before it moves to the line under its state (the unit review). */
+	private static final int MIN_BAR = 30;
 	/** The chip grid's row pitch and its columns' starts, in thousandths of its width (spec 2.12). */
 	private static final int PITCH = 17;
 	private static final int[] COLUMNS = {0, 355, 680, 1000};
@@ -231,6 +236,10 @@ public class PactScreen extends MagicScreen implements MenuAccess<PactMenu> {
 			case PactStatePayload.INVITE -> invite(state);
 			default -> closed(state);
 		}
+		if (body != null && surface == Surface.SCROLL) {
+			// The scroll ends on a whole line: no blocker or row shows cut through at its foot (the unit review).
+			body.snap(24);
+		}
 	}
 
 	private void opening() {
@@ -256,13 +265,23 @@ public class PactScreen extends MagicScreen implements MenuAccess<PactMenu> {
 		spiritHeader(state, true);
 		tag(ui("terms"), true);
 		header(state, false);
-		pinTop(state);
+		// In the compact layout, while anything stands in his way, his service line leaves the pinned top for the scroll, after
+		// the blockers, so every blocker shows whole above the price (spec 2.11; the unit review).
+		boolean serviceBelow = layout.compact() && !state.notes().isEmpty();
+		pinTop(state, null, !serviceBelow);
 		// The answer above his terms, at the top of the body, where no footer tooltip reaches (they open below the footer).
 		result(state);
 		List<AbstractWidget> blockers = notes(state, MagicTheme.NEED, PRICE_FOOT);
 		ScreenRectangle text = body(PRICE_FOOT);
 		unpinned(blockers);
-		terms(state, text);
+		if (serviceBelow) {
+			AbstractWidget service = serviceChip(state, null, text.width());
+			if (service != null) {
+				service.setX(text.left());
+				inBody("term:service", service, 3);
+			}
+		}
+		terms(state, text, false);
 		priceRow(state, false);
 		boolean free = !PactClient.waiting();
 		MagicButton back = back(beats > 0, () -> turn(beats - 1));
@@ -291,7 +310,7 @@ public class PactScreen extends MagicScreen implements MenuAccess<PactMenu> {
 			MagicButton skip = new MagicButton(MagicButton.Look.LINK, ui("short.skip.hint"), ui("short.terms"), unused -> turn(beats))
 					.glyph(MagicArt.Glyph.ARROW).glyphAfter().onDark(layout.compact());
 			skip.setRectangle(skip.labelWidth(font), skip.getHeight(), headerRight() - skip.labelWidth(font), headerTextY() - 1);
-			onScreen("skip", skip);
+			onScreen("skip", skip, headerRoom());
 		}
 		header(state, true);
 		ScreenRectangle text = body(0);
@@ -322,8 +341,9 @@ public class PactScreen extends MagicScreen implements MenuAccess<PactMenu> {
 			beside("next", next, layout.rightArrow());
 			footer(FOOTER_WIDEST, new String[] {"leave"}, leave());
 		} else {
+			// Cream glyphs on the plates (the documentation's dark page arrows read 1.3 to 1.9:1 on the wood).
 			next = last ? plate(ui("hear_terms"), ui("short.terms"), () -> turn(page + 1)).glyph(MagicArt.Glyph.ARROW)
-					: plate(ui("next"), Component.empty(), () -> turn(page + 1)).icon(MagicArt.PAGE_RIGHT, 14, 8);
+					: plate(ui("next"), Component.empty(), () -> turn(page + 1)).glyph(MagicArt.Glyph.ARROW);
 			footer(FOOTER_WIDEST, new String[] {"back", "leave", "next"}, back, leave(), next);
 		}
 	}
@@ -347,15 +367,18 @@ public class PactScreen extends MagicScreen implements MenuAccess<PactMenu> {
 	/** Back to the beat before: a gold arrow beside the scroll when wide, a small plate in the footer when narrow. */
 	private MagicButton back(boolean active, Runnable action) {
 		MagicButton back = layout.arrowsBeside() ? new MagicButton(MagicButton.Look.ARROW_LEFT, ui("back"), Component.empty(), unused -> action.run())
-				: plate(ui("back"), Component.empty(), action).icon(MagicArt.PAGE_LEFT, 14, 8);
+				: plate(ui("back"), Component.empty(), action).glyph(MagicArt.Glyph.BACK);
 		back.active = active;
 		return back;
 	}
 
-	/** His terms (D-S15, amended: a chip each; the six standing terms one chip, or More's six lines; every one narrated whole). */
-	private void terms(PactStatePayload state, ScreenRectangle text) {
+	/**
+	 * His terms (D-S15, amended: a chip each; the six standing terms one chip, or More's six lines; every one narrated
+	 * whole); with {@code firstRow}, only his first chip row (hours, area, quota: the seat page, spec 2.12).
+	 */
+	private void terms(PactStatePayload state, ScreenRectangle text, boolean firstRow) {
 		int at = this.at;
-		if (more) {
+		if (more && !firstRow) {
 			for (int i = 0; i < STANDING.size(); i++) {
 				PactStatePayload.Term term = term(state, STANDING.get(i));
 				if (term != null) {
@@ -372,7 +395,8 @@ public class PactScreen extends MagicScreen implements MenuAccess<PactMenu> {
 		List<AbstractWidget> chips = new ArrayList<>();
 		List<String> keys = new ArrayList<>();
 		for (PactStatePayload.Term term : state.terms()) {
-			if (term.key().equals("service") || term.key().equals("compact") || STANDING.contains(term.key())) {
+			if (term.key().equals("service") || term.key().equals("compact") || STANDING.contains(term.key())
+					|| firstRow && !FIRST_ROW.contains(term.key())) {
 				continue;
 			}
 			chips.add(chip(state, term, text.width()));
@@ -525,7 +549,7 @@ public class PactScreen extends MagicScreen implements MenuAccess<PactMenu> {
 		if (top + need <= layout.text().bottom() - foot - 3 - 24) {
 			for (int i = 0; i < lines.size(); i++) {
 				lines.get(i).setPosition(layout.text().left(), top);
-				onScreen("note:" + i, lines.get(i));
+				onScreen("note:" + i, lines.get(i), layout.text());
 				top += lines.get(i).getHeight() + 1;
 			}
 			return List.of();
@@ -552,11 +576,11 @@ public class PactScreen extends MagicScreen implements MenuAccess<PactMenu> {
 		tag(termsTab ? ui("terms") : ui("tab.service"), termsTab);
 		Rows rows = rows(state);
 		header(state, false, rows);
-		pinTop(state, rows);
+		pinTop(state, rows, true);
 		result(state);
 		if (termsTab) {
 			ScreenRectangle text = body(PRICE_FOOT);
-			terms(state, text);
+			terms(state, text, false);
 			priceRow(state, true);
 		} else {
 			boolean foot = rows.next() >= 0 || !state.offerings().isEmpty();
@@ -610,8 +634,10 @@ public class PactScreen extends MagicScreen implements MenuAccess<PactMenu> {
 			keys.add("suspend");
 			buttons.add(suspend);
 		}
+		// Spec 1.7: the server's row.end is folded into End, its narration and its hover.
+		Component ending = rows.end() >= 0 ? state.notes().get(rows.end()) : Component.empty();
 		MagicButton end = plate(ui("end"), ui("short.end"), this::confirmEnd).glyph(MagicArt.Glyph.CROSS)
-				.hint(ui("end.hint"), rows.end() >= 0 ? state.notes().get(rows.end()) : Component.empty());
+				.hint(ui("end.hint"), ending).tipLine(ending);
 		end.active = free && state.offers(PactRequestPayload.END);
 		keys.add("end");
 		buttons.add(end);
@@ -712,6 +738,14 @@ public class PactScreen extends MagicScreen implements MenuAccess<PactMenu> {
 			return;
 		}
 		pattern = Math.min(pattern, patterns.size() - 1);
+		if (pattern < 0) {
+			// The first pattern still recallable is chosen, so Recall is ready at once (B-kept-stolas-patterns.png).
+			for (int i = 0; i < patterns.size() && pattern < 0; i++) {
+				if (patterns.get(i).ready()) {
+					pattern = i;
+				}
+			}
+		}
 		int rowWidth = Math.min(text.width() - 70, 170);
 		int first = at;
 		for (int i = 0; i < patterns.size(); i++) {
@@ -773,7 +807,7 @@ public class PactScreen extends MagicScreen implements MenuAccess<PactMenu> {
 			Component full = state.notes().get(rows.next());
 			MagicChip next = offering(new MagicChip(full, PactGlance.of(full).shown(), font, MagicTheme.INK, theme.body()), full, 0, 1);
 			next.setPosition(text.left(), y + (MagicArt.PLATE_HEIGHT - next.getHeight()) / 2);
-			onScreen("note:" + rows.next(), next);
+			onScreen("note:" + rows.next(), next, text);
 		}
 		if (!offersBelow) {
 			return;
@@ -782,7 +816,7 @@ public class PactScreen extends MagicScreen implements MenuAccess<PactMenu> {
 		for (int i = 0; i < footOffers.size(); i++) {
 			MagicButton plate = footOffers.get(i);
 			plate.setPosition(x, y);
-			onScreen("offer:" + i, plate);
+			onScreen("offer:" + i, plate, text);
 			x += plate.getWidth() + 4;
 			MagicChip carried = carried(state, i);
 			carried.setPosition(x, y + (MagicArt.PLATE_HEIGHT - carried.getHeight()) / 2);
@@ -848,7 +882,7 @@ public class PactScreen extends MagicScreen implements MenuAccess<PactMenu> {
 		spiritHeader(state, false);
 		tag(ui("without_perch"), false);
 		header(state, false);
-		pinTop(state);
+		pinTop(state, null, true);
 		result(state);
 		List<AbstractWidget> lines = notes(state, MagicTheme.NEED, 0);
 		ScreenRectangle text = body(0);
@@ -875,7 +909,8 @@ public class PactScreen extends MagicScreen implements MenuAccess<PactMenu> {
 			}
 			at = row + 47;
 		}
-		terms(state, text);
+		// Spec 2.12: his first chip row only (hours, area, quota), so the page keeps the full layout and his portrait.
+		terms(state, text, true);
 		boolean free = !PactClient.waiting();
 		MagicButton seat = new MagicButton(MagicButton.Look.PRIMARY, ui("seat"), ui("short.seat"),
 				unused -> PactClient.request(menu, PactRequestPayload.SEAT, endChoice())).hint(ui("seat.hint"), Component.empty());
@@ -892,7 +927,7 @@ public class PactScreen extends MagicScreen implements MenuAccess<PactMenu> {
 	 */
 	private void invite(PactStatePayload state) {
 		surface = Surface.CHOOSER;
-		heading = ui("short.invite").withStyle(ChatFormatting.BOLD);
+		heading = ui("short.invite").copy().withStyle(ChatFormatting.BOLD);
 		drew(heading.getString());
 		ScreenRectangle footer = layout.footer();
 		int titleY = titleY();
@@ -913,12 +948,14 @@ public class PactScreen extends MagicScreen implements MenuAccess<PactMenu> {
 		int rowTop = at + 3;
 		for (int i = 0; i < state.patterns().size(); i++) {
 			PactStatePayload.Choice choice = state.patterns().get(i);
+			Component note = Component.empty();
 			Component reason = Component.empty();
 			if (!choice.ready() && notes < state.notes().size()) {
-				reason = PactGlance.card(state.notes().get(notes++));
+				note = state.notes().get(notes++);
+				reason = PactGlance.card(note);
 			}
 			int index = i;
-			Card card = new Card(choice, reason, step - 4, unused -> PactClient.request(menu, PactRequestPayload.INVITE, index));
+			Card card = new Card(choice, reason, note, step - 4, unused -> PactClient.request(menu, PactRequestPayload.INVITE, index));
 			card.active = free && state.offers(PactRequestPayload.INVITE);
 			int column = i % perRow;
 			int inRow = Math.min(perRow, state.patterns().size() - i + column);
@@ -995,7 +1032,7 @@ public class PactScreen extends MagicScreen implements MenuAccess<PactMenu> {
 			boolean dark = layout.compact();
 			MagicText his = new MagicText(words, font, font.width(words) + 4, dark ? MagicTheme.CREAM : MagicTheme.HEADING, dark ? theme.chrome() : theme.body());
 			his.setPosition(headerRight() - font.width(words) - 1, headerTextY() - 1);
-			onScreen("para:0", his);
+			onScreen("para:0", his, headerRoom());
 			tag = Component.empty();
 		} else {
 			drew(words.getString());
@@ -1010,6 +1047,16 @@ public class PactScreen extends MagicScreen implements MenuAccess<PactMenu> {
 
 	private int headerTextY() {
 		return layout.header().top() + (layout.compact() ? 6 : 19);
+	}
+
+	/**
+	 * The header's room for its words and controls (outside() holds them to it): past the portrait's frame and inside the
+	 * scroll's roll and its dark foot (full); the plate row inside its caps (compact).
+	 */
+	private ScreenRectangle headerRoom() {
+		ScreenRectangle header = layout.header();
+		return layout.compact() ? new ScreenRectangle(header.left() + 3, header.top(), header.width() - 10, header.height())
+				: new ScreenRectangle(header.left() + 48, header.top() + 4, header.width() - 48 - 18, 63);
 	}
 
 	/**
@@ -1039,15 +1086,15 @@ public class PactScreen extends MagicScreen implements MenuAccess<PactMenu> {
 		AbstractWidget service = serviceChip(state, rows, header.right() - 26 - x);
 		if (service != null) {
 			service.setPosition(x, header.top() + 29);
-			onScreen("term:service", service);
+			onScreen("term:service", service, headerRoom());
 		}
 		if (rows != null && rows.state() >= 0) {
-			stateRow(state, rows, x, header.top() + 48, header.right() - 26);
+			stateRow(state, rows, x, header.top() + 48, header.right() - 26, headerRoom());
 			if (rows.escrow() >= 0) {
 				Sockets sockets = sockets(state, rows.escrow());
 				if (sockets != null) {
 					sockets.setPosition(header.left() + 24 - sockets.getWidth() / 2, header.top() + 63);
-					onScreen("note:" + rows.escrow(), sockets);
+					onScreen("note:" + rows.escrow(), sockets, header);
 				}
 			}
 		}
@@ -1068,26 +1115,52 @@ public class PactScreen extends MagicScreen implements MenuAccess<PactMenu> {
 			return new MagicText(full, font, width, MagicTheme.INK, theme.body()).maxLines(1);
 		}
 		MagicChip chip = new MagicChip(full, glance.shown(), font, MagicTheme.INK, theme.body()).tipWidth(MagicChip.WIDE_TIP);
-		return serviceIcon.isEmpty() ? chip : chip.items(List.of(serviceIcon));
+		// One line, held to the room it is given: a longer line (another language) is cut with "…", its tip whole.
+		return (serviceIcon.isEmpty() ? chip : chip.items(List.of(serviceIcon))).fit(width);
 	}
 
-	/** A kept page's state (note:0: its mark and word) and today's work (the gauge, or Stolas's recalls left); returns its right edge. */
-	private int stateRow(PactStatePayload state, Rows rows, int x, int y, int right) {
+	/**
+	 * Where a kept page's state row ended: its first line's right edge, its second line's (-1 when today's work stayed on
+	 * the first) and how far below the first that second line is (0 for none).
+	 */
+	private record StateRow(int first, int second, int below) {
+	}
+
+	/**
+	 * A kept page's state (note:0: its mark and word) and today's work (the gauge, or Stolas's recalls left) after it; when
+	 * the line has no room, the gauge's bar is first shortened to what is left (down to {@link #MIN_BAR}), else today's work
+	 * takes the line below, so nothing runs past {@code right} (the unit review). Each part is held to {@code area}.
+	 */
+	private StateRow stateRow(PactStatePayload state, Rows rows, int x, int y, int right, ScreenRectangle area) {
 		Component full = state.notes().get(rows.state());
 		PactGlance.Glance glance = PactGlance.of(full);
 		// A state without a glance (one this version does not know) is its whole sentence on one line, cut, its tip whole.
-		AbstractWidget mark = glance.isShort() ? MagicChip.of(glance, font, colour(glance.mark()), theme.body())
+		AbstractWidget mark = glance.isShort() ? MagicChip.of(glance, font, colour(glance.mark()), theme.body()).fit(right - x)
 				: new MagicText(full, font, Math.max(20, right - x), colour(glance.mark()), theme.body()).maxLines(1);
 		mark.setPosition(x, y);
-		onScreen("note:" + rows.state(), mark);
-		int next = x + mark.getWidth() + 12;
-		if (rows.gauge() >= 0 && glance.isShort()) {
-			AbstractWidget work = work(state, rows.gauge(), layout.compact() ? 70 : 92);
-			work.setPosition(next, y);
-			onScreen("note:" + rows.gauge(), work);
-			next += work.getWidth();
+		onScreen("note:" + rows.state(), mark, area);
+		int end = x + mark.getWidth();
+		if (rows.gauge() < 0 || !glance.isShort()) {
+			return new StateRow(end, -1, 0);
 		}
-		return next;
+		int next = end + 12;
+		int bar = layout.compact() ? 70 : 92;
+		AbstractWidget work = work(state, rows.gauge(), bar);
+		if (next + work.getWidth() > right && work instanceof Gauge) {
+			int shorter = bar - (next + work.getWidth() - right);
+			if (shorter >= MIN_BAR) {
+				work = work(state, rows.gauge(), shorter);
+			}
+		}
+		if (next + work.getWidth() <= right) {
+			work.setPosition(next, y);
+			onScreen("note:" + rows.gauge(), work, area);
+			return new StateRow(next + work.getWidth(), -1, 0);
+		}
+		int below = mark.getHeight() + (layout.compact() ? 2 : 1);
+		work.setPosition(x, y + below);
+		onScreen("note:" + rows.gauge(), work, area);
+		return new StateRow(end, x + work.getWidth(), below);
 	}
 
 	/** Today's work: a gauge of done of max ("5/16 today") when the row's first two arguments are numbers, else its glance with a calendar. */
@@ -1130,31 +1203,35 @@ public class PactScreen extends MagicScreen implements MenuAccess<PactMenu> {
 	 * In the compact layout the header is a plate row (spec 2.11): his service line and, on a kept page, his state, today's
 	 * work and what is paid ahead move to the body's first lines, pinned there.
 	 */
-	private void pinTop(PactStatePayload state) {
-		pinTop(state, null);
-	}
-
-	private void pinTop(PactStatePayload state, @Nullable Rows rows) {
+	private void pinTop(PactStatePayload state, @Nullable Rows rows, boolean service) {
 		ScreenRectangle text = layout.text();
 		top = text.top();
 		if (!layout.compact()) {
 			return;
 		}
-		AbstractWidget service = serviceChip(state, rows, text.width());
-		if (service != null) {
-			service.setPosition(text.left(), top);
-			onScreen("term:service", service);
-			top += service.getHeight() + 2;
+		AbstractWidget chip = service ? serviceChip(state, rows, text.width()) : null;
+		if (chip != null) {
+			chip.setPosition(text.left(), top);
+			onScreen("term:service", chip, text);
+			top += chip.getHeight() + 2;
 		}
 		if (rows != null && rows.state() >= 0) {
-			stateRow(state, rows, text.left(), top, text.right());
+			StateRow row = stateRow(state, rows, text.left(), top, text.right(), text);
+			int height = 14 + row.below();
 			if (rows.escrow() >= 0) {
+				// What is paid ahead goes at the right of the first line with room for it, else on a line of its own.
 				Component full = state.notes().get(rows.escrow());
 				MagicChip ahead = new MagicChip(full, PactGlance.of(full).shown(), font, MagicTheme.DIM, theme.body());
-				ahead.setPosition(text.right() - ahead.getWidth(), top);
-				onScreen("note:" + rows.escrow(), ahead);
+				int room = text.right() - ahead.getWidth() - 4;
+				int y = top;
+				if (row.first() > room) {
+					y = row.second() >= 0 && row.second() <= room ? top + row.below() : top + row.below() + 11;
+					height += y > top + row.below() ? 11 : 0;
+				}
+				ahead.setPosition(text.right() - ahead.getWidth(), y);
+				onScreen("note:" + rows.escrow(), ahead, text);
 			}
-			top += 14;
+			top += height;
 		}
 	}
 
@@ -1188,7 +1265,7 @@ public class PactScreen extends MagicScreen implements MenuAccess<PactMenu> {
 		if (compact != null) {
 			MagicChip price = new MagicChip(compact.value(), ui("short.price").copy().withStyle(ChatFormatting.BOLD), font, MagicTheme.HEADING, theme.body());
 			price.setPosition(x, y + 6);
-			onScreen("term:compact", price);
+			onScreen("term:compact", price, text);
 			x += 36;
 			if (paid || state.compact().isEmpty()) {
 				PactGlance.Glance glance = PactGlance.of(compact.value());
@@ -1204,8 +1281,21 @@ public class PactScreen extends MagicScreen implements MenuAccess<PactMenu> {
 				stacks.setPosition(x, y);
 				onScreen("", stacks);
 				x += stacks.getWidth() + 6;
+				// The short marks are drawn, so they are narrated too: Price says what is short, have of need (spec 2.6).
+				List<Component> shortOf = new ArrayList<>();
+				for (PactAfford.Line line : count.lines()) {
+					if (count.isShort(line)) {
+						shortOf.add(ui("short.have", line.item().getDefaultInstance().getHoverName(), line.have(), line.need()));
+					}
+				}
+				boolean short_ = state.resonance() > 0 && !count.infinite() && !count.resonanceMet();
+				if (short_) {
+					shortOf.add(ui("short.resonance", count.charge(), state.resonance()));
+				}
+				if (!shortOf.isEmpty()) {
+					price.usage(ui("short.short_of", ComponentUtils.formatList(shortOf, Function.identity())));
+				}
 				if (state.resonance() > 0) {
-					boolean short_ = !count.resonanceMet();
 					Component shown = short_ ? ui("short.resonance", count.charge(), state.resonance()) : PactGlance.of(compact.value()).shown();
 					MagicChip resonance = new MagicChip(compact.value(), shown, font, short_ ? MagicTheme.RED : MagicTheme.INK, theme.body())
 							.glyph(MagicArt.Glyph.SPARKLE).quiet();
@@ -1224,7 +1314,7 @@ public class PactScreen extends MagicScreen implements MenuAccess<PactMenu> {
 		}).icon(more ? MagicArt.MARKER_EXPANDED : MagicArt.MARKER_COLLAPSED, more ? 6 : 3, more ? 3 : 6);
 		int width = toggle.labelWidth(font);
 		toggle.setRectangle(width, toggle.getHeight(), text.right() - width, y + 5);
-		onScreen("more", toggle);
+		onScreen("more", toggle, text);
 		return MagicArt.SLOT + 9;
 	}
 
@@ -1294,7 +1384,7 @@ public class PactScreen extends MagicScreen implements MenuAccess<PactMenu> {
 			}
 		}
 		widget.setPosition(layout.text().left(), top);
-		onScreen(key, widget);
+		onScreen(key, widget, layout.text());
 		top += widget.getHeight() + 2;
 	}
 
@@ -1387,7 +1477,8 @@ public class PactScreen extends MagicScreen implements MenuAccess<PactMenu> {
 			}
 			g.text(font, bold(name, headerRight() - tagRoom - header.left() - 26), header.left() + 25, header.top() + 6, MagicTheme.CREAM, true);
 			if (!tag.getString().isEmpty()) {
-				g.text(font, tag, headerRight() - font.width(tag), header.top() + 6, tagColour == MagicTheme.DIM ? MagicTheme.LAVENDER : MagicTheme.CREAM, true);
+				// Cream on the plate whatever its ink on the scroll (lavender read 2.7 to 3.2:1 there).
+				g.text(font, tag, headerRight() - font.width(tag), header.top() + 6, MagicTheme.CREAM, true);
 			}
 		} else {
 			MagicArt.header(g, header.left(), header.top(), header.width());
@@ -1704,18 +1795,22 @@ public class PactScreen extends MagicScreen implements MenuAccess<PactMenu> {
 	/**
 	 * A spirit on the chooser (spec 2.14): its card (the gilded frame and the spirit in it, chained and locked when it is
 	 * not ready), its name on a plate, and under it "Ready" or "Not yet" with its reason of at most four words, drawn on
-	 * every card that is not ready. Its message is the spirit's name.
+	 * every card that is not ready. Its message is the spirit's name (Fabric's tabToNamed finds it by that); the server's
+	 * whole sentence of what is missing is its tip and is read after "Not yet".
 	 */
 	private final class Card extends MagicButton {
 		private final PactStatePayload.Choice choice;
 		private final List<FormattedCharSequence> reason;
 		private final String reasonText;
+		private final Component note;
 
-		Card(PactStatePayload.Choice choice, Component reason, int width, OnPress press) {
+		Card(PactStatePayload.Choice choice, Component reason, Component note, int width, OnPress press) {
 			super(Look.LINK, choice.name(), choice.name(), press);
 			this.choice = choice;
 			this.reason = font.split(reason, Math.max(40, width));
 			this.reasonText = reason.getString();
+			this.note = note;
+			hint(note, Component.empty());
 			setRectangle(Math.max(64, width), 77 + 2 + MagicArt.PLATE_HEIGHT + 3 + 10 + this.reason.size() * 10, 0, 0);
 		}
 
@@ -1753,9 +1848,10 @@ public class PactScreen extends MagicScreen implements MenuAccess<PactMenu> {
 
 		@Override
 		public void updateWidgetNarration(NarrationElementOutput output) {
-			super.updateWidgetNarration(output);
-			output.add(NarratedElementType.HINT, choice.ready() ? ui("invite.ready") : reasonText.isEmpty() ? ui("invite.not_ready")
-					: Component.empty().append(ui("short.not_yet")).append(": ").append(reasonText));
+			defaultButtonNarrationText(output);
+			String missing = note.getString();
+			output.add(NarratedElementType.HINT, choice.ready() ? ui("invite.ready") : missing.isEmpty() ? ui("invite.not_ready")
+					: Component.empty().append(ui("short.not_yet")).append(": ").append(note));
 		}
 
 		@Override

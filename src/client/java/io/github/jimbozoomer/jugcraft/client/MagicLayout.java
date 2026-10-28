@@ -10,7 +10,7 @@ import net.minecraft.client.gui.navigation.ScreenRectangle;
  * (130) and a footer of plates (19), centred.</li>
  * <li><b>Compact</b> below 240, or whenever the full body would not hold its words: the header is one plate row (19)
  * and the body takes the room it gave up.</li>
- * <li><b>Narrow</b> under 360 wide: the panel takes the width less a margin, and the paging arrows and bookmarks that
+ * <li><b>Narrow</b> under 368 wide: the panel takes the width less a margin, and the paging arrows and bookmarks that
  * sit beside it when wide move into the footer.</li>
  * </ul>
  *
@@ -27,7 +27,11 @@ record MagicLayout(int screenWidth, int screenHeight, boolean compact, boolean n
 	static final int BODY = 130;
 	static final int FOOTER = MagicArt.PLATE_HEIGHT;
 	static final int FULL_FROM = 240;
-	static final int WIDE_FROM = 360;
+	/**
+	 * Wide from 368, not the spec's 360: at 368 the panel ends at 344, beat 3's right arrow takes 346 to 359 and its
+	 * caption, "Terms" (30 wide, centred on the arrow), 338 to 368; any narrower and the caption ran off the screen.
+	 */
+	static final int WIDE_FROM = 368;
 	/** The room each paging arrow (13 wide) takes beside the panel when wide. */
 	static final int ARROW_ROOM = 15;
 	/** The scroll's painted margins, inside which its words sit (rollers and torn edges outside). */

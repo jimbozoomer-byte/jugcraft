@@ -4,8 +4,9 @@ import io.github.jimbozoomer.jugcraft.concordance.spirits.PactSpirits;
 import java.util.List;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
-import net.minecraft.client.gui.screens.inventory.InventoryScreen;
 import net.minecraft.client.multiplayer.ClientLevel;
+import net.minecraft.client.renderer.entity.state.EntityRenderState;
+import net.minecraft.client.renderer.entity.state.LivingEntityRenderState;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.Identifier;
@@ -13,6 +14,8 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
+import org.joml.Quaternionf;
+import org.joml.Vector3f;
 import org.jspecify.annotations.Nullable;
 
 /**
@@ -89,8 +92,7 @@ final class MagicPortrait {
 		if (creature != null) {
 			int size = (int) Math.max(4.0F, Math.min((h - 2) / Math.max(0.1F, creature.getBbHeight()),
 					(w - 2) / Math.max(0.1F, creature.getBbWidth())));
-			// Facing the reader and still: it does not follow the mouse.
-			InventoryScreen.extractEntityInInventoryFollowsMouse(g, x, y, x + w, y + h, size, 0.0625F, x + w / 2.0F, y + h / 2.0F, creature);
+			entity(g, x, y, x + w, y + h, size, creature);
 		} else {
 			Identifier id = Identifier.tryParse(sign);
 			if (id != null && BuiltInRegistries.ITEM.containsKey(id)) {
@@ -100,5 +102,32 @@ final class MagicPortrait {
 		if (ended) {
 			g.fill(x, y, x + w, y + h, GREY);
 		}
+	}
+
+	/**
+	 * {@code creature} in the window (x0, y0)-(x1, y1), facing the reader and still (it does not follow the mouse):
+	 * InventoryScreen.extractEntityInInventoryFollowsMouse's own steps with the mouse at the window's centre, but extracted
+	 * at this frame's partial tick rather than 1. GeckoLib's AnimationController advances an animation only when the partial
+	 * tick is not 1, so at 1 a visual-only portrait (MagicPortraits, aged by tick()) would hold its first frame; under
+	 * reduced motion it is extracted at 1, and holds still.
+	 */
+	private static void entity(GuiGraphicsExtractor g, int x0, int y0, int x1, int y1, int size, LivingEntity creature) {
+		Minecraft minecraft = Minecraft.getInstance();
+		float partialTick = ConcordanceClientOptions.reducedMotion() ? 1.0F
+				: Math.min(0.999F, minecraft.getDeltaTracker().getGameTimeDeltaPartialTick(false));
+		EntityRenderState state = minecraft.getEntityRenderDispatcher().extractEntity(creature, partialTick);
+		state.shadowPieces.clear();
+		state.outlineColor = 0;
+		if (state instanceof LivingEntityRenderState living) {
+			living.bodyRot = 180.0F;
+			living.yRot = 0.0F;
+			living.xRot = 0.0F;
+			living.boundingBoxWidth /= living.scale;
+			living.boundingBoxHeight /= living.scale;
+			living.scale = 1.0F;
+		}
+		Quaternionf rotation = new Quaternionf().rotateZ((float) Math.PI);
+		Quaternionf xRotation = new Quaternionf();
+		g.entity(state, size, new Vector3f(0.0F, state.boundingBoxHeight / 2.0F + 0.0625F, 0.0F), rotation, xRotation, x0, y0, x1, y1);
 	}
 }

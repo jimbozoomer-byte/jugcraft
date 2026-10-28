@@ -131,6 +131,18 @@ class ClientTestSelectionTests(unittest.TestCase):
                 self.assertIn("ConcordanceGardenPactClientGameTests", chosen)
                 self.assertIn("ScreenFitClientGameTests", chosen)
 
+    def test_a_change_to_the_magic_screens_words_selects_them(self):
+        # The unit 1 review: a change to a glance, a short label or a pact sentence alone is judged by the shots' budgets.
+        lang = "src/main/resources/assets/jugcraft/lang/en_us.json"
+        words = ('+++ b/' + lang + '\n-  "screen.jugcraft.pact.glance.term.area": "%1$s blocks",\n'
+                 '+  "screen.jugcraft.pact.glance.term.area": "%1$s b",\n')
+        other = '+++ b/' + lang + '\n+  "block.jugcraft.thing": "Thing",\n'
+        for diff, picked in ((words, True), (other, False)):
+            with self.subTest(picked=picked), patch.object(selection, "git", side_effect=lambda *args, d=diff: d if args[0] == "diff" else ""):
+                chosen, _ = selection.select([lang], self.tests, set(), "base", "head")
+                self.assertEqual("ConcordancePactClientGameTests" in chosen, picked)
+                self.assertEqual("ConcordanceGardenPactClientGameTests" in chosen, picked)
+
     def test_pact_network_test_is_its_own_class_and_weighed(self):
         # Concordance Chunk D unit 5 (D-09): the two-client attempt is a client class of its own, with a running-time estimate.
         chosen, _ = selection.select(["src/gametest/java/io/github/jimbozoomer/jugcraft/test/ConcordancePactNetworkTests.java"], self.tests, set())

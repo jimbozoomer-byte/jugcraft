@@ -270,8 +270,9 @@ skip, and once heard they are not shown again. His terms are chips, each narrate
 the six standing terms are one chip whose More shows their lines; the price row marks a short material or resonance
 ("6/8 resonance") before Accept. His kept page shows his state, today's recalls, four sockets for what is paid ahead,
 the patterns and Recall. The shortened beats and the amended D-S15 were decided by the session in answer to the owner's
-request for far less reading, reviewable at the checkpoint; not owner-accepted. The keys, the keyboard order, the
-narration and the server's answers above are unchanged.
+request for far less reading, reviewable at the checkpoint; not owner-accepted. The control keys and the server's
+answers above are unchanged; Tab now also stops at the new controls (`skip`, `more`, `term:standing`, `term:service`,
+`term:compact`), and the narration reads each chip's whole sentence where it read the page's paragraphs.
 
 ## Stolas's character (D-06)
 

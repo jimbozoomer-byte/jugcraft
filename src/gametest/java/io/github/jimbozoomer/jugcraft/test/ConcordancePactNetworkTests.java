@@ -279,6 +279,7 @@ public final class ConcordancePactNetworkTests implements FabricClientGameTest {
 		check(context.computeOnClient(client -> client.gui.screen() instanceof PactScreen screen && screen.page() == PactScreen.TERMS_PAGE
 				&& screen.control("result") instanceof PactScreen.Verdict verdict && verdict.refused()),
 				"The stranger's screen shows the refusal above his terms");
+		budget(context, TERMS_WORDS, "the stranger's refusal");
 		shot(context, "jugcraft_pact_peer_refused");
 		context.getInput().pressKey(InputConstants.KEY_ESCAPE);
 		context.waitForScreen(null);
@@ -447,6 +448,17 @@ public final class ConcordancePactNetworkTests implements FabricClientGameTest {
 			context.waitTicks(1);
 		}
 		throw new AssertionError("Tab never reached " + key);
+	}
+
+	/** The magic interfaces' budget for his terms, a refusal included (spec 1.1). */
+	private static final int TERMS_WORDS = 50;
+
+	/** Spec 1.1, 4.5: the pact screen draws at most {@code most} words without hovering, counted from what it drew. */
+	private static void budget(ClientGameTestContext context, int most, String what) {
+		List<String> drawn = context.computeOnClient(client -> client.gui.screen() instanceof PactScreen screen ? screen.drawn() : List.of());
+		int words = context.computeOnClient(client -> client.gui.screen() instanceof PactScreen screen ? screen.words() : -1);
+		Jugcraft.LOGGER.info("[pact-network] {} draws {} words (at most {}): {}", what, words, most, drawn);
+		check(words >= 0 && words <= most, what + " draws at most " + most + " words (spec 1.1): " + words + " " + drawn);
 	}
 
 	/** A picture with no toast over it (the peer's own profile keeps it, under owner-network-evidence/). */

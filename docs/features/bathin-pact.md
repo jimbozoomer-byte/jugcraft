@@ -107,8 +107,10 @@ carries).
   beats shortened as above; his terms as chips with the price as stacks, "1/2" in red on a stack not carried and every
   blocker a lock line above them; his kept page with today's carries as a gauge, his matter ("Heart at 12, 64, -30: take
   from it too?") with Leave it and Take from it as plates (the kept one ticked; its answer "Answer kept"), and his last
-  carry as a row with the pylon's or Gleaner's icon. While his first task waits, its row stands above the matter and
-  his kept page can draw more than the spec's 45 words (its client test allows that row's words).
+  carry as a row with the pylon's or Gleaner's icon. His first task's row draws its act short ("First task: use an awake
+  living device by hand here", 10 words; the whole obligation is its tip and narration). While it waits, it stands
+  above the matter, and that page may draw the row's words beyond the kept page's budget (a session decision recorded
+  in [magic-interfaces.md](magic-interfaces.md), reviewable at the checkpoint).
 
 ## Verification
 

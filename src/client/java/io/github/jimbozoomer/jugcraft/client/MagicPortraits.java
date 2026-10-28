@@ -17,9 +17,10 @@ import org.jspecify.annotations.Nullable;
 /**
  * The magic interfaces' visual-only portraits (docs/features/magic-interfaces.md, spec 2.7): a creature of each type,
  * made once per world and never added to it, for the chooser's cards and the roster when no live one stands near. Unlike
- * the roster's first cache it advances its creatures' age each tick (a magic screen's tick calls {@link #tick}), so a
- * GeckoLib spirit plays its idle pose rather than holding its first frame; under reduced motion they hold still. At
- * most sixteen are kept; a new world forgets them. Their ids are their own range, apart from the roster's.
+ * the roster's first cache it advances its creatures' age each tick (a magic screen's tick calls {@link #tick}), and
+ * MagicPortrait draws them at the frame's partial tick, so a GeckoLib spirit plays its idle pose rather than holding its
+ * first frame; under reduced motion they hold still. At most sixteen are kept; a new world forgets them, and leaving a
+ * world clears them (PactClient). Their ids are their own range, apart from the roster's.
  */
 final class MagicPortraits {
 	private static final int MAX = 16;
@@ -77,6 +78,7 @@ final class MagicPortraits {
 		}
 	}
 
+	/** Forgets every portrait and its world (PactClient, on leaving a world). */
 	static void clear() {
 		MADE.clear();
 		level = null;
