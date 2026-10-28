@@ -128,7 +128,7 @@ public final class JugcraftConcordance {
 	public static Item GLOAM_INK;
 	/** Concordance C-D6: what a glass bottle draws instead from a murky batch; a furnace boils it back to its bottle. */
 	public static Item GLOAM_SLUDGE;
-	/** Gloam Ink (C-D6): the fair copy's special recipe (recipe type jugcraft:research_notes_copy). */
+	/** Gloam Ink (C-D6): the fair copy's special recipe (recipe serializer jugcraft:research_notes_copy). */
 	public static RecipeSerializer<ResearchNotesCopyRecipe> NOTES_COPY_SERIALIZER;
 	public static BlockEntityType<CrucibleBlockEntity> CRUCIBLE_ENTITY;
 	/** Concordance Chunk C, C-05: the Crucible Stand, JE heat for the crucible on it. */

@@ -1,9 +1,10 @@
 # Gloam Ink
 
-Status: built on branch `wip/gloam`, not merged, in commits `f9e200f19` (covered extraction, Gloam Ink and Gloam Sludge)
-and `4a0b2c1d9` (fair copies of Research Notes), on this contract (`199114e7e`); this record's own commit follows them.
-Nothing has been compiled or run in a game: the branch has not been pushed and CI has not run. Every result below is a
-local Python check or audit mutation (Verification).
+Status: built for branch `claude/gloam-ink` (not yet pushed; not merged), in commits `f9e200f19` (covered extraction,
+Gloam Ink and Gloam Sludge) and `4a0b2c1d9` (fair copies of Research Notes), on this contract (`199114e7e`); this
+record's own commit follows them, and a fifth applies the review's fixes (As built, "The review's fixes"). Nothing has
+been compiled or run in a game: the branch has not been pushed and CI has not run. Every result below is a local Python
+check or audit mutation (Verification).
 Proposal issue: none; the owner's checkpoint answer C-D6 (23 October 2026, confirmed as the next work on 28 October 2026)
 is the scope approval ([Chunk C's contract](concordance-chunk-c.md), Decisions).
 Owner: @jimbozoomer-byte. AI-assisted implementation with Claude Code; the model is named in the commit trailers.
@@ -37,7 +38,8 @@ Decisions GI-P1 to GI-P17, each Decided by the session (proposed, for the owner'
   contaminant a part) draws Gloam Sludge, at least 1.00 Hollow a part Gloam Ink, thinner the draught. A bowl draws a salve.
 - GI-P5: a furnace boils Gloam Sludge back to its glass bottle, nothing more (smelting, 200 ticks, no experience).
 - GI-P6: bottling Gloam Ink by hand is an Alembic Arts outcome of its own; sludge counts nothing.
-- GI-P7: `needs_cover` is a blocked wait; a Crucible Stand idles. (A Peepo showing it as paused is not built: As built.)
+- GI-P7: `needs_cover` is a blocked wait; a Crucible Stand idles, and reads the lid itself before that wait (As built).
+  (A Peepo showing it as paused is not built: As built.)
 - GI-P8: neither item is weighed, formed, composted, mulched or an ingredient; both at the values file's fallback.
 - GI-P9: Gloam Ink's use is a fair copy: an original sheet, a blank sheet and the ink make one copy; the original and the
   bottle come back; a copy teaches what its original does and credits its writer once.
@@ -93,7 +95,7 @@ Deviations from the contract and its two part specifications, and why:
   `CrucibleCompanion.status` has no arm for `needs_cover` and answers its default, `IDLE`, while a covered formula waits
   for its lid. `aCoveredFormulaWaitsForItsLidAndSaysSo` does not assert the Peepo status (a comment says why),
   `check_gloam_ink` has no Peepo needle, and mutation M20 does not apply. Mapping it to `MACHINE_PAUSED` is one line in
-  the Peepo package, left for that package's owner.
+  the Peepo package, which this change was scoped not to edit; it is offered at the checkpoint.
 - The two hand-bottling tests hold one stack of three glass bottles through each use: 26.3's `Inventory` skips an
   empty selected slot, so a fresh bottle each time would overwrite the last product in slot 0.
 - The sludge's furnace route gives no experience (`"experience": 0.0`), and `check_gloam_ink` refuses any other
@@ -126,21 +128,54 @@ Deviations from the contract and its two part specifications, and why:
 - The contract's formula data does not hold a "maximum contamination" or a "container return" (plan 03:44-50): murky
   is the spoon's own, from `concordance/property/contaminant.json` (`Assay.murkyFrom`, 0.25 a part), and the container
   is a glass bottle (`CrucibleBlockEntity`'s bottling), whose return when crafted is the item's crafting remainder.
+- The journey's sixth step names its own tests, not `theLivingWorkshopFromAManualStart` (the contract listed it): that
+  test walks steps 1 to 5 and brews no ink, sets no lid and copies no sheet.
 - Not applied from the part specifications, because this contract replaces them: PC§4.3 (A5), PC§5.1 (A1, A3, PF§5.1
   step 8), PC§5.5 (PF§5.2), PC§5.6 (A6), PC§5.7 step 1 (A10), PC§5.8 step 2 (A9), PF§4.3 (A5), PF§5.1 step 1, step 5's
   second half and step 10 (A1, A2, R3), and the lines of PF§6.1 and PC§6.1 that A7 and A8 replace.
 
+The review's fixes (the fifth commit, after the records):
+- `Assay.Look.of` calls `Assay.murky` by its class: inside the record a bare `murky(...)` names the record's own
+  accessor `murky()`, and javac refuses it (the review reproduced the error with javac 21), so the main source set did
+  not compile.
+- **A Crucible Stand reads the lid itself.** GI-P7's existing rule let a stand heat for a covered stir it could not take:
+  `Heat.standBand` looks ahead to the next stir whenever the crucible waits for nothing, so with no lid on it heated hot
+  through the water and the four adds (about five pulses at 16 JE a tick) until the crucible's own wait stopped it.
+  `CrucibleStandBlockEntity.plan` now idles, saying `needs_cover`, while its formula's next stir (`Heat.nextStir`) is
+  covered and no lid is on (one block read; `Heat.waitsForHeat` is unchanged), so a lid lifted stops the stand on its
+  next tick. `aStandHeatsOnlyForACoveredStirItCanTake` ticks the stand, with JE to spare, after each of those steps.
+- **A lid is set by using it on the crucible.** A slab or trapdoor used on the crucible answered `TRY_WITH_EMPTY_HAND`
+  and the crucible's empty-hand status took the use, so only a sneaking use placed one. `CrucibleBlock.useItemOn` now
+  passes a `#jugcraft:crucible_lids` block item on to its own placing (`InteractionResult.PASS`, on both sides), so
+  using one on the crucible's top sets it there as on any block; `aLidIsAClosedTrapdoorOrASlabOnTheCrucible` places a
+  stone slab and an oak trapdoor that way. The codex's lid page adds: "A lidded crucible is fed and worked from its
+  sides; using a wooden trapdoor lid opens it."
+- The economy row counts "120 Spider Eyes"; the recipe serializer `jugcraft:research_notes_copy` is no longer called a
+  recipe type (`WHAT_EXISTS.md`, `JugcraftConcordance`, `check_fair_copies`' description); Chunk C's record notes C-D6's
+  confirmation; the Peepo deviation, the auto-crafter claim, Gloam's hex and the verification lines say what is so.
+
+Merging with #526 (the garden cohort, not on main when this was built). `tools/owner_art.py` conflicts in five places,
+each two additions side by side: the module's description, `expected()`, `provenance()`, `errors()` and the
+`--provenance` printing. Keep both sides' loops and lines; in the printing keep #526's built-or-adapted line and add
+`OWNER_OCT23_ADAPTED` to its `only` set. One step is not textual: `oct23_adaptations()`'s `taken` gains
+`| {target for target, *_ in builds()}`, so a built file and an Oct23 adaptation can never share a path (none does
+today). `CHANGELOG.md`, `docs/TESTING.md`, `docs/WHAT_EXISTS.md` and the economy and sharing game tests conflict as
+additions too: keep both. Never hand-merge a pasted table (the journey's, the economy's) or generated output: run their
+generators on the merged tree and paste.
+
 ## Player experience
 
 With the Alembic Arts understood, grow Gloamcap (in the dark beside working magic, faster beside Dewmoss in a mixed bed)
-or craft it from a brown mushroom, glow lichen and an amethyst shard. In an Alembic Crucible over a campfire pour a water
-bucket (three parts), add three Gloamcap and a spider eye, close a trapdoor in its lower half (or set a bottom slab) on
-the crucible and stir hot twice: each glass bottle draws **Gloam Ink**, three in all. Uncovered, the same batch is the
-Poison draught it always was. Too many spider eyes, too much Gloamcap for the water or a searing stir make it murky: the
-liquid looks murky, any spoon and anyone's risk line say so before a bottle is spent, and each bottle draws **Gloam
-Sludge**, which a furnace boils back to its glass bottle. Stirred too little, it is thin and bottles as the draught. A
-recorded formula writes its covered stirs; a crucible following it waits for its lid before each (Jade, the Inspect page
-and the status line say so; a Peepo at its port shows it idle), and a Crucible Stand heats nothing until the lid is on.
+or craft it from a brown mushroom, glow lichen and an amethyst shard. In an Alembic Crucible over a campfire pour a
+water bucket (three parts), add three Gloamcap and a spider eye, close a trapdoor in its lower half (or set a bottom
+slab) on the crucible and stir hot twice: each glass bottle draws **Gloam Ink**, three in all. Uncovered, the same batch
+is the Poison draught it always was. Using a trapdoor or a slab on the crucible's top sets it there; a lidded crucible
+is fed and worked from its sides, and using a wooden trapdoor lid opens it. Too many spider eyes, too much Gloamcap for
+the water or a searing stir make it murky: the liquid looks murky, any spoon and anyone's risk line say so before a
+bottle is spent, and each bottle draws **Gloam Sludge**, which a furnace boils back to its glass bottle. Stirred too
+little, it is thin and bottles as the draught. A recorded formula writes its covered stirs; a crucible following it
+waits for its lid before each (Jade, the Inspect page and the status line say so; a Peepo at its port shows it idle),
+and a Crucible Stand heats nothing until the lid is on.
 
 With a written sheet of Research Notes, a blank sheet and Gloam Ink in any crafting grid (the inventory's two by two is
 enough), make a **fair copy**: the same writer, entries and time written, marked a copy; the original and the ink's
@@ -158,7 +193,7 @@ be drunk, poured into a crucible, ground, composted, weighed or formed.
 - Existing output consumer: Research Notes (a fair copy, read by other players as notes evidence keyed by the original's
   writer; the Conclave's teaching renown for that writer); Gloam Sludge's furnace route returns its bottle.
 - Technology connection: the Crucible Stand's JE heat and an Electric Pump's water as built; an iron trapdoor on redstone
-  automates the lid; auto-crafters copy as a crafting table does.
+  automates the lid; a vanilla Crafter ejects the original and the bottle beside the copy (untested).
 - Magic connection: the Alembic Arts (a new outcome toward mastery); the Greenwardens' mixed bed; the shared record of notes.
 - Reachable entry path: First Light, then the Alembic Arts understood; a crucible, a campfire, a slab or trapdoor, crafted
   Gloamcap, a spider eye; the copy needs no research. No circular unlock (the journey's sixth step checks it).
@@ -197,7 +232,7 @@ No new dependency. The two icons are adapted from the owner's 23 October collect
 
 | Runtime file | Library file | SHA-256 of the library file | Change |
 |---|---|---|---|
-| `textures/item/gloam_ink.png` | `originals/Oct23/Jimtafacts/assets/irons_spellbooks/textures/item/common_ink.png` | `67487dffe22e0ae71699915fb7707583e7017d01e69575bfda7d5ef6d2b4c174` | adapted by `tools/concordance_alchemy_art.py` (`gloam_ink`): the flask's greys 17, 32, 34, 39, 45, 78 and 134 tinted the Gloamcap's violet (#68468e, `tools/icon_materials.py` GLOAM) at their own luma; the quill and every other pixel as drawn |
+| `textures/item/gloam_ink.png` | `originals/Oct23/Jimtafacts/assets/irons_spellbooks/textures/item/common_ink.png` | `67487dffe22e0ae71699915fb7707583e7017d01e69575bfda7d5ef6d2b4c174` | adapted by `tools/concordance_alchemy_art.py` (`gloam_ink`): the flask's greys 17, 32, 34, 39, 45, 78 and 134 tinted the Gloamcap's violet (#684696, `tools/icon_materials.py` GLOAM) at their own luma; the quill and every other pixel as drawn |
 | `textures/item/gloam_sludge.png` | `originals/Oct23/Jimtafacts/assets/irons_spellbooks/textures/item/blood_vial.png` | `814372284e94f2669eb6a5f1c8f03bd9eda1c529b6725613b649f3a37f0d4eea` | adapted by `tools/concordance_alchemy_art.py` (`gloam_sludge`): the reddish pixels tinted Hagmoss (#545e4c, `tools/icon_materials.py` HAGMOSS) at their own luma; the stopper and every other pixel as drawn |
 
 Catalogue rows: `art/owner-library/catalog/edited-2026-10-23-jimtafacts/content.csv`, `irons_spellbooks:common_ink`
@@ -218,7 +253,7 @@ Run locally, on each commit's tree before it was made (nothing compiled; no game
 | `python3 tools/owner_art.py --check` | passed | passed: every imported owner file matches its source | passed |
 | `python3 -B tools/check_mod_data.py` | passed (8,038 material IDs) | passed (8,040) on its second run; the first stopped at a `NameError` in `check_gloam_ink` (`rid`), fixed | passed (8,040) |
 | `python3 scripts/check_repository.py` | passed | passed | passed |
-| `python3 tools/concordance_journey.py --check` | passed | passed | passed: every route holds, six workshop steps |
+| `python3 tools/concordance_journey.py --check` | passed | passed | passed: every route holds |
 | `python3 tools/concordance_economy.py` | gaining cycles: none | gaining cycles: none, with the Gloam Ink row | gaining cycles: none |
 | `python3 tools/check_icon_maps.py` | passed | passed | passed |
 | `node --test tools/world-designer/model.test.cjs` | passed | passed | passed |
@@ -228,6 +263,16 @@ Run locally, on each commit's tree before it was made (nothing compiled; no game
 The records commit ran the same nine checks on its tree before this paragraph was added, and each passed (8,040
 material IDs; 287 tests; every route holds; gaining cycles: none); `check_repository.py` and `git diff --check` ran
 again after it and passed.
+
+The review's fixes ran the same nine checks on their tree before this paragraph was added, and each passed (8,040
+material IDs; 287 tests; every route holds; gaining cycles: none; the World Designer's 12); `check_repository.py` and
+`git diff --check` ran again after it and passed. `tools/generate_material_data.py` ran twice: the first run changed
+only the lid page's line in `en_us.json` within the change, the second nothing. A scratch javac 21 compile of the pure
+packages `concordance/alchemy`, `concordance/diagnostic` and `concordance/rules` (with gson and jspecify only; not the
+build) succeeds, and fails on `Assay` as it was. Mutations, on a scratch copy: F1 to F7, each caught (the stand's lid
+read removed or inverted; the lid's `PASS` removed or turned back to `TRY_WITH_EMPTY_HAND`; the economy's plural undone
+without pasting; the walk test put back in step 6 without pasting; the stand test renamed); M1 to M38 again, each
+caught except M20, which does not apply (M3 regenerated); N1 to N26 again, each caught; the contract link, caught.
 
 `tools/generate_material_data.py` ran twice for each build commit and changed nothing the second time; its rewrites of
 files outside the change (line ends only, `jug-nouveau-content-map.json` reordered, two ornamental corn PNGs with
@@ -239,7 +284,8 @@ functions (`check_gloam_ink`, `check_fair_copies`, `check_signs`, `check_economy
 `owner_art.errors`), with `tools/owner_art.py --check` or the values unit test where named, then restored:
 - The contract: breaking the new link (`gloam-ink.md` to `gloam_ink.md`) in Chunk C's record: `check_repository` reports
   "Broken link in docs/features/concordance-chunk-c.md: gloam_ink.md".
-- Commit 2, M1 to M38: every one reported as expected except M20, which does not apply (the Peepo port is unchanged).
+- Commit 2, M1 to M38: each caught (M15 and M17 with different wording than expected) except M20, which does not apply
+  (the Peepo port is unchanged).
   M3 (least 1.1, regenerated) reports only "the worked formula draws its item, ... (('thin', 'failure', 'thin', None,
   None))". M15's report lists what bone meal reaches beyond a glass bottle's own reach, and M17's lists
   `['jugcraft:gloamcap', 'jugcraft:habitat_gauge']`. M24 was run as three (the route, a registry id, a values entry,
@@ -265,11 +311,14 @@ Not seasonal; any dimension with a crucible. No creature, boss, loot or structur
 ## Rollout and open questions
 
 Proposed until the checkpoint. Questions: (1) is the spider eye the approved carrier? (2) is a lid on the crucible the
-right "covered extraction", including that a lid already set on a crucible now covers hand stirs? (3) is a fair copy of
+right "covered extraction", including that a lid already set on a crucible now covers hand stirs, and that a formula
+recorded under a lid waits for a lid wherever it is set, whatever it brews (record it without one to run it lidless)?
+(3) is a fair copy of
 Research Notes the use you want, with only originals copied, or should Gloam Ink serve ward sigils or links first? A
 writer gains nothing by copying their own notes: a fresh original costs one blank sheet, a copy a blank sheet and an
 ink, so Gloam Ink's use is for someone who holds another player's notes, such as a library or a town.
 Known limits: a Peepo shows a covered formula's wait as idle and counts no ink as stock (both in the Peepo package); a
-stand may heat for one pulse before its crucible finds the lid gone; both items at the values fallback; a copy looks like
+formula recorded under a lid waits for a lid wherever it is set, whatever it brews (record it without one to run it
+lidless); both items at the values fallback; a copy looks like
 its original apart from its tooltip; special recipes are not in the recipe book or JEI's crafting category (the
 tooltip, the codex and the JEI page carry the copy).

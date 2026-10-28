@@ -713,8 +713,9 @@ def _lid_text():
     return ("A lid is a closed trapdoor, or a slab, set on the crucible with its underside whole: not open, and not in "
             "the upper half. A stir under it is covered, and a formula writes it so. Following one, the crucible waits "
             "for its lid before each covered stir, and a Crucible Stand heats nothing until it is on; any other stir is "
-            "taken as ever. Gloamcap wants the dark and working magic near it, a crucible included, and grows faster "
-            "beside Dewmoss in a mixed bed.")
+            "taken as ever. A lidded crucible is fed and worked from its sides; using a wooden trapdoor lid opens it. "
+            "Gloamcap wants the dark and working magic near it, a crucible included, and grows faster beside Dewmoss in "
+            "a mixed bed.")
 
 
 def _sludge_example():

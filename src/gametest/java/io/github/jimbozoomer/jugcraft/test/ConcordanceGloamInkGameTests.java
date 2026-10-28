@@ -38,6 +38,7 @@ import net.fabricmc.fabric.api.transfer.v1.fluid.FluidVariant;
 import net.fabricmc.fabric.api.transfer.v1.transaction.Transaction;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
@@ -62,6 +63,8 @@ import net.minecraft.world.level.block.state.properties.Half;
 import net.minecraft.world.level.block.state.properties.SlabType;
 import net.minecraft.world.level.material.Fluids;
 import net.minecraft.world.level.storage.TagValueInput;
+import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.Vec3;
 import org.jspecify.annotations.Nullable;
 
 /**
@@ -248,7 +251,11 @@ public class ConcordanceGloamInkGameTests {
 		helper.succeed();
 	}
 
-	/** A lid is a #jugcraft:crucible_lids block on the crucible with its underside whole; nothing else is (ten cases). */
+	/**
+	 * A lid is a #jugcraft:crucible_lids block on the crucible with its underside whole; nothing else is (ten cases). Used
+	 * on the crucible's top by the server's own path (ServerPlayerGameMode.useItemOn), a slab or a trapdoor is set on it as
+	 * the item places it, a bottom slab and a closed trapdoor in the lower half: a lid.
+	 */
 	@GameTest(maxTicks = 20)
 	public void aLidIsAClosedTrapdoorOrASlabOnTheCrucible(GameTestHelper helper) {
 		ServerLevel level = helper.getLevel();
@@ -270,6 +277,18 @@ public class ConcordanceGloamInkGameTests {
 				new Case("a hopper", Blocks.HOPPER.defaultBlockState(), false))) {
 			helper.setBlock(at.above(), each.above());
 			helper.assertTrue(crucible.covered(level) == each.lid(), each.what() + " on the crucible is " + (each.lid() ? "a" : "no") + " lid");
+		}
+		ServerPlayer player = alembist(helper);
+		BlockPos absolute = helper.absolutePos(at);
+		player.snapTo(absolute.getX() + 2.5, absolute.getY(), absolute.getZ() + 0.5, 0.0F, 0.0F); // clear of the lid's block
+		BlockHitResult top = new BlockHitResult(Vec3.atCenterOf(absolute).relative(Direction.UP, 0.5), Direction.UP, absolute, false);
+		for (Block lid : List.of(Blocks.STONE_SLAB, Blocks.OAK_TRAPDOOR)) {
+			helper.setBlock(at.above(), Blocks.AIR);
+			player.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(lid));
+			InteractionResult used = player.gameMode.useItemOn(player, level, player.getMainHandItem(), InteractionHand.MAIN_HAND, top);
+			BlockState set = level.getBlockState(absolute.above());
+			helper.assertTrue(used.consumesAction() && set.is(lid) && crucible.covered(level), "Used on the crucible's top, " + lid
+					+ " is set on it as a lid: " + used + ", " + set);
 		}
 		helper.succeed();
 	}
@@ -436,9 +455,11 @@ public class ConcordanceGloamInkGameTests {
 	}
 
 	/**
-	 * On a Crucible Stand: without its lid the crucible waits (needs_cover) and the stand idles, saying why, paying nothing;
-	 * lidded, it waits for hot and the stand aims hot; fed by a creative cell it heats into hot, never past its target, and
-	 * the formula finishes three Gloam Ink unattended, then waits for water while the stand gives nothing.
+	 * On a Crucible Stand with JE to spare and no lid: ticked after each of the water and the four adds, the stand pays
+	 * nothing (it never pre-heats for a covered stir it cannot take, saying why); then the crucible waits (needs_cover) and
+	 * the stand idles, saying why, paying nothing; lidded, it waits for hot and the stand aims hot; fed by a creative cell it
+	 * heats into hot, never past its target, and the formula finishes three Gloam Ink unattended, then waits for water
+	 * while the stand gives nothing.
 	 */
 	@GameTest(maxTicks = 900)
 	public void aStandHeatsOnlyForACoveredStirItCanTake(GameTestHelper helper) {
@@ -453,7 +474,15 @@ public class ConcordanceGloamInkGameTests {
 		crucible.setItem(0, new ItemStack(Garden.GLOAMCAP, 3));
 		crucible.setItem(1, new ItemStack(Items.SPIDER_EYE));
 		crucible.setItem(CrucibleBlockEntity.BOTTLE_SLOT, new ItemStack(Items.GLASS_BOTTLE, 3));
-		helper.assertTrue(pulse(crucible, level, 5) == null && crucible.step() == 5 && crucible.temperature() == Heat.AMBIENT, "In, still cold");
+		stand.energy.setAmount(CrucibleStandBlockEntity.CAPACITY);
+		for (int i = 0; i < 5; i++) {
+			helper.assertTrue(crucible.automate(level) == null, "Step " + i + " is taken: " + crucible.waiting());
+			CrucibleStandBlockEntity.Plan early = stand.plan(level);
+			helper.assertTrue(!stand.heat(level) && stand.given() == Heat.AMBIENT && Diagnostic.of(Code.NEEDS_COVER).equals(early.reason())
+					&& early.band() == null, "Before its covered stir, with no lid, the stand pays nothing, saying why: " + early);
+		}
+		helper.assertTrue(crucible.step() == 5 && crucible.temperature() == Heat.AMBIENT && stand.energy.getAmount() == CrucibleStandBlockEntity.CAPACITY,
+				"In, still cold, the stand's JE untouched");
 		Diagnostic noLid = crucible.automate(level);
 		CrucibleStandBlockEntity.Plan plan = stand.plan(level);
 		long held = stand.energy.getAmount();

@@ -10,6 +10,7 @@ import net.minecraft.util.RandomSource;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
@@ -28,7 +29,8 @@ import org.jspecify.annotations.Nullable;
 
 /**
  * The Alembic Crucible (roadmap step 13). Use water, ingredients, a stirring rod, a bottle or bowl, a spoon, an Assay
- * Glass or a formula on it; empty-handed it says how it stands, and sneaking empty-handed stops it repeating a formula.
+ * Glass or a formula on it; empty-handed it says how it stands, and sneaking empty-handed stops it repeating a formula. A
+ * trapdoor or slab used on it is placed as the item places it (its lid, Concordance C-D6).
  * GeckoLib draws it (client/CrucibleRenderer: the liquid at its level, in the colour of its strongest property);
  * everything else is {@link CrucibleBlockEntity}.
  */
@@ -57,6 +59,11 @@ public class CrucibleBlock extends BaseEntityBlock {
 			InteractionHand hand, BlockHitResult hit) {
 		if (stack.isEmpty()) {
 			return super.useItemOn(stack, state, level, pos, player, hand, hit);
+		}
+		// C-D6 (Gloam Ink): a lid (a #jugcraft:crucible_lids block) is passed on to the item's own placing, on either side,
+		// so using one on the crucible's top sets it on the crucible as on any block.
+		if (stack.getItem() instanceof BlockItem item && item.getBlock().defaultBlockState().is(CrucibleBlockEntity.LIDS)) {
+			return InteractionResult.PASS;
 		}
 		if (player instanceof ServerPlayer server && level instanceof ServerLevel serverLevel
 				&& level.getBlockEntity(pos) instanceof CrucibleBlockEntity crucible) {

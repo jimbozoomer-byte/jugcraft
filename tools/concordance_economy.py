@@ -241,8 +241,11 @@ def extract_rows():
         for op in process:
             if op[0] == "add":
                 adds[op[1]] = adds.get(op[1], 0) + 1
-        names = {info["base"]: info["base_name"], **dict(zip(info["carriers"], info["carrier_names"]))}
-        takes = ", ".join(f"{batches * count:,} {names[ingredient]}" for ingredient, count in adds.items())
+        # Counted as the codex counts them: Gloamcap is its own plural ("three Gloamcap"); a carrier takes an s.
+        plurals = {info["base"]: info["base_name"], **{c: f"{n}s" for c, n in zip(info["carriers"], info["carrier_names"])}}
+        singulars = {info["base"]: info["base_name"], **dict(zip(info["carriers"], info["carrier_names"]))}
+        takes = ", ".join(f"{batches * count:,} {(singulars if batches * count == 1 else plurals)[ingredient]}"
+                          for ingredient, count in adds.items())
         rows.append((f"A crucible repeating {info['name']}'s worked formula all day",
                      f"{takes}, {batches * parts:,} parts of water and {batches * parts:,} glass bottles",
                      f"{batches * parts:,} {info['name']}, or as many {info['failure_name']} from a murky formula",

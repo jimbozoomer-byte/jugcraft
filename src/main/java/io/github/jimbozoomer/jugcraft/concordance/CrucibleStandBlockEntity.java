@@ -1,7 +1,9 @@
 package io.github.jimbozoomer.jugcraft.concordance;
 
 import io.github.jimbozoomer.jugcraft.concordance.alchemy.Band;
+import io.github.jimbozoomer.jugcraft.concordance.alchemy.Formula;
 import io.github.jimbozoomer.jugcraft.concordance.alchemy.Heat;
+import io.github.jimbozoomer.jugcraft.concordance.alchemy.Operation;
 import io.github.jimbozoomer.jugcraft.concordance.compose.Text;
 import io.github.jimbozoomer.jugcraft.concordance.diagnostic.Code;
 import io.github.jimbozoomer.jugcraft.concordance.diagnostic.Diagnostic;
@@ -28,10 +30,11 @@ import org.jspecify.annotations.Nullable;
  * none.</li>
  * <li><b>Heat out</b>, only to the crucible directly above (one block entity read, no scan). Each tick it works out the band
  * that crucible needs ({@link Heat#standBand}): with a formula, its next stir's, but only while the crucible waits for
- * nothing or for heat alone; with none, its own setting. It pays that band's rate ({@value #JE_WARM}, {@value #JE_HOT} or
- * {@value #JE_SEARING} JE a tick) only on a tick the crucible is no hotter than the band's target, and lights; the
- * crucible then heads for the target ({@link CrucibleBlockEntity#below}). Otherwise it pays nothing and goes dark, and the
- * crucible cools by the usual rule. Preserve's hold wins. Fed less than its rate (JE came in within {@value #FED_TICKS}
+ * nothing or for heat alone, and, that stir covered, only with a lid on the crucible (Gloam Ink, C-D6); with none, its own
+ * setting. It pays that band's rate ({@value #JE_WARM}, {@value #JE_HOT} or {@value #JE_SEARING} JE a tick) only on a
+ * tick the crucible is no hotter than the band's target, and lights; the crucible then heads for the target
+ * ({@link CrucibleBlockEntity#below}). Otherwise it pays nothing and goes dark, and the crucible cools by the usual rule.
+ * Preserve's hold wins. Fed less than its rate (JE came in within {@value #FED_TICKS}
  * ticks), a tick it cannot pay holds the crucible where it is while the crucible is below the band (and, following a
  * formula, at the band's lowest degree), so a trickle still brings it to the band for the same JE a degree; inside the
  * band such a tick cools as before. Short of JE, it goes dark only after {@value #DARK_TICKS} such ticks in a row.</li>
@@ -123,6 +126,13 @@ public class CrucibleStandBlockEntity extends BlockEntity {
 		}
 		if (!Heat.waitsForHeat(waiting)) {
 			return new Plan(band, following, false, waiting, true, temperature);
+		}
+		// C-D6 (Gloam Ink): its formula's next stir covered and no lid on the crucible, it idles, as the crucible will wait for
+		// its lid: it never pre-heats for a stir that cannot be taken, nor heats on once the lid is lifted. One block read.
+		Formula program = crucible.program();
+		Operation.Stir next = program == null ? null : Heat.nextStir(program, crucible.step());
+		if (next != null && next.covered() && !crucible.covered(level)) {
+			return new Plan(null, following, false, Diagnostic.of(Code.NEEDS_COVER), true, temperature);
 		}
 		if (band == null || crucible.temperature() > Heat.standTarget(band)) {
 			return new Plan(band, following, false, null, false, temperature);

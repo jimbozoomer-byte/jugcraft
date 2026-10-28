@@ -380,8 +380,8 @@ public class CrucibleBlockEntity extends BlockEntity implements GeoBlockEntity, 
 			}
 			case Operation.Stir stir -> {
 				// C-D6 (Gloam Ink): a covered stir waits for its lid, before its heat, so a Crucible Stand never heats for a stir
-				// that cannot be taken (Heat.waitsForHeat: needs_cover is no wait for heat). Any other stir is taken as written,
-				// lid or none.
+				// that cannot be taken (Heat.waitsForHeat: needs_cover is no wait for heat; before the wait, the stand reads the
+				// lid itself, CrucibleStandBlockEntity.plan). Any other stir is taken as written, lid or none.
 				if (stir.covered() && !covered(level)) {
 					return pause(level, Diagnostic.of(Code.NEEDS_COVER));
 				}

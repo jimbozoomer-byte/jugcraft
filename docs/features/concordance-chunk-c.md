@@ -2362,7 +2362,7 @@ contract, lines 1390-1462). At most three decisions go to the owner at Chunk C's
 | C-D3 | 14 October 2026 | "Crucible Stand (Recommended)": under the Alembic Crucible, on the rooted foundation; turns JE into the heat the running formula's next stir needs (starting rates about 8, 16 and 32 JE/t for warm, hot and searing), while an Electric Pump pipes water into the crucible's tank; manual heat sources still work | Accepted (owner) | C-05, C-06, C-10 |
 | C-D4 | 14 October 2026 | Both carriers, one demand: the crucible's formula shortage, served by a Peepo through the existing `CrucibleCompanion` port and by a Clockwork Porter through a courier request the crucible files (09:136 names both `MachineCompanionPort` and `CourierLedger`). Not asked; the session's default | Proposed | C-06 |
 | C-D5 | 23 October 2026 | At the checkpoint, the balance of hands-on preparation and automation (09:144): keep it as built. The campfire crucible and carrying by hand stay a complete route; the Crucible Stand and the couriers stay optional conveniences paid in JE (the stand's heat; a porter's Ley Charge, which electricity can give) | Accepted (owner) | C-05, C-06, C-10 |
-| C-D6 | 23 October 2026 | At the checkpoint, the next product family (09:144): Gloam Ink (03:27-37: Gloamcap and an approved Hollow carrier, by covered extraction, for research notes, safe links and ward inscriptions; excess contamination yields an unusable sludge, recoverable through a mundane route). (A note, not the owner's answer: when it is built is not yet decided.) | Accepted (owner) | the next work (Deferrals; Where to resume) |
+| C-D6 | 23 October 2026 | At the checkpoint, the next product family (09:144): Gloam Ink (03:27-37: Gloamcap and an approved Hollow carrier, by covered extraction, for research notes, safe links and ward inscriptions; excess contamination yields an unusable sludge, recoverable through a mundane route). (A note, not the owner's answer: confirmed on 28 October 2026 as the work after the garden cohort; built: [Gloam Ink](gloam-ink.md).) | Accepted (owner) | the next work (Deferrals; Where to resume) |
 | C-D7 | 23 October 2026 | At the checkpoint, the workshop's look (09:144): the Crucible Stand's look fits. The Rooted Thallite Foundation's icon was not asked to be redrawn and stays | Accepted (owner) | C-04, C-05 |
 | C-D8 | 23 October 2026 | The review route (Open pull requests and the review route): Chunks B and C are reviewed as two stacked pull requests, Chunk B's against main and Chunk C's against Chunk B's branch | Accepted (owner) | C-00, every unit |
 | C-P1 | 14 October 2026 | A formula's identity is its canonical text (the Peepo plan id hashes it); the rules' revision is `ConcordanceData.revision()`, process-local, so not 03:46's stable version (a recorded deviation); no new formula save key; an incompatibility is re-derived after a load or reload; an unreadable saved program is kept as text and reported. As built in unit 1: `incompatibility()` replays the formula once per revision and after a load, and names the refused step; an unreadable program is kept under `program` (see C-P23) | Proposed | C-01 |
@@ -2460,8 +2460,9 @@ records to main's Scale (C-P40). Before more work:
    shared files: lang, the gametest `fabric.mod.json`, `check_mod_data.py`, `CHANGELOG.md`, `docs/TESTING.md`,
    `WHAT_EXISTS.md` with #366, `INTEGRATION_STATUS.md` with #361 to #365), and merge main again if it has moved past
    `f904df3fd`;
-3. the next smallest outcome (C-D6; when it is built is not yet decided): one Gloam Ink formula from a mixed bed's
-   Gloamcap with Research Notes as its consumer. Its contract and record: [Gloam Ink](gloam-ink.md).
+3. the next smallest outcome (C-D6; confirmed on 28 October 2026 as the work after the garden cohort; built:
+   [Gloam Ink](gloam-ink.md), its contract and record): one Gloam Ink formula from a mixed bed's Gloamcap with Research
+   Notes as its consumer.
 
 ## How this contract was checked
 

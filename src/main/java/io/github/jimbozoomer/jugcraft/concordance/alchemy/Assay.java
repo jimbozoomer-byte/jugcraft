@@ -36,7 +36,7 @@ public final class Assay {
 			if (mixture.isEmpty()) {
 				return PLAIN;
 			}
-			return new Look(mixture.concentration().dominant(), murky(mixture.contaminantConcentration(), catalog));
+			return new Look(mixture.concentration().dominant(), Assay.murky(mixture.contaminantConcentration(), catalog));
 		}
 	}
 

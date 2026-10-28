@@ -35,9 +35,11 @@ takes no power (C-P44). Holding anything, a use is the item's own, so a crucible
   such a tick cools as usual, so with no formula a trickle at or below half its rate keeps the crucible at the band's
   edge rather than at its target. Its coil stays lit through up to 9 ticks in a row it cannot pay.
 - **It idles, dark and paying nothing** (C-P43), while the crucible waits for anything but heat: water, an ingredient,
-  its lid (Gloam Ink, C-D6; not merged: [its record](gloam-ink.md)), a bottle or bowl, room in its output, a batch to bottle before a repeat, or a formula the rules in force refuse. It
-  idles while Preserve holds the crucible (the hold wins), and while the crucible is already hotter than the band's
-  target. The crucible then cools by the usual rule, one degree a tick.
+  its lid (Gloam Ink, C-D6; not merged: [its record](gloam-ink.md)), a bottle or bowl, room in its output, a batch to
+  bottle before a repeat, or a formula the rules in force refuse. Following a formula whose next stir is covered, it
+  also idles whenever no lid is on the crucible, before that wait begins (it reads the lid itself). It idles while
+  Preserve holds the crucible (the hold wins), and while the crucible is already hotter than the band's target. The
+  crucible then cools by the usual rule, one degree a tick.
 - **With no formula,** a plain use with an empty hand cycles it off, warm, hot, searing and off again, by someone who
   may change the block (claims, protected towns, adventure mode and spawn protection refuse), at most once every 10
   ticks a player. Sneaking only reads it. While a formula is set, the formula decides and the setting is kept for later.

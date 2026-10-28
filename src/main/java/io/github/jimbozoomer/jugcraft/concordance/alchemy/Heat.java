@@ -89,10 +89,20 @@ public final class Heat {
 		if (!waitsForHeat(waiting)) {
 			return null;
 		}
+		Operation.Stir stir = nextStir(program, step);
+		return stir == null || stir.band() == Band.COLD ? null : stir.band();
+	}
+
+	/**
+	 * A formula's next stir from {@code step} on, or null with none left before bottling (standBand's band; since
+	 * Concordance C-D6, CrucibleStandBlockEntity.plan reads whether it is covered). At most Mixture.MAX_OPERATIONS
+	 * operations read.
+	 */
+	public static Operation.@Nullable Stir nextStir(Formula program, int step) {
 		List<Operation> operations = program.operations();
 		for (int i = Math.max(0, step); i < operations.size(); i++) {
 			if (operations.get(i) instanceof Operation.Stir stir) {
-				return stir.band() == Band.COLD ? null : stir.band();
+				return stir;
 			}
 		}
 		return null;

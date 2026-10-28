@@ -18511,7 +18511,8 @@ def check_gloam_ink(co, root, lang, registered):
     paper the worked formula draws the item, a murky one the failure, a thin one the draught, and an uncovered or impure
     one nothing; no drawn batch holds more of its axis than its ingredients brought; the game test holds the model's
     numbers. The Java draws as the model does: a stir records the lid (a #jugcraft:crucible_lids block with a whole
-    underside), a covered stir waits for it before its heat (so a Crucible Stand idles), only a glass bottle draws an
+    underside; one used on the crucible is placed as its item places it), a covered stir waits for it before its heat
+    (and a Crucible Stand, reading the lid itself, idles before that wait), only a glass bottle draws an
     extract, murky its failure by the spoon's own murky, and hand bottling practises the item, never the failure. Both
     things are a glass bottle's, stack to 16 and give the bottle back when crafted; none is an ingredient, specimen,
     mulch, compost, a Scale material, a tablet output or a modelled resource; no recipe on disk takes Gloam Ink; the
@@ -18618,6 +18619,16 @@ def check_gloam_ink(co, root, lang, registered):
     if "waiting == null || waiting.code() == Code.WRONG_HEAT || waiting.code() == Code.HELD;" not in source(root / "alchemy" / "Heat.java") \
             or "NEEDS_COVER" in source(root / "alchemy" / "Heat.java"):
         err("alchemy/Heat.waitsForHeat: a lid wait is no wait for heat, so a Crucible Stand idles until the lid is on")
+    # The review: a stand never pre-heats for a covered stir with no lid on (it reads the lid itself, before the wait).
+    stand_plan = _java_body(source(root / "CrucibleStandBlockEntity.java"), "public Plan plan(ServerLevel level)")
+    if "Heat.nextStir(program, crucible.step())" not in stand_plan or "next.covered() && !crucible.covered(level)" not in stand_plan \
+            or "return new Plan(null, following, false, Diagnostic.of(Code.NEEDS_COVER), true, temperature);" not in stand_plan:
+        err("CrucibleStandBlockEntity.plan: its formula's next stir covered and no lid on, the stand idles, saying needs_cover")
+    # The review: a lid used on the crucible is passed on to its own placing, on either side, before the crucible's use.
+    block_use = _java_body(source(root / "CrucibleBlock.java"), "protected InteractionResult useItemOn(")
+    if not 0 <= block_use.find("item.getBlock().defaultBlockState().is(CrucibleBlockEntity.LIDS)") \
+            < block_use.find("return InteractionResult.PASS;") < block_use.find("player instanceof ServerPlayer server"):
+        err("CrucibleBlock.useItemOn: a lid is passed on to its own placing (PASS), so using one on the crucible sets it there")
     crucible = source(root / "CrucibleBlockEntity.java")
     if 'TagKey.create(Registries.BLOCK, Jugcraft.id("crucible_lids"))' not in crucible \
             or "return lid.is(LIDS) && lid.isFaceSturdy(level, above, Direction.DOWN);" not in _java_body(crucible, "public boolean covered(BlockGetter level)"):
@@ -18711,7 +18722,7 @@ EXTRACT_CONSUMERS = {
 
 def check_fair_copies(co, root, lang):
     """Gloam Ink (C-D6; docs/features/gloam-ink.md; GI-P9 to GI-P13): its one consumer. Each extract has a consumer in the
-    game's code (EXTRACT_CONSUMERS). Gloam Ink's is the fair copy (recipe type jugcraft:research_notes_copy, the
+    game's code (EXTRACT_CONSUMERS). Gloam Ink's is the fair copy (recipe serializer jugcraft:research_notes_copy, the
     generator's file, under the Concordance's switch): exactly one original written sheet, one blank sheet and one Gloam
     Ink, nothing else; the copy is a new sheet holding only the original's notes, marked a copy, and a copy is never
     copied; the original stays in the grid and the ink's bottle comes back. A copy changes no reading: notes stay evidence

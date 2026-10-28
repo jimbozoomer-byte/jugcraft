@@ -244,8 +244,9 @@ WORKSHOP = {
                  "it); write down what you know on a sheet of Research Notes and, with a blank sheet and the ink in a "
                  "crafting grid, make a fair copy for another reader: the original and the bottle come back",
          "switches": ["concordance"], "things": ["research_notes"], "practices": ["alchemy"],
-         "tests": ["theLivingWorkshopFromAManualStart", "gloamInkByHandUnderALid", "aCoveredFormulaWaitsForItsLidAndSaysSo",
-                   "aFairCopyIsCraftedInThePlayersOwnGrid", "aFairCopyTeachesWhatItsOriginalDoes"]},
+         # theLivingWorkshopFromAManualStart walks steps 1 to 5 only: this step's tests are its own.
+         "tests": ["gloamInkByHandUnderALid", "aCoveredFormulaWaitsForItsLidAndSaysSo", "aFairCopyIsCraftedInThePlayersOwnGrid",
+                   "aFairCopyTeachesWhatItsOriginalDoes"]},
     ],
 }
 
