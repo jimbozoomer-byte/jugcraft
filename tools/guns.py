@@ -1072,6 +1072,36 @@ GUNS = {
         "damage": 12.0, "pellets": 1, "interval": 33, "auto": False, "capacity": 6,
         "reload": (11, 12, 16), "spread": (1.6, 1.6), "range": 120, "ammo": "rifle_round",
     },
+    # Slice 16B: three more of the owner's guns from their 23 October upload, each built from their own GeckoLib model
+    # and animations: the Gyrojet Pistol, a pistol held in one hand that fires microjets, and the Bomb Lance, a whaler's
+    # lance carried at the hip that fires one at a time, both flying ("jet", as the Maelstrom Gun's); and the
+    # Floundergat, a grapeshot gun loaded a shell at a time.
+    "comet_pistol": {
+        "display": "Comet Pistol",
+        "source": "gyrojet_pistol",
+        "tooltip": "An iron pistol held in one hand that fires microjets, little rockets that fly fast to their mark, six "
+                   "to a magazine. Fires microjets.",
+        "damage": 4.0, "pellets": 1, "interval": 5, "auto": False, "capacity": 6,
+        "reload": 48, "spread": (3.0, 1.0), "range": 48, "ammo": "microjet", "shot": "jet",
+        "jet_speed": 2.5,
+    },
+    "narwhal_lance": {
+        "display": "Narwhal Lance",
+        "source": "bomb_lance",
+        "tooltip": "A whaler's lance carried at the hip, three blades about its tube: one microjet at a time, flying "
+                   "faster and further than any other. Fires microjets.",
+        "damage": 14.0, "pellets": 1, "interval": 13, "auto": False, "capacity": 1,
+        "reload": 46, "spread": (1.0, 0.5), "range": 80, "ammo": "microjet", "shot": "jet",
+        "jet_speed": 3.0,
+    },
+    "halibut_gun": {
+        "display": "Halibut Gun",
+        "source": "floundergat",
+        "tooltip": "A brass grapeshot gun of four shells, loaded a shell at a time: a wide, close blast that throws back "
+                   "what it hits, and its shooter. Fires buckshot shells.",
+        "damage": 2.5, "pellets": 8, "interval": 12, "auto": False, "capacity": 4,
+        "reload": (13, 14, 9), "spread": (10.0, 10.0), "range": 24, "ammo": "buckshot_shell",
+    },
 }
 
 # What a gun fires: bullets, or a slice 8C or 8D gun's "shot". The flying-microjets follow-up's "jet": each shot fires a
@@ -1401,6 +1431,16 @@ RECIPES = {
     "salvo_rifle": (["III", "LRP", "I  "], {"I": "minecraft:iron_ingot", "L": "minecraft:lever", "R": "minecraft:redstone",
                                             "P": "#minecraft:planks"}),
     "highball_repeater": (["III", "ILP"], {"I": "minecraft:iron_ingot", "L": "minecraft:lever", "P": "#minecraft:planks"}),
+    # Slice 16B: iron and a lever again. The owner's recipes give the Gyrojet Pistol treated iron, a heavy gun barrel and
+    # a firing unit (iron, a lever and gunpowder for its rockets' drive), the Bomb Lance iron gun frames, a gun barrel, a
+    # firing unit, planks and three iron bayonets (an Iron Bayonet, its blades), and the Floundergat treated brass and
+    # four heavy gun barrels over a wooden grip (four iron ingots, its barrels, brass, a lever and planks).
+    "comet_pistol": (["IIG", " LP"], {"I": "minecraft:iron_ingot", "G": "minecraft:gunpowder", "L": "minecraft:lever",
+                                      "P": "#minecraft:planks"}),
+    "narwhal_lance": (["BII", "ILP"], {"B": "jugcraft:iron_bayonet", "I": "minecraft:iron_ingot", "L": "minecraft:lever",
+                                       "P": "#minecraft:planks"}),
+    "halibut_gun": (["IIB", "IIL", " P "], {"I": "minecraft:iron_ingot", "B": "#c:ingots/brass", "L": "minecraft:lever",
+                                            "P": "#minecraft:planks"}),
 }
 # The switches beyond "guns" a gun's recipe needs (separate load conditions, all of which must hold): the energy weapons
 # and their cells are useless without the Charging Station, so they need the machines too (as the leaf blower does).
@@ -3440,6 +3480,61 @@ BUILDS = {
         "sight": (8.0, 5.25, 12.25),
         "eye_relief": 3.0,
     },
+    # Slice 16B. The Gyrojet Pistol, the Bomb Lance and the Floundergat are the owner's GeckoLib models, as slice 16A's.
+    # The Gyrojet Pistol's shot jets flame from vents on either side of its slide (the Flames bones, which rest inside
+    # the slide until the shot moves them out) and rocks the seal on its left side; its reload takes the one magazine out and
+    # brings it back, the left arm hanging under it; held in one hand, its left hand shows only then. Its bolt and seal
+    # move but hold nothing, and magazine_2 is never shown. The Bomb Lance is carried at the hip, as the Maelstrom Gun:
+    # its shot drives the lance's head (the "lance" part, on the barrel bone) back and forth, its reload tips its body.
+    # The Floundergat's barrel (with the grips and bayonets under it, "mounts") tips down about the breech to load and
+    # back up to close; its shot moves a bolt and its loop a shell the model lacks: empty, they move nothing.
+    "comet_pistol": {
+        "bones": [
+            ("gun_body", None, ["main"], (8.475, 2.975, 9.0)),
+            ("bolt", "gun_body", [], (9.60146, 4.67316, 12.38542)),
+            ("seal", "gun_body", [], (7.03447, 4.65, 11.525)),
+            ("Flames2", "gun_body", ["flames2"], (7.96187, 5.16594, 15.58813)),
+            ("Flames3", "gun_body", ["flames3"], (8.02937, 5.16594, 13.83313)),
+            ("Flames4", "gun_body", ["flames4"], (7.96187, 5.16594, 14.66563)),
+            ("Flames5", "gun_body", ["flames5"], (7.96187, 5.16594, 14.66563)),
+            ("Flames6", "gun_body", ["flames6"], (8.02937, 5.16594, 13.83313)),
+            ("Flames7", "gun_body", ["flames7"], (7.96187, 5.16594, 15.58813)),
+            ("magazine", "gun_body", ["stan_mag"], (7.975, 0.31124, 16.0787)),
+            ("magazine_2", "gun_body", [], (8.0, 0.325, 16.0)),
+        ],
+        "hands": {"right": (7.53, 1.52, 15.56), "left": (7.29, 1.71, 10.8)},
+        "hand_pose": {"left": ("reload", "1.8333")},
+        "arm_parents": {"left": "magazine"},
+        "arms": {"right": (0.1763, -0.4154, 0.8924), "left": (0.2809, -0.5638, 0.7766)},
+        "muzzle": (8.0, 4.59, 6.5),
+        "sight": (8.0, 5.9, 14.6),
+    },
+    "narwhal_lance": {
+        "bones": [
+            ("gun_body2", None, [], (8.0, 2.864, 12.448)),
+            ("gun_body", "gun_body2", ["main"], (8.0, 2.864, 12.448)),
+            ("body", "gun_body", ["body"], (8.0, 1.114, 13.448)),
+            ("barrel", "body", ["lance"], (8.0, -0.00108, 1.61)),
+        ],
+        "hands": {"right": (8.8, 3.39, 18.51), "left": (9.22, -1.02, 5.96)},
+        "arms": {"right": (-0.1658, -0.7886, 0.5921), "left": (0.6912, -0.1026, 0.7154)},
+        "muzzle": (8.0, 1.2, 0.64),
+        "sight": None,
+    },
+    "halibut_gun": {
+        "bones": [
+            ("gun_body", None, ["main"], (8.0, 1.75, 10.0)),
+            ("bolt", "gun_body", [], (8.62646, 3.44816, 13.38542)),
+            ("shell", "gun_body", [], (8.0, 1.75, 10.0)),
+            ("barrel", "gun_body", ["forend"], (8.0, 2.00295, 10.49921)),
+        ],
+        "mounts": {"grip": "barrel"},
+        "hands": {"right": (7.56, 1.05, 16.06), "left": (9.27, 1.9, 7.15)},
+        "arms": {"right": (0.0653, -0.4957, 0.866), "left": (0.6526, -0.1748, 0.7373)},
+        "muzzle": (8.0, 3.6, 0.3),
+        "sight": (8.0, 5.35, 14.5),
+        "eye_relief": 3.0,
+    },
 }
 
 # Props the animations move on bones that had no part ("@<name>" in a bone's parts): the rounds a reload carries in,
@@ -4006,6 +4101,8 @@ ZOOM = {
     "maelstrom_gun": 0.95, "ermine_rifle": 0.85, "geode_cutter": 0.95,
     # Slice 16A: a pistol, a burst rifle and a repeater (the Highball Rifle's).
     "hush_pistol": 0.9, "salvo_rifle": 0.85, "highball_repeater": 0.75,
+    # Slice 16B: a pistol, a lance carried at the hip (no sights: it stays there, as the Maelstrom Gun) and a shotgun.
+    "comet_pistol": 0.9, "narwhal_lance": 0.95, "halibut_gun": 0.85,
 }
 
 
@@ -4293,6 +4390,11 @@ SHOT_SOUNDS = {
     "hush_pistol": "item/bruiser/silenced_fire.ogg",
     "salvo_rifle": "item/iron_rifle/fire.ogg",
     "highball_repeater": "item/blackpowder/fire.ogg",
+    # Slice 16B: the gyrojet's shot (the Maelstrom Gun's) for both microjet guns, as the owner's data names, and the
+    # boomstick's (the Thunderpipe's) for the Floundergat.
+    "comet_pistol": "item/gyrojet/fire.ogg",
+    "narwhal_lance": "item/gyrojet/fire.ogg",
+    "halibut_gun": "item/boomstick/fire.ogg",
 }
 SUBTITLES = {
     "fire": "Gun fires",
@@ -4507,7 +4609,9 @@ KNOCKBACK = {"jawbreaker": 0.6, "impetus_shotgun": 0.65, "auger_shotgun": 0.65,
              "breacher": 0.65, "rattler_pistol": 0.8, "bronco_smg": 0.85, "sledge": 0.65, "mule": 0.65, "fowler": 0.8,
              "culverin": 0.8, "reverb": 0.65, "tusker": 0.65, "crackling": 0.65, "goshawk_revolver": 3.0,
              "waystation_shotgun": 0.7, "flatboat_gun": 8.0, "holler_pistol": 0.65, "minuet_pistol": 0.55,
-             "half_crown_revolver": 0.55, "holler_carbine": 0.65, "navvy_shotgun": 0.85, "freeholder_rifle": 0.4}
+             "half_crown_revolver": 0.55, "holler_carbine": 0.65, "navvy_shotgun": 0.85, "freeholder_rifle": 0.4,
+             # Slice 16B: the Floundergat's knockbackStrength.
+             "halibut_gun": 0.65}
 PIERCING = {"vesper_rifle": 4.5, "onrush_smg": 3.0, "kreuzer_pistol": 1.0, "psalm_smg": 1.0, "jawbreaker": 4.5,
             "hawker_rifle": 1.0, "quill_rifle": 1.5, "tumbler_rifle": 3.0,
             # Slice 15E: the Shard Culler's "armorPen" (4).
@@ -4533,7 +4637,9 @@ KICK = {"thunderpipe": 0.45, "coach_gun": 0.25, "bellmouth": 0.3, "bulldog_pisto
         "mule": 0.35, "fowler": 0.34, "culverin": 0.35, "reverb": 0.15, "tusker": 0.15, "crackling": 0.5, "borer": 0.25,
         "goshawk_revolver": 2.25, "waystation_shotgun": 0.35, "flatboat_gun": 2.5, "fencepost_thumper": 0.3,
         "holler_pistol": 0.25, "holler_carbine": 0.15, "navvy_shotgun": 0.1, "impetus_shotgun": 0.25,
-        "auger_shotgun": 0.1}
+        "auger_shotgun": 0.1,
+        # Slice 16B: the Floundergat's playerKnockBackStrength.
+        "halibut_gun": 0.45}
 
 # The flying-microjets follow-up: a heavy gun that slows whoever holds it in their main hand (the owner's speedModifier,
 # JugcraftGuns.CARRY_SPEED): the share of their speed they keep, an attribute modifier on the gun (jugcraft:gun_weight,
@@ -4955,6 +5061,21 @@ GEO_PARTS["saketini_ironport"] = {
 # their sum, so the turn must stay the bone's for the swing to be the owner's. Slice 16A: the Saketini Ironport's cap,
 # turned 45 degrees about z, which the shot flips open about x.
 GEO_KEPT_TURNS = {"saketini_ironport": ("Cap",)}
+# Slice 16B: the Gyrojet Pistol, the Bomb Lance and the Floundergat, from the owner's GeckoLib models. The Gyrojet
+# Pistol is a body (its slide and sights on it), its magazines and the six flames its shot jets from its vents (left
+# and right, three each); its stocks are left off, as it has no carbine animations to be held by them. The Bomb Lance
+# is a frame, the body under it and the lance's head (its "barrel" bone: named "lance" here, so no barrel attachment is
+# taken for it). The Floundergat's body is its gun_body; its "barrel" is the barrels the reload tips (named "forend"
+# here, as the Highball Repeater's), carrying the grips and the bayonets, and its stocks hang under the body.
+GEO_PARTS["gyrojet_pistol"] = {"main": "gun_body", "stan_mag": "standard_mag", "ext_mag": "extended_mag",
+                               "speed_mag": "speed_mag", "flames2": "Flames2", "flames3": "Flames3", "flames4": "Flames4",
+                               "flames5": "Flames5", "flames6": "Flames6", "flames7": "Flames7"}
+GEO_PARTS["bomb_lance"] = {"main": "gun_body", "body": "body", "lance": "barrel"}
+GEO_PARTS["floundergat"] = {
+    "main": "gun_body", "forend": "barrel", "light_grip": "light_grip", "vert_grip": "vertical_grip",
+    "iron_bayonet": "iron_bayonet", "anthralite_bayonet": "anthralite_bayonet", "diamond_bayonet": "diamond_bayonet",
+    "netherite_bayonet": "netherite_bayonet", "light_stock": "light_stock", "heavy_stock": "weighted_stock",
+    "wooden_stock": "wooden_stock"}
 GEO_OFFSETS = {"grandle_og": (0.00625, -8.15, -1.0), "mas_55": (0.0, -8.15, -0.8), "prush_gun": (-0.0095, -8.05, -1.25),
                "valora": (0.0125, -8.2, -0.75), "krauser": (-0.0095, -8.1, -0.1384),
                "soul_drummer": (-0.0095, -8.05, -0.2), "uppercut": (-0.0095, -8.5, -1.4),
@@ -4962,7 +5083,10 @@ GEO_OFFSETS = {"grandle_og": (0.00625, -8.15, -1.0), "mas_55": (0.0, -8.15, -0.8
                "drill": (0.0, -8.0, -2.0), "drill_conversion": (0.0, -8.0, -2.0), "lockewood": (0.014, -8.2, -1.25),
                "cyclone": (-0.0202, -8.7, -1.2), "minksy": (0.0, -8.0, 0.0), "shard_culler": (0.025, -7.0, 1.0),
                "mokova": (-0.0125, -8.25, -0.6), "kalaskah": (-0.0095, -8.1, -0.9),
-               "saketini_ironport": (0.0, -8.175, -1.5)}
+               "saketini_ironport": (0.0, -8.175, -1.5), "gyrojet_pistol": (0.0, -8.2, -1.0),
+               # Slice 16B: the owner made the Bomb Lance's GeckoLib model 0.84 the size of its item model; its turned
+               # tube lies on the item model's axis (y 2), its length centred on the item model's.
+               "bomb_lance": (0.0, -9.014, -4.448), "floundergat": (0.0, -8.0, -2.0)}
 # The bones of a GeckoLib model that are another of the owner's guns' item-model parts, moved by (x, y, z) px: the
 # converter must give back those parts' elements, face for face (check_geo()).
 GEO_TWINS = {"grandle_og": {
@@ -5052,8 +5176,14 @@ GEO_TWINS.update({source: {bone: (part if "/" in part else f"{source}/{part}", (
                           "anthralite_bayonet": "saketini/anthralite_bayonet", "diamond_bayonet": "saketini/diamond_bayonet",
                           "netherite_bayonet": "saketini/netherite_bayonet", "muzzle_brake": "saketini/muzzle_brake",
                           "advanced_silencer": "saketini/advanced_silencer", "silencer": "saketini/silencer"}}.items()})
+# Slice 16B: the Gyrojet Pistol's speed magazine is its item-model part, and the Floundergat's light grip is its own, set
+# 0.75 px further forward along with the rest of the model's barrel. The owner reshaped their other parts in these
+# models (the Bomb Lance's is the item model at 0.84 the size).
+GEO_TWINS.update({"gyrojet_pistol": {"speed_mag": ("gyrojet_pistol/speed_mag", (0, 0, 0))},
+                  "floundergat": {"light_grip": ("floundergat/light_grip", (0, 0, -0.75))}})
 GEO_RELAID = ("mas_55", "prush_gun", "valora", "krauser", "soul_drummer", "uppercut", "mas_peddler", "inertial", "zilk_45",
-              "drill", "drill_conversion", "lockewood", "cyclone", "minksy", "shard_culler", "saketini_ironport")
+              "drill", "drill_conversion", "lockewood", "cyclone", "minksy", "shard_culler", "saketini_ironport",
+              "gyrojet_pistol", "bomb_lance", "floundergat")
 
 
 def geo_model(source):

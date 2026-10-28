@@ -248,6 +248,12 @@ public final class JugcraftGuns {
 		SPECS.put("hush_pistol", new GunSpec(4.0F, 1, 5, false, 8, 47, 0, 0, 0, 2.5F, 0.75F, 48, "light_round"));
 		SPECS.put("salvo_rifle", new GunSpec(3.5F, 1, 3, false, 18, 49, 0, 0, 0, 3.0F, 0.75F, 80, "rifle_round"));
 		SPECS.put("highball_repeater", new GunSpec(12.0F, 1, 33, false, 6, 0, 11, 12, 16, 1.6F, 1.6F, 120, "rifle_round"));
+		// Slice 16B: two guns that fire flying Microjets (JET), a pistol held in one hand and a lance carried at the hip
+		// that takes one at a time, and a grapeshot gun loaded a shell at a time that throws back what it hits and its
+		// shooter (KNOCKBACK, KICK).
+		SPECS.put("comet_pistol", new GunSpec(4.0F, 1, 5, false, 6, 48, 0, 0, 0, 3.0F, 1.0F, 48, "microjet"));
+		SPECS.put("narwhal_lance", new GunSpec(14.0F, 1, 13, false, 1, 46, 0, 0, 0, 1.0F, 0.5F, 80, "microjet"));
+		SPECS.put("halibut_gun", new GunSpec(2.5F, 8, 12, false, 4, 0, 13, 14, 9, 10.0F, 10.0F, 24, "buckshot_shell"));
 	}
 
 	/**
@@ -256,7 +262,7 @@ public final class JugcraftGuns {
 	 * line; {@link #ARC}, a bolt that leaps from creature to creature; {@link #ROCKET} (slice 10A), a High-Explosive Rocket;
 	 * {@link #JET} (the flying-microjets follow-up), a Microjet that flies to its mark ({@link GunShots}, {@link Microjet}).
 	 */
-	public static final Map<String, String> SHOTS = Map.ofEntries(Map.entry("trench_lobber", "grenade"), Map.entry("stoker", "flame"), Map.entry("beam_pistol", "beam"), Map.entry("stormlock_rifle", "arc"), Map.entry("linesman", "arc"), Map.entry("spikedriver", "beam"), Map.entry("seam_cutter", "beam"), Map.entry("caisson_pistol", "arc"), Map.entry("earthmover", "rocket"), Map.entry("skylark_rifle", "rocket"), Map.entry("bullfrog", "grenade"), Map.entry("solenoid_rifle", "beam"), Map.entry("votive_rifle", "beam"), Map.entry("glowmouth", "arc"), Map.entry("fencepost_thumper", "grenade"), Map.entry("lantern_musket", "beam"), Map.entry("firedrake", "flame"), Map.entry("maelstrom_gun", "jet"), Map.entry("ermine_rifle", "beam"), Map.entry("geode_cutter", "beam"));
+	public static final Map<String, String> SHOTS = Map.ofEntries(Map.entry("trench_lobber", "grenade"), Map.entry("stoker", "flame"), Map.entry("beam_pistol", "beam"), Map.entry("stormlock_rifle", "arc"), Map.entry("linesman", "arc"), Map.entry("spikedriver", "beam"), Map.entry("seam_cutter", "beam"), Map.entry("caisson_pistol", "arc"), Map.entry("earthmover", "rocket"), Map.entry("skylark_rifle", "rocket"), Map.entry("bullfrog", "grenade"), Map.entry("solenoid_rifle", "beam"), Map.entry("votive_rifle", "beam"), Map.entry("glowmouth", "arc"), Map.entry("fencepost_thumper", "grenade"), Map.entry("lantern_musket", "beam"), Map.entry("firedrake", "flame"), Map.entry("maelstrom_gun", "jet"), Map.entry("ermine_rifle", "beam"), Map.entry("geode_cutter", "beam"), Map.entry("comet_pistol", "jet"), Map.entry("narwhal_lance", "jet"));
 	public static final String GRENADE = "grenade";
 	public static final String FLAME = "flame";
 	public static final String BEAM = "beam";
@@ -271,9 +277,10 @@ public final class JugcraftGuns {
 	/**
 	 * The flying-microjets follow-up: how fast a jet gun's Microjets fly, in blocks a tick (tools/guns.py GUNS
 	 * "jet_speed", the owner's Cyclone's 1.5); each drives itself, so it does not slow, and stops at the end of the gun's
-	 * range if it has hit nothing by then ({@link Microjet}).
+	 * range if it has hit nothing by then ({@link Microjet}). Slice 16B adds the Comet Pistol's, the owner's Gyrojet
+	 * Pistol's 2.5, and the Narwhal Lance's, the owner's Bomb Lance's 3.
 	 */
-	public static final Map<String, Float> JET_SPEED = Map.of("maelstrom_gun", 1.5F);
+	public static final Map<String, Float> JET_SPEED = Map.of("maelstrom_gun", 1.5F, "comet_pistol", 2.5F, "narwhal_lance", 3.0F);
 	/**
 	 * Slice 8D: the JE each round of an energy weapon draws from the Energy Cells in the inventory as it loads
 	 * (tools/guns.py GUNS "charge"); a gun not listed loads rounds of its ammunition.
@@ -297,7 +304,7 @@ public final class JugcraftGuns {
 	 * Slice 10G, two guns at once: the guns held in one hand (tools/guns.py one_handed()), of which a player may hold one
 	 * in each hand and fire both ({@link GunItem#dual}).
 	 */
-	public static final Set<String> ONE_HANDED = Set.of("warden_pistol", "haymaker", "duelling_pistol", "bulldog_pistol", "marshal_revolver", "sapper_revolver", "sentry_pistol", "beam_pistol", "rattler_pistol", "bronco_smg", "spikedriver", "caisson_pistol", "culverin", "ashfall_pistol", "penny_pistol", "tuppence_pistol", "goshawk_revolver", "tabby_revolver", "parley_revolver", "minuet_pistol", "half_crown_revolver", "kreuzer_pistol", "psalm_smg", "jawbreaker", "hush_pistol");
+	public static final Set<String> ONE_HANDED = Set.of("warden_pistol", "haymaker", "duelling_pistol", "bulldog_pistol", "marshal_revolver", "sapper_revolver", "sentry_pistol", "beam_pistol", "rattler_pistol", "bronco_smg", "spikedriver", "caisson_pistol", "culverin", "ashfall_pistol", "penny_pistol", "tuppence_pistol", "goshawk_revolver", "tabby_revolver", "parley_revolver", "minuet_pistol", "half_crown_revolver", "kreuzer_pistol", "psalm_smg", "jawbreaker", "hush_pistol", "comet_pistol");
 	/**
 	 * Slice 13D: one-handed guns that, with a stock fitted, are held in both hands as carbines (tools/guns.py CARBINES):
 	 * they play the owner's carbine_ animations in place of their own, and are no longer one of two guns held at once
@@ -330,8 +337,9 @@ public final class JugcraftGuns {
 	 * gives (tools/guns.py KNOCKBACK). Slice 15B's Jawbreaker is the first, from the owner's Uppercut; slice 15C's Impetus
 	 * Shotgun, from the owner's Inertial, the second; slice 15D's Auger Shotgun, from the owner's Drill Conversion, the
 	 * third. The older guns follow-up gives 24 of the guns before slice 15 theirs, the Flatboat Gun the strongest (8).
+	 * Slice 16B's Halibut Gun, from the owner's Floundergat, follows.
 	 */
-	public static final Map<String, Float> KNOCKBACK = Map.ofEntries(Map.entry("jawbreaker", 0.6F), Map.entry("impetus_shotgun", 0.65F), Map.entry("auger_shotgun", 0.65F), Map.entry("thunderpipe", 0.75F), Map.entry("haymaker", 0.6F), Map.entry("coach_gun", 0.75F), Map.entry("bellmouth", 0.8F), Map.entry("bulldog_pistol", 0.85F), Map.entry("breacher", 0.65F), Map.entry("rattler_pistol", 0.8F), Map.entry("bronco_smg", 0.85F), Map.entry("sledge", 0.65F), Map.entry("mule", 0.65F), Map.entry("fowler", 0.8F), Map.entry("culverin", 0.8F), Map.entry("reverb", 0.65F), Map.entry("tusker", 0.65F), Map.entry("crackling", 0.65F), Map.entry("goshawk_revolver", 3.0F), Map.entry("waystation_shotgun", 0.7F), Map.entry("flatboat_gun", 8.0F), Map.entry("holler_pistol", 0.65F), Map.entry("minuet_pistol", 0.55F), Map.entry("half_crown_revolver", 0.55F), Map.entry("holler_carbine", 0.65F), Map.entry("navvy_shotgun", 0.85F), Map.entry("freeholder_rifle", 0.4F));
+	public static final Map<String, Float> KNOCKBACK = Map.ofEntries(Map.entry("jawbreaker", 0.6F), Map.entry("impetus_shotgun", 0.65F), Map.entry("auger_shotgun", 0.65F), Map.entry("thunderpipe", 0.75F), Map.entry("haymaker", 0.6F), Map.entry("coach_gun", 0.75F), Map.entry("bellmouth", 0.8F), Map.entry("bulldog_pistol", 0.85F), Map.entry("breacher", 0.65F), Map.entry("rattler_pistol", 0.8F), Map.entry("bronco_smg", 0.85F), Map.entry("sledge", 0.65F), Map.entry("mule", 0.65F), Map.entry("fowler", 0.8F), Map.entry("culverin", 0.8F), Map.entry("reverb", 0.65F), Map.entry("tusker", 0.65F), Map.entry("crackling", 0.65F), Map.entry("goshawk_revolver", 3.0F), Map.entry("waystation_shotgun", 0.7F), Map.entry("flatboat_gun", 8.0F), Map.entry("holler_pistol", 0.65F), Map.entry("minuet_pistol", 0.55F), Map.entry("half_crown_revolver", 0.55F), Map.entry("holler_carbine", 0.65F), Map.entry("navvy_shotgun", 0.85F), Map.entry("freeholder_rifle", 0.4F), Map.entry("halibut_gun", 0.65F));
 	/**
 	 * The guns whose bullets pierce armour: a hit deals what it would if the target wore this many points less armour
 	 * ({@link GunShots#pierced}; tools/guns.py PIERCING). Slice 15B's Jawbreaker is the first, from the owner's Uppercut;
@@ -344,9 +352,10 @@ public final class JugcraftGuns {
 	/**
 	 * The guns whose shot pushes their shooter back, by this strength in blocks a tick (the recoil-push follow-up, the
 	 * owner's playerKnockBack; tools/guns.py KICK; {@link GunShots#kick}). The Flatboat Gun's and the Goshawk Revolver's
-	 * are the strongest, the owner's Big Bore's 2.5 and Ultra Knight Hawk's 2.25.
+	 * are the strongest, the owner's Big Bore's 2.5 and Ultra Knight Hawk's 2.25. Slice 16B adds the Halibut Gun's, the
+	 * owner's Floundergat's 0.45.
 	 */
-	public static final Map<String, Float> KICK = Map.ofEntries(Map.entry("thunderpipe", 0.45F), Map.entry("coach_gun", 0.25F), Map.entry("bellmouth", 0.3F), Map.entry("bulldog_pistol", 0.8F), Map.entry("breacher", 0.15F), Map.entry("trench_lobber", 0.2F), Map.entry("stoker", 0.7F), Map.entry("bronco_smg", 0.2F), Map.entry("sledge", 0.35F), Map.entry("skylark_rifle", 0.2F), Map.entry("bullfrog", 0.2F), Map.entry("mule", 0.35F), Map.entry("fowler", 0.34F), Map.entry("culverin", 0.35F), Map.entry("reverb", 0.15F), Map.entry("tusker", 0.15F), Map.entry("crackling", 0.5F), Map.entry("borer", 0.25F), Map.entry("goshawk_revolver", 2.25F), Map.entry("waystation_shotgun", 0.35F), Map.entry("flatboat_gun", 2.5F), Map.entry("fencepost_thumper", 0.3F), Map.entry("holler_pistol", 0.25F), Map.entry("holler_carbine", 0.15F), Map.entry("navvy_shotgun", 0.1F), Map.entry("impetus_shotgun", 0.25F), Map.entry("auger_shotgun", 0.1F));
+	public static final Map<String, Float> KICK = Map.ofEntries(Map.entry("thunderpipe", 0.45F), Map.entry("coach_gun", 0.25F), Map.entry("bellmouth", 0.3F), Map.entry("bulldog_pistol", 0.8F), Map.entry("breacher", 0.15F), Map.entry("trench_lobber", 0.2F), Map.entry("stoker", 0.7F), Map.entry("bronco_smg", 0.2F), Map.entry("sledge", 0.35F), Map.entry("skylark_rifle", 0.2F), Map.entry("bullfrog", 0.2F), Map.entry("mule", 0.35F), Map.entry("fowler", 0.34F), Map.entry("culverin", 0.35F), Map.entry("reverb", 0.15F), Map.entry("tusker", 0.15F), Map.entry("crackling", 0.5F), Map.entry("borer", 0.25F), Map.entry("goshawk_revolver", 2.25F), Map.entry("waystation_shotgun", 0.35F), Map.entry("flatboat_gun", 2.5F), Map.entry("fencepost_thumper", 0.3F), Map.entry("holler_pistol", 0.25F), Map.entry("holler_carbine", 0.15F), Map.entry("navvy_shotgun", 0.1F), Map.entry("impetus_shotgun", 0.25F), Map.entry("auger_shotgun", 0.1F), Map.entry("halibut_gun", 0.45F));
 	/**
 	 * The heavy guns that slow whoever holds them in their main hand, to this share of their speed (the flying-microjets
 	 * follow-up, the owner's speedModifier; tools/guns.py CARRY_SPEED): an attribute modifier on the gun ({@link #WEIGHT},
@@ -718,6 +727,9 @@ public final class JugcraftGuns {
 				"light_stock", "weighted_stock", "wooden_stock", "light_grip", "iron_bayonet", "steel_bayonet",
 				"diamond_bayonet", "netherite_bayonet", "long_scope", "medium_scope", "reflex_sight", "tactical_grip",
 				"laser_sight"));
+		ACCEPTS.put("comet_pistol", List.of("extended_magazine", "speed_magazine"));
+		ACCEPTS.put("halibut_gun", List.of("light_stock", "weighted_stock", "wooden_stock", "light_grip", "vertical_grip",
+				"iron_bayonet", "steel_bayonet", "diamond_bayonet", "netherite_bayonet"));
 	}
 
 	/** The rounds. */

@@ -32,17 +32,19 @@ public class FlyingMicrojetsGameTests {
 	private static final double PIG_SPEED = 0.25;
 
 	/**
-	 * The Maelstrom Gun alone fires Microjets that fly, at the owner's 1.5 blocks a tick. The heavy guns that slow their
+	 * The guns that fire Microjets that fly are the owner's three built microjet guns, at the owner's speeds: the Maelstrom
+	 * Gun's 1.5 blocks a tick, and slice 16B's Comet Pistol's 2.5 and Narwhal Lance's 3. The heavy guns that slow their
 	 * holder are the owner's eight, each to the owner's share of their speed, and each gun's item carries it as a
 	 * main-hand movement-speed modifier, multiplied in last; a gun without any, the Kreuzer Pistol, has none.
 	 */
 	@GameTest
 	public void flyingMicrojetsAreTheOwners(GameTestHelper helper) {
-		helper.assertTrue(JugcraftGuns.JET_SPEED.equals(Map.of("maelstrom_gun", 1.5F))
-				&& JugcraftGuns.shot(JugcraftGuns.GUNS.get("maelstrom_gun")).equals(JugcraftGuns.JET)
-				&& JugcraftGuns.jetSpeed(JugcraftGuns.GUNS.get("maelstrom_gun")) == 1.5F,
-				"The Maelstrom Gun does not fire Microjets that fly 1.5 blocks a tick: " + JugcraftGuns.JET_SPEED);
-		helper.assertTrue(JugcraftGuns.SHOTS.entrySet().stream().filter(entry -> entry.getValue().equals(JugcraftGuns.JET)).count() == 1,
+		Map<String, Float> jets = Map.of("maelstrom_gun", 1.5F, "comet_pistol", 2.5F, "narwhal_lance", 3.0F);
+		helper.assertTrue(JugcraftGuns.JET_SPEED.equals(jets), "The guns' Microjets do not fly at the owner's speeds: " + JugcraftGuns.JET_SPEED);
+		jets.forEach((name, speed) -> helper.assertTrue(JugcraftGuns.shot(JugcraftGuns.GUNS.get(name)).equals(JugcraftGuns.JET)
+				&& JugcraftGuns.jetSpeed(JugcraftGuns.GUNS.get(name)) == speed, "The " + name + " does not fire Microjets that fly " + speed
+				+ " blocks a tick"));
+		helper.assertTrue(JugcraftGuns.SHOTS.entrySet().stream().filter(entry -> entry.getValue().equals(JugcraftGuns.JET)).count() == 3,
 				"Another gun fires Microjets that fly");
 		helper.assertTrue(JugcraftGuns.MICROJET != null, "The Microjet in flight is not registered");
 		Map<String, Float> owners = Map.ofEntries(Map.entry("thresher", 0.85F), Map.entry("stoker", 0.8F), Map.entry("earthmover", 0.95F),

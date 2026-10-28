@@ -40,6 +40,10 @@ No numbered release yet. Entries on feature branches remain proposed until their
 - **Checked:** all 40 Herobrine game tests and 393 scheduler assertions pass natively, and automated rendered and two-client tests pass. CI and a human playtest have not run yet.
 - **His look:** the game's own default player texture, read at run time, under a full-bright eyes layer of four white pixels. No game asset is copied.
 
+### Unmerged: Guns, slice 16B (two microjet guns and a grapeshot gun)
+- **Three more guns** from the owner's own GeckoLib models and animations, from their upload of 23 October: the **Comet Pistol** (the owner's Gyrojet Pistol), held in one hand, six **flying Microjets** a magazine that jet flame from its slide; the **Narwhal Lance** (the Bomb Lance), a whaler's lance carried at the hip that fires one Microjet at a time, the fastest and furthest-flying; and the **Halibut Gun** (the Floundergat), a grapeshot gun of four shells loaded a shell at a time that **throws back** what it hits, and its shooter.
+- Record: [guns.md, slice 16B](docs/features/guns.md#slice-16b-two-microjet-guns-and-a-grapeshot-gun).
+
 ### Unmerged: Guns, slice 16A (a silenced pistol, a burst rifle and a repeater)
 - **Three iron guns** from the owner's own GeckoLib models and animations, from their upload of 23 October: the **Hush Pistol** (the owner's Mokova), held in one hand and silenced the length of its barrel, eight muffled light rounds a magazine; the **Salvo Rifle** (the Kalaskah), which fires a **burst of three** rifle rounds to a pull from a magazine of 18; and the **Highball Repeater** (the Saketini Ironport), the Highball Rifle made over into a repeater of six heavy rounds loaded through a lid a round at a time, as true from the hip as aimed, piercing 2 points of armour.
 - **Converter:** a bone the owner turned that an animation turns about another axis keeps its turn, so the Repeater's cap flips open about its own hinge as the owner made it. The check of the owner's parts compares a turn's origin only where it moves anything.

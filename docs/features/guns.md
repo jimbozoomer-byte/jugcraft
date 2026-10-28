@@ -3464,7 +3464,7 @@ Game tests: `FlyingMicrojetsGameTests` and the updated `DiamondSteelGunsVGameTes
 - **A little under 1.5 blocks a tick:** the game takes the air's share off before each move, and the Microjet makes it up after.
 - **The view narrows** a little while a heavy gun is held, if the game's field-of-view effects are on, as with any slowness.
 - **No trail of the owner's:** the owner's microjet draws a bullet trail (`trailLengthMultiplier`); here it trails smoke and a small flame.
-- **The owner's other microjet guns** (the Gyrojet Pistol, the Bomb Lance and the MK43 Rifle's) are not built as flying guns: the MK43 Rifle's Ranger Rifle fires rifle rounds here.
+- **The owner's other microjet guns** (the Gyrojet Pistol, the Bomb Lance and the MK43 Rifle's) are not built as flying guns: the MK43 Rifle's Ranger Rifle fires rifle rounds here. (Slice 16B builds the Gyrojet Pistol and the Bomb Lance as the Comet Pistol and the Narwhal Lance, which fire flying Microjets.)
 - **Not played:** none of it has been played yet.
 
 ## Slice 16A: a silenced pistol, a burst rifle and a repeater
@@ -3527,6 +3527,87 @@ Three of the owner's guns from their upload of 23 October 2026 that were not yet
 - **Names:** "Hush Pistol", "Salvo Rifle" and "Highball Repeater" are proposed.
 - **Copper rounds:** the owner's data fires the three from copper rounds (compact and standard), which the mod does not have; they fire the Light Round and the Rifle Round, as slice 12B's copper guns do.
 - **The owner's critical hits, damage falloff and advantage against bots or illagers** are not modelled, as for every gun here.
+- **The arms in the reloads and inspections** come large into the view in places, as on the guns before them.
+- **Not played:** none of it has been played yet. The numbers want play to set.
+
+## Slice 16B: two microjet guns and a grapeshot gun
+Three more of the owner's guns from their upload of 23 October 2026 that were not yet built, the next batch after slice 16A (the owner asked on 28 October 2026 for the next batch; of five options offered, the recommended one, this: the Gyrojet Pistol and the Bomb Lance, both firing the now flying Microjet, and a third gun, the Floundergat). Each is built from the owner's own GeckoLib model of it, from that upload ([the library record](../../art/owner-library/README.md#gun-geometry-23-october-2026)), as slice 16A's are. The owner's data puts the Gyrojet Pistol among their iron guns and the Bomb Lance and the Floundergat among their ocean guns, a tier the mod does not have; all three are made of iron here, beside slice 16A's.
+
+| | Comet Pistol | Narwhal Lance | Halibut Gun |
+|---|---|---|---|
+| The owner's gun | Gyrojet Pistol | Bomb Lance | Floundergat |
+| What it is | a dark pistol whose long slide has three vents on either side that jet flame as it fires, its magazine in the grip | a whaler's lance: a long tube on a frame, three blades about its head | a short gun banded in brass, its barrel tipping down at the breech to load |
+| Held | in one hand (the left comes up only to reload) | at the hip in both hands, as the Maelstrom Gun | in both hands: the right on the grip, the left under the barrel |
+| What it fires | Microjets that fly 2.5 blocks a tick, a pull a shot | Microjets that fly 3 blocks a tick, one at a time | Buckshot Shells, eight pellets to a pull |
+| Damage | 4 | 14 | 2.5 a pellet, 20 if all eight land |
+| Rate | a shot every 5 ticks | one shot, then the reload | a shot every 12 ticks |
+| Holds | 6 | 1 | 4, loaded a shell at a time |
+| Reload | 2.4 s | 2.3 s | 0.65 s to open, 0.7 s a shell, 0.45 s to close: 3.9 s for four |
+| Spread, hip / aimed | 3° / 1° | 1° / 0.5° | 10° / 10° |
+| Range | 48 blocks | 80 blocks | 24 blocks |
+| The view aimed | 0.9 | 0.95 (it stays at the hip) | 0.85 |
+| Heavy shot | none | none | knocks back 0.65 further; pushes its shooter back 0.45 |
+| Takes | the Extended and Speed Magazines only | nothing | the stocks, the Light and Vertical Grips and the four bayonets |
+
+**Their numbers** start from the owner's own, in the gun data of the same upload, set beside the guns already built:
+- **Gyrojet Pistol:** the owner's numbers as they are: 4 a microjet, a pull every 5 ticks, six to a magazine, flying 2.5 blocks a tick (`speed`), 3° of spread.
+- **Bomb Lance:** one microjet at a time (`maxAmmo` 1), flying 3 blocks a tick, 1° of spread. The owner's 17.5 a shot is 14 here, below the steel Highball Rifle's 15, as an iron gun's.
+- **Floundergat:** four shells loaded by hand, as wide aimed as from the hip (`alwaysSpread`, 10°), knocking back 0.65 further (`knockbackStrength`) and pushing its shooter back 0.45 (`playerKnockBackStrength`). The owner's 22 pellets of grapeshot at 17.5 are eight of the Buckshot Shell's pellets here, as the other shotguns', at 2.5 each, and a shot every 12 ticks.
+- **The reloads** are the owner's animations'.
+
+**Crafting** (a crafting table; they switch with the guns): iron and a lever, as slice 16A's.
+- **Comet Pistol:** two iron ingots and gunpowder over a lever and planks (the owner's recipe takes treated iron, a heavy gun barrel and a firing unit; the gunpowder is its rockets' drive).
+- **Narwhal Lance:** an Iron Bayonet and two iron ingots over an iron ingot, a lever and planks (iron gun frames, a gun barrel, a firing unit, planks and three iron bayonets, its blades).
+- **Halibut Gun:** four iron ingots, its barrels, beside a brass ingot and a lever, over planks (treated brass and four heavy gun barrels over a wooden grip).
+
+**How they fire:**
+- **The Comet Pistol and the Narwhal Lance** fire Microjets that fly to their mark, as the Maelstrom Gun's do ([the follow-up](#follow-up-flying-microjets-and-heavy-guns-that-slow-their-holder)), each at its own speed (`JET_SPEED`): either reaches a mark 7 blocks off in 3 ticks, and the Comet's one 48 blocks off in about a second. The Narwhal Lance holds one, so it reloads after every shot.
+- **The Halibut Gun** fires its pellets as the other shotguns do. Its hit knocks back further through the [heavy-bullets follow-up](#follow-up-heavy-bullets-knockback-and-armour-piercing), and its shot pushes its shooter back through the [recoil push](#follow-up-guns-that-push-their-shooter-back). It loads a shell at a time, as the Highwayman.
+- **The Comet Pistol** pairs with another one-handed gun as two guns at once ([slice 10G](#slice-10g-two-guns-at-once)).
+
+**What you see:** the owner's animations. The Comet Pistol's shot jets flame from the vents on either side of its slide and rocks the seal on its left side; to reload, the magazine comes out and goes back in, the left hand coming up under it. The Narwhal Lance's shot drives the lance's head back and forth; its reload tips its body. The Halibut Gun's barrel, with the grips and the bayonet under it, tips down about the breech, a shell goes in for each, and it tips back up to close. Sounds, as the owner's data names for each: the gyrojet's shot (the Maelstrom Gun's) for the Comet Pistol and the Narwhal Lance, and the boomstick's (the Thunderpipe's) for the Halibut Gun.
+
+**How the models were built:**
+- **From the owner's GeckoLib models,** as slice 16A's (`GEO_PARTS`): each gun's parts are the bones of its model.
+  - **The Gyrojet Pistol** is a body (its slide and sights on it), its three magazines, and the six flames its shot jets from its vents, three on each side. They rest inside the slide until the shot moves them out. Its stocks are left off: it has no carbine animations to be held by them.
+  - **The Bomb Lance** is a frame, the body under it and the lance's head, the model's `barrel` bone. That part is named `lance` here, so no barrel attachment is taken for it.
+  - **The Floundergat's** body is its `gun_body`. Its `barrel` bone is the barrel the reload tips, carrying the grips and the bayonets (`"mounts"`); it is named `forend` here, as the Highball Repeater's. Its stocks hang under the body.
+- **Textures:** the models' own (`Guns/animated/gun/`); the owner laid out all three anew (`GEO_RELAID`).
+- **The Bomb Lance at its size:** the owner made its GeckoLib model 0.84 the size of its item model, so none of its parts lines up with an item-model part. It is placed with its tube on the item model's axis and its length centred on the item model's (`GEO_OFFSETS`).
+- **Checked against the earlier parts** (`GEO_TWINS`): the Gyrojet Pistol's speed magazine is its item-model part, corner for corner. The Floundergat's light grip is its own, 0.75 px further forward with the rest of the model's barrel. The owner reshaped their other parts in these models.
+- **Bones:** the models' own, turning about the models' pivots (checked).
+  - **Comet Pistol:** `gun_body`, `bolt` and `seal` (both move but hold nothing), the six `Flames` bones, `magazine`, and `magazine_2`, which is never shown.
+  - **Narwhal Lance:** `gun_body2`, `gun_body`, `body` and, under it, `barrel` with the lance's head.
+  - **Halibut Gun:** `gun_body`, `barrel`, and the `bolt` and `shell` its shot and its loading move, which its model lacks: empty, they move nothing.
+- **Hands:** placed from the owner's own arm bones, as slices 15A's to 16A's are. The Comet Pistol's left hand is placed where its reload brings it to the magazine (1.83 s in), as the Hush Pistol's is.
+- **Arms:** each runs from the hand toward the shoulder as a search over the gun's reloads and inspections chose, keeping the sleeves small in the view and out of the eye (the game leaves out an arm within 0.1 block of it).
+  - **Comet Pistol:** its left arm hangs under the magazine; through its reload the sleeve covers at most a tenth of the view, and none of the view through its inspection (the Hush Pistol's way would have covered up to 30% there). Through the middle of its inspection the owner's animation brings the gun and the hand that holds it before the eye, and the right sleeve fills much of the view in the previews there.
+  - **Narwhal Lance:** the right arm runs down from the grip at the hip, and the left back and out from the hand under the tube; neither sleeve covers more than a twentieth of the view.
+  - **Halibut Gun:** the right arm is the Tumbler Rifle's; the left runs back and out from under the barrel, its sleeve covering at most about a fifth of the view as it loads. The search counted its loading a shell at a time, not the plain reload its model also has, which a gun loaded a shell at a time never plays.
+- **Sights:** the owner's: the Comet Pistol's on its slide, the Halibut Gun's on its body. The Narwhal Lance has none: aimed, it stays at the hip, as the Maelstrom Gun. Aimed, the Halibut Gun is held 3 px further out, as the Highball Repeater is (`"eye_relief"`); without it, the back of its body filled the bottom of the view.
+- **Scopes:** none of the three takes one.
+- **Seen from outside:** the Narwhal Lance takes the owner's third-person tilt, the Gattaler's 68.25 degrees (`GunLooks.TILT`): its holder's arms hang at the hip and the lance still points along the look, as the Maelstrom Gun's.
+- **Checked** in first-person and aimed previews: idle, fired, aimed, through each reload (the Halibut's open, each shell and close) and inspection.
+
+**Connections:**
+- **Rounds:** the Microjet (slice 15E) and the Buckshot Shell; nothing new.
+- **Parts:** iron and a lever; gunpowder for the Comet Pistol, an Iron Bayonet for the Narwhal Lance, a brass ingot for the Halibut Gun; planks for all three.
+- **Their place:** the iron tier, beside slices 2's, 3's and 16A's guns. The Comet Pistol and the Narwhal Lance are the iron guns that fire the Microjet, which until now only the diamond-steel Maelstrom Gun fired.
+
+**Balance:** starting numbers, at point blank with every shot landing, over a magazine and its reload.
+- **Comet Pistol:** about 6.6 a second, below the Hush Pistol's 7.8 and the Penny Pistol's 7.3. Its Microjets take time to arrive, and it holds six.
+- **Narwhal Lance:** 14 a shot, once every 2.3 seconds: about 6.1 a second. It is the hardest single shot of the iron guns, and a Microjet reaches 80 blocks off in 27 ticks.
+- **Halibut Gun:** 20 a shot when all eight pellets land, about 14 a second over its four shells and their loading, beside the Highwayman's 13.7. Its 10° of spread and 24 blocks' reach keep it close.
+- **Rounds:** each shot spends one; nothing converts back.
+
+**Save compatibility:** new items `jugcraft:comet_pistol`, `narwhal_lance` and `halibut_gun`; nothing saved changes. `guns.enabled=false` turns their recipes off; the items stay registered.
+
+**Known limits:**
+- **Names:** "Comet Pistol", "Narwhal Lance" and "Halibut Gun" are proposed.
+- **The Bomb Lance's carry:** the owner's quickens its holder (`speedModifier` 1.1); here it does not. The heavy guns' follow-up carries over only the guns that slow.
+- **The Bomb Lance's blades and other rounds:** its own melee (9.5 at 4.5 blocks, with its own animation) and its change of ammunition (`allowAmmoChange`) are not modelled.
+- **Grapeshot:** the owner's Floundergat fires grapeshot, which the mod does not have; it fires the Buckshot Shell.
+- **The owner's critical hits, damage falloff and advantage** are not modelled, as for every gun here.
 - **The arms in the reloads and inspections** come large into the view in places, as on the guns before them.
 - **Not played:** none of it has been played yet. The numbers want play to set.
 
@@ -6651,13 +6732,38 @@ Slice 9E's files: the guns' tactical grip parts and the Laser Sight's textures m
   - `HeavyBulletsGameTests.heavyBulletsAreTheOwners`: the piercing table with the Highball Repeater's 2.
   - `GunsGameTests` counts 108 guns; `DualGunsGameTests` 25 one-handed guns; `TacticalAttachmentsGameTests` the forty-two guns the Tactical Grip fits, the Salvo Rifle and the Highball Repeater among them.
   - Held by the earlier tests and expected to pass with the new guns: no pistol hits as hard as the Holler Pistol, no one-handed gun fires a pull at a time as quickly as the Kreuzer Pistol, and none strays as little aimed as the Minuet Pistol (`BrassSidearmsGameTests`, `DiamondSteelGunsIIGameTests`); no gun firing rifle rounds a pull at a time is pulled as often as the Freeholder Rifle, a burst gun counting its whole cycle (`BrassQuickFirersGameTests`). The guns' client test (`GunsClientGameTests`) takes each new gun through its screenshots as every gun's; the Salvo Rifle's pull spends its burst of three.
+- **Slice 16B, run locally (28 October 2026):**
+  - `python3 tools/guns.py`, then `--check`: PASS. It wrote the three guns' models, animations and atlases; every other gun's files came out unchanged. The converter check passes on the three models (`GEO_TWINS`: the Gyrojet Pistol's speed magazine and the Floundergat's light grip, corner for corner) and holds every bone the models have to the models' pivots.
+  - **Found and fixed while building:**
+    - The Bomb Lance's model is 0.84 the size of its item model, so no part of it lines up with one; it is placed by its tube's axis and its length (`GEO_OFFSETS`).
+    - The Floundergat's light grip sits 0.75 px further forward than its item-model part, with the rest of the model's barrel; the twin check carries that shift.
+    - The arm search had counted the Floundergat's plain reload, which a gun loaded a shell at a time never plays; the left arm was searched again over its loading a shell at a time.
+    - The Halibut Gun's first recipe matched the Haymaker's grid; it now takes four iron ingots in a square, its barrels.
+    - The Narwhal Lance's model carries the owner's third-person tilt, which `GunLooks.TILT` now has.
+  - `python3 tools/generate_material_data.py`: wrote the guns' item models, definitions, recipes, names and sounds. (It also reordered `docs/features/jug-nouveau-content-map.json` and rewrote the line ends of the Jimtafacts GeckoLib files, unrelated; those are left as before.)
+  - `python3 tools/check_mod_data.py`: PASS (8044 material IDs).
+  - `python3 scripts/check_repository.py`: PASS. `python3 -m unittest discover -s scripts/tests`: 287 tests passed (a first run alongside the data generator, while it was still writing files, had 5 failures; on the finished files all passed); `python3 scripts/package_modrinth.py check`: PASS. `git diff --check`: clean.
+  - **Java:** a syntax parse only: 0 errors in the changed and new files.
+  - **Recipes:** every shaped recipe in the mod's data compared, mirrors included: none of the three new grids matches another (the 8 groups of matching grids elsewhere in the mod's data are the same as before).
+  - **Alchemy values:** the three guns' records, priced from their recipes as `tools/build_alchemy_values.py` prices them (that tool needs a Minecraft jar, which isn't available here; the same pricing gives the Hush Pistol its recorded 573): 717 (Comet Pistol), 9589/9 (Narwhal Lance, about 1065) and 4533/4 (Halibut Gun, about 1133).
+  - **Previews:** first-person, idle, fired, aimed, through each reload (the Halibut's open, each shell and close) and inspection; aimed views of the Halibut Gun and the Comet Pistol at eye reliefs of 0 to 6 px, and through the aimed shot's kick. The arms' ways were searched as above.
+- **Slice 16B game tests (not run yet; CI runs them):**
+  - `IronGunsIIGameTests`:
+    - `ironGunsIIAreRegistered`: each is registered with its numbers and its recipe loads, a pull at a time, none setting alight, lifting, bleeding or piercing. The Comet Pistol and the Narwhal Lance fire flying Microjets one at a time, at 2.5 and 3 blocks a tick, knocking back no further and pushing no one; the Comet six from a magazine, held in one hand (not a carbine), taking only the two magazines; the Narwhal one, in both hands, taking nothing. The Halibut Gun is four buckshot shells of eight pellets loaded a shell at a time, as wide aimed as from the hip, knocking back 0.65 further and pushing its shooter back 0.45, taking the stocks, the Light and Vertical Grips and the bayonets but no magazine, barrel attachment or scope.
+    - `cometPistolFiresAFlyingMicrojetFromOneHand`: a shot at a pig seven blocks off makes one Microjet, the gun's, with its damage and range, and spends one of six rounds; the pig is unhurt at once. The Microjet flies 2.35 to 2.55 blocks in a tick, and by the eighth tick it has dealt the gun's damage and is gone. With a Warden Pistol in the other hand the two are two guns at once.
+    - `narwhalLanceFiresOneMicrojetAtATime`: a shot at a pig seven blocks off makes one Microjet and empties the Lance; it flies 2.85 to 3.05 blocks in a tick and has dealt the gun's damage by the sixth. The empty Lance does not fire; given two Microjets it holds none three ticks before its reload's time and one after, leaving the other, and fires again.
+    - `halibutGunLoadsAShellAtATimeAndThrowsBack`: an empty Halibut Gun with two shells holds one after its first shell's time and both by its reload's time for two, leaving none, the reload over. Its shot at a pig three blocks off that a hit can push takes a whole number of 2.5-point pellets, up to eight, and knocks the pig away more than 0.2 blocks a tick faster than a Kreuzer Pistol's shot knocks a second pig; the shooter is pushed back 0.45 times the level share of their look.
+  - `FlyingMicrojetsGameTests.flyingMicrojetsAreTheOwners`: the three guns that fire flying Microjets, at 1.5, 2.5 and 3 blocks a tick, and no other.
+  - `RecoilPushGameTests.kicksAreTheOwners` and `HeavyBulletsGameTests.heavyBulletsAreTheOwners`: the push and knockback tables with the Halibut Gun's 0.45 and 0.65.
+  - `GunsGameTests` counts 111 guns; `DualGunsGameTests` 26 one-handed guns.
+  - Held by the earlier tests and expected to pass with the new guns: no pistol hits as hard as the Holler Pistol, no one-handed gun fires a pull at a time as quickly as the Kreuzer Pistol, and none strays as little aimed as the Minuet Pistol (`BrassSidearmsGameTests`, `DiamondSteelGunsIIGameTests`). The guns' client test (`GunsClientGameTests`) takes each new gun through its screenshots as every gun's; the Comet's and the Narwhal's Microjets reach the husk 7 blocks off well inside the 16 ticks it waits.
 - **Not run:** the client by hand, a two-client dedicated server, and play.
 
 ## World and event applicability
 No worldgen, structures, bosses or seasonal content. Guns, rounds and the Cell Rack come from crafting (and the creative tab). The one loot is slice 10F's: raider gunners, in raids and raider camps, may drop their service arms (their equipment's drop chance) and rounds (the mob loot table `jugcraft:entities/raider_gunner`).
 
 ## Rollout and open questions
-- **Names:** proposed here (Rust Midge, Patchwork Carbine, Thunderpipe, Warden Pistol, Riveter SMG, Haymaker, Longhorn Rifle, Drover Rifle, Coach Gun, Duelling Pistol, Line Musket, Bellmouth, Bulldog Pistol, Marshal Revolver, Sapper Revolver, Sentry Pistol, Garrison Rifle, Breacher, Trench Lobber, Thresher, Stoker, Beam Pistol, Stormlock Rifle, Linesman, Picket Rifle, Ranger Rifle, Kestrel Rifle, Rattler Pistol, Bronco SMG, Squall Rifle, Spikedriver, Seam Cutter, Caisson Pistol, Sledge, Highwayman, Throttle, Earthmover, Skylark Rifle, Bullfrog, Solenoid Rifle, Votive Rifle, Glowmouth, Mule, Fowler, Culverin, Undertone Rifle, Murmur SMG, Reverb, Tusker, Cinder Repeater, Bastion Rifle, Ashfall Pistol, Goldbristle Carbine, Crackling, Chitin SMG, Hermit Rifle, Borer, Penny Pistol, Conductor Carbine, Magpie SMG, Tuppence Pistol, Goshawk Revolver, Lament Rifle, Tabby Revolver, Lookout Rifle, Ammonite Carbine, Fencepost Carbine, Waystation Shotgun, Highball Rifle, Flatboat Gun, Windlass Musket, Millstone Rifle, Fencepost Thumper, Parley Revolver, Lantern Musket, Holler Pistol, Minuet Pistol, Half-Crown Revolver, Holler Carbine, Minuet Carbine, Grange Carbine, Sprocket Gun, Navvy Shotgun, Freeholder Rifle, Quarrel Carbine, Hinterland Rifle, Cloudburst Gun, Firedrake, Harrow, Old Grange Carbine, Vesper Rifle, Onrush SMG, Gallant Rifle, Kreuzer Pistol, Psalm SMG, Jawbreaker, Hawker Rifle, Impetus Shotgun, Quill Rifle, Auger Rifle, Auger Shotgun, Tumbler Rifle, Maelstrom Gun, Ermine Rifle, Geode Cutter, Hush Pistol, Salvo Rifle, Highball Repeater, Light Round, Rifle Round, Buckshot Shell, Paper Cartridge, Dart, Microjet, Bleeding, Energy Cell, Cell Rack, Raider Gunner; the attachments keep plain names: Silencer, Baffled Silencer, Muzzle Brake, Extended Barrel, Extended Magazine, Speed Magazine, Light Stock, Weighted Stock, Wooden Stock, Light Grip, Vertical Grip, the four bayonets, Long Scope, Medium Scope, Reflex Sight, Tactical Grip, Laser Sight). The owner may rename them before release; IDs are stable only after release.
+- **Names:** proposed here (Rust Midge, Patchwork Carbine, Thunderpipe, Warden Pistol, Riveter SMG, Haymaker, Longhorn Rifle, Drover Rifle, Coach Gun, Duelling Pistol, Line Musket, Bellmouth, Bulldog Pistol, Marshal Revolver, Sapper Revolver, Sentry Pistol, Garrison Rifle, Breacher, Trench Lobber, Thresher, Stoker, Beam Pistol, Stormlock Rifle, Linesman, Picket Rifle, Ranger Rifle, Kestrel Rifle, Rattler Pistol, Bronco SMG, Squall Rifle, Spikedriver, Seam Cutter, Caisson Pistol, Sledge, Highwayman, Throttle, Earthmover, Skylark Rifle, Bullfrog, Solenoid Rifle, Votive Rifle, Glowmouth, Mule, Fowler, Culverin, Undertone Rifle, Murmur SMG, Reverb, Tusker, Cinder Repeater, Bastion Rifle, Ashfall Pistol, Goldbristle Carbine, Crackling, Chitin SMG, Hermit Rifle, Borer, Penny Pistol, Conductor Carbine, Magpie SMG, Tuppence Pistol, Goshawk Revolver, Lament Rifle, Tabby Revolver, Lookout Rifle, Ammonite Carbine, Fencepost Carbine, Waystation Shotgun, Highball Rifle, Flatboat Gun, Windlass Musket, Millstone Rifle, Fencepost Thumper, Parley Revolver, Lantern Musket, Holler Pistol, Minuet Pistol, Half-Crown Revolver, Holler Carbine, Minuet Carbine, Grange Carbine, Sprocket Gun, Navvy Shotgun, Freeholder Rifle, Quarrel Carbine, Hinterland Rifle, Cloudburst Gun, Firedrake, Harrow, Old Grange Carbine, Vesper Rifle, Onrush SMG, Gallant Rifle, Kreuzer Pistol, Psalm SMG, Jawbreaker, Hawker Rifle, Impetus Shotgun, Quill Rifle, Auger Rifle, Auger Shotgun, Tumbler Rifle, Maelstrom Gun, Ermine Rifle, Geode Cutter, Hush Pistol, Salvo Rifle, Highball Repeater, Comet Pistol, Narwhal Lance, Halibut Gun, Light Round, Rifle Round, Buckshot Shell, Paper Cartridge, Dart, Microjet, Bleeding, Energy Cell, Cell Rack, Raider Gunner; the attachments keep plain names: Silencer, Baffled Silencer, Muzzle Brake, Extended Barrel, Extended Magazine, Speed Magazine, Light Stock, Weighted Stock, Wooden Stock, Light Grip, Vertical Grip, the four bayonets, Long Scope, Medium Scope, Reflex Sight, Tactical Grip, Laser Sight). The owner may rename them before release; IDs are stable only after release.
 - **The arms:** placed from the animations' own evidence, without the models they were made for. The CI screenshots show where they sit; the rest points and arm directions above are the knobs.
 - **The gun sets the owner chose on 8 October 2026** are all built: the revolvers (slice 8), the service arms (slice 8B), the heavy weapons (slice 8C) and the energy weapons (slice 8D).
 - **The gun sets the owner chose on 10 October 2026** are all built, each its own pull request: the marksman rifles (slice 9A), the automatic weapons (slice 9B), the second energy weapons (slice 9C) and the pump shotguns (slice 9D).
@@ -6668,7 +6774,7 @@ No worldgen, structures, bosses or seasonal content. Guns, rounds and the Cell R
   - other mobs with guns: the owner's Scorched Guns 2-style gun mobs, once their models are in the library (slice 10F gives the raider gunners the service arms);
   - the Whizzbanger, which waits for the model its animations were made for ([above](#the-whizzbanger-waits));
   - the guns beyond these sets;
-  - the owner's other GeckoLib gun models from their upload of 23 October 2026: only the Grandle OG's, the fifteen diamond-steel guns' (slices 15A to 15E) and slice 16A's three are in the library ([the library record](../../art/owner-library/README.md#gun-geometry-23-october-2026));
+  - the owner's other GeckoLib gun models from their upload of 23 October 2026: only the Grandle OG's, the fifteen diamond-steel guns' (slices 15A to 15E) and slices 16A's and 16B's six are in the library ([the library record](../../art/owner-library/README.md#gun-geometry-23-october-2026));
   - the owner's knockback for three guns whose shots push nothing here: the Stoker's flame, the Glowmouth's arc and the Fencepost Thumper's grenades ([above](#follow-up-armour-piercing-and-knockback-for-the-older-guns));
   - the owner's withering (the Flayed God's) and the other hit effects of guns not built yet ([above](#follow-up-hit-effects)).
 - **Balance:** the numbers are starting points for the owner to set.

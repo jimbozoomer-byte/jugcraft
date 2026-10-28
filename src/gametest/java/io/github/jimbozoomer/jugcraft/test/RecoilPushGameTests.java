@@ -19,8 +19,9 @@ import net.minecraft.world.phys.Vec3;
  */
 public class RecoilPushGameTests {
 	/**
-	 * The guns whose shot pushes their shooter back are the owner's 27 built guns with player knockback, at the owner's
-	 * strengths, the Flatboat Gun's (the Big Bore's) 2.5 the strongest. A gun without any, the Kreuzer Pistol, has none.
+	 * The guns whose shot pushes their shooter back are the owner's 28 built guns with player knockback, at the owner's
+	 * strengths, the Flatboat Gun's (the Big Bore's) 2.5 the strongest; slice 16B's Halibut Gun (the Floundergat) is the
+	 * 28th. A gun without any, the Kreuzer Pistol, has none.
 	 */
 	@GameTest
 	public void kicksAreTheOwners(GameTestHelper helper) {
@@ -31,7 +32,8 @@ public class RecoilPushGameTests {
 				Map.entry("reverb", 0.15F), Map.entry("tusker", 0.15F), Map.entry("crackling", 0.5F), Map.entry("borer", 0.25F),
 				Map.entry("goshawk_revolver", 2.25F), Map.entry("waystation_shotgun", 0.35F), Map.entry("flatboat_gun", 2.5F),
 				Map.entry("fencepost_thumper", 0.3F), Map.entry("holler_pistol", 0.25F), Map.entry("holler_carbine", 0.15F),
-				Map.entry("navvy_shotgun", 0.1F), Map.entry("impetus_shotgun", 0.25F), Map.entry("auger_shotgun", 0.1F))),
+				Map.entry("navvy_shotgun", 0.1F), Map.entry("impetus_shotgun", 0.25F), Map.entry("auger_shotgun", 0.1F),
+				Map.entry("halibut_gun", 0.45F))),
 				"The guns that push their shooter back are not the owner's: " + JugcraftGuns.KICK);
 		helper.assertTrue(JugcraftGuns.kick(JugcraftGuns.GUNS.get("kreuzer_pistol")) == 0.0F, "The Kreuzer Pistol pushes its shooter back");
 		helper.succeed();

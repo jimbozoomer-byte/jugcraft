@@ -1793,6 +1793,33 @@
       }
     ]
   },
+  "guns.comet_pistol.fire": {
+    "subtitle": "subtitles.jugcraft.guns.fire",
+    "sounds": [
+      {
+        "name": "jugcraft:guns/gyrojet_fire",
+        "attenuation_distance": 64
+      }
+    ]
+  },
+  "guns.narwhal_lance.fire": {
+    "subtitle": "subtitles.jugcraft.guns.fire",
+    "sounds": [
+      {
+        "name": "jugcraft:guns/gyrojet_fire",
+        "attenuation_distance": 64
+      }
+    ]
+  },
+  "guns.halibut_gun.fire": {
+    "subtitle": "subtitles.jugcraft.guns.fire",
+    "sounds": [
+      {
+        "name": "jugcraft:guns/boomstick_fire",
+        "attenuation_distance": 64
+      }
+    ]
+  },
   "nouveau.empty": {
     "sounds": []
   },

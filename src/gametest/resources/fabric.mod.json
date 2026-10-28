@@ -247,6 +247,7 @@
       "io.github.jimbozoomer.jugcraft.test.RecoilPushGameTests",
       "io.github.jimbozoomer.jugcraft.test.FlyingMicrojetsGameTests",
       "io.github.jimbozoomer.jugcraft.test.IronGunsGameTests",
+      "io.github.jimbozoomer.jugcraft.test.IronGunsIIGameTests",
       "io.github.jimbozoomer.jugcraft.test.HeavyBulletsGameTests",
       "io.github.jimbozoomer.jugcraft.test.ArmorSetsGameTests",
       "io.github.jimbozoomer.jugcraft.test.TitaniumGearGameTests",

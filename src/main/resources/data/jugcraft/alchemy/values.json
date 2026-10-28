@@ -7212,6 +7212,11 @@
       "denominator": 1,
       "source": "recipe jugcraft:combined_cycle_power_plant"
     },
+    "jugcraft:comet_pistol": {
+      "numerator": 717,
+      "denominator": 1,
+      "source": "recipe jugcraft:comet_pistol"
+    },
     "jugcraft:compact_monopole": {
       "numerator": 1,
       "denominator": 1,
@@ -13296,6 +13301,11 @@
       "numerator": 1,
       "denominator": 2,
       "source": "recipe jugcraft:half_tatami_mat"
+    },
+    "jugcraft:halibut_gun": {
+      "numerator": 4533,
+      "denominator": 4,
+      "source": "recipe jugcraft:halibut_gun"
     },
     "jugcraft:halloween_bonfire": {
       "numerator": 131,
@@ -28556,6 +28566,11 @@
       "numerator": 1,
       "denominator": 1,
       "source": "fallback (balance pending)"
+    },
+    "jugcraft:narwhal_lance": {
+      "numerator": 9589,
+      "denominator": 9,
+      "source": "recipe jugcraft:narwhal_lance"
     },
     "jugcraft:navvy_shotgun": {
       "numerator": 399,
