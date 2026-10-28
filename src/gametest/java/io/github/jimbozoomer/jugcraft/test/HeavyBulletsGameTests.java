@@ -21,15 +21,18 @@ public class HeavyBulletsGameTests {
 	/**
 	 * The heavy bullets are the owner's, at the owner's numbers: the Jawbreaker's (the Uppercut's) knock back 0.6 further
 	 * and pierce 4.5 points of armour; slice 15C's Impetus Shotgun's (the Inertial's) knock back 0.65 further, and the
-	 * Hawker Rifle's and the Quill Rifle's (the MAS Peddler's and the Zilk 45's) pierce 1 and 1.5 points.
+	 * Hawker Rifle's and the Quill Rifle's (the MAS Peddler's and the Zilk 45's) pierce 1 and 1.5 points; slice 15A's
+	 * Vesper Rifle's and Onrush SMG's (the MAS 55's and the Prush Gun's) pierce 4.5 and 3, slice 15B's Kreuzer Pistol's
+	 * and Psalm SMG's (the Krauser's and the Soul Drummer's) 1 each. The Gallant Rifle's (the Valora's) are plain.
 	 */
 	@GameTest
 	public void heavyBulletsAreTheOwners(GameTestHelper helper) {
 		helper.assertTrue(JugcraftGuns.KNOCKBACK.equals(Map.of("jawbreaker", 0.6F, "impetus_shotgun", 0.65F))
-				&& JugcraftGuns.PIERCING.equals(Map.of("jawbreaker", 4.5F, "hawker_rifle", 1.0F, "quill_rifle", 1.5F)),
+				&& JugcraftGuns.PIERCING.equals(Map.of("vesper_rifle", 4.5F, "onrush_smg", 3.0F, "kreuzer_pistol", 1.0F,
+						"psalm_smg", 1.0F, "jawbreaker", 4.5F, "hawker_rifle", 1.0F, "quill_rifle", 1.5F)),
 				"The heavy bullets are not the owner's: " + JugcraftGuns.KNOCKBACK + ", " + JugcraftGuns.PIERCING);
-		helper.assertTrue(JugcraftGuns.knockback(JugcraftGuns.GUNS.get("kreuzer_pistol")) == 0.0F
-				&& JugcraftGuns.piercing(JugcraftGuns.GUNS.get("kreuzer_pistol")) == 0.0F, "The Kreuzer Pistol's bullets are heavy too");
+		helper.assertTrue(JugcraftGuns.knockback(JugcraftGuns.GUNS.get("gallant_rifle")) == 0.0F
+				&& JugcraftGuns.piercing(JugcraftGuns.GUNS.get("gallant_rifle")) == 0.0F, "The Gallant Rifle's bullets are heavy too");
 		helper.succeed();
 	}
 

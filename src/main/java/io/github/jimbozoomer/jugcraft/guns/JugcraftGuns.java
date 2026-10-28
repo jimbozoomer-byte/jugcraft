@@ -299,9 +299,10 @@ public final class JugcraftGuns {
 	/**
 	 * The guns whose bullets pierce armour: a hit deals what it would if the target wore this many points less armour
 	 * ({@link GunShots#pierced}; tools/guns.py PIERCING). Slice 15B's Jawbreaker is the first, from the owner's Uppercut;
-	 * slice 15C's Hawker Rifle and Quill Rifle, from the owner's MAS Peddler and Zilk 45, follow.
+	 * slice 15C's Hawker Rifle and Quill Rifle, from the owner's MAS Peddler and Zilk 45, follow; then slices 15A's and
+	 * 15B's other guns, from the owner's MAS 55, Prush Gun, Krauser and Soul Drummer.
 	 */
-	public static final Map<String, Float> PIERCING = Map.of("jawbreaker", 4.5F, "hawker_rifle", 1.0F, "quill_rifle", 1.5F);
+	public static final Map<String, Float> PIERCING = Map.of("vesper_rifle", 4.5F, "onrush_smg", 3.0F, "kreuzer_pistol", 1.0F, "psalm_smg", 1.0F, "jawbreaker", 4.5F, "hawker_rifle", 1.0F, "quill_rifle", 1.5F);
 
 	/** The attachments, in the order the creative tab shows them (tools/guns.py ATTACHMENTS). */
 	public static final Map<String, GunAttachment> ATTACHMENTS = new LinkedHashMap<>();
