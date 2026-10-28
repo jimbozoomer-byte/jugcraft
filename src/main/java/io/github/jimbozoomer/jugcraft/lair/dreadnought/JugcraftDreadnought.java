@@ -3,6 +3,7 @@ package io.github.jimbozoomer.jugcraft.lair.dreadnought;
 import io.github.jimbozoomer.jugcraft.Jugcraft;
 import io.github.jimbozoomer.jugcraft.lair.DischargeBreakerBlock;
 import io.github.jimbozoomer.jugcraft.lair.Lair;
+import io.github.jimbozoomer.jugcraft.lair.LairRewards;
 import io.github.jimbozoomer.jugcraft.lair.Lairs;
 import io.github.jimbozoomer.jugcraft.weapons.DescribedItem;
 import java.util.List;
@@ -65,6 +66,8 @@ public final class JugcraftDreadnought {
 				DataComponents.EQUIPPABLE, Equippable.builder(EquipmentSlot.HEAD).setEquipSound(SoundEvents.ARMOR_EQUIP_IRON).build()));
 
 		Lairs.onPlaced(Lair.FOUNDRY_TRENCH, IronDreadnoughtEntity::summon);
+		// Concordance Chunk E (E4): its fall pays through lair/LairRewards, now or later.
+		LairRewards.payer(IronDreadnoughtLoot.BOSS, IronDreadnoughtLoot::pay);
 		DischargeBreakerBlock.onUsed(JugcraftDreadnought::breakerUsed);
 		CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.INGREDIENTS).register(output -> output.accept(SALVAGED_COIL));
 		CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.COMBAT).register(output -> {

@@ -11743,6 +11743,51 @@ ENCOUNTER_REBEGUN = re.compile(r"if \(phase != Phase\.WAITING && isAlive\(\) && 
 KILLING_BLOW_TAKES_PART = re.compile(r"if \(Encounter\.striker\(source\) instanceof ServerPlayer player\) \{\s*"
                                      r"took\(player, Float\.MIN_VALUE\);")
 
+def check_keeper_credit():
+    """Concordance Chunk E, E4 (docs/features/lair-encounter-credit.md): the five keepers that paid only who hurt them
+    (the Mire Hag, the Crypt Lich, the Iron Dreadnought, the Alpha Werewolf and the Cydonian Sentinel) keep their fight's
+    record in lair/Encounter, as the first four keepers do: begun as they wake and again after a load, forgotten when
+    they are left alone, a blow by a creature a player tamed and the killing blow are the striker's (on them and on every
+    creature that counts for them), each objective they name is a deed, and their fall is claimed once and paid through
+    lair/LairRewards under a saved name, now or kept for the dead and the away. No private damage map is left."""
+    keepers = (("hag", "MireHagEntity", "MireHagLoot", "JugcraftHag", "mire_hag", ("RootKnotEntity", "HagLikenessEntity"),
+                ('deed(player, "lamp");',)),
+               ("lich", "CryptLichEntity", "CryptLichLoot", "JugcraftLich", "crypt_lich", ("RestlessDeadEntity",),
+                ('deed(player, "seal");', 'deed(reader, "read");', 'deed(player, "read");', 'deed(reflector, "bolt");')),
+               ("dreadnought", "IronDreadnoughtEntity", "IronDreadnoughtLoot", "JugcraftDreadnought", "iron_dreadnought",
+                ("SparkerEntity",), ('deed(player, "breaker");', 'deed(player, "route");')),
+               ("alpha", "AlphaWerewolfEntity", "AlphaWerewolfLoot", "JugcraftAlpha", "alpha_werewolf", ("PackmateEntity",),
+                ('deed(ringer, "bell");',)),
+               ("sentinel", "CydonianSentinelEntity", "SentinelLoot", "JugcraftSentinel", "cydonian_sentinel",
+                ("ShardSentryEntity",), ()))
+    for package, entity, loot, registry, boss, adds, deeds in keepers:
+        folder = JAVA_ROOT / "lair" / package
+        def source(name):
+            path = folder / f"{name}.java"
+            return path.read_text(encoding="utf-8") if path.exists() else ""
+        text, loot_java, reg = source(entity), source(loot), source(registry)
+        needles = ["new Encounter(this, this::centre)", "encounter.begin();", ENCOUNTER_REBEGUN, "encounter.abandon();",
+                   "if (!encounter.claim()) {", "if (hurt && Encounter.striker(source) instanceof ServerPlayer player) {",
+                   KILLING_BLOW_TAKES_PART, f"LairRewards.pay(level, {loot}.BOSS, encounter, position(), centre(), EXPERIENCE);",
+                   *deeds]
+        if deeds:
+            needles.append('encounter.deed(server, what + " " + server.getUUID() + " " + server.level().getGameTime());')
+        for needle in needles:
+            if not (needle.search(text) if isinstance(needle, re.Pattern) else needle in text):
+                err(f"lair/{package}/{entity}.java: its fight's credit and reward go through lair/Encounter and "
+                    f"lair/LairRewards ({getattr(needle, 'pattern', needle)})")
+        if "damageBy" in text or "helpers" in text or f"{loot}.reward(level, this" in text:
+            err(f"lair/{package}/{entity}.java still pays the old way (a damage map, helpers, {loot}.reward)")
+        if f'BOSS = "{boss}";' not in loot_java or "public static List<ItemStack> pay(ServerLevel level, Vec3 origin, " \
+                "ServerPlayer player, int experience)" not in loot_java:
+            err(f"lair/{package}/{loot}.java: its rewards are kept under \"{boss}\" and paid by pay() (lair/LairRewards)")
+        if f"LairRewards.payer({loot}.BOSS, {loot}::pay);" not in reg:
+            err(f"lair/{package}/{registry}.java: names {loot}::pay as the payer for \"{boss}\"")
+        for add in adds:
+            if "Encounter.striker(source) instanceof ServerPlayer player" not in source(add):
+                err(f"lair/{package}/{add}.java: a blow by a creature a player tamed is that player's part (Encounter.striker)")
+
+
 def check_yeti():
     """The Yeti King (tools/yeti_king.py, docs/features/yeti-king.md): every number the Java uses is the table's; his
     attacks are the table's; where his fight looks for the Glacier Hall's parts (GlacierHall.java) is where
@@ -12701,6 +12746,8 @@ def check_acquisition(registered):
     tables_for = {key: set() for key in pages}
     for boss, info in aq.BOSSES.items():
         his, him = info["pronouns"]
+        # Its trophy table: bosses/<its id>, or the row's own name for it (the Alpha Werewolf's is bosses/werewolf_alpha).
+        trophy_table = info.get("trophy_table", f"bosses/{boss}")
         loot_path = JAVA_ROOT / info.get("loot_class", f"lair/{boss}/?")
         loot_java = loot_path.read_text(encoding="utf-8") if loot_path.is_file() else ""
         cls = loot_path.stem
@@ -12718,7 +12765,7 @@ def check_acquisition(registered):
             chance = pool.get("condition", {}).get("chance")
             for entry in pool.get("entries", []):
                 namespace, item = split(entry.get("name", ":"))
-                count = entry.get("modifier", {}).get("count", {})
+                count = entry.get("modifier", {}).get("count", {"min": 1, "max": 1})  # no count: always one
                 if namespace == MOD and item in pool_of:
                     err(f"acquisition: loot_table/{info['table']}.json gives {item} from more than one pool (or "
                         "entry), but its JEI page states one")
@@ -12737,11 +12784,12 @@ def check_acquisition(registered):
                 err(f"loot_table/{info['table']}.json gives {item}, which has no JEI page (tools/acquisition.py)")
                 continue
             tables_for[item] |= {DATA / MOD / "loot_table" / f"{info['table']}.json",
-                                 DATA / MOD / "loot_table" / "bosses" / f"{boss}.json",
+                                 DATA / MOD / "loot_table" / f"{trophy_table}.json",
                                  DATA / MOD / "loot_table" / "blocks" / f"{item}.json"}
         item = info["count"][0]
         count = rolled.get(item)
-        if not isinstance(count, tuple) or f"holds {count[0]} to {count[1]}" not in pages.get(item, ""):
+        if not isinstance(count, tuple) or count != tuple(info["count"][1]) \
+                or f"holds {aq.holds(count)}" not in pages.get(item, ""):
             err(f"acquisition: {item}'s JEI page does not say each share holds what loot_table/{info['table']}.json gives")
         for thing in info["chances"]:
             chance = rolled.get(thing)
@@ -12779,20 +12827,20 @@ def check_acquisition(registered):
                         or f"first victory over {him} always brings one of the two" not in pages.get(thing, ""):
                     err(f"acquisition: {thing}'s JEI page does not say {aq.pair_roll(info)!r} and that a first victory "
                         "brings one of the two")
-            trophies = load(DATA / MOD / "loot_table" / "bosses" / f"{boss}.json") or {}
+            trophies = load(DATA / MOD / "loot_table" / f"{trophy_table}.json") or {}
             if len(trophies.get("pools", [])) != 1 or set(trophies) - {"type", "random_sequence", "pools"} \
                     or "condition" in trophies["pools"][0] or not alone(trophies["pools"][0], pair):
-                err(f"acquisition: loot_table/bosses/{boss}.json must be one pool that always gives one of {list(pair)}, "
+                err(f"acquisition: loot_table/{trophy_table}.json must be one pool that always gives one of {list(pair)}, "
                     "each as likely, as their JEI pages say a first victory does")
             held = re.search(r"public static boolean trophy\(ItemStack stack\) \{\s*return ([^;]*);", loot_java)
             accessors = ["".join(word.capitalize() if i else word for i, word in enumerate(item.split("_"))) for item in pair]
-            if not re.search(rf'\bTROPHIES = ResourceKey\.create\(Registries\.LOOT_TABLE,\s*Jugcraft\.id\("bosses/{boss}"\)\);',
+            if not re.search(rf'\bTROPHIES = ResourceKey\.create\(Registries\.LOOT_TABLE,\s*Jugcraft\.id\("{trophy_table}"\)\);',
                              loot_java) \
                     or not re.search(rf"if \(firstKill\(player\) && loot\.stream\(\)\.noneMatch\({cls}::trophy\)\)\s*\{{\s*"
                                      r"loot\.addAll\(table\(level, TROPHIES, \w+, player\)\);", loot_java) \
                     or not held or held.group(1).count("stack.is(") != len(pair) \
                     or any(not re.search(rf"\w+\.{name}\(\)", held.group(1)) for name in accessors):
-                err(f"acquisition: {loot_path.name} must still roll loot_table/bosses/{boss}.json on a player's first kill "
+                err(f"acquisition: {loot_path.name} must still roll loot_table/{trophy_table}.json on a player's first kill "
                     f"when no trophy came ({cls}.trophy naming {list(pair)}), as their JEI pages say")
         # Who is paid: the pages' last sentence is true of this boss. Its rewards go through lair/LairRewards from its
         # fight's Encounter (paid once each, kept for the fallen and the away; healing and wards are credited for every
@@ -21858,6 +21906,7 @@ def main():
     check_iron_dreadnought()
     check_alpha_werewolf()
     check_pumpkin_king()
+    check_keeper_credit()
     check_cydonian_sentinel()
     check_material_sets()
     check_art()

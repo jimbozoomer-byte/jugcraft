@@ -3,8 +3,9 @@ package io.github.jimbozoomer.jugcraft.lair;
 import net.minecraft.world.entity.player.Player;
 
 /**
- * What every lair boss shares (Vesperine, Madame Tatterlace): who may fight one, its health for a party, and its damage,
- * each scaled by the server's {@code lairs.boss_health} and {@code lairs.boss_damage} (0.25 to 4, 1 by default).
+ * What every lair boss shares (Vesperine and Madame Tatterlace first, every keeper since): who may fight one, its health
+ * for a party, and its damage, each scaled by the server's {@code lairs.boss_health} and {@code lairs.boss_damage} (0.25
+ * to 4, 1 by default).
  */
 public final class LairBosses {
 	private LairBosses() {

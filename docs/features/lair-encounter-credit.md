@@ -6,7 +6,9 @@ contract](concordance-chunk-b.md)), not merged; its tests pass in CI (runs 38514
 adds the Yeti King's second objective, a Brace put on another player that meets his push; its test passes in CI (run
 38591108210). Extended in Concordance Chunk C, unit 1 (C-02, C-P8 and C-P30: a Stillroot Poultice put on a friend;
 [the chunk's contract](concordance-chunk-c.md)), not merged; its tests pass in CI (run 38684732031, and again in
-38774859294). See Verification for what has run.
+38774859294). Extended to the five keepers that still paid only who hurt them (the Mire Hag, the Crypt Lich, the Iron
+Dreadnought, the Alpha Werewolf and the Cydonian Sentinel) in Concordance Chunk E (E4, [below](#concordance-chunk-e-every-keeper)),
+not merged; its game tests run in CI. See Verification for what has run.
 Proposal issue: none. The owner chose Chunk A on 10 October 2026; [the chunk's contract](concordance-chunk-a.md) holds
 the scope.
 Owner: @jimbozoomer-byte. AI-assisted implementation with Claude Code; the model is named in the commit trailers.
@@ -272,6 +274,55 @@ Not run: a real fight with a healer in a lair; a real death in a fight (the Yeti
 `ServerPlayer.die` on a test player, without a real blow); a real disconnect or respawn; a rejoin other than the one
 after a whole world's save and reopen (unit 2); two clients; a crash between saves.
 
+## Concordance Chunk E: every keeper
+
+Chunk E's shared expedition polish (E4; [the delivery chunks](../plans/concordance-expansion-2026-10-10/09-claude-delivery-chunks.md#e4-shared-expedition-polish))
+brings the five keepers that still paid only who hurt them onto this record. They are the Mire Hag, the Crypt Lich, the
+Iron Dreadnought, the Alpha Werewolf and the Cydonian Sentinel. Each now does what the first four keepers do:
+
+- Each keeps its fight in an `Encounter` round its arena's centre. The record is begun as it wakes and again after a
+  load, and forgotten when it is left alone.
+- A blow by a creature a player tamed counts as that player's, on the keeper and on every creature that counts for it:
+  - the Hag's Likenesses and Root Knot;
+  - the Lich's Restless Dead;
+  - the Dreadnought's Sparkers;
+  - the Alpha's Packmates;
+  - the Sentinel's Shard Sentries.
+- The killing blow counts.
+- Healing, wards and a Stillroot Poultice on another player count, within the record's thresholds.
+- Each objective it names is a deed, keyed by what, who and the tick:
+  - for the Hag, a lamp relit that shows her (new: before, relighting earned nothing);
+  - for the Lich, a seal broken, a name read back or his bolt struck back;
+  - for the Dreadnought, a discharge routed or a fouled breaker worked;
+  - for the Alpha, the bell that flushed him.
+- Its fall is claimed once and paid through `LairRewards` under a saved name. The names are `mire_hag`, `crypt_lich`,
+  `iron_dreadnought`, `alpha_werewolf` and `cydonian_sentinel`, and each loot class is that name's payer. So a player
+  who died in the fight is paid once back on their feet, and one who left the game when they next join.
+- The Sentinel names no objective. Its Red Storm is weathered, not worked.
+
+Its JEI pages (`tools/acquisition.py`) now cover these five and the Pumpkin King, who was already paid this way.
+
+- Each page says what a share holds and how likely each thing is, with the default data.
+- Each says that a share goes to whoever earns it "by a blow, healing, a ward or an objective"; the Sentinel's says
+  "or a ward".
+- The Alpha's trophies come from `bosses/werewolf_alpha` (its row's `trophy_table`). A material a share always holds one
+  of is written "holds 1".
+
+Checks:
+
+- `check_keeper_credit` holds each of the five to the path above: no private damage map or helpers, the payer
+  registered, and its adds crediting the tamer's owner.
+- `check_acquisition` holds the pages to the tables and to whether each fight names a deed.
+- Deliberate breaks were each caught, then put back:
+  - the Sentinel's reset not forgetting;
+  - a Packmate crediting only the striker, not a tamed creature's owner;
+  - the Lich's payer unregistered.
+
+Tests (`KeeperCreditGameTests`, CI): each of the five, in its own arena, pays a healer who mended 4 of its blow. It keeps
+a fallen striker's share under its name and hands it over once they are on their feet. It pays nothing to the one it
+only hurt, and nothing twice when its fall is reported again. Each one's own tests still check its deeds count as
+taking part, and its loot.
+
 ## World and event applicability
 
 Only the lair bosses are affected; their containment, loot rarity and dimension return are unchanged. Pet ownership:
@@ -298,11 +349,11 @@ chance (and one owed from before the event and handed over during it comes with 
   ([#317](https://github.com/jimbozoomer-byte/jugcraft/pull/317)) have both adopted `Encounter` and `LairRewards`
   (Concordance Chunk B, unit 1). The Mire Hag ([#336](https://github.com/jimbozoomer-byte/jugcraft/pull/336)) and the
   Crypt Lich ([#350](https://github.com/jimbozoomer-byte/jugcraft/pull/350) and
-  [#353](https://github.com/jimbozoomer-byte/jugcraft/pull/353)) are on main through
-  [#352](https://github.com/jimbozoomer-byte/jugcraft/pull/352) with damage-only rewards (a private `damageBy`,
-  `lair/hag/MireHagEntity.java:249` and `lair/lich/CryptLichEntity.java:258`); this record first said "in their own pull
-  requests". Moving them onto `Encounter` is outside Chunk B, and outside Chunk C: a poultice earns nothing in their
-  fights (deferred in [the Chunk C contract](concordance-chunk-c.md)).
+  [#353](https://github.com/jimbozoomer-byte/jugcraft/pull/353)) reached main through
+  [#352](https://github.com/jimbozoomer-byte/jugcraft/pull/352) with damage-only rewards (a private `damageBy`); so did
+  the Iron Dreadnought, the Alpha Werewolf and the Cydonian Sentinel. Moving them onto `Encounter` was outside Chunks B
+  and C (a poultice earned nothing in their fights, deferred in [the Chunk C contract](concordance-chunk-c.md)); Chunk E
+  (E4) has done it ([below](#concordance-chunk-e-every-keeper)), so a poultice now earns its share in their fights too.
 - Harm with no attacking creature, such as freezing, or the Cinder Tyrant's slag's heat and burning, is not the
   fight's hurt, so healing it earns nothing (proposed, B-P5 in [the Chunk B contract](concordance-chunk-b.md)). The
   Cinder Tyrant names no objective (proposed, B-P4): a turned sluice records no one who turned it.

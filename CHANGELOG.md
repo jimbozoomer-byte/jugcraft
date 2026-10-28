@@ -8,6 +8,21 @@ Every change to Jugcraft, newest first, grouped by pull request. For what each t
 
 No numbered release yet. Entries on feature branches remain proposed until their pull requests merge.
 
+### Unmerged: Every lair keeper pays its support (Concordance Chunk E, E4)
+- **Five more keepers share fairly:** the Mire Hag, the Crypt Lich, the Iron Dreadnought, the Alpha Werewolf and the Cydonian Sentinel used to pay only players who hurt them (or did their one helping job). They now use the lairs' shared credit, as Vesperine, Madame Tatterlace, the Yeti King and the Cinder Tyrant do:
+  - healing a friend 4 or more of what the boss's side did, or warding them against it, earns a share;
+  - a tamed creature's blow is its owner's;
+  - the killing blow counts;
+  - a player who dies in the fight is paid once back on their feet, and one who leaves the game is paid when they next join.
+
+  Record: [lair-encounter-credit.md](docs/features/lair-encounter-credit.md#concordance-chunk-e-every-keeper).
+- **Their objectives are deeds:** breaking the Lich's seals, reading his names back or striking his bolt back; routing the Dreadnought's discharge or working a fouled breaker; ringing the bell that flushes the Alpha. New: relighting a lamp that shows the Mire Hag now earns a share.
+- **JEI pages for their loot:** every item those five and the Pumpkin King give now has a page saying where it comes from, how likely it is with the default data, and who earns a share.
+- **Checked:**
+  - **Passing locally:** the Python audits, including a new `check_keeper_credit`.
+  - **CI only, not yet run:** the game tests, including a new `KeeperCreditGameTests`.
+  - **Not done:** playing it by hand.
+
 ### Unmerged: Herobrine (encounters, marks, shoreline pyramids, schedule)
 - **Herobrine:** a still, staring figure with glowing white eyes. He appears to a player 28–52 blocks off (14–28 underground), where they could see him if they turned their head. He is gone when anyone comes within 12 blocks, when they stare him down for 2 seconds, or when he is hit. Now and then he stands right behind them, with a heartbeat only they hear and 3 seconds of Darkness, and is gone once they turn and see him. The apparition never directly damages players or blocks, speaks, wears a name tag or is saved; the separate mark builder leaves the structures described below. Record: [herobrine.md](docs/features/herobrine.md).
 - **Four ways to be seen at a distance:** a watcher on a ridge, in a clearing or just inside a cave mouth in a hillside (placed so a group can share the sighting); a follower who walks the player's own path, freezes while watched, and whose faint footsteps stop when they stop; a second look that finds him gone or moved; and eyes at the far end of a tunnel behind an underground player.

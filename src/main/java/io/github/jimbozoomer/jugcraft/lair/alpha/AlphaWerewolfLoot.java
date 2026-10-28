@@ -18,10 +18,13 @@ import net.minecraft.world.level.storage.loot.LootParams;
 import net.minecraft.world.level.storage.loot.LootTable;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParamSets;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
+import net.minecraft.world.phys.Vec3;
 
 /**
- * The Alpha Werewolf's loot, per participant (everyone who hurt him or his pack, or rang the bell that flushed him, and is
- * still near his ring when he falls): each rolls {@code jugcraft:entities/alpha_werewolf} for themselves (the Alpha Pelt,
+ * The Alpha Werewolf's loot, for each player paid for his fall (lair/LairRewards, which calls {@link #pay}): everyone
+ * who qualified in his fight (lair/Encounter: hurt him or his pack, or whose tamed creature did, or healed or warded
+ * enough, or rang the bell that flushed him) and is alive within 64 blocks of his ring when he falls, and anyone who died
+ * in the fight or left the game during it and is still away, paid once they are back. Each rolls {@code jugcraft:entities/alpha_werewolf} for themselves (the Alpha Pelt,
  * a chance of one of his trophies from {@code jugcraft:bosses/werewolf_alpha}, the Packfinder Charm and the Alpha's
  * Hood), a player's first kill always brings a trophy (whoever has not yet earned Hunter's Moon), the
  * {@value AlphaWerewolfEntity#EXPERIENCE} experience is shared out, and everyone earns Hunter's Moon. He is no Witching
@@ -31,6 +34,8 @@ import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
 public final class AlphaWerewolfLoot {
 	public static final ResourceKey<LootTable> TABLE = ResourceKey.create(Registries.LOOT_TABLE, Jugcraft.id("entities/alpha_werewolf"));
 	public static final ResourceKey<LootTable> TROPHIES = ResourceKey.create(Registries.LOOT_TABLE, Jugcraft.id("bosses/werewolf_alpha"));
+	/** The name his rewards are kept under when they wait for a player (lair/LairRewards): saved, so never renamed. */
+	public static final String BOSS = "alpha_werewolf";
 	public static final String ADVANCEMENT = "hunters_moon";
 
 	private AlphaWerewolfLoot() {
@@ -44,23 +49,36 @@ public final class AlphaWerewolfLoot {
 		}
 		int share = Math.max(1, AlphaWerewolfEntity.EXPERIENCE / participants.size());
 		for (ServerPlayer player : participants) {
-			List<ItemStack> loot = roll(level, alpha, player);
-			for (ItemStack stack : loot) {
-				player.getInventory().placeItemBackInInventory(stack.copy(), Prediction.SERVER_ONLY);
-			}
-			player.giveExperiencePoints(share);
-			TrickOrTreat.award(player, ADVANCEMENT);
-			player.sendSystemMessage(Component.translatable("message.jugcraft.alpha_werewolf.loot"));
-			given.put(player, loot);
+			given.put(player, pay(level, alpha.position(), player, share));
 		}
 		return given;
 	}
 
+	/**
+	 * Pays one player their loot from a fall at {@code origin}: rolled now, into their inventory (the rest at their feet),
+	 * their {@code experience} share and the advancement. Rewards paid later (lair/LairRewards) come this way too.
+	 */
+	public static List<ItemStack> pay(ServerLevel level, Vec3 origin, ServerPlayer player, int experience) {
+		List<ItemStack> loot = roll(level, origin, player);
+		for (ItemStack stack : loot) {
+			player.getInventory().placeItemBackInInventory(stack.copy(), Prediction.SERVER_ONLY);
+		}
+		player.giveExperiencePoints(experience);
+		TrickOrTreat.award(player, ADVANCEMENT);
+		player.sendSystemMessage(Component.translatable("message.jugcraft.alpha_werewolf.loot"));
+		return loot;
+	}
+
 	/** One participant's roll. */
 	public static List<ItemStack> roll(ServerLevel level, AlphaWerewolfEntity alpha, ServerPlayer player) {
-		List<ItemStack> loot = new ArrayList<>(table(level, TABLE, alpha, player));
+		return roll(level, alpha.position(), player);
+	}
+
+	/** One participant's roll, for a fall at {@code origin}. */
+	public static List<ItemStack> roll(ServerLevel level, Vec3 origin, ServerPlayer player) {
+		List<ItemStack> loot = new ArrayList<>(table(level, TABLE, origin, player));
 		if (firstKill(player) && loot.stream().noneMatch(AlphaWerewolfLoot::trophy)) {
-			loot.addAll(table(level, TROPHIES, alpha, player));
+			loot.addAll(table(level, TROPHIES, origin, player));
 		}
 		return loot;
 	}
@@ -70,9 +88,9 @@ public final class AlphaWerewolfLoot {
 		return stack.is(JugcraftAlpha.moonfang()) || stack.is(JugcraftAlpha.howler());
 	}
 
-	private static List<ItemStack> table(ServerLevel level, ResourceKey<LootTable> key, AlphaWerewolfEntity alpha, ServerPlayer player) {
+	private static List<ItemStack> table(ServerLevel level, ResourceKey<LootTable> key, Vec3 origin, ServerPlayer player) {
 		LootTable table = level.getServer().reloadableRegistries().getLootTable(key);
-		LootParams params = new LootParams.Builder(level).withParameter(LootContextParams.ORIGIN, alpha.position())
+		LootParams params = new LootParams.Builder(level).withParameter(LootContextParams.ORIGIN, origin)
 				.withParameter(LootContextParams.THIS_ENTITY, player).create(LootContextParamSets.GIFT);
 		return List.copyOf(table.getRandomItems(params));
 	}

@@ -18,10 +18,14 @@ import net.minecraft.world.level.storage.loot.LootParams;
 import net.minecraft.world.level.storage.loot.LootTable;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParamSets;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
+import net.minecraft.world.phys.Vec3;
 
 /**
- * The Crypt Lich's loot, per participant (everyone who hurt him or his dead, broke one of his seals or read a name back,
- * and is still near his hall when he falls): each rolls {@code jugcraft:entities/crypt_lich} for themselves (Grave Dust,
+ * The Crypt Lich's loot, for each player paid for his fall (lair/LairRewards, which calls {@link #pay}): everyone who
+ * qualified in his fight (lair/Encounter: hurt him or his dead, or whose tamed creature did, or healed or warded enough,
+ * or broke one of his seals, read a name back or struck his bolt back) and is alive within 64 blocks of his hall when he
+ * falls, and anyone who died in the fight or left the game during it and is still away, paid once they are back. Each
+ * rolls {@code jugcraft:entities/crypt_lich} for themselves (Grave Dust,
  * a chance of one of his trophies from {@code jugcraft:bosses/crypt_lich}, the Emptied Phylactery and the Lich's Crown),
  * a player's first kill always brings a trophy (whoever has not yet earned Nameless), the
  * {@value CryptLichEntity#EXPERIENCE} experience is shared out, and everyone earns Nameless. He is no Witching Season
@@ -30,6 +34,8 @@ import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
 public final class CryptLichLoot {
 	public static final ResourceKey<LootTable> TABLE = ResourceKey.create(Registries.LOOT_TABLE, Jugcraft.id("entities/crypt_lich"));
 	public static final ResourceKey<LootTable> TROPHIES = ResourceKey.create(Registries.LOOT_TABLE, Jugcraft.id("bosses/crypt_lich"));
+	/** The name his rewards are kept under when they wait for a player (lair/LairRewards): saved, so never renamed. */
+	public static final String BOSS = "crypt_lich";
 	public static final String ADVANCEMENT = "nameless";
 
 	private CryptLichLoot() {
@@ -43,23 +49,36 @@ public final class CryptLichLoot {
 		}
 		int share = Math.max(1, CryptLichEntity.EXPERIENCE / participants.size());
 		for (ServerPlayer player : participants) {
-			List<ItemStack> loot = roll(level, lich, player);
-			for (ItemStack stack : loot) {
-				player.getInventory().placeItemBackInInventory(stack.copy(), Prediction.SERVER_ONLY);
-			}
-			player.giveExperiencePoints(share);
-			TrickOrTreat.award(player, ADVANCEMENT);
-			player.sendSystemMessage(Component.translatable("message.jugcraft.crypt_lich.loot"));
-			given.put(player, loot);
+			given.put(player, pay(level, lich.position(), player, share));
 		}
 		return given;
 	}
 
+	/**
+	 * Pays one player their loot from a fall at {@code origin}: rolled now, into their inventory (the rest at their feet),
+	 * their {@code experience} share and the advancement. Rewards paid later (lair/LairRewards) come this way too.
+	 */
+	public static List<ItemStack> pay(ServerLevel level, Vec3 origin, ServerPlayer player, int experience) {
+		List<ItemStack> loot = roll(level, origin, player);
+		for (ItemStack stack : loot) {
+			player.getInventory().placeItemBackInInventory(stack.copy(), Prediction.SERVER_ONLY);
+		}
+		player.giveExperiencePoints(experience);
+		TrickOrTreat.award(player, ADVANCEMENT);
+		player.sendSystemMessage(Component.translatable("message.jugcraft.crypt_lich.loot"));
+		return loot;
+	}
+
 	/** One participant's roll. */
 	public static List<ItemStack> roll(ServerLevel level, CryptLichEntity lich, ServerPlayer player) {
-		List<ItemStack> loot = new ArrayList<>(table(level, TABLE, lich, player));
+		return roll(level, lich.position(), player);
+	}
+
+	/** One participant's roll, for a fall at {@code origin}. */
+	public static List<ItemStack> roll(ServerLevel level, Vec3 origin, ServerPlayer player) {
+		List<ItemStack> loot = new ArrayList<>(table(level, TABLE, origin, player));
 		if (firstKill(player) && loot.stream().noneMatch(CryptLichLoot::trophy)) {
-			loot.addAll(table(level, TROPHIES, lich, player));
+			loot.addAll(table(level, TROPHIES, origin, player));
 		}
 		return loot;
 	}
@@ -69,9 +88,9 @@ public final class CryptLichLoot {
 		return stack.is(JugcraftLich.soulreaver()) || stack.is(JugcraftLich.gravewarden());
 	}
 
-	private static List<ItemStack> table(ServerLevel level, ResourceKey<LootTable> key, CryptLichEntity lich, ServerPlayer player) {
+	private static List<ItemStack> table(ServerLevel level, ResourceKey<LootTable> key, Vec3 origin, ServerPlayer player) {
 		LootTable table = level.getServer().reloadableRegistries().getLootTable(key);
-		LootParams params = new LootParams.Builder(level).withParameter(LootContextParams.ORIGIN, lich.position())
+		LootParams params = new LootParams.Builder(level).withParameter(LootContextParams.ORIGIN, origin)
 				.withParameter(LootContextParams.THIS_ENTITY, player).create(LootContextParamSets.GIFT);
 		return List.copyOf(table.getRandomItems(params));
 	}

@@ -9,19 +9,19 @@ import com.geckolib.animation.object.LoopType;
 import com.geckolib.util.GeckoLibUtil;
 import io.github.jimbozoomer.jugcraft.Jugcraft;
 import io.github.jimbozoomer.jugcraft.lair.CydonianSanctum;
+import io.github.jimbozoomer.jugcraft.lair.Encounter;
 import io.github.jimbozoomer.jugcraft.lair.JugcraftLairs;
 import io.github.jimbozoomer.jugcraft.lair.Lair;
 import io.github.jimbozoomer.jugcraft.lair.LairBosses;
 import io.github.jimbozoomer.jugcraft.lair.LairExitBlock;
 import io.github.jimbozoomer.jugcraft.lair.LairInstance;
+import io.github.jimbozoomer.jugcraft.lair.LairRewards;
 import io.github.jimbozoomer.jugcraft.lair.Lairs;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
-import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 import net.minecraft.core.BlockPos;
@@ -94,8 +94,10 @@ import org.jspecify.annotations.Nullable;
  * round each player.
  *
  * <p>Every attack has a wind-up you can read, a strike and a recovery ({@link Attack}); the numbers are here, in one place,
- * and in tools/cydonian_sentinel.py. Knockback, falls, fire, drowning, poison and Wither never harm it. Each participant
- * (whoever hurt it or its sentries) gets their own loot ({@link SentinelLoot}). Left alone it strides back to its
+ * and in tools/cydonian_sentinel.py. Knockback, falls, fire, drowning, poison and Wither never harm it. Each player who
+ * qualified in its fight (lair/Encounter, since Concordance Chunk E, E4: a blow to it or its sentries, their own or a
+ * creature's they tamed, or healing or a ward on another player) gets their own loot ({@link SentinelLoot}), once, paid
+ * through lair/LairRewards. Left alone it strides back to its
  * plinth and reforms, healed: its sentries crumble, its shards, spikes and meteors are gone, and who hurt it is
  * forgotten. Bound to a lair instance it vanishes with it; one with no instance (a test's) keeps to the crater laid out
  * from the origin it was given. The only blocks it changes are the Red Mist it opens in the crater's middle when it falls.
@@ -341,7 +343,8 @@ public class CydonianSentinelEntity extends Monster implements GeoEntity {
 	private @Nullable UUID foe;
 	private int abandoned;
 	private int staggerTicks;
-	private final Map<UUID, Float> damageBy = new HashMap<>();
+	/** This fight: who took part and how (lair/Encounter, since Concordance Chunk E, E4); its crater is the arena. */
+	private final Encounter encounter = new Encounter(this, this::centre);
 	// Its storm.
 	private Storm storm = Storm.CALM;
 	private Wind wind = Wind.EAST;
@@ -576,6 +579,9 @@ public class CydonianSentinelEntity extends Monster implements GeoEntity {
 			discard();
 			return;
 		}
+		if (phase != Phase.WAITING && isAlive() && !encounter.underway()) {
+			encounter.begin();  // a fight back from a save keeps a fresh record of who takes part
+		}
 		if (landOnLoad) {
 			landOnLoad = false;
 			Vec3 woke = woke();
@@ -660,6 +666,7 @@ public class CydonianSentinelEntity extends Monster implements GeoEntity {
 		phaseTicks = 0;
 		setAction(Action.WAKE);
 		setGlow(Glow.FLARE);
+		encounter.begin();
 		bossBar.setVisible(true);
 		level.playSound(null, getX(), getY(), getZ(), SoundEvents.BEACON_ACTIVATE, SoundSource.HOSTILE, 3.0F, 0.5F);
 		level.playSound(null, getX(), getY(), getZ(), SoundEvents.IRON_GOLEM_HURT, SoundSource.HOSTILE, 3.0F, 0.4F);
@@ -1651,19 +1658,25 @@ public class CydonianSentinelEntity extends Monster implements GeoEntity {
 
 	/** Whoever hurt it or its sentries has taken part. */
 	public void took(ServerPlayer player, float amount) {
-		damageBy.merge(player.getUUID(), amount, Float::sum);
+		encounter.damage(player, amount);
 	}
 
-	/** Its participants: everyone who hurt it or its sentries, and is still near its crater. */
+	/** Its participants: everyone who qualified in its fight (lair/Encounter) and is alive near its crater. */
 	public List<ServerPlayer> participants(ServerLevel level) {
 		List<ServerPlayer> out = new ArrayList<>();
 		Vec3 centre = centre();
-		for (ServerPlayer player : level.players()) {
-			if (player.isAlive() && damageBy.getOrDefault(player.getUUID(), 0.0F) > 0.0F && player.position().distanceTo(centre) <= 64.0) {
+		for (UUID id : encounter.qualified()) {
+			ServerPlayer player = level.getServer().getPlayerList().getPlayer(id);
+			if (player != null && player.isAlive() && player.level() == level && player.position().distanceTo(centre) <= Encounter.REACH) {
 				out.add(player);
 			}
 		}
 		return out;
+	}
+
+	/** This fight: who took part and how. */
+	public Encounter encounter() {
+		return encounter;
 	}
 
 	// ---------------------------------------------------------------- abandoned, and defeated
@@ -1687,7 +1700,7 @@ public class CydonianSentinelEntity extends Monster implements GeoEntity {
 		storm = Storm.CALM;
 		stormTicks = 0;
 		stormTimer = STORM_FIRST;
-		damageBy.clear();
+		encounter.abandon();
 		marks.clear();
 		Arrays.fill(cooldowns, 0);
 		setArmor(ARMOR);
@@ -1729,19 +1742,28 @@ public class CydonianSentinelEntity extends Monster implements GeoEntity {
 	public void die(DamageSource source) {
 		super.die(source);
 		if (level() instanceof ServerLevel level) {
+			// A killing blow gets here inside super.hurtServer, before hurtServer's own took(): its striker (or the owner of
+			// the tamed creature that struck) has taken part before the fall is paid. Any amount qualifies.
+			if (Encounter.striker(source) instanceof ServerPlayer player) {
+				took(player, Float.MIN_VALUE);
+			}
 			defeated(level);
 		}
 	}
 
 	/**
-	 * It has fallen: its sentries crumble and its things are gone, its storm dies, each participant gets their loot, its
-	 * lair's instance ends (it closes once everyone has left), its core gutters out, and the Red Mist opens in the
-	 * crater's middle: the way home.
+	 * It has fallen: its sentries crumble and its things are gone, its storm dies, each player who qualified is paid their
+	 * loot (lair/LairRewards: now, or kept for one who died or left the game in it), its lair's instance ends (it closes
+	 * once everyone has left), its core gutters out, and the Red Mist opens in the crater's middle: the way home.
 	 */
 	private void defeated(ServerLevel level) {
+		// However often the fall is reported, it is answered once: one reward each (lair/Encounter's claim).
+		if (!encounter.claim()) {
+			return;
+		}
 		dismiss(level);
 		storm = Storm.CALM;
-		SentinelLoot.reward(level, this, participants(level));
+		LairRewards.pay(level, SentinelLoot.BOSS, encounter, position(), centre(), EXPERIENCE);
 		setGlow(Glow.DIM);
 		LairInstance open = lairInstance(level);
 		if (open != null) {
@@ -1797,7 +1819,7 @@ public class CydonianSentinelEntity extends Monster implements GeoEntity {
 			}
 		}
 		boolean hurt = super.hurtServer(level, source, dealt);
-		if (hurt && source.getEntity() instanceof ServerPlayer player) {
+		if (hurt && Encounter.striker(source) instanceof ServerPlayer player) {
 			took(player, dealt);
 		}
 		return hurt;

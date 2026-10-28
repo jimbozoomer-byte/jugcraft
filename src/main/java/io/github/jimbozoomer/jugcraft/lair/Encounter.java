@@ -27,20 +27,25 @@ import net.minecraft.world.phys.Vec3;
 import org.jspecify.annotations.Nullable;
 
 /**
- * One fight with a lair boss (Concordance Chunk A, A-05; the Yeti King's and the Cinder Tyrant's since Chunk B): who
- * took part and how, kept by the boss while it lives. A player qualifies for the boss's reward by any one of these:
+ * One fight with a lair boss (Concordance Chunk A, A-05; the Yeti King's and the Cinder Tyrant's since Chunk B; the Mire
+ * Hag's, the Crypt Lich's, the Iron Dreadnought's, the Alpha Werewolf's and the Cydonian Sentinel's since Chunk E, E4):
+ * who took part and how, kept by the boss while it lives. A player qualifies for the boss's reward by any one of these:
  * <ul>
  * <li><b>damage</b>: any blow to the boss or a creature that counts for it (Vesperine's skulls and harvest souls, Madame
- * Tatterlace's egg sacs and spiderlings, the Yeti King's whelps, the Cinder Tyrant's Cinderlings; not Vesperine's Grave
- * Thralls), as before Chunk A, or by a creature they tamed;</li>
+ * Tatterlace's egg sacs and spiderlings, the Yeti King's whelps, the Cinder Tyrant's Cinderlings, the Mire Hag's
+ * Likenesses and Root Knot, the Crypt Lich's dead, the Iron Dreadnought's Sparkers, the Alpha Werewolf's pack, the
+ * Cydonian Sentinel's sentries; not Vesperine's Grave Thralls), as before Chunk A, or by a creature they tamed;</li>
  * <li><b>healing</b>: at least {@value #HEALING} health given back to other players the fight had hurt, counting no
  * more than the hurt not yet healed: by the Concordance's healing or (Concordance Chunk C, C-02) by the Regeneration of
  * a Stillroot Poultice put on them in the fight, each of its heals credited as it comes, one health at most;</li>
  * <li><b>warding</b>: at least {@value #WARDING} of the fight's damage soaked by a ward they put on another player;</li>
  * <li><b>an objective</b>: a deed the boss names, such as a ward relit in Vesperine's Harvest, a fellow player cut from
  * Madame Tatterlace's thread, the Yeti King's charge baited into an ice column by one already in his fight, or a Brace
- * one player put on another that meets his push (B-09); each key counts once a fight (a Brace's names the braced player
- * and the tick, so each Brace that meets his push is its own deed).</li>
+ * one player put on another that meets his push (B-09); since Chunk E, a lamp relit that shows the Mire Hag, a seal of
+ * the Crypt Lich's broken, a name read back or his bolt struck back, a discharge of the Iron Dreadnought's routed or a
+ * fouled breaker worked, and the bell rung that flushes the Alpha Werewolf; each key counts once a fight (a Brace's
+ * names the braced player and the tick, so each Brace that meets his push is its own deed; those since Chunk E name the
+ * player and the tick too).</li>
  * </ul>
  * Healing yourself, healing hurt the fight did not do (a fall, another player's blow), healing past full health, a ward
  * that soaks nothing and a deed done again all count for nothing; past qualifying, more of anything adds nothing. The

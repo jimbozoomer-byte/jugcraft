@@ -8,12 +8,14 @@ import com.geckolib.animation.RawAnimation;
 import com.geckolib.animation.object.LoopType;
 import com.geckolib.util.GeckoLibUtil;
 import io.github.jimbozoomer.jugcraft.lair.CryptArchive;
+import io.github.jimbozoomer.jugcraft.lair.Encounter;
 import io.github.jimbozoomer.jugcraft.lair.GraveSealBlock;
 import io.github.jimbozoomer.jugcraft.lair.JugcraftLairs;
 import io.github.jimbozoomer.jugcraft.lair.Lair;
 import io.github.jimbozoomer.jugcraft.lair.LairBosses;
 import io.github.jimbozoomer.jugcraft.lair.LairExitBlock;
 import io.github.jimbozoomer.jugcraft.lair.LairInstance;
+import io.github.jimbozoomer.jugcraft.lair.LairRewards;
 import io.github.jimbozoomer.jugcraft.lair.Lairs;
 import io.github.jimbozoomer.jugcraft.lair.NameStoneBlock;
 import io.github.jimbozoomer.jugcraft.lair.NameStoneBlock.Glow;
@@ -87,8 +89,10 @@ import org.jspecify.annotations.Nullable;
  * every {@value #LAST_RAISE} ticks.
  *
  * <p>Every attack has a wind-up you can read, a strike and a recovery ({@link Attack}); the numbers are here, in one place,
- * and in tools/crypt_lich.py. Wither, poison, drowning, knockback and falls never harm him. Each participant (whoever
- * hurt him or his dead, broke one of his seals or read a name back) gets their own loot ({@link CryptLichLoot}). Left
+ * and in tools/crypt_lich.py. Wither, poison, drowning, knockback and falls never harm him. Each player who qualified in
+ * his fight (lair/Encounter, since Concordance Chunk E, E4: a blow to him or his dead, their own or a creature's they
+ * tamed, healing or a ward on another player, or a deed: breaking one of his seals, reading a name back or striking his
+ * bolt back) gets their own loot ({@link CryptLichLoot}), once, paid through lair/LairRewards. Left
  * alone he climbs back to his throne, healed: his dead crumble, the seals mend, every name is cut dark again, the
  * phylactery is whole, and who hurt him is forgotten. Bound to a lair instance he vanishes with it; one with no instance
  * (a test's) keeps to the archive laid out from the origin he was given. The only blocks he changes are the archive's
@@ -255,9 +259,8 @@ public class CryptLichEntity extends Monster implements GeoEntity {
 	private @Nullable UUID foe;
 	private int abandoned;
 	private int staggerTicks;
-	private final Map<UUID, Float> damageBy = new HashMap<>();
-	/** Whoever broke one of his seals or read a name back: participants too. */
-	private final Set<UUID> helpers = new HashSet<>();
+	/** This fight: who took part and how (lair/Encounter, since Concordance Chunk E, E4); his hall is the arena. */
+	private final Encounter encounter = new Encounter(this, this::centre);
 	private final Map<UUID, Long> wardedWords = new HashMap<>();
 	// His ward.
 	private Ward ward = Ward.CHAINED;
@@ -501,6 +504,9 @@ public class CryptLichEntity extends Monster implements GeoEntity {
 			discard();
 			return;
 		}
+		if (phase != Phase.WAITING && isAlive() && !encounter.underway()) {
+			encounter.begin();  // a fight back from a save keeps a fresh record of who takes part
+		}
 		if (landOnLoad) {
 			landOnLoad = false;
 			Vec3 woke = woke();
@@ -585,6 +591,7 @@ public class CryptLichEntity extends Monster implements GeoEntity {
 		phaseTicks = 0;
 		setAction(Action.WAKE);
 		setCrown(Crown.LIT);
+		encounter.begin();
 		bossBar.setVisible(true);
 		level.playSound(null, getX(), getY(), getZ(), SoundEvents.WITHER_SKELETON_AMBIENT, SoundSource.HOSTILE, 3.0F, 0.5F);
 		level.playSound(null, getX(), getY(), getZ(), SoundEvents.SOUL_ESCAPE.value(), SoundSource.HOSTILE, 3.0F, 0.6F);
@@ -758,7 +765,7 @@ public class CryptLichEntity extends Monster implements GeoEntity {
 			return true;
 		}
 		breakSeal(level, rune);
-		helpers.add(player.getUUID());
+		deed(player, "seal");
 		return true;
 	}
 
@@ -808,9 +815,7 @@ public class CryptLichEntity extends Monster implements GeoEntity {
 	 * the lit name, if it was the scraped one, burns on its stone again, and its seal will break.
 	 */
 	public void restore(ServerLevel level, @Nullable Player reader) {
-		if (reader != null) {
-			helpers.add(reader.getUUID());
-		}
+		deed(reader, "read");
 		Rune lit = lit();
 		if (scraped == null) {
 			return;
@@ -827,7 +832,7 @@ public class CryptLichEntity extends Monster implements GeoEntity {
 
 	/** A name was read back at the lectern of his archive by {@code player}, restoring {@code restored}. */
 	public void lecternRead(ServerLevel level, Player player, List<Rune> restored) {
-		helpers.add(player.getUUID());
+		deed(player, "read");
 		if (scraped != null && restored.contains(scraped)) {
 			restore(level, player);
 		}
@@ -1456,20 +1461,32 @@ public class CryptLichEntity extends Monster implements GeoEntity {
 
 	/** Whoever hurt him or his dead has taken part. */
 	public void took(ServerPlayer player, float amount) {
-		damageBy.merge(player.getUUID(), amount, Float::sum);
+		encounter.damage(player, amount);
 	}
 
-	/** His participants: everyone who hurt him or his dead, broke a seal or read a name back, and is still near his hall. */
+	/** His participants: everyone who qualified in his fight (lair/Encounter) and is alive near his hall. */
 	public List<ServerPlayer> participants(ServerLevel level) {
 		List<ServerPlayer> out = new ArrayList<>();
 		Vec3 centre = centre();
-		for (ServerPlayer player : level.players()) {
-			boolean part = damageBy.getOrDefault(player.getUUID(), 0.0F) > 0.0F || helpers.contains(player.getUUID());
-			if (player.isAlive() && part && player.position().distanceTo(centre) <= 64.0) {
+		for (UUID id : encounter.qualified()) {
+			ServerPlayer player = level.getServer().getPlayerList().getPlayer(id);
+			if (player != null && player.isAlive() && player.level() == level && player.position().distanceTo(centre) <= Encounter.REACH) {
 				out.add(player);
 			}
 		}
 		return out;
+	}
+
+	/** This fight: who took part and how. */
+	public Encounter encounter() {
+		return encounter;
+	}
+
+	/** {@code player} did one of the deeds his fight names: a part in it (lair/Encounter), keyed by what, who and when. */
+	private void deed(@Nullable Player player, String what) {
+		if (player instanceof ServerPlayer server) {
+			encounter.deed(server, what + " " + server.getUUID() + " " + server.level().getGameTime());
+		}
 	}
 
 	// ---------------------------------------------------------------- abandoned, and defeated
@@ -1500,8 +1517,7 @@ public class CryptLichEntity extends Monster implements GeoEntity {
 		broken = 0;
 		scraped = null;
 		scrapedLitAt = NOT_LIT;
-		damageBy.clear();
-		helpers.clear();
+		encounter.abandon();
 		Arrays.fill(cooldowns, 0);
 		setHealth(getMaxHealth());
 		setCrown(Crown.DARK);
@@ -1537,18 +1553,28 @@ public class CryptLichEntity extends Monster implements GeoEntity {
 	public void die(DamageSource source) {
 		super.die(source);
 		if (level() instanceof ServerLevel level) {
+			// A killing blow gets here inside super.hurtServer, before hurtServer's own took(): its striker (or the owner of
+			// the tamed creature that struck) has taken part before the fall is paid. Any amount qualifies.
+			if (Encounter.striker(source) instanceof ServerPlayer player) {
+				took(player, Float.MIN_VALUE);
+			}
 			defeated(level);
 		}
 	}
 
 	/**
-	 * He has fallen: his dead crumble and his things are gone, each participant gets their loot, his lair's instance ends
-	 * (it closes once everyone has left), the soul-fire goes out down the lanes, and Grey Mist rises on the dais where his
-	 * phylactery stood.
+	 * He has fallen: his dead crumble and his things are gone, each player who qualified is paid their loot
+	 * (lair/LairRewards: now, or kept for one who died or left the game in it), his lair's instance ends (it closes once
+	 * everyone has left), the soul-fire goes out down the lanes, and Grey Mist rises on the dais where his phylactery
+	 * stood.
 	 */
 	private void defeated(ServerLevel level) {
+		// However often the fall is reported, it is answered once: one reward each (lair/Encounter's claim).
+		if (!encounter.claim()) {
+			return;
+		}
 		dismiss(level);
-		CryptLichLoot.reward(level, this, participants(level));
+		LairRewards.pay(level, CryptLichLoot.BOSS, encounter, position(), centre(), EXPERIENCE);
 		setCrown(Crown.DARK);
 		for (Rune rune : Rune.values()) {
 			NameStoneBlock.setGlow(level, stone(rune), Glow.DARK);
@@ -1609,7 +1635,7 @@ public class CryptLichEntity extends Monster implements GeoEntity {
 			return false;
 		}
 		boolean hurt = super.hurtServer(level, source, amount);
-		if (hurt && source.getEntity() instanceof ServerPlayer player) {
+		if (hurt && Encounter.striker(source) instanceof ServerPlayer player) {
 			took(player, amount);
 		}
 		return hurt;
@@ -1634,9 +1660,7 @@ public class CryptLichEntity extends Monster implements GeoEntity {
 	 * ticks and spoils his attack; exposed, it hurts him for {@value #REFLECTED_DAMAGE}. Returns whether it hurt him.
 	 */
 	public boolean boltReturned(ServerLevel level, SoulBoltEntity bolt, @Nullable Player reflector) {
-		if (reflector instanceof ServerPlayer player) {
-			helpers.add(player.getUUID());
-		}
+		deed(reflector, "bolt");
 		if (!fighting()) {
 			return false;
 		}

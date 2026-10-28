@@ -2,6 +2,7 @@ package io.github.jimbozoomer.jugcraft.lair.sentinel;
 
 import io.github.jimbozoomer.jugcraft.Jugcraft;
 import io.github.jimbozoomer.jugcraft.lair.Lair;
+import io.github.jimbozoomer.jugcraft.lair.LairRewards;
 import io.github.jimbozoomer.jugcraft.lair.Lairs;
 import io.github.jimbozoomer.jugcraft.weapons.DescribedItem;
 import net.fabricmc.fabric.api.creativetab.v1.CreativeModeTabEvents;
@@ -61,6 +62,8 @@ public final class JugcraftSentinel {
 				DataComponents.EQUIPPABLE, Equippable.builder(EquipmentSlot.HEAD).setEquipSound(SoundEvents.ARMOR_EQUIP_IRON).build()));
 
 		Lairs.onPlaced(Lair.CYDONIAN_SANCTUM, CydonianSentinelEntity::summon);
+		// Concordance Chunk E (E4): its fall pays through lair/LairRewards, now or later.
+		LairRewards.payer(SentinelLoot.BOSS, SentinelLoot::pay);
 		LowfallCore.register();
 		CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.INGREDIENTS).register(output -> output.accept(CYDONIAN_SHARD));
 		CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.COMBAT).register(output -> {
