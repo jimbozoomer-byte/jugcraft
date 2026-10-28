@@ -20,9 +20,12 @@ public final class PeepoRenderer extends MobRenderer<PeepoEntity,PeepoState,Peep
         addLayer(new KnifeLayer(this));
         addLayer(new HoeLayer(this));
         addLayer(new FishingLayer(this));
+        addLayer(new FinishingLayer(this));
         addLayer(new UniformLayer(this));
         addLayer(new AnimalWorkLayer(this));
         addLayer(new ActionItemLayer(this));
+        addLayer(new TaskDetailLayer(this));
+        addLayer(new RestBlanketLayer(this));
         addLayer(new CraftingLayer(this));
         addLayer(new PieLayer(this));
         addLayer(new SpoonLayer(this,new StirringSpoonModel(context.bakeLayer(PeepoClient.SPOON))));
@@ -33,14 +36,24 @@ public final class PeepoRenderer extends MobRenderer<PeepoEntity,PeepoState,Peep
         });
     }
     @Override public PeepoState createRenderState() { return new PeepoState(); }
+    @Override public void submit(PeepoState state,PoseStack pose,SubmitNodeCollector collector,net.minecraft.client.renderer.state.level.CameraRenderState camera){
+        super.submit(state,pose,collector,camera);ThoughtBubble.submit(state,pose,collector,camera);
+    }
     @Override public net.minecraft.world.phys.Vec3 getRenderOffset(PeepoState state){
-        return super.getRenderOffset(state).add(state.pressOffset);
+        return super.getRenderOffset(state).add(state.pressOffset).add(state.rest.offset);
+    }
+    @Override protected net.minecraft.world.phys.AABB getBoundingBoxForCulling(PeepoEntity npc,float partial){
+        var box=super.getBoundingBoxForCulling(npc,partial);
+        if(npc.restMotion.clip()!=CompanionRestMotion.Clip.NONE)
+            return box.minmax(new net.minecraft.world.phys.AABB(npc.restMotion.entry(),npc.restMotion.mount()).inflate(1));
+        return box;
     }
     @Override protected void setupRotations(PeepoState state, PoseStack pose, float bodyRot, float scale) {
         super.setupRotations(state, pose, bodyRot, scale);
         if (state.sleeping && state.deathTime <= 0) {
-            pose.translate(0, state.pumpkin ? .26 : .17, state.jughead && !state.pumpkin ? -.30 : -.25);
-            pose.rotateDegrees(com.mojang.math.Axis.XP, 90);
+            float lie=state.rest.active?state.rest.lie:1;
+            pose.translate(0, (state.pumpkin ? .26 : .17)*lie, (state.jughead && !state.pumpkin ? -.30 : -.25)*lie);
+            pose.rotateDegrees(com.mojang.math.Axis.XP, 90*lie);
         }
     }
     @Override public Identifier getTextureLocation(PeepoState state) { if(state.jughead) return PeepoMod.id(state.blushing ? "textures/entity/jughead_blush.png" : "textures/entity/jughead.png"); return PeepoMod.id(state.blushing ? "textures/entity/peepo_blush.png" : "textures/entity/peepo.png"); }
@@ -61,6 +74,8 @@ public final class PeepoRenderer extends MobRenderer<PeepoEntity,PeepoState,Peep
         state.wheelRunning=entity.isWheelRunning();
         state.sleeping=entity.getRestMode()==CompanionEnergy.Rest.SLEEPING;
         state.sitting=entity.getRestMode()==CompanionEnergy.Rest.SITTING;
+        RestPose.extract(entity,state,partialTick);
+        if(state.rest.active){state.bodyRot=state.rest.yaw;state.yRot=state.xRot=0;}
         state.work=state.eating || state.sleeping || state.sitting || state.wheelRunning || !entity.isAlive()?WorkAnimation.NONE:entity.workAnimation();
         state.social=state.eating || state.sleeping || state.sitting || state.wheelRunning || state.work!=WorkAnimation.NONE || !entity.isAlive()?CompanionSocial.NONE:entity.socialPose();
         state.socialTime=(float)Math.clamp(entity.level().getGameTime()-entity.socialStarted()+partialTick,0,120);
@@ -224,8 +239,23 @@ public final class PeepoRenderer extends MobRenderer<PeepoEntity,PeepoState,Peep
         state.eatingTime=PeepoEntity.EAT_DURATION-entity.getEatingTicks()+partialTick;
         extractCrafting(entity,state,partialTick);
         CompanionActionPose.extract(entity,state,partialTick,items);
-        items.updateForLiving(state.held,!state.actionPose && !state.eating && !state.sleeping && (state.work==WorkAnimation.NONE || state.work==WorkAnimation.SLAUGHTER || state.work==WorkAnimation.INTERACT && local.peepo.CompanionGarden.cuttingTool(entity.getMainHandItem())) ? entity.getMainHandItem() : net.minecraft.world.item.ItemStack.EMPTY,state.holdingLight ? ItemDisplayContext.NONE : ItemDisplayContext.THIRD_PERSON_RIGHT_HAND,entity);
+        TaskDetailPose.extract(entity,state,partialTick,items);
+        items.updateForLiving(state.held,!state.rest.active && !state.actionPose && !state.eating && !state.sleeping && (state.work==WorkAnimation.NONE || state.work==WorkAnimation.SLAUGHTER || state.work==WorkAnimation.INTERACT && local.peepo.CompanionGarden.cuttingTool(entity.getMainHandItem())) ? entity.getMainHandItem() : net.minecraft.world.item.ItemStack.EMPTY,state.holdingLight ? ItemDisplayContext.NONE : ItemDisplayContext.THIRD_PERSON_RIGHT_HAND,entity);
         items.updateForLiving(state.food,state.eating ? entity.getMainHandItem() : net.minecraft.world.item.ItemStack.EMPTY,ItemDisplayContext.FIXED,entity);
+        state.reactionTime=(float)(entity.level().getGameTime()-entity.feedbackStarted()+partialTick);
+        var reaction=entity.feedbackReaction();
+        boolean catchWait=reaction==CompanionFeedbackRules.Reaction.CATCH && state.work==WorkAnimation.FISH_WAIT;
+        state.reaction=!state.eating && !state.sleeping && !state.sitting && !state.wheelRunning && (state.work==WorkAnimation.NONE || catchWait)
+            && state.social==0 && !state.actionPose && !state.toolHandling && !state.detail.brewing() && state.held.isEmpty() && entity.isAlive() && !entity.isPassenger()
+            && (reaction.finishing() && !catchWait || entity.getDeltaMovement().horizontalDistanceSqr()<.0004) && state.reactionTime>=0 && state.reactionTime<40
+            ?reaction:CompanionFeedbackRules.Reaction.NONE;
+        items.updateForLiving(state.finishItem,state.reaction==CompanionFeedbackRules.Reaction.HARVEST || state.reaction==CompanionFeedbackRules.Reaction.CATCH
+            ?new net.minecraft.world.item.ItemStack(entity.feedbackItem()):net.minecraft.world.item.ItemStack.EMPTY,ItemDisplayContext.FIXED,entity);
+        var thought=CompanionThoughts.get(entity);
+        state.thought=thought==null?CompanionFeedbackRules.Kind.NONE:CompanionFeedbackRules.Kind.from(thought.kind());
+        state.thoughtTime=thought==null?0:(float)(entity.level().getGameTime()-thought.started()+partialTick);
+        var icon=thought==null?net.minecraft.world.item.Items.AIR:net.minecraft.core.registries.BuiltInRegistries.ITEM.byId(thought.item());
+        items.updateForLiving(state.thoughtItem,icon==null?net.minecraft.world.item.ItemStack.EMPTY:new net.minecraft.world.item.ItemStack(icon),ItemDisplayContext.GUI,entity);
     }
     private void extractCrafting(PeepoEntity entity,PeepoState state,float partialTick){
         if(state.work==WorkAnimation.CRAFT){
@@ -270,7 +300,8 @@ public final class PeepoRenderer extends MobRenderer<PeepoEntity,PeepoState,Peep
         ActionItemLayer(PeepoRenderer renderer){super(renderer);}
         @Override public void submit(PoseStack pose,SubmitNodeCollector collector,int light,PeepoState s,float yaw,float pitch){
             if(s.isInvisible || !s.actionPose || s.actionItem.isEmpty())return;
-            var p=s.toolPose;pose.pushPose();pose.translate(p.x/16,p.y/16,p.z/16);
+            var p=s.toolPose;var grip=s.handling?HandlingPose.itemPosition(getParentModel()):new org.joml.Vector3f(p.x,p.y,p.z);
+            pose.pushPose();pose.translate(grip.x/16,grip.y/16,grip.z/16);
             pose.rotateDegrees(com.mojang.math.Axis.ZP,p.zRot*net.minecraft.util.Mth.RAD_TO_DEG);
             pose.rotateDegrees(com.mojang.math.Axis.XP,180+p.xRot*net.minecraft.util.Mth.RAD_TO_DEG);
             pose.scale(s.actionScale,s.actionScale,s.actionScale);
@@ -280,7 +311,7 @@ public final class PeepoRenderer extends MobRenderer<PeepoEntity,PeepoState,Peep
     private static final class KnifeLayer extends RenderLayer<PeepoState,PeepoModel>{
         KnifeLayer(PeepoRenderer renderer){super(renderer);}
         @Override public void submit(PoseStack pose,SubmitNodeCollector collector,int light,PeepoState state,float yaw,float pitch){
-            if(state.isInvisible || state.work!=WorkAnimation.CHOP || state.knife.isEmpty())return;
+            if(state.isInvisible || state.toolHandling || state.work!=WorkAnimation.CHOP || state.knife.isEmpty())return;
             pose.pushPose();knifePose(pose,state.toolPose);
             state.knife.submit(pose,collector,light,OverlayTexture.NO_OVERLAY,state.outlineColor);pose.popPose();
         }
@@ -288,7 +319,7 @@ public final class PeepoRenderer extends MobRenderer<PeepoEntity,PeepoState,Peep
     private static final class HoeLayer extends RenderLayer<PeepoState,PeepoModel>{
         HoeLayer(PeepoRenderer renderer){super(renderer);}
         @Override public void submit(PoseStack pose,SubmitNodeCollector collector,int light,PeepoState state,float yaw,float pitch){
-            if(state.isInvisible || state.work!=WorkAnimation.HARVEST || state.hoe.isEmpty())return;
+            if(state.isInvisible || state.toolHandling || state.work!=WorkAnimation.HARVEST || state.hoe.isEmpty())return;
             pose.pushPose();hoePose(pose,state.toolPose);
             state.hoe.submit(pose,collector,light,OverlayTexture.NO_OVERLAY,state.outlineColor);pose.popPose();
         }
@@ -296,7 +327,7 @@ public final class PeepoRenderer extends MobRenderer<PeepoEntity,PeepoState,Peep
     private static final class AnimalWorkLayer extends RenderLayer<PeepoState,PeepoModel>{
         AnimalWorkLayer(PeepoRenderer renderer){super(renderer);}
         @Override public void submit(PoseStack pose,SubmitNodeCollector collector,int light,PeepoState state,float yaw,float pitch){
-            if(state.isInvisible || state.animalTool.isEmpty())return;
+            if(state.isInvisible || state.toolHandling || state.animalTool.isEmpty())return;
             pose.pushPose();
             if(state.work==WorkAnimation.SHEAR || state.work==WorkAnimation.HIVE_SHEAR || state.work==WorkAnimation.HIVE_BOTTLE)workItemPose(pose,state.toolPose,.45F,90);
             else {pose.translate(state.bucketX/16,state.bucketY/16,state.bucketZ/16);pose.rotateDegrees(com.mojang.math.Axis.XP,180);pose.scale(.4F,.4F,.4F);}
@@ -304,7 +335,7 @@ public final class PeepoRenderer extends MobRenderer<PeepoEntity,PeepoState,Peep
         }
     }
     static void knifePose(PoseStack pose,MachineWorkClip p){
-        workItemPose(pose,p,1,90);
+        workItemPose(pose,p,MachineWorkClip.KNIFE_SCALE,MachineWorkClip.KNIFE_FACING);
     }
     static void hoePose(PoseStack pose,MachineWorkClip p){
         // Reverse the blade around the handle: the working edge leads the downstroke.
@@ -344,7 +375,7 @@ public final class PeepoRenderer extends MobRenderer<PeepoEntity,PeepoState,Peep
     private static final class HeldLayer extends RenderLayer<PeepoState,PeepoModel> {
         HeldLayer(PeepoRenderer renderer){super(renderer);}
         @Override public void submit(PoseStack pose,SubmitNodeCollector collector,int light,PeepoState state,float yaw,float pitch){
-            if(state.isInvisible || state.work.isFishing() || state.held.isEmpty())return;
+            if(state.isInvisible || state.toolHandling || state.detail.brewing() || state.work.isFishing() || state.held.isEmpty())return;
             pose.pushPose();
             if(state.holdingLight){
                 getParentModel().translateToUprightHand(pose);

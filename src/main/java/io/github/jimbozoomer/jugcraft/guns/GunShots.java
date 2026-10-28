@@ -1,5 +1,7 @@
 package io.github.jimbozoomer.jugcraft.guns;
 
+import io.github.jimbozoomer.jugcraft.concordance.Authority;
+import io.github.jimbozoomer.jugcraft.config.JugcraftConfig;
 import io.github.jimbozoomer.jugcraft.rocketry.CombatRocket;
 import io.github.jimbozoomer.jugcraft.rocketry.JugcraftRocketry;
 import io.github.jimbozoomer.jugcraft.tools.Chargeable;
@@ -18,10 +20,12 @@ import java.util.UUID;
 import java.util.function.Predicate;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.fabricmc.fabric.api.event.player.AttackEntityCallback;
+import net.fabricmc.fabric.api.event.player.PlayerBlockBreakEvents;
 import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
 import net.fabricmc.fabric.api.networking.v1.PlayerLookup;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
+import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.BlockParticleOption;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.core.registries.Registries;
@@ -39,7 +43,6 @@ import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.effect.MobEffectInstance;
-import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.decoration.ArmorStand;
@@ -49,6 +52,7 @@ import net.minecraft.world.entity.projectile.Projectile;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.ClipContext;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.BlockHitResult;
@@ -95,9 +99,13 @@ import org.jspecify.annotations.Nullable;
  * fires, and a shot of either cuts a shell-at-a-time reload short.</li>
  * <li>Slice 11A, the Nether guns ({@link JugcraftGuns#INCENDIARY}): each creature their bullets hurt is set alight for
  * {@link #BURN_SECONDS}, as a burst of flame sets it alight. No block is set alight.</li>
- * <li>Slice 12A, the End guns ({@link JugcraftGuns#LEVITATING}): each creature their bullets hurt floats up for
- * {@link #LIFT_TICKS}, as a shulker's bullet lifts it (the game's own Levitation, at its first level; a longer spell
- * already on it is kept). It falls when the spell ends.</li>
+ * <li>Slice 12A, the End guns ({@link JugcraftGuns#LEVITATING}): each creature their bullets hurt may float up, as a
+ * shulker's bullet lifts it (the game's own Levitation, at its first level; a longer spell already on it is kept), at
+ * the owner's chance and for the owner's time since the levitation follow-up ({@link #afflict}). It falls when the spell
+ * ends.</li>
+ * <li>Slice 15D: a burst gun ({@link JugcraftGuns#BURSTS}) fires its burst a shot at a time as the client asks, each
+ * shot spending trigger credit as any gun's does; its credit refills at a burst per {@link JugcraftGuns.Burst#cycle},
+ * and banks a whole burst.</li>
  * </ul>
  */
 public final class GunShots {
@@ -119,8 +127,6 @@ public final class GunShots {
 	 * gun's bullet (slice 11A).
 	 */
 	public static final int BURN_SECONDS = 4;
-	/** Ticks an End gun's bullet makes what it hurts float (slice 12A, tools/guns.py LIFT_TICKS). */
-	public static final int LIFT_TICKS = 20;
 	/** The halvings {@link #pierced} takes to find a piercing hit (to well under a thousandth of a heart). */
 	private static final int PIERCE_STEPS = 24;
 	/** How hard a stab pushes its foe back (a sword's knockback is 0.4, and more for a sprinting strike). */
@@ -134,6 +140,8 @@ public final class GunShots {
 	private static final Map<UUID, Long> STABS = new HashMap<>();
 	/** Each player's spinning barrels (slice 8C). */
 	private static final Map<UUID, Spin> SPINS = new HashMap<>();
+	/** Each player's mining beam's cut into a block (the beam-mining follow-up, {@link #cut}). */
+	private static final Map<UUID, Cut> CUTS = new HashMap<>();
 
 	private GunShots() {
 	}
@@ -192,7 +200,7 @@ public final class GunShots {
 		if (spinUp > 0 && !spunUp(player, spinUp, level.getGameTime())) {
 			return false; // the barrels are not up to speed
 		}
-		if (!spend(player, hand, spec, level.getGameTime())) {
+		if (!spend(player, hand, spec, JugcraftGuns.burst(gun), level.getGameTime())) {
 			return false;
 		}
 		boolean aiming = GunItem.aiming(player, stack);
@@ -201,8 +209,10 @@ public final class GunShots {
 		switch (JugcraftGuns.shot(gun)) {
 			case JugcraftGuns.GRENADE -> lob(level, player, stack, spec, spread);
 			case JugcraftGuns.FLAME -> burn(level, player, spec, spread);
-			case JugcraftGuns.BEAM -> beam(level, player, spec, spread, hand);
-			case JugcraftGuns.ARC -> arc(level, player, spec, spread, hand);
+			case JugcraftGuns.BEAM -> beam(level, player, spec, spread, hand, JugcraftGuns.bleed(gun), JugcraftGuns.hitEffect(gun),
+					JugcraftGuns.piercing(gun), JugcraftGuns.mining(gun));
+			case JugcraftGuns.ARC -> arc(level, player, spec, spread, hand, JugcraftGuns.bleed(gun), JugcraftGuns.hitEffect(gun),
+					JugcraftGuns.piercing(gun));
 			case JugcraftGuns.ROCKET -> rocket(level, player, gun, spec, spread);
 			default -> shoot(level, player, gun, spec, spread);
 		}
@@ -328,6 +338,15 @@ public final class GunShots {
 	}
 
 	private static void tick(MinecraftServer server) {
+		// The beam-mining follow-up: a cut no shot has reached for MINE_GAP ticks is let go, its cracks cleared.
+		Iterator<Map.Entry<UUID, Cut>> cuts = CUTS.entrySet().iterator();
+		while (cuts.hasNext()) {
+			Cut cut = cuts.next().getValue();
+			if (cut.level.getGameTime() - cut.last > JugcraftGuns.MINE_GAP) {
+				cut.clear();
+				cuts.remove();
+			}
+		}
 		Iterator<Map.Entry<UUID, Reload>> it = RELOADS.entrySet().iterator();
 		while (it.hasNext()) {
 			Map.Entry<UUID, Reload> entry = it.next();
@@ -345,15 +364,19 @@ public final class GunShots {
 			long elapsed = ((ServerLevel) player.level()).getGameTime() - reload.start;
 			GunSpec spec = reload.spec;
 			if (spec.byShell()) {
-				// One shell lands at the end of each shell's time; the gun closes after the last.
-				while (reload.done < reload.rounds && elapsed >= spec.shellStart() + (long) spec.shellEach() * (reload.done + 1)) {
-					if (load(player, reload.stack, spec, 1, reload.ammo) == 0) {
+				// One shell lands at the end of each shell's time (slice 15E: or a step of several, LOAD_STEPS); the gun
+				// closes after the last.
+				int step = reload.stack.getItem() instanceof GunItem gun ? JugcraftGuns.loadStep(gun) : 1;
+				while (reload.done < reload.rounds && elapsed >= spec.shellStart() + (long) spec.shellEach() * (reload.done / step + 1)) {
+					int wanted = Math.min(step, reload.rounds - reload.done);
+					int loaded = load(player, reload.stack, spec, wanted, reload.ammo);
+					reload.done += loaded;
+					if (loaded < wanted) {
 						reload.rounds = reload.done; // ran out (or the gun is full)
 						break;
 					}
-					reload.done++;
 				}
-				if (elapsed >= spec.reloadTicks(reload.rounds)) {
+				if (elapsed >= spec.reloadTicks(reload.rounds, step)) {
 					it.remove();
 				}
 			} else if (elapsed >= spec.reload()) {
@@ -506,11 +529,18 @@ public final class GunShots {
 		return taken;
 	}
 
-	/** Spends a shot of the player's trigger credit for this hand, if they have one (see the class comment). */
-	private static boolean spend(ServerPlayer player, InteractionHand hand, GunSpec spec, long now) {
+	/**
+	 * Spends a shot of the player's trigger credit for this hand, if they have one (see the class comment). A burst gun's
+	 * credit (slice 15D) refills at its burst's rounds per cycle and banks a whole burst, so its shots come a burst at a
+	 * time, at most a burst a cycle.
+	 */
+	private static boolean spend(ServerPlayer player, InteractionHand hand, GunSpec spec, JugcraftGuns.@Nullable Burst burst,
+			long now) {
 		Map<UUID, Trigger> triggers = hand == InteractionHand.OFF_HAND ? OFF_TRIGGERS : TRIGGERS;
 		Trigger trigger = triggers.computeIfAbsent(player.getUUID(), id -> new Trigger(now));
-		trigger.credit = Math.min(BURST, trigger.credit + Math.max(0, now - trigger.last) / (double) spec.interval());
+		double bank = burst == null ? BURST : Math.max(BURST, burst.rounds());
+		double rate = burst == null ? 1.0 / spec.interval() : burst.rounds() / (double) burst.cycle(spec);
+		trigger.credit = Math.min(bank, trigger.credit + Math.max(0, now - trigger.last) * rate);
 		trigger.last = now;
 		if (trigger.credit < 1.0) {
 			return false;
@@ -522,8 +552,8 @@ public final class GunShots {
 	/** Fires every pellet of one shot and deals what hit. */
 	private static void shoot(ServerLevel level, ServerPlayer player, GunItem gun, GunSpec spec, float spread) {
 		bullets(level, player, player.getEyePosition(), player.getLookAngle(), spec, spread, spec.damage(), JugcraftGuns.ignites(gun),
-				JugcraftGuns.levitates(gun), JugcraftGuns.knockback(gun), JugcraftGuns.piercing(gun), candidate -> target(player, candidate),
-				candidate -> allowed(player, level, candidate));
+				JugcraftGuns.knockback(gun), JugcraftGuns.piercing(gun), JugcraftGuns.bleed(gun), JugcraftGuns.hitEffect(gun),
+				candidate -> target(player, candidate), candidate -> allowed(player, level, candidate));
 	}
 
 	/**
@@ -531,41 +561,53 @@ public final class GunShots {
 	 * block or creature in the gun's range that {@code hittable} lets it strike (others are passed through), and deals
 	 * {@code damage} a pellet to each creature it hits that {@code allowed} lets the shooter strike; a shotgun's pellets
 	 * on one creature land as one hit. A player's shots and, slice 10F, a raider gunner's ({@link MobGuns}) fire this way.
-	 * When {@code ignites} (slice 11A, a Nether gun), each creature the hit hurts is set alight for {@link #BURN_SECONDS};
-	 * when {@code lifts} (slice 12A, an End gun), it floats for {@link #LIFT_TICKS}. Each creature the hit hurts is knocked
-	 * back again by {@code knockback} after a hit's own push, and the hit passes through {@code pierce} points of its armour
-	 * ({@link #pierced}; the Jawbreaker's, {@link JugcraftGuns#KNOCKBACK} and {@link JugcraftGuns#PIERCING}).
+	 * When {@code ignites} (slice 11A, a Nether gun), each creature the hit hurts is set alight for {@link #BURN_SECONDS}.
+	 * Each creature the hit hurts is knocked back again by {@code knockback} after a hit's own push, and the hit passes
+	 * through {@code pierce} points of its armour ({@link #pierced}; the Jawbreaker's, {@link JugcraftGuns#KNOCKBACK} and
+	 * {@link JugcraftGuns#PIERCING}). With a {@code bleed} (the darts-and-bleeding follow-up, {@link JugcraftGuns#BLEEDS}),
+	 * each creature the hit hurts may bleed; with an {@code effect} (the hit-effects follow-up,
+	 * {@link JugcraftGuns#HIT_EFFECTS}), it may be slowed, darkened or (an End gun's, slice 12A) lifted. A gun that fires
+	 * darts ({@link JugcraftGuns#DART}) fires them along a falling flight ({@link #flight}).
 	 */
 	static void bullets(ServerLevel level, LivingEntity shooter, Vec3 eye, Vec3 look, GunSpec spec, float spread, float damage,
-			boolean ignites, boolean lifts, float knockback, float pierce, Predicate<LivingEntity> hittable,
-			Predicate<LivingEntity> allowed) {
+			boolean ignites, float knockback, float pierce, JugcraftGuns.@Nullable Bleed bleed,
+			JugcraftGuns.@Nullable HitEffect effect, Predicate<LivingEntity> hittable, Predicate<LivingEntity> allowed) {
 		RandomSource random = shooter.getRandom();
 		Map<LivingEntity, Float> hits = new LinkedHashMap<>();
+		boolean falls = JugcraftGuns.DART.equals(spec.ammo());
 		for (int i = 0; i < spec.pellets(); i++) {
-			Vec3 direction = stray(look, spread, random);
-			Vec3 end = eye.add(direction.scale(spec.range()));
-			BlockHitResult block = level.clip(new ClipContext(eye, end, ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, shooter));
-			if (block.getType() != HitResult.Type.MISS) {
-				end = block.getLocation();
-			}
-			LivingEntity target = null;
-			double nearest = Double.MAX_VALUE;
-			for (LivingEntity candidate : level.getEntitiesOfClass(LivingEntity.class, new AABB(eye, end).inflate(1.0), hittable)) {
-				var clip = candidate.getBoundingBox().inflate(HIT_MARGIN).clip(eye, end);
-				if (clip.isPresent() && clip.get().distanceToSqr(eye) < nearest) {
-					nearest = clip.get().distanceToSqr(eye);
-					target = candidate;
+			List<Vec3> path = flight(eye, stray(look, spread, random), spec.range(), falls);
+			// Each leg of the flight in turn, to the first block or creature: a bullet's one leg, a dart's one a tick.
+			for (int leg = 1; leg < path.size(); leg++) {
+				Vec3 from = path.get(leg - 1);
+				Vec3 end = path.get(leg);
+				BlockHitResult block = level.clip(new ClipContext(from, end, ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, shooter));
+				if (block.getType() != HitResult.Type.MISS) {
+					end = block.getLocation();
 				}
-			}
-			if (target != null && allowed.test(target)) {
-				hits.merge(target, damage, Float::sum);
-				Vec3 at = eye.add(direction.scale(Math.sqrt(nearest)));
-				level.sendParticles(ParticleTypes.CRIT, at.x, at.y, at.z, 2, 0.05, 0.05, 0.05, 0.1);
-			} else if (block.getType() != HitResult.Type.MISS) {
-				Vec3 at = block.getLocation();
-				level.sendParticles(new BlockParticleOption(ParticleTypes.BLOCK, level.getBlockState(block.getBlockPos())), at.x, at.y,
-						at.z, 4, 0.05, 0.05, 0.05, 0.1);
-				level.sendParticles(ParticleTypes.SMOKE, at.x, at.y, at.z, 1, 0.02, 0.02, 0.02, 0.01);
+				LivingEntity target = null;
+				Vec3 at = null;
+				double nearest = Double.MAX_VALUE;
+				for (LivingEntity candidate : level.getEntitiesOfClass(LivingEntity.class, new AABB(from, end).inflate(1.0), hittable)) {
+					var clip = candidate.getBoundingBox().inflate(HIT_MARGIN).clip(from, end);
+					if (clip.isPresent() && clip.get().distanceToSqr(from) < nearest) {
+						nearest = clip.get().distanceToSqr(from);
+						target = candidate;
+						at = clip.get();
+					}
+				}
+				if (target != null && allowed.test(target)) {
+					hits.merge(target, damage, Float::sum);
+					level.sendParticles(ParticleTypes.CRIT, at.x, at.y, at.z, 2, 0.05, 0.05, 0.05, 0.1);
+				} else if (block.getType() != HitResult.Type.MISS) {
+					Vec3 struck = block.getLocation();
+					level.sendParticles(new BlockParticleOption(ParticleTypes.BLOCK, level.getBlockState(block.getBlockPos())), struck.x,
+							struck.y, struck.z, 4, 0.05, 0.05, 0.05, 0.1);
+					level.sendParticles(ParticleTypes.SMOKE, struck.x, struck.y, struck.z, 1, 0.02, 0.02, 0.02, 0.01);
+				}
+				if (target != null || block.getType() != HitResult.Type.MISS) {
+					break;
+				}
 			}
 		}
 		DamageSource source = new DamageSource(level.registryAccess().lookupOrThrow(Registries.DAMAGE_TYPE)
@@ -580,12 +622,46 @@ public final class GunShots {
 				if (ignites) {
 					target.igniteForSeconds(BURN_SECONDS);
 				}
-				if (lifts) {
-					target.addEffect(new MobEffectInstance(MobEffects.LEVITATION, LIFT_TICKS, 0), shooter);
-				}
+				bleed(target, bleed, shooter, random);
+				afflict(target, effect, shooter, random);
 			}
 		});
 		smoke(level, eye, look);
+	}
+
+	/**
+	 * The points a pellet flies through, from {@code eye} along {@code direction}, until it has flown {@code range} blocks:
+	 * a bullet's straight line in one leg; a dart's ({@code falls}; the darts-and-bleeding follow-up) one leg a tick,
+	 * {@link JugcraftGuns#DART_SPEED} blocks at first and falling {@link JugcraftGuns#DART_DROP} blocks a tick faster
+	 * each tick, as an arrow falls. The whole flight is found at once, as every gun's shot is.
+	 */
+	public static List<Vec3> flight(Vec3 eye, Vec3 direction, double range, boolean falls) {
+		List<Vec3> path = new ArrayList<>(List.of(eye));
+		Vec3 step = direction.normalize().scale(falls ? JugcraftGuns.DART_SPEED : range);
+		for (double left = range; left > 1.0E-6; step = step.add(0.0, -JugcraftGuns.DART_DROP, 0.0)) {
+			double length = step.length();
+			path.add(path.getLast().add(step.scale(Math.min(1.0, left / length))));
+			left -= length;
+		}
+		return path;
+	}
+
+	/** Makes {@code target} bleed, at {@code bleed}'s chance, for its ticks (the darts-and-bleeding follow-up); none for null. */
+	private static void bleed(LivingEntity target, JugcraftGuns.@Nullable Bleed bleed, LivingEntity shooter, RandomSource random) {
+		if (bleed != null && random.nextFloat() < bleed.chance()) {
+			target.addEffect(new MobEffectInstance(JugcraftGuns.BLEEDING, bleed.ticks(), 0), shooter);
+		}
+	}
+
+	/**
+	 * Gives {@code target} {@code effect}'s vanilla effect, at its chance, for its ticks and at its amplifier (the
+	 * hit-effects follow-up, {@link JugcraftGuns#HIT_EFFECTS}); none for null. A longer or stronger effect already on the
+	 * creature stays, as the game's own effects do.
+	 */
+	public static void afflict(LivingEntity target, JugcraftGuns.@Nullable HitEffect effect, LivingEntity shooter, RandomSource random) {
+		if (effect != null && random.nextFloat() < effect.chance()) {
+			target.addEffect(new MobEffectInstance(effect.holder(), effect.ticks(), effect.amplifier()), shooter);
+		}
 	}
 
 	/**
@@ -689,10 +765,13 @@ public final class GunShots {
 
 	/**
 	 * A beam (slice 8D): from the eye along the look, strayed by the spread, to the first block within range. Every creature
-	 * in its line that the shooter may strike takes the shot's damage ({@link JugcraftGuns#ZAP_DAMAGE}); it passes through
-	 * them all. No block is touched.
+	 * in its line that the shooter may strike takes the shot's damage ({@link JugcraftGuns#ZAP_DAMAGE}), through
+	 * {@code pierce} points less armour (slice 15E, {@link #pierced}); it passes through them all, and each it hurts may
+	 * bleed or take the gun's hit effect ({@link #afflict}). A mining beam cuts the block it ends at (the beam-mining
+	 * follow-up, {@link #cut}); no other beam touches a block.
 	 */
-	private static void beam(ServerLevel level, ServerPlayer player, GunSpec spec, float spread, InteractionHand hand) {
+	private static void beam(ServerLevel level, ServerPlayer player, GunSpec spec, float spread, InteractionHand hand,
+			JugcraftGuns.@Nullable Bleed bleed, JugcraftGuns.@Nullable HitEffect effect, float pierce, JugcraftGuns.@Nullable Mining mining) {
 		Vec3 eye = player.getEyePosition();
 		Vec3 direction = stray(player.getLookAngle(), spread, player.getRandom());
 		Vec3 end = eye.add(direction.scale(spec.range()));
@@ -703,11 +782,54 @@ public final class GunShots {
 		DamageSource source = zap(level, player);
 		for (LivingEntity foe : level.getEntitiesOfClass(LivingEntity.class, new AABB(eye, end).inflate(1.0),
 				candidate -> target(player, candidate))) {
-			if (foe.getBoundingBox().inflate(HIT_MARGIN).clip(eye, end).isPresent() && allowed(player, level, foe)) {
-				foe.hurtServer(level, source, spec.damage());
+			if (foe.getBoundingBox().inflate(HIT_MARGIN).clip(eye, end).isPresent() && allowed(player, level, foe)
+					&& foe.hurtServer(level, source, pierced(foe, spec.damage(), pierce))) {
+				bleed(foe, bleed, player, player.getRandom());
+				afflict(foe, effect, player, player.getRandom());
 			}
 		}
 		trace(player, GunTracePayload.BEAM, List.of(end), hand);
+		if (mining != null && block.getType() == HitResult.Type.BLOCK && JugcraftConfig.option("guns.beam_mining")) {
+			cut(level, player, block.getBlockPos(), mining, spec.interval());
+		}
+	}
+
+	/**
+	 * A mining beam's shot cuts into the block it ends at (the beam-mining follow-up): it adds what its {@link
+	 * JugcraftGuns.Mining} cuts in the gun's interval, the block's cracks showing to everyone near, and when the cut is
+	 * through the block breaks as the shooter breaking it by hand would, with its drops (none in creative). It cuts only
+	 * a block the shooter may change ({@link Authority#mayChange}: claims, spawn and town protection, adventure mode), not
+	 * one that holds a block entity (a chest, a machine), not an unbreakable one, and only what a pickaxe of its tier may
+	 * harvest, or what needs no tool. Another block, or a pause of more than {@link JugcraftGuns#MINE_GAP} ticks, starts
+	 * the cut over.
+	 */
+	private static void cut(ServerLevel level, ServerPlayer player, BlockPos pos, JugcraftGuns.Mining mining, int interval) {
+		BlockState state = level.getBlockState(pos);
+		float hardness = state.getDestroySpeed(level, pos);
+		if (state.isAir() || hardness < 0.0F || state.hasBlockEntity()
+				|| state.requiresCorrectToolForDrops() && !mining.pickaxe().isCorrectToolForDrops(state)
+				|| !Authority.mayChange(level, player, pos)) {
+			return;
+		}
+		long now = level.getGameTime();
+		Cut cut = CUTS.get(player.getUUID());
+		if (cut == null || cut.level != level || !cut.pos.equals(pos) || now - cut.last > JugcraftGuns.MINE_GAP) {
+			if (cut != null) {
+				cut.clear();
+			}
+			cut = new Cut(level, pos.immutable(), -1 - player.getId());
+			CUTS.put(player.getUUID(), cut);
+		}
+		cut.last = now;
+		cut.done += mining.cut(hardness, interval);
+		if (cut.done < 1.0F) {
+			level.destroyBlockProgress(cut.crack, pos, Math.min(9, (int) (cut.done * 10.0F)));
+			return;
+		}
+		cut.clear();
+		CUTS.remove(player.getUUID());
+		level.destroyBlock(pos, !player.hasInfiniteMaterials(), player);
+		PlayerBlockBreakEvents.AFTER.invoker().afterBlockBreak(level, player, pos, state, null);
 	}
 
 	/**
@@ -715,9 +837,12 @@ public final class GunShots {
 	 * at most the spread off the look, with no block between it and the eye (the nearer of two equally near the aim).
 	 * From each creature it strikes it leaps on to the nearest other within {@link JugcraftGuns#ARC_REACH} blocks with no
 	 * block between them, at most {@link JugcraftGuns#ARC_HOPS} times, each taking {@link JugcraftGuns#ARC_SHARE} of the
-	 * damage before it. Finding none, it strikes the first block along the look within range, harmlessly.
+	 * damage before it, through {@code pierce} points less armour (the older guns follow-up, {@link #pierced}); each it
+	 * hurts may bleed or take the gun's hit effect (the hit-effects follow-up, {@link #afflict}).
+	 * Finding none, it strikes the first block along the look within range, harmlessly.
 	 */
-	private static void arc(ServerLevel level, ServerPlayer player, GunSpec spec, float spread, InteractionHand hand) {
+	private static void arc(ServerLevel level, ServerPlayer player, GunSpec spec, float spread, InteractionHand hand,
+			JugcraftGuns.@Nullable Bleed bleed, JugcraftGuns.@Nullable HitEffect effect, float pierce) {
 		Vec3 eye = player.getEyePosition();
 		Vec3 look = player.getLookAngle();
 		double reach = spec.range();
@@ -751,7 +876,10 @@ public final class GunShots {
 		for (LivingEntity foe = mark; foe != null; foe = struck.size() > JugcraftGuns.ARC_HOPS ? null : leap(level, player, foe, struck)) {
 			struck.add(foe);
 			points.add(foe.getBoundingBox().getCenter());
-			foe.hurtServer(level, source, damage);
+			if (foe.hurtServer(level, source, pierced(foe, damage, pierce))) {
+				bleed(foe, bleed, player, player.getRandom());
+				afflict(foe, effect, player, player.getRandom());
+			}
 			damage *= JugcraftGuns.ARC_SHARE;
 		}
 		trace(player, GunTracePayload.ARC, points, hand);
@@ -859,6 +987,32 @@ public final class GunShots {
 		RELOADS.remove(player.getUUID());
 		STABS.remove(player.getUUID());
 		SPINS.remove(player.getUUID());
+		Cut cut = CUTS.remove(player.getUUID());
+		if (cut != null) {
+			cut.clear();
+		}
+	}
+
+	/**
+	 * A mining beam's cut into one block (the beam-mining follow-up): where, how far through (1 is through), when a shot
+	 * last reached it, and the id its cracks are shown under (never an entity's, so the shooter sees them too).
+	 */
+	private static final class Cut {
+		final ServerLevel level;
+		final BlockPos pos;
+		final int crack;
+		float done;
+		long last;
+
+		Cut(ServerLevel level, BlockPos pos, int crack) {
+			this.level = level;
+			this.pos = pos;
+			this.crack = crack;
+		}
+
+		void clear() {
+			level.destroyBlockProgress(crack, pos, -1);
+		}
 	}
 
 	private static final class Trigger {

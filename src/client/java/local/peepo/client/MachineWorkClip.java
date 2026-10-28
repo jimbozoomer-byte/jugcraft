@@ -9,6 +9,7 @@ final class MachineWorkClip {
     float x,y,z,xRot,zRot,leftX,leftY,leftZ,rightX,rightY,rightZ;
     float bodyPitch,bodyRoll,bodyX,bodyY;
     static final float HOE_SCALE=.65F, HOE_REACH=11.313708F*HOE_SCALE;
+    static final float KNIFE_SCALE=.65F, KNIFE_FACING=-90;
 
     void stir(float phase){
         // Ease through the near side, then lean into the far sweep. The loop stays continuous.
