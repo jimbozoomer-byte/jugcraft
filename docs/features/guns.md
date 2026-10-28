@@ -2993,7 +2993,7 @@ The owner's data gives four more of their diamond-steel guns armour piercing (`a
 - **Checked:** `tools/check_mod_data.py` holds the Java table to `tools/guns.py`, as before. `HeavyBulletsGameTests.heavyBulletsAreTheOwners` holds the full tables to the owner's numbers, and the Gallant Rifle's bullets to plain ones.
 - **Tooltips:** each of the four says it pierces armour.
 - **Save compatibility:** nothing saved changes.
-- **Not in this follow-up:** the guns before slice 15. The owner's data gives 49 of them armour piercing, knockback or both (27 each, 5 both); they stay plain for now.
+- **Not in this follow-up:** the guns before slice 15. The owner's data gives 49 of them armour piercing, knockback or both (27 each, 5 both); they stayed plain until the [older guns follow-up](#follow-up-armour-piercing-and-knockback-for-the-older-guns).
 
 ## Follow-up: darts and bleeding
 The owner's Zilk 45 (slice 15C's Quill Rifle) fires frog darts that fall over their flight, and its hits may lacerate, as the owner's M3 Marksman's, Railworker's and Scratches' do. Offered after slice 15C, the owner chose it (27 October 2026, "Lets begin with those 3 you suggested"), as its own pull request.
@@ -3276,6 +3276,85 @@ The owner's data lifts what their End guns hit at a chance and for 5 s (`impactE
 **Known limits:**
 - **The fall's damage** is the game's, so the lift does a little harm where it did almost none.
 - **Not played:** none of it has been played yet.
+
+## Follow-up: armour piercing and knockback for the older guns
+The owner's data gives 49 of their guns built before slice 15 armour piercing (`armorPen`), knockback (`knockbackStrength`) or both, which only slice 15's guns had taken. Offered after the hit effects, the owner chose it on 28 October 2026, with four other follow-ups, each its own pull request.
+
+**The guns** (46 of the 49; the other three below), at the owner's numbers:
+
+| Gun | The owner's gun | Armour pierced (points) | Knockback (further push) |
+|---|---|---|---|
+| Patchwork Carbine | Makeshift Rifle | 2.0 | – |
+| Thunderpipe | Boomstick | – | 0.75 |
+| Warden Pistol | Defender Pistol | 1.0 | – |
+| Riveter SMG | Greaser SMG | 1.0 | – |
+| Haymaker | Bruiser | – | 0.6 |
+| Longhorn Rifle | Marlin | 3.5 | – |
+| Coach Gun | Callwell | – | 0.75 |
+| Bellmouth | Blunderbuss | – | 0.8 |
+| Bulldog Pistol | Brawler | – | 0.85 |
+| Sapper Revolver | Trenchur | 2.5 | – |
+| Garrison Rifle | Stigg | 2.0 | – |
+| Breacher | Combat Shotgun | – | 0.65 |
+| Thresher | Gattaler | 1.0 | – |
+| Kestrel Rifle | Whistler | 3.0 | – |
+| Rattler Pistol | Auvtomag | – | 0.8 |
+| Bronco SMG | Jr Wristbreaker | – | 0.85 |
+| Caisson Pistol | Hyperbaria | 1.0 | – |
+| Sledge | Killer 23 | – | 0.65 |
+| Highwayman | Turnpike | 2.5 | – |
+| Mule | Super Shotgun | – | 0.65 |
+| Fowler | Doublet | – | 0.8 |
+| Culverin | Handcannon | – | 0.8 |
+| Undertone Rifle | Sculk Resonator | 6.5 | – |
+| Murmur SMG | Whispers | 7.0 | – |
+| Reverb | Echoes 2 | 7.0 | 0.65 |
+| Tusker | Mangalitsa | – | 0.65 |
+| Cinder Repeater | Vulcanic Repeater | 2.0 | – |
+| Ashfall Pistol | Pyroclastic Flow | 2.0 | – |
+| Crackling | Ribs Glory | – | 0.65 |
+| Conductor Carbine | LLR Director | 2.5 | – |
+| Goshawk Revolver | Ultra Knight Hawk | – | 3.0 |
+| Lament Rifle | Forlorn Hope | 7.0 | – |
+| Ammonite Carbine | Spirulida | 2.0 | – |
+| Waystation Shotgun | Callwell Terminal | – | 0.7 |
+| Highball Rifle | Saketini | 2.5 | – |
+| Flatboat Gun | Big Bore | 2.0 | 8.0 |
+| Millstone Rifle | Winnie Millend | 1.5 | – |
+| Holler Pistol | Howler | 5.0 | 0.65 |
+| Minuet Pistol | M22 Waltz | – | 0.55 |
+| Half-Crown Revolver | Osgood 50 | 4.0 | 0.55 |
+| Holler Carbine | Howler Conversion | 5.0 | 0.65 |
+| Grange Carbine | Grandle | 2.0 | – |
+| Sprocket Gun | Cogloader | 3.0 | – |
+| Navvy Shotgun | Jackhammer | – | 0.85 |
+| Freeholder Rifle | Libertas | – | 0.4 |
+| Old Grange Carbine | Grandle OG | 2.5 | – |
+
+- **How they work:** as the [heavy bullets](#follow-up-heavy-bullets-knockback-and-armour-piercing) already do. A piercing hit deals what it would through that many points less armour (`GunShots.pierced`), so a creature without armour takes each gun's damage as before. A knockback hit gives a second push, of that strength, after the 0.4 every hit gives. A shotgun's pellets on one creature are one hit, so one push and one piercing hit a pull.
+- **Arcs may pierce armour now:** the Caisson Pistol's arc deals each creature it strikes its share through 1 point less armour (`GunShots.arc`). It is the only arc gun with piercing.
+- **The Flatboat Gun** has the owner's Big Bore's knockback of 8, by far the strongest (a plain hit's push is 0.4): it throws what it hits many blocks. The Goshawk Revolver's (the Ultra Knight Hawk's) 3 is the next.
+- **Left out:** the owner's knockback for the Kiln Gun (the Stoker), the Plasmabuss (the Glowmouth) and the Fencer Thumper (the Fencepost Thumper). The Stoker's flame and the Glowmouth's arc deal damage that pushes nothing here (`no_knockback`), and the Fencepost Thumper fires grenades, not bullets.
+- **The Thunderhead's file** (the Cloudburst Gun's) holds a second projectile block, `projectile_1`, with piercing 5 and knockback 0.45. The owner's game reads only `projectile`, so they are left out, as its bleeding came from `projectile`.
+- **Raider gunners** fire the Garrison Rifle (now piercing 2) and the Breacher (now knocking back 0.65) the same way; the Sentry Pistol is plain.
+- **Tooltips:** each of the 46 says its shots pierce armour, knock back what they hit, or both (the Caisson Pistol's, its bolt).
+
+**Checked:** `tools/check_mod_data.py` holds `JugcraftGuns.KNOCKBACK` and `PIERCING` to `tools/guns.py` (now `Map.ofEntries`, as there are more than ten).
+- Knockback must be on a gun that fires bullets; piercing on bullets, a beam or an arc; each value above 0 and at most 8.
+- An arc gun with piercing needs `GunShots.arc` to pierce.
+- Game tests: `HeavyBulletsGameTests` ([Verification](#verification)).
+
+**Balance:** the piercing helps most against armoured foes; against a creature without armour nothing changes.
+- **The highest:** the Lament Rifle's, the Murmur SMG's and the Reverb's 7 points nearly cancel iron armour (15 points for a full set).
+- **The knockback** keeps foes at a shotgun's length, and the Flatboat Gun's clears a crowd.
+- **Conversions:** none.
+
+**Save compatibility:** nothing saved changes.
+
+**Known limits:**
+- **The three guns left out** above keep pushing nothing.
+- **The Flatboat Gun's throw** is the owner's number, untried in play; it may want lowering.
+- **The numbers** are the owner's; none of this has been played yet.
 
 ## Connections
 - **Existing input producers:** copper, iron and gunpowder (vanilla); lead nuggets (the lead switch's lead); brass nuggets (brass, from zinc); paper and planks.
@@ -6340,6 +6419,16 @@ Slice 9E's files: the guns' tactical grip parts and the Laser Sight's textures m
     - `endGunsMakeWhatTheyHitFloat`: each End gun, fired from creative at a sturdy pig until a hit lifts it, at most 60 shots its interval and a tick apart, lifts it at the first level for 100 ticks; the pig rises more than half a block and, when the spell ends, comes down to the floor. An Undertone Rifle's shot leaves its pig standing. The Borer's 23% missing sixty times running is about one in seven million.
   - `HitEffectsGameTests.hitEffectsAreTheOwners`: the table with the three End guns' levitation, naming vanilla's Levitation.
   - `YetiKingGameTests.endGunLevitationLiftsNeitherHimNorHisKin` gives its own 20-tick spell, as before, now that the guns' is 100 ticks at a chance; his refusal does not depend on its length.
+- **The older guns' armour piercing and knockback, run locally (28 October 2026):**
+  - `python3 tools/check_mod_data.py`: PASS (8033 material IDs). Its guns check, run alone, reported an arc whose hits skip `pierced()` in a copy of `GunShots`, knockback put on the Stoker's flame, and a Flatboat Gun knockback missing from `tools/guns.py`.
+  - `python3 tools/guns.py --check`: PASS. `python3 scripts/check_repository.py`: PASS. `python3 -m unittest discover -s scripts/tests`: 287 tests passed; `python3 scripts/package_modrinth.py check`: PASS. `git diff --check`: clean.
+  - **Java:** a syntax parse only: 0 errors in the changed files.
+  - **The 46 tooltips** were compared with the language file: each matches `tools/guns.py`.
+- **The older guns' armour piercing and knockback, game tests (not run yet; CI runs them):**
+  - `HeavyBulletsGameTests`:
+    - `heavyBulletsAreTheOwners`: the full tables, with the 24 knockbacks and 27 piercings added; the Gallant Rifle plain; the Stoker's flame without knockback.
+    - `caissonArcPiercesArmour`: the Caisson Pistol's arc takes more from a pig in 10 points of armour than a plain zap of its damage takes from a second such pig, and no more than that damage.
+    - `jawbreakerKnocksBackAndPiercesArmour`: unchanged, and still holds the bullets' knockback and piercing.
 - **Not run:** the client by hand, a two-client dedicated server, and play.
 
 ## World and event applicability
@@ -6358,7 +6447,7 @@ No worldgen, structures, bosses or seasonal content. Guns, rounds and the Cell R
   - the Whizzbanger, which waits for the model its animations were made for ([above](#the-whizzbanger-waits));
   - the guns beyond these sets;
   - the owner's other GeckoLib gun models from their upload of 23 October 2026: only the Grandle OG's and the fifteen diamond-steel guns' (slices 15A to 15E) are in the library ([the library record](../../art/owner-library/README.md#gun-geometry-23-october-2026));
-  - the owner's armour piercing and knockback for the guns before slice 15: their data gives 49 of them one or both ([above](#follow-up-armour-piercing-for-slices-15as-and-15bs-guns));
+  - the owner's knockback for three guns whose shots push nothing here: the Stoker's flame, the Glowmouth's arc and the Fencepost Thumper's grenades ([above](#follow-up-armour-piercing-and-knockback-for-the-older-guns));
   - a shotgun that pushes its shooter back (the owner's Inertial and Drill Conversion);
   - the owner's withering (the Flayed God's) and the other hit effects of guns not built yet ([above](#follow-up-hit-effects)).
 - **Balance:** the numbers are starting points for the owner to set.

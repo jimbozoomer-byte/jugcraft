@@ -211,7 +211,8 @@ public final class GunShots {
 			case JugcraftGuns.FLAME -> burn(level, player, spec, spread);
 			case JugcraftGuns.BEAM -> beam(level, player, spec, spread, hand, JugcraftGuns.bleed(gun), JugcraftGuns.hitEffect(gun),
 					JugcraftGuns.piercing(gun), JugcraftGuns.mining(gun));
-			case JugcraftGuns.ARC -> arc(level, player, spec, spread, hand, JugcraftGuns.bleed(gun), JugcraftGuns.hitEffect(gun));
+			case JugcraftGuns.ARC -> arc(level, player, spec, spread, hand, JugcraftGuns.bleed(gun), JugcraftGuns.hitEffect(gun),
+					JugcraftGuns.piercing(gun));
 			case JugcraftGuns.ROCKET -> rocket(level, player, gun, spec, spread);
 			default -> shoot(level, player, gun, spec, spread);
 		}
@@ -836,11 +837,12 @@ public final class GunShots {
 	 * at most the spread off the look, with no block between it and the eye (the nearer of two equally near the aim).
 	 * From each creature it strikes it leaps on to the nearest other within {@link JugcraftGuns#ARC_REACH} blocks with no
 	 * block between them, at most {@link JugcraftGuns#ARC_HOPS} times, each taking {@link JugcraftGuns#ARC_SHARE} of the
-	 * damage before it; each it hurts may bleed or take the gun's hit effect (the hit-effects follow-up, {@link #afflict}).
+	 * damage before it, through {@code pierce} points less armour (the older guns follow-up, {@link #pierced}); each it
+	 * hurts may bleed or take the gun's hit effect (the hit-effects follow-up, {@link #afflict}).
 	 * Finding none, it strikes the first block along the look within range, harmlessly.
 	 */
 	private static void arc(ServerLevel level, ServerPlayer player, GunSpec spec, float spread, InteractionHand hand,
-			JugcraftGuns.@Nullable Bleed bleed, JugcraftGuns.@Nullable HitEffect effect) {
+			JugcraftGuns.@Nullable Bleed bleed, JugcraftGuns.@Nullable HitEffect effect, float pierce) {
 		Vec3 eye = player.getEyePosition();
 		Vec3 look = player.getLookAngle();
 		double reach = spec.range();
@@ -874,7 +876,7 @@ public final class GunShots {
 		for (LivingEntity foe = mark; foe != null; foe = struck.size() > JugcraftGuns.ARC_HOPS ? null : leap(level, player, foe, struck)) {
 			struck.add(foe);
 			points.add(foe.getBoundingBox().getCenter());
-			if (foe.hurtServer(level, source, damage)) {
+			if (foe.hurtServer(level, source, pierced(foe, damage, pierce))) {
 				bleed(foe, bleed, player, player.getRandom());
 				afflict(foe, effect, player, player.getRandom());
 			}

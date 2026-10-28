@@ -310,17 +310,18 @@ public final class JugcraftGuns {
 	 * The guns whose bullets knock back each creature they hurt a second time, by this strength, after the 0.4 every hit
 	 * gives (tools/guns.py KNOCKBACK). Slice 15B's Jawbreaker is the first, from the owner's Uppercut; slice 15C's Impetus
 	 * Shotgun, from the owner's Inertial, the second; slice 15D's Auger Shotgun, from the owner's Drill Conversion, the
-	 * third.
+	 * third. The older guns follow-up gives 24 of the guns before slice 15 theirs, the Flatboat Gun the strongest (8).
 	 */
-	public static final Map<String, Float> KNOCKBACK = Map.of("jawbreaker", 0.6F, "impetus_shotgun", 0.65F, "auger_shotgun", 0.65F);
+	public static final Map<String, Float> KNOCKBACK = Map.ofEntries(Map.entry("jawbreaker", 0.6F), Map.entry("impetus_shotgun", 0.65F), Map.entry("auger_shotgun", 0.65F), Map.entry("thunderpipe", 0.75F), Map.entry("haymaker", 0.6F), Map.entry("coach_gun", 0.75F), Map.entry("bellmouth", 0.8F), Map.entry("bulldog_pistol", 0.85F), Map.entry("breacher", 0.65F), Map.entry("rattler_pistol", 0.8F), Map.entry("bronco_smg", 0.85F), Map.entry("sledge", 0.65F), Map.entry("mule", 0.65F), Map.entry("fowler", 0.8F), Map.entry("culverin", 0.8F), Map.entry("reverb", 0.65F), Map.entry("tusker", 0.65F), Map.entry("crackling", 0.65F), Map.entry("goshawk_revolver", 3.0F), Map.entry("waystation_shotgun", 0.7F), Map.entry("flatboat_gun", 8.0F), Map.entry("holler_pistol", 0.65F), Map.entry("minuet_pistol", 0.55F), Map.entry("half_crown_revolver", 0.55F), Map.entry("holler_carbine", 0.65F), Map.entry("navvy_shotgun", 0.85F), Map.entry("freeholder_rifle", 0.4F));
 	/**
 	 * The guns whose bullets pierce armour: a hit deals what it would if the target wore this many points less armour
 	 * ({@link GunShots#pierced}; tools/guns.py PIERCING). Slice 15B's Jawbreaker is the first, from the owner's Uppercut;
 	 * slice 15C's Hawker Rifle and Quill Rifle, from the owner's MAS Peddler and Zilk 45, follow; then slices 15A's and
 	 * 15B's other guns, from the owner's MAS 55, Prush Gun, Krauser and Soul Drummer; slice 15D's Tumbler Rifle, from the
 	 * owner's Lockewood; and slice 15E's Geode Cutter, from the owner's Shard Culler, the first whose beam pierces armour.
+	 * The older guns follow-up gives 27 of the guns before slice 15 theirs, the Caisson Pistol's on its arc.
 	 */
-	public static final Map<String, Float> PIERCING = Map.of("vesper_rifle", 4.5F, "onrush_smg", 3.0F, "kreuzer_pistol", 1.0F, "psalm_smg", 1.0F, "jawbreaker", 4.5F, "hawker_rifle", 1.0F, "quill_rifle", 1.5F, "tumbler_rifle", 3.0F, "geode_cutter", 4.0F);
+	public static final Map<String, Float> PIERCING = Map.ofEntries(Map.entry("vesper_rifle", 4.5F), Map.entry("onrush_smg", 3.0F), Map.entry("kreuzer_pistol", 1.0F), Map.entry("psalm_smg", 1.0F), Map.entry("jawbreaker", 4.5F), Map.entry("hawker_rifle", 1.0F), Map.entry("quill_rifle", 1.5F), Map.entry("tumbler_rifle", 3.0F), Map.entry("geode_cutter", 4.0F), Map.entry("patchwork_carbine", 2.0F), Map.entry("warden_pistol", 1.0F), Map.entry("riveter_smg", 1.0F), Map.entry("longhorn_rifle", 3.5F), Map.entry("sapper_revolver", 2.5F), Map.entry("garrison_rifle", 2.0F), Map.entry("thresher", 1.0F), Map.entry("kestrel_rifle", 3.0F), Map.entry("caisson_pistol", 1.0F), Map.entry("highwayman", 2.5F), Map.entry("undertone_rifle", 6.5F), Map.entry("murmur_smg", 7.0F), Map.entry("reverb", 7.0F), Map.entry("cinder_repeater", 2.0F), Map.entry("ashfall_pistol", 2.0F), Map.entry("conductor_carbine", 2.5F), Map.entry("lament_rifle", 7.0F), Map.entry("ammonite_carbine", 2.0F), Map.entry("highball_rifle", 2.5F), Map.entry("flatboat_gun", 2.0F), Map.entry("millstone_rifle", 1.5F), Map.entry("holler_pistol", 5.0F), Map.entry("half_crown_revolver", 4.0F), Map.entry("holler_carbine", 5.0F), Map.entry("grange_carbine", 2.0F), Map.entry("sprocket_gun", 3.0F), Map.entry("old_grange_carbine", 2.5F));
 	/**
 	 * Slice 15D: a gun that fires a burst to a pull, {@code rounds} shots its {@link GunSpec#interval} apart, then waits
 	 * {@code rest} ticks more before the next pull fires ({@link #BURSTS}).
@@ -878,7 +879,10 @@ public final class JugcraftGuns {
 		return KNOCKBACK.getOrDefault(gun.name(), 0.0F);
 	}
 
-	/** How many points of armour this gun's bullets (or, slice 15E, its beam) pass through ({@link #PIERCING}); 0 for most. */
+	/**
+	 * How many points of armour this gun's bullets (or, slice 15E, its beam; the older guns follow-up, its arc) pass through
+	 * ({@link #PIERCING}); 0 for many.
+	 */
 	public static float piercing(GunItem gun) {
 		return PIERCING.getOrDefault(gun.name(), 0.0F);
 	}

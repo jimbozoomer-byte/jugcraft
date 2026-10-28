@@ -68,14 +68,16 @@ GUNS = {
     "patchwork_carbine": {
         "display": "Patchwork Carbine",
         "source": "makeshift_rifle",
-        "tooltip": "A stockless carbine patched from scrap. One shot each pull. Fires rifle rounds.",
+        "tooltip": "A stockless carbine patched from scrap. One shot each pull. Its shots pierce armour. Fires rifle "
+                   "rounds.",
         "damage": 6.0, "pellets": 1, "interval": 6, "auto": False, "capacity": 10,
         "reload": 48, "spread": (2.0, 0.25), "range": 96, "ammo": "rifle_round",
     },
     "thunderpipe": {
         "display": "Thunderpipe",
         "source": "boomstick",
-        "tooltip": "A sawn-off double barrel. Eight pellets a shot, loaded a shell at a time. Fires buckshot shells.",
+        "tooltip": "A sawn-off double barrel. Eight pellets a shot, loaded a shell at a time. Its shots knock back "
+                   "what they hit. Fires buckshot shells.",
         "damage": 2.5, "pellets": 8, "interval": 8, "auto": False, "capacity": 2,
         "reload": (5, 12, 13), "spread": (9.0, 6.0), "range": 24, "ammo": "buckshot_shell",
     },
@@ -83,22 +85,24 @@ GUNS = {
     "warden_pistol": {
         "display": "Warden Pistol",
         "source": "defender_pistol",
-        "tooltip": "An iron service pistol with a sliding breech, held in one hand. One shot each pull. Fires light rounds.",
+        "tooltip": "An iron service pistol with a sliding breech, held in one hand. One shot each pull. Its shots "
+                   "pierce armour. Fires light rounds.",
         "damage": 4.0, "pellets": 1, "interval": 5, "auto": False, "capacity": 12,
         "reload": 47, "spread": (2.5, 0.75), "range": 56, "ammo": "light_round",
     },
     "riveter_smg": {
         "display": "Riveter SMG",
         "source": "greaser_smg",
-        "tooltip": "An iron submachine gun that empties a long magazine in a hurry. Hold to fire. Fires light rounds.",
+        "tooltip": "An iron submachine gun that empties a long magazine in a hurry. Hold to fire. Its shots pierce "
+                   "armour. Fires light rounds.",
         "damage": 2.5, "pellets": 1, "interval": 3, "auto": True, "capacity": 30,
         "reload": 45, "spread": (3.0, 1.0), "range": 48, "ammo": "light_round",
     },
     "haymaker": {
         "display": "Haymaker",
         "source": "bruiser",
-        "tooltip": "A short pump shotgun, fired one-handed. Eight pellets a shot, loaded a shell at a time. Fires buckshot "
-                   "shells.",
+        "tooltip": "A short pump shotgun, fired one-handed. Eight pellets a shot, loaded a shell at a time. Its shots "
+                   "knock back what they hit. Fires buckshot shells.",
         "damage": 3.0, "pellets": 8, "interval": 14, "auto": False, "capacity": 5,
         "reload": (7, 11, 23), "spread": (7.0, 5.0), "range": 28, "ammo": "buckshot_shell",
     },
@@ -106,7 +110,8 @@ GUNS = {
     "longhorn_rifle": {
         "display": "Longhorn Rifle",
         "source": "marlin",
-        "tooltip": "A heavy lever-action rifle, worked between shots and loaded a round at a time. Fires rifle rounds.",
+        "tooltip": "A heavy lever-action rifle, worked between shots and loaded a round at a time. Its shots pierce "
+                   "armour. Fires rifle rounds.",
         "damage": 8.0, "pellets": 1, "interval": 13, "auto": False, "capacity": 6,
         "reload": (8, 11, 14), "spread": (1.5, 0.15), "range": 120, "ammo": "rifle_round",
     },
@@ -121,8 +126,8 @@ GUNS = {
     "coach_gun": {
         "display": "Coach Gun",
         "source": "callwell",
-        "tooltip": "An over-and-under shotgun that breaks open to load. Eight pellets a shot, two barrels. Fires "
-                   "buckshot shells.",
+        "tooltip": "An over-and-under shotgun that breaks open to load. Eight pellets a shot, two barrels. Its shots "
+                   "knock back what they hit. Fires buckshot shells.",
         "damage": 3.0, "pellets": 8, "interval": 8, "auto": False, "capacity": 2,
         "reload": (12, 13, 13), "spread": (6.0, 4.0), "range": 32, "ammo": "buckshot_shell",
     },
@@ -147,7 +152,7 @@ GUNS = {
         "display": "Bellmouth",
         "source": "blunderbuss",
         "tooltip": "A flintlock blunderbuss with a flared muzzle. Ten balls a shot at close range, then a long reload. "
-                   "Fires paper cartridges.",
+                   "Its shots knock back what they hit. Fires paper cartridges.",
         "damage": 2.5, "pellets": 10, "interval": 10, "auto": False, "capacity": 1,
         "reload": 78, "spread": (12.0, 9.0), "range": 20, "ammo": "paper_cartridge",
     },
@@ -156,7 +161,8 @@ GUNS = {
     "bulldog_pistol": {
         "display": "Bulldog Pistol",
         "source": "brawler",
-        "tooltip": "A one-handed hand cannon that breaks open to load its one heavy round. Fires rifle rounds.",
+        "tooltip": "A one-handed hand cannon that breaks open to load its one heavy round. Its shots knock back what "
+                   "they hit. Fires rifle rounds.",
         "damage": 11.0, "pellets": 1, "interval": 10, "auto": False, "capacity": 1,
         "reload": 45, "spread": (3.0, 1.0), "range": 56, "ammo": "rifle_round",
     },
@@ -170,7 +176,8 @@ GUNS = {
     "sapper_revolver": {
         "display": "Sapper Revolver",
         "source": "trenchur",
-        "tooltip": "A short revolver whose cylinder swings out to load a round at a time. Fires light rounds.",
+        "tooltip": "A short revolver whose cylinder swings out to load a round at a time. Its shots pierce armour. "
+                   "Fires light rounds.",
         "damage": 4.5, "pellets": 1, "interval": 6, "auto": False, "capacity": 6,
         "reload": (9, 12, 13), "spread": (2.5, 0.8), "range": 48, "ammo": "light_round",
     },
@@ -186,14 +193,16 @@ GUNS = {
     "garrison_rifle": {
         "display": "Garrison Rifle",
         "source": "stigg",
-        "tooltip": "A steel assault rifle with a curved magazine, firing for as long as the trigger is held. Fires rifle rounds.",
+        "tooltip": "A steel assault rifle with a curved magazine, firing for as long as the trigger is held. Its shots "
+                   "pierce armour. Fires rifle rounds.",
         "damage": 4.0, "pellets": 1, "interval": 3, "auto": True, "capacity": 30,
         "reload": 53, "spread": (3.0, 0.6), "range": 80, "ammo": "rifle_round",
     },
     "breacher": {
         "display": "Breacher",
         "source": "combat_shotgun",
-        "tooltip": "A pump shotgun fed from a box magazine, so quick to reload. Fires buckshot shells.",
+        "tooltip": "A pump shotgun fed from a box magazine, so quick to reload. Its shots knock back what they hit. "
+                   "Fires buckshot shells.",
         "damage": 3.0, "pellets": 8, "interval": 16, "auto": False, "capacity": 6,
         "reload": 52, "spread": (7.0, 5.0), "range": 28, "ammo": "buckshot_shell",
     },
@@ -219,7 +228,7 @@ GUNS = {
         "display": "Thresher",
         "source": "gattaler",
         "tooltip": "A drum-fed rotary gun. Hold the trigger: the barrels spin up, then it fires for as long as it is "
-                   "held. Fires rifle rounds.",
+                   "held. Its shots pierce armour. Fires rifle rounds.",
         "damage": 3.0, "pellets": 1, "interval": 2, "auto": True, "capacity": 60,
         "reload": 78, "spread": (4.0, 2.0), "range": 64, "ammo": "rifle_round", "spin_up": 15,
     },
@@ -285,7 +294,8 @@ GUNS = {
     "kestrel_rifle": {
         "display": "Kestrel Rifle",
         "source": "whistler",
-        "tooltip": "A copper-bright rifle loaded from the top with a clip of eight. Takes a scope. Fires rifle rounds.",
+        "tooltip": "A copper-bright rifle loaded from the top with a clip of eight. Takes a scope. Its shots pierce "
+                   "armour. Fires rifle rounds.",
         "damage": 9.0, "pellets": 1, "interval": 9, "auto": False, "capacity": 8,
         "reload": 55, "spread": (2.0, 0.15), "range": 128, "ammo": "rifle_round",
     },
@@ -296,7 +306,7 @@ GUNS = {
         "display": "Rattler Pistol",
         "source": "auvtomag",
         "tooltip": "A steel machine pistol, held in one hand, that fires for as long as the trigger is held. Takes a "
-                   "scope. Fires light rounds.",
+                   "scope. Its shots knock back what they hit. Fires light rounds.",
         "damage": 3.0, "pellets": 1, "interval": 3, "auto": True, "capacity": 20,
         "reload": 48, "spread": (4.0, 2.0), "range": 48, "ammo": "light_round",
     },
@@ -304,7 +314,7 @@ GUNS = {
         "display": "Bronco SMG",
         "source": "jr_wristbreaker",
         "tooltip": "A short submachine gun with a broad barrel shroud, fired in one hand: it bucks hard. Hold to fire. "
-                   "Fires light rounds.",
+                   "Its shots knock back what they hit. Fires light rounds.",
         "damage": 3.5, "pellets": 1, "interval": 3, "auto": True, "capacity": 25,
         "reload": 53, "spread": (5.0, 2.5), "range": 40, "ammo": "light_round",
     },
@@ -339,8 +349,9 @@ GUNS = {
     "caisson_pistol": {
         "display": "Caisson Pistol",
         "source": "hyperbaria",
-        "tooltip": "A pressure pistol held in one hand: its bolt leaps from its mark to two more creatures close "
-                   "by, and may make them bleed. The tall tank on top is changed to reload. Runs on Energy Cells.",
+        "tooltip": "A pressure pistol held in one hand: its bolt leaps from its mark to two more creatures close by, "
+                   "and may make them bleed. The tall tank on top is changed to reload. Its bolt pierces armour. Runs "
+                   "on Energy Cells.",
         "damage": 5.0, "pellets": 1, "interval": 8, "auto": False, "capacity": 10,
         "reload": 57, "spread": (6.0, 3.0), "range": 24, "ammo": "energy_cell", "shot": "arc", "charge": 300,
     },
@@ -352,7 +363,7 @@ GUNS = {
         "display": "Sledge",
         "source": "killer_23",
         "tooltip": "A heavy pump shotgun with a bird's-head grip: eight heavy pellets a shot, four shells in its tube. "
-                   "Loaded a shell at a time. Fires buckshot shells.",
+                   "Loaded a shell at a time. Its shots knock back what they hit. Fires buckshot shells.",
         "damage": 4.0, "pellets": 8, "interval": 20, "auto": False, "capacity": 4,
         "reload": (8, 14, 14), "spread": (8.0, 6.0), "range": 24, "ammo": "buckshot_shell",
     },
@@ -360,7 +371,8 @@ GUNS = {
         "display": "Highwayman",
         "source": "turnpike",
         "tooltip": "A long shotgun with a sight, its bolt worked after every shot: aimed, its pellets keep together "
-                   "further than most. Takes a scope. Loaded a shell at a time. Fires buckshot shells.",
+                   "further than most. Takes a scope. Loaded a shell at a time. Its shots pierce armour. Fires "
+                   "buckshot shells.",
         "damage": 3.0, "pellets": 8, "interval": 20, "auto": False, "capacity": 7,
         "reload": (18, 13, 16), "spread": (6.0, 2.5), "range": 40, "ammo": "buckshot_shell",
     },
@@ -438,16 +450,16 @@ GUNS = {
     "mule": {
         "display": "Mule",
         "source": "super_shotgun",
-        "tooltip": "A sawn-off double-barrel that breaks open to load both shells at once. Ten pellets a barrel. Fires "
-                   "buckshot shells.",
+        "tooltip": "A sawn-off double-barrel that breaks open to load both shells at once. Ten pellets a barrel. Its "
+                   "shots knock back what they hit. Fires buckshot shells.",
         "damage": 2.5, "pellets": 10, "interval": 8, "auto": False, "capacity": 2,
         "reload": 35, "spread": (9.0, 7.0), "range": 24, "ammo": "buckshot_shell",
     },
     "fowler": {
         "display": "Fowler",
         "source": "doublet",
-        "tooltip": "A double-barrelled flintlock, a ball rammed down each barrel. Eight balls a shot, two shots, then a "
-                   "long reload. Fires paper cartridges.",
+        "tooltip": "A double-barrelled flintlock, a ball rammed down each barrel. Eight balls a shot, two shots, then "
+                   "a long reload. Its shots knock back what they hit. Fires paper cartridges.",
         "damage": 3.0, "pellets": 8, "interval": 10, "auto": False, "capacity": 2,
         "reload": 97, "spread": (8.0, 5.0), "range": 28, "ammo": "paper_cartridge",
     },
@@ -455,7 +467,7 @@ GUNS = {
         "display": "Culverin",
         "source": "handcannon",
         "tooltip": "A stubby hand cannon, fired one-handed and loaded down its muzzle: a fist of heavy balls at close "
-                   "range, then a long reload. Fires paper cartridges.",
+                   "range, then a long reload. Its shots knock back what they hit. Fires paper cartridges.",
         "damage": 5.0, "pellets": 5, "interval": 20, "auto": False, "capacity": 1,
         "reload": 74, "spread": (9.0, 7.0), "range": 18, "ammo": "paper_cartridge",
     },
@@ -464,8 +476,8 @@ GUNS = {
     "undertone_rifle": {
         "display": "Undertone Rifle",
         "source": "sculk_resonator",
-        "tooltip": "A sculk-grown rifle, its tendrils swaying as it is handled: one hard shot each pull from a magazine of "
-                   "twelve. Fires rifle rounds.",
+        "tooltip": "A sculk-grown rifle, its tendrils swaying as it is handled: one hard shot each pull from a "
+                   "magazine of twelve. Its shots pierce armour. Fires rifle rounds.",
         "damage": 9.0, "pellets": 1, "interval": 7, "auto": False, "capacity": 12,
         "reload": 48, "spread": (2.5, 0.3), "range": 96, "ammo": "rifle_round",
     },
@@ -473,15 +485,15 @@ GUNS = {
         "display": "Murmur SMG",
         "source": "whispers",
         "tooltip": "A sculk-grown machine gun: ten shots a second for as long as the trigger is held, from a magazine "
-                   "that empties as fast. Fires light rounds.",
+                   "that empties as fast. Its shots pierce armour. Fires light rounds.",
         "damage": 3.0, "pellets": 1, "interval": 2, "auto": True, "capacity": 24,
         "reload": 48, "spread": (3.5, 1.5), "range": 48, "ammo": "light_round",
     },
     "reverb": {
         "display": "Reverb",
         "source": "echoes_2",
-        "tooltip": "A sculk-grown double-barrel whose barrels turn aside to take a shell at a time. Ten pellets a barrel. "
-                   "Fires buckshot shells.",
+        "tooltip": "A sculk-grown double-barrel whose barrels turn aside to take a shell at a time. Ten pellets a "
+                   "barrel. Its shots knock back what they hit and pierce armour. Fires buckshot shells.",
         "damage": 3.5, "pellets": 10, "interval": 8, "auto": False, "capacity": 2,
         "reload": (16, 17, 19), "spread": (7.0, 5.0), "range": 32, "ammo": "buckshot_shell",
     },
@@ -490,8 +502,8 @@ GUNS = {
     "tusker": {
         "display": "Tusker",
         "source": "mangalitsa",
-        "tooltip": "A Nether-forged pump shotgun, its pump worked after every shot: eight pellets that set what they hit "
-                   "alight. Loaded a shell at a time. Fires buckshot shells.",
+        "tooltip": "A Nether-forged pump shotgun, its pump worked after every shot: eight pellets that set what they "
+                   "hit alight. Loaded a shell at a time. Its shots knock back what they hit. Fires buckshot shells.",
         "damage": 3.0, "pellets": 8, "interval": 14, "auto": False, "capacity": 6,
         "reload": (12, 12, 13), "spread": (6.5, 4.5), "range": 28, "ammo": "buckshot_shell",
     },
@@ -499,7 +511,7 @@ GUNS = {
         "display": "Cinder Repeater",
         "source": "vulcanic_repeater",
         "tooltip": "A Nether-forged repeater, firing for as long as the trigger is held; its shots set what they hit "
-                   "alight. Fires light rounds.",
+                   "alight. Its shots pierce armour. Fires light rounds.",
         "damage": 3.5, "pellets": 1, "interval": 3, "auto": True, "capacity": 20,
         "reload": 48, "spread": (3.0, 1.2), "range": 48, "ammo": "light_round",
     },
@@ -517,8 +529,8 @@ GUNS = {
     "ashfall_pistol": {
         "display": "Ashfall Pistol",
         "source": "pyroclastic_flow",
-        "tooltip": "A Nether-forged pistol held in one hand, the tank under its barrel changed to reload: heavy shots that "
-                   "set what they hit alight. Fires light rounds.",
+        "tooltip": "A Nether-forged pistol held in one hand, the tank under its barrel changed to reload: heavy shots "
+                   "that set what they hit alight. Its shots pierce armour. Fires light rounds.",
         "damage": 6.0, "pellets": 1, "interval": 8, "auto": False, "capacity": 8,
         "reload": 47, "spread": (2.5, 0.8), "range": 56, "ammo": "light_round",
     },
@@ -533,8 +545,8 @@ GUNS = {
     "crackling": {
         "display": "Crackling",
         "source": "ribs_glory",
-        "tooltip": "A long Nether-forged pump shotgun in gold: six heavy pellets that keep together and set what they hit "
-                   "alight. Loaded a shell at a time. Fires buckshot shells.",
+        "tooltip": "A long Nether-forged pump shotgun in gold: six heavy pellets that keep together and set what they "
+                   "hit alight. Loaded a shell at a time. Its shots knock back what they hit. Fires buckshot shells.",
         "damage": 4.0, "pellets": 6, "interval": 20, "auto": False, "capacity": 5,
         "reload": (6, 10, 11), "spread": (5.0, 3.0), "range": 36, "ammo": "buckshot_shell",
     },
@@ -577,8 +589,8 @@ GUNS = {
     "conductor_carbine": {
         "display": "Conductor Carbine",
         "source": "llr_director",
-        "tooltip": "A copper slide-action carbine, its fore-end worked after every shot: one hard round each pull. Fires "
-                   "rifle rounds.",
+        "tooltip": "A copper slide-action carbine, its fore-end worked after every shot: one hard round each pull. Its "
+                   "shots pierce armour. Fires rifle rounds.",
         "damage": 8.0, "pellets": 1, "interval": 15, "auto": False, "capacity": 8,
         "reload": 49, "spread": (2.0, 0.3), "range": 96, "ammo": "rifle_round",
     },
@@ -604,8 +616,8 @@ GUNS = {
     "goshawk_revolver": {
         "display": "Goshawk Revolver",
         "source": "ultra_knight_hawk",
-        "tooltip": "A heavy iron revolver held in one hand, its cylinder swung out to load a round at a time. Fires "
-                   "rifle rounds.",
+        "tooltip": "A heavy iron revolver held in one hand, its cylinder swung out to load a round at a time. Its "
+                   "shots knock back what they hit. Fires rifle rounds.",
         "damage": 9.0, "pellets": 1, "interval": 10, "auto": False, "capacity": 6,
         "reload": (10, 20, 14), "spread": (2.0, 0.6), "range": 64, "ammo": "rifle_round",
     },
@@ -613,8 +625,8 @@ GUNS = {
         "display": "Lament Rifle",
         "source": "forlorn_hope",
         "tooltip": "A sculk-grown bolt-action rifle, its bolt worked after every shot: one heavy, true shot at long "
-                   "range from a magazine of five, and what it hits may lose its sight for a while. Fires rifle "
-                   "rounds.",
+                   "range from a magazine of five, and what it hits may lose its sight for a while. Its shots pierce "
+                   "armour. Fires rifle rounds.",
         "damage": 16.0, "pellets": 1, "interval": 19, "auto": False, "capacity": 5,
         "reload": 53, "spread": (2.0, 0.05), "range": 160, "ammo": "rifle_round",
     },
@@ -640,8 +652,8 @@ GUNS = {
     "ammonite_carbine": {
         "display": "Ammonite Carbine",
         "source": "spirulida",
-        "tooltip": "A carbine fed from a long curved magazine, its barrel caged in copper bands. One shot each pull. Fires "
-                   "rifle rounds.",
+        "tooltip": "A carbine fed from a long curved magazine, its barrel caged in copper bands. One shot each pull. "
+                   "Its shots pierce armour. Fires rifle rounds.",
         "damage": 5.0, "pellets": 1, "interval": 8, "auto": False, "capacity": 16,
         "reload": 60, "spread": (2.5, 0.4), "range": 88, "ammo": "rifle_round",
     },
@@ -659,8 +671,8 @@ GUNS = {
     "waystation_shotgun": {
         "display": "Waystation Shotgun",
         "source": "callwell_terminal",
-        "tooltip": "A lever-action shotgun with a drum under its action, loaded a shell at a time. Eight pellets a shot. "
-                   "Fires buckshot shells.",
+        "tooltip": "A lever-action shotgun with a drum under its action, loaded a shell at a time. Eight pellets a "
+                   "shot. Its shots knock back what they hit. Fires buckshot shells.",
         "damage": 3.0, "pellets": 8, "interval": 17, "auto": False, "capacity": 8,
         "reload": (9, 13, 18), "spread": (6.5, 4.5), "range": 28, "ammo": "buckshot_shell",
     },
@@ -668,7 +680,7 @@ GUNS = {
         "display": "Highball Rifle",
         "source": "saketini",
         "tooltip": "A single-shot rifle whose barrel swings aside to take each round: one heavy, true shot, quickly "
-                   "reloaded. Fires rifle rounds.",
+                   "reloaded. Its shots pierce armour. Fires rifle rounds.",
         "damage": 15.0, "pellets": 1, "interval": 13, "auto": False, "capacity": 1,
         "reload": 33, "spread": (2.0, 0.1), "range": 128, "ammo": "rifle_round",
     },
@@ -676,8 +688,9 @@ GUNS = {
     "flatboat_gun": {
         "display": "Flatboat Gun",
         "source": "big_bore",
-        "tooltip": "A punt gun, its long barrel loaded through a chamber that swings out to the side: one great blast of "
-                   "sixteen pellets, then a long reload. Fires buckshot shells.",
+        "tooltip": "A punt gun, its long barrel loaded through a chamber that swings out to the side: one great blast "
+                   "of sixteen pellets, then a long reload. Its shots knock back what they hit and pierce armour. "
+                   "Fires buckshot shells.",
         "damage": 3.0, "pellets": 16, "interval": 13, "auto": False, "capacity": 1,
         "reload": 72, "spread": (8.0, 6.0), "range": 36, "ammo": "buckshot_shell",
     },
@@ -692,8 +705,8 @@ GUNS = {
     "millstone_rifle": {
         "display": "Millstone Rifle",
         "source": "winnie_millend",
-        "tooltip": "A heavy lever-action rifle, slower to work than the Drover Rifle and harder hitting, loaded a round "
-                   "at a time. Fires rifle rounds.",
+        "tooltip": "A heavy lever-action rifle, slower to work than the Drover Rifle and harder hitting, loaded a "
+                   "round at a time. Its shots pierce armour. Fires rifle rounds.",
         "damage": 8.5, "pellets": 1, "interval": 15, "auto": False, "capacity": 8,
         "reload": (8, 13, 17), "spread": (2.0, 0.25), "range": 108, "ammo": "rifle_round",
     },
@@ -732,24 +745,25 @@ GUNS = {
     "holler_pistol": {
         "display": "Holler Pistol",
         "source": "howler",
-        "tooltip": "A heavy pistol held in both hands, fed from a box magazine ahead of its trigger and its bolt worked "
-                   "after each shot. Fires rifle rounds.",
+        "tooltip": "A heavy pistol held in both hands, fed from a box magazine ahead of its trigger and its bolt "
+                   "worked after each shot. Its shots knock back what they hit and pierce armour. Fires rifle rounds.",
         "damage": 12.0, "pellets": 1, "interval": 22, "auto": False, "capacity": 10,
         "reload": 58, "spread": (3.0, 0.6), "range": 80, "ammo": "rifle_round",
     },
     "minuet_pistol": {
         "display": "Minuet Pistol",
         "source": "m22_waltz",
-        "tooltip": "A light target pistol held in one hand, quick to fire and, aimed, the truest of them. Fires light "
-                   "rounds.",
+        "tooltip": "A light target pistol held in one hand, quick to fire and, aimed, the truest of them. Its shots "
+                   "knock back what they hit. Fires light rounds.",
         "damage": 3.5, "pellets": 1, "interval": 5, "auto": False, "capacity": 10,
         "reload": 48, "spread": (2.0, 0.25), "range": 64, "ammo": "light_round",
     },
     "half_crown_revolver": {
         "display": "Half-Crown Revolver",
         "source": "osgood_50",
-        "tooltip": "A break-top revolver held in one hand, its barrel tipped down to load the cylinder a round at a time. "
-                   "With a stock fitted it is held in both hands, as a carbine. Fires rifle rounds.",
+        "tooltip": "A break-top revolver held in one hand, its barrel tipped down to load the cylinder a round at a "
+                   "time. With a stock fitted it is held in both hands, as a carbine. Its shots knock back what they "
+                   "hit and pierce armour. Fires rifle rounds.",
         "damage": 9.0, "pellets": 1, "interval": 9, "auto": False, "capacity": 6,
         "reload": (9, 13, 14), "spread": (2.5, 0.6), "range": 64, "ammo": "rifle_round",
     },
@@ -760,7 +774,8 @@ GUNS = {
         "display": "Holler Carbine",
         "source": "howler_conversion",
         "tooltip": "The Holler Pistol made over into a carbine: a long shrouded barrel, and a bolt the shot works "
-                   "itself, so it fires quicker. Held in both hands. Fires rifle rounds.",
+                   "itself, so it fires quicker. Held in both hands. Its shots knock back what they hit and pierce "
+                   "armour. Fires rifle rounds.",
         "damage": 9.0, "pellets": 1, "interval": 10, "auto": False, "capacity": 10,
         "reload": 58, "spread": (2.5, 0.4), "range": 96, "ammo": "rifle_round",
     },
@@ -775,8 +790,8 @@ GUNS = {
     "grange_carbine": {
         "display": "Grange Carbine",
         "source": "grandle",
-        "tooltip": "A brass-fitted carbine held in both hands, fed from a box magazine under its receiver. Fires rifle "
-                   "rounds.",
+        "tooltip": "A brass-fitted carbine held in both hands, fed from a box magazine under its receiver. Its shots "
+                   "pierce armour. Fires rifle rounds.",
         "damage": 7.0, "pellets": 1, "interval": 7, "auto": False, "capacity": 12,
         "reload": 45, "spread": (2.5, 0.35), "range": 96, "ammo": "rifle_round",
     },
@@ -787,7 +802,7 @@ GUNS = {
         "display": "Sprocket Gun",
         "source": "cogloader",
         "tooltip": "An automatic rifle fed from a pan magazine on its top, wound like a sprocket after each change. "
-                   "Fires rifle rounds.",
+                   "Its shots pierce armour. Fires rifle rounds.",
         "damage": 4.5, "pellets": 1, "interval": 4, "auto": True, "capacity": 40,
         "reload": 63, "spread": (4.0, 1.5), "range": 80, "ammo": "rifle_round",
     },
@@ -795,15 +810,15 @@ GUNS = {
         "display": "Navvy Shotgun",
         "source": "jackhammer",
         "tooltip": "An automatic shotgun fed from a box magazine of eight shells: it fires as long as the trigger is "
-                   "held. Fires buckshot shells.",
+                   "held. Its shots knock back what they hit. Fires buckshot shells.",
         "damage": 2.5, "pellets": 6, "interval": 8, "auto": True, "capacity": 8,
         "reload": 52, "spread": (6.0, 4.0), "range": 24, "ammo": "buckshot_shell",
     },
     "freeholder_rifle": {
         "display": "Freeholder Rifle",
         "source": "libertas",
-        "tooltip": "A quick-firing rifle with glowing coils along its barrel, fed from a magazine of twenty. Fires "
-                   "rifle rounds.",
+        "tooltip": "A quick-firing rifle with glowing coils along its barrel, fed from a magazine of twenty. Its shots "
+                   "knock back what they hit. Fires rifle rounds.",
         "damage": 6.0, "pellets": 1, "interval": 5, "auto": False, "capacity": 20,
         "reload": 53, "spread": (2.5, 0.3), "range": 104, "ammo": "rifle_round",
     },
@@ -863,8 +878,9 @@ GUNS = {
     "old_grange_carbine": {
         "display": "Old Grange Carbine",
         "source": "grandle_og",
-        "tooltip": "The Grange Carbine's older make: a longer barrel, loaded from the top with a stripper clip of seven. "
-                   "Slower to fire, harder hitting and further reaching. Held in both hands. Fires rifle rounds.",
+        "tooltip": "The Grange Carbine's older make: a longer barrel, loaded from the top with a stripper clip of "
+                   "seven. Slower to fire, harder hitting and further reaching. Held in both hands. Its shots pierce "
+                   "armour. Fires rifle rounds.",
         "damage": 8.0, "pellets": 1, "interval": 9, "auto": False, "capacity": 7,
         "reload": 39, "spread": (2.0, 0.25), "range": 112, "ammo": "rifle_round",
     },
@@ -4357,12 +4373,30 @@ SILENCED = ("gallant_rifle", "quill_rifle")
 # 15B's other guns the owner's armour piercing for them: the MAS 55's (4.5) to the Vesper Rifle, the Prush Gun's (3.0)
 # to the Onrush SMG, and the Krauser's and the Soul Drummer's (1.0 each) to the Kreuzer Pistol and the Psalm SMG.
 # Slice 15D gives the Drill Conversion's knockback (0.65) to the Auger Shotgun and the Lockewood's armour piercing (3.0)
-# to the Tumbler Rifle.
-KNOCKBACK = {"jawbreaker": 0.6, "impetus_shotgun": 0.65, "auger_shotgun": 0.65}
+# to the Tumbler Rifle. The older guns follow-up gives the guns before slice 15 the owner's numbers for them: 27 pierce
+# armour and 24 knock back, 5 both. The Caisson Pistol's piercing is on its arc (an arc may pierce since then). The
+# owner's knockback for the Kiln Gun (the Stoker's flame), the Plasmabuss (the Glowmouth's arc) and the Fencer Thumper
+# (the Fencepost Thumper's grenades) is left out: a flame and an arc push nothing here, and a grenade is not a bullet.
+# The Big Bore's knockback is 8, the strongest there may be: the Flatboat Gun throws what it hits.
+KNOCKBACK = {"jawbreaker": 0.6, "impetus_shotgun": 0.65, "auger_shotgun": 0.65,
+             # The older guns follow-up: the owner's knockbackStrength for the guns before slice 15 that fire bullets.
+             "thunderpipe": 0.75, "haymaker": 0.6, "coach_gun": 0.75, "bellmouth": 0.8, "bulldog_pistol": 0.85,
+             "breacher": 0.65, "rattler_pistol": 0.8, "bronco_smg": 0.85, "sledge": 0.65, "mule": 0.65, "fowler": 0.8,
+             "culverin": 0.8, "reverb": 0.65, "tusker": 0.65, "crackling": 0.65, "goshawk_revolver": 3.0,
+             "waystation_shotgun": 0.7, "flatboat_gun": 8.0, "holler_pistol": 0.65, "minuet_pistol": 0.55,
+             "half_crown_revolver": 0.55, "holler_carbine": 0.65, "navvy_shotgun": 0.85, "freeholder_rifle": 0.4}
 PIERCING = {"vesper_rifle": 4.5, "onrush_smg": 3.0, "kreuzer_pistol": 1.0, "psalm_smg": 1.0, "jawbreaker": 4.5,
             "hawker_rifle": 1.0, "quill_rifle": 1.5, "tumbler_rifle": 3.0,
             # Slice 15E: the Shard Culler's "armorPen" (4).
-            "geode_cutter": 4.0}
+            "geode_cutter": 4.0,
+            # The older guns follow-up: the owner's armorPen for the guns before slice 15 (the Caisson Pistol's on its arc).
+            "patchwork_carbine": 2.0, "warden_pistol": 1.0, "riveter_smg": 1.0, "longhorn_rifle": 3.5,
+            "sapper_revolver": 2.5, "garrison_rifle": 2.0, "thresher": 1.0, "kestrel_rifle": 3.0, "caisson_pistol": 1.0,
+            "highwayman": 2.5, "undertone_rifle": 6.5, "murmur_smg": 7.0, "reverb": 7.0, "cinder_repeater": 2.0,
+            "ashfall_pistol": 2.0, "conductor_carbine": 2.5, "lament_rifle": 7.0, "ammonite_carbine": 2.0,
+            "highball_rifle": 2.5, "flatboat_gun": 2.0, "millstone_rifle": 1.5, "holler_pistol": 5.0,
+            "half_crown_revolver": 4.0, "holler_carbine": 5.0, "grange_carbine": 2.0, "sprocket_gun": 3.0,
+            "old_grange_carbine": 2.5}
 
 # Slice 15D: the guns that fire a burst to a pull, (rounds, rest): that many shots their interval apart, then a rest of
 # that many ticks more before the next pull fires (JugcraftGuns.BURSTS; the client fires the burst, the server's trigger

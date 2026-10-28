@@ -8,6 +8,12 @@ Every change to Jugcraft, newest first, grouped by pull request. For what each t
 
 No numbered release yet. Entries on feature branches remain proposed until their pull requests merge.
 
+### Unmerged: Guns, armour piercing and knockback for the older guns
+- 46 of the guns built before slice 15 take the owner's armour piercing, knockback or both: 27 pierce armour (up to 7 points, the Lament Rifle's, the Murmur SMG's and the Reverb's) and 24 knock back what they hit further. Against a creature without armour their damage is as before.
+- The **Flatboat Gun** takes the owner's knockback of 8 and throws what it hits; the **Caisson Pistol**'s arc now pierces a point of armour.
+- Their tooltips say so. The owner's knockback for the Stoker, the Glowmouth and the Fencepost Thumper is left out, as a flame, an arc and a grenade push nothing here.
+- Record: [guns.md, armour piercing and knockback for the older guns](docs/features/guns.md#follow-up-armour-piercing-and-knockback-for-the-older-guns).
+
 ### Unmerged: Guns, End-gun levitation
 - The End guns now lift what they hit at the owner's numbers: the **Chitin SMG** and the **Hermit Rifle** 30% of hits and the **Borer** 23%, each for 5 s. Before, every hit lifted it for a second. A lifted creature rises about four blocks and takes a little fall damage coming down.
 - Their tooltips say their shots *may* make what they hit float.

@@ -1852,16 +1852,18 @@ def check_guns():
     for gun in guns.SILENCED:
         if gun not in guns.GUNS or any(guns.ATTACHMENTS[kind]["slot"] == "barrel" for kind in guns.fits(gun)):
             err(f"tools/guns.py SILENCED names {gun}, which is not a gun, or takes a barrel attachment")
-    # Heavy bullets: how much further they knock back, and how many points of armour they (or, from slice 15E, a beam)
-    # pass through.
-    for name, table, shots in (("KNOCKBACK", guns.KNOCKBACK, ("bullet",)), ("PIERCING", guns.PIERCING, ("bullet", "beam"))):
-        entries = ", ".join(f'"{gun}", {value}F' for gun, value in table.items())
-        if f"{name} = Map.of({entries});" not in java:
-            err(f"JugcraftGuns.{name} differs from tools/guns.py: expected Map.of({entries})")
+    # Heavy bullets: how much further they knock back, and how many points of armour they (or, from slice 15E, a beam;
+    # from the older guns follow-up, an arc) pass through.
+    for name, table, shots in (("KNOCKBACK", guns.KNOCKBACK, ("bullet",)), ("PIERCING", guns.PIERCING, ("bullet", "beam", "arc"))):
+        entries = ", ".join(f'Map.entry("{gun}", {value}F)' for gun, value in table.items())
+        if f"{name} = Map.ofEntries({entries});" not in java:
+            err(f"JugcraftGuns.{name} differs from tools/guns.py: expected Map.ofEntries({entries})")
         for gun, value in table.items():
             if gun not in guns.GUNS or guns.GUNS[gun].get("shot", "bullet") not in shots or not 0 < value <= 8:
                 err(f"tools/guns.py {name} names {gun}, which is not a gun that fires {' or '.join(shots)}s, or gives it "
                     f"{value} (more than 0, at most 8)")
+    if any(guns.GUNS[gun].get("shot") == "arc" for gun in guns.PIERCING) and "pierced(foe, damage, pierce)" not in shots_java:
+        err("tools/guns.py PIERCING names an arc gun, but GunShots.arc does not pass its hits through pierced()")
     # The darts-and-bleeding follow-up: how a dart flies, how bleeding hurts, and which guns' hits make a creature bleed.
     for line in (f"DART_SPEED = {guns.DART_SPEED};", f"DART_DROP = {guns.DART_DROP};", f"BLEED_TICKS = {guns.BLEED_TICKS};",
                  f"BLEED_DAMAGE = {guns.BLEED_DAMAGE}F;", f'DART = "dart";'):
