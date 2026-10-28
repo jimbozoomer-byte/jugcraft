@@ -238,6 +238,7 @@ Local checks run on this branch, and their results:
   - `python3 tools/check_icon_maps.py`: PASS (no new map; the ghost train's item is 3D).
   - `javac` scan of the new and changed Java for syntax errors: none. The full compile runs in CI.
   - CI's first run failed to compile the game tests: the new test named the minecart's type `EntityType.MINECART`, which this platform has as `EntityTypes.MINECART`, as the other tests name it. The javac scan checks syntax only, so it could not catch this.
+  - Its next run compiled and ran 3,145 game tests; one failed, the ghost train's: on tick 6 its doors were not standing open for the cart (`A minecart in the IN doorway opens its doors, the OUT doors staying shut`). The log gives nothing more. The test had set its cart down by the doorway block's own position; it now sets it down on the rail at the doorway's middle, a little above it, as the booster rail's passing test does, and looks after two of the train's looks (tick 9) rather than one. Should it fail again, its message says where the cart is, how many carts the train sees by its IN doorway, its doors, whether it is whole, and when its watch last saw a cart. The cause is not yet confirmed.
 
 `HauntedMidwayGameTests` (run in CI):
 - **The cotton-candy cart spins sugar into candy**:
