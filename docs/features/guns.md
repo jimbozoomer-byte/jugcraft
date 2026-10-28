@@ -6497,6 +6497,7 @@ Slice 9E's files: the guns' tactical grip parts and the Laser Sight's textures m
     - `kicksAreTheOwners`: the table is the owner's 27; the Kreuzer Pistol has none.
     - `shotsPushTheirShooterBack`: the Impetus Shotgun's shot at a pig three blocks off pushes its shooter back at 0.25 blocks a tick times the level share of their look, and no other way; a Kreuzer Pistol's shot leaves its shooter as they were.
     - `kickTopsUpAndNeverLifts`: a push of 0.8 from standing moves its shooter 0.8 back; another of 0.8 and one of 0.3 at once add nothing; looking straight down there is no push, and looking 60 degrees down half; half knockback resistance halves it.
+- **Guns that push their shooter back, CI on the first push (run 40620044129, 28 October 2026):** the server game tests ran 2992; one failed, `kickTopsUpAndNeverLifts`. Looking 60 degrees down, the push was 1.0001 blocks a tick back, not 1.0 within a ten-thousandth: the game's look comes from its table of sines, a little off the true half. The push was right; the test now holds it to the look's own level share, and that share to a half within a thousandth.
 - **Not run:** the client by hand, a two-client dedicated server, and play.
 
 ## World and event applicability

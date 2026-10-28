@@ -84,8 +84,13 @@ public class RecoilPushGameTests {
 		helper.assertTrue(player.getDeltaMovement().lengthSqr() < 1.0E-12, "A shot straight down moved its shooter " + player.getDeltaMovement());
 		player.setXRot(60.0F);
 		GunShots.kick(player, 2.0F);
-		helper.assertTrue(Math.abs(player.getDeltaMovement().z + 1.0) < 1.0E-4 && Math.abs(player.getDeltaMovement().y) < 1.0E-12,
-				"A shot looking 60 degrees down moved its shooter " + player.getDeltaMovement() + ", not 1.0 back");
+		// The game's look comes from its table of sines, a ten-thousandth or so off the true half: the push is held to the
+		// look's own level share, and that share to a half.
+		Vec3 look = player.getLookAngle();
+		double share = Math.sqrt(look.x * look.x + look.z * look.z);
+		helper.assertTrue(Math.abs(share - 0.5) < 1.0E-3 && Math.abs(player.getDeltaMovement().z + 2.0 * share) < 1.0E-6
+				&& Math.abs(player.getDeltaMovement().y) < 1.0E-12, "A shot looking 60 degrees down (level share " + share
+						+ ") moved its shooter " + player.getDeltaMovement() + ", not twice that back");
 		player.setDeltaMovement(Vec3.ZERO);
 		player.setXRot(0.0F);
 		player.getAttribute(Attributes.KNOCKBACK_RESISTANCE).setBaseValue(0.5);
