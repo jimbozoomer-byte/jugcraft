@@ -907,7 +907,7 @@ The third of the gun sets the owner chose on 10 October 2026: three more energy 
 - **Seam Cutter:** two copper ingots (its copper body) and an amethyst shard (its lens) over a steel ingot, an advanced circuit and a brass ingot.
 - **Caisson Pistol:** a lightning rod (its arc's emitter) and two steel ingots over an advanced circuit and a brass ingot.
 
-**How they fire:** as slice 8D's (above): the beam passes through every creature in its line that the shooter may strike and stops at the first block; the arc leaps from the creature nearest the aim within the cone to the nearest within 4 blocks, twice, each taking 60% of the damage before it. Neither touches a block. Each shot is `jugcraft:zap` damage, which pushes nothing back and counts every shot, so each of the Seam Cutter's ten a second lands.
+**How they fire:** as slice 8D's (above): the beam passes through every creature in its line that the shooter may strike and stops at the first block; the arc leaps from the creature nearest the aim within the cone to the nearest within 4 blocks, twice, each taking 60% of the damage before it. Neither touches a block (until the [beam-mining follow-up](#follow-up-beams-that-mine), which lets the Seam Cutter's beam cut the block it ends at). Each shot is `jugcraft:zap` damage, which pushes nothing back and counts every shot, so each of the Seam Cutter's ten a second lands.
 
 **What you see:** the owner's animations.
 - **Spikedriver:** each shot drives the rings at the back of its right side back and the tip of its muzzle recoils. To reload, the magazine swings down and out of its left side and a new one swings in under the left hand; then the left hand takes the lever on its left side and swings it back and round, 145°, to charge the rails, and returns it.
@@ -954,7 +954,7 @@ The third of the gun sets the owner chose on 10 October 2026: three more energy 
 **Save compatibility:** new items `jugcraft:spikedriver`, `seam_cutter` and `caisson_pistol`; nothing saved changes. `guns.enabled=false` or `machines.enabled=false` turns their recipes off; the items stay registered.
 
 **Known limits:**
-- **The Seam Cutter cuts no blocks.** The owner's gun is a mining laser, but no beam touches a block (slice 8D's rule). Mining with it would want its own design: protected land, drops and tool tiers.
+- **The Seam Cutter cut no blocks** in this slice. The owner's gun is a mining laser, but no beam touched a block (slice 8D's rule). Mining wanted its own design (protected land, drops and tool tiers), which the [beam-mining follow-up](#follow-up-beams-that-mine) gives it.
 - **The Caisson Pistol's inspection** brings the left hand to its bolt near the eye, and in the preview the left sleeve covers the right third of the view for about a second and a half. A search over the arm's direction found none that keeps it much smaller.
 - **Not played:** none of it has been played yet. The cones, the JE costs and the Seam Cutter's rate want play to set.
 
@@ -1783,7 +1783,7 @@ The reload times are the owner's animations'.
 - **Borer:** three steel ingots over a lever between two shulker shells, over a purpur block.
 
 **How they fire:** as the other bullet guns: each bullet goes from the eye along the look, strayed by the spread, to the first creature or block in its way. A magazine loads at the end of its reload.
-- **Float:** each creature their bullets hurt, except the Yeti King and his whelps, who refuse all Levitation ([yeti-king.md](yeti-king.md)), floats for 1 second (`GunShots.LIFT_TICKS`, 20 ticks): the game's own Levitation at its first level, as a shulker's bullet gives it (a shulker's lasts 10 seconds). It rises about three quarters of a block in that second. Each hit starts it again, so under steady fire it goes on rising, nearly a block a second. When it ends the creature falls, and a fall of more than 3 blocks hurts it, as any fall does. A longer spell of Levitation already on it is kept.
+- **Float:** in this slice, each creature their bullets hurt, except the Yeti King and his whelps, who refuse all Levitation ([yeti-king.md](yeti-king.md)), floated for 1 second (`GunShots.LIFT_TICKS`, 20 ticks); the [End-gun levitation follow-up](#follow-up-end-gun-levitation) gives the owner's chances and time instead. As this slice had it: the game's own Levitation at its first level, as a shulker's bullet gives it (a shulker's lasts 10 seconds). It rises about three quarters of a block in that second. Each hit starts it again, so under steady fire it goes on rising, nearly a block a second. When it ends the creature falls, and a fall of more than 3 blocks hurts it, as any fall does. A longer spell of Levitation already on it is kept.
 - **Only where the shot may strike:** a creature the shooter may not hurt (`GunShots.allowed`) is neither hurt nor lifted.
 - The server works it out with the shot (`JugcraftGuns.LEVITATING`); nothing new is sent to clients, which show the effect as the game always does.
 
@@ -2923,7 +2923,7 @@ The next three of the owner's diamond-steel guns, taken up after slice 15B (on 2
 | The owner's gun | MAS Peddler | Inertial | Zilk 45 |
 | What it is | the MAS 55 made over: a rifle whose magazine stands slanting up out of its side, a wax seal with a strip of scripture on its left side | a shotgun fed from a box of six shells below, a wax seal on its receiver | a dart rifle silenced the length of its barrel, a magazine below |
 | Held | in both hands: the right on the grip, the left under the barrel | in both hands: the right on the grip, the left under the fore-end | in both hands: the right on the grip, the left at the magazine |
-| What it fires | Rifle Rounds, a pull a shot | Buckshot Shells, a shell a pull: eight pellets | Light Rounds, as long as the trigger is held |
+| What it fires | Rifle Rounds, a pull a shot | Buckshot Shells, a shell a pull: eight pellets | Darts (Light Rounds in this slice, until the [darts-and-bleeding follow-up](#follow-up-darts-and-bleeding)), as long as the trigger is held |
 | Damage | 9 | 3.5 a pellet, 28 a pull | 5 |
 | Rate | 2.5 a second (every 8 ticks) | about 1.5 a second (every 13 ticks) | 5 a second (every 4 ticks) |
 | Holds | 12 | 6 | 13 |
@@ -2957,7 +2957,7 @@ The next three of the owner's diamond-steel guns, taken up after slice 15B (on 2
 - **Checked** in first-person, aimed and orthographic previews: idle, fired, aimed, through each reload and inspection, and with each attachment.
 
 **Connections:**
-- **Rounds:** the Rifle Round, the Buckshot Shell and the Light Round; nothing new.
+- **Rounds:** the Rifle Round, the Buckshot Shell and the Light Round; nothing new. Since the [darts-and-bleeding follow-up](#follow-up-darts-and-bleeding) the Quill fires the Dart.
 - **Parts:** stainless steel, a diamond and a lever; planks for the Hawker and the Impetus, redstone and an iron ingot for the Quill.
 - **Their place:** past stainless steel, beside slices 15A's and 15B's guns: the diamond-steel long guns.
 
@@ -2970,7 +2970,7 @@ The next three of the owner's diamond-steel guns, taken up after slice 15B (on 2
 **Save compatibility:** new items `jugcraft:hawker_rifle`, `impetus_shotgun` and `quill_rifle`; nothing saved changes. `guns.enabled=false` turns their recipes off; the items stay registered.
 
 **Known limits:**
-- **The Quill fires Light Rounds, not darts:** the owner's Zilk 45 fires frog darts that fall over their flight and may make what they hit bleed (`lacerated`); Jugcraft has no darts and no bleeding, so its rounds fly straight along the look as the other guns' do.
+- **The Quill fired Light Rounds in this slice:** the owner's Zilk 45 fires frog darts that fall over their flight and may make what they hit bleed (`lacerated`); the [darts-and-bleeding follow-up](#follow-up-darts-and-bleeding) gives the Quill both.
 - **The Impetus does not push its shooter back:** the owner's Inertial does (`playerKnockBack`); no gun does that yet.
 - **The Impetus has no inspection,** as the owner's Inertial has none.
 - **The Impetus's atlas is 256 px,** twice the rule's 128, to keep the owner's texture whole; the owner may prefer it repainted at 128.
@@ -2993,7 +2993,368 @@ The owner's data gives four more of their diamond-steel guns armour piercing (`a
 - **Checked:** `tools/check_mod_data.py` holds the Java table to `tools/guns.py`, as before. `HeavyBulletsGameTests.heavyBulletsAreTheOwners` holds the full tables to the owner's numbers, and the Gallant Rifle's bullets to plain ones.
 - **Tooltips:** each of the four says it pierces armour.
 - **Save compatibility:** nothing saved changes.
-- **Not in this follow-up:** the guns before slice 15. The owner's data gives 49 of them armour piercing, knockback or both (27 each, 5 both); they stay plain for now.
+- **Not in this follow-up:** the guns before slice 15. The owner's data gives 49 of them armour piercing, knockback or both (27 each, 5 both); they stayed plain until the [older guns follow-up](#follow-up-armour-piercing-and-knockback-for-the-older-guns).
+
+## Follow-up: darts and bleeding
+The owner's Zilk 45 (slice 15C's Quill Rifle) fires frog darts that fall over their flight, and its hits may lacerate, as the owner's M3 Marksman's, Railworker's and Scratches' do. Offered after slice 15C, the owner chose it (27 October 2026, "Lets begin with those 3 you suggested"), as its own pull request.
+
+**The Dart** (`jugcraft:dart`), a round:
+- **What it is:** the owner's frog dart, a steel needle in a small iron case. Its icon is a map (`tools/item_icons/dart.txt`) drawn after the owner's `Guns/item/frog_dart.png`; its spent case is the owner's `small_iron_casing.png`.
+- **Crafting:** two iron nuggets over gunpowder make six (the owner's recipe presses a needle and gunpowder into a case).
+- **Price:** 1120/27 essence a dart, about 41.5, against a Light Round's 47.1.
+- **The Quill Rifle fires darts,** its numbers otherwise as in slice 15C.
+
+**How a dart flies:** five blocks a tick, the owner's speed, falling 0.05 of a block a tick faster each tick, as an arrow falls (`GunShots.flight`). The whole flight is worked out the moment the gun fires, as every gun's shot is, and the dart strikes the first block or creature along it. Fired level, it has fallen:
+
+| Out to | 16 blocks | 32 blocks | 48 blocks | 64 blocks (the Quill's range) |
+|---|---|---|---|---|
+| Fallen | 0.18 | 0.87 | 2.07 | about 3.8 |
+
+Aim a little high at a long shot. Bullets fly straight, as before.
+
+**Bleeding** (`jugcraft:bleeding`), a mob effect, the owner's "lacerated" and its icon (`Guns/mob_effect/lacerated.png`, taken into the [library](../../art/owner-library/README.md#gun-geometry-23-october-2026)):
+- **What it does:** one point of damage every two seconds (40 ticks; twice as often at each level above the first), through armour, until it ends; a creature can bleed to death ("bled out"). Milk stops it, as any effect.
+- **Which guns, from the owner's data** (`impactEffect` `scguns:lacerated`, its chance and duration; `BLEEDS`):
+
+| | Picket Rifle | Spikedriver | Harrow | Quill Rifle |
+|---|---|---|---|---|
+| The owner's gun | M3 Marksman | Railworker | Scratches | Zilk 45 |
+| Chance a hit | 30% | 60% | 30% | 40% |
+| How long | 15 s | 15 s | 15 s | 15 s |
+
+- **One chance a hit:** a shotgun's pellets on one creature land as one hit, so the Harrow has one chance a pull for each creature it strikes; the Spikedriver's beam has one for each creature in its line.
+- **Fifteen seconds of bleeding** take seven points, through any armour.
+- **Raider gunners** (slice 10F) fire through the same code; none of their service arms bleeds.
+- **Not given** in this follow-up: the Caisson Pistol (the owner's Hyperbaria) fires an arc here, not the owner's darts, and an arc carried no hit effect; the Cloudburst Gun (the Thunderhead) was missed. The owner's other hit effects (slowness, darkness, withering on some of their guns) were not carried over. The [hit-effects follow-up](#follow-up-hit-effects) gives both guns their bleeding, and the slowness and darkness of the guns built.
+
+**Tooltips:** the Quill's says it fires darts and makes what it hits bleed; the Picket Rifle's, the Spikedriver's and the Harrow's that what they hit may bleed.
+
+**Checked:**
+- `tools/check_mod_data.py` holds the Java to `tools/guns.py`: the dart's speed and fall, bleeding's interval and damage, and the guns that bleed, each a gun that fires bullets or a beam, its chance above 0 and at most 1. `tools/guns.py --check` holds the copied icon and spent case to the library's.
+- `DartsAndBleedingGameTests`:
+  - `dartsAndBleedingAreTheOwners`: the Dart, its recipe and its spent case; the Quill fires it; the guns that bleed at the owner's numbers; the effect registered.
+  - `dartsFallAsTheyFly`: a bullet's flight is one straight leg; a dart's falls 0.75 of a block over its first 30 blocks, and between 3.6 and 3.9 by the end of 64 blocks of flight.
+  - `bleedingGoesThroughArmour`: a sturdy pig in 20 points of armour, bleeding, loses one whole point at the effect's first turn, to the bleeding damage type.
+  - `quillDartsMakeTheirMarkBleed`: thirty of the Quill's darts at a pig three blocks off land and make it bleed (all thirty miss their 40% about once in four million).
+- `GunsGameTests` counts five rounds; `DiamondSteelGunsIIIGameTests` holds the Quill to darts.
+
+**Save compatibility:** a new item, `jugcraft:dart`, and a new effect, `jugcraft:bleeding`. Quill Rifles already made keep their loaded count, now of darts; Light Rounds already in a player's inventory are unchanged. Nothing else saved changes.
+
+## Slice 15D: two barrels and a burst
+The next three of the owner's diamond-steel guns, taken up after slice 15C (on 27 October 2026, offered three next steps, the owner chose "Lets begin with those 3 you suggested"): the Drill, the Drill Conversion and the Lockewood. Each is held in both hands and built from the owner's own GeckoLib model of it, from the upload of 23 October 2026 ([the library record](../../art/owner-library/README.md#gun-geometry-23-october-2026)), as slices 15A's to 15C's are. The Drill and its Conversion are the first of these guns loaded a round at a time; the Lockewood fires a burst to a pull, which no gun did before.
+
+| | Auger Rifle | Auger Shotgun | Tumbler Rifle |
+|---|---|---|---|
+| The owner's gun | Drill | Drill Conversion | Lockewood |
+| What it is | a two-barrelled rifle, its barrels side by side on a stout stock; a wax seal with a strip of scripture hangs off its right side, and an aperture rear sight stands on its receiver | the Drill made over into a shotgun: shorter barrels, an open notch for a rear sight | a compact rifle with a curved magazine below, a pistol grip and a ring rear sight, a seal and scripture on its left side |
+| Held | in both hands: the right on the grip, the left under the barrels | the same | in both hands: the right on the grip, the left at the magazine |
+| What it fires | Paper Cartridges, a pull a shot | Buckshot Shells, a pull a barrel: eight pellets | Rifle Rounds, a burst of three to a pull |
+| Damage | 14 | 3.5 a pellet, 28 a pull | 5.5 |
+| Rate | two shots 6 ticks apart | two shots 6 ticks apart | three shots 3 ticks apart, then a rest of 5 ticks: a burst every 14 ticks at the quickest |
+| Holds | 2, loaded a round at a time | 2, loaded a shell at a time | 21 |
+| Reload | 0.6 s to open, 0.85 s a round, 0.8 s to close: 3.1 s for both | the same | 2.15 s |
+| Spread, hip / aimed | 2° / 0.4° | 7.5° / 7.5° | 2.5° / 0.5° |
+| Range | 96 blocks | 24 blocks | 96 blocks |
+| The view aimed | 0.8 | 0.9 | 0.85 |
+| Heavy bullets | none | knock back 0.65 further | pierce 3 points of armour |
+| Takes | the stocks, both grips (the Vertical Grip), the four bayonets, the three scopes and the Laser Sight; no barrel attachment or magazine | the same | the barrels' four, the magazines, the stocks, both grips (the Tactical Grip), the four bayonets, the three scopes and the Laser Sight |
+
+**Their numbers** start from the owner's own, in the gun data of the same upload, set beside the guns already built: the Drill is their two-shot powder-and-ball rifle (13.5 a shot, both shots quickly, loaded a ball at a time), the Drill Conversion its shotgun (23.5 a pull over its pellets, strays as far aimed as from the hip, `alwaysSpread`), the Lockewood their burst rifle (11 a round, three to a burst every third tick, a rest of 5 ticks after, 21 to a magazine). The reloads are the owner's animations'. The heavy bullets are the owner's too: the Drill Conversion's `knockbackStrength` (0.65) and the Lockewood's `armorPen` (3), through the [heavy-bullets follow-up](#follow-up-heavy-bullets-knockback-and-armour-piercing).
+
+**Crafting** (a crafting table; they switch with the guns): stainless steel, a diamond and a lever, as slices 15A's to 15C's.
+- **Auger Rifle:** three stainless steel ingots over a stainless steel ingot, a diamond and a lever, over two stainless steel ingots with planks between (the owner's recipe takes four gun barrels and a wooden part).
+- **Auger Shotgun:** three stainless steel ingots over a diamond, a lever and planks (two gun barrels and a wooden part).
+- **Tumbler Rifle:** three stainless steel ingots over a diamond, a lever and redstone, over planks and a stainless steel ingot (a rapid firing unit, heavy gun parts, two diamond steel ingots and a wooden part).
+
+**How they fire:** as the guns before them: each round flies along the look, strayed by the spread. The Auger Shotgun's eight pellets each fly their own way; those that strike one creature land as one hit, pushed back once.
+
+**Bursts** (`BURSTS` in `tools/guns.py`, `JugcraftGuns.BURSTS`): a pull of the Tumbler Rifle fires three rounds, one each interval, whether or not the trigger is still held; the next pull fires once the burst's rest has passed. The client fires the burst a shot at a time, as an automatic's (`GunsClient`); running dry, a reload or switching away ends it. The server, which alone fires, counts each shot against the shooter's trigger credit as for every gun (`GunShots.spend`): a burst gun's credit refills at a burst per cycle (three rounds every 14 ticks) and banks a whole burst, so a client that asks faster gains nothing.
+
+**What you see:** the owner's animations. The Augers' shot kicks the gun; to load, the gun rolls over and its barrels hinge down, then the left hand brings a ball (the Shotgun's a shell) to the breech for each round, and the barrels swing shut. The ball is the owner's own, carried by the left arm's bone (`left_arm2`, `ball2`, `ball`) and shown only while it is loaded. The Tumbler's reload takes the magazine out below and brings the full one back. Each is inspected in both hands. Sounds, as the owner's data names for each: the carabine's shot (new here) for the Auger Rifle, the black powder shot (the Line Musket's) for the Auger Shotgun and the iron rifle's (the Kestrel Rifle's) for the Tumbler.
+
+**How the models were built:**
+- **From the owner's GeckoLib models,** as slices 15A's to 15C's (`GEO_PARTS`): each gun's parts are the bones of its model, its standard magazine and barrel the bones the owner named `default_mag` and `standard_barrel`; none of the three has a standard stock bone. Their textures are the models' own (`Guns/animated/gun/`), laid out anew by the owner (`GEO_RELAID`). The owner's no-sights parts for all three are empty, so an empty bone stands in (`gun_body` on the Augers, `body` on the Tumbler).
+- **Two cubes turned about more than one axis:** a pin across the Drill's stock is turned (-90, 45, -90), the Drill Conversion's shell (180, 0, -45). An item-model element turns about one axis only, so the converter lays such a cube anew square to the axes (a whole-quarter turn about its pivot, its faces and their UVs carried over corner for corner) and then turns it about one axis by at most 45 degrees (`relaid_turn()`, `relaid()`): the pin lies across the gun, turned 45 degrees about its length; the shell is turned end for end and then 45 degrees. This follows GeckoLib's order of turns, z then y then x applied last (`RenderUtil.rotateMatrixAroundCube` in its public source; not checked in the pinned 5.5.7 jar).
+- **A shrunken cube:** the Drill Conversion's shell is drawn 0.1 px smaller on each side than its size (`inflate`); the converter moves its corners in by that, its UVs those of its size. The Zilk 45's model has one such cube too, shrunk 0.001 px, which slice 15C's converter left full size: the Quill Rifle's model now draws it 0.002 px smaller, as the owner's does. No other gun's files change.
+- **Checked against the earlier parts:** where a bone keeps its item-model part's shape, the converter must give back that part's elements corner for corner and turn for turn (`GEO_TWINS`): on the Drill 10 bones (its sights, grips, bayonets and stocks), on the Drill Conversion 9 (its bayonets, and the Drill's grips and stocks, which it shares), on the Lockewood 12 (its bolt, grips, three bayonets, muzzle attachments and stocks; the owner reshaped its steel bayonet).
+- **Bones:** the models' own, turning about the models' pivots (checked). On the Augers: `gun_body3`, `gun_body2` and `gun_body` (the reload turns all three); `barrel`, which swings open, with the grips and bayonets riding it (`"mounts"`); `left_arm2`, which carries the left arm and, under `ball2`, the ball; the `bolt` and `shell` their animations move, which their models lack, empty. On the Tumbler: `gun_body`, `bolt`, `seal` and `scriptures`, `magazine` (the left arm hangs under it, as on the Quill) and an empty `magazine_2`, never shown.
+- **Hands:** placed from the owner's own arm bones as slices 15A's to 15C's are. The Augers' left arm hangs under `left_arm2`, whose idle pose is the Old Grange Carbine's, and so takes its way; their idle leaves the left arm itself where it is (`arm_offset()` now allows that). The Tumbler's idle is the Zilk 45's, and its arms take the Quill's ways.
+- **Sights:** the owner's: the Auger Rifle's aperture, the Auger Shotgun's notch between two posts, the Tumbler's ring. Aimed, each is held 1 px further out (`"eye_relief"`), so that nothing comes within 2.3 px of the eye through the aimed shot: a fitted Long Scope came 1.8 to 1.9 px from it at the hip's depth; held out, every gun and sight keeps at least 2.7 px.
+- **Scopes:** where their iron sights stand.
+- **Checked** in first-person, aimed and orthographic previews: idle, fired, aimed, through each reload (the Augers' start, each round and close) and inspection, and with each attachment, the barrels swung open with a bayonet and grip fitted.
+
+**Connections:**
+- **Rounds:** the Paper Cartridge, the Buckshot Shell and the Rifle Round; nothing new.
+- **Parts:** stainless steel, a diamond and a lever; planks for all three, redstone for the Tumbler.
+- **Their place:** past stainless steel, beside slices 15A's to 15C's guns.
+
+**Balance:** starting numbers, at point blank with every shot landing, over a magazine and its reload.
+- **Auger Rifle:** 14 a shot, the hardest single shot of the diamond-steel guns (the Vesper Rifle's is 13); about 8.2 a second over its two shots and their reload. It reaches 96 blocks and strays 0.4° aimed, and fires the cheapest rounds.
+- **Auger Shotgun:** 28 a pull with every pellet landing; about 16.5 a second, beside the Coach Gun's 16.3 (two shells, from the first guns). It knocks back, but reaches less (24 blocks to the Coach Gun's 32) and strays 7.5° even aimed.
+- **Tumbler Rifle:** about 17.4 a second, beside the Onrush SMG's 16.9 and the Gallant Rifle's 16.6, passing 3 points of armour. A burst lands 16.5 in 6 ticks.
+- **Rounds:** each shot spends one; nothing converts back.
+
+**Save compatibility:** new items `jugcraft:auger_rifle`, `auger_shotgun` and `tumbler_rifle`; nothing saved changes. `guns.enabled=false` turns their recipes off; the items stay registered.
+
+**Known limits** (the first two are owner decisions):
+- **The Auger Shotgun fires Buckshot Shells:** the owner's data loads the Drill Conversion with powder and ball but fires a shotgun shell from it and throws out a spent case, and its reload carries a shell. This slice follows the shell; the owner may want paper cartridges instead.
+- **Names:** "Auger Rifle", "Auger Shotgun" and "Tumbler Rifle" are proposed.
+- **The Auger Shotgun does not push its shooter back** as the owner's data asks (`playerKnockBack`), as the Impetus does not.
+- **The Augers' load fills the lower view:** the owner's animation swings the gun low and brings the left arm across.
+- **The arms in the reloads and inspections** come large into the view in places, as on the guns before them.
+- **Not played:** none of it has been played yet. The numbers want play to set.
+
+## Slice 15E: a microjet gun and two beams
+The owner's last three diamond-steel guns, taken up after slice 15D (on 27 October 2026 the owner wrote "Lets do slice 15E"): the Cyclone, the Minksy and the Shard Culler. Each is held in both hands and built from the owner's own GeckoLib model of it, from the upload of 23 October 2026 ([the library record](../../art/owner-library/README.md#gun-geometry-23-october-2026)), as slices 15A's to 15D's are. The Cyclone fires a round the mod did not have, the Microjet, and loads three of them at a time; the Minksy and the Shard Culler run on Energy Cells, and the Shard Culler's is the first beam that pierces armour.
+
+| | Maelstrom Gun | Ermine Rifle | Geode Cutter |
+|---|---|---|---|
+| The owner's gun | Cyclone | Minksy | Shard Culler |
+| What it is | a heavy gun carried at the hip: a block of nine launch tubes, a drum at its side and a microjet under its body; a seal and scripture on its left side | a lever-action rifle with an energy core in its barrel, a notch sight on the receiver and a post at the muzzle | a cutting beam carried at the hip as the Seam Cutter is: a crystal lens before its body, its energy core on the left side, a seal and scripture |
+| Held | in both hands: the right on the rear grip, the left on the handle at its left side | in both hands: the right on the grip, the left under the barrel | in both hands: the right on the grip, the left holding the core |
+| What it fires | Microjets, as long as the trigger is held | a beam a pull, through every creature in its line | a beam as long as the trigger is held, through every creature in its line |
+| Damage | 7.5 | 10 | 3, through 4 points less armour |
+| Rate | every 6 ticks | every 12 ticks | every 3 ticks |
+| Holds | 24, loaded three at a time | 15 charges of 400 JE | 50 charges of 120 JE |
+| Reload | 0.5 s to open, 0.85 s each three, 1 s to close: 8.3 s for all 24 | 2.65 s | 2.95 s |
+| Spread, hip / aimed | 3° / 1.5° | 1.5° / 0.2° | 3° / 1.5° |
+| Range | 64 blocks | 80 blocks | 24 blocks |
+| The view aimed | 0.95 (no sights: it stays at the hip) | 0.85 | 0.95 (no sights) |
+| Takes | nothing | the stocks, both grips (the Vertical Grip), the four bayonets, the three scopes and the Laser Sight | nothing |
+
+**Their numbers** start from the owner's own, in the gun data of the same upload, set beside the guns already built: the Cyclone is their automatic microjet gun (15.5 a microjet every 6 ticks, 24 to a load, `reloadAmount` 3 a step), the Minksy their lever-action beam rifle (16 a pull every 10 ticks, 15 to a core, reaching 150 blocks), the Shard Culler their cutting beam (6 every 3 ticks, 50 to a core, `armorPen` 4). The Ermine reaches 80 blocks, short of the Lantern Musket's 96 and the Solenoid Rifle's 128, which stay the longest-reaching energy guns. The reloads are the owner's animations'.
+
+**The Microjet** (`jugcraft:microjet`, `tools/guns.py` `AMMO`): a new round, the owner's own: a little iron rocket, its lead tip over a charge of gunpowder. A lead nugget over gunpowder over an iron nugget makes four, in a crafting table (they switch with the guns). Its icon is a map (`tools/item_icons/microjet.txt`) drawn after the owner's `Guns/item/microjet.png`; its spent case is the owner's `small_iron_casing.png`, as the owner's data names it. It flies as the other rounds do: along the look at once, strayed by the spread.
+
+**Crafting** (a crafting table; they switch with the guns, and the two beam guns with the machines too, for their circuit and cable, as the energy guns before them):
+- **Maelstrom Gun:** three stainless steel ingots over a stainless steel ingot, a diamond and a stainless steel ingot, over redstone and a lever.
+- **Ermine Rifle:** three stainless steel ingots over a diamond, an Advanced Circuit and Copper Cable, over planks.
+- **Geode Cutter:** two stainless steel ingots and an amethyst shard over a diamond, an Advanced Circuit and Copper Cable, over two stainless steel ingots.
+
+**Loading several rounds a step** (`LOAD_STEPS` in `tools/guns.py`, `JugcraftGuns.LOAD_STEPS`): the Maelstrom Gun is loaded a step at a time as the guns loaded a shell at a time are (`GunSpec.byShell`), but each step's time loads up to three microjets: seven load as three, three and one, in three steps' time (`GunSpec.reloadTicks(rounds, step)`). The server alone loads (`GunShots`), taking each step's microjets from the inventory at the end of its time; a shot cuts the loading short, as for the other guns loaded a round at a time. The client plays the owner's loop once a step (`GunAnimations.reloadName`), and the HUD's reload time and a raider gunner's (none carries it) count the steps too. `tools/check_mod_data.py` holds the Java table to `tools/guns.py`, each to a gun loaded a step at a time, more than one and at most its magazine a step.
+
+**A beam that pierces armour:** `GunShots.beam` now deals each creature in its line what it would through the gun's `PIERCING` less armour (`GunShots.pierced`, as the heavy bullets do); `tools/check_mod_data.py` allows `PIERCING` on a gun that fires a beam. The Geode Cutter's is the owner's 4 points: its 3 against 10 points of armour deals about 2.5 where a plain zap deals about 2. No other beam gun has any.
+
+**What you see:** the owner's animations. The Maelstrom's shot drives its tubes back; to load, its drum slides out to the side, the left hand brings it a microjet (the owner's `rocket`) once a step, and the drum slides back. The Ermine's shot works the lever under the grip and the hammer above it; its reload draws the core, turned a quarter as the owner turned it, out of the left side and back. The Geode Cutter's reload draws its core out of the left side, the left hand with it. Each is inspected in both hands. Sounds, as the owner's data names for each: the gyrojet's shot (new here) for the Maelstrom, the laser's second shot (the Seam Cutter's) for the Ermine and the beam's (the Murmur SMG's) for the Geode Cutter.
+
+**How the models were built:**
+- **From the owner's GeckoLib models,** as slices 15A's to 15D's (`GEO_PARTS`): each gun's parts are the bones of its model; their textures are the models' own (`Guns/animated/gun/`), laid out anew by the owner (`GEO_RELAID`). The Minksy's no-sights part is its `gun_body2`; the Cyclone and the Shard Culler have no sights.
+- **A bone turned a quarter about one axis holding cubes turned about another:** the Minksy's core. An item-model element turns about one axis only, so the converter lays the cubes anew by the bone's quarter turn (their faces and UVs carried over corner for corner), and turns each about the axis its own turn now lies along (`geo_part`, `geo_element`, `relaid()`).
+- **Checked against the earlier parts:** where a bone keeps its item-model part's shape, the converter must give back that part's elements corner for corner and turn for turn (`GEO_TWINS`): on the Cyclone its body, on the Minksy 10 bones (its sights, grips, stocks and bayonets).
+- **Bones:** the models' own, turning about the models' pivots (checked). On the Maelstrom: `gun_body`, `bolt`, `rocket` (the microjet), `barrel`, `magazine` (the drum, on the barrel), `seal` and `scriptures`. On the Ermine: `gun_body`, `gun_body2`, `main` (with the sights), `hammer`, `lever`, `barrel` and `core`. On the Geode Cutter: `gun_body2`, `gun_body`, `seal`, `scriptures`, `core` (the left arm hangs under it) and the owner's empty `grip`, which its reload works.
+- **Hands:** placed from the owner's own arm bones as slices 15A's to 15D's are. Each arm's way from the hand was searched for the one that keeps the most of the view clear through the idle, the shots, the reload and the inspection: the Ermine's right sleeve had covered most of the view aimed, and now runs down out of it.
+- **Sights:** the Ermine's own, the notch on its receiver and the post at its muzzle; scopes where its notch stands. The Maelstrom and the Geode Cutter have none and stay at the hip aimed, the view narrowing a little, as the Seam Cutter's does.
+- **Checked** in first-person previews: idle, fired, aimed, through each reload (the Maelstrom's start, each step and close) and inspection.
+
+**Connections:**
+- **Rounds:** the new Microjet, from lead, gunpowder and iron; the Energy Cell, charged at the Charging Station or the Cell Rack.
+- **Parts:** stainless steel and a diamond, as slices 15A's to 15D's; redstone and a lever for the Maelstrom; an Advanced Circuit and Copper Cable for the two beams, an amethyst shard for the Geode Cutter's lens, planks for the Ermine's stock.
+- **Their place:** past stainless steel, beside slices 15A's to 15D's guns; the two beams past the machines, as the energy guns before them.
+
+**Balance:** starting numbers, at point blank with every shot landing, over a magazine and its reload.
+- **Maelstrom Gun:** 25 a second while it fires; about 11.6 a second over its 24 microjets and their 8.3 s reload, the long load its price. Each microjet costs about as much as a rifle round.
+- **Ermine Rifle:** about 16.7 a second while it fires, 12.9 over its charges and their reload; a beam through every creature in its line, 400 JE a shot (a full cell is 25 shots).
+- **Geode Cutter:** 20 a second while it fires, about 14.4 over its charges and their reload, through every creature in front of it and 4 points of their armour, out to 24 blocks; 120 JE a shot.
+- **Rounds and charge:** each shot spends one; nothing converts back.
+
+**Save compatibility:** new items `jugcraft:maelstrom_gun`, `ermine_rifle`, `geode_cutter` and `microjet`, and the particle `jugcraft:microjet_casing`; nothing saved changes. `guns.enabled=false` turns their recipes off; the items stay registered.
+
+**Known limits** (the first two are owner decisions):
+- **Names:** "Maelstrom Gun", "Ermine Rifle", "Geode Cutter" and "Microjet" are proposed.
+- **The Geode Cutter did not mine** in this slice: the owner's data lets the Shard Culler's beam break blocks (`enableMining`), as the Seam Cutter's could not. The [beam-mining follow-up](#follow-up-beams-that-mine) gives both their mining.
+- **No slowness on a hit** in this slice: the owner's data slows what the Shard Culler hits (`impactEffect`). The [hit-effects follow-up](#follow-up-hit-effects) gives it.
+- **Energy Cells, not the owner's cores:** the owner's beam guns load an energy core, which leaves a spent core behind; here they draw charge from Energy Cells as the energy guns before them.
+- **A microjet does not fly:** the owner's microjets are rockets that fly 1.5 blocks a tick; here it strikes at once along the look, as a round does. The Maelstrom does not slow its carrier as the owner's data asks (`speedModifier`).
+- **The arms in the reloads and inspections** come large into the view in places, as on the guns before them.
+- **Not played:** none of it has been played yet. The numbers want play to set.
+
+## Follow-up: beams that mine
+The owner's data lets two of their beam guns cut blocks (`enableMining`): the CR4K Mining Laser (slice 9C's Seam Cutter) and the Shard Culler (slice 15E's Geode Cutter), which the guns had left out. Offered after slice 15E, the owner chose it on 27 October 2026 ("Lets do the beams that mine"), as its own pull request.
+- **How a beam cuts** (`MINING` and `MINE_GAP` in `tools/guns.py`, `JugcraftGuns.MINING`, `GunShots.cut`): each shot cuts into the block where the beam ends, the first block in its line past every creature, as much as a tool of the gun's mining speed would in the gun's interval. As with vanilla's correct tool, a block of hardness h takes h × 30 ticks over the speed; a block of no hardness goes at once. The block's cracks show to everyone near while it is cut. When the cut is through, the block breaks as its shooter breaking it would: its drops are an unenchanted break's (stone gives cobblestone, an ore its raw ore), none in creative, and the block-break events other mods watch are called. Another block, or a pause of more than 10 ticks (half a second), starts the cut over. Each shot spends its charge as before, so cutting costs JE.
+- **Speeds**, the owner's `miningSpeed`:
+  - **Seam Cutter, 14:** faster than a netherite pickaxe's 9. Stone goes in 2 shots (a fifth of a second), deepslate or an iron ore in 4.
+  - **Geode Cutter, 1:** a bare hand's speed. Stone takes 15 shots (2.25 s), netherrack 4.
+- **What it may cut:** what a pickaxe of its tier may harvest, or what needs no tool.
+  - **Seam Cutter:** an iron pickaxe's harvest, so not obsidian, crying obsidian or ancient debris.
+  - **Geode Cutter:** a diamond pickaxe's, everything a pickaxe mines.
+  - **Neither:** snow and cobwebs, which want a shovel or shears; a block with a block entity (a chest, a furnace, a machine, a sign), so a beam never empties a container; an unbreakable block.
+  - **Passed through, as before:** what has no collision (a torch, a flower, tall grass); the beam ends at the first solid block.
+- **Protection** (`Authority.mayChange`, as the Cavern Burrowing Arrow and the Dark Matter tools use): only where the shooter may break blocks by hand. Not in adventure mode, not under spawn protection, not in the protected town, not where a protection mod's block-break check refuses. Each shot asks again.
+- **Server option:** `guns.beam_mining` in `config/jugcraft.properties`, on by default. False leaves every block whole; the beams still burn creatures.
+- **Raider gunners** carry no mining beam and cut nothing.
+- **Tooltips:** both say the beam cuts the block at its end; the Geode Cutter's says slowly.
+- **Checked:** `tools/check_mod_data.py` holds `JugcraftGuns.MINING` and `MINE_GAP` to `tools/guns.py`: each a gun that fires a beam, its speed above 0 and at most 20, its tier iron or diamond. It also checks the option is in `JugcraftConfig` and that `GunShots` reads it. Game tests: `BeamMiningGameTests` ([Verification](#verification)).
+
+**Balance:**
+- **Seam Cutter:** 100 JE a shot, so a full Energy Cell is 100 shots: about 50 stone or 25 deepslate. It is a mining tool that costs charge where a pickaxe costs durability.
+- **Geode Cutter:** 120 JE a shot, so a cell cuts about 5 stone. It stays a weapon that can cut, slowly, as the owner's data has it.
+- **Conversions:** nothing converts back.
+
+**Save compatibility:** nothing saved changes. A cut in progress is not saved; it is let go when its shooter leaves.
+
+**Known limits:**
+- **Drops are an unenchanted break's:** no Fortune or Silk Touch.
+- **It does not count as mining for statistics:** a cut block is not in the "mined" statistic and costs no hunger.
+- **Not played:** none of it has been played yet. The speeds and charge want play to set.
+
+## Follow-up: hit effects
+The owner's data gives some of their guns a chance, at each hit, of an effect on what they hit (`impactEffect`, with its chance, duration and level). The guns had carried over only bleeding ([darts and bleeding](#follow-up-darts-and-bleeding)). Offered after the beams that mine, the owner chose it on 27 October 2026 ("Lets do the hit effects"), as its own pull request.
+
+**Slowness and darkness** (`HIT_EFFECTS` in `tools/guns.py`, `JugcraftGuns.HIT_EFFECTS`, `GunShots.afflict`): vanilla's own effects, at the owner's numbers.
+
+| | Linesman | Stormlock Rifle | Geode Cutter | Lament Rifle |
+|---|---|---|---|---|
+| The owner's gun | Arc Worker | Teslock Rifle | Shard Culler | Forlorn Hope |
+| Shot | arc | arc | beam | bullet |
+| Effect | Slowness | Slowness | Slowness | Darkness, its second level |
+| Chance a hit | 40% | 40% | 75% | 25% |
+| How long | 10 s | 10 s | 5 s | 5 s |
+
+**Bleeding for two more guns** (`BLEEDS`):
+- **Cloudburst Gun** (the owner's Thunderhead): 30% a hit, for 15 s. The darts-and-bleeding follow-up missed it.
+- **Caisson Pistol** (the owner's Hyperbaria): 50% a hit, for 10 s. The owner's gun fires darts; here it fires an arc, which now carries hit effects.
+
+**How they land:**
+- **Each creature a hit hurts has its own chance:** a bullet's (a shotgun's pellets on one creature are one hit), each in a beam's line, and each an arc strikes as it leaps. An arc gave no effect before; it now gives them as bullets and beams do.
+- **A hit that does no harm gives nothing:** a creature shielded, or one other code protects.
+- **As the game's own effects:** a longer or stronger effect already on a creature stays, and milk ends them. A creature that refuses an effect (as the Yeti King refuses Levitation) refuses it here too.
+- **Slowness** at its first level takes 15% off a creature's speed. **Darkness** dims a player's view in pulses; it does nothing to a mob.
+- **Raider gunners** (slice 10F) fire through the same code; none of their service arms has an effect.
+
+**Tooltips:** each of the six says what its hits may do.
+
+**Checked:** `tools/check_mod_data.py` holds `JugcraftGuns.HIT_EFFECTS` and `BLEEDS` to `tools/guns.py`.
+- Each entry is a gun that fires bullets, a beam or an arc, its chance above 0 and at most 1, its ticks above 0, its level 0 to 4.
+- Each effect named is one `HitEffect.holder()` maps.
+- `GunShots` gives the effect on bullets' and beams' or arcs' hits.
+- Game tests: `HitEffectsGameTests` ([Verification](#verification)).
+
+**Balance:** the effects add no damage of their own.
+- **Slowness** keeps a foe in reach of the short arc guns and the Geode Cutter's 24 blocks.
+- **Darkness** costs a player their view for five seconds, a quarter of the Lament Rifle's hits.
+- **Bleeding:** fifteen seconds take seven points, ten seconds five, through any armour. The Cloudburst fires five times a second, so a creature it keeps hitting soon bleeds.
+- **Conversions:** none.
+
+**Save compatibility:** nothing saved changes. Effects on creatures are saved as the game saves any effect.
+
+**Known limits:**
+- **Withering waits for the Flayed God,** which is not built. The other effects in the owner's data are on guns not built either: the Crusader's healing, the slowness of Dark Matter, the Lone Wonder and the Pulsar, and the Nailer's and RG Jigsaw's bleeding.
+- **Levitation stayed slice 12A's** in this follow-up: the owner's End guns lift what they hit 23% to 30% of the time, for 5 s, where every hit lifted for a second (`LIFT_TICKS`). The [End-gun levitation follow-up](#follow-up-end-gun-levitation) gives the owner's.
+- **Darkness only matters to players.**
+- **Not played:** none of it has been played yet. The chances want play to set.
+
+## Follow-up: End-gun levitation
+The owner's data lifts what their End guns hit at a chance and for 5 s (`impactEffect` `minecraft:levitation`), where slice 12A lifted every hit for a second. Offered after the hit effects, the owner chose it on 28 October 2026, with four other follow-ups, each its own pull request.
+
+| | Chitin SMG | Hermit Rifle | Borer |
+|---|---|---|---|
+| The owner's gun | Carapice | Shellurker | Weevil |
+| Chance a hit | 30% | 30% | 23% |
+| How long | 5 s | 5 s | 5 s |
+
+**How:**
+- **A hit effect now:** the End guns' levitation is in `HIT_EFFECTS` (`tools/guns.py`, `JugcraftGuns`) and given by `GunShots.afflict`, as the other hit effects. It is the game's own Levitation at its first level.
+- **Slice 12A's lift is gone:** no hit lifts for a second any more (`GunShots.LIFT_TICKS` is removed, and `GunShots.bullets` no longer takes a lift).
+- **`LEVITATING`,** the guns whose hits may lift, now follows from the table; `JugcraftGuns.levitates` reads it as before.
+
+**What it does:**
+- **A creature lifted** rises about three quarters of a block in its first second and nearly a block a second after: about four blocks in all, if nothing is above it. It falls when the spell ends. A fall of more than 3 blocks hurts, as any fall does, so it lands a point or so the worse.
+- **Another lifting hit** starts the 5 s again; a hit that does not lift leaves the spell as it is.
+- **Only where the shot may strike,** and the Yeti King and his whelps still refuse it.
+- **Raider gunners** carry no End gun.
+- **Tooltips:** each says its shots *may* make what they hit float.
+
+**Checked:** `tools/check_mod_data.py` holds `HIT_EFFECTS`, now with the three, and `LEVITATING` to `tools/guns.py`. It also checks that `GunShots` gives no Levitation of its own. Game tests: `EndGunsGameTests.endGunsMakeWhatTheyHitFloat`, `HitEffectsGameTests.hitEffectsAreTheOwners` ([Verification](#verification)).
+
+**Balance:**
+- **How soon:** under steady fire the Chitin SMG (6.7 shots a second) lifts its mark in about half a second on average; the Hermit Rifle (5 a second) in under a second; the Borer (4 a second) in about a second.
+- **What it buys:** a lifted creature floats for 5 s whether the fire goes on or not: out of a melee mob's reach, and a slower, higher target. Before, every hit lifted it a little, and it came down a second after the fire stopped.
+- **Conversions:** none.
+
+**Save compatibility:** nothing saved changes.
+
+**Known limits:**
+- **The fall's damage** is the game's, so the lift does a little harm where it did almost none.
+- **Not played:** none of it has been played yet.
+
+## Follow-up: armour piercing and knockback for the older guns
+The owner's data gives 49 of their guns built before slice 15 armour piercing (`armorPen`), knockback (`knockbackStrength`) or both, which only slice 15's guns had taken. Offered after the hit effects, the owner chose it on 28 October 2026, with four other follow-ups, each its own pull request.
+
+**The guns** (46 of the 49; the other three below), at the owner's numbers:
+
+| Gun | The owner's gun | Armour pierced (points) | Knockback (further push) |
+|---|---|---|---|
+| Patchwork Carbine | Makeshift Rifle | 2.0 | – |
+| Thunderpipe | Boomstick | – | 0.75 |
+| Warden Pistol | Defender Pistol | 1.0 | – |
+| Riveter SMG | Greaser SMG | 1.0 | – |
+| Haymaker | Bruiser | – | 0.6 |
+| Longhorn Rifle | Marlin | 3.5 | – |
+| Coach Gun | Callwell | – | 0.75 |
+| Bellmouth | Blunderbuss | – | 0.8 |
+| Bulldog Pistol | Brawler | – | 0.85 |
+| Sapper Revolver | Trenchur | 2.5 | – |
+| Garrison Rifle | Stigg | 2.0 | – |
+| Breacher | Combat Shotgun | – | 0.65 |
+| Thresher | Gattaler | 1.0 | – |
+| Kestrel Rifle | Whistler | 3.0 | – |
+| Rattler Pistol | Auvtomag | – | 0.8 |
+| Bronco SMG | Jr Wristbreaker | – | 0.85 |
+| Caisson Pistol | Hyperbaria | 1.0 | – |
+| Sledge | Killer 23 | – | 0.65 |
+| Highwayman | Turnpike | 2.5 | – |
+| Mule | Super Shotgun | – | 0.65 |
+| Fowler | Doublet | – | 0.8 |
+| Culverin | Handcannon | – | 0.8 |
+| Undertone Rifle | Sculk Resonator | 6.5 | – |
+| Murmur SMG | Whispers | 7.0 | – |
+| Reverb | Echoes 2 | 7.0 | 0.65 |
+| Tusker | Mangalitsa | – | 0.65 |
+| Cinder Repeater | Vulcanic Repeater | 2.0 | – |
+| Ashfall Pistol | Pyroclastic Flow | 2.0 | – |
+| Crackling | Ribs Glory | – | 0.65 |
+| Conductor Carbine | LLR Director | 2.5 | – |
+| Goshawk Revolver | Ultra Knight Hawk | – | 3.0 |
+| Lament Rifle | Forlorn Hope | 7.0 | – |
+| Ammonite Carbine | Spirulida | 2.0 | – |
+| Waystation Shotgun | Callwell Terminal | – | 0.7 |
+| Highball Rifle | Saketini | 2.5 | – |
+| Flatboat Gun | Big Bore | 2.0 | 8.0 |
+| Millstone Rifle | Winnie Millend | 1.5 | – |
+| Holler Pistol | Howler | 5.0 | 0.65 |
+| Minuet Pistol | M22 Waltz | – | 0.55 |
+| Half-Crown Revolver | Osgood 50 | 4.0 | 0.55 |
+| Holler Carbine | Howler Conversion | 5.0 | 0.65 |
+| Grange Carbine | Grandle | 2.0 | – |
+| Sprocket Gun | Cogloader | 3.0 | – |
+| Navvy Shotgun | Jackhammer | – | 0.85 |
+| Freeholder Rifle | Libertas | – | 0.4 |
+| Old Grange Carbine | Grandle OG | 2.5 | – |
+
+- **How they work:** as the [heavy bullets](#follow-up-heavy-bullets-knockback-and-armour-piercing) already do. A piercing hit deals what it would through that many points less armour (`GunShots.pierced`), so a creature without armour takes each gun's damage as before. A knockback hit gives a second push, of that strength, after the 0.4 every hit gives. A shotgun's pellets on one creature are one hit, so one push and one piercing hit a pull.
+- **Arcs may pierce armour now:** the Caisson Pistol's arc deals each creature it strikes its share through 1 point less armour (`GunShots.arc`). It is the only arc gun with piercing.
+- **The Flatboat Gun** has the owner's Big Bore's knockback of 8, by far the strongest (a plain hit's push is 0.4): it throws what it hits many blocks. The Goshawk Revolver's (the Ultra Knight Hawk's) 3 is the next.
+- **Left out:** the owner's knockback for the Kiln Gun (the Stoker), the Plasmabuss (the Glowmouth) and the Fencer Thumper (the Fencepost Thumper). The Stoker's flame and the Glowmouth's arc deal damage that pushes nothing here (`no_knockback`), and the Fencepost Thumper fires grenades, not bullets.
+- **The Thunderhead's file** (the Cloudburst Gun's) holds a second projectile block, `projectile_1`, with piercing 5 and knockback 0.45. The owner's game reads only `projectile`, so they are left out, as its bleeding came from `projectile`.
+- **Raider gunners** fire the Garrison Rifle (now piercing 2) and the Breacher (now knocking back 0.65) the same way; the Sentry Pistol is plain.
+- **Tooltips:** each of the 46 says its shots pierce armour, knock back what they hit, or both (the Caisson Pistol's, its bolt).
+
+**Checked:** `tools/check_mod_data.py` holds `JugcraftGuns.KNOCKBACK` and `PIERCING` to `tools/guns.py` (now `Map.ofEntries`, as there are more than ten).
+- Knockback must be on a gun that fires bullets; piercing on bullets, a beam or an arc; each value above 0 and at most 8.
+- An arc gun with piercing needs `GunShots.arc` to pierce.
+- Game tests: `HeavyBulletsGameTests` ([Verification](#verification)).
+
+**Balance:** the piercing helps most against armoured foes; against a creature without armour nothing changes.
+- **The highest:** the Lament Rifle's, the Murmur SMG's and the Reverb's 7 points nearly cancel iron armour (15 points for a full set).
+- **The knockback** keeps foes at a shotgun's length, and the Flatboat Gun's clears a crowd.
+- **Conversions:** none.
+
+**Save compatibility:** nothing saved changes.
+
+**Known limits:**
+- **The three guns left out** above keep pushing nothing.
+- **The Flatboat Gun's throw** is the owner's number, untried in play; it may want lowering.
+- **The numbers** are the owner's; none of this has been played yet.
 
 ## Connections
 - **Existing input producers:** copper, iron and gunpowder (vanilla); lead nuggets (the lead switch's lead); brass nuggets (brass, from zinc); paper and planks.
@@ -3665,6 +4026,8 @@ Slice 5's files: each gun's attachment parts, and each attachment's item model a
 | light_round_casing | `Guns/item/small_copper_casing.png` | `534d4d0375da46cc` |
 | rifle_round_casing | `Guns/item/large_brass_casing.png` | `2b43b9961479bdbb` |
 | buckshot_shell_casing | `Guns/item/shotgun_shell.png` | `89657710d20d041d` |
+| dart_casing | `Guns/item/small_iron_casing.png` | `3a48a2cd96b9e75d` |
+| microjet_casing | `Guns/item/small_iron_casing.png` | `3a48a2cd96b9e75d` |
 | flash_0 | `Big Cannons and Mounted Guns/textures/muzzleflash.png` | `9e6b36b22790ec34` |
 | flash_1 | `Big Cannons and Mounted Guns/textures/muzzleflash2.png` | `31029be6554ebd9f` |
 | flash_2 | `Big Cannons and Mounted Guns/textures/muzzleflash3.png` | `5c695fc1d9c5b365` |
@@ -3801,6 +4164,7 @@ Slice 9E's files: the guns' tactical grip parts and the Laser Sight's textures m
 | laser_sight | `Guns/item/laser_sight.png` | `1e0a3342068bc5df` |
 | laser_beam | `Guns/item/laser.png` | `aac5f06e892e350a` |
 | laser_dot | `Guns/effect/red_dot_reticle.png` | `8ebc215134886a8f` |
+| bleeding | `Guns/mob_effect/lacerated.png` | `82f240ad3c80cfc3` |
 | earthmover | `Guns/models/item/dozier_rl.json` | `63d00eb0a827fb67` |
 | earthmover | `Guns/item/dozier_rl.png` | `5657bbdc3a8a3439` |
 | earthmover | `Guns/item/dozier_rl.animation.json` | `693ac6d3023f7fdb` |
@@ -4773,6 +5137,56 @@ Slice 9E's files: the guns' tactical grip parts and the Laser Sight's textures m
 | quill_rifle | `Guns/item/relex_sight.png` | `c8a38dbce7c266b0` |
 | quill_rifle | `Guns/item/laser_sight.png` | `1e0a3342068bc5df` |
 | quill_rifle | `Guns/item/laser.png` | `aac5f06e892e350a` |
+| auger_rifle | `Guns/models/item/drill.json` | `32bd7b57a87b507c` |
+| auger_rifle | `Guns/animated/gun/drill.png` | `dd29b1c01310a9ba` |
+| auger_rifle | `Guns/item/drill.animation.json` | `01710173e7b56145` |
+| auger_rifle | `Guns/geo/item/gun/drill.geo.json` | `4d327fca83845c09` |
+| auger_rifle | `Guns/sounds/item/carabine/fire.ogg` | `eeed3dbb8a7871d3` |
+| auger_rifle | `Guns/item/long_scope_texture.png` | `e69191017eb081ad` |
+| auger_rifle | `Guns/item/medium_scope.png` | `543abecf859783be` |
+| auger_rifle | `Guns/item/relex_sight.png` | `c8a38dbce7c266b0` |
+| auger_rifle | `Guns/item/laser_sight.png` | `1e0a3342068bc5df` |
+| auger_rifle | `Guns/item/laser.png` | `aac5f06e892e350a` |
+| auger_shotgun | `Guns/models/item/drill_conversion.json` | `e06d855b9e42a38c` |
+| auger_shotgun | `Guns/animated/gun/drill_conversion.png` | `b053cbbfca1ac4b8` |
+| auger_shotgun | `Guns/item/drill_conversion.animation.json` | `cd868916ec90f759` |
+| auger_shotgun | `Guns/geo/item/gun/drill_conversion.geo.json` | `85d13718a8761ed0` |
+| auger_shotgun | `Guns/sounds/item/blackpowder/fire.ogg` | `a3d3d49a332d034f` |
+| auger_shotgun | `Guns/item/long_scope_texture.png` | `e69191017eb081ad` |
+| auger_shotgun | `Guns/item/medium_scope.png` | `543abecf859783be` |
+| auger_shotgun | `Guns/item/relex_sight.png` | `c8a38dbce7c266b0` |
+| auger_shotgun | `Guns/item/laser_sight.png` | `1e0a3342068bc5df` |
+| auger_shotgun | `Guns/item/laser.png` | `aac5f06e892e350a` |
+| tumbler_rifle | `Guns/models/item/lockewood.json` | `227b10816c7b40b8` |
+| tumbler_rifle | `Guns/animated/gun/lockewood.png` | `2ae21e68648f3f7b` |
+| tumbler_rifle | `Guns/item/lockewood.animation.json` | `22951713f7b9987f` |
+| tumbler_rifle | `Guns/geo/item/gun/lockewood.geo.json` | `a95f03e902e5d4ca` |
+| tumbler_rifle | `Guns/sounds/item/iron_rifle/fire.ogg` | `e4a92914502ffd1c` |
+| tumbler_rifle | `Guns/item/medium_scope.png` | `543abecf859783be` |
+| tumbler_rifle | `Guns/item/long_scope_texture.png` | `e69191017eb081ad` |
+| tumbler_rifle | `Guns/item/relex_sight.png` | `c8a38dbce7c266b0` |
+| tumbler_rifle | `Guns/item/laser_sight.png` | `1e0a3342068bc5df` |
+| tumbler_rifle | `Guns/item/laser.png` | `aac5f06e892e350a` |
+| maelstrom_gun | `Guns/models/item/cyclone.json` | `4a9bfc1346356f81` |
+| maelstrom_gun | `Guns/animated/gun/cyclone.png` | `e4b9fecffd5001de` |
+| maelstrom_gun | `Guns/item/cyclone.animation.json` | `1a36782f698844e9` |
+| maelstrom_gun | `Guns/geo/item/gun/cyclone.geo.json` | `e6de5491b29da4bd` |
+| maelstrom_gun | `Guns/sounds/item/gyrojet/fire.ogg` | `5dd4318907faf231` |
+| ermine_rifle | `Guns/models/item/minksy.json` | `3e955ab4f660724c` |
+| ermine_rifle | `Guns/animated/gun/minksy.png` | `f7e2fc7a932cfa2b` |
+| ermine_rifle | `Guns/item/minksy.animation.json` | `978813a0779a5add` |
+| ermine_rifle | `Guns/geo/item/gun/minksy.geo.json` | `44c1328030613ad3` |
+| ermine_rifle | `Guns/sounds/item/laser/fire_2.ogg` | `a585dc4d697303f0` |
+| ermine_rifle | `Guns/item/long_scope_texture.png` | `e69191017eb081ad` |
+| ermine_rifle | `Guns/item/medium_scope.png` | `543abecf859783be` |
+| ermine_rifle | `Guns/item/relex_sight.png` | `c8a38dbce7c266b0` |
+| ermine_rifle | `Guns/item/laser_sight.png` | `1e0a3342068bc5df` |
+| ermine_rifle | `Guns/item/laser.png` | `aac5f06e892e350a` |
+| geode_cutter | `Guns/models/item/shard_culler.json` | `179cce980f2238ae` |
+| geode_cutter | `Guns/animated/gun/shard_culler.png` | `1c70f7dd638eaaed` |
+| geode_cutter | `Guns/item/shard_culler.animation.json` | `88cae86c74c8617f` |
+| geode_cutter | `Guns/geo/item/gun/shard_culler.geo.json` | `16a99498e48e2c15` |
+| geode_cutter | `Guns/sounds/item/beam/fire.ogg` | `d91dc843b166ee89` |
 
 - **The bolt sound's tag:** `bolt.ogg` carries Vorbis tags naming another source ("All Epic Infantry Assault Rifle Reload Sounds (Fortnite)"). The owner, asked about the eight tagged sounds in the library, answered "I have the rights", so it is used like the rest. None of the other sounds used here carries such a tag.
 - **The scopes' reticles and lens rims (slice 7b):** the owner uploaded them on 8 October 2026 ("heres reticles and vignette"). Two files in that upload carry embedded Photoshop metadata:
@@ -4781,7 +5195,7 @@ Slice 9E's files: the guns' tactical grip parts and the Laser Sight's textures m
 
   Shown this and asked what the scopes should use, the owner answered that they made these files and to use them. Asked the same day whether the "Big Cannons and Mounted Guns" folder is theirs (slice 6's flash frames come from it, and it holds a `wariumlogo.png`), they confirmed it is. The [library README](../../art/owner-library/README.md#effect-textures-8-october-2026) records both.
 - **Names:** Jugcraft's own, under the license policy's fan-homage rules. No `scguns:` reference reaches the game: the converter writes its own files with `jugcraft:` paths, and the animations name no resources.
-- **Drawn here:** the round icons, as maps (`tools/item_icons/light_round.txt`, `rifle_round.txt`, `buckshot_shell.txt`, `paper_cartridge.txt`), and the props' pixels in the atlas copies (the Thunderpipe's and the Highwayman's shells, the Longhorn's cartridge, slice 4's muzzle-loaders' balls, ramrods and flashes, the Stoker's fuel can, the Linesman's and the Glowmouth's cells, the Skylark Rifle's rocket, the Bullfrog's grenade, the Fowler's balls, ramrod and flash, and the Culverin's ball and flash). The Stoker's flame is the owner's pilot flame, copied pixel for pixel into its atlas corner.
+- **Drawn here:** the round icons, as maps (`tools/item_icons/light_round.txt`, `rifle_round.txt`, `buckshot_shell.txt`, `paper_cartridge.txt`, `dart.txt` after the owner's frog dart, `Guns/item/frog_dart.png`, and `microjet.txt` after the owner's `Guns/item/microjet.png`), and the props' pixels in the atlas copies (the Thunderpipe's and the Highwayman's shells, the Longhorn's cartridge, slice 4's muzzle-loaders' balls, ramrods and flashes, the Stoker's fuel can, the Linesman's and the Glowmouth's cells, the Skylark Rifle's rocket, the Bullfrog's grenade, the Fowler's balls, ramrod and flash, and the Culverin's ball and flash). The Stoker's flame is the owner's pilot flame, copied pixel for pixel into its atlas corner.
 - **The Cell Rack (slice 10E):** its block model is built here from boxes (`cell_rack_model()` in `tools/guns.py`) on the power gear's electric-look textures, the Charging Station's. Nothing new is drawn, and no owner file is used; the cells in it are the Energy Cell's own icons.
 
 ## Verification
@@ -5916,13 +6330,112 @@ Slice 9E's files: the guns' tactical grip parts and the Laser Sight's textures m
   - `GunsGameTests` counts 99 guns; `TacticalAttachmentsGameTests` the thirty-nine guns the Tactical Grip fits, these three among them.
   - The guns' client test (`GunsClientGameTests`) takes each new gun through its screenshots as every gun's: the Impetus's inspect screenshot should show it held as at rest.
 - **Armour piercing for slices 15A's and 15B's guns, run locally (27 October 2026):** `python3 tools/generate_material_data.py` rewrote the four tooltips. `python3 tools/check_mod_data.py`: PASS. `python3 tools/guns.py --check`: PASS. `python3 scripts/check_repository.py`: PASS. **Java:** a syntax parse only: 0 errors in the changed files. Game test (not run yet; CI runs it): `HeavyBulletsGameTests.heavyBulletsAreTheOwners`, with the four added.
+- **Darts and bleeding, run locally (27 October 2026):**
+  - `python3 tools/guns.py`: PASS. It copied the owner's small iron case and Lacerated icon; every gun's files came out unchanged.
+  - `python3 tools/check_icon_maps.py tools/item_icons/dart.txt`: PASS, no warnings; previewed beside the Rifle Round and the Light Round.
+  - `python3 tools/generate_material_data.py`: wrote the Dart's item, model, recipe and name, the bleeding damage type and its messages, the effect's name and the four tooltips. (It also reordered `docs/features/jug-nouveau-content-map.json`, unrelated; that file is left as before.)
+  - `python3 tools/generate_textures.py`: drew the Dart's icon from its map. It also wrote 605 unrelated textures over with other bytes; those were put back, and only `textures/item/dart.png` is new.
+  - `python3 tools/check_mod_data.py`: PASS (6256 material IDs).
+  - `python3 scripts/check_repository.py`: PASS. `python3 -m unittest discover -s scripts/tests`: 191 tests passed; `python3 scripts/package_modrinth.py check`: PASS.
+  - **Java:** a syntax parse only: 0 errors in the changed and new files.
+  - **Recipes:** every shaped recipe in the mod's data compared, mirrors included: the Dart's grid matches no other.
+  - **The dart's fall:** worked out in Python from the same rule as `GunShots.flight`, for the table above and the game test's bounds.
+  - **Alchemy value:** the Dart's record, priced from its recipe as `tools/build_alchemy_values.py` prices them (that tool needs a Minecraft jar, which isn't available here).
+- **Darts and bleeding game tests (not run yet; CI runs them):** `DartsAndBleedingGameTests` (above); `GunsGameTests` and `DiamondSteelGunsIIIGameTests` as changed. `MarksmanGunsGameTests.marksmanRiflesLandAndLoad` now stanches the Picket Rifle's bleeding after its shot: in CI (slice 15D's run on fed2bf354) the pig bled 1 between the Picket's shot and the Kestrel's, 24 ticks on, and lost 28 where 27 was due.
+- **Slice 15D, run locally (27 October 2026):**
+  - `python3 tools/guns.py`: PASS. It wrote the three guns' models, animations and atlases and copied the carabine's shot. The converter check passes on the three models (`GEO_TWINS`: 31 bones, corner for corner) and holds every bone the models have to the models' pivots. Of every other gun's files, only the Quill Rifle's model changed: its one cube the owner shrank by 0.001 px, now drawn so.
+  - **Found and fixed while building:** two of the models' cubes are turned about more than one axis, which the converter refused; it now lays such a cube anew square to the axes and turns it about one (`relaid_turn()`, `relaid()`). The Conversion's shell is shrunk (`inflate`), which the converter had ignored. The Augers' idle moves the bone their left arm hangs under and not the arm, which `arm_offset()` had required.
+  - `python3 tools/generate_material_data.py`: wrote the guns' item models, definitions, recipes, names and sounds. (It also reordered `docs/features/jug-nouveau-content-map.json`, unrelated; that file is left as before.)
+  - `python3 tools/check_mod_data.py`: PASS (8029 material IDs).
+  - `python3 scripts/check_repository.py`: PASS. `python3 -m unittest discover -s scripts/tests`: 287 tests passed; `python3 scripts/package_modrinth.py check`: PASS.
+  - **Java:** a syntax parse only: 0 errors in the changed and new files.
+  - **Recipes:** every shaped recipe in the mod's data compared, mirrors included: no gun's grid matches another (the 29 groups of matching grids elsewhere in the mod's data are the same before and after).
+  - **Alchemy values:** the three guns' records, priced from their recipes as `tools/build_alchemy_values.py` prices them (that tool needs a Minecraft jar, which isn't available here): 8211, 8208 and 8273.
+  - **Eye clearance aimed** (the previews' measure, at 1 px further out): the nearest point of each gun through its aimed shot is 3.5 px before the eye (both Augers) and 3.2 px (Tumbler); with a sight fitted, at least 2.7 px (the Long Scope on each).
+- **Slice 15D game tests (not run yet; CI runs them):**
+  - `DiamondSteelGunsIVGameTests`:
+    - `diamondSteelGunsIVAreRegistered`: each is registered with its numbers and its recipe loads, held in both hands, firing plain bullets. The Auger Rifle is two paper cartridges loaded a round at a time; the Auger Shotgun two buckshot shells of eight pellets as wide aimed as from the hip, knocking back 0.65 further; neither takes a barrel attachment or a magazine, nor fires a burst. The Tumbler Rifle is twenty-one rifle rounds every third tick in bursts of three resting 5 ticks (a 14-tick cycle), piercing 3 points, taking what the Quill Rifle takes and the barrels' four.
+    - `augerRifleLoadsARoundAtATime`, `augerShotgunLoadsAShellAtATime`: an empty one with three rounds holds one after its first round's time and two after its reload's, leaving one, and then fires.
+    - `augerShotgunFiresBothBarrels`: a pull takes from the pig a whole number of 3.5-point pellets, at most eight; the second barrel fires on the next pull, and the empty gun does not.
+    - `tumblerRifleFiresInBursts`: three shots three ticks apart all fire, a fourth at the next interval is refused, and after the burst's rest three more fire; six rounds are spent.
+  - `HeavyBulletsGameTests.heavyBulletsAreTheOwners`: the tables with the Auger Shotgun's knockback and the Tumbler Rifle's piercing.
+  - `GunsGameTests` counts 102 guns; `TacticalAttachmentsGameTests` the forty guns the Tactical Grip fits, the Tumbler among them.
+  - `BrassQuickFirersGameTests.brassQuickFirersAreRegistered` holds that no gun firing rifle rounds a pull at a time is pulled as often as the Freeholder Rifle (every 5 ticks). A burst gun's next pull comes a whole cycle later, so it counts that cycle: 14 ticks for the Tumbler. CI's first run on fed2bf354 failed this check, which had counted the Tumbler's 3 ticks between the shots of a burst. (Over a cycle the Tumbler spends 3 rounds in 14 ticks, a little more than the Freeholder's 1 in 5: it is a burst gun, compared above with the Onrush SMG and Gallant Rifle.)
+  - The guns' client test (`GunsClientGameTests`) takes each new gun through its screenshots as every gun's. It fires each gun with one pull of the attack key; it now expects a burst gun's pull to spend its burst's three rounds, where it expected one.
+- **Slice 15E, run locally (27 October 2026):**
+  - `python3 tools/guns.py`, then `--check`: PASS. It wrote the three guns' models, animations and atlases and copied the gyrojet's shot and the Microjet's case; every other gun's files came out unchanged. The converter check passes on the three models (`GEO_TWINS`: 11 bones, corner for corner) and holds every bone the models have to the models' pivots.
+  - **Found and fixed while building:** the Minksy's core is a bone turned a quarter about one axis holding cubes turned about another, which the converter refused (`bone_turn`); it now lays the cubes anew by the bone's turn and turns each about the axis its turn then lies along. A flat cube there showed that `relaid()` picked its corners for one turn only; it now picks them from the turn. The Ermine Rifle's range, first the owner's longer reach (128), would have broken the order of the energy guns the earlier tests hold (`FrontierGunsIVGameTests`, `CoilPlasmaGunsGameTests`: the Lantern Musket reaches further than all but the Solenoid Rifle): it is 80.
+  - `python3 tools/generate_material_data.py`: wrote the guns' and the Microjet's item models, definitions, recipes, names and sounds. (It also reordered `docs/features/jug-nouveau-content-map.json` and rewrote the line ends of some Jimtafacts GeckoLib files, unrelated; those are left as before.)
+  - `python3 tools/generate_textures.py`: drew the Microjet's icon; the other textures it rewrote are left as before.
+  - `python3 tools/check_icon_maps.py tools/item_icons/microjet.txt`: PASS, no warnings; previewed beside the Dart and the Rifle Round.
+  - `python3 tools/check_mod_data.py`: PASS (8033 material IDs).
+  - `python3 scripts/check_repository.py`: PASS. `python3 -m unittest discover -s scripts/tests`: 287 tests passed; `python3 scripts/package_modrinth.py check`: PASS. `git diff --check`: clean.
+  - **Java:** a syntax parse only: 0 errors in the changed and new files.
+  - **Recipes:** every shaped recipe in the mod's data compared, mirrors included: none of the four new grids matches another (the 8 groups of matching grids elsewhere in the mod's data are the same before and after).
+  - **Alchemy values:** the four records, priced from their recipes as `tools/build_alchemy_values.py` prices them (that tool needs a Minecraft jar, which isn't available here): 8266 (Maelstrom), 57181/6 (Ermine, about 9530), 57331/6 (Geode Cutter, about 9555) and 208/3 for a Microjet (about 69; a Rifle Round is about 65).
+  - **Previews:** first-person, idle, fired, aimed, through each reload (the Maelstrom's start, each step and close) and inspection. The arms' ways were searched as above; through the reloads the sleeves cover at most about a tenth of the view (the Ermine's left at the core's draw), and the Ermine's right sleeve no longer covers it aimed.
+- **Slice 15E game tests (not run yet; CI runs them):**
+  - `DiamondSteelGunsVGameTests`:
+    - `diamondSteelGunsVAreRegistered`: each is registered with its numbers and its recipe loads, held in both hands, none setting alight, lifting, bleeding, bursting or knocking back. The Maelstrom Gun is twenty-four Microjets as long as the trigger is held, loaded three a step (24 in eight steps' time; 7 in the time of 9), the Microjet a round with a case and a recipe; the Ermine Rifle a beam a pull on Energy Cells, 400 JE a charge, fifteen a magazine, no piercing, reaching short of the Lantern Musket and taking what the Auger Rifle takes; the Geode Cutter a beam as long as the trigger is held, 120 JE a charge, fifty a magazine, piercing 4 points. Neither the Maelstrom nor the Geode Cutter takes an attachment.
+    - `maelstromGunLoadsThreeAStep`: an empty Maelstrom with seven Microjets holds none two ticks before its first step's time, three after it, six after the second step, and all seven after its reload's time, none left in the inventory and the reload over; a shot then takes its damage from the pig.
+    - `geodeCutterBeamPiercesArmour`: of four pigs in 10 points of armour, one shot by the Geode Cutter takes more than another takes from a plain zap of the Cutter's damage, and no more than that damage; one shot by the Ermine Rifle takes what a plain zap of its damage takes. Each spends a round.
+  - `HeavyBulletsGameTests.heavyBulletsAreTheOwners`: the piercing table with the Geode Cutter's 4.
+  - `GunsGameTests` counts 105 guns and 6 rounds.
+  - Held by the earlier tests and expected to pass with the new guns: each energy gun's magazine fits a cell (`EnergyGunsGameTests`); the Lantern Musket and the Solenoid Rifle reach furthest (`FrontierGunsIVGameTests`, `CoilPlasmaGunsGameTests`); the Laser Sight on the Ermine and no Tactical Grip on any of the three (`TacticalAttachmentsGameTests`).
+  - The guns' client test (`GunsClientGameTests`) takes each new gun through its screenshots as every gun's; its reload of one spent Microjet is one step.
+- **Beams that mine, run locally (27 October 2026):**
+  - `python3 tools/check_mod_data.py`: PASS (8033 material IDs). Its new beam-mining check was tried against a changed gap and a bad entry (an Ermine Rifle of speed 0 and tier "gold"), and reported both.
+  - `python3 tools/guns.py --check`: PASS. `python3 scripts/check_repository.py`: PASS. `python3 -m unittest discover -s scripts/tests`: 287 tests passed; `python3 scripts/package_modrinth.py check`: PASS. `git diff --check`: clean.
+  - **Java:** a syntax parse only: 0 errors in the changed and new files.
+  - **The cuts worked by hand** from the speeds, in the game's own float arithmetic: the Seam Cutter's shot on stone cuts 0.622 (through in 2), the Geode Cutter's on netherrack 0.25 exactly (through in 4).
+- **Beams that mine, game tests (not run yet; CI runs them):**
+  - `BeamMiningGameTests`:
+    - `miningBeamsAreTheOwners`: the table is the owner's two (14 and an iron pickaxe's harvest, 1 and a diamond pickaxe's), both beam guns; the Beam Pistol and the Ermine Rifle cut nothing; the Seam Cutter is through stone in two shots and the Geode Cutter through netherrack in four; a block of no hardness goes at once; the option is on by default.
+    - `seamCutterCutsStone`: the first shot leaves the stone, the second breaks it and it drops cobblestone; two rounds are spent.
+    - `geodeCutterCutsSlowly`: three shots leave netherrack standing, the fourth breaks it and it drops itself.
+    - `beamsLeaveWhatTheyMayNotCut`: eight Seam Cutter shots each leave obsidian (beyond an iron pickaxe), a chest (a block entity) and stone before a shooter in adventure mode.
+    - `beamMiningCanBeTurnedOff`: with `guns.beam_mining` off, a shot leaves a slime block; with it on again, the next shot breaks it.
+  - Earlier tests that fire these beams: the Seam Cutter's (`SecondEnergyGunsGameTests.seamCutterBurnsWhileHeld`) aims over its pigs' stone pillars, and its beam ends beyond them; the Geode Cutter's (`DiamondSteelGunsVGameTests.geodeCutterBeamPiercesArmour`) fires once, cutting a floor block by a fifteenth. The guns' client test fires each gun once at its husk: a Seam Cutter shot cuts the stone-brick wall behind it 62% of the way, so it cracks but stands.
+- **Hit effects, run locally (27 October 2026):**
+  - `python3 tools/check_mod_data.py`: PASS (8033 material IDs). Its new hit-effects check, run alone against broken tables, reported each: a changed Lament chance, an entry that is no gun with a chance of 1.5, 0 ticks and level 9, an effect `HitEffect.holder()` does not map (poison), and bleeding on the Trench Lobber.
+  - `python3 tools/guns.py --check`: PASS. `python3 scripts/check_repository.py`: PASS. `python3 -m unittest discover -s scripts/tests`: 287 tests passed; `python3 scripts/package_modrinth.py check`: PASS. `git diff --check`: clean.
+  - **Java:** a syntax parse only: 0 errors in the changed and new files.
+- **Hit effects, game tests (passed in CI run 40586405989 on 328b93128):** every job passed: both server test jobs (`mod` and `optional integrations absent`, each "All 2988 required tests passed", the five new ones on top of the 2,983 of the beam-mining run) and all 16 client shards.
+  - `HitEffectsGameTests`:
+    - `hitEffectsAreTheOwners`: the table is the owner's four, naming vanilla's Slowness and Darkness; the Linesman and the Stormlock fire arcs, the Geode Cutter a beam, the Lament Rifle bullets; the Picket Rifle and the Caisson Pistol give none.
+    - `afflictGivesItsChance`: a sure darkness lands at its second level for 100 ticks; an effect of no chance, and none, never land. The Lament Rifle's darkness lands on a seeded roll under its chance and not on one over it, as a twin of the same random shows. The twins' seeds are drawn from a seeded source.
+    - **First CI run (40583534364, on 17fc79371):** this test failed. It seeded the twins 0 to 39, and the game's random rolls nearly the same first number for near seeds: about 0.73 for each of those forty, worked out again here in its own arithmetic, so none rolled under a quarter. The effect checks inside the loop passed; only the last assertion, that both a roll under and a roll over were found, failed. It was the only failure of the 2,988 server game tests in that run's `optional integrations absent` job, so the other new tests passed there. Seeds drawn from a source seeded 42 roll over at the first draw and under at the second, worked out the same way.
+    - `geodeCutterBeamSlows`: twelve shots through two pigs in a line hurt and slow both (slowness at its first level, at most 100 ticks); the bedrock behind them stands. All twelve hits missing one pig is about one in seventeen million.
+    - `linesmanArcSlows`: thirty arcs at a pig slow it (all thirty missing is about one in four million).
+    - `caissonArcBleeds`: twenty shots at a pig with two more beside it, two blocks apart, hurt all three and make all three bleed (a pig all twenty miss is about one in a million).
+  - `DartsAndBleedingGameTests.dartsAndBleedingAreTheOwners`: the bleeding table with the Cloudburst Gun's and the Caisson Pistol's.
+- **End-gun levitation, run locally (28 October 2026):**
+  - `python3 tools/check_mod_data.py`: PASS (8033 material IDs). Its guns check, run alone, reported an always-on lift put back into a copy of `GunShots` and a changed Borer chance.
+  - `python3 tools/guns.py --check`: PASS. `python3 scripts/check_repository.py`: PASS. `python3 -m unittest discover -s scripts/tests`: 287 tests passed; `python3 scripts/package_modrinth.py check`: PASS. `git diff --check`: clean.
+  - **Java:** a syntax parse only: 0 errors in the changed files.
+- **End-gun levitation, game tests (not run yet; CI runs them):**
+  - `EndGunsGameTests`:
+    - `endGunsAreRegistered`: each End gun's hit effect is levitation.
+    - `endGunsMakeWhatTheyHitFloat`: each End gun, fired from creative at a sturdy pig until a hit lifts it, at most 60 shots its interval and a tick apart, lifts it at the first level for 100 ticks; the pig rises more than half a block and, when the spell ends, comes down to the floor. An Undertone Rifle's shot leaves its pig standing. The Borer's 23% missing sixty times running is about one in seven million.
+  - `HitEffectsGameTests.hitEffectsAreTheOwners`: the table with the three End guns' levitation, naming vanilla's Levitation.
+  - `YetiKingGameTests.endGunLevitationLiftsNeitherHimNorHisKin` gives its own 20-tick spell, as before, now that the guns' is 100 ticks at a chance; his refusal does not depend on its length.
+- **The older guns' armour piercing and knockback, run locally (28 October 2026):**
+  - `python3 tools/check_mod_data.py`: PASS (8033 material IDs). Its guns check, run alone, reported an arc whose hits skip `pierced()` in a copy of `GunShots`, knockback put on the Stoker's flame, and a Flatboat Gun knockback missing from `tools/guns.py`.
+  - `python3 tools/guns.py --check`: PASS. `python3 scripts/check_repository.py`: PASS. `python3 -m unittest discover -s scripts/tests`: 287 tests passed; `python3 scripts/package_modrinth.py check`: PASS. `git diff --check`: clean.
+  - **Java:** a syntax parse only: 0 errors in the changed files.
+  - **The 46 tooltips** were compared with the language file: each matches `tools/guns.py`.
+- **The older guns' armour piercing and knockback, game tests (not run yet; CI runs them):**
+  - `HeavyBulletsGameTests`:
+    - `heavyBulletsAreTheOwners`: the full tables, with the 24 knockbacks and 27 piercings added; the Gallant Rifle plain; the Stoker's flame without knockback.
+    - `caissonArcPiercesArmour`: the Caisson Pistol's arc takes more from a pig in 10 points of armour than a plain zap of its damage takes from a second such pig, and no more than that damage.
+    - `jawbreakerKnocksBackAndPiercesArmour`: unchanged, and still holds the bullets' knockback and piercing.
 - **Not run:** the client by hand, a two-client dedicated server, and play.
 
 ## World and event applicability
 No worldgen, structures, bosses or seasonal content. Guns, rounds and the Cell Rack come from crafting (and the creative tab). The one loot is slice 10F's: raider gunners, in raids and raider camps, may drop their service arms (their equipment's drop chance) and rounds (the mob loot table `jugcraft:entities/raider_gunner`).
 
 ## Rollout and open questions
-- **Names:** proposed here (Rust Midge, Patchwork Carbine, Thunderpipe, Warden Pistol, Riveter SMG, Haymaker, Longhorn Rifle, Drover Rifle, Coach Gun, Duelling Pistol, Line Musket, Bellmouth, Bulldog Pistol, Marshal Revolver, Sapper Revolver, Sentry Pistol, Garrison Rifle, Breacher, Trench Lobber, Thresher, Stoker, Beam Pistol, Stormlock Rifle, Linesman, Picket Rifle, Ranger Rifle, Kestrel Rifle, Rattler Pistol, Bronco SMG, Squall Rifle, Spikedriver, Seam Cutter, Caisson Pistol, Sledge, Highwayman, Throttle, Earthmover, Skylark Rifle, Bullfrog, Solenoid Rifle, Votive Rifle, Glowmouth, Mule, Fowler, Culverin, Undertone Rifle, Murmur SMG, Reverb, Tusker, Cinder Repeater, Bastion Rifle, Ashfall Pistol, Goldbristle Carbine, Crackling, Chitin SMG, Hermit Rifle, Borer, Penny Pistol, Conductor Carbine, Magpie SMG, Tuppence Pistol, Goshawk Revolver, Lament Rifle, Tabby Revolver, Lookout Rifle, Ammonite Carbine, Fencepost Carbine, Waystation Shotgun, Highball Rifle, Flatboat Gun, Windlass Musket, Millstone Rifle, Fencepost Thumper, Parley Revolver, Lantern Musket, Holler Pistol, Minuet Pistol, Half-Crown Revolver, Holler Carbine, Minuet Carbine, Grange Carbine, Sprocket Gun, Navvy Shotgun, Freeholder Rifle, Quarrel Carbine, Hinterland Rifle, Cloudburst Gun, Firedrake, Harrow, Old Grange Carbine, Vesper Rifle, Onrush SMG, Gallant Rifle, Kreuzer Pistol, Psalm SMG, Jawbreaker, Hawker Rifle, Impetus Shotgun, Quill Rifle, Light Round, Rifle Round, Buckshot Shell, Paper Cartridge, Energy Cell, Cell Rack, Raider Gunner; the attachments keep plain names: Silencer, Baffled Silencer, Muzzle Brake, Extended Barrel, Extended Magazine, Speed Magazine, Light Stock, Weighted Stock, Wooden Stock, Light Grip, Vertical Grip, the four bayonets, Long Scope, Medium Scope, Reflex Sight, Tactical Grip, Laser Sight). The owner may rename them before release; IDs are stable only after release.
+- **Names:** proposed here (Rust Midge, Patchwork Carbine, Thunderpipe, Warden Pistol, Riveter SMG, Haymaker, Longhorn Rifle, Drover Rifle, Coach Gun, Duelling Pistol, Line Musket, Bellmouth, Bulldog Pistol, Marshal Revolver, Sapper Revolver, Sentry Pistol, Garrison Rifle, Breacher, Trench Lobber, Thresher, Stoker, Beam Pistol, Stormlock Rifle, Linesman, Picket Rifle, Ranger Rifle, Kestrel Rifle, Rattler Pistol, Bronco SMG, Squall Rifle, Spikedriver, Seam Cutter, Caisson Pistol, Sledge, Highwayman, Throttle, Earthmover, Skylark Rifle, Bullfrog, Solenoid Rifle, Votive Rifle, Glowmouth, Mule, Fowler, Culverin, Undertone Rifle, Murmur SMG, Reverb, Tusker, Cinder Repeater, Bastion Rifle, Ashfall Pistol, Goldbristle Carbine, Crackling, Chitin SMG, Hermit Rifle, Borer, Penny Pistol, Conductor Carbine, Magpie SMG, Tuppence Pistol, Goshawk Revolver, Lament Rifle, Tabby Revolver, Lookout Rifle, Ammonite Carbine, Fencepost Carbine, Waystation Shotgun, Highball Rifle, Flatboat Gun, Windlass Musket, Millstone Rifle, Fencepost Thumper, Parley Revolver, Lantern Musket, Holler Pistol, Minuet Pistol, Half-Crown Revolver, Holler Carbine, Minuet Carbine, Grange Carbine, Sprocket Gun, Navvy Shotgun, Freeholder Rifle, Quarrel Carbine, Hinterland Rifle, Cloudburst Gun, Firedrake, Harrow, Old Grange Carbine, Vesper Rifle, Onrush SMG, Gallant Rifle, Kreuzer Pistol, Psalm SMG, Jawbreaker, Hawker Rifle, Impetus Shotgun, Quill Rifle, Auger Rifle, Auger Shotgun, Tumbler Rifle, Maelstrom Gun, Ermine Rifle, Geode Cutter, Light Round, Rifle Round, Buckshot Shell, Paper Cartridge, Dart, Microjet, Bleeding, Energy Cell, Cell Rack, Raider Gunner; the attachments keep plain names: Silencer, Baffled Silencer, Muzzle Brake, Extended Barrel, Extended Magazine, Speed Magazine, Light Stock, Weighted Stock, Wooden Stock, Light Grip, Vertical Grip, the four bayonets, Long Scope, Medium Scope, Reflex Sight, Tactical Grip, Laser Sight). The owner may rename them before release; IDs are stable only after release.
 - **The arms:** placed from the animations' own evidence, without the models they were made for. The CI screenshots show where they sit; the rest points and arm directions above are the knobs.
 - **The gun sets the owner chose on 8 October 2026** are all built: the revolvers (slice 8), the service arms (slice 8B), the heavy weapons (slice 8C) and the energy weapons (slice 8D).
 - **The gun sets the owner chose on 10 October 2026** are all built, each its own pull request: the marksman rifles (slice 9A), the automatic weapons (slice 9B), the second energy weapons (slice 9C) and the pump shotguns (slice 9D).
@@ -5933,8 +6446,8 @@ No worldgen, structures, bosses or seasonal content. Guns, rounds and the Cell R
   - other mobs with guns: the owner's Scorched Guns 2-style gun mobs, once their models are in the library (slice 10F gives the raider gunners the service arms);
   - the Whizzbanger, which waits for the model its animations were made for ([above](#the-whizzbanger-waits));
   - the guns beyond these sets;
-  - the owner's other GeckoLib gun models from their upload of 23 October 2026: only the Grandle OG's and the nine diamond-steel guns' built so far (slices 15A to 15C) are in the library ([the library record](../../art/owner-library/README.md#gun-geometry-23-october-2026));
-  - the other six diamond-steel guns;
-  - the owner's armour piercing and knockback for the guns before slice 15: their data gives 49 of them one or both ([above](#follow-up-armour-piercing-for-slices-15as-and-15bs-guns));
-  - darts that fall and make what they hit bleed (the owner's Zilk 45), and a shotgun that pushes its shooter back (the owner's Inertial).
+  - the owner's other GeckoLib gun models from their upload of 23 October 2026: only the Grandle OG's and the fifteen diamond-steel guns' (slices 15A to 15E) are in the library ([the library record](../../art/owner-library/README.md#gun-geometry-23-october-2026));
+  - the owner's knockback for three guns whose shots push nothing here: the Stoker's flame, the Glowmouth's arc and the Fencepost Thumper's grenades ([above](#follow-up-armour-piercing-and-knockback-for-the-older-guns));
+  - a shotgun that pushes its shooter back (the owner's Inertial and Drill Conversion);
+  - the owner's withering (the Flayed God's) and the other hit effects of guns not built yet ([above](#follow-up-hit-effects)).
 - **Balance:** the numbers are starting points for the owner to set.

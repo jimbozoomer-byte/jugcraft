@@ -21,6 +21,46 @@ No numbered release yet. Entries on feature branches remain proposed until their
 - **Checked:** all 40 Herobrine game tests and 393 scheduler assertions pass natively, and automated rendered and two-client tests pass. CI and a human playtest have not run yet.
 - **His look:** the game's own default player texture, read at run time, under a full-bright eyes layer of four white pixels. No game asset is copied.
 
+### Unmerged: Guns, armour piercing and knockback for the older guns
+- 46 of the guns built before slice 15 take the owner's armour piercing, knockback or both: 27 pierce armour (up to 7 points, the Lament Rifle's, the Murmur SMG's and the Reverb's) and 24 knock back what they hit further. Against a creature without armour their damage is as before.
+- The **Flatboat Gun** takes the owner's knockback of 8 and throws what it hits; the **Caisson Pistol**'s arc now pierces a point of armour.
+- Their tooltips say so. The owner's knockback for the Stoker, the Glowmouth and the Fencepost Thumper is left out, as a flame, an arc and a grenade push nothing here.
+- Record: [guns.md, armour piercing and knockback for the older guns](docs/features/guns.md#follow-up-armour-piercing-and-knockback-for-the-older-guns).
+
+### Unmerged: Guns, End-gun levitation
+- The End guns now lift what they hit at the owner's numbers: the **Chitin SMG** and the **Hermit Rifle** 30% of hits and the **Borer** 23%, each for 5 s. Before, every hit lifted it for a second. A lifted creature rises about four blocks and takes a little fall damage coming down.
+- Their tooltips say their shots *may* make what they hit float.
+- Record: [guns.md, End-gun levitation](docs/features/guns.md#follow-up-end-gun-levitation).
+
+### Unmerged: Guns, hit effects
+- The owner's other hit effects come to the guns built, each a chance on every creature a hit hurts, at the owner's numbers: the **Linesman's** and the **Stormlock Rifle's** arcs may slow what they strike (40%, 10 s), the **Geode Cutter's** beam may slow what it burns (75%, 5 s), and the **Lament Rifle's** bullets may darken a player's view (25%, 5 s, Darkness II).
+- **Bleeding for two more guns:** the **Cloudburst Gun** (30%, 15 s), which the darts follow-up missed, and the **Caisson Pistol** (50%, 10 s), whose arc now carries hit effects to each creature it leaps to.
+- Their tooltips say so. The owner's withering waits for the Flayed God, which is not built.
+- Record: [guns.md, hit effects](docs/features/guns.md#follow-up-hit-effects).
+
+### Unmerged: Guns, beams that mine
+- The **Seam Cutter** and the **Geode Cutter** now cut the block their beam ends at, as the owner's mining lasers do. The Seam Cutter goes through stone in two shots (the owner's mining speed of 14, faster than a netherite pickaxe); the Geode Cutter cuts slowly (speed 1, a bare hand's). Cracks show while it cuts, and the block drops what it would broken by hand. The Seam Cutter harvests what an iron pickaxe can; the Geode Cutter what a diamond one can.
+- A beam only cuts where its shooter may break blocks: not in adventure mode, under spawn protection, in the protected town, or where a protection mod refuses. It never cuts a block holding a block entity, such as a chest or a machine. Each shot costs its charge as before.
+- Server option `guns.beam_mining` (on by default) in `config/jugcraft.properties` turns it off.
+- Record: [guns.md, beams that mine](docs/features/guns.md#follow-up-beams-that-mine).
+
+### Unmerged: Guns, slice 15E (a microjet gun and two beams)
+- **Three guns** from the owner's own GeckoLib models and animations, the last of their diamond-steel guns, each held in both hands: the **Maelstrom Gun** (the owner's Cyclone), carried at the hip, firing **Microjets** from nine tubes as long as the trigger is held, 24 to a load; the **Ermine Rifle** (the Minksy), a lever-action rifle whose beam passes through every creature in its line, on Energy Cells; and the **Geode Cutter** (the Shard Culler), a cutting beam carried at the hip, as long as the trigger is held, that passes through 4 points of armour.
+- A new round, the **Microjet**: the owner's little iron rocket (a lead nugget over gunpowder over an iron nugget make four). The Maelstrom Gun loads **three at a time**, a step each three.
+- **Beams can pierce armour** now; only the Geode Cutter's does.
+- Record: [guns.md, slice 15E](docs/features/guns.md#slice-15e-a-microjet-gun-and-two-beams).
+
+### Unmerged: Guns, slice 15D (two barrels and a burst)
+- **Three guns** from the owner's own GeckoLib models and animations, the next of their diamond-steel guns, each held in both hands: the **Auger Rifle** (the owner's Drill), two barrels of 14 a shot whose barrels swing open to load a paper cartridge at a time; the **Auger Shotgun** (the Drill Conversion), the same made over to fire two buckshot shells of eight pellets that stray as far aimed as from the hip and knock back what they hit; and the **Tumbler Rifle** (the Lockewood), which fires a **burst of three** rounds to a pull, from a magazine of 21, piercing 3 points of armour.
+- **Bursts:** a burst gun fires its rounds one each interval after a pull, then rests before the next; the server lets a burst through each burst's time and no faster.
+- **Converter:** the owner's cubes turned about more than one axis, and shrunken cubes, now come through as the owner drew them. The Quill Rifle's one shrunken cube is now drawn 0.002 px smaller, as the owner's model has it.
+- Record: [guns.md, slice 15D](docs/features/guns.md#slice-15d-two-barrels-and-a-burst).
+
+### Unmerged: Guns, darts and bleeding
+- A new round, the **Dart**: the owner's frog dart, a steel needle in a small iron case (two iron nuggets over gunpowder make six). The **Quill Rifle** fires it in place of Light Rounds. A dart falls as it flies, as an arrow does: under a block over 32 blocks, nearly four over 64.
+- A new effect, **Bleeding**: a point of damage every two seconds, through armour, for its length; it can kill, and milk stops it. Hits from the **Picket Rifle** (30%), **Spikedriver** (60%), **Harrow** (30%) and **Quill Rifle** (40%) may make a creature bleed for 15 seconds, as the owner's gun data gives them. Its icon is the owner's.
+- Record: [guns.md, the darts-and-bleeding follow-up](docs/features/guns.md#follow-up-darts-and-bleeding).
+
 ### Unmerged: Guns, armour piercing for slices 15A's and 15B's guns
 - The **Vesper Rifle**, **Onrush SMG**, **Kreuzer Pistol** and **Psalm SMG** now pass through some of a target's armour, as the owner's gun data gives them: 4.5, 3, 1 and 1 points. A creature without armour takes the same damage as before. Their tooltips say so.
 - Record: [guns.md, the armour-piercing follow-up](docs/features/guns.md#follow-up-armour-piercing-for-slices-15as-and-15bs-guns).

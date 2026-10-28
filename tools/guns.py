@@ -68,14 +68,16 @@ GUNS = {
     "patchwork_carbine": {
         "display": "Patchwork Carbine",
         "source": "makeshift_rifle",
-        "tooltip": "A stockless carbine patched from scrap. One shot each pull. Fires rifle rounds.",
+        "tooltip": "A stockless carbine patched from scrap. One shot each pull. Its shots pierce armour. Fires rifle "
+                   "rounds.",
         "damage": 6.0, "pellets": 1, "interval": 6, "auto": False, "capacity": 10,
         "reload": 48, "spread": (2.0, 0.25), "range": 96, "ammo": "rifle_round",
     },
     "thunderpipe": {
         "display": "Thunderpipe",
         "source": "boomstick",
-        "tooltip": "A sawn-off double barrel. Eight pellets a shot, loaded a shell at a time. Fires buckshot shells.",
+        "tooltip": "A sawn-off double barrel. Eight pellets a shot, loaded a shell at a time. Its shots knock back "
+                   "what they hit. Fires buckshot shells.",
         "damage": 2.5, "pellets": 8, "interval": 8, "auto": False, "capacity": 2,
         "reload": (5, 12, 13), "spread": (9.0, 6.0), "range": 24, "ammo": "buckshot_shell",
     },
@@ -83,22 +85,24 @@ GUNS = {
     "warden_pistol": {
         "display": "Warden Pistol",
         "source": "defender_pistol",
-        "tooltip": "An iron service pistol with a sliding breech, held in one hand. One shot each pull. Fires light rounds.",
+        "tooltip": "An iron service pistol with a sliding breech, held in one hand. One shot each pull. Its shots "
+                   "pierce armour. Fires light rounds.",
         "damage": 4.0, "pellets": 1, "interval": 5, "auto": False, "capacity": 12,
         "reload": 47, "spread": (2.5, 0.75), "range": 56, "ammo": "light_round",
     },
     "riveter_smg": {
         "display": "Riveter SMG",
         "source": "greaser_smg",
-        "tooltip": "An iron submachine gun that empties a long magazine in a hurry. Hold to fire. Fires light rounds.",
+        "tooltip": "An iron submachine gun that empties a long magazine in a hurry. Hold to fire. Its shots pierce "
+                   "armour. Fires light rounds.",
         "damage": 2.5, "pellets": 1, "interval": 3, "auto": True, "capacity": 30,
         "reload": 45, "spread": (3.0, 1.0), "range": 48, "ammo": "light_round",
     },
     "haymaker": {
         "display": "Haymaker",
         "source": "bruiser",
-        "tooltip": "A short pump shotgun, fired one-handed. Eight pellets a shot, loaded a shell at a time. Fires buckshot "
-                   "shells.",
+        "tooltip": "A short pump shotgun, fired one-handed. Eight pellets a shot, loaded a shell at a time. Its shots "
+                   "knock back what they hit. Fires buckshot shells.",
         "damage": 3.0, "pellets": 8, "interval": 14, "auto": False, "capacity": 5,
         "reload": (7, 11, 23), "spread": (7.0, 5.0), "range": 28, "ammo": "buckshot_shell",
     },
@@ -106,7 +110,8 @@ GUNS = {
     "longhorn_rifle": {
         "display": "Longhorn Rifle",
         "source": "marlin",
-        "tooltip": "A heavy lever-action rifle, worked between shots and loaded a round at a time. Fires rifle rounds.",
+        "tooltip": "A heavy lever-action rifle, worked between shots and loaded a round at a time. Its shots pierce "
+                   "armour. Fires rifle rounds.",
         "damage": 8.0, "pellets": 1, "interval": 13, "auto": False, "capacity": 6,
         "reload": (8, 11, 14), "spread": (1.5, 0.15), "range": 120, "ammo": "rifle_round",
     },
@@ -121,8 +126,8 @@ GUNS = {
     "coach_gun": {
         "display": "Coach Gun",
         "source": "callwell",
-        "tooltip": "An over-and-under shotgun that breaks open to load. Eight pellets a shot, two barrels. Fires "
-                   "buckshot shells.",
+        "tooltip": "An over-and-under shotgun that breaks open to load. Eight pellets a shot, two barrels. Its shots "
+                   "knock back what they hit. Fires buckshot shells.",
         "damage": 3.0, "pellets": 8, "interval": 8, "auto": False, "capacity": 2,
         "reload": (12, 13, 13), "spread": (6.0, 4.0), "range": 32, "ammo": "buckshot_shell",
     },
@@ -147,7 +152,7 @@ GUNS = {
         "display": "Bellmouth",
         "source": "blunderbuss",
         "tooltip": "A flintlock blunderbuss with a flared muzzle. Ten balls a shot at close range, then a long reload. "
-                   "Fires paper cartridges.",
+                   "Its shots knock back what they hit. Fires paper cartridges.",
         "damage": 2.5, "pellets": 10, "interval": 10, "auto": False, "capacity": 1,
         "reload": 78, "spread": (12.0, 9.0), "range": 20, "ammo": "paper_cartridge",
     },
@@ -156,7 +161,8 @@ GUNS = {
     "bulldog_pistol": {
         "display": "Bulldog Pistol",
         "source": "brawler",
-        "tooltip": "A one-handed hand cannon that breaks open to load its one heavy round. Fires rifle rounds.",
+        "tooltip": "A one-handed hand cannon that breaks open to load its one heavy round. Its shots knock back what "
+                   "they hit. Fires rifle rounds.",
         "damage": 11.0, "pellets": 1, "interval": 10, "auto": False, "capacity": 1,
         "reload": 45, "spread": (3.0, 1.0), "range": 56, "ammo": "rifle_round",
     },
@@ -170,7 +176,8 @@ GUNS = {
     "sapper_revolver": {
         "display": "Sapper Revolver",
         "source": "trenchur",
-        "tooltip": "A short revolver whose cylinder swings out to load a round at a time. Fires light rounds.",
+        "tooltip": "A short revolver whose cylinder swings out to load a round at a time. Its shots pierce armour. "
+                   "Fires light rounds.",
         "damage": 4.5, "pellets": 1, "interval": 6, "auto": False, "capacity": 6,
         "reload": (9, 12, 13), "spread": (2.5, 0.8), "range": 48, "ammo": "light_round",
     },
@@ -186,14 +193,16 @@ GUNS = {
     "garrison_rifle": {
         "display": "Garrison Rifle",
         "source": "stigg",
-        "tooltip": "A steel assault rifle with a curved magazine, firing for as long as the trigger is held. Fires rifle rounds.",
+        "tooltip": "A steel assault rifle with a curved magazine, firing for as long as the trigger is held. Its shots "
+                   "pierce armour. Fires rifle rounds.",
         "damage": 4.0, "pellets": 1, "interval": 3, "auto": True, "capacity": 30,
         "reload": 53, "spread": (3.0, 0.6), "range": 80, "ammo": "rifle_round",
     },
     "breacher": {
         "display": "Breacher",
         "source": "combat_shotgun",
-        "tooltip": "A pump shotgun fed from a box magazine, so quick to reload. Fires buckshot shells.",
+        "tooltip": "A pump shotgun fed from a box magazine, so quick to reload. Its shots knock back what they hit. "
+                   "Fires buckshot shells.",
         "damage": 3.0, "pellets": 8, "interval": 16, "auto": False, "capacity": 6,
         "reload": 52, "spread": (7.0, 5.0), "range": 28, "ammo": "buckshot_shell",
     },
@@ -219,7 +228,7 @@ GUNS = {
         "display": "Thresher",
         "source": "gattaler",
         "tooltip": "A drum-fed rotary gun. Hold the trigger: the barrels spin up, then it fires for as long as it is "
-                   "held. Fires rifle rounds.",
+                   "held. Its shots pierce armour. Fires rifle rounds.",
         "damage": 3.0, "pellets": 1, "interval": 2, "auto": True, "capacity": 60,
         "reload": 78, "spread": (4.0, 2.0), "range": 64, "ammo": "rifle_round", "spin_up": 15,
     },
@@ -250,16 +259,16 @@ GUNS = {
     "stormlock_rifle": {
         "display": "Stormlock Rifle",
         "source": "teslock_rifle",
-        "tooltip": "A coil rifle whose bolt leaps from its mark to two more creatures close by. Loaded a charge at a "
-                   "time. Runs on Energy Cells.",
+        "tooltip": "A coil rifle whose bolt leaps from its mark to two more creatures close by, and may slow them. "
+                   "Loaded a charge at a time. Runs on Energy Cells.",
         "damage": 9.0, "pellets": 1, "interval": 14, "auto": False, "capacity": 5,
         "reload": (18, 17, 20), "spread": (2.0, 0.5), "range": 64, "ammo": "energy_cell", "shot": "arc", "charge": 750,
     },
     "linesman": {
         "display": "Linesman",
         "source": "arc_worker",
-        "tooltip": "A short-range arc thrower. Hold the trigger: its arcs find the creatures in front of it and leap "
-                   "between them. Loaded a cell at a time. Runs on Energy Cells.",
+        "tooltip": "A short-range arc thrower. Hold the trigger: its arcs find the creatures in front of it, leap "
+                   "between them and may slow them. Loaded a cell at a time. Runs on Energy Cells.",
         "damage": 4.0, "pellets": 1, "interval": 6, "auto": True, "capacity": 6,
         "reload": (8, 13, 12), "spread": (15.0, 10.0), "range": 12, "ammo": "energy_cell", "shot": "arc", "charge": 250,
     },
@@ -270,8 +279,8 @@ GUNS = {
     "picket_rifle": {
         "display": "Picket Rifle",
         "source": "m3_marksman",
-        "tooltip": "A steel marksman's rifle with a peep sight: one steady shot each pull, true at long range. Fires rifle "
-                   "rounds.",
+        "tooltip": "A steel marksman's rifle with a peep sight: one steady shot each pull, true at long range, and what it "
+                   "hits may bleed. Fires rifle rounds.",
         "damage": 8.0, "pellets": 1, "interval": 8, "auto": False, "capacity": 10,
         "reload": 43, "spread": (2.0, 0.1), "range": 128, "ammo": "rifle_round",
     },
@@ -285,7 +294,8 @@ GUNS = {
     "kestrel_rifle": {
         "display": "Kestrel Rifle",
         "source": "whistler",
-        "tooltip": "A copper-bright rifle loaded from the top with a clip of eight. Takes a scope. Fires rifle rounds.",
+        "tooltip": "A copper-bright rifle loaded from the top with a clip of eight. Takes a scope. Its shots pierce "
+                   "armour. Fires rifle rounds.",
         "damage": 9.0, "pellets": 1, "interval": 9, "auto": False, "capacity": 8,
         "reload": 55, "spread": (2.0, 0.15), "range": 128, "ammo": "rifle_round",
     },
@@ -296,7 +306,7 @@ GUNS = {
         "display": "Rattler Pistol",
         "source": "auvtomag",
         "tooltip": "A steel machine pistol, held in one hand, that fires for as long as the trigger is held. Takes a "
-                   "scope. Fires light rounds.",
+                   "scope. Its shots knock back what they hit. Fires light rounds.",
         "damage": 3.0, "pellets": 1, "interval": 3, "auto": True, "capacity": 20,
         "reload": 48, "spread": (4.0, 2.0), "range": 48, "ammo": "light_round",
     },
@@ -304,7 +314,7 @@ GUNS = {
         "display": "Bronco SMG",
         "source": "jr_wristbreaker",
         "tooltip": "A short submachine gun with a broad barrel shroud, fired in one hand: it bucks hard. Hold to fire. "
-                   "Fires light rounds.",
+                   "Its shots knock back what they hit. Fires light rounds.",
         "damage": 3.5, "pellets": 1, "interval": 3, "auto": True, "capacity": 25,
         "reload": 53, "spread": (5.0, 2.5), "range": 40, "ammo": "light_round",
     },
@@ -322,8 +332,8 @@ GUNS = {
     "spikedriver": {
         "display": "Spikedriver",
         "source": "railworker",
-        "tooltip": "A rail pistol held in one hand: each heavy shot drives through every creature in its line. Its side "
-                   "magazine is changed and its lever worked to reload. Runs on Energy Cells.",
+        "tooltip": "A rail pistol held in one hand: each heavy shot drives through every creature in its line, and may make "
+                   "them bleed. Its side magazine is changed and its lever worked to reload. Runs on Energy Cells.",
         "damage": 12.0, "pellets": 1, "interval": 16, "auto": False, "capacity": 6,
         "reload": 67, "spread": (1.5, 0.3), "range": 64, "ammo": "energy_cell", "shot": "beam", "charge": 800,
     },
@@ -331,15 +341,17 @@ GUNS = {
         "display": "Seam Cutter",
         "source": "cr4k_mining_laser",
         "tooltip": "A cutting laser carried at the hip: for as long as the trigger is held, its short beam burns through "
-                   "every creature in front of it. Its core is drawn out to change. Runs on Energy Cells.",
+                   "every creature in front of it and cuts the block at its end. Its core is drawn out to change. Runs on "
+                   "Energy Cells.",
         "damage": 1.5, "pellets": 1, "interval": 2, "auto": True, "capacity": 60,
         "reload": 60, "spread": (2.0, 1.0), "range": 16, "ammo": "energy_cell", "shot": "beam", "charge": 100,
     },
     "caisson_pistol": {
         "display": "Caisson Pistol",
         "source": "hyperbaria",
-        "tooltip": "A pressure pistol held in one hand: its bolt leaps from its mark to two more creatures close by. The "
-                   "tall tank on top is changed to reload. Runs on Energy Cells.",
+        "tooltip": "A pressure pistol held in one hand: its bolt leaps from its mark to two more creatures close by, "
+                   "and may make them bleed. The tall tank on top is changed to reload. Its bolt pierces armour. Runs "
+                   "on Energy Cells.",
         "damage": 5.0, "pellets": 1, "interval": 8, "auto": False, "capacity": 10,
         "reload": 57, "spread": (6.0, 3.0), "range": 24, "ammo": "energy_cell", "shot": "arc", "charge": 300,
     },
@@ -351,7 +363,7 @@ GUNS = {
         "display": "Sledge",
         "source": "killer_23",
         "tooltip": "A heavy pump shotgun with a bird's-head grip: eight heavy pellets a shot, four shells in its tube. "
-                   "Loaded a shell at a time. Fires buckshot shells.",
+                   "Loaded a shell at a time. Its shots knock back what they hit. Fires buckshot shells.",
         "damage": 4.0, "pellets": 8, "interval": 20, "auto": False, "capacity": 4,
         "reload": (8, 14, 14), "spread": (8.0, 6.0), "range": 24, "ammo": "buckshot_shell",
     },
@@ -359,7 +371,8 @@ GUNS = {
         "display": "Highwayman",
         "source": "turnpike",
         "tooltip": "A long shotgun with a sight, its bolt worked after every shot: aimed, its pellets keep together "
-                   "further than most. Takes a scope. Loaded a shell at a time. Fires buckshot shells.",
+                   "further than most. Takes a scope. Loaded a shell at a time. Its shots pierce armour. Fires "
+                   "buckshot shells.",
         "damage": 3.0, "pellets": 8, "interval": 20, "auto": False, "capacity": 7,
         "reload": (18, 13, 16), "spread": (6.0, 2.5), "range": 40, "ammo": "buckshot_shell",
     },
@@ -437,16 +450,16 @@ GUNS = {
     "mule": {
         "display": "Mule",
         "source": "super_shotgun",
-        "tooltip": "A sawn-off double-barrel that breaks open to load both shells at once. Ten pellets a barrel. Fires "
-                   "buckshot shells.",
+        "tooltip": "A sawn-off double-barrel that breaks open to load both shells at once. Ten pellets a barrel. Its "
+                   "shots knock back what they hit. Fires buckshot shells.",
         "damage": 2.5, "pellets": 10, "interval": 8, "auto": False, "capacity": 2,
         "reload": 35, "spread": (9.0, 7.0), "range": 24, "ammo": "buckshot_shell",
     },
     "fowler": {
         "display": "Fowler",
         "source": "doublet",
-        "tooltip": "A double-barrelled flintlock, a ball rammed down each barrel. Eight balls a shot, two shots, then a "
-                   "long reload. Fires paper cartridges.",
+        "tooltip": "A double-barrelled flintlock, a ball rammed down each barrel. Eight balls a shot, two shots, then "
+                   "a long reload. Its shots knock back what they hit. Fires paper cartridges.",
         "damage": 3.0, "pellets": 8, "interval": 10, "auto": False, "capacity": 2,
         "reload": 97, "spread": (8.0, 5.0), "range": 28, "ammo": "paper_cartridge",
     },
@@ -454,7 +467,7 @@ GUNS = {
         "display": "Culverin",
         "source": "handcannon",
         "tooltip": "A stubby hand cannon, fired one-handed and loaded down its muzzle: a fist of heavy balls at close "
-                   "range, then a long reload. Fires paper cartridges.",
+                   "range, then a long reload. Its shots knock back what they hit. Fires paper cartridges.",
         "damage": 5.0, "pellets": 5, "interval": 20, "auto": False, "capacity": 1,
         "reload": 74, "spread": (9.0, 7.0), "range": 18, "ammo": "paper_cartridge",
     },
@@ -463,8 +476,8 @@ GUNS = {
     "undertone_rifle": {
         "display": "Undertone Rifle",
         "source": "sculk_resonator",
-        "tooltip": "A sculk-grown rifle, its tendrils swaying as it is handled: one hard shot each pull from a magazine of "
-                   "twelve. Fires rifle rounds.",
+        "tooltip": "A sculk-grown rifle, its tendrils swaying as it is handled: one hard shot each pull from a "
+                   "magazine of twelve. Its shots pierce armour. Fires rifle rounds.",
         "damage": 9.0, "pellets": 1, "interval": 7, "auto": False, "capacity": 12,
         "reload": 48, "spread": (2.5, 0.3), "range": 96, "ammo": "rifle_round",
     },
@@ -472,15 +485,15 @@ GUNS = {
         "display": "Murmur SMG",
         "source": "whispers",
         "tooltip": "A sculk-grown machine gun: ten shots a second for as long as the trigger is held, from a magazine "
-                   "that empties as fast. Fires light rounds.",
+                   "that empties as fast. Its shots pierce armour. Fires light rounds.",
         "damage": 3.0, "pellets": 1, "interval": 2, "auto": True, "capacity": 24,
         "reload": 48, "spread": (3.5, 1.5), "range": 48, "ammo": "light_round",
     },
     "reverb": {
         "display": "Reverb",
         "source": "echoes_2",
-        "tooltip": "A sculk-grown double-barrel whose barrels turn aside to take a shell at a time. Ten pellets a barrel. "
-                   "Fires buckshot shells.",
+        "tooltip": "A sculk-grown double-barrel whose barrels turn aside to take a shell at a time. Ten pellets a "
+                   "barrel. Its shots knock back what they hit and pierce armour. Fires buckshot shells.",
         "damage": 3.5, "pellets": 10, "interval": 8, "auto": False, "capacity": 2,
         "reload": (16, 17, 19), "spread": (7.0, 5.0), "range": 32, "ammo": "buckshot_shell",
     },
@@ -489,8 +502,8 @@ GUNS = {
     "tusker": {
         "display": "Tusker",
         "source": "mangalitsa",
-        "tooltip": "A Nether-forged pump shotgun, its pump worked after every shot: eight pellets that set what they hit "
-                   "alight. Loaded a shell at a time. Fires buckshot shells.",
+        "tooltip": "A Nether-forged pump shotgun, its pump worked after every shot: eight pellets that set what they "
+                   "hit alight. Loaded a shell at a time. Its shots knock back what they hit. Fires buckshot shells.",
         "damage": 3.0, "pellets": 8, "interval": 14, "auto": False, "capacity": 6,
         "reload": (12, 12, 13), "spread": (6.5, 4.5), "range": 28, "ammo": "buckshot_shell",
     },
@@ -498,7 +511,7 @@ GUNS = {
         "display": "Cinder Repeater",
         "source": "vulcanic_repeater",
         "tooltip": "A Nether-forged repeater, firing for as long as the trigger is held; its shots set what they hit "
-                   "alight. Fires light rounds.",
+                   "alight. Its shots pierce armour. Fires light rounds.",
         "damage": 3.5, "pellets": 1, "interval": 3, "auto": True, "capacity": 20,
         "reload": 48, "spread": (3.0, 1.2), "range": 48, "ammo": "light_round",
     },
@@ -516,8 +529,8 @@ GUNS = {
     "ashfall_pistol": {
         "display": "Ashfall Pistol",
         "source": "pyroclastic_flow",
-        "tooltip": "A Nether-forged pistol held in one hand, the tank under its barrel changed to reload: heavy shots that "
-                   "set what they hit alight. Fires light rounds.",
+        "tooltip": "A Nether-forged pistol held in one hand, the tank under its barrel changed to reload: heavy shots "
+                   "that set what they hit alight. Its shots pierce armour. Fires light rounds.",
         "damage": 6.0, "pellets": 1, "interval": 8, "auto": False, "capacity": 8,
         "reload": 47, "spread": (2.5, 0.8), "range": 56, "ammo": "light_round",
     },
@@ -532,19 +545,19 @@ GUNS = {
     "crackling": {
         "display": "Crackling",
         "source": "ribs_glory",
-        "tooltip": "A long Nether-forged pump shotgun in gold: six heavy pellets that keep together and set what they hit "
-                   "alight. Loaded a shell at a time. Fires buckshot shells.",
+        "tooltip": "A long Nether-forged pump shotgun in gold: six heavy pellets that keep together and set what they "
+                   "hit alight. Loaded a shell at a time. Its shots knock back what they hit. Fires buckshot shells.",
         "damage": 4.0, "pellets": 6, "interval": 20, "auto": False, "capacity": 5,
         "reload": (6, 10, 11), "spread": (5.0, 3.0), "range": 36, "ammo": "buckshot_shell",
     },
     # Slice 12A: the End guns, in the shulkers' purpur, each fed from a shulker box with the shulker peering out of it:
-    # a machine gun, a rifle and a heavy machine gun carried at the hip. Their shots make what they hit float, as a
-    # shulker's do (LEVITATING).
+    # a machine gun, a rifle and a heavy machine gun carried at the hip. Their shots may make what they hit float, as a
+    # shulker's do (LEVITATING; at the owner's chances since the levitation follow-up).
     "chitin_smg": {
         "display": "Chitin SMG",
         "source": "carapice",
         "tooltip": "An End-forged machine gun fed from a shulker box, firing for as long as the trigger is held; its "
-                   "shots make what they hit float. Fires light rounds.",
+                   "shots may make what they hit float. Fires light rounds.",
         "damage": 3.0, "pellets": 1, "interval": 3, "auto": True, "capacity": 24,
         "reload": 56, "spread": (3.5, 1.2), "range": 48, "ammo": "light_round",
     },
@@ -552,7 +565,7 @@ GUNS = {
         "display": "Hermit Rifle",
         "source": "shellurker",
         "tooltip": "An End-forged rifle in a shulker's shell, fed from a shulker box and firing for as long as the "
-                   "trigger is held; its shots make what they hit float. Fires rifle rounds.",
+                   "trigger is held; its shots may make what they hit float. Fires rifle rounds.",
         "damage": 5.0, "pellets": 1, "interval": 4, "auto": True, "capacity": 20,
         "reload": 51, "spread": (3.0, 0.5), "range": 80, "ammo": "rifle_round",
     },
@@ -560,7 +573,7 @@ GUNS = {
         "display": "Borer",
         "source": "weevil",
         "tooltip": "An End-forged machine gun carried at the hip, fed from a shulker box under its long barrel and "
-                   "charged with a crank; its shots make what they hit float. Fires rifle rounds.",
+                   "charged with a crank; its shots may make what they hit float. Fires rifle rounds.",
         "damage": 5.5, "pellets": 1, "interval": 5, "auto": True, "capacity": 40,
         "reload": 78, "spread": (4.0, 1.5), "range": 72, "ammo": "rifle_round",
     },
@@ -576,8 +589,8 @@ GUNS = {
     "conductor_carbine": {
         "display": "Conductor Carbine",
         "source": "llr_director",
-        "tooltip": "A copper slide-action carbine, its fore-end worked after every shot: one hard round each pull. Fires "
-                   "rifle rounds.",
+        "tooltip": "A copper slide-action carbine, its fore-end worked after every shot: one hard round each pull. Its "
+                   "shots pierce armour. Fires rifle rounds.",
         "damage": 8.0, "pellets": 1, "interval": 15, "auto": False, "capacity": 8,
         "reload": 49, "spread": (2.0, 0.3), "range": 96, "ammo": "rifle_round",
     },
@@ -603,16 +616,17 @@ GUNS = {
     "goshawk_revolver": {
         "display": "Goshawk Revolver",
         "source": "ultra_knight_hawk",
-        "tooltip": "A heavy iron revolver held in one hand, its cylinder swung out to load a round at a time. Fires "
-                   "rifle rounds.",
+        "tooltip": "A heavy iron revolver held in one hand, its cylinder swung out to load a round at a time. Its "
+                   "shots knock back what they hit. Fires rifle rounds.",
         "damage": 9.0, "pellets": 1, "interval": 10, "auto": False, "capacity": 6,
         "reload": (10, 20, 14), "spread": (2.0, 0.6), "range": 64, "ammo": "rifle_round",
     },
     "lament_rifle": {
         "display": "Lament Rifle",
         "source": "forlorn_hope",
-        "tooltip": "A sculk-grown bolt-action rifle, its bolt worked after every shot: one heavy, true shot at long range "
-                   "from a magazine of five. Fires rifle rounds.",
+        "tooltip": "A sculk-grown bolt-action rifle, its bolt worked after every shot: one heavy, true shot at long "
+                   "range from a magazine of five, and what it hits may lose its sight for a while. Its shots pierce "
+                   "armour. Fires rifle rounds.",
         "damage": 16.0, "pellets": 1, "interval": 19, "auto": False, "capacity": 5,
         "reload": 53, "spread": (2.0, 0.05), "range": 160, "ammo": "rifle_round",
     },
@@ -638,8 +652,8 @@ GUNS = {
     "ammonite_carbine": {
         "display": "Ammonite Carbine",
         "source": "spirulida",
-        "tooltip": "A carbine fed from a long curved magazine, its barrel caged in copper bands. One shot each pull. Fires "
-                   "rifle rounds.",
+        "tooltip": "A carbine fed from a long curved magazine, its barrel caged in copper bands. One shot each pull. "
+                   "Its shots pierce armour. Fires rifle rounds.",
         "damage": 5.0, "pellets": 1, "interval": 8, "auto": False, "capacity": 16,
         "reload": 60, "spread": (2.5, 0.4), "range": 88, "ammo": "rifle_round",
     },
@@ -657,8 +671,8 @@ GUNS = {
     "waystation_shotgun": {
         "display": "Waystation Shotgun",
         "source": "callwell_terminal",
-        "tooltip": "A lever-action shotgun with a drum under its action, loaded a shell at a time. Eight pellets a shot. "
-                   "Fires buckshot shells.",
+        "tooltip": "A lever-action shotgun with a drum under its action, loaded a shell at a time. Eight pellets a "
+                   "shot. Its shots knock back what they hit. Fires buckshot shells.",
         "damage": 3.0, "pellets": 8, "interval": 17, "auto": False, "capacity": 8,
         "reload": (9, 13, 18), "spread": (6.5, 4.5), "range": 28, "ammo": "buckshot_shell",
     },
@@ -666,7 +680,7 @@ GUNS = {
         "display": "Highball Rifle",
         "source": "saketini",
         "tooltip": "A single-shot rifle whose barrel swings aside to take each round: one heavy, true shot, quickly "
-                   "reloaded. Fires rifle rounds.",
+                   "reloaded. Its shots pierce armour. Fires rifle rounds.",
         "damage": 15.0, "pellets": 1, "interval": 13, "auto": False, "capacity": 1,
         "reload": 33, "spread": (2.0, 0.1), "range": 128, "ammo": "rifle_round",
     },
@@ -674,8 +688,9 @@ GUNS = {
     "flatboat_gun": {
         "display": "Flatboat Gun",
         "source": "big_bore",
-        "tooltip": "A punt gun, its long barrel loaded through a chamber that swings out to the side: one great blast of "
-                   "sixteen pellets, then a long reload. Fires buckshot shells.",
+        "tooltip": "A punt gun, its long barrel loaded through a chamber that swings out to the side: one great blast "
+                   "of sixteen pellets, then a long reload. Its shots knock back what they hit and pierce armour. "
+                   "Fires buckshot shells.",
         "damage": 3.0, "pellets": 16, "interval": 13, "auto": False, "capacity": 1,
         "reload": 72, "spread": (8.0, 6.0), "range": 36, "ammo": "buckshot_shell",
     },
@@ -690,8 +705,8 @@ GUNS = {
     "millstone_rifle": {
         "display": "Millstone Rifle",
         "source": "winnie_millend",
-        "tooltip": "A heavy lever-action rifle, slower to work than the Drover Rifle and harder hitting, loaded a round "
-                   "at a time. Fires rifle rounds.",
+        "tooltip": "A heavy lever-action rifle, slower to work than the Drover Rifle and harder hitting, loaded a "
+                   "round at a time. Its shots pierce armour. Fires rifle rounds.",
         "damage": 8.5, "pellets": 1, "interval": 15, "auto": False, "capacity": 8,
         "reload": (8, 13, 17), "spread": (2.0, 0.25), "range": 108, "ammo": "rifle_round",
     },
@@ -730,24 +745,25 @@ GUNS = {
     "holler_pistol": {
         "display": "Holler Pistol",
         "source": "howler",
-        "tooltip": "A heavy pistol held in both hands, fed from a box magazine ahead of its trigger and its bolt worked "
-                   "after each shot. Fires rifle rounds.",
+        "tooltip": "A heavy pistol held in both hands, fed from a box magazine ahead of its trigger and its bolt "
+                   "worked after each shot. Its shots knock back what they hit and pierce armour. Fires rifle rounds.",
         "damage": 12.0, "pellets": 1, "interval": 22, "auto": False, "capacity": 10,
         "reload": 58, "spread": (3.0, 0.6), "range": 80, "ammo": "rifle_round",
     },
     "minuet_pistol": {
         "display": "Minuet Pistol",
         "source": "m22_waltz",
-        "tooltip": "A light target pistol held in one hand, quick to fire and, aimed, the truest of them. Fires light "
-                   "rounds.",
+        "tooltip": "A light target pistol held in one hand, quick to fire and, aimed, the truest of them. Its shots "
+                   "knock back what they hit. Fires light rounds.",
         "damage": 3.5, "pellets": 1, "interval": 5, "auto": False, "capacity": 10,
         "reload": 48, "spread": (2.0, 0.25), "range": 64, "ammo": "light_round",
     },
     "half_crown_revolver": {
         "display": "Half-Crown Revolver",
         "source": "osgood_50",
-        "tooltip": "A break-top revolver held in one hand, its barrel tipped down to load the cylinder a round at a time. "
-                   "With a stock fitted it is held in both hands, as a carbine. Fires rifle rounds.",
+        "tooltip": "A break-top revolver held in one hand, its barrel tipped down to load the cylinder a round at a "
+                   "time. With a stock fitted it is held in both hands, as a carbine. Its shots knock back what they "
+                   "hit and pierce armour. Fires rifle rounds.",
         "damage": 9.0, "pellets": 1, "interval": 9, "auto": False, "capacity": 6,
         "reload": (9, 13, 14), "spread": (2.5, 0.6), "range": 64, "ammo": "rifle_round",
     },
@@ -758,7 +774,8 @@ GUNS = {
         "display": "Holler Carbine",
         "source": "howler_conversion",
         "tooltip": "The Holler Pistol made over into a carbine: a long shrouded barrel, and a bolt the shot works "
-                   "itself, so it fires quicker. Held in both hands. Fires rifle rounds.",
+                   "itself, so it fires quicker. Held in both hands. Its shots knock back what they hit and pierce "
+                   "armour. Fires rifle rounds.",
         "damage": 9.0, "pellets": 1, "interval": 10, "auto": False, "capacity": 10,
         "reload": 58, "spread": (2.5, 0.4), "range": 96, "ammo": "rifle_round",
     },
@@ -773,8 +790,8 @@ GUNS = {
     "grange_carbine": {
         "display": "Grange Carbine",
         "source": "grandle",
-        "tooltip": "A brass-fitted carbine held in both hands, fed from a box magazine under its receiver. Fires rifle "
-                   "rounds.",
+        "tooltip": "A brass-fitted carbine held in both hands, fed from a box magazine under its receiver. Its shots "
+                   "pierce armour. Fires rifle rounds.",
         "damage": 7.0, "pellets": 1, "interval": 7, "auto": False, "capacity": 12,
         "reload": 45, "spread": (2.5, 0.35), "range": 96, "ammo": "rifle_round",
     },
@@ -785,7 +802,7 @@ GUNS = {
         "display": "Sprocket Gun",
         "source": "cogloader",
         "tooltip": "An automatic rifle fed from a pan magazine on its top, wound like a sprocket after each change. "
-                   "Fires rifle rounds.",
+                   "Its shots pierce armour. Fires rifle rounds.",
         "damage": 4.5, "pellets": 1, "interval": 4, "auto": True, "capacity": 40,
         "reload": 63, "spread": (4.0, 1.5), "range": 80, "ammo": "rifle_round",
     },
@@ -793,15 +810,15 @@ GUNS = {
         "display": "Navvy Shotgun",
         "source": "jackhammer",
         "tooltip": "An automatic shotgun fed from a box magazine of eight shells: it fires as long as the trigger is "
-                   "held. Fires buckshot shells.",
+                   "held. Its shots knock back what they hit. Fires buckshot shells.",
         "damage": 2.5, "pellets": 6, "interval": 8, "auto": True, "capacity": 8,
         "reload": 52, "spread": (6.0, 4.0), "range": 24, "ammo": "buckshot_shell",
     },
     "freeholder_rifle": {
         "display": "Freeholder Rifle",
         "source": "libertas",
-        "tooltip": "A quick-firing rifle with glowing coils along its barrel, fed from a magazine of twenty. Fires "
-                   "rifle rounds.",
+        "tooltip": "A quick-firing rifle with glowing coils along its barrel, fed from a magazine of twenty. Its shots "
+                   "knock back what they hit. Fires rifle rounds.",
         "damage": 6.0, "pellets": 1, "interval": 5, "auto": False, "capacity": 20,
         "reload": 53, "spread": (2.5, 0.3), "range": 104, "ammo": "rifle_round",
     },
@@ -830,7 +847,7 @@ GUNS = {
         "display": "Cloudburst Gun",
         "source": "thunderhead",
         "tooltip": "A twin-barrelled automatic fed from a drum of thirty, cocked by the lever-handle on its top: it "
-                   "fires as long as the trigger is held. Fires rifle rounds.",
+                   "fires as long as the trigger is held, and what it hits may bleed. Fires rifle rounds.",
         "damage": 5.0, "pellets": 1, "interval": 4, "auto": True, "capacity": 30,
         "reload": 78, "spread": (4.5, 2.0), "range": 72, "ammo": "rifle_round",
     },
@@ -851,7 +868,7 @@ GUNS = {
         "display": "Harrow",
         "source": "scratches",
         "tooltip": "Four barrels before a drum: each pull throws four pellets in a close group with a burst of flame, "
-                   "and what they hit is set alight. Fed from a can of eight. Fires buckshot shells.",
+                   "and what they hit is set alight and may bleed. Fed from a can of eight. Fires buckshot shells.",
         "damage": 4.5, "pellets": 4, "interval": 11, "auto": False, "capacity": 8,
         "reload": 60, "spread": (3.5, 2.0), "range": 32, "ammo": "buckshot_shell",
     },
@@ -861,8 +878,9 @@ GUNS = {
     "old_grange_carbine": {
         "display": "Old Grange Carbine",
         "source": "grandle_og",
-        "tooltip": "The Grange Carbine's older make: a longer barrel, loaded from the top with a stripper clip of seven. "
-                   "Slower to fire, harder hitting and further reaching. Held in both hands. Fires rifle rounds.",
+        "tooltip": "The Grange Carbine's older make: a longer barrel, loaded from the top with a stripper clip of "
+                   "seven. Slower to fire, harder hitting and further reaching. Held in both hands. Its shots pierce "
+                   "armour. Fires rifle rounds.",
         "damage": 8.0, "pellets": 1, "interval": 9, "auto": False, "capacity": 7,
         "reload": 39, "spread": (2.0, 0.25), "range": 112, "ammo": "rifle_round",
     },
@@ -947,9 +965,67 @@ GUNS = {
         "display": "Quill Rifle",
         "source": "zilk_45",
         "tooltip": "A stainless steel dart rifle, silenced along its whole length: it fires as long as the trigger is "
-                   "held, from a magazine of thirteen, piercing armour. Fires light rounds.",
+                   "held, from a magazine of thirteen, piercing armour and making what it hits bleed. Fires darts.",
         "damage": 5.0, "pellets": 1, "interval": 4, "auto": True, "capacity": 13,
-        "reload": 43, "spread": (3.0, 0.75), "range": 64, "ammo": "light_round",
+        "reload": 43, "spread": (3.0, 0.75), "range": 64, "ammo": "dart",
+    },
+    # Slice 15D, three more of the owner's diamond-steel guns from their later GeckoLib models (GEO_PARTS), each held
+    # in both hands: the Drill, a two-barrelled rifle whose barrels swing open to be loaded a ball at a time; the Drill
+    # Conversion, the Drill made over into a two-barrelled shotgun loaded a shell at a time; and the Lockewood, a rifle
+    # that fires a burst of three to a pull (BURSTS).
+    "auger_rifle": {
+        "display": "Auger Rifle",
+        "source": "drill",
+        "tooltip": "A two-barrelled stainless steel rifle: two heavy shots, then its barrels swing open and a ball is "
+                   "rammed into each in turn. Fires paper cartridges.",
+        "damage": 14.0, "pellets": 1, "interval": 6, "auto": False, "capacity": 2,
+        "reload": (12, 17, 16), "spread": (2.0, 0.4), "range": 96, "ammo": "paper_cartridge",
+    },
+    "auger_shotgun": {
+        "display": "Auger Shotgun",
+        "source": "drill_conversion",
+        "tooltip": "The Auger Rifle made over into a two-barrelled shotgun: eight pellets a barrel that spread as wide "
+                   "aimed as from the hip, knocking back what they hit. Its barrels swing open to load a shell at a "
+                   "time. Fires buckshot shells.",
+        "damage": 3.5, "pellets": 8, "interval": 6, "auto": False, "capacity": 2,
+        "reload": (12, 17, 16), "spread": (7.5, 7.5), "range": 24, "ammo": "buckshot_shell",
+    },
+    "tumbler_rifle": {
+        "display": "Tumbler Rifle",
+        "source": "lockewood",
+        "tooltip": "A stainless steel rifle that fires a burst of three rounds to a pull, from a magazine of twenty-one, "
+                   "piercing armour. Fires rifle rounds.",
+        "damage": 5.5, "pellets": 1, "interval": 3, "auto": False, "capacity": 21,
+        "reload": 43, "spread": (2.5, 0.5), "range": 96, "ammo": "rifle_round",
+    },
+    # Slice 15E: the owner's last three diamond-steel guns, each from their own GeckoLib model and animations: the
+    # Cyclone, a heavy gun carried at the hip that fires microjets from nine tubes as long as the trigger is held, its
+    # drum loaded three at a time (LOAD_STEPS); the Minksy, a lever-action beam rifle; and the Shard Culler, a cutting beam
+    # carried at the hip that pierces armour.
+    "maelstrom_gun": {
+        "display": "Maelstrom Gun",
+        "source": "cyclone",
+        "tooltip": "A heavy stainless steel gun carried at the hip: as long as the trigger is held its nine tubes fire "
+                   "microjets, loaded three at a time. Fires microjets.",
+        "damage": 7.5, "pellets": 1, "interval": 6, "auto": True, "capacity": 24,
+        "reload": (10, 17, 20), "spread": (3.0, 1.5), "range": 64, "ammo": "microjet",
+    },
+    "ermine_rifle": {
+        "display": "Ermine Rifle",
+        "source": "minksy",
+        "tooltip": "A lever-action beam rifle: each pull of the lever sends a beam through every creature in its line. "
+                   "Its core is drawn out to reload. Runs on Energy Cells.",
+        "damage": 10.0, "pellets": 1, "interval": 12, "auto": False, "capacity": 15,
+        "reload": 53, "spread": (1.5, 0.2), "range": 80, "ammo": "energy_cell", "shot": "beam", "charge": 400,
+    },
+    "geode_cutter": {
+        "display": "Geode Cutter",
+        "source": "shard_culler",
+        "tooltip": "A crystal-lensed cutting beam carried at the hip: as long as the trigger is held it burns "
+                   "through every creature in front of it, and through armour, and may slow them; it slowly cuts "
+                   "the block at its end. Runs on Energy Cells.",
+        "damage": 3.0, "pellets": 1, "interval": 3, "auto": True, "capacity": 50,
+        "reload": 59, "spread": (3.0, 1.5), "range": 24, "ammo": "energy_cell", "shot": "beam", "charge": 120,
     },
 }
 
@@ -995,6 +1071,14 @@ AMMO = {
                                                 "B": "#c:nuggets/brass"}, 4)),
     "paper_cartridge": ("Paper Cartridge", "A lead ball and its powder, wrapped in paper for a muzzle-loader.",
                         (["P", "L", "G"], {"P": "minecraft:paper", "L": "#c:nuggets/lead", "G": "minecraft:gunpowder"}, 4)),
+    # The darts follow-up: the owner's frog dart (Guns/item/frog_dart.png; their recipe presses a needle and gunpowder
+    # into a small iron case), for the Quill Rifle. A dart falls over its flight (DART_SPEED, DART_DROP).
+    "dart": ("Dart", "A steel needle in a small iron case, for a dart rifle. It falls a little over a long shot.",
+             (["N", "N", "G"], {"N": "minecraft:iron_nugget", "G": "minecraft:gunpowder"}, 6)),
+    # Slice 15E: the owner's microjet (Guns/item/microjet.png; their recipe presses gunpowder and a bullet tip into a
+    # small iron case), a little rocket that drives itself, for the Maelstrom Gun.
+    "microjet": ("Microjet", "A little iron rocket that drives itself, its lead tip over a charge of gunpowder.",
+                 (["L", "G", "N"], {"L": "#c:nuggets/lead", "G": "minecraft:gunpowder", "N": "minecraft:iron_nugget"}, 4)),
 }
 
 # Gun recipes: crafted at a crafting table from early metal (the iron set adds brass); the owner's art carries the look.
@@ -1237,6 +1321,27 @@ RECIPES = {
                                                  "L": "minecraft:lever", "P": "#minecraft:planks"}),
     "quill_rifle": (["SSS", "DLR", " I "], {"S": "#c:ingots/stainless_steel", "D": "minecraft:diamond",
                                              "L": "minecraft:lever", "R": "minecraft:redstone", "I": "minecraft:iron_ingot"}),
+    # Slice 15D, as before. The owner's recipes give the Drill four gun barrels and the Conversion two (more stainless
+    # steel), each a wooden part (planks), and the Lockewood a rapid firing unit, heavy gun parts, two diamond steel
+    # ingots and a wooden part (redstone, more stainless steel, planks).
+    "auger_rifle": (["SSS", "SDL", "SPS"], {"S": "#c:ingots/stainless_steel", "D": "minecraft:diamond",
+                                             "L": "minecraft:lever", "P": "#minecraft:planks"}),
+    "auger_shotgun": (["SSS", "DLP"], {"S": "#c:ingots/stainless_steel", "D": "minecraft:diamond", "L": "minecraft:lever",
+                                       "P": "#minecraft:planks"}),
+    "tumbler_rifle": (["SSS", "DLR", "PS "], {"S": "#c:ingots/stainless_steel", "D": "minecraft:diamond",
+                                               "L": "minecraft:lever", "R": "minecraft:redstone", "P": "#minecraft:planks"}),
+    # Slice 15E, as before. The owner's recipes give the Cyclone two heavy gun barrels, heavy gun parts and a rapid
+    # firing unit (more stainless steel, redstone); the Minksy and the Shard Culler an energy core and heavy gun parts
+    # (the energy guns' copper cable and advanced circuit), the Minksy a wooden part (planks) and the Shard Culler an
+    # amethyst shard.
+    "maelstrom_gun": (["SSS", "SDS", "RL "], {"S": "#c:ingots/stainless_steel", "D": "minecraft:diamond",
+                                               "R": "minecraft:redstone", "L": "minecraft:lever"}),
+    "ermine_rifle": (["SSS", "DAC", "P  "], {"S": "#c:ingots/stainless_steel", "D": "minecraft:diamond",
+                                              "A": "jugcraft:advanced_circuit", "C": "jugcraft:copper_cable",
+                                              "P": "#minecraft:planks"}),
+    "geode_cutter": (["SSM", "DAC", "S S"], {"S": "#c:ingots/stainless_steel", "M": "minecraft:amethyst_shard",
+                                              "D": "minecraft:diamond", "A": "jugcraft:advanced_circuit",
+                                              "C": "jugcraft:copper_cable"}),
 }
 # The switches beyond "guns" a gun's recipe needs (separate load conditions, all of which must hold): the energy weapons
 # and their cells are useless without the Charging Station, so they need the machines too (as the leaf blower does).
@@ -3099,6 +3204,127 @@ BUILDS = {
         "muzzle": (8.0, 4.2, -1.12),
         "sight": (8.0, 5.75, 13.73),
     },
+    # Slice 15D. The Drill, the Drill Conversion and the Lockewood are the owner's GeckoLib models, as slice 15C's. The
+    # Drill's and the Conversion's bodies sit in gun_body under gun_body2 and gun_body3, which their reloads turn; their
+    # barrels (and the grips and bayonets under them, "mounts") swing open about the breech; the left arm hangs under
+    # left_arm2, which carries it and, under ball2, the ball (the Conversion's shell) its reload loop brings to the
+    # breech, shown only then. Their animations move a bolt and a shell their models lack: empty, they move nothing. The
+    # Lockewood's left arm hangs under its magazine, as the Quill's does; its magazine_2 is never shown.
+    "auger_rifle": {
+        "bones": [
+            ("gun_body3", None, [], (8.0, 1.75, 10.0)),
+            ("gun_body2", "gun_body3", [], (8.0, 1.75, 10.0)),
+            ("gun_body", "gun_body2", ["main", "sights", "seal", "scriptures"], (8.0, 1.75, 10.0)),
+            ("barrel", "gun_body", ["barrel"], (8.0, 1.725, 10.33439)),
+            ("bolt", "gun_body", [], (8.0, 1.75, 10.0)),
+            ("shell", "gun_body", [], (8.0, 1.75, 10.0)),
+            ("left_arm2", "gun_body", [], (2.0, 5.1568, 16.00305)),
+            ("ball2", "left_arm2", [], (2.0, 2.1568, 13.00305)),
+            ("ball", "ball2", ["ball"], (9.0, 2.1568, 13.00305)),
+        ],
+        "mounts": {"grip": "barrel"},
+        "hands": {"right": (7.56, 2.05, 17.25), "left": (8.65, 1.41, 7.54)},
+        "arm_parents": {"left": "left_arm2"},
+        "arms": {"right": (0.0653, -0.4957, 0.866), "left": (0.8924, -0.2391, 0.3827)},
+        "muzzle": (8.0, 4.33, -7.71),
+        "sight": (8.0, 5.75, 14.84),
+        "eye_relief": 1.0,
+    },
+    "auger_shotgun": {
+        "bones": [
+            ("gun_body3", None, [], (8.0, 1.75, 10.0)),
+            ("gun_body2", "gun_body3", [], (8.0, 1.75, 10.0)),
+            ("gun_body", "gun_body2", ["main", "sights", "seal", "scriptures"], (8.0, 1.75, 10.0)),
+            ("barrel", "gun_body", ["barrel"], (8.0, 1.725, 10.33439)),
+            ("bolt", "gun_body", [], (8.0, 1.75, 10.0)),
+            ("shell", "gun_body", [], (8.0, 1.75, 10.0)),
+            ("left_arm2", "gun_body", [], (2.0, 5.1568, 16.00305)),
+            ("ball2", "left_arm2", [], (2.0, 3.0, 12.0)),
+            ("ball", "ball2", ["ball"], (8.0, 3.1568, 12.00305)),
+        ],
+        "mounts": {"grip": "barrel"},
+        "hands": {"right": (7.56, 2.05, 17.25), "left": (8.65, 1.41, 7.54)},
+        "arm_parents": {"left": "left_arm2"},
+        "arms": {"right": (0.0653, -0.4957, 0.866), "left": (0.8924, -0.2391, 0.3827)},
+        "muzzle": (8.0, 4.33, -0.4),
+        "sight": (8.0, 5.74, 14.8),
+        "eye_relief": 1.0,
+    },
+    "tumbler_rifle": {
+        "bones": [
+            ("gun_body", None, ["main", "stan_barrel", "sights"], (8.489, 2.35, 9.25)),
+            ("bolt", "gun_body", ["bolt"], (9.61546, 4.04816, 12.63542)),
+            ("seal", "gun_body", ["seal"], (7.014, 3.4, 12.5)),
+            ("scriptures", "seal", ["scriptures"], (7.114, 3.9, 12.85)),
+            ("magazine", "gun_body", ["stan_mag"], (8.014, 2.2, 10.25)),
+            ("magazine_2", "gun_body", [], (8.489, -0.06376, 12.0787)),
+        ],
+        "hands": {"right": (7.54, 1.45, 15.86), "left": (8.09, 1.58, 7.95)},
+        "arm_parents": {"left": "magazine"},
+        "arms": {"right": (0.0653, -0.4957, 0.866), "left": (0.6871, -0.3967, 0.6088)},
+        "muzzle": (8.0, 3.53, -0.13),
+        "sight": (8.0, 6.0, 14.23),
+        "eye_relief": 1.0,
+    },
+    # Slice 15E, from the owner's GeckoLib models; each bone where the owner's stands, so their animations work it.
+    # The Cyclone is carried at the hip as the Thresher is, without sights. Its barrel (the block of nine tubes, with the
+    # drum the owner named magazine and the seal on its side) drives back as it fires; its reload slides the drum out,
+    # and each loop brings it a microjet (the owner's "rocket", under the body). The hands are where the owner's arms
+    # hold it in its idle: the right on the rear grip, the left on the handle at its left side.
+    "maelstrom_gun": {
+        "bones": [
+            ("gun_body", None, ["main"], (7.9798, 3.35, 9.2)),
+            ("body", "gun_body", [], (7.9798, 3.35, 9.2)),
+            ("bolt", "body", ["bolt"], (8.60626, 5.04816, 12.58542)),
+            ("rocket", "body", ["rocket"], (7.9798, 1.1, 12.2)),
+            ("barrel", "gun_body", ["barrel"], (7.9798, 3.35, 9.2)),
+            ("magazine", "barrel", ["drum"], (7.93748, 0.70875, 3.1625)),
+            ("seal", "barrel", ["seal"], (5.02498, 1.35, 6.95)),
+            ("scriptures", "seal", ["scriptures"], (5.02498, 2.6, 6.2)),
+        ],
+        "hands": {"right": (7.29, 3.41, 18.59), "left": (2.25, 4.97, 12.91)},
+        "arms": {"right": (-0.2164, -0.21, 0.9535), "left": (-0.2131, -0.5144, 0.8306)},
+        "muzzle": (8.0, 2.86, -2.08),
+        "sight": None,
+    },
+    # The Minksy: its shot works the lever under the grip and the hammer above it; its reload draws the energy core
+    # (in the barrel, turned a quarter as the owner turned it) out of the left side and back. The hands are the
+    # owner's arms' in its idle: the right on the grip, the left under the barrel. Its sights are the notch at the back
+    # of the receiver and the post at the muzzle.
+    "ermine_rifle": {
+        "bones": [
+            ("gun_body", None, [], (8.0, 4.25, 10.775)),
+            ("gun_body2", "gun_body", ["no_sights"], (8.0, 4.0, 3.0)),
+            ("main", "gun_body2", ["main", "sights"], (8.0, 4.25, 10.75)),
+            ("hammer", "main", ["hammer"], (8.0, 4.9, 13.9)),
+            ("lever", "main", ["lever"], (8.0, 2.75, 12.0)),
+            ("barrel", "gun_body2", ["barrel"], (8.0, 4.0, 3.0)),
+            ("core", "barrel", ["core"], (7.9985, 4.95451, 7.19723)),
+        ],
+        "hands": {"right": (8.13, 2.02, 15.05), "left": (6.96, 1.59, 6.98)},
+        "arms": {"right": (-0.2057, -0.8997, 0.3851), "left": (0.5877, -0.6813, 0.4364)},
+        "muzzle": (8.0, 5.5, -6.75),
+        "sight": (7.99, 6.9, 10.73),
+    },
+    # The Shard Culler is carried at the hip as the Seam Cutter is, without sights: one body, with its seal and
+    # scriptures, and the energy core on its left side that its reload draws out, the left hand holding it (the
+    # owner's left arm hangs under the core). Its "grip", which the reload works, is empty in the owner's model.
+    "geode_cutter": {
+        "bones": [
+            ("gun_body2", None, [], (8.025, 1.65, 7.0)),
+            ("gun_body", "gun_body2", ["main"], (8.025, 1.65, 7.0)),
+            ("body", "gun_body", [], (8.025, 1.65, 7.0)),
+            ("seal", "body", ["seal"], (7.125, 3.25, 10.75)),
+            ("scriptures", "seal", ["scriptures"], (4.95, 1.85, 9.2)),
+            ("grip", "body", [], (3.3875, 3.85, 8.75)),
+            ("core", "body", ["core"], (5.26753, 0.65325, 11.65)),
+        ],
+        "hands": {"right": (9.72, 4.49, 17.66), "left": (2.38, 3.86, 11.91)},
+        "arm_parents": {"left": "core"},
+        "arms": {"right": (-0.2164, -0.21, 0.9535), "left": (-0.1791, -0.7172, 0.6735)},
+        "muzzle": (8.0, 1.94, -0.19),
+        "sight": None,
+    },
 }
 
 # Props the animations move on bones that had no part ("@<name>" in a bone's parts): the rounds a reload carries in,
@@ -3658,6 +3884,11 @@ ZOOM = {
     "kreuzer_pistol": 0.9, "psalm_smg": 0.9, "jawbreaker": 0.9,
     # Slice 15C: a rifle, a shotgun and a dart rifle.
     "hawker_rifle": 0.8, "impetus_shotgun": 0.9, "quill_rifle": 0.85,
+    # Slice 15D: a rifle, a shotgun and a burst rifle.
+    "auger_rifle": 0.8, "auger_shotgun": 0.9, "tumbler_rifle": 0.85,
+    # Slice 15E: two heavy guns carried at the hip, as the Thresher and the Seam Cutter, and a beam rifle (the owner's
+    # zoom for the Minksy, 0.6, is a scope's; its iron sights narrow the view as the Spikedriver's).
+    "maelstrom_gun": 0.95, "ermine_rifle": 0.85, "geode_cutter": 0.95,
 }
 
 
@@ -3680,7 +3911,8 @@ def tilt(gun):
 # the start of shoot and aim_shoot; the Coach Gun's as it breaks open to reload). The owner's casing art
 # (Guns/item/<file>.png) is copied to textures/particle/<round>_casing.png for the particle jugcraft:<round>_casing
 # (JugcraftGuns.CASINGS). A paper cartridge leaves no case: its cue puffs smoke from the lock instead.
-CASINGS = {"light_round": "small_copper_casing", "rifle_round": "large_brass_casing", "buckshot_shell": "shotgun_shell"}
+CASINGS = {"light_round": "small_copper_casing", "rifle_round": "large_brass_casing", "buckshot_shell": "shotgun_shell",
+           "dart": "small_iron_casing", "microjet": "small_iron_casing"}
 # The Laser Sight's dot (slice 9E), the particle jugcraft:laser_dot (JugcraftGuns.LASER_DOT, client/guns/GunLaser): the
 # owner's red dot (Guns/effect/red_dot_reticle.png, the Reflex Sight's), copied to textures/particle/laser_dot.png.
 LASER_DOT = "red_dot_reticle"
@@ -3704,7 +3936,11 @@ FLASH_SOURCE = BLOCKS / "Big Cannons and Mounted Guns" / "textures"
 FLASH_SIZE = {"light_round": 5.0, "rifle_round": 7.0, "buckshot_shell": 8.0, "paper_cartridge": 10.0, "grenade": 9.0,
               "minecraft:blaze_powder": 8.0, "energy_cell": 6.0,
               # Slice 10A: a rocket's launch flares as wide as black powder.
-              "he_rocket": 10.0}
+              "he_rocket": 10.0,
+              # The darts-and-bleeding follow-up: a dart's small charge flashes narrower than a light round's.
+              "dart": 4.0,
+              # Slice 15E: a microjet's motor flares as wide as a rifle round's charge.
+              "microjet": 7.0}
 # The flash's tint, by the round, where it is not the owner's frames' own white-gold (client/guns/GunLooks
 # FLASH_TINTS, multiplied into the frames): an energy weapon's discharge is cyan-white.
 FLASH_TINT = {"energy_cell": 0x9FF4FF}
@@ -3924,6 +4160,16 @@ SHOT_SOUNDS = {
     "hawker_rifle": "item/bruiser/fire.ogg",
     "impetus_shotgun": "item/brass_shotgun/fire.ogg",
     "quill_rifle": "item/airgun/fire_2.ogg",
+    # Slice 15D: the shots the owner's data names: the carabine's for the Drill, the black powder shot (the Line
+    # Musket's) for the Drill Conversion and the iron rifle's (the Kestrel Rifle's) for the Lockewood.
+    "auger_rifle": "item/carabine/fire.ogg",
+    "auger_shotgun": "item/blackpowder/fire.ogg",
+    "tumbler_rifle": "item/iron_rifle/fire.ogg",
+    # Slice 15E: the shots the owner's data names: the gyrojet's for the Cyclone (new to the mod), the laser's second
+    # (the Seam Cutter's) for the Minksy and the beam's (the Murmur SMG's) for the Shard Culler.
+    "maelstrom_gun": "item/gyrojet/fire.ogg",
+    "ermine_rifle": "item/laser/fire_2.ogg",
+    "geode_cutter": "item/beam/fire.ogg",
 }
 SUBTITLES = {
     "fire": "Gun fires",
@@ -3999,6 +4245,10 @@ DAMAGE_TYPES = {
     # gun's quick shots keep their mark in reach.
     "zap": {"effects": None, "tags": ("no_knockback", "bypasses_cooldown"),
             "death": ("%1$s was zapped by %2$s", "%1$s was zapped by %2$s using %3$s", "%1$s was zapped while fighting %2$s")},
+    # Bleeding (the darts-and-bleeding follow-up): through armour, and each tick of it counts however soon after a hit.
+    # It has no attacker, so its message is the plain one, or the last with whoever last hurt the creature.
+    "bleeding": {"effects": None, "tags": ("bypasses_armor", "bypasses_cooldown"),
+                 "death": ("%1$s bled out", "%1$s bled out", "%1$s bled out while fighting %2$s")},
 }
 
 
@@ -4094,11 +4344,12 @@ BURN_SECONDS = 4
 
 # ------------------------------------------------------------------ the End guns' float (slice 12A)
 
-# Each creature an End gun's bullet hurts floats up for LIFT_TICKS, as a shulker's bullet lifts it: the game's own
-# Levitation, at its first level (about three quarters of a block a second hit). A longer spell already on it is kept.
-# It falls when it ends, and takes the fall's damage (JugcraftGuns.LEVITATING).
-LEVITATING = ("chitin_smg", "hermit_rifle", "borer")
-LIFT_TICKS = 20
+# Each creature an End gun's bullet hurts may float up, as a shulker's bullet lifts it: the game's own Levitation, at
+# its first level (nearly a block a second once it is rising). Slice 12A lifted every hit for a second; the levitation
+# follow-up gives the owner's numbers instead (their impactEffect minecraft:levitation), through HIT_EFFECTS below: 30%
+# of hits for 5 s from the Carapice (the Chitin SMG) and the Shellurker (the Hermit Rifle), 23% from the Weevil (the
+# Borer). A longer spell already on it is kept. It falls when it ends, and takes the fall's damage. LEVITATING, the guns
+# whose hits may lift, follows from HIT_EFFECTS (JugcraftGuns.LEVITATING).
 
 
 # ------------------------------------------------------------------ guns silenced by their build
@@ -4121,9 +4372,89 @@ SILENCED = ("gallant_rifle", "quill_rifle")
 # armour piercing (1.0, 1.5) to the Hawker Rifle and the Quill Rifle. The follow-up after it gives slices 15A's and
 # 15B's other guns the owner's armour piercing for them: the MAS 55's (4.5) to the Vesper Rifle, the Prush Gun's (3.0)
 # to the Onrush SMG, and the Krauser's and the Soul Drummer's (1.0 each) to the Kreuzer Pistol and the Psalm SMG.
-KNOCKBACK = {"jawbreaker": 0.6, "impetus_shotgun": 0.65}
+# Slice 15D gives the Drill Conversion's knockback (0.65) to the Auger Shotgun and the Lockewood's armour piercing (3.0)
+# to the Tumbler Rifle. The older guns follow-up gives the guns before slice 15 the owner's numbers for them: 27 pierce
+# armour and 24 knock back, 5 both. The Caisson Pistol's piercing is on its arc (an arc may pierce since then). The
+# owner's knockback for the Kiln Gun (the Stoker's flame), the Plasmabuss (the Glowmouth's arc) and the Fencer Thumper
+# (the Fencepost Thumper's grenades) is left out: a flame and an arc push nothing here, and a grenade is not a bullet.
+# The Big Bore's knockback is 8, the strongest there may be: the Flatboat Gun throws what it hits.
+KNOCKBACK = {"jawbreaker": 0.6, "impetus_shotgun": 0.65, "auger_shotgun": 0.65,
+             # The older guns follow-up: the owner's knockbackStrength for the guns before slice 15 that fire bullets.
+             "thunderpipe": 0.75, "haymaker": 0.6, "coach_gun": 0.75, "bellmouth": 0.8, "bulldog_pistol": 0.85,
+             "breacher": 0.65, "rattler_pistol": 0.8, "bronco_smg": 0.85, "sledge": 0.65, "mule": 0.65, "fowler": 0.8,
+             "culverin": 0.8, "reverb": 0.65, "tusker": 0.65, "crackling": 0.65, "goshawk_revolver": 3.0,
+             "waystation_shotgun": 0.7, "flatboat_gun": 8.0, "holler_pistol": 0.65, "minuet_pistol": 0.55,
+             "half_crown_revolver": 0.55, "holler_carbine": 0.65, "navvy_shotgun": 0.85, "freeholder_rifle": 0.4}
 PIERCING = {"vesper_rifle": 4.5, "onrush_smg": 3.0, "kreuzer_pistol": 1.0, "psalm_smg": 1.0, "jawbreaker": 4.5,
-            "hawker_rifle": 1.0, "quill_rifle": 1.5}
+            "hawker_rifle": 1.0, "quill_rifle": 1.5, "tumbler_rifle": 3.0,
+            # Slice 15E: the Shard Culler's "armorPen" (4).
+            "geode_cutter": 4.0,
+            # The older guns follow-up: the owner's armorPen for the guns before slice 15 (the Caisson Pistol's on its arc).
+            "patchwork_carbine": 2.0, "warden_pistol": 1.0, "riveter_smg": 1.0, "longhorn_rifle": 3.5,
+            "sapper_revolver": 2.5, "garrison_rifle": 2.0, "thresher": 1.0, "kestrel_rifle": 3.0, "caisson_pistol": 1.0,
+            "highwayman": 2.5, "undertone_rifle": 6.5, "murmur_smg": 7.0, "reverb": 7.0, "cinder_repeater": 2.0,
+            "ashfall_pistol": 2.0, "conductor_carbine": 2.5, "lament_rifle": 7.0, "ammonite_carbine": 2.0,
+            "highball_rifle": 2.5, "flatboat_gun": 2.0, "millstone_rifle": 1.5, "holler_pistol": 5.0,
+            "half_crown_revolver": 4.0, "holler_carbine": 5.0, "grange_carbine": 2.0, "sprocket_gun": 3.0,
+            "old_grange_carbine": 2.5}
+
+# Slice 15D: the guns that fire a burst to a pull, (rounds, rest): that many shots their interval apart, then a rest of
+# that many ticks more before the next pull fires (JugcraftGuns.BURSTS; the client fires the burst, the server's trigger
+# credit allows a burst each cycle, GunShots.spend). The owner's Lockewood fires bursts of three, resting five ticks
+# ("burstAmount" 3, "burstCooldown" 5): the Tumbler Rifle.
+BURSTS = {"tumbler_rifle": (3, 5)}
+
+# Slice 15E: the guns loaded a shell at a time that load several rounds a step: each step of their reload (shellEach
+# ticks, one reload_loop of their animation) loads this many, the last step what is left (JugcraftGuns.LOAD_STEPS,
+# GunShots' reload, GunAnimations' loops). The owner's Cyclone loads its microjets three at a time ("reloadAmount" 3):
+# the Maelstrom Gun.
+LOAD_STEPS = {"maelstrom_gun": 3}
+
+# The beam-mining follow-up after slice 15E: the beam guns whose beam cuts the block at its end, (speed, tier). Each shot
+# adds what a tool of that mining speed would cut in the gun's interval (a block of hardness h takes h x 30 ticks over
+# the speed, as vanilla's correct tool; hardness 0 at once), and the block breaks as the shooter breaking it would, its
+# drops a pickaxe of that tier's (iron or diamond). The speeds are the owner's "miningSpeed": the CR4K Mining Laser's 14
+# (the Seam Cutter), the Shard Culler's 1 (the Geode Cutter); the tiers are set beside the guns' materials, the Seam
+# Cutter's steel and the Geode Cutter's diamond. A pause of more than MINE_GAP ticks, or another block, starts the cut
+# over (JugcraftGuns.MINING, MINE_GAP; GunShots.cut). The server option guns.beam_mining turns it off.
+MINING = {"seam_cutter": (14.0, "iron"), "geode_cutter": (1.0, "diamond")}
+MINE_GAP = 10
+
+
+# ------------------------------------------------------------------ darts and bleeding
+
+# The darts-and-bleeding follow-up after slice 15C, from the owner's Zilk 45 (frog darts that fall, and laceration).
+# A dart (AMMO "dart") flies DART_SPEED blocks a tick, the owner's speed, and falls DART_DROP blocks a tick faster each
+# tick, as an arrow falls (GunShots.flight()): over 32 blocks it has fallen about 0.9 of a block, over 64 about 3.8. A
+# bullet flies straight. Both fly the gun's range at once, as every gun's shots do.
+DART_SPEED = 5.0
+DART_DROP = 0.05
+# Bleeding, the mob effect jugcraft:bleeding (JugcraftGuns.BLEEDING; the owner's "lacerated", its icon theirs): a
+# creature bleeding loses BLEED_DAMAGE every BLEED_TICKS (twice as often at each level above the first) through its
+# armour (the damage type "bleeding"), and can bleed to death; milk stops it, as any effect does. BLEEDS are the guns
+# whose hits may make a creature bleed, each (the chance a hit, ticks), from the owner's data (impactEffect
+# scguns:lacerated, its chance and duration): the M3 Marksman's for the Picket Rifle, the Railworker's for the
+# Spikedriver (its beam), the Scratches' for the Harrow and the Zilk 45's for the Quill Rifle. A shotgun's pellets on
+# one creature land as one hit: one chance a pull. The hit-effects follow-up adds the Thunderhead's for the Cloudburst
+# Gun, which the darts follow-up missed, and the Hyperbaria's for the Caisson Pistol, whose arc now carries it (each
+# creature the arc strikes has its chance).
+BLEED_TICKS = 40
+BLEED_DAMAGE = 1.0
+BLEEDS = {"picket_rifle": (0.3, 300), "spikedriver": (0.6, 300), "harrow": (0.3, 300), "quill_rifle": (0.4, 300),
+          "cloudburst_gun": (0.3, 300), "caisson_pistol": (0.5, 200)}
+BLEEDING_ICON = "lacerated"
+
+# The hit-effects follow-up: the owner's other hit effects (impactEffect, its chance a hit, its ticks and its amplifier)
+# on the guns built, as vanilla's own effects, each creature a hit hurts having its chance (JugcraftGuns.HIT_EFFECTS,
+# GunShots.afflict): slowness from the Arc Worker's arcs (the Linesman), the Teslock Rifle's (the Stormlock Rifle) and
+# the Shard Culler's beam (the Geode Cutter); darkness, at its second level, from the Forlorn Hope (the Lament Rifle);
+# and (the levitation follow-up) levitation from the End guns, in place of slice 12A's lift on every hit. The owner's
+# withering is on the Flayed God, not built.
+HIT_EFFECTS = {"linesman": ("slowness", 0.4, 200, 0), "stormlock_rifle": ("slowness", 0.4, 200, 0),
+               "geode_cutter": ("slowness", 0.75, 100, 0), "lament_rifle": ("darkness", 0.25, 100, 1),
+               "chitin_smg": ("levitation", 0.3, 100, 0), "hermit_rifle": ("levitation", 0.3, 100, 0),
+               "borer": ("levitation", 0.23, 100, 0)}
+LEVITATING = tuple(gun for gun, (effect, *_) in HIT_EFFECTS.items() if effect == "levitation")
 
 
 def cell_rack_model():
@@ -4268,6 +4599,7 @@ def write_all(write, assets, data, lang, condition):
     for ammo in CASINGS:
         write(assets / "particles" / f"{ammo}_casing.json", {"textures": [f"{MOD}:{ammo}_casing"]})
     write(assets / "particles" / "laser_dot.json", {"textures": [f"{MOD}:laser_dot"]})
+    lang[f"effect.{MOD}.bleeding"] = "Bleeding"
     lang[f"key.{MOD}.reload"] = "Reload gun"
     lang[f"key.{MOD}.inspect"] = "Inspect gun"
     lang[f"tooltip.{MOD}.guns.ammo"] = "Loaded: %s / %s"
@@ -4409,14 +4741,51 @@ GEO_PARTS.update({source: {
                  "ext_barrel": "extended_barrel", "silencer": "silencer", "advanced_silencer": "advanced_silencer",
                  "muzzle_brake": "muzzle_brake"},
     "zilk_45": {"no_sights": "body"}}.items()})
+# Slice 15D: the Drill, the Drill Conversion and the Lockewood, from the owner's later edits of them. The Drill and its
+# Conversion share their bones: a body with its seal and scriptures, the barrels as a bone of their own (they swing open
+# to load), the grips and bayonets under the barrels, and the ball the left hand loads, a bone of its own under the arm
+# (the Drill's a ball, the Conversion's a shell). Their stocks and grips are the Drill's, and their empty "gun_body"
+# stands in for "no_sights" (the owner's are empty). The Lockewood is as slice 15A's guns, with no standard stock: its
+# body is its gun_body, its empty "body" the "no_sights".
+GEO_PARTS.update({source: {
+    "main": "body", "sights": "sights", "no_sights": "gun_body", "seal": "seal", "scriptures": "scriptures",
+    "barrel": "barrel", "ball": "ball", "light_stock": "light_stock", "heavy_stock": "weighted_stock",
+    "wooden_stock": "wooden_stock", "light_grip": "light_grip", "vert_grip": "vertical_grip",
+    "iron_bayonet": "iron_bayonet", "anthralite_bayonet": "anthralite_bayonet", "diamond_bayonet": "diamond_bayonet",
+    "netherite_bayonet": "netherite_bayonet"} for source in ("drill", "drill_conversion")})
+GEO_PARTS["lockewood"] = {
+    "main": "gun_body", "bolt": "bolt", "sights": "sights", "no_sights": "body", "seal": "seal", "scriptures": "scriptures",
+    "stan_mag": "default_mag", "ext_mag": "extended_mag", "speed_mag": "speed_mag", "light_stock": "light_stock",
+    "heavy_stock": "weighted_stock", "wooden_stock": "wooden_stock", "light_grip": "light_grip",
+    "tact_grip": "vertical_grip", "iron_bayonet": "iron_bayonet", "anthralite_bayonet": "anthralite_bayonet",
+    "diamond_bayonet": "diamond_bayonet", "netherite_bayonet": "netherite_bayonet", "stan_barrel": "standard_barrel",
+    "ext_barrel": "extended_barrel", "silencer": "silencer", "advanced_silencer": "advanced_silencer",
+    "muzzle_brake": "muzzle_brake"}
 # Where each GeckoLib model stands from the item models' frame, in its own units (each cube's corners and pivot are
 # the item model's less this): the owner's Grandle OG model holds its Grandle's body, sights, bolt, stocks and grips
 # element for element at the same places less this, and its muzzle attachments and bayonets 3 px further forward on its
 # longer barrel (GEO_TWINS, check_geo()).
+# Slice 15E: the Cyclone, the Minksy and the Shard Culler, from the owner's later edits of them. The Cyclone is a body
+# and a barrel the reload's loop works, with the microjet ("rocket") its loading carries and a drum (the owner's
+# "magazine") on the barrel; its grips, stocks and bayonets are empty bones (it takes none). The Minksy's main part is
+# split into its body, the hammer and lever its shot works, and the barrel holding its energy core (the owner's "core",
+# turned a quarter about the barrel, its cubes about their own uprights: geo_part()); its empty no_sights part is the
+# empty gun_body2. The Shard Culler is one body with its seal, scriptures and core.
+GEO_PARTS["cyclone"] = {"main": "gun_body", "bolt": "bolt", "rocket": "rocket", "barrel": "barrel", "drum": "magazine",
+                        "seal": "seal", "scriptures": "scriptures"}
+GEO_PARTS["minksy"] = {
+    "main": "main", "hammer": "hammer", "lever": "lever", "sights": "sights", "no_sights": "gun_body2", "barrel": "barrel",
+    "core": "core", "light_stock": "light_stock", "heavy_stock": "weighted_stock", "wooden_stock": "wooden_stock",
+    "light_grip": "light_grip", "vert_grip": "vertical_grip", "iron_bayonet": "iron_bayonet",
+    "anthralite_bayonet": "anthralite_bayonet", "diamond_bayonet": "diamond_bayonet",
+    "netherite_bayonet": "netherite_bayonet"}
+GEO_PARTS["shard_culler"] = {"main": "gun_body", "seal": "seal", "scriptures": "scriptures", "core": "core"}
 GEO_OFFSETS = {"grandle_og": (0.00625, -8.15, -1.0), "mas_55": (0.0, -8.15, -0.8), "prush_gun": (-0.0095, -8.05, -1.25),
                "valora": (0.0125, -8.2, -0.75), "krauser": (-0.0095, -8.1, -0.1384),
                "soul_drummer": (-0.0095, -8.05, -0.2), "uppercut": (-0.0095, -8.5, -1.4),
-               "mas_peddler": (0.0, -8.15, -0.8), "inertial": (-0.0095, -8.1, -1.0), "zilk_45": (0.0, -7.95, -0.75)}
+               "mas_peddler": (0.0, -8.15, -0.8), "inertial": (-0.0095, -8.1, -1.0), "zilk_45": (0.0, -7.95, -0.75),
+               "drill": (0.0, -8.0, -2.0), "drill_conversion": (0.0, -8.0, -2.0), "lockewood": (0.014, -8.2, -1.25),
+               "cyclone": (-0.0202, -8.7, -1.2), "minksy": (0.0, -8.0, 0.0), "shard_culler": (0.025, -7.0, 1.0)}
 # The bones of a GeckoLib model that are another of the owner's guns' item-model parts, moved by (x, y, z) px: the
 # converter must give back those parts' elements, face for face (check_geo()).
 GEO_TWINS = {"grandle_og": {
@@ -4465,7 +4834,33 @@ GEO_TWINS.update({source: {bone: (f"{source}/{part}", (0, 0, 0)) for bone, part 
                 "diamond_bayonet": "diamond_bayonet", "netherite_bayonet": "netherite_bayonet",
                 "weighted_stock": "heavy_stock", "wooden_stock": "wooden_stock", "light_stock": "light_stock",
                 "default_mag": "stan_mag", "extended_mag": "ext_mag", "speed_mag": "speed_mag"}}.items()})
-GEO_RELAID = ("mas_55", "prush_gun", "valora", "krauser", "soul_drummer", "uppercut", "mas_peddler", "inertial", "zilk_45")
+# Slice 15D: the same for the Drill and the Lockewood; the Drill Conversion's grips and stocks are the Drill's parts,
+# its bayonets its own. The Lockewood's anthralite bayonet the owner reshaped.
+GEO_TWINS.update({source: {bone: (part if "/" in part else f"{source}/{part}", (0, 0, 0)) for bone, part in twins.items()}
+                  for source, twins in {
+    "drill": {"sights": "sights", "vertical_grip": "vert_grip", "light_grip": "light_grip", "iron_bayonet": "iron_bayonet",
+              "anthralite_bayonet": "anthralite_bayonet", "diamond_bayonet": "diamond_bayonet",
+              "netherite_bayonet": "netherite_bayonet", "weighted_stock": "heavy_stock", "wooden_stock": "wooden_stock",
+              "light_stock": "light_stock"},
+    "drill_conversion": {"vertical_grip": "drill/vert_grip", "light_grip": "drill/light_grip",
+                         "iron_bayonet": "iron_bayonet", "anthralite_bayonet": "anthralite_bayonet",
+                         "diamond_bayonet": "diamond_bayonet", "netherite_bayonet": "netherite_bayonet",
+                         "weighted_stock": "drill/heavy_stock", "wooden_stock": "drill/wooden_stock",
+                         "light_stock": "drill/light_stock"},
+    "lockewood": {"bolt": "bolt", "vertical_grip": "tact_grip", "light_grip": "light_grip", "iron_bayonet": "iron_bayonet",
+                  "diamond_bayonet": "diamond_bayonet", "netherite_bayonet": "netherite_bayonet",
+                  "muzzle_brake": "muzzle_brake", "advanced_silencer": "advanced_silencer", "silencer": "silencer",
+                  "weighted_stock": "heavy_stock", "wooden_stock": "wooden_stock", "light_stock": "light_stock"}}.items()})
+# Slice 15E: the same for the Cyclone's body and the Minksy's sights and attachments; none of the Shard Culler's bones
+# keeps its earlier part's shape.
+GEO_TWINS.update({source: {bone: (f"{source}/{part}", (0, 0, 0)) for bone, part in twins.items()} for source, twins in {
+    "cyclone": {"gun_body": "main"},
+    "minksy": {"sights": "sights", "vertical_grip": "vert_grip", "light_grip": "light_grip", "light_stock": "light_stock",
+               "weighted_stock": "heavy_stock", "wooden_stock": "wooden_stock", "iron_bayonet": "iron_bayonet",
+               "anthralite_bayonet": "anthralite_bayonet", "diamond_bayonet": "diamond_bayonet",
+               "netherite_bayonet": "netherite_bayonet"}}.items()})
+GEO_RELAID = ("mas_55", "prush_gun", "valora", "krauser", "soul_drummer", "uppercut", "mas_peddler", "inertial", "zilk_45",
+              "drill", "drill_conversion", "lockewood", "cyclone", "minksy", "shard_culler")
 
 
 def geo_model(source):
@@ -4479,12 +4874,20 @@ def geo_part(source, bone):
     geo = geo_model(source)
     size_px = (geo["description"]["texture_width"], geo["description"]["texture_height"])
     data = next(b for b in geo["bones"] if b["name"] == bone)
-    elements = [geo_element(cube, GEO_OFFSETS[source], size_px, f"scguns:animated/gun/{source}")
-                for cube in data.get("cubes", [])]
+    texture = f"scguns:animated/gun/{source}"
+    elements = [geo_element(cube, GEO_OFFSETS[source], size_px, texture) for cube in data.get("cubes", [])]
     if any(data.get("rotation", [0, 0, 0])):
         turn = geo_element({"origin": [0, 0, 0], "size": [0, 0, 0], "rotation": data["rotation"], "pivot": data["pivot"]},
                            GEO_OFFSETS[source], size_px, "")["rotation"]
-        elements = [dict(element, rotation=bone_turn(element.get("rotation"), turn)) for element in elements]
+        if any(e.get("rotation", {}).get("axis") not in (None, turn["axis"]) for e in elements) \
+                and abs(math.remainder(turn["angle"], 90.0)) < 1e-9:
+            # Slice 15E: the Minksy's core, turned a quarter about x, holds cubes turned about y: each is laid anew by
+            # the bone's square turn, its own turn following (geo_element()'s outer).
+            square = [[round(v) for v in row] for row in axis_turn("xyz".index(turn["axis"]), turn["angle"])]
+            elements = [geo_element(cube, GEO_OFFSETS[source], size_px, texture, (square, turn["origin"]))
+                        for cube in data.get("cubes", [])]
+        else:
+            elements = [dict(element, rotation=bone_turn(element.get("rotation"), turn)) for element in elements]
     return {"elements": elements}
 
 
@@ -4527,31 +4930,123 @@ def geo_pivot(source, bone):
     return (rnd(8.0 - x), rnd(y), rnd(z + 8.0))
 
 
-def geo_element(cube, offset, size_px, texture):
+def geo_element(cube, offset, size_px, texture, outer=None):
     """One cube of an owner GeckoLib model -> the item-model element element_cube() makes the same cube from: its
     corners less the model's offset (GEO_OFFSETS), its one-axis turn, and for each face the vanilla uv and rotation
-    giving each corner the UV GeckoLib gives it (java_face())."""
+    giving each corner the UV GeckoLib gives it (java_face()). A cube the owner turned about more than one axis is laid
+    anew as the same cube square to the axes, then turned about one (relaid_turn()); a cube the owner shrank or swelled
+    ("inflate", slice 15D) has its corners moved out by that much, its UVs those of its size. `outer` (slice 15E), a
+    whole-quarter turn and its centre, is the turn of a bone the owner turned square as a whole: the cube is laid anew
+    by it, and its own turn is then about the axis that turn takes its own axis to, about where it takes its centre."""
     ox, oy, oz = (c - d for c, d in zip(cube["origin"], offset))
     sx, sy, sz = cube["size"]
-    lo = [8.0 - ox - sx, oy, oz + 8.0]
-    element = {"from": [rnd(v) for v in lo], "to": [rnd(v + s) for v, s in zip(lo, (sx, sy, sz))]}
-    turn = cube.get("rotation", [0, 0, 0])
-    axes = [k for k in range(3) if turn[k]]
-    if len(axes) > 1:
-        raise ValueError(f"a cube turned about more than one axis: {turn}")
-    if axes:
-        k = axes[0]
-        px, py, pz = (c - d for c, d in zip(cube["pivot"], offset))
-        element["rotation"] = {"angle": rnd(turn[k] if k == 2 else -turn[k]), "axis": "xyz"[k],
-                               "origin": [rnd(8.0 - px), rnd(py), rnd(pz + 8.0)]}
-    element["faces"] = {}
+    swell = cube.get("inflate", 0.0)
+    lo = [8.0 - ox - sx - swell, oy - swell, oz + 8.0 - swell]
+    hi = [v + s + 2 * swell for v, s in zip(lo, (sx, sy, sz))]
+    corners = {}
     for face in FACES:
         data = cube.get("uv", {}).get(face)
         if data is not None:
-            corners = gecko_corner_uvs(face, data["uv"][0], data["uv"][1], data["uv_size"][0], data["uv_size"][1],
-                                       data.get("uv_rotation", 0), size_px)
-            element["faces"][face] = {**java_face(face, corners), "_texture": texture}
+            corners[face] = gecko_corner_uvs(face, data["uv"][0], data["uv"][1], data["uv_size"][0],
+                                             data["uv_size"][1], data.get("uv_rotation", 0), size_px)
+    turn = cube.get("rotation", [0, 0, 0])
+    axes = [k for k in range(3) if turn[k]]
+    rotation = None
+    if axes:
+        px, py, pz = (c - d for c, d in zip(cube["pivot"], offset))
+        pivot = [8.0 - px, py, pz + 8.0]
+        if len(axes) > 1:
+            square, k, angle = relaid_turn(turn)
+            lo, hi, corners = relaid(square, pivot, lo, hi, corners)
+        else:
+            k = axes[0]
+            angle = turn[k] if k == 2 else -turn[k]
+        rotation = (k, angle, pivot)
+    if outer:
+        square, centre = outer
+        lo, hi, corners = relaid(square, centre, lo, hi, corners)
+        if rotation:
+            # S R_k(a) S^-1 is the turn by a about S e_k: about axis m, by -a where S takes e_k to -e_m.
+            k, angle, pivot = rotation
+            m = next(r for r in range(3) if square[r][k])
+            rotation = (m, angle * square[m][k],
+                        [centre[r] + sum(square[r][t] * (pivot[t] - centre[t]) for t in range(3)) for r in range(3)])
+    if rotation:
+        k, angle, pivot = rotation
+        rotation = {"angle": rnd(angle), "axis": "xyz"[k], "origin": [rnd(v) for v in pivot]}
+    element = {"from": [rnd(v) for v in lo], "to": [rnd(v) for v in hi]}
+    if rotation:
+        element["rotation"] = rotation
+    element["faces"] = {face: {**java_face(face, corners[face]), "_texture": texture}
+                        for face in FACES if face in corners}
     return element
+
+
+# The faces' outward axes, (axis, sign), and the turns square to the axes (the 24 whole-quarter turns), as
+# matrices acting on columns (x, y, z).
+FACE_AXES = {"west": (0, -1), "east": (0, 1), "down": (1, -1), "up": (1, 1), "north": (2, -1), "south": (2, 1)}
+SQUARE_TURNS = [m for m in (
+    [[s[r] if c == p[r] else 0 for c in range(3)] for r in range(3)]
+    for p in ((0, 1, 2), (0, 2, 1), (1, 0, 2), (1, 2, 0), (2, 0, 1), (2, 1, 0))
+    for s in ((1, 1, 1), (1, 1, -1), (1, -1, 1), (1, -1, -1), (-1, 1, 1), (-1, 1, -1), (-1, -1, 1), (-1, -1, -1)))
+    if m[0][0] * (m[1][1] * m[2][2] - m[1][2] * m[2][1]) - m[0][1] * (m[1][0] * m[2][2] - m[1][2] * m[2][0])
+    + m[0][2] * (m[1][0] * m[2][1] - m[1][1] * m[2][0]) == 1]
+
+
+def axis_turn(k, angle):
+    """The right-handed turn by `angle` degrees about axis k, as turned_corners() turns."""
+    a = math.radians(angle)
+    c, s = math.cos(a), math.sin(a)
+    return [[[1, 0, 0], [0, c, -s], [0, s, c]], [[c, 0, s], [0, 1, 0], [-s, 0, c]], [[c, -s, 0], [s, c, 0], [0, 0, 1]]][k]
+
+
+def mat_mul(a, b):
+    return [[sum(a[i][t] * b[t][j] for t in range(3)) for j in range(3)] for i in range(3)]
+
+
+def relaid_turn(turn):
+    """Slice 15D: a GeckoLib cube's turn about more than one axis, as a whole-quarter turn square to the axes (which
+    lays the same cube anew along them) and then a turn about one axis of at most 45 degrees. GeckoLib turns a cube by
+    its x, then its y, then its z (RenderUtil.rotateMatrixAroundCube multiplies in z, y, x), each of (-x, -y, z) in the
+    item models' frame (element_cube()): the whole turn is Rz(z) Ry(-y) Rx(-x). Returns (square turn, axis, angle),
+    the smallest angle where several fit."""
+    whole = mat_mul(axis_turn(2, turn[2]), mat_mul(axis_turn(1, -turn[1]), axis_turn(0, -turn[0])))
+    found = []
+    for square in SQUARE_TURNS:
+        rest = mat_mul(whole, [list(row) for row in zip(*square)])
+        for k in range(3):
+            i, j = [t for t in range(3) if t != k]
+            angle = math.degrees(math.atan2(rest[j][i], rest[i][i])) if k != 1 else \
+                math.degrees(math.atan2(rest[0][2], rest[0][0]))
+            if abs(angle) <= 45.0 + 1e-9 and close(sum(rest, []), sum(axis_turn(k, angle), []), 1e-9):
+                found.append((abs(angle), square, k, angle))
+    if not found:
+        raise ValueError(f"a cube's turn {turn} is no square turn and then one about a single axis")
+    return min(found, key=lambda f: f[0])[1:]
+
+
+def relaid(square, pivot, lo, hi, corners):
+    """The cube from lo to hi turned square to the axes (`square`) about `pivot`: its new corners, and on each new face
+    the UV the old face gave each corner at the corner it came to. Which corner that is follows from the turn itself
+    (new axis r takes old axis k's side, or the other side where the turn reverses it), so a flat cube, whose two
+    sides along an axis meet, keeps its corners apart (slice 15E: the Minksy's core)."""
+    def place(point):
+        rel = [point[t] - pivot[t] for t in range(3)]
+        return [pivot[r] + sum(square[r][t] * rel[t] for t in range(3)) for r in range(3)]
+    ends = [place(lo), place(hi)]
+    new_lo = [min(e[t] for e in ends) for t in range(3)]
+    new_hi = [max(e[t] for e in ends) for t in range(3)]
+    source = [next(k for k in range(3) if square[r][k]) for r in range(3)]
+    moved = {}
+    for face, uvs in corners.items():
+        k, sign = FACE_AXES[face]
+        normal = [square[r][k] * sign for r in range(3)]
+        new_face = next(f for f, (a, s) in FACE_AXES.items() if normal[a] == s)
+        moved[new_face] = {}
+        for pick, uv in uvs.items():
+            moved[new_face][tuple(pick[source[r]] if square[r][source[r]] > 0 else 1 - pick[source[r]]
+                                  for r in range(3))] = uv
+    return new_lo, new_hi, moved
 
 
 def java_face(face, corners):
@@ -5135,9 +5630,11 @@ def key_value(channel, time=None):
 
 def arm_offset(gun, side):
     """The arm's animated position, in the file's units, in the pose its hand point is given for: the idle (constant),
-    or the "hand_pose" keyframe for an arm the idle hides."""
+    or the "hand_pose" keyframe for an arm the idle hides. An arm the pose leaves where it is (slice 15D: the Drill's
+    left arm, whose idle moves the left_arm2 it hangs under, carry()) is not moved."""
     anim, time = BUILDS[gun].get("hand_pose", {}).get(side, ("idle", None))
-    return key_value(animations(gun)["animations"][anim]["bones"][f"{side}_arm"]["position"], time)
+    channels = animations(gun)["animations"][anim]["bones"].get(f"{side}_arm", {})
+    return key_value(channels["position"], time) if "position" in channels else (0.0, 0.0, 0.0)
 
 
 def arm_pivot(gun, side):
@@ -5566,6 +6063,9 @@ def check():
     target = ASSETS / "textures" / "particle" / "laser_dot.png"
     if not target.exists() or target.read_bytes() != (LIBRARY / "effect" / f"{LASER_DOT}.png").read_bytes():
         problems.append(f"the laser dot: {target.relative_to(ROOT)} is not the library's {LASER_DOT}.png unchanged")
+    target = ASSETS / "textures" / "mob_effect" / "bleeding.png"
+    if not target.exists() or target.read_bytes() != (LIBRARY / "mob_effect" / f"{BLEEDING_ICON}.png").read_bytes():
+        problems.append(f"bleeding: {target.relative_to(ROOT)} is not the library's {BLEEDING_ICON}.png unchanged")
     for n, frame in enumerate(FLASH_FRAMES):
         target = ASSETS / "textures" / "item" / "guns" / "flash" / f"flash_{n}.png"
         if not target.exists() or target.read_bytes() != (FLASH_SOURCE / f"{frame}.png").read_bytes():
@@ -5758,6 +6258,9 @@ def write_files():
         target.parent.mkdir(parents=True, exist_ok=True)
         shutil.copyfile(LIBRARY / "item" / f"{casing}.png", target)
     shutil.copyfile(LIBRARY / "effect" / f"{LASER_DOT}.png", ASSETS / "textures" / "particle" / "laser_dot.png")
+    target = ASSETS / "textures" / "mob_effect" / "bleeding.png"
+    target.parent.mkdir(parents=True, exist_ok=True)
+    shutil.copyfile(LIBRARY / "mob_effect" / f"{BLEEDING_ICON}.png", target)
     for n, frame in enumerate(FLASH_FRAMES):
         target = ASSETS / "textures" / "item" / "guns" / "flash" / f"flash_{n}.png"
         target.parent.mkdir(parents=True, exist_ok=True)
@@ -5797,6 +6300,7 @@ def provenance():
     rows += [(name, f"effect/{name}.png") for name in OPTIC_TEXTURES]
     rows += [(f"{ammo}_casing", f"item/{casing}.png") for ammo, casing in CASINGS.items()]
     rows.append(("laser_dot", f"effect/{LASER_DOT}.png"))
+    rows.append(("bleeding", f"mob_effect/{BLEEDING_ICON}.png"))
     rows += [(name, f"item/{source}.png") for name, source in CELL_ART.items()]
     rows = [(owner, LIBRARY / path) for owner, path in rows]
     rows += [(f"flash_{n}", FLASH_SOURCE / f"{frame}.png") for n, frame in enumerate(FLASH_FRAMES)]

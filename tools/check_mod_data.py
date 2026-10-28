@@ -1873,15 +1873,16 @@ def check_guns():
     shots_java = (JAVA_ROOT / "guns" / "GunShots.java").read_text(encoding="utf-8")
     if f"BURN_SECONDS = {guns.BURN_SECONDS};" not in shots_java:
         err(f"GunShots.BURN_SECONDS differs from tools/guns.py: expected {guns.BURN_SECONDS}")
-    # Slice 12A: the End guns, whose bullets make what they hurt float, and for how long.
+    # Slice 12A: the End guns, whose bullets may make what they hurt float (since the levitation follow-up, their
+    # HIT_EFFECTS levitation, checked below with the other hit effects).
     levitating = ", ".join(f'"{gun}"' for gun in guns.LEVITATING)
     if f"LEVITATING = Set.of({levitating});" not in java:
         err(f"JugcraftGuns.LEVITATING differs from tools/guns.py: expected Set.of({levitating})")
     for gun in guns.LEVITATING:
         if gun not in guns.GUNS or guns.GUNS[gun].get("shot", "bullet") != "bullet":
             err(f"tools/guns.py LEVITATING names {gun}, which is not a gun that fires bullets")
-    if f"LIFT_TICKS = {guns.LIFT_TICKS};" not in shots_java:
-        err(f"GunShots.LIFT_TICKS differs from tools/guns.py: expected {guns.LIFT_TICKS}")
+    if "LIFT_TICKS" in shots_java or "MobEffects.LEVITATION" in shots_java:
+        err("GunShots lifts what an End gun hits by itself: since the levitation follow-up only HIT_EFFECTS (afflict) does")
     # Guns silenced by their build: no muzzle flash, and no barrel attachment (a silencer) on them.
     silenced = ", ".join(f'"{gun}"' for gun in guns.SILENCED)
     if f"SILENCED = Set.of({silenced});" not in java:
@@ -1889,19 +1890,81 @@ def check_guns():
     for gun in guns.SILENCED:
         if gun not in guns.GUNS or any(guns.ATTACHMENTS[kind]["slot"] == "barrel" for kind in guns.fits(gun)):
             err(f"tools/guns.py SILENCED names {gun}, which is not a gun, or takes a barrel attachment")
-    # Heavy bullets: how much further they knock back, and how many points of armour they pass through.
-    for name, table in (("KNOCKBACK", guns.KNOCKBACK), ("PIERCING", guns.PIERCING)):
-        entries = ", ".join(f'"{gun}", {value}F' for gun, value in table.items())
-        if f"{name} = Map.of({entries});" not in java:
-            err(f"JugcraftGuns.{name} differs from tools/guns.py: expected Map.of({entries})")
+    # Heavy bullets: how much further they knock back, and how many points of armour they (or, from slice 15E, a beam;
+    # from the older guns follow-up, an arc) pass through.
+    for name, table, shots in (("KNOCKBACK", guns.KNOCKBACK, ("bullet",)), ("PIERCING", guns.PIERCING, ("bullet", "beam", "arc"))):
+        entries = ", ".join(f'Map.entry("{gun}", {value}F)' for gun, value in table.items())
+        if f"{name} = Map.ofEntries({entries});" not in java:
+            err(f"JugcraftGuns.{name} differs from tools/guns.py: expected Map.ofEntries({entries})")
         for gun, value in table.items():
-            if gun not in guns.GUNS or guns.GUNS[gun].get("shot", "bullet") != "bullet" or not 0 < value <= 8:
-                err(f"tools/guns.py {name} names {gun}, which is not a gun that fires bullets, or gives it {value} "
-                    "(more than 0, at most 8)")
+            if gun not in guns.GUNS or guns.GUNS[gun].get("shot", "bullet") not in shots or not 0 < value <= 8:
+                err(f"tools/guns.py {name} names {gun}, which is not a gun that fires {' or '.join(shots)}s, or gives it "
+                    f"{value} (more than 0, at most 8)")
+    if any(guns.GUNS[gun].get("shot") == "arc" for gun in guns.PIERCING) and "pierced(foe, damage, pierce)" not in shots_java:
+        err("tools/guns.py PIERCING names an arc gun, but GunShots.arc does not pass its hits through pierced()")
+    # The darts-and-bleeding follow-up: how a dart flies, how bleeding hurts, and which guns' hits make a creature bleed.
+    for line in (f"DART_SPEED = {guns.DART_SPEED};", f"DART_DROP = {guns.DART_DROP};", f"BLEED_TICKS = {guns.BLEED_TICKS};",
+                 f"BLEED_DAMAGE = {guns.BLEED_DAMAGE}F;", f'DART = "dart";'):
+        if line not in java:
+            err(f"JugcraftGuns differs from tools/guns.py: expected {line}")
+    if "dart" not in guns.AMMO or "dart" not in guns.CASINGS:
+        err("tools/guns.py has no Dart round, or it leaves no case")
+    bleeds = ", ".join(f'"{gun}", new Bleed({chance}F, {ticks})' for gun, (chance, ticks) in guns.BLEEDS.items())
+    if f"BLEEDS = Map.of({bleeds});" not in java:
+        err(f"JugcraftGuns.BLEEDS differs from tools/guns.py: expected Map.of({bleeds})")
+    # The hit-effects follow-up: an arc's hits may bleed too, and some guns' hits give a vanilla effect.
+    hurts = ("bullet", "beam", "arc")
+    for gun, (chance, ticks) in guns.BLEEDS.items():
+        if gun not in guns.GUNS or guns.GUNS[gun].get("shot", "bullet") not in hurts or not 0 < chance <= 1 or ticks <= 0:
+            err(f"tools/guns.py BLEEDS names {gun}, which is not a gun that fires bullets, a beam or an arc, or gives it {chance} "
+                f"a hit (more than 0, at most 1) for {ticks} ticks")
+    effects = ", ".join(f'"{gun}", new HitEffect("{effect}", {chance}F, {ticks}, {amplifier})'
+                        for gun, (effect, chance, ticks, amplifier) in guns.HIT_EFFECTS.items())
+    if f"HIT_EFFECTS = Map.of({effects});" not in java:
+        err(f"JugcraftGuns.HIT_EFFECTS differs from tools/guns.py: expected Map.of({effects})")
+    for gun, (effect, chance, ticks, amplifier) in guns.HIT_EFFECTS.items():
+        if (gun not in guns.GUNS or guns.GUNS[gun].get("shot", "bullet") not in hurts or not 0 < chance <= 1 or ticks <= 0
+                or not 0 <= amplifier <= 4):
+            err(f"tools/guns.py HIT_EFFECTS names {gun}, which is not a gun that fires bullets, a beam or an arc, or gives it "
+                f"{chance} a hit (more than 0, at most 1) for {ticks} ticks at amplifier {amplifier} (0 to 4)")
+        if f'case "{effect}" -> MobEffects.{effect.upper()};' not in java:
+            err(f"tools/guns.py HIT_EFFECTS gives {gun} {effect}, which JugcraftGuns.HitEffect.holder() does not name")
+    if "afflict(foe, effect, player, player.getRandom());" not in shots_java or "afflict(target, effect, shooter, random);" not in shots_java:
+        err("GunShots must give each creature a bullet, beam or arc hurts its gun's hit effect (afflict)")
+    # Slice 15D: the guns that fire a burst to a pull, and how they rest between bursts.
+    bursts = ", ".join(f'"{gun}", new Burst({rounds}, {rest})' for gun, (rounds, rest) in guns.BURSTS.items())
+    if f"BURSTS = Map.of({bursts});" not in java:
+        err(f"JugcraftGuns.BURSTS differs from tools/guns.py: expected Map.of({bursts})")
+    for gun, (rounds, rest) in guns.BURSTS.items():
+        spec = guns.GUNS.get(gun, {})
+        if not spec or spec.get("auto") or not 1 < rounds <= spec.get("capacity", 0) or rest < 0:
+            err(f"tools/guns.py BURSTS names {gun}, which is not a gun of a pull a shot, or gives it a burst of {rounds} "
+                f"(more than one, at most its magazine) or a rest of {rest} ticks")
+    # Slice 15E: the guns loaded a shell at a time that load several rounds a step.
+    steps = ", ".join(f'"{gun}", {step}' for gun, step in guns.LOAD_STEPS.items())
+    if f"LOAD_STEPS = Map.of({steps});" not in java:
+        err(f"JugcraftGuns.LOAD_STEPS differs from tools/guns.py: expected Map.of({steps})")
+    for gun, step in guns.LOAD_STEPS.items():
+        spec = guns.GUNS.get(gun, {})
+        if not spec or not isinstance(spec.get("reload"), tuple) or not 1 < step <= spec.get("capacity", 0):
+            err(f"tools/guns.py LOAD_STEPS names {gun}, which is not a gun loaded a shell at a time, or loads {step} a "
+                f"step (more than one, at most its magazine)")
+    # The beam-mining follow-up: the beams that cut the block they reach, at what speed and to what pickaxe's harvest;
+    # the server option that turns it off.
+    mining = ", ".join(f'"{gun}", new Mining({speed}F, "{tier}")' for gun, (speed, tier) in guns.MINING.items())
+    if f"MINING = Map.of({mining});" not in java or f"MINE_GAP = {guns.MINE_GAP};" not in java:
+        err(f"JugcraftGuns.MINING or MINE_GAP differs from tools/guns.py: expected Map.of({mining}) and {guns.MINE_GAP}")
+    for gun, (speed, tier) in guns.MINING.items():
+        if guns.GUNS.get(gun, {}).get("shot") != "beam" or not 0 < speed <= 20 or tier not in ("iron", "diamond"):
+            err(f"tools/guns.py MINING names {gun}, which is not a gun that fires a beam, or gives it speed {speed} "
+                f"(more than 0, at most 20) or tier {tier} (iron or diamond)")
+    config = (JAVA_ROOT / "config" / "JugcraftConfig.java").read_text(encoding="utf-8")
+    if '"guns.beam_mining", true' not in config or 'JugcraftConfig.option("guns.beam_mining")' not in shots_java:
+        err("JugcraftConfig must hold the server option guns.beam_mining (on by default), and GunShots read it before a beam cuts")
     # Slice 8D: the energy weapons' charge a round, the arcs' leaps and the Energy Cell's capacity.
-    charges = ", ".join(f'"{gun}", {spec["charge"]}' for gun, spec in guns.GUNS.items() if spec.get("charge"))
-    if f"CHARGE = Map.of({charges});" not in java:
-        err(f"JugcraftGuns.CHARGE differs from tools/guns.py GUNS charge: expected Map.of({charges})")
+    charges = ", ".join(f'Map.entry("{gun}", {spec["charge"]})' for gun, spec in guns.GUNS.items() if spec.get("charge"))
+    if f"CHARGE = Map.ofEntries({charges});" not in java:
+        err(f"JugcraftGuns.CHARGE differs from tools/guns.py GUNS charge: expected Map.ofEntries({charges})")
     for line in (f"ARC_HOPS = {guns.ARC_HOPS};", f"ARC_REACH = {guns.ARC_REACH};", f"ARC_SHARE = {guns.ARC_SHARE}F;"):
         if line not in java:
             err(f"JugcraftGuns differs from tools/guns.py: expected {line}")
