@@ -804,6 +804,8 @@ def crop_textures():
     out.update(fall_garden_textures())
     from hearth_data import textures as hearth_textures  # and Cozy Fall Hearth's
     out.update(hearth_textures())
+    from haunted_midway_data import textures as haunted_midway_textures  # and Haunted Midway's
+    out.update(haunted_midway_textures())
     from lair_textures import lair_textures  # and the lairs' blocks, the Mourning Wreath and the Death Knell
     out.update(lair_textures())
     from adam_ondi_ahman_textures import adam_ondi_ahman_textures  # and Adam-ondi-Ahman's Ancient Altar

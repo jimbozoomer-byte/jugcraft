@@ -7882,6 +7882,16 @@
       "denominator": 1,
       "source": "fallback (balance pending)"
     },
+    "jugcraft:cotton_candy": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
+    "jugcraft:cotton_candy_cart": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
     "jugcraft:cotton_seeds": {
       "numerator": 1,
       "denominator": 1,
@@ -32601,6 +32611,11 @@
       "numerator": 1,
       "denominator": 1,
       "source": "recipe jugcraft:popcorn_ball"
+    },
+    "jugcraft:popcorn_wagon": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
     },
     "jugcraft:porcelain_batch": {
       "numerator": 517,

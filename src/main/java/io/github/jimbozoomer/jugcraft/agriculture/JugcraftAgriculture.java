@@ -397,6 +397,8 @@ public final class JugcraftAgriculture {
 	public static BlockEntityType<PlanterBlockEntity> PLANTER_ENTITY;
 	public static BlockEntityType<DecorationBlockEntity> PORCH_SWING_ENTITY;
 	public static BlockEntityType<DecorationBlockEntity> TEA_KETTLE_ENTITY;
+	public static BlockEntityType<DecorationBlockEntity> COTTON_CANDY_CART_ENTITY;
+	public static BlockEntityType<DecorationBlockEntity> POPCORN_WAGON_ENTITY;
 	public static BlockEntityType<FirewoodRackBlockEntity> FIREWOOD_RACK_ENTITY;
 	public static BlockEntityType<DecorationBlockEntity> CHOPPING_BLOCK_ENTITY;
 	public static BlockEntityType<BlanketLadderBlockEntity> BLANKET_LADDER_ENTITY;
@@ -2407,6 +2409,7 @@ public final class JugcraftAgriculture {
 		registerBarnTools();
 		registerFallGarden();
 		registerHearth();
+		registerHauntedMidway();
 	}
 
 	/**
@@ -2979,6 +2982,29 @@ public final class JugcraftAgriculture {
 			registerItem(BuiltInRegistries.BLOCK.getKey(block).getPath(), props -> new BlockItem(block, props),
 					new Item.Properties().useBlockDescriptionPrefix(), BUILDING_TAB);
 		}
+	}
+
+	/**
+	 * Haunted Midway, decor set 6 (tools/haunted_midway.py): part 1's sweet stalls, the Cotton-Candy Cart (and the Cotton
+	 * Candy it spins) and the Caramel-Corn Wagon.
+	 */
+	private static void registerHauntedMidway() {
+		Block cart = registerBlock("cotton_candy_cart", CottonCandyCartBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_PURPLE)
+				.strength(1.5F).sound(SoundType.WOOD).noOcclusion().ignitedByLava().pushReaction(PushReaction.IMMOVEABLE));
+		COTTON_CANDY_CART_ENTITY = Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, Jugcraft.id("cotton_candy_cart"),
+				FabricBlockEntityTypeBuilder.<DecorationBlockEntity>create((pos, state) -> new DecorationBlockEntity(COTTON_CANDY_CART_ENTITY, pos, state),
+						cart).build());
+		Block wagon = registerBlock("popcorn_wagon", PopcornWagonBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_PURPLE)
+				.strength(1.5F).sound(SoundType.WOOD).noOcclusion().ignitedByLava().lightLevel(PopcornWagonBlock::light)
+				.pushReaction(PushReaction.IMMOVEABLE));
+		POPCORN_WAGON_ENTITY = Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, Jugcraft.id("popcorn_wagon"),
+				FabricBlockEntityTypeBuilder.<DecorationBlockEntity>create((pos, state) -> new DecorationBlockEntity(POPCORN_WAGON_ENTITY, pos, state),
+						wagon).build());
+		for (Block block : List.of(cart, wagon)) {
+			registerItem(BuiltInRegistries.BLOCK.getKey(block).getPath(), props -> new BlockItem(block, props),
+					new Item.Properties().useBlockDescriptionPrefix(), BUILDING_TAB);
+		}
+		food("cotton_candy", 2, 0.1F, COMPOST_LOW);
 	}
 
 	private static BlockBehaviour.Properties displayProperties() {

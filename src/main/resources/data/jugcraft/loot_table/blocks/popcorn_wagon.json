@@ -1,0 +1,164 @@
+{
+  "type": "minecraft:block",
+  "pools": [
+    {
+      "condition": {
+        "type": "minecraft:all_of",
+        "terms": [
+          {
+            "type": "minecraft:survives_explosion"
+          },
+          {
+            "type": "minecraft:match_block",
+            "blocks": "jugcraft:popcorn_wagon",
+            "state": {
+              "part": "0"
+            }
+          }
+        ]
+      },
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "jugcraft:popcorn_wagon"
+        }
+      ],
+      "rolls": 1
+    },
+    {
+      "condition": {
+        "type": "minecraft:all_of",
+        "terms": [
+          {
+            "type": "minecraft:match_block",
+            "blocks": "jugcraft:popcorn_wagon",
+            "state": {
+              "part": "0"
+            }
+          },
+          {
+            "type": "minecraft:inverted",
+            "term": {
+              "type": "minecraft:match_block",
+              "blocks": "jugcraft:popcorn_wagon",
+              "state": {
+                "popcorn": "0"
+              }
+            }
+          }
+        ]
+      },
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "jugcraft:popcorn",
+          "modifier": [
+            {
+              "type": "minecraft:set_count",
+              "count": 2,
+              "add": false,
+              "condition": {
+                "type": "minecraft:match_block",
+                "blocks": "jugcraft:popcorn_wagon",
+                "state": {
+                  "popcorn": "2"
+                }
+              }
+            },
+            {
+              "type": "minecraft:set_count",
+              "count": 3,
+              "add": false,
+              "condition": {
+                "type": "minecraft:match_block",
+                "blocks": "jugcraft:popcorn_wagon",
+                "state": {
+                  "popcorn": "3"
+                }
+              }
+            },
+            {
+              "type": "minecraft:set_count",
+              "count": 4,
+              "add": false,
+              "condition": {
+                "type": "minecraft:match_block",
+                "blocks": "jugcraft:popcorn_wagon",
+                "state": {
+                  "popcorn": "4"
+                }
+              }
+            },
+            {
+              "type": "minecraft:set_count",
+              "count": 5,
+              "add": false,
+              "condition": {
+                "type": "minecraft:match_block",
+                "blocks": "jugcraft:popcorn_wagon",
+                "state": {
+                  "popcorn": "5"
+                }
+              }
+            },
+            {
+              "type": "minecraft:set_count",
+              "count": 6,
+              "add": false,
+              "condition": {
+                "type": "minecraft:match_block",
+                "blocks": "jugcraft:popcorn_wagon",
+                "state": {
+                  "popcorn": "6"
+                }
+              }
+            },
+            {
+              "type": "minecraft:set_count",
+              "count": 7,
+              "add": false,
+              "condition": {
+                "type": "minecraft:match_block",
+                "blocks": "jugcraft:popcorn_wagon",
+                "state": {
+                  "popcorn": "7"
+                }
+              }
+            },
+            {
+              "type": "minecraft:set_count",
+              "count": 8,
+              "add": false,
+              "condition": {
+                "type": "minecraft:match_block",
+                "blocks": "jugcraft:popcorn_wagon",
+                "state": {
+                  "popcorn": "8"
+                }
+              }
+            }
+          ]
+        }
+      ],
+      "rolls": 1
+    },
+    {
+      "condition": {
+        "type": "minecraft:match_block",
+        "blocks": "jugcraft:popcorn_wagon",
+        "state": {
+          "part": "0",
+          "popping": "true"
+        }
+      },
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "jugcraft:corn_kernels"
+        }
+      ],
+      "rolls": 1
+    }
+  ],
+  "random_sequence": "jugcraft:blocks/popcorn_wagon"
+}

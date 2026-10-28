@@ -14882,6 +14882,101 @@ def check_fall_garden():
         err(f"item.{MOD}.{cafe['item']}: the text is missing")
 
 
+def check_haunted_midway():
+    """Haunted Midway (tools/haunted_midway.py, docs/features/haunted-midway.md), part 1: each stall's Java block is the
+    table's size and numbers and is registered with its own block entity, its renderer registered; the cart's spinner
+    head turns about the table's bowl and the wagon's kettle about the table's pivot, each from its runner model alone;
+    the cart's heater and the wagon's lamp and lantern glow full-bright; there is a floss model for each serving and a
+    heap for each popcorn; the wagon's upper block gives its light; Cotton Candy is a food of the table's; the wagon coats
+    two popcorn as the crafting recipe does; both drop with what they hold; the recipes were generated; and every message
+    has its text."""
+    import haunted_midway as hm
+    import menu
+    cc, pw = hm.COTTON_CANDY, hm.POPCORN_WAGON
+
+    def read(path):
+        return path.read_text(encoding="utf-8") if path.is_file() else ""
+
+    cart = read(JAVA_ROOT / "agriculture" / "CottonCandyCartBlock.java")
+    w, h, d = cc["size"]
+    for needed in (f"box({w}, {h}, {d})", f"FLOSS = {cc['floss']};", f"SPIN = {cc['spin']}F;", f"BOWL_X = {cc['bowl'][0]}F;",
+                   f"BOWL_Z = {cc['bowl'][1]}F;", "Items.SUGAR", "Items.PAPER", 'item("cotton_candy")'):
+        if needed not in cart:
+            err(f"CottonCandyCartBlock: missing {needed} (tools/haunted_midway.py COTTON_CANDY)")
+    wagon = read(JAVA_ROOT / "agriculture" / "PopcornWagonBlock.java")
+    w, h, d = pw["size"]
+    for needed in (f"box({w}, {h}, {d})", f"CAPACITY = {pw['capacity']};", f"POP_TICKS = {pw['pop_ticks']};", f"LIGHT = {pw['light']};",
+                   f"TIP = {pw['tip']}F;", f"TIP_TICKS = {pw['tip_ticks']};", f"PIVOT_Y = {pw['pivot'][0]}F;", f"PIVOT_Z = {pw['pivot'][1]}F;",
+                   'item("corn_kernels")', 'item("caramel")', 'item("caramel_popcorn")', 'item("popcorn")', "popcorn - 2",
+                   "state.getValue(PART) == TOP ? LIGHT : 0"):
+        if needed not in wagon:
+            err(f"PopcornWagonBlock: missing {needed} (tools/haunted_midway.py POPCORN_WAGON)")
+    # The wagon's Caramel turns two popcorn into one Caramel Popcorn because the crafting recipe does.
+    if menu.SHAPELESS.get("caramel_popcorn") != [["jugcraft:popcorn", "jugcraft:popcorn", "jugcraft:caramel"], 1]:
+        err("tools/menu.py: Caramel Popcorn is no longer two popcorn and a caramel; PopcornWagonBlock coats two at a time")
+    java_main = read(JAVA_ROOT / "agriculture" / "JugcraftAgriculture.java")
+    for block, cls, entity in ((cc["block"], "CottonCandyCartBlock", "COTTON_CANDY_CART_ENTITY"), (pw["block"], "PopcornWagonBlock", "POPCORN_WAGON_ENTITY")):
+        if f'registerBlock("{block}", {cls}::new' not in java_main or f'{entity} = Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, Jugcraft.id("{block}")' not in java_main:
+            err(f"JugcraftAgriculture: {block} must be a {cls} with its own block entity {entity}")
+    if ".lightLevel(PopcornWagonBlock::light)" not in java_main:
+        err(f"JugcraftAgriculture: {pw['block']} must be lit by PopcornWagonBlock::light")
+    food = hm.ITEMS[hm.CANDY["item"]]["food"]
+    if f'food("{hm.CANDY["item"]}", {food[0]}, {food[1]}F, COMPOST_' not in java_main:
+        err(f"JugcraftAgriculture: {hm.CANDY['item']} must be a food of {food} (tools/haunted_midway.py ITEMS)")
+    client = read(CLIENT_JAVA_ROOT / "JugcraftClient.java")
+    for entity, renderer in (("COTTON_CANDY_CART_ENTITY", "CottonCandyCartRenderer"), ("POPCORN_WAGON_ENTITY", "PopcornWagonRenderer")):
+        if f"BlockEntityRendererRegistry.register(JugcraftAgriculture.{entity}, {renderer}::new);" not in client:
+            err(f"JugcraftClient: {entity} needs {renderer}")
+    spinner = read(CLIENT_JAVA_ROOT / "CottonCandyCartRenderer.java")
+    if "CottonCandyCartBlock.BOWL_X" not in spinner or "CottonCandyCartBlock.spin(" not in spinner:
+        err("CottonCandyCartRenderer: the spinner head must spin about the bowl's middle by CottonCandyCartBlock.spin")
+    kettle = read(CLIENT_JAVA_ROOT / "PopcornWagonRenderer.java")
+    if "PopcornWagonBlock.PIVOT_Y" not in kettle or "PopcornWagonBlock.tip(" not in kettle:
+        err("PopcornWagonRenderer: the kettle must tip about its pivot by PopcornWagonBlock.tip")
+    for spec, runner, prop, count in ((cc, "head", "floss", cc["floss"]), (pw, "kettle", "popcorn", pw["capacity"])):
+        block = spec["block"]
+        states = load(ASSETS / "blockstates" / f"{block}.json") or {}
+        parts = states.get("multipart", [])
+        runners = [p for p in parts if p.get("when", {}).get("runner") == "true"]
+        if not runners or any(p["apply"]["model"] != f"{MOD}:block/{block}_{runner}" for p in runners) \
+                or any(p.get("when", {}).get("runner") != "false" for p in parts if p not in runners):
+            err(f"blockstates/{block}.json: its runner must show the {runner} alone, and nothing else with it")
+        shown = {p["when"][prop] for p in parts if prop in p.get("when", {})}
+        if shown != {str(n) for n in range(1, count + 1)}:
+            err(f"blockstates/{block}.json: a model for each {prop} from 1 to {count}, not {sorted(shown)}")
+        if not load(ASSETS / "models" / "block" / f"{block}_{runner}.json"):
+            err(f"models/block/{block}_{runner}.json: the runner model was not generated")
+        loot = json.dumps(load(DATA / MOD / "loot_table" / "blocks" / f"{block}.json") or {})
+        if f'"{prop}": "{count}"' not in loot:
+            err(f"loot_table/blocks/{block}.json: it must give back what it holds, by {prop}")
+    for name in ("heater",):
+        for path in (ASSETS / "models" / "block").glob(f"{cc['block']}_*_{name}.json"):
+            if any(e.get("light_emission") != 15 or e.get("shade") is not False for e in (load(path) or {}).get("elements", [])):
+                err(f"{path.name}: the heater band must glow, full-bright and unshaded")
+    lit = list((ASSETS / "models" / "block").glob(f"{pw['block']}_*_lit.json"))
+    if not lit or any(e.get("light_emission") != 15 or e.get("shade") is not False for path in lit for e in (load(path) or {}).get("elements", [])):
+        err(f"{pw['block']}: its lamp and lantern must glow, full-bright and unshaded")
+    if '"popping": "true"' not in json.dumps(load(DATA / MOD / "loot_table" / "blocks" / f"{pw['block']}.json") or {}):
+        err(f"loot_table/blocks/{pw['block']}.json: a kernel still in the kettle must be given back")
+    for recipe in hm.RECIPES + hm.SHAPELESS:
+        made = load(DATA / MOD / "recipe" / f"{recipe['id']}.json") or {}
+        if made.get("result", {}).get("id") != f"{MOD}:{recipe['result']}":
+            err(f"recipe/{recipe['id']}.json: tools/haunted_midway.py's recipe for {recipe['result']} was not generated")
+    lang = load(ASSETS / "lang" / "en_us.json") or {}
+    keys = [f"block.{MOD}.{cc['block']}", f"block.{MOD}.{pw['block']}", f"item.{MOD}.{hm.CANDY['item']}"]
+    keys += [f"message.{MOD}.{cc['block']}.{k}" for k in ("off", "full", "empty")]
+    keys += [f"message.{MOD}.{pw['block']}.{k}" for k in ("light", "popping", "full", "two")]
+    for key in keys:
+        if key not in lang:
+            err(f"{key}: the text is missing")
+    for refusal in re.findall(r'"(off|full|empty)"', cart):
+        if f"message.{MOD}.{cc['block']}.{refusal}" not in lang:
+            err(f"message.{MOD}.{cc['block']}.{refusal}: CottonCandyCartBlock refuses with it, but the text is missing")
+    for refusal in re.findall(r'"(light|popping|full|two)"', wagon):
+        if f"message.{MOD}.{pw['block']}.{refusal}" not in lang:
+            err(f"message.{MOD}.{pw['block']}.{refusal}: PopcornWagonBlock refuses with it, but the text is missing")
+
+
 def check_hearth():
     """Cozy Fall Hearth (tools/hearth.py, docs/features/cozy-fall-hearth.md), part 1: the Stone Fireplace's Java block is
     the table's size and light, its firebox gives it, and its registration names its light; its fire is a full-bright,
@@ -23035,6 +23130,7 @@ def main():
     check_barn_tools()
     check_fall_garden()
     check_hearth()
+    check_haunted_midway()
     check_hessian_horseman()
     check_cydonian_sentinel()
     check_material_sets()

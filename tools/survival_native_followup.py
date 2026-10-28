@@ -50,6 +50,11 @@ def extend(root, edge, evidence, items):
     route('agriculture/QuernBlock', ['quern', 'minecraft:wheat'], ['flour'], 'grinding')
     route('agriculture/QuernBlock', ['quern', 'dried_chili'], ['paprika'], 'grinding')
     route('agriculture/ButterChurnBlock', ['butter_churn', 'minecraft:milk_bucket'], ['butter', 'minecraft:bucket'])
+    # Haunted Midway, part 1: the Cotton-Candy Cart spins sugar into floss and winds it onto paper; the Caramel-Corn
+    # Wagon pops a kernel into popcorn and coats two popcorn in caramel, as the crafting recipe does.
+    route('agriculture/CottonCandyCartBlock', ['cotton_candy_cart', 'minecraft:sugar', 'minecraft:paper'], ['cotton_candy'], 'spinning')
+    route('agriculture/PopcornWagonBlock', ['popcorn_wagon', 'corn_kernels'], ['popcorn'], 'popping')
+    route('agriculture/PopcornWagonBlock', ['popcorn_wagon', 'popcorn', 'caramel'], ['caramel_popcorn'], 'coating')
     route('agriculture/CinnamonLogBlock', ['cinnamon_log', '#minecraft:axes'], ['stripped_cinnamon_log'])
     route('chemistry/FoamSprayerItem', ['foam_sprayer', 'foam_canister'], ['construction_foam'])
     route('agriculture/OrganicCompostBlock', ['organic_compost'], ['rich_soil'], 'compost_maturation')

@@ -8,6 +8,14 @@ Every change to Jugcraft, newest first, grouped by pull request. For what each t
 
 No numbered release yet. Entries on feature branches remain proposed until their pull requests merge.
 
+### Unmerged: Haunted Midway, part 1 (the sweet stalls)
+- **Cotton-Candy Cart**: a violet and orange cart two blocks high, with a steel spinning bowl and a striped canopy. An empty hand switches it on and its spinner head spins; sugar is spun into pink floss on the bowl's wall, up to three servings, and paper winds a serving onto a cone.
+- **Cotton Candy**: a new candy (2 hunger), made only at the cart.
+- **Caramel-Corn Wagon**: an old popcorn wagon two blocks high, with a glass case, a hung kettle and a jack-o'-lantern on its crest. Lit, a corn kernel pops in its kettle, which tips to spill one Popcorn into the case, up to eight. An empty hand takes one out, and Caramel coats two into Caramel Popcorn, as the crafting recipe does.
+- Recipes: purple wool over iron, a bucket and iron, over planks and a stick; glass panes round a jack-o'-lantern and a cauldron, over planks and iron.
+- Record: [haunted-midway.md](docs/features/haunted-midway.md).
+- **Checked:** the record's Verification. Game tests and screenshots run in CI only; not played by hand.
+
 ### Unmerged: Cozy Fall Hearth, part 5 (the lights)
 - **Hurricane Lamp**: a brass table oil lamp with a glass chimney. Flint and steel lights it and an empty hand turns it down; lit, its chimney glows and it gives light 12.
 - **Mason-Jar Candles**: wax candles in half-gallon mason jars with twine bows, one to four to a block, lit and added to as vanilla's candles are; lit, their glass glows.
