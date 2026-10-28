@@ -29,10 +29,10 @@ import org.jspecify.annotations.Nullable;
  * <li>Sources: the awake Verdant Hearts of his beneficiaries in his area (GardenReach.devices: loaded chunks only, at most
  * 16) holding a whole move ({@value #MOVE_MAX}), or holding any Verdance and making no more (their status not "working"),
  * the fullest first (GC-S25: a Heart still beating gives a whole move or nothing, not a beat's 1 or 2 each think; one that
- * has stopped is still emptied). A Heart that already pours into a Ley Pylon beside it (its own road) is his only once
- * the holder has answered "take from it" ({@link #CLAIM}) at the perch (PactAccords.answer); unanswered, or answered
- * "leave it" ({@link #YIELD}, the safe course), he leaves it alone and, once a presence, turns to it with his inspect
- * gesture to raise the matter.</li>
+ * has stopped is still emptied into a Gleaner with room (a pylon takes whole batches of 3, so 1 or 2 may stay, as before)).
+ * A Heart that already pours into a Ley Pylon beside it (its own road) is his only once the holder has answered "take
+ * from it" ({@link #CLAIM}) at the perch (PactAccords.answer); unanswered, or answered "leave it" ({@link #YIELD}, the
+ * safe course), he leaves it alone and, once a presence, turns to it with his inspect gesture to raise the matter.</li>
  * <li>The lossless road first: a beneficiary Gleaner beyond its own reach of that Heart (where it would draw by itself),
  * with room for a whole move, the emptiest first: up to {@value #MOVE_MAX} through the Gleaner's own draw from that Heart
  * (GleanerBlockEntity.receiveFrom), both ownerships checked with the holder as the one acting.</li>

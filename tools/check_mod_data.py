@@ -20789,11 +20789,15 @@ def check_garden_pacts(co, root, lang, registered, research):
         err("VerdanceCarrying.carry: his index and roads, the answer, hours, quota, his matter raised once, the sources (a whole "
             "move, or any Verdance from a Heart that makes no more, GC-S25; a Heart with its own road only when claimed), a far "
             "Gleaner with room first, then a pylon not beside the Heart, both ends asked, one move (GC-05)")
-    # GC-S25: "working" is the status word a Heart's beat leaves only when it made Verdance, so a Heart full, starved, stalled
-    # or on no bed is one that makes no more and is emptied.
-    beat = _java_body(strip(text(root / "garden" / "VerdantHeartBlockEntity.java")), "public String beat(ServerLevel level)")
-    if not 0 <= beat.find("verdance += beat.made();") < beat.find('status("working");') or beat.count('"working"') != 1:
-        err("VerdantHeartBlockEntity.beat: its status is \"working\" only after a beat made Verdance (Bathin's sources, GC-S25)")
+    # GC-S25: "working" is the status word a Heart's beat leaves only when it made Verdance, and is set nowhere else in the
+    # Heart or its base class, so a Heart full, starved, stalled or on no bed is one that makes no more and is emptied.
+    heart_java = strip(text(root / "garden" / "VerdantHeartBlockEntity.java"))
+    beat = _java_body(heart_java, "public String beat(ServerLevel level)")
+    if (not 0 <= beat.find("verdance += beat.made();") < beat.find('status("working");') or beat.count('"working"') != 1
+            or heart_java.count('status("working")') != 1 or 'status = "working"' in heart_java
+            or '"working"' in strip(text(root / "garden" / "LivingDeviceBlockEntity.java"))):
+        err("VerdantHeartBlockEntity.beat: its status is \"working\" only after a beat made Verdance, and set nowhere else in "
+            "the Heart or LivingDeviceBlockEntity (Bathin's sources, GC-S25)")
     landed = _java_body(carrying, "private static Status carried(")
     order = [landed.find(n) for n in ("memory.moved(move);", "holder.taskDone(level, now);",
                                       "bathin.attendWork(move.to(), BathinEntity.Gesture.WORK.ticks, now);",

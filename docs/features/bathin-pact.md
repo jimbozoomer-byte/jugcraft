@@ -78,16 +78,20 @@ carries).
 - **Whole moves from a beating Heart (GC-S25, decided by the session; unit 2's review, finding 4, option (a)).** Bathin
   takes from a Verdant Heart only when it holds a whole move (`VerdanceCarrying.MOVE_MAX`, 8) or makes no more Verdance
   (its status is not `working`: full, starved, stalled, on no bed), and then whatever it holds, so a nearly empty, idle
-  Heart is still emptied. A Heart beating on its bed makes 1 or 2 Verdance a beat every 200 ticks while he thinks every
-  20, so without this each of his 12 moves a day carried a beat's 1 or 2 (12 to 24 a day); with it a beating Heart gives
-  8 a move into a Gleaner (up to 96 a day), or 2 or 3 whole batches into a pylon. A Heart answered "take from it" whose
-  own pylon takes each beat's whole batches never gathers 8 while it beats: he takes only what its road cannot. His term
+  Heart is still emptied into a Gleaner with room for a whole move (a pylon takes whole batches of 3, so 1 or 2 may
+  stay, as before). A Heart beating on its bed makes 1 or 2 Verdance a beat every 200 ticks while he thinks every 20, so
+  without this each of his 12 moves a day carried a beat's 1 or 2 (12 to 24 a day); with it a beating Heart gives 8 a
+  move into a Gleaner (up to 96 a day), or usually 2 whole batches a move into a pylon (6 Verdance for 4 Ley Charge, so
+  72 Verdance a day by that road at that rate), 3 only when it held 9 or more. A Heart answered "take from it" whose own
+  pylon takes each beat's whole batches never gathers 8 while it beats: he takes only what its road cannot. His term
   ("up to 8 at a time") and Jade note ("Nothing to carry: the Hearts in his area hold no Verdance he may take", shown
-  while a beating Heart gathers its move) are unchanged. The review left this to the owner; it is reviewable at the
-  cohort checkpoint. Evidence: the server test `bathinCarriesWholeMovesFromABeatingHeart` (a Heart on a lit bed among
-  three kinds of crop: he leaves it while it holds less than 8, carries 8 in one move once it has gathered, and empties
-  the rest in one move once its bed is spent) and `check_garden_pacts`'s needle on the source rule; the test is new with
-  this decision and has not been run (no Minecraft build where it was written).
+  while a beating Heart gathers its move) are unchanged; the codex's "His Service" page states the rule. The review left
+  this to the owner; it is reviewable at the cohort checkpoint. Evidence: the server test
+  `bathinCarriesWholeMovesFromABeatingHeart` (a Heart on a lit bed among three kinds of crop: he leaves it while it
+  holds less than 8, carries 8 in one move once it has gathered, and empties the rest in one move once its bed is spent)
+  and `check_garden_pacts`'s needles on the source rule and on `working` (left only by a beat that made Verdance, and
+  set nowhere else in the Heart or its base class); the test is new with this decision and has not been run (no
+  Minecraft build where it was written).
 - **His pose pictures.** Each gesture's telling window (`SPIRITS["bathin"]["body"]["gesture_times"]`) lies inside the
   part of its generated clip that holds the pose: arrive 0.1 to 0.6 s in the tight coil held from 0 to 0.6 s; inspect 0.4
   to 1.2, assent 0.3 to 0.9, refuse 0.3 to 1.0 and work 0.15 to 0.75, each exactly where its pose is reached and held;
