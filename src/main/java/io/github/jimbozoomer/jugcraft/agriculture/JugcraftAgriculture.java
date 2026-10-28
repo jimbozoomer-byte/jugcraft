@@ -405,6 +405,8 @@ public final class JugcraftAgriculture {
 	public static BlockEntityType<GhostTrainBlockEntity> GHOST_TRAIN_ENTITY;
 	public static BlockEntityType<HauntedCarouselBlockEntity> HAUNTED_CAROUSEL_DRIVE;
 	public static EntityType<HauntedCarousel> HAUNTED_CAROUSEL;
+	public static BlockEntityType<HauntedMailboxBlockEntity> HAUNTED_MAILBOX_ENTITY;
+	public static BlockEntityType<DecorationBlockEntity> PUMPKIN_PATH_LIGHT_ENTITY;
 	public static BlockEntityType<FirewoodRackBlockEntity> FIREWOOD_RACK_ENTITY;
 	public static BlockEntityType<DecorationBlockEntity> CHOPPING_BLOCK_ENTITY;
 	public static BlockEntityType<BlanketLadderBlockEntity> BLANKET_LADDER_ENTITY;
@@ -2416,6 +2418,7 @@ public final class JugcraftAgriculture {
 		registerFallGarden();
 		registerHearth();
 		registerHauntedMidway();
+		registerFrontYard();
 	}
 
 	/**
@@ -3050,6 +3053,26 @@ public final class JugcraftAgriculture {
 				FabricBlockEntityTypeBuilder.create(HauntedCarouselBlockEntity::new, carousel).build());
 		HAUNTED_CAROUSEL = entity("haunted_carousel", EntityType.Builder.<HauntedCarousel>of(HauntedCarousel::new, MobCategory.MISC).noLootTable()
 				.noSummon().sized(1.0F, 1.0F).clientTrackingRange(10).updateInterval(20));
+	}
+
+	/**
+	 * Decor set 7, Front-Yard Haunt Scenes (tools/front_yard.py), part 1: the Haunted Mailbox, whose door falls open on
+	 * whoever comes near, and the Pumpkin Path Light, a jack-o'-lantern swaying on a shepherd's hook.
+	 */
+	private static void registerFrontYard() {
+		Block mailbox = registerBlock("haunted_mailbox", HauntedMailboxBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_BLACK)
+				.strength(1.5F).sound(SoundType.WOOD).noOcclusion().ignitedByLava().pushReaction(PushReaction.IMMOVEABLE));
+		HAUNTED_MAILBOX_ENTITY = Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, Jugcraft.id("haunted_mailbox"),
+				FabricBlockEntityTypeBuilder.create(HauntedMailboxBlockEntity::new, mailbox).build());
+		Block light = registerBlock("pumpkin_path_light", PumpkinPathLightBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_ORANGE)
+				.strength(1.0F).sound(SoundType.LANTERN).noOcclusion().lightLevel(PumpkinPathLightBlock::light).pushReaction(PushReaction.IMMOVEABLE));
+		PUMPKIN_PATH_LIGHT_ENTITY = Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, Jugcraft.id("pumpkin_path_light"),
+				FabricBlockEntityTypeBuilder.<DecorationBlockEntity>create((pos, state) -> new DecorationBlockEntity(PUMPKIN_PATH_LIGHT_ENTITY, pos, state),
+						light).build());
+		for (Block block : List.of(mailbox, light)) {
+			registerItem(BuiltInRegistries.BLOCK.getKey(block).getPath(), props -> new BlockItem(block, props),
+					new Item.Properties().useBlockDescriptionPrefix(), BUILDING_TAB);
+		}
 	}
 
 	private static BlockBehaviour.Properties displayProperties() {

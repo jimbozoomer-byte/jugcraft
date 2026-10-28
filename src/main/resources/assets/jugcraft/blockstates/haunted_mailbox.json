@@ -1,0 +1,262 @@
+{
+  "multipart": [
+    {
+      "when": {
+        "facing": "north",
+        "part": "0",
+        "runner": "0"
+      },
+      "apply": {
+        "model": "jugcraft:block/haunted_mailbox_0"
+      }
+    },
+    {
+      "when": {
+        "facing": "north",
+        "part": "1",
+        "runner": "0"
+      },
+      "apply": {
+        "model": "jugcraft:block/haunted_mailbox_1"
+      }
+    },
+    {
+      "when": {
+        "facing": "north",
+        "part": "1",
+        "runner": "0",
+        "flag": "false"
+      },
+      "apply": {
+        "model": "jugcraft:block/haunted_mailbox_1_flag_down"
+      }
+    },
+    {
+      "when": {
+        "facing": "north",
+        "part": "1",
+        "runner": "0",
+        "flag": "true"
+      },
+      "apply": {
+        "model": "jugcraft:block/haunted_mailbox_1_flag_up"
+      }
+    },
+    {
+      "when": {
+        "facing": "north",
+        "runner": "1"
+      },
+      "apply": {
+        "model": "jugcraft:block/haunted_mailbox_lid"
+      }
+    },
+    {
+      "when": {
+        "facing": "north",
+        "runner": "2"
+      },
+      "apply": {
+        "model": "jugcraft:block/haunted_mailbox_eyes"
+      }
+    },
+    {
+      "when": {
+        "facing": "east",
+        "part": "0",
+        "runner": "0"
+      },
+      "apply": {
+        "model": "jugcraft:block/haunted_mailbox_0",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "facing": "east",
+        "part": "1",
+        "runner": "0"
+      },
+      "apply": {
+        "model": "jugcraft:block/haunted_mailbox_1",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "facing": "east",
+        "part": "1",
+        "runner": "0",
+        "flag": "false"
+      },
+      "apply": {
+        "model": "jugcraft:block/haunted_mailbox_1_flag_down",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "facing": "east",
+        "part": "1",
+        "runner": "0",
+        "flag": "true"
+      },
+      "apply": {
+        "model": "jugcraft:block/haunted_mailbox_1_flag_up",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "facing": "east",
+        "runner": "1"
+      },
+      "apply": {
+        "model": "jugcraft:block/haunted_mailbox_lid",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "facing": "east",
+        "runner": "2"
+      },
+      "apply": {
+        "model": "jugcraft:block/haunted_mailbox_eyes",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "facing": "south",
+        "part": "0",
+        "runner": "0"
+      },
+      "apply": {
+        "model": "jugcraft:block/haunted_mailbox_0",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "facing": "south",
+        "part": "1",
+        "runner": "0"
+      },
+      "apply": {
+        "model": "jugcraft:block/haunted_mailbox_1",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "facing": "south",
+        "part": "1",
+        "runner": "0",
+        "flag": "false"
+      },
+      "apply": {
+        "model": "jugcraft:block/haunted_mailbox_1_flag_down",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "facing": "south",
+        "part": "1",
+        "runner": "0",
+        "flag": "true"
+      },
+      "apply": {
+        "model": "jugcraft:block/haunted_mailbox_1_flag_up",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "facing": "south",
+        "runner": "1"
+      },
+      "apply": {
+        "model": "jugcraft:block/haunted_mailbox_lid",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "facing": "south",
+        "runner": "2"
+      },
+      "apply": {
+        "model": "jugcraft:block/haunted_mailbox_eyes",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "facing": "west",
+        "part": "0",
+        "runner": "0"
+      },
+      "apply": {
+        "model": "jugcraft:block/haunted_mailbox_0",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "facing": "west",
+        "part": "1",
+        "runner": "0"
+      },
+      "apply": {
+        "model": "jugcraft:block/haunted_mailbox_1",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "facing": "west",
+        "part": "1",
+        "runner": "0",
+        "flag": "false"
+      },
+      "apply": {
+        "model": "jugcraft:block/haunted_mailbox_1_flag_down",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "facing": "west",
+        "part": "1",
+        "runner": "0",
+        "flag": "true"
+      },
+      "apply": {
+        "model": "jugcraft:block/haunted_mailbox_1_flag_up",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "facing": "west",
+        "runner": "1"
+      },
+      "apply": {
+        "model": "jugcraft:block/haunted_mailbox_lid",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "facing": "west",
+        "runner": "2"
+      },
+      "apply": {
+        "model": "jugcraft:block/haunted_mailbox_eyes",
+        "y": 270
+      }
+    }
+  ]
+}

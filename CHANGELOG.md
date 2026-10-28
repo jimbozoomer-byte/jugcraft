@@ -8,6 +8,13 @@ Every change to Jugcraft, newest first, grouped by pull request. For what each t
 
 No numbered release yet. Entries on feature branches remain proposed until their pull requests merge.
 
+### Unmerged: Front-Yard Haunt Scenes, part 1 (the path)
+- **Haunted Mailbox**: a large rural mailbox of black sheet steel on a weathered post, two blocks high, a cobweb under its arm. An empty hand raises or lowers its red flag. Now and then its door rattles open a crack; walk within 4 blocks and it falls open, two glowing eyes staring out of the dark inside.
+- **Pumpkin Path Light**: a wrought-iron shepherd's hook 1.3 m high, a little jack-o'-lantern swaying on a chain from its crook. Placed lit (light 10); an empty hand puts it out or lights it again.
+- Recipes: iron nuggets round a spider eye and red dye, over a wooden fence (the mailbox); iron bars and a jack-o'-lantern (two path lights).
+- Record: [front-yard-haunt.md](docs/features/front-yard-haunt.md). Decor set 7's first part.
+- **Checked:** the record's Verification. Game tests and screenshots run in CI only; not played by hand.
+
 ### Unmerged: Haunted Midway, part 5 (the haunted carousel)
 - **Haunted Carousel**: a travelling merry-go-round seven blocks across and five high, turned by kinetic power from under its middle, as the Ferris wheel is. Its deck, mirrored column and striped canopy turn round its middle block, the drive house and band organ. Black horses, giant bats and the Pumpkin Coach ride round it, the horses and bats rising and sinking on their brass poles and the bats beating their wings. Its organ plays a waltz of its own while it turns, and its bulbs light. An empty hand boards the nearest free mount (thirteen seats), and riders turn with their mounts; sneaking, an empty hand quiets the organ.
 - Recipe: orange wool round a redstone lamp, over iron bars round a note block, over planks round a gold ingot.

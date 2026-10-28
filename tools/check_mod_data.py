@@ -15157,6 +15157,63 @@ def check_haunted_midway():
             err(f"{key}: the text is missing")
 
 
+def check_front_yard():
+    """Front-Yard Haunt Scenes (tools/front_yard.py, docs/features/front-yard-haunt.md), part 1: the Haunted Mailbox's
+    and the Pumpkin Path Light's Java is the table's; each is registered with its own block entity and renderer, which
+    opens the mailbox's door by `lid` and shows its eyes by `eyes`, and sways the light's lantern by `sway`; each
+    blockstate shows its runners alone (the door and eyes, the lantern and glow) and the mailbox its flag down and up by
+    `flag`; the eyes and the lantern's face glow full-bright; the path light gives its light from its lower block; and
+    their names have their text."""
+    import front_yard as fy
+
+    def read(path):
+        return path.read_text(encoding="utf-8") if path.is_file() else ""
+
+    java_main = read(JAVA_ROOT / "agriculture" / "JugcraftAgriculture.java")
+    client = read(CLIENT_JAVA_ROOT / "JugcraftClient.java")
+    lang = load(ASSETS / "lang" / "en_us.json") or {}
+    mb, pl = fy.MAILBOX, fy.PATH_LIGHT
+    box = read(JAVA_ROOT / "agriculture" / "HauntedMailboxBlock.java")
+    for needed in (f"RATTLE_TICKS = {mb['rattle']};", f"STARE = {mb['stare']};", f"OPEN = {mb['open']}F;", f"HINGE_Y = {mb['hinge'][0]}F;",
+                   f"HINGE_Z = {mb['hinge'][1]}F;", "box({}, {}, {})".format(*mb["size"]), 'BooleanProperty.create("flag")'):
+        if needed not in box:
+            err(f"HauntedMailboxBlock: missing {needed} (tools/front_yard.py MAILBOX)")
+    hook = read(JAVA_ROOT / "agriculture" / "PumpkinPathLightBlock.java")
+    for needed in (f"LIGHT = {pl['light']};", f"SWAY = {pl['sway']}F;", f"PERIOD = {pl['period']};", f"PIVOT_Y = {pl['pivot'][0]}F;",
+                   f"PIVOT_Z = {pl['pivot'][1]}F;", "box({}, {}, {})".format(*pl["size"]), "state.getValue(PART) == MASTER ? LIGHT : 0"):
+        if needed not in hook:
+            err(f"PumpkinPathLightBlock: missing {needed} (tools/front_yard.py PATH_LIGHT)")
+    for block, cls, entity, renderer, calls in ((mb["block"], "HauntedMailboxBlock", "HAUNTED_MAILBOX_ENTITY", "HauntedMailboxRenderer",
+                                                 ("HauntedMailboxBlock.lid(", "HauntedMailboxBlock.eyes(")),
+                                                (pl["block"], "PumpkinPathLightBlock", "PUMPKIN_PATH_LIGHT_ENTITY", "PumpkinPathLightRenderer",
+                                                 ("PumpkinPathLightBlock.sway(",))):
+        if f'registerBlock("{block}", {cls}::new' not in java_main \
+                or f'{entity} = Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, Jugcraft.id("{block}")' not in java_main:
+            err(f"JugcraftAgriculture: {block} must be a {cls} with its own block entity")
+        drawn = read(CLIENT_JAVA_ROOT / f"{renderer}.java")
+        if f"BlockEntityRendererRegistry.register(JugcraftAgriculture.{entity}, {renderer}::new);" not in client \
+                or any(call not in drawn for call in calls):
+            err(f"{renderer}: registered, it must draw {block}'s moving parts by {', '.join(calls)}")
+        if f"block.{MOD}.{block}" not in lang:
+            err(f"block.{MOD}.{block}: the text is missing")
+    if ".lightLevel(PumpkinPathLightBlock::light)" not in java_main:
+        err("JugcraftAgriculture: the Pumpkin Path Light must give light by PumpkinPathLightBlock::light")
+    for block, runners, overlays in ((mb["block"], {"1": "lid", "2": "eyes"}, {"flag_down": "false", "flag_up": "true"}),
+                                     (pl["block"], {"1": "lantern", "2": "glow"}, {})):
+        parts = (load(ASSETS / "blockstates" / f"{block}.json") or {}).get("multipart", [])
+        shown = {p["when"]["runner"]: p["apply"]["model"] for p in parts if p.get("when", {}).get("runner") in runners}
+        if shown != {k: f"{MOD}:block/{block}_{v}" for k, v in runners.items()} \
+                or any(p.get("when", {}).get("runner") not in ["0"] + list(runners) for p in parts):
+            err(f"blockstates/{block}.json: its runners {', '.join(runners)} must show {', '.join(runners.values())} alone")
+        for name, flag in overlays.items():
+            if not any(p["apply"]["model"].endswith(f"_{name}") and p["when"].get("flag") == flag for p in parts):
+                err(f"blockstates/{block}.json: its {name} must show when its flag is {flag}")
+    for name in (f"{mb['block']}_eyes", f"{pl['block']}_glow"):
+        elements = (load(ASSETS / "models" / "block" / f"{name}.json") or {}).get("elements", [])
+        if not elements or any(e.get("light_emission") != 15 or e.get("shade") is not False for e in elements):
+            err(f"models/block/{name}.json: it must glow, full-bright and unshaded")
+
+
 def check_hearth():
     """Cozy Fall Hearth (tools/hearth.py, docs/features/cozy-fall-hearth.md), part 1: the Stone Fireplace's Java block is
     the table's size and light, its firebox gives it, and its registration names its light; its fire is a full-bright,
@@ -23311,6 +23368,7 @@ def main():
     check_fall_garden()
     check_hearth()
     check_haunted_midway()
+    check_front_yard()
     check_hessian_horseman()
     check_cydonian_sentinel()
     check_material_sets()

@@ -13612,6 +13612,11 @@
       "denominator": 1,
       "source": "fallback (balance pending)"
     },
+    "jugcraft:haunted_mailbox": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
     "jugcraft:haunted_portrait": {
       "numerator": 3920,
       "denominator": 9,
@@ -32951,6 +32956,11 @@
       "numerator": 673,
       "denominator": 12,
       "source": "recipe jugcraft:pot_cooking/pumpkin_mooncake"
+    },
+    "jugcraft:pumpkin_path_light": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
     },
     "jugcraft:pumpkin_pie_slice": {
       "numerator": 1,
