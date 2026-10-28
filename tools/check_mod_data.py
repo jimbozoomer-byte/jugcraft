@@ -14889,7 +14889,7 @@ def check_haunted_midway():
     the cart's heater and the wagon's lamp and lantern glow full-bright; there is a floss model for each serving and a
     heap for each popcorn; the wagon's upper block gives its light; Cotton Candy is a food of the table's; the wagon coats
     two popcorn as the crafting recipe does; both drop with what they hold; the recipes were generated; and every message
-    has its text."""
+    has its text. Part 2: the Ticket Booth and Whack-a-Zombie against the table (below)."""
     import haunted_midway as hm
     import menu
     cc, pw = hm.COTTON_CANDY, hm.POPCORN_WAGON
@@ -14975,6 +14975,61 @@ def check_haunted_midway():
     for refusal in re.findall(r'"(light|popping|full|two)"', wagon):
         if f"message.{MOD}.{pw['block']}.{refusal}" not in lang:
             err(f"message.{MOD}.{pw['block']}.{refusal}: PopcornWagonBlock refuses with it, but the text is missing")
+    # Part 2: the booth's roll, sheet and crank are the table's, it prints the ticket and the crank turns about the
+    # table's axle; Whack-a-Zombie's holes, head, lamps and round are the table's, a ticket starts a round, the mallet
+    # whacks (by left click through Midway.attack too), a win rolls the midway's prize table, and its renderer raises
+    # the head from the hole that's up; both renderers are registered, the score lamps glow, and their texts exist.
+    tb, wz = hm.TICKET_BOOTH, hm.WHACK
+    booth = read(JAVA_ROOT / "agriculture" / "TicketBoothBlock.java")
+    w, h, d = tb["size"]
+    for needed in (f"box({w}, {h}, {d})", f"ROLL = {tb['roll']};", f"PER_SHEET = {tb['per_sheet']};", f"CRANK_TICKS = {tb['crank_ticks']};",
+                   f"AXLE_Y = {tb['axle'][0]}F;", f"AXLE_Z = {tb['axle'][1]}F;", "Items.PAPER", 'item("midway_ticket")'):
+        if needed not in booth:
+            err(f"TicketBoothBlock: missing {needed} (tools/haunted_midway.py TICKET_BOOTH)")
+    game = read(JAVA_ROOT / "agriculture" / "WhackAZombieBlock.java")
+    w, h, d = wz["size"]
+    xs = "{" + ", ".join(f"{x}F" for x, _ in wz["holes"]) + "}"
+    zs = "{" + ", ".join(f"{z}F" for _, z in wz["holes"]) + "}"
+    for needed in (f"box({w}, {h}, {d})", f"FIELD = {wz['field']}F;", f"HEAD_PIXELS = {wz['head']}F;", f"LAMPS = {wz['lamps']};",
+                   f"ROUND_TICKS = {wz['round_ticks']};", f"UP_TICKS = {wz['up_ticks']};", f"GAP_TICKS = {wz['gap_ticks']};",
+                   f"RISE_TICKS = {wz['rise_ticks']};", f"HOLES_X = {xs};", f"HOLES_Z = {zs};", 'item("midway_ticket")', "Midway.mallet()",
+                   "Midway.prize(", "level.mayInteract(player, master)", "Midway.REACH * Midway.REACH"):
+        if needed not in game:
+            err(f"WhackAZombieBlock: missing {needed} (tools/haunted_midway.py WHACK)")
+    if "instanceof WhackAZombieBlock whack" not in read(JAVA_ROOT / "agriculture" / "Midway.java"):
+        err("Midway.attack: a swing of the Carnival Mallet at Whack-a-Zombie must whack it")
+    for block, cls, entity in ((tb["block"], "TicketBoothBlock", "TICKET_BOOTH_ENTITY"), (wz["block"], "WhackAZombieBlock", "WHACK_A_ZOMBIE_ENTITY")):
+        if f'registerBlock("{block}", {cls}::new' not in java_main or f'{entity} = Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, Jugcraft.id("{block}")' not in java_main:
+            err(f"JugcraftAgriculture: {block} must be a {cls} with its own block entity {entity}")
+    if f'registerItem("{hm.TICKET["item"]}"' not in java_main:
+        err(f"JugcraftAgriculture: the {hm.TICKET['item']} item must be registered")
+    for entity, renderer in (("TICKET_BOOTH_ENTITY", "TicketBoothRenderer"), ("WHACK_A_ZOMBIE_ENTITY", "WhackAZombieRenderer")):
+        if f"BlockEntityRendererRegistry.register(JugcraftAgriculture.{entity}, {renderer}::new);" not in client:
+            err(f"JugcraftClient: {entity} needs {renderer}")
+    if "TicketBoothBlock.AXLE_Y" not in read(CLIENT_JAVA_ROOT / "TicketBoothRenderer.java"):
+        err("TicketBoothRenderer: the crank must turn about TicketBoothBlock's axle")
+    heads = read(CLIENT_JAVA_ROOT / "WhackAZombieRenderer.java")
+    if "WhackAZombieBlock.HOLES_X[state.hole]" not in heads or "WhackAZombieBlock.rise(" not in heads:
+        err("WhackAZombieRenderer: the head must rise by WhackAZombieBlock.rise from the hole that's up")
+    for spec, runner in ((tb, "crank"), (wz, "head")):
+        block = spec["block"]
+        parts = (load(ASSETS / "blockstates" / f"{block}.json") or {}).get("multipart", [])
+        runners = [p for p in parts if p.get("when", {}).get("runner") == "true"]
+        if not runners or any(p["apply"]["model"] != f"{MOD}:block/{block}_{runner}" for p in runners) \
+                or any(p.get("when", {}).get("runner") != "false" for p in parts if p not in runners):
+            err(f"blockstates/{block}.json: its runner must show the {runner} alone, and nothing else with it")
+    lamps = sorted((ASSETS / "models" / "block").glob(f"{wz['block']}_*_lamp*.json"))
+    if len(lamps) != wz["lamps"] or any(e.get("light_emission") != 15 or e.get("shade") is not False
+                                         for path in lamps for e in (load(path) or {}).get("elements", [])):
+        err(f"{wz['block']}: each of its {wz['lamps']} score lamps must have its lit model, full-bright and unshaded")
+    if '"roll": "4"' not in json.dumps(load(DATA / MOD / "loot_table" / "blocks" / f"{tb['block']}.json") or {}):
+        err(f"loot_table/blocks/{tb['block']}.json: it must give back the paper on its roll")
+    keys = [f"block.{MOD}.{tb['block']}", f"block.{MOD}.{wz['block']}", f"item.{MOD}.{hm.TICKET['item']}"]
+    keys += [f"message.{MOD}.{tb['block']}.{k}" for k in ("full", "empty")]
+    keys += [f"message.{MOD}.{wz['block']}.{k}" for k in ("ticket", "playing", "not_yours", "won", "lost")]
+    for key in keys:
+        if key not in lang:
+            err(f"{key}: the text is missing")
 
 
 def check_hearth():

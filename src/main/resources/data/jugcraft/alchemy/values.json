@@ -28282,6 +28282,11 @@
       "denominator": 1,
       "source": "recipe jugcraft:microwave_counter"
     },
+    "jugcraft:midway_ticket": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
     "jugcraft:milk_bottle": {
       "numerator": 1,
       "denominator": 1,
@@ -36977,6 +36982,11 @@
       "denominator": 1,
       "source": "recipe jugcraft:thyme_bundle"
     },
+    "jugcraft:ticket_booth": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
     "jugcraft:tidebreaker": {
       "numerator": 1,
       "denominator": 1,
@@ -38028,6 +38038,11 @@
       "source": "recipe jugcraft:wet_processing_bench"
     },
     "jugcraft:wet_superphosphate": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
+    "jugcraft:whack_a_zombie": {
       "numerator": 1,
       "denominator": 1,
       "source": "fallback (balance pending)"

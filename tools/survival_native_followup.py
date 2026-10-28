@@ -55,6 +55,8 @@ def extend(root, edge, evidence, items):
     route('agriculture/CottonCandyCartBlock', ['cotton_candy_cart', 'minecraft:sugar', 'minecraft:paper'], ['cotton_candy'], 'spinning')
     route('agriculture/PopcornWagonBlock', ['popcorn_wagon', 'corn_kernels'], ['popcorn'], 'popping')
     route('agriculture/PopcornWagonBlock', ['popcorn_wagon', 'popcorn', 'caramel'], ['caramel_popcorn'], 'coating')
+    # Part 2: the Ticket Booth prints Midway Tickets from paper (Whack-a-Zombie's prizes are the midway's prize table's).
+    route('agriculture/TicketBoothBlock', ['ticket_booth', 'minecraft:paper'], ['midway_ticket'], 'printing')
     route('agriculture/CinnamonLogBlock', ['cinnamon_log', '#minecraft:axes'], ['stripped_cinnamon_log'])
     route('chemistry/FoamSprayerItem', ['foam_sprayer', 'foam_canister'], ['construction_foam'])
     route('agriculture/OrganicCompostBlock', ['organic_compost'], ['rich_soil'], 'compost_maturation')

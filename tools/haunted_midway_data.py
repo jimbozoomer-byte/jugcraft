@@ -476,10 +476,165 @@ def popcorn_wagon():
     return sc
 
 
+# ---------------------------------------------------------------- part 2: the Ticket Booth
+
+TICKET_SIGN = (
+    "YYYYYYYYY",
+    "YYfYYYYYY",
+    ".YfYBBBY.",
+    "YYfYYYYYY",
+    "YYYYYYYYY",
+)
+TICKET_COLOURS = {"Y": shade(BONE, 4), "f": shade(BONE, 1), "B": shade(BLACK, 0)}
+GREEN = pal("2a4420", "3a5c2a", "4e7838", "649448", "7eb05c")
+ZOMBIE_SIGN = (
+    "HHHHHHH",
+    "ZZZZZZZ",
+    "ZEEZEEZ",
+    "ZZZNZZZ",
+    "ZMMMMMZ",
+    "ZZZZZZZ",
+)
+ZOMBIE_COLOURS = {"H": shade(GREEN, 0), "Z": shade(GREEN, 2), "E": shade(BLACK, 0), "N": shade(GREEN, 1), "M": shade(BLACK, 2)}
+
+
+def board(picture, colours, palette=ORANGE):
+    """A sign board: its paint lit along its top row, a gold band along its foot, `picture` in its middle."""
+    def paint(p):
+        for y in range(p.h):
+            for x in range(p.w):
+                p.put(x, y, shade(GOLD, 2) if y == p.h - 1 else shade(palette, 3 if y == 0 else 2))
+        h, w = len(picture), len(picture[0])
+        x0, y0 = (p.w - w) // 2, max(0, (p.h - h) // 2)
+        for j, line in enumerate(picture):
+            for i, ch in enumerate(line):
+                if ch != "." and 0 <= x0 + i < p.w and 0 <= y0 + j < p.h:
+                    p.put(x0 + i, y0 + j, colours[ch])
+    paint.tag = repr(("board", picture, palette))
+    return paint
+
+
+def roll_end():
+    """A paper roll's end: rings of paper, light and mid by turns, about a dark core."""
+    def paint(p):
+        cx, cy = (p.w - 1) / 2, (p.h - 1) / 2
+        for y in range(p.h):
+            for x in range(p.w):
+                r = max(abs(x - cx), abs(y - cy))
+                p.put(x, y, shade(BLACK, 2) if r < 0.6 else shade(PAPER, 2 if round(r) % 2 else 1))
+    paint.tag = repr(("roll_end",))
+    return paint
+
+
+def ticket_booth():
+    """The Ticket Booth, facing north (its back to the south), one block across and two up: a violet lacquered kiosk 87 cm
+    wide on an iron plinth, a black bat painted on its front, a bone-white counter at 87 cm running out before its ticket
+    window (glass in gold posts) and the brass ticket dispenser on it, its slot to the front and its crank's axle at its
+    east side; a striped roof in two tiers and an orange crest board across its front painted with a ticket. Models:
+    `whole`, `crank` (the crank's arm and knob: its runner, drawn by client/TicketBoothRenderer) and `roll1` and `roll2`
+    (the paper on the roll, half full and full)."""
+    spec = hm.TICKET_BOOTH
+    sc = Sculpt(spec["block"], 2603, 128)
+    ay, az = spec["axle"]
+    gold, iron, brass = flat(GOLD), flat(BLACK), flat(GOLD)
+    el = [panel(sc, "plinth", iron, (0.75, 0.0, 2.75), (15.25, 1.0, 15.25)),
+          panel(sc, "cabinet", lacquer(), (1.0, 1.0, 3.0), (15.0, 14.0, 15.0), north=signed(BAT_SIGN)),
+          panel(sc, "counter", gold, (0.5, 14.0, 1.0), (15.5, 14.75, 15.25), up=planks(BONE, board=3, nails=False))]
+    for x0 in (1.0, 14.0):
+        el.append(panel(sc, "post", gold, (x0, 14.75, 3.0), (x0 + 1.0, 26.0, 4.0)))
+        el.append(panel(sc, "side", lacquer(), (x0, 14.75, 4.0), (x0 + 1.0, 26.0, 14.0)))
+    el.append(panel(sc, "back", lacquer(), (1.0, 14.75, 14.0), (15.0, 26.0, 15.0)))
+    import orchard_harvest_data as ohd
+    el.append(panel(sc, "window", ohd.glass(), (2.0, 14.75, 3.25), (14.0, 26.0, 3.5)))
+    el.append(panel(sc, "roof", stripes(), (0.5, 26.0, 2.5), (15.5, 26.75, 15.5)))
+    el.append(panel(sc, "roof", stripes(1), (2.5, 26.75, 4.5), (13.5, 27.5, 13.5)))
+    el.append(panel(sc, "crest", board(TICKET_SIGN, TICKET_COLOURS), (2.0, 26.75, 2.25), (14.0, 31.75, 2.75)))
+    # The dispenser: a brass box on the counter, its ticket slot dark in its front, the crank's axle out of its east side.
+    el.append(panel(sc, "dispenser", brass, (5.0, 14.75, 1.25), (10.0, 17.75, 3.0)))
+    el.append(panel(sc, "slot", flat(BLACK), (6.0, 15.5, 1.15), (9.0, 15.85, 1.25), sides=("north",)))
+    el.append(panel(sc, "axle", flat(STEEL), (10.0, ay - 0.25, az - 0.25), (10.5, ay + 0.25, az + 0.25)))
+    for x0 in (5.25, 9.25):
+        el.append(panel(sc, "cheek", brass, (x0, 17.75, 1.5), (x0 + 0.5, 19.5, 2.75)))
+    sc.models["whole"] = el
+    sc.models["crank"] = [panel(sc, "arm", flat(BLACK), (10.5, ay - 0.25, az - 0.25), (11.0, ay + 1.75, az + 0.25)),
+                          panel(sc, "knob", lengthwise(STEM), (11.0, ay + 1.25, az - 0.35), (12.25, ay + 1.95, az + 0.35))]
+    for stage, (lo, hi) in enumerate(((17.95, 18.95), (17.75, 19.5)), start=1):
+        sc.models[f"roll{stage}"] = [panel(sc, f"roll{stage}", lengthwise(PAPER), (5.75, lo, 2.125 - (hi - lo) / 2),
+                                           (9.25, hi, 2.125 + (hi - lo) / 2), east=roll_end(), west=roll_end())]
+    return sc
+
+
+# ---------------------------------------------------------------- part 2: Whack-a-Zombie
+
+HAIR = pal("1c1612", "2a211a", "3a2e24")
+
+
+def zombie_face():
+    """A zombie head's front, four texels square: dark hair along its top, two black eyes set wide, a frowning mouth,
+    its skin a sickly green."""
+    def paint(p):
+        face = ("HHHH", "EZZE", "ZZZZ", "ZMMZ")
+        for y in range(p.h):
+            for x in range(p.w):
+                ch = face[min(y, 3)][min(x, 3)] if (p.w, p.h) == (4, 4) else ("H" if y == 0 else "Z")
+                p.put(x, y, shade(HAIR, 1) if ch == "H" else ZOMBIE_COLOURS[ch])
+    paint.tag = repr(("zombie_face",))
+    return paint
+
+
+def zombie_skin(top=False):
+    """A zombie head's side, green lit along its left, its dark hair along its top row (all hair on its top)."""
+    def paint(p):
+        for y in range(p.h):
+            for x in range(p.w):
+                p.put(x, y, shade(HAIR, 1 if top and (x + y) % 3 else 2) if top or y == 0 else shade(GREEN, 3 if x == 0 else 2))
+    paint.tag = repr(("zombie_skin", top))
+    return paint
+
+
+def whack_a_zombie():
+    """Whack-a-Zombie, facing north (its back board to the south), one block across and two up: a violet lacquered
+    cabinet on an iron plinth, a zombie's face painted on its front, an orange playfield at 94 cm with five holes (black
+    rubber rims round dark wells), and a back board up from the playfield's back edge with eight score lamps along its
+    top in gold sockets, a zombie's face painted under them and a striped crest. Models: `whole`, `head` (a zombie's
+    square head on its pole over the first hole: its runner, drawn risen from whichever hole is up by
+    client/WhackAZombieRenderer) and `lamp1` to `lamp8` (each lamp lit, full-bright)."""
+    spec = hm.WHACK
+    sc = Sculpt(spec["block"], 2604, 128)
+    field = spec["field"]
+    iron = flat(BLACK)
+    el = [panel(sc, "plinth", iron, (0.75, 0.0, 0.75), (15.25, 1.0, 14.75)),
+          panel(sc, "cabinet", lacquer(), (1.0, 1.0, 1.0), (15.0, field - 1.5, 14.5), north=signed(ZOMBIE_SIGN, colours=ZOMBIE_COLOURS)),
+          panel(sc, "field", flat(GOLD), (0.5, field - 1.5, 0.5), (15.5, field, 14.5), up=lacquer(ORANGE))]
+    for hx, hz in spec["holes"]:
+        el += octagon(sc, "rim", iron, hx, hz, 2.15, 0.35, field, field + 0.15)
+        el += octagon_floor(sc, "well", flat(BLACK[:2]), hx, hz, 1.9, field, field + 0.05)
+    el.append(panel(sc, "board", signed(ZOMBIE_SIGN, colours=ZOMBIE_COLOURS), (1.0, field, 13.0), (15.0, 29.0, 14.5)))
+    lamps = []
+    for k in range(spec["lamps"]):
+        x = 1.375 + 1.75 * k
+        el.append(panel(sc, "socket", flat(GOLD), (x - 0.15, 26.35, 12.8), (x + 1.15, 27.65, 13.0)))
+        el.append(panel(sc, "bulb", flat(BONE), (x, 26.5, 12.4), (x + 1.0, 27.5, 12.8)))
+        lamps.append(glowing([panel(sc, "bulb_lit", glow(LAMP), (x - 0.05, 26.45, 12.35), (x + 1.05, 27.55, 12.8),
+                                    sides=("north", "east", "west", "up", "down"))]))
+    el.append(panel(sc, "crest", stripes(), (0.5, 29.0, 12.75), (15.5, 30.0, 14.75)))
+    el.append(panel(sc, "crest", board(BAT_SIGN, SIGN_COLOURS), (3.5, 30.0, 13.25), (12.5, 32.0, 13.75)))
+    sc.models["whole"] = el
+    for k, lamp in enumerate(lamps, start=1):
+        sc.models[f"lamp{k}"] = lamp
+    hx, hz = spec["holes"][0]
+    r = spec["head"] / 2
+    sc.models["head"] = [panel(sc, "pole", flat(STEEL), (hx - 0.4, field - 4.5, hz - 0.4), (hx + 0.4, field, hz + 0.4)),
+                         panel(sc, "head", zombie_skin(), (hx - r, field, hz - r), (hx + r, field + spec["head"], hz + r),
+                               north=zombie_face(), up=zombie_skin(top=True))]
+    return sc
+
+
 # ---------------------------------------------------------------- building and files
 
 _built = {}
-BUILDERS = {hm.COTTON_CANDY["block"]: cotton_candy_cart, hm.POPCORN_WAGON["block"]: popcorn_wagon}
+BUILDERS = {hm.COTTON_CANDY["block"]: cotton_candy_cart, hm.POPCORN_WAGON["block"]: popcorn_wagon,
+            hm.TICKET_BOOTH["block"]: ticket_booth, hm.WHACK["block"]: whack_a_zombie}
 
 
 def build(block):
@@ -513,10 +668,17 @@ def assets(root, write, lang):
     states = root / "blockstates"
     item = hm.CANDY["item"]
     lang[f"item.{MOD}.{item}"] = hm.CANDY["display"]
+    half = hm.TICKET_BOOTH["roll"] // 2
+    lamps = hm.WHACK["lamps"]
     for spec, runner, overlays in ((hm.COTTON_CANDY, "head", [("heater", {"lit": "true"})]
                                     + [(f"floss{n}", {"floss": str(n)}) for n in range(1, hm.COTTON_CANDY["floss"] + 1)]),
                                    (hm.POPCORN_WAGON, "kettle", [("lit", {"lit": "true"})]
-                                    + [(f"heap{n}", {"popcorn": str(n)}) for n in range(1, hm.POPCORN_WAGON["capacity"] + 1)])):
+                                    + [(f"heap{n}", {"popcorn": str(n)}) for n in range(1, hm.POPCORN_WAGON["capacity"] + 1)]),
+                                   # Part 2: the booth's roll half full and full; each score lamp lit from its score up.
+                                   (hm.TICKET_BOOTH, "crank", [("roll1", {"roll": "|".join(str(n) for n in range(1, half + 1))}),
+                                                              ("roll2", {"roll": "|".join(str(n) for n in range(half + 1, 2 * half + 1))})]),
+                                   (hm.WHACK, "head", [(f"lamp{k}", {"score": "|".join(str(n) for n in range(k, lamps + 1))})
+                                                       for k in range(1, lamps + 1)])):
         block = spec["block"]
         lang[f"block.{MOD}.{block}"] = spec["display"]
         sc = build(block)
@@ -544,8 +706,16 @@ def assets(root, write, lang):
                        ("cotton_candy_cart.empty", "Spin some sugar first"),
                        ("popcorn_wagon.light", "Light it with flint and steel or a fire charge"),
                        ("popcorn_wagon.popping", "The kettle is popping"), ("popcorn_wagon.full", "The case is full"),
-                       ("popcorn_wagon.two", "Caramel coats two popcorn at a time")):
+                       ("popcorn_wagon.two", "Caramel coats two popcorn at a time"),
+                       ("ticket_booth.full", "The roll is full"), ("ticket_booth.empty", "Load the roll with paper"),
+                       ("whack_a_zombie.ticket", "A Midway Ticket starts a round"), ("whack_a_zombie.playing", "A round is on"),
+                       ("whack_a_zombie.not_yours", "It isn't your round"), ("whack_a_zombie.won", "All the lamps! Step right up"),
+                       ("whack_a_zombie.lost", "Time's up")):
         lang[f"message.{MOD}.{key}"] = words
+    item = hm.TICKET["item"]
+    lang[f"item.{MOD}.{item}"] = hm.TICKET["display"]
+    write(root / "models" / "item" / f"{item}.json", {"parent": "minecraft:item/generated", "textures": {"layer0": rid(f"item/{item}")}})
+    write(root / "items" / f"{item}.json", {"model": {"type": "minecraft:model", "model": rid(f"item/{item}")}})
 
 
 def counted(block, prop, most, item):
@@ -561,21 +731,39 @@ def counted(block, prop, most, item):
 
 def loot(out, write):
     """Each stall drops once, from its first block, with what it holds: a sugar for each serving of floss in the cart's
-    bowl; the popcorn in the wagon's case, and the kernel in its kettle if it was popping."""
+    bowl; the popcorn in the wagon's case, and the kernel in its kettle if it was popping; a sheet of paper for each
+    two tickets left on the booth's roll."""
     for spec, extra in ((hm.COTTON_CANDY, [counted(hm.COTTON_CANDY["block"], "floss", hm.COTTON_CANDY["floss"], "minecraft:sugar")]),
                         (hm.POPCORN_WAGON, [counted(hm.POPCORN_WAGON["block"], "popcorn", hm.POPCORN_WAGON["capacity"], rid("popcorn")),
                                             {"condition": {"type": "minecraft:match_block", "blocks": rid(hm.POPCORN_WAGON["block"]),
                                                            "state": {"part": "0", "popping": "true"}},
                                              "entries": [{"type": "minecraft:item", "name": rid("corn_kernels")}], "rolls": 1}])):
-        block = spec["block"]
-        write(out / f"{block}.json", {"type": "minecraft:block", "pools": [{
-            "condition": {"type": "minecraft:all_of", "terms": [{"type": "minecraft:survives_explosion"},
-                                                                {"type": "minecraft:match_block", "blocks": rid(block), "state": {"part": "0"}}]},
-            "entries": [{"type": "minecraft:item", "name": rid(block)}], "rolls": 1}] + extra, "random_sequence": rid(f"blocks/{block}")})
+        drop_once(out, write, spec["block"], extra)
+    # The booth gives back a sheet for each two tickets left on its roll; Whack-a-Zombie drops only itself.
+    tb = hm.TICKET_BOOTH
+    block = tb["block"]
+    sheets = [{"type": "minecraft:set_count", "count": n // tb["per_sheet"], "add": False,
+               "condition": {"type": "minecraft:match_block", "blocks": rid(block), "state": {"roll": str(n)}}}
+              for n in range(2 * tb["per_sheet"], tb["roll"] + 1)]
+    short = [{"type": "minecraft:inverted", "term": {"type": "minecraft:match_block", "blocks": rid(block), "state": {"roll": str(n)}}}
+             for n in range(tb["per_sheet"])]
+    paper = {"condition": {"type": "minecraft:all_of", "terms": [
+                 {"type": "minecraft:match_block", "blocks": rid(block), "state": {"part": "0"}}] + short},
+             "entries": [{"type": "minecraft:item", "name": "minecraft:paper", "modifier": sheets}], "rolls": 1}
+    drop_once(out, write, block, [paper])
+    drop_once(out, write, hm.WHACK["block"], [])
+
+
+def drop_once(out, write, block, extra):
+    """A two-block stall's loot: itself once, from its first block, and the `extra` pools."""
+    write(out / f"{block}.json", {"type": "minecraft:block", "pools": [{
+        "condition": {"type": "minecraft:all_of", "terms": [{"type": "minecraft:survives_explosion"},
+                                                            {"type": "minecraft:match_block", "blocks": rid(block), "state": {"part": "0"}}]},
+        "entries": [{"type": "minecraft:item", "name": rid(block)}], "rolls": 1}] + extra, "random_sequence": rid(f"blocks/{block}")})
 
 
 def tags(tags):
-    """Both stalls are wooden carts: they come off with an axe."""
+    """The stalls are wooden: they come off with an axe."""
     for block in hm.blocks():
         tags.add("block", "minecraft:mineable/axe", rid(block))
 
@@ -584,4 +772,5 @@ def textures():
     import item_icons
     out = {("block", block): build(block).atlas.img for block in hm.blocks()}
     out[("item", hm.CANDY["item"])] = item_icons.draw(hm.CANDY["item"])
+    out[("item", hm.TICKET["item"])] = item_icons.draw(hm.TICKET["item"])
     return out

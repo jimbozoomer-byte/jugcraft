@@ -117,6 +117,10 @@ PANCAKE = Material((52, 28, 10), (104, 60, 22), (160, 100, 42), (204, 146, 72), 
 # flat (no shine); a pale material, so its outline may be a third of its mid tone's luma.
 FLOSS = Material((92, 34, 58), (140, 64, 96), (196, 106, 144), (228, 146, 180), (246, 190, 212), (252, 226, 236),
                  shine=False)
+# Haunted Midway's Midway Ticket (tools/item_icons/midway_ticket.txt): a bright pumpkin-orange card, more yellow and
+# saturated than copper so it can't read as metal. Card, not metal: flat.
+TICKET = Material((70, 30, 4), (120, 56, 8), (200, 98, 8), (238, 142, 22), (250, 182, 48), (254, 220, 124),
+                  shine=False)
 
 MATERIALS = {
     "tech_clay": Material((48, 22, 22), (78, 38, 38), (124, 57, 57), (168, 83, 83), (201, 116, 111), (228, 158, 146),
@@ -131,8 +135,8 @@ MATERIALS = {
     "dew": DEW,
     # Barn & Harvest Tools' dairy and bakery
     "butter": BUTTER, "pancake": PANCAKE,
-    # Haunted Midway's cotton candy
-    "floss": FLOSS,
+    # Haunted Midway's cotton candy and ticket
+    "floss": FLOSS, "ticket": TICKET,
     # the approved metals ("I like the alternate versions for steel and bronze")
     "bronze": px.BRONZE, "steel": px.STEEL,
     # the arms' other materials (leather, rubber and cloth are wraps: their own outline and dark tones are never drawn,

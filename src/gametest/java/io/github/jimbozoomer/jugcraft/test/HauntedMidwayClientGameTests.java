@@ -4,6 +4,8 @@ import io.github.jimbozoomer.jugcraft.agriculture.CottonCandyCartBlock;
 import io.github.jimbozoomer.jugcraft.agriculture.JugcraftAgriculture;
 import io.github.jimbozoomer.jugcraft.agriculture.MultiDecorationBlock;
 import io.github.jimbozoomer.jugcraft.agriculture.PopcornWagonBlock;
+import io.github.jimbozoomer.jugcraft.agriculture.TicketBoothBlock;
+import io.github.jimbozoomer.jugcraft.agriculture.WhackAZombieBlock;
 import java.util.Locale;
 import net.fabricmc.fabric.api.client.gametest.v1.FabricClientGameTest;
 import net.fabricmc.fabric.api.client.gametest.v1.context.ClientGameTestContext;
@@ -21,8 +23,10 @@ import net.minecraft.world.level.block.state.BlockState;
  * Client game test for Haunted Midway, part 1 (decor set 6): on a strip of gravel midway, two Cotton-Candy Carts, one
  * running with its bowl full of floss (its spinner head drawn by client/CottonCandyCartRenderer) and one switched off and
  * empty, and two Caramel-Corn Wagons beside them, one lit with its case full of popcorn (its kettle drawn by
- * client/PopcornWagonRenderer) and one out and empty; built in a real client and photographed from the midway, close by
- * at each stall and by night (CI job {@code client}). They go into docs/features/haunted-midway.md.
+ * client/PopcornWagonRenderer) and one out and empty; and part 2's Ticket Booth with a full roll and a Whack-a-Zombie
+ * cabinet to the west of them, a head up (drawn by client/WhackAZombieRenderer) and five lamps lit; built in a real
+ * client and photographed from the midway, close by at each stall, at the games and by night (CI job {@code client}).
+ * They go into docs/features/haunted-midway.md.
  */
 public class HauntedMidwayClientGameTests implements FabricClientGameTest {
 	@Override
@@ -40,14 +44,15 @@ public class HauntedMidwayClientGameTests implements FabricClientGameTest {
 			server.runCommand("gamerule minecraft:spawn_mobs false");
 			server.runCommand("time set noon");
 			server.runCommand("weather clear");
-			server.runCommand("fill %d %d %d %d %d %d minecraft:gravel".formatted(x - 4, y - 1, z - 3, x + 8, y - 1, z + 8));
-			server.runCommand("fill %d %d %d %d %d %d minecraft:air".formatted(x - 4, y, z - 3, x + 8, y + 6, z + 8));
+			server.runCommand("fill %d %d %d %d %d %d minecraft:gravel".formatted(x - 8, y - 1, z - 3, x + 8, y - 1, z + 8));
+			server.runCommand("fill %d %d %d %d %d %d minecraft:air".formatted(x - 8, y, z - 3, x + 8, y + 6, z + 8));
 			server.runOnServer(minecraft -> build(minecraft.overworld(), origin));
 			context.waitTicks(40);
 			singleplayer.getConnection().waitForChunksRender();
 			shoot(context, singleplayer, x + 2, y + 1, z + 6, 180, 10, "jugcraft_midway_stalls");
 			shoot(context, singleplayer, x, y + 1, z + 2, 180, 25, "jugcraft_midway_cotton_candy");
 			shoot(context, singleplayer, x + 4, y + 1, z + 2, 180, 20, "jugcraft_midway_popcorn");
+			shoot(context, singleplayer, x - 5, y + 1, z + 3, 180, 25, "jugcraft_midway_games");
 			server.runCommand("time set midnight");
 			shoot(context, singleplayer, x + 2, y + 1, z + 5, 180, 10, "jugcraft_midway_night");
 		}
@@ -85,5 +90,10 @@ public class HauntedMidwayClientGameTests implements FabricClientGameTest {
 		stall(level, wagon, origin.offset(4, 0, 0), state -> state.setValue(MultiDecorationBlock.LIT, true)
 				.setValue(PopcornWagonBlock.POPCORN, PopcornWagonBlock.CAPACITY));
 		stall(level, wagon, origin.offset(6, 0, 0), state -> state);
+		// Part 2, to the west: the ticket booth with a full roll, and Whack-a-Zombie with a head up and five lamps lit.
+		stall(level, (TicketBoothBlock) JugcraftAgriculture.block("ticket_booth"), origin.offset(-4, 0, 0),
+				state -> state.setValue(TicketBoothBlock.ROLL_LEFT, TicketBoothBlock.ROLL));
+		stall(level, (WhackAZombieBlock) JugcraftAgriculture.block("whack_a_zombie"), origin.offset(-6, 0, 0),
+				state -> state.setValue(WhackAZombieBlock.HEAD, 2).setValue(WhackAZombieBlock.SCORE, 5));
 	}
 }

@@ -8,6 +8,14 @@ Every change to Jugcraft, newest first, grouped by pull request. For what each t
 
 No numbered release yet. Entries on feature branches remain proposed until their pull requests merge.
 
+### Unmerged: Haunted Midway, part 2 (the ticket booth and Whack-a-Zombie)
+- **Ticket Booth**: a violet kiosk two blocks high with a brass ticket dispenser on its counter. Paper loads its roll (two tickets a sheet); an empty hand turns its crank and prints a Midway Ticket.
+- **Midway Ticket**: a round's admission at the midway's games, printed from paper. It isn't money and buys nothing else.
+- **Whack-a-Zombie**: a game cabinet two blocks high. A ticket starts a 20-second round; zombie heads pop up from five holes, and the Carnival Mallet knocks them down, lighting a lamp each. All eight lamps win a prize from the midway's prize table. Only the player who paid can whack.
+- Recipes: glass panes over a dispenser between planks, over planks; torches over rotten flesh between planks, over a piston between planks.
+- Record: [haunted-midway.md](docs/features/haunted-midway.md).
+- **Checked:** the record's Verification. Game tests and screenshots run in CI only; not played by hand.
+
 ### Unmerged: Haunted Midway, part 1 (the sweet stalls)
 - **Cotton-Candy Cart**: a violet and orange cart two blocks high, with a steel spinning bowl and a striped canopy. An empty hand switches it on and its spinner head spins; sugar is spun into pink floss on the bowl's wall, up to three servings, and paper winds a serving onto a cone.
 - **Cotton Candy**: a new candy (2 hunger), made only at the cart.

@@ -5,6 +5,8 @@ import io.github.jimbozoomer.jugcraft.agriculture.DecorationBlockEntity;
 import io.github.jimbozoomer.jugcraft.agriculture.JugcraftAgriculture;
 import io.github.jimbozoomer.jugcraft.agriculture.MultiDecorationBlock;
 import io.github.jimbozoomer.jugcraft.agriculture.PopcornWagonBlock;
+import io.github.jimbozoomer.jugcraft.agriculture.TicketBoothBlock;
+import io.github.jimbozoomer.jugcraft.agriculture.WhackAZombieBlock;
 import java.util.function.Predicate;
 import net.fabricmc.fabric.api.gametest.v1.GameTest;
 import net.minecraft.core.BlockPos;
@@ -37,6 +39,12 @@ import net.minecraft.world.phys.Vec3;
  * spill marked; an empty hand takes the Popcorn; Caramel isn't spent on fewer than two; two more kernels pop and Caramel
  * coats the two into a Caramel Popcorn; a shovel puts it out. Broken while popping with three in its case, it gives back
  * itself, the three Popcorn and the kernel.
+ * Part 2: the Ticket Booth won't print with an empty roll; three sheets load six tickets; an empty hand prints one, and
+ * the crank must come to rest before the next; broken with four left, it gives back itself and two sheets. Whack-a-Zombie
+ * stands out; an empty hand starts nothing; a ticket starts a round and a second isn't taken while it runs; a head pops
+ * up; another player's whack doesn't count; a whack on the wrong hole doesn't count; the player who paid knocks each head
+ * down as it comes, lighting a lamp each, and all eight win a prize from the midway's prize table and end the round.
+ * Left alone, a round's time runs out: no head is up, no lamp lit and no prize given.
  */
 public class HauntedMidwayGameTests {
 	private static Item item(String id) {
@@ -198,6 +206,133 @@ public class HauntedMidwayGameTests {
 					&& dropped(helper, item("popcorn_wagon")) == 1 && dropped(helper, item("popcorn")) == 3
 					&& dropped(helper, item("corn_kernels")) == 1,
 					"Broken while popping with three in its case, it gives back itself, the three Popcorn and the kernel");
+			helper.succeed();
+		});
+	}
+
+	// ---------------------------------------------------------------- part 2
+
+	private static int prizes(ServerPlayer player) {
+		int count = 0;
+		for (int slot = 0; slot < player.getInventory().getContainerSize(); slot++) {
+			ItemStack stack = player.getInventory().getItem(slot);
+			if (!stack.isEmpty() && !stack.is(item("midway_ticket")) && !stack.is(item("carnival_mallet"))) {
+				count += stack.getCount();
+			}
+		}
+		return count;
+	}
+
+	@GameTest(maxTicks = 60)
+	public void theTicketBoothPrintsTickets(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		floor(helper);
+		TicketBoothBlock booth = (TicketBoothBlock) JugcraftAgriculture.block("ticket_booth");
+		BlockPos pos = new BlockPos(3, 2, 4);
+		BlockPos master = helper.absolutePos(pos);
+		ServerPlayer player = standing(helper, new BlockPos(3, 2, 1));
+		place(player, helper, pos, new ItemStack(item("ticket_booth")));
+		helper.assertTrue(both(level, booth, master, state -> state.getValue(TicketBoothBlock.ROLL_LEFT) == 0), "It stands two blocks high, its roll empty");
+		use(player, level, master, ItemStack.EMPTY);
+		helper.assertTrue(player.getInventory().countItem(item("midway_ticket")) == 0, "With an empty roll it prints nothing");
+		ItemStack paper = new ItemStack(Items.PAPER, 3);
+		for (int i = 0; i < 3; i++) {
+			use(player, level, master.above(), paper);
+		}
+		helper.assertTrue(both(level, booth, master, state -> state.getValue(TicketBoothBlock.ROLL_LEFT) == 6) && paper.isEmpty(),
+				"Three sheets load six tickets");
+		use(player, level, master, ItemStack.EMPTY);
+		use(player, level, master, ItemStack.EMPTY);
+		helper.assertTrue(player.getInventory().countItem(item("midway_ticket")) == 1
+				&& level.getBlockEntity(master) instanceof DecorationBlockEntity crank && crank.marked() != Long.MIN_VALUE,
+				"An empty hand prints a ticket and turns the crank, which must come to rest before the next");
+		helper.runAfterDelay(TicketBoothBlock.CRANK_TICKS + 1, () -> {
+			use(player, level, master, ItemStack.EMPTY);
+			helper.assertTrue(player.getInventory().countItem(item("midway_ticket")) == 2
+					&& both(level, booth, master, state -> state.getValue(TicketBoothBlock.ROLL_LEFT) == 4), "At rest, it prints the next");
+			level.destroyBlock(master, true);
+		});
+		helper.runAfterDelay(TicketBoothBlock.CRANK_TICKS + 4, () -> {
+			helper.assertTrue(level.getBlockState(master).isAir() && level.getBlockState(master.above()).isAir()
+					&& dropped(helper, item("ticket_booth")) == 1 && dropped(helper, Items.PAPER) == 2,
+					"Broken with four tickets left, it gives back itself and two sheets");
+			helper.succeed();
+		});
+	}
+
+	@GameTest(maxTicks = 420)
+	public void whackAZombieWinsAPrize(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		floor(helper);
+		WhackAZombieBlock whack = (WhackAZombieBlock) JugcraftAgriculture.block("whack_a_zombie");
+		BlockPos pos = new BlockPos(3, 2, 4);
+		BlockPos master = helper.absolutePos(pos);
+		ServerPlayer player = standing(helper, new BlockPos(3, 2, 2));
+		ServerPlayer other = standing(helper, new BlockPos(4, 2, 2));
+		place(player, helper, pos, new ItemStack(item("whack_a_zombie")));
+		helper.assertTrue(both(level, whack, master, state -> !state.getValue(MultiDecorationBlock.LIT) && state.getValue(WhackAZombieBlock.HEAD) == 0),
+				"It stands two blocks high, no round on");
+		use(player, level, master, ItemStack.EMPTY);
+		helper.assertTrue(!level.getBlockState(master).getValue(MultiDecorationBlock.LIT), "An empty hand starts nothing");
+		ItemStack tickets = new ItemStack(item("midway_ticket"), 2);
+		use(player, level, master, tickets);
+		use(player, level, master, tickets);
+		helper.assertTrue(both(level, whack, master, state -> state.getValue(MultiDecorationBlock.LIT) && state.getValue(WhackAZombieBlock.SCORE) == 0)
+				&& tickets.getCount() == 1, "A ticket starts a round, and a second isn't taken while it runs");
+		int before = prizes(player);
+		boolean[] checked = new boolean[1];
+		for (int tick = WhackAZombieBlock.GAP_TICKS + 1; tick < 380; tick += 2) {
+			helper.runAfterDelay(tick, () -> {
+				BlockState state = level.getBlockState(master);
+				if (!state.is(whack) || !state.getValue(MultiDecorationBlock.LIT) || state.getValue(WhackAZombieBlock.HEAD) == 0) {
+					return;
+				}
+				int up = state.getValue(WhackAZombieBlock.HEAD) - 1;
+				Vec3 top = WhackAZombieBlock.headTop(master, Direction.NORTH, up);
+				if (!checked[0]) {
+					checked[0] = true;
+					helper.assertTrue(!whack.whack(level, master, state, other, top), "Another player's whack doesn't count");
+					Vec3 wrong = WhackAZombieBlock.headTop(master, Direction.NORTH, (up + 2) % WhackAZombieBlock.HOLES_X.length);
+					helper.assertTrue(!whack.whack(level, master, state, player, wrong) && level.getBlockState(master).getValue(WhackAZombieBlock.SCORE) == 0,
+							"A whack on the wrong hole doesn't count");
+				}
+				int score = state.getValue(WhackAZombieBlock.SCORE);
+				helper.assertTrue(whack.whack(level, master, state, player, top), "A whack on the head that's up is a hit");
+				BlockState after = level.getBlockState(master);
+				helper.assertTrue(after.getValue(WhackAZombieBlock.HEAD) == 0 && after.getValue(WhackAZombieBlock.SCORE) == Math.min(WhackAZombieBlock.LAMPS, score + 1),
+						"The head is knocked down and a lamp lit");
+			});
+		}
+		helper.runAfterDelay(385, () -> {
+			helper.assertTrue(both(level, whack, master, state -> !state.getValue(MultiDecorationBlock.LIT)
+					&& state.getValue(WhackAZombieBlock.SCORE) == WhackAZombieBlock.LAMPS && state.getValue(WhackAZombieBlock.HEAD) == 0),
+					"All eight lamps lit, the round is over");
+			helper.assertTrue(prizes(player) > before, "Its player won a prize from the midway's prize table");
+			helper.succeed();
+		});
+	}
+
+	@GameTest(maxTicks = 460)
+	public void whackAZombieRunsOutOfTime(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		floor(helper);
+		WhackAZombieBlock whack = (WhackAZombieBlock) JugcraftAgriculture.block("whack_a_zombie");
+		BlockPos master = helper.absolutePos(new BlockPos(3, 2, 4));
+		BlockState placed = whack.defaultBlockState().setValue(MultiDecorationBlock.FACING, Direction.NORTH);
+		level.setBlockAndUpdate(master, placed);
+		whack.setPlacedBy(level, master, placed, null, new ItemStack(whack));
+		ServerPlayer player = standing(helper, new BlockPos(3, 2, 2));
+		use(player, level, master, new ItemStack(item("midway_ticket")));
+		int before = prizes(player);
+		boolean[] popped = new boolean[1];
+		for (int tick = WhackAZombieBlock.GAP_TICKS + 2; tick < WhackAZombieBlock.ROUND_TICKS; tick += 5) {
+			helper.runAfterDelay(tick, () -> popped[0] |= level.getBlockState(master).getValue(WhackAZombieBlock.HEAD) > 0);
+		}
+		helper.runAfterDelay(WhackAZombieBlock.ROUND_TICKS + WhackAZombieBlock.UP_TICKS + WhackAZombieBlock.GAP_TICKS + 5, () -> {
+			helper.assertTrue(popped[0], "Heads popped up during the round");
+			helper.assertTrue(both(level, whack, master, state -> !state.getValue(MultiDecorationBlock.LIT)
+					&& state.getValue(WhackAZombieBlock.HEAD) == 0 && state.getValue(WhackAZombieBlock.SCORE) == 0) && prizes(player) == before,
+					"Left alone, its time runs out: no head up, no lamp lit, no prize");
 			helper.succeed();
 		});
 	}

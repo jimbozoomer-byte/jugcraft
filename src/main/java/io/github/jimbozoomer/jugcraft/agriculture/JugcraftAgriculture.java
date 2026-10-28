@@ -399,6 +399,8 @@ public final class JugcraftAgriculture {
 	public static BlockEntityType<DecorationBlockEntity> TEA_KETTLE_ENTITY;
 	public static BlockEntityType<DecorationBlockEntity> COTTON_CANDY_CART_ENTITY;
 	public static BlockEntityType<DecorationBlockEntity> POPCORN_WAGON_ENTITY;
+	public static BlockEntityType<DecorationBlockEntity> TICKET_BOOTH_ENTITY;
+	public static BlockEntityType<WhackAZombieBlockEntity> WHACK_A_ZOMBIE_ENTITY;
 	public static BlockEntityType<FirewoodRackBlockEntity> FIREWOOD_RACK_ENTITY;
 	public static BlockEntityType<DecorationBlockEntity> CHOPPING_BLOCK_ENTITY;
 	public static BlockEntityType<BlanketLadderBlockEntity> BLANKET_LADDER_ENTITY;
@@ -2986,7 +2988,7 @@ public final class JugcraftAgriculture {
 
 	/**
 	 * Haunted Midway, decor set 6 (tools/haunted_midway.py): part 1's sweet stalls, the Cotton-Candy Cart (and the Cotton
-	 * Candy it spins) and the Caramel-Corn Wagon.
+	 * Candy it spins) and the Caramel-Corn Wagon; part 2's Ticket Booth, its Midway Ticket and Whack-a-Zombie.
 	 */
 	private static void registerHauntedMidway() {
 		Block cart = registerBlock("cotton_candy_cart", CottonCandyCartBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_PURPLE)
@@ -3005,6 +3007,21 @@ public final class JugcraftAgriculture {
 					new Item.Properties().useBlockDescriptionPrefix(), BUILDING_TAB);
 		}
 		food("cotton_candy", 2, 0.1F, COMPOST_LOW);
+		// Part 2: the Ticket Booth and the Midway Ticket it prints, and Whack-a-Zombie, a ticket a round.
+		Block booth = registerBlock("ticket_booth", TicketBoothBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_PURPLE)
+				.strength(1.5F).sound(SoundType.WOOD).noOcclusion().ignitedByLava().pushReaction(PushReaction.IMMOVEABLE));
+		TICKET_BOOTH_ENTITY = Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, Jugcraft.id("ticket_booth"),
+				FabricBlockEntityTypeBuilder.<DecorationBlockEntity>create((pos, state) -> new DecorationBlockEntity(TICKET_BOOTH_ENTITY, pos, state),
+						booth).build());
+		Block whack = registerBlock("whack_a_zombie", WhackAZombieBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_PURPLE)
+				.strength(1.5F).sound(SoundType.WOOD).noOcclusion().ignitedByLava().pushReaction(PushReaction.IMMOVEABLE));
+		WHACK_A_ZOMBIE_ENTITY = Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, Jugcraft.id("whack_a_zombie"),
+				FabricBlockEntityTypeBuilder.create(WhackAZombieBlockEntity::new, whack).build());
+		for (Block block : List.of(booth, whack)) {
+			registerItem(BuiltInRegistries.BLOCK.getKey(block).getPath(), props -> new BlockItem(block, props),
+					new Item.Properties().useBlockDescriptionPrefix(), BUILDING_TAB);
+		}
+		registerItem("midway_ticket", Item::new, new Item.Properties(), BUILDING_TAB);
 	}
 
 	private static BlockBehaviour.Properties displayProperties() {

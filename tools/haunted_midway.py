@@ -18,6 +18,22 @@ Part 1, the sweet stalls:
   Popcorn a kernel (as smelting gives), up to `capacity`. An empty hand takes a Popcorn out; Caramel turns two of them
   into a Caramel Popcorn (the crafting recipe's own, tools/menu.py). Broken, it gives back the popcorn in its case and a
   kernel still in its kettle. Neither stall burns fuel.
+
+Part 2, the ticket booth and the first game:
+- The Ticket Booth (TicketBoothBlock): a kiosk one block across and two up, its ticket window glazed over a counter, a
+  striped roof and a crest board painted with a ticket. On its counter stands a brass ticket dispenser with a roll of
+  paper on top and a crank at its side. Paper used on it loads the roll, `per_sheet` tickets a sheet, up to `roll`;
+  an empty hand turns the crank once round (client/TicketBoothRenderer, its runner model about the crank's axle `axle`,
+  height and depth, over `crank_ticks`) and prints a Midway Ticket. A ticket is a round's admission, not money: it is
+  printed from paper and buys nothing but a round; the mod's money stays the Jug. Broken, the booth gives back a sheet
+  for each `per_sheet` tickets left on its roll.
+- Whack-a-Zombie (WhackAZombieBlock): a game cabinet one block across and two up, its playfield at 94 cm with five
+  holes (`holes`, x and z), a back board with `lamps` score lamps along its top and a crest. A Midway Ticket used on it
+  starts a round of `round_ticks` for whoever paid. Square-faced zombie heads `head` pixels high pop up one at a time
+  from the holes, rising over `rise_ticks` (client/WhackAZombieRenderer, its runner model), each up for `up_ticks`, with
+  `gap_ticks` between; the player whacks one with a Carnival Mallet (left click, or use) to knock it down and light a
+  lamp. Lighting all `lamps` wins a prize (the midway's prize table) and ends the round; when the time runs out first,
+  the round is lost. Only the player who paid may whack, from within the High Striker's reach.
 Sizes in pixels, facing north (its back to the south).
 """
 
@@ -26,6 +42,13 @@ COTTON_CANDY = {"block": "cotton_candy_cart", "display": "Cotton-Candy Cart", "s
 CANDY = {"item": "cotton_candy", "display": "Cotton Candy"}
 POPCORN_WAGON = {"block": "popcorn_wagon", "display": "Caramel-Corn Wagon", "size": (1, 2, 1), "capacity": 8, "pop_ticks": 60,
                  "tip": 40.0, "tip_ticks": 20, "pivot": (21.0, 8.0), "light": 10, "counter": 13.75}
+
+TICKET_BOOTH = {"block": "ticket_booth", "display": "Ticket Booth", "size": (1, 2, 1), "roll": 32, "per_sheet": 2, "crank_ticks": 10,
+                "axle": (16.5, 2.1)}
+TICKET = {"item": "midway_ticket", "display": "Midway Ticket"}
+WHACK = {"block": "whack_a_zombie", "display": "Whack-a-Zombie", "size": (1, 2, 1), "field": 15.0, "head": 4.0, "lamps": 8,
+         "holes": ((3.5, 3.75), (8.0, 3.75), (12.5, 3.75), (5.75, 8.75), (10.25, 8.75)), "round_ticks": 400, "up_ticks": 20, "gap_ticks": 10,
+         "rise_ticks": 4}
 
 # Cotton Candy: spun sugar on a paper cone, light as air and gone in a moment (a candy-corn's worth of food).
 ITEMS = {
@@ -37,6 +60,12 @@ RECIPES = [
      "key": {"W": "minecraft:purple_wool", "I": "minecraft:iron_ingot", "B": "minecraft:bucket", "P": "#minecraft:planks",
              "S": "minecraft:stick"},
      "result": COTTON_CANDY["block"], "count": 1, "category": "misc"},
+    {"id": TICKET_BOOTH["block"], "pattern": ["GGG", "PDP", "PPP"],
+     "key": {"G": "minecraft:glass_pane", "D": "minecraft:dispenser", "P": "#minecraft:planks"},
+     "result": TICKET_BOOTH["block"], "count": 1, "category": "misc"},
+    {"id": WHACK["block"], "pattern": ["TTT", "PFP", "PSP"],
+     "key": {"T": "minecraft:torch", "F": "minecraft:rotten_flesh", "S": "minecraft:piston", "P": "#minecraft:planks"},
+     "result": WHACK["block"], "count": 1, "category": "misc"},
     {"id": POPCORN_WAGON["block"], "pattern": ["GJG", "GCG", "PIP"],
      "key": {"G": "minecraft:glass_pane", "J": "minecraft:jack_o_lantern", "C": "minecraft:cauldron", "P": "#minecraft:planks",
              "I": "minecraft:iron_ingot"},
@@ -46,9 +75,9 @@ SHAPELESS = []
 
 
 def blocks():
-    return [COTTON_CANDY["block"], POPCORN_WAGON["block"]]
+    return [COTTON_CANDY["block"], POPCORN_WAGON["block"], TICKET_BOOTH["block"], WHACK["block"]]
 
 
 def items():
-    """The stalls (the Cotton Candy is in ITEMS)."""
-    return blocks()
+    """The stalls and the ticket (the Cotton Candy is in ITEMS)."""
+    return blocks() + [TICKET["item"]]
