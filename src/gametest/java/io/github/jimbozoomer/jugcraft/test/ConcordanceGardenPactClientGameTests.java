@@ -1177,10 +1177,15 @@ public class ConcordanceGardenPactClientGameTests implements FabricClientGameTes
 		return Pacts.holds(BoundWills.of(minecraft).ledger(), player(minecraft).getUUID(), counterpart);
 	}
 
-	/** Waits until its main controller draws {@code clip} past its blend, freezes the world, closes the screen if asked, checks and photographs it, thaws it. */
+	/**
+	 * Waits until its main controller draws {@code clip} past its blend with no gesture drawn over it, freezes the world,
+	 * closes the screen if asked, checks it still draws the loop and no gesture (loopPose's guard, for any spirit), and
+	 * photographs it, thaws it.
+	 */
 	private static void loopPoseOf(ClientGameTestContext context, TestDedicatedServerContext server, BlockPos perch, String id, String clip,
 			String name, boolean closeScreen) {
-		context.waitFor(client -> clip.equals(drawingOf(client, perch, id, MAIN)) && !blendingOf(client, perch, id, MAIN), WAIT);
+		context.waitFor(client -> clip.equals(drawingOf(client, perch, id, MAIN)) && !blendingOf(client, perch, id, MAIN)
+				&& drawingOf(client, perch, id, GESTURES).isEmpty(), WAIT);
 		server.runCommand("tick freeze");
 		try {
 			if (closeScreen) {
@@ -1188,8 +1193,10 @@ public class ConcordanceGardenPactClientGameTests implements FabricClientGameTes
 				context.waitForScreen(null);
 			}
 			context.waitTicks(5);
+			// No gesture drawn over the loop: one that had finished, rewound by the freeze, once hid Buer's (run 40605564166).
 			String drawn = context.computeOnClient(client -> drawingOf(client, perch, id, MAIN));
-			check(clip.equals(drawn), "Frozen while it draws " + clip + ": " + drawn);
+			String over = context.computeOnClient(client -> drawingOf(client, perch, id, GESTURES));
+			check(clip.equals(drawn) && over.isEmpty(), "Frozen while it draws " + clip + ", no gesture over it: " + drawn + " / " + over);
 			shot(context, name);
 		} finally {
 			server.runCommand("tick unfreeze");

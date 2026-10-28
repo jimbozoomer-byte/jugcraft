@@ -6205,6 +6205,80 @@ public class ConcordanceWorkerGameTests {
 		helper.succeed();
 	}
 
+	/**
+	 * GC-05 (GC-S25, decided by the session; the unit review's finding 4): a Heart beating on its bed makes 1 or 2 Verdance a
+	 * beat (tolerating or thriving). He leaves it while it holds less than a whole move, so no move of his day is spent on a
+	 * beat's worth, and carries MOVE_MAX in one move once it has gathered; when it makes no more (its bed spent), what is left
+	 * is his to carry, so the nearly empty Heart is still emptied. The bed lit and among three kinds of crop, as the garden's
+	 * own test of the beat; the Heart placed asleep and woken only at tick 40, so its own pulse beats nothing before these do.
+	 */
+	@GameTest(maxTicks = 60)
+	public void bathinCarriesWholeMovesFromABeatingHeart(GameTestHelper helper) {
+		ServerPlayer keeper = gardenHolder(helper);
+		BlockPos bedAt = new BlockPos(1, 1, 1);
+		VerdantBedBlockEntity bed = keptBed(helper, bedAt, keeper.getUUID(), 0);
+		bed.setNutrients(16);
+		// Three kinds of crop in the Heart's square at its height (Sampler.RADIUS 2), each on a bed of its own; a lamp beside it.
+		keptBed(helper, new BlockPos(0, 1, 3), keeper.getUUID(), 0);
+		keptBed(helper, new BlockPos(1, 1, 3), keeper.getUUID(), 0);
+		keptBed(helper, new BlockPos(2, 1, 3), keeper.getUUID(), 0);
+		helper.setBlock(new BlockPos(0, 2, 3), Garden.SUNPETAL_CROP);
+		helper.setBlock(new BlockPos(1, 2, 3), Garden.DEWMOSS_CROP);
+		helper.setBlock(new BlockPos(2, 2, 3), Garden.MENDVETCH_CROP);
+		helper.setBlock(bedAt.above().north(), Blocks.GLOWSTONE);
+		helper.setBlock(bedAt.above(), Garden.VERDANT_HEART);
+		VerdantHeartBlockEntity heart = helper.getBlockEntity(bedAt.above(), VerdantHeartBlockEntity.class);
+		// Its bed's reading is taken in the ticks before (the level's samples a tick are shared with every running test).
+		for (int tick : new int[] {10, 20, 30}) {
+			helper.runAtTickTime(tick, () -> bed.habitat(helper.getLevel()));
+		}
+		helper.runAtTickTime(40, () -> {
+			ServerLevel level = helper.getLevel();
+			helper.assertTrue(bed.habitat(level) != null, "The Heart's bed has its reading");
+			heart.awaken(keeper.getUUID());
+			long now = dayStart(level, 1);
+			PactPerchBlockEntity perch = bathinPact(helper, keeper, new BlockPos(5, 1, 3), now);
+			BathinEntity bathin = bathin(helper, perch);
+			GleanerBlockEntity far = keptGleaner(helper, new BlockPos(7, 1, 7), keeper.getUUID(), 0);
+			long at = now;
+			int beats = 0;
+			while (heart.verdance() < VerdanceCarrying.MOVE_MAX) {
+				long before = heart.verdance();
+				beats++;
+				String beat = heart.beat(level);
+				helper.assertTrue(beats <= VerdanceCarrying.MOVE_MAX && beat.equals("working") && heart.verdance() > before,
+						"The Heart beats on its bed, making Verdance: " + beat + ", " + heart.verdance());
+				if (heart.verdance() < VerdanceCarrying.MOVE_MAX) {
+					helper.assertValueEqual(bathin.think(level, NOON, at), Status.IDLE, "Less than a whole move in a beating Heart: he leaves it");
+					helper.assertTrue(far.verdance() == 0 && carrying(bathin).last() == null && carrying(bathin).idle() == VerdanceCarrying.Idle.EMPTY,
+							"Nothing moved, and Jade says there is nothing to carry yet: " + heart.verdance());
+					at += 20;
+				}
+			}
+			long gathered = heart.verdance();
+			helper.assertTrue(gathered - VerdanceCarrying.MOVE_MAX < 2 && beats >= VerdanceCarrying.MOVE_MAX / 2
+					&& Pacts.done(pactOf(level, perch).pact(), now) == 0,
+					"1 or 2 a beat: " + beats + " beats gathered " + gathered + ", and none of his moves was spent on them");
+			helper.assertValueEqual(bathin.think(level, NOON, at), Status.WORKING, "A whole move gathered, he carries it");
+			VerdanceCarrying.Move move = carrying(bathin).last();
+			helper.assertTrue(heart.verdance() == gathered - VerdanceCarrying.MOVE_MAX && far.verdance() == VerdanceCarrying.MOVE_MAX
+					&& move != null && move.verdance() == VerdanceCarrying.MOVE_MAX && Pacts.done(pactOf(level, perch).pact(), now) == 1,
+					"MOVE_MAX in one move, counted once: " + heart.verdance() + ", " + far.verdance() + ", " + move);
+			helper.assertValueEqual(heart.beat(level), "working", "It beats again");
+			long left = heart.verdance();
+			helper.assertTrue(left > 0 && left < VerdanceCarrying.MOVE_MAX, "A beat's worth and what the move left: " + left);
+			helper.assertValueEqual(bathin.think(level, NOON, at + 20), Status.IDLE, "Still beating with less than a whole move: he leaves it");
+			bed.setNutrients(0);
+			String stopped = heart.beat(level);
+			helper.assertTrue(!stopped.equals("working") && heart.verdance() == left, "Its bed spent, it makes no more: " + stopped);
+			helper.assertValueEqual(bathin.think(level, NOON, at + 40), Status.WORKING, "Making no more, what it holds is his to carry");
+			helper.assertTrue(heart.verdance() == 0 && far.verdance() == VerdanceCarrying.MOVE_MAX + left
+					&& Pacts.done(pactOf(level, perch).pact(), now) == 2,
+					"The nearly empty Heart emptied in one move; every Verdance it made is in the Gleaner: " + heart.verdance() + ", " + far.verdance());
+			helper.succeed();
+		});
+	}
+
 	/** GC-05 (S1): his save holds no Verdance; killed or unloaded between thinks every reservoir holds what it held; called back, he carries on. */
 	@GameTest(maxTicks = 20)
 	public void bathinNeverHoldsVerdance(GameTestHelper helper) {

@@ -27,10 +27,12 @@ import org.jspecify.annotations.Nullable;
  * the Heart's Verdance falls and the target's rises in the same call, so nothing is ever on the way and he holds none (S1).
  * <ul>
  * <li>Sources: the awake Verdant Hearts of his beneficiaries in his area (GardenReach.devices: loaded chunks only, at most
- * 16), holding Verdance, the fullest first. A Heart that already pours into a Ley Pylon beside it (its own road) is his
- * only once the holder has answered "take from it" ({@link #CLAIM}) at the perch (PactAccords.answer); unanswered, or
- * answered "leave it" ({@link #YIELD}, the safe course), he leaves it alone and, once a presence, turns to it with his
- * inspect gesture to raise the matter.</li>
+ * 16) holding a whole move ({@value #MOVE_MAX}), or holding any Verdance and making no more (their status not "working"),
+ * the fullest first (GC-S25: a Heart still beating gives a whole move or nothing, not a beat's 1 or 2 each think; one that
+ * has stopped is still emptied). A Heart that already pours into a Ley Pylon beside it (its own road) is his only once
+ * the holder has answered "take from it" ({@link #CLAIM}) at the perch (PactAccords.answer); unanswered, or answered
+ * "leave it" ({@link #YIELD}, the safe course), he leaves it alone and, once a presence, turns to it with his inspect
+ * gesture to raise the matter.</li>
  * <li>The lossless road first: a beneficiary Gleaner beyond its own reach of that Heart (where it would draw by itself),
  * with room for a whole move, the emptiest first: up to {@value #MOVE_MAX} through the Gleaner's own draw from that Heart
  * (GleanerBlockEntity.receiveFrom), both ownerships checked with the holder as the one acting.</li>
@@ -58,7 +60,10 @@ public final class VerdanceCarrying {
 	public static final String CLAIM = "claim";
 	/** His answers, in the order the perch offers them (append only). Keep equal to tools/concordance_pacts.py SERVICE_WORDS accords. */
 	public static final List<String> ACCORDS = List.of(YIELD, CLAIM);
-	/** The most Verdance one move sets down in a Gleaner: its own draw (GleanerBlockEntity.DRAW). Keep equal to tools/concordance_garden_pacts.py CONSTANTS. */
+	/**
+	 * The most Verdance one move sets down in a Gleaner: its own draw (GleanerBlockEntity.DRAW); and what a Heart still beating
+	 * must hold before he takes from it (GC-S25). Keep equal to tools/concordance_garden_pacts.py CONSTANTS.
+	 */
 	public static final int MOVE_MAX = 8;
 	/** The most batches one move pours into a pylon (3 Verdance for 2 Ley Charge each). Keep equal to tools/concordance_garden_pacts.py CONSTANTS. */
 	public static final int MAX_BATCHES = 3;
@@ -78,7 +83,7 @@ public final class VerdanceCarrying {
 
 	/** Why his last think moved nothing, for Jade. */
 	public enum Idle {
-		/** No Heart of his beneficiaries' holds Verdance he may take. */
+		/** No Heart of his beneficiaries' holds Verdance he may take (a Heart still beating holds less than a whole move: GC-S25). */
 		EMPTY,
 		/** Verdance waits, but no Gleaner or pylon he may fill from it (or none found before the think's questions ran out). */
 		NOWHERE
@@ -115,7 +120,11 @@ public final class VerdanceCarrying {
 		}
 		List<VerdantHeartBlockEntity> sources = new ArrayList<>();
 		for (VerdantHeartBlockEntity heart : hearts) {
-			if (heart.verdance() > 0 && (claim || !memory.roaded(heart.getBlockPos()))) {
+			// GC-S25 (decided by the session; the unit review's finding 4): a Heart beating on its bed makes 1 or 2 Verdance a
+			// beat, so while it beats he takes only a whole move from it, and his day's moves are not spent a beat at a time;
+			// once it makes no more (full, starved, stalled, no bed), whatever it holds is his to carry.
+			if (heart.verdance() > 0 && (heart.verdance() >= MOVE_MAX || !"working".equals(heart.status()))
+					&& (claim || !memory.roaded(heart.getBlockPos()))) {
 				sources.add(heart);
 			}
 		}

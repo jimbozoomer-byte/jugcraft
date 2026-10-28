@@ -19044,7 +19044,9 @@ GC05_CARRYING_TESTS = {
         "aSuspendedBathinCarriesNothing", "twoBathinsShareOneHeartExactly", "bathinFacesWhereHeSetsItDown",
         "bathinsFirstObligationIsADeviceReadByHand", "bathinsReadingSaysItsNoteAndNamesNoPlayer",
         # The unit review: refused places skipped until the index is read again; his matter only for a beneficiary's Heart.
-        "refusedGleanersNeverStarveBathinsPylonRoad", "aFormerMembersHeartRaisesNoMatter"],
+        "refusedGleanersNeverStarveBathinsPylonRoad", "aFormerMembersHeartRaisesNoMatter",
+        # GC-S25 (the session's decision on the review's finding 4): a Heart still beating gives a whole move or nothing.
+        "bathinCarriesWholeMovesFromABeatingHeart"],
     "ConcordanceEconomyGameTests": ["noVerdanceIsMintedByCarrying"],
 }
 # Concordance garden cohort, GC-05 (check_pacts): each work's answers as shipped, the safe course first. Append only: a
@@ -20502,8 +20504,9 @@ def check_garden_pacts(co, root, lang, registered, research):
     quota, the index, the bed's own rule, the most strained first, at most MAX_ASKED asked whose land it is, one tend,
     remembered, counted, faced, shown) and moves no item, nutrient or practice, saves nothing and scans nothing. GC-05: the
     bed index's devices (in the beds' one pass, capped, a beneficiary's or no one's pylons); Bathin's step asks in order
-    (his index and roads, the answer, hours, quota, his matter raised once, the sources, a far Gleaner with room first,
-    then a pylon not beside the Heart, both ends asked, one move), skips a place refused for itself until the index is
+    (his index and roads, the answer, hours, quota, his matter raised once, the sources: a whole move, or any Verdance once
+    a Heart makes no more, GC-S25; a far Gleaner with room first, then a pylon not beside the Heart, both ends asked, one
+    move), skips a place refused for itself until the index is
     read again, moves Verdance only through the Gleaner's draw and the Heart's pour, and saves and scans nothing."""
     gp = co.garden_pacts
     pg = co.progression
@@ -20768,23 +20771,29 @@ def check_garden_pacts(co, root, lang, registered, research):
     ec = co.ecology
     carrying = strip(text(spirits / "VerdanceCarrying.java"))
     # His step, in order: his index and its roads (a beneficiary's Heart only, asked each think: the unit review), the
-    # answer, his hours and quota, his matter raised once, the sources (a Heart with its own road only when claimed; the
-    # fullest first), the lossless road first (room for a whole move; never a Gleaner within its own reach of the Heart),
-    # then a pylon not beside the Heart that its pour may fill, both ends asked, one move; else why he idled (the last
-    # NOWHERE: his questions spent say it too).
+    # answer, his hours and quota, his matter raised once, the sources (a Heart holding a whole move, or any Verdance once it
+    # makes no more, GC-S25; a Heart with its own road only when claimed; the fullest first), the lossless road first (room
+    # for a whole move; never a Gleaner within its own reach of the Heart), then a pylon not beside the Heart that its pour
+    # may fill, both ends asked, one move; else why he idled (the last NOWHERE: his questions spent say it too).
     step = _java_body(carrying, "static Status carry(")
     order = [step.find(n) for n in (
         "memory.reach(record)", "memory.notice(level, record, hearts);", "boolean claim = CLAIM.equals(answer);",
         "Pacts.inHours(service, time)", "Pacts.done(record.pact(), now) >= service.quota()", "memory.raise()",
+        'heart.verdance() > 0 && (heart.verdance() >= MOVE_MAX || !"working".equals(heart.status()))',
         "claim || !memory.roaded(heart.getBlockPos())", "Comparator.comparingLong(VerdantHeartBlockEntity::verdance).reversed()",
         "GleanerBlockEntity.CAPACITY - gleaner.verdance() >= MOVE_MAX", "gleaner.reaches(heart.getBlockPos())",
         "asking.both(heart.getBlockPos(), heart.keeper(), gleaner.getBlockPos(), gleaner.keeper())",
         "gleaner.receiveFrom(heart, record.holder(), MOVE_MAX, level)", "heart.beside(pylon.getBlockPos()) || !heart.mayPourInto(pylon)",
         "owner == null ? record.holder() : owner", "heart.pourInto(pylon, level, MAX_BATCHES)")] + [step.rfind("memory.idle(Idle.NOWHERE);")]
     if -1 in order or order != sorted(order) or step.count("memory.idle(Idle.NOWHERE);") != 3:
-        err("VerdanceCarrying.carry: his index and roads, the answer, hours, quota, his matter raised once, the sources (a Heart "
-            "with its own road only when claimed), a far Gleaner with room first, then a pylon not beside the Heart, both ends "
-            "asked, one move (GC-05)")
+        err("VerdanceCarrying.carry: his index and roads, the answer, hours, quota, his matter raised once, the sources (a whole "
+            "move, or any Verdance from a Heart that makes no more, GC-S25; a Heart with its own road only when claimed), a far "
+            "Gleaner with room first, then a pylon not beside the Heart, both ends asked, one move (GC-05)")
+    # GC-S25: "working" is the status word a Heart's beat leaves only when it made Verdance, so a Heart full, starved, stalled
+    # or on no bed is one that makes no more and is emptied.
+    beat = _java_body(strip(text(root / "garden" / "VerdantHeartBlockEntity.java")), "public String beat(ServerLevel level)")
+    if not 0 <= beat.find("verdance += beat.made();") < beat.find('status("working");') or beat.count('"working"') != 1:
+        err("VerdantHeartBlockEntity.beat: its status is \"working\" only after a beat made Verdance (Bathin's sources, GC-S25)")
     landed = _java_body(carrying, "private static Status carried(")
     order = [landed.find(n) for n in ("memory.moved(move);", "holder.taskDone(level, now);",
                                       "bathin.attendWork(move.to(), BathinEntity.Gesture.WORK.ticks, now);",
@@ -21413,6 +21422,15 @@ def check_spirit_bodies(co):
     for key, name in body["loops"].items():
         if key != "astir" and f'"{name}"' not in garden_client:
             err(f"ConcordanceGardenPactClientGameTests: checks his {key} loop ({name})")
+    # Unit 1's pose fault (run 40605564166: a finished gesture, rewound by the freeze, drawn over a loop): each of his loop
+    # pictures goes through loopPoseOf, which waits for and checks the loop with no gesture drawn over it, as Buer's loopPose.
+    looped = _java_body(garden_client, "private static void loopPoseOf(")
+    if looped.count("drawingOf(client, perch, id, GESTURES)") != 2 or "over.isEmpty()" not in looped:
+        err("ConcordanceGardenPactClientGameTests.loopPoseOf: waits for and checks its loop with no gesture drawn over it")
+    for key in body["loops"]:
+        if key != "astir" and not re.search(rf'loopPoseOf\(context, server, perch, BATHIN, BATHIN_{key.upper()}, '
+                                            rf'"jugcraft_garden_bathin_{key}", (true|false)\);', garden_client):
+            err(f"ConcordanceGardenPactClientGameTests: his {key} loop is photographed through loopPoseOf (no gesture over it)")
 
 
 def check_pact_network(co):

@@ -70,6 +70,35 @@ each runtime file's SHA-256 equal to its catalog entry. The summon lasts 5.06 s,
 `art/owner-library/catalog/edited-2026-10-18-part2/README.md` (18 October 2026; `files.json` `ownerDeclaration`); for
 the paintings, `art/owner-library/PROVENANCE.md`; the library is unchanged and nothing in it is executed.
 
+## Decisions recorded with the code
+
+These were made after the brief above and go into the records C5 writes for GC-05 (whose status line this page still
+carries).
+
+- **Whole moves from a beating Heart (GC-S25, decided by the session; unit 2's review, finding 4, option (a)).** Bathin
+  takes from a Verdant Heart only when it holds a whole move (`VerdanceCarrying.MOVE_MAX`, 8) or makes no more Verdance
+  (its status is not `working`: full, starved, stalled, on no bed), and then whatever it holds, so a nearly empty, idle
+  Heart is still emptied. A Heart beating on its bed makes 1 or 2 Verdance a beat every 200 ticks while he thinks every
+  20, so without this each of his 12 moves a day carried a beat's 1 or 2 (12 to 24 a day); with it a beating Heart gives
+  8 a move into a Gleaner (up to 96 a day), or 2 or 3 whole batches into a pylon. A Heart answered "take from it" whose
+  own pylon takes each beat's whole batches never gathers 8 while it beats: he takes only what its road cannot. His term
+  ("up to 8 at a time") and Jade note ("Nothing to carry: the Hearts in his area hold no Verdance he may take", shown
+  while a beating Heart gathers its move) are unchanged. The review left this to the owner; it is reviewable at the
+  cohort checkpoint. Evidence: the server test `bathinCarriesWholeMovesFromABeatingHeart` (a Heart on a lit bed among
+  three kinds of crop: he leaves it while it holds less than 8, carries 8 in one move once it has gathered, and empties
+  the rest in one move once its bed is spent) and `check_garden_pacts`'s needle on the source rule; the test is new with
+  this decision and has not been run (no Minecraft build where it was written).
+- **His pose pictures.** Each gesture's telling window (`SPIRITS["bathin"]["body"]["gesture_times"]`) lies inside the
+  part of its generated clip that holds the pose: arrive 0.1 to 0.6 s in the tight coil held from 0 to 0.6 s; inspect 0.4
+  to 1.2, assent 0.3 to 0.9, refuse 0.3 to 1.0 and work 0.15 to 0.75, each exactly where its pose is reached and held;
+  depart 0.25 to 0.75 in the coil held tight from 0.25 until he vanishes at 0.8 to 0.85 s. No window changed. Arrive's
+  and depart's telling poses are the same tight coil, arms folded hard, head down (GC-P57's gestures as designed), so
+  their two pictures will look alike; that is left for the owner, not changed here. His loop pictures go through
+  `loopPoseOf`, which now waits for and checks the loop with no gesture drawn over it (unit 1's pose fault, run
+  40605564166: a finished gesture rewound by the freeze, drawn over a loop); `check_spirit_bodies` holds both. The
+  windows were read against `bathin.animation.json` as `tools/garden_bodies.py` builds it; the guard is unverified until
+  the client test runs.
+
 ## Verification
 
 Not run: nothing of Bathin is built yet, so no build, game test, client shot or audit exercises him. For this brief only,
