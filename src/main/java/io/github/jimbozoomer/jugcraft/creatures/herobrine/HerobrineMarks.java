@@ -564,6 +564,12 @@ public final class HerobrineMarks extends SavedData {
 			return Result.STOP;
 		}
 		BlockState now = level.getBlockState(pos);
+		// Removing neighbouring leaves can make a later planned leaf decay before this queued step.
+		// Already-empty space needs no edit or undo record; any replacement block still stops the job.
+		if (mark.type().equals("grove") && step.state().isAir()
+				&& step.expect().defaultBlockState().is(BlockTags.LEAVES) && now.isAir()) {
+			return Result.SKIP;
+		}
 		// Source-water formations never consume lava or a later flowing-water state.
 		if (mark.type().equals("underwater") && (!now.is(Blocks.WATER) || !now.getFluidState().isSource())) return Result.STOP;
 		// New excavation/lining plans may replace natural stone only inside approved wilderness, rechecked at apply time.
