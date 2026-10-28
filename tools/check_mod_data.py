@@ -12083,6 +12083,34 @@ ENCOUNTER_REBEGUN = re.compile(r"if \(phase != Phase\.WAITING && isAlive\(\) && 
 KILLING_BLOW_TAKES_PART = re.compile(r"if \(Encounter\.striker\(source\) instanceof ServerPlayer player\) \{\s*"
                                      r"took\(player, Float\.MIN_VALUE\);")
 
+def check_lair_loadouts():
+    """Concordance Chunk E (E4; docs/features/lair-loadouts.md): the record's tables are tools/lair_loadouts.py's, which
+    reads each keeper's, arm's, gun's and the Lance's numbers from their own tools; the silver dagger's damage, speed and
+    silver bonus, which have no tool of their own, are the Java's; it is the only silver weapon; and bullets skip the
+    hurt cooldown, as the model counts them."""
+    sys.path.insert(0, str(ROOT / "tools"))
+    import lair_loadouts as ll
+    record_path = ROOT / "docs" / "features" / "lair-loadouts.md"
+    record = record_path.read_text(encoding="utf-8") if record_path.is_file() else ""
+    if ll.rules() not in record or ll.table() not in record:
+        err("docs/features/lair-loadouts.md: its tables are not tools/lair_loadouts.py's (run it and paste)")
+    agriculture = (JAVA_ROOT / "agriculture" / "JugcraftAgriculture.java").read_text(encoding="utf-8")
+    werewolf = (JAVA_ROOT / "agriculture" / "Werewolf.java").read_text(encoding="utf-8")
+    bonus = re.search(r"SILVER = new ToolMaterial\([^,]+, \d+, [\d.]+F, ([\d.]+)F,", werewolf)
+    if f'"silver_dagger", props -> new Item(props.sword(Werewolf.SILVER, {ll.DAGGER_DAMAGE}F, {ll.DAGGER_SPEED}F))' not in agriculture \
+            or not bonus or float(bonus.group(1)) != ll.SILVER_BONUS:
+        err("tools/lair_loadouts.py: the silver dagger's damage, speed and silver bonus are not the Java's "
+            "(agriculture/JugcraftAgriculture.java, agriculture/Werewolf.java SILVER)")
+    if (load(DATA / MOD / "tags" / "item" / "silver_weapons.json") or {}).get("values") != [f"{MOD}:silver_dagger"]:
+        err("tools/lair_loadouts.py measures the silver dagger as the one silver weapon; #jugcraft:silver_weapons holds others")
+    if f"{MOD}:bullet" not in (load(DATA / "minecraft" / "tags" / "damage_type" / "bypasses_cooldown.json") or {}).get("values", []):
+        err("tools/lair_loadouts.py counts bullets past the hurt cooldown; #minecraft:bypasses_cooldown no longer holds jugcraft:bullet")
+    names = [keeper["name"] for keeper in ll.KEEPERS]
+    import encyclopedia as en
+    if len(names) != len(en.DOSSIERS):
+        err(f"tools/lair_loadouts.py KEEPERS measures {len(names)} keepers, but the game has {len(en.DOSSIERS)} (DOSSIERS)")
+
+
 def check_keeper_credit():
     """Concordance Chunk E, E4 (docs/features/lair-encounter-credit.md): the five keepers that paid only who hurt them
     (the Mire Hag, the Crypt Lich, the Iron Dreadnought, the Alpha Werewolf and the Cydonian Sentinel) keep their fight's
@@ -15338,11 +15366,14 @@ def check_hessian_horseman():
     for trophy in hh.TROPHIES:
         if f'Jugcraft.id("{trophy}")' not in registry:
             err(f"JugcraftHorseman must find the {trophy} (Arms VII registers it)")
-    # Nothing makes his spur or his tricorn but him.
+    # Nothing makes his spur, his tricorn or (Concordance Chunk E, E4: it makes his cheaper bridle) his lantern but him.
     for path in (DATA / MOD / "recipe").glob("*.json"):
         result = (load(path) or {}).get("result", {})
-        if isinstance(result, dict) and result.get("id") in {f"{MOD}:{item}" for item in hh.items()}:
+        if isinstance(result, dict) and result.get("id") in {f"{MOD}:{item}" for item in (*hh.items(), *hh.ALWAYS)}:
             err(f"recipe/{path.name} makes {result.get('id')}, which only the Headless Horseman gives")
+    for key in hh.RECIPES:
+        if not (DATA / MOD / "recipe" / f"{key}.json").is_file():
+            err(f"recipe/{key}.json is missing")
     costumes = json.dumps(load(DATA / MOD / "tags" / "item" / "trick_or_treat_costumes.json") or {})
     for item in hh.COSTUMES:
         if f"{MOD}:{item}" not in costumes:
@@ -22599,6 +22630,7 @@ def main():
     check_pumpkin_king()
     check_keeper_credit()
     check_hessian_horseman()
+    check_lair_loadouts()
     check_cydonian_sentinel()
     check_material_sets()
     check_art()
@@ -23224,9 +23256,16 @@ def check_encyclopedia(root, lang):
     prepare_body = _java_body(dossiers, "private static void prepare(")
     if "out.fact(lore(boss));" not in rite_body or "prepare(out, boss);" not in rite_body or "out.recipe(" in prepare_body:
         err("lair/LairDossiers.rite: each found lair names its lore and its preparation, as text and icons (E4)")
+    reset_body = _java_body(dossiers, "public static int resetSeconds(")
+    if f"encyclopedia.{MOD}.dossier.reset" not in lang or '"encyclopedia.jugcraft.dossier.reset", resetSeconds(boss)' not in dossiers:
+        err("lair/LairDossiers.keeper: each keeper's dossier says when the fight starts over, from resetSeconds (E4)")
     for constant in re.findall(r"^\t\t([A-Z_]+)\(Lair\.", enum.group(1) if enum else "", re.M):
         if f"case {constant} ->" not in rite_body or not re.search(rf"case {constant}\b[^>]*->", prepare_body):
             err(f"lair/LairDossiers.java: {constant} needs its own rite words and preparation (rite and prepare)")
+        # Its reset is its own keeper's ABANDON_TICKS (Concordance Chunk E, E4): YETI_KING's YetiKingEntity's.
+        entity = "".join(word.capitalize() for word in constant.split("_")) + "Entity"
+        if f"case {constant} -> {entity}.ABANDON_TICKS / 20;" not in reset_body:
+            err(f"lair/LairDossiers.resetSeconds: {constant} must give its keeper's own ABANDON_TICKS / 20")
     for dossier in en.DOSSIERS.values():
         lore = lang.get(f"encyclopedia.{MOD}.dossier.{dossier['lair']}.lore", "")
         for boss, other in en.DOSSIERS.items():
@@ -23241,8 +23280,9 @@ def check_encyclopedia(root, lang):
     rows = re.search(r"\bMAX_ROWS = (\d+);", payload)
     bestiary = re.search(r"\bMAX_CREATURES = (\d+);", text(guide / "Bestiary.java"))
     # Each keeper beaten: heading, lore, rite, its recipes and sales, season, party, preparation (and its codex link),
-    # keeper, credit, wards, poultice, the win, its loot, its after-win and made-from recipes, the way home, grave goods.
-    dossier_rows = sum(15 + len(d["rite"]) + len(d["trades"]) + len(d["loot"]) + len(d["after_win"]) + len(d["made_from"])
+    # keeper, credit, wards, poultice, the win, its loot, its after-win and made-from recipes, the way home, when the
+    # fight starts over (E4), grave goods.
+    dossier_rows = sum(16 + len(d["rite"]) + len(d["trades"]) + len(d["loot"]) + len(d["after_win"]) + len(d["made_from"])
                        for d in en.DOSSIERS.values())
     worst = dossier_rows + 1 + 3 * int(bestiary.group(1) if bestiary else 0) + 3
     if not rows or worst > int(rows.group(1)):

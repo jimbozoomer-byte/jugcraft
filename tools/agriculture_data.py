@@ -576,6 +576,7 @@ def recipes(out, write):
     iron_dreadnought_data.recipes(out, write, conditions)
     alpha_werewolf_data.recipes(out, write, conditions)
     pumpkin_king_data.recipes(out, write, conditions)
+    hessian_horseman_data.recipes(out, write, conditions)
     cydonian_sentinel_data.recipes(out, write, conditions)
     kitchen_data.recipes(out, write, conditions)
 

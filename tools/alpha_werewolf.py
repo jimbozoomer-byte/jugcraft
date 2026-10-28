@@ -119,6 +119,10 @@ RECIPES = {
     # For those who never fight: the pelt tanned into four leather (a werewolf's pelt gives two). Leather makes no pelt:
     # no loop. The pelt also counts as a werewolf's pelt for the Howling Totem (#jugcraft:werewolf_pelts), one for one.
     "leather_from_alpha_pelt": {"shapeless": ["jugcraft:alpha_pelt"], "result": "minecraft:leather", "count": 4},
+    # His part of what summons him again (Concordance Chunk E, E4): his own pelt calls him without the silver, so a
+    # Howling Totem is his pelt and three bones. One pelt a share, one totem a pelt: no loop.
+    "howling_totem_from_alpha_pelt": {"shapeless": ["jugcraft:alpha_pelt", "minecraft:bone", "minecraft:bone",
+                                                    "minecraft:bone"], "result": "howling_totem"},
 }
 
 MESSAGES = {

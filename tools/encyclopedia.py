@@ -149,7 +149,7 @@ DOSSIERS = {
     "alpha_werewolf": {"lair": "moonlit_ring", "advancement": "hunters_moon", "trophies": ["moonfang", "howler"],
                        "trophy_table": "werewolf_alpha", "rite_class": "HowlingTotemRite", "off_season": None,
                        "tokens": ["howling_totem"], "rite": ["howling_totem"], "trades": [],
-                       "after_win": [], "made_from": [],
+                       "after_win": ["howling_totem_from_alpha_pelt"], "made_from": [],
                        "loot": ["alpha_pelt", "moonfang", "howler", "packfinder_charm", "alphas_hood"]},
     "cydonian_sentinel": {"lair": "cydonian_sanctum", "advancement": "red_planet", "trophies": ["corelance", "redstar_cleaver"],
                           "rite_class": "AltarKeystoneRite", "off_season": None,
@@ -159,13 +159,13 @@ DOSSIERS = {
     "pumpkin_king": {"lair": "crowfield", "advancement": "uncrowned", "trophies": ["hallowreap", "crowbill"],
                      "rite_class": "HarvestCrownRite", "off_season": f"message.{MOD}.lair.crown.off_season",
                      "tokens": ["harvest_crown"], "rite": ["harvest_crown", "scarecrow"], "trades": [("seasonal", "minecraft:hay_block")],
-                     "after_win": [], "made_from": ["kings_lantern"],
+                     "after_win": ["harvest_crown_from_ember"], "made_from": ["kings_lantern"],
                      "loot": ["kings_ember", "hallowreap", "crowbill", "crowward_charm", "pumpkin_kings_crown"]},
     "hessian_horseman": {"lair": "church_bridge", "advancement": "laid_to_rest", "trophies": ["hollowflail", "hessian_sabre"],
                          "rite_class": "HessiansBridleRite", "off_season": None,
                          "in_season": f"message.{MOD}.lair.bridle.in_season",
                          "tokens": ["hessians_bridle"], "rite": ["hessians_bridle"], "trades": [],
-                         "after_win": [], "made_from": [],
+                         "after_win": ["hessians_bridle_from_lantern"], "made_from": [],
                          "loot": ["horseman_lantern", "hollowflail", "hessian_sabre", "hessians_spur", "hessians_tricorn"]},
 }
 
@@ -517,6 +517,9 @@ DOSSIER = {
                        "Grey Mist opens at the foot of his mound, on the farmyard side",
     "church_bridge.leave": "The Grey Mist at the wood road's end behind the arrival takes you home at any time; when he "
                            "falls, Grey Mist opens on the covered bridge over the brook",
+    # Concordance Chunk E (E4): when a fight starts over (each keeper's own ABANDON_TICKS, LairDossiers.resetSeconds).
+    "reset": "If nobody who can fight the keeper stays near for %s seconds, the keeper goes back to where they waited, "
+             "healed, their helpers gone, and the fight starts again from nothing: what anyone did in it is forgotten",
     "grave_goods": "Dying in a lair costs nothing: you respawn with everything you carried, worn and held as it was, "
                    "and all your experience",
     "owed": "A share of the keeper's spoils is kept for you",
