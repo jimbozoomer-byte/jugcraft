@@ -65,58 +65,6 @@
     {
       "condition": {
         "type": "minecraft:random_chance",
-        "chance": 0.125
-      },
-      "entries": [
-        {
-          "type": "minecraft:item",
-          "name": "jugcraft:sentinel_helmet"
-        }
-      ],
-      "rolls": 1
-    },
-    {
-      "condition": {
-        "type": "minecraft:random_chance",
-        "chance": 0.125
-      },
-      "entries": [
-        {
-          "type": "minecraft:item",
-          "name": "jugcraft:sentinel_chestplate"
-        }
-      ],
-      "rolls": 1
-    },
-    {
-      "condition": {
-        "type": "minecraft:random_chance",
-        "chance": 0.125
-      },
-      "entries": [
-        {
-          "type": "minecraft:item",
-          "name": "jugcraft:sentinel_leggings"
-        }
-      ],
-      "rolls": 1
-    },
-    {
-      "condition": {
-        "type": "minecraft:random_chance",
-        "chance": 0.125
-      },
-      "entries": [
-        {
-          "type": "minecraft:item",
-          "name": "jugcraft:sentinel_boots"
-        }
-      ],
-      "rolls": 1
-    },
-    {
-      "condition": {
-        "type": "minecraft:random_chance",
         "chance": 0.075
       },
       "entries": [
@@ -136,6 +84,27 @@
         {
           "type": "minecraft:item",
           "name": "jugcraft:sentinel_shield"
+        }
+      ],
+      "rolls": 1
+    },
+    {
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "jugcraft:sentinel_helmet"
+        },
+        {
+          "type": "minecraft:item",
+          "name": "jugcraft:sentinel_chestplate"
+        },
+        {
+          "type": "minecraft:item",
+          "name": "jugcraft:sentinel_leggings"
+        },
+        {
+          "type": "minecraft:item",
+          "name": "jugcraft:sentinel_boots"
         }
       ],
       "rolls": 1

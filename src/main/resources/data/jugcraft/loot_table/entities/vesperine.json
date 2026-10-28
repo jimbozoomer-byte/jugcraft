@@ -74,64 +74,33 @@
     {
       "condition": {
         "type": "minecraft:random_chance",
-        "chance": 0.125
-      },
-      "entries": [
-        {
-          "type": "minecraft:item",
-          "name": "jugcraft:reaper_helmet"
-        }
-      ],
-      "rolls": 1
-    },
-    {
-      "condition": {
-        "type": "minecraft:random_chance",
-        "chance": 0.125
-      },
-      "entries": [
-        {
-          "type": "minecraft:item",
-          "name": "jugcraft:reaper_chestplate"
-        }
-      ],
-      "rolls": 1
-    },
-    {
-      "condition": {
-        "type": "minecraft:random_chance",
-        "chance": 0.125
-      },
-      "entries": [
-        {
-          "type": "minecraft:item",
-          "name": "jugcraft:reaper_leggings"
-        }
-      ],
-      "rolls": 1
-    },
-    {
-      "condition": {
-        "type": "minecraft:random_chance",
-        "chance": 0.125
-      },
-      "entries": [
-        {
-          "type": "minecraft:item",
-          "name": "jugcraft:reaper_boots"
-        }
-      ],
-      "rolls": 1
-    },
-    {
-      "condition": {
-        "type": "minecraft:random_chance",
         "chance": 0.15
       },
       "entries": [
         {
           "type": "minecraft:item",
           "name": "jugcraft:reaper_scythe"
+        }
+      ],
+      "rolls": 1
+    },
+    {
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "jugcraft:reaper_helmet"
+        },
+        {
+          "type": "minecraft:item",
+          "name": "jugcraft:reaper_chestplate"
+        },
+        {
+          "type": "minecraft:item",
+          "name": "jugcraft:reaper_leggings"
+        },
+        {
+          "type": "minecraft:item",
+          "name": "jugcraft:reaper_boots"
         }
       ],
       "rolls": 1

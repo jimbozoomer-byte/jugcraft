@@ -117,7 +117,7 @@ public class ArmorTiersGameTests {
 			new BossTier("hades", "cinder_tyrant", List.of("hades_scythe")),
 			new BossTier("wight_king", "crypt_lich", List.of("wight_king_zweihander")),
 			new BossTier("sentinel", "cydonian_sentinel", List.of("sentinel_longsword", "sentinel_shield")));
-	/** Shares of a boss's loot rolled per tier: a piece is 12.5% a share and an arm at least 7.5%, so 200 miss one about
+	/** Shares of a boss's loot rolled per tier: a piece is 25% a share and an arm at least 7.5%, so 200 miss one about
 	 * once in six million. */
 	private static final int SHARES = 200;
 
@@ -125,7 +125,8 @@ public class ArmorTiersGameTests {
 	 * How each tier is won (docs/features/armor-tier-sources.md). Every tier but a boss's: its pattern's recipe loads,
 	 * and at a smithing table the pattern, an enchanted, worn netherite piece (the Banana's, iron) and the tier's repair
 	 * item make that tier's piece, keeping the enchantment and wear; a diamond piece makes nothing. A boss's tier: no
-	 * recipe of its name makes a piece or arm, and its boss's shares hold every piece and arm.
+	 * recipe of its name makes a piece or arm, every share of its boss's loot holds exactly one piece, and the shares
+	 * hold every piece and arm.
 	 */
 	@GameTest
 	public void eachTierIsSmithedOrDroppedByItsBoss(GameTestHelper helper) {
@@ -178,8 +179,16 @@ public class ArmorTiersGameTests {
 				for (int share = 0; share < SHARES; share++) {
 					LootParams params = new LootParams.Builder(level).withParameter(LootContextParams.ORIGIN, player.position())
 							.withParameter(LootContextParams.THIS_ENTITY, player).create(LootContextParamSets.GIFT);
+					int pieces = 0;
 					for (ItemStack stack : table.getRandomItems(params)) {
-						dropped.add(BuiltInRegistries.ITEM.getKey(stack.getItem()).getPath());
+						String id = BuiltInRegistries.ITEM.getKey(stack.getItem()).getPath();
+						dropped.add(id);
+						if (things.subList(0, PIECES.length).contains(id)) {
+							pieces += stack.getCount();
+						}
+					}
+					if (pieces != 1) {
+						wrong.add("a share of " + tier.boss() + "'s loot held " + pieces + " " + tier.id() + " pieces, not one");
 					}
 				}
 				for (String thing : things) {

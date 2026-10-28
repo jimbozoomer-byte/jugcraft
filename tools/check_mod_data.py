@@ -11848,7 +11848,8 @@ def check_vesperine():
             chance = pool.get("condition", {}).get("chance")
             count = entry.get("modifier", {}).get("count", {})
             found[item] = chance if chance is not None else (count.get("min"), count.get("max"))
-    expected = {"reaper_shade": vs.SHADE, **vs.CHANCES}
+    # Her armor set's one sure pool: each piece an entry with no chance or count of its own.
+    expected = {"reaper_shade": vs.SHADE, **vs.CHANCES, **{piece: (None, None) for piece in vs.SET_PIECES}}
     if found != expected:
         err(f"loot_table/entities/vesperine.json gives {found}, not tools/vesperine.py's {expected}")
     if f'Jugcraft.id("entities/vesperine")' not in loot_java:
@@ -12271,7 +12272,8 @@ def check_yeti():
             chance = pool.get("condition", {}).get("chance")
             count = entry.get("modifier", {}).get("count", {})
             found_loot[item] = chance if chance is not None else (count.get("min"), count.get("max"))
-    expected = {"yeti_fur": yk.FUR, **{item: yk.TROPHY_CHANCE for item in yk.TROPHIES}, **yk.CHANCES}
+    expected = {"yeti_fur": yk.FUR, **{item: yk.TROPHY_CHANCE for item in yk.TROPHIES}, **yk.CHANCES,
+                **{piece: (None, None) for piece in yk.SET_PIECES}}  # his armor set's one sure pool
     if found_loot != expected:
         err(f"loot_table/entities/yeti_king.json gives {found_loot}, not tools/yeti_king.py's {expected}")
     if tuple(arms_variants.trophies("yeti_king")) != tuple(yk.TROPHIES):
@@ -12582,7 +12584,8 @@ def check_cinder_tyrant():
             chance = pool.get("condition", {}).get("chance")
             count = entry.get("modifier", {}).get("count", {})
             found_loot[item] = chance if chance is not None else (count.get("min"), count.get("max"))
-    expected = {"tyrant_scale": ct.SCALES, **{item: ct.TROPHY_CHANCE for item in ct.TROPHIES}, **ct.CHANCES}
+    expected = {"tyrant_scale": ct.SCALES, **{item: ct.TROPHY_CHANCE for item in ct.TROPHIES}, **ct.CHANCES,
+                **{piece: (None, None) for piece in ct.SET_PIECES}}  # his armor set's one sure pool
     if found_loot != expected:
         err(f"loot_table/entities/cinder_tyrant.json gives {found_loot}, not tools/cinder_tyrant.py's {expected}")
     if tuple(arms_variants.trophies("cinder_tyrant")) != tuple(ct.TROPHIES):
@@ -13096,6 +13099,17 @@ def check_acquisition(registered):
                     or not alone(pool_of.get(thing, {}), [thing]):
                 err(f"acquisition: {thing}'s JEI page does not give loot_table/{info['table']}.json's chance ({chance}), "
                     "one roll of a pool of its own")
+        # Its armor set (docs/features/armor-tier-sources.md): one pool with no chance, rolled once, holding exactly the
+        # set's pieces, so every share holds one, each as likely, as their pages say.
+        if "set" in info:
+            pieces = list(info["set"])
+            pool = pool_of.get(pieces[0], {})
+            if not alone(pool, pieces) or "condition" in pool:
+                err(f"acquisition: loot_table/{info['table']}.json must roll {pieces} in one sure pool of their own, once, "
+                    "each as likely, as their JEI pages say")
+            for thing in pieces:
+                if aq.set_roll(info) not in pages.get(thing, ""):
+                    err(f"acquisition: {thing}'s JEI page does not say each share {aq.set_roll(info)!r}")
         # The Halloween extra: only where a row states it, and then at the loot class's chance.
         event = re.search(r"\bEVENT_[A-Z]+_CHANCE = ([0-9.]+)F;", loot_java)
         if "event" in info:
@@ -13548,7 +13562,8 @@ def check_crypt_lich():
             chance = pool.get("condition", {}).get("chance")
             count = entry.get("modifier", {}).get("count", {})
             found_loot[item] = chance if chance is not None else (count.get("min"), count.get("max"))
-    expected = {"grave_dust": cl.GRAVE_DUST, **{item: cl.TROPHY_CHANCE for item in cl.TROPHIES}, **cl.CHANCES}
+    expected = {"grave_dust": cl.GRAVE_DUST, **{item: cl.TROPHY_CHANCE for item in cl.TROPHIES}, **cl.CHANCES,
+                **{piece: (None, None) for piece in cl.SET_PIECES}}  # his armor set's one sure pool
     if found_loot != expected:
         err(f"loot_table/entities/crypt_lich.json gives {found_loot}, not tools/crypt_lich.py's {expected}")
     if tuple(arms_variants.trophies("crypt_lich")) != tuple(cl.TROPHIES):
@@ -14230,7 +14245,8 @@ def check_cydonian_sentinel():
             chance = pool.get("condition", {}).get("chance")
             count = entry.get("modifier", {}).get("count", {})
             found_loot[item] = chance if chance is not None else (count.get("min"), count.get("max"))
-    expected = {"cydonian_shard": cn.SHARDS, **{item: cn.TROPHY_CHANCE for item in cn.TROPHIES}, **cn.CHANCES}
+    expected = {"cydonian_shard": cn.SHARDS, **{item: cn.TROPHY_CHANCE for item in cn.TROPHIES}, **cn.CHANCES,
+                **{piece: (None, None) for piece in cn.SET_PIECES}}  # its armor set's one sure pool
     if found_loot != expected:
         err(f"loot_table/entities/cydonian_sentinel.json gives {found_loot}, not tools/cydonian_sentinel.py's {expected}")
     if tuple(arms_variants.trophies("cydonian_sentinel")) != tuple(cn.TROPHIES):

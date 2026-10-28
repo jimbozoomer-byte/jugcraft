@@ -65,64 +65,33 @@
     {
       "condition": {
         "type": "minecraft:random_chance",
-        "chance": 0.125
-      },
-      "entries": [
-        {
-          "type": "minecraft:item",
-          "name": "jugcraft:hades_helmet"
-        }
-      ],
-      "rolls": 1
-    },
-    {
-      "condition": {
-        "type": "minecraft:random_chance",
-        "chance": 0.125
-      },
-      "entries": [
-        {
-          "type": "minecraft:item",
-          "name": "jugcraft:hades_chestplate"
-        }
-      ],
-      "rolls": 1
-    },
-    {
-      "condition": {
-        "type": "minecraft:random_chance",
-        "chance": 0.125
-      },
-      "entries": [
-        {
-          "type": "minecraft:item",
-          "name": "jugcraft:hades_leggings"
-        }
-      ],
-      "rolls": 1
-    },
-    {
-      "condition": {
-        "type": "minecraft:random_chance",
-        "chance": 0.125
-      },
-      "entries": [
-        {
-          "type": "minecraft:item",
-          "name": "jugcraft:hades_boots"
-        }
-      ],
-      "rolls": 1
-    },
-    {
-      "condition": {
-        "type": "minecraft:random_chance",
         "chance": 0.15
       },
       "entries": [
         {
           "type": "minecraft:item",
           "name": "jugcraft:hades_scythe"
+        }
+      ],
+      "rolls": 1
+    },
+    {
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "jugcraft:hades_helmet"
+        },
+        {
+          "type": "minecraft:item",
+          "name": "jugcraft:hades_chestplate"
+        },
+        {
+          "type": "minecraft:item",
+          "name": "jugcraft:hades_leggings"
+        },
+        {
+          "type": "minecraft:item",
+          "name": "jugcraft:hades_boots"
         }
       ],
       "rolls": 1

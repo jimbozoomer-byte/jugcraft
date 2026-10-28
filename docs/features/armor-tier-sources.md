@@ -22,7 +22,7 @@ All 18 of the owner's armour sets (`tools/gear.py` `ARMOR_TIERS`, 72 pieces) and
 | Wight King | The Crypt Lich | Wight King Zweihander |
 | Sentinel | The Cydonian Sentinel | Sentinel Longsword, Sentinel Shield |
 
-These are the five sets that came with arms of their own, and each matches its boss by name or look. Every player paid a share of the boss's reward rolls each piece separately at 12.5%, so a share holds half a piece on average and a player needs about 16 victories for the full set, duplicates and all. The set's arm is 15% a share, the same as a boss trophy; the Sentinel's two arms are 7.5% each. Nothing else makes or gives these sets: no recipe, chest, shop or trade.
+These are the five sets that came with arms of their own, and each matches its boss by name or look. Every player paid a share of the boss's reward gets one piece of the set every time, each piece as likely (the contributor: "should be a drop every time"), so a full set takes about 8 victories on average, duplicates and all. The set's arm is 15% a share, the same as a boss trophy; the Sentinel's two arms are 7.5% each. Nothing else makes or gives these sets: no recipe, chest, shop or trade.
 
 For the Yeti King, the Cinder Tyrant and Vesperine, the JEI information page of each piece and arm states these chances, as their other loot's pages do.
 
@@ -67,7 +67,7 @@ Thirteen new 16×16 items, `jugcraft:<set>_pattern`, drawn on the same rolled pa
 ## Checks changed
 
 The repository enforced "creative-only" in several places; each now enforces the new single source instead:
-- `check_mod_data.py`: `check_acquisition` holds each tier's pieces to one source (its smithing recipes, or its boss's share table), and `check_arms_variants` holds each set's arm and shield to its boss's share table. `JugcraftGear.TIER_PATTERNS` must match `gear.tier_patterns()`.
+- `check_mod_data.py`: `check_acquisition` holds each tier's pieces to one source (its smithing recipes, or its boss's share table, where they must be one sure pool), and `check_arms_variants` holds each set's arm and shield to its boss's share table. `JugcraftGear.TIER_PATTERNS` must match `gear.tier_patterns()`.
 - `tools/acquisition.py`: `CREATIVE_ONLY` is gone.
 - The survival audit no longer marks the 72 pieces and 6 arms as deferred (`tools/survival_native_routes.py`, `tools/survival_native_followup.py`, `scripts/tests/test_survival_recipes.py`). The 13 patterns are added to the audit's registry snapshot (`docs/audits/survival-item-registry.json`). The saved report (`docs/audits/survival-recipes.*`) is not rewritten here: a fresh run also picks up unrelated changes merged since it was last saved. Run fresh, the pieces count as recipe-reachable (smithed) or loot-only (boss), and nothing is deferred.
 
@@ -81,7 +81,7 @@ New item IDs: the 13 `jugcraft:<set>_pattern`. New recipes: 13 pattern recipes a
   - every smithed set's pattern recipe loads, and the pattern with an enchanted, worn base piece and the mending item makes that set's piece with the enchantment and wear kept;
   - a diamond piece makes nothing;
   - no boss-set piece or arm has a recipe of its name;
-  - 200 shares of each boss's loot hold every piece and arm of its set.
+  - every share of each boss's loot holds exactly one piece of its set, and 200 shares hold every piece and arm.
 - Local:
   - `python3 tools/generate_material_data.py`, then `python3 tools/check_mod_data.py` passed (8051 material IDs, data files and recipe audit) and `python3 scripts/check_repository.py` passed;
   - the Foundation workflow's tests passed: `python3 -m unittest discover -s scripts/tests` (287 tests), `test_winterhold_academy.py` and `scripts/package_modrinth.py check`;

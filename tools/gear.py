@@ -212,15 +212,13 @@ ARMOR_TIERS = {
 
 # How the armor-only tiers are won (docs/features/armor-tier-sources.md), which the owner left open on 6 October 2026
 # ("They might get dropped by bosses or be craftable"); the contributor's choice of 28 October 2026, for the owner's
-# review. A tier that is a boss's own comes only from that boss: each participant's share rolls one piece at
-# TIER_PIECE_CHANCE and the set's arms (tools/arms_variants.py) at TIER_ARM_CHANCE, in jugcraft:entities/<boss>. Every
-# other tier is smithed: its pattern (crafted round a sheet of paper, P, TIER_PATTERN_COUNT at a time), a plain piece of
-# "base" (netherite, so a set costs at least a netherite set's worth; the Banana costume, iron's) and the tier's own
-# mending material, as the styled armor is.
+# review. A tier that is a boss's own comes only from that boss: every participant's share holds one of its pieces and
+# rolls the set's arms (tools/arms_variants.py) as a trophy, in jugcraft:entities/<boss> (the boss's SET_PIECES and
+# CHANCES, as the contributor asked: "should be a drop every time"). Every other tier is smithed: its pattern (crafted
+# round a sheet of paper, P, TIER_PATTERN_COUNT at a time), a plain piece of "base" (netherite, so a set costs at least
+# a netherite set's worth; the Banana costume, iron's) and the tier's own mending material, as the styled armor is.
 TIER_BOSSES = {"reaper": "vesperine", "frost_knight": "yeti_king", "hades": "cinder_tyrant", "wight_king": "crypt_lich",
                "sentinel": "cydonian_sentinel"}
-TIER_PIECE_CHANCE = 0.5
-TIER_ARM_CHANCE = 0.15
 TIER_PATTERN_COUNT = 4
 TIER_PATTERNS = {
     "bloodthorn": {"base": "netherite", "recipe": (["FRF", "RPR", "FRF"], {"F": "minecraft:crimson_fungus",
