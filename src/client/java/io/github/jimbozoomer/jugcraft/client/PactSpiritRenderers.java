@@ -2,15 +2,23 @@ package io.github.jimbozoomer.jugcraft.client;
 
 import com.geckolib.animatable.manager.AnimatableManager;
 import com.geckolib.animation.AnimationController;
+import com.geckolib.constant.DataTickets;
+import com.geckolib.constant.dataticket.DataTicket;
 import com.geckolib.renderer.GeoEntityRenderer;
+import com.geckolib.renderer.base.BoneSnapshots;
+import com.geckolib.renderer.base.RenderPassInfo;
 import com.geckolib.renderer.layer.builtin.AutoGlowingGeoLayer;
 import io.github.jimbozoomer.jugcraft.concordance.spirits.PactSpiritEntity;
 import io.github.jimbozoomer.jugcraft.concordance.spirits.Workers;
 import net.fabricmc.fabric.api.client.rendering.v1.EntityRendererRegistry;
 import net.minecraft.client.renderer.culling.Frustum;
 import net.minecraft.client.renderer.entity.state.EntityRenderState;
+import net.minecraft.core.BlockPos;
+import net.minecraft.util.Mth;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.phys.AABB;
+import net.minecraft.world.phys.Vec3;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Concordance garden cohort, GC-01 (SG11): every pact spirit's renderer from one row (tools/concordance_pacts.py SPIRITS
@@ -19,11 +27,25 @@ import net.minecraft.world.phys.AABB;
  * began watching it after sees it already gone; one frozen by a tick freeze is drawn as of its last tick from the frame the
  * freeze arrives. Chunk D's Stolas renderer (WorkerClient), unchanged in what it draws, is the first row. Nothing here
  * decides anything.
+ * <p>
+ * GC-06: a row may name a bone its work target draws toward, flown out and back by the client over FLIGHT_TICKS; only
+ * drawing, of server state.
  */
 final class PactSpiritRenderers {
-	/** One spirit's drawing: its scale, its shadow's radius, its culling box widened sideways and below and reaching above, its glowmask. */
-	record Row(float scale, float shadow, double wide, double low, double above, boolean glow) {
+	/**
+	 * One spirit's drawing: its scale, its shadow's radius, its culling box widened sideways and below and reaching above,
+	 * its glowmask; GC-06 (GC-P66): the root-child bone its work target draws toward (Marax's familiar), or null.
+	 */
+	record Row(float scale, float shadow, double wide, double low, double above, boolean glow, @Nullable String reach) {
+		/** A row with no reaching bone (every spirit before Marax: their lines stay as they are). */
+		Row(float scale, float shadow, double wide, double low, double above, boolean glow) {
+			this(scale, shadow, wide, low, above, glow, null);
+		}
 	}
+
+	/** GC-06: where a row's reaching bone is drawn this frame (its model's drawn frame, blocks), and how far through its flight. */
+	private static final DataTicket<Vec3> REACH = DataTicket.create("jugcraft_pact_reach", Vec3.class);
+	private static final DataTicket<Float> FLIGHT = DataTicket.create("jugcraft_pact_flight", Float.class);
 
 	private PactSpiritRenderers() {
 	}
@@ -37,6 +59,10 @@ final class PactSpiritRenderers {
 		// Bathin (GC-05): his built model drawn at its own size; his culling box reaches 0.3 sideways for his shoulders and his
 		// pointing arm, 0.1 below for his hover, 0.3 above; his eyes lit.
 		register(Workers.BATHIN, new Row(1.0F, 0.5F, 0.3, 0.1, 0.3, true));
+		// GC-06 unit 3
+		// GC-07 unit 4
+		// GC-08 unit 5
+		// GC-09 unit 6
 	}
 
 	static <T extends PactSpiritEntity<T>> void register(EntityType<T> type, Row row) {
@@ -50,7 +76,40 @@ final class PactSpiritRenderers {
 				protected AABB getBoundingBoxForCulling(T spirit, float partialTick) {
 					// Its gestures reach past its box (Stolas's spread wings, his arrival from above and his leaving upwards): it
 					// stays drawn while any of it can be on screen.
-					return spirit.getBoundingBox().inflate(row.wide(), row.low(), row.wide()).expandTowards(0.0, row.above(), 0.0);
+					AABB box = spirit.getBoundingBox().inflate(row.wide(), row.low(), row.wide()).expandTowards(0.0, row.above(), 0.0);
+					BlockPos target = row.reach() == null ? null : spirit.flown();
+					// GC-06 (GC-P62): while its reach is out, the box covers where it is drawn (at most TARGET_REACH away).
+					return target == null || spirit.flight(partialTick) <= 0.0F ? box
+							: box.minmax(AABB.ofSize(PactSpiritEntity.reach(spirit.getPosition(partialTick), PactSpiritEntity.hover(target)), 1.0, 1.0, 1.0));
+				}
+
+				@Override
+				public void addRenderData(T spirit, @Nullable Void relatedObject, EntityRenderState state, float partialTick) {
+					super.addRenderData(spirit, relatedObject, state, partialTick);
+					// GC-06 (GC-P66): filled every frame (the render state is reused), so a reach at rest is never left drawn.
+					BlockPos target = row.reach() == null ? null : spirit.flown();
+					float flight = target == null ? 0.0F : spirit.flight(partialTick);
+					float yaw = state.getOrDefaultGeckolibData(DataTickets.ENTITY_BODY_YAW, 0.0F);
+					state.addGeckolibData(FLIGHT, flight);
+					state.addGeckolibData(REACH, flight <= 0.0F ? Vec3.ZERO
+							: PactSpiritEntity.posed(spirit.getPosition(partialTick), yaw, PactSpiritEntity.hover(target), row.scale()));
+				}
+
+				@Override
+				public void adjustModelBonesForRender(RenderPassInfo<EntityRenderState> info, BoneSnapshots bones) {
+					super.adjustModelBonesForRender(info, bones);
+					Float flight = info.getGeckolibData(FLIGHT);
+					Vec3 reach = info.getGeckolibData(REACH);
+					if (row.reach() == null || flight == null || reach == null || flight <= 0.0F) {
+						return;
+					}
+					// Its reaching bone (a root child) drawn from where its clips put it toward the reach, by its flight: a
+					// snapshot's translation is drawn as (-x, y, z) / 16 from the bone's baked pivot (GL BoneSnapshot.java:238).
+					info.model().getBone(row.reach()).ifPresent(bone -> bones.ifPresent(row.reach(), snapshot -> {
+						snapshot.setTranslateX(Mth.lerp(flight, snapshot.getTranslateX(), -(float) (reach.x * 16.0 - bone.pivotX())));
+						snapshot.setTranslateY(Mth.lerp(flight, snapshot.getTranslateY(), (float) (reach.y * 16.0 - bone.pivotY())));
+						snapshot.setTranslateZ(Mth.lerp(flight, snapshot.getTranslateZ(), (float) (reach.z * 16.0 - bone.pivotZ())));
+					}));
 				}
 
 				@Override

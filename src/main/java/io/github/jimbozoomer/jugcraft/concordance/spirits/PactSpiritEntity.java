@@ -16,6 +16,7 @@ import java.util.HashMap;
 import java.util.IdentityHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.function.Supplier;
@@ -23,6 +24,7 @@ import java.util.function.ToLongFunction;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.core.GlobalPos;
 import net.minecraft.core.Registry;
 import net.minecraft.core.UUIDUtil;
@@ -82,6 +84,8 @@ import org.jspecify.annotations.Nullable;
  * Its cues: each gesture and its listening is fired by the server's action, once, with its sound (jugcraft:<spirit>.<cue>)
  * and subtitle, at most one of a kind every {@link #CUE_TICKS} and none while the Concordance is off but its departure.
  * Saved: {@code perch} and {@code record}, here and nowhere else (a subclass saves nothing of its own).
+ * <p>
+ * GC-06: its station (on its perch, or beside it for a standing body) and its work target (synced, never saved) are here too.
  */
 public abstract class PactSpiritEntity<T extends PactSpiritEntity<T>> extends WorkerEntity<T> implements AgreementHolder.Presence {
 	/** The controller a spirit's gestures play on, registered after the worker's own "main" one, so a gesture's bones win while it plays. */
@@ -97,6 +101,21 @@ public abstract class PactSpiritEntity<T extends PactSpiritEntity<T>> extends Wo
 	private static final EntityDataAccessor<Boolean> LISTENING = SynchedEntityData.defineId(PactSpiritEntity.class, EntityDataSerializers.BOOLEAN);
 	/** Whether it is leaving (the server's, set with its departing gesture; never saved): the client hides one it never saw go. */
 	private static final EntityDataAccessor<Boolean> DEPARTING = SynchedEntityData.defineId(PactSpiritEntity.class, EntityDataSerializers.BOOLEAN);
+	/**
+	 * GC-06 (GC-P65): the block its work names while a conversation is open at its perch (Marax's familiar flies to it);
+	 * synced so every watcher draws it, never saved (network only: CT GC-06).
+	 */
+	private static final EntityDataAccessor<Optional<BlockPos>> TARGET = SynchedEntityData.defineId(PactSpiritEntity.class, EntityDataSerializers.OPTIONAL_BLOCK_POS);
+	/**
+	 * GC-06 (GC-P62, amended): the farthest its drawn reach goes toward its work target (blocks); its culling box stops there
+	 * too. The farthest a work target's hover point can be from a station: a cube of WorkerParser.MAX_RADIUS (12) round the
+	 * perch, a station 2 out, 2.5 up: sqrt(14^2 + 14.5^2 + 12^2), about 23.5, under 24.
+	 */
+	public static final double TARGET_REACH = 24.0;
+	/** GC-06 (GC-P65): how long the client takes to carry its reaching bone out to its target, or back (ticks). */
+	public static final int FLIGHT_TICKS = 10;
+	/** GC-06 (GC-P67): how far from its perch a standing body stands (blocks): a body up to 2.2 long clears the perch. */
+	public static final int BESIDE_BLOCKS = 2;
 	/** Every spirit's sound events by path ("stolas.arrive"), registered once each (Workers.register). */
 	private static final Map<String, SoundEvent> SOUNDS = new HashMap<>();
 	/**
@@ -115,14 +134,28 @@ public abstract class PactSpiritEntity<T extends PactSpiritEntity<T>> extends Wo
 		RawAnimation animation();
 	}
 
+	/** GC-06 (GC-P67): where a spirit's body keeps its station. */
+	public enum Station {
+		/** On its perch's top: a rooted, hovering or perching body (every spirit of units 1 and 2; GC-P11). */
+		PERCH,
+		/** On the ground {@value PactSpiritEntity#BESIDE_BLOCKS} blocks to one side of its perch, never between it and whoever speaks (a standing body: Marax). */
+		BESIDE
+	}
+
 	/**
 	 * A spirit's body as the base reads it (tools/concordance_pacts.py SPIRITS): its sound path (jugcraft:<spirit>.<cue>), its
-	 * cues in SOUND_EVENTS' order (each gesture's and "listen"), its gestures, and the ones it arrives and departs with.
+	 * cues in SOUND_EVENTS' order (each gesture's and "listen"), its gestures, the ones it arrives and departs with, and its
+	 * station (SPIRITS "station").
 	 */
-	public record Body(String spirit, List<String> cues, List<? extends Clip> gestures, Clip arrive, Clip depart) {
+	public record Body(String spirit, List<String> cues, List<? extends Clip> gestures, Clip arrive, Clip depart, Station station) {
 		public Body {
 			cues = List.copyOf(cues);
 			gestures = List.copyOf(gestures);
+		}
+
+		/** A body that keeps its station on its perch (Stolas, Buer, Bathin: their Body lines stay as they are). */
+		public Body(String spirit, List<String> cues, List<? extends Clip> gestures, Clip arrive, Clip depart) {
+			this(spirit, cues, gestures, arrive, depart, Station.PERCH);
 		}
 	}
 
@@ -138,6 +171,14 @@ public abstract class PactSpiritEntity<T extends PactSpiritEntity<T>> extends Wo
 	private final long[] cued;
 	/** Its recent cues, oldest first; never saved. */
 	private final ArrayDeque<String> shown = new ArrayDeque<>(SHOWN);
+	/** GC-06: the game time its work target stops showing (the server's; never saved). */
+	private long targetUntil;
+	/** GC-06: the client's: the target it last reached for (kept while its reach comes back), whether going out, and since when (tickCount). */
+	private @Nullable BlockPos flown;
+	private boolean outbound;
+	private int flownAt;
+	/** GC-06 (GC-P67): the side of its perch a standing body was last stationed on (memory only; after a load, read from where it stands). */
+	private @Nullable Direction side;
 	/** GC-02: what a service's step has it look at (a bed, a reservoir), and until when (game time); memory only, never saved. */
 	private @Nullable BlockPos working;
 	private long workingUntil;
@@ -173,6 +214,7 @@ public abstract class PactSpiritEntity<T extends PactSpiritEntity<T>> extends Wo
 		super.defineSynchedData(builder);
 		builder.define(LISTENING, false);
 		builder.define(DEPARTING, false);
+		builder.define(TARGET, Optional.empty());
 	}
 
 	/** Every pact presence's roster kind (a saved string, Chunk D's): one kind for every spirit, never one a spirit. */
@@ -270,6 +312,10 @@ public abstract class PactSpiritEntity<T extends PactSpiritEntity<T>> extends Wo
 					&& PactSessions.live(level.getServer(), GlobalPos.of(level.dimension(), perch), gameTime));
 			// GC-02 (GC-S6): whom it faces, once a think: its work, its speaker, or no one (its body keeps its facing).
 			face(level, gameTime, next);
+			// GC-06 (GC-P65): its work target shows only while it is listened to, and only for its time.
+			if (entityData.get(TARGET).isPresent() && (!entityData.get(LISTENING) || gameTime >= targetUntil)) {
+				entityData.set(TARGET, Optional.empty());
+			}
 		}
 		return next;
 	}
@@ -298,7 +344,7 @@ public abstract class PactSpiritEntity<T extends PactSpiritEntity<T>> extends Wo
 			leave(level, null, perch);
 			return Status.FINISHED;
 		}
-		stay();
+		stay(level);
 		if (record == null) {
 			if (owner != null && home.holder().agreement() != null && getUUID().equals(home.holder().spirit())) {
 				record = home.holder().agreement().record();
@@ -361,12 +407,62 @@ public abstract class PactSpiritEntity<T extends PactSpiritEntity<T>> extends Wo
 				&& getUUID().equals(home.visitor()) && PactSessions.live(level.getServer(), GlobalPos.of(level.dimension(), perch), gameTime);
 	}
 
-	/** Pushed or led off its perch, it is back on it (within its own level, check_workers). Every unit-1 spirit keeps its station on the perch (GC-P11). */
-	private void stay() {
-		double x = perch.getX() + 0.5, y = perch.getY() + 1.0, z = perch.getZ() + 0.5;
-		if (distanceToSqr(x, y, z) > 1.0) {
-			teleportTo(x, y, z);
+	/**
+	 * Pushed or led off its station, it is back on it (within its own level, check_workers). GC-06 (GC-P67): its Body's
+	 * station; a standing body keeps the side it stands on while that side stays clear.
+	 */
+	private void stay(ServerLevel level) {
+		Vec3 at = station(level, position(), true);
+		if (distanceToSqr(at) > 1.0) {
+			teleportTo(at.x, at.y, at.z);
 		}
+	}
+
+	/**
+	 * GC-06 (GC-P67): where it keeps its station now, the point its feet stand on: its perch's top; or, a standing body
+	 * ({@link Station#BESIDE}), the centre of the cell {@value #BESIDE_BLOCKS} blocks out on the first clear side, trying
+	 * first the side a quarter turn clockwise from the one facing {@code toward} (whoever it comes for: so never between
+	 * them and the perch, whose use it would otherwise take), then on round clockwise, that side last; with nobody, south's.
+	 * A side is clear when both cells out to it and the cells over them are loaded and have no collision shape and the
+	 * outer cell's floor is sturdy on top; no side clear, its perch's top. Reads at most 20 blocks, in loaded chunks only.
+	 */
+	public Vec3 station(ServerLevel level, @Nullable Vec3 toward) {
+		return station(level, toward, false);
+	}
+
+	private Vec3 station(ServerLevel level, @Nullable Vec3 toward, boolean keeping) {
+		BlockPos at = perch == null ? blockPosition() : perch;
+		Vec3 top = new Vec3(at.getX() + 0.5, at.getY() + 1.0, at.getZ() + 0.5);
+		if (body.station() != Station.BESIDE || perch == null) {
+			return top;
+		}
+		// Keeping its station, the side it was stationed on comes first (or, after a load, the side it stands on).
+		Direction first = keeping && side != null ? side : toward == null ? Direction.SOUTH
+				: Direction.getApproximateNearest(toward.x - top.x, 0.0, toward.z - top.z);
+		List<Direction> sides = keeping ? List.of(first, first.getClockWise(), first.getOpposite(), first.getCounterClockWise())
+				: List.of(first.getClockWise(), first.getOpposite(), first.getCounterClockWise(), first);
+		for (Direction candidate : sides) {
+			if (clear(level, candidate)) {
+				side = candidate;
+				BlockPos cell = perch.relative(candidate, BESIDE_BLOCKS);
+				return new Vec3(cell.getX() + 0.5, cell.getY(), cell.getZ() + 0.5);
+			}
+		}
+		side = null;
+		return top;
+	}
+
+	/** Whether a standing body has room on {@code side} of its perch (station's rule). Loaded cells only; reads only. */
+	private boolean clear(ServerLevel level, Direction side) {
+		for (int out = 1; out <= BESIDE_BLOCKS; out++) {
+			BlockPos cell = perch.relative(side, out);
+			if (!level.isLoaded(cell) || !level.getBlockState(cell).getCollisionShape(level, cell).isEmpty()
+					|| !level.getBlockState(cell.above()).getCollisionShape(level, cell.above()).isEmpty()) {
+				return false;
+			}
+		}
+		BlockPos floor = perch.relative(side, BESIDE_BLOCKS).below();
+		return level.getBlockState(floor).isFaceSturdy(level, floor, Direction.UP);
 	}
 
 	@Override
@@ -383,6 +479,7 @@ public abstract class PactSpiritEntity<T extends PactSpiritEntity<T>> extends Wo
 		LEAVING.add(this);
 		entityData.set(LISTENING, false);
 		entityData.set(DEPARTING, true);
+		entityData.set(TARGET, Optional.empty());
 		stop();
 		gesture(body.depart());
 	}
@@ -484,6 +581,76 @@ public abstract class PactSpiritEntity<T extends PactSpiritEntity<T>> extends Wo
 	/** Its recent cues, oldest first (server side; never saved: one reloaded or newly watched has none). */
 	public List<String> cues() {
 		return List.copyOf(shown);
+	}
+
+	/** GC-06 (GC-P65): the block its work names now (both sides; the client draws its reach toward it), or none. */
+	public Optional<BlockPos> target() {
+		return entityData.get(TARGET);
+	}
+
+	/**
+	 * GC-06 (GC-P65): its service names {@code at} as its work until game time {@code until}. Shown only while a
+	 * conversation is open at its perch (it listens); cleared at its first think after that conversation ends or
+	 * {@code until} passes, and when it leaves. Nothing is saved and nothing else follows from it.
+	 */
+	void showTarget(BlockPos at, long until) {
+		if (gone() || !entityData.get(LISTENING)) {
+			return;
+		}
+		targetUntil = until;
+		entityData.set(TARGET, Optional.of(at.immutable()));
+	}
+
+	@Override
+	public void onSyncedDataUpdated(EntityDataAccessor<?> accessor) {
+		super.onSyncedDataUpdated(accessor);
+		if (TARGET.equals(accessor) && level().isClientSide()) {
+			// GC-06: the client's flight, from this tick: out to a new target, or back from the last one.
+			Optional<BlockPos> to = entityData.get(TARGET);
+			outbound = to.isPresent();
+			to.ifPresent(at -> flown = at);
+			flownAt = tickCount;
+		}
+	}
+
+	/** GC-06: the target this client last drew its reach toward (kept while the reach comes back), or null. Client side. */
+	public @Nullable BlockPos flown() {
+		return flown;
+	}
+
+	/** GC-06: how far through its flight its reach is drawn at {@code partialTick}: 0 at rest, 1 at its target. Client side. */
+	public float flight(float partialTick) {
+		if (flown == null) {
+			return 0.0F;
+		}
+		float done = Mth.clamp((tickCount - flownAt + partialTick) / FLIGHT_TICKS, 0.0F, 1.0F);
+		return outbound ? done : 1.0F - done;
+	}
+
+	/** GC-06: where a reach toward {@code at} hovers: two and a half blocks over the block's centre (over a bed's crop). */
+	public static Vec3 hover(BlockPos at) {
+		return new Vec3(at.getX() + 0.5, at.getY() + 2.5, at.getZ() + 0.5);
+	}
+
+	/** GC-06 (GC-P62): {@code to} as reached from {@code from}: itself, or the point {@value #TARGET_REACH} blocks toward it. */
+	public static Vec3 reach(Vec3 from, Vec3 to) {
+		Vec3 offset = to.subtract(from);
+		double length = offset.length();
+		return length <= TARGET_REACH ? to : from.add(offset.scale(TARGET_REACH / length));
+	}
+
+	/**
+	 * GC-06 (GC-P66): {@code to}, reached from a body at {@code from} turned to {@code bodyYaw} and drawn at {@code scale},
+	 * in its model's drawn frame (blocks; GeckoLib turns the model by 180 - bodyYaw about y after scaling it, and bakes x
+	 * negated), so a root-child bone whose pivot is put there is drawn at the reach. Pure arithmetic shared by the client's
+	 * renderer and a server test.
+	 */
+	public static Vec3 posed(Vec3 from, float bodyYaw, Vec3 to, float scale) {
+		Vec3 offset = reach(from, to).subtract(from);
+		double turn = Math.toRadians(bodyYaw - 180.0);
+		double cos = Math.cos(turn);
+		double sin = Math.sin(turn);
+		return new Vec3((offset.x * cos + offset.z * sin) / scale, offset.y / scale, (-offset.x * sin + offset.z * cos) / scale);
 	}
 
 	/**

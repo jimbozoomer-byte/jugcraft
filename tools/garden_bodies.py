@@ -578,3 +578,10 @@ def bathin_clips():
 def bathin_animations(read=None):
     """The runtime animation file: his eleven clips, sorted by name."""
     return {"format_version": "1.8.0", "animations": dict(sorted(bathin_clips().items()))}
+
+
+# Each later spirit's body (GC-06 to GC-09) under its unit's line.
+# GC-06 unit 3
+# GC-07 unit 4
+# GC-08 unit 5
+# GC-09 unit 6

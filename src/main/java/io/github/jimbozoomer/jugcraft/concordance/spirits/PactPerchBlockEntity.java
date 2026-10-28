@@ -226,7 +226,8 @@ public class PactPerchBlockEntity extends BlockEntity implements AgreementHolder
 		BlockPos pos = getBlockPos();
 		summoned.setOwner(who);
 		summoned.setPerch(pos);
-		Vec3 station = new Vec3(pos.getX() + 0.5, pos.getY() + 1.0, pos.getZ() + 0.5);
+		// GC-06 (GC-P67): its station: on the perch, or, a standing body, beside it on the side away from whoever it comes for.
+		Vec3 station = summoned.station(level, facing != null && facing.level() == level ? facing.position() : null);
 		// GC-02 (GC-S6): it arrives facing whoever it comes for; south (yaw 0, as before) with nobody in this level to face.
 		float yaw = facing != null && facing.level() == level ? PactSpiritEntity.bearing(station, facing.position(), 0.0F) : 0.0F;
 		summoned.snapTo(station.x, station.y, station.z, yaw, 0.0F);

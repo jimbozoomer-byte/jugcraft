@@ -1082,4 +1082,9 @@ public class ConcordancePersistenceGameTests {
 		helper.assertTrue(bathin.think(level, 6000L, g0 + 20) != Status.AWAITING_ANSWER, "After the restart, answered, it no longer awaits");
 		helper.succeed();
 	}
+
+	// GC-06 unit 3
+	// GC-07 unit 4
+	// GC-08 unit 5
+	// GC-09 unit 6
 }

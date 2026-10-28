@@ -394,6 +394,10 @@ GARDEN = {
          "reaches": [],
          "tests": ["everySpiritsUpkeepWarnsGivesGraceSuspendsAndResumes", "endingAnySpiritsPactReturnsTheEscrowOnce",
                    "bathinArrivesAndDepartsAtOnceInARingOfDust"]},
+        # GC-06 unit 3
+        # GC-07 unit 4
+        # GC-08 unit 5
+        # GC-09 unit 6
     ],
 }
 

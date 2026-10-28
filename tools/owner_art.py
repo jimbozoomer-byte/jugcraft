@@ -17,7 +17,8 @@ cohort (GC-04) adds Buer's body: the owner's Decor Blossom texture copied unchan
 geometry, glowmask and animations adapted by tools/garden_bodies.py (ADAPTED). The garden cohort's GC-05 adds Bathin's
 body, built rather than adapted: its geometry and clips from code alone, its skin and glowmask painted by
 tools/garden_bodies.py only in colours read from two of the owner's Blocks-folder paintings (concordance_pacts.BUILT); each
-written and checked here. Two tables may not import different files to one path.
+written and checked here. GC-07 adds the owner's second edited part as a root built bodies may read (Foras's acorn cap: its
+cubes and texels copied unchanged into his geometry and skin). Two tables may not import different files to one path.
 
 On 7 October 2026 the owner asked for their farming and food textures to be used ("I have already made a ton of custom
 textures and food ... I made all of the textures in there myself its all mine"). Each imported texture is a byte-for-byte
@@ -82,6 +83,10 @@ LIBRARY = os.path.join(ROOT, "art", "owner-library", "originals", "Blocks")
 FOOD = "farming and food textures"
 TEXTURES = os.path.join(ROOT, "src", "main", "resources", "assets", "jugcraft", "textures")
 MAGIC = os.path.join(ROOT, "art", "owner-library", "originals", "Magic")
+# The owner's second edited part (Edited-2026-10-18-Part2; catalog/edited-2026-10-18-part2/files.json): a built body may
+# read a file of it by a path that starts with its folder name (the garden cohort, GC-07: Foras's acorn cap).
+PART2_NAME = "Edited-2026-10-18-Part2"
+PART2 = os.path.join(ROOT, "art", "owner-library", "originals", PART2_NAME)
 ASSETS = os.path.join(ROOT, "src", "main", "resources", "assets", "jugcraft")
 # Adapter modules by name (tools/concordance_pacts.py SPIRITS[...]["body"]["adapted"]: a bare name is tools/stolas_body.py's,
 # Chunk D's; "garden_bodies.<name>" is the garden cohort's, GC-04 on).
@@ -110,6 +115,21 @@ def builds():
 def _read_blocks(path):
     with open(os.path.join(LIBRARY, path), "rb") as handle:
         return handle.read()
+
+
+def _read_owner(path):
+    """A built body's source file: under the second edited part when the path's first folder names it, else a Blocks-folder
+    painting (Bathin's and Foras's paintings read as before)."""
+    head, _, rest = path.partition("/")
+    if head == PART2_NAME:
+        with open(os.path.join(PART2, rest), "rb") as handle:
+            return handle.read()
+    return _read_blocks(path)
+
+
+def _origin(path):
+    """A built body's source as its provenance row names it, under art/owner-library/."""
+    return f"originals/{path}" if path.partition("/")[0] == PART2_NAME else f"originals/Blocks/{path}"
 
 
 def imports():
@@ -277,7 +297,7 @@ def expected():
         files[os.path.join(ASSETS, target)] = adapt(adapter)
     for target, _, builder in builds():
         # The garden cohort's built bodies (GC-05: Bathin's): drawn by code, painted only in the owner's colours.
-        files[os.path.join(ASSETS, target)] = adapt(builder, _read_blocks)
+        files[os.path.join(ASSETS, target)] = adapt(builder, _read_owner)
     return files
 
 
@@ -298,7 +318,7 @@ def provenance():
         if not sources:
             out.append((target, "", "", name))
         for source in sources:
-            out.append((target, f"originals/Blocks/{source}", hashlib.sha256(_read_blocks(source)).hexdigest(), name))
+            out.append((target, _origin(source), hashlib.sha256(_read_owner(source)).hexdigest(), name))
     return out
 
 

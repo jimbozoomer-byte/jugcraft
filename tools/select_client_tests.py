@@ -96,7 +96,13 @@ WEIGHTS = {
     # perch: the chooser twice, his conversation by keyboard at three sizes, a refused and a sealed acceptance, one carry
     # frozen, his matter asked and answered (the accord's two steps, about 40 s), Jade, ten poses frozen, four bearings and
     # the ending: about 34 shots and their waits, about 230 s more (an estimate, not a measurement).
-    "ConcordanceGardenPactClientGameTests": 560,
+    # GC-06b: written as a sum, each later spirit's flow added under its unit's line (+ its seconds).
+    "ConcordanceGardenPactClientGameTests": (560
+                                             # GC-06 unit 3
+                                             # GC-07 unit 4
+                                             # GC-08 unit 5
+                                             # GC-09 unit 6
+                                             ),
     "JugcraftServerClientGameTests": 90,
     # Companion suites exercise timed AI, inventory trips and cooking, not just
     # showrooms. Allow CI headroom over the focused local runtime measurements.

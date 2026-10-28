@@ -13924,6 +13924,8 @@
   "screen.jugcraft.pact.terms_note": "Nothing is spent or agreed until you accept.",
   "screen.jugcraft.pact.waiting": "He considers your answer...",
   "screen.jugcraft.pact.without_perch": "Without its perch",
+  "screen.jugcraft.pact.work.left": "%s left today",
+  "screen.jugcraft.pact.work.spent": "None left today",
   "screen.jugcraft.party.accept": "ACCEPT",
   "screen.jugcraft.party.decline": "DECLINE",
   "screen.jugcraft.party.disabled": "Parties are turned off on this server.",

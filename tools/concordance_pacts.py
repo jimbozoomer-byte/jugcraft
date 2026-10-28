@@ -97,12 +97,22 @@ JOURNAL = {
 
 # Java: worker/PactParser.java (check_pacts compares).
 PARSER = {"MAX_COMPACT_ITEMS": 4, "MAX_COMPACT_COUNT": 64, "MAX_RESONANCE": 32, "MAX_BEATS": 3}
-WORK = ["star_reckoning", "strain_tending", "verdance_carrying"]
+WORK = ["star_reckoning", "strain_tending", "verdance_carrying",
+        # GC-06 unit 3
+        # GC-07 unit 4
+        # GC-08 unit 5
+        # GC-09 unit 6
+        ]
 # The works that serve only their holder (Java: PactParser.HOLDER_ONLY): a definition with one must be "personal".
 HOLDER_ONLY = ["star_reckoning"]
 # Each work's service class (Java: spirits/<class>.java implements PactService, its WORK constant; registered once in
 # Workers.register). Append with each work (GC-04: "strain_tending": "StrainTending"; GC-05: "verdance_carrying").
-SERVICE_CLASSES = {"star_reckoning": "StarReckoning", "strain_tending": "StrainTending", "verdance_carrying": "VerdanceCarrying"}
+SERVICE_CLASSES = {"star_reckoning": "StarReckoning", "strain_tending": "StrainTending", "verdance_carrying": "VerdanceCarrying",
+                   # GC-06 unit 3
+                   # GC-07 unit 4
+                   # GC-08 unit 5
+                   # GC-09 unit 6
+                   }
 # Java: spirits/PactStatePayload.java (MAX_*), PactSessions.java (TIMEOUT_TICKS), PactMenu.java (RATE_TICKS),
 # PactPerchBlockEntity.java (LOOK_TICKS), PactKeeping.java (MAX_OFFERINGS).
 STATE_LIMITS = {"MAX_BEATS": 3, "MAX_TERMS": 16, "MAX_NOTES": 12, "MAX_CHOICES": 8, "MAX_COMPACT": 8, "MAX_KEY": 64,
@@ -124,6 +134,10 @@ BLOSSOM = "assets/ars_jimbaux/"
 # Spanish moss: his mantle, beard, hair, belly scutes and eyes). Colours only are read; no texel, shape or layout is copied.
 WILLOW = "biomes and tree blocks/willow_log.png"
 MOSS = "biomes and tree blocks/spanish_moss.png"
+# GC-06 unit 3
+# GC-07 unit 4
+# GC-08 unit 5
+# GC-09 unit 6
 # Concordance garden cohort, GC-01 (SG11; docs/features/concordance-garden-cohort.md): one row a pact spirit. Its offer
 # (data/jugcraft/concordance/pact/<name>.json), offerings tag, three beats, service term, cues and body are written from
 # here; PACTS, ENTITY_NAMES, OFFERINGS, SOUND_EVENTS, SOUND_FILES, OWNER_FILES, ADAPTED and Stolas's body tables below are
@@ -377,6 +391,10 @@ SPIRITS = {
                       "jugcraft_garden_bathin_arrive"],
         },
     },
+    # GC-06 unit 3
+    # GC-07 unit 4
+    # GC-08 unit 5
+    # GC-09 unit 6
 }
 # Derived (keep these names: tools/concordance.py, tools/owner_art.py, tools/stolas_body.py and check_mod_data read them).
 PACTS = {name: dict(spirit["pact"], beats=list(spirit["beats"])) for name, spirit in SPIRITS.items()}
@@ -387,11 +405,16 @@ REQUIRED = [rid(name) for name in SPIRITS]
 OFFERINGS_TAG = SPIRITS["stolas"]["pact"]["upkeep"]["offering"]
 OFFERINGS = SPIRITS["stolas"]["offerings"]["items"]
 BLOCKS = {"pact_perch": {"name": "Pact Perch"}}
+# One sentence, a clause a spirit (GC-06b: the clauses after Bathin's each under its unit's line, so their merges never meet).
 PERCH_TOOLTIP = ("Use: invite a pact spirit whose Regard you understand (Stolas also wants a star you observed yourself; "
                  f"Buer an awake Verdant Bed of yours within {SPIRITS['buer']['pact']['service']['radius']} blocks; Bathin an "
                  "awake Verdant Heart of yours and an awake Gleaner of yours or a Ley Pylon of yours or no one's within "
-                 f"{SPIRITS['bathin']['pact']['service']['radius']} blocks); or keep the pact seated here. Break it and the "
-                 "pact stays yours, without its perch.")
+                 f"{SPIRITS['bathin']['pact']['service']['radius']} blocks"
+                 # GC-06 unit 3
+                 # GC-07 unit 4
+                 # GC-08 unit 5
+                 # GC-09 unit 6
+                 "); or keep the pact seated here. Break it and the pact stays yours, without its perch.")
 # Polished deepslate, not a slab: the progression graph follows only listed vanilla items (a slab is not in
 # concordance_progression.VANILLA_SOURCES).
 RECIPE = {"type": "minecraft:crafting_shaped", "category": "misc", "pattern": ["SAS", " L ", " D "],
@@ -762,7 +785,12 @@ JADE_STANDINGS = ["none", "kept", "copy", "unreadable", "disabled"]
 JADE_STATES = ["active", "suspended", "upkeep_due", "upkeep_held"]
 # Every work's short name (concordance_workers.WORK and WORK here; check_pacts holds the tables together).
 SERVICE_NAMES = {"gather": "Gathering", "courier": "Carrying its post's requests", "star_reckoning": "Star-reckoning",
-                 "strain_tending": "Strain tending", "verdance_carrying": "Verdance carrying"}
+                 "strain_tending": "Strain tending", "verdance_carrying": "Verdance carrying",
+                 # GC-06 unit 3
+                 # GC-07 unit 4
+                 # GC-08 unit 5
+                 # GC-09 unit 6
+                 }
 JADE_PROVIDERS = {"pact_perch": "Pact Perch", "spirit_anchor": "Spirit Anchor"}
 TOOLTIPS.update({
     "jade.pact.none": "Keeps no agreement",
@@ -914,6 +942,10 @@ SERVICE_WORDS = {
         "question": "\"Shall I take from a Heart that already has a road?\" (a Heart of yours that pours into a pylon of its own)",
         "matters": {"two_roads": "His matter: a Heart here already pours into a pylon of its own"},
     },
+    # GC-06 unit 3
+    # GC-07 unit 4
+    # GC-08 unit 5
+    # GC-09 unit 6
 }
 MESSAGES.update({f"pact.{work}.{key}": text for work, words in SERVICE_WORDS.items() for key, text in words["messages"].items()})
 SCREEN.update({f"screen.{MOD}.pact.service.{work}.{key}": text for work, words in SERVICE_WORDS.items()
@@ -958,3 +990,11 @@ GARDEN_CLIENT_SHOTS += ["jugcraft_garden_bathin_nothing_to_carry", "jugcraft_gar
 # What it photographs of the accord (GC-05; the accord machinery's client steps), appended to Buer's and Bathin's.
 GARDEN_CLIENT_SHOTS += ["jugcraft_garden_roster_awaiting", "jugcraft_garden_bathin_matter_jade", "jugcraft_garden_bathin_matter",
                         "jugcraft_garden_bathin_matter_scale4", "jugcraft_garden_bathin_matter_small", "jugcraft_garden_bathin_answered"]
+# ------------------------------------------------------------------- garden cohort, GC-06b: shared by GC-06 to GC-09
+# GC-P74: each choice of a work's on-request action on its kept page, a Recall button with what is left today
+# (client/PactScreen.workService; Marax's reading its first user).
+SCREEN.update({f"screen.{MOD}.pact.work.left": "%s left today", f"screen.{MOD}.pact.work.spent": "None left today"})
+# GC-06 unit 3
+# GC-07 unit 4
+# GC-08 unit 5
+# GC-09 unit 6

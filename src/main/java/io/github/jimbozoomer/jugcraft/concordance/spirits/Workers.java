@@ -77,6 +77,10 @@ public final class Workers {
 	public static EntityType<BuerEntity> BUER;
 	/** Concordance garden cohort, GC-05 (Dossier 2): Bathin, coiled on his perch (Verdance carrying). */
 	public static EntityType<BathinEntity> BATHIN;
+	// GC-06 unit 3
+	// GC-07 unit 4
+	// GC-08 unit 5
+	// GC-09 unit 6
 	public static Block PACT_PERCH;
 	public static BlockEntityType<PactPerchBlockEntity> PERCH_ENTITY;
 	public static Item PACT_PERCH_ITEM;
@@ -129,6 +133,10 @@ public final class Workers {
 				.fireImmune().clientTrackingRange(8));
 		FabricDefaultAttributeRegistry.register(BATHIN, BathinEntity.createAttributes());
 		PactSpirits.register(BathinEntity.COUNTERPART, BATHIN, BathinEntity.SIGN);
+		// GC-06 unit 3
+		// GC-07 unit 4
+		// GC-08 unit 5
+		// GC-09 unit 6
 		ResourceKey<Block> perchKey = ResourceKey.create(Registries.BLOCK, Jugcraft.id("pact_perch"));
 		PACT_PERCH = Registry.register(BuiltInRegistries.BLOCK, perchKey, new PactPerchBlock(BlockBehaviour.Properties.of()
 				.mapColor(MapColor.WOOD).strength(1.5F, 3.0F).sound(SoundType.WOOD).noOcclusion().pushReaction(PushReaction.IMMOVEABLE).setId(perchKey)));
@@ -141,6 +149,10 @@ public final class Workers {
 		PactServices.register(StrainTending.SERVICE);
 		// GC-05: Bathin's Verdance carrying.
 		PactServices.register(VerdanceCarrying.SERVICE);
+		// GC-06 unit 3
+		// GC-07 unit 4
+		// GC-08 unit 5
+		// GC-09 unit 6
 		PactServices.verify();
 		PactMenu.register();
 		// Concordance Chunk D, D-06: Stolas's cues (jugcraft:stolas.*; sounds.json and subtitles are the generator's).
@@ -149,6 +161,10 @@ public final class Workers {
 		BuerEntity.registerSounds();
 		// GC-05: Bathin's cues (jugcraft:bathin.*).
 		BathinEntity.registerSounds();
+		// GC-06 unit 3
+		// GC-07 unit 4
+		// GC-08 unit 5
+		// GC-09 unit 6
 		// The unit review: every pact spirit's departure ends on time, its chunk ticking it or not (one sweep, GC-01).
 		PactSpiritEntity.registerSweep();
 		CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess, environment) -> command(dispatcher));

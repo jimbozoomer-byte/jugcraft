@@ -220,6 +220,10 @@ public class ConcordanceGardenPactClientGameTests implements FabricClientGameTes
 				ending(context, server, perch);
 				// GC-05: Bathin at the same perch, chosen from the chooser (Stolas's, Buer's and his entries), to his departure.
 				bathin(context, server, connection, perch);
+				// GC-06 unit 3
+				// GC-07 unit 4
+				// GC-08 unit 5
+				// GC-09 unit 6
 				context.runOnClient(client -> {
 					client.options.guiScale().set(scale);
 					client.resizeGui();
@@ -1259,6 +1263,47 @@ public class ConcordanceGardenPactClientGameTests implements FabricClientGameTes
 		}
 	}
 
+	/**
+	 * GC-06b (GC-P78; shared by GC-06 to GC-09): GC-02's facing rule for a standing body (Station.BESIDE), which stands where
+	 * spiritFacing would put the player: from each side of the spirit itself in turn (east, south, west, north), three blocks
+	 * off and facing it, the player opens the perch; its drawn body turns to them (GC-P8: within BATHIN_FACING_TOLERANCE);
+	 * the screen is closed (the body keeps its facing) and the world frozen and photographed from the player's eyes, as
+	 * {@code shots} name (literal names, in that order, so check_pact_screen sees each).
+	 */
+	private static void standingFacing(ClientGameTestContext context, TestDedicatedServerContext server, BlockPos perch, String id, List<String> shots) {
+		Vec3 at = server.computeOnServer(minecraft -> presenceOf(minecraft, perch).position());
+		String[] sides = {"east", "south", "west", "north"};
+		int[][] offsets = {{3, 0}, {0, 3}, {-3, 0}, {0, -3}};
+		float[] bearings = {-90.0F, 0.0F, 90.0F, 180.0F};
+		boolean hidden = hideHud(context);
+		try {
+			for (int i = 0; i < sides.length; i++) {
+				float bearing = bearings[i];
+				server.runCommand(String.format(Locale.ROOT, "tp @a %.1f %.1f %.1f %.1f 10", at.x + offsets[i][0], at.y, at.z + offsets[i][1],
+						Mth.wrapDegrees(bearing + 180.0F)));
+				context.waitTicks(OPEN_GAP);
+				open(context, server, perch);
+				context.waitFor(client -> spiritAt(client, perch, id) instanceof LivingEntity body
+						&& Mth.degreesDifferenceAbs(body.yBodyRot, bearing) <= BATHIN_FACING_TOLERANCE, WAIT);
+				float yaw = context.computeOnClient(client -> spiritAt(client, perch, id) instanceof LivingEntity body ? body.yBodyRot : Float.NaN);
+				float off = Mth.degreesDifferenceAbs(yaw, bearing);
+				Jugcraft.LOGGER.info("[garden-check] {} faces the {}: body yaw {} against bearing {} ({} off)", id, sides[i], yaw, bearing, off);
+				check(off <= BATHIN_FACING_TOLERANCE, id + " turns to whoever speaks, from the " + sides[i] + ": " + yaw);
+				context.getInput().pressKey(InputConstants.KEY_ESCAPE);
+				context.waitForScreen(null);
+				server.runCommand("tick freeze");
+				try {
+					context.waitTicks(3);
+					shot(context, shots.get(i));
+				} finally {
+					server.runCommand("tick unfreeze");
+				}
+			}
+		} finally {
+			restoreHud(context, hidden);
+		}
+	}
+
 	// ---------------------------------------------------------------- GC-05: Bathin (Dossier 2)
 
 	/** GC-05: Bathin at the perch Buer left, from the chooser to his departure; his matter asked and answered on the way. */
@@ -1815,4 +1860,9 @@ public class ConcordanceGardenPactClientGameTests implements FabricClientGameTes
 		context.getInput().pressKey(InputConstants.KEY_ESCAPE);
 		context.waitForScreen(null);
 	}
+
+	// GC-06 unit 3
+	// GC-07 unit 4
+	// GC-08 unit 5
+	// GC-09 unit 6
 }

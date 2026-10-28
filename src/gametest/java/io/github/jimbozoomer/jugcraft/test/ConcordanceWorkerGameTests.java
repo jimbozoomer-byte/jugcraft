@@ -4104,7 +4104,9 @@ public class ConcordanceWorkerGameTests {
 			ServerPlayer player = invitee(helper, d, at, 2);
 			sealThrough(helper, player, d, at);
 			int left = resonance(player);
-			BlockPos second = at.south();
+			// GC-06b: north of its cell (z 0, 3 or 6), inside the structure for each of seven spirits' cells (south of the
+			// seventh, z 8, is outside it).
+			BlockPos second = at.north();
 			PactPerchBlockEntity other = perch(helper, second, player);
 			beside(helper, player, second);
 			PactMenu menu = open(helper, player, other);
@@ -4277,7 +4279,8 @@ public class ConcordanceWorkerGameTests {
 			give(keeper, new ItemStack(offering, 2));
 			helper.assertValueEqual(PactKeeping.deposit(level, keeper, perch.holder(), offering, g0), 2, d.id() + ": two paid ahead");
 			helper.setBlock(at, Blocks.AIR);
-			BlockPos second = at.south();
+			// GC-06b: north of its cell, inside the structure for each of seven spirits' cells.
+			BlockPos second = at.north();
 			PactPerchBlockEntity fresh = perch(helper, second, keeper);
 			beside(helper, keeper, second);
 			PactMenu menu = open(helper, keeper, fresh);
@@ -5738,9 +5741,32 @@ public class ConcordanceWorkerGameTests {
 	}
 
 	/**
+	 * GC-06b (GC-P77): the offers the chooser lists for {@code player}, worked out here as PactMenu does: each offer the perch
+	 * makes (REQUIRED's order) whose research they understand and whose pact they do not hold, at most MAX_CHOICES. So the
+	 * chooser cases hold for every garden spirit a unit adds.
+	 */
+	static List<PactDefinition> invitable(ServerLevel level, ServerPlayer player) {
+		return PactPerchBlockEntity.offered().stream()
+				.filter(d -> ConcordanceProgress.knowledge(player).state(d.research()).atLeast(ResearchState.UNDERSTOOD)
+						&& !Pacts.holds(BoundWills.of(level.getServer()).ledger(), player.getUUID(), d.id()))
+				.limit(PactStatePayload.MAX_CHOICES).toList();
+	}
+
+	/** GC-06b (GC-P77): {@code offers}' signs, in order (each chooser entry's id). */
+	static List<String> signsOf(List<PactDefinition> offers) {
+		return offers.stream().map(d -> PactSpirits.sign(d.id())).toList();
+	}
+
+	/** GC-06b (GC-P77): whether each of {@code offers} asks nothing more of {@code player} at {@code perch}: its service's own missing list empty. */
+	static List<Boolean> readyFor(ServerLevel level, ServerPlayer player, PactPerchBlockEntity perch, List<PactDefinition> offers) {
+		return offers.stream().map(d -> PactServices.get(d.work()).missing(level, player, perch, d).isEmpty()).toList();
+	}
+
+	/**
 	 * GC-01 (SG4, GC-P10): an owner who may invite two spirits is shown the chooser (both, in the perch's order, by sign,
 	 * ready); without Buer's bed his entry says what is missing; with one spirit to invite there is no chooser. INVITE(1)
-	 * begins Buer's visit; accepting seals his pact and spends nothing of Stolas's compact.
+	 * begins Buer's visit; accepting seals his pact and spends nothing of Stolas's compact. GC-05 and GC-06b (GC-P77): every
+	 * garden spirit shares The Garden's Regard, so each is listed too, ready exactly as its own service says.
 	 */
 	@GameTest(maxTicks = 20)
 	public void aPerchOffersOnlyWhatThePlayerMayInvite(GameTestHelper helper) {
@@ -5754,14 +5780,20 @@ public class ConcordanceWorkerGameTests {
 		PactMenu menu = open(helper, owner, perch);
 		PactStatePayload chooser = menu.lastSent();
 		// GC-05 (GC-P59): Bathin shares The Garden's Regard, so he is listed too (third, REQUIRED's order), not ready: no Heart.
+		// GC-06b (GC-P77): so does every later garden spirit, after him, ready exactly as its own service says.
+		List<PactDefinition> listed = invitable(level, owner);
+		List<Boolean> ready = readyFor(level, owner, perch, listed);
 		helper.assertTrue(chooser.mode() == PactStatePayload.INVITE
-				&& chooser.patterns().stream().map(PactStatePayload.Choice::id).toList().equals(List.of(StolasEntity.SIGN, BuerEntity.SIGN, BathinEntity.SIGN))
-				&& chooser.patterns().subList(0, 2).stream().allMatch(choice -> choice.ready() && choice.amount() == 0)
-				&& !chooser.patterns().get(2).ready() && chooser.notes().size() == 1 && note(chooser, "invite.missing") != null
+				&& chooser.patterns().stream().map(PactStatePayload.Choice::id).toList().equals(signsOf(listed))
+				&& signsOf(listed).subList(0, 3).equals(List.of(StolasEntity.SIGN, BuerEntity.SIGN, BathinEntity.SIGN))
+				&& chooser.patterns().stream().map(PactStatePayload.Choice::ready).toList().equals(ready)
+				&& ready.subList(0, 3).equals(List.of(true, true, false))
+				&& chooser.patterns().subList(0, 2).stream().allMatch(choice -> choice.amount() == 0)
+				&& chooser.notes().size() == ready.stream().filter(r -> !r).count() && note(chooser, "invite.missing") != null
 				&& chooser.spirit().equals(PactStatePayload.Spirit.NONE) && key(chooser.speaker()).equals("container.jugcraft.pact_perch")
 				&& chooser.actions() == PactStatePayload.mask(PactRequestPayload.CHOOSE, PactRequestPayload.INVITE) && perch.visitor() == null,
-				"Both Regards understood, a star and a bed: the chooser, Stolas, Buer and Bathin by their signs, Stolas and Buer ready, "
-						+ "Bathin's missing Heart named, no visitor: " + chooser);
+				"Both Regards understood, a star and a bed: the chooser, Stolas, Buer, Bathin and every later garden spirit by their "
+						+ "signs, Stolas and Buer ready, each one not ready named (Bathin's missing Heart), no visitor: " + chooser);
 		// Without Buer's bed his entry says what is still missing.
 		BlockPos bare = perchFor(2);
 		ServerPlayer bedless = TestPlayers.survivor(helper);
@@ -5772,19 +5804,22 @@ public class ConcordanceWorkerGameTests {
 		PactPerchBlockEntity barePerch = perch(helper, bare, bedless);
 		beside(helper, bedless, bare);
 		PactStatePayload missing = open(helper, bedless, barePerch).lastSent();
-		helper.assertTrue(missing.mode() == PactStatePayload.INVITE && missing.patterns().size() == 3 && missing.patterns().get(0).ready()
+		helper.assertTrue(missing.mode() == PactStatePayload.INVITE && missing.patterns().size() == invitable(level, bedless).size()
+				&& missing.patterns().get(0).ready()
 				&& !missing.patterns().get(1).ready() && missing.patterns().get(1).amount() == 1 && note(missing, "invite.missing") != null,
 				"Without a bed of theirs within 8, Buer is listed not ready, what is missing named: " + missing);
 		bedless.closeContainer();
-		// One who understands only the Garden's Regard: the chooser with Buer and Bathin, not Stolas (GC-05, GC-P59).
+		// One who understands only the Garden's Regard: the chooser with Buer and Bathin, not Stolas (GC-05, GC-P59), and with
+		// every later garden spirit after them (GC-06b, GC-P77).
+		List<String> garden = signsOf(PactPerchBlockEntity.offered().stream().filter(d -> d.research().equals(GardenPacts.RESEARCH)).toList());
 		BlockPos gardenAt = perchFor(3);
 		ServerPlayer gardener = invitee(helper, buerD, gardenAt, 0);
 		PactPerchBlockEntity gardenPerch = perch(helper, gardenAt, gardener);
 		beside(helper, gardener, gardenAt);
 		PactStatePayload one = open(helper, gardener, gardenPerch).lastSent();
-		helper.assertTrue(one.mode() == PactStatePayload.INVITE
-				&& one.patterns().stream().map(PactStatePayload.Choice::id).toList().equals(List.of(BuerEntity.SIGN, BathinEntity.SIGN)),
-				"Only the Garden's Regard understood: the chooser with Buer and Bathin, not Stolas: " + one);
+		helper.assertTrue(one.mode() == PactStatePayload.INVITE && one.patterns().stream().map(PactStatePayload.Choice::id).toList().equals(garden)
+				&& garden.subList(0, 2).equals(List.of(BuerEntity.SIGN, BathinEntity.SIGN)) && !garden.contains(StolasEntity.SIGN),
+				"Only the Garden's Regard understood: the chooser with every garden spirit, Buer and Bathin first, not Stolas: " + one);
 		gardener.closeContainer();
 		// One already holding Stolas's pact: one to invite, no chooser.
 		BlockPos heldAt = perchFor(4);
@@ -5793,9 +5828,8 @@ public class ConcordanceWorkerGameTests {
 		PactPerchBlockEntity heldPerch = perch(helper, heldAt, holding);
 		beside(helper, holding, heldAt);
 		PactStatePayload rest = open(helper, holding, heldPerch).lastSent();
-		helper.assertTrue(rest.mode() == PactStatePayload.INVITE
-				&& rest.patterns().stream().map(PactStatePayload.Choice::id).toList().equals(List.of(BuerEntity.SIGN, BathinEntity.SIGN)),
-				"Holding Stolas's pact, he is not listed: the chooser with Buer and Bathin (GC-05): " + rest);
+		helper.assertTrue(rest.mode() == PactStatePayload.INVITE && rest.patterns().stream().map(PactStatePayload.Choice::id).toList().equals(garden),
+				"Holding Stolas's pact, he is not listed: the chooser with every garden spirit (GC-05, GC-06b): " + rest);
 		holding.closeContainer();
 		// Back on the chooser: INVITE(1) begins Buer's visit; accepting seals his pact alone.
 		PactStatePayload invited = invite(owner, menu, 1);
@@ -7214,4 +7248,53 @@ public class ConcordanceWorkerGameTests {
 				&& !Status.AWAITING_ANSWER.active, "awaiting_answer is appended, a reason, read back from its id");
 		helper.succeed();
 	}
+
+	// ---------------------------------------------------------------- Concordance garden cohort, GC-06b: the standing station and the work target, shared
+
+	/** GC-06b: stone under the whole structure (y 0): ground for a standing spirit beside its perch (Station.BESIDE's sturdy floor). */
+	static void floor(GameTestHelper helper) {
+		for (int x = 0; x < 8; x++) {
+			for (int z = 0; z < 8; z++) {
+				helper.setBlock(new BlockPos(x, 0, z), Blocks.STONE);
+			}
+		}
+	}
+
+	/**
+	 * GC-06b (GC-P62, GC-P66): the reaching bone's pose (PactSpiritEntity.posed, the renderer's arithmetic): a bed three blocks
+	 * south of a body is drawn where GeckoLib's turn of the model by 180 - bodyYaw puts it, at every bearing and scale; a
+	 * target past TARGET_REACH is reached that far toward it and no further.
+	 */
+	@GameTest(maxTicks = 20)
+	public void theFamiliarHookReachesItsTargetAtEveryBearing(GameTestHelper helper) {
+		Vec3 from = new Vec3(100.5, 64.0, 100.5);
+		Vec3 to = PactSpiritEntity.hover(new BlockPos(100, 64, 103));
+		float[] yaws = {0.0F, 90.0F, 180.0F, -90.0F};
+		Vec3[] expected = {new Vec3(0.0, 2.5, -3.0), new Vec3(-3.0, 2.5, 0.0), new Vec3(0.0, 2.5, 3.0), new Vec3(3.0, 2.5, 0.0)};
+		for (int i = 0; i < yaws.length; i++) {
+			Vec3 posed = PactSpiritEntity.posed(from, yaws[i], to, 1.0F);
+			helper.assertTrue(posed.distanceTo(expected[i]) < 1.0E-6, "Facing yaw " + yaws[i] + ", a bed 3 south is drawn at " + expected[i] + ": " + posed);
+		}
+		for (int yaw = -180; yaw < 180; yaw += 15) {
+			for (float scale : new float[] {0.5F, 1.0F, 1.4F}) {
+				Vec3 posed = PactSpiritEntity.posed(from, yaw, to, scale);
+				double turn = Math.toRadians(180.0 - yaw);
+				Vec3 drawn = new Vec3(posed.x * Math.cos(turn) + posed.z * Math.sin(turn), posed.y,
+						-posed.x * Math.sin(turn) + posed.z * Math.cos(turn)).scale(scale);
+				helper.assertTrue(from.add(drawn).distanceTo(to) < 1.0E-6,
+						"Turned back as GeckoLib draws it, the pose lands on the bed (yaw " + yaw + ", scale " + scale + ")");
+			}
+		}
+		Vec3 far = new Vec3(100.5, 64.0, 130.5);
+		Vec3 reached = PactSpiritEntity.reach(from, far);
+		helper.assertTrue(Math.abs(reached.distanceTo(from) - PactSpiritEntity.TARGET_REACH) < 1.0E-9 && reached.x == from.x && reached.z > from.z
+				&& Math.abs(PactSpiritEntity.posed(from, 0.0F, far, 1.0F).length() - PactSpiritEntity.TARGET_REACH) < 1.0E-9,
+				"Thirty blocks off, it reaches TARGET_REACH toward it and no further: " + reached);
+		helper.succeed();
+	}
+
+	// GC-06 unit 3
+	// GC-07 unit 4
+	// GC-08 unit 5
+	// GC-09 unit 6
 }

@@ -283,11 +283,21 @@ public class PactScreen extends Screen implements MenuAccess<PactMenu> {
 		return work.isEmpty() || StarReckoning.WORK.equals(work);
 	}
 
-	/** GC-01 (SG5): another work's service section: its heading and what it does by itself (screen.jugcraft.pact.service.<work>.*). */
+	/**
+	 * GC-01 (SG5): another work's service section: its heading and what it does by itself (screen.jugcraft.pact.service.<work>.*).
+	 * GC-06 (GC-P74): then each choice of its on-request action (Marax's reading), sent as RECALL with its index.
+	 */
 	private void workService(PactStatePayload state) {
 		String work = state.spirit().work();
 		say(Component.translatableWithFallback("screen.jugcraft.pact.service." + work + ".heading", work), GOLD, "");
 		say(Component.translatableWithFallback("screen.jugcraft.pact.service." + work + ".about", ""), DIM, "");
+		boolean free = !PactClient.waiting() && state.offers(PactRequestPayload.RECALL);
+		for (int i = 0; i < state.patterns().size(); i++) {
+			PactStatePayload.Choice choice = state.patterns().get(i);
+			int index = i;
+			inline("work:" + i, choice.name(), choice.ready() ? ui("work.left", choice.amount()) : ui("work.spent"),
+					free && choice.ready(), () -> PactClient.request(menu, PactRequestPayload.RECALL, index), false);
+		}
 	}
 
 	/**

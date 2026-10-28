@@ -38,7 +38,12 @@ SPECIMENS = {rid("sunpetal"): "Sunpetal", rid("dewmoss"): "Dewmoss", rid("gloamc
              rid("mendvetch"): "Mendvetch", rid("verdant_chaff"): "Verdant Chaff"}
 MASTERY_SPIRITS = 3  # Java: GardenPacts.MASTERY_SPIRITS: the mastered rule's distinct (GC-S9)
 # Java: PactObligations.Act, in order; append only (unit 2 device, 3 read, 4 graft, 5 feed, 6 harvest).
-ACTS = ["tend", "device"]
+ACTS = ["tend", "device",
+        # GC-06 unit 3
+        # GC-07 unit 4
+        # GC-08 unit 5
+        # GC-09 unit 6
+        ]
 # Each act's one-line hook: (Java file under concordance/, the member it is in, the line, what it follows, what it precedes).
 HOOKS = {"tend": ("garden/VerdantBedBlock.java", "static void tendBy(",
                   "PactObligations.performed(level, player, PactObligations.Act.TEND, pos);",
@@ -47,14 +52,30 @@ HOOKS = {"tend": ("garden/VerdantBedBlock.java", "static void tendBy(",
          # its return at four tabs never matches the method's last at two).
          "device": ("garden/LivingDeviceBlock.java", "protected InteractionResult useWithoutItem(",
                     "PactObligations.performed(serverLevel, server, PactObligations.Act.DEVICE, pos);",
-                    "useEmpty(device, server, serverLevel);", "}\n\t\treturn InteractionResult.SUCCESS;")}
-OBLIGATIONS = {"strain_tending": "tend", "verdance_carrying": "device"}  # work -> act (each act at most one work); GC-04: Buer's; GC-05: Bathin's
+                    "useEmpty(device, server, serverLevel);", "}\n\t\treturn InteractionResult.SUCCESS;"),
+         # GC-06 unit 3
+         # GC-07 unit 4
+         # GC-08 unit 5
+         # GC-09 unit 6
+         }
+# work -> act (each act at most one work); GC-04: Buer's; GC-05: Bathin's; GC-06 on, each unit's under its line.
+OBLIGATIONS = {"strain_tending": "tend", "verdance_carrying": "device",
+               # GC-06 unit 3
+               # GC-07 unit 4
+               # GC-08 unit 5
+               # GC-09 unit 6
+               }
 # work -> {Java file under concordance/: {constant: value}}; each spirit's unit adds its own (check_garden_pacts).
 # GC-04: Buer remembers today's eases of at most 16 beds, and asks GardenPacts.target about at most 8 beds a think.
 # GC-05: a move of Bathin's sets down at most 8 (the Gleaner's own draw) or pours at most 3 batches; at most 8 places asked a
 # think.
 CONSTANTS = {"strain_tending": {"spirits/StrainTending.java": {"MEMORY": 16, "MAX_ASKED": 8}},
-             "verdance_carrying": {"spirits/VerdanceCarrying.java": {"MOVE_MAX": 8, "MAX_BATCHES": 3, "MAX_ASKED": 8}}}
+             "verdance_carrying": {"spirits/VerdanceCarrying.java": {"MOVE_MAX": 8, "MAX_BATCHES": 3, "MAX_ASKED": 8}},
+             # GC-06 unit 3
+             # GC-07 unit 4
+             # GC-08 unit 5
+             # GC-09 unit 6
+             }
 REACH = {"MAX_BEDS": 64, "REFRESH_TICKS": 200}  # Java: spirits/GardenReach (GC-P2)
 # GE8: mechanically distinct services. Each garden work changes one kind of state through one call that only its service
 # class makes, under its own verb; check_garden_pacts holds the classes to the rows and no two rows alike. Each spirit's
@@ -66,6 +87,10 @@ DISTINCT = {
     "verdance_carrying": {"verb": "move an essence at once", "state": "a Verdant Heart's and a Gleaner's or Ley Pylon's reservoirs",
                           "call": "gleaner.receiveFrom(heart, record.holder(), MOVE_MAX, level)", "class": "VerdanceCarrying",
                           "also": "heart.pourInto(pylon, level, MAX_BATCHES)"},
+    # GC-06 unit 3
+    # GC-07 unit 4
+    # GC-08 unit 5
+    # GC-09 unit 6
 }
 CODEX_PLACE = (6, 4)  # the Binding category's map: (0..6, 0..4) holds eleven entries; (6, 4) is free (check_concordance)
 # GC-05 (GC-P45, GC-P54): a device index (GardenReach.devices) holds at most this many Hearts, Gleaners and Ley Pylons, each.
@@ -105,7 +130,12 @@ MESSAGES = {
     "garden_pact.obligation_kept": "First obligation kept: %s of %s garden spirits toward mastering The Garden's Regard",
     **{f"garden_pact.act.{act}": text for act, text in {
         "tend": "tend a strained Verdant Bed",
-        "device": "read or set an awake Verdant Heart, Gleaner, Mulch Maw or Habitat Gauge"}.items()},
+        "device": "read or set an awake Verdant Heart, Gleaner, Mulch Maw or Habitat Gauge",
+        # GC-06 unit 3
+        # GC-07 unit 4
+        # GC-08 unit 5
+        # GC-09 unit 6
+    }.items()},
 }
 # Under tooltip.jugcraft.concordance. (tools/concordance.py TOOLTIPS).
 TOOLTIPS = {"garden_regard_specimen": "The garden's spirits regard this: sneak and use it in the air to examine it"}
@@ -180,6 +210,10 @@ PAGES = [
      + ", then the pact is suspended with nothing lost. Your first obligation: use an awake living device in his area with "
      "an empty hand while the pact is active. Ending it returns what was paid ahead once: his coil tightens, and he is gone "
      "in a ring of dust.", ("garden_regard", "understood")),
+    # GC-06 unit 3
+    # GC-07 unit 4
+    # GC-08 unit 5
+    # GC-09 unit 6
 ]
 
 

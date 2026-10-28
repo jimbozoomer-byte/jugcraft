@@ -23,6 +23,7 @@ import io.github.jimbozoomer.jugcraft.concordance.ecology.Factor;
 import io.github.jimbozoomer.jugcraft.concordance.ecology.Fit;
 import io.github.jimbozoomer.jugcraft.concordance.ecology.Graft;
 import io.github.jimbozoomer.jugcraft.concordance.ecology.Habitat;
+import io.github.jimbozoomer.jugcraft.concordance.ecology.HabitatAdvice;
 import io.github.jimbozoomer.jugcraft.concordance.ecology.HabitatInspection;
 import io.github.jimbozoomer.jugcraft.concordance.ecology.Niche;
 import io.github.jimbozoomer.jugcraft.concordance.ecology.Organism;
@@ -60,6 +61,7 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.EnumSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 import net.fabricmc.fabric.api.gametest.v1.GameTest;
@@ -2305,4 +2307,110 @@ public class ConcordanceGardenGameTests {
 			helper.succeed();
 		});
 	}
+
+	// ---------------------------------------------------------------- the garden cohort, GC-06b: shared sampling and the one-correction rule
+
+	/**
+	 * The garden cohort, GC-06b (shared by GC-06 to GC-09): each of {@code beds} sampled one a tick from tick 1, a second pass
+	 * taking any the level's allowance refused (SampleBudget.PER_TICK a tick, shared with every test running beside this
+	 * one), then {@code body} at tick 2 * beds + 3, once each holds a sample, and the test succeeds after it. A reading test
+	 * reads cachedHabitat only in that tick, so it takes no sample of its own there. A test using it sets maxTicks to at least
+	 * 2 * beds + 10.
+	 */
+	static void afterSampling(GameTestHelper helper, List<VerdantBedBlockEntity> beds, Runnable body) {
+		ServerLevel level = helper.getLevel();
+		int count = beds.size();
+		for (int i = 0; i < 2 * count; i++) {
+			VerdantBedBlockEntity bed = beds.get(i % count);
+			helper.runAtTickTime(1 + i, () -> {
+				if (bed.cachedHabitat(level) == null) {
+					bed.habitat(level);
+				}
+			});
+		}
+		helper.runAtTickTime(2L * count + 3, () -> {
+			for (VerdantBedBlockEntity bed : beds) {
+				helper.assertTrue(bed.cachedHabitat(level) != null, "The bed's area is sampled: " + bed.getBlockPos());
+			}
+			body.run();
+			helper.succeed();
+		});
+	}
+
+	/**
+	 * The garden cohort, GC-06b (GC-P64; the CI form of the unit's scratch harness): HabitatAdvice over every shipped niche
+	 * and graft and a grid of readings. Nothing to correct while a plant thrives; otherwise the first factor holding it, only
+	 * ever toward its ideal range (never more disturbance where its niche needs none), and a change named alone raises it a
+	 * step. The contract's three cases: a Sunpetal at light 9 (light to 11, alone, or the Dewlit graft), a Sunpetal with two
+	 * faults (the first, one of 2) and a Gloamcap with no magic (a quiet source, to 1).
+	 */
+	@GameTest(maxTicks = 20)
+	public void habitatAdviceHoldsForEveryOrganism(GameTestHelper helper) {
+		EcologyCatalog catalog = Garden.catalog();
+		List<Niche> niches = new ArrayList<>();
+		for (Organism organism : catalog.organisms().values()) {
+			niches.add(organism.niche());
+		}
+		for (Graft graft : catalog.grafts().values()) {
+			Organism host = catalog.organism(graft.host());
+			if (host != null) {
+				niches.add(catalog.niche(host, graft.id()));
+			}
+		}
+		int checked = 0;
+		for (Niche niche : niches) {
+			for (int moisture : new int[] {0, 1, 2, 4, 7}) {
+				for (int light : new int[] {0, 6, 9, 10, 11, 15}) {
+					for (int nutrients : new int[] {0, 1, 3, 32}) {
+						for (int diversity : new int[] {1, 3}) {
+							for (int disturbance : new int[] {0, 1, 2, 3, 6, 12, 15}) {
+								for (int strain : new int[] {0, 1, 3}) {
+									Habitat habitat = new Habitat(moisture, light, nutrients, diversity, disturbance, strain);
+									Verdict verdict = Verdict.of(niche, habitat);
+									HabitatAdvice.Advice advice = HabitatAdvice.one(niche, habitat);
+									checked++;
+									if (verdict.growth() == Verdict.Growth.THRIVING) {
+										helper.assertTrue(advice == null, "Nothing to correct while it thrives: " + habitat);
+										continue;
+									}
+									List<Factor> held = verdict.growth() == Verdict.Growth.STALLED ? verdict.outside() : verdict.tolerable();
+									helper.assertTrue(advice != null && advice.factor() == held.getFirst(), "The first factor holding it: " + habitat + " " + advice);
+									Niche.Range range = niche.range(advice.factor());
+									helper.assertTrue((advice.change() != HabitatAdvice.Change.MORE || advice.value() < range.idealMin())
+											&& (advice.change() != HabitatAdvice.Change.LESS || advice.value() > range.idealMax())
+											&& (advice.change() != HabitatAdvice.Change.EASE || strain > 0 && advice.factor() == Factor.DISTURBANCE)
+											&& !(advice.factor() == Factor.DISTURBANCE && advice.change() == HabitatAdvice.Change.MORE && range.idealMin() == 0)
+											&& (!advice.alone() || held.size() == 1), "Only toward its ideal range: " + habitat + " " + advice);
+									if (advice.alone()) {
+										Habitat changed = advice.change() == HabitatAdvice.Change.EASE
+												? new Habitat(moisture, light, nutrients, diversity, disturbance, advice.target())
+												: habitat.with(advice.factor(), advice.target());
+										helper.assertTrue(Verdict.of(niche, changed).growth().pace > verdict.growth().pace,
+												"Its one change raises it a step: " + habitat + " " + advice);
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+		helper.assertValueEqual(checked, niches.size() * 5 * 6 * 4 * 2 * 7 * 3, "Every reading checked");
+		Organism sunpetal = catalog.organism("jugcraft:sunpetal");
+		HabitatAdvice.Advice dim = HabitatAdvice.one(sunpetal.niche(), new Habitat(7, 9, 10, 1, 0, 0),
+				Map.of("jugcraft:dewlit", catalog.niche(sunpetal, "jugcraft:dewlit")));
+		helper.assertTrue(dim != null && dim.factor() == Factor.LIGHT && dim.change() == HabitatAdvice.Change.MORE && dim.target() == 11
+				&& dim.alone() && "jugcraft:dewlit".equals(dim.graft()), "A Sunpetal at light 9: light to 11, alone, or the Dewlit graft: " + dim);
+		HabitatAdvice.Advice two = HabitatAdvice.one(sunpetal.niche(), new Habitat(1, 15, 0, 3, 0, 0));
+		helper.assertTrue(two != null && two.factor() == Factor.MOISTURE && two.of() == 2 && two.target() == 4, "Two faults: the first, one of 2: " + two);
+		HabitatAdvice.Advice quiet = HabitatAdvice.one(catalog.organism("jugcraft:gloamcap").niche(), new Habitat(7, 2, 10, 1, 0, 0));
+		helper.assertTrue(quiet != null && quiet.factor() == Factor.DISTURBANCE && quiet.change() == HabitatAdvice.Change.MORE
+				&& quiet.target() == 1 && quiet.alone(), "A Gloamcap with no magic: a quiet source, to 1: " + quiet);
+		helper.succeed();
+	}
+
+	// GC-06 unit 3
+	// GC-07 unit 4
+	// GC-08 unit 5
+	// GC-09 unit 6
 }

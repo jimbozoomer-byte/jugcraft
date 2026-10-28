@@ -33,6 +33,10 @@ SERVICES = {
     "star_reckoning": "Star-reckoning: once a game day, a sky pattern you observed, recalled",
     "strain_tending": "Strain tending: by daylight, one harvest strain eased on your beds at a time",
     "verdance_carrying": "Verdance carrying: at once, from your Hearts to a far Gleaner or a pylon",
+    # GC-06 unit 3
+    # GC-07 unit 4
+    # GC-08 unit 5
+    # GC-09 unit 6
 }
 # Ars Nouveau's helpers on the roster (G13; Java: nouveau/NouveauHelper.kind is "nouveau_" + its species,
 # NouveauHelpers.register lists them).

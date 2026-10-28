@@ -14,6 +14,8 @@ import io.github.jimbozoomer.jugcraft.concordance.rules.ResearchState;
 import io.github.jimbozoomer.jugcraft.concordance.sky.AstralClaims;
 import io.github.jimbozoomer.jugcraft.concordance.spirits.BoundWills;
 import io.github.jimbozoomer.jugcraft.concordance.spirits.GardenPacts;
+import io.github.jimbozoomer.jugcraft.concordance.spirits.PactKeeping;
+import io.github.jimbozoomer.jugcraft.concordance.spirits.PactPerchBlockEntity;
 import io.github.jimbozoomer.jugcraft.concordance.spirits.StolasEntity;
 import io.github.jimbozoomer.jugcraft.concordance.spirits.Workers;
 import io.github.jimbozoomer.jugcraft.concordance.stages.StageProgress;
@@ -204,7 +206,7 @@ public class ConcordanceJournalGameTests {
 	 * Concordance garden cohort, GC-01 (SG7, GB17, GC-P16), with a second spirit's Regard (GC-04): the pacts section names
 	 * each Regard a perch's offers need, once its reader has begun it. With the Binding Arts alone, Stolas's two lines as
 	 * Chunk D wrote them and no garden line; The Garden's Regard begun, its next step; understood, its next step and whom it
-	 * lets them invite (Buer and Bathin, GC-05). No line names an id.
+	 * lets them invite (every garden spirit, Buer and Bathin first: GC-05, GC-06b). No line names an id.
 	 */
 	@GameTest(maxTicks = 20)
 	public void theJournalNamesEachRegardsNextStep(GameTestHelper helper) {
@@ -229,10 +231,14 @@ public class ConcordanceJournalGameTests {
 				"Understood: its next step (to mastered) and whom it lets them invite");
 		Object[] args = ((TranslatableContents) lines.get(3).text().getContents()).getArgs();
 		// GC-05 (GC-P59): the Regard lets them invite Buer and Bathin, named in the perch's order (ComponentUtils.formatList).
-		helper.assertTrue(args.length == 2 && args[1] instanceof Component named
+		// GC-06b (GC-P77): and every later garden spirit after them, worked out here from the perch's offers.
+		List<String> garden = PactPerchBlockEntity.offered().stream().filter(d -> d.research().equals(GardenPacts.RESEARCH))
+				.map(d -> key(PactKeeping.name(d.id()))).toList();
+		helper.assertTrue(args.length == 2 && args[1] instanceof Component named && garden.size() >= 2
+				&& garden.subList(0, 2).equals(List.of("entity.jugcraft.buer", "entity.jugcraft.bathin"))
 				&& named.getSiblings().stream().map(ConcordanceJournalGameTests::key).filter(name -> name.startsWith("entity.")).toList()
-						.equals(List.of("entity.jugcraft.buer", "entity.jugcraft.bathin")),
-				"The invite line names Buer and Bathin: " + Arrays.toString(args));
+						.equals(garden),
+				"The invite line names every garden spirit, Buer and Bathin first: " + Arrays.toString(args));
 		helper.assertTrue(lines.stream().noneMatch(line -> line.text().getString().contains("jugcraft:")), "No line names an id");
 		helper.succeed();
 	}

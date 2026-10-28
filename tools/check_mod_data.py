@@ -19049,7 +19049,12 @@ GC05_CARRYING_TESTS = {
 }
 # Concordance garden cohort, GC-05 (check_pacts): each work's answers as shipped, the safe course first. Append only: a
 # value saved in a perch's accord is never renamed, reordered or removed. Units 4 to 6 add theirs.
-GC05_ACCORDS = {"verdance_carrying": ["yield", "claim"]}
+GC05_ACCORDS = {"verdance_carrying": ["yield", "claim"],
+                # GC-06 unit 3
+                # GC-07 unit 4
+                # GC-08 unit 5
+                # GC-09 unit 6
+                }
 # The accord machinery's game tests (check_pacts).
 GC05_ACCORD_TESTS = {
     "ConcordanceWorkerGameTests": ["theKeptPageAsksTheMatterAndKeepsTheAnswer", "theRosterSaysAwaitingYourAnswer",
@@ -20383,6 +20388,62 @@ def check_pacts(co, root, lang, registered, research):
         for name in names:
             if not re.search(rf"public void {name}\(GameTestHelper \w+\)", source):
                 err(f"{cls}: missing the garden cohort's GC-05 game test {name}")
+    # --- Concordance garden cohort, GC-06b (GC-P62, GC-P65 to GC-P67, GC-P74; shared by GC-06 to GC-09): stations, the work
+    # target, the reaching bone, a work's choices on its kept page. (Each row's station and reaching bone: GC-06's rules.) ---
+    base = java("spirits/PactSpiritEntity.java")
+    renderers = (CLIENT_JAVA_ROOT / "PactSpiritRenderers.java").read_text(encoding="utf-8")
+    station = _java_body(base, "private Vec3 station(ServerLevel level, @Nullable Vec3 toward, boolean keeping)")
+    clear = _java_body(base, "private boolean clear(ServerLevel level, Direction side)")
+    if "body.station() != Station.BESIDE || perch == null" not in station or station.count("return top;") != 2 \
+            or "side = null;\n\t\treturn top;" not in station \
+            or "List.of(first.getClockWise(), first.getOpposite(), first.getCounterClockWise(), first)" not in station \
+            or not 0 <= clear.find("level.isLoaded(cell)") < clear.find("level.getBlockState(cell)") \
+            or "isFaceSturdy(level, floor, Direction.UP)" not in clear \
+            or "Vec3 at = station(level, position(), true);" not in _java_body(base, "private void stay(ServerLevel level)") \
+            or "stay(level);" not in _java_body(base, "private Status decide(") \
+            or "summoned.station(level, facing != null && facing.level() == level ? facing.position() : null)" \
+            not in java("spirits/PactPerchBlockEntity.java"):
+        err("PactSpiritEntity.station: on its perch, or two blocks out on a clear side, a quarter turn clockwise from whoever it "
+            "comes for first, its own side last; loaded cells only; else its perch; summoned there and kept there (GC-P67)")
+    if "SynchedEntityData.defineId(PactSpiritEntity.class, EntityDataSerializers.OPTIONAL_BLOCK_POS)" not in base \
+            or "builder.define(TARGET, Optional.empty());" not in base:
+        err("spirits/PactSpiritEntity.java: TARGET is an optional block position in synced data (GC-P65)")
+    for member in ("protected void addAdditionalSaveData(", "protected void readAdditionalSaveData("):
+        if re.search(r"TARGET|targetUntil|flown|outbound|\bside\b", _java_body(base, member)):
+            err(f"spirits/PactSpiritEntity.java {member.strip()}: its work target is never saved or read back (network only; GC-06)")
+    show = _java_body(base, "void showTarget(BlockPos at, long until)")
+    think = _java_body(base, "public Status think(")
+    leave = _java_body(base, "public void leave(")
+    if "if (gone() || !entityData.get(LISTENING)) {" not in show \
+            or "!entityData.get(LISTENING) || gameTime >= targetUntil" not in think \
+            or not 0 <= leave.find("entityData.set(DEPARTING, true);") < leave.find("entityData.set(TARGET, Optional.empty());") \
+            or not re.search(r"public static final double TARGET_REACH = 24\.0;", base) \
+            or not re.search(r"public static final int FLIGHT_TICKS = 10;", base):
+        err("spirits/PactSpiritEntity.java: its work target shows only while it listens and for its time, is cleared at the "
+            "think after and when it leaves, and is reached at most TARGET_REACH, 24 blocks (GC-P62 as amended, GC-P65)")
+    for path in sorted((root / "spirits").glob("*.java")):
+        if path.name != "PactSpiritEntity.java" and re.search(r"\bTARGET\b(?!_)", path.read_text(encoding="utf-8").replace("WALK_TARGET", "")):
+            err(f"spirits/{path.name}: only PactSpiritEntity touches its work target (others call showTarget)")
+    culling = _java_body(renderers, "protected AABB getBoundingBoxForCulling(")
+    adjust = _java_body(renderers, "public void adjustModelBonesForRender(")
+    if "record Row(float scale, float shadow, double wide, double low, double above, boolean glow, @Nullable String reach)" not in renderers \
+            or "PactSpiritEntity.posed(" not in _java_body(renderers, "public void addRenderData(") \
+            or "box.minmax(AABB.ofSize(PactSpiritEntity.reach(" not in culling \
+            or not 0 <= adjust.find("super.adjustModelBonesForRender(info, bones);") < adjust.find("info.getGeckolibData(FLIGHT)"):
+        err("client/PactSpiritRenderers: a row's reaching bone is posed by PactSpiritEntity.posed after its clips, its culling "
+            "box widened to the reach (GC-P66)")
+    if "ui(\"work.left\", choice.amount())" not in _java_body((CLIENT_JAVA_ROOT / "PactScreen.java").read_text(encoding="utf-8"),
+                                                          "private void workService(PactStatePayload state)"):
+        err("client/PactScreen.workService: a work's on-request choices are Recall buttons with what is left today (GC-P74)")
+    for cls, names in GC06B_TESTS.items():
+        source = (tests / f"{cls}.java").read_text(encoding="utf-8") if (tests / f"{cls}.java").is_file() else ""
+        for name in names:
+            if not re.search(rf"public void {name}\(GameTestHelper \w+\)", source):
+                err(f"{cls}: missing the garden cohort's GC-06b game test {name}")
+    # GC-06 unit 3
+    # GC-07 unit 4
+    # GC-08 unit 5
+    # GC-09 unit 6
 
 
 def check_stolas_regard(co, root, lang, research):
@@ -20793,15 +20854,25 @@ def check_garden_pacts(co, root, lang, registered, research):
     if -1 in order or order != sorted(order) or carrying.count("return Status.WORKING;") != 1 or carrying.count("holder.taskDone(") != 1:
         err("VerdanceCarrying.carried: one move remembered, counted once, faced, gestured and shown at both ends through his "
             "shimmer on its tick (GC-05)")
-    asked = _java_body(carrying, "private Asked ask(BlockPos pos, @Nullable UUID keeper)")
-    if "asked.size() >= MAX_ASKED" not in asked or "GardenPacts.target(level, record, pos, keeper, time, now)" not in asked:
-        err("VerdanceCarrying.Asking: each place asked of GardenPacts.target once, at most MAX_ASKED a think (GC-S7)")
+    # GC-06b: one think's questions are GardenAsking's (lifted from Bathin's service unchanged, shared by every garden service
+    # that asks place by place), at most its service's MAX_ASKED.
+    asking = strip(text(spirits / "GardenAsking.java"))
+    asked = _java_body(asking, "Asked ask(BlockPos pos, @Nullable UUID keeper)")
+    if "asked.size() >= most" not in asked or "GardenPacts.target(level, record, pos, keeper, time, now)" not in asked \
+            or "new GardenAsking(level, record, time, now, MAX_ASKED, memory::skipped, memory::skip)" not in carrying:
+        err("GardenAsking: each place asked of GardenPacts.target once, at most its service's MAX_ASKED a think, Bathin's "
+            "questions among them (GC-S7)")
+    for path in sorted(spirits.glob("*.java")):
+        if path.name != "GardenAsking.java" and re.search(r"\b(class Asking|enum Asked)\b", strip(path.read_text(encoding="utf-8"))):
+            err(f"spirits/{path.name}: one think's questions are GardenAsking's, never a service's own copy (GC-06b)")
     # The unit review: a place refused for itself is skipped, at no question, until his index is read again (as Buer's
-    # beds), so refused Gleaners never starve the pylon road; a place he may change is never skipped.
+    # beds), so refused Gleaners never starve the pylon road; a place he may change is never skipped. GC-06b: his memory
+    # says which and is told each, through GardenAsking.
     remembered = _java_body(carrying, "public static final class Memory")
-    if not 0 <= asked.find("if (memory.skipped(pos)) {") < asked.find("asked.size() >= MAX_ASKED") \
-            or not 0 <= asked.find("answer = Asked.NOT_HERE;") < asked.find("memory.skip(pos);") \
-            or carrying.count("memory.skip(") != 1 or "if (skipped.size() < MAX_SKIPPED) {" not in remembered \
+    if not 0 <= asked.find("if (skipped.test(pos)) {") < asked.find("asked.size() >= most") \
+            or not 0 <= asked.find("answer = Asked.NOT_HERE;") < asked.find("skip.accept(pos);") \
+            or asking.count("skip.accept(") != 1 or "memory.skip(" in carrying or carrying.count("memory::skip)") != 1 \
+            or "if (skipped.size() < MAX_SKIPPED) {" not in remembered \
             or "private static final int MAX_SKIPPED = 3 * GardenReach.MAX_DEVICES;" not in remembered \
             or "if (reach != null && reach.refreshes() != skippedAt) {" not in _java_body(remembered, "void notice(") \
             or "GardenPacts.benefits(record, heart.keeper()) && heart.feedsAPylonBeside(level)" not in _java_body(remembered, "void notice("):
@@ -20840,6 +20911,10 @@ def check_garden_pacts(co, root, lang, registered, research):
     if f"each at most {limits.get('MOVE_MAX')} Verdance" not in service_row or f" or {limits.get('MAX_BATCHES')} batches " not in service_row:
         err("tools/concordance_pacts.py SERVICE_WORDS verdance_carrying row.service: names MOVE_MAX and MAX_BATCHES as "
             "tools/concordance_garden_pacts.py CONSTANTS holds them")
+    # GC-06 unit 3
+    # GC-07 unit 4
+    # GC-08 unit 5
+    # GC-09 unit 6
 
 
 def check_pact_screen(co, lang):
@@ -21413,6 +21488,10 @@ def check_spirit_bodies(co):
     for key, name in body["loops"].items():
         if key != "astir" and f'"{name}"' not in garden_client:
             err(f"ConcordanceGardenPactClientGameTests: checks his {key} loop ({name})")
+    # GC-06 unit 3
+    # GC-07 unit 4
+    # GC-08 unit 5
+    # GC-09 unit 6
 
 
 def check_pact_network(co):
@@ -24313,6 +24392,16 @@ GC05_BATHIN_TESTS = {
                                    "bathinsCarryShimmersBothEndsAtOnce", "bathinAnswersEachActionWithHisGesture",
                                    "aDuplicateBathinCarriesNothing"],
 }
+# The garden cohort, GC-06b's game tests (check_pacts): the shared reaching bone's arithmetic and the one-correction rule.
+GC06B_TESTS = {
+    "ConcordanceWorkerGameTests": ["theFamiliarHookReachesItsTargetAtEveryBearing"],
+    "ConcordanceGardenGameTests": ["habitatAdviceHoldsForEveryOrganism"],
+}
+# Each later unit's tables (GC-06 to GC-09) under its line.
+# GC-06 unit 3
+# GC-07 unit 4
+# GC-08 unit 5
+# GC-09 unit 6
 # GC-04 (GB24): Stolas's Flashjack draws these six zero-thickness box-UV cubes on both faces, as the owner made them (D-D3
 # keeps his geometry byte for byte); the twin rule allows exactly these, so a seventh, in any spirit, fails. Recorded as a
 # question for the cohort checkpoint, not changed here.

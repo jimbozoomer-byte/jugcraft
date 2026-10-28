@@ -144,6 +144,12 @@ class ClientTestSelectionTests(unittest.TestCase):
             chosen, _ = selection.select([path], tests, set(), "base", "head")
         self.assertEqual(chosen, set(tests))
 
+    # The garden cohort: each later unit's case (GC-06 to GC-09) under its line.
+    # GC-06 unit 3
+    # GC-07 unit 4
+    # GC-08 unit 5
+    # GC-09 unit 6
+
 
 if __name__ == "__main__":
     unittest.main()

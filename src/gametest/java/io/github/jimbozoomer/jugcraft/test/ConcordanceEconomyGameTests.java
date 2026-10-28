@@ -234,4 +234,9 @@ public class ConcordanceEconomyGameTests {
 				"A day's moves on both roads, the claimed Heart among the sources; then his quota; no item");
 		helper.succeed();
 	}
+
+	// GC-06 unit 3
+	// GC-07 unit 4
+	// GC-08 unit 5
+	// GC-09 unit 6
 }

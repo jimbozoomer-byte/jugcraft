@@ -4,6 +4,7 @@ import io.github.jimbozoomer.jugcraft.concordance.LeyPylonBlockEntity;
 import io.github.jimbozoomer.jugcraft.concordance.garden.GleanerBlockEntity;
 import io.github.jimbozoomer.jugcraft.concordance.garden.VerdantHeartBlockEntity;
 import io.github.jimbozoomer.jugcraft.concordance.resource.BoundWill;
+import io.github.jimbozoomer.jugcraft.concordance.spirits.GardenAsking.Asked;
 import io.github.jimbozoomer.jugcraft.concordance.worker.PactDefinition;
 import io.github.jimbozoomer.jugcraft.concordance.worker.Pacts;
 import io.github.jimbozoomer.jugcraft.concordance.worker.Status;
@@ -133,7 +134,7 @@ public final class VerdanceCarrying {
 		}
 		// The emptiest first (where Verdance is wanted most), the nearest the perch among equals.
 		gleaners.sort(Comparator.comparingLong(GleanerBlockEntity::verdance));
-		Asking asking = new Asking(level, record, memory, time, now);
+		GardenAsking asking = new GardenAsking(level, record, time, now, MAX_ASKED, memory::skipped, memory::skip);
 		for (VerdantHeartBlockEntity heart : sources) {
 			for (GleanerBlockEntity gleaner : gleaners) {
 				if (gleaner.reaches(heart.getBlockPos())) {
@@ -225,79 +226,6 @@ public final class VerdanceCarrying {
 			rows.add(Component.translatable(KEY + "row.leaving", memory.roads().size()));
 		}
 		return rows;
-	}
-
-	/** What a place's question came to this think. */
-	private enum Asked {
-		/** The holder may change it now, for a beneficiary. */
-		MAY,
-		/** Not this place (not a beneficiary's now, not the holder's to change by hand, outside the area): skipped until his index is next read. */
-		NOT_HERE,
-		/** The pact's own reason (suspended, held, its quota spent, its holder not near): the think stops with it. */
-		PACT,
-		/** No question left this think. */
-		SPENT
-	}
-
-	/**
-	 * One think's questions to GardenPacts.target: each place once, at most MAX_ASKED places; a place his memory skips is
-	 * not asked (no question spent). Server thread only.
-	 */
-	private static final class Asking {
-		private final ServerLevel level;
-		private final BoundWill record;
-		private final Memory memory;
-		private final long time;
-		private final long now;
-		private final Map<BlockPos, Asked> asked = new HashMap<>();
-		private Status stop = Status.IDLE;
-
-		Asking(ServerLevel level, BoundWill record, Memory memory, long time, long now) {
-			this.level = level;
-			this.record = record;
-			this.memory = memory;
-			this.time = time;
-			this.now = now;
-		}
-
-		/** The first place's answer unless it is MAY, else the second's. */
-		Asked both(BlockPos from, @Nullable UUID fromKeeper, BlockPos to, @Nullable UUID toKeeper) {
-			Asked first = ask(from, fromKeeper);
-			return first == Asked.MAY ? ask(to, toKeeper) : first;
-		}
-
-		private Asked ask(BlockPos pos, @Nullable UUID keeper) {
-			Asked known = asked.get(pos);
-			if (known != null) {
-				return known;
-			}
-			if (memory.skipped(pos)) {
-				return Asked.NOT_HERE;
-			}
-			if (asked.size() >= MAX_ASKED) {
-				return Asked.SPENT;
-			}
-			Status refused = GardenPacts.target(level, record, pos, keeper, time, now);
-			Asked answer;
-			if (refused == null) {
-				answer = Asked.MAY;
-			} else if (refused == Status.IDLE || refused == Status.BLOCKED_BY_ACCESS || refused == Status.OUTSIDE_AGREEMENT) {
-				// This place's own answer: skipped until his index is read again (the unit review, as Buer's beds), so refused
-				// places never crowd the rest out of a think's questions, and each protection a refusal asks is asked once a read.
-				answer = Asked.NOT_HERE;
-				memory.skip(pos);
-			} else {
-				stop = refused;
-				answer = Asked.PACT;
-			}
-			asked.put(pos.immutable(), answer);
-			return answer;
-		}
-
-		/** The pact's reason that stopped the think. */
-		Status stop() {
-			return stop;
-		}
 	}
 
 	/**

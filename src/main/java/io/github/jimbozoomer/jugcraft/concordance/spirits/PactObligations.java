@@ -32,7 +32,12 @@ public final class PactObligations {
 	public enum Act {
 		TEND("tend"),
 		/** GC-05 (Bathin): an awake living device (a Verdant Heart, Gleaner, Mulch Maw or Habitat Gauge) read or set with an empty hand. */
-		DEVICE("device");
+		DEVICE("device"),
+		// GC-06 unit 3
+		// GC-07 unit 4
+		// GC-08 unit 5
+		// GC-09 unit 6
+		;
 
 		public final String id;
 
