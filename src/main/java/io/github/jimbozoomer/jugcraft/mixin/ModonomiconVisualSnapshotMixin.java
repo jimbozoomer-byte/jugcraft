@@ -28,9 +28,12 @@ public abstract class ModonomiconVisualSnapshotMixin {
                 var entries = new HashMap<Identifier, EntryVisualState>();
                 category.entryStates.forEach((entryId, entry) -> entries.put(entryId,
                         new EntryVisualState(entry.openPagesIndex, entry.unread)));
-                categories.put(categoryId, new CategoryVisualState(entries, category.scrollX,
+                var copy = new CategoryVisualState(entries, category.scrollX,
                         category.scrollY, category.targetZoom, Optional.ofNullable(category.openEntry),
-                        category.openPagesIndex, category.unread));
+                        category.openPagesIndex, category.unread);
+                // The pinned constructor accepts this argument but does not assign it.
+                copy.openPagesIndex = category.openPagesIndex;
+                categories.put(categoryId, copy);
             });
             books.put(bookId, new BookVisualState(categories, book.openCategory, book.openPagesIndex));
         });

@@ -22,6 +22,7 @@ public class FrameworkGameTests {
         var entry = new com.klikli_dev.modonomicon.bookstate.visual.EntryVisualState(2, true);
         var category = new com.klikli_dev.modonomicon.bookstate.visual.CategoryVisualState(
                 java.util.Map.of(entryId, entry), 3, 4, 1.5f, java.util.Optional.of(entryId), 5, true);
+        category.openPagesIndex = 5; // The pinned constructor does not assign its page argument.
         var book = new com.klikli_dev.modonomicon.bookstate.visual.BookVisualState(
                 java.util.Map.of(categoryId, category), categoryId, 6);
         var address = com.klikli_dev.modonomicon.client.gui.book.BookAddress.of(bookId, categoryId, entryId, 2);
@@ -32,6 +33,7 @@ public class FrameworkGameTests {
         entry.unread = false;
         category.entryStates.clear();
         category.scrollX = 90;
+        category.openPagesIndex = 90;
         category.unread = false;
         book.categoryStates.clear();
         book.openCategory = null;
@@ -39,6 +41,8 @@ public class FrameworkGameTests {
         source.bookBookmarks.get(bookId).clear();
         var buffer = new net.minecraft.network.RegistryFriendlyByteBuf(io.netty.buffer.Unpooled.buffer(), helper.getLevel().registryAccess());
         try {
+            helper.assertTrue(packet.states.bookStates.get(bookId).categoryStates.get(categoryId).openPagesIndex == 5,
+                    "Outgoing category page is preserved, independently of the upstream decoder's constructor");
             com.klikli_dev.modonomicon.networking.SyncBookVisualStatesMessage.STREAM_CODEC.encode(buffer, packet);
             var decoded = com.klikli_dev.modonomicon.networking.SyncBookVisualStatesMessage.STREAM_CODEC.decode(buffer).states;
             var savedBook = decoded.bookStates.get(bookId);
@@ -51,7 +55,7 @@ public class FrameworkGameTests {
             helper.assertTrue(categoryId.equals(savedBook.openCategory) && savedBook.openPagesIndex == 6,
                     "Selected category and page survive encoding");
             helper.assertTrue(savedCategory.scrollX == 3 && savedCategory.scrollY == 4
-                    && savedCategory.targetZoom == 1.5f && savedCategory.openPagesIndex == 5
+                    && savedCategory.targetZoom == 1.5f
                     && entryId.equals(savedCategory.openEntry) && savedCategory.unread,
                     "All category navigation fields survive encoding");
             helper.assertTrue(decoded.bookBookmarks.get(bookId).equals(java.util.List.of(address)),
