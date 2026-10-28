@@ -34,6 +34,18 @@ Part 2, the ticket booth and the first game:
   `gap_ticks` between; the player whacks one with a Carnival Mallet (left click, or use) to knock it down and light a
   lamp. Lighting all `lamps` wins a prize (the midway's prize table) and ends the round; when the time runs out first,
   the round is lost. Only the player who paid may whack, from within the High Striker's reach.
+
+Part 3, the shooting gallery:
+- The Shooting Gallery (ShootingGalleryBlock): a booth three blocks across and two up, a counter at 88 cm across its
+  front, a night sky painted on its back wall, and two gold rails across it: on the upper rail `per_rail` tin bats run
+  one way, on the lower `per_rail` tin ghosts the other (`rails`: each rail's height, depth, way and target), each
+  target `targets` wide and high, at `speed` pixels a tick along `track` (x from and to), the rails' ends hidden behind
+  covers so the targets go round out of sight. Its header board across the top is lettered SHOOTING, with `bulbs`
+  bulbs under it. A Midway Ticket used on it starts a round of `round_ticks` for whoever paid; their projectiles (an
+  arrow, a snowball, anything thrown or shot), from `min_distance` blocks or more, knock down a target where they cross
+  its rail (client/ShootingGalleryRenderer draws the targets, standing or knocked flat). Knocking all of them down wins
+  a prize (the midway's prize table) and ends the round; when the time runs out first, the round is lost and they stand
+  up again. The targets move all the time, by the game's clock, so every client sees them where the server judges them.
 Sizes in pixels, facing north (its back to the south).
 """
 
@@ -49,6 +61,10 @@ TICKET = {"item": "midway_ticket", "display": "Midway Ticket"}
 WHACK = {"block": "whack_a_zombie", "display": "Whack-a-Zombie", "size": (1, 2, 1), "field": 15.0, "head": 4.0, "lamps": 8,
          "holes": ((3.5, 3.75), (8.0, 3.75), (12.5, 3.75), (5.75, 8.75), (10.25, 8.75)), "round_ticks": 400, "up_ticks": 20, "gap_ticks": 10,
          "rise_ticks": 4}
+
+GALLERY = {"block": "shooting_gallery", "display": "Shooting Gallery", "size": (3, 2, 1), "counter": 14.0, "board": 15.0,
+           "rails": ((20.5, 13.5, 1, "bat"), (16.0, 11.5, -1, "ghost")), "targets": {"bat": (6, 3), "ghost": (5, 5)}, "per_rail": 4,
+           "track": (2.0, 46.0), "speed": 0.25, "round_ticks": 600, "min_distance": 2.0, "bulbs": 11}
 
 # Cotton Candy: spun sugar on a paper cone, light as air and gone in a moment (a candy-corn's worth of food).
 ITEMS = {
@@ -66,6 +82,9 @@ RECIPES = [
     {"id": WHACK["block"], "pattern": ["TTT", "PFP", "PSP"],
      "key": {"T": "minecraft:torch", "F": "minecraft:rotten_flesh", "S": "minecraft:piston", "P": "#minecraft:planks"},
      "result": WHACK["block"], "count": 1, "category": "misc"},
+    {"id": GALLERY["block"], "pattern": ["WWW", "PBP", "PPP"],
+     "key": {"W": "minecraft:orange_wool", "B": "minecraft:bow", "P": "#minecraft:planks"},
+     "result": GALLERY["block"], "count": 1, "category": "misc"},
     {"id": POPCORN_WAGON["block"], "pattern": ["GJG", "GCG", "PIP"],
      "key": {"G": "minecraft:glass_pane", "J": "minecraft:jack_o_lantern", "C": "minecraft:cauldron", "P": "#minecraft:planks",
              "I": "minecraft:iron_ingot"},
@@ -75,7 +94,7 @@ SHAPELESS = []
 
 
 def blocks():
-    return [COTTON_CANDY["block"], POPCORN_WAGON["block"], TICKET_BOOTH["block"], WHACK["block"]]
+    return [COTTON_CANDY["block"], POPCORN_WAGON["block"], TICKET_BOOTH["block"], WHACK["block"], GALLERY["block"]]
 
 
 def items():

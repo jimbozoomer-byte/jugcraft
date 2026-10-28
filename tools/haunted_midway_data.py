@@ -630,11 +630,140 @@ def whack_a_zombie():
     return sc
 
 
+# ---------------------------------------------------------------- part 3: the Shooting Gallery
+
+# The header's letters, three texels wide and five high (SHOOTING needs only these).
+LETTERS = {"S": ("###", "#..", "###", "..#", "###"), "H": ("#.#", "#.#", "###", "#.#", "#.#"),
+           "O": ("###", "#.#", "#.#", "#.#", "###"), "T": ("###", ".#.", ".#.", ".#.", ".#."),
+           "I": ("###", ".#.", ".#.", ".#.", "###"), "N": ("##.", "#.#", "#.#", "#.#", "#.#"),
+           "G": ("###", "#..", "#.#", "#.#", "###")}
+BAT_TARGET = ("#.##.#", "######", ".#..#.")
+GHOST_TARGET = (".###.", "#####", "#E#E#", "#####", "#.#.#")
+GHOST_SIGN = GHOST_TARGET
+BOARD_WOOD = pal("2a2018", "3a2c20", "4a3a2a", "5a4834")
+
+
+def lettered(word):
+    """The header board: violet lacquer lit along its top row with a gold band along its foot, `word` across its middle
+    in bone-white letters three texels wide and five high, each letter's left column lit a tone."""
+    def paint(p):
+        for y in range(p.h):
+            for x in range(p.w):
+                p.put(x, y, shade(GOLD, 2) if y == p.h - 1 else shade(VIOLET, 3 if y == 0 else 2))
+        width = len(word) * 4 - 1
+        x0, y0 = (p.w - width) // 2, max(0, (p.h - 1 - 5) // 2)
+        for k, letter in enumerate(word):
+            for j, line in enumerate(LETTERS[letter]):
+                for i, ch in enumerate(line):
+                    if ch == "#":
+                        p.put(x0 + k * 4 + i, y0 + j, shade(BONE, 4 if i == 0 else 3))
+    paint.tag = repr(("lettered", word))
+    return paint
+
+
+def night_sky():
+    """The gallery's back wall: a night sky in the deepest violet, a crescent moon to the right between the rails and
+    stars set on a slanting lattice (one every so many texels, each row of them a step along), never at random."""
+    def paint(p):
+        mx, my, r = p.w - 7.5, 9.5, 3.5
+        for y in range(p.h):
+            for x in range(p.w):
+                d = math.hypot(x - mx, y - my)
+                bite = math.hypot(x - mx - 1.5, y - my + 1.0)
+                if d <= r and bite > r - 0.5:
+                    p.put(x, y, shade(BONE, 4 if d < r - 1 else 3))
+                elif (x * 3 + y * 7) % 47 == 0 and y < p.h - 6:
+                    p.put(x, y, shade(BONE, 3))
+                else:
+                    p.put(x, y, shade(VIOLET, 0 if y < p.h // 2 else 1))
+    paint.tag = repr(("night_sky",))
+    return paint
+
+
+def cutout(shape, palette, colours=None):
+    """A tin target's face: `shape` painted (its top row lit a tone), the rest cut out, so the card is its silhouette."""
+    def paint(p):
+        for y in range(p.h):
+            for x in range(p.w):
+                ch = shape[y][x] if y < len(shape) and x < len(shape[0]) else "."
+                if ch == ".":
+                    clear(p, x, y)
+                elif colours and ch in colours:
+                    p.put(x, y, colours[ch])
+                else:
+                    p.put(x, y, shade(palette, 3 if y == 0 else 2))
+    paint.tag = repr(("cutout", shape, palette))
+    return paint
+
+
+def gallery_front():
+    """The counter's front: violet lacquer in its gold bead, a ghost painted at its middle and a bat at each quarter."""
+    def paint(p):
+        lacquer()(p)
+        for picture, centre, colours in ((BAT_SIGN, p.w // 4, SIGN_COLOURS), (GHOST_SIGN, p.w // 2, {"#": shade(BONE, 4), "E": shade(BLACK, 0)}),
+                                         (BAT_SIGN, 3 * p.w // 4, SIGN_COLOURS)):
+            h, w = len(picture), len(picture[0])
+            x0, y0 = centre - w // 2, (p.h - h) // 2
+            for j, line in enumerate(picture):
+                for i, ch in enumerate(line):
+                    if ch != ".":
+                        p.put(x0 + i, y0 + j, colours[ch] if ch in colours else shade(BLACK, 0))
+    paint.tag = repr(("gallery_front",))
+    return paint
+
+
+def shooting_gallery():
+    """The Shooting Gallery, facing north (its back wall to the south), three blocks across and two up: a violet counter
+    at 88 cm across its front (a ghost and two bats painted on it, a bone-white top), side walls and gold front posts, a
+    board floor, a night sky on its back wall, the two gold rails across it on brackets with orange covers hiding their
+    ends, and its header board lettered SHOOTING with a row of bulbs under it, under a striped roof. Models: `whole`,
+    `bat` and `ghost` (one tin target each, standing on its post at the frame's left edge, x 0, on its rail: the runners,
+    drawn by client/ShootingGalleryRenderer at each target's place) and `bulbs_lit` (the bulbs glowing, while a round
+    runs)."""
+    spec = hm.GALLERY
+    sc = Sculpt(spec["block"], 2605, 128)
+    top = spec["counter"]
+    gold, iron = flat(GOLD), flat(BLACK)
+    el = [panel(sc, "counter", lacquer(), (0.0, 0.0, 0.0), (48.0, top - 0.75, 4.0), north=gallery_front()),
+          panel(sc, "counter_top", gold, (0.0, top - 0.75, 0.0), (48.0, top, 4.5), up=planks(BONE, board=3, nails=False)),
+          panel(sc, "floor", planks(BOARD_WOOD, board=3, nails=False), (1.0, 0.0, 4.0), (47.0, 0.5, 15.0)),
+          panel(sc, "back", night_sky(), (1.0, 0.0, 15.0), (47.0, 31.5, 16.0)),
+          panel(sc, "roof", stripes(), (0.0, 31.5, 0.5), (48.0, 32.0, 16.0)),
+          panel(sc, "header", lettered("SHOOTING"), (0.0, 25.0, 0.0), (48.0, 32.0, 0.5))]
+    for x0 in (0.0, 47.0):
+        el.append(panel(sc, "wall", lacquer(), (x0, 0.0, 4.0), (x0 + 1.0, 31.5, 15.0)))
+        el.append(panel(sc, "post", gold, (x0, top, 0.0), (x0 + 1.0, 25.0, 1.0)))
+    lo, hi = spec["track"]
+    for rail_y, rail_z, _, _ in spec["rails"]:
+        el.append(panel(sc, "rail", gold, (lo, rail_y - 0.5, rail_z - 0.5), (hi, rail_y, rail_z + 0.5)))
+        for bx in (lo + 1.0, (lo + hi) / 2, hi - 1.5):
+            el.append(panel(sc, "bracket", iron, (bx, rail_y - 0.5, rail_z + 0.5), (bx + 0.5, rail_y, 15.0)))
+    for x0, x1 in ((1.0, 5.0), (43.0, 47.0)):
+        el.append(panel(sc, "cover", lacquer(ORANGE), (x0, top, 10.25), (x1, 25.0, 10.75)))
+    bulbs = []
+    for k in range(spec["bulbs"]):
+        x = 2.0 + 4.4 * k
+        el.append(panel(sc, "bulb", flat(BONE), (x - 0.3, 24.3, 0.1), (x + 0.3, 24.9, 0.7)))
+        bulbs += glowing([panel(sc, "bulb_lit", glow(LAMP), (x - 0.35, 24.25, 0.05), (x + 0.35, 24.95, 0.75),
+                                sides=("north", "east", "west", "down"))])
+    sc.models["whole"] = el
+    sc.models["bulbs_lit"] = bulbs
+    # The targets, each at x 0 of the frame (the renderer moves them along their rails).
+    ghost_colours = {"E": shade(BLACK, 0)}
+    # The bats are tin painted pumpkin orange, so they show against the night sky; the ghosts bone-white.
+    for (rail_y, rail_z, _, kind), shape, palette, colours in zip(spec["rails"], (BAT_TARGET, GHOST_TARGET), (ORANGE, BONE), (None, ghost_colours)):
+        w, h = spec["targets"][kind]
+        sc.models[kind] = [panel(sc, f"{kind}_post", flat(STEEL), (-0.25, rail_y, rail_z - 0.1), (0.25, rail_y + 0.5, rail_z + 0.1)),
+                           panel(sc, kind, cutout(shape, palette, colours), (-w / 2, rail_y + 0.5, rail_z - 0.1), (w / 2, rail_y + 0.5 + h, rail_z + 0.1),
+                                 sides=("north", "south"))]
+    return sc
+
+
 # ---------------------------------------------------------------- building and files
 
 _built = {}
 BUILDERS = {hm.COTTON_CANDY["block"]: cotton_candy_cart, hm.POPCORN_WAGON["block"]: popcorn_wagon,
-            hm.TICKET_BOOTH["block"]: ticket_booth, hm.WHACK["block"]: whack_a_zombie}
+            hm.TICKET_BOOTH["block"]: ticket_booth, hm.WHACK["block"]: whack_a_zombie, hm.GALLERY["block"]: shooting_gallery}
 
 
 def build(block):
@@ -678,7 +807,9 @@ def assets(root, write, lang):
                                    (hm.TICKET_BOOTH, "crank", [("roll1", {"roll": "|".join(str(n) for n in range(1, half + 1))}),
                                                               ("roll2", {"roll": "|".join(str(n) for n in range(half + 1, 2 * half + 1))})]),
                                    (hm.WHACK, "head", [(f"lamp{k}", {"score": "|".join(str(n) for n in range(k, lamps + 1))})
-                                                       for k in range(1, lamps + 1)])):
+                                                       for k in range(1, lamps + 1)]),
+                                   # Part 3: the gallery's two targets are its runners 1 and 2; its bulbs glow while a round runs.
+                                   (hm.GALLERY, {"1": "bat", "2": "ghost"}, [("bulbs_lit", {"lit": "true"})])):
         block = spec["block"]
         lang[f"block.{MOD}.{block}"] = spec["display"]
         sc = build(block)
@@ -686,21 +817,33 @@ def assets(root, write, lang):
         n = len(d17d.cells(size))
         write_cut(write, models, block, "whole", sc.models["whole"], size)
         have = {name: write_cut(write, models, block, name, sc.models[name], size) for name, _ in overlays}
-        write(models / f"{block}_{runner}.json", fa.model(block, d20d.separated(sc.models[runner])))
+        # A runner is the model its `runner` value shows alone: "true" for most, "1" and "2" for the gallery's two targets.
+        runners = {"true": runner} if isinstance(runner, str) else runner
+        off = "false" if isinstance(runner, str) else "0"
+        for name in runners.values():
+            write(models / f"{block}_{name}.json", fa.model(block, d20d.separated(sc.models[name])))
         multipart = []
         for f, y in FACINGS.items():
             turn = {"y": y} if y else {}
             for p in range(n):
-                plain = {"facing": f, "part": str(p), "runner": "false"}
+                plain = {"facing": f, "part": str(p), "runner": off}
                 multipart.append({"when": plain, "apply": {"model": rid(f"block/{block}_{p}"), **turn}})
                 for name, when in overlays:
                     if have[name][p]:
                         multipart.append({"when": dict(plain, **when), "apply": {"model": rid(f"block/{block}_{p}_{name}"), **turn}})
-            multipart.append({"when": {"facing": f, "runner": "true"}, "apply": {"model": rid(f"block/{block}_{runner}"), **turn}})
+            for value, name in runners.items():
+                multipart.append({"when": {"facing": f, "runner": value}, "apply": {"model": rid(f"block/{block}_{name}"), **turn}})
         write(states / f"{block}.json", {"multipart": multipart})
-        whole = sc.models["whole"] + sc.models[runner]
-        write(root / "models" / "item" / f"{block}.json",
-              fa.model(block, fa.transformed(d17d.pinned(d20d.separated(whole)), 0.5, (4.0, 0.0, 4.0), (0, 0, 0))))
+        if size[0] == 1:
+            whole = sc.models["whole"] + [e for name in runners.values() for e in sc.models[name]]
+            item = fa.transformed(d17d.pinned(d20d.separated(whole)), 0.5, (4.0, 0.0, 4.0), (0, 0, 0))
+        else:
+            # The gallery whole at a third of its size, two targets on each rail.
+            targets = [e for (_, _, _, kind) in spec["rails"] for at in (14.0, 34.0)
+                       for e in d20d.shifted(sc.models[kind], at, 0, 0)]
+            whole = sc.models["whole"] + targets
+            item = fa.transformed(d17d.pinned(d20d.separated(whole)), 1.0 / 3.0, (0.0, 0.0, 8.0 - 8.0 / 3.0), (0, 0, 0))
+        write(root / "models" / "item" / f"{block}.json", fa.model(block, item))
         write(root / "items" / f"{block}.json", {"model": {"type": "minecraft:model", "model": rid(f"item/{block}")}})
     for key, words in (("cotton_candy_cart.off", "Switch it on first"), ("cotton_candy_cart.full", "The bowl is full of floss"),
                        ("cotton_candy_cart.empty", "Spin some sugar first"),
@@ -710,7 +853,10 @@ def assets(root, write, lang):
                        ("ticket_booth.full", "The roll is full"), ("ticket_booth.empty", "Load the roll with paper"),
                        ("whack_a_zombie.ticket", "A Midway Ticket starts a round"), ("whack_a_zombie.playing", "A round is on"),
                        ("whack_a_zombie.not_yours", "It isn't your round"), ("whack_a_zombie.won", "All the lamps! Step right up"),
-                       ("whack_a_zombie.lost", "Time's up")):
+                       ("whack_a_zombie.lost", "Time's up"),
+                       ("shooting_gallery.ticket", "A Midway Ticket starts a round"), ("shooting_gallery.playing", "A round is on"),
+                       ("shooting_gallery.won", "All down! Step right up"), ("shooting_gallery.lost", "Time's up"),
+                       ("shooting_gallery.too_close", "Stand further back to shoot")):
         lang[f"message.{MOD}.{key}"] = words
     item = hm.TICKET["item"]
     lang[f"item.{MOD}.{item}"] = hm.TICKET["display"]
@@ -752,6 +898,7 @@ def loot(out, write):
              "entries": [{"type": "minecraft:item", "name": "minecraft:paper", "modifier": sheets}], "rolls": 1}
     drop_once(out, write, block, [paper])
     drop_once(out, write, hm.WHACK["block"], [])
+    drop_once(out, write, hm.GALLERY["block"], [])
 
 
 def drop_once(out, write, block, extra):

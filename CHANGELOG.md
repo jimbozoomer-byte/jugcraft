@@ -8,6 +8,12 @@ Every change to Jugcraft, newest first, grouped by pull request. For what each t
 
 No numbered release yet. Entries on feature branches remain proposed until their pull requests merge.
 
+### Unmerged: Haunted Midway, part 3 (the shooting gallery)
+- **Shooting Gallery**: a booth three blocks across and two up, lettered SHOOTING, with a night sky on its back wall. Four orange tin bats and four white tin ghosts run along two rails, opposite ways. A Midway Ticket starts a 30-second round; shots from the payer (arrows, snowballs or anything thrown) knock the targets down, and all eight down win a prize from the midway's prize table.
+- Recipe: three orange wool over a bow between planks, over three planks.
+- Record: [haunted-midway.md](docs/features/haunted-midway.md).
+- **Checked:** the record's Verification. Game tests and screenshots run in CI only; not played by hand.
+
 ### Unmerged: Haunted Midway, part 2 (the ticket booth and Whack-a-Zombie)
 - **Ticket Booth**: a violet kiosk two blocks high with a brass ticket dispenser on its counter. Paper loads its roll (two tickets a sheet); an empty hand turns its crank and prints a Midway Ticket.
 - **Midway Ticket**: a round's admission at the midway's games, printed from paper. It isn't money and buys nothing else.

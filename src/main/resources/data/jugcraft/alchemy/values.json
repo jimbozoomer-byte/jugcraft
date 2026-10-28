@@ -34727,6 +34727,11 @@
       "denominator": 1,
       "source": "reference tag minecraft:saplings"
     },
+    "jugcraft:shooting_gallery": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
     "jugcraft:show_launcher": {
       "numerator": 983,
       "denominator": 1,

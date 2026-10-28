@@ -15024,6 +15024,42 @@ def check_haunted_midway():
         err(f"{wz['block']}: each of its {wz['lamps']} score lamps must have its lit model, full-bright and unshaded")
     if '"roll": "4"' not in json.dumps(load(DATA / MOD / "loot_table" / "blocks" / f"{tb['block']}.json") or {}):
         err(f"loot_table/blocks/{tb['block']}.json: it must give back the paper on its roll")
+    # Part 3: the gallery's rails, targets, track, speed, round and distance are the table's; a ticket starts a round, a
+    # projectile is judged where it reached the back wall and followed back to the rails, and a win rolls the prize
+    # table; its renderer draws its targets where targetX puts them, from its runner models 1 and 2; its bulbs glow.
+    sg = hm.GALLERY
+    gal = read(JAVA_ROOT / "agriculture" / "ShootingGalleryBlock.java")
+    w, h, d = sg["size"]
+    (bat_y, bat_z, bat_way, _), (ghost_y, ghost_z, ghost_way, _) = sg["rails"]
+    bw, bh = sg["targets"]["bat"]
+    gw, gh = sg["targets"]["ghost"]
+    for needed in (f"box({w}, {h}, {d})", f"PER_RAIL = {sg['per_rail']};", f"SPEED = {sg['speed']}F;", f"ROUND_TICKS = {sg['round_ticks']};",
+                   f"MIN_DISTANCE = {sg['min_distance']};", f"COUNTER = {sg['counter']}F;", f"BOARD = {sg['board']}F;",
+                   f"RAIL_Y = {{{bat_y}F, {ghost_y}F}};", f"RAIL_Z = {{{bat_z}F, {ghost_z}F}};", f"WAYS = {{{bat_way}, {ghost_way}}};",
+                   f"TARGET_W = {{{float(bw)}F, {float(gw)}F}};", f"TARGET_H = {{{float(bh)}F, {float(gh)}F}};",
+                   f"TRACK_FROM = {sg['track'][0]}F;", f"TRACK_TO = {sg['track'][1]}F;", 'item("midway_ticket")',
+                   "protected void onProjectileHit(", "projectile.getOwner() instanceof ServerPlayer", "Midway.prize(",
+                   "level.mayInteract(shooter, master)"):
+        if needed not in gal:
+            err(f"ShootingGalleryBlock: missing {needed} (tools/haunted_midway.py GALLERY)")
+    if f'registerBlock("{sg["block"]}", ShootingGalleryBlock::new' not in java_main \
+            or f'SHOOTING_GALLERY_ENTITY = Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, Jugcraft.id("{sg["block"]}")' not in java_main:
+        err(f"JugcraftAgriculture: {sg['block']} must be a ShootingGalleryBlock with its own block entity")
+    if "BlockEntityRendererRegistry.register(JugcraftAgriculture.SHOOTING_GALLERY_ENTITY, ShootingGalleryRenderer::new);" not in client:
+        err("JugcraftClient: SHOOTING_GALLERY_ENTITY needs ShootingGalleryRenderer")
+    if "ShootingGalleryBlock.targetX(" not in read(CLIENT_JAVA_ROOT / "ShootingGalleryRenderer.java"):
+        err("ShootingGalleryRenderer: the targets must be drawn where ShootingGalleryBlock.targetX puts them, as the server judges them")
+    parts = (load(ASSETS / "blockstates" / f"{sg['block']}.json") or {}).get("multipart", [])
+    shown = {p["when"]["runner"]: p["apply"]["model"] for p in parts if p.get("when", {}).get("runner") in ("1", "2")}
+    if shown != {"1": f"{MOD}:block/{sg['block']}_bat", "2": f"{MOD}:block/{sg['block']}_ghost"} \
+            or any(p.get("when", {}).get("runner") not in ("0", "1", "2") for p in parts):
+        err(f"blockstates/{sg['block']}.json: its runners 1 and 2 must show a bat and a ghost alone, and the gallery only at 0")
+    bulbs = list((ASSETS / "models" / "block").glob(f"{sg['block']}_*_bulbs_lit.json"))
+    if not bulbs or any(e.get("light_emission") != 15 or e.get("shade") is not False for path in bulbs for e in (load(path) or {}).get("elements", [])):
+        err(f"{sg['block']}: its bulbs must glow while a round runs, full-bright and unshaded")
+    for key in [f"block.{MOD}.{sg['block']}"] + [f"message.{MOD}.{sg['block']}.{k}" for k in ("ticket", "playing", "won", "lost", "too_close")]:
+        if key not in lang:
+            err(f"{key}: the text is missing")
     keys = [f"block.{MOD}.{tb['block']}", f"block.{MOD}.{wz['block']}", f"item.{MOD}.{hm.TICKET['item']}"]
     keys += [f"message.{MOD}.{tb['block']}.{k}" for k in ("full", "empty")]
     keys += [f"message.{MOD}.{wz['block']}.{k}" for k in ("ticket", "playing", "not_yours", "won", "lost")]

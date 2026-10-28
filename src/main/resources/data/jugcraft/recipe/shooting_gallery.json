@@ -1,0 +1,24 @@
+{
+  "fabric:load_conditions": [
+    {
+      "condition": "jugcraft:feature_enabled",
+      "feature": "agriculture"
+    }
+  ],
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    "WWW",
+    "PBP",
+    "PPP"
+  ],
+  "key": {
+    "W": "minecraft:orange_wool",
+    "B": "minecraft:bow",
+    "P": "#minecraft:planks"
+  },
+  "result": {
+    "id": "jugcraft:shooting_gallery",
+    "count": 1
+  }
+}

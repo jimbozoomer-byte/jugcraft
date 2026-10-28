@@ -1,9 +1,9 @@
 # Haunted Midway
 
-Status: parts 1 (the sweet stalls) and 2 (the ticket booth and Whack-a-Zombie) implemented. CI builds them and runs their game tests and client screenshots; not yet played by hand. Parts 3 (the shooting gallery), 4 (the ghost train) and 5 (the haunted carousel) are planned.
+Status: parts 1 (the sweet stalls), 2 (the ticket booth and Whack-a-Zombie) and 3 (the shooting gallery) implemented. CI builds them and runs their game tests and client screenshots; not yet played by hand. Parts 4 (the ghost train) and 5 (the haunted carousel) are planned.
 Proposal issue: none. The owner asked for it directly on 28 October 2026, as set 6 of the ten sets of fall and Halloween decor ("Then I want you to do 1-10 in parts in that order one by one"), drawn by their rules.
 Owner: @jimbozoomer-byte
-Target milestone and tier: Discovery tier; made from wool, iron, a bucket, planks and a stick (the cart), and glass panes, a jack-o'-lantern, a cauldron, planks and iron (the wagon); part 2 from glass panes, a dispenser and planks (the booth), and torches, rotten flesh, a piston and planks (the game).
+Target milestone and tier: Discovery tier; made from wool, iron, a bucket, planks and a stick (the cart), and glass panes, a jack-o'-lantern, a cauldron, planks and iron (the wagon); part 2 from glass panes, a dispenser and planks (the booth), and torches, rotten flesh, a piston and planks (the game); part 3 from orange wool, a bow and planks.
 Primary specialty and supported player role: building, with a little cooking. A builder sets up a fair's midway after dark; the stalls make the sweets the kitchen already knows, at the same cost. Nothing in it is needed to progress.
 
 ## Player experience
@@ -57,8 +57,19 @@ The midway has its own livery, darker than the fall fair's red and white: midnig
   - Recipe: three torches over a plank, rotten flesh and a plank, over a plank, a piston and a plank.
 - Broken, each comes away whole and drops itself once. The booth gives back a sheet of paper for each two tickets left on its roll; an odd one left over is lost.
 
+### Part 3: the shooting gallery
+- **Shooting Gallery** (three blocks across, two up): a booth with a violet counter at 88 cm across its front, a ghost and two bats painted on it. Inside, a board floor runs back to a night sky painted on its back wall, with a crescent moon and stars.
+  - Two gold rails run across it. **Four orange tin bats run one way along the upper rail, four bone-white tin ghosts the other way along the lower**, each going round out of sight behind orange covers at the rails' ends. They run all the time, a turn every 9 seconds.
+  - Its header board across the top is lettered **SHOOTING**, with a row of bulbs under it, under a striped roof.
+  - **A Midway Ticket starts a 30-second round** for whoever paid, and its bulbs light; a second ticket isn't taken while one runs. With no round on, an empty hand tells you how to start one.
+  - **Shoot the targets**: an arrow, a snowball, or anything else shot or thrown, from 2 blocks or more back from the back wall (a step back from the counter).
+    - A shot is judged where it reached the back wall, followed back along its path to each rail, the nearer first. A standing target in sight where it crossed a rail is knocked down flat with a chime.
+    - Only the player who paid knocks targets down; a shot between the targets, at a hidden one or from too close knocks nothing down.
+  - **All eight down win a prize** from the midway's prize table and end the round; if the time runs out first, the round is lost. Either way the targets stand up again.
+  - Recipe: three orange wool over a plank, a bow and a plank, over three planks.
+  - Broken, it comes away whole, from any block, and drops itself once.
+
 ### Planned
-- **Part 3: the shooting gallery**: tin bats and ghosts on moving rails, a ticket a round, paying out from the same prize table.
 - **Part 4: the ghost train**: a dark ride's facade, with cars on a track.
 - **Part 5: the haunted carousel**: seven by seven, black horses, bats and a pumpkin coach, turned by kinetic power as the Ferris wheel is, with organ music.
 
@@ -101,12 +112,25 @@ The midway has its own livery, darker than the fall fair's red and white: midnig
   - the ticket icon's first stamp, a bat at sixteen pixels, read as a heart and then a band of teeth; it is now two lines of print;
   - the icon's first orange was too near copper for the checker; it is now brighter.
 
+### Part 3's gallery
+- Built the same way, at real size (`tools/haunted_midway_data.py` shooting_gallery()), and cut into its six blocks' models.
+- **Its header is lettered**: SHOOTING, in bone-white letters three texels wide and five high, each lit along its left column. At 48 pixels across, the gallery has room for a word.
+- **The night sky**: the deepest violet, a crescent moon to the right between the rails, and stars set on a slanting lattice, one every so many texels, never at random.
+- **The targets are tin cut-outs**: flat cards cut to their silhouettes, a bat six pixels across and three high in pumpkin orange, a ghost five by five in bone-white with two black eyes and a wavy hem, each on a steel post on its rail.
+- **Moving parts move.** The two targets are the blockstate's `runner` models 1 and 2. `ShootingGalleryRenderer` draws each of the eight where the game's clock puts it, lying back flat when knocked down. Every client draws them where the server judges them.
+- **The first previews**, fixed before commit:
+  - the bats, first in black tin, were lost against the night sky; they are now pumpkin orange;
+  - the upper rail sat the bats against the header's bulbs; it is a pixel lower;
+  - the moon first sat behind the header; it is now in the open sky;
+  - the stars were too many and read as noise; they are now half as dense.
+
 ## Connections
 - Existing input producer: sugar and paper (vanilla, from sugar cane) for the cart; the farm's corn kernels (`jugcraft:corn_kernels`, from corn) and the kitchen's Caramel for the wagon.
 - Existing output consumer: the Cotton Candy is eaten. The Popcorn and Caramel Popcorn are the kitchen's own, made as smelting and crafting make them: Caramel Popcorn goes on to the Popcorn Ball.
 - Technology/magic connections (or infrastructure/cosmetic applicability): cosmetic, with the farm's corn and the kitchen's caramel.
 - Reachable entry path: from the first day, with corn from the farm for the wagon.
 - Which connections are required vs optional; trade and solo routes: all optional, crafted solo, and tradeable like any item. Popcorn is still made by smelting a kernel, and Caramel Popcorn by crafting, without the wagon.
+- Part 3's inputs: a ticket, and arrows, snowballs or anything else to shoot or throw. Its outputs: the same prize table's prizes.
 - Part 2's inputs: paper for the tickets; the High Striker's Carnival Mallet to play. Its outputs: the midway's prizes (the plushes), from the prize table the High Striker and Ring Toss already roll.
 - How this specialty stays useful without mastering every other branch: it is a fair's furniture for anyone's build.
 
@@ -118,6 +142,7 @@ The midway has its own livery, darker than the fall fair's red and white: midnig
 - Part 2: a sheet of paper prints two tickets, and a round costs one. A won round gives one roll of the prize table, as a ringer or a rung bell does. The High Striker and Ring Toss stay free, so the ticket adds a little cost to the hardest game to win and no new prize.
   - Breaking the booth gives back a sheet for each two tickets left, never more; an odd ticket left over is lost.
   - Nothing turns a ticket or a prize back into paper, so there is no loop.
+- Part 3: a round costs a ticket and whatever is shot, and a win gives one roll of the prize table, the same as Whack-a-Zombie's.
 - No loop: nothing it makes leads back to sugar, paper, kernels or caramel (the audit refuses any loop).
 
 ## Multiplayer and persistence
@@ -130,11 +155,15 @@ The midway has its own livery, darker than the fall fair's red and white: midnig
   - the head that's up and the score are its blocks' state (`head` 0 to 5, `score` 0 to 8, `lit` while a round runs), so clients see them with nothing else sent;
   - the heads pop and drop on the first block's scheduled ticks, one at a time; nothing else ticks;
   - a whack is judged on the server: the player must be the one who paid, within 6 blocks and allowed to use blocks there, and the hole is found from where their swing (or use) landed, against the head's own shape.
+- **The gallery's round is the server's**: who paid, when it ends and which targets are down are kept by its block entity (`shooting_gallery`, saved as `player`, `ends` and `knocked`) and sent to clients, which draw the knocked ones flat. `lit` is on its blocks while a round runs. One scheduled tick ends the round when its time is up.
+  - A shot is judged on the server, by the block the projectile hit: it must be the payer's, shot from 2 blocks or more, by a player allowed to use blocks there, and at the back wall.
+  - The targets' places are worked out from the game's clock alone, the same on the server and every client, so nothing about them is sent.
 - None of them can be pushed by a piston.
 - IDs (stable from release):
   - the blocks and items `cotton_candy_cart` (`facing`, `part` 0 to 1, `lit`, `floss` 0 to 3, model-only `runner`; block entity `cotton_candy_cart`) and `popcorn_wagon` (`facing`, `part` 0 to 1, `lit`, `popcorn` 0 to 8, `popping`, model-only `runner`; block entity `popcorn_wagon`);
   - the item `cotton_candy`;
-  - part 2's blocks and items `ticket_booth` (`facing`, `part` 0 to 1, `roll` 0 to 32, model-only `runner`; block entity `ticket_booth`) and `whack_a_zombie` (`facing`, `part` 0 to 1, `lit`, `head` 0 to 5, `score` 0 to 8, model-only `runner`; block entity `whack_a_zombie`, its saved `player`, `ends` and `last`), and the item `midway_ticket`.
+  - part 2's blocks and items `ticket_booth` (`facing`, `part` 0 to 1, `roll` 0 to 32, model-only `runner`; block entity `ticket_booth`) and `whack_a_zombie` (`facing`, `part` 0 to 1, `lit`, `head` 0 to 5, `score` 0 to 8, model-only `runner`; block entity `whack_a_zombie`, its saved `player`, `ends` and `last`), and the item `midway_ticket`;
+  - part 3's block and item `shooting_gallery` (`facing`, `part` 0 to 5, `lit`, model-only `runner` 0 to 2; block entity `shooting_gallery`, its saved `player`, `ends` and `knocked`).
 - Their recipes follow the agriculture switch. The blocks and items stay registered when it is off.
 
 ## Dependencies and assets
@@ -163,6 +192,12 @@ Local checks run on this branch, and their results:
   - `python3 tools/check_icon_maps.py`: PASS (277 maps, with the Midway Ticket's and its new `ticket` material; no new warning).
   - `javac` scan of the new and changed Java for syntax errors: none. The full compile runs in CI.
   - CI's first run failed `theTicketBoothPrintsTickets`: a second turn of the crank in the same tick printed a second ticket. The turn's time was marked only by its block event, which the server runs at the end of the tick. The booth now marks the turn on the server at once; the block event still tells the clients.
+- Part 3, all on the first run:
+  - `python3 tools/check_mod_data.py`: PASS (8,132 material IDs). `check_haunted_midway` now also checks the gallery against `tools/haunted_midway.py`: its rails, targets, track, speed, round and shooting distance. It checks that a projectile is judged at the back wall by `onProjectileHit` for its owner, that a win rolls the prize table, that the renderer draws the targets where `targetX` puts them from the runner models 1 and 2 alone, that its bulbs glow, and every text.
+  - `python3 scripts/check_repository.py`: PASS.
+  - `python3 -m unittest discover -s scripts/tests`: 287 tests, OK.
+  - `python3 tools/check_icon_maps.py`: PASS (no new map; the gallery's item is 3D).
+  - `javac` scan of the new Java for syntax errors: none. The full compile runs in CI.
 
 `HauntedMidwayGameTests` (run in CI):
 - **The cotton-candy cart spins sugar into candy**:
@@ -192,13 +227,20 @@ Local checks run on this branch, and their results:
   - the player who paid knocks each head down as it comes, each lighting a lamp;
   - all eight lit end the round, and the player has won a prize from the midway's prize table.
 - **Part 2: Whack-a-Zombie runs out of time**: left alone, heads pop up during the round, and when its time runs out no head is up, no lamp is lit and no prize is given.
+- **Part 3: the shooting gallery knocks down targets**:
+  - it stands three blocks across and two up, no round on; a ticket starts a round;
+  - another player's shot, a shot from too close and a shot between the targets knock nothing down;
+  - the player who paid knocks each target down as it comes into sight;
+  - all eight down end the round, standing them up again, and the player has won a prize.
+- **Part 3: the shooting gallery runs out of time**: with one target down and then left alone, its time runs out; they stand again and no prize is given.
 
-`HauntedMidwayClientGameTests` takes five screenshots on a strip of gravel midway. It holds:
+`HauntedMidwayClientGameTests` takes six screenshots on a strip of gravel midway. It holds:
 - two Cotton-Candy Carts, one running with its bowl full of floss (its head drawn by `CottonCandyCartRenderer`) and one off and empty;
 - two Caramel-Corn Wagons beside them, one lit with its case full (its kettle drawn by `PopcornWagonRenderer`) and one out and empty;
-- part 2's Ticket Booth with a full roll, and a Whack-a-Zombie cabinet with a head up (drawn by `WhackAZombieRenderer`) and five lamps lit.
+- part 2's Ticket Booth with a full roll, and a Whack-a-Zombie cabinet with a head up (drawn by `WhackAZombieRenderer`) and five lamps lit;
+- part 3's Shooting Gallery, a round on with its bulbs lit and three targets knocked down (the targets drawn by `ShootingGalleryRenderer`).
 
-The shots are from the midway, close by at each stall, at the games, and by night.
+The shots are from the midway, close by at each stall, at the games, at the gallery, and by night.
 
 Not run: a hand playtest, and a two-client playtest.
 
@@ -206,5 +248,5 @@ Not run: a hand playtest, and a two-client playtest.
 Seasonal in look, not in use: it is made and works all year, and nothing about it ends with October. It doesn't generate in the world.
 
 ## Rollout and open questions
-- Part 1 is the sweet stalls, part 2 the ticket booth and Whack-a-Zombie. Parts 3 to 5 follow, each stacked on the last.
+- Part 1 is the sweet stalls, part 2 the ticket booth and Whack-a-Zombie, part 3 the shooting gallery. Parts 4 and 5 follow, each stacked on the last.
 - Open: whether the High Striker and Ring Toss should take a ticket too (they stay free); whether the cart's floss should take a dye's colour (blue raspberry, ghost-white); whether the wagon should take butter for buttered popcorn once the barn's butter is a kitchen ingredient.

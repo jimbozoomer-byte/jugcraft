@@ -5,6 +5,8 @@ import io.github.jimbozoomer.jugcraft.agriculture.DecorationBlockEntity;
 import io.github.jimbozoomer.jugcraft.agriculture.JugcraftAgriculture;
 import io.github.jimbozoomer.jugcraft.agriculture.MultiDecorationBlock;
 import io.github.jimbozoomer.jugcraft.agriculture.PopcornWagonBlock;
+import io.github.jimbozoomer.jugcraft.agriculture.ShootingGalleryBlock;
+import io.github.jimbozoomer.jugcraft.agriculture.ShootingGalleryBlockEntity;
 import io.github.jimbozoomer.jugcraft.agriculture.TicketBoothBlock;
 import io.github.jimbozoomer.jugcraft.agriculture.WhackAZombieBlock;
 import java.util.function.Predicate;
@@ -45,6 +47,10 @@ import net.minecraft.world.phys.Vec3;
  * up; another player's whack doesn't count; a whack on the wrong hole doesn't count; the player who paid knocks each head
  * down as it comes, lighting a lamp each, and all eight win a prize from the midway's prize table and end the round.
  * Left alone, a round's time runs out: no head is up, no lamp lit and no prize given.
+ * Part 3: the Shooting Gallery stands three blocks across and two up, out; a ticket starts a round; a shot from too close,
+ * another player's shot and a shot between the targets knock nothing down; the player who paid knocks each target down
+ * as it comes into sight, and all eight down win a prize and end the round, every target standing again. Left alone, a
+ * round's time runs out with no prize.
  */
 public class HauntedMidwayGameTests {
 	private static Item item(String id) {
@@ -333,6 +339,116 @@ public class HauntedMidwayGameTests {
 			helper.assertTrue(both(level, whack, master, state -> !state.getValue(MultiDecorationBlock.LIT)
 					&& state.getValue(WhackAZombieBlock.HEAD) == 0 && state.getValue(WhackAZombieBlock.SCORE) == 0) && prizes(player) == before,
 					"Left alone, its time runs out: no head up, no lamp lit, no prize");
+			helper.succeed();
+		});
+	}
+
+	// ---------------------------------------------------------------- part 3
+
+	/** A point on the gallery's back wall (facing north, first block at {@code master}) at frame {@code x} and height {@code y}. */
+	private static Vec3 onBackWall(BlockPos master, double x, double y) {
+		return new Vec3(master.getX() + (x - 32.0) / 16.0, master.getY() + y / 16.0, master.getZ() + ShootingGalleryBlock.BOARD / 16.0);
+	}
+
+	private static ShootingGalleryBlock gallery(GameTestHelper helper, BlockPos master) {
+		ServerLevel level = helper.getLevel();
+		ShootingGalleryBlock gallery = (ShootingGalleryBlock) JugcraftAgriculture.block("shooting_gallery");
+		BlockState placed = gallery.defaultBlockState().setValue(MultiDecorationBlock.FACING, Direction.NORTH);
+		level.setBlockAndUpdate(master, placed);
+		gallery.setPlacedBy(level, master, placed, null, new ItemStack(gallery));
+		return gallery;
+	}
+
+	@GameTest(maxTicks = 300)
+	public void theShootingGalleryKnocksDownTargets(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		floor(helper);
+		BlockPos master = helper.absolutePos(new BlockPos(5, 2, 5));
+		ShootingGalleryBlock gallery = gallery(helper, master);
+		helper.assertTrue(both(level, gallery, master, state -> !state.getValue(MultiDecorationBlock.LIT)),
+				"It stands three blocks across and two up, no round on");
+		ServerPlayer player = standing(helper, new BlockPos(4, 2, 1));
+		ServerPlayer other = standing(helper, new BlockPos(3, 2, 1));
+		use(player, level, master, new ItemStack(item("midway_ticket")));
+		helper.assertTrue(both(level, gallery, master, state -> state.getValue(MultiDecorationBlock.LIT)), "A ticket starts a round");
+		ShootingGalleryBlockEntity round = (ShootingGalleryBlockEntity) level.getBlockEntity(master);
+		Vec3 back = new Vec3(0.0, 0.0, 1.0);
+		BlockState state = level.getBlockState(master);
+		// A ghost in sight now, for the refusals.
+		long now = level.getGameTime();
+		int ghost = 0;
+		for (int k = 0; k < ShootingGalleryBlock.PER_RAIL; k++) {
+			float x = ShootingGalleryBlock.targetX(1, k, now, 0.0F);
+			if (x > ShootingGalleryBlock.SEEN_FROM + 3.0F && x < ShootingGalleryBlock.SEEN_TO - 3.0F) {
+				ghost = k;
+			}
+		}
+		Vec3 aim = onBackWall(master, ShootingGalleryBlock.targetX(1, ghost, now, 0.0F), ShootingGalleryBlock.RAIL_Y[1] + 3.0);
+		helper.assertTrue(gallery.shot(level, master, state, other, aim, back) < 0 && round.down() == 0, "Another player's shot knocks nothing down");
+		Vec3 stand = player.position();
+		BlockPos counter = helper.absolutePos(new BlockPos(4, 2, 5));
+		player.setPos(counter.getX() + 0.5, counter.getY(), counter.getZ() + 0.5);
+		helper.assertTrue(gallery.shot(level, master, state, player, aim, back) < 0 && round.down() == 0, "A shot from too close knocks nothing down");
+		player.setPos(stand.x, stand.y, stand.z);
+		double gap = ShootingGalleryBlock.targetX(1, ghost, now, 0.0F) + 5.5;
+		helper.assertTrue(gallery.shot(level, master, state, player, onBackWall(master, gap, ShootingGalleryBlock.RAIL_Y[1] + 3.0), back) < 0
+				&& round.down() == 0, "A shot between the targets knocks nothing down");
+		int before = prizes(player);
+		for (int tick = 1; tick < 260; tick++) {
+			helper.runAfterDelay(tick, () -> {
+				BlockState here = level.getBlockState(master);
+				if (!here.getValue(MultiDecorationBlock.LIT)) {
+					return;
+				}
+				long time = level.getGameTime();
+				for (int target = 0; target < ShootingGalleryBlock.TARGETS; target++) {
+					int rail = target / ShootingGalleryBlock.PER_RAIL;
+					float x = ShootingGalleryBlock.targetX(rail, target % ShootingGalleryBlock.PER_RAIL, time, 0.0F);
+					if (round.isDown(target) || x < ShootingGalleryBlock.SEEN_FROM + 3.0F || x > ShootingGalleryBlock.SEEN_TO - 3.0F) {
+						continue;
+					}
+					Vec3 at = onBackWall(master, x, ShootingGalleryBlock.RAIL_Y[rail] + 0.5 + ShootingGalleryBlock.TARGET_H[rail] / 2.0);
+					int down = round.down();
+					int hit = gallery.shot(level, master, here, player, at, back);
+					helper.assertTrue(hit == target || round.down() == 0 && down == ShootingGalleryBlock.TARGETS - 1,
+							"A shot at target " + target + " in sight knocks it down, not " + hit);
+					if (!level.getBlockState(master).getValue(MultiDecorationBlock.LIT)) {
+						return;
+					}
+				}
+			});
+		}
+		helper.runAfterDelay(265, () -> {
+			helper.assertTrue(both(level, gallery, master, state2 -> !state2.getValue(MultiDecorationBlock.LIT)) && round.down() == 0,
+					"All eight down, the round is over and they stand again");
+			helper.assertTrue(prizes(player) > before, "Its player won a prize from the midway's prize table");
+			helper.succeed();
+		});
+	}
+
+	@GameTest(maxTicks = 660)
+	public void theShootingGalleryRunsOutOfTime(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		floor(helper);
+		BlockPos master = helper.absolutePos(new BlockPos(5, 2, 5));
+		ShootingGalleryBlock gallery = gallery(helper, master);
+		ServerPlayer player = standing(helper, new BlockPos(4, 2, 1));
+		use(player, level, master, new ItemStack(item("midway_ticket")));
+		ShootingGalleryBlockEntity round = (ShootingGalleryBlockEntity) level.getBlockEntity(master);
+		// One target down, then left alone.
+		long now = level.getGameTime();
+		for (int k = 0; k < ShootingGalleryBlock.PER_RAIL && round.down() == 0; k++) {
+			float x = ShootingGalleryBlock.targetX(0, k, now, 0.0F);
+			if (x > ShootingGalleryBlock.SEEN_FROM + 3.0F && x < ShootingGalleryBlock.SEEN_TO - 3.0F) {
+				gallery.shot(level, master, level.getBlockState(master), player, onBackWall(master, x, ShootingGalleryBlock.RAIL_Y[0] + 2.0),
+						new Vec3(0.0, 0.0, 1.0));
+			}
+		}
+		helper.assertTrue(round.down() == 1, "A target is knocked down");
+		int before = prizes(player);
+		helper.runAfterDelay(ShootingGalleryBlock.ROUND_TICKS + 5, () -> {
+			helper.assertTrue(both(level, gallery, master, state -> !state.getValue(MultiDecorationBlock.LIT)) && round.down() == 0
+					&& prizes(player) == before, "Its time run out, the round is lost: they stand again, and no prize");
 			helper.succeed();
 		});
 	}

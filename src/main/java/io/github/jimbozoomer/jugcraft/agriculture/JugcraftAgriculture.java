@@ -401,6 +401,7 @@ public final class JugcraftAgriculture {
 	public static BlockEntityType<DecorationBlockEntity> POPCORN_WAGON_ENTITY;
 	public static BlockEntityType<DecorationBlockEntity> TICKET_BOOTH_ENTITY;
 	public static BlockEntityType<WhackAZombieBlockEntity> WHACK_A_ZOMBIE_ENTITY;
+	public static BlockEntityType<ShootingGalleryBlockEntity> SHOOTING_GALLERY_ENTITY;
 	public static BlockEntityType<FirewoodRackBlockEntity> FIREWOOD_RACK_ENTITY;
 	public static BlockEntityType<DecorationBlockEntity> CHOPPING_BLOCK_ENTITY;
 	public static BlockEntityType<BlanketLadderBlockEntity> BLANKET_LADDER_ENTITY;
@@ -2988,7 +2989,8 @@ public final class JugcraftAgriculture {
 
 	/**
 	 * Haunted Midway, decor set 6 (tools/haunted_midway.py): part 1's sweet stalls, the Cotton-Candy Cart (and the Cotton
-	 * Candy it spins) and the Caramel-Corn Wagon; part 2's Ticket Booth, its Midway Ticket and Whack-a-Zombie.
+	 * Candy it spins) and the Caramel-Corn Wagon; part 2's Ticket Booth, its Midway Ticket and Whack-a-Zombie; part 3's
+	 * Shooting Gallery.
 	 */
 	private static void registerHauntedMidway() {
 		Block cart = registerBlock("cotton_candy_cart", CottonCandyCartBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_PURPLE)
@@ -3022,6 +3024,12 @@ public final class JugcraftAgriculture {
 					new Item.Properties().useBlockDescriptionPrefix(), BUILDING_TAB);
 		}
 		registerItem("midway_ticket", Item::new, new Item.Properties(), BUILDING_TAB);
+		// Part 3: the Shooting Gallery, a ticket a round.
+		Block gallery = registerBlock("shooting_gallery", ShootingGalleryBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_PURPLE)
+				.strength(1.5F).sound(SoundType.WOOD).noOcclusion().ignitedByLava().pushReaction(PushReaction.IMMOVEABLE));
+		SHOOTING_GALLERY_ENTITY = Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, Jugcraft.id("shooting_gallery"),
+				FabricBlockEntityTypeBuilder.create(ShootingGalleryBlockEntity::new, gallery).build());
+		registerItem("shooting_gallery", props -> new BlockItem(gallery, props), new Item.Properties().useBlockDescriptionPrefix(), BUILDING_TAB);
 	}
 
 	private static BlockBehaviour.Properties displayProperties() {
