@@ -45,9 +45,9 @@ import org.jspecify.annotations.Nullable;
  * <li>a codex entry is linked only once the player's research has opened it (the entry's own unlock, which the audit
  * pins to the codex data).</li>
  * </ul>
- * Rows past {@value EncyclopediaPayload.Page#MAX_ROWS} are dropped (the last says there is more), grids past
- * {@value #MAX_GRIDS} keep their text only, and icons past {@value EncyclopediaPayload.Row#MAX_ICONS} are dropped. It only
- * reads.
+ * Rows past {@value EncyclopediaPayload.Page#MAX_ROWS} are dropped (the last says there is more), a recipe past
+ * {@value #MAX_GRIDS} grids keeps its text and shows its items instead (the result, then each ingredient once; Concordance
+ * Chunk E, E4), and icons past {@value EncyclopediaPayload.Row#MAX_ICONS} are dropped. It only reads.
  */
 public final class PageWriter {
 	/** The most crafting grids a page shows. */
@@ -113,9 +113,9 @@ public final class PageWriter {
 	}
 
 	/**
-	 * A way to the step above that is the recipe {@code id}, shown with its crafting grid if this server has it. If it
-	 * does not, a required way is said to be unavailable here (and nothing is advertised); any other is left out. Returns
-	 * whether the recipe was shown.
+	 * A way to the step above that is the recipe {@code id}, shown with its crafting grid if this server has it (past
+	 * {@value #MAX_GRIDS} grids, by its items). If it does not, a required way is said to be unavailable here (and nothing
+	 * is advertised); any other is left out. Returns whether the recipe was shown.
 	 */
 	public boolean recipe(EncyclopediaPayload.EdgeKind kind, Identifier id, Component text) {
 		Optional<RecipeHolder<?>> found = recipes.find(id);
@@ -126,13 +126,29 @@ public final class PageWriter {
 			}
 			return false;
 		}
-		EncyclopediaPayload.Grid grid = grids < MAX_GRIDS ? grid(id, found.get().value()) : null;
-		if (grid != null) {
+		EncyclopediaPayload.Grid grid = grid(id, found.get().value());
+		if (grid != null && grids < MAX_GRIDS) {
 			grids++;
+			add(EncyclopediaPayload.Kind.EDGE, EncyclopediaPayload.StepState.NONE, kind, text, null, List.of(grid.result()), grid, null);
+		} else {
+			add(EncyclopediaPayload.Kind.EDGE, EncyclopediaPayload.StepState.NONE, kind, text, null, grid == null ? List.of() : items(grid), null, null);
 		}
-		add(EncyclopediaPayload.Kind.EDGE, EncyclopediaPayload.StepState.NONE, kind, text, null,
-				grid == null ? List.of() : List.of(grid.result()), grid, null);
 		return true;
+	}
+
+	/**
+	 * A recipe told by its items, for a page whose grids are spoken for: the result, then each ingredient once, in the
+	 * grid's order, at most {@value EncyclopediaPayload.Row#MAX_ICONS}.
+	 */
+	public static List<Item> items(EncyclopediaPayload.Grid grid) {
+		Set<Item> items = new LinkedHashSet<>();
+		items.add(grid.result());
+		for (List<Item> slot : grid.slots()) {
+			if (!slot.isEmpty() && items.size() < EncyclopediaPayload.Row.MAX_ICONS) {
+				items.add(slot.getFirst());
+			}
+		}
+		return List.copyOf(items);
 	}
 
 	/** A recipe's grid, read from the server's recipe as the recipe book shows it; null for a kind it does not draw. */

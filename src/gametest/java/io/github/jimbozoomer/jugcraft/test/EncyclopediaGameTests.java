@@ -3,6 +3,7 @@ package io.github.jimbozoomer.jugcraft.test;
 import io.github.jimbozoomer.jugcraft.Jugcraft;
 import io.github.jimbozoomer.jugcraft.agriculture.HalloweenSeason;
 import io.github.jimbozoomer.jugcraft.agriculture.TrickOrTreat;
+import io.github.jimbozoomer.jugcraft.agriculture.Werewolves;
 import io.github.jimbozoomer.jugcraft.concordance.Alchemy;
 import io.github.jimbozoomer.jugcraft.concordance.CircleAnchorBlockEntity;
 import io.github.jimbozoomer.jugcraft.concordance.ComposeText;
@@ -48,8 +49,27 @@ import io.github.jimbozoomer.jugcraft.lair.LairDossiers;
 import io.github.jimbozoomer.jugcraft.lair.LairRewards;
 import io.github.jimbozoomer.jugcraft.lair.LairVisit;
 import io.github.jimbozoomer.jugcraft.lair.Lairs;
+import io.github.jimbozoomer.jugcraft.lair.AltarKeystoneRite;
+import io.github.jimbozoomer.jugcraft.lair.HarvestCrownRite;
 import io.github.jimbozoomer.jugcraft.lair.LastRites;
+import io.github.jimbozoomer.jugcraft.lair.OrdersRite;
+import io.github.jimbozoomer.jugcraft.lair.alpha.AlphaWerewolfEntity;
+import io.github.jimbozoomer.jugcraft.lair.alpha.JugcraftAlpha;
+import io.github.jimbozoomer.jugcraft.lair.dreadnought.GroundingStrap;
+import io.github.jimbozoomer.jugcraft.lair.dreadnought.IronDreadnoughtEntity;
+import io.github.jimbozoomer.jugcraft.lair.dreadnought.JugcraftDreadnought;
+import io.github.jimbozoomer.jugcraft.lair.hag.JugcraftHag;
+import io.github.jimbozoomer.jugcraft.lair.hag.MireHagEntity;
+import io.github.jimbozoomer.jugcraft.lair.king.JugcraftPumpkinKing;
+import io.github.jimbozoomer.jugcraft.lair.king.PumpkinKingEntity;
+import io.github.jimbozoomer.jugcraft.lair.lich.JugcraftLich;
+import io.github.jimbozoomer.jugcraft.lair.sentinel.CydonianSentinelEntity;
+import io.github.jimbozoomer.jugcraft.lair.sentinel.JugcraftSentinel;
+import io.github.jimbozoomer.jugcraft.lair.tatterlace.GoldenThimble;
+import io.github.jimbozoomer.jugcraft.lair.tatterlace.JugcraftTatterlace;
+import io.github.jimbozoomer.jugcraft.lair.tatterlace.TatterlaceEntity;
 import io.github.jimbozoomer.jugcraft.lair.tyrant.JugcraftTyrant;
+import io.github.jimbozoomer.jugcraft.lair.vesperine.VesperineEntity;
 import io.github.jimbozoomer.jugcraft.lair.yeti.JugcraftYeti;
 import io.github.jimbozoomer.jugcraft.town.JugcraftTown;
 import io.github.jimbozoomer.jugcraft.town.Town;
@@ -212,10 +232,11 @@ public class EncyclopediaGameTests {
 	}
 
 	/**
-	 * A lair that keeps no season, from its token to a win: the token shows the rite (its words and token, its recipe's
-	 * grid, all year) and not the keeper; inside the lair, or owed a share, the keeper is met (support's thresholds, one of
-	 * two trophies on a first win, each loot with JEI's words, the cheaper token after a boss, the way home); the
-	 * advancement marks them beaten.
+	 * A lair from its token to a win: the token shows the lair's lore, the rite (its words and token, its recipe's grid,
+	 * when it works) and its preparation, and not the keeper; inside the lair, or owed a share, the keeper is met
+	 * (support's thresholds, one of two trophies on a first win, each loot with JEI's words, the cheaper token after a boss
+	 * and what is made of the loot, if any, the way home); the advancement marks them beaten. Since Concordance Chunk E
+	 * (E4), every lair: one that keeps the Halloween season says when its rite works now.
 	 */
 	private static void keeperDossier(GameTestHelper helper, LairDossiers.Boss boss, Item token, List<Item> trophies) {
 		if (!JugcraftConfig.isFeatureEnabled(JugcraftLairs.FEATURE)) {
@@ -231,8 +252,15 @@ public class EncyclopediaGameTests {
 		List<EncyclopediaPayload.Row> rite = section(page(found, LairDossiers.PAGE), boss.lair);
 		EncyclopediaPayload.Row words = row(rite, dossier + lair + ".rite");
 		helper.assertTrue(words != null && words.icons().contains(token), "the rite, with its token: " + words);
-		helper.assertTrue(grid(rite, EncyclopediaPayload.EdgeKind.REQUIRED, boss.rite.getFirst()), "the token's recipe, as a required grid");
-		helper.assertTrue(row(rite, dossier + "all_year") != null, "the rite works all year");
+		helper.assertTrue(rite.size() > 1 && key(rite.get(1).text()).equals(dossier + lair + ".lore"), "the lair's lore first: " + rite);
+		helper.assertTrue(rite.stream().anyMatch(row -> key(row.text()).startsWith(dossier + lair + ".prepare") && row.grid().isEmpty()),
+				"what readies a player for the keeper, with no grid");
+		for (String recipe : boss.rite) {
+			helper.assertTrue(grid(rite, EncyclopediaPayload.EdgeKind.REQUIRED, recipe), "the rite's recipe " + recipe + ", as a required grid");
+		}
+		helper.assertTrue(boss.offSeason == null ? row(rite, dossier + "all_year") != null
+				: rite.stream().map(row -> key(row.text())).anyMatch(key -> key.equals(dossier + "any_night") || key.equals(dossier + "in_season")
+						|| key.equals(boss.offSeason)), "when the rite works");
 		helper.assertTrue(keys(found).stream().noneMatch(key -> key.equals("entity.jugcraft." + boss.boss) || key.startsWith(dossier + "first_win")),
 				"the keeper is not named before met");
 
@@ -249,8 +277,16 @@ public class EncyclopediaGameTests {
 			helper.assertTrue(first != null && first.icons().equals(trophies), "a first win brings one of the two trophies: " + first);
 			helper.assertValueEqual(met.stream().map(row -> key(row.text())).filter(key -> key.startsWith("jei.jugcraft.acquire.")).toList(),
 					boss.loot.stream().map(loot -> "jei.jugcraft.acquire." + loot).toList(), "each loot, with JEI's words, in the table's order");
-			helper.assertTrue(grid(met, EncyclopediaPayload.EdgeKind.OPTIONAL_BOSS, boss.afterWin.getFirst()), "the cheaper token, optional after a boss");
-			helper.assertTrue(row(met, dossier + lair + ".leave") != null && row(met, dossier + "made_from") == null, "the way home; nothing made from the loot");
+			for (String recipe : boss.afterWin) {
+				helper.assertTrue(grid(met, EncyclopediaPayload.EdgeKind.OPTIONAL_BOSS, recipe), "the cheaper token " + recipe + ", optional after a boss");
+			}
+			helper.assertTrue(row(met, dossier + "after_win") != null == !boss.afterWin.isEmpty(), "a cheaper token only where the loot opens one");
+			for (String recipe : boss.madeFrom) {
+				helper.assertTrue(met.stream().anyMatch(row -> key(row.text()).equals(dossier + "made_from") && row.edgeOf() == EncyclopediaPayload.EdgeKind.OPTIONAL_BOSS
+						&& row.grid().map(grid -> grid.recipe().equals(Jugcraft.id(recipe))).orElse(false)), recipe + " is made from the loot, optional after a boss");
+			}
+			helper.assertTrue(row(met, dossier + lair + ".leave") != null && row(met, dossier + "made_from") != null == !boss.madeFrom.isEmpty(),
+					"the way home; and what is made from the loot, if anything");
 		} finally {
 			player.removeAttached(Lairs.VISIT);
 		}
@@ -581,6 +617,116 @@ public class EncyclopediaGameTests {
 		keeperDossier(helper, LairDossiers.Boss.CINDER_TYRANT, JugcraftLairs.KILN_SEAL, List.of(JugcraftTyrant.cinderbrand(), JugcraftTyrant.magmaw()));
 	}
 
+	/** Concordance Chunk E (E4): the Lantern Fen's dossier, from a Hag Stone carried to a win over the Mire Hag. */
+	@GameTest(maxTicks = 20)
+	public void theLanternFensDossier(GameTestHelper helper) {
+		keeperDossier(helper, LairDossiers.Boss.MIRE_HAG, JugcraftLairs.HAG_STONE, List.of(JugcraftHag.hagthorn(), JugcraftHag.bogfang()));
+	}
+
+	/** Concordance Chunk E (E4): the Archive of Last Names' dossier, from a Writ of Exhumation carried to a win over the Crypt Lich. */
+	@GameTest(maxTicks = 20)
+	public void theArchiveOfLastNamesDossier(GameTestHelper helper) {
+		keeperDossier(helper, LairDossiers.Boss.CRYPT_LICH, JugcraftLairs.EXHUMATION_WRIT, List.of(JugcraftLich.soulreaver(), JugcraftLich.gravewarden()));
+	}
+
+	/** Concordance Chunk E (E4): the Foundry Trench's dossier, from Sealed Orders carried to a win over the Iron Dreadnought. */
+	@GameTest(maxTicks = 20)
+	public void theFoundryTrenchsDossier(GameTestHelper helper) {
+		keeperDossier(helper, LairDossiers.Boss.IRON_DREADNOUGHT, JugcraftLairs.SEALED_ORDERS,
+				List.of(JugcraftDreadnought.dynamoHalberd(), JugcraftDreadnought.pistonHammer()));
+	}
+
+	/** Concordance Chunk E (E4): the Moonlit Ring's dossier, from a Howling Totem carried to a win over the Alpha Werewolf. */
+	@GameTest(maxTicks = 20)
+	public void theMoonlitRingsDossier(GameTestHelper helper) {
+		keeperDossier(helper, LairDossiers.Boss.ALPHA_WEREWOLF, JugcraftLairs.HOWLING_TOTEM,
+				List.of(BuiltInRegistries.ITEM.getValue(Jugcraft.id("moonfang")), BuiltInRegistries.ITEM.getValue(Jugcraft.id("howler"))));
+	}
+
+	/** Concordance Chunk E (E4): the Cydonian Sanctum's dossier, from an Altar Keystone carried to a win over the Cydonian Sentinel. */
+	@GameTest(maxTicks = 20)
+	public void theCydonianSanctumsDossier(GameTestHelper helper) {
+		keeperDossier(helper, LairDossiers.Boss.CYDONIAN_SENTINEL, JugcraftLairs.ALTAR_KEYSTONE,
+				List.of(JugcraftSentinel.corelance(), JugcraftSentinel.redstarCleaver()));
+	}
+
+	/** Concordance Chunk E (E4): the Crowfield's dossier, from a Harvest Crown carried to a win over the Pumpkin King. */
+	@GameTest(maxTicks = 20)
+	public void theCrowfieldsDossier(GameTestHelper helper) {
+		keeperDossier(helper, LairDossiers.Boss.PUMPKIN_KING, JugcraftLairs.HARVEST_CROWN,
+				List.of(JugcraftPumpkinKing.hallowreap(), JugcraftPumpkinKing.crowbill()));
+	}
+
+	/**
+	 * Concordance Chunk E (E4): every found lair gives its lore, first, naming no keeper, its rite's numbers the game's,
+	 * and what readies a player for its keeper as text and icons with no grid, its numbers the game's: the piece of the
+	 * keeper's loot that answers them, where one does. (The Glacier Hall's and the Cinder Kiln's brews have tests of their
+	 * own.)
+	 */
+	@GameTest(maxTicks = 20)
+	public void everyLairGivesItsLoreAndPreparation(GameTestHelper helper) {
+		if (!JugcraftConfig.isFeatureEnabled(JugcraftLairs.FEATURE)) {
+			helper.succeed();
+			return;
+		}
+		ServerPlayer player = player(helper);
+		for (LairDossiers.Boss boss : LairDossiers.Boss.values()) {
+			player.getInventory().add(new ItemStack(BuiltInRegistries.ITEM.getValue(Jugcraft.id(boss.tokens.getFirst()))));
+		}
+		EncyclopediaPayload found = build(player);
+		EncyclopediaPayload.Page page = page(found, LairDossiers.PAGE);
+		List<String> named = keys(found);
+		String dossier = "encyclopedia.jugcraft.dossier.";
+		// Each keeper's preparation: its numbers, and its icons.
+		Map<LairDossiers.Boss, List<Object>> numbers = Map.of(
+				LairDossiers.Boss.VESPERINE, List.of(String.valueOf((int) VesperineEntity.SLAM_RADIUS)),
+				LairDossiers.Boss.TATTERLACE, List.of(TatterlaceEntity.KNIT_TICKS / 20, GoldenThimble.COOLDOWN / 20),
+				LairDossiers.Boss.MIRE_HAG, List.of(String.valueOf((int) MireHagEntity.LAMP_REACH), MireHagEntity.REVEAL_TICKS / 20),
+				LairDossiers.Boss.CRYPT_LICH, List.of(),
+				LairDossiers.Boss.IRON_DREADNOUGHT, List.of(String.valueOf((int) IronDreadnoughtEntity.ARC_JUMP), Math.round(GroundingStrap.SHARE * 100.0F)),
+				LairDossiers.Boss.ALPHA_WEREWOLF, List.of(AlphaWerewolfEntity.FLUSHED_TICKS / 20, String.valueOf((int) JugcraftAlpha.CHARM_REACH)),
+				LairDossiers.Boss.CYDONIAN_SENTINEL, List.of(String.valueOf((int) CydonianSentinelEntity.SHELTER_REACH),
+						String.valueOf((int) CydonianSentinelEntity.STAGGER_DAMAGE)),
+				LairDossiers.Boss.PUMPKIN_KING, List.of(Math.round((PumpkinKingEntity.FIRE - 1.0F) * 100.0F)));
+		Map<LairDossiers.Boss, List<Item>> icons = Map.of(
+				LairDossiers.Boss.VESPERINE, List.of(),
+				LairDossiers.Boss.TATTERLACE, List.of(JugcraftTatterlace.GOLDEN_THIMBLE),
+				LairDossiers.Boss.MIRE_HAG, List.of(),
+				LairDossiers.Boss.CRYPT_LICH, List.of(JugcraftLich.EMPTIED_PHYLACTERY),
+				LairDossiers.Boss.IRON_DREADNOUGHT, List.of(JugcraftDreadnought.GROUNDING_STRAP),
+				LairDossiers.Boss.ALPHA_WEREWOLF, List.of(BuiltInRegistries.ITEM.getValue(Jugcraft.id("silver_dagger")),
+						BuiltInRegistries.ITEM.getValue(Jugcraft.id("wolfsbane")), JugcraftAlpha.PACKFINDER_CHARM),
+				LairDossiers.Boss.CYDONIAN_SENTINEL, List.of(JugcraftSentinel.LOWFALL_CORE),
+				LairDossiers.Boss.PUMPKIN_KING, List.of());
+		// The new rites' numbers.
+		Map<LairDossiers.Boss, List<Object>> rites = Map.of(
+				LairDossiers.Boss.MIRE_HAG, List.of(), LairDossiers.Boss.CRYPT_LICH, List.of(),
+				LairDossiers.Boss.IRON_DREADNOUGHT, List.of(OrdersRite.TRENCH_BLOCKS, OrdersRite.TRENCH_RANGE),
+				LairDossiers.Boss.ALPHA_WEREWOLF, List.of(Werewolves.WARD_REACH),
+				LairDossiers.Boss.CYDONIAN_SENTINEL, List.of(AltarKeystoneRite.REACH_BLOCKS),
+				LairDossiers.Boss.PUMPKIN_KING, List.of(HarvestCrownRite.HARVEST_MIN, HarvestCrownRite.HARVEST_REACH));
+		for (LairDossiers.Boss boss : LairDossiers.Boss.values()) {
+			List<EncyclopediaPayload.Row> rows = section(page, boss.lair);
+			String lair = boss.lair.id;
+			if (rites.containsKey(boss)) {
+				EncyclopediaPayload.Row rite = row(rows, dossier + lair + ".rite");
+				helper.assertValueEqual(rite == null ? null : List.of(args(rite.text())), rites.get(boss), lair + "'s rite numbers are the game's");
+			}
+			helper.assertTrue(rows.size() > 2 && key(rows.get(1).text()).equals(dossier + lair + ".lore") && rows.get(1).icons().isEmpty(),
+					lair + "'s lore comes first: " + rows.stream().map(row -> key(row.text())).toList());
+			helper.assertTrue(!named.contains("entity.jugcraft." + boss.boss), boss + " is not named before met");
+			if (!numbers.containsKey(boss)) {
+				continue;
+			}
+			EncyclopediaPayload.Row prepare = row(rows, dossier + lair + ".prepare");
+			helper.assertTrue(prepare != null && prepare.kindOf() == EncyclopediaPayload.Kind.FACT && prepare.grid().isEmpty(),
+					lair + " names what readies a player, as a fact with no grid");
+			helper.assertValueEqual(List.of(args(prepare.text())), numbers.get(boss), lair + "'s preparation numbers are the game's");
+			helper.assertValueEqual(prepare.icons(), icons.get(boss), lair + "'s preparation icons");
+		}
+		helper.succeed();
+	}
+
 	/**
 	 * Concordance Chunk C (C-02, C-P9): the Cinder Kiln's rite names what readies a player for his slag and flame, as text
 	 * and icons with no grid: the Kiln Draught's Fire Resistance for the data's longest time (magma cream or sugar, the
@@ -632,7 +778,10 @@ public class EncyclopediaGameTests {
 		helper.succeed();
 	}
 
-	/** With the Halloween event over and lairs.off_season off, the Last Rites wait for the season; the horn and the seal work all year. */
+	/**
+	 * With the Halloween event over and lairs.off_season off, the Last Rites and the Harvest Crown wait for the season; every
+	 * other rite works all year (Concordance Chunk E, E4: the stone, the writ, the orders, the totem and the keystone too).
+	 */
 	@GameTest(maxTicks = 20)
 	public void eachRiteSaysWhenItWorks(GameTestHelper helper) {
 		if (!JugcraftConfig.isFeatureEnabled(JugcraftLairs.FEATURE)) {
@@ -640,7 +789,8 @@ public class EncyclopediaGameTests {
 			return;
 		}
 		ServerPlayer player = player(helper);
-		for (Item token : List.of(JugcraftLairs.DEATH_KNELL, JugcraftLairs.FROST_HORN, JugcraftLairs.KILN_SEAL)) {
+		for (Item token : List.of(JugcraftLairs.DEATH_KNELL, JugcraftLairs.FROST_HORN, JugcraftLairs.KILN_SEAL, JugcraftLairs.HAG_STONE,
+				JugcraftLairs.EXHUMATION_WRIT, JugcraftLairs.SEALED_ORDERS, JugcraftLairs.HOWLING_TOTEM, JugcraftLairs.ALTAR_KEYSTONE, JugcraftLairs.HARVEST_CROWN)) {
 			player.getInventory().add(new ItemStack(token));
 		}
 		HalloweenSeason.Mode mode = HalloweenSeason.mode();
@@ -656,7 +806,9 @@ public class EncyclopediaGameTests {
 			JugcraftConfig.setTextOption("lairs.off_season", offSeason);
 		}
 		helper.assertTrue(row(section(page, Lair.HOLLOW_ACRE), "message.jugcraft.lair.rite.off_season") != null, "out of season the Last Rites wait for it");
-		for (Lair lair : List.of(Lair.GLACIER_HALL, Lair.CINDER_KILN)) {
+		helper.assertTrue(row(section(page, Lair.CROWFIELD), "message.jugcraft.lair.crown.off_season") != null, "out of season the Harvest Crown waits for it");
+		for (Lair lair : List.of(Lair.GLACIER_HALL, Lair.CINDER_KILN, Lair.LANTERN_FEN, Lair.CRYPT_ARCHIVE, Lair.FOUNDRY_TRENCH, Lair.MOONLIT_RING,
+				Lair.CYDONIAN_SANCTUM)) {
 			List<EncyclopediaPayload.Row> rows = section(page, lair);
 			helper.assertTrue(row(rows, "encyclopedia.jugcraft.dossier.all_year") != null && row(rows, "message.jugcraft.lair.rite.off_season") == null,
 					lair.id + "'s rite works all year: " + rows.stream().map(row -> key(row.text())).toList());
@@ -686,8 +838,9 @@ public class EncyclopediaGameTests {
 
 	/**
 	 * Every keeper found and beaten: each dossier is whole (with the Stillroot Poultice's credit while the Concordance is
-	 * on, Chunk C, C-02), every recipe named is drawn as a grid, in order, within PageWriter.MAX_GRIDS, and no row is
-	 * dropped. A keeper past the bound needs the page's layout changed first.
+	 * on, Chunk C, C-02; and since Concordance Chunk E, E4, its lore and its preparation), every recipe named is shown in
+	 * order, as a grid while PageWriter.MAX_GRIDS lasts and then by its items (the result, then each ingredient once:
+	 * the very items of the grid it has when its keeper alone is found), and no row is dropped.
 	 */
 	@GameTest(maxTicks = 20)
 	public void theExpeditionsPageHoldsEveryKeeper(GameTestHelper helper) {
@@ -697,16 +850,32 @@ public class EncyclopediaGameTests {
 		}
 		ServerPlayer player = player(helper);
 		List<Identifier> wanted = new ArrayList<>();
+		// Each recipe's grid as the page draws it when its keeper alone is beaten (the budget then unspent).
+		Map<Identifier, EncyclopediaPayload.Grid> alone = new java.util.HashMap<>();
 		for (LairDossiers.Boss boss : LairDossiers.Boss.values()) {
 			TrickOrTreat.award(player, boss.advancement);
 			for (List<String> recipes : List.of(boss.rite, boss.afterWin, boss.madeFrom)) {
 				recipes.forEach(recipe -> wanted.add(Jugcraft.id(recipe)));
 			}
+			ServerPlayer one = player(helper);
+			TrickOrTreat.award(one, boss.advancement);
+			grids(build(one)).forEach(grid -> alone.put(grid.recipe(), grid));
+			one.discard();
 		}
 		EncyclopediaPayload.Page page = page(build(player), LairDossiers.PAGE);
 		helper.assertTrue(page != null, "every keeper beaten has a dossier");
-		List<Identifier> drawn = page.rows().stream().flatMap(row -> row.grid().stream()).map(EncyclopediaPayload.Grid::recipe).toList();
-		helper.assertValueEqual(drawn, wanted, "every recipe named, drawn in order (" + drawn.size() + " grids of " + PageWriter.MAX_GRIDS + ")");
+		List<EncyclopediaPayload.Row> recipes = page.rows().stream().filter(row -> row.kindOf() == EncyclopediaPayload.Kind.EDGE
+				&& (row.edgeOf() == EncyclopediaPayload.EdgeKind.REQUIRED || row.edgeOf() == EncyclopediaPayload.EdgeKind.OPTIONAL_BOSS)).toList();
+		List<Identifier> drawn = recipes.stream().flatMap(row -> row.grid().stream()).map(EncyclopediaPayload.Grid::recipe).toList();
+		helper.assertTrue(recipes.size() == wanted.size() && wanted.size() > PageWriter.MAX_GRIDS
+				&& drawn.equals(wanted.subList(0, PageWriter.MAX_GRIDS)), "every recipe named, in order, the first " + PageWriter.MAX_GRIDS
+				+ " drawn as grids: " + drawn + " of " + wanted);
+		for (int i = PageWriter.MAX_GRIDS; i < wanted.size(); i++) {
+			EncyclopediaPayload.Grid grid = alone.get(wanted.get(i));
+			helper.assertTrue(grid != null && recipes.get(i).grid().isEmpty() && recipes.get(i).icons().equals(PageWriter.items(grid))
+					&& recipes.get(i).icons().getFirst() == grid.result(), wanted.get(i) + ", past the grids, is shown by its items: "
+					+ recipes.get(i).icons() + " (its grid alone: " + grid + ")");
+		}
 		helper.assertTrue(page.rows().stream().noneMatch(row -> key(row.text()).equals("encyclopedia.jugcraft.more"))
 				&& key(page.rows().getLast().text()).equals("encyclopedia.jugcraft.dossier.grave_goods"),
 				"no row dropped: " + page.rows().size() + " rows of " + EncyclopediaPayload.Page.MAX_ROWS);
@@ -715,12 +884,13 @@ public class EncyclopediaGameTests {
 			List<String> keys = section(page, boss.lair).stream().map(row -> key(row.text())).toList();
 			List<String> whole = new ArrayList<>(List.of("lair.jugcraft." + boss.lair.id, dossier + boss.lair.id + ".rite", dossier + "party",
 					"entity.jugcraft." + boss.boss, dossier + boss.lair.id + ".credit", dossier + "credit.wards", dossier + "won",
-					dossier + boss.lair.id + ".leave", dossier + "grave_goods"));
+					dossier + boss.lair.id + ".leave", dossier + "grave_goods", dossier + boss.lair.id + ".lore"));
 			boss.loot.forEach(loot -> whole.add("jei.jugcraft.acquire." + loot));
 			if (JugcraftConfig.isFeatureEnabled(JugcraftConcordance.FEATURE)) {
 				whole.add(dossier + "credit.poultice");
 			}
-			helper.assertTrue(keys.containsAll(whole), boss + "'s dossier is whole: " + keys);
+			helper.assertTrue(keys.containsAll(whole) && keys.stream().anyMatch(key -> key.startsWith(dossier + boss.lair.id + ".prepare")),
+					boss + "'s dossier is whole: " + keys);
 		}
 		helper.succeed();
 	}

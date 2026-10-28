@@ -22317,8 +22317,9 @@ def check_encyclopedia(root, lang):
     steps (their order, weights and what each waits for), the recipes, sales and codex entries the route and the lair
     dossiers name, and the Keys page's keys are tools/encyclopedia.py's; every recipe named exists, every sale is one a
     shop sells, no required step needs a boss's loot, and every codex link is gated as its entry is; each dossier's Boss
-    entry names its own tokens, rite, trophies, loot, recipes and sales; its season words are its rite class's; and
-    every keeper found and beaten draws no more than PageWriter.MAX_GRIDS grids; the pages only read; the request is
+    entry names its own tokens, rite, trophies, loot, recipes and sales; its season words are its rite class's; every
+    lair has a dossier, with its lore and its preparation (Concordance Chunk E, E4); a recipe past PageWriter.MAX_GRIDS
+    grids is shown by its items, and every keeper found and beaten fits the page's rows; the pages only read; the request is
     rate-limited, carries no text and is answered only to a game that can receive it; the key works only from the game,
     the inventory's button closes the inventory first and needs no mixin; every word has its text; and the record's
     route table is the tool's."""
@@ -22439,17 +22440,24 @@ def check_encyclopedia(root, lang):
     # its own place (Boss's List.of arguments, read by position: a name in another list does not count) and in the
     # tool's order, and its sales; each recipe exists; the loot and trophy tables are the keeper's; the season fact is
     # the rite class's own; the first rite recipe makes a token and no rite recipe the Java names needs a boss's loot;
-    # and, every keeper found and beaten, every recipe the Java names draws a grid within PageWriter.MAX_GRIDS.
+    # and every recipe the Java names is one PageWriter draws (as a grid while PageWriter.MAX_GRIDS lasts, then by its
+    # items). Concordance Chunk E (E4): every lair the game has keeps a dossier, with its lore and its preparation.
     enum = re.search(r"public enum Boss \{(.*?)\n\t\tpublic final Lair lair;", dossiers, re.S)
     entries = {}
     for chunk in re.split(r"\n(?=\t\t[A-Z_]+\(Lair\.)", enum.group(1) if enum else ""):
         head = re.match(r"\t\t[A-Z_]+\(Lair\.([A-Z_]+),", chunk)
         if head:
             entries[head.group(1).lower()] = chunk
-    if sorted(entries) != sorted(dossier["lair"] for dossier in en.DOSSIERS.values()):
-        err(f"lair/LairDossiers.java: Boss's lairs {sorted(entries)} are not those of DOSSIERS in tools/encyclopedia.py")
+    if list(entries) != [dossier["lair"] for dossier in en.DOSSIERS.values()]:
+        err(f"lair/LairDossiers.java: Boss's lairs {list(entries)} are not those of DOSSIERS in tools/encyclopedia.py, in order")
+    # Every lair the game has, whose keeper the game has: a lair is placed for its keeper (Lairs.onPlaced), so each
+    # placed lair's keeper has a dossier.
+    placed = set()
+    for path in (JAVA_ROOT / "lair").rglob("*.java"):
+        placed |= {lair.lower() for lair in re.findall(r"Lairs\.onPlaced\(Lair\.([A-Z_]+),", text(path))}
+    if not placed or placed - set(entries):
+        err(f"lair/LairDossiers.java: the lairs {sorted(placed - set(entries))} have a keeper but no dossier (Concordance Chunk E, E4)")
     drawn = ("minecraft:crafting_shaped", "minecraft:crafting_shapeless", "minecraft:stonecutting")
-    grids = 0
     # Boss's List.of arguments, in the constructor's order.
     fields = ("trophies", "tokens", "rite", "sales", "loot", "after_win", "made_from")
     for boss, dossier in en.DOSSIERS.items():
@@ -22479,7 +22487,6 @@ def check_encyclopedia(root, lang):
             kind = (load(file) or {}).get("type")
             if kind not in drawn:
                 err(f"lair/LairDossiers.java: {boss}'s recipe {recipe} is {kind}, for which PageWriter draws no grid")
-            grids += 1
             if recipe in named["rite"]:
                 for ingredient in re.findall(r'"(jugcraft:[a-z_]+)"', file.read_text(encoding="utf-8")):
                     if ingredient in loot_items:
@@ -22489,10 +22496,11 @@ def check_encyclopedia(root, lang):
         table = set(re.findall(r'"name": "jugcraft:([a-z_]+)"', text(DATA / MOD / "loot_table" / "entities" / f"{boss}.json")))
         if table != set(dossier["loot"]):
             err(f"tools/encyclopedia.py: {boss}'s loot {sorted(dossier['loot'])} is not the table's {sorted(table)}")
-        trophies = set(re.findall(r'"name": "jugcraft:([a-z_]+)"', text(DATA / MOD / "loot_table" / "bosses" / f"{boss}.json")))
+        trophy_table = dossier.get("trophy_table", boss)
+        trophies = set(re.findall(r'"name": "jugcraft:([a-z_]+)"', text(DATA / MOD / "loot_table" / "bosses" / f"{trophy_table}.json")))
         if not 1 <= len(dossier["trophies"]) <= 2 or set(dossier["trophies"]) != trophies or not trophies <= table:
             err(f"tools/encyclopedia.py: {boss}'s trophies {dossier['trophies']} must be the one or two of "
-                f"loot_table/bosses/{boss}.json ({sorted(trophies)}), each in the loot table")
+                f"loot_table/bosses/{trophy_table}.json ({sorted(trophies)}), each in the loot table")
         season = dossier["off_season"]
         rite_java = text(JAVA_ROOT / "lair" / f"{dossier['rite_class']}.java")
         waits = "Lairs.offSeason()" in rite_java
@@ -22506,14 +22514,41 @@ def check_encyclopedia(root, lang):
                 err(f"encyclopedia: missing lang jei.{MOD}.acquire.{name} (the dossier shows each loot's acquisition text)")
         for key in (f"lair.{MOD}.{dossier['lair']}", f"encyclopedia.{MOD}.dossier.{dossier['lair']}.leave",
                     f"encyclopedia.{MOD}.dossier.{dossier['lair']}.credit",
-                    f"encyclopedia.{MOD}.dossier.{dossier['lair']}.rite", f"advancements.{MOD}.{dossier['advancement']}.title",
+                    f"encyclopedia.{MOD}.dossier.{dossier['lair']}.rite", f"encyclopedia.{MOD}.dossier.{dossier['lair']}.lore",
+                    f"encyclopedia.{MOD}.dossier.{dossier['lair']}.prepare", f"advancements.{MOD}.{dossier['advancement']}.title",
                     f"entity.{MOD}.{boss}", *([season] if season else [])):
             if key not in lang:
                 err(f"encyclopedia: missing lang {key}")
-    limit = re.search(r"\bMAX_GRIDS = (\d+);", text(guide / "PageWriter.java"))
-    if not limit or grids > int(limit.group(1)):
-        err(f"lair/LairDossiers.java: every keeper found and beaten, the Expeditions page would draw {grids} recipe grids, "
-            f"past PageWriter.MAX_GRIDS ({limit.group(1) if limit else 'not found'}): change the page's layout before adding a keeper")
+    # Each rite names its keeper's lore (never the keeper: who is named only once met) and its preparation, every
+    # lair's, as text and icons; and its own rite words, one case each.
+    rite_body = _java_body(dossiers, "private static void rite(")
+    prepare_body = _java_body(dossiers, "private static void prepare(")
+    if "out.fact(lore(boss));" not in rite_body or "prepare(out, boss);" not in rite_body or "out.recipe(" in prepare_body:
+        err("lair/LairDossiers.rite: each found lair names its lore and its preparation, as text and icons (E4)")
+    for constant in re.findall(r"^\t\t([A-Z_]+)\(Lair\.", enum.group(1) if enum else "", re.M):
+        if f"case {constant} ->" not in rite_body or not re.search(rf"case {constant}\b[^>]*->", prepare_body):
+            err(f"lair/LairDossiers.java: {constant} needs its own rite words and preparation (rite and prepare)")
+    for dossier in en.DOSSIERS.values():
+        lore = lang.get(f"encyclopedia.{MOD}.dossier.{dossier['lair']}.lore", "")
+        for boss, other in en.DOSSIERS.items():
+            name = lang.get(f"entity.{MOD}.{boss}", "")
+            if name and name.removeprefix("The ") in lore:
+                err(f"encyclopedia: {dossier['lair']}'s lore names {name}, who is named only once met")
+    # Past PageWriter.MAX_GRIDS grids a recipe keeps its text and shows its items; with every keeper found and beaten the
+    # rows fit the page with the bestiary after them (EncyclopediaGameTests.theExpeditionsPageHoldsEveryKeeper counts them).
+    writer = text(guide / "PageWriter.java")
+    if "grid != null && grids < MAX_GRIDS" not in writer or "grid == null ? List.of() : items(grid)" not in writer:
+        err("guide/encyclopedia/PageWriter.recipe: a recipe past MAX_GRIDS grids is shown by its items (E4)")
+    rows = re.search(r"\bMAX_ROWS = (\d+);", payload)
+    bestiary = re.search(r"\bMAX_CREATURES = (\d+);", text(guide / "Bestiary.java"))
+    # Each keeper beaten: heading, lore, rite, its recipes and sales, season, party, preparation (and its codex link),
+    # keeper, credit, wards, poultice, the win, its loot, its after-win and made-from recipes, the way home, grave goods.
+    dossier_rows = sum(15 + len(d["rite"]) + len(d["trades"]) + len(d["loot"]) + len(d["after_win"]) + len(d["made_from"])
+                       for d in en.DOSSIERS.values())
+    worst = dossier_rows + 1 + 3 * int(bestiary.group(1) if bestiary else 0) + 3
+    if not rows or worst > int(rows.group(1)):
+        err(f"guide/encyclopedia/EncyclopediaPayload.java: every keeper found and beaten with the bestiary full is {worst} rows, "
+            f"past Page.MAX_ROWS ({rows.group(1) if rows else 'not found'})")
 
     # Codex links: each names an entry of the Arcane Concordance whose own unlock is the one given.
     entries = DATA / MOD / "modonomicon" / "books" / "arcane_concordance" / "entries"
