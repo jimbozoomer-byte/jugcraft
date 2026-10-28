@@ -21,7 +21,8 @@ import net.minecraft.world.phys.AABB;
  * ticks, for each player in the overworld, {@link #SPAWN_CHANCE} of the time the server tries one spot
  * {@link #MIN_DISTANCE} to {@link #MAX_DISTANCE} blocks away, in a loaded chunk, open to the sky: a swamp ({@link #HAUNTS}), or within
  * {@link #CORN_RADIUS} blocks of a corn plant. Fewer than {@link #NEAR_CAP} wisps may be near a player, and at most
- * {@link #LEVEL_CAP} in the world. Each try reads at most a few dozen blocks and never loads a chunk.
+ * {@link #LEVEL_CAP} in the world. Under a Blood Moon ({@link BloodMoon}) the server tries every time, and
+ * {@link BloodMoon#WISP_NEAR_CAP} may gather near a player. Each try reads at most a few dozen blocks and never loads a chunk.
  */
 public final class Wisps {
 	/** The swamps wisps come out over: the common swamps and the landscape collection's (tools/agriculture.py WISPS). */
@@ -52,7 +53,7 @@ public final class Wisps {
 				if (total >= LEVEL_CAP) {
 					return;
 				}
-				if (!player.isSpectator() && level.getRandom().nextFloat() < SPAWN_CHANCE && trySpawn(level, player.blockPosition(), level.getRandom())) {
+				if (!player.isSpectator() && level.getRandom().nextFloat() < (BloodMoon.active() ? BloodMoon.WISP_CHANCE : SPAWN_CHANCE) && trySpawn(level, player.blockPosition(), level.getRandom())) {
 					total++;
 				}
 			}
@@ -77,7 +78,7 @@ public final class Wisps {
 
 	/** Tries to put one wisp somewhere around {@code near}; returns whether it did. */
 	public static boolean trySpawn(ServerLevel level, BlockPos near, RandomSource random) {
-		if (level.getEntitiesOfClass(WillOWisp.class, new AABB(near).inflate(NEAR_RANGE)).size() >= NEAR_CAP) {
+		if (level.getEntitiesOfClass(WillOWisp.class, new AABB(near).inflate(NEAR_RANGE)).size() >= (BloodMoon.active() ? BloodMoon.WISP_NEAR_CAP : NEAR_CAP)) {
 			return false;
 		}
 		double angle = random.nextDouble() * Math.PI * 2.0;

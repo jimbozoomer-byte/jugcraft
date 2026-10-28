@@ -162,9 +162,11 @@ public final class CompanionFishing {
                 var loot=level.getServer().reloadableRegistries().getLootTable(BuiltInLootTables.FISHING).getRandomItems(params);
                 var fish=loot.stream().filter(s->s.is(net.minecraft.tags.ItemTags.FISHES)).findFirst();
                 if(fish.isPresent())try(var tx=Transaction.openOuter()){
-                    if(npc.uniforms.bonus(CompanionUniforms.Type.FISHERMAN,tx))loot.add(fish.get().copy());tx.commit();
+                    if(npc.uniforms.bonus(CompanionUniforms.Type.FISHERMAN,tx)){loot.add(fish.get().copy());npc.feedback.bonusProduced(tx);}tx.commit();
                 }
                 pendingAt=target.at();pending=loot.stream().limit(64).filter(s->!s.isEmpty()).map(ItemStack::copy).toList();
+                // The catch now belongs to pending cargo even if the inventory is temporarily full.
+                if(!pending.isEmpty())npc.feedback.finished(CompanionFeedbackRules.Kind.CATCH,pending.getFirst().getItem());
                 for(int i=64;i<loot.size();i++)npc.spawnAtLocation(level,loot.get(i));
                 rod.hurtAndBreak(1,npc,EquipmentSlot.MAINHAND);
                 var mending=level.registryAccess().lookupOrThrow(net.minecraft.core.registries.Registries.ENCHANTMENT).getOrThrow(Enchantments.MENDING);

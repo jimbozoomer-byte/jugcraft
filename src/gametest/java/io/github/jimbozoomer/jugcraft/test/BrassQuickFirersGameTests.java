@@ -60,8 +60,11 @@ public class BrassQuickFirersGameTests {
 		JugcraftGuns.SPECS.forEach((name, spec) -> {
 			helper.assertTrue(name.equals("navvy_shotgun") || !(spec.auto() && spec.ammo().equals("buckshot_shell")),
 					"The " + name + " is an automatic gun that fires shells too");
+			// Slice 15D: a burst gun's pull fires its burst, and its next pull comes a whole cycle later.
+			JugcraftGuns.Burst burst = JugcraftGuns.BURSTS.get(name);
+			int pull = burst == null ? spec.interval() : burst.cycle(spec);
 			helper.assertTrue(name.equals("freeholder_rifle") || spec.auto() || !spec.ammo().equals("rifle_round")
-					|| spec.interval() > freeholder.interval(), "The " + name + " fires rifle rounds a pull at a time as quickly as the Freeholder Rifle");
+					|| pull > freeholder.interval(), "The " + name + " fires rifle rounds a pull at a time as quickly as the Freeholder Rifle");
 		});
 
 		List<String> sprocketTakes = JugcraftGuns.ACCEPTS.get("sprocket_gun");

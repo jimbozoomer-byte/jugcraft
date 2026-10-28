@@ -16,7 +16,7 @@ import org.jspecify.annotations.Nullable;
  * tools/crypt_archive.py, tools/foundry_trench.py, tools/moonlit_ring.py, tools/cydonian_sanctum.py, tools/crowfield.py;
  * checked by tools/check_mod_data.py).
  * tools/crypt_archive.py, tools/foundry_trench.py, tools/moonlit_ring.py, tools/cydonian_sanctum.py,
- * tools/crown_of_thunder.py; checked by tools/check_mod_data.py).
+ * tools/crown_of_thunder.py, tools/church_bridge.py; checked by tools/check_mod_data.py).
  */
 public enum Lair {
 	/** Vesperine's lair (docs/features/hollow-acre.md). */
@@ -43,7 +43,12 @@ public enum Lair {
 	/** The Pumpkin King's lair (docs/features/crowfield.md): a pumpkin field walled with corn, a harvest moon low over its north. */
 	CROWFIELD("crowfield", 69, 30, 76, new Vec3(34.5, 5.0, 61.5), 180.0F, 34.5, 32.5, 40, 1, new BlockPos(20, 21, -26), 15),
 	/** The Storm Roc's lair (docs/features/crown-of-thunder.md): a summit above the clouds, under a storm, so no moon. */
-	CROWN_OF_THUNDER("crown_of_thunder", 64, 44, 64, new Vec3(32.5, 29.0, 54.5), 180.0F, 32.5, 32.5, 40, 18, null, 0);
+	CROWN_OF_THUNDER("crown_of_thunder", 64, 44, 64, new Vec3(32.5, 29.0, 54.5), 180.0F, 32.5, 32.5, 40, 18, null, 0),
+	/**
+	 * The Headless Horseman's lair out of the Halloween season (docs/features/church-bridge.md): a wooded hollow, a brook and
+	 * a covered bridge by an old church, a full moon low over the church.
+	 */
+	CHURCH_BRIDGE("church_bridge", 72, 26, 86, new Vec3(36.5, 5.0, 77.5), 180.0F, 36.5, 50.5, 50, 1, new BlockPos(36, 30, -28), 13);
 
 	/** Blocks between one instance slot and the next, along X (tools/lairs.py SPACING). */
 	public static final int SPACING = 1024;

@@ -265,5 +265,94 @@
         ]
       }
     }
+  },
+  "jugcraft:hollowflail": {
+    "anchor": [
+      7.3197,
+      8.933,
+      8.0
+    ],
+    "grip": [
+      3.2379,
+      4.8512,
+      8.0
+    ],
+    "links": 4,
+    "pitch": 1.2095,
+    "twist": 90,
+    "lug": 2.6498,
+    "reach": 2.0561,
+    "haft": 0.4673,
+    "chain_radius": 0.4673,
+    "display": {
+      "firstperson_lefthand": {
+        "rotation": [
+          0,
+          90,
+          -25
+        ],
+        "translation": [
+          1.13,
+          3.49,
+          2.32
+        ],
+        "scale": [
+          0.895,
+          0.895,
+          0.895
+        ]
+      },
+      "firstperson_righthand": {
+        "rotation": [
+          0,
+          -90,
+          25
+        ],
+        "translation": [
+          1.13,
+          3.49,
+          2.32
+        ],
+        "scale": [
+          0.895,
+          0.895,
+          0.895
+        ]
+      },
+      "thirdperson_lefthand": {
+        "rotation": [
+          0,
+          90,
+          -55
+        ],
+        "translation": [
+          0.0,
+          5.06,
+          1.61
+        ],
+        "scale": [
+          1.119,
+          1.119,
+          1.119
+        ]
+      },
+      "thirdperson_righthand": {
+        "rotation": [
+          0,
+          -90,
+          55
+        ],
+        "translation": [
+          0.0,
+          5.06,
+          1.61
+        ],
+        "scale": [
+          1.119,
+          1.119,
+          1.119
+        ]
+      }
+    }
   }
 }

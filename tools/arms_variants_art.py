@@ -110,6 +110,14 @@ RUSTED = M((30, 12, 6), (56, 26, 12), (92, 44, 20), (128, 66, 32), (164, 94, 52)
 CROW_IRON = M((6, 6, 10), (18, 18, 24), (40, 40, 50), (58, 58, 72), (82, 80, 104), (118, 114, 146))
 CROW_FEATHER = M((8, 8, 12), (18, 16, 26), (28, 24, 40), (42, 36, 60), (62, 54, 88), (96, 84, 130), shine=False)
 
+# The Headless Horseman's (docs/features/hessian-horseman.md): a Hessian trooper's blued cavalry steel, tarnished brass,
+# black bridle leather, a pumpkin's rind with his fire in it, and a pumpkin's green stem.
+HESSIAN_STEEL = M((14, 16, 24), (34, 38, 52), (58, 64, 84), (90, 98, 122), (134, 142, 166), (196, 202, 220))
+TARNISHED_BRASS = M((40, 28, 8), (78, 58, 18), (118, 92, 34), (156, 126, 52), (192, 162, 78), (226, 204, 128))
+BRIDLE = M((8, 6, 6), (18, 14, 14), (30, 24, 22), (44, 36, 32), (62, 52, 46), (84, 72, 64), shine=False)
+PUMPKIN_STEM = M((18, 24, 8), (32, 42, 14), (50, 64, 22), (72, 90, 32), (96, 116, 44), (124, 146, 60), shine=False)
+HESSIAN_RED = M((40, 6, 8), (70, 12, 16), (104, 20, 26), (134, 30, 36), (162, 46, 50), (190, 70, 72), shine=False)
+
 # Style(blade, fitting, grip, haft, gem, accent, cloth)
 GILDED = Style(POLISHED, GOLD, ROYAL, px.DARK_WOOD, SAPPHIRE, GOLD, ROYAL)
 IRONCLAD = Style(GUNSTEEL, px.OLIVE, px.RUBBER, px.GUNMETAL, HAZARD, px.GUNMETAL, px.OLIVE)
@@ -127,6 +135,7 @@ HADES = Style(SLATE, ASHEN, BLOOD, NIGHT, BLOOD, SOOT, BLOOD)
 VESPER = Style(MOON, SILVER, BLOOD, OBSIDIAN, MOONSTONE, MOONSTONE, BLOOD)
 TATTER = Style(NEEDLE, GOLD, VELVET, px.DARK_WOOD, AMETHYST, VELVET, VELVET)
 KING = Style(RUSTED, CROW_IRON, STRAW_WRAP, CORN_STALK, MAGMA, MAGMA, STRAW_WRAP)
+HORSEMAN = Style(HESSIAN_STEEL, TARNISHED_BRASS, BRIDLE, px.DARK_WOOD, MAGMA, RIND, HESSIAN_RED)
 SENTINEL_CORE = Style(CYDONIAN_CRYSTAL, RUST_IRON, DARK_IRON, MARS_STONE, MAGMA, MAGMA, RUST_IRON)
 
 SENTINEL = Style(SENTINEL_GOLD, SENTINEL_GOLD, SENTINEL_LEATHER, SENTINEL_LEATHER, SENTINEL_JET, SENTINEL_GOLD,
@@ -139,7 +148,7 @@ LINE_STYLES = {"gilded": GILDED, "ironclad": IRONCLAD, "bonecarved": BONECARVED,
                "yeti_king": YETI, "cinder_tyrant": CINDER, "mire_hag": HAG, "crypt_lich": LICH,
                "cydonian_sentinel": SENTINEL_CORE,
                "iron_dreadnought": DREADNOUGHT, "werewolf_alpha": WEREWOLF, "storm_roc": ROC,
-               "abyssal_leviathan": LEVIATHAN, "vesperine": VESPER, "tatterlace": TATTER, "pumpkin_king": KING, "hades": HADES, "sentinel": SENTINEL, "frost_knight": FROST_KNIGHT,
+               "abyssal_leviathan": LEVIATHAN, "vesperine": VESPER, "tatterlace": TATTER, "pumpkin_king": KING, "hessian_horseman": HORSEMAN, "hades": HADES, "sentinel": SENTINEL, "frost_knight": FROST_KNIGHT,
                "wight_king": WIGHT_KING, "reaper": REAPER}
 
 
@@ -999,6 +1008,62 @@ def crowbill():
     return d
 
 
+# ---------------------------------------------------------------- the Headless Horseman's (docs/features/hessian-horseman.md)
+
+
+def hessian_sabre():
+    """The Headless Horseman's sabre, his trophy: a cavalry sabre's length and hold, its curved blade in blued steel with a
+    dark fuller along its back, a brass knuckle-bow sweeping from the guard to the pommel, a grip of black bridle leather
+    bound with brass wire, a brass cap for a pommel, and an ember of his fire set in the guard."""
+    st = HORSEMAN
+    d = Design(35, grip=4.8)
+    pommel(d, 1.4, 1.2, st, cap=False)
+    grip(d, 2.2, 7.6, 0.85, st, period=1.4)
+    d.strip(7.8, 8.8, 3.0, 2.2, material=TARNISHED_BRASS, depth=2.4)
+    # The knuckle-bow: from the guard round the hand to the pommel.
+    d.line(8.3, -3.0, 2.4, -3.4, 0.8, TARNISHED_BRASS, depth=1.6)
+    d.line(2.4, -3.4, 1.2, -1.0, 0.8, TARNISHED_BRASS, depth=1.6)
+    curved(d, 8.8, 31.0, 1.25, lambda s: 0.008 * (s - 8.8) ** 2, st, tip=3.4)
+    # The fuller, a dark groove along the back of the blade.
+    d.strip(10.0, 25.0, lambda s: -0.55 + 0.008 * (s - 8.8) ** 2 + 0.15, lambda s: 0.85 - 0.008 * (s - 8.8) ** 2,
+            material=HESSIAN_STEEL, depth=0.8, z=2, tone=DARK)
+    gem(d, 8.3, 0.0, 0.55, st)
+    return d
+
+
+def hollowflail_handle(d=None):
+    """The Hollowflail's handle alone: a dark wooden haft bound with brass, a grip of black bridle leather, a brass collar
+    and an iron eye the chain hangs from (tools/arms_heads.py VARIANT_HEADS draws the chain and the jack-o'-lantern
+    swinging, in the hand)."""
+    st = HORSEMAN
+    d = d or Design(34, grip=5.5)
+    d.disc(1.0, 0.0, 1.2, TARNISHED_BRASS, depth=2.4)
+    haft(d, 1.0, 14.0, 0.9, st, rings=(5.0, 10.5))
+    grip(d, 1.8, 9.8, 1.05, st, period=1.5)
+    d.strip(13.5, 15.5, 1.15, material=TARNISHED_BRASS, depth=2.6)
+    d.ring(arms_art.FLAIL_EYE, 0.0, 1.1, 0.45, px.CHAIN, depth=1.2, part="eye")
+    return d
+
+
+def hollowflail():
+    """The Headless Horseman's flail, his trophy: the handle, an iron chain, and for its head a jack-o'-lantern with his
+    fire burning in its carved face."""
+    d = hollowflail_handle(Design(34, grip=5.5))
+    for i, (s, t) in enumerate([(16.4, 0.7), (18.2, 1.8), (19.9, 2.8), (21.5, 3.5)]):
+        d.disc(s, t, 0.8, px.CHAIN, depth=1.4 if i % 2 else 2.0, part=f"link{i}")
+        d.disc(s, t, 0.32, px.CHAIN, depth=2.2, z=1, tone=OUT_DARK)
+    d.disc(26.2, 4.2, 4.0, RIND, depth=6.0, z=1, part="pumpkin")
+    # Its ribs, two dark grooves either side of its middle (a strip spans from -left to +right across the haft's line).
+    for i, t in enumerate((2.6, 5.8)):
+        d.strip(23.2, 29.2, -(t - 0.25), t + 0.25, material=RIND, depth=6.4, z=2, tone=DARK, part=f"rib{i}")
+    d.strip(29.8, 31.4, -(4.2 - 0.6), 4.2 + 0.6, material=PUMPKIN_STEM, depth=1.8, z=1, part="stem")
+    # Its carved face, his fire in it: two eyes and a grin.
+    for t in (2.9, 5.5):
+        d.disc(27.2, t, 0.6, MAGMA, depth=6.6, z=3)
+    d.strip(24.4, 25.4, -2.4, 6.0, material=MAGMA, depth=6.6, z=3, part="grin")
+    return d
+
+
 def sentinel_longsword():
     """The Sentinel's sword, after the owner's design: a broad gold blade, its edges pale and a brown groove down its
     middle, under a square-ended gold crossguard set with a jet square (the square ring on the set's arm), a brown
@@ -1127,7 +1192,7 @@ DESIGNS = {name: fn for name, fn in globals().items() if callable(fn) and name i
     "glacier_maul", "rimeclaw", "cinderbrand", "magmaw", "hagthorn", "bogfang", "soulreaver", "gravewarden",
     "corelance", "redstar_cleaver",
     "dynamo_halberd", "piston_hammer", "moonfang", "howler", "stormcaller", "galefeather", "tidebreaker",
-    "leviathans_hook", "vesper_scythe", "needle_rapier", "hallowreap", "crowbill", "hades_scythe", "sentinel_longsword", "frost_knight_greatsword", "wight_king_zweihander",
+    "leviathans_hook", "vesper_scythe", "needle_rapier", "hallowreap", "crowbill", "hollowflail", "hessian_sabre", "hades_scythe", "sentinel_longsword", "frost_knight_greatsword", "wight_king_zweihander",
     "reaper_scythe")}
 
 
@@ -1139,7 +1204,10 @@ def design(name):
 
 
 # Variants whose head swings free (tools/arms_heads.py VARIANT_HEADS): their 3D model is the handle alone.
-HANDLES = {"bonecarved_flail": bonecarved_flail_handle}
+HANDLES = {"bonecarved_flail": bonecarved_flail_handle, "hollowflail": hollowflail_handle}
+# The materials of each one's swinging head (tools/arms_heads.py paint_swatches): its chain, its ball and its fittings.
+HEAD_MATERIALS = {"bonecarved_flail": {"chain": BONE, "blade": BONE, "fitting": HORN},
+                  "hollowflail": {"chain": px.CHAIN, "blade": RIND, "fitting": PUMPKIN_STEM}}
 
 
 def model_design(name):
@@ -1176,7 +1244,7 @@ def model(name, held):
     texture.paste(upright, (0, 0))
     if name in HANDLES:
         import arms_heads
-        arms_heads.paint_swatches(texture, {"chain": BONE, "blade": BONE, "fitting": HORN}, skull=True)
+        arms_heads.paint_swatches(texture, HEAD_MATERIALS[name], face=arms_heads.VARIANT_HEADS[name]["style"])
     return texture, elements
 
 

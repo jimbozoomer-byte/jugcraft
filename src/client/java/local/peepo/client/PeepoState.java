@@ -3,6 +3,7 @@ import net.minecraft.client.renderer.entity.state.LivingEntityRenderState;
 import net.minecraft.client.renderer.item.ItemStackRenderState;
 public final class PeepoState extends LivingEntityRenderState { public final ItemStackRenderState held = new ItemStackRenderState(); public final ItemStackRenderState food = new ItemStackRenderState(); public boolean holdingLight; public boolean sitting; public boolean sleeping; public boolean eating; public boolean wheelRunning; public float eatingTime; public boolean blushing; public boolean pumpkin; public boolean jughead;
     public local.peepo.WorkAnimation work=local.peepo.WorkAnimation.NONE;
+    public final RestPose rest=new RestPose();
     public local.peepo.CompanionUniforms.Type uniform=local.peepo.CompanionUniforms.Type.NONE;
     public float heldLightScale=.35F;
     public float workPhase;
@@ -23,6 +24,11 @@ public final class PeepoState extends LivingEntityRenderState { public final Ite
     float pieX,pieY,pieZ,pieReach;
     public int social;
     public float socialTime;
+    public local.peepo.CompanionFeedbackRules.Reaction reaction=local.peepo.CompanionFeedbackRules.Reaction.NONE;
+    public float reactionTime,thoughtTime;
+    public local.peepo.CompanionFeedbackRules.Kind thought=local.peepo.CompanionFeedbackRules.Kind.NONE;
+    public final ItemStackRenderState thoughtItem=new ItemStackRenderState();
+    public final ItemStackRenderState finishItem=new ItemStackRenderState();
     final MachineWorkClip toolPose=new MachineWorkClip();
     float crankX,crankY,crankZ;
     public local.peepo.CompanionGesture gesture=local.peepo.CompanionGesture.NONE;
@@ -31,5 +37,11 @@ public final class PeepoState extends LivingEntityRenderState { public final Ite
     public net.minecraft.world.phys.Vec3 pressOffset=net.minecraft.world.phys.Vec3.ZERO;
     public final ItemStackRenderState actionItem=new ItemStackRenderState();
     float actionScale=.38F;
+    boolean handling,handlingRemainder;
+    float handlingTime,handlingLead,handlingWeight=1,handlingLoad,handlingReach;
+    public local.peepo.CompanionGesture detail=local.peepo.CompanionGesture.NONE;
+    public boolean toolHandling,fertilizing;
+    public float detailTime,detailScale;
+    public final ItemStackRenderState detailPrimary=new ItemStackRenderState(),detailSecondary=new ItemStackRenderState();
 }
 

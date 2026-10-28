@@ -4,11 +4,13 @@ Owner-requested on 8 October 2026, implemented with OpenAI Codex (GPT-6) on `pee
 
 ## Behavior
 
+The 26 October 2026 correction, implemented with **OpenAI Codex (GPT-6)**, renders the equipped knife at 65% size and reverses its facing. Tool drawing uses the same smaller scale and orientation. Native textures and models remain in use; the earlier native-size descriptions and evidence below describe the original revision.
+
 Cooking Pot helpers choose only the north or south rim. The current pot is not rotatable: its bail spans east-west at z=7.5..8.5 pixels, with lugs/uprights on the east and west. If one safe side is blocked the other is considered; helpers do not fall back through a handle when both are blocked. Existing lower-level access, headroom checks, leases, assistance and safe exits remain.
 
 Cutting Board helpers approach the block's facing side and face inward toward its food. At floor level they stand beside the front edge. For a board on a one-block counter they approach from below and stand on its front edge, with a saved ground-level exit. Occupancy checks the companion's actual bounds, including Jughead's height. Removing/rotating the board, blocking its working space, stopping work or unloading releases the station through the existing routine.
 
-The new CHOP action uses the actual knife in the Hand slot. Its native item model is resolved with `ItemDisplayContext.NONE`, without the ordinary companion held-item reduction or arm-bone scale. Existing knife textures/models and resource-pack changes therefore remain in use. The diagonal knife handle is the shared pivot for two stacked hands. A slow lift, quick downstroke, body lean and dip repeat over forty working ticks. The client phase uses the existing synchronized action start time; no new per-frame server packets, fake tools, entities or particles are introduced.
+The CHOP action uses the actual knife in the Hand slot. Its native item model is resolved with `ItemDisplayContext.NONE`, at 65% size independently of arm-bone scale. Existing knife textures/models and resource-pack changes therefore remain in use. The diagonal knife handle is the shared pivot for two stacked hands. A slow lift, quick downstroke, body lean and dip repeat over forty working ticks. The client phase uses the existing synchronized action start time; no new per-frame server packets, fake tools, entities or particles are introduced.
 
 The cut still processes the existing recipe once per forty work ticks, costs up to 16 JE and wears the real equipped knife once. Filters, ingredients, output/byproduct storage, tool predicates and Supply/Output transport retain their existing authority. Only CHOP is appended to the action IDs; existing IDs and saved data remain compatible. Update both client and server to render the new action.
 

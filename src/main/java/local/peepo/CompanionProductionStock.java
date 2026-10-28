@@ -155,6 +155,7 @@ public final class CompanionProductionStock {
             for(var raw:in){var filling=HearthOvenBlockEntity.rawFilling(raw);if(filling!=null && JugcraftAgriculture.item(filling.pie())==item)n+=raw.getCount();}
         }else if(block instanceof CuttingBoardBlockEntity board){
             if(!board.item().isEmpty())in.add(board.item().copy());
+            if(!board.companionKitchen.queuedCuts().isEmpty())in.add(board.companionKitchen.queuedCuts());
             for(var raw:in){var r=CuttingRecipe.find(((ServerLevel)npc.level()).getServer(),raw,npc.assignedHand()).orElse(null);if(r!=null)for(var s:r.cut())if(s.is(item))n+=s.getCount()*raw.getCount();}
         }else if(CompanionStockRecipes.supports(block))n=CompanionStockRecipes.pending(npc,block,item,in,this);
         return n;
@@ -219,6 +220,15 @@ public final class CompanionProductionStock {
         var results=results(npc,block,raw);
         return results.stream().anyMatch(s->filter.allows(s) && wants(npc,block,s));
     }
+    private int cuttingRoom(PeepoEntity npc,BlockEntity block,ItemStack raw,int nativeNeed){
+        int batches=0;
+        for(var product:results(npc,block,raw))if(filter.allows(product)){
+            int goal=inputGoal(npc,block,product);if(goal==Integer.MAX_VALUE)return nativeNeed;
+            int remaining=Math.max(0,goal-pending(npc,block,product));
+            batches=Math.max(batches,(remaining+product.getCount()-1)/product.getCount());
+        }
+        return Math.min(nativeNeed,batches);
+    }
     public CompanionLogistics.Port wrap(PeepoEntity npc,BlockEntity block,CompanionAssignments.Target work,CompanionLogistics.Port base){
         if(!enabled())return base;
         return new CompanionLogistics.Port(){
@@ -245,6 +255,7 @@ public final class CompanionProductionStock {
                 if(CompanionAdditionalStock.supports(block))return CompanionAdditionalStock.limit(npc,block,stack,base.pickupNeeded(stack),CompanionProductionStock.this);
                 if(CompanionStockRecipes.supports(block))return CompanionStockRecipes.limit(npc,block,stack,base.pickupNeeded(stack),base.stockAuxiliaryNeed(stack),CompanionProductionStock.this);
                 if(!pickupAllowed(stack))return 0;
+                if(block instanceof CuttingBoardBlockEntity)return cuttingRoom(npc,block,stack,base.pickupNeeded(stack));
                 return block instanceof CookingPotBlockEntity pot?CookingPotSupplies.missing(pot,stack,npc):base.pickupNeeded(stack);
             }
             public double supplyPriority(ItemStack raw){return results(npc,block,raw).stream().filter(filter::allows).mapToDouble(s->priority(npc,block,s)).max().orElse(-3);}
@@ -253,11 +264,13 @@ public final class CompanionProductionStock {
                 if(CompanionStockRecipes.supports(block))return CompanionStockRecipes.limit(npc,block,stack,base.needed(stack,tx),base.stockAuxiliaryNeed(stack),CompanionProductionStock.this);
                 if(!pickupAllowed(stack))return 0;
                 int needed=base.needed(stack,tx);
+                if(block instanceof CuttingBoardBlockEntity)return cuttingRoom(npc,block,stack,needed);
                 return block instanceof CookingPotBlockEntity pot?Math.min(needed,CookingPotSupplies.missing(pot,stack,npc)):needed;
             }
             public Storage<ItemVariant> inputs(){return CompanionStockRecipes.supports(block)?base.stockInputs(raw->CompanionStockRecipes.ingredientRoom(npc,block,raw,CompanionProductionStock.this)):base.inputs();}
             public Storage<ItemVariant> outputs(){return base.outputs();}
             public List<ItemStack> supplyBatch(Storage<ItemVariant> source,int slots){
+                if(block instanceof CuttingBoardBlockEntity board && board.companionKitchen.cuttingBatchActive())return List.of();
                 invalidate();if(!refresh(npc,block) || !canRegister(npc.getUUID()))return List.of();
                 if(block instanceof CookingPotBlockEntity pot)return CookingPotSupplies.create(pot,source,npc.assignments.supplies.combined(work,false),slots,npc);
                 return CompanionDeliveryPlan.create(source,inputs(),slots,this::needed,null,this::supplyPriority);
