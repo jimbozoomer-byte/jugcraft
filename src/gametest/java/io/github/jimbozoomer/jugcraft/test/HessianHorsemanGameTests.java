@@ -478,17 +478,24 @@ public class HessianHorsemanGameTests {
 		ServerPlayer farOff = player(helper, origin, 36.5, 66.5);
 		Set<Attack> used = new HashSet<>();
 		boolean[] crossed = {false};
+		boolean[] awake = {false};
+		// Watched every tick once he wakes. Registered here, not in a delayed task: onEachTick schedules a task for each
+		// tick left, and adding that many while the test's delayed tasks are being run breaks their iteration.
+		helper.onEachTick(() -> {
+			if (!awake[0]) {
+				return;
+			}
+			if (horseman.attack() != null) {
+				used.add(horseman.attack());
+			}
+			crossed[0] |= horseman.onBridge(horseman);
+		});
 		helper.runAfterDelay(LOADING_TICKS, () -> {
 			onBridge.setGameMode(GameType.SURVIVAL);
 			shield(onBridge);
 			shield(farOff);
 			horseman.wake(level);
-			helper.onEachTick(() -> {
-				if (horseman.attack() != null) {
-					used.add(horseman.attack());
-				}
-				crossed[0] |= horseman.onBridge(horseman);
-			});
+			awake[0] = true;
 			helper.runAfterDelay(AWAKE + 100, () -> {
 				boolean throwsOnly = used.stream().allMatch(Attack::thrown);
 				horseman.snuffIn(10000);
