@@ -328,6 +328,10 @@ public class PactScreen extends MagicScreen implements MenuAccess<PactMenu> {
 		// His line: the beat's own words after its stage direction (the whole beat stays its message).
 		FormattedText line = stage == null ? said : FormattedText.of(said.getString().substring(stage.getString().length()).trim());
 		MagicText words = new MagicText(said, line, font, width, MagicTheme.INK, theme.body()).ruled();
+		if (stage != null) {
+			// The stage direction is drawn just above, so the whole beat is on the page: no tip repeating it (CI's pictures).
+			words.wholeOnPage();
+		}
 		words.setX(text.left() + 2);
 		inBodyAt("beat", words, at);
 		MagicButton back = back(page > 0, () -> turn(page - 1));

@@ -83,12 +83,17 @@ final class MagicPortrait {
 		return "";
 	}
 
+	/** The glow behind a portrait's spirit: warm cream at the window's foot, clear at a third of its height. */
+	private static final int GLOW = 0x60F2DCA8;
+
 	/**
 	 * The window at (x, y), w x h: the cosmos, then {@code creature} (or {@code sign}'s item when it is null), greyed when
 	 * {@code ended}.
 	 */
 	static void draw(GuiGraphicsExtractor g, int x, int y, int w, int h, @Nullable LivingEntity creature, String sign, boolean ended) {
 		MagicArt.cosmosWindow(g, x, y, w, h);
+		// A warm glow rising behind the spirit, so a dark one (Stolas's raven) stands off the cosmos (CI's pictures).
+		g.fillGradient(x, y + h / 3, x + w, y + h, GLOW & 0x00FFFFFF, GLOW);
 		if (creature != null) {
 			int size = (int) Math.max(4.0F, Math.min((h - 2) / Math.max(0.1F, creature.getBbHeight()),
 					(w - 2) / Math.max(0.1F, creature.getBbWidth())));

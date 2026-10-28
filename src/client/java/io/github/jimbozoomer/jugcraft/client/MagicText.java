@@ -41,6 +41,8 @@ final class MagicText extends AbstractWidget implements MagicScreen.Drawn {
 	private List<FormattedCharSequence> lines = List.of();
 	private List<FormattedCharSequence> tip = List.of();
 	private String drawn = "";
+	/** The rest of its message is drawn beside it (a beat's stage direction above its line), so only a cut line wants a tip. */
+	private boolean wholeOnPage;
 
 	/**
 	 * A paragraph whose message is {@code full} and which draws {@code shown} in {@code width}, in {@code inks}' {@code colour}
@@ -64,6 +66,13 @@ final class MagicText extends AbstractWidget implements MagicScreen.Drawn {
 	/** On the ruled scroll: lines fourteen apart, as its rules are (spec 2.2). */
 	MagicText ruled() {
 		pitch = RULED_PITCH;
+		layout();
+		return this;
+	}
+
+	/** Its message is on the page across its parts (a beat's stage direction drawn above it): no tip unless a line is cut. */
+	MagicText wholeOnPage() {
+		wholeOnPage = true;
 		layout();
 		return this;
 	}
@@ -136,7 +145,7 @@ final class MagicText extends AbstractWidget implements MagicScreen.Drawn {
 		}
 		lines = List.copyOf(kept);
 		drawn = words.toString();
-		boolean shortened = clamped || !shown.getString().equals(getMessage().getString());
+		boolean shortened = clamped || !wholeOnPage && !shown.getString().equals(getMessage().getString());
 		tip = shortened ? font.split(getMessage(), TIP_WIDTH) : List.of();
 		int leadHeight = !item.isEmpty() ? 16 : mark != null ? MagicArt.Mark.HEIGHT : 0;
 		setHeight(Math.max(leadHeight, Math.max(1, lines.size()) * pitch) + 2);
