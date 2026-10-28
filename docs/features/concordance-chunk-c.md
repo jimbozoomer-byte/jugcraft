@@ -2461,7 +2461,7 @@ records to main's Scale (C-P40). Before more work:
    `WHAT_EXISTS.md` with #366, `INTEGRATION_STATUS.md` with #361 to #365), and merge main again if it has moved past
    `f904df3fd`;
 3. the next smallest outcome (C-D6; when it is built is not yet decided): one Gloam Ink formula from a mixed bed's
-   Gloamcap with Research Notes as its consumer.
+   Gloamcap with Research Notes as its consumer. Its contract and record: [Gloam Ink](gloam-ink.md).
 
 ## How this contract was checked
 
