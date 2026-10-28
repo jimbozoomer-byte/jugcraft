@@ -263,7 +263,7 @@ Local checks run on this branch, and their results:
   - `python3 -m unittest discover -s scripts/tests`: 287 tests, OK. The booth's route from paper to ticket is declared with the other native ones.
   - `python3 tools/check_icon_maps.py`: PASS (277 maps, with the Midway Ticket's and its new `ticket` material; no new warning).
   - `javac` scan of the new and changed Java for syntax errors: none. The full compile runs in CI.
-  - CI's first run failed `theTicketBoothPrintsTickets`: a second turn of the crank in the same tick printed a second ticket. The turn's time was marked only by its block event, which the server runs at the end of the tick. The booth now marks the turn on the server at once; the block event still tells the clients.
+  - CI failed `theTicketBoothPrintsTickets` twice. The first guess was that a second turn of the crank in the same tick printed a second ticket, because the turn was marked only by its block event, which the server runs at the end of the tick. The booth now marks the turn on the server at once, but the test still failed. The real cause was in the test: its empty hand is put in by overwriting the selected slot, where the first ticket had landed, so that ticket was lost. The test now takes each ticket out as it is printed.
 - Part 3, all on the first run:
   - `python3 tools/check_mod_data.py`: PASS (8,132 material IDs). `check_haunted_midway` now also checks the gallery against `tools/haunted_midway.py`: its rails, targets, track, speed, round and shooting distance. It checks that a projectile is judged at the back wall by `onProjectileHit` for its owner, that a win rolls the prize table, that the renderer draws the targets where `targetX` puts them from the runner models 1 and 2 alone, that its bulbs glow, and every text.
   - `python3 scripts/check_repository.py`: PASS.
@@ -281,6 +281,7 @@ Local checks run on this branch, and their results:
   - `python3 -m unittest discover -s scripts/tests`: 287 tests, OK.
   - `python3 tools/check_icon_maps.py`: PASS (no new map; the ghost train's item is 3D).
   - `javac` scan of the new and changed Java for syntax errors: none. The full compile runs in CI.
+  - CI's first run failed to compile the game tests: the new test named the minecart's type `EntityType.MINECART`, which this platform has as `EntityTypes.MINECART`, as the other tests name it. The javac scan checks syntax only, so it could not catch this.
 - Part 5:
   - `python3 tools/check_mod_data.py`: failed on the first run, then PASS (8,134 material IDs), including the art check of every model and of the carousel's quad parts. The failure: the carousel's one texture was 256 by 256, and a block texture may be at most 128. Its middle and item now have a 128 by 128 block texture, and the turning parts their own 256 by 256 entity texture, as the harvest effigy's cloak has. `check_haunted_midway` now also checks:
     - the carousel's size, rings, mounts, seats, bob, power, speeds, reach and organ against `tools/haunted_midway.py`, and that the tune is three beats a bar in note-block steps;
