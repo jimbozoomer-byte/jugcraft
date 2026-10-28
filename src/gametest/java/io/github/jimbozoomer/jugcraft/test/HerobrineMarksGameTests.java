@@ -203,6 +203,48 @@ public class HerobrineMarksGameTests {
 	}
 
 	@GameTest(structure = ARENA, padding = 48, skyAccess = true, maxTicks = 20)
+	public void aDecayedLeafDoesNotAbortTheRestOfAGrove(GameTestHelper helper) {
+		changedLeafDuringGrove(helper, true);
+	}
+
+	@GameTest(structure = ARENA, padding = 48, skyAccess = true, maxTicks = 20)
+	public void aPlayerReplacementStillStopsAGrove(GameTestHelper helper) {
+		changedLeafDuringGrove(helper, false);
+	}
+
+	private static void changedLeafDuringGrove(GameTestHelper helper, boolean decayed) {
+		platform(helper);
+		ServerLevel level = helper.getLevel();
+		tree(helper, 24, 24, false);
+		BlockPos feet = feet(helper, 22, 22);
+		HerobrineMarks.Wild wild = HerobrineMarks.approve(level, feet, 24, "test");
+		try {
+			HerobrineMarkPlans.Plan plan = HerobrineMarkPlans.grove(level, feet, feet(helper, 22, 8), message(), level.getRandom());
+			helper.assertTrue(plan != null, "The tree should make a grove");
+			List<HerobrineMarkPlans.Step> leaves = plan.steps().stream().filter(step -> step.state().isAir()).toList();
+			BlockPos changed = leaves.get(leaves.size() / 2).pos();
+			// Deterministically reproduce a leaf disappearing between planning and application.
+			level.setBlockAndUpdate(changed, (decayed ? Blocks.AIR : Blocks.OAK_PLANKS).defaultBlockState());
+			String id = HerobrineMarks.buildNow(level, plan);
+			HerobrineMarks.Mark mark = HerobrineMarks.get(level.getServer()).marks().get(id);
+			helper.assertTrue(mark != null && mark.finished() == decayed,
+					decayed ? "An already absent leaf must not abort the remaining grove" : "A player's replacement must stop the grove");
+			if (decayed) {
+				for (HerobrineMarkPlans.Step step : leaves) {
+					helper.assertTrue(level.getBlockState(step.pos()).isAir(), "Every planned natural leaf should be gone");
+				}
+			}
+			helper.assertTrue(level.getBlockState(helper.absolutePos(new BlockPos(24, GROUND + 4, 24))).is(Blocks.OAK_LOG), "The trunk stays");
+			HerobrineMarks.undo(level, id);
+			helper.assertTrue(level.getBlockState(changed).is(decayed ? Blocks.AIR : Blocks.OAK_PLANKS),
+					"Undo must preserve a change the grove did not make");
+		} finally {
+			HerobrineMarks.revoke(level, wild);
+		}
+		helper.succeed();
+	}
+
+	@GameTest(structure = ARENA, padding = 48, skyAccess = true, maxTicks = 20)
 	public void leavesAPlayerPlacedKeepAGroveAway(GameTestHelper helper) {
 		platform(helper);
 		ServerLevel level = helper.getLevel();
