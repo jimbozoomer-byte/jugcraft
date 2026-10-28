@@ -102,7 +102,7 @@ ROOT_DISPLAY = {
 
 
 def flora_textures():
-    """(kind, name) -> image: each flora plant's texture, the mandrake's, and the ivy's item picture."""
+    """(kind, name) -> image: each flora plant's texture, the mandrake's, the ivy's item picture and bittersweet's icon."""
     out = {}
     for plant in pl.flora() + ["mandrake"]:
         out[("block", plant)] = fm.build(plant).atlas.img
@@ -111,4 +111,7 @@ def flora_textures():
     scale = fa.SIZE / 16
     sheet = ivy.atlas.img.crop((round(u0 * scale), round(v0 * scale), round(u1 * scale), round(v1 * scale)))
     out[("item", "creeping_ivy")] = sheet
+    # Bittersweet's item is its 16 x 16 icon map (tools/item_icons/bittersweet.txt; docs/ITEM_ICONS.md).
+    import item_icons
+    out[("item", "bittersweet")] = item_icons.draw("bittersweet")
     return out

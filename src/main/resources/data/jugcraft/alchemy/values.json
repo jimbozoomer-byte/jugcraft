@@ -752,6 +752,11 @@
       "denominator": 1,
       "source": "recipe jugcraft:assayers_scale"
     },
+    "jugcraft:aster": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
     "jugcraft:astral_verbena": {
       "numerator": 1,
       "denominator": 1,
@@ -2673,6 +2678,11 @@
       "source": "fallback (balance pending)"
     },
     "jugcraft:birthday_cake_slice": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
+    "jugcraft:bittersweet": {
       "numerator": 1,
       "denominator": 1,
       "source": "fallback (balance pending)"
@@ -10213,6 +10223,11 @@
       "source": "recipe jugcraft:dried_chili"
     },
     "jugcraft:dried_herbs": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
+    "jugcraft:dried_sunflower": {
       "numerator": 1,
       "denominator": 1,
       "source": "fallback (balance pending)"
@@ -31147,6 +31162,11 @@
       "denominator": 1,
       "source": "fallback (balance pending)"
     },
+    "jugcraft:ornamental_cabbage": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
     "jugcraft:ornamental_corn": {
       "numerator": 1,
       "denominator": 1,
@@ -31161,6 +31181,11 @@
       "numerator": 1,
       "denominator": 2,
       "source": "recipe jugcraft:ornamental_corn_kernels"
+    },
+    "jugcraft:ornamental_kale": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
     },
     "jugcraft:osmanthus_flowers": {
       "numerator": 1,
@@ -31316,6 +31341,11 @@
       "numerator": 32,
       "denominator": 1,
       "source": "reference tag minecraft:logs"
+    },
+    "jugcraft:pampas_grass": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
     },
     "jugcraft:pan_de_muerto": {
       "numerator": 313,
@@ -34486,6 +34516,11 @@
       "numerator": 673,
       "denominator": 2,
       "source": "recipe jugcraft:security_jacket"
+    },
+    "jugcraft:sedum": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
     },
     "jugcraft:seed_pouch": {
       "numerator": 1,

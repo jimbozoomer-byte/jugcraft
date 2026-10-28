@@ -21,6 +21,7 @@ import decor18
 import decor19
 import decor20
 import barn_tools
+import fall_garden
 import orchard_harvest
 import pumpkin_patch
 import adam_ondi_ahman
@@ -3042,6 +3043,8 @@ SHAPELESS += orchard_harvest.SHAPELESS
 SHAPED += barn_tools.RECIPES
 SHAPELESS += barn_tools.SHAPELESS
 ITEMS.update(barn_tools.ITEMS)
+# Fall Garden & Porch, decor set 4 (tools/fall_garden.py): the garden plants' recipes (the plants are tools/plants.py's).
+SHAPELESS += fall_garden.SHAPELESS
 SHAPELESS += decor20.SHAPELESS
 
 # Kitchen and cooking expansion, slice 1: the Farmhouse Kitchen (tools/kitchen.py).

@@ -1,0 +1,21 @@
+{
+  "variants": {
+    "": [
+      {
+        "model": "jugcraft:block/aster"
+      },
+      {
+        "model": "jugcraft:block/aster",
+        "y": 90
+      },
+      {
+        "model": "jugcraft:block/aster",
+        "y": 180
+      },
+      {
+        "model": "jugcraft:block/aster",
+        "y": 270
+      }
+    ]
+  }
+}

@@ -14799,6 +14799,26 @@ def check_barn_tools():
         err("barn_lantern: its blockstate adds the flame only while it is lit")
 
 
+def check_fall_garden():
+    """Fall Garden & Porch (tools/fall_garden.py, docs/features/fall-garden-and-porch.md), part 1: each fall plant is a
+    sculpted plant of tools/plants.py with its builder; the garden plants' recipes were generated, and each makes the
+    plant from its cabbage seed or sunflower; the wild ones have their vanilla-biome patches."""
+    import fall_garden as fg
+    import flora_models as fm
+    for plant in fg.PLANTS:
+        info = plants.PLANTS.get(plant)
+        if not info or info.get("art") != "flora" or plant not in fm.BUILDERS:
+            err(f"{plant}: a fall garden plant must be a sculpted plant of tools/plants.py with a builder (tools/fall_garden_flora.py)")
+    for recipe in fg.SHAPELESS:
+        made = load(DATA / MOD / "recipe" / f"{recipe['id']}.json") or {}
+        if made.get("result", {}).get("id") != f"{MOD}:{recipe['result']}":
+            err(f"recipe/{recipe['id']}.json: tools/fall_garden.py's recipe for {recipe['result']} was not generated")
+    garden = {r["result"] for r in fg.SHAPELESS}
+    for plant in fg.PLANTS:
+        if plant not in garden and "patch" not in plants.PLANTS.get(plant, {}):
+            err(f"{plant}: a wild fall plant needs its patch in vanilla's biomes, or a recipe, to be found at all")
+
+
 def check_orchard_harvest():
     """Orchard & Apple Harvest (tools/orchard_harvest.py, docs/features/orchard-apple-harvest.md): the ladder's, the
     bin's and the cart's Java blocks are the table's size; the bin's, cart's and bag's capacities and stages, the crates'
@@ -22771,6 +22791,7 @@ def main():
     check_pumpkin_patch()
     check_orchard_harvest()
     check_barn_tools()
+    check_fall_garden()
     check_hessian_horseman()
     check_cydonian_sentinel()
     check_material_sets()

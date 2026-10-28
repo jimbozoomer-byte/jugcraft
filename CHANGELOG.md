@@ -8,6 +8,12 @@ Every change to Jugcraft, newest first, grouped by pull request. For what each t
 
 No numbered release yet. Entries on feature branches remain proposed until their pull requests merge.
 
+### Unmerged: Fall Garden & Porch, part 1 (the fall garden's plants)
+- Seven fall plants, sculpted in the graveyard flora's style: **New England Aster**, **Autumn Stonecrop**, **Ornamental Kale**, **Ornamental Cabbage** (small flowers with potted forms), **Pampas Grass** (a tall flower, 2 m to its plumes), **Dried Sunflower** (a two-block plant, its seed head bowed) and **Bittersweet** (a vine of scarlet berries in orange husks).
+- Asters grow in plains and forests, stonecrop and pampas grass in plains, and bittersweet in forests. A cabbage seed and purple dye make an ornamental kale, a cabbage seed and bone meal an ornamental cabbage, and a sunflower makes a dried one.
+- Record: [fall-garden-and-porch.md](docs/features/fall-garden-and-porch.md).
+- **Checked:** the record's Verification. Game tests and screenshots run in CI only; not played by hand.
+
 ### Unmerged: Barn & Harvest Tools, part 5 (the barn's stores and fittings)
 - **Grain Sacks**: burlap sacks of grain, tied and stamped, that stack three to a block and drop each sack. A wool and three wheat make one.
 - **Milk Can**: a tinplate dairy can that stands facing you.

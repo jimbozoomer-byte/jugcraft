@@ -196,5 +196,54 @@
   {
     "id": "creeping_ivy",
     "kind": "vine"
+  },
+  {
+    "id": "aster",
+    "kind": "flower",
+    "effect": "minecraft:luck",
+    "seconds": 6.0,
+    "patch": [
+      "IS_PLAINS",
+      "IS_FOREST"
+    ]
+  },
+  {
+    "id": "sedum",
+    "kind": "flower",
+    "effect": "minecraft:resistance",
+    "seconds": 4.0,
+    "patch": [
+      "IS_PLAINS"
+    ]
+  },
+  {
+    "id": "ornamental_kale",
+    "kind": "flower",
+    "effect": "minecraft:haste",
+    "seconds": 5.0
+  },
+  {
+    "id": "ornamental_cabbage",
+    "kind": "flower",
+    "effect": "minecraft:jump_boost",
+    "seconds": 5.0
+  },
+  {
+    "id": "pampas_grass",
+    "kind": "tall_flower",
+    "patch": [
+      "IS_PLAINS"
+    ]
+  },
+  {
+    "id": "dried_sunflower",
+    "kind": "tall_plant"
+  },
+  {
+    "id": "bittersweet",
+    "kind": "vine",
+    "patch": [
+      "IS_FOREST"
+    ]
   }
 ]
