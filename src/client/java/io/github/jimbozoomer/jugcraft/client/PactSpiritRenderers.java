@@ -16,8 +16,9 @@ import net.minecraft.world.phys.AABB;
  * Concordance garden cohort, GC-01 (SG11): every pact spirit's renderer from one row (tools/concordance_pacts.py SPIRITS
  * "body"."render"): GeckoLib draws it from its own model at its scale, its glowmask lit when it has one; its culling box
  * reaches as far as its gestures carry it; one leaving is drawn only where its departing gesture was fired, so one who
- * began watching it after sees it already gone. Chunk D's Stolas renderer (WorkerClient), unchanged in what it draws, is
- * the first row. Nothing here decides anything.
+ * began watching it after sees it already gone; one frozen by a tick freeze is drawn as of its last tick from the frame the
+ * freeze arrives. Chunk D's Stolas renderer (WorkerClient), unchanged in what it draws, is the first row. Nothing here
+ * decides anything.
  */
 final class PactSpiritRenderers {
 	/** One spirit's drawing: its scale, its shadow's radius, its culling box widened sideways and below and reaching above, its glowmask. */
@@ -54,6 +55,15 @@ final class PactSpiritRenderers {
 					// Leaving, it is drawn only where its departing gesture was fired: one who began watching it after sees it
 					// already gone, never perched until it vanishes (Chunk D's unit review).
 					return (!spirit.leaving() || departs(spirit)) && super.shouldRender(spirit, culler, camX, camY, camZ, partialTicks);
+				}
+
+				@Override
+				public void extractRenderState(T spirit, EntityRenderState state, float partialTick) {
+					// A frozen spirit is drawn as of its last tick, as vanilla draws one once a tick freeze reaches this client's
+					// timer. On the frame the freeze arrives vanilla still passes the running partial tick though the spirit is no
+					// longer ticked, so its age steps back and GeckoLib rewinds a finished gesture to its last frame, drawn over its
+					// loop for as long as the world stays frozen.
+					super.extractRenderState(spirit, state, spirit.level().tickRateManager().isEntityFrozen(spirit) ? 1.0F : partialTick);
 				}
 			};
 			if (row.glow()) {

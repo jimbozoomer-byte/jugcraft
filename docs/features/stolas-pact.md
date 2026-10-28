@@ -258,9 +258,9 @@ opened by using the perch (`PactMenu`, an extended menu with no slots):
   and the screen, an in-game screen, draws subtitles over itself.
 
 It fits windows down to 320×180 scaled pixels and scrolls its body; the client test draws it at GUI scale 4 in a
-1920×1080 window and at GUI scale 2 in a 640×360 one. `PactClient` sends only the five bounded numbers for the open menu
-and decides nothing. `PactStatePayload`'s lists are capped at 3 beats, 16 terms, 12 notes, 8 patterns, 8 offerings and 8
-compact stacks.
+1920×1080 window and in a 640×360 one, where vanilla caps the GUI scale 2 it asks for at 1 (a GUI 640 wide).
+`PactClient` sends only the five bounded numbers for the open menu and decides nothing. `PactStatePayload`'s lists are
+capped at 3 beats, 16 terms, 12 notes, 8 patterns, 8 offerings and 8 compact stacks.
 
 ## Stolas's character (D-06)
 

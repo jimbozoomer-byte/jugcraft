@@ -194,8 +194,8 @@ def buer_clips(owner):
         gestures["refuse"]: once(times["refuse"], dict(petals((0, 1.0), (0.3, 0.25), (1.3, 0.25), (2.0, 1.0)), **{
             "pistil": {"rotation": _keys((0, lean), (0.4, (-8, 60, 0)), (0.9, (-8, 60, 0)), (1.0, (-8, 45, 0)), (1.1, (-8, 60, 0)),
                                          (1.3, (-8, 60, 0)), (2.0, lean), easing=EASE)}})),
-        # Depart: his petals close (shut by 0.6 s: the telling pose), then he sinks into the perch, dwindling to nothing; the
-        # last frame holds until the server removes him.
+        # Depart: his petals close (shut by 0.6 s), then he sinks into the perch from 0.8 s, dwindling to nothing (1.1 to
+        # 1.6 s, shut and half sunk: the telling pose); the last frame holds until the server removes him.
         gestures["depart"]: once(times["depart"], dict(petals((0, 1.0), (0.6, 0.0), (2.0, 0.0)), **{
             "pistil": {"rotation": _keys((0, lean), (0.6, zero), (2.0, zero), easing=EASE)},
             "base": {"position": _keys((0, zero), (0.8, zero), (2.0, (0, -6, 0)), easing=EASE),

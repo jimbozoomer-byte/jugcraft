@@ -271,11 +271,11 @@ public final class ConcordancePactNetworkTests implements FabricClientGameTest {
 		mark("accept.txt", accept.reason());
 		check(!accept.done() && Pacts.Outcome.NOT_PERMITTED.id.equals(accept.reason()),
 				"The stranger's Accept, sent all the same, is refused as not permitted: " + accept.reason());
-		// The refusal, under his terms, brought into view by the keyboard before the picture.
+		// The refusal, above his terms, the keyboard on it before the picture.
 		tabTo(context, "result");
 		check(context.computeOnClient(client -> client.gui.screen() instanceof PactScreen screen && screen.page() == PactScreen.TERMS_PAGE
 				&& screen.control("result") instanceof PactScreen.Verdict verdict && verdict.refused()),
-				"The stranger's screen shows the refusal under his terms");
+				"The stranger's screen shows the refusal above his terms");
 		shot(context, "jugcraft_pact_peer_refused");
 		context.getInput().pressKey(InputConstants.KEY_ESCAPE);
 		context.waitForScreen(null);
