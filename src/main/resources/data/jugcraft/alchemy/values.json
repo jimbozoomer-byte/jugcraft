@@ -1202,6 +1202,11 @@
       "denominator": 2,
       "source": "recipe jugcraft:bat_wings"
     },
+    "jugcraft:bat_wreath": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
     "jugcraft:battery_box": {
       "numerator": 22177,
       "denominator": 6,
@@ -2648,6 +2653,11 @@
       "source": "fallback (balance pending)"
     },
     "jugcraft:best_costume_ribbon": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
+    "jugcraft:beware_doormat": {
       "numerator": 1,
       "denominator": 1,
       "source": "fallback (balance pending)"
@@ -12531,6 +12541,11 @@
       "numerator": 81,
       "denominator": 1,
       "source": "recipe jugcraft:gargoyle"
+    },
+    "jugcraft:gargoyle_knocker": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
     },
     "jugcraft:gargoyle_rainspout": {
       "numerator": 131,

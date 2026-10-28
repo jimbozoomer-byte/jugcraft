@@ -409,6 +409,7 @@ public final class JugcraftAgriculture {
 	public static BlockEntityType<DecorationBlockEntity> PUMPKIN_PATH_LIGHT_ENTITY;
 	public static BlockEntityType<SkeletonAnimalBlockEntity> SKELETON_ANIMAL_ENTITY;
 	public static BlockEntityType<DecorationBlockEntity> RISING_ZOMBIE_ENTITY;
+	public static BlockEntityType<DecorationBlockEntity> GARGOYLE_KNOCKER_ENTITY;
 	public static BlockEntityType<FirewoodRackBlockEntity> FIREWOOD_RACK_ENTITY;
 	public static BlockEntityType<DecorationBlockEntity> CHOPPING_BLOCK_ENTITY;
 	public static BlockEntityType<BlanketLadderBlockEntity> BLANKET_LADDER_ENTITY;
@@ -3082,10 +3083,23 @@ public final class JugcraftAgriculture {
 		RISING_ZOMBIE_ENTITY = Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, Jugcraft.id("rising_zombie"),
 				FabricBlockEntityTypeBuilder.<DecorationBlockEntity>create((pos, state) -> new DecorationBlockEntity(RISING_ZOMBIE_ENTITY, pos, state),
 						zombie).build());
-		for (Block block : List.of(mailbox, light, dog, cat, crow, zombie)) {
-			registerItem(BuiltInRegistries.BLOCK.getKey(block).getPath(), props -> new BlockItem(block, props),
+		// Part 3: the doorway. The knocker and the bat wreath hang on walls and doors, as the other wreaths do.
+		Block knocker = registerBlock("gargoyle_knocker", GargoyleKnockerBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_BROWN)
+				.strength(1.0F).sound(SoundType.METAL).noCollision().noOcclusion().randomTicks().pushReaction(PushReaction.POPPED));
+		GARGOYLE_KNOCKER_ENTITY = Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, Jugcraft.id("gargoyle_knocker"),
+				FabricBlockEntityTypeBuilder.<DecorationBlockEntity>create((pos, state) -> new DecorationBlockEntity(GARGOYLE_KNOCKER_ENTITY, pos, state),
+						knocker).build());
+		Block batWreath = registerBlock("bat_wreath", BatWreathBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_BLACK)
+				.strength(0.2F).sound(SoundType.GRASS).noCollision().noOcclusion().ignitedByLava().pushReaction(PushReaction.POPPED));
+		Block doormat = registerBlock("beware_doormat", BewareDoormatBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_BROWN)
+				.strength(0.2F).sound(SoundType.GRASS).noOcclusion().ignitedByLava().pushReaction(PushReaction.POPPED));
+		for (Block block : List.of(mailbox, light, dog, cat, crow, zombie, knocker, batWreath, doormat)) {
+			registerItem(BuiltInRegistries.BLOCK.getKey(block).getPath(),
+					props -> block instanceof AutumnWreathBlock ? new WreathBlockItem(block, props) : new BlockItem(block, props),
 					new Item.Properties().useBlockDescriptionPrefix(), BUILDING_TAB);
 		}
+		FlammableBlockRegistry.getDefaultInstance().add(batWreath, 30, 60);
+		FlammableBlockRegistry.getDefaultInstance().add(doormat, 30, 60);
 	}
 
 	/** Bleached bones: they come away easily, and a piston pops them off. */

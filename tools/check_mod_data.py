@@ -15167,7 +15167,11 @@ def check_front_yard():
     shape and pivot, the wag, sway and watch, the claw, reach and shoulders); each is registered (the animals sharing one
     block entity) with its renderer, which moves them by `wag`, `sway` and `watch`, and `claw` and `lurch`; each animal's
     blockstate shows its moving part alone at runner 1, and the zombie's its arms alone at runners 1 and 2, each arm
-    leaning out whole from its shoulder; and their names have their text."""
+    leaning out whole from its shoulder; and their names have their text. Part 3: the knocker's, the doormat's and the
+    bat wreath's Java is the table's; the knocker and the bat wreath are kinds of the Autumn Wreath, with wreath items, so
+    they hang on doors; the door attachment asks each what it is by its hooks, not by its class; the knocker's renderer
+    swings its ring and lights its eyes on walls and doors; its eyes glow; and the knocker and wreath sit within a door
+    wreath's depth."""
     import front_yard as fy
 
     def read(path):
@@ -15268,6 +15272,50 @@ def check_front_yard():
         if not elements or any(e.get("rotation", {}).get("axis") != "z" or e["rotation"].get("angle") != angle
                                or e["rotation"].get("origin", [None])[0] != (sx if name == "right_arm" else 16.0 - sx) for e in elements):
             err(f"models/block/{rz['block']}_{name}.json: the arm must lean {angle} degrees out from its shoulder, whole")
+    # Part 3: the doorway.
+    kn, bw, dm = fy.KNOCKER, fy.BAT_WREATH, fy.DOORMAT
+    knocker = read(JAVA_ROOT / "agriculture" / "GargoyleKnockerBlock.java")
+    for item in (f"RAPS = {kn['raps']};", f"RAP_TICKS = {kn['rap_ticks']};", f"SWING = {kn['swing']}F;", f"PIVOT_Y = {kn['pivot'][0]}F;",
+                 f"PIVOT_Z = {kn['pivot'][1]}F;", f"HAUNT = {kn['haunt']};", f"DOOR_CHANCE = {kn['door_chance']};",
+                 "extends AutumnWreathBlock implements EntityBlock", "TrickOrTreat.knockWith("):
+        if item not in knocker:
+            err(f"GargoyleKnockerBlock: missing {item} (tools/front_yard.py KNOCKER)")
+    if f"HEARTBEAT = {dm['heartbeat']};" not in read(JAVA_ROOT / "agriculture" / "BewareDoormatBlock.java"):
+        err("BewareDoormatBlock: its heartbeat must be the table's (tools/front_yard.py DOORMAT)")
+    if "extends AutumnWreathBlock" not in read(JAVA_ROOT / "agriculture" / "BatWreathBlock.java"):
+        err("BatWreathBlock: it must be a kind of AutumnWreathBlock, to hang on doors as the other wreaths do")
+    for block, cls in ((kn["block"], "GargoyleKnockerBlock"), (bw["block"], "BatWreathBlock"), (dm["block"], "BewareDoormatBlock")):
+        if f'registerBlock("{block}", {cls}::new' not in java_main:
+            err(f"JugcraftAgriculture: {block} must be a {cls}")
+        if f"block.{MOD}.{block}" not in lang:
+            err(f"block.{MOD}.{block}: the text is missing")
+    if 'GARGOYLE_KNOCKER_ENTITY = Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, Jugcraft.id("gargoyle_knocker")' not in java_main \
+            or "props -> block instanceof AutumnWreathBlock ? new WreathBlockItem(block, props) : new BlockItem(block, props)" not in java_main:
+        err("JugcraftAgriculture: the knocker needs its block entity, and it and the bat wreath their wreath items, to hang on doors")
+    drawn = read(CLIENT_JAVA_ROOT / "GargoyleKnockerRenderer.java")
+    door_drawn = read(CLIENT_JAVA_ROOT / "DoorWreathRenderer.java")
+    if "BlockEntityRendererRegistry.register(JugcraftAgriculture.GARGOYLE_KNOCKER_ENTITY, GargoyleKnockerRenderer::new);" not in client \
+            or any(call not in drawn for call in ("GargoyleKnockerBlock.ring(", "GargoyleKnockerBlock.eyes(")) \
+            or "GargoyleKnockerRenderer.draw(" not in door_drawn:
+        err("GargoyleKnockerRenderer: registered, it must swing the ring by ring and light the eyes by eyes, on walls and (by DoorWreathRenderer) doors")
+    wreath_java = read(JAVA_ROOT / "agriculture" / "DoorWreath.java")
+    if "instanceof HollyWreathBlock" in wreath_java or "ornament.useOnDoor(" not in wreath_java or "ornament.doorTick(" not in wreath_java:
+        err("DoorWreath: what hangs on a door must say how it differs by AutumnWreathBlock's takesMums, doorBox, useOnDoor and doorTick")
+    variants = (load(ASSETS / "blockstates" / f"{kn['block']}.json") or {}).get("variants", {})
+    for face in ("north", "east", "south", "west"):
+        if [variants.get(f"facing={face},runner={r}", {}).get("model") for r in "012"] != \
+                [f"{MOD}:block/{kn['block']}{suffix}" for suffix in ("", "_ring", "_eyes")]:
+            err(f"blockstates/{kn['block']}.json: facing {face} must show the knocker, its ring and its eyes by runner")
+    eyes = (load(ASSETS / "models" / "block" / f"{kn['block']}_eyes.json") or {}).get("elements", [])
+    if not eyes or any(e.get("light_emission") != 15 or e.get("shade") is not False for e in eyes):
+        err(f"models/block/{kn['block']}_eyes.json: its eyes must glow, full-bright and unshaded")
+    ring = (load(ASSETS / "models" / "block" / f"{kn['block']}_ring.json") or {}).get("elements", [])
+    if not ring or min(e["from"][2] for e in ring) < 11.5:
+        err(f"models/block/{kn['block']}_ring.json: the ring must hang within a door wreath's depth")
+    for block in (kn["block"], bw["block"]):
+        elements = (load(ASSETS / "models" / "block" / f"{block}.json") or {}).get("elements", [])
+        if not elements or min(e["from"][2] for e in elements) < 11.5 or max(e["to"][2] for e in elements) > 16.0:
+            err(f"models/block/{block}.json: it must sit against what it hangs on, within a door wreath's depth (4.5 pixels)")
 
 
 def check_hearth():

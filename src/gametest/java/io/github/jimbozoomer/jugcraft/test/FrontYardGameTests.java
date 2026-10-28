@@ -1,8 +1,13 @@
 package io.github.jimbozoomer.jugcraft.test;
 
 import io.github.jimbozoomer.jugcraft.Jugcraft;
+import io.github.jimbozoomer.jugcraft.agriculture.AutumnWreathBlock;
+import io.github.jimbozoomer.jugcraft.agriculture.BatWreathBlock;
+import io.github.jimbozoomer.jugcraft.agriculture.BewareDoormatBlock;
 import io.github.jimbozoomer.jugcraft.agriculture.DecorationBlockEntity;
+import io.github.jimbozoomer.jugcraft.agriculture.DoorWreath;
 import io.github.jimbozoomer.jugcraft.agriculture.FacingDecorationBlock;
+import io.github.jimbozoomer.jugcraft.agriculture.GargoyleKnockerBlock;
 import io.github.jimbozoomer.jugcraft.agriculture.HauntedMailboxBlock;
 import io.github.jimbozoomer.jugcraft.agriculture.HauntedMailboxBlockEntity;
 import io.github.jimbozoomer.jugcraft.agriculture.JugcraftAgriculture;
@@ -17,6 +22,7 @@ import java.util.function.Predicate;
 import net.fabricmc.fabric.api.gametest.v1.GameTest;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.resources.ResourceKey;
@@ -28,8 +34,11 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.GameType;
+import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.DoorBlock;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.properties.DoubleBlockHalf;
 import net.minecraft.world.level.storage.loot.LootTable;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.BlockHitResult;
@@ -47,7 +56,11 @@ import net.minecraft.world.phys.Vec3;
  * themselves; the dog's tail wags only while someone is near, the cat's sways, each cat in its own time, and the crow's
  * head turns toward whoever it watches as far as it can, glancing about with no one near, in quick snaps. The Rising
  * Zombie stands two blocks high and groans for an empty hand without changing; broken, it drops once; its arms claw out of
- * step and reach higher the nearer anyone comes. Their recipes and loot load (two lights a craft).
+ * step and reach higher the nearer anyone comes. Part 3: the Gargoyle Door Knocker hangs on a wall facing out and raps
+ * for an empty hand, its ring swinging and its eyes glowing while it raps, then still; on a door its knock neither opens
+ * the door nor lets a second knock in while it raps, and with a Candy Bag it knocks for trick-or-treat. The Bat Wreath
+ * hangs on a wall and a door, takes no mums and drops as itself. The Beware Doormat lies facing whoever places it and
+ * goes with what is under it. Their recipes and loot load (two lights a craft).
  */
 public class FrontYardGameTests {
 	private static Item item(String id) {
@@ -259,10 +272,110 @@ public class FrontYardGameTests {
 		helper.succeed();
 	}
 
+	/** Uses {@code held} on the {@code face} side of the block at {@code absolute}, as a player placing or using it there. */
+	private static void useOnFace(ServerPlayer player, BlockPos absolute, Direction face, ItemStack held) {
+		player.setItemInHand(InteractionHand.MAIN_HAND, held);
+		player.getMainHandItem().useOn(new UseOnContext(player, InteractionHand.MAIN_HAND,
+				new BlockHitResult(Vec3.atCenterOf(absolute).relative(face, 0.5), face, absolute, false)));
+	}
+
+	private static void door(ServerLevel level, BlockPos base) {
+		level.setBlock(base.below(), Blocks.STONE.defaultBlockState(), Block.UPDATE_ALL);
+		level.setBlock(base, Blocks.OAK_DOOR.defaultBlockState(), Block.UPDATE_ALL);
+		level.setBlock(base.above(), Blocks.OAK_DOOR.defaultBlockState().setValue(DoorBlock.HALF, DoubleBlockHalf.UPPER), Block.UPDATE_ALL);
+	}
+
+	@GameTest(maxTicks = 60)
+	public void theGargoyleKnockerRapsOnAWallAndADoor(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		floor(helper);
+		BlockPos wall = helper.absolutePos(new BlockPos(2, 2, 5));
+		level.setBlock(wall, Blocks.STONE_BRICKS.defaultBlockState(), Block.UPDATE_ALL);
+		ServerPlayer player = standing(helper, new BlockPos(2, 2, 2));
+		useOnFace(player, wall, Direction.NORTH, new ItemStack(item("gargoyle_knocker")));
+		BlockPos at = wall.north();
+		BlockState hung = level.getBlockState(at);
+		helper.assertTrue(hung.getBlock() instanceof GargoyleKnockerBlock && hung.getValue(AutumnWreathBlock.FACING) == Direction.NORTH
+				&& level.getBlockEntity(at) instanceof DecorationBlockEntity, "It hangs on the wall's face, facing out, with its block entity");
+		use(player, level, at, ItemStack.EMPTY);
+		float lifted = GargoyleKnockerBlock.ring(GargoyleKnockerBlock.RAP_TICKS / 2.0F);
+		helper.assertTrue(Math.abs(lifted - GargoyleKnockerBlock.SWING) < 0.01F && GargoyleKnockerBlock.ring(0.0F) == 0.0F
+				&& GargoyleKnockerBlock.ring(GargoyleKnockerBlock.RAP_TICKS) < 0.01F, "Its ring lifts " + GargoyleKnockerBlock.SWING + " and strikes: " + lifted);
+		helper.assertTrue(GargoyleKnockerBlock.eyes(1.0F) && !GargoyleKnockerBlock.eyes(GargoyleKnockerBlock.RAPS * GargoyleKnockerBlock.RAP_TICKS
+				+ GargoyleKnockerBlock.GLOW_AFTER), "its eyes glowing while it raps, then not");
+		BlockPos base = helper.absolutePos(new BlockPos(5, 2, 4));
+		door(level, base);
+		DoorWreath ornament = DoorWreath.attach(level, base.above(), true, hung.getBlock().defaultBlockState());
+		helper.assertTrue(ornament != null, "It hangs on a door too");
+		helper.runAfterDelay(1, () -> {
+			helper.assertTrue(level.getBlockEntity(at) instanceof DecorationBlockEntity watch && watch.marked() != Long.MIN_VALUE,
+					"An empty hand knocks on the wall's knocker");
+			ornament.interact(player, InteractionHand.MAIN_HAND, Vec3.ZERO);
+			long knocked = ornament.knockedAt();
+			helper.assertTrue(knocked != Long.MIN_VALUE && !level.getBlockState(base).getValue(DoorBlock.OPEN),
+					"On a door, an empty hand knocks rather than opening it");
+			ornament.interact(player, InteractionHand.MAIN_HAND, Vec3.ZERO);
+			helper.assertTrue(ornament.knockedAt() == knocked, "and a second knock waits while it raps");
+			ItemStack bag = new ItemStack(item("candy_bag"));
+			player.setItemInHand(InteractionHand.MAIN_HAND, bag);
+			helper.runAfterDelay(GargoyleKnockerBlock.RAPS * GargoyleKnockerBlock.RAP_TICKS + 2, () -> {
+				ornament.interact(player, InteractionHand.MAIN_HAND, Vec3.ZERO);
+				helper.assertTrue(ornament.knockedAt() > knocked && player.getCooldowns().isOnCooldown(bag),
+						"With a Candy Bag it knocks again, for trick-or-treat at its door");
+				level.destroyBlock(at, true);
+				helper.assertTrue(dropped(helper, item("gargoyle_knocker")) == 1, "Broken on the wall, it drops itself");
+				helper.succeed();
+			});
+		});
+	}
+
+	@GameTest(maxTicks = 40)
+	public void theBatWreathHangsOnWallsAndDoors(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		floor(helper);
+		BlockPos wall = helper.absolutePos(new BlockPos(2, 2, 5));
+		level.setBlock(wall, Blocks.STONE_BRICKS.defaultBlockState(), Block.UPDATE_ALL);
+		ServerPlayer player = standing(helper, new BlockPos(2, 2, 2));
+		useOnFace(player, wall, Direction.NORTH, new ItemStack(item("bat_wreath")));
+		BlockState hung = level.getBlockState(wall.north());
+		helper.assertTrue(hung.getBlock() instanceof BatWreathBlock && hung.getValue(AutumnWreathBlock.FACING) == Direction.NORTH,
+				"It hangs on the wall's face, facing out");
+		ItemStack mums = new ItemStack(item("red_mum"), 2);
+		var result = hung.useItemOn(mums, level, player, InteractionHand.MAIN_HAND,
+				new BlockHitResult(Vec3.atCenterOf(wall.north()), Direction.NORTH, wall.north(), false));
+		helper.assertTrue(result == net.minecraft.world.InteractionResult.PASS && level.getBlockState(wall.north()) == hung && mums.getCount() == 2,
+				"It takes no mums");
+		BlockPos base = helper.absolutePos(new BlockPos(5, 2, 4));
+		door(level, base);
+		useOnFace(player, base.above(), Direction.NORTH, new ItemStack(item("bat_wreath")));
+		var hanging = level.getEntitiesOfClass(DoorWreath.class, new AABB(base.above()).inflate(1), e -> e.getPos().equals(base.above()));
+		helper.assertTrue(hanging.size() == 1 && hanging.get(0).wreathState().getBlock() instanceof BatWreathBlock, "It hangs on a door, as the other wreaths do");
+		ItemStack picked = hanging.get(0).getPickResult();
+		helper.assertTrue(picked.is(item("bat_wreath")) && !picked.has(DataComponents.BLOCK_STATE), "and comes away as itself, with no mums");
+		helper.succeed();
+	}
+
+	@GameTest(maxTicks = 40)
+	public void theBewareDoormatLiesAtTheDoor(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		floor(helper);
+		BlockPos pos = new BlockPos(3, 2, 4);
+		BlockPos at = helper.absolutePos(pos);
+		ServerPlayer player = standing(helper, new BlockPos(3, 2, 1));
+		place(player, helper, pos, new ItemStack(item("beware_doormat")));
+		BlockState mat = level.getBlockState(at);
+		helper.assertTrue(mat.getBlock() instanceof BewareDoormatBlock && mat.getValue(FacingDecorationBlock.FACING) == Direction.NORTH,
+				"It lies facing whoever places it, its device read the right way up by them");
+		level.setBlock(at.below(), Blocks.AIR.defaultBlockState(), Block.UPDATE_ALL);
+		helper.assertTrue(level.getBlockState(at).isAir() && dropped(helper, item("beware_doormat")) == 1, "With nothing under it, it goes, dropping itself");
+		helper.succeed();
+	}
+
 	@GameTest
 	public void frontYardDataLoads(GameTestHelper helper) {
 		ServerLevel level = helper.getLevel();
-		for (String id : new String[] {"haunted_mailbox", "pumpkin_path_light", "skeleton_dog", "skeleton_cat", "skeleton_crow", "rising_zombie"}) {
+		for (String id : new String[] {"haunted_mailbox", "pumpkin_path_light", "skeleton_dog", "skeleton_cat", "skeleton_crow", "rising_zombie",
+				"gargoyle_knocker", "bat_wreath", "beware_doormat"}) {
 			helper.assertTrue(level.recipeAccess().byKey(ResourceKey.create(Registries.RECIPE, Jugcraft.id(id))).isPresent(), id + " has a recipe");
 			helper.assertTrue(level.getServer().reloadableRegistries().getLootTable(ResourceKey.create(Registries.LOOT_TABLE,
 					Jugcraft.id("blocks/" + id))) != LootTable.EMPTY, id + "'s loot loads");

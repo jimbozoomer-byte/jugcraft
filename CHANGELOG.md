@@ -8,6 +8,15 @@ Every change to Jugcraft, newest first, grouped by pull request. For what each t
 
 No numbered release yet. Entries on feature branches remain proposed until their pull requests merge.
 
+### Unmerged: Front-Yard Haunt Scenes, part 3 (the doorway)
+- **Gargoyle Door Knocker**: a bronze gargoyle's head with a ring in its jaws. It hangs on a wall or on either face of a wooden door, as the wreaths do. An empty hand raps it three times, its ring swinging and its eyes glowing ember-red. With a Candy Bag it knocks for trick-or-treat at its door. It is haunted: now and then it raps by itself.
+- **Bat Wreath**: black twigs wound into a ring with three paper bats flying off it and a purple bow, for walls and doors.
+- **Beware Doormat**: a coir mat with a skull and crossbones. Now and then whoever treads on it hears a heart beating under the boards.
+- The door wreaths' attachment now asks what hangs on it what it is, instead of singling out the holly wreath; the autumn and holly wreaths behave as before.
+- Recipes: an iron ingot and five nuggets (the knocker); five sticks, paper and black dye (the wreath); five wheat and black dye (the mat).
+- Record: [front-yard-haunt.md](docs/features/front-yard-haunt.md). Decor set 7's third part.
+- **Checked:** the record's Verification. Game tests and screenshots run in CI only; not played by hand.
+
 ### Unmerged: Front-Yard Haunt Scenes, part 2 (the bones and the risen)
 - **Skeleton Dog, Skeleton Cat and Skeleton Crow**: the bleached bones of a big dog sitting, a cat arched with its tail up and fangs bared, and a crow perched, each at real size, their skulls' sockets square. Each faces whoever places it, and an empty hand rattles its bones. The dog's tail sweeps the ground while anyone is within 6 blocks; the cat's tail sways; the crow's skull turns to watch whoever is within 8 blocks, in a bird's quick snaps, and glances about when no one is.
 - **Rising Zombie**: a zombie clawing its way out of a mound of dug earth, two blocks high: a torn burial shirt with its ribs showing through, its head lolling, its arms raised and clawing at the air. The nearer anyone comes, the higher they reach. An empty hand makes it groan.

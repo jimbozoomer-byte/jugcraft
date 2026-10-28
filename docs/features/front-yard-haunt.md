@@ -1,9 +1,9 @@
 # Front-Yard Haunt Scenes
 
-Status: parts 1 (the path: the Haunted Mailbox and the Pumpkin Path Light) and 2 (the bones and the risen: the Skeleton Dog, Cat and Crow and the Rising Zombie) implemented. CI builds them and runs their game tests and client screenshots; not yet played by hand. Parts 3 to 5 are planned (below).
+Status: parts 1 (the path: the Haunted Mailbox and the Pumpkin Path Light), 2 (the bones and the risen: the Skeleton Dog, Cat and Crow and the Rising Zombie) and 3 (the doorway: the Gargoyle Door Knocker, the Bat Wreath and the Beware Doormat) implemented. CI builds them and runs their game tests and client screenshots; not yet played by hand. Parts 4 and 5 are planned (below).
 Proposal issue: none. The owner asked for it directly on 28 October 2026, as set 7 of the ten sets of fall and Halloween decor ("Then I want you to do 1-10 in parts in that order one by one"), drawn by their rules.
 Owner: @jimbozoomer-byte
-Target milestone and tier: Discovery tier; the mailbox is made from iron nuggets, a spider eye, red dye and a wooden fence, two path lights from iron bars and a jack-o'-lantern, the skeleton animals from bones and string (the crow with a feather), and the Rising Zombie from rotten flesh, a bone and coarse dirt.
+Target milestone and tier: Discovery tier; the mailbox is made from iron nuggets, a spider eye, red dye and a wooden fence, two path lights from iron bars and a jack-o'-lantern, the skeleton animals from bones and string (the crow with a feather), the Rising Zombie from rotten flesh, a bone and coarse dirt, the knocker from an iron ingot and nuggets, the bat wreath from sticks, paper and black dye, and the doormat from wheat and black dye.
 Primary specialty and supported player role: building. A builder dresses the front of a house for Halloween night, from the street to the door. Nothing in it is needed to progress.
 
 ## Player experience
@@ -49,8 +49,26 @@ The front yard after dark: what a trick-or-treater passes on the way to the door
   - Broken, it comes away whole and drops itself once.
 - The wag, the sway, the watching and the clawing are each player's own sight of them, drawn by their game; nothing is held.
 
+### Part 3: the doorway
+- **Gargoyle Door Knocker**: a bronze gargoyle's head, 30 cm high on its back plate.
+  - It is horned, with deep sockets under its brow and a wrinkled snout. Its jaws hold a ring, with a stud below for the ring to strike.
+  - **It hangs where a wreath does**: on the side of a block, or on either face of a wooden door, where it swings with the door.
+  - **An empty hand knocks**: it lifts the ring and raps three times, 6 ticks apart. The ring swings out 40 degrees each time and strikes the stud, and the gargoyle's eyes glow ember-red while it raps.
+  - On a door, its knock doesn't open the door; sneak to leave it be, or use the door itself.
+  - **With a Candy Bag it knocks for trick-or-treat**: at the door it hangs on, or at a wooden door beside the wall it hangs on. It follows the same rules as knocking with the bag.
+  - **It is haunted**: now and then it raps by itself, about every few minutes on a wall (on its random ticks) or on a door.
+  - Recipe: an iron nugget, an iron ingot and an iron nugget, over two iron nuggets, over an iron nugget.
+- **Bat Wreath**: black twigs wound into a ring 75 cm across, two rings of bundles crossing and twigs sticking out of them.
+  - Three black paper bats fly off it to the upper left and the right, their wingtips raised. A purple satin bow is tied at its foot.
+  - It hangs on the side of a block or on either face of a door, as the autumn and holly wreaths do. It is dressed for good and takes no mums.
+  - Recipe: a stick, paper and a stick, over two sticks, over a stick, black dye and a stick.
+- **Beware Doormat**: a coir doormat 75 cm by 50 cm, a black border round a skull and crossbones.
+  - It lies facing whoever places it, its device the right way up to them, and goes if what is under it does.
+  - **Tread on it** and now and then (one step in 8) a heart beats under the boards.
+  - Recipe: a wheat, black dye and a wheat, over three wheat.
+- Broken, each drops itself; on a door, the knocker and the wreath drop as the other wreaths do.
+
 ### Planned
-- **Part 3: the doorway**: a gargoyle door knocker that moves and knocks, a black-twig bat wreath (with the autumn, bittersweet and holly wreaths) and a "Beware" doormat.
 - **Part 4: the Crashed Witch**: striped stockings and a snapped broom sticking out of a tree or a wall.
 - **Part 5: the Trick-or-Treat Candy Chute**: from the porch rail to the path; candy dropped in slides down it, tied into trick-or-treating.
 
@@ -77,12 +95,24 @@ The front yard after dark: what a trick-or-treater passes on the way to the door
 - Moving parts, from each blockstate's `runner` models:
   - `SkeletonAnimalRenderer` sweeps the dog's tail and turns the crow's skull about the upright, and sways the cat's tail from side to side, each about its pivot;
   - `RisingZombieRenderer` claws each arm forward and back about its shoulder and leans it nearer upright as the player nears.
+- **Cast bronze** (part 3): bronze lit along each piece's top, a darker right edge, and verdigris gathered along its foot where the rain runs off. Its face has deep black sockets, dark nostrils and polished fangs.
+- **The knocker's ring**: an octagon of polished bronze bars, the corners turned 45 degrees.
+- **The bat wreath's twigs**: dark grey-brown bark in stripes along each bundle. Each ring of eight bundles is drawn at a texel a pixel, turned in steps of 22.5 or 45 degrees, the only turns a block model takes.
+- **The paper bats**: furred bodies and ears. Their wings are cut out, each three texels high: the tip raised at the wrist, the leading edge across, the fingers hanging below with the membrane scalloped between them.
+- **The doormat's coir**: bristles woven in rows, two tones by turns, a lit tuft every fourth texel. Its device is black, the bristles round it clipped pale so it reads, drawn the right way up for a visitor coming from the street.
+- Moving parts, from the knocker's blockstate `runner` models: `GargoyleKnockerRenderer` swings the ring out about its pivot in the jaws after each knock and lights the eyes full-bright, on a wall from its block entity's mark and on a door (through `DoorWreathRenderer`) from the door attachment's knock.
+- **The part 3 previews**, fixed before commit:
+  - the ring's corner bars leaned the wrong way, so it read as a cross; they now close the octagon;
+  - the paper bats' wings, cut out by the midway's carousel-bat wing, came out all but empty at this size; they now have a wing of their own;
+  - the bat wreath's inner ring stuck bars inward, where a bundle steeper than 45 degrees could not be turned; those are drawn upright and turned the rest of the way;
+  - the doormat's bristles were too busy for its device, which read upside down to a visitor; the bristles are now in rows, the device's clipped pale, and it is drawn the right way up.
 - **The part 2 previews**, fixed before commit:
   - the cat's two sockets ran together into one dark band, like a visor; they now open between its brow, nose and cheekbones;
   - the zombie's left arm, reaching forward, hid its face from the front; both arms now rise from the shoulders and lean out.
 
 ## Connections
-- Existing input producer: vanilla iron, spider eyes, dye, fences and jack-o'-lanterns; bones, string and feathers (skeletons, spiders and chickens); rotten flesh (zombies) and coarse dirt.
+- Existing input producer: vanilla iron, spider eyes, dye, fences and jack-o'-lanterns; bones, string and feathers (skeletons, spiders and chickens); rotten flesh (zombies) and coarse dirt; sticks, paper and wheat.
+- Existing system it joins: **trick-or-treating** (the Candy Bag's knock on a wooden door), which the knocker knocks with, and the **door wreaths**, which the knocker and the bat wreath hang on doors with.
 - Existing output consumer: none; they are a yard's decoration.
 - Technology/magic connections (or infrastructure/cosmetic applicability): cosmetic.
 - Reachable entry path: from the first days, with a little iron, or the drops of the first night's mobs.
@@ -92,6 +122,8 @@ The front yard after dark: what a trick-or-treater passes on the way to the door
 ## Balance and automation
 - The mailbox costs four iron nuggets, a spider eye, red dye and a fence; two path lights cost four iron bars and a jack-o'-lantern. Each gives back only itself.
 - The dog costs five bones and a string, the cat three bones and a string, the crow two bones, a feather and a string, and the Rising Zombie five rotten flesh, a bone and three coarse dirt. Each gives back only itself.
+- The knocker costs an iron ingot and five nuggets, the bat wreath five sticks, paper and black dye, and the doormat five wheat and black dye. Each gives back only itself.
+- The knocker's trick-or-treat knock is the Candy Bag's own: the same cooldown, the same answer and treats, nothing added.
 - They make nothing and take nothing. No loop.
 
 ## Multiplayer and persistence
@@ -100,11 +132,18 @@ The front yard after dark: what a trick-or-treater passes on the way to the door
 - **The path light's light is the server's**: `lit`, on both blocks. Its sway is worked out from the game's clock on each client; nothing is sent. Its block entity (`pumpkin_path_light`) keeps nothing; it is there for its renderer.
 - **The skeleton animals and the Rising Zombie hold nothing**: their moving parts are worked out on each client from its own distance and the game's clock. The animals' shared block entity (`skeleton_animal`) keeps on each client whether that player is near and since when, and where the crow's head is turning; the zombie's (`rising_zombie`) keeps nothing. Nothing is sent or saved, and nothing ticks on the server.
 - The mailbox, the path light and the Rising Zombie can't be pushed by a piston; a piston pops a skeleton animal off, and it drops itself.
+- **The knocker's knocks are the server's**: an empty hand or a Candy Bag knocks, and the server raps it (its scheduled ticks on a wall, its door attachment's ticks on a door). Its block entity (`gargoyle_knocker`) marks each knock on every side, from a block event, for its renderer. On a door the attachment keeps a count of knocks, sent to every client so each draws the ring swinging; nothing about a knock is saved. While it raps, another knock waits.
+- **Its haunting** is the server's too, so everyone hears it: one random tick in 3 on a wall, one tick in 3,000 on a door, it knocks.
+- **Hanging on a door**, the knocker and the bat wreath use the door wreaths' attachment (`door_wreath`), unchanged in what it saves: the block state of what hangs there. That attachment now asks what hangs on it what it is (whether it takes mums, its box on a door, its use, its tick). It no longer singles out the holly wreath by class, and the autumn and holly wreaths behave as before.
+- The knocker and the bat wreath pop off when pushed, as the wreaths do; so does the doormat.
 - IDs (stable from release):
   - the block and item `haunted_mailbox` (`facing`, `part` 0 to 1, `lit` (unused), `flag`, model-only `runner` 0 to 2; block entity `haunted_mailbox`, saving nothing);
   - the block and item `pumpkin_path_light` (`facing`, `part` 0 to 1, `lit`, model-only `runner` 0 to 2; block entity `pumpkin_path_light`, saving nothing).
   - the blocks and items `skeleton_dog`, `skeleton_cat` and `skeleton_crow` (`facing`, model-only `runner` 0 to 1; one block entity `skeleton_animal` for the three, saving nothing);
   - the block and item `rising_zombie` (`facing`, `part` 0 to 1, `lit` (unused), model-only `runner` 0 to 2; block entity `rising_zombie`, saving nothing).
+  - the block and item `gargoyle_knocker` (`facing`, `flowers` (unused, as the wreath's kind), model-only `runner` 0 to 2; block entity `gargoyle_knocker`, saving nothing);
+  - the block and item `bat_wreath` (`facing`, `flowers` (unused));
+  - the block and item `beware_doormat` (`facing`).
 - Their recipes follow the agriculture switch. The blocks and items stay registered when it is off.
 
 ## Dependencies and assets
@@ -137,6 +176,19 @@ Local checks run on this branch, and their results:
   - `javac` scan of the new and changed Java for syntax errors: none. Every member the new Java calls is used elsewhere in the code already. The full compile runs in CI.
   - The models were previewed offline (review aids, not committed); what the previews showed and what was fixed is under How it is drawn.
 
+- Part 3:
+  - `python3 tools/check_mod_data.py`: PASS on the second run (8,143 material IDs), including the art check of every block and item model. The first run failed one of the new checks: the bat wreath reached a tenth of a pixel into the wall behind it. Its bundles' back faces all lay in one plane and crossed at the corners, so the build nudged one out. Every other bundle now sits a tenth in. `check_front_yard` now also checks:
+    - the knocker's, the doormat's and the bat wreath's Java against `tools/front_yard.py`;
+    - that the knocker and the bat wreath are kinds of the Autumn Wreath with wreath items, so they hang on doors;
+    - that the door attachment asks what hangs on it by its hooks rather than singling out the holly wreath by class;
+    - that the knocker's renderer swings its ring and lights its eyes on walls and doors, and that its eyes glow;
+    - that the knocker and the wreath sit within a door wreath's depth.
+  - `python3 scripts/check_repository.py`: PASS.
+  - `python3 -m unittest discover -s scripts/tests`: 287 tests, OK.
+  - `python3 tools/check_icon_maps.py`: PASS (no new map; the three items are 3D).
+  - `javac` scan of the new and changed Java for syntax errors: none. Every member the new Java calls is used elsewhere in the code already. The full compile runs in CI.
+  - The models were previewed offline (review aids, not committed); what the previews showed and what was fixed is under How it is drawn.
+
 `FrontYardGameTests` (run in CI):
 - **The haunted mailbox raises its flag**: it stands two blocks high, facing the player, its flag down, its block entity on its first block; an empty hand raises its flag on both blocks and lowers it again; broken at its box, it comes away whole and drops once.
 - **The mailbox's door falls open for whoever comes near**: with someone near, it falls open 75 degrees from shut, its eyes staring out; with no one, it shuts, its eyes hidden, and now and then rattles open a crack; each box in its own time.
@@ -144,18 +196,26 @@ Local checks run on this branch, and their results:
 - **The skeleton animals face whoever places them** (part 2): the dog, the cat and the crow each stand facing the player, their block entity kept; an empty hand rattles each one's bones and changes nothing; broken, each drops itself.
 - **The skeleton animals move**: with someone near, the dog's tail wags 25 degrees, starting from still; with no one, it lies still. The cat's tail sways 15 degrees, each cat in its own time. The crow's head turns toward whoever it watches, as far as 70 degrees; with no one near it only glances about, now this way, now that, in a quick snap.
 - **The Rising Zombie claws and groans**: it stands two blocks high, facing the player, its block entity on its first block; an empty hand makes it groan and changes nothing; its arms claw 12 degrees, out of step, and reach higher the nearer anyone comes; broken, it comes away whole and drops once.
-- **Their data loads**: all six recipes and loot tables.
+- **The gargoyle knocker raps on a wall and a door** (part 3):
+  - it hangs on a wall's face, facing out, with its block entity, and an empty hand knocks; its ring lifts 40 degrees and strikes, its eyes glowing while it raps and then not;
+  - on a door, an empty hand knocks rather than opening the door, and a second knock waits while it raps; with a Candy Bag it knocks again, the bag's trick-or-treat cooldown starting;
+  - broken on the wall, it drops itself.
+- **The bat wreath hangs on walls and doors**: it hangs on a wall's face, takes no mums, hangs on a door as the other wreaths do, and comes away as itself.
+- **The Beware Doormat lies at the door**: it lies facing whoever places it, and with nothing under it it goes, dropping itself.
+- **Their data loads**: all nine recipes and loot tables.
 
-`FrontYardClientGameTests` takes four screenshots of a gravel path across a lawn. It holds:
+`FrontYardClientGameTests` takes five screenshots of a gravel path across a lawn. It holds:
 - a Haunted Mailbox at the street end, its flag up;
 - three Pumpkin Path Lights down the path's side, lit, their lanterns swaying (drawn by `PumpkinPathLightRenderer`);
 - a Skeleton Dog sitting by the mailbox, and a Skeleton Crow on a fence post beside it;
 - a Skeleton Cat arched on the lawn, and a Rising Zombie rising there, facing the path (drawn by `SkeletonAnimalRenderer` and `RisingZombieRenderer`).
+- at the path's end, a house front of dark oak with a Gargoyle Door Knocker on its door (drawn by `DoorWreathRenderer`), a Bat Wreath on its wall and a Beware Doormat at its step.
 
 The shots are:
 - from along the path, far enough that the mailbox stays shut;
 - from the street close by the mailbox, near enough that its door falls open and its eyes stare out (drawn by `HauntedMailboxRenderer`), the dog's tail wags and the crow watches the camera;
 - from the lawn close by the zombie, near enough that its arms reach higher;
+- from the path before the door, the knocker set rapping three ticks before the shot, its ring swung out and its eyes glowing;
 - by night.
 
 Not run: a hand playtest, and a two-client playtest.
@@ -164,5 +224,5 @@ Not run: a hand playtest, and a two-client playtest.
 Seasonal in look, not in use: it is made and works all year, and nothing about it ends with October. It doesn't generate in the world.
 
 ## Rollout and open questions
-- Part 1 is the path and part 2 the bones and the risen; parts 3 to 5 follow, each stacked on the last.
+- Part 1 is the path, part 2 the bones and the risen, and part 3 the doorway; parts 4 and 5 follow, each stacked on the last.
 - Open: whether the mailbox should hold a letter or two (it holds nothing now); whether the path lights should take a dye for their glow's colour; whether the skeleton dog should sit up for a bone held out to it.

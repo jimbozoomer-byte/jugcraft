@@ -33,6 +33,18 @@ Part 2, the bones and the risen:
   to and fro `claw` degrees about its shoulders (`shoulder`, the right's across, height and depth; the left's is its
   mirror), once in `period` ticks, out of step; the nearer anyone comes (within `reach` blocks), the higher they reach,
   up to `lurch` degrees nearer upright (client/RisingZombieRenderer). An empty hand makes it groan.
+Part 3, the doorway:
+- The Gargoyle Door Knocker (GargoyleKnockerBlock): a bronze gargoyle's head 30 cm high on its back plate, a ring in its
+  jaws and a stud below it for the ring to strike. It hangs on the side of a block or on either face of a door, as the
+  wreaths do. An empty hand lifts its ring and raps `raps` times, `rap_ticks` apart, the ring swinging out `swing` degrees
+  about its pivot in the jaws (`pivot`, height and depth) and the gargoyle's eyes glowing while it raps
+  (client/GargoyleKnockerRenderer, and on a door client/DoorWreathRenderer). With a Candy Bag in hand it knocks for
+  trick-or-treat at its own door, or at a wooden door beside the wall it hangs on. It is haunted: now and then (one
+  random tick in `haunt` on a wall, one tick in `door_chance` on a door) it raps by itself.
+- The Bat Wreath (BatWreathBlock): black twigs wound into a ring 75 cm across, three black paper bats flying off it and
+  a purple satin bow at its foot. It hangs on the side of a block or on either face of a door, as the other wreaths do.
+- The Beware Doormat (BewareDoormatBlock): a coir doormat 75 cm by 50 cm, a black border round a skull and crossbones.
+  Now and then (one step in `heartbeat`) whoever treads on it hears a heart beating under the boards.
 Sizes in pixels, facing north (the street to the north, the house behind it to the south).
 """
 
@@ -51,6 +63,11 @@ RISING_ZOMBIE = {"block": "rising_zombie", "display": "Rising Zombie", "size": (
                  "lurch": 20.0, "shoulder": (11.5, 10.5, 8.0), "lean": (22.5, 45.0)}
 ANIMALS = (SKELETON_DOG, SKELETON_CAT, SKELETON_CROW)
 
+KNOCKER = {"block": "gargoyle_knocker", "display": "Gargoyle Door Knocker", "raps": 3, "rap_ticks": 6, "swing": 40.0, "pivot": (7.75, 15.0),
+           "haunt": 3, "door_chance": 3000}
+BAT_WREATH = {"block": "bat_wreath", "display": "Bat Wreath"}
+DOORMAT = {"block": "beware_doormat", "display": "Beware Doormat", "heartbeat": 8}
+
 ITEMS = {}
 
 RECIPES = [
@@ -66,6 +83,15 @@ RECIPES = [
     {"id": RISING_ZOMBIE["block"], "pattern": ["RRR", "RBR", "DDD"],
      "key": {"R": "minecraft:rotten_flesh", "B": "minecraft:bone", "D": "minecraft:coarse_dirt"},
      "result": RISING_ZOMBIE["block"], "count": 1, "category": "misc"},
+    # The knocker: a cast head of iron and its ring of nuggets.
+    {"id": KNOCKER["block"], "pattern": ["NIN", "N N", " N "], "key": {"N": "minecraft:iron_nugget", "I": "minecraft:iron_ingot"},
+     "result": KNOCKER["block"], "count": 1, "category": "misc"},
+    # The bat wreath: sticks wound round, paper bats, black dye.
+    {"id": BAT_WREATH["block"], "pattern": ["SPS", "S S", "SDS"], "key": {"S": "minecraft:stick", "P": "minecraft:paper", "D": "minecraft:black_dye"},
+     "result": BAT_WREATH["block"], "count": 1, "category": "building"},
+    # The doormat: straw bristles round a black device.
+    {"id": DOORMAT["block"], "pattern": ["WBW", "WWW"], "key": {"W": "minecraft:wheat", "B": "minecraft:black_dye"},
+     "result": DOORMAT["block"], "count": 1, "category": "building"},
 ]
 # The bones are bones, tied with string; the crow's are a bird's, with a feather.
 SHAPELESS = [
@@ -80,7 +106,7 @@ SHAPELESS = [
 
 def blocks():
     return [MAILBOX["block"], PATH_LIGHT["block"], SKELETON_DOG["block"], SKELETON_CAT["block"], SKELETON_CROW["block"],
-            RISING_ZOMBIE["block"]]
+            RISING_ZOMBIE["block"], KNOCKER["block"], BAT_WREATH["block"], DOORMAT["block"]]
 
 
 def items():

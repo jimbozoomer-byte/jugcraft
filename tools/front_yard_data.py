@@ -18,8 +18,8 @@ import flora_art as fa
 import front_yard as fy
 import pumpkin_patch_data as ppd
 from flora_art import Sculpt, pal, rotation, shade
-from haunted_midway_data import (BLACK, BONE, GREEN, HAIR, LAMP, ORANGE, STEEL, STEM, clear, face_glow, glow, glowing, pumpkin_side,
-                                 zombie_skin)
+from haunted_midway_data import (BLACK, BONE, GREEN, HAIR, LAMP, ORANGE, STEEL, STEM, VIOLET, clear, face_glow, fur, glow, glowing,
+                                 membrane, pumpkin_side, zombie_skin)
 from pumpkin_patch_data import flat, lengthwise, panel
 
 MOD = "jugcraft"
@@ -484,11 +484,215 @@ def rising_zombie():
     return sc
 
 
+# ---------------------------------------------------------------- part 3: the doorway
+
+BRONZE = pal("2a1c10", "47301a", "684828", "8c6638", "b08c52")
+VERDIGRIS = pal("2c4a42", "3e6a5c", "5a8c7a")
+TWIG = pal("141014", "221c20", "322a2e", "463c40")
+COIR = pal("4a3418", "6a4c24", "8a6834", "a8844a")
+EMBER = pal("8a1a0a", "d8401a", "ff8a3a")
+
+
+def cast():
+    """Cast bronze, old: its middle tone, lit along its top row, a darker edge down its right, and verdigris gathered
+    along its foot, where the rain runs off it."""
+    def paint(p):
+        for y in range(p.h):
+            for x in range(p.w):
+                if y == p.h - 1 and p.h > 1:
+                    p.put(x, y, shade(VERDIGRIS, 1 if x % 2 else 0))
+                else:
+                    p.put(x, y, shade(BRONZE, 3 if y == 0 else 1 if (x == p.w - 1 and p.w > 2) else 2))
+    paint.tag = repr(("cast",))
+    return paint
+
+
+def bronze_face(rows):
+    """A cast face, row by row from its top: `B` bronze (lit along the top row), `S` a deep socket, `N` a nostril, `F`
+    a fang (polished bright), `V` verdigris in a crease."""
+    colours = {"S": shade(BLACK, 0), "N": shade(BRONZE, 0), "F": shade(BRONZE, 4), "V": shade(VERDIGRIS, 1)}
+    def paint(p):
+        for y in range(p.h):
+            row = rows[min(y, len(rows) - 1)]
+            for x in range(p.w):
+                ch = row[min(x, len(row) - 1)]
+                p.put(x, y, colours.get(ch) or shade(BRONZE, 3 if y == 0 else 2))
+    paint.tag = repr(("bronze_face", tuple(rows)))
+    return paint
+
+
+def gargoyle_knocker():
+    """The Gargoyle Door Knocker, facing north (hung on the north side of the block behind it, its back at the block's
+    south edge): a bronze back plate 25 cm by 37 cm, a gargoyle's head on it, horned, its brow over two deep sockets,
+    its snout wrinkled and its jaws open over the ring, and a stud below for the ring to strike. Models: `whole`, and its
+    runners `ring` (the ring hanging in its jaws; the renderer lifts and drops it about its pivot) and `eyes` (glowing
+    while it raps, full-bright)."""
+    spec = fy.KNOCKER
+    sc = Sculpt(spec["block"], 2707, 128)
+    metal = cast()
+    el = [panel(sc, "plate", metal, (6.25, 4.0, 15.5), (9.75, 12.5, 16.0)),
+          panel(sc, "plate_lip", metal, (6.0, 5.0, 15.5), (6.25, 11.5, 16.0)),
+          panel(sc, "plate_lip", metal, (9.75, 5.0, 15.5), (10.0, 11.5, 16.0)),
+          panel(sc, "brow", metal, (6.75, 9.5, 14.25), (9.25, 11.5, 15.5), north=bronze_face(("BBB", "SVS"))),
+          panel(sc, "crown", metal, (7.0, 11.5, 14.5), (9.0, 12.0, 15.5)),
+          panel(sc, "horn", metal, (6.6, 11.25, 14.75), (7.1, 12.75, 15.25), rot=rotation((6.85, 11.25, 15.0), "z", 22.5)),
+          panel(sc, "horn", metal, (8.9, 11.25, 14.75), (9.4, 12.75, 15.25), rot=rotation((9.15, 11.25, 15.0), "z", -22.5)),
+          panel(sc, "snout", metal, (7.25, 8.5, 13.75), (8.75, 9.5, 15.5), north=bronze_face(("NN",)), up=bronze_face(("VV", "BB"))),
+          panel(sc, "jaw", metal, (7.0, 7.25, 14.0), (9.0, 8.0, 15.5), north=bronze_face(("FF",))),
+          panel(sc, "cheek", metal, (6.5, 7.5, 14.5), (7.0, 9.5, 15.5)),
+          panel(sc, "cheek", metal, (9.0, 7.5, 14.5), (9.5, 9.5, 15.5)),
+          panel(sc, "stud", metal, (7.6, 4.25, 15.25), (8.4, 5.0, 15.5))]
+    sc.models["whole"] = el
+    ring = flat(BRONZE)
+    cx, cy, z0, z1 = 8.0, 6.0, 14.75, 15.25
+    r = []
+    r.append(panel(sc, "ring", ring, (7.4, cy + 1.25, z0), (8.6, cy + 1.75, z1)))
+    r.append(panel(sc, "ring", ring, (7.4, cy - 1.75, z0), (8.6, cy - 1.25, z1)))
+    r.append(panel(sc, "ring", ring, (cx - 1.75, cy - 0.6, z0), (cx - 1.25, cy + 0.6, z1)))
+    r.append(panel(sc, "ring", ring, (cx + 1.25, cy - 0.6, z0), (cx + 1.75, cy + 0.6, z1)))
+    for dx, dy, angle in ((-1.06, 1.06, 45), (1.06, 1.06, -45), (-1.06, -1.06, -45), (1.06, -1.06, 45)):
+        ox, oy = cx + dx, cy + dy
+        r.append(panel(sc, "ring", ring, (ox - 0.55, oy - 0.25, z0 + 0.02), (ox + 0.55, oy + 0.25, z1 - 0.02),
+                       rot=rotation((ox, oy, 15.0), "z", angle)))
+    sc.models["ring"] = r
+    ember = glow(EMBER)
+    sc.models["eyes"] = glowing([panel(sc, "eye", ember, (6.85, 10.0, 14.2), (7.6, 10.5, 14.25), sides=("north",)),
+                                 panel(sc, "eye", ember, (8.4, 10.0, 14.2), (9.15, 10.5, 14.25), sides=("north",))])
+    return sc
+
+
+def bat_wing(left):
+    """A paper bat's wing seen from the front, three texels high, its hinge at the body (the piece's right for the `left`
+    wing, else its left): its tip raised at the top of its outer end, its leading edge across the middle row, and the
+    fingers hanging below it with the membrane scalloped between them, cut out round its shape."""
+    def paint(p):
+        for y in range(p.h):
+            for x in range(p.w):
+                u = p.w - 1 - x if left else x
+                on = u == p.w - 1 if y == 0 else True if y == 1 else (u % 2 == 0 and u < p.w - 1)
+                if on:
+                    p.put(x, y, shade(BLACK, 2 if y == 1 else 1))
+                else:
+                    clear(p, x, y)
+    paint.tag = repr(("bat_wing", left))
+    return paint
+
+
+def bat_cutout(sc, name, cx, cy, span, z, lean=0.0):
+    """A black paper bat flying off the wreath, `span` pixels from wing tip to wing tip, its body at (cx, cy): a furred
+    body, its head with two ears, and its two wings spread, cut out with their trailing edges scalloped, in a plane at
+    depth `z`, leaning `lean` degrees."""
+    half = span / 2
+    out = [panel(sc, f"{name}_body", fur(), (cx - 0.5, cy - 1.0, z - 0.5), (cx + 0.5, cy + 0.5, z)),
+           panel(sc, f"{name}_head", fur(), (cx - 0.5, cy + 0.5, z - 0.5), (cx + 0.5, cy + 1.25, z)),
+           panel(sc, f"{name}_ear", fur(), (cx - 0.5, cy + 1.25, z - 0.35), (cx - 0.2, cy + 1.75, z - 0.15)),
+           panel(sc, f"{name}_ear", fur(), (cx + 0.2, cy + 1.25, z - 0.35), (cx + 0.5, cy + 1.75, z - 0.15)),
+           panel(sc, f"{name}_wing", bat_wing(True), (cx - half, cy - 1.0, z - 0.25), (cx - 0.5, cy + 2.0, z - 0.25), sides=("north", "south")),
+           panel(sc, f"{name}_wing", bat_wing(False), (cx + 0.5, cy - 1.0, z - 0.25), (cx + half, cy + 2.0, z - 0.25), sides=("north", "south"))]
+    return tilted(out, (cx, cy, z), lean, axis="z") if lean else out
+
+
+def bat_wreath():
+    """The Bat Wreath, facing north (hung on the north side of the block behind it): black twigs wound into a ring 75 cm
+    across, an outer ring of eight bundles crossed by an inner ring of eight more turned half a side round, twigs sticking
+    out of them, three black paper bats flying off it to the upper left and the right, and a purple satin bow tied at its
+    foot. Its one model, `whole`."""
+    spec = fy.BAT_WREATH
+    sc = Sculpt(spec["block"], 2708, 128)
+    twig = lengthwise(TWIG)
+    el = []
+    cx, cy = 8.0, 8.0
+
+    def ring(a, t, z0, z1, phase):
+        """Eight bundles round the middle, `a` out to their outer face and `t` thick, turned `phase` (0 or 22.5 degrees)."""
+        side = 2 * a * math.tan(math.pi / 8) + 0.4
+        out = []
+        for k in range(8):
+            theta = math.radians(90 - 45 * k + phase)
+            mx, my = cx + (a - t / 2) * math.cos(theta), cy + (a - t / 2) * math.sin(theta)
+            # Each bundle runs across its radius, `alpha` from across; block models turn by 22.5 or 45 degrees only, so a
+            # bundle steeper than 45 is drawn upright and turned the rest of the way.
+            alpha = (phase - 45 * k) % 180
+            alpha = alpha - 180 if alpha > 90 else alpha
+            along_x = abs(alpha) <= 45
+            beta = alpha if along_x else (alpha - 90 if alpha > 0 else alpha + 90)
+            w, h = (side, t) if along_x else (t, side)
+            # Every other bundle sits a tenth in from the next at back and front, so where they cross at the corners
+            # no two faces lie in one plane.
+            inset = 0.1 * (k % 2)
+            lo, hi = (mx - w / 2, my - h / 2, z0 + inset), (mx + w / 2, my + h / 2, z1 - inset)
+            out.append(panel(sc, "bundle", twig, lo, hi, rot=rotation((mx, my, (z0 + z1) / 2), "z", beta)))
+        return out
+
+    el += ring(6.0, 1.25, 14.75, 16.0, 0.0)
+    el += ring(5.0, 1.0, 14.0, 15.0, 22.5)
+    # Twigs sticking out of the bundles, this way and that.
+    for ox, oy, angle in ((3.0, 12.4, 22.5), (12.6, 12.6, -22.5), (14.3, 6.4, 22.5), (1.9, 5.6, -22.5), (9.8, 2.0, 45), (5.4, 2.2, -45),
+                          (8.0, 14.4, 0)):
+        el.append(panel(sc, "twig", twig, (ox - 1.25, oy - 0.2, 13.8), (ox + 1.25, oy + 0.2, 14.2), rot=rotation((ox, oy, 14.0), "z", angle)))
+    # The bats, flying off it, and the bow at its foot.
+    el += bat_cutout(sc, "bat", 3.4, 11.4, 7.0, 13.75, lean=22.5)
+    el += bat_cutout(sc, "bat_small", 12.8, 9.6, 5.0, 13.75, lean=-22.5)
+    el += bat_cutout(sc, "bat_small", 13.0, 3.6, 5.0, 13.75)
+    satin = flat(VIOLET)
+    el += [panel(sc, "bow_knot", satin, (7.5, 1.75, 13.5), (8.5, 2.75, 14.0)),
+           panel(sc, "bow_loop", satin, (5.75, 2.0, 13.75), (7.5, 3.25, 14.0)),
+           panel(sc, "bow_loop", satin, (8.5, 2.0, 13.75), (10.25, 3.25, 14.0)),
+           panel(sc, "bow_tail", satin, (6.9, 0.5, 13.75), (7.5, 1.75, 14.0), rot=rotation((7.2, 1.75, 13.9), "z", -22.5)),
+           panel(sc, "bow_tail", satin, (8.5, 0.5, 13.75), (9.1, 1.75, 14.0), rot=rotation((8.8, 1.75, 13.9), "z", 22.5))]
+    sc.models["whole"] = el
+    return sc
+
+
+# The doormat's device, ten texels by six inside its border: a skull over crossed bones, black on the coir.
+DEVICE = ("#..####..#",
+          ".########.",
+          "..#.##.#..",
+          "..##..##..",
+          ".#.####.#.",
+          "#..#..#..#")
+
+
+def coir(device=False):
+    """A coir doormat's bristles: woven in rows, two tones by turns, a lit tuft every fourth texel, staggered row by row.
+    Its top (`device`) has a black border a texel wide round a skull and crossbones, the bristles round the device
+    clipped short and pale so it reads."""
+    def paint(p):
+        for y in range(p.h):
+            for x in range(p.w):
+                k = 3 if (x + 2 * (y % 2)) % 4 == 0 else 2 if y % 2 == 0 else 1
+                p.put(x, y, shade(COIR, k))
+        if device:
+            for y in range(p.h):
+                for x in range(p.w):
+                    edge = x == 0 or y == 0 or x == p.w - 1 or y == p.h - 1
+                    dx, dy = x - (p.w - 10) // 2, y - (p.h - 6) // 2
+                    inside = 0 <= dx < 10 and 0 <= dy < 6
+                    # The top's first row is its north edge: the device is drawn the right way up for a visitor
+                    # coming to the door from the north, its top toward the door.
+                    if edge or (inside and DEVICE[5 - dy][dx] == "#"):
+                        p.put(x, y, shade(BLACK, 1 if edge else 0))
+                    elif inside:
+                        p.put(x, y, shade(COIR, 3))
+    paint.tag = repr(("coir", device))
+    return paint
+
+
+def beware_doormat():
+    """The Beware Doormat, facing north (its device read from the north): a coir mat 75 cm by 50 cm and 3 cm thick, its
+    top a black border round a skull and crossbones. Its one model, `whole`."""
+    spec = fy.DOORMAT
+    sc = Sculpt(spec["block"], 2709, 128)
+    sc.models["whole"] = [panel(sc, "mat", coir(), (2.0, 0.0, 4.0), (14.0, 0.5, 12.0), up=coir(device=True))]
+    return sc
+
+
 # ---------------------------------------------------------------- building and files
 
 _built = {}
 BUILDERS = {fy.MAILBOX["block"]: haunted_mailbox, fy.PATH_LIGHT["block"]: pumpkin_path_light, fy.SKELETON_DOG["block"]: skeleton_dog,
-            fy.SKELETON_CAT["block"]: skeleton_cat, fy.SKELETON_CROW["block"]: skeleton_crow, fy.RISING_ZOMBIE["block"]: rising_zombie}
+            fy.SKELETON_CAT["block"]: skeleton_cat, fy.SKELETON_CROW["block"]: skeleton_crow, fy.RISING_ZOMBIE["block"]: rising_zombie,
+            fy.KNOCKER["block"]: gargoyle_knocker, fy.BAT_WREATH["block"]: bat_wreath, fy.DOORMAT["block"]: beware_doormat}
 
 
 def build(block):
@@ -505,15 +709,17 @@ def _image_of(name):
 MULTI = ((fy.MAILBOX, {"1": "lid", "2": "eyes"}, [("flag_down", {"flag": "false"}), ("flag_up", {"flag": "true"})], ("flag_down", "lid")),
          (fy.PATH_LIGHT, {"1": "lantern", "2": "glow"}, [], ("lantern",)),
          (fy.RISING_ZOMBIE, {"1": "left_arm", "2": "right_arm"}, [], ("left_arm", "right_arm")))
-# Each skeleton animal's one moving part, its `runner` 1.
-RUNNER = {fy.SKELETON_DOG["block"]: "tail", fy.SKELETON_CAT["block"]: "tail", fy.SKELETON_CROW["block"]: "head"}
+# Each one-block piece: its runners' models by `runner` value (none for a piece without moving parts), and what its
+# item shows besides it whole.
+SINGLE = ((fy.SKELETON_DOG, {"1": "tail"}, ("tail",)), (fy.SKELETON_CAT, {"1": "tail"}, ("tail",)), (fy.SKELETON_CROW, {"1": "head"}, ("head",)),
+          (fy.KNOCKER, {"1": "ring", "2": "eyes"}, ("ring",)), (fy.BAT_WREATH, {}, ()), (fy.DOORMAT, {}, ()))
 
 
 def assets(root, write, lang):
     """Each multi-block piece's blocks' models, cut from the whole, its overlays cut the same way (the mailbox's flag down
     and up), its runners whole in its first block's frame, a multipart blockstate adding each by its property (the runner
-    alone when `runner`), and its item (the piece whole at half size). Each skeleton animal's model, its moving part's
-    model (shown alone when `runner` is 1), and its item (the animal whole)."""
+    alone when `runner`), and its item (the piece whole at half size). Each one-block piece's model, its moving parts'
+    models (each shown alone at its `runner`), and its item (the piece whole)."""
     write = fa.closing_writer(write, _image_of)
     models = root / "models" / "block"
     states = root / "blockstates"
@@ -550,20 +756,25 @@ def assets(root, write, lang):
         item = fa.transformed(d17d.pinned(d20d.separated(shown)), 0.5, (4.0, 0.0, 4.0), (0, 0, 0))
         write(root / "models" / "item" / f"{block}.json", fa.model(block, item))
         write(root / "items" / f"{block}.json", {"model": {"type": "minecraft:model", "model": rid(f"item/{block}")}})
-    for spec in fy.ANIMALS:
+    for spec, runners, item_shows in SINGLE:
         block = spec["block"]
         lang[f"block.{MOD}.{block}"] = spec["display"]
         sc = build(block)
-        runner = RUNNER[block]
         write(models / f"{block}.json", fa.model(block, d20d.separated(sc.models["whole"])))
-        write(models / f"{block}_{runner}.json", fa.model(block, d20d.separated(sc.models[runner])))
+        for name in runners.values():
+            write(models / f"{block}_{name}.json", fa.model(block, d20d.separated(sc.models[name])))
         variants = {}
         for f, y in FACINGS.items():
             turn = {"y": y} if y else {}
-            variants[f"facing={f},runner=0"] = {"model": rid(f"block/{block}"), **turn}
-            variants[f"facing={f},runner=1"] = {"model": rid(f"block/{block}_{runner}"), **turn}
+            if runners:
+                variants[f"facing={f},runner=0"] = {"model": rid(f"block/{block}"), **turn}
+                for value, name in runners.items():
+                    variants[f"facing={f},runner={value}"] = {"model": rid(f"block/{block}_{name}"), **turn}
+            else:
+                variants[f"facing={f}"] = {"model": rid(f"block/{block}"), **turn}
         write(states / f"{block}.json", {"variants": variants})
-        write(root / "models" / "item" / f"{block}.json", fa.model(block, d20d.separated(sc.models["whole"] + sc.models[runner])))
+        shown = sc.models["whole"] + [e for name in item_shows for e in sc.models[name]]
+        write(root / "models" / "item" / f"{block}.json", fa.model(block, d20d.separated(shown)))
         write(root / "items" / f"{block}.json", {"model": {"type": "minecraft:model", "model": rid(f"item/{block}")}})
 
 
@@ -581,12 +792,16 @@ def loot(out, write):
 
 def tags(tags):
     """The mailbox comes off with an axe (its post is wood), the path light with a pickaxe (it is iron), the skeleton
-    animals with a pickaxe (they are bone, as a bone block is) and the Rising Zombie with a shovel (it is a mound of earth)."""
+    animals with a pickaxe (they are bone, as a bone block is), the Rising Zombie with a shovel (it is a mound of earth),
+    the knocker with a pickaxe (bronze), the bat wreath with an axe (twigs) and the doormat with a hoe (straw)."""
     tags.add("block", "minecraft:mineable/axe", rid(fy.MAILBOX["block"]))
     tags.add("block", "minecraft:mineable/pickaxe", rid(fy.PATH_LIGHT["block"]))
     for spec in fy.ANIMALS:
         tags.add("block", "minecraft:mineable/pickaxe", rid(spec["block"]))
     tags.add("block", "minecraft:mineable/shovel", rid(fy.RISING_ZOMBIE["block"]))
+    tags.add("block", "minecraft:mineable/pickaxe", rid(fy.KNOCKER["block"]))
+    tags.add("block", "minecraft:mineable/axe", rid(fy.BAT_WREATH["block"]))
+    tags.add("block", "minecraft:mineable/hoe", rid(fy.DOORMAT["block"]))
 
 
 def textures():
