@@ -3164,7 +3164,7 @@ The owner's last three diamond-steel guns, taken up after slice 15D (on 27 Octob
 - **The Geode Cutter did not mine** in this slice: the owner's data lets the Shard Culler's beam break blocks (`enableMining`), as the Seam Cutter's could not. The [beam-mining follow-up](#follow-up-beams-that-mine) gives both their mining.
 - **No slowness on a hit** in this slice: the owner's data slows what the Shard Culler hits (`impactEffect`). The [hit-effects follow-up](#follow-up-hit-effects) gives it.
 - **Energy Cells, not the owner's cores:** the owner's beam guns load an energy core, which leaves a spent core behind; here they draw charge from Energy Cells as the energy guns before them.
-- **A microjet does not fly:** the owner's microjets are rockets that fly 1.5 blocks a tick; here it strikes at once along the look, as a round does. The Maelstrom does not slow its carrier as the owner's data asks (`speedModifier`).
+- **A microjet did not fly** in this slice: the owner's microjets are rockets that fly 1.5 blocks a tick, and the Maelstrom slows its carrier (`speedModifier`). The [flying-microjets follow-up](#follow-up-flying-microjets-and-heavy-guns-that-slow-their-holder) gives both.
 - **The arms in the reloads and inspections** come large into the view in places, as on the guns before them.
 - **Not played:** none of it has been played yet. The numbers want play to set.
 
@@ -3412,6 +3412,59 @@ The owner's data gives 37 of their guns a push on their shooter at each shot (`p
 **Known limits:**
 - **No rocket jumps:** the owner's guns may push their shooter up when fired at the ground; here there is no push up or down.
 - **The strongest pushes** are the owner's numbers, untried in play; they may want lowering.
+- **Not played:** none of it has been played yet.
+
+## Follow-up: flying microjets and heavy guns that slow their holder
+The owner's Cyclone fires microjets that fly as rockets: 1.5 blocks a tick, untouched by gravity, living 50 ticks (its `projectile` data). Slice 15E's Maelstrom Gun struck at once instead. The owner's data also slows the carrier of eleven heavy guns (`speedModifier`), eight of them built. Offered after the hit effects as the Maelstrom's microjets flying and the gun slowing its carrier, the owner chose it on 28 October 2026, with four other follow-ups, each its own pull request. Their data slows the carrier of the other seven built heavy guns too, so all eight take it here.
+
+**The Microjet in flight** (`jugcraft:microjet`, `Microjet`; the shot `"jet"` and `jet_speed` in `tools/guns.py`, `JugcraftGuns.JET` and `JET_SPEED`, `GunShots.jet`):
+- **Fired** from the eye along the look, at the owner's 1.5 blocks a tick, strayed by the gun's spread, a Microjet a shot. The puff of smoke at the muzzle, the casing and the gun's sound are as before.
+- **It flies straight,** untouched by gravity, and **drives itself:** what the air (or water) takes off its speed in a tick, it makes up, so it keeps the speed it was fired at. The air's share comes off before each tick's move, so it covers a little under 1.5 blocks a tick.
+- **It stops** at the first creature its shooter may strike (the same allies, mounts and marker stands a bullet passes through) or the first block, or once it has flown the gun's range (64 blocks), with a puff of smoke. It flies at most 100 ticks, whatever its range.
+- **Its hit is a bullet's:** the creature takes the gun's damage as `jugcraft:bullet`, if other code (the town's protection) lets its shooter strike it, with the gun's piercing, knockback, burning, bleeding and hit effect (the Maelstrom has none of these). It breaks no block and does not burst.
+- **The server owns it:** it moves the Microjet and decides its hit; the client draws it, as the round, with a trail of smoke and a small flame. A Microjet whose shooter has left the level harms nothing.
+- **Raider gunners** do not fire the Maelstrom (they fire bullets only).
+
+**Heavy guns that slow their holder** (`CARRY_SPEED` in `tools/guns.py`, `JugcraftGuns.CARRY_SPEED`):
+
+| Gun | The owner's gun | Speed kept |
+|---|---|---|
+| Thresher | Gattaler | 0.85 |
+| Stoker | Kiln Gun | 0.8 |
+| Earthmover | Dozier RL | 0.95 |
+| Borer | Weevil | 0.8 |
+| Cloudburst Gun | Thunderhead | 0.8 |
+| Harrow | Scratches | 0.95 |
+| Maelstrom Gun | Cyclone | 0.9 |
+| Geode Cutter | Shard Culler | 0.9 |
+
+- **How:** each gun's item carries a movement-speed modifier (`jugcraft:gun_weight`, multiplied in last) while it is in the main hand, as a shield carries its weight. The game puts it on whoever holds the gun, player or mob, and takes it off when the gun leaves the hand; the tooltip shows it with the item's other attributes.
+- **The other hand:** a heavy gun in the other hand does not slow. None of the eight is held in one hand, so none fires from there.
+- **Tooltips:** each of the eight says it slows whoever holds it; the Maelstrom Gun's also says its microjets fly to their mark.
+
+**Checked:** `tools/guns.py` checks that a jet gun, and only one, fires Microjets, one a shot, at 0.5 to 4 blocks a tick, and that each `CARRY_SPEED` entry is a gun keeping 0.5 to under 1 of its holder's speed. `tools/check_mod_data.py` holds `JugcraftGuns.JET_SPEED` and `CARRY_SPEED` to `tools/guns.py`. It also checks:
+- the items carry the main-hand modifier;
+- the Microjet is registered, named and drawn;
+- `GunShots.fire` fires it for a jet gun;
+- the Microjet lands its hit only on what its shooter may strike.
+
+Game tests: `FlyingMicrojetsGameTests` and the updated `DiamondSteelGunsVGameTests` ([Verification](#verification)).
+
+**Balance:**
+- **The Maelstrom's damage is unchanged** (7.5 a microjet; the owner's is 15.5). Its shots now take time to arrive: about a quarter of a second at 7 blocks, over two seconds at its full 64. A moving creature can step out of the way, and a shot can be dodged as a skeleton's arrow can.
+- **Slowing:** a tenth or a fifth off the holder's speed while a heavy gun is out, a twentieth for the Earthmover and the Harrow. Putting the gun away ends it.
+- **Conversions:** none.
+
+**Save compatibility:**
+- **New entity** `jugcraft:microjet`. A Microjet saved in flight keeps its gun, damage, the range it has left and its speed.
+- **Held guns** take the modifier from the item itself, so guns already made slow their holder with no change to them.
+- Nothing else saved changes.
+
+**Known limits:**
+- **A little under 1.5 blocks a tick:** the game takes the air's share off before each move, and the Microjet makes it up after.
+- **The view narrows** a little while a heavy gun is held, if the game's field-of-view effects are on, as with any slowness.
+- **No trail of the owner's:** the owner's microjet draws a bullet trail (`trailLengthMultiplier`); here it trails smoke and a small flame.
+- **The owner's other microjet guns** (the Gyrojet Pistol, the Bomb Lance and the MK43 Rifle's) are not built as flying guns: the MK43 Rifle's Ranger Rifle fires rifle rounds here.
 - **Not played:** none of it has been played yet.
 
 ## Connections
@@ -6498,6 +6551,24 @@ Slice 9E's files: the guns' tactical grip parts and the Laser Sight's textures m
     - `shotsPushTheirShooterBack`: the Impetus Shotgun's shot at a pig three blocks off pushes its shooter back at 0.25 blocks a tick times the level share of their look, and no other way; a Kreuzer Pistol's shot leaves its shooter as they were.
     - `kickTopsUpAndNeverLifts`: a push of 0.8 from standing moves its shooter 0.8 back; another of 0.8 and one of 0.3 at once add nothing; looking straight down there is no push, and looking 60 degrees down half; half knockback resistance halves it.
 - **Guns that push their shooter back, CI on the first push (run 40620044129, 28 October 2026):** the server game tests ran 2992; one failed, `kickTopsUpAndNeverLifts`. Looking 60 degrees down, the push was 1.0001 blocks a tick back, not 1.0 within a ten-thousandth: the game's look comes from its table of sines, a little off the true half. The push was right; the test now holds it to the look's own level share, and that share to a half within a thousandth.
+- **Flying microjets and heavy guns that slow their holder, run locally (28 October 2026):**
+  - `python3 tools/check_mod_data.py`: PASS (8033 material IDs). Its guns check, run alone, caught each of these deliberate breaks:
+    - a `GunShots.fire` without the jet case;
+    - a `Microjet` that lands its hit without asking whether its shooter may strike;
+    - a modifier on either hand;
+    - the Harrow missing from the Java `CARRY_SPEED`;
+    - a carry speed of 0.4;
+    - a jet speed out of step with the Java.
+  - `python3 tools/guns.py --check`: PASS. `python3 scripts/check_repository.py`: PASS. `python3 -m unittest discover -s scripts/tests`: 287 tests passed; `python3 scripts/package_modrinth.py check`: PASS. `git diff --check`: clean.
+  - **Java:** a syntax parse only: 0 errors in the changed and new files.
+  - **The language file:** the Microjet's name and the eight tooltips match `tools/guns.py`.
+- **Flying microjets and heavy guns that slow their holder, game tests (not run yet; CI runs them):**
+  - `FlyingMicrojetsGameTests`:
+    - `flyingMicrojetsAreTheOwners`: the Maelstrom Gun alone fires flying Microjets, at 1.5 blocks a tick, and the entity is registered. The eight carry speeds are the owner's, and each gun's item carries its main-hand modifier; every other gun carries none.
+    - `microjetFliesToItsMark`: a Maelstrom shot at a pig seven blocks off makes one Microjet, the gun's, with its damage and range, and hurts nothing at once. A tick later it has flown 1.4 to 1.55 blocks and the pig is still unhurt; by the tenth tick it has dealt the gun's damage and is gone.
+    - `microjetStopsAtABlockOrItsRange`: a wall stops a Maelstrom shot before the pig. Of two Microjets set flying along the open arena, the one of 4 blocks' range is gone by the sixth tick; the one of 12 flies on, with what it has flown taken off its range.
+    - `heavyGunSlowsItsHolder`: a pig holding a Maelstrom Gun in its main hand moves at 0.9 of its speed; one holding it in the other hand, and one holding a Kreuzer Pistol, are not slowed.
+  - `DiamondSteelGunsVGameTests`: the Maelstrom Gun fires jets; its loading test reads the pig's damage six ticks after the shot, once the Microjet has flown the three blocks to it.
 - **Not run:** the client by hand, a two-client dedicated server, and play.
 
 ## World and event applicability

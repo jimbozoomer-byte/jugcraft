@@ -229,7 +229,7 @@ GUNS = {
         "display": "Thresher",
         "source": "gattaler",
         "tooltip": "A drum-fed rotary gun. Hold the trigger: the barrels spin up, then it fires for as long as it is "
-                   "held. Its shots pierce armour. Fires rifle rounds.",
+                   "held. Its shots pierce armour. It slows whoever holds it. Fires rifle rounds.",
         "damage": 3.0, "pellets": 1, "interval": 2, "auto": True, "capacity": 60,
         "reload": 78, "spread": (4.0, 2.0), "range": 64, "ammo": "rifle_round", "spin_up": 15,
     },
@@ -237,7 +237,7 @@ GUNS = {
         "display": "Stoker",
         "source": "kiln_gun",
         "tooltip": "A flamethrower that burns blaze powder: a short jet that sets creatures alight and never a block. "
-                   "Its flame pushes its shooter back. Each blaze powder is four bursts.",
+                   "Its flame pushes its shooter back. It slows whoever holds it. Each blaze powder is four bursts.",
         "damage": 2.0, "pellets": 1, "interval": 4, "auto": True, "capacity": 32,
         "reload": 61, "spread": (10.0, 6.0), "range": 8, "ammo": "minecraft:blaze_powder", "shot": "flame",
     },
@@ -397,7 +397,7 @@ GUNS = {
         "display": "Earthmover",
         "source": "dozier_rl",
         "tooltip": "A shoulder rocket launcher with a revolving drum of four rockets. Each bursts where it hits, or at "
-                   "the end of its range; none breaks a block. Fires high-explosive rockets.",
+                   "the end of its range; none breaks a block. It slows whoever holds it. Fires high-explosive rockets.",
         "damage": 24.0, "pellets": 1, "interval": 20, "auto": False, "capacity": 4,
         "reload": 61, "spread": (2.5, 1.0), "range": 72, "ammo": "he_rocket", "shot": "rocket", "rocket_speed": 3.0,
     },
@@ -583,7 +583,7 @@ GUNS = {
         "source": "weevil",
         "tooltip": "An End-forged machine gun carried at the hip, fed from a shulker box under its long barrel and "
                    "charged with a crank; its shots may make what they hit float. Each shot pushes its shooter back. "
-                   "Fires rifle rounds.",
+                   "It slows whoever holds it. Fires rifle rounds.",
         "damage": 5.5, "pellets": 1, "interval": 5, "auto": True, "capacity": 40,
         "reload": 78, "spread": (4.0, 1.5), "range": 72, "ammo": "rifle_round",
     },
@@ -858,7 +858,8 @@ GUNS = {
         "display": "Cloudburst Gun",
         "source": "thunderhead",
         "tooltip": "A twin-barrelled automatic fed from a drum of thirty, cocked by the lever-handle on its top: it "
-                   "fires as long as the trigger is held, and what it hits may bleed. Fires rifle rounds.",
+                   "fires as long as the trigger is held, and what it hits may bleed. It slows whoever holds it. Fires "
+                   "rifle rounds.",
         "damage": 5.0, "pellets": 1, "interval": 4, "auto": True, "capacity": 30,
         "reload": 78, "spread": (4.5, 2.0), "range": 72, "ammo": "rifle_round",
     },
@@ -879,7 +880,8 @@ GUNS = {
         "display": "Harrow",
         "source": "scratches",
         "tooltip": "Four barrels before a drum: each pull throws four pellets in a close group with a burst of flame, "
-                   "and what they hit is set alight and may bleed. Fed from a can of eight. Fires buckshot shells.",
+                   "and what they hit is set alight and may bleed. Fed from a can of eight. It slows whoever holds it. "
+                   "Fires buckshot shells.",
         "damage": 4.5, "pellets": 4, "interval": 11, "auto": False, "capacity": 8,
         "reload": 60, "spread": (3.5, 2.0), "range": 32, "ammo": "buckshot_shell",
     },
@@ -1017,9 +1019,11 @@ GUNS = {
         "display": "Maelstrom Gun",
         "source": "cyclone",
         "tooltip": "A heavy stainless steel gun carried at the hip: as long as the trigger is held its nine tubes fire "
-                   "microjets, loaded three at a time. Fires microjets.",
+                   "microjets, little rockets that fly to their mark, loaded three at a time. It slows whoever holds "
+                   "it. Fires microjets.",
         "damage": 7.5, "pellets": 1, "interval": 6, "auto": True, "capacity": 24,
-        "reload": (10, 17, 20), "spread": (3.0, 1.5), "range": 64, "ammo": "microjet",
+        "reload": (10, 17, 20), "spread": (3.0, 1.5), "range": 64, "ammo": "microjet", "shot": "jet",
+        "jet_speed": 1.5,
     },
     "ermine_rifle": {
         "display": "Ermine Rifle",
@@ -1032,16 +1036,22 @@ GUNS = {
     "geode_cutter": {
         "display": "Geode Cutter",
         "source": "shard_culler",
-        "tooltip": "A crystal-lensed cutting beam carried at the hip: as long as the trigger is held it burns "
-                   "through every creature in front of it, and through armour, and may slow them; it slowly cuts "
-                   "the block at its end. Runs on Energy Cells.",
+        "tooltip": "A crystal-lensed cutting beam carried at the hip: as long as the trigger is held it burns through "
+                   "every creature in front of it, and through armour, and may slow them; it slowly cuts the block at "
+                   "its end. It slows whoever holds it. Runs on Energy Cells.",
         "damage": 3.0, "pellets": 1, "interval": 3, "auto": True, "capacity": 50,
         "reload": 59, "spread": (3.0, 1.5), "range": 24, "ammo": "energy_cell", "shot": "beam", "charge": 120,
     },
 }
 
-# What a gun fires: bullets, or a slice 8C or 8D gun's "shot".
-SHOTS = ("bullet", "grenade", "flame", "beam", "arc", "rocket")
+# What a gun fires: bullets, or a slice 8C or 8D gun's "shot". The flying-microjets follow-up's "jet": each shot fires a
+# Microjet (jugcraft:microjet, the round) that flies, straight and untouched by gravity, at "jet_speed" blocks a tick,
+# driving itself so it does not slow, until it hits a creature or a block or has flown "range" blocks (JugcraftGuns.JET,
+# JET_SPEED, Microjet). The creature it hits takes "damage" as from a bullet; it breaks no block and does not burst.
+SHOTS = ("bullet", "grenade", "flame", "beam", "arc", "rocket", "jet")
+# The Microjet in flight (jugcraft:microjet, an entity as well as the round), and its name.
+JET_ENTITY = "microjet"
+JET_DISPLAY = "Microjet"
 # An arc (slice 8D) leaps on from its first creature to at most this many more, each the nearest within this many
 # blocks of the last that the shooter may strike and that it can reach in a straight line, each taking this share of
 # the damage before it (JugcraftGuns.ARC_HOPS, ARC_REACH, ARC_SHARE).
@@ -4421,6 +4431,12 @@ KICK = {"thunderpipe": 0.45, "coach_gun": 0.25, "bellmouth": 0.3, "bulldog_pisto
         "holler_pistol": 0.25, "holler_carbine": 0.15, "navvy_shotgun": 0.1, "impetus_shotgun": 0.25,
         "auger_shotgun": 0.1}
 
+# The flying-microjets follow-up: a heavy gun that slows whoever holds it in their main hand (the owner's speedModifier,
+# JugcraftGuns.CARRY_SPEED): the share of their speed they keep, an attribute modifier on the gun (jugcraft:gun_weight,
+# movement speed, multiplied in last) that the game puts on its holder and shows in the tooltip, as a shield's weight.
+CARRY_SPEED = {"thresher": 0.85, "stoker": 0.8, "earthmover": 0.95, "borer": 0.8, "cloudburst_gun": 0.8, "harrow": 0.95,
+               "maelstrom_gun": 0.9, "geode_cutter": 0.9}
+
 # Slice 15D: the guns that fire a burst to a pull, (rounds, rest): that many shots their interval apart, then a rest of
 # that many ticks more before the next pull fires (JugcraftGuns.BURSTS; the client fires the burst, the server's trigger
 # credit allows a burst each cycle, GunShots.spend). The owner's Lockewood fires bursts of three, resting five ticks
@@ -4557,6 +4573,8 @@ def write_all(write, assets, data, lang, condition):
         write(data / "recipe" / f"{gun}.json", {
             "fabric:load_conditions": switches(condition, gun), "type": "minecraft:crafting_shaped",
             "category": "equipment", "pattern": pattern, "key": key, "result": {"id": f"{MOD}:{gun}"}})
+    # The flying-microjets follow-up: the Microjet in flight.
+    lang[f"entity.{MOD}.{JET_ENTITY}"] = JET_DISPLAY
     # Slice 8D: the Energy Cell. Charged, it glows (the owner's three frames, run by an .mcmeta); spent, it shows the
     # owner's empty cell: its jugcraft:energy charge is 0, the item's default, when spent.
     lang[f"item.{MOD}.{CELL}"] = CELL_DISPLAY
@@ -6061,6 +6079,14 @@ def check():
                 spec["ammo"] == "he_rocket" and spec["pellets"] == 1 and 0.5 <= spec["rocket_speed"] <= 8.0):
             problems.append(f"{gun}: a rocket gun, and only one, fires a High-Explosive Rocket a shot, at 0.5 to 8 blocks "
                             "a tick (rocket_speed)")
+        # The flying-microjets follow-up: a jet gun, and only one, fires a Microjet a shot at its own speed.
+        jet = spec.get("shot") == "jet"
+        if jet != ("jet_speed" in spec) or jet and not (
+                spec["ammo"] == "microjet" and spec["pellets"] == 1 and 0.5 <= spec["jet_speed"] <= 4.0):
+            problems.append(f"{gun}: a jet gun, and only one, fires a Microjet a shot, at 0.5 to 4 blocks a tick (jet_speed)")
+    for gun, share in CARRY_SPEED.items():
+        if gun not in GUNS or not 0.5 <= share < 1.0:
+            problems.append(f"CARRY_SPEED: {gun} is not a gun, or keeps {share} of its holder's speed (0.5 to under 1)")
     if not all(isinstance(n, int) and n >= 1 for n in OTHER_AMMO.values()):
         problems.append("OTHER_AMMO: each item loads a whole number of rounds, at least one")
     for gun in CARBINES:

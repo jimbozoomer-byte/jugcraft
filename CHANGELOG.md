@@ -8,6 +8,11 @@ Every change to Jugcraft, newest first, grouped by pull request. For what each t
 
 No numbered release yet. Entries on feature branches remain proposed until their pull requests merge.
 
+### Unmerged: Guns, flying microjets and heavy guns that slow their holder
+- The **Maelstrom Gun**'s microjets now fly to their mark as little rockets, at the owner's 1.5 blocks a tick, instead of striking at once. Each stops at the first creature or block in its way or at the end of the gun's range, and hits as a bullet does; none breaks a block.
+- Eight heavy guns slow whoever holds them in their main hand, at the owner's numbers: the **Stoker**, **Borer** and **Cloudburst Gun** to 0.8 of their speed, the **Thresher** to 0.85, the **Maelstrom Gun** and **Geode Cutter** to 0.9, and the **Earthmover** and **Harrow** to 0.95. The tooltip shows it.
+- Record: [guns.md, flying microjets and heavy guns that slow their holder](docs/features/guns.md#follow-up-flying-microjets-and-heavy-guns-that-slow-their-holder).
+
 ### Unmerged: Guns that push their shooter back
 - 27 guns now push their shooter back with each shot, at the owner's strengths: most shotguns a step or two (0.1 to 0.5 blocks a tick), the **Bulldog Pistol** and the **Stoker** harder, and the **Goshawk Revolver** and the **Flatboat Gun** several blocks.
 - The push is level, away from where the shooter looks, and brings them back up to the gun's strength rather than adding to it, so holding the trigger never drives them faster; a shot at the ground does not lift them. Knockback resistance lessens it.

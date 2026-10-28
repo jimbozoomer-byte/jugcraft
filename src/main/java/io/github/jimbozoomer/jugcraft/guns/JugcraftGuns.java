@@ -28,12 +28,18 @@ import net.minecraft.sounds.SoundEvent;
 import net.minecraft.world.damagesource.DamageType;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffects;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.EquipmentSlotGroup;
+import net.minecraft.world.entity.MobCategory;
+import net.minecraft.world.entity.ai.attributes.AttributeModifier;
+import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.CreativeModeTabs;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.Rarity;
+import net.minecraft.world.item.component.ItemAttributeModifiers;
 import net.minecraft.world.item.component.UseEffects;
 import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraft.world.level.block.Block;
@@ -241,20 +247,27 @@ public final class JugcraftGuns {
 	/**
 	 * What the slice 8C and 8D guns fire, where it is not bullets (tools/guns.py GUNS "shot"): {@link #GRENADE}, a Grenade
 	 * lobbed from the muzzle; {@link #FLAME}, a short jet of flame; {@link #BEAM}, a beam through every creature in its
-	 * line; {@link #ARC}, a bolt that leaps from creature to creature; {@link #ROCKET} (slice 10A), a High-Explosive Rocket
-	 * ({@link GunShots}).
+	 * line; {@link #ARC}, a bolt that leaps from creature to creature; {@link #ROCKET} (slice 10A), a High-Explosive Rocket;
+	 * {@link #JET} (the flying-microjets follow-up), a Microjet that flies to its mark ({@link GunShots}, {@link Microjet}).
 	 */
-	public static final Map<String, String> SHOTS = Map.ofEntries(Map.entry("trench_lobber", "grenade"), Map.entry("stoker", "flame"), Map.entry("beam_pistol", "beam"), Map.entry("stormlock_rifle", "arc"), Map.entry("linesman", "arc"), Map.entry("spikedriver", "beam"), Map.entry("seam_cutter", "beam"), Map.entry("caisson_pistol", "arc"), Map.entry("earthmover", "rocket"), Map.entry("skylark_rifle", "rocket"), Map.entry("bullfrog", "grenade"), Map.entry("solenoid_rifle", "beam"), Map.entry("votive_rifle", "beam"), Map.entry("glowmouth", "arc"), Map.entry("fencepost_thumper", "grenade"), Map.entry("lantern_musket", "beam"), Map.entry("firedrake", "flame"), Map.entry("ermine_rifle", "beam"), Map.entry("geode_cutter", "beam"));
+	public static final Map<String, String> SHOTS = Map.ofEntries(Map.entry("trench_lobber", "grenade"), Map.entry("stoker", "flame"), Map.entry("beam_pistol", "beam"), Map.entry("stormlock_rifle", "arc"), Map.entry("linesman", "arc"), Map.entry("spikedriver", "beam"), Map.entry("seam_cutter", "beam"), Map.entry("caisson_pistol", "arc"), Map.entry("earthmover", "rocket"), Map.entry("skylark_rifle", "rocket"), Map.entry("bullfrog", "grenade"), Map.entry("solenoid_rifle", "beam"), Map.entry("votive_rifle", "beam"), Map.entry("glowmouth", "arc"), Map.entry("fencepost_thumper", "grenade"), Map.entry("lantern_musket", "beam"), Map.entry("firedrake", "flame"), Map.entry("maelstrom_gun", "jet"), Map.entry("ermine_rifle", "beam"), Map.entry("geode_cutter", "beam"));
 	public static final String GRENADE = "grenade";
 	public static final String FLAME = "flame";
 	public static final String BEAM = "beam";
 	public static final String ARC = "arc";
 	public static final String ROCKET = "rocket";
+	public static final String JET = "jet";
 	/**
 	 * Slice 10A: how fast a rocket gun's rockets fly, in blocks a tick (tools/guns.py GUNS "rocket_speed"); each bursts
 	 * at the end of the gun's range if it has hit nothing by then.
 	 */
 	public static final Map<String, Float> ROCKET_SPEED = Map.of("earthmover", 3.0F, "skylark_rifle", 4.5F);
+	/**
+	 * The flying-microjets follow-up: how fast a jet gun's Microjets fly, in blocks a tick (tools/guns.py GUNS
+	 * "jet_speed", the owner's Cyclone's 1.5); each drives itself, so it does not slow, and stops at the end of the gun's
+	 * range if it has hit nothing by then ({@link Microjet}).
+	 */
+	public static final Map<String, Float> JET_SPEED = Map.of("maelstrom_gun", 1.5F);
 	/**
 	 * Slice 8D: the JE each round of an energy weapon draws from the Energy Cells in the inventory as it loads
 	 * (tools/guns.py GUNS "charge"); a gun not listed loads rounds of its ammunition.
@@ -328,6 +341,14 @@ public final class JugcraftGuns {
 	 * are the strongest, the owner's Big Bore's 2.5 and Ultra Knight Hawk's 2.25.
 	 */
 	public static final Map<String, Float> KICK = Map.ofEntries(Map.entry("thunderpipe", 0.45F), Map.entry("coach_gun", 0.25F), Map.entry("bellmouth", 0.3F), Map.entry("bulldog_pistol", 0.8F), Map.entry("breacher", 0.15F), Map.entry("trench_lobber", 0.2F), Map.entry("stoker", 0.7F), Map.entry("bronco_smg", 0.2F), Map.entry("sledge", 0.35F), Map.entry("skylark_rifle", 0.2F), Map.entry("bullfrog", 0.2F), Map.entry("mule", 0.35F), Map.entry("fowler", 0.34F), Map.entry("culverin", 0.35F), Map.entry("reverb", 0.15F), Map.entry("tusker", 0.15F), Map.entry("crackling", 0.5F), Map.entry("borer", 0.25F), Map.entry("goshawk_revolver", 2.25F), Map.entry("waystation_shotgun", 0.35F), Map.entry("flatboat_gun", 2.5F), Map.entry("fencepost_thumper", 0.3F), Map.entry("holler_pistol", 0.25F), Map.entry("holler_carbine", 0.15F), Map.entry("navvy_shotgun", 0.1F), Map.entry("impetus_shotgun", 0.25F), Map.entry("auger_shotgun", 0.1F));
+	/**
+	 * The heavy guns that slow whoever holds them in their main hand, to this share of their speed (the flying-microjets
+	 * follow-up, the owner's speedModifier; tools/guns.py CARRY_SPEED): an attribute modifier on the gun ({@link #WEIGHT},
+	 * movement speed, multiplied in last) that the game puts on its holder and shows in the tooltip, as a shield's weight.
+	 */
+	public static final Map<String, Float> CARRY_SPEED = Map.ofEntries(Map.entry("thresher", 0.85F), Map.entry("stoker", 0.8F), Map.entry("earthmover", 0.95F), Map.entry("borer", 0.8F), Map.entry("cloudburst_gun", 0.8F), Map.entry("harrow", 0.95F), Map.entry("maelstrom_gun", 0.9F), Map.entry("geode_cutter", 0.9F));
+	/** The id of a heavy gun's slowing modifier ({@link #CARRY_SPEED}). */
+	public static final Identifier WEIGHT = Jugcraft.id("gun_weight");
 	/**
 	 * Slice 15D: a gun that fires a burst to a pull, {@code rounds} shots its {@link GunSpec#interval} apart, then waits
 	 * {@code rest} ticks more before the next pull fires ({@link #BURSTS}).
@@ -717,6 +738,8 @@ public final class JugcraftGuns {
 	public static final ResourceKey<DamageType> BLEED_TYPE = ResourceKey.create(Registries.DAMAGE_TYPE, Jugcraft.id("bleeding"));
 	/** Bleeding, the mob effect some guns' hits give ({@link #BLEEDS}, {@link BleedingEffect}). */
 	public static Holder<MobEffect> BLEEDING;
+	/** A Microjet in flight, fired by a jet gun (the flying-microjets follow-up, {@link #JET}). */
+	public static EntityType<Microjet> MICROJET;
 	/** The energy weapons' ammunition (slice 8D): charge, filled at the Charging Station. */
 	public static Item ENERGY_CELL;
 	/** Rounds loaded in a gun. */
@@ -780,9 +803,12 @@ public final class JugcraftGuns {
 		}
 		LASER_DOT = Registry.register(BuiltInRegistries.PARTICLE_TYPE, Jugcraft.id("laser_dot"), FabricParticleTypes.simple(true));
 		BLEEDING = Registry.registerForHolder(BuiltInRegistries.MOB_EFFECT, Jugcraft.id("bleeding"), new BleedingEffect());
+		ResourceKey<EntityType<?>> jetKey = ResourceKey.create(Registries.ENTITY_TYPE, Jugcraft.id("microjet"));
+		MICROJET = Registry.register(BuiltInRegistries.ENTITY_TYPE, jetKey, EntityType.Builder.<Microjet>of(Microjet::new,
+				MobCategory.MISC).sized(0.25F, 0.25F).clientTrackingRange(4).updateInterval(2).build(jetKey));
 		SPECS.forEach((name, spec) -> GUNS.put(name, (GunItem) JugcraftRegistry.item(name, properties -> new GunItem(name, spec,
-				properties.stacksTo(1).rarity(Rarity.UNCOMMON).component(LOADED, 0)
-						.component(DataComponents.USE_EFFECTS, new UseEffects(false, true, AIM_SPEED))))));
+				carried(name, properties.stacksTo(1).rarity(Rarity.UNCOMMON).component(LOADED, 0)
+						.component(DataComponents.USE_EFFECTS, new UseEffects(false, true, AIM_SPEED)))))));
 		ATTACHMENTS.keySet().forEach(name -> ATTACHMENT_ITEMS.put(name, JugcraftRegistry.item(name,
 				properties -> new AttachmentItem(name, properties.stacksTo(16)))));
 		CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.COMBAT).register(output -> {
@@ -863,6 +889,30 @@ public final class JugcraftGuns {
 	/** Blocks a tick this rocket gun's rockets fly (slice 10A, {@link #ROCKET_SPEED}); 0 for any other gun. */
 	public static float rocketSpeed(GunItem gun) {
 		return ROCKET_SPEED.getOrDefault(gun.name(), 0.0F);
+	}
+
+	/** Blocks a tick this jet gun's Microjets fly (the flying-microjets follow-up, {@link #JET_SPEED}); 0 for any other gun. */
+	public static float jetSpeed(GunItem gun) {
+		return JET_SPEED.getOrDefault(gun.name(), 0.0F);
+	}
+
+	/** The share of its holder's speed this gun leaves them, held in the main hand ({@link #CARRY_SPEED}); 1 for most. */
+	public static float carrySpeed(GunItem gun) {
+		return CARRY_SPEED.getOrDefault(gun.name(), 1.0F);
+	}
+
+	/**
+	 * A heavy gun's properties with its slowing modifier ({@link #CARRY_SPEED}, {@link #WEIGHT}): movement speed, multiplied
+	 * in last by the share it keeps, while it is in the main hand. Any other gun's are as they were.
+	 */
+	private static Item.Properties carried(String name, Item.Properties properties) {
+		Float share = CARRY_SPEED.get(name);
+		if (share == null) {
+			return properties;
+		}
+		return properties.attributes(ItemAttributeModifiers.builder().add(Attributes.MOVEMENT_SPEED,
+				new AttributeModifier(WEIGHT, share - 1.0, AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL), EquipmentSlotGroup.MAINHAND)
+				.build());
 	}
 
 	/** Ticks this gun's barrels spin up before it fires; 0 for a gun without ({@link #SPIN_UP}). */

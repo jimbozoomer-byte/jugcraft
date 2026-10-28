@@ -95,6 +95,8 @@ public final class JugcraftClient implements ClientModInitializer {
 				net.minecraft.client.renderer.entity.NoopRenderer::new);
 		BlockEntityRenderers.register(io.github.jimbozoomer.jugcraft.rocketry.JugcraftRocketry.ZIPLINE_ANCHOR_ENTITY, ZiplineRenderer::new);
 		EntityRendererRegistry.register(io.github.jimbozoomer.jugcraft.rocketry.JugcraftRocketry.COMBAT_ROCKET, ThrownItemRenderer::new);
+		// The flying-microjets follow-up: a Microjet in flight shows as the round.
+		EntityRendererRegistry.register(io.github.jimbozoomer.jugcraft.guns.JugcraftGuns.MICROJET, ThrownItemRenderer::new);
 		EntityRendererRegistry.register(io.github.jimbozoomer.jugcraft.lair.JugcraftLairs.MIST_GATE,
 				net.minecraft.client.renderer.entity.NoopRenderer::new);
 		VesperineClient.register();
