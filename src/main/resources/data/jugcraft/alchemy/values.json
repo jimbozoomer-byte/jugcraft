@@ -2687,6 +2687,11 @@
       "denominator": 1,
       "source": "fallback (balance pending)"
     },
+    "jugcraft:bittersweet_wreath": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
     "jugcraft:bitumen": {
       "numerator": 1,
       "denominator": 1,
@@ -7761,6 +7766,11 @@
       "numerator": 69,
       "denominator": 1,
       "source": "recipe jugcraft:corn_dog"
+    },
+    "jugcraft:corn_dolly": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
     },
     "jugcraft:corn_kernel_bag": {
       "numerator": 9,
@@ -32572,6 +32582,11 @@
       "denominator": 1,
       "source": "fallback (balance pending)"
     },
+    "jugcraft:porch_swing": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
     "jugcraft:porch_witch": {
       "numerator": 2000,
       "denominator": 1,
@@ -33028,6 +33043,11 @@
       "source": "local quartz mining/Fortune accounting"
     },
     "jugcraft:quern": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
+    "jugcraft:quilt_rail": {
       "numerator": 1,
       "denominator": 1,
       "source": "fallback (balance pending)"
@@ -37943,6 +37963,11 @@
       "source": "fallback (balance pending)"
     },
     "jugcraft:wheat_dough": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
+    "jugcraft:wheat_stook": {
       "numerator": 1,
       "denominator": 1,
       "source": "fallback (balance pending)"

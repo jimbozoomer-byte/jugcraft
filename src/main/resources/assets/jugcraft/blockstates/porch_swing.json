@@ -1,0 +1,244 @@
+{
+  "variants": {
+    "facing=north,lit=false,part=0,runner=false": {
+      "model": "jugcraft:block/porch_swing_0"
+    },
+    "facing=north,lit=false,part=0,runner=true": {
+      "model": "jugcraft:block/porch_swing_swing"
+    },
+    "facing=north,lit=true,part=0,runner=false": {
+      "model": "jugcraft:block/porch_swing_0"
+    },
+    "facing=north,lit=true,part=0,runner=true": {
+      "model": "jugcraft:block/porch_swing_swing"
+    },
+    "facing=north,lit=false,part=1,runner=false": {
+      "model": "jugcraft:block/porch_swing_1"
+    },
+    "facing=north,lit=false,part=1,runner=true": {
+      "model": "jugcraft:block/porch_swing_swing"
+    },
+    "facing=north,lit=true,part=1,runner=false": {
+      "model": "jugcraft:block/porch_swing_1"
+    },
+    "facing=north,lit=true,part=1,runner=true": {
+      "model": "jugcraft:block/porch_swing_swing"
+    },
+    "facing=north,lit=false,part=2,runner=false": {
+      "model": "jugcraft:block/porch_swing_2"
+    },
+    "facing=north,lit=false,part=2,runner=true": {
+      "model": "jugcraft:block/porch_swing_swing"
+    },
+    "facing=north,lit=true,part=2,runner=false": {
+      "model": "jugcraft:block/porch_swing_2"
+    },
+    "facing=north,lit=true,part=2,runner=true": {
+      "model": "jugcraft:block/porch_swing_swing"
+    },
+    "facing=north,lit=false,part=3,runner=false": {
+      "model": "jugcraft:block/porch_swing_3"
+    },
+    "facing=north,lit=false,part=3,runner=true": {
+      "model": "jugcraft:block/porch_swing_swing"
+    },
+    "facing=north,lit=true,part=3,runner=false": {
+      "model": "jugcraft:block/porch_swing_3"
+    },
+    "facing=north,lit=true,part=3,runner=true": {
+      "model": "jugcraft:block/porch_swing_swing"
+    },
+    "facing=east,lit=false,part=0,runner=false": {
+      "model": "jugcraft:block/porch_swing_0",
+      "y": 90
+    },
+    "facing=east,lit=false,part=0,runner=true": {
+      "model": "jugcraft:block/porch_swing_swing",
+      "y": 90
+    },
+    "facing=east,lit=true,part=0,runner=false": {
+      "model": "jugcraft:block/porch_swing_0",
+      "y": 90
+    },
+    "facing=east,lit=true,part=0,runner=true": {
+      "model": "jugcraft:block/porch_swing_swing",
+      "y": 90
+    },
+    "facing=east,lit=false,part=1,runner=false": {
+      "model": "jugcraft:block/porch_swing_1",
+      "y": 90
+    },
+    "facing=east,lit=false,part=1,runner=true": {
+      "model": "jugcraft:block/porch_swing_swing",
+      "y": 90
+    },
+    "facing=east,lit=true,part=1,runner=false": {
+      "model": "jugcraft:block/porch_swing_1",
+      "y": 90
+    },
+    "facing=east,lit=true,part=1,runner=true": {
+      "model": "jugcraft:block/porch_swing_swing",
+      "y": 90
+    },
+    "facing=east,lit=false,part=2,runner=false": {
+      "model": "jugcraft:block/porch_swing_2",
+      "y": 90
+    },
+    "facing=east,lit=false,part=2,runner=true": {
+      "model": "jugcraft:block/porch_swing_swing",
+      "y": 90
+    },
+    "facing=east,lit=true,part=2,runner=false": {
+      "model": "jugcraft:block/porch_swing_2",
+      "y": 90
+    },
+    "facing=east,lit=true,part=2,runner=true": {
+      "model": "jugcraft:block/porch_swing_swing",
+      "y": 90
+    },
+    "facing=east,lit=false,part=3,runner=false": {
+      "model": "jugcraft:block/porch_swing_3",
+      "y": 90
+    },
+    "facing=east,lit=false,part=3,runner=true": {
+      "model": "jugcraft:block/porch_swing_swing",
+      "y": 90
+    },
+    "facing=east,lit=true,part=3,runner=false": {
+      "model": "jugcraft:block/porch_swing_3",
+      "y": 90
+    },
+    "facing=east,lit=true,part=3,runner=true": {
+      "model": "jugcraft:block/porch_swing_swing",
+      "y": 90
+    },
+    "facing=south,lit=false,part=0,runner=false": {
+      "model": "jugcraft:block/porch_swing_0",
+      "y": 180
+    },
+    "facing=south,lit=false,part=0,runner=true": {
+      "model": "jugcraft:block/porch_swing_swing",
+      "y": 180
+    },
+    "facing=south,lit=true,part=0,runner=false": {
+      "model": "jugcraft:block/porch_swing_0",
+      "y": 180
+    },
+    "facing=south,lit=true,part=0,runner=true": {
+      "model": "jugcraft:block/porch_swing_swing",
+      "y": 180
+    },
+    "facing=south,lit=false,part=1,runner=false": {
+      "model": "jugcraft:block/porch_swing_1",
+      "y": 180
+    },
+    "facing=south,lit=false,part=1,runner=true": {
+      "model": "jugcraft:block/porch_swing_swing",
+      "y": 180
+    },
+    "facing=south,lit=true,part=1,runner=false": {
+      "model": "jugcraft:block/porch_swing_1",
+      "y": 180
+    },
+    "facing=south,lit=true,part=1,runner=true": {
+      "model": "jugcraft:block/porch_swing_swing",
+      "y": 180
+    },
+    "facing=south,lit=false,part=2,runner=false": {
+      "model": "jugcraft:block/porch_swing_2",
+      "y": 180
+    },
+    "facing=south,lit=false,part=2,runner=true": {
+      "model": "jugcraft:block/porch_swing_swing",
+      "y": 180
+    },
+    "facing=south,lit=true,part=2,runner=false": {
+      "model": "jugcraft:block/porch_swing_2",
+      "y": 180
+    },
+    "facing=south,lit=true,part=2,runner=true": {
+      "model": "jugcraft:block/porch_swing_swing",
+      "y": 180
+    },
+    "facing=south,lit=false,part=3,runner=false": {
+      "model": "jugcraft:block/porch_swing_3",
+      "y": 180
+    },
+    "facing=south,lit=false,part=3,runner=true": {
+      "model": "jugcraft:block/porch_swing_swing",
+      "y": 180
+    },
+    "facing=south,lit=true,part=3,runner=false": {
+      "model": "jugcraft:block/porch_swing_3",
+      "y": 180
+    },
+    "facing=south,lit=true,part=3,runner=true": {
+      "model": "jugcraft:block/porch_swing_swing",
+      "y": 180
+    },
+    "facing=west,lit=false,part=0,runner=false": {
+      "model": "jugcraft:block/porch_swing_0",
+      "y": 270
+    },
+    "facing=west,lit=false,part=0,runner=true": {
+      "model": "jugcraft:block/porch_swing_swing",
+      "y": 270
+    },
+    "facing=west,lit=true,part=0,runner=false": {
+      "model": "jugcraft:block/porch_swing_0",
+      "y": 270
+    },
+    "facing=west,lit=true,part=0,runner=true": {
+      "model": "jugcraft:block/porch_swing_swing",
+      "y": 270
+    },
+    "facing=west,lit=false,part=1,runner=false": {
+      "model": "jugcraft:block/porch_swing_1",
+      "y": 270
+    },
+    "facing=west,lit=false,part=1,runner=true": {
+      "model": "jugcraft:block/porch_swing_swing",
+      "y": 270
+    },
+    "facing=west,lit=true,part=1,runner=false": {
+      "model": "jugcraft:block/porch_swing_1",
+      "y": 270
+    },
+    "facing=west,lit=true,part=1,runner=true": {
+      "model": "jugcraft:block/porch_swing_swing",
+      "y": 270
+    },
+    "facing=west,lit=false,part=2,runner=false": {
+      "model": "jugcraft:block/porch_swing_2",
+      "y": 270
+    },
+    "facing=west,lit=false,part=2,runner=true": {
+      "model": "jugcraft:block/porch_swing_swing",
+      "y": 270
+    },
+    "facing=west,lit=true,part=2,runner=false": {
+      "model": "jugcraft:block/porch_swing_2",
+      "y": 270
+    },
+    "facing=west,lit=true,part=2,runner=true": {
+      "model": "jugcraft:block/porch_swing_swing",
+      "y": 270
+    },
+    "facing=west,lit=false,part=3,runner=false": {
+      "model": "jugcraft:block/porch_swing_3",
+      "y": 270
+    },
+    "facing=west,lit=false,part=3,runner=true": {
+      "model": "jugcraft:block/porch_swing_swing",
+      "y": 270
+    },
+    "facing=west,lit=true,part=3,runner=false": {
+      "model": "jugcraft:block/porch_swing_3",
+      "y": 270
+    },
+    "facing=west,lit=true,part=3,runner=true": {
+      "model": "jugcraft:block/porch_swing_swing",
+      "y": 270
+    }
+  }
+}

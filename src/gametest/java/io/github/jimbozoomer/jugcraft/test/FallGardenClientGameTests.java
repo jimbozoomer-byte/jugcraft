@@ -1,8 +1,11 @@
 package io.github.jimbozoomer.jugcraft.test;
 
+import io.github.jimbozoomer.jugcraft.agriculture.FacingDecorationBlock;
 import io.github.jimbozoomer.jugcraft.agriculture.JugcraftAgriculture;
+import io.github.jimbozoomer.jugcraft.agriculture.MultiDecorationBlock;
 import io.github.jimbozoomer.jugcraft.agriculture.PlanterBlock;
 import io.github.jimbozoomer.jugcraft.agriculture.PlanterBlockEntity;
+import io.github.jimbozoomer.jugcraft.agriculture.WallDecorationBlock;
 import java.util.Locale;
 import net.fabricmc.fabric.api.client.gametest.v1.FabricClientGameTest;
 import net.fabricmc.fabric.api.client.gametest.v1.context.ClientGameTestContext;
@@ -26,8 +29,10 @@ import net.minecraft.world.level.block.state.properties.DoubleBlockHalf;
  * Client game test for Fall Garden & Porch, part 1 (decor set 4): a fall border on grass, asters and stonecrop behind
  * ornamental kale and cabbage, pampas grass and dried sunflowers at its back, a potted aster on a log, and bittersweet
  * climbing a wall of logs; and part 2's planters beside it, a Window Box of three flowers on the logs, a Half-Barrel of
- * kale and a Galvanized Tub of two flowers; built in a real client and photographed from the front, close by and at the
- * planters, by day (CI job {@code client}). The planters' flowers are drawn by client/PlanterRenderer, so the pictures
+ * kale and a Galvanized Tub of two flowers; and part 3's porch behind the cameras, under a plank roof: the Porch Swing
+ * hung from it, a Bittersweet Wreath and a Corn Dolly on its back wall, Quilt Rails along its front and a Wheat Stook at
+ * its corner; built in a real client and photographed from the front, close by, at the planters and at the porch, by day
+ * (CI job {@code client}). The swing is drawn by client/PorchSwingRenderer. The planters' flowers are drawn by client/PlanterRenderer, so the pictures
  * show it draws them. The pictures go into docs/features/fall-garden-and-porch.md.
  */
 public class FallGardenClientGameTests implements FabricClientGameTest {
@@ -44,14 +49,15 @@ public class FallGardenClientGameTests implements FabricClientGameTest {
 			server.runCommand("gamerule minecraft:send_command_feedback false");
 			server.runCommand("time set noon");
 			server.runCommand("weather clear");
-			server.runCommand("fill %d %d %d %d %d %d minecraft:grass_block".formatted(x - 4, y - 1, z - 4, x + 10, y - 1, z + 10));
-			server.runCommand("fill %d %d %d %d %d %d minecraft:air".formatted(x - 4, y, z - 4, x + 10, y + 6, z + 10));
+			server.runCommand("fill %d %d %d %d %d %d minecraft:grass_block".formatted(x - 4, y - 1, z - 4, x + 10, y - 1, z + 19));
+			server.runCommand("fill %d %d %d %d %d %d minecraft:air".formatted(x - 4, y, z - 4, x + 10, y + 6, z + 19));
 			server.runOnServer(minecraft -> build(minecraft.overworld(), origin));
 			context.waitTicks(40);
 			singleplayer.getConnection().waitForChunksRender();
 			shoot(context, singleplayer, x + 3, y + 1, z + 8, 180, 20, "jugcraft_fall_garden");
 			shoot(context, singleplayer, x + 2, y + 1, z + 4, 180, 35, "jugcraft_fall_garden_close");
 			shoot(context, singleplayer, x + 9, y + 1, z + 4, 180, 25, "jugcraft_fall_garden_planters");
+			shoot(context, singleplayer, x + 4, y + 1, z + 18, 180, 10, "jugcraft_fall_garden_porch");
 		}
 	}
 
@@ -114,6 +120,33 @@ public class FallGardenClientGameTests implements FabricClientGameTest {
 		planter(level, "window_box", origin.offset(9, 1, -1), Items.POPPY, JugcraftAgriculture.item("aster"), JugcraftAgriculture.item("sedum"));
 		planter(level, "half_barrel_planter", origin.offset(8, 0, 1), JugcraftAgriculture.item("ornamental_kale"));
 		planter(level, "galvanized_tub_planter", origin.offset(10, 0, 1), Items.CORNFLOWER, JugcraftAgriculture.item("aster"));
+		// Part 3, south of every other camera: a porch of plank roof on log posts, a plank back wall, the swing hung from the
+		// roof facing south, the wreath and the dolly on the wall, quilt rails along the front and a stook at the corner.
+		for (int across = 1; across <= 7; across++) {
+			for (int deep = 10; deep <= 14; deep++) {
+				level.setBlock(origin.offset(across, 2, deep), Blocks.SPRUCE_PLANKS.defaultBlockState(), Block.UPDATE_ALL);
+			}
+			for (int up = 0; up < 2; up++) {
+				level.setBlock(origin.offset(across, up, 10), Blocks.SPRUCE_PLANKS.defaultBlockState(), Block.UPDATE_ALL);
+			}
+		}
+		for (int up = 0; up < 2; up++) {
+			level.setBlock(origin.offset(1, up, 14), Blocks.SPRUCE_LOG.defaultBlockState(), Block.UPDATE_ALL);
+			level.setBlock(origin.offset(7, up, 14), Blocks.SPRUCE_LOG.defaultBlockState(), Block.UPDATE_ALL);
+		}
+		MultiDecorationBlock swing = (MultiDecorationBlock) JugcraftAgriculture.block("porch_swing");
+		BlockState hung = swing.defaultBlockState().setValue(MultiDecorationBlock.FACING, Direction.SOUTH);
+		level.setBlock(origin.offset(3, 0, 12), hung, Block.UPDATE_ALL);
+		swing.setPlacedBy(level, origin.offset(3, 0, 12), hung, null, new ItemStack(swing));
+		level.setBlock(origin.offset(2, 1, 11), JugcraftAgriculture.block("bittersweet_wreath").defaultBlockState()
+				.setValue(WallDecorationBlock.FACING, Direction.SOUTH), Block.UPDATE_ALL);
+		level.setBlock(origin.offset(6, 1, 11), JugcraftAgriculture.block("corn_dolly").defaultBlockState()
+				.setValue(WallDecorationBlock.FACING, Direction.SOUTH), Block.UPDATE_ALL);
+		for (int across : new int[] {2, 6}) {
+			level.setBlock(origin.offset(across, 0, 14), JugcraftAgriculture.block("quilt_rail").defaultBlockState()
+					.setValue(FacingDecorationBlock.FACING, Direction.SOUTH), Block.UPDATE_ALL);
+		}
+		level.setBlock(origin.offset(0, 0, 13), JugcraftAgriculture.block("wheat_stook").defaultBlockState(), Block.UPDATE_ALL);
 		// A potted aster on a log by the border.
 		level.setBlock(origin.offset(-1, 0, 1), Blocks.SPRUCE_LOG.defaultBlockState(), Block.UPDATE_ALL);
 		level.setBlock(origin.offset(-1, 1, 1), JugcraftAgriculture.block("potted_aster").defaultBlockState(), Block.UPDATE_ALL);

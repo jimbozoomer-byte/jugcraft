@@ -8,6 +8,12 @@ Every change to Jugcraft, newest first, grouped by pull request. For what each t
 
 No numbered release yet. Entries on feature branches remain proposed until their pull requests merge.
 
+### Unmerged: Fall Garden & Porch, part 3 (the porch)
+- **Porch Swing**: a slatted bench swing 1.5 m wide hung on chains from a ceiling two blocks up. Two can sit on it; it sways in the breeze, and more with someone on it. It comes down when its ceiling goes.
+- **Wheat Stook** (six sheaves stood to dry), **Corn Dolly** (a plaited straw harvest knot with a red bow, on a wall), **Bittersweet Wreath** (eight bittersweet make one) and **Quilt Rail** (a porch rail with a patchwork quilt over it).
+- Record: [fall-garden-and-porch.md](docs/features/fall-garden-and-porch.md).
+- **Checked:** the record's Verification. Game tests and screenshots run in CI only; not played by hand.
+
 ### Unmerged: Fall Garden & Porch, part 2 (planters)
 - **Window Box** (on a wall, three flowers), **Half-Barrel Planter** (one) and **Galvanized Tub Planter** (two): use any small flower on one to plant it, an empty hand to take back the last. The flowers grow in them as their own models.
 - A barrel and two dirt make two half-barrels; planks round dirt make a window box; iron round dirt a tub.

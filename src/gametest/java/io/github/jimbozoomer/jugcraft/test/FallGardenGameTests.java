@@ -1,9 +1,13 @@
 package io.github.jimbozoomer.jugcraft.test;
 
 import io.github.jimbozoomer.jugcraft.Jugcraft;
+import io.github.jimbozoomer.jugcraft.agriculture.FacingDecorationBlock;
 import io.github.jimbozoomer.jugcraft.agriculture.JugcraftAgriculture;
 import io.github.jimbozoomer.jugcraft.agriculture.PlanterBlock;
 import io.github.jimbozoomer.jugcraft.agriculture.PlanterBlockEntity;
+import io.github.jimbozoomer.jugcraft.agriculture.PorchSwingBlock;
+import io.github.jimbozoomer.jugcraft.agriculture.Seat;
+import io.github.jimbozoomer.jugcraft.agriculture.WallDecorationBlock;
 import java.util.List;
 import net.fabricmc.fabric.api.gametest.v1.GameTest;
 import net.minecraft.core.BlockPos;
@@ -42,6 +46,9 @@ import net.minecraft.world.phys.Vec3;
  * won't hang without a wall and hangs on one facing out; it takes three small flowers and refuses a fourth and anything
  * that isn't one; an empty hand takes back the last planted; it comes off with its wall, giving back its flowers. The
  * Half-Barrel and the Galvanized Tub stand facing the player and take one and two; broken, they give their flowers back.
+ * Part 3: the Porch Swing won't hang without a ceiling, hangs whole from one, seats two (one on each seat) and comes down
+ * whole with its ceiling, dropping once; the Corn Dolly and the Bittersweet Wreath hang on a wall and come off with it;
+ * the Wheat Stook and the Quilt Rail stand facing the player and drop themselves.
  */
 public class FallGardenGameTests {
 	private static final TagKey<Item> SMALL_FLOWERS = TagKey.create(Registries.ITEM, Identifier.withDefaultNamespace("small_flowers"));
@@ -205,6 +212,83 @@ public class FallGardenGameTests {
 			helper.assertTrue(dropped(helper, item("ornamental_kale")) == 1 && dropped(helper, item("aster")) == 2
 					&& dropped(helper, item("half_barrel_planter")) == 1 && dropped(helper, item("galvanized_tub_planter")) == 1,
 					"Broken, they give back their flowers and themselves");
+			helper.succeed();
+		});
+	}
+
+	// ---------------------------------------------------------------- part 3
+
+	private static void floor(GameTestHelper helper) {
+		for (int x = 0; x < 8; x++) {
+			for (int z = 0; z < 8; z++) {
+				helper.setBlock(new BlockPos(x, 1, z), Blocks.STONE);
+			}
+		}
+	}
+
+	@GameTest(maxTicks = 40)
+	public void theSwingHangsAndSeatsTwo(GameTestHelper helper) {
+		floor(helper);
+		BlockPos pos = new BlockPos(4, 2, 3);
+		PorchSwingBlock swing = (PorchSwingBlock) block("porch_swing");
+		ServerPlayer player = standing(helper, new BlockPos(4, 2, 1), new ItemStack(item("porch_swing")));
+		player.getMainHandItem().useOn(new UseOnContext(player, InteractionHand.MAIN_HAND, hit(helper, pos.below(), Direction.UP)));
+		helper.assertBlockNotPresent(swing, pos);
+		BlockPos master = helper.absolutePos(pos);
+		for (int part = 2; part < swing.cells().length; part++) {
+			helper.getLevel().setBlockAndUpdate(swing.partPos(master, Direction.NORTH, part).above(), Blocks.OAK_PLANKS.defaultBlockState());
+		}
+		player.getMainHandItem().useOn(new UseOnContext(player, InteractionHand.MAIN_HAND, hit(helper, pos.below(), Direction.UP)));
+		for (int part = 0; part < swing.cells().length; part++) {
+			helper.assertTrue(helper.getLevel().getBlockState(swing.partPos(master, Direction.NORTH, part)).is(swing), "Its block " + part + " is there");
+		}
+		BlockPos second = swing.partPos(master, Direction.NORTH, 1);
+		player.setItemInHand(InteractionHand.MAIN_HAND, ItemStack.EMPTY);
+		player.gameMode.useItemOn(player, helper.getLevel(), ItemStack.EMPTY, InteractionHand.MAIN_HAND,
+				new BlockHitResult(Vec3.atCenterOf(master), Direction.UP, master, false));
+		ServerPlayer friend = standing(helper, new BlockPos(3, 2, 1), ItemStack.EMPTY);
+		friend.gameMode.useItemOn(friend, helper.getLevel(), ItemStack.EMPTY, InteractionHand.MAIN_HAND,
+				new BlockHitResult(Vec3.atCenterOf(second.above()), Direction.NORTH, second.above(), false));
+		helper.assertTrue(player.isPassenger() && friend.isPassenger() && Seat.at(helper.getLevel(), master).size() == 1
+				&& Seat.at(helper.getLevel(), second).size() == 1, "Two sit on it, one on each seat (the second from its chains above)");
+		player.stopRiding();
+		friend.stopRiding();
+		helper.getLevel().setBlockAndUpdate(swing.partPos(master, Direction.NORTH, 3).above(), Blocks.AIR.defaultBlockState());
+		helper.runAfterDelay(3, () -> {
+			helper.assertTrue(helper.getLevel().getBlockState(master).isAir() && dropped(helper, item("porch_swing")) == 1,
+					"Without its ceiling it comes down whole, dropping once");
+			helper.succeed();
+		});
+	}
+
+	@GameTest(maxTicks = 40)
+	public void thePorchDecorationsStand(GameTestHelper helper) {
+		floor(helper);
+		BlockPos wall = new BlockPos(3, 3, 5);
+		helper.setBlock(wall, Blocks.OAK_PLANKS);
+		helper.setBlock(wall.east(), Blocks.OAK_PLANKS);
+		ServerPlayer player = standing(helper, new BlockPos(3, 2, 1), new ItemStack(item("corn_dolly")));
+		player.getMainHandItem().useOn(new UseOnContext(player, InteractionHand.MAIN_HAND, hit(helper, wall, Direction.NORTH)));
+		player.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(item("bittersweet_wreath")));
+		player.getMainHandItem().useOn(new UseOnContext(player, InteractionHand.MAIN_HAND, hit(helper, wall.east(), Direction.NORTH)));
+		helper.assertTrue(helper.getBlockState(wall.north()).is(block("corn_dolly")) && helper.getBlockState(wall.east().north()).is(block("bittersweet_wreath"))
+				&& helper.getBlockState(wall.north()).getValue(WallDecorationBlock.FACING) == Direction.NORTH, "The dolly and the wreath hang on the wall");
+		BlockPos stookPos = new BlockPos(2, 2, 3);
+		BlockPos railPos = new BlockPos(5, 2, 3);
+		player.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(item("wheat_stook")));
+		player.getMainHandItem().useOn(new UseOnContext(player, InteractionHand.MAIN_HAND, hit(helper, stookPos.below(), Direction.UP)));
+		player.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(item("quilt_rail")));
+		player.getMainHandItem().useOn(new UseOnContext(player, InteractionHand.MAIN_HAND, hit(helper, railPos.below(), Direction.UP)));
+		helper.assertTrue(helper.getBlockState(stookPos).is(block("wheat_stook")) && helper.getBlockState(railPos).is(block("quilt_rail"))
+				&& helper.getBlockState(railPos).getValue(FacingDecorationBlock.FACING) == Direction.NORTH, "The stook and the rail stand facing the player");
+		helper.setBlock(wall, Blocks.AIR);
+		helper.setBlock(wall.east(), Blocks.AIR);
+		helper.getLevel().destroyBlock(helper.absolutePos(stookPos), true);
+		helper.getLevel().destroyBlock(helper.absolutePos(railPos), true);
+		helper.runAfterDelay(3, () -> {
+			helper.assertTrue(dropped(helper, item("corn_dolly")) == 1 && dropped(helper, item("bittersweet_wreath")) == 1
+					&& dropped(helper, item("wheat_stook")) == 1 && dropped(helper, item("quilt_rail")) == 1,
+					"Without their wall the dolly and the wreath come off; broken, the stook and the rail drop themselves");
 			helper.succeed();
 		});
 	}

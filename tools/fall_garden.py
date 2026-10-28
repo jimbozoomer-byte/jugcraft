@@ -53,6 +53,40 @@ SHAPELESS += [
 ]
 
 
+# ---------------------------------------------------------------- part 3: the porch
+# The Porch Swing (agriculture/PorchSwingBlock): a slatted bench swing 1.5 m wide, its seat 50 cm up, hung by chains from
+# two hooks in a ceiling two blocks up; two sit on it. It sways `breeze` degrees each way when empty and `sitter` with
+# someone on it, a sway taking `ticks`; it turns about its hooks, `pivot` (height, depth in pixels from its first block,
+# facing north).
+SWING = {"block": "porch_swing", "display": "Porch Swing", "size": (2, 2, 1), "seat": 0.5, "breeze": 1.5, "sitter": 8.0, "ticks": 70.0,
+         "pivot": (31.5, 8.0)}
+# The rest of the porch: decorations. The Wheat Stook: six sheaves of wheat stood together to dry, 95 cm high. The Corn
+# Dolly: a plaited straw harvest knot with a red ribbon, hung on a wall or door. The Bittersweet Wreath: a ring of
+# twisted bittersweet vine with its berries and yellow leaves, 69 cm across, on a wall. The Quilt Rail: a length of
+# porch rail with a patchwork quilt hung over it to air.
+PORCH = {
+    "wheat_stook": {"display": "Wheat Stook"},
+    "corn_dolly": {"display": "Corn Dolly"},
+    "bittersweet_wreath": {"display": "Bittersweet Wreath"},
+    "quilt_rail": {"display": "Quilt Rail"},
+}
+
+RECIPES += [
+    {"id": "porch_swing", "pattern": ["C C", "PSP", "P P"], "key": {"C": "minecraft:iron_chain", "P": "#minecraft:planks",
+                                                                   "S": "#minecraft:wooden_slabs"},
+     "result": "porch_swing", "count": 1, "category": "misc"},
+    {"id": "bittersweet_wreath", "pattern": ["BBB", "B B", "BBB"], "key": {"B": "jugcraft:bittersweet"}, "result": "bittersweet_wreath",
+     "count": 1, "category": "misc"},
+]
+SHAPELESS += [
+    {"id": "wheat_stook", "inputs": ["minecraft:wheat"] * 6 + ["minecraft:string"], "result": "wheat_stook", "count": 1, "category": "misc"},
+    {"id": "corn_dolly", "inputs": ["minecraft:wheat", "minecraft:wheat", "minecraft:wheat", "minecraft:red_dye"], "result": "corn_dolly",
+     "count": 1, "category": "misc"},
+    {"id": "quilt_rail", "inputs": ["#minecraft:wooden_fences", "#minecraft:wool", "#minecraft:wool", "#minecraft:wool"],
+     "result": "quilt_rail", "count": 1, "category": "misc"},
+]
+
+
 def blocks():
     """Every block set 4 adds beyond the plants (which are tools/plants.py's)."""
-    return list(PLANTERS)
+    return list(PLANTERS) + [SWING["block"]] + list(PORCH)

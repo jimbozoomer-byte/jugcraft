@@ -14803,7 +14803,8 @@ def check_fall_garden():
     """Fall Garden & Porch (tools/fall_garden.py, docs/features/fall-garden-and-porch.md), part 1: each fall plant is a
     sculpted plant of tools/plants.py with its builder; the garden plants' recipes were generated, and each makes the
     plant from its cabbage seed or sunflower; the wild ones have their vanilla-biome patches. Part 2: the planters' Java
-    numbers are the table's, their renderer is registered, and their recipes and message exist."""
+    numbers are the table's, their renderer is registered, and their recipes and message exist. Part 3: the Porch Swing's
+    numbers are the table's, its renderer turns it about the model's hooks, and its runner variants name the swing."""
     import fall_garden as fg
     java_main = (JAVA_ROOT / "agriculture" / "JugcraftAgriculture.java").read_text(encoding="utf-8") \
         if (JAVA_ROOT / "agriculture" / "JugcraftAgriculture.java").is_file() else ""
@@ -14840,6 +14841,26 @@ def check_fall_garden():
     for recipe in fg.RECIPES:
         if not (DATA / MOD / "recipe" / f"{recipe['id']}.json").is_file():
             err(f"{recipe['id']}: tools/fall_garden.py's recipe was not generated")
+    # Part 3: the Porch Swing's size, seat and sway are the table's, and its renderer turns it about the hooks the model
+    # hangs it from.
+    sw = fg.SWING
+    swing = (JAVA_ROOT / "agriculture" / "PorchSwingBlock.java").read_text(encoding="utf-8") \
+        if (JAVA_ROOT / "agriculture" / "PorchSwingBlock.java").is_file() else ""
+    w, h, d = sw["size"]
+    for needed in (f"box({w}, {h}, {d})", f"SEAT_HEIGHT = {sw['seat']};", f"BREEZE_SWING = {sw['breeze']}F;", f"SITTER_SWING = {sw['sitter']}F;",
+                   f"SWING_TICKS = {sw['ticks']}F;"):
+        if needed not in swing:
+            err(f"PorchSwingBlock: missing {needed} (tools/fall_garden.py SWING)")
+    renderer = (CLIENT_JAVA_ROOT / "PorchSwingRenderer.java").read_text(encoding="utf-8") \
+        if (CLIENT_JAVA_ROOT / "PorchSwingRenderer.java").is_file() else ""
+    if f"PIVOT_Y = {sw['pivot'][0]}F;" not in renderer or f"PIVOT_Z = {sw['pivot'][1]}F;" not in renderer:
+        err(f"PorchSwingRenderer: the swing must turn about its hooks, tools/fall_garden.py SWING pivot {sw['pivot']}")
+    if "BlockEntityRendererRegistry.register(JugcraftAgriculture.PORCH_SWING_ENTITY, PorchSwingRenderer::new);" not in client:
+        err("JugcraftClient: the Porch Swing needs PorchSwingRenderer")
+    states = load(ASSETS / "blockstates" / f"{sw['block']}.json") or {}
+    runners = [k for k in states.get("variants", {}) if "runner=true" in k]
+    if not runners or any(states["variants"][k]["model"] != f"{MOD}:block/{sw['block']}_swing" for k in runners):
+        err(f"{sw['block']}: its runner=true variants must name the swing's own model")
 
 
 def check_orchard_harvest():

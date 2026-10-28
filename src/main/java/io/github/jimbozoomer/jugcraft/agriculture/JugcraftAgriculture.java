@@ -395,6 +395,7 @@ public final class JugcraftAgriculture {
 	public static BlockEntityType<HarvestBellBlockEntity> HARVEST_BELL_ENTITY;
 	public static BlockEntityType<FruitStoreBlockEntity> FEED_TROUGH_ENTITY;
 	public static BlockEntityType<PlanterBlockEntity> PLANTER_ENTITY;
+	public static BlockEntityType<DecorationBlockEntity> PORCH_SWING_ENTITY;
 	public static BlockEntityType<CaramelAppleStandBlockEntity> CARAMEL_APPLE_STAND_ENTITY;
 	public static ExtendedMenuType<FarmStandMenu, FarmStandMenu.Opening> FARM_STAND_MENU;
 	/** The Harvest Effigy catching (assets/jugcraft/sounds/effigy, made by tools/choir_sounds.py). */
@@ -2880,7 +2881,8 @@ public final class JugcraftAgriculture {
 
 	/**
 	 * Fall Garden & Porch, decor set 4 (tools/fall_garden.py; part 1's plants are registered with the other wild plants):
-	 * part 2's planters, which take small flowers.
+	 * part 2's planters, which take small flowers; part 3's porch: the Porch Swing, the Wheat Stook, the Corn Dolly, the
+	 * Bittersweet Wreath and the Quilt Rail.
 	 */
 	private static void registerFallGarden() {
 		Block box = registerBlock("window_box", props -> new PlanterBlock(props, PlanterBlock.WINDOW_BOX), BlockBehaviour.Properties.of()
@@ -2892,6 +2894,28 @@ public final class JugcraftAgriculture {
 		PLANTER_ENTITY = Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, Jugcraft.id("planter"),
 				FabricBlockEntityTypeBuilder.create(PlanterBlockEntity::new, box, barrel, tub).build());
 		for (Block block : List.of(box, barrel, tub)) {
+			registerItem(BuiltInRegistries.BLOCK.getKey(block).getPath(), props -> new BlockItem(block, props),
+					new Item.Properties().useBlockDescriptionPrefix(), BUILDING_TAB);
+		}
+		// Part 3: the porch.
+		Block swing = registerBlock("porch_swing", PorchSwingBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.WOOD).strength(1.5F)
+				.sound(SoundType.WOOD).noOcclusion().ignitedByLava().pushReaction(PushReaction.IMMOVEABLE));
+		PORCH_SWING_ENTITY = Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, Jugcraft.id("porch_swing"),
+				FabricBlockEntityTypeBuilder.<DecorationBlockEntity>create((pos, state) -> new DecorationBlockEntity(PORCH_SWING_ENTITY, pos, state), swing)
+						.build());
+		Block stook = registerBlock("wheat_stook", props -> new FacingDecorationBlock(props, new double[] {2.5, 0.0, 2.5, 13.5, 15.0, 13.5}),
+				BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_YELLOW).strength(0.5F).sound(SoundType.GRASS).noOcclusion().ignitedByLava()
+						.pushReaction(PushReaction.POPPED));
+		Block dolly = registerBlock("corn_dolly", props -> new WallDecorationBlock(props, 2.0, 4.0, 12.0), BlockBehaviour.Properties.of()
+				.mapColor(MapColor.COLOR_YELLOW).instabreak().sound(SoundType.GRASS).noCollision().noOcclusion().ignitedByLava()
+				.pushReaction(PushReaction.POPPED));
+		Block wreath = registerBlock("bittersweet_wreath", props -> new WallDecorationBlock(props, 2.5, 2.5, 13.5), BlockBehaviour.Properties.of()
+				.mapColor(MapColor.COLOR_ORANGE).instabreak().sound(SoundType.GRASS).noCollision().noOcclusion().ignitedByLava()
+				.pushReaction(PushReaction.POPPED));
+		Block quilt = registerBlock("quilt_rail", props -> new FacingDecorationBlock(props, new double[] {0.0, 0.0, 6.0, 16.0, 15.0, 10.0}),
+				BlockBehaviour.Properties.of().mapColor(MapColor.WOOD).strength(1.0F).sound(SoundType.WOOL).noOcclusion().ignitedByLava()
+						.pushReaction(PushReaction.POPPED));
+		for (Block block : List.of(swing, stook, dolly, wreath, quilt)) {
 			registerItem(BuiltInRegistries.BLOCK.getKey(block).getPath(), props -> new BlockItem(block, props),
 					new Item.Properties().useBlockDescriptionPrefix(), BUILDING_TAB);
 		}
