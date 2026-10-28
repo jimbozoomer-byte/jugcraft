@@ -103,6 +103,11 @@ public final class HalloweenSeason {
 		return MonthDay.now(clock.withZone(zone));
 	}
 
+	/** Today's full date on the server's clock, in the operator's time zone. */
+	public static LocalDate date() {
+		return LocalDate.now(clock.withZone(zone));
+	}
+
 	/** The Harvest Moon's day ({@code halloween.harvest_moon}, Halloween by default). */
 	public static MonthDay harvestMoon() {
 		return harvestMoon;
