@@ -15,6 +15,56 @@ import net.minecraft.nbt.CompoundTag;
 /** Exercises the optional overlay against a real machine without changing its stored state. */
 public class FrameworkGameTests {
     @GameTest
+    public void visualPacketKeepsNestedSendTimeSnapshot(GameTestHelper helper) {
+        var bookId = io.github.jimbozoomer.jugcraft.Jugcraft.id("snapshot_book");
+        var categoryId = io.github.jimbozoomer.jugcraft.Jugcraft.id("snapshot_category");
+        var entryId = io.github.jimbozoomer.jugcraft.Jugcraft.id("snapshot_entry");
+        var entry = new com.klikli_dev.modonomicon.bookstate.visual.EntryVisualState(2, true);
+        var category = new com.klikli_dev.modonomicon.bookstate.visual.CategoryVisualState(
+                java.util.Map.of(entryId, entry), 3, 4, 1.5f, java.util.Optional.of(entryId), 5, true);
+        var book = new com.klikli_dev.modonomicon.bookstate.visual.BookVisualState(
+                java.util.Map.of(categoryId, category), categoryId, 6);
+        var address = com.klikli_dev.modonomicon.client.gui.book.BookAddress.of(bookId, categoryId, entryId, 2);
+        var source = new com.klikli_dev.modonomicon.bookstate.BookVisualStates(
+                java.util.Map.of(bookId, book), java.util.Map.of(bookId, java.util.List.of(address)));
+        var packet = new com.klikli_dev.modonomicon.networking.SyncBookVisualStatesMessage(source);
+        entry.openPagesIndex = 99;
+        entry.unread = false;
+        category.entryStates.clear();
+        category.scrollX = 90;
+        category.unread = false;
+        book.categoryStates.clear();
+        book.openCategory = null;
+        source.bookStates.clear();
+        source.bookBookmarks.get(bookId).clear();
+        var buffer = new net.minecraft.network.RegistryFriendlyByteBuf(io.netty.buffer.Unpooled.buffer(), helper.getLevel().registryAccess());
+        try {
+            com.klikli_dev.modonomicon.networking.SyncBookVisualStatesMessage.STREAM_CODEC.encode(buffer, packet);
+            var decoded = com.klikli_dev.modonomicon.networking.SyncBookVisualStatesMessage.STREAM_CODEC.decode(buffer).states;
+            var savedBook = decoded.bookStates.get(bookId);
+            helper.assertTrue(savedBook != null, "Queued books survive changes to the live map");
+            var savedCategory = savedBook.categoryStates.get(categoryId);
+            helper.assertTrue(savedCategory != null, "Nested categories are detached too");
+            var savedEntry = savedCategory.entryStates.get(entryId);
+            helper.assertTrue(savedEntry != null && savedEntry.openPagesIndex == 2 && savedEntry.unread,
+                    "Nested entry fields retain their send-time values");
+            helper.assertTrue(categoryId.equals(savedBook.openCategory) && savedBook.openPagesIndex == 6,
+                    "Selected category and page survive encoding");
+            helper.assertTrue(savedCategory.scrollX == 3 && savedCategory.scrollY == 4
+                    && savedCategory.targetZoom == 1.5f && savedCategory.openPagesIndex == 5
+                    && entryId.equals(savedCategory.openEntry) && savedCategory.unread,
+                    "All category navigation fields survive encoding");
+            helper.assertTrue(decoded.bookBookmarks.get(bookId).equals(java.util.List.of(address)),
+                    "Bookmark lists are detached from live changes");
+            helper.assertTrue(source.bookStates.isEmpty() && source.bookBookmarks.get(bookId).isEmpty(),
+                    "Encoding must not restore or modify live state");
+        } finally {
+            buffer.release();
+        }
+        helper.succeed();
+    }
+
+    @GameTest
     public void researchPacketKeepsSendTimeSnapshot(GameTestHelper helper) {
         var source = new com.klikli_dev.modonomicon.research.state.PlayerResearchState();
         var fact = io.github.jimbozoomer.jugcraft.Jugcraft.id("snapshot_fact");

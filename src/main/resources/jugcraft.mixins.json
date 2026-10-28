@@ -13,6 +13,7 @@
     "SpatialContainerAccess",
     "SpatialMenuMixin",
     "ModonomiconResearchSnapshotMixin",
+    "ModonomiconVisualSnapshotMixin",
     "JimtaCreeperAccessor",
     "JimtaElectricBoatFluidMixin",
     "JimtaCurioLivingMixin",
