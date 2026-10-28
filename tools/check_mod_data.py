@@ -14297,7 +14297,8 @@ def check_alpha_werewolf():
 def check_pumpkin_patch():
     """The Pumpkin Patch Market's displays (tools/pumpkin_patch.py DISPLAYS, docs/features/pumpkin-patch-market.md): each
     display's Java class has the table's blocks, spots and scale, the renderer turns its pieces by the table's TURNS, and
-    every spot lies inside the display's frame."""
+    every spot lies inside the display's frame; part 3's Chalkboard Sign has the table's words, in order, with their text,
+    and its renderer the model's boards; the Giant Warty Gourd is the table's size."""
     import pumpkin_patch as pp
     classes = {"wheelbarrow": "PumpkinWheelbarrowBlock", "wagon": "PumpkinWagonBlock", "pyramid": "PumpkinPyramidBlock"}
     for key, spec in pp.DISPLAYS.items():
@@ -14323,6 +14324,27 @@ def check_pumpkin_patch():
     turns = re.search(r"TURNS = \{([^}]*)\}", base)
     if not turns or [float(v) for v in re.findall(r"(-?[\d.]+)F", turns.group(1))] != list(pp.TURNS):
         err("ProduceDisplayBlock.TURNS is not tools/pumpkin_patch.py TURNS")
+    # Part 3: the Chalkboard Sign's words and boards, and the Giant Warty Gourd's size.
+    board = (JAVA_ROOT / "agriculture" / "ChalkboardSignBlock.java").read_text(encoding="utf-8")
+    words = re.search(r"enum Words implements StringRepresentable \{\s*([A-Z_, ]+);", board)
+    if not words or [w.strip().lower() for w in words.group(1).split(",")] != list(pp.WORDS):
+        err("ChalkboardSignBlock.Words is not tools/pumpkin_patch.py WORDS, in order")
+    renderer = (CLIENT_JAVA_ROOT / "ChalkboardSignRenderer.java").read_text(encoding="utf-8")
+    chalk = pp.CHALKBOARD
+    for name, value in (("LEAN", chalk["lean"]), ("HINGE_Y", chalk["hinge"][0]), ("HINGE_Z", chalk["hinge"][1]),
+                        ("SLATE_DROP", chalk["slate_drop"]), ("SLATE_OUT", chalk["slate_out"]), ("WIDTH", chalk["slate_width"]),
+                        ("HEIGHT", chalk["slate_height"])):
+        found = re.search(rf"\b{name} = ([\d.]+)F;", renderer)
+        if not found or float(found.group(1)) != value:
+            err(f"ChalkboardSignRenderer.{name} is not tools/pumpkin_patch.py CHALKBOARD's {value}")
+    lang = load(ASSETS / "lang" / "en_us.json") or {}
+    for key in [f"chalkboard_sign.{w}" for w in pp.WORDS] + ["chalkboard_sign.written", "chalkboard_sign.unnamed_tag"]:
+        if f"message.{MOD}.{key}" not in lang:
+            err(f"Message {key} has no text")
+    giant = (JAVA_ROOT / "agriculture" / "GiantWartyGourdBlock.java").read_text(encoding="utf-8")
+    w, h, d = pp.GIANT_WARTY["size"]
+    if f"box({w}, {h}, {d})" not in giant or f"SCALE = {pp.GIANT_WARTY['scale']};" not in giant:
+        err(f"GiantWartyGourdBlock is not {w} x {h} x {d} blocks, {pp.GIANT_WARTY['scale']} times the Warty Gourd, as tools/pumpkin_patch.py says")
 
 
 def check_pumpkin_king():

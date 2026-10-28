@@ -6647,6 +6647,11 @@
       "denominator": 1,
       "source": "recipe jugcraft:chainsaw"
     },
+    "jugcraft:chalkboard_sign": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
     "jugcraft:chanterelle": {
       "numerator": 1,
       "denominator": 1,
@@ -12593,6 +12598,11 @@
       "source": "fallback (balance pending)"
     },
     "jugcraft:giant_pumpkin_seeds": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
+    "jugcraft:giant_warty_gourd": {
       "numerator": 1,
       "denominator": 1,
       "source": "fallback (balance pending)"
@@ -32708,6 +32718,11 @@
       "source": "fallback (balance pending)"
     },
     "jugcraft:pumpkin_sweater": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
+    "jugcraft:pumpkin_vine_cover": {
       "numerator": 1,
       "denominator": 1,
       "source": "fallback (balance pending)"

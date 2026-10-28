@@ -335,6 +335,114 @@ def pyramid():
     return sc
 
 
+# ---------------------------------------------------------------- part 3: the Chalkboard Sign
+
+SLATE = pal("1c2420", "232d28", "2b3731", "35433b", "425248")
+
+
+def slate():
+    """A chalkboard's slate: one flat dark green-black, with two short eraser smears a tone lighter at fixed places."""
+    def paint(p):
+        for y in range(p.h):
+            for x in range(p.w):
+                p.put(x, y, shade(SLATE, 2))
+        for x0, y0, length in ((1, p.h - 3, 4), (p.w - 6, 2, 3)):
+            for x in range(x0, min(p.w, x0 + length)):
+                if 0 <= y0 < p.h:
+                    p.put(x, y0, shade(SLATE, 3))
+    paint.tag = repr(("slate",))
+    return paint
+
+
+def chalkboard():
+    """The Chalkboard Sign, facing north: two boards hinged together at the top, each leaning out from upright
+    (CHALKBOARD["lean"]), the front one forward and the back one back, each a wooden frame whose side rails stand to the
+    ground as legs round a recessed slate; two iron hinges between them."""
+    spec = pp.CHALKBOARD
+    sc = Sculpt(spec["block"], 3104, 64)
+    hy, hz = spec["hinge"]
+    el = []
+    for side, (z0, z1) in ((-1, (hz - 0.7, hz - 0.1)), (1, (hz + 0.1, hz + 0.7))):
+        turn = rotation((8.0, hy, hz), "x", -spec["lean"] * side)
+        face = z0 if side < 0 else z1
+        slate_z = (face + 0.1 * -side, z1) if side < 0 else (z0, face + 0.1 * -side)
+        # The legs run on below the board's foot as far as its lean needs for them to stand on the ground.
+        el.append(panel(sc, "rail", lengthwise(WOOD), (2.0, -1.5, z0), (3.0, 13.5, z1), rot=turn))
+        el.append(panel(sc, "rail", lengthwise(WOOD), (13.0, -1.5, z0), (14.0, 13.5, z1), rot=turn))
+        el.append(panel(sc, "rail", lengthwise(WOOD), (2.0, 13.5, z0), (14.0, 15.0, z1), rot=turn))
+        el.append(panel(sc, "rail", lengthwise(WOOD), (3.0, 1.5, z0), (13.0, 2.5, z1), rot=turn))
+        el.append(panel(sc, "slate", slate(), (3.0, 2.5, slate_z[0]), (13.0, 13.5, slate_z[1]), rot=turn))
+    for x in (4.0, 11.0):
+        el.append(panel(sc, "hinge", flat(IRON), (x, hy - 0.6, hz - 0.3), (x + 1.0, hy + 0.2, hz + 0.3)))
+    sc.models[spec["block"]] = d20d.separated(el)
+    return sc
+
+
+# ---------------------------------------------------------------- part 3: the Pumpkin Vine Cover
+
+def vine_cover_texture():
+    """The Pumpkin Vine Cover's 16x16 picture, cut out (each texel fully clear or fully opaque), in the vanilla manner of
+    docs/NATURAL_TEXTURES.md: one leaf green stepped into tones (wood_style.ramp), no outline. A cluster that stands on
+    its own at any of its four turns: one vine across the block with a tendril curling off it and off each end, three
+    broad lobed leaves on short stalks (the tip away from the vine, lit up and to the left and shaded down and to the
+    right in three even bands, a lighter vein from stalk to tip) and one open pumpkin flower."""
+    from PIL import Image
+    from wood_style import ramp
+    green = ramp((79, 122, 46))
+    stem = ramp((96, 120, 52))
+    yellow = ramp((232, 176, 40))
+    img = Image.new("RGBA", (16, 16), (0, 0, 0, 0))
+
+    def put(x, y, c):
+        if 0 <= x < 16 and 0 <= y < 16:
+            img.putpixel((x, y), tuple(c) + (255,))
+    for x, y in ((1, 12), (2, 12), (3, 11), (4, 11), (5, 11), (6, 10), (7, 10), (8, 10), (9, 9), (10, 9), (11, 8), (12, 7), (13, 7),
+                 (14, 6)):
+        put(x, y, stem[2])
+    for x, y in ((0, 13), (0, 14), (1, 15), (2, 14), (7, 11), (7, 12), (6, 13), (5, 13), (5, 12), (15, 5), (15, 4), (14, 3)):
+        put(x, y, stem[3])
+    big = ["...#...", ".#####.", "#######", "#######", ".#####.", ".##.##."]
+    small = ["..#..", "#####", "#####", ".#.#."]
+    for shape, ox, oy, down, stalk in ((big, 1, 3, False, ((4, 9), (4, 10))), (big, 9, 10, True, ((12, 9),)),
+                                        (small, 9, 1, False, ((11, 5), (12, 6)))):
+        rows = shape[::-1] if down else shape
+        h, w = len(rows), len(rows[0])
+        cx, cy = ox + (w - 1) / 2, oy + (h - 1) / 2
+        for j, row in enumerate(rows):
+            for i, ch in enumerate(row):
+                if ch == "#":
+                    x, y = ox + i, oy + j
+                    d = (x - cx) + (y - cy)
+                    put(x, y, green[3] if d < -1.5 else green[1] if d > 1.5 else green[2])
+        for j in range(1, h - 1):
+            put(ox + w // 2, oy + j, green[4])
+        for x, y in stalk:
+            put(x, y, stem[2])
+    for (x, y), k in (((8, 6), 4), ((7, 7), 3), ((9, 7), 3), ((7, 8), 2), ((9, 8), 2), ((8, 7), 1)):
+        put(x, y, yellow[k])
+    put(8, 9, stem[2])
+    return img
+
+
+def vine_cover_model():
+    """A flat mat lying just above the ground, the picture on both its faces (a sheet, as a leaf is)."""
+    block = pp.VINE_COVER["block"]
+    return {"parent": "minecraft:block/block", "ambientocclusion": False,
+            "textures": {"p": f"{MOD}:block/{block}", "particle": f"{MOD}:block/{block}"},
+            "elements": [fa.plane_xz(0.0, 16.0, 0.0, 16.0, 0.25, (0.0, 0.0, 16.0, 16.0))]}
+
+
+# ---------------------------------------------------------------- part 3: the Giant Warty Gourd
+
+def giant_warty_gourd():
+    """The Giant Warty Gourd modelled whole in its frame: the Warty Gourd's own boxes (tools/festival_data.py),
+    GIANT_WARTY["scale"] times bigger, every face keeping its picture on the gourd's own textures; and its textures."""
+    import festival_data
+    spec = pp.GIANT_WARTY
+    model = festival_data.gourd_model("warty_gourd")
+    return d17d.grown(model["elements"], spec["scale"], spec["size"]), model["textures"]
+
+
 # ---------------------------------------------------------------- building and files
 
 class PlannedAtlas(fa.Atlas):
@@ -403,6 +511,13 @@ def planned(builder, size=128):
 
 _built = {}
 BUILDERS = {"pumpkin_wheelbarrow": wheelbarrow, "pumpkin_wagon": wagon, "pumpkin_pyramid": pyramid}
+_chalkboard = []
+
+
+def built_chalkboard():
+    if not _chalkboard:
+        _chalkboard.append(planned(chalkboard, 64))
+    return _chalkboard[0]
 
 
 def build(block):
@@ -434,10 +549,24 @@ def item_display(block):
 
 
 def _image_of(name):
+    if name == pp.CHALKBOARD["block"]:
+        return built_chalkboard().atlas.img
     try:
         return build(name).atlas.img
     except KeyError:
         return None
+
+
+CHALKBOARD_DISPLAY = {"gui": {"rotation": [25, 225, 0], "translation": [0, 0, 0], "scale": [0.7, 0.7, 0.7]},
+                      "ground": {"rotation": [0, 0, 0], "translation": [0, 2, 0], "scale": [0.4, 0.4, 0.4]},
+                      "fixed": {"rotation": [0, 0, 0], "translation": [0, 0, 0], "scale": [0.6, 0.6, 0.6]},
+                      "thirdperson_righthand": {"rotation": [0, 45, 0], "translation": [0, 2, 0], "scale": [0.4, 0.4, 0.4]},
+                      "firstperson_righthand": {"rotation": [0, 45, 0], "translation": [0, 2, 0], "scale": [0.4, 0.4, 0.4]}}
+GIANT_DISPLAY = {"gui": {"rotation": [25, 225, 0], "translation": [0, -1.5, 0], "scale": [0.62, 0.62, 0.62]},
+                 "ground": {"rotation": [0, 0, 0], "translation": [0, 2, 0], "scale": [0.3, 0.3, 0.3]},
+                 "fixed": {"rotation": [0, 0, 0], "translation": [0, -2, 0], "scale": [0.55, 0.55, 0.55]},
+                 "thirdperson_righthand": {"rotation": [0, 45, 0], "translation": [0, 2, 0], "scale": [0.3, 0.3, 0.3]},
+                 "firstperson_righthand": {"rotation": [0, 45, 0], "translation": [0, 2, 0], "scale": [0.3, 0.3, 0.3]}}
 
 
 def assets(root, write, lang):
@@ -458,21 +587,82 @@ def assets(root, write, lang):
         write(items / f"{block}.json", fa.model(block, sc.models["item"], item_display(block)))
         write(root / "items" / f"{block}.json", {"model": {"type": "minecraft:model", "model": rid(f"item/{block}")}})
     lang["message.jugcraft.produce_display.full"] = "It's full"
+    extras(root, write, lang)
+
+
+def extras(root, write, lang):
+    """Part 3's files: the Chalkboard Sign (one model, turned by facing, the same for every word), the Pumpkin Vine Cover
+    (a flat mat at four random turns; its item is its picture) and the Giant Warty Gourd (the Warty Gourd's own model
+    grown, cut into its twelve blocks; its item is the Warty Gourd's own model)."""
+    models = root / "models" / "block"
+    states = root / "blockstates"
+    items = root / "models" / "item"
+    board = pp.CHALKBOARD["block"]
+    lang[f"block.{MOD}.{board}"] = pp.CHALKBOARD["display"]
+    write(models / f"{board}.json", fa.model(board, built_chalkboard().models[board]))
+    write(states / f"{board}.json", {"variants": {
+        f"facing={f},words={w}": {"model": rid(f"block/{board}"), **({"y": FACINGS[f]} if FACINGS[f] else {})}
+        for f in FACINGS for w in pp.WORDS}})
+    write(items / f"{board}.json", fa.model(board, built_chalkboard().models[board], CHALKBOARD_DISPLAY))
+    write(root / "items" / f"{board}.json", {"model": {"type": "minecraft:model", "model": rid(f"item/{board}")}})
+    for word, text in pp.WORDS.items():
+        lang[f"message.{MOD}.{board}.{word}"] = text
+    lang[f"message.{MOD}.{board}.written"] = "Sneak and use it with an empty hand to wipe your words off first."
+    lang[f"message.{MOD}.{board}.unnamed_tag"] = "Name the tag in an anvil first: its name is what gets chalked."
+
+    cover = pp.VINE_COVER["block"]
+    lang[f"block.{MOD}.{cover}"] = pp.VINE_COVER["display"]
+    write(models / f"{cover}.json", vine_cover_model())
+    write(states / f"{cover}.json", {"variants": {"": [{"model": rid(f"block/{cover}"), **({"y": y} if y else {})} for y in (0, 90, 180, 270)]}})
+    write(items / f"{cover}.json", {"parent": "minecraft:item/generated", "textures": {"layer0": rid(f"block/{cover}")}})
+    write(root / "items" / f"{cover}.json", {"model": {"type": "minecraft:model", "model": rid(f"item/{cover}")}})
+
+    giant = pp.GIANT_WARTY["block"]
+    lang[f"block.{MOD}.{giant}"] = pp.GIANT_WARTY["display"]
+    elements, textures = giant_warty_gourd()
+    size = pp.GIANT_WARTY["size"]
+    n = len(d17d.cells(size))
+    for part in range(n):
+        mine = d17d.cell_part(elements, d17d.frame_cell(size, part), size)
+        write(models / f"{giant}_{part}.json", {"parent": "minecraft:block/block", "textures": textures, "elements": mine})
+    write(states / f"{giant}.json", {"variants": {
+        f"facing={f},lit={l},part={p}": {"model": rid(f"block/{giant}_{p}"), **({"y": FACINGS[f]} if FACINGS[f] else {})}
+        for f in FACINGS for l in ("false", "true") for p in range(n)}})
+    # The item: the same gourd at half the giant's size (one and a half times the Warty Gourd's), so it stands out from it.
+    import festival_data
+    small = d17d.grown(festival_data.gourd_model("warty_gourd")["elements"], pp.GIANT_WARTY["scale"] / 2, (1, 1, 1))
+    write(items / f"{giant}.json", {"parent": "minecraft:block/block", "textures": textures, "elements": small, "display": GIANT_DISPLAY})
+    write(root / "items" / f"{giant}.json", {"model": {"type": "minecraft:model", "model": rid(f"item/{giant}")}})
 
 
 def loot(out, write):
-    """Each display drops once, from its first block."""
-    for block in pp.display_blocks():
+    """Each display drops once, from its first block; so does the Giant Warty Gourd. The Chalkboard Sign keeps its words
+    (the market's, and its own as its name); the Pumpkin Vine Cover drops itself."""
+    for block in pp.display_blocks() + [pp.GIANT_WARTY["block"]]:
         write(out / f"{block}.json", {"type": "minecraft:block", "pools": [{
             "condition": {"type": "minecraft:all_of", "terms": [{"type": "minecraft:survives_explosion"},
                                                                 {"type": "minecraft:match_block", "blocks": rid(block), "state": {"part": "0"}}]},
             "entries": [{"type": "minecraft:item", "name": rid(block)}], "rolls": 1}], "random_sequence": rid(f"blocks/{block}")})
+    board = pp.CHALKBOARD["block"]
+    write(out / f"{board}.json", {"type": "minecraft:block", "pools": [{
+        "condition": {"type": "minecraft:survives_explosion"},
+        "entries": [{"type": "minecraft:item", "name": rid(board), "modifier": [
+            {"type": "minecraft:copy_components", "include": ["minecraft:custom_name"], "source": "block_entity"},
+            {"type": "minecraft:copy_state", "block": rid(board), "properties": ["words"]}]}],
+        "rolls": 1}], "random_sequence": rid(f"blocks/{board}")})
+    cover = pp.VINE_COVER["block"]
+    write(out / f"{cover}.json", {"type": "minecraft:block", "pools": [{
+        "condition": {"type": "minecraft:survives_explosion"}, "entries": [{"type": "minecraft:item", "name": rid(cover)}], "rolls": 1}],
+        "random_sequence": rid(f"blocks/{cover}")})
 
 
 def tags(tags):
-    for block in pp.display_blocks():
+    for block in pp.display_blocks() + pp.extra_blocks():
         tags.add("block", "minecraft:mineable/axe", rid(block))
 
 
 def textures():
-    return {("block", block): build(block).atlas.img for block in pp.display_blocks()}
+    out = {("block", block): build(block).atlas.img for block in pp.display_blocks()}
+    out[("block", pp.CHALKBOARD["block"])] = built_chalkboard().atlas.img
+    out[("block", pp.VINE_COVER["block"])] = vine_cover_texture()
+    return out

@@ -382,6 +382,7 @@ public final class JugcraftAgriculture {
 	public static BlockEntityType<HarvestEffigyBlockEntity> HARVEST_EFFIGY_ENTITY;
 	public static BlockEntityType<FarmStandBlockEntity> FARM_STAND_ENTITY;
 	public static BlockEntityType<ProduceDisplayBlockEntity> PRODUCE_DISPLAY_ENTITY;
+	public static BlockEntityType<ChalkboardSignBlockEntity> CHALKBOARD_SIGN_ENTITY;
 	public static ExtendedMenuType<FarmStandMenu, FarmStandMenu.Opening> FARM_STAND_MENU;
 	/** The Harvest Effigy catching (assets/jugcraft/sounds/effigy, made by tools/choir_sounds.py). */
 	public static SoundEvent EFFIGY_BURN;
@@ -2374,6 +2375,7 @@ public final class JugcraftAgriculture {
 		registerLaboratoryLarderDining();
 		registerPumpkinNight();
 		registerPumpkinPatchDisplays();
+		registerPumpkinPatchExtras();
 	}
 
 	/**
@@ -2721,6 +2723,25 @@ public final class JugcraftAgriculture {
 				FabricBlockEntityTypeBuilder.create(ProduceDisplayBlockEntity::new, wheelbarrow, wagon, pyramid).build());
 		for (Block display : new Block[] {wheelbarrow, wagon, pyramid}) {
 			registerItem(BuiltInRegistries.BLOCK.getKey(display).getPath(), props -> new BlockItem(display, props),
+					new Item.Properties().useBlockDescriptionPrefix(), BUILDING_TAB);
+		}
+	}
+
+	/**
+	 * The Pumpkin Patch Market's last pieces (decor set 1, part 3; tools/pumpkin_patch.py): the Chalkboard Sign, Pumpkin
+	 * Vine Cover and the Giant Warty Gourd.
+	 */
+	private static void registerPumpkinPatchExtras() {
+		Block chalkboard = registerBlock("chalkboard_sign", ChalkboardSignBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.WOOD)
+				.strength(1.0F).sound(SoundType.WOOD).noOcclusion().ignitedByLava().pushReaction(PushReaction.POPPED));
+		CHALKBOARD_SIGN_ENTITY = Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, Jugcraft.id("chalkboard_sign"),
+				FabricBlockEntityTypeBuilder.create(ChalkboardSignBlockEntity::new, chalkboard).build());
+		Block cover = registerBlock("pumpkin_vine_cover", PumpkinVineCoverBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.PLANT)
+				.instabreak().sound(SoundType.GRASS).noCollision().noOcclusion().ignitedByLava().pushReaction(PushReaction.POPPED));
+		Block giant = registerBlock("giant_warty_gourd", GiantWartyGourdBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_YELLOW)
+				.strength(1.0F).sound(SoundType.WOOD).noOcclusion().pushReaction(PushReaction.IMMOVEABLE));
+		for (Block block : new Block[] {chalkboard, cover, giant}) {
+			registerItem(BuiltInRegistries.BLOCK.getKey(block).getPath(), props -> new BlockItem(block, props),
 					new Item.Properties().useBlockDescriptionPrefix(), BUILDING_TAB);
 		}
 	}

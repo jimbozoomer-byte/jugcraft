@@ -2,16 +2,22 @@ package io.github.jimbozoomer.jugcraft.test;
 
 import io.github.jimbozoomer.jugcraft.Jugcraft;
 import io.github.jimbozoomer.jugcraft.agriculture.AttachedGourdStemBlock;
+import io.github.jimbozoomer.jugcraft.agriculture.ChalkboardSignBlock;
+import io.github.jimbozoomer.jugcraft.agriculture.ChalkboardSignBlockEntity;
+import io.github.jimbozoomer.jugcraft.agriculture.GiantWartyGourdBlock;
 import io.github.jimbozoomer.jugcraft.agriculture.GourdStemBlock;
 import io.github.jimbozoomer.jugcraft.agriculture.JugcraftAgriculture;
 import io.github.jimbozoomer.jugcraft.agriculture.ProduceDisplayBlock;
 import io.github.jimbozoomer.jugcraft.agriculture.ProduceDisplayBlockEntity;
+import java.util.List;
 import net.fabricmc.fabric.api.gametest.v1.GameTest;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -24,6 +30,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.item.component.BlockItemStateProperties;
 import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.block.Block;
@@ -44,7 +51,10 @@ import net.minecraft.world.phys.shapes.Shapes;
  * is smaller than a block (light and faces pass it) and counts in the Crowfield's harvest, and each has its wild patch.
  * Part 2's displays (the Pumpkin Wheelbarrow, Wagon and Pyramid) stand whole where they are placed, take produce on any of
  * their blocks one piece a spot up to their spots, refuse what is not produce, give the last piece back to an empty hand,
- * remember what they hold, and break whole, spilling it.
+ * remember what they hold, and break whole, spilling it. Part 3: the Chalkboard Sign faces the player, chalks the market's
+ * words in turn and a named Name Tag's name, only for a player who may build, and keeps its words when broken; Pumpkin
+ * Vine Cover lies flat, is walked through, won't go where nothing holds it up and comes off when its support goes; the
+ * Giant Warty Gourd stands whole, two by three by two, and breaks whole, dropping itself once.
  */
 public class PumpkinPatchGameTests {
 	/** The six, as tools/pumpkin_patch.py VARIETIES lists them. */
@@ -143,9 +153,13 @@ public class PumpkinPatchGameTests {
 		return helper.getLevel().getBlockEntity(helper.absolutePos(at)) instanceof ProduceDisplayBlockEntity display ? display : null;
 	}
 
+	private static List<ItemEntity> drops(GameTestHelper helper, Item item) {
+		return helper.getLevel().getEntitiesOfClass(ItemEntity.class, new AABB(helper.absolutePos(new BlockPos(4, 2, 4))).inflate(8.0),
+				entity -> entity.getItem().is(item));
+	}
+
 	private static int dropped(GameTestHelper helper, Item item) {
-		return helper.getLevel().getEntitiesOfClass(ItemEntity.class, new AABB(helper.absolutePos(new BlockPos(4, 2, 4))).inflate(8.0)).stream()
-				.filter(entity -> entity.getItem().is(item)).mapToInt(entity -> entity.getItem().getCount()).sum();
+		return drops(helper, item).stream().mapToInt(entity -> entity.getItem().getCount()).sum();
 	}
 
 	/** The checks every display passes: see the class's description. */
@@ -219,5 +233,151 @@ public class PumpkinPatchGameTests {
 	public void thePyramidHoldsTwentyFive(GameTestHelper helper) {
 		checkDisplay(helper, "pumpkin_pyramid", new BlockPos(6, 2, 2), 9, 25);
 		helper.succeed();
+	}
+
+	// ---------------------------------------------------------------- part 3
+
+	private static BlockHitResult hit(GameTestHelper helper, BlockPos pos, Direction side) {
+		BlockPos absolute = helper.absolutePos(pos);
+		return new BlockHitResult(Vec3.atCenterOf(absolute).relative(side, 0.5), side, absolute, false);
+	}
+
+	private static InteractionResult use(GameTestHelper helper, ServerPlayer player, BlockPos pos, Direction side) {
+		return player.gameMode.useItemOn(player, helper.getLevel(), player.getMainHandItem(), InteractionHand.MAIN_HAND, hit(helper, pos, side));
+	}
+
+	private static ServerPlayer standing(GameTestHelper helper, BlockPos at, ItemStack held) {
+		ServerPlayer player = helper.makeMockServerPlayerInLevel();
+		player.setGameMode(GameType.SURVIVAL);
+		BlockPos absolute = helper.absolutePos(at);
+		player.setPos(absolute.getX() + 0.5, absolute.getY(), absolute.getZ() + 0.5);
+		player.setItemInHand(InteractionHand.MAIN_HAND, held);
+		return player;
+	}
+
+	/**
+	 * A Chalkboard Sign faces the player, saying PUMPKINS; use chalks the next words; a player who may not build changes
+	 * nothing; a Name Tag named in an anvil chalks its name, and isn't used up; an unnamed one chalks nothing; with its own
+	 * words, use changes nothing and sneak-use wipes them; broken, it keeps its words, its own as its name.
+	 */
+	@GameTest(maxTicks = 40)
+	public void theChalkboardTakesWords(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		floor(helper);
+		ServerPlayer player = standing(helper, new BlockPos(3, 2, 6), new ItemStack(item("chalkboard_sign")));
+		player.setYRot(180.0F);
+		BlockPos pos = new BlockPos(3, 2, 3);
+		player.getMainHandItem().useOn(new UseOnContext(player, InteractionHand.MAIN_HAND, hit(helper, pos.below(), Direction.UP)));
+		helper.assertTrue(helper.getBlockState(pos).getValue(ChalkboardSignBlock.FACING) == Direction.SOUTH
+				&& helper.getBlockState(pos).getValue(ChalkboardSignBlock.WORDS) == ChalkboardSignBlock.Words.PUMPKINS, "It faces the player, saying PUMPKINS");
+		ChalkboardSignBlockEntity sign = helper.getBlockEntity(pos, ChalkboardSignBlockEntity.class);
+		player.setItemInHand(InteractionHand.MAIN_HAND, ItemStack.EMPTY);
+		use(helper, player, pos, Direction.SOUTH);
+		use(helper, player, pos, Direction.SOUTH);
+		helper.assertTrue(helper.getBlockState(pos).getValue(ChalkboardSignBlock.WORDS) == ChalkboardSignBlock.Words.U_PICK, "Use chalks the next words");
+		player.setGameMode(GameType.ADVENTURE);
+		use(helper, player, pos, Direction.SOUTH);
+		helper.assertTrue(helper.getBlockState(pos).getValue(ChalkboardSignBlock.WORDS) == ChalkboardSignBlock.Words.U_PICK,
+				"A player who may not build changes nothing");
+		player.setGameMode(GameType.SURVIVAL);
+		player.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(Items.NAME_TAG));
+		use(helper, player, pos, Direction.SOUTH);
+		helper.assertTrue(sign.text().isEmpty(), "An unnamed tag chalks nothing");
+		ItemStack tag = new ItemStack(Items.NAME_TAG);
+		tag.set(DataComponents.CUSTOM_NAME, Component.literal("Hayrides at Noon"));
+		player.setItemInHand(InteractionHand.MAIN_HAND, tag);
+		use(helper, player, pos, Direction.SOUTH);
+		helper.assertTrue(sign.text().equals("Hayrides at Noon") && player.getMainHandItem().getCount() == 1, "A named tag chalks its name, kept");
+		player.setItemInHand(InteractionHand.MAIN_HAND, ItemStack.EMPTY);
+		use(helper, player, pos, Direction.SOUTH);
+		helper.assertTrue(helper.getBlockState(pos).getValue(ChalkboardSignBlock.WORDS) == ChalkboardSignBlock.Words.U_PICK
+				&& sign.text().equals("Hayrides at Noon"), "With its own words, use changes nothing");
+		player.setShiftKeyDown(true);
+		use(helper, player, pos, Direction.SOUTH);
+		player.setShiftKeyDown(false);
+		helper.assertTrue(sign.text().isEmpty(), "Sneak-use wipes them off");
+		sign.paint("Cider Inside");
+		level.destroyBlock(helper.absolutePos(pos), true);
+		helper.runAfterDelay(3, () -> {
+			List<ItemEntity> signs = drops(helper, item("chalkboard_sign"));
+			helper.assertTrue(signs.size() == 1, "Broken, it drops once");
+			ItemStack stack = signs.get(0).getItem();
+			Component name = stack.get(DataComponents.CUSTOM_NAME);
+			BlockItemStateProperties state = stack.get(DataComponents.BLOCK_STATE);
+			helper.assertTrue(name != null && name.getString().equals("Cider Inside"), "with its own words as its name: " + name);
+			helper.assertTrue(state != null && state.apply(block("chalkboard_sign").defaultBlockState()).getValue(ChalkboardSignBlock.WORDS)
+					== ChalkboardSignBlock.Words.U_PICK, "and the market's words it showed: " + state);
+			helper.succeed();
+		});
+	}
+
+	/**
+	 * Pumpkin Vine Cover lies flat on the ground (a pixel high, walked through); it won't go where nothing holds it up;
+	 * when the block under it goes, it comes off as an item.
+	 */
+	@GameTest(maxTicks = 40)
+	public void theVineCoverLiesOnTheGround(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		floor(helper);
+		helper.setBlock(new BlockPos(3, 2, 3), Blocks.STONE);
+		helper.setBlock(new BlockPos(3, 3, 3), Blocks.STONE);
+		ServerPlayer player = standing(helper, new BlockPos(3, 2, 6), new ItemStack(item("pumpkin_vine_cover"), 4));
+		BlockPos ground = new BlockPos(5, 2, 3);
+		player.getMainHandItem().useOn(new UseOnContext(player, InteractionHand.MAIN_HAND, hit(helper, ground.below(), Direction.UP)));
+		helper.assertBlockPresent(block("pumpkin_vine_cover"), ground);
+		BlockPos absolute = helper.absolutePos(ground);
+		BlockState cover = level.getBlockState(absolute);
+		helper.assertTrue(cover.getCollisionShape(level, absolute).isEmpty() && cover.getShape(level, absolute).max(Direction.Axis.Y) <= 1.0 / 16 + 1e-6,
+				"It lies a pixel high and is walked through");
+		// Against the side of the stone pillar's top, with nothing under that spot, it won't go.
+		player.getMainHandItem().useOn(new UseOnContext(player, InteractionHand.MAIN_HAND, hit(helper, new BlockPos(3, 3, 3), Direction.EAST)));
+		helper.assertBlockNotPresent(block("pumpkin_vine_cover"), new BlockPos(4, 3, 3));
+		helper.setBlock(ground.below(), Blocks.AIR);
+		helper.assertBlockNotPresent(block("pumpkin_vine_cover"), ground);
+		helper.runAfterDelay(3, () -> {
+			helper.assertTrue(dropped(helper, item("pumpkin_vine_cover")) == 1,
+					"Without the ground under it, it comes off as an item");
+			helper.succeed();
+		});
+	}
+
+	/**
+	 * The Giant Warty Gourd stands whole where it is placed, two blocks across, three up and two deep from the block aimed
+	 * at, facing the player, each block with its piece of the gourd's shape; use does nothing to it; broken at its top, it
+	 * all goes and drops itself once.
+	 */
+	@GameTest(maxTicks = 40)
+	public void theGiantWartyGourdStandsWhole(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		floor(helper);
+		BlockPos master = new BlockPos(4, 2, 2);
+		ServerPlayer player = standing(helper, master.north(), new ItemStack(item("giant_warty_gourd")));
+		player.setYRot(0.0F);
+		player.getMainHandItem().useOn(new UseOnContext(player, InteractionHand.MAIN_HAND, hit(helper, master.below(), Direction.UP)));
+		GiantWartyGourdBlock block = (GiantWartyGourdBlock) block("giant_warty_gourd");
+		BlockPos first = helper.absolutePos(master);
+		helper.assertTrue(level.getBlockState(first).is(block) && level.getBlockState(first).getValue(GiantWartyGourdBlock.FACING) == Direction.NORTH,
+				"It stands where it was placed, facing the player");
+		helper.assertTrue(block.cells().length == 12 && block.across() == 2 && block.deep() == 2, "It is two by three by two blocks");
+		for (int part = 0; part < 12; part++) {
+			BlockPos at = block.partPos(first, Direction.NORTH, part);
+			BlockState there = level.getBlockState(at);
+			helper.assertTrue(there.is(block) && block.part(there) == part && !there.getShape(level, at).isEmpty(),
+					"It is missing its block " + part + ", or that block its piece of the gourd: " + there);
+		}
+		player.setItemInHand(InteractionHand.MAIN_HAND, ItemStack.EMPTY);
+		BlockState before = level.getBlockState(first);
+		use(helper, player, master, Direction.NORTH);
+		helper.assertTrue(level.getBlockState(first) == before, "Use does nothing to it");
+		BlockPos top = block.partPos(first, Direction.NORTH, 11);
+		level.destroyBlock(top, true);
+		for (int part = 0; part < 12; part++) {
+			helper.assertFalse(level.getBlockState(block.partPos(first, Direction.NORTH, part)).is(block), "It breaks whole");
+		}
+		helper.runAfterDelay(3, () -> {
+			helper.assertTrue(dropped(helper, item("giant_warty_gourd")) == 1,
+					"It drops itself once");
+			helper.succeed();
+		});
 	}
 }

@@ -1,6 +1,6 @@
 # The Pumpkin Patch Market
 
-Status: parts 1 (six squashes and gourds) and 2 (the market's displays) implemented. CI builds them and runs their game tests and client screenshots; not yet played by hand.
+Status: parts 1 (six squashes and gourds), 2 (the market's displays) and 3 (the Chalkboard Sign, Pumpkin Vine Cover and the Giant Warty Gourd) implemented; the set is complete. CI builds them and runs their game tests and client screenshots; not yet played by hand.
 Proposal issue: none. The owner asked for it directly on 28 October 2026. They asked for big sets of Halloween and fall decor ("Pumpkins, Harvests, Halloween stuff") drawn by their rules, "not reverting back to the basic way". Then: "Then I want you to do 1-10 in parts in that order one by one". This is set 1 of the ten.
 Owner: @jimbozoomer-byte
 Target milestone and tier: Discovery tier. Seeds come from short grass and from wild patches; growing needs only farmland, and the recipes need nothing beyond the gourds themselves, sugar and an egg.
@@ -54,17 +54,31 @@ Three real-life-sized displays to set your produce out on. Each is several block
 - **Wagon:** two sticks, a chest, two planks, red dye, two iron ingots and a hay bale.
 - **Pyramid:** three wooden slabs and four planks.
 
-### Still to come
-- The Chalkboard Sign: an A-frame you write the prices on.
-- Pumpkin-vine ground cover.
-- The Giant Warty Pumpkin: the Giant Pumpkin scaled, with the warty skin.
+### Part 3: the sign, the ground and the giant
+- **Chalkboard Sign** (one block): an A-frame market board.
+  - Two slate boards in wooden frames, hinged together at the top with two iron hinges, each leaning 22.5 degrees out from upright. Their side rails run down to the ground as legs.
+  - The market's words are chalked on both boards: **PUMPKINS**, **FRESH PICKED**, **U-PICK**, **GOURDS**, **SQUASH**, **PIES**, **CIDER** and **OPEN**. Use it with an empty hand to chalk the next.
+  - Or write your own, as on the Spooky Sign: use a Name Tag named in an anvil on it (the tag isn't used up), or rename the sign in an anvil before placing it. Your own words cover the market's; sneak-use with an empty hand wipes them off.
+  - Chalking it needs build permission. Broken, it keeps its words (its own as its name).
+  - Recipe: four sticks, planks and black dye.
+- **Pumpkin Vine Cover**: a mat of pumpkin vine lying flat on the ground.
+  - One vine across the block with tendrils curling off it, three broad lobed leaves on short stalks, and one open yellow flower.
+  - Each is placed at one of four turns at random, so a spread of it doesn't tile.
+  - It is walked through, not on, like leaf litter. It needs a solid top under it and comes off as an item when that goes.
+  - Recipe: two vines and pumpkin seeds make six.
+- **Giant Warty Gourd**: the Warty Gourd three times bigger.
+  - Its body, neck and stalk are the Warty Gourd's own, on its own textures, nothing redesigned. It is two blocks wide and deep and three tall.
+  - Like the displays, it is placed and broken as one, facing whoever places it, and drops once.
+  - Recipe: nine Warty Gourds.
 
 The bushel baskets first listed for this set were dropped: the woven Basket and the Pumpkin Crate already cover them.
 
 ## Changes from the idea list
 - The "Warty Goblin" was dropped: the Warty Gourd already exists. The **Swan Gourd** takes its place.
 - The Long Island Cheese is a lying squash shape, not a whole carvable block like the heirlooms. Carving and the heirloom tag (`#jugcraft:heirloom_pumpkins`) stay with the five carvable heirlooms. It gets its own pie recipe instead.
-- The Giant Warty Pumpkin is still to come, so it can be the existing Giant Pumpkin scaled with the warty skin and nothing else (docs/ART_DIRECTION.md, "A bigger version is the same thing, bigger").
+- The Giant Warty Pumpkin became the **Giant Warty Gourd**: the Warty Gourd itself three times bigger. The Giant Pumpkin given a warty skin would be a new design, not the same thing bigger (docs/ART_DIRECTION.md, "A bigger version is the same thing, bigger").
+- The Chalkboard Sign chalks a set of market words and a player's own, rather than prices: a price would be a number nobody keeps true.
+- The Pumpkin on a stump is left to set 5's chopping block, which a pumpkin or gourd can sit on; until then a pumpkin set on a log is the same thing.
 - The pyramid is a stepped square pyramid three blocks across (ledges eight pixels wide, so a piece fits on each) rather than a narrow stack.
 
 ## How they are drawn (docs/ART_DIRECTION.md, docs/NATURAL_TEXTURES.md, docs/ITEM_ICONS.md)
@@ -86,9 +100,19 @@ The bushel baskets first listed for this set were dropped: the woven Basket and 
     - Nails are two-texel heads lit at the top left; iron is flat bands; hay is straight stripes; the wagon's sides are barn-red slats with a dark gap.
     - No random shade at any texel.
   - **Atlas:** the pieces are packed into each display's 128 × 128 texture tallest first.
+- **Part 3** (tools/pumpkin_patch_data.py):
+  - **The Chalkboard Sign** is real-life sized: a board 12 pixels wide (75 cm) standing 15 high. Each board is a frame of boxes turned 22.5 degrees about the hinge, the slate recessed a tenth of a pixel inside it.
+    - The slate is one flat dark green-black with two short eraser smears a tone lighter, placed.
+    - The frame is the displays' wood, its grain along each rail; the hinges are flat iron.
+    - The words are drawn by the client in chalk white, leaning with each board.
+  - **The vine cover** is a 16×16 cut-out picture, one leaf green stepped into tones (`wood_style.ramp`), no outline.
+    - Each leaf is lit up and to the left and shaded down and to the right in three even bands, a lighter vein from stalk to tip.
+    - The cluster stands on its own at any of its four turns.
+  - **The Giant Warty Gourd** is the Warty Gourd's model scaled three times (`decor17_data.grown`), each face keeping its picture, cut into its twelve blocks. Its item is the same gourd half as big.
 
 ## Connections
 - Existing input producer: short grass (the grass-seed table) and world generation (wild patches); farmland and the existing stem growth (`GourdStemBlock`, `CropGrowth`, so beans beside a stem speed it as for every squash).
+- Existing input producer (part 3): vines and pumpkin seeds (the vine cover), sticks, planks and black dye (the chalkboard), and the existing Warty Gourd (the giant).
 - Existing output consumer: the Pumpkin Crate and Farm Stand displays (shared crop tags) and part 2's displays (the Pumpkin Crate's tag); the Crowfield harvest (`#jugcraft:crowfield_harvest`, counted by the Harvest Crown rite); pumpkin pie (Long Island Cheese); composters; chicken and parrot food (seeds).
 - Technology connection: the Hydroponics machine grows each from its seeds (600 ticks a fruit, the seed returned), as it does every gourd (docs/features/hydroponics.md; its recipes are generated for every gourd seed).
 - Magic connection: none.
@@ -102,6 +126,7 @@ The bushel baskets first listed for this set were dropped: the woven Basket and 
 - Growth time per stage, in wheat's time: Blue Hubbard 1.25; Turban and Long Island Cheese 1.0; Sweet Dumpling and Spoon Gourd 0.85; Swan Gourd 1.0.
 - One pumpkin pie from one Long Island Cheese, sugar and an egg, the same as from a pumpkin or an heirloom.
 - The displays only hold what is put on them, one piece a spot: they make, grow and change nothing, and give back exactly what went on.
+- Part 3 is decor only. Nine Warty Gourds make one Giant Warty Gourd, which drops only itself. Two vines and pumpkin seeds make six vine covers, which drop only themselves. Nothing turns either back, so no loop gains.
 
 ## Multiplayer and persistence
 - Part 1: plain blocks and items, server-side growth (the existing gourd stem code); no block entities.
@@ -111,7 +136,11 @@ The bushel baskets first listed for this set were dropped: the woven Basket and 
   - Breaking it from any block takes the whole down and spills its pieces once.
   - Pistons can't move it (`PushReaction.IMMOVEABLE`; 26.3 has no `BLOCK`).
   - The client draws the pieces (`ProduceDisplayRenderer`), each lit as the block it stands in.
-- IDs (stable from release): part 2's `pumpkin_wheelbarrow`, `pumpkin_wagon`, `pumpkin_pyramid` (block entity `produce_display`); part 1's `turban_squash`, `blue_hubbard_squash`, `sweet_dumpling_squash`, `long_island_cheese_pumpkin`, `spoon_gourd`, `swan_gourd`, each with `_seeds`, `_stem` and `attached_<id>_stem`.
+- Part 3:
+  - The Chalkboard Sign's own words are kept as a Spooky Sign's are (`ChalkboardSignBlockEntity` extends `SpookySignBlockEntity`): plain text, cut to the gravestone's 50 characters with control characters dropped, saved with the world and sent to clients.
+  - Words are changed on the server only, and only by a player who may build there.
+  - The vine cover and the giant gourd keep nothing; the giant gourd can't be moved by pistons (`PushReaction.IMMOVEABLE`); a piston pops the vine cover off (`POPPED`).
+- IDs (stable from release): part 3's `chalkboard_sign` (block entity `chalkboard_sign`), `pumpkin_vine_cover`, `giant_warty_gourd`; part 2's `pumpkin_wheelbarrow`, `pumpkin_wagon`, `pumpkin_pyramid` (block entity `produce_display`); part 1's `turban_squash`, `blue_hubbard_squash`, `sweet_dumpling_squash`, `long_island_cheese_pumpkin`, `spoon_gourd`, `swan_gourd`, each with `_seeds`, `_stem` and `attached_<id>_stem`.
 - Every recipe and patch follows the agriculture feature switch, as the other gourds do. Turning agriculture off stops the recipes; the blocks stay registered.
 
 ## Dependencies and assets
@@ -120,12 +149,12 @@ The bushel baskets first listed for this set were dropped: the woven Basket and 
 ## Verification
 Local checks run on this branch, and their results:
 - `python3 tools/check_icon_maps.py` on the six seeds maps: PASS (6 maps, 0 warnings).
-- `python3 tools/check_mod_data.py`: PASS (part 1: 8,049 material IDs; with part 2: 8,052), including the art check over every block and item model (the six gourd models and the displays' 27 part models and 3 item models among them; no allow-list entry added) and `check_pumpkin_patch`.
+- `python3 tools/check_mod_data.py`: PASS (part 1: 8,049 material IDs; with part 2: 8,052; with part 3: 8,055), including the art check over every block and item model (the six gourd models, the displays' 27 part models and 3 item models, and part 3's 14 block and 3 item models among them; no allow-list entry added) and `check_pumpkin_patch`.
 - `python3 scripts/check_repository.py`: PASS.
 - `python3 -m unittest discover -s scripts/tests`: 287 tests, OK.
 - `javac` parse (syntax only) of the changed and new Java: OK. The full compile runs in CI.
 - CI on `68c39b6` (part 2's first push): the build failed to compile, since 26.3 has no `PushReaction.BLOCK` (the displays now use `IMMOVEABLE`), so no game test or screenshot ran on it.
-- Offline previews of the six gourd models and the three displays, textured and drawn with back faces culled, were looked at from front and back while drawing (a review aid, not committed).
+- Offline previews of the six gourd models, the three displays, the Chalkboard Sign, the vine cover (tiled at random turns) and the Giant Warty Gourd (its twelve part models put back together), textured and drawn with back faces culled, were looked at from front and back while drawing (a review aid, not committed).
 
 Game tests (CI only, not run locally):
 - `PumpkinPatchGameTests`:
@@ -141,11 +170,21 @@ Game tests (CI only, not run locally):
   - it gives the last piece back to an empty hand;
   - it remembers what it holds through a save;
   - it breaks whole, dropping once and spilling the rest.
-- `PumpkinPatchClientGameTests`: five screenshots:
+- `PumpkinPatchGameTests`, part 3:
+  - the Chalkboard Sign faces its maker saying PUMPKINS and chalks the next words in turn;
+  - a player in adventure mode changes nothing;
+  - a named Name Tag chalks its name and is kept, and an unnamed one chalks nothing;
+  - with its own words, use changes nothing, and sneak-use wipes them;
+  - broken, it drops once with its words and its own as its name;
+  - the vine cover lies a pixel high with no collision, won't go where nothing holds it up, and comes off as an item when its ground goes;
+  - the Giant Warty Gourd stands whole (12 blocks, each with its piece of the shape), facing its maker; use does nothing to it; broken at its top, it all goes and drops once.
+- `PumpkinPatchClientGameTests`: seven screenshots:
   - the six in a row on boards, the row from behind, and the patch;
   - the three displays filled, from the front;
-  - the wagon from the side.
-- `check_pumpkin_patch` in tools/check_mod_data.py: each display's Java sizes, spots and scale and the renderer's turns are the table's. A wagon spot changed by hand was caught.
+  - the wagon from the side;
+  - part 3 set out in front of the displays;
+  - the Chalkboard Signs close.
+- `check_pumpkin_patch` in tools/check_mod_data.py: each display's Java sizes, spots and scale and the renderer's turns are the table's. A wagon spot changed by hand was caught. Part 3: the Chalkboard Sign's words (in order, with their text) and the renderer's boards, and the Giant Warty Gourd's size, are the table's.
 
 Not run: a hand playtest, and a two-client playtest (none is needed beyond the existing gourd behaviour, which these reuse unchanged).
 
@@ -153,5 +192,4 @@ Not run: a hand playtest, and a two-client playtest (none is needed beyond the e
 Wild patches in the overworld biomes listed above (and the landscape collection's of the same kinds), placed as the other gourds' are: one patch in about 32 matching chunks. They are not seasonal: they grow and are found all year, as the other gourds are.
 
 ## Rollout and open questions
-- Part 3 follows on its own branch: the Chalkboard Sign, the pumpkin-vine ground cover and the Giant Warty Pumpkin.
 - Open: whether the Halloween Peddler should sell the new seeds as it does the heirlooms'. It doesn't yet; grass and wild patches are enough to reach them.

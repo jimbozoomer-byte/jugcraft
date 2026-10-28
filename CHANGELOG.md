@@ -8,6 +8,13 @@ Every change to Jugcraft, newest first, grouped by pull request. For what each t
 
 No numbered release yet. Entries on feature branches remain proposed until their pull requests merge.
 
+### Unmerged: The Pumpkin Patch Market, part 3 (the sign, the ground and the giant)
+- **Chalkboard Sign**: an A-frame of two slate boards in wooden frames, hinged at the top, the market's words chalked on both faces. Use it to chalk the next: PUMPKINS, FRESH PICKED, U-PICK, GOURDS, SQUASH, PIES, CIDER, OPEN. A named Name Tag (or renaming it in an anvil) chalks your own words; sneak-use wipes them. It needs build permission and keeps its words when broken.
+- **Pumpkin Vine Cover**: a mat of pumpkin vine, broad leaves, tendrils and a flower lying flat on the ground, walked through, at a random turn so a spread doesn't tile. Two vines and pumpkin seeds make six.
+- **Giant Warty Gourd**: the Warty Gourd three times bigger, on its own textures, two blocks wide and deep and three tall, placed and broken as one. Nine Warty Gourds make one.
+- Record: [pumpkin-patch-market.md](docs/features/pumpkin-patch-market.md).
+- **Checked:** the record's Verification. Game tests and screenshots run in CI only; not played by hand.
+
 ### Unmerged: The Pumpkin Patch Market, part 2 (the market's displays)
 - **Three real-life-sized displays for your produce**, each several blocks placed and broken as one:
   - the **Pumpkin Wheelbarrow**: two blocks long, an iron-shod spoked wheel, a flared plank tray; holds 5;

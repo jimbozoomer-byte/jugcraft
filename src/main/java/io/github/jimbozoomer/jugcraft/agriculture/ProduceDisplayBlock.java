@@ -19,7 +19,6 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.shapes.CollisionContext;
-import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
 import org.jspecify.annotations.Nullable;
 
@@ -46,21 +45,6 @@ public abstract class ProduceDisplayBlock extends MultiDecorationBlock implement
 
 	/** Each part's shape for each facing. */
 	protected abstract Map<Direction, VoxelShape[]> shapes();
-
-	/** The part shapes of a prop made of several boxes {x0, y0, z0, x1, y1, z1} in its frame, each part's pieces joined. */
-	protected static Map<Direction, VoxelShape[]> shapesOf(int[][] cells, double[]... boxes) {
-		Map<Direction, VoxelShape[]> out = partShapes(boxes[0], cells);
-		for (int i = 1; i < boxes.length; i++) {
-			Map<Direction, VoxelShape[]> more = partShapes(boxes[i], cells);
-			for (Map.Entry<Direction, VoxelShape[]> entry : out.entrySet()) {
-				VoxelShape[] shapes = entry.getValue();
-				for (int part = 0; part < shapes.length; part++) {
-					shapes[part] = Shapes.or(shapes[part], more.get(entry.getKey())[part]);
-				}
-			}
-		}
-		return out;
-	}
 
 	@Override
 	protected VoxelShape getShape(BlockState state, BlockGetter level, BlockPos pos, CollisionContext context) {

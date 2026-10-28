@@ -1,5 +1,8 @@
 package io.github.jimbozoomer.jugcraft.test;
 
+import io.github.jimbozoomer.jugcraft.agriculture.ChalkboardSignBlock;
+import io.github.jimbozoomer.jugcraft.agriculture.ChalkboardSignBlockEntity;
+import io.github.jimbozoomer.jugcraft.agriculture.GiantWartyGourdBlock;
 import io.github.jimbozoomer.jugcraft.agriculture.GourdStemBlock;
 import io.github.jimbozoomer.jugcraft.agriculture.JugcraftAgriculture;
 import io.github.jimbozoomer.jugcraft.agriculture.ProduceDisplayBlock;
@@ -25,7 +28,9 @@ import net.minecraft.world.level.block.state.properties.BlockStateProperties;
  * Client game test for the Pumpkin Patch Market's squashes and gourds (decor set 1, part 1): the six laid out in a row on
  * a market's boards, and a patch of them growing on their stems, built in a real client and photographed close, from
  * behind and over the patch, by day; and part 2's displays (the Pumpkin Wheelbarrow, Wagon and Pyramid) filled with them,
- * from the front and the side (CI job {@code client}). The pictures go into docs/features/pumpkin-patch-market.md.
+ * from the front and the side; and part 3's Chalkboard Signs, Pumpkin Vine Cover and Giant Warty Gourd set out in front
+ * of them, from the front and close by the signs (CI job {@code client}). The pictures go into
+ * docs/features/pumpkin-patch-market.md.
  */
 public class PumpkinPatchClientGameTests implements FabricClientGameTest {
 	/** The six, as tools/pumpkin_patch.py VARIETIES lists them. */
@@ -58,6 +63,10 @@ public class PumpkinPatchClientGameTests implements FabricClientGameTest {
 			context.waitTicks(20);
 			shoot(context, singleplayer, x + 5, y + 3, z + 21, 180, 18, "jugcraft_pumpkin_patch_displays");
 			shoot(context, singleplayer, x + 13, y + 3, z + 9, 90, 22, "jugcraft_pumpkin_patch_wagon_side");
+			server.runOnServer(minecraft -> extras(minecraft.overworld(), origin));
+			context.waitTicks(20);
+			shoot(context, singleplayer, x + 6, y + 3, z + 23, 180, 20, "jugcraft_pumpkin_patch_extras");
+			shoot(context, singleplayer, x + 3, y + 1, z + 19, 155, 15, "jugcraft_pumpkin_patch_chalkboard");
 		}
 	}
 
@@ -113,6 +122,35 @@ public class PumpkinPatchClientGameTests implements FabricClientGameTest {
 			if (level.getBlockEntity(master) instanceof ProduceDisplayBlockEntity display) {
 				for (int piece = 0; piece < display.capacity(); piece++) {
 					display.add(piece % 7 == 6 ? new ItemStack(Items.PUMPKIN) : new ItemStack(JugcraftAgriculture.item(VARIETIES[piece % 7 % VARIETIES.length])));
+				}
+			}
+		}
+	}
+
+	/**
+	 * Part 3 in front of the displays: three Chalkboard Signs facing south (PUMPKINS, FRESH PICKED and one with its own
+	 * words), the Giant Warty Gourd to the east of them, and Pumpkin Vine Cover spread over the free ground round them.
+	 */
+	private static void extras(ServerLevel level, BlockPos origin) {
+		ChalkboardSignBlock board = (ChalkboardSignBlock) JugcraftAgriculture.block("chalkboard_sign");
+		BlockState south = board.defaultBlockState().setValue(ChalkboardSignBlock.FACING, Direction.SOUTH);
+		set(level, origin.offset(1, 0, 16), south);
+		set(level, origin.offset(5, 0, 17), south.setValue(ChalkboardSignBlock.WORDS, ChalkboardSignBlock.Words.FRESH_PICKED));
+		set(level, origin.offset(8, 0, 16), south);
+		if (level.getBlockEntity(origin.offset(8, 0, 16)) instanceof ChalkboardSignBlockEntity sign) {
+			sign.paint("Hot Cider & Pies");
+		}
+		GiantWartyGourdBlock giant = (GiantWartyGourdBlock) JugcraftAgriculture.block("giant_warty_gourd");
+		BlockPos master = origin.offset(10, 0, 15);
+		BlockState state = giant.defaultBlockState().setValue(GiantWartyGourdBlock.FACING, Direction.SOUTH);
+		set(level, master, state);
+		giant.setPlacedBy(level, master, state, null, new ItemStack(giant));
+		BlockState cover = JugcraftAgriculture.block("pumpkin_vine_cover").defaultBlockState();
+		for (int dx = -1; dx <= 12; dx++) {
+			for (int dz = 13; dz <= 20; dz++) {
+				BlockPos at = origin.offset(dx, 0, dz);
+				if (level.getBlockState(at).isAir() && (dx * 7 + dz * 3) % 5 != 0) {
+					set(level, at, cover);
 				}
 			}
 		}

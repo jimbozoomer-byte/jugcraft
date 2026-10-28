@@ -1,0 +1,52 @@
+{
+  "parent": "minecraft:block/block",
+  "textures": {
+    "particle": "jugcraft:block/warty_gourd_side",
+    "side": "jugcraft:block/warty_gourd_side",
+    "top": "jugcraft:block/warty_gourd_top",
+    "stem": "jugcraft:block/gourd_stalk"
+  },
+  "elements": [
+    {
+      "from": [
+        4,
+        0,
+        0
+      ],
+      "to": [
+        16,
+        16,
+        12
+      ],
+      "faces": {
+        "south": {
+          "texture": "#side",
+          "uv": [
+            4.0,
+            10.6667,
+            8.0,
+            16.0
+          ]
+        },
+        "west": {
+          "texture": "#side",
+          "uv": [
+            8.0,
+            10.6667,
+            12.0,
+            16.0
+          ]
+        },
+        "down": {
+          "texture": "#side",
+          "uv": [
+            4.0,
+            4.0,
+            8.0,
+            8.0
+          ]
+        }
+      }
+    }
+  ]
+}

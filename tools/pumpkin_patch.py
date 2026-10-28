@@ -1,5 +1,6 @@
 """The Pumpkin Patch Market, decor set 1 (docs/features/pumpkin-patch-market.md). Part 1: six new squashes and gourds for
-the fall's displays and kitchens. Part 2: the displays to show them on (DISPLAYS, below). Each grows from a stem like every gourd (tools/agriculture.py GOURDS, FOUND_WILD; the
+the fall's displays and kitchens. Part 2: the displays to show them on (DISPLAYS, below). Part 3: the Chalkboard Sign,
+the Pumpkin Vine Cover and the Giant Warty Gourd. Each grows from a stem like every gourd (tools/agriculture.py GOURDS, FOUND_WILD; the
 Java in agriculture/JugcraftAgriculture.java), and is drawn here: its model's boxes, and the colours its skins are
 painted in (tools/pumpkin_patch_textures.py, in the vanilla manner of docs/NATURAL_TEXTURES.md).
 
@@ -107,6 +108,38 @@ DISPLAY_RECIPES = [
     {"id": "pumpkin_pyramid", "pattern": [" S ", "SPS", "PPP"], "key": {"S": "#minecraft:wooden_slabs", "P": "#minecraft:planks"},
      "result": "pumpkin_pyramid", "count": 1, "category": "building"},
 ]
+
+
+# Part 3. The Chalkboard Sign: an A-frame of two slate boards in wooden frames, hinged at the top. Use it to chalk the
+# next of its market words on both faces (WORDS, in order); or write your own, as on the Spooky Sign: a Name Tag named in
+# an anvil (not used up), or the sign renamed before it is placed; sneak-use with an empty hand wipes them. The client
+# chalks the words on each board (client/ChalkboardSignRenderer.java): the boards lean `lean` degrees from upright about
+# their hinge, `hinge` (y, z) in pixels; each slate's middle is `slate_drop` pixels below the hinge along the board and
+# its face `slate_out` pixels out from the hinge's line, `slate_width` by `slate_height` pixels.
+CHALKBOARD = {"block": "chalkboard_sign", "display": "Chalkboard Sign", "lean": 22.5, "hinge": (15.0, 8.0),
+              "slate_drop": 7.0, "slate_out": 0.6, "slate_width": 9.0, "slate_height": 9.0}
+WORDS = {"pumpkins": "PUMPKINS", "fresh_picked": "FRESH PICKED", "u_pick": "U-PICK", "gourds": "GOURDS", "squash": "SQUASH",
+         "pies": "PIES", "cider": "CIDER", "open": "OPEN"}
+# Pumpkin-vine ground cover: a creeping mat of pumpkin vine, broad leaves, curling tendrils and a flower or two, lying
+# flat on the ground (a carpet you walk through), placed at one of four turns at random so a patch doesn't tile.
+VINE_COVER = {"block": "pumpkin_vine_cover", "display": "Pumpkin Vine Cover"}
+# The Giant Warty Gourd: the Warty Gourd's own model `scale` times bigger, on its own textures, nothing redesigned
+# (docs/ART_DIRECTION.md, "A bigger version is the same thing, bigger"), `size` blocks (across, up, deep).
+GIANT_WARTY = {"block": "giant_warty_gourd", "display": "Giant Warty Gourd", "scale": 3, "size": (2, 3, 2)}
+EXTRA_RECIPES = [
+    {"id": "chalkboard_sign", "pattern": ["SPS", "SDS"], "key": {"S": "minecraft:stick", "P": "#minecraft:planks", "D": "minecraft:black_dye"},
+     "result": "chalkboard_sign", "count": 1, "category": "building"},
+    {"id": "giant_warty_gourd", "pattern": ["GGG", "GGG", "GGG"], "key": {"G": "jugcraft:warty_gourd"}, "result": "giant_warty_gourd",
+     "count": 1, "category": "building"},
+]
+EXTRA_SHAPELESS = [
+    {"id": "pumpkin_vine_cover", "inputs": ["minecraft:vine", "minecraft:vine", "minecraft:pumpkin_seeds"], "result": "pumpkin_vine_cover",
+     "count": 6, "category": "building"},
+]
+
+
+def extra_blocks():
+    return [CHALKBOARD["block"], VINE_COVER["block"], GIANT_WARTY["block"]]
 
 
 def display_blocks():

@@ -245,6 +245,7 @@ public final class JugcraftClient implements ClientModInitializer {
 		BlockEntityRendererRegistry.register(JugcraftAgriculture.FLOATING_CANDLE_ENTITY, FloatingCandleRenderer::new);
 		BlockEntityRendererRegistry.register(JugcraftAgriculture.PUMPKIN_CRATE_ENTITY, PumpkinCrateRenderer::new);
 		BlockEntityRendererRegistry.register(JugcraftAgriculture.PRODUCE_DISPLAY_ENTITY, ProduceDisplayRenderer::new);
+		BlockEntityRendererRegistry.register(JugcraftAgriculture.CHALKBOARD_SIGN_ENTITY, ChalkboardSignRenderer::new);
 		BlockEntityRendererRegistry.register(JugcraftAgriculture.ROCKING_CHAIR_ENTITY, RockingChairRenderer::new);
 		BlockEntityRendererRegistry.register(JugcraftAgriculture.LURKING_EYES_ENTITY, LurkingEyesRenderer::new);
 		BlockEntityRendererRegistry.register(JugcraftAgriculture.SILHOUETTE_WINDOW_ENTITY, SilhouetteWindowRenderer::new);
