@@ -4,6 +4,8 @@ import io.github.jimbozoomer.jugcraft.Jugcraft;
 import io.github.jimbozoomer.jugcraft.agriculture.AutumnWreathBlock;
 import io.github.jimbozoomer.jugcraft.agriculture.BatWreathBlock;
 import io.github.jimbozoomer.jugcraft.agriculture.BewareDoormatBlock;
+import io.github.jimbozoomer.jugcraft.agriculture.CandyChuteBlock;
+import io.github.jimbozoomer.jugcraft.agriculture.CandyChuteBlockEntity;
 import io.github.jimbozoomer.jugcraft.agriculture.CrashedWitchBlock;
 import io.github.jimbozoomer.jugcraft.agriculture.DecorationBlockEntity;
 import io.github.jimbozoomer.jugcraft.agriculture.DoorWreath;
@@ -34,6 +36,8 @@ import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.item.component.BundleContents;
 import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.block.Block;
@@ -64,7 +68,12 @@ import net.minecraft.world.phys.Vec3;
  * hangs on a wall and a door, takes no mums and drops as itself. The Beware Doormat lies facing whoever places it and
  * goes with what is under it. Part 4: the Crashed Witch hangs on a wall facing out; an empty hand makes her cackle once
  * until she has done; her legs kick only in their bursts, the whole time with someone near and after a cackle, out of
- * step; with the wall gone she goes, dropping herself. Their recipes and loot load (two lights a craft).
+ * step; with the wall gone she goes, dropping herself. Part 5: the Candy Chute stands two blocks high and three long,
+ * its mouth toward whoever places it and its funnel behind, its first block keeping what slides; a treat used on it goes
+ * in one at a time, the next refused until {@value CandyChuteBlock#DROP_TICKS} ticks have passed, and slides down it,
+ * quickening, for {@value CandyChuteBlock#SLIDE_TICKS} ticks; it comes out onto the path for a player without a Candy Bag
+ * and into the bag of one with it; the chute holds no more than {@value CandyChuteBlock#HOLD} and takes nothing but
+ * treats; broken, it drops what was sliding and itself once. Their recipes and loot load (two lights a craft).
  */
 public class FrontYardGameTests {
 	private static Item item(String id) {
@@ -411,11 +420,88 @@ public class FrontYardGameTests {
 		});
 	}
 
+	private static int bagged(ItemStack bag) {
+		BundleContents contents = bag.get(DataComponents.BUNDLE_CONTENTS);
+		return contents == null ? 0 : contents.itemCopies().mapToInt(ItemStack::getCount).sum();
+	}
+
+	@GameTest(maxTicks = 100)
+	public void theCandyChuteSlidesTreatsDownToTheBag(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		floor(helper);
+		CandyChuteBlock chute = (CandyChuteBlock) JugcraftAgriculture.block("candy_chute");
+		BlockPos master = helper.absolutePos(new BlockPos(3, 2, 2));
+		ServerPlayer player = standing(helper, new BlockPos(3, 2, 1));
+		place(player, helper, new BlockPos(3, 2, 2), new ItemStack(item("candy_chute")));
+		helper.assertTrue(both(level, chute, master, state -> state.getValue(MultiDecorationBlock.FACING) == Direction.NORTH),
+				"It stands two blocks high and three long, its mouth toward the player");
+		helper.assertTrue(level.getBlockEntity(master) instanceof CandyChuteBlockEntity && level.getBlockEntity(master.above()) == null,
+				"Its first block keeps what slides down it");
+		Vec3 mouth = CandyChuteBlock.mouth(master, Direction.NORTH);
+		Vec3 funnel = CandyChuteBlock.point(master, Direction.NORTH, CandyChuteBlock.FUNNEL_Y, CandyChuteBlock.FUNNEL_Z);
+		helper.assertTrue(mouth.z < master.getZ() + 0.5 && funnel.z > master.getZ() + 2.0 && funnel.y > mouth.y + 1.0
+				&& CandyChuteBlock.mouth(master, Direction.EAST).x > master.getX() + 0.5, "Its mouth is at the front, low, and its funnel high behind");
+		helper.assertTrue(CandyChuteBlock.slide(0.0F) == 0.0F && CandyChuteBlock.slide(CandyChuteBlock.SLIDE_TICKS) == 1.0F
+				&& CandyChuteBlock.slide(CandyChuteBlock.SLIDE_TICKS / 2.0F) < 0.5F, "A treat slides from the funnel to the mouth, quickening");
+		BlockPos back = chute.partPos(master, Direction.NORTH, chute.cells().length - 1);
+		BlockState before = level.getBlockState(master);
+		use(player, level, back, ItemStack.EMPTY);
+		helper.assertTrue(level.getBlockState(master) == before, "An empty hand changes nothing");
+		use(player, level, back, new ItemStack(Items.COOKIE, 3));
+		helper.assertTrue(player.getMainHandItem().getCount() == 2 && level.getBlockEntity(master) instanceof CandyChuteBlockEntity held
+				&& held.sliding().size() == 1, "A treat goes in at the funnel, one at a time");
+		use(player, level, back, player.getMainHandItem());
+		helper.assertTrue(player.getMainHandItem().getCount() == 2, "and the next not until " + CandyChuteBlock.DROP_TICKS + " ticks have passed");
+		helper.runAfterDelay(CandyChuteBlock.SLIDE_TICKS + 2, () -> {
+			helper.assertTrue(level.getBlockEntity(master) instanceof CandyChuteBlockEntity held && held.sliding().isEmpty(),
+					"After " + CandyChuteBlock.SLIDE_TICKS + " ticks it has slid down");
+			helper.assertTrue(dropped(helper, Items.COOKIE) == 1, "and with no bag it comes out onto the path, not " + dropped(helper, Items.COOKIE));
+			level.getEntitiesOfClass(ItemEntity.class, new AABB(master).inflate(6.0), entity -> entity.getItem().is(Items.COOKIE)).forEach(ItemEntity::discard);
+			ItemStack bag = new ItemStack(item("candy_bag"));
+			player.getInventory().setItem(9, bag);
+			use(player, level, back, player.getMainHandItem());
+			helper.runAfterDelay(CandyChuteBlock.SLIDE_TICKS + 2, () -> {
+				helper.assertTrue(bagged(player.getInventory().getItem(9)) == 1 && dropped(helper, Items.COOKIE) == 0,
+						"With a Candy Bag, whoever waits at the mouth catches it in the bag");
+				use(player, level, back, player.getMainHandItem());
+				helper.assertTrue(player.getMainHandItem().isEmpty(), "Another goes in");
+				level.destroyBlock(master, true);
+				helper.assertTrue(level.getBlockState(master).isAir() && level.getBlockState(back).isAir(), "Broken, it comes away whole");
+				helper.assertTrue(dropped(helper, Items.COOKIE) == 1 && dropped(helper, item("candy_chute")) == 1,
+						"dropping what was sliding and itself once");
+				helper.succeed();
+			});
+		});
+	}
+
+	@GameTest(maxTicks = 40)
+	public void theCandyChuteTakesOnlyTreatsAndHoldsEight(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		floor(helper);
+		BlockPos master = helper.absolutePos(new BlockPos(3, 2, 2));
+		ServerPlayer player = standing(helper, new BlockPos(3, 2, 1));
+		place(player, helper, new BlockPos(3, 2, 2), new ItemStack(item("candy_chute")));
+		if (!(level.getBlockEntity(master) instanceof CandyChuteBlockEntity chute)) {
+			throw helper.assertionException("The chute keeps what slides down it");
+		}
+		helper.assertTrue(!chute.drop(new ItemStack(Items.STONE), level.getGameTime()), "It takes nothing but treats");
+		ItemStack cookies = new ItemStack(Items.COOKIE, 16);
+		long now = level.getGameTime();
+		for (int i = 0; i < CandyChuteBlock.HOLD; i++) {
+			helper.assertTrue(chute.drop(cookies, now + (long) i * CandyChuteBlock.DROP_TICKS), "Treat " + (i + 1) + " goes in");
+		}
+		helper.assertTrue(!chute.drop(cookies, now + (long) CandyChuteBlock.HOLD * CandyChuteBlock.DROP_TICKS)
+				&& cookies.getCount() == 16 - CandyChuteBlock.HOLD, "and no more than " + CandyChuteBlock.HOLD + " at once");
+		level.destroyBlock(master.above(), true);
+		helper.assertTrue(dropped(helper, Items.COOKIE) == CandyChuteBlock.HOLD, "Broken, it drops all it held, not " + dropped(helper, Items.COOKIE));
+		helper.succeed();
+	}
+
 	@GameTest
 	public void frontYardDataLoads(GameTestHelper helper) {
 		ServerLevel level = helper.getLevel();
 		for (String id : new String[] {"haunted_mailbox", "pumpkin_path_light", "skeleton_dog", "skeleton_cat", "skeleton_crow", "rising_zombie",
-				"gargoyle_knocker", "bat_wreath", "beware_doormat", "crashed_witch"}) {
+				"gargoyle_knocker", "bat_wreath", "beware_doormat", "crashed_witch", "candy_chute"}) {
 			helper.assertTrue(level.recipeAccess().byKey(ResourceKey.create(Registries.RECIPE, Jugcraft.id(id))).isPresent(), id + " has a recipe");
 			helper.assertTrue(level.getServer().reloadableRegistries().getLootTable(ResourceKey.create(Registries.LOOT_TABLE,
 					Jugcraft.id("blocks/" + id))) != LootTable.EMPTY, id + "'s loot loads");

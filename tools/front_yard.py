@@ -54,6 +54,15 @@ Part 4, the Crashed Witch:
   the middle) once in `kick_ticks` ticks, out of step, in a burst of `burst` ticks every `every` ticks, never in step with
   another witch's; and while anyone is within `near` blocks she kicks the whole time. An empty hand makes her cackle and
   kick, for everyone.
+Part 5, the Trick-or-Treat Candy Chute:
+- The Trick-or-Treat Candy Chute (CandyChuteBlock): an open chute 2.5 m long, wrapped in orange and black stripes, from a
+  funnel at porch-rail height on its post down to a mouth at a child's hand height, one block across, two up and three
+  long (`size`), its mouth toward whoever places it (the street) and its funnel behind. A treat (item tag
+  `jugcraft:candy_bag_treats`) used on it goes in at the funnel, one at a time, no faster than one in `drop_ticks` ticks
+  and no more than `hold` at once, and slides down the chute for `slide_ticks` ticks, quickening, from the funnel
+  (`funnel`, height and depth) to the mouth (`mouth`), drawn sliding by client/CandyChuteRenderer. At the mouth it goes
+  into the Candy Bag of whoever stands within `catch` blocks of it carrying one, or else it drops out onto the path. What
+  is sliding is saved with the world, and dropped if the chute is broken.
 Sizes in pixels, facing north (the street to the north, the house behind it to the south).
 """
 
@@ -79,6 +88,9 @@ DOORMAT = {"block": "beware_doormat", "display": "Beware Doormat", "heartbeat": 
 
 CRASHED_WITCH = {"block": "crashed_witch", "display": "Crashed Witch", "kick": 25.0, "kick_ticks": 12, "burst": 36, "every": 160,
                  "near": 6.0, "hips": (9.5, 14.0), "hip_x": 1.25, "splay": 22.5}
+
+CANDY_CHUTE = {"block": "candy_chute", "display": "Trick-or-Treat Candy Chute", "size": (1, 2, 3), "slide_ticks": 20, "hold": 8,
+               "drop_ticks": 4, "catch": 1.5, "funnel": (25.0, 42.0), "mouth": (8.5, 2.0)}
 
 ITEMS = {}
 
@@ -108,6 +120,10 @@ RECIPES = [
     {"id": CRASHED_WITCH["block"], "pattern": ["WOW", "WOW", "LSH"],
      "key": {"W": "minecraft:black_wool", "O": "minecraft:orange_wool", "L": "minecraft:leather", "S": "minecraft:stick", "H": "minecraft:wheat"},
      "result": CRASHED_WITCH["block"], "count": 1, "category": "building"},
+    # The chute: paper rolled into a long chute, striped orange and black, on a post of sticks.
+    {"id": CANDY_CHUTE["block"], "pattern": ["  P", " PO", "PSB"],
+     "key": {"P": "minecraft:paper", "O": "minecraft:orange_dye", "S": "minecraft:stick", "B": "minecraft:black_dye"},
+     "result": CANDY_CHUTE["block"], "count": 1, "category": "building"},
 ]
 # The bones are bones, tied with string; the crow's are a bird's, with a feather.
 SHAPELESS = [
@@ -122,7 +138,8 @@ SHAPELESS = [
 
 def blocks():
     return [MAILBOX["block"], PATH_LIGHT["block"], SKELETON_DOG["block"], SKELETON_CAT["block"], SKELETON_CROW["block"],
-            RISING_ZOMBIE["block"], KNOCKER["block"], BAT_WREATH["block"], DOORMAT["block"], CRASHED_WITCH["block"]]
+            RISING_ZOMBIE["block"], KNOCKER["block"], BAT_WREATH["block"], DOORMAT["block"], CRASHED_WITCH["block"],
+            CANDY_CHUTE["block"]]
 
 
 def items():

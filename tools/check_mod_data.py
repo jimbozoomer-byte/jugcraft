@@ -15172,7 +15172,10 @@ def check_front_yard():
     they hang on doors; the door attachment asks each what it is by its hooks, not by its class; the knocker's renderer
     swings its ring and lights its eyes on walls and doors; its eyes glow; and the knocker and wreath sit within a door
     wreath's depth. Part 4: the Crashed Witch's Java is the table's; she is registered with her block entity and her
-    renderer splays and kicks her legs; her blockstate shows each leg alone, each standing out from her hip at the wall."""
+    renderer splays and kicks her legs; her blockstate shows each leg alone, each standing out from her hip at the wall.
+    Part 5: the Candy Chute's Java is the table's; it takes treats by the Candy Bag's tag and fills Candy Bags at its
+    mouth; it is registered with its block entity and its renderer slides its treats down by `slide` from the funnel to
+    the mouth; its blockstate shows each of its blocks at every facing."""
     import front_yard as fy
 
     def read(path):
@@ -15345,6 +15348,32 @@ def check_front_yard():
         hx = 8.0 + (cw["hip_x"] if side == "right" else -cw["hip_x"])
         if not elements or max(e["to"][2] for e in elements) > hz + 0.01 or not any(abs((e["from"][0] + e["to"][0]) / 2 - hx) < 0.01 for e in elements):
             err(f"models/block/{cw['block']}_{side}_leg.json: the leg must stand out from her hip at the wall ({hx}, depth {hz})")
+    # Part 5: the Trick-or-Treat Candy Chute.
+    cc = fy.CANDY_CHUTE
+    chute = read(JAVA_ROOT / "agriculture" / "CandyChuteBlock.java")
+    (fy_, fz), (my, mz) = cc["funnel"], cc["mouth"]
+    for item in (f"SLIDE_TICKS = {cc['slide_ticks']};", f"HOLD = {cc['hold']};", f"DROP_TICKS = {cc['drop_ticks']};", f"CATCH = {cc['catch']};",
+                 f"FUNNEL_Y = {fy_}F;", f"FUNNEL_Z = {fz}F;", f"MOUTH_Y = {my}F;", f"MOUTH_Z = {mz}F;", "box({}, {}, {})".format(*cc["size"]),
+                 "extends MultiDecorationBlock implements EntityBlock", "stack.is(CandyBagItem.TREATS)"):
+        if item not in chute:
+            err(f"CandyChuteBlock: missing {item} (tools/front_yard.py CANDY_CHUTE)")
+    held = read(JAVA_ROOT / "agriculture" / "CandyChuteBlockEntity.java")
+    if any(call not in held for call in ("treat.is(CandyBagItem.TREATS)", "TrickOrTreat.candyBag(", "CandyBagItem.fill(", "preRemoveSideEffects")):
+        err("CandyChuteBlockEntity: it must take only treats, fill the Candy Bag of whoever waits at the mouth, and drop what is sliding when broken")
+    if f'registerBlock("{cc["block"]}", CandyChuteBlock::new' not in java_main \
+            or f'CANDY_CHUTE_ENTITY = Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, Jugcraft.id("{cc["block"]}")' not in java_main:
+        err(f"JugcraftAgriculture: {cc['block']} must be a CandyChuteBlock with its own block entity")
+    if f"block.{MOD}.{cc['block']}" not in lang:
+        err(f"block.{MOD}.{cc['block']}: the text is missing")
+    drawn = read(CLIENT_JAVA_ROOT / "CandyChuteRenderer.java")
+    if "BlockEntityRendererRegistry.register(JugcraftAgriculture.CANDY_CHUTE_ENTITY, CandyChuteRenderer::new);" not in client \
+            or any(call not in drawn for call in ("CandyChuteBlock.slide(", "CandyChuteBlock.FUNNEL_Y", "CandyChuteBlock.MOUTH_Z")):
+        err("CandyChuteRenderer: registered, it must slide the treats by slide from the funnel to the mouth")
+    parts = (load(ASSETS / "blockstates" / f"{cc['block']}.json") or {}).get("multipart", [])
+    shown = {(p["when"].get("facing"), p["when"].get("part")): p["apply"]["model"] for p in parts}
+    cells = cc["size"][0] * cc["size"][1] * cc["size"][2]
+    if shown != {(f, str(n)): f"{MOD}:block/{cc['block']}_{n}" for f in ("north", "east", "south", "west") for n in range(cells)}:
+        err(f"blockstates/{cc['block']}.json: it must show each of its {cells} blocks at every facing")
 
 
 def check_hearth():

@@ -8,6 +8,13 @@ Every change to Jugcraft, newest first, grouped by pull request. For what each t
 
 No numbered release yet. Entries on feature branches remain proposed until their pull requests merge.
 
+### Unmerged: Front-Yard Haunt Scenes, part 5 (the Trick-or-Treat Candy Chute)
+- **Trick-or-Treat Candy Chute**: a paper chute 2.5 m long wrapped in orange and black, from a funnel at porch-rail height down to a mouth at a child's hand height, three blocks long and two high.
+- Use a treat on it (anything a Candy Bag takes) and it slides down the chute, tumbling, and drops into the Candy Bag of whoever waits at the mouth, or out onto the path. One at a time, up to eight in the chute; what is sliding is saved, and drops if the chute is broken.
+- Recipe: three paper, orange dye, black dye and a stick.
+- Record: [front-yard-haunt.md](docs/features/front-yard-haunt.md). Decor set 7's fifth and last part.
+- **Checked:** the record's Verification. Game tests and screenshots run in CI only; not played by hand.
+
 ### Unmerged: Front-Yard Haunt Scenes, part 4 (the Crashed Witch)
 - **Crashed Witch**: a witch stuck out to her hips in a tree or a wall where she flew her broom into it. Her ragged skirt is bunched round the hole, her legs stick out in orange-and-black striped stockings and buckled boots, and her snapped broom pokes out by her.
 - Her legs kick now and then, and the whole time while anyone is within 6 blocks. An empty hand makes her cackle and kick harder.

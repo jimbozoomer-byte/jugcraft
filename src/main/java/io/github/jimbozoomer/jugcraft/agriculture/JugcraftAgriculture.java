@@ -411,6 +411,7 @@ public final class JugcraftAgriculture {
 	public static BlockEntityType<DecorationBlockEntity> RISING_ZOMBIE_ENTITY;
 	public static BlockEntityType<DecorationBlockEntity> GARGOYLE_KNOCKER_ENTITY;
 	public static BlockEntityType<DecorationBlockEntity> CRASHED_WITCH_ENTITY;
+	public static BlockEntityType<CandyChuteBlockEntity> CANDY_CHUTE_ENTITY;
 	public static BlockEntityType<FirewoodRackBlockEntity> FIREWOOD_RACK_ENTITY;
 	public static BlockEntityType<DecorationBlockEntity> CHOPPING_BLOCK_ENTITY;
 	public static BlockEntityType<BlanketLadderBlockEntity> BLANKET_LADDER_ENTITY;
@@ -3100,7 +3101,12 @@ public final class JugcraftAgriculture {
 		CRASHED_WITCH_ENTITY = Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, Jugcraft.id("crashed_witch"),
 				FabricBlockEntityTypeBuilder.<DecorationBlockEntity>create((pos, state) -> new DecorationBlockEntity(CRASHED_WITCH_ENTITY, pos, state),
 						witch).build());
-		for (Block block : List.of(mailbox, light, dog, cat, crow, zombie, knocker, batWreath, doormat, witch)) {
+		// Part 5: the Trick-or-Treat Candy Chute, from the porch rail down to the path.
+		Block chute = registerBlock("candy_chute", CandyChuteBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_ORANGE)
+				.strength(0.8F).sound(SoundType.WOOD).noCollision().noOcclusion().ignitedByLava().pushReaction(PushReaction.IMMOVEABLE));
+		CANDY_CHUTE_ENTITY = Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, Jugcraft.id("candy_chute"),
+				FabricBlockEntityTypeBuilder.create(CandyChuteBlockEntity::new, chute).build());
+		for (Block block : List.of(mailbox, light, dog, cat, crow, zombie, knocker, batWreath, doormat, witch, chute)) {
 			registerItem(BuiltInRegistries.BLOCK.getKey(block).getPath(),
 					props -> block instanceof AutumnWreathBlock ? new WreathBlockItem(block, props) : new BlockItem(block, props),
 					new Item.Properties().useBlockDescriptionPrefix(), BUILDING_TAB);
@@ -3108,6 +3114,7 @@ public final class JugcraftAgriculture {
 		FlammableBlockRegistry.getDefaultInstance().add(batWreath, 30, 60);
 		FlammableBlockRegistry.getDefaultInstance().add(doormat, 30, 60);
 		FlammableBlockRegistry.getDefaultInstance().add(witch, 30, 60);
+		FlammableBlockRegistry.getDefaultInstance().add(chute, 30, 60);
 	}
 
 	/** Bleached bones: they come away easily, and a piston pops them off. */

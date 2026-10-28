@@ -20,7 +20,7 @@ import pumpkin_patch_data as ppd
 from flora_art import Sculpt, pal, rotation, shade
 from haunted_midway_data import (BLACK, BONE, GOLD, GREEN, HAIR, LAMP, ORANGE, STEEL, STEM, VIOLET, clear, face_glow, fur, glow, glowing,
                                  membrane, pumpkin_side, zombie_skin)
-from pumpkin_patch_data import flat, lengthwise, panel
+from pumpkin_patch_data import flat, lengthwise, panel, walls
 
 MOD = "jugcraft"
 FACINGS = ppd.FACINGS
@@ -803,13 +803,79 @@ def crashed_witch():
     return sc
 
 
+# ---------------------------------------------------------------- part 5: the Candy Chute
+
+POST = pal("3a2614", "553a20", "6e4e2c", "8a6638")
+
+
+def wrapped():
+    """The chute's wrapping: orange and black in bands three texels wide running slantwise round it, as a paper strip is
+    wound on, each band lit along its top row."""
+    def paint(p):
+        for y in range(p.h):
+            for x in range(p.w):
+                band = ((x + y) // 3) % 2 == 0
+                k = 3 if y == 0 and p.h > 1 else 2
+                p.put(x, y, shade(ORANGE, k) if band else shade(BLACK, k - 1))
+    paint.tag = repr(("wrapped",))
+    return paint
+
+
+def chute_line(spec):
+    """The chute's floor line, (height, depth) at its funnel end and its mouth end: down 22.5 degrees from the funnel."""
+    fy_, fz = spec["funnel"]
+    mz = spec["mouth"][1]
+    return (fy_, fz), (fy_ - (fz - mz) * math.tan(math.radians(22.5)), mz)
+
+
+def candy_chute():
+    """The Trick-or-Treat Candy Chute, facing north (its mouth to the street at the north, its funnel behind it to the
+    south), one block across, two up and three long: an open chute (a floor and two low sides) wrapped in orange and black
+    stripes, sloping down 22.5 degrees from its funnel on a wooden post at porch-rail height to its mouth at a child's
+    hand height, on a little trestle near its mouth. Its one model, `whole` (the treats sliding down it are drawn by
+    client/CandyChuteRenderer)."""
+    spec = fy.CANDY_CHUTE
+    sc = Sculpt(spec["block"], 2711, 128)
+    wrap = wrapped()
+    (y0, z0), (y1, z1) = chute_line(spec)
+    el = []
+    # The chute, in three lengths along its line, each turned down 22.5 degrees about its own middle.
+    n = 3
+    run = (z0 - z1) / n / math.cos(math.radians(22.5)) + 0.6
+    for k in range(n):
+        u = (k + 0.5) / n
+        cy, cz = y0 + (y1 - y0) * u, z0 + (z1 - z0) * u
+        turn = rotation((8.0, cy, cz), "x", -22.5)
+        el += [panel(sc, "chute", wrap, (6.5, cy - 0.5, cz - run / 2), (9.5, cy, cz + run / 2), rot=turn),
+               panel(sc, "chute_side", wrap, (6.0, cy - 0.5, cz - run / 2 + 0.05), (6.5, cy + 1.25, cz + run / 2 - 0.05), rot=turn),
+               panel(sc, "chute_side", wrap, (9.5, cy - 0.5, cz - run / 2 + 0.05), (10.0, cy + 1.25, cz + run / 2 - 0.05), rot=turn)]
+    # The funnel at the top: open, stepped out in two rings over the chute's head, a floor under the first.
+    el += [panel(sc, "funnel_floor", flat(BLACK), (6.0, y0 - 0.25, z0 + 0.25), (10.0, y0 + 0.25, z0 + 4.25))]
+    el += walls(sc, "funnel", wrap, 5.5, z0 - 0.25, 10.5, z0 + 4.75, 0.5, y0 - 0.25, y0 + 1.5)
+    el += walls(sc, "funnel", wrap, 4.25, z0 - 1.5, 11.75, z0 + 6.0, 0.5, y0 + 1.5, y0 + 3.0)
+    # The mouth: a lip round the chute's foot.
+    el.append(panel(sc, "lip", flat(BLACK), (5.75, y1 - 0.75, z1 - 0.5), (10.25, y1 + 1.0, z1)))
+    # The post at the funnel end, at porch-rail height, its clamp, and its foot; a trestle near the mouth.
+    wood = lengthwise(POST)
+    el += [panel(sc, "post", wood, (7.25, 0.0, z0 + 2.0), (8.75, y0 + 0.5, z0 + 3.5)),
+           panel(sc, "clamp", flat(BLACK), (7.0, y0 - 1.5, z0 + 1.75), (9.0, y0 - 0.5, z0 + 3.75)),
+           panel(sc, "foot", wood, (4.5, 0.0, z0 + 2.0), (11.5, 1.0, z0 + 3.5)),
+           panel(sc, "foot", wood, (7.25, 0.0, z0 - 1.0), (8.75, 1.0, z0 + 6.0))]
+    ty = y1 + (y0 - y1) * (6.0 - z1) / (z0 - z1) - 0.6
+    el += [panel(sc, "trestle", wood, (6.25, 0.0, 5.5), (7.0, ty, 6.25)),
+           panel(sc, "trestle", wood, (9.0, 0.0, 5.5), (9.75, ty, 6.25)),
+           panel(sc, "trestle_bar", wood, (6.25, ty - 0.75, 5.5), (9.75, ty, 6.25))]
+    sc.models["whole"] = el
+    return sc
+
+
 # ---------------------------------------------------------------- building and files
 
 _built = {}
 BUILDERS = {fy.MAILBOX["block"]: haunted_mailbox, fy.PATH_LIGHT["block"]: pumpkin_path_light, fy.SKELETON_DOG["block"]: skeleton_dog,
             fy.SKELETON_CAT["block"]: skeleton_cat, fy.SKELETON_CROW["block"]: skeleton_crow, fy.RISING_ZOMBIE["block"]: rising_zombie,
             fy.KNOCKER["block"]: gargoyle_knocker, fy.BAT_WREATH["block"]: bat_wreath, fy.DOORMAT["block"]: beware_doormat,
-            fy.CRASHED_WITCH["block"]: crashed_witch}
+            fy.CRASHED_WITCH["block"]: crashed_witch, fy.CANDY_CHUTE["block"]: candy_chute}
 
 
 def build(block):
@@ -825,7 +891,8 @@ def _image_of(name):
 # Each multi-block piece: its runners' models (by `runner` value), its overlays (by property), and what its item shows.
 MULTI = ((fy.MAILBOX, {"1": "lid", "2": "eyes"}, [("flag_down", {"flag": "false"}), ("flag_up", {"flag": "true"})], ("flag_down", "lid")),
          (fy.PATH_LIGHT, {"1": "lantern", "2": "glow"}, [], ("lantern",)),
-         (fy.RISING_ZOMBIE, {"1": "left_arm", "2": "right_arm"}, [], ("left_arm", "right_arm")))
+         (fy.RISING_ZOMBIE, {"1": "left_arm", "2": "right_arm"}, [], ("left_arm", "right_arm")),
+         (fy.CANDY_CHUTE, {}, [], ()))
 # Each one-block piece: its runners' models by `runner` value (none for a piece without moving parts), and what its
 # item shows besides it whole.
 SINGLE = ((fy.SKELETON_DOG, {"1": "tail"}, ("tail",)), (fy.SKELETON_CAT, {"1": "tail"}, ("tail",)), (fy.SKELETON_CROW, {"1": "head"}, ("head",)),
@@ -862,7 +929,7 @@ def assets(root, write, lang):
         for f, y in FACINGS.items():
             turn = {"y": y} if y else {}
             for p in range(n):
-                plain = {"facing": f, "part": str(p), "runner": "0"}
+                plain = {"facing": f, "part": str(p), **({"runner": "0"} if runners else {})}
                 multipart.append({"when": plain, "apply": {"model": rid(f"block/{block}_{p}"), **turn}})
                 for name, when in overlays:
                     if have[name][p]:
@@ -911,7 +978,8 @@ def loot(out, write):
 def tags(tags):
     """The mailbox comes off with an axe (its post is wood), the path light with a pickaxe (it is iron), the skeleton
     animals with a pickaxe (they are bone, as a bone block is), the Rising Zombie with a shovel (it is a mound of earth),
-    the knocker with a pickaxe (bronze), the bat wreath with an axe (twigs) and the doormat with a hoe (straw)."""
+    the knocker with a pickaxe (bronze), the bat wreath with an axe (twigs), the doormat with a hoe (straw) and the candy
+    chute with an axe (its post)."""
     tags.add("block", "minecraft:mineable/axe", rid(fy.MAILBOX["block"]))
     tags.add("block", "minecraft:mineable/pickaxe", rid(fy.PATH_LIGHT["block"]))
     for spec in fy.ANIMALS:
@@ -920,6 +988,7 @@ def tags(tags):
     tags.add("block", "minecraft:mineable/pickaxe", rid(fy.KNOCKER["block"]))
     tags.add("block", "minecraft:mineable/axe", rid(fy.BAT_WREATH["block"]))
     tags.add("block", "minecraft:mineable/hoe", rid(fy.DOORMAT["block"]))
+    tags.add("block", "minecraft:mineable/axe", rid(fy.CANDY_CHUTE["block"]))
 
 
 def textures():

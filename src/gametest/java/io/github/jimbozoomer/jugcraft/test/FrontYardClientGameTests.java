@@ -1,6 +1,8 @@
 package io.github.jimbozoomer.jugcraft.test;
 
 import io.github.jimbozoomer.jugcraft.agriculture.AutumnWreathBlock;
+import io.github.jimbozoomer.jugcraft.agriculture.CandyChuteBlock;
+import io.github.jimbozoomer.jugcraft.agriculture.CandyChuteBlockEntity;
 import io.github.jimbozoomer.jugcraft.agriculture.DoorWreath;
 import io.github.jimbozoomer.jugcraft.agriculture.FacingDecorationBlock;
 import io.github.jimbozoomer.jugcraft.agriculture.HauntedMailboxBlock;
@@ -24,18 +26,20 @@ import net.minecraft.world.phys.AABB;
 import net.minecraft.world.level.block.state.BlockState;
 
 /**
- * Client game test for Front-Yard Haunt Scenes, parts 1 to 4 (decor set 7): a front path of gravel across a lawn, a
+ * Client game test for Front-Yard Haunt Scenes, parts 1 to 5 (decor set 7): a front path of gravel across a lawn, a
  * Haunted Mailbox at the street end with its flag up, and three Pumpkin Path Lights along the path, lit, their lanterns
  * swaying (drawn by client/PumpkinPathLightRenderer). By the mailbox a Skeleton Dog sits and a Skeleton Crow perches on a
  * fence post; on the lawn a Skeleton Cat arches and a Rising Zombie claws its way out of the ground (their moving parts
  * drawn by client/SkeletonAnimalRenderer and client/RisingZombieRenderer). At the path's end a house front of dark oak
  * has a Gargoyle Door Knocker on its door (drawn by client/DoorWreathRenderer), a Bat Wreath on its wall and a Beware
- * Doormat at its step; by the path a tree trunk with a Crashed Witch out to her hips in it (client/CrashedWitchRenderer).
- * Photographed from along the path, from far
+ * Doormat at its step; by the path a tree trunk with a Crashed Witch out to her hips in it (client/CrashedWitchRenderer);
+ * beside the door a Trick-or-Treat Candy Chute running from the porch down toward the street. Photographed from along the
+ * path, from far
  * enough that the mailbox stays shut; from the street close by the mailbox, near enough that its door falls open and its
  * eyes stare out (client/HauntedMailboxRenderer), the dog wags and the crow watches the camera; from the lawn close by the
  * zombie, near enough that it reaches higher; from the path before the door, the knocker rapping; from the path by the
- * witch, near enough that she kicks the whole time; and by night (CI job
+ * witch, near enough that she kicks the whole time; from the lawn beside the chute, candy corn sliding down it
+ * (client/CandyChuteRenderer); and by night (CI job
  * {@code client}). They go into
  * docs/features/front-yard-haunt.md.
  */
@@ -76,6 +80,14 @@ public class FrontYardClientGameTests implements FabricClientGameTest {
 			context.takeScreenshot("jugcraft_front_yard_door");
 			// On the path, three blocks from the witch: near enough that she kicks the whole time.
 			shoot(context, singleplayer, x + 1, y + 1, z + 3, 270, 10, "jugcraft_front_yard_witch");
+			// From the lawn beside the chute, side-on, four pieces of candy corn dropped in four ticks apart sliding down it.
+			server.runCommand("setblock %d %d %d minecraft:barrier".formatted(x - 5, y, z + 10));
+			server.runCommand(String.format(Locale.ROOT, "tp @p %.1f %d %.1f %d %d", x - 4.5, y + 1, z + 10.5, 270, 15));
+			context.waitTicks(40);
+			singleplayer.getConnection().waitForChunksRender();
+			server.runOnServer(minecraft -> candy(minecraft.overworld(), origin));
+			context.waitTicks(2);
+			context.takeScreenshot("jugcraft_front_yard_chute");
 			server.runCommand("time set midnight");
 			shoot(context, singleplayer, x + 4, y + 1, z + 11, 160, 15, "jugcraft_front_yard_night");
 		}
@@ -135,6 +147,17 @@ public class FrontYardClientGameTests implements FabricClientGameTest {
 				.setValue(io.github.jimbozoomer.jugcraft.agriculture.WallDecorationBlock.FACING, Direction.WEST), Block.UPDATE_ALL);
 	}
 
+	/** Drops four pieces of candy corn into the chute beside the door, four ticks apart, the last a tick ago. */
+	private static void candy(ServerLevel level, BlockPos origin) {
+		if (level.getBlockEntity(origin.offset(-1, 0, 9)) instanceof CandyChuteBlockEntity chute) {
+			ItemStack candy = new ItemStack(JugcraftAgriculture.item("candy_corn"), 4);
+			long now = level.getGameTime();
+			for (int k = 3; k >= 0; k--) {
+				chute.drop(candy, now - 1 - (long) CandyChuteBlock.DROP_TICKS * k);
+			}
+		}
+	}
+
 	/** The house front at the path's end: its door, the knocker on its door, the wreath on its wall, the mat at its step. */
 	private static void doorway(ServerLevel level, BlockPos origin) {
 		for (int dx = -2; dx <= 3; dx++) {
@@ -150,6 +173,8 @@ public class FrontYardClientGameTests implements FabricClientGameTest {
 		level.setBlock(origin.offset(2, 1, 11), JugcraftAgriculture.block("bat_wreath").defaultBlockState().setValue(AutumnWreathBlock.FACING,
 				Direction.NORTH), Block.UPDATE_ALL);
 		animal(level, "beware_doormat", origin.offset(0, 0, 11), Direction.NORTH);
+		// The chute beside the door, from the porch rail by the wall down toward the street.
+		stand(level, (MultiDecorationBlock) JugcraftAgriculture.block("candy_chute"), origin.offset(-1, 0, 9), Direction.NORTH, state -> state);
 	}
 
 	private static void knock(ServerLevel level, BlockPos origin) {

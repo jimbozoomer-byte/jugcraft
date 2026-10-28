@@ -3712,6 +3712,11 @@
       "denominator": 1,
       "source": "recipe jugcraft:candy_cache"
     },
+    "jugcraft:candy_chute": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
     "jugcraft:candy_corn": {
       "numerator": 1,
       "denominator": 1,

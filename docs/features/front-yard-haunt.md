@@ -1,9 +1,9 @@
 # Front-Yard Haunt Scenes
 
-Status: parts 1 (the path: the Haunted Mailbox and the Pumpkin Path Light), 2 (the bones and the risen: the Skeleton Dog, Cat and Crow and the Rising Zombie) 3 (the doorway: the Gargoyle Door Knocker, the Bat Wreath and the Beware Doormat) and 4 (the Crashed Witch) implemented. CI builds them and runs their game tests and client screenshots; not yet played by hand. Part 5 is planned (below).
+Status: all five parts implemented: 1 (the path: the Haunted Mailbox and the Pumpkin Path Light), 2 (the bones and the risen: the Skeleton Dog, Cat and Crow and the Rising Zombie), 3 (the doorway: the Gargoyle Door Knocker, the Bat Wreath and the Beware Doormat), 4 (the Crashed Witch) and 5 (the Trick-or-Treat Candy Chute). CI builds them and runs their game tests and client screenshots; not yet played by hand.
 Proposal issue: none. The owner asked for it directly on 28 October 2026, as set 7 of the ten sets of fall and Halloween decor ("Then I want you to do 1-10 in parts in that order one by one"), drawn by their rules.
 Owner: @jimbozoomer-byte
-Target milestone and tier: Discovery tier; the mailbox is made from iron nuggets, a spider eye, red dye and a wooden fence, two path lights from iron bars and a jack-o'-lantern, the skeleton animals from bones and string (the crow with a feather), the Rising Zombie from rotten flesh, a bone and coarse dirt, the knocker from an iron ingot and nuggets, the bat wreath from sticks, paper and black dye, the doormat from wheat and black dye, and the Crashed Witch from black and orange wool, leather, a stick and wheat.
+Target milestone and tier: Discovery tier; the mailbox is made from iron nuggets, a spider eye, red dye and a wooden fence, two path lights from iron bars and a jack-o'-lantern, the skeleton animals from bones and string (the crow with a feather), the Rising Zombie from rotten flesh, a bone and coarse dirt, the knocker from an iron ingot and nuggets, the bat wreath from sticks, paper and black dye, the doormat from wheat and black dye, the Crashed Witch from black and orange wool, leather, a stick and wheat, and the Candy Chute from paper, orange and black dye and a stick.
 Primary specialty and supported player role: building. A builder dresses the front of a house for Halloween night, from the street to the door. Nothing in it is needed to progress.
 
 ## Player experience
@@ -79,8 +79,18 @@ The front yard after dark: what a trick-or-treater passes on the way to the door
   - Recipe: black wool, orange wool and black wool, twice over, over leather, a stick and wheat.
   - Broken, she drops herself.
 
-### Planned
-- **Part 5: the Trick-or-Treat Candy Chute**: from the porch rail to the path; candy dropped in slides down it, tied into trick-or-treating.
+### Part 5: the Trick-or-Treat Candy Chute
+- **Trick-or-Treat Candy Chute** (one block across, two up and three long): an open chute 2.5 m long, for handing out candy at a distance.
+  - It is a paper chute, a floor and two low sides, wrapped slantwise in orange and black bands.
+  - It slopes down 22.5 degrees from a funnel at porch-rail height to a mouth at a child's hand height, about half a metre up.
+  - The funnel is open, stepped out in two rings, clamped to a wooden post with a cross foot. A little trestle holds the chute up near its mouth, which has a black lip round it.
+  - **Its mouth faces whoever places it** (stand on the path, facing the house), and its funnel is behind, by the porch.
+  - **A treat used on it goes in at the funnel**: anything a Candy Bag takes (the item tag `jugcraft:candy_bag_treats`: candy, cookies, soul cakes), one at a time, no faster than one in 4 ticks, and no more than 8 in the chute at once.
+  - **It slides down the chute**, quickening, for 20 ticks (a second), tumbling over as it goes.
+  - **At the mouth it drops into a Candy Bag**: that of whoever stands within 1.5 blocks of the mouth carrying one, in either hand or anywhere in their inventory. With no one there, or the bag full, it drops out onto the path.
+  - An empty hand does nothing to it; it has no light.
+  - Recipe: paper, rolled diagonally up the grid, with orange dye beside the middle, a stick and black dye beside the foot.
+  - Broken at any block, it comes away whole and drops once, with whatever was still sliding down it.
 
 ## How it is drawn (docs/ART_DIRECTION.md, docs/NATURAL_TEXTURES.md)
 - Built from boxes at real size, one texel to a model pixel (`tools/front_yard_data.py`), in the Haunted Midway's manner, whose painters it shares. Each two-high piece is cut into its two blocks' models.
@@ -113,6 +123,10 @@ The front yard after dark: what a trick-or-treater passes on the way to the door
 - Moving parts, from the knocker's blockstate `runner` models: `GargoyleKnockerRenderer` swings the ring out about its pivot in the jaws after each knock and lights the eyes full-bright, on a wall from its block entity's mark and on a door (through `DoorWreathRenderer`) from the door attachment's knock.
 - **The witch** (part 4): her stockings striped a texel at a time across the leg, orange and black, each stripe lit along its top. Her boots are black with a gold buckle. Her skirt is black gathered in folds, every third texel a tone deeper and every fifth catching a dull violet sheen, its hem cut out into tatters. The broom is brown wood in stripes along it, with straw bristles and a pale splintered end where it snapped.
 - `CrashedWitchRenderer` splays each leg out to its side about her hip and kicks it up and down there, from her blockstate's `runner` models.
+- **The chute's wrapping** (part 5): orange and black in bands three texels wide, running slantwise round it as a paper strip is wound on, each band lit along its top row. The funnel is wrapped the same; its floor and the mouth's lip are black. The post, foot and trestle are wood in stripes along the grain.
+- The chute is three lengths along one line, each turned down 22.5 degrees, the steepest a block model's turn allows short of 45.
+- **What slides down it moves**: `CandyChuteRenderer` draws each treat from its block entity's list, from the funnel to the mouth along the chute's floor, faster as it goes, and turns it about the upright as it slides, so a flat item never shows only its edge. The treats are drawn larger than life (0.4 of an item on the ground), as items are, so they read.
+- **The part 5 previews**, fixed before commit: the funnel was too small to read as one; it is now stepped out in two rings over a floor. The stripes were a texel wide and buzzed; they are now three texels.
 - **The part 4 previews**, fixed before commit: her skirt was one flat black panel behind her legs; it now flares out to the wall in three layers, folded, its hem torn.
 - **The part 3 previews**, fixed before commit:
   - the ring's corner bars leaned the wrong way, so it read as a cross; they now close the octagon;
@@ -125,7 +139,8 @@ The front yard after dark: what a trick-or-treater passes on the way to the door
 
 ## Connections
 - Existing input producer: vanilla iron, spider eyes, dye, fences and jack-o'-lanterns; bones, string and feathers (skeletons, spiders and chickens); rotten flesh (zombies) and coarse dirt; sticks, paper, wheat, wool and leather.
-- Existing system it joins: **trick-or-treating** (the Candy Bag's knock on a wooden door), which the knocker knocks with, and the **door wreaths**, which the knocker and the bat wreath hang on doors with.
+- Existing system it joins: **trick-or-treating** (the Candy Bag's knock on a wooden door), which the knocker knocks with and whose Candy Bag the chute fills, and the **door wreaths**, which the knocker and the bat wreath hang on doors with.
+- The chute takes what a Candy Bag takes (`jugcraft:candy_bag_treats`) and fills it with `CandyBagItem.fill`, as a treat put in by hand would be.
 - Existing output consumer: none; they are a yard's decoration.
 - Technology/magic connections (or infrastructure/cosmetic applicability): cosmetic.
 - Reachable entry path: from the first days, with a little iron, or the drops of the first night's mobs.
@@ -138,6 +153,7 @@ The front yard after dark: what a trick-or-treater passes on the way to the door
 - The knocker costs an iron ingot and five nuggets, the bat wreath five sticks, paper and black dye, and the doormat five wheat and black dye. Each gives back only itself.
 - The knocker's trick-or-treat knock is the Candy Bag's own: the same cooldown, the same answer and treats, nothing added.
 - The Crashed Witch costs four black wool, two orange wool, leather, a stick and wheat, and gives back only herself.
+- The Candy Chute costs three paper, orange dye, black dye and a stick, and gives back only itself. A treat goes down it unchanged: one in, the same one out. It doesn't count as a house visited on the Candy Bag's night, so it adds nothing to trick-or-treating's own rewards.
 - They make nothing and take nothing. No loop.
 
 ## Multiplayer and persistence
@@ -150,6 +166,8 @@ The front yard after dark: what a trick-or-treater passes on the way to the door
 - **Its haunting** is the server's too, so everyone hears it: one random tick in 3 on a wall, one tick in 3,000 on a door, it knocks.
 - **Hanging on a door**, the knocker and the bat wreath use the door wreaths' attachment (`door_wreath`), unchanged in what it saves: the block state of what hangs there. That attachment now asks what hangs on it what it is (whether it takes mums, its box on a door, its use, its tick). It no longer singles out the holly wreath by class, and the autumn and holly wreaths behave as before.
 - The knocker and the bat wreath pop off when pushed, as the wreaths do; so does the doormat.
+- **What slides down the chute is the server's**: its block entity (`candy_chute`, on its first block) keeps each treat and the game time it went in, saves them with the world, and sends the list to every client when it changes, so everyone sees the same candy sliding. The server delivers each treat 20 ticks after it went in. Its tick does nothing while the chute is empty, and a chute holds at most 8.
+- A treat goes in only by a player using it on the chute in reach, one item a use, at most one in 4 ticks; the server checks that it is a treat. What comes out is what went in, into a bag or onto the path; nothing is lost if a bag is full. The chute can't be pushed by a piston.
 - **The witch's kicking is each player's own sight of her**, from their distance and the game's clock. Her cackle is the server's: an empty hand plays it and sends a block event, and her block entity (`crashed_witch`) marks it on every side so every client draws her kicking harder. Nothing is saved, and nothing ticks on the server. She pops off when pushed.
 - IDs (stable from release):
   - the block and item `haunted_mailbox` (`facing`, `part` 0 to 1, `lit` (unused), `flag`, model-only `runner` 0 to 2; block entity `haunted_mailbox`, saving nothing);
@@ -159,7 +177,8 @@ The front yard after dark: what a trick-or-treater passes on the way to the door
   - the block and item `gargoyle_knocker` (`facing`, `flowers` (unused, as the wreath's kind), model-only `runner` 0 to 2; block entity `gargoyle_knocker`, saving nothing);
   - the block and item `bat_wreath` (`facing`, `flowers` (unused));
   - the block and item `beware_doormat` (`facing`);
-  - the block and item `crashed_witch` (`facing`, model-only `runner` 0 to 2; block entity `crashed_witch`, saving nothing).
+  - the block and item `crashed_witch` (`facing`, model-only `runner` 0 to 2; block entity `crashed_witch`, saving nothing);
+  - the block and item `candy_chute` (`facing`, `part` 0 to 5, `lit` (unused); block entity `candy_chute`, saving `sliding`: each treat and the game time it went in).
 - Their recipes follow the agriculture switch. The blocks and items stay registered when it is off.
 
 ## Dependencies and assets
@@ -216,6 +235,18 @@ Local checks run on this branch, and their results:
   - `javac` scan of the new and changed Java for syntax errors: none. Every member the new Java calls is used elsewhere in the code already. The full compile runs in CI.
   - The model was previewed offline (a review aid, not committed); what the preview showed and what was fixed is under How it is drawn.
 
+- Part 5, all on the first run:
+  - `python3 tools/check_mod_data.py`: PASS (8,145 material IDs), including the art check of every block and item model. `check_front_yard` now also checks:
+    - the Candy Chute's Java against `tools/front_yard.py`, and that it takes treats by the Candy Bag's tag;
+    - that its block entity fills the Candy Bag of whoever waits at the mouth and drops what is sliding when broken;
+    - its registration with its block entity, and that its renderer slides the treats by `slide` from the funnel to the mouth;
+    - that its blockstate shows each of its six blocks at every facing.
+  - `python3 scripts/check_repository.py`: PASS.
+  - `python3 -m unittest discover -s scripts/tests`: 287 tests, OK.
+  - `python3 tools/check_icon_maps.py`: PASS (no new map; its item is 3D).
+  - `javac` scan of the new and changed Java for syntax errors: none. Every member the new Java calls is used elsewhere in the code already, or declared in it. The full compile runs in CI.
+  - The model was previewed offline (a review aid, not committed); what the preview showed and what was fixed is under How it is drawn.
+
 `FrontYardGameTests` (run in CI):
 - **The haunted mailbox raises its flag**: it stands two blocks high, facing the player, its flag down, its block entity on its first block; an empty hand raises its flag on both blocks and lowers it again; broken at its box, it comes away whole and drops once.
 - **The mailbox's door falls open for whoever comes near**: with someone near, it falls open 75 degrees from shut, its eyes staring out; with no one, it shuts, its eyes hidden, and now and then rattles open a crack; each box in its own time.
@@ -234,15 +265,23 @@ Local checks run on this branch, and their results:
   - far off and between her bursts she lies still; in a burst she kicks, the whole time with someone near and after she cackles, her legs out of step;
   - an empty hand makes her cackle, and not again until she has done;
   - with the log gone she goes, dropping herself.
-- **Their data loads**: all ten recipes and loot tables.
+- **The Candy Chute slides treats down to the bag** (part 5):
+  - it stands two blocks high and three long, its mouth toward the player, its block entity on its first block alone;
+  - its mouth is at the front and low, its funnel high behind, at either facing; a treat slides from the funnel to the mouth, quickening;
+  - an empty hand changes nothing; a cookie used on its funnel goes in, one at a time, and the next is refused until 4 ticks have passed;
+  - after 20 ticks it has slid down, and for a player without a Candy Bag it comes out onto the path; with a Candy Bag in their inventory, it goes into the bag;
+  - broken, it comes away whole, dropping what was sliding and itself once.
+- **The Candy Chute takes only treats and holds eight**: stone is refused; eight cookies go in, four ticks apart, and a ninth is refused; broken, it drops all eight.
+- **Their data loads**: all eleven recipes and loot tables.
 
-`FrontYardClientGameTests` takes six screenshots of a gravel path across a lawn. It holds:
+`FrontYardClientGameTests` takes seven screenshots of a gravel path across a lawn. It holds:
 - a Haunted Mailbox at the street end, its flag up;
 - three Pumpkin Path Lights down the path's side, lit, their lanterns swaying (drawn by `PumpkinPathLightRenderer`);
 - a Skeleton Dog sitting by the mailbox, and a Skeleton Crow on a fence post beside it;
 - a Skeleton Cat arched on the lawn, and a Rising Zombie rising there, facing the path (drawn by `SkeletonAnimalRenderer` and `RisingZombieRenderer`).
 - at the path's end, a house front of dark oak with a Gargoyle Door Knocker on its door (drawn by `DoorWreathRenderer`), a Bat Wreath on its wall and a Beware Doormat at its step.
-- by the path, a tree trunk with a Crashed Witch out to her hips in it (drawn by `CrashedWitchRenderer`).
+- by the path, a tree trunk with a Crashed Witch out to her hips in it (drawn by `CrashedWitchRenderer`);
+- beside the door, a Candy Chute running from the porch toward the street.
 
 The shots are:
 - from along the path, far enough that the mailbox stays shut;
@@ -250,6 +289,7 @@ The shots are:
 - from the lawn close by the zombie, near enough that its arms reach higher;
 - from the path before the door, the knocker set rapping three ticks before the shot, its ring swung out and its eyes glowing;
 - from the path by the witch, near enough that she kicks the whole time;
+- from the lawn beside the chute, side-on, four pieces of candy corn dropped in four ticks apart sliding down it (drawn by `CandyChuteRenderer`);
 - by night.
 
 Not run: a hand playtest, and a two-client playtest.
@@ -258,5 +298,5 @@ Not run: a hand playtest, and a two-client playtest.
 Seasonal in look, not in use: it is made and works all year, and nothing about it ends with October. It doesn't generate in the world.
 
 ## Rollout and open questions
-- Part 1 is the path, part 2 the bones and the risen, part 3 the doorway and part 4 the Crashed Witch; part 5 follows, stacked on the last.
-- Open: whether the mailbox should hold a letter or two (it holds nothing now); whether the path lights should take a dye for their glow's colour; whether the skeleton dog should sit up for a bone held out to it.
+- Part 1 is the path, part 2 the bones and the risen, part 3 the doorway, part 4 the Crashed Witch and part 5 the Candy Chute, each stacked on the last. With part 5 the set is complete.
+- Open: whether the mailbox should hold a letter or two (it holds nothing now); whether the path lights should take a dye for their glow's colour; whether the skeleton dog should sit up for a bone held out to it; whether the chute should be fed from a candy bowl or a hopper, or answer a knock at its house's door with a treat.
