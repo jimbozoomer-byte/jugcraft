@@ -368,6 +368,32 @@ GARDEN = {
          "reaches": [],
          "tests": ["buerTendsThroughHisGrace", "everySpiritsUpkeepWarnsGivesGraceSuspendsAndResumes",
                    "endingAnySpiritsPactReturnsTheEscrowOnce", "buerFromTheCodexToDeparture"]},
+        # GC-05: Bathin, from his perch to his departure (Dossier 2). No whole-path test of his own (the contract's GC-05);
+        # unit 7's theGardenPactsFromCodexToDeparture walks these steps.
+        {"research": [], "things": ["verdant_heart", "gleaner"],
+         "text": "Set a Verdant Heart on an awake Verdant Bed of yours and a Gleaner of yours, both within 10 blocks of your "
+                 "Pact Perch, the Gleaner more than 4 blocks from the Heart; use the perch and choose Bathin: he is suddenly "
+                 "coiled on it and names every term before anything is spent (without a Heart, or with nowhere to carry, he "
+                 "does not come: \"Nothing here to carry, or nowhere to carry it\"); accept, and his compact (2 ender pearls, "
+                 "8 Verdant Chaff) is spent once",
+         "reaches": [f"pact:{rid('bathin')}"],
+         "tests": ["bathinRefusesWithNothingToCarry", "everySpiritSealsOnceAndSpendsOnce",
+                   "bathinArrivesAndDepartsAtOnceInARingOfDust"]},
+        {"research": [], "things": [],
+         "text": "At any hour, while you are near, Bathin moves Verdance at once from your Heart into the far Gleaner (or, "
+                 "with Circle Lore's Ley Pylon, 3 for 2 into a pylon away from the Heart): both ends shimmer and nothing is "
+                 "on the way; a Heart with its own pylon he leaves alone until you answer at the perch. Use an awake living "
+                 "device in his area with an empty hand: his first obligation",
+         "reaches": [f"practice:{rid('garden_pact_service')}"],
+         "tests": ["bathinMovesVerdanceExactly", "bathinsCarryShimmersBothEndsAtOnce",
+                   "bathinLeavesAHeartWithItsOwnPylonUntilAnswered", "bathinsFirstObligationIsADeviceReadByHand"]},
+        {"research": [], "things": [],
+         "text": "Keep the pact with four Verdant Chaff a week (a missed week is warned and carried through a day's grace, "
+                 "then the service is suspended with nothing taken; an offering resumes it). End it at the perch: what was "
+                 "paid ahead comes back once, and his coil tightens and he is gone in a ring of dust",
+         "reaches": [],
+         "tests": ["everySpiritsUpkeepWarnsGivesGraceSuspendsAndResumes", "endingAnySpiritsPactReturnsTheEscrowOnce",
+                   "bathinArrivesAndDepartsAtOnceInARingOfDust"]},
     ],
 }
 

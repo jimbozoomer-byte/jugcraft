@@ -6,6 +6,7 @@ import io.github.jimbozoomer.jugcraft.concordance.CrucibleStandBlockEntity;
 import io.github.jimbozoomer.jugcraft.concordance.JugcraftConcordance;
 import io.github.jimbozoomer.jugcraft.concordance.KindledLanternItem;
 import io.github.jimbozoomer.jugcraft.concordance.LanternCharge;
+import io.github.jimbozoomer.jugcraft.concordance.LeyPylonBlockEntity;
 import io.github.jimbozoomer.jugcraft.concordance.LumenSconceBlock;
 import io.github.jimbozoomer.jugcraft.concordance.LumenSconceBlockEntity;
 import io.github.jimbozoomer.jugcraft.concordance.RateGate;
@@ -13,8 +14,16 @@ import io.github.jimbozoomer.jugcraft.concordance.alchemy.Band;
 import io.github.jimbozoomer.jugcraft.concordance.alchemy.Heat;
 import io.github.jimbozoomer.jugcraft.concordance.diagnostic.Code;
 import io.github.jimbozoomer.jugcraft.concordance.diagnostic.Diagnostic;
+import io.github.jimbozoomer.jugcraft.concordance.garden.GleanerBlockEntity;
+import io.github.jimbozoomer.jugcraft.concordance.garden.VerdantHeartBlockEntity;
+import io.github.jimbozoomer.jugcraft.concordance.spirits.BathinEntity;
+import io.github.jimbozoomer.jugcraft.concordance.spirits.PactPerchBlockEntity;
+import io.github.jimbozoomer.jugcraft.concordance.spirits.VerdanceCarrying;
+import io.github.jimbozoomer.jugcraft.concordance.worker.Pacts;
+import io.github.jimbozoomer.jugcraft.concordance.worker.Status;
 import io.github.jimbozoomer.jugcraft.energy.EnergyStorage;
 import java.util.List;
+import java.util.UUID;
 import net.fabricmc.fabric.api.gametest.v1.GameTest;
 import net.fabricmc.fabric.api.transfer.v1.fluid.FluidStorage;
 import net.fabricmc.fabric.api.transfer.v1.item.ItemStorage;
@@ -173,6 +182,56 @@ public class ConcordanceEconomyGameTests {
 		helper.assertTrue(FluidStorage.SIDED.find(level, standAt, null) == null && ItemStorage.SIDED.find(level, standAt, null) == null,
 				"It holds no fluid and no items to give");
 		helper.assertTrue(level.getEntitiesOfClass(ItemEntity.class, new AABB(standAt).inflate(2.0)).isEmpty(), "and drops nothing");
+		helper.succeed();
+	}
+
+	/**
+	 * Concordance garden cohort, GC-05 (Bathin): a game day of his moves on both roads, with a Heart that has its own road
+	 * answered "take from it". After every think the Verdance in Hearts and Gleaners has fallen by exactly 3/2 of the Ley
+	 * Charge the pylons gained: a Gleaner move changes the sum by nothing, a pour loses a third, nothing is ever made. No
+	 * pour goes into a pylon beside its own Heart, and no item appears.
+	 */
+	@GameTest(structure = "jugcraft-test:drone_depot", maxTicks = 20)
+	public void noVerdanceIsMintedByCarrying(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		ServerPlayer keeper = ConcordanceWorkerGameTests.gardenHolder(helper);
+		UUID own = keeper.getUUID();
+		long now = ConcordanceWorkerGameTests.dayStart(level, 1);
+		PactPerchBlockEntity perch = ConcordanceWorkerGameTests.bathinPact(helper, keeper, new BlockPos(8, 1, 8), now);
+		BathinEntity bathin = ConcordanceWorkerGameTests.bathin(helper, perch);
+		List<VerdantHeartBlockEntity> hearts = List.of(ConcordanceWorkerGameTests.keptHeart(helper, new BlockPos(1, 1, 1), own, 64),
+				ConcordanceWorkerGameTests.keptHeart(helper, new BlockPos(1, 1, 14), own, 64));
+		LeyPylonBlockEntity road = ConcordanceWorkerGameTests.ownedPylon(helper, new BlockPos(2, 1, 1), own, 0);
+		List<GleanerBlockEntity> gleaners = List.of(ConcordanceWorkerGameTests.keptGleaner(helper, new BlockPos(14, 1, 1), own, 0),
+				ConcordanceWorkerGameTests.keptGleaner(helper, new BlockPos(14, 1, 14), own, 5));
+		List<LeyPylonBlockEntity> pylons = List.of(road, ConcordanceWorkerGameTests.ownedPylon(helper, new BlockPos(14, 3, 8), own, 46),
+				ConcordanceWorkerGameTests.ownedPylon(helper, new BlockPos(8, 5, 14), null, 0));
+		helper.assertValueEqual(bathin.think(level, 6000L, now), Status.AWAITING_ANSWER, "A Heart with its own road waits");
+		ConcordanceWorkerGameTests.answer(helper, keeper, perch, VerdanceCarrying.CLAIM);
+		long verdance0 = ConcordanceWorkerGameTests.verdance(hearts, gleaners);
+		long ley0 = pylons.stream().mapToLong(LeyPylonBlockEntity::ley).sum();
+		int quota = ConcordanceWorkerGameTests.bathinOffer().quota();
+		boolean poured = false;
+		boolean carried = false;
+		boolean fromTheRoad = false;
+		Status status = Status.IDLE;
+		for (int k = 1; k <= quota + 1; k++) {
+			status = bathin.think(level, 6000L, now + 20L * k);
+			long verdance = ConcordanceWorkerGameTests.verdance(hearts, gleaners);
+			long ley = pylons.stream().mapToLong(LeyPylonBlockEntity::ley).sum();
+			helper.assertTrue(2 * (verdance0 - verdance) == 3 * (ley - ley0),
+					"Think " + k + ": Verdance down by 3/2 of the Ley Charge made, nothing made: " + verdance + ", " + ley);
+			VerdanceCarrying.Move last = ConcordanceWorkerGameTests.carrying(bathin).last();
+			if (last != null && last.at() == now + 20L * k) {
+				helper.assertTrue(!last.pylon() || last.from().distManhattan(last.to()) != 1, "Never into a pylon beside its own Heart: " + last);
+				poured |= last.pylon();
+				carried |= !last.pylon();
+				fromTheRoad |= last.from().equals(hearts.getFirst().getBlockPos());
+			}
+		}
+		helper.assertTrue(status == Status.FINISHED && poured && carried && fromTheRoad
+				&& Pacts.done(ConcordanceWorkerGameTests.pactOf(level, perch).pact(), now) == quota && ConcordanceWorkerGameTests.loose(helper) == 0,
+				"A day's moves on both roads, the claimed Heart among the sources; then his quota; no item");
 		helper.succeed();
 	}
 }

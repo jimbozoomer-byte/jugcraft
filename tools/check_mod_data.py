@@ -12939,14 +12939,16 @@ def check_acquisition(registered):
         err("ConcordanceJourneyGameTests.theGardenPactsRecipesLoad must load the recipe of every garden row "
             f"(GARDEN_RECIPES: {sorted(wanted)})")
     made_as(aq.GARDEN_PACTS, "the garden pacts")
-    # GC-04: every Jugcraft item a garden pact's compact or offerings name is a garden row, so the journey makes it.
+    # GC-04: every Jugcraft item a garden pact's compact or offerings name is a garden row, so the journey makes it; GC-05:
+    # or a thing the world grows (concordance_progression.PRODUCERS: Bathin's Verdant Chaff, what a harvest leaves).
     for name, spirit in concordance.pacts.SPIRITS.items():
         if spirit["pact"]["research"] != f"{MOD}:garden_regard":
             continue
         named = [cost["item"] for cost in spirit["pact"]["compact"]["items"]] + spirit["offerings"]["items"]
         for item in sorted(set(named)):
-            if item.startswith(f"{MOD}:") and split(item)[1] not in aq.GARDEN_PACTS:
-                err(f"tools/acquisition.py GARDEN_PACTS: {item}, in {name}'s compact or offerings, is no garden row")
+            if item.startswith(f"{MOD}:") and split(item)[1] not in aq.GARDEN_PACTS and item not in concordance.progression.PRODUCERS:
+                err(f"tools/acquisition.py GARDEN_PACTS: {item}, in {name}'s compact or offerings, is no garden row, nor a thing "
+                    "the world grows (concordance_progression.PRODUCERS)")
     # The owner's armour tiers the record keeps creative-only: nothing gives them.
     for tier in aq.CREATIVE_ONLY:
         for piece in gear.ARMOR:
@@ -19030,14 +19032,30 @@ def check_graft(co, root, lang):
 
 
 # The garden cohort, GC-05's game tests for Verdance carrying and the bed index's devices (check_verdance_roads holds the
-# list). The garden row: the garden side's three and the bed index's devices; Bathin's worker and economy tests add their rows.
+# list). The garden row: the garden side's three and the bed index's devices; Bathin's worker and economy rows (GC-05).
 GC05_CARRYING_TESTS = {
     "ConcordanceGardenGameTests": ["theGardenReachCapsItsDevices", "aGleanerReceivesFromANamedHeartAtAnyDistance",
                                    "aHeartPoursIntoANamedPylonByItsOwnRule", "aHeartSaysWhetherItHasItsOwnRoad"],
+    "ConcordanceWorkerGameTests": [
+        "bathinMovesVerdanceExactly", "bathinPoursIntoAFarPylonAtThreeForTwo", "bathinPrefersAFarGleanerToAPylon",
+        "bathinChangesAtMostOneMoveAThink", "bathinNeverHoldsVerdance", "bathinHonoursTheHeartsParty",
+        "bathinNeverTouchesAClaimedReservoir", "bathinLeavesAHeartWithItsOwnPylonUntilAnswered",
+        "aClaimAnswerLetsBathinTakeFromIt", "bathinStopsAtHisQuota", "bathinWaitsForAPresentHolder",
+        "aSuspendedBathinCarriesNothing", "twoBathinsShareOneHeartExactly", "bathinFacesWhereHeSetsItDown",
+        "bathinsFirstObligationIsADeviceReadByHand", "bathinsReadingSaysItsNoteAndNamesNoPlayer"],
+    "ConcordanceEconomyGameTests": ["noVerdanceIsMintedByCarrying"],
 }
 # Concordance garden cohort, GC-05 (check_pacts): each work's answers as shipped, the safe course first. Append only: a
 # value saved in a perch's accord is never renamed, reordered or removed. Units 4 to 6 add theirs.
 GC05_ACCORDS = {"verdance_carrying": ["yield", "claim"]}
+# The accord machinery's game tests (check_pacts).
+GC05_ACCORD_TESTS = {
+    "ConcordanceWorkerGameTests": ["theKeptPageAsksTheMatterAndKeepsTheAnswer", "theRosterSaysAwaitingYourAnswer",
+                                   "anAnsweredAccordSurvivesARestart", "anUnknownAccordReadsAsUnanswered",
+                                   "aResolveFromAnotherPlayerIsRefused", "aResolveOutsideTheKeepModeIsDropped",
+                                   "anAccordIsClearedWhenItsPactEnds", "theAccordWireIsBounded"],
+    "ConcordancePersistenceGameTests": ["anAwaitingAnswerSurvivesARestart"],
+}
 
 
 def check_verdance_roads(root):
@@ -20121,6 +20139,12 @@ def check_pacts(co, root, lang, registered, research):
     if '"tooltip.jugcraft.concordance.jade.pact.matter." + service + "." + matter' not in jade_text \
             or '"tooltip.jugcraft.concordance.jade.pact.accord"' not in jade_text:
         err("JugcraftJadeClient: the matter and the answer kept, in its work's words (GC-P48)")
+    # The accord machinery's game tests (GC-05: they land with Bathin, its first user).
+    for cls, names in GC05_ACCORD_TESTS.items():
+        source = (tests / f"{cls}.java").read_text(encoding="utf-8") if (tests / f"{cls}.java").is_file() else ""
+        for name in names:
+            if not re.search(rf"public void {name}\(GameTestHelper \w+\)", source):
+                err(f"{cls}: missing the garden cohort's GC-05 accord game test {name}")
     # --- Concordance garden cohort, GC-01 (SG1 to SG12; docs/features/concordance-garden-cohort.md) ---
     workers_java = java("spirits/Workers.java")
     base = java("spirits/PactSpiritEntity.java")
@@ -20305,6 +20329,51 @@ def check_pacts(co, root, lang, registered, research):
         for name in names:
             if not re.search(rf"public void {name}\(GameTestHelper \w+\)", source):
                 err(f"{cls}: missing the garden cohort's GC-04 game test {name}")
+    # --- Concordance garden cohort, GC-05: Bathin as a character (docs/features/bathin-pact.md) ---
+    bathin = java("spirits/BathinEntity.java")
+    body = pa.SPIRITS["bathin"]["body"]
+    # The chooser and its tests tell spirits apart by their signs.
+    signs = [spirit["sign"] for spirit in pa.SPIRITS.values()]
+    if len(set(signs)) != len(signs):
+        err(f"tools/concordance_pacts.py SPIRITS: each spirit's sign is its own (the chooser names spirits by it): {signs}")
+    # GC-P57: the base shows a gesture's world effect once, after its clip, through one hook that does nothing by default.
+    gesture = _java_body(base, "public void gesture(Clip clip) {")
+    if not 0 <= gesture.find("triggerAnim(GESTURE_CONTROLLER, clip.id());") < gesture.find("gestured(level, clip);") \
+            or gesture.count("gestured(") != 1 or not re.search(r"protected void gestured\(ServerLevel level, Clip clip\) \{\s*\}", base):
+        err("spirits/PactSpiritEntity.java: gesture shows its spirit's world effect once, after its clip (gestured, empty by default; "
+            "GC-05)")
+    # Dossier 2 details (a) and (b): a ring of dust as he arrives and departs; a shimmer at the two ends of a carry; nothing
+    # shown between, and nothing shown by his service itself. Both are the shared signs (concordance/ sends no particle of
+    # its own: check_signs), each as his row names it.
+    code = re.sub(r"//[^\n]*|/\*.*?\*/", " ", bathin, flags=re.S)
+    shown = _java_body(bathin, "protected void gestured(ServerLevel level, Clip clip) {")
+    ring = _java_body(bathin, "private void ring(ServerLevel level) {")
+    shimmer = _java_body(bathin, "public void shimmer(ServerLevel level, BlockPos from, BlockPos to) {")
+    if "clip == Gesture.ARRIVE || clip == Gesture.DEPART" not in shown or "ring(level);" not in shown \
+            or code.count("Signs.show(") != 2 or "Signs.show(level, position().add(0.0, 0.1, 0.0), RING, null);" not in ring \
+            or "Signs.show(level, end, SHIMMER);" not in shimmer or "for (BlockPos end : List.of(from, to)) {" not in shimmer \
+            or "shimmered = new Shimmer(level.getGameTime(), from.immutable(), to.immutable());" not in shimmer \
+            or "rings++;" not in ring or "Signs.flow(" in code or "Sign.FLOW" in code or "lerp" in code.lower():
+        err("spirits/BathinEntity.java: a ring of dust as he arrives and departs, a shimmer at the two ends of a carry, nothing "
+            "between (Dossier 2 details a and b)")
+    carrying = java("spirits/VerdanceCarrying.java")
+    if "Signs." in carrying or "sendParticles(" in carrying or carrying.count(".shimmer(level, ") != 1:
+        err("spirits/VerdanceCarrying.java: a carry shows only through Bathin's shimmer, once a move (nothing in transit is ever drawn)")
+    for constant, sign in (("RING", body["ring"]), ("SHIMMER", body["shimmer"])):
+        if sign not in co.signs.SIGNS or f"public static final Sign {constant} = Sign.{sign.upper()};" not in bathin:
+            err(f"spirits/BathinEntity.java: {constant} is the shared sign {sign} (tools/concordance_pacts.py SPIRITS['bathin']['body'])")
+    if "case PactRequestPayload.RESOLVE -> done ? Gesture.ASSENT : null;" not in _java_body(bathin, "public static @Nullable Gesture reaction("):
+        err("spirits/BathinEntity.java: he assents when his matter is answered (RESOLVE; every gesture paired with words)")
+    if "Bathin" not in pa.PERCH_TOOLTIP or "within 10" not in pa.PERCH_TOOLTIP:
+        err("tools/concordance_pacts.py PERCH_TOOLTIP: names what Bathin wants near the perch")
+    pages = [page[1] for page in co.garden_pacts.PAGES] if hasattr(co, "garden_pacts") else []
+    if not {"Bathin", "Two Roads from One Heart"} <= set(pages):
+        err("tools/concordance_garden_pacts.py PAGES: Bathin's codex pages (Dossier 2 item 2)")
+    for cls, names in GC05_BATHIN_TESTS.items():
+        source = (tests / f"{cls}.java").read_text(encoding="utf-8") if (tests / f"{cls}.java").is_file() else ""
+        for name in names:
+            if not re.search(rf"public void {name}\(GameTestHelper \w+\)", source):
+                err(f"{cls}: missing the garden cohort's GC-05 game test {name}")
 
 
 def check_stolas_regard(co, root, lang, research):
@@ -20680,6 +20749,64 @@ def check_garden_pacts(co, root, lang, registered, research):
             "(the unit review)")
     if "new GardenReach(perch.getBlockPos(), definition.radius(), found -> own.equals(found.keeper()))" not in _java_body(tending, "public List<Missing> missing("):
         err("StrainTending.missing: an awake bed the inviter keeps within his radius, read from the loaded chunks (GardenReach)")
+    # --- GC-05 (Bathin; docs/features/bathin-pact.md): Verdance carrying. The garden side, the losing conversion and the
+    # carrying tests are check_verdance_roads'; the bed index's devices are held above. ---
+    strip = lambda source: re.sub(r"//[^\n]*|/\*.*?\*/", " ", source, flags=re.S)
+    ec = co.ecology
+    carrying = strip(text(spirits / "VerdanceCarrying.java"))
+    # His step, in order: his index and its roads, the answer, his hours and quota, his matter raised once, the sources (a
+    # Heart with its own road only when claimed; the fullest first), the lossless road first (room for a whole move; never a
+    # Gleaner within its own reach of the Heart), then a pylon not beside the Heart that its pour may fill, both ends asked,
+    # one move; else why he idled.
+    step = _java_body(carrying, "static Status carry(")
+    order = [step.find(n) for n in (
+        "memory.reach(record)", "memory.notice(level, hearts);", "boolean claim = CLAIM.equals(answer);",
+        "Pacts.inHours(service, time)", "Pacts.done(record.pact(), now) >= service.quota()", "memory.raise()",
+        "claim || !memory.roaded(heart.getBlockPos())", "Comparator.comparingLong(VerdantHeartBlockEntity::verdance).reversed()",
+        "GleanerBlockEntity.CAPACITY - gleaner.verdance() >= MOVE_MAX", "gleaner.reaches(heart.getBlockPos())",
+        "asking.both(heart.getBlockPos(), heart.keeper(), gleaner.getBlockPos(), gleaner.keeper())",
+        "gleaner.receiveFrom(heart, record.holder(), MOVE_MAX, level)", "heart.beside(pylon.getBlockPos()) || !heart.mayPourInto(pylon)",
+        "owner == null ? record.holder() : owner", "heart.pourInto(pylon, level, MAX_BATCHES)", "memory.idle(Idle.NOWHERE);")]
+    if -1 in order or order != sorted(order):
+        err("VerdanceCarrying.carry: his index and roads, the answer, hours, quota, his matter raised once, the sources (a Heart "
+            "with its own road only when claimed), a far Gleaner with room first, then a pylon not beside the Heart, both ends "
+            "asked, one move (GC-05)")
+    landed = _java_body(carrying, "private static Status carried(")
+    order = [landed.find(n) for n in ("memory.moved(move);", "holder.taskDone(level, now);",
+                                      "bathin.attendWork(move.to(), BathinEntity.Gesture.WORK.ticks, now);",
+                                      "bathin.gesture(BathinEntity.Gesture.WORK);", "bathin.shimmer(level, move.from(), move.to());",
+                                      "return Status.WORKING;")]
+    if -1 in order or order != sorted(order) or carrying.count("return Status.WORKING;") != 1 or carrying.count("holder.taskDone(") != 1:
+        err("VerdanceCarrying.carried: one move remembered, counted once, faced, gestured and shown at both ends through his "
+            "shimmer on its tick (GC-05)")
+    asked = _java_body(carrying, "private Asked ask(BlockPos pos, @Nullable UUID keeper)")
+    if "asked.size() >= MAX_ASKED" not in asked or "GardenPacts.target(level, record, pos, keeper, time, now)" not in asked:
+        err("VerdanceCarrying.Asking: each place asked of GardenPacts.target once, at most MAX_ASKED a think (GC-S7)")
+    row = gp.DISTINCT.get("verdance_carrying", {})
+    if carrying.count(row.get("also", "?")) != 1:
+        err(f"spirits/VerdanceCarrying.java: makes {row.get('also')} once (DISTINCT)")
+    for banned in (".fill(", ".setLey(", ".setVerdance(", ".drawInto(", "Transfers.", ".extract(", ".insert(", "new Reservoir(",
+                   "Overflow.", "Conversion", "ItemStack", "ItemEntity", "getInventory()", "ValueOutput", "output.store(",
+                   "ConcordanceProgress.record(", "Evidence.", ".give(", ".take(", "getChunk(", "betweenClosed(", "Authority.", "Courier"):
+        if banned in carrying:
+            err(f"spirits/VerdanceCarrying.java: never {banned} (Verdance moves only through the Gleaner's draw and the Heart's "
+                "pour, in one call; no item, nutrient or practice; never cargo: no courier ledger, reservation or transit (the "
+                "hand's mechanism); nothing saved; no scan; whose land is GardenPacts.target's)")
+    if not re.search(r"public static final List<String> ACCORDS = List\.of\(YIELD, CLAIM\);", carrying) \
+            or 'String YIELD = "yield";' not in carrying or 'String CLAIM = "claim";' not in carrying \
+            or "PactAccords.answer(level, perch)" not in _java_body(carrying, "static @Nullable String answer(") \
+            or ".accord()" in carrying \
+            or list(co.pacts.SERVICE_WORDS.get("verdance_carrying", {}).get("accords", {})) != ["yield", "claim"]:
+        err("VerdanceCarrying: his answers are yield then claim (append only), worded in SERVICE_WORDS and read through "
+            "PactAccords.answer, so an unknown one reads as unanswered (GC-P51)")
+    invited = _java_body(carrying, "public List<Missing> missing(")
+    if "!reach.hearts(level, now).isEmpty()" not in invited or "own::equals" not in invited \
+            or "!reach.gleaners(level, now).isEmpty() || !reach.pylons(level, now).isEmpty()" not in invited \
+            or 'KEY + "missing", definition.radius(), definition.radius()' not in invited:
+        err("VerdanceCarrying.missing: an awake Heart of the inviter's, and a Gleaner of theirs or a pylon of theirs or no "
+            "one's, within his radius (Dossier 2 item 2; GC-P58)")
+    if gp.CONSTANTS.get("verdance_carrying", {}).get("spirits/VerdanceCarrying.java", {}).get("MOVE_MAX") != ec.GLEANER_DRAW:
+        err(f"tools/concordance_garden_pacts.py CONSTANTS: Bathin's MOVE_MAX is the Gleaner's own draw ({ec.GLEANER_DRAW})")
 
 
 def check_pact_screen(co, lang):
@@ -21146,6 +21273,111 @@ def check_spirit_bodies(co):
     for key in ("idle", "listen", "waiting", "suspended"):
         if f'"{body["loops"][key]}"' not in garden_client:
             err(f"ConcordanceGardenPactClientGameTests: checks his {key} loop ({body['loops'][key]})")
+    # --- GC-05: Bathin's body, built (GC-S12, GC-P56, GC-P57) ---
+    # (Imported here: this module imports garden_bodies nowhere else; tools/owner_art.py imports it as an adapter.)
+    import garden_bodies
+    body = pa.SPIRITS["bathin"]["body"]
+    built = {"geckolib/models/entity/bathin.geo.json": ((), "garden_bodies.bathin_model"),
+             "geckolib/animations/entity/bathin.animation.json": ((), "garden_bodies.bathin_animations"),
+             "textures/entity/bathin.png": ((pa.WILLOW, pa.MOSS), "garden_bodies.bathin_skin"),
+             "textures/entity/bathin_glowmask.png": ((pa.WILLOW, pa.MOSS), "garden_bodies.bathin_glowmask")}
+    if body.get("built") != built or body.get("owner_files") or body.get("adapted") \
+            or {t: v for t, v in pa.BUILT.items() if "/bathin" in t} != built \
+            or not set(built) <= {target for target, _, _ in owner_art.builds()}:
+        err("tools/concordance_pacts.py SPIRITS['bathin']: his body is built by tools/garden_bodies.py and painted only from the "
+            "willow log and the Spanish moss; nothing of it is copied or adapted (GC-S12; the Siren is not used)")
+    blocks = ROOT / "art" / "owner-library" / "originals" / "Blocks"
+    read = lambda path: (blocks / path).read_bytes()
+    geo = load(ASSETS / "geckolib" / "models" / "entity" / "bathin.geo.json") or {}
+    clips = (load(ASSETS / "geckolib" / "animations" / "entity" / "bathin.animation.json") or {}).get("animations", {})
+    if geo != garden_bodies.bathin_model(read) or clips != garden_bodies.bathin_animations(read)["animations"]:
+        err("bathin.geo.json and bathin.animation.json: tools/garden_bodies.py's, unedited (run tools/owner_art.py)")
+    bones = (geo.get("minecraft:geometry") or [{}])[0].get("bones", [])
+    cubes = [cube for bone in bones for cube in bone.get("cubes", [])]
+    if not cubes or garden_bodies.coplanar(geo) or any(0 in cube["size"] for cube in cubes) \
+            or any("rotation" in bone for bone in bones) or any("rotation" in cube for cube in cubes):
+        err(f"bathin.geo.json: no flat cube, nothing turned at rest, no two faces on one plane facing one way "
+            f"(docs/ART_DIRECTION.md): {garden_bodies.coplanar(geo) if cubes else 'no cubes'}")
+    # His skin: every texel opaque or clear and one of the two paintings' colours; his glowmask his two eyes alone.
+    try:
+        colours = set(garden_bodies.palette(read, pa.WILLOW, 5)) | set(garden_bodies.palette(read, pa.MOSS, 8))
+    except SystemExit as stopped:
+        colours = set()
+        err(str(stopped))
+    skin, mask = ASSETS / "textures" / "entity" / "bathin.png", ASSETS / "textures" / "entity" / "bathin_glowmask.png"
+    if skin.is_file() and mask.is_file():
+        with Image.open(skin) as a, Image.open(mask) as b:
+            sheet, glow = a.convert("RGBA"), b.convert("RGBA")
+            drawn = sheet.getcolors(1 << 16) or []
+            lit = {(x, y) for y in range(glow.height) for x in range(glow.width) if glow.getpixel((x, y))[3]}
+            if sheet.size != tuple(garden_bodies.BATHIN_TEXTURE) or {p[3] for _, p in drawn} - {0, 255} \
+                    or not {p[:3] for _, p in drawn if p[3]} <= colours:
+                err("textures/entity/bathin.png: 128 x 64, opaque or clear, only the willow log's and the Spanish moss's colours")
+            fx, fy, _, _ = garden_bodies.box_faces(garden_bodies.BATHIN_UV["head"], garden_bodies.BATHIN_SIZES["head"])["front"]
+            eyes = {(fx + x, fy + y) for y, row in enumerate(garden_bodies.BATHIN_FACE) for x, key in enumerate(row) if key == "E"}
+            if glow.size != sheet.size or lit != eyes or {tuple(t) for t in body["eye_texels"]} != eyes \
+                    or any(glow.getpixel(p) != sheet.getpixel(p) for p in lit):
+                err(f"textures/entity/bathin_glowmask.png: his eyes alone, as his skin draws them on his face "
+                    f"({sorted(eyes)}; eye_texels {body['eye_texels']}): {sorted(lit)}")
+    else:
+        err("textures/entity/bathin.png and bathin_glowmask.png: run tools/owner_art.py (Bathin's body)")
+    # His clips: each loop loops at its length; each gesture its length, played once (departure held), its telling pose inside.
+    for key, name in body["loops"].items():
+        if clips.get(name, {}).get("loop") is not True or clips[name].get("animation_length") != body["loop_lengths"][key]:
+            err(f"bathin.animation.json: his {key} loop {name} loops, {body['loop_lengths'][key]} s")
+    for key, (length, (start, end)) in body["gesture_times"].items():
+        clip = clips.get(body["gestures"][key], {})
+        held = "hold_on_last_frame" if key == "depart" else False
+        if clip.get("animation_length") != length or clip.get("loop") != held or not 0 < start < end < length or end - start < 0.5:
+            err(f"bathin.animation.json: his {key} is {length} s, {'held' if held else 'played once'}, its telling pose inside it")
+    bathin_java = text(JAVA_ROOT / "concordance" / "spirits" / "BathinEntity.java")
+    for key, name in body["loops"].items():
+        if f'RawAnimation.begin().thenLoop("{name}")' not in bathin_java:
+            err(f"spirits/BathinEntity.java: his {key} loop plays {name}")
+    declared = re.findall(r'^\t\t([A-Z]+)\("([a-z]+)", (\d+), RawAnimation\.begin\(\)\.then(Play|PlayAndHold)\("([a-z.]+)"\)\)[,;]$',
+                          bathin_java, re.M)
+    wanted = [(key.upper(), key, str(round(length * 20)), "PlayAndHold" if key == "depart" else "Play", body["gestures"][key])
+              for key, (length, _) in body["gesture_times"].items()]
+    if declared != wanted:
+        err(f"spirits/BathinEntity.java: Gesture is {[g[1] for g in wanted]}, each its clip and its length in ticks: {declared}")
+    check_geckolib("bathin", bathin_java, None, None, kind="entity")
+    # His box holds his coil (the part that rests on the perch); his culling box holds all of him (GC-P56).
+    if cubes:
+        low = [min(c["origin"][a] for c in cubes) for a in range(3)]
+        high = [max(c["origin"][a] + c["size"][a] for c in cubes) for a in range(3)]
+        coil = max(c["size"][0] for bone in bones if bone["name"] == "coil" for c in bone["cubes"]) / 16 * body["scale"]
+        across = max(high[0] - low[0], high[2] - low[2]) / 16 * body["scale"]
+        tall = (high[1] - low[1]) / 16 * body["scale"]
+        size, r = pa.SPIRITS["bathin"]["entity"], body["render"]
+        if abs(size["width"] - coil) > 0.1 or abs(size["height"] - tall) > 0.2 * tall \
+                or across > size["width"] + 2 * r["wide"] or tall > size["height"] + r["above"]:
+            err(f"Bathin's box {size['width']} x {size['height']} holds his coil ({coil:.2f}) and his height ({tall:.2f}); his "
+                f"culling box his shoulders ({across:.2f})")
+    # The art plan: every spirit's box differs from every other's, and from the workshop hand's (Stolas's excepted: the two
+    # already lie within a fifth of each other), by at least a fifth on one axis.
+    boxes = {name: (s["entity"]["width"], s["entity"]["height"]) for name, s in pa.SPIRITS.items()}
+    names = sorted(boxes)
+    for i, a in enumerate(names):
+        for b in names[i + 1:]:
+            if max(abs(x - y) / max(x, y) for x, y in zip(boxes[a], boxes[b])) < 0.2:
+                err(f"spirits {a} and {b}: boxes {boxes[a]} and {boxes[b]} differ by less than a fifth on every axis (own silhouettes)")
+    workers_src = text(JAVA_ROOT / "concordance" / "spirits" / "Workers.java")
+    hand = re.search(r'WORKSHOP_HAND = entity\("workshop_hand".*?\.sized\(([0-9.]+)F, ([0-9.]+)F\)', workers_src, re.S)
+    for name, box in boxes.items():
+        if name != "stolas" and (not hand or max(abs(x - float(y)) / max(x, float(y)) for x, y in zip(box, hand.groups())) < 0.2):
+            err(f"spirit {name}: box {box} differs from the workshop hand's by less than a fifth on every axis (own silhouette)")
+    # His poses and shots, from his front, each gesture frozen inside its window (the client read without comments, above).
+    posed = {key.lower(): (float(a), float(b)) for key, a, b in re.findall(
+        r'clipPose\(context, server, perch, BATHIN, BathinEntity\.Gesture\.([A-Z]+), ([0-9.]+), ([0-9.]+), "jugcraft_garden_bathin_[a-z]+"\);',
+        garden_client)}
+    if posed != {key: window for key, (_, window) in body["gesture_times"].items()}:
+        err(f"ConcordanceGardenPactClientGameTests: each of Bathin's gestures frozen inside its telling pose: {posed}")
+    for name in body["shots"]:
+        if f'"{name}"' not in garden_client:
+            err(f"ConcordanceGardenPactClientGameTests: takes {name}")
+    for key, name in body["loops"].items():
+        if key != "astir" and f'"{name}"' not in garden_client:
+            err(f"ConcordanceGardenPactClientGameTests: checks his {key} loop ({name})")
 
 
 def check_pact_network(co):
@@ -24038,6 +24270,13 @@ GC04_TESTS = {
         "anObligationIsRecordedOncePerPlayerAndSpirit", "anObligationNeverMastersStolassRegard",
         "anObligationOutsideTheAreaOrWhileSuspendedCountsNothing"],
     "ConcordanceJourneyGameTests": ["buerFromTheCodexToDeparture"],
+}
+# The garden cohort, GC-05's game tests of Bathin as a character (check_pacts). His service's are GC05_CARRYING_TESTS, the
+# accord's GC05_ACCORD_TESTS; each test in one table.
+GC05_BATHIN_TESTS = {
+    "ConcordanceWorkerGameTests": ["bathinRefusesWithNothingToCarry", "bathinArrivesAndDepartsAtOnceInARingOfDust",
+                                   "bathinsCarryShimmersBothEndsAtOnce", "bathinAnswersEachActionWithHisGesture",
+                                   "aDuplicateBathinCarriesNothing"],
 }
 # GC-04 (GB24): Stolas's Flashjack draws these six zero-thickness box-UV cubes on both faces, as the owner made them (D-D3
 # keeps his geometry byte for byte); the twin rule allows exactly these, so a seventh, in any spirit, fails. Recorded as a

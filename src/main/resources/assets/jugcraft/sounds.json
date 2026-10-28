@@ -653,6 +653,73 @@
       }
     ]
   },
+  "bathin.arrive": {
+    "subtitle": "subtitles.jugcraft.bathin.arrive",
+    "sounds": [
+      {
+        "name": "jugcraft:menagerie/cavern/item/magic_conch/magic_conch_summon",
+        "attenuation_distance": 16,
+        "pitch": 1.5
+      }
+    ]
+  },
+  "bathin.listen": {
+    "subtitle": "subtitles.jugcraft.bathin.listen",
+    "sounds": [
+      {
+        "name": "jugcraft:menagerie/cavern/item/sea_staff/sea_staff_bubble_1",
+        "attenuation_distance": 16,
+        "pitch": 1.2
+      }
+    ]
+  },
+  "bathin.inspect": {
+    "subtitle": "subtitles.jugcraft.bathin.inspect",
+    "sounds": [
+      {
+        "name": "jugcraft:menagerie/cavern/item/sea_staff/sea_staff_bubble_2",
+        "attenuation_distance": 16
+      }
+    ]
+  },
+  "bathin.assent": {
+    "subtitle": "subtitles.jugcraft.bathin.assent",
+    "sounds": [
+      {
+        "name": "jugcraft:menagerie/cavern/item/magic_conch/magic_conch_cast",
+        "attenuation_distance": 16
+      }
+    ]
+  },
+  "bathin.refuse": {
+    "subtitle": "subtitles.jugcraft.bathin.refuse",
+    "sounds": [
+      {
+        "name": "jugcraft:menagerie/cavern/item/magic_conch/magic_conch_cast",
+        "attenuation_distance": 16,
+        "pitch": 0.7
+      }
+    ]
+  },
+  "bathin.depart": {
+    "subtitle": "subtitles.jugcraft.bathin.depart",
+    "sounds": [
+      {
+        "name": "jugcraft:menagerie/cavern/item/magic_conch/magic_conch_cast",
+        "attenuation_distance": 16,
+        "pitch": 1.8
+      }
+    ]
+  },
+  "bathin.work": {
+    "subtitle": "subtitles.jugcraft.bathin.work",
+    "sounds": [
+      {
+        "name": "jugcraft:menagerie/cavern/item/sea_staff/sea_staff_bubble_0",
+        "attenuation_distance": 16
+      }
+    ]
+  },
   "alchemy_chargetick": {
     "sounds": [
       "jugcraft:alchemy/chargetick"

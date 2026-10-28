@@ -33,6 +33,9 @@ final class PactSpiritRenderers {
 		// Buer (GC-04): the Decor Blossom drawn 2.2 times its block size (the bud 1.4 blocks across, open about 1.7 across its
 		// sides); his culling box reaches 1 block below for his sinking departure, 0.5 above for his raised pistil; his pistil lit.
 		register(Workers.BUER, new Row(2.2F, 0.6F, 0.4, 1.0, 0.5, true));
+		// Bathin (GC-05): his built model drawn at its own size; his culling box reaches 0.3 sideways for his shoulders and his
+		// pointing arm, 0.1 below for his hover, 0.3 above; his eyes lit.
+		register(Workers.BATHIN, new Row(1.0F, 0.5F, 0.3, 0.1, 0.3, true));
 	}
 
 	static <T extends PactSpiritEntity<T>> void register(EntityType<T> type, Row row) {

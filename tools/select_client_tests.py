@@ -92,8 +92,11 @@ WEIGHTS = {
     # Concordance garden cohort, GC-04 (GC-P30): a dedicated server's start, the perch refused for want of a bed, the
     # chooser and Buer's conversation by keyboard at three sizes, a refused and a sealed acceptance, his work on a bed,
     # the overworked row, Jade, ten poses frozen, his underside, four bearings and the ending: about 35 shots and their
-    # waits, about 330 s at the pace the Winter entry implies (an estimate, not a measurement).
-    "ConcordanceGardenPactClientGameTests": 330,
+    # waits, about 330 s at the pace the Winter entry implies (an estimate, not a measurement). GC-05 adds Bathin at the same
+    # perch: the chooser twice, his conversation by keyboard at three sizes, a refused and a sealed acceptance, one carry
+    # frozen, his matter asked and answered (the accord's two steps, about 40 s), Jade, ten poses frozen, four bearings and
+    # the ending: about 34 shots and their waits, about 230 s more (an estimate, not a measurement).
+    "ConcordanceGardenPactClientGameTests": 560,
     "JugcraftServerClientGameTests": 90,
     # Companion suites exercise timed AI, inventory trips and cooking, not just
     # showrooms. Allow CI headroom over the focused local runtime measurements.

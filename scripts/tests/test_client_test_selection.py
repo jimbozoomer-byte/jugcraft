@@ -94,6 +94,15 @@ class ClientTestSelectionTests(unittest.TestCase):
                 self.assertIn("ConcordanceGardenPactClientGameTests", chosen)
         self.assertIn("ConcordanceGardenPactClientGameTests", selection.WEIGHTS)
 
+    def test_bathin_body_and_entity_select_the_garden_client_test(self):
+        # Concordance garden cohort, GC-05: Bathin's body and entity are shown by the garden's client class.
+        for path in ("src/main/resources/assets/jugcraft/textures/entity/bathin.png",
+                     "src/main/resources/assets/jugcraft/geckolib/models/entity/bathin.geo.json",
+                     "src/main/java/io/github/jimbozoomer/jugcraft/concordance/spirits/BathinEntity.java"):
+            with self.subTest(path=path):
+                chosen, _ = selection.select([path], self.tests, set())
+                self.assertIn("ConcordanceGardenPactClientGameTests", chosen)
+
     def test_roster_screen_selects_the_roster_client_test(self):
         # Concordance Chunk D unit 3 (D-07): the roster screen is shown by its own client class and by the screen fit check.
         chosen, _ = selection.select(["src/client/java/io/github/jimbozoomer/jugcraft/client/RosterScreen.java"], self.tests, set())

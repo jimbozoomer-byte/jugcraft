@@ -73,7 +73,8 @@ import org.jspecify.annotations.Nullable;
  * <p>
  * Its body (its subclass's {@link Body}): the worker's main controller plays its loops for what the server synced; its
  * gestures play on a controller of their own over it, each fired by the server through {@link #gesture} (GeckoLib sends it
- * to those watching it then; one who starts watching later sees its state, never a replay). It arrives when it is
+ * to those watching it then; one who starts watching later sees its state, never a replay). A subclass may show something
+ * in the world with a gesture ({@link #gestured}: Bathin's ring of dust). It arrives when it is
  * summoned to a perch; when it leaves it makes its departing gesture and is gone that gesture's length of game time
  * later: struck off its holder's roster at once, never saved meanwhile, discarded by its own tick or, where its chunk no
  * longer ticks it, by the server's sweep ({@link #registerSweep}, one for every spirit).
@@ -459,7 +460,17 @@ public abstract class PactSpiritEntity<T extends PactSpiritEntity<T>> extends Wo
 	public void gesture(Clip clip) {
 		if (!isRemoved() && level() instanceof ServerLevel level && cueing(level, clip.id(), clip != body.depart())) {
 			triggerAnim(GESTURE_CONTROLLER, clip.id());
+			// GC-05: what this spirit shows in the world with the gesture, beyond its clip and cue (Bathin's ring of dust).
+			gestured(level, clip);
 		}
+	}
+
+	/**
+	 * GC-05: what a spirit shows in the world with one of its gestures beyond its clip and its cue, once, on the server, as
+	 * the gesture is shown (so never while its cue is held back, and always with its departure). Default nothing. Bounded:
+	 * a few particles at most; it changes nothing.
+	 */
+	protected void gestured(ServerLevel level, Clip clip) {
 	}
 
 	/** Registers {@code body}'s sound events once (its subclass's registerSounds, from Workers.register); sounds.json and their subtitles are tools/concordance_pacts.py's. */

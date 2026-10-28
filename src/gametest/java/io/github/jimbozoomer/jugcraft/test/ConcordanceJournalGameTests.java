@@ -204,7 +204,7 @@ public class ConcordanceJournalGameTests {
 	 * Concordance garden cohort, GC-01 (SG7, GB17, GC-P16), with a second spirit's Regard (GC-04): the pacts section names
 	 * each Regard a perch's offers need, once its reader has begun it. With the Binding Arts alone, Stolas's two lines as
 	 * Chunk D wrote them and no garden line; The Garden's Regard begun, its next step; understood, its next step and whom it
-	 * lets them invite (Buer). No line names an id.
+	 * lets them invite (Buer and Bathin, GC-05). No line names an id.
 	 */
 	@GameTest(maxTicks = 20)
 	public void theJournalNamesEachRegardsNextStep(GameTestHelper helper) {
@@ -228,8 +228,11 @@ public class ConcordanceJournalGameTests {
 						"journal.jugcraft.pacts.research.invite"),
 				"Understood: its next step (to mastered) and whom it lets them invite");
 		Object[] args = ((TranslatableContents) lines.get(3).text().getContents()).getArgs();
-		helper.assertTrue(args.length == 2 && args[1] instanceof Component named && key(named).equals("entity.jugcraft.buer"),
-				"The invite line names Buer: " + Arrays.toString(args));
+		// GC-05 (GC-P59): the Regard lets them invite Buer and Bathin, named in the perch's order (ComponentUtils.formatList).
+		helper.assertTrue(args.length == 2 && args[1] instanceof Component named
+				&& named.getSiblings().stream().map(ConcordanceJournalGameTests::key).filter(name -> name.startsWith("entity.")).toList()
+						.equals(List.of("entity.jugcraft.buer", "entity.jugcraft.bathin")),
+				"The invite line names Buer and Bathin: " + Arrays.toString(args));
 		helper.assertTrue(lines.stream().noneMatch(line -> line.text().getString().contains("jugcraft:")), "No line names an id");
 		helper.succeed();
 	}

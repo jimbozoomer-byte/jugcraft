@@ -14,8 +14,10 @@ OWNER_BLOCKS_FILES). Concordance Chunk D adds Stolas's body: the owner's Flashja
 (tools/concordance_pacts.py OWNER_FILES), and (unit 3, D-06) his skin, glowmask and animations adapted from the rig's own
 files by tools/stolas_body.py (concordance_pacts.ADAPTED), written and checked here like the recolourings. The garden
 cohort (GC-04) adds Buer's body: the owner's Decor Blossom texture copied unchanged (concordance_pacts.OWNER_FILES), its
-geometry, glowmask and animations adapted by tools/garden_bodies.py (ADAPTED). Two tables may not import different files
-to one path.
+geometry, glowmask and animations adapted by tools/garden_bodies.py (ADAPTED). The garden cohort's GC-05 adds Bathin's
+body, built rather than adapted: its geometry and clips from code alone, its skin and glowmask painted by
+tools/garden_bodies.py only in colours read from two of the owner's Blocks-folder paintings (concordance_pacts.BUILT); each
+written and checked here. Two tables may not import different files to one path.
 
 On 7 October 2026 the owner asked for their farming and food textures to be used ("I have already made a ton of custom
 textures and food ... I made all of the textures in there myself its all mine"). Each imported texture is a byte-for-byte
@@ -33,8 +35,8 @@ from what this import would write.
     python3 tools/owner_art.py --provenance   the magic imports' sources and SHA-256, for the feature record
     python3 tools/owner_art.py --provenance trinkets   the same for one slice's files (a tools/concordance_<slice>.py,
                                                        or another module with OWNER_FILES, such as encyclopedia)
-    python3 tools/owner_art.py --provenance pacts    the pact spirits' bodies (Stolas's, Buer's): the copied files and the
-                                                     adapted ones, each marked with its adapter
+    python3 tools/owner_art.py --provenance pacts    the pact spirits' bodies: the copied, adapted and built files,
+                                                     marked (each adapted or built one with its adapter or builder)
 """
 import hashlib
 import io
@@ -89,6 +91,25 @@ ADAPTERS = {"stolas_body": stolas_body, "garden_bodies": garden_bodies}
 def _adapter(name):
     module, _, attr = name.rpartition(".")
     return getattr(ADAPTERS[module or "stolas_body"], attr)
+
+
+def builds():
+    """(runtime path under assets/jugcraft, the Blocks-folder paintings it reads, builder) for every pact spirit's body file
+    built rather than copied or adapted: Bathin's geometry, skin, glowmask and clips (tools/concordance_pacts.py BUILT, made
+    by tools/garden_bodies.py; the garden cohort, GC-05). His skin is painted only in colours read from the paintings it
+    names; his geometry and clips read none. None may share a path with a copied or adapted file."""
+    taken = {target for target, _ in magic_imports()} | {target for target, _, _ in adaptations()}
+    out = []
+    for target, (sources, builder) in sorted(concordance_pacts.BUILT.items()):
+        if target in taken:
+            raise SystemExit(f"tools/owner_art.py: {target} is both built and copied or adapted")
+        out.append((target, tuple(sources), _adapter(builder)))
+    return out
+
+
+def _read_blocks(path):
+    with open(os.path.join(LIBRARY, path), "rb") as handle:
+        return handle.read()
 
 
 def imports():
@@ -159,9 +180,10 @@ def _read_magic(path):
         return handle.read()
 
 
-def adapt(adapter):
-    """An adapted file's bytes: a PNG for an image; otherwise JSON with LF line ends and a 2-space indent."""
-    made = adapter(_read_magic)
+def adapt(adapter, read=_read_magic):
+    """An adapted (or built) file's bytes: a PNG for an image; otherwise JSON with LF line ends and a 2-space indent.
+    {read} reads the library's files (the Magic folder's, or for a built body the Blocks folder's paintings)."""
+    made = adapter(read)
     if isinstance(made, Image.Image):
         return _png_bytes(made)
     return (json.dumps(made, indent=2) + "\n").encode("utf-8")
@@ -253,6 +275,9 @@ def expected():
         # The pact spirits' bodies (Stolas's, D-06; the garden cohort's, GC-04): adapted from the owner's files, never drawn over
         # by hand.
         files[os.path.join(ASSETS, target)] = adapt(adapter)
+    for target, _, builder in builds():
+        # The garden cohort's built bodies (GC-05: Bathin's): drawn by code, painted only in the owner's colours.
+        files[os.path.join(ASSETS, target)] = adapt(builder, _read_blocks)
     return files
 
 
@@ -268,6 +293,12 @@ def provenance():
     for target, source, adapter in adaptations():
         out.append((target, f"originals/Magic/{source}", hashlib.sha256(_read_magic(source)).hexdigest(),
                     f"{adapter.__module__}.{adapter.__name__}"))
+    for target, sources, builder in builds():
+        name = f"{builder.__module__}.{builder.__name__}"
+        if not sources:
+            out.append((target, "", "", name))
+        for source in sources:
+            out.append((target, f"originals/Blocks/{source}", hashlib.sha256(_read_blocks(source)).hexdigest(), name))
     return out
 
 
@@ -285,6 +316,7 @@ def errors():
     adapted.update(_target(target) for target, _ in compositions())
     adapted.update(_target(target) for target in garden.ORNAMENTAL_EARS)
     adapted.update(os.path.join(ASSETS, target) for target, _, _ in adaptations() if target.endswith(".png"))
+    adapted.update(os.path.join(ASSETS, target) for target, _, _ in builds() if target.endswith(".png"))
     for path, data in expected().items():
         rel = os.path.relpath(path, ROOT)
         if not os.path.isfile(path):
@@ -319,11 +351,12 @@ if __name__ == "__main__":
                 # A slice outside the Concordance's modules (the encyclopedia: tools/encyclopedia.py).
                 module = __import__(rest[0])
             only = set(getattr(module, "OWNER_FILES", {})) | set(getattr(module, "OWNER_BLOCKS_FILES", {})) \
-                | set(getattr(module, "ADAPTED", {}))
+                | set(getattr(module, "ADAPTED", {})) | set(getattr(module, "BUILT", {}))
         for target, source, digest, adapter in provenance():
             if only is None or target in only:
-                adapted = f" adapted by `tools/{adapter.split('.')[0]}.py` ({adapter.split('.')[1]}) |" if adapter else ""
-                print(f"| `{target}` | `{source}` | `{digest}` |" + adapted)
+                verb = "built" if target in concordance_pacts.BUILT else "adapted"
+                made = f" {verb} by `tools/{adapter.split('.')[0]}.py` ({adapter.split('.')[1]}) |" if adapter else ""
+                print((f"| `{target}` | `{source}` | `{digest}` |" if source else f"| `{target}` | built from code alone | |") + made)
         sys.exit(0)
     if "--check" in sys.argv:
         problems = errors()

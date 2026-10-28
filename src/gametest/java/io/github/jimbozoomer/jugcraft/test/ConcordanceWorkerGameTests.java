@@ -17,8 +17,10 @@ import io.github.jimbozoomer.jugcraft.concordance.courier.CourierLedger;
 import io.github.jimbozoomer.jugcraft.concordance.courier.CourierPostBlockEntity;
 import io.github.jimbozoomer.jugcraft.concordance.courier.Couriers;
 import io.github.jimbozoomer.jugcraft.concordance.garden.Garden;
+import io.github.jimbozoomer.jugcraft.concordance.garden.GleanerBlockEntity;
 import io.github.jimbozoomer.jugcraft.concordance.garden.VerdantBedBlock;
 import io.github.jimbozoomer.jugcraft.concordance.garden.VerdantBedBlockEntity;
+import io.github.jimbozoomer.jugcraft.concordance.garden.VerdantHeartBlockEntity;
 import io.github.jimbozoomer.jugcraft.concordance.journal.Journal;
 import io.github.jimbozoomer.jugcraft.concordance.journal.JournalSection;
 import io.github.jimbozoomer.jugcraft.concordance.logistics.Logistics;
@@ -37,6 +39,7 @@ import io.github.jimbozoomer.jugcraft.concordance.sky.AstrolabeItem;
 import io.github.jimbozoomer.jugcraft.concordance.sky.ObservatoryBlockEntity;
 import io.github.jimbozoomer.jugcraft.concordance.sky.Sky;
 import io.github.jimbozoomer.jugcraft.concordance.spirits.AgreementHolder;
+import io.github.jimbozoomer.jugcraft.concordance.spirits.BathinEntity;
 import io.github.jimbozoomer.jugcraft.concordance.spirits.BondingCharmItem;
 import io.github.jimbozoomer.jugcraft.concordance.spirits.BoundWills;
 import io.github.jimbozoomer.jugcraft.concordance.spirits.BuerEntity;
@@ -45,6 +48,7 @@ import io.github.jimbozoomer.jugcraft.concordance.spirits.GardenPacts;
 import io.github.jimbozoomer.jugcraft.concordance.spirits.GardenReach;
 import io.github.jimbozoomer.jugcraft.concordance.spirits.GatheringShadeEntity;
 import io.github.jimbozoomer.jugcraft.concordance.spirits.HearthlingEntity;
+import io.github.jimbozoomer.jugcraft.concordance.spirits.PactAccords;
 import io.github.jimbozoomer.jugcraft.concordance.spirits.PactHistory;
 import io.github.jimbozoomer.jugcraft.concordance.spirits.PactKeeping;
 import io.github.jimbozoomer.jugcraft.concordance.spirits.PactMenu;
@@ -68,6 +72,7 @@ import io.github.jimbozoomer.jugcraft.concordance.spirits.StarReckoning;
 import io.github.jimbozoomer.jugcraft.concordance.spirits.StolasEntity;
 import io.github.jimbozoomer.jugcraft.concordance.spirits.StolasRegard;
 import io.github.jimbozoomer.jugcraft.concordance.spirits.StrainTending;
+import io.github.jimbozoomer.jugcraft.concordance.spirits.VerdanceCarrying;
 import io.github.jimbozoomer.jugcraft.concordance.spirits.WorkerEntity;
 import io.github.jimbozoomer.jugcraft.concordance.spirits.WorkerRoster;
 import io.github.jimbozoomer.jugcraft.concordance.spirits.Workers;
@@ -4027,7 +4032,8 @@ public class ConcordanceWorkerGameTests {
 	static PactMenu sealThrough(GameTestHelper helper, ServerPlayer player, PactDefinition d, BlockPos at) {
 		PactPerchBlockEntity perch = perch(helper, at, player);
 		beside(helper, player, at);
-		PactMenu menu = open(helper, player, perch);
+		// GC-05 (GC-P59): a garden invitee may invite Buer and Bathin both, so the chooser comes first.
+		PactMenu menu = offerOf(helper, player, perch, d);
 		helper.assertTrue(answered(send(player, menu, PactRequestPayload.ACCEPT, 0), PactMenu.SEALED), d.id() + "'s pact is sealed");
 		return menu;
 	}
@@ -4060,12 +4066,14 @@ public class ConcordanceWorkerGameTests {
 			ServerPlayer player = invitee(helper, d, at, 2);
 			PactPerchBlockEntity perch = perch(helper, at, player);
 			beside(helper, player, at);
-			PactMenu menu = open(helper, player, perch);
+			// GC-05 (GC-P59): a garden invitee meets the chooser first (Buer and Bathin share The Garden's Regard), which counts
+			// one revision before the offer.
+			PactMenu menu = offerOf(helper, player, perch, d);
 			PactStatePayload opened = menu.lastSent();
 			List<PactSpiritEntity<?>> visitors = spiritsOf(helper, d);
-			helper.assertTrue(opened.mode() == PactStatePayload.NEGOTIATE && opened.revision() == 1 && opened.notes().isEmpty() && opened.offers(PactRequestPayload.ACCEPT)
+			helper.assertTrue(opened.mode() == PactStatePayload.NEGOTIATE && opened.revision() >= 1 && opened.notes().isEmpty() && opened.offers(PactRequestPayload.ACCEPT)
 					&& opened.spirit().equals(new PactStatePayload.Spirit(PactSpirits.sign(d.id()), d.work())) && visitors.size() == 1 && visitors.getFirst().owner() == null,
-					d.id() + ": opened, its offer at revision 1, nothing missing, its spirit named, a visitor bound to no one: " + opened);
+					d.id() + ": opened, its offer at revision 1 or later, nothing missing, its spirit named, a visitor bound to no one: " + opened);
 			UUID visitor = visitors.getFirst().getUUID();
 			long now = level.getGameTime();
 			PactStatePayload sealed = send(player, menu, PactRequestPayload.ACCEPT, 0);
@@ -4100,11 +4108,15 @@ public class ConcordanceWorkerGameTests {
 			PactPerchBlockEntity other = perch(helper, second, player);
 			beside(helper, player, second);
 			PactMenu menu = open(helper, player, other);
-			helper.assertTrue(note(menu.lastSent(), "missing.held") != null && !menu.lastSent().offers(PactRequestPayload.ACCEPT) && other.visitor() == null
-					&& spiritsOf(helper, d).size() == 1, d.id() + ": at a second perch, already held; it does not come");
+			// GC-05 (GC-P59): a garden holder is offered the other garden spirit there (the one other they may invite); the
+			// second perch never offers d itself, or offers it already held, and d never comes twice.
+			PactStatePayload shown = menu.lastSent();
+			helper.assertTrue((!PactSpirits.sign(d.id()).equals(shown.spirit().sign()) || note(shown, "missing.held") != null)
+					&& spiritsOf(helper, d).size() == 1, d.id() + ": at a second perch it is not offered again, or offered already held; it does not come: " + shown);
 			PactStatePayload refused = send(player, menu, PactRequestPayload.ACCEPT, 0);
-			helper.assertTrue(answered(refused, Pacts.Outcome.ALREADY_HELD.id) && pocketed(player, 1, d) && resonance(player) == left
-					&& BoundWills.of(level.getServer()).ledger().heldBy(player.getUUID()).size() == 1, d.id() + ": accepting there is refused, nothing spent");
+			helper.assertTrue(refused != null && !refused.result().get().done() && pocketed(player, 1, d) && resonance(player) == left
+					&& BoundWills.of(level.getServer()).ledger().heldBy(player.getUUID()).size() == 1 && spiritsOf(helper, d).size() == 1,
+					d.id() + ": accepting there seals nothing of d's (one record) and spends none of its compact: " + said(refused));
 			player.closeContainer();
 		}
 		helper.succeed();
@@ -4121,7 +4133,7 @@ public class ConcordanceWorkerGameTests {
 			ServerPlayer player = invitee(helper, d, at, 0);
 			PactPerchBlockEntity perch = perch(helper, at, player);
 			beside(helper, player, at);
-			PactMenu menu = open(helper, player, perch);
+			PactMenu menu = offerOf(helper, player, perch, d);
 			List<PactSpiritEntity<?>> visitors = spiritsOf(helper, d);
 			helper.assertValueEqual(visitors.size(), 1, d.id() + ": it comes to hear them");
 			PactStatePayload refused = send(player, menu, PactRequestPayload.ACCEPT, 0);
@@ -4462,7 +4474,7 @@ public class ConcordanceWorkerGameTests {
 			PactPerchBlockEntity perch = perch(helper, at, first);
 			beside(helper, first, at);
 			beside(helper, second, at);
-			PactMenu one = open(helper, first, perch);
+			PactMenu one = offerOf(helper, first, perch, d);
 			PactMenu two = open(helper, second, perch);
 			helper.assertTrue(spiritsOf(helper, d).size() == 1 && perch.visitor() != null && note(two.lastSent(), "missing.owner") != null,
 					d.id() + ": two conversations, one visitor; the one who is not its owner told so");
@@ -4893,7 +4905,7 @@ public class ConcordanceWorkerGameTests {
 			beside(helper, player, at);
 			Knowledge before = ConcordanceProgress.knowledge(player);
 			int heard = HEARD.getOrDefault(player.getUUID(), 0);
-			PactMenu menu = open(helper, player, perch);
+			PactMenu menu = offerOf(helper, player, perch, d);
 			PactStatePayload terms = send(player, menu, PactRequestPayload.CHOOSE, 0);
 			helper.assertTrue(terms != null && terms.result().isEmpty(), d.id() + ": turning to the terms answers with the state alone");
 			helper.assertTrue(answered(send(player, menu, PactRequestPayload.DECLINE, 0), PactMenu.DECLINED), d.id() + ": declined");
@@ -5334,7 +5346,8 @@ public class ConcordanceWorkerGameTests {
 		keptBed(helper, new BlockPos(4, 1, 4), STRANGER, 0);
 		keptBed(helper, new BlockPos(11, 1, 2), keeper.getUUID(), 0);
 		helper.setBlock(new BlockPos(3, 1, 4), Garden.VERDANT_BED.defaultBlockState());
-		PactMenu menu = open(helper, keeper, perch);
+		// GC-05 (GC-P59): Buer is chosen from the chooser (he and Bathin share The Garden's Regard); not ready, he does not come.
+		PactMenu menu = offerOf(helper, keeper, perch, buerOffer());
 		PactStatePayload state = menu.lastSent();
 		Component note = state.notes().stream().filter(line -> key(line).equals(TENDING_KEY + "missing")).findFirst().orElse(null);
 		helper.assertTrue(state.mode() == PactStatePayload.NEGOTIATE && note != null && Integer.valueOf(8).equals(arg(note, 0))
@@ -5348,7 +5361,7 @@ public class ConcordanceWorkerGameTests {
 		keeper.closeContainer();
 		keptBed(helper, new BlockPos(3, 1, 4), keeper.getUUID(), 0);
 		RateGate.forget(keeper.getUUID());
-		PactStatePayload invited = open(helper, keeper, perch).lastSent();
+		PactStatePayload invited = offerOf(helper, keeper, perch, buerOffer()).lastSent();
 		helper.assertTrue(invited.notes().isEmpty() && invited.offers(PactRequestPayload.ACCEPT)
 				&& perch.visitor() != null && level.getEntity(perch.visitor()) instanceof BuerEntity, "With a bed of theirs awake within 8, he comes");
 		helper.succeed();
@@ -5555,7 +5568,7 @@ public class ConcordanceWorkerGameTests {
 			ServerPlayer player = invitee(helper, d, at, 0);
 			PactPerchBlockEntity perch = perch(helper, at, player);
 			beside(helper, player, at);
-			PactMenu menu = open(helper, player, perch);
+			PactMenu menu = offerOf(helper, player, perch, d);
 			helper.assertTrue(key(term(menu.lastSent(), "compact")).equals(PACT_KEY + "term.compact.items"),
 					d.id() + ": its compact's term is the one without resonance");
 			List<String> words = new ArrayList<>();
@@ -5735,12 +5748,15 @@ public class ConcordanceWorkerGameTests {
 		beside(helper, owner, at);
 		PactMenu menu = open(helper, owner, perch);
 		PactStatePayload chooser = menu.lastSent();
+		// GC-05 (GC-P59): Bathin shares The Garden's Regard, so he is listed too (third, REQUIRED's order), not ready: no Heart.
 		helper.assertTrue(chooser.mode() == PactStatePayload.INVITE
-				&& chooser.patterns().stream().map(PactStatePayload.Choice::id).toList().equals(List.of(StolasEntity.SIGN, BuerEntity.SIGN))
-				&& chooser.patterns().stream().allMatch(choice -> choice.ready() && choice.amount() == 0) && chooser.notes().isEmpty()
+				&& chooser.patterns().stream().map(PactStatePayload.Choice::id).toList().equals(List.of(StolasEntity.SIGN, BuerEntity.SIGN, BathinEntity.SIGN))
+				&& chooser.patterns().subList(0, 2).stream().allMatch(choice -> choice.ready() && choice.amount() == 0)
+				&& !chooser.patterns().get(2).ready() && chooser.notes().size() == 1 && note(chooser, "invite.missing") != null
 				&& chooser.spirit().equals(PactStatePayload.Spirit.NONE) && key(chooser.speaker()).equals("container.jugcraft.pact_perch")
 				&& chooser.actions() == PactStatePayload.mask(PactRequestPayload.CHOOSE, PactRequestPayload.INVITE) && perch.visitor() == null,
-				"Both Regards understood, a star and a bed: the chooser, Stolas then Buer by their signs, both ready, no visitor: " + chooser);
+				"Both Regards understood, a star and a bed: the chooser, Stolas, Buer and Bathin by their signs, Stolas and Buer ready, "
+						+ "Bathin's missing Heart named, no visitor: " + chooser);
 		// Without Buer's bed his entry says what is still missing.
 		BlockPos bare = perchFor(2);
 		ServerPlayer bedless = TestPlayers.survivor(helper);
@@ -5751,18 +5767,19 @@ public class ConcordanceWorkerGameTests {
 		PactPerchBlockEntity barePerch = perch(helper, bare, bedless);
 		beside(helper, bedless, bare);
 		PactStatePayload missing = open(helper, bedless, barePerch).lastSent();
-		helper.assertTrue(missing.mode() == PactStatePayload.INVITE && missing.patterns().size() == 2 && missing.patterns().get(0).ready()
+		helper.assertTrue(missing.mode() == PactStatePayload.INVITE && missing.patterns().size() == 3 && missing.patterns().get(0).ready()
 				&& !missing.patterns().get(1).ready() && missing.patterns().get(1).amount() == 1 && note(missing, "invite.missing") != null,
 				"Without a bed of theirs within 8, Buer is listed not ready, what is missing named: " + missing);
 		bedless.closeContainer();
-		// One who understands only the Garden's Regard: no chooser, Buer's offer.
+		// One who understands only the Garden's Regard: the chooser with Buer and Bathin, not Stolas (GC-05, GC-P59).
 		BlockPos gardenAt = perchFor(3);
 		ServerPlayer gardener = invitee(helper, buerD, gardenAt, 0);
 		PactPerchBlockEntity gardenPerch = perch(helper, gardenAt, gardener);
 		beside(helper, gardener, gardenAt);
 		PactStatePayload one = open(helper, gardener, gardenPerch).lastSent();
-		helper.assertTrue(one.mode() == PactStatePayload.NEGOTIATE && one.spirit().sign().equals(BuerEntity.SIGN),
-				"Only the Garden's Regard understood: no chooser, Buer's offer: " + one);
+		helper.assertTrue(one.mode() == PactStatePayload.INVITE
+				&& one.patterns().stream().map(PactStatePayload.Choice::id).toList().equals(List.of(BuerEntity.SIGN, BathinEntity.SIGN)),
+				"Only the Garden's Regard understood: the chooser with Buer and Bathin, not Stolas: " + one);
 		gardener.closeContainer();
 		// One already holding Stolas's pact: one to invite, no chooser.
 		BlockPos heldAt = perchFor(4);
@@ -5771,8 +5788,9 @@ public class ConcordanceWorkerGameTests {
 		PactPerchBlockEntity heldPerch = perch(helper, heldAt, holding);
 		beside(helper, holding, heldAt);
 		PactStatePayload rest = open(helper, holding, heldPerch).lastSent();
-		helper.assertTrue(rest.mode() == PactStatePayload.NEGOTIATE && rest.spirit().sign().equals(BuerEntity.SIGN),
-				"Holding Stolas's pact, one is left to invite: no chooser, Buer's offer: " + rest);
+		helper.assertTrue(rest.mode() == PactStatePayload.INVITE
+				&& rest.patterns().stream().map(PactStatePayload.Choice::id).toList().equals(List.of(BuerEntity.SIGN, BathinEntity.SIGN)),
+				"Holding Stolas's pact, he is not listed: the chooser with Buer and Bathin (GC-05): " + rest);
 		holding.closeContainer();
 		// Back on the chooser: INVITE(1) begins Buer's visit; accepting seals his pact alone.
 		PactStatePayload invited = invite(owner, menu, 1);
@@ -5796,10 +5814,12 @@ public class ConcordanceWorkerGameTests {
 		beside(helper, owner, at);
 		PactMenu menu = open(helper, owner, perch);
 		helper.assertValueEqual(menu.lastSent().mode(), PactStatePayload.INVITE, "The chooser");
-		PactStatePayload past = invite(owner, menu, 2);
+		// GC-05 (GC-P59): INVITE(2) is Bathin now; one past the list is its size.
+		int listed = menu.lastSent().patterns().size();
+		PactStatePayload past = invite(owner, menu, listed);
 		helper.assertTrue(answered(past, PactMenu.NOT_OFFERED) && past.mode() == PactStatePayload.INVITE && perch.visitor() == null
-				&& spiritsOf(helper, buerOffer()).isEmpty() && spiritsOf(helper, stolasOffer()).isEmpty(),
-				"INVITE(2) past the two listed: not offered, still the chooser, nobody comes");
+				&& spiritsOf(helper, buerOffer()).isEmpty() && spiritsOf(helper, stolasOffer()).isEmpty() && spiritsOf(helper, bathinOffer()).isEmpty(),
+				"INVITE(" + listed + ") past the " + listed + " listed: not offered, still the chooser, nobody comes");
 		helper.assertTrue(request(owner, menu.containerId, menu.lastSequence() + 1, PactRequestPayload.INVITE, PactStatePayload.MAX_CHOICES,
 				menu.lastSent().revision()) == null, "INVITE(8), past the screen's bound: dropped before anything");
 		helper.succeed();
@@ -5876,8 +5896,9 @@ public class ConcordanceWorkerGameTests {
 		beside(helper, owner, at);
 		PactMenu menu = open(helper, owner, perch);
 		PactStatePayload chooser = menu.lastSent();
-		helper.assertTrue(chooser.mode() == PactStatePayload.INVITE && chooser.patterns().size() == 2 && !chooser.patterns().get(0).ready()
-				&& chooser.patterns().get(1).ready(), "The chooser: Stolas not ready (no star of theirs), Buer ready: " + chooser);
+		helper.assertTrue(chooser.mode() == PactStatePayload.INVITE && chooser.patterns().size() == 3 && !chooser.patterns().get(0).ready()
+				&& chooser.patterns().get(1).ready() && !chooser.patterns().get(2).ready(),
+				"The chooser: Stolas not ready (no star of theirs), Buer ready, Bathin not (no Heart; GC-05): " + chooser);
 		helper.assertTrue(answered(invite(owner, menu, 1), PactMenu.INVITED) && perch.visitor(level) instanceof BuerEntity, "INVITE(1): Buer comes");
 		helper.assertTrue(answered(send(owner, menu, PactRequestPayload.DECLINE, 0), PactMenu.DECLINED), "Its owner declines");
 		RateGate.forget(owner.getUUID());
@@ -5918,6 +5939,1192 @@ public class ConcordanceWorkerGameTests {
 				"A pact worker noted with no record: no portrait of its own (the Spirit Anchor): " + worker);
 		helper.assertTrue(spirit != null && key(spirit.kind()).equals("message.jugcraft.concordance.workers.kind.spirit"),
 				"A record whose counterpart is no spirit: a spirit's row: " + spirit);
+		helper.succeed();
+	}
+
+	// ---------------------------------------------------------------- Concordance garden cohort, GC-05: Bathin, his service and his matter
+
+	/** GC-05: his service's words (tools/concordance_pacts.py SERVICE_WORDS["verdance_carrying"]). */
+	static final String CARRYING_KEY = "message.jugcraft.concordance.pact.verdance_carrying.";
+
+	static {
+		// GC-05 (SG12): Bathin comes where an awake Verdant Heart and an awake Gleaner the inviter keeps lie within 10 of the
+		// perch: the Heart beside the perch's grid cell (perchFor leaves x - 1 free) and the Gleaner at x - 1, z - 1 (clear of
+		// every case's second and copied perches, which stand south). The Heart holds no Verdance and stands on no bed, so it
+		// makes none and nothing is ever carried: every shared case reads him idle.
+		FIXTURES.put(BathinEntity.COUNTERPART, (helper, player, perch) -> {
+			BlockPos heart = perch.offset(-1, 0, 0);
+			BlockPos gleaner = perch.offset(-1, 0, -1);
+			keptHeart(helper, heart, player.getUUID(), 0);
+			keptGleaner(helper, gleaner, player.getUUID(), 0);
+			return List.of(heart, gleaner);
+		});
+	}
+
+	/** Bathin's offer as the server loaded it (data/jugcraft/concordance/pact/bathin.json). */
+	static PactDefinition bathinOffer() {
+		PactDefinition offer = PactPerchBlockEntity.definition(BathinEntity.COUNTERPART);
+		if (offer == null) {
+			throw new AssertionError("Bathin's offer is loaded");
+		}
+		return offer;
+	}
+
+	/** An awake Verdant Heart at {@code at} kept by {@code keeper}, holding {@code verdance}, with no bed under it (it makes none). */
+	static VerdantHeartBlockEntity keptHeart(GameTestHelper helper, BlockPos at, UUID keeper, long verdance) {
+		helper.setBlock(at, Garden.VERDANT_HEART);
+		VerdantHeartBlockEntity heart = helper.getBlockEntity(at, VerdantHeartBlockEntity.class);
+		heart.awaken(keeper);
+		heart.setVerdance(verdance);
+		return heart;
+	}
+
+	/** An awake Gleaner at {@code at} kept by {@code keeper}, holding {@code verdance}. */
+	static GleanerBlockEntity keptGleaner(GameTestHelper helper, BlockPos at, UUID keeper, long verdance) {
+		helper.setBlock(at, Garden.GLEANER);
+		GleanerBlockEntity gleaner = helper.getBlockEntity(at, GleanerBlockEntity.class);
+		gleaner.awaken(keeper);
+		gleaner.setVerdance(verdance);
+		return gleaner;
+	}
+
+	/** A Ley Pylon at {@code at} owned by {@code owner} (null: no one), holding {@code ley}. */
+	static LeyPylonBlockEntity ownedPylon(GameTestHelper helper, BlockPos at, @Nullable UUID owner, long ley) {
+		helper.setBlock(at, JugcraftConcordance.LEY_PYLON);
+		LeyPylonBlockEntity pylon = helper.getBlockEntity(at, LeyPylonBlockEntity.class);
+		pylon.setOwner(owner);
+		pylon.setLey(helper.getLevel(), ley);
+		return pylon;
+	}
+
+	/** Bathin's pact sealed for {@code holder} at a perch they placed at {@code at}, at game time {@code now}; they stand beside it. */
+	static PactPerchBlockEntity bathinPact(GameTestHelper helper, ServerPlayer holder, BlockPos at, long now) {
+		PactPerchBlockEntity perch = perch(helper, at, holder);
+		beside(helper, holder, at);
+		helper.assertValueEqual(perch.holder().seal(helper.getLevel(), holder, PactPerchBlockEntity.sealing(bathinOffer(), null, null), now).outcome(),
+				Pacts.Outcome.DONE, "Bathin's pact is sealed at the perch");
+		return perch;
+	}
+
+	/** The Bathin kept at {@code perch} (its presence), asserted there. */
+	static BathinEntity bathin(GameTestHelper helper, PactPerchBlockEntity perch) {
+		PactSpiritEntity<?> found = perch.presence(helper.getLevel());
+		helper.assertTrue(found instanceof BathinEntity, "Bathin is on his perch: " + found);
+		return (BathinEntity) found;
+	}
+
+	static VerdanceCarrying.Memory carrying(BathinEntity bathin) {
+		return bathin.serviceMemory(VerdanceCarrying.Memory.class, VerdanceCarrying.Memory::new);
+	}
+
+	/** The Verdance in {@code hearts} and {@code gleaners} together. */
+	static long verdance(List<VerdantHeartBlockEntity> hearts, List<GleanerBlockEntity> gleaners) {
+		return hearts.stream().mapToLong(VerdantHeartBlockEntity::verdance).sum() + gleaners.stream().mapToLong(GleanerBlockEntity::verdance).sum();
+	}
+
+	/** How many of {@code spirit}'s recent cues are {@code cue}. */
+	static long cued(PactSpiritEntity<?> spirit, String cue) {
+		return spirit.cues().stream().filter(cue::equals).count();
+	}
+
+	/** The holder answers his matter at the perch as the screen does (RESOLVE with the answer's index among those sent); the perch keeps it. */
+	static void answer(GameTestHelper helper, ServerPlayer holder, PactPerchBlockEntity perch, String accord) {
+		RateGate.forget(holder.getUUID());
+		PactMenu menu = open(helper, holder, perch);
+		send(holder, menu, PactRequestPayload.RESOLVE, VerdanceCarrying.ACCORDS.indexOf(accord));
+		holder.closeContainer();
+		helper.assertValueEqual(perch.accord(), accord, "The perch keeps the answer " + accord);
+	}
+
+	/**
+	 * GC-05: a Heart of {@code keeper}'s that already has its own road: an awake Verdant Heart at {@code heartAt} holding 16
+	 * Verdance (on no bed: it makes none and never pours by itself), a Ley Pylon {@code keeper} owns beside it (east), and,
+	 * so Bathin has somewhere else to carry, an awake empty Gleaner of theirs five blocks west (beyond its own reach of 4).
+	 */
+	static VerdantHeartBlockEntity heartWithItsOwnRoad(GameTestHelper helper, UUID keeper, BlockPos heartAt) {
+		VerdantHeartBlockEntity heart = keptHeart(helper, heartAt, keeper, 16);
+		ownedPylon(helper, heartAt.east(), keeper, 0);
+		keptGleaner(helper, heartAt.west(5), keeper, 0);
+		return heart;
+	}
+
+	/**
+	 * GC-05 (GC-P59): {@code player} opens their empty perch for {@code d}. With two or more spirits they may invite (Buer and
+	 * Bathin share The Garden's Regard) the chooser comes first, and {@code d} is chosen there by its sign, as its entry sends
+	 * INVITE; with one, its offer comes at once (GC-01's rule). The menu, its last state {@code d}'s NEGOTIATE.
+	 */
+	static PactMenu offerOf(GameTestHelper helper, ServerPlayer player, PactPerchBlockEntity perch, PactDefinition d) {
+		PactMenu menu = open(helper, player, perch);
+		if (menu.lastSent().mode() == PactStatePayload.INVITE) {
+			List<PactStatePayload.Choice> listed = menu.lastSent().patterns();
+			int index = -1;
+			for (int i = 0; i < listed.size(); i++) {
+				if (listed.get(i).id().equals(PactSpirits.sign(d.id()))) {
+					index = i;
+				}
+			}
+			helper.assertTrue(index >= 0, d.id() + " is on the chooser: " + listed.stream().map(PactStatePayload.Choice::id).toList());
+			PactStatePayload invited = invite(player, menu, index);
+			helper.assertTrue(answered(invited, PactMenu.INVITED), d.id() + " is invited from the chooser: "
+					+ String.valueOf(invited == null ? null : invited.result()));
+		}
+		helper.assertTrue(menu.lastSent().mode() == PactStatePayload.NEGOTIATE && PactSpirits.sign(d.id()).equals(menu.lastSent().spirit().sign()),
+				d.id() + "'s offer is shown");
+		return menu;
+	}
+
+	/** GC-05: one move a think: the Heart down by exactly what a far Gleaner gains, at most 8, both in one step; counted once; no item. */
+	@GameTest(maxTicks = 20)
+	public void bathinMovesVerdanceExactly(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		ServerPlayer keeper = gardenHolder(helper);
+		long now = dayStart(level, 1);
+		PactPerchBlockEntity perch = bathinPact(helper, keeper, new BlockPos(3, 1, 3), now);
+		BathinEntity bathin = bathin(helper, perch);
+		VerdantHeartBlockEntity heart = keptHeart(helper, new BlockPos(0, 1, 0), keeper.getUUID(), 10);
+		GleanerBlockEntity near = keptGleaner(helper, new BlockPos(2, 1, 2), keeper.getUUID(), 0);
+		GleanerBlockEntity far = keptGleaner(helper, new BlockPos(7, 1, 7), keeper.getUUID(), 0);
+		int items = carried(keeper);
+		helper.assertValueEqual(bathin.think(level, NOON, now), Status.WORKING, "He carries");
+		helper.assertTrue(heart.verdance() == 2 && far.verdance() == 8 && near.verdance() == 0,
+				"8 from the Heart into the far Gleaner in the same step; the Gleaner within its own reach is left to its own draw: "
+						+ heart.verdance() + ", " + far.verdance() + ", " + near.verdance());
+		VerdanceCarrying.Move last = carrying(bathin).last();
+		helper.assertTrue(last != null && !last.pylon() && last.verdance() == 8 && last.from().equals(heart.getBlockPos())
+				&& last.to().equals(far.getBlockPos()) && last.at() == now, "He remembers the move, never an amount held: " + last);
+		helper.assertTrue(Pacts.done(pactOf(level, perch).pact(), now) == 1 && cued(bathin, "work") == 1, "Counted once; one work cue");
+		List<Component> rows = VerdanceCarrying.rows(level, pactOf(level, perch), now);
+		helper.assertTrue(keys(rows).equals(List.of(CARRYING_KEY + "row.service", CARRYING_KEY + "row.moved"))
+				&& Integer.valueOf(1).equals(arg(rows.get(0), 0)) && Long.valueOf(8L).equals(arg(rows.get(1), 0))
+				&& far.getBlockPos().toShortString().equals(arg(rows.get(1), 2)), "The kept page: 1 move today, and where 8 went: " + keys(rows));
+		helper.assertValueEqual(bathin.think(level, MIDNIGHT, now + 20), Status.WORKING,
+				"The next think, at midnight (his hours are every hour, GC-P41): the rest");
+		helper.assertTrue(heart.verdance() == 0 && far.verdance() == 10 && heart.verdance() + far.verdance() + near.verdance() == 10,
+				"The last 2: what the Heart held; 10 in all before and after");
+		helper.assertValueEqual(bathin.think(level, NOON, now + 40), Status.IDLE, "The Heart empty, he waits");
+		helper.assertTrue(carrying(bathin).idle() == VerdanceCarrying.Idle.EMPTY
+				&& new PactService.Note("empty", 0).equals(VerdanceCarrying.SERVICE.note(level, bathin, pactOf(level, perch), NOON, now + 40)),
+				"Jade says why: nothing to carry");
+		helper.assertTrue(carried(keeper) == items && loose(helper) == 0 && Pacts.done(pactOf(level, perch).pact(), now) == 2,
+				"No item moved; two moves counted");
+		helper.succeed();
+	}
+
+	/** GC-05: into a pylon not beside the Heart, at most 3 whole batches, 3 Verdance for 2 Ley Charge each; never a part batch; a loss. */
+	@GameTest(maxTicks = 20)
+	public void bathinPoursIntoAFarPylonAtThreeForTwo(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		ServerPlayer keeper = gardenHolder(helper);
+		long now = dayStart(level, 1);
+		PactPerchBlockEntity perch = bathinPact(helper, keeper, new BlockPos(3, 1, 3), now);
+		BathinEntity bathin = bathin(helper, perch);
+		VerdantHeartBlockEntity heart = keptHeart(helper, new BlockPos(0, 1, 0), keeper.getUUID(), 10);
+		LeyPylonBlockEntity far = ownedPylon(helper, new BlockPos(7, 1, 0), keeper.getUUID(), 0);
+		helper.assertValueEqual(bathin.think(level, NOON, now), Status.WORKING, "He pours into the far pylon");
+		helper.assertTrue(heart.verdance() == 1 && far.ley() == 6, "Three batches at most: 9 Verdance for 6 Ley Charge, 1 left: "
+				+ heart.verdance() + ", " + far.ley());
+		helper.assertTrue(3 * far.ley() == 2 * (10 - heart.verdance()) && far.ley() < 10 - heart.verdance(), "3 for 2: a third lost, nothing made");
+		VerdanceCarrying.Move last = carrying(bathin).last();
+		helper.assertTrue(last != null && last.pylon() && last.verdance() == 9 && last.ley() == 6 && last.to().equals(far.getBlockPos()),
+				"He remembers the pour: " + last);
+		List<Component> rows = VerdanceCarrying.rows(level, pactOf(level, perch), now);
+		helper.assertTrue(keys(rows).equals(List.of(CARRYING_KEY + "row.service", CARRYING_KEY + "row.poured"))
+				&& Long.valueOf(9L).equals(arg(rows.get(1), 0)) && Long.valueOf(6L).equals(arg(rows.get(1), 3)), "The kept page names the pour");
+		helper.assertValueEqual(bathin.think(level, NOON, now + 20), Status.IDLE, "1 Verdance is not a batch");
+		helper.assertTrue(heart.verdance() == 1 && far.ley() == 6, "nothing moved");
+		heart.setVerdance(64);
+		far.setLey(level, LeyPylonBlockEntity.CAPACITY - 1);
+		helper.assertValueEqual(bathin.think(level, NOON, now + 40), Status.IDLE, "Room for less than a batch: full to him");
+		helper.assertTrue(heart.verdance() == 64 && far.ley() == LeyPylonBlockEntity.CAPACITY - 1
+				&& carrying(bathin).idle() == VerdanceCarrying.Idle.NOWHERE, "nothing moved; nowhere to set it");
+		far.setLey(level, LeyPylonBlockEntity.CAPACITY - 4);
+		helper.assertValueEqual(bathin.think(level, NOON, now + 60), Status.WORKING, "Room for two batches");
+		helper.assertTrue(heart.verdance() == 58 && far.ley() == LeyPylonBlockEntity.CAPACITY && Pacts.done(pactOf(level, perch).pact(), now) == 2,
+				"Two whole batches, 6 for 4; two moves counted");
+		helper.succeed();
+	}
+
+	/** GC-05 (GC-P50): the lossless road first: a far Gleaner with room for a whole move before a pylon; without that room, the pylon. */
+	@GameTest(maxTicks = 20)
+	public void bathinPrefersAFarGleanerToAPylon(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		ServerPlayer keeper = gardenHolder(helper);
+		long now = dayStart(level, 1);
+		PactPerchBlockEntity perch = bathinPact(helper, keeper, new BlockPos(3, 1, 3), now);
+		BathinEntity bathin = bathin(helper, perch);
+		VerdantHeartBlockEntity heart = keptHeart(helper, new BlockPos(0, 1, 0), keeper.getUUID(), 10);
+		GleanerBlockEntity gleaner = keptGleaner(helper, new BlockPos(7, 1, 7), keeper.getUUID(), 0);
+		LeyPylonBlockEntity pylon = ownedPylon(helper, new BlockPos(7, 1, 0), keeper.getUUID(), 0);
+		helper.assertValueEqual(bathin.think(level, NOON, now), Status.WORKING, "He carries");
+		helper.assertTrue(gleaner.verdance() == 8 && heart.verdance() == 2 && pylon.ley() == 0,
+				"The lossless road first: 8 into the far Gleaner, nothing into the pylon: " + heart.verdance() + ", " + gleaner.verdance() + ", " + pylon.ley());
+		helper.assertValueEqual(bathin.think(level, NOON, now + 20), Status.WORKING, "The next think");
+		helper.assertTrue(gleaner.verdance() == 10 && heart.verdance() == 0 && pylon.ley() == 0, "The rest into the Gleaner too");
+		heart.setVerdance(10);
+		gleaner.setVerdance(9);
+		helper.assertValueEqual(bathin.think(level, NOON, now + 40), Status.WORKING, "A Gleaner with room for 7 is no whole move: the pylon");
+		helper.assertTrue(pylon.ley() == 6 && heart.verdance() == 1 && gleaner.verdance() == 9,
+				"A Gleaner without room for a whole move is passed over; the pylon takes 3 batches: " + heart.verdance() + ", " + pylon.ley());
+		helper.assertTrue(Pacts.done(pactOf(level, perch).pact(), now) == 3, "Three moves counted");
+		helper.succeed();
+	}
+
+	/** GC-05 (GE3; GC-P50's order): one change a think: the fullest Heart into the emptiest Gleaner with room, the total kept. */
+	@GameTest(maxTicks = 20)
+	public void bathinChangesAtMostOneMoveAThink(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		ServerPlayer keeper = gardenHolder(helper);
+		long now = dayStart(level, 1);
+		PactPerchBlockEntity perch = bathinPact(helper, keeper, new BlockPos(3, 1, 3), now);
+		BathinEntity bathin = bathin(helper, perch);
+		VerdantHeartBlockEntity a = keptHeart(helper, new BlockPos(0, 1, 0), keeper.getUUID(), 10);
+		VerdantHeartBlockEntity b = keptHeart(helper, new BlockPos(0, 1, 7), keeper.getUUID(), 20);
+		GleanerBlockEntity l = keptGleaner(helper, new BlockPos(7, 1, 7), keeper.getUUID(), 0);
+		GleanerBlockEntity m = keptGleaner(helper, new BlockPos(7, 1, 0), keeper.getUUID(), 4);
+		long total = 34;
+		helper.assertValueEqual(bathin.think(level, NOON, now), Status.WORKING, "Think 1");
+		helper.assertTrue(b.verdance() == 12 && l.verdance() == 8 && a.verdance() == 10 && m.verdance() == 4
+				&& verdance(List.of(a, b), List.of(l, m)) == total && cued(bathin, "work") == 1,
+				"The fullest Heart into the emptiest Gleaner; nothing else changed; one work cue");
+		helper.assertValueEqual(bathin.think(level, NOON, now + 20), Status.WORKING, "Think 2");
+		helper.assertTrue(b.verdance() == 4 && m.verdance() == 12 && a.verdance() == 10 && l.verdance() == 8
+				&& verdance(List.of(a, b), List.of(l, m)) == total, "B still the fullest; M now the emptiest with room");
+		helper.assertValueEqual(bathin.think(level, NOON, now + 40), Status.WORKING, "Think 3");
+		helper.assertTrue(a.verdance() == 2 && l.verdance() == 16 && b.verdance() == 4 && m.verdance() == 12
+				&& verdance(List.of(a, b), List.of(l, m)) == total, "A the fullest; L has room for a whole move, M not");
+		helper.assertValueEqual(bathin.think(level, NOON, now + 60), Status.IDLE, "Think 4: no Gleaner has room for a whole move, and no pylon");
+		helper.assertTrue(a.verdance() == 2 && l.verdance() == 16 && b.verdance() == 4 && m.verdance() == 12
+				&& verdance(List.of(a, b), List.of(l, m)) == total && carrying(bathin).idle() == VerdanceCarrying.Idle.NOWHERE,
+				"Nothing changed; nowhere to set it");
+		helper.succeed();
+	}
+
+	/** GC-05 (S1): his save holds no Verdance; killed or unloaded between thinks every reservoir holds what it held; called back, he carries on. */
+	@GameTest(maxTicks = 20)
+	public void bathinNeverHoldsVerdance(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		ServerPlayer keeper = gardenHolder(helper);
+		long now = dayStart(level, 1);
+		BlockPos at = new BlockPos(3, 1, 3);
+		PactPerchBlockEntity perch = bathinPact(helper, keeper, at, now);
+		BathinEntity bathin = bathin(helper, perch);
+		VerdantHeartBlockEntity heart = keptHeart(helper, new BlockPos(0, 1, 0), keeper.getUUID(), 20);
+		GleanerBlockEntity gleaner = keptGleaner(helper, new BlockPos(7, 1, 7), keeper.getUUID(), 0);
+		helper.assertValueEqual(bathin.think(level, NOON, now), Status.WORKING, "A move");
+		helper.assertTrue(heart.verdance() == 12 && gleaner.verdance() == 8, "8 moved, 20 in all");
+		TagValueOutput saved = TagValueOutput.createWithContext(ProblemReporter.DISCARDING, level.registryAccess());
+		bathin.saveWithoutId(saved);
+		CompoundTag tag = saved.buildResult();
+		helper.assertTrue(!tag.toString().toLowerCase(Locale.ROOT).contains("verdance") && !tag.contains("memory") && !tag.contains("last"),
+				"His save holds no Verdance and no memory: " + tag.keySet());
+		bathin.remove(Entity.RemovalReason.KILLED);
+		helper.assertTrue(heart.verdance() == 12 && gleaner.verdance() == 8 && loose(helper) == 0, "Killed between thinks: nothing dropped, lost or owed");
+		PactKeeping.tick(level, perch.holder(), helper.absolutePos(at), now + 20);
+		BathinEntity back = bathin(helper, perch);
+		helper.assertTrue(back != bathin && carrying(back).last() == null, "Called back for his holder near, he remembers no move");
+		helper.assertValueEqual(back.think(level, NOON, now + 40), Status.WORKING, "and carries on from the reservoirs as they are");
+		helper.assertTrue(heart.verdance() == 4 && gleaner.verdance() == 16, "8 more; still 20 in all");
+		back.remove(Entity.RemovalReason.UNLOADED_TO_CHUNK);
+		helper.assertTrue(heart.verdance() == 4 && gleaner.verdance() == 16, "Unloaded between thinks: unchanged");
+		VerdantHeartBlockEntity heartCopy = new VerdantHeartBlockEntity(heart.getBlockPos(), heart.getBlockState());
+		heartCopy.loadWithComponents(TagValueInput.create(ProblemReporter.DISCARDING, level.registryAccess(), heart.saveWithoutMetadata(level.registryAccess())));
+		GleanerBlockEntity gleanerCopy = new GleanerBlockEntity(gleaner.getBlockPos(), gleaner.getBlockState());
+		gleanerCopy.loadWithComponents(TagValueInput.create(ProblemReporter.DISCARDING, level.registryAccess(), gleaner.saveWithoutMetadata(level.registryAccess())));
+		helper.assertTrue(heartCopy.verdance() == 4 && gleanerCopy.verdance() == 16, "A restart reads every Verdance back from its reservoir");
+		helper.succeed();
+	}
+
+	/** GC-05: a stranger's Heart, Gleaner and pylon never; a party member's while in the party, not after; no one's pylon as the Heart's own pour would. */
+	@GameTest(maxTicks = 20)
+	public void bathinHonoursTheHeartsParty(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		ServerPlayer keeper = gardenHolder(helper);
+		ServerPlayer member = TestPlayers.survivor(helper);
+		long now = dayStart(level, 1);
+		PactPerchBlockEntity perch = bathinPact(helper, keeper, new BlockPos(3, 1, 3), now);
+		BathinEntity bathin = bathin(helper, perch);
+		VerdantHeartBlockEntity theirs = keptHeart(helper, new BlockPos(0, 1, 0), STRANGER, 20);
+		GleanerBlockEntity mine = keptGleaner(helper, new BlockPos(7, 1, 7), keeper.getUUID(), 0);
+		helper.assertValueEqual(bathin.think(level, NOON, now), Status.IDLE, "A stranger's Heart is no source of his");
+		helper.assertTrue(theirs.verdance() == 20 && mine.verdance() == 0, "untouched");
+		VerdantHeartBlockEntity own = keptHeart(helper, new BlockPos(0, 1, 7), keeper.getUUID(), 20);
+		GleanerBlockEntity strangers = keptGleaner(helper, new BlockPos(7, 1, 0), STRANGER, 0);
+		LeyPylonBlockEntity strangersPylon = ownedPylon(helper, new BlockPos(7, 3, 4), STRANGER, 0);
+		mine.setVerdance(GleanerBlockEntity.CAPACITY);
+		long refreshed = now + GardenReach.REFRESH_TICKS;
+		helper.assertValueEqual(bathin.think(level, NOON, refreshed), Status.IDLE, "His Gleaner full, a stranger's Gleaner and pylon are nowhere he sets it down");
+		helper.assertTrue(own.verdance() == 20 && strangers.verdance() == 0 && strangersPylon.ley() == 0 && theirs.verdance() == 20, "all untouched");
+		LeyPylonBlockEntity nobodys = ownedPylon(helper, new BlockPos(4, 3, 7), null, 0);
+		long again = refreshed + GardenReach.REFRESH_TICKS;
+		helper.assertValueEqual(bathin.think(level, NOON, again), Status.WORKING, "No one's pylon is fed, as the Heart's own pour would feed it");
+		helper.assertTrue(own.verdance() == 11 && nobodys.ley() == 6 && strangersPylon.ley() == 0 && strangers.verdance() == 0,
+				"9 for 6 into no one's; a stranger's still untouched");
+		VerdantHeartBlockEntity members = keptHeart(helper, new BlockPos(1, 5, 1), member.getUUID(), 30);
+		GleanerBlockEntity membersGleaner = keptGleaner(helper, new BlockPos(7, 5, 7), member.getUUID(), 0);
+		PartyManager parties = JugcraftParties.manager();
+		long ms = System.currentTimeMillis();
+		try {
+			helper.assertTrue(parties.invite(keeper.getUUID(), member.getUUID(), ms) == PartyManager.Result.OK
+					&& parties.accept(member.getUUID(), ms) == PartyManager.Result.OK, "The holder and a member form a party");
+			long joined = again + GardenReach.REFRESH_TICKS;
+			helper.assertValueEqual(bathin.think(level, NOON, joined), Status.WORKING, "Under party, the member's Heart and Gleaner are his to serve");
+			helper.assertTrue(members.verdance() == 22 && membersGleaner.verdance() == 8, "8 from the member's Heart (the fullest) into the member's Gleaner");
+			helper.assertTrue(parties.leave(member.getUUID()) == PartyManager.Result.OK, "The member leaves the party");
+			helper.assertValueEqual(bathin.think(level, NOON, joined + 20), Status.WORKING, "He goes on with the holder's own");
+			helper.assertTrue(members.verdance() == 22 && membersGleaner.verdance() == 8 && own.verdance() == 2 && nobodys.ley() == 12,
+					"Their Heart and Gleaner refused at once (asked at each change), indexed or not; the holder's poured instead");
+		} finally {
+			parties.adminDisband(keeper.getUUID());
+		}
+		helper.succeed();
+	}
+
+	/** GC-05 (GC-S7): never a Gleaner or a Heart its holder could not change by hand (a claim); unclaimed, he carries. */
+	@GameTest(maxTicks = 20)
+	public void bathinNeverTouchesAClaimedReservoir(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		ServerPlayer keeper = gardenHolder(helper);
+		long now = dayStart(level, 1);
+		PactPerchBlockEntity perch = bathinPact(helper, keeper, new BlockPos(3, 1, 3), now);
+		BathinEntity bathin = bathin(helper, perch);
+		VerdantHeartBlockEntity heart = keptHeart(helper, new BlockPos(0, 1, 0), keeper.getUUID(), 10);
+		GleanerBlockEntity gleaner = keptGleaner(helper, new BlockPos(7, 1, 7), keeper.getUUID(), 0);
+		try (TestClaims claims = TestClaims.open().block(helper.absolutePos(new BlockPos(7, 1, 7)), STRANGER)) {
+			helper.assertValueEqual(bathin.think(level, NOON, now), Status.IDLE, "The holder could not change the claimed Gleaner by hand");
+			helper.assertTrue(heart.verdance() == 10 && gleaner.verdance() == 0, "Neither is touched");
+		}
+		try (TestClaims claims = TestClaims.open().block(helper.absolutePos(new BlockPos(0, 1, 0)), STRANGER)) {
+			helper.assertValueEqual(bathin.think(level, NOON, now + 20), Status.IDLE, "nor take from a claimed Heart");
+			helper.assertTrue(heart.verdance() == 10 && gleaner.verdance() == 0, "unchanged");
+		}
+		helper.assertValueEqual(bathin.think(level, NOON, now + 40), Status.WORKING, "Unclaimed, he carries");
+		helper.assertTrue(heart.verdance() == 2 && gleaner.verdance() == 8, "8 from the Heart into the Gleaner");
+		helper.succeed();
+	}
+
+	/** GC-05: a Heart beside its own pylon is left until answered; he raises it once and works on under the safe answer; answered leave it, he leaves it. */
+	@GameTest(maxTicks = 20)
+	public void bathinLeavesAHeartWithItsOwnPylonUntilAnswered(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		ServerPlayer keeper = gardenHolder(helper);
+		long now = dayStart(level, 1);
+		PactPerchBlockEntity perch = bathinPact(helper, keeper, new BlockPos(3, 1, 3), now);
+		BathinEntity bathin = bathin(helper, perch);
+		VerdantHeartBlockEntity roaded = keptHeart(helper, new BlockPos(0, 1, 0), keeper.getUUID(), 30);
+		LeyPylonBlockEntity road = ownedPylon(helper, new BlockPos(1, 1, 0), keeper.getUUID(), 0);
+		GleanerBlockEntity far = keptGleaner(helper, new BlockPos(7, 1, 7), keeper.getUUID(), 0);
+		helper.assertTrue(roaded.feedsAPylonBeside(level) && perch.accord() == null, "The Heart pours into the pylon beside it; nothing answered");
+		helper.assertValueEqual(bathin.think(level, NOON, now), Status.AWAITING_ANSWER, "He raises his matter and waits for the answer");
+		helper.assertTrue(roaded.verdance() == 30 && far.verdance() == 0 && road.ley() == 0, "and leaves that Heart alone");
+		helper.assertTrue(cued(bathin, "inspect") == 1 && bathin.attending() instanceof BlockPosTracker tracked
+				&& tracked.currentBlockPosition().equals(roaded.getBlockPos()), "He turns to that Heart and considers it");
+		PactService.Complication matter = VerdanceCarrying.SERVICE.complication(level, pactOf(level, perch), perch, now);
+		helper.assertTrue(matter != null && VerdanceCarrying.TWO_ROADS.equals(matter.id()) && roaded.getBlockPos().equals(matter.pos())
+				&& matter.answers().equals(List.of("yield", "claim")) && key(matter.line()).equals(CARRYING_KEY + "matter.two_roads"),
+				"His matter: the Heart with a road, and the two answers: " + matter);
+		helper.assertTrue(new PactService.Note("two_roads", 1).equals(VerdanceCarrying.SERVICE.note(level, bathin, pactOf(level, perch), NOON, now)),
+				"Jade: one Heart waits for the answer");
+		helper.assertValueEqual(bathin.think(level, NOON, now + 20), Status.AWAITING_ANSWER, "Still waiting");
+		helper.assertTrue(cued(bathin, "inspect") == 1, "He raised it once");
+		VerdantHeartBlockEntity plain = keptHeart(helper, new BlockPos(0, 1, 6), keeper.getUUID(), 10);
+		long refreshed = now + GardenReach.REFRESH_TICKS;
+		helper.assertValueEqual(bathin.think(level, NOON, refreshed), Status.AWAITING_ANSWER,
+				"Meanwhile he works under the safe answer, still awaiting it (GC-P47)");
+		helper.assertTrue(plain.verdance() == 2 && far.verdance() == 8 && roaded.verdance() == 30, "from the Heart without a road; the other left");
+		answer(helper, keeper, perch, VerdanceCarrying.YIELD);
+		helper.assertValueEqual(bathin.think(level, NOON, refreshed + 20), Status.WORKING, "Answered leave it, he goes on with the other");
+		helper.assertTrue(plain.verdance() == 0 && far.verdance() == 10 && roaded.verdance() == 30, "Its last 2; the Heart with a road still left");
+		helper.assertValueEqual(bathin.think(level, NOON, refreshed + 40), Status.IDLE, "Answered, he no longer waits; nothing else to carry");
+		helper.assertTrue(roaded.verdance() == 30 && road.ley() == 0
+				&& VerdanceCarrying.SERVICE.complication(level, pactOf(level, perch), perch, refreshed + 40) != null
+				&& keys(VerdanceCarrying.rows(level, pactOf(level, perch), refreshed + 40)).contains(CARRYING_KEY + "row.leaving"),
+				"That Heart is left as answered; the matter stands so the answer can be changed; the page says which he leaves");
+		helper.succeed();
+	}
+
+	/** GC-05: answered "take from it", he takes from a Heart with its own road too, into a far Gleaner or a far pylon, never the one beside it. */
+	@GameTest(maxTicks = 20)
+	public void aClaimAnswerLetsBathinTakeFromIt(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		ServerPlayer keeper = gardenHolder(helper);
+		long now = dayStart(level, 1);
+		PactPerchBlockEntity perch = bathinPact(helper, keeper, new BlockPos(3, 1, 3), now);
+		BathinEntity bathin = bathin(helper, perch);
+		VerdantHeartBlockEntity roaded = keptHeart(helper, new BlockPos(0, 1, 0), keeper.getUUID(), 30);
+		LeyPylonBlockEntity road = ownedPylon(helper, new BlockPos(1, 1, 0), keeper.getUUID(), 0);
+		GleanerBlockEntity far = keptGleaner(helper, new BlockPos(7, 1, 7), keeper.getUUID(), 0);
+		LeyPylonBlockEntity farPylon = ownedPylon(helper, new BlockPos(7, 3, 0), keeper.getUUID(), 0);
+		helper.assertValueEqual(bathin.think(level, NOON, now), Status.AWAITING_ANSWER, "He raises his matter");
+		answer(helper, keeper, perch, VerdanceCarrying.CLAIM);
+		helper.assertValueEqual(bathin.think(level, NOON, now + 20), Status.WORKING, "Answered take from it, he takes from it too");
+		helper.assertTrue(roaded.verdance() == 22 && far.verdance() == 8, "8 into the far Gleaner: " + roaded.verdance() + ", " + far.verdance());
+		helper.assertValueEqual(bathin.think(level, NOON, now + 40), Status.WORKING, "Again");
+		helper.assertTrue(roaded.verdance() == 14 && far.verdance() == 16, "The Gleaner full");
+		helper.assertValueEqual(bathin.think(level, NOON, now + 60), Status.WORKING, "Then a pylon");
+		helper.assertTrue(roaded.verdance() == 5 && farPylon.ley() == 6 && road.ley() == 0,
+				"A far pylon, never the one beside it: that is the Heart's own road");
+		answer(helper, keeper, perch, VerdanceCarrying.YIELD);
+		helper.assertValueEqual(bathin.think(level, NOON, now + 80), Status.IDLE, "Answered leave it again, he leaves it");
+		helper.assertTrue(roaded.verdance() == 5 && new PactService.Note("empty", 0).equals(VerdanceCarrying.SERVICE.note(level, bathin,
+				pactOf(level, perch), NOON, now + 80)), "Answered, Jade says no answer waits: nothing to carry");
+		helper.succeed();
+	}
+
+	/** GC-05: his terms' moves a game day (12) and no more; the next day he goes on. */
+	@GameTest(structure = "jugcraft-test:drone_depot", maxTicks = 20)
+	public void bathinStopsAtHisQuota(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		ServerPlayer keeper = gardenHolder(helper);
+		long now = dayStart(level, 1);
+		PactPerchBlockEntity perch = bathinPact(helper, keeper, new BlockPos(8, 1, 8), now);
+		BathinEntity bathin = bathin(helper, perch);
+		int quota = bathinOffer().quota();
+		helper.assertValueEqual(quota, 12, "His terms: 12 moves a game day (GC-P41)");
+		List<VerdantHeartBlockEntity> hearts = List.of(keptHeart(helper, new BlockPos(1, 1, 1), keeper.getUUID(), 64),
+				keptHeart(helper, new BlockPos(1, 1, 3), keeper.getUUID(), 64));
+		List<GleanerBlockEntity> gleaners = new ArrayList<>();
+		for (int i = 0; i < 7; i++) {
+			gleaners.add(keptGleaner(helper, new BlockPos(7 + i, 1, 13), keeper.getUUID(), 0));
+		}
+		for (int k = 0; k < quota; k++) {
+			helper.assertValueEqual(bathin.think(level, NOON, now + 20L * k), Status.WORKING, "Move " + k + " of his " + quota);
+		}
+		helper.assertValueEqual(bathin.think(level, NOON, now + 20L * quota), Status.FINISHED, "His day's moves spent, he stops");
+		long held = hearts.stream().mapToLong(VerdantHeartBlockEntity::verdance).sum();
+		long set = gleaners.stream().mapToLong(GleanerBlockEntity::verdance).sum();
+		helper.assertTrue(held == 128 - 8L * quota && set == 8L * quota && Pacts.done(pactOf(level, perch).pact(), now) == quota,
+				"12 moves of 8: " + held + " left, " + set + " set down");
+		helper.assertValueEqual(bathin.think(level, NOON, dayStart(level, 2)), Status.WORKING, "The next game day he carries again");
+		helper.succeed();
+	}
+
+	/** GC-05 (GE1, GE2): no stand-in; nothing carried for a holder away, dead, in another level or logged out; back beside the perch, he carries. */
+	@GameTest(maxTicks = 20)
+	public void bathinWaitsForAPresentHolder(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		ServerPlayer keeper = gardenHolder(helper);
+		long now = dayStart(level, 1);
+		BlockPos at = new BlockPos(3, 1, 3);
+		PactPerchBlockEntity perch = bathinPact(helper, keeper, at, now);
+		BathinEntity bathin = bathin(helper, perch);
+		VerdantHeartBlockEntity heart = keptHeart(helper, new BlockPos(0, 1, 0), keeper.getUUID(), 10);
+		GleanerBlockEntity gleaner = keptGleaner(helper, new BlockPos(7, 1, 7), keeper.getUUID(), 0);
+		BlockPos home = helper.absolutePos(at);
+		keeper.snapTo(home.getX() + 100.5, home.getY(), home.getZ() + 0.5, 0.0F, 0.0F);
+		helper.assertValueEqual(bathin.think(level, NOON, now), Status.OWNER_OFFLINE, "100 blocks off in this level: not near");
+		boolean answering = JugcraftConfig.option(Authority.ABSENT_OPTION);
+		JugcraftConfig.setOption(Authority.ABSENT_OPTION, true);
+		try {
+			helper.assertValueEqual(bathin.think(level, NOON, now + 20), Status.OWNER_OFFLINE, "With absent owners' devices allowed, still no stand-in");
+		} finally {
+			JugcraftConfig.setOption(Authority.ABSENT_OPTION, answering);
+		}
+		beside(helper, keeper, at);
+		keeper.setHealth(0.0F);
+		helper.assertValueEqual(bathin.think(level, NOON, now + 40), Status.OWNER_OFFLINE, "Dead beside the perch: not present");
+		keeper.setHealth(keeper.getMaxHealth());
+		ServerLevel nether = level.getServer().getLevel(Level.NETHER);
+		helper.assertTrue(nether != null, "The test server has a Nether");
+		keeper.teleport(new TeleportTransition(nether, new Vec3(0.5, 64.0, 0.5), Vec3.ZERO, 0.0F, 0.0F, TeleportTransition.DO_NOTHING));
+		helper.assertValueEqual(bathin.think(level, NOON, now + 60), Status.OWNER_OFFLINE, "In another level: not present");
+		helper.assertTrue(heart.verdance() == 10 && gleaner.verdance() == 0 && Pacts.done(pactOf(level, perch).pact(), now) == 0,
+				"Nothing was carried or counted meanwhile");
+		keeper.teleport(new TeleportTransition(level, helper.absoluteVec(new Vec3(3.5, 1.0, 5.5)), Vec3.ZERO, 0.0F, 0.0F, TeleportTransition.DO_NOTHING));
+		helper.assertValueEqual(bathin.think(level, NOON, now + 80), Status.WORKING, "Back beside the perch, he carries");
+		helper.assertTrue(heart.verdance() == 2 && gleaner.verdance() == 8, "8 moved");
+		TestPlayers.leave(keeper);
+		helper.assertValueEqual(bathin.think(level, NOON, now + 100), Status.OWNER_OFFLINE, "Logged out: he waits");
+		helper.assertTrue(heart.verdance() == 2 && gleaner.verdance() == 8, "and carries nothing for them");
+		helper.succeed();
+	}
+
+	/** GC-05 (Dossier 2 item 4): suspended by its holder he carries nothing and his page says so by name; resumed, he carries. */
+	@GameTest(maxTicks = 20)
+	public void aSuspendedBathinCarriesNothing(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		ServerPlayer keeper = gardenHolder(helper);
+		long now = dayStart(level, 1);
+		PactPerchBlockEntity perch = bathinPact(helper, keeper, new BlockPos(3, 1, 3), now);
+		BathinEntity bathin = bathin(helper, perch);
+		VerdantHeartBlockEntity heart = keptHeart(helper, new BlockPos(0, 1, 0), keeper.getUUID(), 10);
+		GleanerBlockEntity gleaner = keptGleaner(helper, new BlockPos(7, 1, 7), keeper.getUUID(), 0);
+		helper.assertTrue(PactKeeping.suspend(level, keeper, perch.holder(), now) == AgreementHolder.Toggle.SUSPENDED, "Its holder suspends it");
+		helper.assertValueEqual(bathin.think(level, NOON, now + 20), Status.SUSPENDED, "Suspended, he waits");
+		Component row = VerdanceCarrying.SERVICE.suspendedRow(PactKeeping.name(BathinEntity.COUNTERPART));
+		helper.assertTrue(heart.verdance() == 10 && gleaner.verdance() == 0 && Pacts.done(pactOf(level, perch).pact(), now) == 0
+				&& key(row).equals("message.jugcraft.concordance.pact.row.state.suspended.serves")
+				&& VerdanceCarrying.SERVICE.note(level, bathin, pactOf(level, perch), NOON, now + 20) == null,
+				"Nothing carried or counted; his page says so by name; Jade has no note while the pact does not serve");
+		helper.assertTrue(PactKeeping.resume(level, keeper, perch.holder(), now + 40) == AgreementHolder.Toggle.RESUMED, "Resumed");
+		helper.assertValueEqual(bathin.think(level, NOON, now + 60), Status.WORKING, "He carries again");
+		helper.assertTrue(heart.verdance() == 2 && gleaner.verdance() == 8, "8 moved");
+		helper.succeed();
+	}
+
+	/** GC-05 (GE5; S1 under contention): two holders' Bathins (a party) over one Heart in one tick move what it held, never more; each counts its own. */
+	@GameTest(maxTicks = 20)
+	public void twoBathinsShareOneHeartExactly(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		ServerPlayer first = gardenHolder(helper);
+		ServerPlayer second = gardenHolder(helper);
+		PartyManager parties = JugcraftParties.manager();
+		long ms = System.currentTimeMillis();
+		try {
+			helper.assertTrue(parties.invite(first.getUUID(), second.getUUID(), ms) == PartyManager.Result.OK
+					&& parties.accept(second.getUUID(), ms) == PartyManager.Result.OK, "Two holders in one party");
+			long now = dayStart(level, 1);
+			PactPerchBlockEntity a = bathinPact(helper, first, new BlockPos(2, 1, 2), now);
+			PactPerchBlockEntity b = bathinPact(helper, second, new BlockPos(5, 1, 5), now);
+			BathinEntity one = bathin(helper, a), other = bathin(helper, b);
+			VerdantHeartBlockEntity heart = keptHeart(helper, new BlockPos(0, 1, 0), first.getUUID(), 10);
+			GleanerBlockEntity gleanerA = keptGleaner(helper, new BlockPos(7, 1, 7), first.getUUID(), 0);
+			GleanerBlockEntity gleanerB = keptGleaner(helper, new BlockPos(7, 1, 0), second.getUUID(), 0);
+			helper.assertValueEqual(one.think(level, NOON, now), Status.WORKING, "The first Bathin carries from the party's Heart");
+			helper.assertValueEqual(other.think(level, NOON, now), Status.WORKING, "The second, in the same tick, carries what is left");
+			helper.assertValueEqual(one.think(level, NOON, now + 20), Status.IDLE, "Then the Heart is empty to the first");
+			helper.assertValueEqual(other.think(level, NOON, now + 20), Status.IDLE, "and to the second");
+			helper.assertTrue(heart.verdance() == 0 && gleanerA.verdance() + gleanerB.verdance() == 10
+					&& Pacts.done(pactOf(level, a).pact(), now) == 1 && Pacts.done(pactOf(level, b).pact(), now) == 1,
+					"Two carriers over one Heart moved what it held, never more; each pact counted its own one");
+		} finally {
+			parties.adminDisband(first.getUUID());
+		}
+		helper.succeed();
+	}
+
+	/** GC-05 (GC-P57): he faces where he set the Verdance down while his work gesture plays. */
+	@GameTest(maxTicks = 20)
+	public void bathinFacesWhereHeSetsItDown(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		ServerPlayer keeper = gardenHolder(helper);
+		long now = dayStart(level, 1);
+		PactPerchBlockEntity perch = bathinPact(helper, keeper, new BlockPos(3, 1, 3), now);
+		BathinEntity bathin = bathin(helper, perch);
+		keptHeart(helper, new BlockPos(0, 1, 0), keeper.getUUID(), 10);
+		GleanerBlockEntity far = keptGleaner(helper, new BlockPos(7, 1, 7), keeper.getUUID(), 0);
+		helper.assertValueEqual(bathin.think(level, NOON, now), Status.WORKING, "He carries");
+		helper.assertTrue(bathin.attending() instanceof BlockPosTracker tracked && tracked.currentBlockPosition().equals(far.getBlockPos())
+				&& within(bathin.getYRot(), PactSpiritEntity.bearing(bathin.position(), Vec3.atCenterOf(far.getBlockPos()), 0.0F), 1.0F)
+				&& cued(bathin, "work") == 1, "He faces where he set it down for his work gesture: " + yaws(bathin));
+		helper.succeed();
+	}
+
+	/** GC-05: his first obligation is the holder's own use of an awake device by hand in his area; a waking is not; his own carrying is not. */
+	@GameTest(maxTicks = 20)
+	public void bathinsFirstObligationIsADeviceReadByHand(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		ServerPlayer keeper = gardenHolder(helper);
+		long g0 = level.getGameTime();
+		PactPerchBlockEntity perch = bathinPact(helper, keeper, new BlockPos(3, 1, 3), g0);
+		BathinEntity bathin = bathin(helper, perch);
+		BlockPos heartAt = new BlockPos(0, 1, 0);
+		helper.setBlock(heartAt, Garden.VERDANT_HEART);
+		BlockPos abs = helper.absolutePos(heartAt);
+		Garden.VERDANT_HEART.setPlacedBy(level, abs, level.getBlockState(abs), keeper, new ItemStack(Garden.VERDANT_HEART));
+		VerdantHeartBlockEntity heart = helper.getBlockEntity(heartAt, VerdantHeartBlockEntity.class);
+		helper.assertTrue(heart.awake() && keeper.getUUID().equals(heart.keeper()), "Placed by a Greenwarden, a Heart is awake at once");
+		heart.setVerdance(10);
+		keptGleaner(helper, new BlockPos(7, 1, 7), keeper.getUUID(), 0);
+		helper.assertTrue(VerdanceCarrying.SERVICE.obligation() == PactObligations.Act.DEVICE
+				&& keys(VerdanceCarrying.SERVICE.obligationRows(level, keeper, pactOf(level, perch), g0))
+						.equals(List.of("message.jugcraft.concordance.garden_pact.obligation")), "His page names the act");
+		int heard = GARDEN_SERVED.getOrDefault(keeper.getUUID(), 0);
+		helper.assertValueEqual(bathin.think(level, NOON, g0), Status.WORKING, "He carries");
+		helper.assertTrue(!PactObligations.kept(keeper, BathinEntity.COUNTERPART) && GARDEN_SERVED.getOrDefault(keeper.getUUID(), 0) == heard,
+				"His own carrying keeps nothing of the holder's");
+		BlockPos dormantAt = new BlockPos(6, 1, 0);
+		helper.setBlock(dormantAt, Garden.GLEANER);
+		ConcordanceGardenGameTests.handUse(helper, keeper, dormantAt, ItemStack.EMPTY, false);
+		helper.assertTrue(helper.getBlockEntity(dormantAt, GleanerBlockEntity.class).awake() && !PactObligations.kept(keeper, BathinEntity.COUNTERPART)
+				&& GARDEN_SERVED.getOrDefault(keeper.getUUID(), 0) == heard, "Waking a dormant Gleaner by hand is not his obligation");
+		ConcordanceGardenGameTests.handUse(helper, keeper, heartAt, ItemStack.EMPTY, false);
+		helper.assertTrue(PactObligations.kept(keeper, BathinEntity.COUNTERPART) && GARDEN_SERVED.getOrDefault(keeper.getUUID(), 0) == heard + 1
+				&& keys(VerdanceCarrying.SERVICE.obligationRows(level, keeper, pactOf(level, perch), g0))
+						.equals(List.of("message.jugcraft.concordance.garden_pact.obligation_kept")),
+				"Reading the awake Heart with an empty hand in his area keeps it, once");
+		ConcordanceGardenGameTests.handUse(helper, keeper, dormantAt, ItemStack.EMPTY, false);
+		helper.assertTrue(GARDEN_SERVED.getOrDefault(keeper.getUUID(), 0) == heard + 1, "and it is not recorded again");
+		helper.succeed();
+	}
+
+	/**
+	 * GC-05 (Jade; GC-P48): the readings of his perch and of him: kept, his work, active; the perch's names him. With a Heart
+	 * that has its own road unanswered, both carry his note (two_roads, one Heart) and his matter, no answer yet; none of
+	 * the four readings names a player.
+	 */
+	@GameTest(maxTicks = 20)
+	public void bathinsReadingSaysItsNoteAndNamesNoPlayer(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		ServerPlayer keeper = gardenHolder(helper);
+		long now = dayStart(level, 1);
+		PactPerchBlockEntity perch = bathinPact(helper, keeper, new BlockPos(3, 1, 3), now);
+		BathinEntity bathin = bathin(helper, perch);
+		CompoundTag ofPerch = PactReading.holder(level, perch, now);
+		CompoundTag ofHim = PactReading.presence(level, bathin, now);
+		for (CompoundTag reading : List.of(ofPerch, ofHim)) {
+			helper.assertTrue("kept".equals(reading.getStringOr("standing", "")) && VerdanceCarrying.WORK.equals(reading.getStringOr("service", ""))
+					&& "active".equals(reading.getStringOr("state", "")) && PactReading.KEYS.containsAll(reading.keySet()),
+					"The reading: kept, his work, active: " + reading);
+		}
+		helper.assertTrue(BathinEntity.COUNTERPART.equals(ofPerch.getStringOr("counterpart", "")) && !ofHim.contains("counterpart"),
+				"The perch's reading names him; his own does not repeat it: " + ofPerch + " " + ofHim);
+		keptHeart(helper, new BlockPos(0, 1, 0), keeper.getUUID(), 30);
+		ownedPylon(helper, new BlockPos(1, 1, 0), keeper.getUUID(), 0);
+		keptGleaner(helper, new BlockPos(7, 1, 7), keeper.getUUID(), 0);
+		helper.assertValueEqual(bathin.think(level, NOON, now), Status.AWAITING_ANSWER, "A Heart with its own road waits for the answer");
+		CompoundTag perchAsked = PactReading.holder(level, perch, now);
+		CompoundTag himAsked = PactReading.presence(level, bathin, now);
+		for (CompoundTag reading : List.of(perchAsked, himAsked)) {
+			helper.assertTrue("two_roads".equals(reading.getStringOr("note", "")) && reading.getIntOr("note_count", 0) == 1
+					&& VerdanceCarrying.TWO_ROADS.equals(reading.getStringOr("matter", "")) && !reading.contains("accord")
+					&& PactReading.KEYS.containsAll(reading.keySet()), "His note and his matter, no answer yet: " + reading);
+		}
+		String all = ofPerch + " " + ofHim + " " + perchAsked + " " + himAsked;
+		helper.assertTrue(!all.contains(keeper.getUUID().toString()) && !all.contains(keeper.getName().getString()), "and no player is named: " + all);
+		helper.succeed();
+	}
+
+	/**
+	 * GC-05: no Heart of the inviter's within 10, or nowhere to carry it (a stranger's pylon is nowhere): he does not come and
+	 * nothing is spent; with a Heart and a pylon no one owns, he comes.
+	 */
+	@GameTest(structure = "jugcraft-test:drone_depot", maxTicks = 20)
+	public void bathinRefusesWithNothingToCarry(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		helper.assertTrue(Language.getInstance().has(CARRYING_KEY + "missing"), "the server reads the mod's words (Fabric's language loader)");
+		ServerPlayer keeper = gardenHolder(helper);
+		pocketFor(keeper, bathinOffer(), 1);
+		BlockPos at = new BlockPos(2, 1, 2);
+		PactPerchBlockEntity perch = perch(helper, at, keeper);
+		beside(helper, keeper, at);
+		keptHeart(helper, new BlockPos(4, 2, 4), STRANGER, 0);
+		keptHeart(helper, new BlockPos(13, 2, 2), keeper.getUUID(), 0);
+		helper.setBlock(new BlockPos(3, 2, 6), Garden.VERDANT_HEART);
+		keptGleaner(helper, new BlockPos(2, 1, 9), keeper.getUUID(), 0);
+		PactMenu menu = offerOf(helper, keeper, perch, bathinOffer());
+		PactStatePayload state = menu.lastSent();
+		Component note = state.notes().stream().filter(line -> key(line).equals(CARRYING_KEY + "missing")).findFirst().orElse(null);
+		helper.assertTrue(note != null && Integer.valueOf(10).equals(arg(note, 0)) && Integer.valueOf(10).equals(arg(note, 1)) && perch.visitor() == null,
+				"No Heart of theirs within 10 (a stranger's, a dormant one and one 11 off do not count): he says why and does not come: "
+						+ keys(state.notes()));
+		PactStatePayload refused = send(keeper, menu, PactRequestPayload.ACCEPT, 0);
+		helper.assertTrue(answered(refused, VerdanceCarrying.NOTHING_TO_CARRY) && !refused.result().get().done()
+				&& said(refused).equals(CARRYING_KEY + "missing") && pocketed(keeper, 1, bathinOffer()) && recordOf(level, keeper) == null,
+				"Accepting is refused with his reason; nothing spent, nothing held");
+		helper.assertTrue(refused.result().get().message().getString().startsWith("\"Nothing here to carry, or nowhere to carry it.\""),
+				"His words: " + refused.result().get().message().getString());
+		keeper.closeContainer();
+		helper.setBlock(new BlockPos(2, 1, 9), Blocks.AIR);
+		keptHeart(helper, new BlockPos(3, 2, 6), keeper.getUUID(), 0);
+		RateGate.forget(keeper.getUUID());
+		PactStatePayload nowhere = offerOf(helper, keeper, perch, bathinOffer()).lastSent();
+		helper.assertTrue(keys(nowhere.notes()).contains(CARRYING_KEY + "missing") && perch.visitor() == null,
+				"A Heart of theirs and no Gleaner or pylon: nowhere to carry it, so he does not come: " + keys(nowhere.notes()));
+		keeper.closeContainer();
+		ownedPylon(helper, new BlockPos(6, 1, 2), STRANGER, 0);
+		RateGate.forget(keeper.getUUID());
+		helper.assertTrue(keys(offerOf(helper, keeper, perch, bathinOffer()).lastSent().notes()).contains(CARRYING_KEY + "missing")
+				&& perch.visitor() == null, "A stranger's pylon is nowhere of theirs to carry to: he does not come");
+		keeper.closeContainer();
+		ownedPylon(helper, new BlockPos(6, 1, 2), null, 0);
+		RateGate.forget(keeper.getUUID());
+		PactStatePayload invited = offerOf(helper, keeper, perch, bathinOffer()).lastSent();
+		helper.assertTrue(invited.notes().isEmpty() && invited.offers(PactRequestPayload.ACCEPT)
+				&& perch.visitor() != null && level.getEntity(perch.visitor()) instanceof BathinEntity,
+				"With a Heart of theirs and a Ley Pylon no one owns within 10, and no Gleaner, he comes (Dossier 2 item 2)");
+		helper.succeed();
+	}
+
+	/**
+	 * GC-05: he never travels. Invited, he is at his station in the tick he is summoned, in a ring of dust; sealed and ended,
+	 * he departs where he is, in a second ring, and is gone the moment his departure ends, never having moved. Each ring is
+	 * the shared sign his row names, shown at his foot.
+	 */
+	@GameTest(maxTicks = 20)
+	public void bathinArrivesAndDepartsAtOnceInARingOfDust(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		ServerPlayer keeper = gardenHolder(helper);
+		pocketFor(keeper, bathinOffer(), 1);
+		BlockPos at = new BlockPos(2, 1, 2);
+		FIXTURES.get(BathinEntity.COUNTERPART).meet(helper, keeper, at);
+		PactPerchBlockEntity perch = perch(helper, at, keeper);
+		beside(helper, keeper, at);
+		long now = level.getGameTime();
+		try (SignWatch signs = new SignWatch(helper)) {
+			PactMenu menu = offerOf(helper, keeper, perch, bathinOffer());
+			BathinEntity visitor = perch.visitor() != null && level.getEntity(perch.visitor()) instanceof BathinEntity found ? found : null;
+			Vec3 station = helper.absoluteVec(new Vec3(at.getX() + 0.5, at.getY() + 1.0, at.getZ() + 0.5));
+			helper.assertTrue(visitor != null && visitor.position().equals(station) && visitor.rings() == 1 && visitor.cues().equals(List.of("arrive"))
+					&& signs.of(BathinEntity.RING).size() == 1,
+					"Invited, he is on his perch at once, in a ring of dust: " + (visitor == null ? "none" : visitor.position() + ", rings " + visitor.rings()));
+			helper.assertTrue(answered(send(keeper, menu, PactRequestPayload.ACCEPT, 0), PactMenu.SEALED), "His pact is sealed");
+			BathinEntity presence = bathin(helper, perch);
+			helper.assertTrue(presence == visitor && presence.position().equals(station) && presence.rings() == 1,
+					"The visitor is his pact's presence, where he arrived");
+			helper.assertTrue(answered(send(keeper, menu, PactRequestPayload.END, 0), "ended") && presence.departing() && presence.rings() == 2
+					&& "depart".equals(presence.cues().getLast()) && presence.position().equals(station) && signs.of(BathinEntity.RING).size() == 2,
+					"Ended, he departs where he is, in a ring of dust: " + presence.cues());
+			PactSpiritEntity.sweep(now + BathinEntity.Gesture.DEPART.ticks - 1);
+			helper.assertTrue(!presence.isRemoved() && presence.position().equals(station), "Still there, unmoved, until his departure ends");
+			PactSpiritEntity.sweep(now + BathinEntity.Gesture.DEPART.ticks);
+			helper.assertTrue(presence.isRemoved(), "Then gone at once, with no path");
+		}
+		helper.succeed();
+	}
+
+	/**
+	 * GC-05: one carry, by his own think: the Heart falls and the far Gleaner rises by the same amount in one server step, his
+	 * shimmer names exactly those two reservoirs at that tick (the shared sign of work at each, nothing travelling between),
+	 * his work is heard, and no ring shows.
+	 */
+	@GameTest(maxTicks = 20)
+	public void bathinsCarryShimmersBothEndsAtOnce(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		ServerPlayer keeper = gardenHolder(helper);
+		long now = dayStart(level, 1);
+		PactPerchBlockEntity perch = bathinPact(helper, keeper, new BlockPos(2, 1, 2), now);
+		BathinEntity bathin = bathin(helper, perch);
+		VerdantHeartBlockEntity heart = keptHeart(helper, new BlockPos(1, 2, 1), keeper.getUUID(), 8);
+		GleanerBlockEntity gleaner = keptGleaner(helper, new BlockPos(7, 1, 7), keeper.getUUID(), 0);
+		int rings = bathin.rings();
+		try (SignWatch signs = new SignWatch(helper)) {
+			helper.assertValueEqual(bathin.think(level, NOON, now), Status.WORKING, "He carries");
+			BathinEntity.Shimmer shimmer = bathin.lastShimmer();
+			helper.assertTrue(heart.verdance() == 0 && gleaner.verdance() == 8,
+					"8 left the Heart and 8 reached the Gleaner 6 blocks beyond its reach, at once: " + heart.verdance() + " " + gleaner.verdance());
+			helper.assertTrue(shimmer != null && shimmer.at() == level.getGameTime() && shimmer.from().equals(heart.getBlockPos())
+					&& shimmer.to().equals(gleaner.getBlockPos()), "Both ends shimmered in the tick of the move, and nothing else: " + shimmer);
+			helper.assertTrue(signs.at(BathinEntity.SHIMMER, new BlockPos(1, 2, 1)) == 1 && signs.at(BathinEntity.SHIMMER, new BlockPos(7, 1, 7)) == 1
+					&& signs.of(Sign.FLOW).isEmpty() && signs.of(BathinEntity.RING).isEmpty(),
+					"The shared sign of work at each end, nothing travelling between them: " + signs.all());
+			helper.assertTrue("work".equals(bathin.cues().getLast()) && bathin.rings() == rings, "His work is heard; no ring of dust for a carry");
+		}
+		helper.succeed();
+	}
+
+	/** GC-05: which gesture answers which action, which loop each state shows, every cue's sound registered. */
+	@GameTest(maxTicks = 20)
+	public void bathinAnswersEachActionWithHisGesture(GameTestHelper helper) {
+		helper.assertTrue(BathinEntity.reaction(PactRequestPayload.ACCEPT, PactMenu.SEALED, true) == BathinEntity.Gesture.ASSENT
+				&& BathinEntity.reaction(PactRequestPayload.ACCEPT, VerdanceCarrying.NOTHING_TO_CARRY, false) == BathinEntity.Gesture.REFUSE
+				&& BathinEntity.reaction(PactRequestPayload.DEPOSIT, PactMenu.DEPOSITED, true) == BathinEntity.Gesture.INSPECT
+				&& BathinEntity.reaction(PactRequestPayload.DEPOSIT, PactMenu.NOTHING_DEPOSITED, false) == null
+				&& BathinEntity.reaction(PactRequestPayload.RESUME, "resumed", true) == BathinEntity.Gesture.ASSENT
+				&& BathinEntity.reaction(PactRequestPayload.RESOLVE, "resolved", true) == BathinEntity.Gesture.ASSENT
+				&& BathinEntity.reaction(PactRequestPayload.RESOLVE, "resolved", false) == null
+				&& BathinEntity.reaction(PactRequestPayload.RECALL, "recalled", true) == null
+				&& BathinEntity.reaction(PactRequestPayload.ACCEPT, PactMenu.NOT_OFFERED, false) == null, "His answers");
+		helper.assertTrue(BathinEntity.loop(Status.WORKING, false) == BathinEntity.Loop.IDLE && BathinEntity.loop(Status.IDLE, true) == BathinEntity.Loop.LISTEN
+				&& BathinEntity.loop(Status.OWNER_OFFLINE, false) == BathinEntity.Loop.WAITING
+				&& BathinEntity.loop(Status.UPKEEP_DUE, false) == BathinEntity.Loop.ASTIR && BathinEntity.loop(Status.UPKEEP_HELD, true) == BathinEntity.Loop.LISTEN
+				&& BathinEntity.loop(Status.SUSPENDED, false) == BathinEntity.Loop.SUSPENDED && BathinEntity.loop(Status.DISABLED, true) == BathinEntity.Loop.WAITING
+				&& BathinEntity.loop(Status.FINISHED, true) == BathinEntity.Loop.LISTEN && BathinEntity.loop(Status.FINISHED, false) == BathinEntity.Loop.WAITING
+				&& BathinEntity.loop(Status.AWAITING_ANSWER, false) == BathinEntity.Loop.IDLE, "His loops");
+		for (String cue : BathinEntity.SOUND_IDS) {
+			helper.assertTrue(BuiltInRegistries.SOUND_EVENT.containsKey(Jugcraft.id("bathin." + cue)), "jugcraft:bathin." + cue + " is registered");
+		}
+		helper.succeed();
+	}
+
+	/** GC-05: a second Bathin at the perch, or a copy of his save, is no presence: it leaves at once and carries nothing; his own carries once. */
+	@GameTest(maxTicks = 20)
+	public void aDuplicateBathinCarriesNothing(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		ServerPlayer keeper = gardenHolder(helper);
+		long now = dayStart(level, 1);
+		PactPerchBlockEntity perch = bathinPact(helper, keeper, new BlockPos(2, 1, 2), now);
+		BathinEntity bathin = bathin(helper, perch);
+		VerdantHeartBlockEntity heart = keptHeart(helper, new BlockPos(1, 2, 1), keeper.getUUID(), 8);
+		GleanerBlockEntity gleaner = keptGleaner(helper, new BlockPos(7, 1, 7), keeper.getUUID(), 0);
+		BathinEntity stranger = Workers.BATHIN.create(level, EntitySpawnReason.MOB_SUMMONED);
+		stranger.setOwner(keeper.getUUID());
+		stranger.setPerch(perch.getBlockPos());
+		helper.assertValueEqual(stranger.think(level, NOON, now), Status.FINISHED, "A Bathin not the perch's presence leaves");
+		TagValueOutput saved = TagValueOutput.createWithContext(ProblemReporter.DISCARDING, level.registryAccess());
+		bathin.saveWithoutId(saved);
+		BathinEntity twin = Workers.BATHIN.create(level, EntitySpawnReason.LOAD);
+		twin.load(TagValueInput.create(ProblemReporter.DISCARDING, level.registryAccess(), saved.buildResult()));
+		twin.setUUID(UUID.randomUUID());
+		helper.assertValueEqual(twin.think(level, NOON, now), Status.FINISHED, "A copy of his save, under another id, leaves");
+		helper.assertTrue(heart.verdance() == 8 && gleaner.verdance() == 0 && stranger.lastShimmer() == null && twin.lastShimmer() == null
+				&& Pacts.done(pactOf(level, perch).pact(), now) == 0 && stranger.gone() && twin.gone(),
+				"Neither carried, shimmered or counted anything");
+		helper.assertValueEqual(bathin.think(level, NOON, now), Status.WORKING, "The presence carries, once");
+		helper.assertTrue(heart.verdance() == 0 && gleaner.verdance() == 8, "8 moved, by him alone");
+		helper.succeed();
+	}
+
+	/**
+	 * GC-05 (GC-S11, GC-P46): Bathin raises his matter on the kept page: its line, his two answers (the safe course first,
+	 * none kept), the row saying a choice waits and naming the safe course, second; RESOLVE keeps an answer as the perch's
+	 * accord, marked on the page and said in the row; it can be changed back and given again; answering spends, moves and
+	 * changes nothing else, and the terms' revision does not move.
+	 */
+	@GameTest(maxTicks = 20)
+	public void theKeptPageAsksTheMatterAndKeepsTheAnswer(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		ServerPlayer keeper = gardenHolder(helper);
+		long g0 = level.getGameTime();
+		VerdantHeartBlockEntity heart = heartWithItsOwnRoad(helper, keeper.getUUID(), new BlockPos(5, 2, 5));
+		PactPerchBlockEntity perch = bathinPact(helper, keeper, new BlockPos(1, 1, 1), g0);
+		helper.assertValueEqual(bathin(helper, perch).think(level, NOON, g0), Status.AWAITING_ANSWER, "A choice waits: he says so");
+		helper.assertTrue(heart.verdance() == 16, "Until it is answered he leaves the Heart with its own road alone: nothing is lost while it waits");
+		PactMenu menu = open(helper, keeper, perch);
+		PactStatePayload asked = menu.lastSent();
+		PactStatePayload.Spirit spirit = asked.spirit();
+		helper.assertTrue(asked.mode() == PactStatePayload.KEEP && asked.offers(PactRequestPayload.RESOLVE)
+				&& spirit.work().equals(VerdanceCarrying.WORK) && !spirit.matter().getString().isBlank()
+				&& spirit.answers().stream().map(PactStatePayload.Choice::id).toList().equals(List.of(VerdanceCarrying.YIELD, VerdanceCarrying.CLAIM))
+				&& spirit.answers().stream().allMatch(answer -> answer.amount() == 0 && answer.ready()),
+				"The kept page asks his matter with his two answers, the safe course first, none kept: " + spirit);
+		List<String> notes = keys(asked.notes());
+		helper.assertTrue(notes.get(1).equals(PACT_KEY + "row.matter.awaiting") && notes.getLast().equals(PACT_KEY + "row.end")
+				&& key((Component) arg(asked.notes().get(1), 1)).equals(PACT_KEY + VerdanceCarrying.WORK + ".accord." + VerdanceCarrying.YIELD),
+				"Second, the row says a choice waits and names the safe course; the page is whole (row.end last): " + notes);
+		int revision = asked.revision();
+		int items = carried(keeper);
+		int escrow = escrowed(level, pactOf(level, perch).id());
+		PactStatePayload claimed = send(keeper, menu, PactRequestPayload.RESOLVE, 1);
+		helper.assertTrue(answered(claimed, PactMenu.RESOLVED) && claimed.result().get().done() && VerdanceCarrying.CLAIM.equals(perch.accord())
+				&& said(claimed).equals(PACT_KEY + "answer.resolved"), "RESOLVE keeps take from it as the perch's accord");
+		helper.assertTrue(claimed.spirit().answers().get(0).amount() == 0 && claimed.spirit().answers().get(1).amount() == 1
+				&& keys(claimed.notes()).get(1).equals(PACT_KEY + "row.matter.answered")
+				&& key((Component) arg(claimed.notes().get(1), 1)).equals(PACT_KEY + VerdanceCarrying.WORK + ".accord." + VerdanceCarrying.CLAIM),
+				"The answer kept is marked, and the row says it stands");
+		PactStatePayload yielded = send(keeper, menu, PactRequestPayload.RESOLVE, 0);
+		helper.assertTrue(answered(yielded, PactMenu.RESOLVED) && VerdanceCarrying.YIELD.equals(perch.accord())
+				&& yielded.spirit().answers().get(0).amount() == 1, "It can be changed back at any time");
+		PactStatePayload again = send(keeper, menu, PactRequestPayload.RESOLVE, 0);
+		helper.assertTrue(answered(again, PactMenu.RESOLVED) && again.result().get().done() && VerdanceCarrying.YIELD.equals(perch.accord()),
+				"The same answer again is kept as it was");
+		helper.assertTrue(again.revision() == revision && carried(keeper) == items && escrowed(level, pactOf(level, perch).id()) == escrow
+				&& heart.verdance() == 16, "Answering moves no term, item, offering or Verdance");
+		keeper.closeContainer();
+		helper.succeed();
+	}
+
+	/**
+	 * GC-05 (GB27, GC-P44): while a choice waits and its holder is near, the presence says AWAITING_ANSWER: its roster entry
+	 * keeps that saved status and its row says "awaiting your answer" with the waiting icon; Jade says it with the matter;
+	 * it is a reason shown with a sign of want. With its holder away it says that instead, and back near it asks again (nothing
+	 * was settled for them); once answered it no longer awaits and Jade names the answer. Stolas's pact never awaits one.
+	 */
+	@GameTest(maxTicks = 20)
+	public void theRosterSaysAwaitingYourAnswer(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		ServerPlayer keeper = gardenHolder(helper);
+		long g0 = level.getGameTime();
+		BlockPos at = new BlockPos(1, 1, 1);
+		heartWithItsOwnRoad(helper, keeper.getUUID(), new BlockPos(5, 2, 5));
+		PactPerchBlockEntity perch = bathinPact(helper, keeper, at, g0);
+		BathinEntity bathin = bathin(helper, perch);
+		BoundWill record = pactOf(level, perch);
+		helper.assertValueEqual(bathin.think(level, NOON, g0), Status.AWAITING_ANSWER, "A choice waits");
+		WorkerRoster.Entry entry = WorkerRoster.of(level.getServer()).workers(keeper.getUUID()).get(bathin.getUUID());
+		helper.assertTrue(entry != null && "awaiting_answer".equals(entry.status()) && Status.fromId(entry.status()) == Status.AWAITING_ANSWER,
+				"The roster keeps the saved status awaiting_answer: " + entry);
+		RosterStatePayload.Row row = rowOf(roster(keeper), record.id());
+		helper.assertTrue(row != null && key(row.waiting()).equals("compose.jugcraft.worker.status.awaiting_answer")
+				&& row.icon() == RosterStatePayload.WAITING, "Its row says awaiting your answer, with the waiting icon: " + row);
+		helper.assertTrue(WorkerEntity.sign(Status.AWAITING_ANSWER) == Sign.WANT && !Status.AWAITING_ANSWER.active,
+				"A reason, not an intent, shown with a sign of want");
+		CompoundTag reading = PactReading.holder(level, perch, g0);
+		CompoundTag ofHim = PactReading.presence(level, bathin, g0);
+		helper.assertTrue("awaiting_answer".equals(reading.getStringOr("waiting", "")) && VerdanceCarrying.TWO_ROADS.equals(reading.getStringOr("matter", ""))
+				&& !reading.contains("accord") && VerdanceCarrying.TWO_ROADS.equals(ofHim.getStringOr("matter", ""))
+				&& PactReading.KEYS.containsAll(reading.keySet()) && PactReading.KEYS.containsAll(ofHim.keySet())
+				&& !(reading + " " + ofHim).contains(keeper.getUUID().toString()),
+				"Jade: its presence awaits your answer, the matter, no answer yet, no player named: " + reading + " " + ofHim);
+		place(helper, keeper, 100.5, 1.0, 100.5);
+		helper.assertValueEqual(bathin.think(level, NOON, g0 + 20), Status.OWNER_OFFLINE, "Its holder away, it says that instead (GC-S7)");
+		beside(helper, keeper, at);
+		helper.assertValueEqual(bathin.think(level, NOON, g0 + 40), Status.AWAITING_ANSWER, "Back near, the choice still waits: nothing was settled for them");
+		helper.assertTrue(PactAccords.resolve(level, keeper, perch, VerdanceCarrying.WORK, VerdanceCarrying.CLAIM, g0 + 40), "The holder answers at the perch");
+		Status after = bathin.think(level, NOON, g0 + 60);
+		RosterStatePayload.Row answered = rowOf(roster(keeper), record.id());
+		CompoundTag kept = PactReading.holder(level, perch, g0 + 60);
+		helper.assertTrue(after != Status.AWAITING_ANSWER && answered != null && !key(answered.waiting()).endsWith(".awaiting_answer")
+				&& VerdanceCarrying.CLAIM.equals(kept.getStringOr("accord", "")) && !"awaiting_answer".equals(kept.getStringOr("waiting", "")),
+				"Answered, it no longer awaits; the roster and Jade say so, Jade with the answer: " + after + " " + kept);
+		ServerPlayer reckoner = regarded(helper);
+		PactPerchBlockEntity his = stolasPact(helper, reckoner, new BlockPos(6, 1, 1), g0);
+		helper.assertTrue(stolas(level, his).think(level, NOON, g0) != Status.AWAITING_ANSWER
+				&& PactAccords.matter(level, his, pactOf(level, his), g0) == null, "Stolas raises no matter and never awaits an answer");
+		helper.succeed();
+	}
+
+	/**
+	 * GC-05 (GC-P42; GE3): an answer is the perch's optional key "accord", the stamp still 1, and reads back after a
+	 * restart: the perch reloaded keeps it, its presence keeps to that course and does not ask again. A copy of the perch
+	 * carries the key but reads nothing: no answer, no matter, no RESOLVE (its page is closed); the original keeps its own.
+	 */
+	@GameTest(maxTicks = 20)
+	public void anAnsweredAccordSurvivesARestart(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		ServerPlayer keeper = gardenHolder(helper);
+		long g0 = level.getGameTime();
+		heartWithItsOwnRoad(helper, keeper.getUUID(), new BlockPos(5, 2, 5));
+		PactPerchBlockEntity perch = bathinPact(helper, keeper, new BlockPos(1, 1, 1), g0);
+		PactService carrying = PactServices.get(VerdanceCarrying.WORK);
+		CompoundTag unanswered = perch.saveWithoutMetadata(level.registryAccess());
+		helper.assertTrue(!unanswered.contains("accord") && unanswered.getIntOr(Saved.VERSION, 0) == 1, "Unanswered: no key, version 1: " + unanswered);
+		for (String answer : List.of(VerdanceCarrying.YIELD, VerdanceCarrying.CLAIM)) {
+			helper.assertTrue(PactAccords.resolve(level, keeper, perch, VerdanceCarrying.WORK, answer, g0), "Answered " + answer);
+			CompoundTag saved = perch.saveWithoutMetadata(level.registryAccess());
+			helper.assertTrue(answer.equals(saved.getStringOr("accord", "")) && saved.getIntOr(Saved.VERSION, 0) == 1,
+					"Saved as the perch's optional accord, the stamp still 1: " + saved);
+			PactPerchBlockEntity read = new PactPerchBlockEntity(perch.getBlockPos(), perch.getBlockState());
+			read.loadWithComponents(TagValueInput.create(ProblemReporter.DISCARDING, level.registryAccess(), saved));
+			helper.assertTrue(answer.equals(read.accord()), "and read back: " + read.accord());
+			perch.loadWithComponents(TagValueInput.create(ProblemReporter.DISCARDING, level.registryAccess(), saved));
+			helper.assertTrue(answer.equals(PactAccords.answer(level, perch)) && answer.equals(PactAccords.course(level, perch, carrying))
+					&& bathin(helper, perch).think(level, NOON, g0) != Status.AWAITING_ANSWER, "After the restart it keeps to " + answer + " and does not ask again");
+		}
+		BlockPos copyAt = new BlockPos(3, 1, 1);
+		PactPerchBlockEntity copy = perch(helper, copyAt, keeper);
+		copy.loadWithComponents(TagValueInput.create(ProblemReporter.DISCARDING, level.registryAccess(), perch.saveWithoutMetadata(level.registryAccess())));
+		CompoundTag copied = PactReading.holder(level, copy, g0);
+		helper.assertTrue(VerdanceCarrying.CLAIM.equals(copy.accord()) && PactAccords.answer(level, copy) == null && VerdanceCarrying.YIELD.equals(PactAccords.course(level, copy, carrying))
+				&& "copy".equals(copied.getStringOr("standing", "")) && !copied.contains("accord") && !copied.contains("matter"),
+				"A copy carries the key but reads nothing (GE3): " + copied);
+		beside(helper, keeper, copyAt);
+		PactMenu atCopy = open(helper, keeper, copy);
+		helper.assertTrue(atCopy.lastSent().mode() == PactStatePayload.CLOSED && atCopy.lastSent().spirit().answers().isEmpty()
+				&& answered(send(keeper, atCopy, PactRequestPayload.RESOLVE, 0), PactMenu.NOT_OFFERED)
+				&& VerdanceCarrying.CLAIM.equals(PactAccords.answer(level, perch)), "No answer is given at a copy; the original keeps its own");
+		keeper.closeContainer();
+		helper.succeed();
+	}
+
+	/**
+	 * GC-05 (GC-P42): an accord this version does not know (a word no service has, or another service's) reads as
+	 * unanswered: the matter is asked again and the safe course kept, the unknown value saved back as written until the
+	 * holder answers; one longer than 16 characters, or at a perch keeping no pact, is not read at all.
+	 */
+	@GameTest(maxTicks = 20)
+	public void anUnknownAccordReadsAsUnanswered(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		ServerPlayer keeper = gardenHolder(helper);
+		long g0 = level.getGameTime();
+		VerdantHeartBlockEntity heart = heartWithItsOwnRoad(helper, keeper.getUUID(), new BlockPos(5, 2, 5));
+		PactPerchBlockEntity perch = bathinPact(helper, keeper, new BlockPos(1, 1, 1), g0);
+		PactService carrying = PactServices.get(VerdanceCarrying.WORK);
+		for (String unknown : List.of("sideways", "prudent")) {
+			CompoundTag saved = perch.saveWithoutMetadata(level.registryAccess());
+			saved.putString("accord", unknown);
+			perch.loadWithComponents(TagValueInput.create(ProblemReporter.DISCARDING, level.registryAccess(), saved));
+			helper.assertTrue(unknown.equals(perch.accord()) && PactAccords.answer(level, perch) == null
+					&& VerdanceCarrying.YIELD.equals(PactAccords.course(level, perch, carrying)), "Kept as written, read as unanswered: " + unknown);
+			helper.assertValueEqual(bathin(helper, perch).think(level, NOON, g0), Status.AWAITING_ANSWER, "so the matter is asked again (" + unknown + ")");
+			helper.assertTrue(heart.verdance() == 16 && unknown.equals(perch.saveWithoutMetadata(level.registryAccess()).getStringOr("accord", "")),
+					"the safe course kept, and the value saved back as it was, for the build that wrote it");
+		}
+		PactMenu menu = open(helper, keeper, perch);
+		PactStatePayload asked = menu.lastSent();
+		helper.assertTrue(asked.spirit().answers().stream().allMatch(answer -> answer.amount() == 0)
+				&& keys(asked.notes()).get(1).equals(PACT_KEY + "row.matter.awaiting"), "Its page asks, none marked");
+		helper.assertTrue(answered(send(keeper, menu, PactRequestPayload.RESOLVE, 0), PactMenu.RESOLVED) && VerdanceCarrying.YIELD.equals(perch.accord())
+				&& VerdanceCarrying.YIELD.equals(perch.saveWithoutMetadata(level.registryAccess()).getStringOr("accord", "")), "An answer replaces it");
+		keeper.closeContainer();
+		CompoundTag tooLong = perch.saveWithoutMetadata(level.registryAccess());
+		tooLong.putString("accord", "x".repeat(PactAccords.MAX_ACCORD + 1));
+		perch.loadWithComponents(TagValueInput.create(ProblemReporter.DISCARDING, level.registryAccess(), tooLong));
+		helper.assertTrue(perch.accord() == null && !perch.saveWithoutMetadata(level.registryAccess()).contains("accord"),
+				"Longer than 16 characters, it is not read and not written back");
+		PactPerchBlockEntity empty = perch(helper, new BlockPos(3, 1, 1), keeper);
+		CompoundTag stray = empty.saveWithoutMetadata(level.registryAccess());
+		stray.putString("accord", VerdanceCarrying.CLAIM);
+		empty.loadWithComponents(TagValueInput.create(ProblemReporter.DISCARDING, level.registryAccess(), stray));
+		helper.assertTrue(empty.accord() == null && !empty.saveWithoutMetadata(level.registryAccess()).contains("accord"),
+				"At a perch keeping no pact, an accord is not read");
+		helper.succeed();
+	}
+
+	/**
+	 * GC-05 (GE1): only the holder answers, in person. Another player at the perch reads it closed, sees no answers, and
+	 * their RESOLVE is not offered; a party member who shares the pact's service is refused alike; a stand-in carrying the
+	 * holder's identity is never heard; an answer for another work's page, or one Bathin does not know, is refused; nothing
+	 * is written until the holder answers.
+	 */
+	@GameTest(maxTicks = 20)
+	public void aResolveFromAnotherPlayerIsRefused(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		ServerPlayer keeper = gardenHolder(helper);
+		ServerPlayer stranger = gardenHolder(helper);
+		ServerPlayer friend = gardenHolder(helper);
+		long g0 = level.getGameTime();
+		BlockPos at = new BlockPos(1, 1, 1);
+		heartWithItsOwnRoad(helper, keeper.getUUID(), new BlockPos(5, 2, 5));
+		PactPerchBlockEntity perch = bathinPact(helper, keeper, at, g0);
+		PartyManager parties = JugcraftParties.manager();
+		long ms = System.currentTimeMillis();
+		try {
+			helper.assertTrue(parties.invite(keeper.getUUID(), friend.getUUID(), ms) == PartyManager.Result.OK
+					&& parties.accept(friend.getUUID(), ms) == PartyManager.Result.OK, "The holder and a friend form a party");
+			for (ServerPlayer other : List.of(stranger, friend)) {
+				beside(helper, other, at);
+				PactMenu menu = open(helper, other, perch);
+				PactStatePayload shown = menu.lastSent();
+				helper.assertTrue(shown.mode() == PactStatePayload.CLOSED && shown.spirit().answers().isEmpty() && !shown.offers(PactRequestPayload.RESOLVE),
+						"Another player reads the perch closed, with no answers");
+				PactStatePayload sent = send(other, menu, PactRequestPayload.RESOLVE, 1);
+				helper.assertTrue(answered(sent, PactMenu.NOT_OFFERED) && !sent.result().get().done() && perch.accord() == null,
+						"Their RESOLVE is not offered and writes nothing");
+				helper.assertTrue(!PactAccords.resolve(level, other, perch, VerdanceCarrying.WORK, VerdanceCarrying.CLAIM, g0) && perch.accord() == null,
+						"nor does the accord take their answer directly");
+				other.closeContainer();
+			}
+			FakePlayer standIn = FakePlayer.get(level, new GameProfile(keeper.getUUID(), "[Concordance]"));
+			helper.assertTrue(!PactAccords.resolve(level, standIn, perch, VerdanceCarrying.WORK, VerdanceCarrying.CLAIM, g0)
+					&& PactMenu.receive(standIn, new PactRequestPayload(0, 1, PactRequestPayload.RESOLVE, 1, 1)) == null && perch.accord() == null,
+					"A stand-in with the holder's identity never answers, nor is it heard");
+			helper.assertTrue(!PactAccords.resolve(level, keeper, perch, StrainTending.WORK, VerdanceCarrying.CLAIM, g0)
+					&& !PactAccords.resolve(level, keeper, perch, VerdanceCarrying.WORK, "sideways", g0) && perch.accord() == null,
+					"An answer for another work's page, or one Bathin does not know, is refused");
+			helper.assertValueEqual(bathin(helper, perch).think(level, NOON, g0), Status.AWAITING_ANSWER, "So the choice still waits on its holder");
+			helper.assertTrue(PactAccords.resolve(level, keeper, perch, VerdanceCarrying.WORK, VerdanceCarrying.CLAIM, g0) && VerdanceCarrying.CLAIM.equals(perch.accord()),
+					"The holder, in person, answers");
+		} finally {
+			parties.adminDisband(keeper.getUUID());
+		}
+		helper.succeed();
+	}
+
+	/**
+	 * GC-05 (GC-P43): RESOLVE is taken only on the kept page that sent answers. On a negotiation, the chooser, the kept page
+	 * of a pact whose service raises no choice (Stolas's) and a seat page no answers are sent, RESOLVE is not offered, and
+	 * it is answered not offered and writes nothing (the closed page is aResolveFromAnotherPlayerIsRefused's). On Bathin's
+	 * kept page an index past the two answers sent is not offered; one past the screen's bound is dropped before anything.
+	 */
+	@GameTest(maxTicks = 20)
+	public void aResolveOutsideTheKeepModeIsDropped(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		long g0 = level.getGameTime();
+		ServerPlayer novice = ready(level, TestPlayers.survivor(helper));
+		PactPerchBlockEntity first = perch(helper, new BlockPos(1, 1, 1), novice);
+		beside(helper, novice, new BlockPos(1, 1, 1));
+		PactMenu negotiating = open(helper, novice, first);
+		ServerPlayer chooser = ready(level, gardenHolder(helper));
+		PactPerchBlockEntity second = perch(helper, new BlockPos(3, 1, 1), chooser);
+		beside(helper, chooser, new BlockPos(3, 1, 1));
+		PactMenu choosing = open(helper, chooser, second);
+		ServerPlayer reckoner = ready(level, TestPlayers.survivor(helper));
+		PactPerchBlockEntity his = stolasPact(helper, reckoner, new BlockPos(5, 1, 1), g0);
+		PactMenu keepingStolas = open(helper, reckoner, his);
+		ServerPlayer keeper = gardenHolder(helper);
+		heartWithItsOwnRoad(helper, keeper.getUUID(), new BlockPos(5, 2, 5));
+		bathinPact(helper, keeper, new BlockPos(1, 1, 6), g0);
+		helper.setBlock(new BlockPos(1, 1, 6), Blocks.AIR);
+		PactPerchBlockEntity seat = perch(helper, new BlockPos(3, 1, 6), keeper);
+		beside(helper, keeper, new BlockPos(3, 1, 6));
+		PactMenu seating = open(helper, keeper, seat);
+		record Shown(String name, ServerPlayer player, PactMenu menu, int mode) {
+		}
+		for (Shown page : List.of(new Shown("negotiate", novice, negotiating, PactStatePayload.NEGOTIATE),
+				new Shown("invite", chooser, choosing, PactStatePayload.INVITE),
+				new Shown("keep without a choice", reckoner, keepingStolas, PactStatePayload.KEEP),
+				new Shown("seat", keeper, seating, PactStatePayload.SEAT))) {
+			PactStatePayload before = page.menu().lastSent();
+			helper.assertTrue(before.mode() == page.mode() && before.spirit().answers().isEmpty() && !before.offers(PactRequestPayload.RESOLVE),
+					page.name() + ": no answers are sent and RESOLVE is not offered");
+			PactStatePayload sent = send(page.player(), page.menu(), PactRequestPayload.RESOLVE, 0);
+			helper.assertTrue(answered(sent, PactMenu.NOT_OFFERED) && !sent.result().get().done() && sent.mode() == page.mode(),
+					page.name() + ": RESOLVE is answered not offered and the page stays");
+		}
+		helper.assertTrue(first.accord() == null && second.accord() == null && his.accord() == null && seat.accord() == null,
+				"Nothing was written anywhere");
+		helper.assertTrue(answered(send(keeper, seating, PactRequestPayload.SEAT, 0), AgreementHolder.Seat.SEATED.id), "Seated at the new perch");
+		bathin(helper, seat).think(level, NOON, g0);
+		PactStatePayload kept = send(keeper, seating, PactRequestPayload.CHOOSE, 0);
+		helper.assertTrue(kept.mode() == PactStatePayload.KEEP && kept.spirit().answers().size() == 2 && kept.offers(PactRequestPayload.RESOLVE),
+				"His kept page now sends two answers");
+		helper.assertTrue(answered(send(keeper, seating, PactRequestPayload.RESOLVE, 2), PactMenu.NOT_OFFERED) && seat.accord() == null,
+				"Past the two answers sent: not offered");
+		helper.assertTrue(request(keeper, seating.containerId, seating.lastSequence() + 1, PactRequestPayload.RESOLVE, PactStatePayload.MAX_CHOICES,
+				seating.lastSent().revision()) == null && seat.accord() == null, "Past the screen's bound: dropped before anything");
+		for (ServerPlayer player : List.of(novice, chooser, reckoner, keeper)) {
+			player.closeContainer();
+		}
+		helper.succeed();
+	}
+
+	/**
+	 * GC-05 (GC-P42, GC-P46): an answer belongs to the pact kept at its perch. Ended there, ended from the roster, or left
+	 * without its perch, it is gone (neither read nor saved); a pact sealed again at that perch, or seated at another,
+	 * starts unanswered and asks again.
+	 */
+	@GameTest(maxTicks = 20)
+	public void anAccordIsClearedWhenItsPactEnds(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		ServerPlayer keeper = gardenHolder(helper);
+		long g0 = level.getGameTime();
+		BlockPos at = new BlockPos(1, 1, 1);
+		heartWithItsOwnRoad(helper, keeper.getUUID(), new BlockPos(5, 2, 5));
+		PactPerchBlockEntity perch = bathinPact(helper, keeper, at, g0);
+		bathin(helper, perch).think(level, NOON, g0);
+		PactMenu menu = open(helper, keeper, perch);
+		helper.assertTrue(answered(send(keeper, menu, PactRequestPayload.RESOLVE, 1), PactMenu.RESOLVED) && VerdanceCarrying.CLAIM.equals(perch.accord()), "Answered: take from it");
+		helper.assertTrue(answered(send(keeper, menu, PactRequestPayload.END, 0), AgreementHolder.Ended.ENDED.name().toLowerCase(Locale.ROOT))
+				&& perch.accord() == null && !perch.saveWithoutMetadata(level.registryAccess()).contains("accord"), "Ended at the perch: the answer is gone");
+		keeper.closeContainer();
+		helper.assertValueEqual(perch.holder().seal(level, keeper, PactPerchBlockEntity.sealing(bathinOffer(), null, null), g0).outcome(),
+				Pacts.Outcome.DONE, "Sealed again at the same perch");
+		helper.assertTrue(perch.accord() == null && PactAccords.answer(level, perch) == null
+				&& bathin(helper, perch).think(level, NOON, g0) == Status.AWAITING_ANSWER, "A new pact starts unanswered and asks again");
+		helper.assertTrue(PactAccords.resolve(level, keeper, perch, VerdanceCarrying.WORK, VerdanceCarrying.CLAIM, g0), "Answered again");
+		UUID id = pactOf(level, perch).id();
+		helper.assertTrue(answered(act(keeper, rowOf(roster(keeper), id), RosterRequestPayload.END), "ended") && perch.accord() == null
+				&& !perch.saveWithoutMetadata(level.registryAccess()).contains("accord"), "Ended from the roster, its perch loaded: the answer is gone");
+		helper.assertValueEqual(perch.holder().seal(level, keeper, PactPerchBlockEntity.sealing(bathinOffer(), null, null), g0).outcome(),
+				Pacts.Outcome.DONE, "Sealed a third time");
+		helper.assertTrue(PactAccords.resolve(level, keeper, perch, VerdanceCarrying.WORK, VerdanceCarrying.CLAIM, g0), "Answered a third time");
+		helper.setBlock(at, Blocks.AIR);
+		BlockPos movedAt = new BlockPos(1, 1, 6);
+		PactPerchBlockEntity moved = perch(helper, movedAt, keeper);
+		beside(helper, keeper, movedAt);
+		PactMenu seating = open(helper, keeper, moved);
+		helper.assertTrue(answered(send(keeper, seating, PactRequestPayload.SEAT, 0), AgreementHolder.Seat.SEATED.id) && moved.accord() == null
+				&& bathin(helper, moved).think(level, NOON, g0) == Status.AWAITING_ANSWER, "Left without its perch and seated at another, it starts unanswered");
+		keeper.closeContainer();
+		helper.succeed();
+	}
+
+	/**
+	 * GC-05 (GC-P43, GC-P44): the wire's additions. RESOLVE is action 10, appended; a state's spirit carries its matter and
+	 * at most three answers, cut before sending and read back whole; the two-part spirit has neither; every service's
+	 * answers are at most three short saved words, Bathin's the safe course first; AWAITING_ANSWER is appended, a reason.
+	 */
+	@GameTest(maxTicks = 20)
+	public void theAccordWireIsBounded(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		helper.assertTrue(PactRequestPayload.RESOLVE == 10 && PactRequestPayload.ACTIONS.get(10).equals("resolve")
+				&& PactRequestPayload.ACTIONS.size() == 11 && PactStatePayload.MAX_ANSWERS == 3, "RESOLVE appended as 10; three answers at most");
+		List<PactStatePayload.Choice> four = List.of(VerdanceCarrying.YIELD, VerdanceCarrying.CLAIM, "third", "fourth").stream()
+				.map(id -> new PactStatePayload.Choice(id, Component.literal(id), 0, true)).toList();
+		PactStatePayload.Spirit spirit = new PactStatePayload.Spirit(BathinEntity.SIGN, VerdanceCarrying.WORK,
+				Component.translatable(PACT_KEY + VerdanceCarrying.WORK + ".question"), four);
+		PactStatePayload.Spirit plain = new PactStatePayload.Spirit("jugcraft:a", "b");
+		helper.assertTrue(spirit.answers().size() == 3 && plain.matter().getString().isEmpty() && plain.answers().isEmpty(),
+				"Cut to three; the two-part spirit has no matter and no answers");
+		PactStatePayload state = new PactStatePayload(1, 1, PactStatePayload.KEEP, Component.empty(), List.of(), List.of(), List.of(), List.of(),
+				List.of(), List.of(), 0, PactStatePayload.mask(PactRequestPayload.RESOLVE), Optional.empty(), spirit);
+		RegistryFriendlyByteBuf buffer = new RegistryFriendlyByteBuf(Unpooled.buffer(), level.registryAccess());
+		PactStatePayload.CODEC.encode(buffer, state);
+		PactStatePayload back = PactStatePayload.CODEC.decode(buffer);
+		helper.assertTrue(back.spirit().equals(spirit) && buffer.readableBytes() == 0 && back.offers(PactRequestPayload.RESOLVE),
+				"Read back whole: " + back.spirit());
+		for (PactService service : PactServices.all()) {
+			List<String> accords = service.accords();
+			helper.assertTrue(accords.size() <= PactStatePayload.MAX_ANSWERS && accords.stream().distinct().count() == accords.size()
+					&& accords.stream().allMatch(value -> value.matches("[a-z_]{1," + PactAccords.MAX_ACCORD + "}")),
+					service.work() + "'s answers are at most three short saved words: " + accords);
+		}
+		helper.assertTrue(PactServices.get(VerdanceCarrying.WORK).accords().equals(List.of(VerdanceCarrying.YIELD, VerdanceCarrying.CLAIM))
+				&& PactServices.get(StarReckoning.WORK).accords().isEmpty() && PactServices.get(StrainTending.WORK).accords().isEmpty(),
+				"Bathin's: leave it, then take from it; Star-reckoning and strain tending raise no choice");
+		Status[] statuses = Status.values();
+		helper.assertTrue(statuses[statuses.length - 1] == Status.AWAITING_ANSWER && Status.fromId("awaiting_answer") == Status.AWAITING_ANSWER
+				&& !Status.AWAITING_ANSWER.active, "awaiting_answer is appended, a reason, read back from its id");
 		helper.succeed();
 	}
 }

@@ -49,7 +49,8 @@ import net.minecraft.world.level.material.PushReaction;
  * loaded or not, without loading anything. Since Concordance Chunk D (D-08) a second spirit, the Workshop Hand, is sealed
  * at a Spirit Anchor bound to its holder's Courier Post and carries that post's requests. Concordance Chunk D adds Stolas,
  * the pact perch and its screen. The garden cohort adds Buer (GC-04), whose strain tending eases a strain from his holder's
- * beds by daylight.
+ * beds by daylight, and Bathin (GC-05), who moves Verdance at once from his holder's Hearts to a far Gleaner or a pylon away
+ * from them.
  */
 public final class Workers {
 	public static final String RESEARCH = "jugcraft:binding_arts";
@@ -74,6 +75,8 @@ public final class Workers {
 	public static EntityType<StolasEntity> STOLAS;
 	/** Concordance garden cohort, GC-04 (Dossier 1): Buer, rooted on his perch (strain tending). */
 	public static EntityType<BuerEntity> BUER;
+	/** Concordance garden cohort, GC-05 (Dossier 2): Bathin, coiled on his perch (Verdance carrying). */
+	public static EntityType<BathinEntity> BATHIN;
 	public static Block PACT_PERCH;
 	public static BlockEntityType<PactPerchBlockEntity> PERCH_ENTITY;
 	public static Item PACT_PERCH_ITEM;
@@ -121,6 +124,11 @@ public final class Workers {
 				.fireImmune().clientTrackingRange(8));
 		FabricDefaultAttributeRegistry.register(BUER, BuerEntity.createAttributes());
 		PactSpirits.register(BuerEntity.COUNTERPART, BUER, BuerEntity.SIGN);
+		// Concordance garden cohort, GC-05: Bathin, MISC as every worker is (a transport crate refuses him), coiled on his perch.
+		BATHIN = entity("bathin", EntityType.Builder.<BathinEntity>of(BathinEntity::new, MobCategory.MISC).sized(0.9F, 1.9F).eyeHeight(1.65F)
+				.fireImmune().clientTrackingRange(8));
+		FabricDefaultAttributeRegistry.register(BATHIN, BathinEntity.createAttributes());
+		PactSpirits.register(BathinEntity.COUNTERPART, BATHIN, BathinEntity.SIGN);
 		ResourceKey<Block> perchKey = ResourceKey.create(Registries.BLOCK, Jugcraft.id("pact_perch"));
 		PACT_PERCH = Registry.register(BuiltInRegistries.BLOCK, perchKey, new PactPerchBlock(BlockBehaviour.Properties.of()
 				.mapColor(MapColor.WOOD).strength(1.5F, 3.0F).sound(SoundType.WOOD).noOcclusion().pushReaction(PushReaction.IMMOVEABLE).setId(perchKey)));
@@ -131,12 +139,16 @@ public final class Workers {
 		// GC-01 (SG1): one service a work, every work the parser accepts served, before any menu can ask.
 		PactServices.register(StarReckoning.SERVICE);
 		PactServices.register(StrainTending.SERVICE);
+		// GC-05: Bathin's Verdance carrying.
+		PactServices.register(VerdanceCarrying.SERVICE);
 		PactServices.verify();
 		PactMenu.register();
 		// Concordance Chunk D, D-06: Stolas's cues (jugcraft:stolas.*; sounds.json and subtitles are the generator's).
 		StolasEntity.registerSounds();
 		// GC-04: Buer's cues (jugcraft:buer.*).
 		BuerEntity.registerSounds();
+		// GC-05: Bathin's cues (jugcraft:bathin.*).
+		BathinEntity.registerSounds();
 		// The unit review: every pact spirit's departure ends on time, its chunk ticking it or not (one sweep, GC-01).
 		PactSpiritEntity.registerSweep();
 		CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess, environment) -> command(dispatcher));

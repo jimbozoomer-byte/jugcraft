@@ -78,4 +78,19 @@ public final class GardenPacts {
 		}
 		return Authority.mayChange(level, holder, pos) ? null : Status.BLOCKED_BY_ACCESS;
 	}
+
+	/**
+	 * GC-05: the presence of {@code type} kept at {@code record}'s perch (in {@code level}, its perch loaded), bound to its
+	 * holder and not leaving; null otherwise (a visitor, another spirit, a copied perch's view, another level). Reads only. A
+	 * service's rows and notes find their spirit's memory through it.
+	 */
+	public static <T extends PactSpiritEntity<T>> @Nullable T presence(ServerLevel level, BoundWill record, Class<T> type) {
+		BoundWill.Pact pact = record.pact();
+		if (pact == null || pact.place() == null || !pact.place().dimension().equals(level.dimension().identifier().toString())) {
+			return null;
+		}
+		BlockPos at = Couriers.pos(pact.place());
+		PactSpiritEntity<?> found = level.isLoaded(at) && level.getBlockEntity(at) instanceof PactPerchBlockEntity perch ? perch.presence(level) : null;
+		return type.isInstance(found) && found.owner() != null ? type.cast(found) : null;
+	}
 }

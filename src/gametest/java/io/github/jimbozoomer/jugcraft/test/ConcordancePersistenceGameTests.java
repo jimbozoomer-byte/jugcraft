@@ -39,9 +39,11 @@ import io.github.jimbozoomer.jugcraft.concordance.sky.AstralClaims;
 import io.github.jimbozoomer.jugcraft.concordance.sky.AstrolabeItem;
 import io.github.jimbozoomer.jugcraft.concordance.spire.SpireRecord;
 import io.github.jimbozoomer.jugcraft.concordance.spirits.AgreementHolder;
+import io.github.jimbozoomer.jugcraft.concordance.spirits.BathinEntity;
 import io.github.jimbozoomer.jugcraft.concordance.spirits.BoundWills;
 import io.github.jimbozoomer.jugcraft.concordance.spirits.GardenReach;
 import io.github.jimbozoomer.jugcraft.concordance.spirits.GatheringShadeEntity;
+import io.github.jimbozoomer.jugcraft.concordance.spirits.PactAccords;
 import io.github.jimbozoomer.jugcraft.concordance.spirits.PactHistory;
 import io.github.jimbozoomer.jugcraft.concordance.spirits.PactKeeping;
 import io.github.jimbozoomer.jugcraft.concordance.spirits.PactPerchBlockEntity;
@@ -49,6 +51,7 @@ import io.github.jimbozoomer.jugcraft.concordance.spirits.SpiritAnchorBlock;
 import io.github.jimbozoomer.jugcraft.concordance.spirits.SpiritAnchorBlockEntity;
 import io.github.jimbozoomer.jugcraft.concordance.spirits.StarReckoning;
 import io.github.jimbozoomer.jugcraft.concordance.spirits.StolasEntity;
+import io.github.jimbozoomer.jugcraft.concordance.spirits.VerdanceCarrying;
 import io.github.jimbozoomer.jugcraft.concordance.spirits.WorkerRoster;
 import io.github.jimbozoomer.jugcraft.concordance.spirits.Workers;
 import io.github.jimbozoomer.jugcraft.concordance.spirits.WorkshopHandEntity;
@@ -1047,5 +1050,36 @@ public class ConcordancePersistenceGameTests {
 	private static @Nullable BoundWills reread(DynamicOps<JsonElement> ops, BoundWills wills) {
 		JsonElement written = BoundWills.CODEC.encodeStart(ops, wills).result().orElse(null);
 		return written == null ? null : BoundWills.CODEC.parse(ops, written).result().orElse(null);
+	}
+
+	/**
+	 * Concordance garden cohort, GC-05 (GC-P44): the roster's new saved status, awaiting_answer, reads back from the
+	 * roster's save and from its presence's own; answered, the perch reloaded, the presence no longer awaits.
+	 */
+	@GameTest(maxTicks = 20)
+	public void anAwaitingAnswerSurvivesARestart(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		MinecraftServer server = level.getServer();
+		ServerPlayer keeper = ConcordanceWorkerGameTests.gardenHolder(helper);
+		long g0 = level.getGameTime();
+		ConcordanceWorkerGameTests.heartWithItsOwnRoad(helper, keeper.getUUID(), new BlockPos(5, 2, 5));
+		PactPerchBlockEntity perch = ConcordanceWorkerGameTests.bathinPact(helper, keeper, new BlockPos(1, 1, 1), g0);
+		BathinEntity bathin = ConcordanceWorkerGameTests.bathin(helper, perch);
+		helper.assertValueEqual(bathin.think(level, 6000L, g0), Status.AWAITING_ANSWER, "A choice waits");
+		DynamicOps<JsonElement> ops = level.registryAccess().createSerializationContext(JsonOps.INSTANCE);
+		JsonElement written = WorkerRoster.CODEC.encodeStart(ops, WorkerRoster.of(server)).result().orElseThrow();
+		WorkerRoster read = WorkerRoster.CODEC.parse(ops, written).result().orElseThrow();
+		WorkerRoster.Entry entry = read.workers(keeper.getUUID()).get(bathin.getUUID());
+		helper.assertTrue(entry != null && "awaiting_answer".equals(entry.status()) && Status.fromId(entry.status()) == Status.AWAITING_ANSWER,
+				"The roster's save keeps awaiting_answer: " + entry);
+		TagValueOutput out = TagValueOutput.createWithContext(ProblemReporter.DISCARDING, level.registryAccess());
+		bathin.saveWithoutId(out);
+		BathinEntity copy = Workers.BATHIN.create(level, EntitySpawnReason.LOAD);
+		copy.load(TagValueInput.create(ProblemReporter.DISCARDING, level.registryAccess(), out.buildResult()));
+		helper.assertTrue(copy.status() == Status.AWAITING_ANSWER, "and so does its presence's own save");
+		helper.assertTrue(PactAccords.resolve(level, keeper, perch, VerdanceCarrying.WORK, VerdanceCarrying.CLAIM, g0), "Answered");
+		perch.loadWithComponents(TagValueInput.create(ProblemReporter.DISCARDING, level.registryAccess(), perch.saveWithoutMetadata(level.registryAccess())));
+		helper.assertTrue(bathin.think(level, 6000L, g0 + 20) != Status.AWAITING_ANSWER, "After the restart, answered, it no longer awaits");
+		helper.succeed();
 	}
 }

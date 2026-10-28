@@ -666,8 +666,9 @@ public class ConcordanceJourneyGameTests {
 	 */
 	private static final List<String> PACT_HALL_RECIPES = List.of("verdant_bed", "sunpetal", "assayers_scale", "observatory", "astrolabe",
 			"pact_perch", "spirit_anchor", "courier_post", "porter_key");
-	/** The garden cohort, GC-03: the recipes of tools/acquisition.py GARDEN_PACTS (check_acquisition holds the two equal); GC-04 adds the perch and Mendvetch. */
-	private static final List<String> GARDEN_RECIPES = List.of("sunpetal", "verdant_bed", "bonding_charm", "pact_perch", "mendvetch");
+	/** The garden cohort, GC-03: the recipes of tools/acquisition.py GARDEN_PACTS (check_acquisition holds the two equal); GC-04 adds the perch and Mendvetch, GC-05 the Verdant Heart and the Gleaner. */
+	private static final List<String> GARDEN_RECIPES = List.of("sunpetal", "verdant_bed", "bonding_charm", "pact_perch", "mendvetch", "verdant_heart",
+			"gleaner");
 
 	// The pact hall in the yard (jugcraft-test:drone_depot, its floor laid first). WorkshopHands' corner (x 1 to 3, z 2 to 5)
 	// keeps the workshop hand's post, chest, crucible and anchor, as the hand's own tests place them.
@@ -1071,9 +1072,9 @@ public class ConcordanceJourneyGameTests {
 	 * its worst is overworked, refused until bone meal by hand composts it, then mended; their own empty hand on a strained
 	 * bed in his area keeps his first obligation once. A Mendvetch paid ahead (he looks it over); suspended, he tends nothing;
 	 * resumed; ended at the perch, the Mendvetch comes back once, he closes and sinks away, the departure is kept once, and
-	 * ending again returns nothing. The path takes one tick; the test then waits out his departing gesture. The chooser is
-	 * not here (it needs Stolas's Regard, which this route never asks): ConcordanceWorkerGameTests and the garden client class
-	 * show it (GC-P29).
+	 * ending again returns nothing. The path takes one tick; the test then waits out his departing gesture. Since GC-05 the
+	 * owner's open meets the chooser first (Buer and Bathin share The Garden's Regard), and Buer is chosen there by his sign
+	 * (GC-P59); ConcordanceWorkerGameTests and the garden client class show the chooser itself (GC-P29).
 	 */
 	@GameTest(structure = "jugcraft-test:drone_depot", maxTicks = 80)
 	public void buerFromTheCodexToDeparture(GameTestHelper helper) {
@@ -1113,14 +1114,14 @@ public class ConcordanceJourneyGameTests {
 				"The perch, crafted by its recipe, is placed by hand");
 		PactPerchBlockEntity perch = helper.getBlockEntity(GARDEN_PERCH_AT, PactPerchBlockEntity.class);
 		helper.assertTrue(use(helper, holder, GARDEN_PERCH_AT, ItemStack.EMPTY).consumesAction() && holder.containerMenu instanceof PactMenu, "Its owner opens it");
-		PactStatePayload far = ((PactMenu) holder.containerMenu).lastSent();
+		PactStatePayload far = chooseBuer(helper, holder, (PactMenu) holder.containerMenu);
 		helper.assertTrue(far.mode() == PactStatePayload.NEGOTIATE && ConcordanceWorkerGameTests.keys(far.notes()).contains(ConcordanceWorkerGameTests.TENDING_KEY + "missing")
 				&& perch.visitor() == null, "Their only bed 10 blocks off: he does not come, and says why");
 		holder.closeContainer();
 		wake(helper, holder, BUER_BED_AT);
 		helper.assertTrue(use(helper, holder, GARDEN_PERCH_AT, ItemStack.EMPTY).consumesAction() && holder.containerMenu instanceof PactMenu, "Opened again");
 		PactMenu menu = (PactMenu) holder.containerMenu;
-		PactStatePayload invited = menu.lastSent();
+		PactStatePayload invited = chooseBuer(helper, holder, menu);
 		helper.assertTrue(invited.mode() == PactStatePayload.NEGOTIATE && invited.notes().isEmpty() && invited.offers(PactRequestPayload.ACCEPT)
 				&& invited.terms().stream().map(PactStatePayload.Term::key).toList().equals(PactStatePayload.TERMS)
 				&& ConcordanceWorkerGameTests.keys(invited.beats()).equals(offer.beats().stream()
@@ -1199,5 +1200,24 @@ public class ConcordanceJourneyGameTests {
 			helper.assertTrue(buer.isRemoved(), "His departure over, he is gone from the world");
 			helper.succeed();
 		});
+	}
+
+	/**
+	 * GC-05 (GC-P59): with Buer and Bathin both offered to a holder of The Garden's Regard, the owner's open shows the chooser
+	 * first; Buer is chosen there by his sign, as his entry sends INVITE. The state then shown (Buer's offer).
+	 */
+	private static PactStatePayload chooseBuer(GameTestHelper helper, ServerPlayer holder, PactMenu menu) {
+		if (menu.lastSent().mode() == PactStatePayload.INVITE) {
+			List<PactStatePayload.Choice> listed = menu.lastSent().patterns();
+			int index = -1;
+			for (int i = 0; i < listed.size(); i++) {
+				if (listed.get(i).id().equals(BuerEntity.SIGN)) {
+					index = i;
+				}
+			}
+			helper.assertTrue(index >= 0 && ConcordanceWorkerGameTests.answered(ConcordanceWorkerGameTests.invite(holder, menu, index), PactMenu.INVITED),
+					"The chooser lists Buer, and he is invited from it: " + listed.stream().map(PactStatePayload.Choice::id).toList());
+		}
+		return menu.lastSent();
 	}
 }

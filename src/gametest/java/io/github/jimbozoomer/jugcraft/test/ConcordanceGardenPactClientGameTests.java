@@ -9,13 +9,20 @@ import com.mojang.blaze3d.platform.InputConstants;
 import io.github.jimbozoomer.jugcraft.Jugcraft;
 import io.github.jimbozoomer.jugcraft.client.PactClient;
 import io.github.jimbozoomer.jugcraft.client.PactScreen;
+import io.github.jimbozoomer.jugcraft.client.RosterClient;
+import io.github.jimbozoomer.jugcraft.client.RosterScreen;
 import io.github.jimbozoomer.jugcraft.concordance.ConcordanceProgress;
+import io.github.jimbozoomer.jugcraft.concordance.JugcraftConcordance;
+import io.github.jimbozoomer.jugcraft.concordance.LeyPylonBlockEntity;
 import io.github.jimbozoomer.jugcraft.concordance.garden.Garden;
+import io.github.jimbozoomer.jugcraft.concordance.garden.GleanerBlockEntity;
 import io.github.jimbozoomer.jugcraft.concordance.garden.VerdantBedBlock;
 import io.github.jimbozoomer.jugcraft.concordance.garden.VerdantBedBlockEntity;
+import io.github.jimbozoomer.jugcraft.concordance.garden.VerdantHeartBlockEntity;
 import io.github.jimbozoomer.jugcraft.concordance.rules.ResearchState;
 import io.github.jimbozoomer.jugcraft.concordance.sky.AstralClaims;
 import io.github.jimbozoomer.jugcraft.concordance.spirits.AgreementHolder;
+import io.github.jimbozoomer.jugcraft.concordance.spirits.BathinEntity;
 import io.github.jimbozoomer.jugcraft.concordance.spirits.BoundWills;
 import io.github.jimbozoomer.jugcraft.concordance.spirits.BuerEntity;
 import io.github.jimbozoomer.jugcraft.concordance.spirits.GardenPacts;
@@ -25,13 +32,17 @@ import io.github.jimbozoomer.jugcraft.concordance.spirits.PactReading;
 import io.github.jimbozoomer.jugcraft.concordance.spirits.PactRequestPayload;
 import io.github.jimbozoomer.jugcraft.concordance.spirits.PactSpiritEntity;
 import io.github.jimbozoomer.jugcraft.concordance.spirits.PactStatePayload;
+import io.github.jimbozoomer.jugcraft.concordance.spirits.RosterStatePayload;
 import io.github.jimbozoomer.jugcraft.concordance.spirits.StolasEntity;
 import io.github.jimbozoomer.jugcraft.concordance.spirits.StrainTending;
+import io.github.jimbozoomer.jugcraft.concordance.spirits.VerdanceCarrying;
 import io.github.jimbozoomer.jugcraft.concordance.worker.Pacts;
 import io.github.jimbozoomer.jugcraft.concordance.worker.Status;
+import io.github.jimbozoomer.jugcraft.config.JugcraftConfig;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+import java.util.UUID;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.function.Predicate;
 import net.fabricmc.fabric.api.client.gametest.v1.FabricClientGameTest;
@@ -103,6 +114,11 @@ import org.jspecify.annotations.Nullable;
  * ({@code jugcraft_garden_buer_faces_*}).</li>
  * <li><b>The end</b>: End asks first ({@code jugcraft_garden_buer_end_confirm}); yes ends it once and he departs
  * ({@code jugcraft_garden_buer_ended}).</li>
+ * <li><b>Bathin</b> (GC-05; docs/features/bathin-pact.md), at the same perch: listed not ready without a Heart, then chosen
+ * by keyboard and suddenly there in a ring of dust; his conversation at three sizes, refused and sealed; one carry frozen
+ * with both ends shimmering; his matter on the roster ("awaiting your answer"), in Jade and on his kept page, answered
+ * and changed back; Jade; ten poses; four bearings; the end ({@code jugcraft_garden_bathin_*},
+ * {@code jugcraft_garden_roster_awaiting}).</li>
  * </ul>
  * The helpers that name no spirit are Chunk D's, copied (its file stays as it is). The perch is opened by the server's use of
  * it (no aimed click), each open at least its rate gate's ten ticks after the last. The narrator is not heard, and one
@@ -148,6 +164,18 @@ public class ConcordanceGardenPactClientGameTests implements FabricClientGameTes
 	private static final String LISTEN = "animation.buer.listen";
 	private static final String WAITING = "animation.buer.waiting";
 	private static final String SUSPENDED = "animation.buer.suspended";
+	// GC-05: Bathin (tools/concordance_pacts.py SPIRITS["bathin"]; check_spirit_bodies).
+	private static final String BATHIN = "jugcraft:bathin";
+	private static final String BATHIN_IDLE = "animation.bathin.idle";
+	private static final String BATHIN_LISTEN = "animation.bathin.listen";
+	private static final String BATHIN_WAITING = "animation.bathin.waiting";
+	private static final String BATHIN_SUSPENDED = "animation.bathin.suspended";
+	/** GC-P8's body tolerance, for his facing. */
+	private static final float BATHIN_FACING_TOLERANCE = 15.0F;
+	/** His refusal at a perch with no Heart of the inviter's near, or nowhere to carry (Dossier 2 item 6). */
+	private static final String NOTHING_TO_CARRY = "Nothing here to carry, or nowhere to carry it.";
+	/** His compact (data/jugcraft/concordance/pact/bathin.json): no resonance, so no astrolabe. */
+	private static final List<String> BATHIN_COMPACT = List.of("minecraft:ender_pearl 2", "jugcraft:verdant_chaff 8");
 
 	@Override
 	public void runTest(ClientGameTestContext context) {
@@ -190,6 +218,8 @@ public class ConcordanceGardenPactClientGameTests implements FabricClientGameTes
 				below(context, server, connection, perch);
 				facing(context, server, connection, perch);
 				ending(context, server, perch);
+				// GC-05: Bathin at the same perch, chosen from the chooser (Stolas's, Buer's and his entries), to his departure.
+				bathin(context, server, connection, perch);
 				context.runOnClient(client -> {
 					client.options.guiScale().set(scale);
 					client.resizeGui();
@@ -201,7 +231,7 @@ public class ConcordanceGardenPactClientGameTests implements FabricClientGameTes
 	/**
 	 * The stone floor and air round the owner's perch two blocks south (wide enough for a bed three west of it and a camera
 	 * five west); the Binding Arts, Verdant Husbandry, The Garden's Regard and Stolas's Regard understood and the Lantern Star
-	 * observed, so the chooser lists two spirits; an empty inventory. No bed yet.
+	 * observed, so the chooser lists Stolas and Buer (and, since GC-05, Bathin); an empty inventory. No bed yet.
 	 */
 	private static void prepare(MinecraftServer minecraft, BlockPos stand, BlockPos perch) {
 		check(BuiltInRegistries.BLOCK.containsKey(Identifier.parse(PERCH)) && BuiltInRegistries.ENTITY_TYPE.containsKey(Identifier.parse(BUER)),
@@ -278,8 +308,9 @@ public class ConcordanceGardenPactClientGameTests implements FabricClientGameTes
 	}
 
 	/**
-	 * GC-P18 (GC-P10): an awake Verdant Bed of the holder's three blocks west of the perch, and both spirits ready; the
-	 * chooser at GUI scale 2, at GUI scale 4 in a 1920x1080 window and in a 320x180 window; Buer chosen by keyboard alone.
+	 * GC-P18 (GC-P10): an awake Verdant Bed of the holder's three blocks west of the perch, and Stolas and Buer ready (Bathin,
+	 * listed since GC-05, not yet: no Heart); the chooser at GUI scale 2, at GUI scale 4 in a 1920x1080 window and in a
+	 * 320x180 window; Buer chosen by keyboard alone.
 	 */
 	private static void chooser(ClientGameTestContext context, TestDedicatedServerContext server, BlockPos perch, BlockPos bed) {
 		server.runOnServer(minecraft -> {
@@ -291,8 +322,10 @@ public class ConcordanceGardenPactClientGameTests implements FabricClientGameTes
 		});
 		context.waitTicks(OPEN_GAP);
 		open(context, server, perch);
+		// GC-05 (GC-P59): Stolas's and Buer's entries ready; Bathin's listed, not yet (no Heart of the holder's near).
 		context.waitFor(client -> PactClient.state() != null && PactClient.state().mode() == PactStatePayload.INVITE
-				&& PactClient.state().patterns().size() >= 2 && PactClient.state().patterns().stream().allMatch(PactStatePayload.Choice::ready), WAIT);
+				&& PactClient.state().patterns().stream().filter(choice -> choice.id().equals(StolasEntity.SIGN) || choice.id().equals(BuerEntity.SIGN))
+						.filter(PactStatePayload.Choice::ready).count() == 2, WAIT);
 		String ids = context.computeOnClient(client -> PactClient.state().patterns().stream().map(PactStatePayload.Choice::id).toList().toString());
 		String flags = context.computeOnClient(client -> PactClient.state().patterns().stream().map(choice -> String.valueOf(choice.ready())).toList().toString());
 		Jugcraft.LOGGER.info("[garden-check] chooser: {} ready={}", ids, flags);
@@ -1091,5 +1124,691 @@ public class ConcordanceGardenPactClientGameTests implements FabricClientGameTes
 		if (!condition) {
 			throw new AssertionError(message);
 		}
+	}
+
+	// ---------------------------------------------------------------- GC-05: any pact spirit at the perch (Bathin's flow)
+
+	/** The client's pact spirit of entity type {@code id} within 4 of the perch, or null. */
+	private static @Nullable PactSpiritEntity<?> spiritAt(Minecraft client, BlockPos perch, String id) {
+		EntityType<?> type = BuiltInRegistries.ENTITY_TYPE.getValue(Identifier.parse(id));
+		List<Entity> found = client.level.getEntities((Entity) null, new AABB(perch).inflate(4), entity -> entity.getType() == type);
+		return !found.isEmpty() && found.getFirst() instanceof PactSpiritEntity<?> spirit ? spirit : null;
+	}
+
+	private static @Nullable AnimationController<?> controllerOf(Minecraft client, BlockPos perch, String id, String name) {
+		PactSpiritEntity<?> spirit = spiritAt(client, perch, id);
+		if (spirit == null) {
+			return null;
+		}
+		AnimatableManager<PactSpiritEntity<?>> manager = spirit.getAnimatableInstanceCache().getManagerForId(spirit.getId());
+		return manager.getAnimationControllers().get(name);
+	}
+
+	/** The clip one of its controllers is drawing now ("" when it draws nothing). */
+	private static String drawingOf(Minecraft client, BlockPos perch, String id, String name) {
+		AnimationController<?> controller = controllerOf(client, perch, id, name);
+		AnimationPoint point = controller == null || !controller.isAnimatingBones() ? null : controller.getCurrentAnimationPoint();
+		return point == null ? "" : point.animation().name();
+	}
+
+	private static boolean blendingOf(Minecraft client, BlockPos perch, String id, String name) {
+		AnimationController<?> controller = controllerOf(client, perch, id, name);
+		return controller != null && controller.isTransitioning();
+	}
+
+	/** The gesture last triggered on it (it stays set after it plays). */
+	private static @Nullable RawAnimation gesturedOf(Minecraft client, BlockPos perch, String id) {
+		AnimationController<?> gestures = controllerOf(client, perch, id, GESTURES);
+		return gestures == null ? null : gestures.getCurrentRawAnimation();
+	}
+
+	/** The pact spirit at the perch on the server (its presence, else its visitor; never one leaving), asserted there. */
+	private static PactSpiritEntity<?> presenceOf(MinecraftServer minecraft, BlockPos perch) {
+		PactSpiritEntity<?> spirit = ((PactPerchBlockEntity) minecraft.overworld().getBlockEntity(perch)).presence(minecraft.overworld());
+		check(spirit != null, "A pact spirit is on the perch");
+		return spirit;
+	}
+
+	private static boolean holds(MinecraftServer minecraft, String counterpart) {
+		return Pacts.holds(BoundWills.of(minecraft).ledger(), player(minecraft).getUUID(), counterpart);
+	}
+
+	/** Waits until its main controller draws {@code clip} past its blend, freezes the world, closes the screen if asked, checks and photographs it, thaws it. */
+	private static void loopPoseOf(ClientGameTestContext context, TestDedicatedServerContext server, BlockPos perch, String id, String clip,
+			String name, boolean closeScreen) {
+		context.waitFor(client -> clip.equals(drawingOf(client, perch, id, MAIN)) && !blendingOf(client, perch, id, MAIN), WAIT);
+		server.runCommand("tick freeze");
+		try {
+			if (closeScreen) {
+				context.getInput().pressKey(InputConstants.KEY_ESCAPE);
+				context.waitForScreen(null);
+			}
+			context.waitTicks(5);
+			String drawn = context.computeOnClient(client -> drawingOf(client, perch, id, MAIN));
+			check(clip.equals(drawn), "Frozen while it draws " + clip + ": " + drawn);
+			shot(context, name);
+		} finally {
+			server.runCommand("tick unfreeze");
+		}
+	}
+
+	/**
+	 * The server fires {@code clip} on the spirit at the perch; the world is frozen at the middle of its telling pose
+	 * ({@code from} to {@code to} seconds in), where the client's gesture controller must be drawing it; photographed, thawed
+	 * and played out (gesturePose, for any spirit).
+	 */
+	private static void clipPose(ClientGameTestContext context, TestDedicatedServerContext server, BlockPos perch, String id,
+			PactSpiritEntity.Clip clip, double from, double to, String name) {
+		int middle = (int) Math.round((from + to) * 10.0);
+		String clipName = clip.animation().getAnimationStages().getFirst().animationName();
+		server.runOnServer(minecraft -> presenceOf(minecraft, perch).gesture(clip));
+		context.waitTicks(middle);
+		server.runCommand("tick freeze");
+		try {
+			context.waitTicks(5);
+			double at = context.computeOnClient(client -> clipName.equals(drawingOf(client, perch, id, GESTURES))
+					? controllerOf(client, perch, id, GESTURES).getCurrentAnimationTime() : -1.0);
+			Jugcraft.LOGGER.info("[garden-check] {}'s {} frozen {} s into its clip", id, clip.id(), at);
+			check(at >= from && at <= to, "Its " + clip.id() + " is caught in its telling pose, " + from + " to " + to + " s into it: " + at);
+			shot(context, name);
+		} finally {
+			server.runCommand("tick unfreeze");
+		}
+		context.waitTicks(clip.ticks() - middle + 5);
+	}
+
+	/**
+	 * GC-02's rule for any spirit: from each side of the perch in turn (east, south, west, north), two blocks off and facing
+	 * it, the player opens the perch; the spirit's drawn body turns to them (GC-P8); the screen is closed (the body keeps its
+	 * facing) and the world frozen and photographed from the player's eyes, so from the spirit's front, as {@code shots} name.
+	 */
+	private static void spiritFacing(ClientGameTestContext context, TestDedicatedServerContext server, BlockPos perch, String id, List<String> shots) {
+		String[] sides = {"east", "south", "west", "north"};
+		int[][] offsets = {{2, 0}, {0, 2}, {-2, 0}, {0, -2}};
+		float[] bearings = {-90.0F, 0.0F, 90.0F, 180.0F};
+		boolean hidden = hideHud(context);
+		try {
+			for (int i = 0; i < sides.length; i++) {
+				float bearing = bearings[i];
+				server.runCommand(String.format(Locale.ROOT, "tp @a %.1f %d %.1f %.1f 10", perch.getX() + 0.5 + offsets[i][0], perch.getY(),
+						perch.getZ() + 0.5 + offsets[i][1], Mth.wrapDegrees(bearing + 180.0F)));
+				context.waitTicks(OPEN_GAP);
+				open(context, server, perch);
+				context.waitFor(client -> spiritAt(client, perch, id) instanceof LivingEntity body
+						&& Mth.degreesDifferenceAbs(body.yBodyRot, bearing) <= BATHIN_FACING_TOLERANCE, WAIT);
+				float yaw = context.computeOnClient(client -> spiritAt(client, perch, id) instanceof LivingEntity body ? body.yBodyRot : Float.NaN);
+				float off = Mth.degreesDifferenceAbs(yaw, bearing);
+				Jugcraft.LOGGER.info("[garden-check] {} faces the {}: body yaw {} against bearing {} ({} off)", id, sides[i], yaw, bearing, off);
+				check(off <= BATHIN_FACING_TOLERANCE, id + " turns to whoever speaks, from the " + sides[i] + ": " + yaw);
+				context.getInput().pressKey(InputConstants.KEY_ESCAPE);
+				context.waitForScreen(null);
+				server.runCommand("tick freeze");
+				try {
+					context.waitTicks(3);
+					shot(context, shots.get(i));
+				} finally {
+					server.runCommand("tick unfreeze");
+				}
+			}
+		} finally {
+			restoreHud(context, hidden);
+		}
+	}
+
+	// ---------------------------------------------------------------- GC-05: Bathin (Dossier 2)
+
+	/** GC-05: Bathin at the perch Buer left, from the chooser to his departure; his matter asked and answered on the way. */
+	private static void bathin(ClientGameTestContext context, TestDedicatedServerContext server, TestDedicatedServerConnection connection,
+			BlockPos perch) {
+		BlockPos heart = perch.offset(-5, 0, 3);
+		BlockPos gleaner = perch.offset(2, 0, 3);
+		BlockPos road = perch.offset(-5, 0, 6);
+		server.runOnServer(minecraft -> yard(minecraft, perch));
+		standSouth(context, server, perch);
+		connection.waitForChunksRender();
+		nothingToCarry(context, server, perch);
+		bathinChooser(context, server, perch, heart, gleaner);
+		bathinConversation(context, server);
+		bathinSizes(context);
+		Hearing hearing = hear(context);
+		bathinAcceptance(context, server);
+		bathinHeard(context, server, hearing, perch);
+		carrying(context, server, connection, perch, heart, gleaner);
+		standSouth(context, server, perch);
+		rosterAwaiting(context, server, perch, road);
+		standSouth(context, server, perch);
+		matter(context, server, perch);
+		bathinJade(context, server, perch);
+		bathinPoses(context, server, perch);
+		spiritFacing(context, server, perch, BATHIN, List.of("jugcraft_garden_bathin_faces_east", "jugcraft_garden_bathin_faces_south",
+				"jugcraft_garden_bathin_faces_west", "jugcraft_garden_bathin_faces_north"));
+		standSouth(context, server, perch);
+		bathinEnding(context, server, perch);
+	}
+
+	/** The player south of the perch, facing it (his front; the camera Buer's poses use), and the server given its moment. */
+	private static void standSouth(ClientGameTestContext context, TestDedicatedServerContext server, BlockPos perch) {
+		standSouth(server, perch);
+		context.waitTicks(10);
+	}
+
+	/**
+	 * A stone floor and clear air from 7 west to 4 east and 3 north to 10 south of the perch (the perch and Buer's bed kept):
+	 * room for Bathin's Heart, his Gleaner beyond its reach, the Heart with its own pylon his matter is about, and the
+	 * carrying camera.
+	 */
+	private static void yard(MinecraftServer minecraft, BlockPos perch) {
+		ServerLevel level = minecraft.overworld();
+		BlockPos buersBed = perch.west(3);
+		for (int dx = -7; dx <= 4; dx++) {
+			for (int dz = -3; dz <= 10; dz++) {
+				level.setBlockAndUpdate(perch.offset(dx, -1, dz), Blocks.STONE.defaultBlockState());
+				for (int dy = 0; dy <= 3; dy++) {
+					BlockPos at = perch.offset(dx, dy, dz);
+					if (!at.equals(perch) && !at.equals(buersBed)) {
+						level.setBlockAndUpdate(at, Blocks.AIR.defaultBlockState());
+					}
+				}
+			}
+		}
+	}
+
+	/** Dossier 2 item 6: with no Heart of the player's near, the chooser lists Bathin not ready, his refusal in his words. */
+	private static void nothingToCarry(ClientGameTestContext context, TestDedicatedServerContext server, BlockPos perch) {
+		context.waitTicks(OPEN_GAP);
+		open(context, server, perch);
+		context.waitFor(client -> PactClient.state() != null && PactClient.state().mode() == PactStatePayload.INVITE, WAIT);
+		String entries = context.computeOnClient(client -> entries(PactClient.state()));
+		Jugcraft.LOGGER.info("[garden-check] chooser before his Heart: {}", entries);
+		boolean listed = context.computeOnClient(client -> PactClient.state().patterns().stream()
+				.anyMatch(choice -> choice.id().equals(BathinEntity.SIGN) && !choice.ready() && choice.amount() == 1)
+				&& PactClient.state().notes().stream().anyMatch(note -> note.getString().contains(NOTHING_TO_CARRY)));
+		check(listed, "Bathin listed, not ready, in his words: " + entries);
+		fits(context, "the chooser without his Heart");
+		named(context);
+		shot(context, "jugcraft_garden_bathin_nothing_to_carry");
+		context.getInput().pressKey(InputConstants.KEY_ESCAPE);
+		context.waitForScreen(null);
+	}
+
+	/**
+	 * His Heart (on the stone floor, no bed: it makes no Verdance by itself) and a Gleaner beyond its reach; the chooser lists
+	 * him ready; chosen by keyboard, he is suddenly on the perch in a ring of dust.
+	 */
+	private static void bathinChooser(ClientGameTestContext context, TestDedicatedServerContext server, BlockPos perch, BlockPos heart,
+			BlockPos gleaner) {
+		server.runOnServer(minecraft -> {
+			ServerLevel level = minecraft.overworld();
+			ServerPlayer player = player(minecraft);
+			level.setBlockAndUpdate(heart, Garden.VERDANT_HEART.defaultBlockState());
+			((VerdantHeartBlockEntity) level.getBlockEntity(heart)).awaken(player.getUUID());
+			level.setBlockAndUpdate(gleaner, Garden.GLEANER.defaultBlockState());
+			((GleanerBlockEntity) level.getBlockEntity(gleaner)).awaken(player.getUUID());
+		});
+		context.waitTicks(25);
+		open(context, server, perch);
+		context.waitFor(client -> PactClient.state() != null && PactClient.state().mode() == PactStatePayload.INVITE
+				&& PactClient.state().patterns().stream().anyMatch(choice -> choice.id().equals(BathinEntity.SIGN) && choice.ready()), WAIT);
+		String entries = context.computeOnClient(client -> entries(PactClient.state()));
+		Jugcraft.LOGGER.info("[garden-check] chooser with his Heart and Gleaner: {}", entries);
+		context.waitFor(client -> client.gui.screen() instanceof PactScreen, WAIT);
+		fits(context, "the chooser with three spirits");
+		named(context);
+		shot(context, "jugcraft_garden_bathin_chooser");
+		String name = context.computeOnClient(client -> Component.translatable("entity.jugcraft.bathin").getString());
+		tabToNamed(context, name);
+		context.getInput().pressKey(InputConstants.KEY_RETURN);
+		context.waitFor(client -> PactClient.state() != null && PactClient.state().mode() == PactStatePayload.NEGOTIATE
+				&& BathinEntity.SIGN.equals(PactClient.state().spirit().sign()) && spiritAt(client, perch, BATHIN) != null, WAIT);
+		context.waitFor(client -> BathinEntity.Gesture.ARRIVE.animation.equals(gesturedOf(client, perch, BATHIN)), WAIT);
+		RawAnimation arrived = context.computeOnClient(client -> gesturedOf(client, perch, BATHIN));
+		int rings = server.computeOnServer(minecraft -> bathinAt(minecraft, perch).rings());
+		Jugcraft.LOGGER.info("[garden-check] invited bathin: gesture {}, rings of dust {}", arrived, rings);
+		check(BathinEntity.Gesture.ARRIVE.animation.equals(arrived) && rings == 1, "Chosen, he is suddenly on the perch, in a ring of dust");
+	}
+
+	/** His three beats, then every term by keyboard (Enter three times), none naming an astrolabe or resonance (GB23). */
+	private static void bathinConversation(ClientGameTestContext context, TestDedicatedServerContext server) {
+		String shown = context.computeOnClient(client -> describe(PactClient.state()));
+		Jugcraft.LOGGER.info("[garden-check] bathin's offer: {}", shown);
+		boolean whole = context.computeOnClient(client -> PactClient.state().beats().size() == 3 && PactClient.state().notes().isEmpty()
+				&& PactClient.state().offers(PactRequestPayload.ACCEPT)
+				&& PactClient.state().terms().stream().map(PactStatePayload.Term::key).toList().equals(PactStatePayload.TERMS));
+		check(whole, "Bathin speaks three beats, nothing stands in the way, and his terms name every term, in order: " + shown);
+		fits(context, "his beat at GUI scale 2");
+		named(context);
+		shot(context, "jugcraft_garden_bathin_conversation");
+		tabTo(context, "next");
+		for (int beat = 0; beat < 3; beat++) {
+			context.getInput().pressKey(InputConstants.KEY_RETURN);
+			context.waitTicks(3);
+		}
+		boolean onTerms = context.computeOnClient(client -> screen(client).page() == PactScreen.TERMS_PAGE && "para:0".equals(screen(client).focusedKey()));
+		check(onTerms, "Enter three times reaches his terms, the keyboard on their first line, never on Accept");
+		String words = context.computeOnClient(client -> String.join(" ", PactClient.state().terms().stream()
+				.map(term -> term.value().getString()).toList()).toLowerCase(Locale.ROOT));
+		Jugcraft.LOGGER.info("[garden-check] his terms: {}", words);
+		check(!words.contains("astrolabe") && !words.contains("resonance") && words.contains("verdance"),
+				"His terms name his service and no astrolabe or resonance: " + words);
+		fits(context, "his terms at GUI scale 2");
+		named(context);
+		shot(context, "jugcraft_garden_bathin_terms");
+		boolean held = server.computeOnServer(minecraft -> holds(minecraft, BATHIN));
+		check(!held, "Hearing his terms records nothing");
+	}
+
+	/** His terms and a beat at GUI scale 4 (1920 x 1080) and in a 320 x 180 window. */
+	private static void bathinSizes(ClientGameTestContext context) {
+		int width = context.computeOnClient(client -> client.getWindow().getWidth());
+		int height = context.computeOnClient(client -> client.getWindow().getHeight());
+		context.getInput().resizeWindow(1920, 1080);
+		context.runOnClient(client -> {
+			client.options.guiScale().set(4);
+			client.resizeGui();
+		});
+		context.waitTicks(10);
+		int applied = context.computeOnClient(client -> client.getWindow().getGuiScale());
+		check(applied == 4, "His high-scale shots are at GUI scale 4: " + applied);
+		fits(context, "his terms at GUI scale 4");
+		named(context);
+		shot(context, "jugcraft_garden_bathin_terms_scale4");
+		press(context, "back");
+		fits(context, "his beat at GUI scale 4");
+		named(context);
+		shot(context, "jugcraft_garden_bathin_conversation_scale4");
+		press(context, "next");
+		context.runOnClient(client -> {
+			client.options.guiScale().set(2);
+			client.resizeGui();
+		});
+		context.getInput().resizeWindow(320, 180);
+		context.waitTicks(10);
+		String gui = context.computeOnClient(client -> client.getWindow().getGuiScaledWidth() + "x" + client.getWindow().getGuiScaledHeight());
+		Jugcraft.LOGGER.info("[garden-check] his terms in a 320x180 window: GUI {}", gui);
+		check("320x180".equals(gui), "A 320x180 window draws a 320x180 GUI: " + gui);
+		fits(context, "his terms at 320x180");
+		named(context);
+		shot(context, "jugcraft_garden_bathin_terms_small");
+		press(context, "back");
+		fits(context, "his beat at 320x180");
+		named(context);
+		shot(context, "jugcraft_garden_bathin_conversation_small");
+		press(context, "next");
+		context.getInput().resizeWindow(width, height);
+		context.waitTicks(10);
+		boolean back = context.computeOnClient(client -> screen(client).page() == PactScreen.TERMS_PAGE);
+		check(back, "Back on his terms");
+	}
+
+	/** Accept refused without his compact (worded without an astrolabe), then sealed with it: 2 ender pearls and 8 chaff, spent once. */
+	private static void bathinAcceptance(ClientGameTestContext context, TestDedicatedServerContext server) {
+		tabTo(context, "accept");
+		PactStatePayload.Result refused = answer(context);
+		String said = refused.message().getString();
+		int refusedMode = context.computeOnClient(client -> PactClient.state().mode());
+		Jugcraft.LOGGER.info("[garden-check] Accept without his compact: {} ({})", refused.reason(), said);
+		check("cannot_afford".equals(refused.reason()) && !refused.done() && !said.toLowerCase(Locale.ROOT).contains("astrolabe")
+				&& refusedMode == PactStatePayload.NEGOTIATE, "Without his compact Accept is refused, worded without an astrolabe: " + said);
+		boolean heldAfterRefusal = server.computeOnServer(minecraft -> holds(minecraft, BATHIN));
+		check(!heldAfterRefusal, "A refusal records and spends nothing");
+		context.waitFor(client -> screen(client).control("result") instanceof PactScreen.Verdict verdict && verdict.refused(), WAIT);
+		shot(context, "jugcraft_garden_bathin_refused");
+		List<String> cost = context.computeOnClient(client -> PactClient.state().compact().stream()
+				.map(stack -> BuiltInRegistries.ITEM.getKey(stack.getItem()) + " " + stack.getCount()).toList());
+		int resonance = context.computeOnClient(client -> PactClient.state().resonance());
+		Jugcraft.LOGGER.info("[garden-check] his compact: {} and {} resonance", cost, resonance);
+		check(cost.equals(BATHIN_COMPACT) && resonance == 0, "His compact: 2 ender pearls and 8 Verdant Chaff, no resonance: " + cost);
+		server.runOnServer(minecraft -> cost.forEach(line -> player(minecraft).getInventory().add(stack(line))));
+		context.waitTicks(5);
+		tabTo(context, "accept");
+		PactStatePayload.Result sealed = answer(context);
+		int sealedMode = context.computeOnClient(client -> PactClient.state().mode());
+		check(sealed.done() && "sealed".equals(sealed.reason()) && sealedMode == PactStatePayload.KEEP, "Accepting with his compact seals the pact: " + sealed.reason());
+		String spent = server.computeOnServer(minecraft -> holds(minecraft, BATHIN) + " "
+				+ cost.stream().mapToInt(line -> player(minecraft).getInventory().countItem(stack(line).getItem())).sum());
+		Jugcraft.LOGGER.info("[garden-check] sealed: held, compact left = {}", spent);
+		check("true 0".equals(spent), "Sealed once, his compact spent once: " + spent);
+		context.waitFor(client -> screen(client).control("result") instanceof PactScreen.Verdict verdict && !verdict.refused(), WAIT);
+		fits(context, "his kept pact at GUI scale 2");
+		named(context);
+		shot(context, "jugcraft_garden_bathin_kept");
+	}
+
+	/** His refuse and assent fired by the server, their subtitles his, and his carry's; heard where the machine can play sound. */
+	private static void bathinHeard(ClientGameTestContext context, TestDedicatedServerContext server, Hearing hearing, BlockPos perch) {
+		String refuse = context.computeOnClient(client -> Component.translatable("subtitles.jugcraft.bathin.refuse").getString());
+		String assent = context.computeOnClient(client -> Component.translatable("subtitles.jugcraft.bathin.assent").getString());
+		String carry = context.computeOnClient(client -> Component.translatable("subtitles.jugcraft.bathin.work").getString());
+		boolean defined = context.computeOnClient(client -> refuse.equals(subtitle(client, "bathin.refuse"))
+				&& assent.equals(subtitle(client, "bathin.assent")) && carry.equals(subtitle(client, "bathin.work")));
+		check(!refuse.startsWith("subtitles.") && !carry.startsWith("subtitles.") && defined,
+				"His refuse, assent and carry have their subtitles in the client's sounds: " + refuse + ", " + assent + ", " + carry);
+		List<String> cues = server.computeOnServer(minecraft -> bathinAt(minecraft, perch).cues());
+		Jugcraft.LOGGER.info("[garden-check] Bathin's cues so far: {}", cues);
+		check(cues.contains("refuse") && "assent".equals(cues.getLast()), "The server fired his refusal, then his assent: " + cues);
+		try {
+			if (hearing.sounding()) {
+				context.waitFor(client -> hearing.heard().contains(refuse) && hearing.heard().contains(assent), WAIT);
+				Jugcraft.LOGGER.info("[garden-check] subtitles heard: {}", hearing.heard());
+			} else {
+				Jugcraft.LOGGER.info("[garden-check] no sound device: the sound engine is off, so no subtitle can show; checked as defined and as fired");
+			}
+		} finally {
+			context.runOnClient(client -> {
+				client.getSoundManager().removeListener(hearing.listener());
+				client.options.showSubtitles().set(hearing.subtitles());
+			});
+		}
+	}
+
+	/**
+	 * Dossier 2 item 3 and detail b, the service at work: one carry by his own think on the server, 8 Verdance leaving the
+	 * player's Heart and arriving in the far Gleaner in the same tick, both ends shimmering and nothing between. Frozen two
+	 * client ticks later (the shimmer's signs reach the client on its next tick) and photographed from where both ends and he
+	 * are seen. The Heart is left empty, so nothing more is carried while later steps photograph him.
+	 */
+	private static void carrying(ClientGameTestContext context, TestDedicatedServerContext server, TestDedicatedServerConnection connection,
+			BlockPos perch, BlockPos heart, BlockPos gleaner) {
+		context.getInput().pressKey(InputConstants.KEY_ESCAPE);
+		context.waitForScreen(null);
+		boolean hidden = hideHud(context);
+		try {
+			server.runCommand(String.format(Locale.ROOT, "tp @a %.1f %d %.1f 180 25", perch.getX() - 1.0, perch.getY() + 1, perch.getZ() + 9.5));
+			context.waitTicks(10);
+			connection.waitForChunksRender();
+			String moved = server.computeOnServer(minecraft -> {
+				ServerLevel level = minecraft.overworld();
+				VerdantHeartBlockEntity source = (VerdantHeartBlockEntity) level.getBlockEntity(heart);
+				GleanerBlockEntity target = (GleanerBlockEntity) level.getBlockEntity(gleaner);
+				source.setVerdance(8);
+				BathinEntity bathin = bathinAt(minecraft, perch);
+				Status status = bathin.think(level, NOON, level.getGameTime());
+				BathinEntity.Shimmer shimmer = bathin.lastShimmer();
+				boolean both = shimmer != null && shimmer.at() == level.getGameTime() && shimmer.from().equals(heart) && shimmer.to().equals(gleaner);
+				return status.id + " " + source.verdance() + " " + target.verdance() + " " + both;
+			});
+			Jugcraft.LOGGER.info("[garden-check] one carry: status, Heart, Gleaner, both ends shimmering that tick = {}", moved);
+			check("working 0 8 true".equals(moved), "One carry: 8 Verdance left the Heart and reached the far Gleaner in one tick, both ends shimmering: " + moved);
+			context.waitTicks(2);
+			server.runCommand("tick freeze");
+			try {
+				context.waitTicks(5);
+				shot(context, "jugcraft_garden_bathin_shimmer");
+			} finally {
+				server.runCommand("tick unfreeze");
+			}
+		} finally {
+			restoreHud(context, hidden);
+		}
+	}
+
+	/** GC-05: Bathin's presence at {@code perch}, asserted there (server side). */
+	private static BathinEntity bathinAt(MinecraftServer minecraft, BlockPos perch) {
+		ServerLevel level = minecraft.overworld();
+		PactSpiritEntity<?> found = ((PactPerchBlockEntity) level.getBlockEntity(perch)).presence(level);
+		check(found instanceof BathinEntity, "Bathin is on his perch: " + found);
+		return (BathinEntity) found;
+	}
+
+	/**
+	 * GC-05: a Heart of the player's beside its own pylon at {@code at} (on the yard's stone floor, no bed), within his area
+	 * (the Bathin flow's Gleaner already there); his device index forgotten (it served since his sealing), then his think
+	 * raises the matter. Server side.
+	 */
+	private static String raise(MinecraftServer minecraft, BlockPos perch, BlockPos at) {
+		ServerLevel level = minecraft.overworld();
+		ServerPlayer player = player(minecraft);
+		level.setBlockAndUpdate(at, Garden.VERDANT_HEART.defaultBlockState());
+		VerdantHeartBlockEntity heart = (VerdantHeartBlockEntity) level.getBlockEntity(at);
+		heart.awaken(player.getUUID());
+		heart.setVerdance(16);
+		level.setBlockAndUpdate(at.east(), JugcraftConcordance.LEY_PYLON.defaultBlockState());
+		((LeyPylonBlockEntity) level.getBlockEntity(at.east())).setOwner(player.getUUID());
+		BathinEntity bathin = bathinAt(minecraft, perch);
+		bathin.serviceMemory(VerdanceCarrying.Memory.class, VerdanceCarrying.Memory::new).forget();
+		return bathin.think(level, NOON, level.getGameTime()).id;
+	}
+
+	/** GC-05: the roster names the waiting choice, opened by its key: Bathin's row says "awaiting your answer", the waiting icon. */
+	private static void rosterAwaiting(ClientGameTestContext context, TestDedicatedServerContext server, BlockPos perch, BlockPos at) {
+		String raised = server.computeOnServer(minecraft -> raise(minecraft, perch, at));
+		check("awaiting_answer".equals(raised), "His matter waits on the player: " + raised);
+		context.getInput().pressKey(RosterClient.key());
+		context.waitForScreen(RosterScreen.class);
+		context.waitFor(client -> RosterClient.state() != null, WAIT);
+		context.waitTicks(3);
+		String awaiting = context.computeOnClient(client -> Component.translatable("compose.jugcraft.worker.status.awaiting_answer").getString());
+		String rows = context.computeOnClient(client -> RosterClient.state().rows().stream()
+				.map(row -> row.name().getString() + ": " + row.waiting().getString() + " (icon " + row.icon() + ")").toList().toString());
+		Jugcraft.LOGGER.info("[garden-check] roster while his matter waits: {}", rows);
+		boolean says = context.computeOnClient(client -> RosterClient.state().rows().stream()
+				.anyMatch(row -> row.waiting().getString().equals(awaiting) && row.icon() == RosterStatePayload.WAITING));
+		check(says && awaiting.contains("awaiting your answer"), "Bathin's row says awaiting your answer, with the waiting icon: " + rows);
+		shot(context, "jugcraft_garden_roster_awaiting");
+		context.getInput().pressKey(InputConstants.KEY_ESCAPE);
+		context.waitForScreen(null);
+		String reading = server.computeOnServer(minecraft -> {
+			ServerLevel level = minecraft.overworld();
+			return PactReading.holder(level, (PactPerchBlockEntity) level.getBlockEntity(perch), level.getGameTime()).toString();
+		});
+		Jugcraft.LOGGER.info("[garden-check] Jade's reading of his perch while his matter waits: {}", reading);
+		check(reading.contains("two_roads") && reading.contains("awaiting_answer"), "Jade's reading names the matter and the waiting: " + reading);
+		if (FabricLoader.getInstance().isModLoaded("jade")) {
+			boolean hidden = context.computeOnClient(client -> client.gui.hud.isHidden());
+			context.runOnClient(client -> {
+				if (client.gui.hud.isHidden()) {
+					client.gui.hud.toggle();
+				}
+			});
+			try {
+				standSouth(server, perch);
+				context.waitTicks(10);
+				context.getInput().lookAt(perch);
+				context.waitTicks(20);
+				shot(context, "jugcraft_garden_bathin_matter_jade");
+			} finally {
+				restoreHud(context, hidden);
+			}
+		} else {
+			Jugcraft.LOGGER.info("[garden-check] Jade is not loaded: no Jade shot of his matter");
+		}
+	}
+
+	/**
+	 * GC-05: his matter on his kept page, by keyboard: the row and the question with two answers, none kept; it fits at GUI 2,
+	 * GUI 4 and 320x180, every control named; Enter on "take from it" keeps it at the perch (RESOLVE), marked; then "leave
+	 * it" again, so later steps start from the safe course.
+	 */
+	private static void matter(ClientGameTestContext context, TestDedicatedServerContext server, BlockPos perch) {
+		context.waitTicks(OPEN_GAP);
+		open(context, server, perch);
+		context.waitFor(client -> PactClient.state() != null && PactClient.state().mode() == PactStatePayload.KEEP
+				&& PactClient.state().spirit().answers().size() == 2, WAIT);
+		String shown = context.computeOnClient(client -> PactClient.state().spirit().matter().getString() + " / "
+				+ PactClient.state().spirit().answers().stream().map(answer -> answer.name().getString() + "=" + answer.amount()).toList() + " / "
+				+ PactClient.state().notes().stream().map(Component::getString).toList());
+		Jugcraft.LOGGER.info("[garden-check] his matter on the kept page: {}", shown);
+		boolean asked = context.computeOnClient(client -> PactClient.state().notes().stream().anyMatch(note -> note.getString().contains("awaits your answer"))
+				&& PactClient.state().spirit().answers().stream().allMatch(answer -> answer.amount() == 0)
+				&& screen(client).control("matter") != null && screen(client).control("answer:0") != null && screen(client).control("answer:1") != null);
+		check(asked, "The page says a choice waits and asks it, two answers, none kept: " + shown);
+		tabTo(context, "matter");
+		String narrated = context.computeOnClient(client -> screen(client).control("matter").getMessage().getString());
+		check(!narrated.isBlank(), "The matter is a focusable, narrated line: " + narrated);
+		fits(context, "his matter at GUI scale 2");
+		named(context);
+		shot(context, "jugcraft_garden_bathin_matter");
+		int width = context.computeOnClient(client -> client.getWindow().getWidth());
+		int height = context.computeOnClient(client -> client.getWindow().getHeight());
+		context.getInput().resizeWindow(1920, 1080);
+		context.runOnClient(client -> {
+			client.options.guiScale().set(4);
+			client.resizeGui();
+		});
+		context.waitTicks(10);
+		int applied = context.computeOnClient(client -> client.getWindow().getGuiScale());
+		check(applied == 4, "At GUI scale 4: " + applied);
+		fits(context, "his matter at GUI scale 4");
+		named(context);
+		shot(context, "jugcraft_garden_bathin_matter_scale4");
+		context.runOnClient(client -> {
+			client.options.guiScale().set(2);
+			client.resizeGui();
+		});
+		context.getInput().resizeWindow(320, 180);
+		context.waitTicks(10);
+		String gui = context.computeOnClient(client -> client.getWindow().getGuiScaledWidth() + "x" + client.getWindow().getGuiScaledHeight());
+		Jugcraft.LOGGER.info("[garden-check] his matter in a 320x180 window: GUI {}", gui);
+		check("320x180".equals(gui), "A 320x180 window draws a 320x180 GUI: " + gui);
+		fits(context, "his matter at 320x180");
+		named(context);
+		shot(context, "jugcraft_garden_bathin_matter_small");
+		context.getInput().resizeWindow(width, height);
+		context.waitTicks(10);
+		tabTo(context, "answer:1");
+		PactStatePayload.Result claimed = answer(context);
+		String kept = server.computeOnServer(minecraft -> String.valueOf(((PactPerchBlockEntity) minecraft.overworld().getBlockEntity(perch)).accord()));
+		boolean marked = context.computeOnClient(client -> PactClient.state().spirit().answers().get(0).amount() == 0
+				&& PactClient.state().spirit().answers().get(1).amount() == 1);
+		check(claimed.done() && "resolved".equals(claimed.reason()) && "claim".equals(kept) && marked,
+				"Enter on take from it keeps it at the perch, marked: " + claimed.reason() + " " + kept);
+		context.waitFor(client -> screen(client).control("result") instanceof PactScreen.Verdict verdict && !verdict.refused(), WAIT);
+		String focused = context.computeOnClient(client -> screen(client).focusedKey());
+		check("answer:1".equals(focused), "The keyboard stays on the answer it pressed: " + focused);
+		shot(context, "jugcraft_garden_bathin_answered");
+		tabTo(context, "answer:0");
+		PactStatePayload.Result yielded = answer(context);
+		String back = server.computeOnServer(minecraft -> String.valueOf(((PactPerchBlockEntity) minecraft.overworld().getBlockEntity(perch)).accord()));
+		check(yielded.done() && "yield".equals(back), "Changed back at once: leave it: " + back);
+		context.getInput().pressKey(InputConstants.KEY_ESCAPE);
+		context.waitForScreen(null);
+	}
+
+	/** Jade's readings of his perch and of him (read on the server: no Jade class); with Jade loaded, his overlay. */
+	private static void bathinJade(ClientGameTestContext context, TestDedicatedServerContext server, BlockPos perch) {
+		String readings = server.computeOnServer(minecraft -> {
+			ServerLevel level = minecraft.overworld();
+			CompoundTag ofPerch = PactReading.holder(level, (PactPerchBlockEntity) level.getBlockEntity(perch), level.getGameTime());
+			CompoundTag ofHim = PactReading.presence(level, bathinAt(minecraft, perch), level.getGameTime());
+			String both = ofPerch + " " + ofHim;
+			boolean right = "kept".equals(ofPerch.getStringOr("standing", "")) && BATHIN.equals(ofPerch.getStringOr("counterpart", ""))
+					&& VerdanceCarrying.WORK.equals(ofPerch.getStringOr("service", "")) && "active".equals(ofPerch.getStringOr("state", ""))
+					&& ofPerch.getIntOr("due_days", -1) == 7 && "kept".equals(ofHim.getStringOr("standing", ""))
+					&& PactReading.KEYS.containsAll(ofPerch.keySet()) && PactReading.KEYS.containsAll(ofHim.keySet())
+					&& !both.contains(player(minecraft).getUUID().toString()) && !both.contains(player(minecraft).getName().getString());
+			return (right ? "ok " : "bad ") + both;
+		});
+		Jugcraft.LOGGER.info("[garden-check] Jade's readings of his perch and of Bathin: {}", readings);
+		check(readings.startsWith("ok"), "Jade's readings: his pact, service, state and next offering, naming no player: " + readings);
+		if (FabricLoader.getInstance().isModLoaded("jade")) {
+			boolean hidden = context.computeOnClient(client -> client.gui.hud.isHidden());
+			context.runOnClient(client -> {
+				if (client.gui.hud.isHidden()) {
+					client.gui.hud.toggle();
+				}
+			});
+			try {
+				standSouth(server, perch);
+				context.waitTicks(10);
+				context.getInput().lookAt(perch.above());
+				context.waitTicks(20);
+				shot(context, "jugcraft_garden_bathin_jade");
+			} finally {
+				restoreHud(context, hidden);
+			}
+		} else {
+			Jugcraft.LOGGER.info("[garden-check] Jade is not loaded: no Jade shot of Bathin");
+		}
+	}
+
+	/**
+	 * His body from his front (south of the perch, facing north; he faces whoever opened it there): each loop as the server
+	 * drives it and each gesture frozen inside its telling pose, the HUD hidden. Waiting is posed with the Concordance
+	 * switched off (he serves at any hour, so there is no night to sleep through); his astir loop is not posed (an offering
+	 * due would change the upkeep later steps read, as Stolas's and Buer's: GC-P29). His depart and arrive show his ring of
+	 * dust (the server's sign, frozen with the world).
+	 */
+	private static void bathinPoses(ClientGameTestContext context, TestDedicatedServerContext server, BlockPos perch) {
+		boolean hidden = hideHud(context);
+		try {
+			standSouth(server, perch);
+			context.waitTicks(OPEN_GAP);
+			open(context, server, perch);
+			context.waitFor(client -> spiritAt(client, perch, BATHIN) instanceof LivingEntity body
+					&& Mth.degreesDifferenceAbs(body.yBodyRot, 0.0F) <= BATHIN_FACING_TOLERANCE, WAIT);
+			context.getInput().pressKey(InputConstants.KEY_ESCAPE);
+			context.waitForScreen(null);
+			context.getInput().lookAt(perch.above());
+			loopPoseOf(context, server, perch, BATHIN, BATHIN_IDLE, "jugcraft_garden_bathin_idle", false);
+			context.waitTicks(OPEN_GAP);
+			open(context, server, perch);
+			context.waitFor(client -> spiritAt(client, perch, BATHIN) instanceof BathinEntity bathin && bathin.listening(), WAIT);
+			loopPoseOf(context, server, perch, BATHIN, BATHIN_LISTEN, "jugcraft_garden_bathin_listen", true);
+			context.waitFor(client -> BATHIN_IDLE.equals(drawingOf(client, perch, BATHIN, MAIN)), WAIT);
+			AgreementHolder.Toggle suspended = server.computeOnServer(minecraft -> PactKeeping.suspend(minecraft.overworld(), player(minecraft),
+					holder(minecraft, perch), minecraft.overworld().getGameTime()));
+			check(suspended == AgreementHolder.Toggle.SUSPENDED, "Its holder suspends the pact: " + suspended);
+			loopPoseOf(context, server, perch, BATHIN, BATHIN_SUSPENDED, "jugcraft_garden_bathin_suspended", false);
+			AgreementHolder.Toggle resumed = server.computeOnServer(minecraft -> PactKeeping.resume(minecraft.overworld(), player(minecraft),
+					holder(minecraft, perch), minecraft.overworld().getGameTime()));
+			check(resumed == AgreementHolder.Toggle.RESUMED, "and resumes it: " + resumed);
+			context.waitFor(client -> BATHIN_IDLE.equals(drawingOf(client, perch, BATHIN, MAIN)), WAIT);
+			boolean on = server.computeOnServer(minecraft -> JugcraftConfig.isFeatureEnabled(JugcraftConcordance.FEATURE));
+			server.runOnServer(minecraft -> JugcraftConfig.setFeatureEnabled(JugcraftConcordance.FEATURE, false));
+			try {
+				loopPoseOf(context, server, perch, BATHIN, BATHIN_WAITING, "jugcraft_garden_bathin_waiting", false);
+			} finally {
+				server.runOnServer(minecraft -> JugcraftConfig.setFeatureEnabled(JugcraftConcordance.FEATURE, on));
+			}
+			context.waitFor(client -> BATHIN_IDLE.equals(drawingOf(client, perch, BATHIN, MAIN)), WAIT);
+			clipPose(context, server, perch, BATHIN, BathinEntity.Gesture.INSPECT, 0.4, 1.2, "jugcraft_garden_bathin_inspect");
+			clipPose(context, server, perch, BATHIN, BathinEntity.Gesture.ASSENT, 0.3, 0.9, "jugcraft_garden_bathin_assent");
+			clipPose(context, server, perch, BATHIN, BathinEntity.Gesture.REFUSE, 0.3, 1.0, "jugcraft_garden_bathin_refuse");
+			clipPose(context, server, perch, BATHIN, BathinEntity.Gesture.WORK, 0.15, 0.75, "jugcraft_garden_bathin_work");
+			// He leaves (depart holds its last frame: nothing of him drawn) and comes back (his arrival replaces it), each in a ring of dust.
+			clipPose(context, server, perch, BATHIN, BathinEntity.Gesture.DEPART, 0.25, 0.75, "jugcraft_garden_bathin_depart");
+			clipPose(context, server, perch, BATHIN, BathinEntity.Gesture.ARRIVE, 0.1, 0.6, "jugcraft_garden_bathin_arrive");
+			context.waitFor(client -> drawingOf(client, perch, BATHIN, GESTURES).isEmpty()
+					&& BATHIN_IDLE.equals(drawingOf(client, perch, BATHIN, MAIN)), WAIT);
+			boolean kept = server.computeOnServer(minecraft -> holds(minecraft, BATHIN) && bathinAt(minecraft, perch).isAlive());
+			check(kept, "His gestures change nothing: the pact is kept and he is on his perch");
+		} finally {
+			restoreHud(context, hidden);
+		}
+	}
+
+	/** Dossier 2 item 6: End asks first; then his coil tightens and he is gone in a ring of dust; the pact ends once. */
+	private static void bathinEnding(ClientGameTestContext context, TestDedicatedServerContext server, BlockPos perch) {
+		context.waitTicks(OPEN_GAP);
+		open(context, server, perch);
+		context.waitFor(client -> PactClient.state() != null && PactClient.state().mode() == PactStatePayload.KEEP, WAIT);
+		UUID him = server.computeOnServer(minecraft -> bathinAt(minecraft, perch).getUUID());
+		press(context, "end");
+		context.waitForScreen(ConfirmScreen.class);
+		boolean keepFocused = context.computeOnClient(client -> client.gui.screen().getFocused() instanceof AbstractWidget keep
+				&& keep.getMessage().getString().equals(Component.translatable("screen.jugcraft.pact.end.no").getString()));
+		check(keepFocused, "End asks first, the keyboard on Keep it");
+		shot(context, "jugcraft_garden_bathin_end_confirm");
+		context.getInput().pressKey(InputConstants.KEY_ESCAPE);
+		context.waitForScreen(PactScreen.class);
+		context.waitTicks(5);
+		boolean stillHeld = server.computeOnServer(minecraft -> holds(minecraft, BATHIN));
+		check(stillHeld, "Keep it (Esc) ends nothing");
+		press(context, "end");
+		context.waitForScreen(ConfirmScreen.class);
+		tabToLabel(context, Component.translatable("screen.jugcraft.pact.end.yes").getString());
+		PactStatePayload.Result ended = answer(context);
+		context.waitFor(client -> BathinEntity.Gesture.DEPART.animation.equals(gesturedOf(client, perch, BATHIN)), WAIT);
+		RawAnimation going = context.computeOnClient(client -> gesturedOf(client, perch, BATHIN));
+		String after = server.computeOnServer(minecraft -> holds(minecraft, BATHIN) + " "
+				+ (minecraft.overworld().getEntity(him) instanceof BathinEntity left ? "departing " + left.departing() + ", rings " + left.rings() : "gone"));
+		int endedMode = context.computeOnClient(client -> PactClient.state().mode());
+		Jugcraft.LOGGER.info("[garden-check] ended: {}; held, then his presence = {}", ended.reason(), after);
+		check(ended.done() && "ended".equals(ended.reason()) && BathinEntity.Gesture.DEPART.animation.equals(going)
+				&& endedMode == PactStatePayload.CLOSED && after.startsWith("false"), "Ending ends the pact once; his coil tightens and he goes: " + after);
+		context.waitFor(client -> spiritAt(client, perch, BATHIN) == null, WAIT);
+		shot(context, "jugcraft_garden_bathin_ended");
+		context.getInput().pressKey(InputConstants.KEY_ESCAPE);
+		context.waitForScreen(null);
 	}
 }

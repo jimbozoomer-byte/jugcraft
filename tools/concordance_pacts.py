@@ -17,8 +17,10 @@ and the pact menu's protocol. D-05 (D-S1, D-S3, D-S6, D-S12, D-S16): Star-reckon
 
 Java: concordance/spirits/StolasRegard.java, PactRegards, PactPerchBlock(Entity), PactMenu, PactRequestPayload,
 PactStatePayload, PactSessions, PactCompact, PactKeeping, PactSpiritEntity (every pact spirit's shared body: the garden
-cohort, GC-01), PactSpirits, PactService, PactServices, StarReckoning, StolasEntity, BuerEntity and StrainTending (the garden
-cohort, GC-04: Buer, his body adapted by tools/garden_bodies.py); concordance/worker/PactDefinition,
+cohort, GC-01), PactSpirits, PactService, PactServices, PactAccords (a pact's accord: the garden cohort, GC-05),
+StarReckoning, StolasEntity, BuerEntity and StrainTending (the garden cohort, GC-04: Buer, his body adapted by
+tools/garden_bodies.py), BathinEntity and VerdanceCarrying (GC-05: Bathin, his body built by tools/garden_bodies.py from
+BUILT); concordance/worker/PactDefinition,
 PactParser, PactCatalog; client/PactClient, PactScreen and PactSpiritRenderers (each spirit's renderer from its SPIRITS
 row; Stolas's raven body, D-06 (D-S5): the Flashjack rig's geometry copied by tools/owner_art.py from OWNER_FILES, its
 skin, glowmask and animations adapted by tools/stolas_body.py from ADAPTED). tools/concordance.py merges these tables into
@@ -95,12 +97,12 @@ JOURNAL = {
 
 # Java: worker/PactParser.java (check_pacts compares).
 PARSER = {"MAX_COMPACT_ITEMS": 4, "MAX_COMPACT_COUNT": 64, "MAX_RESONANCE": 32, "MAX_BEATS": 3}
-WORK = ["star_reckoning", "strain_tending"]
+WORK = ["star_reckoning", "strain_tending", "verdance_carrying"]
 # The works that serve only their holder (Java: PactParser.HOLDER_ONLY): a definition with one must be "personal".
 HOLDER_ONLY = ["star_reckoning"]
 # Each work's service class (Java: spirits/<class>.java implements PactService, its WORK constant; registered once in
-# Workers.register). Append with each work (GC-04: "strain_tending": "StrainTending").
-SERVICE_CLASSES = {"star_reckoning": "StarReckoning", "strain_tending": "StrainTending"}
+# Workers.register). Append with each work (GC-04: "strain_tending": "StrainTending"; GC-05: "verdance_carrying").
+SERVICE_CLASSES = {"star_reckoning": "StarReckoning", "strain_tending": "StrainTending", "verdance_carrying": "VerdanceCarrying"}
 # Java: spirits/PactStatePayload.java (MAX_*), PactSessions.java (TIMEOUT_TICKS), PactMenu.java (RATE_TICKS),
 # PactPerchBlockEntity.java (LOOK_TICKS), PactKeeping.java (MAX_OFFERINGS).
 STATE_LIMITS = {"MAX_BEATS": 3, "MAX_TERMS": 16, "MAX_NOTES": 12, "MAX_CHOICES": 8, "MAX_COMPACT": 8, "MAX_KEY": 64,
@@ -117,6 +119,11 @@ FLASHJACK = "assets/ars_jymbaumental/"
 # The owner's Decor Blossom, Buer's body (the garden cohort, GC-04; art plan). Catalog rows: art/owner-library/catalog/
 # files.csv:19364 (geometry), :19091 (animations), :20417 (texture, 32x32).
 BLOSSOM = "assets/ars_jimbaux/"
+# The owner's paintings Bathin's skin is painted from (the garden cohort, GC-05; art plan): under
+# art/owner-library/originals/Blocks/, catalog files.csv:2164 (the willow log's bark: his coil and his skin) and :2069 (the
+# Spanish moss: his mantle, beard, hair, belly scutes and eyes). Colours only are read; no texel, shape or layout is copied.
+WILLOW = "biomes and tree blocks/willow_log.png"
+MOSS = "biomes and tree blocks/spanish_moss.png"
 # Concordance garden cohort, GC-01 (SG11; docs/features/concordance-garden-cohort.md): one row a pact spirit. Its offer
 # (data/jugcraft/concordance/pact/<name>.json), offerings tag, three beats, service term, cues and body are written from
 # here; PACTS, ENTITY_NAMES, OFFERINGS, SOUND_EVENTS, SOUND_FILES, OWNER_FILES, ADAPTED and Stolas's body tables below are
@@ -281,6 +288,95 @@ SPIRITS = {
                       "jugcraft_garden_buer_arrive"],
         },
     },
+    # Concordance garden cohort, GC-05 (Dossier 2; docs/features/bathin-pact.md): Bathin, the eighteenth spirit, Verdance
+    # carrying. His body is built (tools/garden_bodies.py), not adapted: no owner rig fits a strong man on a serpent's coil.
+    "bathin": {
+        "name": "Bathin",
+        "java": "BathinEntity",
+        # His box holds his coil (0.875 across); his shoulders (1.25) reach past it as a vanilla mob's arms do (GC-P56).
+        "entity": {"width": 0.9, "height": 1.9, "eye": 1.65},
+        "station": "perch",
+        # His sign: the ender pearl, the thing that goes from one place to another at once (GC-P58).
+        "sign": "minecraft:ender_pearl",
+        "pact": {
+            "agreement": rid("bathin_pact"),
+            "research": rid("garden_regard"),
+            "service": {"work": "verdance_carrying", "radius": 10, "from": 0, "to": 24000, "quota": 12},
+            "upkeep": {"offering": rid("bathin_offerings"), "count": 4, "period_days": 7, "grace_days": 1, "cap": 4},
+            "beneficiaries": "party",
+            "compact": {"items": [{"item": "minecraft:ender_pearl", "count": 2}, {"item": rid("verdant_chaff"), "count": 8}],
+                        "resonance": 0},
+        },
+        # His offering (GC-P41): Verdant Chaff, what a harvest leaves; no Styx gift.
+        "offerings": {"name": "Bathin's Offerings", "items": [rid("verdant_chaff")]},
+        # His three beats (GC-P40; GC-P58 adds the stage direction before the greeting, as Stolas's and Buer's have). No
+        # source quotation in game (GC-S14).
+        "beats": {
+            "greeting": "A ring of dust settles, and a broad-shouldered man is coiled on the perch as if he had always been "
+                        "there, a serpent's tail wound beneath him. \"Roads are for those who must walk them. I am Bathin.\"",
+            "service": "\"What your Hearts hold, I set down where it is wanted: a Gleaner far off, a pylon away from your "
+                       "beds. Nothing is ever on the way.\"",
+            "price": "\"Chaff, four to the week. I carry the green; keep me in husk.\"",
+        },
+        # His numbers from the tables that hold the Java's (garden/GleanerBlockEntity: the Gleaner's own draw and reach;
+        # worker/Pacts.REACH); his service's two conditions, the holder near and only what the holder could change by hand,
+        # named before anything is spent (as Buer's, GC-04's unit review).
+        "term": "Verdance carrying: at any hour Bathin moves Verdance at once from an awake Verdant Heart of yours or your "
+                f"party's in his area, up to {ecology.GLEANER_DRAW} at a time into a Gleaner more than "
+                f"{ecology.HEART_REACH} blocks from that Heart, or into a Ley Pylon not beside it at the Heart's own 3 for "
+                "2; one move at a time, nothing ever on the way and none kept by him. A Heart that already pours into its own "
+                f"pylon he leaves alone until you answer. He works only while you are within {workers.PACT['REACH']} blocks of "
+                "the perch, and never on a Heart, Gleaner or pylon you could not change by hand",
+        # His cues, in BathinEntity.SOUND_IDS' order: (subtitle, runtime files). The art plan's mono files (GC-S13): the
+        # conch's two recordings and the sea staff's three bubbles, told apart by pitch (GC-P58, "pitch" below).
+        "cues": {
+            "arrive": ("Bathin is suddenly here", ["menagerie/cavern/item/magic_conch/magic_conch_summon"]),
+            "listen": ("Bathin listens", ["menagerie/cavern/item/sea_staff/sea_staff_bubble_1"]),
+            "inspect": ("Bathin weighs it", ["menagerie/cavern/item/sea_staff/sea_staff_bubble_2"]),
+            "assent": ("Bathin assents", ["menagerie/cavern/item/magic_conch/magic_conch_cast"]),
+            "refuse": ("Bathin refuses", ["menagerie/cavern/item/magic_conch/magic_conch_cast"]),
+            "depart": ("Bathin is gone", ["menagerie/cavern/item/magic_conch/magic_conch_cast"]),
+            "work": ("Bathin carries Verdance", ["menagerie/cavern/item/sea_staff/sea_staff_bubble_0"]),
+        },
+        # The departing conch at 1.8 lasts 1.0 s, his departure's length: an entity's sound stops when it is gone.
+        "pitch": {"arrive": 1.5, "listen": 1.2, "refuse": 0.7, "depart": 1.8},
+        # His body (GC-S12, GC-P56): every file built by tools/garden_bodies.py ("built": runtime path -> (the Blocks-folder
+        # paintings it reads, its builder)), written and checked by tools/owner_art.py.
+        "body": {
+            "built": {
+                "geckolib/models/entity/bathin.geo.json": ((), "garden_bodies.bathin_model"),
+                "geckolib/animations/entity/bathin.animation.json": ((), "garden_bodies.bathin_animations"),
+                "textures/entity/bathin.png": ((WILLOW, MOSS), "garden_bodies.bathin_skin"),
+                "textures/entity/bathin_glowmask.png": ((WILLOW, MOSS), "garden_bodies.bathin_glowmask"),
+            },
+            "scale": 1.0,
+            "render": {"shadow": 0.5, "wide": 0.3, "low": 0.1, "above": 0.3, "glow": True},
+            # His loops (BathinEntity.Loop) and gestures (BathinEntity.Gesture), every clip his own.
+            "loops": {"idle": "animation.bathin.idle", "listen": "animation.bathin.listen", "waiting": "animation.bathin.waiting",
+                      "suspended": "animation.bathin.suspended", "astir": "animation.bathin.astir"},
+            "gestures": {"arrive": "animation.bathin.arrive", "inspect": "animation.bathin.inspect",
+                         "assent": "animation.bathin.assent", "refuse": "animation.bathin.refuse",
+                         "depart": "animation.bathin.depart", "work": "animation.bathin.work"},
+            # (seconds, (the telling pose's window)): ConcordanceGardenPactClientGameTests freezes the world inside it.
+            "gesture_times": {"arrive": (1.5, (0.1, 0.6)), "inspect": (2.0, (0.4, 1.2)), "assent": (1.5, (0.3, 0.9)),
+                              "refuse": (1.6, (0.3, 1.0)), "depart": (1.0, (0.25, 0.75)), "work": (1.5, (0.15, 0.75))},
+            "loop_lengths": {"idle": 4.0, "listen": 3.0, "waiting": 2.0, "suspended": 6.0, "astir": 1.5},
+            # His listening pose (degrees): arms folded, chest up, head inclined to his speaker; every screen gesture starts
+            # and ends on it.
+            "attend": {"waist": (-4, 0, 0), "head": (8, 0, 0), "arm_left": (-60, 0, 40), "arm_right": (-60, 0, -40)},
+            # The texels his glowmask lights: his two eyes on the head's front face (garden_bodies.BATHIN_FACE).
+            "eye_texels": ((83, 27), (86, 27)),
+            # Detail (a): the ring of dust he arrives and departs in. Detail (b): the shimmer at each end of a carry. Each is
+            # one of the Concordance's shared signs (tools/concordance_signs.py SIGNS; Java BathinEntity.RING, SHIMMER):
+            # nothing in concordance/ sends particles of its own, so every client draws them as its settings allow.
+            "ring": "shove",
+            "shimmer": "work",
+            "shots": ["jugcraft_garden_bathin_idle", "jugcraft_garden_bathin_listen", "jugcraft_garden_bathin_waiting",
+                      "jugcraft_garden_bathin_suspended", "jugcraft_garden_bathin_inspect", "jugcraft_garden_bathin_assent",
+                      "jugcraft_garden_bathin_refuse", "jugcraft_garden_bathin_work", "jugcraft_garden_bathin_depart",
+                      "jugcraft_garden_bathin_arrive"],
+        },
+    },
 }
 # Derived (keep these names: tools/concordance.py, tools/owner_art.py, tools/stolas_body.py and check_mod_data read them).
 PACTS = {name: dict(spirit["pact"], beats=list(spirit["beats"])) for name, spirit in SPIRITS.items()}
@@ -292,8 +388,10 @@ OFFERINGS_TAG = SPIRITS["stolas"]["pact"]["upkeep"]["offering"]
 OFFERINGS = SPIRITS["stolas"]["offerings"]["items"]
 BLOCKS = {"pact_perch": {"name": "Pact Perch"}}
 PERCH_TOOLTIP = ("Use: invite a pact spirit whose Regard you understand (Stolas also wants a star you observed yourself; "
-                 f"Buer an awake Verdant Bed of yours within {SPIRITS['buer']['pact']['service']['radius']} blocks); or keep "
-                 "the pact seated here. Break it and the pact stays yours, without its perch.")
+                 f"Buer an awake Verdant Bed of yours within {SPIRITS['buer']['pact']['service']['radius']} blocks; Bathin a "
+                 "Verdant Heart of yours and a Gleaner of yours or a Ley Pylon of yours or no one's within "
+                 f"{SPIRITS['bathin']['pact']['service']['radius']}); or keep the pact seated here. Break it and the pact "
+                 "stays yours, without its perch.")
 # Polished deepslate, not a slab: the progression graph follows only listed vanilla items (a slab is not in
 # concordance_progression.VANILLA_SOURCES).
 RECIPE = {"type": "minecraft:crafting_shaped", "category": "misc", "pattern": ["SAS", " L ", " D "],
@@ -566,6 +664,10 @@ SCREEN = {
 # their Chunk D names.
 OWNER_FILES = {target: source for spirit in SPIRITS.values() for target, source in spirit["body"].get("owner_files", {}).items()}
 ADAPTED = {target: entry for spirit in SPIRITS.values() for target, entry in spirit["body"].get("adapted", {}).items()}
+# Files of a pact spirit's body built from code (the garden cohort, GC-05 on: Bathin's), by runtime path: (the Blocks-folder
+# paintings it reads, its builder "garden_bodies.<function>"); tools/owner_art.py writes and checks them beside the copied
+# and adapted files.
+BUILT = {target: entry for spirit in SPIRITS.values() for target, entry in spirit["body"].get("built", {}).items()}
 _STOLAS = SPIRITS["stolas"]["body"]
 BODY_SCALE = _STOLAS["scale"]  # client/PactSpiritRenderers: Stolas's row
 LOOPS = _STOLAS["loops"]
@@ -660,7 +762,7 @@ JADE_STANDINGS = ["none", "kept", "copy", "unreadable", "disabled"]
 JADE_STATES = ["active", "suspended", "upkeep_due", "upkeep_held"]
 # Every work's short name (concordance_workers.WORK and WORK here; check_pacts holds the tables together).
 SERVICE_NAMES = {"gather": "Gathering", "courier": "Carrying its post's requests", "star_reckoning": "Star-reckoning",
-                 "strain_tending": "Strain tending"}
+                 "strain_tending": "Strain tending", "verdance_carrying": "Verdance carrying"}
 JADE_PROVIDERS = {"pact_perch": "Pact Perch", "spirit_anchor": "Spirit Anchor"}
 TOOLTIPS.update({
     "jade.pact.none": "Keeps no agreement",
@@ -776,12 +878,55 @@ SERVICE_WORDS = {
         },
         "answers": ["nothing_to_mend"],
     },
+    # GC-05 (Dossier 2 items 2, 3 and 5; GC-P48 to GC-P52, GC-P58): Bathin's Verdance carrying.
+    "verdance_carrying": {
+        "messages": {
+            "missing": "\"Nothing here to carry, or nowhere to carry it.\" Bathin comes only where a Verdant Heart you keep "
+                       "lies within %s blocks of the perch, with a Gleaner of yours or a Ley Pylon of yours or no one's within "
+                       "%s blocks too",
+            "row.service": "Verdance carrying: %s of %s moves today, each at most 8 Verdance into a far Gleaner or 3 "
+                           "batches into a Ley Pylon (3 Verdance for 2 Ley Charge), with nothing ever on the way",
+            "row.moved": "Last: %s Verdance from the Heart at %s set down in the Gleaner at %s, both in the same moment",
+            "row.poured": "Last: %s Verdance from the Heart at %s set down in the Ley Pylon at %s as %s Ley Charge, both "
+                          "in the same moment",
+            "row.leaving": "Leaving %s of your Hearts alone: each pours into a pylon of its own beside it, as you answered",
+            "matter.two_roads": "\"Your Heart already has a road. Shall I take from it too?\" (the Heart at %s pours into "
+                                "the Ley Pylon beside it)",
+        },
+        "screen": {
+            "heading": "Verdance carrying",
+            "about": "Bathin works by himself, at any hour: the rows above say how many moves he has made today and his "
+                     "last. A Heart that already pours into a pylon beside it waits for your answer.",
+        },
+        # Jade shows a reading to whoever looks, so his notes are worded in the third person like every Jade pact line (the
+        # C3 review's rule for the accord line).
+        "notes": {
+            "two_roads": "Hearts with their own road: %s, waiting for his holder's answer at the perch",
+            "empty": "Nothing to carry: the Hearts in his area hold no Verdance he may take",
+            "nowhere": "Nowhere to carry it: every Gleaner and pylon he may fill is full, or too near its Heart",
+        },
+        "answers": ["nothing_to_carry"],
+        # The accord machinery's words (GC-P49): his answers, the safe course first (Java VerdanceCarrying.ACCORDS, in this
+        # order; append only; each at most ACCORD_MAX characters), his matter in general (shown with a kept answer when none
+        # is raised now) and each matter his complication raises, in Jade's short words (third person: Jade's reader may be
+        # anyone).
+        "accords": {"yield": "Leave it", "claim": "Take from it"},
+        "question": "\"Shall I take from a Heart that already has a road?\" (a Heart of yours that pours into a pylon of its own)",
+        "matters": {"two_roads": "His matter: a Heart here already pours into a pylon of its own"},
+    },
 }
 MESSAGES.update({f"pact.{work}.{key}": text for work, words in SERVICE_WORDS.items() for key, text in words["messages"].items()})
 SCREEN.update({f"screen.{MOD}.pact.service.{work}.{key}": text for work, words in SERVICE_WORDS.items()
                for key, text in words["screen"].items()})
 TOOLTIPS.update({f"jade.pact.note.{work}.{note}": text for work, words in SERVICE_WORDS.items()
                  for note, text in words["notes"].items()})
+# GC-05 (the accord machinery, GC-P49): a work whose matter is a choice words its answers, its question and its matters' Jade
+# lines here (none before Bathin's).
+MESSAGES.update({f"pact.{work}.accord.{value}": text for work, words in SERVICE_WORDS.items()
+                 for value, text in words.get("accords", {}).items()})
+MESSAGES.update({f"pact.{work}.question": words["question"] for work, words in SERVICE_WORDS.items() if words.get("accords")})
+TOOLTIPS.update({f"jade.pact.matter.{work}.{matter}": text for work, words in SERVICE_WORDS.items()
+                 for matter, text in words.get("matters", {}).items()})
 # Each cue's pitch where its SPIRITS row gives one (tools/concordance.py sounds(); a sounds.json entry's "pitch").
 SOUND_PITCH = {f"{name}.{cue}": pitch for name, spirit in SPIRITS.items() for cue, pitch in spirit.get("pitch", {}).items()}
 # The cue files the art plan names for each garden spirit (docs/features/concordance-garden-cohort.md, "Sounds"; every one
@@ -797,3 +942,19 @@ GARDEN_CLIENT_SHOTS = ["jugcraft_garden_regard_tooltip", "jugcraft_garden_choose
                        "jugcraft_garden_buer_overworked", "jugcraft_garden_buer_jade", "jugcraft_garden_buer_below",
                        "jugcraft_garden_buer_faces_east", "jugcraft_garden_buer_faces_south", "jugcraft_garden_buer_faces_west",
                        "jugcraft_garden_buer_faces_north", "jugcraft_garden_buer_end_confirm", "jugcraft_garden_buer_ended"]
+# ------------------------------------------------------------------------------------------- garden cohort, GC-05: Bathin
+ART_SOUNDS["bathin"] = ["menagerie/cavern/item/magic_conch/magic_conch_summon", "menagerie/cavern/item/magic_conch/magic_conch_cast",
+                        "menagerie/cavern/item/sea_staff/sea_staff_bubble_0", "menagerie/cavern/item/sea_staff/sea_staff_bubble_1",
+                        "menagerie/cavern/item/sea_staff/sea_staff_bubble_2"]
+# What ConcordanceGardenPactClientGameTests photographs of Bathin besides his body shots (GC-P59).
+GARDEN_CLIENT_SHOTS += ["jugcraft_garden_bathin_nothing_to_carry", "jugcraft_garden_bathin_chooser",
+                        "jugcraft_garden_bathin_conversation", "jugcraft_garden_bathin_conversation_scale4",
+                        "jugcraft_garden_bathin_conversation_small", "jugcraft_garden_bathin_terms",
+                        "jugcraft_garden_bathin_terms_scale4", "jugcraft_garden_bathin_terms_small", "jugcraft_garden_bathin_refused",
+                        "jugcraft_garden_bathin_kept", "jugcraft_garden_bathin_shimmer", "jugcraft_garden_bathin_jade",
+                        "jugcraft_garden_bathin_faces_east", "jugcraft_garden_bathin_faces_south",
+                        "jugcraft_garden_bathin_faces_west", "jugcraft_garden_bathin_faces_north",
+                        "jugcraft_garden_bathin_end_confirm", "jugcraft_garden_bathin_ended"]
+# What it photographs of the accord (GC-05; the accord machinery's client steps), appended to Buer's and Bathin's.
+GARDEN_CLIENT_SHOTS += ["jugcraft_garden_roster_awaiting", "jugcraft_garden_bathin_matter_jade", "jugcraft_garden_bathin_matter",
+                        "jugcraft_garden_bathin_matter_scale4", "jugcraft_garden_bathin_matter_small", "jugcraft_garden_bathin_answered"]

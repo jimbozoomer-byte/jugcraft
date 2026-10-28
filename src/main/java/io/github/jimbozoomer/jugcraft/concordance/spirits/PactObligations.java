@@ -30,7 +30,9 @@ import net.minecraft.world.entity.player.Player;
 public final class PactObligations {
 	/** The acts by hand a garden service may take as its first obligation. Ids are words (lang), never saved. Append only: unit 2 DEVICE, 3 READ, 4 GRAFT, 5 FEED, 6 HARVEST. Keep equal to tools/concordance_garden_pacts.py ACTS. */
 	public enum Act {
-		TEND("tend");
+		TEND("tend"),
+		/** GC-05 (Bathin): an awake living device (a Verdant Heart, Gleaner, Mulch Maw or Habitat Gauge) read or set with an empty hand. */
+		DEVICE("device");
 
 		public final String id;
 

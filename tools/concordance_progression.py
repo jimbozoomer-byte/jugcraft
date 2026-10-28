@@ -230,6 +230,10 @@ VANILLA_SOURCES = {
     "minecraft:stone_bricks": ("craftable", "stone", "", ""),
     "minecraft:polished_deepslate": ("craftable", "cobbled deepslate, plentiful below the surface", "", ""),
     "minecraft:lightning_rod": ("craftable", "copper ingots", "", ""),
+    # The garden cohort, GC-05: the Gleaner Bathin carries to, on the garden route (its recipe: vines, a hopper, a flower pot).
+    "minecraft:vine": ("renewable", "vines grow on jungle and swamp trees and spread; shears take them", "", ""),
+    "minecraft:hopper": ("craftable", "iron ingots and a chest", "", ""),
+    "minecraft:flower_pot": ("craftable", "bricks, from smelted clay", "", ""),
     # The Concord Spire's shaft and crowns (roadmap step 25).
     "minecraft:deepslate_bricks": ("craftable", "polished deepslate", "", ""),
     "minecraft:deepslate_tiles": ("craftable", "deepslate bricks", "", ""),

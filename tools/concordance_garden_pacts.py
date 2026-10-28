@@ -14,8 +14,8 @@ GC-03 (GC-S9, GC-P6, GC-P7): The Garden's Regard, the cohort's one research, and
 - The bed index (Java: spirits/GardenReach; REACH here).
 
 tools/concordance.py merges these tables into its own; tools/check_mod_data.py (check_garden_pacts) holds the Java and the
-data to them. Each spirit's unit adds its work to OBLIGATIONS and CONSTANTS and its codex page to PAGES (GC-04: Buer's),
-and its row to DISTINCT.
+data to them. Each spirit's unit adds its work to OBLIGATIONS and CONSTANTS and its codex page to PAGES (GC-04: Buer's;
+GC-05: Bathin's), and its row to DISTINCT.
 """
 
 import concordance_ecology as ecology
@@ -38,15 +38,23 @@ SPECIMENS = {rid("sunpetal"): "Sunpetal", rid("dewmoss"): "Dewmoss", rid("gloamc
              rid("mendvetch"): "Mendvetch", rid("verdant_chaff"): "Verdant Chaff"}
 MASTERY_SPIRITS = 3  # Java: GardenPacts.MASTERY_SPIRITS: the mastered rule's distinct (GC-S9)
 # Java: PactObligations.Act, in order; append only (unit 2 device, 3 read, 4 graft, 5 feed, 6 harvest).
-ACTS = ["tend"]
+ACTS = ["tend", "device"]
 # Each act's one-line hook: (Java file under concordance/, the member it is in, the line, what it follows, what it precedes).
 HOOKS = {"tend": ("garden/VerdantBedBlock.java", "static void tendBy(",
                   "PactObligations.performed(level, player, PactObligations.Act.TEND, pos);",
-                  "if (bed.tend(level.getGameTime())) {", "} else {")}
-OBLIGATIONS = {"strain_tending": "tend"}  # work -> act (each act at most one work); GC-04: Buer's
+                  "if (bed.tend(level.getGameTime())) {", "} else {"),
+         # GC-05: an awake living device read or set with an empty hand (after useEmpty; a dormant one returns before it, and
+         # its return at four tabs never matches the method's last at two).
+         "device": ("garden/LivingDeviceBlock.java", "protected InteractionResult useWithoutItem(",
+                    "PactObligations.performed(serverLevel, server, PactObligations.Act.DEVICE, pos);",
+                    "useEmpty(device, server, serverLevel);", "}\n\t\treturn InteractionResult.SUCCESS;")}
+OBLIGATIONS = {"strain_tending": "tend", "verdance_carrying": "device"}  # work -> act (each act at most one work); GC-04: Buer's; GC-05: Bathin's
 # work -> {Java file under concordance/: {constant: value}}; each spirit's unit adds its own (check_garden_pacts).
 # GC-04: Buer remembers today's eases of at most 16 beds, and asks GardenPacts.target about at most 8 beds a think.
-CONSTANTS = {"strain_tending": {"spirits/StrainTending.java": {"MEMORY": 16, "MAX_ASKED": 8}}}
+# GC-05: a move of Bathin's sets down at most 8 (the Gleaner's own draw) or pours at most 3 batches; at most 8 places asked a
+# think.
+CONSTANTS = {"strain_tending": {"spirits/StrainTending.java": {"MEMORY": 16, "MAX_ASKED": 8}},
+             "verdance_carrying": {"spirits/VerdanceCarrying.java": {"MOVE_MAX": 8, "MAX_BATCHES": 3, "MAX_ASKED": 8}}}
 REACH = {"MAX_BEDS": 64, "REFRESH_TICKS": 200}  # Java: spirits/GardenReach (GC-P2)
 # GE8: mechanically distinct services. Each garden work changes one kind of state through one call that only its service
 # class makes, under its own verb; check_garden_pacts holds the classes to the rows and no two rows alike. Each spirit's
@@ -54,6 +62,10 @@ REACH = {"MAX_BEDS": 64, "REFRESH_TICKS": 200}  # Java: spirits/GardenReach (GC-
 DISTINCT = {
     "strain_tending": {"verb": "ease", "state": "a Verdant Bed's harvest strain", "call": "bed.tend(now)",
                        "class": "StrainTending"},
+    # GC-05: Bathin's; "also" is his second call (the pylon road), made once by his class (check_garden_pacts).
+    "verdance_carrying": {"verb": "move an essence at once", "state": "a Verdant Heart's and a Gleaner's or Ley Pylon's reservoirs",
+                          "call": "gleaner.receiveFrom(heart, record.holder(), MOVE_MAX, level)", "class": "VerdanceCarrying",
+                          "also": "heart.pourInto(pylon, level, MAX_BATCHES)"},
 }
 CODEX_PLACE = (6, 4)  # the Binding category's map: (0..6, 0..4) holds eleven entries; (6, 4) is free (check_concordance)
 # GC-05 (GC-P45, GC-P54): a device index (GardenReach.devices) holds at most this many Hearts, Gleaners and Ley Pylons, each.
@@ -91,7 +103,9 @@ MESSAGES = {
     "examine.garden_regard": "You look at the %s as the garden's spirits would: for what its bed gave it",
     "garden_pact.obligation": "First obligation: %s by hand inside the pact's area while it is active",
     "garden_pact.obligation_kept": "First obligation kept: %s of %s garden spirits toward mastering The Garden's Regard",
-    **{f"garden_pact.act.{act}": text for act, text in {"tend": "tend a strained Verdant Bed"}.items()},
+    **{f"garden_pact.act.{act}": text for act, text in {
+        "tend": "tend a strained Verdant Bed",
+        "device": "read or set an awake Verdant Heart, Gleaner, Mulch Maw or Habitat Gauge"}.items()},
 }
 # Under tooltip.jugcraft.concordance. (tools/concordance.py TOOLTIPS).
 TOOLTIPS = {"garden_regard_specimen": "The garden's spirits regard this: sneak and use it in the air to examine it"}
@@ -101,6 +115,9 @@ TOOLTIPS = {"garden_regard_specimen": "The garden's spirits regard this: sneak a
 _BUER = pacts.SPIRITS["buer"]["pact"]
 _BUER_ITEMS = {rid("mendvetch"): "Mendvetch", "minecraft:bone_meal": "bone meal"}  # his compact's and offering's words
 _BUER_OFFERING = _BUER_ITEMS[pacts.SPIRITS["buer"]["offerings"]["items"][0]]
+# GC-05: Bathin's (Dossier 2), their numbers read from his offer and the tables that hold the Java's, as Buer's.
+_BATHIN = pacts.SPIRITS["bathin"]["pact"]
+_BATHIN_ITEMS = {"minecraft:ender_pearl": "ender pearls", rid("verdant_chaff"): "Verdant Chaff"}  # his compact's and offering's words
 
 
 def _count(n):
@@ -133,6 +150,35 @@ PAGES = [
      + ("a day's grace" if _BUER["upkeep"]["grace_days"] == 1 else f"{_BUER['upkeep']['grace_days']} days' grace")
      + ", then the pact is suspended with nothing lost. Your first obligation: tend a strained bed in his area yourself, "
      "with an empty hand, while the pact is active.", ("garden_regard", "understood")),
+    # GC-05: Bathin's (Dossier 2). No source quotation (GC-S14); his matter's page is the accord's.
+    ("text", "Bathin",
+     "Bathin, a spirit of the old books, moves what is wanted from where it is to where it should be, and never by a road. "
+     f"Build a **Pact Perch** with a **Verdant Heart** of yours within {_BATHIN['service']['radius']} blocks of it and a "
+     f"**Gleaner** of yours or a **Ley Pylon** of yours or no one's within {_BATHIN['service']['radius']} too, and use it: he "
+     "is suddenly coiled on the perch, a strong man on a serpent's tail, and names every term before anything is spent. "
+     "Without them he does not come: \"Nothing here to carry, or nowhere to carry it.\"", ("garden_regard", "understood")),
+    ("text", "His Service",
+     f"At any hour, while you are within {workers.PACT['REACH']} blocks of the perch, he takes **Verdance** from a Heart of "
+     f"yours or your party's and sets it down at once: up to {ecology.GLEANER_DRAW} into a **Gleaner** beyond that Heart's "
+     f"own reach (more than {ecology.HEART_REACH} blocks from it), or into a **Ley Pylon** your party or no one owns that is "
+     "not beside it, at the Heart's own 3 for 2. One move at a time, at most "
+     f"{_BATHIN['service']['quota']} a game day. Nothing is ever on the way: the Heart and its target shimmer in the same "
+     "moment, and he holds none.", ("garden_regard", "understood")),
+    ("text", "Two Roads from One Heart",
+     "A Heart with a Ley Pylon of its own beside it already pours into it. Bathin leaves such a Heart alone and asks once, "
+     "on the pact's page at the perch: **Leave it**, or **Take from it**. Until you answer, the roster says \"awaiting your "
+     "answer\" and he keeps to leaving it. You may change your answer whenever you like; nothing is spent either way.",
+     ("garden_regard", "understood")),
+    ("text", "His Price",
+     "The compact, paid as you accept: **"
+     + " and ".join(f"{cost['count']} {_BATHIN_ITEMS[cost['item']]}" for cost in _BATHIN["compact"]["items"])
+     + f"**. Then {_count(_BATHIN['upkeep']['count'])} {_BATHIN_ITEMS[pacts.SPIRITS['bathin']['offerings']['items'][0]]} every "
+     f"{_BATHIN['upkeep']['period_days']} game days, up to {_BATHIN['upkeep']['cap']} weeks paid ahead; a missed week is "
+     "warned and he carries on through "
+     + ("a day's grace" if _BATHIN["upkeep"]["grace_days"] == 1 else f"{_BATHIN['upkeep']['grace_days']} days' grace")
+     + ", then the pact is suspended with nothing lost. Your first obligation: use an awake living device in his area with "
+     "an empty hand while the pact is active. Ending it returns what was paid ahead once: his coil tightens, and he is gone "
+     "in a ring of dust.", ("garden_regard", "understood")),
 ]
 
 
