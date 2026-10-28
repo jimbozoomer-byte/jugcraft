@@ -87,7 +87,7 @@ New item IDs: the 13 `jugcraft:<set>_pattern`. New recipes: 13 pattern recipes a
   - the Foundation workflow's tests passed: `python3 -m unittest discover -s scripts/tests` (287 tests), `test_winterhold_academy.py` and `scripts/package_modrinth.py check`;
   - the changed Java files parse (tree-sitter); they were not compiled locally.
 - New items get the alchemy value file's labelled one-essence fallback ("fallback (balance pending)") until the value builder is next run with the Minecraft jar.
-- CI on the fork: pending.
+- CI on the fork, run 40758967083 (28 October 2026, commit 1dabb3530): passed. The mod compiled, the server game tests (`ArmorTiersGameTests` included) passed with and without the optional integrations, and all 16 client shards passed. An earlier run on the first version (40753201320) had compiled and passed both server jobs before it was cancelled for this change.
 
 Not run: a human smithing a set or beating a boss for one.
 
