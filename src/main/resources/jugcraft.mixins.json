@@ -61,6 +61,7 @@
     "CompanionCraftingTableMixin",
     "AlchemyExperienceAccess",
     "NouveauBreedingMixin",
+    "LineageBreedingMixin",
     "NouveauBrewingMixin",
     "NouveauSanctuaryMixin",
     "NouveauThreadMixin",

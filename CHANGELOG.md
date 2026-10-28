@@ -8,6 +8,29 @@ Every change to Jugcraft, newest first, grouped by pull request. For what each t
 
 No numbered release yet. Entries on feature branches remain proposed until their pull requests merge.
 
+### Unmerged: Star-bred lines, phase 1: star-born animals and the Astrawand
+- **Every farm animal carries a line:** cows, mooshrooms, sheep, pigs, chickens, goats, rabbits and turkeys. A line is four numbers, each two copies (one from each parent, graded 0 to 5), plus hidden gifts.
+  - **Yield:** more meat and wool, and eggs that come as two.
+  - **Vigour:** health, speed, and babies that grow up sooner.
+  - **Fertility:** less rest after breeding.
+  - **Hardiness:** spared from thorns, then freezing, falling, drowning, burning and lightning.
+  - **4 or below is exactly vanilla**, and most wild animals are, so ordinary farms are unchanged. Grades 4 and 5 never occur in the wild.
+- **Hidden gifts** are recessive: two carriers have one baby in four that shows the gift. The first six:
+  - Double Yolk (chickens, turkeys);
+  - Moonfleece (sheep: more wool shorn on an open night);
+  - Angora goats and Woolly Coat pigs, shorn for wool once a day;
+  - Lucky Foot (rabbits);
+  - Heavy Hide (cows, mooshrooms).
+- **The sky pushes.** A baby born under the open sky while a celestial pattern is up takes its sign, which raises the weaker copy of one trait by one grade:
+  - the Full Moon raises Yield;
+  - the New Moon raises Fertility;
+  - the Lantern Star raises Vigour;
+  - the Echo Comet raises Hardiness and wakes a gift.
+- **The Astrawand** (an amethyst shard, a bone and a gold ingot) is a conductor's baton in the manner of the Wind Waker: a fan homage, drawn new.
+  - Point it at an animal and use it: you conduct a little flourish, gold sparkles and notes rise, and its line is read out.
+  - Readers who understand Celestial Attunement see which traits breed true. Masters learn when it carries a gift it does not show.
+- Record: [star-bred-lines.md](docs/features/star-bred-lines.md). Plan: [star-bred-lines-2026-10-28.md](docs/plans/star-bred-lines-2026-10-28.md).
+
 ### Unmerged: The Blood Moon
 - **A Blood Moon rises every fourth night of the Halloween season, and on Halloween night:** the night sky turns blood red with a red haze about you, zombies and skeletons put on costumes far more often (40%), costumed mobs drop double candy, will-o'-wisps gather thick, and the Headless Horseman rides by everyone who hasn't seen him that day. Being out when it rises earns **Bad Moon Rising**.
 - Switch: `halloween.blood_moon` (on by default). Record: [blood-moon.md](docs/features/blood-moon.md).

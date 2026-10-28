@@ -14969,6 +14969,138 @@ def check_pumpkin_king():
                 err(f"{cls}.java {why} ({banned})")
 
 
+def check_lineage():
+    """Star-bred lines, phase 1 (tools/lineage.py, docs/features/star-bred-lines.md): every number lineage/Lineage.java
+    uses is the tool's; the traits, gifts and signs are the tool's, in its order; every celestial pattern raises a trait
+    and every gift belongs to a kind that carries a line; the kinds and the produce are the tags'; each coat's loot table
+    is there; a baby's line is set where vanilla has just bred it (the mixin, listed), and a turkey hen's eggs are
+    counted by her line; the Astrawand is registered, read on the server and rate-limited, and its flourish's clip is the
+    one the client triggers; its models, clip, recipe and words are the tool's; and the record's tables are the tool's."""
+    import lineage as ln
+    folder = JAVA_ROOT / "lineage"
+    sources = {path.stem: path.read_text(encoding="utf-8") for path in folder.glob("*.java")}
+    lineage = sources.get("Lineage", "")
+    if not lineage:
+        err("lineage/Lineage.java: missing")
+        return
+    numbers = {"VANILLA_UP_TO": ln.VANILLA_UP_TO, "WILD_CARRIER": ln.WILD_CARRIER, "YIELD_ONE": ln.YIELD_ONE,
+               "YIELD_TWO": ln.YIELD_TWO, "EGG_ONE": ln.EGG_ONE, "EGG_TWO": ln.EGG_TWO, "DOUBLE_YOLK": ln.DOUBLE_YOLK,
+               "HEALTH_PER_POINT": ln.HEALTH_PER_POINT, "SPEED_PER_POINT": ln.SPEED_PER_POINT,
+               "GROW_PER_POINT": ln.GROW_PER_POINT, "REST_PER_POINT": ln.REST_PER_POINT, "GROWING": ln.GROWING,
+               "REGROW_TICKS": ln.REGROW_TICKS, "NIGHT_FROM": ln.NIGHT_FROM, "NIGHT_TO": ln.NIGHT_TO,
+               "READ_TICKS": ln.READ_TICKS}
+    numbers.update({f"SPARE_{harm.upper()}": at for harm, at in ln.SPARE.items()})
+    for name, value in numbers.items():
+        if not java_number(lineage, name, value):
+            err(f"Lineage.{name} is not tools/lineage.py's {value}")
+    weights = "int[] WILD_WEIGHTS = {" + ", ".join(str(w) for w in ln.WILD_WEIGHTS) + "};"
+    if weights not in lineage:
+        err(f"Lineage.WILD_WEIGHTS is not tools/lineage.py's ({weights})")
+    if sum(ln.WILD_WEIGHTS) != 100 or len(ln.WILD_WEIGHTS) - 1 >= ln.MAX_GRADE - 1:
+        err("tools/lineage.py: the wild weights must add to 100 and leave grades 4 and 5 to the sky")
+    if not (ln.VANILLA_UP_TO < min(ln.SPARE.values()) and ln.VANILLA_UP_TO < ln.YIELD_ONE < ln.YIELD_TWO <= 2 * ln.MAX_GRADE
+            and max(ln.SPARE.values()) <= 2 * ln.MAX_GRADE):
+        err("tools/lineage.py: every effect must start past vanilla and be reachable by 10")
+    if not 0 < round(ln.REST_PER_POINT * (2 * ln.MAX_GRADE - ln.VANILLA_UP_TO), 9) <= 0.3:
+        err("tools/lineage.py: Fertility may shorten the rest by at most 30% (the agriculture plan's bounded breeding)")
+    if not java_number(sources.get("Line", ""), "MAX_GRADE", ln.MAX_GRADE):
+        err(f"Line.MAX_GRADE is not tools/lineage.py's {ln.MAX_GRADE}")
+    # The traits, gifts and signs.
+    traits = re.findall(r"^\t([A-Z_]+)\(\"([a-z_]+)\"\)[,;]", sources.get("Trait", ""), re.M)
+    if [t for _, t in traits] != ln.TRAITS or any(name.lower() != t for name, t in traits):
+        err(f"lineage/Trait.java's traits are not tools/lineage.py TRAITS ({traits})")
+    gifts = {gid: [k for k in re.findall(r'"([a-z_]+:[a-z_]+)"', kinds)]
+             for gid, kinds in re.findall(r'^\t[A-Z_]+\("([a-z_]+)", ((?:"[a-z_:]+"(?:, )?)+)\)[,;]', sources.get("Gift", ""), re.M)}
+    if gifts != {gid: kinds for gid, (_, kinds, _) in ln.GIFTS.items()} or list(gifts) != list(ln.GIFTS):
+        err(f"lineage/Gift.java's gifts are not tools/lineage.py GIFTS ({gifts})")
+    for gid, (_, kinds, _) in ln.GIFTS.items():
+        for kind in kinds:
+            if kind not in ln.KINDS:
+                err(f"tools/lineage.py: gift {gid}'s kind {kind} carries no line (KINDS)")
+    signs = dict(re.findall(r'"([a-z_]+:[a-z_]+)", Trait\.([A-Z_]+)', _java_body(lineage, "public static final Map<String, Trait> SIGNS")))
+    if {p: t.lower() for p, t in signs.items()} != ln.SIGNS:
+        err(f"Lineage.SIGNS is not tools/lineage.py SIGNS ({signs})")
+    patterns = {f"{MOD}:{path.stem}" for path in (DATA / MOD / "concordance" / "pattern").glob("*.json")}
+    if patterns != set(ln.SIGNS):
+        err(f"tools/lineage.py SIGNS must name every celestial pattern, and only those: {sorted(patterns ^ set(ln.SIGNS))}")
+    for trait in ln.TRAITS:
+        always = [p for p, t in ln.SIGNS.items() if t == trait
+                  and "season" not in json.loads((DATA / MOD / "concordance" / "pattern" / f"{p.split(':')[1]}.json").read_text())]
+        if not always:
+            err(f"tools/lineage.py: {trait} must have a pattern that comes all year, so no season gates it")
+    if f'String WAKING = "{ln.WAKING}";' not in lineage or ln.WAKING not in ln.SIGNS:
+        err(f"Lineage.WAKING is not tools/lineage.py's {ln.WAKING}")
+    coats = dict(re.findall(r'Gift\.([A-Z_]+), ResourceKey\.create\(Registries\.LOOT_TABLE, Jugcraft\.id\("lineage/([a-z_]+)"\)\)', lineage))
+    if {g.lower(): t for g, t in coats.items()} != {g: g for g in ln.COATS}:
+        err(f"Lineage.COATS is not tools/lineage.py COATS ({coats})")
+    # The tags and the coats' tables.
+    tag_files = {"entity_type/star_bred": ln.KINDS, "item/line_produce": ln.PRODUCE}
+    for path, values in tag_files.items():
+        file = DATA / MOD / "tags" / f"{path}.json"
+        if not file.exists() or sorted(json.loads(file.read_text()).get("values", [])) != sorted(values):
+            err(f"data/jugcraft/tags/{path}.json is not tools/lineage.py's")
+    for gift in ln.COATS:
+        if not (DATA / MOD / "loot_table" / "lineage" / f"{gift}.json").exists():
+            err(f"loot_table/lineage/{gift}.json: missing")
+    # Where a line is made and used.
+    mixin = (JAVA_ROOT / "mixin" / "LineageBreedingMixin.java").read_text(encoding="utf-8") \
+        if (JAVA_ROOT / "mixin" / "LineageBreedingMixin.java").exists() else ""
+    mixins = json.loads((RES / f"{MOD}.mixins.json").read_text())
+    if ('method = "finalizeSpawnChildFromBreeding", at = @At("RETURN")' not in mixin or "Lineage.born(level" not in mixin
+            or "LineageBreedingMixin" not in mixins.get("mixins", [])):
+        err("LineageBreedingMixin must call Lineage.born at the end of finalizeSpawnChildFromBreeding, and be listed")
+    turkey = (JAVA_ROOT / "agriculture" / "Turkey.java").read_text(encoding="utf-8")
+    if "Lineage.eggs(" not in _java_body(turkey, "public boolean layEgg("):
+        err("Turkey.layEgg: a hen's eggs must be counted by her line (Lineage.eggs)")
+    for hook in ("ServerEntityEvents.ENTITY_LOAD.register(Lineage::loaded)",
+                 "ServerLivingEntityEvents.ALLOW_DAMAGE.register(Lineage::allowDamage)",
+                 "LootTableEvents.MODIFY_DROPS.register(Lineage::drops)", "UseEntityCallback.EVENT.register(Lineage::shear)",
+                 "copyOnDeath()", 'Saved.versioned("lineage", Line.CODEC)'):
+        if hook not in lineage:
+            err(f"Lineage.register: expected {hook}")
+    if "io.github.jimbozoomer.jugcraft.lineage.Lineage.register();" not in (JAVA_ROOT / "Jugcraft.java").read_text(encoding="utf-8"):
+        err("Jugcraft.onInitialize must register the lines (Lineage.register)")
+    if re.search(r"ServerTickEvents|\btick\(|aiStep", lineage):
+        err("Lineage: nothing may run per tick")
+    wand = sources.get("AstrawandItem", "")
+    read = _java_body(lineage, "public static void read(ServerPlayer player, Animal animal)")
+    if "Lineage.read(reader, animal)" not in wand or 'RateGate.allow(player, "astrawand", READ_TICKS)' not in read:
+        err("AstrawandItem: a reading is the server's, through Lineage.read, rate-limited")
+    if f'ResourceKey.create(Registries.ITEM, Jugcraft.id("{ln.ITEM}"))' not in lineage:
+        err(f"Lineage.register: the Astrawand is registered as {ln.ITEM}")
+    client = ROOT / "src" / "client" / "java" / "io" / "github" / "jimbozoomer" / "jugcraft" / "client" / "AstrawandClient.java"
+    if not client.exists() or f'Jugcraft.id("{ln.FLOURISH}")' not in client.read_text(encoding="utf-8"):
+        err(f"AstrawandClient must trigger the flourish {ln.FLOURISH}")
+    # The resources are the tool's.
+    written, lang = {}, {}
+    ln.assets(ASSETS, lambda path, obj: written.__setitem__(Path(path), obj), lang)
+    ln.recipes(DATA / MOD / "recipe", lambda path, obj: written.__setitem__(Path(path), obj),
+               lambda: [{"condition": f"{MOD}:feature_enabled", "feature": "agriculture"}])
+    ln.loot(DATA / MOD / "loot_table", lambda path, obj: written.__setitem__(Path(path), obj))
+    import model_writer
+    for path, obj in written.items():
+        if isinstance(obj, dict) and obj.get("elements"):
+            model_writer.finish_elements(obj["elements"])  # as tools/generate_material_data.py write does
+        if not path.exists() or json.loads(path.read_text(encoding="utf-8")) != obj:
+            err(f"{path.relative_to(ROOT)} is not tools/lineage.py's")
+    committed = json.loads((ASSETS / "lang" / "en_us.json").read_text(encoding="utf-8"))
+    for key, text in lang.items():
+        if committed.get(key) != text:
+            err(f"en_us.json: {key} is not tools/lineage.py's")
+    for key in re.findall(r'"((?:message|lineage|tooltip)\.jugcraft\.(?:lineage\.)?[a-z_.]+)"', "\n".join(sources.values())):
+        if key not in committed and not key.endswith("."):
+            err(f"lineage: {key} has no words")
+    for column in [ln.BAND_START[band] + shade for _, band, _, _ in ln.HAND_PARTS for shade in ln.FACE_SHADE.values()]:
+        if not 0 <= column < 16:
+            err("tools/lineage.py: a hand model face samples outside its texture")
+    # The record's tables.
+    record = ROOT / "docs" / "features" / "star-bred-lines.md"
+    text = record.read_text(encoding="utf-8") if record.exists() else ""
+    for name, table in (("effects", ln.effects_table()), ("wild", ln.wild_table())):
+        if table not in text:
+            err(f"docs/features/star-bred-lines.md: the {name} table is not tools/lineage.py's")
+
+
 def check_hessian_horseman():
     """The Headless Horseman in his lair (tools/hessian_horseman.py, docs/features/hessian-horseman.md): every number the
     Java uses is the table's (his, the Dread boon's and the Hessian's Spur's); his attacks are the table's, and his rule can
@@ -22540,6 +22672,7 @@ def main():
     check_pumpkin_king()
     check_hessian_horseman()
     check_cydonian_sentinel()
+    check_lineage()
     check_material_sets()
     check_art()
     check_pixel_hollows()

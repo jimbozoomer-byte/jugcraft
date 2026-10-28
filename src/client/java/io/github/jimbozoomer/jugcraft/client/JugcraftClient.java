@@ -110,6 +110,7 @@ public final class JugcraftClient implements ClientModInitializer {
 		PumpkinKingClient.register();
 		HessianHorsemanClient.register();
 		CydonianSentinelClient.register();
+		AstrawandClient.register();
 		BlockEntityRendererRegistry.register(JugcraftMachines.MACHINE_ENTITY, WindTurbineRenderer::new);
 		BlockEntityRendererRegistry.register(JugcraftKinetics.BELT_PULLEY_ENTITY, BeltRenderer::new);
 		BlockEntityRendererRegistry.register(JugcraftKinetics.SHAFT_ENTITY, KineticRotorRenderer::new);
