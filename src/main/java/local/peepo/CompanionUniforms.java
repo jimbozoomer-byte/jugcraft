@@ -71,9 +71,11 @@ public final class CompanionUniforms extends SnapshotParticipant<Long> {
     }
     /** Duplicate the actual recipe results, retaining their components and stack limits. */
     public List<ItemStack> chefResults(List<ItemStack> results,TransactionContext tx){
+        if(results.stream().anyMatch(s->!s.isEmpty()))npc.feedback.finished(CompanionFeedbackRules.Kind.COOK,Items.AIR,tx);
         if(results.stream().noneMatch(s->!s.isEmpty()) || !bonus(Type.CHEF,tx))return results;
         var doubled=new ArrayList<ItemStack>(results.size()*2);
         for(var result:results)if(!result.isEmpty()){doubled.add(result.copy());doubled.add(result.copy());}
+        npc.feedback.bonusProduced(tx);
         return doubled;
     }
     @Override protected Long createSnapshot(){return bonusSequence;}

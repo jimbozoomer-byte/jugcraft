@@ -333,6 +333,7 @@ public final class CompanionGarden extends SnapshotParticipant<CompanionGarden.S
         Job(CompanionAssignments.Target target){this.target=target;}
         public Kind kind(){return Kind.WORK;}
         public WorkAnimation animation(){
+            if(action==2)return WorkAnimation.FERTILIZE;
             if(!magicCell() && !target.orchard() && !hanging(target) && !mushrooms(target) && hoe() && expected!=null && (action==1 || action==0 && ripe(expected)))return progress>0?WorkAnimation.HARVEST:WorkAnimation.NONE;
             if(action!=0 || expected==null)return WorkAnimation.INTERACT;
             // Keep distant overhead work on its existing pose; ground picking uses a close reach.
@@ -477,6 +478,7 @@ public final class CompanionGarden extends SnapshotParticipant<CompanionGarden.S
             float yaw=(float)Math.toDegrees(Math.atan2(-(cropPos.getX()+.5-npc.getX()),cropPos.getZ()+.5-npc.getZ()));
             npc.setYRot(yaw);npc.yBodyRot=yaw;npc.setYHeadRot(yaw);
             if(animation()==WorkAnimation.PLANT){int slot=seedSlot(target,cropPos);if(slot>=0)npc.setWorkPie(npc.belongings.getItem(slot));}
+            else if(animation()==WorkAnimation.FERTILIZE){int slot=maintenance.slot(target,cropPos);if(slot>=0)npc.setWorkPie(npc.belongings.getItem(slot));}
             else if(animation()==WorkAnimation.PICK)npc.setWorkPie(expected.getBlock() instanceof MushroomColonyBlock?npc.assignedHand():ItemStack.EMPTY);
             if(++progress<npc.uniforms.duration(action==0?(target.orchard()?CompanionUniforms.Type.ORCHARD_KEEPER:!hanging(target)?CompanionUniforms.Type.FARMER:CompanionUniforms.Type.NONE):CompanionUniforms.Type.NONE,tool?HOE_TICKS:WORK_TICKS))return CompanionStatus.WORKING;
             status=finish(cropPos);
@@ -493,9 +495,12 @@ public final class CompanionGarden extends SnapshotParticipant<CompanionGarden.S
         }
         private boolean storeCrop(List<ItemStack> drops,Item seed,TransactionContext tx){
             for(var drop:drops)if(!storeHarvest(drop,target.at(),tx))return false;
-            if(target.orchard() || hanging(target))return true;
             var produce=drops.stream().filter(s->!s.isEmpty() && (seed==null || !s.is(seed))).findFirst().orElseGet(()->drops.stream().filter(s->!s.isEmpty() && PeepoEntity.isEdible(s)).findFirst().orElse(ItemStack.EMPTY));
-            return produce.isEmpty() || !npc.uniforms.bonus(CompanionUniforms.Type.FARMER,tx) || storeHarvest(produce.copyWithCount(1),target.at(),tx);
+            if(!produce.isEmpty())npc.feedback.finished(CompanionFeedbackRules.Kind.HARVEST,produce.getItem(),tx);
+            if(target.orchard() || hanging(target))return true;
+            if(produce.isEmpty() || !npc.uniforms.bonus(CompanionUniforms.Type.FARMER,tx))return true;
+            if(!storeHarvest(produce.copyWithCount(1),target.at(),tx))return false;
+            npc.feedback.bonusProduced(tx);return true;
         }
         private CompanionStatus finishSpecial(BlockPos pos){
             if(CompanionGardenCrops.fruit(expected) && !fruitAllowed(pos,expected))return CompanionStatus.FORBIDDEN;
@@ -595,7 +600,7 @@ public final class CompanionGarden extends SnapshotParticipant<CompanionGarden.S
                 if(!expected.getValue(HerbBundleBlock.DRIED))return CompanionStatus.DRYING;
                 var drops=Block.getDrops(expected,server,pos,null,npc,ItemStack.EMPTY);
                 try(var tx=Transaction.openOuter()){
-                    for(var drop:drops)if(!storeHarvest(drop,target.at(),tx))return CompanionStatus.FULL;
+                    if(!storeCrop(drops,null,tx))return CompanionStatus.FULL;
                     if(!server.setBlock(pos,Blocks.AIR.defaultBlockState(),Block.UPDATE_ALL))return CompanionStatus.BLOCKED;
                     tx.commit();
                 }

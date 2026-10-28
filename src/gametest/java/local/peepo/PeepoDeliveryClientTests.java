@@ -36,7 +36,7 @@ public final class PeepoDeliveryClientTests implements FabricClientGameTest {
         npc=(jughead?PeepoMod.JUGHEAD:PeepoMod.PEEPO).create(l,EntitySpawnReason.COMMAND);
         npc.setNoAi(true);npc.snapTo(base.getX()-3.5,base.getY(),base.getZ()-2.5,0,0);npc.setOnGround(true);l.addFreshEntity(npc);
         var owner=l.getServer().getPlayerList().getPlayers().getFirst();npc.orders.tame(owner);npc.orders.command(owner,3);
-        npc.preferences.social=false;npc.preferences.carryMeals=0;
+        npc.preferences.social=false;npc.preferences.carryMeals=0;npc.preferences.feedback=CompanionFeedbackRules.EXPRESSIVE;
         npc.assignments.assignContainer(l,base.west(6),Direction.UP,false);npc.assignments.assignContainer(l,base.east(6),Direction.UP,true);
     }
     private void reload(ServerLevel l){

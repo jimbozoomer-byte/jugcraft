@@ -9,7 +9,7 @@ import net.minecraft.world.entity.player.Inventory;
 
 /** Inventory stays visible while the right panel switches between assignments and routine preferences. */
 public final class CompanionScreen extends AbstractContainerScreen<CompanionMenu> {
-    private final Button[] buttons=new Button[9],remove=new Button[6],moveUp=new Button[5],moveDown=new Button[5],settings=new Button[9];
+    private final Button[] buttons=new Button[9],remove=new Button[6],moveUp=new Button[5],moveDown=new Button[5],settings=new Button[10];
     private final Button[] transport=new Button[8],filters=new Button[4];
     private Button filterBack;
     private Button stockMode,stockApply,stockOutputs;
@@ -232,6 +232,8 @@ public final class CompanionScreen extends AbstractContainerScreen<CompanionMenu
             }
         }
         settings[8]=button("Social",100,181,212,18,48);
+        settings[9]=button("Feedback",100,202,212,18,49);
+        tip(settings[9],"Off: no work reactions. Subtle: persistent problems, recovery and stock goals. Expressive: adds deliveries, bonus yields, harvest inspection, catch admiration and brushing off after cooking. Private thought bubbles are visible to the owner and allowed party; work always takes priority.");
         tip(settings[8],"Wave to your owner and have short conversations while standing idle. Work, food, rest and commands take priority.");
         settings[0]=button("Schedule",100,78,212,18,40);
         settings[1]=button("Alerts",100,99,103,18,41);
@@ -240,7 +242,7 @@ public final class CompanionScreen extends AbstractContainerScreen<CompanionMenu
         settings[4]=button("-",263,120,22,16,44);settings[5]=button("+",290,120,22,16,45);
         settings[6]=button("-",263,139,22,16,46);settings[7]=button("+",290,139,22,16,47);
         tip(settings[0],"Auto: work whenever energy allows. Day/Night shifts follow Overworld time in every dimension. Sleep remains night-only in the Overworld; other dimensions use seated rest.");
-        tip(settings[1],"A short nearby sound when a new problem starts. At most once every 20 seconds.");
+        tip(settings[1],"Quiet private sound for a persistent problem. Requires Feedback; at most once per companion every 20 seconds, with a shared nearby sound limit.");
         tip(settings[2],"Best meal favors stronger energy regeneration. Small meal favors cheaper, weaker meals. Only cargo slots are used.");
         tip(settings[3],"Keep 0-4 meals in the eight cargo slots. Refill only at your assigned lunch source.");
         tip(settings[4],"Lower the energy percentage at which work pauses.");tip(settings[5],"Raise the energy percentage at which work pauses.");
@@ -310,6 +312,7 @@ public final class CompanionScreen extends AbstractContainerScreen<CompanionMenu
             moveDown[i].active=remove[i].active && i<4 && remove[i+1].active;
         }
         settings[8].setMessage(Component.literal(menu.value(39)==1?"Social: On":"Social: Off"));
+        settings[9].setMessage(Component.literal("Feedback: "+CompanionPreferences.FEEDBACK[Math.clamp(menu.value(80),0,2)]));
         settings[0].setMessage(Component.literal("Schedule: "+CompanionPreferences.SCHEDULES[Math.clamp(menu.value(18),0,2)]));
         settings[1].setMessage(Component.literal(menu.value(23)==1?"Alerts: On":"Alerts: Off"));
         settings[2].setMessage(Component.literal(CompanionPreferences.FOODS[Math.clamp(menu.value(21),0,1)]));
