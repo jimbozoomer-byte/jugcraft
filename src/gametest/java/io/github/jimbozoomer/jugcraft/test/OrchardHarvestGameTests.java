@@ -2,6 +2,8 @@ package io.github.jimbozoomer.jugcraft.test;
 
 import io.github.jimbozoomer.jugcraft.agriculture.AppleBinBlock;
 import io.github.jimbozoomer.jugcraft.agriculture.AppleCrateBlock;
+import io.github.jimbozoomer.jugcraft.agriculture.CaramelAppleStandBlock;
+import io.github.jimbozoomer.jugcraft.agriculture.CaramelAppleStandBlockEntity;
 import io.github.jimbozoomer.jugcraft.agriculture.FruitBinBlock;
 import io.github.jimbozoomer.jugcraft.agriculture.FruitStore;
 import io.github.jimbozoomer.jugcraft.agriculture.FruitStoreBlockEntity;
@@ -43,6 +45,8 @@ import net.minecraft.world.phys.Vec3;
  * Picking Bag hangs only on a wall, takes what fits, shows it, and comes off spilling its fruit when the wall goes. Part 2:
  * apple crates stack three to a block and drop each crate; windfall apples gather four to a block, are walked through,
  * won't go on nothing and give back their apples when their ground goes; the Orchard Handcart holds two stacks and spills them.
+ * Part 3: the Caramel Apple Stand won't dip without caramel and sticks, takes them in, dips an apple for an apple, a stick
+ * and a serving, lights while it has caramel, lets the apple set before it is taken, and gives everything back when broken.
  */
 public class OrchardHarvestGameTests {
 	private static Item item(String id) {
@@ -318,6 +322,59 @@ public class OrchardHarvestGameTests {
 			helper.assertTrue(dropped(helper, item("orchard_handcart")) == 1 && dropped(helper, Items.APPLE) == OrchardHandcartBlock.CAPACITY,
 					"It drops once and spills its apples: " + dropped(helper, item("orchard_handcart")) + ", " + dropped(helper, Items.APPLE));
 			helper.succeed();
+		});
+	}
+
+	// ---------------------------------------------------------------- part 3
+
+	@GameTest(maxTicks = CaramelAppleStandBlock.COOL_TICKS + 100)
+	public void theStandDipsCaramelApples(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		floor(helper);
+		BlockPos master = new BlockPos(4, 2, 2);
+		ServerPlayer player = standing(helper, master.north(), new ItemStack(item("caramel_apple_stand")));
+		place(helper, player, master);
+		CaramelAppleStandBlock stand = (CaramelAppleStandBlock) block("caramel_apple_stand");
+		BlockPos first = helper.absolutePos(master);
+		assertWhole(helper, stand, first, 2, "caramel_apple_stand");
+		CaramelAppleStandBlockEntity stock = stand.stock(level, first, level.getBlockState(first));
+		helper.assertTrue(stock != null, "Its first block keeps its stock");
+		// With nothing in the pot, an apple isn't dipped.
+		player.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(Items.APPLE, 3));
+		use(helper, player, master, Direction.UP);
+		helper.assertTrue(stock.apples() == 0 && player.getMainHandItem().getCount() == 3, "No caramel, no dipping");
+		player.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(item("caramel"), 2));
+		use(helper, player, master, Direction.UP);
+		use(helper, player, master, Direction.UP);
+		player.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(Items.STICK, 1));
+		use(helper, player, new BlockPos(3, 2, 2), Direction.UP);
+		helper.assertTrue(stock.caramel() == 2 && stock.sticks() == 1, "Caramel fills the pot and a stick the jar, from either block");
+		BlockState state = level.getBlockState(first);
+		helper.assertTrue(state.getValue(CaramelAppleStandBlock.POT) == 1 && state.getValue(CaramelAppleStandBlock.JAR) == 1
+				&& state.getLightEmission() == CaramelAppleStandBlock.LIGHT, "It shows its caramel and sticks and the burner lights it: " + state);
+		player.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(Items.APPLE, 3));
+		use(helper, player, master, Direction.UP);
+		helper.assertTrue(stock.apples() == 1 && stock.caramel() == 1 && stock.sticks() == 0 && player.getMainHandItem().getCount() == 2,
+				"An apple, a stick and a serving make a caramel apple on the tray");
+		use(helper, player, master, Direction.UP);
+		helper.assertTrue(stock.apples() == 1 && player.getMainHandItem().getCount() == 2, "No sticks, no dipping");
+		helper.assertTrue(level.getBlockState(stand.partPos(first, Direction.NORTH, 1)).getValue(CaramelAppleStandBlock.RACK_APPLES) == 1,
+				"Both its blocks show the apple on the tray");
+		// Not yet set: an empty hand takes nothing.
+		player.setItemInHand(InteractionHand.MAIN_HAND, ItemStack.EMPTY);
+		use(helper, player, master, Direction.UP);
+		helper.assertTrue(stock.apples() == 1 && player.getInventory().countItem(item("caramel_apple")) == 0, "It must set before it is taken");
+		helper.runAfterDelay(CaramelAppleStandBlock.COOL_TICKS + 1, () -> {
+			use(helper, player, master, Direction.UP);
+			helper.assertTrue(stock.apples() == 0 && player.getInventory().countItem(item("caramel_apple")) == 1
+					&& level.getBlockState(first).getValue(CaramelAppleStandBlock.RACK_APPLES) == 0, "Set, an empty hand takes it");
+			level.destroyBlock(stand.partPos(first, Direction.NORTH, 1), true);
+			helper.runAfterDelay(3, () -> {
+				helper.assertTrue(dropped(helper, item("caramel_apple_stand")) == 1 && dropped(helper, item("caramel")) == 1,
+						"Broken, it drops once and gives back its caramel: " + dropped(helper, item("caramel_apple_stand")) + ", "
+								+ dropped(helper, item("caramel")));
+				helper.succeed();
+			});
 		});
 	}
 }

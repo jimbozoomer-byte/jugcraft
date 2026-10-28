@@ -330,12 +330,165 @@ def handcart():
     return sc
 
 
+# ---------------------------------------------------------------- part 3: the Caramel Apple Stand
+
+COPPER = pal("5a2c18", "7e3e22", "a0552c", "c06c3a", "d88a52")
+CARAMEL = pal("5a3410", "7c4a18", "a0662a", "c2843c", "dca25a")
+SIGN = pal("b8a888", "d6c8a6", "ece0c4")
+SIGN_RED = pal("6a1410", "9a2018", "c03024")
+GLASS = pal("8aa4a8", "b4ccd0", "dceef0")
+STICK = pal("5a4024", "7a5a34", "9a7848", "b4945e")
+# The stand's letters, three texels wide and five high, drawn here (CARAMEL APPLES needs only these).
+GLYPHS = {"C": ("###", "#..", "#..", "#..", "###"), "A": (".#.", "#.#", "###", "#.#", "#.#"), "R": ("##.", "#.#", "##.", "#.#", "#.#"),
+          "M": ("#.#", "###", "###", "#.#", "#.#"), "E": ("###", "#..", "##.", "#..", "###"), "L": ("#..", "#..", "#..", "#..", "###"),
+          "P": ("##.", "#.#", "##.", "#..", "#.."), "S": ("###", "#..", "###", "..#", "###")}
+
+
+def sign_board():
+    """The counter's painted front: cream paint in a red border, CARAMEL over APPLES in red letters three texels wide
+    and five high, each letter's left column lit a tone."""
+    def paint(p):
+        for y in range(p.h):
+            for x in range(p.w):
+                border = x in (0, p.w - 1) or y in (0, p.h - 1)
+                p.put(x, y, shade(SIGN_RED, 1) if border else shade(SIGN, 2 if y > 1 else 1))
+        for row, word in ((2, "CARAMEL"), (8, "APPLES")):
+            width = len(word) * 4 - 1
+            x0 = (p.w - width) // 2
+            for k, letter in enumerate(word):
+                for j, line in enumerate(GLYPHS[letter]):
+                    for i, ch in enumerate(line):
+                        if ch == "#" and 0 <= row + j < p.h:
+                            p.put(x0 + k * 4 + i, row + j, shade(SIGN_RED, 2 if i == 0 else 1))
+    paint.tag = repr(("sign_board",))
+    return paint
+
+
+def glass():
+    """A jar's glass: a clear pane (cut out) inside a pale rim, a lit streak down its left."""
+    def paint(p):
+        for y in range(p.h):
+            for x in range(p.w):
+                edge = x in (0, p.w - 1) or y in (0, p.h - 1)
+                if edge:
+                    p.put(x, y, shade(GLASS, 1))
+                elif x == 1 and 0 < y < p.h - 1:
+                    p.put(x, y, shade(GLASS, 2))
+                else:
+                    p.img.putpixel((x, y), (0, 0, 0, 0))
+    paint.tag = repr(("glass",))
+    return paint
+
+
+def coated():
+    """A caramel apple's side: red apple at its top, caramel over the rest."""
+    def paint(p):
+        for y in range(p.h):
+            for x in range(p.w):
+                if y == 0:
+                    p.put(x, y, shade(FRUIT["apple"], 4 if x == 0 else 3))
+                else:
+                    p.put(x, y, shade(CARAMEL, 3 if x == 0 else 2))
+    paint.tag = repr(("coated",))
+    return paint
+
+
+def stand():
+    """The Caramel Apple Stand, facing north: the counter (front, sides and back boards round it, the painted sign on its
+    front, a top board over all), the iron burner, the copper pot on it (walls round a floor, two handles), the glass
+    stick jar and the paper tray. Its fill (caramel by level, sticks by count, apples by count) and the burner's flame are
+    drawn separately (`overlays`), on the animated caramel and flame textures."""
+    spec = oh.STAND
+    sc = Sculpt(spec["block"], 2213, 128)
+    h = spec["counter_height"]
+    x0, x1, z0, z1, t = 0.5, 31.5, 2.0, 14.0, 0.75
+    board = planks(WOOD, board=3, nails=True)
+    el = [panel(sc, "front", board, (x0, 0.0, z0), (x1, h - 0.75, z0 + t), north=sign_board()),
+          panel(sc, "back", board, (x0, 0.0, z1 - t), (x1, h - 0.75, z1)),
+          panel(sc, "side", board, (x0, 0.0, z0 + t), (x0 + t, h - 0.75, z1 - t)),
+          panel(sc, "side", board, (x1 - t, 0.0, z0 + t), (x1, h - 0.75, z1 - t)),
+          panel(sc, "top", planks(WOOD, board=4, nails=False), (0.0, h - 0.75, 1.5), (32.0, h, 14.5))]
+    # The burner: an iron box with a grate on top, a dark fire door in its front.
+    el.append(panel(sc, "burner", flat(IRON), (3.0, h, 4.0), (10.0, h + 2.5, 11.0)))
+    # The copper pot: walls round a floor, two handles.
+    el += ppd.walls(sc, "pot", flat(COPPER), 3.5, 4.5, 9.5, 10.5, 0.5, h + 2.5, h + 6.5)
+    el.append(panel(sc, "pot_floor", flat(COPPER), (4.0, h + 2.5, 5.0), (9.0, h + 3.0, 10.0)))
+    for xa, xb in ((2.75, 3.5), (9.5, 10.25)):
+        el.append(panel(sc, "handle", flat(COPPER), (xa, h + 4.5, 7.0), (xb, h + 5.5, 8.0)))
+    # The stick jar: glass walls round a floor.
+    el += ppd.walls(sc, "jar", glass(), 12.0, 5.5, 15.0, 8.5, 0.25, h, h + 5.0)
+    el.append(panel(sc, "jar_floor", flat(GLASS), (12.25, h, 5.75), (14.75, h + 0.25, 8.25)))
+    # The cooling tray: waxed paper with a low rim.
+    el += ppd.walls(sc, "tray", flat(SIGN), 18.0, 4.0, 30.0, 12.0, 0.5, h, h + 0.75)
+    el.append(panel(sc, "tray_floor", flat(SIGN), (18.5, h, 4.5), (29.5, h + 0.25, 11.5)))
+    sc.models["whole"] = el
+
+    # Overlays: the caramel's surface at each level, the flame, the sticks and the apples on the tray.
+    # The caramel inside the pot's walls: a sheet five pixels square on the animated texture at one texel a pixel.
+    def surface(y):
+        return {"from": [4.0, y, 5.0], "to": [9.0, y, 10.0],
+                "faces": {"up": {"uv": [0, 0, 5, 5], "texture": "#c"}, "down": {"uv": [0, 5, 5, 0], "texture": "#c"}}}
+    sc.overlays = {"caramel_1": [surface(h + 4.0)], "caramel_2": [surface(h + 5.75)],
+                   "flame": [{"from": [4.5, h + 0.25, 3.95], "to": [8.5, h + 2.25, 3.95], "light_emission": 15, "shade": False,
+                              "faces": {"north": {"uv": [0, 0, 4, 2], "texture": "#f"}}}]}
+    sticks = []
+    for x, z in ((12.8, 6.3), (13.9, 7.1), (13.2, 7.6), (14.2, 6.2), (12.7, 7.5), (13.6, 6.4)):
+        sticks.append(panel(sc, "stick", lengthwise(STICK), (x - 0.25, h + 0.25, z - 0.25), (x + 0.25, h + 7.0, z + 0.25)))
+    sc.overlays["sticks_1"] = sticks[:3]
+    sc.overlays["sticks_2"] = sticks
+    for k, (x, z) in enumerate(spec["spots"], start=1):
+        sc.overlays[f"apple_{k}"] = [
+            panel(sc, "foot", flat(CARAMEL), (x - 1.25, h + 0.25, z - 1.25), (x + 1.25, h + 0.5, z + 1.25)),
+            panel(sc, "coated", coated(), (x - 1.0, h + 0.5, z - 1.0), (x + 1.0, h + 2.5, z + 1.0),
+                  up=flat(FRUIT["apple"])),
+            panel(sc, "stick", lengthwise(STICK), (x - 0.25, h + 2.5, z - 0.25), (x + 0.25, h + 5.5, z + 0.25))]
+    return sc
+
+
+def caramel_strip():
+    """The caramel's surface, animated (`frames` frames, blended by the client), its five texels square (the pot's inside
+    at one texel a pixel) in the frame's top left: one golden-brown tone, lit along its rim where it climbs the copper,
+    and three bubbles that each swell over two frames and are gone, each at its own turn."""
+    from PIL import Image
+    spec = oh.STAND
+    n = spec["frames"]
+    strip = Image.new("RGBA", (16, 16 * n))
+    bubbles = [(1, 1, 0), (3, 2, 3), (2, 3, 5)]
+    for f in range(n):
+        for y in range(16):
+            for x in range(16):
+                rim = x in (0, 4) or y in (0, 4)
+                strip.putpixel((x, f * 16 + y), tuple(shade(CARAMEL, 3 if rim else 2)) + (255,))
+        for bx, by, phase in bubbles:
+            age = (f - phase) % n
+            if age < 2:
+                strip.putpixel((bx, f * 16 + by), tuple(shade(CARAMEL, 4 if age == 0 else 1)) + (255,))
+    return strip
+
+
+def flame_strip():
+    """The burner's flame through its door, animated: two rows, four texels across, at one texel a pixel in each
+    frame's top left. The foot is a band of blue; above it the flame is orange, its tips yellow, and the yellow walks
+    along it a texel a frame. The rest of each frame is clear."""
+    from PIL import Image
+    spec = oh.STAND
+    n = spec["frames"]
+    strip = Image.new("RGBA", (16, 16 * n), (0, 0, 0, 0))
+    blue, orange, yellow = (70, 110, 220), (232, 120, 40), (250, 200, 80)
+    for f in range(n):
+        for x in range(4):
+            strip.putpixel((x, f * 16 + 1), blue + (255,))
+            strip.putpixel((x, f * 16), (yellow if (x + f) % 4 in (0, 1) else orange) + (255,))
+    return strip
+
+
 # ---------------------------------------------------------------- building and files
 
 _built = {}
 BUILDERS = {"orchard_ladder": (ladder, 64), "apple_bin": (apple_bin, 128), "picking_bag": (picking_bag, 64),
             "windfall_apples": (windfall, 16), "orchard_handcart": (handcart, 128)}
 BUILDERS.update({spec["block"]: ((lambda kind: lambda: crate(kind))(kind), 64) for kind, spec in oh.CRATES.items()})
+BUILDERS["caramel_apple_stand"] = (stand, 128)
 
 
 def build(block):
@@ -491,6 +644,66 @@ def part2_assets(root, write, lang):
     write(items / f"{block}.json", fa.model(block, item_model(block, sc.models["whole"] + sc.models[f"heap_apple_{spec['stages'] - 1}"],
                                                              spec["size"], 0.5), DISPLAY))
     write(root / "items" / f"{block}.json", {"model": {"type": "minecraft:model", "model": rid(f"item/{block}")}})
+    part3_assets(root, write, lang)
+
+
+def stand_model(block, elements):
+    """A model of the stand's elements on its texture, with the animated caramel and flame as #c and #f."""
+    return {"parent": "minecraft:block/block", "ambientocclusion": False,
+            "textures": {"p": f"{MOD}:block/{block}", "c": f"{MOD}:block/{block}_caramel", "f": f"{MOD}:block/{block}_flame",
+                         "particle": f"{MOD}:block/{block}"}, "elements": elements}
+
+
+# Which of the stand's blocks each overlay lies in (its part), by what it draws.
+STAND_OVERLAY_PART = {"caramel": 1, "flame": 1, "sticks": 1, "apple": 0}
+
+
+def part3_assets(root, write, lang):
+    """The Caramel Apple Stand's files: its two blocks' models, each overlay's model moved into the block it lies in, a
+    multipart blockstate that adds them by the stand's caramel (`pot`), sticks (`jar`) and apples set out (`rack`), the
+    item (the stand stocked, three apples out), the two animations' frame times, and its messages."""
+    spec = oh.STAND
+    block = spec["block"]
+    models = root / "models" / "block"
+    states = root / "blockstates"
+    items = root / "models" / "item"
+    lang[f"block.{MOD}.{block}"] = spec["display"]
+    sc = build(block)
+    n = len(d17d.cells(spec["size"]))
+    for part, elements in enumerate(ppd.cut(sc.models["whole"], spec["size"])):
+        write(models / f"{block}_{part}.json", fa.model(block, elements))
+    for name, elements in sc.overlays.items():
+        part = STAND_OVERLAY_PART[name.split("_")[0]]
+        cell = d17d.frame_cell(spec["size"], part)
+        moved = ppd.shifted(elements, -cell[0] * 16, -cell[1] * 16, -cell[2] * 16)
+        write(models / f"{block}_{name}.json", stand_model(block, moved))
+    multipart = []
+    for f in FACINGS:
+        turn = {"y": FACINGS[f]} if FACINGS[f] else {}
+
+        def add(model, **when):
+            multipart.append({"when": {"facing": f, **when}, "apply": {"model": rid(f"block/{block}_{model}"), **turn}})
+        for p in range(n):
+            add(str(p), part=str(p))
+        add("caramel_1", part="1", pot="1")
+        add("caramel_2", part="1", pot="2")
+        add("flame", part="1", pot="1|2")
+        add("sticks_1", part="1", jar="1")
+        add("sticks_2", part="1", jar="2")
+        for k in range(1, spec["rack"] + 1):
+            add(f"apple_{k}", part="0", rack="|".join(str(m) for m in range(k, spec["rack"] + 1)))
+    write(states / f"{block}.json", {"multipart": multipart})
+    stocked = (sc.models["whole"] + sc.overlays["caramel_2"] + sc.overlays["flame"] + sc.overlays["sticks_2"]
+               + [e for k in (1, 2, 3) for e in sc.overlays[f"apple_{k}"]])
+    write(items / f"{block}.json", dict(stand_model(block, item_model(block, stocked, spec["size"], 0.5)), display=DISPLAY))
+    write(root / "items" / f"{block}.json", {"model": {"type": "minecraft:model", "model": rid(f"item/{block}")}})
+    for anim in ("caramel", "flame"):
+        write(root / "textures" / "block" / f"{block}_{anim}.png.mcmeta",
+              {"animation": {"frametime": spec["frametime"], "interpolate": True}})
+    for key, text in (("no_caramel", "The pot needs caramel first."), ("no_sticks", "The jar needs sticks first."),
+                      ("rack_full", "The tray is full: take a caramel apple first."), ("setting", "It's still setting."),
+                      ("pot_full", "The pot is full."), ("jar_full", "The jar is full.")):
+        lang[f"message.{MOD}.caramel_apple_stand.{key}"] = text
 
 
 def counted_drop(block, prop, most, item=None):
@@ -507,7 +720,7 @@ def counted_drop(block, prop, most, item=None):
 def loot(out, write):
     """The ladder, the bin and the cart drop once, from their first block; the bag drops itself; a stack of crates drops
     each of its crates, and windfall apples give back an apple for each."""
-    for block in (oh.LADDER["block"], oh.BIN["block"], oh.CART["block"]):
+    for block in (oh.LADDER["block"], oh.BIN["block"], oh.CART["block"], oh.STAND["block"]):
         write(out / f"{block}.json", {"type": "minecraft:block", "pools": [{
             "condition": {"type": "minecraft:all_of", "terms": [{"type": "minecraft:survives_explosion"},
                                                                 {"type": "minecraft:match_block", "blocks": rid(block), "state": {"part": "0"}}]},
@@ -529,4 +742,7 @@ def tags(tags):
 
 
 def textures():
-    return {("block", block): build(block).atlas.img for block in oh.blocks()}
+    out = {("block", block): build(block).atlas.img for block in oh.blocks()}
+    out[("block", f"{oh.STAND['block']}_caramel")] = caramel_strip()
+    out[("block", f"{oh.STAND['block']}_flame")] = flame_strip()
+    return out

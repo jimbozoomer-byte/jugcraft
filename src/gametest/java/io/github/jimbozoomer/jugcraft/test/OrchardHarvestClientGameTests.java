@@ -1,6 +1,7 @@
 package io.github.jimbozoomer.jugcraft.test;
 
 import io.github.jimbozoomer.jugcraft.agriculture.AppleCrateBlock;
+import io.github.jimbozoomer.jugcraft.agriculture.CaramelAppleStandBlockEntity;
 import io.github.jimbozoomer.jugcraft.agriculture.FruitBinBlock;
 import io.github.jimbozoomer.jugcraft.agriculture.FruitStoreBlockEntity;
 import io.github.jimbozoomer.jugcraft.agriculture.JugcraftAgriculture;
@@ -26,9 +27,10 @@ import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 /**
  * Client game test for Orchard & Apple Harvest, part 1 (decor set 2): an apple tree with the Orchard Ladder against it,
  * an Apple Bin full of apples, another half full of pears, and a Picking Bag of apples hung on the trunk; and part 2's
- * stacks of red, green and golden apple crates, windfall apples under the tree and a laden Orchard Handcart; built in a
- * real client and photographed from the front, the side and close by the crates, by day (CI job {@code client}). The
- * pictures go into docs/features/orchard-apple-harvest.md.
+ * stacks of red, green and golden apple crates, windfall apples under the tree and a laden Orchard Handcart; and part 3's
+ * Caramel Apple Stand, stocked, four apples setting on its tray; built in a real client and photographed from the front,
+ * the side, close by the crates and at the stand, by day (CI job {@code client}). The pictures go into
+ * docs/features/orchard-apple-harvest.md.
  */
 public class OrchardHarvestClientGameTests implements FabricClientGameTest {
 	@Override
@@ -52,6 +54,7 @@ public class OrchardHarvestClientGameTests implements FabricClientGameTest {
 			shoot(context, singleplayer, x + 6, y + 2, z + 12, 180, 15, "jugcraft_orchard_harvest");
 			shoot(context, singleplayer, x + 15, y + 3, z + 2, 90, 20, "jugcraft_orchard_harvest_side");
 			shoot(context, singleplayer, x + 6, y + 1, z + 12, 180, 20, "jugcraft_orchard_harvest_crates");
+			shoot(context, singleplayer, x + 13, y + 1, z + 15, 180, 22, "jugcraft_orchard_harvest_stand");
 		}
 	}
 
@@ -117,6 +120,20 @@ public class OrchardHarvestClientGameTests implements FabricClientGameTest {
 		}
 		prop(level, "orchard_handcart", origin.offset(13, 0, 7));
 		fill(level, origin.offset(13, 0, 7), new ItemStack(Items.APPLE, 64), 2);
+		// Part 3: the Caramel Apple Stand, stocked, four apples setting on its tray.
+		BlockPos stand = origin.offset(12, 0, 11);
+		prop(level, "caramel_apple_stand", stand);
+		if (level.getBlockEntity(stand) instanceof CaramelAppleStandBlockEntity stock) {
+			for (int i = 0; i < 6; i++) {
+				stock.addCaramel();
+			}
+			for (int i = 0; i < 10; i++) {
+				stock.addStick();
+			}
+			for (int i = 0; i < 4; i++) {
+				stock.dip(level.getGameTime());
+			}
+		}
 		// The picking bag on the trunk's east side, a few apples in it.
 		BlockPos bag = trunk.offset(1, 1, 0);
 		set(level, bag, JugcraftAgriculture.block("picking_bag").defaultBlockState().setValue(PickingBagBlock.FACING, Direction.EAST));

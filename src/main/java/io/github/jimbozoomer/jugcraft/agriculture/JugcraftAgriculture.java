@@ -385,6 +385,7 @@ public final class JugcraftAgriculture {
 	public static BlockEntityType<ProduceDisplayBlockEntity> PRODUCE_DISPLAY_ENTITY;
 	public static BlockEntityType<ChalkboardSignBlockEntity> CHALKBOARD_SIGN_ENTITY;
 	public static BlockEntityType<FruitStoreBlockEntity> FRUIT_STORE_ENTITY;
+	public static BlockEntityType<CaramelAppleStandBlockEntity> CARAMEL_APPLE_STAND_ENTITY;
 	public static ExtendedMenuType<FarmStandMenu, FarmStandMenu.Opening> FARM_STAND_MENU;
 	/** The Harvest Effigy catching (assets/jugcraft/sounds/effigy, made by tools/choir_sounds.py). */
 	public static SoundEvent EFFIGY_BURN;
@@ -2758,8 +2759,8 @@ public final class JugcraftAgriculture {
 
 	/**
 	 * Orchard & Apple Harvest (decor set 2; tools/orchard_harvest.py): part 1's Orchard Ladder, Apple Bin and Picking Bag,
-	 * and part 2's Orchard Handcart, apple crates and windfall apples; the bin, the bag and the cart share one block entity
-	 * for the fruit they hold.
+	 * part 2's Orchard Handcart, apple crates and windfall apples, and part 3's Caramel Apple Stand; the bin, the bag and
+	 * the cart share one block entity for the fruit they hold.
 	 */
 	private static void registerOrchardHarvest() {
 		Block ladder = registerBlock("orchard_ladder", OrchardLadderBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.WOOD)
@@ -2778,6 +2779,11 @@ public final class JugcraftAgriculture {
 		}
 		gear.add(registerBlock("windfall_apples", WindfallApplesBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_RED)
 				.instabreak().sound(SoundType.GRASS).noCollision().noOcclusion().pushReaction(PushReaction.POPPED)));
+		// Part 3: the Caramel Apple Stand.
+		Block stand = registerBlock("caramel_apple_stand", CaramelAppleStandBlock::new, displayProperties().lightLevel(CaramelAppleStandBlock::light));
+		CARAMEL_APPLE_STAND_ENTITY = Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, Jugcraft.id("caramel_apple_stand"),
+				FabricBlockEntityTypeBuilder.create(CaramelAppleStandBlockEntity::new, stand).build());
+		gear.add(stand);
 		for (Block block : gear) {
 			registerItem(BuiltInRegistries.BLOCK.getKey(block).getPath(), props -> new BlockItem(block, props),
 					new Item.Properties().useBlockDescriptionPrefix(), BUILDING_TAB);

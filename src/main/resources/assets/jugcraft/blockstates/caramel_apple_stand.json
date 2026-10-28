@@ -1,0 +1,555 @@
+{
+  "multipart": [
+    {
+      "when": {
+        "facing": "north",
+        "part": "0"
+      },
+      "apply": {
+        "model": "jugcraft:block/caramel_apple_stand_0"
+      }
+    },
+    {
+      "when": {
+        "facing": "north",
+        "part": "1"
+      },
+      "apply": {
+        "model": "jugcraft:block/caramel_apple_stand_1"
+      }
+    },
+    {
+      "when": {
+        "facing": "north",
+        "part": "1",
+        "pot": "1"
+      },
+      "apply": {
+        "model": "jugcraft:block/caramel_apple_stand_caramel_1"
+      }
+    },
+    {
+      "when": {
+        "facing": "north",
+        "part": "1",
+        "pot": "2"
+      },
+      "apply": {
+        "model": "jugcraft:block/caramel_apple_stand_caramel_2"
+      }
+    },
+    {
+      "when": {
+        "facing": "north",
+        "part": "1",
+        "pot": "1|2"
+      },
+      "apply": {
+        "model": "jugcraft:block/caramel_apple_stand_flame"
+      }
+    },
+    {
+      "when": {
+        "facing": "north",
+        "part": "1",
+        "jar": "1"
+      },
+      "apply": {
+        "model": "jugcraft:block/caramel_apple_stand_sticks_1"
+      }
+    },
+    {
+      "when": {
+        "facing": "north",
+        "part": "1",
+        "jar": "2"
+      },
+      "apply": {
+        "model": "jugcraft:block/caramel_apple_stand_sticks_2"
+      }
+    },
+    {
+      "when": {
+        "facing": "north",
+        "part": "0",
+        "rack": "1|2|3|4|5|6"
+      },
+      "apply": {
+        "model": "jugcraft:block/caramel_apple_stand_apple_1"
+      }
+    },
+    {
+      "when": {
+        "facing": "north",
+        "part": "0",
+        "rack": "2|3|4|5|6"
+      },
+      "apply": {
+        "model": "jugcraft:block/caramel_apple_stand_apple_2"
+      }
+    },
+    {
+      "when": {
+        "facing": "north",
+        "part": "0",
+        "rack": "3|4|5|6"
+      },
+      "apply": {
+        "model": "jugcraft:block/caramel_apple_stand_apple_3"
+      }
+    },
+    {
+      "when": {
+        "facing": "north",
+        "part": "0",
+        "rack": "4|5|6"
+      },
+      "apply": {
+        "model": "jugcraft:block/caramel_apple_stand_apple_4"
+      }
+    },
+    {
+      "when": {
+        "facing": "north",
+        "part": "0",
+        "rack": "5|6"
+      },
+      "apply": {
+        "model": "jugcraft:block/caramel_apple_stand_apple_5"
+      }
+    },
+    {
+      "when": {
+        "facing": "north",
+        "part": "0",
+        "rack": "6"
+      },
+      "apply": {
+        "model": "jugcraft:block/caramel_apple_stand_apple_6"
+      }
+    },
+    {
+      "when": {
+        "facing": "east",
+        "part": "0"
+      },
+      "apply": {
+        "model": "jugcraft:block/caramel_apple_stand_0",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "facing": "east",
+        "part": "1"
+      },
+      "apply": {
+        "model": "jugcraft:block/caramel_apple_stand_1",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "facing": "east",
+        "part": "1",
+        "pot": "1"
+      },
+      "apply": {
+        "model": "jugcraft:block/caramel_apple_stand_caramel_1",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "facing": "east",
+        "part": "1",
+        "pot": "2"
+      },
+      "apply": {
+        "model": "jugcraft:block/caramel_apple_stand_caramel_2",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "facing": "east",
+        "part": "1",
+        "pot": "1|2"
+      },
+      "apply": {
+        "model": "jugcraft:block/caramel_apple_stand_flame",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "facing": "east",
+        "part": "1",
+        "jar": "1"
+      },
+      "apply": {
+        "model": "jugcraft:block/caramel_apple_stand_sticks_1",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "facing": "east",
+        "part": "1",
+        "jar": "2"
+      },
+      "apply": {
+        "model": "jugcraft:block/caramel_apple_stand_sticks_2",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "facing": "east",
+        "part": "0",
+        "rack": "1|2|3|4|5|6"
+      },
+      "apply": {
+        "model": "jugcraft:block/caramel_apple_stand_apple_1",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "facing": "east",
+        "part": "0",
+        "rack": "2|3|4|5|6"
+      },
+      "apply": {
+        "model": "jugcraft:block/caramel_apple_stand_apple_2",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "facing": "east",
+        "part": "0",
+        "rack": "3|4|5|6"
+      },
+      "apply": {
+        "model": "jugcraft:block/caramel_apple_stand_apple_3",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "facing": "east",
+        "part": "0",
+        "rack": "4|5|6"
+      },
+      "apply": {
+        "model": "jugcraft:block/caramel_apple_stand_apple_4",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "facing": "east",
+        "part": "0",
+        "rack": "5|6"
+      },
+      "apply": {
+        "model": "jugcraft:block/caramel_apple_stand_apple_5",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "facing": "east",
+        "part": "0",
+        "rack": "6"
+      },
+      "apply": {
+        "model": "jugcraft:block/caramel_apple_stand_apple_6",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "facing": "south",
+        "part": "0"
+      },
+      "apply": {
+        "model": "jugcraft:block/caramel_apple_stand_0",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "facing": "south",
+        "part": "1"
+      },
+      "apply": {
+        "model": "jugcraft:block/caramel_apple_stand_1",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "facing": "south",
+        "part": "1",
+        "pot": "1"
+      },
+      "apply": {
+        "model": "jugcraft:block/caramel_apple_stand_caramel_1",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "facing": "south",
+        "part": "1",
+        "pot": "2"
+      },
+      "apply": {
+        "model": "jugcraft:block/caramel_apple_stand_caramel_2",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "facing": "south",
+        "part": "1",
+        "pot": "1|2"
+      },
+      "apply": {
+        "model": "jugcraft:block/caramel_apple_stand_flame",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "facing": "south",
+        "part": "1",
+        "jar": "1"
+      },
+      "apply": {
+        "model": "jugcraft:block/caramel_apple_stand_sticks_1",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "facing": "south",
+        "part": "1",
+        "jar": "2"
+      },
+      "apply": {
+        "model": "jugcraft:block/caramel_apple_stand_sticks_2",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "facing": "south",
+        "part": "0",
+        "rack": "1|2|3|4|5|6"
+      },
+      "apply": {
+        "model": "jugcraft:block/caramel_apple_stand_apple_1",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "facing": "south",
+        "part": "0",
+        "rack": "2|3|4|5|6"
+      },
+      "apply": {
+        "model": "jugcraft:block/caramel_apple_stand_apple_2",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "facing": "south",
+        "part": "0",
+        "rack": "3|4|5|6"
+      },
+      "apply": {
+        "model": "jugcraft:block/caramel_apple_stand_apple_3",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "facing": "south",
+        "part": "0",
+        "rack": "4|5|6"
+      },
+      "apply": {
+        "model": "jugcraft:block/caramel_apple_stand_apple_4",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "facing": "south",
+        "part": "0",
+        "rack": "5|6"
+      },
+      "apply": {
+        "model": "jugcraft:block/caramel_apple_stand_apple_5",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "facing": "south",
+        "part": "0",
+        "rack": "6"
+      },
+      "apply": {
+        "model": "jugcraft:block/caramel_apple_stand_apple_6",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "facing": "west",
+        "part": "0"
+      },
+      "apply": {
+        "model": "jugcraft:block/caramel_apple_stand_0",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "facing": "west",
+        "part": "1"
+      },
+      "apply": {
+        "model": "jugcraft:block/caramel_apple_stand_1",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "facing": "west",
+        "part": "1",
+        "pot": "1"
+      },
+      "apply": {
+        "model": "jugcraft:block/caramel_apple_stand_caramel_1",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "facing": "west",
+        "part": "1",
+        "pot": "2"
+      },
+      "apply": {
+        "model": "jugcraft:block/caramel_apple_stand_caramel_2",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "facing": "west",
+        "part": "1",
+        "pot": "1|2"
+      },
+      "apply": {
+        "model": "jugcraft:block/caramel_apple_stand_flame",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "facing": "west",
+        "part": "1",
+        "jar": "1"
+      },
+      "apply": {
+        "model": "jugcraft:block/caramel_apple_stand_sticks_1",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "facing": "west",
+        "part": "1",
+        "jar": "2"
+      },
+      "apply": {
+        "model": "jugcraft:block/caramel_apple_stand_sticks_2",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "facing": "west",
+        "part": "0",
+        "rack": "1|2|3|4|5|6"
+      },
+      "apply": {
+        "model": "jugcraft:block/caramel_apple_stand_apple_1",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "facing": "west",
+        "part": "0",
+        "rack": "2|3|4|5|6"
+      },
+      "apply": {
+        "model": "jugcraft:block/caramel_apple_stand_apple_2",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "facing": "west",
+        "part": "0",
+        "rack": "3|4|5|6"
+      },
+      "apply": {
+        "model": "jugcraft:block/caramel_apple_stand_apple_3",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "facing": "west",
+        "part": "0",
+        "rack": "4|5|6"
+      },
+      "apply": {
+        "model": "jugcraft:block/caramel_apple_stand_apple_4",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "facing": "west",
+        "part": "0",
+        "rack": "5|6"
+      },
+      "apply": {
+        "model": "jugcraft:block/caramel_apple_stand_apple_5",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "facing": "west",
+        "part": "0",
+        "rack": "6"
+      },
+      "apply": {
+        "model": "jugcraft:block/caramel_apple_stand_apple_6",
+        "y": 270
+      }
+    }
+  ]
+}

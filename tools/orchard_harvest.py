@@ -1,7 +1,8 @@
 """Orchard & Apple Harvest, decor set 2 (docs/features/orchard-apple-harvest.md): the gear of an apple harvest, to stand
 beside the Cider Press (tools/agriculture.py CIDER). Part 1: the Orchard Ladder, the Apple Bin and the Picking Bag. Part
-2: apple crates, windfall apples and the Orchard Handcart. The numbers here are what agriculture/OrchardLadderBlock,
-AppleBinBlock, PickingBagBlock, FruitStoreBlockEntity, AppleCrateBlock, WindfallApplesBlock and OrchardHandcartBlock use;
+2: apple crates, windfall apples and the Orchard Handcart. Part 3: the Caramel Apple Stand. The numbers here are what
+agriculture/OrchardLadderBlock, AppleBinBlock, PickingBagBlock, FruitStoreBlockEntity, AppleCrateBlock,
+WindfallApplesBlock, OrchardHandcartBlock, CaramelAppleStandBlock and CaramelAppleStandBlockEntity use;
 tools/check_mod_data.py compares them. tools/orchard_harvest_data.py draws them and writes their files.
 
 Each is real-life sized (docs/ART_DIRECTION.md). A prop of several blocks (agriculture/MultiDecorationBlock) is `size`
@@ -81,8 +82,24 @@ SHAPELESS = [
 ]
 
 
+# Part 3. The Caramel Apple Stand: a wooden counter two blocks across and 0.9 m high, "CARAMEL APPLES" painted on its
+# front, with a copper dipping pot on a little burner, a glass jar of sticks and a cooling tray on top. Stock it with
+# caramel (up to `caramel` servings, one a Caramel) and sticks (up to `sticks`); use an apple on it to dip one: an apple,
+# a stick and a serving of caramel make a caramel apple, as the crafting recipe does (tools/agriculture.py), stood on the
+# tray to set (up to `rack` at once). After `cool_ticks` it has set and an empty hand takes it. The caramel bubbles and
+# the burner's flame flickers in slow, blended frames (`frames`, `frametime`); the flame lights the stand `light` while
+# there is caramel to keep warm. Breaking it gives back what it held.
+STAND = {"block": "caramel_apple_stand", "display": "Caramel Apple Stand", "size": (2, 1, 1), "caramel": 8, "sticks": 16, "rack": 6,
+         "cool_ticks": 600, "light": 6, "frames": 8, "frametime": 6, "counter_height": 14.5,
+         "spots": [(20.0, 6.0), (24.0, 6.0), (28.0, 6.0), (20.0, 10.0), (24.0, 10.0), (28.0, 10.0)]}
+STAND_RECIPE = {"id": "caramel_apple_stand", "pattern": ["IGT", "PPP", "P P"],
+                "key": {"I": "minecraft:copper_ingot", "G": "minecraft:glass_bottle", "T": "minecraft:paper", "P": "#minecraft:planks"},
+                "result": "caramel_apple_stand", "count": 1, "category": "building"}
+RECIPES.append(STAND_RECIPE)
+
+
 def blocks():
-    return [LADDER["block"], BIN["block"], BAG["block"]] + part2_blocks()
+    return [LADDER["block"], BIN["block"], BAG["block"]] + part2_blocks() + [STAND["block"]]
 
 
 def part2_blocks():

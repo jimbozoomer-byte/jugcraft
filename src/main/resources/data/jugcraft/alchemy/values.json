@@ -3712,6 +3712,11 @@
       "denominator": 3,
       "source": "recipe jugcraft:caramel_apple"
     },
+    "jugcraft:caramel_apple_stand": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
     "jugcraft:caramel_popcorn": {
       "numerator": 1,
       "denominator": 1,

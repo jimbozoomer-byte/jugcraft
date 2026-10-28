@@ -8,6 +8,14 @@ Every change to Jugcraft, newest first, grouped by pull request. For what each t
 
 No numbered release yet. Entries on feature branches remain proposed until their pull requests merge.
 
+### Unmerged: Orchard & Apple Harvest, part 3 (the Caramel Apple Stand)
+- **Caramel Apple Stand**: a two-block counter painted CARAMEL APPLES, with a copper dipping pot on a burner, a jar of sticks and a cooling tray.
+  - Stock it with Caramel and sticks, then dip apples. An apple, a stick and a serving make a caramel apple, as the recipe does.
+  - The apples set on the tray for 30 seconds before an empty hand takes them.
+  - The caramel bubbles and the flame flickers in smooth, blended frames.
+- Record: [orchard-apple-harvest.md](docs/features/orchard-apple-harvest.md).
+- **Checked:** the record's Verification. Game tests and screenshots run in CI only; not played by hand.
+
 ### Unmerged: Orchard & Apple Harvest, part 2 (crates, windfalls and the handcart)
 - **Apple crates**: wooden field crates heaped with red, green or golden apples. Each has slatted sides and labelled end boards; stack three to a block.
 - **Windfall Apples**: one to four apples lying in the grass. Two apples make two; broken, they give the apples back.

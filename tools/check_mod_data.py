@@ -14719,6 +14719,25 @@ def check_orchard_harvest():
     crate = (agri / "AppleCrateBlock.java").read_text(encoding="utf-8") if (agri / "AppleCrateBlock.java").is_file() else ""
     if f"CRATE_HEIGHT = {oh.CRATE['height']};" not in crate:
         err(f"AppleCrateBlock.CRATE_HEIGHT is not tools/orchard_harvest.py CRATE's {oh.CRATE['height']}")
+    stand = (agri / "CaramelAppleStandBlock.java").read_text(encoding="utf-8") if (agri / "CaramelAppleStandBlock.java").is_file() else ""
+    lang = load(ASSETS / "lang" / "en_us.json") or {}
+    spec = oh.STAND
+    w, h, d = spec["size"]
+    if f"box({w}, {h}, {d})" not in stand:
+        err(f"CaramelAppleStandBlock is not {w} x {h} x {d} blocks as tools/orchard_harvest.py STAND says")
+    for name, key in (("CARAMEL", "caramel"), ("STICKS", "sticks"), ("RACK", "rack"), ("COOL_TICKS", "cool_ticks"), ("LIGHT", "light")):
+        if f"int {name} = {spec[key]};" not in stand:
+            err(f"CaramelAppleStandBlock.{name} is not tools/orchard_harvest.py STAND's {spec[key]}")
+    if len(spec["spots"]) != spec["rack"]:
+        err("tools/orchard_harvest.py STAND has a tray spot for each apple it holds, and only those")
+    for anim in ("caramel", "flame"):
+        name = f"{spec['block']}_{anim}"
+        meta = load(ASSETS / "textures" / "block" / f"{name}.png.mcmeta") or {}
+        if not meta.get("animation", {}).get("interpolate"):
+            err(f"The stand's {anim} must be a blended animation (textures/block/{name}.png.mcmeta)")
+    for key in ("no_caramel", "no_sticks", "rack_full", "setting", "pot_full", "jar_full"):
+        if f"message.{MOD}.caramel_apple_stand.{key}" not in lang:
+            err(f"Message caramel_apple_stand.{key} has no text")
     store = (agri / "FruitStore.java").read_text(encoding="utf-8") if (agri / "FruitStore.java").is_file() else ""
     if "FRUIT = CiderPressBlock.APPLES" not in store or oh.FRUIT_TAG != "jugcraft:cider_apples":
         err("FruitStore.FRUIT is not the Cider Press's fruit (tools/orchard_harvest.py FRUIT_TAG)")

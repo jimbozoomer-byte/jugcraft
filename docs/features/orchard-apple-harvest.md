@@ -1,6 +1,6 @@
 # Orchard & Apple Harvest
 
-Status: parts 1 (the Orchard Ladder, the Apple Bin and the Picking Bag) and 2 (apple crates, windfall apples and the Orchard Handcart) implemented. CI builds it and runs its game tests and client screenshots; not yet played by hand.
+Status: parts 1 (the Orchard Ladder, the Apple Bin and the Picking Bag), 2 (apple crates, windfall apples and the Orchard Handcart) and 3 (the Caramel Apple Stand) implemented; the set is complete. CI builds it and runs its game tests and client screenshots; not yet played by hand.
 Proposal issue: none. The owner asked for it directly on 28 October 2026, as set 2 of the ten sets of fall and Halloween decor ("Then I want you to do 1-10 in parts in that order one by one"), drawn by their rules.
 Owner: @jimbozoomer-byte
 Target milestone and tier: Discovery tier. Everything is crafted from planks, sticks, slabs, wool, string and an iron nugget.
@@ -49,8 +49,16 @@ Primary specialty and supported player role: farming, with decor for builders. A
   - It holds **128** apples and pears (two stacks), used just like the Apple Bin. The load rises through four stages.
   - Recipe: a stick, three planks and two iron ingots.
 
-### Still to come
-- Part 3: the Caramel Apple Stand, with a dipping pot and a rack of apples on sticks, animated.
+### Part 3: the Caramel Apple Stand
+- **Caramel Apple Stand** (two blocks across, one deep): a wooden counter 0.9 m high, **CARAMEL APPLES** painted in red on its cream front.
+  - On top: a copper dipping pot on a little iron burner, a glass jar of sticks, and a waxed-paper cooling tray.
+  - **Stock it:** use Caramel on it to fill the pot (up to **8** servings) and sticks to fill the jar (up to **16**). The caramel's level and the sticks show.
+  - **Dip:** use an apple on it. An apple, a stick and a serving of caramel make a caramel apple, as the crafting recipe does, stood on the tray with its stick up and a foot of caramel round it (up to **6** at once).
+  - **Take:** after 30 seconds it has set, and an empty hand takes it. Before then it says it's still setting.
+  - While there is caramel, the burner burns (light 6). The flame flickers in its door, and the caramel bubbles in the pot.
+  - Without caramel, sticks or tray room, it says what it needs instead of taking the apple.
+  - Breaking it gives back its caramel, sticks and caramel apples.
+  - Recipe: a copper ingot, a glass bottle and paper over five planks.
 
 ## Changes from the idea list
 - The ladder is one block across, three up and two deep. A pole leaning 22.5 degrees (the only lean a block model can give a box, short of 45) from a nine-foot cap reaches the ground two blocks back.
@@ -76,6 +84,12 @@ Primary specialty and supported player role: farming, with decor for builders. A
   - The crates are the same wood, their apples the same heap in each variety's tones, and their labels cream paper with the variety's band and its fruit.
   - A windfall apple is a two-pixel box (12 cm; vanilla's density gives an apple no smaller) lit at its top left, with a dark stalk.
   - The handcart's wheels are the market displays' spoked wheels (`pumpkin_patch_data.wheel`).
+- **Part 3:**
+  - The stand's lettering is hand-set three-texel by five-texel letters, each with its left column a tone lighter, in a red border.
+  - The copper is one colour in tones, lit along its upper edges. The jar is cut-out glass: a pale rim, a lit streak, clear panes. The caramel apples are red at the top and caramel below, each on a stick.
+  - **Animation:** smooth, blended frames (`"interpolate": true`), at one texel a pixel.
+    - The caramel is one tone with a lit meniscus where it climbs the pot, and bubbles that swell and are gone in turn.
+    - The burner's flame is a band of blue under orange, its yellow tips walking along it a texel a frame. It is cut out, emissive, and never flashes.
 - Nothing is copied, traced or recoloured from Minecraft's textures; the apples are drawn here, not taken from the apple item.
 
 ## Connections
@@ -89,6 +103,7 @@ Primary specialty and supported player role: farming, with decor for builders. A
 ## Balance and automation
 - The bin, the cart and the bag hold fruit and give back exactly what went in. They make, grow and change nothing.
 - Windfall apples give back their apples, one for one, when broken; a crate's apples are spent on it. No loop gains, and no recipe turns anything back.
+- The stand makes a caramel apple from exactly the crafting recipe's inputs (an apple, a stick and a Caramel), only slower: it is the same conversion at a stall.
 - The bin holds four stacks in a two-by-two footprint (a chest holds 27). Its value is that it shows the harvest, not that it stores densely.
 - No hopper or pipe connection yet: fruit goes in and out by hand.
 
@@ -99,7 +114,11 @@ Primary specialty and supported player role: farming, with decor for builders. A
 - Breaking a bin from any block takes the whole down and spills its fruit once. Pistons can't move the ladder or the bin (`PushReaction.IMMOVEABLE`); a piston pops the bag off.
 - Climbable is a block tag, so every block of the ladder climbs, including the two behind its rails that the pole crosses.
 - Part 2: the cart is a bin on wheels, kept and shown the same way (`FruitBinBlock`). Crates and windfall apples keep nothing but their count in their block state.
-- IDs (stable from release): `orchard_ladder`, `apple_bin`, `picking_bag`, `orchard_handcart`, `red_apple_crate`, `green_apple_crate`, `golden_apple_crate`, `windfall_apples`; block entity `fruit_store`.
+- Part 3: the stand's first block keeps its caramel, sticks and each tray apple's dipping time (`CaramelAppleStandBlockEntity`), saved with the world.
+  - Its stock shows through block states (`pot`, `jar`, `rack`) and a multipart blockstate, so clients draw it without the block entity sending anything.
+  - Nothing ticks: whether an apple has set is worked out from the game time when it is taken.
+  - Everything changes on the server only.
+- IDs (stable from release): `orchard_ladder`, `apple_bin`, `picking_bag`, `orchard_handcart`, `red_apple_crate`, `green_apple_crate`, `golden_apple_crate`, `windfall_apples`, `caramel_apple_stand`; block entities `fruit_store` and `caramel_apple_stand`.
 - The recipes follow the agriculture feature switch; the blocks stay registered when it is off.
 
 ## Dependencies and assets
@@ -107,7 +126,8 @@ Primary specialty and supported player role: farming, with decor for builders. A
 
 ## Verification
 Local checks run on this branch, and their results:
-- `python3 tools/check_mod_data.py`: PASS (part 1: 8,058 material IDs, 8,071 after merging main's release batch #537 down the stack; with part 2: 8,076).
+- `python3 tools/check_mod_data.py`: PASS (part 1: 8,058 material IDs, 8,071 after merging main's release batch #537 down the stack; with part 2: 8,076; with part 3: 8,077).
+  - Part 3's first run failed once, fixed before commit: the caramel's surface was a thin box with only its top drawn (holes, O1); it is a sheet.
   - Part 2's first run failed twice, both fixed before commit. The windfall apples first had a recipe back to apples (a recipe loop, refused); their counted drops were first written in the pre-26.x loot keys. It includes the art check over every block and item model (part 1's 6 ladder, 36 bin and 5 bag block models and 3 item models among them; no allow-list entry added) and the new `check_orchard_harvest`.
 - `python3 scripts/check_repository.py`: PASS.
 - `python3 -m unittest discover -s scripts/tests`: 287 tests, OK.
@@ -138,7 +158,14 @@ Game tests (CI only, not run locally), `OrchardHarvestGameTests`:
   - Windfall apples gather four to a block, and a fifth won't go on them. They are walked through, and without their ground they come off, giving back four apples.
   - The handcart stands whole (two blocks), takes two stacks and refuses a third, shows full on both blocks, and drops once, spilling its 128 apples.
 
-`OrchardHarvestClientGameTests` takes three screenshots: an apple tree with the ladder against it, a full apple bin, a half-full pear bin, the bag on the trunk, stacks of the three crates, windfall apples under the tree and a laden handcart, from the front, from the side and close by the crates.
+- **Part 3:** the stand stands whole (two blocks):
+  - an apple isn't dipped without caramel;
+  - caramel and a stick go in from either block, and it shows them and lights;
+  - an apple, a stick and a serving make a caramel apple on the tray, shown on both blocks, and with no sticks left the next apple is refused;
+  - an empty hand takes nothing before it sets, and the apple after 600 ticks;
+  - broken, it drops once and gives back its caramel.
+
+`OrchardHarvestClientGameTests` takes four screenshots: an apple tree with the ladder against it, a full apple bin, a half-full pear bin, the bag on the trunk, stacks of the three crates, windfall apples under the tree, a laden handcart and the stocked stand, from the front, from the side, close by the crates and at the stand.
 
 Not run: a hand playtest, and a two-client playtest.
 
@@ -146,5 +173,4 @@ Not run: a hand playtest, and a two-client playtest.
 Placed blocks only; no world generation. Not seasonal: they are crafted and used all year.
 
 ## Rollout and open questions
-- Parts 2 and 3 follow on their own branches.
 - Open: whether hoppers should fill and empty the bin (it would make it a dense apple buffer for an automated cider line).
