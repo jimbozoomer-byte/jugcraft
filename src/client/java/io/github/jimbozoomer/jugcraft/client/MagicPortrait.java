@@ -58,6 +58,29 @@ final class MagicPortrait {
 	}
 
 	/**
+	 * A visual-only portrait of the pact spirit whose sign is {@code sign} ({@link MagicPortraits}: the chooser's cards, a
+	 * pact without its perch, a spirit that has departed), or null when no pact spirit has that sign.
+	 */
+	static @Nullable LivingEntity ofSign(String sign) {
+		for (PactSpirits.Spirit spirit : PactSpirits.all()) {
+			if (spirit.sign().equals(sign)) {
+				return MagicPortraits.of(spirit.counterpart());
+			}
+		}
+		return null;
+	}
+
+	/** The counterpart (an entity id) of the pact spirit whose sign is {@code sign}, or "" (the beats heard before are kept by it). */
+	static String counterpart(String sign) {
+		for (PactSpirits.Spirit spirit : PactSpirits.all()) {
+			if (spirit.sign().equals(sign)) {
+				return spirit.counterpart();
+			}
+		}
+		return "";
+	}
+
+	/**
 	 * The window at (x, y), w x h: the cosmos, then {@code creature} (or {@code sign}'s item when it is null), greyed when
 	 * {@code ended}.
 	 */

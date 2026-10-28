@@ -262,6 +262,17 @@ It fits windows down to 320×180 scaled pixels and scrolls its body; the client 
 `PactClient` sends only the five bounded numbers for the open menu and decides nothing. `PactStatePayload`'s lists are
 capped at 3 beats, 16 terms, 12 notes, 8 patterns, 8 offerings and 8 compact stacks.
 
+**Since the magic interfaces** ([magic-interfaces.md](magic-interfaces.md), unit 1) the screen is drawn on the relic
+scroll card with far fewer words. His beats are shortened: the stage direction "A raven settles and studies you." and
+his three lines, "You watched the sky and asked the flowers. I am Stolas.", "Once a day, here, I turn the heavens back
+to a star you saw." and "An offering every seven days, kept ahead. Miss one and I wait." The first two carry a Terms
+skip, and once heard they are not shown again. His terms are chips, each narrated and hovered with its whole sentence;
+the six standing terms are one chip whose More shows their lines; the price row marks a short material or resonance
+("6/8 resonance") before Accept. His kept page shows his state, today's recalls, four sockets for what is paid ahead,
+the patterns and Recall. The shortened beats and the amended D-S15 were decided by the session in answer to the owner's
+request for far less reading, reviewable at the checkpoint; not owner-accepted. The keys, the keyboard order, the
+narration and the server's answers above are unchanged.
+
 ## Stolas's character (D-06)
 
 Built in unit 3 (commits `9805a9a7c`, his raven body, and `773b85aba`, his presence, sounds, subtitles and Jade; the

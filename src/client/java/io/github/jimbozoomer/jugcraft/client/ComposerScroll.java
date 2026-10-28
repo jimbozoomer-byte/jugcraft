@@ -15,7 +15,9 @@ import net.minecraft.client.gui.narration.NarrationElementOutput;
 import net.minecraft.client.gui.navigation.ScreenDirection;
 import net.minecraft.client.gui.navigation.ScreenRectangle;
 import net.minecraft.client.input.MouseButtonEvent;
+import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.network.chat.CommonComponents;
+import net.minecraft.resources.Identifier;
 import org.jspecify.annotations.Nullable;
 
 /**
@@ -31,6 +33,9 @@ final class ComposerScroll extends AbstractContainerWidget {
 	private final List<AbstractWidget> children = new ArrayList<>();
 	private final List<Integer> offsets = new ArrayList<>();
 	private int content;
+	private @Nullable Identifier ball;
+	private int ballX;
+	private int ballSize;
 
 	ComposerScroll(Minecraft minecraft, int x, int y, int width, int height, Consumer<@Nullable GuiEventListener> focused) {
 		super(x, y, width, height, CommonComponents.EMPTY, AbstractScrollArea.defaultSettings(10));
@@ -44,6 +49,17 @@ final class ComposerScroll extends AbstractContainerWidget {
 		offsets.add(offset);
 		content = Math.max(content, offset + widget.getHeight());
 		return widget;
+	}
+
+	/**
+	 * Shows its place by a sprite ({@code size} square) at {@code x}, travelling its height while it scrolls, instead of
+	 * vanilla's bar (the magic screens: the scroll's gold ball on its right roller, spec 2.11); nothing while all of it shows.
+	 */
+	ComposerScroll ball(Identifier sprite, int x, int size) {
+		this.ball = sprite;
+		this.ballX = x;
+		this.ballSize = size;
+		return this;
 	}
 
 	/** Places the children once all are added, scrolled to {@code amount} (kept within range). */
@@ -85,7 +101,13 @@ final class ComposerScroll extends AbstractContainerWidget {
 			child.extractRenderState(graphics, over ? mouseX : -1, over ? mouseY : -1, delta);
 		}
 		graphics.disableScissor();
-		extractScrollbar(graphics, mouseX, mouseY);
+		if (ball == null) {
+			extractScrollbar(graphics, mouseX, mouseY);
+		} else if (scrollable()) {
+			int travel = Math.max(0, height - ballSize);
+			int at = getY() + (int) (travel * scrollAmount() / Math.max(1, maxScrollAmount()));
+			graphics.blitSprite(RenderPipelines.GUI_TEXTURED, ball, ballX, at, ballSize, ballSize);
+		}
 	}
 
 	@Override

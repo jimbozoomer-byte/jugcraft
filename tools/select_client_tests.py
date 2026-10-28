@@ -135,6 +135,17 @@ ENDINGS = ("BlockEntityRenderer", "BlockEntity", "Renderer", "Block", "Item", "E
 # And the accord machinery (Concordance garden cohort, GC-05), named by no client test: shown on Bathin's kept page and the
 # roster by the garden's client class (a class this selection keeps only while it is listed).
 SHOWN_BY["PactAccords"] = {"ConcordanceGardenPactClientGameTests"}
+# The magic interfaces (docs/features/magic-interfaces.md): the shared Magic layer and its words and art are shown by every
+# class that opens the pact screen (the pact, garden and network classes, the screen fit check) and by the roster's, whose
+# answers carry PactScreen.Verdict; the kit's sprites and the cosmos are named by no test, so a change to them selects these
+# classes too (MAGIC_ASSETS), as does the end confirmation drawn on the scroll.
+MAGIC_SHOWN = {"ConcordancePactClientGameTests", "ConcordanceGardenPactClientGameTests", "ConcordancePactNetworkTests",
+               "ConcordanceRosterClientGameTests", "ScreenFitClientGameTests"}
+for _name in ("MagicArt", "MagicTheme", "MagicLayout", "MagicScreen", "MagicButton", "MagicText", "MagicChip", "MagicStacks",
+              "MagicPortrait", "MagicPortraits", "PactGlance", "RosterGlance", "PactAfford", "KeepFirstConfirmScreen", "ComposerScroll",
+              "ConcordanceClientOptions"):
+    SHOWN_BY[_name] = SHOWN_BY.get(_name, set()) | MAGIC_SHOWN
+MAGIC_ASSETS = re.compile(r"^src/main/resources/assets/jugcraft/textures/gui/(?:sprites/(?:magic|tooltip)/|magic/)")
 # Files that change nothing a client test shows.
 NOTHING = (
     re.compile(r"^docs/"),
@@ -321,6 +332,9 @@ def select(changed, tests, newly_listed, base=None, head=None):
             if not hits:
                 reasons.append(f"{path}: no client test shows {name}")
             chosen |= hits
+            continue
+        if MAGIC_ASSETS.match(path):
+            chosen |= MAGIC_SHOWN & tests.keys()
             continue
         asset = ASSET.match(path)
         if asset:

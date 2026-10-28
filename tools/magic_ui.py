@@ -582,7 +582,7 @@ def sprite_id(target):
 _WORD = re.compile(r"[A-Za-z0-9]")
 _PLACE = re.compile(r"%(?:(\d+)\$)?s")
 LIMITS = {"chip": 3, "service": 10, "row": 12, "blocker": 14, "answer": 6, "standing": 12, "card": 4, "button": 2,
-          "label": 3, "tip": 20, "fact": 4}
+          "label": 3, "tip": 20, "fact": 4, "beat": 18, "stage": 8}
 # Rows the server sends that are drawn by another element (spec 1.7), never as their own glance.
 FOLDED = ("pact.row.area", "pact.row.area_any", "pact.row.end", "pact.row.matter.awaiting", "pact.row.matter.answered",
           # A compact without resonance is the price row alone: "Price" and its stacks, the sentence its message.
@@ -592,7 +592,7 @@ FOLDED = ("pact.row.area", "pact.row.area_any", "pact.row.end", "pact.row.matter
 # The screens drawn with the Magic layer (client/<name>.java): each must build its controls from MagicButton and its words
 # from MagicText, with no BookArt.Tab or BookArt.Paragraph left (check_magic_ui). Each joins as it moves: PactScreen with
 # unit 1's screen commit, then the roster (unit 2), the composer and the Field Guide (unit 3).
-MAGIC_SCREENS = []
+MAGIC_SCREENS = ["PactScreen"]
 
 
 def nwords(text):
@@ -631,7 +631,9 @@ def card_key(server):
     return "screen.jugcraft.pact.glance.card." + (rest if family == "pact" else server)
 
 
-# The service line of each work (the header's line; the service chip's glance), at most 10 words.
+# The service line of each work (the header's line; the service chip's glance), at most 10 words, and its name (the
+# beats' and the ended page's header, a second glance of the same sentence: screen.jugcraft.pact.glance.term.service.<work>.name).
+SERVICE_NAMES = {"star_reckoning": "Star-reckoning", "strain_tending": "Strain tending", "verdance_carrying": "Verdance carrying"}
 SERVICE_LINES = {"star_reckoning": "Recalls a star you have seen", "strain_tending": "Eases strained beds, one at a time",
                  "verdance_carrying": "Carries your Hearts' Verdance, instantly"}
 _BUER = ("06:00", "18:00", 5, 16)
@@ -692,6 +694,9 @@ GLANCES = {
     "pact.answer.missing_evidence": [("", "Not yet: see what is missing", ("Bathin",), "Not yet: see what is missing",
                                       "answer")],
     "pact.answer.changed": [("", "His terms changed: read them again", (), "His terms changed: read them again", "answer")],
+    "pact.answer.resolved": [("", "Answer kept", ("Leave it",), "Answer kept", "answer")],
+    "pact.deposited": [("", "%1$s %2$s paid ahead", (1, "Amethyst Shard", 1, 4), "1 Amethyst Shard paid ahead", "answer")],
+    "pact.reckoning.recalled": [("", "Recalled: %1$s", ("Lantern Star",), "Recalled: Lantern Star", "answer")],
     # Blockers (every one drawn above the terms as a lock line, keeping its action).
     "pact.missing.owner": [("", "Only the perch's owner may invite %1$s", ("Bathin",),
                             "Only the perch's owner may invite Bathin", "blocker")],
@@ -712,8 +717,9 @@ GLANCES = {
 # Each work's own glances (a garden spirit's unit adds its row): its service line, its kept-page rows, its blockers and
 # its chooser card's reason. Keys are under message.jugcraft.concordance.pact.<work>. (SERVICE_WORDS' messages).
 WORK_GLANCES = {
-    "star_reckoning": {"card": None},
+    "star_reckoning": {"card": None, "icon": "jugcraft:astrolabe"},
     "strain_tending": {
+        "icon": "jugcraft:verdant_bed",
         "row.service": [("", "%1$s/%2$s today", (5, 16), "5/16 today", "chip")],
         "row.asleep": [("", "Asleep until %1$s · %3$s/%4$s today", _BUER, "Asleep until 06:00 · 5/16 today", "row")],
         "row.overworked": [("", "Overworked at %1$s: feed it or let it rest", ("102, 64, -18",),
@@ -725,6 +731,7 @@ WORK_GLANCES = {
         "card": ("Needs a bed near", (8,), "Needs a bed near"),
     },
     "verdance_carrying": {
+        "icon": "jugcraft:verdant_heart",
         "row.service": [("", "%1$s/%2$s today", (3, 12), "3/12 today", "chip")],
         "row.moved": [("", "Last: %1$s Verdance to the Gleaner at %3$s", (8, "12, 64, -30", "40, 63, -2"),
                        "Last: 8 Verdance to the Gleaner at 40, 63, -2", "row")],
@@ -738,10 +745,13 @@ WORK_GLANCES = {
         "card": ("Needs Heart and Gleaner", (10, 10), "Needs Heart and Gleaner"),
     },
 }
+# A work's row that is not a glance: its chooser reason and its icon (the item its service line and its own rows draw).
+WORK_FIELDS = ("card", "icon")
 for _work, _rows in WORK_GLANCES.items():
-    GLANCES[f"pact.term.service.{_work}"] = [("", SERVICE_LINES[_work], (), SERVICE_LINES[_work], "service")]
+    GLANCES[f"pact.term.service.{_work}"] = [("", SERVICE_LINES[_work], (), SERVICE_LINES[_work], "service"),
+                                              ("name", SERVICE_NAMES[_work], (), SERVICE_NAMES[_work], "label")]
     for _key, _glances in _rows.items():
-        if _key != "card":
+        if _key not in WORK_FIELDS:
             GLANCES[f"pact.{_work}.{_key}"] = _glances
 # Chooser card reasons (spec 1.7; at most 4 words): the first missing note's server key -> (pattern, sample, English).
 CARDS = {
@@ -782,10 +792,37 @@ MARK_RULES = (
 )
 
 
+def _matches(kind, text, server):
+    return (kind == "prefix" and server.startswith(text) or kind == "suffix" and server.endswith(text)
+            or kind == "exact" and server == text or kind == "contains" and text in server)
+
+
 def mark(server):
     for kind, text, name in MARK_RULES:
-        if (kind == "prefix" and server.startswith(text) or kind == "suffix" and server.endswith(text)
-                or kind == "exact" and server == text or kind == "contains" and text in server):
+        if _matches(kind, text, server):
+            return name
+    return None
+
+
+# The icon a kept page's or closed page's row draws, by the shape of its server key (Java: PactGlance.ICONS, in this
+# order; the first rule that matches decides, and a row with an icon draws it instead of its mark): "work" is the work's
+# own item (WORK_GLANCES[work]["icon"]), "glyph:<name>" a glyph of GLYPHS in the row's ink, "item:<id>" an item. A row
+# with neither icon nor mark draws its words alone. A garden spirit's rows named as these are get their icons with no
+# change here.
+ICON_RULES = (
+    ("contains", ".row.overworked", "work"),
+    ("suffix", ".row.poured", "item:jugcraft:ley_pylon"),
+    ("suffix", ".row.moved", "item:jugcraft:gleaner"),
+    ("suffix", ".row.leaving", "item:jugcraft:verdant_heart"),
+    ("suffix", "obligation", "glyph:pin"),
+    ("exact", "pact.ended_here", "glyph:pin"),
+    ("exact", "pact.departed", "glyph:spiral"),
+)
+
+
+def icon(server):
+    for kind, text, name in ICON_RULES:
+        if _matches(kind, text, server):
             return name
     return None
 
@@ -798,13 +835,14 @@ SHORT = {
     "close": ("Close", "button"), "end": ("End...", "button"), "recall": ("Recall", "button"),
     "carried": ("×%1$s carried", "label"), "price": ("Price", "label"), "standing": ("Standing terms", "label"),
     "ended": ("Ended", "label"), "ready": ("Ready", "label"), "not_yet": ("Not yet", "label"),
-    "invite": ("Invite a spirit", "label"),
+    "invite": ("Invite a spirit", "label"), "used": ("used", "label"),
+    "resonance": ("%1$s/%2$s resonance", "label"), "any_of": ("Any of: %1$s", "tip"),
     "standing.hint": ("The same for every spirit", "tip"), "accept.hint": ("Pays the price and seals the pact", "tip"),
     "accept.narration": ("Nothing is spent before this", "tip"), "skip.hint": ("Skip to his terms", "tip"),
     "end.leaves": ("He leaves; offerings paid ahead come back once.", "tip"),
     "end.undone": ("This cannot be undone.", "tip"),
 }
-SHORT_SAMPLES = {"carried": (12,)}
+SHORT_SAMPLES = {"carried": (12,), "resonance": (6, 8), "any_of": ("Stolas Starflower, Amethyst Shard",)}
 
 
 def lang_entries(lang):
@@ -1042,6 +1080,33 @@ def problems(lang=None, load=None, read=read_library):
     for work, rows in WORK_GLANCES.items():
         if work in pacts.SERVICE_WORDS and "missing" in pacts.SERVICE_WORDS[work]["messages"] and not rows.get("card"):
             out.append(f"{work}: no chooser card reason")
+        if not re.fullmatch(r"[a-z0-9_.-]+:[a-z0-9_/.-]+", rows.get("icon") or ""):
+            out.append(f"{work}: no icon (an item id) in WORK_GLANCES (its service line's and its own rows' item)")
+        if work not in SERVICE_NAMES or work not in SERVICE_LINES:
+            out.append(f"{work}: no SERVICE_NAMES or SERVICE_LINES entry (the beats' header and the service line)")
+    for kind, text, name in ICON_RULES:
+        if kind not in ("prefix", "suffix", "exact", "contains") or not (
+                name == "work" or name.startswith("glyph:") and name[6:] in GLYPHS
+                or re.fullmatch(r"item:[a-z0-9_.-]+:[a-z0-9_/.-]+", name)):
+            out.append(f"ICON_RULES {kind} {text!r}: {name!r} is not work, glyph:<one of GLYPHS> or item:<id>")
+    # The beats (spec 1.5): at most three, each line at most 18 words; the greeting's stage direction (its own key, which
+    # the screen draws dim) at most 8 words and the greeting's first words.
+    for name, spirit in pacts.SPIRITS.items():
+        if len(spirit["beats"]) > 3:
+            out.append(f"{name}: {len(spirit['beats'])} beats, over the three before the terms (spec 1.1)")
+        stage = lang.get(f"message.jugcraft.concordance.pact.{name}.beat.greeting.stage")
+        for beat in spirit["beats"]:
+            text = lang.get(f"message.jugcraft.concordance.pact.{name}.beat.{beat}", "")
+            line = text
+            if beat == "greeting" and stage:
+                if not text.startswith(stage + " "):
+                    out.append(f"{name}.beat.greeting: does not begin with its stage direction {stage!r}")
+                else:
+                    line = text[len(stage):].strip()
+                if nwords(stage) > LIMITS["stage"]:
+                    out.append(f"{name}.beat.greeting.stage: {nwords(stage)} words, over {LIMITS['stage']} (spec 1.1)")
+            if nwords(line) > LIMITS["beat"]:
+                out.append(f"{name}.beat.{beat}: his line is {nwords(line)} words, over {LIMITS['beat']} (spec 1.1)")
     return out
 
 

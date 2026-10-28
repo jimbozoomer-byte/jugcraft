@@ -195,6 +195,53 @@ class CheckTests(unittest.TestCase):
             pacts.SERVICE_WORDS.clear()
             pacts.SERVICE_WORDS.update(saved)
 
+    def test_a_beat_over_eighteen_words_is_reported(self):
+        lang = dict(LANG)
+        key = "message.jugcraft.concordance.pact.buer.beat.price"
+        lang[key] = '"' + " ".join(["mend"] * 19) + '"'
+        self.assertTrue(any("buer.beat.price" in problem and "over 18" in problem for problem in mu.problems(lang=lang)))
+
+    def test_a_greeting_not_beginning_with_its_stage_direction_is_reported(self):
+        lang = dict(LANG)
+        lang["message.jugcraft.concordance.pact.stolas.beat.greeting.stage"] = "A raven lands."
+        self.assertTrue(any("stolas.beat.greeting: does not begin" in problem for problem in mu.problems(lang=lang)))
+
+    def test_every_beat_line_and_stage_keeps_to_its_limit(self):
+        import concordance_pacts as pacts
+        for name, spirit in pacts.SPIRITS.items():
+            stage = spirit.get("stage", "")
+            for beat, text in spirit["beats"].items():
+                with self.subTest(spirit=name, beat=beat):
+                    line = text[len(stage):].strip() if beat == "greeting" and stage else text
+                    self.assertLessEqual(mu.nwords(line), mu.LIMITS["beat"])
+            self.assertLessEqual(mu.nwords(stage), mu.LIMITS["stage"])
+            self.assertTrue(spirit["beats"]["greeting"].startswith(stage))
+
+
+class IconTests(unittest.TestCase):
+    def test_rows_draw_their_icons_by_the_shape_of_their_key(self):
+        self.assertEqual(mu.icon("pact.strain_tending.row.overworked"), "work")
+        self.assertEqual(mu.icon("pact.verdance_carrying.row.poured"), "item:jugcraft:ley_pylon")
+        self.assertEqual(mu.icon("garden_pact.obligation"), "glyph:pin")
+        self.assertIsNone(mu.icon("garden_pact.obligation_kept"))
+        self.assertIsNone(mu.icon("pact.row.state.active"))
+
+    def test_every_work_has_its_icon_name_and_line(self):
+        for work, rows in mu.WORK_GLANCES.items():
+            with self.subTest(work=work):
+                self.assertRegex(rows["icon"], r"^[a-z0-9_]+:[a-z0-9_/]+$")
+                self.assertLessEqual(mu.nwords(mu.SERVICE_NAMES[work]), mu.LIMITS["label"])
+                self.assertLessEqual(mu.nwords(mu.SERVICE_LINES[work]), mu.LIMITS["service"])
+                self.assertEqual(LANG.get(mu.glance_key(f"pact.term.service.{work}", "name")), mu.SERVICE_NAMES[work])
+
+    def test_an_icon_naming_no_glyph_is_reported(self):
+        saved = mu.ICON_RULES
+        try:
+            mu.ICON_RULES = saved + (("exact", "pact.row.lost", "glyph:feather"),)
+            self.assertTrue(any("glyph:feather" in problem for problem in mu.problems()))
+        finally:
+            mu.ICON_RULES = saved
+
 
 if __name__ == "__main__":
     unittest.main()

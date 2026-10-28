@@ -8,6 +8,7 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.mojang.blaze3d.platform.InputConstants;
 import io.github.jimbozoomer.jugcraft.Jugcraft;
+import io.github.jimbozoomer.jugcraft.client.ConcordanceClientOptions;
 import io.github.jimbozoomer.jugcraft.client.PactClient;
 import io.github.jimbozoomer.jugcraft.client.PactScreen;
 import io.github.jimbozoomer.jugcraft.client.RosterClient;
@@ -223,6 +224,8 @@ public final class ConcordancePactNetworkTests implements FabricClientGameTest {
 	/** The second JVM: the stranger. Each step waits for the holder's mark and leaves its own. */
 	private static void peer(ClientGameTestContext context) {
 		mark("peer-entered", "");
+		// The magic interfaces: no spirit's beats heard before (its own profile keeps its options), so his perch opens on them.
+		context.runOnClient(client -> ConcordanceClientOptions.forgetBeats());
 		String address = "127.0.0.1:" + System.getProperty(PEER);
 		context.runOnClient(client -> ConnectScreen.startConnecting(new TitleScreen(), client, ServerAddress.parseString(address),
 				new ServerData("Pact disposable test", address, ServerData.Type.OTHER), false, null));

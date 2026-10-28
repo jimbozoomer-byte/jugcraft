@@ -1,9 +1,14 @@
 package io.github.jimbozoomer.jugcraft.client;
 
 import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.locale.Language;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.contents.TranslatableContents;
+import net.minecraft.resources.Identifier;
+import net.minecraft.world.item.ItemStack;
 import org.jspecify.annotations.Nullable;
 
 /**
@@ -35,12 +40,26 @@ final class PactGlance {
 	/** The mark a glance draws, by the shape of its server key (tools/magic_ui.py MARK_RULES, in that order). */
 	private record Rule(String kind, String text, MagicArt.Mark mark) {
 		boolean matches(String server) {
-			return switch (kind) {
-				case "prefix" -> server.startsWith(text);
-				case "suffix" -> server.endsWith(text);
-				case "contains" -> server.contains(text);
-				default -> server.equals(text);
-			};
+			return PactGlance.matches(kind, text, server);
+		}
+	}
+
+	/**
+	 * The icon a page's row draws instead of its mark, by the shape of its server key (tools/magic_ui.py ICON_RULES, in that
+	 * order): "work" (the work's own item, {@link #WORK_ICONS}), "glyph:&lt;name&gt;" or "item:&lt;id&gt;".
+	 */
+	private record IconRule(String kind, String text, String icon) {
+		boolean matches(String server) {
+			return PactGlance.matches(kind, text, server);
+		}
+	}
+
+	/** What a row draws before its words: an item, a glyph in its ink, or neither (then its mark, if any). */
+	record Icon(ItemStack item, MagicArt.@Nullable Glyph glyph) {
+		static final Icon NONE = new Icon(ItemStack.EMPTY, null);
+
+		boolean isNone() {
+			return item.isEmpty() && glyph == null;
 		}
 	}
 
@@ -58,6 +77,24 @@ final class PactGlance {
 			new Rule("suffix", "obligation_kept", MagicArt.Mark.TICK),
 			new Rule("suffix", "obligation", MagicArt.Mark.HOURGLASS),
 			new Rule("contains", ".matter.", MagicArt.Mark.ASK));
+
+	private static final List<IconRule> ICONS = List.of(
+			new IconRule("contains", ".row.overworked", "work"),
+			new IconRule("suffix", ".row.poured", "item:jugcraft:ley_pylon"),
+			new IconRule("suffix", ".row.moved", "item:jugcraft:gleaner"),
+			new IconRule("suffix", ".row.leaving", "item:jugcraft:verdant_heart"),
+			new IconRule("suffix", "obligation", "glyph:pin"),
+			new IconRule("exact", "pact.ended_here", "glyph:pin"),
+			new IconRule("exact", "pact.departed", "glyph:spiral"));
+
+	/**
+	 * Each work's own item: its service line's and its "work" rows' icon (tools/magic_ui.py WORK_GLANCES[work]["icon"]); a
+	 * work not here draws its spirit's sign.
+	 */
+	static final Map<String, String> WORK_ICONS = Map.of(
+			"star_reckoning", "jugcraft:astrolabe",
+			"strain_tending", "jugcraft:verdant_bed",
+			"verdance_carrying", "jugcraft:verdant_heart");
 
 	private PactGlance() {
 	}
@@ -113,6 +150,49 @@ final class PactGlance {
 	/** A chooser reason's key (tools/magic_ui.py card_key). */
 	static String cardKey(String server) {
 		return "screen.jugcraft.pact.glance.card." + (server.startsWith("pact.") ? server.substring("pact.".length()) : server);
+	}
+
+	private static boolean matches(String kind, String text, String server) {
+		return switch (kind) {
+			case "prefix" -> server.startsWith(text);
+			case "suffix" -> server.endsWith(text);
+			case "contains" -> server.contains(text);
+			default -> server.equals(text);
+		};
+	}
+
+	/** {@code full}'s server key under message.jugcraft.concordance. (pact.row.next), or "" when it is not a server sentence. */
+	static String server(Component full) {
+		return full.getContents() instanceof TranslatableContents contents && contents.getKey().startsWith(SERVER)
+				? contents.getKey().substring(SERVER.length()) : "";
+	}
+
+	/** The icon the row {@code server} draws, for a pact whose work is {@code work} and whose spirit's sign is {@code sign}. */
+	static Icon icon(String server, String work, String sign) {
+		for (IconRule rule : ICONS) {
+			if (rule.matches(server)) {
+				if (rule.icon().equals("work")) {
+					return new Icon(workIcon(work, sign), null);
+				}
+				if (rule.icon().startsWith("glyph:")) {
+					return new Icon(ItemStack.EMPTY, MagicArt.Glyph.valueOf(rule.icon().substring("glyph:".length()).toUpperCase(Locale.ROOT)));
+				}
+				return new Icon(item(rule.icon().substring("item:".length())), null);
+			}
+		}
+		return Icon.NONE;
+	}
+
+	/** The work's own item ({@link #WORK_ICONS}), else the spirit's sign, else nothing. */
+	static ItemStack workIcon(String work, String sign) {
+		ItemStack own = item(WORK_ICONS.getOrDefault(work, ""));
+		return own.isEmpty() ? item(sign) : own;
+	}
+
+	/** The item {@code id} names, or an empty stack. */
+	static ItemStack item(String id) {
+		Identifier key = id.isEmpty() ? null : Identifier.tryParse(id);
+		return key != null && BuiltInRegistries.ITEM.containsKey(key) ? new ItemStack(BuiltInRegistries.ITEM.getValue(key)) : ItemStack.EMPTY;
 	}
 
 	/** The mark the glance of {@code server} draws, or null. */

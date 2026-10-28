@@ -1,5 +1,6 @@
 package io.github.jimbozoomer.jugcraft.client;
 
+import java.util.ArrayList;
 import java.util.List;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
@@ -33,6 +34,7 @@ final class MagicChip extends AbstractWidget implements MagicScreen.Drawn {
 	private MagicArt.@Nullable Glyph glyph;
 	private MagicArt.@Nullable Mark mark;
 	private List<ItemStack> items = List.of();
+	private String corner = "";
 	private int box;
 	private List<FormattedCharSequence> tip;
 	private @Nullable ClientTooltipPositioner positioner;
@@ -74,6 +76,35 @@ final class MagicChip extends AbstractWidget implements MagicScreen.Drawn {
 		return this;
 	}
 
+	/**
+	 * Its stack's corner, where vanilla's count sits: the count when it is not one, else "+N" when the stack cycles through
+	 * N more (an offering tag's), so a still frame says it too (spec 2.6); in the heading ink on the scroll.
+	 */
+	MagicChip count(int count) {
+		this.corner = count != 1 ? String.valueOf(count) : items.size() > 1 ? "+" + (items.size() - 1) : "";
+		return this;
+	}
+
+	/** Its tip: {@code tip} instead of its whole sentence (the Standing terms chip: "The same for every spirit"). */
+	MagicChip tip(Component tip) {
+		this.tip = font.split(tip, TIP_WIDTH);
+		return this;
+	}
+
+	/** A line added under its tip (the offering's tag, listed whole: "Any of: ..."). */
+	MagicChip tipLine(Component line) {
+		List<FormattedCharSequence> lines = new ArrayList<>(tip);
+		lines.addAll(font.split(line, TIP_WIDTH));
+		this.tip = List.copyOf(lines);
+		return this;
+	}
+
+	/** Takes no focus: the words are another control's (the price row's resonance, the upkeep's carried count). */
+	MagicChip quiet() {
+		active = false;
+		return this;
+	}
+
 	/** Boxed in {@code colour} (a short resonance chip; 0: not boxed). */
 	MagicChip box(int colour) {
 		this.box = colour;
@@ -109,6 +140,10 @@ final class MagicChip extends AbstractWidget implements MagicScreen.Drawn {
 		if (!items.isEmpty()) {
 			int shownItem = ConcordanceClientOptions.reducedMotion() ? 0 : (int) (Util.getMillis() / 1000L % items.size());
 			g.item(items.get(shownItem), x, getY());
+			if (!corner.isEmpty()) {
+				// Where vanilla's count sits (GuiGraphicsExtractor.itemCount: text draws over items).
+				g.text(font, corner, x + 17 - font.width(corner), getY() + 9, shadow ? MagicTheme.CREAM : MagicTheme.HEADING, shadow);
+			}
 		} else if (glyph != null) {
 			MagicArt.glyph(g, glyph, x, mid - MagicArt.Glyph.HEIGHT / 2 - 1, colour);
 		} else if (mark != null) {
@@ -136,6 +171,6 @@ final class MagicChip extends AbstractWidget implements MagicScreen.Drawn {
 
 	@Override
 	public String drawnText() {
-		return shown.getString();
+		return corner.isEmpty() ? shown.getString() : corner + " " + shown.getString();
 	}
 }

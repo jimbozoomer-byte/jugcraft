@@ -24,7 +24,7 @@ Owner: @jimbozoomer-byte. AI-assisted implementation with Claude Code; the model
 | What it rests on | "transport ... suddenly from one country to another"; Jugcraft adaptation: an essence, not people (no player transport, which belongs to a travel cohort). "The Virtues of Herbs and Precious Stones", shared with Stolas, Marax and Foras, is not used |
 | Silhouette | a broad-shouldered upper body rising from a thick, coiled serpent's tail, about 1.9 blocks; no legs; he hovers coiled on the perch. The horse is left out (its "Pale-Coloured" echoes Revelation's pale horse) |
 | Personality | brisk, proud of speed, scornful of roads and waiting; few words |
-| Beats | greeting "Roads are for those who must walk them. I am Bathin."; service "What your Hearts hold, I set down where it is wanted: a Gleaner far off, a pylon away from your beds. Nothing is ever on the way."; price "Chaff, four to the week. I carry the green; keep me in husk." (the greeting after the stage direction "A ring of dust settles, and a broad-shouldered man is coiled on the perch as if he had always been there, a serpent's tail wound beneath him.", proposed, GC-P58) |
+| Beats | greeting "Roads are for those who must walk them. I am Bathin."; service "What your Hearts hold, I set down where it is wanted: a Gleaner far off, a pylon away from your beds. Nothing is ever on the way."; price "Chaff, four to the week. I carry the green; keep me in husk." (the greeting after the stage direction "A ring of dust settles, and a broad-shouldered man is coiled on the perch as if he had always been there, a serpent's tail wound beneath him.", proposed, GC-P58). Shortened for the magic interfaces ([magic-interfaces.md](magic-interfaces.md); decided by the session in answer to the owner's request for far less reading, reviewable at the checkpoint): stage direction "A serpent-tailed man coils on the perch."; service "What your Hearts hold, I set down where it is wanted."; the greeting and price unchanged |
 | Interaction details | (a) he never travels: arrival and departure are instant, a ring of dust and no path; (b) when he carries, both reservoirs shimmer on the same tick and nothing crosses between them |
 | Gestures (proposed, GC-P57) | arrive (whole at once, coiled tight with arms folded hard, then uncoiling), listen (arms folded, chest up, head inclined), inspect (leans over the perch, palm up, weighing), assent (chest out, a curt bow, fist to chest), refuse (turns his shoulder, a flat hand cutting sideways, tail lashing), work (one sharp point at where it is wanted, coil and tail drawn in), depart (coil drawn tight, then gone in one frame); waiting (arms folded, head turned away, tail tapping), suspended (slumped, bowed), astir (fingers drumming, tail lashing) |
 | Refusal | "Nothing here to carry, or nowhere to carry it." |
@@ -102,6 +102,13 @@ carries).
   40605564166: a finished gesture rewound by the freeze, drawn over a loop); `check_spirit_bodies` holds both. The
   windows were read against `bathin.animation.json` as `tools/garden_bodies.py` builds it; the guard is unverified until
   the client test runs.
+- **His pact screen on the relic scroll card** ([magic-interfaces.md](magic-interfaces.md), unit 1; decided by the
+  session in answer to the owner's request for far less reading, reviewable at the checkpoint, not owner-accepted): his
+  beats shortened as above; his terms as chips with the price as stacks, "1/2" in red on a stack not carried and every
+  blocker a lock line above them; his kept page with today's carries as a gauge, his matter ("Heart at 12, 64, -30: take
+  from it too?") with Leave it and Take from it as plates (the kept one ticked; its answer "Answer kept"), and his last
+  carry as a row with the pylon's or Gleaner's icon. While his first task waits, its row stands above the matter and
+  his kept page can draw more than the spec's 45 words (its client test allows that row's words).
 
 ## Verification
 

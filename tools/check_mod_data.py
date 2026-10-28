@@ -4244,7 +4244,8 @@ def check_encyclopedia_routes(registered):
         err(f"encyclopedia: untranslated {key}")
     # Concordance Chunk B's B-11 route cards (d22a55830) were replaced by main's book-style directory (#415): a route's
     # overview is a wrapped paragraph in a scrolling page.
-    if "new ComposerScroll(" not in java or "BookArt.Paragraph(" not in java:
+    # Its paragraphs are narrated: BookArt.Paragraph until the Field Guide moves onto the magic layer (MagicText).
+    if "new ComposerScroll(" not in java or ("BookArt.Paragraph(" not in java and "new MagicText(" not in java):
         err("EncyclopediaRoutesScreen: a route's overview is drawn whole, wrapped in a scrolling page")
 
 
@@ -20614,10 +20615,15 @@ def check_pacts(co, root, lang, registered, research):
         err("tools/concordance.py: SOUND_EVENTS and SOUND_FILES take all of Stolas's, each playing runtime files")
     screen_path = CLIENT_JAVA_ROOT / "PactScreen.java"
     screen = screen_path.read_text(encoding="utf-8") if screen_path.is_file() else ""
+    # The magic interfaces: a screen on the magic layer draws its background, and is an in-game screen, through MagicScreen.
+    backdrop = screen
+    if "extends MagicScreen" in screen and "public void extractBackground(" not in screen:
+        magic_path = CLIENT_JAVA_ROOT / "MagicScreen.java"
+        backdrop = magic_path.read_text(encoding="utf-8") if magic_path.is_file() else ""
     if "public static final class Verdict extends AbstractWidget" not in screen \
             or "verdict(result.message(), result.done())" not in _java_body(screen, "private void result(") \
-            or "minecraft.gui.hud.extractDeferredSubtitles();" not in _java_body(screen, "public void extractBackground(") \
-            or "return true;" not in _java_body(screen, "public boolean isInGameUi("):
+            or "minecraft.gui.hud.extractDeferredSubtitles();" not in _java_body(backdrop, "public void extractBackground(") \
+            or "return true;" not in _java_body(backdrop, "public boolean isInGameUi("):
         err("client/PactScreen.java: each answer has its mark, done or refused (never colour alone), and his subtitles draw over it")
     reading = java("spirits/PactReading.java")
     for const, table in (("KEYS", pa.JADE_KEYS), ("STANDINGS", pa.JADE_STANDINGS), ("STATES", pa.JADE_STATES)):
@@ -21119,7 +21125,7 @@ def check_pacts(co, root, lang, registered, research):
         err("client/PactSpiritRenderers: a row's reaching bone is posed by PactSpiritEntity.posed after its clips, its culling "
             "box widened to the reach (GC-P66)")
     if "ui(\"work.left\", choice.amount())" not in _java_body(uncommented((CLIENT_JAVA_ROOT / "PactScreen.java").read_text(encoding="utf-8")),
-                                                          "private void workService(PactStatePayload state)"):
+                                                          "private void workService(PactStatePayload state"):
         err("client/PactScreen.workService: a work's on-request choices are Recall buttons with what is left today (GC-P74)")
     for cls, names in GC06B_TESTS.items():
         source = (tests / f"{cls}.java").read_text(encoding="utf-8") if (tests / f"{cls}.java").is_file() else ""
@@ -21648,12 +21654,17 @@ def check_pact_screen(co, lang):
     for forbidden in ("new EditBox(", "sendCommand(", "sendChat(", "server.dialog", "Component.literal("):
         if forbidden in screen + client:
             err(f"pact screen: native, command-free, its words the generator's (D-S14, D-S21): no {forbidden}")
-    for needle in ("implements MenuAccess<PactMenu>", "BookArt.Paragraph", "new ComposerScroll(", "protected Component getUsageNarration()",
+    # The magic interfaces (docs/features/magic-interfaces.md, spec 4.5): its words narrated MagicText and its body the
+    # magic layer's scroll (MagicScreen.openBody, a ComposerScroll).
+    magic_screen = text(CLIENT_JAVA_ROOT / "MagicScreen.java")
+    for needle in ("implements MenuAccess<PactMenu>", "extends MagicScreen", "new MagicText(", "openBody(", "protected Component getUsageNarration()",
                    "minecraft.player.closeContainer()"):
         if needle not in screen:
             err(f"client/PactScreen.java: a native menu screen whose words are narrated paragraphs in a scroll ({needle})")
+    if "new ComposerScroll(" not in _java_body(magic_screen, "protected ComposerScroll openBody("):
+        err("client/MagicScreen.java: openBody opens the body's ComposerScroll (the pact screen's scrolling body)")
     confirm = _java_body(screen, "private void confirmEnd(")
-    if "new KeepFirstConfirmScreen(" not in confirm or "PactClient.request(menu, PactRequestPayload.END, endChoice())" not in confirm \
+    if "KeepFirstConfirmScreen.magic(" not in confirm or "PactClient.request(menu, PactRequestPayload.END, endChoice())" not in confirm \
             or screen.count("PactRequestPayload.END,") != 1:
         err("client/PactScreen.java: a pact is ended only from its confirmation's yes, the keyboard on Keep it (confirmEnd)")
     keep_first = text(CLIENT_JAVA_ROOT / "KeepFirstConfirmScreen.java")
@@ -21667,7 +21678,8 @@ def check_pact_screen(co, lang):
             err(f"client/PactScreen.java: missing lang screen.{MOD}.pact.{key}")
     # GC-01 (SG4, SG5, GB8): the chooser drawn, each sign the server sent, Star-reckoning's section as built and every other work's by its keys.
     for needle in ("case PactStatePayload.INVITE -> invite(state);", "PactClient.request(menu, PactRequestPayload.INVITE, index)",
-                   "BookArt.icon(g, sign(state), x + 8, y + 5);", "state.spirit().sign()", "StarReckoning.WORK.equals(work)",
+                   "sign = sign(state);", "MagicPortrait.draw(g, header.left() + 7, header.top() + 10, 34, 49, creature, sign, ended);",
+                   "state.spirit().sign()", "StarReckoning.WORK.equals(work)",
                    "PactClient.request(menu, PactRequestPayload.CHOOSE, index)"):
         if needle not in screen:
             err(f"client/PactScreen.java: {needle} (GC-01)")
@@ -21680,11 +21692,59 @@ def check_pact_screen(co, lang):
                     err(f"pact screen: missing lang {key} (the kept page's service section for {work})")
     # GC-05: the kept page asks its spirit's matter, each answer a RESOLVE with its index, before its service.
     keep_body = _java_body(screen, "private void keep(PactStatePayload state)")
-    matter_body = _java_body(screen, "private void matter(PactStatePayload state)")
-    if not 0 <= keep_body.find("matter(state);") < keep_body.find("if (reckons(state)) {") \
+    matter_body = _java_body(screen, "private void matter(PactStatePayload state")
+    if not 0 <= keep_body.find("matter(state") < keep_body.find("if (reckons(state)) {") \
             or "PactClient.request(menu, PactRequestPayload.RESOLVE, index)" not in matter_body or "state.spirit().answers()" not in matter_body \
-            or 'say(state.spirit().matter(), TEXT, "matter");' not in matter_body:
+            or "state.spirit().matter()" not in matter_body or 'inBody("matter", new MagicText(' not in matter_body:
         err("client/PactScreen.java: the kept page asks its spirit's matter (a narrated line), each answer a RESOLVE by its index (GC-05)")
+    # D-S15 as amended for the magic interfaces (spec 1.3; decided by the session, reviewable at the checkpoint): every term
+    # is a chip or a line whose message is the server's whole sentence, drawn from its glance; the six standing terms share
+    # the chip term:standing, which narrates all six, whose tip says they are the same for every spirit, and whose More
+    # shows their six lines (term:<key>) in place of the chips; every blocker is drawn; the price stays in view.
+    import magic_ui as mu
+    standing = [key for key in pa.TERMS if key not in ("service", "hours", "area", "quota", "upkeep", "grace", "beneficiaries", "compact")]
+    found = re.search(r"List<String> STANDING = List\.of\(([^)]*)\)", screen)
+    if not found or re.findall(r'"([a-z_]+)"', found.group(1)) != standing:
+        err(f"client/PactScreen.STANDING: the standing terms of TERMS, in order ({standing})")
+    terms_body = _java_body(screen, "private void terms(PactStatePayload state")
+    for needle in ('"term:" + term.key()', '"term:standing"', "standing(state)", "more"):
+        if needle not in terms_body:
+            err(f"client/PactScreen.terms: each term a chip or More's line under term:<key>, the six standing terms one chip ({needle})")
+    standing_body = _java_body(screen, "private @Nullable AbstractWidget standing(")
+    if "for (String key : STANDING)" not in standing_body or 'ui("short.standing.hint")' not in standing_body \
+            or "all.append(term.value())" not in standing_body:
+        err("client/PactScreen.standing: one chip narrating all six standing sentences, its tip \"The same for every spirit\" (D-S15 amended)")
+    for needle in ('onScreen("more", toggle);', "more = !more;", "notes(state, MagicTheme.NEED, PRICE_FOOT)", "priceRow(state, false);",
+                   "ConcordanceClientOptions.heardBeats(", "ConcordanceClientOptions.hearBeats(", 'onScreen("skip", skip);',
+                   'ui("short.accept.narration")'):
+        if needle not in screen:
+            err(f"client/PactScreen.java: More, the blockers and the price pinned, the beats' skip and memory, Accept's narration ({needle})")
+    for key in pa.TERMS:
+        if key == "service":
+            wanted = [f"pact.term.service.{work}" for work in mu.WORK_GLANCES]
+        elif key in ("hours", "beneficiaries"):
+            wanted = {"hours": ["pact.term.hours", "pact.term.hours.any"],
+                      "beneficiaries": ["pact.term.beneficiaries.personal", "pact.term.beneficiaries.party"]}[key]
+        elif key == "compact":
+            wanted = ["pact.term.compact", "pact.term.compact_paid"]
+        else:
+            wanted = [f"pact.term.{key}"]
+        for server in wanted:
+            if mu.glance_key(server) not in lang:
+                err(f"pact screen: the term {key} has no glance {mu.glance_key(server)} (D-S15 amended: every term a chip or line)")
+    found = re.search(r"Set<String> FOLDED = Set\.of\(([^)]*)\)", screen)
+    if not found or sorted(re.findall(r'"([a-z_.]+)"', found.group(1))) != sorted(mu.FOLDED):
+        err("client/PactScreen.FOLDED: the rows another element draws are tools/magic_ui.py's FOLDED")
+    # Spec 4.5: the client tests start with no beats heard, hold each shot to its word budget (MagicScreen.words, counted
+    # from what the screen draws) and the end confirmation to its own; the screen fits the smallest GUI (ScreenFit).
+    for cls in ("ConcordancePactClientGameTests", "ConcordanceGardenPactClientGameTests"):
+        source = text(TESTS_ROOT / f"{cls}.java")
+        for needle in ("ConcordanceClientOptions.forgetBeats()", "screen(client).words()", "confirm.drawn()", "screen(client).tabStops()"
+                       if cls == "ConcordancePactClientGameTests" else "screen(client).more()"):
+            if needle not in source:
+                err(f"{cls}: starts with no beats heard and holds its shots to their word budgets (spec 4.5: {needle})")
+    if "new PactScreen(" not in text(TESTS_ROOT / "ScreenFitClientGameTests.java"):
+        err("ScreenFitClientGameTests: the pact perch's screen is checked at the smallest GUI (ScreenKit.Fitted, through MagicScreen)")
     # The client class that shows it.
     entry = "io.github.jimbozoomer.jugcraft.test.ConcordancePactClientGameTests"
     mod = load(ROOT / "src" / "gametest" / "resources" / "fabric.mod.json") or {}
@@ -22307,6 +22367,17 @@ def check_magic_ui(lang):
     rules = re.findall(r'new Rule\("(\w+)", "([^"]+)", MagicArt\.Mark\.(\w+)\)', sources.get("PactGlance", ""))
     if [(kind, text, mark.lower()) for kind, text, mark in rules] != list(mu.MARK_RULES):
         err("client/PactGlance.MARKS: its rules are not tools/magic_ui.py's MARK_RULES, in order")
+    icons = re.findall(r'new IconRule\("(\w+)", "([^"]+)", "([^"]+)"\)', sources.get("PactGlance", ""))
+    if icons != [tuple(rule) for rule in mu.ICON_RULES]:
+        err("client/PactGlance.ICONS: its rules are not tools/magic_ui.py's ICON_RULES, in order")
+    block = sources.get("PactGlance", "").split("WORK_ICONS = Map.of(", 1)
+    works = dict(re.findall(r'"([a-z_]+)", "([a-z0-9_.-]+:[a-z0-9_/.-]+)"', block[1].split(");", 1)[0])) if len(block) == 2 else {}
+    if works != {work: rows["icon"] for work, rows in mu.WORK_GLANCES.items() if rows.get("icon")}:
+        err("client/PactGlance.WORK_ICONS: each work's icon is not tools/magic_ui.py's WORK_GLANCES[work][\"icon\"]")
+    for item in list(works.values()) + [rule[2][5:] for rule in mu.ICON_RULES if rule[2].startswith("item:")]:
+        namespace, path = item.split(":", 1)
+        if namespace == MOD and f"item.{MOD}.{path}" not in lang and f"block.{MOD}.{path}" not in lang:
+            err(f"tools/magic_ui.py: the icon {item} names no item of Jugcraft's")
     glance = sources.get("PactGlance", "")
     for prefix in ('"screen.jugcraft.pact.glance." + rest', '"screen.jugcraft.roster.glance." + rest',
                    '"screen.jugcraft.pact.glance." + server', '"screen.jugcraft.pact.glance.card."',

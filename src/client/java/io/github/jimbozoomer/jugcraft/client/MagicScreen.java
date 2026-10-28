@@ -106,6 +106,15 @@ public abstract class MagicScreen extends Screen implements ScreenKit.Fitted {
 		return keep(key, widget);
 	}
 
+	/** Adds {@code widget} to the body at {@code offset} (the next offset stays where it is), under {@code key} when it has one. */
+	protected <T extends AbstractWidget> T inBodyAt(String key, T widget, int offset) {
+		if (body == null) {
+			throw new IllegalStateException("openBody first");
+		}
+		body.add(widget, offset);
+		return keep(key, widget);
+	}
+
 	/** Adds {@code widget} to the screen itself (header, pinned lines, arrows, bookmarks, footer), under {@code key}. */
 	protected <T extends AbstractWidget> T onScreen(String key, T widget) {
 		addRenderableWidget(widget);
@@ -122,7 +131,8 @@ public abstract class MagicScreen extends Screen implements ScreenKit.Fitted {
 
 	/**
 	 * One row of footer buttons, centred: each as wide as its label needs (MagicButton.labelWidth) and the row's spare
-	 * room shared out, up to {@code widest} each; their tips open below the footer or beside the button, never over the
+	 * room shared out, up to {@code widest} each (a plate with an icon alone, the narrow footer's page arrow, keeps its
+	 * own width); their tips open below the footer or beside the button, never over the
 	 * body (spec 2.8). A row that cannot hold every label keeps equal widths, and outside() names the cut label.
 	 */
 	protected void footer(int widest, String[] keys, MagicButton... buttons) {
@@ -140,7 +150,8 @@ public abstract class MagicScreen extends Screen implements ScreenKit.Fitted {
 		int total = gap * (buttons.length - 1);
 		for (int i = 0; i < buttons.length; i++) {
 			widths[i] = needed > room ? Math.max(1, room / buttons.length)
-					: buttons[i].look().width > 0 ? buttons[i].look().width : Math.min(Math.max(need[i], widest), need[i] + spare / buttons.length);
+					: buttons[i].look().width > 0 ? buttons[i].look().width : buttons[i].iconOnly() ? need[i]
+					: Math.min(Math.max(need[i], widest), need[i] + spare / buttons.length);
 			total += widths[i];
 		}
 		int x = row.left() + (row.width() - total) / 2;
@@ -207,6 +218,7 @@ public abstract class MagicScreen extends Screen implements ScreenKit.Fitted {
 
 	@Override
 	public void extractBackground(GuiGraphicsExtractor g, int mouseX, int mouseY, float delta) {
+		MagicArt.frame();
 		// The world dimmed, then the cosmos centred on the panel (spec 2.1, 2.9: its frame by time, still under reduced motion).
 		g.fill(0, 0, width, height, 0xA0080610);
 		ScreenRectangle panel = layout.panel();
@@ -288,15 +300,57 @@ public abstract class MagicScreen extends Screen implements ScreenKit.Fitted {
 		return out;
 	}
 
-	/** Every string this screen draws without hovering: the chrome's and each visible part's (spec 1.1's budgets), for tests. */
+	/**
+	 * Every string this screen draws without hovering: the chrome's and each visible part's, a part of the body only while
+	 * some of it is scrolled into view (spec 1.1's budgets), for tests.
+	 */
 	public List<String> drawn() {
 		List<String> out = new ArrayList<>(drewChrome);
 		for (AbstractWidget part : parts) {
-			if (part.visible && part instanceof Drawn drawn && !drawn.drawnText().isEmpty()) {
+			boolean shown = body == null || !body.children().contains(part)
+					|| part.getY() < body.getY() + body.getHeight() && part.getY() + part.getHeight() > body.getY();
+			if (part.visible && shown && part instanceof Drawn drawn && !drawn.drawnText().isEmpty()) {
 				out.add(drawn.drawnText());
 			}
 		}
 		return out;
+	}
+
+	/** How many controls Tab stops at: every visible part that takes focus (spec 4.5: at most 20 on a terms page), for tests. */
+	public int tabStops() {
+		int stops = 0;
+		for (AbstractWidget part : parts) {
+			if (part.isActive()) {
+				stops++;
+			}
+		}
+		return stops;
+	}
+
+	/** The key of the control whose tip was drawn in the last whole frame ("" for none), for tests. */
+	public String tipped() {
+		AbstractWidget shown = MagicArt.tipped();
+		for (Map.Entry<String, AbstractWidget> entry : controls.entrySet()) {
+			if (entry.getValue() == shown) {
+				return entry.getKey();
+			}
+		}
+		return "";
+	}
+
+	/** Where the tip of the button under {@code key} opens for the keyboard (null for none), for tests: a footer's never covers the body. */
+	public @Nullable ScreenRectangle tipArea(String key) {
+		return controls.get(key) instanceof MagicButton button ? button.tipArea(width, height) : null;
+	}
+
+	/** The body's scroll as drawn (its painted margins included), for tests. */
+	public ScreenRectangle bodyArea() {
+		return layout.body();
+	}
+
+	/** Whether this GUI size draws the compact layout (the header a plate row), for tests. */
+	public boolean compact() {
+		return layout.compact();
 	}
 
 	/** How many words {@link #drawn} holds: whitespace tokens with a letter or digit (spec 1.1). */

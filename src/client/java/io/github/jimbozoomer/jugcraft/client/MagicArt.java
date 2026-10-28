@@ -36,6 +36,8 @@ final class MagicArt {
 	static final Identifier PAGE_TITLE_FRAME = sprite("page_title_frame");
 	static final Identifier SCROLL_BALL = sprite("scroll_ball");
 	static final Identifier PLATE_OUTLINE = sprite("plate_outline");
+	/** The darkened wooden plate: actions, and in the compact layout the header's row. */
+	static final Identifier PLATE = sprite("plate");
 	static final Identifier STAR_BIG_ACTIVE = sprite("star/big_active");
 	static final Identifier STAR_BIG_INACTIVE = sprite("star/big_inactive");
 	static final Identifier STAR_SMALL_ACTIVE = sprite("star/small_active");
@@ -52,6 +54,9 @@ final class MagicArt {
 	static final Identifier DOC_ARROW_DOWN = sprite("doc/arrow_down");
 	static final Identifier MARKER_COLLAPSED = sprite("marker/collapsed");
 	static final Identifier MARKER_EXPANDED = sprite("marker/expanded");
+	/** The documentation's small page arrows (14x8): the paging arrows on small plates in a narrow footer. */
+	static final Identifier PAGE_LEFT = sprite("doc/page_left");
+	static final Identifier PAGE_RIGHT = sprite("doc/page_right");
 	/** The tooltip style jugcraft:magic: vanilla draws its sprites tooltip/magic_background and tooltip/magic_frame. */
 	static final Identifier TOOLTIP = Jugcraft.id("magic");
 	/** The animated backdrop, a plain texture (its frame is chosen here, so reduced motion can hold it). */
@@ -106,7 +111,27 @@ final class MagicArt {
 		}
 	}
 
+	/** The widget whose tip was set in the frame drawn last (tests: the keyboard's tip shows, spec 4.5). */
+	private static @Nullable AbstractWidget tipped;
+	private static @Nullable AbstractWidget tipping;
+
 	private MagicArt() {
+	}
+
+	/** A magic screen's frame begins: the tip set in the frame before becomes the one {@link #tipped} reports. */
+	static void frame() {
+		tipped = tipping;
+		tipping = null;
+	}
+
+	/** The widget whose tip was shown in the last whole frame, or null. */
+	static @Nullable AbstractWidget tipped() {
+		return tipped;
+	}
+
+	/** A heading's line: the documentation underline, {@code w} wide at its own height, tinted {@code colour}. */
+	static void underline(GuiGraphicsExtractor g, int x, int y, int w, int colour) {
+		g.blitSprite(RenderPipelines.GUI_TEXTURED, DOC_UNDERLINE, x, y, w, 6, colour);
 	}
 
 	static Identifier sprite(String path) {
@@ -228,5 +253,6 @@ final class MagicArt {
 		ClientTooltipPositioner place = at != null ? at
 				: !widget.isHovered() ? new BelowOrAboveWidgetTooltipPositioner(widget.getRectangle()) : new MenuTooltipPositioner(widget.getRectangle());
 		g.setTooltipForNextFrame(Minecraft.getInstance().font, lines, Optional.empty(), place, mouseX, mouseY, keyboard, TOOLTIP);
+		tipping = widget;
 	}
 }

@@ -172,14 +172,15 @@ SPIRITS = {
         "offerings": {"name": "Stolas's Offerings",
                       "items": [rid("stolas_starflower"), rid("ravenquill_lupine"), rid("amethyst_mourningbell"),
                                 "minecraft:amethyst_shard"]},
-        # His three beats (provisional words; his character is a checkpoint question): moved from MESSAGES, verbatim.
+        # His three beats (provisional words; his character is a checkpoint question). Shortened for the magic interfaces
+        # (docs/features/magic-interfaces.md, spec 1.5; decided by the session in answer to the owner's request for far
+        # less reading, reviewable at the checkpoint): a line of at most 18 words each, the greeting's stage direction (at
+        # most 8) first and also its own key (stage, below), so the screen can dim it.
+        "stage": "A raven settles and studies you.",
         "beats": {
-            "greeting": "A raven settles on the perch and studies you with one bright eye. \"You have watched the sky "
-                        "and asked the flowers. I am Stolas. I teach the stars to those who keep their word.\"",
-            "service": "\"Once a day, at this perch, I will turn the heavens back for you: any pattern you have seen "
-                       "with your own eyes, recalled through your astrolabe.\"",
-            "price": "\"In return, an offering every seven days, kept for me ahead. Miss one and I wait; I do not "
-                     "punish. And now, the compact: an open hand.\"",
+            "greeting": "A raven settles and studies you. \"You watched the sky and asked the flowers. I am Stolas.\"",
+            "service": "\"Once a day, here, I turn the heavens back to a star you saw.\"",
+            "price": "\"An offering every seven days, kept ahead. Miss one and I wait.\"",
         },
         # Its service's term (D-S15): moved from MESSAGES "pact.term.service.star_reckoning", verbatim.
         "term": "Star-reckoning: once a game day at this perch you recall any sky pattern you have "
@@ -238,14 +239,14 @@ SPIRITS = {
         # His offering (GC-P21): Mendvetch, the healing crop; no Styx gift.
         "offerings": {"name": "Buer's Offerings", "items": [rid("mendvetch")]},
         # His three beats (GC-P20; GC-P29 adds the stage direction before the greeting, as Stolas's has). No source
-        # quotation in game (GC-S14).
+        # quotation in game (GC-S14). Shortened for the magic interfaces (spec 1.5; decided by the session, reviewable at
+        # the checkpoint), as Stolas's are.
+        "stage": "A great blossom opens on the perch.",
         "beats": {
-            "greeting": "A great blossom opens on the perch and its pistil turns toward you. \"A bed that is worked must "
-                        "also be mended. I am Buer; I mend.\"",
-            "service": "\"By daylight I ease what your harvests strain, one bed at a time, by the bed's own rule and no "
-                       "faster.\"",
-            "price": "\"A Mendvetch each week, for my own mending. And when I call a bed overworked, feed it before you ask "
-                     "me again.\"",
+            "greeting": "A great blossom opens on the perch. \"A bed that is worked must also be mended. I am Buer; I "
+                        "mend.\"",
+            "service": "\"By daylight I ease your harvests' strain, one bed at a time.\"",
+            "price": "\"One Mendvetch a week. Feed an overworked bed before you ask again.\"",
         },
         # His numbers from the tables that hold the Java's (garden/Garden.TEND_TICKS, worker/Pacts.REACH); his service's
         # two conditions, the holder near and only what the holder could change by hand, named before anything is spent
@@ -324,12 +325,12 @@ SPIRITS = {
         # His offering (GC-P41): Verdant Chaff, what a harvest leaves; no Styx gift.
         "offerings": {"name": "Bathin's Offerings", "items": [rid("verdant_chaff")]},
         # His three beats (GC-P40; GC-P58 adds the stage direction before the greeting, as Stolas's and Buer's have). No
-        # source quotation in game (GC-S14).
+        # source quotation in game (GC-S14). Shortened for the magic interfaces (spec 1.5; decided by the session,
+        # reviewable at the checkpoint), as Stolas's are.
+        "stage": "A serpent-tailed man coils on the perch.",
         "beats": {
-            "greeting": "A ring of dust settles, and a broad-shouldered man is coiled on the perch as if he had always been "
-                        "there, a serpent's tail wound beneath him. \"Roads are for those who must walk them. I am Bathin.\"",
-            "service": "\"What your Hearts hold, I set down where it is wanted: a Gleaner far off, a pylon away from your "
-                       "beds. Nothing is ever on the way.\"",
+            "greeting": "A serpent-tailed man coils on the perch. \"Roads are for those who must walk them. I am Bathin.\"",
+            "service": "\"What your Hearts hold, I set down where it is wanted.\"",
             "price": "\"Chaff, four to the week. I carry the green; keep me in husk.\"",
         },
         # His numbers from the tables that hold the Java's (garden/GleanerBlockEntity: the Gleaner's own draw and reach;
@@ -439,6 +440,8 @@ MESSAGES.update({
     "pact.perch_refused": "A pact perch stands only where you may build, placed by your own hand, and never in Styx's home",
     # Each spirit's three beats and its service's term (SPIRITS; GC-01).
     **{f"pact.{name}.beat.{beat}": text for name, spirit in SPIRITS.items() for beat, text in spirit["beats"].items()},
+    # The greeting's stage direction alone (the magic interfaces draw it dim above his line; the beat keeps both words).
+    **{f"pact.{name}.beat.greeting.stage": spirit["stage"] for name, spirit in SPIRITS.items() if spirit.get("stage")},
     **{f"pact.term.service.{spirit['pact']['service']['work']}": spirit["term"] for spirit in SPIRITS.values()},
     # Each term's value (D-S15); the screen labels them (screen.jugcraft.pact.term.<key>).
     "pact.term.hours.any": "Any hour of the day or night",

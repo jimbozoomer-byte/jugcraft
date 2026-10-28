@@ -9,6 +9,7 @@ import net.minecraft.client.gui.components.WidgetSprites;
 import net.minecraft.client.gui.narration.NarratedElementType;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
 import net.minecraft.client.gui.navigation.ScreenRectangle;
+import net.minecraft.client.gui.screens.inventory.tooltip.BelowOrAboveWidgetTooltipPositioner;
 import net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipPositioner;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.network.chat.Component;
@@ -46,9 +47,14 @@ class MagicButton extends Button implements MagicScreen.Drawn {
 		BOOKMARK_DOCUMENTATION(bookmark("documentation"), bookmark("documentation_selected"), 23, 20, 0, 0, true),
 		BOOKMARK_SUMMON_CIRCLE(bookmark("summon_circle"), bookmark("summon_circle_selected"), 23, 20, 0, 0, true),
 		BOOKMARK_SPELL_STYLE(bookmark("spell_style"), bookmark("spell_style_selected"), 23, 20, 0, 0, true),
-		BOOKMARK_SETTINGS(bookmark("settings"), bookmark("settings_selected"), 23, 20, 0, 0, true);
+		BOOKMARK_SETTINGS(bookmark("settings"), bookmark("settings_selected"), 23, 20, 0, 0, true),
+		/**
+		 * Words alone on the scroll or the plate row, in the heading ink (on wood, cream): the header's skip and the price
+		 * row's More; underlined while lit. The pact screen's rows and cards draw their own faces over it.
+		 */
+		LINK(null, null, 0, 10, 0, 0, false);
 
-		final WidgetSprites sprites;
+		final @Nullable WidgetSprites sprites;
 		final @Nullable WidgetSprites selected;
 		final int width;
 		final int height;
@@ -57,7 +63,7 @@ class MagicButton extends Button implements MagicScreen.Drawn {
 		/** Whether its label is cream with a shadow (wood) rather than ink (paper). */
 		final boolean dark;
 
-		Look(WidgetSprites sprites, @Nullable WidgetSprites selected, int width, int height, int left, int right, boolean dark) {
+		Look(@Nullable WidgetSprites sprites, @Nullable WidgetSprites selected, int width, int height, int left, int right, boolean dark) {
 			this.sprites = sprites;
 			this.selected = selected;
 			this.width = width;
@@ -97,8 +103,14 @@ class MagicButton extends Button implements MagicScreen.Drawn {
 	private final Look look;
 	private final Component label;
 	private MagicArt.@Nullable Glyph glyph;
+	private boolean glyphAfter;
 	private MagicArt.@Nullable Mark mark;
 	private ItemStack icon = ItemStack.EMPTY;
+	private @Nullable Identifier sprite;
+	private int spriteWidth;
+	private int spriteHeight;
+	private Component caption = Component.empty();
+	private boolean onDark;
 	private boolean selected;
 	private List<FormattedCharSequence> tip = List.of();
 	private Component hint = Component.empty();
@@ -113,6 +125,7 @@ class MagicButton extends Button implements MagicScreen.Drawn {
 		super(0, 0, look.width > 0 ? look.width : 40, look.height, message, onPress, DEFAULT_NARRATION);
 		this.look = look;
 		this.label = label;
+		this.onDark = look.dark;
 	}
 
 	Look look() {
@@ -124,6 +137,12 @@ class MagicButton extends Button implements MagicScreen.Drawn {
 		return this;
 	}
 
+	/** Its glyph after its words rather than before them (beats 1-2's "Terms" skip, spec 1.5: "Terms" then its arrow). */
+	MagicButton glyphAfter() {
+		this.glyphAfter = true;
+		return this;
+	}
+
 	MagicButton mark(MagicArt.Mark mark) {
 		this.mark = mark;
 		return this;
@@ -131,6 +150,26 @@ class MagicButton extends Button implements MagicScreen.Drawn {
 
 	MagicButton icon(ItemStack icon) {
 		this.icon = icon;
+		return this;
+	}
+
+	/** A sprite as its icon, at its own size (the narrow footer's page arrows, the price row's More marker). */
+	MagicButton icon(Identifier sprite, int width, int height) {
+		this.sprite = sprite;
+		this.spriteWidth = width;
+		this.spriteHeight = height;
+		return this;
+	}
+
+	/** Words drawn under it, centred, cream on the cosmos (beat 3's arrow: "Terms"); they are drawn, so they count. */
+	MagicButton caption(Component caption) {
+		this.caption = caption;
+		return this;
+	}
+
+	/** A text-only look (LINK) set on wood or the cosmos: cream with a shadow rather than the heading ink. */
+	MagicButton onDark(boolean dark) {
+		this.onDark = dark;
 		return this;
 	}
 
@@ -153,6 +192,11 @@ class MagicButton extends Button implements MagicScreen.Drawn {
 		positioner = new FooterTip(band, this);
 	}
 
+	/** Whether it draws an icon and no words (the narrow footer's page arrows). */
+	boolean iconOnly() {
+		return label.getString().isEmpty();
+	}
+
 	boolean isSelected() {
 		return selected;
 	}
@@ -166,7 +210,7 @@ class MagicButton extends Button implements MagicScreen.Drawn {
 	}
 
 	private int contentWidth(Font font) {
-		int iconWidth = !icon.isEmpty() ? 16 : glyph != null ? glyph.width : shownMark() != null ? shownMark().width : 0;
+		int iconWidth = !icon.isEmpty() ? 16 : sprite != null ? spriteWidth : glyph != null ? glyph.width : shownMark() != null ? shownMark().width : 0;
 		String words = label.getString();
 		return iconWidth + (iconWidth > 0 && !words.isEmpty() ? GAP : 0) + font.width(words);
 	}
@@ -183,8 +227,13 @@ class MagicButton extends Button implements MagicScreen.Drawn {
 		// A bookmark lifts when lit (spec 2.8); paper fades when disabled.
 		int y = getY() - (look.bookmark() && lit ? 1 : 0);
 		float alpha = !active && !look.dark ? 0.5F : 1.0F;
-		g.blitSprite(RenderPipelines.GUI_TEXTURED, faces.get(active, lit), getX(), y, getWidth(), getHeight(), alpha);
+		if (faces != null) {
+			g.blitSprite(RenderPipelines.GUI_TEXTURED, faces.get(active, lit), getX(), y, getWidth(), getHeight(), alpha);
+		}
 		Font font = Minecraft.getInstance().font;
+		if (!caption.getString().isEmpty()) {
+			g.text(font, caption, getX() + (getWidth() - font.width(caption)) / 2, getY() + getHeight() + 2, MagicTheme.CREAM, true);
+		}
 		int content = contentWidth(font);
 		if (content == 0) {
 			return;
@@ -194,21 +243,52 @@ class MagicButton extends Button implements MagicScreen.Drawn {
 		if (!icon.isEmpty()) {
 			g.item(icon, x, mid - 8);
 			x += 16 + GAP;
-		} else if (glyph != null) {
+		} else if (sprite != null) {
+			g.blitSprite(RenderPipelines.GUI_TEXTURED, sprite, x, mid - spriteHeight / 2, spriteWidth, spriteHeight);
+			x += spriteWidth + GAP;
+		} else if (glyph != null && !glyphAfter) {
 			MagicArt.glyph(g, glyph, x, mid - MagicArt.Glyph.HEIGHT / 2 - 1, active ? ink() : MagicTheme.GREY);
 			x += glyph.width + GAP;
-		} else if (shownMark() != null) {
+		} else if (glyph == null && shownMark() != null) {
 			MagicArt.mark(g, shownMark(), x, mid - MagicArt.Mark.HEIGHT / 2 - 1);
 			x += shownMark().width + GAP;
 		}
 		String words = label.getString();
 		if (!words.isEmpty()) {
-			g.text(font, words, x, mid - 4, active ? ink() : MagicTheme.GREY, look.dark && active);
+			g.text(font, words, x, mid - 4, active ? ink() : MagicTheme.GREY, onDark && active);
+			if (look == Look.LINK && lit) {
+				// Words alone show focus by a line under them (spec 2.8), in their own ink.
+				g.fill(x, mid + 5, x + font.width(words), mid + 6, ink());
+			}
+			x += font.width(words) + GAP;
+		}
+		if (glyph != null && glyphAfter) {
+			MagicArt.glyph(g, glyph, x, mid - MagicArt.Glyph.HEIGHT / 2 - 1, active ? ink() : MagicTheme.GREY);
 		}
 	}
 
 	private int ink() {
-		return look.dark ? MagicTheme.CREAM : MagicTheme.INK;
+		return look == Look.LINK ? onDark ? MagicTheme.CREAM : MagicTheme.HEADING : look.dark ? MagicTheme.CREAM : MagicTheme.INK;
+	}
+
+	/**
+	 * Where its tip is drawn for the keyboard (the gold rim's rectangle, five beyond the words: TooltipRenderUtil draws its
+	 * sprites twelve out and the rim sits seven in), on a {@code screenWidth} x {@code screenHeight} screen; null when it has
+	 * none. A footer button's is placed by {@link FooterTip}; the tests hold it clear of the body (spec 4.5).
+	 */
+	@Nullable ScreenRectangle tipArea(int screenWidth, int screenHeight) {
+		if (tip.isEmpty()) {
+			return null;
+		}
+		Font font = Minecraft.getInstance().font;
+		int width = 0;
+		for (FormattedCharSequence line : tip) {
+			width = Math.max(width, font.width(line));
+		}
+		int height = tip.size() * 10 - 2;
+		ClientTooltipPositioner place = positioner != null ? positioner : new BelowOrAboveWidgetTooltipPositioner(getRectangle());
+		Vector2ic at = place.positionTooltip(screenWidth, screenHeight, getX(), getY(), width, height);
+		return new ScreenRectangle(at.x() - 5, at.y() - 5, width + 10, height + 10);
 	}
 
 	@Override
@@ -226,7 +306,9 @@ class MagicButton extends Button implements MagicScreen.Drawn {
 
 	@Override
 	public String drawnText() {
-		return label.getString();
+		String words = label.getString();
+		String under = caption.getString();
+		return under.isEmpty() ? words : words.isEmpty() ? under : words + " " + under;
 	}
 
 	/**

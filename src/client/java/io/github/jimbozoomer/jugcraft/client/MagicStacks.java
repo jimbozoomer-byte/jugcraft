@@ -43,6 +43,7 @@ final class MagicStacks extends AbstractWidget implements MagicScreen.Drawn {
 	private final List<Slot> slots;
 	private final boolean paper;
 	private final int[] offsets;
+	private MagicTheme.Inks inks = MagicTheme.DARK;
 
 	MagicStacks(Font font, List<Slot> slots, boolean paper) {
 		super(0, 0, 1, paper ? MagicArt.PAPER_SLOT : MagicArt.SLOT, CommonComponents.EMPTY);
@@ -57,6 +58,12 @@ final class MagicStacks extends AbstractWidget implements MagicScreen.Drawn {
 		}
 		setWidth(Math.max(1, x - GAP));
 		active = false;
+	}
+
+	/** The inks of the surface it sits on (the short mark's red): the scroll's when the price sits on parchment (variant B). */
+	MagicStacks inks(MagicTheme.Inks inks) {
+		this.inks = inks;
+		return this;
 	}
 
 	/** The compact's slots from the payload's stacks, each marked against {@code count} (PactAfford; none marked for infinite materials). */
@@ -119,7 +126,7 @@ final class MagicStacks extends AbstractWidget implements MagicScreen.Drawn {
 			}
 			if (slot.isShort()) {
 				g.outline(sx - 1, sy - 1, size() + 2, size() + 2, SHORT_RIM);
-				g.text(font, shortText(slot), sx + size() + 2, sy + (size() - 8) / 2, paper ? MagicTheme.RED : MagicTheme.BAD, !paper);
+				g.text(font, shortText(slot), sx + size() + 2, sy + (size() - 8) / 2, paper ? MagicTheme.RED : inks.refused(), !paper && inks.shadow());
 			}
 			if (mouseX >= sx && mouseX < sx + size() && mouseY >= sy && mouseY < sy + size()) {
 				g.setTooltipForNextFrame(font, stack, mouseX, mouseY);

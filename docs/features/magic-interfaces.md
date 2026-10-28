@@ -1,9 +1,9 @@
 # Magic interfaces: the owner's magic UI kit and far less reading
 
-Status: **unit 1 in progress, not merged**: its first commit (this record's first version) imports the owner's magic
-interface kit as runtime art and adds the shared Magic layer; **no screen uses it yet**. The pact screen moves onto it in
-unit 1's next commit; unit 1 ends with an evidence checkpoint (the client shots of every pact state beside the design's
-pictures). Built on the garden cohort's line (draft pull request
+Status: **unit 1 built, not merged**: its first commit imports the owner's magic interface kit as runtime art and adds
+the shared Magic layer; its second moves the pact screen onto the layer in every mode, with the shortened beats, the
+amended D-S15 and their checks. Unit 1 ends with an evidence checkpoint (the client shots of every pact state beside the
+design's pictures). **Nothing of it has been compiled or run in Minecraft yet** (see Known limits). Built on the garden cohort's line (draft pull request
 [#526](https://github.com/jimbozoomer-byte/jugcraft/pull/526): units 1 and 2, unit 3's shared prefix, merged with main).
 Proposal issue: none; the owner's request of 28 October 2026 is the scope.
 Owner: @jimbozoomer-byte. AI-assisted implementation with Claude Code; the model is named in the commit trailers.
@@ -20,7 +20,8 @@ mockups (kept with the session's design notes, not in the repository). Its answe
 
 - **A hard text budget.** Numbers stand as numbers, items as item stacks, periods paid ahead as sockets, today's work
   as a gauge; each term is a chip (a glyph and at most three words). Every server sentence stays whole as the chip's or
-  row's message: its narration and its hover or keyboard-focus tip. Buer's terms page goes from 267 words drawn to 34.
+  row's message: its narration and its hover or keyboard-focus tip. Buer's terms page goes from 267 words drawn to 34
+  in the design (36 as built, composed from the generated files).
 - **One look from the owner's kit** (variant B, the relic scroll card): the animated cosmos, the gilded portrait header
   with the live spirit, parchment scrolls on gold-capped rollers, wooden plates for actions, gold arrows for paging,
   purple bookmarks for tabs, gold-framed item slots and tooltips.
@@ -30,11 +31,11 @@ mockups (kept with the session's design notes, not in the repository). Its answe
 | Decision | Status |
 |---|---|
 | The pact screens, the roster and the composer take **variant B** (the relic scroll card); the book stays for reading (Field Guide, codex) | **Decided by the session** (recommended variant B; the owner was shown both; `MagicTheme` keeps `BOOK` for variant A) |
-| **D-S15 amended:** before Accept every term is a chip, each narrated and hovered with its full sentence; the six standing terms share one chip, "Standing terms", whose hover says they are the same for every spirit, whose narration reads all six sentences, and whose More toggle shows their six lines in place of the chips; every blocker is drawn above the terms; the price stays in view | **Decided by the session, in answer to the owner's request for far less reading; reviewable at the checkpoint.** Not owner-accepted. This commit adds the words (the standing lines are the glances of `term.suspension` to `term.perch`, "Standing terms" and its hint); the screen applies it in unit 1's next commit, with `check_pact_screen` changed with it |
-| **The beats shortened** (spec 1.5: at most 18 words a line, a stage direction of at most 8) and a `Terms` skip on beats 1 and 2 | **Decided by the session, in answer to the owner's request for far less reading; reviewable at the checkpoint.** Not owner-accepted. Not in this commit: the beats are rewritten with the screen |
+| **D-S15 amended:** before Accept every term is a chip, each narrated and hovered with its full sentence; the six standing terms share one chip, "Standing terms", whose hover says they are the same for every spirit, whose narration reads all six sentences, and whose More toggle shows their six lines in place of the chips; every blocker is drawn above the terms; the price stays in view | **Decided by the session, in answer to the owner's request for far less reading; reviewable at the checkpoint.** Not owner-accepted. The first commit added the words (the standing lines are the glances of `term.suspension` to `term.perch`, "Standing terms" and its hint); the screen commit applies it, with `check_pact_screen` changed with it |
+| **The beats shortened** (spec 1.5: at most 18 words a line, a stage direction of at most 8), a `Terms` skip on beats 1 and 2, and a spirit's beats once heard not shown again (the next visit opens on his terms; a client-only set in Jugcraft's client options) | **Decided by the session, in answer to the owner's request for far less reading; reviewable at the checkpoint.** Not owner-accepted. Applied in the screen commit to Stolas's, Buer's and Bathin's beats (their records quote the new words) |
 | The service sentences (`term.service.<work>`) stay as shipped; GC-S7's two phrases stay in them | Spec 1.6 (a rewrite saved four to six words) |
 
-## What this commit adds
+## What the first commit adds
 
 - **`tools/magic_ui.py`**: the kit's runtime art and the short words.
   - `OWNER_FILES` (40 files copied unchanged, every one written as RGBA: twenty of the originals are palette PNGs with a
@@ -71,17 +72,65 @@ mockups (kept with the session's design notes, not in the repository). Its answe
   holding at least the resonance).
 - **`check_magic_ui`** (tools/check_mod_data.py) and **`scripts/tests/test_magic_ui.py`**.
 
+## What the screen commit changes
+
+**The pact screen is drawn on the relic scroll card in every mode** (`PactScreen` now extends `MagicScreen`). Every
+control keeps its key, and every server sentence stays whole as the message, narration and tip of what draws it. The
+word counts are from screens composed from the generated files at 427x240 (spec 1.1's budget in brackets):
+
+| Mode | What the player sees first | Words |
+|---|---|---|
+| Chooser | "Invite a spirit" in gold over the cosmos; a portrait card a spirit (`invite:N`), "Ready" or "Not yet" with its short reason under each; Close | 15 (25) |
+| Beats | the header (the live spirit, his name, three pips, `Terms` and its arrow on beats 1 and 2 (`skip`), his service's icon and name); the ruled scroll with the stage direction dim and his line (`beat`); gold arrows beside it (`back`, `next`; beat 3's captioned "Terms"); Leave. Under 360 wide the arrows are footer plates | 26, 16 (30) |
+| Terms | "His terms" (`para:0`); blockers and the answer pinned on top; a chip a term (`term:hours` ... `term:beneficiaries`) and "Standing terms" (`term:standing`); the price row: "Price", the stacks (a short one rimmed red with have/need), the resonance (boxed red when short), More (`more`); Accept, Decline and the back arrow | Buer 36, Bathin with three blockers 50, refused 39 to 43 (50); More 63 (70) |
+| Kept page | the header adds the state (`note:0`), today's gauge and four sockets for what is paid ahead; the service tab: what needs doing first, the matter and its answers, the other rows, Star-reckoning's patterns and Recall or the work's choices, the next offering with Offer and "×N carried" at the foot; the terms tab: the chips and the price paid at sealing; bookmarks for the tabs; Suspend or Resume, End..., Close | 35 to 44 (45; 48 compact, where the sockets read "0/4 ahead") |
+| Stranded seat | "Without its perch"; the note and a card a stranded spirit (`stranded:N`); the chips; Seat here, End..., Close | 44 (45) |
+| End confirm | the scroll over the cosmos: "End your pact with Buer?", two short lines, End the pact (its cross) and Keep it, the keyboard on Keep it | 22 (25) |
+| Ended | the portrait greyed, "Ended"; "Pact ended. Use the perch to invite Buer again"; "Buer departs; 4 offerings came back"; Close | 20 (30) |
+
+- **Far less reading in the words themselves.** Every beat is at most 18 words, the greeting's stage direction at most
+  8 and also its own key (`pact.<spirit>.beat.greeting.stage`), so the screen dims it; the server's beat keeps both.
+  New glances: `answer.resolved` ("Answer kept"), `deposited`, `reckoning.recalled` and each service's name
+  (`term.service.<work>.name`, the header's line); new short labels `used`, `resonance` and `any_of`.
+- **Icons on rows:** a row draws its work's item, the offering, the pylon, the Gleaner or a glyph where one says more than
+  a mark (`ICON_RULES` and `WORK_GLANCES[work]["icon"]` in `tools/magic_ui.py`, mirrored by `PactGlance`); the others
+  keep their marks.
+- **More** shows the six standing lines, a line apart on one column, in place of the standing chip, and stays shown
+  across the server's state packets. **A second visit** opens on his terms: the client remembers the spirits whose beats
+  were heard (`ConcordanceClientOptions`, `concordance.heard_beats`).
+- **A kept, seat, chooser or closed page that would scroll in the full layout is drawn compact** (spec 2.11), so its
+  words stay in view; the beats and his terms keep the full layout (his terms scroll between their pinned top and price
+  by design).
+- **The layer grew what the screen needed:** a text-only `LINK` button, sprite icons, captions and a glyph after the
+  words; a chip's corner count, tip line and quiet ink; a text column; `inBodyAt`, `tabStops`, `tipped`, `tipArea` and
+  `bodyArea` for the tests; the page arrows; the scroll's gold ball (`ComposerScroll.ball`); a footer plate with an icon
+  alone keeps its own width.
+- **Audits changed with it:** `check_pact_screen` (the amended D-S15: every `TERMS` key a chip or a More line with its
+  glance and whole sentence, the standing order, `FOLDED` mirrored, the skip, More, the heard beats, Accept's narration,
+  the confirm on the scroll; the tests that pin them), `check_pacts` (subtitles drawn through `MagicScreen`),
+  `check_encyclopedia_routes` (a page's paragraphs may be `MagicText`) and `check_magic_ui` (the beats' and stage
+  directions' limits, `ICON_RULES` and `WORK_ICONS` mirrored, every icon item registered, `MAGIC_SCREENS` now naming
+  `PactScreen`). `tools/select_client_tests.py` `SHOWN_BY` sends a change to the layer, its glances, `PactAfford`, the
+  confirm, the composer's scroll, the client options or the kit's sprites to the pact screens' client tests.
+- **Client tests:** every shot keeps its name. Added before the shots: the word budgets counted from what the screen
+  drew; every term a control with its whole sentence and at most 20 Tab stops; `skip` from beat 1 landing on `para:0`
+  and a second visit opening on the terms; More showing all 14 term controls within 70 words and surviving a state
+  packet, Less restoring the chip; the short marks ("0/4") on a price not carried; the keyboard's tip shown and
+  Accept's clear of the body; Accept narrating that nothing is spent before it; a kept page opening on its state; the
+  end confirm within 25 words; every card not ready drawing "Not yet" and its reason; the pact screen in
+  `ScreenFitClientGameTests` at the smallest GUI; `outside()` empty at 427x240, 320x180 and 1920x1080 at GUI scale 4.
+
 ## Record fields (CLAUDE.md)
 
-| Field | The magic interfaces (this commit) |
+| Field | The magic interfaces (unit 1) |
 |---|---|
 | Tier | every tier's magic screens; nothing is gated by it |
 | Input producer | the server's own sentences and arguments (PactStatePayload, RosterStatePayload: unchanged); the owner's library |
-| Output consumer | the pact screen (unit 1's next commit), the roster and chooser (unit 2), the composer and Field Guide (unit 3), the alchemy and Nouveau screens (unit 4) |
+| Output consumer | the pact screen in every mode (the screen commit), the roster (unit 2), the composer and Field Guide (unit 3), the alchemy and Nouveau screens (unit 4) |
 | Costs | none in play; about 3 MB of texture memory for the cosmos, the sprites in the GUI atlas |
 | Unlocks | nothing; presentation only |
 | Failure behaviour | a sentence without a glance, or a glance naming more arguments than the server sent, shows the whole sentence; a spirit that is not standing at the perch shows its sign; the screen's short marks are display only, and the seal still decides through the same count |
-| Test evidence | `check_magic_ui` (27 mutations caught), `scripts/tests/test_magic_ui.py` (22 tests) and the generators' checks, run locally; nothing compiled or run in Minecraft yet (no screen uses the layer) |
+| Test evidence | `check_magic_ui`, `check_pact_screen` and their mutations, `scripts/tests/test_magic_ui.py` and `test_client_test_selection.py`, the generators' checks and composed renders, run locally (see Verification); the pact screens' client tests are written but have not run: nothing has been compiled or run in Minecraft yet |
 
 ## Connections
 
@@ -92,7 +141,10 @@ mockups (kept with the session's design notes, not in the repository). Its answe
 - **Garden units 4 to 6** (Marax, Foras, Bifrons, Amdusias) add each work's row to `WORK_GLANCES` (its service line,
   kept-page rows, blockers and chooser reason); `check_magic_ui` names any row the server can send without one. Marks
   follow the shape of the server key (`MARK_RULES`), so a work's `missing`, `row.overworked`-like and `matter.*`
-  sentences get theirs with no Java change.
+  sentences get theirs with no Java change. A work's icon is `WORK_GLANCES[work]["icon"]` and one line in
+  `PactGlance.WORK_ICONS` (`check_magic_ui` names a work missing there; until it is added, the header shows the spirit's
+  sign). Its beats and stage direction live in `tools/concordance_pacts.py` beside its other words, held to spec 1.5's
+  limits.
 
 ## Multiplayer, server authority and persistence
 
@@ -233,7 +285,7 @@ magic_ui` prints the same rows with the adapter's name; `check_magic_ui` holds t
 | `textures/gui/sprites/magic/mark/lock.png` | drawn for Jugcraft |  | drawn for Jugcraft (no library file) |
 | `textures/gui/sprites/magic/mark/tick.png` | drawn for Jugcraft |  | drawn for Jugcraft (no library file) |
 
-## Deviations from the spec in this commit
+## Deviations from the spec in the first commit
 
 - **Marks are nine rows tall and as wide as their glyph and two**, not all 9x9: the "?" mark is 7 wide and the moon 10,
   so no glyph is cut (`MagicArt.Mark` holds each width; `check_magic_ui` holds them to the files).
@@ -258,18 +310,37 @@ magic_ui` prints the same rows with the adapter's name; `check_magic_ui` holds t
 - **The cosmos keeps frames 0, 2, ... 14** of sixteen, so its loop stays seamless at about eight frames a second.
 - **Variant A's art is imported too** (the spellbook as `magic/spell_book`, the inked paper strips) so `MagicTheme.BOOK`
   is whole for the Field Guide (unit 3); the encyclopedia's own `book.png` stays until then.
-- **Not yet in `check_magic_ui`:** the beats' and stage directions' limits (they come with the shortened beats, in the
-  screen commit), the codex's 60 words a page (unit 3), and `tools/select_client_tests.py` `SHOWN_BY` entries (no
-  client test shows the layer before the pact screen uses it). The "screens use MagicButton and MagicText" rule is in
-  place with no screen in `MAGIC_SCREENS` yet.
+- **Not in the first commit's `check_magic_ui`:** the beats' and stage directions' limits and
+  `tools/select_client_tests.py`'s `SHOWN_BY` entries (both came with the screen commit), and the codex's 60 words a
+  page (unit 3).
 - **`RosterScreen.Portraits` stays** until the roster moves (unit 2); `MagicPortraits` is a second cache with its own
   id range.
+
+## Deviations from the spec in the screen commit
+
+- **The ended page's departure line draws the returns glyph**, not a stack of the offering that came back: the closed
+  state names no offering, and no payload changes in this unit. It is an ink line, as the design's picture shows, not a
+  ticked answer.
+- **The stranded seat page has one view:** its chips are listed under the stranded spirits, with no service and terms
+  bookmarks and no sockets (the design's picture shows both); the seat state sends no escrow row and no service rows.
+- **Glances and short labels beyond the spec's tables:** `answer.resolved` ("Answer kept": the kept answer's plate already
+  carries the tick), `deposited`, `reckoning.recalled`, each service's name (`term.service.<work>.name`), and the short
+  labels `used`, `resonance` (the spec's "6/8 resonance") and `any_of` (the upkeep chip's hover).
+- **Bathin's matter page while his first task waits** draws that task's row (13 words) above the matter: the spec
+  measured the kept page from a picture without it. Its client test allows the kept budget plus that row's words; where the
+  full layout cannot hold the page (with his last carry's row too, in the composed picture at 427x240), it is drawn
+  compact and the header becomes the plate row.
 
 ## Known limits
 
 - **Nothing here has been compiled or run in Minecraft.** No Minecraft jar is available where this was written: every
   call was checked against the decompiled 26.3 sources and the repository's own uses, and the files parse. CI's Build
-  is the first compile. No screen uses the layer, so no client test exercises it yet.
+  is the first compile, and the pact screens' client tests (their word budgets, Tab stops, tips and shots) have not
+  run. The composed pictures are a port of the screen's geometry to the generated files, not the game's own drawing.
+- The word counts above are the composed pictures'; the client tests count what the game draws, so a state with more
+  rows than the design's pictures (Bathin's first task beside his matter, above) can draw more.
+- At 320x180 a kept page with a matter, its answers and a first task scrolls: the answers sit below the fold, with the
+  scroll's gold ball showing there is more.
 - A blocker drawn from an advancement's description keeps that description's words: The Garden's Regard's first
   ("Examine a garden specimen: ...") is 19 words, over the blockers' 14. Shortening it is the research's own text
   (also its advancement), left for the checkpoint.
@@ -277,7 +348,34 @@ magic_ui` prints the same rows with the adapter's name; `check_magic_ui` holds t
 
 ## Verification
 
-Run locally on this commit, all passing (none of it in CI, and nothing in Minecraft):
+**The screen commit**, run locally, all passing (none of it in CI, and nothing in Minecraft):
+
+- `python3 -B tools/check_mod_data.py` (with `check_pact_screen`, `check_pacts`, `check_encyclopedia_routes` and
+  `check_magic_ui` as changed): PASS. `python3 tools/owner_art.py --check`: every imported owner file matches its source
+  (no art changed in this commit).
+- `python3 -m unittest discover -s scripts/tests`: 324 tests. `python3 scripts/check_repository.py`, `python3
+  tools/concordance_journey.py --check`, `python3 tools/concordance_economy.py` (gaining cycles: none), `python3
+  tools/check_icon_maps.py`, `node --test tools/world-designer/model.test.cjs` (12), `git diff --check`.
+- Every changed Java file parses (16 files); every vanilla call was read in the decompiled 26.3 sources or the
+  repository's own uses. Nothing compiled.
+- The audits' mutations, each on a scratch copy of the tree: 26 made, 26 caught (the standing terms out of order, the
+  standing chip narrating one sentence, More not toggling, the skip removed, the beats heard not remembered, Accept's
+  narration dropped, a term without its glance, `FOLDED` out of step, the end asked through the plain confirmation, the
+  matter as a chip, the screen off the magic layer, the subtitles not drawn, the screen dropped from ScreenFit, a test
+  starting with beats heard, a test not counting the words drawn, an icon rule or a work's icon changed in Java only, an
+  icon naming no item, a beat over 18 words in the generator and in the language file, a greeting not starting with its
+  stage direction, a stage direction over 8 words, BookArt back in the screen, the route overview neither BookArt nor
+  MagicText, a work's choices not saying what is left, and the magic layer dropped from the client-test selection).
+- Every runtime sprite, and every pact page composed from the generated files alone (a port of the screen's geometry:
+  the sprites, their slices, the language file), rendered at GUI scale 2 at 427x240, 320x180 and 480x270 and looked at
+  beside the design's pictures: the chooser, beats 1 and 3, Buer's and Bathin's terms, Bathin's with three blockers, More,
+  Buer and Stolas refused, sealed, the kept page's service and terms tabs, overworked, Stolas's patterns, Bathin's
+  matter, the stranded seat, the end confirmation and the ended page. Looking at them changed the screen: the skip's
+  arrow after its word, the standing lines a line apart on one column, the ended page's departure as an ink line, the
+  chooser's title in bold and its cards clear of the scroll's top, and the narrow footer's page arrows at their own
+  width. Each page's `outside()` was empty in the port at all three sizes.
+
+**The first commit**, run locally on it, all passing (none of it in CI, and nothing in Minecraft):
 
 - `python3 tools/owner_art.py --check` (every imported owner file matches its source) and `python3 tools/magic_ui.py`.
 - `python3 -B tools/check_mod_data.py`, with `check_magic_ui`: PASS.
@@ -303,6 +401,8 @@ None: presentation only.
 
 ## Rollout and open questions
 
-- Unit 1's next commit moves the pact screen onto the layer in every mode, with the shortened beats, the amended D-S15
-  and their checks; unit 1 ends at the owner's checkpoint with the client shots of every pact state.
+- Unit 1 ends at the owner's checkpoint: CI's first compile, then the client shots of every pact state beside the
+  design's pictures, with each shot's word count from its log.
 - The owner reviews variant B, the D-S15 wording and the shortened beats at that checkpoint.
+- Unit 2 moves the roster onto the layer (its glances are already in place); units 3 and 4 the composer and Field Guide,
+  then the alchemy and Nouveau screens.

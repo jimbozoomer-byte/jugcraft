@@ -53,6 +53,11 @@ Copied from the contract's
    - *Beats (GC-P20):* greeting "A bed that is worked must also be mended. I am Buer; I mend."; service "By daylight I
      ease what your harvests strain, one bed at a time, by the bed's own rule and no faster."; price "A Mendvetch each
      week, for my own mending. And when I call a bed overworked, feed it before you ask me again."
+   - *Beats as shortened for the magic interfaces* ([magic-interfaces.md](magic-interfaces.md); decided by the session
+     in answer to the owner's request for far less reading, reviewable at the checkpoint): stage direction "A great
+     blossom opens on the perch."; greeting "A bed that is worked must also be mended. I am Buer; I mend."; service "By
+     daylight I ease your harvests' strain, one bed at a time."; price "One Mendvetch a week. Feed an overworked bed
+     before you ask again."
 2. **Invitation and entry route.** The Garden's Regard *(`jugcraft:garden_regard`, built in GC-03)* understood; an awake
    Verdant Bed the inviter keeps within 8 blocks of the perch. Codex: Binding, The Garden's Regard, page "Buer". The
    journal's pacts section names the next step.
@@ -247,6 +252,14 @@ The shared screen (GC-01): the chooser lists him once The Garden's Regard is und
 player's is within 8, else with his reason ("There is nothing here I could mend"); his beats and terms, keyboard only, at GUI 4 and 320x180; the kept page's service section (today's eases, or
 asleep until dawn; the overworked bed) and the shared first-obligation row; offerings, suspend, resume and end. No
 garden term or refusal names an astrolabe.
+
+Since the magic interfaces ([magic-interfaces.md](magic-interfaces.md), unit 1) it is the relic scroll card: his beats
+shortened, with a Terms skip; his terms as chips (06:00-18:00, 8 blocks, 16 a day, his Mendvetch every 7 days with 4
+ahead, a day's grace, you and your party, Standing terms) and the price as stacks; his kept page with today's eases as a
+gauge, the overworked bed as a row with the bed's icon, and the next offering with Offer at the scroll's foot. The
+shortened beats and the amended D-S15 were decided by the session in answer to the owner's request for far less reading,
+reviewable at the checkpoint; not owner-accepted. The shots below keep their names; their Seen column records the run
+before this change.
 
 ## Dependencies and assets
 

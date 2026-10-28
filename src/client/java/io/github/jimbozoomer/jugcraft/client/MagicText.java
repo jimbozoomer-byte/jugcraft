@@ -27,10 +27,11 @@ final class MagicText extends AbstractWidget implements MagicScreen.Drawn {
 	private static final int GAP = 3;
 	private static final int TIP_WIDTH = 200;
 	private final Font font;
-	private final Component shown;
+	private final FormattedText shown;
 	private final int colour;
 	private final boolean shadow;
 	private int pitch = PITCH;
+	private int column = -1;
 	private int maxLines = Integer.MAX_VALUE;
 	private int focusColour;
 	private MagicArt.@Nullable Glyph glyph;
@@ -41,8 +42,11 @@ final class MagicText extends AbstractWidget implements MagicScreen.Drawn {
 	private List<FormattedCharSequence> tip = List.of();
 	private String drawn = "";
 
-	/** A paragraph whose message is {@code full} and which draws {@code shown} in {@code width}, in {@code inks}' {@code colour}. */
-	MagicText(Component full, Component shown, Font font, int width, int colour, MagicTheme.Inks inks) {
+	/**
+	 * A paragraph whose message is {@code full} and which draws {@code shown} in {@code width}, in {@code inks}' {@code colour}
+	 * ({@code shown} may be a part of the server's words: a beat's line after its stage direction).
+	 */
+	MagicText(Component full, FormattedText shown, Font font, int width, int colour, MagicTheme.Inks inks) {
 		super(0, 0, Math.max(20, width), 1, full);
 		this.font = font;
 		this.shown = shown;
@@ -67,6 +71,16 @@ final class MagicText extends AbstractWidget implements MagicScreen.Drawn {
 	/** At most {@code lines} lines, the last cut with "…" (the whole sentence then in its tip). */
 	MagicText maxLines(int lines) {
 		maxLines = Math.max(1, lines);
+		layout();
+		return this;
+	}
+
+	/**
+	 * Its words start {@code width} in, whatever its lead: a list's lines on one column, stacked a line apart (the standing
+	 * terms, spec 2.12).
+	 */
+	MagicText column(int width) {
+		this.column = width;
 		layout();
 		return this;
 	}
@@ -96,6 +110,9 @@ final class MagicText extends AbstractWidget implements MagicScreen.Drawn {
 	}
 
 	private int leadWidth() {
+		if (column >= 0) {
+			return column;
+		}
 		return !item.isEmpty() ? 16 + GAP : glyph != null ? glyph.width + GAP : mark != null ? mark.width + GAP : 0;
 	}
 
@@ -143,8 +160,10 @@ final class MagicText extends AbstractWidget implements MagicScreen.Drawn {
 			ty += pitch;
 		}
 		if (isFocused()) {
-			// One pixel under its words while focused (spec 2.8).
-			g.fill(tx, getY() + getHeight() - 1, getX() + getWidth() - 1, getY() + getHeight(), focusColour);
+			// One pixel under its words while focused (spec 2.8); a column's lines are stacked a line apart, so its line sits
+			// in the gap above the next one's words.
+			int under = getY() + getHeight() - (column >= 0 ? 3 : 1);
+			g.fill(tx, under, getX() + getWidth() - 1, under + 1, focusColour);
 		}
 	}
 

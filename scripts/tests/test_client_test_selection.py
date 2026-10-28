@@ -118,6 +118,19 @@ class ClientTestSelectionTests(unittest.TestCase):
         chosen, _ = selection.select(["src/main/java/io/github/jimbozoomer/jugcraft/concordance/spirits/PactAccords.java"], tests, set())
         self.assertIn("ConcordanceGardenPactClientGameTests", chosen)
 
+    def test_the_magic_layer_and_its_art_select_the_pact_screens_tests(self):
+        # The magic interfaces: the shared layer and the kit's sprites are named by no test, yet every pact screen shows them.
+        for path in ("src/client/java/io/github/jimbozoomer/jugcraft/client/MagicButton.java",
+                     "src/client/java/io/github/jimbozoomer/jugcraft/client/PactGlance.java",
+                     "src/main/resources/assets/jugcraft/textures/gui/sprites/magic/plate.png",
+                     "src/main/resources/assets/jugcraft/textures/gui/sprites/tooltip/magic_frame.png",
+                     "src/main/resources/assets/jugcraft/textures/gui/magic/cosmos.png"):
+            with self.subTest(path=path):
+                chosen, _ = selection.select([path], self.tests, set())
+                self.assertIn("ConcordancePactClientGameTests", chosen)
+                self.assertIn("ConcordanceGardenPactClientGameTests", chosen)
+                self.assertIn("ScreenFitClientGameTests", chosen)
+
     def test_pact_network_test_is_its_own_class_and_weighed(self):
         # Concordance Chunk D unit 5 (D-09): the two-client attempt is a client class of its own, with a running-time estimate.
         chosen, _ = selection.select(["src/gametest/java/io/github/jimbozoomer/jugcraft/test/ConcordancePactNetworkTests.java"], self.tests, set())

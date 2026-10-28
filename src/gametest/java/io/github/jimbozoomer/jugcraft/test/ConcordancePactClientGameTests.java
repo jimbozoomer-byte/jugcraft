@@ -7,6 +7,8 @@ import com.geckolib.animation.state.AnimationPoint;
 import com.geckolib.renderer.GeoEntityRenderer;
 import com.mojang.blaze3d.platform.InputConstants;
 import io.github.jimbozoomer.jugcraft.Jugcraft;
+import io.github.jimbozoomer.jugcraft.client.ConcordanceClientOptions;
+import io.github.jimbozoomer.jugcraft.client.KeepFirstConfirmScreen;
 import io.github.jimbozoomer.jugcraft.client.PactClient;
 import io.github.jimbozoomer.jugcraft.client.PactScreen;
 import io.github.jimbozoomer.jugcraft.concordance.ConcordanceProgress;
@@ -27,6 +29,7 @@ import io.github.jimbozoomer.jugcraft.concordance.spirits.StolasEntity;
 import io.github.jimbozoomer.jugcraft.concordance.worker.Pacts;
 import io.github.jimbozoomer.jugcraft.config.JugcraftConfig;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
 import java.util.UUID;
@@ -40,6 +43,10 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.events.ContainerEventHandler;
 import net.minecraft.client.gui.components.events.GuiEventListener;
+import net.minecraft.client.gui.narration.NarratedElementType;
+import net.minecraft.client.gui.narration.NarrationElementOutput;
+import net.minecraft.client.gui.narration.NarrationThunk;
+import net.minecraft.client.gui.navigation.ScreenRectangle;
 import net.minecraft.client.gui.screens.ConfirmScreen;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.client.sounds.SoundEngine;
@@ -90,6 +97,11 @@ import org.jspecify.annotations.Nullable;
  * ahead ({@code jugcraft_pact_service}).</li>
  * <li>(D-05) <b>The end</b>: End asks first ({@code jugcraft_pact_end_confirm}), the keyboard on Keep it (D-06); Esc keeps
  * the pact; yes ends it once, the offering back in the holder's inventory, Stolas gone ({@code jugcraft_pact_ended}).</li>
+ * <li>(The magic interfaces, docs/features/magic-interfaces.md, spec 4.5) <b>Far less reading</b>: every shot holds its
+ * screen's word budget, counted from what the screen draws; his terms are a chip each with the standing terms as one, in
+ * at most 20 Tab stops; the short materials are marked before Accept; Accept's tip opens clear of the body and its
+ * narration says nothing is spent before it; a tip shows on keyboard focus; a second visit opens on his terms; a kept
+ * pact opens on how it stands.</li>
  * </ul>
  * The perch is opened by the server's use of it (no aimed click), and each step that opens it waits for a menu newer than
  * the one open before, with its first state. The narrator is not heard, and one client is not two.
@@ -133,6 +145,8 @@ public class ConcordancePactClientGameTests implements FabricClientGameTest {
 		try (TestDedicatedServerContext server = context.worldBuilder().createServer()) {
 			try (TestDedicatedServerConnection connection = server.connect()) {
 				connection.waitForChunksRender();
+				// The magic interfaces: no spirit's beats heard before, so his perch opens on them (spec 1.5).
+				context.runOnClient(client -> ConcordanceClientOptions.forgetBeats());
 				server.runCommand("time set noon");
 				server.runCommand("weather clear");
 				server.runCommand("gamerule minecraft:spawn_mobs false");
@@ -216,6 +230,7 @@ public class ConcordancePactClientGameTests implements FabricClientGameTest {
 				"Stolas speaks three beats, nothing stands in the way, and his terms name every term, in order: " + shown);
 		fits(context, "a beat at GUI scale 2");
 		named(context);
+		budget(context, BEAT_WORDS, "his first beat");
 		shot(context, "jugcraft_pact_conversation");
 		tabTo(context, "next");
 		for (int beat = 0; beat < 3; beat++) {
@@ -226,8 +241,51 @@ public class ConcordancePactClientGameTests implements FabricClientGameTest {
 				"Enter three times reaches his terms, the keyboard on their first line, never on Accept");
 		fits(context, "the terms at GUI scale 2");
 		named(context);
+		budget(context, TERMS_WORDS, "his terms");
+		terms(context);
 		shot(context, "jugcraft_pact_terms");
 		check(!server.computeOnServer(ConcordancePactClientGameTests::held), "Hearing his terms records nothing");
+		// Spec 4.5: the short materials are marked before Accept (PactAfford's count; the server still decides).
+		List<String> drawn = context.computeOnClient(client -> screen(client).drawn());
+		check(drawn.stream().anyMatch(words -> words.matches("(.* )?0/\\d+( .*)?")), "Short of his compact, its materials are marked before Accept: " + drawn);
+		// A tip shows on keyboard focus, and Accept's opens clear of the body, its narration saying nothing is spent before it.
+		tabTo(context, "term:area");
+		context.waitTicks(3);
+		String tipped = context.computeOnClient(client -> screen(client).tipped());
+		check("term:area".equals(tipped), "The area chip's tip shows on keyboard focus: " + tipped);
+		String clear = context.computeOnClient(client -> {
+			ScreenRectangle tip = screen(client).tipArea("accept");
+			return tip == null ? "no tip" : tip.intersects(screen(client).bodyArea()) ? "over the body at " + tip : "";
+		});
+		check(clear.isEmpty(), "Accept's tip opens clear of the body (spec 2.8): " + clear);
+		String said = context.computeOnClient(client -> narrated(screen(client).control("accept")));
+		String nothing = context.computeOnClient(client -> Component.translatable("screen.jugcraft.pact.short.accept.narration").getString());
+		check(said.contains(nothing), "Accept's narration says nothing is spent before it: " + said);
+		// Spec 1.5: his beats heard, a second visit opens on his terms (the server hears them asked for, as before).
+		context.runOnClient(client -> client.gui.setScreen(new PactScreen(screen(client).getMenu(), client.player.getInventory(), screen(client).getTitle())));
+		context.waitFor(client -> client.gui.screen() instanceof PactScreen again && again.page() == PactScreen.TERMS_PAGE
+				&& "para:0".equals(again.focusedKey()), WAIT);
+	}
+
+	/**
+	 * The magic interfaces (spec 4.5, D-S15 amended): his terms are a control each (service, hours, area, quota, upkeep,
+	 * grace, who benefits, the price) and one Standing terms chip, every message the server's whole sentence, in at most 20
+	 * Tab stops.
+	 */
+	private static void terms(ClientGameTestContext context) {
+		List<String> missing = context.computeOnClient(client -> {
+			List<String> out = new ArrayList<>();
+			for (String key : List.of("service", "hours", "area", "quota", "upkeep", "grace", "beneficiaries", "standing", "compact")) {
+				AbstractWidget control = screen(client).control("term:" + key);
+				if (control == null || control.getMessage().getString().isBlank()) {
+					out.add(key);
+				}
+			}
+			return out;
+		});
+		check(missing.isEmpty(), "Every term is a control with its whole sentence (D-S15 amended): missing " + missing);
+		int stops = context.computeOnClient(client -> screen(client).tabStops());
+		check(stops <= 20, "His terms take at most 20 Tab stops: " + stops);
 	}
 
 	private static void sizes(ClientGameTestContext context) {
@@ -242,9 +300,11 @@ public class ConcordancePactClientGameTests implements FabricClientGameTest {
 		int applied = context.computeOnClient(client -> client.getWindow().getGuiScale());
 		check(applied == 4, "The high-scale shots are at GUI scale 4: " + applied);
 		fits(context, "the terms at GUI scale 4");
+		budget(context, TERMS_WORDS, "his terms at GUI scale 4");
 		shot(context, "jugcraft_pact_terms_scale4");
 		press(context, "back");
 		fits(context, "a beat at GUI scale 4");
+		budget(context, BEAT_WORDS, "his last beat at GUI scale 4");
 		shot(context, "jugcraft_pact_conversation_scale4");
 		press(context, "next");
 		context.runOnClient(client -> {
@@ -254,9 +314,11 @@ public class ConcordancePactClientGameTests implements FabricClientGameTest {
 		context.getInput().resizeWindow(640, 360);
 		context.waitTicks(10);
 		fits(context, "the terms in a 640x360 window");
+		budget(context, TERMS_WORDS, "his terms at 320x180");
 		shot(context, "jugcraft_pact_terms_small");
 		press(context, "back");
 		fits(context, "a beat in a 640x360 window");
+		budget(context, BEAT_WORDS, "his last beat at 320x180");
 		shot(context, "jugcraft_pact_conversation_small");
 		press(context, "next");
 		context.getInput().resizeWindow(width, height);
@@ -276,6 +338,7 @@ public class ConcordancePactClientGameTests implements FabricClientGameTest {
 		context.waitFor(client -> screen(client).control("result") instanceof PactScreen.Verdict verdict && verdict.refused(), WAIT);
 		check(context.computeOnClient(client -> "result".equals(screen(client).focusedKey()) && screen(client).inView("result")),
 				"The refusal is in view above his terms, the keyboard on it and off Accept (no tooltip over it)");
+		budget(context, TERMS_WORDS, "his refusal");
 		shot(context, "jugcraft_pact_refused");
 		List<String> cost = context.computeOnClient(client -> PactClient.state().compact().stream()
 				.map(stack -> BuiltInRegistries.ITEM.getKey(stack.getItem()) + " " + stack.getCount()).toList());
@@ -296,6 +359,7 @@ public class ConcordancePactClientGameTests implements FabricClientGameTest {
 		context.waitFor(client -> screen(client).control("result") instanceof PactScreen.Verdict verdict && !verdict.refused(), WAIT);
 		fits(context, "the kept pact at GUI scale 2");
 		named(context);
+		budget(context, keptWords(context), "the kept pact");
 		shot(context, "jugcraft_pact_kept");
 	}
 
@@ -414,6 +478,11 @@ public class ConcordancePactClientGameTests implements FabricClientGameTest {
 		context.waitTicks(5);
 		open(context, server, perch);
 		context.waitFor(client -> PactClient.state() != null && PactClient.state().mode() == PactStatePayload.KEEP, WAIT);
+		// Spec 2.12: a kept pact opens on how it stands (note:0, the state row, its message the server's sentence).
+		String stands = context.computeOnClient(client -> PactClient.state().notes().getFirst().getString());
+		context.waitFor(client -> client.gui.screen() instanceof PactScreen kept && "note:0".equals(kept.focusedKey()), WAIT);
+		check(context.computeOnClient(client -> narrated(screen(client).control("note:0")).contains(stands)),
+				"His kept page opens on how it stands, read whole: " + stands);
 		int star = context.computeOnClient(client -> index(PactClient.state().patterns(), LANTERN_STAR));
 		check(star >= 0 && context.computeOnClient(client -> PactClient.state().patterns().get(star).ready()),
 				"His service offers the patterns the holder observed, this occurrence still recallable (D-S1)");
@@ -440,6 +509,7 @@ public class ConcordancePactClientGameTests implements FabricClientGameTest {
 				.mapToInt(ItemStack::getCount).sum() + " " + player(minecraft).getInventory().countItem(Items.AMETHYST_SHARD));
 		Jugcraft.LOGGER.info("[pact-check] offering: {}, escrow and shards = {}", offered.reason(), escrow);
 		check(offered.done() && "deposited".equals(offered.reason()) && escrow.equals("1 0"), "The offering is paid ahead: " + escrow);
+		budget(context, keptWords(context), "his service");
 		shot(context, "jugcraft_pact_service");
 	}
 
@@ -450,6 +520,7 @@ public class ConcordancePactClientGameTests implements FabricClientGameTest {
 		check(context.computeOnClient(client -> client.gui.screen().getFocused() instanceof AbstractWidget keep
 				&& keep.getMessage().getString().equals(Component.translatable("screen.jugcraft.pact.end.no").getString())),
 				"End asks first, the keyboard on Keep it (D-06)");
+		confirmBudget(context);
 		shot(context, "jugcraft_pact_end_confirm");
 		context.getInput().pressKey(InputConstants.KEY_ESCAPE);
 		context.waitForScreen(PactScreen.class);
@@ -467,6 +538,7 @@ public class ConcordancePactClientGameTests implements FabricClientGameTest {
 				&& context.computeOnClient(client -> PactClient.state().mode()) == PactStatePayload.CLOSED,
 				"Ending ends the pact once and hands what was paid ahead back: " + after);
 		context.waitFor(client -> stolas(client, perch) == null, WAIT);
+		budget(context, ENDED_WORDS, "the ended page");
 		shot(context, "jugcraft_pact_ended");
 		context.getInput().pressKey(InputConstants.KEY_ESCAPE);
 		context.waitForScreen(null);
@@ -797,6 +869,52 @@ public class ConcordancePactClientGameTests implements FabricClientGameTest {
 		context.getInput().pressKey(InputConstants.KEY_RETURN);
 		context.waitFor(client -> PactClient.lastAnswer() > before && !PactClient.waiting() && PactClient.state() != null, WAIT);
 		return context.computeOnClient(client -> PactClient.state().result().orElseThrow());
+	}
+
+	/** The magic interfaces' word budgets (spec 1.1): a beat page, his terms (blockers and a refusal included), the ended page. */
+	private static final int BEAT_WORDS = 30;
+	private static final int TERMS_WORDS = 50;
+	private static final int ENDED_WORDS = 30;
+
+	/** A kept page's budget: 45, or 48 in the compact layout, which writes what is paid ahead as "0/4 ahead" (spec 1.1). */
+	private static int keptWords(ClientGameTestContext context) {
+		return context.computeOnClient(client -> screen(client).compact()) ? 48 : 45;
+	}
+
+	/** Spec 1.1, 4.5: the pact screen draws at most {@code most} words without hovering, counted from what it drew. */
+	private static void budget(ClientGameTestContext context, int most, String what) {
+		List<String> drawn = context.computeOnClient(client -> screen(client).drawn());
+		int words = context.computeOnClient(client -> screen(client).words());
+		Jugcraft.LOGGER.info("[pact-check] {} draws {} words (at most {}): {}", what, words, most, drawn);
+		check(words <= most, what + " draws at most " + most + " words (spec 1.1): " + words + " " + drawn);
+	}
+
+	/** Spec 1.1: the end confirmation draws at most 25 words (its question, two lines, its two buttons). */
+	private static void confirmBudget(ClientGameTestContext context) {
+		List<String> drawn = context.computeOnClient(client -> client.gui.screen() instanceof KeepFirstConfirmScreen confirm ? confirm.drawn() : List.of());
+		long words = drawn.stream().flatMap(line -> Arrays.stream(line.split("\\s+"))).filter(token -> token.chars().anyMatch(Character::isLetterOrDigit)).count();
+		Jugcraft.LOGGER.info("[pact-check] the end confirmation draws {} words: {}", words, drawn);
+		check(!drawn.isEmpty() && words <= 25, "The end confirmation draws at most 25 words: " + words + " " + drawn);
+	}
+
+	/** What a control says to the narrator (its title, usage and hint), as the narrator would be given it. */
+	private static String narrated(@Nullable AbstractWidget widget) {
+		if (widget == null) {
+			return "";
+		}
+		StringBuilder out = new StringBuilder();
+		widget.updateNarration(new NarrationElementOutput() {
+			@Override
+			public void add(NarratedElementType type, NarrationThunk<?> contents) {
+				contents.getText(text -> out.append(text).append(' '));
+			}
+
+			@Override
+			public NarrationElementOutput nest() {
+				return this;
+			}
+		});
+		return out.toString();
 	}
 
 	private static void fits(ClientGameTestContext context, String where) {
