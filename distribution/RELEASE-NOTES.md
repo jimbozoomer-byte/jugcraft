@@ -6,6 +6,7 @@ JUGCRAFT companion, guns and Halloween update — release candidate.
 - Blood Moons: a red sky and haze every fourth in-game night during Halloween, plus Halloween night, with additional seasonal activity and Bad Moon Rising.
 - Graveyard Rising: ring a graveyard bell twice on a seasonal night to opt into three waves, with bounded concurrent events and per-night rewards.
 - The Church Bridge: an off-season Horseman lair opened by the Hessian's Bridle at a jack-o'-lantern on a fence/wall post under the night sky. Includes the Dark Road brazier mechanic, phantom riders, the Hollowflail and Hessian Sabre, Dread, the Hessian's Spur and Tricorn, and participant rewards. During Halloween, the existing Overworld Horseman summon remains the route to fight him.
+- Reliability: Herobrine groves finish when planned leaves naturally decay, while still preserving player replacements. Codex book-state packets retain a complete snapshot so rapid research updates cannot corrupt their network serialization and disconnect players.
 
 No world regeneration is required. Matching updated server and client builds are required for new registrations and packets. Preserve world/player data, configuration and the previous managed files before upgrading; rollback means restoring the matching backup. Recover queued cutting-board goods before downgrading.
 
