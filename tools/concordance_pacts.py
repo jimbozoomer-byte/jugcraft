@@ -273,7 +273,7 @@ SPIRITS = {
                          "depart": "animation.buer.depart", "work": "animation.buer.work"},
             # (seconds, (the telling pose's window)): ConcordanceGardenPactClientGameTests freezes the world inside it.
             "gesture_times": {"arrive": (2.5, (1.2, 1.9)), "inspect": (2.0, (0.4, 1.2)), "assent": (2.0, (0.5, 1.3)),
-                              "refuse": (2.0, (0.4, 1.3)), "depart": (2.0, (0.6, 1.2)), "work": (3.0, (1.4, 2.2))},
+                              "refuse": (2.0, (0.4, 1.3)), "depart": (2.0, (1.1, 1.6)), "work": (3.0, (1.4, 2.2))},
             "loop_lengths": {"listen": 3.0, "waiting": 6.0, "suspended": 8.0, "astir": 2.0},
             # His listening pose (degrees): the pistil leaned toward his speaker; every screen gesture starts and ends on it.
             "attend": {"pistil": (12, 0, 0)},

@@ -274,6 +274,8 @@ public class ConcordancePactClientGameTests implements FabricClientGameTest {
 				&& server.computeOnServer(ConcordancePactClientGameTests::charge) == AstrolabeItem.CAPACITY, "A refusal records and spends nothing");
 		// D-06: the screen rebuilds on its next tick; the refusal carries its mark, a cross, not colour alone (waited for: critique 4).
 		context.waitFor(client -> screen(client).control("result") instanceof PactScreen.Verdict verdict && verdict.refused(), WAIT);
+		check(context.computeOnClient(client -> "result".equals(screen(client).focusedKey()) && screen(client).inView("result")),
+				"The refusal is in view above his terms, the keyboard on it and off Accept (no tooltip over it)");
 		shot(context, "jugcraft_pact_refused");
 		List<String> cost = context.computeOnClient(client -> PactClient.state().compact().stream()
 				.map(stack -> BuiltInRegistries.ITEM.getKey(stack.getItem()) + " " + stack.getCount()).toList());
@@ -536,7 +538,9 @@ public class ConcordancePactClientGameTests implements FabricClientGameTest {
 			context.waitForScreen(null);
 		}
 		context.waitTicks(5);
-		check(context.computeOnClient(client -> clip.equals(drawing(client, perch, MAIN))), "Frozen while he draws " + clip);
+		// No gesture drawn over the loop (the garden cohort's run 40605564166: a finished one, rewound by the freeze, hid Buer's).
+		check(context.computeOnClient(client -> clip.equals(drawing(client, perch, MAIN))
+				&& drawing(client, perch, StolasEntity.GESTURE_CONTROLLER).isEmpty()), "Frozen while he draws " + clip + ", no gesture over it");
 		shot(context, name);
 		server.runCommand("tick unfreeze");
 	}

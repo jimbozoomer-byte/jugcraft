@@ -43,12 +43,13 @@ import org.jspecify.annotations.Nullable;
  * in words and each answer as a button, the one kept marked; the answer is sent and kept at once and can be changed at any
  * time.
  * <p>
- * The server's answer, a refusal with its reason included, is shown and read aloud. Each answer carries its mark (a tick
+ * The server's answer, a refusal with its reason included, is shown and read aloud; a new one while his terms are shown is
+ * drawn above them, the body turned to it and the keyboard on it. Each answer carries its mark (a tick
  * or a cross), and Stolas's subtitles draw over the screen (D-06); ending asks first, the keyboard on Keep it
  * (KeepFirstConfirmScreen). Every word is a focusable, narrated
  * paragraph and every control a button: Tab and Shift+Tab move, Enter or Space presses, Esc leaves. The screen fits any
- * window down to 320x180 scaled pixels and scrolls its body. Nothing in it decides: each button sends one bounded request
- * through {@link PactClient}. No text box, chat command, vanilla Dialog or GuiLib.
+ * window down to 320x180 scaled pixels, every footer label whole, and scrolls its body. Nothing in it decides: each button
+ * sends one bounded request through {@link PactClient}. No text box, chat command, vanilla Dialog or GuiLib.
  */
 public class PactScreen extends Screen implements MenuAccess<PactMenu> {
 	/** The page his terms are on, after his three beats. */
@@ -62,6 +63,8 @@ public class PactScreen extends Screen implements MenuAccess<PactMenu> {
 	private static final int MAX_HEIGHT = 260;
 	private static final int TOP = 26;
 	private static final int FOOT = 20;
+	/** Room round a footer button's label: BookArt.Tab draws it 6 in and fits it 7 short of its right edge (extractContents). */
+	private static final int LABEL_ROOM = 13;
 	/** The sign by the speaker's name when a state names none (the chooser) or before the first state: the perch. */
 	private static final String PERCH = "jugcraft:pact_perch";
 	private final PactMenu menu;
@@ -81,6 +84,8 @@ public class PactScreen extends Screen implements MenuAccess<PactMenu> {
 	private int mode = -1;
 	private int pattern = -1;
 	private String focus = "";
+	/** The last answer this screen has shown (PactClient.lastAnswer()); one heard before it opened is not new. */
+	private int shownAnswer = PactClient.lastAnswer();
 
 	public PactScreen(PactMenu menu, Inventory inventory, Component title) {
 		super(title);
@@ -118,7 +123,14 @@ public class PactScreen extends Screen implements MenuAccess<PactMenu> {
 			pattern = -1;
 			scroll = 0;
 			focus = mode == PactStatePayload.NEGOTIATE ? "beat" : mode == PactStatePayload.INVITE ? "invite:0" : state.result().isPresent() ? "result" : "note:0";
+		} else if (state != null && mode == PactStatePayload.NEGOTIATE && page >= state.beats().size() && state.result().isPresent()
+				&& PactClient.lastAnswer() != shownAnswer) {
+			// A new answer on his terms (a refusal: sealed or declined leaves the page) is the body's first line; the body turns
+			// to it and the keyboard leaves Accept for it, so neither Accept's tooltip nor the body's end hides it.
+			scroll = 0;
+			focus = "result";
 		}
+		shownAnswer = PactClient.lastAnswer();
 		if (state != null && PactClient.takeChanged()) {
 			// His terms changed under the screen: they are shown again, from their first line, before anything is accepted.
 			page = state.beats().size();
@@ -153,9 +165,10 @@ public class PactScreen extends Screen implements MenuAccess<PactMenu> {
 					button("leave", ui("leave"), ui("leave.hint"), true, this::onClose, false));
 			return;
 		}
+		// The answer above his terms, at the top of the body, where no footer tooltip reaches (they open above the footer).
+		result(state);
 		terms(state);
 		notes(state, ui("in_the_way"), WARN);
-		result(state);
 		boolean free = !PactClient.waiting();
 		footer(button("back", ui("back"), Component.empty(), beats > 0, () -> turn(beats - 1), false),
 				button("accept", ui("accept"), ui("accept.hint"), free && state.offers(PactRequestPayload.ACCEPT),
@@ -435,14 +448,37 @@ public class PactScreen extends Screen implements MenuAccess<PactMenu> {
 		return addRenderableWidget(tab);
 	}
 
+	/**
+	 * One row of buttons under the body: equal widths while every label fits whole; when one would be cut (Accept the pact in
+	 * a GUI 320 wide), each button gets its whole label's width and the rest of the row is shared equally. A row that cannot
+	 * hold every label whole stays equal, and outside() names the cut label.
+	 */
 	private void footer(Button... buttons) {
 		int gap = 4;
-		int each = Math.max(24, (w - 20 - gap * (buttons.length - 1)) / buttons.length);
+		int room = w - 20 - gap * (buttons.length - 1);
+		int each = Math.max(24, room / buttons.length);
+		int[] need = new int[buttons.length];
+		int needed = 0;
+		boolean cut = false;
 		for (int i = 0; i < buttons.length; i++) {
-			buttons[i].setX(x + 10 + i * (each + gap));
-			buttons[i].setY(y + h - FOOT - 6);
-			buttons[i].setWidth(each);
+			need[i] = labelWidth(buttons[i]);
+			needed += need[i];
+			cut |= need[i] > each;
 		}
+		int spare = room - needed;
+		int left = x + 10;
+		for (int i = 0; i < buttons.length; i++) {
+			int width = !cut || spare < 0 ? each : need[i] + spare / buttons.length + (i < spare % buttons.length ? 1 : 0);
+			buttons[i].setX(left);
+			buttons[i].setY(y + h - FOOT - 6);
+			buttons[i].setWidth(width);
+			left += width + gap;
+		}
+	}
+
+	/** The width a footer button needs to show its whole label (never under 24). */
+	private int labelWidth(AbstractWidget button) {
+		return Math.max(24, font.width(button.getMessage().getString()) + LABEL_ROOM);
 	}
 
 	private void restore() {
@@ -588,7 +624,14 @@ public class PactScreen extends Screen implements MenuAccess<PactMenu> {
 		return controls.get(key);
 	}
 
-	/** What does not fit: the panel or body off screen, a footer button outside the panel or narrower than 24 (tests: none). */
+	/** Whether the line or control under {@code key} lies wholly inside the body's visible part, for tests. */
+	public boolean inView(String key) {
+		AbstractWidget widget = controls.get(key);
+		return widget != null && body != null && widget.getY() >= body.getY()
+				&& widget.getY() + widget.getHeight() <= body.getY() + body.getHeight();
+	}
+
+	/** What does not fit: the panel or body off screen, a footer button outside the panel, narrower than 24 or cutting its label (tests: none). */
 	public List<String> outside() {
 		List<String> out = new ArrayList<>();
 		if (x < 0 || y < 0 || x + w > width || y + h > height) {
@@ -602,6 +645,8 @@ public class PactScreen extends Screen implements MenuAccess<PactMenu> {
 			if (widget.getX() < x || widget.getY() < y || widget.getX() + widget.getWidth() > x + w || widget.getY() + widget.getHeight() > y + h
 					|| widget.getWidth() < 24) {
 				out.add(key);
+			} else if (labelWidth(widget) > widget.getWidth()) {
+				out.add(key + " (label cut)");
 			}
 		}
 		return out;

@@ -451,6 +451,8 @@ public class ConcordanceGardenPactClientGameTests implements FabricClientGameTes
 				"Without the compact's materials Accept is refused with its reason: " + refused.reason() + " " + said);
 		check(!server.computeOnServer(ConcordanceGardenPactClientGameTests::held), "A refusal records nothing");
 		context.waitFor(client -> screen(client).control("result") instanceof PactScreen.Verdict verdict && verdict.refused(), WAIT);
+		check(context.computeOnClient(client -> "result".equals(screen(client).focusedKey()) && screen(client).inView("result")),
+				"The refusal is in view above his terms, the keyboard on it and off Accept (no tooltip over it)");
 		shot(context, "jugcraft_garden_buer_refused");
 		List<String> cost = context.computeOnClient(client -> PactClient.state().compact().stream()
 				.map(stack -> BuiltInRegistries.ITEM.getKey(stack.getItem()) + " " + stack.getCount()).toList());
@@ -655,7 +657,7 @@ public class ConcordanceGardenPactClientGameTests implements FabricClientGameTes
 			gesturePose(context, server, perch, BuerEntity.Gesture.REFUSE, 0.4, 1.3, "jugcraft_garden_buer_refuse");
 			gesturePose(context, server, perch, BuerEntity.Gesture.WORK, 1.4, 2.2, "jugcraft_garden_buer_work");
 			// He closes and sinks (depart holds its last frame) and unfurls again (his arrival replaces it).
-			gesturePose(context, server, perch, BuerEntity.Gesture.DEPART, 0.6, 1.2, "jugcraft_garden_buer_depart");
+			gesturePose(context, server, perch, BuerEntity.Gesture.DEPART, 1.1, 1.6, "jugcraft_garden_buer_depart");
 			gesturePose(context, server, perch, BuerEntity.Gesture.ARRIVE, 1.2, 1.9, "jugcraft_garden_buer_arrive");
 			context.waitFor(client -> drawing(client, perch, GESTURES).isEmpty() && IDLE.equals(drawing(client, perch, MAIN)), WAIT);
 			check(server.computeOnServer(ConcordanceGardenPactClientGameTests::held) && server.computeOnServer(minecraft -> presence(minecraft, perch).isAlive()),
@@ -788,7 +790,9 @@ public class ConcordanceGardenPactClientGameTests implements FabricClientGameTes
 				context.waitForScreen(null);
 			}
 			context.waitTicks(5);
-			check(context.computeOnClient(client -> clip.equals(drawing(client, perch, MAIN))), "Frozen while he draws " + clip);
+			// No gesture drawn over the loop: one that had finished, rewound by the freeze, once hid it (run 40605564166).
+			check(context.computeOnClient(client -> clip.equals(drawing(client, perch, MAIN)) && drawing(client, perch, GESTURES).isEmpty()),
+					"Frozen while he draws " + clip + ", no gesture over it");
 			shot(context, name);
 		} finally {
 			server.runCommand("tick unfreeze");

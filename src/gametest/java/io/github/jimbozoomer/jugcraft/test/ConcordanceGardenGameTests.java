@@ -2104,7 +2104,9 @@ public class ConcordanceGardenGameTests {
 		long now = level.getGameTime();
 		helper.assertTrue(positions(reach.beds(level, now)).equals(expected) && reach.refreshes() == 1 && reach.scanned() >= 72,
 				"64 of 70, nearest first; the dormant bed and the stranger's never indexed: " + reach.scanned());
-		helper.setBlock(helper.relativePos(expected.getFirst()), Blocks.AIR);
+		// Broken at its own (absolute) place: 26.3's GameTestHelper.relativePos is no inverse of absolutePos in an unrotated
+		// test (it turns the place half round the origin), so the bed it named was never broken.
+		level.setBlockAndUpdate(expected.getFirst(), Blocks.AIR.defaultBlockState());
 		helper.assertTrue(positions(reach.beds(level, now + 1)).equals(expected.subList(1, GardenReach.MAX_BEDS)) && reach.refreshes() == 1,
 				"The nearest broken, it is gone at once, and nothing is scanned again");
 		bedOf(helper, new BlockPos(4, 2, 4), keeper);

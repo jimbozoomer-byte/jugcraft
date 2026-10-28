@@ -1070,11 +1070,11 @@ public class ConcordanceJourneyGameTests {
 	 * rooted, and names every term; accepting short of the compact is refused with its reason and spends nothing; with 4
 	 * Mendvetch (crafted) and 4 bone meal it seals once and spends once. By daylight he eases one strain; a bed worked back to
 	 * its worst is overworked, refused until bone meal by hand composts it, then mended; their own empty hand on a strained
-	 * bed in his area keeps his first obligation once. A Mendvetch paid ahead (he looks it over); suspended, he tends nothing;
-	 * resumed; ended at the perch, the Mendvetch comes back once, he closes and sinks away, the departure is kept once, and
-	 * ending again returns nothing. The path takes one tick; the test then waits out his departing gesture. Since GC-05 the
-	 * owner's open meets the chooser first (Buer and Bathin share The Garden's Regard), and Buer is chosen there by his sign
-	 * (GC-P59); ConcordanceWorkerGameTests and the garden client class show the chooser itself (GC-P29).
+	 * bed in his area keeps his first obligation once. Both Mendvetch left over paid ahead (he looks them over); suspended, he
+	 * tends nothing; resumed; ended at the perch, the Mendvetch come back once, he closes and sinks away, the departure is kept
+	 * once, and ending again returns nothing. The path takes one tick; the test then waits out his departing gesture. Since
+	 * GC-05 the owner's open meets the chooser first (Buer and Bathin share The Garden's Regard), and Buer is chosen there by
+	 * his sign (GC-P59); ConcordanceWorkerGameTests and the garden client class show the chooser itself (GC-P29).
 	 */
 	@GameTest(structure = "jugcraft-test:drone_depot", maxTicks = 80)
 	public void buerFromTheCodexToDeparture(GameTestHelper helper) {
@@ -1174,9 +1174,11 @@ public class ConcordanceJourneyGameTests {
 		menu = (PactMenu) holder.containerMenu;
 		int slot = ConcordanceWorkerGameTests.offering(menu.lastSent(), "jugcraft:mendvetch");
 		PactStatePayload paid = ConcordanceWorkerGameTests.send(holder, menu, PactRequestPayload.DEPOSIT, slot);
-		helper.assertTrue(slot >= 0 && ConcordanceWorkerGameTests.answered(paid, PactMenu.DEPOSITED) && ConcordanceWorkerGameTests.escrowed(level, record) == 1
-				&& ConcordanceWorkerGameTests.count(holder, "jugcraft:mendvetch") == 1 && "inspect".equals(buer.cues().getLast()),
-				"A Mendvetch paid ahead; he looks it over");
+		// A deposit pays every Mendvetch carried that the escrow has room for (4 ahead; PactKeeping.deposit), not one per request.
+		helper.assertTrue(slot >= 0 && ConcordanceWorkerGameTests.answered(paid, PactMenu.DEPOSITED) && ConcordanceWorkerGameTests.escrowed(level, record) == 2
+				&& ConcordanceWorkerGameTests.count(holder, "jugcraft:mendvetch") == 0 && "inspect".equals(buer.cues().getLast()),
+				"Both Mendvetch they carry paid ahead; he looks them over: " + ConcordanceWorkerGameTests.escrowed(level, record) + " held, "
+						+ ConcordanceWorkerGameTests.count(holder, "jugcraft:mendvetch") + " carried, " + buer.cues());
 		helper.assertTrue(ConcordanceWorkerGameTests.answered(ConcordanceWorkerGameTests.send(holder, menu, PactRequestPayload.SUSPEND, 0), "suspended"), "Suspended");
 		bed.setStrain(2);
 		helper.assertValueEqual(buer.think(level, PACT_NOON, t + 3L * Garden.TEND_TICKS), Status.SUSPENDED, "Suspended, he tends nothing");

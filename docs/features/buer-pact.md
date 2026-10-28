@@ -1,11 +1,15 @@
 # Buer's pact
 
-Status: **briefed, not built** (Concordance garden cohort, GC-04a). This page is Buer's brief: the
+Status: **built and run in CI, not merged** (Concordance garden cohort, GC-04: brief `9742f240b`, Buer `3e736655a`,
+the unit review's fixes `4b9a038bb`, three test fixes `4ca363d38`; draft pull request
+[#526](https://github.com/jimbozoomer-byte/jugcraft/pull/526) against main). In CI run
+[40605564166](https://github.com/jimbozoomer-byte/jugcraft/actions/runs/40605564166) every server test of his passed with and without the optional integrations, and
+`ConcordanceGardenPactClientGameTests` passed; its pictures were looked at for this record ([Verification](#verification)).
+No person has played him; one client, not two. This page began as Buer's brief: the
 [contract](concordance-garden-cohort.md)'s Dossier 1 and the palette files his body and cues are made from (library
 path, catalog row, SHA-256), committed before any body file, as
 [the per-spirit template](concordance-garden-cohort.md#the-per-spirit-template-every-spirit-ticket-gc-04-to-gc-09) asks
-(D-D5). Nothing of Buer exists in the game yet: no entity, data, words, sounds, body files or tests. Everything below
-the brief is the design GC-04 builds, and every result is "not run" until it has run.
+(D-D5); the sections after the brief now describe him as built.
 Proposal issue: none; the owner's selected scope ("gardens next", D-D5; the contract's GC-D3) and
 [GC-04](concordance-garden-cohort.md#gc-04-buer-end-to-end-unit-1).
 Owner: @jimbozoomer-byte. AI-assisted implementation with Claude Code; the model is named in the commit trailers.
@@ -18,7 +22,8 @@ He is the cohort's first garden spirit and the second spirit a Pact Perch can in
 screen, roster, journal and Jade lines that Stolas uses ([Stolas's pact](stolas-pact.md); GC-01 to GC-03). Builds on
 [spirits, familiars and constructs](arcane-concordance-workers.md) and
 [ecological cultivation](arcane-concordance-ecology.md) (Verdant Beds, strain, tending). The proposals GC-P20 to
-GC-P22 are the contract's; none is the owner's.
+GC-P22 are the contract's and GC-P23 to GC-P29 the unit's ([Decisions](concordance-garden-cohort.md#decisions)); none is
+the owner's.
 
 ## The brief (Dossier 1, entry 10: strain tending)
 
@@ -39,9 +44,9 @@ Copied from the contract's
    - *Silhouette:* a rooted **corolla**: four broad petals round an upright pistil that leans like an arrow toward
      whatever he attends (Sagittary as a motif only, never a centaur or archer); legless, the only rooted spirit. Body:
      the owner's Decor Blossom, its texture byte for byte and its geometry adapted (stem lengthened, *the clear face of
-     each two-faced plane dropped*; [below](#palette-and-body-files)). *At the planned scale 2.2: about 1.4 blocks
-     across shut (the 10-pixel leaf plate), about 1.7 open (the owner's `open` pose; an estimate here, held by
-     `check_spirit_bodies` once built) and about 1.6 tall.*
+     each two-faced plane dropped*; [below](#palette-and-body-files)). *Drawn at 2.2 (as built): about 1.4 blocks
+     across shut (the 10-pixel leaf plate), about 1.7 open (the owner's `open` pose; an estimate, not measured for this
+     record) and about 1.6 tall.*
      Not imported: the lion-headed wheel of five goat legs (de Plancy and Le Breton, 1863), Genshin Impact's Buer
      (Nahida). *Nor, by GC-S14, any other adaptation's design, seal, conjuration or legion count.*
    - *Personality:* a physician's calm; exact and kind; disapproves of overwork; speaks in diagnoses.
@@ -71,9 +76,10 @@ Copied from the contract's
    *nothing spent*). Departure: his petals close and he sinks into the perch; struck off the roster, escrow returned
    once, a history entry.
 7. **Interaction details.** (a) Outside his hours his petals fold shut and he sleeps (the `waiting` loop at night, with
-   the kept page saying "asleep until dawn"). *Limit, planned: with an offering due his loop is the astir one (half
+   the kept page saying "asleep until dawn"). *Limit, as built: with an offering due his loop is the astir one (half
    open) by day and by night, since the pact's status stays "upkeep due"; the kept page and Jade still say "asleep
-   until dawn" at night (GC-P25, GC-P27; recorded, not hidden).* (b) Before he unfurls over a bed, his pistil points at it
+   until dawn" at night (GC-P25, GC-P27; recorded, not hidden). As photographed, his asleep loop shows his petals open in
+   the same V as by day, not folded shut ([Verification](#verification)).* (b) Before he unfurls over a bed, his pistil points at it
    for a moment (attend, then the work gesture), so a watcher sees which bed he chose; *his work over, he turns back to
    whoever is speaking to him (GC-02).*
 8. **Evidence.** *Accessibility:* every cue subtitled and every gesture paired with words on the kept page, the roster
@@ -98,8 +104,8 @@ in the catalog is "Magic / assets/ars_jimbaux".
 | `animations/decor_blossom_animations.json` (clips `open` 1.6667 s, `close` 1.75 s, `active` 5 s looped) | `catalog/files.csv:19091` | 3,364 bytes | `368a8b72ec7d921eca0cb3f89b764df55e29ddf6aecf3fc16659a41572f191db` | `geckolib/animations/entity/buer.animation.json` (adapted) |
 | `textures/block/decor_blossom.png` (32x32) | `catalog/files.csv:20417` | 314 bytes | `2334749d3e11db8e6880bc60fb5d76081c24f11fe14e4e26ad02b330a263a68b` | `textures/entity/buer.png` (byte for byte) and `textures/entity/buer_glowmask.png` (adapted) |
 
-The planned technical changes (GC-S12; the unit's proposals, recorded in the contract's Decisions with its records),
-made by a new pure generator, `tools/garden_bodies.py` (no I/O, no randomness), and written and checked by
+The technical changes, as built (GC-S12; the unit's proposals GC-P24 and GC-P25 in the contract's Decisions), made by a
+new pure generator, `tools/garden_bodies.py` (no I/O, no randomness), and written and checked by
 `tools/owner_art.py`; the originals stay intact:
 
 - **Texture:** copied byte for byte. No texel is redrawn or recoloured.
@@ -128,7 +134,7 @@ made by a new pure generator, `tools/garden_bodies.py` (no I/O, no randomness), 
   (listen, waiting, suspended, astir) and gestures (arrive, inspect, assent, refuse, depart, work) keyed on the rig's own
   bones `base`, `petal1` to `petal4` and `pistil` (the `petal1a` to `petal4a` bones stay unkeyed, as the owner's clips
   leave them).
-- **Scale and box (planned):** drawn at 2.2; entity box 1.2 x 1.6 (the contract said about 1.2 x 1.2, but the drawn
+- **Scale and box (as built):** drawn at 2.2; entity box 1.2 x 1.6, eyes 1.4 (the contract said about 1.2 x 1.2, but the drawn
   flower is about 1.6 tall).
 - **Supplied labels and metadata, retained as provenance:** the folder's leftover mod metadata names Ars Nouveau, author
   Bailey Hollingsworth, `license="GNU GENERAL PUBLIC LICENSE"`
@@ -136,6 +142,18 @@ made by a new pure generator, `tools/garden_bodies.py` (no I/O, no randomness), 
   folder's language file carries a supporter-reward message that Jugcraft does not import. The owner's declaration is
   [PROVENANCE.md](../../art/owner-library/PROVENANCE.md). The same files already make the decorative block
   `jugcraft:nouveau_decor_blossom` ([Jug Nouveau](jug-nouveau.md)), which keeps its own use: a block, not a creature.
+
+**Runtime provenance** (`python3 tools/owner_art.py --provenance pacts`, Buer's rows, run for this record; the
+runtime SHA-256 computed with `sha256sum`):
+
+| Runtime file (`src/main/resources/assets/jugcraft/`) | Library original (`art/owner-library/`) | Library SHA-256 | How made | Runtime SHA-256 |
+|---|---|---|---|---|
+| `textures/entity/buer.png` | `originals/Magic/assets/ars_jimbaux/textures/block/decor_blossom.png` | `2334749d3e11db8e6880bc60fb5d76081c24f11fe14e4e26ad02b330a263a68b` | copied byte for byte | the same |
+| `textures/entity/buer_glowmask.png` | the same texture | as above | `tools/garden_bodies.py` (`buer_glowmask`) | `2f0eb1e49e87e9a2dcb8a45ca313fa7a279d2751747a94d39959f2bfcb75b39d` |
+| `geckolib/models/entity/buer.geo.json` | `originals/Magic/assets/ars_jimbaux/geo/decor_blossom.geo.json` | `3209e72155163331b462fb5cf1d2062917c34ec7c972987b51886146adfe4d4e` | `tools/garden_bodies.py` (`buer_model`) | `eca1f6ad027b28cf7664d4e5a4493332340d108721958c9253239b5f5511f48c` |
+| `geckolib/animations/entity/buer.animation.json` | `originals/Magic/assets/ars_jimbaux/animations/decor_blossom_animations.json` | `368a8b72ec7d921eca0cb3f89b764df55e29ddf6aecf3fc16659a41572f191db` | `tools/garden_bodies.py` (`buer_animations`) | `426233b6e4b1dadd02a4dbba4f8a00cfc5b936e7e4627476703990f2b98d4c97` |
+
+`python3 tools/owner_art.py --check` holds each runtime file to what its adapter makes from the original.
 
 ## Sound files
 
@@ -151,10 +169,9 @@ channel) and its last granule (length).
 | `alchemy/peheal.ogg` | `Magic/sounds/item/peheal.ogg` | `catalog/files.csv:26691` | `96500aa60f6fd497a8ca5e751416683d0ccb424ac6dc1aa939abb249c391cc93` | 1, 22.05 kHz, 0.99 s |
 
 The two Grove files are one recording: same length, and they differ in 39 bytes, all Ogg stream serials and page
-checksums. So his seven cues draw on three recordings, told apart by pitch through `sounds.json` (planned; a proposal
-of the unit):
+checksums. So his seven cues draw on three recordings, told apart by pitch through `sounds.json` (as built, GC-P26):
 
-| Event (planned) | Subtitle | File | Pitch |
+| Event | Subtitle | File | Pitch |
 |---|---|---|---|
 | `jugcraft:buer.arrive` | Buer unfurls | `menagerie/fable/butterfly_heal` | 1.0 |
 | `jugcraft:buer.listen` | Buer listens | `alchemy/peheal` | 1.25 |
@@ -180,15 +197,15 @@ Never Stolas's doorbell chime or flutter; no voice; no new audio; no downmixed c
 
 ## Record fields (CLAUDE.md)
 
-| Field | Buer's pact (planned) |
+| Field | Buer's pact (as built) |
 |---|---|
 | Tier | Practitioner, Spiritbinders: The Garden's Regard needs the Binding Arts and Verdant Husbandry understood |
 | Input producer | a garden specimen examined, a ripe organism crop harvested by hand, a bound worker kept at its work (the Regard, GC-03); the perch (two sticks, an amethyst shard, a dark oak log, polished deepslate); an awake Verdant Bed of the inviter's within 8; the compact (4 Mendvetch, from two crafts of wheat seeds, bone meal and an amethyst shard, two each; and 4 bone meal); offerings (`#jugcraft:buer_offerings`: Mendvetch) |
 | Output consumer | the beds' strain (growth and the habitat read it); the record's day count; the holder's first obligation (tending a strained bed in his area by hand while the pact serves), one of the three distinct garden spirits' obligations that master The Garden's Regard (from unit 3) |
 | Costs | the compact once; one Mendvetch every 7 game days, at most 4 ahead; no resonance; no per-tend cost |
 | Unlocks | the invitation (Regard understood and a bed); strain tending (the pact); one obligation toward The Garden's Regard mastered |
-| Failure behaviour | every refusal spends nothing and names its reason; outside his hours, with his holder away (no stand-in, whatever the server's absent-owner option), suspended, held for upkeep or past his quota, he tends nothing and says why; an overworked bed waits for compost or rest; a missed offering warns, gives a game day's grace (he works on), then suspends with nothing lost; ending returns what was paid ahead once; a broken perch ends nothing; switched off, everything waits |
-| Test evidence | not run: nothing of Buer is built yet. The plan is below (Verification) |
+| Failure behaviour | every refusal spends nothing and names its reason; a bed refused for itself (no longer a beneficiary's, or one the holder could not change by hand) is skipped until his bed index is next read, so it never stalls him; outside his hours, with his holder away (no stand-in, whatever the server's absent-owner option), suspended, held for upkeep or past his quota, he tends nothing and says why; an overworked bed waits for compost or rest; a missed offering warns, gives a game day's grace (he works on), then suspends with nothing lost; ending returns what was paid ahead once; a broken perch ends nothing; switched off, everything waits |
+| Test evidence | `GC04_TESTS`' 24 server tests (his twenty, the three obligation tests, the whole path), the GC-01 tests that need a second spirit and SG12's fifteen for `jugcraft:buer`, all passed in CI run 40605564166; `ConcordanceGardenPactClientGameTests` passed there, its pictures looked at; not played by a person ([Verification](#verification)) |
 
 ## Connections
 
@@ -226,8 +243,8 @@ events, the work `strain_tending` (saved in a Bound Will's service; appended, ne
 
 ## The pact screen
 
-The shared screen (GC-01): the chooser lists him once a bed of the player's is within 8 (else "not yet", with his
-reason); his beats and terms, keyboard only, at GUI 4 and 320x180; the kept page's service section (today's eases, or
+The shared screen (GC-01): the chooser lists him once The Garden's Regard is understood, "ready" once a bed of the
+player's is within 8, else with his reason ("There is nothing here I could mend"); his beats and terms, keyboard only, at GUI 4 and 320x180; the kept page's service section (today's eases, or
 asleep until dawn; the overworked bed) and the shared first-obligation row; offerings, suspend, resume and end. No
 garden term or refusal names an astrolabe.
 
@@ -238,29 +255,96 @@ pin. Files: [Palette and body files](#palette-and-body-files) and [Sound files](
 
 ## Verification
 
-Nothing has run for Buer: this commit is his brief, with no game change. Each item of the brief is to be shown by the
-evidence named here (the contract's GE9), and each result is written from the run that produced it.
+Written from CI run [40605564166](https://github.com/jimbozoomer-byte/jugcraft/actions/runs/40605564166) (pull request #526 on `4ca363d38`, merged into main's `233cca018`)
+and its job logs; the earlier runs are in the [contract](concordance-garden-cohort.md#unit-1-as-built-and-its-evidence).
+"Passed" means the run's log says so. Each brief item is shown by the evidence named (the contract's GE9):
 
-| Brief item | Evidence planned (server game tests in `ConcordanceWorkerGameTests` unless named; client shots of `ConcordanceGardenPactClientGameTests`) | Result |
+| Brief item | Evidence (server game tests in `ConcordanceWorkerGameTests` unless named; shots of `ConcordanceGardenPactClientGameTests`) | Result |
 |---|---|---|
-| 1. Identity | his body files from `tools/owner_art.py` (`--check`), `check_spirit_bodies` (bones, clips, scale, a box at least 20% unlike every other spirit's, the twin-face rule), `check_geckolib` per face; shots of his poses from his front (`jugcraft_garden_buer_idle` and the rest) and from below (`jugcraft_garden_buer_below`) | not run |
-| 2. Invitation and route | `ConcordanceJourneyGameTests.buerFromTheCodexToDeparture`; `aPerchOffersOnlyWhatThePlayerMayInvite`; `ConcordanceJournalGameTests.theJournalNamesEachRegardsNextStep`; `tools/concordance_journey.py --check` (his route); shot `jugcraft_garden_chooser` | not run |
-| 3. Service | `buerEasesOneStrainAtTheBedsOwnRate`, `buerTendsOnlyBedsOfHisBeneficiaries`, `buerNeverTouchesAClaimedOrDormantBed`, `buerSkipsBedsHeMayNotChange`, `buerWaitsForAPresentHolder`, `buerChangesAtMostOneBedAThink`, `buerStopsAtHisQuota`, `buerTendsThroughHisGrace`; shot `jugcraft_garden_buer_at_work` | not run |
-| 4. Upkeep and suspension | `everySpiritSealsOnceAndSpendsOnce`, `everySpiritsUpkeepWarnsGivesGraceSuspendsAndResumes`, `aSuspendedBuerTendsNothing`, `noGardenTermOrRefusalNamesAnAstrolabe`; `check_acquisition` (his compact and offering reachable); shots `jugcraft_garden_buer_terms` (three sizes) | not run |
-| 5. The overworked bed | `anOverworkedBedWaitsForCompost`, `anOverworkedComplaintIsForgottenOnRestart`, `buersReadingSaysItsNoteAndNamesNoPlayer`; shots `jugcraft_garden_buer_overworked`, `jugcraft_garden_buer_jade` | not run |
-| 6. Refusal and departure | `buerRefusesWithoutABedToMend`, `everySpiritsRefusalSpendsNothing`, `buerAnswersEachActionWithHisGesture`, the end of `buerFromTheCodexToDeparture` (escrow once); shots `jugcraft_garden_buer_nothing_to_mend`, `jugcraft_garden_buer_depart`, `jugcraft_garden_buer_ended` | not run |
-| 7. Interaction details | (a) `buerSleepsOutsideHisHours`, shot `jugcraft_garden_buer_asleep`; (b) `buerFacesTheBedHeTends` (the bed, then his speaker, then no one), shots `jugcraft_garden_buer_work` and `jugcraft_garden_buer_faces_east`, `_south`, `_west`, `_north` | not run |
-| 8. Evidence | the client class keyboard-only at GUI 4 and 320x180 (`_scale4`, `_small` shots; every screen read for the narrator); ownership, save and duplication as item 8 names them, plus `aDuplicateBuerTendsNothing` and `twoBuersShareOneBedsTendWindow`; GC-03's three obligation tests (`anObligationIsRecordedOncePerPlayerAndSpirit`, `anObligationNeverMastersStolassRegard`, `anObligationOutsideTheAreaOrWhileSuspendedCountsNothing`) | not run |
+| 1. Identity | his body files from `tools/owner_art.py` (`--check`), `check_spirit_bodies` (bones and every bone key, cube pivots, clips, scale, box, the twin-face rule), `check_geckolib` per face; his poses from his front and his underside (shots below) | the audits pass locally; the shots looked at (below), with three that do not show what they are named for |
+| 2. Invitation and route | `ConcordanceJourneyGameTests.buerFromTheCodexToDeparture`; `aPerchOffersOnlyWhatThePlayerMayInvite`; `ConcordanceJournalGameTests.theJournalNamesEachRegardsNextStep`; `tools/concordance_journey.py --check` (his route); shots `jugcraft_garden_regard_tooltip`, `jugcraft_garden_chooser` (three sizes), `jugcraft_garden_buer_nothing_to_mend` | passed; journey check passes locally; shots seen |
+| 3. Service | `buerEasesOneStrainAtTheBedsOwnRate`, `buerTendsOnlyBedsOfHisBeneficiaries`, `buerNeverTouchesAClaimedOrDormantBed`, `buerSkipsBedsHeMayNotChange`, `buerWaitsForAPresentHolder`, `buerChangesAtMostOneBedAThink`, `buerStopsAtHisQuota`, `buerTendsThroughHisGrace`; shot `jugcraft_garden_buer_at_work` | passed; shot seen |
+| 4. Upkeep and suspension | `everySpiritSealsOnceAndSpendsOnce`, `everySpiritsUpkeepWarnsGivesGraceSuspendsAndResumes`, `aSuspendedBuerTendsNothing`, `noGardenTermOrRefusalNamesAnAstrolabe`; `check_acquisition` (his compact and offering reachable); shots `jugcraft_garden_buer_terms` (three sizes), `jugcraft_garden_buer_kept` | passed; audit passes locally; shots seen |
+| 5. The overworked bed | `anOverworkedBedWaitsForCompost`, `anOverworkedComplaintIsForgottenOnRestart`, `buersReadingSaysItsNoteAndNamesNoPlayer`; shots `jugcraft_garden_buer_overworked`, `jugcraft_garden_buer_jade` | passed; shots seen (the Jade shot was taken after the bed was fed, so it shows no overworked note) |
+| 6. Refusal and departure | `buerRefusesWithoutABedToMend`, `everySpiritsRefusalSpendsNothing`, `buerAnswersEachActionWithHisGesture`, the end of `buerFromTheCodexToDeparture` (escrow once); shots `jugcraft_garden_buer_nothing_to_mend`, `jugcraft_garden_buer_refused`, `jugcraft_garden_buer_depart`, `jugcraft_garden_buer_end_confirm`, `jugcraft_garden_buer_ended` | passed; shots seen (the refused shot does not show his refusal; the depart shot shows a shut bud, not yet sunk) |
+| 7. Interaction details | (a) `buerSleepsOutsideHisHours`, shot `jugcraft_garden_buer_asleep`; (b) `buerFacesTheBedHeTends` (the bed, then his speaker, then no one), `aWorkTargetOutranksTheSpeakerWhileItsGesturePlays`, shots `jugcraft_garden_buer_work`, `jugcraft_garden_buer_at_work` and `jugcraft_garden_buer_faces_east`, `_south`, `_west`, `_north` | passed; shots seen ((a)'s shot shows his petals open, not folded shut: below) |
+| 8. Evidence | the client class keyboard-only at the default GUI, GUI 4 and 320x180 (`_scale4`, `_small` shots); ownership, save and duplication as item 8 names them, plus `aDuplicateBuerTendsNothing` and `twoBuersShareOneBedsTendWindow`; the three obligation tests (`anObligationIsRecordedOncePerPlayerAndSpirit`, `anObligationNeverMastersStolassRegard`, `anObligationOutsideTheAreaOrWhileSuspendedCountsNothing`) | passed; shots seen; the narrator not heard (no sound device) |
 
-- **Server** (`./gradlew build`, CI): not run.
-- **Without the optional integrations** (`-PjugcraftOptionalIntegrations=false`, CI): not run.
-- **Client** (`./gradlew runClientGameTest -PclientTests=ConcordanceGardenPactClientGameTests`, CI): not run; the class
-  does not exist yet. Every shot named will be looked at and marked seen before it is called evidence.
-- **Local, for this brief:** the library files' SHA-256 and catalog rows, the sound headers and the texels above, read
-  as data. The repository's local checks on this commit are reported in its commit message.
-- **Not covered by the plan:** people; sound (CI has none); two clients at Buer's perch (the network test is Stolas's);
-  the narrator heard; a player's hardware; the overworked bed reached by real harvests in a game test (the tests'
-  strain setter stands in).
+**Server** (`./gradlew build`, CI): the `mod` job passed all 3,109 required server tests, `GC04_TESTS`' 24 and every
+GC-01 to GC-03 test among them; SG12's fifteen ran for `jugcraft:buer` as for Stolas. **Without the optional
+integrations** (`-PjugcraftOptionalIntegrations=false`): every test of his passed; the job's first attempt failed on one test of
+main's (the Herobrine grove test, which fails the same way in main's own run), and its re-run passed all 3,109 required
+tests. Before the fixes in `4ca363d38`, run
+[40597482976](https://github.com/jimbozoomer-byte/jugcraft/actions/runs/40597482976) failed three tests in both jobs, two of them his (`buerEasesOneStrainAtTheBedsOwnRate`: a
+test player joining in creative mode was handed a guide book that the test's empty-hand use then destroyed;
+`buerFromTheCodexToDeparture`: a deposit pays every matching item carried, so both Mendvetch left went in), each a fault of
+the test.
+
+**Client** (`./gradlew runClientGameTest -PclientTests=ConcordanceGardenPactClientGameTests`, CI): passed in client shard 0
+of runs 40597482976 and 40605564166 (one client against a dedicated server). Its log lines from run 40605564166 include:
+the specimen's tooltip lines; "chooser without a bed: [jugcraft:stolas_starflower ready, jugcraft:mendvetch missing 1]"
+with his refusal as the note; "chooser: ... ready=[true, true]"; "facing on arrival: drawn body yaw -180.0, inviter's
+bearing 180.0"; his fourteen terms; "Accept without the compact's materials: cannot_afford" with the resonance-free line;
+"Buer's Open Hand Compact: [jugcraft:mendvetch 4, minecraft:bone_meal 4] and 0 resonance"; "sealed: held, materials left
+= true [0, 0]"; his cues so far `[arrive, refuse, assent]`, with "no sound device: ... checked as defined and as fired";
+"his think over a strained bed: status and strain = WORKING 1"; his work frozen 1.43 s into its clip with his drawn body
+yaw at the bed's bearing; "overworked: status, complaint and strain = IDLE true 3"; "fed: used, strain and his rows = true
+2"; Jade's readings of the perch and of him; "his kept page at midnight: [...row.asleep]"; each gesture frozen inside its
+telling window (inspect 0.78 s, assent 0.89 s, refuse 0.84 s, work 1.79 s, depart 0.88 s, arrive 1.53 s); the camera
+below him; his drawn body yaw at each speaker's bearing from four sides; "ended: ended, held false, mode 3".
+
+Its 33 pictures (480 by 270, or 320 by 180 for the small window, as the log prints them), each looked at for this record.
+**Seen** says only what the picture shows:
+
+| Shot (`jugcraft_garden_` + name) | The step | Seen |
+|---|---|---|
+| `regard_tooltip` | a garden specimen's tooltip | the inventory screen with the Sunpetal's tooltip: "Plant it in a Verdant Bed; harvested, an alchemical ingredient bright with Radiance.", "The garden's spirits regard this: sneak and use it in the air to examine it", "Jugcraft" |
+| `buer_nothing_to_mend` | the chooser before a bed is near | "Whom will you invite?": Stolas (selected) and Buer, each with its sign; under "Still missing:", Buer: "There is nothing here I could mend." Buer comes only where an awake Verdant Bed you keep lies within 8 blocks of the perch; Close |
+| `chooser` | the chooser, default GUI | Stolas (selected) and Buer, no missing note; Close |
+| `chooser_scale4` | at GUI 4 | the same list, chat lines at the left edge behind the panel |
+| `chooser_small` | a 320x180 window | title, question, Stolas, Buer and Close, all inside the window |
+| `buer_conversation` | his first beat | "1 of 3": "A great blossom opens on the perch and its pistil turns toward you. "A bed that is worked must also be mended. I am Buer; I mend.""; Back (greyed), Next, Leave |
+| `buer_terms` | his terms, default GUI | "His terms": Service (strain tending, ending "He works only while you are within 64 blocks of the perch, and never on a bed you could not change by hand"), Hours 06:00 to 18:00, Area within 8 blocks, Daily quota 16, Upkeep (1 x Buer's Offerings every 7 game days, at most 4 periods), Grace; Back, Accept the pact, Decline. The rows after Grace are not in view |
+| `buer_terms_scale4` | at GUI 4 | the same terms and the "If suspended" row; the same three buttons |
+| `buer_conversation_scale4` | his third beat at GUI 4 | "3 of 3": "A Mendvetch each week, for my own mending. And when I call a bed overworked, feed it before you ask me again."; Back focused (its label shown), Hear his terms, Leave |
+| `buer_terms_small` | terms at 320x180 | the service text wrapped and scrollable; the accept button's label cut to "Accept the pa..."; Back, Decline. *Fixed pending the next CI run:* in a GUI 320 wide the footer's equal buttons left Accept the pact 79 of its 80 pixels; a row whose label would be cut now gives each button its whole label and shares the rest, and the fit check names a cut label |
+| `buer_conversation_small` | third beat at 320x180 | the whole beat; Back focused, Hear his terms, Leave |
+| `buer_refused` | accept without the compact | the terms' last rows (How long, Breach, How to end it, What comes back, If the perch is broken, "Who benefits: You and your party", "The Open Hand Compact: Paid as you accept: 4 x Mendvetch, 4 x Bone Meal" with both icons) and the dim note "Nothing is spent or agre…", cut off by Accept the pact's tooltip ("Pays the Open Hand Compact and seals the pact, both at once"); Accept the pact focused. **His refusal's answer line is not in view** (it follows the note). No astrolabe in view. *Fixed pending the next CI run:* the answer was added after the note, below the body's kept scroll, and the keyboard went back to Accept, whose tooltip opened over the body; a new answer on his terms is now their first line, the body turned to it and the keyboard on it (the test checks both before the picture) |
+| `buer_kept` | his kept page after sealing | "Your pact": Strain tending 0 of 16 beds eased today; Next offering 1 Buer's Offerings in 7 game days; Paid ahead 0 of at most 4 periods; First obligation (tend a strained Verdant Bed by hand inside the pact's area while it is active); "At this perch, within 8 blocks, from 06:00 to 18:00"; what ending returns; "The pact is sealed: Buer keeps this perch" ticked; His service, Terms, Close |
+| `buer_at_work` | his work over a strained bed | in the world by day: a Verdant Bed in front; above and behind it his open blossom (violet petals, a glowing yellow pistil cap) with a column of white particles between bed and blossom |
+| `buer_overworked` | the bed worked back to 3 | "Your pact": "The pact is active"; Strain tending 1 of 16; "Overworked: the bed at -3, -60, 2 was worked faster than it heals. Buer will not mend it until it is fed (bone meal, fertilizer or a Mulch Maw) or rests fallow"; Next offering; Paid ahead; First obligation |
+| `buer_jade` | Jade on him | his blossom close up, the crosshair on him; Jade's box: "Buer", a row of hearts, "idle: nothing to do", "Service: Strain tending", "Active", "Next offering in 7 game days", "Jugcraft"; the action bar "Fed the bed: nutrients 6 / 32". No overworked note (the bed had been fed) |
+| `buer_idle` | his idle loop, from his front | by day: two broad lilac petals raised in a V, the yellow pistil cap between them, the purple star of the leaf plate round the stem, the brown stem standing on the pact perch; a Verdant Bed at the left |
+| `buer_listen` | his listening loop (screen open, then closed with the world frozen) | **its 480x270 preview in the log is byte for byte `buer_idle`'s** (compared): no listening pose distinct from idle is shown, though the test checked his client was drawing the listening clip when it froze. *Fixed pending the next CI run:* on the frame the freeze reached his client, vanilla still gave him the running partial tick though he was no longer ticked, so his age stepped back and GeckoLib rewound his last gesture (work) to its final frame, drawn over every loop while the world stayed frozen; a frozen spirit is now drawn as of its last tick, and each loop picture checks that no gesture is drawn over it |
+| `buer_asleep` | midnight | night and stars; **the same open V of petals as by day**, darker; the petals are not folded shut (Dossier item 7(a) says they fold shut). *Fixed pending the next CI run:* the same rewound work gesture over his asleep loop (as `buer_listen`) |
+| `buer_suspended` | his pact suspended | by day: the petals spread wider and lower, drooping outward; the pistil cap between them |
+| `buer_inspect` | his inspect gesture | the petals drawn up together into a cup, the yellow cap glowing between their tips |
+| `buer_assent` | his assent gesture | the petals spread wide and tipped forward, much as in the suspended picture, the pistil upright between them |
+| `buer_refuse` | his refuse gesture | the petals drawn up and shut together, only a hint of the yellow cap between their tips |
+| `buer_work` | his work gesture | the petals in a V, the pistil pushed up high above them, its glowing yellow cap at the top |
+| `buer_depart` | his depart gesture (0.88 s of 2 s) | the petals closed into a shut bud at full height on the stem; **not yet sunk into the perch**. *Fixed pending the next CI run:* the clip sinks him from 0.8 s, so at 0.88 s he had hardly begun; his telling window is now 1.1 to 1.6 s (frozen near 1.35 s, shut and half sunk) |
+| `buer_arrive` | his arrive gesture | the petals open in a V, much as idle |
+| `buer_below` | from below (the plate's and cap's undersides) | from a pit looking up: the leaf plate's underside as a dark purple star, the stem, the petals above against the sky; a plain shaded surface, no speckled or mixed pattern |
+| `buer_faces_east` | spoken to from the east | the front of his blossom toward the camera; directly behind his stem, dark and in shade, the Verdant Bed (three blocks west of the perch, straight beyond him from the east) |
+| `buer_faces_south` | from the south | the same front view; a Verdant Bed at the left |
+| `buer_faces_west` | from the west | the same front view, shaded like the east shot; no bed in view |
+| `buer_faces_north` | from the north | the same front view; a Verdant Bed at the right (together the four show the background turning round while his front stays toward each speaker) |
+| `buer_end_confirm` | ending, asked first | "End your pact with Buer?" "Buer will leave, and what you paid ahead comes back to you once. This cannot be undone."; End the pact, Keep it; the world blurred behind |
+| `buer_ended` | the pact ended | "At this perch:" "The pact is ended. Use the perch again to invite Buer anew"; ticked "Buer departs (ended by its holder); 0 offerings came back to you"; Close |
+
+**Local** (this record's commit; no Minecraft build here): `python3 scripts/check_repository.py` (structure and links), `python3 tools/concordance_journey.py
+--check`, `python3 -B tools/check_mod_data.py` (its `check_delivery` holding the re-pasted delivery matrix) and
+`git diff --check`, each run on this commit's tree and passed; `python3 tools/owner_art.py --provenance pacts` printed
+Buer's provenance rows. The generators were not run: this commit changes no generated file, and the one generated block
+it changes, the delivery matrix, was printed by `tools/concordance_delivery.py` and pasted. No Minecraft build, game test
+or client test ran here.
+
+**Not covered:** people; sound (CI has none); two clients at Buer's perch (the garden's two-client test is unit 7's);
+the narrator heard; a player's hardware; a dispatch of every client class on the cohort's head; his roster portrait in a
+picture (`ConcordanceRosterClientGameTests` is unchanged); the overworked bed reached by real harvests in a game test (the
+tests' strain setter stands in; Chunk C's tests count a harvest's strain); his astir loop (not photographed, GC-P29).
+Open for review: the listen, asleep and depart pictures above, and the refused picture shows Accept's tooltip and the
+terms' last lines, not his refusal.
 
 ## World and event applicability
 
@@ -269,8 +353,11 @@ cave, dungeon, boss or loot role.
 
 ## Rollout and open questions
 
-Ships with the garden cohort's unit 1 (GC-01 to GC-04), behind the Concordance's switch; GC-04 lands after this brief.
-Open: Stolas's six two-faced box-UV cubes (kept as the owner made them; the twin rule will record them, a question for
-the cohort's checkpoint); the chooser not in the whole-path test (it needs Stolas's Regard; shown by the server test and
+Ships with the garden cohort's unit 1 (GC-01 to GC-04), behind the Concordance's switch; built, not merged (draft #526).
+Open: Stolas's six two-faced box-UV cubes (kept as the owner made them; the twin rule records them, a question for
+the cohort's checkpoint); the listen picture identical to idle, the asleep picture showing his petals open, the depart
+picture not yet sunk and the refused picture showing Accept's tooltip and the terms' last lines, not his refusal
+([Verification](#verification)); the journey's Buer steps writing his numbers as literals; the chooser not in the whole-path test (it needs Stolas's Regard; shown by the server test and
 the client class); his astir loop not photographed; an offering due shows him astir at night (item 7a); the Goetia
-citation's edition (the contract's GB18) is settled only after Project Gutenberg's record #72679 is read.
+citation's edition (the contract's GB18) is settled only after Project Gutenberg's record #72679 is read (it could not
+be read from the session on 28 October 2026).
