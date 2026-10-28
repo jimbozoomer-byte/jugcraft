@@ -49,6 +49,8 @@ public final class JugcraftConfig {
 	 * Horseman ride by in the season (see {@code agriculture/HorsemanSightings}); {@code halloween.blood_moon} ({@code on}
 	 * or {@code off}): whether a Blood Moon rises every fourth night of the season and on Halloween (see
 	 * {@code agriculture/BloodMoon}).</li>
+	 * <li>{@code halloween.graveyard_rising} ({@code on} or {@code off}): whether ringing a bell by a graveyard on a
+	 * night in the Halloween season wakes the dead (see {@code agriculture/GraveyardRising}).</li>
 	 * <li>Seasons (see {@code season/SeasonCalendar.Settings}): the season follows the server's date in
 	 * {@code seasons.timezone} for {@code seasons.hemisphere} ({@code north} or {@code south}); {@code seasons.mode} is
 	 * {@code auto} (follow the date), {@code spring}, {@code summer}, {@code autumn}, {@code winter} (always that
@@ -87,6 +89,7 @@ public final class JugcraftConfig {
 			Map.entry("halloween.start", "10-20"), Map.entry("halloween.end", "11-03"), Map.entry("halloween.timezone", "UTC"),
 			Map.entry("halloween.mode", "auto"), Map.entry("halloween.harvest_moon", "10-31"),
 			Map.entry("halloween.horseman_sightings", "on"), Map.entry("halloween.blood_moon", "on"),
+			Map.entry("halloween.graveyard_rising", "on"),
 			Map.entry("seasons.mode", "auto"), Map.entry("seasons.hemisphere", "north"), Map.entry("seasons.timezone", "UTC"),
 			Map.entry("seasons.snow", "off"), Map.entry("seasons.snow_depth", "2"),
 			Map.entry("harvest_feast", "us"), Map.entry("harvest_feast.days", "4"),

@@ -4599,6 +4599,7 @@ def check_agriculture():
     check_regatta(java, main)
     check_festivities(java, main)
     check_night(java, main)
+    check_graveyard_rising(java, main)
     check_decor(java)
     check_decor2(java)
     check_decor3(java)
@@ -6115,6 +6116,90 @@ def check_festivities(java, main):
         model = load(ASSETS / "models" / "block" / f"{stone}.json") or {}
         if [tuple(e["from"] + e["to"]) for e in model.get("elements", [])] != [tuple(b) for b in info["boxes"]]:
             err(f"{stone}: model boxes differ from its shape")
+
+
+def check_graveyard_rising(java, main):
+    """Graveyard Rising: GraveyardRising.java's numbers, waves and names are tools/agriculture.py's GRAVEYARD_RISING, the
+    table makes sense, it is registered and on by default, it only starts in the season and at night, reads no unloaded
+    chunk, leaves the bell to ring, sends any risen left by a restart back, rewards a player once a night, and its graves
+    tag, gift loot table, advancement and words are written."""
+    rising = ag.GRAVEYARD_RISING
+    source = java.get("GraveyardRising", "")
+    for key, name in (("min_graves", "MIN_GRAVES"), ("radius", "RADIUS"), ("height", "HEIGHT"),
+                      ("confirm_min_ticks", "CONFIRM_MIN_TICKS"), ("confirm_ticks", "CONFIRM_TICKS"),
+                      ("ring_cooldown", "RING_COOLDOWN"), ("first_wave_ticks", "FIRST_WAVE_TICKS"),
+                      ("wave_gap_ticks", "WAVE_GAP_TICKS"), ("range", "RANGE"), ("abandon_ticks", "ABANDON_TICKS"),
+                      ("leash", "LEASH"), ("check_ticks", "CHECK_TICKS"), ("extra_per_player", "EXTRA_PER_PLAYER"),
+                      ("max_extra", "MAX_EXTRA"), ("max_risings", "MAX_RISINGS"), ("apart", "APART")):
+        match = re.search(rf"\b{name} = (\d+);", source)
+        if not match or int(match.group(1)) != rising[key]:
+            err(f"GraveyardRising.{name} differs from tools/agriculture.py GRAVEYARD_RISING[{key!r}] ({rising[key]})")
+    for key, name in (("option", "OPTION"), ("tag", "TAG"), ("advancement", "ADVANCEMENT"), ("table", "TABLE"), ("extra", "EXTRA")):
+        if f'{name} = "{rising[key]}";' not in source:
+            err(f"GraveyardRising.{name} is not {rising[key]!r}")
+    waves = re.search(r"WAVES = List\.of\((.*?)\);\n", source, re.S)
+    found = [[(entity, int(count)) for entity, count in re.findall(r'new Rise\("([a-z_:]+)", (\d+)\)', line)]
+             for line in re.findall(r"List\.of\((new Rise[^\n]*)", waves.group(1))] if waves else []
+    if found != [list(wave) for wave in rising["waves"]]:
+        err(f"GraveyardRising.WAVES {found} differs from tools/agriculture.py {rising['waves']}")
+    archers = re.search(r"ARCHERS = List\.of\(([^)]*)\)", source)
+    if not archers or re.findall(r'"([a-z_:]+)"', archers.group(1)) != rising["archers"]:
+        err("GraveyardRising.ARCHERS differs from tools/agriculture.py")
+    if 'Jugcraft.id("graves")' not in source or f'Jugcraft.id("{rising["attachment"]}")' not in source:
+        err("GraveyardRising: the graves tag or the reward attachment is not the table's")
+
+    import arms_variants
+    entities = [entity for wave in rising["waves"] for entity, _ in wave] + [rising["extra"]]
+    if any(entity in arms_variants.FRIGHTLESS for entity in entities):
+        err("GRAVEYARD_RISING: a boss climbs out of the graves")
+    if not set(rising["archers"]) <= set(entities):
+        err("GRAVEYARD_RISING: an archer that never rises")
+    if not (rising["leash"] < rising["range"] and rising["confirm_min_ticks"] < rising["confirm_ticks"]
+            and rising["ring_cooldown"] <= rising["confirm_min_ticks"] and rising["min_graves"] >= 1
+            and rising["max_extra"] >= rising["extra_per_player"] >= 0 and rising["apart"] > rising["radius"] * 2):
+        err("GRAVEYARD_RISING: the leash must be inside the range, the second ring after the first's cooldown and inside "
+            "its window, and risings far enough apart that no grave serves two")
+
+    for part, why in (("if (RISINGS.isEmpty() || server.getTickCount() % CHECK_TICKS != 0)", "ticks only every CHECK_TICKS while a rising is under way"),
+                      ("if (!HalloweenSeason.active())", "starts only in the Halloween season"),
+                      ("!night(dayTime) ? Result.DAYTIME", "starts only at night"),
+                      ('return fail(level, party, "dawn");', "ends at dawn"),
+                      ("if (!level.isLoaded(pos))", "reads no unloaded chunk for graves"),
+                      ("return level.isLoaded(at)", "raises nobody in an unloaded chunk"),
+                      ("return InteractionResult.PASS;", "leaves the bell to ring"),
+                      ("hand == InteractionHand.MAIN_HAND", "rings once per use"),
+                      ("entity.entityTags().contains(TAG) && !RISEN.contains(entity.getUUID())", "sends the risen left by a restart back"),
+                      ("if (rested(player) == night)", "rewards a player once a night"),
+                      ("if (risen.size() * 2 < wanted)", "fails a wave the graves have no room for"),
+                      ("level.getDifficulty() == Difficulty.PEACEFUL ? Result.PEACEFUL", "refuses peaceful")):
+        if part not in source:
+            err(f"GraveyardRising no longer {why}")
+    if "GraveyardRising.register();" not in main:
+        err("JugcraftAgriculture doesn't register GraveyardRising")
+    if f'Map.entry("{rising["option"]}", "on")' not in CONFIG.read_text(encoding="utf-8"):
+        err(f"JugcraftConfig: {rising['option']} should default to on")
+
+    namespace, path = rising["graves_tag"].split(":")
+    graves = (load(DATA / namespace / "tags" / "block" / f"{path}.json") or {}).get("values")
+    if graves != rising["graves"]:
+        err(f"{rising['graves_tag']} block tag differs from GRAVEYARD_RISING['graves']")
+    table = load(DATA / "jugcraft" / "loot_table" / f"{rising['table']}.json") or {}
+    pools = table.get("pools", [])
+    if (table.get("type") != "minecraft:gift" or len(pools) != 2 or pools[0].get("rolls") != rising["rolls"]
+            or [entry.get("name") for entry in pools[0].get("entries", [])] != [item for item, _, _ in rising["treats"]]
+            or [entry.get("name", "") for entry in pools[1].get("entries", [])] != [item for item, _ in rising["keepsakes"]]):
+        err(f"loot_table/{rising['table']}.json differs from GRAVEYARD_RISING's treats and keepsakes")
+    if not (DATA / "jugcraft" / "advancement" / f"{rising['advancement']}.json").exists():
+        err(f"advancement {rising['advancement']} is not written")
+    lang = load(ASSETS / "lang" / "en_us.json") or {}
+    results = re.search(r"enum Result \{([^}]*)\}", source)
+    said = re.findall(r"[A-Z_]+", results.group(1))[6:] if results else []
+    keys = ([f"message.jugcraft.graveyard_rising.{name.lower()}" for name in said]
+            + [f"message.jugcraft.graveyard_rising.{key}" for key in ("wave", "won", "rested_already", "failed", "dawn", "blocked")]
+            + ["event.jugcraft.graveyard_rising.wave"])
+    missing = [key for key in keys if key not in lang]
+    if not said or missing:
+        err(f"Graveyard Rising's words are missing: {missing or 'GraveyardRising.Result'}")
 
 
 def check_night(java, main):
