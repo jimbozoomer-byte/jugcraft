@@ -1,10 +1,10 @@
 # Gloam Ink
 
-Status: built for branch `claude/gloam-ink` (not yet pushed; not merged), in commits `f9e200f19` (covered extraction,
+Status: built on branch `claude/awesome-davinci-iwv3b9` (not merged), in commits `f9e200f19` (covered extraction,
 Gloam Ink and Gloam Sludge) and `4a0b2c1d9` (fair copies of Research Notes), on this contract (`199114e7e`); this
 record's own commit follows them, and a fifth applies the review's fixes (As built, "The review's fixes"). Nothing has
-been compiled or run in a game: the branch has not been pushed and CI has not run. Every result below is a local Python
-check or audit mutation (Verification).
+been compiled or run in a game by this record's commits; CI results are added when its run finishes. Every result
+below is a local Python check or audit mutation (Verification).
 Proposal issue: none; the owner's checkpoint answer C-D6 (23 October 2026, confirmed as the next work on 28 October 2026)
 is the scope approval ([Chunk C's contract](concordance-chunk-c.md), Decisions).
 Owner: @jimbozoomer-byte. AI-assisted implementation with Claude Code; the model is named in the commit trailers.
