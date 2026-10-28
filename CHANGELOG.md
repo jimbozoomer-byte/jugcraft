@@ -27,7 +27,7 @@ No numbered release yet. Entries on feature branches remain proposed until their
 
   Record: [lair-encounter-credit.md](docs/features/lair-encounter-credit.md#concordance-chunk-e-every-keeper).
 - **Their objectives are deeds:** breaking the Lich's seals, reading his names back or striking his bolt back; routing the Dreadnought's discharge or working a fouled breaker; ringing the bell that flushes the Alpha. New: relighting a lamp that shows the Mire Hag now earns a share.
-- **JEI pages for their loot:** every item those five and the Pumpkin King give now has a page saying where it comes from, how likely it is with the default data, and who earns a share.
+- **JEI pages for their loot:** every item those five, the Pumpkin King and the Headless Horseman of the Church Bridge give now has a page saying where it comes from, how likely it is with the default data, and who earns a share. The Horseman's Lantern's page also names the Horseman who rides the Overworld in the Halloween season, who drops one too.
 - **Checked:**
   - **Passing locally:** the Python audits, including a new `check_keeper_credit`.
   - **CI only, not yet run:** the game tests, including a new `KeeperCreditGameTests`.

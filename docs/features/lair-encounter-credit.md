@@ -300,7 +300,9 @@ Iron Dreadnought, the Alpha Werewolf and the Cydonian Sentinel. Each now does wh
   who died in the fight is paid once back on their feet, and one who left the game when they next join.
 - The Sentinel names no objective. Its Red Storm is weathered, not worked.
 
-Its JEI pages (`tools/acquisition.py`) now cover these five and the Pumpkin King, who was already paid this way.
+Its JEI pages (`tools/acquisition.py`) now cover these five, the Pumpkin King, who was already paid this way, and the
+Headless Horseman of the Church Bridge (main's #537, paid this way from the start), whose Horseman's Lantern page also
+names the Overworld Horseman of the Halloween season, who drops one too (a row's `also`).
 
 - Each page says what a share holds and how likely each thing is, with the default data.
 - Each says that a share goes to whoever earns it "by a blow, healing, a ward or an objective"; the Sentinel's says

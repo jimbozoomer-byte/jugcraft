@@ -13126,6 +13126,17 @@ def check_acquisition(registered):
             tables_for[item] |= {DATA / MOD / "loot_table" / f"{info['table']}.json",
                                  DATA / MOD / "loot_table" / f"{trophy_table}.json",
                                  DATA / MOD / "loot_table" / "blocks" / f"{item}.json"}
+        # An item another table gives too (the Horseman's Lantern, which the Headless Horseman of the Overworld drops):
+        # that table gives it, and its page says so.
+        for thing, (table, words) in info.get("also", {}).items():
+            path = DATA / MOD / "loot_table" / f"{table}.json"
+            gives = {split(entry.get("name", ":"))[1] for pool in (load(path) or {}).get("pools", [])
+                     for entry in pool.get("entries", [])}
+            if thing not in rolled or thing not in gives or words not in pages.get(thing, ""):
+                err(f"acquisition: {boss}'s row says loot_table/{table}.json gives {thing} too; it must, and the item's "
+                    "page must say so")
+            elif thing in tables_for:
+                tables_for[thing].add(path)
         item = info["count"][0]
         count = rolled.get(item)
         if not isinstance(count, tuple) or count != tuple(info["count"][1]) \
