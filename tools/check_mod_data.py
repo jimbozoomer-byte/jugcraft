@@ -15060,6 +15060,40 @@ def check_haunted_midway():
     for key in [f"block.{MOD}.{sg['block']}"] + [f"message.{MOD}.{sg['block']}.{k}" for k in ("ticket", "playing", "won", "lost", "too_close")]:
         if key not in lang:
             err(f"{key}: the text is missing")
+    # Part 4: the ghost train's doorways, leaves, wall and timings are the table's; its cells leave the doorways free and
+    # its models are cut by those same cells; it looks for minecarts from its ticker and swings its doors and springs its
+    # ghost by block events; its renderer swings the leaves and the ghost from its runner models 1 to 3; its windows glow.
+    gt = hm.GHOST_TRAIN
+    front = read(JAVA_ROOT / "agriculture" / "GhostTrainBlock.java")
+    for needed in (f"LOOK_TICKS = {gt['look_ticks']};", f"REACH = {gt['reach']};", f"SWING_TICKS = {gt['swing_ticks']};",
+                   f"HOLD_TICKS = {gt['hold_ticks']};", f"SPOOK_TICKS = {gt['spook_ticks']};", f"LIGHT = {gt['light']};",
+                   f"DOORS = {{{gt['doors'][0]}, {gt['doors'][1]}}};", f"LEAF_W = {gt['leaf'][0]}F;", f"LEAF_H = {gt['leaf'][1]}F;",
+                   f"WALL_FROM = {gt['wall'][0]}F;", f"WALL_TO = {gt['wall'][1]}F;", f"ACROSS = {gt['size'][0]};", f"UP = {gt['size'][1]};",
+                   "getEntitiesOfClass(AbstractMinecart.class", "getTicker("):
+        if needed not in front:
+            err(f"GhostTrainBlock: missing {needed} (tools/haunted_midway.py GHOST_TRAIN)")
+    import haunted_midway_data as hmd
+    cells = hmd.train_cells()
+    if len(cells) != gt["size"][0] * gt["size"][1] - 2 * len(gt["doors"]) or any(r in gt["doors"] and u < 2 for r, u in cells):
+        err("tools/haunted_midway_data.py train_cells(): the ghost train's blocks must leave its two doorways' lower blocks free")
+    parts = (load(ASSETS / "blockstates" / f"{gt['block']}.json") or {}).get("multipart", [])
+    if {p["when"]["part"] for p in parts if "part" in p.get("when", {})} != {str(k) for k in range(len(cells))}:
+        err(f"blockstates/{gt['block']}.json: a model for each of its {len(cells)} blocks")
+    shown = {p["when"]["runner"]: p["apply"]["model"] for p in parts if p.get("when", {}).get("runner") in ("1", "2", "3")}
+    if shown != {"1": f"{MOD}:block/{gt['block']}_leaf_left", "2": f"{MOD}:block/{gt['block']}_leaf_right", "3": f"{MOD}:block/{gt['block']}_spook"}:
+        err(f"blockstates/{gt['block']}.json: its runners 1 to 3 must show its two door leaves and its ghost alone")
+    if f'registerBlock("{gt["block"]}", GhostTrainBlock::new' not in java_main or ".lightLevel(GhostTrainBlock::light)" not in java_main \
+            or f'GHOST_TRAIN_ENTITY = Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, Jugcraft.id("{gt["block"]}")' not in java_main:
+        err(f"JugcraftAgriculture: {gt['block']} must be a GhostTrainBlock lit by GhostTrainBlock::light, with its own block entity")
+    doors = read(CLIENT_JAVA_ROOT / "GhostTrainRenderer.java")
+    if "BlockEntityRendererRegistry.register(JugcraftAgriculture.GHOST_TRAIN_ENTITY, GhostTrainRenderer::new);" not in client \
+            or "GhostTrainBlock.swing(" not in doors or "GhostTrainBlock.spook(" not in doors:
+        err("GhostTrainRenderer: registered, it must swing the doors by GhostTrainBlock.swing and spring the ghost by GhostTrainBlock.spook")
+    lit = list((ASSETS / "models" / "block").glob(f"{gt['block']}_*_windows_lit.json"))
+    if not lit or any(e.get("light_emission") != 15 or e.get("shade") is not False for path in lit for e in (load(path) or {}).get("elements", [])):
+        err(f"{gt['block']}: its lit windows must glow, full-bright and unshaded")
+    if f"block.{MOD}.{gt['block']}" not in lang:
+        err(f"block.{MOD}.{gt['block']}: the text is missing")
     keys = [f"block.{MOD}.{tb['block']}", f"block.{MOD}.{wz['block']}", f"item.{MOD}.{hm.TICKET['item']}"]
     keys += [f"message.{MOD}.{tb['block']}.{k}" for k in ("full", "empty")]
     keys += [f"message.{MOD}.{wz['block']}.{k}" for k in ("ticket", "playing", "not_yours", "won", "lost")]

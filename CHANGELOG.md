@@ -8,6 +8,12 @@ Every change to Jugcraft, newest first, grouped by pull request. For what each t
 
 No numbered release yet. Entries on feature branches remain proposed until their pull requests merge.
 
+### Unmerged: Haunted Midway, part 4 (the ghost train)
+- **Ghost Train**: a dark ride's front, five blocks across and four up, a haunted house's clapboard wall lettered GHOST TRAIN, with lit windows and two doorways at track level, IN and OUT. A track of rails runs through its doorways; when a minecart (or the Haunted Hayride) comes, that doorway's doors swing open, and a ghost springs up over the IN doors with a cackle. The ride behind it is the player's to build.
+- Recipe: planks round a glass pane, two wooden doors and a jack-o'-lantern, over planks round a rail.
+- Record: [haunted-midway.md](docs/features/haunted-midway.md).
+- **Checked:** the record's Verification. Game tests and screenshots run in CI only; not played by hand.
+
 ### Unmerged: Haunted Midway, part 3 (the shooting gallery)
 - **Shooting Gallery**: a booth three blocks across and two up, lettered SHOOTING, with a night sky on its back wall. Four orange tin bats and four white tin ghosts run along two rails, opposite ways. A Midway Ticket starts a 30-second round; shots from the payer (arrows, snowballs or anything thrown) knock the targets down, and all eight down win a prize from the midway's prize table.
 - Recipe: three orange wool over a bow between planks, over three planks.

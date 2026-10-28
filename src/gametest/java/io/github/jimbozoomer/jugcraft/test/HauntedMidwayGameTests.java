@@ -2,6 +2,8 @@ package io.github.jimbozoomer.jugcraft.test;
 
 import io.github.jimbozoomer.jugcraft.agriculture.CottonCandyCartBlock;
 import io.github.jimbozoomer.jugcraft.agriculture.DecorationBlockEntity;
+import io.github.jimbozoomer.jugcraft.agriculture.GhostTrainBlock;
+import io.github.jimbozoomer.jugcraft.agriculture.GhostTrainBlockEntity;
 import io.github.jimbozoomer.jugcraft.agriculture.JugcraftAgriculture;
 import io.github.jimbozoomer.jugcraft.agriculture.MultiDecorationBlock;
 import io.github.jimbozoomer.jugcraft.agriculture.PopcornWagonBlock;
@@ -17,6 +19,8 @@ import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.vehicle.minecart.Minecart;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -51,6 +55,10 @@ import net.minecraft.world.phys.Vec3;
  * another player's shot and a shot between the targets knock nothing down; the player who paid knocks each target down
  * as it comes into sight, and all eight down win a prize and end the round, every target standing again. Left alone, a
  * round's time runs out with no prize.
+ * Part 4: the Ghost Train stands five blocks across and four up, its two doorways left free (a rail laid in one stays);
+ * a minecart in the IN doorway opens its doors and springs its ghost, the OUT doors staying shut; gone, the doors shut
+ * again; an empty hand lights its windows, its window blocks giving light; broken, it comes away whole and the rail
+ * in its doorway stays.
  */
 public class HauntedMidwayGameTests {
 	private static Item item(String id) {
@@ -449,6 +457,54 @@ public class HauntedMidwayGameTests {
 		helper.runAfterDelay(ShootingGalleryBlock.ROUND_TICKS + 5, () -> {
 			helper.assertTrue(both(level, gallery, master, state -> !state.getValue(MultiDecorationBlock.LIT)) && round.down() == 0
 					&& prizes(player) == before, "Its time run out, the round is lost: they stand again, and no prize");
+			helper.succeed();
+		});
+	}
+
+	// ---------------------------------------------------------------- part 4
+
+	@GameTest(maxTicks = 100)
+	public void theGhostTrainOpensForACart(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		floor(helper);
+		GhostTrainBlock train = (GhostTrainBlock) JugcraftAgriculture.block("ghost_train");
+		BlockPos master = helper.absolutePos(new BlockPos(6, 2, 4));
+		BlockState placed = train.defaultBlockState().setValue(MultiDecorationBlock.FACING, Direction.NORTH);
+		level.setBlockAndUpdate(master, placed);
+		train.setPlacedBy(level, master, placed, null, new ItemStack(train));
+		helper.assertTrue(both(level, train, master, state -> !state.getValue(GhostTrainBlock.IN_OPEN) && !state.getValue(GhostTrainBlock.OUT_OPEN)),
+				"It stands five blocks across and four up, its doors shut");
+		BlockPos in = GhostTrainBlock.doorway(master, Direction.NORTH, 0);
+		BlockPos out = GhostTrainBlock.doorway(master, Direction.NORTH, 1);
+		helper.assertTrue(level.getBlockState(in).isAir() && level.getBlockState(in.above()).isAir() && level.getBlockState(out).isAir(),
+				"Its doorways are left free");
+		level.setBlockAndUpdate(in, Blocks.RAIL.defaultBlockState());
+		Minecart cart = helper.spawn(EntityType.MINECART, helper.relativePos(in));
+		helper.runAfterDelay(GhostTrainBlock.LOOK_TICKS + 2, () -> {
+			helper.assertTrue(both(level, train, master, state -> state.getValue(GhostTrainBlock.IN_OPEN) && !state.getValue(GhostTrainBlock.OUT_OPEN)),
+					"A minecart in the IN doorway opens its doors, the OUT doors staying shut");
+			helper.assertTrue(level.getBlockEntity(master) instanceof GhostTrainBlockEntity watch && watch.marked() != Long.MIN_VALUE
+					&& watch.changedAt(0) != Long.MIN_VALUE, "Its ghost springs up as they open");
+			cart.discard();
+		});
+		helper.runAfterDelay(GhostTrainBlock.LOOK_TICKS * 2 + GhostTrainBlock.HOLD_TICKS + 6, () -> {
+			helper.assertTrue(both(level, train, master, state -> !state.getValue(GhostTrainBlock.IN_OPEN)), "The cart gone, its doors shut again");
+			ServerPlayer player = standing(helper, new BlockPos(6, 2, 1));
+			use(player, level, master.above(2), ItemStack.EMPTY);
+			int lit = 0;
+			for (int part = 0; part < train.cells().length; part++) {
+				lit += level.getBlockState(train.partPos(master, Direction.NORTH, part)).getLightEmission() > 0 ? 1 : 0;
+			}
+			helper.assertTrue(both(level, train, master, state -> state.getValue(MultiDecorationBlock.LIT)) && lit == 3
+					&& level.getBlockState(master.above(2)).getLightEmission() == GhostTrainBlock.LIGHT, "An empty hand lights its three windows");
+			level.destroyBlock(master, true);
+		});
+		helper.runAfterDelay(GhostTrainBlock.LOOK_TICKS * 2 + GhostTrainBlock.HOLD_TICKS + 10, () -> {
+			for (int part = 0; part < train.cells().length; part++) {
+				helper.assertTrue(level.getBlockState(train.partPos(master, Direction.NORTH, part)).isAir(), "Its block " + part + " is gone");
+			}
+			helper.assertTrue(level.getBlockState(in).is(Blocks.RAIL) && dropped(helper, item("ghost_train")) == 1,
+					"Broken, it comes away whole, dropping itself once, and the rail in its doorway stays");
 			helper.succeed();
 		});
 	}

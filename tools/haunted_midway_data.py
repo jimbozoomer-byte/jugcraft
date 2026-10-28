@@ -632,11 +632,12 @@ def whack_a_zombie():
 
 # ---------------------------------------------------------------- part 3: the Shooting Gallery
 
-# The header's letters, three texels wide and five high (SHOOTING needs only these).
+# The signs' letters, three texels wide and five high (SHOOTING, GHOST TRAIN, IN and OUT need only these).
 LETTERS = {"S": ("###", "#..", "###", "..#", "###"), "H": ("#.#", "#.#", "###", "#.#", "#.#"),
            "O": ("###", "#.#", "#.#", "#.#", "###"), "T": ("###", ".#.", ".#.", ".#.", ".#."),
            "I": ("###", ".#.", ".#.", ".#.", "###"), "N": ("##.", "#.#", "#.#", "#.#", "#.#"),
-           "G": ("###", "#..", "#.#", "#.#", "###")}
+           "G": ("###", "#..", "#.#", "#.#", "###"), "R": ("##.", "#.#", "##.", "#.#", "#.#"),
+           "A": (".#.", "#.#", "###", "#.#", "#.#"), "U": ("#.#", "#.#", "#.#", "#.#", "###"), " ": ("...",) * 5}
 BAT_TARGET = ("#.##.#", "######", ".#..#.")
 GHOST_TARGET = (".###.", "#####", "#E#E#", "#####", "#.#.#")
 GHOST_SIGN = GHOST_TARGET
@@ -759,11 +760,143 @@ def shooting_gallery():
     return sc
 
 
+# ---------------------------------------------------------------- part 4: the Ghost Train
+
+SIDING = pal("221c2a", "2e2638", "3a3046", "463a54", "544864")
+STONE_FOOT = pal("2a2a2e", "3a3a40", "4a4a52", "5a5a64")
+
+
+def clapboard():
+    """Clapboard siding: boards laid along the wall three texels high, each lit along its top row and shadowed along its
+    lower edge where the next board laps over it, in a haunted house's faded violet."""
+    def paint(p):
+        for y in range(p.h):
+            within = y % 3
+            for x in range(p.w):
+                p.put(x, y, shade(SIDING, 3 if within == 0 else 0 if within == 2 else 2))
+    paint.tag = repr(("clapboard",))
+    return paint
+
+
+def window(lit):
+    """A window four panes square in a gold frame: unlit, dark glass with a lighter streak; lit, warm lamplight in steady
+    bands, palest in its middle. Either way a ghost stands in it, black against the light, the light showing through its
+    eyes."""
+    ghost = (".###.", "#.#.#", "#####", "#####", "#.#.#")
+    def paint(p):
+        mid = (p.h - 1) / 2
+        for y in range(p.h):
+            for x in range(p.w):
+                frame = x in (0, p.w - 1) or y in (0, p.h - 1) or x == p.w // 2 or y == p.h // 2
+                if frame:
+                    p.put(x, y, shade(GOLD, 2))
+                elif lit:
+                    p.put(x, y, shade(LAMP, 2 - min(2, int(abs(y - mid) / 2))))
+                else:
+                    p.put(x, y, shade(VIOLET, 1 if (x + y) % 5 else 2))
+        x0, y0 = (p.w - 5) // 2, p.h - 6
+        for j, line in enumerate(ghost):
+            for i, ch in enumerate(line):
+                if ch == "#":
+                    p.put(x0 + i, y0 + j, shade(BLACK, 0))
+    paint.tag = repr(("window", lit))
+    return paint
+
+
+def door_leaf():
+    """A door leaf: boards up it in dark wood, two gold straps across it near its top and foot."""
+    def paint(p):
+        for y in range(p.h):
+            for x in range(p.w):
+                strap = y in (3, 4, p.h - 5, p.h - 4)
+                if strap:
+                    p.put(x, y, shade(GOLD, 3 if y in (3, p.h - 5) else 2))
+                else:
+                    p.put(x, y, shade(BOARD_WOOD, 0 if x % 3 == 2 else 3 if x % 3 == 0 else 2))
+    paint.tag = repr(("door_leaf",))
+    return paint
+
+
+def train_cells():
+    """The Ghost Train's blocks in part order, {right, up} from its first block as GhostTrainBlock counts them: five
+    across and four up, less the two doorways' lower two blocks."""
+    w, h, _ = hm.GHOST_TRAIN["size"]
+    return [(r, u) for u in range(h) for r in range(w) if not (r in hm.GHOST_TRAIN["doors"] and u < 2)]
+
+
+def cut_cells(elements, size, cells):
+    """A model drawn whole in its frame cut into the blocks `cells` ({right, up}) holds, in that order, each piece moved
+    into its block (as pumpkin_patch_data.cut, for a prop with gaps in it); what lies in a gap is not drawn."""
+    elements = d20d.separated(elements)
+    parts = []
+    for right, up in cells:
+        cell = (size[0] - 1 - right, up, 0)
+        parts.append(d17d.cell_part(d17d.pinned(elements), cell, size))
+    return parts
+
+
+def ghost_train():
+    """The Ghost Train, facing north (the ride behind it, to the south), five blocks across and four up: a haunted
+    house's clapboard front on a stone footing, two doorways at track level a block across and two high (OUT at the
+    frame's x 16 to 32, IN at 48 to 64), each in orange jambs under a board lettered with its name, a ghost painted on the
+    wall between them, three windows with ghosts in them above, a board lettered GHOST TRAIN under the striped eaves, a
+    crest with a bat and pumpkins at the eaves' corners. Models: `whole`, `windows_lit` (the windows lit from inside),
+    and its runners: `leaf_left` and `leaf_right` (the IN doorway's two door leaves, hinged at its sides; the renderer
+    swings them, and draws the OUT doorway's from the same, moved) and `spook` (the ghost that springs up over the IN
+    doors)."""
+    spec = hm.GHOST_TRAIN
+    sc = Sculpt(spec["block"], 2606, 128)
+    z0, z1 = spec["wall"]
+    siding = clapboard()
+    gold = flat(GOLD)
+    el = []
+    for x0, x1 in ((0.0, 16.0), (32.0, 48.0), (64.0, 80.0)):
+        el.append(panel(sc, "foot", flat(STONE_FOOT), (x0, 0.0, 0.0), (x1, 1.5, z1)))
+        el.append(panel(sc, "wall", siding, (x0, 1.5, z0), (x1, 32.0, z1)))
+    el.append(panel(sc, "wall", siding, (0.0, 32.0, z0), (80.0, 60.0, z1)))
+    el.append(panel(sc, "ghost_sign", signed(GHOST_SIGN, colours={"#": shade(BONE, 4), "E": shade(BLACK, 0)}), (35.0, 8.0, z0 - 0.25),
+                    (45.0, 24.0, z0)))
+    for (x0, x1), word in (((16.0, 32.0), "OUT"), ((48.0, 64.0), "IN")):
+        for jx in (x0 - 2.0, x1):
+            el.append(panel(sc, "jamb", lacquer(ORANGE), (jx, 1.5, z0 - 1.5), (jx + 2.0, 34.0, z1)))
+        el.append(panel(sc, "lintel", gold, (x0 - 2.0, 32.0, z0 - 1.5), (x1 + 2.0, 34.0, z1)))
+        # Its sign stands off the wall on two brackets, so the IN doorway's ghost waits hidden behind it.
+        el.append(panel(sc, "door_sign", lettered(word), (x0, 34.0, z0 - 1.5), (x1, 41.0, z0 - 1.0)))
+        for bx in (x0 + 2.0, x1 - 2.5):
+            el.append(panel(sc, "bracket", flat(BLACK), (bx, 36.0, z0 - 1.0), (bx + 0.5, 36.5, z0)))
+    windows = []
+    for x0 in (4.0, 36.0, 68.0):
+        el.append(panel(sc, "window", window(False), (x0, 43.0, z0 - 0.5), (x0 + 8.0, 53.0, z0)))
+        windows += glowing([panel(sc, "window_lit", window(True), (x0 - 0.05, 42.95, z0 - 0.55), (x0 + 8.05, 53.05, z0 - 0.5),
+                                  sides=("north",))])
+    el.append(panel(sc, "sign", lettered("GHOST TRAIN"), (16.0, 53.0, z0 - 0.5), (64.0, 60.0, z0)))
+    el.append(panel(sc, "eaves", stripes(), (0.0, 60.0, 0.0), (80.0, 61.0, 6.0)))
+    el.append(panel(sc, "crest", board(BAT_SIGN, SIGN_COLOURS), (34.0, 61.0, 1.0), (46.0, 64.0, 1.5)))
+    for px in (1.5, 76.0):
+        el.append(panel(sc, "pumpkin", pumpkin_side(), (px, 61.0, 1.5), (px + 2.5, 63.0, 4.0), north=pumpkin_side(face=True)))
+        el.append(panel(sc, "stem", lengthwise(STEM), (px + 1.0, 63.0, 2.5), (px + 1.5, 63.75, 3.0)))
+    sc.models["whole"] = el
+    sc.models["windows_lit"] = windows
+    # The IN doorway's leaves, in the first block's own model (the frame less 64 across), hinged at the doorway's sides.
+    lw, lh = spec["leaf"]
+    leaf_z = (z0 + z1) / 2
+    sc.models["leaf_left"] = [panel(sc, "leaf", door_leaf(), (-16.0, 1.5, leaf_z - 0.25), (-16.0 + lw, 1.5 + lh, leaf_z + 0.25))]
+    sc.models["leaf_right"] = [panel(sc, "leaf", door_leaf(), (-lw, 1.5, leaf_z - 0.25), (0.0, 1.5 + lh, leaf_z + 0.25))]
+    # The ghost on its spring, a block lower than it springs (a block model stays within -16..32): the renderer lifts it
+    # a block, over the IN sign, and wobbles it about its spring's top (y 25 here).
+    ghost_colours = {"E": shade(BLACK, 0)}
+    sc.models["spook"] = [panel(sc, "spring", flat(STEEL), (-8.25, 19.0, z0 - 0.75), (-7.75, 25.0, z0 - 0.25)),
+                          panel(sc, "spook", cutout(GHOST_TARGET, BONE, ghost_colours), (-10.5, 25.0, z0 - 0.75), (-5.5, 30.0, z0 - 0.25),
+                                sides=("north", "south"))]
+    return sc
+
+
 # ---------------------------------------------------------------- building and files
 
 _built = {}
 BUILDERS = {hm.COTTON_CANDY["block"]: cotton_candy_cart, hm.POPCORN_WAGON["block"]: popcorn_wagon,
-            hm.TICKET_BOOTH["block"]: ticket_booth, hm.WHACK["block"]: whack_a_zombie, hm.GALLERY["block"]: shooting_gallery}
+            hm.TICKET_BOOTH["block"]: ticket_booth, hm.WHACK["block"]: whack_a_zombie, hm.GALLERY["block"]: shooting_gallery,
+            hm.GHOST_TRAIN["block"]: ghost_train}
 
 
 def build(block):
@@ -776,11 +909,19 @@ def _image_of(name):
     return build(name).atlas.img if name in BUILDERS else None
 
 
+def cut_parts(block, elements, size):
+    """A model's pieces for each of the block's parts: the Ghost Train's by its own cells (it has gaps for its doorways),
+    the rest's as a full box of blocks."""
+    if block == hm.GHOST_TRAIN["block"]:
+        return cut_cells(elements, size, train_cells())
+    return ppd.cut(elements, size)
+
+
 def write_cut(write, models, block, name, elements, size):
     """A model cut into its blocks' parts (`<block>_<part>` plus `_<name>`), returning which parts have any."""
     suffix = "" if name == "whole" else f"_{name}"
     have = []
-    for part, pieces in enumerate(ppd.cut(elements, size)):
+    for part, pieces in enumerate(cut_parts(block, elements, size)):
         if pieces or name == "whole":
             write(models / f"{block}_{part}{suffix}.json", fa.model(block, pieces))
         have.append(bool(pieces))
@@ -809,12 +950,14 @@ def assets(root, write, lang):
                                    (hm.WHACK, "head", [(f"lamp{k}", {"score": "|".join(str(n) for n in range(k, lamps + 1))})
                                                        for k in range(1, lamps + 1)]),
                                    # Part 3: the gallery's two targets are its runners 1 and 2; its bulbs glow while a round runs.
-                                   (hm.GALLERY, {"1": "bat", "2": "ghost"}, [("bulbs_lit", {"lit": "true"})])):
+                                   (hm.GALLERY, {"1": "bat", "2": "ghost"}, [("bulbs_lit", {"lit": "true"})]),
+                                   # Part 4: the ghost train's door leaves and its ghost are its runners 1 to 3; its windows glow when lit.
+                                   (hm.GHOST_TRAIN, {"1": "leaf_left", "2": "leaf_right", "3": "spook"}, [("windows_lit", {"lit": "true"})])):
         block = spec["block"]
         lang[f"block.{MOD}.{block}"] = spec["display"]
         sc = build(block)
         size = spec["size"]
-        n = len(d17d.cells(size))
+        n = len(train_cells()) if block == hm.GHOST_TRAIN["block"] else len(d17d.cells(size))
         write_cut(write, models, block, "whole", sc.models["whole"], size)
         have = {name: write_cut(write, models, block, name, sc.models[name], size) for name, _ in overlays}
         # A runner is the model its `runner` value shows alone: "true" for most, "1" and "2" for the gallery's two targets.
@@ -837,6 +980,10 @@ def assets(root, write, lang):
         if size[0] == 1:
             whole = sc.models["whole"] + [e for name in runners.values() for e in sc.models[name]]
             item = fa.transformed(d17d.pinned(d20d.separated(whole)), 0.5, (4.0, 0.0, 4.0), (0, 0, 0))
+        elif block == hm.GHOST_TRAIN["block"]:
+            # The ghost train's front at a fifth of its size, its doors shut.
+            doors = [e for at in (64.0, 32.0) for e in d20d.shifted(sc.models["leaf_left"] + sc.models["leaf_right"], at, 0, 0)]
+            item = fa.transformed(d17d.pinned(d20d.separated(sc.models["whole"] + doors)), 0.2, (0.0, 0.0, 8.0 - 1.6), (0, 0, 0))
         else:
             # The gallery whole at a third of its size, two targets on each rail.
             targets = [e for (_, _, _, kind) in spec["rails"] for at in (14.0, 34.0)
@@ -899,6 +1046,7 @@ def loot(out, write):
     drop_once(out, write, block, [paper])
     drop_once(out, write, hm.WHACK["block"], [])
     drop_once(out, write, hm.GALLERY["block"], [])
+    drop_once(out, write, hm.GHOST_TRAIN["block"], [])
 
 
 def drop_once(out, write, block, extra):

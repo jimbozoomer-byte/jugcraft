@@ -1,9 +1,9 @@
 # Haunted Midway
 
-Status: parts 1 (the sweet stalls), 2 (the ticket booth and Whack-a-Zombie) and 3 (the shooting gallery) implemented. CI builds them and runs their game tests and client screenshots; not yet played by hand. Parts 4 (the ghost train) and 5 (the haunted carousel) are planned.
+Status: parts 1 (the sweet stalls), 2 (the ticket booth and Whack-a-Zombie), 3 (the shooting gallery) and 4 (the ghost train) implemented. CI builds them and runs their game tests and client screenshots; not yet played by hand. Part 5 (the haunted carousel) is planned.
 Proposal issue: none. The owner asked for it directly on 28 October 2026, as set 6 of the ten sets of fall and Halloween decor ("Then I want you to do 1-10 in parts in that order one by one"), drawn by their rules.
 Owner: @jimbozoomer-byte
-Target milestone and tier: Discovery tier; made from wool, iron, a bucket, planks and a stick (the cart), and glass panes, a jack-o'-lantern, a cauldron, planks and iron (the wagon); part 2 from glass panes, a dispenser and planks (the booth), and torches, rotten flesh, a piston and planks (the game); part 3 from orange wool, a bow and planks.
+Target milestone and tier: Discovery tier; made from wool, iron, a bucket, planks and a stick (the cart), and glass panes, a jack-o'-lantern, a cauldron, planks and iron (the wagon); part 2 from glass panes, a dispenser and planks (the booth), and torches, rotten flesh, a piston and planks (the game); part 3 from orange wool, a bow and planks; part 4 from planks, a glass pane, wooden doors, a jack-o'-lantern and a rail.
 Primary specialty and supported player role: building, with a little cooking. A builder sets up a fair's midway after dark; the stalls make the sweets the kitchen already knows, at the same cost. Nothing in it is needed to progress.
 
 ## Player experience
@@ -69,8 +69,18 @@ The midway has its own livery, darker than the fall fair's red and white: midnig
   - Recipe: three orange wool over a plank, a bow and a plank, over three planks.
   - Broken, it comes away whole, from any block, and drops itself once.
 
+### Part 4: the ghost train
+- **Ghost Train** (five blocks across, four up): a dark ride's front, the size of a real one, 5 m wide and 4 m high.
+  - It is a haunted house's clapboard wall on a stone footing, lettered **GHOST TRAIN** under its striped eaves, with a bat on its crest and a jack-o'-lantern at each corner of the eaves. Three windows have ghosts standing in them, and a ghost is painted on the wall between its doorways.
+  - **Its two doorways, IN and OUT, are at track level**, each a block across and two high, in orange jambs under a lettered board. They are not part of it, so **you lay a track of rails through them** and build the ride behind it.
+  - **Its doors open for the cars**: double doors in each doorway, hinged at its sides. When a minecart (a plain one or a Haunted Hayride) comes into a doorway or the block before or after it, that doorway's doors swing open, the IN doors inward and the OUT doors outward. They shut a second after the last cart has gone.
+  - **As the IN doors open, a ghost springs up** from behind the IN sign on a spring, wobbling, with a cackle and a wisp of soul flames, and sinks back two seconds later.
+  - An empty hand lights its windows or puts them out; lit, its three window blocks give light 9.
+  - It takes no ticket: the ride behind it is yours to build and to run as you like.
+  - Recipe: a plank, a glass pane and a plank, over a wooden door, a jack-o'-lantern and a wooden door, over a plank, a rail and a plank.
+  - Broken, it comes away whole, from any block, and drops itself once; the track through its doorways stays.
+
 ### Planned
-- **Part 4: the ghost train**: a dark ride's facade, with cars on a track.
 - **Part 5: the haunted carousel**: seven by seven, black horses, bats and a pumpkin coach, turned by kinetic power as the Ferris wheel is, with organ music.
 
 ## How it is drawn (docs/ART_DIRECTION.md, docs/NATURAL_TEXTURES.md)
@@ -124,12 +134,25 @@ The midway has its own livery, darker than the fall fair's red and white: midnig
   - the moon first sat behind the header; it is now in the open sky;
   - the stars were too many and read as noise; they are now half as dense.
 
+### Part 4's ghost train
+- Built the same way, at real size (`tools/haunted_midway_data.py` ghost_train()), and cut into its sixteen blocks by its own cells: five across and four up, less its doorways' lower two blocks each (`train_cells()`, `cut_cells()`), so a track runs through them.
+- **Clapboard siding**: boards along the wall three texels high, each lit along its top row and shadowed where the next laps over it, in a haunted house's faded violet, on a stone footing.
+- **Its signs are lettered**: GHOST TRAIN under the eaves, and IN and OUT over the doorways, in the gallery's letters. The IN sign stands off the wall on two brackets, so the ghost waits hidden behind it.
+- **Its windows**: four panes in a gold frame; unlit, dark glass; lit, warm lamplight in steady bands, as their own full-bright model. A ghost stands black in each, the light showing through its eyes.
+- **Its doors**: boards up them in dark wood with two gold straps, hinged at the doorways' sides.
+- **Moving parts move**, from the blockstate's `runner` models 1 to 3: `GhostTrainRenderer` swings each doorway's leaves a quarter turn about their hinges, the IN doors in and the OUT doors out, easing over a fifth of a second. It springs the ghost up from behind the IN sign, wobbling on its spring.
+- **The first previews**, fixed before commit:
+  - the doors stopped short of the lintel, leaving a gap over them; they are now taller;
+  - the ghosts in the windows read as a #; they are now a ghost five texels wide, the light through its eyes;
+  - the IN doorway's ghost first sat in front of its sign; the sign now stands off the wall, the ghost behind it.
+
 ## Connections
 - Existing input producer: sugar and paper (vanilla, from sugar cane) for the cart; the farm's corn kernels (`jugcraft:corn_kernels`, from corn) and the kitchen's Caramel for the wagon.
 - Existing output consumer: the Cotton Candy is eaten. The Popcorn and Caramel Popcorn are the kitchen's own, made as smelting and crafting make them: Caramel Popcorn goes on to the Popcorn Ball.
 - Technology/magic connections (or infrastructure/cosmetic applicability): cosmetic, with the farm's corn and the kitchen's caramel.
 - Reachable entry path: from the first day, with corn from the farm for the wagon.
 - Which connections are required vs optional; trade and solo routes: all optional, crafted solo, and tradeable like any item. Popcorn is still made by smelting a kernel, and Caramel Popcorn by crafting, without the wagon.
+- Part 4's inputs: a track of rails and minecarts, or the Haunted Hayride (Halloween decorations batch 12), to ride it. Its outputs: none; it is a ride's front.
 - Part 3's inputs: a ticket, and arrows, snowballs or anything else to shoot or throw. Its outputs: the same prize table's prizes.
 - Part 2's inputs: paper for the tickets; the High Striker's Carnival Mallet to play. Its outputs: the midway's prizes (the plushes), from the prize table the High Striker and Ring Toss already roll.
 - How this specialty stays useful without mastering every other branch: it is a fair's furniture for anyone's build.
@@ -143,6 +166,7 @@ The midway has its own livery, darker than the fall fair's red and white: midnig
   - Breaking the booth gives back a sheet for each two tickets left, never more; an odd ticket left over is lost.
   - Nothing turns a ticket or a prize back into paper, so there is no loop.
 - Part 3: a round costs a ticket and whatever is shot, and a win gives one roll of the prize table, the same as Whack-a-Zombie's.
+- Part 4 makes nothing and takes nothing: its doors and ghost are its only doings.
 - No loop: nothing it makes leads back to sugar, paper, kernels or caramel (the audit refuses any loop).
 
 ## Multiplayer and persistence
@@ -158,12 +182,16 @@ The midway has its own livery, darker than the fall fair's red and white: midnig
 - **The gallery's round is the server's**: who paid, when it ends and which targets are down are kept by its block entity (`shooting_gallery`, saved as `player`, `ends` and `knocked`) and sent to clients, which draw the knocked ones flat. `lit` is on its blocks while a round runs. One scheduled tick ends the round when its time is up.
   - A shot is judged on the server, by the block the projectile hit: it must be the payer's, shot from 2 blocks or more, by a player allowed to use blocks there, and at the back wall.
   - The targets' places are worked out from the game's clock alone, the same on the server and every client, so nothing about them is sent.
+- **The ghost train's doors are the server's**: every 4 ticks its first block looks in two small boxes, each doorway and a block before and after it, for a minecart. Nothing else is looked at, and nothing else ticks.
+  - Whether each doorway's doors are open is its blocks' state (`in_open`, `out_open`). Each opening and shutting, and its ghost's spring, is a block event its block entity (`ghost_train`) marks, so every client near it sees them move.
+  - The block entity keeps nothing over a restart: when a cart was last seen is the server's memory, and a front reloaded with its doors open shuts them at its next look.
 - None of them can be pushed by a piston.
 - IDs (stable from release):
   - the blocks and items `cotton_candy_cart` (`facing`, `part` 0 to 1, `lit`, `floss` 0 to 3, model-only `runner`; block entity `cotton_candy_cart`) and `popcorn_wagon` (`facing`, `part` 0 to 1, `lit`, `popcorn` 0 to 8, `popping`, model-only `runner`; block entity `popcorn_wagon`);
   - the item `cotton_candy`;
   - part 2's blocks and items `ticket_booth` (`facing`, `part` 0 to 1, `roll` 0 to 32, model-only `runner`; block entity `ticket_booth`) and `whack_a_zombie` (`facing`, `part` 0 to 1, `lit`, `head` 0 to 5, `score` 0 to 8, model-only `runner`; block entity `whack_a_zombie`, its saved `player`, `ends` and `last`), and the item `midway_ticket`;
-  - part 3's block and item `shooting_gallery` (`facing`, `part` 0 to 5, `lit`, model-only `runner` 0 to 2; block entity `shooting_gallery`, its saved `player`, `ends` and `knocked`).
+  - part 3's block and item `shooting_gallery` (`facing`, `part` 0 to 5, `lit`, model-only `runner` 0 to 2; block entity `shooting_gallery`, its saved `player`, `ends` and `knocked`);
+  - part 4's block and item `ghost_train` (`facing`, `part` 0 to 15, `lit`, `in_open`, `out_open`, model-only `runner` 0 to 3; block entity `ghost_train`, saving nothing). Its blocks are five across and four up less its doorways' lower two blocks each.
 - Their recipes follow the agriculture switch. The blocks and items stay registered when it is off.
 
 ## Dependencies and assets
@@ -198,6 +226,17 @@ Local checks run on this branch, and their results:
   - `python3 -m unittest discover -s scripts/tests`: 287 tests, OK.
   - `python3 tools/check_icon_maps.py`: PASS (no new map; the gallery's item is 3D).
   - `javac` scan of the new Java for syntax errors: none. The full compile runs in CI.
+- Part 4:
+  - `python3 tools/check_mod_data.py`: failed on the first run, then PASS (8,133 material IDs). The ghost's runner model reached 46 pixels up, past the -16..32 a block model may span. It is now modelled a block lower; the renderer lifts it a block and wobbles it about its spring's top there. `check_haunted_midway` now also checks the ghost train against `tools/haunted_midway.py`:
+    - its doorways, leaves, wall and timings;
+    - that its cells leave the doorways' lower blocks free, with a model for each of its blocks;
+    - that it looks for minecarts from its ticker;
+    - that its renderer swings the doors by `swing` and springs the ghost by `spook`, from the runner models 1 to 3 alone;
+    - that its windows glow, and its text.
+  - `python3 scripts/check_repository.py`: PASS.
+  - `python3 -m unittest discover -s scripts/tests`: 287 tests, OK.
+  - `python3 tools/check_icon_maps.py`: PASS (no new map; the ghost train's item is 3D).
+  - `javac` scan of the new and changed Java for syntax errors: none. The full compile runs in CI.
 
 `HauntedMidwayGameTests` (run in CI):
 - **The cotton-candy cart spins sugar into candy**:
@@ -233,14 +272,21 @@ Local checks run on this branch, and their results:
   - the player who paid knocks each target down as it comes into sight;
   - all eight down end the round, standing them up again, and the player has won a prize.
 - **Part 3: the shooting gallery runs out of time**: with one target down and then left alone, its time runs out; they stand again and no prize is given.
+- **Part 4: the ghost train opens for a cart**:
+  - it stands five blocks across and four up, its doors shut, its doorways left free; a rail laid in one stays;
+  - a minecart in the IN doorway opens its doors and springs its ghost, the OUT doors staying shut;
+  - the cart gone, the doors shut again;
+  - an empty hand lights its windows, its three window blocks giving light 9;
+  - broken, it comes away whole, dropping itself once, and the rail in its doorway stays.
 
-`HauntedMidwayClientGameTests` takes six screenshots on a strip of gravel midway. It holds:
+`HauntedMidwayClientGameTests` takes seven screenshots on a strip of gravel midway. It holds:
 - two Cotton-Candy Carts, one running with its bowl full of floss (its head drawn by `CottonCandyCartRenderer`) and one off and empty;
 - two Caramel-Corn Wagons beside them, one lit with its case full (its kettle drawn by `PopcornWagonRenderer`) and one out and empty;
 - part 2's Ticket Booth with a full roll, and a Whack-a-Zombie cabinet with a head up (drawn by `WhackAZombieRenderer`) and five lamps lit;
-- part 3's Shooting Gallery, a round on with its bulbs lit and three targets knocked down (the targets drawn by `ShootingGalleryRenderer`).
+- part 3's Shooting Gallery, a round on with its bulbs lit and three targets knocked down (the targets drawn by `ShootingGalleryRenderer`);
+- part 4's Ghost Train beyond it, its windows lit, a track of rails through its doorways and a minecart in its IN doorway, so its doors stand open (drawn by `GhostTrainRenderer`).
 
-The shots are from the midway, close by at each stall, at the games, at the gallery, and by night.
+The shots are from the midway, close by at each stall, at the games, at the gallery, at the ghost train, and by night.
 
 Not run: a hand playtest, and a two-client playtest.
 
@@ -248,5 +294,5 @@ Not run: a hand playtest, and a two-client playtest.
 Seasonal in look, not in use: it is made and works all year, and nothing about it ends with October. It doesn't generate in the world.
 
 ## Rollout and open questions
-- Part 1 is the sweet stalls, part 2 the ticket booth and Whack-a-Zombie, part 3 the shooting gallery. Parts 4 and 5 follow, each stacked on the last.
-- Open: whether the High Striker and Ring Toss should take a ticket too (they stay free); whether the cart's floss should take a dye's colour (blue raspberry, ghost-white); whether the wagon should take butter for buttered popcorn once the barn's butter is a kitchen ingredient.
+- Part 1 is the sweet stalls, part 2 the ticket booth and Whack-a-Zombie, part 3 the shooting gallery, part 4 the ghost train. Part 5 follows, stacked on the last.
+- Open: whether the ghost train should come with its own car (the Haunted Hayride and plain minecarts serve for now), and spooks along the ride inside; whether the High Striker and Ring Toss should take a ticket too (they stay free); whether the cart's floss should take a dye's colour (blue raspberry, ghost-white); whether the wagon should take butter for buttered popcorn once the barn's butter is a kitchen ingredient.

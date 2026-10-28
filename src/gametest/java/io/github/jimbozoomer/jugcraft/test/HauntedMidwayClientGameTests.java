@@ -1,6 +1,7 @@
 package io.github.jimbozoomer.jugcraft.test;
 
 import io.github.jimbozoomer.jugcraft.agriculture.CottonCandyCartBlock;
+import io.github.jimbozoomer.jugcraft.agriculture.GhostTrainBlock;
 import io.github.jimbozoomer.jugcraft.agriculture.JugcraftAgriculture;
 import io.github.jimbozoomer.jugcraft.agriculture.MultiDecorationBlock;
 import io.github.jimbozoomer.jugcraft.agriculture.PopcornWagonBlock;
@@ -28,8 +29,10 @@ import net.minecraft.world.level.block.state.BlockState;
  * client/PopcornWagonRenderer) and one out and empty; and part 2's Ticket Booth with a full roll and a Whack-a-Zombie
  * cabinet to the west of them, a head up (drawn by client/WhackAZombieRenderer) and five lamps lit; and part 3's Shooting
  * Gallery to the east, a round on, its bulbs lit and three targets knocked down (the targets drawn by
- * client/ShootingGalleryRenderer); built in a real client and photographed from the midway, close by at each stall, at
- * the games, at the gallery and by night (CI job {@code client}).
+ * client/ShootingGalleryRenderer); and part 4's Ghost Train beyond it, a track of rails through its doorways and a
+ * minecart in its IN doorway, so its doors stand open (drawn by client/GhostTrainRenderer), its windows lit; built in a
+ * real client and photographed from the midway, close by at each stall, at the games, at the gallery, at the ghost train
+ * and by night (CI job {@code client}).
  * They go into docs/features/haunted-midway.md.
  */
 public class HauntedMidwayClientGameTests implements FabricClientGameTest {
@@ -48,8 +51,8 @@ public class HauntedMidwayClientGameTests implements FabricClientGameTest {
 			server.runCommand("gamerule minecraft:spawn_mobs false");
 			server.runCommand("time set noon");
 			server.runCommand("weather clear");
-			server.runCommand("fill %d %d %d %d %d %d minecraft:gravel".formatted(x - 8, y - 1, z - 3, x + 12, y - 1, z + 8));
-			server.runCommand("fill %d %d %d %d %d %d minecraft:air".formatted(x - 8, y, z - 3, x + 12, y + 6, z + 8));
+			server.runCommand("fill %d %d %d %d %d %d minecraft:gravel".formatted(x - 8, y - 1, z - 3, x + 19, y - 1, z + 8));
+			server.runCommand("fill %d %d %d %d %d %d minecraft:air".formatted(x - 8, y, z - 3, x + 19, y + 6, z + 8));
 			server.runOnServer(minecraft -> build(minecraft.overworld(), origin));
 			context.waitTicks(40);
 			singleplayer.getConnection().waitForChunksRender();
@@ -58,6 +61,14 @@ public class HauntedMidwayClientGameTests implements FabricClientGameTest {
 			shoot(context, singleplayer, x + 4, y + 1, z + 2, 180, 20, "jugcraft_midway_popcorn");
 			shoot(context, singleplayer, x - 5, y + 1, z + 3, 180, 25, "jugcraft_midway_games");
 			shoot(context, singleplayer, x + 10, y + 1, z + 5, 180, 10, "jugcraft_midway_gallery");
+			// Part 4: a track through the ghost train's doorways, and a minecart in its IN doorway, so its doors stand open.
+			for (int across : new int[] {14, 16}) {
+				for (int deep = -2; deep <= 2; deep++) {
+					server.runCommand("setblock %d %d %d minecraft:rail".formatted(x + across, y, z + deep));
+				}
+			}
+			server.runCommand("summon minecraft:minecart %d %d %d".formatted(x + 14, y, z));
+			shoot(context, singleplayer, x + 15, y + 1, z + 7, 180, 8, "jugcraft_midway_ghost_train");
 			server.runCommand("time set midnight");
 			shoot(context, singleplayer, x + 2, y + 1, z + 5, 180, 10, "jugcraft_midway_night");
 		}
@@ -109,5 +120,8 @@ public class HauntedMidwayClientGameTests implements FabricClientGameTest {
 				round.knock(target);
 			}
 		}
+		// Part 4, beyond the gallery: the ghost train's front (its blocks running east from its first), its windows lit.
+		stall(level, (GhostTrainBlock) JugcraftAgriculture.block("ghost_train"), origin.offset(13, 0, 0),
+				state -> state.setValue(MultiDecorationBlock.LIT, true));
 	}
 }

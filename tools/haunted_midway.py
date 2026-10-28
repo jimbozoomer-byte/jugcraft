@@ -46,6 +46,18 @@ Part 3, the shooting gallery:
   its rail (client/ShootingGalleryRenderer draws the targets, standing or knocked flat). Knocking all of them down wins
   a prize (the midway's prize table) and ends the round; when the time runs out first, the round is lost and they stand
   up again. The targets move all the time, by the game's clock, so every client sees them where the server judges them.
+
+Part 4, the ghost train:
+- The Ghost Train (GhostTrainBlock): a dark ride's front, five blocks across and four up, a haunted house's clapboard
+  wall lettered GHOST TRAIN under its eaves, two lit windows with ghosts in them and two doorways at track level, IN
+  and OUT, two blocks high and one across (`doors`, each doorway's block across: the doorways are not its blocks, so a
+  track of rails runs through them). Each doorway has double doors (`leaf` wide and high), hinged at its sides. Every
+  `look_ticks` its first block looks for a minecart in each doorway or the block before or after it (`reach` blocks):
+  with one there, that doorway's doors swing open (over `swing_ticks`, client/GhostTrainRenderer, the IN doors in, the
+  OUT doors out), and stay open until `hold_ticks` after the last cart has gone. As the IN doors open, a ghost springs
+  up over them with a cackle (`spook_ticks`). An empty hand lights its windows or puts them out (`light`, from its upper
+  blocks). The cars are vanilla minecarts on a track the player lays: the ride itself, behind the front, is theirs to
+  build. It takes no ticket.
 Sizes in pixels, facing north (its back to the south).
 """
 
@@ -66,6 +78,9 @@ GALLERY = {"block": "shooting_gallery", "display": "Shooting Gallery", "size": (
            "rails": ((20.5, 13.5, 1, "bat"), (16.0, 11.5, -1, "ghost")), "targets": {"bat": (6, 3), "ghost": (5, 5)}, "per_rail": 4,
            "track": (2.0, 46.0), "speed": 0.25, "round_ticks": 600, "min_distance": 2.0, "bulbs": 11}
 
+GHOST_TRAIN = {"block": "ghost_train", "display": "Ghost Train", "size": (5, 4, 1), "doors": (1, 3), "leaf": (8.0, 30.0), "wall": (2.0, 5.0),
+               "look_ticks": 4, "reach": 1.0, "swing_ticks": 4, "hold_ticks": 20, "spook_ticks": 40, "light": 9}
+
 # Cotton Candy: spun sugar on a paper cone, light as air and gone in a moment (a candy-corn's worth of food).
 ITEMS = {
     CANDY["item"]: {"display": CANDY["display"], "food": [2, 0.1], "compost": "low", "tags": ["c:foods/candy"]},
@@ -85,6 +100,10 @@ RECIPES = [
     {"id": GALLERY["block"], "pattern": ["WWW", "PBP", "PPP"],
      "key": {"W": "minecraft:orange_wool", "B": "minecraft:bow", "P": "#minecraft:planks"},
      "result": GALLERY["block"], "count": 1, "category": "misc"},
+    {"id": GHOST_TRAIN["block"], "pattern": ["PGP", "DLD", "PRP"],
+     "key": {"P": "#minecraft:planks", "G": "minecraft:glass_pane", "D": "#minecraft:wooden_doors", "L": "minecraft:jack_o_lantern",
+             "R": "minecraft:rail"},
+     "result": GHOST_TRAIN["block"], "count": 1, "category": "misc"},
     {"id": POPCORN_WAGON["block"], "pattern": ["GJG", "GCG", "PIP"],
      "key": {"G": "minecraft:glass_pane", "J": "minecraft:jack_o_lantern", "C": "minecraft:cauldron", "P": "#minecraft:planks",
              "I": "minecraft:iron_ingot"},
@@ -94,7 +113,8 @@ SHAPELESS = []
 
 
 def blocks():
-    return [COTTON_CANDY["block"], POPCORN_WAGON["block"], TICKET_BOOTH["block"], WHACK["block"], GALLERY["block"]]
+    return [COTTON_CANDY["block"], POPCORN_WAGON["block"], TICKET_BOOTH["block"], WHACK["block"], GALLERY["block"],
+            GHOST_TRAIN["block"]]
 
 
 def items():

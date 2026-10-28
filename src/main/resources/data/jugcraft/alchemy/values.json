@@ -12702,6 +12702,11 @@
       "denominator": 6,
       "source": "recipe jugcraft:pot_cooking/ghost_taffy"
     },
+    "jugcraft:ghost_train": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
     "jugcraft:giant_beating_heart": {
       "numerator": 32747,
       "denominator": 36,

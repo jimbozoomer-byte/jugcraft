@@ -402,6 +402,7 @@ public final class JugcraftAgriculture {
 	public static BlockEntityType<DecorationBlockEntity> TICKET_BOOTH_ENTITY;
 	public static BlockEntityType<WhackAZombieBlockEntity> WHACK_A_ZOMBIE_ENTITY;
 	public static BlockEntityType<ShootingGalleryBlockEntity> SHOOTING_GALLERY_ENTITY;
+	public static BlockEntityType<GhostTrainBlockEntity> GHOST_TRAIN_ENTITY;
 	public static BlockEntityType<FirewoodRackBlockEntity> FIREWOOD_RACK_ENTITY;
 	public static BlockEntityType<DecorationBlockEntity> CHOPPING_BLOCK_ENTITY;
 	public static BlockEntityType<BlanketLadderBlockEntity> BLANKET_LADDER_ENTITY;
@@ -2990,7 +2991,7 @@ public final class JugcraftAgriculture {
 	/**
 	 * Haunted Midway, decor set 6 (tools/haunted_midway.py): part 1's sweet stalls, the Cotton-Candy Cart (and the Cotton
 	 * Candy it spins) and the Caramel-Corn Wagon; part 2's Ticket Booth, its Midway Ticket and Whack-a-Zombie; part 3's
-	 * Shooting Gallery.
+	 * Shooting Gallery; part 4's Ghost Train.
 	 */
 	private static void registerHauntedMidway() {
 		Block cart = registerBlock("cotton_candy_cart", CottonCandyCartBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_PURPLE)
@@ -3030,6 +3031,13 @@ public final class JugcraftAgriculture {
 		SHOOTING_GALLERY_ENTITY = Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, Jugcraft.id("shooting_gallery"),
 				FabricBlockEntityTypeBuilder.create(ShootingGalleryBlockEntity::new, gallery).build());
 		registerItem("shooting_gallery", props -> new BlockItem(gallery, props), new Item.Properties().useBlockDescriptionPrefix(), BUILDING_TAB);
+		// Part 4: the Ghost Train's front, its doors opening for the carts that come through.
+		Block train = registerBlock("ghost_train", GhostTrainBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_PURPLE)
+				.strength(2.0F).sound(SoundType.WOOD).noOcclusion().ignitedByLava().lightLevel(GhostTrainBlock::light)
+				.pushReaction(PushReaction.IMMOVEABLE));
+		GHOST_TRAIN_ENTITY = Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, Jugcraft.id("ghost_train"),
+				FabricBlockEntityTypeBuilder.create(GhostTrainBlockEntity::new, train).build());
+		registerItem("ghost_train", props -> new BlockItem(train, props), new Item.Properties().useBlockDescriptionPrefix(), BUILDING_TAB);
 	}
 
 	private static BlockBehaviour.Properties displayProperties() {
