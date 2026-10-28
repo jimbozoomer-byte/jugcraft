@@ -89,7 +89,7 @@ Primary specialty and supported player role: farming and cooking. Part 1 builds 
     - The ristras are five chilies, each a two-pixel flat-toned box, red fresh and a dark brick red dried, on a string.
   - **The Corn Crib** is weathered grey wood: horizontal slats 1.5 pixels high with a pixel's gap between, corner posts and a stepped gable.
     - Its roof is corrugated tin, in stripes along the slope. Each side is two halves, one a block, turned 22.5 degrees up about its eave (just inside the frame, so the cut gives each half to its block) to meet the other under a tin ridge cap.
-    - The ears inside are a box at each stage, painted as ears heaped lengthwise: rows of ears two texels high, six long with a dark texel between, each row half an ear along from the last, the kernels a two-tone checker lit along each ear's top.
+    - The ears inside are a box at each stage (its top a quarter pixel under the plate when full), cut into the blocks it crosses and added over the crib's own models by a multipart blockstate by `fill`, so the crib is drawn once, not once a stage. They are painted as ears heaped lengthwise: rows of ears two texels high, six long with a dark texel between, each row half an ear along from the last, the kernels a two-tone checker lit along each ear's top.
 - Nothing is copied, traced or recoloured from Minecraft's textures.
 
 ## Connections

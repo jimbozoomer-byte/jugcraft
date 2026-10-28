@@ -1,0 +1,9 @@
+{
+  "parent": "minecraft:block/block",
+  "ambientocclusion": false,
+  "textures": {
+    "p": "jugcraft:block/corn_crib",
+    "particle": "jugcraft:block/corn_crib"
+  },
+  "elements": []
+}

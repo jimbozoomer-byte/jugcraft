@@ -244,7 +244,9 @@ def crib():
     # A tin cap along the ridge, over the halves' meeting.
     el.append(panel(sc, "ridge", flat(IRON), (0.0, 32.25, 7.0), (32.0, 33.0, 9.0)))
     sc.models["whole"] = el
-    inside = 28.0 - 5.0
+    # The ears rise from the floor to just under the plate (a quarter pixel short, so the full heap's top doesn't share the
+    # plate's plane).
+    inside = 27.75 - 5.0
     for stage in range(1, spec["stages"] + 1):
         top = 5.0 + inside * stage / spec["stages"]
         sc.models[f"heap_{stage}"] = [panel(sc, "corn", ear_corn(), (3.0, 5.0, 3.25), (29.0, top, 12.75))]
@@ -323,9 +325,10 @@ def item_model(elements, size, scale):
 
 def part3_assets(root, write, lang):
     """The Drying Rack's two blocks' models, each bunch's model moved into the block it hangs in, and a multipart
-    blockstate adding them by each block's `left` and `right`; and the Corn Crib's four blocks' models at each stage, cut
-    from the whole, with a variant for each (`fill`; its `fruit` and `lit`, from the store and the prop it shares code
-    with, draw nothing). Their items show them whole: the rack hung with one bunch of each, the crib half full."""
+    blockstate adding them by each block's `left` and `right`; and the Corn Crib's four blocks' models, cut from the whole,
+    with the ears at each stage cut the same way and added by a multipart blockstate by `fill` (its `fruit` and `lit`, from
+    the store and the prop it shares code with, draw nothing). Their items show them whole: the rack hung with one bunch
+    of each, the crib half full."""
     models = root / "models" / "block"
     states = root / "blockstates"
 
@@ -358,20 +361,20 @@ def part3_assets(root, write, lang):
     lang[f"block.{MOD}.{block}"] = spec["display"]
     sc = build(block)
     n = len(d17d.cells(spec["size"]))
-    for stage in range(spec["stages"] + 1):
-        elements = sc.models["whole"] + (sc.models[f"heap_{stage}"] if stage else [])
-        for part, cut in enumerate(ppd.cut(elements, spec["size"])):
-            write(models / (f"{block}_{part}" + (f"_{stage}" if stage else "") + ".json"), fa.model(block, cut))
-    variants = {}
+    for part, elements in enumerate(ppd.cut(sc.models["whole"], spec["size"])):
+        write(models / f"{block}_{part}.json", fa.model(block, elements))
+    for stage in range(1, spec["stages"] + 1):
+        for part, elements in enumerate(ppd.cut(sc.models[f"heap_{stage}"], spec["size"])):
+            write(models / f"{block}_{part}_heap_{stage}.json", fa.model(block, elements))
+    multipart = []
     for f, y in FACINGS.items():
         turn = {"y": y} if y else {}
-        for stage in range(spec["stages"] + 1):
-            for p in range(n):
-                model = f"{block}_{p}" + (f"_{stage}" if stage else "")
-                for fruit in ("apple", "pear"):
-                    for lit in ("false", "true"):
-                        variants[f"facing={f},fill={stage},fruit={fruit},lit={lit},part={p}"] = {"model": rid(f"block/{model}"), **turn}
-    write(states / f"{block}.json", {"variants": variants})
+        for p in range(n):
+            multipart.append({"when": {"facing": f, "part": str(p)}, "apply": {"model": rid(f"block/{block}_{p}"), **turn}})
+            for stage in range(1, spec["stages"] + 1):
+                multipart.append({"when": {"facing": f, "part": str(p), "fill": str(stage)},
+                                  "apply": {"model": rid(f"block/{block}_{p}_heap_{stage}"), **turn}})
+    write(states / f"{block}.json", {"multipart": multipart})
     half = sc.models["whole"] + sc.models[f"heap_{spec['stages'] // 2}"]
     write(root / "models" / "item" / f"{block}.json", fa.model(block, item_model(half, spec["size"], 0.5), ITEM_DISPLAY))
     write(root / "items" / f"{block}.json", {"model": {"type": "minecraft:model", "model": rid(f"item/{block}")}})

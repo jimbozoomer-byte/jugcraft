@@ -1,1204 +1,848 @@
 {
-  "variants": {
-    "facing=north,fill=0,fruit=apple,lit=false,part=0": {
-      "model": "jugcraft:block/corn_crib_0"
-    },
-    "facing=north,fill=0,fruit=apple,lit=true,part=0": {
-      "model": "jugcraft:block/corn_crib_0"
-    },
-    "facing=north,fill=0,fruit=pear,lit=false,part=0": {
-      "model": "jugcraft:block/corn_crib_0"
-    },
-    "facing=north,fill=0,fruit=pear,lit=true,part=0": {
-      "model": "jugcraft:block/corn_crib_0"
-    },
-    "facing=north,fill=0,fruit=apple,lit=false,part=1": {
-      "model": "jugcraft:block/corn_crib_1"
-    },
-    "facing=north,fill=0,fruit=apple,lit=true,part=1": {
-      "model": "jugcraft:block/corn_crib_1"
-    },
-    "facing=north,fill=0,fruit=pear,lit=false,part=1": {
-      "model": "jugcraft:block/corn_crib_1"
-    },
-    "facing=north,fill=0,fruit=pear,lit=true,part=1": {
-      "model": "jugcraft:block/corn_crib_1"
-    },
-    "facing=north,fill=0,fruit=apple,lit=false,part=2": {
-      "model": "jugcraft:block/corn_crib_2"
-    },
-    "facing=north,fill=0,fruit=apple,lit=true,part=2": {
-      "model": "jugcraft:block/corn_crib_2"
-    },
-    "facing=north,fill=0,fruit=pear,lit=false,part=2": {
-      "model": "jugcraft:block/corn_crib_2"
-    },
-    "facing=north,fill=0,fruit=pear,lit=true,part=2": {
-      "model": "jugcraft:block/corn_crib_2"
-    },
-    "facing=north,fill=0,fruit=apple,lit=false,part=3": {
-      "model": "jugcraft:block/corn_crib_3"
-    },
-    "facing=north,fill=0,fruit=apple,lit=true,part=3": {
-      "model": "jugcraft:block/corn_crib_3"
-    },
-    "facing=north,fill=0,fruit=pear,lit=false,part=3": {
-      "model": "jugcraft:block/corn_crib_3"
-    },
-    "facing=north,fill=0,fruit=pear,lit=true,part=3": {
-      "model": "jugcraft:block/corn_crib_3"
-    },
-    "facing=north,fill=1,fruit=apple,lit=false,part=0": {
-      "model": "jugcraft:block/corn_crib_0_1"
-    },
-    "facing=north,fill=1,fruit=apple,lit=true,part=0": {
-      "model": "jugcraft:block/corn_crib_0_1"
-    },
-    "facing=north,fill=1,fruit=pear,lit=false,part=0": {
-      "model": "jugcraft:block/corn_crib_0_1"
-    },
-    "facing=north,fill=1,fruit=pear,lit=true,part=0": {
-      "model": "jugcraft:block/corn_crib_0_1"
-    },
-    "facing=north,fill=1,fruit=apple,lit=false,part=1": {
-      "model": "jugcraft:block/corn_crib_1_1"
-    },
-    "facing=north,fill=1,fruit=apple,lit=true,part=1": {
-      "model": "jugcraft:block/corn_crib_1_1"
-    },
-    "facing=north,fill=1,fruit=pear,lit=false,part=1": {
-      "model": "jugcraft:block/corn_crib_1_1"
-    },
-    "facing=north,fill=1,fruit=pear,lit=true,part=1": {
-      "model": "jugcraft:block/corn_crib_1_1"
-    },
-    "facing=north,fill=1,fruit=apple,lit=false,part=2": {
-      "model": "jugcraft:block/corn_crib_2_1"
-    },
-    "facing=north,fill=1,fruit=apple,lit=true,part=2": {
-      "model": "jugcraft:block/corn_crib_2_1"
-    },
-    "facing=north,fill=1,fruit=pear,lit=false,part=2": {
-      "model": "jugcraft:block/corn_crib_2_1"
-    },
-    "facing=north,fill=1,fruit=pear,lit=true,part=2": {
-      "model": "jugcraft:block/corn_crib_2_1"
-    },
-    "facing=north,fill=1,fruit=apple,lit=false,part=3": {
-      "model": "jugcraft:block/corn_crib_3_1"
-    },
-    "facing=north,fill=1,fruit=apple,lit=true,part=3": {
-      "model": "jugcraft:block/corn_crib_3_1"
-    },
-    "facing=north,fill=1,fruit=pear,lit=false,part=3": {
-      "model": "jugcraft:block/corn_crib_3_1"
-    },
-    "facing=north,fill=1,fruit=pear,lit=true,part=3": {
-      "model": "jugcraft:block/corn_crib_3_1"
-    },
-    "facing=north,fill=2,fruit=apple,lit=false,part=0": {
-      "model": "jugcraft:block/corn_crib_0_2"
-    },
-    "facing=north,fill=2,fruit=apple,lit=true,part=0": {
-      "model": "jugcraft:block/corn_crib_0_2"
-    },
-    "facing=north,fill=2,fruit=pear,lit=false,part=0": {
-      "model": "jugcraft:block/corn_crib_0_2"
-    },
-    "facing=north,fill=2,fruit=pear,lit=true,part=0": {
-      "model": "jugcraft:block/corn_crib_0_2"
-    },
-    "facing=north,fill=2,fruit=apple,lit=false,part=1": {
-      "model": "jugcraft:block/corn_crib_1_2"
-    },
-    "facing=north,fill=2,fruit=apple,lit=true,part=1": {
-      "model": "jugcraft:block/corn_crib_1_2"
-    },
-    "facing=north,fill=2,fruit=pear,lit=false,part=1": {
-      "model": "jugcraft:block/corn_crib_1_2"
-    },
-    "facing=north,fill=2,fruit=pear,lit=true,part=1": {
-      "model": "jugcraft:block/corn_crib_1_2"
-    },
-    "facing=north,fill=2,fruit=apple,lit=false,part=2": {
-      "model": "jugcraft:block/corn_crib_2_2"
-    },
-    "facing=north,fill=2,fruit=apple,lit=true,part=2": {
-      "model": "jugcraft:block/corn_crib_2_2"
-    },
-    "facing=north,fill=2,fruit=pear,lit=false,part=2": {
-      "model": "jugcraft:block/corn_crib_2_2"
-    },
-    "facing=north,fill=2,fruit=pear,lit=true,part=2": {
-      "model": "jugcraft:block/corn_crib_2_2"
-    },
-    "facing=north,fill=2,fruit=apple,lit=false,part=3": {
-      "model": "jugcraft:block/corn_crib_3_2"
-    },
-    "facing=north,fill=2,fruit=apple,lit=true,part=3": {
-      "model": "jugcraft:block/corn_crib_3_2"
-    },
-    "facing=north,fill=2,fruit=pear,lit=false,part=3": {
-      "model": "jugcraft:block/corn_crib_3_2"
-    },
-    "facing=north,fill=2,fruit=pear,lit=true,part=3": {
-      "model": "jugcraft:block/corn_crib_3_2"
-    },
-    "facing=north,fill=3,fruit=apple,lit=false,part=0": {
-      "model": "jugcraft:block/corn_crib_0_3"
-    },
-    "facing=north,fill=3,fruit=apple,lit=true,part=0": {
-      "model": "jugcraft:block/corn_crib_0_3"
-    },
-    "facing=north,fill=3,fruit=pear,lit=false,part=0": {
-      "model": "jugcraft:block/corn_crib_0_3"
-    },
-    "facing=north,fill=3,fruit=pear,lit=true,part=0": {
-      "model": "jugcraft:block/corn_crib_0_3"
-    },
-    "facing=north,fill=3,fruit=apple,lit=false,part=1": {
-      "model": "jugcraft:block/corn_crib_1_3"
-    },
-    "facing=north,fill=3,fruit=apple,lit=true,part=1": {
-      "model": "jugcraft:block/corn_crib_1_3"
-    },
-    "facing=north,fill=3,fruit=pear,lit=false,part=1": {
-      "model": "jugcraft:block/corn_crib_1_3"
-    },
-    "facing=north,fill=3,fruit=pear,lit=true,part=1": {
-      "model": "jugcraft:block/corn_crib_1_3"
-    },
-    "facing=north,fill=3,fruit=apple,lit=false,part=2": {
-      "model": "jugcraft:block/corn_crib_2_3"
-    },
-    "facing=north,fill=3,fruit=apple,lit=true,part=2": {
-      "model": "jugcraft:block/corn_crib_2_3"
-    },
-    "facing=north,fill=3,fruit=pear,lit=false,part=2": {
-      "model": "jugcraft:block/corn_crib_2_3"
-    },
-    "facing=north,fill=3,fruit=pear,lit=true,part=2": {
-      "model": "jugcraft:block/corn_crib_2_3"
-    },
-    "facing=north,fill=3,fruit=apple,lit=false,part=3": {
-      "model": "jugcraft:block/corn_crib_3_3"
-    },
-    "facing=north,fill=3,fruit=apple,lit=true,part=3": {
-      "model": "jugcraft:block/corn_crib_3_3"
-    },
-    "facing=north,fill=3,fruit=pear,lit=false,part=3": {
-      "model": "jugcraft:block/corn_crib_3_3"
-    },
-    "facing=north,fill=3,fruit=pear,lit=true,part=3": {
-      "model": "jugcraft:block/corn_crib_3_3"
-    },
-    "facing=north,fill=4,fruit=apple,lit=false,part=0": {
-      "model": "jugcraft:block/corn_crib_0_4"
-    },
-    "facing=north,fill=4,fruit=apple,lit=true,part=0": {
-      "model": "jugcraft:block/corn_crib_0_4"
-    },
-    "facing=north,fill=4,fruit=pear,lit=false,part=0": {
-      "model": "jugcraft:block/corn_crib_0_4"
-    },
-    "facing=north,fill=4,fruit=pear,lit=true,part=0": {
-      "model": "jugcraft:block/corn_crib_0_4"
-    },
-    "facing=north,fill=4,fruit=apple,lit=false,part=1": {
-      "model": "jugcraft:block/corn_crib_1_4"
-    },
-    "facing=north,fill=4,fruit=apple,lit=true,part=1": {
-      "model": "jugcraft:block/corn_crib_1_4"
-    },
-    "facing=north,fill=4,fruit=pear,lit=false,part=1": {
-      "model": "jugcraft:block/corn_crib_1_4"
-    },
-    "facing=north,fill=4,fruit=pear,lit=true,part=1": {
-      "model": "jugcraft:block/corn_crib_1_4"
-    },
-    "facing=north,fill=4,fruit=apple,lit=false,part=2": {
-      "model": "jugcraft:block/corn_crib_2_4"
-    },
-    "facing=north,fill=4,fruit=apple,lit=true,part=2": {
-      "model": "jugcraft:block/corn_crib_2_4"
-    },
-    "facing=north,fill=4,fruit=pear,lit=false,part=2": {
-      "model": "jugcraft:block/corn_crib_2_4"
-    },
-    "facing=north,fill=4,fruit=pear,lit=true,part=2": {
-      "model": "jugcraft:block/corn_crib_2_4"
-    },
-    "facing=north,fill=4,fruit=apple,lit=false,part=3": {
-      "model": "jugcraft:block/corn_crib_3_4"
-    },
-    "facing=north,fill=4,fruit=apple,lit=true,part=3": {
-      "model": "jugcraft:block/corn_crib_3_4"
-    },
-    "facing=north,fill=4,fruit=pear,lit=false,part=3": {
-      "model": "jugcraft:block/corn_crib_3_4"
-    },
-    "facing=north,fill=4,fruit=pear,lit=true,part=3": {
-      "model": "jugcraft:block/corn_crib_3_4"
-    },
-    "facing=east,fill=0,fruit=apple,lit=false,part=0": {
-      "model": "jugcraft:block/corn_crib_0",
-      "y": 90
-    },
-    "facing=east,fill=0,fruit=apple,lit=true,part=0": {
-      "model": "jugcraft:block/corn_crib_0",
-      "y": 90
-    },
-    "facing=east,fill=0,fruit=pear,lit=false,part=0": {
-      "model": "jugcraft:block/corn_crib_0",
-      "y": 90
-    },
-    "facing=east,fill=0,fruit=pear,lit=true,part=0": {
-      "model": "jugcraft:block/corn_crib_0",
-      "y": 90
-    },
-    "facing=east,fill=0,fruit=apple,lit=false,part=1": {
-      "model": "jugcraft:block/corn_crib_1",
-      "y": 90
-    },
-    "facing=east,fill=0,fruit=apple,lit=true,part=1": {
-      "model": "jugcraft:block/corn_crib_1",
-      "y": 90
-    },
-    "facing=east,fill=0,fruit=pear,lit=false,part=1": {
-      "model": "jugcraft:block/corn_crib_1",
-      "y": 90
-    },
-    "facing=east,fill=0,fruit=pear,lit=true,part=1": {
-      "model": "jugcraft:block/corn_crib_1",
-      "y": 90
-    },
-    "facing=east,fill=0,fruit=apple,lit=false,part=2": {
-      "model": "jugcraft:block/corn_crib_2",
-      "y": 90
-    },
-    "facing=east,fill=0,fruit=apple,lit=true,part=2": {
-      "model": "jugcraft:block/corn_crib_2",
-      "y": 90
-    },
-    "facing=east,fill=0,fruit=pear,lit=false,part=2": {
-      "model": "jugcraft:block/corn_crib_2",
-      "y": 90
-    },
-    "facing=east,fill=0,fruit=pear,lit=true,part=2": {
-      "model": "jugcraft:block/corn_crib_2",
-      "y": 90
-    },
-    "facing=east,fill=0,fruit=apple,lit=false,part=3": {
-      "model": "jugcraft:block/corn_crib_3",
-      "y": 90
-    },
-    "facing=east,fill=0,fruit=apple,lit=true,part=3": {
-      "model": "jugcraft:block/corn_crib_3",
-      "y": 90
-    },
-    "facing=east,fill=0,fruit=pear,lit=false,part=3": {
-      "model": "jugcraft:block/corn_crib_3",
-      "y": 90
-    },
-    "facing=east,fill=0,fruit=pear,lit=true,part=3": {
-      "model": "jugcraft:block/corn_crib_3",
-      "y": 90
-    },
-    "facing=east,fill=1,fruit=apple,lit=false,part=0": {
-      "model": "jugcraft:block/corn_crib_0_1",
-      "y": 90
-    },
-    "facing=east,fill=1,fruit=apple,lit=true,part=0": {
-      "model": "jugcraft:block/corn_crib_0_1",
-      "y": 90
-    },
-    "facing=east,fill=1,fruit=pear,lit=false,part=0": {
-      "model": "jugcraft:block/corn_crib_0_1",
-      "y": 90
-    },
-    "facing=east,fill=1,fruit=pear,lit=true,part=0": {
-      "model": "jugcraft:block/corn_crib_0_1",
-      "y": 90
-    },
-    "facing=east,fill=1,fruit=apple,lit=false,part=1": {
-      "model": "jugcraft:block/corn_crib_1_1",
-      "y": 90
-    },
-    "facing=east,fill=1,fruit=apple,lit=true,part=1": {
-      "model": "jugcraft:block/corn_crib_1_1",
-      "y": 90
-    },
-    "facing=east,fill=1,fruit=pear,lit=false,part=1": {
-      "model": "jugcraft:block/corn_crib_1_1",
-      "y": 90
-    },
-    "facing=east,fill=1,fruit=pear,lit=true,part=1": {
-      "model": "jugcraft:block/corn_crib_1_1",
-      "y": 90
-    },
-    "facing=east,fill=1,fruit=apple,lit=false,part=2": {
-      "model": "jugcraft:block/corn_crib_2_1",
-      "y": 90
-    },
-    "facing=east,fill=1,fruit=apple,lit=true,part=2": {
-      "model": "jugcraft:block/corn_crib_2_1",
-      "y": 90
-    },
-    "facing=east,fill=1,fruit=pear,lit=false,part=2": {
-      "model": "jugcraft:block/corn_crib_2_1",
-      "y": 90
-    },
-    "facing=east,fill=1,fruit=pear,lit=true,part=2": {
-      "model": "jugcraft:block/corn_crib_2_1",
-      "y": 90
-    },
-    "facing=east,fill=1,fruit=apple,lit=false,part=3": {
-      "model": "jugcraft:block/corn_crib_3_1",
-      "y": 90
-    },
-    "facing=east,fill=1,fruit=apple,lit=true,part=3": {
-      "model": "jugcraft:block/corn_crib_3_1",
-      "y": 90
-    },
-    "facing=east,fill=1,fruit=pear,lit=false,part=3": {
-      "model": "jugcraft:block/corn_crib_3_1",
-      "y": 90
-    },
-    "facing=east,fill=1,fruit=pear,lit=true,part=3": {
-      "model": "jugcraft:block/corn_crib_3_1",
-      "y": 90
-    },
-    "facing=east,fill=2,fruit=apple,lit=false,part=0": {
-      "model": "jugcraft:block/corn_crib_0_2",
-      "y": 90
-    },
-    "facing=east,fill=2,fruit=apple,lit=true,part=0": {
-      "model": "jugcraft:block/corn_crib_0_2",
-      "y": 90
-    },
-    "facing=east,fill=2,fruit=pear,lit=false,part=0": {
-      "model": "jugcraft:block/corn_crib_0_2",
-      "y": 90
-    },
-    "facing=east,fill=2,fruit=pear,lit=true,part=0": {
-      "model": "jugcraft:block/corn_crib_0_2",
-      "y": 90
-    },
-    "facing=east,fill=2,fruit=apple,lit=false,part=1": {
-      "model": "jugcraft:block/corn_crib_1_2",
-      "y": 90
-    },
-    "facing=east,fill=2,fruit=apple,lit=true,part=1": {
-      "model": "jugcraft:block/corn_crib_1_2",
-      "y": 90
-    },
-    "facing=east,fill=2,fruit=pear,lit=false,part=1": {
-      "model": "jugcraft:block/corn_crib_1_2",
-      "y": 90
-    },
-    "facing=east,fill=2,fruit=pear,lit=true,part=1": {
-      "model": "jugcraft:block/corn_crib_1_2",
-      "y": 90
-    },
-    "facing=east,fill=2,fruit=apple,lit=false,part=2": {
-      "model": "jugcraft:block/corn_crib_2_2",
-      "y": 90
-    },
-    "facing=east,fill=2,fruit=apple,lit=true,part=2": {
-      "model": "jugcraft:block/corn_crib_2_2",
-      "y": 90
-    },
-    "facing=east,fill=2,fruit=pear,lit=false,part=2": {
-      "model": "jugcraft:block/corn_crib_2_2",
-      "y": 90
-    },
-    "facing=east,fill=2,fruit=pear,lit=true,part=2": {
-      "model": "jugcraft:block/corn_crib_2_2",
-      "y": 90
-    },
-    "facing=east,fill=2,fruit=apple,lit=false,part=3": {
-      "model": "jugcraft:block/corn_crib_3_2",
-      "y": 90
-    },
-    "facing=east,fill=2,fruit=apple,lit=true,part=3": {
-      "model": "jugcraft:block/corn_crib_3_2",
-      "y": 90
-    },
-    "facing=east,fill=2,fruit=pear,lit=false,part=3": {
-      "model": "jugcraft:block/corn_crib_3_2",
-      "y": 90
-    },
-    "facing=east,fill=2,fruit=pear,lit=true,part=3": {
-      "model": "jugcraft:block/corn_crib_3_2",
-      "y": 90
-    },
-    "facing=east,fill=3,fruit=apple,lit=false,part=0": {
-      "model": "jugcraft:block/corn_crib_0_3",
-      "y": 90
-    },
-    "facing=east,fill=3,fruit=apple,lit=true,part=0": {
-      "model": "jugcraft:block/corn_crib_0_3",
-      "y": 90
-    },
-    "facing=east,fill=3,fruit=pear,lit=false,part=0": {
-      "model": "jugcraft:block/corn_crib_0_3",
-      "y": 90
-    },
-    "facing=east,fill=3,fruit=pear,lit=true,part=0": {
-      "model": "jugcraft:block/corn_crib_0_3",
-      "y": 90
-    },
-    "facing=east,fill=3,fruit=apple,lit=false,part=1": {
-      "model": "jugcraft:block/corn_crib_1_3",
-      "y": 90
-    },
-    "facing=east,fill=3,fruit=apple,lit=true,part=1": {
-      "model": "jugcraft:block/corn_crib_1_3",
-      "y": 90
-    },
-    "facing=east,fill=3,fruit=pear,lit=false,part=1": {
-      "model": "jugcraft:block/corn_crib_1_3",
-      "y": 90
-    },
-    "facing=east,fill=3,fruit=pear,lit=true,part=1": {
-      "model": "jugcraft:block/corn_crib_1_3",
-      "y": 90
-    },
-    "facing=east,fill=3,fruit=apple,lit=false,part=2": {
-      "model": "jugcraft:block/corn_crib_2_3",
-      "y": 90
-    },
-    "facing=east,fill=3,fruit=apple,lit=true,part=2": {
-      "model": "jugcraft:block/corn_crib_2_3",
-      "y": 90
-    },
-    "facing=east,fill=3,fruit=pear,lit=false,part=2": {
-      "model": "jugcraft:block/corn_crib_2_3",
-      "y": 90
-    },
-    "facing=east,fill=3,fruit=pear,lit=true,part=2": {
-      "model": "jugcraft:block/corn_crib_2_3",
-      "y": 90
-    },
-    "facing=east,fill=3,fruit=apple,lit=false,part=3": {
-      "model": "jugcraft:block/corn_crib_3_3",
-      "y": 90
-    },
-    "facing=east,fill=3,fruit=apple,lit=true,part=3": {
-      "model": "jugcraft:block/corn_crib_3_3",
-      "y": 90
-    },
-    "facing=east,fill=3,fruit=pear,lit=false,part=3": {
-      "model": "jugcraft:block/corn_crib_3_3",
-      "y": 90
-    },
-    "facing=east,fill=3,fruit=pear,lit=true,part=3": {
-      "model": "jugcraft:block/corn_crib_3_3",
-      "y": 90
-    },
-    "facing=east,fill=4,fruit=apple,lit=false,part=0": {
-      "model": "jugcraft:block/corn_crib_0_4",
-      "y": 90
-    },
-    "facing=east,fill=4,fruit=apple,lit=true,part=0": {
-      "model": "jugcraft:block/corn_crib_0_4",
-      "y": 90
-    },
-    "facing=east,fill=4,fruit=pear,lit=false,part=0": {
-      "model": "jugcraft:block/corn_crib_0_4",
-      "y": 90
-    },
-    "facing=east,fill=4,fruit=pear,lit=true,part=0": {
-      "model": "jugcraft:block/corn_crib_0_4",
-      "y": 90
-    },
-    "facing=east,fill=4,fruit=apple,lit=false,part=1": {
-      "model": "jugcraft:block/corn_crib_1_4",
-      "y": 90
-    },
-    "facing=east,fill=4,fruit=apple,lit=true,part=1": {
-      "model": "jugcraft:block/corn_crib_1_4",
-      "y": 90
-    },
-    "facing=east,fill=4,fruit=pear,lit=false,part=1": {
-      "model": "jugcraft:block/corn_crib_1_4",
-      "y": 90
-    },
-    "facing=east,fill=4,fruit=pear,lit=true,part=1": {
-      "model": "jugcraft:block/corn_crib_1_4",
-      "y": 90
-    },
-    "facing=east,fill=4,fruit=apple,lit=false,part=2": {
-      "model": "jugcraft:block/corn_crib_2_4",
-      "y": 90
-    },
-    "facing=east,fill=4,fruit=apple,lit=true,part=2": {
-      "model": "jugcraft:block/corn_crib_2_4",
-      "y": 90
-    },
-    "facing=east,fill=4,fruit=pear,lit=false,part=2": {
-      "model": "jugcraft:block/corn_crib_2_4",
-      "y": 90
-    },
-    "facing=east,fill=4,fruit=pear,lit=true,part=2": {
-      "model": "jugcraft:block/corn_crib_2_4",
-      "y": 90
-    },
-    "facing=east,fill=4,fruit=apple,lit=false,part=3": {
-      "model": "jugcraft:block/corn_crib_3_4",
-      "y": 90
-    },
-    "facing=east,fill=4,fruit=apple,lit=true,part=3": {
-      "model": "jugcraft:block/corn_crib_3_4",
-      "y": 90
-    },
-    "facing=east,fill=4,fruit=pear,lit=false,part=3": {
-      "model": "jugcraft:block/corn_crib_3_4",
-      "y": 90
-    },
-    "facing=east,fill=4,fruit=pear,lit=true,part=3": {
-      "model": "jugcraft:block/corn_crib_3_4",
-      "y": 90
-    },
-    "facing=south,fill=0,fruit=apple,lit=false,part=0": {
-      "model": "jugcraft:block/corn_crib_0",
-      "y": 180
-    },
-    "facing=south,fill=0,fruit=apple,lit=true,part=0": {
-      "model": "jugcraft:block/corn_crib_0",
-      "y": 180
-    },
-    "facing=south,fill=0,fruit=pear,lit=false,part=0": {
-      "model": "jugcraft:block/corn_crib_0",
-      "y": 180
-    },
-    "facing=south,fill=0,fruit=pear,lit=true,part=0": {
-      "model": "jugcraft:block/corn_crib_0",
-      "y": 180
-    },
-    "facing=south,fill=0,fruit=apple,lit=false,part=1": {
-      "model": "jugcraft:block/corn_crib_1",
-      "y": 180
-    },
-    "facing=south,fill=0,fruit=apple,lit=true,part=1": {
-      "model": "jugcraft:block/corn_crib_1",
-      "y": 180
-    },
-    "facing=south,fill=0,fruit=pear,lit=false,part=1": {
-      "model": "jugcraft:block/corn_crib_1",
-      "y": 180
-    },
-    "facing=south,fill=0,fruit=pear,lit=true,part=1": {
-      "model": "jugcraft:block/corn_crib_1",
-      "y": 180
-    },
-    "facing=south,fill=0,fruit=apple,lit=false,part=2": {
-      "model": "jugcraft:block/corn_crib_2",
-      "y": 180
-    },
-    "facing=south,fill=0,fruit=apple,lit=true,part=2": {
-      "model": "jugcraft:block/corn_crib_2",
-      "y": 180
-    },
-    "facing=south,fill=0,fruit=pear,lit=false,part=2": {
-      "model": "jugcraft:block/corn_crib_2",
-      "y": 180
-    },
-    "facing=south,fill=0,fruit=pear,lit=true,part=2": {
-      "model": "jugcraft:block/corn_crib_2",
-      "y": 180
-    },
-    "facing=south,fill=0,fruit=apple,lit=false,part=3": {
-      "model": "jugcraft:block/corn_crib_3",
-      "y": 180
-    },
-    "facing=south,fill=0,fruit=apple,lit=true,part=3": {
-      "model": "jugcraft:block/corn_crib_3",
-      "y": 180
-    },
-    "facing=south,fill=0,fruit=pear,lit=false,part=3": {
-      "model": "jugcraft:block/corn_crib_3",
-      "y": 180
-    },
-    "facing=south,fill=0,fruit=pear,lit=true,part=3": {
-      "model": "jugcraft:block/corn_crib_3",
-      "y": 180
-    },
-    "facing=south,fill=1,fruit=apple,lit=false,part=0": {
-      "model": "jugcraft:block/corn_crib_0_1",
-      "y": 180
-    },
-    "facing=south,fill=1,fruit=apple,lit=true,part=0": {
-      "model": "jugcraft:block/corn_crib_0_1",
-      "y": 180
-    },
-    "facing=south,fill=1,fruit=pear,lit=false,part=0": {
-      "model": "jugcraft:block/corn_crib_0_1",
-      "y": 180
-    },
-    "facing=south,fill=1,fruit=pear,lit=true,part=0": {
-      "model": "jugcraft:block/corn_crib_0_1",
-      "y": 180
-    },
-    "facing=south,fill=1,fruit=apple,lit=false,part=1": {
-      "model": "jugcraft:block/corn_crib_1_1",
-      "y": 180
-    },
-    "facing=south,fill=1,fruit=apple,lit=true,part=1": {
-      "model": "jugcraft:block/corn_crib_1_1",
-      "y": 180
-    },
-    "facing=south,fill=1,fruit=pear,lit=false,part=1": {
-      "model": "jugcraft:block/corn_crib_1_1",
-      "y": 180
-    },
-    "facing=south,fill=1,fruit=pear,lit=true,part=1": {
-      "model": "jugcraft:block/corn_crib_1_1",
-      "y": 180
-    },
-    "facing=south,fill=1,fruit=apple,lit=false,part=2": {
-      "model": "jugcraft:block/corn_crib_2_1",
-      "y": 180
-    },
-    "facing=south,fill=1,fruit=apple,lit=true,part=2": {
-      "model": "jugcraft:block/corn_crib_2_1",
-      "y": 180
-    },
-    "facing=south,fill=1,fruit=pear,lit=false,part=2": {
-      "model": "jugcraft:block/corn_crib_2_1",
-      "y": 180
-    },
-    "facing=south,fill=1,fruit=pear,lit=true,part=2": {
-      "model": "jugcraft:block/corn_crib_2_1",
-      "y": 180
-    },
-    "facing=south,fill=1,fruit=apple,lit=false,part=3": {
-      "model": "jugcraft:block/corn_crib_3_1",
-      "y": 180
-    },
-    "facing=south,fill=1,fruit=apple,lit=true,part=3": {
-      "model": "jugcraft:block/corn_crib_3_1",
-      "y": 180
-    },
-    "facing=south,fill=1,fruit=pear,lit=false,part=3": {
-      "model": "jugcraft:block/corn_crib_3_1",
-      "y": 180
-    },
-    "facing=south,fill=1,fruit=pear,lit=true,part=3": {
-      "model": "jugcraft:block/corn_crib_3_1",
-      "y": 180
-    },
-    "facing=south,fill=2,fruit=apple,lit=false,part=0": {
-      "model": "jugcraft:block/corn_crib_0_2",
-      "y": 180
-    },
-    "facing=south,fill=2,fruit=apple,lit=true,part=0": {
-      "model": "jugcraft:block/corn_crib_0_2",
-      "y": 180
-    },
-    "facing=south,fill=2,fruit=pear,lit=false,part=0": {
-      "model": "jugcraft:block/corn_crib_0_2",
-      "y": 180
-    },
-    "facing=south,fill=2,fruit=pear,lit=true,part=0": {
-      "model": "jugcraft:block/corn_crib_0_2",
-      "y": 180
-    },
-    "facing=south,fill=2,fruit=apple,lit=false,part=1": {
-      "model": "jugcraft:block/corn_crib_1_2",
-      "y": 180
-    },
-    "facing=south,fill=2,fruit=apple,lit=true,part=1": {
-      "model": "jugcraft:block/corn_crib_1_2",
-      "y": 180
-    },
-    "facing=south,fill=2,fruit=pear,lit=false,part=1": {
-      "model": "jugcraft:block/corn_crib_1_2",
-      "y": 180
-    },
-    "facing=south,fill=2,fruit=pear,lit=true,part=1": {
-      "model": "jugcraft:block/corn_crib_1_2",
-      "y": 180
-    },
-    "facing=south,fill=2,fruit=apple,lit=false,part=2": {
-      "model": "jugcraft:block/corn_crib_2_2",
-      "y": 180
-    },
-    "facing=south,fill=2,fruit=apple,lit=true,part=2": {
-      "model": "jugcraft:block/corn_crib_2_2",
-      "y": 180
-    },
-    "facing=south,fill=2,fruit=pear,lit=false,part=2": {
-      "model": "jugcraft:block/corn_crib_2_2",
-      "y": 180
-    },
-    "facing=south,fill=2,fruit=pear,lit=true,part=2": {
-      "model": "jugcraft:block/corn_crib_2_2",
-      "y": 180
-    },
-    "facing=south,fill=2,fruit=apple,lit=false,part=3": {
-      "model": "jugcraft:block/corn_crib_3_2",
-      "y": 180
-    },
-    "facing=south,fill=2,fruit=apple,lit=true,part=3": {
-      "model": "jugcraft:block/corn_crib_3_2",
-      "y": 180
-    },
-    "facing=south,fill=2,fruit=pear,lit=false,part=3": {
-      "model": "jugcraft:block/corn_crib_3_2",
-      "y": 180
-    },
-    "facing=south,fill=2,fruit=pear,lit=true,part=3": {
-      "model": "jugcraft:block/corn_crib_3_2",
-      "y": 180
-    },
-    "facing=south,fill=3,fruit=apple,lit=false,part=0": {
-      "model": "jugcraft:block/corn_crib_0_3",
-      "y": 180
-    },
-    "facing=south,fill=3,fruit=apple,lit=true,part=0": {
-      "model": "jugcraft:block/corn_crib_0_3",
-      "y": 180
-    },
-    "facing=south,fill=3,fruit=pear,lit=false,part=0": {
-      "model": "jugcraft:block/corn_crib_0_3",
-      "y": 180
-    },
-    "facing=south,fill=3,fruit=pear,lit=true,part=0": {
-      "model": "jugcraft:block/corn_crib_0_3",
-      "y": 180
-    },
-    "facing=south,fill=3,fruit=apple,lit=false,part=1": {
-      "model": "jugcraft:block/corn_crib_1_3",
-      "y": 180
-    },
-    "facing=south,fill=3,fruit=apple,lit=true,part=1": {
-      "model": "jugcraft:block/corn_crib_1_3",
-      "y": 180
-    },
-    "facing=south,fill=3,fruit=pear,lit=false,part=1": {
-      "model": "jugcraft:block/corn_crib_1_3",
-      "y": 180
-    },
-    "facing=south,fill=3,fruit=pear,lit=true,part=1": {
-      "model": "jugcraft:block/corn_crib_1_3",
-      "y": 180
-    },
-    "facing=south,fill=3,fruit=apple,lit=false,part=2": {
-      "model": "jugcraft:block/corn_crib_2_3",
-      "y": 180
-    },
-    "facing=south,fill=3,fruit=apple,lit=true,part=2": {
-      "model": "jugcraft:block/corn_crib_2_3",
-      "y": 180
-    },
-    "facing=south,fill=3,fruit=pear,lit=false,part=2": {
-      "model": "jugcraft:block/corn_crib_2_3",
-      "y": 180
-    },
-    "facing=south,fill=3,fruit=pear,lit=true,part=2": {
-      "model": "jugcraft:block/corn_crib_2_3",
-      "y": 180
-    },
-    "facing=south,fill=3,fruit=apple,lit=false,part=3": {
-      "model": "jugcraft:block/corn_crib_3_3",
-      "y": 180
-    },
-    "facing=south,fill=3,fruit=apple,lit=true,part=3": {
-      "model": "jugcraft:block/corn_crib_3_3",
-      "y": 180
-    },
-    "facing=south,fill=3,fruit=pear,lit=false,part=3": {
-      "model": "jugcraft:block/corn_crib_3_3",
-      "y": 180
-    },
-    "facing=south,fill=3,fruit=pear,lit=true,part=3": {
-      "model": "jugcraft:block/corn_crib_3_3",
-      "y": 180
-    },
-    "facing=south,fill=4,fruit=apple,lit=false,part=0": {
-      "model": "jugcraft:block/corn_crib_0_4",
-      "y": 180
-    },
-    "facing=south,fill=4,fruit=apple,lit=true,part=0": {
-      "model": "jugcraft:block/corn_crib_0_4",
-      "y": 180
-    },
-    "facing=south,fill=4,fruit=pear,lit=false,part=0": {
-      "model": "jugcraft:block/corn_crib_0_4",
-      "y": 180
-    },
-    "facing=south,fill=4,fruit=pear,lit=true,part=0": {
-      "model": "jugcraft:block/corn_crib_0_4",
-      "y": 180
-    },
-    "facing=south,fill=4,fruit=apple,lit=false,part=1": {
-      "model": "jugcraft:block/corn_crib_1_4",
-      "y": 180
-    },
-    "facing=south,fill=4,fruit=apple,lit=true,part=1": {
-      "model": "jugcraft:block/corn_crib_1_4",
-      "y": 180
-    },
-    "facing=south,fill=4,fruit=pear,lit=false,part=1": {
-      "model": "jugcraft:block/corn_crib_1_4",
-      "y": 180
-    },
-    "facing=south,fill=4,fruit=pear,lit=true,part=1": {
-      "model": "jugcraft:block/corn_crib_1_4",
-      "y": 180
-    },
-    "facing=south,fill=4,fruit=apple,lit=false,part=2": {
-      "model": "jugcraft:block/corn_crib_2_4",
-      "y": 180
-    },
-    "facing=south,fill=4,fruit=apple,lit=true,part=2": {
-      "model": "jugcraft:block/corn_crib_2_4",
-      "y": 180
-    },
-    "facing=south,fill=4,fruit=pear,lit=false,part=2": {
-      "model": "jugcraft:block/corn_crib_2_4",
-      "y": 180
-    },
-    "facing=south,fill=4,fruit=pear,lit=true,part=2": {
-      "model": "jugcraft:block/corn_crib_2_4",
-      "y": 180
-    },
-    "facing=south,fill=4,fruit=apple,lit=false,part=3": {
-      "model": "jugcraft:block/corn_crib_3_4",
-      "y": 180
-    },
-    "facing=south,fill=4,fruit=apple,lit=true,part=3": {
-      "model": "jugcraft:block/corn_crib_3_4",
-      "y": 180
-    },
-    "facing=south,fill=4,fruit=pear,lit=false,part=3": {
-      "model": "jugcraft:block/corn_crib_3_4",
-      "y": 180
-    },
-    "facing=south,fill=4,fruit=pear,lit=true,part=3": {
-      "model": "jugcraft:block/corn_crib_3_4",
-      "y": 180
-    },
-    "facing=west,fill=0,fruit=apple,lit=false,part=0": {
-      "model": "jugcraft:block/corn_crib_0",
-      "y": 270
-    },
-    "facing=west,fill=0,fruit=apple,lit=true,part=0": {
-      "model": "jugcraft:block/corn_crib_0",
-      "y": 270
-    },
-    "facing=west,fill=0,fruit=pear,lit=false,part=0": {
-      "model": "jugcraft:block/corn_crib_0",
-      "y": 270
-    },
-    "facing=west,fill=0,fruit=pear,lit=true,part=0": {
-      "model": "jugcraft:block/corn_crib_0",
-      "y": 270
-    },
-    "facing=west,fill=0,fruit=apple,lit=false,part=1": {
-      "model": "jugcraft:block/corn_crib_1",
-      "y": 270
-    },
-    "facing=west,fill=0,fruit=apple,lit=true,part=1": {
-      "model": "jugcraft:block/corn_crib_1",
-      "y": 270
-    },
-    "facing=west,fill=0,fruit=pear,lit=false,part=1": {
-      "model": "jugcraft:block/corn_crib_1",
-      "y": 270
-    },
-    "facing=west,fill=0,fruit=pear,lit=true,part=1": {
-      "model": "jugcraft:block/corn_crib_1",
-      "y": 270
-    },
-    "facing=west,fill=0,fruit=apple,lit=false,part=2": {
-      "model": "jugcraft:block/corn_crib_2",
-      "y": 270
-    },
-    "facing=west,fill=0,fruit=apple,lit=true,part=2": {
-      "model": "jugcraft:block/corn_crib_2",
-      "y": 270
-    },
-    "facing=west,fill=0,fruit=pear,lit=false,part=2": {
-      "model": "jugcraft:block/corn_crib_2",
-      "y": 270
-    },
-    "facing=west,fill=0,fruit=pear,lit=true,part=2": {
-      "model": "jugcraft:block/corn_crib_2",
-      "y": 270
-    },
-    "facing=west,fill=0,fruit=apple,lit=false,part=3": {
-      "model": "jugcraft:block/corn_crib_3",
-      "y": 270
-    },
-    "facing=west,fill=0,fruit=apple,lit=true,part=3": {
-      "model": "jugcraft:block/corn_crib_3",
-      "y": 270
-    },
-    "facing=west,fill=0,fruit=pear,lit=false,part=3": {
-      "model": "jugcraft:block/corn_crib_3",
-      "y": 270
-    },
-    "facing=west,fill=0,fruit=pear,lit=true,part=3": {
-      "model": "jugcraft:block/corn_crib_3",
-      "y": 270
-    },
-    "facing=west,fill=1,fruit=apple,lit=false,part=0": {
-      "model": "jugcraft:block/corn_crib_0_1",
-      "y": 270
-    },
-    "facing=west,fill=1,fruit=apple,lit=true,part=0": {
-      "model": "jugcraft:block/corn_crib_0_1",
-      "y": 270
-    },
-    "facing=west,fill=1,fruit=pear,lit=false,part=0": {
-      "model": "jugcraft:block/corn_crib_0_1",
-      "y": 270
-    },
-    "facing=west,fill=1,fruit=pear,lit=true,part=0": {
-      "model": "jugcraft:block/corn_crib_0_1",
-      "y": 270
-    },
-    "facing=west,fill=1,fruit=apple,lit=false,part=1": {
-      "model": "jugcraft:block/corn_crib_1_1",
-      "y": 270
-    },
-    "facing=west,fill=1,fruit=apple,lit=true,part=1": {
-      "model": "jugcraft:block/corn_crib_1_1",
-      "y": 270
-    },
-    "facing=west,fill=1,fruit=pear,lit=false,part=1": {
-      "model": "jugcraft:block/corn_crib_1_1",
-      "y": 270
-    },
-    "facing=west,fill=1,fruit=pear,lit=true,part=1": {
-      "model": "jugcraft:block/corn_crib_1_1",
-      "y": 270
-    },
-    "facing=west,fill=1,fruit=apple,lit=false,part=2": {
-      "model": "jugcraft:block/corn_crib_2_1",
-      "y": 270
-    },
-    "facing=west,fill=1,fruit=apple,lit=true,part=2": {
-      "model": "jugcraft:block/corn_crib_2_1",
-      "y": 270
-    },
-    "facing=west,fill=1,fruit=pear,lit=false,part=2": {
-      "model": "jugcraft:block/corn_crib_2_1",
-      "y": 270
-    },
-    "facing=west,fill=1,fruit=pear,lit=true,part=2": {
-      "model": "jugcraft:block/corn_crib_2_1",
-      "y": 270
-    },
-    "facing=west,fill=1,fruit=apple,lit=false,part=3": {
-      "model": "jugcraft:block/corn_crib_3_1",
-      "y": 270
-    },
-    "facing=west,fill=1,fruit=apple,lit=true,part=3": {
-      "model": "jugcraft:block/corn_crib_3_1",
-      "y": 270
-    },
-    "facing=west,fill=1,fruit=pear,lit=false,part=3": {
-      "model": "jugcraft:block/corn_crib_3_1",
-      "y": 270
-    },
-    "facing=west,fill=1,fruit=pear,lit=true,part=3": {
-      "model": "jugcraft:block/corn_crib_3_1",
-      "y": 270
-    },
-    "facing=west,fill=2,fruit=apple,lit=false,part=0": {
-      "model": "jugcraft:block/corn_crib_0_2",
-      "y": 270
-    },
-    "facing=west,fill=2,fruit=apple,lit=true,part=0": {
-      "model": "jugcraft:block/corn_crib_0_2",
-      "y": 270
-    },
-    "facing=west,fill=2,fruit=pear,lit=false,part=0": {
-      "model": "jugcraft:block/corn_crib_0_2",
-      "y": 270
-    },
-    "facing=west,fill=2,fruit=pear,lit=true,part=0": {
-      "model": "jugcraft:block/corn_crib_0_2",
-      "y": 270
-    },
-    "facing=west,fill=2,fruit=apple,lit=false,part=1": {
-      "model": "jugcraft:block/corn_crib_1_2",
-      "y": 270
-    },
-    "facing=west,fill=2,fruit=apple,lit=true,part=1": {
-      "model": "jugcraft:block/corn_crib_1_2",
-      "y": 270
-    },
-    "facing=west,fill=2,fruit=pear,lit=false,part=1": {
-      "model": "jugcraft:block/corn_crib_1_2",
-      "y": 270
-    },
-    "facing=west,fill=2,fruit=pear,lit=true,part=1": {
-      "model": "jugcraft:block/corn_crib_1_2",
-      "y": 270
-    },
-    "facing=west,fill=2,fruit=apple,lit=false,part=2": {
-      "model": "jugcraft:block/corn_crib_2_2",
-      "y": 270
-    },
-    "facing=west,fill=2,fruit=apple,lit=true,part=2": {
-      "model": "jugcraft:block/corn_crib_2_2",
-      "y": 270
-    },
-    "facing=west,fill=2,fruit=pear,lit=false,part=2": {
-      "model": "jugcraft:block/corn_crib_2_2",
-      "y": 270
-    },
-    "facing=west,fill=2,fruit=pear,lit=true,part=2": {
-      "model": "jugcraft:block/corn_crib_2_2",
-      "y": 270
-    },
-    "facing=west,fill=2,fruit=apple,lit=false,part=3": {
-      "model": "jugcraft:block/corn_crib_3_2",
-      "y": 270
-    },
-    "facing=west,fill=2,fruit=apple,lit=true,part=3": {
-      "model": "jugcraft:block/corn_crib_3_2",
-      "y": 270
-    },
-    "facing=west,fill=2,fruit=pear,lit=false,part=3": {
-      "model": "jugcraft:block/corn_crib_3_2",
-      "y": 270
-    },
-    "facing=west,fill=2,fruit=pear,lit=true,part=3": {
-      "model": "jugcraft:block/corn_crib_3_2",
-      "y": 270
-    },
-    "facing=west,fill=3,fruit=apple,lit=false,part=0": {
-      "model": "jugcraft:block/corn_crib_0_3",
-      "y": 270
-    },
-    "facing=west,fill=3,fruit=apple,lit=true,part=0": {
-      "model": "jugcraft:block/corn_crib_0_3",
-      "y": 270
-    },
-    "facing=west,fill=3,fruit=pear,lit=false,part=0": {
-      "model": "jugcraft:block/corn_crib_0_3",
-      "y": 270
-    },
-    "facing=west,fill=3,fruit=pear,lit=true,part=0": {
-      "model": "jugcraft:block/corn_crib_0_3",
-      "y": 270
-    },
-    "facing=west,fill=3,fruit=apple,lit=false,part=1": {
-      "model": "jugcraft:block/corn_crib_1_3",
-      "y": 270
-    },
-    "facing=west,fill=3,fruit=apple,lit=true,part=1": {
-      "model": "jugcraft:block/corn_crib_1_3",
-      "y": 270
-    },
-    "facing=west,fill=3,fruit=pear,lit=false,part=1": {
-      "model": "jugcraft:block/corn_crib_1_3",
-      "y": 270
-    },
-    "facing=west,fill=3,fruit=pear,lit=true,part=1": {
-      "model": "jugcraft:block/corn_crib_1_3",
-      "y": 270
-    },
-    "facing=west,fill=3,fruit=apple,lit=false,part=2": {
-      "model": "jugcraft:block/corn_crib_2_3",
-      "y": 270
-    },
-    "facing=west,fill=3,fruit=apple,lit=true,part=2": {
-      "model": "jugcraft:block/corn_crib_2_3",
-      "y": 270
-    },
-    "facing=west,fill=3,fruit=pear,lit=false,part=2": {
-      "model": "jugcraft:block/corn_crib_2_3",
-      "y": 270
-    },
-    "facing=west,fill=3,fruit=pear,lit=true,part=2": {
-      "model": "jugcraft:block/corn_crib_2_3",
-      "y": 270
-    },
-    "facing=west,fill=3,fruit=apple,lit=false,part=3": {
-      "model": "jugcraft:block/corn_crib_3_3",
-      "y": 270
-    },
-    "facing=west,fill=3,fruit=apple,lit=true,part=3": {
-      "model": "jugcraft:block/corn_crib_3_3",
-      "y": 270
-    },
-    "facing=west,fill=3,fruit=pear,lit=false,part=3": {
-      "model": "jugcraft:block/corn_crib_3_3",
-      "y": 270
-    },
-    "facing=west,fill=3,fruit=pear,lit=true,part=3": {
-      "model": "jugcraft:block/corn_crib_3_3",
-      "y": 270
-    },
-    "facing=west,fill=4,fruit=apple,lit=false,part=0": {
-      "model": "jugcraft:block/corn_crib_0_4",
-      "y": 270
-    },
-    "facing=west,fill=4,fruit=apple,lit=true,part=0": {
-      "model": "jugcraft:block/corn_crib_0_4",
-      "y": 270
-    },
-    "facing=west,fill=4,fruit=pear,lit=false,part=0": {
-      "model": "jugcraft:block/corn_crib_0_4",
-      "y": 270
-    },
-    "facing=west,fill=4,fruit=pear,lit=true,part=0": {
-      "model": "jugcraft:block/corn_crib_0_4",
-      "y": 270
-    },
-    "facing=west,fill=4,fruit=apple,lit=false,part=1": {
-      "model": "jugcraft:block/corn_crib_1_4",
-      "y": 270
-    },
-    "facing=west,fill=4,fruit=apple,lit=true,part=1": {
-      "model": "jugcraft:block/corn_crib_1_4",
-      "y": 270
-    },
-    "facing=west,fill=4,fruit=pear,lit=false,part=1": {
-      "model": "jugcraft:block/corn_crib_1_4",
-      "y": 270
-    },
-    "facing=west,fill=4,fruit=pear,lit=true,part=1": {
-      "model": "jugcraft:block/corn_crib_1_4",
-      "y": 270
-    },
-    "facing=west,fill=4,fruit=apple,lit=false,part=2": {
-      "model": "jugcraft:block/corn_crib_2_4",
-      "y": 270
-    },
-    "facing=west,fill=4,fruit=apple,lit=true,part=2": {
-      "model": "jugcraft:block/corn_crib_2_4",
-      "y": 270
-    },
-    "facing=west,fill=4,fruit=pear,lit=false,part=2": {
-      "model": "jugcraft:block/corn_crib_2_4",
-      "y": 270
-    },
-    "facing=west,fill=4,fruit=pear,lit=true,part=2": {
-      "model": "jugcraft:block/corn_crib_2_4",
-      "y": 270
-    },
-    "facing=west,fill=4,fruit=apple,lit=false,part=3": {
-      "model": "jugcraft:block/corn_crib_3_4",
-      "y": 270
-    },
-    "facing=west,fill=4,fruit=apple,lit=true,part=3": {
-      "model": "jugcraft:block/corn_crib_3_4",
-      "y": 270
-    },
-    "facing=west,fill=4,fruit=pear,lit=false,part=3": {
-      "model": "jugcraft:block/corn_crib_3_4",
-      "y": 270
-    },
-    "facing=west,fill=4,fruit=pear,lit=true,part=3": {
-      "model": "jugcraft:block/corn_crib_3_4",
-      "y": 270
+  "multipart": [
+    {
+      "when": {
+        "facing": "north",
+        "part": "0"
+      },
+      "apply": {
+        "model": "jugcraft:block/corn_crib_0"
+      }
+    },
+    {
+      "when": {
+        "facing": "north",
+        "part": "0",
+        "fill": "1"
+      },
+      "apply": {
+        "model": "jugcraft:block/corn_crib_0_heap_1"
+      }
+    },
+    {
+      "when": {
+        "facing": "north",
+        "part": "0",
+        "fill": "2"
+      },
+      "apply": {
+        "model": "jugcraft:block/corn_crib_0_heap_2"
+      }
+    },
+    {
+      "when": {
+        "facing": "north",
+        "part": "0",
+        "fill": "3"
+      },
+      "apply": {
+        "model": "jugcraft:block/corn_crib_0_heap_3"
+      }
+    },
+    {
+      "when": {
+        "facing": "north",
+        "part": "0",
+        "fill": "4"
+      },
+      "apply": {
+        "model": "jugcraft:block/corn_crib_0_heap_4"
+      }
+    },
+    {
+      "when": {
+        "facing": "north",
+        "part": "1"
+      },
+      "apply": {
+        "model": "jugcraft:block/corn_crib_1"
+      }
+    },
+    {
+      "when": {
+        "facing": "north",
+        "part": "1",
+        "fill": "1"
+      },
+      "apply": {
+        "model": "jugcraft:block/corn_crib_1_heap_1"
+      }
+    },
+    {
+      "when": {
+        "facing": "north",
+        "part": "1",
+        "fill": "2"
+      },
+      "apply": {
+        "model": "jugcraft:block/corn_crib_1_heap_2"
+      }
+    },
+    {
+      "when": {
+        "facing": "north",
+        "part": "1",
+        "fill": "3"
+      },
+      "apply": {
+        "model": "jugcraft:block/corn_crib_1_heap_3"
+      }
+    },
+    {
+      "when": {
+        "facing": "north",
+        "part": "1",
+        "fill": "4"
+      },
+      "apply": {
+        "model": "jugcraft:block/corn_crib_1_heap_4"
+      }
+    },
+    {
+      "when": {
+        "facing": "north",
+        "part": "2"
+      },
+      "apply": {
+        "model": "jugcraft:block/corn_crib_2"
+      }
+    },
+    {
+      "when": {
+        "facing": "north",
+        "part": "2",
+        "fill": "1"
+      },
+      "apply": {
+        "model": "jugcraft:block/corn_crib_2_heap_1"
+      }
+    },
+    {
+      "when": {
+        "facing": "north",
+        "part": "2",
+        "fill": "2"
+      },
+      "apply": {
+        "model": "jugcraft:block/corn_crib_2_heap_2"
+      }
+    },
+    {
+      "when": {
+        "facing": "north",
+        "part": "2",
+        "fill": "3"
+      },
+      "apply": {
+        "model": "jugcraft:block/corn_crib_2_heap_3"
+      }
+    },
+    {
+      "when": {
+        "facing": "north",
+        "part": "2",
+        "fill": "4"
+      },
+      "apply": {
+        "model": "jugcraft:block/corn_crib_2_heap_4"
+      }
+    },
+    {
+      "when": {
+        "facing": "north",
+        "part": "3"
+      },
+      "apply": {
+        "model": "jugcraft:block/corn_crib_3"
+      }
+    },
+    {
+      "when": {
+        "facing": "north",
+        "part": "3",
+        "fill": "1"
+      },
+      "apply": {
+        "model": "jugcraft:block/corn_crib_3_heap_1"
+      }
+    },
+    {
+      "when": {
+        "facing": "north",
+        "part": "3",
+        "fill": "2"
+      },
+      "apply": {
+        "model": "jugcraft:block/corn_crib_3_heap_2"
+      }
+    },
+    {
+      "when": {
+        "facing": "north",
+        "part": "3",
+        "fill": "3"
+      },
+      "apply": {
+        "model": "jugcraft:block/corn_crib_3_heap_3"
+      }
+    },
+    {
+      "when": {
+        "facing": "north",
+        "part": "3",
+        "fill": "4"
+      },
+      "apply": {
+        "model": "jugcraft:block/corn_crib_3_heap_4"
+      }
+    },
+    {
+      "when": {
+        "facing": "east",
+        "part": "0"
+      },
+      "apply": {
+        "model": "jugcraft:block/corn_crib_0",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "facing": "east",
+        "part": "0",
+        "fill": "1"
+      },
+      "apply": {
+        "model": "jugcraft:block/corn_crib_0_heap_1",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "facing": "east",
+        "part": "0",
+        "fill": "2"
+      },
+      "apply": {
+        "model": "jugcraft:block/corn_crib_0_heap_2",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "facing": "east",
+        "part": "0",
+        "fill": "3"
+      },
+      "apply": {
+        "model": "jugcraft:block/corn_crib_0_heap_3",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "facing": "east",
+        "part": "0",
+        "fill": "4"
+      },
+      "apply": {
+        "model": "jugcraft:block/corn_crib_0_heap_4",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "facing": "east",
+        "part": "1"
+      },
+      "apply": {
+        "model": "jugcraft:block/corn_crib_1",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "facing": "east",
+        "part": "1",
+        "fill": "1"
+      },
+      "apply": {
+        "model": "jugcraft:block/corn_crib_1_heap_1",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "facing": "east",
+        "part": "1",
+        "fill": "2"
+      },
+      "apply": {
+        "model": "jugcraft:block/corn_crib_1_heap_2",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "facing": "east",
+        "part": "1",
+        "fill": "3"
+      },
+      "apply": {
+        "model": "jugcraft:block/corn_crib_1_heap_3",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "facing": "east",
+        "part": "1",
+        "fill": "4"
+      },
+      "apply": {
+        "model": "jugcraft:block/corn_crib_1_heap_4",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "facing": "east",
+        "part": "2"
+      },
+      "apply": {
+        "model": "jugcraft:block/corn_crib_2",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "facing": "east",
+        "part": "2",
+        "fill": "1"
+      },
+      "apply": {
+        "model": "jugcraft:block/corn_crib_2_heap_1",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "facing": "east",
+        "part": "2",
+        "fill": "2"
+      },
+      "apply": {
+        "model": "jugcraft:block/corn_crib_2_heap_2",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "facing": "east",
+        "part": "2",
+        "fill": "3"
+      },
+      "apply": {
+        "model": "jugcraft:block/corn_crib_2_heap_3",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "facing": "east",
+        "part": "2",
+        "fill": "4"
+      },
+      "apply": {
+        "model": "jugcraft:block/corn_crib_2_heap_4",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "facing": "east",
+        "part": "3"
+      },
+      "apply": {
+        "model": "jugcraft:block/corn_crib_3",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "facing": "east",
+        "part": "3",
+        "fill": "1"
+      },
+      "apply": {
+        "model": "jugcraft:block/corn_crib_3_heap_1",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "facing": "east",
+        "part": "3",
+        "fill": "2"
+      },
+      "apply": {
+        "model": "jugcraft:block/corn_crib_3_heap_2",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "facing": "east",
+        "part": "3",
+        "fill": "3"
+      },
+      "apply": {
+        "model": "jugcraft:block/corn_crib_3_heap_3",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "facing": "east",
+        "part": "3",
+        "fill": "4"
+      },
+      "apply": {
+        "model": "jugcraft:block/corn_crib_3_heap_4",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "facing": "south",
+        "part": "0"
+      },
+      "apply": {
+        "model": "jugcraft:block/corn_crib_0",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "facing": "south",
+        "part": "0",
+        "fill": "1"
+      },
+      "apply": {
+        "model": "jugcraft:block/corn_crib_0_heap_1",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "facing": "south",
+        "part": "0",
+        "fill": "2"
+      },
+      "apply": {
+        "model": "jugcraft:block/corn_crib_0_heap_2",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "facing": "south",
+        "part": "0",
+        "fill": "3"
+      },
+      "apply": {
+        "model": "jugcraft:block/corn_crib_0_heap_3",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "facing": "south",
+        "part": "0",
+        "fill": "4"
+      },
+      "apply": {
+        "model": "jugcraft:block/corn_crib_0_heap_4",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "facing": "south",
+        "part": "1"
+      },
+      "apply": {
+        "model": "jugcraft:block/corn_crib_1",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "facing": "south",
+        "part": "1",
+        "fill": "1"
+      },
+      "apply": {
+        "model": "jugcraft:block/corn_crib_1_heap_1",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "facing": "south",
+        "part": "1",
+        "fill": "2"
+      },
+      "apply": {
+        "model": "jugcraft:block/corn_crib_1_heap_2",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "facing": "south",
+        "part": "1",
+        "fill": "3"
+      },
+      "apply": {
+        "model": "jugcraft:block/corn_crib_1_heap_3",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "facing": "south",
+        "part": "1",
+        "fill": "4"
+      },
+      "apply": {
+        "model": "jugcraft:block/corn_crib_1_heap_4",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "facing": "south",
+        "part": "2"
+      },
+      "apply": {
+        "model": "jugcraft:block/corn_crib_2",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "facing": "south",
+        "part": "2",
+        "fill": "1"
+      },
+      "apply": {
+        "model": "jugcraft:block/corn_crib_2_heap_1",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "facing": "south",
+        "part": "2",
+        "fill": "2"
+      },
+      "apply": {
+        "model": "jugcraft:block/corn_crib_2_heap_2",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "facing": "south",
+        "part": "2",
+        "fill": "3"
+      },
+      "apply": {
+        "model": "jugcraft:block/corn_crib_2_heap_3",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "facing": "south",
+        "part": "2",
+        "fill": "4"
+      },
+      "apply": {
+        "model": "jugcraft:block/corn_crib_2_heap_4",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "facing": "south",
+        "part": "3"
+      },
+      "apply": {
+        "model": "jugcraft:block/corn_crib_3",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "facing": "south",
+        "part": "3",
+        "fill": "1"
+      },
+      "apply": {
+        "model": "jugcraft:block/corn_crib_3_heap_1",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "facing": "south",
+        "part": "3",
+        "fill": "2"
+      },
+      "apply": {
+        "model": "jugcraft:block/corn_crib_3_heap_2",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "facing": "south",
+        "part": "3",
+        "fill": "3"
+      },
+      "apply": {
+        "model": "jugcraft:block/corn_crib_3_heap_3",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "facing": "south",
+        "part": "3",
+        "fill": "4"
+      },
+      "apply": {
+        "model": "jugcraft:block/corn_crib_3_heap_4",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "facing": "west",
+        "part": "0"
+      },
+      "apply": {
+        "model": "jugcraft:block/corn_crib_0",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "facing": "west",
+        "part": "0",
+        "fill": "1"
+      },
+      "apply": {
+        "model": "jugcraft:block/corn_crib_0_heap_1",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "facing": "west",
+        "part": "0",
+        "fill": "2"
+      },
+      "apply": {
+        "model": "jugcraft:block/corn_crib_0_heap_2",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "facing": "west",
+        "part": "0",
+        "fill": "3"
+      },
+      "apply": {
+        "model": "jugcraft:block/corn_crib_0_heap_3",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "facing": "west",
+        "part": "0",
+        "fill": "4"
+      },
+      "apply": {
+        "model": "jugcraft:block/corn_crib_0_heap_4",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "facing": "west",
+        "part": "1"
+      },
+      "apply": {
+        "model": "jugcraft:block/corn_crib_1",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "facing": "west",
+        "part": "1",
+        "fill": "1"
+      },
+      "apply": {
+        "model": "jugcraft:block/corn_crib_1_heap_1",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "facing": "west",
+        "part": "1",
+        "fill": "2"
+      },
+      "apply": {
+        "model": "jugcraft:block/corn_crib_1_heap_2",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "facing": "west",
+        "part": "1",
+        "fill": "3"
+      },
+      "apply": {
+        "model": "jugcraft:block/corn_crib_1_heap_3",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "facing": "west",
+        "part": "1",
+        "fill": "4"
+      },
+      "apply": {
+        "model": "jugcraft:block/corn_crib_1_heap_4",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "facing": "west",
+        "part": "2"
+      },
+      "apply": {
+        "model": "jugcraft:block/corn_crib_2",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "facing": "west",
+        "part": "2",
+        "fill": "1"
+      },
+      "apply": {
+        "model": "jugcraft:block/corn_crib_2_heap_1",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "facing": "west",
+        "part": "2",
+        "fill": "2"
+      },
+      "apply": {
+        "model": "jugcraft:block/corn_crib_2_heap_2",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "facing": "west",
+        "part": "2",
+        "fill": "3"
+      },
+      "apply": {
+        "model": "jugcraft:block/corn_crib_2_heap_3",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "facing": "west",
+        "part": "2",
+        "fill": "4"
+      },
+      "apply": {
+        "model": "jugcraft:block/corn_crib_2_heap_4",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "facing": "west",
+        "part": "3"
+      },
+      "apply": {
+        "model": "jugcraft:block/corn_crib_3",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "facing": "west",
+        "part": "3",
+        "fill": "1"
+      },
+      "apply": {
+        "model": "jugcraft:block/corn_crib_3_heap_1",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "facing": "west",
+        "part": "3",
+        "fill": "2"
+      },
+      "apply": {
+        "model": "jugcraft:block/corn_crib_3_heap_2",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "facing": "west",
+        "part": "3",
+        "fill": "3"
+      },
+      "apply": {
+        "model": "jugcraft:block/corn_crib_3_heap_3",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "facing": "west",
+        "part": "3",
+        "fill": "4"
+      },
+      "apply": {
+        "model": "jugcraft:block/corn_crib_3_heap_4",
+        "y": 270
+      }
     }
-  }
+  ]
 }
