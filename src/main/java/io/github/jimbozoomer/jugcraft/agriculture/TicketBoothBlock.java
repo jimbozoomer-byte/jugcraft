@@ -137,6 +137,8 @@ public class TicketBoothBlock extends MultiDecorationBlock implements EntityBloc
 			return InteractionResult.CONSUME;
 		}
 		setRoll(level, master, state.getValue(FACING), left - 1);
+		// Marked here at once, so a second turn in the same tick waits; the block event tells the clients.
+		booth.mark(level.getGameTime());
 		ItemStack ticket = new ItemStack(JugcraftAgriculture.item("midway_ticket"));
 		if (!player.getInventory().add(ticket)) {
 			Block.popResource(level, pos, ticket);
