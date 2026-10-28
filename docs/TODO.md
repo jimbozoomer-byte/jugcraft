@@ -4,30 +4,24 @@
 
 The owner's brainstorm after Concordance Chunk E. Today the sky gives the Concordance's six patterns, the Orrery
 Observatory's Astral Resonance and the Astrolabe's short attunements
-([arcane-concordance-celestial.md](features/arcane-concordance-celestial.md)). These ideas give it more uses. None is
-scoped or approved for building yet.
+([arcane-concordance-celestial.md](features/arcane-concordance-celestial.md)). These ideas give it more uses. The owner
+chose star-bred lines first and it is designed; the others are not scoped yet.
 
-- [ ] **Star-bred lines (being designed with the owner).** Seeds and animals carry a few heritable traits that players
-  breed for on purpose:
-  - for crops, yield, growth, hardiness and quality;
-  - for animals, produce, speed, temper and hardiness.
+- [ ] **Star-bred lines (designed; animals first).** The plan is
+  [star-bred-lines-2026-10-28.md](plans/star-bred-lines-2026-10-28.md). Farm animals carry a line: four numbers anyone
+  can read (Yield, Vigour, Fertility, Hardiness) and hidden gifts found by breeding. A baby born under a pattern takes
+  its sign, which raises one number past its parents'. The owner's answers (28 October 2026):
+  - genetics are a mix of readable numbers and hidden genes;
+  - animals first, vanilla kinds as well as Jugcraft's;
+  - forcing a trait has a cost and no other drawback;
+  - a CRISPR-style gene lab is the technological route, and using both routes is better than either;
+  - **the Astrawand reads only.** It is a slender conductor's baton in the look of the Wind Waker from The Legend of
+    Zelda: a pale shaft, a gold grip and pommel, and a little star at its tip. It is a fan homage with its own name,
+    and its art and model are drawn new for Jugcraft, not copied (LICENSE_POLICY.md, fan homages). The Astrolabe keeps
+    its present work: gathering resonance and attuning.
 
-  The sky is the magical push: what is planted or born under a pattern takes its sign, which nudges a trait linked to
-  that pattern, and a star rite can deliberately work a chosen trait into a line or fix it so it breeds true.
-  - Builds on the Concordance garden's niches and grafts
-    ([arcane-concordance-ecology.md](features/arcane-concordance-ecology.md)) and the Astrolabe's recall, so no one waits
-    on the calendar.
-  - Must keep within the agriculture plan's no-feedback-loop rules ([industrial-agriculture-plan.md](features/industrial-agriculture-plan.md)).
-  - **The Astrawand** (owner's request, 28 October 2026): signs and traits are read with a new tool, not the Astrolabe.
-    It is a slender conductor's baton in the look of the Wind Waker from The Legend of Zelda: a pale shaft, a gold
-    pommel and ferrule, and a little star at its tip. It is a fan homage with its own name, and its art and model are
-    drawn new for Jugcraft, not copied (LICENSE_POLICY.md, fan homages). The owner library has no baton to start from.
-    - Point it at a crop, seed or animal to read its sign and traits.
-    - It could also *conduct* the star rite: a short pattern of strokes for each sky pattern, as the Wind Waker's
-      songs are conducted.
-    - The Astrolabe keeps its present work: gathering resonance and attuning.
-  - Open questions are with the owner: how deep the genetics go, crops or animals first, vanilla kinds or only
-    Jugcraft's, and drawbacks for forced traits.
+  Phases: star-born animals and the Astrawand; the star rite; the gene lab; more kinds; star-bred crops (reconciled
+  with the industrial crops' genes and the Concordance garden's grafts).
 - [ ] **Omens and horoscopes (magical side; the owner likes it).** Each night's sky shifts the world a little, and the
   forecast says how. Examples:
   - a Full Moon makes the Alpha Werewolf hunt harder and his loot richer;
