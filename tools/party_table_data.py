@@ -25,6 +25,15 @@ CHOCOLATE = pal("2a160c", "3e2214", "56321e", "6e4428")
 ICING = (244, 244, 240)
 MERINGUE = pal("b0a898", "d0c8b8", "e4ddd0", "f2eee4", "fbf9f3")
 COCOA = (74, 44, 24)
+PASTRY = pal("8a5a22", "b07a34", "d09c4c", "e6bc6c", "f4d898")
+SAUSAGE = pal("5a2418", "7e3424", "a04a34", "bc6448")
+MUSTARD = (232, 184, 40)
+DOUGH = pal("3e5a1c", "547626", "6c9232", "86ac44")
+ALMOND = (206, 160, 104)
+CRUMB = pal("6a4422", "8a5c30", "a87840")
+PORCELAIN = pal("b8b4ac", "d8d4cc", "ecebe6", "f8f7f4")
+JELLY = pal("5a0a12", "8a121e", "b41c2a", "d8343c")
+IRIS = (52, 104, 168)
 CANDY = {"tip": (246, 238, 220), "middle": (236, 124, 28), "foot": (250, 196, 54)}
 
 
@@ -333,6 +342,169 @@ def ghost_meringue_platter():
     return sc
 
 
+# ---------------------------------------------------------------- part 3: the trays
+
+def flat_colour(colour, alpha=255):
+    """One colour all over (an eye, a dot of mustard)."""
+    def paint(p):
+        for y in range(p.h):
+            for x in range(p.w):
+                p.put(x, y, colour, alpha)
+    paint.tag = repr(("flat_colour", colour, alpha))
+    return paint
+
+
+def toned(palette, lit=True):
+    """A palette's middle tone, its top row lit (and its foot shaded, on a side three texels high or more)."""
+    def paint(p):
+        top = len(palette) - 1
+        for y in range(p.h):
+            for x in range(p.w):
+                k = top if lit and y == 0 and p.h > 1 else 1 if y == p.h - 1 and p.h > 2 else top - 1
+                p.put(x, y, shade(palette, k))
+    paint.tag = repr(("toned", palette, lit))
+    return paint
+
+
+def wound():
+    """Pastry wound round a sausage: bands a texel wide across it, pastry, sausage and pastry, the pastry lit at its
+    left; the sausage shows between."""
+    def paint(p):
+        long_x = p.w >= p.h
+        for y in range(p.h):
+            for x in range(p.w):
+                a = x if long_x else y
+                p.put(x, y, shade(SAUSAGE, 2) if a % 3 == 1 else shade(PASTRY, 3 if a % 3 == 0 else 2))
+    paint.tag = repr(("wound",))
+    return paint
+
+
+def finger():
+    """A witch's finger of green shortbread, from its tip down: an almond nail, a knuckle crease a tone deeper, then the
+    finger, lit along its left."""
+    def paint(p):
+        for y in range(p.h):
+            for x in range(p.w):
+                if y == 0:
+                    p.put(x, y, ALMOND)
+                else:
+                    p.put(x, y, shade(DOUGH, 1 if y == 1 else 3 if x == 0 else 2))
+    paint.tag = repr(("finger",))
+    return paint
+
+
+def crumbs():
+    """Cookie crumbs: two tones by turns, a lit crumb every third texel."""
+    def paint(p):
+        for y in range(p.h):
+            for x in range(p.w):
+                p.put(x, y, shade(CRUMB, 2 if (x + 2 * y) % 3 == 0 else 1 if (x + y) % 2 else 0))
+    paint.tag = repr(("crumbs",))
+    return paint
+
+
+def jelly():
+    """Red jelly, clear: its middle tone, see-through, its top row lit."""
+    def paint(p):
+        for y in range(p.h):
+            for x in range(p.w):
+                p.put(x, y, shade(JELLY, 3 if y == 0 and p.h > 1 else 2), 190)
+    paint.tag = repr(("jelly",))
+    return paint
+
+
+def sausage_slots():
+    """Where each sausage lies on the tray, front to back along it, in the order they go on: two rows of four, either
+    side of the ramekin of mustard."""
+    return [(x, z) for z in (7.0, 9.0) for x in (5.5, 6.5, 9.5, 10.5)]
+
+
+def mummy_sausage(sc, cx, cz, y):
+    """A mummy sausage 12 cm long and 5 cm thick, lying front to back: wound in pastry, two dots of mustard for eyes near
+    its front end."""
+    eye = flat_colour(MUSTARD)
+    return [panel(sc, "mummy", wound(), (cx - 0.375, y, cz - 1.0), (cx + 0.375, y + 0.75, cz + 1.0), north=toned(SAUSAGE), south=toned(SAUSAGE)),
+            panel(sc, "mummy_eye", eye, (cx - 0.3, y + 0.75, cz - 0.8), (cx - 0.1, y + 0.8, cz - 0.6), sides=("up", "north", "east", "west")),
+            panel(sc, "mummy_eye", eye, (cx + 0.1, y + 0.75, cz - 0.8), (cx + 0.3, y + 0.8, cz - 0.6), sides=("up", "north", "east", "west"))]
+
+
+def mummy_sausage_tray():
+    """The Mummy Sausage Tray, facing north: a black baking tray 40 cm by 28 cm, its low sides round it, a white ramekin
+    of mustard in its middle. Models: `whole` (the tray and ramekin) and `slot_0` up to the last (each sausage)."""
+    spec = pt.MUMMY_TRAY
+    sc = Sculpt(spec["block"], 2804, 128)
+    steel, white = enamel(), toned(PORCELAIN)
+    el = [panel(sc, "tray", steel, (4.75, 0.0, 5.75), (11.25, 0.25, 10.25))]
+    el += walls(sc, "tray_side", steel, 4.75, 5.75, 11.25, 10.25, 0.25, 0.25, 0.75)
+    el += walls(sc, "ramekin", white, 7.25, 7.25, 8.75, 8.75, 0.25, 0.25, 1.0)
+    el.append(panel(sc, "mustard", flat_colour(MUSTARD), (7.5, 0.25, 7.5), (8.5, 0.75, 8.5), sides=("up",)))
+    sc.models["whole"] = el
+    for k, (x, z) in enumerate(sausage_slots()):
+        sc.models[f"slot_{k}"] = mummy_sausage(sc, x, z, 0.25)
+    return sc
+
+
+# Each finger: where it stands in the crumbs (x, z), and how it leans out (the axis, degrees).
+FINGERS = ((7.0, 7.0, "x", -22.5), (8.0, 6.75, "x", -22.5), (9.0, 7.0, "z", -22.5), (6.75, 8.0, "z", 22.5), (9.25, 8.0, "z", -22.5),
+           (7.0, 9.0, "z", 22.5), (8.0, 9.25, "x", 22.5), (9.0, 9.0, "x", 22.5), (7.75, 8.0, "x", 0.0), (8.5, 8.25, "z", 0.0))
+
+
+def witch_finger_cauldron():
+    """The Witch-Finger Cauldron, facing north: a cast-iron pot 25 cm across, round (two boxes crossed), its lip round its
+    top, on three stubby legs, filled with cookie crumbs. Models: `whole` (the pot and crumbs) and `slot_0` up to the
+    last (each finger, standing in the crumbs and leaning out, 14 cm long and 3 cm thick)."""
+    spec = pt.FINGER_CAULDRON
+    sc = Sculpt(spec["block"], 2805, 128)
+    iron = cast()
+    el = []
+    for x, z in ((6.75, 6.75), (9.25, 6.75), (8.0, 9.5)):
+        el.append(panel(sc, "leg", iron, (x - 0.25, 0.0, z - 0.25), (x + 0.25, 0.5, z + 0.25)))
+    el += round_plate(sc, "pot_foot", iron, 3.0, 0.5, 1.0)
+    el += round_plate(sc, "pot", iron, 4.0, 1.0, 2.5)
+    el += walls(sc, "pot_lip", iron, 6.25, 6.25, 9.75, 9.75, 0.25, 2.5, 3.0)
+    el.append(panel(sc, "crumbs", crumbs(), (6.5, 2.5, 6.5), (9.5, 2.625, 9.5), sides=("up",)))
+    sc.models["whole"] = el
+    nail = finger()
+    for k, (x, z, axis, angle) in enumerate(FINGERS):
+        rot = fa.rotation((x, 2.5, z), axis, angle) if angle else None
+        sc.models[f"slot_{k}"] = [panel(sc, "finger", nail, (x - 0.25, 1.75, z - 0.25), (x + 0.25, 4.0, z + 0.25), rot=rot,
+                                        up=flat_colour(ALMOND))]
+    return sc
+
+
+def jelly_slots():
+    """The jelly's segments round its hole, in the order they set: from the front, round to the right."""
+    step = 1.125
+    return [(8.0 + dx * step, 8.0 + dz * step) for dx, dz in ((0, -1), (1, -1), (1, 0), (1, 1), (0, 1), (-1, 1), (-1, 0), (-1, -1))]
+
+
+def eyeball_jelly_mould():
+    """The Eyeball Jelly Mould, facing north: a round white plate 28 cm across, on which the ring of jelly stands, 22 cm
+    across and 9 cm high. Models: `whole` (the plate) and `slot_0` up to the last (each segment of clear red jelly, an
+    eyeball set in it looking out, its blue iris toward the ring's outside; the corner segments drawn in from the outside,
+    so the ring reads round)."""
+    spec = pt.JELLY_MOULD
+    sc = Sculpt(spec["block"], 2806, 128)
+    sc.models["whole"] = round_plate(sc, "plate", toned(PORCELAIN), 4.5, 0.0, 0.25)
+    half = 1.125 / 2
+    white, iris = toned(PORCELAIN, lit=False), flat_colour(IRIS)
+    for k, (x, z) in enumerate(jelly_slots()):
+        dx, dz = x - 8.0, z - 8.0
+        # A corner segment is drawn in from the ring's outside, so the ring reads round, not square.
+        x0, x1 = x - half + (0.25 if dx < 0 and dz else 0.0), x + half - (0.25 if dx > 0 and dz else 0.0)
+        z0, z1 = z - half + (0.25 if dz < 0 and dx else 0.0), z + half - (0.25 if dz > 0 and dx else 0.0)
+        el = [panel(sc, "jelly", jelly(), (x0, 0.25, z0), (x1, 1.75, z1)),
+              panel(sc, "eyeball", white, (x - 0.3, 0.7, z - 0.3), (x + 0.3, 1.3, z + 0.3))]
+        if abs(dz) >= abs(dx):
+            zo = z - 0.35 if dz < 0 else z + 0.3
+            el.append(panel(sc, "iris", iris, (x - 0.15, 0.85, zo), (x + 0.15, 1.15, zo + 0.05)))
+        else:
+            xo = x - 0.35 if dx < 0 else x + 0.3
+            el.append(panel(sc, "iris", iris, (xo, 0.85, z - 0.15), (xo + 0.05, 1.15, z + 0.15)))
+        sc.models[f"slot_{k}"] = el
+    return sc
+
+
 def lowered(elements):
     """`elements` set down onto a Feast Table: `table_drop` pixels lower."""
     return fa.transformed(elements, 1.0, (0.0, -pt.TABLE["table_drop"], 0.0))
@@ -342,7 +514,8 @@ def lowered(elements):
 
 _built = {}
 BUILDERS = {pt.DISPENSER["block"]: candy_corn_dispenser, pt.CUPCAKE_TOWER["block"]: spider_cupcake_tower,
-            pt.MERINGUE_PLATTER["block"]: ghost_meringue_platter}
+            pt.MERINGUE_PLATTER["block"]: ghost_meringue_platter, pt.MUMMY_TRAY["block"]: mummy_sausage_tray,
+            pt.FINGER_CAULDRON["block"]: witch_finger_cauldron, pt.JELLY_MOULD["block"]: eyeball_jelly_mould}
 
 
 def build(block):
@@ -434,8 +607,9 @@ def tags(tags):
 
 
 def textures():
-    """Each piece's block texture, and the Ghost Meringue's icon, drawn from its map (tools/item_icons/ghost_meringue.txt)."""
+    """Each piece's block texture, and each food's icon, drawn from its map (tools/item_icons/<food>.txt)."""
     import item_icons
     out = {("block", block): build(block).atlas.img for block in pt.blocks()}
-    out[("item", pt.MERINGUE["item"])] = item_icons.draw(pt.MERINGUE["item"])
+    for item in pt.ITEMS:
+        out[("item", item)] = item_icons.draw(item)
     return out

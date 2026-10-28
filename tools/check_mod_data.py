@@ -15385,7 +15385,8 @@ def check_party_table():
     foods are the table's, each has a place for every serving, and both are registered; their blockstates add each
     serving while they hold more than that many, on a Feast Table and off it; each `_table` model is the table's drop
     lower, and the drop is the Feast Table's own (its top's height); their loot drops what they hold; and the Ghost
-    Meringue is the table's food, a candy a Candy Bag takes."""
+    Meringue is the table's food, a candy a Candy Bag takes. Part 3: the same for the tray, the cauldron and the jelly
+    mould, and their foods are registered as the table says (the sausage, being meat, as a meal that doesn't compost)."""
     import party_table as pt
     import party_table_data as ptd
 
@@ -15448,8 +15449,12 @@ def check_party_table():
         err(f"PartyServingBlock: it must be set down {drop} pixels onto a Feast Table (tools/party_table.py TABLE)")
     if f"Block.box(0.0, 0.0, 0.0, 16.0, {pt.TABLE['table_top']}, 16.0)" not in feast or pt.TABLE["table_top"] + drop != 16.0:
         err(f"tools/party_table.py TABLE: the drop must bring a piece down onto the Feast Table's top ({pt.TABLE['table_top']})")
-    for spec, cls, slots in ((pt.CUPCAKE_TOWER, "SpiderCupcakeTowerBlock", ptd.tower_slots()),
-                             (pt.MERINGUE_PLATTER, "GhostMeringuePlatterBlock", ptd.platter_slots())):
+    stands = ((pt.CUPCAKE_TOWER, "SpiderCupcakeTowerBlock", ptd.tower_slots()), (pt.MERINGUE_PLATTER, "GhostMeringuePlatterBlock", ptd.platter_slots()),
+              (pt.MUMMY_TRAY, "MummySausageTrayBlock", ptd.sausage_slots()), (pt.FINGER_CAULDRON, "WitchFingerCauldronBlock", ptd.FINGERS),
+              (pt.JELLY_MOULD, "EyeballJellyMouldBlock", ptd.jelly_slots()))
+    if [spec["block"] for spec, _, _ in stands] != [spec["block"] for spec in pt.serving()]:
+        err("check_party_table: every table piece that holds a food must be checked")
+    for spec, cls, slots in stands:
         block, cap = spec["block"], spec["capacity"]
         java = read(JAVA_ROOT / "agriculture" / f"{cls}.java")
         if f"CAPACITY = {cap};" not in java or f'"{spec["serves"]}"' not in java or "extends PartyServingBlock" not in java:
@@ -15485,6 +15490,14 @@ def check_party_table():
     candy = load(DATA / "c" / "tags" / "item" / "foods" / "candy.json") or {}
     if f"{MOD}:{mg['item']}" not in candy.get("values", []):
         err(f"c:foods/candy: {mg['item']} must be candy, so a Candy Bag takes it")
+    # Part 3: the trays' foods.
+    for item, food in pt.FOODS.items():
+        n, sat = food["food"]
+        registered = f'meal("{item}", {n}, {sat}F)' if food["compost"] is None else f'food("{item}", {n}, {sat}F, COMPOST_{food["compost"].upper()})'
+        if registered not in java_main:
+            err(f"JugcraftAgriculture: {item} must be registered as {registered} (tools/party_table.py FOODS)")
+    if {spec["serves"] for spec in pt.serving()} - set(pt.ITEMS) - {"spiderweb_cupcake"}:
+        err("tools/party_table.py: every food a table piece holds must be one of its own foods, or the Spiderweb Cupcake")
 
 
 def check_hearth():

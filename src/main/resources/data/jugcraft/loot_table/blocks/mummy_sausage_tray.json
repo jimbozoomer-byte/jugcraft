@@ -1,0 +1,258 @@
+{
+  "type": "minecraft:block",
+  "pools": [
+    {
+      "condition": {
+        "type": "minecraft:survives_explosion"
+      },
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "jugcraft:mummy_sausage_tray"
+        }
+      ],
+      "rolls": 1
+    },
+    {
+      "condition": {
+        "type": "minecraft:all_of",
+        "terms": [
+          {
+            "type": "minecraft:survives_explosion"
+          },
+          {
+            "type": "minecraft:match_block",
+            "blocks": "jugcraft:mummy_sausage_tray",
+            "state": {
+              "servings": "1"
+            }
+          }
+        ]
+      },
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "jugcraft:mummy_sausage",
+          "modifier": [
+            {
+              "type": "minecraft:set_count",
+              "count": 1
+            }
+          ]
+        }
+      ],
+      "rolls": 1
+    },
+    {
+      "condition": {
+        "type": "minecraft:all_of",
+        "terms": [
+          {
+            "type": "minecraft:survives_explosion"
+          },
+          {
+            "type": "minecraft:match_block",
+            "blocks": "jugcraft:mummy_sausage_tray",
+            "state": {
+              "servings": "2"
+            }
+          }
+        ]
+      },
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "jugcraft:mummy_sausage",
+          "modifier": [
+            {
+              "type": "minecraft:set_count",
+              "count": 2
+            }
+          ]
+        }
+      ],
+      "rolls": 1
+    },
+    {
+      "condition": {
+        "type": "minecraft:all_of",
+        "terms": [
+          {
+            "type": "minecraft:survives_explosion"
+          },
+          {
+            "type": "minecraft:match_block",
+            "blocks": "jugcraft:mummy_sausage_tray",
+            "state": {
+              "servings": "3"
+            }
+          }
+        ]
+      },
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "jugcraft:mummy_sausage",
+          "modifier": [
+            {
+              "type": "minecraft:set_count",
+              "count": 3
+            }
+          ]
+        }
+      ],
+      "rolls": 1
+    },
+    {
+      "condition": {
+        "type": "minecraft:all_of",
+        "terms": [
+          {
+            "type": "minecraft:survives_explosion"
+          },
+          {
+            "type": "minecraft:match_block",
+            "blocks": "jugcraft:mummy_sausage_tray",
+            "state": {
+              "servings": "4"
+            }
+          }
+        ]
+      },
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "jugcraft:mummy_sausage",
+          "modifier": [
+            {
+              "type": "minecraft:set_count",
+              "count": 4
+            }
+          ]
+        }
+      ],
+      "rolls": 1
+    },
+    {
+      "condition": {
+        "type": "minecraft:all_of",
+        "terms": [
+          {
+            "type": "minecraft:survives_explosion"
+          },
+          {
+            "type": "minecraft:match_block",
+            "blocks": "jugcraft:mummy_sausage_tray",
+            "state": {
+              "servings": "5"
+            }
+          }
+        ]
+      },
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "jugcraft:mummy_sausage",
+          "modifier": [
+            {
+              "type": "minecraft:set_count",
+              "count": 5
+            }
+          ]
+        }
+      ],
+      "rolls": 1
+    },
+    {
+      "condition": {
+        "type": "minecraft:all_of",
+        "terms": [
+          {
+            "type": "minecraft:survives_explosion"
+          },
+          {
+            "type": "minecraft:match_block",
+            "blocks": "jugcraft:mummy_sausage_tray",
+            "state": {
+              "servings": "6"
+            }
+          }
+        ]
+      },
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "jugcraft:mummy_sausage",
+          "modifier": [
+            {
+              "type": "minecraft:set_count",
+              "count": 6
+            }
+          ]
+        }
+      ],
+      "rolls": 1
+    },
+    {
+      "condition": {
+        "type": "minecraft:all_of",
+        "terms": [
+          {
+            "type": "minecraft:survives_explosion"
+          },
+          {
+            "type": "minecraft:match_block",
+            "blocks": "jugcraft:mummy_sausage_tray",
+            "state": {
+              "servings": "7"
+            }
+          }
+        ]
+      },
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "jugcraft:mummy_sausage",
+          "modifier": [
+            {
+              "type": "minecraft:set_count",
+              "count": 7
+            }
+          ]
+        }
+      ],
+      "rolls": 1
+    },
+    {
+      "condition": {
+        "type": "minecraft:all_of",
+        "terms": [
+          {
+            "type": "minecraft:survives_explosion"
+          },
+          {
+            "type": "minecraft:match_block",
+            "blocks": "jugcraft:mummy_sausage_tray",
+            "state": {
+              "servings": "8"
+            }
+          }
+        ]
+      },
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "jugcraft:mummy_sausage",
+          "modifier": [
+            {
+              "type": "minecraft:set_count",
+              "count": 8
+            }
+          ]
+        }
+      ],
+      "rolls": 1
+    }
+  ],
+  "random_sequence": "jugcraft:blocks/mummy_sausage_tray"
+}

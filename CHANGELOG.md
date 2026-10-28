@@ -8,6 +8,18 @@ Every change to Jugcraft, newest first, grouped by pull request. For what each t
 
 No numbered release yet. Entries on feature branches remain proposed until their pull requests merge.
 
+### Unmerged: Halloween Party Table, part 3 (the trays)
+- **Mummy Sausage Tray**: a black baking tray with a ramekin of mustard, holding 8 Mummy Sausages.
+- **Witch-Finger Cauldron**: a little cast-iron cauldron of cookie crumbs, holding 10 Witch Fingers poking up out of it.
+- **Eyeball Jelly Mould**: a ring of clear red jelly on a white plate, 8 segments, each with an eyeball in it.
+- **New foods**:
+  - **Mummy Sausage**: four from a cooked porkchop and pastry dough.
+  - **Witch Finger**: eight from two wheat, sugar and green dye.
+  - **Eyeball Jelly**: four from sugar, sweet berries, bone meal and a glow berry.
+- Each piece is filled with its food and served by hand like the cake stands, and sits down onto a Feast Table.
+- Record: [halloween-party-table.md](docs/features/halloween-party-table.md). Decor set 8's third part.
+- **Checked:** the record's Verification. Game tests and screenshots run in CI only; not played by hand.
+
 ### Unmerged: Halloween Party Table, part 2 (the cake stands)
 - **Spider Cupcake Tower**: a black three-tier stand 50 cm high holding 13 Spiderweb Cupcakes, every third with a licorice spider on it. Use a cupcake to put one on; an empty hand takes one off.
 - **Ghost Meringue Platter**: an oval black-glazed platter holding 9 Ghost Meringues in three rows, put on and taken off the same way.

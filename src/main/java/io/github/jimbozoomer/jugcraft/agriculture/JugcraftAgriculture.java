@@ -3131,11 +3131,21 @@ public final class JugcraftAgriculture {
 				.mapColor(MapColor.COLOR_BLACK).strength(0.8F).sound(SoundType.METAL).noOcclusion().pushReaction(PushReaction.POPPED));
 		Block platter = registerBlock("ghost_meringue_platter", GhostMeringuePlatterBlock::new, BlockBehaviour.Properties.of()
 				.mapColor(MapColor.COLOR_BLACK).strength(0.5F).sound(SoundType.DECORATED_POT).noOcclusion().pushReaction(PushReaction.POPPED));
-		for (Block block : List.of(dispenser, tower, platter)) {
+		// Part 3: the trays, and their foods.
+		Block tray = registerBlock("mummy_sausage_tray", MummySausageTrayBlock::new, BlockBehaviour.Properties.of()
+				.mapColor(MapColor.COLOR_BLACK).strength(0.8F).sound(SoundType.METAL).noOcclusion().pushReaction(PushReaction.POPPED));
+		Block cauldron = registerBlock("witch_finger_cauldron", WitchFingerCauldronBlock::new, BlockBehaviour.Properties.of()
+				.mapColor(MapColor.COLOR_BLACK).strength(1.0F).sound(SoundType.METAL).noOcclusion().pushReaction(PushReaction.POPPED));
+		Block mould = registerBlock("eyeball_jelly_mould", EyeballJellyMouldBlock::new, BlockBehaviour.Properties.of()
+				.mapColor(MapColor.SNOW).strength(0.5F).sound(SoundType.DECORATED_POT).noOcclusion().pushReaction(PushReaction.POPPED));
+		for (Block block : List.of(dispenser, tower, platter, tray, cauldron, mould)) {
 			registerItem(BuiltInRegistries.BLOCK.getKey(block).getPath(), props -> new BlockItem(block, props),
 					new Item.Properties().useBlockDescriptionPrefix(), BUILDING_TAB);
 		}
 		food("ghost_meringue", 1, 0.1F, COMPOST_MEDIUM_HIGH);
+		meal("mummy_sausage", 3, 0.5F);
+		food("witch_finger", 2, 0.1F, COMPOST_MEDIUM_HIGH);
+		food("eyeball_jelly", 2, 0.2F, COMPOST_MEDIUM_HIGH);
 	}
 
 	/** Bleached bones: they come away easily, and a piston pops them off. */

@@ -38,7 +38,8 @@ import net.minecraft.world.phys.Vec3;
  * facing whoever places it, empty and off any table; their food goes on one at a time up to their capacity, anything else
  * changing nothing; an empty hand takes one off into the player's inventory; broken, each drops itself and what it held.
  * On a Feast Table each is set down onto its top, and stands back up when the table goes. The Ghost Meringue is candy, so
- * a Candy Bag takes it. Their recipes and loot load.
+ * a Candy Bag takes it. Part 3: the Mummy Sausage Tray, the Witch-Finger Cauldron and the Eyeball Jelly Mould serve
+ * their foods the same way. Their recipes and loot load.
  */
 public class PartyTableGameTests {
 	private static Item item(String id) {
@@ -156,9 +157,10 @@ public class PartyTableGameTests {
 		ServerLevel level = helper.getLevel();
 		floor(helper);
 		ServerPlayer player = standing(helper, new BlockPos(3, 2, 1));
-		String[][] stands = {{"spider_cupcake_tower", "spiderweb_cupcake"}, {"ghost_meringue_platter", "ghost_meringue"}};
+		String[][] stands = {{"spider_cupcake_tower", "spiderweb_cupcake"}, {"ghost_meringue_platter", "ghost_meringue"},
+				{"mummy_sausage_tray", "mummy_sausage"}, {"witch_finger_cauldron", "witch_finger"}, {"eyeball_jelly_mould", "eyeball_jelly"}};
 		for (int k = 0; k < stands.length; k++) {
-			BlockPos rel = new BlockPos(2 + 2 * k, 2, 3);
+			BlockPos rel = new BlockPos(1 + k, 2, 3);
 			BlockPos at = helper.absolutePos(rel);
 			Item food = item(stands[k][1]);
 			place(player, helper, rel, new ItemStack(item(stands[k][0])));
@@ -212,7 +214,11 @@ public class PartyTableGameTests {
 		ServerLevel level = helper.getLevel();
 		helper.assertTrue(level.recipeAccess().byKey(ResourceKey.create(Registries.RECIPE, Jugcraft.id("ghost_meringue"))).isPresent(),
 				"ghost_meringue has a recipe");
-		for (String id : new String[] {"candy_corn_dispenser", "spider_cupcake_tower", "ghost_meringue_platter"}) {
+		for (String food : new String[] {"mummy_sausage", "witch_finger", "eyeball_jelly"}) {
+			helper.assertTrue(level.recipeAccess().byKey(ResourceKey.create(Registries.RECIPE, Jugcraft.id(food))).isPresent(), food + " has a recipe");
+		}
+		for (String id : new String[] {"candy_corn_dispenser", "spider_cupcake_tower", "ghost_meringue_platter", "mummy_sausage_tray",
+				"witch_finger_cauldron", "eyeball_jelly_mould"}) {
 			helper.assertTrue(level.recipeAccess().byKey(ResourceKey.create(Registries.RECIPE, Jugcraft.id(id))).isPresent(), id + " has a recipe");
 			helper.assertTrue(level.getServer().reloadableRegistries().getLootTable(ResourceKey.create(Registries.LOOT_TABLE,
 					Jugcraft.id("blocks/" + id))) != LootTable.EMPTY, id + "'s loot loads");

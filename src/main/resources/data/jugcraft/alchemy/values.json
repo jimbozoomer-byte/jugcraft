@@ -11512,6 +11512,16 @@
       "denominator": 4,
       "source": "recipe jugcraft:extended_magazine"
     },
+    "jugcraft:eyeball_jelly": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
+    "jugcraft:eyeball_jelly_mould": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
     "jugcraft:eyewash_station": {
       "numerator": 1,
       "denominator": 1,
@@ -28627,6 +28637,16 @@
       "denominator": 9,
       "source": "recipe jugcraft:mummy_sarcophagus"
     },
+    "jugcraft:mummy_sausage": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
+    "jugcraft:mummy_sausage_tray": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
     "jugcraft:mummy_wraps": {
       "numerator": 112,
       "denominator": 1,
@@ -39273,6 +39293,16 @@
       "source": "recipe jugcraft:wire_drawer"
     },
     "jugcraft:wisp_in_a_jar": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
+    "jugcraft:witch_finger": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
+    "jugcraft:witch_finger_cauldron": {
       "numerator": 1,
       "denominator": 1,
       "source": "fallback (balance pending)"

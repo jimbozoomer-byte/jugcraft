@@ -23,8 +23,9 @@ import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec3;
 
 /**
- * Client game test for the Halloween Party Table, parts 1 and 2 (decor set 8): a party corner on a dark oak floor, a
- * Feast Table along its back with a full Spider Cupcake Tower and a full Ghost Meringue Platter set down on its top, and
+ * Client game test for the Halloween Party Table, parts 1 to 3 (decor set 8): a party corner on a dark oak floor, a
+ * Feast Table along its back with a full Mummy Sausage Tray, Witch-Finger Cauldron, Spider Cupcake Tower, Ghost Meringue
+ * Platter and Eyeball Jelly Mould set down on its top, and
  * three Candy Corn Dispensers standing before it, full, half full and empty (their globes by {@code fill}). Photographed
  * close by at the dispensers' height; then with the full one's crank set turning ten ticks before the shot, half way
  * round, and the half-full one's set turning twenty-six ticks before, its piece dropped and its flap swung out
@@ -77,18 +78,21 @@ public class PartyTableClientGameTests implements FabricClientGameTest {
 	}
 
 	private static void build(ServerLevel level, BlockPos origin) {
-		// The feast table along the back, two blocks long.
+		// The feast table along the back, six blocks long.
 		BlockState length = JugcraftAgriculture.block("feast_table").defaultBlockState().setValue(FeastTableBlock.AXIS, Direction.Axis.X);
-		for (int dx = -1; dx <= 2; dx++) {
+		for (int dx = -2; dx <= 3; dx++) {
 			level.setBlock(origin.offset(dx, 0, 2), length, Block.UPDATE_ALL);
 		}
-		for (int dx = -1; dx <= 2; dx++) {
+		for (int dx = -2; dx <= 3; dx++) {
 			BlockPos at = origin.offset(dx, 0, 2);
 			level.setBlock(at, Block.updateFromNeighbourShapes(level.getBlockState(at), level, at), Block.UPDATE_ALL);
 		}
-		// On the table, set down onto its top and full: the cupcake tower and the meringue platter.
-		for (String id : new String[] {"spider_cupcake_tower", "ghost_meringue_platter"}) {
-			BlockPos at = origin.offset(id.startsWith("spider") ? 0 : 1, 1, 2);
+		// On the table, set down onto its top and full, from west to east: the sausage tray, the witch-finger cauldron, the
+		// cupcake tower, the meringue platter and the jelly mould.
+		String[] stands = {"mummy_sausage_tray", "witch_finger_cauldron", "spider_cupcake_tower", "ghost_meringue_platter", "eyeball_jelly_mould"};
+		for (int k = 0; k < stands.length; k++) {
+			String id = stands[k];
+			BlockPos at = origin.offset(k - 2, 1, 2);
 			PartyServingBlock stand = (PartyServingBlock) JugcraftAgriculture.block(id);
 			level.setBlock(at, stand.defaultBlockState().setValue(FacingDecorationBlock.FACING, Direction.NORTH)
 					.setValue(PartyServingBlock.ON_TABLE, true).setValue(stand.servings(), stand.capacity()), Block.UPDATE_ALL);
