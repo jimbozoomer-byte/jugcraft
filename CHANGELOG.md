@@ -8,6 +8,16 @@ Every change to Jugcraft, newest first, grouped by pull request. For what each t
 
 No numbered release yet. Entries on feature branches remain proposed until their pull requests merge.
 
+### Unmerged: A dossier for every lair, with lore, preparation and the way home (Concordance Chunk E, E4)
+- **Seven more dossiers:** the encyclopedia's Expeditions page now covers the Lantern Fen, the Archive of Last Names, the Foundry Trench, the Moonlit Ring, the Cydonian Sanctum, the Crowfield and the Church Bridge (whose rite works only out of the Halloween season, as the dossier says), as it did the first four lairs: the rite and its recipes, when it works, the keeper's credit, trophies and loot, and the way home (and where Grey or Red Mist opens when the keeper falls).
+- **Lore and preparation in every dossier:** each found lair gives a line of lore, a clue to its keeper's rule that never names them, and what readies a player for the fight, with the game's numbers and the piece of the keeper's loot that helps (the Golden Thimble, the Emptied Phylactery, the Grounding Strap, the Packfinder Charm, the Lowfall Core).
+- **The page's room:** recipes past the page's twelve grids are shown by their items instead, and the page holds more rows.
+- Record: [lair-dossiers.md](docs/features/lair-dossiers.md).
+- **Checked:**
+  - **Passing locally:** the Python audits, with `check_encyclopedia` extended.
+  - **CI only, not yet run:** the game tests, including seven new ones in `EncyclopediaGameTests`.
+  - **Not done:** playing it by hand.
+
 ### Unmerged: Every lair keeper pays its support (Concordance Chunk E, E4)
 - **Five more keepers share fairly:** the Mire Hag, the Crypt Lich, the Iron Dreadnought, the Alpha Werewolf and the Cydonian Sentinel used to pay only players who hurt them (or did their one helping job). They now use the lairs' shared credit, as Vesperine, Madame Tatterlace, the Yeti King and the Cinder Tyrant do:
   - healing a friend 4 or more of what the boss's side did, or warding them against it, earns a share;

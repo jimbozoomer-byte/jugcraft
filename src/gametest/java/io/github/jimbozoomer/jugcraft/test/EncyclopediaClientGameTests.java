@@ -34,6 +34,7 @@ import io.github.jimbozoomer.jugcraft.guide.encyclopedia.EncyclopediaPayload;
 import io.github.jimbozoomer.jugcraft.lair.JugcraftLairs;
 import io.github.jimbozoomer.jugcraft.lair.Lair;
 import io.github.jimbozoomer.jugcraft.lair.LairDossiers;
+import io.github.jimbozoomer.jugcraft.lair.hag.MireHagLoot;
 import io.github.jimbozoomer.jugcraft.lair.tyrant.CinderTyrantLoot;
 import io.github.jimbozoomer.jugcraft.lair.yeti.YetiKingLoot;
 import io.github.jimbozoomer.jugcraft.machine.JugcraftMachines;
@@ -126,7 +127,8 @@ import net.minecraft.world.level.material.Fluids;
  * screen at GUI scale 4 and in a small window ({@code jugcraft_encyclopedia_scale4}, {@code jugcraft_encyclopedia_small}).
  * Since Concordance Chunk B (B-11), with the Frost Horn and the Kiln Seal carried and both keepers beaten, Expeditions
  * scrolled to the Glacier Hall's and the Cinder Kiln's dossiers ({@code jugcraft_encyclopedia_expedition_glacier_hall},
- * {@code jugcraft_encyclopedia_expedition_cinder_kiln}).</li>
+ * {@code jugcraft_encyclopedia_expedition_cinder_kiln}) and, since Concordance Chunk E (E4), the Lantern Fen's
+ * ({@code jugcraft_encyclopedia_expedition_lantern_fen}).</li>
  * </ul>
  */
 public class EncyclopediaClientGameTests implements FabricClientGameTest {
@@ -894,13 +896,15 @@ public class EncyclopediaClientGameTests implements FabricClientGameTest {
 
 		// Concordance Chunk B (B-11): the Glacier Hall's and the Cinder Kiln's dossiers (their tokens carried, their keepers
 		// beaten), each opened as its own section of the book (each dossier starts with a heading named after its lair)
-		// and scrolled to the top of the page's body.
+		// and scrolled to the top of the page's body; since Concordance Chunk E (E4) the Lantern Fen's too, its lore first.
 		server.runOnServer(minecraft -> {
 			ServerPlayer player = first(minecraft);
 			player.getInventory().add(new ItemStack(JugcraftLairs.FROST_HORN));
 			player.getInventory().add(new ItemStack(JugcraftLairs.KILN_SEAL));
+			player.getInventory().add(new ItemStack(JugcraftLairs.HAG_STONE));
 			TrickOrTreat.award(player, YetiKingLoot.ADVANCEMENT);
 			TrickOrTreat.award(player, CinderTyrantLoot.ADVANCEMENT);
+			TrickOrTreat.award(player, MireHagLoot.ADVANCEMENT);
 		});
 		context.waitTicks(10);
 		context.getInput().pressKey(InputConstants.KEY_ESCAPE);
@@ -911,13 +915,13 @@ public class EncyclopediaClientGameTests implements FabricClientGameTest {
 			EncyclopediaClient.changed();
 		});
 		context.waitTicks(5);
-		for (Lair lair : List.of(Lair.GLACIER_HALL, Lair.CINDER_KILN)) {
+		for (Lair lair : List.of(Lair.GLACIER_HALL, Lair.CINDER_KILN, Lair.LANTERN_FEN)) {
 			context.runOnClient(client -> ((EncyclopediaScreen) client.gui.screen()).showSectionContaining(LairDossiers.name(lair)));
 			context.waitTicks(3);
 			String placed = context.computeOnClient(client -> scrollTo(client, LairDossiers.name(lair)));
 			Jugcraft.LOGGER.info("[encyclopedia-check] the {} dossier on the Expeditions page: {}", lair.id, placed);
 			check(placed.startsWith("ok"), "The Expeditions page does not show the " + lair.id + " dossier: " + placed);
-			context.runOnClient(client -> client.gui.toastManager().clear());   // the two advancements' toasts
+			context.runOnClient(client -> client.gui.toastManager().clear());   // the advancements' toasts
 			context.waitTicks(5);
 			context.takeScreenshot("jugcraft_encyclopedia_expedition_" + lair.id);
 		}
