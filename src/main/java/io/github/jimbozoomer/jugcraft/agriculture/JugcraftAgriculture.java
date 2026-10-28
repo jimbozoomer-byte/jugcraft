@@ -2933,7 +2933,7 @@ public final class JugcraftAgriculture {
 	/**
 	 * Cozy Fall Hearth, decor set 5 (tools/hearth.py): part 1's Stone Fireplace and Mantel Garland; part 2's Woodstove (a
 	 * heat source), and the Tea Kettle and Simmer Pot set on it; part 3's Firewood Rack and Chopping Block; part 4's Blanket
-	 * Ladder and Knitting Basket.
+	 * Ladder and Knitting Basket; part 5's Hurricane Lamp and Mason-Jar Candles.
 	 */
 	private static void registerHearth() {
 		Block fireplace = registerBlock("stone_fireplace", StoneFireplaceBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.STONE)
@@ -2970,7 +2970,12 @@ public final class JugcraftAgriculture {
 				.strength(0.5F).sound(SoundType.WOOD).noOcclusion().ignitedByLava().pushReaction(PushReaction.POPPED));
 		KNITTING_BASKET_ENTITY = Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, Jugcraft.id("knitting_basket"),
 				FabricBlockEntityTypeBuilder.create(KnittingBasketBlockEntity::new, basket).build());
-		for (Block block : List.of(stove, kettle, pot, rack, chopping, ladder, basket)) {
+		// Part 5: the lights.
+		Block lamp = registerBlock("hurricane_lamp", HurricaneLampBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.GOLD)
+				.strength(0.5F).sound(SoundType.LANTERN).noOcclusion().lightLevel(HurricaneLampBlock::light).pushReaction(PushReaction.POPPED));
+		Block jars = registerBlock("mason_jar_candle", MasonJarCandleBlock::new, BlockBehaviour.Properties.ofFullCopy(Blocks.CANDLE)
+				.mapColor(MapColor.SAND).sound(SoundType.GLASS));
+		for (Block block : List.of(stove, kettle, pot, rack, chopping, ladder, basket, lamp, jars)) {
 			registerItem(BuiltInRegistries.BLOCK.getKey(block).getPath(), props -> new BlockItem(block, props),
 					new Item.Properties().useBlockDescriptionPrefix(), BUILDING_TAB);
 		}

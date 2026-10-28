@@ -14892,7 +14892,8 @@ def check_hearth():
     table's, with a model for each count; the chopping block splits by the log's own crafting recipe, and its hatchet is
     drawn by its renderer, swung by the table's numbers about its grip, from its runner model. Part 4: the ladder's size,
     throws and rungs are the table's and its renderer hangs the throws at the model's rungs; the basket's capacity is the
-    table's; both renderers are registered and have their textures."""
+    table's; both renderers are registered and have their textures. Part 5: the lamp's light is the table's and its lit
+    chimney full-bright; the jars' sizes, flame and layout are the table's, and each count's lit model glows."""
     import hearth as hh
     fp = hh.FIREPLACE
     java = (JAVA_ROOT / "agriculture" / "StoneFireplaceBlock.java").read_text(encoding="utf-8") \
@@ -15030,6 +15031,32 @@ def check_hearth():
         if not (ASSETS / "textures" / "entity" / f"{texture}.png").is_file():
             err(f"textures/entity/{texture}.png: {renderer} has no texture")
     for key in (f"block.{MOD}.{ld['block']}", f"block.{MOD}.{bk['block']}", f"message.{MOD}.{ld['block']}.full", f"message.{MOD}.{bk['block']}.full"):
+        if key not in lang:
+            err(f"{key}: the text is missing")
+    # Part 5: the lamp's light is the table's and its lit chimney is full-bright; the jars' sizes, flame and layout are
+    # the table's, and each count's lit model glows.
+    lp = hh.LAMP
+    lamp = (JAVA_ROOT / "agriculture" / "HurricaneLampBlock.java").read_text(encoding="utf-8") \
+        if (JAVA_ROOT / "agriculture" / "HurricaneLampBlock.java").is_file() else ""
+    if f"LIGHT = {lp['light']};" not in lamp:
+        err(f"HurricaneLampBlock: missing LIGHT = {lp['light']}; (tools/hearth.py LAMP)")
+    if f'registerBlock("{lp["block"]}", HurricaneLampBlock::new' not in java_main or ".lightLevel(HurricaneLampBlock::light)" not in java_main:
+        err(f"JugcraftAgriculture: {lp['block']} must be a HurricaneLampBlock lit by HurricaneLampBlock::light")
+    jc = hh.JAR_CANDLE
+    jars = (JAVA_ROOT / "agriculture" / "MasonJarCandleBlock.java").read_text(encoding="utf-8") \
+        if (JAVA_ROOT / "agriculture" / "MasonJarCandleBlock.java").is_file() else ""
+    needed = [f"JAR_WIDTH = {jc['width']};", f"JAR_HEIGHT = {jc['height']};", f"FLAME_Y = {jc['flame']};"]
+    needed += ["{" + ", ".join("{" + f"{x}, {z}" + "}" for x, z in layout) + "}" for layout in jc["layout"]]
+    for need in needed:
+        if need not in jars:
+            err(f"MasonJarCandleBlock: missing {need} (tools/hearth.py JAR_CANDLE)")
+    glows = [f"{lp['block']}_chimney_lit"] + [f"{jc['block']}_{n}_lit" for n in range(1, len(jc["layout"]) + 1)]
+    for name in glows:
+        model = load(ASSETS / "models" / "block" / f"{name}.json") or {}
+        lit = [e for e in model.get("elements", []) if e.get("light_emission") == 15]
+        if not lit or any(e.get("shade") is not False for e in lit):
+            err(f"models/block/{name}.json: its lit glass must be full-bright and unshaded")
+    for key in (f"block.{MOD}.{lp['block']}", f"block.{MOD}.{jc['block']}"):
         if key not in lang:
             err(f"{key}: the text is missing")
 

@@ -37,6 +37,12 @@ Part 4, the comforts:
   client/BlanketLadderRenderer.
 - The Knitting Basket (KnittingBasketBlock): a wicker basket holding up to `balls` balls of yarn, each drawn in its own
   colour by client/KnittingBasketRenderer, and a pair of knitting needles.
+
+Part 5, the lights:
+- The Hurricane Lamp (HurricaneLampBlock): a table oil lamp with a glass chimney, lit as a candle is and turned down by
+  hand. Lit, it gives light `light`, and its chimney glows (lit glass, full-bright).
+- Mason-Jar Candles (MasonJarCandleBlock): vanilla's candle, one to four to a block, each in a half-gallon jar `width`
+  pixels across and `height` high with its flame at `flame`, placed by `layout` for each count; lit, their glass glows.
 Sizes in pixels, facing north (its wall behind, to the south).
 """
 
@@ -50,6 +56,10 @@ RACK = {"block": "firewood_rack", "display": "Firewood Rack", "capacity": 16}
 LADDER = {"block": "blanket_ladder", "display": "Blanket Ladder", "size": (1, 2, 1), "throws": 3, "lean": 22.5, "foot": 3.75,
           "rungs": (5.0, 10.25, 15.5, 20.75, 26.0)}
 BASKET = {"block": "knitting_basket", "display": "Knitting Basket", "balls": 4}
+LAMP = {"block": "hurricane_lamp", "display": "Hurricane Lamp", "light": 12}
+JAR_CANDLE = {"block": "mason_jar_candle", "display": "Mason-Jar Candle", "width": 1.75, "height": 3.5, "flame": 2.75,
+              "layout": (((8.0, 8.0),), ((6.75, 7.5), (9.25, 8.75)), ((6.5, 6.75), (9.5, 7.25), (8.0, 9.75)),
+                         ((6.5, 6.5), (9.5, 6.5), (6.5, 9.5), (9.5, 9.5)))}
 CHOPPING_BLOCK = {"block": "chopping_block", "display": "Chopping Block", "swing_ticks": 8, "swing": 55.0, "grip": (10.6, 2.46)}
 
 RECIPES = [
@@ -64,6 +74,9 @@ RECIPES = [
      "result": "firewood_rack", "count": 1, "category": "misc"},
     {"id": "blanket_ladder", "pattern": ["P P", "PSP", "P P"], "key": {"P": "#minecraft:planks", "S": "minecraft:stick"},
      "result": "blanket_ladder", "count": 1, "category": "misc"},
+    {"id": "hurricane_lamp", "pattern": [" G ", "GTG", " C "], "key": {"G": "minecraft:glass_pane", "T": "minecraft:torch",
+                                                                   "C": "minecraft:copper_ingot"},
+     "result": "hurricane_lamp", "count": 1, "category": "misc"},
 ]
 SHAPELESS = [
     {"id": "mantel_garland", "inputs": ["#minecraft:leaves", "#minecraft:leaves", "minecraft:pumpkin", "minecraft:string"],
@@ -74,12 +87,14 @@ SHAPELESS = [
      "category": "misc"},
     {"id": "knitting_basket", "inputs": ["jugcraft:foraging_basket", "jugcraft:yarn"], "result": "knitting_basket", "count": 1,
      "category": "misc"},
+    {"id": "mason_jar_candle", "inputs": ["jugcraft:mason_jar", "minecraft:candle", "minecraft:string"], "result": "mason_jar_candle",
+     "count": 1, "category": "misc"},
 ]
 
 
 def blocks():
     return [FIREPLACE["block"], WOODSTOVE["block"], KETTLE["block"], SIMMER_POT["block"], RACK["block"], CHOPPING_BLOCK["block"], LADDER["block"],
-            BASKET["block"]]
+            BASKET["block"], LAMP["block"], JAR_CANDLE["block"]]
 
 
 def items():

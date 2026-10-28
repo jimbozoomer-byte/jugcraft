@@ -10,6 +10,7 @@ import io.github.jimbozoomer.jugcraft.agriculture.BlanketLadderBlockEntity;
 import io.github.jimbozoomer.jugcraft.agriculture.FacingDecorationBlock;
 import io.github.jimbozoomer.jugcraft.agriculture.FirewoodRackBlock;
 import io.github.jimbozoomer.jugcraft.agriculture.FirewoodRackBlockEntity;
+import io.github.jimbozoomer.jugcraft.agriculture.HurricaneLampBlock;
 import io.github.jimbozoomer.jugcraft.agriculture.StoneFireplaceBlock;
 import io.github.jimbozoomer.jugcraft.agriculture.StovetopBlock;
 import io.github.jimbozoomer.jugcraft.agriculture.WoodstoveBlock;
@@ -29,6 +30,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.CandleBlock;
 import net.minecraft.world.level.block.state.BlockState;
 
 /**
@@ -38,11 +40,11 @@ import net.minecraft.world.level.block.state.BlockState;
  * Simmer Pot simmering on the other; and part 3's Firewood Rack full of logs beside them and a Chopping Block before it
  * (its hatchet drawn by client/ChoppingBlockRenderer); and part 4's Blanket Ladder against the wall west of the
  * fireplaces with three throws on it and a Knitting Basket of four coloured balls and its needles before it (the throws
- * and the yarn drawn by client/BlanketLadderRenderer and client/KnittingBasketRenderer); built in a real client and
- * photographed from the room, close by, at the stoves, at the woodpile, at the comforts and by night (CI job
- * {@code client}). The fire is its own full-bright model in an
- * animated texture, so the pictures show it burns in its firebox and behind the stoves' mica. They go into
- * docs/features/cozy-fall-hearth.md.
+ * and the yarn drawn by client/BlanketLadderRenderer and client/KnittingBasketRenderer); and part 5's Hurricane Lamp and
+ * three Mason-Jar Candles lit on the floor before the fireplace; built in a real client and photographed from the room,
+ * close by, at the stoves, at the woodpile, at the comforts, at the lights and by night (CI job {@code client}). The fire
+ * is its own full-bright model in an animated texture, so the pictures show it burns in its firebox and behind the
+ * stoves' mica. They go into docs/features/cozy-fall-hearth.md.
  */
 public class HearthClientGameTests implements FabricClientGameTest {
 	@Override
@@ -70,6 +72,7 @@ public class HearthClientGameTests implements FabricClientGameTest {
 			shoot(context, singleplayer, x + 5, y + 1, z + 3, 180, 30, "jugcraft_hearth_stoves");
 			shoot(context, singleplayer, x + 7, y + 1, z + 5, 180, 20, "jugcraft_hearth_woodpile");
 			shoot(context, singleplayer, x - 5, y + 1, z + 4, 180, 20, "jugcraft_hearth_comforts");
+			shoot(context, singleplayer, x + 1, y, z + 4, 180, 30, "jugcraft_hearth_lights");
 			server.runCommand("time set midnight");
 			shoot(context, singleplayer, x + 1, y, z + 5, 180, 5, "jugcraft_hearth_night");
 		}
@@ -149,5 +152,10 @@ public class HearthClientGameTests implements FabricClientGameTest {
 			}
 			yarn.put(new ItemStack(JugcraftAgriculture.item("knitting_needles")));
 		}
+		// Part 5: a hurricane lamp and three mason-jar candles lit on the floor before the fireplace.
+		level.setBlock(origin.offset(0, 0, 2), JugcraftAgriculture.block("hurricane_lamp").defaultBlockState()
+				.setValue(FacingDecorationBlock.FACING, Direction.SOUTH).setValue(HurricaneLampBlock.LIT, true), Block.UPDATE_ALL);
+		level.setBlock(origin.offset(2, 0, 2), JugcraftAgriculture.block("mason_jar_candle").defaultBlockState()
+				.setValue(CandleBlock.CANDLES, 3).setValue(CandleBlock.LIT, true), Block.UPDATE_ALL);
 	}
 }

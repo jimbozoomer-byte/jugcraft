@@ -27,6 +27,10 @@ Part 4:
 - The ladder: oak, its grain along its rails and rungs. Its throws and the basket's yarn are drawn by renderers in their
   own colours over textures in greys: a twill with a striped border and a fringe; strands wound on a slant.
 - Wicker: weavers passing over and under the stakes two texels at a time, each row a step along from the last.
+Part 5:
+- Glass, as the Barn Lantern's: cut out inside a pale rim with a lit streak (at real size the lamp's chimney and the
+  jars are too narrow to show a clear pane). Lit, it is warm glass lit from inside, full-bright, in steady bands,
+  palest at its middle rows where the flame is. Brass in flat bands, cream wax, twine.
 """
 import math
 
@@ -580,13 +584,93 @@ def throw_blanket():
     return img
 
 
+# ---------------------------------------------------------------- part 5: the hurricane lamp, the mason-jar candles
+
+WAX = pal("c8b894", "dccca8", "ece0c0")
+LIT_GLASS = pal("c08a30", "e8b450", "f8d888", "fff0c0")
+TWINE = pal("6a5030", "8a6c42", "a88a58")
+
+
+def lit_glass():
+    """Glass lit from inside by a flame: warm, in bands down it (palest at its middle rows, where the flame is, a tone
+    deeper towards its ends and its rim), steady, never flickering."""
+    def paint(p):
+        mid = (p.h - 1) / 2
+        for y in range(p.h):
+            for x in range(p.w):
+                edge = x in (0, p.w - 1) and p.w > 2
+                k = 3 - min(2, int(abs(y - mid) / max(1.0, p.h / 4)))
+                p.put(x, y, shade(LIT_GLASS, max(0, k - (1 if edge else 0))))
+    paint.tag = "lit_glass"
+    return paint
+
+
+def glowing(elements):
+    """`elements` full-bright and unshaded, for a glow."""
+    for e in elements:
+        e["light_emission"] = 15
+        e["shade"] = False
+    return elements
+
+
+def hurricane_lamp():
+    """The Hurricane Lamp, facing north: a table oil lamp 37 cm high, a brass foot and stem under a brass font, its burner
+    with a wick knob to the side, and a glass chimney narrow at its neck, swelling round the flame and narrowing again at
+    its top. Models: `whole` (the lamp without its chimney), `chimney` (cut-out glass, a pale rim and a lit streak, as the
+    Barn Lantern's globe) and `chimney_lit` (the same glass lit from inside, full-bright: at real size the glass is too
+    narrow to see a flame through, so the lit glass is the glow)."""
+    import orchard_harvest_data as ohd
+    sc = Sculpt(hh.LAMP["block"], 2509, 64)
+    brass = flat(BRASS)
+    sc.models["whole"] = [panel(sc, "foot", brass, (6.25, 0.0, 6.25), (9.75, 0.5, 9.75)),
+                          panel(sc, "stem", brass, (7.25, 0.5, 7.25), (8.75, 1.25, 8.75)),
+                          panel(sc, "font", brass, (6.5, 1.25, 6.5), (9.5, 2.5, 9.5)),
+                          panel(sc, "font", brass, (6.9, 2.5, 6.9), (9.1, 3.0, 9.1)),
+                          panel(sc, "burner", brass, (7.25, 3.0, 7.25), (8.75, 3.5, 8.75)),
+                          panel(sc, "knob", brass, (8.75, 3.05, 7.8), (9.4, 3.45, 8.2))]
+
+    def chimney(glass):
+        return (walls(sc, "neck", glass, 7.4, 7.4, 8.6, 8.6, 0.2, 3.5, 3.9) + walls(sc, "bulb", glass, 6.75, 6.75, 9.25, 9.25, 0.25, 3.9, 5.25)
+                + walls(sc, "neck", glass, 7.4, 7.4, 8.6, 8.6, 0.2, 5.25, 6.0))
+    sc.models["chimney"] = chimney(ohd.glass())
+    sc.models["chimney_lit"] = glowing(chimney(lit_glass()))
+    return sc
+
+
+def mason_jar_candles():
+    """Mason-Jar Candles, one to four: each a half-gallon jar 11 cm across and 22 cm high (cut-out glass, a pale rim and a
+    lit streak), a cream wax candle poured in it to half way with its wick, and a twine bow round its neck. Models:
+    `jars1` to `jars4`, and `jars1_lit` to `jars4_lit` with the glass lit from inside, full-bright; their flames are
+    vanilla's candle flames, at MasonJarCandleBlock's offsets."""
+    import orchard_harvest_data as ohd
+    spec = hh.JAR_CANDLE
+    sc = Sculpt(spec["block"], 2510, 64)
+    glass = ohd.glass()
+    r, h = spec["width"] / 2, spec["height"]
+    for count, layout in enumerate(spec["layout"], start=1):
+        el, lit = [], []
+        for cx, cz in layout:
+            el += walls(sc, "jar", glass, cx - r, cz - r, cx + r, cz + r, 0.2, 0.0, h)
+            lit += glowing(walls(sc, "jar", lit_glass(), cx - r, cz - r, cx + r, cz + r, 0.2, 0.0, h))
+            dressing = [panel(sc, "wax", flat(WAX), (cx - r + 0.2, 0.0, cz - r + 0.2), (cx + r - 0.2, 1.75, cz + r - 0.2)),
+                        panel(sc, "wick", flat(BARK), (cx - 0.1, 1.75, cz - 0.1), (cx + 0.1, spec["flame"] - 0.5, cz + 0.1)),
+                        panel(sc, "twine", flat(TWINE), (cx - r - 0.05, h - 0.85, cz - r - 0.05), (cx + r + 0.05, h - 0.6, cz + r + 0.05)),
+                        panel(sc, "bow", flat(TWINE), (cx - 0.5, h - 1.1, cz - r - 0.2), (cx + 0.5, h - 0.35, cz - r - 0.05))]
+            el += dressing
+            lit += dressing
+        sc.models[f"jars{count}"] = el
+        sc.models[f"jars{count}_lit"] = lit
+    return sc
+
+
 _built = {}
 BUILDERS = {hh.FIREPLACE["block"]: fireplace, hh.WOODSTOVE["block"]: woodstove, hh.KETTLE["block"]: kettle, hh.SIMMER_POT["block"]: simmer_pot,
             hh.RACK["block"]: firewood_rack, hh.CHOPPING_BLOCK["block"]: chopping_block, hh.LADDER["block"]: blanket_ladder,
-            hh.BASKET["block"]: knitting_basket}
+            hh.BASKET["block"]: knitting_basket, hh.LAMP["block"]: hurricane_lamp, hh.JAR_CANDLE["block"]: mason_jar_candles}
 # Each one's texture's size: the fireplace's and the stove's 128 texels square, the rest 64.
 SIZES = {hh.FIREPLACE["block"]: 128, hh.WOODSTOVE["block"]: 128, hh.KETTLE["block"]: 64, hh.SIMMER_POT["block"]: 64, hh.RACK["block"]: 64,
-         hh.CHOPPING_BLOCK["block"]: 64, hh.LADDER["block"]: 64, hh.BASKET["block"]: 64}
+         hh.CHOPPING_BLOCK["block"]: 64, hh.LADDER["block"]: 64, hh.BASKET["block"]: 64,
+         hh.LAMP["block"]: 64, hh.JAR_CANDLE["block"]: 64}
 
 
 def build(block):
@@ -656,6 +740,7 @@ def assets(root, write, lang):
     part2_assets(root, write, lang)
     part3_assets(root, write, lang)
     part4_assets(root, write, lang)
+    part5_assets(root, write, lang)
 
 
 # The kettle and the pot are small: shown larger in a slot and a hand, lifted to the middle.
@@ -801,9 +886,48 @@ def part4_assets(root, write, lang):
     write(root / "items" / f"{block}.json", {"model": {"type": "minecraft:model", "model": rid(f"item/{block}")}})
 
 
+def part5_assets(root, write, lang):
+    """The hurricane lamp's model, its chimney's and its lit chimney's (a multipart by `lit`), and the mason-jar candles'
+    models for one to four jars, lit and not (vanilla's candle properties: `candles`, `lit`, `waterlogged`). Their items
+    show the lamp and one jar, unlit."""
+    models = root / "models" / "block"
+    states = root / "blockstates"
+    spec = hh.LAMP
+    block = spec["block"]
+    lang[f"block.{MOD}.{block}"] = spec["display"]
+    sc = build(block)
+    for name in ("whole", "chimney", "chimney_lit"):
+        write(models / (f"{block}.json" if name == "whole" else f"{block}_{name}.json"), fa.model(block, d20d.separated(sc.models[name])))
+    multipart = []
+    for f, y in FACINGS.items():
+        turn = {"y": y} if y else {}
+        multipart.append({"when": {"facing": f}, "apply": {"model": rid(f"block/{block}"), **turn}})
+        multipart.append({"when": {"facing": f, "lit": "false"}, "apply": {"model": rid(f"block/{block}_chimney"), **turn}})
+        multipart.append({"when": {"facing": f, "lit": "true"}, "apply": {"model": rid(f"block/{block}_chimney_lit"), **turn}})
+    write(states / f"{block}.json", {"multipart": multipart})
+    write(root / "models" / "item" / f"{block}.json",
+          fa.model(block, d20d.separated(sc.models["whole"] + sc.models["chimney"]), KETTLE_DISPLAY))
+    write(root / "items" / f"{block}.json", {"model": {"type": "minecraft:model", "model": rid(f"item/{block}")}})
+    spec = hh.JAR_CANDLE
+    block = spec["block"]
+    lang[f"block.{MOD}.{block}"] = spec["display"]
+    sc = build(block)
+    variants = {}
+    for count in range(1, len(spec["layout"]) + 1):
+        for lit in ("false", "true"):
+            name = f"{block}_{count}" + ("_lit" if lit == "true" else "")
+            write(models / f"{name}.json", fa.model(block, d20d.separated(sc.models[f"jars{count}" + ("_lit" if lit == "true" else "")])))
+            for wet in ("false", "true"):
+                variants[f"candles={count},lit={lit},waterlogged={wet}"] = {"model": rid(f"block/{name}")}
+    write(states / f"{block}.json", {"variants": variants})
+    write(root / "models" / "item" / f"{block}.json", fa.model(block, d20d.separated(sc.models["jars1"]), POT_DISPLAY))
+    write(root / "items" / f"{block}.json", {"model": {"type": "minecraft:model", "model": rid(f"item/{block}")}})
+
+
 def loot(out, write):
     """The fireplace and the blanket ladder drop once, from their first blocks (a garland on the fireplace stays with the
-    blocks, so it is dropped too; the ladder's throws come back from its block entity); the rest each drop themselves."""
+    blocks, so it is dropped too; the ladder's throws come back from its block entity); the mason-jar candles drop one
+    for each jar, as vanilla's candles do; the rest each drop themselves."""
     block = hh.LADDER["block"]
     write(out / f"{block}.json", {"type": "minecraft:block", "pools": [{
         "condition": {"type": "minecraft:all_of", "terms": [{"type": "minecraft:survives_explosion"},
@@ -818,20 +942,31 @@ def loot(out, write):
          "entries": [{"type": "minecraft:item", "name": rid(hh.GARLAND["item"])}], "rolls": 1}],
         "random_sequence": rid(f"blocks/{block}")})
     for block in (hh.WOODSTOVE["block"], hh.KETTLE["block"], hh.SIMMER_POT["block"], hh.RACK["block"], hh.CHOPPING_BLOCK["block"],
-                  hh.BASKET["block"]):
+                  hh.BASKET["block"], hh.LAMP["block"]):
         write(out / f"{block}.json", {"type": "minecraft:block", "pools": [{
             "condition": {"type": "minecraft:survives_explosion"}, "entries": [{"type": "minecraft:item", "name": rid(block)}], "rolls": 1}],
             "random_sequence": rid(f"blocks/{block}")})
+
+    block = hh.JAR_CANDLE["block"]
+    counts = [{"type": "minecraft:set_count", "count": n,
+               "condition": {"type": "minecraft:match_block", "blocks": rid(block), "state": {"candles": str(n)}}}
+              for n in range(2, len(hh.JAR_CANDLE["layout"]) + 1)]
+    write(out / f"{block}.json", {"type": "minecraft:block", "pools": [{
+        "entries": [{"type": "minecraft:item", "modifier": counts + [{"type": "minecraft:explosion_decay"}], "name": rid(block)}],
+        "rolls": 1}], "random_sequence": rid(f"blocks/{block}")})
 
 
 def tags(tags):
     """Stone and iron come off with a pickaxe, the chopping block with an axe; the woodstove heats what stands on it, as the
     Kitchen Stove does."""
-    for block in (hh.FIREPLACE["block"], hh.WOODSTOVE["block"], hh.KETTLE["block"], hh.SIMMER_POT["block"], hh.RACK["block"]):
+    for block in (hh.FIREPLACE["block"], hh.WOODSTOVE["block"], hh.KETTLE["block"], hh.SIMMER_POT["block"], hh.RACK["block"],
+                  hh.LAMP["block"]):
         tags.add("block", "minecraft:mineable/pickaxe", rid(block))
     for block in (hh.CHOPPING_BLOCK["block"], hh.LADDER["block"], hh.BASKET["block"]):
         tags.add("block", "minecraft:mineable/axe", rid(block))
     tags.add("block", f"{MOD}:heat_sources", rid(hh.WOODSTOVE["block"]))
+    # Lit with flint and steel, a fire charge or a burning arrow, put out by hand or a splash, as vanilla's candles.
+    tags.add("block", "minecraft:candles", rid(hh.JAR_CANDLE["block"]))
 
 
 def textures():
@@ -842,7 +977,7 @@ def textures():
            ("item", hh.GARLAND["item"]): item_icons.draw(hh.GARLAND["item"]),
            ("block", f"{pot}_brew"): brew_strip(), ("block", f"{pot}_brew_still"): brew_still()}
     for other in (hh.WOODSTOVE["block"], hh.KETTLE["block"], pot, hh.RACK["block"], hh.CHOPPING_BLOCK["block"], hh.LADDER["block"],
-                  hh.BASKET["block"]):
+                  hh.BASKET["block"], hh.LAMP["block"], hh.JAR_CANDLE["block"]):
         out[("block", other)] = build(other).atlas.img
     out[("entity", "throw_blanket")] = throw_blanket()
     out[("entity", "yarn_ball")] = yarn_ball()

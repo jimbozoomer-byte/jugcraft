@@ -16592,6 +16592,11 @@
       "denominator": 1,
       "source": "recipe jugcraft:howling_totem"
     },
+    "jugcraft:hurricane_lamp": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
     "jugcraft:hv_chem_feeder": {
       "numerator": 2566,
       "denominator": 3,
@@ -28171,6 +28176,11 @@
       "numerator": 301,
       "denominator": 27,
       "source": "recipe jugcraft:mason_jar"
+    },
+    "jugcraft:mason_jar_candle": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
     },
     "jugcraft:mcc_lineup": {
       "numerator": 2399,

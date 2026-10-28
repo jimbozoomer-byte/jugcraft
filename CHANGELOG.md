@@ -8,6 +8,13 @@ Every change to Jugcraft, newest first, grouped by pull request. For what each t
 
 No numbered release yet. Entries on feature branches remain proposed until their pull requests merge.
 
+### Unmerged: Cozy Fall Hearth, part 5 (the lights)
+- **Hurricane Lamp**: a brass table oil lamp with a glass chimney. Flint and steel lights it and an empty hand turns it down; lit, its chimney glows and it gives light 12.
+- **Mason-Jar Candles**: wax candles in half-gallon mason jars with twine bows, one to four to a block, lit and added to as vanilla's candles are; lit, their glass glows.
+- Recipes: glass panes round a torch over a copper ingot; a mason jar, a candle and a string.
+- Set 5 is complete. Record: [cozy-fall-hearth.md](docs/features/cozy-fall-hearth.md).
+- **Checked:** the record's Verification. Game tests and screenshots run in CI only; not played by hand.
+
 ### Unmerged: Cozy Fall Hearth, part 4 (the comforts)
 - **Blanket Ladder**: a wooden ladder leaning on a wall, two blocks high. Wool carpets of any colour fold over its top three rungs as throws in their colours, with a striped border and a fringe; an empty hand takes back the last; it falls if its wall goes.
 - **Knitting Basket**: a wicker basket holding four balls of yarn, each shown in its own dyed colour, and a pair of knitting needles, kept as worn as they were.

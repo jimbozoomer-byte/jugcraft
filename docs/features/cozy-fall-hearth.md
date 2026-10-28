@@ -1,6 +1,6 @@
 # Cozy Fall Hearth
 
-Status: parts 1 (the hearth), 2 (the stove), 3 (the woodpile) and 4 (the comforts) implemented. CI builds them and runs their game tests and client screenshots; not yet played by hand. Part 5 is planned below.
+Status: all five parts implemented: 1 (the hearth), 2 (the stove), 3 (the woodpile), 4 (the comforts) and 5 (the lights). CI builds them and runs their game tests and client screenshots; not yet played by hand.
 Proposal issue: none. The owner asked for it directly on 28 October 2026, as set 5 of the ten sets of fall and Halloween decor ("Then I want you to do 1-10 in parts in that order one by one"), drawn by their rules.
 Owner: @jimbozoomer-byte
 Target milestone and tier: Discovery tier; made from cobblestone, planks, a campfire and a stone slab, and (part 2) iron, a furnace, copper and the kitchen's mulling spices.
@@ -74,8 +74,14 @@ Primary specialty and supported player role: building. A builder furnishes a roo
   - It knits nothing: the needles do that in the hand.
   - Recipe (shapeless): a foraging basket and a ball of yarn.
 
-### Planned parts
-- **Part 5: the lights.** A hurricane lamp for the table (a different thing from set 3's Barn Lantern, which hangs on a wall), and mason-jar candles, made with the kitchen's mason jar.
+### Part 5: the lights
+- **Hurricane Lamp**: a table oil lamp 37 cm high: a brass foot and stem under a brass font, its burner with a wick knob, and a glass chimney narrow at its neck, swelling round the flame and narrowing again at its top. It is the one for a table; set 3's Barn Lantern is the one for a wall.
+  - Flint and steel or a fire charge lights it, and an empty hand turns its wick down.
+  - Lit, its chimney glows from the flame inside and it gives light 12. It burns no oil.
+  - Recipe: glass panes round a torch, over a copper ingot.
+- **Mason-Jar Candles**: wax candles poured into half-gallon mason jars, 11 cm across and 22 cm high, each with a twine bow round its neck.
+  - One to four stand in a block, and they are lit, put out and added to just as vanilla's candles are. Lit, their glass glows and each gives light 3.
+  - Recipe (shapeless): a mason jar from the pantry, a candle and a string.
 
 ## How it is drawn (docs/ART_DIRECTION.md, docs/NATURAL_TEXTURES.md)
 - Built from boxes at real size, one texel to a model pixel, in the market displays' manner (`tools/hearth_data.py`), and cut into its nine blocks' models.
@@ -127,9 +133,17 @@ Primary specialty and supported player role: building. A builder furnishes a roo
   - the basket's walls hid its yarn, which read as flat slabs; the walls are now lower and the two balls at the back piled up behind the front two;
   - its first wicker, in long blocks, read as brickwork; it is now the finer over-and-under weave.
 
+### Part 5's lights
+- Built the same way, at real size (`tools/hearth_data.py` hurricane_lamp(), mason_jar_candles()).
+- **Glass, as the Barn Lantern's**: cut out inside a pale rim with a lit streak. At real size the lamp's chimney and the jars are two or three texels across, too narrow to show a clear pane, so they read as pale glass.
+- **Glows cut out, never flicker.** Lit, the glass is warm glass lit from inside, full-bright and unshaded, in steady bands: palest at its middle rows where the flame is, a tone deeper towards its ends and rim. A flame inside it couldn't be seen through glass that narrow, so the lit glass is the glow. The jars' flames are vanilla's candle flames, standing inside them.
+- Brass in flat bands, cream wax, a dark wick, and twine round each jar's neck with its bow to the front.
+- **The first previews**, fixed before commit: the glass, too narrow to see through, hid the lamp's flame when lit. The lit glass now glows instead.
+
 ## Connections
 - Existing input producer: cobblestone, planks, a campfire and a smooth stone slab for the fireplace; leaves, a pumpkin and a string for the garland. All vanilla, from the first day.
 - Existing output consumer: none for the fireplace and the garland. The woodstove heats the kitchen's pots: a Cooking Pot on it brews what it brews on a campfire (mint tea, hot cocoa, mulled cider), as do a Skillet, the Canning Kettle and the Candy Kettle.
+- Part 5's inputs: glass panes, a torch and copper for the lamp; the pantry's mason jar, a candle and a string for the jar candles. Its outputs: light.
 - Part 4's inputs: planks and a stick for the ladder; the foraging basket and a ball of yarn for the knitting basket. Its outputs: each gives back what it holds. The basket holds the knitting's yarn and needles, kept as they are.
 - Part 3's inputs: iron bars and iron for the rack; a log and an iron axe for the chopping block. Its outputs: the rack gives back what it holds, and the chopping block gives a log's planks.
 - Part 2's inputs: iron and a furnace for the stove; copper and an iron nugget for the kettle; an iron ingot, a water bucket, an apple and the kitchen's mulling spices (from cinnamon or juniper) for the simmer pot.
@@ -146,6 +160,7 @@ Primary specialty and supported player role: building. A builder furnishes a roo
 - The kettle and the simmer pot make nothing. The pot's water bucket is given back when it is made.
 - The rack keeps the logs put on it and gives back exactly those, each kind as it went in. It splits, grows and multiplies nothing.
 - The ladder and the basket keep what is put on or in them and give back exactly those: the same carpets; the same balls, each its colour; the same needles, as worn as they were.
+- The lamp burns no oil; it gives light 12, a little less than a lantern's 15. The jar candles give a vanilla candle's light (3 each, 12 for four) and drop one for each jar.
 - The chopping block gives exactly what crafting the log gives (it asks the game for the log's own crafting recipe), never more, so it saves no wood and makes no loop. It costs an iron axe, which stays in it as its hatchet; it doesn't come back when the block is broken.
 - No loop: no recipe makes anything that leads back to itself (the audit refuses any loop).
 
@@ -156,7 +171,8 @@ Primary specialty and supported player role: building. A builder furnishes a roo
 - Part 2: the woodstove's `lit` is in its block state, as the fireplace's is. The kettle's and the pot's `heated` is worked out on the server from the block below, when either is placed and whenever that block changes (a stove lit or put out), so nothing ticks. The kettle's block entity (`tea_kettle`) keeps nothing: it is there for its renderer, which works out the lid's rattle from the game time. Steam and sounds are each client's own.
 - Part 3: the rack's logs are kept by its block entity (`firewood_rack`, saved as `logs`), changed on the server only and saved with the world. What it shows is its block state (`logs`, 0 to 16), so nothing is sent but the state. Splitting a log is the server's: it checks the item is a log and looks up its own crafting recipe there. The chopping block's swing is a block event, so every client near it sees it. Its block entity (`chopping_block`) keeps nothing.
 - Part 4: the ladder's throws (`blanket_ladder`, saved as `throws`, on its first block) and the basket's yarn and needles (`knitting_basket`, saved as `yarn` and `needles`) are kept by their block entities. They are changed on the server only, saved with the world and sent to clients, which draw them. The basket's needles also show in its block state (`needles`). The ladder needs its wall, checked on the server when placed and when the wall changes.
-- IDs (stable from release): the block and item `stone_fireplace`; its states `part` (0 to 8), `facing`, `lit`, `garland`. The item `mantel_garland`. Part 2's blocks and items `woodstove` (`facing`, `lit`), `tea_kettle` (`facing`, `heated`, model-only `runner`; block entity `tea_kettle`), `simmer_pot` (`facing`, `heated`); the woodstove is in `jugcraft:heat_sources`. Part 3's blocks and items `firewood_rack` (`facing`, `logs` 0 to 16; block entity `firewood_rack`, its saved `logs`) and `chopping_block` (`facing`, model-only `runner`; block entity `chopping_block`). Part 4's blocks and items `blanket_ladder` (`facing`, `part` 0 to 1; block entity `blanket_ladder`, its saved `throws`) and `knitting_basket` (`facing`, `needles`; block entity `knitting_basket`, its saved `yarn` and `needles`).
+- Part 5: the lamp's `lit` is its block state. The jar candles are vanilla's candle (`candles`, `lit`, `waterlogged`; the block tag `minecraft:candles`), so they light, go out and take more jars just as vanilla's do. Nothing ticks; their flames are vanilla's particles.
+- IDs (stable from release): the block and item `stone_fireplace`; its states `part` (0 to 8), `facing`, `lit`, `garland`. The item `mantel_garland`. Part 2's blocks and items `woodstove` (`facing`, `lit`), `tea_kettle` (`facing`, `heated`, model-only `runner`; block entity `tea_kettle`), `simmer_pot` (`facing`, `heated`); the woodstove is in `jugcraft:heat_sources`. Part 3's blocks and items `firewood_rack` (`facing`, `logs` 0 to 16; block entity `firewood_rack`, its saved `logs`) and `chopping_block` (`facing`, model-only `runner`; block entity `chopping_block`). Part 4's blocks and items `blanket_ladder` (`facing`, `part` 0 to 1; block entity `blanket_ladder`, its saved `throws`) and `knitting_basket` (`facing`, `needles`; block entity `knitting_basket`, its saved `yarn` and `needles`). Part 5's blocks and items `hurricane_lamp` (`facing`, `lit`) and `mason_jar_candle` (`candles` 1 to 4, `lit`, `waterlogged`).
 - Its recipes follow the agriculture switch. The blocks and items stay registered when it is off.
 
 ## Dependencies and assets
@@ -191,6 +207,12 @@ All on the first run:
   - `python3 tools/check_icon_maps.py`: PASS (no new map; the comforts' items are 3D).
   - `javac` scan of the new and changed Java for syntax errors: none. The full compile runs in CI.
   - Part 4's first CI run failed to compile its tests: 26.3 has no `Items.RED_CARPET` (nor the other colours' fields). The tests now take their carpets from vanilla's `minecraft:wool_carpets` tag, the one the ladder takes, so they don't depend on what each colour's item is called.
+- Part 5, all on the first run:
+  - `python3 tools/check_mod_data.py`: PASS (8,125 material IDs). `check_hearth` now also checks the lamp's light, its registration and its lit chimney's glow. It checks the jars' sizes, flame height and layouts against `tools/hearth.py`, and every count's lit model.
+  - `python3 scripts/check_repository.py`: PASS.
+  - `python3 -m unittest discover -s scripts/tests`: 287 tests, OK.
+  - `python3 tools/check_icon_maps.py`: PASS (no new map; the lights' items are 3D).
+  - `javac` scan of the new and changed Java for syntax errors: none. The full compile runs in CI.
 
 Game tests (CI only, not run locally), `HearthGameTests`:
 - **The fireplace lights and takes its garland**:
@@ -225,14 +247,17 @@ Game tests (CI only, not run locally), `HearthGameTests`:
   - worn needles go in and show;
   - an empty hand takes back the needles first, then the last ball;
   - broken, it gives back its three balls and itself.
+- **Part 5: the hurricane lamp lights**: it stands out; flint and steel lights it, wearing the flint, and it gives light 12; an empty hand turns it down.
+- **Part 5: the mason-jar candles light as candles**: a second jar joins the first; flint and steel lights them both, giving light 6 (three each); an empty hand puts them out.
 
-`HearthClientGameTests` takes six screenshots of a room's corner (a spruce floor and a plank back wall). It holds:
+`HearthClientGameTests` takes seven screenshots of a room's corner (a spruce floor and a plank back wall). It holds:
 - a fireplace lit and dressed, and a second beside it out and bare;
 - part 2's two woodstoves lit along the wall, a kettle boiling on one (its lid drawn by `TeaKettleRenderer`) and a simmer pot on the other;
 - part 3's firewood rack full of logs and a chopping block before it (its hatchet drawn by `ChoppingBlockRenderer`);
-- part 4's blanket ladder with three throws of different colours (carpets from vanilla's tag), and a knitting basket of four coloured balls with its needles. The throws and yarn are drawn by their renderers, so the picture shows their colours.
+- part 4's blanket ladder with three throws of different colours (carpets from vanilla's tag), and a knitting basket of four coloured balls with its needles. The throws and yarn are drawn by their renderers, so the picture shows their colours;
+- part 5's hurricane lamp and three mason-jar candles lit on the floor before the fireplace.
 
-The shots are from the room, close by, at the stoves, at the woodpile, at the comforts, and by night.
+The shots are from the room, close by, at the stoves, at the woodpile, at the comforts, at the lights, and by night.
 
 Not run: a hand playtest, and a two-client playtest.
 
@@ -240,5 +265,5 @@ Not run: a hand playtest, and a two-client playtest.
 Not seasonal: it is made and burns all year. It doesn't generate in the world.
 
 ## Rollout and open questions
-- Part 5 (the lights: a hurricane lamp and mason-jar candles) follows.
+- Set 5 is complete with part 5. Set 6 (the Haunted Midway) follows.
 - Open: whether a lit fireplace or woodstove should warm players near it once a cold-weather system exists; whether the fireplace should take other mantel dressings (a winter garland, candles); whether the kettle should give hot water for the kitchen's drinks.

@@ -7,6 +7,7 @@ import io.github.jimbozoomer.jugcraft.agriculture.CookingPotBlockEntity;
 import io.github.jimbozoomer.jugcraft.agriculture.DecorationBlockEntity;
 import io.github.jimbozoomer.jugcraft.agriculture.FacingDecorationBlock;
 import io.github.jimbozoomer.jugcraft.agriculture.FirewoodRackBlock;
+import io.github.jimbozoomer.jugcraft.agriculture.HurricaneLampBlock;
 import io.github.jimbozoomer.jugcraft.agriculture.JugcraftAgriculture;
 import io.github.jimbozoomer.jugcraft.agriculture.Knitting;
 import io.github.jimbozoomer.jugcraft.agriculture.KnittingBasketBlock;
@@ -34,6 +35,7 @@ import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.CampfireBlock;
+import net.minecraft.world.level.block.CandleBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.BlockHitResult;
@@ -56,7 +58,9 @@ import net.minecraft.world.phys.Vec3;
  * nor a stick; an empty
  * hand takes back the last; its wall gone, it falls, giving back itself and its throws. The Knitting Basket takes four
  * balls of yarn, each kept in its colour, and no fifth; the needles go in and show; an empty hand takes back the needles,
- * then the last ball; broken, it gives back its yarn and itself.
+ * then the last ball; broken, it gives back its yarn and itself. Part 5: the Hurricane Lamp stands out, flint and steel lights
+ * it (light {@value HurricaneLampBlock#LIGHT}) and an empty hand turns it down; Mason-Jar Candles take a second jar, light
+ * as candles do (three each) and go out by hand.
  */
 public class HearthGameTests {
 	private static Item item(String id) {
@@ -390,5 +394,47 @@ public class HearthGameTests {
 					"Broken, it gives back its yarn and itself");
 			helper.succeed();
 		});
+	}
+
+	// ---------------------------------------------------------------- part 5
+
+	@GameTest(maxTicks = 20)
+	public void theHurricaneLampLights(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		floor(helper);
+		BlockPos pos = new BlockPos(3, 2, 4);
+		BlockPos at = helper.absolutePos(pos);
+		ServerPlayer player = standing(helper, new BlockPos(3, 2, 1));
+		place(player, helper, pos, new ItemStack(item("hurricane_lamp")));
+		helper.assertTrue(level.getBlockState(at).is(JugcraftAgriculture.block("hurricane_lamp")) && level.getBlockState(at).getLightEmission() == 0,
+				"It stands, out");
+		ItemStack flint = new ItemStack(Items.FLINT_AND_STEEL);
+		use(player, level, at, flint);
+		helper.assertTrue(level.getBlockState(at).getValue(HurricaneLampBlock.LIT) && flint.getDamageValue() == 1
+				&& level.getBlockState(at).getLightEmission() == HurricaneLampBlock.LIGHT, "Flint and steel lights it, and it gives light");
+		use(player, level, at, ItemStack.EMPTY);
+		helper.assertTrue(!level.getBlockState(at).getValue(HurricaneLampBlock.LIT), "An empty hand turns it down");
+		helper.succeed();
+	}
+
+	@GameTest(maxTicks = 20)
+	public void theMasonJarCandlesLightAsCandles(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		floor(helper);
+		BlockPos pos = new BlockPos(3, 2, 4);
+		BlockPos at = helper.absolutePos(pos);
+		ServerPlayer player = standing(helper, new BlockPos(3, 2, 1));
+		place(player, helper, pos, new ItemStack(item("mason_jar_candle")));
+		ItemStack more = new ItemStack(item("mason_jar_candle"), 2);
+		player.setItemInHand(InteractionHand.MAIN_HAND, more);
+		player.gameMode.useItemOn(player, level, more, InteractionHand.MAIN_HAND,
+				new BlockHitResult(Vec3.atCenterOf(at).relative(Direction.UP, 0.2), Direction.UP, at, false));
+		helper.assertTrue(level.getBlockState(at).getValue(CandleBlock.CANDLES) == 2 && more.getCount() == 1, "A second jar joins the first");
+		use(player, level, at, new ItemStack(Items.FLINT_AND_STEEL));
+		helper.assertTrue(level.getBlockState(at).getValue(CandleBlock.LIT) && level.getBlockState(at).getLightEmission() == 6,
+				"Flint and steel lights them both, three light each, as candles give");
+		use(player, level, at, ItemStack.EMPTY);
+		helper.assertTrue(!level.getBlockState(at).getValue(CandleBlock.LIT), "An empty hand puts them out");
+		helper.succeed();
 	}
 }
