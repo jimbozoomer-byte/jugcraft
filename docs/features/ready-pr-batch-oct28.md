@@ -39,3 +39,7 @@ The live server and public client channel remain on 0.1.0-alpha.20261027.1. Prep
 ## Deferred
 
 Drafts remain proposals, including the Glass Abbot, Storm Roc, Cinder Tyrant, garden cohort and utility/economy documentation changes. The Cursed Mirror has conflicts and no current checks. Later gun and Pumpkin Patch Market branches, and costume disguises, were still awaiting validation at selection time. Their readiness should be reassessed in the next batch, not assumed.
+
+## Release validation follow-up — October 28
+
+Exact-main Build 40632227610 exposed a genuine queued-grove race: a natural leaf can decay after planning, and the strict expected-block check then aborted the remaining work. A deterministic regression reproduces the failure by removing a planned leaf before application. Grove removal now skips already-air leaves after claim/town/operator-approval checks; other replacement blocks still abort and are preserved. Skipped air creates no undo entry. A second regression verifies that a player replacement stops the grove and survives undo. Validation is in progress; the live server and channel have not changed. Owner restart approval is recorded, conditional on successful release checks and a full 30-second player warning. Repair by OpenAI Codex (GPT-6).
