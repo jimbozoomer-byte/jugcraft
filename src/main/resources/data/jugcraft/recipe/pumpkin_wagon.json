@@ -1,0 +1,27 @@
+{
+  "fabric:load_conditions": [
+    {
+      "condition": "jugcraft:feature_enabled",
+      "feature": "agriculture"
+    }
+  ],
+  "type": "minecraft:crafting_shaped",
+  "category": "building",
+  "pattern": [
+    "SCS",
+    "PRP",
+    "IHI"
+  ],
+  "key": {
+    "S": "minecraft:stick",
+    "C": "minecraft:chest",
+    "P": "#minecraft:planks",
+    "R": "minecraft:red_dye",
+    "I": "minecraft:iron_ingot",
+    "H": "minecraft:hay_block"
+  },
+  "result": {
+    "id": "jugcraft:pumpkin_wagon",
+    "count": 1
+  }
+}

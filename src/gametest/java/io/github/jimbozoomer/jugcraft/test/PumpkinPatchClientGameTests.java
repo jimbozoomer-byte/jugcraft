@@ -2,6 +2,8 @@ package io.github.jimbozoomer.jugcraft.test;
 
 import io.github.jimbozoomer.jugcraft.agriculture.GourdStemBlock;
 import io.github.jimbozoomer.jugcraft.agriculture.JugcraftAgriculture;
+import io.github.jimbozoomer.jugcraft.agriculture.ProduceDisplayBlock;
+import io.github.jimbozoomer.jugcraft.agriculture.ProduceDisplayBlockEntity;
 import java.util.Locale;
 import net.fabricmc.fabric.api.client.gametest.v1.FabricClientGameTest;
 import net.fabricmc.fabric.api.client.gametest.v1.context.ClientGameTestContext;
@@ -11,6 +13,8 @@ import net.minecraft.client.gui.screens.worldselection.WorldCreationUiState;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.HorizontalDirectionalBlock;
@@ -20,7 +24,8 @@ import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 /**
  * Client game test for the Pumpkin Patch Market's squashes and gourds (decor set 1, part 1): the six laid out in a row on
  * a market's boards, and a patch of them growing on their stems, built in a real client and photographed close, from
- * behind and over the patch, by day (CI job {@code client}). The pictures go into docs/features/pumpkin-patch-market.md.
+ * behind and over the patch, by day; and part 2's displays (the Pumpkin Wheelbarrow, Wagon and Pyramid) filled with them,
+ * from the front and the side (CI job {@code client}). The pictures go into docs/features/pumpkin-patch-market.md.
  */
 public class PumpkinPatchClientGameTests implements FabricClientGameTest {
 	/** The six, as tools/pumpkin_patch.py VARIETIES lists them. */
@@ -40,8 +45,8 @@ public class PumpkinPatchClientGameTests implements FabricClientGameTest {
 			server.runCommand("gamerule minecraft:send_command_feedback false");
 			server.runCommand("time set noon");
 			server.runCommand("weather clear");
-			server.runCommand("fill %d %d %d %d %d %d minecraft:grass_block".formatted(x - 4, y - 1, z - 18, x + 16, y - 1, z + 6));
-			server.runCommand("fill %d %d %d %d %d %d minecraft:air".formatted(x - 4, y, z - 18, x + 16, y + 10, z + 6));
+			server.runCommand("fill %d %d %d %d %d %d minecraft:grass_block".formatted(x - 4, y - 1, z - 18, x + 16, y - 1, z + 26));
+			server.runCommand("fill %d %d %d %d %d %d minecraft:air".formatted(x - 4, y, z - 18, x + 16, y + 10, z + 26));
 			server.runOnServer(minecraft -> build(minecraft.overworld(), origin));
 			context.waitTicks(40);
 			singleplayer.getConnection().waitForChunksRender();
@@ -49,6 +54,10 @@ public class PumpkinPatchClientGameTests implements FabricClientGameTest {
 			shoot(context, singleplayer, x + 5, y + 1, z + 4, 180, 30, "jugcraft_pumpkin_patch_varieties");
 			shoot(context, singleplayer, x + 5, y + 1, z - 4, 0, 30, "jugcraft_pumpkin_patch_varieties_back");
 			shoot(context, singleplayer, x + 6, y + 6, z - 3, 180, 50, "jugcraft_pumpkin_patch_field");
+			server.runOnServer(minecraft -> displays(minecraft.overworld(), origin.offset(0, 0, 12)));
+			context.waitTicks(20);
+			shoot(context, singleplayer, x + 5, y + 3, z + 21, 180, 18, "jugcraft_pumpkin_patch_displays");
+			shoot(context, singleplayer, x + 13, y + 3, z + 9, 90, 22, "jugcraft_pumpkin_patch_wagon_side");
 		}
 	}
 
@@ -87,6 +96,24 @@ public class PumpkinPatchClientGameTests implements FabricClientGameTest {
 				GourdStemBlock block = (GourdStemBlock) JugcraftAgriculture.block(VARIETIES[i] + "_stem");
 				set(level, stem, block.defaultBlockState().setValue(GourdStemBlock.AGE, GourdStemBlock.MAX_AGE));
 				block.growGourd(level, stem, k == 0 ? Direction.NORTH : Direction.SOUTH);
+			}
+		}
+	}
+
+	/** The three displays in a row, facing south (towards the camera), each filled with the six and vanilla pumpkins. */
+	private static void displays(ServerLevel level, BlockPos at) {
+		String[] ids = {"pumpkin_wheelbarrow", "pumpkin_wagon", "pumpkin_pyramid"};
+		int[] xs = {0, 3, 7};
+		for (int i = 0; i < ids.length; i++) {
+			ProduceDisplayBlock block = (ProduceDisplayBlock) JugcraftAgriculture.block(ids[i]);
+			BlockPos master = at.offset(xs[i], 0, 0);
+			BlockState state = block.defaultBlockState().setValue(ProduceDisplayBlock.FACING, Direction.SOUTH);
+			set(level, master, state);
+			block.setPlacedBy(level, master, state, null, new ItemStack(block));
+			if (level.getBlockEntity(master) instanceof ProduceDisplayBlockEntity display) {
+				for (int piece = 0; piece < display.capacity(); piece++) {
+					display.add(piece % 7 == 6 ? new ItemStack(Items.PUMPKIN) : new ItemStack(JugcraftAgriculture.item(VARIETIES[piece % 7 % VARIETIES.length])));
+				}
 			}
 		}
 	}

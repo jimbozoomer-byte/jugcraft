@@ -381,6 +381,7 @@ public final class JugcraftAgriculture {
 	public static BlockEntityType<DecorationBlockEntity> SINGING_PUMPKIN_ENTITY;
 	public static BlockEntityType<HarvestEffigyBlockEntity> HARVEST_EFFIGY_ENTITY;
 	public static BlockEntityType<FarmStandBlockEntity> FARM_STAND_ENTITY;
+	public static BlockEntityType<ProduceDisplayBlockEntity> PRODUCE_DISPLAY_ENTITY;
 	public static ExtendedMenuType<FarmStandMenu, FarmStandMenu.Opening> FARM_STAND_MENU;
 	/** The Harvest Effigy catching (assets/jugcraft/sounds/effigy, made by tools/choir_sounds.py). */
 	public static SoundEvent EFFIGY_BURN;
@@ -2372,6 +2373,7 @@ public final class JugcraftAgriculture {
 		registerCryptAndOssuary();
 		registerLaboratoryLarderDining();
 		registerPumpkinNight();
+		registerPumpkinPatchDisplays();
 	}
 
 	/**
@@ -2704,6 +2706,28 @@ public final class JugcraftAgriculture {
 	private static SoundEvent sound(String id) {
 		Identifier key = Jugcraft.id(id);
 		return Registry.register(BuiltInRegistries.SOUND_EVENT, key, SoundEvent.createVariableRangeEvent(key));
+	}
+
+	/**
+	 * The Pumpkin Patch Market's displays (decor set 1, part 2; tools/pumpkin_patch.py DISPLAYS): the Pumpkin Wheelbarrow,
+	 * the Pumpkin Wagon and the Pumpkin Pyramid, each a prop of several blocks that shows the produce put on it, sharing
+	 * one block entity.
+	 */
+	private static void registerPumpkinPatchDisplays() {
+		Block wheelbarrow = registerBlock("pumpkin_wheelbarrow", PumpkinWheelbarrowBlock::new, displayProperties());
+		Block wagon = registerBlock("pumpkin_wagon", PumpkinWagonBlock::new, displayProperties());
+		Block pyramid = registerBlock("pumpkin_pyramid", PumpkinPyramidBlock::new, displayProperties());
+		PRODUCE_DISPLAY_ENTITY = Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, Jugcraft.id("produce_display"),
+				FabricBlockEntityTypeBuilder.create(ProduceDisplayBlockEntity::new, wheelbarrow, wagon, pyramid).build());
+		for (Block display : new Block[] {wheelbarrow, wagon, pyramid}) {
+			registerItem(BuiltInRegistries.BLOCK.getKey(display).getPath(), props -> new BlockItem(display, props),
+					new Item.Properties().useBlockDescriptionPrefix(), BUILDING_TAB);
+		}
+	}
+
+	private static BlockBehaviour.Properties displayProperties() {
+		return BlockBehaviour.Properties.of().mapColor(MapColor.WOOD).strength(2.0F).sound(SoundType.WOOD).noOcclusion().ignitedByLava()
+				.pushReaction(PushReaction.BLOCK);
 	}
 
 	/**

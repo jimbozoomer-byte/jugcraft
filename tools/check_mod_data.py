@@ -14294,6 +14294,37 @@ def check_alpha_werewolf():
                 err(f"{cls}.java {why} ({banned})")
 
 
+def check_pumpkin_patch():
+    """The Pumpkin Patch Market's displays (tools/pumpkin_patch.py DISPLAYS, docs/features/pumpkin-patch-market.md): each
+    display's Java class has the table's blocks, spots and scale, the renderer turns its pieces by the table's TURNS, and
+    every spot lies inside the display's frame."""
+    import pumpkin_patch as pp
+    classes = {"wheelbarrow": "PumpkinWheelbarrowBlock", "wagon": "PumpkinWagonBlock", "pyramid": "PumpkinPyramidBlock"}
+    for key, spec in pp.DISPLAYS.items():
+        path = JAVA_ROOT / "agriculture" / f"{classes[key]}.java"
+        if not path.is_file():
+            err(f"agriculture/{classes[key]}.java is missing: the {spec['display']}")
+            continue
+        java = path.read_text(encoding="utf-8")
+        w, h, d = spec["size"]
+        if f"box({w}, {h}, {d})" not in java:
+            err(f"{classes[key]} is not {w} x {h} x {d} blocks as tools/pumpkin_patch.py DISPLAYS['{key}'] says")
+        block = re.search(r"SPOTS = \{(.*?)\};", java, re.S)
+        spots = [tuple(float(v) for v in re.findall(r"(-?[\d.]+)F", row)) for row in re.findall(r"\{([^{}]*)\}", block.group(1))] if block else []
+        if spots != [tuple(float(v) for v in spot) for spot in spec["spots"]]:
+            err(f"{classes[key]}.SPOTS is not tools/pumpkin_patch.py DISPLAYS['{key}']['spots']")
+        scale = re.search(r"SCALE = ([\d.]+)F;", java)
+        if not scale or float(scale.group(1)) != spec["scale"]:
+            err(f"{classes[key]}.SCALE is not tools/pumpkin_patch.py's {spec['scale']}")
+        for x, y, z in spec["spots"]:
+            if not (0 <= x <= 16 * w and 0 <= y <= 16 * h and 0 <= z <= 16 * d):
+                err(f"the {spec['display']}'s spot {(x, y, z)} lies outside its frame")
+    base = (JAVA_ROOT / "agriculture" / "ProduceDisplayBlock.java").read_text(encoding="utf-8")
+    turns = re.search(r"TURNS = \{([^}]*)\}", base)
+    if not turns or [float(v) for v in re.findall(r"(-?[\d.]+)F", turns.group(1))] != list(pp.TURNS):
+        err("ProduceDisplayBlock.TURNS is not tools/pumpkin_patch.py TURNS")
+
+
 def check_pumpkin_king():
     """The Pumpkin King (tools/pumpkin_king.py, docs/features/pumpkin-king.md): every number the Java uses is the table's
     (his, his Jacks', his loot's, the Fright boon's and the Crowward Charm's); his attacks are the table's, and his rule can
@@ -21858,6 +21889,7 @@ def main():
     check_iron_dreadnought()
     check_alpha_werewolf()
     check_pumpkin_king()
+    check_pumpkin_patch()
     check_cydonian_sentinel()
     check_material_sets()
     check_art()

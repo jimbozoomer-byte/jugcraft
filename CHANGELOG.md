@@ -8,6 +8,16 @@ Every change to Jugcraft, newest first, grouped by pull request. For what each t
 
 No numbered release yet. Entries on feature branches remain proposed until their pull requests merge.
 
+### Unmerged: The Pumpkin Patch Market, part 2 (the market's displays)
+- **Three real-life-sized displays for your produce**, each several blocks placed and broken as one:
+  - the **Pumpkin Wheelbarrow**: two blocks long, an iron-shod spoked wheel, a flared plank tray; holds 5;
+  - the **Pumpkin Wagon**: two wide, two high, four long, on four spoked wheels, with barn-red slatted sides on stakes and a hay floor; holds 28;
+  - the **Pumpkin Pyramid**: three blocks square, three stepped tiers with lips; holds 25.
+- **Using them:** use any produce the Pumpkin Crate takes on any block of one to set a piece on its next spot; an empty hand takes the last back; breaking it spills them.
+- **Drawn by the owner's rules:** every face painted for itself at vanilla's density (boards along each face's long edge, placed nails, flat iron, striped hay, no noise); cut into blocks so the pictures run on unbroken; no shared planes.
+- Record: [pumpkin-patch-market.md](docs/features/pumpkin-patch-market.md).
+- **Checked:** the record's Verification. Game tests and screenshots run in CI only; not played by hand.
+
 ### Unmerged: The Pumpkin Patch Market, part 1 (six squashes and gourds)
 - **Six new squashes and gourds** for fall displays and kitchens, each grown from its seeds on a stem like every gourd: the **Turban Squash** (red-orange, wearing a striped green and cream turban), the **Blue Hubbard Squash** (big, slate blue, warty, lying on its side), the **Sweet Dumpling Squash** (small, cream, striped green along its ribs), the **Long Island Cheese Pumpkin** (a flat buff wheel that bakes a pumpkin pie), the **Spoon Gourd** (a yellow bowl on a green handle) and the **Swan Gourd** (speckled green, its long neck arched like a swan's).
 - **Where they come from:** short grass (sharing the grass-seed chance), wild patches in their own biomes, and four seeds from each fruit in a crafting grid.

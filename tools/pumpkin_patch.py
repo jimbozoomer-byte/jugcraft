@@ -1,5 +1,5 @@
-"""The Pumpkin Patch Market, decor set 1 (docs/features/pumpkin-patch-market.md), part 1: six new squashes and gourds for
-the fall's displays and kitchens. Each grows from a stem like every gourd (tools/agriculture.py GOURDS, FOUND_WILD; the
+"""The Pumpkin Patch Market, decor set 1 (docs/features/pumpkin-patch-market.md). Part 1: six new squashes and gourds for
+the fall's displays and kitchens. Part 2: the displays to show them on (DISPLAYS, below). Each grows from a stem like every gourd (tools/agriculture.py GOURDS, FOUND_WILD; the
 Java in agriculture/JugcraftAgriculture.java), and is drawn here: its model's boxes, and the colours its skins are
 painted in (tools/pumpkin_patch_textures.py, in the vanilla manner of docs/NATURAL_TEXTURES.md).
 
@@ -68,6 +68,49 @@ TURBAN_CAP = {"base": "e2d8b0", "stripe": "5f8a3a", "band": "c8502a"}
 # (tools/icon_materials.py), told apart as vanilla's pumpkin and melon seeds are: by their colour.
 SEED_MATERIALS = {"turban_squash": "stem", "blue_hubbard_squash": "old_bone", "sweet_dumpling_squash": "paper",
                   "long_island_cheese_pumpkin": "canvas", "spoon_gourd": "straw", "swan_gourd": "horn"}
+
+
+# Part 2: the market's displays. Each shows the produce put on it (item tag jugcraft:crate_produce, the Pumpkin Crate's),
+# one piece on each of its `spots` in turn, and gives the last one back to an empty hand; breaking it spills them. Each is
+# real-life sized, several blocks placed and broken as one (agriculture/MultiDecorationBlock): `size` is (across, up,
+# deep) in blocks. It is modelled whole in its frame (pixels, 0 to 16 x size, facing north: x across to the placer's left
+# from its far block, y up, z away from them; tools/pumpkin_patch_data.py), and each spot is (x, y, z) in that frame: the
+# middle of the piece across and deep, and the floor it stands on. The client draws a piece `scale` of a block across,
+# each turned a little differently (TURNS), so a full display doesn't look stamped out.
+DISPLAYS = {
+    # A wooden wheelbarrow, its iron-rimmed wheel at the front and its grips at the back, heaped with four and one on top.
+    "wheelbarrow": {"block": "pumpkin_wheelbarrow", "display": "Pumpkin Wheelbarrow", "size": (1, 1, 2), "scale": 0.625,
+                    "spots": [(5.75, 7.5, 15.5), (10.25, 7.5, 15.5), (5.75, 7.5, 22.5), (10.25, 7.5, 22.5), (8.0, 10.0, 19.0)]},
+    # A farm wagon: a plank bed with barn-red slatted sides on stakes, a hay floor, four iron-rimmed spoked wheels (the back
+    # pair bigger). Eighteen pieces on the hay in three files, then ten heaped between them.
+    "wagon": {"block": "pumpkin_wagon", "display": "Pumpkin Wagon", "size": (2, 2, 4), "scale": 1.0,
+              "spots": [(x, 12.5, z) for z in (10.0, 19.0, 28.0, 37.0, 46.0, 55.0) for x in (9.0, 16.0, 23.0)]
+              + [(x, 17.5, z) for z in (14.5, 23.5, 32.5, 41.5, 50.5) for x in (12.5, 19.5)]},
+    # A stepped pyramid of boards three blocks square: sixteen pieces round the bottom step, eight round the middle and
+    # one crowning the top.
+    "pyramid": {"block": "pumpkin_pyramid", "display": "Pumpkin Pyramid", "size": (3, 1, 3), "scale": 0.8,
+                "spots": [(x, 4.0, z) for z in (4.75, 43.25) for x in (4.75, 14.25, 24.0, 33.75, 43.25)]
+                + [(x, 4.0, z) for x in (4.75, 43.25) for z in (14.25, 24.0, 33.75)]
+                + [(x, 10.0, z) for z in (12.5, 35.5) for x in (12.5, 24.0, 35.5)]
+                + [(x, 10.0, 24.0) for x in (12.5, 35.5)]
+                + [(24.0, 16.0, 24.0)]},
+}
+# How far each piece is turned (degrees about the vertical), by its spot's index, round and round.
+TURNS = (8.0, -12.0, 20.0, -4.0, 14.0, -18.0, 2.0)
+DISPLAY_RECIPES = [
+    {"id": "pumpkin_wheelbarrow", "pattern": ["P P", "PPP", "SIS"],
+     "key": {"P": "#minecraft:planks", "S": "minecraft:stick", "I": "minecraft:iron_ingot"}, "result": "pumpkin_wheelbarrow",
+     "count": 1, "category": "building"},
+    {"id": "pumpkin_wagon", "pattern": ["SCS", "PRP", "IHI"],
+     "key": {"S": "minecraft:stick", "C": "minecraft:chest", "P": "#minecraft:planks", "R": "minecraft:red_dye",
+             "I": "minecraft:iron_ingot", "H": "minecraft:hay_block"}, "result": "pumpkin_wagon", "count": 1, "category": "building"},
+    {"id": "pumpkin_pyramid", "pattern": [" S ", "SPS", "PPP"], "key": {"S": "#minecraft:wooden_slabs", "P": "#minecraft:planks"},
+     "result": "pumpkin_pyramid", "count": 1, "category": "building"},
+]
+
+
+def display_blocks():
+    return [spec["block"] for spec in DISPLAYS.values()]
 
 
 def textures(variety):

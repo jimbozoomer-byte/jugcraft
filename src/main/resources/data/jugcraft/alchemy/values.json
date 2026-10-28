@@ -32677,6 +32677,11 @@
       "denominator": 1,
       "source": "fallback (balance pending)"
     },
+    "jugcraft:pumpkin_pyramid": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
     "jugcraft:pumpkin_racer": {
       "numerator": 1,
       "denominator": 1,
@@ -32711,6 +32716,16 @@
       "numerator": 164,
       "denominator": 1,
       "source": "recipe jugcraft:pumpkin_vine_garland"
+    },
+    "jugcraft:pumpkin_wagon": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
+    "jugcraft:pumpkin_wheelbarrow": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
     },
     "jugcraft:purified_titanium_chloride_bucket": {
       "numerator": 1,

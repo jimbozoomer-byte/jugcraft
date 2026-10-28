@@ -1,0 +1,23 @@
+{
+  "fabric:load_conditions": [
+    {
+      "condition": "jugcraft:feature_enabled",
+      "feature": "agriculture"
+    }
+  ],
+  "type": "minecraft:crafting_shaped",
+  "category": "building",
+  "pattern": [
+    " S ",
+    "SPS",
+    "PPP"
+  ],
+  "key": {
+    "S": "#minecraft:wooden_slabs",
+    "P": "#minecraft:planks"
+  },
+  "result": {
+    "id": "jugcraft:pumpkin_pyramid",
+    "count": 1
+  }
+}

@@ -69,6 +69,7 @@ import vesperine_data
 import decor18_data
 import decor19_data
 import decor20_data
+import pumpkin_patch_data
 import ofrenda_data
 import graveyard_data
 import regatta_data
@@ -307,6 +308,7 @@ def assets(root, write, lang):
     decor18_data.assets(root, write, lang)
     decor19_data.assets(root, write, lang)
     decor20_data.assets(root, write, lang)
+    pumpkin_patch_data.assets(root, write, lang)
     lair_data.assets(root, write, lang)
     adam_ondi_ahman_data.assets(root, write, lang)
     vesperine_data.assets(root, write, lang)
@@ -473,6 +475,7 @@ def loot(data, write):
     decor18_data.loot(out, write)
     decor19_data.loot(out, write)
     decor20_data.loot(out, write)
+    pumpkin_patch_data.loot(out, write)
     lair_data.loot(out, write)
     adam_ondi_ahman_data.loot(out, write)
     vesperine_data.loot(out, write)
@@ -614,6 +617,7 @@ def tags(tags):
     decor18_data.tags(tags)
     decor19_data.tags(tags)
     decor20_data.tags(tags)
+    pumpkin_patch_data.tags(tags)
     lair_data.tags(tags)
     adam_ondi_ahman_data.tags(tags)
     vesperine_data.tags(tags)
