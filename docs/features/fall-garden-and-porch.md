@@ -1,6 +1,6 @@
 # Fall Garden & Porch
 
-Status: all four parts implemented: 1 (the fall garden's plants), 2 (planters), 3 (the porch) and 4 (café lights). CI builds it and runs its game tests and client screenshots; not yet played by hand. CI builds it and runs its game tests and client screenshots; not yet played by hand.
+Status: all four parts implemented: 1 (the fall garden's plants), 2 (planters), 3 (the porch) and 4 (café lights). CI builds it and runs its game tests and client screenshots; not yet played by hand.
 Proposal issue: none. The owner asked for it directly on 28 October 2026, as set 4 of the ten sets of fall and Halloween decor ("Then I want you to do 1-10 in parts in that order one by one"), drawn by their rules.
 Owner: @jimbozoomer-byte
 Target milestone and tier: Discovery tier; plants found in the wild or made from a seed or a flower.
