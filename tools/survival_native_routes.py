@@ -169,6 +169,10 @@ def extend(root, edge, evidence, items):
             fluid = group + '_' + name
             route(java + 'chemistry/PetroFluids.java', ['fluid:' + j(fluid), 'minecraft:bucket'], [fluid + '_bucket'], 'fluid_filling')
 
+    # Found plastic (docs/features/found-plastic.md): Java adds its pool to the listed structure chests.
+    found(['old_plastic_bottle', 'plastic_duck', 'old_plastic_crate'], java + 'chemistry/FoundPlastic.java',
+          'Structure-chest loot added by LootTableEvents.MODIFY; each generated chest fills once.')
+
     import gear
     exclusions = {j(tier + '_' + part): 'Deferred acquisition design: owner requested preview armor only on October 6; tools/gear.py ARMOR_TIERS records the still-unassigned recipe/drop choice.'
                   for tier in gear.ARMOR_TIERS for part in ('helmet', 'chestplate', 'leggings', 'boots')}

@@ -212,6 +212,9 @@ public final class PetroItems {
 	public static Item STORABLE_BIPROPELLANT_MOTOR;
 	public static Item PROPELLANT_RESIDUE;
 	public static Item MMH_TANK;
+	public static Item OLD_PLASTIC_BOTTLE;
+	public static Item PLASTIC_DUCK;
+	public static Item OLD_PLASTIC_CRATE;
 	public static Item COBALT_CONCENTRATE;
 	public static Item COBALT_INGOT;
 	public static Item COBALT_CATALYST_BED;
@@ -422,6 +425,11 @@ public final class PetroItems {
 		PROPELLANT_RESIDUE = JugcraftRegistry.item("propellant_residue", DescribedItem::new);
 		// MMH (docs/features/cola-and-mmh.md): the storable bipropellant's second fuel.
 		MMH_TANK = JugcraftRegistry.item("mmh_tank", DescribedItem::new);
+		// Found plastic (docs/features/found-plastic.md): chest loot only, broken down by hand into plastic pellets.
+		OLD_PLASTIC_BOTTLE = JugcraftRegistry.item("old_plastic_bottle", DescribedItem::new);
+		PLASTIC_DUCK = JugcraftRegistry.item("plastic_duck", DescribedItem::new);
+		OLD_PLASTIC_CRATE = JugcraftRegistry.item("old_plastic_crate", DescribedItem::new);
+		FoundPlastic.register();
 
 		CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.INGREDIENTS).register(output -> {
 			output.accept(HIGH_PURITY_SILICON);
@@ -600,6 +608,9 @@ public final class PetroItems {
 			output.accept(RUTHENIUM_POWDER);
 			output.accept(RUTHENIUM_CATALYST_BED);
 			output.accept(VANADIUM_CONTACT_BED);
+			output.accept(OLD_PLASTIC_BOTTLE);
+			output.accept(PLASTIC_DUCK);
+			output.accept(OLD_PLASTIC_CRATE);
 		});
 		CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.FOOD_AND_DRINKS).register(output -> output.accept(COLA));
 		CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.COMBAT).register(output -> {

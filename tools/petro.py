@@ -741,3 +741,7 @@ FLUID_RECIPES["chemical_reactor"].extend(cryogenic_fuels.TANK_RECIPES)
 # Last, so the swirls drawn by index for the gases before it keep their seeds.
 GASES["methyl_chloride"] = {"display": "Methyl Chloride", "feature": "machines",
                             "colors": [(120, 150, 120), (154, 186, 152), (186, 212, 182), (220, 238, 214)]}
+
+# Found plastic (docs/features/found-plastic.md): chest loot broken down by hand into plastic pellets.
+import found_plastic
+ITEMS.update(found_plastic.ITEMS)

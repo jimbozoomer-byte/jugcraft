@@ -2802,6 +2802,8 @@ def write_all(write, assets, data, lang, condition, self_drop):
     phosphate_processing.write_extras(write, assets, data, lang, condition)
     synthetic_fuels.write_extras(write, assets, data, lang, condition)
     cryogenic_fuels.write_extras(write, assets, data, lang, condition)
+    import found_plastic
+    found_plastic.write_extras(write, assets, data, lang, condition)
     for kind, name, recipe in form_recipe_files(condition):
         write(data / "recipe" / kind / f"{name}.json", recipe)
 

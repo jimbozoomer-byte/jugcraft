@@ -106,6 +106,14 @@ TERRACOTTA = Material((52, 24, 14), (86, 40, 24), (130, 62, 38), (172, 90, 56), 
                       shine=False)
 DEW = Material((30, 60, 90), (60, 100, 140), (90, 140, 190), (126, 192, 232), (206, 238, 255), (240, 250, 255))
 
+# Found plastic (tools/item_icons/: the Old Plastic Bottle, Plastic Toy Duck and Broken Plastic Crate, loot broken
+# down for plastic pellets). Bottle plastic is a saturated pale blue, kept apart from the clear glass so a bottle of it
+# reads as plastic; toy yellow is a cool lemon, greener than gold. Neither is a metal, so neither shines.
+BOTTLE_PLASTIC = Material((22, 46, 76), (40, 80, 120), (54, 112, 170), (104, 168, 220), (164, 212, 244), (214, 238, 252),
+                          shine=False)
+TOY_YELLOW = Material((60, 58, 6), (100, 96, 14), (168, 170, 24), (222, 226, 50), (244, 248, 124), (252, 254, 200),
+                      shine=False)
+
 MATERIALS = {
     "tech_clay": Material((48, 22, 22), (78, 38, 38), (124, 57, 57), (168, 83, 83), (201, 116, 111), (228, 158, 146),
                       shine=False),
@@ -143,6 +151,7 @@ MATERIALS = {
     "old_bone": OLD_BONE, "soul_fire": SOUL_FIRE,
     # the Earth school's metal (Concordance Chunk C)
     "thallite": THALLITE,
+    "bottle_plastic": BOTTLE_PLASTIC, "toy_yellow": TOY_YELLOW,
 }
 
 # Materials meant to be vanilla's own metal: the distance test against copper, iron and gold is skipped for them.
