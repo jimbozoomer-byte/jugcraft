@@ -193,7 +193,7 @@ public final class Lineage {
 	}
 
 	public static boolean bred(Entity entity) {
-		return entity instanceof Animal && entity.getType().is(STAR_BRED);
+		return entity instanceof Animal && entity.getType().builtInRegistryHolder().is(STAR_BRED);
 	}
 
 	// ---------------------------------------------------------------- lines
@@ -503,7 +503,7 @@ public final class Lineage {
 		animal.setAttached(SHORN, level.getGameTime());
 		((CompanionShearingInvoker) animal).jugcraft$collectShearing(level, COATS.get(coat), shears,
 				(where, stack) -> animal.spawnAtLocation(where, stack));
-		shears.hurtAndBreak(1, player, LivingEntity.getSlotForHand(hand));
+		shears.hurtAndBreak(1, player, hand.asEquipmentSlot());
 		level.playSound(null, animal, SoundEvents.SHEEP_SHEAR, SoundSource.PLAYERS, 1.0F, 1.0F);
 		animal.gameEvent(GameEvent.SHEAR, player);
 		return InteractionResult.SUCCESS;

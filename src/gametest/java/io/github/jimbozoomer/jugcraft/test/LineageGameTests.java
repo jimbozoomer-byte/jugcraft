@@ -438,7 +438,7 @@ public class LineageGameTests {
 		player.setItemInHand(InteractionHand.MAIN_HAND, wand);
 		helper.assertTrue(wand.interactLivingEntity(player, cow, InteractionHand.MAIN_HAND) == InteractionResult.SUCCESS
 				&& cow.getAttached(Lineage.LINE) != null, "Pointed at a cow, the Astrawand reads it (a wild cow is given its line)");
-		helper.assertTrue(JugcraftAgriculture.TURKEY.is(Lineage.STAR_BRED), "Turkeys carry a line");
+		helper.assertTrue(JugcraftAgriculture.TURKEY.builtInRegistryHolder().is(Lineage.STAR_BRED), "Turkeys carry a line");
 		helper.succeed();
 	}
 }
