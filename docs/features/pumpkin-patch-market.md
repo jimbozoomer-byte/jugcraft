@@ -109,7 +109,7 @@ The bushel baskets first listed for this set were dropped: the woven Basket and 
   - Each display's first block keeps what it holds (`ProduceDisplayBlockEntity`), saved with the world and sent to clients.
   - Pieces are set on and taken off on the server only, one a use, and only produce is taken.
   - Breaking it from any block takes the whole down and spills its pieces once.
-  - Pistons can't move it (`PushReaction.BLOCK`).
+  - Pistons can't move it (`PushReaction.IMMOVEABLE`; 26.3 has no `BLOCK`).
   - The client draws the pieces (`ProduceDisplayRenderer`), each lit as the block it stands in.
 - IDs (stable from release): part 2's `pumpkin_wheelbarrow`, `pumpkin_wagon`, `pumpkin_pyramid` (block entity `produce_display`); part 1's `turban_squash`, `blue_hubbard_squash`, `sweet_dumpling_squash`, `long_island_cheese_pumpkin`, `spoon_gourd`, `swan_gourd`, each with `_seeds`, `_stem` and `attached_<id>_stem`.
 - Every recipe and patch follows the agriculture feature switch, as the other gourds do. Turning agriculture off stops the recipes; the blocks stay registered.
@@ -124,6 +124,7 @@ Local checks run on this branch, and their results:
 - `python3 scripts/check_repository.py`: PASS.
 - `python3 -m unittest discover -s scripts/tests`: 287 tests, OK.
 - `javac` parse (syntax only) of the changed and new Java: OK. The full compile runs in CI.
+- CI on `68c39b6` (part 2's first push): the build failed to compile, since 26.3 has no `PushReaction.BLOCK` (the displays now use `IMMOVEABLE`), so no game test or screenshot ran on it.
 - Offline previews of the six gourd models and the three displays, textured and drawn with back faces culled, were looked at from front and back while drawing (a review aid, not committed).
 
 Game tests (CI only, not run locally):

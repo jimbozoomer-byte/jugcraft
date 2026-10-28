@@ -2727,7 +2727,7 @@ public final class JugcraftAgriculture {
 
 	private static BlockBehaviour.Properties displayProperties() {
 		return BlockBehaviour.Properties.of().mapColor(MapColor.WOOD).strength(2.0F).sound(SoundType.WOOD).noOcclusion().ignitedByLava()
-				.pushReaction(PushReaction.BLOCK);
+				.pushReaction(PushReaction.IMMOVEABLE);
 	}
 
 	/**
