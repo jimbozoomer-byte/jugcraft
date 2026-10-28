@@ -18,7 +18,7 @@ import flora_art as fa
 import front_yard as fy
 import pumpkin_patch_data as ppd
 from flora_art import Sculpt, pal, rotation, shade
-from haunted_midway_data import (BLACK, BONE, GREEN, HAIR, LAMP, ORANGE, STEEL, STEM, VIOLET, clear, face_glow, fur, glow, glowing,
+from haunted_midway_data import (BLACK, BONE, GOLD, GREEN, HAIR, LAMP, ORANGE, STEEL, STEM, VIOLET, clear, face_glow, fur, glow, glowing,
                                  membrane, pumpkin_side, zombie_skin)
 from pumpkin_patch_data import flat, lengthwise, panel
 
@@ -687,12 +687,129 @@ def beware_doormat():
     return sc
 
 
+# ---------------------------------------------------------------- part 4: the Crashed Witch
+
+BROOM = pal("3a2614", "553a20", "6e4e2c", "8a6638")
+STRAW = pal("7a6020", "a0822e", "c4a444", "dcc066")
+
+
+def stocking():
+    """A striped stocking along the leg: orange and black by turns, a stripe a texel wide across the leg, each lit along
+    its upper (or left) edge; its ends (across the leg) black."""
+    def paint(p):
+        along_x = p.w >= p.h
+        across = p.h if along_x else p.w
+        for y in range(p.h):
+            for x in range(p.w):
+                a, l = (y, x) if along_x else (x, y)
+                k = 3 if (a == 0 and across > 1) else 2
+                p.put(x, y, shade(ORANGE, k) if l % 2 == 0 else shade(BLACK, k - 1))
+    paint.tag = repr(("stocking",))
+    return paint
+
+
+def rag(right=False):
+    """The skirt's hem, cut out: black cloth with its foot torn into points every other texel, a longer tatter every
+    fourth (mirrored for the `right` side, as it is seen)."""
+    def paint(p):
+        for y in range(p.h):
+            for x in range(p.w):
+                u = p.w - 1 - x if right else x
+                depth = p.h - (2 if u % 4 == 1 else 1 if u % 2 == 1 else 0)
+                if y >= depth and p.h > 1:
+                    clear(p, x, y)
+                else:
+                    p.put(x, y, shade(BLACK, 2 if y == 0 else 1))
+    paint.tag = repr(("rag", right))
+    return paint
+
+
+def skirt_folds():
+    """A witch's black skirt, gathered: black in folds a texel wide, every third shaded a tone deeper, every fifth
+    catching a dull violet sheen, lit along its top."""
+    def paint(p):
+        along_x = p.w >= p.h
+        for y in range(p.h):
+            for x in range(p.w):
+                l = x if along_x else y
+                k = 3 if (y == 0 and p.h > 1) else 0 if l % 3 == 2 else 1
+                p.put(x, y, shade(VIOLET, 1) if l % 5 == 4 and k != 3 else shade(BLACK, k))
+    paint.tag = repr(("skirt_folds",))
+    return paint
+
+
+def splinter():
+    """A snapped broom handle's end: the wood's pale heart, splintered, a darker ring round it."""
+    def paint(p):
+        for y in range(p.h):
+            for x in range(p.w):
+                edge = x == 0 or y == 0 or x == p.w - 1 or y == p.h - 1
+                p.put(x, y, shade(BROOM, 1 if edge and p.w > 2 else 3))
+    paint.tag = repr(("splinter",))
+    return paint
+
+
+def witch_leg(sc, right):
+    """One of the witch's legs, sticking straight out from her hip at the wall (the renderer splays and kicks it): her
+    thigh and knee in the striped stocking, her shin bent down at the knee, and her pointed black boot with its toe curled
+    up, a gold buckle and a heel, bent down with the shin."""
+    spec = fy.CRASHED_WITCH
+    hy, hz = spec["hips"]
+    hx = 8.0 + (spec["hip_x"] if right else -spec["hip_x"])
+    sock = stocking()
+    boot = flat(BLACK)
+
+    def box(lo, hi):
+        # Drawn about the hip's x; the two legs are alike.
+        return (hx + lo[0], lo[1], lo[2]), (hx + hi[0], hi[1], hi[2])
+    knee = rotation((hx, hy, 8.0), "x", -22.5)
+    el = [panel(sc, "thigh", sock, *box((-0.75, hy - 0.75, 8.0), (0.75, hy + 0.75, hz))),
+          panel(sc, "knee", sock, *box((-0.65, hy - 0.65, 7.25), (0.65, hy + 0.65, 8.25))),
+          panel(sc, "shin", sock, *box((-0.5, hy - 0.55, 3.25), (0.5, hy + 0.55, 7.5)), rot=knee),
+          panel(sc, "boot", boot, *box((-0.7, hy - 0.85, 1.25), (0.7, hy + 0.7, 3.5)), rot=knee),
+          panel(sc, "boot_toe", boot, *box((-0.45, hy - 0.2, 0.5), (0.45, hy + 1.1, 1.25)), rot=knee),
+          panel(sc, "heel", boot, *box((-0.45, hy - 1.6, 3.0), (0.45, hy - 0.85, 3.5)), rot=knee),
+          panel(sc, "buckle", flat(GOLD), *box((-0.4, hy + 0.7, 2.25), (0.4, hy + 0.95, 2.75)), rot=knee)]
+    return el
+
+
+def crashed_witch():
+    """The Crashed Witch, facing north (hung on the north side of the block behind it, the wall at the block's south
+    edge): her ragged black skirt bunched round the hole she went in by, a purple petticoat under it, her snapped broom's
+    bristles sticking out by her lower right and its handle's splintered other half by her upper left. Models: `whole`,
+    and its runners `left_leg` and `right_leg` (sticking straight out from her hips; the renderer splays and kicks them)."""
+    spec = fy.CRASHED_WITCH
+    sc = Sculpt(spec["block"], 2710, 128)
+    cloth = skirt_folds()
+    # Her skirt, flung up round her hips as she went in: three layers flaring out to the wall, folded, its hem torn.
+    el = [panel(sc, "skirt", cloth, (3.0, 5.5, 15.25), (13.0, 13.5, 16.0)),
+          panel(sc, "skirt", cloth, (4.0, 6.25, 14.25), (12.0, 12.75, 15.25)),
+          panel(sc, "skirt", cloth, (5.0, 7.0, 13.25), (11.0, 12.0, 14.25)),
+          panel(sc, "hem", rag(), (3.0, 3.5, 15.5), (8.0, 5.5, 15.5), sides=("north", "south"), south=rag(right=True)),
+          panel(sc, "hem", rag(right=True), (8.0, 3.5, 15.5), (13.0, 5.5, 15.5), sides=("north", "south"), south=rag()),
+          panel(sc, "petticoat", flat(VIOLET), (5.5, 7.5, 12.75), (10.5, 8.25, 13.25))]
+    # The broom went in with her: its bristles stick out by her lower right, angled down, bound to a stub of its handle.
+    down = rotation((12.0, 6.0, 14.0), "x", -22.5)
+    el += [panel(sc, "broom_handle", lengthwise(BROOM), (11.6, 5.6, 10.0), (12.4, 6.4, 16.0), rot=down),
+           panel(sc, "broom_binding", flat(BLACK), (11.0, 5.0, 9.25), (13.0, 7.0, 10.0), rot=down),
+           panel(sc, "bristles", lengthwise(STRAW), (10.75, 4.75, 7.0), (13.25, 7.25, 9.25), rot=down),
+           panel(sc, "bristles", lengthwise(STRAW), (10.4, 4.4, 5.5), (13.6, 7.6, 7.0), rot=down)]
+    # Its handle's other half, snapped off short and splintered, by her upper left.
+    up = rotation((4.0, 12.0, 15.0), "x", 22.5)
+    el += [panel(sc, "broom_stub", lengthwise(BROOM), (3.6, 11.6, 12.0), (4.4, 12.4, 16.0), north=splinter(), rot=up)]
+    sc.models["whole"] = el
+    sc.models["left_leg"] = witch_leg(sc, False)
+    sc.models["right_leg"] = witch_leg(sc, True)
+    return sc
+
+
 # ---------------------------------------------------------------- building and files
 
 _built = {}
 BUILDERS = {fy.MAILBOX["block"]: haunted_mailbox, fy.PATH_LIGHT["block"]: pumpkin_path_light, fy.SKELETON_DOG["block"]: skeleton_dog,
             fy.SKELETON_CAT["block"]: skeleton_cat, fy.SKELETON_CROW["block"]: skeleton_crow, fy.RISING_ZOMBIE["block"]: rising_zombie,
-            fy.KNOCKER["block"]: gargoyle_knocker, fy.BAT_WREATH["block"]: bat_wreath, fy.DOORMAT["block"]: beware_doormat}
+            fy.KNOCKER["block"]: gargoyle_knocker, fy.BAT_WREATH["block"]: bat_wreath, fy.DOORMAT["block"]: beware_doormat,
+            fy.CRASHED_WITCH["block"]: crashed_witch}
 
 
 def build(block):
@@ -712,7 +829,8 @@ MULTI = ((fy.MAILBOX, {"1": "lid", "2": "eyes"}, [("flag_down", {"flag": "false"
 # Each one-block piece: its runners' models by `runner` value (none for a piece without moving parts), and what its
 # item shows besides it whole.
 SINGLE = ((fy.SKELETON_DOG, {"1": "tail"}, ("tail",)), (fy.SKELETON_CAT, {"1": "tail"}, ("tail",)), (fy.SKELETON_CROW, {"1": "head"}, ("head",)),
-          (fy.KNOCKER, {"1": "ring", "2": "eyes"}, ("ring",)), (fy.BAT_WREATH, {}, ()), (fy.DOORMAT, {}, ()))
+          (fy.KNOCKER, {"1": "ring", "2": "eyes"}, ("ring",)), (fy.BAT_WREATH, {}, ()), (fy.DOORMAT, {}, ()),
+          (fy.CRASHED_WITCH, {"1": "left_leg", "2": "right_leg"}, ("left_leg", "right_leg")))
 
 
 def assets(root, write, lang):

@@ -9397,6 +9397,11 @@
       "denominator": 1,
       "source": "recipe jugcraft:craps_table"
     },
+    "jugcraft:crashed_witch": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
     "jugcraft:crawling_hand": {
       "numerator": 176,
       "denominator": 1,

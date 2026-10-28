@@ -24,16 +24,18 @@ import net.minecraft.world.phys.AABB;
 import net.minecraft.world.level.block.state.BlockState;
 
 /**
- * Client game test for Front-Yard Haunt Scenes, parts 1 to 3 (decor set 7): a front path of gravel across a lawn, a
+ * Client game test for Front-Yard Haunt Scenes, parts 1 to 4 (decor set 7): a front path of gravel across a lawn, a
  * Haunted Mailbox at the street end with its flag up, and three Pumpkin Path Lights along the path, lit, their lanterns
  * swaying (drawn by client/PumpkinPathLightRenderer). By the mailbox a Skeleton Dog sits and a Skeleton Crow perches on a
  * fence post; on the lawn a Skeleton Cat arches and a Rising Zombie claws its way out of the ground (their moving parts
  * drawn by client/SkeletonAnimalRenderer and client/RisingZombieRenderer). At the path's end a house front of dark oak
  * has a Gargoyle Door Knocker on its door (drawn by client/DoorWreathRenderer), a Bat Wreath on its wall and a Beware
- * Doormat at its step. Photographed from along the path, from far
+ * Doormat at its step; by the path a tree trunk with a Crashed Witch out to her hips in it (client/CrashedWitchRenderer).
+ * Photographed from along the path, from far
  * enough that the mailbox stays shut; from the street close by the mailbox, near enough that its door falls open and its
  * eyes stare out (client/HauntedMailboxRenderer), the dog wags and the crow watches the camera; from the lawn close by the
- * zombie, near enough that it reaches higher; from the path before the door, the knocker rapping; and by night (CI job
+ * zombie, near enough that it reaches higher; from the path before the door, the knocker rapping; from the path by the
+ * witch, near enough that she kicks the whole time; and by night (CI job
  * {@code client}). They go into
  * docs/features/front-yard-haunt.md.
  */
@@ -72,6 +74,8 @@ public class FrontYardClientGameTests implements FabricClientGameTest {
 			server.runOnServer(minecraft -> knock(minecraft.overworld(), origin));
 			context.waitTicks(3);
 			context.takeScreenshot("jugcraft_front_yard_door");
+			// On the path, three blocks from the witch: near enough that she kicks the whole time.
+			shoot(context, singleplayer, x + 1, y + 1, z + 3, 270, 10, "jugcraft_front_yard_witch");
 			server.runCommand("time set midnight");
 			shoot(context, singleplayer, x + 4, y + 1, z + 11, 160, 15, "jugcraft_front_yard_night");
 		}
@@ -117,6 +121,18 @@ public class FrontYardClientGameTests implements FabricClientGameTest {
 		animal(level, "skeleton_cat", origin.offset(-2, 0, 3), Direction.EAST);
 		stand(level, (MultiDecorationBlock) JugcraftAgriculture.block("rising_zombie"), origin.offset(-3, 0, 6), Direction.EAST, state -> state);
 		doorway(level, origin);
+		// A tree trunk east of the path, the witch out to her hips in its west face, kicking toward the path.
+		for (int dy = 0; dy <= 3; dy++) {
+			level.setBlock(origin.offset(5, dy, 3), Blocks.OAK_LOG.defaultBlockState(), Block.UPDATE_ALL);
+		}
+		for (int dx = -1; dx <= 1; dx++) {
+			for (int dz = -1; dz <= 1; dz++) {
+				level.setBlock(origin.offset(5 + dx, 4, 3 + dz), Blocks.OAK_LEAVES.defaultBlockState()
+						.setValue(net.minecraft.world.level.block.LeavesBlock.PERSISTENT, true), Block.UPDATE_ALL);
+			}
+		}
+		level.setBlock(origin.offset(4, 1, 3), JugcraftAgriculture.block("crashed_witch").defaultBlockState()
+				.setValue(io.github.jimbozoomer.jugcraft.agriculture.WallDecorationBlock.FACING, Direction.WEST), Block.UPDATE_ALL);
 	}
 
 	/** The house front at the path's end: its door, the knocker on its door, the wreath on its wall, the mat at its step. */

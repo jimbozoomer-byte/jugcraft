@@ -45,6 +45,15 @@ Part 3, the doorway:
   a purple satin bow at its foot. It hangs on the side of a block or on either face of a door, as the other wreaths do.
 - The Beware Doormat (BewareDoormatBlock): a coir doormat 75 cm by 50 cm, a black border round a skull and crossbones.
   Now and then (one step in `heartbeat`) whoever treads on it hears a heart beating under the boards.
+Part 4, the Crashed Witch:
+- The Crashed Witch (CrashedWitchBlock): a witch who flew her broom into a tree or a wall, out to her hips in it, her
+  ragged black skirt bunched round the hole and her legs sticking out in orange and black striped stockings and pointed
+  black boots with gold buckles, her snapped broom's bristles sticking out by her and its handle's other half by her
+  other side. It hangs on the side of a block, as the wreaths do. Her legs kick (client/CrashedWitchRenderer, each
+  player's own sight of it): `kick` degrees about her hips (`hips`, height and depth; across at `hip_x` either side of
+  the middle) once in `kick_ticks` ticks, out of step, in a burst of `burst` ticks every `every` ticks, never in step with
+  another witch's; and while anyone is within `near` blocks she kicks the whole time. An empty hand makes her cackle and
+  kick, for everyone.
 Sizes in pixels, facing north (the street to the north, the house behind it to the south).
 """
 
@@ -67,6 +76,9 @@ KNOCKER = {"block": "gargoyle_knocker", "display": "Gargoyle Door Knocker", "rap
            "haunt": 3, "door_chance": 3000}
 BAT_WREATH = {"block": "bat_wreath", "display": "Bat Wreath"}
 DOORMAT = {"block": "beware_doormat", "display": "Beware Doormat", "heartbeat": 8}
+
+CRASHED_WITCH = {"block": "crashed_witch", "display": "Crashed Witch", "kick": 25.0, "kick_ticks": 12, "burst": 36, "every": 160,
+                 "near": 6.0, "hips": (9.5, 14.0), "hip_x": 1.25, "splay": 22.5}
 
 ITEMS = {}
 
@@ -92,6 +104,10 @@ RECIPES = [
     # The doormat: straw bristles round a black device.
     {"id": DOORMAT["block"], "pattern": ["WBW", "WWW"], "key": {"W": "minecraft:wheat", "B": "minecraft:black_dye"},
      "result": DOORMAT["block"], "count": 1, "category": "building"},
+    # The crashed witch: black wool for her skirt, orange for her stockings' stripes, leather for her boots, and a broom.
+    {"id": CRASHED_WITCH["block"], "pattern": ["WOW", "WOW", "LSH"],
+     "key": {"W": "minecraft:black_wool", "O": "minecraft:orange_wool", "L": "minecraft:leather", "S": "minecraft:stick", "H": "minecraft:wheat"},
+     "result": CRASHED_WITCH["block"], "count": 1, "category": "building"},
 ]
 # The bones are bones, tied with string; the crow's are a bird's, with a feather.
 SHAPELESS = [
@@ -106,7 +122,7 @@ SHAPELESS = [
 
 def blocks():
     return [MAILBOX["block"], PATH_LIGHT["block"], SKELETON_DOG["block"], SKELETON_CAT["block"], SKELETON_CROW["block"],
-            RISING_ZOMBIE["block"], KNOCKER["block"], BAT_WREATH["block"], DOORMAT["block"]]
+            RISING_ZOMBIE["block"], KNOCKER["block"], BAT_WREATH["block"], DOORMAT["block"], CRASHED_WITCH["block"]]
 
 
 def items():

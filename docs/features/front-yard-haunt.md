@@ -1,9 +1,9 @@
 # Front-Yard Haunt Scenes
 
-Status: parts 1 (the path: the Haunted Mailbox and the Pumpkin Path Light), 2 (the bones and the risen: the Skeleton Dog, Cat and Crow and the Rising Zombie) and 3 (the doorway: the Gargoyle Door Knocker, the Bat Wreath and the Beware Doormat) implemented. CI builds them and runs their game tests and client screenshots; not yet played by hand. Parts 4 and 5 are planned (below).
+Status: parts 1 (the path: the Haunted Mailbox and the Pumpkin Path Light), 2 (the bones and the risen: the Skeleton Dog, Cat and Crow and the Rising Zombie) 3 (the doorway: the Gargoyle Door Knocker, the Bat Wreath and the Beware Doormat) and 4 (the Crashed Witch) implemented. CI builds them and runs their game tests and client screenshots; not yet played by hand. Part 5 is planned (below).
 Proposal issue: none. The owner asked for it directly on 28 October 2026, as set 7 of the ten sets of fall and Halloween decor ("Then I want you to do 1-10 in parts in that order one by one"), drawn by their rules.
 Owner: @jimbozoomer-byte
-Target milestone and tier: Discovery tier; the mailbox is made from iron nuggets, a spider eye, red dye and a wooden fence, two path lights from iron bars and a jack-o'-lantern, the skeleton animals from bones and string (the crow with a feather), the Rising Zombie from rotten flesh, a bone and coarse dirt, the knocker from an iron ingot and nuggets, the bat wreath from sticks, paper and black dye, and the doormat from wheat and black dye.
+Target milestone and tier: Discovery tier; the mailbox is made from iron nuggets, a spider eye, red dye and a wooden fence, two path lights from iron bars and a jack-o'-lantern, the skeleton animals from bones and string (the crow with a feather), the Rising Zombie from rotten flesh, a bone and coarse dirt, the knocker from an iron ingot and nuggets, the bat wreath from sticks, paper and black dye, the doormat from wheat and black dye, and the Crashed Witch from black and orange wool, leather, a stick and wheat.
 Primary specialty and supported player role: building. A builder dresses the front of a house for Halloween night, from the street to the door. Nothing in it is needed to progress.
 
 ## Player experience
@@ -68,8 +68,18 @@ The front yard after dark: what a trick-or-treater passes on the way to the door
   - Recipe: a wheat, black dye and a wheat, over three wheat.
 - Broken, each drops itself; on a door, the knocker and the wreath drop as the other wreaths do.
 
+### Part 4: the Crashed Witch
+- **Crashed Witch**: a witch who flew her broom into a tree or a wall and is stuck out to her hips in it.
+  - Her ragged black skirt is bunched round the hole she went in by, flaring out to the wall in folds, with a purple petticoat under it.
+  - Her legs stick out of it in orange-and-black striped stockings and pointed black boots with gold buckles, splayed a little apart.
+  - Her snapped broom's bristles stick out by her lower right, and its handle's splintered other half by her upper left.
+  - **She hangs on the side of a solid block or a log**, as the wreaths do, and goes if it does.
+  - **Her legs kick**, out of step, 25 degrees up and down at the hip: in a burst now and then, each witch in her own time. While anyone is within 6 blocks, she kicks the whole time, struggling.
+  - **An empty hand makes her cackle**, and she kicks harder, for everyone; she cackles again only once she has done.
+  - Recipe: black wool, orange wool and black wool, twice over, over leather, a stick and wheat.
+  - Broken, she drops herself.
+
 ### Planned
-- **Part 4: the Crashed Witch**: striped stockings and a snapped broom sticking out of a tree or a wall.
 - **Part 5: the Trick-or-Treat Candy Chute**: from the porch rail to the path; candy dropped in slides down it, tied into trick-or-treating.
 
 ## How it is drawn (docs/ART_DIRECTION.md, docs/NATURAL_TEXTURES.md)
@@ -101,6 +111,9 @@ The front yard after dark: what a trick-or-treater passes on the way to the door
 - **The paper bats**: furred bodies and ears. Their wings are cut out, each three texels high: the tip raised at the wrist, the leading edge across, the fingers hanging below with the membrane scalloped between them.
 - **The doormat's coir**: bristles woven in rows, two tones by turns, a lit tuft every fourth texel. Its device is black, the bristles round it clipped pale so it reads, drawn the right way up for a visitor coming from the street.
 - Moving parts, from the knocker's blockstate `runner` models: `GargoyleKnockerRenderer` swings the ring out about its pivot in the jaws after each knock and lights the eyes full-bright, on a wall from its block entity's mark and on a door (through `DoorWreathRenderer`) from the door attachment's knock.
+- **The witch** (part 4): her stockings striped a texel at a time across the leg, orange and black, each stripe lit along its top. Her boots are black with a gold buckle. Her skirt is black gathered in folds, every third texel a tone deeper and every fifth catching a dull violet sheen, its hem cut out into tatters. The broom is brown wood in stripes along it, with straw bristles and a pale splintered end where it snapped.
+- `CrashedWitchRenderer` splays each leg out to its side about her hip and kicks it up and down there, from her blockstate's `runner` models.
+- **The part 4 previews**, fixed before commit: her skirt was one flat black panel behind her legs; it now flares out to the wall in three layers, folded, its hem torn.
 - **The part 3 previews**, fixed before commit:
   - the ring's corner bars leaned the wrong way, so it read as a cross; they now close the octagon;
   - the paper bats' wings, cut out by the midway's carousel-bat wing, came out all but empty at this size; they now have a wing of their own;
@@ -111,7 +124,7 @@ The front yard after dark: what a trick-or-treater passes on the way to the door
   - the zombie's left arm, reaching forward, hid its face from the front; both arms now rise from the shoulders and lean out.
 
 ## Connections
-- Existing input producer: vanilla iron, spider eyes, dye, fences and jack-o'-lanterns; bones, string and feathers (skeletons, spiders and chickens); rotten flesh (zombies) and coarse dirt; sticks, paper and wheat.
+- Existing input producer: vanilla iron, spider eyes, dye, fences and jack-o'-lanterns; bones, string and feathers (skeletons, spiders and chickens); rotten flesh (zombies) and coarse dirt; sticks, paper, wheat, wool and leather.
 - Existing system it joins: **trick-or-treating** (the Candy Bag's knock on a wooden door), which the knocker knocks with, and the **door wreaths**, which the knocker and the bat wreath hang on doors with.
 - Existing output consumer: none; they are a yard's decoration.
 - Technology/magic connections (or infrastructure/cosmetic applicability): cosmetic.
@@ -124,6 +137,7 @@ The front yard after dark: what a trick-or-treater passes on the way to the door
 - The dog costs five bones and a string, the cat three bones and a string, the crow two bones, a feather and a string, and the Rising Zombie five rotten flesh, a bone and three coarse dirt. Each gives back only itself.
 - The knocker costs an iron ingot and five nuggets, the bat wreath five sticks, paper and black dye, and the doormat five wheat and black dye. Each gives back only itself.
 - The knocker's trick-or-treat knock is the Candy Bag's own: the same cooldown, the same answer and treats, nothing added.
+- The Crashed Witch costs four black wool, two orange wool, leather, a stick and wheat, and gives back only herself.
 - They make nothing and take nothing. No loop.
 
 ## Multiplayer and persistence
@@ -136,6 +150,7 @@ The front yard after dark: what a trick-or-treater passes on the way to the door
 - **Its haunting** is the server's too, so everyone hears it: one random tick in 3 on a wall, one tick in 3,000 on a door, it knocks.
 - **Hanging on a door**, the knocker and the bat wreath use the door wreaths' attachment (`door_wreath`), unchanged in what it saves: the block state of what hangs there. That attachment now asks what hangs on it what it is (whether it takes mums, its box on a door, its use, its tick). It no longer singles out the holly wreath by class, and the autumn and holly wreaths behave as before.
 - The knocker and the bat wreath pop off when pushed, as the wreaths do; so does the doormat.
+- **The witch's kicking is each player's own sight of her**, from their distance and the game's clock. Her cackle is the server's: an empty hand plays it and sends a block event, and her block entity (`crashed_witch`) marks it on every side so every client draws her kicking harder. Nothing is saved, and nothing ticks on the server. She pops off when pushed.
 - IDs (stable from release):
   - the block and item `haunted_mailbox` (`facing`, `part` 0 to 1, `lit` (unused), `flag`, model-only `runner` 0 to 2; block entity `haunted_mailbox`, saving nothing);
   - the block and item `pumpkin_path_light` (`facing`, `part` 0 to 1, `lit`, model-only `runner` 0 to 2; block entity `pumpkin_path_light`, saving nothing).
@@ -143,7 +158,8 @@ The front yard after dark: what a trick-or-treater passes on the way to the door
   - the block and item `rising_zombie` (`facing`, `part` 0 to 1, `lit` (unused), model-only `runner` 0 to 2; block entity `rising_zombie`, saving nothing).
   - the block and item `gargoyle_knocker` (`facing`, `flowers` (unused, as the wreath's kind), model-only `runner` 0 to 2; block entity `gargoyle_knocker`, saving nothing);
   - the block and item `bat_wreath` (`facing`, `flowers` (unused));
-  - the block and item `beware_doormat` (`facing`).
+  - the block and item `beware_doormat` (`facing`);
+  - the block and item `crashed_witch` (`facing`, model-only `runner` 0 to 2; block entity `crashed_witch`, saving nothing).
 - Their recipes follow the agriculture switch. The blocks and items stay registered when it is off.
 
 ## Dependencies and assets
@@ -189,6 +205,17 @@ Local checks run on this branch, and their results:
   - `javac` scan of the new and changed Java for syntax errors: none. Every member the new Java calls is used elsewhere in the code already. The full compile runs in CI.
   - The models were previewed offline (review aids, not committed); what the previews showed and what was fixed is under How it is drawn.
 
+- Part 4, all on the first run:
+  - `python3 tools/check_mod_data.py`: PASS (8,144 material IDs), including the art check of every block and item model. `check_front_yard` now also checks:
+    - the Crashed Witch's Java against `tools/front_yard.py`;
+    - her registration with her block entity, and that her renderer splays her legs by `SPLAY` and kicks them by `kick`;
+    - that her blockstate shows each leg alone, each standing out from her hip at the wall.
+  - `python3 scripts/check_repository.py`: PASS.
+  - `python3 -m unittest discover -s scripts/tests`: 287 tests, OK.
+  - `python3 tools/check_icon_maps.py`: PASS (no new map; her item is 3D).
+  - `javac` scan of the new and changed Java for syntax errors: none. Every member the new Java calls is used elsewhere in the code already. The full compile runs in CI.
+  - The model was previewed offline (a review aid, not committed); what the preview showed and what was fixed is under How it is drawn.
+
 `FrontYardGameTests` (run in CI):
 - **The haunted mailbox raises its flag**: it stands two blocks high, facing the player, its flag down, its block entity on its first block; an empty hand raises its flag on both blocks and lowers it again; broken at its box, it comes away whole and drops once.
 - **The mailbox's door falls open for whoever comes near**: with someone near, it falls open 75 degrees from shut, its eyes staring out; with no one, it shuts, its eyes hidden, and now and then rattles open a crack; each box in its own time.
@@ -202,20 +229,27 @@ Local checks run on this branch, and their results:
   - broken on the wall, it drops itself.
 - **The bat wreath hangs on walls and doors**: it hangs on a wall's face, takes no mums, hangs on a door as the other wreaths do, and comes away as itself.
 - **The Beware Doormat lies at the door**: it lies facing whoever places it, and with nothing under it it goes, dropping itself.
-- **Their data loads**: all nine recipes and loot tables.
+- **The Crashed Witch kicks and cackles** (part 4):
+  - she hangs on a log's face, facing out, with her block entity;
+  - far off and between her bursts she lies still; in a burst she kicks, the whole time with someone near and after she cackles, her legs out of step;
+  - an empty hand makes her cackle, and not again until she has done;
+  - with the log gone she goes, dropping herself.
+- **Their data loads**: all ten recipes and loot tables.
 
-`FrontYardClientGameTests` takes five screenshots of a gravel path across a lawn. It holds:
+`FrontYardClientGameTests` takes six screenshots of a gravel path across a lawn. It holds:
 - a Haunted Mailbox at the street end, its flag up;
 - three Pumpkin Path Lights down the path's side, lit, their lanterns swaying (drawn by `PumpkinPathLightRenderer`);
 - a Skeleton Dog sitting by the mailbox, and a Skeleton Crow on a fence post beside it;
 - a Skeleton Cat arched on the lawn, and a Rising Zombie rising there, facing the path (drawn by `SkeletonAnimalRenderer` and `RisingZombieRenderer`).
 - at the path's end, a house front of dark oak with a Gargoyle Door Knocker on its door (drawn by `DoorWreathRenderer`), a Bat Wreath on its wall and a Beware Doormat at its step.
+- by the path, a tree trunk with a Crashed Witch out to her hips in it (drawn by `CrashedWitchRenderer`).
 
 The shots are:
 - from along the path, far enough that the mailbox stays shut;
 - from the street close by the mailbox, near enough that its door falls open and its eyes stare out (drawn by `HauntedMailboxRenderer`), the dog's tail wags and the crow watches the camera;
 - from the lawn close by the zombie, near enough that its arms reach higher;
 - from the path before the door, the knocker set rapping three ticks before the shot, its ring swung out and its eyes glowing;
+- from the path by the witch, near enough that she kicks the whole time;
 - by night.
 
 Not run: a hand playtest, and a two-client playtest.
@@ -224,5 +258,5 @@ Not run: a hand playtest, and a two-client playtest.
 Seasonal in look, not in use: it is made and works all year, and nothing about it ends with October. It doesn't generate in the world.
 
 ## Rollout and open questions
-- Part 1 is the path, part 2 the bones and the risen, and part 3 the doorway; parts 4 and 5 follow, each stacked on the last.
+- Part 1 is the path, part 2 the bones and the risen, part 3 the doorway and part 4 the Crashed Witch; part 5 follows, stacked on the last.
 - Open: whether the mailbox should hold a letter or two (it holds nothing now); whether the path lights should take a dye for their glow's colour; whether the skeleton dog should sit up for a bone held out to it.

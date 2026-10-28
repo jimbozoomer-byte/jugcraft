@@ -15171,7 +15171,8 @@ def check_front_yard():
     bat wreath's Java is the table's; the knocker and the bat wreath are kinds of the Autumn Wreath, with wreath items, so
     they hang on doors; the door attachment asks each what it is by its hooks, not by its class; the knocker's renderer
     swings its ring and lights its eyes on walls and doors; its eyes glow; and the knocker and wreath sit within a door
-    wreath's depth."""
+    wreath's depth. Part 4: the Crashed Witch's Java is the table's; she is registered with her block entity and her
+    renderer splays and kicks her legs; her blockstate shows each leg alone, each standing out from her hip at the wall."""
     import front_yard as fy
 
     def read(path):
@@ -15316,6 +15317,34 @@ def check_front_yard():
         elements = (load(ASSETS / "models" / "block" / f"{block}.json") or {}).get("elements", [])
         if not elements or min(e["from"][2] for e in elements) < 11.5 or max(e["to"][2] for e in elements) > 16.0:
             err(f"models/block/{block}.json: it must sit against what it hangs on, within a door wreath's depth (4.5 pixels)")
+    # Part 4: the Crashed Witch.
+    cw = fy.CRASHED_WITCH
+    witch = read(JAVA_ROOT / "agriculture" / "CrashedWitchBlock.java")
+    hy, hz = cw["hips"]
+    for item in (f"KICK = {cw['kick']}F;", f"KICK_TICKS = {cw['kick_ticks']};", f"BURST = {cw['burst']};", f"EVERY = {cw['every']};",
+                 f"NEAR = {cw['near']};", f"HIP_Y = {hy}F;", f"HIP_Z = {hz}F;", f"HIP_X = {cw['hip_x']}F;", f"SPLAY = {cw['splay']}F;",
+                 "extends WallDecorationBlock implements EntityBlock"):
+        if item not in witch:
+            err(f"CrashedWitchBlock: missing {item} (tools/front_yard.py CRASHED_WITCH)")
+    if f'registerBlock("{cw["block"]}", CrashedWitchBlock::new' not in java_main \
+            or f'CRASHED_WITCH_ENTITY = Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, Jugcraft.id("{cw["block"]}")' not in java_main:
+        err(f"JugcraftAgriculture: {cw['block']} must be a CrashedWitchBlock with its own block entity")
+    if f"block.{MOD}.{cw['block']}" not in lang:
+        err(f"block.{MOD}.{cw['block']}: the text is missing")
+    drawn = read(CLIENT_JAVA_ROOT / "CrashedWitchRenderer.java")
+    if "BlockEntityRendererRegistry.register(JugcraftAgriculture.CRASHED_WITCH_ENTITY, CrashedWitchRenderer::new);" not in client \
+            or "CrashedWitchBlock.kick(" not in drawn or "CrashedWitchBlock.SPLAY" not in drawn:
+        err("CrashedWitchRenderer: registered, it must splay her legs by SPLAY and kick them by kick")
+    variants = (load(ASSETS / "blockstates" / f"{cw['block']}.json") or {}).get("variants", {})
+    for face in ("north", "east", "south", "west"):
+        if [variants.get(f"facing={face},runner={r}", {}).get("model") for r in "012"] != \
+                [f"{MOD}:block/{cw['block']}{suffix}" for suffix in ("", "_left_leg", "_right_leg")]:
+            err(f"blockstates/{cw['block']}.json: facing {face} must show the witch and each leg alone by runner")
+    for side in ("left", "right"):
+        elements = (load(ASSETS / "models" / "block" / f"{cw['block']}_{side}_leg.json") or {}).get("elements", [])
+        hx = 8.0 + (cw["hip_x"] if side == "right" else -cw["hip_x"])
+        if not elements or max(e["to"][2] for e in elements) > hz + 0.01 or not any(abs((e["from"][0] + e["to"][0]) / 2 - hx) < 0.01 for e in elements):
+            err(f"models/block/{cw['block']}_{side}_leg.json: the leg must stand out from her hip at the wall ({hx}, depth {hz})")
 
 
 def check_hearth():

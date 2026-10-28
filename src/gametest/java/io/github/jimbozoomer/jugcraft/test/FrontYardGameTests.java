@@ -4,6 +4,7 @@ import io.github.jimbozoomer.jugcraft.Jugcraft;
 import io.github.jimbozoomer.jugcraft.agriculture.AutumnWreathBlock;
 import io.github.jimbozoomer.jugcraft.agriculture.BatWreathBlock;
 import io.github.jimbozoomer.jugcraft.agriculture.BewareDoormatBlock;
+import io.github.jimbozoomer.jugcraft.agriculture.CrashedWitchBlock;
 import io.github.jimbozoomer.jugcraft.agriculture.DecorationBlockEntity;
 import io.github.jimbozoomer.jugcraft.agriculture.DoorWreath;
 import io.github.jimbozoomer.jugcraft.agriculture.FacingDecorationBlock;
@@ -16,6 +17,7 @@ import io.github.jimbozoomer.jugcraft.agriculture.PumpkinPathLightBlock;
 import io.github.jimbozoomer.jugcraft.agriculture.RisingZombieBlock;
 import io.github.jimbozoomer.jugcraft.agriculture.SkeletonAnimalBlock;
 import io.github.jimbozoomer.jugcraft.agriculture.SkeletonAnimalBlockEntity;
+import io.github.jimbozoomer.jugcraft.agriculture.WallDecorationBlock;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.function.Predicate;
@@ -60,7 +62,9 @@ import net.minecraft.world.phys.Vec3;
  * for an empty hand, its ring swinging and its eyes glowing while it raps, then still; on a door its knock neither opens
  * the door nor lets a second knock in while it raps, and with a Candy Bag it knocks for trick-or-treat. The Bat Wreath
  * hangs on a wall and a door, takes no mums and drops as itself. The Beware Doormat lies facing whoever places it and
- * goes with what is under it. Their recipes and loot load (two lights a craft).
+ * goes with what is under it. Part 4: the Crashed Witch hangs on a wall facing out; an empty hand makes her cackle once
+ * until she has done; her legs kick only in their bursts, the whole time with someone near and after a cackle, out of
+ * step; with the wall gone she goes, dropping herself. Their recipes and loot load (two lights a craft).
  */
 public class FrontYardGameTests {
 	private static Item item(String id) {
@@ -371,11 +375,47 @@ public class FrontYardGameTests {
 		helper.succeed();
 	}
 
+	@GameTest(maxTicks = 40)
+	public void theCrashedWitchKicksAndCackles(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		floor(helper);
+		BlockPos wall = helper.absolutePos(new BlockPos(3, 2, 5));
+		level.setBlock(wall, Blocks.OAK_LOG.defaultBlockState(), Block.UPDATE_ALL);
+		ServerPlayer player = standing(helper, new BlockPos(3, 2, 2));
+		useOnFace(player, wall, Direction.NORTH, new ItemStack(item("crashed_witch")));
+		BlockPos at = wall.north();
+		BlockState hung = level.getBlockState(at);
+		helper.assertTrue(hung.getBlock() instanceof CrashedWitchBlock && hung.getValue(WallDecorationBlock.FACING) == Direction.NORTH
+				&& level.getBlockEntity(at) instanceof DecorationBlockEntity, "She hangs out of the tree's face, facing out, with her block entity");
+		use(player, level, at, ItemStack.EMPTY);
+		float far = Float.MAX_VALUE;
+		helper.assertTrue(CrashedWitchBlock.kick(false, 63.0F, 0, far, -1.0F) == 0.0F, "Far off and between her bursts, she lies still");
+		float burst = CrashedWitchBlock.kick(false, 21.0F, 0, far, -1.0F);
+		helper.assertTrue(Math.abs(burst) > 20.0F && Math.abs(burst) <= CrashedWitchBlock.KICK, "In a burst she kicks: " + burst);
+		helper.assertTrue(Math.abs(CrashedWitchBlock.kick(false, 63.0F, 0, 2.0, -1.0F) - CrashedWitchBlock.KICK) < 0.01F,
+				"With someone near she kicks the whole time");
+		helper.assertTrue(Math.abs(CrashedWitchBlock.kick(false, 63.0F, 0, far, CrashedWitchBlock.BURST / 2.0F)) > 20.0F, "and after she cackles");
+		helper.assertTrue(Math.abs(CrashedWitchBlock.kick(false, 21.0F, 0, far, -1.0F) + CrashedWitchBlock.kick(true, 21.0F, 0, far, -1.0F)) < 0.01F,
+				"her legs out of step");
+		helper.runAfterDelay(1, () -> {
+			long cackled = level.getBlockEntity(at) instanceof DecorationBlockEntity watch ? watch.marked() : Long.MIN_VALUE;
+			helper.assertTrue(cackled != Long.MIN_VALUE, "An empty hand makes her cackle");
+			use(player, level, at, ItemStack.EMPTY);
+			helper.runAfterDelay(1, () -> {
+				helper.assertTrue(level.getBlockEntity(at) instanceof DecorationBlockEntity watch && watch.marked() == cackled,
+						"and not again until she has done");
+				level.setBlock(wall, Blocks.AIR.defaultBlockState(), Block.UPDATE_ALL);
+				helper.assertTrue(level.getBlockState(at).isAir() && dropped(helper, item("crashed_witch")) == 1, "With the tree gone she goes, dropping herself");
+				helper.succeed();
+			});
+		});
+	}
+
 	@GameTest
 	public void frontYardDataLoads(GameTestHelper helper) {
 		ServerLevel level = helper.getLevel();
 		for (String id : new String[] {"haunted_mailbox", "pumpkin_path_light", "skeleton_dog", "skeleton_cat", "skeleton_crow", "rising_zombie",
-				"gargoyle_knocker", "bat_wreath", "beware_doormat"}) {
+				"gargoyle_knocker", "bat_wreath", "beware_doormat", "crashed_witch"}) {
 			helper.assertTrue(level.recipeAccess().byKey(ResourceKey.create(Registries.RECIPE, Jugcraft.id(id))).isPresent(), id + " has a recipe");
 			helper.assertTrue(level.getServer().reloadableRegistries().getLootTable(ResourceKey.create(Registries.LOOT_TABLE,
 					Jugcraft.id("blocks/" + id))) != LootTable.EMPTY, id + "'s loot loads");

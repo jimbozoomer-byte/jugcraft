@@ -410,6 +410,7 @@ public final class JugcraftAgriculture {
 	public static BlockEntityType<SkeletonAnimalBlockEntity> SKELETON_ANIMAL_ENTITY;
 	public static BlockEntityType<DecorationBlockEntity> RISING_ZOMBIE_ENTITY;
 	public static BlockEntityType<DecorationBlockEntity> GARGOYLE_KNOCKER_ENTITY;
+	public static BlockEntityType<DecorationBlockEntity> CRASHED_WITCH_ENTITY;
 	public static BlockEntityType<FirewoodRackBlockEntity> FIREWOOD_RACK_ENTITY;
 	public static BlockEntityType<DecorationBlockEntity> CHOPPING_BLOCK_ENTITY;
 	public static BlockEntityType<BlanketLadderBlockEntity> BLANKET_LADDER_ENTITY;
@@ -3093,13 +3094,20 @@ public final class JugcraftAgriculture {
 				.strength(0.2F).sound(SoundType.GRASS).noCollision().noOcclusion().ignitedByLava().pushReaction(PushReaction.POPPED));
 		Block doormat = registerBlock("beware_doormat", BewareDoormatBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_BROWN)
 				.strength(0.2F).sound(SoundType.GRASS).noOcclusion().ignitedByLava().pushReaction(PushReaction.POPPED));
-		for (Block block : List.of(mailbox, light, dog, cat, crow, zombie, knocker, batWreath, doormat)) {
+		// Part 4: the Crashed Witch, out to her hips in a wall or a tree.
+		Block witch = registerBlock("crashed_witch", CrashedWitchBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_BLACK)
+				.strength(0.5F).sound(SoundType.WOOL).noCollision().noOcclusion().ignitedByLava().pushReaction(PushReaction.POPPED));
+		CRASHED_WITCH_ENTITY = Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, Jugcraft.id("crashed_witch"),
+				FabricBlockEntityTypeBuilder.<DecorationBlockEntity>create((pos, state) -> new DecorationBlockEntity(CRASHED_WITCH_ENTITY, pos, state),
+						witch).build());
+		for (Block block : List.of(mailbox, light, dog, cat, crow, zombie, knocker, batWreath, doormat, witch)) {
 			registerItem(BuiltInRegistries.BLOCK.getKey(block).getPath(),
 					props -> block instanceof AutumnWreathBlock ? new WreathBlockItem(block, props) : new BlockItem(block, props),
 					new Item.Properties().useBlockDescriptionPrefix(), BUILDING_TAB);
 		}
 		FlammableBlockRegistry.getDefaultInstance().add(batWreath, 30, 60);
 		FlammableBlockRegistry.getDefaultInstance().add(doormat, 30, 60);
+		FlammableBlockRegistry.getDefaultInstance().add(witch, 30, 60);
 	}
 
 	/** Bleached bones: they come away easily, and a piston pops them off. */

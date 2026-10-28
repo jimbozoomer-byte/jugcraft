@@ -8,6 +8,13 @@ Every change to Jugcraft, newest first, grouped by pull request. For what each t
 
 No numbered release yet. Entries on feature branches remain proposed until their pull requests merge.
 
+### Unmerged: Front-Yard Haunt Scenes, part 4 (the Crashed Witch)
+- **Crashed Witch**: a witch stuck out to her hips in a tree or a wall where she flew her broom into it. Her ragged skirt is bunched round the hole, her legs stick out in orange-and-black striped stockings and buckled boots, and her snapped broom pokes out by her.
+- Her legs kick now and then, and the whole time while anyone is within 6 blocks. An empty hand makes her cackle and kick harder.
+- Recipe: four black wool and two orange wool over leather, a stick and wheat.
+- Record: [front-yard-haunt.md](docs/features/front-yard-haunt.md). Decor set 7's fourth part.
+- **Checked:** the record's Verification. Game tests and screenshots run in CI only; not played by hand.
+
 ### Unmerged: Front-Yard Haunt Scenes, part 3 (the doorway)
 - **Gargoyle Door Knocker**: a bronze gargoyle's head with a ring in its jaws. It hangs on a wall or on either face of a wooden door, as the wreaths do. An empty hand raps it three times, its ring swinging and its eyes glowing ember-red. With a Candy Bag it knocks for trick-or-treat at its door. It is haunted: now and then it raps by itself.
 - **Bat Wreath**: black twigs wound into a ring with three paper bats flying off it and a purple bow, for walls and doors.
