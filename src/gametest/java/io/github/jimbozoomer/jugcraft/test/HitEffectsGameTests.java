@@ -23,15 +23,19 @@ public class HitEffectsGameTests {
 	/**
 	 * The guns whose hits may give a vanilla effect are the owner's, at the owner's chances, lengths and levels: slowness
 	 * from the Linesman's and the Stormlock Rifle's arcs and the Geode Cutter's beam, darkness at its second level from
-	 * the Lament Rifle's bullets. No other gun's hits give one.
+	 * the Lament Rifle's bullets, and (the levitation follow-up) levitation from the End guns' bullets. No other gun's
+	 * hits give one.
 	 */
 	@GameTest
 	public void hitEffectsAreTheOwners(GameTestHelper helper) {
 		helper.assertTrue(JugcraftGuns.HIT_EFFECTS.equals(Map.of("linesman", new JugcraftGuns.HitEffect("slowness", 0.4F, 200, 0),
 				"stormlock_rifle", new JugcraftGuns.HitEffect("slowness", 0.4F, 200, 0), "geode_cutter", new JugcraftGuns.HitEffect("slowness", 0.75F, 100, 0),
-				"lament_rifle", new JugcraftGuns.HitEffect("darkness", 0.25F, 100, 1))), "The hit effects are not the owner's: " + JugcraftGuns.HIT_EFFECTS);
+				"lament_rifle", new JugcraftGuns.HitEffect("darkness", 0.25F, 100, 1), "chitin_smg", new JugcraftGuns.HitEffect("levitation", 0.3F, 100, 0),
+				"hermit_rifle", new JugcraftGuns.HitEffect("levitation", 0.3F, 100, 0), "borer", new JugcraftGuns.HitEffect("levitation", 0.23F, 100, 0))),
+				"The hit effects are not the owner's: " + JugcraftGuns.HIT_EFFECTS);
 		helper.assertTrue(JugcraftGuns.HIT_EFFECTS.get("linesman").holder().equals(MobEffects.SLOWNESS)
-				&& JugcraftGuns.HIT_EFFECTS.get("lament_rifle").holder().equals(MobEffects.DARKNESS), "A hit effect names the wrong vanilla effect");
+				&& JugcraftGuns.HIT_EFFECTS.get("lament_rifle").holder().equals(MobEffects.DARKNESS)
+				&& JugcraftGuns.HIT_EFFECTS.get("borer").holder().equals(MobEffects.LEVITATION), "A hit effect names the wrong vanilla effect");
 		helper.assertTrue(JugcraftGuns.shot(JugcraftGuns.GUNS.get("linesman")).equals(JugcraftGuns.ARC)
 				&& JugcraftGuns.shot(JugcraftGuns.GUNS.get("stormlock_rifle")).equals(JugcraftGuns.ARC)
 				&& JugcraftGuns.shot(JugcraftGuns.GUNS.get("geode_cutter")).equals(JugcraftGuns.BEAM)

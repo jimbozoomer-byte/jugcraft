@@ -1835,15 +1835,16 @@ def check_guns():
     shots_java = (JAVA_ROOT / "guns" / "GunShots.java").read_text(encoding="utf-8")
     if f"BURN_SECONDS = {guns.BURN_SECONDS};" not in shots_java:
         err(f"GunShots.BURN_SECONDS differs from tools/guns.py: expected {guns.BURN_SECONDS}")
-    # Slice 12A: the End guns, whose bullets make what they hurt float, and for how long.
+    # Slice 12A: the End guns, whose bullets may make what they hurt float (since the levitation follow-up, their
+    # HIT_EFFECTS levitation, checked below with the other hit effects).
     levitating = ", ".join(f'"{gun}"' for gun in guns.LEVITATING)
     if f"LEVITATING = Set.of({levitating});" not in java:
         err(f"JugcraftGuns.LEVITATING differs from tools/guns.py: expected Set.of({levitating})")
     for gun in guns.LEVITATING:
         if gun not in guns.GUNS or guns.GUNS[gun].get("shot", "bullet") != "bullet":
             err(f"tools/guns.py LEVITATING names {gun}, which is not a gun that fires bullets")
-    if f"LIFT_TICKS = {guns.LIFT_TICKS};" not in shots_java:
-        err(f"GunShots.LIFT_TICKS differs from tools/guns.py: expected {guns.LIFT_TICKS}")
+    if "LIFT_TICKS" in shots_java or "MobEffects.LEVITATION" in shots_java:
+        err("GunShots lifts what an End gun hits by itself: since the levitation follow-up only HIT_EFFECTS (afflict) does")
     # Guns silenced by their build: no muzzle flash, and no barrel attachment (a silencer) on them.
     silenced = ", ".join(f'"{gun}"' for gun in guns.SILENCED)
     if f"SILENCED = Set.of({silenced});" not in java:

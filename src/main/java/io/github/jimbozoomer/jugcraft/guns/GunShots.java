@@ -43,7 +43,6 @@ import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.effect.MobEffectInstance;
-import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.decoration.ArmorStand;
@@ -100,9 +99,10 @@ import org.jspecify.annotations.Nullable;
  * fires, and a shot of either cuts a shell-at-a-time reload short.</li>
  * <li>Slice 11A, the Nether guns ({@link JugcraftGuns#INCENDIARY}): each creature their bullets hurt is set alight for
  * {@link #BURN_SECONDS}, as a burst of flame sets it alight. No block is set alight.</li>
- * <li>Slice 12A, the End guns ({@link JugcraftGuns#LEVITATING}): each creature their bullets hurt floats up for
- * {@link #LIFT_TICKS}, as a shulker's bullet lifts it (the game's own Levitation, at its first level; a longer spell
- * already on it is kept). It falls when the spell ends.</li>
+ * <li>Slice 12A, the End guns ({@link JugcraftGuns#LEVITATING}): each creature their bullets hurt may float up, as a
+ * shulker's bullet lifts it (the game's own Levitation, at its first level; a longer spell already on it is kept), at
+ * the owner's chance and for the owner's time since the levitation follow-up ({@link #afflict}). It falls when the spell
+ * ends.</li>
  * <li>Slice 15D: a burst gun ({@link JugcraftGuns#BURSTS}) fires its burst a shot at a time as the client asks, each
  * shot spending trigger credit as any gun's does; its credit refills at a burst per {@link JugcraftGuns.Burst#cycle},
  * and banks a whole burst.</li>
@@ -127,8 +127,6 @@ public final class GunShots {
 	 * gun's bullet (slice 11A).
 	 */
 	public static final int BURN_SECONDS = 4;
-	/** Ticks an End gun's bullet makes what it hurts float (slice 12A, tools/guns.py LIFT_TICKS). */
-	public static final int LIFT_TICKS = 20;
 	/** The halvings {@link #pierced} takes to find a piercing hit (to well under a thousandth of a heart). */
 	private static final int PIERCE_STEPS = 24;
 	/** How hard a stab pushes its foe back (a sword's knockback is 0.4, and more for a sprinting strike). */
@@ -553,8 +551,8 @@ public final class GunShots {
 	/** Fires every pellet of one shot and deals what hit. */
 	private static void shoot(ServerLevel level, ServerPlayer player, GunItem gun, GunSpec spec, float spread) {
 		bullets(level, player, player.getEyePosition(), player.getLookAngle(), spec, spread, spec.damage(), JugcraftGuns.ignites(gun),
-				JugcraftGuns.levitates(gun), JugcraftGuns.knockback(gun), JugcraftGuns.piercing(gun), JugcraftGuns.bleed(gun),
-				JugcraftGuns.hitEffect(gun), candidate -> target(player, candidate), candidate -> allowed(player, level, candidate));
+				JugcraftGuns.knockback(gun), JugcraftGuns.piercing(gun), JugcraftGuns.bleed(gun), JugcraftGuns.hitEffect(gun),
+				candidate -> target(player, candidate), candidate -> allowed(player, level, candidate));
 	}
 
 	/**
@@ -562,16 +560,16 @@ public final class GunShots {
 	 * block or creature in the gun's range that {@code hittable} lets it strike (others are passed through), and deals
 	 * {@code damage} a pellet to each creature it hits that {@code allowed} lets the shooter strike; a shotgun's pellets
 	 * on one creature land as one hit. A player's shots and, slice 10F, a raider gunner's ({@link MobGuns}) fire this way.
-	 * When {@code ignites} (slice 11A, a Nether gun), each creature the hit hurts is set alight for {@link #BURN_SECONDS};
-	 * when {@code lifts} (slice 12A, an End gun), it floats for {@link #LIFT_TICKS}. Each creature the hit hurts is knocked
-	 * back again by {@code knockback} after a hit's own push, and the hit passes through {@code pierce} points of its armour
-	 * ({@link #pierced}; the Jawbreaker's, {@link JugcraftGuns#KNOCKBACK} and {@link JugcraftGuns#PIERCING}). With a
-	 * {@code bleed} (the darts-and-bleeding follow-up, {@link JugcraftGuns#BLEEDS}), each creature the hit hurts may bleed;
-	 * with an {@code effect} (the hit-effects follow-up, {@link JugcraftGuns#HIT_EFFECTS}), it may be slowed or darkened.
-	 * A gun that fires darts ({@link JugcraftGuns#DART}) fires them along a falling flight ({@link #flight}).
+	 * When {@code ignites} (slice 11A, a Nether gun), each creature the hit hurts is set alight for {@link #BURN_SECONDS}.
+	 * Each creature the hit hurts is knocked back again by {@code knockback} after a hit's own push, and the hit passes
+	 * through {@code pierce} points of its armour ({@link #pierced}; the Jawbreaker's, {@link JugcraftGuns#KNOCKBACK} and
+	 * {@link JugcraftGuns#PIERCING}). With a {@code bleed} (the darts-and-bleeding follow-up, {@link JugcraftGuns#BLEEDS}),
+	 * each creature the hit hurts may bleed; with an {@code effect} (the hit-effects follow-up,
+	 * {@link JugcraftGuns#HIT_EFFECTS}), it may be slowed, darkened or (an End gun's, slice 12A) lifted. A gun that fires
+	 * darts ({@link JugcraftGuns#DART}) fires them along a falling flight ({@link #flight}).
 	 */
 	static void bullets(ServerLevel level, LivingEntity shooter, Vec3 eye, Vec3 look, GunSpec spec, float spread, float damage,
-			boolean ignites, boolean lifts, float knockback, float pierce, JugcraftGuns.@Nullable Bleed bleed,
+			boolean ignites, float knockback, float pierce, JugcraftGuns.@Nullable Bleed bleed,
 			JugcraftGuns.@Nullable HitEffect effect, Predicate<LivingEntity> hittable, Predicate<LivingEntity> allowed) {
 		RandomSource random = shooter.getRandom();
 		Map<LivingEntity, Float> hits = new LinkedHashMap<>();
@@ -622,9 +620,6 @@ public final class GunShots {
 				}
 				if (ignites) {
 					target.igniteForSeconds(BURN_SECONDS);
-				}
-				if (lifts) {
-					target.addEffect(new MobEffectInstance(MobEffects.LEVITATION, LIFT_TICKS, 0), shooter);
 				}
 				bleed(target, bleed, shooter, random);
 				afflict(target, effect, shooter, random);

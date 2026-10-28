@@ -84,8 +84,8 @@ import org.jspecify.annotations.Nullable;
  * hand ({@link #ONE_HANDED}), the tank under its barrel changed to reload; the Goldbristle Carbine, fed from a magazine
  * at its side; and the Crackling, a long pump shotgun of six heavy pellets, loaded a shell at a time.</li>
  * <li>Slice 12A, the End guns, each fed from a shulker box: the Chitin SMG and the Hermit Rifle, automatics on light and
- * rifle rounds, and the Borer, a machine gun carried at the hip. Their shots make what they hit float
- * ({@link #LEVITATING}).</li>
+ * rifle rounds, and the Borer, a machine gun carried at the hip. Their shots may make what they hit float
+ * ({@link #LEVITATING}; at the owner's chances since the levitation follow-up).</li>
  * <li>Slice 12B, the copper guns, of copper and iron as the Rust Midge: the Penny Pistol, held in one hand
  * ({@link #ONE_HANDED}); the Conductor Carbine, a slide-action carbine worked after every shot; and the Magpie SMG, an
  * automatic. The pistol and the submachine gun are fed from magazines at their left side.</li>
@@ -295,8 +295,9 @@ public final class JugcraftGuns {
 	 */
 	public static final Set<String> INCENDIARY = Set.of("tusker", "cinder_repeater", "bastion_rifle", "ashfall_pistol", "goldbristle_carbine", "crackling", "hinterland_rifle", "harrow");
 	/**
-	 * Slice 12A, the End guns: the guns whose bullets make each creature they hurt float, for {@link GunShots#LIFT_TICKS}
-	 * as a shulker's bullet does (tools/guns.py LEVITATING).
+	 * Slice 12A, the End guns: the guns whose bullets may make each creature they hurt float, as a shulker's bullet does
+	 * (tools/guns.py LEVITATING). Slice 12A lifted every hit for a second; since the levitation follow-up they lift at the
+	 * owner's chances and for the owner's time, their {@link #HIT_EFFECTS} levitation.
 	 */
 	public static final Set<String> LEVITATING = Set.of("chitin_smg", "hermit_rifle", "borer");
 	/**
@@ -404,6 +405,7 @@ public final class JugcraftGuns {
 			return switch (effect) {
 				case "slowness" -> MobEffects.SLOWNESS;
 				case "darkness" -> MobEffects.DARKNESS;
+				case "levitation" -> MobEffects.LEVITATION;
 				default -> throw new IllegalStateException("No hit effect " + effect);
 			};
 		}
@@ -411,10 +413,10 @@ public final class JugcraftGuns {
 
 	/**
 	 * The guns whose hits may give a vanilla effect (the hit-effects follow-up; tools/guns.py HIT_EFFECTS), from the owner's
-	 * data (its effect, chance, duration and amplifier): slowness from the Linesman, Stormlock Rifle and Geode Cutter, and
-	 * darkness from the Lament Rifle.
+	 * data (its effect, chance, duration and amplifier): slowness from the Linesman, Stormlock Rifle and Geode Cutter,
+	 * darkness from the Lament Rifle, and (the levitation follow-up) levitation from the End guns ({@link #LEVITATING}).
 	 */
-	public static final Map<String, HitEffect> HIT_EFFECTS = Map.of("linesman", new HitEffect("slowness", 0.4F, 200, 0), "stormlock_rifle", new HitEffect("slowness", 0.4F, 200, 0), "geode_cutter", new HitEffect("slowness", 0.75F, 100, 0), "lament_rifle", new HitEffect("darkness", 0.25F, 100, 1));
+	public static final Map<String, HitEffect> HIT_EFFECTS = Map.of("linesman", new HitEffect("slowness", 0.4F, 200, 0), "stormlock_rifle", new HitEffect("slowness", 0.4F, 200, 0), "geode_cutter", new HitEffect("slowness", 0.75F, 100, 0), "lament_rifle", new HitEffect("darkness", 0.25F, 100, 1), "chitin_smg", new HitEffect("levitation", 0.3F, 100, 0), "hermit_rifle", new HitEffect("levitation", 0.3F, 100, 0), "borer", new HitEffect("levitation", 0.23F, 100, 0));
 
 	/** The attachments, in the order the creative tab shows them (tools/guns.py ATTACHMENTS). */
 	public static final Map<String, GunAttachment> ATTACHMENTS = new LinkedHashMap<>();
@@ -866,7 +868,7 @@ public final class JugcraftGuns {
 		return INCENDIARY.contains(gun.name());
 	}
 
-	/** Whether this gun's bullets make what they hurt float (slice 12A, {@link #LEVITATING}). */
+	/** Whether this gun's bullets may make what they hurt float (slice 12A, {@link #LEVITATING}). */
 	public static boolean levitates(GunItem gun) {
 		return LEVITATING.contains(gun.name());
 	}

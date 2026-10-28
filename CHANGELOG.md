@@ -8,6 +8,11 @@ Every change to Jugcraft, newest first, grouped by pull request. For what each t
 
 No numbered release yet. Entries on feature branches remain proposed until their pull requests merge.
 
+### Unmerged: Guns, End-gun levitation
+- The End guns now lift what they hit at the owner's numbers: the **Chitin SMG** and the **Hermit Rifle** 30% of hits and the **Borer** 23%, each for 5 s. Before, every hit lifted it for a second. A lifted creature rises about four blocks and takes a little fall damage coming down.
+- Their tooltips say their shots *may* make what they hit float.
+- Record: [guns.md, End-gun levitation](docs/features/guns.md#follow-up-end-gun-levitation).
+
 ### Unmerged: Guns, hit effects
 - The owner's other hit effects come to the guns built, each a chance on every creature a hit hurts, at the owner's numbers: the **Linesman's** and the **Stormlock Rifle's** arcs may slow what they strike (40%, 10 s), the **Geode Cutter's** beam may slow what it burns (75%, 5 s), and the **Lament Rifle's** bullets may darken a player's view (25%, 5 s, Darkness II).
 - **Bleeding for two more guns:** the **Cloudburst Gun** (30%, 15 s), which the darts follow-up missed, and the **Caisson Pistol** (50%, 10 s), whose arc now carries hit effects to each creature it leaps to.

@@ -1783,7 +1783,7 @@ The reload times are the owner's animations'.
 - **Borer:** three steel ingots over a lever between two shulker shells, over a purpur block.
 
 **How they fire:** as the other bullet guns: each bullet goes from the eye along the look, strayed by the spread, to the first creature or block in its way. A magazine loads at the end of its reload.
-- **Float:** each creature their bullets hurt, except the Yeti King and his whelps, who refuse all Levitation ([yeti-king.md](yeti-king.md)), floats for 1 second (`GunShots.LIFT_TICKS`, 20 ticks): the game's own Levitation at its first level, as a shulker's bullet gives it (a shulker's lasts 10 seconds). It rises about three quarters of a block in that second. Each hit starts it again, so under steady fire it goes on rising, nearly a block a second. When it ends the creature falls, and a fall of more than 3 blocks hurts it, as any fall does. A longer spell of Levitation already on it is kept.
+- **Float:** in this slice, each creature their bullets hurt, except the Yeti King and his whelps, who refuse all Levitation ([yeti-king.md](yeti-king.md)), floated for 1 second (`GunShots.LIFT_TICKS`, 20 ticks); the [End-gun levitation follow-up](#follow-up-end-gun-levitation) gives the owner's chances and time instead. As this slice had it: the game's own Levitation at its first level, as a shulker's bullet gives it (a shulker's lasts 10 seconds). It rises about three quarters of a block in that second. Each hit starts it again, so under steady fire it goes on rising, nearly a block a second. When it ends the creature falls, and a fall of more than 3 blocks hurts it, as any fall does. A longer spell of Levitation already on it is kept.
 - **Only where the shot may strike:** a creature the shooter may not hurt (`GunShots.allowed`) is neither hurt nor lifted.
 - The server works it out with the shot (`JugcraftGuns.LEVITATING`); nothing new is sent to clients, which show the effect as the game always does.
 
@@ -3239,9 +3239,43 @@ The owner's data gives some of their guns a chance, at each hit, of an effect on
 
 **Known limits:**
 - **Withering waits for the Flayed God,** which is not built. The other effects in the owner's data are on guns not built either: the Crusader's healing, the slowness of Dark Matter, the Lone Wonder and the Pulsar, and the Nailer's and RG Jigsaw's bleeding.
-- **Levitation stays slice 12A's:** the owner's End guns lift what they hit 23% to 30% of the time, for 5 s. Here every hit lifts, for a second (`LIFT_TICKS`), as slice 12A chose; this follow-up leaves it.
+- **Levitation stayed slice 12A's** in this follow-up: the owner's End guns lift what they hit 23% to 30% of the time, for 5 s, where every hit lifted for a second (`LIFT_TICKS`). The [End-gun levitation follow-up](#follow-up-end-gun-levitation) gives the owner's.
 - **Darkness only matters to players.**
 - **Not played:** none of it has been played yet. The chances want play to set.
+
+## Follow-up: End-gun levitation
+The owner's data lifts what their End guns hit at a chance and for 5 s (`impactEffect` `minecraft:levitation`), where slice 12A lifted every hit for a second. Offered after the hit effects, the owner chose it on 28 October 2026, with four other follow-ups, each its own pull request.
+
+| | Chitin SMG | Hermit Rifle | Borer |
+|---|---|---|---|
+| The owner's gun | Carapice | Shellurker | Weevil |
+| Chance a hit | 30% | 30% | 23% |
+| How long | 5 s | 5 s | 5 s |
+
+**How:**
+- **A hit effect now:** the End guns' levitation is in `HIT_EFFECTS` (`tools/guns.py`, `JugcraftGuns`) and given by `GunShots.afflict`, as the other hit effects. It is the game's own Levitation at its first level.
+- **Slice 12A's lift is gone:** no hit lifts for a second any more (`GunShots.LIFT_TICKS` is removed, and `GunShots.bullets` no longer takes a lift).
+- **`LEVITATING`,** the guns whose hits may lift, now follows from the table; `JugcraftGuns.levitates` reads it as before.
+
+**What it does:**
+- **A creature lifted** rises about three quarters of a block in its first second and nearly a block a second after: about four blocks in all, if nothing is above it. It falls when the spell ends. A fall of more than 3 blocks hurts, as any fall does, so it lands a point or so the worse.
+- **Another lifting hit** starts the 5 s again; a hit that does not lift leaves the spell as it is.
+- **Only where the shot may strike,** and the Yeti King and his whelps still refuse it.
+- **Raider gunners** carry no End gun.
+- **Tooltips:** each says its shots *may* make what they hit float.
+
+**Checked:** `tools/check_mod_data.py` holds `HIT_EFFECTS`, now with the three, and `LEVITATING` to `tools/guns.py`. It also checks that `GunShots` gives no Levitation of its own. Game tests: `EndGunsGameTests.endGunsMakeWhatTheyHitFloat`, `HitEffectsGameTests.hitEffectsAreTheOwners` ([Verification](#verification)).
+
+**Balance:**
+- **How soon:** under steady fire the Chitin SMG (6.7 shots a second) lifts its mark in about half a second on average; the Hermit Rifle (5 a second) in under a second; the Borer (4 a second) in about a second.
+- **What it buys:** a lifted creature floats for 5 s whether the fire goes on or not: out of a melee mob's reach, and a slower, higher target. Before, every hit lifted it a little, and it came down a second after the fire stopped.
+- **Conversions:** none.
+
+**Save compatibility:** nothing saved changes.
+
+**Known limits:**
+- **The fall's damage** is the game's, so the lift does a little harm where it did almost none.
+- **Not played:** none of it has been played yet.
 
 ## Connections
 - **Existing input producers:** copper, iron and gunpowder (vanilla); lead nuggets (the lead switch's lead); brass nuggets (brass, from zinc); paper and planks.
@@ -6296,6 +6330,16 @@ Slice 9E's files: the guns' tactical grip parts and the Laser Sight's textures m
     - `linesmanArcSlows`: thirty arcs at a pig slow it (all thirty missing is about one in four million).
     - `caissonArcBleeds`: twenty shots at a pig with two more beside it, two blocks apart, hurt all three and make all three bleed (a pig all twenty miss is about one in a million).
   - `DartsAndBleedingGameTests.dartsAndBleedingAreTheOwners`: the bleeding table with the Cloudburst Gun's and the Caisson Pistol's.
+- **End-gun levitation, run locally (28 October 2026):**
+  - `python3 tools/check_mod_data.py`: PASS (8033 material IDs). Its guns check, run alone, reported an always-on lift put back into a copy of `GunShots` and a changed Borer chance.
+  - `python3 tools/guns.py --check`: PASS. `python3 scripts/check_repository.py`: PASS. `python3 -m unittest discover -s scripts/tests`: 287 tests passed; `python3 scripts/package_modrinth.py check`: PASS. `git diff --check`: clean.
+  - **Java:** a syntax parse only: 0 errors in the changed files.
+- **End-gun levitation, game tests (not run yet; CI runs them):**
+  - `EndGunsGameTests`:
+    - `endGunsAreRegistered`: each End gun's hit effect is levitation.
+    - `endGunsMakeWhatTheyHitFloat`: each End gun, fired from creative at a sturdy pig until a hit lifts it, at most 60 shots its interval and a tick apart, lifts it at the first level for 100 ticks; the pig rises more than half a block and, when the spell ends, comes down to the floor. An Undertone Rifle's shot leaves its pig standing. The Borer's 23% missing sixty times running is about one in seven million.
+  - `HitEffectsGameTests.hitEffectsAreTheOwners`: the table with the three End guns' levitation, naming vanilla's Levitation.
+  - `YetiKingGameTests.endGunLevitationLiftsNeitherHimNorHisKin` gives its own 20-tick spell, as before, now that the guns' is 100 ticks at a chance; his refusal does not depend on its length.
 - **Not run:** the client by hand, a two-client dedicated server, and play.
 
 ## World and event applicability

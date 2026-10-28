@@ -539,13 +539,13 @@ GUNS = {
         "reload": (6, 10, 11), "spread": (5.0, 3.0), "range": 36, "ammo": "buckshot_shell",
     },
     # Slice 12A: the End guns, in the shulkers' purpur, each fed from a shulker box with the shulker peering out of it:
-    # a machine gun, a rifle and a heavy machine gun carried at the hip. Their shots make what they hit float, as a
-    # shulker's do (LEVITATING).
+    # a machine gun, a rifle and a heavy machine gun carried at the hip. Their shots may make what they hit float, as a
+    # shulker's do (LEVITATING; at the owner's chances since the levitation follow-up).
     "chitin_smg": {
         "display": "Chitin SMG",
         "source": "carapice",
         "tooltip": "An End-forged machine gun fed from a shulker box, firing for as long as the trigger is held; its "
-                   "shots make what they hit float. Fires light rounds.",
+                   "shots may make what they hit float. Fires light rounds.",
         "damage": 3.0, "pellets": 1, "interval": 3, "auto": True, "capacity": 24,
         "reload": 56, "spread": (3.5, 1.2), "range": 48, "ammo": "light_round",
     },
@@ -553,7 +553,7 @@ GUNS = {
         "display": "Hermit Rifle",
         "source": "shellurker",
         "tooltip": "An End-forged rifle in a shulker's shell, fed from a shulker box and firing for as long as the "
-                   "trigger is held; its shots make what they hit float. Fires rifle rounds.",
+                   "trigger is held; its shots may make what they hit float. Fires rifle rounds.",
         "damage": 5.0, "pellets": 1, "interval": 4, "auto": True, "capacity": 20,
         "reload": 51, "spread": (3.0, 0.5), "range": 80, "ammo": "rifle_round",
     },
@@ -561,7 +561,7 @@ GUNS = {
         "display": "Borer",
         "source": "weevil",
         "tooltip": "An End-forged machine gun carried at the hip, fed from a shulker box under its long barrel and "
-                   "charged with a crank; its shots make what they hit float. Fires rifle rounds.",
+                   "charged with a crank; its shots may make what they hit float. Fires rifle rounds.",
         "damage": 5.5, "pellets": 1, "interval": 5, "auto": True, "capacity": 40,
         "reload": 78, "spread": (4.0, 1.5), "range": 72, "ammo": "rifle_round",
     },
@@ -4328,11 +4328,12 @@ BURN_SECONDS = 4
 
 # ------------------------------------------------------------------ the End guns' float (slice 12A)
 
-# Each creature an End gun's bullet hurts floats up for LIFT_TICKS, as a shulker's bullet lifts it: the game's own
-# Levitation, at its first level (about three quarters of a block a second hit). A longer spell already on it is kept.
-# It falls when it ends, and takes the fall's damage (JugcraftGuns.LEVITATING).
-LEVITATING = ("chitin_smg", "hermit_rifle", "borer")
-LIFT_TICKS = 20
+# Each creature an End gun's bullet hurts may float up, as a shulker's bullet lifts it: the game's own Levitation, at
+# its first level (nearly a block a second once it is rising). Slice 12A lifted every hit for a second; the levitation
+# follow-up gives the owner's numbers instead (their impactEffect minecraft:levitation), through HIT_EFFECTS below: 30%
+# of hits for 5 s from the Carapice (the Chitin SMG) and the Shellurker (the Hermit Rifle), 23% from the Weevil (the
+# Borer). A longer spell already on it is kept. It falls when it ends, and takes the fall's damage. LEVITATING, the guns
+# whose hits may lift, follows from HIT_EFFECTS (JugcraftGuns.LEVITATING).
 
 
 # ------------------------------------------------------------------ guns silenced by their build
@@ -4412,10 +4413,14 @@ BLEEDING_ICON = "lacerated"
 # The hit-effects follow-up: the owner's other hit effects (impactEffect, its chance a hit, its ticks and its amplifier)
 # on the guns built, as vanilla's own effects, each creature a hit hurts having its chance (JugcraftGuns.HIT_EFFECTS,
 # GunShots.afflict): slowness from the Arc Worker's arcs (the Linesman), the Teslock Rifle's (the Stormlock Rifle) and
-# the Shard Culler's beam (the Geode Cutter); darkness, at its second level, from the Forlorn Hope (the Lament Rifle).
-# The owner's withering is on the Flayed God, not built; the levitation of the End guns is slice 12A's (LEVITATING).
+# the Shard Culler's beam (the Geode Cutter); darkness, at its second level, from the Forlorn Hope (the Lament Rifle);
+# and (the levitation follow-up) levitation from the End guns, in place of slice 12A's lift on every hit. The owner's
+# withering is on the Flayed God, not built.
 HIT_EFFECTS = {"linesman": ("slowness", 0.4, 200, 0), "stormlock_rifle": ("slowness", 0.4, 200, 0),
-               "geode_cutter": ("slowness", 0.75, 100, 0), "lament_rifle": ("darkness", 0.25, 100, 1)}
+               "geode_cutter": ("slowness", 0.75, 100, 0), "lament_rifle": ("darkness", 0.25, 100, 1),
+               "chitin_smg": ("levitation", 0.3, 100, 0), "hermit_rifle": ("levitation", 0.3, 100, 0),
+               "borer": ("levitation", 0.23, 100, 0)}
+LEVITATING = tuple(gun for gun, (effect, *_) in HIT_EFFECTS.items() if effect == "levitation")
 
 
 def cell_rack_model():
