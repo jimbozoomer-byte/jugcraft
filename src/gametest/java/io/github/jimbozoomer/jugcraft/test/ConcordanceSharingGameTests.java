@@ -1,7 +1,9 @@
 package io.github.jimbozoomer.jugcraft.test;
 
+import com.google.gson.JsonElement;
 import com.mojang.authlib.GameProfile;
 import com.mojang.serialization.JsonOps;
+import io.github.jimbozoomer.jugcraft.Jugcraft;
 import io.github.jimbozoomer.jugcraft.compat.jade.ConcordanceDataProvider;
 import io.github.jimbozoomer.jugcraft.concordance.ConcordanceData;
 import io.github.jimbozoomer.jugcraft.concordance.ConcordanceProgress;
@@ -13,6 +15,7 @@ import io.github.jimbozoomer.jugcraft.concordance.LumenSconceBlock;
 import io.github.jimbozoomer.jugcraft.concordance.LumenSconceBlockEntity;
 import io.github.jimbozoomer.jugcraft.concordance.RateGate;
 import io.github.jimbozoomer.jugcraft.concordance.ResearchNotes;
+import io.github.jimbozoomer.jugcraft.concordance.ResearchNotesCopyRecipe;
 import io.github.jimbozoomer.jugcraft.concordance.ResearchNotesItem;
 import io.github.jimbozoomer.jugcraft.concordance.assay.Assaying;
 import io.github.jimbozoomer.jugcraft.concordance.courier.Couriers;
@@ -46,20 +49,30 @@ import io.github.jimbozoomer.jugcraft.concordance.worker.Agreement;
 import io.github.jimbozoomer.jugcraft.concordance.worker.Pacts;
 import io.github.jimbozoomer.jugcraft.concordance.worker.Status;
 import io.github.jimbozoomer.jugcraft.concordance.worker.WorkerDefinition;
+import io.github.jimbozoomer.jugcraft.config.JugcraftConfig;
 import io.github.jimbozoomer.jugcraft.party.JugcraftParties;
 import io.github.jimbozoomer.jugcraft.party.PartyManager;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 import net.fabricmc.fabric.api.entity.FakePlayer;
 import net.fabricmc.fabric.api.gametest.v1.GameTest;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.advancements.AdvancementHolder;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.NonNullList;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.contents.TranslatableContents;
 import net.minecraft.resources.Identifier;
+import net.minecraft.resources.RegistryOps;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.ProblemReporter;
@@ -69,8 +82,14 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.inventory.ContainerInput;
+import net.minecraft.world.inventory.InventoryMenu;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.item.crafting.CraftingInput;
+import net.minecraft.world.item.crafting.CraftingRecipe;
+import net.minecraft.world.item.crafting.RecipeHolder;
+import net.minecraft.world.item.crafting.RecipeType;
 import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.storage.TagValueInput;
@@ -85,7 +104,9 @@ import org.jspecify.annotations.Nullable;
  * D, D-02) a copied Spirit Anchor gives nothing and releases nothing, an anchor from before Chunk D claims its record only
  * at its own place, and ending a pact twice returns its escrow once; and (D-04) a copied pact perch is inert; and (D-05)
  * it recalls nothing, and nobody but its holder (their party, a stranger, a stand-in) uses, pays, suspends or ends their
- * pact or keeps its obligation.
+ * pact or keeps its obligation; and (Gloam Ink, C-D6) a fair copy teaches exactly what its original does, is made only
+ * from an original with one blank and one ink, in the player's own grid, gives Stolas's Regard nothing, and an older
+ * sheet reads as an original.
  */
 public class ConcordanceSharingGameTests {
 	private static final String FIRST_LIGHT = "jugcraft:first_light";
@@ -600,6 +621,249 @@ public class ConcordanceSharingGameTests {
 		} finally {
 			parties.adminDisband(keeper.getUUID());
 		}
+		helper.succeed();
+	}
+
+	private static ItemStack sheet(ResearchNotes notes) {
+		ItemStack stack = new ItemStack(JugcraftConcordance.RESEARCH_NOTES_ITEM);
+		stack.set(JugcraftConcordance.RESEARCH_NOTES, notes);
+		return stack;
+	}
+
+	/** A three-by-three crafting grid holding copies of these stacks, the rest empty. */
+	private static CraftingInput grid(ItemStack... stacks) {
+		List<ItemStack> items = new ArrayList<>();
+		for (ItemStack stack : stacks) {
+			items.add(stack.copy());
+		}
+		while (items.size() < 9) {
+			items.add(ItemStack.EMPTY);
+		}
+		return CraftingInput.of(3, 3, items);
+	}
+
+	/**
+	 * Gloam Ink (C-D6): a fair copy teaches exactly what its original does. An author who understood First Light writes a
+	 * sheet; the recipe the crafting table would find makes from it, a blank sheet and Gloam Ink one copy with the same
+	 * author, entries and time written, marked a copy, and gives back the original and the ink's bottle. A reader of the copy
+	 * keeps the author's notes as evidence and still has no state until they observe; the original then adds nothing, nor
+	 * does the copy to a reader of the original; each holds one notes key, the author's; the copy's reader, observing,
+	 * understands; and the author learns nothing from a copy of their own notes.
+	 */
+	@GameTest(maxTicks = 20)
+	public void aFairCopyTeachesWhatItsOriginalDoes(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		ServerPlayer author = player(helper, new BlockPos(1, 2, 1));
+		ServerPlayer first = player(helper, new BlockPos(3, 2, 1));
+		ServerPlayer second = player(helper, new BlockPos(5, 2, 1));
+		ConcordanceProgress.grant(author, FIRST_LIGHT, ResearchState.UNDERSTOOD);
+		author.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(JugcraftConcordance.RESEARCH_NOTES_ITEM));
+		ResearchNotesItem.write(author, InteractionHand.MAIN_HAND, author.getMainHandItem());
+		ItemStack original = writtenNotes(author).copy();
+		ResearchNotes notes = original.get(JugcraftConcordance.RESEARCH_NOTES);
+		helper.assertTrue(notes != null && !notes.fairCopy(), "A sheet written by hand is an original: " + notes);
+
+		CraftingInput input = grid(original, new ItemStack(JugcraftConcordance.RESEARCH_NOTES_ITEM),
+				new ItemStack(JugcraftConcordance.GLOAM_INK));
+		Optional<RecipeHolder<CraftingRecipe>> recipe = level.recipeAccess().getRecipeFor(RecipeType.CRAFTING, input, level);
+		helper.assertTrue(recipe.isPresent() && recipe.get().value() instanceof ResearchNotesCopyRecipe
+				&& recipe.get().id().equals(ResourceKey.create(Registries.RECIPE, Jugcraft.id("research_notes_copy"))),
+				"An original, a blank sheet and Gloam Ink find the fair copy recipe");
+		ItemStack made = recipe.get().value().assemble(input);
+		ResearchNotes copy = made.get(JugcraftConcordance.RESEARCH_NOTES);
+		helper.assertTrue(made.is(JugcraftConcordance.RESEARCH_NOTES_ITEM) && made.getCount() == 1 && copy != null && copy.fairCopy()
+				&& copy.author().equals(notes.author()) && copy.authorName().equals(notes.authorName())
+				&& copy.entries().equals(notes.entries()) && copy.written() == notes.written(),
+				"One copy: the same author, entries and time written, marked a copy: " + copy);
+		NonNullList<ItemStack> left = recipe.get().value().getRemainingItems(input);
+		helper.assertTrue(ItemStack.isSameItemSameComponents(left.get(0), original) && left.get(0).getCount() == 1
+				&& left.get(1).isEmpty() && left.get(2).is(Items.GLASS_BOTTLE) && left.get(2).getCount() == 1,
+				"The original stays, the blank is used and the ink's bottle comes back: " + left);
+
+		ResearchNotesItem.read(first, copy);
+		Knowledge.Progress read = ConcordanceProgress.knowledge(first).progress(FIRST_LIGHT);
+		helper.assertTrue(read.state() == ResearchState.NONE && read.evidence().containsKey("notes:" + author.getUUID()),
+				"The copy is kept as the author's notes, with no state until the reader observes: " + read);
+		Knowledge afterCopy = ConcordanceProgress.knowledge(first);
+		ResearchNotesItem.read(first, notes);
+		helper.assertTrue(ConcordanceProgress.knowledge(first).equals(afterCopy), "The original then adds nothing");
+		ResearchNotesItem.read(second, notes);
+		Knowledge afterOriginal = ConcordanceProgress.knowledge(second);
+		ResearchNotesItem.read(second, copy);
+		helper.assertTrue(ConcordanceProgress.knowledge(second).equals(afterOriginal), "Nor does the copy after the original");
+		for (ServerPlayer reader : List.of(first, second)) {
+			long keys = ConcordanceProgress.knowledge(reader).progress(FIRST_LIGHT).evidence().keySet().stream()
+					.filter(key -> key.startsWith("notes:")).count();
+			helper.assertTrue(keys == 1, "One notes key, the author's, whatever was read: " + keys);
+		}
+		ConcordanceProgress.record(first, new Evidence.Examined("minecraft:amethyst_shard", 0));
+		helper.assertTrue(firstLight(first) == ResearchState.UNDERSTOOD,
+				"Observing for themselves, the copy's reader understands, as the original's would");
+		Knowledge authorBefore = ConcordanceProgress.knowledge(author);
+		helper.assertTrue(ResearchNotesItem.read(author, copy) == InteractionResult.FAIL
+				&& ConcordanceProgress.knowledge(author).equals(authorBefore), "An author learns nothing from a copy of their own notes");
+		helper.succeed();
+	}
+
+	/**
+	 * Gloam Ink (C-D6): the fair copy takes exactly one original written sheet, one blank sheet and one Gloam Ink, in any
+	 * order, in the player's own two-by-two grid too. A fair copy is never copied; without the ink or the blank, with a
+	 * second ink, blank or written sheet, with an ink sac or Gloam Sludge for the ink, or with anything else in the grid,
+	 * nothing is made, by this recipe or by any the crafting table finds; with the Concordance switched off, nothing is
+	 * copied; and the recipe loads.
+	 */
+	@GameTest(maxTicks = 20)
+	public void onlyAnOriginalWithOneBlankAndOneInkIsCopied(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		helper.assertTrue(level.recipeAccess().byKey(ResourceKey.create(Registries.RECIPE, Jugcraft.id("research_notes_copy"))).isPresent(),
+				"The fair copy recipe loads");
+		ResearchNotes notes = new ResearchNotes(UUID.randomUUID(), "Scribe", Map.of(FIRST_LIGHT, ResearchState.UNDERSTOOD), 7L);
+		ItemStack original = sheet(notes);
+		ItemStack copy = sheet(notes.asFairCopy());
+		ItemStack other = sheet(new ResearchNotes(UUID.randomUUID(), "Other", Map.of(FIRST_LIGHT, ResearchState.OBSERVED), 9L));
+		ItemStack blank = new ItemStack(JugcraftConcordance.RESEARCH_NOTES_ITEM);
+		ItemStack ink = new ItemStack(JugcraftConcordance.GLOAM_INK);
+		ResearchNotesCopyRecipe recipe = ResearchNotesCopyRecipe.INSTANCE;
+		helper.assertTrue(recipe.matches(grid(original, blank, ink), level), "An original, a blank and an ink are copied");
+		helper.assertTrue(recipe.matches(CraftingInput.of(2, 2, List.of(ink.copy(), ItemStack.EMPTY, blank.copy(), original.copy())), level),
+				"In any order, in the player's own two-by-two grid");
+		Map<String, CraftingInput> refused = new LinkedHashMap<>();
+		refused.put("a fair copy", grid(copy, blank, ink));
+		refused.put("no ink", grid(original, blank));
+		refused.put("no blank", grid(original, ink));
+		refused.put("nothing written", grid(blank, blank, ink));
+		refused.put("two inks", grid(original, blank, ink, ink));
+		refused.put("two blanks", grid(original, blank, blank, ink));
+		refused.put("two written sheets", grid(original, other, blank, ink));
+		refused.put("an ink sac for the ink", grid(original, blank, new ItemStack(Items.INK_SAC)));
+		refused.put("Gloam Sludge for the ink", grid(original, blank, new ItemStack(JugcraftConcordance.GLOAM_SLUDGE)));
+		refused.put("something else too", grid(original, blank, ink, new ItemStack(Items.STICK)));
+		for (Map.Entry<String, CraftingInput> each : refused.entrySet()) {
+			helper.assertFalse(recipe.matches(each.getValue(), level) || !recipe.assemble(each.getValue()).isEmpty(),
+					"Nothing is copied with " + each.getKey());
+			helper.assertFalse(level.recipeAccess().getRecipeFor(RecipeType.CRAFTING, each.getValue(), level)
+					.filter(holder -> holder.value() instanceof ResearchNotesCopyRecipe).isPresent(),
+					"No crafting recipe copies with " + each.getKey());
+		}
+		// GI-P12: with the Concordance switched off, nothing is copied (the switch is toggled within this one body).
+		boolean before = JugcraftConfig.isFeatureEnabled(JugcraftConcordance.FEATURE);
+		try {
+			JugcraftConfig.setFeatureEnabled(JugcraftConcordance.FEATURE, false);
+			helper.assertFalse(recipe.matches(grid(original, blank, ink), level) || !recipe.assemble(grid(original, blank, ink)).isEmpty(),
+					"With the Concordance switched off, nothing is copied");
+		} finally {
+			JugcraftConfig.setFeatureEnabled(JugcraftConcordance.FEATURE, before);
+		}
+		helper.succeed();
+	}
+
+	/**
+	 * Gloam Ink (C-D6), through the server's own crafting: in a survival player's two-by-two grid, an original sheet, three
+	 * blank sheets and three Gloam Inks show a fair copy in the result slot. Taking it leaves the original in its slot and
+	 * uses one blank and one ink; shift-taking the rest makes one copy for each, the three copies stack, the original is
+	 * still in the grid, and the three bottles come back (the last in the ink's emptied slot).
+	 */
+	@GameTest(maxTicks = 20)
+	public void aFairCopyIsCraftedInThePlayersOwnGrid(GameTestHelper helper) {
+		ServerPlayer author = player(helper, new BlockPos(1, 2, 1));
+		ConcordanceProgress.grant(author, FIRST_LIGHT, ResearchState.UNDERSTOOD);
+		author.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(JugcraftConcordance.RESEARCH_NOTES_ITEM));
+		ResearchNotesItem.write(author, InteractionHand.MAIN_HAND, author.getMainHandItem());
+		ItemStack original = writtenNotes(author).copy();
+		author.getInventory().clearContent();
+		InventoryMenu menu = author.inventoryMenu;
+		menu.getCraftSlots().setItem(0, original.copy());
+		menu.getCraftSlots().setItem(1, new ItemStack(JugcraftConcordance.RESEARCH_NOTES_ITEM, 3));
+		menu.getCraftSlots().setItem(2, new ItemStack(JugcraftConcordance.GLOAM_INK, 3));
+		ResearchNotes shown = menu.getSlot(InventoryMenu.RESULT_SLOT).getItem().get(JugcraftConcordance.RESEARCH_NOTES);
+		helper.assertTrue(shown != null && shown.fairCopy(), "The result slot shows a fair copy: " + shown);
+		menu.clicked(InventoryMenu.RESULT_SLOT, 0, ContainerInput.PICKUP, author);
+		ResearchNotes carried = menu.getCarried().get(JugcraftConcordance.RESEARCH_NOTES);
+		helper.assertTrue(menu.getCarried().getCount() == 1 && carried != null && carried.fairCopy(), "One copy taken");
+		helper.assertTrue(ItemStack.isSameItemSameComponents(menu.getCraftSlots().getItem(0), original)
+				&& menu.getCraftSlots().getItem(1).getCount() == 2 && menu.getCraftSlots().getItem(2).getCount() == 2,
+				"The original stays in its slot; one blank and one ink are used");
+		ItemStack taken = menu.getCarried().copy();
+		menu.setCarried(ItemStack.EMPTY);
+		author.getInventory().add(taken);
+		menu.clicked(InventoryMenu.RESULT_SLOT, 0, ContainerInput.QUICK_MOVE, author);
+		Inventory inventory = author.getInventory();
+		int copies = 0;
+		int bottles = 0;
+		for (int slot = 0; slot < inventory.getContainerSize(); slot++) {
+			ItemStack stack = inventory.getItem(slot);
+			ResearchNotes held = stack.get(JugcraftConcordance.RESEARCH_NOTES);
+			if (held != null && held.fairCopy()) {
+				copies += stack.getCount();
+				helper.assertTrue(stack.getCount() == 3, "The copies of one sheet stack: " + stack.getCount());
+			}
+			if (stack.is(Items.GLASS_BOTTLE)) {
+				bottles += stack.getCount();
+			}
+		}
+		// The last ink's bottle stays in the ink's own slot, as a crafting grid gives a remainder back where its slot is empty
+		// (26.3's ResultSlot.onTake); the two before it go to the inventory.
+		ItemStack lastBottle = menu.getCraftSlots().getItem(2);
+		helper.assertTrue(copies == 3 && lastBottle.is(Items.GLASS_BOTTLE) && bottles + lastBottle.getCount() == 3,
+				"Three copies and three bottles in all: " + copies + ", " + bottles + " and " + lastBottle);
+		helper.assertTrue(ItemStack.isSameItemSameComponents(menu.getCraftSlots().getItem(0), original)
+				&& menu.getCraftSlots().getItem(1).isEmpty() && menu.getSlot(InventoryMenu.RESULT_SLOT).getItem().isEmpty(),
+				"The original is still in the grid; the blanks and inks are used up; nothing more is shown");
+		menu.getCraftSlots().clearContent();
+		helper.succeed();
+	}
+
+	/**
+	 * Gloam Ink (C-D6, D-S4): a fair copy of notes naming Stolas's Regard gives it nothing, as the original gives nothing
+	 * (notesNeverStandInForStolasEvidence): no state and no kept evidence.
+	 */
+	@GameTest(maxTicks = 20)
+	public void aFairCopyGivesStolasNothing(GameTestHelper helper) {
+		ServerPlayer author = player(helper, new BlockPos(1, 2, 1));
+		ServerPlayer reader = player(helper, new BlockPos(3, 2, 1));
+		for (ServerPlayer each : List.of(author, reader)) {
+			ConcordanceProgress.grant(each, FIRST_LIGHT, ResearchState.UNDERSTOOD);
+			ConcordanceProgress.grant(each, Workers.RESEARCH, ResearchState.UNDERSTOOD);
+		}
+		ConcordanceProgress.grant(author, StolasRegard.RESEARCH, ResearchState.MASTERED);
+		author.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(JugcraftConcordance.RESEARCH_NOTES_ITEM));
+		ResearchNotesItem.write(author, InteractionHand.MAIN_HAND, author.getMainHandItem());
+		ItemStack made = ResearchNotesCopyRecipe.INSTANCE.assemble(grid(writtenNotes(author),
+				new ItemStack(JugcraftConcordance.RESEARCH_NOTES_ITEM), new ItemStack(JugcraftConcordance.GLOAM_INK)));
+		ResearchNotes copy = made.get(JugcraftConcordance.RESEARCH_NOTES);
+		helper.assertTrue(copy != null && copy.fairCopy() && copy.entries().get(StolasRegard.RESEARCH) == ResearchState.UNDERSTOOD,
+				"The copy names Stolas's Regard as its original does: " + copy);
+		ResearchNotesItem.read(reader, copy);
+		Knowledge.Progress read = ConcordanceProgress.knowledge(reader).progress(StolasRegard.RESEARCH);
+		helper.assertTrue(read.state() == ResearchState.NONE && read.evidence().isEmpty(),
+				"Read, the copy gives Stolas's Regard nothing, not even kept evidence: " + read);
+		helper.succeed();
+	}
+
+	/**
+	 * Gloam Ink (C-D6), save compatibility: an original sheet saves exactly the fields it always had (author, author_name,
+	 * entries, written; no fair_copy), so a sheet saved before Gloam Ink reads as an original; a fair copy saves fair_copy
+	 * true and reads back as a copy, in its component and through a whole item stack.
+	 */
+	@GameTest(maxTicks = 20)
+	public void anOlderSheetReadsAsAnOriginal(GameTestHelper helper) {
+		ResearchNotes original = new ResearchNotes(UUID.randomUUID(), "Scribe", Map.of(FIRST_LIGHT, ResearchState.UNDERSTOOD), 42L);
+		JsonElement saved = ResearchNotes.CODEC.encodeStart(JsonOps.INSTANCE, original).getOrThrow();
+		helper.assertTrue(saved.getAsJsonObject().keySet().equals(Set.of("author", "author_name", "entries", "written")),
+				"An original saves exactly the fields it always had: " + saved);
+		ResearchNotes read = ResearchNotes.CODEC.parse(JsonOps.INSTANCE, saved).getOrThrow();
+		helper.assertTrue(read.equals(original) && !read.fairCopy(), "A sheet without fair_copy reads as an original: " + read);
+		ResearchNotes copy = original.asFairCopy();
+		JsonElement copied = ResearchNotes.CODEC.encodeStart(JsonOps.INSTANCE, copy).getOrThrow();
+		helper.assertTrue(copied.getAsJsonObject().has("fair_copy") && copied.getAsJsonObject().get("fair_copy").getAsBoolean()
+				&& ResearchNotes.CODEC.parse(JsonOps.INSTANCE, copied).getOrThrow().equals(copy),
+				"A copy saves and reads back as a copy: " + copied);
+		RegistryOps<JsonElement> ops = RegistryOps.create(JsonOps.INSTANCE, helper.getLevel().registryAccess());
+		ItemStack stack = sheet(copy);
+		ItemStack back = ItemStack.CODEC.parse(ops, ItemStack.CODEC.encodeStart(ops, stack).getOrThrow()).getOrThrow();
+		ResearchNotes kept = back.get(JugcraftConcordance.RESEARCH_NOTES);
+		helper.assertTrue(ItemStack.isSameItemSameComponents(back, stack) && kept != null && kept.fairCopy(),
+				"A copied sheet keeps its notes through a save: " + back);
 		helper.succeed();
 	}
 }

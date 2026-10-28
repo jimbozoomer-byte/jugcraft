@@ -104,7 +104,8 @@ RITUALS = {"adept_wand": "adept_attunement", "rooted_thallite_foundation": "root
 # EXTRACTS), whether the item or its failure. Each page says how it is drawn and where the codex gives the process; USES
 # adds what an item is for.
 EXTRACTED = {**{key: key for key in alchemy.EXTRACTS}, **{info["failure"]: key for key, info in alchemy.EXTRACTS.items()}}
-USES = {}
+USES = {"gloam_ink": "In a crafting grid, an original sheet of written Research Notes, a blank sheet and Gloam Ink make "
+                     "a fair copy of the notes; the original and the bottle come back."}
 
 # The first magic loadout (the record's route): nothing new, only what survival already makes. Item -> how it is made:
 # "recipe" (the crafting recipe of its own name) or "working:<name>" (a Lampwright's Bench working). The Wayfaring
@@ -134,7 +135,7 @@ WORKSHOP = {"mendvetch": "recipe", "crucible": "recipe", "formula": "recipe", "l
             "warding_stone": "recipe", "thallite_plate": "recipe:thallite_plate_by_hand",
             "rooted_thallite_foundation": "ritual:root_and_rivet", "crucible_stand": "recipe", "courier_post": "recipe",
             "clockwork_porter": "recipe", "porter_key": "recipe", "verdant_bed": "recipe", "sunpetal": "recipe",
-            "dewmoss": "recipe", "gloamcap": "recipe"}
+            "dewmoss": "recipe", "gloamcap": "recipe", "research_notes": "recipe"}
 FACTORY = {"coal_generator": "recipe", "copper_cable": "recipe", "machine_casing": "recipe", "metal_press": "recipe",
            "electric_pump": "recipe", "bronze_fluid_pipe": "recipe"}
 CHUNK_C_ITEMS = ["rooted_thallite_foundation", "crucible_stand"]

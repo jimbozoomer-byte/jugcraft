@@ -244,8 +244,8 @@ public class ConcordanceJourneyGameTests {
 	 */
 	private static final List<String> WORKSHOP_RECIPES = List.of("mendvetch", "crucible", "formula", "lampwright_bench", "ley_pylon",
 			"circle_anchor", "warding_stone", "thallite_plate_by_hand", "crucible_stand", "courier_post", "clockwork_porter", "porter_key",
-			"verdant_bed", "sunpetal", "dewmoss", "gloamcap", "coal_generator", "copper_cable", "machine_casing", "metal_press",
-			"electric_pump", "bronze_fluid_pipe");
+			"verdant_bed", "sunpetal", "dewmoss", "gloamcap", "research_notes", "coal_generator", "copper_cable", "machine_casing",
+			"metal_press", "electric_pump", "bronze_fluid_pipe");
 
 	// The yard (jugcraft-test:drone_depot, 16 by 8 by 16, all air; a stone floor at y 0 is laid first).
 	/** The hand crucibles: the Kiln Draught's over a campfire, the poultice's over a magma block. */

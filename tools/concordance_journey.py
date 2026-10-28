@@ -33,7 +33,9 @@ Nothing here is generated into the game. tools/check_mod_data.py (check_journey)
   is out of reach); each step's switches are exactly those its recipes load under, the first step's only the
   Concordance's; every thing named is a row of tools/acquisition.py WORKSHOP or FACTORY and every row is named; and each
   product is brewed by its named process, from things the same player has, over a heat whose degrees lie in the band it
-  stirs at;
+  stirs at; since Gloam Ink (C-D6) the living workshop has six steps, Gloam Ink and its fair copy the sixth, and each
+  covered extraction's worked formula takes what the route has, over the heat named, under the lid named, every stir
+  covered and in that heat's band;
 - the pact hall (PACT, Concordance Chunk D) holds without Styx: one player alone, in the Overworld alone (the workshop
   hand's step also in the Nether, which it needs), with no structure loot, nothing else mastered and nothing past the
   Practitioner stage, reaches each step with the research it names (each step needing it) and makes every thing it
@@ -183,6 +185,9 @@ WORKSHOP = {
                  "kiln_draught": ("sugar", "minecraft:campfire")},
     # What each form is bottled in (Java: CrucibleBlockEntity.formFor; tools/concordance_alchemy.py CONTAINERS).
     "containers": {"draught": "minecraft:glass_bottle", "salve": "minecraft:bowl"},
+    # Gloam Ink (C-D6, GI-P16): each covered extraction's worked formula (tools/concordance_alchemy.py EXTRACTS "process"),
+    # brewed over the heat named, under the lid named (a #jugcraft:crucible_lids block), drawn into a glass bottle.
+    "extracts": {"gloam_ink": ("minecraft:campfire", "minecraft:smooth_stone_slab")},
     "steps": [
         {"stage": "practitioner", "research": ["first_light", "alembic_arts"],
          "text": "Craft Mendvetch from wheat seeds, bone meal and an amethyst shard. Set an Alembic Crucible over a campfire "
@@ -231,6 +236,16 @@ WORKSHOP = {
          "tests": ["theLivingWorkshopFromAManualStart", "aBedSaysWhatItsPlantNeedsAndHowFar",
                    "aMixedBedGrowsFasterOnlyForAnotherKind", "restCompostAndTendingEaseStrain",
                    "aGraftTakesOnceAndConsumesItsDonor"]},
+        # Gloam Ink (C-D6): the mixed bed's Gloamcap drawn as Gloam Ink under a lid (tools/concordance_alchemy.py EXTRACTS),
+        # and its one use, a fair copy of Research Notes (Java: ResearchNotesCopyRecipe).
+        {"stage": "adept", "research": [],
+         "text": "Over the campfire, under a lid (a slab set on the crucible), draw Gloam Ink from three of the mixed bed's "
+                 "Gloamcap and a spider eye in three parts of water, stirred hot twice (the codex's Gloam Ink entry gives "
+                 "it); write down what you know on a sheet of Research Notes and, with a blank sheet and the ink in a "
+                 "crafting grid, make a fair copy for another reader: the original and the bottle come back",
+         "switches": ["concordance"], "things": ["research_notes"], "practices": ["alchemy"],
+         "tests": ["theLivingWorkshopFromAManualStart", "gloamInkByHandUnderALid", "aCoveredFormulaWaitsForItsLidAndSaysSo",
+                   "aFairCopyIsCraftedInThePlayersOwnGrid", "aFairCopyTeachesWhatItsOriginalDoes"]},
     ],
 }
 
@@ -320,6 +335,9 @@ COOPERATIVE = [
      ["aPartyProjectSharesItsWork", "teachingCreditsTheAuthorOnce"]),
     ("Notes pass instructions between players, never observation or mastery",
      ["notesShareInstructionsNotExperience"]),
+    ("A fair copy in Gloam Ink carries one writer's notes to more readers at once; each reader still counts the writer "
+     "once, and the writer's teaching is credited once a learner",
+     ["aFairCopyTeachesWhatItsOriginalDoes", "aFairCopyCreditsItsAuthorOnce"]),
     ("A ritual for two gathers both and shields them; a participant who leaves stops it",
      ["theVigilGathersTwoAndShieldsThem", "aParticipantWhoLeavesStopsTheRitual"]),
     ("A spire's keepers share its upkeep; strangers neither count nor change it",
@@ -423,8 +441,8 @@ def _switches(recipe):
 def workshop_walk(pg, research, invocations, rituals, at_hand, understood, cap=None):
     """What one player alone reaches in the Overworld alone, with only the research entries {understood} understood and
     nothing mastered: every other research state is removed from the graph, to which every Concordance thing the workshop
-    names (tools/acquisition.py WORKSHOP) and every product's ingredients and heat are added as a step needing them would
-    add them. Returns (reached, the graph's problems)."""
+    names (tools/acquisition.py WORKSHOP) and every product's and extract's ingredients, heat, lid and container are added
+    as a step needing them would add them. Returns (reached, the graph's problems)."""
     import acquisition
     import concordance_alchemy as al
     problems = []
@@ -439,6 +457,12 @@ def workshop_walk(pg, research, invocations, rituals, at_hand, understood, cap=N
         container = WORKSHOP["containers"].get(al.PRODUCTS.get(product, {}).get("form"))
         if container:
             pg.item_node(nodes, at_hand, container, problems)
+    for key, (heat, lid) in WORKSHOP["extracts"].items():
+        for operation in al.EXTRACTS.get(key, {}).get("process", []):
+            if operation[0] == "add":
+                pg.item_node(nodes, at_hand, al.INGREDIENTS[operation[1]]["item"], problems)
+        for item in (heat, lid, "minecraft:glass_bottle"):
+            pg.item_node(nodes, at_hand, item, problems)
     without = {pg.research_node(rid(key), state) for key in research for state in pg.RESEARCH_STATES
                if state == "mastered" or key not in understood}
     return pg.reachable(nodes, research, cap=cap, dimensions={""}, without=without), problems
@@ -518,6 +542,23 @@ def workshop_problems(pg, research, invocations, rituals, at_hand):
         if al.CONTAINERS.get(form, "?") not in container or f"item:{container}" not in final:
             found.append(f"journey workshop: {product} is bottled in a {al.CONTAINERS.get(form)}, which WORKSHOP's "
                          f"containers ({container or 'none'}) do not give in the Overworld by the route")
+    # Gloam Ink (C-D6): each covered extraction's worked formula over the heat named, under the lid named, into a glass
+    # bottle: what it takes is had in the Overworld by the route, and every stir is that heat's band and covered.
+    for key, (heat, lid) in WORKSHOP["extracts"].items():
+        process = al.EXTRACTS.get(key, {}).get("process")
+        if not process:
+            found.append(f"journey workshop: {key} is no extract (tools/concordance_alchemy.py EXTRACTS)")
+            continue
+        band = _band(al.HEAT_SOURCES.get(heat, al.AMBIENT))
+        for operation in process:
+            if operation[0] == "add" and f"item:{al.INGREDIENTS[operation[1]]['item']}" not in final:
+                found.append(f"journey workshop: {key}'s {operation[1]} is not had in the Overworld by the route")
+            if operation[0] == "stir" and (operation[1] != band or operation[2:] != ("covered",)):
+                found.append(f"journey workshop: {key} stirs {' '.join(operation[1:])}, but {heat} holds a crucible {band} "
+                             "and only covered stirs draw an extract")
+        for item in (heat, lid, "minecraft:glass_bottle"):
+            if f"item:{item}" not in final:
+                found.append(f"journey workshop: {key}'s {item} is not had in the Overworld by the route")
     return found
 
 

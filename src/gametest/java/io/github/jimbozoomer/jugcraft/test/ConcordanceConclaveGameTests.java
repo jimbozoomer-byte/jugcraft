@@ -2,6 +2,8 @@ package io.github.jimbozoomer.jugcraft.test;
 
 import io.github.jimbozoomer.jugcraft.concordance.ConcordanceProgress;
 import io.github.jimbozoomer.jugcraft.concordance.RateGate;
+import io.github.jimbozoomer.jugcraft.concordance.ResearchNotes;
+import io.github.jimbozoomer.jugcraft.concordance.ResearchNotesItem;
 import io.github.jimbozoomer.jugcraft.concordance.conclave.Conclave;
 import io.github.jimbozoomer.jugcraft.concordance.conclave.ProjectDefinition;
 import io.github.jimbozoomer.jugcraft.concordance.conclave.ProjectState;
@@ -318,6 +320,23 @@ public class ConcordanceConclaveGameTests {
 		var ops = level.registryAccess().createSerializationContext(NbtOps.INSTANCE);
 		ConclaveProjects reread = ConclaveProjects.CODEC.parse(ops, ConclaveProjects.CODEC.encodeStart(ops, record).getOrThrow()).getOrThrow();
 		helper.assertTrue(reread.setAsideFor(owner).equals(java.util.List.of(orphan)), "and kept through a save");
+		helper.succeed();
+	}
+
+	/** Gloam Ink (C-D6): a learner who advances by reading a fair copy credits its original's author once, as the original would. */
+	@GameTest(maxTicks = 20)
+	public void aFairCopyCreditsItsAuthorOnce(GameTestHelper helper) {
+		ServerPlayer author = member(helper, true);
+		ServerPlayer learner = member(helper, false);
+		ConcordanceProgress.grant(learner, "jugcraft:sympathy", ResearchState.OBSERVED);
+		ResearchNotes original = new ResearchNotes(author.getUUID(), author.getName().getString(),
+				Map.of("jugcraft:sympathy", ResearchState.UNDERSTOOD), helper.getLevel().getGameTime());
+		ResearchNotesItem.read(learner, original.asFairCopy());
+		helper.assertTrue(ConcordanceProgress.knowledge(learner).state("jugcraft:sympathy") == ResearchState.UNDERSTOOD,
+				"The copy taught the learner");
+		helper.assertTrue(renown(author) == Conclave.TEACHING_RENOWN, "and its original's author gains teaching renown: " + renown(author));
+		ResearchNotesItem.read(learner, original);
+		helper.assertTrue(renown(author) == Conclave.TEACHING_RENOWN, "The original then teaches nothing new");
 		helper.succeed();
 	}
 }

@@ -29,6 +29,20 @@
       "title": "book.jugcraft.arcane_concordance.foundations.research_notes.p1.title",
       "text": "book.jugcraft.arcane_concordance.foundations.research_notes.p1.text",
       "show_title_separator": true
+    },
+    {
+      "type": "modonomicon:text",
+      "id": "p2",
+      "title": "book.jugcraft.arcane_concordance.foundations.research_notes.p2.title",
+      "text": "book.jugcraft.arcane_concordance.foundations.research_notes.p2.text",
+      "show_title_separator": true,
+      "condition": {
+        "type": "modonomicon:research_node_unlocked",
+        "node_id": "jugcraft:concordance/alembic_arts_observed",
+        "tooltip": {
+          "translate": "book.jugcraft.arcane_concordance.locked.alembic_arts.observed"
+        }
+      }
     }
   ]
 }

@@ -990,6 +990,13 @@ def codex():
                  "for one way of understanding it, but you must still encounter and observe it **yourself**, and "
                  "mastery comes only from your own practice. Notes from the same writer count once, and your own "
                  "notes teach you nothing new."),
+                # Gloam Ink (C-D6): its one use, open once the Alembic Arts are observed, as the brewing entry is.
+                ("text", "Fair Copies",
+                 "In a crafting grid, a written sheet, a blank sheet and a bottle of "
+                 f"[Gloam Ink](entry://{MOD}:{BOOK}/alembic/gloam_ink) make a **fair copy**: the same writer, the same "
+                 "entries. The original and the bottle come back. A copy teaches exactly what its original does, so "
+                 "whoever has read one gains nothing from the other, and a fair copy is not copied again: copy from "
+                 "the original.", ("alembic_arts", "observed")),
             ],
         },
         ("radiance", "first_light"): {
@@ -1795,6 +1802,7 @@ def lang_entries(lang):
     lang[f"tooltip.{MOD}.research_notes.blank"] = "Blank: use it to write down what you know"
     lang[f"tooltip.{MOD}.research_notes.author"] = "Notes by %s"
     lang[f"tooltip.{MOD}.research_notes.entry"] = "%s: %s"
+    lang[f"tooltip.{MOD}.research_notes.fair_copy"] = "A fair copy in Gloam Ink (it is not copied again)"
     for state, name in RESEARCH_STATE_NAMES.items():
         lang[f"research_state.{MOD}.{state}"] = name
     for block, info in {**BLOCKS, **ITEMLESS_BLOCKS}.items():
@@ -1996,6 +2004,10 @@ def write_all(write, assets, data, lang, condition, self_drop):
         "fabric:load_conditions": condition(FEATURE), "type": "minecraft:crafting_shapeless", "category": "misc",
         "ingredients": ["minecraft:paper", "minecraft:ink_sac", "minecraft:feather"],
         "result": {"id": rid("research_notes"), "count": 2}})
+    # Gloam Ink (C-D6): a fair copy of an original sheet (Java: ResearchNotesCopyRecipe), a special recipe like the
+    # Skeleton Key's copying (tools/decor18.py), under the Concordance's switch.
+    write(data / "recipe" / "research_notes_copy.json", {
+        "fabric:load_conditions": condition(FEATURE), "type": rid("research_notes_copy")})
     write(data / "recipe" / "lumen_sconce.json", {
         "fabric:load_conditions": condition(FEATURE), "type": "minecraft:crafting_shaped", "category": "building",
         "pattern": [" A ", " C ", "CCC"],

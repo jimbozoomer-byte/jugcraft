@@ -44,6 +44,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.component.Consumables;
 import net.minecraft.world.item.Rarity;
+import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.block.entity.BlockEntityType;
@@ -127,6 +128,8 @@ public final class JugcraftConcordance {
 	public static Item GLOAM_INK;
 	/** Concordance C-D6: what a glass bottle draws instead from a murky batch; a furnace boils it back to its bottle. */
 	public static Item GLOAM_SLUDGE;
+	/** Gloam Ink (C-D6): the fair copy's special recipe (recipe type jugcraft:research_notes_copy). */
+	public static RecipeSerializer<ResearchNotesCopyRecipe> NOTES_COPY_SERIALIZER;
 	public static BlockEntityType<CrucibleBlockEntity> CRUCIBLE_ENTITY;
 	/** Concordance Chunk C, C-05: the Crucible Stand, JE heat for the crucible on it. */
 	public static Block CRUCIBLE_STAND;
@@ -270,6 +273,10 @@ public final class JugcraftConcordance {
 		// the bottle back), never a brew (data/jugcraft/concordance/extract/gloam_ink.json).
 		GLOAM_INK = item("gloam_ink", DescribedItem::new, new Item.Properties().stacksTo(16).craftRemainder(Items.GLASS_BOTTLE));
 		GLOAM_SLUDGE = item("gloam_sludge", DescribedItem::new, new Item.Properties().stacksTo(16).craftRemainder(Items.GLASS_BOTTLE));
+		// Gloam Ink's one consumer (C-D6, GI-P12): a fair copy of Research Notes, a special crafting recipe like the Skeleton
+		// Key's copying and vanilla's book cloning.
+		NOTES_COPY_SERIALIZER = Registry.register(BuiltInRegistries.RECIPE_SERIALIZER, Jugcraft.id("research_notes_copy"),
+				ResearchNotesCopyRecipe.SERIALIZER);
 		CRUCIBLE_ENTITY = Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, Jugcraft.id("crucible"),
 				FabricBlockEntityTypeBuilder.create(CrucibleBlockEntity::new, CRUCIBLE).build());
 		// Water by pipe into the crucible's tank (a formula's water steps draw on it); items through its container.

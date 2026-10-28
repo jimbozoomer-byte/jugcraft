@@ -562,7 +562,8 @@ EXTRACTS = {
                   # GI-P2: the approved carrier, a registered ingredient (03:41); the owner approves it at the checkpoint.
                   "carriers": ["spider_eye"], "carrier_names": ["Spider Eye"],
                   "axis": "hollow", "least": 1.0, "codex": "alembic/gloam_ink",
-                  "tooltip": "Gloamcap drawn under a lid in an Alembic Crucible.",
+                  "tooltip": "Gloamcap drawn under a lid in an Alembic Crucible. With a written sheet of Research Notes "
+                             "and a blank sheet in a crafting grid, it makes a fair copy; the bottle comes back.",
                   "failure_tooltip": "A murky batch, no good as ink. Boil it dry in a furnace for its glass bottle.",
                   "process": GLOAM_INK,
                   "murky": GLOAM_INK[:5] + [("add", "spider_eye", "raw")] + GLOAM_INK[5:],  # a second spider eye: 0.300
@@ -688,8 +689,13 @@ def _kiln_example():
             f"time.")
 
 
-# Concordance C-D6: the pages Gloam Ink's consumers add to its entry (the Research Notes part fills this).
-GLOAM_INK_USES = []
+# Concordance C-D6: the pages Gloam Ink's consumers add to its entry.
+GLOAM_INK_USES = [
+    ("text", "Its Use",
+     f"With a written sheet of Research Notes and a blank sheet in a crafting grid, Gloam Ink makes a **fair copy** of the "
+     f"notes: the original and the bottle come back ([Research Notes](entry://{MOD}:arcane_concordance/foundations/"
+     f"research_notes) says what a copy teaches). Gloam Sludge has no use but its bottle."),
+]
 
 
 def _gloam_example():

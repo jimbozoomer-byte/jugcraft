@@ -28,7 +28,8 @@ import net.minecraft.world.level.Level;
  * author, it gives the reader the evidence those notes are allowed to stand for: First Light, for example, accepts notes
  * from someone who understood it as a way to understand it, but the reader must still encounter and observe it for
  * themselves, and must still practise to master it. Reading the same author twice counts once. The sheet is not used
- * up by reading, so one writer's notes can teach a whole library of readers.
+ * up by reading, so one writer's notes can teach a whole library of readers. A written original can be copied with Gloam
+ * Ink ({@link ResearchNotesCopyRecipe}); a fair copy is read exactly as its original is.
  * <p>
  * All of it runs on the server, limited to one write or read per player every {@value #COOLDOWN_TICKS} ticks.
  */
@@ -115,6 +116,9 @@ public class ResearchNotesItem extends Item {
 			return;
 		}
 		tooltip.accept(Component.translatable("tooltip.jugcraft.research_notes.author", notes.authorName()).withStyle(ChatFormatting.GRAY));
+		if (notes.fairCopy()) {
+			tooltip.accept(Component.translatable("tooltip.jugcraft.research_notes.fair_copy").withStyle(ChatFormatting.DARK_PURPLE));
+		}
 		for (Map.Entry<String, ResearchState> entry : notes.entries().entrySet()) {
 			tooltip.accept(Component.translatable("tooltip.jugcraft.research_notes.entry", ConcordanceProgress.researchName(entry.getKey()),
 					Component.translatable("research_state.jugcraft." + entry.getValue().id())).withStyle(ChatFormatting.DARK_AQUA));

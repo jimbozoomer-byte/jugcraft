@@ -542,7 +542,8 @@ def item_units(ref):
 
 # Special recipes, which make their result from what is in the grid: their type, registered by Java.
 SPECIAL_RECIPES = {f"{MOD}:{decor18.KEY['recipe']}", f"{MOD}:gun_attachment", f"{MOD}:gun_attachment_removal",
-                   f"{MOD}:household_door_mat_copy", f"{MOD}:beast_bison_upgrade", f"{MOD}:beast_mimicream_repair"}
+                   f"{MOD}:household_door_mat_copy", f"{MOD}:beast_bison_upgrade", f"{MOD}:beast_mimicream_repair",
+                   f"{MOD}:research_notes_copy"}  # Gloam Ink (C-D6): a fair copy of Research Notes
 
 
 def ingredient_choices(value):
@@ -16096,6 +16097,7 @@ def check_concordance(registered):
     check_diagnostics(co, root, lang)
     check_workshop_products(co, root, lang)
     check_gloam_ink(co, root, lang, registered)
+    check_fair_copies(co, root, lang)
     check_poultice_credit(co, lang)
     check_crucible_stand(co, root, lang)
     check_ecology(co, root, lang, registered, research)
@@ -18698,6 +18700,118 @@ def check_gloam_ink(co, root, lang, registered):
         for name in names:
             if name not in found:
                 err(f"{cls}.{name} is missing (Gloam Ink's tests)")
+
+
+# Each covered extraction's consumer in the game's code: (path under src/main/java/io/github/jimbozoomer/jugcraft, text
+# that must be there). Gloam Ink, C-D6 (09:124: "no decorative recipes with no consumer"); check_fair_copies.
+EXTRACT_CONSUMERS = {
+    "gloam_ink": [("concordance/ResearchNotesCopyRecipe.java", "if (stack.is(JugcraftConcordance.GLOAM_INK)) {")],
+}
+
+
+def check_fair_copies(co, root, lang):
+    """Gloam Ink (C-D6; docs/features/gloam-ink.md; GI-P9 to GI-P13): its one consumer. Each extract has a consumer in the
+    game's code (EXTRACT_CONSUMERS). Gloam Ink's is the fair copy (recipe type jugcraft:research_notes_copy, the
+    generator's file, under the Concordance's switch): exactly one original written sheet, one blank sheet and one Gloam
+    Ink, nothing else; the copy is a new sheet holding only the original's notes, marked a copy, and a copy is never
+    copied; the original stays in the grid and the ink's bottle comes back. A copy changes no reading: notes stay evidence
+    keyed by the original's author (EvidenceRule's notes:<author>, ResearchNotesItem.read), and reading never asks
+    whether a sheet is a copy. A sheet is no resource of the Concordance's economy. The codex, the JEI page, the tooltips
+    and the tests say so. (What Gloam Ink is, and that it feeds nothing else, is check_gloam_ink's.)"""
+    sys.path.insert(0, str(ROOT / "tools"))
+    import acquisition as aq
+    import concordance_economy as ec
+    al = co.alchemy
+
+    def source(path):
+        return path.read_text(encoding="utf-8") if path.exists() else ""
+
+    def flat(text):
+        return " ".join(text.split())
+    concordance_java = flat(source(root / "JugcraftConcordance.java"))
+    # Each extract has a consumer in the game's code (09:124: no decorative recipes): Gloam Ink's is the fair copy.
+    for key in al.EXTRACTS:
+        uses = EXTRACT_CONSUMERS.get(key, [])
+        if not uses or any(needle not in source(JAVA_ROOT / path) for path, needle in uses):
+            err(f"extract {key}: no consumer in the game's code (EXTRACT_CONSUMERS; 09:124: no decorative recipes)")
+    if ('Registry.register(BuiltInRegistries.RECIPE_SERIALIZER, Jugcraft.id("research_notes_copy"), '
+            'ResearchNotesCopyRecipe.SERIALIZER);') not in concordance_java:
+        err("JugcraftConcordance: registers the fair copy's recipe serializer as jugcraft:research_notes_copy")
+    if load(DATA / MOD / "recipe" / "research_notes_copy.json") != {
+            "fabric:load_conditions": [{"condition": f"{MOD}:feature_enabled", "feature": "concordance"}],
+            "type": f"{MOD}:research_notes_copy"}:
+        err("recipe/research_notes_copy.json is the generator's: the special recipe under the Concordance's switch alone "
+            "(run tools/generate_material_data.py)")
+    if f"{MOD}:research_notes_copy" not in SPECIAL_RECIPES:
+        err("check_mod_data SPECIAL_RECIPES: jugcraft:research_notes_copy is a special recipe")
+    copy_java = source(root / "ResearchNotesCopyRecipe.java")
+    original = flat(_java_body(copy_java, "static @Nullable ResearchNotes original("))
+    for needle in ("if (!JugcraftConfig.isFeatureEnabled(JugcraftConcordance.FEATURE)) { return null; }",
+                   "if (stack.is(JugcraftConcordance.GLOAM_INK)) { inks++; }",
+                   "if (notes == null) { blanks++; } else if (original != null || notes.fairCopy()) { return null; } "
+                   "else { original = notes; }",
+                   "} else { return null; }",
+                   "return blanks == 1 && inks == 1 ? original : null;"):
+        if needle not in original:
+            err("ResearchNotesCopyRecipe.original: exactly one original, one blank and one Gloam Ink, nothing else, never "
+                f"a fair copy, and only while the Concordance is on ({needle})")
+    assemble = flat(_java_body(copy_java, "public ItemStack assemble("))
+    if "ItemStack copy = new ItemStack(JugcraftConcordance.RESEARCH_NOTES_ITEM);" not in assemble \
+            or "copy.set(JugcraftConcordance.RESEARCH_NOTES, notes.asFairCopy());" not in assemble \
+            or "copyWithCount" in assemble:
+        err("ResearchNotesCopyRecipe.assemble: one new sheet holding only the original's notes, marked a copy")
+    remaining = flat(_java_body(copy_java, "public NonNullList<ItemStack> getRemainingItems("))
+    for needle in ("if (stack.has(JugcraftConcordance.RESEARCH_NOTES)) { left.set(slot, stack.copyWithCount(1)); }",
+                   "ItemStackTemplate remainder = stack.getItem().getCraftingRemainder();"):
+        if needle not in remaining:
+            err(f"ResearchNotesCopyRecipe.getRemainingItems: the original stays and the ink's bottle comes back ({needle})")
+    notes_java = source(root / "ResearchNotes.java")
+    if 'Codec.BOOL.optionalFieldOf("fair_copy", false).forGetter(ResearchNotes::fairCopy)' not in flat(notes_java) \
+            or "return new ResearchNotes(author, authorName, entries, written, true);" \
+            not in flat(_java_body(notes_java, "public ResearchNotes asFairCopy(")):
+        err("ResearchNotes: fair_copy is optional and false by default (older sheets are originals, and an original saves "
+            "as before), and a fair copy keeps its original's author, entries and time written")
+    item_java = source(root / "ResearchNotesItem.java")
+    read = flat(_java_body(item_java, "public static InteractionResult read("))
+    if "new Evidence.ReadNotes(entry.getKey(), notes.author().toString(), entry.getValue())" not in read \
+            or "if (notes.author().equals(player.getUUID())) {" not in read or "fairCopy" in read:
+        err("ResearchNotesItem.read: a sheet is read as its original author's notes, refused to that author, and never "
+            "by whether it is a copy")
+    if '"notes:" + notes.author()' not in source(root / "rules" / "EvidenceRule.java"):
+        err("rules/EvidenceRule: notes count once per author (notes:<author>), so a copy mints no evidence")
+    hover = flat(_java_body(item_java, "public void appendHoverText("))
+    if 'if (notes.fairCopy()) { tooltip.accept(Component.translatable("tooltip.jugcraft.research_notes.fair_copy")' \
+            not in hover:
+        err("ResearchNotesItem.appendHoverText: a fair copy says so")
+    if "research_notes" in ec.RESOURCES:
+        err("tools/concordance_economy.py: notes are an item outside the Concordance's resources; model their conversions "
+            "before they feed one")
+    # Words: the tooltips, the codex page and the JEI page.
+    for key in (f"item.{MOD}.gloam_ink", f"tooltip.{MOD}.gloam_ink", f"tooltip.{MOD}.research_notes.fair_copy"):
+        if not lang.get(key):
+            err(f"lang: missing {key} (run tools/generate_material_data.py)")
+    prefix = f"book.{MOD}.{co.BOOK}.foundations.research_notes"
+    entry = load(DATA / MOD / "modonomicon" / "books" / co.BOOK / "entries" / "foundations" / "research_notes.json") or {}
+    pages = entry.get("pages", [])
+    if len(pages) < 3 or pages[2].get("condition") != co.condition_json(("alembic_arts", "observed")) \
+            or "fair copy" not in lang.get(f"{prefix}.p2.text", ""):
+        err("codex foundations/research_notes: its third page explains fair copies, open once the Alembic Arts are observed")
+    page = lang.get(f"{aq.PREFIX}.gloam_ink", "")
+    if aq.EXTRACTED.get("gloam_ink") != "gloam_ink" or "fair copy" not in page or "Research Notes" not in page:
+        err("tools/acquisition.py: Gloam Ink's JEI page says the crucible draws it and what it copies")
+    # The tests that exercise all of it.
+    tests = ROOT / "src" / "gametest" / "java" / "io" / "github" / "jimbozoomer" / "jugcraft" / "test"
+    sharing = source(tests / "ConcordanceSharingGameTests.java")
+    for name in ("aFairCopyTeachesWhatItsOriginalDoes", "onlyAnOriginalWithOneBlankAndOneInkIsCopied",
+                 "aFairCopyIsCraftedInThePlayersOwnGrid", "aFairCopyGivesStolasNothing", "anOlderSheetReadsAsAnOriginal"):
+        if f"public void {name}(GameTestHelper helper)" not in sharing:
+            err(f"ConcordanceSharingGameTests.{name}: missing (Gloam Ink's fair copy)")
+    if "public void aFairCopyCreditsItsAuthorOnce(GameTestHelper helper)" not in source(tests / "ConcordanceConclaveGameTests.java"):
+        err("ConcordanceConclaveGameTests.aFairCopyCreditsItsAuthorOnce: missing (a copy credits its original's author once)")
+    client = source(tests / "ConcordanceGloamInkClientGameTests.java")
+    for shot in ("jugcraft_gloam_ink_fair_copy", "jugcraft_gloam_ink_lidded_crucible"):
+        if f'"{shot}"' not in client:
+            err(f"ConcordanceGloamInkClientGameTests: the shot {shot} is missing")
 
 
 def check_poultice_credit(co, lang):
