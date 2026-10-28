@@ -10,20 +10,24 @@ import net.minecraft.world.phys.Vec3;
 /** Client-only motions for real work/transfer events. No inventory lookup, particles or entity spawning. */
 final class CompanionActionPose {
     static void extract(PeepoEntity npc,PeepoState s,float partial,ItemModelResolver items){
-        s.actionPose=s.spatula=s.pressSeated=false;s.pressOffset=Vec3.ZERO;
+        s.actionPose=s.spatula=s.pressSeated=s.handling=false;s.pressOffset=Vec3.ZERO;
         s.gesture=CompanionGesture.NONE;s.actionScale=.38F;
         var shown=ItemStack.EMPTY;var level=npc.level();
-        if(!s.eating && !s.sleeping && !s.sitting && !s.wheelRunning && npc.isAlive()){
-            if(s.work==WorkAnimation.NONE)s.gesture=npc.gesture();
+        if(!s.eating && !s.sleeping && !s.sitting && !s.wheelRunning && !npc.isPassenger() && npc.isAlive()){
+            if(s.work==WorkAnimation.NONE && !npc.gesture().tool() && !npc.gesture().brewing())s.gesture=npc.gesture();
             if(s.gesture!=CompanionGesture.NONE){
                 var target=npc.gestureTarget();
                 if(s.gesture==CompanionGesture.CARRY || level.hasChunkAt(target) && target.distToCenterSqr(npc.position())<16){
-                    float t=Mth.clamp((level.getGameTime()-npc.gestureStarted()+partial)/CompanionGesture.TICKS,0,1);
+                    float t=Mth.clamp((level.getGameTime()-npc.gestureStarted()+partial)/s.gesture.duration(),0,1);
                     var center=s.gesture==CompanionGesture.CARRY?npc.getPosition(partial).add(0,.35,0):nearSurface(npc,target,partial);
                     var point=relative(npc,center,partial);
+                    s.handlingLead=npc.gestureLead();s.handlingLoad=npc.gestureLoad();s.handlingRemainder=!npc.gestureAux().isEmpty();
                     handling(s,t,point.x,point.y,point.z);
                     s.actionPose=true;shown=npc.gestureItem();
-                    if(s.gesture==CompanionGesture.PUT && t>.6F || s.spatula)shown=ItemStack.EMPTY;
+                    if(s.handling){
+                        if(s.gesture==CompanionGesture.PUT && t>=.72F)shown=npc.gestureAux();
+                        s.actionScale*=HandlingPose.itemScale(s);
+                    }else if(s.spatula)shown=ItemStack.EMPTY;
                 }
             }else if(s.work==WorkAnimation.PLANT || s.work==WorkAnimation.PICK || s.work==WorkAnimation.WATER_FILL){
                 var target=npc.workTarget();
@@ -61,6 +65,8 @@ final class CompanionActionPose {
     }
     private static void reset(MachineWorkClip p){p.x=p.xRot=p.zRot=p.bodyPitch=p.bodyRoll=p.bodyX=p.bodyY=0;}
     static void handling(PeepoState s,float t,float targetX,float targetY,float targetZ){
+        if(s.gesture.handling()){HandlingPose.prepare(s,t,targetX,targetY,targetZ);return;}
+        s.handling=false;
         var p=s.toolPose;reset(p);
         float reach=s.gesture==CompanionGesture.CARRY?0:s.gesture==CompanionGesture.TAKE?1-smooth(t):Mth.sin(t*Mth.PI);
         float bob=s.gesture==CompanionGesture.CARRY?Mth.sin(s.walkAnimationPos*1.3F)*Math.min(s.walkAnimationSpeed,.5F)*.35F:0;

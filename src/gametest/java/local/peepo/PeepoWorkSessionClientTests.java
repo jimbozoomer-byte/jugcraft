@@ -85,27 +85,45 @@ public final class PeepoWorkSessionClientTests implements FabricClientGameTest {
                 s.runOnServer(v->{check(npc.orders.command(v.getPlayerList().getPlayers().getFirst(),1),"Stay command accepted during session");
                     check(!npc.isUsingJobAt(anchor),"Stay cancels session immediately");});
             }
-            for(boolean jughead:new boolean[]{false,true}){
+            for(boolean bunk:new boolean[]{false,true})for(boolean jughead:new boolean[]{false,true}){
+                s.runCommand(bunk?"time set midnight":"time set noon");
                 s.runOnServer(v->{setup(v.overworld(),jughead);
                     for(int i=0;i<3;i++)v.overworld().setBlockAndUpdate(anchor.east(i).above(),Blocks.WHEAT.defaultBlockState());
-                    var stool=net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(PeepoMod.id("wooden_stool"));
-                    v.overworld().setBlockAndUpdate(base.south(3),stool.defaultBlockState());
+                    if(bunk){
+                        npc.setStoredEnergy(npc.getEnergyCapacity()/2);
+                        for(int i=0;i<3;i++)v.overworld().setBlockAndUpdate(base.south(3).above(i),CompanionBeds.BLOCKS.getFirst().defaultBlockState());
+                        npc.assignments.assign(v.overworld(),base.south(3).above(2));
+                    }else{
+                        var stool=net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(PeepoMod.id("wooden_stool"));
+                        v.overworld().setBlockAndUpdate(base.south(3),stool.defaultBlockState());
+                    }
                 });
                 try{s.waitFor(v->{
                     if(v.overworld().getGameTime()%80==0)org.slf4j.LoggerFactory.getLogger("peepo-session-test").info("seat search: variant={}, position={}, routine={}, ground={}, energy={}",jughead,npc.position(),npc.routineStatus(),npc.onGround(),npc.getEnergy());
-                    return npc.getRestMode()==CompanionEnergy.Rest.SITTING;
+                    return npc.getRestMode()==(bunk?CompanionEnergy.Rest.SLEEPING:CompanionEnergy.Rest.SITTING)
+                        && v.overworld().getGameTime()-npc.restMotion.started()>=npc.restMotion.duration();
                 },600);}catch(AssertionError e){throw new AssertionError(s.computeOnServer(v->"seat search: variant="+jughead+", position="+npc.position()+", routine="+npc.routineStatus()+", ground="+npc.onGround()),e);}
                 s.runOnServer(v->{v.overworld().setBlockAndUpdate(anchor.above(),Blocks.WHEAT.defaultBlockState().setValue(CropBlock.AGE,7));npc.garden.inputsChanged(anchor);});
-                long[] leftSeat={-1};
+                long[] leftSeat={-1};boolean[] stoodUp={false};
                 try{s.waitFor(v->{
                     long now=v.overworld().getGameTime();
+                    if(npc.restMotion.holdingExit()){
+                        stoodUp[0]=true;
+                        if(npc.restMotion.clip()!=(bunk?CompanionRestMotion.Clip.WAKE:CompanionRestMotion.Clip.STAND)
+                            || now-npc.restMotion.started()>=npc.restMotion.duration())
+                            throw new AssertionError("rest departure exceeded its bounded clip");
+                        if((npc.routineStatus()!=CompanionStatus.RESTING && npc.routineStatus()!=CompanionStatus.WAITING)
+                            || !npc.getNavigation().isDone())
+                            throw new AssertionError("stand-up lost the pending work handoff");
+                        return false;
+                    }
                     if(npc.getRestMode()==CompanionEnergy.Rest.NONE){
                         if(leftSeat[0]<0)leftSeat[0]=now;
                         if(now-leftSeat[0]>10 && !npc.isUsingJobAt(anchor))throw new AssertionError("seat handoff yielded to wandering instead of claiming ready garden");
                     }
                     return npc.workAnimation()==WorkAnimation.HARVEST;
                 },240);}catch(AssertionError e){throw new AssertionError(s.computeOnServer(v->"seat resume: position="+npc.position()+", routine="+npc.routineStatus()+", rest="+npc.getRestMode()+", ground="+npc.onGround()+", job="+npc.garden.job(anchor).workStatus(npc)),e);}
-                s.runOnServer(v->check(npc.getRestMode()==CompanionEnergy.Rest.NONE,"idle sitting yields to newly ready work"));
+                s.runOnServer(v->{check(stoodUp[0],"idle sitting completes the stand-up animation before work");check(npc.getRestMode()==CompanionEnergy.Rest.NONE,"idle sitting yields to newly ready work");});
                 s.waitFor(v->!((CropBlock)v.overworld().getBlockState(anchor.above()).getBlock()).isMaxAge(v.overworld().getBlockState(anchor.above())),100);
                 s.runOnServer(v->{check(crops(v.overworld(),false)==3,"resumed work harvests and replants");npc.transport.stop();npc.resetCompanionRoutine();npc.discard();});
             }

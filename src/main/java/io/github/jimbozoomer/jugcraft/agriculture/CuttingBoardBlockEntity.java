@@ -45,6 +45,7 @@ public class CuttingBoardBlockEntity extends BlockEntity {
 	public ItemStack take() {
 		ItemStack out = item;
 		item = ItemStack.EMPTY;
+		companionKitchen.advanceCut();
 		if (!out.isEmpty()) {
 			changed();
 		}

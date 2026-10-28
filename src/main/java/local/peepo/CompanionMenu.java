@@ -11,7 +11,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.flag.FeatureFlags;
 
 public final class CompanionMenu extends AbstractContainerMenu {
-    public static final int DATA_COUNT=80, RECIPE_START=46, FILTER_START=50;
+    public static final int DATA_COUNT=81, RECIPE_START=46, FILTER_START=50;
     public static final int WIDTH=480, RECIPE_X=416, SEED_X=396;
     public static final int JOB_ROW_HEIGHT=28, STATUS_SPACE=40, HEIGHT=312+STATUS_SPACE;
     public static MenuType<CompanionMenu> TYPE;
@@ -44,6 +44,7 @@ public final class CompanionMenu extends AbstractContainerMenu {
     public static void initialize(){TYPE=Registry.register(BuiltInRegistries.MENU,PeepoMod.id("companion_commands"),new MenuType<>(CompanionMenu::new,FeatureFlags.VANILLA_SET));
         net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry.serverboundPlay().register(CompanionStockEditPayload.TYPE,CompanionStockEditPayload.CODEC);
         net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry.clientboundPlay().register(CompanionStockPayload.TYPE,CompanionStockPayload.CODEC);
+        net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry.clientboundPlay().register(CompanionFeedbackPayload.TYPE,CompanionFeedbackPayload.CODEC);
         net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking.registerGlobalReceiver(CompanionStockEditPayload.TYPE,(payload,context)->{if(context.player().containerMenu instanceof CompanionMenu menu)menu.editStock(context.player(),payload);});
         net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry.serverboundPlay().register(CompanionEditPayload.TYPE,CompanionEditPayload.CODEC);
         net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry.serverboundPlay().register(PopulationEditPayload.TYPE,PopulationEditPayload.CODEC);
@@ -119,6 +120,7 @@ public final class CompanionMenu extends AbstractContainerMenu {
         data=npc==null?new SimpleContainerData(DATA_COUNT):new ContainerData(){
             public int get(int i){
                 var supplies=npc.assignments.supplies;
+                if(i==80)return npc.preferences.feedback;
                 if(i==79)return stockSlot;
                 if(i>=71)return npc.report.row(CompanionAssignments.containerSlot(i>=75,(i-71)%4));
                 if(i>=67)return supplies.route(i-67).keep;

@@ -457,8 +457,8 @@ public final class PeepoCompanionClientTests implements FabricClientGameTest {
             check(!PeepoSpawns.canSpawn(PeepoMod.JUGHEAD,level,EntitySpawnReason.NATURAL,pos,level.getRandom()),"Jughead swamp exclusion");
             var mobs=new ArrayList<PeepoEntity>();
             try{
-                for(int i=0;i<6;i++){check(PeepoSpawns.belowLocalLimit(PeepoMod.PEEPO,level,pos),"early spawn cap");var p=npc(level,false);p.snapTo(pos.getX()+.5,pos.getY(),pos.getZ()+.5,0,0);p.finalizeSpawn(level,level.getCurrentDifficultyAt(pos),EntitySpawnReason.NATURAL,null);mobs.add(p);}
-                check(!PeepoSpawns.belowLocalLimit(PeepoMod.PEEPO,level,pos) && PeepoSpawns.belowLocalLimit(PeepoMod.JUGHEAD,level,pos),"six-per-variant spawn cap");
+                for(int i=0;i<PeepoSpawns.LOCAL_LIMIT;i++){check(PeepoSpawns.belowLocalLimit(PeepoMod.PEEPO,level,pos),"early spawn cap");var p=npc(level,false);p.snapTo(pos.getX()+.5,pos.getY(),pos.getZ()+.5,0,0);p.finalizeSpawn(level,level.getCurrentDifficultyAt(pos),EntitySpawnReason.NATURAL,null);mobs.add(p);}
+                check(!PeepoSpawns.belowLocalLimit(PeepoMod.PEEPO,level,pos) && PeepoSpawns.belowLocalLimit(PeepoMod.JUGHEAD,level,pos),"wild-per-variant spawn cap");
                 check(copy(level,mobs.getFirst()).isNaturallySpawned(),"spawn origin persistence");
             }finally{mobs.forEach(PeepoEntity::discard);}
         });

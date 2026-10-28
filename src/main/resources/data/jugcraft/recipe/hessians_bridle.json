@@ -1,0 +1,24 @@
+{
+  "fabric:load_conditions": [
+    {
+      "condition": "jugcraft:feature_enabled",
+      "feature": "agriculture"
+    }
+  ],
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    "L L",
+    "IJI",
+    " L "
+  ],
+  "key": {
+    "L": "minecraft:leather",
+    "I": "minecraft:iron_ingot",
+    "J": "minecraft:jack_o_lantern"
+  },
+  "result": {
+    "id": "jugcraft:hessians_bridle",
+    "count": 1
+  }
+}
