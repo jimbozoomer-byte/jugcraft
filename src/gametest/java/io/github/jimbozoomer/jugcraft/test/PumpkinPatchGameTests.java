@@ -193,11 +193,13 @@ public class PumpkinPatchGameTests {
 				id + " should take one piece a spot: holds " + display.produce().size() + ", " + player.getMainHandItem().getCount() + " left");
 		level.getBlockState(far).useItemOn(player.getMainHandItem(), level, player, InteractionHand.MAIN_HAND, hitFar);
 		helper.assertTrue(display.produce().size() == spots && player.getMainHandItem().getCount() == 1, id + " should take no more when full");
-		// What is not produce is not taken.
+		// What is not produce is not taken, nor does it take a piece back (used as a player uses it, so an empty-hand use
+		// that follows a block's refusal would show).
 		display.takeLast();
 		player.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(Items.STICK, 4));
-		level.getBlockState(far).useItemOn(player.getMainHandItem(), level, player, InteractionHand.MAIN_HAND, hitFar);
-		helper.assertTrue(display.produce().size() == spots - 1 && player.getMainHandItem().getCount() == 4, id + " should not take a stick");
+		player.gameMode.useItemOn(player, level, player.getMainHandItem(), InteractionHand.MAIN_HAND, hitFar);
+		helper.assertTrue(display.produce().size() == spots - 1 && player.getMainHandItem().getCount() == 4,
+				id + " should neither take a stick nor give a piece back for one: holds " + display.produce().size());
 		// An empty hand takes the last piece back.
 		player.setItemInHand(InteractionHand.MAIN_HAND, ItemStack.EMPTY);
 		InteractionResult taken = level.getBlockState(far).useWithoutItem(level, player, hitFar);
