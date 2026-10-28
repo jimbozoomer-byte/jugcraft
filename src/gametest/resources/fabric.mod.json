@@ -120,6 +120,7 @@
       "io.github.jimbozoomer.jugcraft.test.FestivityGameTests",
       "io.github.jimbozoomer.jugcraft.test.NightGameTests",
       "io.github.jimbozoomer.jugcraft.test.HorsemanSightingsGameTests",
+      "io.github.jimbozoomer.jugcraft.test.BloodMoonGameTests",
       "io.github.jimbozoomer.jugcraft.test.DecorGameTests",
       "io.github.jimbozoomer.jugcraft.test.Decor2GameTests",
       "io.github.jimbozoomer.jugcraft.test.Decor3GameTests",

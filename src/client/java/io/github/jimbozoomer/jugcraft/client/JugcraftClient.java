@@ -1,5 +1,6 @@
 package io.github.jimbozoomer.jugcraft.client;
 
+import io.github.jimbozoomer.jugcraft.agriculture.BloodMoon;
 import io.github.jimbozoomer.jugcraft.agriculture.HarvestMoon;
 import io.github.jimbozoomer.jugcraft.agriculture.JugcraftAgriculture;
 import io.github.jimbozoomer.jugcraft.agriculture.OpenCarvingPayload;
@@ -372,12 +373,14 @@ public final class JugcraftClient implements ClientModInitializer {
 		EntityRendererRegistry.register(JugcraftAgriculture.THROW_MARKER, ThrowMarkerRenderer::new);
 		EntityRendererRegistry.register(JugcraftAgriculture.SEAT, SeatRenderer::new);
 		ClientPlayNetworking.registerGlobalReceiver(HarvestMoon.Payload.TYPE, (payload, context) -> HarvestMoon.clientActive = payload.active());
+		ClientPlayNetworking.registerGlobalReceiver(BloodMoon.Payload.TYPE, (payload, context) -> BloodMoon.clientActive = payload.active());
 		EntityRendererRegistry.register(JugcraftAgriculture.PUMPKIN_BARGE, PumpkinBoatRenderer::new);
 		EntityRendererRegistry.register(JugcraftAgriculture.PUMPKIN_RACER, PumpkinBoatRenderer::new);
 		ClientPlayNetworking.registerGlobalReceiver(OpenCarvingPayload.TYPE,
 				(payload, context) -> Minecraft.getInstance().gui.setScreen(new CarvingScreen(payload)));
 		ClientPlayConnectionEvents.DISCONNECT.register((handler, client) -> {
 			HarvestMoon.clientActive = false;
+			BloodMoon.clientActive = false;
 			client.execute(CarvingTextures::clear);
 		});
 		BlockEntityRenderers.register(JugcraftDrones.TERMINAL_ENTITY, context -> new DroneDepotRenderer());
