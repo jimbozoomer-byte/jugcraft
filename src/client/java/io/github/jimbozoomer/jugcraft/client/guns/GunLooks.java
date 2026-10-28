@@ -16,7 +16,8 @@ public final class GunLooks {
 	static final Map<String, Look> LOOKS = new HashMap<>();
 	/** How big a shot's muzzle flash is, across, in the gun model's pixels, by the round it fires (or grenade or fuel). */
 	static final Map<String, Float> FLASH_SIZES = Map.of("light_round", 5.0F, "rifle_round", 7.0F, "buckshot_shell", 8.0F,
-			"paper_cartridge", 10.0F, "grenade", 9.0F, "minecraft:blaze_powder", 8.0F, "energy_cell", 6.0F, "he_rocket", 10.0F);
+			"paper_cartridge", 10.0F, "grenade", 9.0F, "minecraft:blaze_powder", 8.0F, "energy_cell", 6.0F, "he_rocket", 10.0F,
+			"dart", 4.0F, "microjet", 7.0F);
 	/**
 	 * The flash's tint, RGB, multiplied into the owner's white-gold frames, by the round, where it has one (tools/guns.py
 	 * FLASH_TINT): an energy weapon's discharge is cyan-white (slice 8D).
@@ -52,7 +53,7 @@ public final class GunLooks {
 	 * the back of its receiver two thirds of a pixel past the eye and the Magpie SMG's to it; the Penny Pistol stays
 	 * five pixels off.
 	 */
-	static final Map<String, Float> EYE_RELIEF = Map.ofEntries(Map.entry("garrison_rifle", 4.0F), Map.entry("beam_pistol", 4.0F), Map.entry("picket_rifle", 2.0F), Map.entry("ranger_rifle", 2.0F), Map.entry("kestrel_rifle", 2.0F), Map.entry("rattler_pistol", 4.0F), Map.entry("bronco_smg", 4.0F), Map.entry("squall_rifle", 3.0F), Map.entry("spikedriver", 2.0F), Map.entry("sledge", 6.0F), Map.entry("highwayman", 6.0F), Map.entry("throttle", 2.0F), Map.entry("skylark_rifle", 3.0F), Map.entry("solenoid_rifle", 1.0F), Map.entry("votive_rifle", 2.0F), Map.entry("glowmouth", 3.0F), Map.entry("mule", 2.5F), Map.entry("fowler", 3.0F), Map.entry("undertone_rifle", 2.0F), Map.entry("murmur_smg", 1.0F), Map.entry("reverb", 1.0F), Map.entry("tusker", 1.0F), Map.entry("cinder_repeater", 1.0F), Map.entry("bastion_rifle", 6.0F), Map.entry("goldbristle_carbine", 1.0F), Map.entry("crackling", 6.0F), Map.entry("hermit_rifle", 2.0F), Map.entry("conductor_carbine", 2.5F), Map.entry("magpie_smg", 2.0F), Map.entry("tuppence_pistol", 1.0F), Map.entry("lament_rifle", 6.0F), Map.entry("lookout_rifle", 3.5F), Map.entry("ammonite_carbine", 3.0F), Map.entry("fencepost_carbine", 6.0F), Map.entry("waystation_shotgun", 1.0F), Map.entry("highball_rifle", 3.0F), Map.entry("flatboat_gun", 6.0F), Map.entry("windlass_musket", 3.0F), Map.entry("millstone_rifle", 5.0F), Map.entry("fencepost_thumper", 5.5F), Map.entry("lantern_musket", 3.5F), Map.entry("holler_pistol", 5.0F), Map.entry("minuet_pistol", 3.0F), Map.entry("holler_carbine", 5.5F), Map.entry("minuet_carbine", 2.0F), Map.entry("grange_carbine", 4.0F), Map.entry("sprocket_gun", 3.5F), Map.entry("navvy_shotgun", 2.0F), Map.entry("freeholder_rifle", 2.0F), Map.entry("quarrel_carbine", 2.0F), Map.entry("hinterland_rifle", 2.0F), Map.entry("harrow", 3.0F), Map.entry("old_grange_carbine", 4.0F), Map.entry("vesper_rifle", 4.0F), Map.entry("onrush_smg", 1.0F), Map.entry("gallant_rifle", 1.0F), Map.entry("psalm_smg", 1.0F), Map.entry("jawbreaker", 1.0F), Map.entry("hawker_rifle", 1.0F), Map.entry("impetus_shotgun", 1.0F));
+	static final Map<String, Float> EYE_RELIEF = Map.ofEntries(Map.entry("garrison_rifle", 4.0F), Map.entry("beam_pistol", 4.0F), Map.entry("picket_rifle", 2.0F), Map.entry("ranger_rifle", 2.0F), Map.entry("kestrel_rifle", 2.0F), Map.entry("rattler_pistol", 4.0F), Map.entry("bronco_smg", 4.0F), Map.entry("squall_rifle", 3.0F), Map.entry("spikedriver", 2.0F), Map.entry("sledge", 6.0F), Map.entry("highwayman", 6.0F), Map.entry("throttle", 2.0F), Map.entry("skylark_rifle", 3.0F), Map.entry("solenoid_rifle", 1.0F), Map.entry("votive_rifle", 2.0F), Map.entry("glowmouth", 3.0F), Map.entry("mule", 2.5F), Map.entry("fowler", 3.0F), Map.entry("undertone_rifle", 2.0F), Map.entry("murmur_smg", 1.0F), Map.entry("reverb", 1.0F), Map.entry("tusker", 1.0F), Map.entry("cinder_repeater", 1.0F), Map.entry("bastion_rifle", 6.0F), Map.entry("goldbristle_carbine", 1.0F), Map.entry("crackling", 6.0F), Map.entry("hermit_rifle", 2.0F), Map.entry("conductor_carbine", 2.5F), Map.entry("magpie_smg", 2.0F), Map.entry("tuppence_pistol", 1.0F), Map.entry("lament_rifle", 6.0F), Map.entry("lookout_rifle", 3.5F), Map.entry("ammonite_carbine", 3.0F), Map.entry("fencepost_carbine", 6.0F), Map.entry("waystation_shotgun", 1.0F), Map.entry("highball_rifle", 3.0F), Map.entry("flatboat_gun", 6.0F), Map.entry("windlass_musket", 3.0F), Map.entry("millstone_rifle", 5.0F), Map.entry("fencepost_thumper", 5.5F), Map.entry("lantern_musket", 3.5F), Map.entry("holler_pistol", 5.0F), Map.entry("minuet_pistol", 3.0F), Map.entry("holler_carbine", 5.5F), Map.entry("minuet_carbine", 2.0F), Map.entry("grange_carbine", 4.0F), Map.entry("sprocket_gun", 3.5F), Map.entry("navvy_shotgun", 2.0F), Map.entry("freeholder_rifle", 2.0F), Map.entry("quarrel_carbine", 2.0F), Map.entry("hinterland_rifle", 2.0F), Map.entry("harrow", 3.0F), Map.entry("old_grange_carbine", 4.0F), Map.entry("vesper_rifle", 4.0F), Map.entry("onrush_smg", 1.0F), Map.entry("gallant_rifle", 1.0F), Map.entry("psalm_smg", 1.0F), Map.entry("jawbreaker", 1.0F), Map.entry("hawker_rifle", 1.0F), Map.entry("impetus_shotgun", 1.0F), Map.entry("auger_rifle", 1.0F), Map.entry("auger_shotgun", 1.0F), Map.entry("tumbler_rifle", 1.0F));
 	/**
 	 * How far the owner's third-person transform tilts a gun up off the arm that holds it, in degrees (tools/guns.py
 	 * tilt(): the x rotation of its "thirdperson_righthand"); a gun not listed has none. The Gattaler's is made for an
@@ -61,7 +62,7 @@ public final class GunLooks {
 	 * Cutter, slice 9C) is made the same way, and the Weevil's (the Borer, slice 12A); the Thunderhead's (the Cloudburst
 	 * Gun, slice 14D) and the Spitfire's (the Firedrake, slice 14E) are the Gattaler's own.
 	 */
-	static final Map<String, Float> TILT = Map.of("thresher", 68.25F, "seam_cutter", 72.75F, "borer", 66.75F, "cloudburst_gun", 68.25F, "firedrake", 68.25F);
+	static final Map<String, Float> TILT = Map.of("thresher", 68.25F, "seam_cutter", 72.75F, "borer", 66.75F, "cloudburst_gun", 68.25F, "firedrake", 68.25F, "maelstrom_gun", 67.25F, "geode_cutter", 66.75F);
 	private static final Look DEFAULT = new Look(true, 1.0F);
 
 	static {
@@ -164,6 +165,12 @@ public final class GunLooks {
 		LOOKS.put("hawker_rifle", new Look(true, 0.8F));
 		LOOKS.put("impetus_shotgun", new Look(true, 0.9F));
 		LOOKS.put("quill_rifle", new Look(true, 0.85F));
+		LOOKS.put("auger_rifle", new Look(true, 0.8F));
+		LOOKS.put("auger_shotgun", new Look(true, 0.9F));
+		LOOKS.put("tumbler_rifle", new Look(true, 0.85F));
+		LOOKS.put("maelstrom_gun", new Look(true, 0.95F));
+		LOOKS.put("ermine_rifle", new Look(true, 0.85F));
+		LOOKS.put("geode_cutter", new Look(true, 0.95F));
 		OPTICS.put("long_scope", new Optic(0.3F, "long_scope_reticle2", "scope_vignette", null));
 		OPTICS.put("medium_scope", new Optic(0.5F, "long_scope_reticle2", "scope_vignette", null));
 		OPTICS.put("reflex_sight", new Optic(0.85F, null, null, "red_dot_reticle"));
