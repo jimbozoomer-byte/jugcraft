@@ -162,7 +162,7 @@ Local checks run on this branch, and their results:
   - `python3 -m unittest discover -s scripts/tests`: 287 tests, OK. The booth's route from paper to ticket is declared with the other native ones.
   - `python3 tools/check_icon_maps.py`: PASS (277 maps, with the Midway Ticket's and its new `ticket` material; no new warning).
   - `javac` scan of the new and changed Java for syntax errors: none. The full compile runs in CI.
-  - CI's first run failed `theTicketBoothPrintsTickets`: a second turn of the crank in the same tick printed a second ticket. The turn's time was marked only by its block event, which the server runs at the end of the tick. The booth now marks the turn on the server at once; the block event still tells the clients.
+  - CI failed `theTicketBoothPrintsTickets` twice. The first guess was that a second turn of the crank in the same tick printed a second ticket, because the turn was marked only by its block event, which the server runs at the end of the tick. The booth now marks the turn on the server at once, but the test still failed. The real cause was in the test: its empty hand is put in by overwriting the selected slot, where the first ticket had landed, so that ticket was lost. The test now takes each ticket out as it is printed.
 
 `HauntedMidwayGameTests` (run in CI):
 - **The cotton-candy cart spins sugar into candy**:

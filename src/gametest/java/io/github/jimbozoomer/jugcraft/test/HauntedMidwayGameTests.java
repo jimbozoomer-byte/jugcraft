@@ -93,6 +93,23 @@ public class HauntedMidwayGameTests {
 		return true;
 	}
 
+	/**
+	 * Takes the Midway Tickets out of the player's 36 inventory slots and returns how many there were. The tests' empty
+	 * hand is put in by overwriting the selected slot, where a printed ticket lands when that slot is empty, so a ticket
+	 * left there would be lost.
+	 */
+	private static int takeTickets(ServerPlayer player) {
+		int taken = 0;
+		for (int slot = 0; slot < 36; slot++) {
+			ItemStack stack = player.getInventory().getItem(slot);
+			if (stack.is(item("midway_ticket"))) {
+				taken += stack.getCount();
+				player.getInventory().setItem(slot, ItemStack.EMPTY);
+			}
+		}
+		return taken;
+	}
+
 	private static int dropped(GameTestHelper helper, Item item) {
 		return helper.getLevel().getEntitiesOfClass(ItemEntity.class, new AABB(helper.absolutePos(new BlockPos(3, 3, 4))).inflate(5.0),
 				entity -> entity.getItem().is(item)).stream().mapToInt(entity -> entity.getItem().getCount()).sum();
@@ -241,15 +258,19 @@ public class HauntedMidwayGameTests {
 		}
 		helper.assertTrue(both(level, booth, master, state -> state.getValue(TicketBoothBlock.ROLL_LEFT) == 6) && paper.isEmpty(),
 				"Three sheets load six tickets");
+		// Each ticket is taken as it is printed, before the next empty hand is put in.
+		int[] printed = {0};
 		use(player, level, master, ItemStack.EMPTY);
+		printed[0] += takeTickets(player);
 		use(player, level, master, ItemStack.EMPTY);
-		helper.assertTrue(player.getInventory().countItem(item("midway_ticket")) == 1
-				&& level.getBlockEntity(master) instanceof DecorationBlockEntity crank && crank.marked() != Long.MIN_VALUE,
-				"An empty hand prints a ticket and turns the crank, which must come to rest before the next");
+		printed[0] += takeTickets(player);
+		helper.assertTrue(printed[0] == 1 && level.getBlockEntity(master) instanceof DecorationBlockEntity crank && crank.marked() != Long.MIN_VALUE,
+				"An empty hand prints a ticket and turns the crank, which must come to rest before the next: " + printed[0] + " printed");
 		helper.runAfterDelay(TicketBoothBlock.CRANK_TICKS + 1, () -> {
 			use(player, level, master, ItemStack.EMPTY);
-			helper.assertTrue(player.getInventory().countItem(item("midway_ticket")) == 2
-					&& both(level, booth, master, state -> state.getValue(TicketBoothBlock.ROLL_LEFT) == 4), "At rest, it prints the next");
+			printed[0] += takeTickets(player);
+			helper.assertTrue(printed[0] == 2 && both(level, booth, master, state -> state.getValue(TicketBoothBlock.ROLL_LEFT) == 4),
+					"At rest, it prints the next: " + printed[0] + " printed");
 			level.destroyBlock(master, true);
 		});
 		helper.runAfterDelay(TicketBoothBlock.CRANK_TICKS + 4, () -> {
