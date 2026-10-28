@@ -20390,19 +20390,22 @@ def check_pacts(co, root, lang, registered, research):
                 err(f"{cls}: missing the garden cohort's GC-05 game test {name}")
     # --- Concordance garden cohort, GC-06b (GC-P62, GC-P65 to GC-P67, GC-P74; shared by GC-06 to GC-09): stations, the work
     # target, the reaching bone, a work's choices on its kept page. (Each row's station and reaching bone: GC-06's rules.) ---
-    base = java("spirits/PactSpiritEntity.java")
-    renderers = (CLIENT_JAVA_ROOT / "PactSpiritRenderers.java").read_text(encoding="utf-8")
+    # Read without comments, so a required line commented out is missing.
+    uncommented = lambda source: re.sub(r"//[^\n]*|/\*.*?\*/", " ", source, flags=re.S)
+    base = uncommented(java("spirits/PactSpiritEntity.java"))
+    renderers = uncommented((CLIENT_JAVA_ROOT / "PactSpiritRenderers.java").read_text(encoding="utf-8"))
     station = _java_body(base, "private Vec3 station(ServerLevel level, @Nullable Vec3 toward, boolean keeping)")
     clear = _java_body(base, "private boolean clear(ServerLevel level, Direction side)")
     if "body.station() != Station.BESIDE || perch == null" not in station or station.count("return top;") != 2 \
             or "side = null;\n\t\treturn top;" not in station \
             or "List.of(first.getClockWise(), first.getOpposite(), first.getCounterClockWise(), first)" not in station \
-            or not 0 <= clear.find("level.isLoaded(cell)") < clear.find("level.getBlockState(cell)") \
+            or not 0 <= clear.find("level.isLoaded(cell)") < clear.find("level.getBlockState(") \
+            or "Math.max(2, Mth.ceil(getBbHeight()))" not in clear \
             or "isFaceSturdy(level, floor, Direction.UP)" not in clear \
             or "Vec3 at = station(level, position(), true);" not in _java_body(base, "private void stay(ServerLevel level)") \
             or "stay(level);" not in _java_body(base, "private Status decide(") \
             or "summoned.station(level, facing != null && facing.level() == level ? facing.position() : null)" \
-            not in java("spirits/PactPerchBlockEntity.java"):
+            not in uncommented(java("spirits/PactPerchBlockEntity.java")):
         err("PactSpiritEntity.station: on its perch, or two blocks out on a clear side, a quarter turn clockwise from whoever it "
             "comes for first, its own side last; loaded cells only; else its perch; summoned there and kept there (GC-P67)")
     if "SynchedEntityData.defineId(PactSpiritEntity.class, EntityDataSerializers.OPTIONAL_BLOCK_POS)" not in base \
@@ -20415,14 +20418,14 @@ def check_pacts(co, root, lang, registered, research):
     think = _java_body(base, "public Status think(")
     leave = _java_body(base, "public void leave(")
     if "if (gone() || !entityData.get(LISTENING)) {" not in show \
-            or "!entityData.get(LISTENING) || gameTime >= targetUntil" not in think \
+            or "!entityData.get(LISTENING) || gameTime >= targetUntil)) {\n\t\t\t\tentityData.set(TARGET, Optional.empty());" not in think \
             or not 0 <= leave.find("entityData.set(DEPARTING, true);") < leave.find("entityData.set(TARGET, Optional.empty());") \
             or not re.search(r"public static final double TARGET_REACH = 24\.0;", base) \
             or not re.search(r"public static final int FLIGHT_TICKS = 10;", base):
         err("spirits/PactSpiritEntity.java: its work target shows only while it listens and for its time, is cleared at the "
             "think after and when it leaves, and is reached at most TARGET_REACH, 24 blocks (GC-P62 as amended, GC-P65)")
     for path in sorted((root / "spirits").glob("*.java")):
-        if path.name != "PactSpiritEntity.java" and re.search(r"\bTARGET\b(?!_)", path.read_text(encoding="utf-8").replace("WALK_TARGET", "")):
+        if path.name != "PactSpiritEntity.java" and re.search(r"\bTARGET\b(?!_)", uncommented(path.read_text(encoding="utf-8")).replace("WALK_TARGET", "")):
             err(f"spirits/{path.name}: only PactSpiritEntity touches its work target (others call showTarget)")
     culling = _java_body(renderers, "protected AABB getBoundingBoxForCulling(")
     adjust = _java_body(renderers, "public void adjustModelBonesForRender(")
@@ -20432,7 +20435,7 @@ def check_pacts(co, root, lang, registered, research):
             or not 0 <= adjust.find("super.adjustModelBonesForRender(info, bones);") < adjust.find("info.getGeckolibData(FLIGHT)"):
         err("client/PactSpiritRenderers: a row's reaching bone is posed by PactSpiritEntity.posed after its clips, its culling "
             "box widened to the reach (GC-P66)")
-    if "ui(\"work.left\", choice.amount())" not in _java_body((CLIENT_JAVA_ROOT / "PactScreen.java").read_text(encoding="utf-8"),
+    if "ui(\"work.left\", choice.amount())" not in _java_body(uncommented((CLIENT_JAVA_ROOT / "PactScreen.java").read_text(encoding="utf-8")),
                                                           "private void workService(PactStatePayload state)"):
         err("client/PactScreen.workService: a work's on-request choices are Recall buttons with what is left today (GC-P74)")
     for cls, names in GC06B_TESTS.items():
@@ -20584,6 +20587,9 @@ def check_garden_pacts(co, root, lang, registered, research):
         if not re.search(rf"\bint {const} = {value};", reach_java):
             err(f"spirits/GardenReach.java: {const} differs from tools/concordance_garden_pacts.py REACH ({value})")
     acts = re.findall(r'^\t\t([A-Z_]+)\("([a-z_]+)"\)[,;]', _java_body(duties_java, "public enum Act"), re.M)
+    act_body = _java_body(duties_java, "public enum Act")
+    if re.search(r'^\t\t[A-Z_]+\("[a-z_]+"\);', act_body, re.M) or not re.search(r"^\t\t;$", act_body, re.M):
+        err("PactObligations.Act: each constant ends with \",\" and the lone \";\" line closes the list (GC-06b), so the units' merges compile")
     if [sid for _, sid in acts] != gp.ACTS or any(name.lower() != sid for name, sid in acts):
         err(f"PactObligations.Act {acts} differs from tools/concordance_garden_pacts.py ACTS (same order, append only)")
     # The research, its specimens and its gate.

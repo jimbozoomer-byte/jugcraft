@@ -2311,20 +2311,24 @@ public class ConcordanceGardenGameTests {
 	// ---------------------------------------------------------------- the garden cohort, GC-06b: shared sampling and the one-correction rule
 
 	/**
-	 * The garden cohort, GC-06b (shared by GC-06 to GC-09): each of {@code beds} sampled one a tick from tick 1, a second pass
-	 * taking any the level's allowance refused (SampleBudget.PER_TICK a tick, shared with every test running beside this
-	 * one), then {@code body} at tick 2 * beds + 3, once each holds a sample, and the test succeeds after it. A reading test
-	 * reads cachedHabitat only in that tick, so it takes no sample of its own there. A test using it sets maxTicks to at least
-	 * 2 * beds + 10.
+	 * The garden cohort, GC-06b (shared by GC-06 to GC-09): {@code beds} sampled with one request a tick, for the first bed
+	 * still unsampled, from tick 1 to 2 * beds + 2 (a request the level's allowance refuses, SampleBudget.PER_TICK a tick
+	 * shared with every test running beside this one and the beds' own sampling, is made again the next tick), then
+	 * {@code body} at tick 2 * beds + 3, once each holds a sample, and the test succeeds after it. Called in the test's own
+	 * body (tick 0). A reading test reads cachedHabitat only in that tick, so it takes no sample of its own there. A test
+	 * using it sets maxTicks to at least 2 * beds + 10.
 	 */
 	static void afterSampling(GameTestHelper helper, List<VerdantBedBlockEntity> beds, Runnable body) {
+		helper.assertTrue(helper.getTick() == 0, "afterSampling is called in the test's own body (tick 0)");
 		ServerLevel level = helper.getLevel();
 		int count = beds.size();
-		for (int i = 0; i < 2 * count; i++) {
-			VerdantBedBlockEntity bed = beds.get(i % count);
-			helper.runAtTickTime(1 + i, () -> {
-				if (bed.cachedHabitat(level) == null) {
-					bed.habitat(level);
+		for (int t = 1; t <= 2 * count + 2; t++) {
+			helper.runAtTickTime(t, () -> {
+				for (VerdantBedBlockEntity bed : beds) {
+					if (bed.cachedHabitat(level) == null) {
+						bed.habitat(level);
+						break;
+					}
 				}
 			});
 		}

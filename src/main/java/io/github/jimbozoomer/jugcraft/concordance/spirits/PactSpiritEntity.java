@@ -423,8 +423,11 @@ public abstract class PactSpiritEntity<T extends PactSpiritEntity<T>> extends Wo
 	 * ({@link Station#BESIDE}), the centre of the cell {@value #BESIDE_BLOCKS} blocks out on the first clear side, trying
 	 * first the side a quarter turn clockwise from the one facing {@code toward} (whoever it comes for: so never between
 	 * them and the perch, whose use it would otherwise take), then on round clockwise, that side last; with nobody, south's.
-	 * A side is clear when both cells out to it and the cells over them are loaded and have no collision shape and the
-	 * outer cell's floor is sturdy on top; no side clear, its perch's top. Reads at most 20 blocks, in loaded chunks only.
+	 * A side is clear when both cells out to it are loaded and they and the cells over them, up to the body's height (at
+	 * least two), have no collision shape and the outer cell's floor is sturdy on top; no side clear, its perch's top.
+	 * Reads at most 4 x (2 x height + 1) blocks (20 for a body up to two blocks tall), in loaded chunks only. Not read: the
+	 * width of a body past its cell (a 1.6-wide body stands 0.3 into the cells beside and beyond it) and fluids (GC-06's As
+	 * built).
 	 */
 	public Vec3 station(ServerLevel level, @Nullable Vec3 toward) {
 		return station(level, toward, false);
@@ -452,13 +455,19 @@ public abstract class PactSpiritEntity<T extends PactSpiritEntity<T>> extends Wo
 		return top;
 	}
 
-	/** Whether a standing body has room on {@code side} of its perch (station's rule). Loaded cells only; reads only. */
+	/** Whether a standing body has room on {@code side} of its perch, up to its height (station's rule). Loaded cells only; reads only. */
 	private boolean clear(ServerLevel level, Direction side) {
+		int height = Math.max(2, Mth.ceil(getBbHeight()));
 		for (int out = 1; out <= BESIDE_BLOCKS; out++) {
 			BlockPos cell = perch.relative(side, out);
-			if (!level.isLoaded(cell) || !level.getBlockState(cell).getCollisionShape(level, cell).isEmpty()
-					|| !level.getBlockState(cell.above()).getCollisionShape(level, cell.above()).isEmpty()) {
+			if (!level.isLoaded(cell)) {
 				return false;
+			}
+			for (int up = 0; up < height; up++) {
+				BlockPos room = cell.above(up);
+				if (!level.getBlockState(room).getCollisionShape(level, room).isEmpty()) {
+					return false;
+				}
 			}
 		}
 		BlockPos floor = perch.relative(side, BESIDE_BLOCKS).below();
@@ -605,11 +614,13 @@ public abstract class PactSpiritEntity<T extends PactSpiritEntity<T>> extends Wo
 	public void onSyncedDataUpdated(EntityDataAccessor<?> accessor) {
 		super.onSyncedDataUpdated(accessor);
 		if (TARGET.equals(accessor) && level().isClientSide()) {
-			// GC-06: the client's flight, from this tick: out to a new target, or back from the last one.
+			// GC-06: the client's flight, from this tick: out to a new target from rest, or on from where its reach is drawn now
+			// (back from the last one, or out again to the same one), so a target cleared or shown again mid-flight never jumps.
 			Optional<BlockPos> to = entityData.get(TARGET);
+			float now = to.isPresent() && !to.get().equals(flown) ? 0.0F : flight(0.0F);
 			outbound = to.isPresent();
 			to.ifPresent(at -> flown = at);
-			flownAt = tickCount;
+			flownAt = tickCount - Math.round((outbound ? now : 1.0F - now) * FLIGHT_TICKS);
 		}
 	}
 

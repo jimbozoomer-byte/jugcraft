@@ -4375,7 +4375,7 @@ public class ConcordanceWorkerGameTests {
 			give(keeper, new ItemStack(offering, 2));
 			helper.assertValueEqual(PactKeeping.deposit(level, keeper, original.holder(), offering, now), 2, d.id() + ": two paid ahead");
 			BoundWill record = pactOf(level, original);
-			BlockPos copyAt = at.south(2);
+			BlockPos copyAt = at.north();
 			helper.setBlock(copyAt, Workers.PACT_PERCH);
 			PactPerchBlockEntity copy = helper.getBlockEntity(copyAt, PactPerchBlockEntity.class);
 			copy.loadWithComponents(TagValueInput.create(ProblemReporter.DISCARDING, level.registryAccess(), original.saveWithoutMetadata(level.registryAccess())));

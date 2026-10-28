@@ -33,6 +33,7 @@ public final class PactObligations {
 		TEND("tend"),
 		/** GC-05 (Bathin): an awake living device (a Verdant Heart, Gleaner, Mulch Maw or Habitat Gauge) read or set with an empty hand. */
 		DEVICE("device"),
+		// Each unit's constant under its own line, ending ","; the lone ";" below closes the list.
 		// GC-06 unit 3
 		// GC-07 unit 4
 		// GC-08 unit 5

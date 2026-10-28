@@ -1106,6 +1106,14 @@ the familiar hovering over the named bed (frozen); his night look.
 `TARGET` never written to a save), the pure-package list, bodies. **Acceptance:** Dossier 3's items; a reading takes no sample (budget unchanged) and
 changes nothing; the advice never names supplying disturbance to a plant whose niche forbids it.
 
+**As built (GC-06b, the shared prefix units 4 to 6 branch from; Marax's own part follows):** a standing body's station
+side is clear when both cells out to it are loaded and they and the cells over them, up to the body's height (at least
+two: Marax, 1.4 tall, needs two; Foras, 2.2, and Amdusias, 2.4, need three), have no collision shape and the outer cell's
+floor is sturdy on top. Known limits, decided by the session: the check does not read a body's width past its cell (a
+1.6-wide body stands 0.3 into the cells beside its own and into the cell three out, so a full block there, such as Buer's
+bed at `west(3)` in the client yard, is accepted), nor fluids (water has no collision shape, so a flooded cell counts as
+clear). A target cleared or shown again mid-flight carries the familiar's reach on from where it is drawn.
+
 ### GC-07. Foras (unit 4)
 
 **Changes:** `S/ForasEntity` (`jugcraft:foras`, standing station); `S/GraftKeeping` (`graft_keeping`; `missing`: a store
