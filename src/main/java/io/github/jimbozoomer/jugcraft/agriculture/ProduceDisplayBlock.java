@@ -77,7 +77,8 @@ public abstract class ProduceDisplayBlock extends MultiDecorationBlock implement
 	protected InteractionResult useItemOn(ItemStack stack, BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand,
 			BlockHitResult hit) {
 		if (!stack.is(PumpkinCrateBlock.PRODUCE)) {
-			return InteractionResult.TRY_WITH_EMPTY_HAND;
+			// Only an empty hand goes on to take a piece back; anything else does what it would on any block.
+			return stack.isEmpty() ? InteractionResult.TRY_WITH_EMPTY_HAND : InteractionResult.PASS;
 		}
 		ProduceDisplayBlockEntity display = display(level, pos, state);
 		if (display == null) {
