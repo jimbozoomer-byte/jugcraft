@@ -198,6 +198,7 @@ EXCLUDED = [
     rid("phoenix_down"), rid("amphibian_boot"), rid("ice_breaker"),
     rid("rooted_thallite_foundation"),  # Concordance Chunk C, C-04: Root and Rivet's, never weighed
     rid("pact_perch"),  # Concordance Chunk D, D-04 (D-S19): a pact item, never weighed
+    rid("gloam_ink"), rid("gloam_sludge"),  # Concordance C-D6 (GI-P8): an ink and its failure, never weighed or formed
     "minecraft:enchanted_book", "minecraft:totem_of_undying", "minecraft:nether_star", "minecraft:experience_bottle",
     "minecraft:potion", "minecraft:splash_potion", "minecraft:lingering_potion", "minecraft:written_book",
     "minecraft:filled_map", "minecraft:player_head", "minecraft:spawner", "minecraft:trial_spawner", "minecraft:heart_of_the_sea",

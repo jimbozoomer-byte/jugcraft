@@ -45,6 +45,24 @@ public record Mixture(int parts, Vector pending, Vector dissolved, long contamin
 		return parts == 0;
 	}
 
+	/**
+	 * Whether it was extracted under a lid (Concordance C-D6, Gloam Ink): stirred at least once, and every stir covered
+	 * ({@link Operation.Stir#covered()}). Read from its history, so a formula's replay is as covered as its batch; a
+	 * history that did not read back (an older build's save) is no longer covered. At most MAX_OPERATIONS read.
+	 */
+	public boolean covered() {
+		boolean stirred = false;
+		for (Operation operation : history) {
+			if (operation instanceof Operation.Stir stir) {
+				if (!stir.covered()) {
+					return false;
+				}
+				stirred = true;
+			}
+		}
+		return stirred;
+	}
+
 	/** The result of an operation: the new mixture, or why it cannot be done (nothing changes). */
 	public sealed interface Step {
 	}

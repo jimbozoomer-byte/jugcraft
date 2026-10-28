@@ -3,7 +3,8 @@ docs/features/concordance-first-loadout.md; the Yeti King and the Cinder Tyrant 
 
 JEI shows a crafting or machine recipe for most things. The Adept's Wand and, since Concordance Chunk C, the Rooted
 Thallite Foundation (each made by a ritual) and what the lair bosses give (rolled from their loot tables when they fall:
-Vesperine, Madame Tatterlace, the Yeti King and the Cinder Tyrant) have none, so each gets an information page instead,
+Vesperine, Madame Tatterlace, the Yeti King and the Cinder Tyrant) have none, and, since Gloam Ink (C-D6), neither has
+what only the Alembic Crucible draws (EXTRACTED), so each gets an information page instead,
 written here from the generators' own tables (tools/vesperine.py, tools/tatterlace.py, tools/yeti_king.py,
 tools/cinder_tyrant.py, tools/concordance_rituals.py, tools/lairs.py and tools/biomes.py) so that its numbers are the
 data's.
@@ -27,6 +28,7 @@ Pure data: it imports only the generators' tables, which import nothing of the g
 """
 import biomes
 import cinder_tyrant as ct
+import concordance_alchemy as alchemy
 import concordance_ember as ember
 import concordance_rime_kit as rime_kit
 import concordance_rituals as rituals
@@ -98,6 +100,11 @@ CRAFTED = {"reaper_hood": _crafted("reaper_hood", vs.RECIPES, vs.ITEMS)}
 # Things only a ritual makes: item -> the ritual (tools/concordance_rituals.py RITUALS). The Rooted Thallite Foundation
 # since Concordance Chunk C (C-04, Root and Rivet).
 RITUALS = {"adept_wand": "adept_attunement", "rooted_thallite_foundation": "root_and_rivet"}
+# Things only the Alembic Crucible draws (Gloam Ink, C-D6; GI-P15): item -> its extract (tools/concordance_alchemy.py
+# EXTRACTS), whether the item or its failure. Each page says how it is drawn and where the codex gives the process; USES
+# adds what an item is for.
+EXTRACTED = {**{key: key for key in alchemy.EXTRACTS}, **{info["failure"]: key for key, info in alchemy.EXTRACTS.items()}}
+USES = {}
 
 # The first magic loadout (the record's route): nothing new, only what survival already makes. Item -> how it is made:
 # "recipe" (the crafting recipe of its own name) or "working:<name>" (a Lampwright's Bench working). The Wayfaring
@@ -239,9 +246,26 @@ def _ritual_page(key):
             f"({info['ley'] * info['steps'] * parts['channel']} in all).")
 
 
+def _extract_page(item):
+    key = EXTRACTED[item]
+    info = alchemy.EXTRACTS[key]
+    carriers = " or ".join(_a(name) for name in info["carrier_names"])
+    lid = "stirred under a lid (a closed lower trapdoor or a bottom slab on the crucible)"
+    if item == key:
+        how = (f"an Alembic Crucible draws it into a glass bottle from {info['base_name']} and {carriers} {lid}, at "
+               f"least {info['least']:.2f} {info['axis'].title()} a part: the codex's {info['name']} entry gives the "
+               "process.")
+    else:
+        how = (f"an Alembic Crucible draws it into a glass bottle instead of {info['name']} from a murky batch of "
+               f"{info['base_name']} and {carriers} {lid}. A furnace boils it dry for its glass bottle; it has no other "
+               "use.")
+    return f"Not crafted or traded. {DEFAULT.capitalize()}, {how}" + (f" {USES[item]}" if item in USES else "")
+
+
 def pages():
     """Each page's words: item -> text."""
-    return {**_boss_pages(), **{item: _ritual_page(ritual) for item, ritual in RITUALS.items()}}
+    return {**_boss_pages(), **{item: _ritual_page(ritual) for item, ritual in RITUALS.items()},
+            **{item: _extract_page(item) for item in EXTRACTED}}
 
 
 def rows():

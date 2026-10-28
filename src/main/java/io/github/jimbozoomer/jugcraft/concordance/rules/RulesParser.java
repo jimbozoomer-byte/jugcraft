@@ -5,6 +5,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
 import io.github.jimbozoomer.jugcraft.concordance.alchemy.Axis;
+import io.github.jimbozoomer.jugcraft.concordance.alchemy.Extract;
 import io.github.jimbozoomer.jugcraft.concordance.alchemy.Ingredient;
 import io.github.jimbozoomer.jugcraft.concordance.alchemy.Preparation;
 import io.github.jimbozoomer.jugcraft.concordance.alchemy.Product;
@@ -25,6 +26,7 @@ import io.github.jimbozoomer.jugcraft.concordance.ritual.StructurePattern;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.EnumMap;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -653,6 +655,50 @@ public final class RulesParser {
 			return new Product(id, form, id(object, "status"), name, codex);
 		} catch (Invalid | IllegalStateException | UnsupportedOperationException | IllegalArgumentException problem) {
 			problems.add("product " + id + ": " + problem.getMessage());
+			return null;
+		}
+	}
+
+	/**
+	 * A covered extraction's item (Concordance C-D6, Gloam Ink): {@code {"schema": 1, "item": "jugcraft:gloam_ink", "failure":
+	 * "jugcraft:gloam_sludge", "base": "jugcraft:gloamcap", "carriers": ["minecraft:spider_eye"], "axis": "hollow",
+	 * "least": 1.0, "codex": "alembic/gloam_ink"}}. At least one carrier, each named once and none the base; its item and
+	 * failure two things, neither an ingredient of it; least above 0 (units a part, at most MAX_PROPERTY).
+	 */
+	public @Nullable Extract extract(String id, JsonElement json) {
+		try {
+			JsonObject object = object(json, "extract");
+			only(object, "schema", "item", "failure", "base", "carriers", "axis", "least", "codex");
+			schema(object);
+			String axisName = string(object, "axis");
+			Axis axis = Axis.fromId(axisName);
+			if (axis == null) {
+				throw new Invalid("\"axis\" is not a property (radiance, verdance, ember, rime, tide, hollow): \"" + axisName + "\"");
+			}
+			String item = id(object, "item");
+			String failure = id(object, "failure");
+			String base = id(object, "base");
+			List<String> carriers = ids(object, "carriers");
+			if (carriers.isEmpty()) {
+				throw new Invalid("\"carriers\" names at least one carrier");
+			}
+			if (carriers.contains(base) || new HashSet<>(carriers).size() != carriers.size()) {
+				throw new Invalid("each carrier is named once, and none is the base");
+			}
+			if (item.equals(failure) || item.equals(base) || failure.equals(base) || carriers.contains(item) || carriers.contains(failure)) {
+				throw new Invalid("its item and failure are two things, neither an ingredient of it");
+			}
+			long least = milli(member(object, "least"), "least", MAX_PROPERTY);
+			if (least < 1) {
+				throw new Invalid("\"least\" must be above 0");
+			}
+			String codex = string(object, "codex");
+			if (!CODEX.matcher(codex).matches()) {
+				throw new Invalid("\"codex\" is not a codex entry (category/entry): \"" + codex + "\"");
+			}
+			return new Extract(id, item, failure, base, carriers, axis, least, codex);
+		} catch (Invalid | IllegalStateException | UnsupportedOperationException | IllegalArgumentException problem) {
+			problems.add("extract " + id + ": " + problem.getMessage());
 			return null;
 		}
 	}

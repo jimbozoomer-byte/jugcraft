@@ -78,6 +78,11 @@ def extend(root, edge, evidence, items):
     found('blueprint/SurveyStakeBlockEntity', ['blueprint'], 'Record a bounded building selection through survey stakes; blueprint carries the recorded plan.')
     found('concordance/Alchemy', ['draught','salve'], 'Brew an actual ingredient mixture in the crucible and choose its form; effect data and solvent are required.')
     found('concordance/MortarItem', ['reagent'], 'Grind an ingredient from the alchemy catalog using the mortar; the output preserves ingredient/preparation data.')
+    # Concordance C-D6 (Gloam Ink): a glass bottle draws Gloam Ink from a covered batch of Gloamcap and its carrier (a lid:
+    # a closed trapdoor or a slab on the crucible), or Gloam Sludge when it is murky.
+    route('concordance/CrucibleBlockEntity', ['crucible', 'gloamcap', 'minecraft:spider_eye', 'minecraft:water_bucket',
+          'minecraft:glass_bottle', 'minecraft:campfire', '#minecraft:wooden_trapdoors'], ['gloam_ink', 'gloam_sludge'],
+          'covered_extraction')
     found('concordance/smithy/Artificery', ['resonant_ring'], 'Artificer bench forging consumes the selected substrate and focus, and writes rolled artifice data.')
     found('concordance/garden/Garden', ['verdant_chaff'], 'Garden harvesting byproduct.')
 

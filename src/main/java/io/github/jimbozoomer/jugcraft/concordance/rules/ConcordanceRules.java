@@ -2,6 +2,7 @@ package io.github.jimbozoomer.jugcraft.concordance.rules;
 
 import com.google.gson.JsonElement;
 import io.github.jimbozoomer.jugcraft.concordance.alchemy.AlchemyCatalog;
+import io.github.jimbozoomer.jugcraft.concordance.alchemy.Extract;
 import io.github.jimbozoomer.jugcraft.concordance.alchemy.Ingredient;
 import io.github.jimbozoomer.jugcraft.concordance.alchemy.Preparation;
 import io.github.jimbozoomer.jugcraft.concordance.alchemy.Product;
@@ -324,8 +325,8 @@ public final class ConcordanceRules {
 
 	/**
 	 * The files under {@code data/<ns>/concordance/}: kind (research, invocation, working, conversion, component,
-	 * instrument, structure, ritual, ingredient, preparation, property, product, organism, disturbance, graft or pattern), id,
-	 * content.
+	 * instrument, structure, ritual, ingredient, preparation, property, product, extract, organism, disturbance, graft or
+	 * pattern), id, content.
 	 */
 	public record Source(String kind, String id, JsonElement json) {
 	}
@@ -376,6 +377,7 @@ public final class ConcordanceRules {
 		Map<String, Preparation> preparations = new TreeMap<>();
 		Map<String, Property> properties = new TreeMap<>();
 		Map<String, Product> products = new TreeMap<>();
+		Map<String, Extract> extracts = new TreeMap<>();
 		List<String> problems = new ArrayList<>();
 		for (Source source : sources) {
 			switch (source.kind()) {
@@ -454,6 +456,12 @@ public final class ConcordanceRules {
 					Product product = parser.product(source.id(), source.json());
 					if (product != null) {
 						products.put(product.id(), product);
+					}
+				}
+				case "extract" -> {
+					Extract extract = parser.extract(source.id(), source.json());
+					if (extract != null) {
+						extracts.put(extract.id(), extract);
 					}
 				}
 				case "organism" -> {
@@ -579,7 +587,7 @@ public final class ConcordanceRules {
 				}
 				default -> problems.add(source.id() + ": unknown kind of Concordance file \"" + source.kind()
 						+ "\" (expected research, invocation, working, conversion, component, instrument, structure, ritual, ingredient, "
-						+ "preparation, property, product, organism, disturbance, graft, pattern, offering, worker, substrate, gem, rune, affix, relic, material, transmutation, "
+						+ "preparation, property, product, extract, organism, disturbance, graft, pattern, offering, worker, substrate, gem, rune, affix, relic, material, transmutation, "
 						+ "curse, commission, project, stage, practice, pact, wonder or wonder_configuration)");
 			}
 		}
@@ -732,7 +740,38 @@ public final class ConcordanceRules {
 		if (!byItem.isEmpty() && plain != 1) {
 			problems.add("alchemy: exactly one preparation must have no tool (how an ingredient goes in as it comes); found " + plain);
 		}
-		AlchemyCatalog alchemy = new AlchemyCatalog(byItem, preparations, properties, products);
+		// Concordance C-D6 (Gloam Ink): an extract is drawn from ingredients the catalogue knows, its base carries its axis,
+		// no ingredient is in two extracts, so a batch is never two at once, and neither its item nor its failure is an
+		// ingredient, so nothing it draws feeds a crucible back. The first problem found is said.
+		Map<String, String> extractIngredients = new HashMap<>();
+		for (Extract extract : List.copyOf(extracts.values())) {
+			String problem = null;
+			for (String item : extract.ingredients()) {
+				if (problem != null) {
+					break;
+				}
+				if (!byItem.containsKey(item)) {
+					problem = item + " is not an alchemical ingredient";
+				} else if (extractIngredients.containsKey(item)) {
+					problem = item + " is already in extract " + extractIngredients.get(item);
+				}
+			}
+			if (problem == null && byItem.get(extract.base()).properties().get(extract.axis()) <= 0) {
+				problem = "its base " + extract.base() + " carries no " + extract.axis().id;
+			}
+			if (problem == null && (byItem.containsKey(extract.item()) || byItem.containsKey(extract.failure()))) {
+				problem = "its item or failure is an alchemical ingredient, which would feed it back";
+			}
+			if (problem != null) {
+				problems.add("extract " + extract.id() + ": " + problem);
+				extracts.remove(extract.id());
+			} else {
+				for (String item : extract.ingredients()) {
+					extractIngredients.put(item, extract.id());
+				}
+			}
+		}
+		AlchemyCatalog alchemy = new AlchemyCatalog(byItem, preparations, properties, products, extracts);
 		// Ecology: a block is one organism and an item plants one crop, or the garden could not tell which grows.
 		Map<String, String> organismBlocks = new HashMap<>();
 		Map<String, String> organismItems = new HashMap<>();

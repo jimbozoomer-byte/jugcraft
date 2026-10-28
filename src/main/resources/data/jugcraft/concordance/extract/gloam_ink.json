@@ -1,0 +1,12 @@
+{
+  "schema": 1,
+  "item": "jugcraft:gloam_ink",
+  "failure": "jugcraft:gloam_sludge",
+  "base": "jugcraft:gloamcap",
+  "carriers": [
+    "minecraft:spider_eye"
+  ],
+  "axis": "hollow",
+  "least": 1.0,
+  "codex": "alembic/gloam_ink"
+}

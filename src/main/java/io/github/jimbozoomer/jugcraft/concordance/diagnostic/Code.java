@@ -64,7 +64,10 @@ public enum Code {
 	PARTICIPANTS("participants", Kind.SHORTAGE),
 	// Concordance Chunk C, C-05 (the Crucible Stand).
 	/** () nothing stands on it to heat */
-	NO_CRUCIBLE("no_crucible", Kind.BLOCKED);
+	NO_CRUCIBLE("no_crucible", Kind.BLOCKED),
+	// Concordance C-D6 (Gloam Ink).
+	/** () its next stir is covered and no lid is on it */
+	NEEDS_COVER("needs_cover", Kind.BLOCKED);
 
 	public final String id;
 	public final Kind kind;

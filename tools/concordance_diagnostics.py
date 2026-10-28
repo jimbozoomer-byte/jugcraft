@@ -42,6 +42,8 @@ CODES = {
     "participants": ("shortage", "%s of %s participants have joined; the rest have %s s to join (an empty-hand use)"),
     # Concordance Chunk C, C-05 (the Crucible Stand).
     "no_crucible": ("blocked", "Nothing to heat: set an Alembic Crucible on it"),
+    # Concordance C-D6 (Gloam Ink).
+    "needs_cover": ("blocked", "Its next stir is taken under a lid: close a trapdoor in its lower half, or set a bottom slab, on it"),
 }
 
 

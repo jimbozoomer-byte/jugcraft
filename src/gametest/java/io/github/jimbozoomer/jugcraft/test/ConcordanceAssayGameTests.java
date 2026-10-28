@@ -283,4 +283,31 @@ public class ConcordanceAssayGameTests {
 				"nothing is formed from it as a pattern");
 		helper.succeed();
 	}
+
+	/**
+	 * Concordance C-D6 (GI-P8): Gloam Ink and Gloam Sludge are excluded and no tablet output: dissolved for no more than
+	 * their worth (the values file's labelled fallback), and nothing is formed from either as a pattern.
+	 */
+	@GameTest(maxTicks = 20)
+	public void gloamInkAndSludgeAreNeverFormed(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		ServerPlayer player = assayer(helper);
+		for (String id : List.of("jugcraft:gloam_ink", "jugcraft:gloam_sludge")) {
+			Item thing = item(id);
+			ItemStack stack = new ItemStack(thing, 2);
+			helper.assertTrue(thing != Items.AIR && stack.is(Assaying.EXCLUDED) && !stack.is(TabletOutputs.ALLOWED),
+					id + ": excluded and no tablet output: " + Assaying.eligibility(stack));
+			Material material = Assaying.catalog().material(id);
+			helper.assertTrue(material != null, id + ": valued like every default item");
+			use(player, level, stack, ItemStack.EMPTY);
+			Assaying.use(player, level, player.getMainHandItem(), player.getOffhandItem());
+			helper.assertTrue(Assaying.balance(player) <= Assay.dissolve(material, 2), id + ": dissolved for no more than its worth");
+			Assaying.setBalance(player, 10_000L);
+			use(player, level, ItemStack.EMPTY, new ItemStack(thing));
+			helper.assertTrue(Assaying.balance(player) == 10_000L && player.getMainHandItem().isEmpty() && player.getOffhandItem().getCount() == 1,
+					id + ": nothing is formed from it as a pattern");
+			Assaying.setBalance(player, 0L);
+		}
+		helper.succeed();
+	}
 }

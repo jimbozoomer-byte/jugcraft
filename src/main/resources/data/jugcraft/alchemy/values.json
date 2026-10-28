@@ -12712,6 +12712,16 @@
       "denominator": 1,
       "source": "reference tag minecraft:small_flowers"
     },
+    "jugcraft:gloam_ink": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
+    "jugcraft:gloam_sludge": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
     "jugcraft:gloamcap": {
       "numerator": 36,
       "denominator": 1,

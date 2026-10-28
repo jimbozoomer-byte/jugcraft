@@ -1,5 +1,6 @@
 package io.github.jimbozoomer.jugcraft.test;
 
+import io.github.jimbozoomer.jugcraft.concordance.Alchemy;
 import io.github.jimbozoomer.jugcraft.concordance.ConcordanceProgress;
 import io.github.jimbozoomer.jugcraft.concordance.CrucibleBlockEntity;
 import io.github.jimbozoomer.jugcraft.concordance.CrucibleStandBlockEntity;
@@ -13,6 +14,7 @@ import io.github.jimbozoomer.jugcraft.concordance.alchemy.Band;
 import io.github.jimbozoomer.jugcraft.concordance.alchemy.Heat;
 import io.github.jimbozoomer.jugcraft.concordance.diagnostic.Code;
 import io.github.jimbozoomer.jugcraft.concordance.diagnostic.Diagnostic;
+import io.github.jimbozoomer.jugcraft.concordance.garden.Garden;
 import io.github.jimbozoomer.jugcraft.energy.EnergyStorage;
 import java.util.List;
 import net.fabricmc.fabric.api.gametest.v1.GameTest;
@@ -21,12 +23,19 @@ import net.fabricmc.fabric.api.transfer.v1.item.ItemStorage;
 import net.fabricmc.fabric.api.transfer.v1.transaction.Transaction;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.component.DataComponents;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.item.ItemEntity;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.ItemStackTemplate;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.item.crafting.RecipeType;
+import net.minecraft.world.item.crafting.SingleRecipeInput;
 import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.phys.AABB;
@@ -173,6 +182,31 @@ public class ConcordanceEconomyGameTests {
 		helper.assertTrue(FluidStorage.SIDED.find(level, standAt, null) == null && ItemStorage.SIDED.find(level, standAt, null) == null,
 				"It holds no fluid and no items to give");
 		helper.assertTrue(level.getEntitiesOfClass(ItemEntity.class, new AABB(standAt).inflate(2.0)).isEmpty(), "and drops nothing");
+		helper.succeed();
+	}
+
+	/**
+	 * Concordance C-D6 (Gloam Ink): what a covered extraction draws turns into nothing it came from. Gloam Ink and Gloam
+	 * Sludge are no crucible ingredient, mulch or compost, stack to 16 and give back exactly their glass bottle when
+	 * crafted; a furnace boils the sludge back to its bottle and nothing more, and does not boil the ink.
+	 */
+	@GameTest(maxTicks = 20)
+	public void extractsTurnIntoNothingTheyCameFrom(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		for (Item thing : List.of(JugcraftConcordance.GLOAM_INK, JugcraftConcordance.GLOAM_SLUDGE)) {
+			ItemStack stack = new ItemStack(thing);
+			ItemStackTemplate back = thing.getCraftingRemainder();
+			helper.assertTrue(back != null && back.create().is(Items.GLASS_BOTTLE) && back.create().getCount() == 1 && stack.getMaxStackSize() == 16,
+					thing + " gives back exactly its bottle when crafted, and stacks to 16: " + back);
+			helper.assertTrue(!stack.has(DataComponents.COMPOSTABLE) && Garden.mulch(stack) == 0
+					&& Alchemy.catalog().ingredient(BuiltInRegistries.ITEM.getKey(thing).toString()) == null, thing + " is no compost, mulch or ingredient");
+		}
+		SingleRecipeInput sludge = new SingleRecipeInput(new ItemStack(JugcraftConcordance.GLOAM_SLUDGE));
+		ItemStack boiled = level.getServer().getRecipeManager().getRecipeFor(RecipeType.SMELTING, sludge, level)
+				.orElseThrow(() -> helper.assertionException("A furnace does not boil Gloam Sludge")).value().assemble(sludge);
+		helper.assertTrue(boiled.is(Items.GLASS_BOTTLE) && boiled.getCount() == 1, "The sludge boils back to its bottle and no more: " + boiled);
+		SingleRecipeInput ink = new SingleRecipeInput(new ItemStack(JugcraftConcordance.GLOAM_INK));
+		helper.assertTrue(level.getServer().getRecipeManager().getRecipeFor(RecipeType.SMELTING, ink, level).isEmpty(), "Gloam Ink is not boiled back");
 		helper.succeed();
 	}
 }

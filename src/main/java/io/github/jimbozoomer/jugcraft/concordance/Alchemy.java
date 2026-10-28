@@ -2,6 +2,7 @@ package io.github.jimbozoomer.jugcraft.concordance;
 
 import io.github.jimbozoomer.jugcraft.concordance.alchemy.AlchemyCatalog;
 import io.github.jimbozoomer.jugcraft.concordance.alchemy.Assay;
+import io.github.jimbozoomer.jugcraft.concordance.alchemy.Extract;
 import io.github.jimbozoomer.jugcraft.concordance.alchemy.Outcome;
 import io.github.jimbozoomer.jugcraft.concordance.alchemy.Product;
 import io.github.jimbozoomer.jugcraft.concordance.alchemy.Property;
@@ -28,6 +29,7 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import org.jspecify.annotations.Nullable;
 
 /**
@@ -106,6 +108,18 @@ public final class Alchemy {
 			harmful |= harmful(dose);
 		}
 		return catalog().product(form, statuses, harmful);
+	}
+
+	/**
+	 * The stack a glass bottle draws as an extract (Concordance C-D6, Gloam Ink): its item, or, murky, its failure, by id;
+	 * null when it draws the draught instead (too thin), when nothing is drawn, or when this game lacks the item, so a
+	 * bottle is never spent on nothing (plan 03:64). Server only: the id is the rules'.
+	 */
+	public static @Nullable ItemStack extract(Extract.@Nullable Drawn drawn) {
+		String made = drawn == null ? null : drawn.made();
+		Identifier id = made == null ? null : Identifier.tryParse(made);
+		Item item = id == null ? Items.AIR : BuiltInRegistries.ITEM.getValue(id);
+		return item == Items.AIR ? null : new ItemStack(item);
 	}
 
 	/**

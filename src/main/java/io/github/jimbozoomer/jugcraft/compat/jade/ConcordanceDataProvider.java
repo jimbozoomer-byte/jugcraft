@@ -206,8 +206,9 @@ public enum ConcordanceDataProvider implements IServerDataProvider<BlockAccessor
 
 	/**
 	 * The crucible: temperature and band, the seconds Preserve still holds the band (Chunk B unit 3), volume, the tank's
-	 * whole parts, and, following a formula, its step and next operation, and the crucible's own reason (Concordance Chunk
-	 * C, C-01: Diagnostic.encode, its code and parameters, worded on the client). Never the makeup: that takes sampling.
+	 * whole parts, and, following a formula, its step and next operation, whether a lid covers it (C-D6), and the
+	 * crucible's own reason (Concordance Chunk C, C-01: Diagnostic.encode, its code and parameters, worded on the client).
+	 * Never the makeup: that takes sampling.
 	 */
 	public static CompoundTag snapshot(CrucibleBlockEntity crucible, long now) {
 		CompoundTag snapshot = new CompoundTag();
@@ -226,6 +227,10 @@ public enum ConcordanceDataProvider implements IServerDataProvider<BlockAccessor
 			if (crucible.step() < program.operations().size()) {
 				snapshot.putString("next", program.operations().get(crucible.step()).text());
 			}
+		}
+		// Concordance C-D6 (Gloam Ink): a lid on it, as the server reads it (CrucibleBlockEntity.covered); sent only when there is one.
+		if (crucible.getLevel() != null && crucible.covered(crucible.getLevel())) {
+			snapshot.putBoolean("covered", true);
 		}
 		Diagnostic reason = crucible.waiting();
 		if (reason != null) {

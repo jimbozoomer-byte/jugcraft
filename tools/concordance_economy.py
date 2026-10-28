@@ -14,6 +14,7 @@ Run it to print the table: python3 tools/concordance_economy.py
 import json
 from pathlib import Path
 
+import concordance_alchemy as alchemy
 import concordance_rituals as rituals
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -90,6 +91,7 @@ ANCHORS = {
                        ("celestial/Calendar.java", "RECALL_TICKS = 2400;"),
                        ("spirits/StarReckoning.java", "AstrolabeItem.recall(player, level, astrolabe, pattern, time, gameTime)"),
                        ("data:concordance/pact/stolas.json", None)],
+    "gloam_ink": [("data:concordance/extract/gloam_ink.json", None), ("CrucibleBlockEntity.java", "AUTOMATION_TICKS = 20;")],
 }
 
 # Concordance Chunk D, D-05: Stolas's terms as concordance/pact/stolas.json writes them (days), and the recall's figures.
@@ -113,6 +115,11 @@ SCONCE_BURN_TICKS = 1200
 FOCUS_MAX = 20
 VITAE_AN_HOUR = 60     # check_crimson's bound on what an hour of offerings can give
 STAND_JE = {"warm": 8, "hot": 16, "searing": 32}  # a Crucible Stand's JE a tick (CrucibleStandBlockEntity.JE_*)
+# Concordance C-D6 (Gloam Ink): a crucible following a formula takes one step or bottles one dose a pulse
+# (CrucibleBlockEntity.AUTOMATION_TICKS). What a covered extraction draws is no resource here: nothing converts Gloam Ink
+# or Gloam Sludge back into one (check_gloam_ink), so it closes no cycle; the row is the worked formula's day, not a
+# crucible's most.
+AUTOMATION_TICKS = 20
 STEP_TICKS = 40         # a ritual's step (ritual/RitualMachine.STEP_TICKS)
 FOCUS_REGEN_TICKS = 40  # a player's Focus comes back one point this often (rules/FocusPool.REGEN_TICKS)
 
@@ -221,6 +228,30 @@ def sources():
     ]
 
 
+def extract_rows():
+    """One crucible repeating each extract's worked formula all day (tools/concordance_alchemy.py EXTRACTS), one step or one
+    bottle a pulse: what it takes and draws at most."""
+    rows = []
+    for info in alchemy.EXTRACTS.values():
+        process = info["process"]
+        parts = sum(op[1] for op in process if op[0] == "water")
+        pulses = len(process) + parts
+        batches = DAY // AUTOMATION_TICKS // pulses
+        adds = {}
+        for op in process:
+            if op[0] == "add":
+                adds[op[1]] = adds.get(op[1], 0) + 1
+        names = {info["base"]: info["base_name"], **dict(zip(info["carriers"], info["carrier_names"]))}
+        takes = ", ".join(f"{batches * count:,} {names[ingredient]}" for ingredient, count in adds.items())
+        rows.append((f"A crucible repeating {info['name']}'s worked formula all day",
+                     f"{takes}, {batches * parts:,} parts of water and {batches * parts:,} glass bottles",
+                     f"{batches * parts:,} {info['name']}, or as many {info['failure_name']} from a murky formula",
+                     f"one step or one bottle every {AUTOMATION_TICKS} ticks: {pulses} a batch of {parts}",
+                     f"none; {info['name']} and {info['failure_name']} never become {info['base_name']}, a carrier, bone "
+                     f"meal, nutrients or Ley Charge, and {info['failure_name']} gives back only its bottle"))
+    return rows
+
+
 def installations():
     """Representative installations a day: (name, inputs, outputs, bound, consequence)."""
     pulse, configurations = spires()
@@ -237,6 +268,7 @@ def installations():
          f"{STAND_JE['searing']} JE a tick searing, {STAND_JE['hot']} hot, {STAND_JE['warm']} warm; nothing while its crucible "
          "waits for anything but heat, is held, or is hotter than it aims",
          "none; heat is never stored, carried or turned back into JE, Ley Charge or anything else"),
+        *extract_rows(),
         ("Gleaner on Concordance crops", f"{DAY // GLEAN_TICKS} Verdance", f"{DAY // GLEAN_TICKS} harvests, of ripe crops only",
          f"one every {GLEAN_TICKS} ticks", "each crop falls back to step 1 and must regrow at its cost"),
         ("Kindled Lantern, lit", f"{DAY // LANTERN_BURN_TICKS} Radiance", "light at its carrier",

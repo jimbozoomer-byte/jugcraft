@@ -483,6 +483,10 @@ public final class JugcraftJadeClient implements JugcraftJadePlugin.ClientRegist
 					if (held > 0) {
 						tooltip.add(Component.translatable("tooltip.jugcraft.concordance.jade.held", held));
 					}
+					// Concordance C-D6 (Gloam Ink): a lid on it, as the server read it.
+					if (data.getBooleanOr("covered", false)) {
+						tooltip.add(Component.translatable("tooltip.jugcraft.concordance.jade.covered"));
+					}
 					tooltip.add(Component.translatable("tooltip.jugcraft.concordance.jade.volume", data.getIntOr("parts", 0), Mixture.MAX_PARTS));
 					// Concordance Chunk C (C-01): the tank, and why it waits as the crucible says it (worded here, worked out on the server).
 					tooltip.add(Component.translatable("tooltip.jugcraft.concordance.jade.tank", data.getIntOr("tank", 0), CrucibleBlockEntity.WATER_PER_BUCKET));

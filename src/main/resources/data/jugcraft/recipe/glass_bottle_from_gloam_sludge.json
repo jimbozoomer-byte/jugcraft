@@ -1,0 +1,16 @@
+{
+  "fabric:load_conditions": [
+    {
+      "condition": "jugcraft:feature_enabled",
+      "feature": "concordance"
+    }
+  ],
+  "type": "minecraft:smelting",
+  "category": "misc",
+  "ingredient": "jugcraft:gloam_sludge",
+  "result": {
+    "id": "minecraft:glass_bottle"
+  },
+  "experience": 0.0,
+  "cookingtime": 200
+}

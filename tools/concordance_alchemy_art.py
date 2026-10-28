@@ -3,6 +3,7 @@ animated strip whose liquid ripples), its item icon, and the alchemy items. Orig
 tools/concordance_art.py includes these in its textures(). The crucible's .png.mcmeta is written by the data generator.
 """
 
+import io
 import math
 import random
 
@@ -237,3 +238,44 @@ def textures():
             ("item", "assay_glass"): assay_glass(), ("item", "formula"): formula(False),
             ("item", "formula_written"): formula(True), ("item", "reagent"): reagent(), ("item", "draught"): draught(),
             ("item", "salve"): salve()}
+
+
+# Gloam Ink (C-D6): the owner's Common Ink (tools/concordance_alchemy.py OWNER_OCT23_ADAPTED), its flask's greys tinted the
+# Gloamcap's mid violet (tools/icon_materials.py GLOAM) scaled to each grey's own luma, so the owner's shading stays as
+# drawn; the quill's greys (150 and lighter) and every other pixel are kept. tools/owner_art.py writes and checks it, after
+# every generator, so nothing draws over it.
+GLOAM_INK_GREYS = (17, 32, 34, 39, 45, 78, 134)
+
+
+def gloam_ink(read):
+    """Gloam Ink's icon from the owner's Common Ink (read(path) gives a file under art/owner-library/originals/Oct23)."""
+    from icon_materials import GLOAM
+    mid = GLOAM.mid
+    luma = 0.299 * mid[0] + 0.587 * mid[1] + 0.114 * mid[2]
+    source = Image.open(io.BytesIO(read(alchemy.GLOAM_INK_SOURCE))).convert("RGBA")
+    out = source.copy()
+    for y in range(source.height):
+        for x in range(source.width):
+            r, g, b, a = source.getpixel((x, y))
+            if a and r == g == b and r in GLOAM_INK_GREYS:
+                out.putpixel((x, y), tuple(min(255, round(channel * r / luma)) for channel in mid) + (a,))
+    return out
+
+
+def gloam_sludge(read):
+    """Gloam Sludge's icon from the owner's Blood Vial (read(path) gives a file under art/owner-library/originals/Oct23):
+    every reddish pixel (its liquid, the liquid's outline and the neck's tint) set to Hagmoss's mid tone
+    (tools/icon_materials.py HAGMOSS) at that pixel's own luma, so the owner's shading stays as drawn; the stopper's
+    blue-greys and every other pixel are kept."""
+    from icon_materials import HAGMOSS
+    mid = HAGMOSS.mid
+    luma = 0.299 * mid[0] + 0.587 * mid[1] + 0.114 * mid[2]
+    source = Image.open(io.BytesIO(read(alchemy.GLOAM_SLUDGE_SOURCE))).convert("RGBA")
+    out = source.copy()
+    for y in range(source.height):
+        for x in range(source.width):
+            r, g, b, a = source.getpixel((x, y))
+            if a and r > g and r > b:
+                level = 0.299 * r + 0.587 * g + 0.114 * b
+                out.putpixel((x, y), tuple(min(255, round(channel * level / luma)) for channel in mid) + (a,))
+    return out

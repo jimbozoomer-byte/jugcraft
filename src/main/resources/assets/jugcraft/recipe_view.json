@@ -39913,6 +39913,14 @@
       "key": "glacier_maul"
     },
     {
+      "item": "jugcraft:gloam_ink",
+      "key": "gloam_ink"
+    },
+    {
+      "item": "jugcraft:gloam_sludge",
+      "key": "gloam_sludge"
+    },
+    {
       "item": "jugcraft:golden_thimble",
       "key": "golden_thimble"
     },

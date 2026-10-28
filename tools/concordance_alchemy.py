@@ -43,6 +43,17 @@ OWNER_BLOCKS_FILES = {
     "textures/block/crucible_stand_frame.png": "Guns/block/treated_iron_block.png",
     "textures/block/crucible_stand_coil.png": "Big Cannons and Mounted Guns/textures/block/coilside.png",
 }
+# Gloam Ink's and Gloam Sludge's icons (C-D6, GI-P14), searched for first in the owner's library (art/owner-library/catalog;
+# the 23 October collection's content.csv lists five inks and its vials): the owner's Common Ink, its flask tinted the
+# Gloamcap's violet, and the owner's Blood Vial, its liquid tinted a murky Hagmoss, each at the owner's own values
+# (tools/concordance_alchemy_art.py gloam_ink, gloam_sludge), written and checked by tools/owner_art.py from
+# art/owner-library/originals/Oct23. The files sit under assets/irons_spellbooks, a label left from the mod the owner used
+# as a base (art/owner-library/PROVENANCE.md); the same files, unchanged, are Jugcraft's Common Ink and Blood Vial
+# (textures/jimtafacts/spellbooks/item/).
+GLOAM_INK_SOURCE = "Jimtafacts/assets/irons_spellbooks/textures/item/common_ink.png"
+GLOAM_SLUDGE_SOURCE = "Jimtafacts/assets/irons_spellbooks/textures/item/blood_vial.png"
+OWNER_OCT23_ADAPTED = {"textures/item/gloam_ink.png": (GLOAM_INK_SOURCE, "gloam_ink"),
+                       "textures/item/gloam_sludge.png": (GLOAM_SLUDGE_SOURCE, "gloam_sludge")}
 # Concordance Chunk C, C-05 (C-D3, C-P12; starting values): where a Crucible Stand heats the crucible on it for a stir at
 # each band (cold is off: the crucible settles at AMBIENT), the JE a tick it pays while it heats, its store, what it takes
 # a tick from a cable, and how often one player may set it (Java: alchemy/Heat.STAND_*, CrucibleStandBlockEntity). Each
@@ -189,6 +200,7 @@ MESSAGES = {
     "alchemy.unknown": "You have not learned the Alembic Arts (the codex says how)",
     "alchemy.added": "Added %s",
     "alchemy.stirred": "Stirred (%s)",
+    "alchemy.stirred_covered": "Stirred under the lid (%s)",
     "alchemy.water": "Poured in water: %s parts",
     "alchemy.bottled": "Bottled a %s",
     "alchemy.nothing_to_bottle": "The crucible is empty",
@@ -246,6 +258,13 @@ TEXT = {
     "alchemy.op.water": "%s parts of water",
     "alchemy.op.add": "%s, %s",
     "alchemy.op.stir": "a %s stir",
+    # Concordance C-D6 (Gloam Ink): a covered stir's words, what a glass bottle draws instead, and the risk of a murky batch.
+    "alchemy.op.stir_covered": "a %s stir under a lid",
+    "alchemy.extract.drawn": "Covered, a glass bottle draws %s: %s %s a part (it needs %s)",
+    "alchemy.extract.thin": "Too thin for %s: %s %s a part (it needs %s), so a glass bottle draws the draught",
+    "alchemy.extract.murky": "Murky, a glass bottle draws %s, not %s: contaminant %s a part, murky from %s",
+    "alchemy.risk.failure": "Murky: a glass bottle draws %s",
+    "alchemy.inspect.covered": "A lid covers it: its stirs are taken under the lid",
     "alchemy.risk.harm": "Danger: a dose would bring %s",
     # A searing stir fouls the mixture, keeps SEARING_KEEP of its Radiance and Verdance and none of its Rime (RIME_KEEP).
     "alchemy.risk.searing": "Danger: step %s stirs it searing, which fouls it, spoils its Radiance and Verdance and thaws all its Rime",
@@ -297,6 +316,7 @@ TOOLTIPS = {
     # Concordance Chunk C, C-01 (C-P4): the next step is still shown to anyone, raw; why it waits is the crucible's reason.
     "jade.waiting": "Next step: %s",
     "jade.tank": "Water: %s / %s parts",
+    "jade.covered": "Under a lid",
     # Concordance Chunk C, C-05: Jade on a Crucible Stand.
     "jade.stand_energy": "Energy: %s / %s JE",
     "jade.stand_setting": "Set to %s",
@@ -324,7 +344,7 @@ def lang_entries(lang):
         lang[f"jei.{MOD}.alchemy.{key}"] = "Alchemy: " + ", ".join(
             f"{axis.title()} {value:.2f}" for axis, value in info["properties"].items()) + (
             f"; contaminant {info['contaminant']:.2f}" if info.get("contaminant") else "") + (
-            RIME_JEI if info["properties"].get("rime") else "") + "".join(
+            RIME_JEI if info["properties"].get("rime") else "") + _extract_jei(key) + "".join(
             PRODUCT_JEI.format(axis=product["property"].title(), status=STATUS_NAMES[PROPERTIES[product["property"]]["status"]],
                                container=CONTAINERS[product["form"]], name=product["name"])
             for product in PRODUCTS.values() if key in product["jei"])
@@ -366,7 +386,8 @@ def _milli(units):
 
 def simulate(operations):
     """The process as Java's alchemy/Mixture does it, in milli-units with floor division: ("water", n), ("add", key, prep),
-    ("stir", band) -> (parts, pending, dissolved, contaminant), each by axis. For the codex's worked Winter Brine and
+    ("stir", band[, "covered"]); a covered stir dissolves as any other (Concordance C-D6) -> (parts, pending, dissolved,
+    contaminant), each by axis. For the codex's worked Winter Brine and
     check_mod_data.py check_winter_brine, which hold it to ConcordanceAlchemyGameTests."""
     parts, pending, dissolved, contaminant = 0, dict.fromkeys(AXES, 0), dict.fromkeys(AXES, 0), 0
     for operation in operations:
@@ -528,6 +549,84 @@ PRODUCT_REWARD_ROUTES = {rid("tyrant_scale"): {"minecraft:magma_cream"},  # two 
                          # and is kept, but the graph (check_mod_data.py _made_from) counts a recipe's tool as an input.
                          rid("gossamer_silk"): {rid("mendvetch"), "minecraft:sugar"},
                          rid("salvaged_coil"): {rid("mendvetch"), "minecraft:sugar"}}
+# Concordance C-D6 (Gloam Ink; GI-P1 to GI-P8): covered extractions (Java: alchemy/Extract.java; data
+# concordance/extract/<key>.json). A glass bottle draws the item instead of a draught from a covered batch (stirred, every
+# stir under a lid: a closed trapdoor or a slab on the crucible, CrucibleBlockEntity.covered) made of the base at least
+# once and at least one carrier and nothing else; murky (the spoon's murky: contaminant a part at least half Nausea's
+# threshold) the failure; thinner than "least" of its axis a part, the draught as uncovered. "process" is the worked
+# formula the codex shows, the economy row repeats and the game test holds; "murky" and "thin" are its two failures.
+GLOAM_INK = [("water", 3)] + [("add", "gloamcap", "raw")] * 3 + [("add", "spider_eye", "raw")] + [("stir", "hot", "covered")] * 2
+EXTRACTS = {
+    "gloam_ink": {"name": "Gloam Ink", "failure": "gloam_sludge", "failure_name": "Gloam Sludge",
+                  "base": "gloamcap", "base_name": "Gloamcap",
+                  # GI-P2: the approved carrier, a registered ingredient (03:41); the owner approves it at the checkpoint.
+                  "carriers": ["spider_eye"], "carrier_names": ["Spider Eye"],
+                  "axis": "hollow", "least": 1.0, "codex": "alembic/gloam_ink",
+                  "tooltip": "Gloamcap drawn under a lid in an Alembic Crucible.",
+                  "failure_tooltip": "A murky batch, no good as ink. Boil it dry in a furnace for its glass bottle.",
+                  "process": GLOAM_INK,
+                  "murky": GLOAM_INK[:5] + [("add", "spider_eye", "raw")] + GLOAM_INK[5:],  # a second spider eye: 0.300
+                  "thin": GLOAM_INK[:6]},  # one hot stir: 0.715 Hollow a part
+}
+# The things an extract draws: names and tooltips (tools/concordance.py merges ITEMS; DescribedItem shows the tooltip).
+for _key, _info in EXTRACTS.items():
+    ITEMS[_key] = {"name": _info["name"], "tooltip": _info["tooltip"]}
+    ITEMS[_info["failure"]] = {"name": _info["failure_name"], "tooltip": _info["failure_tooltip"]}
+# What JEI's page for an extract's base or carrier adds (Concordance C-D6).
+EXTRACT_JEI = {"base": "; stirred under a lid with {carriers}, its {axis} draws {name}",
+               "carrier": "; stirred under a lid with {base}, it carries {name}"}
+
+
+def covered(operations):
+    """Whether a process is a covered batch (Java: Mixture.covered): stirred at least once, every stir covered."""
+    stirs = [op for op in operations if op[0] == "stir"]
+    return bool(stirs) and all(op[2:] == ("covered",) for op in stirs)
+
+
+def murky(contaminant):
+    """Whether {contaminant} milli-units a part is murky (Java: Assay.murky): twice it reaches Nausea's threshold."""
+    return contaminant * 2 >= _milli(PROPERTIES["contaminant"]["threshold"])
+
+
+def murky_from():
+    """The least contaminant a part that is murky (Java: Assay.murkyFrom)."""
+    return (_milli(PROPERTIES["contaminant"]["threshold"]) + 1) // 2
+
+
+def drawn(key, operations):
+    """What a glass bottle draws from {operations} as Java's Extract.drawn judges it: "item", "failure", "thin", or None
+    (not covered, or not made of the base, a carrier and nothing else)."""
+    info = EXTRACTS[key]
+    adds = [op[1] for op in operations if op[0] == "add"]
+    made_of = (info["base"] in adds and any(c in adds for c in info["carriers"])
+               and all(a == info["base"] or a in info["carriers"] for a in adds))
+    if not covered(operations) or not made_of:
+        return None
+    dose, contaminant = bottle(operations)
+    if murky(contaminant):
+        return "failure"
+    return "item" if dose[info["axis"]] >= _milli(info["least"]) else "thin"
+
+
+def extract_json(key, info):
+    """concordance/extract/<key>.json (Java: rules/RulesParser.extract)."""
+    return {"schema": 1, "item": rid(key), "failure": rid(info["failure"]), "base": INGREDIENTS[info["base"]]["item"],
+            "carriers": [INGREDIENTS[c]["item"] for c in info["carriers"]], "axis": info["axis"], "least": info["least"],
+            "codex": info["codex"]}
+
+
+def _extract_jei(key):
+    """The words a JEI page of ingredient {key} adds when it is an extract's base or carrier."""
+    out = ""
+    for info in EXTRACTS.values():
+        if key == info["base"]:
+            out += EXTRACT_JEI["base"].format(carriers=" or ".join(f"a {n}" for n in info["carrier_names"]),
+                                              axis=info["axis"].title(), name=info["name"])
+        if key in info["carriers"]:
+            out += EXTRACT_JEI["carrier"].format(base=info["base_name"], name=info["name"])
+    return out
+
+
 ROMAN = ["I", "II", "III", "IV", "V"]
 
 
@@ -587,6 +686,43 @@ def _kiln_example():
             f"sugar stirred the same way hold {_exact(sugar['ember'])}: {_seconds(outcome(sugar, 0)['ember'][2])} s. In "
             f"two parts of water the magma cream makes two draughts of {_seconds(split[2])} s each: more bottles, no more "
             f"time.")
+
+
+# Concordance C-D6: the pages Gloam Ink's consumers add to its entry (the Research Notes part fills this).
+GLOAM_INK_USES = []
+
+
+def _gloam_example():
+    info = EXTRACTS["gloam_ink"]
+    dose, contaminant = bottle(info["process"])
+    parts = info["process"][0][1]
+    return (f"Three Gloamcap and a spider eye as they come in {parts} parts of water (a water bucket), stirred hot twice "
+            f"under a lid, hold {_exact(dose[info['axis']])} Hollow and {_exact(contaminant)} contaminant a part: each "
+            f"glass bottle draws **Gloam Ink**, {parts} in all. It takes Gloamcap, at least one spider eye to carry it and "
+            f"nothing else, every stir under the lid, and at least {_units(info['least'])} Hollow a part. Uncovered, the "
+            f"same batch is a draught of Poison.")
+
+
+def _lid_text():
+    return ("A lid is a closed trapdoor, or a slab, set on the crucible with its underside whole: not open, and not in "
+            "the upper half. A stir under it is covered, and a formula writes it so. Following one, the crucible waits "
+            "for its lid before each covered stir, and a Crucible Stand heats nothing until it is on; any other stir is "
+            "taken as ever. Gloamcap wants the dark and working magic near it, a crucible included, and grows faster "
+            "beside Dewmoss in a mixed bed.")
+
+
+def _sludge_example():
+    info = EXTRACTS["gloam_ink"]
+    _, dirty = bottle(info["murky"])
+    thin, _ = bottle(info["thin"])
+    cap = _milli(INGREDIENTS["gloamcap"]["contaminant"])
+    eye = _milli(INGREDIENTS["spider_eye"]["contaminant"])
+    return (f"From {_exact(murky_from())} contaminant a part, what a spoon calls murky, a glass bottle draws "
+            f"**Gloam Sludge** instead: no good as ink. Each Gloamcap brings {_exact(cap)} to the pot, each spider eye "
+            f"{_exact(eye)} and a searing stir {_exact(SEARING_CONTAMINANT)}: a second spider eye in the batch above "
+            f"leaves {_exact(dirty)} a part. Boil the sludge dry in a furnace and its bottle comes back. Stirred hot only "
+            f"once, the batch holds {_exact(thin[info['axis']])} Hollow a part, too thin for ink: it bottles as the "
+            f"draught.")
 
 
 # The statuses the properties brew, by name (the codex's property table and the products' JEI lines).
@@ -685,8 +821,9 @@ def codex():
                  f"ingredients through a hopper (up to {BUFFER_SLOTS} kinds waiting), it follows the formula step "
                  f"by step, waiting for the heat each stir needs, and bottles into its output when it has bottles. "
                  f"A Pneumatic Extractor at its side takes the brews out, so the fire can stay beneath. "
-                 f"It never guesses: a missing ingredient or the wrong heat simply waits. The crucible says what it "
-                 f"waits for (use it with an empty hand). If the rules change so that a step can no longer be made, "
+                 f"It never guesses: a missing ingredient, the wrong heat or a covered stir's missing lid simply waits. "
+                 f"The crucible says what it waits for (use it with an empty hand). If the rules change so that a step "
+                 f"can no longer be made, "
                  f"the formula stays set, says which step and why, and carries on when they change back. Only someone "
                  f"who could break the crucible by hand may work it, or set or clear its formula."),
             ],
@@ -748,6 +885,15 @@ def codex():
                  "works as it always has."),
             ],
         },
+        # Concordance C-D6 (Gloam Ink): the first covered extraction. The consumer's pages follow these (GLOAM_INK_USES).
+        ("alembic", "gloam_ink"): {
+            "name": "Gloam Ink", "x": 0, "y": 6, "icon": rid("gloam_ink"), "condition": (art, "observed"),
+            "description": "Gloamcap drawn under a lid: an ink",
+            "pages": [
+                ("text", "Gloam Ink", _gloam_example()),
+                ("text", "Under the Lid", _lid_text()),
+                ("text", "Gloam Sludge", _sludge_example()),
+            ] + GLOAM_INK_USES},
     }
 
 
@@ -777,6 +923,9 @@ def tags(tags):
         tags.add("item", ALCHEMY_SPECIMEN_TAG, ref)
     tags.add("block", "minecraft:mineable/pickaxe", rid("crucible"))
     tags.add("block", "minecraft:mineable/pickaxe", rid("crucible_stand"))
+    # Concordance C-D6 (GI-P1): what may be a crucible's lid (CrucibleBlockEntity.LIDS), its underside whole.
+    tags.add("block", f"{MOD}:crucible_lids", "#minecraft:trapdoors")
+    tags.add("block", f"{MOD}:crucible_lids", "#minecraft:slabs")
 
 
 def crucible_geo():
@@ -863,7 +1012,8 @@ def stand_model(lit):
 
 def write_all(write, assets, data, lang, condition, self_drop):
     lang_entries(lang)
-    for item in ("mortar", "stirring_rod", "sampling_spoon", "assay_glass", "reagent", "draught", "salve"):
+    for item in ("mortar", "stirring_rod", "sampling_spoon", "assay_glass", "reagent", "draught", "salve", "gloam_ink",
+                 "gloam_sludge"):
         parent = "minecraft:item/handheld" if item in ("stirring_rod", "sampling_spoon") else "minecraft:item/generated"
         write(assets / "models" / "item" / f"{item}.json", {"parent": parent, "textures": {"layer0": rid(f"item/{item}")}})
         write(assets / "items" / f"{item}.json", {"model": {"type": "minecraft:model", "model": rid(f"item/{item}")}})
@@ -919,6 +1069,9 @@ def write_all(write, assets, data, lang, condition, self_drop):
                            "type": "minecraft:crafting_shaped", "category": "misc", "pattern": ["ICI", "ICI", "IFI"],
                            "key": {"I": "minecraft:iron_ingot", "C": "minecraft:copper_ingot", "F": rid("rooted_thallite_foundation")},
                            "result": {"id": rid("crucible_stand"), "count": 1}},
+        # Concordance C-D6 (GI-P5): Gloam Sludge's mundane route, its glass bottle back from a furnace, and no experience.
+        "glass_bottle_from_gloam_sludge": {"type": "minecraft:smelting", "category": "misc", "ingredient": rid("gloam_sludge"),
+                                           "result": {"id": "minecraft:glass_bottle"}, "experience": 0.0, "cookingtime": 200},
     }
     for name, recipe in recipes.items():
         write(data / "recipe" / f"{name}.json", dict({"fabric:load_conditions": condition(feature)}, **recipe))
@@ -934,6 +1087,9 @@ def write_data(write, data):
     # Concordance Chunk C, C-02: the workshop's products (Java: rules/RulesParser.product).
     for key, info in PRODUCTS.items():
         write(data / "concordance" / "product" / f"{key}.json", product_json(key, info))
+    # Concordance C-D6: covered extractions (Java: rules/RulesParser.extract).
+    for key, info in EXTRACTS.items():
+        write(data / "concordance" / "extract" / f"{key}.json", extract_json(key, info))
 
 
 def recipe_ingredients():

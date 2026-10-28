@@ -16095,6 +16095,7 @@ def check_concordance(registered):
     check_winter_brine(co, root, lang)
     check_diagnostics(co, root, lang)
     check_workshop_products(co, root, lang)
+    check_gloam_ink(co, root, lang, registered)
     check_poultice_credit(co, lang)
     check_crucible_stand(co, root, lang)
     check_ecology(co, root, lang, registered, research)
@@ -18486,6 +18487,217 @@ def check_workshop_products(co, root, lang):
     for key in (f"encyclopedia.{MOD}.dossier.cinder_kiln.prepare", f"encyclopedia.{MOD}.dossier.cinder_kiln.prepare.charm"):
         if key not in lang:
             err(f"Kiln Draught: missing lang {key}")
+
+
+# Concordance C-D6 (Gloam Ink): its server game tests, by class.
+GLOAM_INK_TESTS = {
+    "ConcordanceGloamInkGameTests": ["gloamInkIsDrawnOnlyFromACoveredBatchOfItsOwnIngredients",
+                                     "aLidIsAClosedTrapdoorOrASlabOnTheCrucible", "gloamInkByHandUnderALid",
+                                     "aMurkyBatchBottlesSludgeAndSaysSoBeforehand", "anUncoveredOrThinBatchIsTheDraughtAsBefore",
+                                     "aCoveredFormulaWaitsForItsLidAndSaysSo", "aStandHeatsOnlyForACoveredStirItCanTake",
+                                     "aGloamInkFormulaAsksForGloamcapThenItsCarrier",
+                                     "aFullOutputOfInkPausesAndSludgeIsAnotherThing", "aCoveredBatchAndItsFormulaSurviveASave",
+                                     "theLidAndItsInkAreShownButNeverTheMakeup", "theExtractParsesStrictly"],
+    "ConcordanceAssayGameTests": ["gloamInkAndSludgeAreNeverFormed"],
+    "ConcordanceEconomyGameTests": ["extractsTurnIntoNothingTheyCameFrom"],
+}
+
+
+def check_gloam_ink(co, root, lang, registered):
+    """Concordance C-D6 (docs/features/gloam-ink.md; GI-P1 to GI-P8): a covered extraction's item. The data is the
+    generator's; its base is a crop grown in a mixed bed and made from vanilla things, its carriers carry its axis; on
+    paper the worked formula draws the item, a murky one the failure, a thin one the draught, and an uncovered or impure
+    one nothing; no drawn batch holds more of its axis than its ingredients brought; the game test holds the model's
+    numbers. The Java draws as the model does: a stir records the lid (a #jugcraft:crucible_lids block with a whole
+    underside), a covered stir waits for it before its heat (so a Crucible Stand idles), only a glass bottle draws an
+    extract, murky its failure by the spoon's own murky, and hand bottling practises the item, never the failure. Both
+    things are a glass bottle's, stack to 16 and give the bottle back when crafted; none is an ingredient, specimen,
+    mulch, compost, a Scale material, a tablet output or a modelled resource; no recipe on disk takes Gloam Ink; the
+    sludge's one use is the furnace that gives its bottle back, and no experience; the ink is valued no higher than its
+    base and the sludge no higher than a glass bottle. The words, JEI pages (tools/acquisition.py EXTRACTED), Jade line,
+    survival route, registry snapshot, values and tests exist."""
+    import itertools
+    from fractions import Fraction
+    sys.path.insert(0, str(ROOT / "tools"))
+    import acquisition as aq
+    import concordance_economy as ec
+    al, eq = co.alchemy, co.equivalence
+
+    def source(path):
+        return path.read_text(encoding="utf-8") if path.exists() else ""
+    folder = DATA / MOD / "concordance"
+    concordance_java = source(root / "JugcraftConcordance.java")
+    tests_root = ROOT / "src" / "gametest" / "java" / "io" / "github" / "jimbozoomer" / "jugcraft" / "test"
+    data = {p.stem: load(p) or {} for p in (folder / "extract").glob("*.json")}
+    if set(data) != set(al.EXTRACTS):
+        err(f"concordance/extract: {sorted(data)} differ from EXTRACTS (run tools/generate_material_data.py)")
+    organisms = [load(p) or {} for p in sorted((folder / "organism").glob("*.json"))]
+    pages = aq.pages()
+    things = set()
+    for key, info in al.EXTRACTS.items():
+        if data.get(key) != al.extract_json(key, info):
+            err(f"concordance/extract/{key}.json differs from EXTRACTS (run tools/generate_material_data.py)")
+        for thing, name in ((key, info["name"]), (info["failure"], info["failure_name"])):
+            things.add(f"{MOD}:{thing}")
+            if thing not in registered or lang.get(f"item.{MOD}.{thing}") != name or f"tooltip.{MOD}.{thing}" not in lang:
+                err(f"extract {key}: {thing} is a registered item named {name}, with its tooltip")
+            # GI-P15: JEI's page for each is tools/acquisition.py's (check_acquisition holds its words and its row).
+            if aq.EXTRACTED.get(thing) != key or info["base_name"] not in pages.get(thing, ""):
+                err(f"extract {key}: JEI shows a page for {thing} naming {info['base_name']} (tools/acquisition.py EXTRACTED)")
+            if f'item("{thing}", DescribedItem::new, new Item.Properties().stacksTo(16).craftRemainder(Items.GLASS_BOTTLE))' not in concordance_java:
+                err(f"JugcraftConcordance: {thing} is a glass bottle's, stacks to 16 and gives its bottle back when crafted (GI-P3)")
+        base_item = al.INGREDIENTS[info["base"]]["item"]
+        organism = next((o for o in organisms if o.get("item") == base_item), {})
+        if organism.get("role") != "crop" or not (organism.get("neighbours") or {}).get("organisms"):
+            err(f"extract {key}: its base {base_item} is a crop grown in a mixed bed (C-D6: a mixed bed's Gloamcap)")
+        recipe = load(DATA / MOD / "recipe" / f"{split(base_item)[1]}.json") or {}
+        named = set(re.findall(r'"(#?[a-z0-9_.-]+:[a-z0-9_/.-]+)"', json.dumps(recipe.get("ingredients", recipe.get("key", {})))))
+        if split(base_item)[0] == MOD and (not named or any(not ref.startswith("minecraft:") for ref in named)):
+            err(f"extract {key}: {base_item} is crafted from vanilla things alone, a manual start ({sorted(named)})")
+        if lang.get(f"item.{MOD}.{split(base_item)[1]}") != info["base_name"]:
+            err(f"extract {key}: base_name {info['base_name']} is not {base_item}'s name")
+        for carrier, carrier_name in zip(info["carriers"], info["carrier_names"], strict=True):
+            if al.INGREDIENTS[carrier]["properties"].get(info["axis"], 0) <= 0 \
+                    or al.ALCHEMY_SPECIMENS.get(al.INGREDIENTS[carrier]["item"]) != carrier_name:
+                err(f"extract {key}: its carrier {carrier} carries {info['axis']} and is named {carrier_name}")
+        # On paper: the worked formula draws the item, the murky one the failure, the thin one the draught; uncovered or
+        # with another ingredient, nothing.
+        uncovered = [op[:2] if op[0] == "stir" else op for op in info["process"]]
+        impure = info["process"][:1] + [("add", "sugar", "raw")] + info["process"][1:]
+        found = (al.drawn(key, info["process"]), al.drawn(key, info["murky"]), al.drawn(key, info["thin"]),
+                 al.drawn(key, uncovered), al.drawn(key, impure))
+        if found != ("item", "failure", "thin", None, None):
+            err(f"extract {key}: the worked formula draws its item, the murky one its failure, the thin one the draught, "
+                f"and uncovered or impure nothing ({found})")
+        # Conservation: no drawn batch holds more of its axis than its ingredients brought.
+        least = al._milli(info["least"])
+        per = {name: al._milli(al.INGREDIENTS[name]["properties"].get(info["axis"], 0)) for name in [info["base"], *info["carriers"]]}
+        for parts, bases, carriers, band, stirs, prep in itertools.product(range(1, al.MAX_PARTS + 1), range(1, 7), range(1, 3),
+                                                                          al.BANDS, range(1, 5), al.PREPARATIONS):
+            ops = ([("water", parts)] + [("add", info["base"], prep)] * bases + [("add", info["carriers"][0], "raw")] * carriers
+                   + [("stir", band, "covered")] * stirs)
+            if al.drawn(key, ops) == "item" and parts * least > bases * per[info["base"]] + carriers * per[info["carriers"][0]]:
+                err(f"extract {key}: {ops} draws more {info['axis']} than its ingredients brought")
+                break
+        # The game test holds the model's numbers and the worked formula's text.
+        dose, contaminant = al.bottle(info["process"])
+        dirty_dose, dirty = al.bottle(info["murky"])
+        thin, _ = al.bottle(info["thin"])
+        expected = [dose[info["axis"]], contaminant, dirty_dose[info["axis"]], dirty, thin[info["axis"]]]
+        tests = source(tests_root / "ConcordanceGloamInkGameTests.java")
+        if f"static final long[] GLOAM = {{{', '.join(map(str, expected))}}};" not in tests:
+            err(f"ConcordanceGloamInkGameTests.GLOAM must be the generator's {expected}")
+        literal = re.search(r'static final String GLOAM_INK = ((?:"[^"]*"\s*\+?\s*)+);', tests)
+        written = "".join(re.findall(r'"([^"]*)"', literal.group(1))) if literal else ""
+        canonical = "; ".join(f"water {op[1]}" if op[0] == "water" else
+                              f"add {al.INGREDIENTS[op[1]]['item']} {al.rid(op[2])}" if op[0] == "add" else
+                              f"stir {op[1]}" + (" covered" if op[2:] == ("covered",) else "") for op in info["process"])
+        if written != canonical:
+            err(f"ConcordanceGloamInkGameTests.GLOAM_INK is not the worked formula ({canonical})")
+    # The Java draws as the model does.
+    operation = source(root / "alchemy" / "Operation.java")
+    if 'return "stir " + band.id + (covered ? " covered" : "");' not in operation or 'words[2].equals("covered")' not in operation \
+            or "public Stir(Band band) {" not in operation:
+        err("alchemy/Operation.Stir: a covered stir writes and reads 'stir <band> covered'; one argument makes an uncovered stir")
+    covered_body = _java_body(source(root / "alchemy" / "Mixture.java"), "public boolean covered()")
+    if "if (!stir.covered()) {" not in covered_body or "return stirred;" not in covered_body:
+        err("alchemy/Mixture.covered: stirred at least once and every stir covered (C-D6)")
+    extract_java = source(root / "alchemy" / "Extract.java")
+    drawn_body = _java_body(extract_java, "public static @Nullable Drawn drawn(")
+    order = [drawn_body.find(n) for n in ("!mixture.covered()", "catalog.extract(mixture.history())",
+                                          "Assay.murky(contaminant, catalog)", "amount < extract.least()")]
+    if min(order) < 0 or order != sorted(order):
+        err("alchemy/Extract.drawn: covered, then its ingredients, then murky (its failure), then thin, then its item")
+    assay = source(root / "alchemy" / "Assay.java")
+    if "return fouling != null && contaminant * 2 >= fouling.threshold();" not in _java_body(assay, "public static boolean murky(") \
+            or "murky(mixture.contaminantConcentration(), catalog)" not in assay \
+            or 'Text.of("alchemy.risk.failure"' not in assay or "drawn.kind() != Extract.Kind.FAILURE" not in assay:
+        err("alchemy/Assay: murky is the spoon's own (Look), and the risk line names a murky batch's failure to anyone")
+    if "waiting == null || waiting.code() == Code.WRONG_HEAT || waiting.code() == Code.HELD;" not in source(root / "alchemy" / "Heat.java") \
+            or "NEEDS_COVER" in source(root / "alchemy" / "Heat.java"):
+        err("alchemy/Heat.waitsForHeat: a lid wait is no wait for heat, so a Crucible Stand idles until the lid is on")
+    crucible = source(root / "CrucibleBlockEntity.java")
+    if 'TagKey.create(Registries.BLOCK, Jugcraft.id("crucible_lids"))' not in crucible \
+            or "return lid.is(LIDS) && lid.isFaceSturdy(level, above, Direction.DOWN);" not in _java_body(crucible, "public boolean covered(BlockGetter level)"):
+        err("CrucibleBlockEntity.covered: a #jugcraft:crucible_lids block with a whole underside (GI-P1)")
+    automate = _java_body(crucible, "public @Nullable Diagnostic automate(ServerLevel level)")
+    lid_at, heat_at = automate.find("if (stir.covered() && !covered(level)) {"), automate.find("if (band() != stir.band()) {")
+    if not 0 <= lid_at < heat_at or "return pause(level, Diagnostic.of(Code.NEEDS_COVER));" not in automate:
+        err("CrucibleBlockEntity.automate: a covered stir waits for its lid before its heat (needs_cover)")
+    use = _java_body(crucible, "public InteractionResult use(ServerPlayer player")
+    if "boolean lidded = covered(level);" not in use or "new Operation.Stir(band(), lidded)" not in use:
+        err("CrucibleBlockEntity.use: a stir by hand records whether a lid covers it")
+    output = _java_body(crucible, "private @Nullable Diagnostic bottleIntoOutput(")
+    if not 0 <= output.find("container.is(Items.GLASS_BOTTLE) ? Alchemy.extract(Extract.drawn(mixture, Alchemy.catalog())) : null") \
+            < output.find("Mixture.Bottled bottled = mixture.bottle();"):
+        err("CrucibleBlockEntity.bottleIntoOutput: only a glass bottle draws an extract, judged before the dose is drawn")
+    hand = _java_body(crucible, "private InteractionResult bottle(")
+    if "Extract.Drawn drawn = held.is(Items.GLASS_BOTTLE) ? Extract.drawn(mixture, Alchemy.catalog()) : null;" not in hand \
+            or "if (drawn.kind() == Extract.Kind.ITEM) {" not in hand or hand.count("new Evidence.Practiced(Alchemy.ACTIVITY, drawn.extract().id())") != 1:
+        err("CrucibleBlockEntity.bottle: by hand, only a glass bottle draws an extract, and only its item is practised (GI-P6)")
+    if "return item == Items.AIR ? null : new ItemStack(item);" not in _java_body(source(root / "Alchemy.java"), "public static @Nullable ItemStack extract("):
+        err("Alchemy.extract: an item this game lacks draws the draught, so no bottle is spent on nothing")
+    lids = load(DATA / MOD / "tags" / "block" / "crucible_lids.json") or {}
+    if lids.get("values") != ["#minecraft:trapdoors", "#minecraft:slabs"]:
+        err("tags/block/crucible_lids.json: trapdoors and slabs (GI-P1; run tools/generate_material_data.py)")
+    jade = _java_body(source(JAVA_ROOT / "compat" / "jade" / "ConcordanceDataProvider.java"), "public static CompoundTag snapshot(CrucibleBlockEntity")
+    if 'snapshot.putBoolean("covered", true);' not in jade or '"tooltip.jugcraft.concordance.jade.covered"' not in source(CLIENT_JAVA_ROOT / "compat" / "JugcraftJadeClient.java"):
+        err("Jade: the crucible's snapshot says a lid covers it, and the client words it")
+    if "crucible.covered(level)" not in _java_body(source(root / "encyclopedia" / "InspectPage.java"), "private static void crucible(") \
+            or 'Text.of("alchemy.inspect.covered")' not in source(root / "alchemy" / "CrucibleInspection.java") \
+            or "Extract.drawn(applied.mixture(), catalog)" not in source(root / "alchemy" / "CrucibleInspection.java"):
+        err("The Inspect page shows the lid to anyone and a master's preview says what a glass bottle draws")
+    # Never weighed, fed back, mulched or composted; the sludge's one use gives its bottle back.
+    if not things <= set(eq.EXCLUDED):
+        err(f"tools/concordance_equivalence.py EXCLUDED: {sorted(things - set(eq.EXCLUDED))} are never weighed (GI-P8)")
+    item_tags = DATA / MOD / "tags" / "item"
+    tablet = set((load(item_tags / "tablet_outputs.json") or {}).get("values", []))
+    mulch = {v for p in (item_tags / "mulch").glob("*.json") for v in (load(p) or {}).get("values", [])}
+    specimens = {v for p in item_tags.glob("*_specimens.json") for v in (load(p) or {}).get("values", [])} | set(al.ALCHEMY_SPECIMENS)
+    materials = {(load(p) or {}).get("item") for p in (folder / "material").glob("*.json")} | set(eq.MATERIALS)
+    ingredients = {info["item"] for info in al.INGREDIENTS.values()}
+    for kind, found in (("a tablet output", tablet), ("mulch", mulch), ("a specimen", specimens), ("a Scale material", materials),
+                        ("an ingredient", ingredients)):
+        if things & found:
+            err(f"{sorted(things & found)} is {kind}: an extract feeds nothing back (C-D6)")
+    if "COMPOSTABLE" in "".join(line for line in concordance_java.splitlines() if "gloam" in line.lower()):
+        err("JugcraftConcordance: an extract is no compost")
+    bottle_reach = _made_from({"minecraft:glass_bottle"}, scale=False) | {"minecraft:glass_bottle"}
+    for key, info in al.EXTRACTS.items():
+        ink, sludge = f"{MOD}:{key}", f"{MOD}:{info['failure']}"
+        fed = _made_from({ink}, scale=False)
+        if fed:
+            err(f"{ink} feeds {sorted(fed)}: no recipe on disk takes it; its consumer is code (EXTRACT_CONSUMERS)")
+        if _made_from({sludge}, scale=False) - bottle_reach:
+            err(f"{sludge} reaches {sorted(_made_from({sludge}, scale=False) - bottle_reach)}: its only use gives back its bottle")
+        takers = sorted(p.name for p in (DATA / MOD / "recipe").rglob("*.json") if f'"{sludge}"' in p.read_text(encoding="utf-8"))
+        boiled = load(DATA / MOD / "recipe" / "glass_bottle_from_gloam_sludge.json") or {}
+        if takers != ["glass_bottle_from_gloam_sludge.json"] or boiled.get("type") != "minecraft:smelting" \
+                or boiled.get("ingredient") != sludge or boiled.get("result") != {"id": "minecraft:glass_bottle"} \
+                or boiled.get("experience", 0.0) != 0.0:
+            err(f"{sludge}: its one mundane route is a furnace giving back exactly its glass bottle ({takers}, GI-P5)")
+    if {k for info in al.EXTRACTS.items() for k in (info[0], info[1]["failure"])} & set(ec.RESOURCES):
+        err("economy: an extract is no modelled resource (C-D6)")
+    # The route, the snapshot, the values and the tests.
+    if "['gloam_ink', 'gloam_sludge']" not in source(ROOT / "tools" / "survival_native_followup.py"):
+        err("tools/survival_native_followup.py: Gloam Ink's covered extraction is a survival route")
+    registry = set(load(ROOT / "docs" / "audits" / "survival-item-registry.json") or [])
+    values = (load(DATA / MOD / "alchemy" / "values.json") or {}).get("items", {})
+
+    def worth(item):
+        value = values.get(item)
+        return Fraction(value["numerator"], value["denominator"]) if value else None
+    for key, info in al.EXTRACTS.items():
+        for thing, ceiling in ((f"{MOD}:{key}", al.INGREDIENTS[info["base"]]["item"]),
+                               (f"{MOD}:{info['failure']}", "minecraft:glass_bottle")):
+            if thing not in registry or worth(thing) is None or worth(ceiling) is None or worth(thing) > worth(ceiling):
+                err(f"{thing}: in docs/audits/survival-item-registry.json and alchemy/values.json, valued no higher than "
+                    f"{ceiling} (tools/build_alchemy_values.py)")
+    for cls, names in GLOAM_INK_TESTS.items():
+        found = set(re.findall(r"public void (\w+)\(GameTestHelper", source(tests_root / f"{cls}.java")))
+        for name in names:
+            if name not in found:
+                err(f"{cls}.{name} is missing (Gloam Ink's tests)")
 
 
 def check_poultice_credit(co, lang):
@@ -23286,8 +23498,8 @@ def check_signs(co, root, lang):
     its order; the warnings' sounds are registered, drawn and subtitled; every server-side Concordance particle goes
     through a sign (no sendParticles), so each client draws it as its settings allow; the display settings are read only
     by client code and blocks' animateTick (the server never decides from them); a crucible tells a client only its
-    heat, volume and the spoon's reading, and Jade (Concordance Chunk C, C-01) its tank and own encoded reason, never its
-    makeup; and the setting's words exist."""
+    heat, volume and the spoon's reading, and Jade (Concordance Chunk C, C-01) its tank, whether a lid covers it and own
+    encoded reason, never its makeup; and the setting's words exist."""
     sg = co.signs
     def text(path):
         return path.read_text(encoding="utf-8") if path.exists() else ""
@@ -23333,9 +23545,9 @@ def check_signs(co, root, lang):
     # never the makeup; the client words what it was sent and works nothing out.
     jade = _java_body(text(JAVA_ROOT / "compat" / "jade" / "ConcordanceDataProvider.java"), "public static CompoundTag snapshot(CrucibleBlockEntity")
     put = set(re.findall(r'snapshot\.put\w+\("([a-z_]+)"', jade))
-    if not jade or not put <= {"temperature", "band", "held", "parts", "tank", "step", "steps", "next", "reason"} \
+    if not jade or not put <= {"temperature", "band", "held", "parts", "tank", "step", "steps", "next", "reason", "covered"} \
             or 'snapshot.putString("reason", reason.encode())' not in jade or "crucible.waiting()" not in jade:
-        err(f"ConcordanceDataProvider.java: Jade's crucible snapshot is the heat, hold, volume, tank, step and the crucible's own reason, not {sorted(put)}")
+        err(f"ConcordanceDataProvider.java: Jade's crucible snapshot is the heat, hold, volume, tank, step, a lid and the crucible's own reason, not {sorted(put)}")
     for needle in ("mixture()", "dissolved", "pending", "contaminant", "concentration", "history", "Assay.", "outcome(", "replay(", "catalog()", "rules()"):
         if needle in jade:
             err(f"ConcordanceDataProvider.java: Jade's crucible snapshot never reads the makeup ({needle})")
@@ -23496,7 +23708,7 @@ def check_economy(root):
     Concordance Chunk C (C-04), each ritual sink is its ritual's run as the data states it; since C-05, a crucible's heat
     is a sink that becomes nothing else, modelled at a Crucible Stand's cheapest rate; since Concordance Chunk D (D-05), a
     recalled attunement is a sink too, modelled at the cheapest recall, and Stolas's upkeep, quota and offerings are his
-    definition's and tag's."""
+    definition's and tag's; since C-D6, a covered extraction's things are no resource, bounded by a crucible's day."""
     sys.path.insert(0, str(ROOT / "tools"))
     import concordance_alchemy as al
     import concordance_economy as ec
@@ -23554,6 +23766,13 @@ def check_economy(root):
         err("economy: RECALL_COSTS are not the patterns' cheapest and dearest recall")
     if any(source == "recalled_attunement" for source, _ in ec.edges()):
         err("economy: a recalled attunement becomes nothing else")
+    # Concordance C-D6 (Gloam Ink): an extract is no modelled resource; its row is the worked formula at the crucible's pulse.
+    if ec.AUTOMATION_TICKS != al.AUTOMATION_TICKS:
+        err("economy: AUTOMATION_TICKS is not tools/concordance_alchemy.py's (CrucibleBlockEntity.AUTOMATION_TICKS)")
+    for key, info in al.EXTRACTS.items():
+        for thing in (key, info["failure"]):
+            if thing in ec.RESOURCES or any(thing in (source, result) for _, source, _, result, _ in ec.CONVERSIONS):
+                err(f"economy: {thing} is no modelled resource and nothing converts it (check_gloam_ink)")
     gaining = ec.gaining_cycles(ec.edges())
     if gaining:
         err(f"economy: a cycle of conversions gives back at least what it took, from {gaining}")

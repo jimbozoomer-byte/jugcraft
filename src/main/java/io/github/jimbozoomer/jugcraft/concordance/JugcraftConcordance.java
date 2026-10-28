@@ -123,6 +123,10 @@ public final class JugcraftConcordance {
 	public static Item REAGENT_ITEM;
 	public static Item DRAUGHT;
 	public static Item SALVE;
+	/** Concordance C-D6 (Gloam Ink): what a glass bottle draws from a covered batch of Gloamcap and its carrier; its one use is a fair copy of Research Notes. */
+	public static Item GLOAM_INK;
+	/** Concordance C-D6: what a glass bottle draws instead from a murky batch; a furnace boils it back to its bottle. */
+	public static Item GLOAM_SLUDGE;
 	public static BlockEntityType<CrucibleBlockEntity> CRUCIBLE_ENTITY;
 	/** Concordance Chunk C, C-05: the Crucible Stand, JE heat for the crucible on it. */
 	public static Block CRUCIBLE_STAND;
@@ -262,6 +266,10 @@ public final class JugcraftConcordance {
 		DRAUGHT = item("draught", properties -> new BrewItem(properties, false), new Item.Properties().stacksTo(16)
 				.usingConvertsTo(Items.GLASS_BOTTLE).component(DataComponents.CONSUMABLE, Consumables.defaultDrink().build()));
 		SALVE = item("salve", properties -> new BrewItem(properties, true), new Item.Properties().stacksTo(16));
+		// Concordance C-D6 (Gloam Ink, GI-P3): a covered extraction's item and its failure, each a glass bottle's (crafting gives
+		// the bottle back), never a brew (data/jugcraft/concordance/extract/gloam_ink.json).
+		GLOAM_INK = item("gloam_ink", DescribedItem::new, new Item.Properties().stacksTo(16).craftRemainder(Items.GLASS_BOTTLE));
+		GLOAM_SLUDGE = item("gloam_sludge", DescribedItem::new, new Item.Properties().stacksTo(16).craftRemainder(Items.GLASS_BOTTLE));
 		CRUCIBLE_ENTITY = Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, Jugcraft.id("crucible"),
 				FabricBlockEntityTypeBuilder.create(CrucibleBlockEntity::new, CRUCIBLE).build());
 		// Water by pipe into the crucible's tank (a formula's water steps draw on it); items through its container.
@@ -360,8 +368,12 @@ public final class JugcraftConcordance {
 			output.accept(crucible);
 			output.accept(crucibleStand);
 		});
-		// Concordance Chunk C, C-04: Root and Rivet's foundation, an ingredient.
-		CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.INGREDIENTS).register(output -> output.accept(ROOTED_THALLITE_FOUNDATION));
+		// Concordance Chunk C, C-04: Root and Rivet's foundation, an ingredient; C-D6: Gloam Ink and Gloam Sludge.
+		CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.INGREDIENTS).register(output -> {
+			output.accept(ROOTED_THALLITE_FOUNDATION);
+			output.accept(GLOAM_INK);
+			output.accept(GLOAM_SLUDGE);
+		});
 	}
 
 	private static SoundEvent sound(String id) {

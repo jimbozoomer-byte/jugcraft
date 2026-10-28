@@ -279,7 +279,7 @@ public final class InspectPage {
 		boolean apart = !crucible.mixture().isEmpty() && (crucible.step() == 0 || crucible.incompatibility() != null);
 		CrucibleInspection.State state = new CrucibleInspection.State(crucible.temperature(), crucible.below(level),
 				crucible.held(ConcordanceProgress.now(level)), crucible.mixture(), crucible.tankParts(), CrucibleBlockEntity.WATER_PER_BUCKET,
-				crucible.program(), crucible.step(), reason == null ? null : reason.text(), apart);
+				crucible.program(), crucible.step(), reason == null ? null : reason.text(), apart, crucible.covered(level));
 		List<CrucibleInspection.Section> sections = CrucibleInspection.read(state, reading, Alchemy::harmfulStatus, Alchemy.catalog());
 		lines(out, sections.getFirst());
 		slots(crucible, out);

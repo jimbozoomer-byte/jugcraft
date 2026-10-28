@@ -7,10 +7,12 @@ import com.geckolib.animation.AnimationController;
 import com.geckolib.animation.RawAnimation;
 import com.geckolib.util.GeckoLibUtil;
 import com.mojang.serialization.Codec;
+import io.github.jimbozoomer.jugcraft.Jugcraft;
 import io.github.jimbozoomer.jugcraft.concordance.alchemy.AlchemyCatalog;
 import io.github.jimbozoomer.jugcraft.concordance.alchemy.Assay;
 import io.github.jimbozoomer.jugcraft.concordance.alchemy.Axis;
 import io.github.jimbozoomer.jugcraft.concordance.alchemy.Band;
+import io.github.jimbozoomer.jugcraft.concordance.alchemy.Extract;
 import io.github.jimbozoomer.jugcraft.concordance.alchemy.Formula;
 import io.github.jimbozoomer.jugcraft.concordance.alchemy.Heat;
 import io.github.jimbozoomer.jugcraft.concordance.alchemy.Mixture;
@@ -51,6 +53,7 @@ import net.minecraft.core.NonNullList;
 import net.minecraft.core.UUIDUtil;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
@@ -62,6 +65,7 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundSource;
+import net.minecraft.tags.TagKey;
 import net.minecraft.util.Prediction;
 import net.minecraft.world.ContainerHelper;
 import net.minecraft.world.InteractionHand;
@@ -74,6 +78,7 @@ import net.minecraft.world.item.ItemUtils;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.alchemy.PotionContents;
 import net.minecraft.world.item.alchemy.Potions;
+import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
@@ -102,6 +107,9 @@ import org.jspecify.annotations.Nullable;
  * ({@link #waiting()}). A formula the rules can no longer follow stays set, says which step and why, and does nothing
  * until they can again. Only someone who could change the block by hand changes a crucible (Concordance Chunk C,
  * C-01).</li>
+ * <li><b>Lids</b> (Concordance C-D6, Gloam Ink): a stir under a lid ({@link #covered}) is covered; a formula's covered stir
+ * waits for its lid before its heat; a glass bottle from a covered batch of an extract's ingredients draws the extract's
+ * item (Gloam Ink), or, murky, its failure ({@link Extract}).</li>
  * <li><b>Supply</b> (Concordance Chunk C, C-06): its formula's {@link #shortage()} is the one demand a Peepo at its port
  * and its own courier request serve. Waiting for an ingredient, it files one request as its formula's setter, while they
  * answer (Authority.answering), at the nearest Courier Post within {@value #POST_REACH} blocks they may use, for exactly
@@ -132,6 +140,8 @@ public class CrucibleBlockEntity extends BlockEntity implements GeoBlockEntity, 
 	/** C-06 (C-P13): the wait after a filing found no post or the couriers' quota full (ticks), doubling to MAX_FILING_BACKOFF. Keep equal to tools/concordance_logistics.py. */
 	public static final int FILING_BACKOFF = 200;
 	public static final int MAX_FILING_BACKOFF = 1200;
+	/** C-D6 (Gloam Ink): the blocks that may be a crucible's lid (#jugcraft:crucible_lids: trapdoors and slabs). */
+	public static final TagKey<Block> LIDS = TagKey.create(Registries.BLOCK, Jugcraft.id("crucible_lids"));
 	/** From above, only what goes in; from the sides, that and the output; from below, only the output. */
 	private static final int[] ABOVE = {0, 1, 2, 3, 4, BOTTLE_SLOT};
 	private static final int[] SIDES = {0, 1, 2, 3, 4, BOTTLE_SLOT, OUTPUT_SLOT};
@@ -311,6 +321,18 @@ public class CrucibleBlockEntity extends BlockEntity implements GeoBlockEntity, 
 	}
 
 	/**
+	 * Whether a lid covers it now (Concordance C-D6, Gloam Ink): a #jugcraft:crucible_lids block on it whose underside is
+	 * whole (a closed trapdoor in the lower half, a bottom or double slab); not an open or upper trapdoor, a top slab, a
+	 * hopper or any other block, so a ceiling never covers one by chance. One block read, on either side; a stir records it
+	 * (Operation.Stir.covered).
+	 */
+	public boolean covered(BlockGetter level) {
+		BlockPos above = worldPosition.above();
+		BlockState lid = level.getBlockState(above);
+		return lid.is(LIDS) && lid.isFaceSturdy(level, above, Direction.DOWN);
+	}
+
+	/**
 	 * One pulse of its formula, every {@value #AUTOMATION_TICKS} ticks (or a test's, at a known moment): its next step if
 	 * it can be taken now or, the formula done, one bottle into the output. Returns why it waits (waiting()), or null when
 	 * it did something. A formula the rules in force cannot follow, or a saved one that no longer reads, keeps its step and
@@ -357,6 +379,12 @@ public class CrucibleBlockEntity extends BlockEntity implements GeoBlockEntity, 
 				}
 			}
 			case Operation.Stir stir -> {
+				// C-D6 (Gloam Ink): a covered stir waits for its lid, before its heat, so a Crucible Stand never heats for a stir
+				// that cannot be taken (Heat.waitsForHeat: needs_cover is no wait for heat). Any other stir is taken as written,
+				// lid or none.
+				if (stir.covered() && !covered(level)) {
+					return pause(level, Diagnostic.of(Code.NEEDS_COVER));
+				}
 				if (band() != stir.band()) {
 					// Waiting for the heat shows no sign, as it never did. Preserve's hold is the reason only while it keeps the
 					// heat from the stir's band: unheld, the block beneath would move it that way (C-01). Over a magma block
@@ -647,9 +675,14 @@ public class CrucibleBlockEntity extends BlockEntity implements GeoBlockEntity, 
 		if (form == null) {
 			return pause(level, Diagnostic.of(Code.NEEDS_CONTAINER));
 		}
+		// C-D6 (Gloam Ink): a glass bottle draws an extract's item from a covered batch of its ingredients, or, murky, its
+		// failure; otherwise the draught or salve as ever. Judged before the dose is drawn: every dose is the same share.
+		ItemStack made = container.is(Items.GLASS_BOTTLE) ? Alchemy.extract(Extract.drawn(mixture, Alchemy.catalog())) : null;
 		Mixture.Bottled bottled = mixture.bottle();
-		Outcome outcome = Outcome.of(bottled.dose(), bottled.contaminant(), Alchemy.catalog(), mixture.history());
-		ItemStack made = Alchemy.brew(form, outcome);
+		if (made == null) {
+			Outcome outcome = Outcome.of(bottled.dose(), bottled.contaminant(), Alchemy.catalog(), mixture.history());
+			made = Alchemy.brew(form, outcome);
+		}
 		ItemStack output = items.get(OUTPUT_SLOT);
 		if (!output.isEmpty() && !ItemStack.isSameItemSameComponents(output, made)) {
 			return pause(level, Diagnostic.of(Code.OUTPUT_DIFFERS)); // paused; nothing voided (plan 03:64)
@@ -736,10 +769,11 @@ public class CrucibleBlockEntity extends BlockEntity implements GeoBlockEntity, 
 				player.sendOverlayMessage(Component.translatable("message.jugcraft.concordance.alchemy.settling"));
 				return InteractionResult.FAIL;
 			}
-			if (apply(player, level, new Operation.Stir(band()))) {
+			boolean lidded = covered(level); // C-D6: a stir under a lid is covered, and its formula will say so
+			if (apply(player, level, new Operation.Stir(band(), lidded))) {
 				lastStir = now;
-				player.sendOverlayMessage(Component.translatable("message.jugcraft.concordance.alchemy.stirred",
-						ComposeText.name(new Text.Ref("band", band().id))));
+				player.sendOverlayMessage(Component.translatable(lidded ? "message.jugcraft.concordance.alchemy.stirred_covered"
+						: "message.jugcraft.concordance.alchemy.stirred", ComposeText.name(new Text.Ref("band", band().id))));
 				sound(level, JugcraftConcordance.CRUCIBLE_STIR_SOUND);
 			}
 			return InteractionResult.SUCCESS;
@@ -787,15 +821,23 @@ public class CrucibleBlockEntity extends BlockEntity implements GeoBlockEntity, 
 			player.sendOverlayMessage(Component.translatable("message.jugcraft.concordance.alchemy.nothing_to_bottle"));
 			return InteractionResult.FAIL;
 		}
+		// C-D6 (Gloam Ink): a glass bottle draws an extract from a covered batch of its ingredients (bottleIntoOutput's rule).
+		Extract.Drawn drawn = held.is(Items.GLASS_BOTTLE) ? Extract.drawn(mixture, Alchemy.catalog()) : null;
+		ItemStack extracted = Alchemy.extract(drawn);
 		Outcome outcome = Outcome.of(bottled.dose(), bottled.contaminant(), Alchemy.catalog(), mixture.history());
-		ItemStack made = Alchemy.brew(form, outcome);
+		ItemStack made = extracted != null ? extracted : Alchemy.brew(form, outcome);
 		mixture = bottled.rest();
 		if (program != null && mixture.isEmpty()) {
 			step = 0;
 		}
 		held.shrink(1);
 		player.getInventory().placeItemBackInInventory(made, Prediction.SERVER_ONLY);
-		if (!outcome.effects().isEmpty()) {
+		if (drawn != null && extracted != null) {
+			// Gloam Ink is an outcome of its own for the Alembic Arts' mastery (GI-P6); its failure counts for nothing.
+			if (drawn.kind() == Extract.Kind.ITEM) {
+				ConcordanceProgress.record(player, new Evidence.Practiced(Alchemy.ACTIVITY, drawn.extract().id()));
+			}
+		} else if (!outcome.effects().isEmpty()) {
 			ConcordanceProgress.record(player, new Evidence.Practiced(Alchemy.ACTIVITY, outcome.key()));
 		}
 		RimeSurvey.bottled(player, bottled.dose()); // Rimekeeping's workshop study (Chunk B unit 3)

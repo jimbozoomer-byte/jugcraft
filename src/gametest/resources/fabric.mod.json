@@ -88,6 +88,7 @@
       "io.github.jimbozoomer.jugcraft.test.ConcordanceBaselineGameTests",
       "io.github.jimbozoomer.jugcraft.test.ConcordanceRitualGameTests",
       "io.github.jimbozoomer.jugcraft.test.ConcordanceAlchemyGameTests",
+      "io.github.jimbozoomer.jugcraft.test.ConcordanceGloamInkGameTests",
       "io.github.jimbozoomer.jugcraft.test.ConcordanceGardenGameTests",
       "io.github.jimbozoomer.jugcraft.test.ConcordanceSkyGameTests",
       "io.github.jimbozoomer.jugcraft.test.ConcordanceVigilGameTests",

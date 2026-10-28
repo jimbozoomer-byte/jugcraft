@@ -77,6 +77,7 @@ The table is rendered by `python3 tools/concordance_economy.py`, and `check_econ
 | Verdant Heart on a thriving bed, beside a Ley Pylon | 120 nutrients (60 bone meal) | 240 Verdance, poured as 160 Ley Charge | one beat every 200 ticks | the bed's nutrients fall; it stops on a starved bed |
 | Ley Pylon on Jugcraft Energy | 1,536,000 JE | 1,536 Ley Charge | 64 JE a tick | none; Ley Charge never becomes JE again |
 | Crucible Stand on Jugcraft Energy, heating searing all day | 768,000 JE | 24,000 ticks of one crucible's heat, no more | 32 JE a tick searing, 16 hot, 8 warm; nothing while its crucible waits for anything but heat, is held, or is hotter than it aims | none; heat is never stored, carried or turned back into JE, Ley Charge or anything else |
+| A crucible repeating Gloam Ink's worked formula all day | 360 Gloamcap, 120 Spider Eye, 360 parts of water and 360 glass bottles | 360 Gloam Ink, or as many Gloam Sludge from a murky formula | one step or one bottle every 20 ticks: 10 a batch of 3 | none; Gloam Ink and Gloam Sludge never become Gloamcap, a carrier, bone meal, nutrients or Ley Charge, and Gloam Sludge gives back only its bottle |
 | Gleaner on Concordance crops | 600 Verdance | 600 harvests, of ripe crops only | one every 40 ticks | each crop falls back to step 1 and must regrow at its cost |
 | Kindled Lantern, lit | 60 Radiance | light at its carrier | a measure every 400 ticks; a measure begun is spent | light |
 | Lumen Sconce | 20 Radiance | light 15 | a measure every 1200 ticks; a measure begun is spent | light |

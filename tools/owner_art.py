@@ -13,7 +13,8 @@ unit 3 adds the Crucible Stand's treated iron and copper coil from the Blocks fo
 OWNER_BLOCKS_FILES). Concordance Chunk D adds Stolas's body: the owner's Flashjack model copied unchanged under his name
 (tools/concordance_pacts.py OWNER_FILES), and (unit 3, D-06) his skin, glowmask and animations adapted from the rig's own
 files by tools/stolas_body.py (concordance_pacts.ADAPTED), written and checked here like the recolourings. Two tables may
-not import different files to one path.
+not import different files to one path. Gloam Ink (C-D6) adapts its icons from the owner's 23 October collection
+(tools/concordance_alchemy.py OWNER_OCT23_ADAPTED).
 
 On 7 October 2026 the owner asked for their farming and food textures to be used ("I have already made a ton of custom
 textures and food ... I made all of the textures in there myself its all mine"). Each imported texture is a byte-for-byte
@@ -76,6 +77,8 @@ LIBRARY = os.path.join(ROOT, "art", "owner-library", "originals", "Blocks")
 FOOD = "farming and food textures"
 TEXTURES = os.path.join(ROOT, "src", "main", "resources", "assets", "jugcraft", "textures")
 MAGIC = os.path.join(ROOT, "art", "owner-library", "originals", "Magic")
+# The owner's 23 October collection (art/owner-library/catalog/edited-2026-10-23-jimtafacts/README.md).
+OCT23 = os.path.join(ROOT, "art", "owner-library", "originals", "Oct23")
 ASSETS = os.path.join(ROOT, "src", "main", "resources", "assets", "jugcraft")
 
 
@@ -139,6 +142,25 @@ def adaptations():
             raise SystemExit(f"tools/owner_art.py: {target} is both copied and adapted")
         out.append((target, source, getattr(stolas_body, adapter)))
     return out
+
+
+def oct23_adaptations():
+    """(runtime path under assets/jugcraft, library path under Oct23/, adapter) for every file adapted from the owner's 23
+    October collection: Gloam Ink's and Gloam Sludge's icons (tools/concordance_alchemy.py OWNER_OCT23_ADAPTED, made by
+    tools/concordance_alchemy_art.py gloam_ink and gloam_sludge; C-D6). None may share a path with another import."""
+    import concordance_alchemy_art
+    taken = set(dict(magic_imports())) | set(dict(block_asset_imports())) | {target for target, *_ in adaptations()}
+    out = []
+    for target, (source, adapter) in sorted(concordance_alchemy.OWNER_OCT23_ADAPTED.items()):
+        if target in taken:
+            raise SystemExit(f"tools/owner_art.py: {target} is adapted from Oct23 and imported another way")
+        out.append((target, source, getattr(concordance_alchemy_art, adapter)))
+    return out
+
+
+def _read_oct23(path):
+    with open(os.path.join(OCT23, path), "rb") as handle:
+        return handle.read()
 
 
 def _read_magic(path):
@@ -239,20 +261,27 @@ def expected():
     for target, _, adapter in adaptations():
         # Stolas's body (D-06): adapted from the owner's Flashjack files, never drawn over by hand.
         files[os.path.join(ASSETS, target)] = adapt(adapter)
+    for target, _, adapter in oct23_adaptations():
+        # Gloam Ink's and Gloam Sludge's icons (C-D6): the owner's Common Ink and Blood Vial, tinted, never drawn over by hand.
+        files[os.path.join(ASSETS, target)] = _png_bytes(adapter(_read_oct23))
     return files
 
 
 def provenance():
-    """(runtime path, library path, SHA-256 of the library file, and the adapter's name, None for a copy) for every
-    magic-collection import, every Blocks-folder file copied whole by path (block_asset_imports) and every adapted file
-    (adaptations)."""
+    """(runtime path, library path, SHA-256 of the library file, and the adapter as module.function, None for a copy) for
+    every magic-collection import, every Blocks-folder file copied whole by path (block_asset_imports) and every adapted
+    file (adaptations, and the 23 October collection's: oct23_adaptations)."""
     out = []
     for root, name, table in ((MAGIC, "Magic", magic_imports()), (LIBRARY, "Blocks", block_asset_imports())):
         for target, source in table:
             with open(os.path.join(root, source), "rb") as handle:
                 out.append((target, f"originals/{name}/{source}", hashlib.sha256(handle.read()).hexdigest(), None))
     for target, source, adapter in adaptations():
-        out.append((target, f"originals/Magic/{source}", hashlib.sha256(_read_magic(source)).hexdigest(), adapter.__name__))
+        out.append((target, f"originals/Magic/{source}", hashlib.sha256(_read_magic(source)).hexdigest(),
+                    f"{adapter.__module__}.{adapter.__name__}"))
+    for target, source, adapter in oct23_adaptations():
+        out.append((target, f"originals/Oct23/{source}", hashlib.sha256(_read_oct23(source)).hexdigest(),
+                    f"{adapter.__module__}.{adapter.__name__}"))
     return out
 
 
@@ -270,6 +299,7 @@ def errors():
     adapted.update(_target(target) for target, _ in compositions())
     adapted.update(_target(target) for target in garden.ORNAMENTAL_EARS)
     adapted.update(os.path.join(ASSETS, target) for target, _, _ in adaptations() if target.endswith(".png"))
+    adapted.update(os.path.join(ASSETS, target) for target, _, _ in oct23_adaptations())
     for path, data in expected().items():
         rel = os.path.relpath(path, ROOT)
         if not os.path.isfile(path):
@@ -304,10 +334,11 @@ if __name__ == "__main__":
                 # A slice outside the Concordance's modules (the encyclopedia: tools/encyclopedia.py).
                 module = __import__(rest[0])
             only = set(getattr(module, "OWNER_FILES", {})) | set(getattr(module, "OWNER_BLOCKS_FILES", {})) \
-                | set(getattr(module, "ADAPTED", {}))
+                | set(getattr(module, "ADAPTED", {})) | set(getattr(module, "OWNER_OCT23_ADAPTED", {}))
         for target, source, digest, adapter in provenance():
             if only is None or target in only:
-                adapted = f" adapted by `tools/stolas_body.py` ({adapter}) |" if adapter else ""
+                tool, _, name = (adapter or "").rpartition(".")
+                adapted = f" adapted by `tools/{tool}.py` ({name}) |" if adapter else ""
                 print(f"| `{target}` | `{source}` | `{digest}` |" + adapted)
         sys.exit(0)
     if "--check" in sys.argv:

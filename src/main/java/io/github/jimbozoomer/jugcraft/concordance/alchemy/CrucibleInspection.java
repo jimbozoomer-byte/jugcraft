@@ -20,10 +20,10 @@ public final class CrucibleInspection {
 	/**
 	 * The crucible as the server has it now; reason is the crucible's own (Diagnostic.text()), or null; apart, whether its
 	 * mixture is not its formula's own batch (made before the formula was set, or under a formula the rules refuse:
-	 * Assay.risks).
+	 * Assay.risks); covered, whether a lid covers it (C-D6).
 	 */
 	public record State(int temperature, Heat.Below below, int heldTicks, Mixture mixture, int tankParts, int tankCapacity,
-			@Nullable Formula program, int step, @Nullable Text reason, boolean apart) {
+			@Nullable Formula program, int step, @Nullable Text reason, boolean apart, boolean covered) {
 	}
 
 	/** A heading (none for the first section) and its lines. */
@@ -54,6 +54,10 @@ public final class CrucibleInspection {
 				preview.add(Text.of("alchemy.assay.nothing"));
 			}
 			preview.addAll(outcome.reasons());
+			Extract.Drawn drawn = Extract.drawn(applied.mixture(), catalog); // C-D6: what a glass bottle draws instead
+			if (drawn != null) {
+				preview.addAll(drawn.reasons());
+			}
 			out.add(new Section(Text.of("alchemy.inspect.preview"), preview));
 		}
 		return out;
@@ -74,6 +78,9 @@ public final class CrucibleInspection {
 		}
 		if (state.heldTicks() > 0) {
 			out.add(Text.of("alchemy.inspect.held", new Text.Ref("band", band.id), (state.heldTicks() + 19) / 20));
+		}
+		if (state.covered()) {
+			out.add(Text.of("alchemy.inspect.covered"));
 		}
 		out.add(Text.of("alchemy.inspect.volume", state.mixture().parts(), Mixture.MAX_PARTS));
 		out.add(Text.of("alchemy.inspect.tank", state.tankParts(), state.tankCapacity()));

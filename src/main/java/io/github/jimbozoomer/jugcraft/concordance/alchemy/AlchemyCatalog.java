@@ -3,23 +3,25 @@ package io.github.jimbozoomer.jugcraft.concordance.alchemy;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import org.jspecify.annotations.Nullable;
 
 /**
- * The loaded alchemy data: ingredients by item id, preparations, properties and (Concordance Chunk C, C-02) workshop
- * products by id. Immutable; part of the {@link io.github.jimbozoomer.jugcraft.concordance.rules.ConcordanceRules} a
+ * The loaded alchemy data: ingredients by item id, preparations, properties, (Concordance Chunk C, C-02) workshop
+ * products by id and (Concordance C-D6) covered extractions by id. Immutable; part of the {@link io.github.jimbozoomer.jugcraft.concordance.rules.ConcordanceRules} a
  * reload swaps whole.
  */
 public record AlchemyCatalog(Map<String, Ingredient> ingredients, Map<String, Preparation> preparations,
-		Map<String, Property> properties, Map<String, Product> products) {
-	public static final AlchemyCatalog EMPTY = new AlchemyCatalog(Map.of(), Map.of(), Map.of(), Map.of());
+		Map<String, Property> properties, Map<String, Product> products, Map<String, Extract> extracts) {
+	public static final AlchemyCatalog EMPTY = new AlchemyCatalog(Map.of(), Map.of(), Map.of(), Map.of(), Map.of());
 
 	public AlchemyCatalog {
 		ingredients = Collections.unmodifiableMap(new LinkedHashMap<>(ingredients));
 		preparations = Collections.unmodifiableMap(new LinkedHashMap<>(preparations));
 		properties = Collections.unmodifiableMap(new LinkedHashMap<>(properties));
 		products = Collections.unmodifiableMap(new LinkedHashMap<>(products));
+		extracts = Collections.unmodifiableMap(new LinkedHashMap<>(extracts));
 	}
 
 	/** The ingredient an item is, or null. */
@@ -72,6 +74,24 @@ public record AlchemyCatalog(Map<String, Ingredient> ingredients, Map<String, Pr
 					return null;
 				}
 				found = product;
+			}
+		}
+		return found;
+	}
+
+	/**
+	 * The extract a batch of {@code history}'s ingredients is (Concordance C-D6): the one whose base and carriers it is made
+	 * of (Extract.madeOf). Null if none, or if more than one is (ConcordanceRules lets no ingredient be in two, so this
+	 * guards only hand-made catalogues): an ambiguous batch draws the draught rather than guess.
+	 */
+	public @Nullable Extract extract(List<Operation> history) {
+		Extract found = null;
+		for (Extract extract : extracts.values()) {
+			if (extract.madeOf(history)) {
+				if (found != null) {
+					return null;
+				}
+				found = extract;
 			}
 		}
 		return found;

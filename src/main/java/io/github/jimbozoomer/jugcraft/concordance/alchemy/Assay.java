@@ -36,9 +36,23 @@ public final class Assay {
 			if (mixture.isEmpty()) {
 				return PLAIN;
 			}
-			Property fouling = catalog.property(Property.CONTAMINANT);
-			return new Look(mixture.concentration().dominant(), fouling != null && mixture.contaminantConcentration() * 2 >= fouling.threshold());
+			return new Look(mixture.concentration().dominant(), murky(mixture.contaminantConcentration(), catalog));
 		}
+	}
+
+	/**
+	 * Whether a part holding {@code contaminant} milli-units is murky: twice it reaches Nausea's threshold (what a spoon
+	 * tells, Look; since Concordance C-D6, what makes an extract's batch its failure). Never, with no contaminant property.
+	 */
+	public static boolean murky(long contaminant, AlchemyCatalog catalog) {
+		Property fouling = catalog.property(Property.CONTAMINANT);
+		return fouling != null && contaminant * 2 >= fouling.threshold();
+	}
+
+	/** The least contaminant a part that is murky: half Nausea's threshold, rounded up (Long.MAX_VALUE with none). */
+	public static long murkyFrom(AlchemyCatalog catalog) {
+		Property fouling = catalog.property(Property.CONTAMINANT);
+		return fouling == null ? Long.MAX_VALUE : (fouling.threshold() + 1) / 2;
 	}
 
 	public static List<Text> read(Mixture mixture, int temperature, int level, AlchemyCatalog catalog) {
@@ -84,6 +98,11 @@ public final class Assay {
 			out.add(Text.of("alchemy.assay.nothing"));
 		}
 		out.addAll(outcome.reasons());
+		// Concordance C-D6: what a glass bottle draws instead, from a covered batch of an extract's ingredients.
+		Extract.Drawn drawn = Extract.drawn(mixture, catalog);
+		if (drawn != null) {
+			out.addAll(drawn.reasons());
+		}
 		return out;
 	}
 
@@ -100,30 +119,38 @@ public final class Assay {
 	public static List<Text> risks(@Nullable Formula program, Mixture mixture, boolean apart, Predicate<String> harmful, AlchemyCatalog catalog) {
 		List<Text> out = new ArrayList<>();
 		List<Operation> operations;
-		List<Outcome> outcomes = new ArrayList<>();
+		List<Mixture> judged = new ArrayList<>();
 		boolean live = false;
 		if (program != null) {
 			operations = program.operations();
 			if (program.replay(catalog) instanceof Mixture.Applied applied) {
-				outcomes.add(applied.mixture().outcome(catalog));
+				judged.add(applied.mixture());
 			}
 			live = apart && !mixture.isEmpty();
 			if (live) {
-				outcomes.add(mixture.outcome(catalog));
+				judged.add(mixture);
 			}
 		} else if (!mixture.isEmpty()) {
 			operations = mixture.history();
-			outcomes.add(mixture.outcome(catalog));
+			judged.add(mixture);
 		} else {
 			return out;
 		}
 		List<Text.Ref> harms = new ArrayList<>();
-		for (Outcome outcome : outcomes) {
-			for (Outcome.Effect effect : outcome.effects()) {
+		List<Text.Ref> failures = new ArrayList<>();
+		for (Mixture each : judged) {
+			for (Outcome.Effect effect : each.outcome(catalog).effects()) {
 				Text.Ref status = new Text.Ref("status", effect.property().status());
 				if ((effect.property().intent() == Intent.HARMFUL || harmful.test(status.id())) && !harms.contains(status)) {
 					harms.add(status);
 				}
+			}
+			// Concordance C-D6: a murky covered batch of an extract's ingredients draws its failure, never its item: said to
+			// anyone, before a bottle is spent.
+			Extract.Drawn drawn = Extract.drawn(each, catalog);
+			Text.Ref failure = drawn == null || drawn.kind() != Extract.Kind.FAILURE ? null : new Text.Ref("item", drawn.extract().failure());
+			if (failure != null && !failures.contains(failure)) {
+				failures.add(failure);
 			}
 		}
 		if (!harms.isEmpty()) {
@@ -135,6 +162,9 @@ public final class Assay {
 		}
 		if (live && firstSearing(mixture.history()) >= 0) {
 			out.add(Text.of("alchemy.risk.seared"));
+		}
+		for (Text.Ref failure : failures) {
+			out.add(Text.of("alchemy.risk.failure", failure));
 		}
 		return out;
 	}

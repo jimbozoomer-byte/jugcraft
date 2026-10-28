@@ -6,8 +6,8 @@ import org.jspecify.annotations.Nullable;
 
 /**
  * One step of an alchemical process, in the canonical text a formula records: {@code water <parts>},
- * {@code add <item> <preparation>} or {@code stir <band>}. A mixture's history is its operations in order, and
- * replaying them from nothing makes the same mixture.
+ * {@code add <item> <preparation>} or {@code stir <band>} (under a lid, {@code stir <band> covered}: Concordance C-D6). A
+ * mixture's history is its operations in order, and replaying them from nothing makes the same mixture.
  */
 public sealed interface Operation {
 	Pattern ID = Pattern.compile("[a-z0-9_.-]+:[a-z0-9_./-]+");
@@ -60,16 +60,25 @@ public sealed interface Operation {
 		}
 	}
 
-	/** Stirs once at the temperature band the mixture is in. */
-	record Stir(Band band) implements Operation {
+	/**
+	 * Stirs once at the temperature band the mixture is in; {@code covered}, under a lid (Concordance C-D6, Gloam Ink:
+	 * CrucibleBlockEntity.covered), written {@code stir <band> covered}. A covered stir dissolves as any other: the lid
+	 * decides only what a glass bottle draws (Extract).
+	 */
+	record Stir(Band band, boolean covered) implements Operation {
+		/** An uncovered stir, as every formula before C-D6 wrote it. */
+		public Stir(Band band) {
+			this(band, false);
+		}
+
 		@Override
 		public String text() {
-			return "stir " + band.id;
+			return "stir " + band.id + (covered ? " covered" : "");
 		}
 
 		@Override
 		public Text describe() {
-			return Text.of("alchemy.op.stir", new Text.Ref("band", band.id));
+			return Text.of(covered ? "alchemy.op.stir_covered" : "alchemy.op.stir", new Text.Ref("band", band.id));
 		}
 	}
 
@@ -80,7 +89,8 @@ public sealed interface Operation {
 			return switch (words[0]) {
 				case "water" -> words.length == 2 ? new Water(Integer.parseInt(words[1])) : null;
 				case "add" -> words.length == 3 ? new Add(words[1], words[2]) : null;
-				case "stir" -> words.length == 2 && Band.fromId(words[1]) != null ? new Stir(Band.fromId(words[1])) : null;
+				case "stir" -> (words.length == 2 || words.length == 3 && words[2].equals("covered")) && Band.fromId(words[1]) != null
+						? new Stir(Band.fromId(words[1]), words.length == 3) : null;
 				default -> null;
 			};
 		} catch (IllegalArgumentException invalid) {
