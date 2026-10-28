@@ -1355,12 +1355,18 @@ public class ConcordanceGardenPactClientGameTests implements FabricClientGameTes
 		String[] sides = {"east", "south", "west", "north"};
 		int[][] offsets = {{2, 0}, {0, 2}, {-2, 0}, {0, -2}};
 		float[] bearings = {-90.0F, 0.0F, 90.0F, 180.0F};
+		// The look goes to the spirit's middle, so a tall one (Bathin, coiled high on the perch) is framed head and all.
+		double middle = server.computeOnServer(minecraft -> {
+			PactSpiritEntity<?> spirit = presenceOf(minecraft, perch);
+			return spirit.getY() + spirit.getBbHeight() / 2.0;
+		});
+		float pitch = (float) -Math.toDegrees(Math.atan2(middle - (perch.getY() + 1.62), 2.0));
 		boolean hidden = hideHud(context);
 		try {
 			for (int i = 0; i < sides.length; i++) {
 				float bearing = bearings[i];
-				server.runCommand(String.format(Locale.ROOT, "tp @a %.1f %d %.1f %.1f 10", perch.getX() + 0.5 + offsets[i][0], perch.getY(),
-						perch.getZ() + 0.5 + offsets[i][1], Mth.wrapDegrees(bearing + 180.0F)));
+				server.runCommand(String.format(Locale.ROOT, "tp @a %.1f %d %.1f %.1f %.1f", perch.getX() + 0.5 + offsets[i][0], perch.getY(),
+						perch.getZ() + 0.5 + offsets[i][1], Mth.wrapDegrees(bearing + 180.0F), pitch));
 				context.waitTicks(OPEN_GAP);
 				open(context, server, perch);
 				context.waitFor(client -> spiritAt(client, perch, id) instanceof LivingEntity body
