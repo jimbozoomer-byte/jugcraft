@@ -51,8 +51,8 @@ import net.minecraft.world.phys.AABB;
  * scopes, each aimed through on the Longhorn Rifle (the view through it or the reflex dot, the narrowed view, the slower
  * mouse). Slice 8C: the heavy weapons fire their own ammunition (grenades, blaze powder) the same way, and the
  * Thresher's trigger is held until its barrels have spun up and it fires. Slice 9F: aimed down its sights, each gun's
- * arms are drawn at half their size, and a fitted stock is left out. Screenshots jugcraft_guns_* (CI job
- * {@code client}).
+ * arms are drawn at half their size, and a fitted stock is left out. Slice 15D: a burst gun's one pull fires its whole
+ * burst. Screenshots jugcraft_guns_* (CI job {@code client}).
  */
 public class GunsClientGameTests implements FabricClientGameTest {
 	@Override
@@ -170,10 +170,14 @@ public class GunsClientGameTests implements FabricClientGameTest {
 				float after = health(server, x, y, z);
 				int loaded = server.computeOnServer(minecraft -> GunItem.loaded(player(minecraft).getMainHandItem()));
 				int spent = capacity - loaded;
+				// Slice 15D: a burst gun's one pull fires its whole burst, which has run out by now.
+				JugcraftGuns.Burst burst = JugcraftGuns.burst(JugcraftGuns.GUNS.get(gun));
+				int pulled = burst == null ? 1 : burst.rounds();
 				Jugcraft.LOGGER.info("[guns] {} fired at a husk: health {} -> {}, rounds {} -> {}", gun, before, after, capacity, loaded);
-				if (after >= before || spent < 1 || spinUp == 0 && spent != 1) {
-					throw new AssertionError("The " + gun + " did not hit the husk and spend " + (spinUp > 0 ? "rounds" : "a round")
-							+ ": health " + before + " -> " + after + ", rounds " + capacity + " -> " + loaded);
+				if (after >= before || spent < 1 || spinUp == 0 && spent != pulled) {
+					throw new AssertionError("The " + gun + " did not hit the husk and spend " + (spinUp > 0 ? "rounds"
+							: pulled == 1 ? "a round" : pulled + " rounds") + ": health " + before + " -> " + after + ", rounds " + capacity
+							+ " -> " + loaded);
 				}
 
 				context.getInput().pressKey(options -> GunsClient.reloadKey());

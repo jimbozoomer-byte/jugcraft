@@ -14,6 +14,7 @@ import java.util.Set;
 import net.fabricmc.fabric.api.creativetab.v1.CreativeModeTabEvents;
 import net.fabricmc.fabric.api.object.builder.v1.block.entity.FabricBlockEntityTypeBuilder;
 import net.fabricmc.fabric.api.particle.v1.FabricParticleTypes;
+import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
 import net.minecraft.core.component.DataComponentType;
 import net.minecraft.core.component.DataComponents;
@@ -25,10 +26,13 @@ import net.minecraft.resources.Identifier;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.world.damagesource.DamageType;
+import net.minecraft.world.effect.MobEffect;
+import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.CreativeModeTabs;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.item.Rarity;
 import net.minecraft.world.item.component.UseEffects;
 import net.minecraft.world.item.crafting.RecipeSerializer;
@@ -37,6 +41,7 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockBehaviour;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Guns (docs/features/guns.md): the owner's guns, built from the owner's models and played with the owner's animations
@@ -79,8 +84,8 @@ import net.minecraft.world.level.block.state.BlockBehaviour;
  * hand ({@link #ONE_HANDED}), the tank under its barrel changed to reload; the Goldbristle Carbine, fed from a magazine
  * at its side; and the Crackling, a long pump shotgun of six heavy pellets, loaded a shell at a time.</li>
  * <li>Slice 12A, the End guns, each fed from a shulker box: the Chitin SMG and the Hermit Rifle, automatics on light and
- * rifle rounds, and the Borer, a machine gun carried at the hip. Their shots make what they hit float
- * ({@link #LEVITATING}).</li>
+ * rifle rounds, and the Borer, a machine gun carried at the hip. Their shots may make what they hit float
+ * ({@link #LEVITATING}; at the owner's chances since the levitation follow-up).</li>
  * <li>Slice 12B, the copper guns, of copper and iron as the Rust Midge: the Penny Pistol, held in one hand
  * ({@link #ONE_HANDED}); the Conductor Carbine, a slide-action carbine worked after every shot; and the Magpie SMG, an
  * automatic. The pistol and the submachine gun are fed from magazines at their left side.</li>
@@ -220,7 +225,17 @@ public final class JugcraftGuns {
 		SPECS.put("jawbreaker", new GunSpec(12.0F, 1, 8, false, 4, 47, 0, 0, 0, 2.5F, 0.5F, 72, "rifle_round"));
 		SPECS.put("hawker_rifle", new GunSpec(9.0F, 1, 8, false, 12, 50, 0, 0, 0, 2.5F, 0.25F, 112, "rifle_round"));
 		SPECS.put("impetus_shotgun", new GunSpec(3.5F, 8, 13, false, 6, 48, 0, 0, 0, 6.0F, 4.5F, 28, "buckshot_shell"));
-		SPECS.put("quill_rifle", new GunSpec(5.0F, 1, 4, true, 13, 43, 0, 0, 0, 3.0F, 0.75F, 64, "light_round"));
+		SPECS.put("quill_rifle", new GunSpec(5.0F, 1, 4, true, 13, 43, 0, 0, 0, 3.0F, 0.75F, 64, "dart"));
+		// Slice 15D: three more of the owner's diamond-steel guns: a two-barrelled rifle and its shotgun make-over, each
+		// loaded a round at a time, and a rifle that fires a burst of three to a pull (BURSTS).
+		SPECS.put("auger_rifle", new GunSpec(14.0F, 1, 6, false, 2, 0, 12, 17, 16, 2.0F, 0.4F, 96, "paper_cartridge"));
+		SPECS.put("auger_shotgun", new GunSpec(3.5F, 8, 6, false, 2, 0, 12, 17, 16, 7.5F, 7.5F, 24, "buckshot_shell"));
+		SPECS.put("tumbler_rifle", new GunSpec(5.5F, 1, 3, false, 21, 43, 0, 0, 0, 2.5F, 0.5F, 96, "rifle_round"));
+		// Slice 15E: the owner's last three diamond-steel guns: an automatic gun of little rockets loaded three at a time
+		// (LOAD_STEPS), and two energy weapons, a rifle's beam and a cutter's beam through armour (PIERCING).
+		SPECS.put("maelstrom_gun", new GunSpec(7.5F, 1, 6, true, 24, 0, 10, 17, 20, 3.0F, 1.5F, 64, "microjet"));
+		SPECS.put("ermine_rifle", new GunSpec(10.0F, 1, 12, false, 15, 53, 0, 0, 0, 1.5F, 0.2F, 80, "energy_cell"));
+		SPECS.put("geode_cutter", new GunSpec(3.0F, 1, 3, true, 50, 59, 0, 0, 0, 3.0F, 1.5F, 24, "energy_cell"));
 	}
 
 	/**
@@ -229,7 +244,7 @@ public final class JugcraftGuns {
 	 * line; {@link #ARC}, a bolt that leaps from creature to creature; {@link #ROCKET} (slice 10A), a High-Explosive Rocket
 	 * ({@link GunShots}).
 	 */
-	public static final Map<String, String> SHOTS = Map.ofEntries(Map.entry("trench_lobber", "grenade"), Map.entry("stoker", "flame"), Map.entry("beam_pistol", "beam"), Map.entry("stormlock_rifle", "arc"), Map.entry("linesman", "arc"), Map.entry("spikedriver", "beam"), Map.entry("seam_cutter", "beam"), Map.entry("caisson_pistol", "arc"), Map.entry("earthmover", "rocket"), Map.entry("skylark_rifle", "rocket"), Map.entry("bullfrog", "grenade"), Map.entry("solenoid_rifle", "beam"), Map.entry("votive_rifle", "beam"), Map.entry("glowmouth", "arc"), Map.entry("fencepost_thumper", "grenade"), Map.entry("lantern_musket", "beam"), Map.entry("firedrake", "flame"));
+	public static final Map<String, String> SHOTS = Map.ofEntries(Map.entry("trench_lobber", "grenade"), Map.entry("stoker", "flame"), Map.entry("beam_pistol", "beam"), Map.entry("stormlock_rifle", "arc"), Map.entry("linesman", "arc"), Map.entry("spikedriver", "beam"), Map.entry("seam_cutter", "beam"), Map.entry("caisson_pistol", "arc"), Map.entry("earthmover", "rocket"), Map.entry("skylark_rifle", "rocket"), Map.entry("bullfrog", "grenade"), Map.entry("solenoid_rifle", "beam"), Map.entry("votive_rifle", "beam"), Map.entry("glowmouth", "arc"), Map.entry("fencepost_thumper", "grenade"), Map.entry("lantern_musket", "beam"), Map.entry("firedrake", "flame"), Map.entry("ermine_rifle", "beam"), Map.entry("geode_cutter", "beam"));
 	public static final String GRENADE = "grenade";
 	public static final String FLAME = "flame";
 	public static final String BEAM = "beam";
@@ -244,7 +259,7 @@ public final class JugcraftGuns {
 	 * Slice 8D: the JE each round of an energy weapon draws from the Energy Cells in the inventory as it loads
 	 * (tools/guns.py GUNS "charge"); a gun not listed loads rounds of its ammunition.
 	 */
-	public static final Map<String, Integer> CHARGE = Map.of("beam_pistol", 400, "stormlock_rifle", 750, "linesman", 250, "spikedriver", 800, "seam_cutter", 100, "caisson_pistol", 300, "solenoid_rifle", 1100, "votive_rifle", 200, "glowmouth", 750, "lantern_musket", 900);
+	public static final Map<String, Integer> CHARGE = Map.ofEntries(Map.entry("beam_pistol", 400), Map.entry("stormlock_rifle", 750), Map.entry("linesman", 250), Map.entry("spikedriver", 800), Map.entry("seam_cutter", 100), Map.entry("caisson_pistol", 300), Map.entry("solenoid_rifle", 1100), Map.entry("votive_rifle", 200), Map.entry("glowmouth", 750), Map.entry("lantern_musket", 900), Map.entry("ermine_rifle", 400), Map.entry("geode_cutter", 120));
 	/**
 	 * An arc leaps on from its first creature to at most {@link #ARC_HOPS} more, each the nearest within {@link #ARC_REACH}
 	 * blocks of the last, each taking {@link #ARC_SHARE} of the damage before it (tools/guns.py).
@@ -280,8 +295,9 @@ public final class JugcraftGuns {
 	 */
 	public static final Set<String> INCENDIARY = Set.of("tusker", "cinder_repeater", "bastion_rifle", "ashfall_pistol", "goldbristle_carbine", "crackling", "hinterland_rifle", "harrow");
 	/**
-	 * Slice 12A, the End guns: the guns whose bullets make each creature they hurt float, for {@link GunShots#LIFT_TICKS}
-	 * as a shulker's bullet does (tools/guns.py LEVITATING).
+	 * Slice 12A, the End guns: the guns whose bullets may make each creature they hurt float, as a shulker's bullet does
+	 * (tools/guns.py LEVITATING). Slice 12A lifted every hit for a second; since the levitation follow-up they lift at the
+	 * owner's chances and for the owner's time, their {@link #HIT_EFFECTS} levitation.
 	 */
 	public static final Set<String> LEVITATING = Set.of("chitin_smg", "hermit_rifle", "borer");
 	/**
@@ -293,15 +309,115 @@ public final class JugcraftGuns {
 	/**
 	 * The guns whose bullets knock back each creature they hurt a second time, by this strength, after the 0.4 every hit
 	 * gives (tools/guns.py KNOCKBACK). Slice 15B's Jawbreaker is the first, from the owner's Uppercut; slice 15C's Impetus
-	 * Shotgun, from the owner's Inertial, the second.
+	 * Shotgun, from the owner's Inertial, the second; slice 15D's Auger Shotgun, from the owner's Drill Conversion, the
+	 * third. The older guns follow-up gives 24 of the guns before slice 15 theirs, the Flatboat Gun the strongest (8).
 	 */
-	public static final Map<String, Float> KNOCKBACK = Map.of("jawbreaker", 0.6F, "impetus_shotgun", 0.65F);
+	public static final Map<String, Float> KNOCKBACK = Map.ofEntries(Map.entry("jawbreaker", 0.6F), Map.entry("impetus_shotgun", 0.65F), Map.entry("auger_shotgun", 0.65F), Map.entry("thunderpipe", 0.75F), Map.entry("haymaker", 0.6F), Map.entry("coach_gun", 0.75F), Map.entry("bellmouth", 0.8F), Map.entry("bulldog_pistol", 0.85F), Map.entry("breacher", 0.65F), Map.entry("rattler_pistol", 0.8F), Map.entry("bronco_smg", 0.85F), Map.entry("sledge", 0.65F), Map.entry("mule", 0.65F), Map.entry("fowler", 0.8F), Map.entry("culverin", 0.8F), Map.entry("reverb", 0.65F), Map.entry("tusker", 0.65F), Map.entry("crackling", 0.65F), Map.entry("goshawk_revolver", 3.0F), Map.entry("waystation_shotgun", 0.7F), Map.entry("flatboat_gun", 8.0F), Map.entry("holler_pistol", 0.65F), Map.entry("minuet_pistol", 0.55F), Map.entry("half_crown_revolver", 0.55F), Map.entry("holler_carbine", 0.65F), Map.entry("navvy_shotgun", 0.85F), Map.entry("freeholder_rifle", 0.4F));
 	/**
 	 * The guns whose bullets pierce armour: a hit deals what it would if the target wore this many points less armour
 	 * ({@link GunShots#pierced}; tools/guns.py PIERCING). Slice 15B's Jawbreaker is the first, from the owner's Uppercut;
-	 * slice 15C's Hawker Rifle and Quill Rifle, from the owner's MAS Peddler and Zilk 45, follow.
+	 * slice 15C's Hawker Rifle and Quill Rifle, from the owner's MAS Peddler and Zilk 45, follow; then slices 15A's and
+	 * 15B's other guns, from the owner's MAS 55, Prush Gun, Krauser and Soul Drummer; slice 15D's Tumbler Rifle, from the
+	 * owner's Lockewood; and slice 15E's Geode Cutter, from the owner's Shard Culler, the first whose beam pierces armour.
+	 * The older guns follow-up gives 27 of the guns before slice 15 theirs, the Caisson Pistol's on its arc.
 	 */
-	public static final Map<String, Float> PIERCING = Map.of("jawbreaker", 4.5F, "hawker_rifle", 1.0F, "quill_rifle", 1.5F);
+	public static final Map<String, Float> PIERCING = Map.ofEntries(Map.entry("vesper_rifle", 4.5F), Map.entry("onrush_smg", 3.0F), Map.entry("kreuzer_pistol", 1.0F), Map.entry("psalm_smg", 1.0F), Map.entry("jawbreaker", 4.5F), Map.entry("hawker_rifle", 1.0F), Map.entry("quill_rifle", 1.5F), Map.entry("tumbler_rifle", 3.0F), Map.entry("geode_cutter", 4.0F), Map.entry("patchwork_carbine", 2.0F), Map.entry("warden_pistol", 1.0F), Map.entry("riveter_smg", 1.0F), Map.entry("longhorn_rifle", 3.5F), Map.entry("sapper_revolver", 2.5F), Map.entry("garrison_rifle", 2.0F), Map.entry("thresher", 1.0F), Map.entry("kestrel_rifle", 3.0F), Map.entry("caisson_pistol", 1.0F), Map.entry("highwayman", 2.5F), Map.entry("undertone_rifle", 6.5F), Map.entry("murmur_smg", 7.0F), Map.entry("reverb", 7.0F), Map.entry("cinder_repeater", 2.0F), Map.entry("ashfall_pistol", 2.0F), Map.entry("conductor_carbine", 2.5F), Map.entry("lament_rifle", 7.0F), Map.entry("ammonite_carbine", 2.0F), Map.entry("highball_rifle", 2.5F), Map.entry("flatboat_gun", 2.0F), Map.entry("millstone_rifle", 1.5F), Map.entry("holler_pistol", 5.0F), Map.entry("half_crown_revolver", 4.0F), Map.entry("holler_carbine", 5.0F), Map.entry("grange_carbine", 2.0F), Map.entry("sprocket_gun", 3.0F), Map.entry("old_grange_carbine", 2.5F));
+	/**
+	 * Slice 15D: a gun that fires a burst to a pull, {@code rounds} shots its {@link GunSpec#interval} apart, then waits
+	 * {@code rest} ticks more before the next pull fires ({@link #BURSTS}).
+	 */
+	public record Burst(int rounds, int rest) {
+		/** Ticks from one burst's first shot to the next's at the quickest: the server's trigger allows a burst so often. */
+		public int cycle(GunSpec spec) {
+			return rounds * spec.interval() + rest;
+		}
+	}
+
+	/**
+	 * The guns that fire a burst to a pull (tools/guns.py BURSTS): slice 15D's Tumbler Rifle, three rounds and a rest of 5
+	 * ticks, as the owner's Lockewood.
+	 */
+	public static final Map<String, Burst> BURSTS = Map.of("tumbler_rifle", new Burst(3, 5));
+	/**
+	 * Slice 15E: the guns loaded a shell at a time that load several rounds at each shell's time (tools/guns.py LOAD_STEPS):
+	 * the Maelstrom Gun, from the owner's Cyclone, three microjets a step.
+	 */
+	public static final Map<String, Integer> LOAD_STEPS = Map.of("maelstrom_gun", 3);
+
+	/**
+	 * The beam-mining follow-up: a beam gun whose beam cuts the block at its end as a tool of this mining speed would,
+	 * and cuts only what a pickaxe of this tier ({@code iron} or {@code diamond}) may harvest, or what needs no tool
+	 * ({@link #MINING}; GunShots.cut).
+	 */
+	public record Mining(float speed, String tier) {
+		/** The pickaxe whose harvest the beam's is. */
+		public ItemStack pickaxe() {
+			return new ItemStack(tier.equals("diamond") ? Items.DIAMOND_PICKAXE : Items.IRON_PICKAXE);
+		}
+
+		/**
+		 * How far through a block of this hardness one shot cuts (1 is through), from a gun firing every {@code interval}
+		 * ticks: as vanilla's correct tool, hardness × 30 ticks over the speed, and a block of no hardness at once.
+		 */
+		public float cut(float hardness, int interval) {
+			return hardness <= 0.0F ? 1.0F : speed * interval / (hardness * 30.0F);
+		}
+	}
+
+	/**
+	 * The beams that mine (tools/guns.py MINING), at the owner's mining speeds: the Seam Cutter, from the owner's CR4K
+	 * Mining Laser, 14, an iron pickaxe's harvest; the Geode Cutter, from the owner's Shard Culler, 1, a diamond
+	 * pickaxe's. The server option {@code guns.beam_mining} turns it off.
+	 */
+	public static final Map<String, Mining> MINING = Map.of("seam_cutter", new Mining(14.0F, "iron"), "geode_cutter", new Mining(1.0F, "diamond"));
+	/** A pause of more than this many ticks between a mining beam's shots on a block starts its cut over. */
+	public static final int MINE_GAP = 10;
+	/** The round that falls over its flight (the darts-and-bleeding follow-up; tools/guns.py AMMO "dart"). */
+	public static final String DART = "dart";
+	/** How far a dart flies a tick, in blocks (the owner's frog dart's speed; {@link GunShots#flight}). */
+	public static final double DART_SPEED = 5.0;
+	/** How much faster a dart falls each tick it flies, in blocks a tick, as an arrow falls. */
+	public static final double DART_DROP = 0.05;
+	/** Every how many ticks a creature bleeding loses {@link #BLEED_DAMAGE} (twice as often at each level above the first). */
+	public static final int BLEED_TICKS = 40;
+	/** What a creature bleeding loses each time, through its armour. */
+	public static final float BLEED_DAMAGE = 1.0F;
+
+	/** A gun's chance a hit to make a creature bleed, and for how many ticks ({@link #BLEEDS}). */
+	public record Bleed(float chance, int ticks) {
+	}
+
+	/**
+	 * The guns whose hits may make a creature bleed (the darts-and-bleeding follow-up; tools/guns.py BLEEDS), from the
+	 * owner's data (their "lacerated", its chance and duration): the M3 Marksman's for the Picket Rifle, the Railworker's
+	 * for the Spikedriver, the Scratches' for the Harrow and the Zilk 45's for the Quill Rifle; and (the hit-effects
+	 * follow-up) the Thunderhead's for the Cloudburst Gun and the Hyperbaria's for the Caisson Pistol, whose arc now
+	 * carries it.
+	 */
+	public static final Map<String, Bleed> BLEEDS = Map.of("picket_rifle", new Bleed(0.3F, 300), "spikedriver", new Bleed(0.6F, 300), "harrow", new Bleed(0.3F, 300), "quill_rifle", new Bleed(0.4F, 300), "cloudburst_gun", new Bleed(0.3F, 300), "caisson_pistol", new Bleed(0.5F, 200));
+
+	/**
+	 * A vanilla effect a gun's hit may give (the hit-effects follow-up, {@link #HIT_EFFECTS}): its name, the chance a hit
+	 * gives it, for how many ticks and at what amplifier.
+	 */
+	public record HitEffect(String effect, float chance, int ticks, int amplifier) {
+		/** The vanilla effect this names. */
+		public Holder<MobEffect> holder() {
+			return switch (effect) {
+				case "slowness" -> MobEffects.SLOWNESS;
+				case "darkness" -> MobEffects.DARKNESS;
+				case "levitation" -> MobEffects.LEVITATION;
+				default -> throw new IllegalStateException("No hit effect " + effect);
+			};
+		}
+	}
+
+	/**
+	 * The guns whose hits may give a vanilla effect (the hit-effects follow-up; tools/guns.py HIT_EFFECTS), from the owner's
+	 * data (its effect, chance, duration and amplifier): slowness from the Linesman, Stormlock Rifle and Geode Cutter,
+	 * darkness from the Lament Rifle, and (the levitation follow-up) levitation from the End guns ({@link #LEVITATING}).
+	 */
+	public static final Map<String, HitEffect> HIT_EFFECTS = Map.of("linesman", new HitEffect("slowness", 0.4F, 200, 0), "stormlock_rifle", new HitEffect("slowness", 0.4F, 200, 0), "geode_cutter", new HitEffect("slowness", 0.75F, 100, 0), "lament_rifle", new HitEffect("darkness", 0.25F, 100, 1), "chitin_smg", new HitEffect("levitation", 0.3F, 100, 0), "hermit_rifle", new HitEffect("levitation", 0.3F, 100, 0), "borer", new HitEffect("levitation", 0.23F, 100, 0));
 
 	/** The attachments, in the order the creative tab shows them (tools/guns.py ATTACHMENTS). */
 	public static final Map<String, GunAttachment> ATTACHMENTS = new LinkedHashMap<>();
@@ -547,16 +663,29 @@ public final class JugcraftGuns {
 		ACCEPTS.put("quill_rifle", List.of("extended_magazine", "speed_magazine", "light_stock", "weighted_stock",
 				"wooden_stock", "light_grip", "iron_bayonet", "steel_bayonet", "diamond_bayonet", "netherite_bayonet",
 				"long_scope", "medium_scope", "reflex_sight", "tactical_grip", "laser_sight"));
+		ACCEPTS.put("auger_rifle", List.of("light_stock", "weighted_stock", "wooden_stock", "light_grip", "vertical_grip",
+				"iron_bayonet", "steel_bayonet", "diamond_bayonet", "netherite_bayonet", "long_scope", "medium_scope",
+				"reflex_sight", "laser_sight"));
+		ACCEPTS.put("auger_shotgun", List.of("light_stock", "weighted_stock", "wooden_stock", "light_grip", "vertical_grip",
+				"iron_bayonet", "steel_bayonet", "diamond_bayonet", "netherite_bayonet", "long_scope", "medium_scope",
+				"reflex_sight", "laser_sight"));
+		ACCEPTS.put("tumbler_rifle", List.of("silencer", "baffled_silencer", "muzzle_brake", "extended_barrel",
+				"extended_magazine", "speed_magazine", "light_stock", "weighted_stock", "wooden_stock", "light_grip",
+				"iron_bayonet", "steel_bayonet", "diamond_bayonet", "netherite_bayonet", "long_scope", "medium_scope",
+				"reflex_sight", "tactical_grip", "laser_sight"));
+		ACCEPTS.put("ermine_rifle", List.of("light_stock", "weighted_stock", "wooden_stock", "light_grip", "vertical_grip",
+				"iron_bayonet", "steel_bayonet", "diamond_bayonet", "netherite_bayonet", "long_scope", "medium_scope",
+				"reflex_sight", "laser_sight"));
 	}
 
 	/** The rounds. */
-	public static final List<String> AMMO = List.of("light_round", "rifle_round", "buckshot_shell", "paper_cartridge");
+	public static final List<String> AMMO = List.of("light_round", "rifle_round", "buckshot_shell", "paper_cartridge", "dart", "microjet");
 	/** The sound events the animations and the guns play (assets/jugcraft/sounds.json, written by tools/guns.py). */
 	public static final List<String> SOUND_EVENTS = List.of("bolt", "bolt_pull", "bolt_release", "clank", "dry_fire",
 			"gun_rustle", "insert", "jam", "lever", "metal", "pump", "pump_half", "rack", "reload_end", "reload_mag_in",
 			"reload_mag_out", "shell_in", "slap");
 	/** The rounds that leave a spent case, each with its particle jugcraft:&lt;round&gt;_casing (tools/guns.py CASINGS). */
-	public static final List<String> CASING_AMMO = List.of("light_round", "rifle_round", "buckshot_shell");
+	public static final List<String> CASING_AMMO = List.of("light_round", "rifle_round", "buckshot_shell", "dart", "microjet");
 	/** Walking speed while aiming down the sights (vanilla's using an item is 0.2). */
 	public static final float AIM_SPEED = 0.6F;
 
@@ -578,6 +707,10 @@ public final class JugcraftGuns {
 	public static final ResourceKey<DamageType> FLAME_DAMAGE = ResourceKey.create(Registries.DAMAGE_TYPE, Jugcraft.id("flame"));
 	/** The energy weapons' beams and arcs (slice 8D): neither projectile nor fire, and they push nothing back. */
 	public static final ResourceKey<DamageType> ZAP_DAMAGE = ResourceKey.create(Registries.DAMAGE_TYPE, Jugcraft.id("zap"));
+	/** Bleeding's damage (the darts-and-bleeding follow-up): through armour, and every tick of it counts. */
+	public static final ResourceKey<DamageType> BLEED_TYPE = ResourceKey.create(Registries.DAMAGE_TYPE, Jugcraft.id("bleeding"));
+	/** Bleeding, the mob effect some guns' hits give ({@link #BLEEDS}, {@link BleedingEffect}). */
+	public static Holder<MobEffect> BLEEDING;
 	/** The energy weapons' ammunition (slice 8D): charge, filled at the Charging Station. */
 	public static Item ENERGY_CELL;
 	/** Rounds loaded in a gun. */
@@ -640,6 +773,7 @@ public final class JugcraftGuns {
 					FabricParticleTypes.simple()));
 		}
 		LASER_DOT = Registry.register(BuiltInRegistries.PARTICLE_TYPE, Jugcraft.id("laser_dot"), FabricParticleTypes.simple(true));
+		BLEEDING = Registry.registerForHolder(BuiltInRegistries.MOB_EFFECT, Jugcraft.id("bleeding"), new BleedingEffect());
 		SPECS.forEach((name, spec) -> GUNS.put(name, (GunItem) JugcraftRegistry.item(name, properties -> new GunItem(name, spec,
 				properties.stacksTo(1).rarity(Rarity.UNCOMMON).component(LOADED, 0)
 						.component(DataComponents.USE_EFFECTS, new UseEffects(false, true, AIM_SPEED))))));
@@ -735,7 +869,7 @@ public final class JugcraftGuns {
 		return INCENDIARY.contains(gun.name());
 	}
 
-	/** Whether this gun's bullets make what they hurt float (slice 12A, {@link #LEVITATING}). */
+	/** Whether this gun's bullets may make what they hurt float (slice 12A, {@link #LEVITATING}). */
 	public static boolean levitates(GunItem gun) {
 		return LEVITATING.contains(gun.name());
 	}
@@ -745,9 +879,37 @@ public final class JugcraftGuns {
 		return KNOCKBACK.getOrDefault(gun.name(), 0.0F);
 	}
 
-	/** How many points of armour this gun's bullets pass through ({@link #PIERCING}); 0 for most. */
+	/**
+	 * How many points of armour this gun's bullets (or, slice 15E, its beam; the older guns follow-up, its arc) pass through
+	 * ({@link #PIERCING}); 0 for many.
+	 */
 	public static float piercing(GunItem gun) {
 		return PIERCING.getOrDefault(gun.name(), 0.0F);
+	}
+
+	/** This gun's chance a hit to make a creature bleed, and for how long ({@link #BLEEDS}); null for most. */
+	public static @Nullable Bleed bleed(GunItem gun) {
+		return BLEEDS.get(gun.name());
+	}
+
+	/** The vanilla effect this gun's hits may give ({@link #HIT_EFFECTS}); null for most. */
+	public static @Nullable HitEffect hitEffect(GunItem gun) {
+		return HIT_EFFECTS.get(gun.name());
+	}
+
+	/** The burst this gun fires to a pull (slice 15D, {@link #BURSTS}); null for a gun that fires one shot a pull. */
+	public static @Nullable Burst burst(GunItem gun) {
+		return BURSTS.get(gun.name());
+	}
+
+	/** How this gun's beam mines (the beam-mining follow-up, {@link #MINING}); null for a gun whose shot cuts no block. */
+	public static @Nullable Mining mining(GunItem gun) {
+		return MINING.get(gun.name());
+	}
+
+	/** Rounds this gun loads at each shell's time (slice 15E, {@link #LOAD_STEPS}); 1 for most. */
+	public static int loadStep(GunItem gun) {
+		return LOAD_STEPS.getOrDefault(gun.name(), 1);
 	}
 
 	/** JE a round of this energy weapon draws from Energy Cells (slice 8D, {@link #CHARGE}); 0 for a gun that loads rounds. */
