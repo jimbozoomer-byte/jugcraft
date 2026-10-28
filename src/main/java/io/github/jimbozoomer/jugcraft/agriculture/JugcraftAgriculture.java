@@ -396,6 +396,7 @@ public final class JugcraftAgriculture {
 	public static BlockEntityType<FruitStoreBlockEntity> FEED_TROUGH_ENTITY;
 	public static BlockEntityType<PlanterBlockEntity> PLANTER_ENTITY;
 	public static BlockEntityType<DecorationBlockEntity> PORCH_SWING_ENTITY;
+	public static BlockEntityType<DecorationBlockEntity> TEA_KETTLE_ENTITY;
 	public static BlockEntityType<CaramelAppleStandBlockEntity> CARAMEL_APPLE_STAND_ENTITY;
 	public static ExtendedMenuType<FarmStandMenu, FarmStandMenu.Opening> FARM_STAND_MENU;
 	/** The Harvest Effigy catching (assets/jugcraft/sounds/effigy, made by tools/choir_sounds.py). */
@@ -2925,12 +2926,30 @@ public final class JugcraftAgriculture {
 				BUILDING_TAB);
 	}
 
-	/** Cozy Fall Hearth, decor set 5 (tools/hearth.py): part 1's Stone Fireplace and Mantel Garland. */
+	/**
+	 * Cozy Fall Hearth, decor set 5 (tools/hearth.py): part 1's Stone Fireplace and Mantel Garland; part 2's Woodstove (a
+	 * heat source), and the Tea Kettle and Simmer Pot set on it.
+	 */
 	private static void registerHearth() {
 		Block fireplace = registerBlock("stone_fireplace", StoneFireplaceBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.STONE)
 				.strength(2.0F, 6.0F).sound(SoundType.STONE).noOcclusion().lightLevel(StoneFireplaceBlock::light).pushReaction(PushReaction.IMMOVEABLE));
 		registerItem("stone_fireplace", props -> new BlockItem(fireplace, props), new Item.Properties().useBlockDescriptionPrefix(), BUILDING_TAB);
 		registerItem("mantel_garland", Item::new, new Item.Properties(), BUILDING_TAB);
+		// Part 2: the stove, and the kettle and the pot set on it.
+		Block stove = registerBlock("woodstove", WoodstoveBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_BLACK)
+				.strength(3.0F, 6.0F).sound(SoundType.METAL).requiresCorrectToolForDrops().noOcclusion().lightLevel(WoodstoveBlock::light)
+				.pushReaction(PushReaction.IMMOVEABLE));
+		Block kettle = registerBlock("tea_kettle", TeaKettleBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_ORANGE)
+				.strength(1.0F).sound(SoundType.COPPER).noOcclusion().pushReaction(PushReaction.POPPED));
+		TEA_KETTLE_ENTITY = Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, Jugcraft.id("tea_kettle"),
+				FabricBlockEntityTypeBuilder.<DecorationBlockEntity>create((pos, state) -> new DecorationBlockEntity(TEA_KETTLE_ENTITY, pos, state), kettle)
+						.build());
+		Block pot = registerBlock("simmer_pot", SimmerPotBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.QUARTZ)
+				.strength(1.0F).sound(SoundType.METAL).noOcclusion().pushReaction(PushReaction.POPPED));
+		for (Block block : List.of(stove, kettle, pot)) {
+			registerItem(BuiltInRegistries.BLOCK.getKey(block).getPath(), props -> new BlockItem(block, props),
+					new Item.Properties().useBlockDescriptionPrefix(), BUILDING_TAB);
+		}
 	}
 
 	private static BlockBehaviour.Properties displayProperties() {

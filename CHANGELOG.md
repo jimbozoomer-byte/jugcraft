@@ -8,6 +8,14 @@ Every change to Jugcraft, newest first, grouped by pull request. For what each t
 
 No numbered release yet. Entries on feature branches remain proposed until their pull requests merge.
 
+### Unmerged: Cozy Fall Hearth, part 2 (the stove)
+- **Cast-Iron Woodstove**: a parlour box stove 1 m high, its fire showing through mica windows. Lit with flint and steel or a fire charge (a shovel puts it out), it gives light 13 and heats what stands on it, as a campfire or the Kitchen Stove does: a Cooking Pot brews mint tea, hot cocoa and mulled cider on it. It burns no fuel.
+- **Tea Kettle**: a copper kettle that boils on any heat source, steaming, its lid rattling.
+- **Simmer Pot**: an enamel saucepan of spiced water, apple slices, cinnamon and cloves that simmers on any heat source. Neither makes anything.
+- Recipes: seven iron ingots and a furnace; five copper ingots and an iron nugget; an iron ingot, a water bucket, an apple and mulling spices.
+- Record: [cozy-fall-hearth.md](docs/features/cozy-fall-hearth.md).
+- **Checked:** the record's Verification. Game tests and screenshots run in CI only; not played by hand.
+
 ### Unmerged: Cozy Fall Hearth, part 1 (the hearth)
 - **Stone Fireplace**: a fieldstone chimney breast three blocks across and three up, on a flagstone hearth, with an oak mantel at 1.4 m. Flint and steel or a fire charge lights it and a shovel puts it out; lit, a fire burns in its firebox in smooth bands and gives light 15. A decoration: it burns no fuel and makes nothing.
 - **Mantel Garland**: autumn leaves, little pumpkins and pine cones, draped along a fireplace's mantel; sneak with an empty hand to take it back.

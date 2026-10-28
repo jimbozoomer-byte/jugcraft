@@ -34857,6 +34857,11 @@
       "denominator": 1,
       "source": "fallback (balance pending)"
     },
+    "jugcraft:simmer_pot": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
     "jugcraft:singing_pumpkin_alto": {
       "numerator": 1,
       "denominator": 1,
@@ -36758,6 +36763,11 @@
       "source": "recipe jugcraft:tattered_curtains"
     },
     "jugcraft:tatterlace_headdress": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
+    "jugcraft:tea_kettle": {
       "numerator": 1,
       "denominator": 1,
       "source": "fallback (balance pending)"
@@ -39206,6 +39216,11 @@
       "numerator": 65,
       "denominator": 4,
       "source": "recipe jugcraft:wooden_stock"
+    },
+    "jugcraft:woodstove": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
     },
     "jugcraft:wool_socks": {
       "numerator": 1,

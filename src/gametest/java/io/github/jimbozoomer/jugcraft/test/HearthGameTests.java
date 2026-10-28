@@ -1,8 +1,13 @@
 package io.github.jimbozoomer.jugcraft.test;
 
+import io.github.jimbozoomer.jugcraft.agriculture.CookingPotBlockEntity;
+import io.github.jimbozoomer.jugcraft.agriculture.FacingDecorationBlock;
 import io.github.jimbozoomer.jugcraft.agriculture.JugcraftAgriculture;
 import io.github.jimbozoomer.jugcraft.agriculture.MultiDecorationBlock;
 import io.github.jimbozoomer.jugcraft.agriculture.StoneFireplaceBlock;
+import io.github.jimbozoomer.jugcraft.agriculture.StovetopBlock;
+import io.github.jimbozoomer.jugcraft.agriculture.WoodstoveBlock;
+import java.util.List;
 import net.fabricmc.fabric.api.gametest.v1.GameTest;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -17,6 +22,7 @@ import net.minecraft.world.item.Items;
 import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.CampfireBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.BlockHitResult;
@@ -27,6 +33,10 @@ import net.minecraft.world.phys.Vec3;
  * its nine blocks is taken and stands whole, three across and three up, where there is room; flint and steel lights every
  * block, wearing the flint, its firebox alone giving light {@value StoneFireplaceBlock#LIGHT}; a shovel puts it out. A Mantel Garland drapes every block and is spent; a second isn't; sneaking with an empty hand
  * takes it back. Broken at its firebox, lit and dressed, it all comes away, dropping the fireplace and its garland once.
+ * Part 2: the Woodstove stands facing the player, out; a Tea Kettle and a Simmer Pot stand on it cold; lit, it gives
+ * light and heats them, and a Cooking Pot counts it as heat; a shovel puts it out and the kettle cools; broken, the
+ * kettle comes off it and both drop. A kettle stands on stone, cold; a simmer pot on a lit campfire simmers and stops
+ * when the fire goes out; with its floor gone, the kettle comes off.
  */
 public class HearthGameTests {
 	private static Item item(String id) {
@@ -54,6 +64,14 @@ public class HearthGameTests {
 		player.setItemInHand(InteractionHand.MAIN_HAND, held);
 		player.gameMode.useItemOn(player, level, player.getMainHandItem(), InteractionHand.MAIN_HAND,
 				new BlockHitResult(Vec3.atCenterOf(absolute).relative(Direction.NORTH, 0.5), Direction.NORTH, absolute, false));
+	}
+
+	/** Places {@code held} from the player's hand on the top of the block below {@code pos} (relative). */
+	private static void place(ServerPlayer player, GameTestHelper helper, BlockPos pos, ItemStack held) {
+		player.setItemInHand(InteractionHand.MAIN_HAND, held);
+		BlockPos below = helper.absolutePos(pos.below());
+		player.getMainHandItem().useOn(new UseOnContext(player, InteractionHand.MAIN_HAND,
+				new BlockHitResult(Vec3.atCenterOf(below).relative(Direction.UP, 0.5), Direction.UP, below, false)));
 	}
 
 	private static boolean all(ServerLevel level, StoneFireplaceBlock fireplace, BlockPos master, java.util.function.Predicate<BlockState> test) {
@@ -141,6 +159,72 @@ public class HearthGameTests {
 			}
 			helper.assertTrue(dropped(helper, item("stone_fireplace")) == 1 && dropped(helper, item("mantel_garland")) == 1,
 					"Broken at its firebox it comes away whole, dropping itself and its garland once");
+			helper.succeed();
+		});
+	}
+
+	// ---------------------------------------------------------------- part 2
+
+	@GameTest(maxTicks = 40)
+	public void theWoodstoveHeatsWhatStandsOnIt(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		floor(helper);
+		BlockPos stovePos = new BlockPos(2, 2, 4);
+		BlockPos potStovePos = new BlockPos(5, 2, 4);
+		ServerPlayer player = standing(helper, new BlockPos(3, 2, 1));
+		for (BlockPos at : List.of(stovePos, potStovePos)) {
+			place(player, helper, at, new ItemStack(item("woodstove")));
+		}
+		BlockState stove = helper.getBlockState(stovePos);
+		helper.assertTrue(stove.is(JugcraftAgriculture.block("woodstove")) && stove.getValue(FacingDecorationBlock.FACING) == Direction.NORTH
+				&& !stove.getValue(WoodstoveBlock.LIT), "It stands facing the player, out");
+		place(player, helper, stovePos.above(), new ItemStack(item("tea_kettle")));
+		place(player, helper, potStovePos.above(), new ItemStack(item("simmer_pot")));
+		BlockPos kettle = helper.absolutePos(stovePos.above());
+		BlockPos pot = helper.absolutePos(potStovePos.above());
+		helper.assertTrue(level.getBlockState(kettle).is(JugcraftAgriculture.block("tea_kettle")) && !level.getBlockState(kettle).getValue(StovetopBlock.HEATED)
+				&& level.getBlockState(pot).is(JugcraftAgriculture.block("simmer_pot")) && !level.getBlockState(pot).getValue(StovetopBlock.HEATED),
+				"The kettle and the pot stand on the stoves, cold");
+		ItemStack flint = new ItemStack(Items.FLINT_AND_STEEL);
+		use(player, level, helper.absolutePos(stovePos), flint);
+		use(player, level, helper.absolutePos(potStovePos), flint);
+		helper.assertTrue(helper.getBlockState(stovePos).getValue(WoodstoveBlock.LIT) && flint.getDamageValue() == 2
+				&& helper.getBlockState(stovePos).getLightEmission() == WoodstoveBlock.LIGHT, "Flint and steel lights them, and they give light");
+		helper.assertTrue(level.getBlockState(kettle).getValue(StovetopBlock.HEATED) && level.getBlockState(pot).getValue(StovetopBlock.HEATED),
+				"Lit, they heat the kettle and the pot");
+		use(player, level, helper.absolutePos(stovePos), new ItemStack(Items.IRON_SHOVEL));
+		helper.assertTrue(!helper.getBlockState(stovePos).getValue(WoodstoveBlock.LIT) && !level.getBlockState(kettle).getValue(StovetopBlock.HEATED),
+				"A shovel puts it out, and the kettle cools");
+		// A Cooking Pot counts it as heat, as it counts a campfire.
+		level.setBlockAndUpdate(pot, Blocks.AIR.defaultBlockState());
+		level.setBlockAndUpdate(pot, JugcraftAgriculture.block("cooking_pot").defaultBlockState());
+		helper.assertTrue(CookingPotBlockEntity.isHeated(level, pot), "A Cooking Pot cooks on a lit woodstove");
+		helper.getLevel().destroyBlock(helper.absolutePos(stovePos), true);
+		helper.runAfterDelay(3, () -> {
+			helper.assertTrue(level.getBlockState(kettle).isAir() && dropped(helper, item("tea_kettle")) == 1 && dropped(helper, item("woodstove")) == 1,
+					"The stove broken, the kettle comes off it, and both drop");
+			helper.succeed();
+		});
+	}
+
+	@GameTest(maxTicks = 40)
+	public void theKettleStandsOnAFloorOrAFire(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		floor(helper);
+		ServerPlayer player = standing(helper, new BlockPos(3, 2, 1));
+		BlockPos onStone = new BlockPos(2, 2, 3);
+		place(player, helper, onStone, new ItemStack(item("tea_kettle")));
+		helper.assertTrue(helper.getBlockState(onStone).is(JugcraftAgriculture.block("tea_kettle")) && !helper.getBlockState(onStone).getValue(StovetopBlock.HEATED),
+				"It stands on stone, cold");
+		BlockPos fire = new BlockPos(5, 2, 3);
+		helper.setBlock(fire, Blocks.CAMPFIRE);
+		place(player, helper, fire.above(), new ItemStack(item("simmer_pot")));
+		helper.assertTrue(helper.getBlockState(fire.above()).getValue(StovetopBlock.HEATED), "On a lit campfire it simmers");
+		helper.setBlock(fire, Blocks.CAMPFIRE.defaultBlockState().setValue(CampfireBlock.LIT, false));
+		helper.assertFalse(helper.getBlockState(fire.above()).getValue(StovetopBlock.HEATED), "Its fire out, it stops");
+		helper.setBlock(onStone.below(), Blocks.AIR);
+		helper.runAfterDelay(3, () -> {
+			helper.assertTrue(helper.getBlockState(onStone).isAir() && dropped(helper, item("tea_kettle")) == 1, "Its floor gone, the kettle comes off");
 			helper.succeed();
 		});
 	}

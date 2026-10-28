@@ -14886,7 +14886,9 @@ def check_hearth():
     """Cozy Fall Hearth (tools/hearth.py, docs/features/cozy-fall-hearth.md), part 1: the Stone Fireplace's Java block is
     the table's size and light, its firebox gives it, and its registration names its light; its fire is a full-bright,
     unshaded model of the fire texture alone, animated in smooth bands; the fireplace's and the garland's recipes were
-    generated; and the light message has its text."""
+    generated; and the light message has its text. Part 2: the woodstove's light and burn are the table's, it is a heat
+    source, and its fire is full-bright; the kettle's lid is drawn by its renderer, rattling by the table's numbers about
+    its hinge, from its runner model; the simmer pot's surface moves in smooth bands."""
     import hearth as hh
     fp = hh.FIREPLACE
     java = (JAVA_ROOT / "agriculture" / "StoneFireplaceBlock.java").read_text(encoding="utf-8") \
@@ -14917,6 +14919,48 @@ def check_hearth():
             err(f"recipe/{recipe['id']}.json: tools/hearth.py's recipe for {recipe['result']} was not generated")
     lang = load(ASSETS / "lang" / "en_us.json") or {}
     for key in (f"block.{MOD}.{fp['block']}", f"item.{MOD}.{hh.GARLAND['item']}", f"message.{MOD}.{fp['block']}.light"):
+        if key not in lang:
+            err(f"{key}: the text is missing")
+    # Part 2: the woodstove's light and burn are the table's, it is a heat source, and its fire is full-bright on the
+    # fireplace's fire texture; the kettle's lid is drawn by its renderer, rattling by the table's numbers about its
+    # hinge; the simmer pot's surface moves in smooth bands.
+    ws = hh.WOODSTOVE
+    stove = (JAVA_ROOT / "agriculture" / "WoodstoveBlock.java").read_text(encoding="utf-8") \
+        if (JAVA_ROOT / "agriculture" / "WoodstoveBlock.java").is_file() else ""
+    for needed in (f"LIGHT = {ws['light']};", f"BURN = {ws['burn']}F;"):
+        if needed not in stove:
+            err(f"WoodstoveBlock: missing {needed} (tools/hearth.py WOODSTOVE)")
+    if f'registerBlock("{ws["block"]}", WoodstoveBlock::new' not in java_main or ".lightLevel(WoodstoveBlock::light)" not in java_main:
+        err(f"JugcraftAgriculture: {ws['block']} must be a WoodstoveBlock lit by WoodstoveBlock::light")
+    heat = (load(DATA / MOD / "tags" / "block" / "heat_sources.json") or {}).get("values", [])
+    if f"{MOD}:{ws['block']}" not in heat:
+        err(f"{ws['block']}: the woodstove must be in the block tag {MOD}:heat_sources, so pots and kettles heat on it")
+    model = load(ASSETS / "models" / "block" / f"{ws['block']}_fire.json") or {}
+    if set(model.get("textures", {}).values()) != {f"{MOD}:block/{fp['block']}_fire"} or not model.get("elements") \
+            or any(e.get("light_emission") != 15 or e.get("shade") is not False for e in model["elements"]):
+        err(f"models/block/{ws['block']}_fire.json: the woodstove's fire must be full-bright and unshaded, on the fireplace's fire")
+    kt = hh.KETTLE
+    kettle = (JAVA_ROOT / "agriculture" / "TeaKettleBlock.java").read_text(encoding="utf-8") \
+        if (JAVA_ROOT / "agriculture" / "TeaKettleBlock.java").is_file() else ""
+    for needed in (f"LID_LIFT = {kt['lid_lift']}F;", f"LID_TIP = {kt['lid_tip']}F;"):
+        if needed not in kettle:
+            err(f"TeaKettleBlock: missing {needed} (tools/hearth.py KETTLE)")
+    lid = (CLIENT_JAVA_ROOT / "TeaKettleRenderer.java").read_text(encoding="utf-8") \
+        if (CLIENT_JAVA_ROOT / "TeaKettleRenderer.java").is_file() else ""
+    if f"HINGE_Y = {kt['hinge'][0]}F;" not in lid or f"HINGE_Z = {kt['hinge'][1]}F;" not in lid:
+        err(f"TeaKettleRenderer: the lid must tip about its back edge, tools/hearth.py KETTLE hinge {kt['hinge']}")
+    client = (CLIENT_JAVA_ROOT / "JugcraftClient.java").read_text(encoding="utf-8") if (CLIENT_JAVA_ROOT / "JugcraftClient.java").is_file() else ""
+    if "BlockEntityRendererRegistry.register(JugcraftAgriculture.TEA_KETTLE_ENTITY, TeaKettleRenderer::new);" not in client:
+        err("JugcraftClient: the Tea Kettle's lid needs TeaKettleRenderer")
+    states = load(ASSETS / "blockstates" / f"{kt['block']}.json") or {}
+    runners = [k for k in states.get("variants", {}) if "runner=true" in k]
+    if not runners or any(states["variants"][k]["model"] != f"{MOD}:block/{kt['block']}_lid" for k in runners):
+        err(f"{kt['block']}: its runner=true variants must name the lid's own model")
+    sp = hh.SIMMER_POT
+    meta = load(ASSETS / "textures" / "block" / f"{sp['block']}_brew.png.mcmeta") or {}
+    if meta.get("animation", {}).get("interpolate") is not True or meta["animation"].get("frametime") != sp["frametime"]:
+        err(f"textures/block/{sp['block']}_brew.png.mcmeta: the simmering must move in smooth bands (interpolated, frametime {sp['frametime']})")
+    for key in [f"block.{MOD}.{b}" for b in (ws["block"], kt["block"], sp["block"])]:
         if key not in lang:
             err(f"{key}: the text is missing")
 
