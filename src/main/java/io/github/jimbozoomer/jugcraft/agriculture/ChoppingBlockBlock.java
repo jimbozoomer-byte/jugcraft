@@ -81,7 +81,7 @@ public class ChoppingBlockBlock extends FacingDecorationBlock implements EntityB
 			if (!player.getInventory().add(planks)) {
 				Block.popResource(level, pos.above(), planks);
 			}
-			level.playSound(null, pos, SoundEvents.AXE_STRIP, SoundSource.BLOCKS, 1.0F, 0.8F + level.getRandom().nextFloat() * 0.2F);
+			level.playSound(null, pos, SoundEvents.AXE_STRIP.value(), SoundSource.BLOCKS, 1.0F, 0.8F + level.getRandom().nextFloat() * 0.2F);
 			server.sendParticles(new BlockParticleOption(ParticleTypes.BLOCK, wood), pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5, 10,
 					0.15, 0.05, 0.15, 0.05);
 			level.blockEvent(pos, this, CHOP, 0);

@@ -156,6 +156,7 @@ All on the first run:
   - `python3 -m unittest discover -s scripts/tests`: 287 tests, OK.
   - `python3 tools/check_icon_maps.py`: PASS (no new map; the woodpile's items are 3D).
   - `javac` scan of the new and changed Java for syntax errors: none. The full compile runs in CI.
+  - Part 3's first CI run failed to compile: in 26.3 `SoundEvents.AXE_STRIP` is a sound holder, not a sound, so `playSound` refused it. The chopping block now plays its value, as the Spooky Sign does.
 
 Game tests (CI only, not run locally), `HearthGameTests`:
 - **The fireplace lights and takes its garland**:
