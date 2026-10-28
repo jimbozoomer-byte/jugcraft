@@ -76,7 +76,18 @@ public final class GraveyardRisingGameTests {
 	/** Ringing a bell by a graveyard: nothing out of season, too few graves, by day, then a stir, then the dead rise. */
 	@GameTest(maxTicks = 200)
 	public void ringingTwiceByAGraveyardWakesTheDead(GameTestHelper helper) {
+		ringingSequence(helper, false);
+	}
+
+	/** Reproduces the full-suite case where enough graves exist before the prerequisite probe. */
+	@GameTest(maxTicks = 200)
+	public void existingGravesDoNotConsumeTheFirstConfirmationRing(GameTestHelper helper) {
+		ringingSequence(helper, true);
+	}
+
+	private static void ringingSequence(GameTestHelper helper, boolean alreadyEnoughGraves) {
 		floor(helper);
+		if (alreadyEnoughGraves) graves(helper);
 		ServerLevel level = helper.getLevel();
 		ServerPlayer player = player(helper);
 		helper.setBlock(new BlockPos(0, 2, 0), Blocks.BELL);
@@ -94,8 +105,11 @@ public final class GraveyardRisingGameTests {
 		boolean few = GraveyardRising.graves(level, bell).size() == GraveyardRising.MIN_GRAVES - 1;
 		HalloweenSeason.setMode(HalloweenSeason.Mode.ON);
 		try {
-			GraveyardRising.Result first = GraveyardRising.ring(player, bell, MIDNIGHT);
-			helper.assertTrue(!few || first == GraveyardRising.Result.TOO_FEW_GRAVES, "Too few graves to wake: " + first);
+			// Nearby parallel fixtures may already supply enough graves. Probe by day so
+			// that this prerequisite/cooldown check cannot arm the later two-ring sequence.
+			GraveyardRising.Result first = GraveyardRising.ring(player, bell, NOON);
+			helper.assertTrue(first == (few ? GraveyardRising.Result.TOO_FEW_GRAVES : GraveyardRising.Result.DAYTIME),
+					"The prerequisite probe must not stir the graves: " + first);
 			helper.assertTrue(GraveyardRising.ring(player, bell, MIDNIGHT) == GraveyardRising.Result.WAIT, "A player looks for graves once a second");
 		} finally {
 			HalloweenSeason.reset();
@@ -113,7 +127,8 @@ public final class GraveyardRisingGameTests {
 		helper.runAfterDelay(2L * (GraveyardRising.RING_COOLDOWN + 2), () -> {
 			HalloweenSeason.setMode(HalloweenSeason.Mode.ON);
 			try {
-				helper.assertTrue(GraveyardRising.ring(player, bell, MIDNIGHT) == GraveyardRising.Result.STIRRED, "The first ring stirs the graves");
+				GraveyardRising.Result result = GraveyardRising.ring(player, bell, MIDNIGHT);
+				helper.assertTrue(result == GraveyardRising.Result.STIRRED, "The first ring stirs the graves: " + result);
 			} finally {
 				HalloweenSeason.reset();
 			}
