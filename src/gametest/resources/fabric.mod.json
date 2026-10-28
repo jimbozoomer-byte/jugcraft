@@ -120,6 +120,7 @@
       "io.github.jimbozoomer.jugcraft.test.FallGardenGameTests",
       "io.github.jimbozoomer.jugcraft.test.HearthGameTests",
       "io.github.jimbozoomer.jugcraft.test.HauntedMidwayGameTests",
+      "io.github.jimbozoomer.jugcraft.test.HauntedCarouselGameTests",
       "io.github.jimbozoomer.jugcraft.test.CarvingGameTests",
       "io.github.jimbozoomer.jugcraft.test.HalloweenGameTests",
       "io.github.jimbozoomer.jugcraft.test.RegattaGameTests",

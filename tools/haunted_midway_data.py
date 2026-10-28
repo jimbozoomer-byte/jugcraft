@@ -16,7 +16,13 @@ each material one colour stepped into tones, its marks placed the way it is made
   square, lit at their top left, set in a staggered grid with a golden hull between them.
 - Glass, as the Caramel Apple Stand's jar: cut out inside a pale rim with a lit streak. Glows (the heater band, the case
   lamp and the jack-o'-lantern's face) are full-bright, unshaded and steady, a face cut out to its holes.
+- The Haunted Carousel (part 5) is drawn by its renderer from quads (assets/jugcraft/haunted_midway_quads.json), on its
+  own 256 x 256 texture (textures/entity/haunted_carousel.png; its middle block's and item's models are on a block
+  texture of their own): its deck and canopy are turned solids of sixteen flat sides (`lathe`), each side painted for its
+  own size, a texel a pixel, its panels' seams following their slant; its mounts and their poles are boxes, written out
+  as quads (decor6_data.quads).
 """
+import hashlib
 import math
 
 import decor17_data as d17d
@@ -25,6 +31,7 @@ import flora_art as fa
 import haunted_midway as hm
 import pumpkin_patch_data as ppd
 from flora_art import Sculpt, pal, rotation, shade
+from decor6_data import quads
 from pumpkin_patch_data import flat, lengthwise, panel, planks, walls, wrapped
 
 MOD = "jugcraft"
@@ -890,13 +897,549 @@ def ghost_train():
                                 sides=("north", "south"))]
     return sc
 
+# ---------------------------------------------------------------- the Haunted Carousel (part 5)
+
+# Its turning parts in pixels about its middle (x along slot 0, y up from its foot, z so that a slot's angle turns x
+# toward -z, as the renderer's Axis.YP does): a deck of SIDES flat sides, the column's eight, the canopy's SIDES.
+RIDE = f"entity/{hm.CAROUSEL['entity']}"
+SIDES = 16
+DECK_IN, DECK_OUT, DECK_TOP, TRIM = 9.0, 54.0, 3.0, 3.0
+COLUMN, COLLAR = 7.0, 8.0
+CEILING, BOARD_TOP, ROOF_TOP, DRUM, DRUM_TOP = 48.0, 58.0, 70.0, 6.0, 72.0
+VALANCE = 3.5
+SWEEP = (45.5, 48.0)
+POLE = 1.25
+BULB_ROWS = (49.5, 56.5)
+BULB_ACROSS = (-5.5, 5.5)
+WING = 12.0
+PUMPKIN_SIGN = (
+    "...s...",
+    ".OOsOO.",
+    "OYOOOYO",
+    "OOOYOOO",
+    "OYYYYYO",
+    ".OOOOO.",
+)
+PUMPKIN_COLOURS = {"O": shade(ORANGE, 3), "s": shade(GREEN, 2), "Y": shade(LAMP, 1)}
+BAT_COLOURS = {"B": shade(BLACK, 0)}
+
+
+def _tag(painter):
+    return hashlib.sha1(getattr(painter, "tag", repr(painter)).encode()).hexdigest()[:8]
+
+
+def lathe(sc, key, painters, profile, sides=SIDES, phase=0.0, cutout=False):
+    """The quads of a turned solid about the y axis, `sides` flat facets round, the first facing x (or turned `phase`
+    radians on): `profile` the (apothem, y) points of its outline in order round it, counter-clockwise seen with the
+    apothem to the right and y up, so each band's facets face out of it. `painters` gives each band (each pair of points)
+    its painter, or a list for its facets by turns. A band's facets share their pieces, a texel to a pixel across and along
+    them, each facet's narrower end in the middle of its piece; down a piece runs from the band's higher end (or, for a
+    level band, its outer end). Quads in decor6_data.quads()'s format, on the carousel's own texture (`RIDE`)."""
+    out = []
+    half = math.tan(math.pi / sides)
+    for band, (p0, p1) in enumerate(zip(profile, profile[1:])):
+        (a0, y0), (a1, y1) = p0, p1
+        length = math.hypot(a1 - a0, y1 - y0)
+        na, ny = (y1 - y0) / length, -(a1 - a0) / length
+        w = max(1, int(math.ceil(2 * max(a0, a1) * half - 1e-6)))
+        h = max(1, int(math.ceil(length - 1e-6)))
+        start, end = (p1, p0) if (y1 > y0 or (y1 == y0 and a1 > a0)) else (p0, p1)
+        band_painters = painters[band] if isinstance(painters[band], (list, tuple)) else [painters[band]]
+        for k in range(sides):
+            painter = band_painters[k % len(band_painters)]
+            u0, v0, u1, v1 = sc.piece(f"{key}{band}_{_tag(painter)}_{w}x{h}", w, h, painter)
+            c = phase + k * 2 * math.pi / sides
+            ux, uz, wx, wz = math.cos(c), -math.sin(c), -math.sin(c), -math.cos(c)
+            corners = []
+            for (a, y), t in ((start, 0.0), (end, length)):
+                for side in (-1.0, 1.0):
+                    s = side * a * half
+                    corners.append(([a * ux + s * wx, y, a * uz + s * wz], s, t))
+            quad = [corners[0], corners[1], corners[3], corners[2]]
+            normal = [na * ux, ny, na * uz]
+            p = [q[0] for q in quad]
+            e1 = [p[1][i] - p[0][i] for i in range(3)]
+            e2 = [p[2][i] - p[1][i] for i in range(3)]
+            if abs(sum(abs(v) for v in e1)) < 1e-9:
+                e1, e2 = e2, [p[3][i] - p[2][i] for i in range(3)]
+            cross = [e1[1] * e2[2] - e1[2] * e2[1], e1[2] * e2[0] - e1[0] * e2[2], e1[0] * e2[1] - e1[1] * e2[0]]
+            if sum(cross[i] * normal[i] for i in range(3)) < 0:
+                quad.reverse()
+            vertices = [[round(pt[0], 4), round(pt[1], 4), round(pt[2], 4), round((u0 + (w / 2 + s) / w * (u1 - u0)) / 16, 5),
+                         round((v0 + t / h * (v1 - v0)) / 16, 5)] for pt, s, t in quad]
+            quad_out = {"texture": RIDE, "normal": [round(n, 4) for n in normal], "vertices": vertices}
+            if cutout:
+                quad_out["cutout"] = True
+            out.append(quad_out)
+    return out
+
+
+def turned_y(origin, degrees):
+    """An element rotation about y by any angle, for the renderer's quads (decor6_data.quads turns them; block models
+    could not)."""
+    return {"origin": list(origin), "axis": "y", "angle": degrees} if degrees else None
+
+
+def panel_seams(palette, narrow, narrow_top=True, seam=GOLD):
+    """A canopy's or ceiling's panel, a facet narrowing to `narrow` of its width at its piece's top (or, not
+    `narrow_top`, its foot): its field in the palette's middle tone with a lit line just inside its edges, and a gold seam
+    along its slanting sides (painted out to the piece's corners, so all of it is opaque)."""
+    def paint(p):
+        for y in range(p.h):
+            t = (y + 0.5) / p.h if narrow_top else 1.0 - (y + 0.5) / p.h
+            edge = p.w / 2 * (narrow + (1.0 - narrow) * t)
+            for x in range(p.w):
+                d = abs(x + 0.5 - p.w / 2)
+                if d > edge - 1.0:
+                    p.put(x, y, shade(seam, 3 if d <= edge else 2))
+                elif d > edge - 2.0:
+                    p.put(x, y, shade(palette, 3))
+                else:
+                    p.put(x, y, shade(palette, 2))
+    paint.tag = repr(("panel_seams", palette, round(narrow, 4), narrow_top, seam))
+    return paint
+
+
+def skirt():
+    """The deck's edge: a gold binding along its top, an orange band and a black foot."""
+    def paint(p):
+        for y in range(p.h):
+            for x in range(p.w):
+                p.put(x, y, shade(GOLD, 3) if y == 0 else shade(ORANGE, 2) if y < p.h - 1 else shade(BLACK, 1))
+    paint.tag = repr(("skirt",))
+    return paint
+
+
+def mirror():
+    """One of the column's mirrors: a gold frame round silvered glass, faintly violet, in three bands from bright at the
+    top to dim at the foot, crossed by one slanting highlight."""
+    def paint(p):
+        for y in range(p.h):
+            for x in range(p.w):
+                if x in (0, p.w - 1) or y in (0, p.h - 1):
+                    p.put(x, y, shade(GOLD, 3 if (x == 0 or y == 0) else 1))
+                elif (x + y) % (p.h // 2 or 1) == 2 and 0 < x < p.w - 1:
+                    p.put(x, y, shade(STEEL, 4))
+                else:
+                    band = 3 * y // p.h
+                    p.put(x, y, shade(STEEL, 3 - band) if band < 2 else shade(VIOLET, 3))
+    paint.tag = repr(("mirror",))
+    return paint
+
+
+def rounding_board(picture, field, colours):
+    """A rounding board: its field (`field`'s middle tone) between a gold rail along its top and foot, an orange pinstripe
+    inside each, and `picture` in its middle."""
+    def paint(p):
+        for y in range(p.h):
+            for x in range(p.w):
+                if y in (0, p.h - 1):
+                    p.put(x, y, shade(GOLD, 3 if y == 0 else 2))
+                elif y in (1, p.h - 2):
+                    p.put(x, y, shade(ORANGE if field is BLACK else BLACK, 2))
+                else:
+                    p.put(x, y, shade(field, 2))
+        h, w = len(picture), len(picture[0])
+        x0, y0 = (p.w - w) // 2, (p.h - h) // 2
+        for j, line in enumerate(picture):
+            for i, ch in enumerate(line):
+                if ch != "." and 0 <= x0 + i < p.w and 0 <= y0 + j < p.h:
+                    p.put(x0 + i, y0 + j, colours[ch])
+    paint.tag = repr(("rounding_board", picture, field))
+    return paint
+
+
+def coat(palette=BLACK):
+    """A carousel horse's lacquered black coat: three smooth bands, lit along the top, darkest at the belly."""
+    def paint(p):
+        for y in range(p.h):
+            k = 3 if y == 0 and p.h > 2 else (2, 1, 0)[min(2, 3 * y // p.h)]
+            for x in range(p.w):
+                p.put(x, y, shade(palette, k))
+    paint.tag = repr(("coat", palette))
+    return paint
+
+
+def fur():
+    """A bat's fur: short tufts in rows, each row's a texel on from the last, two tones of black."""
+    def paint(p):
+        for y in range(p.h):
+            for x in range(p.w):
+                p.put(x, y, shade(BLACK, 2 if (x + y // 2) % 3 == 0 else 1))
+    paint.tag = repr(("fur",))
+    return paint
+
+
+def eyed(base, eye, front_right):
+    """A head's side, `base` painted, with a glinting orange eye near its front top: toward the piece's right when
+    `front_right` (as an east side shows a north-facing head), else its left."""
+    def paint(p):
+        base(p)
+        x = p.w - 2 if front_right else 1
+        y = 1 if p.h > 2 else 0
+        p.put(x, y, shade(ORANGE, 4))
+        if p.h > 3:
+            p.put(x, y + 1, shade(ORANGE, 2))
+    paint.tag = repr(("eyed", base.tag, eye, front_right))
+    return paint
+
+
+def eyes_front():
+    """A bat's face: its fur, two orange eyes, lit, above its snout."""
+    def paint(p):
+        fur()(p)
+        for x in (p.w // 2 - 2, p.w // 2 + 1):
+            p.put(x, 1, shade(ORANGE, 4))
+            p.put(x, 2, shade(ORANGE, 2))
+    paint.tag = repr(("eyes_front",))
+    return paint
+
+
+def membrane(left):
+    """A bat's wing seen from above, `WING` texels out from its hinge (at the piece's left, or its right for the `left`
+    wing) and ten from front (top) to back: its skin in three panels fanning out from the hinge between its finger bones,
+    dark and darker by turns (the bones the panels' edges, not drawn lines: at a texel a pixel they would only step), the
+    trailing edge scalloped between the fingers' tips (cut out), a lit bone along the front."""
+    def paint(p):
+        tips = (0.0, p.w / 3.0, 2 * p.w / 3.0, float(p.w))
+        for y in range(p.h):
+            for x in range(p.w):
+                u = (p.w - 1 - x if left else x) + 0.5
+                k = max(i for i in range(3) if tips[i] <= u)
+                frac = (u - tips[k]) / (tips[k + 1] - tips[k])
+                if y + 0.5 > p.h - 2.5 * math.sin(math.pi * frac):
+                    clear(p, x, y)
+                elif y == 0:
+                    p.put(x, y, shade(BLACK, 3))
+                else:
+                    # Which panel: between the fingers fanning from the hinge to the tips along the trailing edge.
+                    spread = u * (p.h - 0.5) / max(y + 0.5, 0.5)
+                    panel_k = sum(1 for t in tips[1:3] if spread > t)
+                    p.put(x, y, shade(VIOLET, 0) if panel_k % 2 == 0 else shade(BLACK, 1))
+    paint.tag = repr(("membrane", left))
+    return paint
+
+
+def carousel_spin(sc):
+    """The parts that turn as one: the deck (its boards running out from the middle, a gold trim round its edge and a
+    banded skirt), the mirrored column, the canopy (ceiling, rounding boards with a bat or a jack-o'-lantern on each,
+    roof panels orange and black, a gold drum on top and a jack-o'-lantern over it), its scalloped valance, the eight
+    sweeps under the ceiling and the brass poles each horse and bat rides."""
+    boards = planks(BOARD_WOOD)
+    quads_out = lathe(sc, "deck", [flat(BLACK), skirt(), flat(GOLD), boards, flat(BLACK)],
+                      [(DECK_IN, 0.0), (DECK_OUT, 0.0), (DECK_OUT, DECK_TOP), (DECK_OUT - TRIM, DECK_TOP), (DECK_IN, DECK_TOP),
+                       (DECK_IN, 0.0)])
+    # The column stands in its collars (each a closed ring), its foot half a pixel up inside the lower one.
+    quads_out += lathe(sc, "column", [flat(BLACK), mirror()], [(0.0, 16.5), (COLUMN, 16.5), (COLUMN, CEILING)], sides=8,
+                       phase=math.pi / 8)
+    for y0, y1 in ((16.0, 18.0), (CEILING - 2.5, CEILING)):
+        quads_out += lathe(sc, f"collar{int(y0)}_", [flat(GOLD)] * 4,
+                           [(COLUMN - 0.5, y0), (COLLAR, y0), (COLLAR, y1), (COLUMN - 0.5, y1), (COLUMN - 0.5, y0)])
+    narrow_roof = DRUM / DECK_OUT
+    quads_out += lathe(sc, "canopy", [[panel_seams(VIOLET, 0.0, False), panel_seams(BLACK, 0.0, False)],
+                                      [rounding_board(PUMPKIN_SIGN, BLACK, PUMPKIN_COLOURS), rounding_board(BAT_SIGN, ORANGE, BAT_COLOURS)],
+                                      [panel_seams(ORANGE, narrow_roof), panel_seams(BLACK, narrow_roof)], flat(GOLD), flat(GOLD)],
+                       [(0.0, CEILING), (DECK_OUT, CEILING), (DECK_OUT, BOARD_TOP), (DRUM, ROOF_TOP), (DRUM, DRUM_TOP), (0.0, DRUM_TOP)])
+    quads_out += lathe(sc, "valance", [valance()], [(DECK_OUT, CEILING - VALANCE), (DECK_OUT, CEILING)], cutout=True)
+    el = [panel(sc, "finial", pumpkin_side(), (-4.0, DRUM_TOP, -4.0), (4.0, DRUM_TOP + 6.0, 4.0), north=pumpkin_side(face=True),
+                south=pumpkin_side(face=True)),
+          panel(sc, "finial_stem", lengthwise(STEM), (-0.75, DRUM_TOP + 6.0, -0.75), (0.75, DRUM_TOP + 7.5, 0.75))]
+    sweep = flat(GOLD)
+    poles = wrapped(GOLD)
+    for slot in range(len(hm.CAROUSEL["mounts"])):
+        degrees = 45.0 * slot
+        el.append(panel(sc, "sweep", sweep, (COLLAR + 0.5, SWEEP[0], -1.0), (DECK_OUT - 0.5, SWEEP[1], 1.0),
+                        rot=turned_y((0.0, SWEEP[0], 0.0), degrees)))
+        rings = [hm.CAROUSEL["outer"]] if hm.CAROUSEL["mounts"][slot] != "coach" else []
+        rings += [hm.CAROUSEL["inner"]] if slot in hm.CAROUSEL["inner_slots"] else []
+        for ring in rings:
+            r = ring * 16
+            # Each pole's top is buried in its crank, so no face of it shares the crank's or the sweep's plane.
+            el.append(panel(sc, "pole", poles, (r - POLE / 2, DECK_TOP, -POLE / 2), (r + POLE / 2, SWEEP[0] - 0.75, POLE / 2),
+                            rot=turned_y((0.0, DECK_TOP, 0.0), degrees)))
+            el.append(panel(sc, "crank", flat(BLACK), (r - 1.25, SWEEP[0] - 1.5, -1.25), (r + 1.25, SWEEP[0], 1.25),
+                            rot=turned_y((0.0, SWEEP[0], 0.0), degrees)))
+    sc.models["spin_boxes"] = el
+    return quads_out
+
+
+def carousel_bulbs(sc):
+    """Its bulbs, a row along the top and the foot of each rounding board, two to a board, standing out from it."""
+    lamp = glow(LAMP)
+    el = []
+    for k in range(SIDES):
+        degrees = k * 360.0 / SIDES
+        for y in BULB_ROWS:
+            for s in BULB_ACROSS:
+                el.append(panel(sc, "bulb", lamp, (DECK_OUT, y - 0.5, s - 0.5), (DECK_OUT + 0.75, y + 0.5, s + 0.5),
+                                rot=turned_y((0.0, y, 0.0), degrees)))
+    return el
+
+
+def carousel_horse(sc):
+    """A black carousel horse, a jumper, about 1.5 m nose to tail, facing north on its pole (at x 0, z 0), its saddle's
+    seat at y 0: its barrel and rump, chest and neck reaching up and forward, a violet mane, its head bowed with a gold
+    bridle, glinting orange eyes and pricked ears, its front legs thrown forward and bent at the knee, its hind legs
+    reaching back, gold hooves, an orange saddle with a gold pommel and cantle on a violet blanket, and a violet tail
+    streaming behind."""
+    hide = coat()
+    gold = flat(GOLD)
+    mane = lengthwise(VIOLET)
+    el = [panel(sc, "horse_body", hide, (-2.5, -7.5, -7.0), (2.5, -1.5, 7.0)),
+          panel(sc, "horse_belly", hide, (-2.0, -8.5, -5.5), (2.0, -7.5, 5.5)),
+          panel(sc, "horse_rump", hide, (-2.25, -1.5, 4.5), (2.25, -0.75, 7.0)),
+          panel(sc, "horse_chest", hide, (-2.25, -7.0, -8.5), (2.25, -2.0, -7.0)),
+          panel(sc, "saddle", lacquer(ORANGE), (-2.75, -1.5, -1.0), (2.75, 0.0, 4.5)),
+          panel(sc, "cantle", gold, (-2.25, 0.0, 3.5), (2.25, 1.25, 4.5)),
+          panel(sc, "pommel", gold, (-1.25, 0.0, -1.0), (1.25, 0.75, 0.0))]
+    for x0, x1 in ((-3.0, -2.5), (2.5, 3.0)):
+        el.append(panel(sc, "blanket", lacquer(VIOLET), (x0, -5.0, -1.5), (x1, -1.5, 5.0)))
+    neck = rotation((0.0, -3.0, -8.0), "x", -22.5)
+    el += [panel(sc, "horse_neck", hide, (-1.75, -4.0, -10.0), (1.75, 6.0, -6.0), rot=neck),
+           panel(sc, "mane", mane, (-0.5, -2.0, -6.0), (0.5, 6.5, -5.0), rot=neck)]
+    head = rotation((0.0, 7.0, -11.5), "x", -45)
+    el += [panel(sc, "horse_head", hide, (-1.5, 3.5, -17.0), (1.5, 7.0, -11.0), rot=head,
+                 east=eyed(hide, "horse", True), west=eyed(hide, "horse", False)),
+           panel(sc, "muzzle", coat(STEEL), (-1.1, 3.5, -18.5), (1.1, 5.75, -17.0), rot=head),
+           panel(sc, "bridle", gold, (-1.7, 3.3, -15.0), (1.7, 7.2, -14.5), rot=head),
+           panel(sc, "forelock", mane, (-0.6, 7.0, -12.5), (0.6, 7.75, -11.0), rot=head)]
+    for x0, x1 in ((-1.3, -0.4), (0.4, 1.3)):
+        el.append(panel(sc, "ear", hide, (x0, 7.0, -12.25), (x1, 8.75, -11.5), rot=head))
+    shoulder = (0.0, -6.5, -6.75)
+    upper = rotation(shoulder, "x", 45)
+    knee_drop = 5.5
+    knee = (0.0, shoulder[1] - knee_drop * math.cos(math.radians(45)), shoulder[2] - knee_drop * math.sin(math.radians(45)))
+    lower = rotation(knee, "x", -22.5)
+    for x0, x1 in ((-1.75, -0.5), (0.5, 1.75)):
+        el.append(panel(sc, "foreleg", hide, (x0, shoulder[1] - knee_drop, shoulder[2] - 0.75), (x1, shoulder[1], shoulder[2] + 0.75), rot=upper))
+        el.append(panel(sc, "shin", hide, (x0 + 0.1, knee[1] - 4.5, knee[2] - 0.7), (x1 - 0.1, knee[1], knee[2] + 0.7), rot=lower))
+        el.append(panel(sc, "hoof", gold, (x0, knee[1] - 5.5, knee[2] - 0.8), (x1, knee[1] - 4.5, knee[2] + 0.8), rot=lower))
+    hip = (0.0, -7.0, 5.5)
+    hind = rotation(hip, "x", -22.5)
+    for x0, x1 in ((-1.75, -0.5), (0.5, 1.75)):
+        el.append(panel(sc, "hindleg", hide, (x0, hip[1] - 7.5, hip[2] - 0.8), (x1, hip[1] + 0.5, hip[2] + 0.8), rot=hind))
+        el.append(panel(sc, "hoof", gold, (x0 - 0.1, hip[1] - 8.5, hip[2] - 0.9), (x1 + 0.1, hip[1] - 7.5, hip[2] + 0.9), rot=hind))
+    el.append(panel(sc, "tail", mane, (-0.75, -3.0, 7.0), (0.75, -1.25, 12.0), rot=rotation((0.0, -2.0, 7.0), "x", 45)))
+    return el
+
+
+def carousel_bat(sc):
+    """A giant black bat to ride, facing north on its pole, its saddle's seat at y 0: a furry body with a rounder belly,
+    a violet saddle with a gold rim, its head with a snout, tall ears, orange eyes and two white fangs, and its feet tucked
+    under. Its wings are its own models (`carousel_wing`), hinged at its sides 3 pixels under the seat."""
+    hair = fur()
+    el = [panel(sc, "bat_body", hair, (-3.0, -7.5, -5.0), (3.0, -1.5, 4.0)),
+          panel(sc, "bat_chest", hair, (-2.25, -7.0, -6.0), (2.25, -2.0, -5.0)),
+          panel(sc, "bat_belly", hair, (-2.25, -8.75, -3.5), (2.25, -7.5, 2.5)),
+          panel(sc, "bat_rump", hair, (-2.0, -6.5, 4.0), (2.0, -2.0, 5.5)),
+          panel(sc, "bat_saddle", lacquer(VIOLET), (-2.75, -1.5, -2.0), (2.75, 0.0, 4.0)),
+          panel(sc, "bat_cantle", flat(GOLD), (-2.25, 0.0, 3.0), (2.25, 1.0, 4.0)),
+          panel(sc, "bat_head", hair, (-2.25, -4.5, -9.5), (2.25, 0.5, -6.0), north=eyes_front()),
+          panel(sc, "snout", hair, (-1.25, -3.75, -11.0), (1.25, -1.5, -9.5))]
+    for x0, x1 in ((-2.25, -0.75), (0.75, 2.25)):
+        el.append(panel(sc, "bat_ear", hair, (x0, 0.5, -8.0), (x1, 3.5, -7.0)))
+        el.append(panel(sc, "bat_ear_tip", hair, (x0 + 0.4, 3.5, -7.85), (x1 - 0.4, 4.5, -7.15)))
+    for x0, x1 in ((-0.9, -0.4), (0.4, 0.9)):
+        el.append(panel(sc, "fang", flat(BONE), (x0, -4.75, -10.75), (x1, -3.75, -10.25)))
+    for x0, x1 in ((-1.75, -1.0), (1.0, 1.75)):
+        el.append(panel(sc, "bat_foot", flat(STEEL), (x0, -10.0, 1.0), (x1, -8.75, 2.5)))
+    return el
+
+
+def carousel_wing(sc, left):
+    """A bat's wing, from its hinge (the origin) out `WING` pixels to the right (or the left, `left`) and from 5 in front
+    to 5 behind: its skin a cut-out sheet (drawn from both sides) and a bone along its front edge."""
+    x0, x1 = (-WING, 0.0) if left else (0.0, WING)
+    sheet = panel(sc, "wing", membrane(left), (x0, 0.0, -5.0), (x1, 0.0, 5.0), sides=("up",))
+    bone = panel(sc, "wing_bone", flat(BLACK), (x0, -0.4, -5.4), (x1, 0.4, -4.6))
+    return sheet, [bone]
+
+
+def carousel_coach(sc):
+    """The Pumpkin Coach, facing north on the deck (its middle at x 0, z 0, the deck's top at y 0): an eight-sided
+    pumpkin shell 1.25 m long, ribbed, gold-rimmed and carved with a face at the front, on four orange-spoked wheels; a
+    violet bench for two inside with a back, and its curling green stem rising behind with a leaf."""
+    shell = pumpkin_side()
+    rim = flat(GOLD)
+    a, t, y0, y1 = 10.0, 2.0, 3.0, 14.0
+    side = 2 * a * math.tan(math.radians(22.5))
+    el = [panel(sc, "coach_shell", shell, (-side / 2, y0, -a), (side / 2, y1, -a + t), up=rim),
+          panel(sc, "coach_shell", shell, (-side / 2, y0, a - t), (side / 2, y1, a), up=rim),
+          panel(sc, "coach_shell", shell, (-a, y0, -side / 2), (-a + t, y1, side / 2), up=rim),
+          panel(sc, "coach_shell", shell, (a - t, y0, -side / 2), (a, y1, side / 2), up=rim)]
+    for angle in (45, -45):
+        for z_lo, z_hi in ((-a, -a + t), (a - t, a)):
+            el.append(panel(sc, "coach_shell", shell, (-side / 2, y0, z_lo), (side / 2, y1 - 0.1, z_hi),
+                            rot=rotation((0.0, (y0 + y1) / 2, 0.0), "y", angle), up=rim))
+    # Its middle bulges, as a pumpkin does: a ring round the shell's middle three-quarters of a pixel proud, ribbed, the
+    # carved face on its front.
+    bulge, b0, b1 = a + 0.75, 6.0, 11.0
+    bside = 2 * bulge * math.tan(math.radians(22.5))
+    el += [panel(sc, "coach_bulge", shell, (-bside / 2, b0, -bulge), (bside / 2, b1, -bulge + 1.0), north=pumpkin_side(face=True)),
+           panel(sc, "coach_bulge", shell, (-bside / 2, b0, bulge - 1.0), (bside / 2, b1, bulge)),
+           panel(sc, "coach_bulge", shell, (-bulge, b0, -bside / 2), (-bulge + 1.0, b1, bside / 2)),
+           panel(sc, "coach_bulge", shell, (bulge - 1.0, b0, -bside / 2), (bulge, b1, bside / 2))]
+    for angle in (45, -45):
+        for z_lo, z_hi in ((-bulge, -bulge + 1.0), (bulge - 1.0, bulge)):
+            el.append(panel(sc, "coach_bulge", shell, (-bside / 2, b0 + 0.1, z_lo), (bside / 2, b1 - 0.1, z_hi),
+                            rot=rotation((0.0, (b0 + b1) / 2, 0.0), "y", angle)))
+    el += solid_octagon(sc, "coach_floor", flat(PUMPKIN), 0.0, 0.0, a - t, y0, y0 + 1.0)
+    el += [panel(sc, "coach_bench", lacquer(VIOLET), (-7.5, y0 + 1.0, -1.0), (7.5, 7.25, 5.0)),
+           panel(sc, "coach_back", lacquer(VIOLET), (-7.5, 7.25, 5.0), (7.5, 13.0, 7.0)),
+           panel(sc, "coach_stem", lengthwise(GREEN), (-1.25, y1, 7.0), (1.25, 20.0, 9.5)),
+           panel(sc, "coach_curl", lengthwise(GREEN), (-1.0, 18.0, 9.5), (1.0, 20.0, 12.0)),
+           panel(sc, "coach_curl_tip", lengthwise(GREEN), (-1.0, 16.0, 10.5), (1.0, 18.0, 12.0)),
+           panel(sc, "coach_leaf", flat(GREEN), (1.25, 15.5, 7.0), (5.0, 16.0, 10.0))]
+    for z in (-6.5, 6.5):
+        el.append(panel(sc, "coach_axle", flat(STEEL), (-10.0, 3.5, z - 0.5), (10.0, 4.5, z + 0.5)))
+        for x0, x1 in ((-11.5, -10.5), (10.5, 11.5)):
+            el += wheel(sc, "coach_wheel", 4.0, z, 4.0, x0, x1)
+    return el
+
+
+def solid_octagon(sc, name, painter, cx, cz, a, y0, y1, top=None):
+    """A solid eight-sided block about (cx, cz), `a` from its middle to its sides, from y0 to y1: a cross of three boxes
+    square to the block that meet without overlapping, and two boxes turned 45 degrees about the middle filling the
+    corners, set a tenth and two tenths of a pixel lower and higher so no two of their tops or feet share a plane."""
+    s = a * math.tan(math.radians(22.5))
+    cap = {"up": top} if top else {}
+    out = [panel(sc, name, painter, (cx - a, y0, cz - s), (cx + a, y1, cz + s), **cap),
+           panel(sc, name, painter, (cx - s, y0, cz - a), (cx + s, y1, cz - s), **cap),
+           panel(sc, name, painter, (cx - s, y0, cz + s), (cx + s, y1, cz + a), **cap)]
+    for k, angle in enumerate((45, -45)):
+        lift = 0.1 * (k + 1)
+        out.append(panel(sc, name, painter, (cx - s, y0 + lift, cz - a), (cx + s, y1 - lift, cz + a),
+                         rot=rotation((cx, (y0 + y1) / 2, cz), "y", angle), **cap))
+    return out
+
+
+def organ_pipes():
+    """The band organ's front: a row of gold pipes a texel wide, a texel apart, tallest in the middle, each with a dark
+    mouth near its foot, on a black panel with a gold foot rail."""
+    def paint(p):
+        for y in range(p.h):
+            for x in range(p.w):
+                p.put(x, y, shade(BLACK, 1))
+        for x in range(p.w):
+            p.put(x, p.h - 1, shade(GOLD, 2))
+        mid = (p.w - 1) / 2
+        for x in range(1, p.w - 1, 2):
+            top = 1 + int(round(abs(x - mid) * 0.8))
+            for y in range(top, p.h - 1):
+                p.put(x, y, shade(GOLD, 4 if y == top else 3))
+            if p.h - 4 > top:
+                p.put(x, p.h - 4, shade(BLACK, 0))
+    paint.tag = repr(("organ_pipes",))
+    return paint
+
+
+def carousel_house(sc):
+    """The carousel's middle block, which stays still, facing north: its drive house, an eight-sided violet house 88 cm
+    across with a gold top, its band organ's front of gold pipes standing before its north side."""
+    el = solid_octagon(sc, "house", lacquer(VIOLET), 8.0, 8.0, 7.0, 0.0, 16.0, top=flat(GOLD))
+    el.append(panel(sc, "organ", flat(BLACK), (4.6, 2.0, 0.25), (11.4, 14.0, 1.0), north=organ_pipes()))
+    return el
+
+
+def mini_horse(cx, cz, fx, fz, sc, y):
+    """A horse for the item, at (cx, cz) with its saddle at `y`, facing (fx, fz) (a whole quarter turn): its body, its
+    neck and head reaching up at the front, and its legs, in black, all square to the block."""
+    def box(along0, along1, y0, y1, half):
+        if fx:
+            xs = sorted((cx + fx * along0, cx + fx * along1))
+            return (xs[0], y0, cz - half), (xs[1], y1, cz + half)
+        zs = sorted((cz + fz * along0, cz + fz * along1))
+        return (cx - half, y0, zs[0]), (cx + half, y1, zs[1])
+    hide = coat()
+    out = []
+    for name, along, ys, half in (("mini_body", (-1.1, 1.0), (y - 0.9, y - 0.2), 0.35), ("mini_neck", (0.7, 1.3), (y - 0.2, y + 1.0), 0.25),
+                                  ("mini_legs", (-0.9, 0.8), (y - 1.8, y - 0.9), 0.25), ("mini_saddle", (-0.3, 0.4), (y - 0.2, y), 0.4)):
+        lo, hi = box(along[0], along[1], ys[0], ys[1], half)
+        out.append(panel(sc, name, lacquer(ORANGE) if name == "mini_saddle" else hide, lo, hi))
+    return out
+
+
+def carousel_item(sc):
+    """The carousel in miniature for its item, a seventh of its size in the block's middle: its deck, column and drive
+    house, its canopy with its rounding boards, stepped roof and pumpkin, its poles and four horses on the outer ring."""
+    k = 1.0 / 7.0
+    c = 8.0
+    el = solid_octagon(sc, "mini_deck", flat(BOARD_WOOD), c, c, DECK_OUT * k, 0.0, DECK_TOP * k)
+    el += solid_octagon(sc, "mini_column", lacquer(VIOLET), c, c, COLUMN * k, DECK_TOP * k, CEILING * k)
+    el += solid_octagon(sc, "mini_boards", flat(BLACK), c, c, DECK_OUT * k, CEILING * k, BOARD_TOP * k)
+    tiers = (46.0, 34.0, 22.0, 10.0)
+    step = (ROOF_TOP - BOARD_TOP) * k / len(tiers)
+    for n, apothem in enumerate(tiers):
+        el += solid_octagon(sc, "mini_roof", flat(ORANGE), c, c, apothem * k, BOARD_TOP * k + n * step,
+                            BOARD_TOP * k + (n + 1) * step)
+    el.append(panel(sc, "mini_pumpkin", pumpkin_side(), (c - 0.6, ROOF_TOP * k, c - 0.6), (c + 0.6, ROOF_TOP * k + 1.0, c + 0.6)))
+    r = hm.CAROUSEL["outer"] * 16 * k
+    saddle = (DECK_TOP + hm.CAROUSEL["seats"]["horse"] * 16) * k
+    for q in range(4):
+        angle = math.radians(90 * q)
+        px, pz = c + r * math.cos(angle), c - r * math.sin(angle)
+        el.append(panel(sc, "mini_pole", flat(GOLD), (px - 0.1, DECK_TOP * k, pz - 0.1), (px + 0.1, SWEEP[0] * k, pz + 0.1)))
+        el += mini_horse(px, pz, round(-math.sin(angle)), round(-math.cos(angle)), sc, saddle)
+    return el
+
+
+def carousel():
+    """The Haunted Carousel's block models, on its 128 x 128 block texture: `whole` (its middle block, the drive house)
+    and `item` (the carousel in miniature)."""
+    sc = Sculpt(hm.CAROUSEL["block"], 2607, 128)
+    sc.models["whole"] = carousel_house(sc)
+    sc.models["item"] = carousel_item(sc)
+    return sc
+
+
+def carousel_ride():
+    """The renderer's parts, on the carousel's own 256 x 256 texture (`RIDE`): `spin_boxes` with the turned quads in
+    `sc.spin`, `bulbs`, `horse`, `bat`, `wing_left` and `wing_right` (and their bones), and `coach`."""
+    sc = Sculpt(RIDE, 2608, 256)
+    sc.spin = carousel_spin(sc)
+    sc.models["bulbs"] = carousel_bulbs(sc)
+    sc.models["horse"] = carousel_horse(sc)
+    sc.models["bat"] = carousel_bat(sc)
+    for name, left in (("wing_left", True), ("wing_right", False)):
+        sheet, bones = carousel_wing(sc, left)
+        sc.models[name] = [sheet]
+        sc.models[name + "_bones"] = bones
+    sc.models["coach"] = carousel_coach(sc)
+    return sc
+
+
+_ride = []
+
+
+def built_ride():
+    if not _ride:
+        _ride.append(ppd.planned(carousel_ride, 256))
+    return _ride[0]
+
+
+def carousel_quads():
+    """The renderer's models (assets/jugcraft/haunted_midway_quads.json): the turning deck, column and canopy (with the
+    sweeps, poles and finial), its bulbs, the horse, the bat and its two wings (cut out round their scallops), and the
+    coach."""
+    sc = built_ride()
+    tex = {"p": RIDE}
+    out = {"haunted_carousel_spin": sc.spin + quads(sc.models["spin_boxes"], tex),
+           "haunted_carousel_bulbs": quads(sc.models["bulbs"], tex)}
+    for name in ("horse", "bat", "coach"):
+        out[f"haunted_carousel_{name}"] = quads(sc.models[name], tex)
+    for name in ("wing_left", "wing_right"):
+        out[f"haunted_carousel_bat_{name}"] = [dict(q, cutout=True) for q in quads(d17d.single_sheets(sc.models[name]), tex)] \
+            + quads(sc.models[name + "_bones"], tex)
+    return out
+
+
 
 # ---------------------------------------------------------------- building and files
 
 _built = {}
 BUILDERS = {hm.COTTON_CANDY["block"]: cotton_candy_cart, hm.POPCORN_WAGON["block"]: popcorn_wagon,
             hm.TICKET_BOOTH["block"]: ticket_booth, hm.WHACK["block"]: whack_a_zombie, hm.GALLERY["block"]: shooting_gallery,
-            hm.GHOST_TRAIN["block"]: ghost_train}
+            hm.GHOST_TRAIN["block"]: ghost_train, hm.CAROUSEL["block"]: carousel}
 
 
 def build(block):
@@ -1009,6 +1552,28 @@ def assets(root, write, lang):
     lang[f"item.{MOD}.{item}"] = hm.TICKET["display"]
     write(root / "models" / "item" / f"{item}.json", {"parent": "minecraft:item/generated", "textures": {"layer0": rid(f"item/{item}")}})
     write(root / "items" / f"{item}.json", {"model": {"type": "minecraft:model", "model": rid(f"item/{item}")}})
+    carousel_assets(root, write, lang)
+
+
+def carousel_assets(root, write, lang):
+    """The Haunted Carousel's middle block's model and blockstate (turned to its facing, its lights and organ drawn
+    alike), its item (the carousel in miniature), its names and messages, and the renderer's quads."""
+    spec = hm.CAROUSEL
+    block = spec["block"]
+    sc = build(block)
+    write(root / "models" / "block" / f"{block}.json", fa.model(block, d20d.separated(sc.models["whole"])))
+    write(root / "blockstates" / f"{block}.json",
+          {"variants": {f"facing={f}": {"model": rid(f"block/{block}"), **({"y": y} if y else {})} for f, y in FACINGS.items()}})
+    write(root / "models" / "item" / f"{block}.json", fa.model(block, d20d.separated(sc.models["item"])))
+    write(root / "items" / f"{block}.json", {"model": {"type": "minecraft:model", "model": rid(f"item/{block}")}})
+    lang[f"block.{MOD}.{block}"] = spec["display"]
+    lang[f"entity.{MOD}.{spec['entity']}"] = spec["entity_display"]
+    for key, words in (("no_room", "The Haunted Carousel needs a clear space %s blocks across, %s through and %s high"),
+                       ("full", "Every mount is taken: wait for the next ride"),
+                       ("jammed", "The Haunted Carousel is jammed: something is in a mount's way"),
+                       ("organ_on", "The band organ plays"), ("organ_off", "The band organ is quiet")):
+        lang[f"message.{MOD}.{block}.{key}"] = words
+    write(root / "haunted_midway_quads.json", carousel_quads())
 
 
 def counted(block, prop, most, item):
@@ -1047,6 +1612,11 @@ def loot(out, write):
     drop_once(out, write, hm.WHACK["block"], [])
     drop_once(out, write, hm.GALLERY["block"], [])
     drop_once(out, write, hm.GHOST_TRAIN["block"], [])
+    # The carousel is one block: its middle drops itself.
+    block = hm.CAROUSEL["block"]
+    write(out / f"{block}.json", {"type": "minecraft:block", "pools": [{
+        "condition": {"type": "minecraft:survives_explosion"}, "entries": [{"type": "minecraft:item", "name": rid(block)}], "rolls": 1}],
+        "random_sequence": rid(f"blocks/{block}")})
 
 
 def drop_once(out, write, block, extra):
@@ -1068,4 +1638,5 @@ def textures():
     out = {("block", block): build(block).atlas.img for block in hm.blocks()}
     out[("item", hm.CANDY["item"])] = item_icons.draw(hm.CANDY["item"])
     out[("item", hm.TICKET["item"])] = item_icons.draw(hm.TICKET["item"])
+    out[("entity", hm.CAROUSEL["entity"])] = built_ride().atlas.img
     return out

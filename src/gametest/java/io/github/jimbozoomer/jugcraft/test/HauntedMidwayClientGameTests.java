@@ -2,6 +2,8 @@ package io.github.jimbozoomer.jugcraft.test;
 
 import io.github.jimbozoomer.jugcraft.agriculture.CottonCandyCartBlock;
 import io.github.jimbozoomer.jugcraft.agriculture.GhostTrainBlock;
+import io.github.jimbozoomer.jugcraft.agriculture.HauntedCarousel;
+import io.github.jimbozoomer.jugcraft.agriculture.HauntedCarouselBlock;
 import io.github.jimbozoomer.jugcraft.agriculture.JugcraftAgriculture;
 import io.github.jimbozoomer.jugcraft.agriculture.MultiDecorationBlock;
 import io.github.jimbozoomer.jugcraft.agriculture.PopcornWagonBlock;
@@ -9,6 +11,9 @@ import io.github.jimbozoomer.jugcraft.agriculture.ShootingGalleryBlock;
 import io.github.jimbozoomer.jugcraft.agriculture.ShootingGalleryBlockEntity;
 import io.github.jimbozoomer.jugcraft.agriculture.TicketBoothBlock;
 import io.github.jimbozoomer.jugcraft.agriculture.WhackAZombieBlock;
+import io.github.jimbozoomer.jugcraft.kinetic.HandCrankBlock;
+import io.github.jimbozoomer.jugcraft.kinetic.HandCrankBlockEntity;
+import io.github.jimbozoomer.jugcraft.kinetic.JugcraftKinetics;
 import java.util.Locale;
 import net.fabricmc.fabric.api.client.gametest.v1.FabricClientGameTest;
 import net.fabricmc.fabric.api.client.gametest.v1.context.ClientGameTestContext;
@@ -30,9 +35,11 @@ import net.minecraft.world.level.block.state.BlockState;
  * cabinet to the west of them, a head up (drawn by client/WhackAZombieRenderer) and five lamps lit; and part 3's Shooting
  * Gallery to the east, a round on, its bulbs lit and three targets knocked down (the targets drawn by
  * client/ShootingGalleryRenderer); and part 4's Ghost Train beyond it, a track of rails through its doorways and a
- * minecart in its IN doorway, so its doors stand open (drawn by client/GhostTrainRenderer), its windows lit; built in a
- * real client and photographed from the midway, close by at each stall, at the games, at the gallery, at the ghost train
- * and by night (CI job {@code client}).
+ * minecart in its IN doorway, so its doors stand open (drawn by client/GhostTrainRenderer), its windows lit; and part 5's
+ * Haunted Carousel at the end of the midway, turning on a hand crank under its middle, its lights on (drawn by
+ * client/HauntedCarouselRenderer); built in a real client and photographed from the midway, close by at each stall, at
+ * the games, at the gallery, at the ghost train, at the carousel, and by night at the stalls and the carousel (CI job
+ * {@code client}).
  * They go into docs/features/haunted-midway.md.
  */
 public class HauntedMidwayClientGameTests implements FabricClientGameTest {
@@ -51,8 +58,8 @@ public class HauntedMidwayClientGameTests implements FabricClientGameTest {
 			server.runCommand("gamerule minecraft:spawn_mobs false");
 			server.runCommand("time set noon");
 			server.runCommand("weather clear");
-			server.runCommand("fill %d %d %d %d %d %d minecraft:gravel".formatted(x - 8, y - 1, z - 3, x + 19, y - 1, z + 8));
-			server.runCommand("fill %d %d %d %d %d %d minecraft:air".formatted(x - 8, y, z - 3, x + 19, y + 6, z + 8));
+			server.runCommand("fill %d %d %d %d %d %d minecraft:gravel".formatted(x - 8, y - 1, z - 3, x + 28, y - 1, z + 11));
+			server.runCommand("fill %d %d %d %d %d %d minecraft:air".formatted(x - 8, y, z - 3, x + 28, y + 6, z + 11));
 			server.runOnServer(minecraft -> build(minecraft.overworld(), origin));
 			context.waitTicks(40);
 			singleplayer.getConnection().waitForChunksRender();
@@ -69,8 +76,11 @@ public class HauntedMidwayClientGameTests implements FabricClientGameTest {
 			}
 			server.runCommand("summon minecraft:minecart %d %d %d".formatted(x + 14, y, z));
 			shoot(context, singleplayer, x + 15, y + 1, z + 7, 180, 8, "jugcraft_midway_ghost_train");
+			// Part 5: the carousel at the end of the midway, turning.
+			shoot(context, singleplayer, x + 24, y + 1, z + 10, 180, 12, "jugcraft_midway_carousel");
 			server.runCommand("time set midnight");
 			shoot(context, singleplayer, x + 2, y + 1, z + 5, 180, 10, "jugcraft_midway_night");
+			shoot(context, singleplayer, x + 24, y + 1, z + 10, 180, 12, "jugcraft_midway_carousel_night");
 		}
 	}
 
@@ -123,5 +133,18 @@ public class HauntedMidwayClientGameTests implements FabricClientGameTest {
 		// Part 4, beyond the gallery: the ghost train's front (its blocks running east from its first), its windows lit.
 		stall(level, (GhostTrainBlock) JugcraftAgriculture.block("ghost_train"), origin.offset(13, 0, 0),
 				state -> state.setValue(MultiDecorationBlock.LIT, true));
+		// Part 5, at the end: the carousel, its middle facing the camera, turning on a hand crank under it.
+		BlockPos middle = origin.offset(24, 0, 2);
+		level.setBlock(middle, JugcraftAgriculture.block(HauntedCarouselBlock.ID).defaultBlockState()
+				.setValue(HauntedCarouselBlock.FACING, Direction.SOUTH), Block.UPDATE_ALL);
+		level.setBlock(middle.below(), JugcraftKinetics.HAND_CRANK.defaultBlockState().setValue(HandCrankBlock.FACING, Direction.UP), Block.UPDATE_ALL);
+		if (level.getBlockEntity(middle.below()) instanceof HandCrankBlockEntity crank) {
+			crank.addTurns(100000);
+		}
+		HauntedCarousel carousel = HauntedCarousel.raise(level, middle);
+		if (carousel != null) {
+			carousel.setAngle(0.4F);
+			carousel.setSpeed(HauntedCarousel.FULL_SPEED);
+		}
 	}
 }

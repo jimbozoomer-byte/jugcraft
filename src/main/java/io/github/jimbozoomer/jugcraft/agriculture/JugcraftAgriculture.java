@@ -403,6 +403,8 @@ public final class JugcraftAgriculture {
 	public static BlockEntityType<WhackAZombieBlockEntity> WHACK_A_ZOMBIE_ENTITY;
 	public static BlockEntityType<ShootingGalleryBlockEntity> SHOOTING_GALLERY_ENTITY;
 	public static BlockEntityType<GhostTrainBlockEntity> GHOST_TRAIN_ENTITY;
+	public static BlockEntityType<HauntedCarouselBlockEntity> HAUNTED_CAROUSEL_DRIVE;
+	public static EntityType<HauntedCarousel> HAUNTED_CAROUSEL;
 	public static BlockEntityType<FirewoodRackBlockEntity> FIREWOOD_RACK_ENTITY;
 	public static BlockEntityType<DecorationBlockEntity> CHOPPING_BLOCK_ENTITY;
 	public static BlockEntityType<BlanketLadderBlockEntity> BLANKET_LADDER_ENTITY;
@@ -3038,6 +3040,16 @@ public final class JugcraftAgriculture {
 		GHOST_TRAIN_ENTITY = Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, Jugcraft.id("ghost_train"),
 				FabricBlockEntityTypeBuilder.create(GhostTrainBlockEntity::new, train).build());
 		registerItem("ghost_train", props -> new BlockItem(train, props), new Item.Properties().useBlockDescriptionPrefix(), BUILDING_TAB);
+		// Part 5: the Haunted Carousel's middle (the block, which sets it turning, boards riders, plays its organ and takes
+		// kinetic power) and the carousel itself.
+		Block carousel = registerBlock(HauntedCarouselBlock.ID, HauntedCarouselBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_ORANGE)
+				.strength(2.0F, 6.0F).sound(SoundType.WOOD).noOcclusion().ignitedByLava().lightLevel(HauntedCarouselBlock::light)
+				.pushReaction(PushReaction.IMMOVEABLE));
+		registerItem(HauntedCarouselBlock.ID, props -> new BlockItem(carousel, props), new Item.Properties().useBlockDescriptionPrefix(), BUILDING_TAB);
+		HAUNTED_CAROUSEL_DRIVE = Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, Jugcraft.id(HauntedCarouselBlock.ID),
+				FabricBlockEntityTypeBuilder.create(HauntedCarouselBlockEntity::new, carousel).build());
+		HAUNTED_CAROUSEL = entity("haunted_carousel", EntityType.Builder.<HauntedCarousel>of(HauntedCarousel::new, MobCategory.MISC).noLootTable()
+				.noSummon().sized(1.0F, 1.0F).clientTrackingRange(10).updateInterval(20));
 	}
 
 	private static BlockBehaviour.Properties displayProperties() {

@@ -14889,7 +14889,8 @@ def check_haunted_midway():
     the cart's heater and the wagon's lamp and lantern glow full-bright; there is a floss model for each serving and a
     heap for each popcorn; the wagon's upper block gives its light; Cotton Candy is a food of the table's; the wagon coats
     two popcorn as the crafting recipe does; both drop with what they hold; the recipes were generated; and every message
-    has its text. Part 2: the Ticket Booth and Whack-a-Zombie against the table (below)."""
+    has its text. Parts 2 to 5 (the Ticket Booth and Whack-a-Zombie, the Shooting Gallery, the Ghost Train and the
+    Haunted Carousel) against the table, below."""
     import haunted_midway as hm
     import menu
     cc, pw = hm.COTTON_CANDY, hm.POPCORN_WAGON
@@ -15094,6 +15095,60 @@ def check_haunted_midway():
         err(f"{gt['block']}: its lit windows must glow, full-bright and unshaded")
     if f"block.{MOD}.{gt['block']}" not in lang:
         err(f"block.{MOD}.{gt['block']}: the text is missing")
+    # Part 5: the carousel's numbers and tune are the table's; its middle block raises it, boards it and quiets its organ,
+    # and takes kinetic power; it, its block entity and its renderer are registered; its quads are among DecorQuads' files,
+    # every part there on the carousel's own entity texture, the bats' wings cut out; its text.
+    cs = hm.CAROUSEL
+    ride = read(JAVA_ROOT / "agriculture" / "HauntedCarousel.java")
+    middle = read(JAVA_ROOT / "agriculture" / "HauntedCarouselBlock.java")
+    melody = [n for bar in cs["tune"] for n in bar]
+
+    def listed(values):
+        return "{" + ", ".join(str(v) for v in values) + "}"
+    for needed in (f"WIDTH = {cs['width']};", f"SLOTS = {len(cs['mounts'])};", f"DECK = {cs['deck']};", f"OUTER = {cs['outer']};",
+                   f"INNER = {cs['inner']};", f"HORSE_SEAT = {cs['seats']['horse']};", f"BAT_SEAT = {cs['seats']['bat']};",
+                   f"COACH_SEAT = {cs['seats']['coach']};", f"SEAT_BACK = {cs['seat_back']};", f"COACH_ACROSS = {cs['coach_across']};",
+                   f"BOB = {cs['bob']};", f"BOBS = {cs['bobs']};", f"NEED = {cs['need']};", f"TURN_TICKS = {cs['turn_ticks']};",
+                   f"ACCEL = FULL_SPEED / {round(1 / cs['accel'])}.0F;", f"DECEL = FULL_SPEED / {round(1 / cs['decel'])}.0F;",
+                   f"BOARD_REACH = {cs['board_reach']};", f"BEAT_TICKS = {cs['beat_ticks']};",
+                   "OUTER_MOUNTS = " + listed(m.upper() for m in cs["mounts"]) + ";", "INNER_SLOTS = " + listed(cs["inner_slots"]) + ";",
+                   "MELODY = " + listed(melody) + ";", "BASS = " + listed(cs["bass"]) + ";", "CHORD = " + listed(cs["chord"]) + ";",
+                   "SoundSource.RECORDS", "protected Vec3 getPassengerAttachmentPoint(", "public boolean blocked(", "isLocalPlayer()"):
+        if needed not in ride:
+            err(f"HauntedCarousel: missing {needed} (tools/haunted_midway.py CAROUSEL)")
+    if len(melody) != 3 * len(cs["bass"]) or len(cs["chord"]) != len(cs["bass"]) \
+            or any(not -1 <= n <= 24 for n in melody) or any(not 0 <= n <= 24 for n in cs["bass"] + cs["chord"]):
+        err("tools/haunted_midway.py CAROUSEL: the tune must be three beats a bar, a bass and chord note a bar, all note-block steps 0 to 24")
+    for needed in (f"HEIGHT = {cs['height']};", f"LIGHT = {cs['light']};", "isSecondaryUseActive()", "HauntedCarousel.raise(",
+                   "affectNeighborsAfterRemoval("):
+        if needed not in middle:
+            err(f"HauntedCarouselBlock: missing {needed} (tools/haunted_midway.py CAROUSEL)")
+    if "HauntedCarousel.NEED - taken" not in read(JAVA_ROOT / "agriculture" / "HauntedCarouselBlockEntity.java"):
+        err("HauntedCarouselBlockEntity: it must take at most HauntedCarousel.NEED KE a tick")
+    for needed in ("registerBlock(HauntedCarouselBlock.ID, HauntedCarouselBlock::new", ".lightLevel(HauntedCarouselBlock::light)",
+                   "HAUNTED_CAROUSEL_DRIVE = Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, Jugcraft.id(HauntedCarouselBlock.ID)",
+                   f'HAUNTED_CAROUSEL = entity("{cs["entity"]}"'):
+        if needed not in java_main:
+            err(f"JugcraftAgriculture: missing {needed}")
+    turning = read(CLIENT_JAVA_ROOT / "HauntedCarouselRenderer.java")
+    if "EntityRendererRegistry.register(JugcraftAgriculture.HAUNTED_CAROUSEL, HauntedCarouselRenderer::new);" not in client \
+            or "HauntedCarousel.seatHeight(" not in turning or "HauntedCarousel.flap(" not in turning or "FULL_BRIGHT" not in turning:
+        err("HauntedCarouselRenderer: registered, it must ride the mounts by HauntedCarousel.seatHeight, beat the wings by flap and light the bulbs")
+    if '"haunted_midway_quads.json"' not in read(CLIENT_JAVA_ROOT / "DecorQuads.java"):
+        err("DecorQuads must read haunted_midway_quads.json")
+    quads = load(ASSETS / "haunted_midway_quads.json") or {}
+    for name in ("spin", "bulbs", "horse", "bat", "bat_wing_left", "bat_wing_right", "coach"):
+        part = quads.get(f"haunted_carousel_{name}")
+        if not part:
+            err(f"haunted_midway_quads.json has no quads for haunted_carousel_{name}")
+        elif any(q["texture"] != f"entity/{cs['entity']}" for q in part):
+            err(f"haunted_midway_quads.json: haunted_carousel_{name} must be drawn on the carousel's own texture, entity/{cs['entity']}")
+        elif name.startswith("bat_wing") and not any(q.get("cutout") for q in part):
+            err(f"haunted_midway_quads.json: haunted_carousel_{name}'s skin must be cut out round its scallops")
+    for key in [f"block.{MOD}.{cs['block']}", f"entity.{MOD}.{cs['entity']}"] + [
+            f"message.{MOD}.{cs['block']}.{k}" for k in ("no_room", "full", "jammed", "organ_on", "organ_off")]:
+        if key not in lang:
+            err(f"{key}: the text is missing")
     keys = [f"block.{MOD}.{tb['block']}", f"block.{MOD}.{wz['block']}", f"item.{MOD}.{hm.TICKET['item']}"]
     keys += [f"message.{MOD}.{tb['block']}.{k}" for k in ("full", "empty")]
     keys += [f"message.{MOD}.{wz['block']}.{k}" for k in ("ticket", "playing", "not_yours", "won", "lost")]

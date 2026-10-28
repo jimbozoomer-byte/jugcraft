@@ -8,6 +8,12 @@ Every change to Jugcraft, newest first, grouped by pull request. For what each t
 
 No numbered release yet. Entries on feature branches remain proposed until their pull requests merge.
 
+### Unmerged: Haunted Midway, part 5 (the haunted carousel)
+- **Haunted Carousel**: a travelling merry-go-round seven blocks across and five high, turned by kinetic power from under its middle, as the Ferris wheel is. Its deck, mirrored column and striped canopy turn round its middle block, the drive house and band organ. Black horses, giant bats and the Pumpkin Coach ride round it, the horses and bats rising and sinking on their brass poles and the bats beating their wings. Its organ plays a waltz of its own while it turns, and its bulbs light. An empty hand boards the nearest free mount (thirteen seats), and riders turn with their mounts; sneaking, an empty hand quiets the organ.
+- Recipe: orange wool round a redstone lamp, over iron bars round a note block, over planks round a gold ingot.
+- Record: [haunted-midway.md](docs/features/haunted-midway.md). Set 6 is complete with it.
+- **Checked:** the record's Verification. Game tests and screenshots run in CI only; not played by hand.
+
 ### Unmerged: Haunted Midway, part 4 (the ghost train)
 - **Ghost Train**: a dark ride's front, five blocks across and four up, a haunted house's clapboard wall lettered GHOST TRAIN, with lit windows and two doorways at track level, IN and OUT. A track of rails runs through its doorways; when a minecart (or the Haunted Hayride) comes, that doorway's doors swing open, and a ghost springs up over the IN doors with a cackle. The ride behind it is the player's to build.
 - Recipe: planks round a glass pane, two wooden doors and a jack-o'-lantern, over planks round a rail.

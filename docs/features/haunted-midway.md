@@ -1,9 +1,9 @@
 # Haunted Midway
 
-Status: parts 1 (the sweet stalls), 2 (the ticket booth and Whack-a-Zombie), 3 (the shooting gallery) and 4 (the ghost train) implemented. CI builds them and runs their game tests and client screenshots; not yet played by hand. Part 5 (the haunted carousel) is planned.
+Status: parts 1 (the sweet stalls), 2 (the ticket booth and Whack-a-Zombie), 3 (the shooting gallery), 4 (the ghost train) and 5 (the haunted carousel) implemented, which completes the set. CI builds them and runs their game tests and client screenshots; not yet played by hand.
 Proposal issue: none. The owner asked for it directly on 28 October 2026, as set 6 of the ten sets of fall and Halloween decor ("Then I want you to do 1-10 in parts in that order one by one"), drawn by their rules.
 Owner: @jimbozoomer-byte
-Target milestone and tier: Discovery tier; made from wool, iron, a bucket, planks and a stick (the cart), and glass panes, a jack-o'-lantern, a cauldron, planks and iron (the wagon); part 2 from glass panes, a dispenser and planks (the booth), and torches, rotten flesh, a piston and planks (the game); part 3 from orange wool, a bow and planks; part 4 from planks, a glass pane, wooden doors, a jack-o'-lantern and a rail.
+Target milestone and tier: Discovery tier; made from wool, iron, a bucket, planks and a stick (the cart), and glass panes, a jack-o'-lantern, a cauldron, planks and iron (the wagon); part 2 from glass panes, a dispenser and planks (the booth), and torches, rotten flesh, a piston and planks (the game); part 3 from orange wool, a bow and planks; part 4 from planks, a glass pane, wooden doors, a jack-o'-lantern and a rail; part 5 from orange wool, a redstone lamp, iron bars, a note block, planks and a gold ingot, and turned by kinetic power.
 Primary specialty and supported player role: building, with a little cooking. A builder sets up a fair's midway after dark; the stalls make the sweets the kitchen already knows, at the same cost. Nothing in it is needed to progress.
 
 ## Player experience
@@ -80,8 +80,19 @@ The midway has its own livery, darker than the fall fair's red and white: midnig
   - Recipe: a plank, a glass pane and a plank, over a wooden door, a jack-o'-lantern and a wooden door, over a plank, a rail and a plank.
   - Broken, it comes away whole, from any block, and drops itself once; the track through its doorways stays.
 
-### Planned
-- **Part 5: the haunted carousel**: seven by seven, black horses, bats and a pumpkin coach, turned by kinetic power as the Ferris wheel is, with organ music.
+### Part 5: the haunted carousel
+- **Haunted Carousel** (seven blocks across and through, five up): a travelling merry-go-round at real size, 7 m across, the pumpkin on its canopy 5 m up. Its middle block, the drive house with its band organ's gold pipes on the front, is its only real block; the rest turns round it.
+  - **Its deck turns** with a mirrored column at its middle, under a striped orange-and-black canopy. The rounding boards carry a jack-o'-lantern and a black bat by turns, with bulbs along their top and foot and a scalloped valance below.
+  - **Twelve mounts**: on the outer ring, the Pumpkin Coach, then black horses and giant bats by turns; four more black horses on the inner ring beside the outer ones.
+  - **The horses and bats ride up and down their twisted brass poles**, three times a turn, by turns; the bats beat their wings as they go. The coach stays on the deck on its four wheels.
+  - **It turns on kinetic power, as the Ferris wheel does**, from a hand crank or a shaft under its middle (one beside it would stand in the mounts' way). 8 KE a tick turns it once round in 12 seconds; less turns it slower. It speeds up and slows down gently.
+  - **While it turns, its band organ plays a waltz of its own**, a short tune in E minor on flute, bass and harp. Sneaking, an empty hand on its middle switches the organ off or on.
+  - **An empty hand on its middle boards the free mount nearest you**, from up to 5 blocks away. It seats thirteen: two in the coach, one on each horse and bat. You turn with your mount, facing the way it goes; getting off sets you down beside it.
+  - While it turns or anyone rides, its bulbs light and its middle gives light 12 under the canopy.
+  - A block where a mount is about to go stops it, jammed, until it is cleared.
+  - It needs a clear space 7 by 7 and 5 high, all air or plants. It takes no ticket.
+  - Recipe: orange wool, a redstone lamp and orange wool, over iron bars, a note block and iron bars, over a plank, a gold ingot and a plank.
+  - Broken, its middle drops itself and the carousel goes, setting any riders on the ground.
 
 ## How it is drawn (docs/ART_DIRECTION.md, docs/NATURAL_TEXTURES.md)
 - Built from boxes at real size, one texel to a model pixel, in the market displays' manner (`tools/haunted_midway_data.py`), and cut into each stall's two blocks' models.
@@ -146,12 +157,35 @@ The midway has its own livery, darker than the fall fair's red and white: midnig
   - the ghosts in the windows read as a #; they are now a ghost five texels wide, the light through its eyes;
   - the IN doorway's ghost first sat in front of its sign; the sign now stands off the wall, the ghost behind it.
 
+### Part 5's carousel
+- **Drawn by its renderer, from quads** (`assets/jugcraft/haunted_midway_quads.json`, `HauntedCarouselRenderer`): it is far too big for a block model. Its middle is a block model on a 128 by 128 block texture; the rest is drawn on its own 256 by 256 texture (`textures/entity/haunted_carousel.png`), a texel a pixel.
+- **The deck and canopy are turned solids of sixteen flat sides** (`lathe()`), each side painted for its own size:
+  - the deck's boards run out from the middle, with a gold trim and a banded skirt;
+  - the roof's panels, orange and black by turns, are bounded by gold seams that follow their slant to the top;
+  - the ceiling under it is violet and black panels, crossed by the gold sweeps the poles hang from;
+  - the rounding boards carry their pictures between gold rails.
+- **The column's mirrors**: eight panels of silvered glass in gold frames, bright at the top and dim at the foot, crossed by one slanting highlight.
+- **The mounts are boxes at real size**:
+  - a black horse 1.5 m nose to tail, a jumper with its forelegs thrown forward, with a violet mane and tail, a gold bridle and hooves and an orange saddle;
+  - a giant black bat with tall ears, orange eyes and white fangs, its wings cut out round their scalloped trailing edges, the skin in panels between the fingers;
+  - the Pumpkin Coach, a ribbed pumpkin shell bulging at its middle with a carved face, a violet bench for two, its green stem curling behind, on four orange-spoked wheels.
+- **The glows**: the bulbs are steady, brightest along their middle, full-bright while it is lit. Nothing flashes.
+- **Moving parts move**: the whole carousel turns, the horses and bats ride up and down, and the bats beat their wings.
+- **The item** is the carousel in miniature, a seventh of its size, in block-model boxes: deck, column, rounding boards, a stepped orange roof, its pumpkin and four horses.
+- **The first previews**, fixed before commit:
+  - the bat was a box with ears; it now has a chest, belly and rump, a snout, and wings 12 pixels out, held a little raised;
+  - the bat's finger bones were drawn as lines that only stepped (noise); the skin is now in panels between them;
+  - the horse's head was a stub; it is now longer, with a grey muzzle, its orange eye showing;
+  - the coach read as a tub; it now bulges round its middle like a pumpkin, and its stem is green;
+  - the item's striped roof tiers were a jumble at icon size; they are now plain orange.
+
 ## Connections
 - Existing input producer: sugar and paper (vanilla, from sugar cane) for the cart; the farm's corn kernels (`jugcraft:corn_kernels`, from corn) and the kitchen's Caramel for the wagon.
 - Existing output consumer: the Cotton Candy is eaten. The Popcorn and Caramel Popcorn are the kitchen's own, made as smelting and crafting make them: Caramel Popcorn goes on to the Popcorn Ball.
 - Technology/magic connections (or infrastructure/cosmetic applicability): cosmetic, with the farm's corn and the kitchen's caramel.
 - Reachable entry path: from the first day, with corn from the farm for the wagon.
 - Which connections are required vs optional; trade and solo routes: all optional, crafted solo, and tradeable like any item. Popcorn is still made by smelting a kernel, and Caramel Popcorn by crafting, without the wagon.
+- Part 5's inputs: kinetic power from the mod's shafts, gearboxes and sources, or a hand crank, under its middle. Its outputs: none; it is a ride.
 - Part 4's inputs: a track of rails and minecarts, or the Haunted Hayride (Halloween decorations batch 12), to ride it. Its outputs: none; it is a ride's front.
 - Part 3's inputs: a ticket, and arrows, snowballs or anything else to shoot or throw. Its outputs: the same prize table's prizes.
 - Part 2's inputs: paper for the tickets; the High Striker's Carnival Mallet to play. Its outputs: the midway's prizes (the plushes), from the prize table the High Striker and Ring Toss already roll.
@@ -167,6 +201,7 @@ The midway has its own livery, darker than the fall fair's red and white: midnig
   - Nothing turns a ticket or a prize back into paper, so there is no loop.
 - Part 3: a round costs a ticket and whatever is shot, and a win gives one roll of the prize table, the same as Whack-a-Zombie's.
 - Part 4 makes nothing and takes nothing: its doors and ghost are its only doings.
+- Part 5 makes nothing. It takes up to 8 KE a tick while it turns, as the Ferris wheel takes 12, and the energy goes into the turning; nothing comes back out.
 - No loop: nothing it makes leads back to sugar, paper, kernels or caramel (the audit refuses any loop).
 
 ## Multiplayer and persistence
@@ -185,6 +220,13 @@ The midway has its own livery, darker than the fall fair's red and white: midnig
 - **The ghost train's doors are the server's**: every 4 ticks its first block looks in two small boxes, each doorway and a block before and after it, for a minecart. Nothing else is looked at, and nothing else ticks.
   - Whether each doorway's doors are open is its blocks' state (`in_open`, `out_open`). Each opening and shutting, and its ghost's spring, is a block event its block entity (`ghost_train`) marks, so every client near it sees them move.
   - The block entity keeps nothing over a restart: when a cart was last seen is the server's memory, and a front reloaded with its doors open shuts them at its next look.
+- **The carousel is the server's**: an entity (`haunted_carousel`) standing at its middle's foot. Its angle and speed are the server's and saved with it. Clients are sent its speed, and its angle once a second, and turn it in between, as the Ferris wheel does.
+  - Who sits on each mount is synced entity data. A rider's place comes from the carousel's angle alone, so every client puts them on the same mount at the same height.
+  - A rider's own client turns their view with their mount each tick; others see their facing as they see any player's.
+  - Boarding is the server's: within 5 blocks of its middle, riding nothing, onto a free seat.
+  - Each tick it turns, it looks at the twelve mounts' places, three points each, for a block in the way; nothing else is looked at.
+  - Its organ plays from the server, at most three notes every 8 ticks while it turns, heard as note blocks are (on the Jukebox/Note Blocks volume).
+  - Its middle's `lit` follows the carousel's lights, and `organ` the player's switch; both are block state.
 - None of them can be pushed by a piston.
 - IDs (stable from release):
   - the blocks and items `cotton_candy_cart` (`facing`, `part` 0 to 1, `lit`, `floss` 0 to 3, model-only `runner`; block entity `cotton_candy_cart`) and `popcorn_wagon` (`facing`, `part` 0 to 1, `lit`, `popcorn` 0 to 8, `popping`, model-only `runner`; block entity `popcorn_wagon`);
@@ -192,12 +234,14 @@ The midway has its own livery, darker than the fall fair's red and white: midnig
   - part 2's blocks and items `ticket_booth` (`facing`, `part` 0 to 1, `roll` 0 to 32, model-only `runner`; block entity `ticket_booth`) and `whack_a_zombie` (`facing`, `part` 0 to 1, `lit`, `head` 0 to 5, `score` 0 to 8, model-only `runner`; block entity `whack_a_zombie`, its saved `player`, `ends` and `last`), and the item `midway_ticket`;
   - part 3's block and item `shooting_gallery` (`facing`, `part` 0 to 5, `lit`, model-only `runner` 0 to 2; block entity `shooting_gallery`, its saved `player`, `ends` and `knocked`);
   - part 4's block and item `ghost_train` (`facing`, `part` 0 to 15, `lit`, `in_open`, `out_open`, model-only `runner` 0 to 3; block entity `ghost_train`, saving nothing). Its blocks are five across and four up less its doorways' lower two blocks each.
+  - part 5's block and item `haunted_carousel` (`facing`, `lit`, `organ`; block entity `haunted_carousel`, saving nothing) and its entity `haunted_carousel` (saving `angle` and `speed`).
 - Their recipes follow the agriculture switch. The blocks and items stay registered when it is off.
 
 ## Dependencies and assets
 - No new dependency.
 - Models, blockstates, loot tables and textures are generated by `tools/haunted_midway_data.py` from `tools/haunted_midway.py`, through `tools/generate_material_data.py` and `tools/generate_textures.py`.
 - The Cotton Candy's and the Midway Ticket's icons are drawn from their maps by `tools/item_icons.py`.
+- The carousel's turning parts are written as quads (`assets/jugcraft/haunted_midway_quads.json`) by the same file, and read by `DecorQuads`.
 - Nothing is copied, traced or recoloured from Minecraft's textures.
 
 ## Verification
@@ -237,6 +281,17 @@ Local checks run on this branch, and their results:
   - `python3 -m unittest discover -s scripts/tests`: 287 tests, OK.
   - `python3 tools/check_icon_maps.py`: PASS (no new map; the ghost train's item is 3D).
   - `javac` scan of the new and changed Java for syntax errors: none. The full compile runs in CI.
+- Part 5:
+  - `python3 tools/check_mod_data.py`: failed on the first run, then PASS (8,134 material IDs), including the art check of every model and of the carousel's quad parts. The failure: the carousel's one texture was 256 by 256, and a block texture may be at most 128. Its middle and item now have a 128 by 128 block texture, and the turning parts their own 256 by 256 entity texture, as the harvest effigy's cloak has. `check_haunted_midway` now also checks:
+    - the carousel's size, rings, mounts, seats, bob, power, speeds, reach and organ against `tools/haunted_midway.py`, and that the tune is three beats a bar in note-block steps;
+    - that its middle raises it, boards riders, quiets the organ when sneaking and takes it down when broken, and its drive takes at most `NEED` KE a tick;
+    - its registration and renderer, which rides the mounts by `seatHeight`, beats the wings by `flap` and lights the bulbs;
+    - that `DecorQuads` reads its quads, every part is drawn on its own texture and the wings are cut out, and its text.
+  - `python3 scripts/check_repository.py`: PASS.
+  - `python3 -m unittest discover -s scripts/tests`: 287 tests, OK.
+  - `python3 tools/check_icon_maps.py`: PASS (no new map; the item is 3D).
+  - `javac` scan of the new and changed Java for syntax errors: none. The full compile runs in CI.
+  - The carousel was previewed offline from its quads, turned and with its mounts risen and fallen (a review aid, not committed); what the previews showed is under How it is drawn.
 
 `HauntedMidwayGameTests` (run in CI):
 - **The cotton-candy cart spins sugar into candy**:
@@ -279,14 +334,24 @@ Local checks run on this branch, and their results:
   - an empty hand lights its windows, its three window blocks giving light 9;
   - broken, it comes away whole, dropping itself once, and the rail in its doorway stays.
 
-`HauntedMidwayClientGameTests` takes seven screenshots on a strip of gravel midway. It holds:
+`HauntedCarouselGameTests` (run in CI, in the Ferris wheel's 44 by 44 arena):
+- **it stands where there is room**: placed by a player, its middle faces them, one carousel turns round it and its drive is there; with a block in its space, a second isn't placed;
+- **a hand crank under it turns it**: its middle takes 8 KE a tick and no more; cranked, it comes up to full speed, its lights on and its middle giving light 12; the crank stopped, it slows to a stop and its lights go out;
+- **riders board the nearest mount and ride up and down**: not from afar; a player boards the outer horse nearest them, and a second the coach; a rider rides up and down with their horse, 0.4 blocks between highest and lowest; getting off sets them on the ground outside their mount, and their seat is free again;
+- **a block in the way jams it**: a block where a bat sits blocks it; driven, it stays jammed; cleared, it turns again;
+- **its organ plays while it turns and can be quieted**: turning, it plays a beat every 8 ticks; sneaking, an empty hand quiets it (boarding nothing) and it plays no more; not sneaking, an empty hand boards it;
+- **breaking its middle takes it down**: the carousel goes, its rider is off, and its middle drops once;
+- **its data loads**: the recipe and the loot table.
+
+`HauntedMidwayClientGameTests` takes nine screenshots on a strip of gravel midway. It holds:
 - two Cotton-Candy Carts, one running with its bowl full of floss (its head drawn by `CottonCandyCartRenderer`) and one off and empty;
 - two Caramel-Corn Wagons beside them, one lit with its case full (its kettle drawn by `PopcornWagonRenderer`) and one out and empty;
 - part 2's Ticket Booth with a full roll, and a Whack-a-Zombie cabinet with a head up (drawn by `WhackAZombieRenderer`) and five lamps lit;
 - part 3's Shooting Gallery, a round on with its bulbs lit and three targets knocked down (the targets drawn by `ShootingGalleryRenderer`);
-- part 4's Ghost Train beyond it, its windows lit, a track of rails through its doorways and a minecart in its IN doorway, so its doors stand open (drawn by `GhostTrainRenderer`).
+- part 4's Ghost Train beyond it, its windows lit, a track of rails through its doorways and a minecart in its IN doorway, so its doors stand open (drawn by `GhostTrainRenderer`);
+- part 5's Haunted Carousel at the end of the midway, turning on a hand crank under its middle, its lights on (drawn by `HauntedCarouselRenderer`).
 
-The shots are from the midway, close by at each stall, at the games, at the gallery, at the ghost train, and by night.
+The shots are from the midway, close by at each stall, at the games, at the gallery, at the ghost train, at the carousel, and by night at the stalls and at the carousel.
 
 Not run: a hand playtest, and a two-client playtest.
 
@@ -294,5 +359,5 @@ Not run: a hand playtest, and a two-client playtest.
 Seasonal in look, not in use: it is made and works all year, and nothing about it ends with October. It doesn't generate in the world.
 
 ## Rollout and open questions
-- Part 1 is the sweet stalls, part 2 the ticket booth and Whack-a-Zombie, part 3 the shooting gallery, part 4 the ghost train. Part 5 follows, stacked on the last.
-- Open: whether the ghost train should come with its own car (the Haunted Hayride and plain minecarts serve for now), and spooks along the ride inside; whether the High Striker and Ring Toss should take a ticket too (they stay free); whether the cart's floss should take a dye's colour (blue raspberry, ghost-white); whether the wagon should take butter for buttered popcorn once the barn's butter is a kitchen ingredient.
+- Part 1 is the sweet stalls, part 2 the ticket booth and Whack-a-Zombie, part 3 the shooting gallery, part 4 the ghost train and part 5 the haunted carousel, each stacked on the last. The set is complete with part 5.
+- Open: whether the carousel should earn an advancement for a whole ride, as the Ferris wheel's do, and take a ticket (it is free, as the Ferris wheel is); whether the ghost train should come with its own car (the Haunted Hayride and plain minecarts serve for now), and spooks along the ride inside; whether the High Striker and Ring Toss should take a ticket too (they stay free); whether the cart's floss should take a dye's colour (blue raspberry, ghost-white); whether the wagon should take butter for buttered popcorn once the barn's butter is a kitchen ingredient.

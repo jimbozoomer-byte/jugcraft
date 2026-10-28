@@ -58,7 +58,28 @@ Part 4, the ghost train:
   up over them with a cackle (`spook_ticks`). An empty hand lights its windows or puts them out (`light`, from its upper
   blocks). The cars are vanilla minecarts on a track the player lays: the ride itself, behind the front, is theirs to
   build. It takes no ticket.
-Sizes in pixels, facing north (its back to the south).
+
+Part 5, the haunted carousel:
+- The Haunted Carousel (HauntedCarouselBlock, its middle; HauntedCarousel, the entity that turns): a travelling
+  merry-go-round `width` blocks across and through and `height` up. Its middle, the drive house with its band organ's
+  pipes on the front, is its one real block. Placed where it has room, it sets the carousel turning round itself: a deck
+  of boards a hand high (`deck` blocks), a mirrored column, a striped canopy on rounding boards hung with bulbs and a
+  scalloped valance, and a jack-o'-lantern on top. Round its outer ring (`outer` blocks out), a slot every eighth of a
+  turn, stand the Pumpkin Coach and black horses and bats by turns (`mounts`, from slot 0); four more horses stand on its
+  inner ring (`inner` blocks out) beside the outer ones (`inner_slots`). The horses and bats ride up and down their brass
+  poles `bobs` times a turn, `bob` blocks either way, by turns, and the bats beat their wings as they go; the coach stays
+  on the deck. Each mount seats one rider, the coach two side by side (`coach_across` either side of its middle): `seats`
+  is each kind's seat over the deck, `seat_back` how far behind its pole. It turns on kinetic power through its middle,
+  as the Ferris wheel does: `need` KE a tick turns it at full speed, once round in `turn_ticks`, less slower; it speeds up
+  by `accel` of full speed a tick and slows by `decel`. Its power comes up from under its middle (a shaft or source
+  beside it would stand in the mounts' way). While it turns, its band organ plays a waltz of its own in E minor, a beat
+  every `beat_ticks` (`tune`: each bar's three beats of tune, -1 a rest; `bass`, each bar's first beat; `chord`, its
+  second and third; in note-block steps, 0 the F sharp a note block plays unstruck). While it turns or anyone rides, its
+  bulbs light and its middle gives light (`light`). An empty hand on its middle boards the free mount nearest the player,
+  within `board_reach` blocks of its middle; sneaking, it switches the organ off or on. A rider turns with their mount,
+  facing the way it goes; getting off, they are set down on the ground just outside it. A block where a mount is about to
+  go stops it, jammed, until it is cleared. It takes no ticket.
+Sizes in pixels, facing north (its back to the south), but the carousel's, in blocks.
 """
 
 COTTON_CANDY = {"block": "cotton_candy_cart", "display": "Cotton-Candy Cart", "size": (1, 2, 1), "floss": 3, "spin": 18.0,
@@ -80,6 +101,14 @@ GALLERY = {"block": "shooting_gallery", "display": "Shooting Gallery", "size": (
 
 GHOST_TRAIN = {"block": "ghost_train", "display": "Ghost Train", "size": (5, 4, 1), "doors": (1, 3), "leaf": (8.0, 30.0), "wall": (2.0, 5.0),
                "look_ticks": 4, "reach": 1.0, "swing_ticks": 4, "hold_ticks": 20, "spook_ticks": 40, "light": 9}
+
+CAROUSEL = {"block": "haunted_carousel", "display": "Haunted Carousel", "entity": "haunted_carousel", "entity_display": "Haunted Carousel",
+            "width": 7, "height": 5, "deck": 0.1875, "outer": 2.55, "inner": 1.45,
+            "mounts": ("coach", "horse", "bat", "horse", "bat", "horse", "bat", "horse"), "inner_slots": (1, 3, 5, 7),
+            "seats": {"horse": 1.25, "bat": 1.15, "coach": 0.45}, "seat_back": 0.125, "coach_across": 0.33, "bob": 0.2, "bobs": 3,
+            "need": 8, "turn_ticks": 240, "accel": 1 / 60, "decel": 1 / 80, "board_reach": 5.0, "light": 12, "beat_ticks": 8,
+            "tune": ((10, 13, 17), (22, -1, 21), (22, 18, 15), (17, -1, 13), (12, 15, 18), (17, 15, 12), (13, 12, 9), (10, -1, -1)),
+            "bass": (10, 10, 3, 10, 5, 5, 10, 10), "chord": (13, 13, 18, 13, 21, 21, 13, 13)}
 
 # Cotton Candy: spun sugar on a paper cone, light as air and gone in a moment (a candy-corn's worth of food).
 ITEMS = {
@@ -104,6 +133,12 @@ RECIPES = [
      "key": {"P": "#minecraft:planks", "G": "minecraft:glass_pane", "D": "#minecraft:wooden_doors", "L": "minecraft:jack_o_lantern",
              "R": "minecraft:rail"},
      "result": GHOST_TRAIN["block"], "count": 1, "category": "misc"},
+    # The carousel: orange wool for its canopy, a lamp for its lights, iron bars for its poles, a note block for its organ,
+    # planks for its deck and horses and gold for its trim. Its power comes from the kinetic network.
+    {"id": CAROUSEL["block"], "pattern": ["WLW", "BNB", "PGP"],
+     "key": {"W": "minecraft:orange_wool", "L": "minecraft:redstone_lamp", "B": "minecraft:iron_bars", "N": "minecraft:note_block",
+             "P": "#minecraft:planks", "G": "minecraft:gold_ingot"},
+     "result": CAROUSEL["block"], "count": 1, "category": "misc"},
     {"id": POPCORN_WAGON["block"], "pattern": ["GJG", "GCG", "PIP"],
      "key": {"G": "minecraft:glass_pane", "J": "minecraft:jack_o_lantern", "C": "minecraft:cauldron", "P": "#minecraft:planks",
              "I": "minecraft:iron_ingot"},
@@ -114,7 +149,7 @@ SHAPELESS = []
 
 def blocks():
     return [COTTON_CANDY["block"], POPCORN_WAGON["block"], TICKET_BOOTH["block"], WHACK["block"], GALLERY["block"],
-            GHOST_TRAIN["block"]]
+            GHOST_TRAIN["block"], CAROUSEL["block"]]
 
 
 def items():
