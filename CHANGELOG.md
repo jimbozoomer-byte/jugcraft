@@ -8,6 +8,14 @@ Every change to Jugcraft, newest first, grouped by pull request. For what each t
 
 No numbered release yet. Entries on feature branches remain proposed until their pull requests merge.
 
+### Unmerged: Orchard & Apple Harvest, part 1 (the ladder, the bin and the bag)
+- **Orchard Ladder**: a nine-foot three-legged orchard ladder (one across, three up, two deep). Its rails taper to a cap, with flat steps, and a pole is hinged at the top leaning back to the ground. Climb it like a ladder.
+- **Apple Bin**: a 1.2 m slatted bulk bin on a pallet (two by two). It holds 256 apples and pears, the heap inside rising through four stages and showing the fruit that went in last.
+- **Picking Bag**: a canvas picking bag with an iron hoop mouth on a wall hook. It holds 16 fruit, shown heaped in its mouth.
+- Use fruit on the bin or bag to put it in; an empty hand takes back a stack; breaking spills the fruit.
+- Record: [orchard-apple-harvest.md](docs/features/orchard-apple-harvest.md).
+- **Checked:** the record's Verification. Game tests and screenshots run in CI only; not played by hand.
+
 ### Unmerged: The Pumpkin Patch Market, part 3 (the sign, the ground and the giant)
 - **Chalkboard Sign**: an A-frame of two slate boards in wooden frames, hinged at the top, the market's words chalked on both faces. Use it to chalk the next: PUMPKINS, FRESH PICKED, U-PICK, GOURDS, SQUASH, PIES, CIDER, OPEN. A named Name Tag (or renaming it in an anvil) chalks your own words; sneak-use wipes them. It needs build permission and keeps its words when broken.
 - **Pumpkin Vine Cover**: a mat of pumpkin vine, broad leaves, tendrils and a flower lying flat on the ground, walked through, at a random turn so a spread doesn't tile. Two vines and pumpkin seeds make six.

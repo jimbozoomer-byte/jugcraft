@@ -527,6 +527,11 @@
       "denominator": 1,
       "source": "recipe jugcraft:apothecary_shelf"
     },
+    "jugcraft:apple_bin": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
     "jugcraft:apple_butter": {
       "numerator": 10705,
       "denominator": 27,
@@ -30982,6 +30987,11 @@
       "denominator": 1,
       "source": "recipe jugcraft:orange_seeds"
     },
+    "jugcraft:orchard_ladder": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
     "jugcraft:ore_drill": {
       "numerator": 25877,
       "denominator": 1,
@@ -31491,6 +31501,11 @@
       "numerator": 421,
       "denominator": 4,
       "source": "recipe jugcraft:picket_rifle"
+    },
+    "jugcraft:picking_bag": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
     },
     "jugcraft:pickled_beets": {
       "numerator": 7267,

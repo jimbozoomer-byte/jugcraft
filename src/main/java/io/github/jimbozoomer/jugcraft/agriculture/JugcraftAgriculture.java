@@ -383,6 +383,7 @@ public final class JugcraftAgriculture {
 	public static BlockEntityType<FarmStandBlockEntity> FARM_STAND_ENTITY;
 	public static BlockEntityType<ProduceDisplayBlockEntity> PRODUCE_DISPLAY_ENTITY;
 	public static BlockEntityType<ChalkboardSignBlockEntity> CHALKBOARD_SIGN_ENTITY;
+	public static BlockEntityType<FruitStoreBlockEntity> FRUIT_STORE_ENTITY;
 	public static ExtendedMenuType<FarmStandMenu, FarmStandMenu.Opening> FARM_STAND_MENU;
 	/** The Harvest Effigy catching (assets/jugcraft/sounds/effigy, made by tools/choir_sounds.py). */
 	public static SoundEvent EFFIGY_BURN;
@@ -2376,6 +2377,7 @@ public final class JugcraftAgriculture {
 		registerPumpkinNight();
 		registerPumpkinPatchDisplays();
 		registerPumpkinPatchExtras();
+		registerOrchardHarvest();
 	}
 
 	/**
@@ -2741,6 +2743,24 @@ public final class JugcraftAgriculture {
 		Block giant = registerBlock("giant_warty_gourd", GiantWartyGourdBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_YELLOW)
 				.strength(1.0F).sound(SoundType.WOOD).noOcclusion().pushReaction(PushReaction.IMMOVEABLE));
 		for (Block block : new Block[] {chalkboard, cover, giant}) {
+			registerItem(BuiltInRegistries.BLOCK.getKey(block).getPath(), props -> new BlockItem(block, props),
+					new Item.Properties().useBlockDescriptionPrefix(), BUILDING_TAB);
+		}
+	}
+
+	/**
+	 * Orchard & Apple Harvest (decor set 2; tools/orchard_harvest.py), part 1: the Orchard Ladder, the Apple Bin and the
+	 * Picking Bag, the bin and the bag sharing one block entity for the fruit they hold.
+	 */
+	private static void registerOrchardHarvest() {
+		Block ladder = registerBlock("orchard_ladder", OrchardLadderBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.WOOD)
+				.strength(1.0F).sound(SoundType.LADDER).noOcclusion().ignitedByLava().pushReaction(PushReaction.IMMOVEABLE));
+		Block bin = registerBlock("apple_bin", AppleBinBlock::new, displayProperties());
+		Block bag = registerBlock("picking_bag", PickingBagBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.WOOL).strength(0.8F)
+				.sound(SoundType.WOOL).noOcclusion().ignitedByLava().pushReaction(PushReaction.POPPED));
+		FRUIT_STORE_ENTITY = Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, Jugcraft.id("fruit_store"),
+				FabricBlockEntityTypeBuilder.create(FruitStoreBlockEntity::new, bin, bag).build());
+		for (Block block : new Block[] {ladder, bin, bag}) {
 			registerItem(BuiltInRegistries.BLOCK.getKey(block).getPath(), props -> new BlockItem(block, props),
 					new Item.Properties().useBlockDescriptionPrefix(), BUILDING_TAB);
 		}

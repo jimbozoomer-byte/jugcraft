@@ -14347,6 +14347,36 @@ def check_pumpkin_patch():
         err(f"GiantWartyGourdBlock is not {w} x {h} x {d} blocks, {pp.GIANT_WARTY['scale']} times the Warty Gourd, as tools/pumpkin_patch.py says")
 
 
+def check_orchard_harvest():
+    """Orchard & Apple Harvest (tools/orchard_harvest.py, docs/features/orchard-apple-harvest.md): the ladder's and the
+    bin's Java blocks are the table's size; the bin's and the bag's capacities and stages are the table's; the ladder is
+    climbable; the fruit they take is the Cider Press's; and the full message has its text."""
+    import orchard_harvest as oh
+    agri = JAVA_ROOT / "agriculture"
+    for cls, spec in (("OrchardLadderBlock", oh.LADDER), ("AppleBinBlock", oh.BIN)):
+        java = (agri / f"{cls}.java").read_text(encoding="utf-8") if (agri / f"{cls}.java").is_file() else ""
+        w, h, d = spec["size"]
+        if f"box({w}, {h}, {d})" not in java:
+            err(f"{cls} is not {w} x {h} x {d} blocks as tools/orchard_harvest.py says")
+    for cls, spec in (("AppleBinBlock", oh.BIN), ("PickingBagBlock", oh.BAG)):
+        java = (agri / f"{cls}.java").read_text(encoding="utf-8") if (agri / f"{cls}.java").is_file() else ""
+        for name, value in (("CAPACITY", spec["capacity"]), ("STAGES", spec["stages"])):
+            if f"int {name} = {value};" not in java:
+                err(f"{cls}.{name} is not tools/orchard_harvest.py's {value}")
+    store = (agri / "FruitStore.java").read_text(encoding="utf-8") if (agri / "FruitStore.java").is_file() else ""
+    if "FRUIT = CiderPressBlock.APPLES" not in store or oh.FRUIT_TAG != "jugcraft:cider_apples":
+        err("FruitStore.FRUIT is not the Cider Press's fruit (tools/orchard_harvest.py FRUIT_TAG)")
+    kinds = re.search(r"enum Kind implements StringRepresentable \{\s*([A-Z_, ]+);", store)
+    if not kinds or [k.strip().lower() for k in kinds.group(1).split(",")] != list(oh.FRUITS):
+        err("FruitStore.Kind is not tools/orchard_harvest.py FRUITS, in order")
+    climbable = load(RES / "data" / "minecraft" / "tags" / "block" / "climbable.json") or {}
+    if f"{MOD}:{oh.LADDER['block']}" not in climbable.get("values", []):
+        err("The Orchard Ladder is not in #minecraft:climbable")
+    lang = load(ASSETS / "lang" / "en_us.json") or {}
+    if f"message.{MOD}.fruit_store.full" not in lang:
+        err("Message fruit_store.full has no text")
+
+
 def check_pumpkin_king():
     """The Pumpkin King (tools/pumpkin_king.py, docs/features/pumpkin-king.md): every number the Java uses is the table's
     (his, his Jacks', his loot's, the Fright boon's and the Crowward Charm's); his attacks are the table's, and his rule can
@@ -21912,6 +21942,7 @@ def main():
     check_alpha_werewolf()
     check_pumpkin_king()
     check_pumpkin_patch()
+    check_orchard_harvest()
     check_cydonian_sentinel()
     check_material_sets()
     check_art()

@@ -796,6 +796,8 @@ def crop_textures():
     out.update(pumpkin_night_textures())
     from pumpkin_patch_data import textures as pumpkin_patch_display_textures  # and the Pumpkin Patch Market's displays
     out.update(pumpkin_patch_display_textures())
+    from orchard_harvest_data import textures as orchard_harvest_textures  # and Orchard & Apple Harvest's gear
+    out.update(orchard_harvest_textures())
     from lair_textures import lair_textures  # and the lairs' blocks, the Mourning Wreath and the Death Knell
     out.update(lair_textures())
     from adam_ondi_ahman_textures import adam_ondi_ahman_textures  # and Adam-ondi-Ahman's Ancient Altar
