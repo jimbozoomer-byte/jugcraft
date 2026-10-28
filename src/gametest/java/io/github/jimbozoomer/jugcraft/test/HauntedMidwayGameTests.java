@@ -20,6 +20,7 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.EntityTypes;
+import net.minecraft.world.entity.vehicle.minecart.AbstractMinecart;
 import net.minecraft.world.entity.vehicle.minecart.Minecart;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.item.Item;
@@ -500,10 +501,17 @@ public class HauntedMidwayGameTests {
 		helper.assertTrue(level.getBlockState(in).isAir() && level.getBlockState(in.above()).isAir() && level.getBlockState(out).isAir(),
 				"Its doorways are left free");
 		level.setBlockAndUpdate(in, Blocks.RAIL.defaultBlockState());
-		Minecart cart = helper.spawn(EntityTypes.MINECART, helper.relativePos(in));
-		helper.runAfterDelay(GhostTrainBlock.LOOK_TICKS + 2, () -> {
+		// Set down on the rail at the doorway's middle, as the booster rail's test sets its cart down.
+		Minecart cart = helper.spawn(EntityTypes.MINECART, Vec3.atBottomCenterOf(helper.relativePos(in)).add(0.0, 0.1, 0.0));
+		helper.runAfterDelay(GhostTrainBlock.LOOK_TICKS * 2 + 1, () -> {
+			BlockState front = level.getBlockState(master);
+			String saw = "the cart " + (cart.isAlive() ? "at " + cart.position() + " (its doorway " + in + ")" : "gone") + ", "
+					+ level.getEntitiesOfClass(AbstractMinecart.class, GhostTrainBlock.watched(master, Direction.NORTH, 0)).size()
+					+ " cart(s) by its IN doorway, its front " + (front.is(train) ? "IN " + front.getValue(GhostTrainBlock.IN_OPEN) + " OUT "
+					+ front.getValue(GhostTrainBlock.OUT_OPEN) : "gone") + ", whole " + both(level, train, master, state -> true) + ", last seen "
+					+ (level.getBlockEntity(master) instanceof GhostTrainBlockEntity seen ? seen.lastSeen(0) + " at " + level.getGameTime() : "no watch");
 			helper.assertTrue(both(level, train, master, state -> state.getValue(GhostTrainBlock.IN_OPEN) && !state.getValue(GhostTrainBlock.OUT_OPEN)),
-					"A minecart in the IN doorway opens its doors, the OUT doors staying shut");
+					"A minecart in the IN doorway opens its doors, the OUT doors staying shut: " + saw);
 			helper.assertTrue(level.getBlockEntity(master) instanceof GhostTrainBlockEntity watch && watch.marked() != Long.MIN_VALUE
 					&& watch.changedAt(0) != Long.MIN_VALUE, "Its ghost springs up as they open");
 			cart.discard();
