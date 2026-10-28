@@ -59,6 +59,8 @@ Three new item IDs: `jugcraft:old_plastic_bottle`, `jugcraft:plastic_duck` and `
 - CI on the fork, run 40548021745 (27 October 2026): the mod compiled and every finished client shard passed; the server tests failed in `foundPlasticIsInTheListedChestsOnly`, which found that `jugcraft:chests/landscape_desert_outpost` does not exist. The desert outpost's table is `jugcraft:landscape_desert_outpost`, outside `chests/`; the list was corrected.
 - CI on the fork, run 40556613572 (27 October 2026, after the fix): passed. The server game tests, `FoundPlasticGameTests` included, passed with and without the optional integrations, and all 16 client shards passed.
 
+- The Foundation workflow's tests (`python3 -m unittest discover -s scripts/tests`) first missed two records, fixed on 28 October 2026: the three items now have the alchemy value file's labelled one-essence fallback ("fallback (balance pending)") until the value builder is next run with the Minecraft jar, and the survival audit knows their source (`tools/survival_native_routes.py` names `FoundPlastic.java`; the registry snapshot `docs/audits/survival-item-registry.json` lists them). After the fix all 287 passed locally, and `check_mod_data.py` and `check_repository.py` passed.
+
 Not run: a human opening chests in a world, or the icons seen in the game.
 
 ## AI attribution
