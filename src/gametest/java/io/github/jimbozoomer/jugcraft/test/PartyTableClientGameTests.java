@@ -1,5 +1,6 @@
 package io.github.jimbozoomer.jugcraft.test;
 
+import io.github.jimbozoomer.jugcraft.agriculture.CakeBlock;
 import io.github.jimbozoomer.jugcraft.agriculture.CandyCornDispenserBlock;
 import io.github.jimbozoomer.jugcraft.agriculture.CandyCornDispenserBlockEntity;
 import io.github.jimbozoomer.jugcraft.agriculture.FacingDecorationBlock;
@@ -18,6 +19,7 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec3;
@@ -25,7 +27,7 @@ import net.minecraft.world.phys.Vec3;
 /**
  * Client game test for the Halloween Party Table, parts 1 to 3 (decor set 8): a party corner on a dark oak floor, a
  * Feast Table along its back with a full Mummy Sausage Tray, Witch-Finger Cauldron, Spider Cupcake Tower, Ghost Meringue
- * Platter and Eyeball Jelly Mould set down on its top, and
+ * Platter and Eyeball Jelly Mould set down on its top, a Pumpkin Layer Cake on a block beside it, and
  * three Candy Corn Dispensers standing before it, full, half full and empty (their globes by {@code fill}). Photographed
  * close by at the dispensers' height; then with the full one's crank set turning ten ticks before the shot, half way
  * round, and the half-full one's set turning twenty-six ticks before, its piece dropped and its flap swung out
@@ -97,6 +99,10 @@ public class PartyTableClientGameTests implements FabricClientGameTest {
 			level.setBlock(at, stand.defaultBlockState().setValue(FacingDecorationBlock.FACING, Direction.NORTH)
 					.setValue(PartyServingBlock.ON_TABLE, true).setValue(stand.servings(), stand.capacity()), Block.UPDATE_ALL);
 		}
+		// The pumpkin layer cake on a block of stripped oak beside the dispensers, whole, facing the camera.
+		level.setBlock(origin.offset(4, 0, 0), Blocks.STRIPPED_OAK_WOOD.defaultBlockState(), Block.UPDATE_ALL);
+		level.setBlock(origin.offset(4, 1, 0), JugcraftAgriculture.block("pumpkin_layer_cake").defaultBlockState()
+				.setValue(CakeBlock.FACING, Direction.NORTH), Block.UPDATE_ALL);
 		// Before it, facing the camera to the north: half full, full and empty, from west to east.
 		int[] counts = {CandyCornDispenserBlock.CAPACITY / 2, CandyCornDispenserBlock.CAPACITY, 0};
 		for (int k = 0; k < 3; k++) {

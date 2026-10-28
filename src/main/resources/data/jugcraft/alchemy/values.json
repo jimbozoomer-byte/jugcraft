@@ -33007,6 +33007,16 @@
       "denominator": 1,
       "source": "fallback (balance pending)"
     },
+    "jugcraft:pumpkin_layer_cake": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
+    "jugcraft:pumpkin_layer_cake_slice": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
     "jugcraft:pumpkin_milkshake": {
       "numerator": 439,
       "denominator": 3,
@@ -33388,6 +33398,11 @@
       "source": "recipe jugcraft:raw_pork_pie"
     },
     "jugcraft:raw_pumpkin_cream_pie": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
+    "jugcraft:raw_pumpkin_layer_cake": {
       "numerator": 1,
       "denominator": 1,
       "source": "fallback (balance pending)"

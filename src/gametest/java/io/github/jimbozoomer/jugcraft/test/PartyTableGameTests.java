@@ -1,12 +1,14 @@
 package io.github.jimbozoomer.jugcraft.test;
 
 import io.github.jimbozoomer.jugcraft.Jugcraft;
+import io.github.jimbozoomer.jugcraft.agriculture.CakeBlock;
 import io.github.jimbozoomer.jugcraft.agriculture.CandyBagItem;
 import io.github.jimbozoomer.jugcraft.agriculture.CandyCornDispenserBlock;
 import io.github.jimbozoomer.jugcraft.agriculture.CandyCornDispenserBlockEntity;
 import io.github.jimbozoomer.jugcraft.agriculture.FacingDecorationBlock;
 import io.github.jimbozoomer.jugcraft.agriculture.JugcraftAgriculture;
 import io.github.jimbozoomer.jugcraft.agriculture.PartyServingBlock;
+import io.github.jimbozoomer.jugcraft.agriculture.PieFilling;
 import net.fabricmc.fabric.api.gametest.v1.GameTest;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -39,7 +41,8 @@ import net.minecraft.world.phys.Vec3;
  * changing nothing; an empty hand takes one off into the player's inventory; broken, each drops itself and what it held.
  * On a Feast Table each is set down onto its top, and stands back up when the table goes. The Ghost Meringue is candy, so
  * a Candy Bag takes it. Part 3: the Mummy Sausage Tray, the Witch-Finger Cauldron and the Eyeball Jelly Mould serve
- * their foods the same way. Their recipes and loot load.
+ * their foods the same way. Part 4: the Pumpkin Layer Cake is a cake, set down as a CakeBlock and baked from Cake Batter
+ * (the cakes' own tests serve, slice and bake it with the others). Their recipes and loot load.
  */
 public class PartyTableGameTests {
 	private static Item item(String id) {
@@ -214,6 +217,9 @@ public class PartyTableGameTests {
 		ServerLevel level = helper.getLevel();
 		helper.assertTrue(level.recipeAccess().byKey(ResourceKey.create(Registries.RECIPE, Jugcraft.id("ghost_meringue"))).isPresent(),
 				"ghost_meringue has a recipe");
+		helper.assertTrue(PieFilling.PUMPKIN_LAYER_CAKE.cake && JugcraftAgriculture.block("pumpkin_layer_cake") instanceof CakeBlock
+				&& level.recipeAccess().byKey(ResourceKey.create(Registries.RECIPE, Jugcraft.id("raw_pumpkin_layer_cake"))).isPresent(),
+				"The Pumpkin Layer Cake is a cake, set down as a CakeBlock, its raw cake from Cake Batter");
 		for (String food : new String[] {"mummy_sausage", "witch_finger", "eyeball_jelly"}) {
 			helper.assertTrue(level.recipeAccess().byKey(ResourceKey.create(Registries.RECIPE, Jugcraft.id(food))).isPresent(), food + " has a recipe");
 		}

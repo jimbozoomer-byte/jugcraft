@@ -37,7 +37,15 @@ CAKES = {
                     "with": ["jugcraft:coffee_beans", "minecraft:cocoa_beans"]},
     "apple_cake": {"display": "Apple Cake", "food": [4, 0.6], "color": 0x9E5A26,
                    "with": ["minecraft:apple", "minecraft:apple"]},
+    # The Halloween Party Table's (decor set 8, part 4; docs/features/halloween-party-table.md): not on the owner's page,
+    # so drawn by code (PAINTED), and last in PieFilling, after its pies and tarts, as the oven saves a filling by its place.
+    "pumpkin_layer_cake": {"display": "Pumpkin Layer Cake", "food": [4, 0.6], "color": 0xC8782E,
+                           "with": ["minecraft:pumpkin", "jugcraft:candy_corn"]},
 }
+# The cakes not on the owner's page, drawn by code in their manner (tools/cake_art.py painted_faces): the Pumpkin Layer
+# Cake, three layers of spiced pumpkin sponge and cream cheese under black chocolate ganache poured over orange
+# buttercream, candy corn round its top and a fondant pumpkin in its middle.
+PAINTED = {"pumpkin_layer_cake"}
 
 # Cake Batter: two wheat, an egg, a sugar and a bucket of milk (the bucket comes back, as in vanilla's cake).
 BATTER_RECIPE = ["minecraft:wheat", "minecraft:wheat", "minecraft:egg", "minecraft:sugar", "minecraft:milk_bucket"]
@@ -51,6 +59,11 @@ BARS = {
         ("x", 9, 2, "hi"), ("x", 10, 5, "hi")]},
     "apple_cake": {"length": 4, "width": 2, "height": 1.5, "leaves": 0, "bars": [
         ("z", 3, 2), ("z", 2, 6), ("x", 10, 2), ("x", 11, 5), ("x", 2, 8), ("z", 10, 8), ("x", 3, 13), ("z", 10, 13)]},
+    # The Pumpkin Layer Cake's candy corn: eight kernels lying in from its edge, two to a side either side of the cut,
+    # each pointing in to the fondant pumpkin in the middle; a kernel is three texels long: its white tip (its "leaves" end), its orange middle and its yellow foot.
+    "pumpkin_layer_cake": {"length": 3, "width": 1, "height": 1, "leaves": 1, "bars": [
+        ("z", 1, 6, "hi"), ("z", 1, 9, "hi"), ("z", 12, 6, "lo"), ("z", 12, 9, "lo"),
+        ("x", 1, 6, "hi"), ("x", 1, 9, "hi"), ("x", 12, 6, "lo"), ("x", 12, 9, "lo")]},
 }
 # The birthday cake's candles: one texel square and CANDLE_HEIGHT tall, striped white and their colour, two on each side.
 CANDLE_HEIGHT = 4
@@ -58,7 +71,9 @@ CANDLE_ORDER = ["blue", "yellow", "green", "pink"]
 CANDLES = {"birthday_cake": [(1, 10, "blue"), (1, 6, "yellow"), (4, 1, "green"), (9, 1, "pink"), (5, 13, "pink"),
                              (10, 13, "green"), (14, 9, "yellow"), (13, 4, "blue")]}
 # The cheesecake's square of berry jam, in the middle of the top: (x0, z0, x1, z1) and its height.
-JAM = {"cheesecake": ((6, 6, 10, 10), 1)}
+JAM = {"cheesecake": ((6, 6, 10, 10), 1),
+       # The Pumpkin Layer Cake's fondant pumpkin, in its middle, cut with the quarters as the jam is.
+       "pumpkin_layer_cake": ((6, 6, 10, 10), 2)}
 
 
 def turn(lo, hi):

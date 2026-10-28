@@ -5446,7 +5446,9 @@ def check_pies_and_tarts():
               for bake, info in pies_and_tarts.BAKES.items()]
     if declared != wanted:
         err(f"PieFilling.java's pies and tarts {declared} differ from tools/pies_and_tarts.py BAKES (ID, slice food, colour, height, in order)")
-    last_cake = max((filling.find(f'"{c}"') for c in cakes.CAKES), default=-1)
+    # The cakes the owner drew come before the pies and tarts; a cake added later (cakes.PAINTED) follows them, at the end,
+    # so that no saved filling moves.
+    last_cake = max((filling.find(f'"{c}"') for c in cakes.CAKES if c not in cakes.PAINTED), default=-1)
     if filling.find(f'"{next(iter(pies_and_tarts.BAKES))}"') < last_cake:
         err("PieFilling.java must list the pies and tarts after the cakes: the Hearth Oven saves a filling by its place")
     if "public CakeBlock(@Nullable PieFilling filling, int height, Properties properties)" not in java.get("CakeBlock", ""):

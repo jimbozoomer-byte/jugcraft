@@ -1,6 +1,6 @@
 # Halloween Party Table
 
-Status: parts 1 (the candy: the Candy Corn Dispenser), 2 (the cake stands: the Spider Cupcake Tower and the Ghost Meringue Platter, and the Ghost Meringue) and 3 (the trays: the Mummy Sausage Tray, the Witch-Finger Cauldron and the Eyeball Jelly Mould, and their foods) implemented. CI builds them and runs their game tests and client screenshots; not yet played by hand. Parts 4 and 5 are planned (below).
+Status: parts 1 (the candy: the Candy Corn Dispenser), 2 (the cake stands: the Spider Cupcake Tower and the Ghost Meringue Platter, and the Ghost Meringue) 3 (the trays: the Mummy Sausage Tray, the Witch-Finger Cauldron and the Eyeball Jelly Mould, and their foods) and 4 (the cake: the Pumpkin Layer Cake) implemented. CI builds them and runs their game tests and client screenshots; not yet played by hand. Part 5 is planned (below).
 Proposal issue: none. The owner asked for it directly on 28 October 2026, as set 8 of the ten sets of fall and Halloween decor ("Then I want you to do 1-10 in parts in that order one by one"), drawn by their rules.
 Owner: @jimbozoomer-byte
 Target milestone and tier: Discovery tier; the dispenser is made from glass, iron and black dye, and filled with candy corn; the cupcake tower from iron nuggets and black dye, the meringue platter from clay and black dye, and Ghost Meringues from an egg, sugar and cocoa; the sausage tray from iron and a bowl, the witch-finger cauldron from iron, the jelly mould from clay and bone meal, and their foods from a cooked porkchop and pastry dough, wheat, sugar and green dye, and sugar, sweet berries, bone meal and a glow berry.
@@ -54,8 +54,13 @@ Table pieces too, set down onto a Feast Table as the cake stands are. Each holds
   - **Witch Finger**: a finger of green shortbread with an almond nail and knuckle creases. 2 hunger and 0.1 saturation, a cookie's worth; eight, as cookies are, from two wheat, sugar and green dye.
   - **Eyeball Jelly**: a serving of clear red jelly with an eyeball in it. 2 hunger and 0.2 saturation; four from sugar, two sweet berries, bone meal for its gelatin and a glow berry for the eyes.
 
+### Part 4: the cake
+- **Pumpkin Layer Cake**: an eighth cake beside the [seven the owner drew](cakes.md), made and served as they are.
+  - **Its look**: three layers of spiced pumpkin sponge with cream cheese between them, coated in orange buttercream, with black chocolate ganache poured over its top and dripping down its sides. Eight kernels of candy corn lie round its top, pointing in to a fondant pumpkin in its middle.
+  - **Baking**: Cake Batter, a sugar, a pumpkin and candy corn make the Raw Pumpkin Layer Cake, baked in the Hearth Oven as the other cakes are; left in too long it comes out a Burnt Cake.
+  - **Serving**: it is set down whole, a block wide and nine texels tall, as the others are. A hungry player eats a quarter; a knife cuts a quarter off as a Slice of Pumpkin Layer Cake (4 hunger, 0.6 saturation, as the other cakes' slices). A cut shows its layers, and the candy corn and the pumpkin are cut with the quarters.
+
 ### Planned
-- **Part 4: the cake**: a pumpkin layer cake that slices, as vanilla's cake does.
 - **Part 5: the table**: a bat table runner, goodie bags and skull goblets.
 
 ## How it is drawn (docs/ART_DIRECTION.md, docs/NATURAL_TEXTURES.md)
@@ -74,6 +79,17 @@ Table pieces too, set down onto a Feast Table as the cake stands are. Each holds
 - **The witch fingers**, 14 cm long and 3 cm thick, from the tip down: an almond nail, a knuckle crease a tone deeper, then green shortbread lit along its left. Each leans out of the crumbs 22.5 degrees, the only turn a block model takes short of 45, except the two in the middle, which stand straight. The crumbs are two tones by turns with a lit crumb every third texel; the cauldron is the dispenser's black cast iron, round (two boxes crossed), with a lip.
 - **The jelly**: clear red, see-through, lit along its top row, each segment 1.1 pixels square and 9 cm high round the hole. The corner segments are drawn in from the ring's outside, so the ring reads round. Each eyeball is a white cube with a blue iris on the side facing out, seen through the jelly.
 - **The new icons** (`tools/item_icons/mummy_sausage.txt`, `witch_finger.txt`, `eyeball_jelly.txt`) are 16x16 maps in the existing flat materials: the sausage in `pancake` pastry and `terracotta` with `butter` eyes, the finger in `leaf` with a `pancake` nail, the jelly in `red_paint` on a `paper` plate with a `dew` iris.
+- **The cake** (part 4) is drawn in the manner of the owner's cakes, which `tools/cake_art.py` reads off their drawing; it is not on the drawing, so `painted_faces` paints its faces in the same rows:
+  - its sides are orange buttercream, lit at the top and shaded to the foot, with a lighter spatula stroke every fourth column, and the ganache's edge along the top running down in drips of set lengths (a different run on its front and side);
+  - its inside is the ganache, then pumpkin sponge (a regular crumb: a darker texel every fifth along a slant, a lighter every seventh), cream cheese, sponge, cream cheese and sponge, with the buttercream coat a texel deep at either edge;
+  - its top is ganache, its rim a tone deeper, with a short arc of gloss near its back left;
+  - each candy corn kernel is three texels (white tip, orange, yellow foot);
+  - the fondant pumpkin is ribbed orange with a green stem in its middle.
+  - Its slice icon is the owner's Slice of Cake recoloured, as the others' are, here with its sponge and ganache and a candy-corn topping. Its crumb is taken from the sponge's rows alone.
+- **The part 4 previews**, fixed before commit:
+  - the kernels paired up at the corners into L shapes, so they now lie two to a side either side of the cut, pointing in at the pumpkin;
+  - the gloss, a long slanting streak, read as a crack, so it is now a short arc;
+  - the slice icon's crumb was sampled from the whole inside, cream cheese with it, and showed white specks; it now comes from the sponge alone.
 - **The part 3 previews**, fixed before commit:
   - the jelly ring was eight equal cubes and read as a square, so its corner segments are now drawn in;
   - the first icons were too plain: the sausage's eyes were lost against its pastry, the finger read as a twig and the jelly as a red box. The sausage is now thicker, with its face set on the sausage between the bands; the finger swells at two creased knuckles; the jelly is a fluted mould on a plate, with a gloss.
@@ -100,6 +116,7 @@ Table pieces too, set down onto a Feast Table as the cake stands are. Each holds
 - It hands out one piece a second at most, by hand.
 - The cupcake tower costs six iron nuggets and black dye, the meringue platter two clay balls and black dye. Each gives back only itself, and what goes on comes off one for one.
 - The sausage tray costs three iron ingots, two nuggets and a bowl; the cauldron five iron ingots and two nuggets; the jelly mould two clay balls and bone meal. Each gives back only itself.
+- The Pumpkin Layer Cake costs what the other cakes cost (a Cake Batter, a sugar and its own two ingredients, here a pumpkin and candy corn) and gives what they give: four quarters of 4 hunger.
 - The trays' foods are crafted as vanilla's foods are, sugar and pastry adding to what they are made from:
   - four Mummy Sausages (12 hunger) come from a cooked porkchop (8) and pastry dough;
   - eight Witch Fingers (16) come from two wheat, as eight cookies do;
@@ -120,7 +137,8 @@ Table pieces too, set down onto a Feast Table as the cake stands are. Each holds
   - the blocks and items `spider_cupcake_tower` (`facing`, `on_table`, `servings` 0 to 13) and `ghost_meringue_platter` (`facing`, `on_table`, `servings` 0 to 9);
   - the item `ghost_meringue`;
   - the blocks and items `mummy_sausage_tray` (`servings` 0 to 8), `witch_finger_cauldron` (`servings` 0 to 10) and `eyeball_jelly_mould` (`servings` 0 to 8), each with `facing` and `on_table`;
-  - the items `mummy_sausage`, `witch_finger` and `eyeball_jelly`.
+  - the items `mummy_sausage`, `witch_finger` and `eyeball_jelly`;
+  - the block and item `pumpkin_layer_cake` (a cake's `facing` and `bites`), the items `raw_pumpkin_layer_cake` and `pumpkin_layer_cake_slice`, and `PieFilling.PUMPKIN_LAYER_CAKE`, saved by the Hearth Oven by its place, last in the list.
 - Their recipes follow the agriculture switch. The blocks and items stay registered when it is off.
 
 ## Dependencies and assets
@@ -166,6 +184,17 @@ Local checks run on this branch, and their results:
   - `python3 tools/check_icon_maps.py`: PASS (281 maps, the three new ones among them).
   - `javac` scan of the new and changed Java for syntax errors: none. Every member the new Java calls is used elsewhere in the code already, or declared in it, with the same arguments where the call is new. The full compile runs in CI.
   - The models and icons were previewed offline; what the previews showed and what was fixed is under How it is drawn.
+- Part 4:
+  - `python3 tools/check_mod_data.py`: PASS on the second run (8,158 material IDs), including the art check of every block and item model.
+    - The first run failed before its checks: `tools/generate_textures.py` stopped with an `IndexError`, because the cake's new `SPONGE` palette in `tools/cake_art.py` replaced the owner's `SPONGE` of the same name. The cake's palettes are now named `PLC_`.
+    - `check_pies_and_tarts` now leaves the painted cake out of the check that the owner's cakes are last on their drawing.
+  - `python3 scripts/check_repository.py`: PASS.
+  - `python3 -m unittest discover -s scripts/tests`: 287 tests, OK on the second run.
+    - The first run failed one: `test_tree_batch_five_bc` checked that the Persimmon Pie was the very last filling. It now checks that the fillings before it are unchanged and it comes after them, so fillings added later don't break it.
+  - `python3 tools/check_icon_maps.py`: PASS (281 maps; the cake's icons are drawn by `tools/cake_art.py`, not from maps).
+  - After the slice icon's fix, textures generated again and `check_mod_data.py`, `check_repository.py` and `check_icon_maps.py` run on them: all PASS.
+  - `javac` scan of the changed Java for syntax errors: none. Every member it calls is used elsewhere in the code already, with the same arguments. The full compile runs in CI.
+  - The cake was previewed offline; what the previews showed and what was fixed is under How it is drawn.
 
 `PartyTableGameTests` (run in CI):
 - **The Candy Corn Dispenser fills and turns**:
@@ -184,9 +213,10 @@ Local checks run on this branch, and their results:
   - broken, it drops itself and what it held.
   - The Ghost Meringue is candy, so a Candy Bag takes it.
 - **The cake stands stand on a Feast Table**: a platter placed on one is set down onto its top, and stands back up when the table goes.
-- **Their data loads**: the four foods' recipes, and the six pieces' recipes and loot tables.
+- **Their data loads**: the four foods' recipes, the six pieces' recipes and loot tables, and the Pumpkin Layer Cake is a cake, set down as a `CakeBlock`, with its raw cake's recipe (part 4).
+- The cakes' own tests (`CakeGameTests`, `CakeClientGameTests`) serve, slice, bake and photograph it with the owner's seven; their count of cakes is now eight.
 
-`PartyTableClientGameTests` takes three screenshots of a party corner on a dark oak floor. A Feast Table six blocks long runs along its back with a full sausage tray, witch-finger cauldron, cupcake tower, meringue platter and jelly mould set down on its top, and three dispensers stand before it, half full, full and empty:
+`PartyTableClientGameTests` takes three screenshots of a party corner on a dark oak floor. A Feast Table six blocks long runs along its back with a full sausage tray, witch-finger cauldron, cupcake tower, meringue platter and jelly mould set down on its top. Three dispensers stand before it, half full, full and empty, with a Pumpkin Layer Cake on a block beside them:
 - close by, at the dispensers' height;
 - the full one's crank half way round, and the half-full one's flap swung out as its piece drops (drawn by `CandyCornDispenserRenderer`);
 - from above the dispensers, looking down on the stands and trays on the table.
@@ -197,5 +227,5 @@ Not run: a hand playtest, and a two-client playtest.
 Seasonal in look, not in use: it is made and works all year, and nothing about it ends with October. It doesn't generate in the world.
 
 ## Rollout and open questions
-- Part 1 is the candy, part 2 the cake stands and part 3 the trays; parts 4 and 5 follow, each stacked on the last.
-- Open: whether the dispenser should take other small candy, or a coin to turn; whether the stands should be set down onto other tables than the Feast Table (each lower top would need its own copies of the models).
+- Part 1 is the candy, part 2 the cake stands, part 3 the trays and part 4 the cake; part 5 follows, stacked on the last.
+- Open: whether the dispenser should take other small candy, or a coin to turn; whether the stands should be set down onto other tables than the Feast Table (each lower top would need its own copies of the models); and whether the cakes, which stand a block high on any block, should be set down onto a Feast Table as the stands are (that would change all eight cakes' block).

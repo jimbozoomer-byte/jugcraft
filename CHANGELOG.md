@@ -8,6 +8,13 @@ Every change to Jugcraft, newest first, grouped by pull request. For what each t
 
 No numbered release yet. Entries on feature branches remain proposed until their pull requests merge.
 
+### Unmerged: Halloween Party Table, part 4 (the Pumpkin Layer Cake)
+- **Pumpkin Layer Cake**: an eighth cake beside the owner's seven. It has three layers of pumpkin sponge and cream cheese, orange buttercream with black chocolate ganache dripping down it, candy corn round its top and a fondant pumpkin in the middle.
+- Cake Batter, a sugar, a pumpkin and candy corn make the raw cake. It bakes in the Hearth Oven and is eaten or cut a quarter at a time like the other cakes.
+- It comes last in the Hearth Oven's fillings, so saved ovens keep their pies and cakes.
+- Record: [halloween-party-table.md](docs/features/halloween-party-table.md) and [cakes.md](docs/features/cakes.md). Decor set 8's fourth part.
+- **Checked:** the record's Verification. Game tests and screenshots run in CI only; not played by hand.
+
 ### Unmerged: Halloween Party Table, part 3 (the trays)
 - **Mummy Sausage Tray**: a black baking tray with a ramekin of mustard, holding 8 Mummy Sausages.
 - **Witch-Finger Cauldron**: a little cast-iron cauldron of cookie crumbs, holding 10 Witch Fingers poking up out of it.

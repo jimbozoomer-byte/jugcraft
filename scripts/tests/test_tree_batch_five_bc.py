@@ -73,7 +73,8 @@ class TreeBatchFiveBCTests(unittest.TestCase):
         source=(ROOT/"src/main/java/io/github/jimbozoomer/jugcraft/agriculture/PieFilling.java").read_text(encoding="utf-8")
         names=re.findall(r'^\t([A-Z_]+)\(',source,re.M)
         old="APPLE PUMPKIN_CREAM CRANBERRY SWEET_POTATO CHESTNUT CHOCOLATE SWEET_BERRY PEACH LEMON CARROT_CAKE BIRTHDAY_CAKE ICE_CREAM_CAKE RED_VELVET_CAKE CHEESECAKE COFFEE_CAKE APPLE_CAKE STRAWBERRY_PIE BLUEBERRY_TART PLUM_PIE BANOFFEE_PIE SWEET_BERRY_TART LEMON_TART WHIPPED_PUMPKIN_PIE PORK_PIE STRAWBERRY_TART COFFEE_TART".split()
-        self.assertEqual(names,old+["PERSIMMON"])
+        # The released fillings and the persimmon keep their places; later fillings (the Pumpkin Layer Cake) follow them.
+        self.assertEqual(names[:len(old)+1],old+["PERSIMMON"])
         self.assertEqual(list(ag.PIES["fillings"])[-1],"persimmon")
 
 if __name__ == "__main__": unittest.main()
