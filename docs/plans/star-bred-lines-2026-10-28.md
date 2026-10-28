@@ -87,9 +87,10 @@ better number only ever adds.
 An animal with no line yet is given one the first time it loads. The line is worked out from its own UUID, so loading
 it again gives the same result, and there is nothing to re-roll.
 
-- Each copy is graded 0 (20%), 1 (35%), 2 (30%) or 3 (15%). A wild trait is about 3 on average, and about 1 wild animal
-  in 9 shows 5 or more in a given trait.
-- **Grades 4 and 5 never occur in the wild.** They are the sky's grades, or the lab's at a price.
+- Each copy is graded 0 (25%), 1 (45%) or 2 (30%), so a wild trait is at most 4 and **every wild animal is exactly
+  vanilla**. No other feature's animals change. (Revised in phase 1: wild copies were planned 0 to 3, which gave about
+  1 wild animal in 9 a bonus and changed other features' test animals.)
+- **Grades 3 to 5 never occur in the wild.** They are the sky's grades, or the lab's at a price.
 - 1 wild animal in 6 carries one copy of one of its kind's gifts.
 
 ### Hidden gifts (the genes found by breeding)
@@ -98,7 +99,8 @@ A gift is recessive. One copy (a **carrier**) shows nothing; two copies show it.
 shows the gift. The ways to find one are:
 
 - breeding: a gift appearing in a baby;
-- the Astrawand, once Star Husbandry is mastered, which says an animal carries something unseen;
+- the Astrawand, once Star Husbandry is mastered (Celestial Attunement in phase 1), which says an animal carries
+  something unseen;
 - the gene lab's sequencer, which names every copy.
 
 The first gifts:
@@ -138,10 +140,14 @@ Every trait has a pattern that comes all year. The Winter Crown and the Harvest 
 needed for anything. The sign stays on the animal as its birth sign. It is the hook for the horoscopes idea later (a
 sign that counts on omen nights).
 
-**The arithmetic.** Two wild 3+3 parents give a 3+3 baby. Born under the Full Moon, it is 4+3, Yield 7. Two such
-animals bred under the next Full Moon can give a 5+4, Yield 9. Fixing 5+5 needs a third night, or a lucky pairing. By
-breeding alone, a Yield 10 line that breeds true takes about three Full Moons, close to a month of game days. The rite
-and the lab shorten that.
+**The arithmetic.** Each rising of a pattern lifts the line's best grade by one:
+
+1. Two wild 2+2 parents give a 2+2 baby. Born under the Full Moon, it is 3+2: Yield 5.
+2. Two such animals bred together give a 3+3 one time in four. Born under the next Full Moon, it is 4+3: Yield 7.
+3. Two 4+3s give a 4+4 one time in four. Born under the third Full Moon, it is 5+4: Yield 9.
+4. Two 5+4s, bred on any day, give a 5+5 one time in four: a Yield 10 line that breeds true.
+
+By breeding alone that is three Full Moons, about 24 game days. The rite and the lab shorten that.
 
 ## The Astrawand (reading only)
 
@@ -164,7 +170,8 @@ changes nothing and costs nothing. The reading goes to chat:
 > Yield 7 · Vigour 4 · Fertility 5 · Hardiness 3
 > Gifts: Moonfleece
 
-How much it shows depends on the reader's Star Husbandry:
+How much it shows depends on the reader's Star Husbandry (in phase 1, built 28 October 2026, on their Celestial
+Attunement instead: Star Husbandry arrives with the star rite in phase 2, which needs it):
 
 - **Anyone:** the sign, the generation, the four numbers and the gifts it shows.
 - **Understood:** each trait that breeds true is marked.
@@ -173,7 +180,9 @@ How much it shows depends on the reader's Star Husbandry:
 **Recipe.** An amethyst shard (the star), a bone (the shaft) and a gold ingot (the grip), laid on the diagonal.
 Discovery tier, with nothing gated.
 
-## Star Husbandry (the research)
+## Star Husbandry (the research; phase 2)
+
+It arrives with the star rite, the first thing that needs it.
 
 A new Concordance research in the Starwatchers' tradition, at the Practitioner stage. It needs Celestial Attunement
 understood. Its states follow Verdant Husbandry's:
@@ -303,11 +312,10 @@ Each phase ends with a checkpoint to the owner before the next.
    - the line on eight kinds, inheritance and signs;
    - the four traits' effects and the six gifts;
    - the Astrawand: icon, hand model, flourish and reading;
-   - Star Husbandry;
    - a feature record and tests.
 
    Player outcome: breed animals under the night sky, read them with the Astrawand, and get more from a better line.
-2. **The star rite**: the Star Manger, raising and fixing a trait, waking a gift under the comet, and recall.
+2. **The star rite**: Star Husbandry, the Star Manger, raising and fixing a trait, waking a gift under the comet, and recall.
 3. **The gene lab**: the syringe, samples, the sequencer, the splicer, serums, directed mutation and star-drawn samples.
 4. **More kinds**: horses and their kin, reconciled with vanilla's inheritance. Then the Menagerie's livestock, with
    capture and eggs carrying the line.

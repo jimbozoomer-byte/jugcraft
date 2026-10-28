@@ -144,6 +144,8 @@ public final class Jugcraft implements ModInitializer {
 		JugcraftGuide.register();
 		JugcraftFinance.register();
 		JugcraftAgriculture.register();
+		// Star-bred lines: farm animals carry a line, take a sign from the sky, and the Astrawand reads them.
+		io.github.jimbozoomer.jugcraft.lineage.Lineage.register();
 		io.github.jimbozoomer.jugcraft.jimtafacts.industry.IndustrialCrops.register();
 		io.github.jimbozoomer.jugcraft.lair.JugcraftLairs.register();
 		io.github.jimbozoomer.jugcraft.lair.vesperine.JugcraftVesperine.register();

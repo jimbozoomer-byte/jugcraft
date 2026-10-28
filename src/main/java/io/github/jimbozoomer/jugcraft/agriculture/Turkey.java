@@ -156,7 +156,10 @@ public class Turkey extends Animal {
 			return false;
 		}
 		Item egg = BuiltInRegistries.ITEM.getValue(Identifier.withDefaultNamespace("egg"));
-		spawnAtLocation(level, egg);
+		// A star-bred hen's line may make it two, or three (docs/features/star-bred-lines.md).
+		int eggs = io.github.jimbozoomer.jugcraft.lineage.Lineage.enabled()
+				? io.github.jimbozoomer.jugcraft.lineage.Lineage.eggs(io.github.jimbozoomer.jugcraft.lineage.Lineage.line(this), random) : 1;
+		spawnAtLocation(level, new ItemStack(egg, eggs));
 		playSound(SoundEvents.WOOL_PLACE, 0.8F, 1.2F + (random.nextFloat() - random.nextFloat()) * 0.2F);
 		gameEvent(GameEvent.ENTITY_PLACE);
 		eggTime = nextEgg();

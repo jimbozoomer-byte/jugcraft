@@ -752,6 +752,11 @@
       "denominator": 1,
       "source": "fallback (balance pending)"
     },
+    "jugcraft:astrawand": {
+      "numerator": 2224,
+      "denominator": 1,
+      "source": "recipe jugcraft:astrawand"
+    },
     "jugcraft:astrolabe": {
       "numerator": 7264,
       "denominator": 1,
