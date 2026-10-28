@@ -14804,7 +14804,8 @@ def check_fall_garden():
     sculpted plant of tools/plants.py with its builder; the garden plants' recipes were generated, and each makes the
     plant from its cabbage seed or sunflower; the wild ones have their vanilla-biome patches. Part 2: the planters' Java
     numbers are the table's, their renderer is registered, and their recipes and message exist. Part 3: the Porch Swing's
-    numbers are the table's, its renderer turns it about the model's hooks, and its runner variants name the swing."""
+    numbers are the table's, its renderer turns it about the model's hooks, and its runner variants name the swing. Part
+    4: the café lights' strand, lamps, texture and item."""
     import fall_garden as fg
     java_main = (JAVA_ROOT / "agriculture" / "JugcraftAgriculture.java").read_text(encoding="utf-8") \
         if (JAVA_ROOT / "agriculture" / "JugcraftAgriculture.java").is_file() else ""
@@ -14861,6 +14862,24 @@ def check_fall_garden():
     runners = [k for k in states.get("variants", {}) if "runner=true" in k]
     if not runners or any(states["variants"][k]["model"] != f"{MOD}:block/{sw['block']}_swing" for k in runners):
         err(f"{sw['block']}: its runner=true variants must name the swing's own model")
+    # Part 4: the café lights' strand lights along its length with the table's lamps, is drawn with its own texture, and
+    # its item strings it.
+    cafe = fg.CAFE_LIGHTS
+    hook = (JAVA_ROOT / "agriculture" / "StringLightHookBlockEntity.java").read_text(encoding="utf-8") \
+        if (JAVA_ROOT / "agriculture" / "StringLightHookBlockEntity.java").is_file() else ""
+    for needed in (f'CAFE("cafe", "{cafe["item"]}", true)', f"LAMP_LIGHT = {cafe['light']};", f"LAMP_SPACING = {cafe['spacing']};"):
+        if needed not in hook:
+            err(f"StringLightHookBlockEntity: missing {needed} (tools/fall_garden.py CAFE_LIGHTS)")
+    strands = (CLIENT_JAVA_ROOT / "StringLightsRenderer.java").read_text(encoding="utf-8") \
+        if (CLIENT_JAVA_ROOT / "StringLightsRenderer.java").is_file() else ""
+    if 'Jugcraft.id("textures/entity/cafe_string_lights.png")' not in strands or "submitCafe(" not in strands:
+        err("StringLightsRenderer: the café lights need their own strand, drawn with textures/entity/cafe_string_lights.png")
+    if not (ASSETS / "textures" / "entity" / "cafe_string_lights.png").is_file():
+        err("textures/entity/cafe_string_lights.png: the café lights' strand has no texture")
+    if f'registerItem("{cafe["item"]}", props -> new StringLightsItem(props, StringLightHookBlockEntity.Strand.CAFE)' not in java_main:
+        err(f"JugcraftAgriculture: {cafe['item']} must be a StringLightsItem of Strand.CAFE")
+    if f"item.{MOD}.{cafe['item']}" not in lang:
+        err(f"item.{MOD}.{cafe['item']}: the text is missing")
 
 
 def check_orchard_harvest():

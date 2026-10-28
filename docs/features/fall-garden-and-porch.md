@@ -1,6 +1,6 @@
 # Fall Garden & Porch
 
-Status: parts 1 (the fall garden's plants), 2 (planters) and 3 (the porch) implemented. Part 4 is planned: string lights that light along their length. CI builds it and runs its game tests and client screenshots; not yet played by hand.
+Status: all four parts implemented: 1 (the fall garden's plants), 2 (planters), 3 (the porch) and 4 (café lights). CI builds it and runs its game tests and client screenshots; not yet played by hand. CI builds it and runs its game tests and client screenshots; not yet played by hand.
 Proposal issue: none. The owner asked for it directly on 28 October 2026, as set 4 of the ten sets of fall and Halloween decor ("Then I want you to do 1-10 in parts in that order one by one"), drawn by their rules.
 Owner: @jimbozoomer-byte
 Target milestone and tier: Discovery tier; plants found in the wild or made from a seed or a flower.
@@ -52,6 +52,12 @@ Three planters, each filled with soil, that take any small flower (`#minecraft:s
 - **Quilt Rail**: a length of porch rail (two posts, a top and a bottom rail, three balusters) with a patchwork quilt hung over it to air.
   - Recipe (shapeless): a wooden fence and three wool.
 
+### Part 4: café lights
+- **Café String Lights**: warm Edison bulbs hanging on short drops from a black cord, about a bulb a block.
+  - String them between two String Light Hooks as the other strands are, and light them the same way, with redstone or electricity at either hook.
+  - **They light along their length.** While lit, the strand puts a light of 12 in the air about every two blocks along it, just under where it sags, and only where the air is empty (never over a block). When it goes dark, comes down or loses its hook, it puts those lights out again.
+  - Recipe (shapeless): two string, a glowstone dust, a glass pane and a black dye.
+
 ## Changes from the idea list
 - The idea list put **goldenrod** and **cattails** in set 4. Both grow already (the biomes branch's batches 2 and 3), so they are not built again.
 - The dried sunflower is **two blocks** tall, as a vanilla sunflower is, not three. A three-block plant would need a block of its own kind for one plant, and its head would reach into a block that could hold something else.
@@ -78,6 +84,10 @@ Three planters, each filled with soil, that take any small flower (`#minecraft:s
 - **The Bittersweet Wreath**: the vine is an octagon of lengths, as a ring is drawn in pixels.
 - **The Quilt Rail**: the quilt's patches are four texels across in four fabrics (rust, mustard, cream and pine), in a steady order. Each has a darker seam at its lower and right edge.
 - The first previews showed the wreath thin and sparse, and the dolly without its ears. The wreath's vine is now thicker, with ten clusters of berries and eight leaves, and the ears now fan out under the dolly.
+
+### Part 4's café lights
+- The strand's texture (`entity/cafe_string_lights`, 16 by 16) is the black cord in two tones along it, and an Edison bulb's warm glass, paler to its middle, with its filament a bright zigzag. The renderer draws each bulb full-bright while lit, and smoky while dark.
+- The item's icon is a 16 by 16 map (`tools/item_icons/cafe_string_lights.txt`): a swag of black cord with three warm bulbs on drops below it. The first draft's bulbs crowded the cord and each other, leaving the outline doubled and pinholes; they now hang five apart.
 
 ### Part 1's plants
 - Sculpted as the graveyard flora is (`tools/fall_garden_flora.py`, on `tools/flora_art.py`, written by `tools/flora_data.py`), each with its own 64 by 64 texture. They are painted in the clean style, with no per-pixel random tones.
@@ -114,8 +124,9 @@ Three planters, each filled with soil, that take any small flower (`#minecraft:s
 ## Multiplayer and persistence
 - Plain blocks, registered from the generated `/jugcraft/plants.json` with the other wild plants; nothing ticks but what vanilla's flowers and glow lichen do.
 - Part 2: a planter's flowers are kept by its block entity (`planter`), changed on the server only, saved with the world and sent to clients for drawing. Placing a flower checks the planter's own spots on the server. A full planter keeps the flower in the hand rather than placing it in front. Nothing ticks.
+- Part 4: the strand's lights are vanilla light blocks, placed and removed by the hook that holds the strand, on the server only. The hook saves where it put them and removes only those that are still its own lights. It never places one over a block, or in a chunk that isn't loaded; one in a chunk that has unloaded is put out the next time that chunk is there. The work is bounded by the strand's length: at most eight spots, checked every ten ticks.
 - Part 3: the swing keeps nothing; its sway is worked out from the game time and whether anyone sits on it, so nothing ticks. Sitting uses the shared `Seat`, one sitter to a seat, on the server. The swing needs its ceiling, the dolly and the wreath their wall, each checked on the server when placed and when a neighbour changes.
-- IDs (stable from release): `aster`, `sedum`, `ornamental_kale`, `ornamental_cabbage` (each with its `potted_` block), `pampas_grass`, `dried_sunflower`, `bittersweet`. Placed features: `patch_aster`, `patch_sedum`, `patch_pampas_grass`, `patch_bittersweet`. Part 2's blocks `window_box`, `half_barrel_planter`, `galvanized_tub_planter`, and the block entity `planter`. Part 3's blocks `porch_swing` (and its block entity), `wheat_stook`, `corn_dolly`, `bittersweet_wreath`, `quilt_rail`.
+- IDs (stable from release): `aster`, `sedum`, `ornamental_kale`, `ornamental_cabbage` (each with its `potted_` block), `pampas_grass`, `dried_sunflower`, `bittersweet`. Placed features: `patch_aster`, `patch_sedum`, `patch_pampas_grass`, `patch_bittersweet`. Part 2's blocks `window_box`, `half_barrel_planter`, `galvanized_tub_planter`, and the block entity `planter`. Part 3's blocks `porch_swing` (and its block entity), `wheat_stook`, `corn_dolly`, `bittersweet_wreath`, `quilt_rail`. Part 4's item `cafe_string_lights` (strand `cafe`) and the hook's saved `lamps`.
 - The dye and stew recipes and the garden plants' recipes follow the biomes switch, the cabbages' the agriculture switch too (the seed is the kitchen garden's). The blocks stay registered when either is off.
 
 ## Dependencies and assets
@@ -152,6 +163,12 @@ Local checks run on this branch, and their results:
   - `javac` parse (syntax only) of the new and changed Java: OK.
 
 Game tests (CI only, not run locally), `FallGardenGameTests`:
+- Part 4:
+  - `python3 tools/check_mod_data.py`: PASS (8,114 material IDs). `check_fall_garden` now checks the café strand, its lamps' light and spacing against `tools/fall_garden.py`, its texture, its renderer and its item.
+  - `python3 scripts/check_repository.py`: PASS.
+  - `python3 -m unittest discover -s scripts/tests`: 287 tests, OK.
+  - `python3 tools/check_icon_maps.py`: PASS (274 maps, with the café lights'; no new warning). Its first drafts failed the lint (doubled outlines and pinholes where the bulbs crowded the cord), and one passing draft was warned for standing on the wrong rows; the bulbs now hang five apart, in the compact family.
+  - `javac` parse (syntax only) of the new and changed Java: OK.
 - Every plant has its block and item:
   - the four small flowers are small flowers with potted forms;
   - pampas grass is a tall flower, and the dried sunflower a two-block plant;
@@ -176,10 +193,16 @@ Game tests (CI only, not run locally), `FallGardenGameTests`:
     - without its ceiling it comes down whole, dropping once.
   - **The rest**: the dolly and the wreath hang on a wall and come off with it, and the stook and the rail stand facing the player; each drops itself.
 
+- **Part 4: the café lights**, strung between two hooks on posts:
+  - dark, they light nothing;
+  - lit, they put a lamp of light 12 in each empty spot along them, and none over a block built in one;
+  - dark again, their lamps go out;
+  - lit again, and with a hook broken, the lamps go out and the strand drops.
+
 `FallGardenClientGameTests` takes four screenshots:
 - from the front and close by;
 - at the planters (a window box of three flowers on the logs, a half-barrel of kale and a tub of two flowers, drawn by `PlanterRenderer`);
-- at the porch: the swing under its plank roof (drawn by `PorchSwingRenderer`), the wreath and the dolly on its back wall, quilt rails along its front, and a stook.
+- at the porch: the swing under its plank roof (drawn by `PorchSwingRenderer`), the wreath and the dolly on its back wall, quilt rails along its front, a stook, and café lights strung along its front, lit by a redstone block set in the roof.
 
 The first two show: a fall border on grass, with asters and stonecrop behind ornamental kale and cabbage, pampas grass and dried sunflowers at its back against a wall of logs with bittersweet on it, and a potted aster.
 
@@ -189,5 +212,5 @@ Not run: a hand playtest, and a two-client playtest. Whether the patches generat
 The wild plants generate in vanilla's biomes by conventional tag: asters in plains and forests, stonecrop and pampas grass in plains, bittersweet in forests. Not seasonal: they grow and are made all year.
 
 ## Rollout and open questions
-- Part 4: string lights that light along their length.
-- Open: whether a dried sunflower should give sunflower seeds when broken; whether planters should take tall flowers or saplings.
+- Set 4 is complete with part 4. Set 5 (Cozy Fall Hearth) follows.
+- Open: whether the other strands should light along their length too; whether a dried sunflower should give sunflower seeds when broken; whether planters should take tall flowers or saplings.

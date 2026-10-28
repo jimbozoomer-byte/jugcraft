@@ -3642,6 +3642,11 @@
       "denominator": 9,
       "source": "recipe jugcraft:cafe_chair"
     },
+    "jugcraft:cafe_string_lights": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
     "jugcraft:cafe_table": {
       "numerator": 1051,
       "denominator": 36,

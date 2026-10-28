@@ -8,6 +8,12 @@ Every change to Jugcraft, newest first, grouped by pull request. For what each t
 
 No numbered release yet. Entries on feature branches remain proposed until their pull requests merge.
 
+### Unmerged: Fall Garden & Porch, part 4 (café lights)
+- **Café String Lights**: warm Edison bulbs on a black cord, strung between String Light Hooks and lit by redstone or electricity like the other strands. While lit they light the air along their length (light 12 about every two blocks), and put those lights out when they go dark or come down.
+- Recipe: two string, glowstone dust, a glass pane and black dye.
+- Record: [fall-garden-and-porch.md](docs/features/fall-garden-and-porch.md).
+- **Checked:** the record's Verification. Game tests and screenshots run in CI only; not played by hand.
+
 ### Unmerged: Fall Garden & Porch, part 3 (the porch)
 - **Porch Swing**: a slatted bench swing 1.5 m wide hung on chains from a ceiling two blocks up. Two can sit on it; it sways in the breeze, and more with someone on it. It comes down when its ceiling goes.
 - **Wheat Stook** (six sheaves stood to dry), **Corn Dolly** (a plaited straw harvest knot with a red bow, on a wall), **Bittersweet Wreath** (eight bittersweet make one) and **Quilt Rail** (a porch rail with a patchwork quilt over it).

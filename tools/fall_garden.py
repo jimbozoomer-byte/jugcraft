@@ -87,6 +87,24 @@ SHAPELESS += [
 ]
 
 
+# ---------------------------------------------------------------- part 4: café lights
+# Café String Lights (StringLightHookBlockEntity.Strand.CAFE): warm Edison bulbs on a black cord, strung between String
+# Light Hooks like the other strands and lit the same way (redstone, or electricity). While lit they light the air along
+# them: a lamp (a vanilla light block, light `light`) in empty air about every `spacing` blocks along the sag, put out
+# again when they go dark, come down or lose a hook.
+CAFE_LIGHTS = {"item": "cafe_string_lights", "display": "Café String Lights", "light": 12, "spacing": 2.0}
+
+SHAPELESS += [
+    {"id": "cafe_string_lights", "inputs": ["minecraft:string", "minecraft:string", "minecraft:glowstone_dust", "minecraft:glass_pane",
+                                            "minecraft:black_dye"], "result": "cafe_string_lights", "count": 1, "category": "misc"},
+]
+
+
+def items():
+    """Every item set 4 adds beyond its blocks' and the plants'."""
+    return [CAFE_LIGHTS["item"]]
+
+
 def blocks():
     """Every block set 4 adds beyond the plants (which are tools/plants.py's)."""
     return list(PLANTERS) + [SWING["block"]] + list(PORCH)

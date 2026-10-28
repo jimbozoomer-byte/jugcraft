@@ -32,6 +32,11 @@ public class StringLightsRenderer implements BlockEntityRenderer<StringLightHook
 	/** A garland's cord (u 0-0.25), its leaves (0.25-0.5 and 0.5-0.75) and a warm bulb (0.75-1). */
 	private static final RenderType VINE_GARLAND = RenderTypes.entityCutout(Jugcraft.id("textures/entity/pumpkin_vine_garland.png"));
 	private static final RenderType LEAF_GARLAND = RenderTypes.entityCutout(Jugcraft.id("textures/entity/autumn_leaf_garland.png"));
+	/** Café lights: a black cord (u 0-0.5) and a warm Edison bulb (0.5-1). */
+	private static final RenderType CAFE = RenderTypes.entityCutout(Jugcraft.id("textures/entity/cafe_string_lights.png"));
+	private static final float CAFE_BULB = 3.5F / 16;
+	private static final float CAFE_DROP = 2.0F / 16;
+	private static final float CAFE_SPACING = 1.0F;
 	private static final float LEAF_SPACING = 0.26F;
 	private static final float LEAF = 0.24F;
 	private static final float GOURD_SPACING = 1.4F;
@@ -96,6 +101,10 @@ public class StringLightsRenderer implements BlockEntityRenderer<StringLightHook
 			submitBunting(pose, collector, offset, length, sag, segments, start, light);
 			return;
 		}
+		if (state.strand == StringLightHookBlockEntity.Strand.CAFE) {
+			submitCafe(pose, collector, offset, length, sag, segments, start, light, state.lit);
+			return;
+		}
 		if (state.strand == StringLightHookBlockEntity.Strand.PUMPKIN_VINE || state.strand == StringLightHookBlockEntity.Strand.AUTUMN_LEAVES) {
 			submitGarland(pose, collector, offset, length, sag, segments, start, light, state.lit,
 					state.strand == StringLightHookBlockEntity.Strand.PUMPKIN_VINE);
@@ -114,6 +123,33 @@ public class StringLightsRenderer implements BlockEntityRenderer<StringLightHook
 			for (int i = 1; i <= bulbs; i++) {
 				Vector3f at = along(start, offset, sag, i / (float) (bulbs + 1)).sub(0, BULB * 0.7F, 0);
 				bulb(buffer, matrix, bulbLight, bulbColor, at);
+			}
+		});
+	}
+
+	/**
+	 * Café lights: the black cord, and a warm Edison bulb hanging on a short drop below it about every
+	 * {@value #CAFE_SPACING} block; lit, the bulbs glow at full brightness (the air along the strand is lit by the
+	 * hook's lamps, StringLightHookBlockEntity), unlit they are smoky glass.
+	 */
+	private static void submitCafe(PoseStack pose, SubmitNodeCollector collector, Vec3 offset, float length, float sag, int segments,
+			Vector3f start, int light, boolean lit) {
+		int bulbs = Math.max(1, (int) Math.floor(length / CAFE_SPACING));
+		int bulbLight = lit ? FULL_BRIGHT : light;
+		int bulbColor = lit ? 0xFFFFFFFF : 0xFF8A8478;
+		collector.submitCustomGeometry(pose, CAFE, (matrix, buffer) -> {
+			for (int i = 0; i < segments; i++) {
+				Vector3f a = along(start, offset, sag, i / (float) segments);
+				Vector3f b = along(start, offset, sag, (i + 1) / (float) segments);
+				wire(buffer, matrix, light, a, b, new Vector3f(0, WIRE, 0), 0.0F, 0.5F);
+				Vector3f side = new Vector3f(b).sub(a).cross(0, 1, 0);
+				wire(buffer, matrix, light, a, b, side.lengthSquared() < 1.0E-8F ? new Vector3f(WIRE, 0, 0) : side.normalize().mul(WIRE), 0.0F, 0.5F);
+			}
+			for (int i = 1; i <= bulbs; i++) {
+				Vector3f top = along(start, offset, sag, i / (float) (bulbs + 1));
+				Vector3f bottom = new Vector3f(top).sub(0, CAFE_DROP, 0);
+				wire(buffer, matrix, light, top, bottom, new Vector3f(WIRE, 0, 0), 0.0F, 0.5F);
+				cube(buffer, matrix, bulbLight, bulbColor, new Vector3f(bottom).sub(0, CAFE_BULB / 2, 0), CAFE_BULB, 0.5F, 1.0F);
 			}
 		});
 	}

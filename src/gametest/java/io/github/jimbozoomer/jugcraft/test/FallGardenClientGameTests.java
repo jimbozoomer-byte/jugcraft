@@ -5,6 +5,9 @@ import io.github.jimbozoomer.jugcraft.agriculture.JugcraftAgriculture;
 import io.github.jimbozoomer.jugcraft.agriculture.MultiDecorationBlock;
 import io.github.jimbozoomer.jugcraft.agriculture.PlanterBlock;
 import io.github.jimbozoomer.jugcraft.agriculture.PlanterBlockEntity;
+import io.github.jimbozoomer.jugcraft.agriculture.StringLightHookBlock;
+import io.github.jimbozoomer.jugcraft.agriculture.StringLightHookBlockEntity;
+import io.github.jimbozoomer.jugcraft.agriculture.StringLightsItem;
 import io.github.jimbozoomer.jugcraft.agriculture.WallDecorationBlock;
 import java.util.Locale;
 import net.fabricmc.fabric.api.client.gametest.v1.FabricClientGameTest;
@@ -23,6 +26,7 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.DoublePlantBlock;
 import net.minecraft.world.level.block.MultifaceBlock;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.properties.AttachFace;
 import net.minecraft.world.level.block.state.properties.DoubleBlockHalf;
 
 /**
@@ -31,7 +35,7 @@ import net.minecraft.world.level.block.state.properties.DoubleBlockHalf;
  * climbing a wall of logs; and part 2's planters beside it, a Window Box of three flowers on the logs, a Half-Barrel of
  * kale and a Galvanized Tub of two flowers; and part 3's porch behind the cameras, under a plank roof: the Porch Swing
  * hung from it, a Bittersweet Wreath and a Corn Dolly on its back wall, Quilt Rails along its front and a Wheat Stook at
- * its corner; built in a real client and photographed from the front, close by, at the planters and at the porch, by day
+ * its corner, and part 4's Café String Lights along its front, lit; built in a real client and photographed from the front, close by, at the planters and at the porch, by day
  * (CI job {@code client}). The swing is drawn by client/PorchSwingRenderer. The planters' flowers are drawn by client/PlanterRenderer, so the pictures
  * show it draws them. The pictures go into docs/features/fall-garden-and-porch.md.
  */
@@ -147,6 +151,13 @@ public class FallGardenClientGameTests implements FabricClientGameTest {
 					.setValue(FacingDecorationBlock.FACING, Direction.SOUTH), Block.UPDATE_ALL);
 		}
 		level.setBlock(origin.offset(0, 0, 13), JugcraftAgriculture.block("wheat_stook").defaultBlockState(), Block.UPDATE_ALL);
+		// Part 4: café lights along the porch front, on hooks under the roof, lit by a redstone block set in the roof.
+		for (int across : new int[] {2, 6}) {
+			level.setBlock(origin.offset(across, 1, 14), JugcraftAgriculture.block("string_light_hook").defaultBlockState()
+					.setValue(StringLightHookBlock.FACE, AttachFace.CEILING).setValue(StringLightHookBlock.FACING, Direction.SOUTH), Block.UPDATE_ALL);
+		}
+		level.setBlock(origin.offset(2, 2, 14), Blocks.REDSTONE_BLOCK.defaultBlockState(), Block.UPDATE_ALL);
+		StringLightsItem.string(level, origin.offset(2, 1, 14), origin.offset(6, 1, 14), StringLightHookBlockEntity.Strand.CAFE);
 		// A potted aster on a log by the border.
 		level.setBlock(origin.offset(-1, 0, 1), Blocks.SPRUCE_LOG.defaultBlockState(), Block.UPDATE_ALL);
 		level.setBlock(origin.offset(-1, 1, 1), JugcraftAgriculture.block("potted_aster").defaultBlockState(), Block.UPDATE_ALL);

@@ -2882,7 +2882,7 @@ public final class JugcraftAgriculture {
 	/**
 	 * Fall Garden & Porch, decor set 4 (tools/fall_garden.py; part 1's plants are registered with the other wild plants):
 	 * part 2's planters, which take small flowers; part 3's porch: the Porch Swing, the Wheat Stook, the Corn Dolly, the
-	 * Bittersweet Wreath and the Quilt Rail.
+	 * Bittersweet Wreath and the Quilt Rail; part 4's Café String Lights.
 	 */
 	private static void registerFallGarden() {
 		Block box = registerBlock("window_box", props -> new PlanterBlock(props, PlanterBlock.WINDOW_BOX), BlockBehaviour.Properties.of()
@@ -2919,6 +2919,9 @@ public final class JugcraftAgriculture {
 			registerItem(BuiltInRegistries.BLOCK.getKey(block).getPath(), props -> new BlockItem(block, props),
 					new Item.Properties().useBlockDescriptionPrefix(), BUILDING_TAB);
 		}
+		// Part 4: café lights, strung between String Light Hooks, which light the air along their length.
+		registerItem("cafe_string_lights", props -> new StringLightsItem(props, StringLightHookBlockEntity.Strand.CAFE), new Item.Properties(),
+				BUILDING_TAB);
 	}
 
 	private static BlockBehaviour.Properties displayProperties() {

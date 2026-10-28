@@ -16,6 +16,7 @@ import decor17_data as d17d
 import decor20_data as d20d
 import fall_garden as fg
 import flora_art as fa
+import item_icons
 import pumpkin_patch_data as ppd
 from decor18_data import shifted as d18d_shifted
 from flora_art import Sculpt, pal, shade
@@ -357,6 +358,10 @@ def assets(root, write, lang):
         write(root / "models" / "item" / f"{block}.json", fa.model(block, d20d.separated(sc.models["whole"]), DISPLAY))
         write(root / "items" / f"{block}.json", {"model": {"type": "minecraft:model", "model": rid(f"item/{block}")}})
     lang[f"message.{MOD}.planter.full"] = "Every spot in it is planted"
+    item = fg.CAFE_LIGHTS["item"]
+    lang[f"item.{MOD}.{item}"] = fg.CAFE_LIGHTS["display"]
+    write(root / "models" / "item" / f"{item}.json", {"parent": "minecraft:item/generated", "textures": {"layer0": rid(f"item/{item}")}})
+    write(root / "items" / f"{item}.json", {"model": {"type": "minecraft:model", "model": rid(f"item/{item}")}})
     part3_assets(root, write, lang)
 
 
@@ -425,5 +430,29 @@ def tags(tags):
         tags.add("block", "minecraft:mineable/hoe", rid(block))
 
 
+CORD = pal("16161c", "222230", "30303e")
+GLOW = pal("8a5a1a", "c08a30", "e8b450", "f8d888", "fff0c0")
+
+
+def cafe_strand():
+    """The café lights' strand texture (entity/cafe_string_lights, 16 x 16, its halves read by StringLightsRenderer): the
+    black cord in two tones along it, and an Edison bulb's warm glass, paler to its middle, with its filament a bright
+    zigzag down the middle."""
+    from PIL import Image
+    img = Image.new("RGBA", (16, 16), (0, 0, 0, 255))
+    for y in range(16):
+        for x in range(8):
+            img.putpixel((x, y), tuple(shade(CORD, 2 if x in (2, 3, 4) else 1)) + (255,))
+        for x in range(8, 16):
+            d = abs(x - 11.5)
+            k = 3 if d < 1.5 else 2 if d < 3 else 1
+            img.putpixel((x, y), tuple(shade(GLOW, k)) + (255,))
+        img.putpixel((11 if (y // 2) % 2 == 0 else 12, y), tuple(shade(GLOW, 4)) + (255,))
+    return img
+
+
 def textures():
-    return {("block", block): build(block).atlas.img for block in BUILDERS}
+    out = {("block", block): build(block).atlas.img for block in BUILDERS}
+    out[("entity", "cafe_string_lights")] = cafe_strand()
+    out[("item", fg.CAFE_LIGHTS["item"])] = item_icons.draw(fg.CAFE_LIGHTS["item"])
+    return out

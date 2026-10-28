@@ -7,6 +7,9 @@ import io.github.jimbozoomer.jugcraft.agriculture.PlanterBlock;
 import io.github.jimbozoomer.jugcraft.agriculture.PlanterBlockEntity;
 import io.github.jimbozoomer.jugcraft.agriculture.PorchSwingBlock;
 import io.github.jimbozoomer.jugcraft.agriculture.Seat;
+import io.github.jimbozoomer.jugcraft.agriculture.StringLightHookBlock;
+import io.github.jimbozoomer.jugcraft.agriculture.StringLightHookBlockEntity;
+import io.github.jimbozoomer.jugcraft.agriculture.StringLightsItem;
 import io.github.jimbozoomer.jugcraft.agriculture.WallDecorationBlock;
 import java.util.List;
 import net.fabricmc.fabric.api.gametest.v1.GameTest;
@@ -28,12 +31,14 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.LightBlock;
 import net.minecraft.world.level.block.DoublePlantBlock;
 import net.minecraft.world.level.block.FlowerPotBlock;
 import net.minecraft.world.level.block.MultifaceBlock;
 import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.properties.AttachFace;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec3;
@@ -48,7 +53,9 @@ import net.minecraft.world.phys.Vec3;
  * Half-Barrel and the Galvanized Tub stand facing the player and take one and two; broken, they give their flowers back.
  * Part 3: the Porch Swing won't hang without a ceiling, hangs whole from one, seats two (one on each seat) and comes down
  * whole with its ceiling, dropping once; the Corn Dolly and the Bittersweet Wreath hang on a wall and come off with it;
- * the Wheat Stook and the Quilt Rail stand facing the player and drop themselves.
+ * the Wheat Stook and the Quilt Rail stand facing the player and drop themselves. Part 4: Café String Lights strung
+ * between two hooks light nothing while dark; lit, they put a lamp in each empty spot along them (never over a block
+ * there), put their lamps out when they go dark, light again, and put them out when a hook is broken.
  */
 public class FallGardenGameTests {
 	private static final TagKey<Item> SMALL_FLOWERS = TagKey.create(Registries.ITEM, Identifier.withDefaultNamespace("small_flowers"));
@@ -289,6 +296,54 @@ public class FallGardenGameTests {
 			helper.assertTrue(dropped(helper, item("corn_dolly")) == 1 && dropped(helper, item("bittersweet_wreath")) == 1
 					&& dropped(helper, item("wheat_stook")) == 1 && dropped(helper, item("quilt_rail")) == 1,
 					"Without their wall the dolly and the wreath come off; broken, the stook and the rail drop themselves");
+			helper.succeed();
+		});
+	}
+
+	// ---------------------------------------------------------------- part 4
+
+	@GameTest(maxTicks = 40)
+	public void cafeLightsLightAlongTheirLength(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		floor(helper);
+		// Two hooks on posts, so the strand sags through the air between them.
+		BlockPos a = new BlockPos(1, 4, 3);
+		BlockPos b = new BlockPos(7, 4, 3);
+		for (BlockPos hook : List.of(a, b)) {
+			helper.setBlock(hook.below(), Blocks.STONE);
+			helper.setBlock(hook.below(2), Blocks.STONE);
+			helper.setBlock(hook, block("string_light_hook").defaultBlockState().setValue(StringLightHookBlock.FACE, AttachFace.FLOOR)
+					.setValue(StringLightHookBlock.FACING, Direction.NORTH));
+		}
+		helper.assertTrue(StringLightsItem.string(level, helper.absolutePos(a), helper.absolutePos(b), StringLightHookBlockEntity.Strand.CAFE)
+				== StringLightsItem.Result.STRUNG, "Strung");
+		StringLightHookBlockEntity hook = helper.getBlockEntity(a, StringLightHookBlockEntity.class);
+		List<BlockPos> spots = hook.lampSpots();
+		helper.assertTrue(spots.size() >= 2, "It has spots along it for its lamps: " + spots);
+		BlockPos built = spots.get(0);
+		level.setBlockAndUpdate(built, Blocks.OAK_PLANKS.defaultBlockState());
+		hook.update(level);
+		helper.assertTrue(hook.lamps().isEmpty(), "Dark, it lights nothing along it");
+		helper.setBlock(a.north(), Blocks.REDSTONE_BLOCK);
+		hook.update(level);
+		helper.assertTrue(hook.lamps().size() == spots.size() - 1 && level.getBlockState(built).is(Blocks.OAK_PLANKS), "Lit, it lights each empty spot, not one built in: "
+				+ hook.lamps());
+		for (BlockPos lamp : hook.lamps()) {
+			BlockState there = level.getBlockState(lamp);
+			helper.assertTrue(there.is(Blocks.LIGHT) && there.getValue(LightBlock.LEVEL) == StringLightHookBlockEntity.LAMP_LIGHT, "A lamp at " + lamp);
+		}
+		List<BlockPos> lit = hook.lamps();
+		helper.setBlock(a.north(), Blocks.AIR);
+		hook.update(level);
+		helper.assertTrue(hook.lamps().isEmpty() && lit.stream().allMatch(pos -> level.getBlockState(pos).isAir()), "Dark again, its lamps go out");
+		helper.setBlock(a.north(), Blocks.REDSTONE_BLOCK);
+		hook.update(level);
+		List<BlockPos> again = hook.lamps();
+		helper.assertTrue(!again.isEmpty(), "And light again");
+		level.destroyBlock(helper.absolutePos(a), true);
+		helper.assertTrue(again.stream().allMatch(pos -> level.getBlockState(pos).isAir()), "Its hook broken, its lamps go out");
+		helper.runAfterDelay(3, () -> {
+			helper.assertTrue(dropped(helper, item("cafe_string_lights")) == 1, "and its strand drops");
 			helper.succeed();
 		});
 	}
