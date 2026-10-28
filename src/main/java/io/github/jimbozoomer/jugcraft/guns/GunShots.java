@@ -30,6 +30,7 @@ import net.minecraft.core.particles.BlockParticleOption;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.protocol.game.ClientboundSetEntityMotionPacket;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -221,6 +222,7 @@ public final class GunShots {
 		}
 		player.awardStat(Stats.ITEM_USED.get(gun));
 		player.gameEvent(GameEvent.PROJECTILE_SHOOT);
+		kick(player, JugcraftGuns.kick(gun));
 		Vec3 eye = player.getEyePosition();
 		// The shooter's client plays its own shot; everyone else hears it here.
 		level.playSound(player, eye.x, eye.y, eye.z, JugcraftGuns.sound("guns." + gun.name() + ".fire"), SoundSource.PLAYERS,
@@ -644,6 +646,31 @@ public final class GunShots {
 			left -= length;
 		}
 		return path;
+	}
+
+	/**
+	 * Pushes {@code player} back from a shot of this {@code strength} (the recoil-push follow-up, {@link JugcraftGuns#KICK}):
+	 * away from where they look, level, until they move back at least {@code strength} blocks a tick times the level share
+	 * of the look (all of it looking level, none looking straight up or down), less their knockback resistance. A shooter
+	 * already moving back as fast is left as they are, so a gun held on the trigger does not drive them ever faster; there
+	 * is no push up or down. Their client is told, as a player moves themselves. Nothing for a strength of 0.
+	 */
+	public static void kick(ServerPlayer player, float strength) {
+		Vec3 look = player.getLookAngle();
+		Vec3 back = new Vec3(-look.x, 0.0, -look.z);
+		double level = back.length();
+		if (strength <= 0.0F || level < 1.0E-6) {
+			return;
+		}
+		Vec3 way = back.scale(1.0 / level);
+		double resist = Math.max(0.0, 1.0 - player.getAttributeValue(Attributes.KNOCKBACK_RESISTANCE));
+		double wanted = strength * level * resist;
+		double along = player.getDeltaMovement().dot(way);
+		if (along >= wanted) {
+			return;
+		}
+		player.setDeltaMovement(player.getDeltaMovement().add(way.scale(wanted - along)));
+		player.connection.send(new ClientboundSetEntityMotionPacket(player));
 	}
 
 	/** Makes {@code target} bleed, at {@code bleed}'s chance, for its ticks (the darts-and-bleeding follow-up); none for null. */

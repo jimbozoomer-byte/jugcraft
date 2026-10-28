@@ -323,6 +323,12 @@ public final class JugcraftGuns {
 	 */
 	public static final Map<String, Float> PIERCING = Map.ofEntries(Map.entry("vesper_rifle", 4.5F), Map.entry("onrush_smg", 3.0F), Map.entry("kreuzer_pistol", 1.0F), Map.entry("psalm_smg", 1.0F), Map.entry("jawbreaker", 4.5F), Map.entry("hawker_rifle", 1.0F), Map.entry("quill_rifle", 1.5F), Map.entry("tumbler_rifle", 3.0F), Map.entry("geode_cutter", 4.0F), Map.entry("patchwork_carbine", 2.0F), Map.entry("warden_pistol", 1.0F), Map.entry("riveter_smg", 1.0F), Map.entry("longhorn_rifle", 3.5F), Map.entry("sapper_revolver", 2.5F), Map.entry("garrison_rifle", 2.0F), Map.entry("thresher", 1.0F), Map.entry("kestrel_rifle", 3.0F), Map.entry("caisson_pistol", 1.0F), Map.entry("highwayman", 2.5F), Map.entry("undertone_rifle", 6.5F), Map.entry("murmur_smg", 7.0F), Map.entry("reverb", 7.0F), Map.entry("cinder_repeater", 2.0F), Map.entry("ashfall_pistol", 2.0F), Map.entry("conductor_carbine", 2.5F), Map.entry("lament_rifle", 7.0F), Map.entry("ammonite_carbine", 2.0F), Map.entry("highball_rifle", 2.5F), Map.entry("flatboat_gun", 2.0F), Map.entry("millstone_rifle", 1.5F), Map.entry("holler_pistol", 5.0F), Map.entry("half_crown_revolver", 4.0F), Map.entry("holler_carbine", 5.0F), Map.entry("grange_carbine", 2.0F), Map.entry("sprocket_gun", 3.0F), Map.entry("old_grange_carbine", 2.5F));
 	/**
+	 * The guns whose shot pushes their shooter back, by this strength in blocks a tick (the recoil-push follow-up, the
+	 * owner's playerKnockBack; tools/guns.py KICK; {@link GunShots#kick}). The Flatboat Gun's and the Goshawk Revolver's
+	 * are the strongest, the owner's Big Bore's 2.5 and Ultra Knight Hawk's 2.25.
+	 */
+	public static final Map<String, Float> KICK = Map.ofEntries(Map.entry("thunderpipe", 0.45F), Map.entry("coach_gun", 0.25F), Map.entry("bellmouth", 0.3F), Map.entry("bulldog_pistol", 0.8F), Map.entry("breacher", 0.15F), Map.entry("trench_lobber", 0.2F), Map.entry("stoker", 0.7F), Map.entry("bronco_smg", 0.2F), Map.entry("sledge", 0.35F), Map.entry("skylark_rifle", 0.2F), Map.entry("bullfrog", 0.2F), Map.entry("mule", 0.35F), Map.entry("fowler", 0.34F), Map.entry("culverin", 0.35F), Map.entry("reverb", 0.15F), Map.entry("tusker", 0.15F), Map.entry("crackling", 0.5F), Map.entry("borer", 0.25F), Map.entry("goshawk_revolver", 2.25F), Map.entry("waystation_shotgun", 0.35F), Map.entry("flatboat_gun", 2.5F), Map.entry("fencepost_thumper", 0.3F), Map.entry("holler_pistol", 0.25F), Map.entry("holler_carbine", 0.15F), Map.entry("navvy_shotgun", 0.1F), Map.entry("impetus_shotgun", 0.25F), Map.entry("auger_shotgun", 0.1F));
+	/**
 	 * Slice 15D: a gun that fires a burst to a pull, {@code rounds} shots its {@link GunSpec#interval} apart, then waits
 	 * {@code rest} ticks more before the next pull fires ({@link #BURSTS}).
 	 */
@@ -885,6 +891,11 @@ public final class JugcraftGuns {
 	 */
 	public static float piercing(GunItem gun) {
 		return PIERCING.getOrDefault(gun.name(), 0.0F);
+	}
+
+	/** How hard this gun's shot pushes its shooter back, in blocks a tick (the recoil-push follow-up, {@link #KICK}); 0 for most. */
+	public static float kick(GunItem gun) {
+		return KICK.getOrDefault(gun.name(), 0.0F);
 	}
 
 	/** This gun's chance a hit to make a creature bleed, and for how long ({@link #BLEEDS}); null for most. */

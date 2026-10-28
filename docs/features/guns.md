@@ -3356,6 +3356,64 @@ The owner's data gives 49 of their guns built before slice 15 armour piercing (`
 - **The Flatboat Gun's throw** is the owner's number, untried in play; it may want lowering.
 - **The numbers** are the owner's; none of this has been played yet.
 
+## Follow-up: guns that push their shooter back
+The owner's data gives 37 of their guns a push on their shooter at each shot (`playerKnockBack`, with its `playerKnockBackStrength`), most of them shotguns; 27 of those guns are built. Offered after the hit effects as shotguns that push their shooter back (the owner's Inertial and Drill Conversion), the owner chose it on 28 October 2026, with four other follow-ups, each its own pull request. Their data gives it to more than those two, so all 27 built take it here.
+
+| Gun | The owner's gun | Push (blocks a tick) |
+|---|---|---|
+| Thunderpipe | Boomstick | 0.45 |
+| Coach Gun | Callwell | 0.25 |
+| Bellmouth | Blunderbuss | 0.3 |
+| Bulldog Pistol | Brawler | 0.8 |
+| Breacher | Combat Shotgun | 0.15 |
+| Trench Lobber | Hammer GL | 0.2 |
+| Stoker | Kiln Gun | 0.7 |
+| Bronco SMG | Jr Wristbreaker | 0.2 |
+| Sledge | Killer 23 | 0.35 |
+| Skylark Rifle | Rocket Rifle | 0.2 |
+| Bullfrog | Blooper | 0.2 |
+| Mule | Super Shotgun | 0.35 |
+| Fowler | Doublet | 0.34 |
+| Culverin | Handcannon | 0.35 |
+| Reverb | Echoes 2 | 0.15 |
+| Tusker | Mangalitsa | 0.15 |
+| Crackling | Ribs Glory | 0.5 |
+| Borer | Weevil | 0.25 |
+| Goshawk Revolver | Ultra Knight Hawk | 2.25 |
+| Waystation Shotgun | Callwell Terminal | 0.35 |
+| Flatboat Gun | Big Bore | 2.5 |
+| Fencepost Thumper | Fencer Thumper | 0.3 |
+| Holler Pistol | Howler | 0.25 |
+| Holler Carbine | Howler Conversion | 0.15 |
+| Navvy Shotgun | Jackhammer | 0.1 |
+| Impetus Shotgun | Inertial | 0.25 |
+| Auger Shotgun | Drill Conversion | 0.1 |
+
+**How it pushes** (`KICK` in `tools/guns.py`, `JugcraftGuns.KICK`, `GunShots.kick`):
+- **Back from the look, level:** each shot pushes its shooter away from where they look, by the gun's strength in blocks a tick times the level share of the look. A shot looking level pushes all of it; one looking halfway down, half; straight up or down, nothing.
+- **No push up or down,** so a shot at the ground does not lift its shooter, and no gun can fly them.
+- **Up to the strength, not on top of it:** the push brings the shooter's speed back up to the strength, and a shooter already moving back that fast is left as they are. A gun held on the trigger keeps them moving back at its strength, never faster.
+- **Knockback resistance** (netherite, a Brace) takes its share off, as from any push.
+- **The server works it out with the shot** and tells the shooter's client, as a player moves themselves; nothing new is sent.
+- **Raider gunners** are not pushed (their Breacher has 0.15 in the owner's data).
+
+**Tooltips:** each of the 27 says each shot pushes its shooter back (the Stoker's, its flame).
+
+**Checked:** `tools/check_mod_data.py` holds `JugcraftGuns.KICK` to `tools/guns.py`: each a gun, each strength above 0 and at most 8. It also checks that `GunShots.fire` pushes by it. Game tests: `RecoilPushGameTests` ([Verification](#verification)).
+
+**Balance:**
+- **Most pushes are small,** 0.1 to 0.5 blocks a tick: a step or two back from a shotgun's blast.
+- **The Bulldog Pistol (0.8) and the Stoker (0.7)** push harder. The Stoker pushes steadily while it burns.
+- **The Goshawk Revolver (2.25) and the Flatboat Gun (2.5),** the owner's Ultra Knight Hawk and Big Bore, throw their shooter several blocks back on the ground, and much further in the air.
+- **Conversions:** none.
+
+**Save compatibility:** nothing saved changes.
+
+**Known limits:**
+- **No rocket jumps:** the owner's guns may push their shooter up when fired at the ground; here there is no push up or down.
+- **The strongest pushes** are the owner's numbers, untried in play; they may want lowering.
+- **Not played:** none of it has been played yet.
+
 ## Connections
 - **Existing input producers:** copper, iron and gunpowder (vanilla); lead nuggets (the lead switch's lead); brass nuggets (brass, from zinc); paper and planks.
 - **Existing output consumer:** combat. The guns kill what drops loot for every branch.
@@ -6429,6 +6487,16 @@ Slice 9E's files: the guns' tactical grip parts and the Laser Sight's textures m
     - `heavyBulletsAreTheOwners`: the full tables, with the 24 knockbacks and 27 piercings added; the Gallant Rifle plain; the Stoker's flame without knockback.
     - `caissonArcPiercesArmour`: the Caisson Pistol's arc takes more from a pig in 10 points of armour than a plain zap of its damage takes from a second such pig, and no more than that damage.
     - `jawbreakerKnocksBackAndPiercesArmour`: unchanged, and still holds the bullets' knockback and piercing.
+- **Guns that push their shooter back, run locally (28 October 2026):**
+  - `python3 tools/check_mod_data.py`: PASS (8033 material IDs). Its guns check, run alone, reported a copy of `GunShots` whose `fire` does not push, a strength of 9, and the Flatboat Gun's push missing from `tools/guns.py`.
+  - `python3 tools/guns.py --check`: PASS. `python3 scripts/check_repository.py`: PASS. `python3 -m unittest discover -s scripts/tests`: 287 tests passed; `python3 scripts/package_modrinth.py check`: PASS. `git diff --check`: clean.
+  - **Java:** a syntax parse only: 0 errors in the changed and new files.
+  - **The 27 tooltips** in the language file match `tools/guns.py`.
+- **Guns that push their shooter back, game tests (not run yet; CI runs them):**
+  - `RecoilPushGameTests`:
+    - `kicksAreTheOwners`: the table is the owner's 27; the Kreuzer Pistol has none.
+    - `shotsPushTheirShooterBack`: the Impetus Shotgun's shot at a pig three blocks off pushes its shooter back at 0.25 blocks a tick times the level share of their look, and no other way; a Kreuzer Pistol's shot leaves its shooter as they were.
+    - `kickTopsUpAndNeverLifts`: a push of 0.8 from standing moves its shooter 0.8 back; another of 0.8 and one of 0.3 at once add nothing; looking straight down there is no push, and looking 60 degrees down half; half knockback resistance halves it.
 - **Not run:** the client by hand, a two-client dedicated server, and play.
 
 ## World and event applicability
@@ -6448,6 +6516,5 @@ No worldgen, structures, bosses or seasonal content. Guns, rounds and the Cell R
   - the guns beyond these sets;
   - the owner's other GeckoLib gun models from their upload of 23 October 2026: only the Grandle OG's and the fifteen diamond-steel guns' (slices 15A to 15E) are in the library ([the library record](../../art/owner-library/README.md#gun-geometry-23-october-2026));
   - the owner's knockback for three guns whose shots push nothing here: the Stoker's flame, the Glowmouth's arc and the Fencepost Thumper's grenades ([above](#follow-up-armour-piercing-and-knockback-for-the-older-guns));
-  - a shotgun that pushes its shooter back (the owner's Inertial and Drill Conversion);
   - the owner's withering (the Flayed God's) and the other hit effects of guns not built yet ([above](#follow-up-hit-effects)).
 - **Balance:** the numbers are starting points for the owner to set.

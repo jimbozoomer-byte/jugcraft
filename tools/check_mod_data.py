@@ -1864,6 +1864,15 @@ def check_guns():
                     f"{value} (more than 0, at most 8)")
     if any(guns.GUNS[gun].get("shot") == "arc" for gun in guns.PIERCING) and "pierced(foe, damage, pierce)" not in shots_java:
         err("tools/guns.py PIERCING names an arc gun, but GunShots.arc does not pass its hits through pierced()")
+    # The recoil-push follow-up: the guns whose shot pushes their shooter back, and how hard.
+    kicks = ", ".join(f'Map.entry("{gun}", {value}F)' for gun, value in guns.KICK.items())
+    if f"KICK = Map.ofEntries({kicks});" not in java:
+        err(f"JugcraftGuns.KICK differs from tools/guns.py: expected Map.ofEntries({kicks})")
+    for gun, value in guns.KICK.items():
+        if gun not in guns.GUNS or not 0 < value <= 8:
+            err(f"tools/guns.py KICK names {gun}, which is not a gun, or gives it {value} (more than 0, at most 8)")
+    if "kick(player, JugcraftGuns.kick(gun));" not in shots_java:
+        err("GunShots.fire must push its shooter back by the gun's KICK (kick)")
     # The darts-and-bleeding follow-up: how a dart flies, how bleeding hurts, and which guns' hits make a creature bleed.
     for line in (f"DART_SPEED = {guns.DART_SPEED};", f"DART_DROP = {guns.DART_DROP};", f"BLEED_TICKS = {guns.BLEED_TICKS};",
                  f"BLEED_DAMAGE = {guns.BLEED_DAMAGE}F;", f'DART = "dart";'):

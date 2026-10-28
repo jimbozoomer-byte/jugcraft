@@ -77,7 +77,7 @@ GUNS = {
         "display": "Thunderpipe",
         "source": "boomstick",
         "tooltip": "A sawn-off double barrel. Eight pellets a shot, loaded a shell at a time. Its shots knock back "
-                   "what they hit. Fires buckshot shells.",
+                   "what they hit. Each shot pushes its shooter back. Fires buckshot shells.",
         "damage": 2.5, "pellets": 8, "interval": 8, "auto": False, "capacity": 2,
         "reload": (5, 12, 13), "spread": (9.0, 6.0), "range": 24, "ammo": "buckshot_shell",
     },
@@ -127,7 +127,7 @@ GUNS = {
         "display": "Coach Gun",
         "source": "callwell",
         "tooltip": "An over-and-under shotgun that breaks open to load. Eight pellets a shot, two barrels. Its shots "
-                   "knock back what they hit. Fires buckshot shells.",
+                   "knock back what they hit. Each shot pushes its shooter back. Fires buckshot shells.",
         "damage": 3.0, "pellets": 8, "interval": 8, "auto": False, "capacity": 2,
         "reload": (12, 13, 13), "spread": (6.0, 4.0), "range": 32, "ammo": "buckshot_shell",
     },
@@ -152,7 +152,7 @@ GUNS = {
         "display": "Bellmouth",
         "source": "blunderbuss",
         "tooltip": "A flintlock blunderbuss with a flared muzzle. Ten balls a shot at close range, then a long reload. "
-                   "Its shots knock back what they hit. Fires paper cartridges.",
+                   "Its shots knock back what they hit. Each shot pushes its shooter back. Fires paper cartridges.",
         "damage": 2.5, "pellets": 10, "interval": 10, "auto": False, "capacity": 1,
         "reload": 78, "spread": (12.0, 9.0), "range": 20, "ammo": "paper_cartridge",
     },
@@ -162,7 +162,7 @@ GUNS = {
         "display": "Bulldog Pistol",
         "source": "brawler",
         "tooltip": "A one-handed hand cannon that breaks open to load its one heavy round. Its shots knock back what "
-                   "they hit. Fires rifle rounds.",
+                   "they hit. Each shot pushes its shooter back. Fires rifle rounds.",
         "damage": 11.0, "pellets": 1, "interval": 10, "auto": False, "capacity": 1,
         "reload": 45, "spread": (3.0, 1.0), "range": 56, "ammo": "rifle_round",
     },
@@ -202,7 +202,7 @@ GUNS = {
         "display": "Breacher",
         "source": "combat_shotgun",
         "tooltip": "A pump shotgun fed from a box magazine, so quick to reload. Its shots knock back what they hit. "
-                   "Fires buckshot shells.",
+                   "Each shot pushes its shooter back. Fires buckshot shells.",
         "damage": 3.0, "pellets": 8, "interval": 16, "auto": False, "capacity": 6,
         "reload": 52, "spread": (7.0, 5.0), "range": 28, "ammo": "buckshot_shell",
     },
@@ -219,8 +219,9 @@ GUNS = {
     "trench_lobber": {
         "display": "Trench Lobber",
         "source": "hammer_gl",
-        "tooltip": "A pump-action grenade launcher fed from a box magazine. Each shot lobs a grenade that goes off where "
-                   "it lands; it never breaks blocks. Loads any grenade, the one in the other hand first.",
+        "tooltip": "A pump-action grenade launcher fed from a box magazine. Each shot lobs a grenade that goes off "
+                   "where it lands; it never breaks blocks. Each shot pushes its shooter back. Loads any grenade, the "
+                   "one in the other hand first.",
         "damage": 16.0, "pellets": 1, "interval": 14, "auto": False, "capacity": 6,
         "reload": 53, "spread": (3.0, 1.0), "range": 24, "ammo": "grenade", "shot": "grenade",
     },
@@ -236,7 +237,7 @@ GUNS = {
         "display": "Stoker",
         "source": "kiln_gun",
         "tooltip": "A flamethrower that burns blaze powder: a short jet that sets creatures alight and never a block. "
-                   "Each blaze powder is four bursts.",
+                   "Its flame pushes its shooter back. Each blaze powder is four bursts.",
         "damage": 2.0, "pellets": 1, "interval": 4, "auto": True, "capacity": 32,
         "reload": 61, "spread": (10.0, 6.0), "range": 8, "ammo": "minecraft:blaze_powder", "shot": "flame",
     },
@@ -314,7 +315,7 @@ GUNS = {
         "display": "Bronco SMG",
         "source": "jr_wristbreaker",
         "tooltip": "A short submachine gun with a broad barrel shroud, fired in one hand: it bucks hard. Hold to fire. "
-                   "Its shots knock back what they hit. Fires light rounds.",
+                   "Its shots knock back what they hit. Each shot pushes its shooter back. Fires light rounds.",
         "damage": 3.5, "pellets": 1, "interval": 3, "auto": True, "capacity": 25,
         "reload": 53, "spread": (5.0, 2.5), "range": 40, "ammo": "light_round",
     },
@@ -363,7 +364,8 @@ GUNS = {
         "display": "Sledge",
         "source": "killer_23",
         "tooltip": "A heavy pump shotgun with a bird's-head grip: eight heavy pellets a shot, four shells in its tube. "
-                   "Loaded a shell at a time. Its shots knock back what they hit. Fires buckshot shells.",
+                   "Loaded a shell at a time. Its shots knock back what they hit. Each shot pushes its shooter back. "
+                   "Fires buckshot shells.",
         "damage": 4.0, "pellets": 8, "interval": 20, "auto": False, "capacity": 4,
         "reload": (8, 14, 14), "spread": (8.0, 6.0), "range": 24, "ammo": "buckshot_shell",
     },
@@ -402,16 +404,18 @@ GUNS = {
     "skylark_rifle": {
         "display": "Skylark Rifle",
         "source": "rocket_rifle",
-        "tooltip": "A rifle that fires one rocket at a time, fast and flat. It bursts where it hits, or at the end of its "
-                   "range; it never breaks a block. Fires high-explosive rockets.",
+        "tooltip": "A rifle that fires one rocket at a time, fast and flat. It bursts where it hits, or at the end of "
+                   "its range; it never breaks a block. Each shot pushes its shooter back. Fires high-explosive "
+                   "rockets.",
         "damage": 24.0, "pellets": 1, "interval": 20, "auto": False, "capacity": 1,
         "reload": 48, "spread": (1.5, 0.25), "range": 135, "ammo": "he_rocket", "shot": "rocket", "rocket_speed": 4.5,
     },
     "bullfrog": {
         "display": "Bullfrog",
         "source": "blooper",
-        "tooltip": "A stubby grenade launcher with a sliding barrel, loaded a grenade at a time. Each shot lobs it to go "
-                   "off where it lands; it never breaks a block. Loads any grenade, the one in the other hand first.",
+        "tooltip": "A stubby grenade launcher with a sliding barrel, loaded a grenade at a time. Each shot lobs it to "
+                   "go off where it lands; it never breaks a block. Each shot pushes its shooter back. Loads any "
+                   "grenade, the one in the other hand first.",
         "damage": 16.0, "pellets": 1, "interval": 20, "auto": False, "capacity": 1,
         "reload": 45, "spread": (3.0, 1.5), "range": 20, "ammo": "grenade", "shot": "grenade",
     },
@@ -451,7 +455,7 @@ GUNS = {
         "display": "Mule",
         "source": "super_shotgun",
         "tooltip": "A sawn-off double-barrel that breaks open to load both shells at once. Ten pellets a barrel. Its "
-                   "shots knock back what they hit. Fires buckshot shells.",
+                   "shots knock back what they hit. Each shot pushes its shooter back. Fires buckshot shells.",
         "damage": 2.5, "pellets": 10, "interval": 8, "auto": False, "capacity": 2,
         "reload": 35, "spread": (9.0, 7.0), "range": 24, "ammo": "buckshot_shell",
     },
@@ -459,7 +463,8 @@ GUNS = {
         "display": "Fowler",
         "source": "doublet",
         "tooltip": "A double-barrelled flintlock, a ball rammed down each barrel. Eight balls a shot, two shots, then "
-                   "a long reload. Its shots knock back what they hit. Fires paper cartridges.",
+                   "a long reload. Its shots knock back what they hit. Each shot pushes its shooter back. Fires paper "
+                   "cartridges.",
         "damage": 3.0, "pellets": 8, "interval": 10, "auto": False, "capacity": 2,
         "reload": 97, "spread": (8.0, 5.0), "range": 28, "ammo": "paper_cartridge",
     },
@@ -467,7 +472,8 @@ GUNS = {
         "display": "Culverin",
         "source": "handcannon",
         "tooltip": "A stubby hand cannon, fired one-handed and loaded down its muzzle: a fist of heavy balls at close "
-                   "range, then a long reload. Its shots knock back what they hit. Fires paper cartridges.",
+                   "range, then a long reload. Its shots knock back what they hit. Each shot pushes its shooter back. "
+                   "Fires paper cartridges.",
         "damage": 5.0, "pellets": 5, "interval": 20, "auto": False, "capacity": 1,
         "reload": 74, "spread": (9.0, 7.0), "range": 18, "ammo": "paper_cartridge",
     },
@@ -493,7 +499,8 @@ GUNS = {
         "display": "Reverb",
         "source": "echoes_2",
         "tooltip": "A sculk-grown double-barrel whose barrels turn aside to take a shell at a time. Ten pellets a "
-                   "barrel. Its shots knock back what they hit and pierce armour. Fires buckshot shells.",
+                   "barrel. Its shots knock back what they hit and pierce armour. Each shot pushes its shooter back. "
+                   "Fires buckshot shells.",
         "damage": 3.5, "pellets": 10, "interval": 8, "auto": False, "capacity": 2,
         "reload": (16, 17, 19), "spread": (7.0, 5.0), "range": 32, "ammo": "buckshot_shell",
     },
@@ -503,7 +510,8 @@ GUNS = {
         "display": "Tusker",
         "source": "mangalitsa",
         "tooltip": "A Nether-forged pump shotgun, its pump worked after every shot: eight pellets that set what they "
-                   "hit alight. Loaded a shell at a time. Its shots knock back what they hit. Fires buckshot shells.",
+                   "hit alight. Loaded a shell at a time. Its shots knock back what they hit. Each shot pushes its "
+                   "shooter back. Fires buckshot shells.",
         "damage": 3.0, "pellets": 8, "interval": 14, "auto": False, "capacity": 6,
         "reload": (12, 12, 13), "spread": (6.5, 4.5), "range": 28, "ammo": "buckshot_shell",
     },
@@ -546,7 +554,8 @@ GUNS = {
         "display": "Crackling",
         "source": "ribs_glory",
         "tooltip": "A long Nether-forged pump shotgun in gold: six heavy pellets that keep together and set what they "
-                   "hit alight. Loaded a shell at a time. Its shots knock back what they hit. Fires buckshot shells.",
+                   "hit alight. Loaded a shell at a time. Its shots knock back what they hit. Each shot pushes its "
+                   "shooter back. Fires buckshot shells.",
         "damage": 4.0, "pellets": 6, "interval": 20, "auto": False, "capacity": 5,
         "reload": (6, 10, 11), "spread": (5.0, 3.0), "range": 36, "ammo": "buckshot_shell",
     },
@@ -573,7 +582,8 @@ GUNS = {
         "display": "Borer",
         "source": "weevil",
         "tooltip": "An End-forged machine gun carried at the hip, fed from a shulker box under its long barrel and "
-                   "charged with a crank; its shots may make what they hit float. Fires rifle rounds.",
+                   "charged with a crank; its shots may make what they hit float. Each shot pushes its shooter back. "
+                   "Fires rifle rounds.",
         "damage": 5.5, "pellets": 1, "interval": 5, "auto": True, "capacity": 40,
         "reload": 78, "spread": (4.0, 1.5), "range": 72, "ammo": "rifle_round",
     },
@@ -617,7 +627,7 @@ GUNS = {
         "display": "Goshawk Revolver",
         "source": "ultra_knight_hawk",
         "tooltip": "A heavy iron revolver held in one hand, its cylinder swung out to load a round at a time. Its "
-                   "shots knock back what they hit. Fires rifle rounds.",
+                   "shots knock back what they hit. Each shot pushes its shooter back. Fires rifle rounds.",
         "damage": 9.0, "pellets": 1, "interval": 10, "auto": False, "capacity": 6,
         "reload": (10, 20, 14), "spread": (2.0, 0.6), "range": 64, "ammo": "rifle_round",
     },
@@ -672,7 +682,7 @@ GUNS = {
         "display": "Waystation Shotgun",
         "source": "callwell_terminal",
         "tooltip": "A lever-action shotgun with a drum under its action, loaded a shell at a time. Eight pellets a "
-                   "shot. Its shots knock back what they hit. Fires buckshot shells.",
+                   "shot. Its shots knock back what they hit. Each shot pushes its shooter back. Fires buckshot shells.",
         "damage": 3.0, "pellets": 8, "interval": 17, "auto": False, "capacity": 8,
         "reload": (9, 13, 18), "spread": (6.5, 4.5), "range": 28, "ammo": "buckshot_shell",
     },
@@ -689,8 +699,8 @@ GUNS = {
         "display": "Flatboat Gun",
         "source": "big_bore",
         "tooltip": "A punt gun, its long barrel loaded through a chamber that swings out to the side: one great blast "
-                   "of sixteen pellets, then a long reload. Its shots knock back what they hit and pierce armour. "
-                   "Fires buckshot shells.",
+                   "of sixteen pellets, then a long reload. Its shots knock back what they hit and pierce armour. Each "
+                   "shot pushes its shooter back. Fires buckshot shells.",
         "damage": 3.0, "pellets": 16, "interval": 13, "auto": False, "capacity": 1,
         "reload": 72, "spread": (8.0, 6.0), "range": 36, "ammo": "buckshot_shell",
     },
@@ -716,9 +726,9 @@ GUNS = {
     "fencepost_thumper": {
         "display": "Fencepost Thumper",
         "source": "fencer_thumper",
-        "tooltip": "A revolving grenade launcher, its barrel tipped down to load the cylinder a grenade at a time and its "
-                   "pump worked to turn it. Each shot lobs a grenade that goes off where it lands; it never breaks a "
-                   "block. Loads any grenade, the one in the other hand first.",
+        "tooltip": "A revolving grenade launcher, its barrel tipped down to load the cylinder a grenade at a time and "
+                   "its pump worked to turn it. Each shot lobs a grenade that goes off where it lands; it never breaks "
+                   "a block. Each shot pushes its shooter back. Loads any grenade, the one in the other hand first.",
         "damage": 16.0, "pellets": 1, "interval": 18, "auto": False, "capacity": 4,
         "reload": (12, 22, 19), "spread": (3.0, 1.25), "range": 20, "ammo": "grenade", "shot": "grenade",
     },
@@ -746,7 +756,8 @@ GUNS = {
         "display": "Holler Pistol",
         "source": "howler",
         "tooltip": "A heavy pistol held in both hands, fed from a box magazine ahead of its trigger and its bolt "
-                   "worked after each shot. Its shots knock back what they hit and pierce armour. Fires rifle rounds.",
+                   "worked after each shot. Its shots knock back what they hit and pierce armour. Each shot pushes its "
+                   "shooter back. Fires rifle rounds.",
         "damage": 12.0, "pellets": 1, "interval": 22, "auto": False, "capacity": 10,
         "reload": 58, "spread": (3.0, 0.6), "range": 80, "ammo": "rifle_round",
     },
@@ -775,7 +786,7 @@ GUNS = {
         "source": "howler_conversion",
         "tooltip": "The Holler Pistol made over into a carbine: a long shrouded barrel, and a bolt the shot works "
                    "itself, so it fires quicker. Held in both hands. Its shots knock back what they hit and pierce "
-                   "armour. Fires rifle rounds.",
+                   "armour. Each shot pushes its shooter back. Fires rifle rounds.",
         "damage": 9.0, "pellets": 1, "interval": 10, "auto": False, "capacity": 10,
         "reload": 58, "spread": (2.5, 0.4), "range": 96, "ammo": "rifle_round",
     },
@@ -810,7 +821,7 @@ GUNS = {
         "display": "Navvy Shotgun",
         "source": "jackhammer",
         "tooltip": "An automatic shotgun fed from a box magazine of eight shells: it fires as long as the trigger is "
-                   "held. Its shots knock back what they hit. Fires buckshot shells.",
+                   "held. Its shots knock back what they hit. Each shot pushes its shooter back. Fires buckshot shells.",
         "damage": 2.5, "pellets": 6, "interval": 8, "auto": True, "capacity": 8,
         "reload": 52, "spread": (6.0, 4.0), "range": 24, "ammo": "buckshot_shell",
     },
@@ -956,8 +967,8 @@ GUNS = {
     "impetus_shotgun": {
         "display": "Impetus Shotgun",
         "source": "inertial",
-        "tooltip": "A stainless steel shotgun fed from a box of six shells, a shell a pull, knocking back what it hits. "
-                   "Fires buckshot shells.",
+        "tooltip": "A stainless steel shotgun fed from a box of six shells, a shell a pull, knocking back what it "
+                   "hits. Each shot pushes its shooter back. Fires buckshot shells.",
         "damage": 3.5, "pellets": 8, "interval": 13, "auto": False, "capacity": 6,
         "reload": 48, "spread": (6.0, 4.5), "range": 28, "ammo": "buckshot_shell",
     },
@@ -986,7 +997,7 @@ GUNS = {
         "source": "drill_conversion",
         "tooltip": "The Auger Rifle made over into a two-barrelled shotgun: eight pellets a barrel that spread as wide "
                    "aimed as from the hip, knocking back what they hit. Its barrels swing open to load a shell at a "
-                   "time. Fires buckshot shells.",
+                   "time. Each shot pushes its shooter back. Fires buckshot shells.",
         "damage": 3.5, "pellets": 8, "interval": 6, "auto": False, "capacity": 2,
         "reload": (12, 17, 16), "spread": (7.5, 7.5), "range": 24, "ammo": "buckshot_shell",
     },
@@ -4397,6 +4408,18 @@ PIERCING = {"vesper_rifle": 4.5, "onrush_smg": 3.0, "kreuzer_pistol": 1.0, "psal
             "highball_rifle": 2.5, "flatboat_gun": 2.0, "millstone_rifle": 1.5, "holler_pistol": 5.0,
             "half_crown_revolver": 4.0, "holler_carbine": 5.0, "grange_carbine": 2.0, "sprocket_gun": 3.0,
             "old_grange_carbine": 2.5}
+
+# The recoil-push follow-up: a gun whose shot pushes its shooter back (the owner's playerKnockBack and its strength,
+# JugcraftGuns.KICK, GunShots.kick). The shooter is pushed away from where they look, level, until they move back at
+# least the strength in blocks a tick times the level share of the look (less their knockback resistance); a shooter
+# already moving back as fast is left as they are, so a gun held on the trigger does not drive them ever faster. There
+# is no push up or down: a shot at the ground does not lift its shooter. Raider gunners are not pushed.
+KICK = {"thunderpipe": 0.45, "coach_gun": 0.25, "bellmouth": 0.3, "bulldog_pistol": 0.8, "breacher": 0.15,
+        "trench_lobber": 0.2, "stoker": 0.7, "bronco_smg": 0.2, "sledge": 0.35, "skylark_rifle": 0.2, "bullfrog": 0.2,
+        "mule": 0.35, "fowler": 0.34, "culverin": 0.35, "reverb": 0.15, "tusker": 0.15, "crackling": 0.5, "borer": 0.25,
+        "goshawk_revolver": 2.25, "waystation_shotgun": 0.35, "flatboat_gun": 2.5, "fencepost_thumper": 0.3,
+        "holler_pistol": 0.25, "holler_carbine": 0.15, "navvy_shotgun": 0.1, "impetus_shotgun": 0.25,
+        "auger_shotgun": 0.1}
 
 # Slice 15D: the guns that fire a burst to a pull, (rounds, rest): that many shots their interval apart, then a rest of
 # that many ticks more before the next pull fires (JugcraftGuns.BURSTS; the client fires the burst, the server's trigger

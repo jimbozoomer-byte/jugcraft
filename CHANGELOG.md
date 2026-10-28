@@ -8,6 +8,12 @@ Every change to Jugcraft, newest first, grouped by pull request. For what each t
 
 No numbered release yet. Entries on feature branches remain proposed until their pull requests merge.
 
+### Unmerged: Guns that push their shooter back
+- 27 guns now push their shooter back with each shot, at the owner's strengths: most shotguns a step or two (0.1 to 0.5 blocks a tick), the **Bulldog Pistol** and the **Stoker** harder, and the **Goshawk Revolver** and the **Flatboat Gun** several blocks.
+- The push is level, away from where the shooter looks, and brings them back up to the gun's strength rather than adding to it, so holding the trigger never drives them faster; a shot at the ground does not lift them. Knockback resistance lessens it.
+- Their tooltips say so.
+- Record: [guns.md, guns that push their shooter back](docs/features/guns.md#follow-up-guns-that-push-their-shooter-back).
+
 ### Unmerged: Guns, armour piercing and knockback for the older guns
 - 46 of the guns built before slice 15 take the owner's armour piercing, knockback or both: 27 pierce armour (up to 7 points, the Lament Rifle's, the Murmur SMG's and the Reverb's) and 24 knock back what they hit further. Against a creature without armour their damage is as before.
 - The **Flatboat Gun** takes the owner's knockback of 8 and throws what it hits; the **Caisson Pistol**'s arc now pierces a point of armour.
