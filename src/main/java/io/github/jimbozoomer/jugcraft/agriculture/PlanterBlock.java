@@ -4,15 +4,18 @@ import java.util.EnumMap;
 import java.util.Map;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.Identifier;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
-import net.minecraft.tags.ItemTags;
+import net.minecraft.tags.TagKey;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.BlockItem;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.BlockGetter;
@@ -56,6 +59,9 @@ public class PlanterBlock extends HorizontalDirectionalBlock implements EntityBl
 	public static final Planter GALVANIZED_TUB = new Planter(new double[][] {{2.0, 0.0, 5.0, 14.0, 4.5, 11.0}, {3.0, 0.0, 4.0, 13.0, 4.5, 12.0}},
 			new double[][] {{5.5, 8.0}, {10.5, 8.0}}, 3.75, 0.65F, false);
 
+	/** What grows in a planter: vanilla's small flowers tag (26.3 has no ItemTags field for it). */
+	public static final TagKey<Item> SMALL_FLOWERS = TagKey.create(Registries.ITEM, Identifier.withDefaultNamespace("small_flowers"));
+
 	private final Planter planter;
 	private final Map<Direction, VoxelShape> shapes = new EnumMap<>(Direction.class);
 
@@ -74,7 +80,7 @@ public class PlanterBlock extends HorizontalDirectionalBlock implements EntityBl
 
 	/** Whether {@code stack} can be planted in a planter: a small flower that is a block. */
 	public static boolean plantable(ItemStack stack) {
-		return stack.is(ItemTags.SMALL_FLOWERS) && stack.getItem() instanceof BlockItem;
+		return stack.is(SMALL_FLOWERS) && stack.getItem() instanceof BlockItem;
 	}
 
 	@Override

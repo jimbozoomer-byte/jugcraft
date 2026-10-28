@@ -114,6 +114,7 @@ Local checks run on this branch, and their results:
   - `python3 -m unittest discover -s scripts/tests`: 287 tests, OK.
   - `python3 tools/check_icon_maps.py`: PASS (no new map; the planters' items are 3D).
   - `javac` parse (syntax only) of the new and changed Java: OK.
+  - Part 2's first CI run failed to compile: 26.3 has no `ItemTags.SMALL_FLOWERS` field. `PlanterBlock` now makes the `#minecraft:small_flowers` tag key itself (the tag is vanilla's, with set 4's flowers added).
 
 Game tests (CI only, not run locally), `FallGardenGameTests`:
 - Every plant has its block and item:
