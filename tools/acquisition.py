@@ -37,6 +37,7 @@ import concordance_trinkets as trinkets
 import crypt_lich as cl
 import cydonian_sentinel as cs
 import gear
+import hessian_horseman as hh
 import iron_dreadnought as idn
 import lairs
 import mire_hag as mh
@@ -63,8 +64,8 @@ OBJECTIVE = "an objective"
 # (item, (fewest, most)); the chance of each single thing; their trophy table where it is not bosses/<their id>
 # ("trophy_table"); their trophies, either "first" (one trophy, among the
 # chances, that a player's first victory always brings) or "trophies" (two that share one pool, (items, chance), of which
-# a first victory always brings one); and, for the Witching Season's bosses only, the Halloween event's extra chance
-# (item, chance).
+# a first victory always brings one); for the Witching Season's bosses only, the Halloween event's extra chance
+# (item, chance); and any item another loot table gives too ("also": item -> (that table, the sentence its page adds)).
 BOSSES = {
     "vesperine": {"name": vs.ENTITIES["vesperine"], "pronouns": ("her", "her"),
                   "lair": lairs.LAIRS["hollow_acre"]["display"], "opened": "which the Last Rites open at night",
@@ -133,6 +134,18 @@ BOSSES = {
                      "loot_class": "lair/king/PumpkinKingLoot.java", "table": "entities/pumpkin_king", "objective": True,
                      "trophies": (pk.TROPHIES, pk.TROPHY_CHANCE), "count": ("kings_ember", (1, 1)),
                      "chances": pk.CHANCES, "event": ("pumpkin_kings_crown", pk.EVENT_CROWN_CHANCE)},
+    # Main's #537 put him on the shared credit with his lair; his pages since Concordance Chunk E (E4). His lair opens only
+    # out of the Halloween season, so no event chance.
+    "hessian_horseman": {"name": hh.ENTITIES["hessian_horseman"], "pronouns": ("his", "him"),
+                         "lair": lairs.LAIRS["church_bridge"]["display"],
+                         "opened": f"which a {lairs.ITEMS['hessians_bridle']} used on a jack-o'-lantern on a post at night, "
+                                   "out of the Halloween season, opens",
+                         "loot_class": "lair/horseman/HorsemanLoot.java", "table": "entities/hessian_horseman",
+                         "objective": True, "trophies": (hh.TROPHIES, hh.TROPHY_CHANCE),
+                         "count": (hh.ALWAYS[0], (1, 1)), "chances": hh.CHANCES,
+                         "also": {hh.ALWAYS[0]: ("entities/headless_horseman",
+                                                 "The Headless Horseman who rides the Overworld in the Halloween season "
+                                                 "drops one too when a player brings him down")}},
 }
 
 
@@ -266,8 +279,9 @@ def _boss_pages():
                 lead = f"Crafted from {count} {name}. {subject} also gives it"
             else:
                 lead = f"Not crafted or traded. {subject} gives it"
+            also = f"{info['also'][thing][1]}. " if thing in info.get("also", {}) else ""
             pages[thing] = (f"{lead} in {_the(info['lair'])}, {info['opened']}. {DEFAULT.capitalize()}, {roll}. "
-                            f"{share(info)}")
+                            f"{also}{share(info)}")
     return pages
 
 
