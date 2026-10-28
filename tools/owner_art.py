@@ -316,7 +316,8 @@ def errors():
     adapted.update(_target(target) for target, _ in compositions())
     adapted.update(_target(target) for target in garden.ORNAMENTAL_EARS)
     adapted.update(os.path.join(ASSETS, target) for target, _, _ in adaptations() if target.endswith(".png"))
-    adapted.update(os.path.join(ASSETS, target) for target, _, _ in builds() if target.endswith(".png"))
+    built = {os.path.join(ASSETS, target) for target, _, _ in builds()}
+    adapted.update(path for path in built if path.endswith(".png"))
     for path, data in expected().items():
         rel = os.path.relpath(path, ROOT)
         if not os.path.isfile(path):
@@ -334,7 +335,10 @@ def errors():
                     same = original.size == current.size and original.tobytes() == current.tobytes()
                 except (OSError, ValueError):
                     same = False
-            if not same:
+            if not same and path in built:
+                # A built body file (GC-05) is made, not imported: it differs from what its builder makes.
+                out.append(f"{rel} differs from what tools/garden_bodies.py builds (run tools/owner_art.py)")
+            elif not same:
                 out.append(f"{rel} differs from the owner's library file it is imported from; the owner's art is kept as "
                            "drawn (tools/owner_art.py)")
     return out

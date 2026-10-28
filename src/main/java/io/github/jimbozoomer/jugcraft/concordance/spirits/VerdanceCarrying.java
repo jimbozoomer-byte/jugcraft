@@ -10,6 +10,7 @@ import io.github.jimbozoomer.jugcraft.concordance.worker.Status;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -38,10 +39,11 @@ import org.jspecify.annotations.Nullable;
  * jugcraft:verdance_to_ley, 3 Verdance for 2 Ley Charge, its owner rule unchanged).</li>
  * </ul>
  * Both places of a move are asked at the change (GardenPacts.target: serves there, a beneficiary's, the holder near, the
- * holder's own hands), at most {@value #MAX_ASKED} places a think. A move is shown only by Bathin's shimmer at its two
+ * holder's own hands), at most {@value #MAX_ASKED} places a think; a place refused for itself is not asked again until his
+ * index is next read, so refused places never crowd out the rest. A move is shown only by Bathin's shimmer at its two
  * ends (BathinEntity.shimmer). No new conversion; no item, nutrient or practice moves; the move is counted on the record.
- * What he remembers ({@link Memory}: his index, the Hearts with their own road, why he idled, his last move) is the
- * presence's alone and never saved.
+ * What he remembers ({@link Memory}: his index, the Hearts with their own road, the places skipped, why he idled, his
+ * last move) is the presence's alone and never saved.
  */
 public final class VerdanceCarrying {
 	/** Its work id (worker/PactParser.WORK; tools/concordance_pacts.py WORK). */
@@ -78,7 +80,7 @@ public final class VerdanceCarrying {
 	public enum Idle {
 		/** No Heart of his beneficiaries' holds Verdance he may take. */
 		EMPTY,
-		/** Verdance waits, but no Gleaner or pylon he may fill from it. */
+		/** Verdance waits, but no Gleaner or pylon he may fill from it (or none found before the think's questions ran out). */
 		NOWHERE
 	}
 
@@ -93,7 +95,7 @@ public final class VerdanceCarrying {
 		Memory memory = bathin.serviceMemory(Memory.class, Memory::new);
 		GardenReach reach = memory.reach(record);
 		List<VerdantHeartBlockEntity> hearts = reach.hearts(level, now);
-		memory.notice(level, hearts);
+		memory.notice(level, record, hearts);
 		String answer = answer(level, bathin);
 		boolean claim = CLAIM.equals(answer);
 		BoundWill.Service service = record.pact().service();
@@ -131,7 +133,7 @@ public final class VerdanceCarrying {
 		}
 		// The emptiest first (where Verdance is wanted most), the nearest the perch among equals.
 		gleaners.sort(Comparator.comparingLong(GleanerBlockEntity::verdance));
-		Asking asking = new Asking(level, record, time, now);
+		Asking asking = new Asking(level, record, memory, time, now);
 		for (VerdantHeartBlockEntity heart : sources) {
 			for (GleanerBlockEntity gleaner : gleaners) {
 				if (gleaner.reaches(heart.getBlockPos())) {
@@ -142,6 +144,7 @@ public final class VerdanceCarrying {
 					return asking.stop();
 				}
 				if (asked == Asked.SPENT) {
+					memory.idle(Idle.NOWHERE);
 					return Status.IDLE;
 				}
 				if (asked == Asked.MAY) {
@@ -164,6 +167,7 @@ public final class VerdanceCarrying {
 					return asking.stop();
 				}
 				if (asked == Asked.SPENT) {
+					memory.idle(Idle.NOWHERE);
 					return Status.IDLE;
 				}
 				if (asked == Asked.MAY) {
@@ -227,7 +231,7 @@ public final class VerdanceCarrying {
 	private enum Asked {
 		/** The holder may change it now, for a beneficiary. */
 		MAY,
-		/** Not this place (not a beneficiary's now, not the holder's to change by hand, outside the area): skipped. */
+		/** Not this place (not a beneficiary's now, not the holder's to change by hand, outside the area): skipped until his index is next read. */
 		NOT_HERE,
 		/** The pact's own reason (suspended, held, its quota spent, its holder not near): the think stops with it. */
 		PACT,
@@ -235,18 +239,23 @@ public final class VerdanceCarrying {
 		SPENT
 	}
 
-	/** One think's questions to GardenPacts.target: each place once, at most MAX_ASKED places. Server thread only. */
+	/**
+	 * One think's questions to GardenPacts.target: each place once, at most MAX_ASKED places; a place his memory skips is
+	 * not asked (no question spent). Server thread only.
+	 */
 	private static final class Asking {
 		private final ServerLevel level;
 		private final BoundWill record;
+		private final Memory memory;
 		private final long time;
 		private final long now;
 		private final Map<BlockPos, Asked> asked = new HashMap<>();
 		private Status stop = Status.IDLE;
 
-		Asking(ServerLevel level, BoundWill record, long time, long now) {
+		Asking(ServerLevel level, BoundWill record, Memory memory, long time, long now) {
 			this.level = level;
 			this.record = record;
+			this.memory = memory;
 			this.time = time;
 			this.now = now;
 		}
@@ -262,6 +271,9 @@ public final class VerdanceCarrying {
 			if (known != null) {
 				return known;
 			}
+			if (memory.skipped(pos)) {
+				return Asked.NOT_HERE;
+			}
 			if (asked.size() >= MAX_ASKED) {
 				return Asked.SPENT;
 			}
@@ -270,7 +282,10 @@ public final class VerdanceCarrying {
 			if (refused == null) {
 				answer = Asked.MAY;
 			} else if (refused == Status.IDLE || refused == Status.BLOCKED_BY_ACCESS || refused == Status.OUTSIDE_AGREEMENT) {
+				// This place's own answer: skipped until his index is read again (the unit review, as Buer's beds), so refused
+				// places never crowd the rest out of a think's questions, and each protection a refusal asks is asked once a read.
 				answer = Asked.NOT_HERE;
+				memory.skip(pos);
 			} else {
 				stop = refused;
 				answer = Asked.PACT;
@@ -287,12 +302,17 @@ public final class VerdanceCarrying {
 
 	/**
 	 * What one Bathin presence remembers between its thinks (PactSpiritEntity.serviceMemory: never saved, lost with the
-	 * entity): his device index, the indexed Hearts that have their own road, whether he has raised his matter, why he last
-	 * idled, and his last move. It never holds Verdance: a move is over when its call returns. Server thread only.
+	 * entity): his device index, the indexed Hearts that have their own road, the places refused for themselves since the
+	 * index was last read, whether he has raised his matter, why he last idled, and his last move. It never holds Verdance:
+	 * a move is over when its call returns. Server thread only.
 	 */
 	public static final class Memory {
+		/** The most places skipped: every Heart, Gleaner and pylon an index holds. */
+		private static final int MAX_SKIPPED = 3 * GardenReach.MAX_DEVICES;
 		private @Nullable GardenReach reach;
 		private List<BlockPos> roads = List.of();
+		private final HashSet<BlockPos> skipped = new HashSet<>();
+		private int skippedAt = -1;
 		private boolean raised;
 		private @Nullable Idle idle;
 		private @Nullable Move last;
@@ -300,17 +320,20 @@ public final class VerdanceCarrying {
 		public Memory() {
 		}
 
-		/** {@code record}'s device index, made again when its perch or radius changed (GardenReach.covers). */
+		/** {@code record}'s device index, made again (forgetting the places skipped) when its perch or radius changed (GardenReach.covers). */
 		GardenReach reach(BoundWill record) {
 			if (reach == null || !reach.covers(record)) {
 				reach = GardenReach.devices(record);
+				skipped.clear();
+				skippedAt = -1;
 			}
 			return reach;
 		}
 
 		/**
 		 * Forgets his device index, so his next think reads his area again (GardenReach.forget): an operator's or a test's,
-		 * after devices were placed within the index's REFRESH_TICKS. Nothing else he remembers changes.
+		 * after devices were placed within the index's REFRESH_TICKS. The places skipped are forgotten at that read; nothing
+		 * else he remembers changes.
 		 */
 		public void forget() {
 			if (reach != null) {
@@ -318,11 +341,20 @@ public final class VerdanceCarrying {
 			}
 		}
 
-		/** The indexed Hearts that pour into a pylon beside them now, nearest the perch first (at most 16, six reads each); why he idled is forgotten. */
-		void notice(ServerLevel level, List<VerdantHeartBlockEntity> hearts) {
+		/**
+		 * The indexed Hearts whose keeper {@code record}'s pact benefits now (asked again each think: the index keeps its
+		 * keepers only from its last refresh) that pour into a pylon beside them now, nearest the perch first (at most 16, six
+		 * reads each); why he idled is forgotten. When the read that gave {@code hearts} refreshed the index, the places
+		 * skipped since the last are forgotten, so a claim lifted or a keeper who joined the party is asked again.
+		 */
+		void notice(ServerLevel level, BoundWill record, List<VerdantHeartBlockEntity> hearts) {
+			if (reach != null && reach.refreshes() != skippedAt) {
+				skippedAt = reach.refreshes();
+				skipped.clear();
+			}
 			List<BlockPos> found = new ArrayList<>();
 			for (VerdantHeartBlockEntity heart : hearts) {
-				if (heart.feedsAPylonBeside(level)) {
+				if (GardenPacts.benefits(record, heart.keeper()) && heart.feedsAPylonBeside(level)) {
 					found.add(heart.getBlockPos());
 				}
 			}
@@ -332,6 +364,18 @@ public final class VerdanceCarrying {
 
 		boolean roaded(BlockPos heart) {
 			return roads.contains(heart);
+		}
+
+		/** GardenPacts.target refused the place at {@code pos} for itself: not asked again until the index is next read. */
+		void skip(BlockPos pos) {
+			if (skipped.size() < MAX_SKIPPED) {
+				skipped.add(pos.immutable());
+			}
+		}
+
+		/** Whether the place at {@code pos} was refused for itself since the index was last read (tests and carry). */
+		public boolean skipped(BlockPos pos) {
+			return skipped.contains(pos);
 		}
 
 		/** The Hearts with their own road at his last think, nearest the perch first. */
@@ -444,7 +488,7 @@ public final class VerdanceCarrying {
 		/**
 		 * His matter (two roads from one Heart) while an indexed Heart of his has its own road, answered or not, so the answer
 		 * can be changed at the perch; null without a presence of his here (a copied perch's view has none), or with no such
-		 * Heart now. The Heart is read again (loaded, awake, its road still there). Reads only.
+		 * Heart now. The Heart is read again (loaded, awake, its keeper still a beneficiary, its road still there). Reads only.
 		 */
 		@Override
 		public PactService.@Nullable Complication complication(ServerLevel level, BoundWill record, PactPerchBlockEntity perch, long now) {
@@ -453,7 +497,7 @@ public final class VerdanceCarrying {
 			}
 			BlockPos road = bathin.serviceMemory(Memory.class, Memory::new).road();
 			if (road == null || !level.isLoaded(road) || !(level.getBlockEntity(road) instanceof VerdantHeartBlockEntity heart)
-					|| heart.isRemoved() || !heart.awake() || !heart.feedsAPylonBeside(level)) {
+					|| heart.isRemoved() || !heart.awake() || !GardenPacts.benefits(record, heart.keeper()) || !heart.feedsAPylonBeside(level)) {
 				return null;
 			}
 			return new PactService.Complication(TWO_ROADS, Component.translatable(KEY + "matter.two_roads", road.toShortString()), road, ACCORDS);

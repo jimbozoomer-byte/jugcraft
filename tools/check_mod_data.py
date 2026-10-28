@@ -19042,7 +19042,9 @@ GC05_CARRYING_TESTS = {
         "bathinNeverTouchesAClaimedReservoir", "bathinLeavesAHeartWithItsOwnPylonUntilAnswered",
         "aClaimAnswerLetsBathinTakeFromIt", "bathinStopsAtHisQuota", "bathinWaitsForAPresentHolder",
         "aSuspendedBathinCarriesNothing", "twoBathinsShareOneHeartExactly", "bathinFacesWhereHeSetsItDown",
-        "bathinsFirstObligationIsADeviceReadByHand", "bathinsReadingSaysItsNoteAndNamesNoPlayer"],
+        "bathinsFirstObligationIsADeviceReadByHand", "bathinsReadingSaysItsNoteAndNamesNoPlayer",
+        # The unit review: refused places skipped until the index is read again; his matter only for a beneficiary's Heart.
+        "refusedGleanersNeverStarveBathinsPylonRoad", "aFormerMembersHeartRaisesNoMatter"],
     "ConcordanceEconomyGameTests": ["noVerdanceIsMintedByCarrying"],
 }
 # Concordance garden cohort, GC-05 (check_pacts): each work's answers as shipped, the safe course first. Append only: a
@@ -19432,7 +19434,12 @@ def check_pacts(co, root, lang, registered, research):
     bar, never as a state for a closed menu. The garden cohort (GC-01 to GC-04): one row a spirit, each a thin subclass
     registered as its row says; a service steps after decide (an offering due included, GC-P27); each garden work's words,
     notes and reasons are its own (SERVICE_WORDS); Jade's note is read by the world's clock; a garden spirit's cues play
-    only its art plan's files, pitched as SOUND_PITCH says; and the cohort's game tests exist."""
+    only its art plan's files, pitched as SOUND_PITCH says; and the cohort's game tests exist. GC-05: the accord machinery
+    (RESOLVE appended to the wire and kept only through PactAccords.resolve's checks, the accord the perch's saved key alone
+    and counted only for the pact it keeps now, AWAITING_ANSWER after the step, each work's accords append only, the matter
+    row second on the kept page, Jade's and the readings' matter and answer) and its game tests; Bathin as a character (his
+    sign his own, his signs the shared ones, his assent on an answer, his tooltip, his four codex pages in order) and his
+    game tests."""
     wk = co.workers
     def java(relative):
         path = root / relative
@@ -20367,8 +20374,10 @@ def check_pacts(co, root, lang, registered, research):
     if "Bathin" not in pa.PERCH_TOOLTIP or "within 10" not in pa.PERCH_TOOLTIP:
         err("tools/concordance_pacts.py PERCH_TOOLTIP: names what Bathin wants near the perch")
     pages = [page[1] for page in co.garden_pacts.PAGES] if hasattr(co, "garden_pacts") else []
-    if not {"Bathin", "Two Roads from One Heart"} <= set(pages):
-        err("tools/concordance_garden_pacts.py PAGES: Bathin's codex pages (Dossier 2 item 2)")
+    # All four of his pages, in order ("His Price" is Buer's title too, so a set of titles could not see it dropped).
+    want = ["Bathin", "His Service", "Two Roads from One Heart", "His Price"]
+    if not any(pages[i:i + len(want)] == want for i in range(len(pages))):
+        err("tools/concordance_garden_pacts.py PAGES: Bathin's codex pages, all four in order (Dossier 2 item 2)")
     for cls, names in GC05_BATHIN_TESTS.items():
         source = (tests / f"{cls}.java").read_text(encoding="utf-8") if (tests / f"{cls}.java").is_file() else ""
         for name in names:
@@ -20491,7 +20500,11 @@ def check_garden_pacts(co, root, lang, registered, research):
     read. Every word has its text, and the ticket's game tests exist. GC-04: each garden work has its distinct row
     (DISTINCT: GE8), its call made once by its own class; Buer's step asks in order (today, his complaints, his hours, his
     quota, the index, the bed's own rule, the most strained first, at most MAX_ASKED asked whose land it is, one tend,
-    remembered, counted, faced, shown) and moves no item, nutrient or practice, saves nothing and scans nothing."""
+    remembered, counted, faced, shown) and moves no item, nutrient or practice, saves nothing and scans nothing. GC-05: the
+    bed index's devices (in the beds' one pass, capped, a beneficiary's or no one's pylons); Bathin's step asks in order
+    (his index and roads, the answer, hours, quota, his matter raised once, the sources, a far Gleaner with room first,
+    then a pylon not beside the Heart, both ends asked, one move), skips a place refused for itself until the index is
+    read again, moves Verdance only through the Gleaner's draw and the Heart's pour, and saves and scans nothing."""
     gp = co.garden_pacts
     pg = co.progression
 
@@ -20754,20 +20767,21 @@ def check_garden_pacts(co, root, lang, registered, research):
     strip = lambda source: re.sub(r"//[^\n]*|/\*.*?\*/", " ", source, flags=re.S)
     ec = co.ecology
     carrying = strip(text(spirits / "VerdanceCarrying.java"))
-    # His step, in order: his index and its roads, the answer, his hours and quota, his matter raised once, the sources (a
-    # Heart with its own road only when claimed; the fullest first), the lossless road first (room for a whole move; never a
-    # Gleaner within its own reach of the Heart), then a pylon not beside the Heart that its pour may fill, both ends asked,
-    # one move; else why he idled.
+    # His step, in order: his index and its roads (a beneficiary's Heart only, asked each think: the unit review), the
+    # answer, his hours and quota, his matter raised once, the sources (a Heart with its own road only when claimed; the
+    # fullest first), the lossless road first (room for a whole move; never a Gleaner within its own reach of the Heart),
+    # then a pylon not beside the Heart that its pour may fill, both ends asked, one move; else why he idled (the last
+    # NOWHERE: his questions spent say it too).
     step = _java_body(carrying, "static Status carry(")
     order = [step.find(n) for n in (
-        "memory.reach(record)", "memory.notice(level, hearts);", "boolean claim = CLAIM.equals(answer);",
+        "memory.reach(record)", "memory.notice(level, record, hearts);", "boolean claim = CLAIM.equals(answer);",
         "Pacts.inHours(service, time)", "Pacts.done(record.pact(), now) >= service.quota()", "memory.raise()",
         "claim || !memory.roaded(heart.getBlockPos())", "Comparator.comparingLong(VerdantHeartBlockEntity::verdance).reversed()",
         "GleanerBlockEntity.CAPACITY - gleaner.verdance() >= MOVE_MAX", "gleaner.reaches(heart.getBlockPos())",
         "asking.both(heart.getBlockPos(), heart.keeper(), gleaner.getBlockPos(), gleaner.keeper())",
         "gleaner.receiveFrom(heart, record.holder(), MOVE_MAX, level)", "heart.beside(pylon.getBlockPos()) || !heart.mayPourInto(pylon)",
-        "owner == null ? record.holder() : owner", "heart.pourInto(pylon, level, MAX_BATCHES)", "memory.idle(Idle.NOWHERE);")]
-    if -1 in order or order != sorted(order):
+        "owner == null ? record.holder() : owner", "heart.pourInto(pylon, level, MAX_BATCHES)")] + [step.rfind("memory.idle(Idle.NOWHERE);")]
+    if -1 in order or order != sorted(order) or step.count("memory.idle(Idle.NOWHERE);") != 3:
         err("VerdanceCarrying.carry: his index and roads, the answer, hours, quota, his matter raised once, the sources (a Heart "
             "with its own road only when claimed), a far Gleaner with room first, then a pylon not beside the Heart, both ends "
             "asked, one move (GC-05)")
@@ -20782,6 +20796,19 @@ def check_garden_pacts(co, root, lang, registered, research):
     asked = _java_body(carrying, "private Asked ask(BlockPos pos, @Nullable UUID keeper)")
     if "asked.size() >= MAX_ASKED" not in asked or "GardenPacts.target(level, record, pos, keeper, time, now)" not in asked:
         err("VerdanceCarrying.Asking: each place asked of GardenPacts.target once, at most MAX_ASKED a think (GC-S7)")
+    # The unit review: a place refused for itself is skipped, at no question, until his index is read again (as Buer's
+    # beds), so refused Gleaners never starve the pylon road; a place he may change is never skipped.
+    remembered = _java_body(carrying, "public static final class Memory")
+    if not 0 <= asked.find("if (memory.skipped(pos)) {") < asked.find("asked.size() >= MAX_ASKED") \
+            or not 0 <= asked.find("answer = Asked.NOT_HERE;") < asked.find("memory.skip(pos);") \
+            or carrying.count("memory.skip(") != 1 or "if (skipped.size() < MAX_SKIPPED) {" not in remembered \
+            or "private static final int MAX_SKIPPED = 3 * GardenReach.MAX_DEVICES;" not in remembered \
+            or "if (reach != null && reach.refreshes() != skippedAt) {" not in _java_body(remembered, "void notice(") \
+            or "GardenPacts.benefits(record, heart.keeper()) && heart.feedsAPylonBeside(level)" not in _java_body(remembered, "void notice("):
+        err("VerdanceCarrying.Memory: the places refused for themselves, at most every place an index holds, skipped until "
+            "the index is next read; his roads only a beneficiary's Hearts, asked each think (the unit review)")
+    if "!GardenPacts.benefits(record, heart.keeper())" not in _java_body(carrying, "public PactService.@Nullable Complication complication("):
+        err("VerdanceCarrying.complication: his matter only for a Heart whose keeper his pact benefits now (PA 2.14; the unit review)")
     row = gp.DISTINCT.get("verdance_carrying", {})
     if carrying.count(row.get("also", "?")) != 1:
         err(f"spirits/VerdanceCarrying.java: makes {row.get('also')} once (DISTINCT)")
@@ -20807,6 +20834,12 @@ def check_garden_pacts(co, root, lang, registered, research):
             "one's, within his radius (Dossier 2 item 2; GC-P58)")
     if gp.CONSTANTS.get("verdance_carrying", {}).get("spirits/VerdanceCarrying.java", {}).get("MOVE_MAX") != ec.GLEANER_DRAW:
         err(f"tools/concordance_garden_pacts.py CONSTANTS: Bathin's MOVE_MAX is the Gleaner's own draw ({ec.GLEANER_DRAW})")
+    # His page's row names his two limits as the Java holds them (the unit review: its words are written out).
+    limits = gp.CONSTANTS.get("verdance_carrying", {}).get("spirits/VerdanceCarrying.java", {})
+    service_row = co.pacts.SERVICE_WORDS.get("verdance_carrying", {}).get("messages", {}).get("row.service", "")
+    if f"each at most {limits.get('MOVE_MAX')} Verdance" not in service_row or f" or {limits.get('MAX_BATCHES')} batches " not in service_row:
+        err("tools/concordance_pacts.py SERVICE_WORDS verdance_carrying row.service: names MOVE_MAX and MAX_BATCHES as "
+            "tools/concordance_garden_pacts.py CONSTANTS holds them")
 
 
 def check_pact_screen(co, lang):
@@ -20988,7 +21021,9 @@ def check_spirit_bodies(co):
     cohort's GC-04: Buer's body is the owner's Decor Blossom, its texture copied and its geometry, glowmask and clips adapted
     by tools/garden_bodies.py; his geometry is the owner's but for the stem's copy and the clear face of each twin pair
     (pinned); no spirit's zero-thickness cube draws both faces of its plane but Stolas's recorded six (GB24); his glowmask is
-    his pistil's heart; his clips, Java, size and the garden client class's poses and shots agree."""
+    his pistil's heart; his clips, Java, size and the garden client class's poses and shots agree. GC-05: Bathin's body is
+    built by tools/garden_bodies.py, painted only from the willow log and the Spanish moss, nothing copied or adapted; no
+    flat or turned cube and no coplanar faces; his glowmask his two eyes alone; his clips, Java, box and culling box agree."""
     pa = co.pacts
     flash = "assets/ars_jymbaumental/"
 

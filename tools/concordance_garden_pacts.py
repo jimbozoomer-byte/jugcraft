@@ -153,8 +153,9 @@ PAGES = [
     # GC-05: Bathin's (Dossier 2). No source quotation (GC-S14); his matter's page is the accord's.
     ("text", "Bathin",
      "Bathin, a spirit of the old books, moves what is wanted from where it is to where it should be, and never by a road. "
-     f"Build a **Pact Perch** with a **Verdant Heart** of yours within {_BATHIN['service']['radius']} blocks of it and a "
-     f"**Gleaner** of yours or a **Ley Pylon** of yours or no one's within {_BATHIN['service']['radius']} too, and use it: he "
+     f"Build a **Pact Perch** with an awake **Verdant Heart** of yours within {_BATHIN['service']['radius']} blocks of it "
+     f"and an awake **Gleaner** of yours or a **Ley Pylon** of yours or no one's within {_BATHIN['service']['radius']} "
+     "blocks too, and use it: he "
      "is suddenly coiled on the perch, a strong man on a serpent's tail, and names every term before anything is spent. "
      "Without them he does not come: \"Nothing here to carry, or nowhere to carry it.\"", ("garden_regard", "understood")),
     ("text", "His Service",

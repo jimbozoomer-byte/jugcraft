@@ -322,9 +322,9 @@ SPIRITS = {
         # worker/Pacts.REACH); his service's two conditions, the holder near and only what the holder could change by hand,
         # named before anything is spent (as Buer's, GC-04's unit review).
         "term": "Verdance carrying: at any hour Bathin moves Verdance at once from an awake Verdant Heart of yours or your "
-                f"party's in his area, up to {ecology.GLEANER_DRAW} at a time into a Gleaner more than "
-                f"{ecology.HEART_REACH} blocks from that Heart, or into a Ley Pylon not beside it at the Heart's own 3 for "
-                "2; one move at a time, nothing ever on the way and none kept by him. A Heart that already pours into its own "
+                f"party's in his area, up to {ecology.GLEANER_DRAW} at a time into a Gleaner of yours or your party's more "
+                f"than {ecology.HEART_REACH} blocks from that Heart, or into a Ley Pylon of yours, your party's or no one's, "
+                "not beside it, at the Heart's own 3 for 2; one move at a time, nothing ever on the way and none kept by him. A Heart that already pours into its own "
                 f"pylon he leaves alone until you answer. He works only while you are within {workers.PACT['REACH']} blocks of "
                 "the perch, and never on a Heart, Gleaner or pylon you could not change by hand",
         # His cues, in BathinEntity.SOUND_IDS' order: (subtitle, runtime files). The art plan's mono files (GC-S13): the
@@ -388,10 +388,10 @@ OFFERINGS_TAG = SPIRITS["stolas"]["pact"]["upkeep"]["offering"]
 OFFERINGS = SPIRITS["stolas"]["offerings"]["items"]
 BLOCKS = {"pact_perch": {"name": "Pact Perch"}}
 PERCH_TOOLTIP = ("Use: invite a pact spirit whose Regard you understand (Stolas also wants a star you observed yourself; "
-                 f"Buer an awake Verdant Bed of yours within {SPIRITS['buer']['pact']['service']['radius']} blocks; Bathin a "
-                 "Verdant Heart of yours and a Gleaner of yours or a Ley Pylon of yours or no one's within "
-                 f"{SPIRITS['bathin']['pact']['service']['radius']}); or keep the pact seated here. Break it and the pact "
-                 "stays yours, without its perch.")
+                 f"Buer an awake Verdant Bed of yours within {SPIRITS['buer']['pact']['service']['radius']} blocks; Bathin an "
+                 "awake Verdant Heart of yours and an awake Gleaner of yours or a Ley Pylon of yours or no one's within "
+                 f"{SPIRITS['bathin']['pact']['service']['radius']} blocks); or keep the pact seated here. Break it and the "
+                 "pact stays yours, without its perch.")
 # Polished deepslate, not a slab: the progression graph follows only listed vanilla items (a slab is not in
 # concordance_progression.VANILLA_SOURCES).
 RECIPE = {"type": "minecraft:crafting_shaped", "category": "misc", "pattern": ["SAS", " L ", " D "],
@@ -881,9 +881,9 @@ SERVICE_WORDS = {
     # GC-05 (Dossier 2 items 2, 3 and 5; GC-P48 to GC-P52, GC-P58): Bathin's Verdance carrying.
     "verdance_carrying": {
         "messages": {
-            "missing": "\"Nothing here to carry, or nowhere to carry it.\" Bathin comes only where a Verdant Heart you keep "
-                       "lies within %s blocks of the perch, with a Gleaner of yours or a Ley Pylon of yours or no one's within "
-                       "%s blocks too",
+            "missing": "\"Nothing here to carry, or nowhere to carry it.\" Bathin comes only where an awake Verdant Heart "
+                       "you keep lies within %s blocks of the perch, with an awake Gleaner of yours or a Ley Pylon of yours or "
+                       "no one's within %s blocks too",
             "row.service": "Verdance carrying: %s of %s moves today, each at most 8 Verdance into a far Gleaner or 3 "
                            "batches into a Ley Pylon (3 Verdance for 2 Ley Charge), with nothing ever on the way",
             "row.moved": "Last: %s Verdance from the Heart at %s set down in the Gleaner at %s, both in the same moment",
