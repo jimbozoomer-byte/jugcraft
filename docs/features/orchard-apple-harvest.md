@@ -86,7 +86,7 @@ Primary specialty and supported player role: farming, with decor for builders. A
 
 ## Verification
 Local checks run on this branch, and their results:
-- `python3 tools/check_mod_data.py`: PASS (8,058 material IDs). It includes the art check over every block and item model (part 1's 6 ladder, 36 bin and 5 bag block models and 3 item models among them; no allow-list entry added) and the new `check_orchard_harvest`.
+- `python3 tools/check_mod_data.py`: PASS (8,058 material IDs; 8,071 after merging main's release batch #537 down the stack). It includes the art check over every block and item model (part 1's 6 ladder, 36 bin and 5 bag block models and 3 item models among them; no allow-list entry added) and the new `check_orchard_harvest`.
 - `python3 scripts/check_repository.py`: PASS.
 - `python3 -m unittest discover -s scripts/tests`: 287 tests, OK.
 - `javac` parse (syntax only) of the new and changed Java: OK. The full compile runs in CI.
