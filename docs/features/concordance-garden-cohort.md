@@ -1,15 +1,20 @@
 # Concordance garden cohort: six garden spirits on the shared pact record (contract)
 
-Status: **contract (GC-00); nothing is built, run or merged.** Written read-only from the worktree of
-`claude/chunk-d-pact-hall` at `5eba71ced` (main's `78f9353a7` + Chunk B #465 + Chunk C #466 + Chunk D #474, all open and
-unmerged), from the five survey reports written for it (`survey-pacts.md`, `survey-gardens.md`, `survey-assets.md`,
-`survey-sources.md`, `survey-plans.md`; kept with the session's working notes, not committed), from a critique of its
+Status: **contract (GC-00); unit 1 (GC-01 to GC-04) built, run in CI and recorded (see
+[unit 1 as built and its evidence](#unit-1-as-built-and-its-evidence)); units 2 to 7 not started; nothing of the cohort
+is merged.** The contract was written read-only from the worktree of `claude/chunk-d-pact-hall` at `5eba71ced` (main's
+`78f9353a7` + Chunk B #465 + Chunk C #466 + Chunk D #474, all then open and unmerged), from the five survey reports
+written for it (`survey-pacts.md`, `survey-gardens.md`, `survey-assets.md`, `survey-sources.md`, `survey-plans.md`; kept with the session's working notes, not committed), from a critique of its
 first draft (27 corrections, each checked against the code before it was applied; see
 [Critique corrections not applied](#critique-corrections-not-applied)) and from the code they cite, re-read where this
 page relies on it (see [How this contract was checked](#how-this-contract-was-checked)). It is committed as
 `docs/features/concordance-garden-cohort.md` (GC-00) on a new branch, `claude/garden-cohort`, stacked on
-`claude/chunk-d-pact-hall` (the owner chose "New stacked branch" on 26 October 2026; GC-S16), and will be reviewed as
-the fourth stacked pull request.
+`claude/chunk-d-pact-hall` (the owner chose "New stacked branch" on 26 October 2026; GC-S16), to be reviewed as the
+fourth stacked pull request. That stack has ended: on 27 October 2026 the owner's #494 (`46bac6b34`) brought Chunks B
+to D to main in one squashed commit with the October 26 community batch, and #465, #466 and #474 were closed without
+merging. The cohort has merged main since (`cfeded41e`, made against Chunk D's final head `301d64028` as its base, and
+`10566d074`) and is reviewed as draft pull request [#526](https://github.com/jimbozoomer-byte/jugcraft/pull/526)
+against main.
 
 Proposal: the owner answered Chunk D's checkpoint on 26 October 2026 (recorded there as D-D3 to D-D5 and here as
 **GC-D1 to GC-D3**): "keep stolas", "do D-P50", "gardens next". The garden cohort is the first of the twelve suggested
@@ -19,7 +24,8 @@ kept his look and manner. The other two parts of that recommendation (turning St
 giving each later spirit its own silhouette) were not answered separately (CD:2780), so this contract carries them as
 the session's decision **GC-S23**, not as the owner's: "a spirit faces whoever speaks to it" is shared groundwork that
 Stolas also uses. Chunk D's proposal said the cohort "needs Chunks B to D merged" (CD:2710); this contract stacks it on
-the unmerged Chunk D instead (GC-S16), also the session's decision.
+the unmerged Chunk D instead (GC-S16), also the session's decision. (Chunk D reached main with #494 on 27 October
+2026, so since then the cohort stands on main.)
 
 Decision provenance. **GC-D*n*** is the owner's. **GC-S*n*** is "Decided by the session": the owner told Chunk D's
 session "dont ask me to approve just finish this whole part" (D-D2, 23 October 2026, given for Chunk D); this workflow
@@ -124,7 +130,7 @@ unchanged. Every Java compile and game test runs only in CI (GC-S24; [Checks](#c
 | Unit | Tickets | What it delivers | Record (proposed) | State |
 |---|---|---|---|---|
 | 0 | GC-00 | This contract | `docs/features/concordance-garden-cohort.md` | Contract |
-| 1 | GC-01, GC-02, GC-03, GC-04 | A compile-only first push (SG1 to SG3, Stolas a thin subclass); one perch for many spirits (Stolas unchanged); a spirit faces whoever speaks; the groundwork Buer uses (the bed index for beds, the beneficiary rule, the read-only `mayTendAt` and `cachedHabitat`, obligations with `TEND`, The Garden's Regard reachable to understood); **Buer complete**: strain tending, the overworked bed, his body from the owner's Decor Blossom | this contract; new `buer-pact.md`; `stolas-pact.md`; `arcane-concordance-workers.md`; `arcane-concordance-ecology.md` | Not started |
+| 1 | GC-01, GC-02, GC-03, GC-04 | A compile-only first push (SG1 to SG3, Stolas a thin subclass); one perch for many spirits (Stolas unchanged); a spirit faces whoever speaks; the groundwork Buer uses (the bed index for beds, the beneficiary rule, the read-only `mayTendAt` and `cachedHabitat`, obligations with `TEND`, The Garden's Regard reachable to understood); **Buer complete**: strain tending, the overworked bed, his body from the owner's Decor Blossom | this contract; new `buer-pact.md`; `stolas-pact.md`; `arcane-concordance-workers.md`; `arcane-concordance-ecology.md` | Built (`62b0095fa` to `4ca363d38`) and recorded; in CI run 40605564166 every unit-1 server and client test passed (its one remaining failure, after a re-run, is main's `HerobrineClientGameTests`); not merged (draft #526); [evidence](#unit-1-as-built-and-its-evidence) |
 | 2 | GC-05 | **Bathin**: Verdance carrying, two roads from one Heart; with him, the shared accord machinery (`resolve`, the perch's `accord`, the payload's matter and answers, the roster's "awaiting your answer") and the bed index's Hearts, Gleaners and pylons | new `bathin-pact.md` | Not started |
 | 3 | GC-06 | **Marax**: one-correction reading by his familiar, the proud familiar; the synced work target and its renderer hook; The Garden's Regard mastery reachable from here (three spirits) | new `marax-pact.md` | Not started |
 | 4 | GC-07 | **Foras**: graft keeping from a store beside the perch, the logician's objection; the bed index's containers; the owner library's second edited part in `tools/owner_art.py` | new `foras-pact.md` | Not started |
@@ -151,12 +157,13 @@ how a habitat is read.
   `mayChange`; `mayChangeFor` unchanged), `ConcordanceEffects.java` and `ConcordanceProgress.java` (Focus capacity
   bonuses). Nothing in `spirits/`, `worker/`, `garden/` or `ecology/`. Merge it down the stack before unit 1 (GC-S16).
 - **No local game build:** the session's environment has no Minecraft jar and no Loom cache (`~/.gradle/caches/fabric-loom`
-  is absent), so every Java compile and every game test runs only in CI: the stacked pull request's `pull_request` run,
+  is absent), so every Java compile and every game test runs only in CI: the cohort pull request's `pull_request` run (#526),
   or a `workflow_dispatch` of the Build workflow (`.github/workflows/build.yml:1-15`). Locally, only the Python generators
   and audits run. A compile error (an over-long `StreamCodec.composite`, a wrong SmartBrainLib signature) shows only in
   CI (GC-S24).
 - **The stack beneath:** #465 (Chunk B, base main), #466 (Chunk C, base B), #474 (Chunk D, base C), all open; a review
-  change to any is a merge into the cohort.
+  change to any is a merge into the cohort. *(Since 27 October 2026 all three are closed without merging; their content
+  is on main through the owner's #494.)*
 - **No spirit but Stolas has a brief, a roster entry or any code** (`survey-sources.md` §1: no candidate name in lang,
   assets or code, so no name collides).
 - **The pact system is spirit-agnostic in its record and rules and Stolas-specific around them** (`survey-pacts.md` §0,
@@ -194,32 +201,32 @@ how a habitat is read.
 
 | # | Gap | Evidence | Closed by |
 |---|---|---|---|
-| GB1 | The perch offers only Stolas: `definition()`, `call()` refuses any other counterpart, `summon` creates only `Workers.STOLAS` | `S/PactPerchBlockEntity.java:68-69, 95-106, 129-145` | GC-01 |
-| GB2 | Stolas's sky observation is required for every invitation and acceptance | `S/PactMenu.java:181, 189-191, 290, 475` | GC-01 |
-| GB3 | The service action, choices and keeping rows are Star-reckoning's | `S/PactMenu.java:327-336, 413-440`; `S/PactKeeping.java:219-234` *(survey)* | GC-01 |
-| GB4 | End, seat and the stranded view pass `PactDefinition.STOLAS`: a stranded garden pact could never be seated or ended at a perch | `S/PactMenu.java:345, 352, 392` | GC-01 |
-| GB5 | Mastery leak: `stolas_regard`'s mastered rule matches any `jugcraft:pact_service` key, so a garden obligation recorded there would master Stolas's Regard | `D/concordance/research/stolas_regard.json`; `rules/EvidenceRule.java:77-78, 111` (re-read) | GC-03 (own practice) |
-| GB6 | Roster: kind `pact` only for Stolas's counterpart; an unloaded pact presence is portraited as Stolas | `S/Roster.java:86-87, 391, 488` (re-read) | GC-01 |
-| GB7 | Jade's entity reading is typed to Stolas | `compat/jade/WorkerDataProvider.java:60-62`; `S/PactReading.java:50-55, 70-99` *(survey)* | GC-01 |
-| GB8 | The screen's sign is fixed to `jugcraft:stolas_starflower`; its service section is Star-reckoning's | `C/PactScreen.java:62` (re-read), `:162-176, 200-223` *(survey)* | GC-01 |
-| GB9 | 36 generic pact lang lines are worded for Stolas ("Stolas keeps this perch", "he returns") | `tools/concordance_pacts.py:153-222, 327-376, 437-454, 514-535` *(survey)* | GC-01 |
-| GB10 | Spirits face south; the evidence camera stands south (D-P133) | `S/PactPerchBlockEntity.java:137` | GC-02 |
-| GB11 | Reading a bed's habitat spends the level's sample budget when the sample is stale; no cached-only read | `G/VerdantBedBlockEntity.java:179-193` | GC-03 |
-| GB12 | `Garden.nearest` builds and sorts every position of its box (867 at reach 8 for `bedsAround`); the Gleaner's 729-position search measured 333 µs | `G/Garden.java:329-348`; ECO:203-209 *(survey)* | GC-03 (bed index) |
+| GB1 | The perch offers only Stolas: `definition()`, `call()` refuses any other counterpart, `summon` creates only `Workers.STOLAS` | `S/PactPerchBlockEntity.java:68-69, 95-106, 129-145` | GC-01 (closed as built, unit 1) |
+| GB2 | Stolas's sky observation is required for every invitation and acceptance | `S/PactMenu.java:181, 189-191, 290, 475` | GC-01 (closed as built, unit 1) |
+| GB3 | The service action, choices and keeping rows are Star-reckoning's | `S/PactMenu.java:327-336, 413-440`; `S/PactKeeping.java:219-234` *(survey)* | GC-01 (closed as built, unit 1) |
+| GB4 | End, seat and the stranded view pass `PactDefinition.STOLAS`: a stranded garden pact could never be seated or ended at a perch | `S/PactMenu.java:345, 352, 392` | GC-01 (closed as built, unit 1) |
+| GB5 | Mastery leak: `stolas_regard`'s mastered rule matches any `jugcraft:pact_service` key, so a garden obligation recorded there would master Stolas's Regard | `D/concordance/research/stolas_regard.json`; `rules/EvidenceRule.java:77-78, 111` (re-read) | GC-03 (own practice): closed as built, unit 1: a separate practice recorded only by `PactObligations` (`anObligationNeverMastersStolassRegard`) |
+| GB6 | Roster: kind `pact` only for Stolas's counterpart; an unloaded pact presence is portraited as Stolas | `S/Roster.java:86-87, 391, 488` (re-read) | GC-01 (closed as built, unit 1) |
+| GB7 | Jade's entity reading is typed to Stolas | `compat/jade/WorkerDataProvider.java:60-62`; `S/PactReading.java:50-55, 70-99` *(survey)* | GC-01 (closed as built, unit 1) |
+| GB8 | The screen's sign is fixed to `jugcraft:stolas_starflower`; its service section is Star-reckoning's | `C/PactScreen.java:62` (re-read), `:162-176, 200-223` *(survey)* | GC-01 (closed as built, unit 1) |
+| GB9 | 36 generic pact lang lines are worded for Stolas ("Stolas keeps this perch", "he returns") | `tools/concordance_pacts.py:153-222, 327-376, 437-454, 514-535` *(survey)* | GC-01 (closed as built, unit 1: ten lines take the name, GC-P12) |
+| GB10 | Spirits face south; the evidence camera stands south (D-P133) | `S/PactPerchBlockEntity.java:137` | GC-02 (closed as built, unit 1) |
+| GB11 | Reading a bed's habitat spends the level's sample budget when the sample is stale; no cached-only read | `G/VerdantBedBlockEntity.java:179-193` | GC-03 (closed as built, unit 1) |
+| GB12 | `Garden.nearest` builds and sorts every position of its box (867 at reach 8 for `bedsAround`); the Gleaner's 729-position search measured 333 µs | `G/Garden.java:329-348`; ECO:203-209 *(survey)* | GC-03 (bed index; closed as built, unit 1) |
 | GB13 | The graft gesture is private and player-keyed | `G/OrganismCropBlock.java:305-328` | GC-07 |
 | GB14 | `tendedAt` is not saved: after a restart a bed may be tended again at once | `G/VerdantBedBlockEntity.java:77-78` | Not changed; bounded by the quota (Risks) |
-| GB15 | `check_geckolib` reads only box UV (`u, v = cube["uv"]`); the Decor Blossom is per-face UV | `tools/check_mod_data.py:17415` | GC-04 |
-| GB16 | `check_stolas_body` pins `OWNER_FILES` and `ADAPTED` to Stolas's three files | `tools/check_mod_data.py:18904` | GC-01, GC-04 |
-| GB17 | The journal's pacts section goes through `StolasRegard::report` only | `journal/Journal.java:95` (re-read) | GC-01 |
-| GB18 | The repository's only Goetia citation names the work "The Lesser Key of Solomon" and links Gutenberg #72679, which Gutenberg records as L. W. de Laurence's 1916 reprint of the Mathers text | `docs/features/styxhexenhammer.md:37` (re-read); Gutenberg's record *(survey)* | GC-04 records (after the record is checked) |
-| GB19 | Main's #475 is not in the stack | REST today | before unit 1 (GC-S16) |
-| GB20 | No conflict or complication mechanism exists for any pact | `survey-plans.md` §2.1 | GC-04 (task), GC-05 (choice) |
-| GB21 | `LookAtTarget` is registered with SmartBrainLib's default `invalidTarget` (`!pos.isVisibleBy(entity)`, checked as it starts); vanilla `EntityTracker.isVisibleBy` needs the target in `NEAREST_VISIBLE_LIVING_ENTITIES`, which the worker's only sensor (`NearbyPlayersSensor`) never fills, so an entity look target would never start | `S/WorkerEntity.java:187-194`; SmartBrainLib `api/core/behaviour/custom/look/LookAtTarget.java:31, 171`; mc263src `net/minecraft/world/entity/ai/behavior/EntityTracker.java:51`; SmartBrainLib `NearbyPlayersSensor.java:30` | GC-02 |
-| GB22 | `PactStatePayload` already has 13 fields in one `StreamCodec.composite`; 26.3's largest overload takes 14, so four new top-level fields would not compile | `S/PactStatePayload.java:81-95`; mc263src `StreamCodec.java:533` | GC-01 (one nested field) |
-| GB23 | The terms page and the cannot-afford refusal name "Astral Resonance from your astrolabe" whatever the resonance (`d.resonance()`); `term.quota` reads "%s a game day", wrong for a cap | `S/PactMenu.java:301, 489-490, 514`; lang `message.jugcraft.concordance.pact.term.compact`, `.answer.cannot_afford`, `.term.quota` | GC-01 (resonance-free keys), GC-09 (a per-work quota key) |
-| GB24 | The owner's Decor Blossom has four zero-thickness cubes each drawing two opposite faces on one plane (GeckoLib draws entities with `entityCutout`, which does not cull in 26.3); `tools/art_check.py` reads block, item and quad models only, not `.geo.json` | `Magic/assets/ars_jimbaux/geo/decor_blossom.geo.json`; GeckoLib `renderer/base/GeoRenderer.java:73-75`; `docs/ART_DIRECTION.md:31`; `tools/art_check.py:489-490, 662` | GC-04 |
-| GB25 | `tools/owner_art.py` reads only `Blocks/` and `Magic/`, and adapts only through Stolas's table and `stolas_body` | `tools/owner_art.py:75, 78, 130-140` | GC-04 (the cohort's table), GC-07 (the second edited part) |
-| GB26 | `tools/concordance_progression.py` honours `distinct` only for `examine`, so a practice needing three spirits would read as reachable with one | `tools/concordance_progression.py:527` | GC-03 |
+| GB15 | `check_geckolib` reads only box UV (`u, v = cube["uv"]`); the Decor Blossom is per-face UV | `tools/check_mod_data.py:17415` | GC-04 (closed as built, unit 1) |
+| GB16 | `check_stolas_body` pins `OWNER_FILES` and `ADAPTED` to Stolas's three files | `tools/check_mod_data.py:18904` | GC-01, GC-04 (closed as built, unit 1) |
+| GB17 | The journal's pacts section goes through `StolasRegard::report` only | `journal/Journal.java:95` (re-read) | GC-01 (closed as built, unit 1) |
+| GB18 | The repository's only Goetia citation names the work "The Lesser Key of Solomon" and links Gutenberg #72679, which Gutenberg records as L. W. de Laurence's 1916 reprint of the Mathers text | `docs/features/styxhexenhammer.md:37` (re-read); Gutenberg's record *(survey)* | GC-04 records, after the record is checked: **open**: Gutenberg's record not read (`www.gutenberg.org` was not reachable from the session on 28 October 2026), so `styxhexenhammer.md:37` is unchanged |
+| GB19 | Main's #475 is not in the stack | REST today | before unit 1 (GC-S16): closed (`54a2acb6c`) |
+| GB20 | No conflict or complication mechanism exists for any pact | `survey-plans.md` §2.1 | GC-04 (task): closed as built, unit 1 (Buer's overworked bed); GC-05 (choice): open |
+| GB21 | `LookAtTarget` is registered with SmartBrainLib's default `invalidTarget` (`!pos.isVisibleBy(entity)`, checked as it starts); vanilla `EntityTracker.isVisibleBy` needs the target in `NEAREST_VISIBLE_LIVING_ENTITIES`, which the worker's only sensor (`NearbyPlayersSensor`) never fills, so an entity look target would never start | `S/WorkerEntity.java:187-194`; SmartBrainLib `api/core/behaviour/custom/look/LookAtTarget.java:31, 171`; mc263src `net/minecraft/world/entity/ai/behavior/EntityTracker.java:51`; SmartBrainLib `NearbyPlayersSensor.java:30` | GC-02 (closed as built, unit 1) |
+| GB22 | `PactStatePayload` already has 13 fields in one `StreamCodec.composite`; 26.3's largest overload takes 14, so four new top-level fields would not compile | `S/PactStatePayload.java:81-95`; mc263src `StreamCodec.java:533` | GC-01 (one nested field; closed as built, unit 1) |
+| GB23 | The terms page and the cannot-afford refusal name "Astral Resonance from your astrolabe" whatever the resonance (`d.resonance()`); `term.quota` reads "%s a game day", wrong for a cap | `S/PactMenu.java:301, 489-490, 514`; lang `message.jugcraft.concordance.pact.term.compact`, `.answer.cannot_afford`, `.term.quota` | GC-01 (resonance-free keys): closed as built, unit 1; GC-09 (a per-work quota key): open |
+| GB24 | The owner's Decor Blossom has four zero-thickness cubes each drawing two opposite faces on one plane (GeckoLib draws entities with `entityCutout`, which does not cull in 26.3); `tools/art_check.py` reads block, item and quad models only, not `.geo.json` | `Magic/assets/ars_jimbaux/geo/decor_blossom.geo.json`; GeckoLib `renderer/base/GeoRenderer.java:73-75`; `docs/ART_DIRECTION.md:31`; `tools/art_check.py:489-490, 662` | GC-04 (closed as built, unit 1) |
+| GB25 | `tools/owner_art.py` reads only `Blocks/` and `Magic/`, and adapts only through Stolas's table and `stolas_body` | `tools/owner_art.py:75, 78, 130-140` | GC-04 (the cohort's table and adapters): partly closed, unit 1; the second edited part waits for GC-07 or GC-09 |
+| GB26 | `tools/concordance_progression.py` honours `distinct` only for `examine`, so a practice needing three spirits would read as reachable with one | `tools/concordance_progression.py:527` | GC-03 (closed as built, unit 1) |
 | GB27 | The roster's status is a saved id from a closed enum; nothing can say "awaiting your answer" | `S/WorkerRoster.java:33-40`; `W/Status.java` | GC-05 |
 | GB28 | Three ambience families the asset survey suggested are stereo in every file, which `check_pacts` refuses: `cavern.candy_cavity_ambience_additions`, `cavern.forlorn_hollows_ambience_additions`, `cavern.abyssal_chasm_ambience_additions` | Vorbis headers read for this contract (every file two channels) | Art plan (mono events named) |
 
@@ -236,6 +243,11 @@ how a habitat is read.
 | #470, #473, #459, #455, #458 | Guns 14D to 15A; Retro Trader | lang, `sounds.json` (generated), gametest `fabric.mod.json` (#455 also `check_mod_data.py`; #458 also `JugcraftClient.java`) | `sounds.json` is generated: the cohort's 42 events go through the generator |
 | #454, #449, #448, #453 | Seasonal audit, quartz, Frostward College, lair inventory | gametest `fabric.mod.json`, `check_mod_data.py`, lang, `JugcraftClient.java` (#448) | Hot files only |
 | #477, #479 | Tower cost order; blueprint table fit | none of the cohort's files | None |
+
+**Refreshed for unit 1's records (REST, 28 October 2026):** #465, #466 and #474 were closed without merging on 27
+October 2026 (about 01:16Z); their content is on main in the owner's #494 (`46bac6b34`, merged 01:14Z the same day,
+one squashed commit with the October 26 community batch), so the first row above is history. Main's head at the
+cohort's last CI run was `233cca018` (#525). The other rows were not re-read for this refresh.
 
 **Hot shared files:** lang `en_us.json`, `sounds.json` (generated), both `fabric.mod.json`, `tools/check_mod_data.py`,
 `tools/concordance.py`, `JugcraftClient.java`, `JugcraftJadePlugin.java`, `JugcraftJadeClient.java`, `ScreenKit.java`,
@@ -254,7 +266,7 @@ how a habitat is read.
    `python -m unittest discover -s scripts/tests`; `python3 tools/concordance_journey.py --check`;
    `python3 tools/owner_art.py --check` (units grafting owner parts or palettes); `python3 tools/concordance_economy.py`
    (unit 5); `git diff --check`.
-4. In CI only: `./gradlew build` (compilation and server game tests), by the stacked pull request's `pull_request` run;
+4. In CI only: `./gradlew build` (compilation and server game tests), by the cohort pull request's `pull_request` run;
    `-PjugcraftOptionalIntegrations=false` for every unit (each changes Jade).
 5. In CI only: `./gradlew runClientGameTest -PclientTests=...` for the classes `tools/select_client_tests.py` picks, with a
    `WEIGHTS` entry for each new class and its selection unit test.
@@ -297,7 +309,11 @@ source's words; where the game goes beyond the text it says "Jugcraft adaptation
   the test upkeep already uses, `S/AgreementHolder.java:515`, and Stolas's `decide`, `S/StolasEntity.java:295`), and
   (3) that holder may change the block by hand (`Authority.mayChange`), each checked at the moment of the change. So a
   service never runs while no upkeep accrues: time away is never owed, and never served either. Every `work` step runs
-  only after the base's `decide` has returned `IDLE` (the presence's UUID and record verified, its pact's state read).
+  only after the base's `decide` has returned `IDLE` (the presence's UUID and record verified, its pact's state read),
+  or `UPKEEP_DUE` with the holder near *(amended unit 1, GC-P27: an offering due serves through its grace, as its terms
+  say, the status staying `UPKEEP_DUE`; `decide` returns the pact's own state before it asks presence, so the base serves
+  under `UPKEEP_DUE` only when `Authority.presentNear(level, holder, perch, Pacts.REACH)` finds the holder, and a garden
+  service asks again at each change through `GardenPacts.target`)*.
   No stand-in ever answers for a garden service; with the holder away or far off the spirit waits (`owner_offline`).
   Research is checked at invitation and sealing only (the hand's precedent, CD schema review).
 - **Bounded work:** one think every 20 ticks (`WorkerEntity.THINK_TICKS`); at most one change a think; targets from the
@@ -628,8 +644,9 @@ content. CI must compile it and pass every Stolas test before the rest of GC-01 
   and sound play, the gesture controller, `listen`, `kind() = "pact"`, `joinsRosterOnStatus() = false`, station keeping
   (`stay()`: on the perch, or on the side chosen at summon; teleport only by `teleportTo(x, y, z)`), and a `Body` table
   per subclass (loop and gesture clip names, lengths, telling windows; cue ids `jugcraft:<spirit>.<cue>`; the reaction
-  table; the station kind). A service's `work` runs only after `decide` has returned `IDLE`, so a copied or duplicate
-  presence never works. **`StolasEntity` becomes a thin subclass** keeping `COUNTERPART`, its `Gesture` and `Loop` enums
+  table; the station kind). A service's `work` runs only after `decide` has returned `IDLE` *(amended unit 1, GC-P27: or
+  `UPKEEP_DUE` with the holder within `Pacts.REACH` of the perch)*, in either case only for a presence verified at its own
+  perch, so a copied or duplicate presence never works. **`StolasEntity` becomes a thin subclass** keeping `COUNTERPART`, its `Gesture` and `Loop` enums
   (tests and the client name them), its entity id and save keys; his behaviour is unchanged.
 - **SG3 `S/PactSpirits`** (new): counterpart to entity type, filled in `Workers.register`. `PactPerchBlockEntity`:
   `presence(level)` and `visitor(level)` typed to the base (replacing `stolas()` and `unbound()`), `welcome(level,
@@ -714,6 +731,27 @@ audit mutations (a deliberate fault for each new pin, each reported).
 the generators with Stolas alone reproduce today's data, sounds, codex and assets byte for byte; E1 and E5 (Chunk D's
 codes) hold for any definition through SG12.
 
+**As built (GC-01; `62b0095fa` compile-only, then `202e75969`; CI in
+[unit 1's evidence](#unit-1-as-built-and-its-evidence)):** SG1 to SG3 first, compile-only, with no lang, data, asset,
+client or test change; then, in one commit, the `SPIRITS` table with its zero-diff gate (with Stolas's row alone the
+generators changed no generated file, and the probe printed `True 6`, Stolas's adapted model, animations, skin and
+glowmask; the generators' incidental rewrites, which predate unit 1, were restored first:
+[Corrections](#corrections-to-unit-1s-commit-messages)) and the rest of GC-01. Departures from this ticket, each a
+proposal in [Decisions](#decisions): the chooser's tests that need a second spirit (`aPerchOffersOnlyWhatThePlayerMayInvite`,
+`anInviteIndexOutOfRangeIsDropped`, `aNonOwnerNeverSeesTheChooser`, `aStaleChooserRevisionIsRefused`, the two-spirit half
+of `aStrandedPactOfAnySpiritIsSeatedOrEnded`, `theJournalNamesEachRegardsNextStep`, `theRosterPortraitsEachPactBySpirit`)
+and the chooser's pictures landed with Buer in GC-04, in the cohort's own client class, not in
+`ConcordancePactClientGameTests` (GC-P18); a standing body's side cell waits for its first standing body (GC-P5, GC-P11);
+three existing test lines changed (GC-P17); ten shared lines take the spirit's name, not 36 (GC-P12, R9); `PactService`'s
+members are `serviceRows`, `obligationRows`, `suspendedRow` and `work(..., time, now)`, not this ticket's `rows` and
+`work(level, spirit, record, holder, now)` (GC-P14). The chooser lists only spirits whose research the player understands
+(`PactMenu.listed`), each "ready" or with what its own service says is missing (Buer: an awake bed of the inviter's within
+8); a spirit whose research is not understood is not listed at all, so "what is missing (research, its fixture)" above holds
+for the fixture only. The unit review added `aVisitorOfAnotherSpiritLeavesWhenTheChosenCannotCome` (choosing a spirit that
+cannot come sends another spirit's waiting visitor away). Interfaces as listed under Changes, plus `PactServices`,
+`PactRegards` and `PactSpiritRenderers` (new). Nothing saved was added or renamed. GB1 to GB4, GB6 to GB9, GB16
+(Stolas's half), GB17, GB22 and GB23 (its resonance half) closed.
+
 ### GC-02. A spirit faces whoever speaks to it (unit 1; GC-S23)
 
 **What the player sees.** Stolas, and every garden spirit, arrives facing whoever invited it; while a conversation is open
@@ -759,6 +797,21 @@ holder, then to the peer when the peer speaks. **Audits:** `check_workers` still
 **Acceptance:** GC-S23's groundwork, Stolas included; no client class changed for facing; no sensor added and no
 per-tick work beyond the existing think and the brain's existing behaviour.
 
+**As built (GC-02, `adc822110`):** server only, as specified: `WorkerEntity` `attend`, `attending`, `unseen` and
+`LOOK_REACH` (32); `PactSessions.speaker` with an order counter; the base's `face`, `bearing`, `turnTo` and `attendWork`;
+the perch summons a spirit facing whoever it comes for. SmartBrainLib's default `LookAtTarget` test was confirmed against
+2.0.3's source tree (its "Update to 2.0.3" commit, `deb0150`), not the pinned jar; the tests that rely on the replacement
+test pass in CI. With A-03 a spirit faces whoever speaks unless it is switched off: a spent day's quota (FINISHED) no longer
+stops it. Tests: this ticket's four, `aSpiritArrivesFacingItsInviter`, `theLookTargetIsDroppedOnlyWhenGoneElsewhereOrFar`,
+and `aWorkTargetOutranksTheSpeakerWhileItsGesturePlays`, which is beyond the specification (a work target outranks the
+speaker while its gesture plays, then the speaker again). This ticket's `aSpiritFacesTheBedItWorks` is GC-04's
+`buerFacesTheBedHeTends` (R8: one test, Buer's name; since the unit review it checks the bed, then the speaker, then no
+one). `ConcordancePactClientGameTests` checks the arrival facing, photographs Stolas from four sides
+(`jugcraft_pact_stolas_faces_*`, looked at for this record: [Stolas's Verification](stolas-pact.md#verification)), re-sends
+him as to a late watcher, and photographs his body, poses and Jade from the north (D-P133 superseded); its client weight
+is 260. No sensor, packet, payload field, saved key, id or lang line was added. GB10 and GB21 closed. GC-P8 and GC-P9 kept,
+GC-P8's wording amended (Decisions).
+
 ### GC-03. The garden service groundwork (unit 1)
 
 Only what Buer uses, plus `cachedHabitat`, which units 3, 4 and 6 (built in parallel) all read and which its own test
@@ -774,7 +827,7 @@ and in their tooltip; nothing else until Buer (GC-04).
   `Garden.nearest` (GB12). Per-presence memory, not saved. Unit 2 adds Hearts, Gleaners and Ley Pylons (16 of each), unit
   4 plain containers touching the perch (16).
 - **Beneficiary rule** (`S/GardenPacts.target(level, record, holder, pos, keeper)`, new; called only after the base's
-  `decide` returned `IDLE`): the record serves at that place now (`Pacts.serves(record, Place(pos), time, now)`: hold,
+  `decide` returned `IDLE`, or `UPKEEP_DUE` with the holder near: GC-P27): the record serves at that place now (`Pacts.serves(record, Place(pos), time, now)`: hold,
   area, hours, quota), the keeper is a beneficiary at this moment, the holder is present near the perch
   (`Authority.presentNear(level, holder, perch, Pacts.REACH)`, as upkeep looks), and that player may change the block
   (`Authority.mayChange`). Returns a `Status` reason or null. No stand-in, ever.
@@ -825,6 +878,36 @@ and 2, mastered from unit 3), `talkingTeachesNothing` extended to garden spirits
 
 **Acceptance:** S1 (nothing in transit), S3 (beneficiaries checked at each use), S5 and S6 hold; no spirit takes a sample;
 the hook changes no existing behaviour of the gesture (its existing tests unchanged).
+
+**As built (GC-03, `80c311c93`, with two of its tests' setup fixed in `6101ad482`):** `S/GardenReach` indexes the awake
+beds of the keepers a pact benefits in its area from the loaded chunks' block-entity maps (at most 9 chunks), keeps the 64
+nearest the perch, re-reads every 200 ticks or when the clock runs back, and resolves each place in loaded chunks at each
+read; it never builds a box of positions, loads a chunk or samples. `S/GardenPacts.target` asks, in order, whether the
+pact serves there now, whether the keeper benefits now, whether the holder is within 64 blocks of the perch in its level,
+and whether the holder could change the block; it never asks a stand-in (its Javadoc says since the unit review that
+`think` calls services under `IDLE`, or under `UPKEEP_DUE` with the holder near: GC-P27). `VerdantBedBlockEntity.mayTendAt`
+reads the bed's own tending rule (the window it shares with every tender) and changes nothing; `cachedHabitat` builds a
+habitat from the last sample and never takes one, and `habitat` now reads through it. `S/PactObligations` records
+`jugcraft:garden_pact_service` keyed by the spirit when the holder tends a bed by hand inside an active garden pact's
+area, once a player a spirit; `PactService.obligation()` names the act. The Garden's Regard is begun after the Binding
+Arts and Verdant Husbandry are understood: examine a garden specimen (Sunpetal, Dewmoss, Gloamcap, Mendvetch or Verdant
+Chaff), harvest an organism crop by hand, keep a bound worker at work; it is mastered by three garden spirits' first
+obligations (reachable from unit 3). The progression tool honours the garden practice's `distinct` (GB26) and expects
+mastery out of reach until three spirits ship; the journey's `GARDEN` route reaches understood; `GARDEN_PACTS` names its
+three things. Tests: this ticket's, with `talkingTeachesNothing` a new test over every offered spirit (R10: no such test
+existed to extend; Styx's `talkingGrantsNoResearch` is unchanged), and two beyond the specification for the validation
+plan's named suites: `ConcordanceSharingGameTests.notesNeverStandInForTheGardensRegard` and
+`ConcordancePersistenceGameTests.theGardenGroundworkSavesNothing`. The guide's research table was re-pasted with this
+commit (A-09). GB5, GB11, GB12 and GB26 closed.
+
+CLAUDE.md fields for The Garden's Regard: **Tier** Practitioner (Spiritbinders). **Input producer** the player's own
+hands and workers: garden specimens (the garden's produce and chaff), a hand harvest, a bound worker's service; for
+mastery, garden pacts' obligations. **Output consumer** the garden pacts' invitations (each needs the Regard understood)
+and nothing else. **Costs** none of its own (a Sunpetal: a sunflower, an amethyst shard, bone meal; a Bonding Charm).
+**Unlocks** invitations to garden spirits; mastery unlocks nothing in this cohort. **Failure behaviour** nothing before
+both prerequisites; notes never stand in; a repeat records nothing; mastery unreachable while fewer than three spirits ship
+(the tool says so). **Test evidence** GC03_TESTS's twelve, passed in CI run 40605564166
+([unit 1's evidence](#unit-1-as-built-and-its-evidence)).
 
 ### GC-04. Buer, end to end (unit 1)
 
@@ -880,6 +963,53 @@ reachable), `concordance_journey --check` (his route), `select_client_tests` `WE
 
 **Acceptance (dossier items 1 to 8):** every item of Dossier 1 shown by a named test, shot or record line; GE1 to GE8
 for Buer; the first complete spirit before any second (09:16).
+
+**As built (GC-04; brief `9742f240b`, Buer `3e736655a`, the unit review's fixes `4b9a038bb`, three test fixes
+`4ca363d38`; [record](buer-pact.md)):** `S/BuerEntity` (rooted on the perch; entity box 1.2 x 1.6, eyes 1.4, drawn at 2.2;
+GC-P25) and `S/StrainTending` (the `PactService` for `strain_tending`), his definition, offerings tag, seven sounds,
+words, codex pages, roster and journey rows from the generators, and his body adapted from the owner's Decor Blossom by
+`tools/garden_bodies.py` through `tools/owner_art.py`, the texture byte for byte. Departures from this ticket and the parts
+(each recorded, none hidden):
+
+- **His body** (GC-P24, GC-P25): the clear face of each two-faced plane is dropped, and for the blades that is `north`,
+  not `south` as this ticket says (the owner's sheet draws `south`; dropping it would erase the stalk). His box is 1.2 x 1.6,
+  not about 1.2 x 1.2 (the drawn flower is 1.6 tall; R21). Stolas's six two-faced box-UV cubes are recorded
+  (`STOLAS_TWINS`), not changed (R23).
+- **Through the grace** (GC-P27, R3): a pact's service steps under `UPKEEP_DUE` too, the status staying `UPKEEP_DUE`;
+  since the unit review (finding 11) only while the holder is near, so no service runs for an absent holder. This departs
+  from GC-S7's literal "after decide returned IDLE"; the common terms, SG2 and GC-03 above are amended to match.
+- **At night with an offering due** (GC-P25, GC-P27; the unit review's finding 17): his loop maps `UPKEEP_DUE` to astir
+  (half open) whatever the hour, while the kept page and Jade say "asleep until dawn" at night. Recorded, not changed; a
+  synced "sleeping" flag would remove it.
+- **Listening** (A-06): his loop shows listening over everything but switched off; a spent quota (FINISHED) shows him shut
+  only while nobody speaks (A-03 for facing, A-07 in `buerStopsAtHisQuota` and `buerAnswersEachActionWithHisGesture`).
+- **The chooser** (finding 16): he is listed whenever The Garden's Regard is understood, marked not ready with his reason
+  ("There is nothing here I could mend": an awake bed of the inviter's within 8) until a bed is there, not only "once a bed
+  of theirs is within 8" as above.
+- **The overworked bed's remedies:** bone meal on a full bed composts nothing (`VerdantBedBlock.useItemOn` returns before
+  `compost()` when nothing is given), so his row also names rest (a bed with no crop growing rests a strain away).
+- **Sounds** (GC-P26): his seven cues draw on three recordings (two of the art plan's four files are one recording), told
+  apart by pitch through `sounds.json` (`listen` 1.25, `refuse` 0.6, `depart` 0.7).
+- **The whole path** (GC-P29, R27): `buerFromTheCodexToDeparture` has no chooser (it would need Stolas's Regard); the
+  chooser is held by the GC-01 server tests and the client class. The client's small size is 320x180.
+- **The unit review** (34 findings, 31 confirmed in full or narrowed; fixed in `4b9a038bb`): beds refused for themselves
+  (not a beneficiary's now, not the holder's to change, outside the area) are skipped until the bed index is next read, so
+  eight refused beds nearer the perch no longer stall him (`buerSkipsBedsHeMayNotChange`); his term names both of its
+  conditions (only while you are within 64 blocks of the perch, never on a bed you could not change by hand); his words
+  read his numbers from his definition and the shared constants (the journey's Buer steps in
+  `tools/concordance_journey.py` still write "within 8 blocks", "(4 Mendvetch, 4 bone meal)", "a week" and "a day's grace"
+  as literals: open); the geometry audit holds every bone key and cube pivot; GB26's probe tests totals of exactly 2 and 3.
+- **Forced test lines** (GC-P17, R11, A-08): appending `jugcraft:buer` to `PactParser.REQUIRED` makes a catalog of Stolas
+  alone report Buer's definition missing, so `thePactDefinitionParsesStrictly` now allows only the other shipped
+  definitions' "no definition loaded". Two audits were widened for him (R12, A-01: Stolas's legacy sound-id check reads
+  only `stolas.` events; R16, A-02: each `SPIRITS` row's offerings tag).
+- **Client evidence** (looked at for this record, [Buer's Verification](buer-pact.md#verification)): the shot named
+  `jugcraft_garden_buer_listen` is byte for byte the same file as `jugcraft_garden_buer_idle`, so no picture shows his
+  listening pose, though the test checked his client was drawing that clip when it froze; the asleep shot shows his petals
+  open in the same V as by day, not folded shut as Dossier 1 item 7(a) says; the depart shot shows a shut bud at full
+  height, not yet sunk. Each is a question for the review, not a passed claim.
+
+Saved: nothing new. GB15, GB20 (task half), GB24 and GB25 (in part) closed; GB18 open (Gutenberg's record not read).
 
 ### GC-05. Bathin (unit 2)
 
@@ -1242,15 +1372,126 @@ any sound heard (CI has no sound device; subtitles are checked as defined and fi
 
 | Code | Requirement | Tickets | Tests |
 |---|---|---|---|
-| GE1 | No one binds another player or works another's land (E1) | GC-01, GC-03 to GC-09 | `anotherPlayerCannotAcceptForTheHolder` (SG12, every spirit), `aResolveFromAnotherPlayerIsRefused`, each spirit's stranger test (`buerTendsOnlyBedsOfHisBeneficiaries`, `bathinHonoursTheHeartsParty`, `onlyTheHolderMayAskForAReading`, `maraxNeverReadsAStrangersBed`, `forasTakesOnlyFromAStoreTheHolderMayChange`, `forasNeverGraftsAStrangersBed`, `aRootRunnerNeverTouchesAStrangersBed`, `aStrangersCropIsNeverSheltered`); SG12's `...WaitsForANearHolder`; the network test |
-| GE2 | Upkeep suspends without hidden offline punishment (E2) | GC-01 (SG12) | SG12's upkeep cases for every definition; each spirit's `...WaitsForAPresentHolder`; SG12's `...WaitsForANearHolder` (no service where no upkeep accrues) |
-| GE3 | Copying multiplies nothing (E3) | GC-01, GC-05 | `aCopiedPerchIsInert` and `onePresencePerPact` (every definition: a copied or duplicate spirit entity never works); `anAnsweredAccordSurvivesARestart` with a copy reading nothing |
+| GE1 | No one binds another player or works another's land (E1) | GC-01, GC-03 to GC-09 | `anotherPlayerCannotAcceptForAnySpiritsHolder` (SG12, every spirit), `aResolveFromAnotherPlayerIsRefused`, each spirit's stranger test (`buerTendsOnlyBedsOfHisBeneficiaries`, `buerSkipsBedsHeMayNotChange`, `bathinHonoursTheHeartsParty`, `onlyTheHolderMayAskForAReading`, `maraxNeverReadsAStrangersBed`, `forasTakesOnlyFromAStoreTheHolderMayChange`, `forasNeverGraftsAStrangersBed`, `aRootRunnerNeverTouchesAStrangersBed`, `aStrangersCropIsNeverSheltered`); SG12's `everySpiritWaitsForANearHolder`; the network test |
+| GE2 | Upkeep suspends without hidden offline punishment (E2) | GC-01 (SG12) | SG12's upkeep cases for every definition; each spirit's `...WaitsForAPresentHolder`; SG12's `everySpiritWaitsForANearHolder` (no service where no upkeep accrues) |
+| GE3 | Copying multiplies nothing (E3) | GC-01, GC-05 | `aCopiedPerchIsInertForEverySpirit` and `onePresencePerPactForEverySpirit` (every definition: a copied or duplicate spirit entity never works); `anAnsweredAccordSurvivesARestart` with a copy reading nothing |
 | GE4 | End, death, unload and restart return property once (E4) | GC-01, GC-05, GC-07, GC-08 | SG12's ending and removal cases; `bathinNeverHoldsVerdance`; `forasSpendsOneDonorAGraftAndNeverTwo`; `aRootRunnerLosesHalfAndMintsNone` |
-| GE5 | Two users cannot both own one pact place or one unique service (E5) | GC-01, GC-04, GC-07, GC-09 | `twoNegotiationsAtOnePerchSealOnce` (every definition; the other player `NOT_PERMITTED`); `twoBuersShareOneBedsTendWindow`, `twoForasNeverGraftOneBedTwice`, `twoCanopiesNeverStack` |
-| GE6 | The named suites extended (09:172) | every ticket | Worker, Sharing, Persistence, Logistics (none expected), Economy, Journey, Progression, Journal; `ConcordanceGardenPactClientGameTests`, `ConcordancePactClientGameTests`, `ConcordanceRosterClientGameTests`, `ScreenFitClientGameTests`, `ConcordanceGardenNetworkTests` |
+| GE5 | Two users cannot both own one pact place or one unique service (E5) | GC-01, GC-04, GC-07, GC-09 | `twoNegotiationsAtOnePerchSealOnceForEverySpirit` (every definition; the other player `NOT_PERMITTED`); `twoBuersShareOneBedsTendWindow`, `twoForasNeverGraftOneBedTwice`, `twoCanopiesNeverStack` |
+| GE6 | The named suites extended (09:172) | every ticket | Worker, Sharing, Persistence, Logistics (none expected), Economy, Journey, Progression, Journal (unit 1: Sharing's `notesNeverStandInForTheGardensRegard` and Persistence's `theGardenGroundworkSavesNothing`, beyond the specification; copies only by the Worker class's `aCopiedPerchIsInertForEverySpirit`; Economy no new test); `ConcordanceGardenPactClientGameTests`, `ConcordancePactClientGameTests`, `ConcordanceRosterClientGameTests`, `ScreenFitClientGameTests`, `ConcordanceGardenNetworkTests` |
 | GE7 | A conversation-to-service-to-departure sequence (09:174) | GC-04, GC-10 | `buerFromTheCodexToDeparture`; `theGardenPactsFromCodexToDeparture`; the client classes |
 | GE8 | Mechanically distinct services (03:170, 03:177) | GC-04 to GC-09 | the distinctness table held by `check_garden_pacts` (one work, one service class, one state changed, distinct verbs); each service's own tests |
 | GE9 | Each dossier's eight items (03:167-175) | GC-04 to GC-09 | the per-spirit template's checklist in each record, every line naming its test, shot or record |
+
+### Unit 1 as built and its evidence
+
+Written on 28 October 2026 for unit 1's records commit from the CI runs' own job lists and logs (read through GitHub's
+REST API and its job-log tool) and from the commits' messages. "Passed" means the run's log says so. Nothing here was run
+by a person, and one client is not two: the garden's two-client test is unit 7's. AI-assisted implementation with Claude
+Code; the model is named in the commit trailers.
+
+**Commits** (branch `claude/garden-cohort`; draft pull request [#526](https://github.com/jimbozoomer-byte/jugcraft/pull/526)
+against main, not merged):
+
+| Commit | What it holds |
+|---|---|
+| `62b0095fa` | GC-01a: the compile-only slice (SG1 to SG3; Stolas a thin subclass; Chunk D's audit needles retargeted; no lang, data, asset, client or test change) |
+| `202e75969` | GC-01: the `SPIRITS` table with its zero-diff gate, then the chooser, wire, words, Jade, roster, journal, renderer table, SG12 for Stolas and GC-01's tests |
+| `adc822110` | GC-02: facing |
+| `80c311c93` | GC-03: the garden groundwork, The Garden's Regard, its journey and guide blocks |
+| `6101ad482` | two GC-03 server tests' setup fixed ([Corrections](#corrections-to-unit-1s-commit-messages)) |
+| `9742f240b` | GC-04a: Buer's brief, before any body file (D-D5) |
+| `3e736655a` | GC-04: Buer, end to end |
+| `4b9a038bb` | the unit review's fixes ([GC-04's As built](#gc-04-buer-end-to-end-unit-1)) |
+| `1129567eb` | merge of the branch as pushed (`18ac27f2c`: GC-01a with Chunk D's merges of main's #488 and of two game-test changes, releasing what the server sends to mock players and logging the heap) |
+| `cfeded41e` | merge of main through #524: #494 carries Chunks B to D as one squashed commit, so the merge was made against Chunk D's final head `301d64028` as its base; only the generated lang conflicted, and it was regenerated |
+| `10566d074` | merge of main's #525 |
+| `4ca363d38` | the three server tests run 40597482976 failed, each a fault of the test, fixed in the test (the game code met its contract in each) |
+| this commit | the records |
+
+**CI runs** (the pull request runs test #526 merged into main's `233cca018`):
+
+| Run | Event and commit | Result |
+|---|---|---|
+| [40421207295](https://github.com/jimbozoomer-byte/jugcraft/actions/runs/40421207295) | workflow_dispatch (every client class) on `18ac27f2c` (GC-01a with Chunk D's merges) | Compiled. `mod` and `optional integrations absent` each passed all 2,788 required server tests, Stolas's unchanged. Of 16 client shards 12 passed, GC-01a's three named classes among them (`ConcordancePactNetworkTests` in shard 3, `ConcordancePactClientGameTests` in shard 5, `ConcordanceRosterClientGameTests` in shard 14); shard 12 failed in `local.peepo.PeepoPopulationClientTests` (a timed-out cow-breeding wait, `CompanionPopulationChecks.java:94`, after the server fell 121 ticks behind; not a unit-1 class); shards 2, 9 and 10 were cancelled with the run when the base moved. GC-01b to GC-04 had no CI run of their own: they were pushed together and first ran in the next run |
+| [40597482976](https://github.com/jimbozoomer-byte/jugcraft/actions/runs/40597482976) | pull_request on `10566d074` | Compiled. `mod` and `optional integrations absent` each ran 3,109 server tests and failed the same three, all unit 1's: `theGardenReachIsCappedAndCached` ("The nearest broken, it is gone at once, and nothing is scanned again"), `buerEasesOneStrainAtTheBedsOwnRate` ("2 to 1, still nothing else moved, counted again") and `buerFromTheCodexToDeparture` ("A Mendvetch paid ahead; he looks it over"), fixed in `4ca363d38`. The selection picked 31 of 274 client classes; all 16 client shards passed, `ConcordanceGardenPactClientGameTests` in shard 0 |
+| [40605564166](https://github.com/jimbozoomer-byte/jugcraft/actions/runs/40605564166) | pull_request on `4ca363d38` | Compiled. `mod` passed all 3,109 required server tests with the optional integrations: 73 more than main's own run of that base ran (3,036 in run 40596966503's `optional integrations absent` job), the number of tests unit 1 adds (`GC01_TESTS` 30, `GC02_TESTS` 7, `GC03_TESTS` 12, `GC04_TESTS` 24). `optional integrations absent` failed one test, main's `herobrine_marks_game_tests_a_grove_takes_only_the_leaves_and_leaves_the_logs` ("16 leaves are left on the bare tree"; main's run 40596966503 fails it the same way, "5 leaves"), so every unit-1 test passed there too. Of 16 client shards 15 passed, the garden class in shard 0 and Stolas's in shard 3; shard 13 failed in main's `HerobrineClientGameTests` ("Test encounter placement failed: NO_VISIBLE_SPOT"; it passed on `10566d074` and in main's run; unit 1 changes no Herobrine file; not investigated here). The two failed jobs were re-run once (attempt 2): `optional integrations absent` then passed all 3,109 required tests, the grove test among them; shard 13 failed again the same way, so the run's conclusion stays failure, on that main class alone |
+
+**Server tests** (all passed in run 40605564166, with and without the optional integrations):
+
+| Ticket | Tests |
+|---|---|
+| GC-01 (`GC01_TESTS`, 30) | the eight of GC-01's first part; SG12's fifteen (`everySpiritSealsOnceAndSpendsOnce` to `everySpiritsKeysSurviveASave`), each run for every offered spirit, Stolas and Buer; the five that need a second spirit (`aPerchOffersOnlyWhatThePlayerMayInvite`, `anInviteIndexOutOfRangeIsDropped`, `aNonOwnerNeverSeesTheChooser`, `aStaleChooserRevisionIsRefused`, `theRosterPortraitsEachPactBySpirit`); the review's `aVisitorOfAnotherSpiritLeavesWhenTheChosenCannotCome`; `ConcordanceJournalGameTests.theJournalNamesEachRegardsNextStep` |
+| GC-02 (`GC02_TESTS`, 7) | `aSpiritArrivesFacingItsInviter`, `aSpiritFacesWhoeverSpeaksToIt`, `theLatestSpeakerIsFaced`, `aTeleportBackKeepsTheFacing`, `aClosedConversationLeavesTheFacing`, `theLookTargetIsDroppedOnlyWhenGoneElsewhereOrFar`, `aWorkTargetOutranksTheSpeakerWhileItsGesturePlays` |
+| GC-03 (`GC03_TESTS`, 12) | six in `ConcordanceGardenGameTests`; `aGardenPactActsOnlyForABeneficiaryWhileItsHolderIsNear`, `talkingTeachesNothing`; `theGardensRegardIsReachable`; `theGardenPactsRecipesLoad`; `notesNeverStandInForTheGardensRegard`; `theGardenGroundworkSavesNothing` |
+| GC-04 (`GC04_TESTS`, 24) | Buer's twenty (the specification's nineteen and the review's `buerSkipsBedsHeMayNotChange`); the three obligation tests; `buerFromTheCodexToDeparture` |
+| Edited lines (GC-P17) | `thePactScreensMessagesAreBounded`, `ConcordancePactNetworkTests` (its `missing.owner` line), `thePactDefinitionParsesStrictly`; and every Chunk D test of Stolas's, unchanged |
+
+**Client tests** (one client each; run 40605564166 attempt 1): `ConcordanceGardenPactClientGameTests` (new, weight 330)
+passed in shard 0; its 33 pictures were looked at for this record and each is described in
+[Buer's Verification](buer-pact.md#verification), with what it does not show. `ConcordancePactClientGameTests` passed in
+shard 3; its four facing pictures were looked at ([Stolas's Verification](stolas-pact.md#verification)).
+`ConcordancePactNetworkTests` (two client JVMs at Stolas's perch, as Chunk D built it) passed in shard 1,
+`ConcordanceRosterClientGameTests` (unchanged: no picture of Buer's portrait) in shard 6 and `ScreenFitClientGameTests`
+in shard 15. The same classes passed in run 40597482976.
+
+**Completion evidence for Buer** (the codes above; every test named passed in run 40605564166):
+
+| Code | Buer (unit 1), as built |
+|---|---|
+| GE1 | `buerTendsOnlyBedsOfHisBeneficiaries`, `buerNeverTouchesAClaimedOrDormantBed`, `buerSkipsBedsHeMayNotChange`, `aGardenPactActsOnlyForABeneficiaryWhileItsHolderIsNear`, `anotherPlayerCannotAcceptForAnySpiritsHolder`, `everySpiritWaitsForANearHolder` |
+| GE2 | `everySpiritsUpkeepWarnsGivesGraceSuspendsAndResumes`, `aStandInNeverAnswersAnySpiritsUpkeep`, `buerWaitsForAPresentHolder`, `buerTendsThroughHisGrace`, `everySpiritWaitsForANearHolder` |
+| GE3 | `aCopiedPerchIsInertForEverySpirit`, `onePresencePerPactForEverySpirit`, `aDuplicateBuerTendsNothing`; he moves no item or nutrient (`buerEasesOneStrainAtTheBedsOwnRate`) |
+| GE4 | `endingAnySpiritsPactReturnsTheEscrowOnce`, `aRemovedPresenceNeverEndsAnySpiritsPact`, `everySpiritsBrokenPerchLeavesThePactWithoutIt`, `everySpiritsPactIsSeatedAgain`, `everySpiritsKeysSurviveASave`, `anOverworkedComplaintIsForgottenOnRestart` |
+| GE5 | `twoNegotiationsAtOnePerchSealOnceForEverySpirit`, `everySpiritIsOnePactAHolder`, `twoBuersShareOneBedsTendWindow` |
+| GE6 | Worker, Journal, Progression, Journey, Resource (the A-08 line), Sharing (`notesNeverStandInForTheGardensRegard`; copies only by the Worker class's `aCopiedPerchIsInertForEverySpirit`), Persistence (`theGardenGroundworkSavesNothing`); Economy and Logistics: no new test; the client classes above. `ConcordanceGardenNetworkTests` is unit 7's |
+| GE7 | `buerFromTheCodexToDeparture` (without the chooser: GC-P29); the client class from the specimen's tooltip to the ended pact |
+| GE8 | one work, one service class, `check_garden_pacts`; the distinctness table needs a second garden service (unit 2) |
+| GE9 | Buer's checklist: [his Verification](buer-pact.md#verification) |
+
+**APIs the specification left unconfirmed** (critique 12, refreshed): every unit-1 class compiled in runs 40597482976 and
+40605564166, so the compile-level ones hold (the 14-pair `StreamCodec.composite` with the 13-argument constructor, the
+`AutoGlowingGeoLayer::new` inference, the `LinkedHashMap` fixture table, the type-use `PactMenu.@Nullable Answered`,
+`Comparator.comparingInt(...).reversed()`). The tests that rest on the run-time ones passed:
+`Language.getInstance().has` on the game-test server (`stolasLinesRenderAsBefore`), `Entity.setUUID` on an unadded entity
+(`aDuplicateBuerTendsNothing`) and `load` on one (`anOverworkedComplaintIsForgottenOnRestart`, `everySpiritsKeysSurviveASave`), bone meal through
+`useItemOn` (`anOverworkedBedWaitsForCompost`), `ServerChunkCache.removeEntity/addEntity` (the late watcher in
+`ConcordancePactClientGameTests`), `time set midnight` and `waitForScreen(null)` after the level loads (the garden client
+class). Still unconfirmed: the pinned SmartBrainLib jar's own sources (behaviour matches in the facing tests); Gutenberg's
+record #72679 (GB18).
+
+**Local checks for this records commit** (no Minecraft build here): `python3 scripts/check_repository.py` (structure and links), `python3 tools/concordance_journey.py
+--check`, `python3 -B tools/check_mod_data.py` (its `check_delivery` holding the re-pasted delivery matrix) and
+`git diff --check`, each run on this commit's tree and passed; `python3 tools/owner_art.py --provenance pacts` printed
+Buer's provenance rows. The generators were not run: this commit changes no generated file, and the one generated block
+it changes, the delivery matrix, was printed by `tools/concordance_delivery.py` and pasted. No Minecraft build, game test
+or client test ran here.
+
+**Not run:** a workflow_dispatch of every client class on unit 1's head (the specification's C5 asked for one; the pull
+request's selection ran 31 of 274 classes); the opted-in `pact clients without optional integrations` job and the load
+cards (skipped in pull request runs; the garden class without Jade and the garden load card are unit 7's); a second
+client at Buer's perch; any person playing, alone or with others; any sound (CI has no sound device; subtitles are
+checked as defined and fired).
+
+#### Corrections to unit 1's commit messages
+
+The commits are pushed and are not rewritten, so their messages are corrected here (the unit review's findings 10, 22
+and 23):
+
+- **`202e75969` does not say that the generators' incidental rewrites were restored, and `9742f240b` says the generator
+  "left src/main/resources unchanged" though the files it rewrote are there.** On the session's machine `tools/generate_material_data.py` rewrites 71 files under `src/main/resources` from CRLF to LF with no change
+  of content and reorders `docs/features/jug-nouveau-content-map.json` with identical content, and `tools/owner_art.py`
+  rewrites two ornamental corn textures with identical pixels (the logs count 72 to 74 rewritten files in all); each was
+  restored with `git checkout` before a gate or check was read. So GC-01b's "git status listed only
+  tools/concordance_pacts.py" held only after that restore, and GC-04a's "left src/main/resources unchanged" (its message
+  does name the rewrites and their restore) means unchanged once the CRLF-only files it rewrote there were restored. The noise is not unit 1's: it appears on the merged base
+  `54a2acb6c` before any unit-1 edit, so the specification's precondition (a clean `git status --porcelain` after the
+  generators on the merged head) was not met by the merge; it is recorded as the merge's gap.
+- **`6101ad482`** is titled "GC-03: complete the groundwork" but adds no groundwork: it fixes two GC-03 server tests'
+  setup (`aBedSaysWhetherItMayBeTendedWithoutChangingIt` grows its crop lit and sampled as the other harvest tests do;
+  `theGardenGroundworkSavesNothing` lets the presence think once before its record is compared).
+- **`3e736655a`** says "all 26 of the contract's audit mutations were caught locally". The mutations B1 to B26 are the
+  Buer part design's, not this contract's, and the harness logged B26 as missed: its audit fired, with a different
+  message than the harness expected (the unit review's re-run found the same).
 
 ## Schema review (the shared schema against eight services)
 
@@ -1337,8 +1578,10 @@ reproducing today's generated data, sounds, codex and assets, with every Stolas 
 
 ## Risks
 
-- **The stack:** four unmerged stacked pull requests plus main's #475; every review change below is a merge, and #475
-  touches the same hot files.
+- **The stack** (until 27 October 2026): four unmerged stacked pull requests plus main's #475; every review change below
+  was a merge, and #475 touched the same hot files. Since #494 brought Chunks B to D to main, the cohort merges main
+  directly (`cfeded41e`, `10566d074`); main still moves the hot files (#524 and #525 did), and generated files are
+  regenerated after each merge, never hand-merged.
 - **Stolas regression:** extracting the base from a 525-line class while every Stolas test and generated file stays
   unchanged; mitigated by the compile-only first push, the byte-for-byte generator check (data, sounds, codex, assets),
   `stolasLinesRenderAsBefore` and the unchanged tests.
@@ -1451,11 +1694,21 @@ reproducing today's generated data, sounds, codex and assets, with every Stolas 
 | 7 | the whole path; the load card (opted in) | the line-up, every spirit's evidence; `ConcordanceGardenNetworkTests`; the opted-in run without optional integrations | every check; `check_garden_load_card`, `check_pact_network` | none |
 
 Every unit also runs `tools/check_mod_data.py`, `scripts/check_repository.py`, `scripts/tests` and the generators (output
-current) locally, and the build with its server game tests in CI (the stacked pull request's run), then CI by
+current) locally, and the build with its server game tests in CI (the cohort pull request's run), then CI by
 workflow_dispatch with every client class. Evidence rules (10:5-22): each command reported as run and passed, run and
 failed, or not run; CI counts only for its commit; spending tests use `TestPlayers.survivor`; a screenshot counts once
 someone has looked at it ("Seen" column); generator-model numbers stay labelled so until a test measures them; nothing is
 called balanced without a human playtest.
+
+**Unit 1 as run** (row 1 above against the build): Worker, Journal, Progression, Journey, Resource, Sharing and
+Persistence ran in CI (run 40605564166); Sharing's "copies" are held only by the Worker class's
+`aCopiedPerchIsInertForEverySpirit` (Sharing's own new test is `notesNeverStandInForTheGardensRegard`); Economy gained no
+test. Of the client classes, `ConcordanceGardenPactClientGameTests` and `ConcordancePactClientGameTests` (facing; the
+chooser moved to the garden class, GC-P18) ran and passed; `ConcordanceRosterClientGameTests` and
+`ScreenFitClientGameTests` ran unchanged and passed, so there is no picture of Buer's roster portrait. The save tests are
+`everySpiritsKeysSurviveASave` (both spirits) and `theGardenGroundworkSavesNothing`. The row's local checks were run on each commit
+by the unit's builders and reported passing (in the commit messages that list them and the session's working notes), with
+the generators' incidental rewrites restored ([Corrections](#corrections-to-unit-1s-commit-messages)).
 
 ## Decisions
 
@@ -1473,7 +1726,7 @@ proposals (GC-P, numbered in the reserved blocks). Chunk A to D decisions are un
 | GC-S4 | 26 October 2026 | One perch offers every pact through a chooser at an empty perch, for its owner only (appended action and mode; `INVITE` only in the `invite` mode; choosing again means declining and reopening); no new holder block | Decided by the session | GC-01 |
 | GC-S5 | 26 October 2026 | The shared generalization SG1 to SG12; Stolas keeps his class, ids, keys, rendered words and tests; generic lang keys gain `%s` and never move; no scripting language | Decided by the session | GC-01 |
 | GC-S6 | 26 October 2026 | Facing: summoned facing the inviter, attending the latest speaker, facing its work; server only, through `LookAtTarget` with an explicit target test (alive, same level, within 32 blocks), no new sensor; Chunk D's south camera (D-P133) moves to the speaker's side | Decided by the session | GC-02 |
-| GC-S7 | 26 October 2026 | Garden services act only for a beneficiary keeper, with the holder present within `Pacts.REACH` of the perch (`Authority.presentNear`, the test upkeep uses) and able to change the block, checked at each change, after the base's `decide` returned `IDLE`; never a stand-in; research checked at invitation and sealing | Decided by the session | GC-03 to GC-09 |
+| GC-S7 | 26 October 2026 | Garden services act only for a beneficiary keeper, with the holder present within `Pacts.REACH` of the perch (`Authority.presentNear`, the test upkeep uses) and able to change the block, checked at each change, after the base's `decide` returned `IDLE` (refined by GC-P27: or `UPKEEP_DUE` with the holder near); never a stand-in; research checked at invitation and sealing | Decided by the session | GC-03 to GC-09 |
 | GC-S8 | 26 October 2026 | Garden spirits keep their perch and work at a distance in their area; no walking or paths | Decided by the session | every spirit |
 | GC-S9 | 26 October 2026 | One cohort research, The Garden's Regard, with one practice `garden_pact_service` keyed by spirit (mastery: three spirits, reachable from unit 3); each spirit's own by-hand first obligation; Stolas's Regard and practice untouched | Decided by the session | GC-03 |
 | GC-S10 | 26 October 2026 | Compacts of ordinary materials, no resonance, worded without an astrolabe; upkeep the Gentle shape with each spirit's own offering | Decided by the session | every spirit |
@@ -1495,14 +1748,40 @@ proposals (GC-P, numbered in the reserved blocks). Chunk A to D decisions are un
 | GC-P2 | 26 October 2026 | `GardenReach`: 64 beds, nearest first, refreshed every 200 ticks, loaded chunks only | Proposed (unit 1) | GC-03 |
 | GC-P3 | 26 October 2026 | Wire in unit 1: `invite` action 9, mode `invite` 4; one nested payload field `spirit` (`sign`, `work`), the payload at 14 top-level fields | Proposed (unit 1) | GC-01 |
 | GC-P4 | 26 October 2026 | Resonance-free wording: `term.compact.items` and `answer.cannot_afford.items`, chosen at resonance 0; per-work quota keys `term.quota.<work>` with the generic key as fallback | Proposed (unit 1) | GC-01, GC-09 |
-| GC-P5 | 26 October 2026 | Stations: rooted or hovering bodies on the perch; standing bodies on the first free side cell toward the inviter (clockwise), else on the perch | Proposed (unit 1) | GC-01 |
+| GC-P5 | 26 October 2026 | Stations: rooted or hovering bodies on the perch; standing bodies on the first free side cell toward the inviter (clockwise), else on the perch *(amended unit 1: not used in unit 1, whose spirits are all on the perch, GC-P11; it stays the rule for the first standing body, unit 3)* | Proposed (unit 1) | GC-01, GC-06 |
 | GC-P6 | 26 October 2026 | The Garden's Regard: examine a garden specimen (with an examine line and a tooltip); cultivation; worker service; mastered by `garden_pact_service` distinct 3 | Proposed (unit 1) | GC-03 |
 | GC-P7 | 26 October 2026 | First obligations: Buer `TEND`, Bathin `DEVICE` (an awake living device used with an empty hand), Marax `READ`, Foras `GRAFT`, Bifrons `FEED`, Amdusias `HARVEST`, each act and hook added with its spirit | Proposed (unit 1) | GC-03 to GC-09 |
-| GC-P8 | 26 October 2026 | Facing: head at vanilla's 10° a tick; the body by vanilla's body control; tests allow 10° (head) and 15° (body) | Proposed (unit 1) | GC-02 |
+| GC-P8 | 26 October 2026 | Facing: head at vanilla's 10° a tick; the body by vanilla's body control; tests allow 10° (head) and 15° (body) *(amended unit 1: the speaker is the latest to open the screen or send a request; a work target outranks the speaker while its gesture plays; a spirit faces whoever speaks whatever its status but switched off, a spent quota included, A-03)* | Proposed (unit 1) | GC-02 |
 | GC-P9 | 26 October 2026 | The `LookAtTarget` target test: an entity target is invalid when dead, in another level or beyond 32 blocks; a block target never | Proposed (unit 1) | GC-02 |
+| GC-P10 | 26 October 2026 | The chooser: an empty perch's owner who may invite two or more spirits (offered at that perch, Regard understood, no pact with it held; at most 8, in `PactParser.REQUIRED`'s order) chooses among them, each "ready" or with what its service says is still missing; with exactly one, its offer at once (no chooser: Stolas's path as built); with none, the first offer whose research they have begun, else the first offered. Anyone else sees the waiting visitor's offer, else the same single offer, with "Only this perch's owner may invite (that spirit) here"; never the chooser. A choice holds for the conversation while it stays offered; choosing a spirit that cannot come sends another spirit's waiting visitor away (the unit review) | Proposed (unit 1) | GC-01 |
+| GC-P11 | 26 October 2026 | Every unit-1 spirit is summoned on the perch (Stolas; Buer is rooted). GC-P5's side cell for standing bodies lands with the first standing body (Marax, unit 3); `SPIRITS` records each row's `station` ("perch" until then) | Proposed (unit 1) | GC-01, GC-06 |
+| GC-P12 | 26 October 2026 | Words: the ten lines every spirit shares that named Stolas take the spirit's name as `%s` (keys unchanged; his rendering identical, `stolasLinesRenderAsBefore`); the eleven only Star-reckoning shows and the fifteen with only "he"/"his" stay as written; each caller passes the name (R9: not GC-01's 36) | Proposed (unit 1) | GC-01 |
+| GC-P13 | 26 October 2026 | The wire beyond GC-P3: `Spirit(sign, work)`, each at most `MAX_ID` characters, `Spirit.NONE` for the chooser; a thirteen-argument constructor keeps Chunk D's calls; INVITE answered `invited`; INVITE (owner only) and RECALL honoured only in the mode that sent their list and within it, else `not_offered`; SEAT and END index the seat page's list there (past it, `not_offered`) and elsewhere name, as Chunk D's did, the reader's first pact without its perch, else the pact kept here; the revision moves when the chooser's list does | Proposed (unit 1) | GC-01 |
+| GC-P14 | 26 October 2026 | `PactService` in unit 1: `work`, `holderOnly`, `missing`, `choices`, `perform`, `serviceRows`, `obligationRows`, `suspendedRow` and a default `work` step returning IDLE *(amended unit 1, R2: `obligation()` landed with GC-03 and Jade's `Note` and `note(...)` with GC-04; `complication` lands with GC-05)*. `PactServices` registers each once, checked against `PactParser.WORK` and `HOLDER_ONLY`, and the game refuses to start without one for every work. A departure from GC-01's SG1 member names (`rows`, `work(level, spirit, record, holder, now)`) | Proposed (unit 1) | GC-01 |
+| GC-P15 | 26 October 2026 | `PactParser.REQUIRED` lists every shipped offer in `SPIRITS`'s order, which is the perch's; a missing one is reported as "offers it to no one until one does"; a loaded offer whose spirit is not registered is never offered | Proposed (unit 1) | GC-01 |
+| GC-P16 | 26 October 2026 | The journal's pacts section: Stolas's two lines as built; another Regard a perch offers gets its line only once its reader has begun it, so a reader who never began one sees Chunk D's section exactly | Proposed (unit 1) | GC-01 |
+| GC-P17 | 26 October 2026 | Forced edits of existing test lines *(amended unit 1, R11, A-08: three lines, not two)*: `thePactScreensMessagesAreBounded` holds Chunk D's nine actions in place (`ACTIONS.subList(0, 9)`) instead of counting them; the network test renders `missing.owner` with Stolas's name; `ConcordanceResourceGameTests.thePactDefinitionParsesStrictly` allows only the other shipped definitions' "no definition loaded" (GC-04) | Proposed (unit 1) | GC-01, GC-04 |
+| GC-P18 | 26 October 2026 | *(Reworded unit 1, R7:)* GC-01 adds no client step; `ConcordancePactClientGameTests` gains no chooser (GC-02 changes it only for facing); the chooser is photographed with a second spirit in the cohort's client class (GC-P30) with GC-04 (default GUI, scale 4, 320x180, keyboard only). A departure from GC-01's "Client" line | Proposed (unit 1) | GC-01, GC-04 |
+| GC-P19 | 26 October 2026 | GC-01 in three steps *(amended unit 1: landed as two commits, `62b0095fa` compile-only and `202e75969` with the zero-diff gate inside it)*; Jade names a visiting spirit from the reading's appended key `visitor` (its counterpart), never from the offer | Proposed (unit 1) | GC-01 |
 | GC-P20, GC-P21 | 26 October 2026 | Buer's beats; his terms (radius 8, 0 to 12,000, 16 a day, party), offering (Mendvetch, 1 a week) and compact (4 Mendvetch, 4 bone meal) | Proposed (unit 1) | GC-04 |
 | GC-P22 | 26 October 2026 | The overworked bed: eased today and at strain 3 again; resolved at strain 2 or below; at most 16 remembered, unsaved; a service row on the kept page and Jade | Proposed (unit 1) | GC-04 |
-| GC-P30 | 26 October 2026 | One garden client class for every spirit, shots named `jugcraft_garden_<spirit>_<view>` | Proposed (unit 1) | GC-04 to GC-10 |
+| GC-P23 | 26 October 2026 | The overworked memory (refines GC-P22): the presence's `serviceMemory` (never saved) holds the beds he eased today and his complaints, together at most 16, the oldest eased forgotten first; a new game day forgets the eases, a complaint stands until its bed eases to 2 or less (by any of the bed's rules) or is broken or asleep; a resolved bed is his again and is a fresh complaint only after he eases it again; beds in unloaded chunks are left as remembered; shown only while loaded, awake and at 3. *(Unit review:)* the beds refused for themselves since the index was last read, at most 64, also never saved, are skipped until its next read | Proposed (unit 1) | GC-04 |
+| GC-P24 | 26 October 2026 | Of each zero-thickness per-face pair, the generator drops the face whose texels are all clear, computed from the texture, and stops when a pair is both drawn or both clear; for the Decor Blossom: plate `down`, cap `down`, both blades `north` (corrects the contract's "south" of the blades, which would erase the drawn stalk); Stolas's six box-UV twins recorded, not changed (R22, R23) | Proposed (unit 1) | GC-04, the twin rule for every spirit |
+| GC-P25 | 26 October 2026 | Buer's body numbers: the stem repeated once (2.7 px), scale 2.2, entity box 1.2 x 1.6 (eyes 1.4; R21), shadow 0.6, culling 0.4 / 1.0 below / 0.5 above, his pistil's three full-red texels lit; his clips: the owner's three kept, four loops and six gestures added with their lengths and telling windows as `SPIRITS` records *(amended unit 1, A-06: his listening loop shows over everything but switched off; a spent quota shows him shut only while nobody speaks)* | Proposed (unit 1) | GC-04 |
+| GC-P26 | 26 October 2026 | His seven cues use the art plan's three recordings (two of the four named files are one), told apart by pitch: listen 1.25, refuse 0.6, depart 0.7; `sounds.json` gains `pitch` for pact cues through `SOUND_PITCH` | Proposed (unit 1) | GC-04 |
+| GC-P27 | 26 October 2026 | A pact's service steps under `UPKEEP_DUE` too (its terms promise service through the grace), the status staying `UPKEEP_DUE`, and a garden service asks the holder's presence at each change (`GardenPacts.target`), since `decide` returns the pact's own state before asking it. *(Unit review, finding 11:)* the base steps under `UPKEEP_DUE` only when `Authority.presentNear` finds the holder within `Pacts.REACH`, so no service runs for an absent holder; the common terms, SG2 and GC-03's beneficiary rule are amended to say so (R3, R24) | Proposed (unit 1) | GC-04 onward (every service) |
+| GC-P28 | 26 October 2026 | Strain tending's choice: from the index, beds the bed's own rule allows and not overworked, the most strained first then the index's order (nearest the perch), at most 8 asked a think, the first that may be changed tended; per-bed refusals (not a beneficiary's now, not the holder's to change, outside the area) skip that bed (since the unit review until the index's next read), the pact's own (suspended, held, quota, holder away) stop the think | Proposed (unit 1) | GC-04 |
+| GC-P29 | 26 October 2026 | Words and evidence: each garden work's words in `SERVICE_WORDS` (messages, its kept-page section, Jade notes, its own reason ids, never one of PactMenu's ANSWERS: Buer's `nothing_to_mend`); a generic `PactService.note` and two Jade keys (a shared hook, not a spirit's code in PactReading); the greeting's stage direction as Stolas's has; his codex pages in GC-03's entry; the whole-path test without the chooser (it needs Stolas's Regard), which the GC-01 server tests and the client class show (R27); the client's small size 320x180; his astir loop not photographed | Proposed (unit 1) | GC-04 to GC-10 |
+| GC-P30 | 26 October 2026 | One garden client class for every spirit, shots named `jugcraft_garden_<spirit>_<view>` *(amended unit 1: or `jugcraft_garden_<view>` for a view of no one spirit, such as the chooser and the specimen tooltip; R19)* | Proposed (unit 1) | GC-04 to GC-10 |
+| GC-P31 | 26 October 2026 | A garden obligation counts while its pact is active (seated, kept by its perch, neither suspended nor held for upkeep) and the act is inside its area, whatever its hours or its day's quota (Stolas's precedent): the act is the holder's, so a sleeping or spent spirit never hides it; the bed's keeper is not asked (the gesture already asked the holder's own hands) | Proposed (unit 1) | GC-03, GC-04 to GC-09 |
+| GC-P32 | 26 October 2026 | The bed index indexes only beds whose keeper the pact benefits at each refresh (strangers never crowd the 64; `target` asks again at each change, S3); it keeps places, not entities, resolved in loaded chunks at each read; a clock run back refreshes it | Proposed (unit 1) | GC-03 |
+| GC-P33 | 26 October 2026 | A presence's service memory (`PactSpiritEntity.serviceMemory`, typed, never saved) holds each garden service's index and its day's memory | Proposed (unit 1) | GC-03 onward |
+| GC-P34 | 26 October 2026 | `GardenPacts.target`'s reasons and order: OUTSIDE_AGREEMENT (no service or perch, another level, outside the area or hours), SUSPENDED, UPKEEP_HELD, FINISHED (quota), IDLE (not a beneficiary's), OWNER_OFFLINE (holder not within `Pacts.REACH`), BLOCKED_BY_ACCESS; cheapest first, Authority's events last | Proposed (unit 1) | GC-03 onward |
+| GC-P35 | 26 October 2026 | The Regard's specimens are the four organism crops' produce and Verdant Chaff; its icon the Verdant Bed; its codex entry at Binding (6, 4) with the perch's recipe; its words as built | Proposed (unit 1) | GC-03 |
+| GC-P36 | 26 October 2026 | GB26: only the garden practice's `distinct` is honoured, as distinct shipped garden definitions each a way to the practice; the audit expects the practice unreachable while none ships and the mastered state while fewer than three do, and flags either if reached early | Proposed (unit 1) | GC-03, unit 3 |
+| GC-P37 | 26 October 2026 | The journey's `GARDEN` route (three steps to understood) and acquisition's `GARDEN_PACTS` (`sunpetal`, `verdant_bed`, `bonding_charm`); `verdant_chaff` a `PRODUCERS` row (the cultivation practice) | Proposed (unit 1) | GC-03 onward |
+| GC-P38 | 26 October 2026 | One shared first-obligation row for every garden service (`PactObligations.rows`: the act to do, or "kept: n of 3 toward mastery") | Proposed (unit 1) | GC-04 to GC-09 |
+| GC-P39 | 26 October 2026 | `habitat()` reads through `cachedHabitat()` (one place for unit 6's canopy); `tend` and `mayTendAt` share `tendedLately` | Proposed (unit 1) | GC-03, GC-09 |
 | GC-P40, GC-P41 | 26 October 2026 | Bathin's beats; terms (radius 10, any hour, 12 moves, party), offering (4 Verdant Chaff a week), compact (2 ender pearls, 8 chaff) | Proposed (unit 2) | GC-05 |
 | GC-P42 | 26 October 2026 | The perch's `accord`: a string of at most 16 characters from the service's list; absent when unanswered; read as unanswered when unknown; cleared on end or unseat | Proposed (unit 2) | GC-05 |
 | GC-P43 | 26 October 2026 | Wire in unit 2: `resolve` action 10 (the `keep` mode, the holder only); `spirit.matter`, `spirit.answers` (at most 3) | Proposed (unit 2) | GC-05 |
@@ -1518,6 +1797,36 @@ proposals (GC-P, numbered in the reserved blocks). Chunk A to D decisions are un
 | GC-P122 | 26 October 2026 | The canopy rules: crops whose disturbance minimum is 0 (all once answered); the largest covering canopy; `strained()` undamped; the quota worded "At most %s beds sheltered at once"; his cue `pocket_horn_fade` | Proposed (unit 6) | GC-09 |
 | GC-P141 | 26 October 2026 | The garden load card's workload and budget (above) | Proposed (unit 7) | GC-10 |
 | GC-P142 | 26 October 2026 | The garden two-client scenario (above) | Proposed (unit 7) | GC-10 |
+
+### Unit 1's amendments and reconciliations (cited in code and commits)
+
+Unit 1 was built from four part designs reconciled into one specification (kept with the session's working notes, not
+committed). Its amendments (A-n) and the reconciliations (R-n) that code, commits or this page cite are recorded here so
+every citation resolves; none is the owner's.
+
+| Id | What changed | Why |
+|---|---|---|
+| A-01 | `check_pacts`' legacy `StolasEntity.SOUND_IDS` check reads only `stolas.` events (R12) | it compared with every pact sound event, so Buer's seven would fail it |
+| A-02 | the offerings rule per `SPIRITS` row inside `check_pacts`' existing loop: each tag is its row's offerings, one of them reachable without Styx (R16) | Buer's tag is Mendvetch alone, not Stolas's vanilla-item rule |
+| A-03 | `PactSpiritEntity.face` attends unless switched off (`next != DISABLED`); a spent quota (FINISHED) no longer stops a spirit facing its speaker | Buer returns FINISHED for a spent quota, and every FINISHED from `decide` comes after the spirit has left |
+| A-04 | SG12's fixture table declared empty and filled in a `static {}` block | avoids a lambda inferred through a diamond |
+| A-05 | SG12's `think` calls pass world time 0 (06:00) and an explicit game time | a garden spirit is outside its agreement outside its hours, so the real clock would make the cases depend on the hour of the run |
+| A-06 | `BuerEntity.loop` shows listening over everything but switched off; FINISHED shows him shut only while nobody speaks | with Stolas's rule he would stay shut while spoken to after his quota was spent |
+| A-07 | `buerStopsAtHisQuota` opens the perch after FINISHED (he attends and listens); `buerAnswersEachActionWithHisGesture` asserts the FINISHED loops | pins A-03 and A-06 |
+| A-08 | `thePactDefinitionParsesStrictly` allows only the other shipped definitions' "no definition loaded" (R11) | appending `jugcraft:buer` to `PactParser.REQUIRED` makes a catalog of Stolas alone report Buer's definition missing |
+| A-09 | the guide's research table re-pasted with GC-03 (R13) | `check_delivery` holds it to `tools/concordance_delivery.py`, which lists every research entry |
+| A-10 | `tools/owner_art.py` run after the generator in every commit that changes art | `generate_material_data.py` never runs it |
+| R2 | `PactService`'s final members: GC-01's, `obligation()` with GC-03, `Note` and `note()` with GC-04 | GC-P14 |
+| R3, R24 | a service steps under `UPKEEP_DUE` (GC-P27), its presence asked at each change | the terms promise service through the grace |
+| R7 | GC-01 adds no client step; the chooser is photographed in the cohort's client class | GC-P18 |
+| R8 | GC-02's `aSpiritFacesTheBedItWorks` and GC-04's `buerFacesTheBedHeTends` are one test, Buer's | the two tickets named the same check |
+| R9 | ten shared lines take `%s`, not 36 | GC-P12 |
+| R10 | `talkingTeachesNothing` is a new test over every offered spirit | GC-03 called it "extended", but no such test existed (Styx's is `talkingGrantsNoResearch`, unchanged) |
+| R19 | shot names `jugcraft_garden_<view>` for a view of no one spirit | GC-P30 |
+| R21 | Buer's box 1.2 x 1.6 | GC-P25 |
+| R22, R23 | the blades drop `north`; Stolas's six twins recorded | GC-P24 |
+| R27 | the whole-path test without the chooser | GC-P29 |
+| R28 | the delivery matrix's SmartBrainLib row names the look target a pact spirit's own decision sets, and `aSpiritFacesWhoeverSpeaksToIt` | GC-02 sets a look target |
 
 ### The cohort checkpoint's three questions (09:18; at the end, after unit 7)
 
@@ -1538,11 +1847,18 @@ proposals (GC-P, numbered in the reserved blocks). Chunk A to D decisions are un
 
 ## Where to resume
 
-1. Refresh main and the open pull requests; merge main (#475) into Chunk B, then C, then D, as Chunk D merged main
-   (GC-S16); create `claude/garden-cohort` from the result.
-2. Land this contract as `docs/features/concordance-garden-cohort.md` with unit 1's first commit.
-3. Start GC-01 with its compile-only slice (SG1 to SG3, Stolas a thin subclass), pushed for CI; then the `SPIRITS` table
-   and the byte-for-byte check with Stolas alone.
+Unit 1 (GC-01 to GC-04) is built, its CI evidence and records are in this page and its records, and it waits in draft
+pull request #526 for the owner's review. Next:
+
+1. Run 40605564166's one remaining failure, `HerobrineClientGameTests`' placement (NO_VISIBLE_SPOT, twice on
+   `4ca363d38`; passed on `10566d074` and on main), is main's class; unit 1 changes no Herobrine file. Re-run it once
+   more, or leave it to main, before the owner's review; it is not the cohort's to fix.
+2. Refresh main and the open pull requests; merge main into `claude/garden-cohort` if it moved (generated files
+   regenerated, never hand-merged).
+3. Start unit 2 (GC-05, Bathin) from unit 1's head: the accord machinery, `Status.AWAITING_ANSWER`, the bed index's
+   Hearts, Gleaners and pylons, and `PactObligations.DEVICE`, with GC-P40 to GC-P59.
+4. Open items unit 1 leaves: the listen, asleep and depart pictures (GC-04's As built); the journey's Buer steps still
+   write his numbers as literals; GB18 (Gutenberg's record); a dispatch of every client class on the cohort's head.
 
 ## How this contract was checked
 
@@ -1594,6 +1910,13 @@ proposals (GC-P, numbered in the reserved blocks). Chunk A to D decisions are un
   rotation paths (SmartBrainLib's `LookAtTarget`, re-read), the owner library's files, catalog rows and hashes, every source quotation and its
   label, the Gleaner's measured search cost, Peepo's work, the crow code, `Transfers` and `CourierWork.reserve`'s chunk
   scan.
+- **Unit 1's records (28 October 2026):** the CI runs 40421207295, 40597482976 and 40605564166 and main's
+  40596966503 read through GitHub's REST API (jobs, attempts) and its job-log tool (each job's last 5,000 lines: the
+  server tests' summaries and failures, the client shards' `[garden-check]` and `[pact-check]` lines and pictures);
+  the 33 pictures of `ConcordanceGardenPactClientGameTests` (shard 0) and Stolas's four facing pictures (shard 3) of
+  run 40605564166 extracted from the logs and looked at one by one; the pull requests #465, #466, #474, #494 and #526
+  by REST; the unit's commits and messages; the code lines the As built notes name. Gutenberg's record #72679 could not
+  be read (the host was not reachable from the session).
 - **Not done:** no scan of the 1904 text was opened; nothing was built, generated, run or tested (no local game build
   exists); the default `LookAtTarget` predicate was read from an unversioned reference copy, not the pinned jar's
   sources; no repository file was edited.

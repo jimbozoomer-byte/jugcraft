@@ -4,10 +4,12 @@ Status: the automated parts are merged to main ([#250](https://github.com/jimboz
 branch `claude/concordance-steps-26-32`, integrated by [#263](https://github.com/jimbozoomer-byte/jugcraft/pull/263) on
 8 October 2026). **The human playtest has not been run**; see Verification for what has. Concordance Chunk C (C-10)
 adds the living workshop (`WORKSHOP` in `tools/concordance_journey.py`;
-`ConcordanceJourneyGameTests.theLivingWorkshopFromAManualStart` and `theWorkshopsRecipesLoad`). Not merged; its two
-server game tests passed in CI (run 38774859294 on `bb856f873`). Concordance Chunk D (D-09) adds the pact hall (`PACT`;
-`ConcordanceJourneyGameTests.thePactHallFromStyxToDeparture` and `thePactHallsRecipesLoad`). Not merged; both passed in
-both server jobs of run 40133540741.
+`ConcordanceJourneyGameTests.theLivingWorkshopFromAManualStart` and `theWorkshopsRecipesLoad`), on main since #494; its
+two server game tests passed in CI (run 38774859294 on `bb856f873`). Concordance Chunk D (D-09) adds the pact hall (`PACT`;
+`ConcordanceJourneyGameTests.thePactHallFromStyxToDeparture` and `thePactHallsRecipesLoad`), on main since #494 (27
+October 2026, Chunks B to D in one squashed commit); both passed in both server jobs of run 40133540741. The garden
+cohort's unit 1 adds the garden pacts (`GARDEN`; `ConcordanceJourneyGameTests.buerFromTheCodexToDeparture` and
+`theGardenPactsRecipesLoad`), not merged (draft #526); both passed in both server jobs of run 40605564166.
 Proposal issue: none; the owner's Arcane Concordance brief (roadmap step 31) is the scope approval.
 Owner: @jimbozoomer-byte. AI-assisted implementation with Claude Code; the model is named in the commit trailers.
 Target milestone and tier: Concordance milestone 23, every stage. Roadmap step 31.
@@ -77,7 +79,9 @@ From a fresh world, with nothing from the Nether or the End and nothing past the
 
 The living workshop, below the routes, is not a fourth way to Architect but Chunk C's way from a manual start to a
 powered, supplied crucible and its garden. The pact hall, after it, is Chunk D's: from Styx's hint, or a feather, to
-Stolas's pact kept and ended, and the workshop hand his Regard unlocks. It is not a route to Architect either.
+Stolas's pact kept and ended, and the workshop hand his Regard unlocks. It is not a route to Architect either. The garden
+pacts' route (the garden cohort) begins with The Garden's Regard, without Styx or Stolas; each spirit's unit adds its
+steps.
 
 A route is not a script the game enforces: a player may take any research in any order. A route is the smallest set of
 research one player needs to reach the Architect stage that way. Dreamwalking is on no route; any route can take it up

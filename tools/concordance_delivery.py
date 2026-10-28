@@ -100,10 +100,11 @@ MATRIX = {
         ["codexLoadsWithoutErrors", "metResearchSaysWhatComesNext"],
         "The codex has been read only as data; nobody has read it in a client"),
     "smartbrainlib": (
-        "The workers' brains: a nearby-players sensor and look and walk behaviours driven by the walk target each "
-        "worker's own decision sets; bonds, agreements, bodies and loads stay Jugcraft's records",
+        "The workers' brains: a nearby-players sensor and look and walk behaviours driven by the walk and look targets "
+        "each worker's own decision sets (a pact spirit looks at whoever speaks to it, or the bed it works on: the garden "
+        "cohort, GC-02); bonds, agreements, bodies and loads stay Jugcraft's records",
         "required",
-        ["aPorterSaysWhyItStops", "aSpiritKeepsToItsAgreement", "aFamiliarMendsByItsBond"],
+        ["aPorterSaysWhyItStops", "aSpiritKeepsToItsAgreement", "aFamiliarMendsByItsBond", "aSpiritFacesWhoeverSpeaksToIt"],
         "Pathing over long distances and through many loaded workers not profiled"),
     "fusion-connected-textures": (
         "Warding Stones and Verdant Beds join their neighbours, through a built-in resource pack registered only when "
