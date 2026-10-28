@@ -14888,7 +14888,9 @@ def check_hearth():
     unshaded model of the fire texture alone, animated in smooth bands; the fireplace's and the garland's recipes were
     generated; and the light message has its text. Part 2: the woodstove's light and burn are the table's, it is a heat
     source, and its fire is full-bright; the kettle's lid is drawn by its renderer, rattling by the table's numbers about
-    its hinge, from its runner model; the simmer pot's surface moves in smooth bands."""
+    its hinge, from its runner model; the simmer pot's surface moves in smooth bands. Part 3: the rack's capacity is the
+    table's, with a model for each count; the chopping block splits by the log's own crafting recipe, and its hatchet is
+    drawn by its renderer, swung by the table's numbers about its grip, from its runner model."""
     import hearth as hh
     fp = hh.FIREPLACE
     java = (JAVA_ROOT / "agriculture" / "StoneFireplaceBlock.java").read_text(encoding="utf-8") \
@@ -14961,6 +14963,39 @@ def check_hearth():
     if meta.get("animation", {}).get("interpolate") is not True or meta["animation"].get("frametime") != sp["frametime"]:
         err(f"textures/block/{sp['block']}_brew.png.mcmeta: the simmering must move in smooth bands (interpolated, frametime {sp['frametime']})")
     for key in [f"block.{MOD}.{b}" for b in (ws["block"], kt["block"], sp["block"])]:
+        if key not in lang:
+            err(f"{key}: the text is missing")
+    # Part 3: the rack's capacity is the table's and it has a model for each count; the chopping block splits by the log's
+    # own crafting recipe (never more), and its hatchet is drawn by its renderer, swung by the table's numbers about its grip.
+    rk = hh.RACK
+    rack = (JAVA_ROOT / "agriculture" / "FirewoodRackBlock.java").read_text(encoding="utf-8") \
+        if (JAVA_ROOT / "agriculture" / "FirewoodRackBlock.java").is_file() else ""
+    if f"CAPACITY = {rk['capacity']};" not in rack:
+        err(f"FirewoodRackBlock: missing CAPACITY = {rk['capacity']}; (tools/hearth.py RACK)")
+    states = load(ASSETS / "blockstates" / f"{rk['block']}.json") or {}
+    for logs in range(rk["capacity"] + 1):
+        if not (ASSETS / "models" / "block" / f"{rk['block']}_{logs}.json").is_file() \
+                or states.get("variants", {}).get(f"facing=north,logs={logs}", {}).get("model") != f"{MOD}:block/{rk['block']}_{logs}":
+            err(f"{rk['block']}: no model for {logs} logs on it")
+    if f"message.{MOD}.{rk['block']}.full" not in lang:
+        err(f"message.{MOD}.{rk['block']}.full: the text is missing")
+    cb = hh.CHOPPING_BLOCK
+    chop = (JAVA_ROOT / "agriculture" / "ChoppingBlockBlock.java").read_text(encoding="utf-8") \
+        if (JAVA_ROOT / "agriculture" / "ChoppingBlockBlock.java").is_file() else ""
+    for needed in (f"SWING_TICKS = {cb['swing_ticks']};", f"SWING_DEGREES = {cb['swing']}F;", "getRecipeFor(RecipeType.CRAFTING, input, level)"):
+        if needed not in chop:
+            err(f"ChoppingBlockBlock: missing {needed} (tools/hearth.py CHOPPING_BLOCK; a log splits by its own crafting recipe)")
+    hatchet = (CLIENT_JAVA_ROOT / "ChoppingBlockRenderer.java").read_text(encoding="utf-8") \
+        if (CLIENT_JAVA_ROOT / "ChoppingBlockRenderer.java").is_file() else ""
+    if f"GRIP_Y = {cb['grip'][0]}F;" not in hatchet or f"GRIP_Z = {cb['grip'][1]}F;" not in hatchet:
+        err(f"ChoppingBlockRenderer: the hatchet must swing about its grip, tools/hearth.py CHOPPING_BLOCK grip {cb['grip']}")
+    if "BlockEntityRendererRegistry.register(JugcraftAgriculture.CHOPPING_BLOCK_ENTITY, ChoppingBlockRenderer::new);" not in client:
+        err("JugcraftClient: the Chopping Block's hatchet needs ChoppingBlockRenderer")
+    states = load(ASSETS / "blockstates" / f"{cb['block']}.json") or {}
+    runners = [k for k in states.get("variants", {}) if "runner=true" in k]
+    if not runners or any(states["variants"][k]["model"] != f"{MOD}:block/{cb['block']}_hatchet" for k in runners):
+        err(f"{cb['block']}: its runner=true variants must name the hatchet's own model")
+    for key in (f"block.{MOD}.{rk['block']}", f"block.{MOD}.{cb['block']}"):
         if key not in lang:
             err(f"{key}: the text is missing")
 

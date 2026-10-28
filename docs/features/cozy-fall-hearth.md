@@ -1,6 +1,6 @@
 # Cozy Fall Hearth
 
-Status: parts 1 (the hearth) and 2 (the stove) implemented. CI builds them and runs their game tests and client screenshots; not yet played by hand. Parts 3 to 5 are planned below.
+Status: parts 1 (the hearth), 2 (the stove) and 3 (the woodpile) implemented. CI builds them and runs their game tests and client screenshots; not yet played by hand. Parts 4 and 5 are planned below.
 Proposal issue: none. The owner asked for it directly on 28 October 2026, as set 5 of the ten sets of fall and Halloween decor ("Then I want you to do 1-10 in parts in that order one by one"), drawn by their rules.
 Owner: @jimbozoomer-byte
 Target milestone and tier: Discovery tier; made from cobblestone, planks, a campfire and a stone slab, and (part 2) iron, a furnace, copper and the kitchen's mulling spices.
@@ -46,8 +46,21 @@ Primary specialty and supported player role: building. A builder furnishes a roo
   - Recipe (shapeless): an iron ingot, a water bucket (the bucket is given back), an apple and mulling spices.
 - The kettle and the pot come off when what they stand on goes.
 
+### Part 3: the woodpile
+- **Firewood Rack**: a wrought-iron log rack 87 cm wide, 37 cm deep and 94 cm high. It has two end frames (uprights under a top bar curled at its ends) on four feet, joined by a front and a back rail.
+  - Use a log of any kind on it to stack it, up to 16; an empty hand takes back the one stacked last.
+  - It shows each log as a split log, four to a layer from the bottom left, their ends to the front: pale end grain with the bark at one corner.
+  - It keeps each log as it went in, so it gives back the kinds it was given. Broken, it drops them all.
+  - A comparator reads how full it is.
+  - Full, it says so and keeps the log in your hand.
+  - Recipe: iron bars down the two sides, over three iron ingots.
+- **Chopping Block**: a sawn round of oak 44 cm across and 45 cm high, its bark on and its rings on top, with a hatchet sunk in it.
+  - **Use a log on it to split it**: the log is spent and its planks given, exactly what crafting it gives (the log's own crafting recipe, never more), with the chop's sound and chips of that wood.
+  - **Its hatchet swings** each time, up about its grip and back down into the round.
+  - Anything that isn't a log does what it would on any block.
+  - Recipe (shapeless): a log and an iron axe (its hatchet).
+
 ### Planned parts
-- **Part 3: the woodpile.** A firewood rack that fills with split logs, and a chopping block with its axe.
 - **Part 4: the comforts.** A blanket ladder hung with folded blankets, and a knitting basket.
 - **Part 5: the lights.** A hurricane lamp for the table (a different thing from set 3's Barn Lantern, which hangs on a wall), and mason-jar candles, made with the kitchen's mason jar.
 
@@ -78,9 +91,22 @@ Primary specialty and supported player role: building. A builder furnishes a roo
   - its handle ran across the spout; it now runs in line with it, as a kettle's does;
   - the simmer pot's rim was a solid box that hid what was in it; it is now a ring.
 
+### Part 3's woodpile
+- Built the same way, at real size (`tools/hearth_data.py` firewood_rack(), chopping_block()).
+- **Split firewood**: each piece's end is three texels square. Its end grain is pale, in one of two tones by its place in the stack, so neighbours never match. The bark is at one outer corner and the heart a tone darker at the opposite one, as a quarter split from a round shows.
+  - Its long sides are split wood or bark, along the piece.
+  - The rack has a model for each count of logs, 0 to 16, all on one texture, so each log shows as it goes on.
+- **The round**: oak bark in stripes up it, its top rings about a dark pith, with a check (a crack) from the pith to the bark, as a drying round splits.
+- **The hatchet**: an iron head and a hickory handle, its grain along it. **Moving parts move.** It is its own model, the blockstate's `runner`, drawn by `ChoppingBlockRenderer`. On each chop it swings 55 degrees up about its grip and back down into the round over eight ticks, a smooth arc.
+- The rack doesn't draw the vanilla logs' own models: shrunk to a piece of firewood they would put four texels to a pixel. Its firewood is its own, one texel to a pixel.
+- **The first previews**, fixed before commit:
+  - the split ends, with bark along two edges, read as a maze pattern; each end now has its bark at one corner;
+  - the round's bark was the fireplace logs' charred one and read as a dark crate; it is now oak's grey-brown.
+
 ## Connections
 - Existing input producer: cobblestone, planks, a campfire and a smooth stone slab for the fireplace; leaves, a pumpkin and a string for the garland. All vanilla, from the first day.
 - Existing output consumer: none for the fireplace and the garland. The woodstove heats the kitchen's pots: a Cooking Pot on it brews what it brews on a campfire (mint tea, hot cocoa, mulled cider), as do a Skillet, the Canning Kettle and the Candy Kettle.
+- Part 3's inputs: iron bars and iron for the rack; a log and an iron axe for the chopping block. Its outputs: the rack gives back what it holds, and the chopping block gives a log's planks.
 - Part 2's inputs: iron and a furnace for the stove; copper and an iron nugget for the kettle; an iron ingot, a water bucket, an apple and the kitchen's mulling spices (from cinnamon or juniper) for the simmer pot.
 - Technology/magic connections (or infrastructure/cosmetic applicability): cosmetic, and the kitchen's heat sources (part 2).
 - Reachable entry path: from the first day, with no other branch.
@@ -93,6 +119,8 @@ Primary specialty and supported player role: building. A builder furnishes a roo
 - The garland costs two leaves, a pumpkin and a string. It is kept by the fireplace and given back whole, by hand or when the fireplace is broken. Nothing turns it back into what made it.
 - The woodstove costs seven iron ingots and a furnace and burns no fuel, like a campfire or the Kitchen Stove. It heats a pot as a campfire does and no faster, so it adds a heat source without adding any output.
 - The kettle and the simmer pot make nothing. The pot's water bucket is given back when it is made.
+- The rack keeps the logs put on it and gives back exactly those, each kind as it went in. It splits, grows and multiplies nothing.
+- The chopping block gives exactly what crafting the log gives (it asks the game for the log's own crafting recipe), never more, so it saves no wood and makes no loop. It costs an iron axe, which stays in it as its hatchet; it doesn't come back when the block is broken.
 - No loop: no recipe makes anything that leads back to itself (the audit refuses any loop).
 
 ## Multiplayer and persistence
@@ -100,7 +128,8 @@ Primary specialty and supported player role: building. A builder furnishes a roo
 - The crackle and smoke are each client's own, drawn near the firebox while lit.
 - It can't be pushed by a piston.
 - Part 2: the woodstove's `lit` is in its block state, as the fireplace's is. The kettle's and the pot's `heated` is worked out on the server from the block below, when either is placed and whenever that block changes (a stove lit or put out), so nothing ticks. The kettle's block entity (`tea_kettle`) keeps nothing: it is there for its renderer, which works out the lid's rattle from the game time. Steam and sounds are each client's own.
-- IDs (stable from release): the block and item `stone_fireplace`; its states `part` (0 to 8), `facing`, `lit`, `garland`. The item `mantel_garland`. Part 2's blocks and items `woodstove` (`facing`, `lit`), `tea_kettle` (`facing`, `heated`, model-only `runner`; block entity `tea_kettle`), `simmer_pot` (`facing`, `heated`); the woodstove is in `jugcraft:heat_sources`.
+- Part 3: the rack's logs are kept by its block entity (`firewood_rack`, saved as `logs`), changed on the server only and saved with the world. What it shows is its block state (`logs`, 0 to 16), so nothing is sent but the state. Splitting a log is the server's: it checks the item is a log and looks up its own crafting recipe there. The chopping block's swing is a block event, so every client near it sees it. Its block entity (`chopping_block`) keeps nothing.
+- IDs (stable from release): the block and item `stone_fireplace`; its states `part` (0 to 8), `facing`, `lit`, `garland`. The item `mantel_garland`. Part 2's blocks and items `woodstove` (`facing`, `lit`), `tea_kettle` (`facing`, `heated`, model-only `runner`; block entity `tea_kettle`), `simmer_pot` (`facing`, `heated`); the woodstove is in `jugcraft:heat_sources`. Part 3's blocks and items `firewood_rack` (`facing`, `logs` 0 to 16; block entity `firewood_rack`, its saved `logs`) and `chopping_block` (`facing`, model-only `runner`; block entity `chopping_block`).
 - Its recipes follow the agriculture switch. The blocks and items stay registered when it is off.
 
 ## Dependencies and assets
@@ -121,6 +150,12 @@ All on the first run:
   - `python3 -m unittest discover -s scripts/tests`: 287 tests, OK.
   - `python3 tools/check_icon_maps.py`: PASS (no new map; the stove's items are 3D).
   - `javac` scan of the new and changed Java for syntax errors: none in them. The full compile runs in CI.
+- Part 3, all on the first run:
+  - `python3 tools/check_mod_data.py`: PASS (8,121 material IDs). `check_hearth` now also checks the rack's capacity against `tools/hearth.py` and that it has a model for each count. It checks that the chopping block splits by the log's own crafting recipe, and that its hatchet is drawn by its renderer from its runner model, swung by the table's numbers about its grip.
+  - `python3 scripts/check_repository.py`: PASS.
+  - `python3 -m unittest discover -s scripts/tests`: 287 tests, OK.
+  - `python3 tools/check_icon_maps.py`: PASS (no new map; the woodpile's items are 3D).
+  - `javac` scan of the new and changed Java for syntax errors: none. The full compile runs in CI.
 
 Game tests (CI only, not run locally), `HearthGameTests`:
 - **The fireplace lights and takes its garland**:
@@ -138,8 +173,20 @@ Game tests (CI only, not run locally), `HearthGameTests`:
   - a Cooking Pot on the other, lit, counts it as heat;
   - broken, the stove drops itself, and the kettle comes off it and drops.
 - **Part 2: the kettle stands on a floor or a fire**: on stone it stands cold; a simmer pot on a lit campfire simmers, and stops when the fire is put out; with its floor gone, the kettle comes off and drops.
+- **Part 3: the firewood rack holds sixteen logs**:
+  - it stands empty, and a stick isn't stacked;
+  - fifteen oak logs and a birch go on it, each spent, and a seventeenth doesn't;
+  - a comparator reads it full (15);
+  - an empty hand takes back the birch, the last stacked;
+  - broken, it drops its fifteen oak logs and itself.
+- **Part 3: the chopping block splits a log**: a spruce log is spent and splits into four spruce planks, as crafting it gives; cobblestone isn't split; the chop marks its hatchet's swing.
 
-`HearthClientGameTests` takes four screenshots of a room's corner (a spruce floor and a plank back wall). It holds a fireplace lit and dressed, a second beside it out and bare, and part 2's two woodstoves lit along the wall, a kettle boiling on one (its lid drawn by `TeaKettleRenderer`) and a simmer pot on the other. The shots are from the room, close by, at the stoves, and by night.
+`HearthClientGameTests` takes five screenshots of a room's corner (a spruce floor and a plank back wall). It holds:
+- a fireplace lit and dressed, and a second beside it out and bare;
+- part 2's two woodstoves lit along the wall, a kettle boiling on one (its lid drawn by `TeaKettleRenderer`) and a simmer pot on the other;
+- part 3's firewood rack full of logs and a chopping block before it (its hatchet drawn by `ChoppingBlockRenderer`).
+
+The shots are from the room, close by, at the stoves, at the woodpile, and by night.
 
 Not run: a hand playtest, and a two-client playtest.
 
@@ -147,5 +194,5 @@ Not run: a hand playtest, and a two-client playtest.
 Not seasonal: it is made and burns all year. It doesn't generate in the world.
 
 ## Rollout and open questions
-- Part 3 (the woodpile: a firewood rack and a chopping block with its axe) follows.
+- Part 4 (the comforts: a blanket ladder and a knitting basket) follows.
 - Open: whether a lit fireplace or woodstove should warm players near it once a cold-weather system exists; whether the fireplace should take other mantel dressings (a winter garland, candles); whether the kettle should give hot water for the kitchen's drinks.

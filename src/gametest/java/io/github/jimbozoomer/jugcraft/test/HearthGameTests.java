@@ -1,7 +1,10 @@
 package io.github.jimbozoomer.jugcraft.test;
 
+import io.github.jimbozoomer.jugcraft.agriculture.ChoppingBlockBlock;
 import io.github.jimbozoomer.jugcraft.agriculture.CookingPotBlockEntity;
+import io.github.jimbozoomer.jugcraft.agriculture.DecorationBlockEntity;
 import io.github.jimbozoomer.jugcraft.agriculture.FacingDecorationBlock;
+import io.github.jimbozoomer.jugcraft.agriculture.FirewoodRackBlock;
 import io.github.jimbozoomer.jugcraft.agriculture.JugcraftAgriculture;
 import io.github.jimbozoomer.jugcraft.agriculture.MultiDecorationBlock;
 import io.github.jimbozoomer.jugcraft.agriculture.StoneFireplaceBlock;
@@ -31,12 +34,16 @@ import net.minecraft.world.phys.Vec3;
 /**
  * Cozy Fall Hearth, part 1 (decor set 5; docs/features/cozy-fall-hearth.md): the Stone Fireplace won't stand where any of
  * its nine blocks is taken and stands whole, three across and three up, where there is room; flint and steel lights every
- * block, wearing the flint, its firebox alone giving light {@value StoneFireplaceBlock#LIGHT}; a shovel puts it out. A Mantel Garland drapes every block and is spent; a second isn't; sneaking with an empty hand
- * takes it back. Broken at its firebox, lit and dressed, it all comes away, dropping the fireplace and its garland once.
+ * block, wearing the flint, its firebox alone giving light {@value StoneFireplaceBlock#LIGHT}; a shovel puts it out. A
+ * Mantel Garland drapes every block and is spent; a second isn't; sneaking with an empty hand takes it back. Broken at
+ * its firebox, lit and dressed, it all comes away, dropping the fireplace and its garland once.
  * Part 2: the Woodstove stands facing the player, out; a Tea Kettle and a Simmer Pot stand on it cold; lit, it gives
  * light and heats them, and a Cooking Pot counts it as heat; a shovel puts it out and the kettle cools; broken, the
  * kettle comes off it and both drop. A kettle stands on stone, cold; a simmer pot on a lit campfire simmers and stops
- * when the fire goes out; with its floor gone, the kettle comes off.
+ * when the fire goes out; with its floor gone, the kettle comes off. Part 3: the Firewood Rack takes sixteen logs of any
+ * kind and no more, nor a stick; a comparator reads it full; an empty hand takes back the last; broken, it gives them back
+ * as they went in. The Chopping Block splits a spruce log into four spruce planks, as crafting does, and marks its
+ * hatchet's swing; cobblestone isn't split.
  */
 public class HearthGameTests {
 	private static Item item(String id) {
@@ -182,7 +189,8 @@ public class HearthGameTests {
 		place(player, helper, potStovePos.above(), new ItemStack(item("simmer_pot")));
 		BlockPos kettle = helper.absolutePos(stovePos.above());
 		BlockPos pot = helper.absolutePos(potStovePos.above());
-		helper.assertTrue(level.getBlockState(kettle).is(JugcraftAgriculture.block("tea_kettle")) && !level.getBlockState(kettle).getValue(StovetopBlock.HEATED)
+		helper.assertTrue(level.getBlockState(kettle).is(JugcraftAgriculture.block("tea_kettle"))
+				&& !level.getBlockState(kettle).getValue(StovetopBlock.HEATED)
 				&& level.getBlockState(pot).is(JugcraftAgriculture.block("simmer_pot")) && !level.getBlockState(pot).getValue(StovetopBlock.HEATED),
 				"The kettle and the pot stand on the stoves, cold");
 		ItemStack flint = new ItemStack(Items.FLINT_AND_STEEL);
@@ -214,7 +222,8 @@ public class HearthGameTests {
 		ServerPlayer player = standing(helper, new BlockPos(3, 2, 1));
 		BlockPos onStone = new BlockPos(2, 2, 3);
 		place(player, helper, onStone, new ItemStack(item("tea_kettle")));
-		helper.assertTrue(helper.getBlockState(onStone).is(JugcraftAgriculture.block("tea_kettle")) && !helper.getBlockState(onStone).getValue(StovetopBlock.HEATED),
+		helper.assertTrue(helper.getBlockState(onStone).is(JugcraftAgriculture.block("tea_kettle"))
+				&& !helper.getBlockState(onStone).getValue(StovetopBlock.HEATED),
 				"It stands on stone, cold");
 		BlockPos fire = new BlockPos(5, 2, 3);
 		helper.setBlock(fire, Blocks.CAMPFIRE);
@@ -225,6 +234,62 @@ public class HearthGameTests {
 		helper.setBlock(onStone.below(), Blocks.AIR);
 		helper.runAfterDelay(3, () -> {
 			helper.assertTrue(helper.getBlockState(onStone).isAir() && dropped(helper, item("tea_kettle")) == 1, "Its floor gone, the kettle comes off");
+			helper.succeed();
+		});
+	}
+
+	// ---------------------------------------------------------------- part 3
+
+	@GameTest(maxTicks = 40)
+	public void theFirewoodRackHoldsSixteenLogs(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		floor(helper);
+		BlockPos pos = new BlockPos(3, 2, 4);
+		ServerPlayer player = standing(helper, new BlockPos(3, 2, 1));
+		place(player, helper, pos, new ItemStack(item("firewood_rack")));
+		BlockPos rack = helper.absolutePos(pos);
+		helper.assertTrue(level.getBlockState(rack).is(JugcraftAgriculture.block("firewood_rack"))
+				&& level.getBlockState(rack).getValue(FirewoodRackBlock.LOGS) == 0, "It stands empty");
+		use(player, level, rack, new ItemStack(Items.STICK));
+		helper.assertTrue(level.getBlockState(rack).getValue(FirewoodRackBlock.LOGS) == 0, "A stick isn't stacked");
+		ItemStack oak = new ItemStack(Items.OAK_LOG, 15);
+		for (int i = 0; i < 15; i++) {
+			use(player, level, rack, oak);
+		}
+		ItemStack birch = new ItemStack(Items.BIRCH_LOG, 2);
+		use(player, level, rack, birch);
+		helper.assertTrue(level.getBlockState(rack).getValue(FirewoodRackBlock.LOGS) == 16 && oak.isEmpty() && birch.getCount() == 1,
+				"Sixteen logs go on it, each spent, of any kind");
+		use(player, level, rack, birch);
+		helper.assertTrue(birch.getCount() == 1, "A seventeenth doesn't");
+		helper.assertTrue(level.getBlockState(rack).getAnalogOutputSignal(level, rack, Direction.NORTH) == 15, "A comparator reads it full");
+		use(player, level, rack, ItemStack.EMPTY);
+		helper.assertTrue(level.getBlockState(rack).getValue(FirewoodRackBlock.LOGS) == 15 && player.getInventory().countItem(Items.BIRCH_LOG) == 1,
+				"An empty hand takes back the birch log, the last stacked");
+		level.destroyBlock(rack, true);
+		helper.runAfterDelay(3, () -> {
+			helper.assertTrue(dropped(helper, Items.OAK_LOG) == 15 && dropped(helper, item("firewood_rack")) == 1,
+					"Broken, it gives back its logs as they went in, and itself");
+			helper.succeed();
+		});
+	}
+
+	@GameTest(maxTicks = 20)
+	public void theChoppingBlockSplitsALog(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		floor(helper);
+		BlockPos pos = new BlockPos(3, 2, 4);
+		ServerPlayer player = standing(helper, new BlockPos(3, 2, 1));
+		place(player, helper, pos, new ItemStack(item("chopping_block")));
+		BlockPos block = helper.absolutePos(pos);
+		helper.assertTrue(level.getBlockState(block).is(JugcraftAgriculture.block("chopping_block")), "It stands");
+		ItemStack spruce = new ItemStack(Items.SPRUCE_LOG, 2);
+		use(player, level, block, spruce);
+		helper.assertTrue(spruce.getCount() == 1 && player.getInventory().countItem(Items.SPRUCE_PLANKS) == 4,
+				"A spruce log is split into four spruce planks, as crafting it gives");
+		helper.assertTrue(ChoppingBlockBlock.split(level, new ItemStack(Items.COBBLESTONE)).isEmpty(), "Cobblestone isn't split");
+		helper.runAfterDelay(2, () -> {
+			helper.assertTrue(helper.getBlockEntity(pos, DecorationBlockEntity.class).marked() != Long.MIN_VALUE, "The chop marked its hatchet's swing");
 			helper.succeed();
 		});
 	}

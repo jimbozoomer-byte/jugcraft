@@ -8,6 +8,13 @@ Every change to Jugcraft, newest first, grouped by pull request. For what each t
 
 No numbered release yet. Entries on feature branches remain proposed until their pull requests merge.
 
+### Unmerged: Cozy Fall Hearth, part 3 (the woodpile)
+- **Firewood Rack**: a wrought-iron log rack that holds 16 logs of any kind, each shown as a split log, four to a layer. An empty hand takes back the last; a comparator reads how full it is; broken, it gives them back as they went in.
+- **Chopping Block**: a sawn round of oak with a hatchet in it. Use a log on it to split it into exactly the planks crafting gives; the hatchet swings each time.
+- Recipes: four iron bars and three iron ingots; a log and an iron axe.
+- Record: [cozy-fall-hearth.md](docs/features/cozy-fall-hearth.md).
+- **Checked:** the record's Verification. Game tests and screenshots run in CI only; not played by hand.
+
 ### Unmerged: Cozy Fall Hearth, part 2 (the stove)
 - **Cast-Iron Woodstove**: a parlour box stove 1 m high, its fire showing through mica windows. Lit with flint and steel or a fire charge (a shovel puts it out), it gives light 13 and heats what stands on it, as a campfire or the Kitchen Stove does: a Cooking Pot brews mint tea, hot cocoa and mulled cider on it. It burns no fuel.
 - **Tea Kettle**: a copper kettle that boils on any heat source, steaming, its lid rattling.

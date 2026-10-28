@@ -17,6 +17,12 @@ Part 2:
 - Copper and brass: flat bands, each tier of the kettle lit along its top, so its body reads as a turned dome.
 - Enamel: cream, with a cobalt rim and handle. The simmer pot's water: its colour in rings, still, or (simmering) an
   animated strip of rings spreading out from the middle, blended.
+Part 3:
+- Split firewood: each piece's end pale end grain in one of two tones by its place in the stack (so neighbours differ),
+  the bark at one outer corner and the heart a tone darker at the opposite one; its long sides split wood or bark, along
+  it. The rack is wrought iron in flat bands.
+- The chopping block's round: oak bark in stripes up it, its top rings about a dark pith with a check from the pith to
+  the bark. The hatchet: an iron head, a hickory handle along its length.
 """
 import math
 
@@ -383,10 +389,107 @@ def simmer_pot():
     return sc
 
 
+# ---------------------------------------------------------------- part 3: the firewood rack, the chopping block
+
+SPLIT = pal("8a6a40", "a8844e", "c4a066", "dcbc84")
+OAK_BARK = pal("3e3226", "54453a", "6a5a4a", "807060")
+HICKORY = pal("6a4a28", "86603a", "a27a4c", "bc9462")
+
+
+def split_end(corner, tone):
+    """A split log's end, three texels square: pale end grain in tone `tone` (pieces differ by their place in the stack,
+    so neighbours never match), its outer corner (by `corner`: 0 top left, 1 top right, 2 bottom right, 3 bottom left)
+    the bark and the corner opposite a tone darker, the heart of the round it was split from."""
+    def paint(p):
+        bx = 0 if corner in (0, 3) else p.w - 1
+        by = 0 if corner in (0, 1) else p.h - 1
+        for y in range(p.h):
+            for x in range(p.w):
+                if x == bx and y == by:
+                    p.put(x, y, shade(OAK_BARK, 1))
+                elif x == p.w - 1 - bx and y == p.h - 1 - by:
+                    p.put(x, y, shade(SPLIT, tone - 1))
+                else:
+                    p.put(x, y, shade(SPLIT, tone))
+    paint.tag = f"split_end{corner}{tone}"
+    return paint
+
+
+def rings():
+    """A sawn round's top: rings of wood about its middle, light and mid by turns, a dark pith, the bark round its edge,
+    and a check (a split) from the pith to the edge, as a round dried out cracks."""
+    def paint(p):
+        cx, cy = (p.w - 1) / 2, (p.h - 1) / 2
+        outer = (min(p.w, p.h) - 1) / 2
+        for y in range(p.h):
+            for x in range(p.w):
+                r = math.hypot(x - cx, y - cy)
+                if r >= outer - 0.25:
+                    k, pal_ = 1, OAK_BARK
+                elif r < 0.75:
+                    k, pal_ = 0, ENDGRAIN
+                else:
+                    k, pal_ = (2 if int(r) % 2 else 1), ENDGRAIN
+                if x == int(cx) and y > cy and r < outer - 0.25:
+                    k, pal_ = 0, ENDGRAIN
+                p.put(x, y, shade(pal_, k))
+    paint.tag = "rings"
+    return paint
+
+
+def firewood_rack():
+    """The Firewood Rack, facing north: a wrought-iron rack 87 cm wide, 37 cm deep and 94 cm high, two end frames (front
+    and back uprights under a top bar curled at its ends) on four feet, joined by a front and a back rail; and the split
+    logs laid on the rails between the frames, their ends to the front, four to a layer, layer on layer from the bottom
+    left, each piece its own quarter of a round. Models: `logs0` to `logs16`, the rack holding that many, all on one
+    texture."""
+    sc = Sculpt(hh.RACK["block"], 2505, 64)
+    iron = flat(CAST)
+    frame = []
+    for x0 in (1.0, 14.0):
+        for z0 in (5.0, 10.0):
+            frame.append(panel(sc, "upright", iron, (x0, 1.0, z0), (x0 + 1.0, 14.0, z0 + 1.0)))
+            frame.append(panel(sc, "foot", iron, (x0 - 0.25, 0.0, z0 - 0.25), (x0 + 1.25, 1.0, z0 + 1.25)))
+        frame.append(panel(sc, "top_bar", iron, (x0, 14.0, 5.0), (x0 + 1.0, 15.0, 11.0)))
+        for z0 in (4.25, 11.0):
+            frame.append(panel(sc, "curl", iron, (x0, 14.25, z0), (x0 + 1.0, 15.0, z0 + 0.75)))
+    for z0 in (5.0, 10.0):
+        frame.append(panel(sc, "rail", iron, (2.0, 1.0, z0), (14.0, 2.0, z0 + 1.0)))
+    pieces = []
+    for i in range(hh.RACK["capacity"]):
+        layer, slot = divmod(i, 4)
+        x0, y0 = 2.0 + slot * 3.0 + 0.125, 2.0 + layer * 3.0
+        corner, tone = (slot + layer * 3) % 4, 2 + (slot + layer) % 2
+        top = lengthwise(OAK_BARK) if corner in (0, 1) else lengthwise(SPLIT)
+        pieces.append(panel(sc, "piece", lengthwise(SPLIT), (x0, y0, 5.25), (x0 + 2.75, y0 + 2.875, 10.75), up=top,
+                            north=split_end(corner, tone), south=split_end((corner + 1) % 4, tone)))
+    for n in range(hh.RACK["capacity"] + 1):
+        sc.models[f"logs{n}"] = frame + pieces[:n]
+    return sc
+
+
+def chopping_block():
+    """The Chopping Block, facing north: a sawn round of oak 44 cm across and 45 cm high (two crossed boxes, an octagon),
+    its bark on and its rings on top; and a hatchet sunk in its top, its handle rising to the front. Models: `whole` (the
+    round) and `hatchet` (drawn by client/ChoppingBlockRenderer)."""
+    sc = Sculpt(hh.CHOPPING_BLOCK["block"], 2506, 64)
+    bark = lengthwise(OAK_BARK)
+    el = [panel(sc, "round", bark, (4.5, 0.0, 4.5), (11.5, 7.25, 11.5), up=rings()),
+          panel(sc, "round", bark, (5.25, 0.0, 5.25), (10.75, 7.24, 10.75), up=rings(), rot=rotation((8.0, 0.0, 8.0), "y", 45))]
+    sc.models["whole"] = el
+    head = flat(IRON)
+    sc.models["hatchet"] = [panel(sc, "head", head, (7.75, 6.0, 7.0), (8.25, 8.25, 9.75)),
+                            panel(sc, "poll", head, (7.6, 7.75, 9.75), (8.4, 8.75, 10.5)),
+                            panel(sc, "handle", lengthwise(HICKORY), (7.7, 8.0, 2.0), (8.3, 8.6, 8.0), rot=rotation((8.0, 8.3, 8.0), "x", 22.5))]
+    return sc
+
+
 _built = {}
-BUILDERS = {hh.FIREPLACE["block"]: fireplace, hh.WOODSTOVE["block"]: woodstove, hh.KETTLE["block"]: kettle, hh.SIMMER_POT["block"]: simmer_pot}
-# Each one's texture's size: the fireplace's and the stove's 128 texels square, the kettle's and the pot's 64.
-SIZES = {hh.FIREPLACE["block"]: 128, hh.WOODSTOVE["block"]: 128, hh.KETTLE["block"]: 64, hh.SIMMER_POT["block"]: 64}
+BUILDERS = {hh.FIREPLACE["block"]: fireplace, hh.WOODSTOVE["block"]: woodstove, hh.KETTLE["block"]: kettle, hh.SIMMER_POT["block"]: simmer_pot,
+            hh.RACK["block"]: firewood_rack, hh.CHOPPING_BLOCK["block"]: chopping_block}
+# Each one's texture's size: the fireplace's and the stove's 128 texels square, the rest 64.
+SIZES = {hh.FIREPLACE["block"]: 128, hh.WOODSTOVE["block"]: 128, hh.KETTLE["block"]: 64, hh.SIMMER_POT["block"]: 64, hh.RACK["block"]: 64,
+         hh.CHOPPING_BLOCK["block"]: 64}
 
 
 def build(block):
@@ -454,6 +557,7 @@ def assets(root, write, lang):
     write(root / "items" / f"{item}.json", {"model": {"type": "minecraft:model", "model": rid(f"item/{item}")}})
     lang[f"message.{MOD}.{block}.light"] = "Light it with flint and steel or a fire charge"
     part2_assets(root, write, lang)
+    part3_assets(root, write, lang)
 
 
 # The kettle and the pot are small: shown larger in a slot and a hand, lifted to the middle.
@@ -525,6 +629,40 @@ def part2_assets(root, write, lang):
           {"animation": {"frametime": hh.SIMMER_POT["frametime"], "interpolate": True}})
 
 
+def part3_assets(root, write, lang):
+    """The firewood rack's model for each count of logs on it, and the chopping block's (the round, and its hatchet as its
+    `runner`, drawn by client/ChoppingBlockRenderer); their items show the rack full and the block with its hatchet."""
+    models = root / "models" / "block"
+    states = root / "blockstates"
+    spec = hh.RACK
+    block = spec["block"]
+    lang[f"block.{MOD}.{block}"] = spec["display"]
+    lang[f"message.{MOD}.{block}.full"] = "The rack is full"
+    sc = build(block)
+    variants = {}
+    for logs in range(spec["capacity"] + 1):
+        write(models / f"{block}_{logs}.json", fa.model(block, d20d.separated(sc.models[f"logs{logs}"])))
+        for f, y in FACINGS.items():
+            variants[f"facing={f},logs={logs}"] = {"model": rid(f"block/{block}_{logs}"), **({"y": y} if y else {})}
+    write(states / f"{block}.json", {"variants": variants})
+    write(root / "models" / "item" / f"{block}.json", {"parent": rid(f"block/{block}_{spec['capacity']}")})
+    write(root / "items" / f"{block}.json", {"model": {"type": "minecraft:model", "model": rid(f"item/{block}")}})
+    spec = hh.CHOPPING_BLOCK
+    block = spec["block"]
+    lang[f"block.{MOD}.{block}"] = spec["display"]
+    sc = build(block)
+    write(models / f"{block}.json", fa.model(block, d20d.separated(sc.models["whole"])))
+    write(models / f"{block}_hatchet.json", fa.model(block, d20d.separated(sc.models["hatchet"])))
+    variants = {}
+    for f, y in FACINGS.items():
+        turn = {"y": y} if y else {}
+        variants[f"facing={f},runner=false"] = {"model": rid(f"block/{block}"), **turn}
+        variants[f"facing={f},runner=true"] = {"model": rid(f"block/{block}_hatchet"), **turn}
+    write(states / f"{block}.json", {"variants": variants})
+    write(root / "models" / "item" / f"{block}.json", fa.model(block, d20d.separated(sc.models["whole"] + sc.models["hatchet"])))
+    write(root / "items" / f"{block}.json", {"model": {"type": "minecraft:model", "model": rid(f"item/{block}")}})
+
+
 def loot(out, write):
     """The fireplace drops once, from its first block (a garland on it stays with the blocks, so it is dropped too)."""
     block = hh.FIREPLACE["block"]
@@ -535,16 +673,18 @@ def loot(out, write):
         {"condition": {"type": "minecraft:match_block", "blocks": rid(block), "state": {"part": "0", "garland": "true"}},
          "entries": [{"type": "minecraft:item", "name": rid(hh.GARLAND["item"])}], "rolls": 1}],
         "random_sequence": rid(f"blocks/{block}")})
-    for block in (hh.WOODSTOVE["block"], hh.KETTLE["block"], hh.SIMMER_POT["block"]):
+    for block in (hh.WOODSTOVE["block"], hh.KETTLE["block"], hh.SIMMER_POT["block"], hh.RACK["block"], hh.CHOPPING_BLOCK["block"]):
         write(out / f"{block}.json", {"type": "minecraft:block", "pools": [{
             "condition": {"type": "minecraft:survives_explosion"}, "entries": [{"type": "minecraft:item", "name": rid(block)}], "rolls": 1}],
             "random_sequence": rid(f"blocks/{block}")})
 
 
 def tags(tags):
-    """Stone and iron come off with a pickaxe; the woodstove heats what stands on it, as the Kitchen Stove does."""
-    for block in (hh.FIREPLACE["block"], hh.WOODSTOVE["block"], hh.KETTLE["block"], hh.SIMMER_POT["block"]):
+    """Stone and iron come off with a pickaxe, the chopping block with an axe; the woodstove heats what stands on it, as the
+    Kitchen Stove does."""
+    for block in (hh.FIREPLACE["block"], hh.WOODSTOVE["block"], hh.KETTLE["block"], hh.SIMMER_POT["block"], hh.RACK["block"]):
         tags.add("block", "minecraft:mineable/pickaxe", rid(block))
+    tags.add("block", "minecraft:mineable/axe", rid(hh.CHOPPING_BLOCK["block"]))
     tags.add("block", f"{MOD}:heat_sources", rid(hh.WOODSTOVE["block"]))
 
 
@@ -555,6 +695,6 @@ def textures():
     out = {("block", block): build(block).atlas.img, ("block", f"{block}_fire"): fire_strip(),
            ("item", hh.GARLAND["item"]): item_icons.draw(hh.GARLAND["item"]),
            ("block", f"{pot}_brew"): brew_strip(), ("block", f"{pot}_brew_still"): brew_still()}
-    for other in (hh.WOODSTOVE["block"], hh.KETTLE["block"], pot):
+    for other in (hh.WOODSTOVE["block"], hh.KETTLE["block"], pot, hh.RACK["block"], hh.CHOPPING_BLOCK["block"]):
         out[("block", other)] = build(other).atlas.img
     return out

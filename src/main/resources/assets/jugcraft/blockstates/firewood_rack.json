@@ -1,0 +1,259 @@
+{
+  "variants": {
+    "facing=north,logs=0": {
+      "model": "jugcraft:block/firewood_rack_0"
+    },
+    "facing=east,logs=0": {
+      "model": "jugcraft:block/firewood_rack_0",
+      "y": 90
+    },
+    "facing=south,logs=0": {
+      "model": "jugcraft:block/firewood_rack_0",
+      "y": 180
+    },
+    "facing=west,logs=0": {
+      "model": "jugcraft:block/firewood_rack_0",
+      "y": 270
+    },
+    "facing=north,logs=1": {
+      "model": "jugcraft:block/firewood_rack_1"
+    },
+    "facing=east,logs=1": {
+      "model": "jugcraft:block/firewood_rack_1",
+      "y": 90
+    },
+    "facing=south,logs=1": {
+      "model": "jugcraft:block/firewood_rack_1",
+      "y": 180
+    },
+    "facing=west,logs=1": {
+      "model": "jugcraft:block/firewood_rack_1",
+      "y": 270
+    },
+    "facing=north,logs=2": {
+      "model": "jugcraft:block/firewood_rack_2"
+    },
+    "facing=east,logs=2": {
+      "model": "jugcraft:block/firewood_rack_2",
+      "y": 90
+    },
+    "facing=south,logs=2": {
+      "model": "jugcraft:block/firewood_rack_2",
+      "y": 180
+    },
+    "facing=west,logs=2": {
+      "model": "jugcraft:block/firewood_rack_2",
+      "y": 270
+    },
+    "facing=north,logs=3": {
+      "model": "jugcraft:block/firewood_rack_3"
+    },
+    "facing=east,logs=3": {
+      "model": "jugcraft:block/firewood_rack_3",
+      "y": 90
+    },
+    "facing=south,logs=3": {
+      "model": "jugcraft:block/firewood_rack_3",
+      "y": 180
+    },
+    "facing=west,logs=3": {
+      "model": "jugcraft:block/firewood_rack_3",
+      "y": 270
+    },
+    "facing=north,logs=4": {
+      "model": "jugcraft:block/firewood_rack_4"
+    },
+    "facing=east,logs=4": {
+      "model": "jugcraft:block/firewood_rack_4",
+      "y": 90
+    },
+    "facing=south,logs=4": {
+      "model": "jugcraft:block/firewood_rack_4",
+      "y": 180
+    },
+    "facing=west,logs=4": {
+      "model": "jugcraft:block/firewood_rack_4",
+      "y": 270
+    },
+    "facing=north,logs=5": {
+      "model": "jugcraft:block/firewood_rack_5"
+    },
+    "facing=east,logs=5": {
+      "model": "jugcraft:block/firewood_rack_5",
+      "y": 90
+    },
+    "facing=south,logs=5": {
+      "model": "jugcraft:block/firewood_rack_5",
+      "y": 180
+    },
+    "facing=west,logs=5": {
+      "model": "jugcraft:block/firewood_rack_5",
+      "y": 270
+    },
+    "facing=north,logs=6": {
+      "model": "jugcraft:block/firewood_rack_6"
+    },
+    "facing=east,logs=6": {
+      "model": "jugcraft:block/firewood_rack_6",
+      "y": 90
+    },
+    "facing=south,logs=6": {
+      "model": "jugcraft:block/firewood_rack_6",
+      "y": 180
+    },
+    "facing=west,logs=6": {
+      "model": "jugcraft:block/firewood_rack_6",
+      "y": 270
+    },
+    "facing=north,logs=7": {
+      "model": "jugcraft:block/firewood_rack_7"
+    },
+    "facing=east,logs=7": {
+      "model": "jugcraft:block/firewood_rack_7",
+      "y": 90
+    },
+    "facing=south,logs=7": {
+      "model": "jugcraft:block/firewood_rack_7",
+      "y": 180
+    },
+    "facing=west,logs=7": {
+      "model": "jugcraft:block/firewood_rack_7",
+      "y": 270
+    },
+    "facing=north,logs=8": {
+      "model": "jugcraft:block/firewood_rack_8"
+    },
+    "facing=east,logs=8": {
+      "model": "jugcraft:block/firewood_rack_8",
+      "y": 90
+    },
+    "facing=south,logs=8": {
+      "model": "jugcraft:block/firewood_rack_8",
+      "y": 180
+    },
+    "facing=west,logs=8": {
+      "model": "jugcraft:block/firewood_rack_8",
+      "y": 270
+    },
+    "facing=north,logs=9": {
+      "model": "jugcraft:block/firewood_rack_9"
+    },
+    "facing=east,logs=9": {
+      "model": "jugcraft:block/firewood_rack_9",
+      "y": 90
+    },
+    "facing=south,logs=9": {
+      "model": "jugcraft:block/firewood_rack_9",
+      "y": 180
+    },
+    "facing=west,logs=9": {
+      "model": "jugcraft:block/firewood_rack_9",
+      "y": 270
+    },
+    "facing=north,logs=10": {
+      "model": "jugcraft:block/firewood_rack_10"
+    },
+    "facing=east,logs=10": {
+      "model": "jugcraft:block/firewood_rack_10",
+      "y": 90
+    },
+    "facing=south,logs=10": {
+      "model": "jugcraft:block/firewood_rack_10",
+      "y": 180
+    },
+    "facing=west,logs=10": {
+      "model": "jugcraft:block/firewood_rack_10",
+      "y": 270
+    },
+    "facing=north,logs=11": {
+      "model": "jugcraft:block/firewood_rack_11"
+    },
+    "facing=east,logs=11": {
+      "model": "jugcraft:block/firewood_rack_11",
+      "y": 90
+    },
+    "facing=south,logs=11": {
+      "model": "jugcraft:block/firewood_rack_11",
+      "y": 180
+    },
+    "facing=west,logs=11": {
+      "model": "jugcraft:block/firewood_rack_11",
+      "y": 270
+    },
+    "facing=north,logs=12": {
+      "model": "jugcraft:block/firewood_rack_12"
+    },
+    "facing=east,logs=12": {
+      "model": "jugcraft:block/firewood_rack_12",
+      "y": 90
+    },
+    "facing=south,logs=12": {
+      "model": "jugcraft:block/firewood_rack_12",
+      "y": 180
+    },
+    "facing=west,logs=12": {
+      "model": "jugcraft:block/firewood_rack_12",
+      "y": 270
+    },
+    "facing=north,logs=13": {
+      "model": "jugcraft:block/firewood_rack_13"
+    },
+    "facing=east,logs=13": {
+      "model": "jugcraft:block/firewood_rack_13",
+      "y": 90
+    },
+    "facing=south,logs=13": {
+      "model": "jugcraft:block/firewood_rack_13",
+      "y": 180
+    },
+    "facing=west,logs=13": {
+      "model": "jugcraft:block/firewood_rack_13",
+      "y": 270
+    },
+    "facing=north,logs=14": {
+      "model": "jugcraft:block/firewood_rack_14"
+    },
+    "facing=east,logs=14": {
+      "model": "jugcraft:block/firewood_rack_14",
+      "y": 90
+    },
+    "facing=south,logs=14": {
+      "model": "jugcraft:block/firewood_rack_14",
+      "y": 180
+    },
+    "facing=west,logs=14": {
+      "model": "jugcraft:block/firewood_rack_14",
+      "y": 270
+    },
+    "facing=north,logs=15": {
+      "model": "jugcraft:block/firewood_rack_15"
+    },
+    "facing=east,logs=15": {
+      "model": "jugcraft:block/firewood_rack_15",
+      "y": 90
+    },
+    "facing=south,logs=15": {
+      "model": "jugcraft:block/firewood_rack_15",
+      "y": 180
+    },
+    "facing=west,logs=15": {
+      "model": "jugcraft:block/firewood_rack_15",
+      "y": 270
+    },
+    "facing=north,logs=16": {
+      "model": "jugcraft:block/firewood_rack_16"
+    },
+    "facing=east,logs=16": {
+      "model": "jugcraft:block/firewood_rack_16",
+      "y": 90
+    },
+    "facing=south,logs=16": {
+      "model": "jugcraft:block/firewood_rack_16",
+      "y": 180
+    },
+    "facing=west,logs=16": {
+      "model": "jugcraft:block/firewood_rack_16",
+      "y": 270
+    }
+  }
+}

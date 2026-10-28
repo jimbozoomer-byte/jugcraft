@@ -6912,6 +6912,11 @@
       "denominator": 1,
       "source": "recipe jugcraft:chompa_costume"
     },
+    "jugcraft:chopping_block": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
     "jugcraft:chromite": {
       "numerator": 1,
       "denominator": 1,
@@ -12011,6 +12016,11 @@
       "numerator": 3685,
       "denominator": 2,
       "source": "recipe jugcraft:firedrake"
+    },
+    "jugcraft:firewood_rack": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
     },
     "jugcraft:first_aid_kit": {
       "numerator": 1,
