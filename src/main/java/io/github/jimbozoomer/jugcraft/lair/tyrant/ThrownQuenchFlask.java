@@ -14,7 +14,7 @@ import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.projectile.ThrowableItemProjectile;
+import net.minecraft.world.entity.projectile.throwableitemprojectile.ThrowableItemProjectile;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
@@ -81,7 +81,7 @@ public class ThrownQuenchFlask extends ThrowableItemProjectile {
 		AABB box = new AABB(at, at).inflate(RADIUS);
 		for (LivingEntity living : level.getEntitiesOfClass(LivingEntity.class, box, other -> other.isAlive()
 				&& other.distanceToSqr(at) <= RADIUS * RADIUS)) {
-			if (living.getType().is(QUENCHABLE)) {
+			if (living.is(QUENCHABLE)) {
 				// The blow first, so a Cinderling's thrower has taken part in its Tyrant's fight; then it gutters out.
 				living.hurtServer(level, level.damageSources().thrown(flask == null ? living : flask, owner), FIRE_BORN_DAMAGE);
 				if (living instanceof CinderlingEntity cinderling && !cinderling.isRemoved()) {
@@ -98,7 +98,7 @@ public class ThrownQuenchFlask extends ThrowableItemProjectile {
 		int reach = (int) Math.ceil(RADIUS);
 		BlockPos centre = BlockPos.containing(at);
 		for (BlockPos pos : BlockPos.betweenClosed(centre.offset(-reach, -reach, -reach), centre.offset(reach, reach, reach))) {
-			if (level.getBlockState(pos).is(BlockTags.FIRE) && pos.getCenter().distanceToSqr(at) <= (RADIUS + 0.5) * (RADIUS + 0.5)) {
+			if (level.getBlockState(pos).is(BlockTags.FIRE) && Vec3.atCenterOf(pos).distanceToSqr(at) <= (RADIUS + 0.5) * (RADIUS + 0.5)) {
 				level.removeBlock(pos, false);
 				doused++;
 			}

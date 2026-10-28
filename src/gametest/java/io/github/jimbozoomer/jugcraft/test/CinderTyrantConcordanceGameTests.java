@@ -399,7 +399,7 @@ public class CinderTyrantConcordanceGameTests {
 					"Tempered, it did not climb toward hot while the one beside it stayed cold: " + tempered.temperature() + " and " + control.temperature());
 			tempered.temper(ConcordanceProgress.now(level), 0);
 			helper.assertTrue(tempered.tempered(ConcordanceProgress.now(level)) == 0
-					&& !tempered.saveWithoutMetadata(level.registryAccess()).contains(CrucibleBlockEntity.TEMPERED_UNTIL),
+					&& !tempered.saveWithoutMetadata(level.registryAccess()).keySet().contains(CrucibleBlockEntity.TEMPERED_UNTIL),
 					"An ended tempering was not forgotten");
 			player.discard();
 			helper.succeed();
