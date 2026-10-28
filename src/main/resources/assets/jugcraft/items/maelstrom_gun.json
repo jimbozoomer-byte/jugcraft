@@ -1,0 +1,9 @@
+{
+  "model": {
+    "type": "minecraft:special",
+    "base": "jugcraft:item/maelstrom_gun",
+    "model": {
+      "type": "geckolib:geckolib"
+    }
+  }
+}

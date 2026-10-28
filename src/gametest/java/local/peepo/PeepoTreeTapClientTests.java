@@ -115,7 +115,7 @@ public final class PeepoTreeTapClientTests implements FabricClientGameTest {
         check(job.workStatus(npc)==CompanionStatus.READY,"consuming last empty bottle can free its slot");
         level.setBlock(base,Blocks.AIR.defaultBlockState(),2);
         check(job.workStatus(npc)==CompanionStatus.MISSING,"removed tap stops work");
-        check(PeepoSpawns.LOCAL_LIMIT==6,"six-companion local cap remains");
+        check(PeepoSpawns.LOCAL_LIMIT==4,"four-wild-companion local cap");
         });
     }
     private void delivery(TestServerContext server,boolean jughead,int fill,boolean upgraded,int expected){

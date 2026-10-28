@@ -90,7 +90,8 @@
     "ClaimDispenserMixin",
     "DeathGraveMixin",
     "AircraftArrowMixin",
-    "JimtaSpiderLootSpawnMixin"
+    "JimtaSpiderLootSpawnMixin",
+    "DreadDamageMixin"
   ],
   "injectors": {
     "defaultRequire": 1
