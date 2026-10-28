@@ -1,6 +1,6 @@
 # Bosses branch (brainstorm)
 
-Status: **a brainstorm; nine bosses are built.** On 10 October 2026 the owner chose to build a new boss "the same way" as Madame Tatterlace ([features/tatterlace.md](../features/tatterlace.md)); the Yeti King is first, to the plan below. The same day the owner asked for "the next boss same way" as him: the Cinder Tyrant, to his plan below. Both are built. On 13 October 2026 the owner chose the next: the Mire Hag, to her plan below, who is built too; and after her, the same day, the Crypt Lich, to his plan below, who is built too. On 14 October 2026 the owner chose the Iron Dreadnought, to his plan below, who is built too. The same day the owner chose the Alpha Werewolf, to his plan below. On 23 October 2026 the owner chose a Halloween boss, the Pumpkin King, to his plan below, who is built too. On 4 October 2026 the owner asked for variant weapons, many of them "drops from bosses ill make later", themed around those bosses ("example: Yeti King"), and to "brainstorm bosses we could make". This page is that brainstorm. The bosses' weapons already exist: Arms VII ([features/arms-vii.md](../features/arms-vii.md)) adds two trophies for each of the first eight bosses below, and their loot tables are ready (`data/jugcraft/loot_table/bosses/<boss>.json`, one of the two per roll). Building a boss is a separate, reviewed feature each time, in the order the Yeti King was built in: [BOSS_PLAYBOOK.md](BOSS_PLAYBOOK.md). Everything here is a proposal for the owner to pick from, change or drop.
+Status: **a brainstorm; ten bosses are built.** On 10 October 2026 the owner chose to build a new boss "the same way" as Madame Tatterlace ([features/tatterlace.md](../features/tatterlace.md)); the Yeti King is first, to the plan below. The same day the owner asked for "the next boss same way" as him: the Cinder Tyrant, to his plan below. Both are built. On 13 October 2026 the owner chose the next: the Mire Hag, to her plan below, who is built too; and after her, the same day, the Crypt Lich, to his plan below, who is built too. On 14 October 2026 the owner chose the Iron Dreadnought, to his plan below, who is built too. The same day the owner chose the Alpha Werewolf, to his plan below. On 23 October 2026 the owner chose a Halloween boss, the Pumpkin King, to his plan below, who is built too. On 27 October 2026 the owner asked for a lair where the Headless Horseman lives out of the Halloween season: his plan is below, and both its parts, the lair and his lair fight, are built. On 4 October 2026 the owner asked for variant weapons, many of them "drops from bosses ill make later", themed around those bosses ("example: Yeti King"), and to "brainstorm bosses we could make". This page is that brainstorm. The bosses' weapons already exist: Arms VII ([features/arms-vii.md](../features/arms-vii.md)) adds two trophies for each of the first eight bosses below, and their loot tables are ready (`data/jugcraft/loot_table/bosses/<boss>.json`, one of the two per roll). Building a boss is a separate, reviewed feature each time, in the order the Yeti King was built in: [BOSS_PLAYBOOK.md](BOSS_PLAYBOOK.md). Everything here is a proposal for the owner to pick from, change or drop.
 
 The owner's Mars adventure, the Cydonian Sentinel, is also implemented: [feature record](../features/cydonian-sentinel.md).
 
@@ -29,6 +29,7 @@ From [CONTENT_BRANCHES.md](../CONTENT_BRANCHES.md) ("Caves, dungeons and bosses"
 | **The Alpha Werewolf** | The Moonlit Ring: the Howling Totem | [moonlit-ring.md](../features/moonlit-ring.md), [alpha-werewolf.md](../features/alpha-werewolf.md) | Not yet |
 | **The Storm Roc** (part 1 so far) | The Crown of Thunder: the Thunder Vane | [crown-of-thunder.md](../features/crown-of-thunder.md) | Not yet |
 | **The Pumpkin King** | The Crowfield: the Harvest Crown | [crowfield.md](../features/crowfield.md), [pumpkin-king.md](../features/pumpkin-king.md) | Not yet |
+| **The Headless Horseman** (in his lair) | The Church Bridge, out of the Halloween season: the Hessian's Bridle | [church-bridge.md](../features/church-bridge.md), [hessian-horseman.md](../features/hessian-horseman.md) | Not yet |
 
 The first two are the Witching Season's ([features/witching-season.md](../features/witching-season.md)); all six, the Iron Dreadnought's trench and the Alpha Werewolf's ring are on the shared lair framework (`lair/`). Vesperine and Madame Tatterlace roll their own loot table, `loot_table/entities/<boss>.json`, for each player who took part: their trophies, the Vesper Scythe and the Needle Rapier (Arms VII's), come at 15% a share and always on a player's first win. The Arms VII trophy tables `bosses/vesperine` and `bosses/tatterlace` are written by `tools/arms_variants.py` as the others' are, but nothing rolls them. The Yeti King and the Cinder Tyrant roll theirs the same way, a trophy always on a player's first win. Both have been on Concordance Chunk A's support credit since Chunk B ([lair-encounter-credit.md](../features/lair-encounter-credit.md)). JEI's information pages on their loot and the encyclopedia's lair dossiers cover the first four (the Yeti King and the Cinder Tyrant since Chunk B; [concordance-first-loadout.md](../features/concordance-first-loadout.md), [arcane-concordance-first-route.md](../features/arcane-concordance-first-route.md)).
 
@@ -994,6 +995,159 @@ He follows the rules every boss follows (above):
 - every opening costs a Harvest Crown, and it works all year unless the server keeps it to Halloween.
 
 Nothing a tier needs comes only from him: heirloom pumpkins, gold and hay come without him, and so does every crop he guards.
+
+## The Headless Horseman in his lair: the plan (being built)
+
+On 27 October 2026 the owner asked for the Headless Horseman to come at players in the Halloween season without
+necessarily killing them, and for "the lair which is where he will reside when its not longer halloween season". They
+chose the lair for the off-season only. In the season he rides the Overworld as he always has: he is summoned at
+midnight with a lit scarecrow head ([features/halloween-nights.md](../features/halloween-nights.md)), and with Horseman
+sightings he rides past players to frighten them. Out of the season he waits in his lair, and a rite calls players there
+to fight him. It is built by [the boss playbook](BOSS_PLAYBOOK.md): first the lair and the rite that opens it (part 1),
+then his lair fight and his loot (part 2), each its own pull request with tests and pictures.
+
+The numbers here are the plan's. Each part's feature record says what changed in building it. Part 1, the lair and the
+bridle: [features/church-bridge.md](../features/church-bridge.md); part 2, his lair fight and his loot:
+[features/hessian-horseman.md](../features/hessian-horseman.md#changes-from-the-plan).
+
+*The Hessian trooper whose head was carried off by a cannonball, riding out of the old wood on a black horse, his
+cloak streaming, a jack-o'-lantern blazing on his saddle where his head should be.* Out of the season he keeps to the
+hollow where the legend says he was buried: a road through a dark wood, a brook, and the covered bridge by the old
+church that he never crosses.
+
+### The Church Bridge
+
+A wooded hollow under a full moon. North is the church.
+- **The arrival:** the **wood road**, at the hollow's south edge, between old trees. Grey Mist fills the road's end behind
+  it: the way home. The road is safe.
+- **The hollow, the arena:** a clearing about 41 blocks across in an old wood, with a floor of podzol, moss and coarse
+  earth, the road running north through it to the bridge between low split-rail fences with gaps in them. Two fallen
+  trunks give low cover.
+- **The braziers:** eight **Soul Braziers** (the lairs' brazier, a fixture) in a ring round the hollow's middle, lit.
+  Part 2 snuffs them and players light them again.
+- **The brook and the bridge:** the brook crosses the hollow's north edge from west to east. The road crosses it by a
+  **covered bridge** of weathered spruce with a shingled roof.
+- **The church and its yard:** across the brook is the **old church**: fieldstone walls, a steep dark roof and a white
+  wooden belfry over its door. Its churchyard of old gravestones runs down to the brook inside a low stone wall.
+- **The wood:** the hollow is walled all round by old trunks with a thicket of Moonwood Leaves between them, too thick to
+  pass, and a canopy over it.
+- **The moon:** a full moon low over the church. The sky is deep blue-black, and mist drifts in the air.
+
+Everything there is vanilla blocks and the lairs' own (the braziers, Moonwood Leaves, Grey Mist and the moon), and nothing
+in it changes by itself once placed. Only the braziers can be used.
+
+### The rite: the Hessian's Bridle
+
+1. Craft a **Hessian's Bridle**: three leather, two iron ingots and a jack-o'-lantern.
+2. Use it on a **jack-o'-lantern standing on a fence or wall post**, **at night**, in the Overworld, under the open sky,
+   **out of the Halloween season**. A lit hand-carved pumpkin counts as a jack-o'-lantern.
+3. Hoofbeats come out of the dark and the lantern flares. Grey Mist rises where the user stands, and they come to on the
+   wood road. The bridle is used up, and the lantern and its post are untouched. For 60 seconds anyone can walk into the
+   mist and follow. Nobody is taken in by standing near it.
+4. In the season the bridle only says that he rides the Overworld tonight, and how to call him: a lit scarecrow head at
+   midnight. By day, outside the Overworld, on anything but a lantern on a post, under a roof, or with every hollow
+   taken, it only says why, and nothing is used up.
+
+Leather, iron and a jack-o'-lantern are all-year materials, so the bridle is never seasonal. The lair is the
+off-season's answer to the season's summoning, and neither is the only way to meet him.
+
+### The fight (part 2)
+
+The Headless Horseman has 420 health, scaled for the party: half as much again for each player after the first, at most
+two and a half times. He has armour 8 and rides his black horse; falls never harm him.
+
+He waits mounted at the bridge's foot, his lantern dark. He wakes when a player who can fight him steps off the wood road
+into the hollow, or strikes him: the horse rears, his lantern bursts into flame, and he laughs. He keeps to the hollow:
+more than 24 blocks from its middle, he is set back. **He never crosses the bridge:** his horse balks at it, as in the
+legend, but he throws.
+
+**His rule: the Dark Road.** Every 24 seconds he rides round the hollow and snuffs two braziers: the one nearest the
+player he is hunting, and its neighbour round the ring. A dark brazier is lit again by using it.
+- While four or more braziers are dark, he is **hidden in the dark**: every blow does half damage to him. His tells stay
+  as clear as ever.
+- If every brazier he snuffed is lit again within 10 seconds, he is **revealed**. His lantern flares white and his horse
+  rears, staggering him for 2 seconds, and for 8 seconds every blow does half as much again.
+
+From anywhere in the hollow, a sprinting player reaches both braziers of a snuffing well inside the 10 seconds. Part 2's
+audit walks the hollow to keep it so.
+
+**Phase 1, "The Ride"** (full health to half):
+
+| Attack | Read it by | What it does |
+| --- | --- | --- |
+| Sabre Pass | Hoofbeats quicken and he lowers his sabre along his line (1.0 s) | A gallop through a player's place along a line 16 blocks long: 9 damage and thrown aside. Step out of the line |
+| Pumpkin Toss | He lifts a flaming pumpkin from his saddle, and a ring of embers glows where it will land (1.0 s) | 7 damage within 3 blocks, and set alight for 3 s. Step off the ring |
+| Rearing Stomp | His horse rears, screaming (0.8 s) | 6 damage within 3.5 blocks. Step back |
+| The Dark Road | He wheels and lifts his lantern (1.2 s) | Above |
+
+**At half health, "The Hollow Wakes":** he rides to the bridge's foot and lifts his lantern high (2 s, unhurt). Every
+brazier gutters and two go dark.
+
+**Phase 2, "The Headless Charge"** (half to a quarter): he keeps every attack, snuffs braziers every 18 seconds, and adds:
+
+| Attack | Read it by | What it does |
+| --- | --- | --- |
+| Head Hurl | He lifts the blazing jack-o'-lantern from his saddle and draws back (1.5 s); a pillar of flame marks where it will land | Thrown at the farthest player, or at anyone on the bridge first: 12 damage within 2.5 blocks, and set alight. Step off the mark |
+| Phantom Riders | Blue fire runs along two lines across the hollow (1.5 s) | Two ghostly riders gallop down the lines: 6 damage each. Step out of the lines |
+
+**Below a quarter, "The Last Ride":** three braziers go dark every 15 seconds. The braziers' 10 seconds and his tells stay
+as long as ever.
+
+**Left alone** for 10 seconds, he rides back to the bridge's foot, healed. His braziers are lit again, and who hurt him
+is forgotten.
+
+### His loot (per participant)
+
+A participant is a player who hurt him, or lit a brazier during a snuffing that revealed him, and is within 64 blocks
+of the hollow's middle when he falls.
+
+| Loot | Chance |
+| --- | --- |
+| **The Horseman's Lantern** (his old drop, a lantern block) | 1, always |
+| **A trophy:** one of two new Arms VII weapons for him, the **Hollowflail** (a flail whose head is a blazing jack-o'-lantern) or the **Hessian Sabre** (a cavalry sabre), with a new boon, **Dread** | 15%; certain on a player's first kill |
+| **The Hessian's Spur**: in the offhand, a horse its rider is on gallops a fifth faster at night | 25% |
+| **The Hessian's Tricorn**, a costume | 20% |
+| 350 experience, shared out | always |
+| An advancement for laying him to rest | always |
+
+- **Dread** (the trophies' boon, planned): a struck monster, never a boss, takes a fifth more damage from everything for
+  4 seconds, once every 8 seconds per target.
+- The Horseman's Lantern and his cloak still drop from the summoned Horseman in the season. The lair is their
+  off-season route, and nothing core needs them.
+- When he falls, his lantern rolls from the saddle and goes out. His horse rears and fades into the mist, and Grey Mist
+  opens on the bridge: the way home.
+
+### The shared lair contract
+
+- **Arrival, staging, waking and return:** the wood road is safe. He wakes when a player steps into the hollow, or strikes
+  him. Grey Mist fills the road's end, and opens on the bridge when he falls.
+- **Fixtures:** the eight braziers, which any player in the hollow may light, and the Grey Mist. Nothing else can be used,
+  built or broken.
+- **The floor:** the hollow owns it. Only the braziers change (lit or dark), and all of them are lit again when he resets.
+  Each instance is placed fresh.
+- **Who fights:** players who may fight a lair's boss (`LairBosses`), with party health as above.
+- **Reset:** when no eligible player is left, or he is left alone for 10 seconds.
+- **Clean-up:** his phantom riders are his, and gone with him.
+- **Death, disconnect and restart:** as at every lair. Grave Goods keep what a player falls with, and instances close on
+  a restart. Each participant's loot is rolled once when he falls.
+- **An ordinary player** can do everything: a brazier is lit by using it, a dark one smokes, every attack is read
+  before it lands, and the revealed window opens him to any weapon. Alone, a player can light both braziers of a
+  snuffing in time.
+- **Outside the instance:** nothing. The bridle is used up, but the lantern and its post are left as they were, and no
+  rider of his comes out.
+
+### Rules kept
+
+He follows the rules every boss follows (above):
+- his hollow is his arena, and resets when everyone leaves;
+- every attack is read before it lands, and every snuffing can be undone in time by one player;
+- dying there keeps everything as Grave Goods;
+- his health scales with the party, and every participant rolls his loot;
+- nothing in his hollow can be built or broken, and the only blocks that change are his braziers;
+- every opening costs a Hessian's Bridle, and the hollow is open only out of the season, the season keeping its own way
+  to meet him.
+
+Nothing a tier needs comes only from him.
 
 ## The Storm Roc: the plan (being built)
 

@@ -20,6 +20,16 @@ public final class KitchenCompanionPort extends SnapshotParticipant<KitchenCompa
     private final BlockEntity block;
     public final CompanionRecipeFilter filter=new CompanionRecipeFilter();
     private final ItemStack[] finished=new ItemStack[9];
+    // One visible workpiece plus a single matching stack, bounded to 64 pieces in total.
+    public static final int CUTTING_BATCH=64;
+    private ItemStack cuttingQueue=ItemStack.EMPTY;
+    public ItemStack queuedCuts(){return cuttingQueue.copy();}
+    public boolean cuttingBatchActive(){return block instanceof CuttingBoardBlockEntity b && (!b.item().isEmpty() || !cuttingQueue.isEmpty());}
+    public void advanceCut(){
+        if(block instanceof CuttingBoardBlockEntity board && board.item().isEmpty() && !cuttingQueue.isEmpty()){
+            board.companionPut(cuttingQueue.split(1));nextStatus=0;
+        }
+    }
     public final CuttingBoardJob job;
     private long nextStatus;
     private int filterRevision;
@@ -49,11 +59,19 @@ public final class KitchenCompanionPort extends SnapshotParticipant<KitchenCompa
     public CompanionLogistics.Port forCompanion(PeepoEntity npc){return new CompanionLogistics.Port(){
         public Identifier plan(){return Identifier.fromNamespaceAndPath("peepo","kitchen");}
         public int needed(ItemStack item){return need(npc,item);}
+        public int pickupNeeded(ItemStack item){return cuttingBatchActive()?0:needed(item);}
+        public List<ItemStack> supplyBatch(Storage<ItemVariant> source,int slots){
+            return cuttingBatchActive()?List.of():CompanionLogistics.Port.super.supplyBatch(source,slots);
+        }
         public Storage<ItemVariant> inputs(){return new InsertionOnlyStorage<>(){
             public long insert(ItemVariant variant,long amount,TransactionContext tx){
                 if(variant.isBlank() || amount<=0)return 0;var stack=variant.toStack(1);int n=(int)Math.min(amount,need(npc,stack));if(n<=0)return 0;
                 updateSnapshots(tx);
-                if(block instanceof CuttingBoardBlockEntity b)b.companionPut(stack);
+                if(block instanceof CuttingBoardBlockEntity b){
+                    int queued=n;
+                    if(b.item().isEmpty()){b.companionPut(stack);queued--;}
+                    if(queued>0)cuttingQueue=stack.copyWithCount(cuttingQueue.getCount()+queued);
+                }
                 else if(block instanceof SkilletBlockEntity s)n=s.companionInsert(stack,n,npc,tx);
                 else if(block instanceof KitchenStoveBlockEntity s)n=s.companionInsert(stack,n,npc,tx);
                 return n;
@@ -65,7 +83,10 @@ public final class KitchenCompanionPort extends SnapshotParticipant<KitchenCompa
     private int need(PeepoEntity npc,ItemStack raw){
         if(!live() || !CompanionJobs.permitted(npc,block.getBlockPos()))return 0;
         if(block instanceof CuttingBoardBlockEntity b){
-            var recipe=cutting(npc,raw);return b.item().isEmpty() && recipe!=null && fits(recipe.cut())?1:0;
+            if(!b.item().isEmpty() && !ItemStack.isSameItemSameComponents(b.item(),raw)
+                || !cuttingQueue.isEmpty() && !ItemStack.isSameItemSameComponents(cuttingQueue,raw))return 0;
+            var recipe=cutting(npc,raw);
+            return recipe!=null && fits(recipe.cut())?Math.max(0,Math.min(CUTTING_BATCH,raw.getMaxStackSize())-b.item().getCount()-cuttingQueue.getCount()):0;
         }
         var result=cooked(raw);if(result.isEmpty() || !filter.allows(result))return 0;
         if(block instanceof SkilletBlockEntity s)return CookingPotBlockEntity.isHeated(block.getLevel(),block.getBlockPos())?s.companionRoom(raw,result):0;
@@ -93,7 +114,7 @@ public final class KitchenCompanionPort extends SnapshotParticipant<KitchenCompa
             updateSnapshots(tx);
             if(!store(npc.uniforms.chefResults(recipe.cut(),tx))){cutStatus=CompanionStatus.FULL;return false;}
             if(npc.extractWorkEnergy(CompanionUniforms.Type.CHEF,16,tx)<=0){cutStatus=CompanionStatus.RECOVERING;return false;}
-            board.companionPut(ItemStack.EMPTY);tx.commit();
+            board.companionPut(ItemStack.EMPTY);advanceCut();tx.commit();
         }
         npc.belongings.getItem(9).hurtAndBreak(1,npc,net.minecraft.world.entity.EquipmentSlot.MAINHAND);
         npc.belongings.setChanged();
@@ -126,13 +147,22 @@ public final class KitchenCompanionPort extends SnapshotParticipant<KitchenCompa
             });
         }return new CombinedStorage<>(slots);
     }
-    record Snapshot(Object input,List<ItemStack> output){}
-    protected Snapshot createSnapshot(){Object input=block instanceof CuttingBoardBlockEntity b?b.item().copy():block instanceof SkilletBlockEntity s?s.companionSnapshot():((KitchenStoveBlockEntity)block).companionSnapshot();return new Snapshot(input,Arrays.stream(finished).map(ItemStack::copy).toList());}
-    protected void readSnapshot(Snapshot s){if(block instanceof CuttingBoardBlockEntity b)b.companionPut((ItemStack)s.input);else if(block instanceof SkilletBlockEntity pan)pan.companionRestore(s.input);else ((KitchenStoveBlockEntity)block).companionRestore(s.input);for(int i=0;i<9;i++)finished[i]=s.output.get(i).copy();}
+    record Snapshot(Object input,List<ItemStack> output,ItemStack queued){}
+    protected Snapshot createSnapshot(){Object input=block instanceof CuttingBoardBlockEntity b?b.item().copy():block instanceof SkilletBlockEntity s?s.companionSnapshot():((KitchenStoveBlockEntity)block).companionSnapshot();return new Snapshot(input,Arrays.stream(finished).map(ItemStack::copy).toList(),cuttingQueue.copy());}
+    protected void readSnapshot(Snapshot s){if(block instanceof CuttingBoardBlockEntity b)b.companionPut((ItemStack)s.input);else if(block instanceof SkilletBlockEntity pan)pan.companionRestore(s.input);else ((KitchenStoveBlockEntity)block).companionRestore(s.input);for(int i=0;i<9;i++)finished[i]=s.output.get(i).copy();cuttingQueue=s.queued.copy();nextStatus=0;}
     protected void onFinalCommit(){changed();}
     public void changed(){nextStatus=0;block.setChanged();if(block.getLevel()!=null)block.getLevel().sendBlockUpdated(block.getBlockPos(),block.getBlockState(),block.getBlockState(),net.minecraft.world.level.block.Block.UPDATE_CLIENTS);}
-    public void save(ValueOutput out){filter.save(out);out.store("CompanionFinished",ItemStack.OPTIONAL_CODEC.listOf(),Arrays.asList(finished));}
-    public void load(ValueInput in){filter.load(in);filter.initialize(ItemStack.EMPTY);Arrays.fill(finished,ItemStack.EMPTY);var list=in.read("CompanionFinished",ItemStack.OPTIONAL_CODEC.listOf()).orElse(List.of());for(int i=0;i<Math.min(9,list.size());i++)finished[i]=list.get(i);}
-    public boolean handOver(net.minecraft.world.entity.player.Player player){boolean any=false;for(int i=0;i<9;i++){var item=finished[i];if(item.isEmpty())continue;any=true;finished[i]=ItemStack.EMPTY;if(!player.getInventory().add(item))net.minecraft.world.level.block.Block.popResource(block.getLevel(),block.getBlockPos(),item);}if(any)changed();return any;}
-    public void drop(){if(block.getLevel()==null)return;for(var item:finished)net.minecraft.world.Containers.dropItemStack(block.getLevel(),block.getBlockPos().getX()+.5,block.getBlockPos().getY()+.5,block.getBlockPos().getZ()+.5,item);Arrays.fill(finished,ItemStack.EMPTY);job.removed();}
+    public void save(ValueOutput out){filter.save(out);out.store("CompanionFinished",ItemStack.OPTIONAL_CODEC.listOf(),Arrays.asList(finished));if(block instanceof CuttingBoardBlockEntity)out.store("CompanionCuttingQueue",ItemStack.OPTIONAL_CODEC,cuttingQueue);}
+    public void load(ValueInput in){filter.load(in);filter.initialize(ItemStack.EMPTY);Arrays.fill(finished,ItemStack.EMPTY);var list=in.read("CompanionFinished",ItemStack.OPTIONAL_CODEC.listOf()).orElse(List.of());for(int i=0;i<Math.min(9,list.size());i++)finished[i]=list.get(i);cuttingQueue=block instanceof CuttingBoardBlockEntity?in.read("CompanionCuttingQueue",ItemStack.OPTIONAL_CODEC).orElse(ItemStack.EMPTY):ItemStack.EMPTY;nextStatus=0;}
+    public boolean handOver(net.minecraft.world.entity.player.Player player){
+        var items=takeFinished();
+        // Empty-hand retrieval also cancels an unfinished batch, including after a filter/tool change.
+        if(!cuttingQueue.isEmpty() && block instanceof CuttingBoardBlockEntity board){
+            items.add(cuttingQueue);cuttingQueue=ItemStack.EMPTY;
+            if(!board.item().isEmpty()){items.add(board.item().copy());board.companionPut(ItemStack.EMPTY);}
+        }
+        for(var item:items)if(!player.getInventory().add(item))net.minecraft.world.level.block.Block.popResource(block.getLevel(),block.getBlockPos(),item);
+        if(!items.isEmpty())changed();return !items.isEmpty();
+    }
+    public void drop(){if(block.getLevel()==null)return;var items=takeFinished();items.add(cuttingQueue);cuttingQueue=ItemStack.EMPTY;for(var item:items)net.minecraft.world.Containers.dropItemStack(block.getLevel(),block.getBlockPos().getX()+.5,block.getBlockPos().getY()+.5,block.getBlockPos().getZ()+.5,item);job.removed();}
 }

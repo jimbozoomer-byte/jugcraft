@@ -70,6 +70,7 @@ import zeppelin
 import mech
 import landship
 import unmasking
+import herobrine
 import trains
 import artillery
 import tower_guns
@@ -1589,6 +1590,43 @@ def check_unmasking():
             err(f"Unmasking does not give {villain} the mask {mask} (tools/unmasking.py)")
         if len(crooks) != unmasking.CROOKS or not all(name and excuse for name, excuse in crooks):
             err(f"tools/unmasking.py: {villain} needs {unmasking.CROOKS} crooks, each with a name and an excuse")
+def check_herobrine():
+    """creatures/herobrine against tools/herobrine.py: his timings and distances, the server option, his name, and his
+    eyes texture (clear but for the four eye pixels). His body is the game's own default player texture, read at run
+    time: the renderer must name DefaultPlayerSkin, and no copied skin may ship."""
+    folder = JAVA_ROOT / "creatures" / "herobrine"
+    def read(path):
+        return path.read_text(encoding="utf-8") if path.is_file() else ""
+    entity = read(folder / "Herobrine.java")
+    encounters = read(folder / "HerobrineEncounters.java")
+    for const in ("VANISH_DISTANCE", "STARE_TICKS", "DISTANT_TICKS", "CLOSE_TICKS", "CLOSE_STARE_TICKS", "SEEN_TICKS"):
+        if f" {const} = {getattr(herobrine, const)};" not in entity:
+            err(f"Herobrine.{const} differs from tools/herobrine.py ({getattr(herobrine, const)})")
+    for const in ("GRACE_TICKS", "IDLE_TICKS", "CLOSE_DARKNESS_TICKS"):
+        if f" {const} = {getattr(herobrine, const)};" not in encounters:
+            err(f"HerobrineEncounters.{const} differs from tools/herobrine.py ({getattr(herobrine, const)})")
+    if f' ID = "{herobrine.ENTITY}";' not in encounters:
+        err(f"HerobrineEncounters.ID differs from tools/herobrine.py ({herobrine.ENTITY})")
+    config = (JAVA_ROOT / "config" / "JugcraftConfig.java").read_text(encoding="utf-8")
+    for key, default in herobrine.OPTIONS.items():
+        if f'Map.entry("{key}", "{default}")' not in config:
+            err(f"JugcraftConfig.TEXT_OPTIONS lacks {key} (default {default})")
+    renderer = read(CLIENT_JAVA_ROOT / "HerobrineRenderer.java")
+    if "DefaultPlayerSkin.getDefaultTexture()" not in renderer or f'"textures/entity/{herobrine.ENTITY}_eyes.png"' not in renderer:
+        err("HerobrineRenderer must draw the game's default player texture with textures/entity/herobrine_eyes.png over it")
+    if (ASSETS / "textures" / "entity" / f"{herobrine.ENTITY}.png").is_file():
+        err(f"textures/entity/{herobrine.ENTITY}.png must not exist: Herobrine's body is the game's own player texture")
+    eyes = ASSETS / "textures" / "entity" / f"{herobrine.ENTITY}_eyes.png"
+    if not eyes.is_file():
+        err(f"textures/entity/{herobrine.ENTITY}_eyes.png is missing: run tools/generate_textures.py")
+    else:
+        img = Image.open(eyes).convert("RGBA")
+        lit = {(x, y) for y in range(img.height) for x in range(img.width) if img.getpixel((x, y))[3]}
+        if img.size != (64, 64) or lit != set(herobrine.EYES):
+            err(f"textures/entity/{herobrine.ENTITY}_eyes.png should be 64x64 and clear but for {herobrine.EYES}")
+    lang = load(ASSETS / "lang" / "en_us.json") or {}
+    if lang.get(f"entity.{MOD}.{herobrine.ENTITY}") != herobrine.NAME:
+        err(f"entity.{MOD}.{herobrine.ENTITY} is not named {herobrine.NAME}: run tools/generate_material_data.py")
 def check_trains():
     """train/ against tools/trains.py: each vehicle's length, size and seats, the driving, fuel and coupling numbers, the
     seat heights and exhaust, and the renderer's wheels and axles."""
@@ -4596,6 +4634,7 @@ def check_agriculture():
     check_regatta(java, main)
     check_festivities(java, main)
     check_night(java, main)
+    check_graveyard_rising(java, main)
     check_decor(java)
     check_decor2(java)
     check_decor3(java)
@@ -6114,6 +6153,90 @@ def check_festivities(java, main):
             err(f"{stone}: model boxes differ from its shape")
 
 
+def check_graveyard_rising(java, main):
+    """Graveyard Rising: GraveyardRising.java's numbers, waves and names are tools/agriculture.py's GRAVEYARD_RISING, the
+    table makes sense, it is registered and on by default, it only starts in the season and at night, reads no unloaded
+    chunk, leaves the bell to ring, sends any risen left by a restart back, rewards a player once a night, and its graves
+    tag, gift loot table, advancement and words are written."""
+    rising = ag.GRAVEYARD_RISING
+    source = java.get("GraveyardRising", "")
+    for key, name in (("min_graves", "MIN_GRAVES"), ("radius", "RADIUS"), ("height", "HEIGHT"),
+                      ("confirm_min_ticks", "CONFIRM_MIN_TICKS"), ("confirm_ticks", "CONFIRM_TICKS"),
+                      ("ring_cooldown", "RING_COOLDOWN"), ("first_wave_ticks", "FIRST_WAVE_TICKS"),
+                      ("wave_gap_ticks", "WAVE_GAP_TICKS"), ("range", "RANGE"), ("abandon_ticks", "ABANDON_TICKS"),
+                      ("leash", "LEASH"), ("check_ticks", "CHECK_TICKS"), ("extra_per_player", "EXTRA_PER_PLAYER"),
+                      ("max_extra", "MAX_EXTRA"), ("max_risings", "MAX_RISINGS"), ("apart", "APART")):
+        match = re.search(rf"\b{name} = (\d+);", source)
+        if not match or int(match.group(1)) != rising[key]:
+            err(f"GraveyardRising.{name} differs from tools/agriculture.py GRAVEYARD_RISING[{key!r}] ({rising[key]})")
+    for key, name in (("option", "OPTION"), ("tag", "TAG"), ("advancement", "ADVANCEMENT"), ("table", "TABLE"), ("extra", "EXTRA")):
+        if f'{name} = "{rising[key]}";' not in source:
+            err(f"GraveyardRising.{name} is not {rising[key]!r}")
+    waves = re.search(r"WAVES = List\.of\((.*?)\);\n", source, re.S)
+    found = [[(entity, int(count)) for entity, count in re.findall(r'new Rise\("([a-z_:]+)", (\d+)\)', line)]
+             for line in re.findall(r"List\.of\((new Rise[^\n]*)", waves.group(1))] if waves else []
+    if found != [list(wave) for wave in rising["waves"]]:
+        err(f"GraveyardRising.WAVES {found} differs from tools/agriculture.py {rising['waves']}")
+    archers = re.search(r"ARCHERS = List\.of\(([^)]*)\)", source)
+    if not archers or re.findall(r'"([a-z_:]+)"', archers.group(1)) != rising["archers"]:
+        err("GraveyardRising.ARCHERS differs from tools/agriculture.py")
+    if 'Jugcraft.id("graves")' not in source or f'Jugcraft.id("{rising["attachment"]}")' not in source:
+        err("GraveyardRising: the graves tag or the reward attachment is not the table's")
+
+    import arms_variants
+    entities = [entity for wave in rising["waves"] for entity, _ in wave] + [rising["extra"]]
+    if any(entity in arms_variants.FRIGHTLESS for entity in entities):
+        err("GRAVEYARD_RISING: a boss climbs out of the graves")
+    if not set(rising["archers"]) <= set(entities):
+        err("GRAVEYARD_RISING: an archer that never rises")
+    if not (rising["leash"] < rising["range"] and rising["confirm_min_ticks"] < rising["confirm_ticks"]
+            and rising["ring_cooldown"] <= rising["confirm_min_ticks"] and rising["min_graves"] >= 1
+            and rising["max_extra"] >= rising["extra_per_player"] >= 0 and rising["apart"] > rising["radius"] * 2):
+        err("GRAVEYARD_RISING: the leash must be inside the range, the second ring after the first's cooldown and inside "
+            "its window, and risings far enough apart that no grave serves two")
+
+    for part, why in (("if (RISINGS.isEmpty() || server.getTickCount() % CHECK_TICKS != 0)", "ticks only every CHECK_TICKS while a rising is under way"),
+                      ("if (!HalloweenSeason.active())", "starts only in the Halloween season"),
+                      ("!night(dayTime) ? Result.DAYTIME", "starts only at night"),
+                      ('return fail(level, party, "dawn");', "ends at dawn"),
+                      ("if (!level.isLoaded(pos))", "reads no unloaded chunk for graves"),
+                      ("return level.isLoaded(at)", "raises nobody in an unloaded chunk"),
+                      ("return InteractionResult.PASS;", "leaves the bell to ring"),
+                      ("hand == InteractionHand.MAIN_HAND", "rings once per use"),
+                      ("entity.entityTags().contains(TAG) && !RISEN.contains(entity.getUUID())", "sends the risen left by a restart back"),
+                      ("if (rested(player) == night)", "rewards a player once a night"),
+                      ("if (risen.size() * 2 < wanted)", "fails a wave the graves have no room for"),
+                      ("level.getDifficulty() == Difficulty.PEACEFUL ? Result.PEACEFUL", "refuses peaceful")):
+        if part not in source:
+            err(f"GraveyardRising no longer {why}")
+    if "GraveyardRising.register();" not in main:
+        err("JugcraftAgriculture doesn't register GraveyardRising")
+    if f'Map.entry("{rising["option"]}", "on")' not in CONFIG.read_text(encoding="utf-8"):
+        err(f"JugcraftConfig: {rising['option']} should default to on")
+
+    namespace, path = rising["graves_tag"].split(":")
+    graves = (load(DATA / namespace / "tags" / "block" / f"{path}.json") or {}).get("values")
+    if graves != rising["graves"]:
+        err(f"{rising['graves_tag']} block tag differs from GRAVEYARD_RISING['graves']")
+    table = load(DATA / "jugcraft" / "loot_table" / f"{rising['table']}.json") or {}
+    pools = table.get("pools", [])
+    if (table.get("type") != "minecraft:gift" or len(pools) != 2 or pools[0].get("rolls") != rising["rolls"]
+            or [entry.get("name") for entry in pools[0].get("entries", [])] != [item for item, _, _ in rising["treats"]]
+            or [entry.get("name", "") for entry in pools[1].get("entries", [])] != [item for item, _ in rising["keepsakes"]]):
+        err(f"loot_table/{rising['table']}.json differs from GRAVEYARD_RISING's treats and keepsakes")
+    if not (DATA / "jugcraft" / "advancement" / f"{rising['advancement']}.json").exists():
+        err(f"advancement {rising['advancement']} is not written")
+    lang = load(ASSETS / "lang" / "en_us.json") or {}
+    results = re.search(r"enum Result \{([^}]*)\}", source)
+    said = re.findall(r"[A-Z_]+", results.group(1))[6:] if results else []
+    keys = ([f"message.jugcraft.graveyard_rising.{name.lower()}" for name in said]
+            + [f"message.jugcraft.graveyard_rising.{key}" for key in ("wave", "won", "rested_already", "failed", "dawn", "blocked")]
+            + ["event.jugcraft.graveyard_rising.wave"])
+    missing = [key for key in keys if key not in lang]
+    if not said or missing:
+        err(f"Graveyard Rising's words are missing: {missing or 'GraveyardRising.Result'}")
+
+
 def check_night(java, main):
     """Halloween nights: Java matches tools/agriculture.py, every trebuchet state has a model, and the Horseman's loot
     is tools/agriculture.py's (dropped only when a player defeats him)."""
@@ -6148,6 +6271,82 @@ def check_night(java, main):
     for (source, name), value in expected.items():
         if number(source, name) != value:
             err(f"{source}.{name} = {number(source, name)} differs from tools/agriculture.py ({value})")
+    # His sightings in the season: the rider's and the director's numbers are the table's; he is never saved, harms
+    # nobody (his pumpkin is the harmless kind), is drawn as the Horseman is, can be switched off, and is seen with words.
+    sight = ag.HORSEMAN_SIGHTINGS
+    for (source, name), key in {("HorsemanSightings", "CHECK_TICKS"): "check_ticks", ("HorsemanSightings", "SETTLE_TICKS"): "settle_ticks",
+                                ("HorsemanSightings", "START_CHANCE"): "start_chance", ("HorsemanSightings", "MIN_GAP_DAYS"): "min_gap_days",
+                                ("HorsemanSightings", "MAX_GAP_DAYS"): "max_gap_days", ("HorsemanSightings", "ONE_AT_A_TIME"): "one_at_a_time",
+                                ("HorsemanSightings", "WITNESS_RANGE"): "witness_range", ("HorsemanSightings", "START_DISTANCE"): "start_distance",
+                                ("HorsemanSightings", "CLIMB"): "climb", ("HorsemanRider", "APPROACH_SPEED"): "approach_speed",
+                                ("HorsemanRider", "APPROACH_TICKS"): "approach_ticks", ("HorsemanRider", "CIRCLE_RADIUS"): "circle_radius",
+                                ("HorsemanRider", "CIRCLE_TICKS"): "circle_ticks", ("HorsemanRider", "THROW_AT"): "throw_at",
+                                ("HorsemanRider", "LEAVE_SPEED"): "leave_speed", ("HorsemanRider", "LEAVE_TICKS"): "leave_ticks",
+                                ("HorsemanRider", "MAX_TICKS"): "max_ticks", ("FlamingPumpkin", "FRIGHT_TICKS"): "fright_ticks",
+                                ("FlamingPumpkin", "FRIGHT_PUSH"): "fright_push"}.items():
+        if number(source, name) != sight[key]:
+            err(f"{source}.{name} = {number(source, name)} differs from tools/agriculture.py HORSEMAN_SIGHTINGS ({sight[key]})")
+    if not 0 < sight["min_gap_days"] <= sight["max_gap_days"] or not 0 < sight["throw_at"] < sight["circle_ticks"] \
+            or sight["approach_ticks"] + sight["circle_ticks"] + sight["leave_ticks"] > sight["max_ticks"] \
+            or not sight["circle_radius"] < sight["start_distance"] <= sight["witness_range"] < sight["one_at_a_time"]:
+        err("tools/agriculture.py HORSEMAN_SIGHTINGS: the gaps must be in order, he must fling his pumpkin while he circles, "
+            "his whole ride must fit in max_ticks, and he must start nearer than witness_range, which is inside one_at_a_time")
+    sightings, rider = java.get("HorsemanSightings", ""), java.get("HorsemanRider", "")
+    for needed, why in (('OPTION = "' + sight["option"] + '";', "be switched by halloween.horseman_sightings"),
+                        ('ADVANCEMENT = "' + sight["advancement"] + '";', "award Sleepy Hollow"),
+                        ("!passing || !Wisps.night(clock) || !enabled()", "come only on passing Halloween nights, when switched on"),
+                        ("level.isPositionEntityTicking(column)", "never read a chunk that is not loaded and ticking")):
+        if needed not in sightings:
+            err(f"HorsemanSightings must {why} ({needed})")
+    if "FlamingPumpkin.harmless(level, this)" not in rider or "return false;" not in rider.split("hurtServer", 1)[-1][:120]:
+        err("HorsemanRider must fling only harmless pumpkins and take no harm")
+    agriculture = java.get("JugcraftAgriculture", "")
+    if not re.search(r'entity\("horseman_rider", EntityType\.Builder\.<HorsemanRider>of\(HorsemanRider::new, MobCategory\.MISC\)[^;]*\.noSave\(\)', agriculture):
+        err("JugcraftAgriculture must register horseman_rider as a never-saved creature (MobCategory.MISC, noSave)")
+    client = (CLIENT_JAVA_ROOT / "JugcraftClient.java").read_text(encoding="utf-8")
+    if "EntityRendererRegistry.register(JugcraftAgriculture.HORSEMAN_RIDER, HorsemanRenderer::new);" not in client:
+        err("JugcraftClient must draw the rider as the Horseman (HorsemanRenderer)")
+    config = (JAVA_ROOT / "config" / "JugcraftConfig.java").read_text(encoding="utf-8")
+    if f'Map.entry("{sight["option"]}", "on")' not in config:
+        err(f"JugcraftConfig must default {sight['option']} to on")
+    if sight["advancement"] not in ag.HALLOWEEN_ADVANCEMENTS:
+        err(f"tools/agriculture.py HALLOWEEN_ADVANCEMENTS has no {sight['advancement']}")
+    lang = load(ASSETS / "lang" / "en_us.json") or {}
+    for key in ("entity.jugcraft.horseman_rider", "message.jugcraft.horseman.hoofbeats", "message.jugcraft.horseman.sighting_gone"):
+        if key not in lang:
+            err(f"en_us.json has no words for {key}")
+    # The Blood Moon: its numbers are the table's, it only adds to what the season already brings, and it is wired into
+    # the costumes, the candy, the wisps, the sightings and the client's sky.
+    blood = ag.BLOOD_MOON
+    for name, key in (("EVERY", "every"), ("CHECK_TICKS", "check_ticks"), ("COSTUME_CHANCE", "costume_chance"), ("CANDY_ROLLS", "candy_rolls"),
+                      ("WISP_CHANCE", "wisp_chance"), ("WISP_NEAR_CAP", "wisp_near_cap"), ("HAZE_TICKS", "haze_ticks"),
+                      ("HAZE_COUNT", "haze_count"), ("HAZE_RADIUS", "haze_radius")):
+        if number("BloodMoon", name) != blood[key]:
+            err(f"BloodMoon.{name} = {number('BloodMoon', name)} differs from tools/agriculture.py BLOOD_MOON ({blood[key]})")
+    if not (blood["every"] >= 2 and ag.COSTUMED_MOBS["chance"] < blood["costume_chance"] <= 1.0 and blood["candy_rolls"] >= 1
+            and wisps["spawn_chance"] <= blood["wisp_chance"] <= 1.0 and wisps["near_cap"] <= blood["wisp_near_cap"] <= wisps["level_cap"]):
+        err("tools/agriculture.py BLOOD_MOON: it rises at most every other night and only adds: more costumes, candy and wisps, "
+            "never past the wisps' cap for the world")
+    for source, needed, why in (("BloodMoon", 'OPTION = "' + blood["option"] + '";', "be switched by halloween.blood_moon"),
+                                ("BloodMoon", 'ADVANCEMENT = "' + blood["advancement"] + '";', "award Bad Moon Rising"),
+                                ("CostumedMobs", "random.nextFloat() >= chance()", "dress more mobs under it"),
+                                ("CostumedMobs", "BloodMoon.active() ? BloodMoon.CANDY_ROLLS : 1", "roll the candy more under it"),
+                                ("Wisps", "BloodMoon.active() ? BloodMoon.WISP_CHANCE : SPAWN_CHANCE", "bring more wisps under it"),
+                                ("Wisps", "BloodMoon.active() ? BloodMoon.WISP_NEAR_CAP : NEAR_CAP", "let more wisps gather under it"),
+                                ("HorsemanSightings", "BloodMoon.active() && last != today.toEpochDay()", "send the Horseman by under it"),
+                                ("JugcraftAgriculture", "BloodMoon.register();", "run it")):
+        if needed not in java.get(source, ""):
+            err(f"{source} must {why} ({needed})")
+    if "BloodMoon.clientActive = payload.active()" not in client or '"BloodMoonSkyMixin"' not in (ROOT / "src" / "client" / "resources"
+            / "jugcraft.client.mixins.json").read_text(encoding="utf-8"):
+        err("The client must hear the Blood Moon and turn its sky (BloodMoonSkyMixin)")
+    if f'Map.entry("{blood["option"]}", "on")' not in config:
+        err(f"JugcraftConfig must default {blood['option']} to on")
+    if blood["advancement"] not in ag.HALLOWEEN_ADVANCEMENTS:
+        err(f"tools/agriculture.py HALLOWEEN_ADVANCEMENTS has no {blood['advancement']}")
+    for key in ("message.jugcraft.blood_moon.rises", "message.jugcraft.blood_moon.sets"):
+        if key not in lang:
+            err(f"en_us.json has no words for {key}")
     if treb["board"] != ag.HARVEST_SCALE["board"] or "BOARD = HarvestScaleBlockEntity.BOARD;" not in java.get("TrebuchetBlockEntity", ""):
         err("The trebuchet's board must hand out the Harvest Scale's ribbons, one per place")
     if not treb["min_angle"] <= treb["default_angle"] <= treb["max_angle"] or (treb["default_angle"] - treb["min_angle"]) % treb["angle_step"]:
@@ -9587,6 +9786,7 @@ def check_lairs():
     import crypt_archive as ca
     import foundry_trench as ft
     import crown_of_thunder as ct
+    import church_bridge as cb
     import cydonian_sanctum as cs
     import glacier_hall as gh
     import hollow_acre as ha
@@ -9605,7 +9805,8 @@ def check_lairs():
                                        ("moonlit_ring", mr, mr.CENTRE, (mr.MOON, mr.MOON_RADIUS)),
                                        ("cydonian_sanctum", cs, cs.CENTRE, None),
                                        ("crowfield", cf, cf.CENTRE, (cf.MOON, cf.MOON_RADIUS)),
-                                       ("crown_of_thunder", ct, ct.CENTRE, None)):
+                                       ("crown_of_thunder", ct, ct.CENTRE, None),
+                                       ("church_bridge", cb, cb.CENTRE, (cb.MOON, cb.MOON_RADIUS))):
         ax, ay, az, yaw = layout.ARRIVAL
         sky = "null, 0" if moon is None else "new BlockPos({}, {}, {}), {}".format(*moon[0], moon[1])
         expected = (f'{name.upper()}("{name}", {layout.SIZE[0]}, {layout.SIZE[1]}, {layout.SIZE[2]}, new Vec3({float(ax)}, '
@@ -9639,7 +9840,8 @@ def check_lairs():
         if f'fixture("{block}",' not in registry:
             err(f"JugcraftLairs does not register the lair block {block}")
     for name in ("mourning_wreath", "death_knell", "cursed_spindle", "frost_horn", "kiln_seal", "hag_stone", "exhumation_writ",
-                 "sealed_orders", "howling_totem", "altar_keystone", "harvest_crown", "thunder_vane", la.GATE["entity"]):
+                 "sealed_orders", "howling_totem", "altar_keystone", "harvest_crown", "thunder_vane", "hessians_bridle",
+                 la.GATE["entity"]):
         if f'Jugcraft.id("{name}")' not in registry:
             err(f"JugcraftLairs does not register {name}")
     if f"float GLARE_FRICTION = {la.GLARE_FRICTION}F;" not in registry:
@@ -9885,6 +10087,26 @@ def check_lairs():
             err(f"No words for the Crown of Thunder's {name} rod")
     if "open.lair == Lair.CROWN_OF_THUNDER) { ThunderVaneRite.follow(server, open);" not in gate:
         err("MistGateEntity does not take followers into the Crown of Thunder by the vane's way (ThunderVaneRite.follow)")
+    # The Church Bridge's: the bridle's rest and reach, that it opens only out of the season on a lantern on a post at
+    # night, its registration, the braziers' names, and the gate's follow into the hollow.
+    bridle = (folder / "HessiansBridleRite.java").read_text(encoding="utf-8")
+    for name, key in (("COOLDOWN", "cooldown"), ("MIST_RANGE", "mist_range")):
+        if not java_number(bridle, name, la.BRIDLE[key]):
+            err(f"HessiansBridleRite.{name} is not tools/lairs.py BRIDLE {key} ({la.BRIDLE[key]})")
+    for part, why in (("if (inSeason) {\n\t\t\treturn Missing.IN_SEASON;", "refuses the Halloween season"),
+                      ("if (!night) {\n\t\t\treturn Missing.NOT_NIGHT;", "refuses the day"),
+                      ("post.is(BlockTags.FENCES) || post.is(BlockTags.WALLS)", "wants its lantern on a fence or wall post"),
+                      ("state.is(Blocks.JACK_O_LANTERN)", "takes a jack-o'-lantern"),
+                      ("Lairs.open(level.getServer(), Lair.CHURCH_BRIDGE)", "opens the Church Bridge")):
+        if part not in bridle:
+            err(f"HessiansBridleRite no longer {why}")
+    if "output.accept(HESSIANS_BRIDLE);" not in registry:
+        err("JugcraftLairs does not put the Hessian's Bridle in the creative tab")
+    for name in cb.BRAZIER_NAMES:
+        if f"lair.{MOD}.church_bridge.brazier.{name}" not in (load(ASSETS / "lang" / "en_us.json") or {}):
+            err(f"No words for the Church Bridge's {name} brazier")
+    if "open.lair == Lair.CHURCH_BRIDGE) { HessiansBridleRite.follow(server, open);" not in gate:
+        err("MistGateEntity does not take followers into the Church Bridge by the bridle's way (HessiansBridleRite.follow)")
     for name, recipe in la.RECIPES.items():
         data = load(DATA / MOD / "recipe" / f"{name}.json") or {}
         if data.get("result", {}).get("id") != f"{MOD}:{recipe.get('result', name)}":
@@ -9949,6 +10171,7 @@ def check_lairs():
     check_cydonian_sanctum(cs)
     check_crowfield(cf)
     check_crown_of_thunder(ct)
+    check_church_bridge(cb)
 
 
 def check_cydonian_sanctum(cs):
@@ -10384,6 +10607,98 @@ def check_cinder_kiln(ck):
     client = ROOT / "src" / "gametest" / "java" / "io" / "github" / "jimbozoomer" / "jugcraft" / "test" / "CinderKilnClientGameTests.java"
     if not java_number(client.read_text(encoding="utf-8"), "BOWL_LIGHT", ck.BOWL_LIGHT):
         err(f"CinderKilnClientGameTests does not read the bowl's light against BOWL_LIGHT {ck.BOWL_LIGHT}")
+
+
+def check_church_bridge(cb):
+    """The Church Bridge as tools/church_bridge.py builds it is the hollow its record describes
+    (docs/features/church-bridge.md), and where the Java looks for its parts (ChurchBridge.java) is where the layout puts
+    them: the arrival stands on the wood road with room overhead, and the Grey Mist fills the road's end; a walk from the
+    arrival, never stepping more than half a block, reaches every brazier, the bridge's deck end to end and the belfry's
+    door; each brazier stands lit on the floor of the hollow, off the road; the brook's water is held in on every side;
+    and nothing in it changes by itself once placed (no vanilla leaves, grass blocks, farmland or flowing water)."""
+    from collections import deque
+    blocks = cb.build()
+    name = lambda pos: blocks[pos][0] if pos in blocks else None
+    props = lambda pos: dict(blocks[pos][1]) if pos in blocks else {}
+    java = re.sub(r"\s+", " ", (JAVA_ROOT / "lair" / "ChurchBridge.java").read_text(encoding="utf-8"))
+    for jname, value in (("SOIL", cb.SOIL), ("STAND", cb.STAND), ("CENTRE_X", cb.CENTRE[0]), ("CENTRE_Z", cb.CENTRE[1]),
+                         ("HOLLOW", cb.HOLLOW), ("ROAD_WEST", cb.ROAD[0]), ("ROAD_EAST", cb.ROAD[1]),
+                         ("ROAD_NORTH", cb.ROAD_NORTH), ("ROAD_SOUTH", cb.ROAD_SOUTH), ("BRIDGE_NORTH", cb.BRIDGE["z"][0]),
+                         ("BRIDGE_SOUTH", cb.BRIDGE["z"][1]), ("BRIDGE_WEST", cb.BRIDGE_WALLS[0]),
+                         ("BRIDGE_EAST", cb.BRIDGE_WALLS[1]), ("BROOK_NORTH", cb.BROOK["z"][0]), ("BROOK_SOUTH", cb.BROOK["z"][1]),
+                         ("WAIT_X", cb.WAIT[0]), ("WAIT_Y", float(cb.WAIT[1])), ("WAIT_Z", cb.WAIT[2]),
+                         ("EXIT_WEST", cb.EXIT["x"][0]), ("EXIT_EAST", cb.EXIT["x"][1]), ("EXIT_Z", cb.EXIT["z"])):
+        if not java_number(java, jname, value):
+            err(f"ChurchBridge.{jname} is not tools/church_bridge.py's {value}")
+    if f"float WAIT_YAW = {cb.WAIT[3]}F;" not in java:
+        err(f"ChurchBridge.WAIT_YAW is not tools/church_bridge.py's {cb.WAIT[3]}")
+    braziers = cb.braziers()
+    expected = "BRAZIERS = {{{}}};".format(", ".join(f"new BlockPos({x}, {cb.STAND}, {z})" for x, z in braziers.values()))
+    if expected not in java:
+        err(f"ChurchBridge.BRAZIERS is not tools/church_bridge.py's, in ring order: expected {expected}")
+    if f"enum Brazier {{ {', '.join(n.upper() for n in cb.BRAZIER_NAMES)};" not in java:
+        err(f"ChurchBridge.Brazier is not tools/church_bridge.py BRAZIER_NAMES {cb.BRAZIER_NAMES} in order")
+
+    names = {state[0] for state in blocks.values()}
+    for banned in sorted(n for n in names if (n.startswith("minecraft:") and n.endswith("_leaves"))
+                         or n in ("minecraft:grass_block", "minecraft:farmland", "minecraft:short_grass", "minecraft:vine")):
+        err(f"tools/church_bridge.py places {banned}, which would change once placed")
+    for (x, y, z), state in blocks.items():
+        if state[0] != "minecraft:water":
+            continue
+        if dict(state[1]).get("level") != "0":
+            err(f"The Church Bridge's brook has flowing water at {(x, y, z)}")
+            break
+        leak = [n for n in ((x + 1, y, z), (x - 1, y, z), (x, y, z + 1), (x, y, z - 1), (x, y - 1, z)) if n not in blocks]
+        if leak:
+            err(f"The Church Bridge's brook would run out at {leak[0]}")
+            break
+
+    ax, ay, az, _ = cb.ARRIVAL
+    arrival = (int(ax), ay, int(az))
+    if name((arrival[0], ay - 1, arrival[2])) != "minecraft:dirt_path" \
+            or any(name((arrival[0], ay + dy, arrival[2])) not in (None, "minecraft:light") for dy in (0, 1, 2)):
+        err(f"The Church Bridge's arrival at {cb.ARRIVAL[:3]} does not stand on the wood road with room overhead")
+    for cell in cb.exit_cells():
+        if name(cell) != "jugcraft:lair_exit":
+            err(f"The Church Bridge's Grey Mist is missing at {cell}")
+    for brazier, (x, z) in braziers.items():
+        if name((x, cb.STAND, z)) != "jugcraft:lair_brazier" or props((x, cb.STAND, z)) != {"lit": "true"}:
+            err(f"The Church Bridge's {brazier} brazier is not lit at {(x, cb.STAND, z)}")
+        if not cb.in_hollow(x, z) or cb.on_road(x, z):
+            err(f"The Church Bridge's {brazier} brazier is not in the hollow, off the road")
+
+    # A walk from the arrival: a cell can be stood in when its floor (the block under it, or a bridge deck) holds and the
+    # cell and the one over it are free; steps of a block up or down are not taken (no stairs in the hollow's way).
+    passable = {None, "minecraft:light", "jugcraft:lair_exit"}
+    free = lambda pos: name(pos) in passable
+    def standable(x, y, z):
+        under = name((x, y - 1, z))
+        return free((x, y, z)) and free((x, y + 1, z)) and under not in passable and under != "minecraft:water"
+    start = (arrival[0], cb.STAND, arrival[2])
+    seen, queue = {start}, deque([start])
+    while queue:
+        x, y, z = queue.popleft()
+        for dx, dz in ((1, 0), (-1, 0), (0, 1), (0, -1)):
+            nxt = (x + dx, y, z + dz)
+            if nxt not in seen and 0 <= nxt[0] < cb.SIZE[0] and 0 <= nxt[2] < cb.SIZE[2] and standable(*nxt):
+                seen.add(nxt)
+                queue.append(nxt)
+    for brazier, (x, z) in braziers.items():
+        if not any((x + dx, cb.STAND, z + dz) in seen for dx, dz in ((1, 0), (-1, 0), (0, 1), (0, -1))):
+            err(f"No walk from the Church Bridge's arrival comes beside the {brazier} brazier")
+    for z in range(cb.BRIDGE["z"][0], cb.BRIDGE["z"][1] + 1):
+        if (cb.ROAD[0] + 1, cb.STAND, z) not in seen:
+            err(f"No walk from the Church Bridge's arrival crosses the bridge at row {z}")
+            break
+    door = ((cb.DOOR["x"][0] + cb.DOOR["x"][1]) // 2, cb.STAND, cb.DOOR["z"])
+    if door not in seen:
+        err(f"No walk from the Church Bridge's arrival reaches the belfry's door at {door}")
+    wx, wy, wz, _ = cb.WAIT
+    if (int(wx), wy, int(wz)) not in seen or not cb.in_hollow(int(wx), int(wz)) or not cb.on_road(int(wx), int(wz)) \
+            or cb.on_bridge(int(wx), int(wz)):
+        err(f"Where the Horseman waits, {cb.WAIT[:3]}, is not on the road in the hollow at the bridge's foot, where the walk "
+            "reaches")
 
 
 def check_crown_of_thunder(ct):
@@ -14678,6 +14993,346 @@ def check_pumpkin_king():
     for key in pk.MESSAGES:
         if f'"message.jugcraft.pumpkin_king.{key}"' not in sent:
             err(f"tools/pumpkin_king.py MESSAGES has {key}, which the Java never sends")
+    for cls, text in sources_all.items():
+        for key in re.findall(r'"((?:message|tooltip|entity)\.jugcraft\.[a-z_.]+[a-z_])"', text):
+            if key not in lang:
+                err(f"{cls}.java sends {key}, which has no words in en_us.json")
+        for banned, why in (("setChunkForced", "loads a chunk"), ("addRegionTicket", "loads a chunk"),
+                            ("TicketType", "loads a chunk"), ("changeDimension", "crosses dimensions"),
+                            ("TeleportTransition", "crosses dimensions")):
+            if banned in text:
+                err(f"{cls}.java {why} ({banned})")
+
+
+def check_hessian_horseman():
+    """The Headless Horseman in his lair (tools/hessian_horseman.py, docs/features/hessian-horseman.md): every number the
+    Java uses is the table's (his, the Dread boon's and the Hessian's Spur's); his attacks are the table's, and his rule can
+    be played (the Hollow Wakes before the Last Ride; hidden in the dark every blow bites less, revealed more; his
+    snuffings come sooner as he weakens, and the time to light one again ends before the next is due; his stagger is
+    shorter than the time he stays revealed; each attack's reach is its range, and on a foe on the bridge he only
+    throws); from every cell of the hollow a walk, never stepping more than half a block, reaches every brazier of the
+    snuffing he would make against a player standing there well within the time to light them, at a sprint; his clips
+    last as long as the Java waits on them; his model stands as tall as his box; where his fight looks for the hollow's
+    parts (ChurchBridge.java) is where tools/church_bridge.py builds them: he waits on open floor with room for him, and
+    the Grey Mist that opens on the bridge when he falls is open deck; the braziers' lighting, his deeds and his exposure
+    are wired as the record says; every entity is registered, named and drawn; his GeckoLib bodies have their models,
+    clips (every clip the Java names) and sheets, their box-UV regions inside the sheet without overlapping, their sheets
+    and glowmasks TEXTURE_SCALE times the size each model declares and cut out; no bone is animated by two of his
+    controllers; his loot table is the table's and his trophies are Arms VII's, with the Dread boon worked by ArmItem and
+    its damage added by its mixin; the costume tag and his advancement are there; every message he sends has its words;
+    and nothing of his loads a chunk or leaves its dimension."""
+    import math
+    from collections import deque
+    import arms_variants
+    import church_bridge as cb
+    import hessian_horseman as hh
+    import hessian_horseman_models as hm
+    folder = JAVA_ROOT / "lair" / "horseman"
+    sources = {path.stem: path.read_text(encoding="utf-8") for path in folder.glob("*.java")}
+    if not sources:
+        err("lair/horseman: no Java")
+        return
+    dread = (JAVA_ROOT / "weapons" / "DreadBoon.java").read_text(encoding="utf-8")
+    sources_all = {**sources, "DreadBoon": dread}
+    horseman = sources.get("HessianHorsemanEntity", "")
+    rider = sources.get("PhantomRiderEntity", "")
+    registry = sources.get("JugcraftHorseman", "")
+    loot_java = sources.get("HorsemanLoot", "")
+    flat_java = re.sub(r"\s+", " ", horseman)
+    d = hh.HESSIAN_HORSEMAN
+    for cls, table in (("HessianHorsemanEntity", d), ("JugcraftHorseman", hh.SPUR),
+                       ("DreadBoon", {"TICKS": arms_variants.DREAD[0], "COOLDOWN": arms_variants.DREAD[1],
+                                      "SHARE": arms_variants.DREAD_SHARE, "MAX": arms_variants.DREAD_MAX})):
+        for name, value in table.items():
+            if not java_number(sources_all.get(cls, ""), name, value):
+                err(f"{cls}.{name} is not tools/hessian_horseman.py's {value}")
+    for attack, (windup, active, recovery, cooldown, near, far, ride, charge) in hh.ATTACKS.items():
+        expected = (f"{attack}({windup}, {active}, {recovery}, {cooldown}, {float(near)}, {float(far)}, "
+                    f"{str(ride).lower()}, {str(charge).lower()})")
+        if expected not in horseman:
+            err(f"HessianHorsemanEntity.Attack: expected {expected}")
+    thrown = "return " + " || ".join(f"this == {a}" for a in hh.THROWN) + ";"
+    if thrown not in horseman:
+        err(f"HessianHorsemanEntity.Attack.thrown must be tools/hessian_horseman.py THROWN ({thrown})")
+    for call in ("LairBosses.damage(base)", "LairBosses.partyScale(players, PARTY_STEP, PARTY_MAX)"):
+        if call not in horseman:
+            err(f"HessianHorsemanEntity does not scale as every lair boss does ({call})")
+    # His rule can be played.
+    if not 0.0 < d["LAST_AT"] < d["WAKES_AT"] < 1.0:
+        err("tools/hessian_horseman.py: the Last Ride (LAST_AT) must come after the Hollow Wakes (WAKES_AT)")
+    if not 0.0 < d["HIDDEN"] < 1.0 < d["REVEALED"]:
+        err("tools/hessian_horseman.py: hidden in the dark every blow must bite less, and revealed more")
+    if not d["SNUFF_TICKS"] + d["RELIGHT_TICKS"] < d["LAST_EVERY"] < d["CHARGE_EVERY"] < d["SNUFF_EVERY"]:
+        err("tools/hessian_horseman.py: his snuffings must come sooner as he weakens, and each must be over before the next "
+            "is due (SNUFF_TICKS + RELIGHT_TICKS < LAST_EVERY < CHARGE_EVERY < SNUFF_EVERY)")
+    if not 0 < d["REVEAL_STAGGER"] < d["REVEALED_TICKS"]:
+        err("tools/hessian_horseman.py: he must stay revealed longer than he staggers")
+    if not 0 < d["SNUFFED"] <= d["LAST_SNUFFED"] < d["HIDDEN_DARK"] <= len(cb.BRAZIER_NAMES) or d["WAKES_SNUFFED"] >= d["HIDDEN_DARK"]:
+        err("tools/hessian_horseman.py: one snuffing alone must never hide him (SNUFFED <= LAST_SNUFFED and WAKES_SNUFFED < "
+            "HIDDEN_DARK <= the braziers)")
+    for attack, reach in (("SABRE_PASS", d["PASS_LENGTH"]), ("PUMPKIN_TOSS", d["TOSS_RANGE"]), ("REARING_STOMP", d["STOMP_REACH"]),
+                          ("HEAD_HURL", d["HURL_RANGE"])):
+        if hh.ATTACKS[attack][5] != reach:
+            err(f"tools/hessian_horseman.py: he must use {attack} only on a foe within its reach ({reach})")
+    if hh.ATTACKS["PUMPKIN_TOSS"][1] != d["TOSS_FLIGHT"] or hh.ATTACKS["HEAD_HURL"][1] != d["HURL_FLIGHT"]:
+        err("tools/hessian_horseman.py: the Pumpkin Toss's and the Head Hurl's active ticks must be their flights")
+    if d["RIDERS"] != hh.PHANTOM["MAX"] or d["RIDERS"] != 2:
+        err("tools/hessian_horseman.py: his Phantom Riders are two, one down each of the two lines")
+    if d["LEASH"] <= cb.HOLLOW or d["LEASH"] >= math.hypot(cb.CENTRE[0] - cb.WAIT[0], cb.CENTRE[1] - cb.BRIDGE["z"][0]):
+        err("tools/hessian_horseman.py: his leash must take in the hollow and stop short of the bridge's far end")
+    clips = hm.hessian_horseman_animations()["animations"]
+    for clip, ticks in (("rear_wake", d["WAKE_TICKS"]), ("lift", d["WAKES_TICKS"]), ("snuff", d["SNUFF_TICKS"]),
+                        ("pass_windup", hh.ATTACKS["SABRE_PASS"][0]), ("toss_windup", hh.ATTACKS["PUMPKIN_TOSS"][0]),
+                        ("stomp_windup", hh.ATTACKS["REARING_STOMP"][0]), ("hurl_windup", hh.ATTACKS["HEAD_HURL"][0]),
+                        ("riders_windup", hh.ATTACKS["PHANTOM_RIDERS"][0])):
+        length = clips.get(f"animation.hessian_horseman.{clip}", {}).get("animation_length", 0)
+        if round(length * 20) != ticks:
+            err(f"tools/hessian_horseman_models.py: his {clip} clip ({length} s) must last {ticks} ticks, as the Java waits on it")
+    sizes = {entity: re.search(rf'entity\("{entity}".*?sized\(([\d.]+)F, ([\d.]+)F\)', registry, re.S) for entity in hh.ENTITIES}
+    for entity, stands in hm.STANDS.items():
+        size = sizes.get(entity)
+        if not size or abs(stands / 16.0 - float(size.group(2))) > 0.25:
+            err(f"JugcraftHorseman: the {entity}'s box must be as tall as its model ({stands / 16.0} blocks)")
+
+    # Where his fight looks for the hollow's parts is where tools/church_bridge.py builds them.
+    java_bridge = re.sub(r"\s+", " ", (JAVA_ROOT / "lair" / "ChurchBridge.java").read_text(encoding="utf-8"))
+    for jname, value in (("BRIDGE_EXIT_WEST", cb.BRIDGE_EXIT["x"][0]), ("BRIDGE_EXIT_EAST", cb.BRIDGE_EXIT["x"][1]),
+                         ("BRIDGE_EXIT_Z", cb.BRIDGE_EXIT["z"]), ("SIZE_X", cb.SIZE[0]), ("SIZE_Z", cb.SIZE[2])):
+        if not java_number(java_bridge, jname, value):
+            err(f"ChurchBridge.{jname} is not tools/church_bridge.py's {value}")
+    blocks = cb.build()
+    name = lambda pos: blocks[pos][0] if pos in blocks else None
+    passable = {None, "minecraft:light", "jugcraft:lair_exit"}
+    free = lambda pos: name(pos) in passable
+    for x in range(cb.BRIDGE_EXIT["x"][0], cb.BRIDGE_EXIT["x"][1] + 1):
+        for y in range(cb.STAND, cb.STAND + 3):
+            if not free((x, y, cb.BRIDGE_EXIT["z"])) or free((x, cb.SOIL, cb.BRIDGE_EXIT["z"])):
+                err(f"The Grey Mist that opens on the bridge at {(x, y, cb.BRIDGE_EXIT['z'])} is not open deck")
+    hs = sizes.get("hessian_horseman")
+    hw, hh_ = (float(hs.group(1)), float(hs.group(2))) if hs else (0.0, 0.0)
+    wx, _, wz, _ = cb.WAIT
+    for bx in range(math.floor(wx - hw / 2), math.floor(wx + hw / 2 - 1.0E-6) + 1):
+        for bz in range(math.floor(wz - hw / 2), math.floor(wz + hw / 2 - 1.0E-6) + 1):
+            if free((bx, cb.SOIL, bz)) or not all(free((bx, cb.STAND + dy, bz)) for dy in range(math.ceil(hh_))):
+                err(f"Where the Horseman waits, {cb.WAIT[:3]}, has no room for him at {(bx, bz)}")
+
+    # The Dark Road can be undone: from every cell of the hollow a walk reaches each brazier of the snuffing he would make
+    # against a player there (the nearest, then on round the ring toward the nearer neighbour, as ChurchBridge.run picks
+    # them), well within the time to light them at a sprint (SPRINT blocks a second; a brazier is lit from beside it).
+    def standable(x, y, z):
+        under = name((x, y - 1, z))
+        return free((x, y, z)) and free((x, y + 1, z)) and under not in passable and under != "minecraft:water"
+    braziers = cb.braziers()
+    order = [braziers[n] for n in cb.BRAZIER_NAMES]
+
+    def distances(seeds):
+        dist = {s: 0 for s in seeds}
+        queue = deque(seeds)
+        while queue:
+            x, y, z = queue.popleft()
+            for dx, dz in ((1, 0), (-1, 0), (0, 1), (0, -1)):
+                nxt = (x + dx, y, z + dz)
+                if nxt not in dist and 0 <= nxt[0] < cb.SIZE[0] and 0 <= nxt[2] < cb.SIZE[2] and standable(*nxt):
+                    dist[nxt] = dist[(x, y, z)] + 1
+                    queue.append(nxt)
+        return dist
+    beside = [[(x + dx, cb.STAND, z + dz) for dx, dz in ((1, 0), (-1, 0), (0, 1), (0, -1)) if standable(x + dx, cb.STAND, z + dz)]
+              for x, z in order]
+    walks = [distances(seeds) for seeds in beside]
+
+    def run(x, z, count):
+        near = lambda i: math.hypot(order[i][0] + 0.5 - x, order[i][1] + 0.5 - z)
+        first = min(range(len(order)), key=lambda i: (near(i), i))
+        step = 1 if near((first + 1) % len(order)) <= near((first - 1) % len(order)) else -1
+        return [(first + step * k) % len(order) for k in range(count)]
+    SPRINT = 5.6
+    worst = {}
+    for count, share in ((d["SNUFFED"], 0.6), (d["LAST_SNUFFED"], 0.85)):
+        limit = SPRINT * d["RELIGHT_TICKS"] / 20.0 * share
+        for x in range(cb.SIZE[0]):
+            for z in range(cb.SIZE[2]):
+                if not cb.in_hollow(x, z) or not standable(x, cb.STAND, z) or (x, cb.STAND, z) not in walks[0]:
+                    continue
+                path = run(x + 0.5, z + 0.5, count)
+                total = walks[path[0]].get((x, cb.STAND, z), 10 ** 6)
+                for a, b in zip(path, path[1:]):
+                    total += min((walks[b].get(cell, 10 ** 6) for cell in beside[a]), default=10 ** 6)
+                if total > worst.get(count, (0, None))[0]:
+                    worst[count] = (total, (x, z))
+        if worst.get(count, (0, None))[0] > limit:
+            err(f"From {worst[count][1]} in the Church Bridge's hollow the {count} braziers he would snuff are a "
+                f"{worst[count][0]}-block walk, more than {limit:.1f} (a sprint, {share:.0%} of RELIGHT_TICKS)")
+    # His rule, as the record says.
+    for needed, why in (("float dealt = amount * exposure();", "let the dark hide him and the light reveal him"),
+                        ("return revealed() ? REVEALED : hidden() ? HIDDEN : 1.0F;", "bite deeper revealed and less hidden"),
+                        ("if (phase == Phase.WAKING || phase == Phase.HOLLOW_WAKES) { return false; }", "be unhurt waking and at the Hollow Wakes"),
+                        ("if (burning >= snuffed.size()) { reveal(level); }", "be revealed only when every brazier of the snuffing burns again"),
+                        ("if (lit == null || relightTicks <= 0) { return false; }", "be revealed only within the time to light them"),
+                        ('encounter.deed(lighter, "revealed:" + snuffings + ":" + id)', "count the lighters of a snuffing that revealed him as taking part"),
+                        ("ChurchBridge.run(target.getX() - origin.getX(), target.getZ() - origin.getZ(), count)", "snuff the braziers nearest the player he hunts"),
+                        ("|| balking && !candidate.thrown()", "only throw at a foe on the bridge"),
+                        ("&& !ChurchBridge.onBridge(x - origin.getX(), z - origin.getZ())", "never ride his Sabre Pass onto the bridge"),
+                        ("if (riders.size() >= RIDERS) { break; }", "keep his riders to RIDERS"),
+                        ("LairRewards.pay(level, HorsemanLoot.BOSS, encounter, position(), centre(), EXPERIENCE);", "pay his fall as every lair boss's is paid"),
+                        ("for (BlockPos cell : ChurchBridge.bridgeExitCells())", "open the Grey Mist on the bridge")):
+        if needed not in flat_java:
+            err(f"HessianHorsemanEntity must {why} ({needed})")
+    for needed, why in (("struck.contains(player.getUUID())", "strike each player once"), ("fade(level)", "fade without him")):
+        if needed not in rider:
+            err(f"PhantomRiderEntity must {why} ({needed})")
+    for needed, why in (("Lairs.onPlaced(Lair.CHURCH_BRIDGE, HessianHorsemanEntity::summon)", "set him waiting in every Church Bridge"),
+                        ("Lairs.onRelit(JugcraftHorseman::relit)", "hear the braziers lit"),
+                        ("horseman.brazierLit(level, pos, player)", "tell him who lit which brazier"),
+                        ("LairRewards.payer(HorsemanLoot.BOSS, HorsemanLoot::pay)", "let his rewards wait for a player"),
+                        ("DreadBoon.register()", "run the Dread boon"),
+                        ("speed.addTransientModifier(new AttributeModifier(SPURRED, SPUR_SPEED, AttributeModifier.Operation.ADD_MULTIPLIED_BASE))",
+                         "spur a horse with a modifier that is never saved"),
+                        ("level.dimension() == Level.OVERWORLD && !level.isBrightOutside()", "spur only at night in the Overworld")):
+        if needed not in re.sub(r"\s+", " ", registry):
+            err(f"JugcraftHorseman must {why} ({needed})")
+    if "target instanceof Enemy && !target.is(FrightBoon.FRIGHTLESS)" not in dread or "LAST.size() >= MAX" not in dread \
+            or 'Jugcraft.id("dread")' not in dread:
+        err("DreadBoon must fill only monsters with dread, never one in #jugcraft:frightless, and remember at most MAX")
+    if "case DREAD -> DreadBoon.struck(level, target, attacker);" not in (JAVA_ROOT / "weapons" / "ArmItem.java").read_text(encoding="utf-8"):
+        err("ArmItem must work the Dread boon (DreadBoon.struck)")
+    mixin = JAVA_ROOT / "mixin" / "DreadDamageMixin.java"
+    if not mixin.is_file() or "DreadBoon.taken((LivingEntity) (Object) this, amount)" not in mixin.read_text(encoding="utf-8") \
+            or "DreadDamageMixin" not in (load(RES / f"{MOD}.mixins.json") or {}).get("mixins", []):
+        err("DreadDamageMixin must add Dread's share to every blow (getDamageAfterMagicAbsorb), listed in jugcraft.mixins.json")
+    client = (CLIENT_JAVA_ROOT / "HessianHorsemanClient.java").read_text(encoding="utf-8")
+    if "HessianHorsemanClient.register();" not in (CLIENT_JAVA_ROOT / "JugcraftClient.java").read_text(encoding="utf-8"):
+        err("JugcraftClient must register HessianHorsemanClient")
+    if "lair.horseman.JugcraftHorseman.register();" not in (JAVA_ROOT / "Jugcraft.java").read_text(encoding="utf-8"):
+        err("Jugcraft must register JugcraftHorseman")
+
+    def drawn(entity):
+        start = client.find(f"register(JugcraftHorseman.{entity.upper()},")
+        end = client.find("EntityRendererRegistry.register(", start + 1)
+        return client[start:end if end >= 0 else len(client)] if start >= 0 else ""
+    if f'ADVANCEMENT = "{hh.ADVANCEMENT["key"]}";' not in loot_java:
+        err("HorsemanLoot's advancement differs from tools/hessian_horseman.py")
+    lang = load(ASSETS / "lang" / "en_us.json") or {}
+    for entity in hh.ENTITIES:
+        if f'entity("{entity}"' not in registry:
+            err(f"JugcraftHorseman does not register the {entity} entity")
+        if lang.get(f"entity.{MOD}.{entity}") != hh.ENTITIES[entity]:
+            err(f"The {entity} entity is not named {hh.ENTITIES[entity]!r}")
+        if not drawn(entity):
+            err(f"HessianHorsemanClient draws no {entity}")
+    for item in hh.items():
+        if f'"{item}"' not in registry:
+            err(f"JugcraftHorseman does not register {item}")
+    # His GeckoLib bodies.
+    gecko = ASSETS / "geckolib"
+    clips_named = {}
+    for text in sources.values():
+        for clip in re.findall(r'"(animation\.[a-z_]+\.[a-z_]+)"', text):
+            clips_named.setdefault(clip.split(".")[1], set()).add(clip)
+    for clip in re.findall(r'prefix \+ "([a-z_]+)"', horseman):
+        clips_named.setdefault("hessian_horseman", set()).add(f"animation.hessian_horseman.{clip}")
+    for entity, body in hh.GECKO.items():
+        geo = load(gecko / "models" / "entity" / f"{entity}.geo.json") or {}
+        animations = load(gecko / "animations" / "entity" / f"{entity}.animation.json") or {}
+        definition = (geo.get("minecraft:geometry") or [{}])[0]
+        if not definition:
+            err(f"{entity}: no GeckoLib model")
+            continue
+        body_clips = animations.get("animations", {})
+        for clip in clips_named.get(body, set()):
+            if clip not in body_clips:
+                err(f"{entity}: the Java plays {clip}, which is not in {entity}.animation.json")
+        for clip in hm.CLIPS[body]:
+            if f"animation.{body}.{clip}" not in body_clips:
+                err(f"{entity}.animation.json: missing animation.{body}.{clip}")
+        sheet_w = definition.get("description", {}).get("texture_width", 0)
+        sheet_h = definition.get("description", {}).get("texture_height", 0)
+        bones = {bone["name"] for bone in definition.get("bones", [])}
+        for clip in body_clips.values():
+            for bone in clip.get("bones", {}):
+                if bone not in bones:
+                    err(f"{entity}.animation.json: animates unknown bone {bone}")
+        regions = set()
+        for bone in definition.get("bones", []):
+            for cube in bone.get("cubes", []):
+                w, h_, dd = cube["size"]
+                u, v = cube["uv"]
+                region = (u, v, u + 2 * (w + dd), v + dd + h_)
+                if region[2] > sheet_w or region[3] > sheet_h:
+                    err(f"{entity}.geo.json: a cube in {bone['name']} maps outside the {sheet_w}x{sheet_h} sheet")
+                regions.add(region)
+        regions = sorted(regions)
+        for i, a in enumerate(regions):
+            for b in regions[i + 1:]:
+                if a[0] < b[2] and b[0] < a[2] and a[1] < b[3] and b[1] < a[3]:
+                    err(f"{entity}.geo.json: UV regions {a} and {b} overlap")
+        glows = entity in hh.GLOWING
+        part = drawn(entity)
+        if not part or ("AutoGlowingGeoLayer" in part) != glows:
+            err(f"HessianHorsemanClient: the {entity}'s glow layer must match tools/hessian_horseman.py GLOWING")
+        for name_ in (entity, f"{entity}_glowmask") if glows else (entity,):
+            sheet = ASSETS / "textures" / "entity" / f"{name_}.png"
+            if not sheet.is_file():
+                err(f"{entity}: missing textures/entity/{name_}.png")
+                continue
+            with Image.open(sheet) as image:
+                if image.size != (sheet_w * hm.TEXTURE_SCALE, sheet_h * hm.TEXTURE_SCALE):
+                    err(f"textures/entity/{name_}.png must be {sheet_w * hm.TEXTURE_SCALE}x{sheet_h * hm.TEXTURE_SCALE}")
+                if any(image.convert("RGBA").getchannel("A").histogram()[1:255]):
+                    err(f"textures/entity/{name_}.png has half-transparent pixels (it is drawn cut out)")
+    # His controllers own their bones: no bone is animated by two.
+    owned = {bone: controller for controller, bones in hm.CONTROLLERS.items() for bone in bones}
+    for clip_name, clip in clips.items():
+        controller = hm.owner(clip_name.split(".")[-1])
+        for bone in clip.get("bones", {}):
+            if owned.get(bone, "body") != controller:
+                err(f"hessian_horseman: {clip_name} ({controller}) animates {bone}, which the {owned.get(bone, 'body')} controller owns")
+    for controller in ("body", *hm.CONTROLLERS):
+        if f'new AnimationController<HessianHorsemanEntity>("{controller}"' not in horseman:
+            err(f"HessianHorsemanEntity has no {controller} controller (tools/hessian_horseman_models.py CONTROLLERS)")
+    # His loot, and his trophies: Arms VII's, as his bosses/hessian_horseman table holds them.
+    table = load(DATA / MOD / "loot_table" / "entities" / "hessian_horseman.json") or {}
+    if table.get("type") != "minecraft:gift":
+        err("loot_table/entities/hessian_horseman.json must be a gift table (rolled for each player paid)")
+    found_loot = {}
+    for pool in table.get("pools", []):
+        for entry in pool.get("entries", []):
+            found_loot[entry.get("name", "").split(":")[-1]] = pool.get("condition", {}).get("chance", 1.0)
+    expected = {**{item: 1.0 for item in hh.ALWAYS}, **{item: hh.TROPHY_CHANCE for item in hh.TROPHIES}, **hh.CHANCES}
+    if found_loot != expected:
+        err(f"loot_table/entities/hessian_horseman.json gives {found_loot}, not tools/hessian_horseman.py's {expected}")
+    if tuple(arms_variants.trophies("hessian_horseman")) != tuple(hh.TROPHIES):
+        err(f"tools/hessian_horseman.py TROPHIES {hh.TROPHIES} are not Arms VII's: {arms_variants.trophies('hessian_horseman')}")
+    if any(arms_variants.BY_ID[t][2] != "dread" for t in hh.TROPHIES if t in arms_variants.BY_ID):
+        err("The Headless Horseman's trophies must carry the Dread boon")
+    trophies = load(DATA / MOD / "loot_table" / "bosses" / "hessian_horseman.json") or {}
+    held_items = [entry.get("name") for pool in trophies.get("pools", []) for entry in pool.get("entries", [])]
+    if held_items != [f"{MOD}:{item}" for item in hh.TROPHIES]:
+        err(f"loot_table/bosses/hessian_horseman.json holds {held_items}, not his trophies {hh.TROPHIES}")
+    for table_id in ("entities/hessian_horseman", "bosses/hessian_horseman"):
+        if f'Jugcraft.id("{table_id}")' not in loot_java:
+            err(f"HorsemanLoot must roll loot_table/{table_id}.json")
+    for trophy in hh.TROPHIES:
+        if f'Jugcraft.id("{trophy}")' not in registry:
+            err(f"JugcraftHorseman must find the {trophy} (Arms VII registers it)")
+    # Nothing makes his spur or his tricorn but him.
+    for path in (DATA / MOD / "recipe").glob("*.json"):
+        result = (load(path) or {}).get("result", {})
+        if isinstance(result, dict) and result.get("id") in {f"{MOD}:{item}" for item in hh.items()}:
+            err(f"recipe/{path.name} makes {result.get('id')}, which only the Headless Horseman gives")
+    costumes = json.dumps(load(DATA / MOD / "tags" / "item" / "trick_or_treat_costumes.json") or {})
+    for item in hh.COSTUMES:
+        if f"{MOD}:{item}" not in costumes:
+            err(f"{item} must count as a costume (tags/item/trick_or_treat_costumes.json)")
+    if f"{MOD}:hessian_horseman" not in (load(DATA / MOD / "tags" / "entity_type" / "frightless.json") or {}).get("values", []):
+        err("The Headless Horseman in his lair must be spared by Fright and Dread (tags/entity_type/frightless.json)")
+    advancement = load(DATA / MOD / "advancement" / f"{hh.ADVANCEMENT['key']}.json") or {}
+    if advancement.get("criteria", {}).get("done", {}).get("trigger") != "minecraft:impossible" \
+            or advancement.get("display", {}).get("icon", {}).get("id") != hh.ADVANCEMENT["icon"]:
+        err(f"advancement/{hh.ADVANCEMENT['key']}.json must be his, granted from code (an impossible \"done\")")
+    sent = "".join(sources.values())
+    for key in hh.MESSAGES:
+        if f'"message.jugcraft.hessian_horseman.{key}"' not in sent:
+            err(f"tools/hessian_horseman.py MESSAGES has {key}, which the Java never sends")
     for cls, text in sources_all.items():
         for key in re.findall(r'"((?:message|tooltip|entity)\.jugcraft\.[a-z_.]+[a-z_])"', text):
             if key not in lang:
@@ -21862,6 +22517,7 @@ def main():
     check_howitzer_walker()
     check_landship()
     check_unmasking()
+    check_herobrine()
     check_trains()
     check_artillery()
     check_tower_guns()
@@ -21917,6 +22573,7 @@ def main():
     check_iron_dreadnought()
     check_alpha_werewolf()
     check_pumpkin_king()
+    check_hessian_horseman()
     check_cydonian_sentinel()
     check_material_sets()
     check_art()

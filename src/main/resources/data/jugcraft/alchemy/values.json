@@ -13777,6 +13777,26 @@
       "denominator": 1,
       "source": "recipe jugcraft:hermit_rifle"
     },
+    "jugcraft:hessian_sabre": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
+    "jugcraft:hessians_bridle": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
+    "jugcraft:hessians_spur": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
+    "jugcraft:hessians_tricorn": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
     "jugcraft:hibiscus": {
       "numerator": 16,
       "denominator": 1,
@@ -13836,6 +13856,11 @@
       "numerator": 399,
       "denominator": 2,
       "source": "recipe jugcraft:holler_pistol"
+    },
+    "jugcraft:hollowflail": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
     },
     "jugcraft:holly_fence": {
       "numerator": 40,

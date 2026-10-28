@@ -5,8 +5,9 @@ the Last Rites' Mourning Wreath and Death Knell, the Cursed Spindle, the Frost H
 Writ of Exhumation, Sealed Orders, the Howling Totem, the Mist Gate's name, the lairs' messages, and each lair's dimension
 (its dimension type, level stem and biome) and structure template (tools/hollow_acre.py, tools/spindle_loft.py,
 tools/glacier_hall.py, tools/cinder_kiln.py, tools/lantern_fen.py, tools/crypt_archive.py, tools/foundry_trench.py,
-tools/moonlit_ring.py, tools/cydonian_sanctum.py, tools/crown_of_thunder.py). Also the Crown of Thunder's blocks and the
-Thunder Vane (docs/features/crown-of-thunder.md).
+tools/moonlit_ring.py, tools/cydonian_sanctum.py, tools/crown_of_thunder.py, tools/church_bridge.py). Also the Crown of
+Thunder's blocks and the Thunder Vane (docs/features/crown-of-thunder.md), and the Hessian's Bridle
+(docs/features/church-bridge.md).
 
 Called from tools/agriculture_data.py (assets, loot, recipes, tags, worldgen). Formats follow vanilla 26.3's own files:
 the dimension type copies the shape of vanilla's End (logged from the running game by LairGameTests), the level stem a
@@ -14,6 +15,7 @@ flat generator with no layers, and the biome vanilla's void with no spawns.
 """
 from decor_data import MOD, HORIZONTAL, rid, self_drop
 import alpha_werewolf as aw
+import church_bridge
 import cinder_kiln
 import crowfield
 import crown_of_thunder
@@ -36,7 +38,7 @@ TEMPLATES = {"hollow_acre": hollow_acre, "spindle_loft": spindle_loft, "glacier_
              "cinder_kiln": cinder_kiln, "lantern_fen": lantern_fen, "crypt_archive": crypt_archive,
              "foundry_trench": foundry_trench, "moonlit_ring": moonlit_ring, "cydonian_sanctum": cydonian_sanctum,
              "crowfield": crowfield,
-             "crown_of_thunder": crown_of_thunder}
+             "crown_of_thunder": crown_of_thunder, "church_bridge": church_bridge}
 
 
 def cube(lo, hi, faces, texture, cull=None, shade=True, uvs=None):
@@ -766,6 +768,7 @@ def assets(root, write, lang):
     lang[f"item.{MOD}.altar_keystone"] = ITEMS["altar_keystone"]
     lang[f"item.{MOD}.harvest_crown"] = ITEMS["harvest_crown"]
     lang[f"item.{MOD}.thunder_vane"] = ITEMS["thunder_vane"]
+    lang[f"item.{MOD}.hessians_bridle"] = ITEMS["hessians_bridle"]
     lang[f"tooltip.{MOD}.death_knell"] = "Rung at a grave at night, among lit candles, with a wreath laid on it"
     lang[f"tooltip.{MOD}.cursed_spindle"] = "Used on a Spinning Wheel at night: prick your finger, and wake in the Spindle Loft"
     lang[f"tooltip.{MOD}.mourning_wreath"] = "Lay it on a grave for the Last Rites"
@@ -798,6 +801,13 @@ def assets(root, write, lang):
         lang[f"lair.{MOD}.crown_of_thunder.rod.{rod}"] = f"the {rod} rod"
     lang[f"tooltip.{MOD}.thunder_vane"] = ("Raised high in the mountains under the open sky while it rains: lightning answers, "
                                            "and the wind takes you to the Crown of Thunder")
+    lang[f"tooltip.{MOD}.hessians_bridle"] = ("Used at night, out of the Halloween season, on a jack-o'-lantern standing on a "
+                                              "fence or wall post under the open sky: hoofbeats answer, and the mist takes you "
+                                              "to the Church Bridge")
+    for name in church_bridge.BRAZIER_NAMES:
+        first, second = name.split("_")       # north_east: the north-north-east brazier; east_north: east-north-east
+        point = f"{first}-{first}-{second}" if first in ("north", "south") else f"{first}-{second}-{first}"
+        lang[f"lair.{MOD}.church_bridge.brazier.{name}"] = f"the {point} brazier"
     lang[f"entity.{MOD}.{GATE['entity']}"] = GATE["display"]
 
     for lair, info in LAIRS.items():
@@ -883,6 +893,14 @@ def assets(root, write, lang):
         f"message.{MOD}.lair.vane.roofed": "Raise the vane under the open sky",
         f"message.{MOD}.lair.vane.misting": "The wind already tears at the mist here: use it to follow",
         f"message.{MOD}.lair.vane.opened": "Lightning strikes the vane, it spins wild, and the wind tears the mist open",
+        f"message.{MOD}.lair.bridle.not_lantern": "Use the bridle on a jack-o'-lantern standing on a fence or wall post",
+        f"message.{MOD}.lair.bridle.not_overworld": "No rider answers the bridle here",
+        f"message.{MOD}.lair.bridle.not_night": "He rides only by night: use the bridle after dark",
+        f"message.{MOD}.lair.bridle.in_season": ("In the Halloween season he rides the world: call him at midnight with a lit "
+                                                 "scarecrow head"),
+        f"message.{MOD}.lair.bridle.roofed": "The rider cannot find a lantern under a roof",
+        f"message.{MOD}.lair.bridle.misting": "The mist has already risen here: use it to follow",
+        f"message.{MOD}.lair.bridle.opened": "Hoofbeats come out of the dark, the lantern flares, and the mist rises round you",
         f"message.{MOD}.lair.dial.turned": "The dial turns to %s",
         f"message.{MOD}.lair.dial.matched": "%s lights on the Star Door",
         f"message.{MOD}.lair.door.opened": "The Star Door grinds open",
