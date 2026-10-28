@@ -73,17 +73,25 @@ public class ConcordanceGloamInkClientGameTests implements FabricClientGameTest 
 					client.player.inventoryMenu.getSlot(InventoryMenu.RESULT_SLOT).getItem().copy());
 			context.takeScreenshot("jugcraft_gloam_ink_fair_copy");
 			int scale = context.computeOnClient(client -> client.options.guiScale().get());
+			int width = context.computeOnClient(client -> client.getWindow().getWidth());
+			int height = context.computeOnClient(client -> client.getWindow().getHeight());
+			// The test window is too small for GUI scale 4 (the game caps it), so it is widened first, as the pact tests do.
+			context.getInput().resizeWindow(1920, 1080);
 			context.runOnClient(client -> {
 				client.options.guiScale().set(4);
 				client.resizeGui();
 				client.gui.toastManager().clear();
 			});
 			context.waitTicks(10);
+			int applied = context.computeOnClient(client -> client.getWindow().getGuiScale());
+			check(applied == 4, "The fair copy's scale-4 shot draws GUI scale " + applied);
 			context.takeScreenshot("jugcraft_gloam_ink_fair_copy_scale4");
 			context.runOnClient(client -> {
 				client.options.guiScale().set(scale);
 				client.resizeGui();
 			});
+			context.getInput().resizeWindow(width, height);
+			context.waitTicks(10);
 			List<String> copyLines = context.computeOnClient(client ->
 					lines(client, client.player.inventoryMenu.getSlot(InventoryMenu.RESULT_SLOT).getItem()));
 			List<String> originalLines = context.computeOnClient(client ->

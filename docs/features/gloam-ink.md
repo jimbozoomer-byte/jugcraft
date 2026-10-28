@@ -3,8 +3,8 @@
 Status: built on branch `claude/awesome-davinci-iwv3b9` (not merged), in commits `f9e200f19` (covered extraction,
 Gloam Ink and Gloam Sludge) and `4a0b2c1d9` (fair copies of Research Notes), on this contract (`199114e7e`); this
 record's own commit follows them, and a fifth applies the review's fixes (As built, "The review's fixes"). Nothing has
-been compiled or run in a game by this record's commits; CI results are added when its run finishes. Every result
-below is a local Python check or audit mutation (Verification).
+been run in a game by hand. CI passed in full on `a04fe31a0` (Verification); every other result below is a local
+Python check or audit mutation.
 Proposal issue: none; the owner's checkpoint answer C-D6 (23 October 2026, confirmed as the next work on 28 October 2026)
 is the scope approval ([Chunk C's contract](concordance-chunk-c.md), Decisions).
 Owner: @jimbozoomer-byte. AI-assisted implementation with Claude Code; the model is named in the commit trailers.
@@ -303,6 +303,14 @@ game test holds them.
 |---|---|---|---|---|---|---|---|
 | Gloam Ink, covered extraction (C-D6) | Practitioner | Gloamcap (mixed bed or crafted), a spider eye, water, glass bottles, heat, a lid | the fair copy | 3 Gloamcap, 1 spider eye, 3 parts of water, 3 bottles for 3 inks; 2 hot stirs | nothing | murky: Gloam Sludge (a furnace returns its bottle, no experience); thin or uncovered: the draught; no lid: a formula waits, nothing lost | `ConcordanceGloamInkGameTests`, `gloamInkAndSludgeAreNeverFormed`, `extractsTurnIntoNothingTheyCameFrom` (not run until CI) |
 | Fair copy of Research Notes (C-D6) | Practitioner (the ink); none (the copy) | Gloam Ink, a written original, a blank sheet | other players' research (notes evidence keyed by the original's writer); the Conclave's teaching renown | 1 ink and 1 blank a copy; original and bottle return | nothing | a copy, a missing or extra ink, blank or sheet, sludge or anything else makes nothing; switched off, nothing; a copy teaches nothing its original did not; Stolas's Regard takes nothing | the five `ConcordanceSharingGameTests`, `aFairCopyCreditsItsAuthorOnce`, `ConcordanceGloamInkClientGameTests` (not run until CI) |
+
+CI: Build run 40714392824 (started by hand on the branch) on `a04fe31a0` passed in full: the mod job (`./gradlew build`
+with every required server game test, Gloam Ink's included), the job without the optional integrations, and every one
+of the 282 client test classes across 16 shards, `ConcordanceGloamInkClientGameTests` among them. Its three pictures were
+looked at: the fair copy in the survival inventory's grid (original, blank sheet and Gloam Ink making one copy) and
+Jade's reading of the lidded crucible ("Under a lid"). The picture named for GUI scale 4 was drawn at scale 2, because the
+test window is too small for scale 4 and the game caps it; the test now widens the window first and checks the scale
+(the commit after this run). No two-client or hand play-test has been run.
 
 ## World and event applicability
 
