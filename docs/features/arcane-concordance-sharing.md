@@ -29,6 +29,13 @@ what does not fit stays in the lantern. Anyone may pour, so a Lampwright can kee
 player who placed it can sneak-use to draw Radiance back out. Use it empty-handed to read its charge. Broken, it keeps
 its Radiance on the item and burns it again when placed.
 
+## Fair copies (Gloam Ink)
+
+A written sheet, a blank sheet and Gloam Ink in a crafting grid make a fair copy: the same writer, entries and time
+written, marked a copy; the original and the bottle come back. A copy is read exactly as its original (notes count once
+per writer) and is never copied again. With the Concordance switched off nothing is copied. Not merged; not yet run in
+CI. See [Gloam Ink](gloam-ink.md).
+
 ## Connections
 
 - Input producer: First Light research (notes record it); Kindled Lanterns from the Lampwright's Bench (the sconce's

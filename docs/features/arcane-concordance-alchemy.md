@@ -7,6 +7,9 @@ why it waits and keeps a formula honestly; C-02: the Stillroot Poultice and the 
 contract](concordance-chunk-c.md)), and unit 3 (C-05: a [Crucible Stand](crucible-stand.md) heats a crucible with
 JE; C-06: a crucible asks the couriers for its formula's shortage), not merged; their tests passed in CI, most
 recently with unit 5 in run 38774859294 on `bb856f873` (see Verification).
+Extended by Gloam Ink (C-D6; [its record](gloam-ink.md); not merged, not yet run in CI): a lid on the crucible covers its
+stirs, and a glass bottle draws Gloam Ink from a covered batch of Gloamcap and a spider eye, or Gloam Sludge when it is
+murky.
 Proposal issue: none; the owner's Arcane Concordance brief (roadmap step 13) is the scope approval.
 Owner: @jimbozoomer-byte. AI-assisted implementation with Claude Code; the model is named in the commit trailers.
 Target milestone and tier: Concordance milestone 5, Practitioner stage (Jugcraft Discovery). Roadmap step 13.
@@ -171,6 +174,13 @@ Since Concordance Chunk C (C-01):
   (claims, protected towns, adventure mode and spawn protection refuse). Tasting, the glass and recording onto a blank
   formula stay open.
 
+**Under a lid** (Gloam Ink, C-D6; not merged; [its record](gloam-ink.md)). Three Gloamcap and a spider eye in three
+parts of water over a campfire, stirred hot twice with a closed trapdoor (in its lower half) or a bottom slab on the
+crucible, draw Gloam Ink into each glass bottle; uncovered, the same batch is the Poison draught as before. Murky (a
+second spider eye, too much Gloamcap or a searing stir), each bottle draws Gloam Sludge, which a furnace boils back to
+its bottle; any spoon and anyone's risk line say so first. A formula records its covered stirs and waits for its lid
+before each.
+
 ## How it works
 
 **Data** (`data/<ns>/concordance/ingredient/`, `/preparation/`, `/property/`, read by `AlchemyCatalog` in
@@ -222,6 +232,11 @@ counts once.
   its form and what its brew carries, with harm judged by the server; a brew matching two stays unnamed.
 - *Fouling* (C-02): a property may declare `fouling`. In `Outcome.of` the fouling is taken, subtracted, then judged
   (`Property.fouled`).
+- *Lids and extracts* (Gloam Ink, C-D6). A stir records whether a lid covers it (`stir <band> covered`;
+  `CrucibleBlockEntity.covered`: a `#jugcraft:crucible_lids` block with a whole underside); a formula's covered stir
+  waits for its lid (`needs_cover`) before its heat. Extracts (`data/<ns>/concordance/extract/`, `RulesParser.extract`,
+  `alchemy/Extract`) are items a glass bottle draws from a covered batch of exactly their ingredients; murky, their
+  failure; too thin, the draught.
 
 ## Connections
 
@@ -488,6 +503,11 @@ batch bottled as two poultices in two bowls; it passed in client shard 4 of run 
 reads "Crucible Stand beneath heats it towards 65 degrees" and "Formula: step 3 of 9: Mendvetch, as it comes". The
 load card measures a crucible replaying the poultice on a stand (21 poultices while measured, every item accounted
 for) and the journey test brews both products by hand and the poultice powered; both passed in that run.
+
+**Gloam Ink** (C-D6; not merged; [its record](gloam-ink.md#verification)). `ConcordanceGloamInkGameTests` (twelve),
+`ConcordanceAssayGameTests.gloamInkAndSludgeAreNeverFormed`, `ConcordanceEconomyGameTests.extractsTurnIntoNothingTheyCameFrom`
+and `ConcordanceGloamInkClientGameTests`: not run until CI. `check_gloam_ink` and the amended `check_signs` and
+`check_economy` pass locally, and every audit mutation the record lists was reported.
 
 ## World and event applicability
 

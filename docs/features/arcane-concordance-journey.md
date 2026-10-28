@@ -180,6 +180,9 @@ Stolas found through Styx or without him, his pact kept and ended, and the works
 | Not knowing what comes next | the journal says what the next state and each route still need | `metResearchSaysWhatComesNext`, `eachRouteSaysWhatItStillNeeds` |
 <!-- journey:end -->
 
+Since Gloam Ink (C-D6; not merged; [its record](gloam-ink.md)) the living workshop has a sixth step: Gloam Ink under a
+lid and a fair copy of Research Notes.
+
 ## The playtest (not run)
 
 **Setups.** Run each route twice:

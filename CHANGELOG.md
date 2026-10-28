@@ -8,6 +8,14 @@ Every change to Jugcraft, newest first, grouped by pull request. For what each t
 
 No numbered release yet. Entries on feature branches remain proposed until their pull requests merge.
 
+### Unmerged: Arcane Concordance, Gloam Ink
+- **Gloam Ink:** stir Gloamcap and a spider eye under a lid (a closed trapdoor in its lower half, or a bottom slab, on
+  the Alembic Crucible) and a glass bottle draws Gloam Ink; a murky batch draws Gloam Sludge, which a furnace boils back
+  to its bottle. A formula waits for its lid. Record: [gloam-ink.md](docs/features/gloam-ink.md).
+- **Fair copies of Research Notes:** a written sheet, a blank sheet and Gloam Ink in a crafting grid make a fair copy
+  with the same writer and entries; the original and the bottle come back. A copy teaches exactly what its original
+  does (each reader counts a writer once) and is not copied again. Record: [gloam-ink.md](docs/features/gloam-ink.md).
+
 ### Unmerged: The Blood Moon
 - **A Blood Moon rises every fourth night of the Halloween season, and on Halloween night:** the night sky turns blood red with a red haze about you, zombies and skeletons put on costumes far more often (40%), costumed mobs drop double candy, will-o'-wisps gather thick, and the Headless Horseman rides by everyone who hasn't seen him that day. Being out when it rises earns **Bad Moon Rising**.
 - Switch: `halloween.blood_moon` (on by default). Record: [blood-moon.md](docs/features/blood-moon.md).

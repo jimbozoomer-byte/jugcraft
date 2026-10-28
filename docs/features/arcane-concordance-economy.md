@@ -113,6 +113,11 @@ Since Concordance Chunk D (D-05; not merged; [Stolas's pact](stolas-pact.md#cost
 Star-reckoning is a sink of resonance (modelled at the cheapest recall, 6), and Stolas's offerings are a sink of at most
 1/7 of an offering a day a pact. `tools/concordance_economy.py` still reports "gaining cycles: none".
 
+Since Gloam Ink (C-D6; not merged; [its record](gloam-ink.md#balance-and-automation)): a crucible repeating its worked
+formula draws 360 inks a day (the worked formula's day; a crucible's most is about 428); neither Gloam Ink nor Gloam
+Sludge is a resource, and nothing converts them back. `tools/concordance_economy.py` still reports "gaining cycles:
+none".
+
 ## Interactions tested
 
 The brief's combinations, and the tests that exercise them (new in this step marked **new**):
@@ -129,6 +134,7 @@ The brief's combinations, and the tests that exercise them (new in this step mar
 | Automation of a formula | `ConcordanceAlchemyGameTests.machineryRunsAFormulaTwice` |
 | Electricity into a crucible's heat (Concordance Chunk C, C-05; not merged; passed in CI) | `ConcordanceEconomyGameTests.aStandTurnsElectricityIntoHeatOnly`: set to each heat, a Crucible Stand pays exactly its rate on each tick it heats until its store runs short; off, under a crucible already hotter than it aims or with nothing to heat, nothing; no JE comes back out on any face, and no fluid or item. `check_economy`: no gaining cycle through `je_to_heat` |
 | Two carriers for one demand (Concordance Chunk C, C-06; not merged; passed in CI) | `ConcordanceLogisticsGameTests`: `aCrucibleAsksOnceForItsExactShortage`, `aClearedOrReplacedFormulaCancelsItsRequest`, `aFullCourierQuotaWaitsAndBacksOff`, `aBrokenCrucibleTurnsItsRequestBack`, `aCourierFillsACrucibleUntilItIsFull`, `aPostTheSetterMayNotUseIsNeverAsked`, `anUnloadedCrucibleWaitsAndLosesNothing`, `aDiscardedPorterStrandsItsCargoOnce` and `anOfflineSetterPausesTheCourier`, each counting every item in containers and carried after every step; the Peepo client groups `noOverSupplyWithAnOpenCourierRequest` and "crucible demand" (`PeepoIntegrationClientTests`), a full crucible and an unloaded one (`CompanionAutomationChecks`). See [logistics](arcane-concordance-logistics.md) |
+| Covered extraction into an ink (Gloam Ink, C-D6; not merged; not yet run in CI) | `ConcordanceEconomyGameTests.extractsTurnIntoNothingTheyCameFrom`; `ConcordanceAssayGameTests.gloamInkAndSludgeAreNeverFormed`; `check_gloam_ink`: no recipe, tag or Scale takes either back to Gloamcap, a carrier, bone meal or nutrients, and the sludge's furnace gives back only its bottle |
 
 The brief's library interactions:
 
