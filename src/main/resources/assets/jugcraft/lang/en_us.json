@@ -9200,6 +9200,7 @@
   "encyclopedia.jugcraft.dossier.out_of_season": "This rite works only out of the Halloween season",
   "encyclopedia.jugcraft.dossier.owed": "A share of the keeper's spoils is kept for you",
   "encyclopedia.jugcraft.dossier.party": "A lair holds %s players; its gate stays open %s seconds for friends to follow",
+  "encyclopedia.jugcraft.dossier.reset": "If nobody who can fight the keeper stays near for %s seconds, the keeper goes back to where they waited, healed, their helpers gone, and the fight starts again from nothing: what anyone did in it is forgotten",
   "encyclopedia.jugcraft.dossier.share": "Damage %s, healing %s, warded %s, objectives %s",
   "encyclopedia.jugcraft.dossier.share.none": "This fight: you have no part in it yet",
   "encyclopedia.jugcraft.dossier.share.not_yet": "This fight: not yet enough for a share",

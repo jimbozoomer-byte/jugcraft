@@ -64,15 +64,18 @@ import io.github.jimbozoomer.jugcraft.lair.horseman.HessianHorsemanEntity;
 import io.github.jimbozoomer.jugcraft.lair.horseman.JugcraftHorseman;
 import io.github.jimbozoomer.jugcraft.lair.king.JugcraftPumpkinKing;
 import io.github.jimbozoomer.jugcraft.lair.king.PumpkinKingEntity;
+import io.github.jimbozoomer.jugcraft.lair.lich.CryptLichEntity;
 import io.github.jimbozoomer.jugcraft.lair.lich.JugcraftLich;
 import io.github.jimbozoomer.jugcraft.lair.sentinel.CydonianSentinelEntity;
 import io.github.jimbozoomer.jugcraft.lair.sentinel.JugcraftSentinel;
 import io.github.jimbozoomer.jugcraft.lair.tatterlace.GoldenThimble;
 import io.github.jimbozoomer.jugcraft.lair.tatterlace.JugcraftTatterlace;
 import io.github.jimbozoomer.jugcraft.lair.tatterlace.TatterlaceEntity;
+import io.github.jimbozoomer.jugcraft.lair.tyrant.CinderTyrantEntity;
 import io.github.jimbozoomer.jugcraft.lair.tyrant.JugcraftTyrant;
 import io.github.jimbozoomer.jugcraft.lair.vesperine.VesperineEntity;
 import io.github.jimbozoomer.jugcraft.lair.yeti.JugcraftYeti;
+import io.github.jimbozoomer.jugcraft.lair.yeti.YetiKingEntity;
 import io.github.jimbozoomer.jugcraft.town.JugcraftTown;
 import io.github.jimbozoomer.jugcraft.town.Town;
 import io.github.jimbozoomer.jugcraft.town.TownDecor;
@@ -291,6 +294,8 @@ public class EncyclopediaGameTests {
 			}
 			helper.assertTrue(row(met, dossier + lair + ".leave") != null && row(met, dossier + "made_from") != null == !boss.madeFrom.isEmpty(),
 					"the way home; and what is made from the loot, if anything");
+			EncyclopediaPayload.Row reset = row(met, dossier + "reset");
+			helper.assertTrue(reset != null && args(reset.text())[0].equals(LairDossiers.resetSeconds(boss)), "when the fight starts over: " + reset);
 		} finally {
 			player.removeAttached(Lairs.VISIT);
 		}
@@ -669,6 +674,28 @@ public class EncyclopediaGameTests {
 	}
 
 	/**
+	 * Concordance Chunk E (E4): every keeper's dossier says when its fight starts over, in its keeper's own seconds: how long
+	 * it waits with nobody near who can fight it before going back, healed (each keeper's ABANDON_TICKS).
+	 */
+	@GameTest(maxTicks = 20)
+	public void everyKeeperSaysWhenItsFightStartsOver(GameTestHelper helper) {
+		Map<LairDossiers.Boss, Integer> ticks = Map.ofEntries(
+				Map.entry(LairDossiers.Boss.VESPERINE, VesperineEntity.ABANDON_TICKS), Map.entry(LairDossiers.Boss.TATTERLACE, TatterlaceEntity.ABANDON_TICKS),
+				Map.entry(LairDossiers.Boss.YETI_KING, YetiKingEntity.ABANDON_TICKS), Map.entry(LairDossiers.Boss.CINDER_TYRANT, CinderTyrantEntity.ABANDON_TICKS),
+				Map.entry(LairDossiers.Boss.MIRE_HAG, MireHagEntity.ABANDON_TICKS), Map.entry(LairDossiers.Boss.CRYPT_LICH, CryptLichEntity.ABANDON_TICKS),
+				Map.entry(LairDossiers.Boss.IRON_DREADNOUGHT, IronDreadnoughtEntity.ABANDON_TICKS),
+				Map.entry(LairDossiers.Boss.ALPHA_WEREWOLF, AlphaWerewolfEntity.ABANDON_TICKS),
+				Map.entry(LairDossiers.Boss.CYDONIAN_SENTINEL, CydonianSentinelEntity.ABANDON_TICKS),
+				Map.entry(LairDossiers.Boss.PUMPKIN_KING, PumpkinKingEntity.ABANDON_TICKS),
+				Map.entry(LairDossiers.Boss.HESSIAN_HORSEMAN, HessianHorsemanEntity.ABANDON_TICKS));
+		helper.assertValueEqual(ticks.keySet(), Set.of(LairDossiers.Boss.values()), "every keeper's reset is checked");
+		for (LairDossiers.Boss boss : LairDossiers.Boss.values()) {
+			helper.assertValueEqual(LairDossiers.resetSeconds(boss), ticks.get(boss) / 20, boss + " starts over after its own ABANDON_TICKS");
+		}
+		helper.succeed();
+	}
+
+	/**
 	 * Concordance Chunk E (E4): every found lair gives its lore, first, naming no keeper, its rite's numbers the game's,
 	 * and what readies a player for its keeper as text and icons with no grid, its numbers the game's: the piece of the
 	 * keeper's loot that answers them, where one does. (The Glacier Hall's and the Cinder Kiln's brews have tests of their
@@ -909,7 +936,7 @@ public class EncyclopediaGameTests {
 			List<String> keys = section(page, boss.lair).stream().map(row -> key(row.text())).toList();
 			List<String> whole = new ArrayList<>(List.of("lair.jugcraft." + boss.lair.id, dossier + boss.lair.id + ".rite", dossier + "party",
 					"entity.jugcraft." + boss.boss, dossier + boss.lair.id + ".credit", dossier + "credit.wards", dossier + "won",
-					dossier + boss.lair.id + ".leave", dossier + "grave_goods", dossier + boss.lair.id + ".lore"));
+					dossier + boss.lair.id + ".leave", dossier + "grave_goods", dossier + boss.lair.id + ".lore", dossier + "reset"));
 			boss.loot.forEach(loot -> whole.add("jei.jugcraft.acquire." + loot));
 			if (JugcraftConfig.isFeatureEnabled(JugcraftConcordance.FEATURE)) {
 				whole.add(dossier + "credit.poultice");

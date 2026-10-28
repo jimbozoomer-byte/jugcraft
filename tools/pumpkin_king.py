@@ -115,6 +115,10 @@ LANTERN_LIGHT = 15
 RECIPES = {
     # For those who never fight: the ember set in any heirloom pumpkin. Nothing makes an ember but him: no loop.
     "kings_lantern": {"shapeless": ["jugcraft:kings_ember", "#jugcraft:heirloom_pumpkins"], "result": "kings_lantern"},
+    # His part of what summons him again (Concordance Chunk E, E4): his ember for two of the Harvest Crown's three
+    # heirloom pumpkins and both its gold ingots. One ember a share, one crown an ember: no loop.
+    "harvest_crown_from_ember": {"shapeless": ["jugcraft:kings_ember", "#jugcraft:heirloom_pumpkins", "minecraft:hay_block"],
+                                 "result": "harvest_crown"},
 }
 
 MESSAGES = {

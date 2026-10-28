@@ -13,9 +13,7 @@ import org.jspecify.annotations.Nullable;
  * A lair: a pocket dimension of its own, into whose instance slots its structure template is placed fresh by
  * {@link Lairs}. Every position here is relative to the template's corner; the numbers are its layout tool's
  * (tools/hollow_acre.py, tools/spindle_loft.py, tools/glacier_hall.py, tools/cinder_kiln.py, tools/lantern_fen.py,
- * tools/crypt_archive.py, tools/foundry_trench.py, tools/moonlit_ring.py, tools/cydonian_sanctum.py, tools/crowfield.py;
- * checked by tools/check_mod_data.py).
- * tools/crypt_archive.py, tools/foundry_trench.py, tools/moonlit_ring.py, tools/cydonian_sanctum.py,
+ * tools/crypt_archive.py, tools/foundry_trench.py, tools/moonlit_ring.py, tools/cydonian_sanctum.py, tools/crowfield.py,
  * tools/crown_of_thunder.py, tools/church_bridge.py; checked by tools/check_mod_data.py).
  */
 public enum Lair {

@@ -28,15 +28,18 @@ import io.github.jimbozoomer.jugcraft.lair.horseman.HessianHorsemanEntity;
 import io.github.jimbozoomer.jugcraft.lair.horseman.HorsemanLoot;
 import io.github.jimbozoomer.jugcraft.lair.king.PumpkinKingEntity;
 import io.github.jimbozoomer.jugcraft.lair.king.PumpkinKingLoot;
+import io.github.jimbozoomer.jugcraft.lair.lich.CryptLichEntity;
 import io.github.jimbozoomer.jugcraft.lair.lich.CryptLichLoot;
 import io.github.jimbozoomer.jugcraft.lair.sentinel.CydonianSentinelEntity;
 import io.github.jimbozoomer.jugcraft.lair.sentinel.SentinelLoot;
 import io.github.jimbozoomer.jugcraft.lair.tatterlace.GoldenThimble;
 import io.github.jimbozoomer.jugcraft.lair.tatterlace.TatterlaceEntity;
 import io.github.jimbozoomer.jugcraft.lair.tatterlace.TatterlaceLoot;
+import io.github.jimbozoomer.jugcraft.lair.tyrant.CinderTyrantEntity;
 import io.github.jimbozoomer.jugcraft.lair.tyrant.CinderTyrantLoot;
 import io.github.jimbozoomer.jugcraft.lair.vesperine.VesperineEntity;
 import io.github.jimbozoomer.jugcraft.lair.vesperine.VesperineLoot;
+import io.github.jimbozoomer.jugcraft.lair.yeti.YetiKingEntity;
 import io.github.jimbozoomer.jugcraft.lair.yeti.YetiKingLoot;
 import java.util.ArrayList;
 import java.util.List;
@@ -115,17 +118,19 @@ public final class LairDossiers {
 				List.of()),
 		ALPHA_WEREWOLF(Lair.MOONLIT_RING, AlphaWerewolfLoot.BOSS, AlphaWerewolfLoot.ADVANCEMENT, List.of("moonfang", "howler"), null, null,
 				List.of("howling_totem"), List.of("howling_totem"), List.of(),
-				List.of("alpha_pelt", "moonfang", "howler", "packfinder_charm", "alphas_hood"), List.of(), List.of()),
+				List.of("alpha_pelt", "moonfang", "howler", "packfinder_charm", "alphas_hood"), List.of("howling_totem_from_alpha_pelt"), List.of()),
 		CYDONIAN_SENTINEL(Lair.CYDONIAN_SANCTUM, SentinelLoot.BOSS, SentinelLoot.ADVANCEMENT, List.of("corelance", "redstar_cleaver"), null, null,
 				List.of("altar_keystone"), List.of("altar_keystone", "altar_keystone_from_dreamglass"), List.of(),
 				List.of("cydonian_shard", "corelance", "redstar_cleaver", "lowfall_core", "sentinels_visor"), List.of("altar_keystone_from_cydonian_shards"),
 				List.of()),
 		PUMPKIN_KING(Lair.CROWFIELD, PumpkinKingLoot.BOSS, PumpkinKingLoot.ADVANCEMENT, List.of("hallowreap", "crowbill"), "message.jugcraft.lair.crown.off_season", null,
 				List.of("harvest_crown"), List.of("harvest_crown", "scarecrow"), List.of(Items.HAY_BLOCK),
-				List.of("kings_ember", "hallowreap", "crowbill", "crowward_charm", "pumpkin_kings_crown"), List.of(), List.of("kings_lantern")),
+				List.of("kings_ember", "hallowreap", "crowbill", "crowward_charm", "pumpkin_kings_crown"), List.of("harvest_crown_from_ember"),
+				List.of("kings_lantern")),
 		HESSIAN_HORSEMAN(Lair.CHURCH_BRIDGE, HorsemanLoot.BOSS, HorsemanLoot.ADVANCEMENT, List.of("hollowflail", "hessian_sabre"), null,
 				"message.jugcraft.lair.bridle.in_season", List.of("hessians_bridle"), List.of("hessians_bridle"), List.of(),
-				List.of("horseman_lantern", "hollowflail", "hessian_sabre", "hessians_spur", "hessians_tricorn"), List.of(), List.of());
+				List.of("horseman_lantern", "hollowflail", "hessian_sabre", "hessians_spur", "hessians_tricorn"), List.of("hessians_bridle_from_lantern"),
+				List.of());
 
 		public final Lair lair;
 		/** The keeper's id in {@link LairRewards} ("vesperine"), and its entity's. */
@@ -357,7 +362,10 @@ public final class LairDossiers {
 		return property != null && status.equals(property.status());
 	}
 
-	/** The keeper, once met: how support earns a share, the first win and the loot, the recipes it opens, leaving, and the fight. */
+	/**
+	 * The keeper, once met: how support earns a share, the first win and the loot, the recipes it opens, leaving, when the
+	 * fight starts over, and the fight.
+	 */
 	private static void keeper(ServerPlayer player, PageWriter out, Boss boss, Discovery discovery) {
 		out.heading(Component.translatable("entity.jugcraft." + boss.boss));
 		out.fact(Component.translatable("encyclopedia.jugcraft.dossier." + boss.lair.id + ".credit", number(Encounter.HEALING),
@@ -395,6 +403,8 @@ public final class LairDossiers {
 					made == null ? Component.literal(recipe) : made.getDefaultInstance().getHoverName()));
 		}
 		out.fact(Component.translatable("encyclopedia.jugcraft.dossier." + boss.lair.id + ".leave"));
+		// Concordance Chunk E (E4): when the fight starts over, from the keeper's own number.
+		out.fact(Component.translatable("encyclopedia.jugcraft.dossier.reset", resetSeconds(boss)));
 		out.fact(Component.translatable("encyclopedia.jugcraft.dossier.grave_goods"));
 		LairRewards.Owed owed = player.getAttached(LairRewards.OWED);
 		if (owed != null && owed.due().stream().anyMatch(due -> due.boss().equals(boss.boss))) {
@@ -404,6 +414,26 @@ public final class LairDossiers {
 		if (visit != null && visit.lair().equals(boss.lair.id)) {
 			share(player, out);
 		}
+	}
+
+	/**
+	 * How long, in seconds, a keeper waits with nobody near who can fight them before going back, healed, and forgetting
+	 * the fight (each keeper's own ABANDON_TICKS; Concordance Chunk E, E4).
+	 */
+	public static int resetSeconds(Boss boss) {
+		return switch (boss) {
+			case VESPERINE -> VesperineEntity.ABANDON_TICKS / 20;
+			case TATTERLACE -> TatterlaceEntity.ABANDON_TICKS / 20;
+			case YETI_KING -> YetiKingEntity.ABANDON_TICKS / 20;
+			case CINDER_TYRANT -> CinderTyrantEntity.ABANDON_TICKS / 20;
+			case MIRE_HAG -> MireHagEntity.ABANDON_TICKS / 20;
+			case CRYPT_LICH -> CryptLichEntity.ABANDON_TICKS / 20;
+			case IRON_DREADNOUGHT -> IronDreadnoughtEntity.ABANDON_TICKS / 20;
+			case ALPHA_WEREWOLF -> AlphaWerewolfEntity.ABANDON_TICKS / 20;
+			case CYDONIAN_SENTINEL -> CydonianSentinelEntity.ABANDON_TICKS / 20;
+			case PUMPKIN_KING -> PumpkinKingEntity.ABANDON_TICKS / 20;
+			case HESSIAN_HORSEMAN -> HessianHorsemanEntity.ABANDON_TICKS / 20;
+		};
 	}
 
 	/**

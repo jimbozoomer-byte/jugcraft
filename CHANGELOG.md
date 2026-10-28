@@ -8,6 +8,21 @@ Every change to Jugcraft, newest first, grouped by pull request. For what each t
 
 No numbered release yet. Entries on feature branches remain proposed until their pull requests merge.
 
+### Unmerged: Faster replays and a loadout measurement (Concordance Chunk E, E4)
+- **A cheaper token for every keeper:** the Alpha Werewolf's pelt and three bones make a Howling Totem with no silver; the Pumpkin King's ember, an heirloom pumpkin and a hay bale make a Harvest Crown; the Headless Horseman's lantern and two leather make a Hessian's Bridle. Each is shown in his dossier, optional after a win. A share gives one and a token takes one, so none is a loop.
+- **When a fight starts over:** every met keeper's dossier says that with nobody near who can fight them for 10 seconds, the keeper goes back healed and the fight starts again from nothing.
+- **How long each keeper takes:** a new record, [lair-loadouts.md](docs/features/lair-loadouts.md), works out from the game's own numbers how many seconds of hitting each keeper takes, alone, with a steel sword, a steel battle axe, the silver dagger, the Lance of Dawn, a Garrison Rifle and a Ranger Rifle, with its rule answered and not. In short:
+  - answering the rule halves the time or better against seven keepers;
+  - guns are quickest;
+  - the silver dagger loses half its blows to the hurt cooldown;
+  - the Lance alone is support.
+
+  It is a model, not a playtest.
+- **Checked:**
+  - **Passing locally:** the Python audits, with a new `check_lair_loadouts`.
+  - **CI only, not yet run:** the game tests.
+  - **Not done:** timing fights by hand.
+
 ### Unmerged: A dossier for every lair, with lore, preparation and the way home (Concordance Chunk E, E4)
 - **Seven more dossiers:** the encyclopedia's Expeditions page now covers the Lantern Fen, the Archive of Last Names, the Foundry Trench, the Moonlit Ring, the Cydonian Sanctum, the Crowfield and the Church Bridge (whose rite works only out of the Halloween season, as the dossier says), as it did the first four lairs: the rite and its recipes, when it works, the keeper's credit, trophies and loot, and the way home (and where Grey or Red Mist opens when the keeper falls).
 - **Lore and preparation in every dossier:** each found lair gives a line of lore, a clue to its keeper's rule that never names them, and what readies a player for the fight, with the game's numbers and the piece of the keeper's loot that helps (the Golden Thimble, the Emptied Phylactery, the Grounding Strap, the Packfinder Charm, the Lowfall Core).

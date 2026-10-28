@@ -4,7 +4,8 @@ docs/features/concordance-first-loadout.md; the Yeti King and the Cinder Tyrant 
 JEI shows a crafting or machine recipe for most things. The Adept's Wand and, since Concordance Chunk C, the Rooted
 Thallite Foundation (each made by a ritual) and what the lair bosses give (rolled from their loot tables when they fall:
 Vesperine, Madame Tatterlace, the Yeti King and the Cinder Tyrant; since Concordance Chunk E, E4, the Mire Hag, the Crypt
-Lich, the Iron Dreadnought, the Alpha Werewolf, the Cydonian Sentinel and the Pumpkin King) have none, so each gets an
+Lich, the Iron Dreadnought, the Alpha Werewolf, the Cydonian Sentinel, the Pumpkin King and the Headless Horseman of the
+Church Bridge) have none, so each gets an
 information page instead, written here from the generators' own tables (tools/vesperine.py, tools/tatterlace.py,
 tools/yeti_king.py, tools/cinder_tyrant.py, the other keepers' own, tools/concordance_rituals.py, tools/lairs.py and
 tools/biomes.py) so that its numbers are the data's.
