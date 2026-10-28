@@ -527,6 +527,9 @@ RESEARCH.update(garden_pacts.RESEARCH)
 # Concordance Chunk D, D-07 (tools/concordance_roster.py): the roster's words, limits and icons, the journal's pacts lines
 # and the Ars Nouveau helpers' roster kinds (G13).
 import concordance_roster as roster  # noqa: E402
+# The magic interfaces (tools/magic_ui.py; docs/features/magic-interfaces.md): the short words the magic screens draw (each
+# glance fed the server's own arguments), the chooser's reasons and the short labels.
+import magic_ui  # noqa: E402
 # Everything a player can examine or study: each research entry's specimens (Java: JugcraftConcordance.SPECIMENS).
 SPECIMEN_TAGS = [SPECIMEN_TAG, rituals.CIRCLE_SPECIMEN_TAG, alchemy.ALCHEMY_SPECIMEN_TAG, ecology.GARDEN_SPECIMEN_TAG,
                  celestial.CELESTIAL_SPECIMEN_TAG, crimson.CRIMSON_SPECIMEN_TAG, workers.BINDING_SPECIMEN_TAG,
@@ -1916,6 +1919,7 @@ def write_all(write, assets, data, lang, condition, self_drop):
     pacts.lang_entries(lang)
     garden_pacts.lang_entries(lang)
     roster.lang_entries(lang)
+    magic_ui.lang_entries(lang)
     # Items.
     write(assets / "models" / "item" / "initiate_wand.json",
           {"parent": "minecraft:item/handheld", "textures": {"layer0": rid("item/initiate_wand")}})

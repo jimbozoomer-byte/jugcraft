@@ -18,7 +18,11 @@ geometry, glowmask and animations adapted by tools/garden_bodies.py (ADAPTED). T
 body, built rather than adapted: its geometry and clips from code alone, its skin and glowmask painted by
 tools/garden_bodies.py only in colours read from two of the owner's Blocks-folder paintings (concordance_pacts.BUILT); each
 written and checked here. GC-07 adds the owner's second edited part as a root built bodies may read (Foras's acorn cap: its
-cubes and texels copied unchanged into his geometry and skin). Two tables may not import different files to one path.
+cubes and texels copied unchanged into his geometry and skin). The magic interfaces (tools/magic_ui.py,
+docs/features/magic-interfaces.md) add the owner's magic interface kit: its OWNER_FILES copied unchanged but written as
+RGBA, its ADAPTED pieces each made by a named adapter that states the region it changes (the splash frame's lettering
+painted out among them), its BUILT glyphs and marks drawn by code, and each sprite's gui.scaling (.png.mcmeta) beside it.
+Two tables may not import different files to one path.
 
 On 7 October 2026 the owner asked for their farming and food textures to be used ("I have already made a ton of custom
 textures and food ... I made all of the textures in there myself its all mine"). Each imported texture is a byte-for-byte
@@ -74,6 +78,7 @@ import feasts  # noqa: E402
 import garden  # noqa: E402
 import garden_bodies  # noqa: E402
 import kitchen  # noqa: E402
+import magic_ui  # noqa: E402
 import menu  # noqa: E402
 import rice  # noqa: E402
 import soil  # noqa: E402
@@ -90,7 +95,7 @@ PART2 = os.path.join(ROOT, "art", "owner-library", "originals", PART2_NAME)
 ASSETS = os.path.join(ROOT, "src", "main", "resources", "assets", "jugcraft")
 # Adapter modules by name (tools/concordance_pacts.py SPIRITS[...]["body"]["adapted"]: a bare name is tools/stolas_body.py's,
 # Chunk D's; "garden_bodies.<name>" is the garden cohort's, GC-04 on).
-ADAPTERS = {"stolas_body": stolas_body, "garden_bodies": garden_bodies}
+ADAPTERS = {"stolas_body": stolas_body, "garden_bodies": garden_bodies, "magic_ui": magic_ui}
 
 
 def _adapter(name):
@@ -109,6 +114,11 @@ def builds():
         if target in taken:
             raise SystemExit(f"tools/owner_art.py: {target} is both built and copied or adapted")
         out.append((target, tuple(sources), _adapter(builder)))
+    # The magic interfaces' glyphs and marks drawn for Jugcraft (tools/magic_ui.py BUILT): code alone, no library file.
+    for target in sorted(magic_ui.BUILT):
+        if target in taken or target in concordance_pacts.BUILT:
+            raise SystemExit(f"tools/owner_art.py: {target} is both built and copied or adapted")
+        out.append((target, (), magic_ui.builder(target)))
     return out
 
 
@@ -192,6 +202,12 @@ def adaptations():
         if target in copied:
             raise SystemExit(f"tools/owner_art.py: {target} is both copied and adapted")
         out.append((target, source, _adapter(adapter)))
+    # The magic interfaces (tools/magic_ui.py): the kit's copies, written as RGBA (several originals are palette or
+    # colour-keyed PNGs), and its adapted pieces, each by its named adapter.
+    for target in sorted(set(magic_ui.OWNER_FILES) | set(magic_ui.ADAPTED)):
+        if target in copied or target in concordance_pacts.ADAPTED:
+            raise SystemExit(f"tools/owner_art.py: {target} is both copied and adapted")
+        out.append((target, magic_ui.source(target), magic_ui.adapter(target)))
     return out
 
 
@@ -296,8 +312,12 @@ def expected():
         # by hand.
         files[os.path.join(ASSETS, target)] = adapt(adapter)
     for target, _, builder in builds():
-        # The garden cohort's built bodies (GC-05: Bathin's): drawn by code, painted only in the owner's colours.
+        # The garden cohort's built bodies (GC-05: Bathin's): drawn by code, painted only in the owner's colours. The
+        # magic interfaces' drawn glyphs and marks read nothing.
         files[os.path.join(ASSETS, target)] = adapt(builder, _read_owner)
+    for target, scaling in magic_ui.MCMETA.items():
+        # Each magic interface sprite drawn at more than its own size: its nine-slice borders (gui.scaling).
+        files[os.path.join(ASSETS, target) + ".mcmeta"] = (json.dumps(scaling, indent=2) + "\n").encode("utf-8")
     return files
 
 
@@ -337,6 +357,7 @@ def errors():
     adapted.update(_target(target) for target in garden.ORNAMENTAL_EARS)
     adapted.update(os.path.join(ASSETS, target) for target, _, _ in adaptations() if target.endswith(".png"))
     built = {os.path.join(ASSETS, target) for target, _, _ in builds()}
+    magic_built = {os.path.join(ASSETS, target) for target in magic_ui.BUILT}
     adapted.update(path for path in built if path.endswith(".png"))
     for path, data in expected().items():
         rel = os.path.relpath(path, ROOT)
@@ -356,8 +377,10 @@ def errors():
                 except (OSError, ValueError):
                     same = False
             if not same and path in built:
-                # A built body file (GC-05) is made, not imported: it differs from what its builder makes.
-                out.append(f"{rel} differs from what tools/garden_bodies.py builds (run tools/owner_art.py)")
+                # A built file (a body, GC-05; a magic interface glyph) is made, not imported: it differs from what its
+                # builder makes.
+                maker = "tools/magic_ui.py" if path in magic_built else "tools/garden_bodies.py"
+                out.append(f"{rel} differs from what {maker} builds (run tools/owner_art.py)")
             elif not same:
                 out.append(f"{rel} differs from the owner's library file it is imported from; the owner's art is kept as "
                            "drawn (tools/owner_art.py)")
@@ -378,7 +401,8 @@ if __name__ == "__main__":
                 | set(getattr(module, "ADAPTED", {})) | set(getattr(module, "BUILT", {}))
         for target, source, digest, adapter in provenance():
             if only is None or target in only:
-                verb = "built" if target in concordance_pacts.BUILT else "adapted"
+                verb = ("built" if target in concordance_pacts.BUILT or target in magic_ui.BUILT
+                        else "copied as RGBA" if target in magic_ui.OWNER_FILES else "adapted")
                 made = f" {verb} by `tools/{adapter.split('.')[0]}.py` ({adapter.split('.')[1]}) |" if adapter else ""
                 print((f"| `{target}` | `{source}` | `{digest}` |" if source else f"| `{target}` | built from code alone | |") + made)
         sys.exit(0)

@@ -8,6 +8,10 @@ Every change to Jugcraft, newest first, grouped by pull request. For what each t
 
 No numbered release yet. Entries on feature branches remain proposed until their pull requests merge.
 
+### Unmerged: Magic interfaces, unit 1 (in progress)
+- **The owner's magic interface kit is in the game's resources, with a shared look for the magic screens** (the owner's 28 October request: far less reading, a much richer style): the animated cosmos, the gilded portrait header, parchment scrolls, wooden plates, gold arrows, bookmarks, gold-framed slots and tooltips, and short words (69 glances that show a server sentence's numbers in two or three words, with the whole sentence kept as its narration and hover). **No screen uses it yet:** the pact screen moves onto it next. The splash frame's "ARS NOUVEAU" lettering is painted out of its copy. Record: [magic-interfaces.md](docs/features/magic-interfaces.md).
+- Not yet compiled or run in Minecraft; checked locally by `check_magic_ui` and `scripts/tests/test_magic_ui.py`.
+
 ### Unmerged: Arcane Concordance, the garden cohort's unit 1 (Buer)
 - **The pact perch offers every spirit you may invite; with two or more, its owner chooses** (GC-01): an empty perch's owner sees each spirit's sign and name, "ready" or what is still missing, and choosing one brings it. With Stolas alone nothing changes: his offer at once, his words word for word. A garden spirit's terms and refusals never name an astrolabe. Record: [concordance-garden-cohort.md](docs/features/concordance-garden-cohort.md).
 - **Pact spirits, Stolas included, arrive facing whoever invites them and turn to whoever is speaking to them at their perch** (GC-02).

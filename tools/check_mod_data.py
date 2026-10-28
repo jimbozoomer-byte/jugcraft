@@ -16132,6 +16132,7 @@ def check_concordance(registered):
     check_spirit_bodies(co)
     check_pact_network(co)
     check_roster_screen(co, lang)
+    check_magic_ui(lang)
     check_logistics(co, root, lang, registered)
     check_hand(co, root, lang, research)
     check_crucible_supply(co, root)
@@ -22236,6 +22237,107 @@ def check_pact_network(co):
         err(".github/workflows/build.yml: the job pact-clients-without-optional runs ConcordancePactClientGameTests, "
             "ConcordanceRosterClientGameTests and ConcordancePactNetworkTests without the optional integrations, only when a manual "
             f"run asks (D-P137): {classes}")
+
+
+def check_magic_ui(lang):
+    """The magic interfaces (docs/features/magic-interfaces.md; tools/magic_ui.py, spec 4.5): the art, glances and short
+    labels hold (magic_ui.problems(): every runtime copy decodes as RGBA and differs from its library file only in the
+    region its adapter states, so the splash frame's lettering is painted out; every .mcmeta fits its sprite; each
+    sprite's main fill and the inks drawn on it are 4.5:1 or more; every glance renders its expected English from the
+    server's own arguments by position and keeps to its word limit; every row, blocker and term the server can send has a
+    glance or is folded), tools/owner_art.py writes them, and the Java names what the tables hold: every sprite
+    MagicArt and MagicButton name has its file, the Glyph and Mark widths are the files' own, MagicTheme's inks are the
+    palette, PactGlance's mark rules are MARK_RULES, the seal counts through PactAfford, which names no client class, and
+    the layer uses no GuiLib, mixin, text box or literal text. A screen moved to the layer (MAGIC_SCREENS) builds with
+    MagicButton and MagicText alone."""
+    import magic_ui as mu
+    for problem in mu.problems(lang=lang):
+        err(f"check_magic_ui: {problem}")
+    adapted = {target for target, _, _ in owner_art.adaptations()}
+    if not (set(mu.OWNER_FILES) | set(mu.ADAPTED)) <= adapted:
+        err("tools/owner_art.py: writes and checks the magic interface kit (magic_ui.OWNER_FILES and ADAPTED in adaptations())")
+    if not set(mu.BUILT) <= {target for target, _, _ in owner_art.builds()}:
+        err("tools/owner_art.py: writes the magic interfaces' drawn glyphs and marks (magic_ui.BUILT in builds())")
+    expected = owner_art.expected()
+    for target in mu.MCMETA:
+        if str(ASSETS / (target + ".mcmeta")) not in expected:
+            err(f"tools/owner_art.py: does not write {target}.mcmeta (magic_ui.MCMETA)")
+    names = ("MagicArt", "MagicTheme", "MagicLayout", "MagicScreen", "MagicButton", "MagicText", "MagicChip", "MagicStacks",
+             "MagicPortrait", "MagicPortraits", "PactGlance", "RosterGlance")
+    sources = {}
+    for name in names:
+        path = CLIENT_JAVA_ROOT / f"{name}.java"
+        if not path.exists():
+            err(f"client/{name}.java is missing (the magic interfaces' shared layer)")
+            continue
+        sources[name] = path.read_text(encoding="utf-8")
+    for name, text in sources.items():
+        for banned in ("guilib", "Mixin", "EditBox", "Component.literal", "sendCommand", "sendChat"):
+            if banned in text:
+                err(f"client/{name}.java: the magic layer uses no {banned} (native widgets, server words, no GuiLib or mixin)")
+    art, button = sources.get("MagicArt", ""), sources.get("MagicButton", "")
+    named = set(re.findall(r'sprite\("([a-z0-9_/]+)"\)', art + button))
+    for helper, forms in (("paper", ("paper/{}", "paper/{}_highlighted")),
+                          ("arrow", ("arrow/{}", "arrow/{}_disabled", "arrow/{}_highlighted")),
+                          ("action", ("action/{}", "action/{}_inactive", "action/{}_highlighted")),
+                          ("bookmark", ("bookmark/{}",))):
+        for value in re.findall(helper + r'\("([a-z_]+)"\)', button):
+            named.update(form.format(value) for form in forms)
+    for path in sorted(named):
+        if not (ASSETS / "textures" / "gui" / "sprites" / "magic" / f"{path}.png").is_file():
+            err(f"client/MagicArt or MagicButton names the sprite jugcraft:magic/{path}, which tools/magic_ui.py does not write")
+    for enum, folder, height in (("Glyph", "glyph", 7), ("Mark", "mark", 9)):
+        block = art.split(f"enum {enum} {{", 1)[1].split("\n\t}\n", 1)[0] if f"enum {enum} {{" in art else ""
+        entries = re.findall(r"([A-Z]+)\((\d+)\)", block.split(";", 1)[0])
+        table = mu.GLYPHS if enum == "Glyph" else tuple(mu.MARKS)
+        if [name.lower() for name, _ in entries] != list(table):
+            err(f"client/MagicArt.{enum}: its entries are not tools/magic_ui.py's {'GLYPHS' if enum == 'Glyph' else 'MARKS'}, in order")
+        if f"static final int HEIGHT = {height};" not in block:
+            err(f"client/MagicArt.{enum}.HEIGHT is not {height}, its sprites' height")
+        for name, width in entries:
+            path = ASSETS / "textures" / "gui" / "sprites" / "magic" / folder / f"{name.lower()}.png"
+            if path.is_file():
+                with Image.open(path) as image:
+                    if image.size != (int(width), height):
+                        err(f"client/MagicArt.{enum}.{name}: {width}x{height}, but its sprite is {image.size[0]}x{image.size[1]}")
+    theme = sources.get("MagicTheme", "")
+    for ink, value in mu.PALETTE.items():
+        if f"static final int {ink.upper()} = 0xFF{value:06X};" not in theme:
+            err(f"client/MagicTheme.{ink.upper()} is not tools/magic_ui.py's palette (#{value:06x})")
+    rules = re.findall(r'new Rule\("(\w+)", "([^"]+)", MagicArt\.Mark\.(\w+)\)', sources.get("PactGlance", ""))
+    if [(kind, text, mark.lower()) for kind, text, mark in rules] != list(mu.MARK_RULES):
+        err("client/PactGlance.MARKS: its rules are not tools/magic_ui.py's MARK_RULES, in order")
+    glance = sources.get("PactGlance", "")
+    for prefix in ('"screen.jugcraft.pact.glance." + rest', '"screen.jugcraft.roster.glance." + rest',
+                   '"screen.jugcraft.pact.glance." + server', '"screen.jugcraft.pact.glance.card."',
+                   'static final String SERVER = "message.jugcraft.concordance.";'):
+        if prefix not in glance:
+            err(f"client/PactGlance: a glance's key is tools/magic_ui.py's glance_key and card_key ({prefix} is missing)")
+    compact = (JAVA_ROOT / "concordance" / "spirits" / "PactCompact.java").read_text(encoding="utf-8")
+    if "return PactAfford.count(player, needs, resonance).affords();" not in compact:
+        err("PactCompact.affords: the seal counts through PactAfford, as the pact screen's short marks do (spec 2.6)")
+    afford = JAVA_ROOT / "concordance" / "spirits" / "PactAfford.java"
+    afford_text = afford.read_text(encoding="utf-8") if afford.exists() else ""
+    if not afford_text or "net.minecraft.client" in afford_text or "jugcraft.client" in afford_text:
+        err("concordance/spirits/PactAfford.java: the shared count exists and names no client class (server-safe)")
+    stacks = sources.get("MagicStacks", "")
+    if "PactAfford.Count" not in stacks or "isShort(line)" not in stacks:
+        err("client/MagicStacks: marks a short slot from PactAfford's count (spec 2.6)")
+    for name in mu.MAGIC_SCREENS:
+        text = (CLIENT_JAVA_ROOT / f"{name}.java").read_text(encoding="utf-8")
+        if "new MagicButton(" not in text or "new MagicText(" not in text or "BookArt.Tab" in text or "BookArt.Paragraph" in text:
+            err(f"client/{name}.java: a screen on the magic layer builds with MagicButton and MagicText (no BookArt.Tab or Paragraph)")
+    for name, text in sources.items():
+        for key in re.findall(r'"((?:screen|message)\.jugcraft\.[a-z_.]+[a-z_])"', text):
+            if key not in lang:
+                err(f"client/{name}.java: missing lang {key}")
+    record = ROOT / "docs" / "features" / "magic-interfaces.md"
+    rows = record.read_text(encoding="utf-8") if record.exists() else ""
+    only = set(mu.OWNER_FILES) | set(mu.ADAPTED) | set(mu.BUILT)
+    for target, source, digest, _ in owner_art.provenance():
+        if target in only and f"| `{target}` | " + (f"`{source}` | `{digest}` |" if source else "drawn for Jugcraft |") not in rows:
+            err(f"docs/features/magic-interfaces.md: no provenance row for {target} with its source and SHA-256 "
+                "(python3 tools/owner_art.py --provenance magic_ui)")
 
 
 def check_roster_screen(co, lang):
