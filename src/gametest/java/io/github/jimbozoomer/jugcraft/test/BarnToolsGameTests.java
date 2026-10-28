@@ -7,6 +7,10 @@ import io.github.jimbozoomer.jugcraft.agriculture.DryingRackBlock;
 import io.github.jimbozoomer.jugcraft.agriculture.DryingRackBlockEntity;
 import io.github.jimbozoomer.jugcraft.agriculture.FruitBinBlock;
 import io.github.jimbozoomer.jugcraft.agriculture.FruitStoreBlockEntity;
+import io.github.jimbozoomer.jugcraft.agriculture.HarvestBellBlock;
+import io.github.jimbozoomer.jugcraft.agriculture.HarvestBellBlockEntity;
+import io.github.jimbozoomer.jugcraft.agriculture.HayPulleyBlock;
+import io.github.jimbozoomer.jugcraft.agriculture.HayPulleyBlockEntity;
 import io.github.jimbozoomer.jugcraft.agriculture.JugcraftAgriculture;
 import io.github.jimbozoomer.jugcraft.agriculture.QuernBlock;
 import io.github.jimbozoomer.jugcraft.agriculture.QuernBlockEntity;
@@ -47,7 +51,9 @@ import net.minecraft.world.phys.Vec3;
  * Drying Rack stands whole, hangs bunches of four peppers and herbs on its hooks and refuses anything else, shows them,
  * gives back a fresh bunch, waits to show them dry and gives them back dried, and gives back its bunches when broken; the
  * Corn Crib stands whole, takes corn up to its capacity and nothing else, shows it on every block, gives back a stack and
- * spills its corn when broken.
+ * spills its corn when broken. Part 4: the Hay-Loft Pulley hangs on a wall facing out, lets its rope down and hauls it
+ * up a block a use within its reach, waits for a haul, and comes off with its wall; the Harvest Bell stands whole, rings,
+ * won't ring again before its swing dies away, then rings again, and breaks whole.
  */
 public class BarnToolsGameTests {
 	private static Item item(String id) {
@@ -373,6 +379,74 @@ public class BarnToolsGameTests {
 			helper.assertTrue(dropped(helper, item("corn")) == left && dropped(helper, item("corn_crib")) == 1,
 					"Broken, it spills its corn and drops once: " + dropped(helper, item("corn")) + " of " + left);
 			helper.succeed();
+		});
+	}
+
+	// ---------------------------------------------------------------- part 4
+
+	@GameTest(maxTicks = 20 + 3 * (HayPulleyBlock.HAUL_TICKS + 1) + 20)
+	public void thePulleyLetsDownAndHaulsUp(GameTestHelper helper) {
+		stone(helper);
+		BlockPos wall = new BlockPos(3, 4, 4);
+		helper.setBlock(wall, Blocks.OAK_PLANKS);
+		BlockPos pos = wall.north();
+		ServerPlayer player = standing(helper, new BlockPos(3, 2, 1), new ItemStack(item("hay_pulley")));
+		player.getMainHandItem().useOn(new UseOnContext(player, InteractionHand.MAIN_HAND, hit(helper, wall, Direction.NORTH)));
+		BlockState state = helper.getBlockState(pos);
+		helper.assertTrue(state.is(JugcraftAgriculture.block("hay_pulley")) && state.getValue(HayPulleyBlock.FACING) == Direction.NORTH
+				&& state.getValue(HayPulleyBlock.DROP) == 1, "It hangs on the wall facing out, its rope a block down: " + state);
+		player.setItemInHand(InteractionHand.MAIN_HAND, ItemStack.EMPTY);
+		player.setShiftKeyDown(true);
+		helper.assertFalse(useOn(helper, player, pos).consumesAction(), "It hauls up no higher than a block down");
+		player.setShiftKeyDown(false);
+		useOn(helper, player, pos);
+		useOn(helper, player, pos);
+		HayPulleyBlockEntity pulley = helper.getBlockEntity(pos, HayPulleyBlockEntity.class);
+		helper.assertTrue(helper.getBlockState(pos).getValue(HayPulleyBlock.DROP) == 2 && pulley.from() == 1,
+				"It lets down a block, and the next haul waits: " + helper.getBlockState(pos));
+		helper.runAfterDelay(HayPulleyBlock.HAUL_TICKS + 1, () -> {
+			useOn(helper, player, pos);
+			helper.assertTrue(helper.getBlockState(pos).getValue(HayPulleyBlock.DROP) == 3, "It lets down another");
+			helper.runAfterDelay(HayPulleyBlock.HAUL_TICKS + 1, () -> {
+				player.setShiftKeyDown(true);
+				useOn(helper, player, pos);
+				helper.assertTrue(helper.getBlockState(pos).getValue(HayPulleyBlock.DROP) == 2 && pulley.from() == 3, "Sneaking, it hauls up a block");
+				// Without its wall it comes off.
+				helper.setBlock(wall, Blocks.AIR);
+				helper.assertBlockNotPresent(JugcraftAgriculture.block("hay_pulley"), pos);
+				helper.runAfterDelay(3, () -> {
+					helper.assertTrue(dropped(helper, item("hay_pulley")) == 1, "Without its wall it comes off, dropping itself");
+					helper.succeed();
+				});
+			});
+		});
+	}
+
+	@GameTest(maxTicks = 20 + HarvestBellBlock.SWING_TICKS + 30)
+	public void theBellRingsAndSettles(GameTestHelper helper) {
+		stone(helper);
+		BlockPos pos = new BlockPos(3, 2, 3);
+		ServerPlayer player = standing(helper, new BlockPos(3, 2, 1), new ItemStack(item("harvest_bell")));
+		place(helper, player, pos);
+		helper.assertTrue(helper.getBlockState(pos.above()).is(JugcraftAgriculture.block("harvest_bell")), "It stands whole, two blocks up");
+		HarvestBellBlockEntity bell = helper.getBlockEntity(pos, HarvestBellBlockEntity.class);
+		long now = helper.getLevel().getGameTime();
+		helper.assertTrue(bell.ready(now), "Unrung, it can be rung");
+		player.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(Items.STICK));
+		useOn(helper, player, pos.above());
+		helper.assertTrue(bell.ready(now), "A stick doesn't ring it");
+		player.setItemInHand(InteractionHand.MAIN_HAND, ItemStack.EMPTY);
+		helper.assertTrue(useOn(helper, player, pos.above()).consumesAction() && !bell.ready(now), "An empty hand rings it from its top");
+		helper.assertTrue(!bell.ready(now + HarvestBellBlock.SWING_TICKS - 1) && bell.ready(now + HarvestBellBlock.SWING_TICKS),
+				"It swings for its time before it can ring again");
+		helper.runAfterDelay(HarvestBellBlock.SWING_TICKS + 1, () -> {
+			helper.assertTrue(useOn(helper, player, pos).consumesAction() && !bell.ready(helper.getLevel().getGameTime()),
+					"Settled, it rings again, from its foot");
+			helper.getLevel().destroyBlock(helper.absolutePos(pos.above()), true);
+			helper.runAfterDelay(3, () -> {
+				helper.assertTrue(dropped(helper, item("harvest_bell")) == 1 && helper.getBlockState(pos).isAir(), "It breaks whole and drops once");
+				helper.succeed();
+			});
 		});
 	}
 }

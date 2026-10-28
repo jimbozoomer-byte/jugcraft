@@ -8,6 +8,12 @@ Every change to Jugcraft, newest first, grouped by pull request. For what each t
 
 No numbered release yet. Entries on feature branches remain proposed until their pull requests merge.
 
+### Unmerged: Barn & Harvest Tools, part 4 (the Hay-Loft Pulley and the Harvest Bell)
+- **Hay-Loft Pulley**: a braced beam on a wall with an iron pulley and a rope down to a hay hook. Use it to let the rope down a block (to four) and sneak-use to haul it up; the wheel turns and the rope runs, and the hook sways as it hangs.
+- **Harvest Bell**: a bronze farm bell in an iron yoke on a post (two up). Use it to ring it: it swings and rings, the swing dying away, and can be rung again once it settles.
+- Record: [barn-and-harvest-tools.md](docs/features/barn-and-harvest-tools.md).
+- **Checked:** the record's Verification. Game tests and screenshots run in CI only; not played by hand.
+
 ### Unmerged: Barn & Harvest Tools, part 3 (the Drying Rack and the Corn Crib)
 - **Drying Rack**: a freestanding two-block frame with four hooks. Hang bunches of four herb sprigs or peppers; each dries in two minutes into Dried Herbs or Dried Chili, one for one, shown on its hook, and comes down with an empty hand.
 - **Corn Crib**: a slatted crib on posts under a tin gable roof (two across, two up). It holds 256 corn, the ears showing through the slats as it fills.

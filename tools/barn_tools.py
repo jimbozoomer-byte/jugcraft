@@ -2,9 +2,10 @@
 docs/branches/AGRICULTURE.md planned but never built, and a barn's gear. Part 1: the planned hand tools, the Steel Sickle
 (in tools/agriculture.py SICKLES, beside the flint and bronze ones), the Watering Can and the Seed Pouch. Part 2: the mill
 and the dairy, the Quern and the Butter Churn, and the Flour, Butter and Pancakes they lead to. Part 3: drying and keeping
-the harvest, the Drying Rack and the Corn Crib. The numbers here are what the Java (agriculture/WateringCanItem,
-SeedPouchItem, QuernBlock, ButterChurnBlock, DryingRackBlock, CornCribBlock) uses; tools/check_mod_data.py compares
-them.
+the harvest, the Drying Rack and the Corn Crib. Part 4: the hay loft's pulley and the farm bell, the Hay-Loft Pulley and
+the Harvest Bell. The numbers here are what the Java (agriculture/WateringCanItem, SeedPouchItem, QuernBlock,
+ButterChurnBlock, DryingRackBlock, CornCribBlock, HayPulleyBlock, HarvestBellBlock) uses; tools/check_mod_data.py
+compares them.
 tools/barn_tools_data.py writes their files; their icons are maps in tools/item_icons/.
 """
 
@@ -47,6 +48,18 @@ RACK = {"block": "drying_rack", "display": "Drying Rack", "size": (1, 2, 1), "bu
 # ears show through its slats, rising through `stages` stages as it fills.
 CRIB = {"block": "corn_crib", "display": "Corn Crib", "size": (2, 2, 1), "capacity": 256, "stages": 4}
 
+# ---------------------------------------------------------------- part 4: the hay loft and the bell
+
+# The Hay-Loft Pulley: a beam out from a wall, braced, with an iron pulley block at its end and a rope over its wheel
+# down to a hay hook, as a barn's hay hood has. The rope hangs from one to `drops` blocks below it. A use with an empty
+# hand lets it down a block and sneaking hauls it up a block, the wheel turning and the rope running over `haul_ticks`
+# ticks; a haul waits for the last. The hook sways a little as it hangs (drawn only).
+PULLEY = {"block": "hay_pulley", "display": "Hay-Loft Pulley", "drops": 4, "haul_ticks": 20}
+# The Harvest Bell: a farm bell hung in an iron yoke on a post, on a stone footing, one block across and two up. A use
+# with an empty hand rings it: it swings and rings, the swing dying away over `swing_ticks` ticks, and the next ring waits
+# for it to settle.
+BELL = {"block": "harvest_bell", "display": "Harvest Bell", "size": (1, 2, 1), "swing_ticks": 40}
+
 # What they make: plain ingredients, and a food that needs both (tools/agriculture.py ITEMS).
 ITEMS = {
     "flour": {"display": "Flour", "compost": "low", "tags": []},
@@ -70,6 +83,12 @@ RECIPES = [
     {"id": "corn_crib", "pattern": ["LLL", "SCS", "P P"], "key": {"L": "#minecraft:wooden_slabs", "S": "minecraft:stick",
                                                                  "C": "minecraft:chest", "P": "#minecraft:planks"},
      "result": "corn_crib", "count": 1, "category": "misc"},
+    # Part 4.
+    {"id": "hay_pulley", "pattern": ["PPI", " SW", " S "], "key": {"P": "#minecraft:planks", "I": "#c:ingots/iron", "S": "minecraft:string",
+                                                                  "W": "minecraft:tripwire_hook"},
+     "result": "hay_pulley", "count": 1, "category": "misc"},
+    {"id": "harvest_bell", "pattern": [" C ", "ICI", " L "], "key": {"C": "#c:ingots/copper", "I": "#c:ingots/iron", "L": "#minecraft:logs"},
+     "result": "harvest_bell", "count": 1, "category": "misc"},
 ]
 
 # Flour makes Wheat Dough as wheat does (three and a bucket of water make three), and Pancakes with butter and an egg.
@@ -87,4 +106,4 @@ def items():
 
 
 def blocks():
-    return [QUERN["block"], CHURN["block"], RACK["block"], CRIB["block"]]
+    return [QUERN["block"], CHURN["block"], RACK["block"], CRIB["block"], PULLEY["block"], BELL["block"]]

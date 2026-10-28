@@ -5,6 +5,7 @@ import io.github.jimbozoomer.jugcraft.agriculture.ButterChurnBlockEntity;
 import io.github.jimbozoomer.jugcraft.agriculture.DryingRackBlock;
 import io.github.jimbozoomer.jugcraft.agriculture.DryingRackBlockEntity;
 import io.github.jimbozoomer.jugcraft.agriculture.FruitStoreBlockEntity;
+import io.github.jimbozoomer.jugcraft.agriculture.HayPulleyBlock;
 import io.github.jimbozoomer.jugcraft.agriculture.HandWorkedBlock;
 import io.github.jimbozoomer.jugcraft.agriculture.JugcraftAgriculture;
 import io.github.jimbozoomer.jugcraft.agriculture.MultiDecorationBlock;
@@ -28,7 +29,8 @@ import net.minecraft.world.level.block.state.BlockState;
 /**
  * Client game test for Barn & Harvest Tools, part 2 (decor set 3): two Querns on a plank floor, one with wheat in its
  * eye, and two Butter Churns, one holding milk; and part 3's Drying Rack hung with peppers and sage and a Corn Crib half
- * full; built in a real client and photographed from the front, close by and at the rack and crib, by day (CI job
+ * full; and part 4's Hay-Loft Pulley on a wall, its rope let down three blocks, and the Harvest Bell; built in a real
+ * client and photographed from the front, close by, at the rack and crib and at the pulley and bell, by day (CI job
  * {@code client}). The moving parts (the quern's upper stone and peg, the churn's dasher) are drawn by their
  * renderer, so the pictures show it draws them. The pictures go into docs/features/barn-and-harvest-tools.md.
  */
@@ -46,14 +48,15 @@ public class BarnToolsClientGameTests implements FabricClientGameTest {
 			server.runCommand("gamerule minecraft:send_command_feedback false");
 			server.runCommand("time set noon");
 			server.runCommand("weather clear");
-			server.runCommand("fill %d %d %d %d %d %d minecraft:spruce_planks".formatted(x - 4, y - 1, z - 4, x + 8, y - 1, z + 16));
-			server.runCommand("fill %d %d %d %d %d %d minecraft:air".formatted(x - 4, y, z - 4, x + 8, y + 6, z + 16));
+			server.runCommand("fill %d %d %d %d %d %d minecraft:spruce_planks".formatted(x - 4, y - 1, z - 4, x + 12, y - 1, z + 17));
+			server.runCommand("fill %d %d %d %d %d %d minecraft:air".formatted(x - 4, y, z - 4, x + 12, y + 6, z + 17));
 			server.runOnServer(minecraft -> build(minecraft.overworld(), origin));
 			context.waitTicks(40);
 			singleplayer.getConnection().waitForChunksRender();
 			shoot(context, singleplayer, x + 2, y + 1, z + 6, 180, 25, "jugcraft_barn_tools");
 			shoot(context, singleplayer, x + 1, y + 1, z + 3, 180, 40, "jugcraft_barn_tools_close");
 			shoot(context, singleplayer, x + 2, y + 2, z + 15, 180, 15, "jugcraft_barn_tools_storage");
+			shoot(context, singleplayer, x + 8, y + 2, z + 17, 180, 10, "jugcraft_barn_tools_loft");
 		}
 	}
 
@@ -109,6 +112,15 @@ public class BarnToolsClientGameTests implements FabricClientGameTest {
 			store.add(new ItemStack(JugcraftAgriculture.item("corn"), 64));
 			store.add(new ItemStack(JugcraftAgriculture.item("corn"), 64));
 		}
+		// Part 4: the Harvest Bell, and the Hay-Loft Pulley on a wall of planks, its rope three blocks down to hay bales.
+		prop(level, "harvest_bell", origin.offset(6, 0, 12));
+		for (int up = 0; up < 4; up++) {
+			level.setBlock(origin.offset(9, up, 11), Blocks.SPRUCE_PLANKS.defaultBlockState(), Block.UPDATE_ALL);
+		}
+		level.setBlock(origin.offset(9, 3, 12), JugcraftAgriculture.block("hay_pulley").defaultBlockState()
+				.setValue(HayPulleyBlock.FACING, Direction.SOUTH).setValue(HayPulleyBlock.DROP, 3), Block.UPDATE_ALL);
+		level.setBlock(origin.offset(9, 0, 13), Blocks.HAY_BLOCK.defaultBlockState(), Block.UPDATE_ALL);
+		level.setBlock(origin.offset(10, 0, 13), Blocks.HAY_BLOCK.defaultBlockState(), Block.UPDATE_ALL);
 		// A hay bale and a barrel behind them, for scale.
 		level.setBlock(origin.offset(2, 0, -1), Blocks.HAY_BLOCK.defaultBlockState(), Block.UPDATE_ALL);
 		level.setBlock(origin.offset(5, 0, -1), Blocks.BARREL.defaultBlockState(), Block.UPDATE_ALL);

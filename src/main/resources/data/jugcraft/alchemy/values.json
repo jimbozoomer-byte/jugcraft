@@ -13462,6 +13462,11 @@
       "denominator": 5,
       "source": "recipe jugcraft:harvest_balloon"
     },
+    "jugcraft:harvest_bell": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
     "jugcraft:harvest_crown": {
       "numerator": 4315,
       "denominator": 1,
@@ -13546,6 +13551,11 @@
       "numerator": 114,
       "denominator": 1,
       "source": "recipe jugcraft:hay_bale_seat"
+    },
+    "jugcraft:hay_pulley": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
     },
     "jugcraft:haymaker": {
       "numerator": 3509,

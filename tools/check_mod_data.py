@@ -14693,7 +14693,9 @@ def check_barn_tools():
     component is bounded by its capacity; their recipes exist and the tooltips have their text. Part 2: the Quern's
     capacity, turns and turn time and the Butter Churn's strokes, butter and stroke time are the table's; each one's
     runner variants name its moving part's model; the flour and pancake recipes exist; the messages have their text.
-    Part 3: the Drying Rack's bunch and drying time and the Corn Crib's capacity, stages and sizes are the table's."""
+    Part 3: the Drying Rack's bunch and drying time and the Corn Crib's capacity, stages and sizes are the table's.
+    Part 4: the Hay-Loft Pulley's reach and haul time and the Harvest Bell's size and swing are the table's, and their
+    renderers turn and hang their pieces where the models are drawn."""
     import barn_tools as bt
     agri = JAVA_ROOT / "agriculture"
     can = (agri / "WateringCanItem.java").read_text(encoding="utf-8") if (agri / "WateringCanItem.java").is_file() else ""
@@ -14712,7 +14714,8 @@ def check_barn_tools():
             err(f"{recipe['id']}: tools/barn_tools.py's recipe was not generated")
     lang = load(ASSETS / "lang" / "en_us.json") or {}
     for key in ("item.jugcraft.watering_can.water", "item.jugcraft.seed_pouch.contents", "message.jugcraft.quern.full",
-                "message.jugcraft.quern.other", "message.jugcraft.butter_churn.full", "message.jugcraft.drying_rack.full"):
+                "message.jugcraft.quern.other", "message.jugcraft.butter_churn.full", "message.jugcraft.drying_rack.full",
+                "message.jugcraft.harvest_bell.ringing"):
         if key not in lang:
             err(f"{key}: the text is missing")
     # Part 2: the Quern's and the Butter Churn's numbers, their moving parts' models, and their recipes.
@@ -14748,6 +14751,26 @@ def check_barn_tools():
         w, h, d = spec["size"]
         if f"box({w}, {h}, {d})" not in java:
             err(f"{spec['block']} is not {w} x {h} x {d} blocks as tools/barn_tools.py says")
+    # Part 4: the Hay-Loft Pulley's and the Harvest Bell's numbers, and where their renderers turn and hang their pieces
+    # (as tools/barn_tools_data.py draws them).
+    import barn_tools_data as btd
+    pulley = (agri / "HayPulleyBlock.java").read_text(encoding="utf-8") if (agri / "HayPulleyBlock.java").is_file() else ""
+    for name, value in (("DROPS", bt.PULLEY["drops"]), ("HAUL_TICKS", bt.PULLEY["haul_ticks"])):
+        if f"int {name} = {value};" not in pulley:
+            err(f"HayPulleyBlock.{name} is not tools/barn_tools.py PULLEY's {value}")
+    bell = (agri / "HarvestBellBlock.java").read_text(encoding="utf-8") if (agri / "HarvestBellBlock.java").is_file() else ""
+    w, h, d = bt.BELL["size"]
+    if f"int SWING_TICKS = {bt.BELL['swing_ticks']};" not in bell or f"box({w}, {h}, {d})" not in bell:
+        err(f"HarvestBellBlock is not tools/barn_tools.py BELL's {w} x {h} x {d} blocks with a {bt.BELL['swing_ticks']}-tick swing")
+    client = ROOT / "src" / "client" / "java" / "io" / "github" / "jimbozoomer" / "jugcraft" / "client"
+    renderer = (client / "HayPulleyRenderer.java").read_text(encoding="utf-8") if (client / "HayPulleyRenderer.java").is_file() else ""
+    for name, value in (("AXLE_Y", btd.WHEEL_AXLE[0]), ("AXLE_Z", btd.WHEEL_AXLE[1]), ("ROPE_Z", btd.ROPE_AT[1]), ("ROPE_TOP", btd.ROPE_TOP)):
+        if f"float {name} = {value}F;" not in renderer:
+            err(f"HayPulleyRenderer.{name} is not where tools/barn_tools_data.py draws it ({value})")
+    worked = (client / "HandWorkedRenderer.java").read_text(encoding="utf-8") if (client / "HandWorkedRenderer.java").is_file() else ""
+    for name, value in (("BELL_AXLE_Y", btd.BELL_AXLE[0] - 16.0), ("BELL_AXLE_Z", btd.BELL_AXLE[1])):
+        if f"float {name} = {value}F;" not in worked:
+            err(f"HandWorkedRenderer.{name} is not where tools/barn_tools_data.py hangs the bell ({value})")
 
 
 def check_orchard_harvest():

@@ -17,6 +17,7 @@ Everything is drawn here by code; no Mojang texture is read, traced or copied.
 import barn_tools as bt
 import decor17_data as d17d
 import decor20_data as d20d
+from decor18_data import shifted as d18d_shifted
 import flora_art as fa
 import item_icons
 import pumpkin_patch_data as ppd
@@ -36,6 +37,10 @@ HERBS = {"herbs": pal("243e18", "345a22", "4a7a2e", "64983c"), "dried_herbs": pa
 CHILI = {"chili": pal("520e08", "801a0e", "ac2814", "cc4424"), "dried_chili": pal("340c08", "52140c", "702014", "8a321c")}
 STRING = pal("847456", "aa9a76", "cabc96")
 CORN = pal("6a4a0e", "a07818", "d0a828", "e8c440", "f4dc70")
+# Part 4: the bell's cast bronze, the pulley's rope, the bell post's stone footing.
+BRONZE = pal("4a2a12", "74441e", "a0642c", "c0823e", "dca45a")
+ROPE = pal("6e5c3a", "927c52", "b09a6a")
+FOOTING = pal("4e4c48", "68655f", "807d76", "999690")
 
 
 def rid(path):
@@ -253,11 +258,91 @@ def crib():
     return sc
 
 
+# ---------------------------------------------------------------- part 4: the Hay-Loft Pulley
+
+# Where the pulley's wheel turns (its axle, along x) and where its rope leaves it, going down, in the block's pixels.
+WHEEL_AXLE = (12.0, 3.0)
+ROPE_AT = (8.0, 1.5)
+ROPE_TOP = 12.0
+
+
+def pulley():
+    """The Hay-Loft Pulley, facing north (its wall behind it, to the south): an iron wall plate, a beam out from it under
+    the block's top with a knee brace under it, and an iron pulley block (two cheeks and an axle bolt) under the beam's
+    end. Its moving pieces are their own models: the wheel (`wheel`), a block's length of rope (`rope`) and the hay hook
+    (`hook`: a ring, a shank and two tines curving in), each drawn where it hangs at the top of the block."""
+    spec = bt.PULLEY
+    sc = Sculpt(spec["block"], 2305, 64)
+    el = [panel(sc, "plate", flat(IRON), (5.5, 9.0, 15.25), (10.5, 15.5, 16.0)),
+          panel(sc, "beam", lengthwise(WOOD), (6.75, 13.0, 1.0), (9.25, 15.5, 15.25)),
+          # The knee brace, from low on the wall plate up under the beam, turned 45 degrees about its middle.
+          panel(sc, "brace", lengthwise(WOOD), (7.25, 9.9, 8.85), (8.75, 11.1, 16.65), rot=fa.rotation((8.0, 10.5, 12.75), "x", 45)),
+          panel(sc, "cheek", flat(IRON), (6.25, 10.0, 1.25), (6.75, 13.0, 4.75)),
+          panel(sc, "cheek", flat(IRON), (9.25, 10.0, 1.25), (9.75, 13.0, 4.75)),
+          panel(sc, "bolt", flat(IRON), (5.75, 11.5, 2.5), (10.25, 12.5, 3.5))]
+    sc.models["base"] = el
+    cy, cz = WHEEL_AXLE
+    # The wheel: a disc three pixels across in two row bands, standing across x between the cheeks.
+    sc.models["wheel"] = [panel(sc, "wheel", flat(WOOD), (7.0, cy - 1.5, cz - 1.0), (9.0, cy + 1.5, cz + 1.0)),
+                          panel(sc, "wheel", flat(WOOD), (7.0, cy - 1.0, cz - 1.5), (9.0, cy + 1.0, cz + 1.5)),
+                          panel(sc, "hub", flat(IRON), (6.85, cy - 0.5, cz - 0.5), (9.15, cy + 0.5, cz + 0.5))]
+    x, z = ROPE_AT
+    sc.models["rope"] = [panel(sc, "rope", lengthwise(ROPE), (x - 0.25, 0.0, z - 0.25), (x + 0.25, 16.0, z + 0.25))]
+    # The hook, its ring at the top of the block (where the rope ends): a ring, a shank, a crosspiece and two tines.
+    sc.models["hook"] = [panel(sc, "ring", flat(IRON), (x - 0.75, 14.5, z - 0.25), (x + 0.75, 16.0, z + 0.25)),
+                         panel(sc, "shank", flat(IRON), (x - 0.25, 10.0, z - 0.25), (x + 0.25, 14.5, z + 0.25)),
+                         panel(sc, "cross", flat(IRON), (x - 2.5, 9.5, z - 0.25), (x + 2.5, 10.0, z + 0.25))]
+    for side in (-1, 1):
+        sc.models["hook"] += [panel(sc, "tine", flat(IRON), (x + side * 2.5 - 0.25, 7.0, z - 0.25), (x + side * 2.5 + 0.25, 9.5, z + 0.25)),
+                              panel(sc, "tip", flat(IRON), (x + side * 1.75 - 0.5, 6.5, z - 0.25), (x + side * 1.75 + 0.5, 7.0, z + 0.25))]
+    return sc
+
+
+# ---------------------------------------------------------------- part 4: the Harvest Bell
+
+def cast(palette):
+    """Cast metal round a bell: its middle tone, lit down its left edge and shaded down its right, the same on every band,
+    so the bands read as one cast surface rather than a stack."""
+    def paint(p):
+        for y in range(p.h):
+            for x in range(p.w):
+                p.put(x, y, shade(palette, 3 if x == 0 and p.w > 2 else 1 if x == p.w - 1 and p.w > 2 else 2))
+    paint.tag = repr(("cast", palette))
+    return paint
+
+
+# The bell's axle (along x), about which it swings, in the frame's pixels.
+BELL_AXLE = (29.5, 8.0)
+
+
+def bell():
+    """The Harvest Bell, facing north, one block across and two up: a stone footing, a squared post, an iron yoke on
+    its top (a crosspiece and two arms with bearings), and the bell, its own model (`bell`, drawn in the upper block): a
+    cast bronze bell of stepped bands from crown to lip on an iron axle through the yoke's bearings."""
+    spec = bt.BELL
+    sc = Sculpt(spec["block"], 2306, 64)
+    el = [panel(sc, "footing", flat(FOOTING), (4.0, 0.0, 4.0), (12.0, 2.0, 12.0)),
+          panel(sc, "post", lengthwise(GREY_WOOD), (7.0, 2.0, 7.0), (9.0, 23.5, 9.0)),
+          panel(sc, "cross", flat(IRON), (4.0, 23.5, 7.25), (12.0, 24.5, 8.75))]
+    for x0 in (4.0, 11.25):
+        el.append(panel(sc, "arm", flat(IRON), (x0, 24.5, 7.5), (x0 + 0.75, 30.5, 8.5)))
+    sc.models["whole"] = el
+    ay, az = BELL_AXLE
+    # A bell's profile, crown to lip: a narrow crown, the shoulder, a nearly straight waist, then the flare and the lip.
+    bands = ((1.25, 28.25, 29.0), (2.0, 27.25, 28.25), (2.25, 25.5, 27.25), (2.75, 24.75, 25.5), (3.0, 24.25, 24.75))
+    bell_ = [panel(sc, "axle", flat(IRON), (4.75, ay - 0.5, az - 0.5), (11.25, ay + 0.5, az + 0.5))]
+    for half, y0, y1 in bands:
+        bell_.append(panel(sc, "bell", cast(BRONZE), (8.0 - half, y0, az - half), (8.0 + half, y1, az + half), up=flat(BRONZE),
+                           down=flat(BRONZE)))
+    sc.models["bell"] = bell_
+    return sc
+
+
 # ---------------------------------------------------------------- building and files
 
 _built = {}
 BUILDERS = {bt.QUERN["block"]: (quern, 64), bt.CHURN["block"]: (churn, 64), bt.RACK["block"]: (rack, 64),
-            bt.CRIB["block"]: (crib, 128)}
+            bt.CRIB["block"]: (crib, 128), bt.PULLEY["block"]: (pulley, 64), bt.BELL["block"]: (bell, 64)}
 
 
 def build(block):
@@ -378,16 +463,74 @@ def part3_assets(root, write, lang):
     half = sc.models["whole"] + sc.models[f"heap_{spec['stages'] // 2}"]
     write(root / "models" / "item" / f"{block}.json", fa.model(block, item_model(half, spec["size"], 0.5), ITEM_DISPLAY))
     write(root / "items" / f"{block}.json", {"model": {"type": "minecraft:model", "model": rid(f"item/{block}")}})
+    part4_assets(root, write, lang)
+
+
+# The pulley's pieces, as HayPulleyBlock.PIECE names them, and the bell's moving part.
+PULLEY_PIECES = ("block", "wheel", "rope", "hook")
+
+
+def part4_assets(root, write, lang):
+    """The Hay-Loft Pulley's model and its moving pieces' (the blockstate's `piece` picks one; a placed pulley is
+    `piece=block`, the rest are drawn by client/HayPulleyRenderer), and the Harvest Bell's two blocks' models, cut from the
+    whole, and its bell's (`runner=true`, drawn swinging by client/HandWorkedRenderer). Their items show them whole: the
+    pulley with a block of rope and its hook, the bell on its post."""
+    models = root / "models" / "block"
+    states = root / "blockstates"
+
+    spec = bt.PULLEY
+    block = spec["block"]
+    lang[f"block.{MOD}.{block}"] = spec["display"]
+    sc = build(block)
+    names = {"block": "base", "wheel": "wheel", "rope": "rope", "hook": "hook"}
+    for piece in PULLEY_PIECES:
+        name = block if piece == "block" else f"{block}_{piece}"
+        write(models / f"{name}.json", fa.model(block, d20d.separated(sc.models[names[piece]])))
+    variants = {}
+    for f, y in FACINGS.items():
+        turn = {"y": y} if y else {}
+        for drop in range(1, spec["drops"] + 1):
+            for piece in PULLEY_PIECES:
+                name = block if piece == "block" else f"{block}_{piece}"
+                variants[f"drop={drop},facing={f},piece={piece}"] = {"model": rid(f"block/{name}"), **turn}
+    write(states / f"{block}.json", {"variants": variants})
+    hung = (sc.models["base"] + sc.models["wheel"] + d18d_shifted(sc.models["rope"], 0, ROPE_TOP - 16.0, 0)
+            + d18d_shifted(sc.models["hook"], 0, ROPE_TOP - 32.0, 0))
+    write(root / "models" / "item" / f"{block}.json",
+          fa.model(block, fa.transformed(d17d.pinned(d20d.separated(hung)), 0.5, (4, 8, 4), (0, 0, 0)), ITEM_DISPLAY))
+    write(root / "items" / f"{block}.json", {"model": {"type": "minecraft:model", "model": rid(f"item/{block}")}})
+
+    spec = bt.BELL
+    block = spec["block"]
+    lang[f"block.{MOD}.{block}"] = spec["display"]
+    sc = build(block)
+    n = len(d17d.cells(spec["size"]))
+    for part, elements in enumerate(ppd.cut(sc.models["whole"], spec["size"])):
+        write(models / f"{block}_{part}.json", fa.model(block, elements))
+    write(models / f"{block}_bell.json", fa.model(block, d18d_shifted(d20d.separated(sc.models["bell"]), 0, -16.0, 0)))
+    variants = {}
+    for f, y in FACINGS.items():
+        turn = {"y": y} if y else {}
+        for p in range(n):
+            for lit in ("false", "true"):
+                variants[f"facing={f},lit={lit},part={p},runner=false"] = {"model": rid(f"block/{block}_{p}"), **turn}
+                variants[f"facing={f},lit={lit},part={p},runner=true"] = {"model": rid(f"block/{block}_bell"), **turn}
+    write(states / f"{block}.json", {"variants": variants})
+    write(root / "models" / "item" / f"{block}.json",
+          fa.model(block, item_model(sc.models["whole"] + sc.models["bell"], spec["size"], 0.5), ITEM_DISPLAY))
+    write(root / "items" / f"{block}.json", {"model": {"type": "minecraft:model", "model": rid(f"item/{block}")}})
+    lang[f"message.{MOD}.harvest_bell.ringing"] = "The bell is still ringing"
 
 
 def loot(out, write):
     """The quern and the churn drop themselves; the quern spills its grain (QuernBlockEntity), the churn its milk. The
-    rack and the crib drop once, from their first block; the rack gives back its bunches, the crib spills its corn."""
-    for block in (bt.QUERN["block"], bt.CHURN["block"]):
+    rack, the crib and the bell drop once, from their first block; the rack gives back its bunches, the crib spills its
+    corn. The pulley drops itself."""
+    for block in (bt.QUERN["block"], bt.CHURN["block"], bt.PULLEY["block"]):
         write(out / f"{block}.json", {"type": "minecraft:block", "pools": [{
             "condition": {"type": "minecraft:survives_explosion"}, "entries": [{"type": "minecraft:item", "name": rid(block)}], "rolls": 1}],
             "random_sequence": rid(f"blocks/{block}")})
-    for block in (bt.RACK["block"], bt.CRIB["block"]):
+    for block in (bt.RACK["block"], bt.CRIB["block"], bt.BELL["block"]):
         write(out / f"{block}.json", {"type": "minecraft:block", "pools": [{
             "condition": {"type": "minecraft:all_of", "terms": [{"type": "minecraft:survives_explosion"},
                                                                 {"type": "minecraft:match_block", "blocks": rid(block), "state": {"part": "0"}}]},

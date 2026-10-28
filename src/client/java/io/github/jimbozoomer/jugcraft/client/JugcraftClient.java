@@ -2,6 +2,7 @@ package io.github.jimbozoomer.jugcraft.client;
 
 import io.github.jimbozoomer.jugcraft.agriculture.BloodMoon;
 import io.github.jimbozoomer.jugcraft.agriculture.ButterChurnBlockEntity;
+import io.github.jimbozoomer.jugcraft.agriculture.HarvestBellBlockEntity;
 import io.github.jimbozoomer.jugcraft.agriculture.HarvestMoon;
 import io.github.jimbozoomer.jugcraft.agriculture.JugcraftAgriculture;
 import io.github.jimbozoomer.jugcraft.agriculture.OpenCarvingPayload;
@@ -251,9 +252,12 @@ public final class JugcraftClient implements ClientModInitializer {
 		BlockEntityRendererRegistry.register(JugcraftAgriculture.PRODUCE_DISPLAY_ENTITY, ProduceDisplayRenderer::new);
 		BlockEntityRendererRegistry.register(JugcraftAgriculture.CHALKBOARD_SIGN_ENTITY, ChalkboardSignRenderer::new);
 		BlockEntityRendererRegistry.register(JugcraftAgriculture.QUERN_ENTITY,
-				context -> new HandWorkedRenderer<QuernBlockEntity>(context, HandWorkedRenderer.TURN));
+				context -> new HandWorkedRenderer<QuernBlockEntity>(context, HandWorkedRenderer.STATION, HandWorkedRenderer.TURN));
 		BlockEntityRendererRegistry.register(JugcraftAgriculture.BUTTER_CHURN_ENTITY,
-				context -> new HandWorkedRenderer<ButterChurnBlockEntity>(context, HandWorkedRenderer.PLUNGE));
+				context -> new HandWorkedRenderer<ButterChurnBlockEntity>(context, HandWorkedRenderer.STATION, HandWorkedRenderer.PLUNGE));
+		BlockEntityRendererRegistry.register(JugcraftAgriculture.HARVEST_BELL_ENTITY,
+				context -> new HandWorkedRenderer<HarvestBellBlockEntity>(context, HandWorkedRenderer.BELL, HandWorkedRenderer.SWING));
+		BlockEntityRendererRegistry.register(JugcraftAgriculture.HAY_PULLEY_ENTITY, HayPulleyRenderer::new);
 		BlockEntityRendererRegistry.register(JugcraftAgriculture.ROCKING_CHAIR_ENTITY, RockingChairRenderer::new);
 		BlockEntityRendererRegistry.register(JugcraftAgriculture.LURKING_EYES_ENTITY, LurkingEyesRenderer::new);
 		BlockEntityRendererRegistry.register(JugcraftAgriculture.SILHOUETTE_WINDOW_ENTITY, SilhouetteWindowRenderer::new);

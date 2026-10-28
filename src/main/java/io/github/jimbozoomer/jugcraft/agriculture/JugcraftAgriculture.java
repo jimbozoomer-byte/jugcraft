@@ -391,6 +391,8 @@ public final class JugcraftAgriculture {
 	public static BlockEntityType<ButterChurnBlockEntity> BUTTER_CHURN_ENTITY;
 	public static BlockEntityType<DryingRackBlockEntity> DRYING_RACK_ENTITY;
 	public static BlockEntityType<FruitStoreBlockEntity> CORN_CRIB_ENTITY;
+	public static BlockEntityType<HayPulleyBlockEntity> HAY_PULLEY_ENTITY;
+	public static BlockEntityType<HarvestBellBlockEntity> HARVEST_BELL_ENTITY;
 	public static BlockEntityType<CaramelAppleStandBlockEntity> CARAMEL_APPLE_STAND_ENTITY;
 	public static ExtendedMenuType<FarmStandMenu, FarmStandMenu.Opening> FARM_STAND_MENU;
 	/** The Harvest Effigy catching (assets/jugcraft/sounds/effigy, made by tools/choir_sounds.py). */
@@ -2802,7 +2804,7 @@ public final class JugcraftAgriculture {
 	 * Barn & Harvest Tools (decor set 3; tools/barn_tools.py), part 1: the planned hand tools, the Watering Can and the Seed
 	 * Pouch (the Steel Sickle is registered with the other sickles); part 2: the Quern and the Butter Churn, and the Flour,
 	 * Butter and Pancakes they lead to; part 3: the Drying Rack and the Corn Crib (whose corn is kept as the Apple Bin keeps
-	 * fruit, by a FruitStoreBlockEntity of its own type).
+	 * fruit, by a FruitStoreBlockEntity of its own type); part 4: the Hay-Loft Pulley and the Harvest Bell.
 	 */
 	private static void registerBarnTools() {
 		WATERING_CAN_WATER = Registry.register(BuiltInRegistries.DATA_COMPONENT_TYPE, Jugcraft.id("watering_can_water"),
@@ -2836,6 +2838,19 @@ public final class JugcraftAgriculture {
 				FabricBlockEntityTypeBuilder.<FruitStoreBlockEntity>create((pos, state) -> new FruitStoreBlockEntity(CORN_CRIB_ENTITY, pos, state), crib)
 						.build());
 		for (Block block : List.of(rack, crib)) {
+			registerItem(BuiltInRegistries.BLOCK.getKey(block).getPath(), props -> new BlockItem(block, props),
+					new Item.Properties().useBlockDescriptionPrefix(), BUILDING_TAB);
+		}
+		// Part 4: the Hay-Loft Pulley and the Harvest Bell.
+		Block pulley = registerBlock("hay_pulley", HayPulleyBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.WOOD).strength(1.0F)
+				.sound(SoundType.WOOD).noOcclusion().ignitedByLava().pushReaction(PushReaction.POPPED));
+		HAY_PULLEY_ENTITY = Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, Jugcraft.id("hay_pulley"),
+				FabricBlockEntityTypeBuilder.create(HayPulleyBlockEntity::new, pulley).build());
+		Block bell = registerBlock("harvest_bell", HarvestBellBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.METAL).strength(2.0F)
+				.sound(SoundType.WOOD).noOcclusion().pushReaction(PushReaction.IMMOVEABLE));
+		HARVEST_BELL_ENTITY = Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, Jugcraft.id("harvest_bell"),
+				FabricBlockEntityTypeBuilder.create(HarvestBellBlockEntity::new, bell).build());
+		for (Block block : List.of(pulley, bell)) {
 			registerItem(BuiltInRegistries.BLOCK.getKey(block).getPath(), props -> new BlockItem(block, props),
 					new Item.Properties().useBlockDescriptionPrefix(), BUILDING_TAB);
 		}
