@@ -20,6 +20,7 @@ import decor17
 import decor18
 import decor19
 import decor20
+import barn_tools
 import orchard_harvest
 import pumpkin_patch
 import adam_ondi_ahman
@@ -2277,6 +2278,10 @@ SICKLES = {
                      "features": []},
     "bronze_sickle": {"display": "Bronze Sickle", "radius": 2, "durability": 350, "material": "#c:ingots/bronze",
                       "features": ["tin"]},
+    # Barn & Harvest Tools (tools/barn_tools.py): the planned Steel Sickle, 7 by 7 once the steel tier lands (steel's
+    # tool uses, tools/gear.py GEAR_TIERS). Its icon is a map, tools/item_icons/steel_sickle.txt.
+    "steel_sickle": {"display": "Steel Sickle", "radius": 3, "durability": 900, "material": "#c:ingots/steel",
+                     "features": ["machines"]},
 }
 SICKLE_PATTERN = [" M ", "  M", "SM "]
 
@@ -2914,7 +2919,7 @@ def all_items():
             + decor2_items() + decor3_items() + decor4_items() + decor5_items() + decor6_items() + decor7_items() + decor8_items()
             + decor9_items() + decor10_items() + decor11_items() + decor12_items() + decor13_items() + decor14_items()
             + chandlery_items() + cider_items() + pantry_items() + firework_items()
-            + lantern_items() + feast_blocks() + [MAZE["gate"]] + ghost_items() + face_paint_items() + candy_items() + foraging_items() + bat_items() + knitting_items() + pie_items() + [SPIRIT_BOARD["block"], TURKEYS["roast"], THEREMIN["block"], OFRENDA["block"]] + list(OFRENDA["decor"]) + graveyard.items() + [h["item"] for h in HEX["brews"].values()] + [BROOMSTICK["item"]] + [WOLFSBANE["block"], WEREWOLF["dagger"], WEREWOLF["arrow"]] + WEREWOLF_PELTS + WEREWOLF_RUGS + [SQUIRRELS["acorn"]] + midway.items() + ferris_wheel.items() + pinata.items() + hot_air_balloon.items() + leaf_blower.items() + plants.items() + decor15.items() + decor16.items() + decor17.items() + decor18.items() + decor19.items() + decor20.items() + pumpkin_patch.display_blocks() + pumpkin_patch.extra_blocks() + orchard_harvest.blocks() + kitchen.items() + feasts.items() + rice.items() + soil.items() + orchard.items() + [i for i in cakes.items() if i not in cakes.ITEMS] + pies_and_tarts.items() + garden.items()
+            + lantern_items() + feast_blocks() + [MAZE["gate"]] + ghost_items() + face_paint_items() + candy_items() + foraging_items() + bat_items() + knitting_items() + pie_items() + [SPIRIT_BOARD["block"], TURKEYS["roast"], THEREMIN["block"], OFRENDA["block"]] + list(OFRENDA["decor"]) + graveyard.items() + [h["item"] for h in HEX["brews"].values()] + [BROOMSTICK["item"]] + [WOLFSBANE["block"], WEREWOLF["dagger"], WEREWOLF["arrow"]] + WEREWOLF_PELTS + WEREWOLF_RUGS + [SQUIRRELS["acorn"]] + midway.items() + ferris_wheel.items() + pinata.items() + hot_air_balloon.items() + leaf_blower.items() + plants.items() + decor15.items() + decor16.items() + decor17.items() + decor18.items() + decor19.items() + decor20.items() + pumpkin_patch.display_blocks() + pumpkin_patch.extra_blocks() + orchard_harvest.blocks() + barn_tools.items() + kitchen.items() + feasts.items() + rice.items() + soil.items() + orchard.items() + [i for i in cakes.items() if i not in cakes.ITEMS] + pies_and_tarts.items() + garden.items()
             + herbs.items() + spices.items() + lairs.items() + vesperine.items() + tatterlace.items()
             + yeti_king.items() + cinder_tyrant.items() + mire_hag.items() + crypt_lich.items()
             + iron_dreadnought.items() + alpha_werewolf.items() + pumpkin_king.items() + hessian_horseman.items()
@@ -3033,6 +3038,8 @@ SHAPELESS += pumpkin_patch.EXTRA_SHAPELESS
 # Orchard & Apple Harvest, decor set 2 (tools/orchard_harvest.py).
 SHAPED += orchard_harvest.RECIPES
 SHAPELESS += orchard_harvest.SHAPELESS
+# Barn & Harvest Tools, decor set 3 (tools/barn_tools.py).
+SHAPED += barn_tools.RECIPES
 SHAPELESS += decor20.SHAPELESS
 
 # Kitchen and cooking expansion, slice 1: the Farmhouse Kitchen (tools/kitchen.py).

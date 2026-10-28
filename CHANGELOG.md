@@ -8,6 +8,13 @@ Every change to Jugcraft, newest first, grouped by pull request. For what each t
 
 No numbered release yet. Entries on feature branches remain proposed until their pull requests merge.
 
+### Unmerged: Barn & Harvest Tools, part 1 (the planned hand tools)
+- **Steel Sickle**: the third sickle, harvesting and replanting ripe crops in a 7 by 7 square. Three steel ingots and a stick.
+- **Watering Can**: a tinplate can that holds 16 pours, filled at any water. A pour wets the farmland in the 3 by 3 square round it and gives each crop there a one-in-six chance of a growth step, half a second between pours.
+- **Seed Pouch**: a wool pouch that holds four kinds of seed. Use it to gather your seeds, use it on farmland to sow the empty 3 by 3 round it, sneak-use it to empty it.
+- Record: [barn-and-harvest-tools.md](docs/features/barn-and-harvest-tools.md).
+- **Checked:** the record's Verification. Game tests run in CI only; not played by hand.
+
 ### Unmerged: Orchard & Apple Harvest, part 3 (the Caramel Apple Stand)
 - **Caramel Apple Stand**: a two-block counter painted CARAMEL APPLES, with a copper dipping pot on a burner, a jar of sticks and a cooling tray.
   - Stock it with Caramel and sticks, then dip apples. An apple, a stick and a serving make a caramel apple, as the recipe does.

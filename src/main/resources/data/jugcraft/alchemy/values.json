@@ -34422,6 +34422,11 @@
       "denominator": 2,
       "source": "recipe jugcraft:security_jacket"
     },
+    "jugcraft:seed_pouch": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
     "jugcraft:self_propelled_howitzer": {
       "numerator": 523,
       "denominator": 1,
@@ -35656,6 +35661,11 @@
       "numerator": 9,
       "denominator": 1,
       "source": "recipe jugcraft:steel_shovel"
+    },
+    "jugcraft:steel_sickle": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
     },
     "jugcraft:steel_spear": {
       "numerator": 9,
@@ -37728,6 +37738,11 @@
       "source": "recipe jugcraft:water_wheel"
     },
     "jugcraft:watergrass": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
+    "jugcraft:watering_can": {
       "numerator": 1,
       "denominator": 1,
       "source": "fallback (balance pending)"

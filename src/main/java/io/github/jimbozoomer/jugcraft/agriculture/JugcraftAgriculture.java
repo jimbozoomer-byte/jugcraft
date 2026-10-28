@@ -287,6 +287,8 @@ public final class JugcraftAgriculture {
 	public static DataComponentType<PumpkinCarving> STENCIL;
 	/** Sips of water in a Gourd Canteen. */
 	public static DataComponentType<Integer> CANTEEN_WATER;
+	/** Pours of water in a Watering Can (Barn & Harvest Tools). */
+	public static DataComponentType<Integer> WATERING_CAN_WATER;
 	public static BlockEntityType<GiantPumpkinBlockEntity> GIANT_PUMPKIN_ENTITY;
 	public static BlockEntityType<ScarecrowBlockEntity> SCARECROW_ENTITY;
 	/** What a scarecrow wears for a head. */
@@ -829,6 +831,7 @@ public final class JugcraftAgriculture {
 		// Farm tools.
 		sickle("flint_sickle", 1, 131);
 		sickle("bronze_sickle", 2, 350);
+		sickle("steel_sickle", 3, 900);
 
 		// Wild plants: natural seed sources.
 		wild("wild_corn");
@@ -2387,6 +2390,7 @@ public final class JugcraftAgriculture {
 		registerPumpkinPatchDisplays();
 		registerPumpkinPatchExtras();
 		registerOrchardHarvest();
+		registerBarnTools();
 	}
 
 	/**
@@ -2788,6 +2792,18 @@ public final class JugcraftAgriculture {
 			registerItem(BuiltInRegistries.BLOCK.getKey(block).getPath(), props -> new BlockItem(block, props),
 					new Item.Properties().useBlockDescriptionPrefix(), BUILDING_TAB);
 		}
+	}
+
+	/**
+	 * Barn & Harvest Tools (decor set 3; tools/barn_tools.py), part 1: the planned hand tools, the Watering Can and the Seed
+	 * Pouch. (The Steel Sickle is registered with the other sickles.)
+	 */
+	private static void registerBarnTools() {
+		WATERING_CAN_WATER = Registry.register(BuiltInRegistries.DATA_COMPONENT_TYPE, Jugcraft.id("watering_can_water"),
+				DataComponentType.<Integer>builder().persistent(Codec.intRange(0, WateringCanItem.CAPACITY))
+						.networkSynchronized(ByteBufCodecs.VAR_INT).build());
+		registerItem("watering_can", WateringCanItem::new, new Item.Properties().stacksTo(1).component(WATERING_CAN_WATER, 0), TOOL_TAB);
+		registerItem("seed_pouch", SeedPouchItem::new, new Item.Properties().stacksTo(1), TOOL_TAB);
 	}
 
 	private static BlockBehaviour.Properties displayProperties() {

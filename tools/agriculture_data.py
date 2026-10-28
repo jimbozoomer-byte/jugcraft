@@ -71,6 +71,7 @@ import decor18_data
 import decor19_data
 import decor20_data
 import orchard_harvest_data
+import barn_tools_data
 import pumpkin_patch_data
 import ofrenda_data
 import graveyard_data
@@ -312,6 +313,7 @@ def assets(root, write, lang):
     decor20_data.assets(root, write, lang)
     pumpkin_patch_data.assets(root, write, lang)
     orchard_harvest_data.assets(root, write, lang)
+    barn_tools_data.assets(root, write, lang)
     lair_data.assets(root, write, lang)
     adam_ondi_ahman_data.assets(root, write, lang)
     vesperine_data.assets(root, write, lang)

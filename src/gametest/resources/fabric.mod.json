@@ -116,6 +116,7 @@
       "io.github.jimbozoomer.jugcraft.test.FestivalGameTests",
       "io.github.jimbozoomer.jugcraft.test.PumpkinPatchGameTests",
       "io.github.jimbozoomer.jugcraft.test.OrchardHarvestGameTests",
+      "io.github.jimbozoomer.jugcraft.test.BarnToolsGameTests",
       "io.github.jimbozoomer.jugcraft.test.CarvingGameTests",
       "io.github.jimbozoomer.jugcraft.test.HalloweenGameTests",
       "io.github.jimbozoomer.jugcraft.test.RegattaGameTests",

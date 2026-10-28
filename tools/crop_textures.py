@@ -798,6 +798,8 @@ def crop_textures():
     out.update(pumpkin_patch_display_textures())
     from orchard_harvest_data import textures as orchard_harvest_textures  # and Orchard & Apple Harvest's gear
     out.update(orchard_harvest_textures())
+    from barn_tools_data import textures as barn_tools_textures  # and Barn & Harvest Tools' hand tools
+    out.update(barn_tools_textures())
     from lair_textures import lair_textures  # and the lairs' blocks, the Mourning Wreath and the Death Knell
     out.update(lair_textures())
     from adam_ondi_ahman_textures import adam_ondi_ahman_textures  # and Adam-ondi-Ahman's Ancient Altar

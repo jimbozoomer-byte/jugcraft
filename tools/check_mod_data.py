@@ -14687,6 +14687,32 @@ def check_pumpkin_patch():
         err(f"GiantWartyGourdBlock is not {w} x {h} x {d} blocks, {pp.GIANT_WARTY['scale']} times the Warty Gourd, as tools/pumpkin_patch.py says")
 
 
+def check_barn_tools():
+    """Barn & Harvest Tools (tools/barn_tools.py, docs/features/barn-and-harvest-tools.md), part 1: the Watering Can's
+    capacity, reach, growth odds and cooldown and the Seed Pouch's kinds and reach are the table's; the can's water
+    component is bounded by its capacity; their recipes exist and the tooltips have their text."""
+    import barn_tools as bt
+    agri = JAVA_ROOT / "agriculture"
+    can = (agri / "WateringCanItem.java").read_text(encoding="utf-8") if (agri / "WateringCanItem.java").is_file() else ""
+    for name, key in (("CAPACITY", "capacity"), ("RADIUS", "radius"), ("GROW_ODDS", "grow_odds"), ("COOLDOWN", "cooldown")):
+        if f"int {name} = {bt.WATERING_CAN[key]};" not in can:
+            err(f"WateringCanItem.{name} is not tools/barn_tools.py WATERING_CAN's {bt.WATERING_CAN[key]}")
+    pouch = (agri / "SeedPouchItem.java").read_text(encoding="utf-8") if (agri / "SeedPouchItem.java").is_file() else ""
+    for name, key in (("KINDS", "kinds"), ("RADIUS", "radius")):
+        if f"int {name} = {bt.SEED_POUCH[key]};" not in pouch:
+            err(f"SeedPouchItem.{name} is not tools/barn_tools.py SEED_POUCH's {bt.SEED_POUCH[key]}")
+    main = (agri / "JugcraftAgriculture.java").read_text(encoding="utf-8") if (agri / "JugcraftAgriculture.java").is_file() else ""
+    if "Codec.intRange(0, WateringCanItem.CAPACITY)" not in main:
+        err("JugcraftAgriculture: the Watering Can's water component should be bounded by WateringCanItem.CAPACITY")
+    for recipe in bt.RECIPES:
+        if not (DATA / MOD / "recipe" / f"{recipe['id']}.json").is_file():
+            err(f"{recipe['id']}: tools/barn_tools.py's recipe was not generated")
+    lang = load(ASSETS / "lang" / "en_us.json") or {}
+    for key in ("item.jugcraft.watering_can.water", "item.jugcraft.seed_pouch.contents"):
+        if key not in lang:
+            err(f"{key}: the tooltip has no text")
+
+
 def check_orchard_harvest():
     """Orchard & Apple Harvest (tools/orchard_harvest.py, docs/features/orchard-apple-harvest.md): the ladder's, the
     bin's and the cart's Java blocks are the table's size; the bin's, cart's and bag's capacities and stages, the crates'
@@ -22658,6 +22684,7 @@ def main():
     check_pumpkin_king()
     check_pumpkin_patch()
     check_orchard_harvest()
+    check_barn_tools()
     check_hessian_horseman()
     check_cydonian_sentinel()
     check_material_sets()
