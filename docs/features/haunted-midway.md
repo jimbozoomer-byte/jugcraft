@@ -237,6 +237,7 @@ Local checks run on this branch, and their results:
   - `python3 -m unittest discover -s scripts/tests`: 287 tests, OK.
   - `python3 tools/check_icon_maps.py`: PASS (no new map; the ghost train's item is 3D).
   - `javac` scan of the new and changed Java for syntax errors: none. The full compile runs in CI.
+  - CI's first run failed to compile the game tests: the new test named the minecart's type `EntityType.MINECART`, which this platform has as `EntityTypes.MINECART`, as the other tests name it. The javac scan checks syntax only, so it could not catch this.
 
 `HauntedMidwayGameTests` (run in CI):
 - **The cotton-candy cart spins sugar into candy**:

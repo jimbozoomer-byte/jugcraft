@@ -19,7 +19,7 @@ import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
-import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.EntityTypes;
 import net.minecraft.world.entity.vehicle.minecart.Minecart;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.item.Item;
@@ -500,7 +500,7 @@ public class HauntedMidwayGameTests {
 		helper.assertTrue(level.getBlockState(in).isAir() && level.getBlockState(in.above()).isAir() && level.getBlockState(out).isAir(),
 				"Its doorways are left free");
 		level.setBlockAndUpdate(in, Blocks.RAIL.defaultBlockState());
-		Minecart cart = helper.spawn(EntityType.MINECART, helper.relativePos(in));
+		Minecart cart = helper.spawn(EntityTypes.MINECART, helper.relativePos(in));
 		helper.runAfterDelay(GhostTrainBlock.LOOK_TICKS + 2, () -> {
 			helper.assertTrue(both(level, train, master, state -> state.getValue(GhostTrainBlock.IN_OPEN) && !state.getValue(GhostTrainBlock.OUT_OPEN)),
 					"A minecart in the IN doorway opens its doors, the OUT doors staying shut");
