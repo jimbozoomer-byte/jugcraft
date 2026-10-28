@@ -58,7 +58,8 @@ public interface FruitStore {
 	/** Puts all the fruit in {@code stack} that fits into {@code store} (on the server; the client only predicts). */
 	static InteractionResult putIn(FruitStoreBlockEntity store, ItemStack stack, Level level, BlockPos pos, Player player) {
 		if (!stack.is(FRUIT)) {
-			return InteractionResult.TRY_WITH_EMPTY_HAND;
+			// Only an empty hand goes on to take a stack back; anything else does what it would on any block.
+			return stack.isEmpty() ? InteractionResult.TRY_WITH_EMPTY_HAND : InteractionResult.PASS;
 		}
 		if (level.isClientSide()) {
 			return InteractionResult.SUCCESS;
