@@ -231,6 +231,7 @@ Local checks run on this branch, and their results:
   - Part 2: PASS (272 maps, 51 declared materials with the two new ones; no new warning).
   - Parts 3, 4 and 5 add no icon map (their items are 3D).
 - `javac` parse (syntax only) of the new and changed Java: OK. The full compile runs in CI.
+- Part 5's first CI run failed one game test, `theTroughKeepsFeed` ("Cobblestone doesn't go in"). The test held cobblestone to show the trough refuses what isn't feed. It did refuse it, but the game then placed the cobblestone on top of the trough, as it would on any block, so the hand held nine. The test now holds a stick, which isn't feed and can't be placed.
 - CI's first run failed to compile (`SeedPouchItem.java:82`): 26.3's `LivingEntity.drop` takes a `Prediction`. Emptying the pouch now uses `Inventory.placeItemBackInInventory(stack, Prediction.SERVER_ONLY)`, as the Farm Stand does.
 - CI's second run (`optional integrations absent`) failed one game test, `thePouchGathersSowsAndEmpties`: the field was sown but no seed was spent. The pouch asked `isCreative()`, which the test's mock player always answers yes; it now asks `getAbilities().instabuild`, which follows the game mode, as the rest of the mod does.
 - The three icons were drawn and looked at at 1x and 10x while drawing (a review aid, not committed).
@@ -299,7 +300,7 @@ Game tests (CI only, not run locally), `BarnToolsGameTests`:
     - against one, it stands whole, facing out, and an empty hand does nothing to it;
     - without its wall it comes off whole, dropping once.
   - **The trough**:
-    - it stands whole (two blocks), and cobblestone doesn't go in;
+    - it stands whole (two blocks), and a stick doesn't go in;
     - it takes hay bales and wheat up to its 128, no more, and shows itself full on both blocks;
     - an empty hand takes back the last stack in;
     - broken from its second block, it spills its hay and drops once.

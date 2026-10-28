@@ -531,9 +531,10 @@ public class BarnToolsGameTests {
 			helper.assertTrue(helper.getLevel().getBlockState(trough.partPos(master, Direction.NORTH, part)).is(trough), "Its block " + part + " is there");
 		}
 		FruitStoreBlockEntity store = helper.getBlockEntity(pos, FruitStoreBlockEntity.class);
-		player.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(Items.COBBLESTONE, 10));
+		// (a stick: refused, it then does what it does on any block, nothing; a block held would be placed on the trough)
+		player.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(Items.STICK, 10));
 		useOn(helper, player, pos);
-		helper.assertTrue(store.count() == 0 && player.getMainHandItem().getCount() == 10, "Cobblestone doesn't go in");
+		helper.assertTrue(store.count() == 0 && player.getMainHandItem().getCount() == 10, "A stick doesn't go in");
 		player.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(Items.HAY_BLOCK, 64));
 		useOn(helper, player, pos);
 		for (int i = 0; i < 2; i++) {
