@@ -86,6 +86,11 @@ GRAVE_DUST = (3, 6)
 TROPHIES = ("soulreaver", "gravewarden")
 TROPHY_CHANCE = 0.15
 CHANCES = {"emptied_phylactery": 0.25, "lichs_crown": 0.2}
+# The Wight King armor set (tools/gear.py TIER_BOSSES; docs/features/armor-tier-sources.md): nothing else
+# gives it. Each piece rolls on its own, half a piece a share on average, and its arm as a trophy does.
+CHANCES.update({"wight_king_helmet": 0.125, "wight_king_chestplate": 0.125,
+                "wight_king_leggings": 0.125, "wight_king_boots": 0.125,
+                "wight_king_zweihander": 0.15})
 ADVANCEMENT = {"key": "nameless", "title": "Nameless", "icon": "jugcraft:soulreaver",
                "description": "Break the Crypt Lich's chains and bring him down in the Archive of Last Names",
                "frame": "challenge"}

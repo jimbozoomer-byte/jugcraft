@@ -129,8 +129,7 @@ def extend(root, edge, evidence, items):
     # are the survival inventory item. Mage blocks are temporary spell output.
     exclusions={j('herbal_pumpkling_crop'): 'Internal crop block item; plant herbal_pumpkling_seeds in survival.',
                 j('nouveau_mage_block'): 'Temporary phantom-block spell output; not a permanent survival building material.'}
-    for name in ('frost_knight_greatsword','hades_scythe','reaper_scythe','sentinel_longsword','sentinel_shield','wight_king_zweihander'):
-        exclusions[j(name)]='Deferred acquisition design: matching owner-preview armor set; tools/arms_variants.py SETS and ArmsVIIGameTests intentionally specify no survival recipe or trophy table yet.'
+    # The armour sets' arms drop from their set's boss since 28 October 2026 (tools/gear.py TIER_BOSSES).
     for size in ('medium','large'):
         exclusions[j('beast_'+size+'_catfish_bucket')]='Compatibility variant: current native catfish has one small profile; actual captures use beast_small_catfish_bucket. Legacy containers remain releasable.'
     return exclusions

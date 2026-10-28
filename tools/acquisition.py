@@ -17,11 +17,10 @@ Written by generate_material_data.py: the rows to assets/jugcraft/recipe_view.js
 client/compat/JugcraftJeiPlugin, which adds each as an information page) and the words to the language file, as
 jei.jugcraft.acquire.<key>. The first magic loadout the record recommends is listed here too (LOADOUT), so the checker
 can confirm survival already makes every piece of it (with its optional branches: the Wayfaring trinkets and, since
-Chunk B, the Rime travel kit), and so are the owner's armour tiers that stay creative-only
-(CREATIVE_ONLY), so it can confirm nothing gives them yet, and, since Concordance Chunk C (C-10), the living workshop's
-things (WORKSHOP; the factory's parts in FACTORY; Chunk C's own items in CHUNK_C_ITEMS), so it can confirm survival makes
-each as its row says. tools/check_mod_data.py (check_acquisition) ties each page, the loadout, the workshop and the
-creative-only tiers to the files on disk.
+Chunk B, the Rime travel kit), and, since Concordance Chunk C (C-10), the living workshop's things (WORKSHOP; the
+factory's parts in FACTORY; Chunk C's own items in CHUNK_C_ITEMS), so it can confirm survival makes each as its row says.
+tools/check_mod_data.py (check_acquisition) ties each page, the loadout and the workshop to the files on disk, and the
+owner's armour tiers to their one source each (tools/gear.py TIER_BOSSES and TIER_PATTERNS).
 
 Pure data: it imports only the generators' tables, which import nothing of the generator's.
 """
@@ -31,7 +30,6 @@ import concordance_ember as ember
 import concordance_rime_kit as rime_kit
 import concordance_rituals as rituals
 import concordance_trinkets as trinkets
-import gear
 import lairs
 import tatterlace as tt
 import vesperine as vs
@@ -108,11 +106,6 @@ LOADOUT = {"initiate_wand": "recipe", "lampwright_bench": "recipe", "kindled_lan
            **{piece: "recipe" for piece in ember.ARMOR}, "lesser_fire_focus": "recipe", "fire_bangle": "recipe"}
 OPTIONAL = {**{item: "recipe" for item in trinkets.TRINKETS}, "fire_focus": "recipe",
             **{item: "recipe" for item in rime_kit.ITEMS}}  # Rime's travel kit (Chunk B, B-10), made the same way
-# The owner's armour tiers (tools/gear.py ARMOR_TIERS, the Wayfarer among them) that no recipe, drop, shop or trade gives:
-# all of them, as the owner asked when each was made (6 October 2026: "for now just make the armor we can figure that out
-# later"; the later designs likewise, as tools/gear.py records). The first loadout leaves that as it is. When the owner
-# settles how a tier is won, take it out of here and out of the record's creative-only table.
-CREATIVE_ONLY = list(gear.ARMOR_TIERS)
 # Concordance Chunk C (C-10): the living workshop's route (tools/concordance_journey.py WORKSHOP). WORKSHOP: every
 # Concordance thing it makes or places, each made in survival as it is: by the crafting recipe of its own name ("recipe"),
 # the recipe named ("recipe:<file>": the Thallite plate's is thallite_plate_by_hand), a Lampwright's Bench working

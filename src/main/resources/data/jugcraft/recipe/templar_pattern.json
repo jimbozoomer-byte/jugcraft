@@ -1,0 +1,25 @@
+{
+  "fabric:load_conditions": [
+    {
+      "condition": "jugcraft:feature_enabled",
+      "feature": "machines"
+    }
+  ],
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    "IRI",
+    "BPB",
+    "IRI"
+  ],
+  "key": {
+    "I": "minecraft:iron_nugget",
+    "R": "minecraft:red_dye",
+    "B": "minecraft:black_dye",
+    "P": "minecraft:paper"
+  },
+  "result": {
+    "id": "jugcraft:templar_pattern",
+    "count": 4
+  }
+}

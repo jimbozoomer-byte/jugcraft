@@ -1,0 +1,15 @@
+{
+  "fabric:load_conditions": [
+    {
+      "condition": "jugcraft:feature_enabled",
+      "feature": "machines"
+    }
+  ],
+  "type": "minecraft:smithing_transform",
+  "template": "jugcraft:valkyrie_pattern",
+  "base": "minecraft:netherite_helmet",
+  "addition": "minecraft:phantom_membrane",
+  "result": {
+    "id": "jugcraft:valkyrie_helmet"
+  }
+}

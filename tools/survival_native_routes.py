@@ -169,9 +169,9 @@ def extend(root, edge, evidence, items):
             fluid = group + '_' + name
             route(java + 'chemistry/PetroFluids.java', ['fluid:' + j(fluid), 'minecraft:bucket'], [fluid + '_bucket'], 'fluid_filling')
 
-    import gear
-    exclusions = {j(tier + '_' + part): 'Deferred acquisition design: owner requested preview armor only on October 6; tools/gear.py ARMOR_TIERS records the still-unassigned recipe/drop choice.'
-                  for tier in gear.ARMOR_TIERS for part in ('helmet', 'chestplate', 'leggings', 'boots')}
+    # The owner's armour tiers are smithed or dropped by their boss since 28 October 2026 (tools/gear.py TIER_PATTERNS
+    # and TIER_BOSSES; docs/features/armor-tier-sources.md), so the graph follows their recipes and loot like any item.
+    exclusions = {}
     # Only the retired basic forms are compatibility-only. Recovered furniture,
     # boats and the edible walnut remain active survival items.
     from walnut_data import ALIASES

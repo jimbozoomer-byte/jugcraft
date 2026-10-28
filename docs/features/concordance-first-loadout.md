@@ -24,15 +24,7 @@ understood), the owner's Ember regalia (the **Pyromancer's** set, or the cheaper
 of Fire** and the **Fire Bangle**) and, as an optional branch, the owner's **Wayfaring trinkets**. Every one is the
 owner's design or a Concordance item that already had a recipe or a working; none of it is new.
 
-**The owner's armour tiers stay creative-only.** None of the 18 tiers in `tools/gear.py` `ARMOR_TIERS` (72 pieces),
-the **Wayfarer** among them, gains a recipe, a drop, a shop or a trade here. They are still had only from the creative
-tab, as the owner asked when each was made ([bloodthorn-armor.md](bloodthorn-armor.md),
-[four-armor-designs.md](four-armor-designs.md), [armor-designs-8-october.md](armor-designs-8-october.md)). This record
-does not claim that any of them became obtainable; how each is won is the owner's to decide (see Rollout).
-`check_acquisition` fails if a recipe (its result, results or byproducts), a bench working, a ritual, the Assayer's
-Scale, a loot table, a town shop, a villager trade, a commission or a project starts to give one before this record and
-`tools/acquisition.py` say so. It reads data, and only the loot class's and the boss package's reward and deed lines;
-other drops coded in Java are not seen (see Known limits).
+**The owner's armour tiers are no longer creative-only (28 October 2026).** This record kept all 18 tiers in `tools/gear.py` `ARMOR_TIERS` (72 pieces), the **Wayfarer** among them, creative-only, as the owner asked when each was made. Since [armor-tier-sources.md](armor-tier-sources.md), five come only from their boss and the other thirteen are smithed; `check_acquisition` now holds each piece to that one source.
 
 **JEI says where ritual and boss things come from.** With JEI installed, each thing that only a ritual makes or only a
 lair boss gives now has an information page (JEI's "Information" tab, shown when you look up the item's recipes), since
@@ -151,8 +143,8 @@ No research, recipe or stage needs anything a boss gives: the bosses' materials 
 | `salamander_charm` | off-hand charm against hot ground | loot only |
 | `tyrant_crest` | head costume | loot only |
 | `tyrant_scale` | material | loot only |
-| the 18 owner armour tiers' 72 pieces (`wayfarer_*` among them) | armour | creative-only |
-| `hades_scythe`, `sentinel_longsword`, `frost_knight_greatsword`, `wight_king_zweihander`, `reaper_scythe`, `sentinel_shield` | the armour sets' arms and shield | creative-only (`check_arms_variants` forbids their recipes and drops until the owner settles how a set is won) |
+| the 18 owner armour tiers' 72 pieces (`wayfarer_*` among them) | armour | smithed, or only from their boss ([armor-tier-sources.md](armor-tier-sources.md)) |
+| `hades_scythe`, `sentinel_longsword`, `frost_knight_greatsword`, `wight_king_zweihander`, `reaper_scythe`, `sentinel_shield` | the armour sets' arms and shield | only from their set's boss ([armor-tier-sources.md](armor-tier-sources.md)) |
 | the 12 trophies of the 6 bosses not yet built (`hagthorn`, `bogfang` and the rest) | weapons | listed only in `loot_table/bosses/<boss>.json`, which nothing rolls: not had in survival yet |
 
 ### Each selected item (A-07)
@@ -169,7 +161,7 @@ No research, recipe or stage needs anything a boss gives: the bosses' materials 
 
 Not selected for the loadout, and unchanged: the Reaper's Hood, Tatterlace's Headdress, Golden Thimble and skull
 trophies (costumes and a curio from the lairs; their art is Jugcraft's, see [vesperine.md](vesperine.md) and
-[tatterlace.md](tatterlace.md)), and everything creative-only above.
+[tatterlace.md](tatterlace.md)), and the owner's armour tiers and their arms above.
 
 ## Connections
 
@@ -225,8 +217,8 @@ trophies (costumes and a curio from the lairs; their art is Jugcraft's, see [ves
 and the Kiln Seal's lands) and `tools/biomes.py` (those lands' names); no number is typed twice. `generate_material_data.py` writes the rows to
 `assets/jugcraft/recipe_view.json` (`"acquisition_info"`: an item and a key each) and the words to `en_us.json`
 (`jei.jugcraft.acquire.<key>`). `client/compat/JugcraftJeiPlugin.addAcquisitionInfo` reads the rows and adds a page for
-each registered item. The same module lists the loadout (`LOADOUT`, `OPTIONAL`) and the creative-only tiers
-(`CREATIVE_ONLY`) for the checker. Since Concordance Chunk B, unit 4 ([the winter record](arcane-concordance-winter.md);
+each registered item. The same module lists the loadout (`LOADOUT`, `OPTIONAL`) for the checker (and listed the
+creative-only tiers, `CREATIVE_ONLY`, until [armor-tier-sources.md](armor-tier-sources.md)). Since Concordance Chunk B, unit 4 ([the winter record](arcane-concordance-winter.md);
 not yet merged), `OPTIONAL` also holds Rime's travel kit (the two water foci, the Water Bangle and the twelve pieces of
 the three water sets), made by recipe as the Focus of Fire is; they are Rime's, not part of First Light's loadout, and
 have no JEI information page (JEI shows their recipes). `tools/concordance_journey.py` holds each of the fifteen to the
@@ -338,7 +330,7 @@ Owner decisions (all proposed; none is taken by this change):
 
 | Decision | Proposal | Status |
 |---|---|---|
-| A-D10: how the Wayfarer (and the other owner tiers) are won | Keep them creative-only for Chunk A. Later, for the Wayfarer, choose between (a) re-tiering it as a light caster's set (for example the Pyromancer's 1/3/2/1 at 10x durability) with a leather, wool and luminous-matter recipe, or (b) keeping netherite's numbers and winning it by smithing a netherite piece with leather (a netherite upgrade template, the netherite piece and leather: at least a netherite set's worth, as the owner's record asks). The numbers stay the owner's. | Proposed |
+| A-D10: how the Wayfarer (and the other owner tiers) are won | Keep them creative-only for Chunk A. Later, for the Wayfarer, choose between (a) re-tiering it as a light caster's set (for example the Pyromancer's 1/3/2/1 at 10x durability) with a leather, wool and luminous-matter recipe, or (b) keeping netherite's numbers and winning it by smithing a netherite piece with leather (a netherite upgrade template, the netherite piece and leather: at least a netherite set's worth, as the owner's record asks). The numbers stay the owner's. | Superseded: the Wayfarer is smithed onto netherite with leather ([armor-tier-sources.md](armor-tier-sources.md)) |
 | A-D15: spoiler policy for acquisition text | JEI's pages and the encyclopedia's lair dossiers state the exact chances (7.5%, 15%, 20%, 25%, 50%) and the first-victory guarantee, always "with the default data"; the alternative is to name the boss and say "sometimes". The encyclopedia's discovery rule is A-D9, proposed in [the chunk's contract](concordance-chunk-a.md#decisions). | Proposed |
 | A-D11: should a shop sell first-route materials? | Today the town sells a lantern, a compass, a lead, glow ink sacs, candles and lilies of the valley (and, at the Seasonal Stall in December, red wool), and buys amethyst, copper, gold, wool and leather. Selling amethyst shards (say) would answer chapter 9's question on crafting- or trade-oriented acquisition, but the town's rule that no item is both sold and bought (`tools/town_shops.py`, checked by `check_mod_data`) means the General Store would stop buying it. | Proposed |
 

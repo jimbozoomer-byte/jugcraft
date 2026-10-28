@@ -1,0 +1,24 @@
+{
+  "fabric:load_conditions": [
+    {
+      "condition": "jugcraft:feature_enabled",
+      "feature": "machines"
+    }
+  ],
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    "NRN",
+    "RPR",
+    "NRN"
+  ],
+  "key": {
+    "N": "#c:nuggets/bronze",
+    "R": "minecraft:red_dye",
+    "P": "minecraft:paper"
+  },
+  "result": {
+    "id": "jugcraft:spartan_pattern",
+    "count": 4
+  }
+}

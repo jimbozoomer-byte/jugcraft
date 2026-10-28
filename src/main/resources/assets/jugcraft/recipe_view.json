@@ -39909,6 +39909,26 @@
       "key": "dirge_skull"
     },
     {
+      "item": "jugcraft:frost_knight_boots",
+      "key": "frost_knight_boots"
+    },
+    {
+      "item": "jugcraft:frost_knight_chestplate",
+      "key": "frost_knight_chestplate"
+    },
+    {
+      "item": "jugcraft:frost_knight_greatsword",
+      "key": "frost_knight_greatsword"
+    },
+    {
+      "item": "jugcraft:frost_knight_helmet",
+      "key": "frost_knight_helmet"
+    },
+    {
+      "item": "jugcraft:frost_knight_leggings",
+      "key": "frost_knight_leggings"
+    },
+    {
       "item": "jugcraft:glacier_maul",
       "key": "glacier_maul"
     },
@@ -39921,6 +39941,26 @@
       "key": "gossamer_silk"
     },
     {
+      "item": "jugcraft:hades_boots",
+      "key": "hades_boots"
+    },
+    {
+      "item": "jugcraft:hades_chestplate",
+      "key": "hades_chestplate"
+    },
+    {
+      "item": "jugcraft:hades_helmet",
+      "key": "hades_helmet"
+    },
+    {
+      "item": "jugcraft:hades_leggings",
+      "key": "hades_leggings"
+    },
+    {
+      "item": "jugcraft:hades_scythe",
+      "key": "hades_scythe"
+    },
+    {
       "item": "jugcraft:magmaw",
       "key": "magmaw"
     },
@@ -39929,8 +39969,28 @@
       "key": "needle_rapier"
     },
     {
+      "item": "jugcraft:reaper_boots",
+      "key": "reaper_boots"
+    },
+    {
+      "item": "jugcraft:reaper_chestplate",
+      "key": "reaper_chestplate"
+    },
+    {
+      "item": "jugcraft:reaper_helmet",
+      "key": "reaper_helmet"
+    },
+    {
       "item": "jugcraft:reaper_hood",
       "key": "reaper_hood"
+    },
+    {
+      "item": "jugcraft:reaper_leggings",
+      "key": "reaper_leggings"
+    },
+    {
+      "item": "jugcraft:reaper_scythe",
+      "key": "reaper_scythe"
     },
     {
       "item": "jugcraft:reaper_shade",

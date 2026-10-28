@@ -1,0 +1,24 @@
+{
+  "fabric:load_conditions": [
+    {
+      "condition": "jugcraft:feature_enabled",
+      "feature": "machines"
+    }
+  ],
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    "AOA",
+    "OPO",
+    "AOA"
+  ],
+  "key": {
+    "A": "minecraft:amethyst_shard",
+    "O": "minecraft:orange_dye",
+    "P": "minecraft:paper"
+  },
+  "result": {
+    "id": "jugcraft:sunset_gem_pattern",
+    "count": 4
+  }
+}

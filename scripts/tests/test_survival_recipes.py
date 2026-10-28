@@ -48,7 +48,10 @@ class SurvivalGraphTests(unittest.TestCase):
         unresolved = [r['item'] for r in report['items'] if r['status'] in ('no_documented_route','recipe_chain_needs_review')]
         self.assertEqual([], unresolved, 'Every active survival chain needs a real source')
         from survival_jimtafacts_routes import DEFERRED_ACQUISITION
-        self.assertEqual(78+len(DEFERRED_ACQUISITION), report['summary']['deferred_acquisition_design'])
+        self.assertEqual(len(DEFERRED_ACQUISITION), report['summary'].get('deferred_acquisition_design', 0))
+        # The owner's armour tiers and their sets' arms: smithed, or dropped by their boss (docs/features/armor-tier-sources.md).
+        for name in ('bloodthorn_helmet', 'banana_boots', 'reaper_chestplate', 'sentinel_shield', 'frost_knight_greatsword'):
+            self.assertIn(rows['jugcraft:' + name]['status'], ('recipe_chain_reachable', 'chain_with_acquisition_evidence', 'loot_only'), name)
         for name in DEFERRED_ACQUISITION:
             self.assertEqual('deferred_acquisition_design', rows['jugcraft:jimta_spellbooks_'+name]['status'])
         for table in ('landscape_keep_loot_table','landscape_camp_loot_table','cavern_caveman_house','cavern_underground_cabin','cavern_gingerbread_town'):
