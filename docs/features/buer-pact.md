@@ -261,6 +261,10 @@ shortened beats and the amended D-S15 were decided by the session in answer to t
 reviewable at the checkpoint; not owner-accepted. The shots below keep their names; their Seen column records the run
 before this change.
 
+Since GC-05 ([Bathin](bathin-pact.md); not merged) Buer and Bathin share The Garden's Regard, so with the Regard
+understood the perch first asks whom to invite: Buer or Bathin (and Stolas, for one who knows his Regard), each a card
+"Ready" or with what is missing.
+
 ## Dependencies and assets
 
 GeckoLib (approved; his model, clips, glowmask layer); Jade optional (his note, behind `compat/`). No new dependency or
@@ -344,6 +348,14 @@ Its 33 pictures (480 by 270, or 320 by 180 for the small window, as the log prin
 | `buer_faces_north` | from the north | the same front view; a Verdant Bed at the right (together the four show the background turning round while his front stays toward each speaker) |
 | `buer_end_confirm` | ending, asked first | "End your pact with Buer?" "Buer will leave, and what you paid ahead comes back to you once. This cannot be undone."; End the pact, Keep it; the world blurred behind |
 | `buer_ended` | the pact ended | "At this perch:" "The pact is ended. Use the perch again to invite Buer anew"; ticked "Buer departs (ended by its holder); 0 offerings came back to you"; Close |
+
+**Since GC-05:** a second garden spirit turns every garden invitation into the chooser, so his tests that open an empty
+perch choose him there (GC-P59: `buerRefusesWithoutABedToMend`, and `buerFromTheCodexToDeparture` through a `chooseBuer`
+step), each keeping its intent; his words, body, sounds and service are unchanged. In CI run
+[40777920181](https://github.com/jimbozoomer-byte/jugcraft/actions/runs/40777920181) (on `8af703330`, with the restyled
+screens) both server jobs passed all 3,206 required tests, his among them, and `ConcordanceGardenPactClientGameTests`
+passed with his flow first; his 33 pictures of that run were not looked at for this record (the Seen column above is run
+40605564166's).
 
 **Local** (this record's commit; no Minecraft build here): `python3 scripts/check_repository.py` (structure and links), `python3 tools/concordance_journey.py
 --check`, `python3 -B tools/check_mod_data.py` (its `check_delivery` holding the re-pasted delivery matrix) and

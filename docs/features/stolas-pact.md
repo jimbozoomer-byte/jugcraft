@@ -623,6 +623,14 @@ generators' incidental rewrites were restored: [the contract's corrections](conc
   His other pictures in that shard were not looked at for this record.
 - **Not run for GC-01 and GC-02:** a person; the chooser with him alone on screen (it needs a second spirit; the garden
   class photographs it with Buer); two clients at his perch for facing (unit 7).
+- **Since GC-05 (Bathin, [record](bathin-pact.md); not merged):** the perch offers a third spirit, Bathin, so an owner
+  who also understands The Garden's Regard meets the chooser with three entries. GC-05 changed none of Stolas's ids,
+  keys, words, body or tests: his service raises no matter (`PactService.complication` is none by default), so the
+  accord machinery shows him no matter row, and his readings and statuses gain nothing (`08cb27921`). In CI run
+  [40777920181](https://github.com/jimbozoomer-byte/jugcraft/actions/runs/40777920181) (on `8af703330`, which also
+  carries the magic interfaces' restyled screens) both server jobs passed all 3,206 required tests, his among them, and
+  `ConcordancePactClientGameTests` (shard 3), `ConcordancePactNetworkTests` (shard 1) and
+  `ConcordanceRosterClientGameTests` (shard 6) passed; their pictures were not looked at for this record.
 
 ## World and event applicability
 

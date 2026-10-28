@@ -8,7 +8,8 @@ beds, the compost page, the mixed bed, harvest strain and the Dewlit graft) is b
 commit); its tests passed in CI (run 38726242149, with unit 3, and again in run 38774859294;
 [contract](concordance-chunk-c.md)). The garden cohort's unit 1 (GC-03 and GC-04: two read-only bed reads, the tending
 hook and Buer's strain tending; [contract](concordance-garden-cohort.md)) is not merged (draft #526); its tests passed in
-CI run 40605564166.
+CI run 40605564166. Its unit 2 (GC-05: the Gleaner's and the Heart's named roads, the bed index's devices and Bathin's
+Verdance carrying; [record](bathin-pact.md)) is not merged either; its tests passed in CI run 40777920181.
 Proposal issue: none; the owner's Arcane Concordance brief (roadmap step 14) is the scope approval.
 Owner: @jimbozoomer-byte. AI-assisted implementation with Claude Code; the model is named in the commit trailers.
 Target milestone and tier: Concordance milestone 6, Practitioner stage (Jugcraft Workshops). Roadmap step 14.
@@ -166,7 +167,10 @@ eases by these rules. `check_ecology` allows `tend` from `VerdantBedBlock` and `
 pulse: the Heart every 200 ticks, the Maw, Gauge and Gleaner every 40. The Heart's Verdance is a typed
 `Reservoir` of `essence/verdance`; the Gleaner draws it through `Transfers.move` with both devices' `Ownership` (the
 keeper's party), so a stranger's Gleaner is refused. The Heart pours into a pylon through the data conversion
-`jugcraft:verdance_to_ley`.
+`jugcraft:verdance_to_ley`. Since the garden cohort (GC-05; not merged) the Gleaner's draw from one Heart
+(`receiveFrom`) and the Heart's pour into one pylon (`pourInto`) can be named at a distance by a pact spirit (Bathin's
+Verdance carrying): the same ownership, the same conversion, both reservoirs changed in one step. The Gleaner's own draw
+and the Heart's pour beside it are these bodies, unchanged in what they do; no device's saved key changed.
 
 **Practice.** Harvesting a ripe crop by hand records `Evidence.Practiced("jugcraft:cultivation", <crop>)`; all four
 crops master Verdant Husbandry.
@@ -375,6 +379,15 @@ with and without the optional integrations, these passed: `theGardenReachNeverLo
 `GameTestHelper.relativePos` is no inverse of `absolutePos` in an unrotated test), fixed in the test in `4ca363d38`.
 `python3 tools/check_mod_data.py` (`check_ecology`'s `tend` callers) passes locally. Not run: a long unattended garden
 with Buer on a real server; any person.
+
+**The garden cohort, unit 2 (GC-05; not merged).** In CI run 40777920181 (pull request #526 on `8af703330`), with and
+without the optional integrations, these passed: `aGleanerReceivesFromANamedHeartAtAnyDistance`,
+`aHeartPoursIntoANamedPylonByItsOwnRule`, `aHeartSaysWhetherItHasItsOwnRoad` and `theGardenReachCapsItsDevices`
+(`ConcordanceGardenGameTests`); Bathin's carrying tests, among them `bathinCarriesWholeMovesFromABeatingHeart` (a Heart
+beating on a lit bed among three kinds of crop) and `bathinsFirstObligationIsADeviceReadByHand`
+(`ConcordanceWorkerGameTests`); and `noVerdanceIsMintedByCarrying` (`ConcordanceEconomyGameTests`). The existing
+`theHeartBeatsVerdanceIntoAPylon` and Gleaner tests passed unchanged. `check_verdance_roads` and `check_garden_pacts`
+pass locally. Not run: a long unattended garden with Bathin on a real server; any person.
 
 ## World and event applicability
 

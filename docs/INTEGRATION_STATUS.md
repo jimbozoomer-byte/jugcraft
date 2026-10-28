@@ -15,7 +15,7 @@ consolidation and recipe-picker playtest remains outside this batch.
 
 Updated 11 October 2026 for [integration PR #320](https://github.com/jimbozoomer-byte/jugcraft/pull/320) (source PRs #299–308 and #310–319), following [integration PR #277](https://github.com/jimbozoomer-byte/jugcraft/pull/277) and [follow-up PR #298](https://github.com/jimbozoomer-byte/jugcraft/pull/298). This is the owner-facing index: feature records contain the detailed behavior and historical test evidence. The PRs' current GitHub states determine which combined work has reached `main`.
 
-## Not merged: Concordance garden cohort, unit 1 (Buer)
+## Not merged: Concordance garden cohort, units 1 and 2 (Buer, Bathin)
 
 On branch `claude/garden-cohort`; draft pull request [jimbozoomer-byte/jugcraft#526](https://github.com/jimbozoomer-byte/jugcraft/pull/526)
 against main; not merged. Unit 1 (GC-01 to GC-04) of seven is built: one pact spirit base with a perch for many spirits
@@ -27,6 +27,12 @@ attempt and the re-run); main's Herobrine grove test failed once without the opt
 on the re-run. The run before,
 40597482976, failed three unit-1 server tests, each a fault of the test, fixed in `4ca363d38`. No person has played it;
 one client, not two ([the contract's evidence](features/concordance-garden-cohort.md#unit-1-as-built-and-its-evidence)).
+Unit 2 (GC-05) is built too: Bathin, the second garden spirit, with the accord machinery (a spirit's matter answered at
+its perch) and the bed index's Hearts, Gleaners and pylons. In CI run
+[40777920181](https://github.com/jimbozoomer-byte/jugcraft/actions/runs/40777920181) on `8af703330` the whole run passed:
+both server jobs passed all 3,206 required tests, unit 2's 38 among them, and the garden client class passed; its 34
+pictures of Bathin were looked at ([the contract's evidence](features/concordance-garden-cohort.md#unit-2-as-built-and-its-evidence)).
+Not played by a person; one client, not two.
 
 | Area | Implemented change | Record |
 | --- | --- | --- |
@@ -34,6 +40,8 @@ one client, not two ([the contract's evidence](features/concordance-garden-cohor
 | Facing (GC-02) | Pact spirits arrive facing whoever invites them and turn to whoever speaks at their perch; server only, no sensor added | [contract](features/concordance-garden-cohort.md), [Stolas](features/stolas-pact.md) |
 | The garden groundwork (GC-03) | The bed index (loaded chunks only, 64 beds, 200 ticks), whose land a service may touch, two read-only bed reads, first obligations; The Garden's Regard | [workers](features/arcane-concordance-workers.md), [ecology](features/arcane-concordance-ecology.md) |
 | Buer (GC-04) | Strain tending by daylight, one bed at a time by each bed's own rule; the overworked bed; Mendvetch a week; the owner's Decor Blossom as his body | [Buer](features/buer-pact.md) |
+| Bathin (GC-05) | Verdance carried at once from your Hearts to a far Gleaner or into a Ley Pylon away from them (3 for 2), 12 moves a day, nothing ever on the way; four Verdant Chaff a week; a body built for Jugcraft from the owner's paintings' colours | [Bathin](features/bathin-pact.md) |
+| A matter to settle (GC-05) | A pact spirit may raise a choice its holder answers at the perch; the answer is kept by the perch and may be changed; until then the spirit takes the safe course and the roster says "awaiting your answer" | [Bathin](features/bathin-pact.md#his-matter-two-roads-from-one-heart-the-accord), [workers](features/arcane-concordance-workers.md) |
 
 ## Merged with #494: Concordance Chunk D (pact hall)
 

@@ -9,7 +9,10 @@ two server game tests passed in CI (run 38774859294 on `bb856f873`). Concordance
 `ConcordanceJourneyGameTests.thePactHallFromStyxToDeparture` and `thePactHallsRecipesLoad`), on main since #494 (27
 October 2026, Chunks B to D in one squashed commit); both passed in both server jobs of run 40133540741. The garden
 cohort's unit 1 adds the garden pacts (`GARDEN`; `ConcordanceJourneyGameTests.buerFromTheCodexToDeparture` and
-`theGardenPactsRecipesLoad`), not merged (draft #526); both passed in both server jobs of run 40605564166.
+`theGardenPactsRecipesLoad`), not merged (draft #526); both passed in both server jobs of run 40605564166. Its unit 2
+adds Bathin's steps (7 to 9; the Gleaner's recipe walked from vines, a hopper and a flower pot), held by the worker tests
+they name, with no whole-path test of his own; those tests and `buerFromTheCodexToDeparture`, which now chooses Buer at
+the chooser, passed in both server jobs of run 40777920181.
 Proposal issue: none; the owner's Arcane Concordance brief (roadmap step 31) is the scope approval.
 Owner: @jimbozoomer-byte. AI-assisted implementation with Claude Code; the model is named in the commit trailers.
 Target milestone and tier: Concordance milestone 23, every stage. Roadmap step 31.
