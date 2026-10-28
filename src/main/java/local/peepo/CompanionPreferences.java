@@ -9,8 +9,10 @@ import net.minecraft.core.component.DataComponents;
 public final class CompanionPreferences {
     public static final String[] SCHEDULES={"Auto","Day shift","Night shift"};
     public static final String[] FOODS={"Best meal","Small meal"};
+    public static final String[] FEEDBACK={"Off","Subtle","Expressive"};
     private final PeepoEntity npc;
     public int schedule,breakAt,resumeAt=80,foodPolicy,carryMeals=2;
+    public int feedback=CompanionFeedbackRules.SUBTLE;
     public boolean alerts,social=true;
     CompanionPreferences(PeepoEntity npc){this.npc=npc;}
     public boolean onShift(){
@@ -36,6 +38,7 @@ public final class CompanionPreferences {
             case 46->resumeAt=Math.max(breakAt+10,resumeAt-10);
             case 47->resumeAt=Math.min(95,resumeAt+10);
             case 48->{social=!social;npc.social.cancel();}
+            case 49->{feedback=(feedback+1)%3;npc.feedback.clear();}
             default->{return false;}
         }
         npc.updateRecoveryState();if(button==40 || button>=44 && button<=47)npc.resetCompanionRoutine();return true;
@@ -43,10 +46,12 @@ public final class CompanionPreferences {
     public void save(ValueOutput out){
         out.putInt("WorkSchedule",schedule);out.putInt("BreakAt",breakAt);out.putInt("ResumeAt",resumeAt);
         out.putInt("FoodPolicy",foodPolicy);out.putInt("CarryMeals",carryMeals);out.putBoolean("WorkAlerts",alerts);out.putBoolean("SocialEnabled",social);
+        out.putInt("WorkFeedback",feedback);
     }
     public void load(ValueInput in){
         schedule=Math.clamp(in.getIntOr("WorkSchedule",0),0,2);breakAt=Math.clamp(in.getIntOr("BreakAt",0),0,70);
         resumeAt=Math.clamp(in.getIntOr("ResumeAt",80),breakAt+10,95);foodPolicy=Math.clamp(in.getIntOr("FoodPolicy",0),0,1);
         carryMeals=Math.clamp(in.getIntOr("CarryMeals",2),0,4);alerts=in.getBooleanOr("WorkAlerts",false);social=in.getBooleanOr("SocialEnabled",true);
+        feedback=Math.clamp(in.getIntOr("WorkFeedback",CompanionFeedbackRules.SUBTLE),0,2);
     }
 }

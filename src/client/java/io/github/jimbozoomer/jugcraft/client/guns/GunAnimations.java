@@ -119,9 +119,11 @@ public final class GunAnimations {
 			}
 			controller.triggerableAnim(idle, RawAnimation.begin().thenLoop(idle));
 			if (spec.byShell()) {
-				for (int shells = 1; shells <= spec.capacity(); shells++) {
-					controller.triggerableAnim(as + reloadName(spec, shells), RawAnimation.begin().then(as + "reload_start", LoopType.PLAY_ONCE)
-							.thenPlayXTimes(as + "reload_loop", shells).then(as + "reload_stop", LoopType.PLAY_ONCE).thenLoop(idle));
+				// Slice 15E: a gun that loads several rounds a step (JugcraftGuns.LOAD_STEPS) plays its loop once a step.
+				int step = JugcraftGuns.loadStep(gun);
+				for (int steps = 1; steps <= Math.ceilDiv(spec.capacity(), step); steps++) {
+					controller.triggerableAnim(as + reloadName(gun, spec, steps * step), RawAnimation.begin().then(as + "reload_start", LoopType.PLAY_ONCE)
+							.thenPlayXTimes(as + "reload_loop", steps).then(as + "reload_stop", LoopType.PLAY_ONCE).thenLoop(idle));
 				}
 			} else {
 				controller.triggerableAnim(as + "reload", once(as + "reload", idle));
@@ -148,9 +150,13 @@ public final class GunAnimations {
 		registrar.add(controller);
 	}
 
-	/** The triggerable reload that loads this many rounds. */
-	public static String reloadName(GunSpec spec, int rounds) {
-		return spec.byShell() ? "reload_" + Math.max(1, Math.min(spec.capacity(), rounds)) : "reload";
+	/**
+	 * The triggerable reload that loads this many rounds: for a gun loaded a shell at a time, named for its steps (one a
+	 * round, but for slice 15E's guns that load several a step, {@link JugcraftGuns#loadStep}).
+	 */
+	public static String reloadName(GunItem gun, GunSpec spec, int rounds) {
+		int step = JugcraftGuns.loadStep(gun);
+		return spec.byShell() ? "reload_" + Math.max(1, Math.min(Math.ceilDiv(spec.capacity(), step), Math.ceilDiv(rounds, step))) : "reload";
 	}
 
 	private static RawAnimation once(String name, String idle) {

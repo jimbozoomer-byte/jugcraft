@@ -111,7 +111,7 @@ public final class MobGuns {
 		Vec3 eye = shooter.getEyePosition();
 		Vec3 look = target.getBoundingBox().getCenter().subtract(eye).normalize();
 		GunShots.bullets(level, shooter, eye, look, spec, spec.hipSpread(), spec.damage() * DAMAGE, JugcraftGuns.ignites(gun),
-				JugcraftGuns.levitates(gun), JugcraftGuns.knockback(gun), JugcraftGuns.piercing(gun),
+				JugcraftGuns.knockback(gun), JugcraftGuns.piercing(gun), JugcraftGuns.bleed(gun), JugcraftGuns.hitEffect(gun),
 				foe -> foe != shooter && foe.isAlive() && !foe.isSpectator() && !(foe instanceof ArmorStand stand && stand.isMarker())
 						&& foe.getRootVehicle() != shooter.getRootVehicle() && !(shooter instanceof Gunner gunner && gunner.spares(foe)),
 				foe -> true);
@@ -216,7 +216,7 @@ public final class MobGuns {
 				return;
 			}
 			if (rounds <= 0) {
-				reloading = Math.max(1, spec.reloadTicks(spec.capacity()));
+				reloading = Math.max(1, spec.reloadTicks(spec.capacity(), JugcraftGuns.loadStep(gun)));
 				burst = 0;
 				announce(mob, GunActionPayload.RELOAD, spec.capacity());
 				return;

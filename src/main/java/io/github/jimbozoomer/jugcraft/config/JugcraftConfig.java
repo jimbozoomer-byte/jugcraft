@@ -32,9 +32,11 @@ public final class JugcraftConfig {
 	 * {@code concordance.absent_owner_authority}: a Concordance device or worker whose owner is away (offline or in
 	 * another dimension) still acts, as a stand-in with the owner's identity (Fabric's fake player) that towns, spawn
 	 * protection and protection mods judge as that owner; false (the default) makes it wait for its owner
-	 * (concordance/Authority).
+	 * (concordance/Authority). {@code guns.beam_mining}: the mining beams (the Seam Cutter's and the Geode Cutter's) cut
+	 * the blocks they reach, where their shooter may break blocks; false leaves every block whole (guns/GunShots).
 	 */
-	public static final Map<String, Boolean> OPTIONS = Map.of("carving.free_draw", true, "concordance.absent_owner_authority", false, "vanadium.legacy_iron_recipes", false);
+	public static final Map<String, Boolean> OPTIONS = Map.of("carving.free_draw", true, "concordance.absent_owner_authority", false, "vanadium.legacy_iron_recipes", false,
+			"guns.beam_mining", true);
 
 	/**
 	 * Text options, with their defaults.
@@ -43,7 +45,12 @@ public final class JugcraftConfig {
 	 * both included) in {@code halloween.timezone} on the server's clock; {@code halloween.mode} is {@code auto} (follow
 	 * the dates), {@code on} or {@code off} (for testing and off-season worlds); {@code halloween.harvest_moon} is the
 	 * day (month-day) of the Harvest Moon, whose nights make crops grow faster. Treats already given are kept whatever
-	 * the setting.</li>
+	 * the setting. {@code halloween.horseman_sightings} ({@code on} or {@code off}): whether players see the Headless
+	 * Horseman ride by in the season (see {@code agriculture/HorsemanSightings}); {@code halloween.blood_moon} ({@code on}
+	 * or {@code off}): whether a Blood Moon rises every fourth night of the season and on Halloween (see
+	 * {@code agriculture/BloodMoon}).</li>
+	 * <li>{@code halloween.graveyard_rising} ({@code on} or {@code off}): whether ringing a bell by a graveyard on a
+	 * night in the Halloween season wakes the dead (see {@code agriculture/GraveyardRising}).</li>
 	 * <li>Seasons (see {@code season/SeasonCalendar.Settings}): the season follows the server's date in
 	 * {@code seasons.timezone} for {@code seasons.hemisphere} ({@code north} or {@code south}); {@code seasons.mode} is
 	 * {@code auto} (follow the date), {@code spring}, {@code summer}, {@code autumn}, {@code winter} (always that
@@ -81,6 +88,8 @@ public final class JugcraftConfig {
             Map.entry("companions.paths_per_tick", "8"), Map.entry("companions.searches_per_tick", "4"),
 			Map.entry("halloween.start", "10-20"), Map.entry("halloween.end", "11-03"), Map.entry("halloween.timezone", "UTC"),
 			Map.entry("halloween.mode", "auto"), Map.entry("halloween.harvest_moon", "10-31"),
+			Map.entry("halloween.horseman_sightings", "on"), Map.entry("halloween.blood_moon", "on"),
+			Map.entry("halloween.graveyard_rising", "on"),
 			Map.entry("seasons.mode", "auto"), Map.entry("seasons.hemisphere", "north"), Map.entry("seasons.timezone", "UTC"),
 			Map.entry("seasons.snow", "off"), Map.entry("seasons.snow_depth", "2"),
 			Map.entry("harvest_feast", "us"), Map.entry("harvest_feast.days", "4"),
@@ -184,7 +193,7 @@ public final class JugcraftConfig {
 			properties.store(writer, "Jugcraft feature switches (false stops new worldgen and recipes; existing items and blocks stay)"
 					+ " and server options (carving.free_draw=false allows only the starter pumpkin faces;"
 					+ " concordance.absent_owner_authority=true lets Concordance devices act while their owner is away, as a stand-in"
-					+ " that protection judges as that owner; halloween.* sets when"
+					+ " that protection judges as that owner; guns.beam_mining=false stops the mining beams cutting blocks; halloween.* sets when"
 					+ " the Halloween event runs: start and end as MM-DD, a timezone, mode auto, on or off, and the Harvest Moon's day;"
 					+ " seasons.*: seasonal colours follow the server's date; mode auto, spring, summer, autumn, winter or off,"
 					+ " hemisphere north or south, a timezone, and opt-in winter snow; harvest_feast us, canada or off;"

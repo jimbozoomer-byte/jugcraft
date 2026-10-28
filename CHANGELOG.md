@@ -16,6 +16,25 @@ No numbered release yet. Entries on feature branches remain proposed until their
 - **Tempering:** Hearthspark on an Alembic Crucible holds its heat at hot for 60 seconds, whatever is beneath; this counts as a hearth kind kindled.
 - **Checked:** the Python audits and unit tests pass locally; the game tests run in CI. Not played by hand.
 
+### Unmerged: The Blood Moon
+- **A Blood Moon rises every fourth night of the Halloween season, and on Halloween night:** the night sky turns blood red with a red haze about you, zombies and skeletons put on costumes far more often (40%), costumed mobs drop double candy, will-o'-wisps gather thick, and the Headless Horseman rides by everyone who hasn't seen him that day. Being out when it rises earns **Bad Moon Rising**.
+- Switch: `halloween.blood_moon` (on by default). Record: [blood-moon.md](docs/features/blood-moon.md).
+
+### Unmerged: Headless Horseman sightings
+- **Everyone sees the Headless Horseman** a few times each Halloween season: on a night out under the sky he bursts out of the dark in front of you, gallops at you through the mist, swings round you, flings a flaming pumpkin at your feet and rides off into the night. The pumpkin only blinds you for a moment and pushes you back; nobody is hurt, and he can't be fought (call him at midnight with a lit scarecrow head for that).
+- He comes on your first night of the season, then every 2 or 3 days, and again on Halloween; everyone near sees him together and earns **Sleepy Hollow**. Only on nights that pass, never while time is stopped. Switch: `halloween.horseman_sightings` (on by default). Record: [horseman-sightings.md](docs/features/horseman-sightings.md).
+
+### Unmerged: The Headless Horseman in his lair, his phantom riders and his loot (part 2)
+- **The Headless Horseman** waits mounted at the bridge's foot in every Church Bridge and rears into the fight when a player steps off the wood road into the hollow. His health scales with the party (420, up to 1050); he fights with a Sabre Pass down a line through his foe, a Pumpkin Toss onto a ring of embers and a Rearing Stomp. His horse never crosses the bridge: with his foe on it, he only throws. At half health the Hollow Wakes: he lifts his lantern high at the bridge's foot and two braziers go dark; the Headless Charge adds a Head Hurl (at anyone on the bridge first) and two Phantom Riders galloping down lines that cross at his foe; below a quarter, the Last Ride.
+- **His rule, the Dark Road:** every 24 seconds (then 18, then 15) he snuffs the two Soul Braziers nearest his foe (three in the Last Ride). Light them all again within 10 seconds and he is revealed for 8 seconds: every blow does half as much again. While four or more are dark he is hidden, and every blow does half.
+- **His loot,** rolled for each participant: the Horseman's Lantern, a chance of one of his two new Arms VII trophies (the Hollowflail, whose jack-o'-lantern head swings on its chain, and the Hessian Sabre, with the new **Dread** boon: a struck monster, never a boss, takes a fifth more damage from everything for 4 seconds; certain on a player's first win), the Hessian's Spur (in the offhand, the horse you ride gallops a fifth faster at night) and the Hessian's Tricorn (a costume), 350 experience shared out, and the advancement Laid to Rest. Record: [docs/features/hessian-horseman.md](docs/features/hessian-horseman.md).
+
+### Unmerged: The Church Bridge and the Hessian's Bridle (the Headless Horseman's lair, part 1)
+- **The Horseman's off-season lair:** a Hessian's Bridle (three leather, two iron ingots and a jack-o'-lantern) used at night, out of the Halloween season, on a jack-o'-lantern standing on a fence or wall post under the open sky raises Grey Mist that takes you to the Church Bridge: a wooded hollow under a full moon, the wood road running through it past eight Soul Braziers to a covered bridge over a brook, and the old church and its churchyard beyond. In the season the bridle says he rides the world instead (call him at midnight with a lit scarecrow head). The hollow stands empty until part 2 brings his lair fight and loot; the plan is in [BOSSES.md](docs/branches/BOSSES.md#the-headless-horseman-in-his-lair-the-plan-being-built). Record: [church-bridge.md](docs/features/church-bridge.md).
+
+### Unmerged: Graveyard Rising
+- **Wake a graveyard on a Halloween night:** every night of the season, ring a bell (every village has one) with at least six graves within 16 blocks, then ring it again, and the dead climb out of the graves in three waves (zombies; then skeletons with bows; then husks and a stray too), one more zombie a wave for each extra player. Lay the last wave to rest and everyone within 48 blocks gets the graves' thanks (sweets and bones, sometimes a Skeleton Suit or Mummy Wraps) and Graveyard Shift, once a night each. Dawn, an abandoned graveyard or walled-in graves send the dead back. The server's `halloween.graveyard_rising` (default `on`) turns it off. Record: [graveyard-rising.md](docs/features/graveyard-rising.md).
+
 ### Unmerged: Herobrine (encounters, marks, shoreline pyramids, schedule)
 - **Herobrine:** a still, staring figure with glowing white eyes. He appears to a player 28–52 blocks off (14–28 underground), where they could see him if they turned their head. He is gone when anyone comes within 12 blocks, when they stare him down for 2 seconds, or when he is hit. Now and then he stands right behind them, with a heartbeat only they hear and 3 seconds of Darkness, and is gone once they turn and see him. The apparition never directly damages players or blocks, speaks, wears a name tag or is saved; the separate mark builder leaves the structures described below. Record: [herobrine.md](docs/features/herobrine.md).
 - **Four ways to be seen at a distance:** a watcher on a ridge, in a clearing or just inside a cave mouth in a hillside (placed so a group can share the sighting); a follower who walks the player's own path, freezes while watched, and whose faint footsteps stop when they stop; a second look that finds him gone or moved; and eyes at the far end of a tunnel behind an underground player.
@@ -28,6 +47,50 @@ No numbered release yet. Entries on feature branches remain proposed until their
 - **The schedule:** OpenAI Codex/Astra's `HerobrineScheduleDirector`, by the owner's plan, implements the `HerobrineDirector` seam and is installed at server start. It keeps high activity through 3 November inclusive and is rarer from 4 November. Operators also have `/jugcraft herobrine status|sighting|scare`, and `herobrine.haunting=off` stops scheduled encounters.
 - **Checked:** all 40 Herobrine game tests and 393 scheduler assertions pass natively, and automated rendered and two-client tests pass. CI and a human playtest have not run yet.
 - **His look:** the game's own default player texture, read at run time, under a full-bright eyes layer of four white pixels. No game asset is copied.
+
+### Unmerged: Guns, armour piercing and knockback for the older guns
+- 46 of the guns built before slice 15 take the owner's armour piercing, knockback or both: 27 pierce armour (up to 7 points, the Lament Rifle's, the Murmur SMG's and the Reverb's) and 24 knock back what they hit further. Against a creature without armour their damage is as before.
+- The **Flatboat Gun** takes the owner's knockback of 8 and throws what it hits; the **Caisson Pistol**'s arc now pierces a point of armour.
+- Their tooltips say so. The owner's knockback for the Stoker, the Glowmouth and the Fencepost Thumper is left out, as a flame, an arc and a grenade push nothing here.
+- Record: [guns.md, armour piercing and knockback for the older guns](docs/features/guns.md#follow-up-armour-piercing-and-knockback-for-the-older-guns).
+
+### Unmerged: Guns, End-gun levitation
+- The End guns now lift what they hit at the owner's numbers: the **Chitin SMG** and the **Hermit Rifle** 30% of hits and the **Borer** 23%, each for 5 s. Before, every hit lifted it for a second. A lifted creature rises about four blocks and takes a little fall damage coming down.
+- Their tooltips say their shots *may* make what they hit float.
+- Record: [guns.md, End-gun levitation](docs/features/guns.md#follow-up-end-gun-levitation).
+
+### Unmerged: Guns, hit effects
+- The owner's other hit effects come to the guns built, each a chance on every creature a hit hurts, at the owner's numbers: the **Linesman's** and the **Stormlock Rifle's** arcs may slow what they strike (40%, 10 s), the **Geode Cutter's** beam may slow what it burns (75%, 5 s), and the **Lament Rifle's** bullets may darken a player's view (25%, 5 s, Darkness II).
+- **Bleeding for two more guns:** the **Cloudburst Gun** (30%, 15 s), which the darts follow-up missed, and the **Caisson Pistol** (50%, 10 s), whose arc now carries hit effects to each creature it leaps to.
+- Their tooltips say so. The owner's withering waits for the Flayed God, which is not built.
+- Record: [guns.md, hit effects](docs/features/guns.md#follow-up-hit-effects).
+
+### Unmerged: Guns, beams that mine
+- The **Seam Cutter** and the **Geode Cutter** now cut the block their beam ends at, as the owner's mining lasers do. The Seam Cutter goes through stone in two shots (the owner's mining speed of 14, faster than a netherite pickaxe); the Geode Cutter cuts slowly (speed 1, a bare hand's). Cracks show while it cuts, and the block drops what it would broken by hand. The Seam Cutter harvests what an iron pickaxe can; the Geode Cutter what a diamond one can.
+- A beam only cuts where its shooter may break blocks: not in adventure mode, under spawn protection, in the protected town, or where a protection mod refuses. It never cuts a block holding a block entity, such as a chest or a machine. Each shot costs its charge as before.
+- Server option `guns.beam_mining` (on by default) in `config/jugcraft.properties` turns it off.
+- Record: [guns.md, beams that mine](docs/features/guns.md#follow-up-beams-that-mine).
+
+### Unmerged: Guns, slice 15E (a microjet gun and two beams)
+- **Three guns** from the owner's own GeckoLib models and animations, the last of their diamond-steel guns, each held in both hands: the **Maelstrom Gun** (the owner's Cyclone), carried at the hip, firing **Microjets** from nine tubes as long as the trigger is held, 24 to a load; the **Ermine Rifle** (the Minksy), a lever-action rifle whose beam passes through every creature in its line, on Energy Cells; and the **Geode Cutter** (the Shard Culler), a cutting beam carried at the hip, as long as the trigger is held, that passes through 4 points of armour.
+- A new round, the **Microjet**: the owner's little iron rocket (a lead nugget over gunpowder over an iron nugget make four). The Maelstrom Gun loads **three at a time**, a step each three.
+- **Beams can pierce armour** now; only the Geode Cutter's does.
+- Record: [guns.md, slice 15E](docs/features/guns.md#slice-15e-a-microjet-gun-and-two-beams).
+
+### Unmerged: Guns, slice 15D (two barrels and a burst)
+- **Three guns** from the owner's own GeckoLib models and animations, the next of their diamond-steel guns, each held in both hands: the **Auger Rifle** (the owner's Drill), two barrels of 14 a shot whose barrels swing open to load a paper cartridge at a time; the **Auger Shotgun** (the Drill Conversion), the same made over to fire two buckshot shells of eight pellets that stray as far aimed as from the hip and knock back what they hit; and the **Tumbler Rifle** (the Lockewood), which fires a **burst of three** rounds to a pull, from a magazine of 21, piercing 3 points of armour.
+- **Bursts:** a burst gun fires its rounds one each interval after a pull, then rests before the next; the server lets a burst through each burst's time and no faster.
+- **Converter:** the owner's cubes turned about more than one axis, and shrunken cubes, now come through as the owner drew them. The Quill Rifle's one shrunken cube is now drawn 0.002 px smaller, as the owner's model has it.
+- Record: [guns.md, slice 15D](docs/features/guns.md#slice-15d-two-barrels-and-a-burst).
+
+### Unmerged: Guns, darts and bleeding
+- A new round, the **Dart**: the owner's frog dart, a steel needle in a small iron case (two iron nuggets over gunpowder make six). The **Quill Rifle** fires it in place of Light Rounds. A dart falls as it flies, as an arrow does: under a block over 32 blocks, nearly four over 64.
+- A new effect, **Bleeding**: a point of damage every two seconds, through armour, for its length; it can kill, and milk stops it. Hits from the **Picket Rifle** (30%), **Spikedriver** (60%), **Harrow** (30%) and **Quill Rifle** (40%) may make a creature bleed for 15 seconds, as the owner's gun data gives them. Its icon is the owner's.
+- Record: [guns.md, the darts-and-bleeding follow-up](docs/features/guns.md#follow-up-darts-and-bleeding).
+
+### Unmerged: Guns, armour piercing for slices 15A's and 15B's guns
+- The **Vesper Rifle**, **Onrush SMG**, **Kreuzer Pistol** and **Psalm SMG** now pass through some of a target's armour, as the owner's gun data gives them: 4.5, 3, 1 and 1 points. A creature without armour takes the same damage as before. Their tooltips say so.
+- Record: [guns.md, the armour-piercing follow-up](docs/features/guns.md#follow-up-armour-piercing-for-slices-15as-and-15bs-guns).
 
 ### Unmerged: Keep your inventory in boss fights
 - **Dying in a lair costs nothing:** as with the keepInventory rule, but only in lairs (every boss fight). No items or experience fall; you respawn outside with every slot as it was (armour and offhand worn), the same held slot and all your experience. Dying anywhere else is unchanged. No grave is ever placed in a lair; Grave Goods still catch anything another mod drops there. Record: [lair-keep-inventory.md](docs/features/lair-keep-inventory.md).

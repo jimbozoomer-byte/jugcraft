@@ -128,3 +128,28 @@ Unload now releases the routine with movement deferred. Bed, seat and cooking sa
 ## Limits
 
 This is not a two-player concurrency or multiplayer-capacity certification. Two porters share one route in the integration world; the dedicated reconnect test has one real client. Large populations across dimensions, large factory loads, every machine/recipe combination, every biome, survival crafting, external furniture/diagonal-fence integrations, optional dependencies absent, and dynamic-light/shader appearance remain outside this run. The GUI tests validate data and button packets; they do not automate every mouse interaction or every GUI scale. Carried porter serialization is checked in memory; a disk restart during an active haul remains a manual case. Existing Blockbench exports were not regenerated.
+
+## Full-pack habitat spawning regression — 27 October 2026
+
+OpenAI Codex (GPT-6) tested the existing dirty `peepo-integration` checkout based on `52082f4f3c0aa8cff0f34799e0037f62f4fa6273`, using Minecraft 26.3, Fabric Loader 0.19.5, Fabric API 0.161.0+26.3 and local Temurin JDK 25. The new focused `PeepoSpawnClientTests` passed **400 assertions across all 11 configured habitats**. The Gradle invocation completed successfully in 2 minutes 22 seconds. No production gameplay code changed.
+
+| Companion | Primary habitats (weight 12) | Secondary habitats (weight 8) |
+| --- | --- | --- |
+| Peepo | Swamp, Lush Swamp, Bayou | Marsh, Wetland, Lush River |
+| Jughead | Beach, Dune Beach, Overgrown Beach | Oasis, Hot Springs |
+
+Each habitat is loaded through the full pack's real biome registry and applied to a dry test platform in a disposable flat Overworld. Tests verify habitat tags, exactly one spawn-table entry, weights, groups of 1–4, exclusion of the other companion, all six explicitly supported ground blocks, invalid stone, water and roof rejection, and disabled chunk-generation spawning. Plains rejects both companions and has neither in its spawn table.
+
+For every habitat, the test invokes Minecraft's native `NaturalSpawner.spawnCategoryForPosition` group path with its real weighted selection, placement, collision, mob checks and natural-origin finalization. It reaches six naturally spawned companions, rejects 80 further group attempts, permits a replacement after one is removed, checks separate species caps, and confirms seven command-spawned companions do not consume the natural budget. The fixture disables background spawning, filters native group attempts to the intended companion, and bypasses the global creature-budget gate. This establishes that habitat registration and native group spawning work; it does not measure encounter frequency, the ordinary global passive cap, or terrain availability in survival seeds.
+
+Reproduce from this checkout with:
+
+```powershell
+./build-local.ps1 -Tasks @('runClientGameTest','-PclientTests=PeepoSpawnClientTests')
+```
+
+Local evidence: `build/companion-biome-spawn-2026-10-27.log`. The six client-test-selection unit tests also passed; evidence is in `build/companion-spawn-selector-2026-10-27.log`.
+
+### Wild-only limit and supplemental spawning — 27 October 2026
+
+The later owner-requested policy supersedes the six-companion limit above: four wild companions per type within 128 blocks, excluding owned companions, with bounded supplemental natural spawning. The updated `PeepoSpawnClientTests` passed **872 assertions across all eleven habitats** in 1m18s using the same platform. It verifies both spawn paths, unchanged 12/8 weights and ordinary group sizes, adoption/replacement, full passive budgets, natural provenance, Fabric spawn cancellation, loaded surface sampling, chunk-load avoidance, world borders, player distance, disabled spawning, dimensions, regional cooldown sharing and server-wide admission bounds. The shared-region requests are synthetic; two-client concurrency, natural encounter rates in survival terrain and a populated-server load benchmark were not performed. See [implementation and evidence](companion-wild-spawning.md).

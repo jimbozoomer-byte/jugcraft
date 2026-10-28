@@ -49,8 +49,10 @@ final class AssignedVanillaBed implements CompanionStation {
     public boolean claim(PeepoEntity p){if(!availableTo(p))return false;CompanionSeats.reserveExternal(p,pos,240);CompanionSeats.reserveExternal(p,foot(),240);return true;}
     public boolean occupy(PeepoEntity p){
         if(!availableTo(p)||!p.setRestMode(CompanionEnergy.Rest.SLEEPING))return false;
-        CompanionSeats.reserveExternal(p,pos,40);CompanionSeats.reserveExternal(p,foot(),40);mounted=true;
-        Vec3 at=pillow();float yaw=facing.getOpposite().toYRot();CompanionMotion.position(p,at,yaw);
+        CompanionSeats.reserveExternal(p,pos,40);CompanionSeats.reserveExternal(p,foot(),40);
+        Vec3 at=pillow();float yaw=facing.getOpposite().toYRot();
+        if(!mounted)p.restMotion.enter(true,pos,entry,at,yaw);
+        mounted=true;CompanionMotion.position(p,at,yaw);
         p.setDeltaMovement(Vec3.ZERO);p.resetFallDistance();p.setBedExit(BlockPos.containing(entry));return true;
     }
     public void release(PeepoEntity p){CompanionSeats.releaseExternal(p,pos);CompanionSeats.releaseExternal(p,foot());if(mounted){p.setRestMode(CompanionEnergy.Rest.NONE);p.leaveCompanionBed();}mounted=false;}
