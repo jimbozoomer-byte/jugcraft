@@ -1,6 +1,8 @@
 package io.github.jimbozoomer.jugcraft.test;
 
 import io.github.jimbozoomer.jugcraft.agriculture.JugcraftAgriculture;
+import io.github.jimbozoomer.jugcraft.agriculture.PlanterBlock;
+import io.github.jimbozoomer.jugcraft.agriculture.PlanterBlockEntity;
 import java.util.Locale;
 import net.fabricmc.fabric.api.client.gametest.v1.FabricClientGameTest;
 import net.fabricmc.fabric.api.client.gametest.v1.context.ClientGameTestContext;
@@ -10,6 +12,9 @@ import net.minecraft.client.gui.screens.worldselection.WorldCreationUiState;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.DoublePlantBlock;
@@ -20,8 +25,10 @@ import net.minecraft.world.level.block.state.properties.DoubleBlockHalf;
 /**
  * Client game test for Fall Garden & Porch, part 1 (decor set 4): a fall border on grass, asters and stonecrop behind
  * ornamental kale and cabbage, pampas grass and dried sunflowers at its back, a potted aster on a log, and bittersweet
- * climbing a wall of logs; built in a real client and photographed from the front and close by, by day (CI job
- * {@code client}). The pictures go into docs/features/fall-garden-and-porch.md.
+ * climbing a wall of logs; and part 2's planters beside it, a Window Box of three flowers on the logs, a Half-Barrel of
+ * kale and a Galvanized Tub of two flowers; built in a real client and photographed from the front, close by and at the
+ * planters, by day (CI job {@code client}). The planters' flowers are drawn by client/PlanterRenderer, so the pictures
+ * show it draws them. The pictures go into docs/features/fall-garden-and-porch.md.
  */
 public class FallGardenClientGameTests implements FabricClientGameTest {
 	@Override
@@ -44,6 +51,7 @@ public class FallGardenClientGameTests implements FabricClientGameTest {
 			singleplayer.getConnection().waitForChunksRender();
 			shoot(context, singleplayer, x + 3, y + 1, z + 8, 180, 20, "jugcraft_fall_garden");
 			shoot(context, singleplayer, x + 2, y + 1, z + 4, 180, 35, "jugcraft_fall_garden_close");
+			shoot(context, singleplayer, x + 9, y + 1, z + 4, 180, 25, "jugcraft_fall_garden_planters");
 		}
 	}
 
@@ -62,6 +70,15 @@ public class FallGardenClientGameTests implements FabricClientGameTest {
 		BlockState lower = JugcraftAgriculture.block(id).defaultBlockState();
 		level.setBlock(at, lower.setValue(DoublePlantBlock.HALF, DoubleBlockHalf.LOWER), Block.UPDATE_CLIENTS);
 		level.setBlock(at.above(), lower.setValue(DoublePlantBlock.HALF, DoubleBlockHalf.UPPER), Block.UPDATE_CLIENTS);
+	}
+
+	private static void planter(ServerLevel level, String id, BlockPos at, Item... flowers) {
+		level.setBlock(at, JugcraftAgriculture.block(id).defaultBlockState().setValue(PlanterBlock.FACING, Direction.SOUTH), Block.UPDATE_ALL);
+		if (level.getBlockEntity(at) instanceof PlanterBlockEntity planted) {
+			for (Item flower : flowers) {
+				planted.plant(new ItemStack(flower));
+			}
+		}
 	}
 
 	private static void build(ServerLevel level, BlockPos origin) {
@@ -88,6 +105,15 @@ public class FallGardenClientGameTests implements FabricClientGameTest {
 			level.setBlock(origin.offset(across, 0, 1),
 					JugcraftAgriculture.block(across % 2 == 0 ? "ornamental_kale" : "ornamental_cabbage").defaultBlockState(), Block.UPDATE_ALL);
 		}
+		// Part 2, at the end of the border: the logs run on, a window box on them, and a half-barrel and a tub before it.
+		for (int across = 8; across <= 10; across++) {
+			for (int up = 0; up < 3; up++) {
+				level.setBlock(origin.offset(across, up, -2), Blocks.SPRUCE_LOG.defaultBlockState(), Block.UPDATE_ALL);
+			}
+		}
+		planter(level, "window_box", origin.offset(9, 1, -1), Items.POPPY, JugcraftAgriculture.item("aster"), JugcraftAgriculture.item("sedum"));
+		planter(level, "half_barrel_planter", origin.offset(8, 0, 1), JugcraftAgriculture.item("ornamental_kale"));
+		planter(level, "galvanized_tub_planter", origin.offset(10, 0, 1), Items.CORNFLOWER, JugcraftAgriculture.item("aster"));
 		// A potted aster on a log by the border.
 		level.setBlock(origin.offset(-1, 0, 1), Blocks.SPRUCE_LOG.defaultBlockState(), Block.UPDATE_ALL);
 		level.setBlock(origin.offset(-1, 1, 1), JugcraftAgriculture.block("potted_aster").defaultBlockState(), Block.UPDATE_ALL);

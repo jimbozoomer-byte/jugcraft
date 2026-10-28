@@ -8,6 +8,12 @@ Every change to Jugcraft, newest first, grouped by pull request. For what each t
 
 No numbered release yet. Entries on feature branches remain proposed until their pull requests merge.
 
+### Unmerged: Fall Garden & Porch, part 2 (planters)
+- **Window Box** (on a wall, three flowers), **Half-Barrel Planter** (one) and **Galvanized Tub Planter** (two): use any small flower on one to plant it, an empty hand to take back the last. The flowers grow in them as their own models.
+- A barrel and two dirt make two half-barrels; planks round dirt make a window box; iron round dirt a tub.
+- Record: [fall-garden-and-porch.md](docs/features/fall-garden-and-porch.md).
+- **Checked:** the record's Verification. Game tests and screenshots run in CI only; not played by hand.
+
 ### Unmerged: Fall Garden & Porch, part 1 (the fall garden's plants)
 - Seven fall plants, sculpted in the graveyard flora's style: **New England Aster**, **Autumn Stonecrop**, **Ornamental Kale**, **Ornamental Cabbage** (small flowers with potted forms), **Pampas Grass** (a tall flower, 2 m to its plumes), **Dried Sunflower** (a two-block plant, its seed head bowed) and **Bittersweet** (a vine of scarlet berries in orange husks).
 - Asters grow in plains and forests, stonecrop and pampas grass in plains, and bittersweet in forests. A cabbage seed and purple dye make an ornamental kale, a cabbage seed and bone meal an ornamental cabbage, and a sunflower makes a dried one.

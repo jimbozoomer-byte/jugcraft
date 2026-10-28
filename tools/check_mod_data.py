@@ -14802,8 +14802,11 @@ def check_barn_tools():
 def check_fall_garden():
     """Fall Garden & Porch (tools/fall_garden.py, docs/features/fall-garden-and-porch.md), part 1: each fall plant is a
     sculpted plant of tools/plants.py with its builder; the garden plants' recipes were generated, and each makes the
-    plant from its cabbage seed or sunflower; the wild ones have their vanilla-biome patches."""
+    plant from its cabbage seed or sunflower; the wild ones have their vanilla-biome patches. Part 2: the planters' Java
+    numbers are the table's, their renderer is registered, and their recipes and message exist."""
     import fall_garden as fg
+    java_main = (JAVA_ROOT / "agriculture" / "JugcraftAgriculture.java").read_text(encoding="utf-8") \
+        if (JAVA_ROOT / "agriculture" / "JugcraftAgriculture.java").is_file() else ""
     import flora_models as fm
     for plant in fg.PLANTS:
         info = plants.PLANTS.get(plant)
@@ -14817,6 +14820,26 @@ def check_fall_garden():
     for plant in fg.PLANTS:
         if plant not in garden and "patch" not in plants.PLANTS.get(plant, {}):
             err(f"{plant}: a wild fall plant needs its patch in vanilla's biomes, or a recipe, to be found at all")
+    # Part 2: each planter's spots, soil, size of what grows in it and whether it hangs on a wall are the table's, in
+    # PlanterBlock; the renderer is registered; the full message has its text; the recipes were generated.
+    planter = (JAVA_ROOT / "agriculture" / "PlanterBlock.java").read_text(encoding="utf-8") \
+        if (JAVA_ROOT / "agriculture" / "PlanterBlock.java").is_file() else ""
+    for block, spec in fg.PLANTERS.items():
+        spots = "{" + ", ".join(f"{{{x}, {z}}}" for x, z in spec["spots"]) + "}"
+        expected = f"new double[][] {spots}, {spec['soil']}, {spec['scale']}F, {'true' if spec['wall'] else 'false'})"
+        if f"Planter {spec['java']} = new Planter(" not in planter or expected not in planter:
+            err(f"PlanterBlock.{spec['java']} is not tools/fall_garden.py's {block} (spots, soil, scale, wall: {expected})")
+        if f'registerBlock("{block}", props -> new PlanterBlock(props, PlanterBlock.{spec["java"]})' not in java_main:
+            err(f"JugcraftAgriculture: {block} must be registered as a PlanterBlock of PlanterBlock.{spec['java']}")
+    client = (CLIENT_JAVA_ROOT / "JugcraftClient.java").read_text(encoding="utf-8") if (CLIENT_JAVA_ROOT / "JugcraftClient.java").is_file() else ""
+    if "BlockEntityRendererRegistry.register(JugcraftAgriculture.PLANTER_ENTITY, PlanterRenderer::new);" not in client:
+        err("JugcraftClient: the planters' flowers need PlanterRenderer")
+    lang = load(ASSETS / "lang" / "en_us.json") or {}
+    if f"message.{MOD}.planter.full" not in lang:
+        err(f"message.{MOD}.planter.full: the text is missing")
+    for recipe in fg.RECIPES:
+        if not (DATA / MOD / "recipe" / f"{recipe['id']}.json").is_file():
+            err(f"{recipe['id']}: tools/fall_garden.py's recipe was not generated")
 
 
 def check_orchard_harvest():

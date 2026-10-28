@@ -12472,6 +12472,11 @@
       "denominator": 2,
       "source": "recipe jugcraft:gallant_rifle"
     },
+    "jugcraft:galvanized_tub_planter": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
     "jugcraft:garden_herb_soup": {
       "numerator": 137,
       "denominator": 1,
@@ -13378,6 +13383,11 @@
       "source": "fallback (balance pending)"
     },
     "jugcraft:hagthorn": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
+    "jugcraft:half_barrel_planter": {
       "numerator": 1,
       "denominator": 1,
       "source": "fallback (balance pending)"
@@ -39021,6 +39031,11 @@
       "numerator": 2501,
       "denominator": 4,
       "source": "recipe jugcraft:windlass_musket"
+    },
+    "jugcraft:window_box": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
     },
     "jugcraft:winged_skull_headstone": {
       "numerator": 2,

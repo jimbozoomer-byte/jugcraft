@@ -800,6 +800,8 @@ def crop_textures():
     out.update(orchard_harvest_textures())
     from barn_tools_data import textures as barn_tools_textures  # and Barn & Harvest Tools' hand tools
     out.update(barn_tools_textures())
+    from fall_garden_data import textures as fall_garden_textures  # and Fall Garden & Porch's planters
+    out.update(fall_garden_textures())
     from lair_textures import lair_textures  # and the lairs' blocks, the Mourning Wreath and the Death Knell
     out.update(lair_textures())
     from adam_ondi_ahman_textures import adam_ondi_ahman_textures  # and Adam-ondi-Ahman's Ancient Altar

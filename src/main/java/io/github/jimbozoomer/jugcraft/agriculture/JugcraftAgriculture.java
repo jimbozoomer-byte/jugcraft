@@ -394,6 +394,7 @@ public final class JugcraftAgriculture {
 	public static BlockEntityType<HayPulleyBlockEntity> HAY_PULLEY_ENTITY;
 	public static BlockEntityType<HarvestBellBlockEntity> HARVEST_BELL_ENTITY;
 	public static BlockEntityType<FruitStoreBlockEntity> FEED_TROUGH_ENTITY;
+	public static BlockEntityType<PlanterBlockEntity> PLANTER_ENTITY;
 	public static BlockEntityType<CaramelAppleStandBlockEntity> CARAMEL_APPLE_STAND_ENTITY;
 	public static ExtendedMenuType<FarmStandMenu, FarmStandMenu.Opening> FARM_STAND_MENU;
 	/** The Harvest Effigy catching (assets/jugcraft/sounds/effigy, made by tools/choir_sounds.py). */
@@ -2398,6 +2399,7 @@ public final class JugcraftAgriculture {
 		registerPumpkinPatchExtras();
 		registerOrchardHarvest();
 		registerBarnTools();
+		registerFallGarden();
 	}
 
 	/**
@@ -2871,6 +2873,25 @@ public final class JugcraftAgriculture {
 				.sound(SoundType.LANTERN).noOcclusion().pushReaction(PushReaction.POPPED)
 				.lightLevel(state -> state.getValue(BarnLanternBlock.LIT) ? BarnLanternBlock.LIGHT : 0));
 		for (Block block : List.of(sack, can, toolRack, trough, lantern)) {
+			registerItem(BuiltInRegistries.BLOCK.getKey(block).getPath(), props -> new BlockItem(block, props),
+					new Item.Properties().useBlockDescriptionPrefix(), BUILDING_TAB);
+		}
+	}
+
+	/**
+	 * Fall Garden & Porch, decor set 4 (tools/fall_garden.py; part 1's plants are registered with the other wild plants):
+	 * part 2's planters, which take small flowers.
+	 */
+	private static void registerFallGarden() {
+		Block box = registerBlock("window_box", props -> new PlanterBlock(props, PlanterBlock.WINDOW_BOX), BlockBehaviour.Properties.of()
+				.mapColor(MapColor.WOOD).strength(1.0F).sound(SoundType.WOOD).noOcclusion().ignitedByLava().pushReaction(PushReaction.POPPED));
+		Block barrel = registerBlock("half_barrel_planter", props -> new PlanterBlock(props, PlanterBlock.HALF_BARREL), BlockBehaviour.Properties.of()
+				.mapColor(MapColor.WOOD).strength(1.5F).sound(SoundType.WOOD).noOcclusion().ignitedByLava().pushReaction(PushReaction.POPPED));
+		Block tub = registerBlock("galvanized_tub_planter", props -> new PlanterBlock(props, PlanterBlock.GALVANIZED_TUB), BlockBehaviour.Properties.of()
+				.mapColor(MapColor.METAL).strength(1.5F).sound(SoundType.LANTERN).noOcclusion().pushReaction(PushReaction.POPPED));
+		PLANTER_ENTITY = Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, Jugcraft.id("planter"),
+				FabricBlockEntityTypeBuilder.create(PlanterBlockEntity::new, box, barrel, tub).build());
+		for (Block block : List.of(box, barrel, tub)) {
 			registerItem(BuiltInRegistries.BLOCK.getKey(block).getPath(), props -> new BlockItem(block, props),
 					new Item.Properties().useBlockDescriptionPrefix(), BUILDING_TAB);
 		}

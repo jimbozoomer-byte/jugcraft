@@ -1,6 +1,6 @@
 # Fall Garden & Porch
 
-Status: part 1 (the fall garden's plants) implemented. Parts 2 to 4 are planned: planters, the porch's pieces, and string lights that light along their length. CI builds it and runs its game tests and client screenshots; not yet played by hand.
+Status: parts 1 (the fall garden's plants) and 2 (planters) implemented. Parts 3 and 4 are planned: the porch's pieces, and string lights that light along their length. CI builds it and runs its game tests and client screenshots; not yet played by hand.
 Proposal issue: none. The owner asked for it directly on 28 October 2026, as set 4 of the ten sets of fall and Halloween decor ("Then I want you to do 1-10 in parts in that order one by one"), drawn by their rules.
 Owner: @jimbozoomer-byte
 Target milestone and tier: Discovery tier; plants found in the wild or made from a seed or a flower.
@@ -26,12 +26,33 @@ Seven plants, each sculpted in the graveyard flora's hand-built style: stems of 
   - Found climbing logs and stone in forests.
 - Every small flower has its potted form. All of them compost and burn like vanilla's flowers.
 
+### Part 2: planters
+Three planters, each filled with soil, that take any small flower (`#minecraft:small_flowers`: vanilla's and these). Use a flower on one to plant it in the next free spot; use it with an empty hand to take back the one planted last. The flowers grow in it as themselves, smaller.
+- **Window Box**: a box of nailed boards painted sage green, 94 cm long, 25 cm deep and 25 cm high, hung on a wall (it comes off when the wall goes). Three flowers in a row, at half their size.
+  - Recipe: planks round dirt, over three planks.
+- **Half-Barrel Planter**: an oak half-barrel, 62 cm across and 45 cm high, its staves upright under two iron hoops. One flower in the middle, nearly full size.
+  - Recipe (shapeless): a barrel and two dirt make two, as a barrel sawn in two does.
+- **Galvanized Tub Planter**: an oval zinc wash tub, 75 by 50 cm and 28 cm high, with a drop handle at each end. Two flowers side by side.
+  - Recipe: iron ingots round dirt, over three iron ingots.
+- A full planter says so, and keeps the flower in your hand. Anything that isn't a small flower does what it would on any block. Broken, a planter gives back its flowers.
+
 ## Changes from the idea list
 - The idea list put **goldenrod** and **cattails** in set 4. Both grow already (the biomes branch's batches 2 and 3), so they are not built again.
 - The dried sunflower is **two blocks** tall, as a vanilla sunflower is, not three. A three-block plant would need a block of its own kind for one plant, and its head would reach into a block that could hold something else.
 - Ornamental kale and cabbage are made from cabbage seeds (with purple dye or bone meal), not grown as crops of their own.
 
 ## How they are drawn (docs/ART_DIRECTION.md, docs/NATURAL_TEXTURES.md)
+### Part 2's planters
+- Built from boxes at real size, one texel to a model pixel, in the market displays' manner (`tools/fall_garden_data.py`).
+- Round and oval things are two crossed boxes, as the churn and the quern are. Their soil is the top of the body, with a rim of four thin boxes along the outline above it, so no box is left open.
+- The marks follow each material:
+  - the soil is turned clods in a steady diagonal run;
+  - the barrel's staves stand upright, three texels wide, with a seam down each;
+  - the zinc has the coating's spangle in a steady run and two pressed ribs round it.
+- What grows in a planter is each flower's own block model, drawn by `PlanterRenderer` in its spot.
+- The first previews showed the barrel's staves running sideways like a crate's, and the window box's two-pixel boards striping hard. Both were fixed before commit: the staves now stand upright, and each face of the box is one board.
+
+### Part 1's plants
 - Sculpted as the graveyard flora is (`tools/fall_garden_flora.py`, on `tools/flora_art.py`, written by `tools/flora_data.py`), each with its own 64 by 64 texture. They are painted in the clean style, with no per-pixel random tones.
 - Sizes are real ones, at a block a metre.
 - Each material is one colour stepped into tones:
@@ -50,7 +71,7 @@ Seven plants, each sculpted in the graveyard flora's hand-built style: stems of 
 
 ## Connections
 - Existing input producer: the wild ones are found in vanilla's biomes. The kitchen garden's cabbage seeds, with purple dye or bone meal, make the ornamental cabbages, and a vanilla sunflower makes the dried one.
-- Existing output consumer: dyes, suspicious stew, flower pots, composters, bees (they are flowers). Set 4's planters (part 2) will take them.
+- Existing output consumer: dyes, suspicious stew, flower pots, composters, bees (they are flowers), and part 2's planters, which take every small flower, vanilla's too.
 - Technology/magic connections (or infrastructure/cosmetic applicability): cosmetic, and the biomes branch's wild plants.
 - Reachable entry path: from the first day: the wild plants are found, and cabbage seeds come from wild cabbage.
 - Which connections are required vs optional; trade and solo routes: all optional, solo-found or solo-crafted, and tradeable like any item.
@@ -60,10 +81,12 @@ Seven plants, each sculpted in the graveyard flora's hand-built style: stems of 
 - The flowers give one dye each (pampas two), as vanilla's do.
 - **No loop.** A kale costs a cabbage seed and a purple dye and gives one magenta dye; a cabbage costs a seed and a bone meal and gives one white dye. Neither takes the dye it gives, so no recipe leads back to itself (the audit refuses any loop).
 - A dried sunflower costs a sunflower (two yellow dye) and gives no dye.
+- A planter keeps the flowers put in it and gives back exactly those. It grows, multiplies and spreads nothing. Two half-barrels cost a barrel and two dirt, and nothing turns them back.
 
 ## Multiplayer and persistence
 - Plain blocks, registered from the generated `/jugcraft/plants.json` with the other wild plants; nothing ticks but what vanilla's flowers and glow lichen do.
-- IDs (stable from release): `aster`, `sedum`, `ornamental_kale`, `ornamental_cabbage` (each with its `potted_` block), `pampas_grass`, `dried_sunflower`, `bittersweet`. Placed features: `patch_aster`, `patch_sedum`, `patch_pampas_grass`, `patch_bittersweet`.
+- Part 2: a planter's flowers are kept by its block entity (`planter`), changed on the server only, saved with the world and sent to clients for drawing. Placing a flower checks the planter's own spots on the server. A full planter keeps the flower in the hand rather than placing it in front. Nothing ticks.
+- IDs (stable from release): `aster`, `sedum`, `ornamental_kale`, `ornamental_cabbage` (each with its `potted_` block), `pampas_grass`, `dried_sunflower`, `bittersweet`. Placed features: `patch_aster`, `patch_sedum`, `patch_pampas_grass`, `patch_bittersweet`. Part 2's blocks `window_box`, `half_barrel_planter`, `galvanized_tub_planter`, and the block entity `planter`.
 - The dye and stew recipes and the garden plants' recipes follow the biomes switch, the cabbages' the agriculture switch too (the seed is the kitchen garden's). The blocks stay registered when either is off.
 
 ## Dependencies and assets
@@ -85,6 +108,12 @@ Local checks run on this branch, and their results:
     - three models left a face uncovered (the rosettes' bud, the plumes' tops).
   - Two unit tests failed alongside those (which two was not kept); after the fixes all 287 pass.
 - The models were previewed offline, textured, from two sides (review aids, not committed); what the previews showed is under How they are drawn.
+- Part 2, all on the first run:
+  - `python3 tools/check_mod_data.py`: PASS (8,108 material IDs). `check_fall_garden` now also checks the planters' Java numbers against `tools/fall_garden.py`, their renderer and their recipes.
+  - `python3 scripts/check_repository.py`: PASS.
+  - `python3 -m unittest discover -s scripts/tests`: 287 tests, OK.
+  - `python3 tools/check_icon_maps.py`: PASS (no new map; the planters' items are 3D).
+  - `javac` parse (syntax only) of the new and changed Java: OK.
 
 Game tests (CI only, not run locally), `FallGardenGameTests`:
 - Every plant has its block and item:
@@ -94,7 +123,17 @@ Game tests (CI only, not run locally), `FallGardenGameTests`:
   - each stands on grass.
 - Bittersweet holds to a wall of logs; a hand takes none of it, and shears take one for its face.
 
-`FallGardenClientGameTests` takes two screenshots, from the front and close by: a fall border on grass, with asters and stonecrop behind ornamental kale and cabbage, pampas grass and dried sunflowers at its back against a wall of logs with bittersweet on it, and a potted aster.
+- **Part 2:**
+  - **The window box**:
+    - it won't hang without a wall, and hangs on one facing out;
+    - a stick isn't planted;
+    - an aster, a poppy and a dandelion are, each spending one;
+    - a fourth flower isn't planted and stays in the hand;
+    - an empty hand takes back the dandelion;
+    - without its wall it comes off, giving back itself and its flowers.
+  - **The half-barrel and the tub**: they stand facing the player; the barrel takes one flower and the tub two, refusing more; broken, they give back their flowers and themselves.
+
+`FallGardenClientGameTests` takes three screenshots, from the front, close by and at the planters (a window box of three flowers on the logs, a half-barrel of kale and a tub of two flowers, drawn by `PlanterRenderer`): a fall border on grass, with asters and stonecrop behind ornamental kale and cabbage, pampas grass and dried sunflowers at its back against a wall of logs with bittersweet on it, and a potted aster.
 
 Not run: a hand playtest, and a two-client playtest. Whether the patches generate is checked by data files, not by a world being made.
 
@@ -102,7 +141,6 @@ Not run: a hand playtest, and a two-client playtest. Whether the patches generat
 The wild plants generate in vanilla's biomes by conventional tag: asters in plains and forests, stonecrop and pampas grass in plains, bittersweet in forests. Not seasonal: they grow and are made all year.
 
 ## Rollout and open questions
-- Part 2: planters (a window box, a half-barrel, a galvanized tub) that take these plants.
 - Part 3: the porch: a porch swing on chains, a wheat stook, a woven corn dolly, a bittersweet wreath, a quilt over a rail.
 - Part 4: string lights that light along their length.
-- Open: whether a dried sunflower should give sunflower seeds when broken.
+- Open: whether a dried sunflower should give sunflower seeds when broken; whether planters should take tall flowers or saplings.
