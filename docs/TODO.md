@@ -1,5 +1,47 @@
 # Jugcraft TODO
 
+## Astronomy and astrology: making the sky useful — October 28
+
+The owner's brainstorm after Concordance Chunk E. Today the sky gives the Concordance's six patterns, the Orrery
+Observatory's Astral Resonance and the Astrolabe's short attunements
+([arcane-concordance-celestial.md](features/arcane-concordance-celestial.md)). These ideas give it more uses. None is
+scoped or approved for building yet.
+
+- [ ] **Star-bred lines (being designed with the owner).** Seeds and animals carry a few heritable traits that players
+  breed for on purpose:
+  - for crops, yield, growth, hardiness and quality;
+  - for animals, produce, speed, temper and hardiness.
+
+  The sky is the magical push: what is planted or born under a pattern takes its sign, which nudges a trait linked to
+  that pattern, and a star rite can deliberately work a chosen trait into a line or fix it so it breeds true.
+  - Builds on the Concordance garden's niches and grafts
+    ([arcane-concordance-ecology.md](features/arcane-concordance-ecology.md)) and the Astrolabe's recall, so no one waits
+    on the calendar.
+  - Must keep within the agriculture plan's no-feedback-loop rules ([industrial-agriculture-plan.md](features/industrial-agriculture-plan.md)).
+  - Open questions are with the owner: how deep the genetics go, crops or animals first, vanilla kinds or only
+    Jugcraft's, and drawbacks for forced traits.
+- [ ] **Omens and horoscopes (magical side; the owner likes it).** Each night's sky shifts the world a little, and the
+  forecast says how. Examples:
+  - a Full Moon makes the Alpha Werewolf hunt harder and his loot richer;
+  - a New Moon thickens Vesperine's souls;
+  - a comet night is lucky for expeditions.
+
+  A town astrologer sells daily horoscopes, and villager moods or prices may shift with the sky. Omens stay bonuses,
+  never gates: core progression must not wait for the right night.
+- [ ] **Sky-tuned engineering (astronomy, tech-focused; needs refining).** Astronomy as the technology branch's tool,
+  not magic. Starting ideas:
+  - tidal generators that surge at full and new moon;
+  - astronomical clocks that give redstone signals when a pattern rises, as automation timers;
+  - a town observatory dome (dieselpunk, real-life size) that gives everyone the forecast;
+  - rocket launch windows to Mars at planetary alignments, so astronomy plans space travel.
+
+  Needs refining into a tech-first design before it is scoped.
+- [ ] **Star-signs: constellations on gear and spells (needs more thought).** Learned constellations inscribed on gear
+  or spells, waxing and waning with their pattern: a blade sharper under the Full Moon, a Lance stronger while the
+  Winter Crown is up, a star forge that works only at alignments. Needs thinking through before any design.
+- Also floated, not discussed further yet: meteor falls charted by the forecast, with star-iron and sky-glass as new
+  materials.
+
 ## Local cosmetic costume — October 26
 
 - [x] Implemented locally: **Tony Tony Chompa costume**, using the existing bat costume as the
