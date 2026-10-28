@@ -123,6 +123,8 @@ public class CrucibleBlockEntity extends BlockEntity implements GeoBlockEntity, 
 	public static final int WATER_PER_BUCKET = 3;
 	/** Preserve's hold: the game time it ends (optional; absent = not held). */
 	public static final String HELD_UNTIL = "held_until";
+	/** Hearthspark's tempering (Concordance Chunk E, E3; ember/Ember.kindle): its heat climbs to hot until then. */
+	public static final String TEMPERED_UNTIL = "tempered_until";
 	/** C-06: who set its formula (optional; absent = nobody known, so it asks no courier). */
 	public static final String FORMULA_OWNER = "formula_owner";
 	/** C-06: its open courier request's number (optional; absent = none). */
@@ -150,6 +152,7 @@ public class CrucibleBlockEntity extends BlockEntity implements GeoBlockEntity, 
 	private long lastStir = Long.MIN_VALUE / 2;
 	/** Preserve: game time until which the temperature stays in its band; 0 when not held. Saved only while held. */
 	private long heldUntil;
+	private long temperedUntil;
 	/** Why its formula waits now: what stopped its last pulse (Concordance Chunk C, C-01), or null. Not saved. Read through waiting(). */
 	private @Nullable Diagnostic waiting;
 	/** A saved formula this build can no longer read (C-01, C-P1): kept as written and saved back, never followed; "" if none. */
@@ -252,10 +255,28 @@ public class CrucibleBlockEntity extends BlockEntity implements GeoBlockEntity, 
 		setChanged();
 	}
 
+	/** Ticks Hearthspark's tempering still lasts at {@code now} (0 when not tempered). */
+	public int tempered(long now) {
+		return temperedUntil > now ? (int) Math.min(Rime.MAX_HOLD_TICKS, temperedUntil - now) : 0;
+	}
+
+	/**
+	 * Hearthspark's tempering: for {@code ticks} (at most Rime.MAX_HOLD_TICKS; a recast restarts it) the heat climbs
+	 * toward hot ({@link Heat#STAND_HOT}) whatever is beneath, and a hotter source beneath still has its way; 0 ends it.
+	 * Preserve's hold still keeps the band it holds.
+	 */
+	public void temper(long now, int ticks) {
+		temperedUntil = ticks <= 0 ? 0L : now + Math.min(ticks, Rime.MAX_HOLD_TICKS);
+		setChanged();
+	}
+
 	// ---------------------------------------------------------------- heat and automation
 
 	void serverTick(ServerLevel level) {
 		int target = heatBelow(level);
+		if (temperedUntil != 0L) {
+			target = tempering(level, target);
+		}
 		int next = Heat.toward(temperature, target);
 		if (heldUntil != 0L) {
 			next = holding(level, next);
@@ -272,6 +293,17 @@ public class CrucibleBlockEntity extends BlockEntity implements GeoBlockEntity, 
 				&& JugcraftConfig.isFeatureEnabled(JugcraftConcordance.FEATURE)) {
 			automate(level);
 		}
+	}
+
+	/** While tempered, the heat it climbs toward: at least hot; once over, forgotten. */
+	private int tempering(ServerLevel level, int target) {
+		long now = ConcordanceProgress.now(level);
+		if (now >= temperedUntil) {
+			temperedUntil = 0L;
+			setChanged();
+			return target;
+		}
+		return Math.max(target, Heat.STAND_HOT);
 	}
 
 	/** While held, the next temperature kept in its band; once over, forgotten. A hold further ahead than allowed is cut. */
@@ -1093,6 +1125,7 @@ public class CrucibleBlockEntity extends BlockEntity implements GeoBlockEntity, 
 		incompatible = null;
 		checkedRevision = -1;
 		heldUntil = Math.max(0L, input.getLongOr(HELD_UNTIL, 0L));
+		temperedUntil = Math.max(0L, input.getLongOr(TEMPERED_UNTIL, 0L));
 		// C-06: optional, read with defaults (a save from before reads as nobody's, asking nothing); the stamp stays 1.
 		formulaOwner = saved.isEmpty() ? null : input.read(FORMULA_OWNER, UUIDUtil.CODEC).orElse(null);
 		long asked = input.getLongOr(REQUEST, -1L);
@@ -1132,6 +1165,9 @@ public class CrucibleBlockEntity extends BlockEntity implements GeoBlockEntity, 
 		}
 		if (request > 0L) {
 			output.putLong(REQUEST, request);
+		}
+		if (temperedUntil > 0L) {
+			output.putLong(TEMPERED_UNTIL, temperedUntil);
 		}
 		if (heldUntil > 0L) {
 			output.putLong(HELD_UNTIL, heldUntil);

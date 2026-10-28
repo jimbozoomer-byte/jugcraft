@@ -79,7 +79,7 @@ BOSSES = {
                                  + " or ".join(f"the {biomes.BIOMES[land.split(':')[1]]['display']}"
                                                for land in lairs.SEAL_LANDS) + " opens at any hour"),
                       "loot_class": "lair/tyrant/CinderTyrantLoot.java", "table": "entities/cinder_tyrant",
-                      "objective": False, "trophies": (ct.TROPHIES, ct.TROPHY_CHANCE), "count": ("tyrant_scale", ct.SCALES),
+                      "objective": True, "trophies": (ct.TROPHIES, ct.TROPHY_CHANCE), "count": ("tyrant_scale", ct.SCALES),
                       "chances": ct.CHANCES},
 }
 

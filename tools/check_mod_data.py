@@ -12298,6 +12298,115 @@ def check_cinder_tyrant():
             if banned in text:
                 err(f"{cls}.java {why} ({banned})")
 
+def check_tyrant_concordance():
+    """Concordance Chunk E, E2 and E3 (docs/features/cinder-tyrant-concordance.md): the Cinder Tyrant's heat and cooling
+    package. The Quench Flask's numbers are tools/cinder_tyrant.py's; it strikes only #jugcraft:quenchable (the table's,
+    never him) and never quenches him, which only his sluices' water does; it is made from a glass bottle and snowballs, no
+    magic. Cooled is Quench's status and the flask's, a heat buffer that spares hot ground and burning only (no Fire
+    Resistance), which the kiln's slag respects, and the flask's cools longer than Quench's. Rime lengthens his cooling
+    window by the table's RIME_LENGTHEN, once a quench, through Rimebind's listener; whoever turned the sluice he is
+    quenched in, whoever cast that Rimebind and whoever braced a friend against his push has done a deed of his fight
+    (B-P4), and a Brace takes its share off his push as off the Yeti King's. Hearthspark tempers an Alembic Crucible for
+    Ember's TEMPER_TICKS, within a hold's cap, saved with the crucible. The Cinder Kiln's dossier names the flask always,
+    the Concordance's answers only while it is on, as text and icons."""
+    import cinder_tyrant as ct
+    import concordance_ember as ce
+    import concordance_rime as cr
+    def source(path):
+        return path.read_text(encoding="utf-8") if path.exists() else ""
+    tyrant_dir = JAVA_ROOT / "lair" / "tyrant"
+    flask = source(tyrant_dir / "ThrownQuenchFlask.java")
+    flask_item = source(tyrant_dir / "QuenchFlaskItem.java")
+    boss = source(tyrant_dir / "CinderTyrantEntity.java")
+    registry = source(tyrant_dir / "JugcraftTyrant.java")
+    cooling = source(JAVA_ROOT / "concordance" / "rime" / "Cooling.java")
+    rime = source(JAVA_ROOT / "concordance" / "rime" / "Rime.java")
+    rimebind = source(JAVA_ROOT / "concordance" / "rime" / "Rimebind.java")
+    sluice = source(JAVA_ROOT / "lair" / "SluiceGateBlock.java")
+    slag = source(JAVA_ROOT / "lair" / "MoltenSlagBlock.java")
+    ember = source(JAVA_ROOT / "concordance" / "ember" / "Ember.java")
+    crucible = source(JAVA_ROOT / "concordance" / "CrucibleBlockEntity.java")
+    effect_spec = source(JAVA_ROOT / "concordance" / "effect" / "EffectSpec.java")
+    dossiers = source(JAVA_ROOT / "lair" / "LairDossiers.java")
+    lang = load(ASSETS / "lang" / "en_us.json") or {}
+    # The Quench Flask.
+    for name, value in ct.QUENCH_FLASK.items():
+        if not java_number(flask, name, value):
+            err(f"ThrownQuenchFlask.{name} is not tools/cinder_tyrant.py QUENCH_FLASK's {value}")
+    if "new ThrownQuenchFlask(server, player, stack.copyWithCount(1))" not in flask_item:
+        err("QuenchFlaskItem: using a Quench Flask throws it (ThrownQuenchFlask)")
+    tag = load(DATA / MOD / "tags" / "entity_type" / "quenchable.json") or {}
+    if tag.get("values") != list(ct.QUENCHABLE) or f"{MOD}:cinder_tyrant" in ct.QUENCHABLE:
+        err(f"tags/entity_type/quenchable.json must be tools/cinder_tyrant.py QUENCHABLE {list(ct.QUENCHABLE)}, never the "
+            "Tyrant himself")
+    if 'TagKey.create(Registries.ENTITY_TYPE, Jugcraft.id("quenchable"))' not in flask or ".quench(" in flask:
+        err("ThrownQuenchFlask: it strikes the #jugcraft:quenchable creatures and never quenches the Tyrant (only his "
+            "sluices' water does)")
+    if ct.RECIPES.get("quench_flask") != {"shapeless": ["minecraft:glass_bottle"] + ["minecraft:snowball"] * 3,
+                                          "result": "quench_flask"}:
+        err("tools/cinder_tyrant.py RECIPES quench_flask: a glass bottle and three snowballs, made with no magic")
+    # Cooled.
+    damage = set(re.findall(r"DamageTypes\.([A-Z_]+)", cooling))
+    if f'String STATUS = "{cr.COOLED}";' not in cooling or damage != {"HOT_FLOOR", "ON_FIRE"} \
+            or f"0x{cr.COOLED_COLOUR:06X}" not in cooling.upper().replace("0X", "0x") or "Cooling.register();" not in rime:
+        err(f"rime/Cooling: Cooled is {cr.COOLED} (colour 0x{cr.COOLED_COLOUR:06X}, registered from Rime.register), and "
+            f"spares only hot ground and burning (HOT_FLOOR, ON_FIRE), never fire itself or lava: found {sorted(damage)}")
+    if "Cooling.cooled(living)" not in _java_body(slag, "public static boolean harms("):
+        err("MoltenSlagBlock.harms: the Cinder Kiln's slag spares a Cooled creature")
+    quenching = cr.COMPONENTS.get(cr.QUENCH_WORD, {}).get("operation", {})
+    if quenching.get("status") != cr.COOLED or quenching.get("intent") != "helpful":
+        err(f"tools/concordance_rime.py {cr.QUENCH_WORD}: Quench's operation is a helpful {cr.COOLED}")
+    if not cr.COOLED_TICKS < ct.QUENCH_FLASK["COOLED_TICKS"]:
+        err("A Quench Flask cools for longer than Quench (its codex says so): tools/cinder_tyrant.py QUENCH_FLASK "
+            "COOLED_TICKS must exceed tools/concordance_rime.py COOLED_TICKS")
+    # Rime's answer to him, and the deeds of his fight.
+    bound = _java_body(rimebind, "public static void bound(")
+    if "listener.bound(person, target);" not in bound or bound.find("RIME_THAW") > bound.find("listener.bound("):
+        err("Rimebind.bound: its listeners hear a binding that took, after its Thaw starts")
+    if "Rimebind.onBound(" not in registry or "tyrant.rimebound(level, caster)" not in registry:
+        err("JugcraftTyrant: a Rimebind that takes on the Tyrant reaches CinderTyrantEntity.rimebound")
+    rimebound = _java_body(boss, "public boolean rimebound(")
+    if ("quenched <= 0 || lengthened" not in rimebound or "lengthened = true;" not in rimebound
+            or "quenched += RIME_LENGTHEN;" not in rimebound or 'encounter.deed(caster, "rime " + quenches);' not in rimebound
+            or "lengthened = false;" not in _java_body(boss, "public void quench(")):
+        err("CinderTyrantEntity.rimebound: only while he is quenched, once a quench (quench() clears it), lengthening the "
+            "window RIME_LENGTHEN and crediting its caster")
+    if "listener.opened(level, trough, turner);" not in _java_body(sluice, "public static Turn turn(") \
+            or "SluiceGateBlock.onOpened(" not in registry:
+        err("SluiceGateBlock.turn: the Tyrant hears of the gates players open (onOpened)")
+    if not re.search(r"quench\(level\);\s*sluiceDeed\(level\);", _java_body(boss, "public int slamLands(")) \
+            or 'encounter.deed(turner, "sluice " + quenches + " " + flood.turner());' not in boss:
+        err("CinderTyrantEntity.slamLands: quenched in a trough a player flooded, whoever turned its gate has done a deed "
+            "of his fight (B-P4)")
+    push = _java_body(boss, "void push(ServerPlayer player")
+    if "static void push(" in boss or "Brace.spend(player)" not in push or "braced(player)" not in push:
+        err("CinderTyrantEntity.push: a Brace takes its share off his sweep's and slam's push, and one another player put "
+            "on is their deed")
+    # Hearthspark tempers a crucible.
+    max_duration = re.search(r"int MAX_DURATION = (\d+);", effect_spec)
+    if not java_number(ember, "TEMPER_TICKS", ce.TEMPER_TICKS) or "crucible" not in ce.HEARTHS \
+            or max_duration is None or ce.TEMPER_TICKS > int(max_duration.group(1)):
+        err("ember/Ember.TEMPER_TICKS: tools/concordance_ember.py's, within a hold's cap (EffectSpec.MAX_DURATION), and "
+            "the crucible a hearth Hearthspark knows")
+    kindle = _java_body(ember, "public static boolean kindle(")
+    if "crucible.temper(ConcordanceProgress.now(level), TEMPER_TICKS);" not in kindle \
+            or "JugcraftConcordance.CRUCIBLE" not in _java_body(ember, "public static boolean kindleable("):
+        err("Ember.kindle: Hearthspark on an Alembic Crucible tempers it for TEMPER_TICKS")
+    if "output.putLong(TEMPERED_UNTIL, temperedUntil);" not in crucible or "input.getLongOr(TEMPERED_UNTIL, 0L)" not in crucible \
+            or "Math.max(target, Heat.STAND_HOT)" not in crucible:
+        err("CrucibleBlockEntity: a tempered crucible climbs toward hot (Heat.STAND_HOT), and its tempering is saved")
+    # The Cinder Kiln's dossier.
+    prepare = _java_body(dossiers, "private static void prepare(")
+    flask_at, concordance_at = prepare.find("cinder_kiln.prepare.flask"), prepare.find("if (concordance) {")
+    if (flask_at < 0 or concordance_at < flask_at or "cinder_kiln.prepare.concordance" not in prepare[concordance_at:]
+            or prepare.find("if (!brews(ember, FIRE_RESISTANCE))") < concordance_at or "out.recipe(" in prepare):
+        err("LairDossiers.prepare: the Cinder Kiln's dossier names the Quench Flask always and the Concordance's answers "
+            "only while it is on, as text and icons, before the Kiln Draught")
+    for key in ("cinder_kiln.prepare.flask", "cinder_kiln.prepare.concordance"):
+        if f"encyclopedia.{MOD}.dossier.{key}" not in lang:
+            err(f"Cinder Kiln dossier: missing lang encyclopedia.{MOD}.dossier.{key}")
+
+
 def check_mire_hag():
     """The Mire Hag (tools/mire_hag.py, docs/features/mire-hag.md): every number the Java uses is the table's; her
     attacks are the table's, and her rule can be played (the marsh's middle lies beyond every lamp's light and the little
@@ -16617,8 +16726,9 @@ def check_rime(co, root, lang, research):
             if key.startswith("preserve:") and needs != rm.ALEMBIC_ARTS:
                 err(f"Rimekeeping key {key}: Preserve counts a crucible holding a mixture, which only someone who "
                     f"understands the Alembic Arts fills by hand; it needs {rm.ALEMBIC_ARTS}")
-    if research.get("rimekeeping", {}).get("unlocks") != {"understood": {"invocations": [f"{MOD}:rimebind", f"{MOD}:preserve"]}}:
-        err("rimekeeping: understood teaches Rimebind and Preserve")
+    if research.get("rimekeeping", {}).get("unlocks") != {"understood": {"invocations": [f"{MOD}:rimebind", f"{MOD}:preserve",
+                                                                                     f"{MOD}:quench"]}}:
+        err("rimekeeping: understood teaches Rimebind, Preserve and Quench (Chunk E, E3)")
     # B-06: Rimebind.
     for needle in (f'String STATUS = "{rm.RIMEBOUND}";', f"double SLOW = {rm.RIMEBOUND_SLOW};",
                    f"int GRACE_TICKS = {rm.RIME_GRACE_TICKS};", f'Jugcraft.id("{split(rm.RIMEBOUND)[1]}")',
@@ -21851,6 +21961,7 @@ def main():
     check_tatterlace()
     check_yeti()
     check_cinder_tyrant()
+    check_tyrant_concordance()
     check_mire_hag()
 
     check_acquisition(registered)

@@ -266,6 +266,7 @@
       "io.github.jimbozoomer.jugcraft.test.YetiKingGameTests",
       "io.github.jimbozoomer.jugcraft.test.CinderKilnGameTests",
       "io.github.jimbozoomer.jugcraft.test.CinderTyrantGameTests",
+      "io.github.jimbozoomer.jugcraft.test.CinderTyrantConcordanceGameTests",
       "io.github.jimbozoomer.jugcraft.test.LanternFenGameTests",
       "io.github.jimbozoomer.jugcraft.test.CryptArchiveGameTests",
       "io.github.jimbozoomer.jugcraft.test.FoundryTrenchGameTests",

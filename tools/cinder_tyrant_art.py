@@ -12,7 +12,7 @@ patterns on the model's pixel grid.
   the cores, his eyes, his throat and his mouth.
 - His Cinderlings: little salamanders of slag, a black crust cracked all over with fire, two bright eyes.
 - His things: the gob of magma (fire under a cooling crust) and the falling cinder (glowing rock trailing smoke).
-- The worn crest's textures, and the icons of the Tyrant Scale, the Salamander Charm and the crest (tools/item_icons/).
+- The worn crest's textures, and the icons of the Tyrant Scale, the Salamander Charm, the Quench Flask and the crest (tools/item_icons/).
 
 Called from crop_textures.crop_textures(). Every pixel is drawn here by code; no Mojang texture, nor any other texture,
 is read, traced or recoloured.

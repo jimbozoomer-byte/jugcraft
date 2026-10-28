@@ -63,6 +63,9 @@ def assets(root, write, lang):
     lang[f"tooltip.{MOD}.tyrant_scale"] = "A scale of the Cinder Tyrant's obsidian: crushes into magma cream, and makes a cheaper Kiln Seal"
     lang[f"tooltip.{MOD}.salamander_charm"] = "In the offhand, hot ground never burns you: magma blocks and molten slag"
     lang[f"tooltip.{MOD}.tyrant_crest"] = "A costume: counts for trick-or-treating and the costume contest"
+    lang[f"tooltip.{MOD}.quench_flask"] = ("Thrown, it splashes meltwater: puts out fire and cools everyone it reaches (hot "
+                                           "ground and burning pass them by), and fire-born creatures hiss and gutter")
+    lang[f"entity.{MOD}.quench_flask"] = "Quench Flask"
 
     for key, text in ct.MESSAGES.items():
         lang[f"message.{MOD}.cinder_tyrant.{key}"] = text
@@ -105,6 +108,9 @@ def tags(tags):
     for item in ct.COSTUMES:
         tags.add("item", COSTUME_TAG, rid(item))
         tags.add("item", COSTUME_HAT_TAG, rid(item))
+    # The creatures born of fire a Quench Flask strikes (Concordance Chunk E, E2).
+    for entity in ct.QUENCHABLE:
+        tags.add("entity_type", f"{MOD}:quenchable", entity)
 
 
 def advancements(data, write):

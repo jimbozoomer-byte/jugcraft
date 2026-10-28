@@ -43,8 +43,9 @@ import net.spell_engine.internals.container.SpellContainerSource;
  * back as it was. CI job {@code client}.
  */
 public class ConcordanceRimeStrataClientGameTests implements FabricClientGameTest {
-	private static final List<String> SPELLS = List.of("rimebind", "brace", "preserve");
-	private static final List<String> STATUSES = List.of("rimebound", "rime_thaw", "braced");
+	// Quench and Cooled since Concordance Chunk E (E3).
+	private static final List<String> SPELLS = List.of("rimebind", "brace", "preserve", "quench");
+	private static final List<String> STATUSES = List.of("rimebound", "rime_thaw", "braced", "cooled");
 
 	@Override
 	public void runTest(ClientGameTestContext context) {

@@ -5,6 +5,8 @@ import io.github.jimbozoomer.jugcraft.concordance.ConcordanceEffects;
 import io.github.jimbozoomer.jugcraft.concordance.effect.EffectKind;
 import io.github.jimbozoomer.jugcraft.concordance.effect.EffectSpec;
 import io.github.jimbozoomer.jugcraft.concordance.effect.Tolerance;
+import java.util.ArrayList;
+import java.util.List;
 import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -30,6 +32,18 @@ public final class Rimebind {
 	public static final int GRACE_TICKS = 40;
 	public static Holder<MobEffect> RIMEBOUND;
 	public static Holder<MobEffect> RIME_THAW;
+	private static final List<Bound> BOUND_BY = new ArrayList<>();
+
+	/** Told when a Rimebound takes on a creature, and who cast it (null if nobody is here to answer for it). */
+	@FunctionalInterface
+	public interface Bound {
+		void bound(@Nullable ServerPlayer caster, LivingEntity target);
+	}
+
+	/** Listens for the bindings that take (at registration): the Cinder Tyrant's cooling window answers one. */
+	public static void onBound(Bound listener) {
+		BOUND_BY.add(listener);
+	}
 
 	private Rimebind() {
 	}
@@ -73,6 +87,9 @@ public final class Rimebind {
 		target.addEffect(new MobEffectInstance(RIME_THAW, ticks + GRACE_TICKS, 0, false, false, false));
 		if (restrains(target)) {
 			Rime.practise(person, Rime.KEY_RESTRAINT);
+		}
+		for (Bound listener : BOUND_BY) {
+			listener.bound(person, target);
 		}
 	}
 }

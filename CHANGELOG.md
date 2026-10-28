@@ -8,6 +8,14 @@ Every change to Jugcraft, newest first, grouped by pull request. For what each t
 
 No numbered release yet. Entries on feature branches remain proposed until their pull requests merge.
 
+### Unmerged: The Cinder Tyrant's heat and cooling package (Concordance Chunk E)
+- **The Quench Flask:** a glass bottle shaken with three snowballs, thrown. Its splash puts out and **Cooled** everyone within 2.5 blocks for 10 seconds, strikes fire-born creatures (blazes, magma cubes, his Cinderlings) for 6, puts out fire and his burning patches, and never quenches him. Cooled spares hot ground and burning, but not fire itself: it is no Fire Resistance. Record: [cinder-tyrant-concordance.md](docs/features/cinder-tyrant-concordance.md).
+- **Quench (Rime, support):** taught with Rimebind and Preserve. Touch a creature to put it out and cool it for 5 seconds. That makes 14 invocations.
+- **The schools answer him:** a Rimebind on him while he is quenched keeps his seams dark 2 seconds longer, once a quench, and a Brace halves his sweep's and slam's push. Each is its caster's deed in his fight.
+- **His objective (B-P4):** whoever opens the sluice he is quenched in has done a deed. His JEI pages now name an objective, and his dossier names the flask (always) and the Concordance's answers (while it is on).
+- **Tempering:** Hearthspark on an Alembic Crucible holds its heat at hot for 60 seconds, whatever is beneath; this counts as a hearth kind kindled.
+- **Checked:** the Python audits and unit tests pass locally; the game tests run in CI. Not played by hand.
+
 ### Unmerged: Herobrine (encounters, marks, shoreline pyramids, schedule)
 - **Herobrine:** a still, staring figure with glowing white eyes. He appears to a player 28–52 blocks off (14–28 underground), where they could see him if they turned their head. He is gone when anyone comes within 12 blocks, when they stare him down for 2 seconds, or when he is hit. Now and then he stands right behind them, with a heartbeat only they hear and 3 seconds of Darkness, and is gone once they turn and see him. The apparition never directly damages players or blocks, speaks, wears a name tag or is saved; the separate mark builder leaves the structures described below. Record: [herobrine.md](docs/features/herobrine.md).
 - **Four ways to be seen at a distance:** a watcher on a ridge, in a clearing or just inside a cave mouth in a hillside (placed so a group can share the sighting); a follower who walks the player's own path, freezes while watched, and whose faint footsteps stop when they stop; a second look that finds him gone or moved; and eyes at the far end of a tunnel behind an underground player.

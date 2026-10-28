@@ -49,7 +49,9 @@ import io.github.jimbozoomer.jugcraft.lair.LairRewards;
 import io.github.jimbozoomer.jugcraft.lair.LairVisit;
 import io.github.jimbozoomer.jugcraft.lair.Lairs;
 import io.github.jimbozoomer.jugcraft.lair.LastRites;
+import io.github.jimbozoomer.jugcraft.lair.tyrant.CinderTyrantEntity;
 import io.github.jimbozoomer.jugcraft.lair.tyrant.JugcraftTyrant;
+import io.github.jimbozoomer.jugcraft.lair.tyrant.ThrownQuenchFlask;
 import io.github.jimbozoomer.jugcraft.lair.yeti.JugcraftYeti;
 import io.github.jimbozoomer.jugcraft.town.JugcraftTown;
 import io.github.jimbozoomer.jugcraft.town.Town;
@@ -585,7 +587,8 @@ public class EncyclopediaGameTests {
 	 * Concordance Chunk C (C-02, C-P9): the Cinder Kiln's rite names what readies a player for his slag and flame, as text
 	 * and icons with no grid: the Kiln Draught's Fire Resistance for the data's longest time (magma cream or sugar, the
 	 * crucible, a draught) and the Salamander Charm, with a codex link once the Alembic Arts are observed. Named only while
-	 * the data's Ember brews Fire Resistance; with the Concordance off, the Charm alone.
+	 * the data's Ember brews Fire Resistance; with the Concordance off, the Charm alone. Since Chunk E (E-03) the Quench
+	 * Flask comes first, with or without the Concordance, and the Concordance's answers to him only while it is on.
 	 */
 	@GameTest(maxTicks = 20)
 	public void theCinderKilnsRiteNamesTheKilnDraught(GameTestHelper helper) {
@@ -608,6 +611,16 @@ public class EncyclopediaGameTests {
 		helper.assertValueEqual(draught.icons(), List.of(Items.MAGMA_CREAM, Items.SUGAR, JugcraftConcordance.CRUCIBLE.asItem(), JugcraftConcordance.DRAUGHT,
 				JugcraftTyrant.SALAMANDER_CHARM), "magma cream, sugar, the crucible, a draught and the Charm");
 		helper.assertFalse(keys(carried).contains(codex), "no codex link before the Alembic Arts are observed");
+		// Concordance Chunk E (E-03): the Quench Flask, with no magic, before it; the Concordance's own answers while it is on.
+		EncyclopediaPayload.Row flask = row(rite, prepare + ".flask");
+		helper.assertTrue(flask != null && flask.grid().isEmpty() && rite.indexOf(flask) < rite.indexOf(draught)
+				&& List.of(args(flask.text())).equals(List.of(ThrownQuenchFlask.COOLED_TICKS / 20)),
+				"the rite names the Quench Flask first, as a fact with no grid and the flask's seconds: " + flask);
+		helper.assertValueEqual(flask.icons(), List.of(Items.GLASS_BOTTLE, Items.SNOWBALL, JugcraftTyrant.QUENCH_FLASK),
+				"a glass bottle, a snowball and the flask");
+		EncyclopediaPayload.Row answers = row(rite, prepare + ".concordance");
+		helper.assertTrue(answers != null && answers.grid().isEmpty() && List.of(args(answers.text())).equals(List.of(CinderTyrantEntity.RIME_LENGTHEN / 20)),
+				"with the Concordance on, its answers to him, with Rime's seconds: " + answers);
 
 		ConcordanceProgress.grant(player, FIRST_LIGHT, ResearchState.UNDERSTOOD);
 		ConcordanceProgress.grant(player, Alchemy.RESEARCH, ResearchState.OBSERVED);
@@ -629,6 +642,8 @@ public class EncyclopediaGameTests {
 			JugcraftConfig.setFeatureEnabled(JugcraftConcordance.FEATURE, on);
 		}
 		helper.assertTrue(off.contains(prepare + ".charm") && !off.contains(prepare), "with the Concordance off, the Charm alone: " + off);
+		helper.assertTrue(off.contains(prepare + ".flask") && !off.contains(prepare + ".concordance"),
+				"with the Concordance off, the Quench Flask still, and none of its answers: " + off);
 		helper.succeed();
 	}
 
