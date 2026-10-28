@@ -210,6 +210,47 @@ ARMOR_TIERS = {
                "repair": "minecraft:lapis_lazuli", "fire_resistant": False},
 }
 
+# How the armor-only tiers are won (docs/features/armor-tier-sources.md), which the owner left open on 6 October 2026
+# ("They might get dropped by bosses or be craftable"); the contributor's choice of 28 October 2026, for the owner's
+# review. A tier that is a boss's own comes only from that boss: every participant's share holds one of its pieces and
+# rolls the set's arms (tools/arms_variants.py) as a trophy, in jugcraft:entities/<boss> (the boss's SET_PIECES and
+# CHANCES, as the contributor asked: "should be a drop every time"). Every other tier is smithed: its pattern (crafted
+# round a sheet of paper, P, TIER_PATTERN_COUNT at a time), a plain piece of "base" (netherite, so a set costs at least
+# a netherite set's worth; the Banana costume, iron's) and the tier's own mending material, as the styled armor is.
+TIER_BOSSES = {"reaper": "vesperine", "frost_knight": "yeti_king", "hades": "cinder_tyrant", "wight_king": "crypt_lich",
+               "sentinel": "cydonian_sentinel"}
+TIER_PATTERN_COUNT = 4
+TIER_PATTERNS = {
+    "bloodthorn": {"base": "netherite", "recipe": (["FRF", "RPR", "FRF"], {"F": "minecraft:crimson_fungus",
+                                                                          "R": "minecraft:redstone"})},
+    "reforged_white_diamond": {"base": "netherite", "recipe": (["QQQ", "DPD", "QQQ"], {"Q": "minecraft:quartz",
+                                                                                      "D": "minecraft:diamond"})},
+    "sunset_gem": {"base": "netherite", "recipe": (["AOA", "OPO", "AOA"], {"A": "minecraft:amethyst_shard",
+                                                                          "O": "minecraft:orange_dye"})},
+    "pharaoh": {"base": "netherite", "recipe": (["NSN", "SPS", "NSN"], {"N": "minecraft:gold_nugget",
+                                                                       "S": "minecraft:chiseled_sandstone"})},
+    "dread_knight": {"base": "netherite", "recipe": (["NBN", "BPB", "NBN"], {"N": "minecraft:gold_nugget",
+                                                                            "B": "minecraft:black_dye"})},
+    "valkyrie": {"base": "netherite", "recipe": (["FNF", "NPN", "FNF"], {"F": "minecraft:feather",
+                                                                        "N": "minecraft:gold_nugget"})},
+    "wayfarer": {"base": "netherite", "recipe": (["LBL", "BPB", "LCL"], {"L": "minecraft:leather",
+                                                                        "B": "minecraft:blue_dye",
+                                                                        "C": "minecraft:compass"})},
+    "spartan": {"base": "netherite", "recipe": (["NRN", "RPR", "NRN"], {"N": "#c:nuggets/bronze",
+                                                                       "R": "minecraft:red_dye"})},
+    "berserker": {"base": "netherite", "recipe": (["BRB", "QPQ", "BRB"], {"B": "minecraft:bone", "R": "minecraft:red_dye",
+                                                                         "Q": "minecraft:quartz"})},
+    "paladin": {"base": "netherite", "recipe": (["WAW", "NPN", "WAW"], {"W": "minecraft:white_dye",
+                                                                       "A": "minecraft:amethyst_shard",
+                                                                       "N": "minecraft:gold_nugget"})},
+    "templar": {"base": "netherite", "recipe": (["IRI", "BPB", "IRI"], {"I": "minecraft:iron_nugget",
+                                                                       "R": "minecraft:red_dye",
+                                                                       "B": "minecraft:black_dye"})},
+    "banana": {"base": "iron", "recipe": (["YBY", "BPB", "YBY"], {"Y": "minecraft:yellow_dye", "B": f"{MOD}:banana"})},
+    "scarab": {"base": "netherite", "recipe": (["NLN", "LPL", "NLN"], {"N": "minecraft:gold_nugget",
+                                                                      "L": "minecraft:lapis_lazuli"})},
+}
+
 
 # Batch 27 gear (docs/features/gear-and-plastic.md), after Mekanism's scuba gear, free runners, Meka-Tana and
 # Meka-Bow (MIT; no code or art taken): display name, crafting pattern and key, and the item model it uses.
@@ -240,6 +281,25 @@ def style_items():
 def style_templates():
     """The styled armor's smithing templates, in ARMOR_STYLES order."""
     return [info["template"] for info in ARMOR_STYLES.values()]
+
+
+def tier_patterns():
+    """The smithed armor-only tiers' patterns, <tier>_pattern, in TIER_PATTERNS order."""
+    return [f"{tier}_pattern" for tier in TIER_PATTERNS]
+
+
+def tier_of_pattern(pattern):
+    """The armor-only tier a pattern smiths, or None."""
+    tier = pattern.removesuffix("_pattern")
+    return tier if pattern.endswith("_pattern") and tier in TIER_PATTERNS else None
+
+
+def tier_pattern_tooltip(tier):
+    info, display = TIER_PATTERNS[tier], ARMOR_TIERS[tier]["display"]
+    addition = ARMOR_TIERS[tier]["repair"].split(":")[1].replace("_", " ")
+    article = "an" if info["base"][0] in "aeiou" else "a"
+    return (f"A smithing template. With one {addition} it turns {article} {info['base']} helmet, chestplate, leggings "
+            f"or boots into {display} armor. Keeps enchantments and wear.")
 
 
 def base_piece(item):
@@ -274,7 +334,7 @@ def tier_items():
 def items():
     """Every item this module registers, in registration order."""
     return ([f"{tier}_{piece}" for tier in GEAR_TIERS for piece in PIECES] + style_items() + tier_items()
-            + style_templates() + [f"{tier}_paxel" for tier in PAXEL_TIERS] + list(EXTRAS))
+            + style_templates() + tier_patterns() + [f"{tier}_paxel" for tier in PAXEL_TIERS] + list(EXTRAS))
 
 
 def display(item):
@@ -282,6 +342,8 @@ def display(item):
         return EXTRAS[item]["display"]
     if item in style_templates():
         return ARMOR_STYLES[style_of_template(item)]["template_name"]
+    if tier_of_pattern(item):
+        return f"{ARMOR_TIERS[tier_of_pattern(item)]['display']} Pattern"
     tier, piece = item.rsplit("_", 1)
     if piece == "paxel":
         return f"{PAXEL_TIERS[tier]} Paxel"
@@ -308,7 +370,7 @@ def write_all(write, assets, data, lang, condition):
         if item in EXTRAS:
             kind = EXTRAS[item]["model"]
         else:
-            kind = "generated" if piece in ARMOR or item in style_templates() else "handheld"
+            kind = "generated" if piece in ARMOR or item in style_templates() or tier_of_pattern(item) else "handheld"
         model = {"parent": f"minecraft:item/{kind}", "textures": {"layer0": f"{MOD}:item/{item}"}}
         write(assets / "models" / "item" / f"{item}.json", model)
         definition = {"type": "minecraft:model", "model": f"{MOD}:item/{item}"}
@@ -344,6 +406,8 @@ def write_all(write, assets, data, lang, condition):
         for piece in ARMOR:
             lang[f"tooltip.{MOD}.{style}_{piece}"] = info["lore"]
         lang[f"tooltip.{MOD}.{info['template']}"] = info["template_tooltip"]
+    for tier in TIER_PATTERNS:
+        lang[f"tooltip.{MOD}.{tier}_pattern"] = tier_pattern_tooltip(tier)
     for trait, (name, text) in TRAITS.items():
         lang[f"tooltip.{MOD}.thallite.{trait}.trait"] = name
         lang[f"tooltip.{MOD}.thallite.{trait}"] = text
@@ -381,6 +445,19 @@ def write_all(write, assets, data, lang, condition):
                     "fabric:load_conditions": condition(feature(plain)), "type": "minecraft:smithing_transform",
                     "template": f"{MOD}:{template}", "base": f"{MOD}:{styled}", "addition": GEAR_TIERS[metal]["ingot"],
                     "result": {"id": f"{MOD}:{plain}"}})
+    # The smithed armor-only tiers (TIER_PATTERNS): the pattern at a crafting table, then at a smithing table the
+    # pattern, a plain piece of the base metal and the tier's mending material. One way: nothing turns a piece back.
+    for tier, info in TIER_PATTERNS.items():
+        pattern, key = info["recipe"]
+        write(recipes / f"{tier}_pattern.json", {
+            "fabric:load_conditions": condition("machines"), "type": "minecraft:crafting_shaped",
+            "category": "misc", "pattern": pattern, "key": {**key, "P": "minecraft:paper"},
+            "result": {"id": f"{MOD}:{tier}_pattern", "count": TIER_PATTERN_COUNT}})
+        for piece in ARMOR:
+            write(recipes / f"{tier}_{piece}.json", {
+                "fabric:load_conditions": condition("machines"), "type": "minecraft:smithing_transform",
+                "template": f"{MOD}:{tier}_pattern", "base": f"minecraft:{info['base']}_{piece}",
+                "addition": ARMOR_TIERS[tier]["repair"], "result": {"id": f"{MOD}:{tier}_{piece}"}})
     for item, info in EXTRAS.items():
         write(recipes / f"{item}.json", {
             "fabric:load_conditions": condition("machines"), "type": "minecraft:crafting_shaped",

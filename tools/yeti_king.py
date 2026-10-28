@@ -70,6 +70,11 @@ FUR = (4, 8)
 TROPHIES = ("glacier_maul", "rimeclaw")
 TROPHY_CHANCE = 0.15
 CHANCES = {"yeti_mitten": 0.25, "yeti_king_crown": 0.2}
+# The Frost Knight armor set (tools/gear.py TIER_BOSSES; docs/features/armor-tier-sources.md): nothing else
+# gives it. Every share holds one of its pieces, each as likely; its arm rolls as a trophy does.
+SET_PIECES = ("frost_knight_helmet", "frost_knight_chestplate",
+              "frost_knight_leggings", "frost_knight_boots")
+CHANCES.update({"frost_knight_greatsword": 0.15})
 ADVANCEMENT = {"key": "abominable", "title": "Abominable", "icon": "jugcraft:glacier_maul",
                "description": "Bring down the Yeti King in the Glacier Hall", "frame": "challenge"}
 

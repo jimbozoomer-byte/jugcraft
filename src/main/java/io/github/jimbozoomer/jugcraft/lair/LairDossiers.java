@@ -66,17 +66,21 @@ public final class LairDossiers {
 	public enum Boss {
 		VESPERINE(Lair.HOLLOW_ACRE, VesperineLoot.BOSS, VesperineLoot.ADVANCEMENT, List.of("vesper_scythe"), "message.jugcraft.lair.rite.off_season",
 				List.of("death_knell", "mourning_wreath"), List.of("death_knell", "mourning_wreath", "gothic_headstone_from_stonecutting"),
-				List.of(Items.LILY_OF_THE_VALLEY, Items.CANDLE), List.of("reaper_shade", "vesper_scythe", "reaper_hood", "dirge_skull", "requiem_skull"),
+				List.of(Items.LILY_OF_THE_VALLEY, Items.CANDLE), List.of("reaper_shade", "vesper_scythe", "reaper_hood", "dirge_skull", "requiem_skull",
+						"reaper_helmet", "reaper_chestplate", "reaper_leggings", "reaper_boots", "reaper_scythe"),
 				List.of("mourning_wreath_from_shade"), List.of("reaper_hood")),
 		TATTERLACE(Lair.SPINDLE_LOFT, TatterlaceLoot.BOSS, TatterlaceLoot.ADVANCEMENT, List.of("needle_rapier"), "message.jugcraft.lair.spindle.off_season",
 				List.of("cursed_spindle"), List.of("cursed_spindle", "spinning_wheel"), List.of(),
 				List.of("gossamer_silk", "needle_rapier", "golden_thimble", "tatterlace_headdress"), List.of("cursed_spindle_from_silk"), List.of()),
 		YETI_KING(Lair.GLACIER_HALL, YetiKingLoot.BOSS, YetiKingLoot.ADVANCEMENT, List.of("glacier_maul", "rimeclaw"), null,
 				List.of("frost_horn"), List.of("frost_horn"), List.of(Items.SNOW_BLOCK),
-				List.of("yeti_fur", "glacier_maul", "rimeclaw", "yeti_mitten", "yeti_king_crown"), List.of("frost_horn_from_fur"), List.of()),
+				List.of("yeti_fur", "glacier_maul", "rimeclaw", "yeti_mitten", "yeti_king_crown",
+						"frost_knight_helmet", "frost_knight_chestplate", "frost_knight_leggings", "frost_knight_boots",
+						"frost_knight_greatsword"), List.of("frost_horn_from_fur"), List.of()),
 		CINDER_TYRANT(Lair.CINDER_KILN, CinderTyrantLoot.BOSS, CinderTyrantLoot.ADVANCEMENT, List.of("cinderbrand", "magmaw"), null,
 				List.of("kiln_seal"), List.of("kiln_seal"), List.of(),
-				List.of("tyrant_scale", "cinderbrand", "magmaw", "salamander_charm", "tyrant_crest"), List.of("kiln_seal_from_scales"), List.of());
+				List.of("tyrant_scale", "cinderbrand", "magmaw", "salamander_charm", "tyrant_crest",
+						"hades_helmet", "hades_chestplate", "hades_leggings", "hades_boots", "hades_scythe"), List.of("kiln_seal_from_scales"), List.of());
 
 		public final Lair lair;
 		/** The keeper's id in {@link LairRewards} ("vesperine"), and its entity's. */

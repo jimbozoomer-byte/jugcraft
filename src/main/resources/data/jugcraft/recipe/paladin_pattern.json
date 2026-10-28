@@ -1,0 +1,25 @@
+{
+  "fabric:load_conditions": [
+    {
+      "condition": "jugcraft:feature_enabled",
+      "feature": "machines"
+    }
+  ],
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    "WAW",
+    "NPN",
+    "WAW"
+  ],
+  "key": {
+    "W": "minecraft:white_dye",
+    "A": "minecraft:amethyst_shard",
+    "N": "minecraft:gold_nugget",
+    "P": "minecraft:paper"
+  },
+  "result": {
+    "id": "jugcraft:paladin_pattern",
+    "count": 4
+  }
+}

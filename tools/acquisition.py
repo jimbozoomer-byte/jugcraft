@@ -17,11 +17,10 @@ Written by generate_material_data.py: the rows to assets/jugcraft/recipe_view.js
 client/compat/JugcraftJeiPlugin, which adds each as an information page) and the words to the language file, as
 jei.jugcraft.acquire.<key>. The first magic loadout the record recommends is listed here too (LOADOUT), so the checker
 can confirm survival already makes every piece of it (with its optional branches: the Wayfaring trinkets and, since
-Chunk B, the Rime travel kit), and so are the owner's armour tiers that stay creative-only
-(CREATIVE_ONLY), so it can confirm nothing gives them yet, and, since Concordance Chunk C (C-10), the living workshop's
-things (WORKSHOP; the factory's parts in FACTORY; Chunk C's own items in CHUNK_C_ITEMS), so it can confirm survival makes
-each as its row says. tools/check_mod_data.py (check_acquisition) ties each page, the loadout, the workshop and the
-creative-only tiers to the files on disk.
+Chunk B, the Rime travel kit), and, since Concordance Chunk C (C-10), the living workshop's things (WORKSHOP; the
+factory's parts in FACTORY; Chunk C's own items in CHUNK_C_ITEMS), so it can confirm survival makes each as its row says.
+tools/check_mod_data.py (check_acquisition) ties each page, the loadout and the workshop to the files on disk, and the
+owner's armour tiers to their one source each (tools/gear.py TIER_BOSSES and TIER_PATTERNS).
 
 Pure data: it imports only the generators' tables, which import nothing of the generator's.
 """
@@ -54,14 +53,14 @@ OBJECTIVE = "an objective"
 # rolls for each share (its TABLE); whether their fight has an objective (a deed); the material every share holds
 # (item, (fewest, most)); the chance of each single thing; their trophies, either "first" (one trophy, among the
 # chances, that a player's first victory always brings) or "trophies" (two that share one pool, (items, chance), of which
-# a first victory always brings one); and, for the Witching Season's bosses only, the Halloween event's extra chance
-# (item, chance).
+# a first victory always brings one); for the Witching Season's bosses only, the Halloween event's extra chance
+# (item, chance); and the pieces of the armor set only they give, of which every share holds one ("set").
 BOSSES = {
     "vesperine": {"name": vs.ENTITIES["vesperine"], "pronouns": ("her", "her"),
                   "lair": lairs.LAIRS["hollow_acre"]["display"], "opened": "which the Last Rites open at night",
                   "loot_class": "lair/vesperine/VesperineLoot.java", "table": "entities/vesperine", "objective": True,
                   "first": "vesper_scythe", "count": ("reaper_shade", vs.SHADE), "chances": vs.CHANCES,
-                  "event": ("reaper_hood", vs.EVENT_HOOD_CHANCE)},
+                  "event": ("reaper_hood", vs.EVENT_HOOD_CHANCE), "set": vs.SET_PIECES},
     "tatterlace": {"name": tt.ENTITIES["tatterlace"], "pronouns": ("her", "her"),
                    "lair": lairs.LAIRS["spindle_loft"]["display"],
                    "opened": f"which a {lairs.ITEMS['cursed_spindle']} used on a Spinning Wheel opens at night",
@@ -72,7 +71,8 @@ BOSSES = {
                   "lair": lairs.LAIRS["glacier_hall"]["display"],
                   "opened": f"which a {lairs.ITEMS['frost_horn']} blown on snow or ice opens at night",
                   "loot_class": "lair/yeti/YetiKingLoot.java", "table": "entities/yeti_king", "objective": True,
-                  "trophies": (yk.TROPHIES, yk.TROPHY_CHANCE), "count": ("yeti_fur", yk.FUR), "chances": yk.CHANCES},
+                  "trophies": (yk.TROPHIES, yk.TROPHY_CHANCE), "count": ("yeti_fur", yk.FUR), "chances": yk.CHANCES,
+                  "set": yk.SET_PIECES},
     "cinder_tyrant": {"name": ct.ENTITIES["cinder_tyrant"], "pronouns": ("his", "him"),
                       "lair": lairs.LAIRS["cinder_kiln"]["display"],
                       "opened": (f"which a {lairs.ITEMS['kiln_seal']} pressed into a magma block in the Nether, "
@@ -80,7 +80,7 @@ BOSSES = {
                                                for land in lairs.SEAL_LANDS) + " opens at any hour"),
                       "loot_class": "lair/tyrant/CinderTyrantLoot.java", "table": "entities/cinder_tyrant",
                       "objective": False, "trophies": (ct.TROPHIES, ct.TROPHY_CHANCE), "count": ("tyrant_scale", ct.SCALES),
-                      "chances": ct.CHANCES},
+                      "chances": ct.CHANCES, "set": ct.SET_PIECES},
 }
 
 
@@ -108,11 +108,6 @@ LOADOUT = {"initiate_wand": "recipe", "lampwright_bench": "recipe", "kindled_lan
            **{piece: "recipe" for piece in ember.ARMOR}, "lesser_fire_focus": "recipe", "fire_bangle": "recipe"}
 OPTIONAL = {**{item: "recipe" for item in trinkets.TRINKETS}, "fire_focus": "recipe",
             **{item: "recipe" for item in rime_kit.ITEMS}}  # Rime's travel kit (Chunk B, B-10), made the same way
-# The owner's armour tiers (tools/gear.py ARMOR_TIERS, the Wayfarer among them) that no recipe, drop, shop or trade gives:
-# all of them, as the owner asked when each was made (6 October 2026: "for now just make the armor we can figure that out
-# later"; the later designs likewise, as tools/gear.py records). The first loadout leaves that as it is. When the owner
-# settles how a tier is won, take it out of here and out of the record's creative-only table.
-CREATIVE_ONLY = list(gear.ARMOR_TIERS)
 # Concordance Chunk C (C-10): the living workshop's route (tools/concordance_journey.py WORKSHOP). WORKSHOP: every
 # Concordance thing it makes or places, each made in survival as it is: by the crafting recipe of its own name ("recipe"),
 # the recipe named ("recipe:<file>": the Thallite plate's is thallite_plate_by_hand), a Lampwright's Bench working
@@ -182,6 +177,13 @@ def pair_roll(info):
     return f"a {pct(chance)} chance of one of {his} two trophies ({pct(chance / 2)} each)"
 
 
+def set_roll(info):
+    """What a page of a piece of a boss's armor set says of its pool: every share holds one piece, each as likely."""
+    pieces = info["set"]
+    name = gear.ARMOR_TIERS[pieces[0].rsplit("_", 1)[0]]["display"]
+    return f"always holds one piece of {name} armor, each piece as likely ({pct(1 / len(pieces))})"
+
+
 def _boss_pages():
     pages = {}
     for info in BOSSES.values():
@@ -198,6 +200,8 @@ def _boss_pages():
                                 f"{him} always brings one of the two")
         else:
             rolls[info["first"]] += f", and a player's first victory over {him} always brings it"
+        for thing in info.get("set", ()):
+            rolls[thing] = f"each share of {his} reward {set_roll(info)}"
         if "event" in info:
             thing, chance = info["event"]
             rolls[thing] += (f", and another {pct(chance)} chance during the Halloween event unless the server turns "

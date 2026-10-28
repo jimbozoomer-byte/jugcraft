@@ -1,0 +1,15 @@
+{
+  "fabric:load_conditions": [
+    {
+      "condition": "jugcraft:feature_enabled",
+      "feature": "machines"
+    }
+  ],
+  "type": "minecraft:smithing_transform",
+  "template": "jugcraft:sunset_gem_pattern",
+  "base": "minecraft:netherite_chestplate",
+  "addition": "minecraft:amethyst_shard",
+  "result": {
+    "id": "jugcraft:sunset_gem_chestplate"
+  }
+}

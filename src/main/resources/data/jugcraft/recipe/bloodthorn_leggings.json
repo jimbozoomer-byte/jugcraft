@@ -1,0 +1,15 @@
+{
+  "fabric:load_conditions": [
+    {
+      "condition": "jugcraft:feature_enabled",
+      "feature": "machines"
+    }
+  ],
+  "type": "minecraft:smithing_transform",
+  "template": "jugcraft:bloodthorn_pattern",
+  "base": "minecraft:netherite_leggings",
+  "addition": "minecraft:netherite_ingot",
+  "result": {
+    "id": "jugcraft:bloodthorn_leggings"
+  }
+}

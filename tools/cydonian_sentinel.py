@@ -115,6 +115,11 @@ SHARDS = (4, 8)
 TROPHIES = ("corelance", "redstar_cleaver")
 TROPHY_CHANCE = 0.15
 CHANCES = {"lowfall_core": 0.25, "sentinels_visor": 0.2}
+# The Sentinel armor set (tools/gear.py TIER_BOSSES; docs/features/armor-tier-sources.md): nothing else
+# gives it. Every share holds one of its pieces, each as likely; its two arms roll as a pair of trophies do.
+SET_PIECES = ("sentinel_helmet", "sentinel_chestplate",
+              "sentinel_leggings", "sentinel_boots")
+CHANCES.update({"sentinel_longsword": 0.075, "sentinel_shield": 0.075})
 ADVANCEMENT = {"key": "red_planet", "title": "Red Planet", "icon": "jugcraft:corelance",
                "description": "Weather the Red Storm and bring down the Cydonian Sentinel on Mars",
                "frame": "challenge"}

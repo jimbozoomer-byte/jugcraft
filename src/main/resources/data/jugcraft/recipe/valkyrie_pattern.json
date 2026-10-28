@@ -1,0 +1,24 @@
+{
+  "fabric:load_conditions": [
+    {
+      "condition": "jugcraft:feature_enabled",
+      "feature": "machines"
+    }
+  ],
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    "FNF",
+    "NPN",
+    "FNF"
+  ],
+  "key": {
+    "F": "minecraft:feather",
+    "N": "minecraft:gold_nugget",
+    "P": "minecraft:paper"
+  },
+  "result": {
+    "id": "jugcraft:valkyrie_pattern",
+    "count": 4
+  }
+}

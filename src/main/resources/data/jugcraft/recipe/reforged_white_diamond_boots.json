@@ -1,0 +1,15 @@
+{
+  "fabric:load_conditions": [
+    {
+      "condition": "jugcraft:feature_enabled",
+      "feature": "machines"
+    }
+  ],
+  "type": "minecraft:smithing_transform",
+  "template": "jugcraft:reforged_white_diamond_pattern",
+  "base": "minecraft:netherite_boots",
+  "addition": "minecraft:diamond",
+  "result": {
+    "id": "jugcraft:reforged_white_diamond_boots"
+  }
+}

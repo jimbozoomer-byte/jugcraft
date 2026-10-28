@@ -84,6 +84,11 @@ SCALES = (3, 6)
 TROPHIES = ("cinderbrand", "magmaw")
 TROPHY_CHANCE = 0.15
 CHANCES = {"salamander_charm": 0.25, "tyrant_crest": 0.2}
+# The Hades armor set (tools/gear.py TIER_BOSSES; docs/features/armor-tier-sources.md): nothing else
+# gives it. Every share holds one of its pieces, each as likely; its arm rolls as a trophy does.
+SET_PIECES = ("hades_helmet", "hades_chestplate",
+              "hades_leggings", "hades_boots")
+CHANCES.update({"hades_scythe": 0.15})
 ADVANCEMENT = {"key": "tempered", "title": "Tempered", "icon": "jugcraft:cinderbrand",
                "description": "Bring down the Cinder Tyrant in the Cinder Kiln", "frame": "challenge"}
 

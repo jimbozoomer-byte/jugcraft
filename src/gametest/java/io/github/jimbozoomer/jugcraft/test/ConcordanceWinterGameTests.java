@@ -633,7 +633,7 @@ public class ConcordanceWinterGameTests {
 	/**
 	 * B-P26, B-P52, B-P53: a Frost boon arm's slow that takes on a hostile creature at normal tolerance is Rimekeeping's
 	 * elective cold work for whoever understands Rimekeeping, whichever Frost arm struck (the Yeti King's Glacier Maul and
-	 * Rimeclaw, and the creative-only Frost Knight Greatsword: the boon counts, not the line). It is counted once, kept
+	 * Rimeclaw, and the Frost Knight Greatsword: the boon counts, not the line). It is counted once, kept
 	 * through a save, and stands for one kind (the elective, which the Yeti King's column shares, B-P56, as
 	 * YetiKingGameTests.aColumnIsElectiveRimeworkForItsBaiterOnce shows): with two Preserves it masters Rimekeeping. The
 	 * slow is the boon's own on whatever it lands: a novice learns nothing from it, a pig or a resistant ravager is no

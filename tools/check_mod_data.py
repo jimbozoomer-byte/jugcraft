@@ -2218,7 +2218,8 @@ def check_armor_styles(java):
     Java lists the styles and templates and derives each material from its metal's; every set has its equipment asset
     and 64x32 worn layers; each styled piece has its smithing recipes both ways, its slot tag and its lore; each
     template its recipe and tooltip."""
-    for name, expected in (("ARMOR_STYLES", list(gear.ARMOR_STYLES)), ("STYLE_TEMPLATES", gear.style_templates())):
+    for name, expected in (("ARMOR_STYLES", list(gear.ARMOR_STYLES)), ("STYLE_TEMPLATES", gear.style_templates()),
+                           ("TIER_PATTERNS", gear.tier_patterns())):
         match = re.search(name + r" = List\.of\(([^)]*)\)", java)
         found = re.findall(r'"([a-z_]+)"', match.group(1)) if match else None
         if found != expected:
@@ -2713,24 +2714,33 @@ def check_arms_variants():
     for line, info in list(av.BOSSES.items()) + list(av.SETS.items()):
         if info["display"] not in lang.get(f"tooltip.{MOD}.arms.line.{line}.trait", info["display"]):
             err(f"lang: the {line} line's name does not name {info['display']}")
-    # An armor set's arm is creative only for now: no recipe (above), no boss table of its own, and nothing drops it.
+    # An armor set's arm comes only from its set's boss (tools/gear.py TIER_BOSSES; docs/features/armor-tier-sources.md):
+    # no recipe (above), no boss table of its own, and no loot table but that boss's share.
     tables = {path: path.read_text(encoding="utf-8")
               for folder in DATA.glob("*/loot_table") for path in folder.rglob("*.json")}
+    def boss_only(name, armor_set, what):
+        boss = gear.TIER_BOSSES.get(armor_set)
+        share = DATA / MOD / "loot_table" / "entities" / f"{boss}.json"
+        if boss is None:
+            err(f"tools/gear.py TIER_BOSSES: the {av.SETS[armor_set]['display']} set has {what} {name}, so it needs a boss")
+        elif f'"{MOD}:{name}"' not in tables.get(share, ""):
+            err(f"loot_table/entities/{boss}.json must give {name}, the {av.SETS[armor_set]['display']} set's {what}")
+        for path, text in sorted(tables.items()):
+            if path != share and f'"{MOD}:{name}"' in text:
+                err(f"{path.relative_to(DATA)} drops {name}, the {av.SETS[armor_set]['display']} set's {what}, which "
+                    f"only {boss}'s share gives")
     for armor_set, info in av.SETS.items():
         if not av.set_arms(armor_set):
             err(f"tools/arms_variants.py: the {info['display']} set has no arm")
         if (DATA / MOD / "loot_table" / "bosses" / f"{armor_set}.json").is_file():
-            err(f"loot_table/bosses/{armor_set}.json: the {info['display']} set is no boss, and has no loot table yet")
-        for path, text in sorted(tables.items()):
-            for name in av.set_arms(armor_set):
-                if f'"{MOD}:{name}"' in text:
-                    err(f"{path.relative_to(DATA)} drops {name}, the {info['display']} set's arm, which nothing drops "
-                        "until the owner settles how the set is won")
+            err(f"loot_table/bosses/{armor_set}.json: the {info['display']} set is no boss's trophy line")
+        for name in av.set_arms(armor_set):
+            boss_only(name, armor_set, "arm")
     for style, info in av.STYLES.items():
         if not (DATA / MOD / "recipe" / f"{info['pattern']}.json").is_file():
             err(f"recipe/{info['pattern']}.json is missing: the {style} pattern must be craftable")
     # An armor set's shield: as tools/arms_variants.py has it, of an armor set, in a shape with its own model and tooltip,
-    # blocking as a kit shield in SET_SHIELD_METAL; creative only, as a set's arm is (no recipe, nothing drops it).
+    # blocking as a kit shield in SET_SHIELD_METAL; only its set's boss gives it, as a set's arm.
     import arms_kit
     found = re.findall(r'new SetShield\("([a-z_]+)", "([a-z_]+)", "([a-z_]+)", "([a-z_]+)"\)', java)
     expected = [(name, info["set"], info["shape"], info["base"]) for name, info in av.SET_SHIELDS.items()]
@@ -2749,10 +2759,7 @@ def check_arms_variants():
             err(f"lang: {name}'s shape {info['shape']} needs tooltip.{MOD}.arms.{info['shape']} and its .trait name")
         if (DATA / MOD / "recipe" / f"{name}.json").is_file():
             err(f"{name} is the {av.SETS[info['set']]['display']} set's shield: it has no recipe")
-        for path, text in sorted(tables.items()):
-            if f'"{MOD}:{name}"' in text:
-                err(f"{path.relative_to(DATA)} drops {name}, the {av.SETS[info['set']]['display']} set's shield, which "
-                    "nothing drops until the owner settles how the set is won")
+        boss_only(name, info["set"], "shield")
 
 
 def check_mesh_models():
@@ -11841,7 +11848,8 @@ def check_vesperine():
             chance = pool.get("condition", {}).get("chance")
             count = entry.get("modifier", {}).get("count", {})
             found[item] = chance if chance is not None else (count.get("min"), count.get("max"))
-    expected = {"reaper_shade": vs.SHADE, **vs.CHANCES}
+    # Her armor set's one sure pool: each piece an entry with no chance or count of its own.
+    expected = {"reaper_shade": vs.SHADE, **vs.CHANCES, **{piece: (None, None) for piece in vs.SET_PIECES}}
     if found != expected:
         err(f"loot_table/entities/vesperine.json gives {found}, not tools/vesperine.py's {expected}")
     if f'Jugcraft.id("entities/vesperine")' not in loot_java:
@@ -12264,7 +12272,8 @@ def check_yeti():
             chance = pool.get("condition", {}).get("chance")
             count = entry.get("modifier", {}).get("count", {})
             found_loot[item] = chance if chance is not None else (count.get("min"), count.get("max"))
-    expected = {"yeti_fur": yk.FUR, **{item: yk.TROPHY_CHANCE for item in yk.TROPHIES}, **yk.CHANCES}
+    expected = {"yeti_fur": yk.FUR, **{item: yk.TROPHY_CHANCE for item in yk.TROPHIES}, **yk.CHANCES,
+                **{piece: (None, None) for piece in yk.SET_PIECES}}  # his armor set's one sure pool
     if found_loot != expected:
         err(f"loot_table/entities/yeti_king.json gives {found_loot}, not tools/yeti_king.py's {expected}")
     if tuple(arms_variants.trophies("yeti_king")) != tuple(yk.TROPHIES):
@@ -12575,7 +12584,8 @@ def check_cinder_tyrant():
             chance = pool.get("condition", {}).get("chance")
             count = entry.get("modifier", {}).get("count", {})
             found_loot[item] = chance if chance is not None else (count.get("min"), count.get("max"))
-    expected = {"tyrant_scale": ct.SCALES, **{item: ct.TROPHY_CHANCE for item in ct.TROPHIES}, **ct.CHANCES}
+    expected = {"tyrant_scale": ct.SCALES, **{item: ct.TROPHY_CHANCE for item in ct.TROPHIES}, **ct.CHANCES,
+                **{piece: (None, None) for piece in ct.SET_PIECES}}  # his armor set's one sure pool
     if found_loot != expected:
         err(f"loot_table/entities/cinder_tyrant.json gives {found_loot}, not tools/cinder_tyrant.py's {expected}")
     if tuple(arms_variants.trophies("cinder_tyrant")) != tuple(ct.TROPHIES):
@@ -13089,6 +13099,17 @@ def check_acquisition(registered):
                     or not alone(pool_of.get(thing, {}), [thing]):
                 err(f"acquisition: {thing}'s JEI page does not give loot_table/{info['table']}.json's chance ({chance}), "
                     "one roll of a pool of its own")
+        # Its armor set (docs/features/armor-tier-sources.md): one pool with no chance, rolled once, holding exactly the
+        # set's pieces, so every share holds one, each as likely, as their pages say.
+        if "set" in info:
+            pieces = list(info["set"])
+            pool = pool_of.get(pieces[0], {})
+            if not alone(pool, pieces) or "condition" in pool:
+                err(f"acquisition: loot_table/{info['table']}.json must roll {pieces} in one sure pool of their own, once, "
+                    "each as likely, as their JEI pages say")
+            for thing in pieces:
+                if aq.set_roll(info) not in pages.get(thing, ""):
+                    err(f"acquisition: {thing}'s JEI page does not say each share {aq.set_roll(info)!r}")
         # The Halloween extra: only where a row states it, and then at the loot class's chance.
         event = re.search(r"\bEVENT_[A-Z]+_CHANCE = ([0-9.]+)F;", loot_java)
         if "event" in info:
@@ -13268,15 +13289,18 @@ def check_acquisition(registered):
         err("ConcordanceJourneyGameTests.thePactHallsRecipesLoad must load the recipe of every pact-hall row "
             f"(PACT_HALL_RECIPES: {sorted(wanted)})")
     made_as(aq.PACT_HALL, "the pact hall")
-    # The owner's armour tiers the record keeps creative-only: nothing gives them.
-    for tier in aq.CREATIVE_ONLY:
+    # The owner's armour tiers (docs/features/armor-tier-sources.md): a boss's tier comes only from that boss's share,
+    # every other only from its smithing recipe; no shop, trade or other recipe or table gives either.
+    for tier in gear.ARMOR_TIERS:
+        boss = gear.TIER_BOSSES.get(tier)
         for piece in gear.ARMOR:
             ref = f"{MOD}:{tier}_{piece}"
-            sources = [str(path.relative_to(DATA)) for path in made.get(ref, []) + dropped.get(ref, [])] + given.get(ref, [])
-            if sources:
-                err(f"{sources[0]} gives {tier}_{piece}, which docs/features/concordance-first-loadout.md keeps "
-                    "creative-only: once the owner settles how a tier is won, take it out of CREATIVE_ONLY "
-                    "(tools/acquisition.py) and the record's creative-only table")
+            want = [DATA / MOD / "loot_table" / "entities" / f"{boss}.json"] if boss else []
+            sources = sorted(made.get(ref, [])) + sorted(dropped.get(ref, []))
+            expected = want if boss else [DATA / MOD / "recipe" / f"{tier}_{piece}.json"]
+            if sources != expected or given.get(ref):
+                err(f"{tier}_{piece} comes from {[str(p.relative_to(DATA)) for p in sources] + given.get(ref, [])}, not "
+                    f"only {[str(p.relative_to(DATA)) for p in expected]} (tools/gear.py TIER_BOSSES and TIER_PATTERNS)")
 
 
 def check_crypt_lich():
@@ -13538,7 +13562,8 @@ def check_crypt_lich():
             chance = pool.get("condition", {}).get("chance")
             count = entry.get("modifier", {}).get("count", {})
             found_loot[item] = chance if chance is not None else (count.get("min"), count.get("max"))
-    expected = {"grave_dust": cl.GRAVE_DUST, **{item: cl.TROPHY_CHANCE for item in cl.TROPHIES}, **cl.CHANCES}
+    expected = {"grave_dust": cl.GRAVE_DUST, **{item: cl.TROPHY_CHANCE for item in cl.TROPHIES}, **cl.CHANCES,
+                **{piece: (None, None) for piece in cl.SET_PIECES}}  # his armor set's one sure pool
     if found_loot != expected:
         err(f"loot_table/entities/crypt_lich.json gives {found_loot}, not tools/crypt_lich.py's {expected}")
     if tuple(arms_variants.trophies("crypt_lich")) != tuple(cl.TROPHIES):
@@ -14220,7 +14245,8 @@ def check_cydonian_sentinel():
             chance = pool.get("condition", {}).get("chance")
             count = entry.get("modifier", {}).get("count", {})
             found_loot[item] = chance if chance is not None else (count.get("min"), count.get("max"))
-    expected = {"cydonian_shard": cn.SHARDS, **{item: cn.TROPHY_CHANCE for item in cn.TROPHIES}, **cn.CHANCES}
+    expected = {"cydonian_shard": cn.SHARDS, **{item: cn.TROPHY_CHANCE for item in cn.TROPHIES}, **cn.CHANCES,
+                **{piece: (None, None) for piece in cn.SET_PIECES}}  # its armor set's one sure pool
     if found_loot != expected:
         err(f"loot_table/entities/cydonian_sentinel.json gives {found_loot}, not tools/cydonian_sentinel.py's {expected}")
     if tuple(arms_variants.trophies("cydonian_sentinel")) != tuple(cn.TROPHIES):

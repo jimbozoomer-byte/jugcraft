@@ -61,6 +61,40 @@
         }
       ],
       "rolls": 1
+    },
+    {
+      "condition": {
+        "type": "minecraft:random_chance",
+        "chance": 0.15
+      },
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "jugcraft:wight_king_zweihander"
+        }
+      ],
+      "rolls": 1
+    },
+    {
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "jugcraft:wight_king_helmet"
+        },
+        {
+          "type": "minecraft:item",
+          "name": "jugcraft:wight_king_chestplate"
+        },
+        {
+          "type": "minecraft:item",
+          "name": "jugcraft:wight_king_leggings"
+        },
+        {
+          "type": "minecraft:item",
+          "name": "jugcraft:wight_king_boots"
+        }
+      ],
+      "rolls": 1
     }
   ]
 }

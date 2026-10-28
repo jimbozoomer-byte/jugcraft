@@ -1,5 +1,7 @@
 # Hades Armor and the Hades Scythe: the third of the owner's armor tiers
 
+**Update, 28 October 2026:** no longer creative-only. The Hades set and the Hades Scythe drop only from the Cinder Tyrant ([armor-tier-sources.md](armor-tier-sources.md)).
+
 Status: implemented on `claude/hades-armor`, awaiting review. It is built on `integration/oct7-pr-backlog`, which carries the knight armor's 3D engine (#227) and Bloodthorn and Reforged White Diamond (#235), whose armor-only tier code it reuses. **Not yet compiled, game-tested or played:** the Java compiles only in CI.
 Proposal issue: none. This is the third of the five armor designs the owner sent on 6 October 2026 ("Can we start implementing the next 5 that I created. Again want you to use the the complex armor for each one to capture the shape of each piece like I have... Lets do these 1 by 1"), with its weapon: "I also want the scythe from my Hades Armor set." Its picture is titled "HADES ARMOR". The owner's answers for all five ([bloodthorn-armor.md](bloodthorn-armor.md)):
 - what kind of armor: "New stronger armor tiers";

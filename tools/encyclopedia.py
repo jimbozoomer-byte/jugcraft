@@ -110,7 +110,8 @@ DOSSIERS = {
                   "rite": ["death_knell", "mourning_wreath", "gothic_headstone_from_stonecutting"],
                   "trades": [("florist", "minecraft:lily_of_the_valley"), ("curios", "minecraft:candle")],
                   "after_win": ["mourning_wreath_from_shade"], "made_from": ["reaper_hood"],
-                  "loot": ["reaper_shade", "vesper_scythe", "reaper_hood", "dirge_skull", "requiem_skull"]},
+                  "loot": ["reaper_shade", "vesper_scythe", "reaper_hood", "dirge_skull", "requiem_skull",
+                           "reaper_helmet", "reaper_chestplate", "reaper_leggings", "reaper_boots", "reaper_scythe"]},
     "tatterlace": {"lair": "spindle_loft", "advancement": "unravelled", "trophies": ["needle_rapier"],
                    "rite_class": "SpindleRite", "off_season": f"message.{MOD}.lair.spindle.off_season",
                    "tokens": ["cursed_spindle"], "rite": ["cursed_spindle", "spinning_wheel"], "trades": [],
@@ -120,12 +121,15 @@ DOSSIERS = {
                   "rite_class": "FrostHornRite", "off_season": None,
                   "tokens": ["frost_horn"], "rite": ["frost_horn"], "trades": [("seasonal", "minecraft:snow_block")],
                   "after_win": ["frost_horn_from_fur"], "made_from": [],
-                  "loot": ["yeti_fur", "glacier_maul", "rimeclaw", "yeti_mitten", "yeti_king_crown"]},
+                  "loot": ["yeti_fur", "glacier_maul", "rimeclaw", "yeti_mitten", "yeti_king_crown",
+                           "frost_knight_helmet", "frost_knight_chestplate", "frost_knight_leggings",
+                           "frost_knight_boots", "frost_knight_greatsword"]},
     "cinder_tyrant": {"lair": "cinder_kiln", "advancement": "tempered", "trophies": ["cinderbrand", "magmaw"],
                       "rite_class": "KilnSealRite", "off_season": None,
                       "tokens": ["kiln_seal"], "rite": ["kiln_seal"], "trades": [],
                       "after_win": ["kiln_seal_from_scales"], "made_from": [],
-                      "loot": ["tyrant_scale", "cinderbrand", "magmaw", "salamander_charm", "tyrant_crest"]},
+                      "loot": ["tyrant_scale", "cinderbrand", "magmaw", "salamander_charm", "tyrant_crest",
+                           "hades_helmet", "hades_chestplate", "hades_leggings", "hades_boots", "hades_scythe"]},
 }
 
 # What each Jugcraft key does, for the Keys page (key.jugcraft.<name>; every key the client registers).

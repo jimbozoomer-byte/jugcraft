@@ -87,6 +87,9 @@ def loot(out, write):
         "type": "minecraft:set_count", "count": {"type": "minecraft:uniform", "min": low, "max": high}}}], "rolls": 1}]
     pools.append(chance(ct.TROPHIES, ct.TROPHY_CHANCE))
     pools += [chance((item,), p) for item, p in ct.CHANCES.items()]
+    # Its armor set: one sure pool, so every share holds one piece, each as likely (armor-tier-sources.md).
+    pools.append({"entries": [{"type": "minecraft:item", "name": rid(piece)} for piece in ct.SET_PIECES],
+                  "rolls": 1})
     write(out.parent / "entities" / "cinder_tyrant.json", {"type": "minecraft:gift",
                                                             "random_sequence": rid("entities/cinder_tyrant"), "pools": pools})
 
