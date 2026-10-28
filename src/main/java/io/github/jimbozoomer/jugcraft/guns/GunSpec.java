@@ -28,6 +28,14 @@ public record GunSpec(float damage, int pellets, int interval, boolean auto, int
 
 	/** Ticks to load this many rounds. */
 	public int reloadTicks(int rounds) {
-		return byShell() ? shellStart + shellEach * rounds + shellFinish : reload;
+		return reloadTicks(rounds, 1);
+	}
+
+	/**
+	 * Ticks to load this many rounds, a gun loaded a shell at a time taking {@code step} of them at each shell's time
+	 * (slice 15E, {@link JugcraftGuns#LOAD_STEPS}).
+	 */
+	public int reloadTicks(int rounds, int step) {
+		return byShell() ? shellStart + shellEach * Math.ceilDiv(rounds, step) + shellFinish : reload;
 	}
 }

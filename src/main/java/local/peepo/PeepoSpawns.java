@@ -12,10 +12,11 @@ import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.phys.AABB;
+import net.minecraft.world.level.entity.EntityTypeTest;
 
 /** Biome tags are optional integrations: Jugcraft need not be installed. */
 public final class PeepoSpawns {
-    public static final int LOCAL_LIMIT = 6;
+    public static final int LOCAL_LIMIT = 4;
     public static final int LOCAL_RADIUS = 128;
     public static TagKey<Biome> habitat(String name) {
         return TagKey.create(Registries.BIOME, PeepoMod.id(name));
@@ -23,6 +24,7 @@ public final class PeepoSpawns {
     public static void initialize() {
         register(PeepoMod.PEEPO, "peepo");
         register(PeepoMod.JUGHEAD, "jughead");
+        CompanionSpawning.initialize();
     }
     private static void register(EntityType<PeepoEntity> type, String name) {
         var main = habitat(name + "_main_habitat");
@@ -33,14 +35,20 @@ public final class PeepoSpawns {
             Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, PeepoSpawns::canSpawn);
     }
     public static boolean belowLocalLimit(EntityType<?> type, ServerLevelAccessor world, BlockPos pos) {
+        return wildCount(type, world, pos) < LOCAL_LIMIT;
+    }
+    /** Loaded, naturally acquired, unowned population only. Stop once the limit is reached. */
+    static int wildCount(EntityType<?> type, ServerLevelAccessor world, BlockPos pos) {
         var level = world.getLevel();
         var bounds = new AABB(pos.getX()-LOCAL_RADIUS, level.getMinY(), pos.getZ()-LOCAL_RADIUS,
             pos.getX()+LOCAL_RADIUS+1, level.getMaxY(), pos.getZ()+LOCAL_RADIUS+1);
         boolean jughead = type == PeepoMod.JUGHEAD;
-        return level.getEntitiesOfClass(PeepoEntity.class, bounds, m -> m.isAlive()
-            && m.isNaturallySpawned() && m.isJughead() == jughead
+        var found = new java.util.ArrayList<PeepoEntity>(LOCAL_LIMIT);
+        level.getEntities(EntityTypeTest.forClass(PeepoEntity.class), bounds, m -> m.isAlive()
+            && m.isNaturallySpawned() && !m.orders.tamed() && m.isJughead() == jughead
             && Math.pow(m.getX()-pos.getX()-.5, 2)+Math.pow(m.getZ()-pos.getZ()-.5, 2)
-                <= LOCAL_RADIUS*LOCAL_RADIUS).size() < LOCAL_LIMIT;
+                <= LOCAL_RADIUS*LOCAL_RADIUS, found, LOCAL_LIMIT);
+        return found.size();
     }
     public static boolean canSpawn(EntityType<PeepoEntity> type, ServerLevelAccessor world,
             EntitySpawnReason reason, BlockPos pos, RandomSource random) {

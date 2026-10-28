@@ -27,7 +27,7 @@ import net.minecraft.world.level.material.PushReaction;
  * docs/features/foundry-trench.md, docs/features/moonlit-ring.md, docs/features/cydonian-sanctum.md,
  * docs/features/crowfield.md): the lair-only blocks (unbreakable, no items, no
  * drops), the Mourning Wreath and the Death Knell of the Last Rites, the Cursed Spindle, the Frost Horn, the Kiln Seal,
- * the Hag Stone, the Writ of Exhumation, Sealed Orders, the Howling Totem, the Altar Keystone, the Harvest Crown, the Thunder Vane, the Mist
+ * the Hag Stone, the Writ of Exhumation, Sealed Orders, the Howling Totem, the Altar Keystone, the Harvest Crown, the Thunder Vane, the Hessian's Bridle, the Mist
  * Gate, and the lairs' events, rules,
  * rituals and commands. Registered whatever the
  * feature switch says, so saved worlds keep them; the switch
@@ -101,6 +101,7 @@ public final class JugcraftLairs {
 	public static Item ALTAR_KEYSTONE;
 	public static Item HARVEST_CROWN;
 	public static Item THUNDER_VANE;
+	public static Item HESSIANS_BRIDLE;
 	public static EntityType<MistGateEntity> MIST_GATE;
 
 	private JugcraftLairs() {
@@ -219,6 +220,9 @@ public final class JugcraftLairs {
 		ResourceKey<Item> vaneKey = ResourceKey.create(Registries.ITEM, Jugcraft.id("thunder_vane"));
 		THUNDER_VANE = Registry.register(BuiltInRegistries.ITEM, vaneKey, new ThunderVaneItem(new Item.Properties().stacksTo(16)
 				.setId(vaneKey)));
+		ResourceKey<Item> bridleKey = ResourceKey.create(Registries.ITEM, Jugcraft.id("hessians_bridle"));
+		HESSIANS_BRIDLE = Registry.register(BuiltInRegistries.ITEM, bridleKey, new HessiansBridleItem(new Item.Properties().stacksTo(16)
+				.setId(bridleKey)));
 
 		ResourceKey<EntityType<?>> gateKey = ResourceKey.create(Registries.ENTITY_TYPE, Jugcraft.id("mist_gate"));
 		MIST_GATE = Registry.register(BuiltInRegistries.ENTITY_TYPE, gateKey, EntityType.Builder.<MistGateEntity>of(MistGateEntity::new,
@@ -246,6 +250,7 @@ public final class JugcraftLairs {
 			output.accept(ALTAR_KEYSTONE);
 			output.accept(HARVEST_CROWN);
 			output.accept(THUNDER_VANE);
+			output.accept(HESSIANS_BRIDLE);
 		});
 		CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.FUNCTIONAL_BLOCKS).register(output -> output.accept(MOURNING_WREATH_ITEM));
 	}

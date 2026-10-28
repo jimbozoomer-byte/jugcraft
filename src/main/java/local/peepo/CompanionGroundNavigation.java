@@ -37,7 +37,10 @@ final class CompanionGroundNavigation extends GroundPathNavigation {
     private static boolean equipment(net.minecraft.world.level.block.state.BlockState state){
         return state.getBlock() instanceof io.github.jimbozoomer.jugcraft.workshop.WorkshopBlock
             || state.getBlock() instanceof io.github.jimbozoomer.jugcraft.agriculture.CiderPressBlock
-            || state.getBlock() instanceof io.github.jimbozoomer.jugcraft.agriculture.CanningKettleBlock;
+            || state.getBlock() instanceof io.github.jimbozoomer.jugcraft.agriculture.CanningKettleBlock
+            // A bottom bunk looks stepable to vanilla, but the next mattress blocks
+            // Jughead's jug. Route around the column to its shared ground entrance.
+            || state.getBlock() instanceof CompanionBedBlock && state.getValue(CompanionBedBlock.STACKED);
     }
     @Override public void tick(){
         // Recheck only the next few steps, so a stove lit after planning invalidates the route.

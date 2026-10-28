@@ -30,6 +30,7 @@ import crypt_lich
 import iron_dreadnought
 import alpha_werewolf
 import pumpkin_king
+import hessian_horseman
 import cydonian_sentinel
 import vesperine
 import kitchen
@@ -827,6 +828,10 @@ HALLOWEEN_ADVANCEMENTS = {
                         "description": "Throw a pumpkin 50 blocks or more with a trebuchet", "frame": "goal"},
     "headless_horseman": {"icon": "jugcraft:horseman_lantern", "title": "Lost His Head",
                           "description": "Send the Headless Horseman back into the night", "frame": "challenge"},
+    "sleepy_hollow": {"icon": "jugcraft:horseman_cloak", "title": "Sleepy Hollow",
+                      "description": "See the Headless Horseman ride out of the dark in the Halloween season", "frame": "task"},
+    "bad_moon_rising": {"icon": "minecraft:redstone", "title": "Bad Moon Rising",
+                        "description": "Be out in the Overworld when a Blood Moon rises", "frame": "task"},
     "lantern_festival": {"icon": "jugcraft:sky_lantern", "title": "A Sky Full of Wishes",
                          "description": "Be there when eight sky lanterns are let go together", "frame": "goal"},
     "harvest_home": {"icon": "jugcraft:feast_table", "title": "Harvest Home",
@@ -1015,6 +1020,26 @@ HORSEMAN = {"health": 160, "arena_radius": 32, "leave_range": 48, "lonely_ticks"
             # (item, count range) dropped when a player defeats him
             "loot": [("jugcraft:horseman_lantern", [1, 1]), ("jugcraft:horseman_cloak", [1, 1]), ("jugcraft:king_size_candy_bar", [1, 2]),
                      ("jugcraft:candy_corn", [3, 6])]}
+# Sightings of the Horseman in the season (agriculture/HorsemanSightings.java, HorsemanRider.java; FlamingPumpkin's
+# harmless burst): every check_ticks on a passing night, a player due a sighting (their first night of the season, then
+# every min_gap_days to max_gap_days, and Halloween itself), out under the sky, settle_ticks in the game, is sent the
+# rider start_chance of the time; none with a rider or the Horseman within one_at_a_time blocks. He comes from
+# start_distance blocks in front of them, at most climb above or below; gallops at approach_speed (blocks a tick, at most
+# approach_ticks) to circle_radius off; swings half round them over circle_ticks, flinging his pumpkin at throw_at; rides
+# off at leave_speed and vanishes leave_ticks later, max_ticks at most. The pumpkin only blinds (fright_ticks) and pushes
+# (fright_push); everyone within witness_range when it is flung has seen him.
+HORSEMAN_SIGHTINGS = {"check_ticks": 20, "settle_ticks": 600, "start_chance": 0.02, "min_gap_days": 2, "max_gap_days": 3,
+                      "one_at_a_time": 128, "witness_range": 48, "start_distance": 26.0, "climb": 10, "approach_speed": 0.55,
+                      "approach_ticks": 80, "circle_radius": 6.0, "circle_ticks": 30, "throw_at": 12, "leave_speed": 0.6,
+                      "leave_ticks": 50, "max_ticks": 240, "fright_ticks": 30, "fright_push": 0.6,
+                      "option": "halloween.horseman_sightings", "advancement": "sleepy_hollow"}
+# The Blood Moon (agriculture/BloodMoon.java): in the season, every `every`th night by the overworld's day count and the
+# nights of Halloween. Worked out every check_ticks. Under it costumed mobs dress costume_chance of the time (instead of
+# COSTUMED_MOBS' chance) and drop candy_rolls rolls of candy; wisps spawn wisp_chance of the tries, wisp_near_cap to a
+# player; a red haze of haze_count motes within haze_radius of each player out under it, every haze_ticks; and the
+# Horseman rides by everyone not yet seeing him that day (HORSEMAN_SIGHTINGS).
+BLOOD_MOON = {"every": 4, "check_ticks": 100, "costume_chance": 0.4, "candy_rolls": 2, "wisp_chance": 1.0, "wisp_near_cap": 8,
+              "haze_ticks": 40, "haze_count": 6, "haze_radius": 10.0, "option": "halloween.blood_moon", "advancement": "bad_moon_rising"}
 
 
 # ---------------------------------------------------------------- Halloween decorations, batch 1
@@ -1806,6 +1831,41 @@ GHOSTS = {"lantern": "spirit_lantern", "lantern_display": "Spirit Lantern", "ect
           "stir_chance": 0.25, "near_cap": 3, "near_range": 16, "reveal_radius": 12,
           "haunt_radius": 6, "haunt_height": 3.0, "shy_radius": 3.0, "sneak_shy_radius": 1.5, "drift_speed": 0.04, "shy_speed": 0.12,
           "reveal_ticks": 40, "look_ticks": 10, "fade_ticks": 10}
+
+# ---------------------------------------------------------------- Graveyard Rising
+# Graveyard Rising (agriculture/GraveyardRising.java), every night of the Halloween season: in the Overworld, not in
+# peaceful, using a bell (any bell; every village has one) with at least `min_graves` graves (block tag `graves_tag`: the
+# gravestones, the grave mound and the headstones, a headstone of several blocks counted once) within `radius` blocks
+# across and `height` up or down stirs them, and using it again `confirm_min_ticks` to `confirm_ticks` later wakes the
+# dead (a player looks for graves at most once every `ring_cooldown` ticks). After `first_wave_ticks` they climb out of
+# the graves in `waves` (entity, count), `wave_gap_ticks` apart, plus `extra_per_player` more `extra` for each player
+# taking part after the first (at most `max_extra` a wave); `archers` carry bows. Taking part: alive, not spectating,
+# within `range` blocks of the bell. Nobody there for `abandon_ticks`, dawn, a wave the graves have no room for (fewer
+# than half of it), or the switch off, and the rising fails: the dead sink back. One of the risen (entity tag `tag`)
+# straying more than `leash` blocks from the bell sinks back and another climbs out in its place. Clear the last wave and
+# each player taking part not yet rewarded tonight (player attachment `attachment`, the night) gets the gift loot table
+# `table` and the advancement `advancement`. At most `max_risings` at once, none within `apart` blocks of another, each
+# bell once a night. The server checks every `check_ticks`; `option` (on or off) turns it off.
+GRAVEYARD_RISING = {"option": "halloween.graveyard_rising", "graves_tag": "jugcraft:graves",
+                    "graves": ["jugcraft:rounded_gravestone", "jugcraft:cross_gravestone", "jugcraft:obelisk_gravestone",
+                               "jugcraft:grave_mound", "#jugcraft:headstones"],
+                    "min_graves": 6, "radius": 16, "height": 6, "confirm_min_ticks": 20, "confirm_ticks": 200, "ring_cooldown": 20,
+                    "first_wave_ticks": 60, "wave_gap_ticks": 100, "range": 48, "abandon_ticks": 600, "leash": 40, "check_ticks": 20,
+                    "waves": [[("minecraft:zombie", 4)],
+                              [("minecraft:zombie", 3), ("minecraft:skeleton", 3)],
+                              [("minecraft:zombie", 3), ("minecraft:skeleton", 2), ("minecraft:husk", 2), ("minecraft:stray", 1)]],
+                    "archers": ["minecraft:skeleton", "minecraft:stray"],
+                    "extra": "minecraft:zombie", "extra_per_player": 1, "max_extra": 4, "max_risings": 4, "apart": 64,
+                    "tag": "jugcraft.risen", "attachment": "graveyard_rested", "table": "gameplay/graveyard_rising",
+                    "advancement": "graveyard_shift",
+                    # The gift: `rolls` of `treats` (item, weight, [min, max]), then one of `keepsakes` (weights; "" for nothing).
+                    "rolls": 3,
+                    "treats": [("jugcraft:candy_corn", 30, [2, 4]), ("jugcraft:caramel", 15, [1, 2]), ("jugcraft:ghost_taffy", 10, [1, 1]),
+                               ("jugcraft:glow_gum", 10, [1, 1]), ("jugcraft:fizz_rocks", 10, [1, 1]),
+                               ("jugcraft:witchs_licorice", 10, [1, 1]), ("minecraft:bone", 15, [2, 5])],
+                    "keepsakes": [("jugcraft:skeleton_suit", 5), ("jugcraft:mummy_wraps", 5), ("", 40)]}
+HALLOWEEN_ADVANCEMENTS["graveyard_shift"] = {"icon": "jugcraft:rounded_gravestone", "title": "Graveyard Shift",
+                                             "description": "Lay the dead of a Graveyard Rising back to rest", "frame": "challenge"}
 
 # ---------------------------------------------------------------- Fall additions 10: face paint
 # A Face Paint Kit (FacePaintKitItem) paints one of `designs` on a player's face (FacePaint: a Fabric data attachment,
@@ -2855,7 +2915,8 @@ def all_items():
             + lantern_items() + feast_blocks() + [MAZE["gate"]] + ghost_items() + face_paint_items() + candy_items() + foraging_items() + bat_items() + knitting_items() + pie_items() + [SPIRIT_BOARD["block"], TURKEYS["roast"], THEREMIN["block"], OFRENDA["block"]] + list(OFRENDA["decor"]) + graveyard.items() + [h["item"] for h in HEX["brews"].values()] + [BROOMSTICK["item"]] + [WOLFSBANE["block"], WEREWOLF["dagger"], WEREWOLF["arrow"]] + WEREWOLF_PELTS + WEREWOLF_RUGS + [SQUIRRELS["acorn"]] + midway.items() + ferris_wheel.items() + pinata.items() + hot_air_balloon.items() + leaf_blower.items() + plants.items() + decor15.items() + decor16.items() + decor17.items() + decor18.items() + decor19.items() + decor20.items() + kitchen.items() + feasts.items() + rice.items() + soil.items() + orchard.items() + [i for i in cakes.items() if i not in cakes.ITEMS] + pies_and_tarts.items() + garden.items()
             + herbs.items() + spices.items() + lairs.items() + vesperine.items() + tatterlace.items()
             + yeti_king.items() + cinder_tyrant.items() + mire_hag.items() + crypt_lich.items()
-            + iron_dreadnought.items() + alpha_werewolf.items() + pumpkin_king.items() + cydonian_sentinel.items())
+            + iron_dreadnought.items() + alpha_werewolf.items() + pumpkin_king.items() + hessian_horseman.items()
+            + cydonian_sentinel.items())
 
 
 def owns(entry_id):

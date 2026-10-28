@@ -345,9 +345,11 @@ public class CookingPotBlockEntity extends BaseContainerBlockEntity implements W
 		}
         var chef=level.getGameTime()-lastAssisted<=1?companionJob.productiveChef():null;
         if(chef!=null)try(var tx=net.fabricmc.fabric.api.transfer.v1.transaction.Transaction.openOuter()){
-            if(chef.uniforms.bonus(local.peepo.CompanionUniforms.Type.CHEF,tx)){chefPending=meal.copy();flushChefPending();}
+            if(chef.uniforms.bonus(local.peepo.CompanionUniforms.Type.CHEF,tx)){chefPending=meal.copy();flushChefPending();chef.feedback.bonusProduced(tx);}
             tx.commit();
         }
+		var cook=level.getGameTime()-lastAssisted<=1?companionJob.productiveCook():null;
+		if(cook!=null)cook.feedback.finished(local.peepo.CompanionFeedbackRules.Kind.COOK,net.minecraft.world.item.Items.AIR);
 		// Containers go to the result slots, never back among the ingredients, where they would stop the next batch.
 		for (ItemStack leftover : leftovers) {
 			if (!storeLeftover(leftover)) {

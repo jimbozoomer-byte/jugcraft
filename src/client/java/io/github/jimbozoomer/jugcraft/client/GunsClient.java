@@ -74,6 +74,9 @@ import org.jspecify.annotations.Nullable;
  * at its rate. Each gun keeps its own rate, draw and counter, the other's beyond its slot on its side of the hotbar. R
  * reloads the main hand's gun, or the other's when the main one has no room or nothing to load; one gun reloads at a
  * time; H inspects both.</li>
+ * <li>Slice 15D: a pull of a burst gun ({@link JugcraftGuns#BURSTS}) fires its burst, a shot each interval whether or not
+ * the trigger is still held; the next pull fires once the burst's rest has passed. Running dry, a reload or switching
+ * away ends a burst.</li>
  * </ul>
  */
 public final class GunsClient {
@@ -168,6 +171,9 @@ public final class GunsClient {
 				&& !(fresh && predicted(MAIN, stack) <= 0)) {
 			return true; // the barrels are still spinning up (an empty gun still clicks at once)
 		}
+		if (JugcraftGuns.burst(gun) != null && MAIN.burstLeft > 0) {
+			return true; // a burst under way runs on by itself (tick)
+		}
 		if (fresh || gun.spec().auto()) {
 			pull(client, player, MAIN, stack, gun, fresh);
 		}
@@ -221,6 +227,7 @@ public final class GunsClient {
 			return;
 		}
 		if (predicted(held, stack) <= 0 && !player.hasInfiniteMaterials()) {
+			held.burstLeft = 0;
 			if (fresh) {
 				local(player, "dry_fire");
 				held.nextShot = now + spec.interval();
@@ -232,6 +239,15 @@ public final class GunsClient {
 		ClientPlayNetworking.send(GunShotPayload.of(held.hand));
 		held.nextShot = now + spec.interval();
 		held.lastShot = now;
+		JugcraftGuns.Burst burst = JugcraftGuns.burst(gun);
+		if (burst != null) {
+			// Slice 15D: a fresh pull begins a burst; its last shot waits out the burst's rest before the next pull.
+			held.burstLeft = fresh ? burst.rounds() - 1 : held.burstLeft - 1;
+			if (held.burstLeft <= 0) {
+				held.burstLeft = 0;
+				held.nextShot += burst.rest();
+			}
+		}
 		if (!player.hasInfiniteMaterials()) {
 			held.inFlight++; // creative spends nothing, so the server never settles it
 		}
@@ -302,6 +318,14 @@ public final class GunsClient {
 		while (stabKey.consumeClick()) {
 			stab(client, player, now);
 		}
+		// Slice 15D: a burst under way fires its next shot when the interval allows.
+		if (MAIN.burstLeft > 0) {
+			if (stack.getItem() instanceof GunItem gun && JugcraftGuns.burst(gun) != null && now >= reloadingUntil) {
+				pull(client, player, MAIN, stack, gun, false);
+			} else {
+				MAIN.burstLeft = 0;
+			}
+		}
 		// Slice 10G: an automatic in the other hand fires at its rate while right click, which pulled it, is held.
 		ItemStack off = player.getOffhandItem();
 		if (offPulling && dual && off.getItem() instanceof GunItem gun && GunItem.spec(off).auto()) {
@@ -319,6 +343,7 @@ public final class GunsClient {
 		held.id = id;
 		held.inFlight = 0;
 		held.lastSynced = -1;
+		held.burstLeft = 0;
 		if (held == MAIN) {
 			spinSince = -1;
 		}
@@ -375,9 +400,10 @@ public final class GunsClient {
 			return;
 		}
 		ClientPlayNetworking.send(GunReloadPayload.of(hand));
+		held(hand).burstLeft = 0;
 		if (rounds > 0) {
-			GunAnimations.trigger(player, hand, GunAnimations.reloadName(spec, rounds));
-			reloadingUntil = now + spec.reloadTicks(rounds);
+			GunAnimations.trigger(player, hand, GunAnimations.reloadName(gun, spec, rounds));
+			reloadingUntil = now + spec.reloadTicks(rounds, JugcraftGuns.loadStep(gun));
 			reloadByShell = spec.byShell();
 			reloadingHand = hand;
 		}
@@ -421,7 +447,7 @@ public final class GunsClient {
 				GunAnimations.trigger(holder, hand, "aim_shoot");
 				GunEffects.shot(holder, hand);
 			}
-			case GunActionPayload.RELOAD -> GunAnimations.trigger(holder, hand, GunAnimations.reloadName(gun.spec(), payload.rounds()));
+			case GunActionPayload.RELOAD -> GunAnimations.trigger(holder, hand, GunAnimations.reloadName(gun, gun.spec(), payload.rounds()));
 			case GunActionPayload.STAB -> GunEffects.stabbed(holder);
 			case GunActionPayload.SPIN -> GunEffects.spun(holder, JugcraftGuns.spinUp(gun));
 			default -> GunAnimations.trigger(holder, hand, "idle");
@@ -490,6 +516,8 @@ public final class GunsClient {
 		int inFlight;
 		int lastSynced = -1;
 		long id = Long.MIN_VALUE;
+		/** Shots of a burst still to fire (slice 15D). */
+		int burstLeft;
 
 		Held(InteractionHand hand) {
 			this.hand = hand;

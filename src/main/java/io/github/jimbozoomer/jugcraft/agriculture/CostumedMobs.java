@@ -27,7 +27,9 @@ import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
  * and zombie villager rolls once, the first time it enters the world, and {@link #CHANCE} of them dress up in a
  * costume hat, an outfit (a vampire cape, mummy wraps, a skeleton suit, a werewolf mask, cat ears and tail or bat wings)
  * or a carved pumpkin (never over a helmet they already wear). The costume drops like any mob equipment, now and then; killed by a player (and with mob loot on), a costumed mob also drops one roll of
- * candy (loot table {@code jugcraft:entities/costumed_mob_candy}, rolled as a gift to the player). When the event ends no new
+ * candy (loot table {@code jugcraft:entities/costumed_mob_candy}, rolled as a gift to the player). Under a Blood Moon
+ * ({@link BloodMoon}) {@link BloodMoon#COSTUME_CHANCE} of them dress up, and the candy is rolled {@link BloodMoon#CANDY_ROLLS}
+ * times. When the event ends no new
  * mob dresses up; those already dressed keep their costume. With agriculture switched off, no mob dresses up
  * and none drops candy.
  */
@@ -55,9 +57,16 @@ public final class CostumedMobs {
 			if (entity.entityTags().contains(COSTUMED) && source.getEntity() instanceof ServerPlayer killer
 					&& entity.level() instanceof ServerLevel level && level.getGameRules().get(GameRules.MOB_DROPS)
 					&& JugcraftConfig.isFeatureEnabled(JugcraftAgriculture.FEATURE)) {
-				dropCandy(level, entity, killer);
+				for (int roll = 0; roll < (BloodMoon.active() ? BloodMoon.CANDY_ROLLS : 1); roll++) {
+					dropCandy(level, entity, killer);
+				}
 			}
 		});
+	}
+
+	/** The share of mobs that dress up: {@value #CHANCE}, or {@link BloodMoon#COSTUME_CHANCE} under a Blood Moon. */
+	public static float chance() {
+		return BloodMoon.active() ? BloodMoon.COSTUME_CHANCE : CHANCE;
 	}
 
 	/** Whether this kind of mob dresses up for Halloween. */
@@ -75,7 +84,7 @@ public final class CostumedMobs {
 			return false;
 		}
 		mob.addTag(ROLLED);
-		if (random.nextFloat() >= CHANCE || !mob.getItemBySlot(EquipmentSlot.HEAD).isEmpty()) {
+		if (random.nextFloat() >= chance() || !mob.getItemBySlot(EquipmentSlot.HEAD).isEmpty()) {
 			return false;
 		}
 		Identifier costume = Identifier.parse(COSTUMES.get(random.nextInt(COSTUMES.size())));
