@@ -9256,6 +9256,25 @@
           "items": [],
           "fluids": [
             [
+              "jugcraft:naphtha",
+              1000
+            ]
+          ],
+          "fluid_results": [],
+          "results": [
+            [
+              "jugcraft:plastic_pellets",
+              4
+            ]
+          ],
+          "ticks": 100,
+          "tool": "",
+          "retained_inputs": []
+        },
+        {
+          "items": [],
+          "fluids": [
+            [
               "jugcraft:vinyl_chloride",
               500
             ]
@@ -16365,6 +16384,25 @@
             [
               "jugcraft:ethylene",
               500
+            ]
+          ],
+          "results": [],
+          "ticks": 200,
+          "tool": "",
+          "energy_per_tick": 64
+        },
+        {
+          "items": [],
+          "fluids": [
+            [
+              "jugcraft:naphtha",
+              1000
+            ]
+          ],
+          "fluid_results": [
+            [
+              "jugcraft:ethylene",
+              750
             ]
           ],
           "results": [],
