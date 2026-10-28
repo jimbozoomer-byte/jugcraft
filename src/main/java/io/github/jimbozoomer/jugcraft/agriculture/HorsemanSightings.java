@@ -96,9 +96,10 @@ public final class HorsemanSightings {
 		}
 	}
 
-	/** Whether sightings are on: the {@code agriculture} switch and {@code halloween.horseman_sightings}. */
+	/** Whether seasonal sightings are on, including the server's Halloween window and override. */
 	public static boolean enabled() {
-		return JugcraftConfig.isFeatureEnabled(JugcraftAgriculture.FEATURE) && !"off".equalsIgnoreCase(JugcraftConfig.textOption(OPTION));
+		return HalloweenSeason.active() && JugcraftConfig.isFeatureEnabled(JugcraftAgriculture.FEATURE)
+				&& !"off".equalsIgnoreCase(JugcraftConfig.textOption(OPTION));
 	}
 
 	/** Whether {@code player} may be sent him now: out under the open sky in the overworld, settled in and awake. */

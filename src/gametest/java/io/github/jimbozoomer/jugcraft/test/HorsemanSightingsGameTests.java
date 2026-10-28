@@ -36,6 +36,20 @@ import net.minecraft.world.level.block.Blocks;
  * barrier roof would be the ground he looks for, too high above the player).
  */
 public class HorsemanSightingsGameTests {
+	@GameTest
+	public void sightingsRespectTheHalloweenSeason(GameTestHelper helper) {
+		HalloweenSeason.Mode previous = HalloweenSeason.mode();
+		try {
+			HalloweenSeason.setMode(HalloweenSeason.Mode.OFF);
+			helper.assertFalse(HorsemanSightings.enabled(), "No scheduled rider outside the Halloween season");
+			HalloweenSeason.setMode(HalloweenSeason.Mode.ON);
+			helper.assertTrue(HorsemanSightings.enabled(), "Scheduled riders return when Halloween is enabled");
+		} finally {
+			HalloweenSeason.setMode(previous);
+		}
+		helper.succeed();
+	}
+
 	/** An arena of air 69 by 76 blocks: room for his whole ride. */
 	private static final String FIELD = "jugcraft-test:crowfield_plain";
 	/** The most ticks the ride test waits for its forced arena chunks to tick their entities before sending him. */
