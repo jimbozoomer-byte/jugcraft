@@ -1,11 +1,18 @@
 package io.github.jimbozoomer.jugcraft.test;
 
 import io.github.jimbozoomer.jugcraft.Jugcraft;
+import io.github.jimbozoomer.jugcraft.agriculture.DecorationBlockEntity;
+import io.github.jimbozoomer.jugcraft.agriculture.FacingDecorationBlock;
 import io.github.jimbozoomer.jugcraft.agriculture.HauntedMailboxBlock;
 import io.github.jimbozoomer.jugcraft.agriculture.HauntedMailboxBlockEntity;
 import io.github.jimbozoomer.jugcraft.agriculture.JugcraftAgriculture;
 import io.github.jimbozoomer.jugcraft.agriculture.MultiDecorationBlock;
 import io.github.jimbozoomer.jugcraft.agriculture.PumpkinPathLightBlock;
+import io.github.jimbozoomer.jugcraft.agriculture.RisingZombieBlock;
+import io.github.jimbozoomer.jugcraft.agriculture.SkeletonAnimalBlock;
+import io.github.jimbozoomer.jugcraft.agriculture.SkeletonAnimalBlockEntity;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.function.Predicate;
 import net.fabricmc.fabric.api.gametest.v1.GameTest;
 import net.minecraft.core.BlockPos;
@@ -29,13 +36,18 @@ import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec3;
 
 /**
- * Front-Yard Haunt Scenes, part 1 (decor set 7; docs/features/front-yard-haunt.md): the Haunted Mailbox stands two
+ * Front-Yard Haunt Scenes, parts 1 and 2 (decor set 7; docs/features/front-yard-haunt.md): the Haunted Mailbox stands two
  * blocks high, facing the player, its flag down; an empty hand raises its flag on both blocks and lowers it again;
  * broken at its box it comes away whole and drops once. Its haunting is worked out the same everywhere: with someone near,
  * its door falls open {@value HauntedMailboxBlock#OPEN} degrees, its eyes showing; with no one, it shuts and then only
  * rattles open a crack now and then, its eyes hidden. The Pumpkin Path Light stands two blocks high, placed lit, its
  * lower block alone giving light {@value PumpkinPathLightBlock#LIGHT}; an empty hand puts it out and lights it again;
- * broken, it drops once; its lantern sways a little, to and fro. Their recipes and loot load (two lights a craft).
+ * broken, it drops once; its lantern sways a little, to and fro. Part 2: the Skeleton Dog, Cat and Crow each face
+ * whoever places them, keep their moving part's block entity, rattle for an empty hand without changing, and drop
+ * themselves; the dog's tail wags only while someone is near, the cat's sways, each cat in its own time, and the crow's
+ * head turns toward whoever it watches as far as it can, glancing about with no one near, in quick snaps. The Rising
+ * Zombie stands two blocks high and groans for an empty hand without changing; broken, it drops once; its arms claw out of
+ * step and reach higher the nearer anyone comes. Their recipes and loot load (two lights a craft).
  */
 public class FrontYardGameTests {
 	private static Item item(String id) {
@@ -155,10 +167,102 @@ public class FrontYardGameTests {
 		helper.succeed();
 	}
 
+	@GameTest(maxTicks = 40)
+	public void theSkeletonAnimalsFaceWhoeverPlacesThem(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		floor(helper);
+		ServerPlayer player = standing(helper, new BlockPos(3, 2, 1));
+		String[] animals = {"skeleton_dog", "skeleton_cat", "skeleton_crow"};
+		SkeletonAnimalBlock.Kind[] kinds = {SkeletonAnimalBlock.Kind.DOG, SkeletonAnimalBlock.Kind.CAT, SkeletonAnimalBlock.Kind.CROW};
+		for (int k = 0; k < animals.length; k++) {
+			BlockPos pos = new BlockPos(2 + 2 * k, 2, 4);
+			BlockPos at = helper.absolutePos(pos);
+			place(player, helper, pos, new ItemStack(item(animals[k])));
+			BlockState placed = level.getBlockState(at);
+			helper.assertTrue(placed.getBlock() instanceof SkeletonAnimalBlock animal && animal.kind() == kinds[k]
+					&& placed.getValue(FacingDecorationBlock.FACING) == Direction.NORTH && placed.getValue(SkeletonAnimalBlock.RUNNER) == 0,
+					animals[k] + " stands facing the player who placed it");
+			helper.assertTrue(level.getBlockEntity(at) instanceof SkeletonAnimalBlockEntity, animals[k] + " keeps its moving part");
+			use(player, level, at, ItemStack.EMPTY);
+			helper.assertTrue(level.getBlockState(at) == placed, "An empty hand rattles " + animals[k] + "'s bones, changing nothing");
+			level.destroyBlock(at, true);
+			helper.assertTrue(level.getBlockState(at).isAir() && dropped(helper, item(animals[k])) == 1, "Broken, " + animals[k] + " drops itself");
+		}
+		helper.succeed();
+	}
+
+	@GameTest
+	public void theSkeletonAnimalsMove(GameTestHelper helper) {
+		float wagging = 0.0F;
+		float still = 0.0F;
+		float swaying = 0.0F;
+		boolean apart = false;
+		for (int t = 0; t < SkeletonAnimalBlock.SWAY_TICKS; t++) {
+			wagging = Math.max(wagging, Math.abs(SkeletonAnimalBlock.wag(true, 100.0F, t + 0.5F)));
+			still = Math.max(still, Math.abs(SkeletonAnimalBlock.wag(false, 100.0F, t + 0.5F)));
+			swaying = Math.max(swaying, Math.abs(SkeletonAnimalBlock.sway(t, 0)));
+			apart |= Math.abs(SkeletonAnimalBlock.sway(t, 0) - SkeletonAnimalBlock.sway(t, 17)) > 1.0F;
+		}
+		helper.assertTrue(wagging > SkeletonAnimalBlock.WAG * 0.9F && wagging <= SkeletonAnimalBlock.WAG + 0.001F,
+				"With someone near, the dog's tail wags " + SkeletonAnimalBlock.WAG + " degrees: " + wagging);
+		helper.assertTrue(still == 0.0F, "With no one near, it lies still: " + still);
+		helper.assertTrue(Math.abs(SkeletonAnimalBlock.wag(true, 0.0F, 2.5F)) == 0.0F, "starting from still");
+		helper.assertTrue(swaying > SkeletonAnimalBlock.SWAY * 0.9F && swaying <= SkeletonAnimalBlock.SWAY + 0.001F && apart,
+				"The cat's tail sways " + SkeletonAnimalBlock.SWAY + " degrees, each cat in its own time: " + swaying);
+		helper.assertTrue(SkeletonAnimalBlock.watch(true, 30.0F, 0, 0) == 30.0F, "The crow's head turns toward whoever it watches");
+		helper.assertTrue(SkeletonAnimalBlock.watch(true, 120.0F, 0, 0) == SkeletonAnimalBlock.TURN
+				&& SkeletonAnimalBlock.watch(true, -120.0F, 0, 0) == -SkeletonAnimalBlock.TURN, "as far as it can turn");
+		Set<Float> glances = new HashSet<>();
+		for (long snap = 0; snap < 20; snap++) {
+			float glance = SkeletonAnimalBlock.watch(false, 120.0F, snap, 5);
+			helper.assertTrue(Math.abs(glance) <= 40.0F, "With no one near, it only glances about: " + glance);
+			glances.add(glance);
+		}
+		helper.assertTrue(glances.size() >= 3, "now this way, now that: " + glances);
+		helper.assertTrue(SkeletonAnimalBlock.snapping(0.0F, 60.0F, 0.0F) == 0.0F
+				&& SkeletonAnimalBlock.snapping(0.0F, 60.0F, SkeletonAnimalBlock.SNAP_LENGTH) == 60.0F, "in a quick snap");
+		helper.succeed();
+	}
+
+	@GameTest(maxTicks = 40)
+	public void theRisingZombieClawsAndGroans(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		floor(helper);
+		RisingZombieBlock zombie = (RisingZombieBlock) JugcraftAgriculture.block("rising_zombie");
+		BlockPos pos = new BlockPos(3, 2, 4);
+		BlockPos master = helper.absolutePos(pos);
+		ServerPlayer player = standing(helper, new BlockPos(3, 2, 1));
+		place(player, helper, pos, new ItemStack(item("rising_zombie")));
+		helper.assertTrue(both(level, zombie, master, state -> state.getValue(MultiDecorationBlock.FACING) == Direction.NORTH
+				&& state.getValue(RisingZombieBlock.RUNNER) == 0), "It stands two blocks high, facing the player");
+		helper.assertTrue(level.getBlockEntity(master) instanceof DecorationBlockEntity && level.getBlockEntity(master.above()) == null,
+				"Its first block keeps its arms");
+		BlockState before = level.getBlockState(master);
+		use(player, level, master.above(), ItemStack.EMPTY);
+		helper.assertTrue(level.getBlockState(master) == before && !before.getValue(MultiDecorationBlock.LIT),
+				"An empty hand makes it groan, changing nothing");
+		float most = 0.0F;
+		boolean opposed = true;
+		for (int t = 0; t < RisingZombieBlock.CLAW_TICKS; t++) {
+			float left = RisingZombieBlock.claw(false, t, 9);
+			most = Math.max(most, Math.abs(left));
+			opposed &= Math.abs(left + RisingZombieBlock.claw(true, t, 9)) < 0.01F;
+		}
+		helper.assertTrue(most > RisingZombieBlock.CLAW * 0.9F && most <= RisingZombieBlock.CLAW + 0.001F && opposed,
+				"Its arms claw " + RisingZombieBlock.CLAW + " degrees, out of step: " + most);
+		float half = RisingZombieBlock.lurch(RisingZombieBlock.REACH / 2);
+		helper.assertTrue(RisingZombieBlock.lurch(RisingZombieBlock.REACH + 1.0) == 0.0F && RisingZombieBlock.lurch(0.0) == RisingZombieBlock.LURCH
+				&& half > 0.0F && half < RisingZombieBlock.LURCH, "and reach higher the nearer anyone comes: " + half);
+		level.destroyBlock(master.above(), true);
+		helper.assertTrue(level.getBlockState(master).isAir(), "Broken, it comes away whole");
+		helper.assertTrue(dropped(helper, item("rising_zombie")) == 1, "and drops once, not " + dropped(helper, item("rising_zombie")));
+		helper.succeed();
+	}
+
 	@GameTest
 	public void frontYardDataLoads(GameTestHelper helper) {
 		ServerLevel level = helper.getLevel();
-		for (String id : new String[] {"haunted_mailbox", "pumpkin_path_light"}) {
+		for (String id : new String[] {"haunted_mailbox", "pumpkin_path_light", "skeleton_dog", "skeleton_cat", "skeleton_crow", "rising_zombie"}) {
 			helper.assertTrue(level.recipeAccess().byKey(ResourceKey.create(Registries.RECIPE, Jugcraft.id(id))).isPresent(), id + " has a recipe");
 			helper.assertTrue(level.getServer().reloadableRegistries().getLootTable(ResourceKey.create(Registries.LOOT_TABLE,
 					Jugcraft.id("blocks/" + id))) != LootTable.EMPTY, id + "'s loot loads");

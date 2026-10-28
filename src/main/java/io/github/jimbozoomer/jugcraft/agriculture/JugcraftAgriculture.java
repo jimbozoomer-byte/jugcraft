@@ -407,6 +407,8 @@ public final class JugcraftAgriculture {
 	public static EntityType<HauntedCarousel> HAUNTED_CAROUSEL;
 	public static BlockEntityType<HauntedMailboxBlockEntity> HAUNTED_MAILBOX_ENTITY;
 	public static BlockEntityType<DecorationBlockEntity> PUMPKIN_PATH_LIGHT_ENTITY;
+	public static BlockEntityType<SkeletonAnimalBlockEntity> SKELETON_ANIMAL_ENTITY;
+	public static BlockEntityType<DecorationBlockEntity> RISING_ZOMBIE_ENTITY;
 	public static BlockEntityType<FirewoodRackBlockEntity> FIREWOOD_RACK_ENTITY;
 	public static BlockEntityType<DecorationBlockEntity> CHOPPING_BLOCK_ENTITY;
 	public static BlockEntityType<BlanketLadderBlockEntity> BLANKET_LADDER_ENTITY;
@@ -3069,10 +3071,27 @@ public final class JugcraftAgriculture {
 		PUMPKIN_PATH_LIGHT_ENTITY = Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, Jugcraft.id("pumpkin_path_light"),
 				FabricBlockEntityTypeBuilder.<DecorationBlockEntity>create((pos, state) -> new DecorationBlockEntity(PUMPKIN_PATH_LIGHT_ENTITY, pos, state),
 						light).build());
-		for (Block block : List.of(mailbox, light)) {
+		// Part 2: the skeleton animals (one block entity type for the three) and the Rising Zombie.
+		Block dog = registerBlock("skeleton_dog", props -> new SkeletonAnimalBlock(props, SkeletonAnimalBlock.Kind.DOG), boneProperties());
+		Block cat = registerBlock("skeleton_cat", props -> new SkeletonAnimalBlock(props, SkeletonAnimalBlock.Kind.CAT), boneProperties());
+		Block crow = registerBlock("skeleton_crow", props -> new SkeletonAnimalBlock(props, SkeletonAnimalBlock.Kind.CROW), boneProperties());
+		SKELETON_ANIMAL_ENTITY = Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, Jugcraft.id("skeleton_animal"),
+				FabricBlockEntityTypeBuilder.create(SkeletonAnimalBlockEntity::new, dog, cat, crow).build());
+		Block zombie = registerBlock("rising_zombie", RisingZombieBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.DIRT)
+				.strength(1.0F).sound(SoundType.ROOTED_DIRT).noOcclusion().pushReaction(PushReaction.IMMOVEABLE));
+		RISING_ZOMBIE_ENTITY = Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, Jugcraft.id("rising_zombie"),
+				FabricBlockEntityTypeBuilder.<DecorationBlockEntity>create((pos, state) -> new DecorationBlockEntity(RISING_ZOMBIE_ENTITY, pos, state),
+						zombie).build());
+		for (Block block : List.of(mailbox, light, dog, cat, crow, zombie)) {
 			registerItem(BuiltInRegistries.BLOCK.getKey(block).getPath(), props -> new BlockItem(block, props),
 					new Item.Properties().useBlockDescriptionPrefix(), BUILDING_TAB);
 		}
+	}
+
+	/** Bleached bones: they come away easily, and a piston pops them off. */
+	private static BlockBehaviour.Properties boneProperties() {
+		return BlockBehaviour.Properties.of().mapColor(MapColor.SAND).strength(0.5F).sound(SoundType.BONE_BLOCK).noOcclusion()
+				.pushReaction(PushReaction.POPPED);
 	}
 
 	private static BlockBehaviour.Properties displayProperties() {

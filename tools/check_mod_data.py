@@ -15163,7 +15163,11 @@ def check_front_yard():
     opens the mailbox's door by `lid` and shows its eyes by `eyes`, and sways the light's lantern by `sway`; each
     blockstate shows its runners alone (the door and eyes, the lantern and glow) and the mailbox its flag down and up by
     `flag`; the eyes and the lantern's face glow full-bright; the path light gives its light from its lower block; and
-    their names have their text."""
+    their names have their text. Part 2: the skeleton animals' and the Rising Zombie's Java is the table's (each animal's
+    shape and pivot, the wag, sway and watch, the claw, reach and shoulders); each is registered (the animals sharing one
+    block entity) with its renderer, which moves them by `wag`, `sway` and `watch`, and `claw` and `lurch`; each animal's
+    blockstate shows its moving part alone at runner 1, and the zombie's its arms alone at runners 1 and 2, each arm
+    leaning out whole from its shoulder; and their names have their text."""
     import front_yard as fy
 
     def read(path):
@@ -15212,6 +15216,58 @@ def check_front_yard():
         elements = (load(ASSETS / "models" / "block" / f"{name}.json") or {}).get("elements", [])
         if not elements or any(e.get("light_emission") != 15 or e.get("shade") is not False for e in elements):
             err(f"models/block/{name}.json: it must glow, full-bright and unshaded")
+    # Part 2: the skeleton animals and the Rising Zombie.
+    dog, cat, crow, rz = fy.SKELETON_DOG, fy.SKELETON_CAT, fy.SKELETON_CROW, fy.RISING_ZOMBIE
+    animal = read(JAVA_ROOT / "agriculture" / "SkeletonAnimalBlock.java")
+    needed = [f"WAG = {dog['wag']}F;", f"WAG_TICKS = {dog['wag_ticks']};", f"NEAR = {dog['near']};", f"SWAY = {cat['sway']}F;",
+              f"SWAY_TICKS = {cat['period']};", f"WATCH = {crow['watch']};", f"TURN = {crow['turn']}F;", f"SNAP_TICKS = {crow['snap']};"]
+    for kind, spec in (("DOG", dog), ("CAT", cat), ("CROW", crow)):
+        needed.append("{}(new double[] {{{}}}, new float[] {{{}}}".format(kind, ", ".join(str(v) for v in spec["box"]),
+                                                                       ", ".join(f"{v}F" for v in spec["pivot"])))
+        if f'registerBlock("{spec["block"]}", props -> new SkeletonAnimalBlock(props, SkeletonAnimalBlock.Kind.{kind}), boneProperties())' not in java_main:
+            err(f"JugcraftAgriculture: {spec['block']} must be a SkeletonAnimalBlock of the kind {kind}")
+        if f"block.{MOD}.{spec['block']}" not in lang:
+            err(f"block.{MOD}.{spec['block']}: the text is missing")
+        variants = (load(ASSETS / "blockstates" / f"{spec['block']}.json") or {}).get("variants", {})
+        runner = {"dog": "tail", "cat": "tail", "crow": "head"}[kind.lower()]
+        for face in ("north", "east", "south", "west"):
+            if variants.get(f"facing={face},runner=0", {}).get("model") != f"{MOD}:block/{spec['block']}" \
+                    or variants.get(f"facing={face},runner=1", {}).get("model") != f"{MOD}:block/{spec['block']}_{runner}":
+                err(f"blockstates/{spec['block']}.json: facing {face} must show the animal at runner 0 and its {runner} alone at 1")
+    for item in needed:
+        if item not in animal:
+            err(f"SkeletonAnimalBlock: missing {item} (tools/front_yard.py SKELETON_DOG, SKELETON_CAT, SKELETON_CROW)")
+    if 'SKELETON_ANIMAL_ENTITY = Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, Jugcraft.id("skeleton_animal")' not in java_main:
+        err("JugcraftAgriculture: the skeleton animals must share the block entity skeleton_animal")
+    zombie = read(JAVA_ROOT / "agriculture" / "RisingZombieBlock.java")
+    sx, sy, sz = rz["shoulder"]
+    for item in (f"CLAW = {rz['claw']}F;", f"CLAW_TICKS = {rz['period']};", f"REACH = {rz['reach']};", f"LURCH = {rz['lurch']}F;",
+                 f"SHOULDER_X = {sx}F;", f"SHOULDER_Y = {sy}F;", f"SHOULDER_Z = {sz}F;", "box({}, {}, {})".format(*rz["size"])):
+        if item not in zombie:
+            err(f"RisingZombieBlock: missing {item} (tools/front_yard.py RISING_ZOMBIE)")
+    if f'registerBlock("{rz["block"]}", RisingZombieBlock::new' not in java_main \
+            or f'RISING_ZOMBIE_ENTITY = Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, Jugcraft.id("{rz["block"]}")' not in java_main:
+        err(f"JugcraftAgriculture: {rz['block']} must be a RisingZombieBlock with its own block entity")
+    if f"block.{MOD}.{rz['block']}" not in lang:
+        err(f"block.{MOD}.{rz['block']}: the text is missing")
+    for entity, renderer, calls in (("SKELETON_ANIMAL_ENTITY", "SkeletonAnimalRenderer",
+                                     ("SkeletonAnimalBlock.wag(", "SkeletonAnimalBlock.sway(", "SkeletonAnimalBlock.watch(")),
+                                    ("RISING_ZOMBIE_ENTITY", "RisingZombieRenderer", ("RisingZombieBlock.claw(", "RisingZombieBlock.lurch("))):
+        drawn = read(CLIENT_JAVA_ROOT / f"{renderer}.java")
+        if f"BlockEntityRendererRegistry.register(JugcraftAgriculture.{entity}, {renderer}::new);" not in client \
+                or any(call not in drawn for call in calls):
+            err(f"{renderer}: registered, it must draw the moving parts by {', '.join(calls)}")
+    parts = (load(ASSETS / "blockstates" / f"{rz['block']}.json") or {}).get("multipart", [])
+    arms = {"1": "left_arm", "2": "right_arm"}
+    shown = {p["when"]["runner"]: p["apply"]["model"] for p in parts if p.get("when", {}).get("runner") in arms}
+    if shown != {k: f"{MOD}:block/{rz['block']}_{v}" for k, v in arms.items()} \
+            or any(p.get("when", {}).get("runner") not in ["0"] + list(arms) for p in parts):
+        err(f"blockstates/{rz['block']}.json: its runners 1 and 2 must show its left and right arms alone")
+    for name, angle in (("left_arm", rz["lean"][1]), ("right_arm", -rz["lean"][0])):
+        elements = (load(ASSETS / "models" / "block" / f"{rz['block']}_{name}.json") or {}).get("elements", [])
+        if not elements or any(e.get("rotation", {}).get("axis") != "z" or e["rotation"].get("angle") != angle
+                               or e["rotation"].get("origin", [None])[0] != (sx if name == "right_arm" else 16.0 - sx) for e in elements):
+            err(f"models/block/{rz['block']}_{name}.json: the arm must lean {angle} degrees out from its shoulder, whole")
 
 
 def check_hearth():

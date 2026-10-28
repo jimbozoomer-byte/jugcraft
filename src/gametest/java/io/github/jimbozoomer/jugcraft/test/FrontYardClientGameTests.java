@@ -1,5 +1,6 @@
 package io.github.jimbozoomer.jugcraft.test;
 
+import io.github.jimbozoomer.jugcraft.agriculture.FacingDecorationBlock;
 import io.github.jimbozoomer.jugcraft.agriculture.HauntedMailboxBlock;
 import io.github.jimbozoomer.jugcraft.agriculture.JugcraftAgriculture;
 import io.github.jimbozoomer.jugcraft.agriculture.MultiDecorationBlock;
@@ -14,14 +15,19 @@ import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 
 /**
- * Client game test for Front-Yard Haunt Scenes, part 1 (decor set 7): a front path of gravel across a lawn, a Haunted
- * Mailbox at the street end with its flag up, and three Pumpkin Path Lights along the path, lit, their lanterns swaying
- * (drawn by client/PumpkinPathLightRenderer). Photographed from along the path, from far enough that the mailbox stays
- * shut; from the street close by the mailbox, near enough that its door falls open and its eyes stare out
- * (client/HauntedMailboxRenderer); and by night (CI job {@code client}). They go into docs/features/front-yard-haunt.md.
+ * Client game test for Front-Yard Haunt Scenes, parts 1 and 2 (decor set 7): a front path of gravel across a lawn, a
+ * Haunted Mailbox at the street end with its flag up, and three Pumpkin Path Lights along the path, lit, their lanterns
+ * swaying (drawn by client/PumpkinPathLightRenderer). By the mailbox a Skeleton Dog sits and a Skeleton Crow perches on a
+ * fence post; on the lawn a Skeleton Cat arches and a Rising Zombie claws its way out of the ground (their moving parts
+ * drawn by client/SkeletonAnimalRenderer and client/RisingZombieRenderer). Photographed from along the path, from far
+ * enough that the mailbox stays shut; from the street close by the mailbox, near enough that its door falls open and its
+ * eyes stare out (client/HauntedMailboxRenderer), the dog wags and the crow watches the camera; from the lawn close by the
+ * zombie, near enough that it reaches higher; and by night (CI job {@code client}). They go into
+ * docs/features/front-yard-haunt.md.
  */
 public class FrontYardClientGameTests implements FabricClientGameTest {
 	@Override
@@ -48,6 +54,8 @@ public class FrontYardClientGameTests implements FabricClientGameTest {
 			shoot(context, singleplayer, x + 4, y + 1, z + 11, 160, 15, "jugcraft_front_yard_path");
 			// From the street, three blocks from the mailbox: near enough for its door to fall open on the camera.
 			shoot(context, singleplayer, x - 1, y + 1, z - 6, 0, 15, "jugcraft_front_yard_mailbox");
+			// From the lawn, two blocks from the zombie and the cat: near enough for it to reach higher.
+			shoot(context, singleplayer, x - 1, y + 1, z + 8, 135, 20, "jugcraft_front_yard_bones");
 			server.runCommand("time set midnight");
 			shoot(context, singleplayer, x + 4, y + 1, z + 11, 160, 15, "jugcraft_front_yard_night");
 		}
@@ -85,5 +93,16 @@ public class FrontYardClientGameTests implements FabricClientGameTest {
 		for (int k = 0; k < 3; k++) {
 			stand(level, light, origin.offset(2, 0, 1 + 4 * k), Direction.WEST, state -> state.setValue(MultiDecorationBlock.LIT, true));
 		}
+		// The dog sits by the mailbox, facing the street; the crow perches on a fence post beside it.
+		animal(level, "skeleton_dog", origin.offset(-2, 0, -2), Direction.NORTH);
+		level.setBlock(origin.offset(-3, 0, -3), Blocks.OAK_FENCE.defaultBlockState(), Block.UPDATE_ALL);
+		animal(level, "skeleton_crow", origin.offset(-3, 1, -3), Direction.NORTH);
+		// On the lawn the cat arches at the path, and the zombie rises facing it.
+		animal(level, "skeleton_cat", origin.offset(-2, 0, 3), Direction.EAST);
+		stand(level, (MultiDecorationBlock) JugcraftAgriculture.block("rising_zombie"), origin.offset(-3, 0, 6), Direction.EAST, state -> state);
+	}
+
+	private static void animal(ServerLevel level, String id, BlockPos at, Direction facing) {
+		level.setBlock(at, JugcraftAgriculture.block(id).defaultBlockState().setValue(FacingDecorationBlock.FACING, facing), Block.UPDATE_ALL);
 	}
 }

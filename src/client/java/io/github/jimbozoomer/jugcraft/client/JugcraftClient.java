@@ -273,6 +273,8 @@ public final class JugcraftClient implements ClientModInitializer {
 		EntityRendererRegistry.register(JugcraftAgriculture.HAUNTED_CAROUSEL, HauntedCarouselRenderer::new);
 		BlockEntityRendererRegistry.register(JugcraftAgriculture.HAUNTED_MAILBOX_ENTITY, HauntedMailboxRenderer::new);
 		BlockEntityRendererRegistry.register(JugcraftAgriculture.PUMPKIN_PATH_LIGHT_ENTITY, PumpkinPathLightRenderer::new);
+		BlockEntityRendererRegistry.register(JugcraftAgriculture.SKELETON_ANIMAL_ENTITY, SkeletonAnimalRenderer::new);
+		BlockEntityRendererRegistry.register(JugcraftAgriculture.RISING_ZOMBIE_ENTITY, RisingZombieRenderer::new);
 		BlockEntityRendererRegistry.register(JugcraftAgriculture.ROCKING_CHAIR_ENTITY, RockingChairRenderer::new);
 		BlockEntityRendererRegistry.register(JugcraftAgriculture.LURKING_EYES_ENTITY, LurkingEyesRenderer::new);
 		BlockEntityRendererRegistry.register(JugcraftAgriculture.SILHOUETTE_WINDOW_ENTITY, SilhouetteWindowRenderer::new);

@@ -8,6 +8,13 @@ Every change to Jugcraft, newest first, grouped by pull request. For what each t
 
 No numbered release yet. Entries on feature branches remain proposed until their pull requests merge.
 
+### Unmerged: Front-Yard Haunt Scenes, part 2 (the bones and the risen)
+- **Skeleton Dog, Skeleton Cat and Skeleton Crow**: the bleached bones of a big dog sitting, a cat arched with its tail up and fangs bared, and a crow perched, each at real size, their skulls' sockets square. Each faces whoever places it, and an empty hand rattles its bones. The dog's tail sweeps the ground while anyone is within 6 blocks; the cat's tail sways; the crow's skull turns to watch whoever is within 8 blocks, in a bird's quick snaps, and glances about when no one is.
+- **Rising Zombie**: a zombie clawing its way out of a mound of dug earth, two blocks high: a torn burial shirt with its ribs showing through, its head lolling, its arms raised and clawing at the air. The nearer anyone comes, the higher they reach. An empty hand makes it groan.
+- Recipes: five bones and string (the dog), three bones and string (the cat), two bones, a feather and string (the crow); rotten flesh round a bone over coarse dirt (the zombie).
+- Record: [front-yard-haunt.md](docs/features/front-yard-haunt.md). Decor set 7's second part.
+- **Checked:** the record's Verification. Game tests and screenshots run in CI only; not played by hand.
+
 ### Unmerged: Front-Yard Haunt Scenes, part 1 (the path)
 - **Haunted Mailbox**: a large rural mailbox of black sheet steel on a weathered post, two blocks high, a cobweb under its arm. An empty hand raises or lowers its red flag. Now and then its door rattles open a crack; walk within 4 blocks and it falls open, two glowing eyes staring out of the dark inside.
 - **Pumpkin Path Light**: a wrought-iron shepherd's hook 1.3 m high, a little jack-o'-lantern swaying on a chain from its crook. Placed lit (light 10); an empty hand puts it out or lights it again.

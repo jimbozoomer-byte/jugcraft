@@ -33932,6 +33932,11 @@
       "denominator": 1,
       "source": "recipe jugcraft:ring_toss"
     },
+    "jugcraft:rising_zombie": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
     "jugcraft:riveted_band_block": {
       "numerator": 2560,
       "denominator": 9,
@@ -34953,6 +34958,21 @@
       "source": "fallback (balance pending)"
     },
     "jugcraft:singing_pumpkin_tenor": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
+    "jugcraft:skeleton_cat": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
+    "jugcraft:skeleton_crow": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
+    "jugcraft:skeleton_dog": {
       "numerator": 1,
       "denominator": 1,
       "source": "fallback (balance pending)"
