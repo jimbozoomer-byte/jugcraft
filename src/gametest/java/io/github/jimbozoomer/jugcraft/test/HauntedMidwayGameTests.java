@@ -19,6 +19,7 @@ import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
+import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.EntityTypes;
 import net.minecraft.world.entity.vehicle.minecart.AbstractMinecart;
 import net.minecraft.world.entity.vehicle.minecart.Minecart;
@@ -501,8 +502,12 @@ public class HauntedMidwayGameTests {
 		helper.assertTrue(level.getBlockState(in).isAir() && level.getBlockState(in.above()).isAir() && level.getBlockState(out).isAir(),
 				"Its doorways are left free");
 		level.setBlockAndUpdate(in, Blocks.RAIL.defaultBlockState());
-		// Set down on the rail at the doorway's middle, as the booster rail's test sets its cart down.
-		Minecart cart = helper.spawn(EntityTypes.MINECART, Vec3.atBottomCenterOf(helper.relativePos(in)).add(0.0, 0.1, 0.0));
+		// Set down on the rail at the doorway's middle, at the doorway's own place in the world (as the rocket rail's
+		// showcase sets its cart), not through the test's relative positions.
+		Minecart cart = EntityTypes.MINECART.create(level, EntitySpawnReason.COMMAND);
+		helper.assertTrue(cart != null, "A minecart can be made");
+		cart.snapTo(in.getX() + 0.5, in.getY() + 0.1, in.getZ() + 0.5, 0.0F, 0.0F);
+		level.addFreshEntity(cart);
 		helper.runAfterDelay(GhostTrainBlock.LOOK_TICKS * 2 + 1, () -> {
 			BlockState front = level.getBlockState(master);
 			String saw = "the cart " + (cart.isAlive() ? "at " + cart.position() + " (its doorway " + in + ")" : "gone") + ", "
