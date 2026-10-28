@@ -1,10 +1,12 @@
 package io.github.jimbozoomer.jugcraft.client;
 
 import io.github.jimbozoomer.jugcraft.agriculture.BloodMoon;
+import io.github.jimbozoomer.jugcraft.agriculture.ButterChurnBlockEntity;
 import io.github.jimbozoomer.jugcraft.agriculture.HarvestMoon;
 import io.github.jimbozoomer.jugcraft.agriculture.JugcraftAgriculture;
 import io.github.jimbozoomer.jugcraft.agriculture.OpenCarvingPayload;
 import io.github.jimbozoomer.jugcraft.agriculture.OpenEpitaphPayload;
+import io.github.jimbozoomer.jugcraft.agriculture.QuernBlockEntity;
 import io.github.jimbozoomer.jugcraft.agriculture.SpookyBurstPayload;
 import io.github.jimbozoomer.jugcraft.client.arms.ArmsMotion;
 import io.github.jimbozoomer.jugcraft.client.arms.FlailHeads;
@@ -248,6 +250,10 @@ public final class JugcraftClient implements ClientModInitializer {
 		BlockEntityRendererRegistry.register(JugcraftAgriculture.PUMPKIN_CRATE_ENTITY, PumpkinCrateRenderer::new);
 		BlockEntityRendererRegistry.register(JugcraftAgriculture.PRODUCE_DISPLAY_ENTITY, ProduceDisplayRenderer::new);
 		BlockEntityRendererRegistry.register(JugcraftAgriculture.CHALKBOARD_SIGN_ENTITY, ChalkboardSignRenderer::new);
+		BlockEntityRendererRegistry.register(JugcraftAgriculture.QUERN_ENTITY,
+				context -> new HandWorkedRenderer<QuernBlockEntity>(context, HandWorkedRenderer.TURN));
+		BlockEntityRendererRegistry.register(JugcraftAgriculture.BUTTER_CHURN_ENTITY,
+				context -> new HandWorkedRenderer<ButterChurnBlockEntity>(context, HandWorkedRenderer.PLUNGE));
 		BlockEntityRendererRegistry.register(JugcraftAgriculture.ROCKING_CHAIR_ENTITY, RockingChairRenderer::new);
 		BlockEntityRendererRegistry.register(JugcraftAgriculture.LURKING_EYES_ENTITY, LurkingEyesRenderer::new);
 		BlockEntityRendererRegistry.register(JugcraftAgriculture.SILHOUETTE_WINDOW_ENTITY, SilhouetteWindowRenderer::new);

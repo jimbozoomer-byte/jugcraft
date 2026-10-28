@@ -14690,7 +14690,9 @@ def check_pumpkin_patch():
 def check_barn_tools():
     """Barn & Harvest Tools (tools/barn_tools.py, docs/features/barn-and-harvest-tools.md), part 1: the Watering Can's
     capacity, reach, growth odds and cooldown and the Seed Pouch's kinds and reach are the table's; the can's water
-    component is bounded by its capacity; their recipes exist and the tooltips have their text."""
+    component is bounded by its capacity; their recipes exist and the tooltips have their text. Part 2: the Quern's
+    capacity, turns and turn time and the Butter Churn's strokes, butter and stroke time are the table's; each one's
+    runner variants name its moving part's model; the flour and pancake recipes exist; the messages have their text."""
     import barn_tools as bt
     agri = JAVA_ROOT / "agriculture"
     can = (agri / "WateringCanItem.java").read_text(encoding="utf-8") if (agri / "WateringCanItem.java").is_file() else ""
@@ -14708,9 +14710,27 @@ def check_barn_tools():
         if not (DATA / MOD / "recipe" / f"{recipe['id']}.json").is_file():
             err(f"{recipe['id']}: tools/barn_tools.py's recipe was not generated")
     lang = load(ASSETS / "lang" / "en_us.json") or {}
-    for key in ("item.jugcraft.watering_can.water", "item.jugcraft.seed_pouch.contents"):
+    for key in ("item.jugcraft.watering_can.water", "item.jugcraft.seed_pouch.contents", "message.jugcraft.quern.full",
+                "message.jugcraft.quern.other", "message.jugcraft.butter_churn.full"):
         if key not in lang:
-            err(f"{key}: the tooltip has no text")
+            err(f"{key}: the text is missing")
+    # Part 2: the Quern's and the Butter Churn's numbers, their moving parts' models, and their recipes.
+    quern = (agri / "QuernBlock.java").read_text(encoding="utf-8") if (agri / "QuernBlock.java").is_file() else ""
+    for name, key in (("CAPACITY", "capacity"), ("TURNS", "turns"), ("SPIN_TICKS", "spin_ticks")):
+        if f"int {name} = {bt.QUERN[key]};" not in quern:
+            err(f"QuernBlock.{name} is not tools/barn_tools.py QUERN's {bt.QUERN[key]}")
+    churn = (agri / "ButterChurnBlock.java").read_text(encoding="utf-8") if (agri / "ButterChurnBlock.java").is_file() else ""
+    for name, key in (("STROKES", "strokes"), ("BUTTER", "butter"), ("STROKE_TICKS", "stroke_ticks")):
+        if f"int {name} = {bt.CHURN[key]};" not in churn:
+            err(f"ButterChurnBlock.{name} is not tools/barn_tools.py CHURN's {bt.CHURN[key]}")
+    for block in bt.blocks():
+        states = load(ASSETS / "blockstates" / f"{block}.json") or {}
+        runners = [k for k in states.get("variants", {}) if "runner=true" in k]
+        if not runners or any(states["variants"][k]["model"] == f"jugcraft:block/{block}" for k in runners):
+            err(f"{block}: its blockstate's runner=true variants should name the moving part's own model")
+    for recipe in bt.SHAPELESS:
+        if not (DATA / MOD / "recipe" / f"{recipe['id']}.json").is_file():
+            err(f"{recipe['id']}: tools/barn_tools.py's recipe was not generated")
 
 
 def check_orchard_harvest():

@@ -387,6 +387,8 @@ public final class JugcraftAgriculture {
 	public static BlockEntityType<ProduceDisplayBlockEntity> PRODUCE_DISPLAY_ENTITY;
 	public static BlockEntityType<ChalkboardSignBlockEntity> CHALKBOARD_SIGN_ENTITY;
 	public static BlockEntityType<FruitStoreBlockEntity> FRUIT_STORE_ENTITY;
+	public static BlockEntityType<QuernBlockEntity> QUERN_ENTITY;
+	public static BlockEntityType<ButterChurnBlockEntity> BUTTER_CHURN_ENTITY;
 	public static BlockEntityType<CaramelAppleStandBlockEntity> CARAMEL_APPLE_STAND_ENTITY;
 	public static ExtendedMenuType<FarmStandMenu, FarmStandMenu.Opening> FARM_STAND_MENU;
 	/** The Harvest Effigy catching (assets/jugcraft/sounds/effigy, made by tools/choir_sounds.py). */
@@ -2796,7 +2798,8 @@ public final class JugcraftAgriculture {
 
 	/**
 	 * Barn & Harvest Tools (decor set 3; tools/barn_tools.py), part 1: the planned hand tools, the Watering Can and the Seed
-	 * Pouch. (The Steel Sickle is registered with the other sickles.)
+	 * Pouch (the Steel Sickle is registered with the other sickles); part 2: the Quern and the Butter Churn, and the Flour,
+	 * Butter and Pancakes they lead to.
 	 */
 	private static void registerBarnTools() {
 		WATERING_CAN_WATER = Registry.register(BuiltInRegistries.DATA_COMPONENT_TYPE, Jugcraft.id("watering_can_water"),
@@ -2804,6 +2807,22 @@ public final class JugcraftAgriculture {
 						.networkSynchronized(ByteBufCodecs.VAR_INT).build());
 		registerItem("watering_can", WateringCanItem::new, new Item.Properties().stacksTo(1).component(WATERING_CAN_WATER, 0), TOOL_TAB);
 		registerItem("seed_pouch", SeedPouchItem::new, new Item.Properties().stacksTo(1), TOOL_TAB);
+		// Part 2: the Quern and the Butter Churn, and what they lead to.
+		Block quern = registerBlock("quern", QuernBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.STONE).strength(2.0F)
+				.sound(SoundType.STONE).noOcclusion().pushReaction(PushReaction.IMMOVEABLE));
+		QUERN_ENTITY = Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, Jugcraft.id("quern"),
+				FabricBlockEntityTypeBuilder.create(QuernBlockEntity::new, quern).build());
+		Block churn = registerBlock("butter_churn", ButterChurnBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.WOOD).strength(1.5F)
+				.sound(SoundType.WOOD).noOcclusion().ignitedByLava().pushReaction(PushReaction.IMMOVEABLE));
+		BUTTER_CHURN_ENTITY = Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, Jugcraft.id("butter_churn"),
+				FabricBlockEntityTypeBuilder.create(ButterChurnBlockEntity::new, churn).build());
+		for (Block block : List.of(quern, churn)) {
+			registerItem(BuiltInRegistries.BLOCK.getKey(block).getPath(), props -> new BlockItem(block, props),
+					new Item.Properties().useBlockDescriptionPrefix(), EQUIPMENT_TAB);
+		}
+		plain("flour", COMPOST_LOW);
+		registerItem("butter", Item::new, new Item.Properties(), INGREDIENT_TAB);
+		food("pancakes", 5, 0.6F, COMPOST_MEDIUM_HIGH);
 	}
 
 	private static BlockBehaviour.Properties displayProperties() {

@@ -3557,6 +3557,16 @@
       "denominator": 1,
       "source": "fallback (balance pending)"
     },
+    "jugcraft:butter": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
+    "jugcraft:butter_churn": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
     "jugcraft:butternut_squash": {
       "numerator": 1,
       "denominator": 1,
@@ -12071,6 +12081,11 @@
       "numerator": 10591,
       "denominator": 18,
       "source": "recipe jugcraft:floor_candelabrum"
+    },
+    "jugcraft:flour": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
     },
     "jugcraft:flow_battery": {
       "numerator": 64436,
@@ -31272,6 +31287,11 @@
       "denominator": 6,
       "source": "recipe jugcraft:pan_de_muerto_dough"
     },
+    "jugcraft:pancakes": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
     "jugcraft:panel_mold": {
       "numerator": 8,
       "denominator": 1,
@@ -32926,6 +32946,11 @@
       "numerator": 1024,
       "denominator": 1,
       "source": "local quartz mining/Fortune accounting"
+    },
+    "jugcraft:quern": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
     },
     "jugcraft:radiation_control_board": {
       "numerator": 49247,

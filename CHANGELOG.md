@@ -8,6 +8,13 @@ Every change to Jugcraft, newest first, grouped by pull request. For what each t
 
 No numbered release yet. Entries on feature branches remain proposed until their pull requests merge.
 
+### Unmerged: Barn & Harvest Tools, part 2 (the Quern and the Butter Churn)
+- **Quern**: hand millstones in a flour tray on a wooden stand. Fill its eye with wheat or dried chili, then turn the upper stone with an empty hand; it turns once round, and every two turns grind a piece out of the spout (wheat into Flour, a chili into two Paprika).
+- **Butter Churn**: a stave dash churn with iron hoops. Pour in a bucket of milk (the bucket comes back) and work the dasher; the eighth stroke churns two Butter.
+- **Flour**, **Butter** and **Pancakes**: flour makes Wheat Dough as wheat does; two flour, an egg and a butter make two Pancakes.
+- Record: [barn-and-harvest-tools.md](docs/features/barn-and-harvest-tools.md).
+- **Checked:** the record's Verification. Game tests and screenshots run in CI only; not played by hand.
+
 ### Unmerged: Barn & Harvest Tools, part 1 (the planned hand tools)
 - **Steel Sickle**: the third sickle, harvesting and replanting ripe crops in a 7 by 7 square. Three steel ingots and a stick.
 - **Watering Can**: a tinplate can that holds 16 pours, filled at any water. A pour wets the farmland in the 3 by 3 square round it and gives each crop there a one-in-six chance of a growth step, half a second between pours.

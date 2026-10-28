@@ -106,6 +106,13 @@ TERRACOTTA = Material((52, 24, 14), (86, 40, 24), (130, 62, 38), (172, 90, 56), 
                       shine=False)
 DEW = Material((30, 60, 90), (60, 100, 140), (90, 140, 190), (126, 192, 232), (206, 238, 255), (240, 250, 255))
 
+# Barn & Harvest Tools' dairy and bakery (tools/item_icons/butter.txt, pancakes.txt): a pale butter yellow, and a golden
+# pancake brown. Foods, not metals: both are flat (no shine).
+BUTTER = Material((58, 50, 22), (140, 124, 66), (210, 192, 118), (234, 220, 156), (246, 238, 196), (252, 250, 228),
+                  shine=False)
+PANCAKE = Material((52, 28, 10), (104, 60, 22), (160, 100, 42), (204, 146, 72), (230, 186, 112), (246, 220, 166),
+                   shine=False)
+
 MATERIALS = {
     "tech_clay": Material((48, 22, 22), (78, 38, 38), (124, 57, 57), (168, 83, 83), (201, 116, 111), (228, 158, 146),
                       shine=False),
@@ -117,6 +124,8 @@ MATERIALS = {
     # the Greenwardens' garden
     "leaf": LEAF, "moss": MOSS, "gloam": GLOAM, "stem": STEM, "petal": PETAL, "straw": STRAW, "terracotta": TERRACOTTA,
     "dew": DEW,
+    # Barn & Harvest Tools' dairy and bakery
+    "butter": BUTTER, "pancake": PANCAKE,
     # the approved metals ("I like the alternate versions for steel and bronze")
     "bronze": px.BRONZE, "steel": px.STEEL,
     # the arms' other materials (leather, rubber and cloth are wraps: their own outline and dark tones are never drawn,

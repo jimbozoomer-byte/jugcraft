@@ -1,6 +1,10 @@
 package io.github.jimbozoomer.jugcraft.test;
 
+import io.github.jimbozoomer.jugcraft.agriculture.ButterChurnBlock;
+import io.github.jimbozoomer.jugcraft.agriculture.ButterChurnBlockEntity;
 import io.github.jimbozoomer.jugcraft.agriculture.JugcraftAgriculture;
+import io.github.jimbozoomer.jugcraft.agriculture.QuernBlock;
+import io.github.jimbozoomer.jugcraft.agriculture.QuernBlockEntity;
 import io.github.jimbozoomer.jugcraft.agriculture.SeedPouchItem;
 import io.github.jimbozoomer.jugcraft.agriculture.WateringCanItem;
 import java.util.List;
@@ -11,6 +15,7 @@ import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
+import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
@@ -20,6 +25,7 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.CropBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
+import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec3;
 
@@ -28,6 +34,10 @@ import net.minecraft.world.phys.Vec3;
  * source, pours on farmland to wet the square round it and no further, spends a pour each time, waits its cooldown and
  * does nothing dry; the Seed Pouch gathers the seeds a player carries (and nothing else), sows the empty farmland round
  * the farmland it is used on with its first kind first, and empties back when sneak-used; the Steel Sickle harvests 7 by 7.
+ * Part 2: the Quern takes grain and refuses anything else, grinds a piece every two turns (wheat into flour, a dried
+ * chili into two paprika), won't turn again before a turn is done, gives its grain back to a sneaking empty hand and
+ * spills it when broken; the Butter Churn takes a bucket of milk and gives the bucket back, refuses a second, churns
+ * butter on the eighth stroke, won't stroke again before a stroke is done, and spills its milk when broken.
  */
 public class BarnToolsGameTests {
 	private static Item item(String id) {
@@ -168,5 +178,97 @@ public class BarnToolsGameTests {
 		}
 		helper.assertTrue(player.getMainHandItem().getDamageValue() == 1, "It wears 1 a use");
 		helper.succeed();
+	}
+
+	// ---------------------------------------------------------------- part 2
+
+	private static int dropped(GameTestHelper helper, Item item) {
+		return helper.getLevel().getEntitiesOfClass(ItemEntity.class, new AABB(helper.absolutePos(new BlockPos(3, 2, 3))).inflate(4.0),
+				entity -> entity.getItem().is(item)).stream().mapToInt(entity -> entity.getItem().getCount()).sum();
+	}
+
+	@GameTest(maxTicks = 60)
+	public void theQuernGrindsWheat(GameTestHelper helper) {
+		BlockPos pos = new BlockPos(3, 2, 3);
+		helper.setBlock(pos.below(), Blocks.STONE);
+		helper.setBlock(pos, JugcraftAgriculture.block("quern").defaultBlockState());
+		QuernBlockEntity quern = helper.getBlockEntity(pos, QuernBlockEntity.class);
+		ServerPlayer player = standing(helper, new BlockPos(3, 2, 1), new ItemStack(Items.STICK));
+		useOn(helper, player, pos);
+		helper.assertTrue(player.getMainHandItem().getCount() == 1 && quern.grain().isEmpty(), "A stick isn't taken");
+		player.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(Items.WHEAT, 20));
+		useOn(helper, player, pos);
+		helper.assertTrue(quern.grain().getCount() == QuernBlock.CAPACITY && player.getMainHandItem().getCount() == 20 - QuernBlock.CAPACITY
+				&& helper.getBlockState(pos).getValue(QuernBlock.LOADED), "Sixteen wheat go in and show: " + quern.grain());
+		player.setItemInHand(InteractionHand.MAIN_HAND, ItemStack.EMPTY);
+		useOn(helper, player, pos);
+		useOn(helper, player, pos);
+		helper.assertTrue(quern.turns() == 1 && quern.grain().getCount() == QuernBlock.CAPACITY, "A turn waits for the last: " + quern.turns());
+		// (a tick to spare, so the next turn is surely due)
+		helper.runAfterDelay(QuernBlock.SPIN_TICKS + 1, () -> {
+			useOn(helper, player, pos);
+			helper.assertTrue(quern.grain().getCount() == QuernBlock.CAPACITY - 1, "Two turns grind one wheat: " + quern.grain());
+			helper.runAfterDelay(3, () -> {
+				helper.assertTrue(dropped(helper, JugcraftAgriculture.item("flour")) == 1, "It falls out as a flour");
+				// A dried chili grinds into two paprika, as the mortar grinds it.
+				QuernBlockEntity spices = new QuernBlockEntity(helper.absolutePos(pos.east()), helper.getBlockState(pos));
+				spices.add(new ItemStack(JugcraftAgriculture.item("dried_chili")));
+				spices.turn(0L);
+				ItemStack paprika = spices.turn(QuernBlock.SPIN_TICKS);
+				helper.assertTrue(paprika.is(JugcraftAgriculture.item("paprika")) && paprika.getCount() == 2, "A dried chili gives two paprika: " + paprika);
+				// Sneaking, an empty hand takes the grain back.
+				player.setShiftKeyDown(true);
+				useOn(helper, player, pos);
+				helper.assertTrue(quern.grain().isEmpty() && player.getInventory().countItem(Items.WHEAT) == QuernBlock.CAPACITY - 1
+						&& !helper.getBlockState(pos).getValue(QuernBlock.LOADED), "Its grain comes back");
+				// Broken with grain in, it spills it.
+				quern.add(new ItemStack(Items.WHEAT, 5));
+				helper.getLevel().destroyBlock(helper.absolutePos(pos), true);
+				helper.runAfterDelay(3, () -> {
+					helper.assertTrue(dropped(helper, Items.WHEAT) == 5 && dropped(helper, JugcraftAgriculture.item("quern")) == 1,
+							"Broken, it spills its wheat and drops itself");
+					helper.succeed();
+				});
+			});
+		});
+	}
+
+	@GameTest(maxTicks = 20 + ButterChurnBlock.STROKES * (ButterChurnBlock.STROKE_TICKS + 1) + 40)
+	public void theChurnMakesButter(GameTestHelper helper) {
+		BlockPos pos = new BlockPos(3, 2, 3);
+		helper.setBlock(pos.below(), Blocks.STONE);
+		helper.setBlock(pos, JugcraftAgriculture.block("butter_churn").defaultBlockState());
+		ButterChurnBlockEntity churn = helper.getBlockEntity(pos, ButterChurnBlockEntity.class);
+		ServerPlayer player = standing(helper, new BlockPos(3, 2, 1), new ItemStack(Items.MILK_BUCKET));
+		useOn(helper, player, pos);
+		helper.assertTrue(churn.milk() && player.getMainHandItem().is(Items.BUCKET) && helper.getBlockState(pos).getValue(ButterChurnBlock.FULL),
+				"The milk goes in and the bucket comes back");
+		player.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(Items.MILK_BUCKET));
+		useOn(helper, player, pos);
+		helper.assertTrue(player.getMainHandItem().is(Items.MILK_BUCKET), "A second bucket isn't taken");
+		player.setItemInHand(InteractionHand.MAIN_HAND, ItemStack.EMPTY);
+		useOn(helper, player, pos);
+		useOn(helper, player, pos);
+		helper.assertTrue(churn.strokes() == 1, "A stroke waits for the last: " + churn.strokes());
+		// Each later stroke a tick after the last is done.
+		for (int stroke = 1; stroke < ButterChurnBlock.STROKES; stroke++) {
+			int at = stroke;
+			helper.runAfterDelay(stroke * (ButterChurnBlock.STROKE_TICKS + 1), () -> {
+				useOn(helper, player, pos);
+				helper.assertTrue(churn.strokes() == (at + 1) % ButterChurnBlock.STROKES, "Stroke " + (at + 1) + ": " + churn.strokes());
+			});
+		}
+		helper.runAfterDelay(ButterChurnBlock.STROKES * (ButterChurnBlock.STROKE_TICKS + 1) + 3, () -> {
+			helper.assertTrue(dropped(helper, JugcraftAgriculture.item("butter")) == ButterChurnBlock.BUTTER && !churn.milk()
+					&& !helper.getBlockState(pos).getValue(ButterChurnBlock.FULL), "The eighth stroke churns two butter");
+			// Broken with milk in, the milk is spilt: nothing comes out but the churn.
+			churn.fill();
+			helper.getLevel().destroyBlock(helper.absolutePos(pos), true);
+			helper.runAfterDelay(3, () -> {
+				helper.assertTrue(dropped(helper, JugcraftAgriculture.item("butter_churn")) == 1 && dropped(helper, Items.MILK_BUCKET) == 0
+						&& dropped(helper, Items.BUCKET) == 0, "Broken, it drops itself and spills its milk");
+				helper.succeed();
+			});
+		});
 	}
 }

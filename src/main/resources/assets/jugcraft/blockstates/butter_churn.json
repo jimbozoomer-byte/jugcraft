@@ -1,0 +1,64 @@
+{
+  "variants": {
+    "facing=north,full=false,runner=false": {
+      "model": "jugcraft:block/butter_churn"
+    },
+    "facing=north,full=false,runner=true": {
+      "model": "jugcraft:block/butter_churn_runner"
+    },
+    "facing=north,full=true,runner=false": {
+      "model": "jugcraft:block/butter_churn"
+    },
+    "facing=north,full=true,runner=true": {
+      "model": "jugcraft:block/butter_churn_runner"
+    },
+    "facing=east,full=false,runner=false": {
+      "model": "jugcraft:block/butter_churn",
+      "y": 90
+    },
+    "facing=east,full=false,runner=true": {
+      "model": "jugcraft:block/butter_churn_runner",
+      "y": 90
+    },
+    "facing=east,full=true,runner=false": {
+      "model": "jugcraft:block/butter_churn",
+      "y": 90
+    },
+    "facing=east,full=true,runner=true": {
+      "model": "jugcraft:block/butter_churn_runner",
+      "y": 90
+    },
+    "facing=south,full=false,runner=false": {
+      "model": "jugcraft:block/butter_churn",
+      "y": 180
+    },
+    "facing=south,full=false,runner=true": {
+      "model": "jugcraft:block/butter_churn_runner",
+      "y": 180
+    },
+    "facing=south,full=true,runner=false": {
+      "model": "jugcraft:block/butter_churn",
+      "y": 180
+    },
+    "facing=south,full=true,runner=true": {
+      "model": "jugcraft:block/butter_churn_runner",
+      "y": 180
+    },
+    "facing=west,full=false,runner=false": {
+      "model": "jugcraft:block/butter_churn",
+      "y": 270
+    },
+    "facing=west,full=false,runner=true": {
+      "model": "jugcraft:block/butter_churn_runner",
+      "y": 270
+    },
+    "facing=west,full=true,runner=false": {
+      "model": "jugcraft:block/butter_churn",
+      "y": 270
+    },
+    "facing=west,full=true,runner=true": {
+      "model": "jugcraft:block/butter_churn_runner",
+      "y": 270
+    }
+  }
+}
