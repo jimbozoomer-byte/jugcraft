@@ -9,6 +9,7 @@ import com.mojang.blaze3d.platform.InputConstants;
 import io.github.jimbozoomer.jugcraft.Jugcraft;
 import io.github.jimbozoomer.jugcraft.client.ConcordanceClientOptions;
 import io.github.jimbozoomer.jugcraft.client.KeepFirstConfirmScreen;
+import io.github.jimbozoomer.jugcraft.client.MagicScreen;
 import io.github.jimbozoomer.jugcraft.client.PactClient;
 import io.github.jimbozoomer.jugcraft.client.PactScreen;
 import io.github.jimbozoomer.jugcraft.client.RosterClient;
@@ -1116,8 +1117,17 @@ public class ConcordanceGardenPactClientGameTests implements FabricClientGameTes
 				.sum());
 	}
 
+	/**
+	 * Waits until the pact screen shows the state the client holds and awaits no answer: a state packet marks it to rebuild
+	 * on the next tick, and an awaited answer draws its own line, so the words, controls and budgets read the settled page.
+	 */
+	private static void settle(ClientGameTestContext context) {
+		context.waitFor(client -> !PactClient.waiting() && (!(client.gui.screen() instanceof MagicScreen magic) || magic.settled()), WAIT);
+	}
+
 	/** Spec 1.1, 4.5: the pact screen draws at most {@code most} words without hovering, counted from what it drew. */
 	private static void budget(ClientGameTestContext context, int most, String what) {
+		settle(context);
 		List<String> drawn = context.computeOnClient(client -> screen(client).drawn());
 		int words = context.computeOnClient(client -> screen(client).words());
 		Jugcraft.LOGGER.info("[garden-check] {} draws {} words (at most {}): {}", what, words, most, drawn);
@@ -1134,6 +1144,7 @@ public class ConcordanceGardenPactClientGameTests implements FabricClientGameTes
 
 	/** Spec 2.14: the chooser draws "Not yet" and a reason on every card not ready, without a hover. */
 	private static void reasons(ClientGameTestContext context) {
+		settle(context);
 		String notYet = context.computeOnClient(client -> Component.translatable("screen.jugcraft.pact.short.not_yet").getString());
 		List<String> drawn = context.computeOnClient(client -> screen(client).drawn());
 		long waiting = context.computeOnClient(client -> PactClient.state().patterns().stream().filter(choice -> !choice.ready()).count());
@@ -1142,11 +1153,13 @@ public class ConcordanceGardenPactClientGameTests implements FabricClientGameTes
 	}
 
 	private static void fits(ClientGameTestContext context, String where) {
+		settle(context);
 		List<String> outside = context.computeOnClient(client -> screen(client).outside());
 		check(outside.isEmpty(), "Every control of the pact screen is on screen (" + where + "): " + outside);
 	}
 
 	private static void named(ClientGameTestContext context) {
+		settle(context);
 		List<String> blank = context.computeOnClient(client -> blank(client.gui.screen()));
 		check(blank.isEmpty(), "Every reachable control has words for the narrator: " + blank);
 	}

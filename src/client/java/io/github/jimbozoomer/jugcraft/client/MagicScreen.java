@@ -217,6 +217,11 @@ public abstract class MagicScreen extends Screen implements ScreenKit.Fitted {
 		}
 	}
 
+	/** Whether the screen shows its latest state: no rebuild is pending (a state packet marks it to rebuild on the next tick). Tests. */
+	public boolean settled() {
+		return !dirty;
+	}
+
 	@Override
 	public void tick() {
 		super.tick();

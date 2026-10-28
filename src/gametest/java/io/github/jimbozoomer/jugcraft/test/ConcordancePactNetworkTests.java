@@ -9,6 +9,7 @@ import com.google.gson.JsonParser;
 import com.mojang.blaze3d.platform.InputConstants;
 import io.github.jimbozoomer.jugcraft.Jugcraft;
 import io.github.jimbozoomer.jugcraft.client.ConcordanceClientOptions;
+import io.github.jimbozoomer.jugcraft.client.MagicScreen;
 import io.github.jimbozoomer.jugcraft.client.PactClient;
 import io.github.jimbozoomer.jugcraft.client.PactScreen;
 import io.github.jimbozoomer.jugcraft.client.RosterClient;
@@ -453,8 +454,17 @@ public final class ConcordancePactNetworkTests implements FabricClientGameTest {
 	/** The magic interfaces' budget for his terms, a refusal included (spec 1.1). */
 	private static final int TERMS_WORDS = 50;
 
+	/**
+	 * Waits until the pact screen shows the state the client holds and awaits no answer: a state packet marks it to rebuild
+	 * on the next tick, and an awaited answer draws its own line, so the words, controls and budgets read the settled page.
+	 */
+	private static void settle(ClientGameTestContext context) {
+		context.waitFor(client -> !PactClient.waiting() && (!(client.gui.screen() instanceof MagicScreen magic) || magic.settled()), WAIT);
+	}
+
 	/** Spec 1.1, 4.5: the pact screen draws at most {@code most} words without hovering, counted from what it drew. */
 	private static void budget(ClientGameTestContext context, int most, String what) {
+		settle(context);
 		List<String> drawn = context.computeOnClient(client -> client.gui.screen() instanceof PactScreen screen ? screen.drawn() : List.of());
 		int words = context.computeOnClient(client -> client.gui.screen() instanceof PactScreen screen ? screen.words() : -1);
 		Jugcraft.LOGGER.info("[pact-network] {} draws {} words (at most {}): {}", what, words, most, drawn);
