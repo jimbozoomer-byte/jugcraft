@@ -16,6 +16,7 @@ import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.stats.Stats;
 import net.minecraft.tags.TagKey;
+import net.minecraft.util.Prediction;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Inventory;
@@ -78,9 +79,7 @@ public class SeedPouchItem extends Item {
 			}
 			if (!level.isClientSide()) {
 				for (ItemStack seed : held) {
-					if (!player.getInventory().add(seed)) {
-						player.drop(seed, false);
-					}
+					player.getInventory().placeItemBackInInventory(seed, Prediction.SERVER_ONLY);
 				}
 				store(pouch, new ArrayList<>());
 				level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.BUNDLE_DROP_CONTENTS, SoundSource.PLAYERS, 0.8F, 1.0F);

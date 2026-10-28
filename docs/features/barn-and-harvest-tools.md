@@ -73,6 +73,7 @@ Local checks run on this branch, and their results:
 - `python3 -m unittest discover -s scripts/tests`: 287 tests, OK.
 - `python3 tools/check_icon_maps.py`: PASS (the three new maps among 269; no new warning).
 - `javac` parse (syntax only) of the new and changed Java: OK. The full compile runs in CI.
+- CI's first run failed to compile (`SeedPouchItem.java:82`): 26.3's `LivingEntity.drop` takes a `Prediction`. Emptying the pouch now uses `Inventory.placeItemBackInInventory(stack, Prediction.SERVER_ONLY)`, as the Farm Stand does.
 - The three icons were drawn and looked at at 1x and 10x while drawing (a review aid, not committed).
 
 Game tests (CI only, not run locally), `BarnToolsGameTests`:
