@@ -23,6 +23,10 @@ Part 3:
   it. The rack is wrought iron in flat bands.
 - The chopping block's round: oak bark in stripes up it, its top rings about a dark pith with a check from the pith to
   the bark. The hatchet: an iron head, a hickory handle along its length.
+Part 4:
+- The ladder: oak, its grain along its rails and rungs. Its throws and the basket's yarn are drawn by renderers in their
+  own colours over textures in greys: a twill with a striped border and a fringe; strands wound on a slant.
+- Wicker: weavers passing over and under the stakes two texels at a time, each row a step along from the last.
 """
 import math
 
@@ -484,12 +488,105 @@ def chopping_block():
     return sc
 
 
+# ---------------------------------------------------------------- part 4: the blanket ladder, the knitting basket
+
+WICKER = pal("6a4a24", "8a6432", "a88044", "c49c5a")
+NEEDLE = pal("6a5a48", "8e7c66", "b0a088")
+
+
+def rung_depth(y):
+    """How far out from the ladder's first block's front a rung at height `y` sits, along its lean (pixels)."""
+    return hh.LADDER["foot"] + y * math.tan(math.radians(hh.LADDER["lean"]))
+
+
+def blanket_ladder():
+    """The Blanket Ladder, facing north, its wall behind (to the south): two oak rails 1.75 m long, 62 cm apart, leaning
+    22.5 degrees back from their feet to the wall, and five turned rungs across them. Model: `whole` (the throws on it
+    are drawn by client/BlanketLadderRenderer at the top three rungs)."""
+    sc = Sculpt(hh.LADDER["block"], 2507, 64)
+    rail = lengthwise(WOOD)
+    foot = hh.LADDER["foot"]
+    length = 28.0 / math.cos(math.radians(hh.LADDER["lean"]))
+    el = []
+    for x0 in (3.0, 12.0):
+        el.append(panel(sc, "rail", rail, (x0, 0.0, foot - 0.5), (x0 + 1.0, length, foot + 0.5),
+                        rot=rotation((x0 + 0.5, 0.0, foot), "x", hh.LADDER["lean"])))
+    for y in hh.LADDER["rungs"]:
+        z = rung_depth(y)
+        el.append(panel(sc, "rung", rail, (4.0, y - 0.5, z - 0.5), (12.0, y + 0.5, z + 0.5)))
+    sc.models["whole"] = el
+    return sc
+
+
+def wicker():
+    """Wicker: weavers a texel high passing over and under the stakes two texels at a time, each row a step along from the
+    last (a basket's plain weave): over a lit tone, under a dark one, and a mid tone where a stake shows between."""
+    def paint(p):
+        for y in range(p.h):
+            for x in range(p.w):
+                over = ((x // 2) + y) % 2 == 0
+                p.put(x, y, shade(WICKER, 3 if over and x % 2 == 0 else 2 if over else 1))
+    paint.tag = "wicker"
+    return paint
+
+
+def knitting_basket():
+    """The Knitting Basket, facing north: a square wicker basket 37 cm across and 19 cm high, a bentwood handle over it
+    from side to side, and (`needles`) a pair of knitting needles stuck down into it, crossed. Models: `whole` and
+    `needles`; the balls of yarn are drawn by client/KnittingBasketRenderer."""
+    sc = Sculpt(hh.BASKET["block"], 2508, 64)
+    weave = wicker()
+    el = walls(sc, "side", weave, 5.0, 5.0, 11.0, 11.0, 0.5, 0.0, 3.0, top=flat(WICKER))
+    el.append(panel(sc, "floor", weave, (5.5, 0.0, 5.5), (10.5, 0.75, 10.5)))
+    for x0 in (5.0, 10.5):
+        el.append(panel(sc, "bow", lengthwise(WOOD), (x0, 3.0, 7.75), (x0 + 0.5, 6.5, 8.25)))
+    el.append(panel(sc, "bow", lengthwise(WOOD), (5.0, 6.5, 7.75), (11.0, 7.0, 8.25)))
+    sc.models["whole"] = el
+    needles = []
+    for angle, x0 in ((22.5, 8.6), (-22.5, 9.0)):
+        needles.append(panel(sc, "needle", lengthwise(NEEDLE), (x0, 1.5, 9.05), (x0 + 0.3, 6.5, 9.35), rot=rotation((x0 + 0.15, 1.5, 9.2), "z", angle)))
+        needles.append(panel(sc, "knob", flat(WOOD), (x0 - 0.15, 6.5, 9.0), (x0 + 0.45, 7.0, 9.4), rot=rotation((x0 + 0.15, 1.5, 9.2), "z", angle)))
+    sc.models["needles"] = needles
+    return sc
+
+
+def yarn_ball():
+    """A ball of yarn's wound strands in greys, for the renderer to colour: strands two texels wide running on a slant, in
+    three tones by turns, the lightest the strand's crown (a steady winding, not noise)."""
+    from PIL import Image
+    img = Image.new("RGBA", (16, 16))
+    greys = (176, 212, 240)
+    for y in range(16):
+        for x in range(16):
+            g = greys[((x + 2 * y) // 2) % 3]
+            img.putpixel((x, y), (g, g, g, 255))
+    return img
+
+
+def throw_blanket():
+    """A throw's weave in greys, for the renderer to colour, laid out as the renderer draws a throw (its fold over the rung
+    at the top, the front fold hanging to row 10): a twill, its diagonal stepping a texel a row; a border of two darker
+    rows (7 and 8) near the hem; and a fringe on the hem's row (10), every other texel cut away. Rows below are unused."""
+    from PIL import Image
+    img = Image.new("RGBA", (16, 16), (0, 0, 0, 0))
+    for y in range(11):
+        for x in range(16):
+            if y == 10:
+                if x % 2 == 0:
+                    img.putpixel((x, y), (196, 196, 196, 255))
+                continue
+            g = 150 if y in (7, 8) else (236 if ((x + y) // 2) % 2 else 210)
+            img.putpixel((x, y), (g, g, g, 255))
+    return img
+
+
 _built = {}
 BUILDERS = {hh.FIREPLACE["block"]: fireplace, hh.WOODSTOVE["block"]: woodstove, hh.KETTLE["block"]: kettle, hh.SIMMER_POT["block"]: simmer_pot,
-            hh.RACK["block"]: firewood_rack, hh.CHOPPING_BLOCK["block"]: chopping_block}
+            hh.RACK["block"]: firewood_rack, hh.CHOPPING_BLOCK["block"]: chopping_block, hh.LADDER["block"]: blanket_ladder,
+            hh.BASKET["block"]: knitting_basket}
 # Each one's texture's size: the fireplace's and the stove's 128 texels square, the rest 64.
 SIZES = {hh.FIREPLACE["block"]: 128, hh.WOODSTOVE["block"]: 128, hh.KETTLE["block"]: 64, hh.SIMMER_POT["block"]: 64, hh.RACK["block"]: 64,
-         hh.CHOPPING_BLOCK["block"]: 64}
+         hh.CHOPPING_BLOCK["block"]: 64, hh.LADDER["block"]: 64, hh.BASKET["block"]: 64}
 
 
 def build(block):
@@ -558,6 +655,7 @@ def assets(root, write, lang):
     lang[f"message.{MOD}.{block}.light"] = "Light it with flint and steel or a fire charge"
     part2_assets(root, write, lang)
     part3_assets(root, write, lang)
+    part4_assets(root, write, lang)
 
 
 # The kettle and the pot are small: shown larger in a slot and a hand, lifted to the middle.
@@ -663,8 +761,54 @@ def part3_assets(root, write, lang):
     write(root / "items" / f"{block}.json", {"model": {"type": "minecraft:model", "model": rid(f"item/{block}")}})
 
 
+def part4_assets(root, write, lang):
+    """The blanket ladder's two blocks' models, cut from the whole (a multipart by part), its item the whole at half size;
+    the knitting basket's model and its needles' (added by `needles`), its item the basket with its needles. The throws
+    and the yarn are drawn by their renderers, on their own textures (textures())."""
+    models = root / "models" / "block"
+    states = root / "blockstates"
+    spec = hh.LADDER
+    block = spec["block"]
+    lang[f"block.{MOD}.{block}"] = spec["display"]
+    lang[f"message.{MOD}.{block}.full"] = "Every rung has a throw"
+    sc = build(block)
+    n = len(d17d.cells(spec["size"]))
+    for part, elements in enumerate(ppd.cut(sc.models["whole"], spec["size"])):
+        write(models / f"{block}_{part}.json", fa.model(block, elements))
+    multipart = []
+    for f, y in FACINGS.items():
+        for p in range(n):
+            multipart.append({"when": {"facing": f, "part": str(p)}, "apply": {"model": rid(f"block/{block}_{p}"), **({"y": y} if y else {})}})
+    write(states / f"{block}.json", {"multipart": multipart})
+    write(root / "models" / "item" / f"{block}.json",
+          fa.model(block, fa.transformed(d17d.pinned(d20d.separated(sc.models["whole"])), 0.5, (4.0, 0.0, 4.0), (0, 0, 0))))
+    write(root / "items" / f"{block}.json", {"model": {"type": "minecraft:model", "model": rid(f"item/{block}")}})
+    spec = hh.BASKET
+    block = spec["block"]
+    lang[f"block.{MOD}.{block}"] = spec["display"]
+    lang[f"message.{MOD}.{block}.full"] = "The basket is full"
+    sc = build(block)
+    write(models / f"{block}.json", fa.model(block, d20d.separated(sc.models["whole"])))
+    write(models / f"{block}_needles.json", fa.model(block, d20d.separated(sc.models["needles"])))
+    multipart = []
+    for f, y in FACINGS.items():
+        turn = {"y": y} if y else {}
+        multipart.append({"when": {"facing": f}, "apply": {"model": rid(f"block/{block}"), **turn}})
+        multipart.append({"when": {"facing": f, "needles": "true"}, "apply": {"model": rid(f"block/{block}_needles"), **turn}})
+    write(states / f"{block}.json", {"multipart": multipart})
+    write(root / "models" / "item" / f"{block}.json",
+          fa.model(block, d20d.separated(sc.models["whole"] + sc.models["needles"]), KETTLE_DISPLAY))
+    write(root / "items" / f"{block}.json", {"model": {"type": "minecraft:model", "model": rid(f"item/{block}")}})
+
+
 def loot(out, write):
-    """The fireplace drops once, from its first block (a garland on it stays with the blocks, so it is dropped too)."""
+    """The fireplace and the blanket ladder drop once, from their first blocks (a garland on the fireplace stays with the
+    blocks, so it is dropped too; the ladder's throws come back from its block entity); the rest each drop themselves."""
+    block = hh.LADDER["block"]
+    write(out / f"{block}.json", {"type": "minecraft:block", "pools": [{
+        "condition": {"type": "minecraft:all_of", "terms": [{"type": "minecraft:survives_explosion"},
+                                                            {"type": "minecraft:match_block", "blocks": rid(block), "state": {"part": "0"}}]},
+        "entries": [{"type": "minecraft:item", "name": rid(block)}], "rolls": 1}], "random_sequence": rid(f"blocks/{block}")})
     block = hh.FIREPLACE["block"]
     write(out / f"{block}.json", {"type": "minecraft:block", "pools": [
         {"condition": {"type": "minecraft:all_of", "terms": [{"type": "minecraft:survives_explosion"},
@@ -673,7 +817,8 @@ def loot(out, write):
         {"condition": {"type": "minecraft:match_block", "blocks": rid(block), "state": {"part": "0", "garland": "true"}},
          "entries": [{"type": "minecraft:item", "name": rid(hh.GARLAND["item"])}], "rolls": 1}],
         "random_sequence": rid(f"blocks/{block}")})
-    for block in (hh.WOODSTOVE["block"], hh.KETTLE["block"], hh.SIMMER_POT["block"], hh.RACK["block"], hh.CHOPPING_BLOCK["block"]):
+    for block in (hh.WOODSTOVE["block"], hh.KETTLE["block"], hh.SIMMER_POT["block"], hh.RACK["block"], hh.CHOPPING_BLOCK["block"],
+                  hh.BASKET["block"]):
         write(out / f"{block}.json", {"type": "minecraft:block", "pools": [{
             "condition": {"type": "minecraft:survives_explosion"}, "entries": [{"type": "minecraft:item", "name": rid(block)}], "rolls": 1}],
             "random_sequence": rid(f"blocks/{block}")})
@@ -684,7 +829,8 @@ def tags(tags):
     Kitchen Stove does."""
     for block in (hh.FIREPLACE["block"], hh.WOODSTOVE["block"], hh.KETTLE["block"], hh.SIMMER_POT["block"], hh.RACK["block"]):
         tags.add("block", "minecraft:mineable/pickaxe", rid(block))
-    tags.add("block", "minecraft:mineable/axe", rid(hh.CHOPPING_BLOCK["block"]))
+    for block in (hh.CHOPPING_BLOCK["block"], hh.LADDER["block"], hh.BASKET["block"]):
+        tags.add("block", "minecraft:mineable/axe", rid(block))
     tags.add("block", f"{MOD}:heat_sources", rid(hh.WOODSTOVE["block"]))
 
 
@@ -695,6 +841,9 @@ def textures():
     out = {("block", block): build(block).atlas.img, ("block", f"{block}_fire"): fire_strip(),
            ("item", hh.GARLAND["item"]): item_icons.draw(hh.GARLAND["item"]),
            ("block", f"{pot}_brew"): brew_strip(), ("block", f"{pot}_brew_still"): brew_still()}
-    for other in (hh.WOODSTOVE["block"], hh.KETTLE["block"], pot, hh.RACK["block"], hh.CHOPPING_BLOCK["block"]):
+    for other in (hh.WOODSTOVE["block"], hh.KETTLE["block"], pot, hh.RACK["block"], hh.CHOPPING_BLOCK["block"], hh.LADDER["block"],
+                  hh.BASKET["block"]):
         out[("block", other)] = build(other).atlas.img
+    out[("entity", "throw_blanket")] = throw_blanket()
+    out[("entity", "yarn_ball")] = yarn_ball()
     return out

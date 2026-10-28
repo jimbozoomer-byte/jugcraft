@@ -2777,6 +2777,11 @@
       "denominator": 1,
       "source": "recipe jugcraft:blank_stencil"
     },
+    "jugcraft:blanket_ladder": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
     "jugcraft:blast_door": {
       "numerator": 97,
       "denominator": 16,
@@ -24443,6 +24448,11 @@
       "source": "fallback (balance pending)"
     },
     "jugcraft:knit_sweater": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
+    "jugcraft:knitting_basket": {
       "numerator": 1,
       "denominator": 1,
       "source": "fallback (balance pending)"

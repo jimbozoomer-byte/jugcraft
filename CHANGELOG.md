@@ -8,6 +8,13 @@ Every change to Jugcraft, newest first, grouped by pull request. For what each t
 
 No numbered release yet. Entries on feature branches remain proposed until their pull requests merge.
 
+### Unmerged: Cozy Fall Hearth, part 4 (the comforts)
+- **Blanket Ladder**: a wooden ladder leaning on a wall, two blocks high. Wool carpets of any colour fold over its top three rungs as throws in their colours, with a striped border and a fringe; an empty hand takes back the last; it falls if its wall goes.
+- **Knitting Basket**: a wicker basket holding four balls of yarn, each shown in its own dyed colour, and a pair of knitting needles, kept as worn as they were.
+- Recipes: planks and a stick; a foraging basket and a ball of yarn.
+- Record: [cozy-fall-hearth.md](docs/features/cozy-fall-hearth.md).
+- **Checked:** the record's Verification. Game tests and screenshots run in CI only; not played by hand.
+
 ### Unmerged: Cozy Fall Hearth, part 3 (the woodpile)
 - **Firewood Rack**: a wrought-iron log rack that holds 16 logs of any kind, each shown as a split log, four to a layer. An empty hand takes back the last; a comparator reads how full it is; broken, it gives them back as they went in.
 - **Chopping Block**: a sawn round of oak with a hatchet in it. Use a log on it to split it into exactly the planks crafting gives; the hatchet swings each time.

@@ -14890,7 +14890,9 @@ def check_hearth():
     source, and its fire is full-bright; the kettle's lid is drawn by its renderer, rattling by the table's numbers about
     its hinge, from its runner model; the simmer pot's surface moves in smooth bands. Part 3: the rack's capacity is the
     table's, with a model for each count; the chopping block splits by the log's own crafting recipe, and its hatchet is
-    drawn by its renderer, swung by the table's numbers about its grip, from its runner model."""
+    drawn by its renderer, swung by the table's numbers about its grip, from its runner model. Part 4: the ladder's size,
+    throws and rungs are the table's and its renderer hangs the throws at the model's rungs; the basket's capacity is the
+    table's; both renderers are registered and have their textures."""
     import hearth as hh
     fp = hh.FIREPLACE
     java = (JAVA_ROOT / "agriculture" / "StoneFireplaceBlock.java").read_text(encoding="utf-8") \
@@ -14996,6 +14998,38 @@ def check_hearth():
     if not runners or any(states["variants"][k]["model"] != f"{MOD}:block/{cb['block']}_hatchet" for k in runners):
         err(f"{cb['block']}: its runner=true variants must name the hatchet's own model")
     for key in (f"block.{MOD}.{rk['block']}", f"block.{MOD}.{cb['block']}"):
+        if key not in lang:
+            err(f"{key}: the text is missing")
+    # Part 4: the ladder's size, throws and rungs are the table's, and its renderer hangs the throws at the model's rungs;
+    # the basket's capacity is the table's; both renderers are registered and have their textures.
+    ld = hh.LADDER
+    ladder = (JAVA_ROOT / "agriculture" / "BlanketLadderBlock.java").read_text(encoding="utf-8") \
+        if (JAVA_ROOT / "agriculture" / "BlanketLadderBlock.java").is_file() else ""
+    w, h, d = ld["size"]
+    for needed in (f"box({w}, {h}, {d})", f"RUNGS = {ld['throws']};"):
+        if needed not in ladder:
+            err(f"BlanketLadderBlock: missing {needed} (tools/hearth.py LADDER)")
+    throws = (CLIENT_JAVA_ROOT / "BlanketLadderRenderer.java").read_text(encoding="utf-8") \
+        if (CLIENT_JAVA_ROOT / "BlanketLadderRenderer.java").is_file() else ""
+    import math
+    tan = math.tan(math.radians(ld["lean"]))
+    top = sorted(ld["rungs"], reverse=True)[:ld["throws"]]
+    for y in top:
+        z = round(ld["foot"] + y * tan, 2)
+        if f"{{{y}F, {z}F}}" not in throws:
+            err(f"BlanketLadderRenderer: a throw must hang at the model's rung {y} high, {z} out (tools/hearth.py LADDER)")
+    bk = hh.BASKET
+    basket = (JAVA_ROOT / "agriculture" / "KnittingBasketBlock.java").read_text(encoding="utf-8") \
+        if (JAVA_ROOT / "agriculture" / "KnittingBasketBlock.java").is_file() else ""
+    if f"BALLS = {bk['balls']};" not in basket:
+        err(f"KnittingBasketBlock: missing BALLS = {bk['balls']}; (tools/hearth.py BASKET)")
+    for entity, renderer, texture in (("BLANKET_LADDER_ENTITY", "BlanketLadderRenderer", "throw_blanket"),
+                                      ("KNITTING_BASKET_ENTITY", "KnittingBasketRenderer", "yarn_ball")):
+        if f"BlockEntityRendererRegistry.register(JugcraftAgriculture.{entity}, {renderer}::new);" not in client:
+            err(f"JugcraftClient: {renderer} must be registered")
+        if not (ASSETS / "textures" / "entity" / f"{texture}.png").is_file():
+            err(f"textures/entity/{texture}.png: {renderer} has no texture")
+    for key in (f"block.{MOD}.{ld['block']}", f"block.{MOD}.{bk['block']}", f"message.{MOD}.{ld['block']}.full", f"message.{MOD}.{bk['block']}.full"):
         if key not in lang:
             err(f"{key}: the text is missing")
 

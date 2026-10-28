@@ -29,6 +29,14 @@ Part 3, the woodpile:
 - The Chopping Block (ChoppingBlockBlock): a sawn round of oak with a hatchet sunk in it. A log used on it is split into
   exactly what crafting it gives (its own crafting recipe), and the hatchet swings up `swing` degrees about its grip
   (`grip`, height and depth) and back down over `swing_ticks` ticks (client/ChoppingBlockRenderer).
+
+Part 4, the comforts:
+- The Blanket Ladder (BlanketLadderBlock): a wooden ladder 1.75 m high, one block across and two up, leaning `lean`
+  degrees back from its feet (`foot` pixels out from its front) to the wall, with rungs at the heights `rungs`. A wool
+  carpet used on it is folded over the next rung down from the top as a throw, up to `throws`, drawn in its colour by
+  client/BlanketLadderRenderer.
+- The Knitting Basket (KnittingBasketBlock): a wicker basket holding up to `balls` balls of yarn, each drawn in its own
+  colour by client/KnittingBasketRenderer, and a pair of knitting needles.
 Sizes in pixels, facing north (its wall behind, to the south).
 """
 
@@ -39,6 +47,9 @@ WOODSTOVE = {"block": "woodstove", "display": "Cast-Iron Woodstove", "light": 13
 KETTLE = {"block": "tea_kettle", "display": "Tea Kettle", "lid_lift": 0.35, "lid_tip": 5.0, "hinge": (4.25, 9.25)}
 SIMMER_POT = {"block": "simmer_pot", "display": "Simmer Pot", "frames": 8, "frametime": 4}
 RACK = {"block": "firewood_rack", "display": "Firewood Rack", "capacity": 16}
+LADDER = {"block": "blanket_ladder", "display": "Blanket Ladder", "size": (1, 2, 1), "throws": 3, "lean": 22.5, "foot": 3.75,
+          "rungs": (5.0, 10.25, 15.5, 20.75, 26.0)}
+BASKET = {"block": "knitting_basket", "display": "Knitting Basket", "balls": 4}
 CHOPPING_BLOCK = {"block": "chopping_block", "display": "Chopping Block", "swing_ticks": 8, "swing": 55.0, "grip": (10.6, 2.46)}
 
 RECIPES = [
@@ -51,6 +62,8 @@ RECIPES = [
      "result": "tea_kettle", "count": 1, "category": "misc"},
     {"id": "firewood_rack", "pattern": ["B B", "B B", "III"], "key": {"B": "minecraft:iron_bars", "I": "minecraft:iron_ingot"},
      "result": "firewood_rack", "count": 1, "category": "misc"},
+    {"id": "blanket_ladder", "pattern": ["P P", "PSP", "P P"], "key": {"P": "#minecraft:planks", "S": "minecraft:stick"},
+     "result": "blanket_ladder", "count": 1, "category": "misc"},
 ]
 SHAPELESS = [
     {"id": "mantel_garland", "inputs": ["#minecraft:leaves", "#minecraft:leaves", "minecraft:pumpkin", "minecraft:string"],
@@ -59,11 +72,14 @@ SHAPELESS = [
      "result": "simmer_pot", "count": 1, "category": "misc"},
     {"id": "chopping_block", "inputs": ["#minecraft:logs_that_burn", "minecraft:iron_axe"], "result": "chopping_block", "count": 1,
      "category": "misc"},
+    {"id": "knitting_basket", "inputs": ["jugcraft:foraging_basket", "jugcraft:yarn"], "result": "knitting_basket", "count": 1,
+     "category": "misc"},
 ]
 
 
 def blocks():
-    return [FIREPLACE["block"], WOODSTOVE["block"], KETTLE["block"], SIMMER_POT["block"], RACK["block"], CHOPPING_BLOCK["block"]]
+    return [FIREPLACE["block"], WOODSTOVE["block"], KETTLE["block"], SIMMER_POT["block"], RACK["block"], CHOPPING_BLOCK["block"], LADDER["block"],
+            BASKET["block"]]
 
 
 def items():

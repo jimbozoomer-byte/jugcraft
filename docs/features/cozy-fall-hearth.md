@@ -1,6 +1,6 @@
 # Cozy Fall Hearth
 
-Status: parts 1 (the hearth), 2 (the stove) and 3 (the woodpile) implemented. CI builds them and runs their game tests and client screenshots; not yet played by hand. Parts 4 and 5 are planned below.
+Status: parts 1 (the hearth), 2 (the stove), 3 (the woodpile) and 4 (the comforts) implemented. CI builds them and runs their game tests and client screenshots; not yet played by hand. Part 5 is planned below.
 Proposal issue: none. The owner asked for it directly on 28 October 2026, as set 5 of the ten sets of fall and Halloween decor ("Then I want you to do 1-10 in parts in that order one by one"), drawn by their rules.
 Owner: @jimbozoomer-byte
 Target milestone and tier: Discovery tier; made from cobblestone, planks, a campfire and a stone slab, and (part 2) iron, a furnace, copper and the kitchen's mulling spices.
@@ -60,8 +60,21 @@ Primary specialty and supported player role: building. A builder furnishes a roo
   - Anything that isn't a log does what it would on any block.
   - Recipe (shapeless): a log and an iron axe (its hatchet).
 
+### Part 4: the comforts
+- **Blanket Ladder** (one block across, two up): two oak rails 1.75 m long and 62 cm apart, leaning 22.5 degrees back from their feet to the wall, with five turned rungs.
+  - It leans on the wall you aim at: its upper block needs a sturdy wall behind it, and it falls when the wall goes.
+  - **Use a wool carpet of any colour on it** to fold it over a rung as a throw, the top rung first, up to three. Each throw hangs a long fold in front and a short one behind, in a twill weave with a striped border and a fringe, in its carpet's colour.
+  - An empty hand takes back the throw hung last. Broken, it gives them all back.
+  - Full, it says so and keeps the carpet in your hand.
+  - Recipe: planks down both sides, a stick across the middle.
+- **Knitting Basket**: a square wicker basket 37 cm across and 19 cm high, with a bentwood handle over it.
+  - **Use a ball of yarn on it** to put it in, up to four, each drawn in its own dyed colour: two in front on its floor, two piled behind them.
+  - **Use knitting needles on it** to stick them in, crossed; they are kept as they are, worn or not.
+  - An empty hand takes back the needles first, then the ball put in last. Broken, it gives it all back.
+  - It knits nothing: the needles do that in the hand.
+  - Recipe (shapeless): a foraging basket and a ball of yarn.
+
 ### Planned parts
-- **Part 4: the comforts.** A blanket ladder hung with folded blankets, and a knitting basket.
 - **Part 5: the lights.** A hurricane lamp for the table (a different thing from set 3's Barn Lantern, which hangs on a wall), and mason-jar candles, made with the kitchen's mason jar.
 
 ## How it is drawn (docs/ART_DIRECTION.md, docs/NATURAL_TEXTURES.md)
@@ -103,9 +116,21 @@ Primary specialty and supported player role: building. A builder furnishes a roo
   - the split ends, with bark along two edges, read as a maze pattern; each end now has its bark at one corner;
   - the round's bark was the fireplace logs' charred one and read as a dark crate; it is now oak's grey-brown.
 
+### Part 4's comforts
+- Built the same way, at real size (`tools/hearth_data.py` blanket_ladder(), knitting_basket()).
+- **The ladder**: oak, its grain along its rails and rungs. The rails are each one box turned 22.5 degrees back about its foot, and the rungs sit on the line of the lean.
+- **Throws and yarn in their own colours.** Each is drawn by its renderer (`BlanketLadderRenderer`, `KnittingBasketRenderer`) over a texture in greys, tinted by the carpet's dye or the yarn's own colour, as the Aura Candle's wax is (`TintedBoxes`).
+  - A throw is a twill whose diagonal steps a texel a row, with a border of two darker rows near the hem and a fringe on the hem, every other texel cut away. It is drawn in the same frame on every rung, so its border and fringe fall the same on each.
+  - A ball of yarn is three crossed boxes, so its corners are rounded off, wound in strands two texels wide on a slant, in three tones by turns.
+- **Wicker**: weavers a texel high passing over and under the stakes two texels at a time, each row a step along from the last.
+- **The first previews**, fixed before commit:
+  - the basket's walls hid its yarn, which read as flat slabs; the walls are now lower and the two balls at the back piled up behind the front two;
+  - its first wicker, in long blocks, read as brickwork; it is now the finer over-and-under weave.
+
 ## Connections
 - Existing input producer: cobblestone, planks, a campfire and a smooth stone slab for the fireplace; leaves, a pumpkin and a string for the garland. All vanilla, from the first day.
 - Existing output consumer: none for the fireplace and the garland. The woodstove heats the kitchen's pots: a Cooking Pot on it brews what it brews on a campfire (mint tea, hot cocoa, mulled cider), as do a Skillet, the Canning Kettle and the Candy Kettle.
+- Part 4's inputs: planks and a stick for the ladder; the foraging basket and a ball of yarn for the knitting basket. Its outputs: each gives back what it holds. The basket holds the knitting's yarn and needles, kept as they are.
 - Part 3's inputs: iron bars and iron for the rack; a log and an iron axe for the chopping block. Its outputs: the rack gives back what it holds, and the chopping block gives a log's planks.
 - Part 2's inputs: iron and a furnace for the stove; copper and an iron nugget for the kettle; an iron ingot, a water bucket, an apple and the kitchen's mulling spices (from cinnamon or juniper) for the simmer pot.
 - Technology/magic connections (or infrastructure/cosmetic applicability): cosmetic, and the kitchen's heat sources (part 2).
@@ -120,6 +145,7 @@ Primary specialty and supported player role: building. A builder furnishes a roo
 - The woodstove costs seven iron ingots and a furnace and burns no fuel, like a campfire or the Kitchen Stove. It heats a pot as a campfire does and no faster, so it adds a heat source without adding any output.
 - The kettle and the simmer pot make nothing. The pot's water bucket is given back when it is made.
 - The rack keeps the logs put on it and gives back exactly those, each kind as it went in. It splits, grows and multiplies nothing.
+- The ladder and the basket keep what is put on or in them and give back exactly those: the same carpets; the same balls, each its colour; the same needles, as worn as they were.
 - The chopping block gives exactly what crafting the log gives (it asks the game for the log's own crafting recipe), never more, so it saves no wood and makes no loop. It costs an iron axe, which stays in it as its hatchet; it doesn't come back when the block is broken.
 - No loop: no recipe makes anything that leads back to itself (the audit refuses any loop).
 
@@ -129,7 +155,8 @@ Primary specialty and supported player role: building. A builder furnishes a roo
 - It can't be pushed by a piston.
 - Part 2: the woodstove's `lit` is in its block state, as the fireplace's is. The kettle's and the pot's `heated` is worked out on the server from the block below, when either is placed and whenever that block changes (a stove lit or put out), so nothing ticks. The kettle's block entity (`tea_kettle`) keeps nothing: it is there for its renderer, which works out the lid's rattle from the game time. Steam and sounds are each client's own.
 - Part 3: the rack's logs are kept by its block entity (`firewood_rack`, saved as `logs`), changed on the server only and saved with the world. What it shows is its block state (`logs`, 0 to 16), so nothing is sent but the state. Splitting a log is the server's: it checks the item is a log and looks up its own crafting recipe there. The chopping block's swing is a block event, so every client near it sees it. Its block entity (`chopping_block`) keeps nothing.
-- IDs (stable from release): the block and item `stone_fireplace`; its states `part` (0 to 8), `facing`, `lit`, `garland`. The item `mantel_garland`. Part 2's blocks and items `woodstove` (`facing`, `lit`), `tea_kettle` (`facing`, `heated`, model-only `runner`; block entity `tea_kettle`), `simmer_pot` (`facing`, `heated`); the woodstove is in `jugcraft:heat_sources`. Part 3's blocks and items `firewood_rack` (`facing`, `logs` 0 to 16; block entity `firewood_rack`, its saved `logs`) and `chopping_block` (`facing`, model-only `runner`; block entity `chopping_block`).
+- Part 4: the ladder's throws (`blanket_ladder`, saved as `throws`, on its first block) and the basket's yarn and needles (`knitting_basket`, saved as `yarn` and `needles`) are kept by their block entities. They are changed on the server only, saved with the world and sent to clients, which draw them. The basket's needles also show in its block state (`needles`). The ladder needs its wall, checked on the server when placed and when the wall changes.
+- IDs (stable from release): the block and item `stone_fireplace`; its states `part` (0 to 8), `facing`, `lit`, `garland`. The item `mantel_garland`. Part 2's blocks and items `woodstove` (`facing`, `lit`), `tea_kettle` (`facing`, `heated`, model-only `runner`; block entity `tea_kettle`), `simmer_pot` (`facing`, `heated`); the woodstove is in `jugcraft:heat_sources`. Part 3's blocks and items `firewood_rack` (`facing`, `logs` 0 to 16; block entity `firewood_rack`, its saved `logs`) and `chopping_block` (`facing`, model-only `runner`; block entity `chopping_block`). Part 4's blocks and items `blanket_ladder` (`facing`, `part` 0 to 1; block entity `blanket_ladder`, its saved `throws`) and `knitting_basket` (`facing`, `needles`; block entity `knitting_basket`, its saved `yarn` and `needles`).
 - Its recipes follow the agriculture switch. The blocks and items stay registered when it is off.
 
 ## Dependencies and assets
@@ -157,6 +184,12 @@ All on the first run:
   - `python3 tools/check_icon_maps.py`: PASS (no new map; the woodpile's items are 3D).
   - `javac` scan of the new and changed Java for syntax errors: none. The full compile runs in CI.
   - Part 3's first CI run failed to compile: in 26.3 `SoundEvents.AXE_STRIP` is a sound holder, not a sound, so `playSound` refused it. The chopping block now plays its value, as the Spooky Sign does.
+- Part 4, all on the first run:
+  - `python3 tools/check_mod_data.py`: PASS (8,123 material IDs). `check_hearth` now also checks the ladder's size, throws and rungs against `tools/hearth.py`, and that its renderer hangs the throws at the model's rungs. It checks the basket's capacity, both renderers' registration and their textures.
+  - `python3 scripts/check_repository.py`: PASS.
+  - `python3 -m unittest discover -s scripts/tests`: 287 tests, OK.
+  - `python3 tools/check_icon_maps.py`: PASS (no new map; the comforts' items are 3D).
+  - `javac` scan of the new and changed Java for syntax errors: none. The full compile runs in CI.
 
 Game tests (CI only, not run locally), `HearthGameTests`:
 - **The fireplace lights and takes its garland**:
@@ -181,13 +214,24 @@ Game tests (CI only, not run locally), `HearthGameTests`:
   - an empty hand takes back the birch, the last stacked;
   - broken, it drops its fifteen oak logs and itself.
 - **Part 3: the chopping block splits a log**: a spruce log is spent and splits into four spruce planks, as crafting it gives; cobblestone isn't split; the chop marks its hatchet's swing.
+- **Part 4: the blanket ladder takes three throws**:
+  - it won't stand without a wall to lean on, and leans on one, two blocks high, facing the player;
+  - a stick isn't hung; a red, a white and a green carpet are, each spent, the red on the top rung; a fourth isn't;
+  - an empty hand takes back the green;
+  - its wall gone, it falls, dropping itself and the red and the white.
+- **Part 4: the knitting basket holds yarn and needles**:
+  - four balls of four colours go in, each kept in its colour, and a fifth doesn't;
+  - worn needles go in and show;
+  - an empty hand takes back the needles first, then the last ball;
+  - broken, it gives back its three balls and itself.
 
-`HearthClientGameTests` takes five screenshots of a room's corner (a spruce floor and a plank back wall). It holds:
+`HearthClientGameTests` takes six screenshots of a room's corner (a spruce floor and a plank back wall). It holds:
 - a fireplace lit and dressed, and a second beside it out and bare;
 - part 2's two woodstoves lit along the wall, a kettle boiling on one (its lid drawn by `TeaKettleRenderer`) and a simmer pot on the other;
-- part 3's firewood rack full of logs and a chopping block before it (its hatchet drawn by `ChoppingBlockRenderer`).
+- part 3's firewood rack full of logs and a chopping block before it (its hatchet drawn by `ChoppingBlockRenderer`);
+- part 4's blanket ladder with red, yellow and green throws, and a knitting basket of four coloured balls with its needles. The throws and yarn are drawn by their renderers, so the picture shows their colours.
 
-The shots are from the room, close by, at the stoves, at the woodpile, and by night.
+The shots are from the room, close by, at the stoves, at the woodpile, at the comforts, and by night.
 
 Not run: a hand playtest, and a two-client playtest.
 
@@ -195,5 +239,5 @@ Not run: a hand playtest, and a two-client playtest.
 Not seasonal: it is made and burns all year. It doesn't generate in the world.
 
 ## Rollout and open questions
-- Part 4 (the comforts: a blanket ladder and a knitting basket) follows.
+- Part 5 (the lights: a hurricane lamp and mason-jar candles) follows.
 - Open: whether a lit fireplace or woodstove should warm players near it once a cold-weather system exists; whether the fireplace should take other mantel dressings (a winter garland, candles); whether the kettle should give hot water for the kitchen's drinks.

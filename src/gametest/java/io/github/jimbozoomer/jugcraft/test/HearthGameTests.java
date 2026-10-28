@@ -1,11 +1,16 @@
 package io.github.jimbozoomer.jugcraft.test;
 
+import io.github.jimbozoomer.jugcraft.agriculture.BlanketLadderBlock;
+import io.github.jimbozoomer.jugcraft.agriculture.BlanketLadderBlockEntity;
 import io.github.jimbozoomer.jugcraft.agriculture.ChoppingBlockBlock;
 import io.github.jimbozoomer.jugcraft.agriculture.CookingPotBlockEntity;
 import io.github.jimbozoomer.jugcraft.agriculture.DecorationBlockEntity;
 import io.github.jimbozoomer.jugcraft.agriculture.FacingDecorationBlock;
 import io.github.jimbozoomer.jugcraft.agriculture.FirewoodRackBlock;
 import io.github.jimbozoomer.jugcraft.agriculture.JugcraftAgriculture;
+import io.github.jimbozoomer.jugcraft.agriculture.Knitting;
+import io.github.jimbozoomer.jugcraft.agriculture.KnittingBasketBlock;
+import io.github.jimbozoomer.jugcraft.agriculture.KnittingBasketBlockEntity;
 import io.github.jimbozoomer.jugcraft.agriculture.MultiDecorationBlock;
 import io.github.jimbozoomer.jugcraft.agriculture.StoneFireplaceBlock;
 import io.github.jimbozoomer.jugcraft.agriculture.StovetopBlock;
@@ -43,7 +48,11 @@ import net.minecraft.world.phys.Vec3;
  * when the fire goes out; with its floor gone, the kettle comes off. Part 3: the Firewood Rack takes sixteen logs of any
  * kind and no more, nor a stick; a comparator reads it full; an empty hand takes back the last; broken, it gives them back
  * as they went in. The Chopping Block splits a spruce log into four spruce planks, as crafting does, and marks its
- * hatchet's swing; cobblestone isn't split.
+ * hatchet's swing; cobblestone isn't split. Part 4: the Blanket Ladder won't stand without a wall to lean on and leans on
+ * one, two blocks high; it takes three carpets as throws, the first on its top rung, and no fourth, nor a stick; an empty
+ * hand takes back the last; its wall gone, it falls, giving back itself and its throws. The Knitting Basket takes four
+ * balls of yarn, each kept in its colour, and no fifth; the needles go in and show; an empty hand takes back the needles,
+ * then the last ball; broken, it gives back its yarn and itself.
  */
 public class HearthGameTests {
 	private static Item item(String id) {
@@ -290,6 +299,80 @@ public class HearthGameTests {
 		helper.assertTrue(ChoppingBlockBlock.split(level, new ItemStack(Items.COBBLESTONE)).isEmpty(), "Cobblestone isn't split");
 		helper.runAfterDelay(2, () -> {
 			helper.assertTrue(helper.getBlockEntity(pos, DecorationBlockEntity.class).marked() != Long.MIN_VALUE, "The chop marked its hatchet's swing");
+			helper.succeed();
+		});
+	}
+
+	// ---------------------------------------------------------------- part 4
+
+	@GameTest(maxTicks = 40)
+	public void theBlanketLadderTakesThreeThrows(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		floor(helper);
+		BlanketLadderBlock ladder = (BlanketLadderBlock) JugcraftAgriculture.block("blanket_ladder");
+		BlockPos pos = new BlockPos(3, 2, 4);
+		BlockPos master = helper.absolutePos(pos);
+		ServerPlayer player = standing(helper, new BlockPos(3, 2, 1));
+		place(player, helper, pos, new ItemStack(item("blanket_ladder")));
+		helper.assertBlockNotPresent(ladder, pos);
+		helper.setBlock(pos.above().south(), Blocks.OAK_PLANKS);
+		place(player, helper, pos, new ItemStack(item("blanket_ladder")));
+		helper.assertTrue(level.getBlockState(master).is(ladder) && level.getBlockState(master.above()).is(ladder)
+				&& level.getBlockState(master).getValue(MultiDecorationBlock.FACING) == Direction.NORTH, "It leans on the wall, two blocks high");
+		BlanketLadderBlockEntity throwsOn = (BlanketLadderBlockEntity) level.getBlockEntity(master);
+		use(player, level, master, new ItemStack(Items.STICK));
+		for (Item carpet : List.of(Items.RED_CARPET, Items.WHITE_CARPET, Items.GREEN_CARPET)) {
+			ItemStack held = new ItemStack(carpet, 2);
+			use(player, level, master.above(), held);
+			helper.assertTrue(held.getCount() == 1, "A " + carpet + " is hung, and spent");
+		}
+		ItemStack fourth = new ItemStack(Items.BLUE_CARPET, 2);
+		use(player, level, master, fourth);
+		helper.assertTrue(throwsOn.throwsOn().size() == 3 && throwsOn.throwsOn().get(0).is(Items.RED_CARPET) && fourth.getCount() == 2,
+				"Three throws, the red on the top rung, and a fourth isn't hung (nor the stick)");
+		use(player, level, master, ItemStack.EMPTY);
+		helper.assertTrue(throwsOn.throwsOn().size() == 2 && player.getInventory().countItem(Items.GREEN_CARPET) == 1,
+				"An empty hand takes back the green, hung last");
+		helper.setBlock(pos.above().south(), Blocks.AIR);
+		helper.runAfterDelay(3, () -> {
+			helper.assertTrue(level.getBlockState(master).isAir() && level.getBlockState(master.above()).isAir()
+					&& dropped(helper, item("blanket_ladder")) == 1 && dropped(helper, Items.RED_CARPET) == 1 && dropped(helper, Items.WHITE_CARPET) == 1,
+					"Its wall gone, it falls, dropping itself and its throws");
+			helper.succeed();
+		});
+	}
+
+	@GameTest(maxTicks = 40)
+	public void theKnittingBasketHoldsYarnAndNeedles(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		floor(helper);
+		BlockPos pos = new BlockPos(3, 2, 4);
+		BlockPos at = helper.absolutePos(pos);
+		ServerPlayer player = standing(helper, new BlockPos(3, 2, 1));
+		place(player, helper, pos, new ItemStack(item("knitting_basket")));
+		KnittingBasketBlockEntity basket = helper.getBlockEntity(pos, KnittingBasketBlockEntity.class);
+		int[] colors = {0xB02E26, 0xF0AF15, 0x5E7C16, 0x3C44AA, 0xF0E6D2};
+		for (int i = 0; i < colors.length; i++) {
+			ItemStack ball = Knitting.yarn(colors[i], 2);
+			use(player, level, at, ball);
+			boolean room = i < KnittingBasketBlock.BALLS;
+			helper.assertTrue(ball.getCount() == (room ? 1 : 2), "Ball " + i + (room ? " goes in" : " doesn't"));
+		}
+		helper.assertTrue(basket.yarn().size() == 4 && Knitting.color(basket.yarn().get(1)) == 0xF0AF15, "Four balls, each its own colour");
+		ItemStack needles = new ItemStack(item("knitting_needles"));
+		needles.setDamageValue(5);
+		use(player, level, at, needles);
+		helper.assertTrue(needles.isEmpty() && level.getBlockState(at).getValue(KnittingBasketBlock.NEEDLES), "The needles go in, and show");
+		use(player, level, at, ItemStack.EMPTY);
+		helper.assertTrue(!level.getBlockState(at).getValue(KnittingBasketBlock.NEEDLES)
+				&& player.getInventory().countItem(item("knitting_needles")) == 1 && basket.yarn().size() == 4,
+				"An empty hand takes back the needles first");
+		use(player, level, at, ItemStack.EMPTY);
+		helper.assertTrue(basket.yarn().size() == 3, "then the ball put in last");
+		level.destroyBlock(at, true);
+		helper.runAfterDelay(3, () -> {
+			helper.assertTrue(dropped(helper, item("yarn")) == 3 && dropped(helper, item("knitting_basket")) == 1,
+					"Broken, it gives back its yarn and itself");
 			helper.succeed();
 		});
 	}

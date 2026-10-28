@@ -1,7 +1,12 @@
 package io.github.jimbozoomer.jugcraft.test;
 
 import io.github.jimbozoomer.jugcraft.agriculture.JugcraftAgriculture;
+import io.github.jimbozoomer.jugcraft.agriculture.Knitting;
+import io.github.jimbozoomer.jugcraft.agriculture.KnittingBasketBlock;
+import io.github.jimbozoomer.jugcraft.agriculture.KnittingBasketBlockEntity;
 import io.github.jimbozoomer.jugcraft.agriculture.MultiDecorationBlock;
+import io.github.jimbozoomer.jugcraft.agriculture.BlanketLadderBlock;
+import io.github.jimbozoomer.jugcraft.agriculture.BlanketLadderBlockEntity;
 import io.github.jimbozoomer.jugcraft.agriculture.FacingDecorationBlock;
 import io.github.jimbozoomer.jugcraft.agriculture.FirewoodRackBlock;
 import io.github.jimbozoomer.jugcraft.agriculture.FirewoodRackBlockEntity;
@@ -28,8 +33,11 @@ import net.minecraft.world.level.block.state.BlockState;
  * Stone Fireplace against it, lit and dressed with its Mantel Garland, and a second beside it out and bare; and part 2's
  * two Woodstoves lit along the wall, a Tea Kettle boiling on one (its lid drawn by client/TeaKettleRenderer) and a
  * Simmer Pot simmering on the other; and part 3's Firewood Rack full of logs beside them and a Chopping Block before it
- * (its hatchet drawn by client/ChoppingBlockRenderer); built in a real client and photographed from the room, close by,
- * at the stoves, at the woodpile and by night (CI job {@code client}). The fire is its own full-bright model in an
+ * (its hatchet drawn by client/ChoppingBlockRenderer); and part 4's Blanket Ladder against the wall west of the
+ * fireplaces with three throws on it and a Knitting Basket of four coloured balls and its needles before it (the throws
+ * and the yarn drawn by client/BlanketLadderRenderer and client/KnittingBasketRenderer); built in a real client and
+ * photographed from the room, close by, at the stoves, at the woodpile, at the comforts and by night (CI job
+ * {@code client}). The fire is its own full-bright model in an
  * animated texture, so the pictures show it burns in its firebox and behind the stoves' mica. They go into
  * docs/features/cozy-fall-hearth.md.
  */
@@ -58,6 +66,7 @@ public class HearthClientGameTests implements FabricClientGameTest {
 			shoot(context, singleplayer, x + 1, y, z + 3, 180, 15, "jugcraft_hearth_close");
 			shoot(context, singleplayer, x + 5, y + 1, z + 3, 180, 30, "jugcraft_hearth_stoves");
 			shoot(context, singleplayer, x + 7, y + 1, z + 5, 180, 20, "jugcraft_hearth_woodpile");
+			shoot(context, singleplayer, x - 5, y + 1, z + 4, 180, 20, "jugcraft_hearth_comforts");
 			server.runCommand("time set midnight");
 			shoot(context, singleplayer, x + 1, y, z + 5, 180, 5, "jugcraft_hearth_night");
 		}
@@ -113,5 +122,25 @@ public class HearthClientGameTests implements FabricClientGameTest {
 		}
 		level.setBlock(origin.offset(7, 0, 2), JugcraftAgriculture.block("chopping_block").defaultBlockState()
 				.setValue(FacingDecorationBlock.FACING, Direction.SOUTH), Block.UPDATE_ALL);
+		// Part 4: a blanket ladder leant on the wall at its west end with three throws on it, and a knitting basket before it.
+		BlanketLadderBlock ladder = (BlanketLadderBlock) JugcraftAgriculture.block("blanket_ladder");
+		BlockPos foot = origin.offset(-5, 0, 0);
+		BlockState leant = ladder.defaultBlockState().setValue(MultiDecorationBlock.FACING, Direction.SOUTH);
+		level.setBlock(foot, leant, Block.UPDATE_ALL);
+		ladder.setPlacedBy(level, foot, leant, null, new ItemStack(ladder));
+		if (level.getBlockEntity(foot) instanceof BlanketLadderBlockEntity throwsOn) {
+			for (ItemStack carpet : new ItemStack[] {new ItemStack(Items.RED_CARPET), new ItemStack(Items.YELLOW_CARPET), new ItemStack(Items.GREEN_CARPET)}) {
+				throwsOn.hang(carpet);
+			}
+		}
+		BlockPos basket = origin.offset(-5, 0, 2);
+		level.setBlock(basket, JugcraftAgriculture.block("knitting_basket").defaultBlockState().setValue(FacingDecorationBlock.FACING, Direction.SOUTH)
+				.setValue(KnittingBasketBlock.NEEDLES, true), Block.UPDATE_ALL);
+		if (level.getBlockEntity(basket) instanceof KnittingBasketBlockEntity yarn) {
+			for (int rgb : new int[] {0xF0E6D2, 0xB02E26, 0x3C44AA, 0xF0AF15}) {
+				yarn.put(Knitting.yarn(rgb, 1));
+			}
+			yarn.put(new ItemStack(JugcraftAgriculture.item("knitting_needles")));
+		}
 	}
 }

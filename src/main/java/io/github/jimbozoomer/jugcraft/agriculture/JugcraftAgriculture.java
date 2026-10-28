@@ -399,6 +399,8 @@ public final class JugcraftAgriculture {
 	public static BlockEntityType<DecorationBlockEntity> TEA_KETTLE_ENTITY;
 	public static BlockEntityType<FirewoodRackBlockEntity> FIREWOOD_RACK_ENTITY;
 	public static BlockEntityType<DecorationBlockEntity> CHOPPING_BLOCK_ENTITY;
+	public static BlockEntityType<BlanketLadderBlockEntity> BLANKET_LADDER_ENTITY;
+	public static BlockEntityType<KnittingBasketBlockEntity> KNITTING_BASKET_ENTITY;
 	public static BlockEntityType<CaramelAppleStandBlockEntity> CARAMEL_APPLE_STAND_ENTITY;
 	public static ExtendedMenuType<FarmStandMenu, FarmStandMenu.Opening> FARM_STAND_MENU;
 	/** The Harvest Effigy catching (assets/jugcraft/sounds/effigy, made by tools/choir_sounds.py). */
@@ -2930,7 +2932,8 @@ public final class JugcraftAgriculture {
 
 	/**
 	 * Cozy Fall Hearth, decor set 5 (tools/hearth.py): part 1's Stone Fireplace and Mantel Garland; part 2's Woodstove (a
-	 * heat source), and the Tea Kettle and Simmer Pot set on it; part 3's Firewood Rack and Chopping Block.
+	 * heat source), and the Tea Kettle and Simmer Pot set on it; part 3's Firewood Rack and Chopping Block; part 4's Blanket
+	 * Ladder and Knitting Basket.
 	 */
 	private static void registerHearth() {
 		Block fireplace = registerBlock("stone_fireplace", StoneFireplaceBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.STONE)
@@ -2958,7 +2961,16 @@ public final class JugcraftAgriculture {
 		CHOPPING_BLOCK_ENTITY = Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, Jugcraft.id("chopping_block"),
 				FabricBlockEntityTypeBuilder.<DecorationBlockEntity>create((pos, state) -> new DecorationBlockEntity(CHOPPING_BLOCK_ENTITY, pos, state),
 						chopping).build());
-		for (Block block : List.of(stove, kettle, pot, rack, chopping)) {
+		// Part 4: the comforts.
+		Block ladder = registerBlock("blanket_ladder", BlanketLadderBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.WOOD)
+				.strength(1.0F).sound(SoundType.WOOD).noOcclusion().ignitedByLava().pushReaction(PushReaction.IMMOVEABLE));
+		BLANKET_LADDER_ENTITY = Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, Jugcraft.id("blanket_ladder"),
+				FabricBlockEntityTypeBuilder.create(BlanketLadderBlockEntity::new, ladder).build());
+		Block basket = registerBlock("knitting_basket", KnittingBasketBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.WOOD)
+				.strength(0.5F).sound(SoundType.WOOD).noOcclusion().ignitedByLava().pushReaction(PushReaction.POPPED));
+		KNITTING_BASKET_ENTITY = Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, Jugcraft.id("knitting_basket"),
+				FabricBlockEntityTypeBuilder.create(KnittingBasketBlockEntity::new, basket).build());
+		for (Block block : List.of(stove, kettle, pot, rack, chopping, ladder, basket)) {
 			registerItem(BuiltInRegistries.BLOCK.getKey(block).getPath(), props -> new BlockItem(block, props),
 					new Item.Properties().useBlockDescriptionPrefix(), BUILDING_TAB);
 		}
