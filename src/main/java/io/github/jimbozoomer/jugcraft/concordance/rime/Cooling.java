@@ -1,6 +1,8 @@
 package io.github.jimbozoomer.jugcraft.concordance.rime;
 
 import io.github.jimbozoomer.jugcraft.Jugcraft;
+import io.github.jimbozoomer.jugcraft.concordance.effect.EffectKind;
+import io.github.jimbozoomer.jugcraft.concordance.effect.EffectSpec;
 import net.fabricmc.fabric.api.entity.event.v1.ServerLivingEntityEvents;
 import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
@@ -52,6 +54,16 @@ public final class Cooling {
 		// Hot ground and burning pass a cooled creature by; everything else of fire still reaches it.
 		ServerLivingEntityEvents.ALLOW_DAMAGE.register((entity, source, amount) -> !(cooled(entity)
 				&& (source.is(DamageTypes.HOT_FLOOR) || source.is(DamageTypes.ON_FIRE))));
+	}
+
+	/**
+	 * After a status took (ConcordanceEffects): Quench's Cooled puts the creature's burning out at once, not only from
+	 * the status's next tick, so a friend quenched in fire is out the moment it takes. Any other status is left alone.
+	 */
+	public static void took(LivingEntity target, EffectSpec effect) {
+		if (effect.kind() == EffectKind.STATUS && STATUS.equals(effect.status())) {
+			target.clearFire();
+		}
 	}
 
 	/** Whether {@code entity} is Cooled now. */

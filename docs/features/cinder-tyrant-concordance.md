@@ -15,7 +15,7 @@ Primary specialty and supported player role: adventuring, with the Rimekeepers (
 
 It never quenches him: only his sluices' water does.
 
-**Cooled** (`jugcraft:cooled`) is a heat buffer, not Fire Resistance. While it lasts, the creature's burning is put out each tick, and hot ground (a magma block, the Cinder Kiln's slag) does not hurt it. Fire itself, lava and a creature's fire (his breath, his spit, his wave) still do. Milk ends it.
+**Cooled** (`jugcraft:cooled`) is a heat buffer, not Fire Resistance. It puts the creature out the moment it takes, and while it lasts its burning is put out each tick, and hot ground (a magma block, the Cinder Kiln's slag) does not hurt it. Fire itself, lava and a creature's fire (his breath, his spit, his wave) still do. Milk ends it.
 
 **The Concordance's answers to him** (all elective):
 - **Quench** (Rime, support; taught with Rimebind and Preserve when Rimekeeping is understood; 3 Focus, 2 mastered). Touch a creature: it is put out and Cooled for 5 seconds. *The everyday use:* quench a friend standing in fire, or yourself before crossing a magma floor.
@@ -113,7 +113,10 @@ Updated tests:
 - `ConcordanceRimeStrataGameTests` checks Rimekeeping teaching Quench, and relearning.
 - `ConcordanceRimeStrataClientGameTests` checks Quench's and Cooled's icons.
 
-Results: not yet run.
+Results:
+- **fc4ea2abd:** 3042 of 3043 game tests passed. The one failure was `quenchCoolsButIsNoFireResistance` ("Quench did not put out and cool its friend"). Quench's Cooled took, but the friend's burning went out only on Cooled's next tick.
+- **The fix:** `Cooling.took`, called from the effect boundary as Rimebind's and Brace's hooks are, now puts the creature out at once. `check_tyrant_concordance` holds the hook, and catches it removed.
+- **After the fix:** the run on the next commit is pending.
 
 **Not done:** a human playthrough, and the two-client dedicated-server playtest.
 

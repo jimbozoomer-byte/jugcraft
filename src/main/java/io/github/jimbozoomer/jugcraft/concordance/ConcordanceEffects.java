@@ -9,6 +9,7 @@ import io.github.jimbozoomer.jugcraft.concordance.effect.Ledger;
 import io.github.jimbozoomer.jugcraft.concordance.effect.Stacking;
 import io.github.jimbozoomer.jugcraft.concordance.effect.Tolerance;
 import io.github.jimbozoomer.jugcraft.concordance.ember.Ember;
+import io.github.jimbozoomer.jugcraft.concordance.rime.Cooling;
 import io.github.jimbozoomer.jugcraft.concordance.rime.Rime;
 import io.github.jimbozoomer.jugcraft.concordance.rime.Rimebind;
 import io.github.jimbozoomer.jugcraft.concordance.sign.Sign;
@@ -224,9 +225,11 @@ public final class ConcordanceEffects {
 				Holder<MobEffect> status = status(effect.status());
 				Result took = status == null ? Result.NOTHING : lasting(target, status, effect.magnitude(), effect, context.actor());
 				if (took.applied()) {
-					// Chunk B unit 3: a Rimebound that took starts its thaw; a Brace remembers who put it on.
+					// Chunk B unit 3: a Rimebound that took starts its thaw; a Brace remembers who put it on. Chunk E (E3): Cooled
+					// puts the creature out at once.
 					Rimebind.bound(person, target, effect);
 					Brace.braced(person, target, effect);
+					Cooling.took(target, effect);
 				}
 				yield took;
 			}

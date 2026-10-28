@@ -12351,6 +12351,9 @@ def check_tyrant_concordance():
             or f"0x{cr.COOLED_COLOUR:06X}" not in cooling.upper().replace("0X", "0x") or "Cooling.register();" not in rime:
         err(f"rime/Cooling: Cooled is {cr.COOLED} (colour 0x{cr.COOLED_COLOUR:06X}, registered from Rime.register), and "
             f"spares only hot ground and burning (HOT_FLOOR, ON_FIRE), never fire itself or lava: found {sorted(damage)}")
+    effects = source(JAVA_ROOT / "concordance" / "ConcordanceEffects.java")
+    if "Cooling.took(target, effect);" not in effects or "target.clearFire();" not in _java_body(cooling, "public static void took("):
+        err("rime/Cooling.took: Cooled put on through the Concordance's effect boundary puts the creature out at once")
     if "Cooling.cooled(living)" not in _java_body(slag, "public static boolean harms("):
         err("MoltenSlagBlock.harms: the Cinder Kiln's slag spares a Cooled creature")
     quenching = cr.COMPONENTS.get(cr.QUENCH_WORD, {}).get("operation", {})
