@@ -18,6 +18,14 @@ scoped or approved for building yet.
     ([arcane-concordance-ecology.md](features/arcane-concordance-ecology.md)) and the Astrolabe's recall, so no one waits
     on the calendar.
   - Must keep within the agriculture plan's no-feedback-loop rules ([industrial-agriculture-plan.md](features/industrial-agriculture-plan.md)).
+  - **The Astrawand** (owner's request, 28 October 2026): signs and traits are read with a new tool, not the Astrolabe.
+    It is a slender conductor's baton in the look of the Wind Waker from The Legend of Zelda: a pale shaft, a gold
+    pommel and ferrule, and a little star at its tip. It is a fan homage with its own name, and its art and model are
+    drawn new for Jugcraft, not copied (LICENSE_POLICY.md, fan homages). The owner library has no baton to start from.
+    - Point it at a crop, seed or animal to read its sign and traits.
+    - It could also *conduct* the star rite: a short pattern of strokes for each sky pattern, as the Wind Waker's
+      songs are conducted.
+    - The Astrolabe keeps its present work: gathering resonance and attuning.
   - Open questions are with the owner: how deep the genetics go, crops or animals first, vanilla kinds or only
     Jugcraft's, and drawbacks for forced traits.
 - [ ] **Omens and horoscopes (magical side; the owner likes it).** Each night's sky shifts the world a little, and the
