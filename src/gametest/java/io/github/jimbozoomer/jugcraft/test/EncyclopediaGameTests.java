@@ -60,6 +60,8 @@ import io.github.jimbozoomer.jugcraft.lair.dreadnought.IronDreadnoughtEntity;
 import io.github.jimbozoomer.jugcraft.lair.dreadnought.JugcraftDreadnought;
 import io.github.jimbozoomer.jugcraft.lair.hag.JugcraftHag;
 import io.github.jimbozoomer.jugcraft.lair.hag.MireHagEntity;
+import io.github.jimbozoomer.jugcraft.lair.horseman.HessianHorsemanEntity;
+import io.github.jimbozoomer.jugcraft.lair.horseman.JugcraftHorseman;
 import io.github.jimbozoomer.jugcraft.lair.king.JugcraftPumpkinKing;
 import io.github.jimbozoomer.jugcraft.lair.king.PumpkinKingEntity;
 import io.github.jimbozoomer.jugcraft.lair.lich.JugcraftLich;
@@ -258,9 +260,11 @@ public class EncyclopediaGameTests {
 		for (String recipe : boss.rite) {
 			helper.assertTrue(grid(rite, EncyclopediaPayload.EdgeKind.REQUIRED, recipe), "the rite's recipe " + recipe + ", as a required grid");
 		}
-		helper.assertTrue(boss.offSeason == null ? row(rite, dossier + "all_year") != null
-				: rite.stream().map(row -> key(row.text())).anyMatch(key -> key.equals(dossier + "any_night") || key.equals(dossier + "in_season")
-						|| key.equals(boss.offSeason)), "when the rite works");
+		List<String> riteKeys = rite.stream().map(row -> key(row.text())).toList();
+		helper.assertTrue(boss.inSeason != null ? riteKeys.contains(HalloweenSeason.active() ? boss.inSeason : dossier + "out_of_season")
+				: boss.offSeason == null ? riteKeys.contains(dossier + "all_year")
+				: riteKeys.contains(dossier + "any_night") || riteKeys.contains(dossier + "in_season") || riteKeys.contains(boss.offSeason),
+				"when the rite works: " + riteKeys);
 		helper.assertTrue(keys(found).stream().noneMatch(key -> key.equals("entity.jugcraft." + boss.boss) || key.startsWith(dossier + "first_win")),
 				"the keeper is not named before met");
 
@@ -657,6 +661,13 @@ public class EncyclopediaGameTests {
 				List.of(JugcraftPumpkinKing.hallowreap(), JugcraftPumpkinKing.crowbill()));
 	}
 
+	/** Concordance Chunk E (E4): the Church Bridge's dossier, from a Hessian's Bridle carried to a win over the Headless Horseman. */
+	@GameTest(maxTicks = 20)
+	public void theChurchBridgesDossier(GameTestHelper helper) {
+		keeperDossier(helper, LairDossiers.Boss.HESSIAN_HORSEMAN, JugcraftLairs.HESSIANS_BRIDLE,
+				List.of(JugcraftHorseman.hollowflail(), JugcraftHorseman.hessianSabre()));
+	}
+
 	/**
 	 * Concordance Chunk E (E4): every found lair gives its lore, first, naming no keeper, its rite's numbers the game's,
 	 * and what readies a player for its keeper as text and icons with no grid, its numbers the game's: the piece of the
@@ -687,7 +698,10 @@ public class EncyclopediaGameTests {
 				LairDossiers.Boss.ALPHA_WEREWOLF, List.of(AlphaWerewolfEntity.FLUSHED_TICKS / 20, String.valueOf((int) JugcraftAlpha.CHARM_REACH)),
 				LairDossiers.Boss.CYDONIAN_SENTINEL, List.of(String.valueOf((int) CydonianSentinelEntity.SHELTER_REACH),
 						String.valueOf((int) CydonianSentinelEntity.STAGGER_DAMAGE)),
-				LairDossiers.Boss.PUMPKIN_KING, List.of(Math.round((PumpkinKingEntity.FIRE - 1.0F) * 100.0F)));
+				LairDossiers.Boss.PUMPKIN_KING, List.of(Math.round((PumpkinKingEntity.FIRE - 1.0F) * 100.0F)),
+				LairDossiers.Boss.HESSIAN_HORSEMAN, List.of(HessianHorsemanEntity.HIDDEN_DARK, Math.round(HessianHorsemanEntity.HIDDEN * 100.0F),
+						HessianHorsemanEntity.RELIGHT_TICKS / 20, HessianHorsemanEntity.REVEALED_TICKS / 20,
+						Math.round((HessianHorsemanEntity.REVEALED - 1.0F) * 100.0F)));
 		Map<LairDossiers.Boss, List<Item>> icons = Map.of(
 				LairDossiers.Boss.VESPERINE, List.of(),
 				LairDossiers.Boss.TATTERLACE, List.of(JugcraftTatterlace.GOLDEN_THIMBLE),
@@ -697,14 +711,16 @@ public class EncyclopediaGameTests {
 				LairDossiers.Boss.ALPHA_WEREWOLF, List.of(BuiltInRegistries.ITEM.getValue(Jugcraft.id("silver_dagger")),
 						BuiltInRegistries.ITEM.getValue(Jugcraft.id("wolfsbane")), JugcraftAlpha.PACKFINDER_CHARM),
 				LairDossiers.Boss.CYDONIAN_SENTINEL, List.of(JugcraftSentinel.LOWFALL_CORE),
-				LairDossiers.Boss.PUMPKIN_KING, List.of());
+				LairDossiers.Boss.PUMPKIN_KING, List.of(),
+				LairDossiers.Boss.HESSIAN_HORSEMAN, List.of());
 		// The new rites' numbers.
 		Map<LairDossiers.Boss, List<Object>> rites = Map.of(
 				LairDossiers.Boss.MIRE_HAG, List.of(), LairDossiers.Boss.CRYPT_LICH, List.of(),
 				LairDossiers.Boss.IRON_DREADNOUGHT, List.of(OrdersRite.TRENCH_BLOCKS, OrdersRite.TRENCH_RANGE),
 				LairDossiers.Boss.ALPHA_WEREWOLF, List.of(Werewolves.WARD_REACH),
 				LairDossiers.Boss.CYDONIAN_SENTINEL, List.of(AltarKeystoneRite.REACH_BLOCKS),
-				LairDossiers.Boss.PUMPKIN_KING, List.of(HarvestCrownRite.HARVEST_MIN, HarvestCrownRite.HARVEST_REACH));
+				LairDossiers.Boss.PUMPKIN_KING, List.of(HarvestCrownRite.HARVEST_MIN, HarvestCrownRite.HARVEST_REACH),
+				LairDossiers.Boss.HESSIAN_HORSEMAN, List.of());
 		for (LairDossiers.Boss boss : LairDossiers.Boss.values()) {
 			List<EncyclopediaPayload.Row> rows = section(page, boss.lair);
 			String lair = boss.lair.id;
@@ -780,7 +796,8 @@ public class EncyclopediaGameTests {
 
 	/**
 	 * With the Halloween event over and lairs.off_season off, the Last Rites and the Harvest Crown wait for the season; every
-	 * other rite works all year (Concordance Chunk E, E4: the stone, the writ, the orders, the totem and the keystone too).
+	 * other rite works all year (Concordance Chunk E, E4: the stone, the writ, the orders, the totem and the keystone too),
+	 * and the Hessian's Bridle works now, only out of the season; in the season it says he rides the world instead.
 	 */
 	@GameTest(maxTicks = 20)
 	public void eachRiteSaysWhenItWorks(GameTestHelper helper) {
@@ -790,23 +807,31 @@ public class EncyclopediaGameTests {
 		}
 		ServerPlayer player = player(helper);
 		for (Item token : List.of(JugcraftLairs.DEATH_KNELL, JugcraftLairs.FROST_HORN, JugcraftLairs.KILN_SEAL, JugcraftLairs.HAG_STONE,
-				JugcraftLairs.EXHUMATION_WRIT, JugcraftLairs.SEALED_ORDERS, JugcraftLairs.HOWLING_TOTEM, JugcraftLairs.ALTAR_KEYSTONE, JugcraftLairs.HARVEST_CROWN)) {
+				JugcraftLairs.EXHUMATION_WRIT, JugcraftLairs.SEALED_ORDERS, JugcraftLairs.HOWLING_TOTEM, JugcraftLairs.ALTAR_KEYSTONE, JugcraftLairs.HARVEST_CROWN,
+				JugcraftLairs.HESSIANS_BRIDLE)) {
 			player.getInventory().add(new ItemStack(token));
 		}
 		HalloweenSeason.Mode mode = HalloweenSeason.mode();
 		String offSeason = JugcraftConfig.textOption("lairs.off_season");
 		EncyclopediaPayload.Page page;
+		EncyclopediaPayload.Page inSeason;
 		// Switched back at once: the server runs other tests.
 		try {
 			HalloweenSeason.setMode(HalloweenSeason.Mode.OFF);
 			JugcraftConfig.setTextOption("lairs.off_season", "off");
 			page = page(build(player), LairDossiers.PAGE);
+			HalloweenSeason.setMode(HalloweenSeason.Mode.ON);
+			inSeason = page(build(player), LairDossiers.PAGE);
 		} finally {
 			HalloweenSeason.setMode(mode);
 			JugcraftConfig.setTextOption("lairs.off_season", offSeason);
 		}
 		helper.assertTrue(row(section(page, Lair.HOLLOW_ACRE), "message.jugcraft.lair.rite.off_season") != null, "out of season the Last Rites wait for it");
 		helper.assertTrue(row(section(page, Lair.CROWFIELD), "message.jugcraft.lair.crown.off_season") != null, "out of season the Harvest Crown waits for it");
+		helper.assertTrue(row(section(page, Lair.CHURCH_BRIDGE), "encyclopedia.jugcraft.dossier.out_of_season") != null
+				&& row(section(inSeason, Lair.CHURCH_BRIDGE), "message.jugcraft.lair.bridle.in_season") != null
+				&& row(section(inSeason, Lair.HOLLOW_ACRE), "encyclopedia.jugcraft.dossier.in_season") != null,
+				"the Hessian's Bridle works only out of the season, and in it says he rides the world; the Last Rites work in it");
 		for (Lair lair : List.of(Lair.GLACIER_HALL, Lair.CINDER_KILN, Lair.LANTERN_FEN, Lair.CRYPT_ARCHIVE, Lair.FOUNDRY_TRENCH, Lair.MOONLIT_RING,
 				Lair.CYDONIAN_SANCTUM)) {
 			List<EncyclopediaPayload.Row> rows = section(page, lair);

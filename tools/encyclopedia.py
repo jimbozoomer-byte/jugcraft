@@ -94,7 +94,8 @@ FIRST_ROUTE = [
                ("recommended", "jugcraft:pyromaniacs_pants"), ("recommended", "jugcraft:pyromaniacs_shoes")],
      "trades": [("general", "minecraft:lantern")], "codex": [], "tests": ["theFirstLoadoutIsMadeInSurvival"]},
     {"id": "lair", "edge": "optional_boss", "done": "a first win over any lair's keeper: The Last Harvest, Unravelled, "
-     "Abominable, Tempered, Seen Through, Nameless, Grounded, Hunter's Moon, Red Planet or Uncrowned", "after": ["compose"],
+     "Abominable, Tempered, Seen Through, Nameless, Grounded, Hunter's Moon, Red Planet, Uncrowned or Laid to Rest",
+     "after": ["compose"],
      "recipes": [], "trades": [], "codex": [], "tests": ["aBossIsHiddenUntilDiscovered", "aWinOverAnyKeeperIsTheLairStep"]},
 ]
 
@@ -103,7 +104,8 @@ FIRST_ROUTE = [
 # is the rite and the words it gives when refused out of the Halloween season (None: it works all year), the tokens, the
 # recipes the rite needs (the first makes a token), the town sales that help, the cheaper recipes for a token the loot
 # opens ("after_win") and the pieces made of the loot ("made_from"). A keeper whose trophy table has another name says
-# so ("trophy_table", as tools/acquisition.py's rows do). Concordance Chunk E (E4): every keeper the game has, in the
+# so ("trophy_table", as tools/acquisition.py's rows do); a lair that opens only out of the Halloween season gives the
+# words its rite refuses with in the season ("in_season"). Concordance Chunk E (E4): every keeper the game has, in the
 # order the page shows them (LairDossiers.Boss).
 DOSSIERS = {
     "vesperine": {"lair": "hollow_acre", "advancement": "the_last_harvest", "trophies": ["vesper_scythe"],
@@ -159,6 +161,12 @@ DOSSIERS = {
                      "tokens": ["harvest_crown"], "rite": ["harvest_crown", "scarecrow"], "trades": [("seasonal", "minecraft:hay_block")],
                      "after_win": [], "made_from": ["kings_lantern"],
                      "loot": ["kings_ember", "hallowreap", "crowbill", "crowward_charm", "pumpkin_kings_crown"]},
+    "hessian_horseman": {"lair": "church_bridge", "advancement": "laid_to_rest", "trophies": ["hollowflail", "hessian_sabre"],
+                         "rite_class": "HessiansBridleRite", "off_season": None,
+                         "in_season": f"message.{MOD}.lair.bridle.in_season",
+                         "tokens": ["hessians_bridle"], "rite": ["hessians_bridle"], "trades": [],
+                         "after_win": [], "made_from": [],
+                         "loot": ["horseman_lantern", "hollowflail", "hessian_sabre", "hessians_spur", "hessians_tricorn"]},
 }
 
 # What each Jugcraft key does, for the Keys page (key.jugcraft.<name>; every key the client registers).
@@ -362,6 +370,11 @@ DOSSIER = {
                              "and a red mist opens over it. Stay within %s blocks of the altar to step through to Mars. "
                              "If a step is missing it says which and nothing is used up. While the mist is open, friends "
                              "follow by using it, or the altar with an empty hand",
+    "church_bridge.rite": "At night in the Overworld, out of the Halloween season, use the Hessian's Bridle on a "
+                          "jack-o'-lantern (or a lit carved pumpkin) standing on a fence or wall post under the open sky. "
+                          "Hoofbeats come out of the dark, the lantern flares and you come to on the wood road; the "
+                          "bridle is used up, and the lantern and its post are left as they were. If a step is missing "
+                          "it says which and nothing is used up. While the Grey Mist rises, friends follow by using it",
     "crowfield.rite": "At night in the Overworld, set the Harvest Crown on a scarecrow that wears a head, its head under "
                       "the open sky, among %s or more blocks of harvest (pumpkins, squashes and gourds) within %s blocks "
                       "of it. The crows burst up crying and you come to in the farmyard; the crown is used up, and the "
@@ -394,6 +407,10 @@ DOSSIER = {
                                 "stone or under the rim on the windward side, never more than %s blocks away. As it "
                                 "charges its Core Lance its chest opens, and a blow of %s or more there staggers it. The "
                                 "Lowfall Core from its loot, held in the other hand, spares you every fall",
+    "church_bridge.prepare": "Against him: while %s or more braziers are dark every blow does him only %s%%. When he "
+                             "snuffs them, light every one of the snuffing again within %s seconds and he is revealed: "
+                             "for %s seconds every blow does %s%% more. Step out of the blue lines his Phantom Riders "
+                             "gallop down",
     "crowfield.prepare": "Against him: pick the gourds he calls before they ripen through, for each that splits frees a "
                          "Jack-o'-Straw or feeds him, and pick a whole harvest to leave him bereft. Fire does him %s%% "
                          "more harm: a burning arrow, Fire Aspect, or an arm that sets alight",
@@ -415,6 +432,8 @@ DOSSIER = {
     "moonlit_ring.lore": "Hunters' lore: his hide turns the blow; silver bites deeper, or flush him with a bell",
     "cydonian_sanctum.lore": "Explorers' lore: the standing stones of the crater break the red wind, and from anywhere on "
                              "its floor shelter is never far",
+    "church_bridge.lore": "Villagers' lore: the rider of the hollow puts out the lights to hide in the dark, and the "
+                          "braziers lit again in time show him",
     "crowfield.lore": "Farmers' lore: the oldest scarecrow is the one the crows answer, and a harvest left on the vine "
                       "burns",
     "grave": "A grave: any headstone, such as a %s",
@@ -422,6 +441,7 @@ DOSSIER = {
     "any_night": "The rite works on any night",
     "in_season": "The rite works now, in the Halloween season",
     "all_year": "This rite works all year, not only in the Halloween season",
+    "out_of_season": "This rite works only out of the Halloween season",
     "party": "A lair holds %s players; its gate stays open %s seconds for friends to follow",
     "hollow_acre.credit": "A share of her reward goes to everyone who strikes her, her skulls Dirge and Requiem or a "
                           "Soul of the Harvest (not her Grave Thralls), gives friends back %s or more of the health her "
@@ -468,6 +488,9 @@ DOSSIER = {
                         "%s or more of the health his side's blows took, wards a friend against %s or more health of "
                         "those blows, or picks a gourd of a harvest picked clean before any lights, within %s blocks of "
                         "his field's middle",
+    "church_bridge.credit": "A share of his reward goes to everyone who strikes him, gives friends back %s or more of the "
+                            "health his side's blows took, wards a friend against %s or more health of those blows, or "
+                            "lights a brazier of a snuffing that reveals him, within %s blocks of the hollow's middle",
     "won": "You have beaten this keeper: %s",
     "first_win": "A first win always brings the %s",
     "first_win.pair": "A first win always brings one of two trophies, at random: the %s or the %s",
@@ -492,6 +515,8 @@ DOSSIER = {
                               "it falls, Red Mist opens in the crater's middle",
     "crowfield.leave": "The Grey Mist where the lane behind the farmyard ends takes you home at any time; when he falls, "
                        "Grey Mist opens at the foot of his mound, on the farmyard side",
+    "church_bridge.leave": "The Grey Mist at the wood road's end behind the arrival takes you home at any time; when he "
+                           "falls, Grey Mist opens on the covered bridge over the brook",
     "grave_goods": "Dying in a lair costs nothing: you respawn with everything you carried, worn and held as it was, "
                    "and all your experience",
     "owed": "A share of the keeper's spoils is kept for you",

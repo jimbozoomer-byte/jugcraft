@@ -14,7 +14,7 @@ Primary specialty and supported player role: adventuring, and the party's planne
 ## Player experience
 
 The encyclopedia's Expeditions page kept a dossier for four lairs: the Hollow Acre, the Spindle Loft, the Glacier Hall and
-the Cinder Kiln. The other six lairs the game has were left out, so a player who found the Lantern Fen or the Crowfield
+the Cinder Kiln. The other seven lairs the game has were left out, so a player who found the Lantern Fen or the Crowfield
 learned nothing there. Now **every lair has a dossier**, in the same shape:
 
 - **Found** (its token carried): the lair's **lore**, the rite in words with the game's numbers, the recipes it needs,
@@ -23,7 +23,7 @@ learned nothing there. Now **every lair has a dossier**, in the same shape:
   piece of loot with JEI's words, the cheaper token and what is made of the loot, and **the way home**.
 - **Beaten:** the first win's advancement.
 
-The six new dossiers:
+The seven new dossiers:
 
 | Lair | Keeper | Token and where it works | Recipes shown | Town sale | The way home |
 |---|---|---|---|---|---|
@@ -33,6 +33,7 @@ The six new dossiers:
 | The Moonlit Ring | the Alpha Werewolf | the Howling Totem, howled at night in the woods, no wolfsbane within 6 | the totem | none | the Grey Mist on the trail behind the camp; the Howling Stone's top when he falls |
 | The Cydonian Sanctum | the Cydonian Sentinel | the Altar Keystone, set in the Ancient Altar of Adam-ondi-Ahman at night (stay within 8) | the keystone, and the keystone from Dreamglass; after a win, the keystone from Cydonian Shards | none | the Red Mist behind the gate chamber's arrival; the crater's middle when it falls |
 | The Crowfield | the Pumpkin King | the Harvest Crown, set on a headed scarecrow among 8 harvest blocks within 6, at night, in the Halloween season unless `lairs.off_season` allows any night | the crown and the scarecrow; after a win, the King's Lantern made from his Ember | a hay bale (the Seasonal shop) | the Grey Mist at the end of the farmyard's lane; the foot of his mound when he falls |
+| The Church Bridge | the Headless Horseman | the Hessian's Bridle, used on a jack-o'-lantern on a post under the sky at night, **only out of** the Halloween season (in it he rides the Overworld instead, and the dossier says so; `lairs.off_season` does not change this) | the bridle | none | the Grey Mist at the wood road's end; the covered bridge when he falls |
 
 **Lore** is a line the lair's own hunters, mourners or clerks would tell: a clue to the keeper's rule that never names
 the keeper (who is named only once met). For example, the Lantern Fen's: "what waits in the fen walks in many shapes,
@@ -52,15 +53,17 @@ the piece that helps, held in the other hand:
 | The Moonlit Ring | silver does full damage; the Warden Bell flushes him for 8 seconds; wolfsbane keeps his Packmates off; the Packfinder Charm shows werewolves within 32 | Silver Dagger, Wolfsbane, Packfinder Charm |
 | The Cydonian Sanctum | shelter is never more than 12 blocks away; a blow of 6 or more on its open core staggers it; the Lowfall Core spares every fall | Lowfall Core |
 | The Crowfield | pick the called gourds before they ripen; pick a whole harvest to leave him bereft; fire does him 50% more | none |
+| The Church Bridge | while 4 or more braziers are dark a blow does him 50%; light a snuffing's braziers again within 10 seconds and he is revealed, every blow doing 50% more for 8 seconds; step out of his Phantom Riders' lines | none |
 | The Glacier Hall, the Cinder Kiln | unchanged: Winter Brine or the Kiln Draught while the Concordance brews it, and the Yeti Mitten or the Salamander Charm | as before |
 
 **Credit** lines name each new keeper's own counted creatures and deeds, as part 1 made them: the Hag's Likenesses and
 Root Knot and a relit lamp that shows her; the Lich's dead, seals, names read back and his bolt struck back; the
 Dreadnought's Sparkers, the breaker that earths his discharge and a fouled breaker worked; the Alpha's Packmates and the
 bell that flushes him; the Sentinel's Shard Sentries (no objective); the Pumpkin King's Jack-o'-Straws and a gourd of a
-harvest picked clean.
+harvest picked clean; the Horseman's braziers, lit again in a snuffing that reveals him (main's #537 put him on the
+shared credit already).
 
-**The route:** any keeper's first win does the First Light route's lair step, now all ten (it read "any lair's keeper"
+**The route:** any keeper's first win does the First Light route's lair step, now all eleven (it read "any lair's keeper"
 before, but the dossiers knew only four).
 
 ## The page's room
@@ -70,7 +73,7 @@ while they last, in the keepers' order, and shows any recipe past them **by its 
 ingredient once, the very items of the grid it would have. So a player who has found only the Crowfield sees its grids;
 one who has found and beaten every keeper sees the first four's grids and the rest as items. The page's row bound
 (`EncyclopediaPayload.Page.MAX_ROWS`) rises from 160 to 384, enough for every keeper found and beaten with the
-bestiary's 24 creatures after them (about 230 rows today), and room for the Storm Roc's and the Glass Abbot's dossiers
+bestiary's 24 creatures after them (about 330 rows today), and room for the Storm Roc's and the Glass Abbot's dossiers
 when their lairs land.
 
 ## Connections
@@ -108,10 +111,13 @@ None new. The lore and preparation words are Jugcraft's own.
   names a keeper; the Werewolf's trophies are read from `bosses/werewolf_alpha.json` (`trophy_table`); a recipe past
   the grid budget is shown by its items; and every keeper found and beaten with the bestiary full fits `MAX_ROWS`.
 - New server game tests (CI) in `EncyclopediaGameTests`: `theLanternFensDossier`, `theArchiveOfLastNamesDossier`,
-  `theFoundryTrenchsDossier`, `theMoonlitRingsDossier`, `theCydonianSanctumsDossier`, `theCrowfieldsDossier` (each from
-  its token carried to a win), `everyLairGivesItsLoreAndPreparation` (the lore first, the rites' and preparations'
-  numbers and icons the game's), and `eachRiteSaysWhenItWorks` and `theExpeditionsPageHoldsEveryKeeper` extended (every
-  recipe in order, the first twelve as grids and the rest by the items of their grids; no row dropped).
+  `theFoundryTrenchsDossier`, `theMoonlitRingsDossier`, `theCydonianSanctumsDossier`, `theCrowfieldsDossier`,
+  `theChurchBridgesDossier` (each from its token carried to a win), `everyLairGivesItsLoreAndPreparation` (the lore
+  first, the rites' and preparations' numbers and icons the game's), and `eachRiteSaysWhenItWorks` (every rite; the
+  Church Bridge's both in and out of the season) and `theExpeditionsPageHoldsEveryKeeper` extended (every recipe in
+  order, the first twelve as grids and the rest by the items of their grids; no row dropped).
+- `check_encyclopedia` also holds a lair that opens only out of the season (`in_season`): its rite reads the season
+  itself, not `lairs.off_season`, and its Boss entry gives the words it refuses with in the season.
 - The client game test (`EncyclopediaClientGameTests`, CI) now also opens the Lantern Fen's dossier, checks it is shown
   and pictures it (`jugcraft_encyclopedia_expedition_lantern_fen`).
 - Not run: play by hand, two clients.
@@ -119,7 +125,8 @@ None new. The lore and preparation words are Jugcraft's own.
 ## World and event applicability
 
 The Crowfield's rite keeps the Halloween season as its rite does (`lairs.off_season`); the dossier says when it works,
-as the Hollow Acre's does. The others work all year.
+as the Hollow Acre's does. The Church Bridge's opens only out of the season; in it the dossier gives the bridle's own
+words (he rides the world: call him at midnight with a lit scarecrow head). The others work all year.
 
 ## Rollout and open questions
 

@@ -23201,6 +23201,13 @@ def check_encyclopedia(root, lang):
                 f"the Halloween season, but its check {'does' if waits else 'does not'} read lairs.off_season")
         if season is None and not re.search(r",\s*null,", entry) or season is not None and f'"{season}"' not in entry:
             err(f"lair/LairDossiers.java: {boss}'s Boss entry must give {season or 'null (works all year)'} as its off-season words")
+        # A lair that opens only out of the Halloween season (Concordance Chunk E, E4: the Church Bridge): its rite reads
+        # the season itself and not lairs.off_season, and its Boss entry gives the words it refuses with in the season.
+        in_season = dossier.get("in_season")
+        if in_season is not None and (season is not None or waits or "HalloweenSeason.active()" not in rite_java
+                                      or f'"{in_season}"' not in entry or in_season not in lang):
+            err(f"lair/{dossier['rite_class']}.java: {boss}'s rite opens only out of the Halloween season, refusing in it "
+                f"with {in_season}, which its Boss entry gives")
         for name in dossier["loot"]:
             if f"jei.{MOD}.acquire.{name}" not in lang:
                 err(f"encyclopedia: missing lang jei.{MOD}.acquire.{name} (the dossier shows each loot's acquisition text)")

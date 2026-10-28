@@ -24,6 +24,8 @@ import io.github.jimbozoomer.jugcraft.lair.dreadnought.IronDreadnoughtEntity;
 import io.github.jimbozoomer.jugcraft.lair.dreadnought.IronDreadnoughtLoot;
 import io.github.jimbozoomer.jugcraft.lair.hag.MireHagEntity;
 import io.github.jimbozoomer.jugcraft.lair.hag.MireHagLoot;
+import io.github.jimbozoomer.jugcraft.lair.horseman.HessianHorsemanEntity;
+import io.github.jimbozoomer.jugcraft.lair.horseman.HorsemanLoot;
 import io.github.jimbozoomer.jugcraft.lair.king.PumpkinKingEntity;
 import io.github.jimbozoomer.jugcraft.lair.king.PumpkinKingLoot;
 import io.github.jimbozoomer.jugcraft.lair.lich.CryptLichLoot;
@@ -60,7 +62,8 @@ import org.jspecify.annotations.Nullable;
  * his frost (Chunk B, B-08: Winter Brine and the Yeti Mitten), and the Cinder Kiln's what readies a player for his slag
  * and flame (Chunk C, C-02: the Kiln Draught and the Salamander Charm). Since Concordance Chunk E (E4,
  * docs/features/lair-dossiers.md) every lair the game has keeps a dossier: the Lantern Fen, the Archive of Last Names, the
- * Foundry Trench, the Moonlit Ring, the Cydonian Sanctum and the Crowfield too; and every found lair gives its lore (a
+ * Foundry Trench, the Moonlit Ring, the Cydonian Sanctum, the Crowfield and the Church Bridge too (the last opens only out
+ * of the Halloween season, and says so); and every found lair gives its lore (a
  * clue to its keeper's rule that never names them) and what readies a player for its keeper.
  * <p>
  * Discovery is read, not saved: the inventory, {@link Lairs#VISIT}, {@link LairRewards#OWED} and the first-win
@@ -87,39 +90,42 @@ public final class LairDossiers {
 	 * first recipe of {@link #rite} makes a token (tools/check_mod_data.py holds it so; {@link #canOpen} reads it).
 	 */
 	public enum Boss {
-		VESPERINE(Lair.HOLLOW_ACRE, VesperineLoot.BOSS, VesperineLoot.ADVANCEMENT, List.of("vesper_scythe"), "message.jugcraft.lair.rite.off_season",
+		VESPERINE(Lair.HOLLOW_ACRE, VesperineLoot.BOSS, VesperineLoot.ADVANCEMENT, List.of("vesper_scythe"), "message.jugcraft.lair.rite.off_season", null,
 				List.of("death_knell", "mourning_wreath"), List.of("death_knell", "mourning_wreath", "gothic_headstone_from_stonecutting"),
 				List.of(Items.LILY_OF_THE_VALLEY, Items.CANDLE), List.of("reaper_shade", "vesper_scythe", "reaper_hood", "dirge_skull", "requiem_skull"),
 				List.of("mourning_wreath_from_shade"), List.of("reaper_hood")),
-		TATTERLACE(Lair.SPINDLE_LOFT, TatterlaceLoot.BOSS, TatterlaceLoot.ADVANCEMENT, List.of("needle_rapier"), "message.jugcraft.lair.spindle.off_season",
+		TATTERLACE(Lair.SPINDLE_LOFT, TatterlaceLoot.BOSS, TatterlaceLoot.ADVANCEMENT, List.of("needle_rapier"), "message.jugcraft.lair.spindle.off_season", null,
 				List.of("cursed_spindle"), List.of("cursed_spindle", "spinning_wheel"), List.of(),
 				List.of("gossamer_silk", "needle_rapier", "golden_thimble", "tatterlace_headdress"), List.of("cursed_spindle_from_silk"), List.of()),
-		YETI_KING(Lair.GLACIER_HALL, YetiKingLoot.BOSS, YetiKingLoot.ADVANCEMENT, List.of("glacier_maul", "rimeclaw"), null,
+		YETI_KING(Lair.GLACIER_HALL, YetiKingLoot.BOSS, YetiKingLoot.ADVANCEMENT, List.of("glacier_maul", "rimeclaw"), null, null,
 				List.of("frost_horn"), List.of("frost_horn"), List.of(Items.SNOW_BLOCK),
 				List.of("yeti_fur", "glacier_maul", "rimeclaw", "yeti_mitten", "yeti_king_crown"), List.of("frost_horn_from_fur"), List.of()),
-		CINDER_TYRANT(Lair.CINDER_KILN, CinderTyrantLoot.BOSS, CinderTyrantLoot.ADVANCEMENT, List.of("cinderbrand", "magmaw"), null,
+		CINDER_TYRANT(Lair.CINDER_KILN, CinderTyrantLoot.BOSS, CinderTyrantLoot.ADVANCEMENT, List.of("cinderbrand", "magmaw"), null, null,
 				List.of("kiln_seal"), List.of("kiln_seal"), List.of(),
 				List.of("tyrant_scale", "cinderbrand", "magmaw", "salamander_charm", "tyrant_crest"), List.of("kiln_seal_from_scales"), List.of()),
-		MIRE_HAG(Lair.LANTERN_FEN, MireHagLoot.BOSS, MireHagLoot.ADVANCEMENT, List.of("hagthorn", "bogfang"), null,
+		MIRE_HAG(Lair.LANTERN_FEN, MireHagLoot.BOSS, MireHagLoot.ADVANCEMENT, List.of("hagthorn", "bogfang"), null, null,
 				List.of("hag_stone"), List.of("hag_stone"), List.of(),
 				List.of("hagmoss", "hagthorn", "bogfang", "hags_eye", "hags_shawl"), List.of("hag_stone_from_hagmoss"), List.of()),
-		CRYPT_LICH(Lair.CRYPT_ARCHIVE, CryptLichLoot.BOSS, CryptLichLoot.ADVANCEMENT, List.of("soulreaver", "gravewarden"), null,
+		CRYPT_LICH(Lair.CRYPT_ARCHIVE, CryptLichLoot.BOSS, CryptLichLoot.ADVANCEMENT, List.of("soulreaver", "gravewarden"), null, null,
 				List.of("exhumation_writ"), List.of("exhumation_writ", "stone_brick_sarcophagus"), List.of(),
 				List.of("grave_dust", "soulreaver", "gravewarden", "emptied_phylactery", "lichs_crown"), List.of("exhumation_writ_from_grave_dust"), List.of()),
-		IRON_DREADNOUGHT(Lair.FOUNDRY_TRENCH, IronDreadnoughtLoot.BOSS, IronDreadnoughtLoot.ADVANCEMENT, List.of("dynamo_halberd", "piston_hammer"), null,
+		IRON_DREADNOUGHT(Lair.FOUNDRY_TRENCH, IronDreadnoughtLoot.BOSS, IronDreadnoughtLoot.ADVANCEMENT, List.of("dynamo_halberd", "piston_hammer"), null, null,
 				List.of("sealed_orders"), List.of("sealed_orders", "field_telephone"), List.of(Items.BELL),
 				List.of("salvaged_coil", "dynamo_halberd", "piston_hammer", "grounding_strap", "dreadnought_visor"), List.of("sealed_orders_from_salvaged_coil"),
 				List.of()),
-		ALPHA_WEREWOLF(Lair.MOONLIT_RING, AlphaWerewolfLoot.BOSS, AlphaWerewolfLoot.ADVANCEMENT, List.of("moonfang", "howler"), null,
+		ALPHA_WEREWOLF(Lair.MOONLIT_RING, AlphaWerewolfLoot.BOSS, AlphaWerewolfLoot.ADVANCEMENT, List.of("moonfang", "howler"), null, null,
 				List.of("howling_totem"), List.of("howling_totem"), List.of(),
 				List.of("alpha_pelt", "moonfang", "howler", "packfinder_charm", "alphas_hood"), List.of(), List.of()),
-		CYDONIAN_SENTINEL(Lair.CYDONIAN_SANCTUM, SentinelLoot.BOSS, SentinelLoot.ADVANCEMENT, List.of("corelance", "redstar_cleaver"), null,
+		CYDONIAN_SENTINEL(Lair.CYDONIAN_SANCTUM, SentinelLoot.BOSS, SentinelLoot.ADVANCEMENT, List.of("corelance", "redstar_cleaver"), null, null,
 				List.of("altar_keystone"), List.of("altar_keystone", "altar_keystone_from_dreamglass"), List.of(),
 				List.of("cydonian_shard", "corelance", "redstar_cleaver", "lowfall_core", "sentinels_visor"), List.of("altar_keystone_from_cydonian_shards"),
 				List.of()),
-		PUMPKIN_KING(Lair.CROWFIELD, PumpkinKingLoot.BOSS, PumpkinKingLoot.ADVANCEMENT, List.of("hallowreap", "crowbill"), "message.jugcraft.lair.crown.off_season",
+		PUMPKIN_KING(Lair.CROWFIELD, PumpkinKingLoot.BOSS, PumpkinKingLoot.ADVANCEMENT, List.of("hallowreap", "crowbill"), "message.jugcraft.lair.crown.off_season", null,
 				List.of("harvest_crown"), List.of("harvest_crown", "scarecrow"), List.of(Items.HAY_BLOCK),
-				List.of("kings_ember", "hallowreap", "crowbill", "crowward_charm", "pumpkin_kings_crown"), List.of(), List.of("kings_lantern"));
+				List.of("kings_ember", "hallowreap", "crowbill", "crowward_charm", "pumpkin_kings_crown"), List.of(), List.of("kings_lantern")),
+		HESSIAN_HORSEMAN(Lair.CHURCH_BRIDGE, HorsemanLoot.BOSS, HorsemanLoot.ADVANCEMENT, List.of("hollowflail", "hessian_sabre"), null,
+				"message.jugcraft.lair.bridle.in_season", List.of("hessians_bridle"), List.of("hessians_bridle"), List.of(),
+				List.of("horseman_lantern", "hollowflail", "hessian_sabre", "hessians_spur", "hessians_tricorn"), List.of(), List.of());
 
 		public final Lair lair;
 		/** The keeper's id in {@link LairRewards} ("vesperine"), and its entity's. */
@@ -129,6 +135,11 @@ public final class LairDossiers {
 		public final List<String> trophies;
 		/** The words a rite refused out of the Halloween season gives; null for a rite that works all year. */
 		public final @Nullable String offSeason;
+		/**
+		 * The words a rite refused in the Halloween season gives, for a lair that opens only out of it (the Church Bridge:
+		 * in the season its keeper rides the Overworld instead); null for every other.
+		 */
+		public final @Nullable String inSeason;
 		/** The items whose carrying shows the lair's rite. */
 		public final List<String> tokens;
 		/** The recipes the rite needs (each a way to it). */
@@ -142,13 +153,14 @@ public final class LairDossiers {
 		/** Recipes for a piece made of the loot, which has no other recipe: optional, after a win. */
 		public final List<String> madeFrom;
 
-		Boss(Lair lair, String boss, String advancement, List<String> trophies, @Nullable String offSeason, List<String> tokens,
-				List<String> rite, List<Item> sales, List<String> loot, List<String> afterWin, List<String> madeFrom) {
+		Boss(Lair lair, String boss, String advancement, List<String> trophies, @Nullable String offSeason, @Nullable String inSeason,
+				List<String> tokens, List<String> rite, List<Item> sales, List<String> loot, List<String> afterWin, List<String> madeFrom) {
 			this.lair = lair;
 			this.boss = boss;
 			this.advancement = advancement;
 			this.trophies = trophies;
 			this.offSeason = offSeason;
+			this.inSeason = inSeason;
 			this.tokens = tokens;
 			this.rite = rite;
 			this.sales = sales;
@@ -252,6 +264,7 @@ public final class LairDossiers {
 			case CYDONIAN_SENTINEL -> Component.translatable("encyclopedia.jugcraft.dossier.cydonian_sanctum.rite", AltarKeystoneRite.REACH_BLOCKS);
 			case PUMPKIN_KING -> Component.translatable("encyclopedia.jugcraft.dossier.crowfield.rite", HarvestCrownRite.HARVEST_MIN,
 					HarvestCrownRite.HARVEST_REACH);
+			case HESSIAN_HORSEMAN -> Component.translatable("encyclopedia.jugcraft.dossier.church_bridge.rite");
 		};
 		out.fact(rite, null, items(boss.tokens));
 		for (String recipe : boss.rite) {
@@ -265,8 +278,10 @@ public final class LairDossiers {
 		for (Item sold : boss.sales) {
 			out.sales(sold);
 		}
-		// A Witching Season rite waits for the Halloween event unless lairs.off_season is on; the others keep no season.
-		out.fact(boss.offSeason == null ? Component.translatable("encyclopedia.jugcraft.dossier.all_year")
+		// A Witching Season rite waits for the Halloween event unless lairs.off_season is on; the Church Bridge's opens only
+		// out of the event, whatever lairs.off_season says; the others keep no season.
+		out.fact(boss.inSeason != null ? Component.translatable(HalloweenSeason.active() ? boss.inSeason : "encyclopedia.jugcraft.dossier.out_of_season")
+				: boss.offSeason == null ? Component.translatable("encyclopedia.jugcraft.dossier.all_year")
 				: Lairs.offSeason() ? Component.translatable("encyclopedia.jugcraft.dossier.any_night")
 				: HalloweenSeason.active() ? Component.translatable("encyclopedia.jugcraft.dossier.in_season")
 				: Component.translatable(boss.offSeason));
@@ -309,6 +324,9 @@ public final class LairDossiers {
 			case CYDONIAN_SENTINEL -> out.fact(Component.translatable(key, number(CydonianSentinelEntity.SHELTER_REACH),
 					number(CydonianSentinelEntity.STAGGER_DAMAGE)), null, items(List.of("lowfall_core")));
 			case PUMPKIN_KING -> out.fact(Component.translatable(key, Math.round((PumpkinKingEntity.FIRE - 1.0F) * 100.0F)));
+			case HESSIAN_HORSEMAN -> out.fact(Component.translatable(key, HessianHorsemanEntity.HIDDEN_DARK,
+					Math.round(HessianHorsemanEntity.HIDDEN * 100.0F), HessianHorsemanEntity.RELIGHT_TICKS / 20, HessianHorsemanEntity.REVEALED_TICKS / 20,
+					Math.round((HessianHorsemanEntity.REVEALED - 1.0F) * 100.0F)));
 			case YETI_KING -> {
 				Property rime = concordance ? Alchemy.catalog().property(Axis.RIME.id) : null;
 				if (!brews(rime, Frostward.STATUS)) {
