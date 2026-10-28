@@ -4,7 +4,7 @@ Current controls and behavior on the `peepo-companion` branch, updated 25 Octobe
 
 ## Quick start
 
-1. Find a companion and right-click it with edible food once to tame it. Peepo's main habitats are swamps, lush swamps and bayous; Jughead's are beaches, dune beaches and overgrown beaches. Natural spawns are in the Overworld. Both use weight 12 in main habitats and 8 in secondary habitats, groups of 1–4, and a maximum of six naturally spawned companions of each type within 128 blocks. The normal passive-creature cap still applies.
+1. Find a companion and right-click it with edible food once to tame it. Peepo's main habitats are swamps, lush swamps and bayous; Jughead's are beaches, dune beaches and overgrown beaches. Natural spawns are in the Overworld. Both retain weight 12 in main habitats and 8 in secondary habitats, with ordinary groups of 1–4. The local limit is **four wild, naturally spawned companions of each type within 128 blocks**; taming one frees its wild place. Occasional extra groups of 1–3 can appear in suitable loaded habitat even when ordinary animals fill the passive-creature budget. Nearby players share a roughly one-minute opportunity, with a higher chance where none of that companion are present. This is a chance, not a guaranteed spawn each minute. Extra attempts obey mob-spawning settings and safe placement, and do not load chunks. See [companion spawning](features/companion-wild-spawning.md).
 2. Shift-right-click the companion without the Planner to open its inventory and commands. It pauses while you edit.
 3. Craft a **Companion Planner**: an iron nugget above a row of three paper, with a stick below the paper. Right-click your companion with it to select that companion.
 4. Right-click a bed to set its home, then right-click a supported workstation to assign work. Assigning work selects **Work** mode.
@@ -39,6 +39,8 @@ The companion has **eight cargo slots**, arranged as two rows of four, plus sepa
 The owner can switch **Owner only / Party: Allowed** to permit their party to manage the companion. Container locks and protected areas still apply. Other players cannot gain control just by selecting it with a Planner.
 
 Hoes, knives and shears are drawn only for their matching work animation. They remain stored in **Hand** while stowed, even with full cargo. Other work tools are also put away when unused. **Hand: Locked** prevents automatic tool replacement; it does not force a tool to remain visibly held. Torches and tiki torches remain held during normal travel, and ordinary held items are put away for sleep, sitting, social gestures and unrelated work.
+
+Peepo and Jughead briefly draw work tools from their side and stow them afterward. Brewing deliveries show an ingredient drop and a bottle swirl; garden fertilizing uses a small pouch and scattering motion. These are visual additions to the existing actions, with no extra work delay, item consumption or energy cost.
 
 ## Planner assignments
 
@@ -89,6 +91,8 @@ Porter routes run in **Work** mode, alongside station assignments. There is no s
 A route's **Filter** allows up to nine item types. An empty route filter accepts any transferable item. **Leave** reserves that many of each item type in the source; **Keep** sets a destination stock target per item type. Both cycle through 0, 16, 32, 64, 128, 256 and 512. Leave 0 reserves nothing; Keep 0 means unlimited.
 
 Deliveries can use all available cargo slots and normal stack sizes, including different ingredients in one trip. A raw pie and its fuel can travel together. Supplies split between chests still require physical visits to those chests. Bigger deliveries use more movement energy. Full or unavailable destinations retain the real cargo for retry; removing a link does not erase carried items.
+
+Both companions look toward nearby containers, lift cargo with both hands, carry it below their faces and carefully lower deliveries. A bulk transfer plays one motion with a stable item instead of restarting for every slot. Partially accepted deliveries return to holding the remaining cargo. These animations add no transfer delay or energy cost; special pie, brewing, stove and sprinkler motions keep their own handling.
 
 ### Supply and Output controls on each job
 
@@ -159,7 +163,7 @@ Normal right-click still opens the player's vanilla crafting menu. **Shift-right
 | Auto-Crafter | Seed the real 3Ã—3 grid with one item in each required slot. Supply replenishes that pattern; Output collects products and container remainders. Normal energy/redstone rules apply. |
 | Electroplating Bath | Supply a compatible damageable item and nickel, silver or gold ingots; pipe in sulfuric acid. Output takes the actual plated/repaired item, preserving its other components. |
 | Cooking Pot | Provide heat and the recipe's ingredients/containers. Peepo brings balanced bulk ingredient loads, then stirs at **+50% cooking speed** until ingredients run out or the pot's result slots fill, before collecting and delivering the finished batch. Supply and Output use the existing links and controls. |
-| Cutting Board | Provide a knife and valid cutting inputs. Peepo stands at the board and makes a two-handed chop. The knife loses durability; all recipe results are retained for Output. |
+| Cutting Board | Provide a knife and valid cutting inputs. Peepo brings up to one stack of matching ingredients (maximum 64), chops the batch, then carries the results to Output. Stock targets reduce the batch; each cut still costs normal time, energy and knife durability. Empty-hand use of the board retrieves finished items and any queued ingredients. |
 | Skillet | Heat it from below. Supply brings compatible raw food and Output collects fried food. Cooking continues without a resident helper; no speed bonus is added. |
 | Kitchen Stove | Light it and keep its top clear for its own cooking. Supply brings cookable food and Output collects cooked food. A pot/skillet on top uses the stove as heat instead; assign that upper station for its workflow. |
 | Cider Press | Supply valid press ingredients and glass bottles. Peepo loads, sits on the rotating handle with dangling legs while operating it, then bottles and collects products through the press's normal workflow. |
@@ -412,7 +416,11 @@ Place a **Lunch Crate**, or put a **Lunch Cover** over a compatible accessible c
 
 On **Routine**, set the work schedule, break/resume energy thresholds, food preference, carried meal target, alerts and social behavior. Auto works whenever energy allows; Day/Night shifts use Overworld time. Exhausted companions rest before resuming. Beds restore more energy than seats, but sleeping happens only at night in the Overworld. Other dimensions use seated/passive rest.
 
+**Feedback** cycles **Off → Subtle → Expressive**. Subtle is the default: persistent problems, tiredness, stock goals and resolved problems get a brief thought bubble and an appropriate gesture when hands are free. Expressive adds occasional successful deliveries, bonus yields and job finishing touches: inspecting harvested produce with both hands, admiring a landed catch in one hand while the other holds the rod, and brushing flour off their hands after kitchen work or a completed food delivery. These work for Peepo and Jughead without requiring a uniform. The displayed produce/catch is cosmetic; it does not remove anything from their inventory. Free-handed movement can continue, and the fishing reaction fits into the next wait for a bite. Tool swings, casting, bites, cargo, eating and rest take priority; a gesture never delays the job and can be skipped if there is no safe gap. Normal crop growth, aging, animal cooldowns and full generator buffers stay quiet. Only the owner and allowed party members see diagnostic bubbles. **Alerts** enables their quiet problem sound; Off feedback silences it too. Reactions and sounds have cooldowns and nearby limits, so a busy workshop does not constantly celebrate or complain. See the [feedback feature record](features/companion-work-feedback.md) for timing and behavior.
+
 Companion beds are small, come in the vanilla bed colors and stack into bunks. Assign the specific bunk as home and leave the bottom entrance accessible. Vanilla beds can also be homes. Stools, supported player seats, bed edges and supported fence rails provide sitting places. They close their eyes for sleep and kick their legs while sitting.
+
+Companions now ease onto and off seats, climb to upper bunks from the bottom entrance, and lie down gradually. At bedtime they pull a blanket matching the bed's color over their body; waking pushes it back down before they get up. The blanket is part of the animation and needs no item. These motions work for Peepo and Jughead, including costumes, independently of the Routine feedback setting. See [rest transitions and blankets](features/companion-rest-transitions.md).
 
 ## Job uniforms
 

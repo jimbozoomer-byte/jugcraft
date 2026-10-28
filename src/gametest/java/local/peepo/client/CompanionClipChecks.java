@@ -50,7 +50,10 @@ public final class CompanionClipChecks {
                 var body=root.getChild("body");bodies.add(body.y+":"+body.z+":"+body.xRot);
                 var pose=new com.mojang.blaze3d.vertex.PoseStack();PeepoRenderer.knifePose(pose,p);
                 var scale=pose.last().pose().getScale(new org.joml.Vector3f());
-                check.accept(scale.distance(1,1,1)<.00001F,"knife keeps native scale independently of arm stretch");
+                check.accept(scale.distance(.65F,.65F,.65F)<.00001F,"knife stays smaller independently of arm stretch");
+                var edge=pose.last().pose().transformDirection(new org.joml.Vector3f(1,0,0));
+                new org.joml.Quaternionf().rotationX(-p.xRot).transform(edge);
+                check.accept(edge.z>-.00001F,"knife blade faces away from its previous backwards orientation");
             }
             check.accept(bodies.size()>10 && arms.size()>10,"whole-body chopping motion on both rigs/costumes");
             state.work=WorkAnimation.NONE;model.setupAnim(state);check.accept(root.getChild("left_arm").yScale==1,"chop clears on idle");

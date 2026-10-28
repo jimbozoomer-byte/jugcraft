@@ -47,7 +47,7 @@ public final class CompanionBedEntity extends BlockEntity implements CompanionSt
     @Override public Vec3 approachPosition() { return mounted ? pillow() : entrance(); }
     @Override public boolean availableTo(PeepoEntity p) {
         expire();
-        return !CompanionSeats.isReserved(level, worldPosition) && !isRemoved() && p.isRestNight() && (occupant == null || occupant.equals(p.getUUID())) && clearEntrance();
+        return !CompanionSeats.isReserved(level, worldPosition) && (mounted || CompanionSeats.externalAvailable(p,BlockPos.containing(entrance()))) && !isRemoved() && p.isRestNight() && (occupant == null || occupant.equals(p.getUUID())) && clearEntrance();
     }
     @Override public boolean claim(PeepoEntity p) {
         if(!mounted)nextClearance=0;
@@ -57,8 +57,9 @@ public final class CompanionBedEntity extends BlockEntity implements CompanionSt
     @Override public boolean occupy(PeepoEntity p) {
         if(!mounted)nextClearance=0;
         if (!availableTo(p) || occupant == null || !p.setRestMode(CompanionEnergy.Rest.SLEEPING)) return false;
-        mounted = true; lease = level.getGameTime() + 20;
         Vec3 at = pillow(); float yaw = facing().getOpposite().toYRot();
+        if(!mounted)p.restMotion.enter(true,worldPosition,entrance(),at,yaw);
+        mounted = true; lease = level.getGameTime() + 20;
         CompanionMotion.position(p,at,yaw);
         p.setDeltaMovement(Vec3.ZERO); p.resetFallDistance(); p.getNavigation().stop();
         p.setBedExit(BlockPos.containing(exit));
@@ -72,7 +73,7 @@ public final class CompanionBedEntity extends BlockEntity implements CompanionSt
     }
     public static void tick(Level level, BlockPos pos, BlockState state, CompanionBedEntity bed) {
         bed.expire(); var p = bed.npc();
-        if (p != null && bed.mounted && (!p.isRestNight() || p.isEating() || !bed.clearEntrance())) bed.release(p);
+        if (p != null && bed.mounted && (!p.isRestNight() || p.isEating() || !bed.clearEntrance())) {if(p.isEating() || !bed.clearEntrance())p.restMotion.cancel();bed.release(p);}
     }
-    @Override public void setRemoved() { var p = npc(); if (p != null) release(p); super.setRemoved(); }
+    @Override public void setRemoved() { var p = npc(); if (p != null) {p.restMotion.cancel();release(p);} super.setRemoved(); }
 }

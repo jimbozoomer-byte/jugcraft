@@ -1,0 +1,89 @@
+{
+  "format_version": "1.12.0",
+  "minecraft:geometry": [
+    {
+      "description": {
+        "identifier": "geometry.hessian_head",
+        "texture_width": 128,
+        "texture_height": 128,
+        "visible_bounds_width": 1.4,
+        "visible_bounds_height": 1.4,
+        "visible_bounds_offset": [
+          0,
+          0.7,
+          0
+        ]
+      },
+      "bones": [
+        {
+          "name": "tumble",
+          "pivot": [
+            0.0,
+            6.0,
+            0.0
+          ],
+          "cubes": [
+            {
+              "origin": [
+                -7.0,
+                0.0,
+                -7.0
+              ],
+              "size": [
+                14,
+                12,
+                14
+              ],
+              "uv": [
+                0,
+                0
+              ]
+            },
+            {
+              "origin": [
+                -1.5,
+                12.0,
+                -1.5
+              ],
+              "size": [
+                3,
+                3,
+                3
+              ],
+              "rotation": [
+                0.0,
+                0.0,
+                10.0
+              ],
+              "pivot": [
+                0.0,
+                12.0,
+                0.0
+              ],
+              "uv": [
+                76,
+                0
+              ]
+            },
+            {
+              "origin": [
+                -5.0,
+                2.0,
+                -7.05
+              ],
+              "size": [
+                10,
+                8,
+                0
+              ],
+              "uv": [
+                56,
+                0
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

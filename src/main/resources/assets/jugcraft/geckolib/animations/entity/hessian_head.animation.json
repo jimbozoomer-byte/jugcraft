@@ -1,0 +1,25 @@
+{
+  "format_version": "1.8.0",
+  "animations": {
+    "animation.hessian_head.tumble": {
+      "loop": true,
+      "animation_length": 0.8,
+      "bones": {
+        "tumble": {
+          "rotation": {
+            "0.0": [
+              0.0,
+              0.0,
+              0.0
+            ],
+            "0.8": [
+              360.0,
+              0.0,
+              90.0
+            ]
+          }
+        }
+      }
+    }
+  }
+}

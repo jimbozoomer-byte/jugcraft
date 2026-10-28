@@ -40,13 +40,16 @@ HEADS = {
               "spike": 3.0, "spike_width": 0.3},
 }
 # Arms VII variants (tools/arms_variants.py) whose head swings free, by name: the Bonecarved Flail's spine of vertebrae
-# and horned skull ("ball": the skull's half width; "horn": its horns' length).
+# and horned skull ("ball": the skull's half width; "horn": its horns' length), and the Hollowflail's iron chain and
+# jack-o'-lantern ("jack": oval links as the spiked flail's, and a carved pumpkin, "ball" its half width, with a stem and
+# lug on top).
 VARIANT_HEADS = {
     "bonecarved_flail": {"style": "skull", "links": 5, "pitch": 1.55, "twist": 0, "vertebra": 1.5, "ball": 3.9, "horn": 2.6},
+    "hollowflail": {"style": "jack", "links": 4, "pitch": 2.2, "twist": 90, "link_width": 1.7, "link_bar": 0.56, "ball": 3.4},
 }
 # The swatches: a 16-texel square in the bottom right corner of the 64x64 _model texture (the handle's upright image
 # only fills the top left), as rows of four 4-texel squares, highlight to dark: the chain, the ball's metal and its
-# fittings. A skull's face and jaw are painted just above them (FACE, JAW).
+# fittings. A skull's face and jaw, or a jack-o'-lantern's carved face, are painted just above them (FACE, JAW).
 SWATCH = (48, 48)
 FACE = (48, 32, 12, 11)
 JAW = (48, 43, 10, 5)
@@ -63,12 +66,14 @@ BALL_TONE = {"up": 1, "north": 1, "west": 1, "south": 2, "east": 2, "down": 2}
 SPIKE_TIP = 1
 
 
-def paint_swatches(texture, materials, skull=False):
+def paint_swatches(texture, materials, face=None):
     """Paints the head's swatches into a flail's _model texture (its free corner; texture is the 64x64 image):
-    materials gives the chain's, the ball's and the fittings' (keys "chain", "blade", "fitting"); a skull's face and
-    jaw too, if it has one."""
-    if skull:
+    materials gives the chain's, the ball's and the fittings' (keys "chain", "blade", "fitting"); and the head's face,
+    if it has one (`face`: its style, "skull" or "jack")."""
+    if face == "skull":
         paint_face(texture, materials["blade"])
+    elif face == "jack":
+        paint_jack_face(texture, materials["blade"])
     x0, y0 = SWATCH
     for row, name in enumerate(ROWS):
         tones = materials[name].tones()
@@ -190,6 +195,53 @@ def paint_face(texture, bone):
     return texture
 
 
+def paint_jack_face(texture, rind):
+    """A jack-o'-lantern's carved face on its rind, in the same clean style: the rind ribbed in two tones, lit along its
+    top and shaded along its bottom; two triangle eyes, a nose and a wide grin with two teeth left in it, each cut through
+    to the fire inside, yellow at its heart and orange at its rim."""
+    tones = rind.tones()
+    orange, yellow = (232, 100, 26), (255, 216, 72)
+    x0, y0, w, h = FACE
+    for y in range(h):
+        for x in range(w):
+            tone = LIGHT if (x // 2) % 2 == 0 else MID
+            if y == 0:
+                tone = HIGHLIGHT
+            elif y == h - 1:
+                tone = DARK
+            texture.putpixel((x0 + x, y0 + y), tuple(tones[tone]) + (255,))
+
+    def fire(x, y, heart):
+        texture.putpixel((x0 + x, y0 + y), (yellow if heart else orange) + (255,))
+    for ex in (2, w - 5):
+        for row, (a, b) in enumerate(((0, 3), (0, 3), (1, 2))):
+            for x in range(ex + a, ex + b):
+                fire(x, 3 + row, row == 1 and x == ex + 1)
+    fire(w // 2 - 1, 6, False)
+    fire(w // 2, 6, False)
+    for x in range(2, w - 2):
+        if x in (w // 3, 2 * w // 3):
+            continue
+        fire(x, 8, True)
+        if 3 <= x <= w - 4:
+            fire(x, 9, False)
+    return texture
+
+
+def jack_elements(head, unit):
+    """A jack-o'-lantern, centred, its stem up (+y, towards the chain) and its face to the front (+z): a squat pumpkin of
+    two crossing boxes of different sizes (no two faces share a plane), the deeper one carrying the carved face on its
+    front, and a green stem with the lug the chain's last link hangs from."""
+    r = head["ball"] * unit
+    face = _face_uv(FACE)
+    a = _box((C - r, C - 0.78 * r, C - 0.8 * r), (C + r, C + 0.78 * r, C + 0.8 * r), "blade", tones=BALL_TONE)
+    b = _box((C - 0.82 * r, C - 0.9 * r, C - r), (C + 0.82 * r, C + 0.9 * r, C + r), "blade", tones=BALL_TONE)
+    b["faces"]["south"] = {"uv": face, "texture": "#tex"}
+    stem = _box((C - 0.17 * r, C + 0.9 * r - 0.1, C - 0.17 * r), (C + 0.17 * r, C + 1.25 * r, C + 0.17 * r), "fitting")
+    lug_eye = _box((C - 0.07 * r, C + 1.25 * r - 0.1, C - 0.05 * r), (C + 0.07 * r, C + 1.5 * r, C + 0.05 * r), "fitting")
+    return [a, b, stem, lug_eye]
+
+
 def _face_uv(rect):
     x0, y0, w, h = rect
     return [x0 / 4.0, y0 / 4.0, (x0 + w) / 4.0, (y0 + h) / 4.0]
@@ -236,6 +288,8 @@ def ball_reach(head, unit):
     haft it swings clear of."""
     if head["style"] == "skull":
         return (head["ball"] + head["horn"] * 0.8) * unit
+    if head["style"] == "jack":
+        return head["ball"] * 1.1 * unit
     return (head["ball"] + head["spike"]) * unit
 
 
@@ -248,6 +302,8 @@ def lug(head, unit):
     """From the ball's centre to where the last link hooks its lug (model pixels)."""
     if head["style"] == "skull":
         return (1.1 + 0.6) * head["ball"] * unit - 0.25 * head["vertebra"] * unit
+    if head["style"] == "jack":
+        return 1.5 * head["ball"] * unit - 0.5 * head["link_bar"] * unit
     return (head["ball"] + 0.62 * head["ball"]) * unit - 0.5 * head["link_bar"] * unit
 
 
@@ -257,8 +313,9 @@ def lug(head, unit):
 def models(head, unit):
     """{"link": model, "ball": model}: a head's models (HEADS or VARIANT_HEADS), textured #tex, with no parent."""
     skull = head["style"] == "skull"
+    ball = skull_elements if skull else jack_elements if head["style"] == "jack" else ball_elements
     return {"link": {"textures": {"particle": "#tex"}, "elements": (vertebra_elements if skull else link_elements)(head, unit)},
-            "ball": {"textures": {"particle": "#tex"}, "elements": (skull_elements if skull else ball_elements)(head, unit)}}
+            "ball": {"textures": {"particle": "#tex"}, "elements": ball(head, unit)}}
 
 
 def definition(item, fallback):

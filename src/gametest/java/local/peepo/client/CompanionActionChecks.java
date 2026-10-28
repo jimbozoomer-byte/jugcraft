@@ -23,7 +23,8 @@ public final class CompanionActionChecks {
                     for(boolean left:new boolean[]{false,true}){
                         var arm=root.getChild(left?"left_arm":"right_arm");var hand=new Vector3f(0,2.7F*arm.yScale,0);
                         new Quaternionf().rotationZYX(arm.zRot,arm.yRot,arm.xRot).transform(hand);hand.add(arm.x,arm.y,arm.z);
-                        check.accept(hand.distance(left?p.leftX:p.rightX,left?p.leftY:p.rightY,left?p.leftZ:p.rightZ)<.001F,"hand follows action pose: "+action);
+                        if(s.handling)check.accept(arm.yScale==1 && hand.distance(arm.x,arm.y,arm.z)<2.701F,"handling keeps actual arm length: "+action);
+                        else check.accept(hand.distance(left?p.leftX:p.rightX,left?p.leftY:p.rightY,left?p.leftZ:p.rightZ)<.001F,"hand follows action pose: "+action);
                         check.accept(arm.yScale<=BoundedActionReach.MAX_REACH/2.7F+.0001F,"action arm stays within comfortable reach: "+action);
                         if(action==7)check.accept(arm.xScale==1 && arm.yScale==1 && arm.zScale==1,"water scoop never stretches either arm");
                     }

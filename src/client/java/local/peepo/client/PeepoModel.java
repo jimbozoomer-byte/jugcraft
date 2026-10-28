@@ -14,6 +14,16 @@ public final class PeepoModel extends EntityModel<PeepoState> {
         workTorso=new ModelPart[]{head,body,hips,pumpkin,shorts};
     }
     ModelPart uniformBone(String name){return root().getChild(name);}
+    org.joml.Vector3f taskHandPosition(boolean left){return handPosition(left?leftArm:rightArm);}
+    org.joml.Vector3f feedbackItemPosition(boolean both){
+        var left=handPosition(leftArm);
+        return both?left.add(handPosition(rightArm)).mul(.5F):left;
+    }
+    private static org.joml.Vector3f handPosition(ModelPart arm){
+        var hand=new org.joml.Vector3f(0,2.7F*arm.yScale,0);
+        new org.joml.Quaternionf().rotationZYX(arm.zRot,arm.yRot,arm.xRot).transform(hand);
+        return hand.add(arm.x,arm.y,arm.z);
+    }
     public void translateToHand(com.mojang.blaze3d.vertex.PoseStack pose){
         rightArm.translateAndRotate(pose);
         pose.translate(0,2.6F/16F,0);
@@ -26,14 +36,15 @@ public final class PeepoModel extends EntityModel<PeepoState> {
     }
     @Override public void setupAnim(PeepoState s) {
         super.setupAnim(s);
-        head.getChild("sleeping_eyes").visible=s.sleeping;
+        boolean closedEyes=(s.rest.active?s.rest.eyesClosed:s.sleeping) || FeedbackPose.sample(s.reaction,s.reactionTime).eyesClosed();
+        head.getChild("sleeping_eyes").visible=closedEyes;
         for (String side : new String[]{"left", "right"}) {
             for (int i=0;i<4;i++) {
-                head.getChild(side+"_eye"+i).visible=!s.sleeping;
-                head.getChild(side+"_eye_rim"+i).visible=!s.sleeping;
+                head.getChild(side+"_eye"+i).visible=!closedEyes;
+                head.getChild(side+"_eye_rim"+i).visible=!closedEyes;
             }
             for (String part : new String[]{"pupil", "shine", "upper_eyelid", "lower_eyelid"})
-                head.getChild(side+"_"+part).visible=!s.sleeping;
+                head.getChild(side+"_"+part).visible=!closedEyes;
         }
         boolean jugheadClothes=s.jughead && !s.pumpkin;
         shorts.visible=jugheadClothes;jug.visible=jugheadClothes;
@@ -72,7 +83,7 @@ public final class PeepoModel extends EntityModel<PeepoState> {
             leftArm.z=rightArm.z=s.pumpkin ? -2.2F : -1.5F;
             head.yRot=0;head.xRot=.08F+bite*.5F;
         }
-        if(s.sitting && !s.eating) {
+        if(s.sitting && !s.eating && !s.rest.active) {
             float kick=Mth.sin(s.ageInTicks*.16F)*.30F;
             leftLeg.xRot=-1.05F+kick;rightLeg.xRot=-1.05F-kick;
             leftArm.xRot=rightArm.xRot=-.70F;
@@ -88,12 +99,14 @@ public final class PeepoModel extends EntityModel<PeepoState> {
             else if(s.work==local.peepo.WorkAnimation.CRANK)CompanionWorkPose.crank(s,leftArm,rightArm,head,leftLeg,rightLeg,workTorso);
             else if(s.work.isPie())CompanionWorkPose.pie(s,leftArm,rightArm,head,leftLeg,rightLeg,workTorso);
             else if(s.work.hasTool() || s.work==local.peepo.WorkAnimation.CHOP || s.work==local.peepo.WorkAnimation.HARVEST || s.work==local.peepo.WorkAnimation.SHEAR || s.work==local.peepo.WorkAnimation.HIVE_SHEAR || s.work==local.peepo.WorkAnimation.HIVE_BOTTLE)CompanionWorkPose.tool(s,leftArm,rightArm,head,leftLeg,rightLeg,workTorso);
-            else CompanionWorkPose.interact(s,leftArm,rightArm,head);
+            else if(!s.fertilizing)CompanionWorkPose.interact(s,leftArm,rightArm,head);
         }
         if(s.pressSeated){
             CiderPressPose.apply(s,leftArm,rightArm,head,leftLeg,rightLeg);
         }else if(s.actionPose && s.work==local.peepo.WorkAnimation.WATER_FILL){
             WaterScoopPose.apply(s,leftArm,rightArm,head,leftLeg,rightLeg,workTorso);
+        }else if(s.actionPose && s.handling){
+            HandlingPose.apply(s,leftArm,rightArm,head,workTorso);
         }else if(s.actionPose){
             float leftWalk=leftLeg.xRot,rightWalk=rightLeg.xRot;
             CompanionWorkPose.tool(s,leftArm,rightArm,head,leftLeg,rightLeg,workTorso);
@@ -119,11 +132,15 @@ public final class PeepoModel extends EntityModel<PeepoState> {
                 head.xRot+=Mth.sin(t*.28F)*.07F;
             }else head.xRot+=Mth.sin(t*.16F)*.045F;
         }
-        if(s.sleeping) {
+        TaskDetailPose.apply(s,head,leftArm,rightArm,workTorso);
+        if(s.reaction!=local.peepo.CompanionFeedbackRules.Reaction.NONE)FeedbackPose.apply(s,head,leftArm,rightArm);
+        if(s.reaction.finishing())FinishingPose.apply(s,head,leftArm,rightArm);
+        if(s.sleeping && !s.rest.active) {
             head.xRot=head.yRot=0;
             leftLeg.xRot=rightLeg.xRot=0;
             leftArm.xRot=rightArm.xRot=0;
             leftArm.zRot=-.08F;rightArm.zRot=.08F;
         }
+        RestPose.apply(s,head,leftArm,rightArm,leftLeg,rightLeg,workTorso);
     }
 }
