@@ -14996,8 +14996,9 @@ def check_lineage():
     weights = "int[] WILD_WEIGHTS = {" + ", ".join(str(w) for w in ln.WILD_WEIGHTS) + "};"
     if weights not in lineage:
         err(f"Lineage.WILD_WEIGHTS is not tools/lineage.py's ({weights})")
-    if sum(ln.WILD_WEIGHTS) != 100 or len(ln.WILD_WEIGHTS) - 1 >= ln.MAX_GRADE - 1:
-        err("tools/lineage.py: the wild weights must add to 100 and leave grades 4 and 5 to the sky")
+    if sum(ln.WILD_WEIGHTS) != 100 or 2 * (len(ln.WILD_WEIGHTS) - 1) > ln.VANILLA_UP_TO:
+        err("tools/lineage.py: the wild weights must add to 100, and every wild trait be at most vanilla's "
+            f"{ln.VANILLA_UP_TO} (no other feature's animal may change)")
     if not (ln.VANILLA_UP_TO < min(ln.SPARE.values()) and ln.VANILLA_UP_TO < ln.YIELD_ONE < ln.YIELD_TWO <= 2 * ln.MAX_GRADE
             and max(ln.SPARE.values()) <= 2 * ln.MAX_GRADE):
         err("tools/lineage.py: every effect must start past vanilla and be reachable by 10")

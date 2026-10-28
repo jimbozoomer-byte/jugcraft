@@ -45,18 +45,19 @@ Notes on the table:
 **Wild animals.** An animal is given its line the first time it loads. The line is worked out from its own UUID, so
 the same animal always has the same line, and there is nothing to re-roll. Each wild copy is graded:
 
-| Grade | 0 | 1 | 2 | 3 |
-|---|---|---|---|---|
-| Chance | 20% | 35% | 30% | 15% |
+| Grade | 0 | 1 | 2 |
+|---|---|---|---|
+| Chance | 25% | 45% | 30% |
 
 A wild trait's number, the two added together:
 
-| Wild number | 0 | 1 | 2 | 3 | 4 | 5 | 6 |
-|---|---|---|---|---|---|---|---|
-| Chance | 4.0% | 14.0% | 24.2% | 27.0% | 19.5% | 9.0% | 2.2% |
+| Wild number | 0 | 1 | 2 | 3 | 4 |
+|---|---|---|---|---|---|
+| Chance | 6.2% | 22.5% | 35.2% | 27.0% | 9.0% |
 
-About one wild animal in nine has a trait of 5 or 6: a fine wild ewe worth catching. **Grades 4 and 5 never occur in
-the wild.** They are the sky's.
+**Every wild animal is exactly vanilla**: no wild trait passes 4. So no other feature's animals change, and a pig that
+another feature's test, trap or gun treats as a plain pig still is one. **Grades 3 to 5 come only from the sky** (and,
+in phase 3, the lab). Breeding wild animals picks and fixes their copies, and the sky lifts them.
 
 **Hidden gifts.** A gift is recessive:
 
@@ -98,14 +99,15 @@ one trait by one grade**, to at most 5. So no baby is ever more than one grade p
 Every trait has a pattern that comes all year. The Winter Crown and the Harvest Moon only add nights, so no season is
 needed for anything.
 
-**From wild 3+3 parents to a line of 10:**
+**From wild 2+2 parents to a line of 10:**
 
-1. The first rising of the pattern gives a 4+3 baby.
-2. Two 4+3s bred together give a 4+4 one time in four. Born under the next rising, it is 5+4.
-3. Two 5+4s, bred on any day, give a 5+5 one time in four.
+1. The first rising of the pattern gives a 3+2 baby.
+2. Two 3+2s bred together give a 3+3 one time in four. Born under the next rising, it is 4+3.
+3. Two 4+3s give a 4+4 one time in four. Born under the third rising, it is 5+4.
+4. Two 5+4s, bred on any day, give a 5+5 one time in four.
 
-That is two risings: two Full Moons for Yield, about 16 game days. Phase 2's star rite and phase 3's gene lab shorten
-it.
+That is three risings: three Full Moons for Yield, about 24 game days, or three Lantern Stars for Vigour, about 9.
+Phase 2's star rite and phase 3's gene lab shorten it.
 
 **The Astrawand.** A slender conductor's baton in the manner of the Wind Waker from *The Legend of Zelda*:
 

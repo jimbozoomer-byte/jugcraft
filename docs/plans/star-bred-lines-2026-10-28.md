@@ -87,9 +87,10 @@ better number only ever adds.
 An animal with no line yet is given one the first time it loads. The line is worked out from its own UUID, so loading
 it again gives the same result, and there is nothing to re-roll.
 
-- Each copy is graded 0 (20%), 1 (35%), 2 (30%) or 3 (15%). A wild trait is about 3 on average, and about 1 wild animal
-  in 9 shows 5 or more in a given trait.
-- **Grades 4 and 5 never occur in the wild.** They are the sky's grades, or the lab's at a price.
+- Each copy is graded 0 (25%), 1 (45%) or 2 (30%), so a wild trait is at most 4 and **every wild animal is exactly
+  vanilla**. No other feature's animals change. (Revised in phase 1: wild copies were planned 0 to 3, which gave about
+  1 wild animal in 9 a bonus and changed other features' test animals.)
+- **Grades 3 to 5 never occur in the wild.** They are the sky's grades, or the lab's at a price.
 - 1 wild animal in 6 carries one copy of one of its kind's gifts.
 
 ### Hidden gifts (the genes found by breeding)
@@ -141,11 +142,12 @@ sign that counts on omen nights).
 
 **The arithmetic.** Each rising of a pattern lifts the line's best grade by one:
 
-1. Two wild 3+3 parents give a 3+3 baby. Born under the Full Moon, it is 4+3: Yield 7.
-2. Two such animals bred together give a 4+4 one time in four. Born under the next Full Moon, it is 5+4: Yield 9.
-3. Two 5+4s, bred on any day, give a 5+5 one time in four: a Yield 10 line that breeds true.
+1. Two wild 2+2 parents give a 2+2 baby. Born under the Full Moon, it is 3+2: Yield 5.
+2. Two such animals bred together give a 3+3 one time in four. Born under the next Full Moon, it is 4+3: Yield 7.
+3. Two 4+3s give a 4+4 one time in four. Born under the third Full Moon, it is 5+4: Yield 9.
+4. Two 5+4s, bred on any day, give a 5+5 one time in four: a Yield 10 line that breeds true.
 
-By breeding alone that is two Full Moons, about 16 game days. The rite and the lab shorten that.
+By breeding alone that is three Full Moons, about 24 game days. The rite and the lab shorten that.
 
 ## The Astrawand (reading only)
 

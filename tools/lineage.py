@@ -34,7 +34,7 @@ WAKING = "jugcraft:echo_comet"  # also wakes a copy of one of the kind's gifts
 
 VANILLA_UP_TO = 4
 MAX_GRADE = 5
-WILD_WEIGHTS = [20, 35, 30, 15]  # grades 0 to 3, in a hundred
+WILD_WEIGHTS = [25, 45, 30]  # grades 0 to 2, in a hundred: every wild trait is at most 4, so exactly vanilla
 WILD_CARRIER = 6
 YIELD_ONE, YIELD_TWO = 6, 9
 EGG_ONE, EGG_TWO = 4, 2
@@ -153,17 +153,18 @@ def effects_table():
 def wild_table():
     """The record's table: how often a wild trait has each number."""
     values = wild_value()
-    rows = ["| Wild number | 0 | 1 | 2 | 3 | 4 | 5 | 6 |", "|---|---|---|---|---|---|---|---|"]
-    rows.append("| Chance | " + " | ".join(f"{float(values.get(v, 0)) * 100:.1f}%" for v in range(7)) + " |")
+    numbers = range(2 * (len(WILD_WEIGHTS) - 1) + 1)
+    rows = ["| Wild number | " + " | ".join(str(v) for v in numbers) + " |", "|---|" + "---|" * len(numbers)]
+    rows.append("| Chance | " + " | ".join(f"{float(values.get(v, 0)) * 100:.1f}%" for v in numbers) + " |")
     return "\n".join(rows)
 
 
 def risings_to_top(start=len(WILD_WEIGHTS) - 1):
     """How many risings of a trait's pattern, at the fewest, before a line of 10, by breeding alone, from wild parents
-    whose best copy is graded `start` (3, the best wild grade). A sign raises the weaker copy by one, so a new grade comes
-    only from a baby whose copies already match the best the line has: 3+3 under a rising gives 4+3; two 4+3s give 4+4
-    one time in four, which under the next rising gives 5+4; two 5+4s, bred on any day, give 5+5 one time in four. Each
-    rising lifts the line's best grade by one."""
+    whose best copy is graded `start` (2, the best wild grade). A sign raises the weaker copy by one, so a new grade comes
+    only from a baby whose copies already match the best the line has: 2+2 under a rising gives 3+2; two 3+2s give 3+3
+    one time in four, which under the next rising gives 4+3; and so on to 5+4, and two 5+4s, bred on any day, give 5+5
+    one time in four. Each rising lifts the line's best grade by one."""
     return MAX_GRADE - start
 
 
@@ -273,6 +274,6 @@ if __name__ == "__main__":
     print(wild_table())
     print()
     print(f"A wild trait past vanilla (5 or more): {float(wild_past_vanilla()) * 100:.1f}%")
-    print(f"Risings of its pattern before a line of 10, from the best wild copies (3): {risings_to_top()}")
+    print(f"Risings of its pattern before a line of 10, from the best wild copies (2): {risings_to_top()}")
     print()
     print(effects_table())

@@ -14,7 +14,7 @@ No numbered release yet. Entries on feature branches remain proposed until their
   - **Vigour:** health, speed, and babies that grow up sooner.
   - **Fertility:** less rest after breeding.
   - **Hardiness:** spared from thorns, then freezing, falling, drowning, burning and lightning.
-  - **4 or below is exactly vanilla**, and most wild animals are, so ordinary farms are unchanged. Grades 4 and 5 never occur in the wild.
+  - **4 or below is exactly vanilla**, and every wild animal is (wild copies are graded 0 to 2), so ordinary farms and every other feature's animals are unchanged. Grades 3 to 5 come only from the sky.
 - **Hidden gifts** are recessive: two carriers have one baby in four that shows the gift. The first six:
   - Double Yolk (chickens, turkeys);
   - Moonfleece (sheep: more wool shorn on an open night);

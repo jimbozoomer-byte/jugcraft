@@ -106,8 +106,11 @@ public final class Lineage {
 
 	/** A trait of this or below is exactly vanilla. */
 	public static final int VANILLA_UP_TO = 4;
-	/** A wild copy's grade, 0 to 3, by these weights (in a hundred); grades 4 and 5 never occur wild. */
-	public static final int[] WILD_WEIGHTS = {20, 35, 30, 15};
+	/**
+	 * A wild copy's grade, 0 to 2, by these weights (in a hundred): a wild trait is at most 4, so every wild animal is
+	 * exactly vanilla; grades 3 to 5 come only from the sky (and, planned, the lab).
+	 */
+	public static final int[] WILD_WEIGHTS = {25, 45, 30};
 	/** 1 wild animal in this many carries one copy of one of its kind's gifts. */
 	public static final int WILD_CARRIER = 6;
 	/** Mixed into a wild line's seed, so a line is not the UUID's other uses of randomness. */
@@ -343,13 +346,18 @@ public final class Lineage {
 		}
 	}
 
-	/** Vigour's health and speed, as permanent modifiers under fixed ids (so again is the same). */
+	/**
+	 * Vigour's health and speed, as permanent modifiers under fixed ids (so again is the same). When that changes its
+	 * most health, its health keeps the same share of it, so an animal at full health stays full and never looks hurt.
+	 */
 	public static void applyVigour(Animal animal, Line line) {
 		int points = line.points(Trait.VIGOUR);
+		float most = animal.getMaxHealth();
 		modify(animal.getAttribute(Attributes.MAX_HEALTH), VIGOUR_HEALTH, HEALTH_PER_POINT * points);
 		modify(animal.getAttribute(Attributes.MOVEMENT_SPEED), VIGOUR_SPEED, SPEED_PER_POINT * points);
-		if (animal.getHealth() > animal.getMaxHealth()) {
-			animal.setHealth(animal.getMaxHealth());
+		float now = animal.getMaxHealth();
+		if (now != most && most > 0.0F) {
+			animal.setHealth(Math.min(now, animal.getHealth() * now / most));
 		}
 	}
 

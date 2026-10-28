@@ -108,21 +108,29 @@ public class LineageGameTests {
 	private static List<String> keys(List<Component> lines) {
 		List<String> out = new ArrayList<>();
 		for (Component line : lines) {
-			if (line.getContents() instanceof TranslatableContents translatable) {
-				out.add(translatable.getKey());
-				for (Object arg : translatable.getArgs()) {
-					if (arg instanceof Component part && part.getContents() instanceof TranslatableContents inner) {
-						out.add(inner.getKey());
-					}
-				}
-			}
+			keys(line, out);
 		}
 		return out;
 	}
 
+	/** Every translation key in a component: its own, its arguments' and its appended parts', depth first. */
+	private static void keys(Component component, List<String> out) {
+		if (component.getContents() instanceof TranslatableContents translatable) {
+			out.add(translatable.getKey());
+			for (Object arg : translatable.getArgs()) {
+				if (arg instanceof Component part) {
+					keys(part, out);
+				}
+			}
+		}
+		for (Component sibling : component.getSiblings()) {
+			keys(sibling, out);
+		}
+	}
+
 	/**
 	 * A wild line is the same each time it is worked out from the same UUID; across many animals no copy is graded past 3
-	 * (4 and 5 are the sky's), every grade 0 to 3 occurs, about 1 in {@value Lineage#WILD_CARRIER} carries one copy of a
+	 * (a wild trait is at most 4: every wild animal is vanilla), every grade 0 to 2 occurs, about 1 in {@value Lineage#WILD_CARRIER} carries one copy of a
 	 * gift, always one of its own kind's, and none shows a gift.
 	 */
 	@GameTest
@@ -143,8 +151,8 @@ public class LineageGameTests {
 				helper.assertTrue(line.gifts().equals(Map.of(Gift.DOUBLE_YOLK.id, 1)), "A wild chicken carries only its own kind's gift: " + line.gifts());
 			}
 		}
-		helper.assertTrue(seen[4] == 0 && seen[5] == 0, "No wild copy is graded 4 or 5");
-		helper.assertTrue(seen[0] > 0 && seen[1] > 0 && seen[2] > 0 && seen[3] > 0, "Every wild grade 0 to 3 occurs");
+		helper.assertTrue(seen[3] == 0 && seen[4] == 0 && seen[5] == 0, "No wild copy is graded past 2, so every wild animal is vanilla");
+		helper.assertTrue(seen[0] > 0 && seen[1] > 0 && seen[2] > 0, "Every wild grade 0 to 2 occurs");
 		helper.assertTrue(carriers > animals / 12 && carriers < animals / 3, "About 1 in 6 wild animals carries a gift: " + carriers + " of " + animals);
 		helper.assertTrue(Lineage.wild(UUID.randomUUID(), EntityTypes.WOLF).gifts().isEmpty(), "A kind with no gifts carries none");
 		helper.succeed();
