@@ -190,6 +190,7 @@ All on the first run:
   - `python3 -m unittest discover -s scripts/tests`: 287 tests, OK.
   - `python3 tools/check_icon_maps.py`: PASS (no new map; the comforts' items are 3D).
   - `javac` scan of the new and changed Java for syntax errors: none. The full compile runs in CI.
+  - Part 4's first CI run failed to compile its tests: 26.3 has no `Items.RED_CARPET` (nor the other colours' fields). The tests now take their carpets from vanilla's `minecraft:wool_carpets` tag, the one the ladder takes, so they don't depend on what each colour's item is called.
 
 Game tests (CI only, not run locally), `HearthGameTests`:
 - **The fireplace lights and takes its garland**:
@@ -216,9 +217,9 @@ Game tests (CI only, not run locally), `HearthGameTests`:
 - **Part 3: the chopping block splits a log**: a spruce log is spent and splits into four spruce planks, as crafting it gives; cobblestone isn't split; the chop marks its hatchet's swing.
 - **Part 4: the blanket ladder takes three throws**:
   - it won't stand without a wall to lean on, and leans on one, two blocks high, facing the player;
-  - a stick isn't hung; a red, a white and a green carpet are, each spent, the red on the top rung; a fourth isn't;
-  - an empty hand takes back the green;
-  - its wall gone, it falls, dropping itself and the red and the white.
+  - a stick isn't hung; three carpets from vanilla's `minecraft:wool_carpets` tag are, each spent, the first on the top rung; a fourth isn't;
+  - an empty hand takes back the third;
+  - its wall gone, it falls, dropping itself and the other two.
 - **Part 4: the knitting basket holds yarn and needles**:
   - four balls of four colours go in, each kept in its colour, and a fifth doesn't;
   - worn needles go in and show;
@@ -229,7 +230,7 @@ Game tests (CI only, not run locally), `HearthGameTests`:
 - a fireplace lit and dressed, and a second beside it out and bare;
 - part 2's two woodstoves lit along the wall, a kettle boiling on one (its lid drawn by `TeaKettleRenderer`) and a simmer pot on the other;
 - part 3's firewood rack full of logs and a chopping block before it (its hatchet drawn by `ChoppingBlockRenderer`);
-- part 4's blanket ladder with red, yellow and green throws, and a knitting basket of four coloured balls with its needles. The throws and yarn are drawn by their renderers, so the picture shows their colours.
+- part 4's blanket ladder with three throws of different colours (carpets from vanilla's tag), and a knitting basket of four coloured balls with its needles. The throws and yarn are drawn by their renderers, so the picture shows their colours.
 
 The shots are from the room, close by, at the stoves, at the woodpile, at the comforts, and by night.
 

@@ -20,8 +20,11 @@ import net.fabricmc.fabric.api.client.gametest.v1.context.TestServerContext;
 import net.fabricmc.fabric.api.client.gametest.v1.context.TestSingleplayerContext;
 import net.minecraft.client.gui.screens.worldselection.WorldCreationUiState;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Holder;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.Block;
@@ -129,8 +132,12 @@ public class HearthClientGameTests implements FabricClientGameTest {
 		level.setBlock(foot, leant, Block.UPDATE_ALL);
 		ladder.setPlacedBy(level, foot, leant, null, new ItemStack(ladder));
 		if (level.getBlockEntity(foot) instanceof BlanketLadderBlockEntity throwsOn) {
-			for (ItemStack carpet : new ItemStack[] {new ItemStack(Items.RED_CARPET), new ItemStack(Items.YELLOW_CARPET), new ItemStack(Items.GREEN_CARPET)}) {
-				throwsOn.hang(carpet);
+			// Three carpets from vanilla's tag, the throws' colours by turns along it.
+			int hung = 0;
+			for (Holder<Item> carpet : BuiltInRegistries.ITEM.getTagOrEmpty(BlanketLadderBlock.CARPETS)) {
+				if (hung++ % 4 == 1 && throwsOn.throwsOn().size() < BlanketLadderBlock.RUNGS) {
+					throwsOn.hang(new ItemStack(carpet.value()));
+				}
 			}
 		}
 		BlockPos basket = origin.offset(-5, 0, 2);

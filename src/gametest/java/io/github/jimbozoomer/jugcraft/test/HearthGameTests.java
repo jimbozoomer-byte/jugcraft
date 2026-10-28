@@ -15,9 +15,12 @@ import io.github.jimbozoomer.jugcraft.agriculture.MultiDecorationBlock;
 import io.github.jimbozoomer.jugcraft.agriculture.StoneFireplaceBlock;
 import io.github.jimbozoomer.jugcraft.agriculture.StovetopBlock;
 import io.github.jimbozoomer.jugcraft.agriculture.WoodstoveBlock;
+import java.util.ArrayList;
 import java.util.List;
 import net.fabricmc.fabric.api.gametest.v1.GameTest;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Holder;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.Direction;
 import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.server.level.ServerLevel;
@@ -49,7 +52,8 @@ import net.minecraft.world.phys.Vec3;
  * kind and no more, nor a stick; a comparator reads it full; an empty hand takes back the last; broken, it gives them back
  * as they went in. The Chopping Block splits a spruce log into four spruce planks, as crafting does, and marks its
  * hatchet's swing; cobblestone isn't split. Part 4: the Blanket Ladder won't stand without a wall to lean on and leans on
- * one, two blocks high; it takes three carpets as throws, the first on its top rung, and no fourth, nor a stick; an empty
+ * one, two blocks high; it takes three carpets (from vanilla's tag) as throws, the first on its top rung, and no fourth,
+ * nor a stick; an empty
  * hand takes back the last; its wall gone, it falls, giving back itself and its throws. The Knitting Basket takes four
  * balls of yarn, each kept in its colour, and no fifth; the needles go in and show; an empty hand takes back the needles,
  * then the last ball; broken, it gives back its yarn and itself.
@@ -88,6 +92,15 @@ public class HearthGameTests {
 		BlockPos below = helper.absolutePos(pos.below());
 		player.getMainHandItem().useOn(new UseOnContext(player, InteractionHand.MAIN_HAND,
 				new BlockHitResult(Vec3.atCenterOf(below).relative(Direction.UP, 0.5), Direction.UP, below, false)));
+	}
+
+	/** The wool carpets, by the tag the Blanket Ladder takes (whatever 26.3 names each colour's item). */
+	private static List<Item> carpets() {
+		List<Item> out = new ArrayList<>();
+		for (Holder<Item> carpet : BuiltInRegistries.ITEM.getTagOrEmpty(BlanketLadderBlock.CARPETS)) {
+			out.add(carpet.value());
+		}
+		return out;
 	}
 
 	private static boolean all(ServerLevel level, StoneFireplaceBlock fireplace, BlockPos master, java.util.function.Predicate<BlockState> test) {
@@ -320,23 +333,25 @@ public class HearthGameTests {
 		helper.assertTrue(level.getBlockState(master).is(ladder) && level.getBlockState(master.above()).is(ladder)
 				&& level.getBlockState(master).getValue(MultiDecorationBlock.FACING) == Direction.NORTH, "It leans on the wall, two blocks high");
 		BlanketLadderBlockEntity throwsOn = (BlanketLadderBlockEntity) level.getBlockEntity(master);
+		List<Item> carpets = carpets();
+		helper.assertTrue(carpets.size() >= 4, "There are carpets in the tag: " + carpets);
 		use(player, level, master, new ItemStack(Items.STICK));
-		for (Item carpet : List.of(Items.RED_CARPET, Items.WHITE_CARPET, Items.GREEN_CARPET)) {
+		for (Item carpet : carpets.subList(0, 3)) {
 			ItemStack held = new ItemStack(carpet, 2);
 			use(player, level, master.above(), held);
 			helper.assertTrue(held.getCount() == 1, "A " + carpet + " is hung, and spent");
 		}
-		ItemStack fourth = new ItemStack(Items.BLUE_CARPET, 2);
+		ItemStack fourth = new ItemStack(carpets.get(3), 2);
 		use(player, level, master, fourth);
-		helper.assertTrue(throwsOn.throwsOn().size() == 3 && throwsOn.throwsOn().get(0).is(Items.RED_CARPET) && fourth.getCount() == 2,
-				"Three throws, the red on the top rung, and a fourth isn't hung (nor the stick)");
+		helper.assertTrue(throwsOn.throwsOn().size() == 3 && throwsOn.throwsOn().get(0).is(carpets.get(0)) && fourth.getCount() == 2,
+				"Three throws, the first on the top rung, and a fourth isn't hung (nor the stick)");
 		use(player, level, master, ItemStack.EMPTY);
-		helper.assertTrue(throwsOn.throwsOn().size() == 2 && player.getInventory().countItem(Items.GREEN_CARPET) == 1,
-				"An empty hand takes back the green, hung last");
+		helper.assertTrue(throwsOn.throwsOn().size() == 2 && player.getInventory().countItem(carpets.get(2)) == 1,
+				"An empty hand takes back the third, hung last");
 		helper.setBlock(pos.above().south(), Blocks.AIR);
 		helper.runAfterDelay(3, () -> {
 			helper.assertTrue(level.getBlockState(master).isAir() && level.getBlockState(master.above()).isAir()
-					&& dropped(helper, item("blanket_ladder")) == 1 && dropped(helper, Items.RED_CARPET) == 1 && dropped(helper, Items.WHITE_CARPET) == 1,
+					&& dropped(helper, item("blanket_ladder")) == 1 && dropped(helper, carpets.get(0)) == 1 && dropped(helper, carpets.get(1)) == 1,
 					"Its wall gone, it falls, dropping itself and its throws");
 			helper.succeed();
 		});
