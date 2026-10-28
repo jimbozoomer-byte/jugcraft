@@ -27,7 +27,6 @@ import io.github.jimbozoomer.jugcraft.concordance.rules.Knowledge;
 import io.github.jimbozoomer.jugcraft.concordance.rules.ResearchState;
 import io.github.jimbozoomer.jugcraft.concordance.strata.Brace;
 import io.github.jimbozoomer.jugcraft.config.JugcraftConfig;
-import io.github.jimbozoomer.jugcraft.guns.GunShots;
 import io.github.jimbozoomer.jugcraft.guns.JugcraftGuns;
 import io.github.jimbozoomer.jugcraft.lair.Encounter;
 import io.github.jimbozoomer.jugcraft.lair.JugcraftLairs;
@@ -353,9 +352,16 @@ public class YetiKingGameTests {
 		return cells.subList(0, Math.min(5, cells.size())).toString();
 	}
 
+	/**
+	 * Ticks of the End-gun Levitation {@link #levitate} gives: slice 12A's second. The guns now lift for the owner's 100
+	 * ticks at a chance ({@code JugcraftGuns.HIT_EFFECTS}); whether he and his kin refuse the spell does not depend on its
+	 * length, so the shorter one keeps the test short.
+	 */
+	private static final int SPELL_TICKS = 20;
+
 	/** End-gun Levitation as GunShots gives it to what a bullet hurt: the game's own, at its first level, from the shooter. */
 	private static boolean levitate(LivingEntity target, ServerPlayer shooter) {
-		return target.addEffect(new MobEffectInstance(MobEffects.LEVITATION, GunShots.LIFT_TICKS, 0), shooter);
+		return target.addEffect(new MobEffectInstance(MobEffects.LEVITATION, SPELL_TICKS, 0), shooter);
 	}
 
 	/** {@code healer} mends {@code patient} 4 through the Concordance's effect boundary, as the Mend word does. */
@@ -1971,8 +1977,8 @@ public class YetiKingGameTests {
 	}
 
 	/**
-	 * End-gun Levitation (GunShots gives the game's own, {@value GunShots#LIFT_TICKS} ticks at its first level, from the
-	 * shooter, to whatever a bullet hurts) lifts neither him nor his kin: hunting he stays on his lake and his whelps on
+	 * End-gun Levitation (GunShots gives the game's own, at its first level, from the shooter, to whatever a bullet hurts;
+	 * here {@value #SPELL_TICKS} ticks of it) lifts neither him nor his kin: hunting he stays on his lake and his whelps on
 	 * their dens' floors for the whole spell and after it, and the End gun's shot that fells him floats him no higher as he
 	 * dies. The whelps are given the spell alone, as GunShots gives it after a hit: a bullet's knockback (he has none) is
 	 * any blow's, not the spell's. The shooter is in creative, so neither he nor his kin go for anyone; and his whelps are
@@ -2029,7 +2035,7 @@ public class YetiKingGameTests {
 						kept[i + 1] = whelp.hasEffect(MobEffects.LEVITATION);
 					}
 				}
-				helper.runAfterDelay(GunShots.LIFT_TICKS + 10, () -> {
+				helper.runAfterDelay(SPELL_TICKS + 10, () -> {
 					watched[0] = null;
 					YetiKingEntity.Phase spelled = king.phase();
 					// The End gun's shot that fells him, as GunShots lands it: the bullet, then the spell if it hurt.

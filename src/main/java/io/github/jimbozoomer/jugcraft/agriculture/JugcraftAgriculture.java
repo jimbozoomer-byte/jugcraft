@@ -318,6 +318,7 @@ public final class JugcraftAgriculture {
 	public static EntityType<ThrowMarker> THROW_MARKER;
 	public static EntityType<HeadlessHorseman> HEADLESS_HORSEMAN;
 	public static EntityType<FlamingPumpkin> FLAMING_PUMPKIN;
+	public static EntityType<HorsemanRider> HORSEMAN_RIDER;
 	public static BlockEntityType<TrebuchetBlockEntity> TREBUCHET_ENTITY;
 	public static BlockEntityType<StringLightHookBlockEntity> STRING_LIGHT_HOOK_ENTITY;
 	public static BlockEntityType<CandyBowlBlockEntity> CANDY_BOWL_ENTITY;
@@ -1419,6 +1420,7 @@ public final class JugcraftAgriculture {
 				.component(DataComponents.BUNDLE_CONTENTS, BundleContents.EMPTY), TOOL_TAB);
 		TrickOrTreat.register();
 		TrickOrTreaters.register();
+		GraveyardRising.register();
 	}
 
 	/**
@@ -1492,6 +1494,11 @@ public final class JugcraftAgriculture {
 		FabricDefaultAttributeRegistry.register(HEADLESS_HORSEMAN, HeadlessHorseman.createAttributes());
 		FLAMING_PUMPKIN = entity("flaming_pumpkin", EntityType.Builder.<FlamingPumpkin>of(FlamingPumpkin::new, MobCategory.MISC).noLootTable()
 				.sized(0.5F, 0.5F).fireImmune().clientTrackingRange(8).updateInterval(5));
+		// The Horseman seen riding in the season: a sighting, never saved (HorsemanSightings).
+		HORSEMAN_RIDER = entity("horseman_rider", EntityType.Builder.<HorsemanRider>of(HorsemanRider::new, MobCategory.MISC).noLootTable().noSave()
+				.sized(1.4F, 2.9F).eyeHeight(2.5F).fireImmune().clientTrackingRange(10).updateInterval(1));
+		FabricDefaultAttributeRegistry.register(HORSEMAN_RIDER, HorsemanRider.createAttributes());
+		HorsemanSightings.register();
 		Block lantern = registerBlock("horseman_lantern", LanternBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_ORANGE)
 				.strength(1.0F).sound(SoundType.LANTERN).lightLevel(state -> 15).noOcclusion().pushReaction(PushReaction.POPPED));
 		registerItem("horseman_lantern", props -> new BlockItem(lantern, props), new Item.Properties().useBlockDescriptionPrefix()
@@ -1501,6 +1508,7 @@ public final class JugcraftAgriculture {
 		registerItem("horseman_cloak", Item::new, new Item.Properties().stacksTo(1).rarity(Rarity.EPIC).component(DataComponents.EQUIPPABLE, cloak),
 				TOOL_TAB);
 		HarvestMoon.register();
+		BloodMoon.register();
 	}
 
 	/**

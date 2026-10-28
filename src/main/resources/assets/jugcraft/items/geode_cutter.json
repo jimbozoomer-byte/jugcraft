@@ -1,0 +1,9 @@
+{
+  "model": {
+    "type": "minecraft:special",
+    "base": "jugcraft:item/geode_cutter",
+    "model": {
+      "type": "geckolib:geckolib"
+    }
+  }
+}

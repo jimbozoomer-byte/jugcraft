@@ -1,0 +1,22 @@
+{
+  "parent": "minecraft:husbandry/root",
+  "display": {
+    "icon": {
+      "id": "jugcraft:rounded_gravestone"
+    },
+    "title": {
+      "translate": "advancements.jugcraft.graveyard_shift.title"
+    },
+    "description": {
+      "translate": "advancements.jugcraft.graveyard_shift.description"
+    },
+    "frame": "challenge",
+    "show_toast": true,
+    "announce_to_chat": true
+  },
+  "criteria": {
+    "done": {
+      "trigger": "minecraft:impossible"
+    }
+  }
+}

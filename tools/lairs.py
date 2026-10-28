@@ -28,7 +28,8 @@ EDGE_DAMAGE = 4.0     # the mist's toll for flying or falling off, never below h
 # (docs/features/lantern-fen.md), the Archive of Last Names' (docs/features/crypt-archive.md), the Foundry Trench's
 # (docs/features/foundry-trench.md), the Moonlit Ring's (docs/features/moonlit-ring.md), the Cydonian Sanctum's
 # (docs/features/cydonian-sanctum.md), then the Crowfield's (docs/features/crowfield.md).
-# (docs/features/cydonian-sanctum.md), then the Crown of Thunder's (docs/features/crown-of-thunder.md).
+# (docs/features/cydonian-sanctum.md), then the Crown of Thunder's (docs/features/crown-of-thunder.md). The Church
+# Bridge (docs/features/church-bridge.md) has none of its own: it reuses the braziers, Moonwood Leaves, Grey Mist and moon.
 LAIR_BLOCKS = {
     "blighted_soil": "Blighted Soil",
     "black_wheat": "Black Wheat",
@@ -280,6 +281,15 @@ VANE_LANDS = ["jugcraft:highland", "jugcraft:karst_pinnacles", "jugcraft:landsca
               "jugcraft:landscape_emerald_peaks", "jugcraft:landscape_forested_highlands", "jugcraft:landscape_highland",
               "jugcraft:landscape_highlands", "jugcraft:landscape_temperate_highlands", "#minecraft:is_mountain",
               "#minecraft:is_hill"]
+# The Hessian's Bridle (the Church Bridge's rite, docs/features/church-bridge.md): used on a jack-o'-lantern (or a lit
+# hand-carved pumpkin) standing on a fence or wall post, at night, in the Overworld, the lantern under the open sky, OUT
+# of the Halloween season (in it the Headless Horseman rides the Overworld instead). Hoofbeats answer, the lantern flares,
+# the bridle is used up, and Grey Mist rises where it was used, the gate for lairs.gate_seconds; whoever goes in comes to
+# on the wood road. lairs.off_season does not change it.
+BRIDLE = {
+    "cooldown": 40,            # ticks between uses of one bridle on a lantern, answered or not
+    "mist_range": 3,           # how near another open mist into the hollow must not be (blocks)
+}
 # The Storm Rods' parts, from the plinth up (tools/crown_of_thunder.py ROD_PARTS), and the light a charged part gives.
 ROD_PARTS = ("base", "middle", "tip")
 ROD_LIGHT = {"base": 6, "middle": 9, "tip": 12}
@@ -297,6 +307,7 @@ ITEMS = {
     "altar_keystone": "Altar Keystone",
     "harvest_crown": "Harvest Crown",
     "thunder_vane": "Thunder Vane",
+    "hessians_bridle": "Hessian's Bridle",
 }
 GATE = {"entity": "mist_gate", "display": "Mist Gate", "width": 1.6, "height": 2.6}
 
@@ -357,6 +368,9 @@ RECIPES = {
     # storm it calls.
     "thunder_vane": {"pattern": ["FLF", "CKC", " C "], "key": {
         "F": "minecraft:feather", "L": "minecraft:lightning_rod", "C": "minecraft:copper_ingot", "K": "minecraft:compass"}},
+    # A bridle: leather straps, iron bit rings, and a jack-o'-lantern to call its rider by. Used up by the rite.
+    "hessians_bridle": {"pattern": ["L L", "IJI", " L "], "key": {
+        "L": "minecraft:leather", "I": "minecraft:iron_ingot", "J": "minecraft:jack_o_lantern"}},
 }
 # What counts as a werewolf's pelt for the totem: every kind's (tools/agriculture.py WEREWOLF kinds), and the Alpha's
 # own (tools/alpha_werewolf.py), one for one.
@@ -464,6 +478,15 @@ LAIRS = {
         "music": "minecraft:music.overworld.jagged_peaks",
         "ambient_light": 0.25,
         "motes": ("minecraft:white_ash", 0.004),
+    },
+    "church_bridge": {
+        "display": "The Church Bridge",
+        "enter": "Hoofbeats come out of the dark, and you come to on the road through %s",
+        "sky": "#0a0e1c", "fog": "#28323f", "water_fog": "#141a24", "water": "#2a3646",
+        "ambient_light_color": "#2a3448", "sky_light_color": "#5a6a90",
+        "music": "minecraft:music.overworld.old_growth_taiga",
+        "ambient_light": 0.2,
+        "motes": ("minecraft:white_ash", 0.003),
     },
 }
 

@@ -767,6 +767,16 @@
       "denominator": 1,
       "source": "recipe jugcraft:survival_completion/atm"
     },
+    "jugcraft:auger_rifle": {
+      "numerator": 8211,
+      "denominator": 1,
+      "source": "recipe jugcraft:auger_rifle"
+    },
+    "jugcraft:auger_shotgun": {
+      "numerator": 8208,
+      "denominator": 1,
+      "source": "recipe jugcraft:auger_shotgun"
+    },
     "jugcraft:aura_candle": {
       "numerator": 1,
       "denominator": 1,
@@ -9642,6 +9652,11 @@
       "denominator": 1,
       "source": "recipe jugcraft:dark_oak_cabinet"
     },
+    "jugcraft:dart": {
+      "numerator": 1120,
+      "denominator": 27,
+      "source": "recipe jugcraft:dart"
+    },
     "jugcraft:data_cable": {
       "numerator": 1,
       "denominator": 2,
@@ -11262,6 +11277,11 @@
       "denominator": 1,
       "source": "recipe jugcraft:equipment_rack"
     },
+    "jugcraft:ermine_rifle": {
+      "numerator": 57181,
+      "denominator": 6,
+      "source": "recipe jugcraft:ermine_rifle"
+    },
     "jugcraft:esf_control_board": {
       "numerator": 246223,
       "denominator": 40,
@@ -12537,6 +12557,11 @@
       "denominator": 1,
       "source": "recipe jugcraft:electronics_pattern"
     },
+    "jugcraft:geode_cutter": {
+      "numerator": 57331,
+      "denominator": 6,
+      "source": "recipe jugcraft:geode_cutter"
+    },
     "jugcraft:geothermal_generator": {
       "numerator": 3978,
       "denominator": 1,
@@ -13777,6 +13802,26 @@
       "denominator": 1,
       "source": "recipe jugcraft:hermit_rifle"
     },
+    "jugcraft:hessian_sabre": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
+    "jugcraft:hessians_bridle": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
+    "jugcraft:hessians_spur": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
+    "jugcraft:hessians_tricorn": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
     "jugcraft:hibiscus": {
       "numerator": 16,
       "denominator": 1,
@@ -13836,6 +13881,11 @@
       "numerator": 399,
       "denominator": 2,
       "source": "recipe jugcraft:holler_pistol"
+    },
+    "jugcraft:hollowflail": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
     },
     "jugcraft:holly_fence": {
       "numerator": 40,
@@ -27672,6 +27722,11 @@
       "denominator": 1,
       "source": "recipe jugcraft:housing_casing"
     },
+    "jugcraft:maelstrom_gun": {
+      "numerator": 8266,
+      "denominator": 1,
+      "source": "recipe jugcraft:maelstrom_gun"
+    },
     "jugcraft:magenta_alchemical_bag": {
       "numerator": 6515,
       "denominator": 2,
@@ -28066,6 +28121,11 @@
       "numerator": 1,
       "denominator": 1,
       "source": "fallback (balance pending)"
+    },
+    "jugcraft:microjet": {
+      "numerator": 208,
+      "denominator": 3,
+      "source": "recipe jugcraft:microjet"
     },
     "jugcraft:microwave_counter": {
       "numerator": 281,
@@ -37076,6 +37136,11 @@
       "numerator": 82303,
       "denominator": 128,
       "source": "recipe jugcraft:tsc_video_wall"
+    },
+    "jugcraft:tumbler_rifle": {
+      "numerator": 8273,
+      "denominator": 1,
+      "source": "recipe jugcraft:tumbler_rifle"
     },
     "jugcraft:tungsten_block": {
       "numerator": 9,

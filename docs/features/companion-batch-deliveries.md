@@ -12,6 +12,16 @@ The pickup planner simulates insertion of the whole batch, including combined ou
 
 Every in-flight cargo slot is reserved against eating or meal insertion. The original single-stack save fields remain supported; additional bounded Pending/Unused entries remember the other stacks and slots. No items are recreated from manifests. Real inventory remains authoritative; loading checks slot bounds, duplicate slot references and matching item components. Death drops the existing inventory as before. Invalidated assignments release the job reservations but retain items in inventory.
 
+## Cutting-board batches — 26 October 2026
+
+Implemented with **OpenAI Codex (GPT-6)**. The companion port accepts one matching stack, capped at 64 ingredients including the single visible workpiece. Additional pieces wait in one saved stack; every successful forty-tick cut advances the next piece. Existing Chef timing, bonus results, energy and knife wear still apply per cut. Output collection waits while the batch can keep working, including after the ordinary twenty-second work session, but higher-priority jobs, rest, missing tools and full output can interrupt it. A full result buffer is unloaded before work resumes.
+
+Pickup simulation snapshots the queue alongside the visible workpiece and results. Production stock counts queued pieces as upcoming products and reduces pickup to whole recipes needed for the target. Empty-hand board retrieval returns queued inputs as well as finished products; breaking the board drops every real item once. Native player cutting continues to remove exactly one workpiece. Existing boards without a saved queue load empty. The queue adds no world search, background task, entity or per-tick inventory scan.
+
+Focused coverage is in `PeepoCuttingBatchClientTests`: bounded pickup and rollback, save/load, native manual removal, full-output/tool interruption, target counts, and actual Supply-to-board-to-Output cycles for both companions, including batches longer than twenty seconds.
+
+Validation on 26 October 2026, Minecraft 26.3 / Fabric Loader 0.19.5 / Java 25, using `52082f4f3` plus these local changes: `runClientGameTest -PclientTests=PeepoCuttingBatchClientTests -x processResources` passed **1,007 assertions** in the final run (`build/cutting-batch-verified.log`). The preceding combined run also passed `PeepoKitchenAnimationClientTests` (**1,256**) and `PeepoTaskDetailClientTests` (**2,494**). The batch-only rerun covers the final no-refill safeguard and failed-energy rollback. Native animation captures and the combined log are preserved under `build/cutting-brewing-evidence/`. Repository/documentation-link and whitespace checks passed. These used disposable integrated-server test worlds; no unrelated full-pack suite or multiplayer load test was run, and no distribution or player world was updated by this revision.
+
 ## Energy and server bounds
 
 While moving, transport spends `2 + max(0, stacks - 1) + max(0, ceil(items / 32) - 1)` JE per tick, based on the remaining delivery load. Empty trips and a single stack of up to 32 cost 2 JE/tick; a pie plus coal normally costs 3; two stacks totaling 128 cost 6; eight full 64-item stacks cost 24. Station work, rest, meals and regeneration retain their existing rules. Existing hearth loading/collection costs remain unchanged.
