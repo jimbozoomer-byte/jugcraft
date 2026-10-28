@@ -163,7 +163,7 @@ public class SeedPouchItem extends Item {
 					continue;
 				}
 				if (item.place(new BlockPlaceContext(player, context.getHand(), seed.copyWithCount(1), hit)).consumesAction()) {
-					if (!player.isCreative()) {
+					if (!player.getAbilities().instabuild) {
 						seed.shrink(1);
 					}
 					sown++;
