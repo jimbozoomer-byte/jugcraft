@@ -1698,8 +1698,9 @@ public class ConcordanceGardenPactClientGameTests implements FabricClientGameTes
 	private static void matter(ClientGameTestContext context, TestDedicatedServerContext server, BlockPos perch) {
 		context.waitTicks(OPEN_GAP);
 		open(context, server, perch);
+		// The state first, then the page built from it: the screen rebuilds a frame after its state arrives.
 		context.waitFor(client -> PactClient.state() != null && PactClient.state().mode() == PactStatePayload.KEEP
-				&& PactClient.state().spirit().answers().size() == 2, WAIT);
+				&& PactClient.state().spirit().answers().size() == 2 && screen(client).control("answer:1") != null, WAIT);
 		String shown = context.computeOnClient(client -> PactClient.state().spirit().matter().getString() + " / "
 				+ PactClient.state().spirit().answers().stream().map(answer -> answer.name().getString() + "=" + answer.amount()).toList() + " / "
 				+ PactClient.state().notes().stream().map(Component::getString).toList());
