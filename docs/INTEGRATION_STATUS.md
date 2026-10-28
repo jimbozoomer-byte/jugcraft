@@ -94,7 +94,7 @@ Built on branch `claude/chunk-b-winter-stone`; on main since 27 October 2026 thr
 `25644502a` passed every job on its second attempt (all 1682 required server game tests, with and without the optional
 integrations, and every client test class); its first attempt failed two tests outside Chunk B (a nuclear plant's
 radiation reading, a Peepo delivery client test), which passed when re-run. Units 1 to 4 also passed run 38549876709
-on `b012875ab`. The evidence is recorded and the owner's checkpoint is awaited; Chunk C, stacked on it, is under way
+on `b012875ab`. The evidence is recorded and the owner's checkpoint is awaited; Chunk C, built on it, reached main with it in #494
 (above). Not played by hand or with two clients ([the chunk's contract](features/concordance-chunk-b.md),
 [its evidence](features/concordance-chunk-b.md#unit-5-evidence-and-handoff-b-09-b-11)).
 

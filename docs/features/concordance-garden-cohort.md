@@ -256,8 +256,9 @@ cohort's last CI run was `233cca018` (#525). The other rows were not re-read for
 
 ### Checks before each unit lands
 
-1. Refresh main and the open pull requests (REST, read only); merge main down the stack if it moved (B, C, D, then
-   the cohort), and the stack's branches if they moved in review.
+1. Refresh main and the open pull requests (REST, read only); merge main into `claude/garden-cohort` if it moved,
+   regenerating generated files, never hand-merging them *(amended unit 1: the B to D stack ended with #494 on 27
+   October 2026)*.
 2. Before any vanilla, GeckoLib or SmartBrainLib call is written, check it against mc263src, GeckoLib 5.5.7's sources and
    SmartBrainLib 2.0.3's (the pinned `smartbrainlib-fabric-26.3-2.0.3`); each ticket records the check (class, member,
    line). The build cannot be compiled locally (Facts), so this is the only check before CI.
@@ -1004,10 +1005,11 @@ words, codex pages, roster and journey rows from the generators, and his body ad
   definitions' "no definition loaded". Two audits were widened for him (R12, A-01: Stolas's legacy sound-id check reads
   only `stolas.` events; R16, A-02: each `SPIRITS` row's offerings tag).
 - **Client evidence** (looked at for this record, [Buer's Verification](buer-pact.md#verification)): the shot named
-  `jugcraft_garden_buer_listen` is byte for byte the same file as `jugcraft_garden_buer_idle`, so no picture shows his
-  listening pose, though the test checked his client was drawing that clip when it froze; the asleep shot shows his petals
-  open in the same V as by day, not folded shut as Dossier 1 item 7(a) says; the depart shot shows a shut bud at full
-  height, not yet sunk. Each is a question for the review, not a passed claim.
+  `jugcraft_garden_buer_listen` has a 480x270 preview in the log that is byte for byte `jugcraft_garden_buer_idle`'s, so
+  no picture shows his listening pose, though the test checked his client was drawing that clip when it froze; the asleep
+  shot shows his petals open in the same V as by day, not folded shut as Dossier 1 item 7(a) says; the depart shot shows
+  a shut bud at full height, not yet sunk; the refused picture shows Accept's tooltip and the terms' last lines, not his
+  refusal. Each is a question for the review, not a passed claim.
 
 Saved: nothing new. GB15, GB20 (task half), GB24 and GB25 (in part) closed; GB18 open (Gutenberg's record not read).
 
@@ -1426,9 +1428,9 @@ against main, not merged):
 | GC-04 (`GC04_TESTS`, 24) | Buer's twenty (the specification's nineteen and the review's `buerSkipsBedsHeMayNotChange`); the three obligation tests; `buerFromTheCodexToDeparture` |
 | Edited lines (GC-P17) | `thePactScreensMessagesAreBounded`, `ConcordancePactNetworkTests` (its `missing.owner` line), `thePactDefinitionParsesStrictly`; and every Chunk D test of Stolas's, unchanged |
 
-**Client tests** (one client each; run 40605564166 attempt 1): `ConcordanceGardenPactClientGameTests` (new, weight 330)
-passed in shard 0; its 33 pictures were looked at for this record and each is described in
-[Buer's Verification](buer-pact.md#verification), with what it does not show. `ConcordancePactClientGameTests` passed in
+**Client tests** (one client each except `ConcordancePactNetworkTests`, which runs two client JVMs; run 40605564166
+attempt 1): `ConcordanceGardenPactClientGameTests` (new, weight 330) passed in shard 0; its 33 pictures were looked at
+for this record and each is described in [Buer's Verification](buer-pact.md#verification), with what it does not show. `ConcordancePactClientGameTests` passed in
 shard 3; its four facing pictures were looked at ([Stolas's Verification](stolas-pact.md#verification)).
 `ConcordancePactNetworkTests` (two client JVMs at Stolas's perch, as Chunk D built it) passed in shard 1,
 `ConcordanceRosterClientGameTests` (unchanged: no picture of Buer's portrait) in shard 6 and `ScreenFitClientGameTests`
@@ -1475,7 +1477,7 @@ checked as defined and fired).
 #### Corrections to unit 1's commit messages
 
 The commits are pushed and are not rewritten, so their messages are corrected here (the unit review's findings 10, 22
-and 23):
+and 23, and `4ca363d38`'s from the records' review):
 
 - **`202e75969` does not say that the generators' incidental rewrites were restored, and `9742f240b` says the generator
   "left src/main/resources unchanged" though the files it rewrote are there.** On the session's machine `tools/generate_material_data.py` rewrites 71 files under `src/main/resources` from CRLF to LF with no change
@@ -1483,15 +1485,18 @@ and 23):
   rewrites two ornamental corn textures with identical pixels (the logs count 72 to 74 rewritten files in all); each was
   restored with `git checkout` before a gate or check was read. So GC-01b's "git status listed only
   tools/concordance_pacts.py" held only after that restore, and GC-04a's "left src/main/resources unchanged" (its message
-  does name the rewrites and their restore) means unchanged once the CRLF-only files it rewrote there were restored. The noise is not unit 1's: it appears on the merged base
-  `54a2acb6c` before any unit-1 edit, so the specification's precondition (a clean `git status --porcelain` after the
-  generators on the merged head) was not met by the merge; it is recorded as the merge's gap.
+  does name the rewrites and their restore) means unchanged once the CRLF-only files it rewrote there were restored.
+  The noise is not unit 1's: GC-01a's builder reported the same rewrites on the merged base `54a2acb6c` before any
+  unit-1 edit (the saved baseline log ran only the audits, so this is the builder's report, not a log); it is recorded
+  as the merge's gap.
 - **`6101ad482`** is titled "GC-03: complete the groundwork" but adds no groundwork: it fixes two GC-03 server tests'
   setup (`aBedSaysWhetherItMayBeTendedWithoutChangingIt` grows its crop lit and sampled as the other harvest tests do;
   `theGardenGroundworkSavesNothing` lets the presence think once before its record is compared).
 - **`3e736655a`** says "all 26 of the contract's audit mutations were caught locally". The mutations B1 to B26 are the
   Buer part design's, not this contract's, and the harness logged B26 as missed: its audit fired, with a different
   message than the harness expected (the unit review's re-run found the same).
+- **`4ca363d38`** says the "optional integrations absent" job failed the three tests; in run 40597482976 the `mod` job
+  failed the same three.
 
 ## Schema review (the shared schema against eight services)
 
@@ -1857,7 +1862,8 @@ pull request #526 for the owner's review. Next:
    regenerated, never hand-merged).
 3. Start unit 2 (GC-05, Bathin) from unit 1's head: the accord machinery, `Status.AWAITING_ANSWER`, the bed index's
    Hearts, Gleaners and pylons, and `PactObligations.DEVICE`, with GC-P40 to GC-P59.
-4. Open items unit 1 leaves: the listen, asleep and depart pictures (GC-04's As built); the journey's Buer steps still
+4. Open items unit 1 leaves: the listen, asleep and depart pictures, and the refused picture, which shows Accept's
+   tooltip and the terms' last lines, not his refusal (GC-04's As built); the journey's Buer steps still
    write his numbers as literals; GB18 (Gutenberg's record); a dispatch of every client class on the cohort's head.
 
 ## How this contract was checked

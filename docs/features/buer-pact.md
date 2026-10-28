@@ -266,7 +266,7 @@ and its job logs; the earlier runs are in the [contract](concordance-garden-coho
 | 3. Service | `buerEasesOneStrainAtTheBedsOwnRate`, `buerTendsOnlyBedsOfHisBeneficiaries`, `buerNeverTouchesAClaimedOrDormantBed`, `buerSkipsBedsHeMayNotChange`, `buerWaitsForAPresentHolder`, `buerChangesAtMostOneBedAThink`, `buerStopsAtHisQuota`, `buerTendsThroughHisGrace`; shot `jugcraft_garden_buer_at_work` | passed; shot seen |
 | 4. Upkeep and suspension | `everySpiritSealsOnceAndSpendsOnce`, `everySpiritsUpkeepWarnsGivesGraceSuspendsAndResumes`, `aSuspendedBuerTendsNothing`, `noGardenTermOrRefusalNamesAnAstrolabe`; `check_acquisition` (his compact and offering reachable); shots `jugcraft_garden_buer_terms` (three sizes), `jugcraft_garden_buer_kept` | passed; audit passes locally; shots seen |
 | 5. The overworked bed | `anOverworkedBedWaitsForCompost`, `anOverworkedComplaintIsForgottenOnRestart`, `buersReadingSaysItsNoteAndNamesNoPlayer`; shots `jugcraft_garden_buer_overworked`, `jugcraft_garden_buer_jade` | passed; shots seen (the Jade shot was taken after the bed was fed, so it shows no overworked note) |
-| 6. Refusal and departure | `buerRefusesWithoutABedToMend`, `everySpiritsRefusalSpendsNothing`, `buerAnswersEachActionWithHisGesture`, the end of `buerFromTheCodexToDeparture` (escrow once); shots `jugcraft_garden_buer_nothing_to_mend`, `jugcraft_garden_buer_refused`, `jugcraft_garden_buer_depart`, `jugcraft_garden_buer_end_confirm`, `jugcraft_garden_buer_ended` | passed; shots seen (the depart shot shows a shut bud, not yet sunk) |
+| 6. Refusal and departure | `buerRefusesWithoutABedToMend`, `everySpiritsRefusalSpendsNothing`, `buerAnswersEachActionWithHisGesture`, the end of `buerFromTheCodexToDeparture` (escrow once); shots `jugcraft_garden_buer_nothing_to_mend`, `jugcraft_garden_buer_refused`, `jugcraft_garden_buer_depart`, `jugcraft_garden_buer_end_confirm`, `jugcraft_garden_buer_ended` | passed; shots seen (the refused shot does not show his refusal; the depart shot shows a shut bud, not yet sunk) |
 | 7. Interaction details | (a) `buerSleepsOutsideHisHours`, shot `jugcraft_garden_buer_asleep`; (b) `buerFacesTheBedHeTends` (the bed, then his speaker, then no one), `aWorkTargetOutranksTheSpeakerWhileItsGesturePlays`, shots `jugcraft_garden_buer_work`, `jugcraft_garden_buer_at_work` and `jugcraft_garden_buer_faces_east`, `_south`, `_west`, `_north` | passed; shots seen ((a)'s shot shows his petals open, not folded shut: below) |
 | 8. Evidence | the client class keyboard-only at the default GUI, GUI 4 and 320x180 (`_scale4`, `_small` shots); ownership, save and duplication as item 8 names them, plus `aDuplicateBuerTendsNothing` and `twoBuersShareOneBedsTendWindow`; the three obligation tests (`anObligationIsRecordedOncePerPlayerAndSpirit`, `anObligationNeverMastersStolassRegard`, `anObligationOutsideTheAreaOrWhileSuspendedCountsNothing`) | passed; shots seen; the narrator not heard (no sound device) |
 
@@ -304,28 +304,28 @@ Its 33 pictures (480 by 270, or 320 by 180 for the small window, as the log prin
 | `chooser_scale4` | at GUI 4 | the same list, chat lines at the left edge behind the panel |
 | `chooser_small` | a 320x180 window | title, question, Stolas, Buer and Close, all inside the window |
 | `buer_conversation` | his first beat | "1 of 3": "A great blossom opens on the perch and its pistil turns toward you. "A bed that is worked must also be mended. I am Buer; I mend.""; Back (greyed), Next, Leave |
-| `buer_terms` | his terms, default GUI | "His terms": Service (strain tending, ending "He works only while you are within 64 blocks of the perch, and never on a bed you could not change by hand"), Hours 06:00 to 18:00, Area within 8 blocks, Daily quota 16, Upkeep (1 x Buer's Offerings every 7 game days, at most 4 periods), Grace; Back, Accept the pact, Decline. The compact's row is below the fold |
+| `buer_terms` | his terms, default GUI | "His terms": Service (strain tending, ending "He works only while you are within 64 blocks of the perch, and never on a bed you could not change by hand"), Hours 06:00 to 18:00, Area within 8 blocks, Daily quota 16, Upkeep (1 x Buer's Offerings every 7 game days, at most 4 periods), Grace; Back, Accept the pact, Decline. The rows after Grace are not in view |
 | `buer_terms_scale4` | at GUI 4 | the same terms and the "If suspended" row; the same three buttons |
 | `buer_conversation_scale4` | his third beat at GUI 4 | "3 of 3": "A Mendvetch each week, for my own mending. And when I call a bed overworked, feed it before you ask me again."; Back focused (its label shown), Hear his terms, Leave |
 | `buer_terms_small` | terms at 320x180 | the service text wrapped and scrollable; the accept button's label cut to "Accept the pa..."; Back, Decline |
 | `buer_conversation_small` | third beat at 320x180 | the whole beat; Back focused, Hear his terms, Leave |
-| `buer_refused` | accept without the compact | the terms scrolled to the end (How long, Breach, How to end it, What comes back, If the perch is broken, "Who benefits: You and your party", "The Open Hand Compact: Paid as you accept: 4 x Mendvetch, 4 x Bone Meal" with both items' icons); Accept the pact focused, its tooltip ("Pays the Open Hand Compact and seals the pact, both at once") covering the answer line, of which only "Nothing is spent or agre..." shows. No astrolabe in view |
+| `buer_refused` | accept without the compact | the terms' last rows (How long, Breach, How to end it, What comes back, If the perch is broken, "Who benefits: You and your party", "The Open Hand Compact: Paid as you accept: 4 x Mendvetch, 4 x Bone Meal" with both icons) and the dim note "Nothing is spent or agre…", cut off by Accept the pact's tooltip ("Pays the Open Hand Compact and seals the pact, both at once"); Accept the pact focused. **His refusal's answer line is not in view** (it follows the note). No astrolabe in view |
 | `buer_kept` | his kept page after sealing | "Your pact": Strain tending 0 of 16 beds eased today; Next offering 1 Buer's Offerings in 7 game days; Paid ahead 0 of at most 4 periods; First obligation (tend a strained Verdant Bed by hand inside the pact's area while it is active); "At this perch, within 8 blocks, from 06:00 to 18:00"; what ending returns; "The pact is sealed: Buer keeps this perch" ticked; His service, Terms, Close |
 | `buer_at_work` | his work over a strained bed | in the world by day: a Verdant Bed in front; above and behind it his open blossom (violet petals, a glowing yellow pistil cap) with a column of white particles between bed and blossom |
 | `buer_overworked` | the bed worked back to 3 | "Your pact": "The pact is active"; Strain tending 1 of 16; "Overworked: the bed at -3, -60, 2 was worked faster than it heals. Buer will not mend it until it is fed (bone meal, fertilizer or a Mulch Maw) or rests fallow"; Next offering; Paid ahead; First obligation |
 | `buer_jade` | Jade on him | his blossom close up, the crosshair on him; Jade's box: "Buer", a row of hearts, "idle: nothing to do", "Service: Strain tending", "Active", "Next offering in 7 game days", "Jugcraft"; the action bar "Fed the bed: nutrients 6 / 32". No overworked note (the bed had been fed) |
 | `buer_idle` | his idle loop, from his front | by day: two broad lilac petals raised in a V, the yellow pistil cap between them, the purple star of the leaf plate round the stem, the brown stem standing on the pact perch; a Verdant Bed at the left |
-| `buer_listen` | his listening loop (screen open, then closed with the world frozen) | **byte for byte the same file as `buer_idle`** (compared): no listening pose distinct from idle is shown, though the test checked his client was drawing the listening clip when it froze |
+| `buer_listen` | his listening loop (screen open, then closed with the world frozen) | **its 480x270 preview in the log is byte for byte `buer_idle`'s** (compared): no listening pose distinct from idle is shown, though the test checked his client was drawing the listening clip when it froze |
 | `buer_asleep` | midnight | night and stars; **the same open V of petals as by day**, darker; the petals are not folded shut (Dossier item 7(a) says they fold shut) |
 | `buer_suspended` | his pact suspended | by day: the petals spread wider and lower, drooping outward; the pistil cap between them |
 | `buer_inspect` | his inspect gesture | the petals drawn up together into a cup, the yellow cap glowing between their tips |
-| `buer_assent` | his assent gesture | the petals spread wide and low, nearly level, the pistil upright between them |
+| `buer_assent` | his assent gesture | the petals spread wide and tipped forward, much as in the suspended picture, the pistil upright between them |
 | `buer_refuse` | his refuse gesture | the petals drawn up and shut together, only a hint of the yellow cap between their tips |
 | `buer_work` | his work gesture | the petals in a V, the pistil pushed up high above them, its glowing yellow cap at the top |
 | `buer_depart` | his depart gesture (0.88 s of 2 s) | the petals closed into a shut bud at full height on the stem; **not yet sunk into the perch** |
 | `buer_arrive` | his arrive gesture | the petals open in a V, much as idle |
 | `buer_below` | from below (the plate's and cap's undersides) | from a pit looking up: the leaf plate's underside as a dark purple star, the stem, the petals above against the sky; a plain shaded surface, no speckled or mixed pattern |
-| `buer_faces_east` | spoken to from the east | the front of his blossom toward the camera; a dark block behind the stem; no bed in view |
+| `buer_faces_east` | spoken to from the east | the front of his blossom toward the camera; directly behind his stem, dark and in shade, the Verdant Bed (three blocks west of the perch, straight beyond him from the east) |
 | `buer_faces_south` | from the south | the same front view; a Verdant Bed at the left |
 | `buer_faces_west` | from the west | the same front view, shaded like the east shot; no bed in view |
 | `buer_faces_north` | from the north | the same front view; a Verdant Bed at the right (together the four show the background turning round while his front stays toward each speaker) |
@@ -343,7 +343,8 @@ or client test ran here.
 the narrator heard; a player's hardware; a dispatch of every client class on the cohort's head; his roster portrait in a
 picture (`ConcordanceRosterClientGameTests` is unchanged); the overworked bed reached by real harvests in a game test (the
 tests' strain setter stands in; Chunk C's tests count a harvest's strain); his astir loop (not photographed, GC-P29).
-Open for review: the listen, asleep and depart pictures above.
+Open for review: the listen, asleep and depart pictures above, and the refused picture shows Accept's tooltip and the
+terms' last lines, not his refusal.
 
 ## World and event applicability
 
@@ -354,8 +355,9 @@ cave, dungeon, boss or loot role.
 
 Ships with the garden cohort's unit 1 (GC-01 to GC-04), behind the Concordance's switch; built, not merged (draft #526).
 Open: Stolas's six two-faced box-UV cubes (kept as the owner made them; the twin rule records them, a question for
-the cohort's checkpoint); the listen picture identical to idle, the asleep picture showing his petals open and the depart
-picture not yet sunk ([Verification](#verification)); the journey's Buer steps writing his numbers as literals; the chooser not in the whole-path test (it needs Stolas's Regard; shown by the server test and
+the cohort's checkpoint); the listen picture identical to idle, the asleep picture showing his petals open, the depart
+picture not yet sunk and the refused picture showing Accept's tooltip and the terms' last lines, not his refusal
+([Verification](#verification)); the journey's Buer steps writing his numbers as literals; the chooser not in the whole-path test (it needs Stolas's Regard; shown by the server test and
 the client class); his astir loop not photographed; an offering due shows him astir at night (item 7a); the Goetia
 citation's edition (the contract's GB18) is settled only after Project Gutenberg's record #72679 is read (it could not
 be read from the session on 28 October 2026).
