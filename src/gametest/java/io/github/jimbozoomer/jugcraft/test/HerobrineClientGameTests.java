@@ -69,6 +69,10 @@ public final class HerobrineClientGameTests implements FabricClientGameTest {
 			context.waitTicks(20);
 			world.getConnection().waitForChunksRender();
 			server.runCommand("tick freeze");
+			// The witnessed daylight encounter can leave a sign/shrine at this same spot.
+			// Rebuild the dark render fixture while frozen, after those world changes.
+			server.runCommand("fill %d %d %d %d %d %d minecraft:stone".formatted(x - 1, y - 1, z - 20, x + 1, y - 1, z + 2));
+			server.runCommand("fill %d %d %d %d %d %d minecraft:air".formatted(x - 1, y, z - 20, x + 1, y + 2, z + 2));
 			int darkness = spawn(context, world, origin.offset(0, 0, -16), Herobrine.Variant.TUNNEL);
 			context.waitTicks(20);
 			context.takeScreenshot("jugcraft_herobrine_tunnel_eyes");

@@ -42,7 +42,8 @@ import org.jspecify.annotations.Nullable;
  * brings them to in the Moonlit Ring's camp ({@link HowlingTotemRite#follow}); and red mist over the Ancient Altar
  * leads to Mars ({@link AltarKeystoneRite#follow}); and where the Thunder Vane was raised, Grey Mist torn by the wind,
  * whirling round and crackling with sparks, thunder rolling in it now and then, which lifts followers and brings them
- * down on the Crown of Thunder's terrace ({@link ThunderVaneRite#follow}).
+ * down on the Crown of Thunder's terrace ({@link ThunderVaneRite#follow}); and where the Hessian's Bridle was used, Grey
+ * Mist with hoofbeats in it, which brings followers to on the Church Bridge's wood road ({@link HessiansBridleRite#follow}).
  */
 public class MistGateEntity extends Entity {
 	/** How often a howl answers from far off through the Howling Totem's mist (ticks). */
@@ -273,6 +274,8 @@ public class MistGateEntity extends Entity {
 			HarvestCrownRite.follow(server, open);
 		} else if (open.lair == Lair.CROWN_OF_THUNDER) {
 			ThunderVaneRite.follow(server, open);
+		} else if (open.lair == Lair.CHURCH_BRIDGE) {
+			HessiansBridleRite.follow(server, open);
 		} else {
 			Lairs.enter(server, open);
 		}

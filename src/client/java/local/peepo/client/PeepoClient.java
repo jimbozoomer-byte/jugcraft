@@ -11,6 +11,7 @@ public final class PeepoClient implements ClientModInitializer {
     public static final ModelLayerLocation WORK_WOOD = new ModelLayerLocation(PeepoMod.id("work_tools"), "wood");
     public static final ModelLayerLocation WORK_METAL = new ModelLayerLocation(PeepoMod.id("work_tools"), "metal");
     @Override public void onInitializeClient() {
+        CompanionThoughts.initialize();
         local.peepo.AssignmentTool.openPlanner=hand->net.minecraft.client.Minecraft.getInstance().gui.setScreen(new PlannerScreen(hand));
         net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking.registerGlobalReceiver(local.peepo.PopulationTypesPayload.TYPE,(payload,context)->{
             if(context.player().containerMenu instanceof local.peepo.CompanionMenu menu && menu.containerId==payload.menu()){menu.populationRow=payload.row();menu.populationAnchor=payload.anchor();menu.populationTypes=payload.types();}

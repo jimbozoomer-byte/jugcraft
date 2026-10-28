@@ -1,0 +1,19 @@
+{
+  "type": "minecraft:entity",
+  "random_sequence": "jugcraft:bosses/hessian_horseman",
+  "pools": [
+    {
+      "rolls": 1,
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "jugcraft:hollowflail"
+        },
+        {
+          "type": "minecraft:item",
+          "name": "jugcraft:hessian_sabre"
+        }
+      ]
+    }
+  ]
+}

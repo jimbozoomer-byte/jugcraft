@@ -1,5 +1,6 @@
 package io.github.jimbozoomer.jugcraft.client;
 
+import io.github.jimbozoomer.jugcraft.agriculture.BloodMoon;
 import io.github.jimbozoomer.jugcraft.agriculture.HarvestMoon;
 import io.github.jimbozoomer.jugcraft.agriculture.JugcraftAgriculture;
 import io.github.jimbozoomer.jugcraft.agriculture.OpenCarvingPayload;
@@ -107,6 +108,7 @@ public final class JugcraftClient implements ClientModInitializer {
 		IronDreadnoughtClient.register();
 		AlphaWerewolfClient.register();
 		PumpkinKingClient.register();
+		HessianHorsemanClient.register();
 		CydonianSentinelClient.register();
 		BlockEntityRendererRegistry.register(JugcraftMachines.MACHINE_ENTITY, WindTurbineRenderer::new);
 		BlockEntityRendererRegistry.register(JugcraftKinetics.BELT_PULLEY_ENTITY, BeltRenderer::new);
@@ -357,6 +359,7 @@ public final class JugcraftClient implements ClientModInitializer {
 		EntityRendererRegistry.register(JugcraftAgriculture.HAY_GOLEM, HayGolemRenderer::new);
 		EntityRendererRegistry.register(JugcraftAgriculture.TURKEY, TurkeyRenderer::new);
 		EntityRendererRegistry.register(JugcraftAgriculture.HEADLESS_HORSEMAN, HorsemanRenderer::new);
+		EntityRendererRegistry.register(JugcraftAgriculture.HORSEMAN_RIDER, HorsemanRenderer::new);
 		EntityRendererRegistry.register(JugcraftAgriculture.FLYING_PUMPKIN, context -> new ThrownItemRenderer<>(context, 1.5F, false));
 		EntityRendererRegistry.register(JugcraftAgriculture.FLAMING_PUMPKIN, context -> new ThrownItemRenderer<>(context, 1.5F, true));
 		EntityRendererRegistry.register(JugcraftAgriculture.BOWLING_PUMPKIN, BowlingPumpkinRenderer::new);
@@ -372,12 +375,14 @@ public final class JugcraftClient implements ClientModInitializer {
 		EntityRendererRegistry.register(JugcraftAgriculture.THROW_MARKER, ThrowMarkerRenderer::new);
 		EntityRendererRegistry.register(JugcraftAgriculture.SEAT, SeatRenderer::new);
 		ClientPlayNetworking.registerGlobalReceiver(HarvestMoon.Payload.TYPE, (payload, context) -> HarvestMoon.clientActive = payload.active());
+		ClientPlayNetworking.registerGlobalReceiver(BloodMoon.Payload.TYPE, (payload, context) -> BloodMoon.clientActive = payload.active());
 		EntityRendererRegistry.register(JugcraftAgriculture.PUMPKIN_BARGE, PumpkinBoatRenderer::new);
 		EntityRendererRegistry.register(JugcraftAgriculture.PUMPKIN_RACER, PumpkinBoatRenderer::new);
 		ClientPlayNetworking.registerGlobalReceiver(OpenCarvingPayload.TYPE,
 				(payload, context) -> Minecraft.getInstance().gui.setScreen(new CarvingScreen(payload)));
 		ClientPlayConnectionEvents.DISCONNECT.register((handler, client) -> {
 			HarvestMoon.clientActive = false;
+			BloodMoon.clientActive = false;
 			client.execute(CarvingTextures::clear);
 		});
 		BlockEntityRenderers.register(JugcraftDrones.TERMINAL_ENTITY, context -> new DroneDepotRenderer());

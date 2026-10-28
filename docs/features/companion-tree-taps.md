@@ -6,6 +6,8 @@ Owner-requested implementation, 23 October 2026, with OpenAI Codex (GPT-6).
 
 Peepo and Jughead use spawn weights 12 in main habitats and 8 in secondary habitats. Existing biome tags, groups of 1–4, natural-only Overworld placement, the passive-creature category and six-per-type/128-block local cap remain unchanged.
 
+The later [27 October spawning change](companion-wild-spawning.md) retains these weights and habitats, lowers the cap to four wild companions per type, excludes owned companions, and adds bounded supplemental spawn attempts. The six-companion description above records this feature's original balance.
+
 A placed Tree Tap is one Planner work assignment. Existing Supply brings glass bottles (eight unreserved empties total); existing Output receives marked latex bottles. The native tap has one bottle of capacity, or eight with its manually installed bucket upgrade. A 40-tick interaction at 4 reserve JE/t (160 JE per batch) collects as many complete bottles as available bottles and cargo allow. Normal delivery effort applies. Fractional fill remains. No bucket upgrades, production acceleration, new recipes or new assets are added. Rubber trees and glass manufacture supply this early-industrial job; latex feeds existing rubber processing and downstream machinery parts.
 
 ## Integration and server behavior
