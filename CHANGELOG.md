@@ -8,6 +8,15 @@ Every change to Jugcraft, newest first, grouped by pull request. For what each t
 
 No numbered release yet. Entries on feature branches remain proposed until their pull requests merge.
 
+### Unmerged: Barn & Harvest Tools, part 5 (the barn's stores and fittings)
+- **Grain Sacks**: burlap sacks of grain, tied and stamped, that stack three to a block and drop each sack. A wool and three wheat make one.
+- **Milk Can**: a tinplate dairy can that stands facing you.
+- **Pitchfork and Rake Rack**: a peg rail on a barn wall with a pitchfork and a hay rake under it (two up); it comes off with its wall.
+- **Feed Trough**: a plank trough two blocks long that holds 128 horse feed (hay bales, wheat, apples, carrots), the hay rising in it as it fills.
+- **Barn Lantern**: a real-sized hurricane lantern on an iron wall bracket, light 15; an empty hand puts it out and lights it.
+- Record: [barn-and-harvest-tools.md](docs/features/barn-and-harvest-tools.md).
+- **Checked:** the record's Verification. Game tests and screenshots run in CI only; not played by hand.
+
 ### Unmerged: Barn & Harvest Tools, part 4 (the Hay-Loft Pulley and the Harvest Bell)
 - **Hay-Loft Pulley**: a braced beam on a wall with an iron pulley and a rope down to a hay hook. Use it to let the rope down a block (to four) and sneak-use to haul it up; the wheel turns and the rope runs, and the hook sways as it hangs.
 - **Harvest Bell**: a bronze farm bell in an iron yoke on a post (two up). Use it to ring it: it swings and rings, the swing dying away, and can be rung again once it settles.

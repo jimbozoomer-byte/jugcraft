@@ -3,9 +3,10 @@ docs/branches/AGRICULTURE.md planned but never built, and a barn's gear. Part 1:
 (in tools/agriculture.py SICKLES, beside the flint and bronze ones), the Watering Can and the Seed Pouch. Part 2: the mill
 and the dairy, the Quern and the Butter Churn, and the Flour, Butter and Pancakes they lead to. Part 3: drying and keeping
 the harvest, the Drying Rack and the Corn Crib. Part 4: the hay loft's pulley and the farm bell, the Hay-Loft Pulley and
-the Harvest Bell. The numbers here are what the Java (agriculture/WateringCanItem, SeedPouchItem, QuernBlock,
-ButterChurnBlock, DryingRackBlock, CornCribBlock, HayPulleyBlock, HarvestBellBlock) uses; tools/check_mod_data.py
-compares them.
+the Harvest Bell. Part 5: the barn's stores and fittings, grain sacks, milk cans, a tool rack, a feed trough and a barn
+lantern. The numbers here are what the Java (agriculture/WateringCanItem, SeedPouchItem, QuernBlock, ButterChurnBlock,
+DryingRackBlock, CornCribBlock, HayPulleyBlock, HarvestBellBlock, GrainSackBlock, FeedTroughBlock, BarnLanternBlock)
+uses; tools/check_mod_data.py compares them.
 tools/barn_tools_data.py writes their files; their icons are maps in tools/item_icons/.
 """
 
@@ -60,6 +61,24 @@ PULLEY = {"block": "hay_pulley", "display": "Hay-Loft Pulley", "drops": 4, "haul
 # for it to settle.
 BELL = {"block": "harvest_bell", "display": "Harvest Bell", "size": (1, 2, 1), "swing_ticks": 40}
 
+# ---------------------------------------------------------------- part 5: the barn's stores and fittings
+
+# Grain Sacks: burlap sacks of grain lying on their sides, tied at the neck, stamped with a mill's mark. Placed on one,
+# another stacks on it, up to `max` to a block, each `height` pixels high; broken, they drop each sack.
+SACK = {"block": "grain_sack", "display": "Grain Sack", "max": 3, "height": 4.5}
+# The Milk Can: a dairy's tinplate milk can, its neck and lid, and its two handles. Decoration.
+CAN = {"block": "milk_can", "display": "Milk Can"}
+# The Pitchfork and Rake Rack: a peg rail on a wall with a pitchfork and a hay rake stood beneath it, one block across
+# and two up. Decoration; it hangs on a sturdy wall and comes off when the wall goes.
+TOOL_RACK = {"block": "tool_rack", "display": "Pitchfork and Rake Rack", "size": (1, 2, 1)}
+# The Feed Trough: a plank trough on legs, two blocks long. It holds `capacity` of what horses eat (#minecraft:horse_food:
+# hay bales, wheat, apples, carrots and the rest), put in and taken back as the Apple Bin takes fruit, its fill showing
+# in four stages.
+TROUGH = {"block": "feed_trough", "display": "Feed Trough", "size": (2, 1, 1), "capacity": 128}
+# The Barn Lantern: a hurricane lantern hung from an iron bracket on a wall. Lit (light `light`) or put out with an
+# empty hand; it hangs on a sturdy wall and comes off when the wall goes.
+LANTERN = {"block": "barn_lantern", "display": "Barn Lantern", "light": 15}
+
 # What they make: plain ingredients, and a food that needs both (tools/agriculture.py ITEMS).
 ITEMS = {
     "flour": {"display": "Flour", "compost": "low", "tags": []},
@@ -89,6 +108,13 @@ RECIPES = [
      "result": "hay_pulley", "count": 1, "category": "misc"},
     {"id": "harvest_bell", "pattern": [" C ", "ICI", " L "], "key": {"C": "#c:ingots/copper", "I": "#c:ingots/iron", "L": "#minecraft:logs"},
      "result": "harvest_bell", "count": 1, "category": "misc"},
+    # Part 5.
+    {"id": "milk_can", "pattern": [" N ", "T T", "TTT"], "key": {"N": "minecraft:iron_nugget", "T": "#c:ingots/tin"},
+     "result": "milk_can", "count": 1, "category": "misc", "features": ["tin"]},
+    {"id": "tool_rack", "pattern": ["PPP", "N N", "S S"], "key": {"P": "#minecraft:planks", "N": "minecraft:iron_nugget", "S": "minecraft:stick"},
+     "result": "tool_rack", "count": 1, "category": "misc"},
+    {"id": "feed_trough", "pattern": ["P P", "PPP", "S S"], "key": {"P": "#minecraft:planks", "S": "minecraft:stick"},
+     "result": "feed_trough", "count": 1, "category": "misc"},
 ]
 
 # Flour makes Wheat Dough as wheat does (three and a bucket of water make three), and Pancakes with butter and an egg.
@@ -97,6 +123,10 @@ SHAPELESS = [
      "result": "wheat_dough", "count": 3, "category": "misc"},
     {"id": "pancakes", "inputs": ["jugcraft:flour", "jugcraft:flour", "minecraft:egg", "jugcraft:butter"],
      "result": "pancakes", "count": 2, "category": "misc"},
+    # Part 5: a sack of grain is a decoration that costs its grain; nothing turns it back.
+    {"id": "grain_sack", "inputs": ["#minecraft:wool", "minecraft:wheat", "minecraft:wheat", "minecraft:wheat"],
+     "result": "grain_sack", "count": 1, "category": "misc"},
+    {"id": "barn_lantern", "inputs": ["minecraft:lantern", "#c:ingots/iron"], "result": "barn_lantern", "count": 1, "category": "misc"},
 ]
 
 
@@ -106,4 +136,5 @@ def items():
 
 
 def blocks():
-    return [QUERN["block"], CHURN["block"], RACK["block"], CRIB["block"], PULLEY["block"], BELL["block"]]
+    return [QUERN["block"], CHURN["block"], RACK["block"], CRIB["block"], PULLEY["block"], BELL["block"], SACK["block"], CAN["block"],
+            TOOL_RACK["block"], TROUGH["block"], LANTERN["block"]]

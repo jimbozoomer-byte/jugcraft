@@ -14695,7 +14695,8 @@ def check_barn_tools():
     runner variants name its moving part's model; the flour and pancake recipes exist; the messages have their text.
     Part 3: the Drying Rack's bunch and drying time and the Corn Crib's capacity, stages and sizes are the table's.
     Part 4: the Hay-Loft Pulley's reach and haul time and the Harvest Bell's size and swing are the table's, and their
-    renderers turn and hang their pieces where the models are drawn."""
+    renderers turn and hang their pieces where the models are drawn. Part 5: the Grain Sacks', Pitchfork and Rake Rack's,
+    Feed Trough's and Barn Lantern's numbers are the table's, and the lantern's flame shows only while it is lit."""
     import barn_tools as bt
     agri = JAVA_ROOT / "agriculture"
     can = (agri / "WateringCanItem.java").read_text(encoding="utf-8") if (agri / "WateringCanItem.java").is_file() else ""
@@ -14771,6 +14772,31 @@ def check_barn_tools():
     for name, value in (("BELL_AXLE_Y", btd.BELL_AXLE[0] - 16.0), ("BELL_AXLE_Z", btd.BELL_AXLE[1])):
         if f"float {name} = {value}F;" not in worked:
             err(f"HandWorkedRenderer.{name} is not where tools/barn_tools_data.py hangs the bell ({value})")
+    # Part 5: the sacks' most to a block and height, the tool rack's and the trough's sizes, the trough's capacity and
+    # feed, and the lantern's light, which shows only while it is lit (its flame alone full-bright).
+    sacks = (agri / "GrainSackBlock.java").read_text(encoding="utf-8") if (agri / "GrainSackBlock.java").is_file() else ""
+    if f"int MAX = {bt.SACK['max']};" not in sacks or f"SACK_HEIGHT = {bt.SACK['height']};" not in sacks:
+        err(f"GrainSackBlock is not tools/barn_tools.py SACK's {bt.SACK['max']} sacks of {bt.SACK['height']} pixels")
+    for cls, spec in (("ToolRackBlock", bt.TOOL_RACK), ("FeedTroughBlock", bt.TROUGH)):
+        java = (agri / f"{cls}.java").read_text(encoding="utf-8") if (agri / f"{cls}.java").is_file() else ""
+        w, h, d = spec["size"]
+        if f"box({w}, {h}, {d})" not in java:
+            err(f"{cls} is not {w} x {h} x {d} blocks as tools/barn_tools.py says")
+    trough = (agri / "FeedTroughBlock.java").read_text(encoding="utf-8") if (agri / "FeedTroughBlock.java").is_file() else ""
+    if f"int CAPACITY = {bt.TROUGH['capacity']};" not in trough or 'withDefaultNamespace("horse_food")' not in trough:
+        err(f"FeedTroughBlock keeps tools/barn_tools.py TROUGH's {bt.TROUGH['capacity']} of #minecraft:horse_food")
+    lamp = (agri / "BarnLanternBlock.java").read_text(encoding="utf-8") if (agri / "BarnLanternBlock.java").is_file() else ""
+    if f"int LIGHT = {bt.LANTERN['light']};" not in lamp \
+            or "state.getValue(BarnLanternBlock.LIT) ? BarnLanternBlock.LIGHT : 0" not in main:
+        err(f"the Barn Lantern gives tools/barn_tools.py LANTERN's light {bt.LANTERN['light']}, and only while lit")
+    for name, glows in ((bt.LANTERN["block"], False), (f"{bt.LANTERN['block']}_flame", True)):
+        model = load(ASSETS / "models" / "block" / f"{name}.json") or {}
+        if any(e.get("light_emission") for e in model.get("elements", [])) != glows:
+            err(f"models/block/{name}.json: only the lantern's flame is drawn full-bright")
+    lit = [part for part in (load(ASSETS / "blockstates" / f"{bt.LANTERN['block']}.json") or {}).get("multipart", [])
+           if part.get("apply", {}).get("model") == f"{MOD}:block/{bt.LANTERN['block']}_flame"]
+    if not lit or any(part.get("when", {}).get("lit") != "true" for part in lit):
+        err("barn_lantern: its blockstate adds the flame only while it is lit")
 
 
 def check_orchard_harvest():

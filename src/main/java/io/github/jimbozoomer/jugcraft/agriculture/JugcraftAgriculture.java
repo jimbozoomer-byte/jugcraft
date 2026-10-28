@@ -393,6 +393,7 @@ public final class JugcraftAgriculture {
 	public static BlockEntityType<FruitStoreBlockEntity> CORN_CRIB_ENTITY;
 	public static BlockEntityType<HayPulleyBlockEntity> HAY_PULLEY_ENTITY;
 	public static BlockEntityType<HarvestBellBlockEntity> HARVEST_BELL_ENTITY;
+	public static BlockEntityType<FruitStoreBlockEntity> FEED_TROUGH_ENTITY;
 	public static BlockEntityType<CaramelAppleStandBlockEntity> CARAMEL_APPLE_STAND_ENTITY;
 	public static ExtendedMenuType<FarmStandMenu, FarmStandMenu.Opening> FARM_STAND_MENU;
 	/** The Harvest Effigy catching (assets/jugcraft/sounds/effigy, made by tools/choir_sounds.py). */
@@ -2851,6 +2852,25 @@ public final class JugcraftAgriculture {
 		HARVEST_BELL_ENTITY = Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, Jugcraft.id("harvest_bell"),
 				FabricBlockEntityTypeBuilder.create(HarvestBellBlockEntity::new, bell).build());
 		for (Block block : List.of(pulley, bell)) {
+			registerItem(BuiltInRegistries.BLOCK.getKey(block).getPath(), props -> new BlockItem(block, props),
+					new Item.Properties().useBlockDescriptionPrefix(), BUILDING_TAB);
+		}
+		// Part 5: the barn's stores and fittings.
+		Block sack = registerBlock("grain_sack", GrainSackBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.WOOL).strength(0.8F)
+				.sound(SoundType.WOOL).noOcclusion().ignitedByLava().pushReaction(PushReaction.POPPED));
+		Block can = registerBlock("milk_can", props -> new FacingDecorationBlock(props, new double[] {4.5, 0.0, 4.5, 11.5, 11.0, 11.5}),
+				BlockBehaviour.Properties.of().mapColor(MapColor.METAL).strength(1.0F).sound(SoundType.LANTERN).noOcclusion()
+						.pushReaction(PushReaction.POPPED));
+		Block toolRack = registerBlock("tool_rack", ToolRackBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.WOOD).strength(1.0F)
+				.sound(SoundType.WOOD).noOcclusion().ignitedByLava().pushReaction(PushReaction.IMMOVEABLE));
+		Block trough = registerBlock("feed_trough", FeedTroughBlock::new, displayProperties());
+		FEED_TROUGH_ENTITY = Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, Jugcraft.id("feed_trough"),
+				FabricBlockEntityTypeBuilder.<FruitStoreBlockEntity>create((pos, state) -> new FruitStoreBlockEntity(FEED_TROUGH_ENTITY, pos, state),
+						trough).build());
+		Block lantern = registerBlock("barn_lantern", BarnLanternBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.METAL).strength(1.0F)
+				.sound(SoundType.LANTERN).noOcclusion().pushReaction(PushReaction.POPPED)
+				.lightLevel(state -> state.getValue(BarnLanternBlock.LIT) ? BarnLanternBlock.LIGHT : 0));
+		for (Block block : List.of(sack, can, toolRack, trough, lantern)) {
 			registerItem(BuiltInRegistries.BLOCK.getKey(block).getPath(), props -> new BlockItem(block, props),
 					new Item.Properties().useBlockDescriptionPrefix(), BUILDING_TAB);
 		}

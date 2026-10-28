@@ -1,6 +1,6 @@
 # Barn & Harvest Tools
 
-Status: parts 1 (the Steel Sickle, the Watering Can and the Seed Pouch), 2 (the Quern and the Butter Churn, with Flour, Butter and Pancakes), 3 (the Drying Rack and the Corn Crib) and 4 (the Hay-Loft Pulley and the Harvest Bell) implemented. Part 5 is planned: the barn's sacks, cans, racks, trough and lantern. CI builds it and runs its game tests and client screenshots; not yet played by hand.
+Status: all five parts implemented: 1 (the Steel Sickle, the Watering Can and the Seed Pouch), 2 (the Quern and the Butter Churn, with Flour, Butter and Pancakes), 3 (the Drying Rack and the Corn Crib), 4 (the Hay-Loft Pulley and the Harvest Bell) and 5 (Grain Sacks, the Milk Can, the Pitchfork and Rake Rack, the Feed Trough and the Barn Lantern). CI builds it and runs its game tests and client screenshots; not yet played by hand.
 Proposal issue: none. The owner asked for it directly on 28 October 2026, as set 3 of the ten sets of fall and Halloween decor ("Then I want you to do 1-10 in parts in that order one by one"), drawn by their rules.
 Owner: @jimbozoomer-byte
 Target milestone and tier: Discovery tier for everything but the Steel Sickle, which is Workshops tier (steel).
@@ -68,6 +68,25 @@ Primary specialty and supported player role: farming and cooking. Part 1 builds 
   - It can't be rung again until it settles; it says so.
   - Recipe: a copper ingot over iron ingots round a copper ingot, over a log.
 
+### Part 5: the barn's stores and fittings
+- **Grain Sacks**: burlap sacks of grain lying on their sides, each 81 cm long, 44 cm across and 28 cm high, tied at the neck with cord and stamped with a mill's mark.
+  - Place one on another to stack them, up to **three** to a block, each set a little along from the one under it. A fourth starts a new stack above.
+  - Broken, a stack drops each of its sacks.
+  - Recipe (shapeless): a wool and three wheat make one. It is a decoration that costs its grain; nothing turns it back.
+- **Milk Can**: a dairy's tinplate milk can, 69 cm high and 31 cm across, with a shoulder up to its neck, a lid with a lifting bar, a rolled band round its middle and two side handles. It stands facing whoever places it.
+  - Recipe: an iron nugget over two tin ingots, over three tin ingots.
+- **Pitchfork and Rake Rack** (one block across, two up): a peg rail on a barn wall at 1.6 m, with a pitchfork (three iron tines) and a wooden hay rake stood beneath it, their heads against the pegs.
+  - It stands against the wall you aim at. Its rail needs a sturdy wall behind its upper block, and the rack comes off whole when the wall goes.
+  - Recipe: three planks over two iron nuggets, over two sticks.
+- **Feed Trough** (two blocks long): a plank trough on four legs, 1.9 m long, 50 cm across and 59 cm high.
+  - It holds **128** of what horses eat (`#minecraft:horse_food`: hay bales, wheat, apples, carrots and the rest). Use feed on either block to put in all you hold that fits, and an empty hand to take back the last stack, as the Apple Bin does.
+  - The hay in it rises through **four stages** as it fills. It takes nothing else. Broken, it spills its feed.
+  - Recipe: planks round the sides and floor, on two sticks.
+- **Barn Lantern**: a hurricane lantern hung by its bail from an iron bracket on a wall, the size of a real one (19 cm across, 41 cm to the top of its bail).
+  - Placed lit, it gives **light 15**, as a lantern does. Use it with an empty hand to put it out (no light) and again to light it.
+  - It hangs on any sturdy wall and comes off when the wall goes.
+  - Recipe (shapeless): a lantern and an iron ingot.
+
 ## Changes from the idea list
 - The idea list put a Bushel Basket in set 3. The soil slice's Wooden and Bamboo Baskets (`tools/soil.py`) are small produce storage already, so it is not built again.
 - The planned tools were in the Agriculture branch's farm equipment table; they are built here as set 3's first part, so the barn has its tools before its furniture.
@@ -76,6 +95,8 @@ Primary specialty and supported player role: farming and cooking. Part 1 builds 
 - The hay-loft pulley is a decoration that works: it lets its rope down and hauls it up, but carries nothing. Lifting hay into the loft by it is open below.
 - The bell is rung by hand only; it doesn't answer redstone.
 - The farm equipment table's Drying Rack also retted flax and made jerky. This one dries herbs and peppers, the crops that have dried forms already; flax retting and jerky wait for their items.
+- The feed trough stores feed; animals don't eat from it. Feeding from it would mean each trough looking for animals every so often, so it is left open below.
+- The milk cans are decoration; they don't hold milk.
 
 ## How they are drawn (docs/ART_DIRECTION.md, docs/ITEM_ICONS.md)
 - All three are flat items whose icons are 16 by 16 maps in `tools/item_icons/` (`steel_sickle.txt`, `watering_can.txt`, `seed_pouch.txt`), drawn by `tools/item_icons.py` in the shared material palettes and checked by `tools/check_icon_maps.py`.
@@ -112,6 +133,17 @@ Primary specialty and supported player role: farming and cooking. Part 1 builds 
     - The bell is cast bronze in five stepped bands, crown to lip, as a bell's profile goes: a narrow crown, the shoulder, a nearly straight waist, then the flare and the lip.
     - Its bronze is one tone lit down the left edge and shaded down the right, the same on every band, so the bands read as one cast surface rather than a stack.
     - It is its own model, the upper block's `runner` variant, which `HandWorkedRenderer` swings about its axle: 40 degrees at first, two and a half swings dying away to nothing.
+- **Part 5:**
+  - **Grain Sacks**: burlap in one flat tone (its weave is far finer than a texel), lit along each side's top row and shaded along its bottom one, so each sack in a stack reads as its own. The top carries the mill's mark, a dark cross three texels across. The ends are drawn in half a pixel and the neck is tied with two-tone cord.
+    - A block's model at each count of sacks (`sacks` 1 to 3), each sack half a pixel along from the one under it, so the stack doesn't look poured.
+    - The first preview's weave, a dark texel in every four, read as a waffle grid; it is now the flat tone.
+  - **The Milk Can**: its round body is two row bands of a circle five pixels across, as the churn's is, its shoulder, neck and lid stepping in.
+    - Its tinplate is one tone with a lit top row (the rolled edge), with no edge shading down the sides. The first preview lit and shaded each band's edges, and the body read as a bundle of tubes; now the boxes read as one surface, lit by their faces' turn.
+  - **The Pitchfork and Rake Rack** is built whole and cut into its two blocks. The rail is nailed planks, the pegs and handles wood along their grain, the fork's crossbar and tines iron straps. The rake's teeth point out from the wall, into the barn.
+  - **The Feed Trough** is the market displays' nailed planks: a floor and walls on four legs, cut into its two blocks. The hay at each stage is a box of the pumpkin patch's hay, cut the same way and added over the trough by a multipart blockstate by `fill`, as the crib's ears are.
+  - **The Barn Lantern**: an iron plate, arm and hook; a tin fount and cap; a cut-out glass globe (the orchard jars' glass) in a wire guard of four iron posts; an iron bail.
+    - The flame is its own model, added by the multipart blockstate only while `lit`, and is the only full-bright, unshaded part. It burns steady in two smooth bands, a pale root under warm yellow, with no flicker.
+    - The first drawing was 25 cm across and 62 cm tall, half as big again as a real hurricane lantern; it was redrawn at 19 by 41 cm before commit.
 - Nothing is copied, traced or recoloured from Minecraft's textures.
 
 ## Connections
@@ -119,10 +151,12 @@ Primary specialty and supported player role: farming and cooking. Part 1 builds 
   - Part 2: wheat; the spice garden's Dried Chili; vanilla milk and eggs; planks, smooth stone slabs and an iron nugget.
   - Part 3: the herb garden's sprigs and the kitchen garden's peppers; corn from the Fall Harvest; sticks, string, slabs, planks and a chest.
   - Part 4: planks, iron, string, a tripwire hook, copper and a log.
+  - Part 5: wool and wheat; tin ingots and iron nuggets; planks and sticks; a vanilla lantern and an iron ingot. The trough takes any `#minecraft:horse_food`, the farm's own wheat and hay among it.
 - Existing output consumer: the fields. The can's water is the Gourd Canteen's, at sixteen pours instead of three, and the pouch plants what the hoe prepared; the steel sickle reaps what they grew.
   - Part 2: Flour makes the kitchen's Wheat Dough (dumplings and the rest); Paprika is the spice garden's; Flour and Butter make Pancakes, a food.
   - Part 3: the rack's Dried Herbs and Dried Chili are the spice garden's (Dried Chili grinds into paprika at the quern or the mortar). The crib's corn goes back out as it came, for kernels, cooking and feed.
   - Part 4: none; the pulley and the bell are working decorations for a barn and a farmyard.
+  - Part 5: none but the trough, which gives back the feed put in it, for breeding and taming horses and the rest. The others are decorations for a barn.
 - Technology/magic connections: the Steel Sickle is the Workshops-tier sickle, made from the machines' steel.
 - Reachable entry path: the can needs tin and a bucket; the pouch wool and string; both from the first days. The steel sickle comes with steel.
 - Which connections are required vs optional; trade and solo routes: all optional; each is solo-craftable, and a sickle, can or pouch can be traded like any item.
@@ -138,6 +172,8 @@ Primary specialty and supported player role: farming and cooking. Part 1 builds 
 - **The rack** dries one for one, as the Herb Bundle (without its string) and the furnace (without its fuel) already do, but slower: two minutes a bunch, four bunches at a time.
 - **The crib** keeps corn and gives back exactly what went in; it makes and changes nothing. It holds four stacks where a chest holds 27: its value is showing the harvest.
 - **The pulley and the bell** make, store and change nothing.
+- **The trough** keeps feed and gives back exactly what went in, as the crib does; it holds two stacks.
+- **The sacks** cost three wheat and a wool each and give nothing back but themselves. **The can, the rack and the lantern** make nothing; the lantern is a lantern's light for a lantern and an iron ingot.
 - No new conversion and no loop: no recipe turns any of these back into their materials.
 
 ## Multiplayer and persistence
@@ -165,7 +201,12 @@ Primary specialty and supported player role: farming and cooking. Part 1 builds 
   - A haul or a ring before the last has finished does nothing, held on the server.
   - The pulley's `piece` and the bell's `runner` only name their moving parts' models; a placed block never takes them.
   - The pulley pops off when pushed; the bell can't be moved by pistons.
-- IDs (stable from release): `steel_sickle`, `watering_can`, `seed_pouch`; the data component `watering_can_water`; part 2's blocks `quern` and `butter_churn` (and their block entities) and items `flour`, `butter`, `pancakes`; part 3's blocks `drying_rack` and `corn_crib` (and their block entities); part 4's blocks `hay_pulley` and `harvest_bell` (and their block entities).
+- Part 5:
+  - The sacks' count (`sacks`), the trough's fill (`fill`) and the lantern's flame (`lit`) are block-state properties. The trough's feed is kept by a `FruitStoreBlockEntity` of its own type (`feed_trough`), changed on the server only.
+  - The rack and the trough break whole from any block and drop once. The rack, trough and lantern check their wall or space when placed, on the server.
+  - Nothing in part 5 ticks.
+  - The sacks, the can and the lantern pop off when pushed; the rack and the trough can't be moved by pistons.
+- IDs (stable from release): `steel_sickle`, `watering_can`, `seed_pouch`; the data component `watering_can_water`; part 2's blocks `quern` and `butter_churn` (and their block entities) and items `flour`, `butter`, `pancakes`; part 3's blocks `drying_rack` and `corn_crib` (and their block entities); part 4's blocks `hay_pulley` and `harvest_bell` (and their block entities); part 5's blocks `grain_sack`, `milk_can`, `tool_rack`, `feed_trough` (and its block entity) and `barn_lantern`.
 - The recipes follow the agriculture feature switch (and the can's the tin switch, the sickle's the machines switch). The items stay registered when it is off.
 
 ## Dependencies and assets
@@ -179,14 +220,16 @@ Local checks run on this branch, and their results:
     - the churn's recipe named a tag the audit doesn't know (`#c:nuggets/iron`); it now takes the iron nugget itself.
   - Part 3: PASS (8,087 material IDs). Its first run failed on my own check: `check_barn_tools` asked every barn block for a moving part's model, and only the quern and churn have one. The generator's first run also stopped on a path built wrongly for the crib's stage models. Both were fixed before commit.
   - Part 4: PASS (8,089 material IDs), including `check_barn_tools`'s comparison of the renderers' axles and rope point with the models.
+  - Part 5: PASS (8,094 material IDs), including `check_barn_tools`'s part 5 numbers and the lantern's flame, full-bright only in its own model and shown only while lit.
 - `python3 scripts/check_repository.py`: PASS.
 - `python3 -m unittest discover -s scripts/tests`: 287 tests, OK.
   - Part 2's first run failed `test_survival_recipes`, fixed before commit: flour, butter and pancakes had no recorded source. The quern and churn are now native routes in `tools/survival_native_followup.py`.
   - Part 3: 287 tests, OK.
   - Part 4: 287 tests, OK.
+  - Part 5: 287 tests, OK.
 - `python3 tools/check_icon_maps.py`: PASS (the three new maps among 269; no new warning).
   - Part 2: PASS (272 maps, 51 declared materials with the two new ones; no new warning).
-  - Parts 3 and 4 add no icon map (their items are 3D).
+  - Parts 3, 4 and 5 add no icon map (their items are 3D).
 - `javac` parse (syntax only) of the new and changed Java: OK. The full compile runs in CI.
 - CI's first run failed to compile (`SeedPouchItem.java:82`): 26.3's `LivingEntity.drop` takes a `Prediction`. Emptying the pouch now uses `Inventory.placeItemBackInInventory(stack, Prediction.SERVER_ONLY)`, as the Farm Stand does.
 - CI's second run (`optional integrations absent`) failed one game test, `thePouchGathersSowsAndEmpties`: the field was sown but no seed was spent. The pouch asked `isCreative()`, which the test's mock player always answers yes; it now asks `getAbilities().instabuild`, which follows the game mode, as the rest of the mod does.
@@ -194,6 +237,10 @@ Local checks run on this branch, and their results:
 - Part 2's models were previewed offline, textured, from two sides and from above, with the runner and its wheat; the food icons at 1x and 10x (review aids, not committed). The first preview showed the stones' bands lit as separate plates and the staves striping hard; the stone faces are now one tone and the staves three texels wide.
 - Part 3's models were previewed the same way: the rack with each kind of bunch, and the crib at each stage, also put back together from its four cut blocks. The previews showed the crib's roof halves turned the wrong way, and then dropped by the cut because they turned about a line outside the frame. The roof now turns the other way, about its eaves just inside the frame.
 - Part 4's models were previewed with their moving pieces where the renderers put them: the pulley with two blocks of rope and its hook, and the bell on its post. The first preview showed the pulley's brace sticking out through the wall and the bell's bands lit like a stack of slabs. The brace now runs from the plate up under the beam, and the bronze is lit down its sides.
+- Part 5's models were previewed the same way, the sacks at three, the trough at half, and the lantern with its flame. The previews showed three things, all fixed before commit:
+  - the burlap's weave read as a waffle grid;
+  - the can's bands striped like tubes;
+  - the lantern was half as big again as a real one.
 
 Game tests (CI only, not run locally), `BarnToolsGameTests`:
 - **The can** fills at a water source the player looks down at, to 16:
@@ -244,10 +291,28 @@ Game tests (CI only, not run locally), `BarnToolsGameTests`:
     - settled, it rings again from its foot;
     - broken, it goes whole and drops once.
 
-`BarnToolsClientGameTests` takes four screenshots:
+- **Part 5:**
+  - **The sacks**: three stack in a block and a fourth starts a stack above; broken, the stack drops each of its three sacks.
+  - **The can**: it stands facing the player, and broken drops itself.
+  - **The rack**:
+    - it won't stand without a wall behind its rail;
+    - against one, it stands whole, facing out, and an empty hand does nothing to it;
+    - without its wall it comes off whole, dropping once.
+  - **The trough**:
+    - it stands whole (two blocks), and cobblestone doesn't go in;
+    - it takes hay bales and wheat up to its 128, no more, and shows itself full on both blocks;
+    - an empty hand takes back the last stack in;
+    - broken from its second block, it spills its hay and drops once.
+  - **The lantern**:
+    - it hangs on the wall facing out, lit, with light 15;
+    - a stick doesn't put it out, an empty hand does (light 0), and lights it again;
+    - without its wall it comes off, dropping itself.
+
+`BarnToolsClientGameTests` takes five screenshots:
 - two querns on a plank floor, one with wheat in its eye, and two churns, one holding milk, from the front and close by (the pictures show the renderer drawing the moving parts);
 - the drying rack hung with peppers and sage, and the corn crib half full;
-- the harvest bell, and the hay-loft pulley on a wall of planks, its rope let down three blocks over hay bales.
+- the harvest bell, and the hay-loft pulley on a wall of planks, its rope let down three blocks over hay bales;
+- the barn's stores: a plank wall with the tool rack and a lit lantern on it, sacks stacked three and two, two milk cans, and the feed trough half full of hay.
 
 Not run: a hand playtest, and a two-client playtest. The can's growth chance is random and is not asserted by a test. The moving parts' motion is not caught in a still picture.
 
@@ -255,6 +320,6 @@ Not run: a hand playtest, and a two-client playtest. The can's growth chance is 
 Items only; no world generation. Not seasonal: they are crafted and used all year.
 
 ## Rollout and open questions
-- Part 5: grain sacks, milk cans, a pitchfork and rake rack, a feed trough and a barn lantern on a hook.
-- Open: whether hoppers should feed the quern and take its flour, and fill and empty the crib; whether the pulley should lift hay (or anything) to a loft; whether the bell should answer redstone.
+- Set 3 is complete with part 5. Set 4 (Fall Garden & Porch) follows.
+- Open: whether hoppers should feed the quern and take its flour, and fill and empty the crib and the trough; whether animals should eat from the trough; whether the pulley should lift hay (or anything) to a loft; whether the bell should answer redstone.
 - Open: whether a dispenser should pour the can or sow from the pouch.

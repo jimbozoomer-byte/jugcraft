@@ -41,6 +41,11 @@ CORN = pal("6a4a0e", "a07818", "d0a828", "e8c440", "f4dc70")
 BRONZE = pal("4a2a12", "74441e", "a0642c", "c0823e", "dca45a")
 ROPE = pal("6e5c3a", "927c52", "b09a6a")
 FOOTING = pal("4e4c48", "68655f", "807d76", "999690")
+# Part 5: burlap, its stamp, tinplate, and the lantern's flame.
+BURLAP = pal("6a5432", "866c44", "a08656", "b89e6a")
+STAMP = pal("3a2a18", "4e3a22")
+TIN = pal("4a4e52", "6a7076", "8c9298", "aab0b6", "c8ced2")
+FLAME = pal("c8601c", "e88a2a", "f6c04a", "fce48a")
 
 
 def rid(path):
@@ -338,11 +343,168 @@ def bell():
     return sc
 
 
+# ---------------------------------------------------------------- part 5: the barn's stores and fittings
+
+def burlap(stamp=False):
+    """Burlap: one flat tone (its weave is far finer than a texel), lit along its top row and shaded along its bottom one,
+    so each sack in a stack reads as its own; a sack's top (`stamp`) carries the mill's mark, a dark cross three texels
+    across, in its middle."""
+    def paint(p):
+        for y in range(p.h):
+            for x in range(p.w):
+                k = 3 if y == 0 and p.h > 2 else 1 if y == p.h - 1 and p.h > 2 else 2
+                p.put(x, y, shade(BURLAP, 2 if stamp else k))
+        if stamp and p.w >= 5 and p.h >= 5:
+            cx, cy = p.w // 2, p.h // 2
+            for dx, dy in ((0, -1), (-1, 0), (1, 0), (0, 1)):
+                p.put(cx + dx, cy + dy, shade(STAMP, 1))
+            p.put(cx, cy, shade(STAMP, 0))
+    paint.tag = repr(("burlap", stamp))
+    return paint
+
+
+def sack():
+    """Grain sacks lying lengthwise, one to three stacked (`sacks_<n>`), each set half a pixel along from the one under it:
+    a burlap body with its ends drawn in, the stamp on its top, and its neck tied with cord at the east end."""
+    spec = bt.SACK
+    sc = Sculpt(spec["block"], 2307, 64)
+    h = spec["height"]
+    sacks = []
+    for k in range(spec["max"]):
+        y, dx = h * k, (0.5 if k % 2 else 0.0)
+        sacks.append([panel(sc, "body", burlap(), (2.5 + dx, y, 4.5), (12.5 + dx, y + h, 11.5), up=burlap(stamp=True)),
+                      panel(sc, "end", burlap(), (2.0 + dx, y + 0.5, 5.0), (2.5 + dx, y + h - 0.5, 11.0)),
+                      panel(sc, "end", burlap(), (12.5 + dx, y + 0.5, 5.0), (13.0 + dx, y + h - 0.5, 11.0)),
+                      panel(sc, "cord", flat(ROPE), (13.0 + dx, y + 1.25, 6.75), (13.75 + dx, y + 3.25, 9.25)),
+                      panel(sc, "neck", burlap(), (13.75 + dx, y + 1.5, 7.0), (15.0 + dx, y + 3.0, 9.0))])
+    for n in range(1, spec["max"] + 1):
+        sc.models[f"sacks_{n}"] = [e for one in sacks[:n] for e in one]
+    return sc
+
+
+def tinplate():
+    """Tinplate round a can: its middle tone, its top row lit (the rolled edge), with no edge shading down its sides, so
+    the boxes that make its round body read as one surface, lit by their faces' turn."""
+    def paint(p):
+        for y in range(p.h):
+            for x in range(p.w):
+                p.put(x, y, shade(TIN, 3 if y == 0 and p.h > 2 else 2))
+    paint.tag = "tinplate"
+    return paint
+
+
+def milk_can():
+    """The Milk Can: a tinplate body (two row bands of a circle five pixels across), a shoulder stepping in to its neck, a
+    lid with a lifting bar, and two side handles."""
+    spec = bt.CAN
+    sc = Sculpt(spec["block"], 2308, 64)
+    tin = tinplate()
+    el = []
+    for a, b in ((1.5, 2.5), (2.5, 1.5)):
+        el.append(panel(sc, "body", tin, (8.0 - a, 0.0, 8.0 - b), (8.0 + a, 7.5, 8.0 + b)))
+    el.append(panel(sc, "shoulder", tin, (6.0, 7.5, 6.0), (10.0, 8.5, 10.0)))
+    el.append(panel(sc, "neck", tin, (6.75, 8.5, 6.75), (9.25, 9.75, 9.25)))
+    el.append(panel(sc, "lid", tin, (6.25, 9.75, 6.25), (9.75, 10.5, 9.75)))
+    el.append(panel(sc, "bar", flat(IRON), (7.5, 10.5, 6.75), (8.5, 11.0, 9.25)))
+    for x0 in (4.75, 10.75):
+        el.append(panel(sc, "handle", flat(IRON), (x0, 6.5, 7.5), (x0 + 0.5, 7.5, 8.5)))
+    # A rolled band round its middle, a quarter pixel proud of the body all round.
+    for a, b in ((1.75, 2.75), (2.75, 1.75)):
+        el.append(panel(sc, "band", tin, (8.0 - a, 3.5, 8.0 - b), (8.0 + a, 4.0, 8.0 + b)))
+    sc.models["whole"] = el
+    return sc
+
+
+def tool_rack():
+    """The Pitchfork and Rake Rack, facing north (its wall behind, to the south), one block across and two up: a peg rail
+    on the wall, and beneath it a pitchfork (a handle, a crossbar and three tines up) and a hay rake (a handle and a
+    toothed head, its teeth out towards the barn), each stood on its handle's foot with its head against a peg."""
+    spec = bt.TOOL_RACK
+    sc = Sculpt(spec["block"], 2309, 64)
+    el = [panel(sc, "rail", planks(WOOD, board=2, nails=True), (1.0, 26.0, 14.5), (15.0, 28.0, 16.0))]
+    for x in (4.5, 11.5):
+        el.append(panel(sc, "peg", lengthwise(WOOD), (x - 0.5, 26.5, 12.5), (x + 0.5, 27.5, 14.5)))
+    # The pitchfork.
+    el.append(panel(sc, "handle", lengthwise(WOOD), (4.0, 0.0, 12.5), (5.0, 21.0, 13.5)))
+    el.append(panel(sc, "fork", flat(IRON), (2.5, 21.0, 12.75), (6.5, 21.5, 13.25)))
+    for x in (2.5, 4.25, 6.0):
+        el.append(panel(sc, "tine", flat(IRON), (x, 21.5, 12.75), (x + 0.5, 26.0, 13.25)))
+    # The hay rake.
+    el.append(panel(sc, "handle", lengthwise(WOOD), (11.0, 0.0, 12.5), (12.0, 23.0, 13.5)))
+    el.append(panel(sc, "head", lengthwise(WOOD), (8.0, 23.0, 12.25), (15.0, 24.25, 13.75)))
+    for x in (8.25, 9.75, 11.25, 12.75, 14.25):
+        el.append(panel(sc, "tooth", lengthwise(WOOD), (x, 23.25, 10.5), (x + 0.5, 23.75, 12.25)))
+    sc.models["whole"] = el
+    return sc
+
+
+def trough():
+    """The Feed Trough, facing north, two blocks long: four legs, a plank floor, sides and ends round it, and the feed in it
+    at each stage (`feed_<stage>`), loose hay."""
+    spec = bt.TROUGH
+    sc = Sculpt(spec["block"], 2310, 64)
+    board = planks(WOOD, board=3, nails=True)
+    el = []
+    for x in (1.5, 29.5):
+        for z in (4.0, 11.0):
+            el.append(panel(sc, "leg", lengthwise(WOOD), (x, 0.0, z), (x + 1.0, 3.0, z + 1.0)))
+    el.append(panel(sc, "floor", board, (1.0, 3.0, 4.0), (31.0, 4.0, 12.0)))
+    el += ppd.walls(sc, "side", board, 1.0, 4.0, 31.0, 12.0, 0.75, 4.0, 9.5)
+    sc.models["whole"] = el
+    for stage in range(1, 5):
+        sc.models[f"feed_{stage}"] = [panel(sc, "feed", ppd.hay(), (1.75, 4.0, 4.75), (30.25, 4.0 + 1.25 * stage, 11.25))]
+    return sc
+
+
+# The lantern's fount's foot (pixels up its block): it hangs from the hook, the top of its bail 6.5 above.
+LANTERN_FOOT = 5.5
+
+
+def lantern():
+    """The Barn Lantern, facing north (its wall behind, to the south): an iron bracket out from the wall with a hook, and
+    hung from it by its bail a hurricane lantern the size of a real one (19 cm across, 41 cm to the top of its bail): a
+    tin fount, a cut-out glass globe in a wire guard, a tin cap and the flame inside (`lit`, emissive)."""
+    import orchard_harvest_data as ohd
+    spec = bt.LANTERN
+    sc = Sculpt(spec["block"], 2311, 64)
+    y0 = LANTERN_FOOT
+    el = [panel(sc, "plate", flat(IRON), (6.5, 11.0, 15.25), (9.5, 15.0, 16.0)),
+          panel(sc, "arm", flat(IRON), (7.5, 13.5, 7.5), (8.5, 14.5, 15.25)),
+          panel(sc, "hook", flat(IRON), (7.75, y0 + 6.25, 7.75), (8.25, 13.5, 8.25)),
+          panel(sc, "bail", flat(IRON), (6.25, y0 + 6.0, 7.75), (9.75, y0 + 6.5, 8.25)),
+          panel(sc, "bail_side", flat(IRON), (6.25, y0 + 3.5, 7.75), (6.5, y0 + 6.0, 8.25)),
+          panel(sc, "bail_side", flat(IRON), (9.5, y0 + 3.5, 7.75), (9.75, y0 + 6.0, 8.25)),
+          panel(sc, "cap", flat(TIN), (6.5, y0 + 3.5, 6.5), (9.5, y0 + 4.25, 9.5)),
+          panel(sc, "fount", flat(TIN), (6.5, y0, 6.5), (9.5, y0 + 1.0, 9.5))]
+    el += ppd.walls(sc, "globe", ohd.glass(), 6.75, 6.75, 9.25, 9.25, 0.25, y0 + 1.0, y0 + 3.5)
+    for x0, z0 in ((6.5, 6.5), (9.0, 6.5), (6.5, 9.0), (9.0, 9.0)):
+        el.append(panel(sc, "guard", flat(IRON), (x0, y0 + 1.0, z0), (x0 + 0.5, y0 + 3.5, z0 + 0.5)))
+    sc.models["whole"] = el
+    flame_ = panel(sc, "flame", flame(), (7.5, y0 + 1.25, 7.5), (8.5, y0 + 2.75, 8.5), up=flame(top=True))
+    flame_["light_emission"] = 15
+    flame_["shade"] = False
+    sc.models["flame"] = [flame_]
+    return sc
+
+
+def flame(top=False):
+    """A wick's flame in two smooth bands: its pale root along the bottom row, warm yellow above; its top (`top`) the warm
+    yellow. No flicker: it burns steady behind its glass."""
+    def paint(p):
+        for y in range(p.h):
+            for x in range(p.w):
+                p.put(x, y, shade(FLAME, 2 if top or y < p.h - 1 else 3))
+    paint.tag = repr(("flame", top))
+    return paint
+
+
 # ---------------------------------------------------------------- building and files
 
 _built = {}
 BUILDERS = {bt.QUERN["block"]: (quern, 64), bt.CHURN["block"]: (churn, 64), bt.RACK["block"]: (rack, 64),
-            bt.CRIB["block"]: (crib, 128), bt.PULLEY["block"]: (pulley, 64), bt.BELL["block"]: (bell, 64)}
+            bt.CRIB["block"]: (crib, 128), bt.PULLEY["block"]: (pulley, 64), bt.BELL["block"]: (bell, 64),
+            bt.SACK["block"]: (sack, 64), bt.CAN["block"]: (milk_can, 64), bt.TOOL_RACK["block"]: (tool_rack, 64),
+            bt.TROUGH["block"]: (trough, 64), bt.LANTERN["block"]: (lantern, 64)}
 
 
 def build(block):
@@ -520,17 +682,106 @@ def part4_assets(root, write, lang):
           fa.model(block, item_model(sc.models["whole"] + sc.models["bell"], spec["size"], 0.5), ITEM_DISPLAY))
     write(root / "items" / f"{block}.json", {"model": {"type": "minecraft:model", "model": rid(f"item/{block}")}})
     lang[f"message.{MOD}.harvest_bell.ringing"] = "The bell is still ringing"
+    part5_assets(root, write, lang)
+
+
+def part5_assets(root, write, lang):
+    """The Grain Sacks' model for each count of sacks and the Milk Can's; the Pitchfork and Rake Rack's two blocks' models
+    and the Feed Trough's two, cut from the whole, the trough's feed at each stage cut the same way and added by a
+    multipart blockstate by `fill` (its `fruit` and `lit` draw nothing); and the Barn Lantern's, its flame added by a
+    multipart blockstate while it is lit. Their items show them whole: one sack, the trough half full, the lantern lit.
+    (`write` is part2_assets()'s closing writer.)"""
+    models = root / "models" / "block"
+    states = root / "blockstates"
+
+    def item(block, model):
+        write(root / "models" / "item" / f"{block}.json", model)
+        write(root / "items" / f"{block}.json", {"model": {"type": "minecraft:model", "model": rid(f"item/{block}")}})
+
+    spec = bt.SACK
+    block = spec["block"]
+    lang[f"block.{MOD}.{block}"] = spec["display"]
+    sc = build(block)
+    variants = {}
+    for n in range(1, spec["max"] + 1):
+        write(models / f"{block}_{n}.json", fa.model(block, d20d.separated(sc.models[f"sacks_{n}"])))
+        for f, y in FACINGS.items():
+            variants[f"facing={f},sacks={n}"] = {"model": rid(f"block/{block}_{n}"), **({"y": y} if y else {})}
+    write(states / f"{block}.json", {"variants": variants})
+    item(block, fa.model(block, d20d.separated(sc.models["sacks_1"]), DISPLAY))
+
+    spec = bt.CAN
+    block = spec["block"]
+    lang[f"block.{MOD}.{block}"] = spec["display"]
+    sc = build(block)
+    write(models / f"{block}.json", fa.model(block, d20d.separated(sc.models["whole"])))
+    write(states / f"{block}.json", {"variants": {f"facing={f}": {"model": rid(f"block/{block}"), **({"y": y} if y else {})}
+                                                  for f, y in FACINGS.items()}})
+    item(block, fa.model(block, d20d.separated(sc.models["whole"]), DISPLAY))
+
+    spec = bt.TOOL_RACK
+    block = spec["block"]
+    lang[f"block.{MOD}.{block}"] = spec["display"]
+    sc = build(block)
+    n = len(d17d.cells(spec["size"]))
+    for part, elements in enumerate(ppd.cut(sc.models["whole"], spec["size"])):
+        write(models / f"{block}_{part}.json", fa.model(block, elements))
+    variants = {}
+    for f, y in FACINGS.items():
+        for p in range(n):
+            for lit in ("false", "true"):
+                variants[f"facing={f},lit={lit},part={p}"] = {"model": rid(f"block/{block}_{p}"), **({"y": y} if y else {})}
+    write(states / f"{block}.json", {"variants": variants})
+    item(block, fa.model(block, item_model(sc.models["whole"], spec["size"], 0.5), ITEM_DISPLAY))
+
+    spec = bt.TROUGH
+    block = spec["block"]
+    lang[f"block.{MOD}.{block}"] = spec["display"]
+    sc = build(block)
+    n = len(d17d.cells(spec["size"]))
+    for part, elements in enumerate(ppd.cut(sc.models["whole"], spec["size"])):
+        write(models / f"{block}_{part}.json", fa.model(block, elements))
+    for stage in range(1, 5):
+        for part, elements in enumerate(ppd.cut(sc.models[f"feed_{stage}"], spec["size"])):
+            write(models / f"{block}_{part}_feed_{stage}.json", fa.model(block, elements))
+    multipart = []
+    for f, y in FACINGS.items():
+        turn = {"y": y} if y else {}
+        for p in range(n):
+            multipart.append({"when": {"facing": f, "part": str(p)}, "apply": {"model": rid(f"block/{block}_{p}"), **turn}})
+            for stage in range(1, 5):
+                multipart.append({"when": {"facing": f, "part": str(p), "fill": str(stage)},
+                                  "apply": {"model": rid(f"block/{block}_{p}_feed_{stage}"), **turn}})
+    write(states / f"{block}.json", {"multipart": multipart})
+    item(block, fa.model(block, item_model(sc.models["whole"] + sc.models["feed_2"], spec["size"], 0.5), ITEM_DISPLAY))
+
+    spec = bt.LANTERN
+    block = spec["block"]
+    lang[f"block.{MOD}.{block}"] = spec["display"]
+    sc = build(block)
+    write(models / f"{block}.json", fa.model(block, d20d.separated(sc.models["whole"])))
+    write(models / f"{block}_flame.json", fa.model(block, sc.models["flame"]))
+    multipart = []
+    for f, y in FACINGS.items():
+        turn = {"y": y} if y else {}
+        multipart.append({"when": {"facing": f}, "apply": {"model": rid(f"block/{block}"), **turn}})
+        multipart.append({"when": {"facing": f, "lit": "true"}, "apply": {"model": rid(f"block/{block}_flame"), **turn}})
+    write(states / f"{block}.json", {"multipart": multipart})
+    item(block, fa.model(block, d20d.separated(sc.models["whole"]) + sc.models["flame"], DISPLAY))
 
 
 def loot(out, write):
     """The quern and the churn drop themselves; the quern spills its grain (QuernBlockEntity), the churn its milk. The
     rack, the crib and the bell drop once, from their first block; the rack gives back its bunches, the crib spills its
-    corn. The pulley drops itself."""
-    for block in (bt.QUERN["block"], bt.CHURN["block"], bt.PULLEY["block"]):
+    corn. The pulley drops itself. Part 5: the milk can and the lantern drop themselves, a stack of grain sacks each of
+    its sacks, and the tool rack and the trough once, from their first block (the trough spills its feed)."""
+    import orchard_harvest_data as ohd
+    write(out / f"{bt.SACK['block']}.json", ohd.counted_drop(bt.SACK["block"], "sacks", bt.SACK["max"]))
+    for block in (bt.QUERN["block"], bt.CHURN["block"], bt.PULLEY["block"], bt.CAN["block"], bt.LANTERN["block"]):
         write(out / f"{block}.json", {"type": "minecraft:block", "pools": [{
             "condition": {"type": "minecraft:survives_explosion"}, "entries": [{"type": "minecraft:item", "name": rid(block)}], "rolls": 1}],
             "random_sequence": rid(f"blocks/{block}")})
-    for block in (bt.RACK["block"], bt.CRIB["block"], bt.BELL["block"]):
+    for block in (bt.RACK["block"], bt.CRIB["block"], bt.BELL["block"], bt.TOOL_RACK["block"], bt.TROUGH["block"]):
         write(out / f"{block}.json", {"type": "minecraft:block", "pools": [{
             "condition": {"type": "minecraft:all_of", "terms": [{"type": "minecraft:survives_explosion"},
                                                                 {"type": "minecraft:match_block", "blocks": rid(block), "state": {"part": "0"}}]},
@@ -538,8 +789,13 @@ def loot(out, write):
 
 
 def tags(tags):
+    """Wood comes off with an axe, the tin milk can and the iron lantern with a pickaxe; burlap sacks need no tool."""
+    metal = (bt.CAN["block"], bt.LANTERN["block"])
     for block in bt.blocks():
-        tags.add("block", "minecraft:mineable/axe", rid(block))
+        if block in metal:
+            tags.add("block", "minecraft:mineable/pickaxe", rid(block))
+        elif block != bt.SACK["block"]:
+            tags.add("block", "minecraft:mineable/axe", rid(block))
 
 
 def assets(root, write, lang):

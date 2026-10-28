@@ -1,12 +1,16 @@
 package io.github.jimbozoomer.jugcraft.test;
 
+import io.github.jimbozoomer.jugcraft.agriculture.BarnLanternBlock;
 import io.github.jimbozoomer.jugcraft.agriculture.ButterChurnBlock;
 import io.github.jimbozoomer.jugcraft.agriculture.ButterChurnBlockEntity;
 import io.github.jimbozoomer.jugcraft.agriculture.CornCribBlock;
 import io.github.jimbozoomer.jugcraft.agriculture.DryingRackBlock;
 import io.github.jimbozoomer.jugcraft.agriculture.DryingRackBlockEntity;
+import io.github.jimbozoomer.jugcraft.agriculture.FacingDecorationBlock;
+import io.github.jimbozoomer.jugcraft.agriculture.FeedTroughBlock;
 import io.github.jimbozoomer.jugcraft.agriculture.FruitBinBlock;
 import io.github.jimbozoomer.jugcraft.agriculture.FruitStoreBlockEntity;
+import io.github.jimbozoomer.jugcraft.agriculture.GrainSackBlock;
 import io.github.jimbozoomer.jugcraft.agriculture.HarvestBellBlock;
 import io.github.jimbozoomer.jugcraft.agriculture.HarvestBellBlockEntity;
 import io.github.jimbozoomer.jugcraft.agriculture.HayPulleyBlock;
@@ -15,6 +19,7 @@ import io.github.jimbozoomer.jugcraft.agriculture.JugcraftAgriculture;
 import io.github.jimbozoomer.jugcraft.agriculture.QuernBlock;
 import io.github.jimbozoomer.jugcraft.agriculture.QuernBlockEntity;
 import io.github.jimbozoomer.jugcraft.agriculture.SeedPouchItem;
+import io.github.jimbozoomer.jugcraft.agriculture.ToolRackBlock;
 import io.github.jimbozoomer.jugcraft.agriculture.WateringCanItem;
 import java.util.List;
 import net.fabricmc.fabric.api.gametest.v1.GameTest;
@@ -53,7 +58,12 @@ import net.minecraft.world.phys.Vec3;
  * Corn Crib stands whole, takes corn up to its capacity and nothing else, shows it on every block, gives back a stack and
  * spills its corn when broken. Part 4: the Hay-Loft Pulley hangs on a wall facing out, lets its rope down and hauls it
  * up a block a use within its reach, waits for a haul, and comes off with its wall; the Harvest Bell stands whole, rings,
- * won't ring again before its swing dies away, then rings again, and breaks whole.
+ * won't ring again before its swing dies away, then rings again, and breaks whole. Part 5: Grain Sacks stack three to
+ * a block (a fourth starts a new stack) and drop each sack; the Milk Can stands facing the player and drops itself; the
+ * Pitchfork and Rake Rack won't stand without a wall behind its rail, stands whole against one facing out, has nothing
+ * to light, and comes off whole with its wall; the Feed Trough stands whole, takes horse feed up to its capacity and
+ * nothing else, shows it on both blocks, gives back a stack and spills its feed when broken; the Barn Lantern hangs on
+ * a wall lit, gives light only while lit, is put out and lit again by an empty hand, and comes off with its wall.
  */
 public class BarnToolsGameTests {
 	private static Item item(String id) {
@@ -447,6 +457,132 @@ public class BarnToolsGameTests {
 				helper.assertTrue(dropped(helper, item("harvest_bell")) == 1 && helper.getBlockState(pos).isAir(), "It breaks whole and drops once");
 				helper.succeed();
 			});
+		});
+	}
+
+	// ---------------------------------------------------------------- part 5
+
+	private static void useOnTop(GameTestHelper helper, ServerPlayer player, BlockPos pos) {
+		player.getMainHandItem().useOn(new UseOnContext(player, InteractionHand.MAIN_HAND, hit(helper, pos, Direction.UP)));
+	}
+
+	@GameTest(maxTicks = 40)
+	public void theSacksStackAndTheCanStands(GameTestHelper helper) {
+		stone(helper);
+		BlockPos pos = new BlockPos(3, 2, 3);
+		Block sack = JugcraftAgriculture.block("grain_sack");
+		ServerPlayer player = standing(helper, new BlockPos(3, 2, 1), new ItemStack(item("grain_sack"), 4));
+		place(helper, player, pos);
+		for (int i = 1; i < GrainSackBlock.MAX; i++) {
+			useOnTop(helper, player, pos);
+		}
+		helper.assertTrue(helper.getBlockState(pos).is(sack) && helper.getBlockState(pos).getValue(GrainSackBlock.SACKS) == GrainSackBlock.MAX
+				&& player.getMainHandItem().getCount() == 1, "Three sacks stack in a block: " + helper.getBlockState(pos));
+		useOnTop(helper, player, pos);
+		helper.assertTrue(helper.getBlockState(pos.above()).is(sack) && helper.getBlockState(pos.above()).getValue(GrainSackBlock.SACKS) == 1,
+				"A fourth starts a new stack above");
+		BlockPos canPos = new BlockPos(5, 2, 3);
+		player.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(item("milk_can")));
+		place(helper, player, canPos);
+		helper.assertTrue(helper.getBlockState(canPos).is(JugcraftAgriculture.block("milk_can"))
+				&& helper.getBlockState(canPos).getValue(FacingDecorationBlock.FACING) == Direction.NORTH, "The can stands facing the player");
+		helper.getLevel().destroyBlock(helper.absolutePos(pos), true);
+		helper.getLevel().destroyBlock(helper.absolutePos(canPos), true);
+		helper.runAfterDelay(3, () -> {
+			helper.assertTrue(dropped(helper, item("grain_sack")) == GrainSackBlock.MAX && dropped(helper, item("milk_can")) == 1,
+					"Broken, the stack drops each sack and the can itself: " + dropped(helper, item("grain_sack")));
+			helper.succeed();
+		});
+	}
+
+	@GameTest(maxTicks = 40)
+	public void theToolRackHangsOnItsWall(GameTestHelper helper) {
+		stone(helper);
+		BlockPos pos = new BlockPos(3, 2, 3);
+		Block rack = JugcraftAgriculture.block("tool_rack");
+		ServerPlayer player = standing(helper, new BlockPos(3, 2, 1), new ItemStack(item("tool_rack")));
+		place(helper, player, pos);
+		helper.assertBlockNotPresent(rack, pos);
+		BlockPos wall = pos.above().south();
+		helper.setBlock(wall, Blocks.OAK_PLANKS);
+		place(helper, player, pos);
+		BlockState state = helper.getBlockState(pos.above());
+		helper.assertTrue(helper.getBlockState(pos).is(rack) && state.is(rack) && state.getValue(ToolRackBlock.FACING) == Direction.NORTH,
+				"With a wall behind its rail it stands whole, facing out: " + state);
+		player.setItemInHand(InteractionHand.MAIN_HAND, ItemStack.EMPTY);
+		helper.assertFalse(useOn(helper, player, pos).consumesAction(), "It has nothing to light");
+		helper.setBlock(wall, Blocks.AIR);
+		helper.runAfterDelay(3, () -> {
+			helper.assertTrue(helper.getBlockState(pos).isAir() && helper.getBlockState(pos.above()).isAir()
+					&& dropped(helper, item("tool_rack")) == 1, "Without its wall it comes off whole, dropping once");
+			helper.succeed();
+		});
+	}
+
+	@GameTest(maxTicks = 40)
+	public void theTroughKeepsFeed(GameTestHelper helper) {
+		stone(helper);
+		BlockPos pos = new BlockPos(4, 2, 3);
+		ServerPlayer player = standing(helper, new BlockPos(4, 2, 1), new ItemStack(item("feed_trough")));
+		place(helper, player, pos);
+		FeedTroughBlock trough = (FeedTroughBlock) JugcraftAgriculture.block("feed_trough");
+		BlockPos master = helper.absolutePos(pos);
+		for (int part = 0; part < trough.cells().length; part++) {
+			helper.assertTrue(helper.getLevel().getBlockState(trough.partPos(master, Direction.NORTH, part)).is(trough), "Its block " + part + " is there");
+		}
+		FruitStoreBlockEntity store = helper.getBlockEntity(pos, FruitStoreBlockEntity.class);
+		player.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(Items.COBBLESTONE, 10));
+		useOn(helper, player, pos);
+		helper.assertTrue(store.count() == 0 && player.getMainHandItem().getCount() == 10, "Cobblestone doesn't go in");
+		player.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(Items.HAY_BLOCK, 64));
+		useOn(helper, player, pos);
+		for (int i = 0; i < 2; i++) {
+			player.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(Items.WHEAT, 64));
+			useOn(helper, player, trough.partPos(pos, Direction.NORTH, 1));
+		}
+		helper.assertTrue(store.count() == FeedTroughBlock.CAPACITY && player.getMainHandItem().getCount() == 64,
+				"It takes hay and wheat up to its capacity, and no more: " + store.count());
+		for (int part = 0; part < trough.cells().length; part++) {
+			BlockState there = helper.getLevel().getBlockState(trough.partPos(master, Direction.NORTH, part));
+			helper.assertTrue(there.getValue(FruitBinBlock.FILL) == FruitBinBlock.STAGES, "Full, shown on block " + part + ": " + there);
+		}
+		player.setItemInHand(InteractionHand.MAIN_HAND, ItemStack.EMPTY);
+		useOn(helper, player, pos);
+		helper.assertTrue(store.count() == FeedTroughBlock.CAPACITY - 64 && player.getInventory().countItem(Items.WHEAT) == 64,
+				"An empty hand takes back the last stack in");
+		helper.getLevel().destroyBlock(trough.partPos(master, Direction.NORTH, 1), true);
+		helper.runAfterDelay(3, () -> {
+			helper.assertTrue(dropped(helper, Items.HAY_BLOCK.asItem()) == 64 && dropped(helper, item("feed_trough")) == 1,
+					"Broken, it spills its feed and drops once: " + dropped(helper, Items.HAY_BLOCK.asItem()));
+			helper.succeed();
+		});
+	}
+
+	@GameTest(maxTicks = 40)
+	public void theLanternHangsLit(GameTestHelper helper) {
+		stone(helper);
+		BlockPos wall = new BlockPos(3, 4, 4);
+		helper.setBlock(wall, Blocks.OAK_PLANKS);
+		BlockPos pos = wall.north();
+		ServerPlayer player = standing(helper, new BlockPos(3, 2, 1), new ItemStack(item("barn_lantern")));
+		player.getMainHandItem().useOn(new UseOnContext(player, InteractionHand.MAIN_HAND, hit(helper, wall, Direction.NORTH)));
+		BlockState state = helper.getBlockState(pos);
+		helper.assertTrue(state.is(JugcraftAgriculture.block("barn_lantern")) && state.getValue(BarnLanternBlock.FACING) == Direction.NORTH
+				&& state.getValue(BarnLanternBlock.LIT) && state.getLightEmission() == BarnLanternBlock.LIGHT, "It hangs on the wall, lit: " + state);
+		player.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(Items.STICK));
+		useOn(helper, player, pos);
+		helper.assertTrue(helper.getBlockState(pos).getValue(BarnLanternBlock.LIT), "A stick doesn't put it out");
+		player.setItemInHand(InteractionHand.MAIN_HAND, ItemStack.EMPTY);
+		useOn(helper, player, pos);
+		helper.assertTrue(!helper.getBlockState(pos).getValue(BarnLanternBlock.LIT) && helper.getBlockState(pos).getLightEmission() == 0,
+				"An empty hand puts it out, and it gives no light");
+		useOn(helper, player, pos);
+		helper.assertTrue(helper.getBlockState(pos).getValue(BarnLanternBlock.LIT), "And lights it again");
+		helper.setBlock(wall, Blocks.AIR);
+		helper.assertBlockNotPresent(JugcraftAgriculture.block("barn_lantern"), pos);
+		helper.runAfterDelay(3, () -> {
+			helper.assertTrue(dropped(helper, item("barn_lantern")) == 1, "Without its wall it comes off, dropping itself");
+			helper.succeed();
 		});
 	}
 }

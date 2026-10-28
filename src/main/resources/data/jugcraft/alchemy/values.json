@@ -1067,6 +1067,11 @@
       "denominator": 1,
       "source": "fallback (balance pending)"
     },
+    "jugcraft:barn_lantern": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
     "jugcraft:basic_ceramic_lining": {
       "numerator": 64,
       "denominator": 1,
@@ -11737,6 +11742,11 @@
       "denominator": 1,
       "source": "recipe jugcraft:feast_table"
     },
+    "jugcraft:feed_trough": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
     "jugcraft:feeder_conduit": {
       "numerator": 3,
       "denominator": 8,
@@ -12883,6 +12893,11 @@
       "source": "recipe jugcraft:gourd_canteen"
     },
     "jugcraft:grain_mash_bucket": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
+    "jugcraft:grain_sack": {
       "numerator": 1,
       "denominator": 1,
       "source": "fallback (balance pending)"
@@ -28187,6 +28202,11 @@
       "denominator": 1,
       "source": "fallback (balance pending)"
     },
+    "jugcraft:milk_can": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
     "jugcraft:millstone_rifle": {
       "numerator": 1465,
       "denominator": 4,
@@ -37046,6 +37066,11 @@
       "numerator": 9,
       "denominator": 1,
       "source": "recipe jugcraft:pot_cooking/tomato_soup"
+    },
+    "jugcraft:tool_rack": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
     },
     "jugcraft:tortilla": {
       "numerator": 2,
