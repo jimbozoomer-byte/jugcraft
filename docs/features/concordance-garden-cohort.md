@@ -2284,18 +2284,25 @@ from unit 3's shared prefix, not yet compiled or run in CI. Next:
 2. Refresh main and the open pull requests; merge main into `claude/garden-cohort` if it moved (generated files
    regenerated, never hand-merged).
 3. Continue unit 3 (GC-06, Marax) from its shared prefix (GC-06a, GC-06b); units 4 to 6 branch from that prefix.
-4. Merge unit 4's line after unit 3's (the order 3, 4, 5, 6), regenerating every generated file rather than merging it by
-   hand. The lines with no marker are resolved by hand: `PactParser.WORK` and `REQUIRED` and the tools' `WORK`, `SPIRITS`
-   order, `SERVICE_*` and `ACTS` (Marax's entry, then Foras's); `PactGlance.WORK_ICONS` (Foras's `Map.entry` under his
-   marker in unit 3's `Map.ofEntries`, Star-reckoning's last); the mark and icon rules (unit 3's proud rows and unit 4's
-   lock, hourglass and two icons, in one order in `PactGlance` and `tools/magic_ui.py`); the garden client's two
-   `CHOOSER_WORDS` budgets in Foras's flow, which become unit 3's `chooserWords(context)`; sorted imports; and in the
-   records the units table, the Decisions rows, the evidence sections, Where to resume, `CHANGELOG.md`'s heading and
-   bullets, `docs/WHAT_EXISTS.md`, `docs/TESTING.md`, `docs/INTEGRATION_STATUS.md` and the shared feature records (union,
-   unit 3's lines first). His journey steps then follow Marax's (14 to 16), his codex pages Marax's, and the garden
-   class's weight is 1040. Then run CI on the merged head (the server jobs, the garden client class, a dispatch of every
-   client class), look at his 33 pictures and give [his Verification](foras-pact.md#verification) its results and its
-   "Seen" column.
+4. Merge unit 4's line after unit 3's (the order 3, 4, 5, 6), regenerating every generated file (`en_us.json`,
+   `sounds.json`, the codex entry, `tools/data/generated-material-resources.json`, the journey block) rather than merging
+   it by hand. A trial merge in memory against unit 3's head `aa2c173e2` (`git merge-tree`, 29 October 2026) merged the
+   marked tables and blocks cleanly and left these to resolve by hand: `PactParser.WORK`, `HOLDER_ONLY` and `REQUIRED`
+   (unit 3's lines, then Foras's work and id); `PactGlance.WORK_ICONS` (Foras's `Map.entry` under his marker in unit 3's
+   `Map.ofEntries`, Star-reckoning's entry last); in `tools/magic_ui.py` his `WORK_GLANCES` row and his Jade short forms
+   and marks under unit 3's `GC-07 unit 4` markers and his no-donor mark after unit 3's proud rule, and in
+   `MagicGlance.MARKS` his five lines under his marker; the two test classes' imports (sorted union); and the files of
+   the magic interfaces' unit 2 and its review, which unit 3's line carries as one commit (`3c2d36b0f`) and this line as
+   `6cb85aef0` without the review (the roster, Jade and `PactScreen` files, `check_mod_data.py`'s roster blocks,
+   `scripts/tests/test_magic_ui.py`, `tools/select_client_tests.py`'s roster line, `concordance-chunk-d.md`): unit 4
+   changed none of them, so unit 3's side stands. Merged without a conflict but wrong after it: Foras's flow's two
+   `CHOOSER_WORDS` budgets, which become unit 3's `chooserWords(context)`. The records conflict wherever both units
+   wrote (the status, the units table, the evidence sections, Where to resume, `CHANGELOG.md`, `docs/WHAT_EXISTS.md`,
+   `docs/TESTING.md`, `docs/INTEGRATION_STATUS.md` and the shared feature records): union, unit 3's lines first; the
+   magic interfaces' record takes unit 3's side with unit 4's closing bullet added. His journey steps then follow
+   Marax's (14 to 16), his codex pages Marax's, and the garden class's weight is 1040. Then run CI on the merged head (the
+   server jobs, the garden client class, a dispatch of every client class), look at his 33 pictures and give
+   [his Verification](foras-pact.md#verification) its results and its "Seen" column.
 5. Open items units 1, 2 and 4 leave: Buer's listen, asleep and depart pictures and his refused picture (GC-04's As built);
    Bathin's ring and shimmer drawn as the shared movement and work signs, his arrive and depart pictures alike, his assent
    picture showing no fist at the chest, the matter pictures with the row's tip over the plates, the pylon road not
