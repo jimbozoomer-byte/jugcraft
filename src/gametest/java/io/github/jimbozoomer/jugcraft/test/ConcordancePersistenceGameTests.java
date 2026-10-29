@@ -1105,6 +1105,10 @@ public class ConcordancePersistenceGameTests {
 		VerdantBedBlockEntity bed = ConcordanceWorkerGameTests.forasHost(helper, new BlockPos(1, 1, 1), holder.getUUID());
 		PactPerchBlockEntity perch = ConcordanceWorkerGameTests.forasPact(helper, holder, at, now);
 		ForasEntity foras = ConcordanceWorkerGameTests.foras(helper, perch);
+		// His first think takes his pact's record (PactSpiritEntity.think), so his save has one to hold; prudent, with no
+		// reading of the host yet, it grafts nothing.
+		foras.think(level, 6000L, now);
+		helper.assertTrue(bed.graft().isEmpty() && store.countItem(Garden.DEWMOSS) == 2, "Prudent and with no reading, his first think grafts nothing");
 		ConcordanceWorkerGameTests.forasAnswer(helper, holder, perch, GraftKeeping.ALWAYS, now);
 		Vec3 stood = foras.position();
 		UUID id = foras.getUUID();
