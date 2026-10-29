@@ -5,6 +5,7 @@ import io.github.jimbozoomer.jugcraft.agriculture.ClockworkRavenBlock;
 import io.github.jimbozoomer.jugcraft.agriculture.FlyingCrankGhostBlock;
 import io.github.jimbozoomer.jugcraft.agriculture.JugcraftAgriculture;
 import io.github.jimbozoomer.jugcraft.agriculture.OrganGrinderSkeletonBlock;
+import io.github.jimbozoomer.jugcraft.agriculture.PumpkinDrummerBlock;
 import io.github.jimbozoomer.jugcraft.kinetic.HandCrankBlock;
 import io.github.jimbozoomer.jugcraft.kinetic.HandCrankBlockEntity;
 import io.github.jimbozoomer.jugcraft.kinetic.JugcraftKinetics;
@@ -22,7 +23,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.DoubleBlockHalf;
 
 /**
- * Client game test for the Clockwork Animatronics, parts 1 to 4 (decor set 9): on a dark oak floor, two Organ-Grinder
+ * Client game test for the Clockwork Animatronics, parts 1 to 5 (decor set 9): on a dark oak floor, two Organ-Grinder
  * Skeletons, one facing the camera (north) and one facing east, and an Animatronic Werewolf facing the camera, each with a
  * hand crank against the back of its lower block. Photographed at rest from the front; then with their cranks turned
  * and their clockwork running, from the front and from the east, where the organ's crank is and the skeleton's right
@@ -30,8 +31,9 @@ import net.minecraft.world.level.block.state.properties.DoubleBlockHalf;
  * (client/AnimatronicWerewolfRenderer); and, part 3, a Flying Crank Ghost facing the camera, its crank behind it, at
  * rest and then flying, its arms up in turn and its eyes lit (client/FlyingCrankGhostRenderer); and, part 4, a
  * Clockwork Raven facing the camera, its crank behind it, at rest and then in its first burst of caws, its beak open
- * and its wings up (client/ClockworkRavenRenderer; CI job {@code client}). They go into
- * docs/features/clockwork-animatronics.md.
+ * and its wings up (client/ClockworkRavenRenderer); and, part 5, a Pumpkin-Headed Drummer facing the camera, his crank
+ * behind him, at rest and then drumming, his right mallet swung back and his face lit (client/PumpkinDrummerRenderer; CI
+ * job {@code client}). They go into docs/features/clockwork-animatronics.md.
  */
 public class ClockworkClientGameTests implements FabricClientGameTest {
 	@Override
@@ -77,6 +79,12 @@ public class ClockworkClientGameTests implements FabricClientGameTest {
 			server.runOnServer(minecraft -> turn(minecraft.overworld(), origin.offset(-3, 0, -3)));
 			context.waitTicks(ClockworkRavenBlock.BURST - 40);
 			shoot(context, singleplayer, x - 3, y + 1, z - 6, 0, 20, "jugcraft_clockwork_raven_caw");
+			// The drummer, at rest; then drumming, his right mallet at the top of its backswing before a beat.
+			server.runOnServer(minecraft -> place(minecraft.overworld(), origin.offset(3, 0, -4), Direction.NORTH, "pumpkin_drummer"));
+			shoot(context, singleplayer, x + 3, y + 1, z - 7, 0, 15, "jugcraft_clockwork_drummer");
+			server.runOnServer(minecraft -> turn(minecraft.overworld(), origin.offset(3, 0, -3)));
+			context.waitTicks(PumpkinDrummerBlock.PATTERN.indexOf('R', 10) * PumpkinDrummerBlock.STEP_TICKS - PumpkinDrummerBlock.BACK_TICKS / 2 - 40);
+			shoot(context, singleplayer, x + 3, y + 1, z - 7, 0, 15, "jugcraft_clockwork_drummer_drumming");
 		}
 	}
 

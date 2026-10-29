@@ -56,6 +56,17 @@ brass bird stand 1.3 m tall, its clockwork in a riveted brass drum at the stand'
 - its eyes glow red.
 Stopped, the flywheel runs down over `ease` ticks and stops where it is, and it folds its wings, shuts its beak and
 its eyes go dark.
+Part 5, the Pumpkin-Headed Drummer (agriculture/PumpkinDrummerBlock, PumpkinDrummerBlockEntity): a bandsman 1.7 m tall
+to the top of his head, which is a carved jack-o'-lantern under a black shako, in a red coat frogged with gold, with a
+rope-tensioned bass drum 50 cm across slung in front of him on white straps, two blocks tall, on a black iron plinth with
+a riveted brass gear housing behind. While it runs:
+- he beats a march (`pattern`, a step every `step_ticks` ticks: R the right mallet, L the left, . a rest), each stroke
+  a backswing of `back` degrees out from the drumhead and in again over `back_ticks` ticks, ending on the beat, his
+  forearm, glove and mallet turning about his elbow (`elbows` across, at `elbow_y`) (client/PumpkinDrummerRenderer);
+  each beat sounds the drum (`drum_sound`), the right mallet's lower (`pitch_right`) than the left's (`pitch_left`);
+- his head dips `nod` degrees about his neck (`neck`: height, depth) on every `nod_steps`th step, in time;
+- the candle in his head lights his carved face.
+Stopped, his mallets and his head come to rest where they hang, and his face goes dark.
 Sizes in pixels of the lower block, facing north (its front, the organ or the werewolf's face, to the north).
 """
 
@@ -114,6 +125,15 @@ CLOCKWORK_RAVEN = {
     "caw_sound": "minecraft:entity.parrot.ambient", "volume": 0.8, "pitch": 0.5,
 }
 
+PUMPKIN_DRUMMER = {
+    "block": "pumpkin_drummer", "display": "Pumpkin-Headed Drummer",
+    "need": 4, "spin_down": 10, "ease": 10.0,
+    "step_ticks": 5, "pattern": "R...R...R.L.R.L.",
+    "back": 30.0, "back_ticks": 8, "elbows": (4.5, 11.5), "elbow_y": 18.5,
+    "neck": (24.0, 10.5), "nod": 6.0, "nod_steps": 4,
+    "drum_sound": "minecraft:block.note_block.basedrum", "volume": 0.9, "pitch_right": 0.6, "pitch_left": 0.75,
+}
+
 RECIPES = [
     # The skeleton (two bone blocks), its top hat (black wool), its organ (a note block on planks) and its clockwork
     # (a clock).
@@ -138,6 +158,12 @@ RECIPES = [
      "key": {"F": "minecraft:feather", "B": "minecraft:black_dye", "I": "minecraft:iron_ingot", "C": "minecraft:clock",
              "G": "minecraft:gold_ingot"},
      "result": CLOCKWORK_RAVEN["block"], "count": 1, "category": "building"},
+    # The drummer's head (a carved pumpkin), his coat (red wool), his drum (a note block), his mallets (sticks) and his
+    # clockwork (a clock).
+    {"id": PUMPKIN_DRUMMER["block"], "pattern": [" P ", "WNW", "SCS"],
+     "key": {"P": "minecraft:carved_pumpkin", "W": "minecraft:red_wool", "N": "minecraft:note_block", "S": "minecraft:stick",
+             "C": "minecraft:clock"},
+     "result": PUMPKIN_DRUMMER["block"], "count": 1, "category": "building"},
 ]
 
 
@@ -147,7 +173,7 @@ def tune_length():
 
 def figures():
     """Every figure's table, in the order they were added."""
-    return [ORGAN_GRINDER, WEREWOLF, FLYING_GHOST, CLOCKWORK_RAVEN]
+    return [ORGAN_GRINDER, WEREWOLF, FLYING_GHOST, CLOCKWORK_RAVEN, PUMPKIN_DRUMMER]
 
 
 def blocks():

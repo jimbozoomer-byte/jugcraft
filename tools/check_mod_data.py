@@ -15395,7 +15395,10 @@ def check_clockwork():
     rise past level nor its wrists above their pulleys. Part 4, the Clockwork Raven: its flywheel, look, caws, beak and
     sound are the table's, a burst of caws fits in its cycle and each caw's beak shuts before the next opens, its wings
     are at the top of a beat on each caw and folded between bursts, the renderer's lean, flywheel, neck, beak, shoulders
-    and easing are the table's, its eyes are drawn at full light and its ragged wings are cut out."""
+    and easing are the table's, its eyes are drawn at full light and its ragged wings are cut out. Part 5, the
+    Pumpkin-Headed Drummer: his march, strokes, nod, loudness and pitches are the table's, each mallet's backswing ends
+    before its next, the renderer's elbows, backswing, neck, nod and easing are the table's, his face is drawn at full
+    light and cut out but for its cuts, which match the carved rind's, and his mallets hang clear of the drumheads."""
     import math
     import clockwork as cw
     import clockwork_data as cwd
@@ -15413,7 +15416,8 @@ def check_clockwork():
         err("DecorQuads must read clockwork_quads.json")
     quads = load(ASSETS / "clockwork_quads.json") or {}
     classes = {cw.ORGAN_GRINDER["block"]: ("OrganGrinderSkeleton", "grinder"), cw.WEREWOLF["block"]: ("AnimatronicWerewolf", "werewolf"),
-               cw.FLYING_GHOST["block"]: ("FlyingCrankGhost", "ghost"), cw.CLOCKWORK_RAVEN["block"]: ("ClockworkRaven", "raven")}
+               cw.FLYING_GHOST["block"]: ("FlyingCrankGhost", "ghost"), cw.CLOCKWORK_RAVEN["block"]: ("ClockworkRaven", "raven"),
+               cw.PUMPKIN_DRUMMER["block"]: ("PumpkinDrummer", "drummer")}
     if set(classes) != set(cw.blocks()):
         err("check_clockwork: every figure must be checked")
     for spec in cw.figures():
@@ -15575,6 +15579,49 @@ def check_clockwork():
     for part in cwd.RAVEN_CUTOUT:
         if not quads.get(f"{block}_{part}") or not all(q.get("cutout") for q in quads[f"{block}_{part}"]):
             err(f"clockwork_quads.json: {block}_{part} has a ragged edge, drawn cut out")
+    # Part 5: the Pumpkin-Headed Drummer.
+    pd = cw.PUMPKIN_DRUMMER
+    block = pd["block"]
+    java = read(JAVA_ROOT / "agriculture" / "PumpkinDrummerBlock.java")
+    held = read(JAVA_ROOT / "agriculture" / "PumpkinDrummerBlockEntity.java")
+    drawn = read(CLIENT_JAVA_ROOT / "PumpkinDrummerRenderer.java")
+    for item in (f"STEP_TICKS = {pd['step_ticks']};", f'PATTERN = "{pd["pattern"]}";', f"BACK_TICKS = {pd['back_ticks']};",
+                 f"NOD_STEPS = {pd['nod_steps']};", f"VOLUME = {pd['volume']}F;", f"PITCH_RIGHT = {pd['pitch_right']}F;",
+                 f"PITCH_LEFT = {pd['pitch_left']}F;"):
+        if item not in java:
+            err(f"PumpkinDrummerBlock: missing {item} (tools/clockwork.py PUMPKIN_DRUMMER)")
+    if pd["drum_sound"] != "minecraft:block.note_block.basedrum" or "SoundEvents.NOTE_BLOCK_BASEDRUM" not in held:
+        err(f"PumpkinDrummerBlockEntity: the drum must sound {pd['drum_sound']} (SoundEvents.NOTE_BLOCK_BASEDRUM)")
+    march = pd["pattern"]
+    if set(march) - set("RL.") or "R" not in march or "L" not in march:
+        err("tools/clockwork.py PUMPKIN_DRUMMER: the march is R, L and . steps, with both mallets in it")
+    for hand in "RL":
+        steps = [i for i, c in enumerate(march) if c == hand]
+        gaps = [((b - a) % len(march) or len(march)) * pd["step_ticks"] for a, b in zip(steps, steps[1:] + steps[:1])]
+        if min(gaps) < pd["back_ticks"]:
+            err(f"tools/clockwork.py PUMPKIN_DRUMMER: the {hand} mallet's backswing ({pd['back_ticks']} ticks) must end before "
+                f"its next beat ({min(gaps)} ticks)")
+    (pel, per), (pny, pnz) = pd["elbows"], pd["neck"]
+    for name, value in (("ELBOW_LEFT", pel), ("ELBOW_RIGHT", per), ("ELBOW_Y", pd["elbow_y"]), ("BACK", pd["back"]), ("NECK_Y", pny),
+                        ("NECK_Z", pnz), ("NOD", pd["nod"]), ("EASE", pd["ease"])):
+        if f"static final float {name} = {value}F;" not in drawn:
+            err(f"PumpkinDrummerRenderer.{name} must be {value} (tools/clockwork.py PUMPKIN_DRUMMER)")
+    if "LightCoordsUtil.FULL_BRIGHT" not in drawn:
+        err("PumpkinDrummerRenderer: his face's candlelight is drawn at full light while he runs")
+    for part in cwd.DRUMMER_CUTOUT:
+        if not quads.get(f"{block}_{part}") or not all(q.get("cutout") for q in quads[f"{block}_{part}"]):
+            err(f"clockwork_quads.json: {block}_{part} is candlelight in its cuts only, drawn cut out")
+    if len(set(len(r) for r in cwd.JACK)) != 1 or not any("E" in r for r in cwd.JACK) or not any("M" in r for r in cwd.JACK):
+        err("clockwork_data.JACK: the jack-o'-lantern's face is rows of one width, with its eyes and its mouth")
+    # The mallet heads hang beside the drumheads, a little clear of them, at rest.
+    sc = cwd.build(block)
+    heads = [e for e in sc.models["whole"] if e["from"][0] <= 8.0 <= e["to"][0] and e["to"][1] - e["from"][1] >= 4.0 and e["from"][2] < 9.0]
+    drum_x = (min(e["from"][0] for e in heads), max(e["to"][0] for e in heads)) if heads else (8.0, 8.0)
+    for side in ("left_forearm", "right_forearm"):
+        ball = sc.models[side][-1]
+        gap = drum_x[0] - ball["to"][0] if ball["to"][0] <= 8.0 else ball["from"][0] - drum_x[1]
+        if not 0.0 < gap <= 0.5:
+            err(f"tools/clockwork_data.py pumpkin_drummer: the {side}'s mallet head must hang just clear of its drumhead (gap {gap:.2f})")
 
 
 def check_party_table():

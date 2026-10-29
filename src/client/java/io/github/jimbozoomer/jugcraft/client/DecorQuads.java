@@ -43,8 +43,8 @@ import org.jspecify.annotations.Nullable;
  * haunted_midway_quads.json (tools/haunted_midway_data.py: the Haunted Carousel's turning deck and canopy, its bulbs, and
  * its horse, bat, bat's wings and coach) and clockwork_quads.json (tools/clockwork_data.py: the Organ-Grinder Skeleton's
  * crank, right arm, head and jaw, the Animatronic Werewolf's turning deck and body, arms, head and jaw, the Flying
- * Crank Ghost's crank, ghost, eyes, arms and wire, and the Clockwork Raven's flywheel, head, lower beak, eyes and
- * wings).
+ * Crank Ghost's crank, ghost, eyes, arms and wire, the Clockwork Raven's flywheel, head, lower beak, eyes and wings,
+ * and the Pumpkin-Headed Drummer's forearms, head and face).
  */
 public final class DecorQuads {
 	private static final List<Identifier> FILES = List.of(Jugcraft.id("decor_quads.json"), Jugcraft.id("decor7_quads.json"),

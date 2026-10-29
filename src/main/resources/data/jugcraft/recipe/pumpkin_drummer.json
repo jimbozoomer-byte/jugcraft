@@ -1,0 +1,26 @@
+{
+  "fabric:load_conditions": [
+    {
+      "condition": "jugcraft:feature_enabled",
+      "feature": "agriculture"
+    }
+  ],
+  "type": "minecraft:crafting_shaped",
+  "category": "building",
+  "pattern": [
+    " P ",
+    "WNW",
+    "SCS"
+  ],
+  "key": {
+    "P": "minecraft:carved_pumpkin",
+    "W": "minecraft:red_wool",
+    "N": "minecraft:note_block",
+    "S": "minecraft:stick",
+    "C": "minecraft:clock"
+  },
+  "result": {
+    "id": "jugcraft:pumpkin_drummer",
+    "count": 1
+  }
+}

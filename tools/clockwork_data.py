@@ -21,7 +21,7 @@ import pumpkin_patch_data as ppd
 from decor6_data import quads
 from flora_art import Sculpt, pal, shade
 from front_yard_data import RED, bone, skull, vertebrae
-from haunted_midway_data import BLACK, BONE, GOLD, STEEL, clear
+from haunted_midway_data import BLACK, BONE, GOLD, PUMPKIN, STEEL, clear
 from pumpkin_patch_data import ALL6, IRON, WOOD, flat, lengthwise, panel, walls
 
 MOD = "jugcraft"
@@ -744,18 +744,175 @@ def raven_posed(sc, spec):
     return sc.models["flywheel"] + sc.models["head"] + sc.models["jaw"] + sc.models["eyes"] + wings
 
 
+# ---------------------------------------------------------------- part 5: the Pumpkin-Headed Drummer
+
+NAVY = pal("0e121c", "181e2c", "242c40")
+WHITE = pal("b8b8b0", "dcdcd4", "f4f4ee")
+VELLUM = pal("c8b88e", "e0d2aa", "efe4c4")
+CANDLE = (255, 196, 72)
+# The jack-o'-lantern's face, five texels across and four high: E an eye, M the mouth (a wide grin), . the rind.
+JACK = (".....", ".E.E.", ".....", ".MMM.")
+
+
+def rind():
+    """A pumpkin's rind: its ribs running up it, a column lit, the next its own tone, then a groove in shadow, then its
+    own tone again, over and over; its top row lit."""
+    def paint(p):
+        for y in range(p.h):
+            for x in range(p.w):
+                p.put(x, y, shade(PUMPKIN, 3 if y == 0 and p.h > 1 else (2, 3, 2, 1)[x % 4]))
+    paint.tag = repr(("rind",))
+    return paint
+
+
+def jack(lit):
+    """The jack-o'-lantern's carved face (`JACK`): the rind with its eyes and grin cut dark into it; or, `lit`, the
+    candle's light in the cuts and nothing elsewhere (cut out), the plate the renderer draws over them at full light."""
+    def paint(p):
+        rind()(p)
+        if p.w == len(JACK[0]) and p.h == len(JACK):
+            for y, row in enumerate(JACK):
+                for x, c in enumerate(row):
+                    if c != ".":
+                        p.put(x, y, CANDLE if lit else HOLLOW)
+                    elif lit:
+                        clear(p, x, y)
+        elif lit:
+            for y in range(p.h):
+                for x in range(p.w):
+                    clear(p, x, y)
+    paint.tag = repr(("jack", lit))
+    return paint
+
+
+def shako():
+    """A bandsman's black shako: felt lit along its top row, a gold band round its foot, a brass badge in the middle of
+    its second row."""
+    def paint(p):
+        for y in range(p.h):
+            for x in range(p.w):
+                if y == p.h - 1 and p.h > 2:
+                    p.put(x, y, shade(GOLD, 3))
+                elif y == 1 and x == p.w // 2 and p.w > 2 and p.h > 2:
+                    p.put(x, y, shade(GOLD, 4))
+                else:
+                    p.put(x, y, shade(BLACK, 3 if y == 0 and p.h > 1 else 1))
+    paint.tag = repr(("shako",))
+    return paint
+
+
+def bandsman(frogged=False):
+    """A bandsman's red coat, flat, its top row lit; `frogged`, gold braid across its chest on its second and fourth
+    rows, between its edges."""
+    def paint(p):
+        for y in range(p.h):
+            for x in range(p.w):
+                if frogged and y in (1, 3) and 0 < x < p.w - 1 and p.w > 3:
+                    p.put(x, y, shade(GOLD, 3))
+                else:
+                    p.put(x, y, shade(RED, 3 if y == 0 and p.h > 1 else 2))
+    paint.tag = repr(("bandsman", frogged))
+    return paint
+
+
+def drum_shell():
+    """A rope-tensioned drum's shell: red lacquer between two brass hoops (its end columns), a white rope a texel wide
+    zigzagging from hoop to hoop and back down it."""
+    def paint(p):
+        inner = p.w - 2
+        for y in range(p.h):
+            rope = 1 + (abs((y % (2 * inner - 2)) - (inner - 1)) if inner > 1 else 0)
+            for x in range(p.w):
+                if x in (0, p.w - 1):
+                    p.put(x, y, shade(GOLD, 3 if y == 0 else 2))
+                elif x == rope:
+                    p.put(x, y, shade(WHITE, 2))
+                else:
+                    p.put(x, y, shade(RED, 1))
+    paint.tag = repr(("drum_shell",))
+    return paint
+
+
+def drum_crossed(sc, name, x0, x1, cy, cz, w, cut, ends):
+    """A drum lying across x from x0 to x1, `w` across, centred on height cy and depth cz: two boxes crossed, each `cut`
+    shorter at its ends, its shell `drum_shell` and its two heads (east and west) `ends`."""
+    shell = drum_shell()
+    return [panel(sc, name, shell, (x0, cy - w / 2, cz - w / 2 + cut), (x1, cy + w / 2, cz + w / 2 - cut), east=ends, west=ends),
+            panel(sc, name, shell, (x0, cy - w / 2 + cut, cz - w / 2), (x1, cy + w / 2 - cut, cz + w / 2), east=ends, west=ends)]
+
+
+def pumpkin_drummer():
+    """The Pumpkin-Headed Drummer, facing north, in its lower block's pixels (two blocks tall).
+    - The figure (`whole`): a round black iron plinth 50 cm across, a riveted brass gear housing behind; black boots,
+      navy trousers; a red bandsman's coat 37 cm across the shoulders, gold braid across its chest above the drum,
+      gold epaulettes and a gold collar; white straps from his shoulders to his drum; his upper arms hanging at his
+      sides; and the bass drum slung in front of him, 50 cm across and 31 cm deep, its shell red lacquer between brass
+      hoops with its white rope zigzagging across, its heads (east and west) pale vellum.
+    - His forearms (`left_forearm`, `right_forearm`), each reaching forward from the elbow to a white glove holding a
+      wooden mallet down beside the drumhead, its white felt head a quarter-pixel off the head.
+    - His head (`head`): a jack-o'-lantern 31 cm across, its face carved, under a black shako with a peak, a gold band,
+      a brass badge and a red plume; and his face's candlelight (`face`), cut out but for its cuts."""
+    spec = cw.PUMPKIN_DRUMMER
+    sc = Sculpt(spec["block"], 2905, 128)
+    cast, br = iron(), brass()
+    coat, trousers, white = bandsman(), flat(NAVY), flat(WHITE)
+    el = round_slab(sc, "plinth", cast, 8.0, 0.0, 0.75, 1.5, cz=10.0)
+    el.append(panel(sc, "housing", riveted(), (6.5, 0.75, 12.0), (9.5, 2.75, 15.0)))
+    for x0 in (5.75, 8.25):
+        el.append(panel(sc, "boot", flat(BLACK), (x0, 0.75, 8.75), (x0 + 2.0, 2.75, 11.75)))
+        el.append(panel(sc, "leg", trousers, (x0, 2.0, 9.5), (x0 + 2.0, 14.0, 11.5)))
+    el.append(panel(sc, "coat", coat, (5.0, 14.0, 9.0), (11.0, 24.0, 12.0), north=bandsman(frogged=True)))
+    el.append(panel(sc, "collar", br, (6.5, 23.5, 9.5), (9.5, 24.5, 11.5)))
+    for x0 in (4.5, 10.5):
+        el.append(panel(sc, "epaulette", br, (x0, 23.0, 9.5), (x0 + 1.0, 24.0, 11.5)))
+    for x0 in (4.0, 11.0):
+        el.append(panel(sc, "upper_arm", coat, (x0, 18.0, 9.5), (x0 + 1.0, 23.0, 11.5)))
+    for x0 in (5.75, 9.25):
+        el.append(panel(sc, "strap", white, (x0, 17.0, 8.75), (x0 + 1.0, 24.0, 9.0)))
+    el += drum_crossed(sc, "drum", 5.5, 10.5, 14.0, 5.0, 8.0, 1.5, flat(VELLUM))
+    sc.models["whole"] = el
+    # The forearms, the left's drawn and the right's its mirror across the figure's middle.
+    ey = spec["elbow_y"]
+    for side, ex in zip(("left_forearm", "right_forearm"), spec["elbows"]):
+        lx = ex if ex < 8.0 else 16.0 - ex
+        m = (lambda a, b: (a, b)) if ex < 8.0 else (lambda a, b: (16.0 - b, 16.0 - a))
+        parts = (("forearm", coat, m(lx - 0.5, lx + 0.5), (ey - 1.0, ey), (6.5, 11.5)),
+                 ("glove", white, m(lx - 0.5, lx + 0.5), (ey - 1.5, ey - 0.5), (5.5, 6.5)),
+                 ("mallet", lengthwise(WOOD), m(lx - 0.25, lx + 0.25), (ey - 4.0, ey - 1.5), (5.75, 6.25)),
+                 ("mallet_head", white, m(lx - 0.25, lx + 0.75), (ey - 5.0, ey - 4.0), (5.5, 6.5)))
+        sc.models[side] = [panel(sc, name, paint, (xs[0], ys[0], zs[0]), (xs[1], ys[1], zs[1])) for name, paint, xs, ys, zs in parts]
+    ny, nz = spec["neck"]
+    sc.models["head"] = [panel(sc, "pumpkin", rind(), (5.5, ny, nz - 2.5), (10.5, ny + 4.0, nz + 2.5), north=jack(False)),
+                         panel(sc, "shako", shako(), (6.5, ny + 4.0, nz - 1.5), (9.5, ny + 7.0, nz + 1.5)),
+                         panel(sc, "peak", flat(BLACK), (6.5, ny + 4.0, nz - 2.25), (9.5, ny + 4.25, nz - 1.5)),
+                         panel(sc, "plume", flat(RED), (7.5, ny + 7.0, nz - 1.5), (8.5, ny + 8.0, nz - 0.5))]
+    sc.models["face"] = [panel(sc, "face", jack(True), (5.5, ny, nz - 2.6), (10.5, ny + 4.0, nz - 2.55))]
+    return sc
+
+
+DRUMMER_MOVING = ("left_forearm", "right_forearm", "head", "face")
+# The drummer's parts drawn cut out (his face's candlelight shows only in its cuts).
+DRUMMER_CUTOUT = ("face",)
+
+
+def drummer_posed(sc, spec):
+    """The drummer's item pose: at rest, his mallets by the drumheads, his face carved dark."""
+    return sc.models["left_forearm"] + sc.models["right_forearm"] + sc.models["head"]
+
+
 # ---------------------------------------------------------------- building and files
 
 _built = {}
 BUILDERS = {cw.ORGAN_GRINDER["block"]: organ_grinder_skeleton, cw.WEREWOLF["block"]: animatronic_werewolf,
-            cw.FLYING_GHOST["block"]: flying_crank_ghost, cw.CLOCKWORK_RAVEN["block"]: clockwork_raven}
+            cw.FLYING_GHOST["block"]: flying_crank_ghost, cw.CLOCKWORK_RAVEN["block"]: clockwork_raven,
+            cw.PUMPKIN_DRUMMER["block"]: pumpkin_drummer}
 # Each figure's moving parts (clockwork_quads.json, `<block>_<part>`), and the parts its item shows, posed.
 PARTS = {cw.ORGAN_GRINDER["block"]: MOVING, cw.WEREWOLF["block"]: WEREWOLF_MOVING, cw.FLYING_GHOST["block"]: GHOST_MOVING,
-         cw.CLOCKWORK_RAVEN["block"]: RAVEN_MOVING}
+         cw.CLOCKWORK_RAVEN["block"]: RAVEN_MOVING, cw.PUMPKIN_DRUMMER["block"]: DRUMMER_MOVING}
 POSES = {cw.ORGAN_GRINDER["block"]: posed, cw.WEREWOLF["block"]: werewolf_posed, cw.FLYING_GHOST["block"]: ghost_posed,
-         cw.CLOCKWORK_RAVEN["block"]: raven_posed}
+         cw.CLOCKWORK_RAVEN["block"]: raven_posed, cw.PUMPKIN_DRUMMER["block"]: drummer_posed}
 # The moving parts drawn cut out, by figure.
-CUTOUT = {cw.FLYING_GHOST["block"]: GHOST_CUTOUT, cw.CLOCKWORK_RAVEN["block"]: RAVEN_CUTOUT}
+CUTOUT = {cw.FLYING_GHOST["block"]: GHOST_CUTOUT, cw.CLOCKWORK_RAVEN["block"]: RAVEN_CUTOUT, cw.PUMPKIN_DRUMMER["block"]: DRUMMER_CUTOUT}
 
 
 def build(block):

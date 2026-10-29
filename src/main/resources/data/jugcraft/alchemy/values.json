@@ -33027,6 +33027,11 @@
       "denominator": 1,
       "source": "fallback (balance pending)"
     },
+    "jugcraft:pumpkin_drummer": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
     "jugcraft:pumpkin_firework": {
       "numerator": 1,
       "denominator": 1,

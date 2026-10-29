@@ -9,6 +9,7 @@ import io.github.jimbozoomer.jugcraft.agriculture.FlyingCrankGhostBlock;
 import io.github.jimbozoomer.jugcraft.agriculture.JugcraftAgriculture;
 import io.github.jimbozoomer.jugcraft.agriculture.OrganGrinderSkeletonBlock;
 import io.github.jimbozoomer.jugcraft.agriculture.OrganGrinderSkeletonBlockEntity;
+import io.github.jimbozoomer.jugcraft.agriculture.PumpkinDrummerBlock;
 import io.github.jimbozoomer.jugcraft.kinetic.HandCrankBlock;
 import io.github.jimbozoomer.jugcraft.kinetic.HandCrankBlockEntity;
 import io.github.jimbozoomer.jugcraft.kinetic.JugcraftKinetics;
@@ -41,6 +42,8 @@ import net.minecraft.world.phys.Vec3;
  * its own need, its howl rises, holds and falls within its cycle, and a hand crank drives it. Part 3: the Flying Crank
  * Ghost runs on its own need, from any side, and runs down; a hand crank behind it drives it; and it breaks whole. Part
  * 4: the Clockwork Raven runs on its own need, its caws, beak and wings keep time in its cycle, and a hand crank drives it.
+ * Part 5: the Pumpkin-Headed Drummer runs on his own need, his mallets' strokes land on their beats and his head dips in
+ * time, and a hand crank drives him.
  */
 public class ClockworkGameTests {
 	private static void floor(GameTestHelper helper) {
@@ -265,10 +268,48 @@ public class ClockworkGameTests {
 		});
 	}
 
+	/** Part 5: the Pumpkin-Headed Drummer runs on his own need, beats his march in time, and a hand crank drives him. */
+	@GameTest(maxTicks = 60)
+	public void theDrummerBeatsOnHisClockwork(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		floor(helper);
+		ServerPlayer player = standing(helper, new BlockPos(3, 2, 1));
+		BlockPos lower = placed(helper, player, new BlockPos(3, 2, 3), "pumpkin_drummer");
+		BlockState state = level.getBlockState(lower);
+		helper.assertTrue(state.getBlock() instanceof PumpkinDrummerBlock && state.getValue(PumpkinDrummerBlock.FACING) == Direction.NORTH
+				&& level.getBlockState(lower.above()).getValue(PumpkinDrummerBlock.HALF) == DoubleBlockHalf.UPPER
+				&& !state.getValue(ClockworkFigure.RUNNING) && level.getBlockEntity(lower) instanceof ClockworkFigureBlockEntity,
+				"He stands two blocks tall on his plinth, facing the player, at rest");
+		ClockworkFigureBlockEntity figure = (ClockworkFigureBlockEntity) level.getBlockEntity(lower);
+		long took = figure.acceptKinetic(Direction.SOUTH, 64);
+		helper.assertTrue(took == PumpkinDrummerBlock.NEED && figure.acceptKinetic(Direction.SOUTH, 64) == 0,
+				"He takes his need a tick and no more: " + took);
+		int step = PumpkinDrummerBlock.STEP_TICKS;
+		int half = PumpkinDrummerBlock.BACK_TICKS / 2;
+		int right = PumpkinDrummerBlock.PATTERN.indexOf('R', 1) * step;
+		int left = PumpkinDrummerBlock.PATTERN.indexOf('L') * step;
+		helper.assertTrue(PumpkinDrummerBlock.beat(0) == 'R' && PumpkinDrummerBlock.beat(left / step) == 'L' && PumpkinDrummerBlock.beat(1) == '.'
+				&& PumpkinDrummerBlock.beat(PumpkinDrummerBlock.PATTERN.length()) == 'R', "His march has its beats and rests, over and over");
+		helper.assertTrue(PumpkinDrummerBlock.stroke(right, 'R') == 0.0F && Math.abs(PumpkinDrummerBlock.stroke(right - half, 'R') - 1.0F) < 1.0E-6F
+				&& PumpkinDrummerBlock.stroke(left, 'L') == 0.0F && Math.abs(PumpkinDrummerBlock.stroke(left - half, 'L') - 1.0F) < 1.0E-6F
+				&& PumpkinDrummerBlock.stroke(left - half, 'R') == 0.0F && PumpkinDrummerBlock.stroke(right + 1, 'R') == 0.0F,
+				"Each mallet swings back before its own beats and lands on them");
+		helper.assertTrue(PumpkinDrummerBlock.nod(0) == 1.0F && PumpkinDrummerBlock.nod(PumpkinDrummerBlock.NOD_STEPS * step / 2.0) < 1.0E-6F,
+				"His head dips on the beat and lifts between");
+		helper.setBlock(new BlockPos(4, 2, 3), JugcraftKinetics.HAND_CRANK.defaultBlockState().setValue(HandCrankBlock.FACING, Direction.WEST));
+		if (level.getBlockEntity(helper.absolutePos(new BlockPos(4, 2, 3))) instanceof HandCrankBlockEntity crank) {
+			crank.addTurns(HandCrankBlockEntity.TICKS_PER_CRANK);
+		}
+		helper.runAtTickTime(20, () -> {
+			helper.assertTrue(running(level, lower), "A hand crank turning beside his lower block drives him");
+			helper.succeed();
+		});
+	}
+
 	@GameTest
 	public void clockworkDataLoads(GameTestHelper helper) {
 		ServerLevel level = helper.getLevel();
-		for (String id : new String[] {"organ_grinder_skeleton", "animatronic_werewolf", "flying_crank_ghost", "clockwork_raven"}) {
+		for (String id : new String[] {"organ_grinder_skeleton", "animatronic_werewolf", "flying_crank_ghost", "clockwork_raven", "pumpkin_drummer"}) {
 			helper.assertTrue(level.recipeAccess().byKey(ResourceKey.create(Registries.RECIPE, Jugcraft.id(id))).isPresent(), id + " has a recipe");
 			helper.assertTrue(level.getServer().reloadableRegistries().getLootTable(ResourceKey.create(Registries.LOOT_TABLE,
 					Jugcraft.id("blocks/" + id))) != LootTable.EMPTY, id + "'s loot loads");

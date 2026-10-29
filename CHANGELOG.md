@@ -8,6 +8,12 @@ Every change to Jugcraft, newest first, grouped by pull request. For what each t
 
 No numbered release yet. Entries on feature branches remain proposed until their pull requests merge.
 
+### Unmerged: Clockwork Animatronics, part 5 (the Pumpkin-Headed Drummer)
+- **Pumpkin-Headed Drummer**: a bandsman with a carved jack-o'-lantern for a head under a black shako, in a red coat frogged with gold, a rope-tensioned bass drum slung in front of him, two blocks tall.
+- He runs on kinetic power, 4 KE a tick. While he runs he beats a march on his drum with both mallets, his head dipping on the beat, and the candle in his head lights his carved face.
+- Record: [clockwork-animatronics.md](docs/features/clockwork-animatronics.md). Decor set 9's fifth part.
+- **Checked:** the record's Verification. Game tests and screenshots run in CI only; not played by hand.
+
 ### Unmerged: Clockwork Animatronics, part 4 (the Clockwork Raven)
 - **Clockwork Raven**: a life-size raven of black enamelled steel plates with red glass eyes, perched on a brass bird stand 1.3 m tall, two blocks tall.
 - It runs on kinetic power, 2 KE a tick. While it runs the flywheel in the stand's drum turns, its head looks slowly from side to side, its eyes glow red, and every six seconds it caws three times, its beak opening and its wings beating with each caw.

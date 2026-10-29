@@ -1,6 +1,6 @@
 # Clockwork Animatronics
 
-Status: parts 1 (the Organ-Grinder Skeleton), 2 (the Animatronic Werewolf), 3 (the Flying Crank Ghost) and 4 (the Clockwork Raven) implemented. CI builds them and runs their game tests and client screenshots; not yet played by hand. Parts 5 and 6 are planned (below).
+Status: parts 1 (the Organ-Grinder Skeleton), 2 (the Animatronic Werewolf), 3 (the Flying Crank Ghost), 4 (the Clockwork Raven) and 5 (the Pumpkin-Headed Drummer) implemented. CI builds them and runs their game tests and client screenshots; not yet played by hand. Part 6 is planned (below).
 Proposal issue: none. The owner asked for it directly on 28 October 2026, as set 9 of the ten sets of fall and Halloween decor ("Then I want you to do 1-10 in parts in that order one by one"): an organ-grinder skeleton with a hurdy-gurdy, an animatronic werewolf on a turntable, a ghost on a crank wire, a mechanical raven and a pumpkin-headed drummer, on the power network, brass and steam at first and a dieselpunk steel version later.
 Owner: @jimbozoomer-byte
 Target milestone and tier: the bronze age of kinetic power ([kinetic-power.md](kinetic-power.md)). The figures are made from vanilla things and a clock; they move on kinetic energy from a hand crank or a steam engine, through iron shafts and brass gearboxes, or from the JE network through an electric motor.
@@ -63,8 +63,22 @@ Halloween figures that move by clockwork. Each runs on kinetic power: a shaft, g
   - Recipe: two feathers either side of black dye (its enamel), over iron ingots either side of a clock, over a gold ingot (the stand's brass).
   - Broken, either half brings it down, and it drops once.
 
+### Part 5: the Pumpkin-Headed Drummer
+- **Pumpkin-Headed Drummer**: a bandsman 1.7 m tall to the top of his head, which is a carved jack-o'-lantern 31 cm across under a black shako. Two blocks tall.
+  - He wears a red coat frogged with gold across the chest, gold epaulettes and collar, navy trousers and black boots. He stands on a round black iron plinth with a riveted brass gear housing behind.
+  - His bass drum, 50 cm across and 31 cm deep, is slung in front of him on white straps, its heads to either side. Its shell is red lacquer between brass hoops, a white rope zigzagging across.
+  - His shako has a peak, a gold band, a brass badge and a red plume. His forearms reach forward to white gloves holding wooden mallets with white felt heads, hanging beside the drumheads.
+  - **He runs on 4 KE a tick**, from a shaft, gearbox or kinetic source touching his lower block.
+  - **While he runs**:
+    - he beats a march two bars long, four beats a bar and a bar every two seconds: the right mallet on the first and third beats of each bar, the left on the second and fourth of the second bar;
+    - each stroke is a backswing, 30 degrees out from the drumhead and in again over 0.4 seconds, landing on its beat. The drum sounds with each, lower under the right mallet than the left;
+    - his head dips on the first and third beats of each bar;
+    - the candle in his head lights his carved eyes and grin.
+  - **His power stopped**, his mallets and head come to rest and his face goes dark. Started again, the march begins from the top.
+  - Recipe: a carved pumpkin over red wool either side of a note block (his drum), over sticks either side of a clock.
+  - Broken, either half brings him down, and he drops once.
+
 ### Planned
-- **Part 5: the drummer**: a pumpkin-headed drummer beating a bass drum in time.
 - **Part 6: the dieselpunk tier**: a steel show controller on the JE network, which drives every figure near it in time, without shafts, in riveted steel and dieselpunk dials.
 
 ## How it is drawn (docs/ART_DIRECTION.md, docs/NATURAL_TEXTURES.md)
@@ -110,6 +124,15 @@ Halloween figures that move by clockwork. Each runs on kinetic power: a shaft, g
     - the head turns about the upright through its neck, and the lower beak drops about its hinge;
     - each wing is hinged at its shoulder and leans with the body: it is turned about its hinge, then leaned as the body is.
   - Its item shows it at rest, its wings folded and leaning with its body.
+- **The drummer** (part 5):
+  - His head's rind has ribs running up it: a column lit, the next its own tone, a groove in shadow, its own tone again, over and over, its top row lit.
+  - His face is carved into its front, five texels by four: two eyes on its second row and a wide grin along its foot, cut dark into the rind. Over them a plate is drawn at full light while he runs, the candle's yellow in the cuts and nothing elsewhere (cut out). Stopped, it is tinted dark.
+  - His coat is red, flat, its top row lit, with gold braid across his chest on its second and fourth rows. The shako is black felt with a gold band and a brass badge.
+  - The drum's shell has brass hoops at its ends and a white rope a texel wide zigzagging from hoop to hoop; its heads are pale vellum.
+  - Moving parts move, drawn by `PumpkinDrummerRenderer`:
+    - each forearm, its glove and mallet with it, swings about its elbow, out from its drumhead and in again;
+    - his head dips about his neck.
+  - Its item shows him at rest, his face carved dark.
 - **The previews**, fixed before commit:
   - the organ's pipes, each with a dark mouth texel near its foot, read as a face with a black bar for a mouth; the mouths are gone and the pipes stand on a brass moulding;
   - the waistcoat's moth holes, a texel each on panels two texels wide, read as black blotches; they are now only on its back;
@@ -129,10 +152,15 @@ Halloween figures that move by clockwork. Each runs on kinetic power: a shaft, g
 - **The part 4 previews**, fixed before commit:
   - the beak was one flat-ended brass block as wide as half the head, and read as a duck's bill; it is now gunmetal, narrowing in three steps to a hooked tip.
   - The preview poses the wings as the renderer does (turned about their hinges, then leaned with the body), at rest, mid-beat and at the top of a beat with the beak open.
+- **The part 5 previews**, fixed before commit:
+  - the drum's rope, painted on both diagonals every fourth texel, read as a red and white checkerboard; it is now one line a texel wide zigzagging from hoop to hoop;
+  - the jack-o'-lantern's grin, its corners raised and a tooth left in its middle, read as a checkerboard too at five texels by four; it is now a plain wide grin under two eyes;
+  - the coat's gold braid on every other row of the chest read as a striped shirt; it is now two rows.
+  - The preview poses each forearm swung back and his head dipped, lit and unlit, from the front, both sides and behind.
 
 ## Connections
 - Existing input producer: kinetic power, from the hand crank, the steam engine and the electric motor (which takes JE), through iron shafts, brass gearboxes and belts ([kinetic-power.md](kinetic-power.md)).
-- Recipe inputs: bone blocks, a note block, black wool, planks and a clock (the skeleton); bones, brown wool, iron, gold and a clock (the werewolf); string, white wool, iron and a clock (the ghost); feathers, black dye, iron, gold and a clock (the raven).
+- Recipe inputs: bone blocks, a note block, black wool, planks and a clock (the skeleton); bones, brown wool, iron, gold and a clock (the werewolf); string, white wool, iron and a clock (the ghost); feathers, black dye, iron, gold and a clock (the raven); a carved pumpkin, red wool, a note block, sticks and a clock (the drummer).
 - Existing output consumer: none; a figure is a power sink, like a machine.
 - Technology/magic connections (or infrastructure/cosmetic applicability): technology. It is decoration that runs on the kinetic network, a use for a hand crank or a small steam engine before electricity.
 - Reachable entry path: a hand crank (planks and an iron shaft), from the first iron. The figure's recipe needs a clock (gold and redstone).
@@ -145,6 +173,7 @@ Halloween figures that move by clockwork. Each runs on kinetic power: a shaft, g
 - The Animatronic Werewolf takes 8 KE a tick, a heavier figure on a turntable: a hand crank runs two, a steam engine eight.
 - The Flying Crank Ghost takes 4 KE a tick, a light ghost on a crank, as the skeleton does.
 - The Clockwork Raven takes 2 KE a tick, the lightest: a hand crank runs eight.
+- The Pumpkin-Headed Drummer takes 4 KE a tick, as the skeleton does.
 - The energy goes into the clockwork: nothing comes back out, and it stores nothing. No loop.
 - Its recipe gives back only itself.
 
@@ -153,8 +182,8 @@ Halloween figures that move by clockwork. Each runs on kinetic power: a shaft, g
 - **The client draws it**: from `running` and its own clock. Each client keeps its own count of the tune from when it saw the figure start, so the crank, the arm, the nod and the jaw move in time with what it hears.
 - It saves nothing: whether it runs comes again from its power on the first tick after a reload.
 - It can't be pushed by a piston.
-- IDs (stable from release): the blocks and items `organ_grinder_skeleton`, `animatronic_werewolf`, `flying_crank_ghost` and `clockwork_raven` (`facing`, `half`, `running`), and their block entities of the same names.
-- Every figure shares one clockwork (`ClockworkFigureBlockEntity`): what differs is its need and what it does as it runs, its tune, its howl, its moan or its caws.
+- IDs (stable from release): the blocks and items `organ_grinder_skeleton`, `animatronic_werewolf`, `flying_crank_ghost`, `clockwork_raven` and `pumpkin_drummer` (`facing`, `half`, `running`), and their block entities of the same names.
+- Every figure shares one clockwork (`ClockworkFigureBlockEntity`): what differs is its need and what it does as it runs, its tune, its howl, its moan, its caws or its march.
 - The ghost's moan is the server's, a sound every nearby player hears. How it flies and whether its eyes are lit are drawn by each client from `running` alone.
 - Its recipe follows the agriculture switch. The block and item stay registered when it is off. It runs on the machines feature's kinetic power: with that off, no hand crank or shaft exists to drive it, and it stands still.
 
@@ -213,6 +242,17 @@ Local checks run on this branch, and their results:
   - `python3 tools/check_icon_maps.py`: PASS.
   - `javac` scan of the new and changed Java for syntax errors: none. Every member the new Java calls is used elsewhere in the code already, or declared in it. The full compile runs in CI.
   - The raven was previewed offline at rest, mid-beat looking aside, and at the top of a beat with its beak open, from the front, both sides and above, and in its item pose; what the previews showed and what was fixed is under How it is drawn.
+- Part 5, all on the first run:
+  - `python3 tools/check_mod_data.py`: PASS (8,167 material IDs), including the art check. `check_clockwork` now also checks the drummer:
+    - his march, backswing, nod, loudness, pitches and drum sound against the table;
+    - that the march is beats and rests with both mallets in it, and that each mallet's backswing ends before its next beat;
+    - that his renderer's elbows, backswing, neck, nod and easing are the table's, his face's candlelight is drawn at full light and cut out, and the jack-o'-lantern's face has its eyes and mouth;
+    - that his mallet heads hang just clear of the drumheads at rest.
+  - `python3 scripts/check_repository.py`: PASS.
+  - `python3 -m unittest discover -s scripts/tests`: 287 tests, OK.
+  - `python3 tools/check_icon_maps.py`: PASS.
+  - `javac` scan of the new and changed Java for syntax errors: none. Every member the new Java calls is used elsewhere in the code already, or declared in it. The full compile runs in CI.
+  - The drummer was previewed offline, each forearm swung back and his head dipped, lit and unlit, from the front, both sides and behind, and in his item pose; what the previews showed and what was fixed is under How it is drawn.
 
 `ClockworkGameTests` (run in CI):
 - **The Organ-Grinder runs on its clockwork**:
@@ -240,15 +280,23 @@ Local checks run on this branch, and their results:
   - its beak is open on each caw and shut between them;
   - its wings are at the top of a beat on each caw, folded half a beat after, and folded between bursts;
   - a hand crank beside it drives it.
+- **The drummer beats on his clockwork** (part 5):
+  - placed, he stands two blocks tall on his plinth, facing the player, at rest, his clockwork a `ClockworkFigureBlockEntity`;
+  - he takes his need, 4 KE, in a tick and no more;
+  - his march has its beats and rests, over and over;
+  - each mallet is at the head on its beats and at the top of its backswing half a backswing before them, and still while the other beats;
+  - his head dips on the beat and lifts between;
+  - a hand crank beside him drives him.
 - **Their data loads**: every figure's recipe and loot table.
 
-`ClockworkClientGameTests` takes nine screenshots on a dark oak floor of two Organ-Grinder Skeletons, one facing the camera and one facing east, and an Animatronic Werewolf facing the camera, each with a hand crank against the back of its lower block:
+`ClockworkClientGameTests` takes eleven screenshots on a dark oak floor of two Organ-Grinder Skeletons, one facing the camera and one facing east, and an Animatronic Werewolf facing the camera, each with a hand crank against the back of its lower block:
 - at rest, from the front;
 - running, their cranks turned, from the front;
 - running, from the east of the skeleton facing the camera, where its crank and its right hand are;
 - the werewolf in its first howl, its arms up and its head back (part 2);
 - a Flying Crank Ghost facing the camera, a hand crank behind it, at rest; then flying, its crank turned and its eyes lit, from the front; and half a turn later, its other arm up, from the side (part 3). The floor reaches further north for these.
-- a Clockwork Raven facing the camera, a hand crank behind it, at rest; then in its first burst of caws, its beak open and its wings up (part 4).
+- a Clockwork Raven facing the camera, a hand crank behind it, at rest; then in its first burst of caws, its beak open and its wings up (part 4);
+- a Pumpkin-Headed Drummer facing the camera, a hand crank behind him, at rest; then drumming, his right mallet at the top of its backswing and his face lit (part 5).
 
 Not run: a hand playtest, and a two-client playtest.
 
@@ -256,7 +304,7 @@ Not run: a hand playtest, and a two-client playtest.
 Seasonal in look, not in use: it is made and works all year. It doesn't generate in the world.
 
 ## Rollout and open questions
-- Part 1 is the Organ-Grinder Skeleton, part 2 the Animatronic Werewolf, part 3 the Flying Crank Ghost and part 4 the Clockwork Raven; parts 5 and 6 follow, each stacked on the last.
+- Part 1 is the Organ-Grinder Skeleton, part 2 the Animatronic Werewolf, part 3 the Flying Crank Ghost, part 4 the Clockwork Raven and part 5 the Pumpkin-Headed Drummer; part 6 follows, stacked on the last.
 - The Clockwork Raven is not the Raven on a Perch (`raven_perch`, the Mad Scientist's set): that one is a lifelike raven that watches players and ruffles its feathers. This one is a clockwork automaton on the kinetic network.
 - Part 2 moved the skeleton's clockwork into the shared `ClockworkFigureBlockEntity` (unchanged in what it does), and its renderer now counts its tune at the server's rate, easing only its crank. The renderer's tune count had been eased too, so the jaw ran a quarter-second behind the notes.
 - Open: whether a figure should also take a redstone signal to start and stop (a power switch), and whether the show controller (part 6) should let a builder set each figure's start in a sequence.
