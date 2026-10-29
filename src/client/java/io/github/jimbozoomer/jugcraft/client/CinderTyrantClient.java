@@ -8,6 +8,7 @@ import io.github.jimbozoomer.jugcraft.lair.tyrant.FallingCinderEntity;
 import io.github.jimbozoomer.jugcraft.lair.tyrant.JugcraftTyrant;
 import io.github.jimbozoomer.jugcraft.lair.tyrant.MagmaGobEntity;
 import net.fabricmc.fabric.api.client.rendering.v1.EntityRendererRegistry;
+import net.minecraft.client.renderer.entity.ThrownItemRenderer;
 import net.minecraft.client.renderer.entity.state.EntityRenderState;
 import net.minecraft.world.phys.AABB;
 
@@ -34,6 +35,8 @@ final class CinderTyrantClient {
 				context, JugcraftTyrant.CINDERLING).withRenderLayer(AutoGlowingGeoLayer::new));
 		EntityRendererRegistry.register(JugcraftTyrant.MAGMA_GOB, context -> new GeoEntityRenderer<MagmaGobEntity, EntityRenderState>(
 				context, JugcraftTyrant.MAGMA_GOB).withRenderLayer(AutoGlowingGeoLayer::new));
+		// The Quench Flask in flight is its item, as a thrown splash potion is.
+		EntityRendererRegistry.register(JugcraftTyrant.THROWN_QUENCH_FLASK, ThrownItemRenderer::new);
 		EntityRendererRegistry.register(JugcraftTyrant.FALLING_CINDER, context -> new GeoEntityRenderer<FallingCinderEntity, EntityRenderState>(
 				context, JugcraftTyrant.FALLING_CINDER).withRenderLayer(AutoGlowingGeoLayer::new));
 	}

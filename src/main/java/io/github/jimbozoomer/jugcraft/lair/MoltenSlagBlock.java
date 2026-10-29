@@ -1,5 +1,6 @@
 package io.github.jimbozoomer.jugcraft.lair;
 
+import io.github.jimbozoomer.jugcraft.concordance.rime.Cooling;
 import io.github.jimbozoomer.jugcraft.lair.tyrant.SalamanderCharm;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
@@ -59,11 +60,11 @@ public class MoltenSlagBlock extends Block {
 	}
 
 	/**
-	 * Whether the slag harms {@code living}: not a fire-immune creature, nor anyone under Fire Resistance, holding a
-	 * Salamander Charm ({@link SalamanderCharm}) or unhurtable.
+	 * Whether the slag harms {@code living}: not a fire-immune creature, nor anyone under Fire Resistance, Cooled
+	 * ({@link Cooling}: Quench or a Quench Flask), holding a Salamander Charm ({@link SalamanderCharm}) or unhurtable.
 	 */
 	public static boolean harms(LivingEntity living) {
-		if (living.fireImmune() || living.hasEffect(MobEffects.FIRE_RESISTANCE) || SalamanderCharm.warded(living)) {
+		if (living.fireImmune() || living.hasEffect(MobEffects.FIRE_RESISTANCE) || Cooling.cooled(living) || SalamanderCharm.warded(living)) {
 			return false;
 		}
 		return !(living instanceof Player player) || !player.getAbilities().invulnerable;

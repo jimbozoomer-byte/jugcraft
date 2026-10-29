@@ -782,7 +782,7 @@ def operation_summary(op):
         return f"{STATUS_NAMES.get(op['status'], op['status'])} for {seconds(op['duration'])} seconds"
     if effect == "alteration":
         if op.get("school") == ember.COMPONENTS["kindling"]["operation"]["school"]:
-            return "kindles a hearth"
+            return "kindles a hearth, or tempers an Alembic Crucible"
         if op.get("school") == rime.COMPONENTS[rime.PRESERVE_WORD]["operation"]["school"]:
             return (f"holds an Alembic Crucible's heat in its band for {seconds(rime.PRESERVE_HOLD_TICKS)} seconds (longer with "
                     "a focus of water)")
@@ -815,7 +815,7 @@ def invocation_codex():
     positions = {("first_light", "understood"): [(2, 0), (2, 2), (0, 2)],
                  ("first_light", "mastered"): [(4, 0), (4, 2), (4, 4)],
                  ("hearthbinding", "understood"): [(0, 6), (2, 6), (4, 6)], ("hearthbinding", "mastered"): [(6, 6)],
-                 ("rimekeeping", "understood"): [(0, 8), (2, 8)], ("stratawrighting", "understood"): [(0, 10)]}
+                 ("rimekeeping", "understood"): [(0, 8), (2, 8), (4, 8)], ("stratawrighting", "understood"): [(0, 10)]}
     for key, info in INVOCATIONS.items():
         research = info["research"].split(":")[1]
         teacher = RESEARCH[research]["name"]

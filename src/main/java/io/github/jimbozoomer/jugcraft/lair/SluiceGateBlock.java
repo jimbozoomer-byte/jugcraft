@@ -1,8 +1,10 @@
 package io.github.jimbozoomer.jugcraft.lair;
 
 import java.util.ArrayDeque;
+import java.util.ArrayList;
 import java.util.Deque;
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Locale;
 import java.util.Set;
 import net.minecraft.core.BlockPos;
@@ -10,6 +12,7 @@ import net.minecraft.core.Direction;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.RandomSource;
@@ -41,7 +44,8 @@ import org.jspecify.annotations.Nullable;
  *
  * <p>A gate's blocks are found by walking from the one used through the blocks of the gate touching it (at most
  * {@value #GATE_BLOCKS}), its trough by walking from under the gate along the trough stone touching it (at most
- * {@value #TROUGH_BLOCKS}), so the kiln's layout (tools/cinder_kiln.py) needs no table here.
+ * {@value #TROUGH_BLOCKS}), so the kiln's layout (tools/cinder_kiln.py) needs no table here. The Cinder Tyrant listens
+ * ({@link #onOpened}) for the gates players open, so whoever turned the one that quenches him is credited.
  */
 public class SluiceGateBlock extends Block {
 	/** A gate's parts (tools/lairs.py SLUICE_PARTS). */
@@ -76,6 +80,18 @@ public class SluiceGateBlock extends Block {
 	public static final int REFILL_TICKS = 400;
 	public static final int GATE_BLOCKS = 40;
 	public static final int TROUGH_BLOCKS = 96;
+	private static final List<Opened> OPENED_BY = new ArrayList<>();
+
+	/** Told when a player opens a gate: its trough's stones, now flooding. */
+	@FunctionalInterface
+	public interface Opened {
+		void opened(ServerLevel level, Set<BlockPos> trough, ServerPlayer player);
+	}
+
+	/** Listens for the gates players open (at registration). */
+	public static void onOpened(Opened listener) {
+		OPENED_BY.add(listener);
+	}
 	// The wheel, on the post behind it: its shaft, hub and rim fill the half of its block toward the post.
 	private static final VoxelShape WHEEL_NORTH = Block.box(1, 1, 8, 15, 15, 16);
 	private static final VoxelShape WHEEL_SOUTH = Block.box(1, 1, 0, 15, 15, 8);
@@ -136,8 +152,14 @@ public class SluiceGateBlock extends Block {
 		}
 		Set<BlockPos> gate = gate(level, pos);
 		set(level, gate, Flow.OPEN);
-		flood(level, trough(level, gate), true);
+		Set<BlockPos> trough = trough(level, gate);
+		flood(level, trough, true);
 		level.scheduleTick(pos, state.getBlock(), FLOOD_TICKS);
+		if (player instanceof ServerPlayer turner) {
+			for (Opened listener : OPENED_BY) {
+				listener.opened(level, trough, turner);
+			}
+		}
 		level.playSound(null, pos, SoundEvents.CHAIN_PLACE, SoundSource.BLOCKS, 1.0F, 0.6F);
 		level.playSound(null, pos, SoundEvents.IRON_DOOR_OPEN, SoundSource.BLOCKS, 1.0F, 0.5F);
 		level.playSound(null, pos, SoundEvents.BUCKET_EMPTY, SoundSource.BLOCKS, 1.5F, 0.6F);

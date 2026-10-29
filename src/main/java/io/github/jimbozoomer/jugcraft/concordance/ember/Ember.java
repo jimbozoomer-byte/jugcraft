@@ -2,10 +2,14 @@ package io.github.jimbozoomer.jugcraft.concordance.ember;
 
 import io.github.jimbozoomer.jugcraft.Jugcraft;
 import io.github.jimbozoomer.jugcraft.concordance.ConcordanceProgress;
+import io.github.jimbozoomer.jugcraft.concordance.CrucibleBlockEntity;
+import io.github.jimbozoomer.jugcraft.concordance.JugcraftConcordance;
 import io.github.jimbozoomer.jugcraft.concordance.effect.EffectKind;
 import io.github.jimbozoomer.jugcraft.concordance.effect.EffectSpec;
 import io.github.jimbozoomer.jugcraft.concordance.rules.Evidence;
 import io.github.jimbozoomer.jugcraft.concordance.rules.ResearchState;
+import io.github.jimbozoomer.jugcraft.concordance.sign.Sign;
+import io.github.jimbozoomer.jugcraft.concordance.sign.Signs;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
@@ -31,7 +35,9 @@ import org.jspecify.annotations.Nullable;
  * small and listed here:
  * <ul>
  * <li>an alteration in Ember's Spell Power school ({@link #SCHOOL}) kindles a hearth (an unlit campfire, candle or
- * candle cake, as flint and steel would) instead of putting out fire ({@link #kindles}, {@link #kindle});</li>
+ * candle cake, as flint and steel would) instead of putting out fire ({@link #kindles}, {@link #kindle}); kindled, an
+ * Alembic Crucible is tempered: its heat climbs to hot and stays there {@value #TEMPER_TICKS} ticks, whatever is beneath
+ * it (Concordance Chunk E, E3: controlled heat, Preserve's counterpart);</li>
  * <li>the Smoulder status keeps a creature alight while it lasts ({@link SmoulderEffect});</li>
  * <li>the hearthkeeping practice: each kind of hearth a player kindles counts once towards mastering Hearthbinding.</li>
  * </ul>
@@ -45,6 +51,8 @@ public final class Ember {
 	public static final String RESEARCH = "jugcraft:hearthbinding";
 	/** Ember's Spell Power school: an alteration in it kindles rather than douses. */
 	public static final String SCHOOL = "spell_power:fire";
+	/** How long a kindled Alembic Crucible stays tempered (tools/concordance_ember.py TEMPER_TICKS). */
+	public static final int TEMPER_TICKS = 1200;
 
 	/** The Smoulder status ({@code jugcraft:smoulder}). */
 	public static Holder<MobEffect> SMOULDER;
@@ -62,14 +70,18 @@ public final class Ember {
 		return spec.kind() == EffectKind.ALTERATION && SCHOOL.equals(spec.school());
 	}
 
-	/** Whether {@code state} is a hearth Ember can kindle: unlit, and not under water. */
+	/** Whether {@code state} is a hearth Ember can kindle: unlit, and not under water; or an Alembic Crucible, to temper. */
 	public static boolean kindleable(BlockState state) {
-		return CampfireBlock.canLight(state) || CandleBlock.canLight(state) || CandleCakeBlock.canLight(state);
+		return CampfireBlock.canLight(state) || CandleBlock.canLight(state) || CandleCakeBlock.canLight(state)
+				|| state.is(JugcraftConcordance.CRUCIBLE);
 	}
 
 	/** The kind of hearth {@code state} is, as the practice counts it, or null if it is none. */
 	public static @Nullable String hearth(BlockState state) {
 		Block block = state.getBlock();
+		if (state.is(JugcraftConcordance.CRUCIBLE)) {
+			return "crucible";
+		}
 		if (block instanceof CandleCakeBlock) {
 			return "candle_cake";
 		}
@@ -93,7 +105,15 @@ public final class Ember {
 			return false;
 		}
 		String hearth = hearth(state);
-		level.setBlock(pos, state.setValue(BlockStateProperties.LIT, true), Block.UPDATE_ALL_IMMEDIATE);
+		if (state.is(JugcraftConcordance.CRUCIBLE)) {
+			if (!(level.getBlockEntity(pos) instanceof CrucibleBlockEntity crucible)) {
+				return false;
+			}
+			crucible.temper(ConcordanceProgress.now(level), TEMPER_TICKS);
+			Signs.show(level, pos, Sign.LIGHT);
+		} else {
+			level.setBlock(pos, state.setValue(BlockStateProperties.LIT, true), Block.UPDATE_ALL_IMMEDIATE);
+		}
 		level.playSound(null, pos, SoundEvents.FIRECHARGE_USE, SoundSource.BLOCKS, 0.5F, level.getRandom().nextFloat() * 0.4F + 1.0F);
 		level.gameEvent(person, GameEvent.BLOCK_CHANGE, pos);
 		if (person != null && hearth != null && ConcordanceProgress.knowledge(person).state(RESEARCH).atLeast(ResearchState.UNDERSTOOD)) {

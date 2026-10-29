@@ -32842,6 +32842,11 @@
       "denominator": 1,
       "source": "local quartz mining/Fortune accounting"
     },
+    "jugcraft:quench_flask": {
+      "numerator": 4,
+      "denominator": 1,
+      "source": "recipe jugcraft:quench_flask"
+    },
     "jugcraft:radiation_control_board": {
       "numerator": 49247,
       "denominator": 8,

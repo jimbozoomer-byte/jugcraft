@@ -303,6 +303,15 @@ DOSSIER = {
                            "long as it is held",
     "cinder_kiln.prepare.charm": "Against his slag: the Salamander Charm from his loot, held in the other hand, keeps hot "
                                  "ground from burning its holder for as long as it is held",
+    # Concordance Chunk E (E-03): an ordinary answer to his flame, always; the Concordance's own while it is on.
+    "cinder_kiln.prepare.flask": "Against his slag and fire, with no magic: a Quench Flask, a glass bottle shaken with "
+                                 "three snowballs and thrown, cools everyone it splashes for %s seconds, so their burning "
+                                 "goes out and his slag does not hurt them, though his flame still does; it puts out fire "
+                                 "and his burning patches where it lands, and fire-born creatures, his Cinderlings among "
+                                 "them, gutter in it",
+    "cinder_kiln.prepare.concordance": "With the Arcane Concordance: Quench cools a friend against his slag; Rimebind on "
+                                       "him while he is quenched holds his plates dark %s seconds longer, once a quench; "
+                                       "Brace halves the shove of his sweep and slam; Hearthguard turns his fire",
     "grave": "A grave: any headstone, such as a %s",
     "any_night": "The rite works on any night",
     "in_season": "The rite works now, in the Halloween season",
@@ -323,8 +332,9 @@ DOSSIER = {
                            "of his lake",
     "cinder_kiln.credit": "A share of his reward goes to everyone who strikes him or his Cinderlings, gives friends back "
                           "%s or more of the health his side took from them (blows, gobs, cinders and flame; not burning "
-                          "afterwards, nor slag), or wards a friend against %s or more health of those, within %s blocks "
-                          "of his bowl",
+                          "afterwards, nor slag), wards a friend against %s or more health of those, opens the sluice "
+                          "whose water quenches him, braces a friend against his sweep or slam, or binds him with Rimebind "
+                          "while he is quenched, within %s blocks of his bowl",
     "credit.wards": "Cast a ward after the keeper wakes: one cast before is not counted. Those who fall are paid when "
                     "they are back on their feet, and those who leave the game when they come back",
     # Concordance Chunk C (C-02, C-P8): after credit.wards, while the Concordance's Verdance brews Regeneration.

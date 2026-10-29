@@ -15,7 +15,9 @@ import io.github.jimbozoomer.jugcraft.guide.encyclopedia.EncyclopediaPayload.Edg
 import io.github.jimbozoomer.jugcraft.guide.encyclopedia.EncyclopediaRequestPayload;
 import io.github.jimbozoomer.jugcraft.guide.encyclopedia.PageWriter;
 import io.github.jimbozoomer.jugcraft.lair.tatterlace.TatterlaceLoot;
+import io.github.jimbozoomer.jugcraft.lair.tyrant.CinderTyrantEntity;
 import io.github.jimbozoomer.jugcraft.lair.tyrant.CinderTyrantLoot;
+import io.github.jimbozoomer.jugcraft.lair.tyrant.ThrownQuenchFlask;
 import io.github.jimbozoomer.jugcraft.lair.vesperine.VesperineLoot;
 import io.github.jimbozoomer.jugcraft.lair.yeti.YetiKingLoot;
 import java.util.ArrayList;
@@ -40,7 +42,8 @@ import org.jspecify.annotations.Nullable;
  * data": {@code jei.jugcraft.acquire.<item>}, tools/acquisition.py), the cheaper token and the pieces the loot makes, how
  * to leave, and, in a fight, the player's own part in it. The Glacier Hall's rite also names what readies a player for
  * his frost (Chunk B, B-08: Winter Brine and the Yeti Mitten), and the Cinder Kiln's what readies a player for his slag
- * and flame (Chunk C, C-02: the Kiln Draught and the Salamander Charm).
+ * and flame (Chunk C, C-02: the Kiln Draught and the Salamander Charm; Chunk E, E-03: the Quench Flask and the
+ * Concordance's answers to him).
  * <p>
  * Discovery is read, not saved: the inventory, {@link Lairs#VISIT}, {@link LairRewards#OWED} and the first-win
  * advancements. So a player who went in, left, and used up their token (a Cursed Spindle, a Frost Horn, a Kiln Seal)
@@ -222,7 +225,9 @@ public final class LairDossiers {
 	 * data's property brews its status (its longest time the data's), with a codex link once the Alembic Arts are
 	 * observed; the keeper's own lasting answer from his loot beside it, or alone. The Glacier Hall (Chunk B, B-08):
 	 * Winter Brine's Frostward and the Yeti Mitten. The Cinder Kiln (Chunk C, C-02, C-P9): the Kiln Draught's Fire
-	 * Resistance, which his slag and flame respect, and the Salamander Charm. It only reads.
+	 * Resistance, which his slag and flame respect, and the Salamander Charm; since Chunk E (E-03) the Quench Flask first,
+	 * made with no magic, and while the Concordance is on its answers to him (Quench, Rimebind on him quenched, Brace,
+	 * Hearthguard). It only reads.
 	 */
 	private static void prepare(PageWriter out, Boss boss) {
 		boolean concordance = JugcraftConfig.isFeatureEnabled(JugcraftConcordance.FEATURE);
@@ -237,6 +242,14 @@ public final class LairDossiers {
 			out.fact(Component.translatable("encyclopedia.jugcraft.dossier.glacier_hall.prepare", rime.maxTicks() / 20), null, icons);
 			out.codex("alembic/winter_brine", "jugcraft:alembic_arts", ResearchState.OBSERVED);
 		} else if (boss == Boss.CINDER_TYRANT) {
+			// Chunk E (E-03): the Quench Flask, made with no magic, always; the Concordance's own answers while it is on.
+			List<Item> flask = new ArrayList<>(List.of(Items.GLASS_BOTTLE, Items.SNOWBALL));
+			flask.addAll(items(List.of("quench_flask")));
+			out.fact(Component.translatable("encyclopedia.jugcraft.dossier.cinder_kiln.prepare.flask", ThrownQuenchFlask.COOLED_TICKS / 20), null, flask);
+			if (concordance) {
+				out.fact(Component.translatable("encyclopedia.jugcraft.dossier.cinder_kiln.prepare.concordance",
+						CinderTyrantEntity.RIME_LENGTHEN / 20), null, items(List.of("arcane_concordance")));
+			}
 			Property ember = concordance ? Alchemy.catalog().property(Axis.EMBER.id) : null;
 			if (!brews(ember, FIRE_RESISTANCE)) {
 				out.fact(Component.translatable("encyclopedia.jugcraft.dossier.cinder_kiln.prepare.charm"), null, items(List.of("salamander_charm")));
