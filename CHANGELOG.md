@@ -8,6 +8,21 @@ Every change to Jugcraft, newest first, grouped by pull request. For what each t
 
 No numbered release yet. Entries on feature branches remain proposed until their pull requests merge.
 
+### Unmerged: Every lair keeper pays its support (Concordance Chunk E, E4)
+- **Five more keepers share fairly:** the Mire Hag, the Crypt Lich, the Iron Dreadnought, the Alpha Werewolf and the Cydonian Sentinel used to pay only players who hurt them (or did their one helping job). They now use the lairs' shared credit, as Vesperine, Madame Tatterlace, the Yeti King and the Cinder Tyrant do:
+  - healing a friend 4 or more of what the boss's side did, or warding them against it, earns a share;
+  - a tamed creature's blow is its owner's;
+  - the killing blow counts;
+  - a player who dies in the fight is paid once back on their feet, and one who leaves the game is paid when they next join.
+
+  Record: [lair-encounter-credit.md](docs/features/lair-encounter-credit.md#concordance-chunk-e-every-keeper).
+- **Their objectives are deeds:** breaking the Lich's seals, reading his names back or striking his bolt back; routing the Dreadnought's discharge or working a fouled breaker; ringing the bell that flushes the Alpha. New: relighting a lamp that shows the Mire Hag now earns a share.
+- **JEI pages for their loot:** every item those five, the Pumpkin King and the Headless Horseman of the Church Bridge give now has a page saying where it comes from, how likely it is with the default data, and who earns a share. The Horseman's Lantern's page also names the Horseman who rides the Overworld in the Halloween season, who drops one too.
+- **Checked:**
+  - **Passing locally:** the Python audits, including a new `check_keeper_credit`.
+  - **CI only, not yet run:** the game tests, including a new `KeeperCreditGameTests`.
+  - **Not done:** playing it by hand.
+
 ### Unmerged: The Blood Moon
 - **A Blood Moon rises every fourth night of the Halloween season, and on Halloween night:** the night sky turns blood red with a red haze about you, zombies and skeletons put on costumes far more often (40%), costumed mobs drop double candy, will-o'-wisps gather thick, and the Headless Horseman rides by everyone who hasn't seen him that day. Being out when it rises earns **Bad Moon Rising**.
 - Switch: `halloween.blood_moon` (on by default). Record: [blood-moon.md](docs/features/blood-moon.md).

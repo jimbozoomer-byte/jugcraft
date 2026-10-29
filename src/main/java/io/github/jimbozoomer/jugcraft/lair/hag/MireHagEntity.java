@@ -7,6 +7,7 @@ import com.geckolib.animation.AnimationController;
 import com.geckolib.animation.RawAnimation;
 import com.geckolib.animation.object.LoopType;
 import com.geckolib.util.GeckoLibUtil;
+import io.github.jimbozoomer.jugcraft.lair.Encounter;
 import io.github.jimbozoomer.jugcraft.lair.FenLampBlock;
 import io.github.jimbozoomer.jugcraft.lair.JugcraftLairs;
 import io.github.jimbozoomer.jugcraft.lair.Lair;
@@ -14,6 +15,7 @@ import io.github.jimbozoomer.jugcraft.lair.LairBosses;
 import io.github.jimbozoomer.jugcraft.lair.LairBrazierBlock;
 import io.github.jimbozoomer.jugcraft.lair.LairExitBlock;
 import io.github.jimbozoomer.jugcraft.lair.LairInstance;
+import io.github.jimbozoomer.jugcraft.lair.LairRewards;
 import io.github.jimbozoomer.jugcraft.lair.Lairs;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -78,7 +80,9 @@ import org.jspecify.annotations.Nullable;
  *
  * <p>Every attack has a wind-up you can read, a strike and a recovery ({@link Attack}); the numbers are here, in one place,
  * and in tools/mire_hag.py. Poison, drowning, knockback and falls never harm her, and she wades as if the water were dry
- * land. Each participant (whoever hurt her, her Likenesses or the Root Knot) gets their own loot ({@link MireHagLoot}).
+ * land. Each player who qualified in her fight (lair/Encounter, since Concordance Chunk E, E4: a blow to her, her
+ * Likenesses or the Root Knot, their own or a creature's they tamed, healing or a ward on another player, or a lamp
+ * relit that shows her) gets their own loot ({@link MireHagLoot}), once, paid through lair/LairRewards.
  * Left alone she climbs back onto her porch, healed: her Likenesses burst, the lamps relight, her pools, roots and hands
  * are gone, and who hurt her is forgotten. Bound to a lair instance she vanishes with it; one with no instance (a test's)
  * keeps to the fen laid out from the origin she was given. The only blocks she changes are the fen's own lamps, and every
@@ -246,7 +250,8 @@ public class MireHagEntity extends Monster implements GeoEntity {
 	/** Her last attack and whom it was on: Root Lanes never twice running on one player. */
 	private @Nullable Attack lastAttack;
 	private @Nullable UUID lastFoe;
-	private final Map<UUID, Float> damageBy = new HashMap<>();
+	/** This fight: who took part and how (lair/Encounter, since Concordance Chunk E, E4); her marsh is the arena. */
+	private final Encounter encounter = new Encounter(this, this::centre);
 	/** Her Likenesses, by the slot each walks in round her foe, and the game times burst ones form again. */
 	private final Map<UUID, Integer> likenesses = new HashMap<>();
 	private final List<Long> returns = new ArrayList<>();
@@ -500,6 +505,9 @@ public class MireHagEntity extends Monster implements GeoEntity {
 			discard();
 			return;
 		}
+		if (phase != Phase.WAITING && isAlive() && !encounter.underway()) {
+			encounter.begin();  // a fight back from a save keeps a fresh record of who takes part
+		}
 		if (landOnLoad) {
 			landOnLoad = false;
 			Vec3 woke = woke();
@@ -590,6 +598,7 @@ public class MireHagEntity extends Monster implements GeoEntity {
 		phase = Phase.WAKING;
 		phaseTicks = 0;
 		setAction(Action.WAKE);
+		encounter.begin();
 		bossBar.setVisible(true);
 		level.playSound(null, getX(), getY(), getZ(), SoundEvents.WITCH_CELEBRATE, SoundSource.HOSTILE, 3.0F, 0.6F);
 		for (BlockPos lamp : lamps()) {
@@ -666,12 +675,14 @@ public class MireHagEntity extends Monster implements GeoEntity {
 
 	/**
 	 * A player lit a lamp that had gone out: she is shown for {@value #REVEAL_TICKS} ticks wherever she is, and every
-	 * Likeness in that lamp's light bursts. Returns how many burst.
+	 * Likeness in that lamp's light bursts; since Concordance Chunk E (E4) the lighting is that player's deed in her fight.
+	 * Returns how many burst.
 	 */
 	public int lampLit(ServerLevel level, BlockPos lamp, @Nullable Player player) {
 		if (!fighting() && phase != Phase.DARKENING) {
 			return 0;
 		}
+		deed(player, "lamp");
 		revealTicks = REVEAL_TICKS;
 		addEffect(new MobEffectInstance(MobEffects.GLOWING, 10, 0, false, false));
 		int burst = 0;
@@ -1380,19 +1391,32 @@ public class MireHagEntity extends Monster implements GeoEntity {
 
 	/** Whoever hurt her, her Likenesses or the Root Knot has taken part. */
 	public void took(ServerPlayer player, float amount) {
-		damageBy.merge(player.getUUID(), amount, Float::sum);
+		encounter.damage(player, amount);
 	}
 
-	/** Her participants: everyone who hurt her, her Likenesses or the Root Knot and is still near her marsh. */
+	/** Her participants: everyone who qualified in her fight (lair/Encounter) and is alive near her marsh. */
 	public List<ServerPlayer> participants(ServerLevel level) {
 		List<ServerPlayer> out = new ArrayList<>();
 		Vec3 centre = centre();
-		for (ServerPlayer player : level.players()) {
-			if (player.isAlive() && damageBy.getOrDefault(player.getUUID(), 0.0F) > 0.0F && player.position().distanceTo(centre) <= 64.0) {
+		for (UUID id : encounter.qualified()) {
+			ServerPlayer player = level.getServer().getPlayerList().getPlayer(id);
+			if (player != null && player.isAlive() && player.level() == level && player.position().distanceTo(centre) <= Encounter.REACH) {
 				out.add(player);
 			}
 		}
 		return out;
+	}
+
+	/** This fight: who took part and how. */
+	public Encounter encounter() {
+		return encounter;
+	}
+
+	/** {@code player} did one of the deeds her fight names: a part in it (lair/Encounter), keyed by what, who and when. */
+	private void deed(@Nullable Player player, String what) {
+		if (player instanceof ServerPlayer server) {
+			encounter.deed(server, what + " " + server.getUUID() + " " + server.level().getGameTime());
+		}
 	}
 
 	// ---------------------------------------------------------------- abandoned, and defeated
@@ -1416,7 +1440,7 @@ public class MireHagEntity extends Monster implements GeoEntity {
 		lastAttack = null;
 		lastFoe = null;
 		revealTicks = 0;
-		damageBy.clear();
+		encounter.abandon();
 		Arrays.fill(cooldowns, 0);
 		setHealth(getMaxHealth());
 		removeEffect(MobEffects.GLOWING);
@@ -1458,18 +1482,27 @@ public class MireHagEntity extends Monster implements GeoEntity {
 	public void die(DamageSource source) {
 		super.die(source);
 		if (level() instanceof ServerLevel level) {
+			// A killing blow gets here inside super.hurtServer, before hurtServer's own took(): its striker (or the owner of
+			// the tamed creature that struck) has taken part before the fall is paid. Any amount qualifies.
+			if (Encounter.striker(source) instanceof ServerPlayer player) {
+				took(player, Float.MIN_VALUE);
+			}
 			defeated(level);
 		}
 	}
 
 	/**
-	 * She has fallen: her Likenesses burst and her things are gone, each participant gets their loot, her lair's instance
-	 * ends (it closes once everyone has left), her lantern goes out, the mist lifts off the marsh, and a gate of Grey Mist
-	 * opens in its middle.
+	 * She has fallen: her Likenesses burst and her things are gone, each player who qualified is paid their loot
+	 * (lair/LairRewards: now, or kept for one who died or left the game in it), her lair's instance ends (it closes once
+	 * everyone has left), her lantern goes out, the mist lifts off the marsh, and a gate of Grey Mist opens in its middle.
 	 */
 	private void defeated(ServerLevel level) {
+		// However often the fall is reported, it is answered once: one reward each (lair/Encounter's claim).
+		if (!encounter.claim()) {
+			return;
+		}
 		dismiss(level);
-		MireHagLoot.reward(level, this, participants(level));
+		LairRewards.pay(level, MireHagLoot.BOSS, encounter, position(), centre(), EXPERIENCE);
 		setLantern(Lantern.OUT);
 		Vec3 centre = centre();
 		level.sendParticles(ParticleTypes.CLOUD, centre.x, centre.y + 1.0, centre.z, 80, 14.0, 0.4, 14.0, 0.04);
@@ -1512,7 +1545,7 @@ public class MireHagEntity extends Monster implements GeoEntity {
 			return false;
 		}
 		boolean hurt = super.hurtServer(level, source, amount);
-		if (hurt && source.getEntity() instanceof ServerPlayer player) {
+		if (hurt && Encounter.striker(source) instanceof ServerPlayer player) {
 			took(player, amount);
 		}
 		return hurt;

@@ -39901,12 +39901,52 @@
       "key": "adept_wand"
     },
     {
+      "item": "jugcraft:alpha_pelt",
+      "key": "alpha_pelt"
+    },
+    {
+      "item": "jugcraft:alphas_hood",
+      "key": "alphas_hood"
+    },
+    {
+      "item": "jugcraft:bogfang",
+      "key": "bogfang"
+    },
+    {
       "item": "jugcraft:cinderbrand",
       "key": "cinderbrand"
     },
     {
+      "item": "jugcraft:corelance",
+      "key": "corelance"
+    },
+    {
+      "item": "jugcraft:crowbill",
+      "key": "crowbill"
+    },
+    {
+      "item": "jugcraft:crowward_charm",
+      "key": "crowward_charm"
+    },
+    {
+      "item": "jugcraft:cydonian_shard",
+      "key": "cydonian_shard"
+    },
+    {
       "item": "jugcraft:dirge_skull",
       "key": "dirge_skull"
+    },
+    {
+      "item": "jugcraft:dreadnought_visor",
+      "key": "dreadnought_visor"
+    },
+    {
+      "item": "jugcraft:dynamo_halberd",
+      "key": "dynamo_halberd"
+    },
+    {
+      "item": "jugcraft:emptied_phylactery",
+      "key": "emptied_phylactery"
     },
     {
       "item": "jugcraft:glacier_maul",
@@ -39921,12 +39961,96 @@
       "key": "gossamer_silk"
     },
     {
+      "item": "jugcraft:grave_dust",
+      "key": "grave_dust"
+    },
+    {
+      "item": "jugcraft:gravewarden",
+      "key": "gravewarden"
+    },
+    {
+      "item": "jugcraft:grounding_strap",
+      "key": "grounding_strap"
+    },
+    {
+      "item": "jugcraft:hagmoss",
+      "key": "hagmoss"
+    },
+    {
+      "item": "jugcraft:hags_eye",
+      "key": "hags_eye"
+    },
+    {
+      "item": "jugcraft:hags_shawl",
+      "key": "hags_shawl"
+    },
+    {
+      "item": "jugcraft:hagthorn",
+      "key": "hagthorn"
+    },
+    {
+      "item": "jugcraft:hallowreap",
+      "key": "hallowreap"
+    },
+    {
+      "item": "jugcraft:hessian_sabre",
+      "key": "hessian_sabre"
+    },
+    {
+      "item": "jugcraft:hessians_spur",
+      "key": "hessians_spur"
+    },
+    {
+      "item": "jugcraft:hessians_tricorn",
+      "key": "hessians_tricorn"
+    },
+    {
+      "item": "jugcraft:hollowflail",
+      "key": "hollowflail"
+    },
+    {
+      "item": "jugcraft:horseman_lantern",
+      "key": "horseman_lantern"
+    },
+    {
+      "item": "jugcraft:howler",
+      "key": "howler"
+    },
+    {
+      "item": "jugcraft:kings_ember",
+      "key": "kings_ember"
+    },
+    {
+      "item": "jugcraft:lichs_crown",
+      "key": "lichs_crown"
+    },
+    {
+      "item": "jugcraft:lowfall_core",
+      "key": "lowfall_core"
+    },
+    {
       "item": "jugcraft:magmaw",
       "key": "magmaw"
     },
     {
+      "item": "jugcraft:moonfang",
+      "key": "moonfang"
+    },
+    {
       "item": "jugcraft:needle_rapier",
       "key": "needle_rapier"
+    },
+    {
+      "item": "jugcraft:packfinder_charm",
+      "key": "packfinder_charm"
+    },
+    {
+      "item": "jugcraft:piston_hammer",
+      "key": "piston_hammer"
+    },
+    {
+      "item": "jugcraft:pumpkin_kings_crown",
+      "key": "pumpkin_kings_crown"
     },
     {
       "item": "jugcraft:reaper_hood",
@@ -39935,6 +40059,10 @@
     {
       "item": "jugcraft:reaper_shade",
       "key": "reaper_shade"
+    },
+    {
+      "item": "jugcraft:redstar_cleaver",
+      "key": "redstar_cleaver"
     },
     {
       "item": "jugcraft:requiem_skull",
@@ -39951,6 +40079,18 @@
     {
       "item": "jugcraft:salamander_charm",
       "key": "salamander_charm"
+    },
+    {
+      "item": "jugcraft:salvaged_coil",
+      "key": "salvaged_coil"
+    },
+    {
+      "item": "jugcraft:sentinels_visor",
+      "key": "sentinels_visor"
+    },
+    {
+      "item": "jugcraft:soulreaver",
+      "key": "soulreaver"
     },
     {
       "item": "jugcraft:tatterlace_headdress",

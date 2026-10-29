@@ -5,6 +5,7 @@ import com.geckolib.animatable.instance.AnimatableInstanceCache;
 import com.geckolib.animatable.manager.AnimatableManager;
 import com.geckolib.animation.AnimationController;
 import com.geckolib.util.GeckoLibUtil;
+import io.github.jimbozoomer.jugcraft.lair.Encounter;
 import java.util.UUID;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
@@ -207,7 +208,7 @@ public class HagLikenessEntity extends Monster implements GeoEntity {
 			discard();
 			return true;
 		}
-		if (striker instanceof ServerPlayer player) {
+		if (Encounter.striker(source) instanceof ServerPlayer player) {
 			found.took(player, Math.max(amount, 1.0F));
 		}
 		found.burst(level, this);

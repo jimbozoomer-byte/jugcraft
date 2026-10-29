@@ -2,6 +2,7 @@ package io.github.jimbozoomer.jugcraft.lair.alpha;
 
 import io.github.jimbozoomer.jugcraft.agriculture.Werewolf;
 import io.github.jimbozoomer.jugcraft.agriculture.Werewolves;
+import io.github.jimbozoomer.jugcraft.lair.Encounter;
 import io.github.jimbozoomer.jugcraft.lair.LairBosses;
 import java.util.UUID;
 import net.minecraft.core.UUIDUtil;
@@ -187,7 +188,7 @@ public class PackmateEntity extends Monster {
 		float dealt = Werewolf.silver(source) ? amount * SILVER : amount;
 		boolean hurt = super.hurtServer(level, source, dealt);
 		AlphaWerewolfEntity master = alpha(level);
-		if (hurt && master != null && source.getEntity() instanceof ServerPlayer player) {
+		if (hurt && master != null && Encounter.striker(source) instanceof ServerPlayer player) {
 			master.took(player, dealt);
 		}
 		return hurt;
