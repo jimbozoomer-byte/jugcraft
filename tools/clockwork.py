@@ -42,6 +42,20 @@ to each of its wrists. While it runs:
 - its eyes glow pale green (a lamp in its hood), and every `moan_every` ticks it moans (`moan_sound`).
 Stopped, the crank runs down over `ease` ticks and stops where it is, and its eyes go dark. The wires all lie in one
 plane across the figure (`wire_z` deep).
+Part 4, the Clockwork Raven (agriculture/ClockworkRavenBlock, ClockworkRavenBlockEntity): a raven of black enamelled
+steel plates, life size (65 cm from beak to tail), with a brass beak and red glass eyes, perched on the crossbar of a
+brass bird stand 1.3 m tall, its clockwork in a riveted brass drum at the stand's foot, two blocks tall. Its body leans
+`tilt` degrees, its breast up, about `body_origin` (height, depth). While it runs:
+- the drum's flywheel turns once every `flywheel_ticks` ticks about its axle (`flywheel`: across, height);
+- its head turns slowly from side to side, `look` degrees either way, once every `look_ticks` ticks, about the
+  upright through its neck (`neck`: across, depth) (client/ClockworkRavenRenderer);
+- every `cycle` ticks it caws `caws` times, `caw_every` ticks apart from `burst` ticks into the cycle (`caw_sound`):
+  for each its beak opens `jaw` degrees about its hinge (`jaw_hinge`: height, depth) over `beak_ticks` ticks before it,
+  stays open `beak_hold` ticks and closes over `beak_ticks`; and its wings, hinged at its shoulders (`shoulders`
+  across, at `shoulder_y`), beat once with each caw, raised `flap` degrees at the caw;
+- its eyes glow red.
+Stopped, the flywheel runs down over `ease` ticks and stops where it is, and it folds its wings, shuts its beak and
+its eyes go dark.
 Sizes in pixels of the lower block, facing north (its front, the organ or the werewolf's face, to the north).
 """
 
@@ -88,6 +102,18 @@ FLYING_GHOST = {
     "moan_every": 200, "moan_sound": "minecraft:entity.ghast.ambient", "volume": 0.6, "pitch": 0.9,
 }
 
+CLOCKWORK_RAVEN = {
+    "block": "clockwork_raven", "display": "Clockwork Raven",
+    "need": 2, "spin_down": 10, "ease": 10.0,
+    "tilt": 22.5, "body_origin": (24.5, 8.5),
+    "flywheel": (8.0, 2.75), "flywheel_ticks": 20,
+    "look": 45.0, "look_ticks": 120, "neck": (8.0, 6.0),
+    "cycle": 120, "burst": 60, "caws": 3, "caw_every": 12, "beak_ticks": 2, "beak_hold": 4,
+    "jaw_hinge": (27.0, 4.75), "jaw": 35.0,
+    "shoulders": (7.0, 9.0), "shoulder_y": 25.75, "flap": 100.0,
+    "caw_sound": "minecraft:entity.parrot.ambient", "volume": 0.8, "pitch": 0.5,
+}
+
 RECIPES = [
     # The skeleton (two bone blocks), its top hat (black wool), its organ (a note block on planks) and its clockwork
     # (a clock).
@@ -106,6 +132,12 @@ RECIPES = [
     {"id": FLYING_GHOST["block"], "pattern": ["SCS", "WIW", " I "],
      "key": {"S": "minecraft:string", "C": "minecraft:clock", "W": "minecraft:white_wool", "I": "minecraft:iron_ingot"},
      "result": FLYING_GHOST["block"], "count": 1, "category": "building"},
+    # The raven (two feathers, its plates enamelled with black dye), its body (iron), its clockwork (a clock) and its
+    # stand (a gold ingot's brass).
+    {"id": CLOCKWORK_RAVEN["block"], "pattern": ["FBF", "ICI", " G "],
+     "key": {"F": "minecraft:feather", "B": "minecraft:black_dye", "I": "minecraft:iron_ingot", "C": "minecraft:clock",
+             "G": "minecraft:gold_ingot"},
+     "result": CLOCKWORK_RAVEN["block"], "count": 1, "category": "building"},
 ]
 
 
@@ -115,7 +147,7 @@ def tune_length():
 
 def figures():
     """Every figure's table, in the order they were added."""
-    return [ORGAN_GRINDER, WEREWOLF, FLYING_GHOST]
+    return [ORGAN_GRINDER, WEREWOLF, FLYING_GHOST, CLOCKWORK_RAVEN]
 
 
 def blocks():

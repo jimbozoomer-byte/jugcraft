@@ -7092,6 +7092,11 @@
       "denominator": 1,
       "source": "recipe jugcraft:clockwork_porter"
     },
+    "jugcraft:clockwork_raven": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
     "jugcraft:cloud_seeding_rocket": {
       "numerator": 11,
       "denominator": 1,

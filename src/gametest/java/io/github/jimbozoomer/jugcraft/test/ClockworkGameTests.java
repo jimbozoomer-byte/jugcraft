@@ -4,6 +4,7 @@ import io.github.jimbozoomer.jugcraft.Jugcraft;
 import io.github.jimbozoomer.jugcraft.agriculture.AnimatronicWerewolfBlock;
 import io.github.jimbozoomer.jugcraft.agriculture.ClockworkFigure;
 import io.github.jimbozoomer.jugcraft.agriculture.ClockworkFigureBlockEntity;
+import io.github.jimbozoomer.jugcraft.agriculture.ClockworkRavenBlock;
 import io.github.jimbozoomer.jugcraft.agriculture.FlyingCrankGhostBlock;
 import io.github.jimbozoomer.jugcraft.agriculture.JugcraftAgriculture;
 import io.github.jimbozoomer.jugcraft.agriculture.OrganGrinderSkeletonBlock;
@@ -38,7 +39,8 @@ import net.minecraft.world.phys.Vec3;
  * tick, runs only on all of it, plays while it runs and runs down after its power stops; a hand crank beside it drives
  * it; broken, it comes down whole and drops once; and its recipe and loot load. Part 2: the Animatronic Werewolf runs on
  * its own need, its howl rises, holds and falls within its cycle, and a hand crank drives it. Part 3: the Flying Crank
- * Ghost runs on its own need, from any side, and runs down; a hand crank behind it drives it; and it breaks whole.
+ * Ghost runs on its own need, from any side, and runs down; a hand crank behind it drives it; and it breaks whole. Part
+ * 4: the Clockwork Raven runs on its own need, its caws, beak and wings keep time in its cycle, and a hand crank drives it.
  */
 public class ClockworkGameTests {
 	private static void floor(GameTestHelper helper) {
@@ -224,10 +226,49 @@ public class ClockworkGameTests {
 		});
 	}
 
+	/** Part 4: the Clockwork Raven runs on its own need, caws in its cycle with its beak and wings, and a hand crank drives it. */
+	@GameTest(maxTicks = 60)
+	public void theRavenCawsOnItsClockwork(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		floor(helper);
+		ServerPlayer player = standing(helper, new BlockPos(3, 2, 1));
+		BlockPos lower = placed(helper, player, new BlockPos(3, 2, 3), "clockwork_raven");
+		BlockState state = level.getBlockState(lower);
+		helper.assertTrue(state.getBlock() instanceof ClockworkRavenBlock && state.getValue(ClockworkRavenBlock.FACING) == Direction.NORTH
+				&& level.getBlockState(lower.above()).getValue(ClockworkRavenBlock.HALF) == DoubleBlockHalf.UPPER
+				&& !state.getValue(ClockworkFigure.RUNNING) && level.getBlockEntity(lower) instanceof ClockworkFigureBlockEntity,
+				"It stands two blocks tall on its stand, facing the player, at rest");
+		ClockworkFigureBlockEntity figure = (ClockworkFigureBlockEntity) level.getBlockEntity(lower);
+		long took = figure.acceptKinetic(Direction.SOUTH, 64);
+		helper.assertTrue(took == ClockworkRavenBlock.NEED && figure.acceptKinetic(Direction.SOUTH, 64) == 0,
+				"It takes its need a tick and no more: " + took);
+		int burst = ClockworkRavenBlock.BURST;
+		int every = ClockworkRavenBlock.CAW_EVERY;
+		int last = burst + (ClockworkRavenBlock.CAWS - 1) * every;
+		helper.assertTrue(ClockworkRavenBlock.cawsAt(burst) && ClockworkRavenBlock.cawsAt(last) && !ClockworkRavenBlock.cawsAt(burst - 1)
+				&& !ClockworkRavenBlock.cawsAt(burst + 1) && !ClockworkRavenBlock.cawsAt(last + every) && !ClockworkRavenBlock.cawsAt(0),
+				"It caws its burst's caws, and only those");
+		helper.assertTrue(ClockworkRavenBlock.beak(0) == 0.0F && ClockworkRavenBlock.beak(burst) == 1.0F
+				&& ClockworkRavenBlock.beak(burst + every / 2.0 + ClockworkRavenBlock.BEAK_HOLD / 2.0) == 0.0F && ClockworkRavenBlock.beak(last) == 1.0F,
+				"Its beak opens for each caw and shuts between them");
+		helper.assertTrue(ClockworkRavenBlock.wings(0) == 0.0F && Math.abs(ClockworkRavenBlock.wings(burst) - 1.0F) < 1.0E-6F
+				&& ClockworkRavenBlock.wings(burst + every / 2.0) < 1.0E-6F && Math.abs(ClockworkRavenBlock.wings(last) - 1.0F) < 1.0E-6F
+				&& ClockworkRavenBlock.wings(ClockworkRavenBlock.CYCLE - 1) == 0.0F,
+				"Its wings beat once a caw, at the top on each, and fold between bursts");
+		helper.setBlock(new BlockPos(4, 2, 3), JugcraftKinetics.HAND_CRANK.defaultBlockState().setValue(HandCrankBlock.FACING, Direction.WEST));
+		if (level.getBlockEntity(helper.absolutePos(new BlockPos(4, 2, 3))) instanceof HandCrankBlockEntity crank) {
+			crank.addTurns(HandCrankBlockEntity.TICKS_PER_CRANK);
+		}
+		helper.runAtTickTime(20, () -> {
+			helper.assertTrue(running(level, lower), "A hand crank turning beside its lower block drives it");
+			helper.succeed();
+		});
+	}
+
 	@GameTest
 	public void clockworkDataLoads(GameTestHelper helper) {
 		ServerLevel level = helper.getLevel();
-		for (String id : new String[] {"organ_grinder_skeleton", "animatronic_werewolf", "flying_crank_ghost"}) {
+		for (String id : new String[] {"organ_grinder_skeleton", "animatronic_werewolf", "flying_crank_ghost", "clockwork_raven"}) {
 			helper.assertTrue(level.recipeAccess().byKey(ResourceKey.create(Registries.RECIPE, Jugcraft.id(id))).isPresent(), id + " has a recipe");
 			helper.assertTrue(level.getServer().reloadableRegistries().getLootTable(ResourceKey.create(Registries.LOOT_TABLE,
 					Jugcraft.id("blocks/" + id))) != LootTable.EMPTY, id + "'s loot loads");

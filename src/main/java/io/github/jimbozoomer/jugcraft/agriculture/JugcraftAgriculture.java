@@ -416,6 +416,7 @@ public final class JugcraftAgriculture {
 	public static BlockEntityType<OrganGrinderSkeletonBlockEntity> ORGAN_GRINDER_SKELETON_ENTITY;
 	public static BlockEntityType<AnimatronicWerewolfBlockEntity> ANIMATRONIC_WEREWOLF_ENTITY;
 	public static BlockEntityType<FlyingCrankGhostBlockEntity> FLYING_CRANK_GHOST_ENTITY;
+	public static BlockEntityType<ClockworkRavenBlockEntity> CLOCKWORK_RAVEN_ENTITY;
 	public static BlockEntityType<FirewoodRackBlockEntity> FIREWOOD_RACK_ENTITY;
 	public static BlockEntityType<DecorationBlockEntity> CHOPPING_BLOCK_ENTITY;
 	public static BlockEntityType<BlanketLadderBlockEntity> BLANKET_LADDER_ENTITY;
@@ -3163,8 +3164,8 @@ public final class JugcraftAgriculture {
 
 	/**
 	 * Decor set 9, the Clockwork Animatronics (tools/clockwork.py): Halloween figures moved by clockwork on kinetic power.
-	 * Part 1: the Organ-Grinder Skeleton; part 2: the Animatronic Werewolf; part 3: the Flying Crank Ghost; each two
-	 * blocks tall, its clockwork in its lower block.
+	 * Part 1: the Organ-Grinder Skeleton; part 2: the Animatronic Werewolf; part 3: the Flying Crank Ghost; part 4: the
+	 * Clockwork Raven; each two blocks tall, its clockwork in its lower block.
 	 */
 	private static void registerClockwork() {
 		Block grinder = registerBlock("organ_grinder_skeleton", OrganGrinderSkeletonBlock::new, BlockBehaviour.Properties.of()
@@ -3184,6 +3185,12 @@ public final class JugcraftAgriculture {
 		FLYING_CRANK_GHOST_ENTITY = Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, Jugcraft.id("flying_crank_ghost"),
 				FabricBlockEntityTypeBuilder.create(FlyingCrankGhostBlockEntity::new, ghost).build());
 		registerItem("flying_crank_ghost", props -> new DoubleHighBlockItem(ghost, props), new Item.Properties().useBlockDescriptionPrefix(),
+				BUILDING_TAB);
+		Block raven = registerBlock("clockwork_raven", ClockworkRavenBlock::new, BlockBehaviour.Properties.of()
+				.mapColor(MapColor.COLOR_BLACK).strength(1.5F).sound(SoundType.METAL).noOcclusion().pushReaction(PushReaction.IMMOVEABLE));
+		CLOCKWORK_RAVEN_ENTITY = Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, Jugcraft.id("clockwork_raven"),
+				FabricBlockEntityTypeBuilder.create(ClockworkRavenBlockEntity::new, raven).build());
+		registerItem("clockwork_raven", props -> new DoubleHighBlockItem(raven, props), new Item.Properties().useBlockDescriptionPrefix(),
 				BUILDING_TAB);
 	}
 

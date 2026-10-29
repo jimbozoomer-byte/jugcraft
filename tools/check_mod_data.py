@@ -15392,7 +15392,10 @@ def check_clockwork():
     easing are the table's. Part 3, the Flying Crank Ghost: its crank, moan and sound are the table's, the renderer's
     crank, pulleys, hood, shoulders, arms, sway and easing are the table's, its eyes are drawn at full light, its torn
     cheesecloth parts are cut out, its wire is drawn 16 pixels up from its foot in the wires' plane, and its arms never
-    rise past level nor its wrists above their pulleys."""
+    rise past level nor its wrists above their pulleys. Part 4, the Clockwork Raven: its flywheel, look, caws, beak and
+    sound are the table's, a burst of caws fits in its cycle and each caw's beak shuts before the next opens, its wings
+    are at the top of a beat on each caw and folded between bursts, the renderer's lean, flywheel, neck, beak, shoulders
+    and easing are the table's, its eyes are drawn at full light and its ragged wings are cut out."""
     import math
     import clockwork as cw
     import clockwork_data as cwd
@@ -15410,7 +15413,7 @@ def check_clockwork():
         err("DecorQuads must read clockwork_quads.json")
     quads = load(ASSETS / "clockwork_quads.json") or {}
     classes = {cw.ORGAN_GRINDER["block"]: ("OrganGrinderSkeleton", "grinder"), cw.WEREWOLF["block"]: ("AnimatronicWerewolf", "werewolf"),
-               cw.FLYING_GHOST["block"]: ("FlyingCrankGhost", "ghost")}
+               cw.FLYING_GHOST["block"]: ("FlyingCrankGhost", "ghost"), cw.CLOCKWORK_RAVEN["block"]: ("ClockworkRaven", "raven")}
     if set(classes) != set(cw.blocks()):
         err("check_clockwork: every figure must be checked")
     for spec in cw.figures():
@@ -15533,6 +15536,45 @@ def check_clockwork():
             if wy >= fg["pulley_y"]:
                 err(f"tools/clockwork.py FLYING_GHOST: a wrist rises to its pulley's height with the crank at {a} degrees")
                 break
+    # Part 4: the Clockwork Raven.
+    cr = cw.CLOCKWORK_RAVEN
+    block = cr["block"]
+    java = read(JAVA_ROOT / "agriculture" / "ClockworkRavenBlock.java")
+    held = read(JAVA_ROOT / "agriculture" / "ClockworkRavenBlockEntity.java")
+    drawn = read(CLIENT_JAVA_ROOT / "ClockworkRavenRenderer.java")
+    for item in (f"FLYWHEEL_TICKS = {cr['flywheel_ticks']};", f"LOOK_TICKS = {cr['look_ticks']};", f"CYCLE = {cr['cycle']};",
+                 f"BURST = {cr['burst']};", f"CAWS = {cr['caws']};", f"CAW_EVERY = {cr['caw_every']};", f"BEAK_TICKS = {cr['beak_ticks']};",
+                 f"BEAK_HOLD = {cr['beak_hold']};", f"VOLUME = {cr['volume']}F;", f"PITCH = {cr['pitch']}F;"):
+        if item not in java:
+            err(f"ClockworkRavenBlock: missing {item} (tools/clockwork.py CLOCKWORK_RAVEN)")
+    if cr["caw_sound"] != "minecraft:entity.parrot.ambient" or "SoundEvents.PARROT_AMBIENT" not in held:
+        err(f"ClockworkRavenBlockEntity: it must caw with {cr['caw_sound']} (SoundEvents.PARROT_AMBIENT)")
+    beat = cr["caw_every"]
+    if cr["burst"] - beat / 2 < 0 or cr["burst"] + cr["caws"] * beat - beat / 2 > cr["cycle"]:
+        err("tools/clockwork.py CLOCKWORK_RAVEN: a burst of caws, its wings beating from half a beat before the first to half "
+            "a beat after the last, must fit in its cycle")
+    if 2 * cr["beak_ticks"] + cr["beak_hold"] > beat:
+        err("tools/clockwork.py CLOCKWORK_RAVEN: its beak must shut after one caw before it opens for the next")
+    # Its wings as the block's wings() has them: at the top on each caw, folded at the burst's ends and between bursts.
+    def wings(t):
+        t = t % cr["cycle"] - (cr["burst"] - beat / 2)
+        return 0.0 if t < 0 or t > cr["caws"] * beat else 0.5 - 0.5 * math.cos(2 * math.pi * t / beat)
+    if any(abs(wings(cr["burst"] + i * beat) - 1.0) > 1e-9 for i in range(cr["caws"])) or wings(0) != 0.0 \
+            or abs(wings(cr["burst"] - beat / 2)) > 1e-9 or abs(wings(cr["burst"] + (cr["caws"] - 0.5) * beat)) > 1e-9:
+        err("tools/clockwork.py CLOCKWORK_RAVEN: its wings must be at the top of a beat on each caw, and folded between bursts")
+    if "ticks % CYCLE - (BURST - CAW_EVERY / 2.0)" not in java or "Math.cos(2.0 * Math.PI * t / CAW_EVERY)" not in java:
+        err("ClockworkRavenBlock.wings: its wings beat once a caw, at the top on each (tools/check_mod_data.py check_clockwork)")
+    (rby, rbz), (rfx, rfy), (rnx, rnz), (rjy, rjz), (rsl, rsr) = cr["body_origin"], cr["flywheel"], cr["neck"], cr["jaw_hinge"], cr["shoulders"]
+    for name, value in (("TILT", cr["tilt"]), ("BODY_Y", rby), ("BODY_Z", rbz), ("FLYWHEEL_X", rfx), ("FLYWHEEL_Y", rfy), ("NECK_X", rnx),
+                        ("NECK_Z", rnz), ("LOOK", cr["look"]), ("JAW_Y", rjy), ("JAW_Z", rjz), ("JAW", cr["jaw"]), ("SHOULDER_LEFT", rsl),
+                        ("SHOULDER_RIGHT", rsr), ("SHOULDER_Y", cr["shoulder_y"]), ("FLAP", cr["flap"]), ("EASE", cr["ease"])):
+        if f"static final float {name} = {value}F;" not in drawn:
+            err(f"ClockworkRavenRenderer.{name} must be {value} (tools/clockwork.py CLOCKWORK_RAVEN)")
+    if "LightCoordsUtil.FULL_BRIGHT" not in drawn:
+        err("ClockworkRavenRenderer: its eyes glow at full light while it runs")
+    for part in cwd.RAVEN_CUTOUT:
+        if not quads.get(f"{block}_{part}") or not all(q.get("cutout") for q in quads[f"{block}_{part}"]):
+            err(f"clockwork_quads.json: {block}_{part} has a ragged edge, drawn cut out")
 
 
 def check_party_table():

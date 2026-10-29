@@ -621,16 +621,141 @@ def ghost_posed(sc, spec):
     return out
 
 
+# ---------------------------------------------------------------- part 4: the Clockwork Raven
+
+RAVEN = pal("0c0e14", "161a24", "222a3a", "34405a", "4e6088")
+RED_GLASS = (255, 64, 40)
+
+
+def plates():
+    """Black enamelled steel plates, in rows three texels deep: each plate's top row catching a blue-black sheen, its
+    middle row its own tone, its foot in the shadow of the plate over it; a brass rivet in every fourth column of each
+    plate's top row."""
+    def paint(p):
+        for y in range(p.h):
+            for x in range(p.w):
+                if y % 3 == 0 and x % 4 == 1 and p.h > 2:
+                    p.put(x, y, shade(GOLD, 3))
+                else:
+                    p.put(x, y, shade(RAVEN, (3, 2, 1)[y % 3]))
+    paint.tag = repr(("plates",))
+    return paint
+
+
+def plumage(edge=False):
+    """Steel feathers, each a texel wide down the piece, lit and shaded by turns, their tips along its foot row; its top
+    row the coverts, with a blue-black sheen. With `edge`, the tips are cut out between every other feather (a wing's
+    ragged trailing edge)."""
+    def paint(p):
+        for y in range(p.h):
+            for x in range(p.w):
+                if edge and p.h > 2 and y == p.h - 1 and x % 2 == 1:
+                    clear(p, x, y)
+                else:
+                    p.put(x, y, shade(RAVEN, 4 if y == 0 and p.h > 1 else 2 if x % 2 == 0 else 1))
+    paint.tag = repr(("plumage", edge))
+    return paint
+
+
+def gunmetal():
+    """Gunmetal (the raven's beak): dark grey steel, lit along its top row."""
+    def paint(p):
+        for y in range(p.h):
+            for x in range(p.w):
+                p.put(x, y, shade(STEEL, 2 if y == 0 and p.h > 1 else 1))
+    paint.tag = repr(("gunmetal",))
+    return paint
+
+
+def red_glass():
+    """A red glass eye, flat; the renderer draws it at full light while the raven runs."""
+    def paint(p):
+        for y in range(p.h):
+            for x in range(p.w):
+                p.put(x, y, RED_GLASS)
+    paint.tag = repr(("red_glass",))
+    return paint
+
+
+def round_slab(sc, name, painter, w, y0, y1, cut, cx=8.0, cz=8.0, **kw):
+    """A round slab `w` across, from y0 to y1, centred on (cx, cz): two boxes crossed, each `cut` shorter at its ends."""
+    return [panel(sc, name, painter, (cx - w / 2 + cut, y0, cz - w / 2), (cx + w / 2 - cut, y1, cz + w / 2), **kw),
+            panel(sc, name, painter, (cx - w / 2, y0, cz - w / 2 + cut), (cx + w / 2, y1, cz + w / 2 - cut), **kw)]
+
+
+def clockwork_raven():
+    """The Clockwork Raven, facing north, in its lower block's pixels (two blocks tall).
+    - The stand (`whole`): a round black iron plinth 50 cm across; on it the clockwork's riveted brass drum, 37 cm across
+      and 25 cm high, under a brass lid; a turned brass column to a mahogany perch 37 cm long, 1.3 m up, an iron collar
+      half way.
+    - The raven on the perch (`whole` too): iron feet gripping the perch, thin legs, a body of black enamelled steel
+      plates 31 cm long leaning `tilt` degrees, its breast up, and a tail of steel feathers 25 cm long, angled down
+      behind.
+    - The flywheel (`flywheel`): a brass disc on the drum's front, an iron lug at its rim.
+    - Its head (`head`): steel plates, a gunmetal beak narrowing to a hooked tip; its lower beak (`jaw`); its red glass eyes
+      (`eyes`), one on each side.
+    - Its wings (`left_wing`, `right_wing`): steel feathers, folded down its sides from its shoulders, their trailing
+      edges ragged; drawn in its body's frame before its lean, as the renderer leans them."""
+    spec = cw.CLOCKWORK_RAVEN
+    sc = Sculpt(spec["block"], 2904, 128)
+    cast, br, studded = iron(), brass(), riveted()
+    steel, feathers, tips = plates(), plumage(), plumage(edge=True)
+    el = round_slab(sc, "plinth", cast, 8.0, 0.0, 0.75, 1.5)
+    el += round_slab(sc, "drum", studded, 6.0, 0.75, 4.75, 1.0)
+    el += round_slab(sc, "lid", br, 4.0, 4.75, 5.25, 1.0)
+    el.append(panel(sc, "column", br, (7.5, 4.75, 7.5), (8.5, 20.75, 8.5)))
+    el.append(panel(sc, "collar", cast, (7.0, 12.0, 7.0), (9.0, 12.5, 9.0)))
+    el.append(panel(sc, "perch", mahogany(), (5.0, 20.75, 7.5), (11.0, 21.75, 8.5)))
+    for x0 in (7.0, 8.25):
+        el.append(panel(sc, "foot", cast, (x0, 21.5, 7.0), (x0 + 0.75, 22.0, 9.0)))
+        el.append(panel(sc, "leg", cast, (x0 + 0.25, 22.0, 7.75), (x0 + 0.5, 23.5, 8.25)))
+    by, bz = spec["body_origin"]
+    el.append(panel(sc, "body", steel, (7.0, 23.0, 6.0), (9.0, 26.0, 11.0), rot=fa.rotation((8.0, by, bz), "x", spec["tilt"])))
+    el.append(panel(sc, "tail", feathers, (7.0, 22.5, 10.5), (9.0, 23.0, 14.5), rot=fa.rotation((8.0, 23.25, 10.5), "x", 45.0)))
+    sc.models["whole"] = el
+    fx, fy = spec["flywheel"]
+    sc.models["flywheel"] = round_plate(sc, "flywheel", br, 3.0, 4.5, 5.0, fx, fy) + [
+        panel(sc, "lug", cast, (fx - 0.25, fy + 1.0, 4.25), (fx + 0.25, fy + 1.5, 4.5))]
+    # The beak narrows from its base to a tip hooked down over the lower beak.
+    beak = gunmetal()
+    sc.models["head"] = [panel(sc, "head", steel, (7.0, 26.25, 4.75), (9.0, 28.25, 6.75)),
+                         panel(sc, "beak", beak, (7.5, 27.0, 3.75), (8.5, 27.75, 4.75)),
+                         panel(sc, "beak", beak, (7.6, 27.0, 2.75), (8.4, 27.6, 3.75)),
+                         panel(sc, "beak", beak, (7.7, 26.75, 2.25), (8.3, 27.5, 2.75))]
+    jy, jz = spec["jaw_hinge"]
+    sc.models["jaw"] = [panel(sc, "jaw", beak, (7.6, jy - 0.5, 3.0), (8.4, jy, jz))]
+    sc.models["eyes"] = [panel(sc, "eye", red_glass(), (6.9, 27.25, 5.0), (6.98, 27.75, 5.5)),
+                         panel(sc, "eye", red_glass(), (9.02, 27.25, 5.0), (9.1, 27.75, 5.5))]
+    sy = spec["shoulder_y"]
+    for side, (x0, x1) in (("left_wing", (6.4, 6.9)), ("right_wing", (9.1, 9.6))):
+        sc.models[side] = [panel(sc, "wing", feathers, (x0, sy - 4.0, 6.0), (x1, sy, 12.0), sides=SIDES4 + ("up",), east=tips, west=tips)]
+    return sc
+
+
+RAVEN_MOVING = ("flywheel", "head", "jaw", "eyes", "left_wing", "right_wing")
+# The raven's parts drawn cut out (its wings' ragged edges).
+RAVEN_CUTOUT = ("left_wing", "right_wing")
+
+
+def raven_posed(sc, spec):
+    """The raven's item pose: at rest, its wings folded and leaning with its body, its beak shut, looking ahead."""
+    by, bz = spec["body_origin"]
+    wings = [dict(e, rotation=fa.rotation((8.0, by, bz), "x", spec["tilt"])) for side in ("left_wing", "right_wing") for e in sc.models[side]]
+    return sc.models["flywheel"] + sc.models["head"] + sc.models["jaw"] + sc.models["eyes"] + wings
+
+
 # ---------------------------------------------------------------- building and files
 
 _built = {}
 BUILDERS = {cw.ORGAN_GRINDER["block"]: organ_grinder_skeleton, cw.WEREWOLF["block"]: animatronic_werewolf,
-            cw.FLYING_GHOST["block"]: flying_crank_ghost}
+            cw.FLYING_GHOST["block"]: flying_crank_ghost, cw.CLOCKWORK_RAVEN["block"]: clockwork_raven}
 # Each figure's moving parts (clockwork_quads.json, `<block>_<part>`), and the parts its item shows, posed.
-PARTS = {cw.ORGAN_GRINDER["block"]: MOVING, cw.WEREWOLF["block"]: WEREWOLF_MOVING, cw.FLYING_GHOST["block"]: GHOST_MOVING}
-POSES = {cw.ORGAN_GRINDER["block"]: posed, cw.WEREWOLF["block"]: werewolf_posed, cw.FLYING_GHOST["block"]: ghost_posed}
+PARTS = {cw.ORGAN_GRINDER["block"]: MOVING, cw.WEREWOLF["block"]: WEREWOLF_MOVING, cw.FLYING_GHOST["block"]: GHOST_MOVING,
+         cw.CLOCKWORK_RAVEN["block"]: RAVEN_MOVING}
+POSES = {cw.ORGAN_GRINDER["block"]: posed, cw.WEREWOLF["block"]: werewolf_posed, cw.FLYING_GHOST["block"]: ghost_posed,
+         cw.CLOCKWORK_RAVEN["block"]: raven_posed}
 # The moving parts drawn cut out, by figure.
-CUTOUT = {cw.FLYING_GHOST["block"]: GHOST_CUTOUT}
+CUTOUT = {cw.FLYING_GHOST["block"]: GHOST_CUTOUT, cw.CLOCKWORK_RAVEN["block"]: RAVEN_CUTOUT}
 
 
 def build(block):

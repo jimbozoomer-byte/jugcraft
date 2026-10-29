@@ -1,6 +1,7 @@
 package io.github.jimbozoomer.jugcraft.test;
 
 import io.github.jimbozoomer.jugcraft.agriculture.AnimatronicWerewolfBlock;
+import io.github.jimbozoomer.jugcraft.agriculture.ClockworkRavenBlock;
 import io.github.jimbozoomer.jugcraft.agriculture.FlyingCrankGhostBlock;
 import io.github.jimbozoomer.jugcraft.agriculture.JugcraftAgriculture;
 import io.github.jimbozoomer.jugcraft.agriculture.OrganGrinderSkeletonBlock;
@@ -21,14 +22,16 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.DoubleBlockHalf;
 
 /**
- * Client game test for the Clockwork Animatronics, parts 1 to 3 (decor set 9): on a dark oak floor, two Organ-Grinder
+ * Client game test for the Clockwork Animatronics, parts 1 to 4 (decor set 9): on a dark oak floor, two Organ-Grinder
  * Skeletons, one facing the camera (north) and one facing east, and an Animatronic Werewolf facing the camera, each with a
  * hand crank against the back of its lower block. Photographed at rest from the front; then with their cranks turned
  * and their clockwork running, from the front and from the east, where the organ's crank is and the skeleton's right
  * hand on it (drawn by client/OrganGrinderSkeletonRenderer); and the werewolf, its turntable turning, in its howl
  * (client/AnimatronicWerewolfRenderer); and, part 3, a Flying Crank Ghost facing the camera, its crank behind it, at
- * rest and then flying, its arms up in turn and its eyes lit (client/FlyingCrankGhostRenderer; CI job {@code client}).
- * They go into docs/features/clockwork-animatronics.md.
+ * rest and then flying, its arms up in turn and its eyes lit (client/FlyingCrankGhostRenderer); and, part 4, a
+ * Clockwork Raven facing the camera, its crank behind it, at rest and then in its first burst of caws, its beak open
+ * and its wings up (client/ClockworkRavenRenderer; CI job {@code client}). They go into
+ * docs/features/clockwork-animatronics.md.
  */
 public class ClockworkClientGameTests implements FabricClientGameTest {
 	@Override
@@ -68,6 +71,12 @@ public class ClockworkClientGameTests implements FabricClientGameTest {
 			shoot(context, singleplayer, x, y + 1, z - 8, 0, 10, "jugcraft_clockwork_crank_ghost_flying");
 			context.waitTicks(FlyingCrankGhostBlock.CRANK_TICKS / 2);
 			shoot(context, singleplayer, x - 3, y + 1, z - 7, -45, 15, "jugcraft_clockwork_crank_ghost_side");
+			// The raven, at rest; then in its first burst of caws, a caw in, its beak open and its wings up.
+			server.runOnServer(minecraft -> place(minecraft.overworld(), origin.offset(-3, 0, -4), Direction.NORTH, "clockwork_raven"));
+			shoot(context, singleplayer, x - 3, y + 1, z - 6, 0, 20, "jugcraft_clockwork_raven");
+			server.runOnServer(minecraft -> turn(minecraft.overworld(), origin.offset(-3, 0, -3)));
+			context.waitTicks(ClockworkRavenBlock.BURST - 40);
+			shoot(context, singleplayer, x - 3, y + 1, z - 6, 0, 20, "jugcraft_clockwork_raven_caw");
 		}
 	}
 

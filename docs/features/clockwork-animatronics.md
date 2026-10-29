@@ -1,6 +1,6 @@
 # Clockwork Animatronics
 
-Status: parts 1 (the Organ-Grinder Skeleton), 2 (the Animatronic Werewolf) and 3 (the Flying Crank Ghost) implemented. CI builds them and runs their game tests and client screenshots; not yet played by hand. Parts 4 to 6 are planned (below).
+Status: parts 1 (the Organ-Grinder Skeleton), 2 (the Animatronic Werewolf), 3 (the Flying Crank Ghost) and 4 (the Clockwork Raven) implemented. CI builds them and runs their game tests and client screenshots; not yet played by hand. Parts 5 and 6 are planned (below).
 Proposal issue: none. The owner asked for it directly on 28 October 2026, as set 9 of the ten sets of fall and Halloween decor ("Then I want you to do 1-10 in parts in that order one by one"): an organ-grinder skeleton with a hurdy-gurdy, an animatronic werewolf on a turntable, a ghost on a crank wire, a mechanical raven and a pumpkin-headed drummer, on the power network, brass and steam at first and a dieselpunk steel version later.
 Owner: @jimbozoomer-byte
 Target milestone and tier: the bronze age of kinetic power ([kinetic-power.md](kinetic-power.md)). The figures are made from vanilla things and a clock; they move on kinetic energy from a hand crank or a steam engine, through iron shafts and brass gearboxes, or from the JE network through an electric motor.
@@ -49,8 +49,21 @@ Halloween figures that move by clockwork. Each runs on kinetic power: a shaft, g
   - Recipe: string either side of a clock (the wires and the clockwork), over white wool either side of an iron ingot (the cheesecloth and the crossbar), over an iron ingot (the post).
   - Broken, either half brings it down, and it drops once.
 
+### Part 4: the Clockwork Raven
+- **Clockwork Raven**: a raven of black enamelled steel plates, life size (65 cm from beak to tail), with a gunmetal beak hooked at its tip and red glass eyes, perched on a brass bird stand 1.3 m tall. Two blocks tall.
+  - The stand is a round black iron plinth 50 cm across. On it sits the clockwork's riveted brass drum, 37 cm across, with a brass flywheel on its front. A turned brass column rises to a mahogany perch, an iron collar half way up.
+  - The raven grips the perch with iron feet. Its body leans 22.5 degrees, breast up, its wings folded down its sides and its tail angled down behind.
+  - **It runs on 2 KE a tick**, a light bird, from a shaft, gearbox or kinetic source touching its lower block.
+  - **While it runs**:
+    - the drum's flywheel turns once a second;
+    - its head looks slowly from side to side, 45 degrees either way, once every six seconds;
+    - every six seconds it caws three times, 0.6 seconds apart, a parrot's call pitched low. For each caw its beak opens and its wings beat once, at the top of the beat on the caw;
+    - its eyes glow red.
+  - **Its power stopped**, the flywheel runs down and stops where it is, its head stops, it folds its wings and shuts its beak, and its eyes go dark.
+  - Recipe: two feathers either side of black dye (its enamel), over iron ingots either side of a clock, over a gold ingot (the stand's brass).
+  - Broken, either half brings it down, and it drops once.
+
 ### Planned
-- **Part 4: the raven**: a mechanical raven on a brass perch, its wings flapping, its head turning and its beak opening as it caws.
 - **Part 5: the drummer**: a pumpkin-headed drummer beating a bass drum in time.
 - **Part 6: the dieselpunk tier**: a steel show controller on the JE network, which drives every figure near it in time, without shafts, in riveted steel and dieselpunk dials.
 
@@ -87,6 +100,16 @@ Halloween figures that move by clockwork. Each runs on kinetic power: a shaft, g
   - The frame is black cast iron (base, post, boom, brace, crossbar, straps) with brass couplings at the post's foot, middle and top. The gear housing and gearbox are riveted brass, with a rivet a tone darker every third texel round each face's rim.
   - Moving parts move, drawn by `FlyingCrankGhostRenderer`: the crank turns about its axle; the ghost is moved with the pin and swayed about the top of its hood; each arm turns about its shoulder; and the wires are one wire, 16 pixels long, stretched and turned to reach from each one's end to the other. A wire is flat steel with no pattern along it, so stretching it changes nothing you can see.
   - Its item shows the pin at the top, the ghost hanging straight under it, both arms half raised (45 degrees), and its wires as near as a block model's turns allow: those to the pulleys turned 22.5 degrees, those down to the sleeves straight.
+- **The raven** (part 4):
+  - Its body and head are black enamelled steel plates in rows three texels deep: each plate's top row has a blue-black sheen, its middle its own tone and its foot the shadow of the plate over it. A brass rivet sits in every fourth column of each plate's top row.
+  - Its wings and tail are steel feathers, each a texel wide, lit and shaded by turns, with the coverts along the top row. The wings' trailing edges are ragged, their tips cut out between every other feather.
+  - Its beak is gunmetal, three boxes narrowing to a tip hooked down over the lower beak. Its eyes are red glass, a texel each, drawn at full light while it runs and tinted dark when it stops.
+  - The drum is riveted brass, the column polished brass, the perch mahogany (the organ's), the plinth and collar black cast iron.
+  - Moving parts move, drawn by `ClockworkRavenRenderer`:
+    - the flywheel turns about its axle, an iron lug on its rim showing it turn;
+    - the head turns about the upright through its neck, and the lower beak drops about its hinge;
+    - each wing is hinged at its shoulder and leans with the body: it is turned about its hinge, then leaned as the body is.
+  - Its item shows it at rest, its wings folded and leaning with its body.
 - **The previews**, fixed before commit:
   - the organ's pipes, each with a dark mouth texel near its foot, read as a face with a black bar for a mouth; the mouths are gone and the pipes stand on a brass moulding;
   - the waistcoat's moth holes, a texel each on panels two texels wide, read as black blotches; they are now only on its back;
@@ -103,10 +126,13 @@ Halloween figures that move by clockwork. Each runs on kinetic power: a shaft, g
   - the shoulders' lit top row showed under the dark face as a row of teeth; the face now sits forward of the cape, over it;
   - holes worn in the cuffs and the robe's torn rows left single texels hanging loose below them; holes now stop above the torn rows.
   - The preview poses every part as the renderer does: the crank, the ghost moved and swayed, the arms turned, and each wire from its end to its end.
+- **The part 4 previews**, fixed before commit:
+  - the beak was one flat-ended brass block as wide as half the head, and read as a duck's bill; it is now gunmetal, narrowing in three steps to a hooked tip.
+  - The preview poses the wings as the renderer does (turned about their hinges, then leaned with the body), at rest, mid-beat and at the top of a beat with the beak open.
 
 ## Connections
 - Existing input producer: kinetic power, from the hand crank, the steam engine and the electric motor (which takes JE), through iron shafts, brass gearboxes and belts ([kinetic-power.md](kinetic-power.md)).
-- Recipe inputs: bone blocks, a note block, black wool, planks and a clock (the skeleton); bones, brown wool, iron, gold and a clock (the werewolf); string, white wool, iron and a clock (the ghost).
+- Recipe inputs: bone blocks, a note block, black wool, planks and a clock (the skeleton); bones, brown wool, iron, gold and a clock (the werewolf); string, white wool, iron and a clock (the ghost); feathers, black dye, iron, gold and a clock (the raven).
 - Existing output consumer: none; a figure is a power sink, like a machine.
 - Technology/magic connections (or infrastructure/cosmetic applicability): technology. It is decoration that runs on the kinetic network, a use for a hand crank or a small steam engine before electricity.
 - Reachable entry path: a hand crank (planks and an iron shaft), from the first iron. The figure's recipe needs a clock (gold and redstone).
@@ -118,6 +144,7 @@ Halloween figures that move by clockwork. Each runs on kinetic power: a shaft, g
 - The Organ-Grinder Skeleton takes 4 KE a tick while it runs, and only on all 4. A hand crank (16 KE a tick) runs four of them; a steam engine (64) sixteen.
 - The Animatronic Werewolf takes 8 KE a tick, a heavier figure on a turntable: a hand crank runs two, a steam engine eight.
 - The Flying Crank Ghost takes 4 KE a tick, a light ghost on a crank, as the skeleton does.
+- The Clockwork Raven takes 2 KE a tick, the lightest: a hand crank runs eight.
 - The energy goes into the clockwork: nothing comes back out, and it stores nothing. No loop.
 - Its recipe gives back only itself.
 
@@ -126,8 +153,8 @@ Halloween figures that move by clockwork. Each runs on kinetic power: a shaft, g
 - **The client draws it**: from `running` and its own clock. Each client keeps its own count of the tune from when it saw the figure start, so the crank, the arm, the nod and the jaw move in time with what it hears.
 - It saves nothing: whether it runs comes again from its power on the first tick after a reload.
 - It can't be pushed by a piston.
-- IDs (stable from release): the blocks and items `organ_grinder_skeleton`, `animatronic_werewolf` and `flying_crank_ghost` (`facing`, `half`, `running`), and their block entities of the same names.
-- Every figure shares one clockwork (`ClockworkFigureBlockEntity`): what differs is its need and what it does as it runs, its tune, its howl or its moan.
+- IDs (stable from release): the blocks and items `organ_grinder_skeleton`, `animatronic_werewolf`, `flying_crank_ghost` and `clockwork_raven` (`facing`, `half`, `running`), and their block entities of the same names.
+- Every figure shares one clockwork (`ClockworkFigureBlockEntity`): what differs is its need and what it does as it runs, its tune, its howl, its moan or its caws.
 - The ghost's moan is the server's, a sound every nearby player hears. How it flies and whether its eyes are lit are drawn by each client from `running` alone.
 - Its recipe follows the agriculture switch. The block and item stay registered when it is off. It runs on the machines feature's kinetic power: with that off, no hand crank or shaft exists to drive it, and it stands still.
 
@@ -175,6 +202,17 @@ Local checks run on this branch, and their results:
   - `python3 tools/check_icon_maps.py`: PASS.
   - `javac` scan of the new and changed Java for syntax errors: none. Every member the new Java calls is used elsewhere in the code already, or declared in it. The full compile runs in CI.
   - The ghost was previewed offline at five turns of its crank, from the front and both sides, posed as the renderer poses it, and in its item pose; what the previews showed and what was fixed is under How it is drawn.
+- Part 4, all on the first run:
+  - `python3 tools/check_mod_data.py`: PASS (8,166 material IDs), including the art check. `check_clockwork` now also checks the raven:
+    - its flywheel, look, caws, beak, loudness and sound against the table;
+    - that a burst of caws, its wings beating from half a beat before the first to half a beat after the last, fits in its cycle, and that its beak shuts after one caw before it opens for the next;
+    - that its wings are at the top of a beat on each caw and folded between bursts, and that the block's `wings` is that curve;
+    - that its renderer's lean, flywheel, neck, look, beak, shoulders, beat and easing are the table's, its eyes are drawn at full light, and its ragged wings are cut out.
+  - `python3 scripts/check_repository.py`: PASS.
+  - `python3 -m unittest discover -s scripts/tests`: 287 tests, OK.
+  - `python3 tools/check_icon_maps.py`: PASS.
+  - `javac` scan of the new and changed Java for syntax errors: none. Every member the new Java calls is used elsewhere in the code already, or declared in it. The full compile runs in CI.
+  - The raven was previewed offline at rest, mid-beat looking aside, and at the top of a beat with its beak open, from the front, both sides and above, and in its item pose; what the previews showed and what was fixed is under How it is drawn.
 
 `ClockworkGameTests` (run in CI):
 - **The Organ-Grinder runs on its clockwork**:
@@ -195,14 +233,22 @@ Local checks run on this branch, and their results:
   - its power stopped, it runs down and stops;
   - a hand crank behind its lower block, facing into it, drives it;
   - broken at its upper half, both halves go and it drops once.
+- **The raven caws on its clockwork** (part 4):
+  - placed, it stands two blocks tall on its stand, facing the player, at rest, its clockwork a `ClockworkFigureBlockEntity`;
+  - it takes its need, 2 KE, in a tick and no more;
+  - it caws on each of its burst's ticks and on no others;
+  - its beak is open on each caw and shut between them;
+  - its wings are at the top of a beat on each caw, folded half a beat after, and folded between bursts;
+  - a hand crank beside it drives it.
 - **Their data loads**: every figure's recipe and loot table.
 
-`ClockworkClientGameTests` takes seven screenshots on a dark oak floor of two Organ-Grinder Skeletons, one facing the camera and one facing east, and an Animatronic Werewolf facing the camera, each with a hand crank against the back of its lower block:
+`ClockworkClientGameTests` takes nine screenshots on a dark oak floor of two Organ-Grinder Skeletons, one facing the camera and one facing east, and an Animatronic Werewolf facing the camera, each with a hand crank against the back of its lower block:
 - at rest, from the front;
 - running, their cranks turned, from the front;
 - running, from the east of the skeleton facing the camera, where its crank and its right hand are;
 - the werewolf in its first howl, its arms up and its head back (part 2);
 - a Flying Crank Ghost facing the camera, a hand crank behind it, at rest; then flying, its crank turned and its eyes lit, from the front; and half a turn later, its other arm up, from the side (part 3). The floor reaches further north for these.
+- a Clockwork Raven facing the camera, a hand crank behind it, at rest; then in its first burst of caws, its beak open and its wings up (part 4).
 
 Not run: a hand playtest, and a two-client playtest.
 
@@ -210,6 +256,7 @@ Not run: a hand playtest, and a two-client playtest.
 Seasonal in look, not in use: it is made and works all year. It doesn't generate in the world.
 
 ## Rollout and open questions
-- Part 1 is the Organ-Grinder Skeleton, part 2 the Animatronic Werewolf and part 3 the Flying Crank Ghost; parts 4 to 6 follow, each stacked on the last.
+- Part 1 is the Organ-Grinder Skeleton, part 2 the Animatronic Werewolf, part 3 the Flying Crank Ghost and part 4 the Clockwork Raven; parts 5 and 6 follow, each stacked on the last.
+- The Clockwork Raven is not the Raven on a Perch (`raven_perch`, the Mad Scientist's set): that one is a lifelike raven that watches players and ruffles its feathers. This one is a clockwork automaton on the kinetic network.
 - Part 2 moved the skeleton's clockwork into the shared `ClockworkFigureBlockEntity` (unchanged in what it does), and its renderer now counts its tune at the server's rate, easing only its crank. The renderer's tune count had been eased too, so the jaw ran a quarter-second behind the notes.
 - Open: whether a figure should also take a redstone signal to start and stop (a power switch), and whether the show controller (part 6) should let a builder set each figure's start in a sequence.

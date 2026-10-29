@@ -8,6 +8,12 @@ Every change to Jugcraft, newest first, grouped by pull request. For what each t
 
 No numbered release yet. Entries on feature branches remain proposed until their pull requests merge.
 
+### Unmerged: Clockwork Animatronics, part 4 (the Clockwork Raven)
+- **Clockwork Raven**: a life-size raven of black enamelled steel plates with red glass eyes, perched on a brass bird stand 1.3 m tall, two blocks tall.
+- It runs on kinetic power, 2 KE a tick. While it runs the flywheel in the stand's drum turns, its head looks slowly from side to side, its eyes glow red, and every six seconds it caws three times, its beak opening and its wings beating with each caw.
+- Record: [clockwork-animatronics.md](docs/features/clockwork-animatronics.md). Decor set 9's fourth part.
+- **Checked:** the record's Verification. Game tests and screenshots run in CI only; not played by hand.
+
 ### Unmerged: Clockwork Animatronics, part 3 (the Flying Crank Ghost)
 - **Flying Crank Ghost**: a hooded cheesecloth ghost hanging in the air on three wires from a crank on an iron post, two blocks tall.
 - It runs on kinetic power, 4 KE a tick. While it runs the crank swings the ghost round a small circle, its torn arms rise in turn on their wires, its eyes glow pale green, and every ten seconds it moans.
