@@ -15,7 +15,7 @@ consolidation and recipe-picker playtest remains outside this batch.
 
 Updated 11 October 2026 for [integration PR #320](https://github.com/jimbozoomer-byte/jugcraft/pull/320) (source PRs #299–308 and #310–319), following [integration PR #277](https://github.com/jimbozoomer-byte/jugcraft/pull/277) and [follow-up PR #298](https://github.com/jimbozoomer-byte/jugcraft/pull/298). This is the owner-facing index: feature records contain the detailed behavior and historical test evidence. The PRs' current GitHub states determine which combined work has reached `main`.
 
-## Not merged: Concordance garden cohort, units 1 and 2 (Buer, Bathin)
+## Not merged: Concordance garden cohort, units 1 to 3 (Buer, Bathin, Marax)
 
 On branch `claude/garden-cohort`; draft pull request [jimbozoomer-byte/jugcraft#526](https://github.com/jimbozoomer-byte/jugcraft/pull/526)
 against main; not merged. Unit 1 (GC-01 to GC-04) of seven is built: one pact spirit base with a perch for many spirits
@@ -33,6 +33,11 @@ its perch) and the bed index's Hearts, Gleaners and pylons. In CI run
 both server jobs passed all 3,206 required tests, unit 2's 38 among them, and the garden client class passed; its 34
 pictures of Bathin were looked at ([the contract's evidence](features/concordance-garden-cohort.md#unit-2-as-built-and-its-evidence)).
 Not played by a person; one client, not two.
+Unit 3 (GC-06) is built and recorded, **not yet compiled or run in CI**: Marax, the third garden spirit, with the
+standing station beside a perch and the synced work target his familiar flies to. His shared prefix (GC-06a, GC-06b)
+was in the head of run 40777920181, which passed in full; nothing of Marax himself has been compiled, and his 22 server
+tests and 33 client shots wait for their first run. Checked locally by the repository's Python checks and audits and a
+scratch harness of his one-change rule ([the contract's evidence](features/concordance-garden-cohort.md#unit-3-as-built-and-its-evidence)).
 
 | Area | Implemented change | Record |
 | --- | --- | --- |
@@ -42,6 +47,8 @@ Not played by a person; one client, not two.
 | Buer (GC-04) | Strain tending by daylight, one bed at a time by each bed's own rule; the overworked bed; Mendvetch a week; the owner's Decor Blossom as his body | [Buer](features/buer-pact.md) |
 | Bathin (GC-05) | Verdance carried at once from your Hearts to a far Gleaner or into a Ley Pylon away from them (3 for 2), 12 moves a day, nothing ever on the way; four Verdant Chaff a week; a body built for Jugcraft from the owner's paintings' colours | [Bathin](features/bathin-pact.md) |
 | A matter to settle (GC-05) | A pact spirit may raise a choice its holder answers at the perch; the answer is kept by the perch and may be changed; until then the spirit takes the safe course and the roster says "awaiting your answer" | [Bathin](features/bathin-pact.md#his-matter-two-roads-from-one-heart-the-accord), [workers](features/arcane-concordance-workers.md) |
+| A spirit beside its perch (GC-06b) | A standing spirit takes the first clear side two blocks out, never between its inviter and the perch; a spirit may show the block it means to every client while its answer is on screen (synced, never saved); a work's on-request choice drawn on the kept page. Not yet run in CI | [contract](features/concordance-garden-cohort.md#gc-06-marax-unit-3), [workers](features/arcane-concordance-workers.md) |
+| Marax (GC-06) | Asked at his perch, his familiar reads your planted beds from their last samples and names one change for the worst, changing nothing; a bed named three times with nothing changed is passed over; two readings a day, for you alone; two sheets of paper a week; his first obligation completes The Garden's Regard's mastery with Buer's and Bathin's. Not yet run in CI | [Marax](features/marax-pact.md) |
 
 ## Merged with #494: Concordance Chunk D (pact hall)
 

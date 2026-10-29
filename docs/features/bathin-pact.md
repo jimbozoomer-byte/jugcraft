@@ -412,6 +412,12 @@ pictures; no CI result for either is recorded here.
 | `bathin_end_confirm` | ending, asked first | a scroll over the cosmos: "End your pact with Bathin?", "He leaves; offerings paid ahead come back once.", "This cannot be undone."; End the pact, Keep it (focused) |
 | `bathin_ended` | the pact ended | his portrait greyed, "Bathin", "Verdance carrying", "Ended"; "Pact ended. Use the perch to invite Bathin again"; "Bathin departs; 0 offerings came back", its tip repeating the whole sentence ("... (ended by its holder); 0 offerings came back to you"); Close |
 
+**Since GC-06** ([Marax](marax-pact.md); not merged, not yet run in CI): the chooser has a fourth entry; Bathin's body
+stands `PERCH`, as before. His per-think questions were lifted unchanged into the shared `GardenAsking` by GC-06b
+(`8cf0ef994`, in the head of run 40777920181), and his work icon's line in `PactGlance.WORK_ICONS` is a `Map.entry` since
+`1473e99f1`; his words, sounds, service, matter and tests are otherwise unchanged. His first obligation is now one of
+three that can master The Garden's Regard (with Buer's and Marax's).
+
 **Local** (this record's commit; no Minecraft build here): `python3 tools/owner_art.py --check`, `python3 -B
 tools/check_mod_data.py`, `python3 scripts/check_repository.py`, `python3 tools/concordance_journey.py --check`,
 `python3 tools/concordance_economy.py` ("gaining cycles: none"), `python3 tools/check_icon_maps.py`, `node --test

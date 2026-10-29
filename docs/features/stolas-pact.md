@@ -631,6 +631,10 @@ generators' incidental rewrites were restored: [the contract's corrections](conc
   carries the magic interfaces' restyled screens) both server jobs passed all 3,206 required tests, his among them, and
   `ConcordancePactClientGameTests` (shard 3), `ConcordancePactNetworkTests` (shard 1) and
   `ConcordanceRosterClientGameTests` (shard 6) passed; their pictures were not looked at for this record.
+- **Since GC-06 (Marax, [record](marax-pact.md); not merged; not yet run in CI):** the chooser has four entries for an
+  owner who understands both Regards. GC-06 changed none of Stolas's ids, keys, words, body or tests: his body's station
+  is `PERCH` (where he always stood), he shows no work target, and Star-reckoning's Recall is drawn as before (the kept
+  page's new choice plates are for other works' on-request actions only).
 
 ## World and event applicability
 
