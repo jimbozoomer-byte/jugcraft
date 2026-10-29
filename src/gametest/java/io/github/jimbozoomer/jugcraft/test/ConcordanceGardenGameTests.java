@@ -32,6 +32,7 @@ import io.github.jimbozoomer.jugcraft.concordance.ecology.Sampler;
 import io.github.jimbozoomer.jugcraft.concordance.ecology.Verdict;
 import io.github.jimbozoomer.jugcraft.concordance.garden.Garden;
 import io.github.jimbozoomer.jugcraft.concordance.garden.GleanerBlockEntity;
+import io.github.jimbozoomer.jugcraft.concordance.garden.Grafting;
 import io.github.jimbozoomer.jugcraft.concordance.garden.HabitatGaugeBlockEntity;
 import io.github.jimbozoomer.jugcraft.concordance.garden.MulchMawBlockEntity;
 import io.github.jimbozoomer.jugcraft.concordance.garden.OrganismCropBlock;
@@ -2415,6 +2416,111 @@ public class ConcordanceGardenGameTests {
 
 	// GC-06 unit 3
 	// GC-07 unit 4
+	// ---------------------------------------------------------------- the garden cohort, GC-07: the graft in one place, the stores
+
+	/**
+	 * GC-07 (GC-P87): the graft's body moved into Grafting.apply and the gesture behaves as before: a Greenwarden's Dewmoss on
+	 * a Sunpetal grafts its bed and spends one, and Grafting.apply on another Sunpetal's bed leaves it exactly as the gesture
+	 * left the first (the graft, the ungrafted plant's verdict forgotten, what clients are told); a second gesture is refused
+	 * and spends nothing. The nine Chunk C graft tests above run unchanged.
+	 */
+	@GameTest(maxTicks = 20)
+	public void theGraftGestureBehavesAsBefore(GameTestHelper helper) {
+		ServerLevel level = level(helper);
+		BlockPos byHand = new BlockPos(1, 1, 2);
+		BlockPos byApply = new BlockPos(5, 1, 2);
+		VerdantBedBlockEntity handBed = bed(helper, byHand, 10);
+		VerdantBedBlockEntity applyBed = bed(helper, byApply, 10);
+		crop(helper, byHand.above(), Garden.SUNPETAL_CROP, 1);
+		crop(helper, byApply.above(), Garden.SUNPETAL_CROP, 1);
+		handBed.note(Verdict.Growth.STALLED.id, List.of()); // each ungrafted plant's last verdict
+		applyBed.note(Verdict.Growth.STALLED.id, List.of());
+		ServerPlayer gardener = gardener(helper, true);
+		ItemStack donor = new ItemStack(Garden.DEWMOSS, 2);
+		helper.assertTrue(handUse(helper, gardener, byHand.above(), donor, false).consumesAction() && donor.getCount() == 1,
+				"The gesture consumes the use and spends one Dewmoss: " + donor.getCount());
+		Graft dewlit = Garden.catalog().graft(DEWLIT);
+		helper.assertTrue(dewlit != null && !Grafting.holds(applyBed), "Dewlit is known, and the second bed carries no graft yet");
+		Grafting.apply(level, helper.absolutePos(byApply.above()), applyBed, dewlit);
+		helper.assertTrue(DEWLIT.equals(handBed.graft()) && handBed.graft().equals(applyBed.graft()) && handBed.growth().isEmpty()
+				&& applyBed.growth().isEmpty() && Grafting.holds(handBed) && Grafting.holds(applyBed),
+				"Both beds carry Dewlit and forgot the ungrafted verdict: " + handBed.graft() + ", " + applyBed.graft() + ", "
+						+ handBed.growth() + ", " + applyBed.growth());
+		CompoundTag byHandSent = handBed.getUpdateTag(level.registryAccess());
+		CompoundTag byApplySent = applyBed.getUpdateTag(level.registryAccess());
+		helper.assertTrue(byHandSent.getStringOr(VerdantBedBlockEntity.GRAFT, "").equals(byApplySent.getStringOr(VerdantBedBlockEntity.GRAFT, "-"))
+				&& SUNPETAL.equals(byHandSent.getStringOr(VerdantBedBlockEntity.GRAFT_HOST, ""))
+				&& SUNPETAL.equals(byApplySent.getStringOr(VerdantBedBlockEntity.GRAFT_HOST, "")),
+				"Clients are told the same graft and host either way: " + byHandSent + ", " + byApplySent);
+		helper.assertTrue(handUse(helper, gardener, byHand.above(), donor, false).consumesAction() && donor.getCount() == 1
+				&& DEWLIT.equals(handBed.graft()), "A second gesture is refused and spends nothing: one graft a bed");
+		helper.succeed();
+	}
+
+	/**
+	 * GC-P84: Dewlit is the Sunpetal's graft, from a Dewmoss; a Gloamcap has none. It gains only where no fit is worse and one
+	 * is better: light 12 (tolerable to ideal), light 12 with diversity 1 (the pace unchanged, a fit better), light 10 (short
+	 * to tolerable); never in full light on a wet bed (ideal either way), on a dry bed (moisture tolerable to short), or for a
+	 * trade (moisture 4: ideal to tolerable, light tolerable to ideal).
+	 */
+	@GameTest(maxTicks = 20)
+	public void aGraftGainsOnlyWhereEveryFitIsNoWorseAndOneBetter(GameTestHelper helper) {
+		Organism petal = Garden.catalog().organism(SUNPETAL);
+		Graft dewlit = Grafting.graftFor(SUNPETAL);
+		helper.assertTrue(petal != null && dewlit != null && DEWLIT.equals(dewlit.id()) && "jugcraft:dewmoss".equals(Grafting.donorItem(dewlit))
+				&& Grafting.graftFor("jugcraft:gloamcap") == null, "Dewlit is the Sunpetal's graft, from a Dewmoss; a Gloamcap has none");
+		Niche own = petal.niche();
+		Niche grafted = Garden.catalog().niche(petal, DEWLIT);
+		record Case(Habitat habitat, boolean gains, String why) {
+		}
+		for (Case c : List.of(new Case(new Habitat(7, 12, 10, 3, 0), true, "light 12: tolerable to ideal"),
+				new Case(new Habitat(7, 12, 10, 1, 0), true, "light 12, diversity 1: the pace is the same, a fit is better"),
+				new Case(new Habitat(5, 10, 10, 3, 0), true, "light 10: short to tolerable"),
+				new Case(new Habitat(7, 15, 10, 3, 0), false, "full light on a wet bed: ideal either way"),
+				new Case(new Habitat(3, 12, 10, 3, 0), false, "dry: moisture tolerable to short, though light gains"),
+				new Case(new Habitat(4, 12, 10, 3, 0), false, "moisture 4: ideal to tolerable, for light tolerable to ideal"))) {
+			helper.assertValueEqual(Grafting.gains(own, grafted, c.habitat()), c.gains(), c.why());
+		}
+		helper.succeed();
+	}
+
+	/**
+	 * GC-P83: an index with stores holds the barrels touching its centre, at most 16, the six face-adjacent first; never the
+	 * centre, a furnace (it takes items by side) or a barrel two away. A barrel broken is gone at once; one placed waits for
+	 * the next refresh.
+	 */
+	@GameTest(maxTicks = 20)
+	public void theGardenReachIndexesStoresTouchingThePerch(GameTestHelper helper) {
+		ServerLevel level = level(helper);
+		long now = level.getGameTime();
+		BlockPos centre = new BlockPos(3, 2, 3);
+		helper.setBlock(centre, Blocks.BARREL);
+		Set<BlockPos> faces = new java.util.HashSet<>();
+		for (int dx = -1; dx <= 1; dx++) {
+			for (int dy = -1; dy <= 1; dy++) {
+				for (int dz = -1; dz <= 1; dz++) {
+					if (dx != 0 || dy != 0 || dz != 0) {
+						helper.setBlock(centre.offset(dx, dy, dz), Blocks.BARREL);
+						if (Math.abs(dx) + Math.abs(dy) + Math.abs(dz) == 1) {
+							faces.add(helper.absolutePos(centre.offset(dx, dy, dz)));
+						}
+					}
+				}
+			}
+		}
+		helper.setBlock(centre.offset(2, 0, 0), Blocks.BARREL);
+		GardenReach reach = GardenReach.withStores(helper.absolutePos(centre), 8, bed -> true);
+		List<BlockPos> stores = reach.stores(level, now);
+		helper.assertTrue(stores.size() == GardenReach.MAX_STORES && Set.copyOf(stores.subList(0, 6)).equals(faces)
+				&& !stores.contains(helper.absolutePos(centre)) && !stores.contains(helper.absolutePos(centre.offset(2, 0, 0))),
+				"Sixteen stores, the six face-adjacent first, never the centre or a barrel two away: " + stores);
+		helper.setBlock(centre.above(), Blocks.FURNACE);
+		helper.assertTrue(!reach.stores(level, now).contains(helper.absolutePos(centre.above())), "A broken barrel is gone at once");
+		reach.forget();
+		helper.assertTrue(!reach.stores(level, now).contains(helper.absolutePos(centre.above())), "A furnace (it takes items by side) is never a store");
+		helper.succeed();
+	}
+
 	// GC-08 unit 5
 	// GC-09 unit 6
 }

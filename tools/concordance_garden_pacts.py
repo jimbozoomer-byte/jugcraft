@@ -95,6 +95,8 @@ DISTINCT = {
 CODEX_PLACE = (6, 4)  # the Binding category's map: (0..6, 0..4) holds eleven entries; (6, 4) is free (check_concordance)
 # GC-05 (GC-P45, GC-P54): a device index (GardenReach.devices) holds at most this many Hearts, Gleaners and Ley Pylons, each.
 REACH["MAX_DEVICES"] = 16  # Java: spirits/GardenReach
+# GC-07 (GC-P82, GC-P83): a store index (GardenReach.withStores) holds at most this many plain containers touching the perch.
+REACH["MAX_STORES"] = 16  # Java: spirits/GardenReach
 
 RESEARCH = {"garden_regard": {
     "name": "The Garden's Regard", "principle": "tether", "tradition": "spiritbinders", "stage": "practitioner",

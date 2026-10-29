@@ -300,7 +300,8 @@ public class OrganismCropBlock extends CropBlock {
 	/**
 	 * Grafts {@code graft} onto the bed beneath for {@code player}, who holds its donor (C-P62): at most once every four ticks
 	 * (RateGate), only where they could change both this crop and its bed by hand (Authority), and only on a bed with no
-	 * graft the rules know (one trait a bed; one they no longer know is replaced). Spends one donor; changes nothing else.
+	 * graft the rules know (Grafting.holds: one trait a bed; one they no longer know is replaced). Spends one donor; changes
+	 * nothing else (Grafting.apply, the one graft Foras's keeping also ends in: GC-07).
 	 */
 	private InteractionResult graftBed(ServerLevel level, BlockPos pos, ServerPlayer player, ItemStack donor, Graft graft) {
 		if (!RateGate.allow(player, "garden", 4)) {
@@ -314,15 +315,12 @@ public class OrganismCropBlock extends CropBlock {
 			player.sendOverlayMessage(ComposeText.show(Diagnostic.of(Code.MISSING_PERMISSION).text()));
 			return InteractionResult.CONSUME;
 		}
-		if (!bed.graft().isEmpty() && Garden.catalog().graft(bed.graft()) != null) {
+		if (Grafting.holds(bed)) {
 			Garden.tell(player, "garden.graft_held", ComposeText.name(new Text.Ref("graft", bed.graft())));
 			return InteractionResult.CONSUME;
 		}
-		bed.setGraft(graft.id());
-		// The niche changed: the last verdict spoke for the ungrafted plant (the unit review).
-		bed.forgetVerdict();
+		Grafting.apply(level, pos, bed, graft);
 		donor.consume(1, player);
-		level.levelEvent(LevelEvent.PARTICLES_AND_SOUND_PLANT_GROWTH, pos, 5);
 		Garden.tell(player, "garden.grafted", getName(), ComposeText.name(new Text.Ref("graft", graft.id())));
 		return InteractionResult.SUCCESS;
 	}

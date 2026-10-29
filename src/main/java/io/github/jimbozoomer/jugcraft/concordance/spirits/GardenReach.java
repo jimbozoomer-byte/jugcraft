@@ -33,13 +33,17 @@ import org.jspecify.annotations.Nullable;
  * GC-05 (GC-P45, GC-P54): in the same pass, an index made with a keeper rule ({@link #devices}) also holds the awake Verdant
  * Hearts and Gleaners whose keeper that rule keeps and the Ley Pylons such a keeper or no one owns, at most
  * {@value #MAX_DEVICES} of each, nearest first, read back the same way. An index of beds alone ({@link #of}) holds none.
- * Unit 4 adds the plain containers touching the perch (16).
+ * GC-07 (GC-P82, GC-P83): an index made with stores ({@link #withStores}) also holds, in the same pass, the plain
+ * containers touching its centre (the 26 cells round the perch; CourierWork.plain, decided on the block entity in
+ * hand), at most {@value #MAX_STORES}, nearest first, read back the same way ({@link #stores(ServerLevel, long)}).
  */
 public final class GardenReach {
 	/** The most beds one index holds. Keep equal to tools/concordance_garden_pacts.py REACH. */
 	public static final int MAX_BEDS = 64;
 	/** GC-05: the most Hearts, the most Gleaners and the most Ley Pylons one index holds, each. Keep equal to tools/concordance_garden_pacts.py REACH. */
 	public static final int MAX_DEVICES = 16;
+	/** GC-07: the most plain containers touching the perch one index holds (Foras's stores). Keep equal to tools/concordance_garden_pacts.py REACH. */
+	public static final int MAX_STORES = 16;
 	/** How long an index serves before it is read again (ticks). Keep equal to tools/concordance_garden_pacts.py REACH. */
 	public static final int REFRESH_TICKS = 200;
 	/** An index of beds alone keeps no keeper's devices. */
@@ -49,10 +53,12 @@ public final class GardenReach {
 	private final int radius;
 	private final Predicate<VerdantBedBlockEntity> indexes;
 	private final Predicate<@Nullable UUID> keeps;
+	private final boolean stores;
 	private List<BlockPos> beds = List.of();
 	private List<BlockPos> hearts = List.of();
 	private List<BlockPos> gleaners = List.of();
 	private List<BlockPos> pylons = List.of();
+	private List<BlockPos> containers = List.of();
 	private long refreshedAt = Long.MIN_VALUE;
 	private int refreshes;
 	private int scanned;
@@ -67,10 +73,16 @@ public final class GardenReach {
 	 * is asked with null for a device nobody keeps) and the Ley Pylons owned by one it accepts or by no one.
 	 */
 	public GardenReach(BlockPos centre, int radius, Predicate<VerdantBedBlockEntity> indexes, Predicate<@Nullable UUID> keeps) {
+		this(centre, radius, indexes, keeps, false);
+	}
+
+	/** The index of the cube of {@code radius} round {@code centre}, holding the plain containers touching it when {@code stores}. */
+	private GardenReach(BlockPos centre, int radius, Predicate<VerdantBedBlockEntity> indexes, Predicate<@Nullable UUID> keeps, boolean stores) {
 		this.centre = centre.immutable();
 		this.radius = Math.clamp(radius, 0, WorkerParser.MAX_RADIUS);
 		this.indexes = indexes;
 		this.keeps = keeps;
+		this.stores = stores;
 	}
 
 	/**
@@ -89,6 +101,20 @@ public final class GardenReach {
 	public static GardenReach devices(BoundWill record) {
 		BoundWill.Pact pact = record.pact();
 		return new GardenReach(Couriers.pos(pact.place()), pact.service().radius(), bed -> false, keeper -> GardenPacts.benefits(record, keeper));
+	}
+
+	/**
+	 * GC-07: {@code record}'s store index: its perch's area, indexing the beds whose keeper its pact benefits (as {@link #of})
+	 * and the plain containers touching the perch; no devices. GardenPacts.target asks again at each change.
+	 */
+	public static GardenReach withStores(BoundWill record) {
+		BoundWill.Pact pact = record.pact();
+		return new GardenReach(Couriers.pos(pact.place()), pact.service().radius(), bed -> GardenPacts.benefits(record, bed.keeper()), NO_DEVICES, true);
+	}
+
+	/** GC-07: an index of the cube of {@code radius} round {@code centre}, of the awake beds {@code indexes} accepts and the plain containers touching {@code centre}. */
+	public static GardenReach withStores(BlockPos centre, int radius, Predicate<VerdantBedBlockEntity> indexes) {
+		return new GardenReach(centre, radius, indexes, NO_DEVICES, true);
 	}
 
 	/** Whether this index is still {@code record}'s area (its perch and radius), so a service memory may keep it. */
@@ -149,6 +175,18 @@ public final class GardenReach {
 		return out;
 	}
 
+	/** GC-07: the indexed plain containers touching the perch still there, loaded and plain, nearest first. Server thread only. */
+	public List<BlockPos> stores(ServerLevel level, long now) {
+		fresh(level, now);
+		List<BlockPos> out = new ArrayList<>(containers.size());
+		for (BlockPos pos : containers) {
+			if (level.isLoaded(pos) && CourierWork.container(level, pos) != null) {
+				out.add(pos);
+			}
+		}
+		return out;
+	}
+
 	/** Forgets the index, so the next read refreshes it. */
 	public void forget() {
 		refreshedAt = Long.MIN_VALUE;
@@ -156,6 +194,7 @@ public final class GardenReach {
 		hearts = List.of();
 		gleaners = List.of();
 		pylons = List.of();
+		containers = List.of();
 	}
 
 	/** How many times it has been read from the chunks (tests and the load card). */
@@ -190,6 +229,9 @@ public final class GardenReach {
 		PriorityQueue<BlockPos> keptHearts = new PriorityQueue<>(MAX_DEVICES + 1, order.reversed());
 		PriorityQueue<BlockPos> keptGleaners = new PriorityQueue<>(MAX_DEVICES + 1, order.reversed());
 		PriorityQueue<BlockPos> keptPylons = new PriorityQueue<>(MAX_DEVICES + 1, order.reversed());
+		// GC-07: the plain containers touching the perch, in the same pass, at most MAX_STORES, decided on the entity in hand
+		// (reading the level here could change the very map being walked: LevelChunk.getBlockEntity).
+		PriorityQueue<BlockPos> keptStores = new PriorityQueue<>(MAX_STORES + 1, order.reversed());
 		int examined = 0;
 		for (int cx = (centre.getX() - radius) >> 4; cx <= (centre.getX() + radius) >> 4; cx++) {
 			for (int cz = (centre.getZ() - radius) >> 4; cz <= (centre.getZ() + radius) >> 4; cz++) {
@@ -223,6 +265,12 @@ public final class GardenReach {
 							}
 						}
 					}
+					if (stores && !entity.isRemoved() && touching(pos) && CourierWork.plain(entity)) {
+						keptStores.add(pos);
+						if (keptStores.size() > MAX_STORES) {
+							keptStores.poll();
+						}
+					}
 				}
 			}
 		}
@@ -230,6 +278,7 @@ public final class GardenReach {
 		hearts = sorted(keptHearts, order);
 		gleaners = sorted(keptGleaners, order);
 		pylons = sorted(keptPylons, order);
+		containers = sorted(keptStores, order);
 		refreshedAt = now;
 		refreshes++;
 		scanned = examined;
@@ -244,5 +293,11 @@ public final class GardenReach {
 	private boolean within(BlockPos pos) {
 		return Math.abs(pos.getX() - centre.getX()) <= radius && Math.abs(pos.getY() - centre.getY()) <= radius
 				&& Math.abs(pos.getZ() - centre.getZ()) <= radius;
+	}
+
+	/** GC-P83: one of the 26 cells touching the centre (the perch), never the centre itself. */
+	private boolean touching(BlockPos pos) {
+		return !pos.equals(centre) && Math.abs(pos.getX() - centre.getX()) <= 1 && Math.abs(pos.getY() - centre.getY()) <= 1
+				&& Math.abs(pos.getZ() - centre.getZ()) <= 1;
 	}
 }

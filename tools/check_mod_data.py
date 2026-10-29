@@ -19547,11 +19547,15 @@ def check_ecology(co, root, lang, registered, research):
     # The unit review: another crop set on a bed, or a graft, forgets the last plant's verdict at once, so Jade never shows
     # one plant's reasons (or the ungrafted niche's) on another; a step or a harvest of the same crop forgets nothing.
     crop_block = java("OrganismCropBlock.java", garden)
+    # GC-07 (GC-P87): the graft's body is Grafting.apply's, which the gesture (and Foras's keeping) calls.
+    grafting = java("Grafting.java", garden)
+    applied = _java_body(grafting, "public static void apply(ServerLevel level, BlockPos cropPos, VerdantBedBlockEntity bed, Graft graft)")
     placed = _java_body(crop_block, "protected void onPlace(")
     if not re.search(r"if \(!oldState\.is\(this\) && level\.getBlockEntity\(pos\.below\(\)\) instanceof VerdantBedBlockEntity bed\) \{\s*"
                      r"bed\.forgetVerdict\(\);", placed) \
-            or not re.search(r"bed\.setGraft\(graft\.id\(\)\);\s*(//[^\n]*\s*)?bed\.forgetVerdict\(\);", _java_body(crop_block, "private InteractionResult graftBed(")):
-        err("OrganismCropBlock: another crop set on a bed, or a graft, forgets the last plant's verdict at once (C-07, C-P55)")
+            or not re.search(r"bed\.setGraft\(graft\.id\(\)\);\s*(//[^\n]*\s*)?bed\.forgetVerdict\(\);", applied) \
+            or "Grafting.apply(level, pos, bed, graft);" not in _java_body(crop_block, "private InteractionResult graftBed("):
+        err("OrganismCropBlock: another crop set on a bed, or a graft (Grafting.apply), forgets the last plant's verdict at once (C-07, C-P55)")
     pour = _java_body(bed_block, "public static boolean pour(ServerLevel level, BlockPos pos, ServerPlayer player)")
     if not 0 <= pour.find('RateGate.allow(player, "garden", 4)') < pour.find("Authority.mayChange(level, player, pos)") < pour.find("level.setBlock("):
         err("VerdantBedBlock.pour: a canteen's sip wets a bed only for someone who may change it, rate-gated (C-07, C-P56)")
@@ -19595,7 +19599,9 @@ def check_graft(co, root, lang):
     Verdant Heart alone reading its own. The gesture asks research, RateGate and Authority at crop and bed, and a refusal
     consumes the use. Another organism's growth clears it and reading never does. The bed saves it only when it has one and
     tells clients it with its host, never the keeper. Jade and the Inspect page name it on its host's crop only. Every word
-    has its lang."""
+    has its lang. GC-07 (GC-P87, GC-P97): the graft itself is Grafting.apply's (the graft, the verdict forgotten, the
+    particles, nothing else), called only by the gesture, after its checks and before its donor is spent, and by Foras's
+    keeping; the one-graft rule is Grafting.holds."""
     ec = co.ecology
     garden = root / "garden"
 
@@ -19665,20 +19671,36 @@ def check_graft(co, root, lang):
         if needle not in use:
             err(f"OrganismCropBlock.useItemOn: a Greenwarden's donor grafts; anything else goes on as before ({needle}) (C-09)")
     act = _java_body(crop, "private InteractionResult graftBed(")
+    # GC-07 (GC-P87): the graft's body moved into Grafting.apply; the held-graft rule into Grafting.holds.
+    grafting = java(garden / "Grafting.java")
+    applied = _java_body(grafting, "public static void apply(ServerLevel level, BlockPos cropPos, VerdantBedBlockEntity bed, Graft graft)")
     for needle in ('RateGate.allow(player, "garden", 4)', "Authority.mayChange(level, player, pos)",
-                   "Authority.mayChange(level, player, pos.below())", "!bed.graft().isEmpty() && Garden.catalog().graft(bed.graft()) != null",
+                   "Authority.mayChange(level, player, pos.below())", "if (Grafting.holds(bed)) {",
                    "donor.consume(1, player)"):
         if needle not in act:
             err(f"OrganismCropBlock.graftBed: rate, Authority at crop and bed, one graft the rules know a bed (one they no longer "
                 f"know is replaced), one donor spent ({needle}) (C-09)")
+    if "return !bed.graft().isEmpty() && Garden.catalog().graft(bed.graft()) != null;" not in _java_body(grafting, "public static boolean holds(VerdantBedBlockEntity bed)"):
+        err("Grafting.holds: one graft the rules know a bed (one they no longer know is replaced) (C-09)")
+    order = [act.find(n) for n in ('RateGate.allow(player, "garden", 4)', "Authority.mayChange(level, player, pos.below())",
+                                   "Grafting.holds(bed)", "Grafting.apply(level, pos, bed, graft);", "donor.consume(1, player)")]
+    if -1 in order or order != sorted(order):
+        err("OrganismCropBlock.graftBed: rate, Authority, the held graft, then the graft and the one donor spent (C-09, GC-07)")
+    if re.search(r"consume\(|Authority|RateGate|getInventory\(|tell\(", applied) or applied.count(";") != 3:
+        err("Grafting.apply: sets the graft, forgets the verdict, shows the particles, and nothing else (GC-P87)")
     if "InteractionResult.FAIL" in act:
         err("OrganismCropBlock.graftBed: a refused graft consumes the use (CONSUME), so the donor's own use never plants it (C-09)")
     # Clearing, and only growth clears.
     if "bed.clearGraftUnlessFor(organismId());" not in grow or grow.find("bed.clearGraftUnlessFor(") > grow.find("bed.awake()"):
         err("OrganismCropBlock.grow: another organism's growth clears the bed's graft, before the dormant check (C-09)")
     for path in sorted(root.rglob("*.java")):
-        if re.search(r"\.(setGraft|clearGraftUnlessFor)\(", java(path)) and path.name != "OrganismCropBlock.java":
-            err(f"concordance/{path.relative_to(root).as_posix()}: only the gesture grafts and only growth clears (C-09)")
+        source, relative = java(path), path.relative_to(root).as_posix()
+        if re.search(r"\.setGraft\(", source) and relative != "garden/Grafting.java":
+            err(f"concordance/{relative}: only Grafting.apply grafts (the gesture's and Foras's one graft; C-09, GC-07)")
+        if re.search(r"\.clearGraftUnlessFor\(", source) and relative != "garden/OrganismCropBlock.java":
+            err(f"concordance/{relative}: only growth clears a graft (C-09)")
+        if "Grafting.apply(" in source and relative not in ("garden/OrganismCropBlock.java", "spirits/GraftKeeping.java", "garden/Grafting.java"):
+            err(f"concordance/{relative}: a graft is applied only by the gesture and by Foras's keeping (GC-07)")
     if re.search(r"(setGraft|clearGraftUnlessFor)\(", report):
         err("OrganismCropBlock.report: a report reads and clears nothing (C-09)")
     # Saved and sent.
@@ -21620,6 +21642,30 @@ def check_garden_pacts(co, root, lang, registered, research):
             "tools/concordance_garden_pacts.py CONSTANTS holds them")
     # GC-06 unit 3
     # GC-07 unit 4
+    # --- GC-07 (GC-P82, GC-P83): the bed index's stores, decided on the entity in hand ---
+    courier_java = text(spirits / "CourierWork.java")
+    refresh = _java_body(reach_java, "private void refresh(ServerLevel level, long now)")
+    for needle in ("keptStores.size() > MAX_STORES", "touching(pos) && CourierWork.plain(entity)", "containers = sorted(keptStores, order);"):
+        if needle not in refresh:
+            err(f"GardenReach.refresh: {needle} (GC-07: the plain containers touching the perch, in the one pass, at most {gp.REACH['MAX_STORES']})")
+    if "getBlockEntity(" in refresh or "CourierWork.container(" in refresh or "CourierWork.store(" in refresh:
+        err("GardenReach.refresh: a store is decided on the entity in hand; the level is never read while a chunk's map is walked (GC-P83, F4)")
+    if "level.isLoaded(pos) && CourierWork.container(level, pos) != null" not in _java_body(reach_java, "public List<BlockPos> stores(ServerLevel level, long now)"):
+        err("GardenReach.stores: read back in loaded chunks only, still a plain container (GC-07)")
+    touching = _java_body(reach_java, "private boolean touching(BlockPos pos)")
+    if "!pos.equals(centre)" not in touching or touching.count("<= 1") != 3:
+        err("GardenReach.touching: the 26 cells round the perch, never the perch (GC-P83)")
+    if "return entity instanceof Container && !(entity instanceof WorldlyContainer);" not in _java_body(courier_java, "static boolean plain(") \
+            or "return plain(entity) ? (Container) entity : null;" not in _java_body(courier_java, "static @Nullable Container container("):
+        err("CourierWork: one plain-container rule (plain); container reads through it (GC-P83)")
+    if "NO_DEVICES, true)" not in _java_body(reach_java, "public static GardenReach withStores(BoundWill record)") \
+            or "GardenPacts.benefits(record, bed.keeper())" not in _java_body(reach_java, "public static GardenReach withStores(BoundWill record)"):
+        err("GardenReach.withStores: the beds the pact benefits and the stores touching the perch, no devices (GC-07)")
+    for cls, names in GC07_GRAFT_TESTS.items():
+        source = (tests / f"{cls}.java").read_text(encoding="utf-8") if (tests / f"{cls}.java").is_file() else ""
+        for name in names:
+            if not re.search(rf"public void {name}\(GameTestHelper \w+\)", source):
+                err(f"{cls}: missing the garden cohort's GC-07 game test {name}")
     # GC-08 unit 5
     # GC-09 unit 6
 
@@ -25390,6 +25436,11 @@ GC06B_TESTS = {
 # Each later unit's tables (GC-06 to GC-09) under its line.
 # GC-06 unit 3
 # GC-07 unit 4
+# Concordance garden cohort, GC-07 (check_garden_pacts): the graft extracted, the bed index's stores, Foras's service.
+GC07_GRAFT_TESTS = {
+    "ConcordanceGardenGameTests": ["theGraftGestureBehavesAsBefore", "aGraftGainsOnlyWhereEveryFitIsNoWorseAndOneBetter",
+                                   "theGardenReachIndexesStoresTouchingThePerch"],
+}
 # GC-08 unit 5
 # GC-09 unit 6
 # GC-04 (GB24): Stolas's Flashjack draws these six zero-thickness box-UV cubes on both faces, as the owner made them (D-D3
