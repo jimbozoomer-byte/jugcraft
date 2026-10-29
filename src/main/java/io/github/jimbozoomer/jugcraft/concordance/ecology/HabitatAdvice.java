@@ -22,6 +22,10 @@ import org.jspecify.annotations.Nullable;
  * <li>{@code grafts}: the niches the plant would grow by under each graft its bed could take now (by id, in the caller's
  * order; empty when its bed carries one already). The first that alone raises it a step on this reading is named beside
  * the change (the Dewlit graft where it alone would raise a Sunpetal a step: at light 9 to 12).</li>
+ * <li>Concordance garden cohort, GC-09 (GC-P137; docs/features/amdusias-pact.md): a reading a canopy sheltered keeps its
+ * shelter through every change tried ({@link Habitat#with}, {@link Habitat#withStrain}), so a strain eased is still judged
+ * against the unsheltered area, and the disturbance named is the one the plant reads, the sheltered value growth, the
+ * Inspect page, the Gauge and Jade show.</li>
  * </ul>
  * Bounded: at most {@value #MOST_VERDICTS} verdicts a call besides one for each graft offered.
  */
@@ -114,8 +118,8 @@ public final class HabitatAdvice {
 				if (value < 0 || value > most) {
 					continue;
 				}
-				Habitat changed = easing ? new Habitat(habitat.moisture(), habitat.light(), habitat.nutrients(), habitat.diversity(),
-						habitat.disturbance(), value) : habitat.with(factor, value);
+				// GC-09 (GC-P137): a changed strain keeps a canopy's shelter, so its reading is still the one growth would read.
+				Habitat changed = easing ? habitat.withStrain(value) : habitat.with(factor, value);
 				if (reaches(niche, changed, goal)) {
 					return value;
 				}

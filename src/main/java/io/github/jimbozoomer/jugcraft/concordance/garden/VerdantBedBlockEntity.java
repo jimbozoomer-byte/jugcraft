@@ -195,14 +195,44 @@ public class VerdantBedBlockEntity extends BlockEntity {
 	 * age, without ever taking a sample, so no reader spends the level's allowance (Garden.budget) and none can starve growth
 	 * of its readings. Null while it holds no sample (none since it was loaded, or one forgotten). The bed's moisture and
 	 * nutrients, the light at the plant and the strain growth would count are read now, as {@link #habitat} reads them; only the
-	 * area is the sample's. It only reads. Server only.
+	 * area is the sample's. It only reads. Server only. Since GC-09 under the largest canopy covering it ({@link #sheltered}),
+	 * for the plant a canopy shelters only.
 	 */
 	public @Nullable Habitat cachedHabitat(ServerLevel level) {
 		if (area == null) {
 			return null;
 		}
 		BlockPos plant = worldPosition.above();
-		return Sampler.habitat(moisture(), level.getRawBrightness(plant, 0), nutrients, area, strainNow());
+		// GC-09 (GC-P122): a canopy's shelter for the plant above, applied here once, so growth and every reader agree.
+		return sheltered(level, Sampler.habitat(moisture(), level.getRawBrightness(plant, 0), nutrients, area, strainNow()));
+	}
+
+	/**
+	 * Concordance garden cohort, GC-09 (GC-S21, GC-P122): {@code habitat} as the plant above reads it under the largest canopy
+	 * covering this bed now (Canopies.damping, never a sum), or unchanged: no canopy is kept in the level, nothing a canopy
+	 * shelters stands above (a Verdant Heart, which beats on this same reading; a device; bare soil), or the plant wants the
+	 * stir (Niche.wantsStir, read in the niche this bed gives it) and no canopy over it was answered "shelter all". Reads only:
+	 * one block state, at most one block entity and one chunk's canopies.
+	 */
+	private Habitat sheltered(ServerLevel level, Habitat habitat) {
+		if (!Canopies.any(level)) {
+			return habitat;
+		}
+		Organism plant = canopyPlant(level);
+		int damping = plant == null ? 0 : Canopies.damping(level, worldPosition, niche(plant).wantsStir(), level.getGameTime());
+		return damping == 0 ? habitat : habitat.sheltered(damping);
+	}
+
+	/**
+	 * GC-09: the plant a canopy may shelter on this bed: the organism crop above it, or the organism a Habitat Gauge above it is
+	 * attuned to (so the Gauge reads what that crop would); null for anything else. Reads only.
+	 */
+	public @Nullable Organism canopyPlant(ServerLevel level) {
+		BlockPos above = worldPosition.above();
+		if (level.getBlockState(above).getBlock() instanceof OrganismCropBlock crop) {
+			return crop.organism();
+		}
+		return level.getBlockEntity(above) instanceof HabitatGaugeBlockEntity gauge ? Garden.catalog().organism(gauge.attuned()) : null;
 	}
 
 	/** Forgets the area's sample, so the next reading takes a fresh one (a test changes the area round it). */
@@ -290,6 +320,11 @@ public class VerdantBedBlockEntity extends BlockEntity {
 		if (habitat != null) {
 			player.sendSystemMessage(ComposeText.show(Text.of("ecology.habitat", habitat.moisture(), habitat.light(),
 					habitat.nutrients(), habitat.diversity(), habitat.disturbance())));
+			// GC-09: what a canopy took from the stir, as growth reads it.
+			Text sheltered = HabitatInspection.sheltered(habitat);
+			if (sheltered != null) {
+				player.sendSystemMessage(ComposeText.show(sheltered));
+			}
 		}
 		// Concordance Chunk C (C-08): its strain, as growth will count it.
 		for (Text line : notes(null)) {

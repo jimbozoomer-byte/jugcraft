@@ -75,6 +75,8 @@ public final class MagicGlance {
 			Map.entry(JADE + "pact.note.graft_keeping.no_host", MagicArt.Mark.MOON),
 			// GC-08 unit 5
 			// GC-09 unit 6
+			Map.entry(JADE + "sheltered", MagicArt.Mark.TICK),
+			Map.entry(ECOLOGY + "sheltered", MagicArt.Mark.TICK),
 			Map.entry("message.jugcraft.concordance.disabled", MagicArt.Mark.LOCK),
 			Map.entry("compose.jugcraft.diagnostic.conflicting_agreement", MagicArt.Mark.CROSS),
 			Map.entry(JADE + "dormant", MagicArt.Mark.MOON),

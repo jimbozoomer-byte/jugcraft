@@ -18,7 +18,9 @@ import org.jspecify.annotations.Nullable;
  * habitat there every {@value #GAUGE_TICKS} ticks (through the bed's sample, so it costs no more than a plant) and
  * gives a comparator signal: in {@link Mode#SUITABILITY}, how well its attuned organism would grow (15 thriving, 8
  * slowly, 0 not at all); in a factor's mode, that factor scaled to 0 to 15. The gauge itself is not a plant, so the
- * diversity it reads is its neighbours'.
+ * diversity it reads is its neighbours'. Since the garden cohort (GC-09) a canopy over its bed shelters the organism it is
+ * attuned to, so it reads what that crop would (VerdantBedBlockEntity.canopyPlant), and it keeps what the canopy took for
+ * Jade, in memory only.
  */
 public class HabitatGaugeBlockEntity extends LivingDeviceBlockEntity {
 	public static final int GAUGE_TICKS = 40;
@@ -50,6 +52,8 @@ public class HabitatGaugeBlockEntity extends LivingDeviceBlockEntity {
 	/** The organism suitability is judged for ("" until a crop is used on it). */
 	private String attuned = "";
 	private int signal;
+	/** GC-09 (GC-P125): what a canopy took from the stir its last reading read (0: none); memory only, never saved, sent to Jade. */
+	private int sheltered;
 
 	public HabitatGaugeBlockEntity(BlockPos pos, BlockState state) {
 		super(Garden.GAUGE_ENTITY, pos, state);
@@ -65,6 +69,11 @@ public class HabitatGaugeBlockEntity extends LivingDeviceBlockEntity {
 
 	public int signal() {
 		return signal;
+	}
+
+	/** GC-09: what a canopy took from the stir its last reading read. */
+	public int sheltered() {
+		return sheltered;
 	}
 
 	public void cycle(ServerLevel level) {
@@ -89,6 +98,7 @@ public class HabitatGaugeBlockEntity extends LivingDeviceBlockEntity {
 	/** Reads the habitat now and sets the signal (and the bulb); returns the signal. */
 	public int read(ServerLevel level) {
 		int value = 0;
+		sheltered = 0;
 		if (!Garden.enabled()) {
 			status("disabled");
 		} else if (!awake) {
@@ -97,6 +107,7 @@ public class HabitatGaugeBlockEntity extends LivingDeviceBlockEntity {
 			status("no_bed");
 		} else {
 			Habitat habitat = bed.habitat(level);
+			sheltered = habitat == null ? 0 : habitat.shelter();
 			if (habitat == null) {
 				status("waiting");
 			} else if (mode.factor != null) {

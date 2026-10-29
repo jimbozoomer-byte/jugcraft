@@ -19583,6 +19583,92 @@ def check_ecology(co, root, lang, registered, research):
                 f"encyclopedia.{MOD}.inspect.garden.habitat", f"encyclopedia.{MOD}.inspect.garden.here"):
         if key not in lang:
             err(f"garden: missing lang {key}")
+    # Concordance garden cohort, GC-09 (GC-S21, GC-P122 to GC-P125, GC-P137): a canopy's shelter is pure, damps only the stir
+    # a crop reads, never below 0, never a sum, never a Heart's, never the strain; every reader says so from the live
+    # reading, and the bed's saved and sent note never does; the canopies are memory only.
+    habitat_java = java("ecology/Habitat.java")
+    shelter = _java_body(habitat_java, "public Habitat sheltered(int damping)")
+    if "record Habitat(int moisture, int light, int nutrients, int diversity, int disturbance, int strain, int shelter)" not in habitat_java \
+            or "this(moisture, light, nutrients, diversity, disturbance, strain, 0);" not in habitat_java \
+            or "this(moisture, light, nutrients, diversity, disturbance, 0, 0);" not in habitat_java \
+            or "disturbance + shelter > Factor.DISTURBANCE.max" not in habitat_java \
+            or "return Math.min(disturbance + shelter + strain, Factor.DISTURBANCE.max);" not in _java_body(habitat_java, "public int strained()") \
+            or "Math.min(area, Math.max(shelter, damping))" not in shelter or "if (damping < 0)" not in shelter \
+            or re.search(r"shelter \+ damping|damping \+ shelter", shelter):
+        err("ecology/Habitat.java: shelter is a 7th component (0 by every earlier constructor); sheltered takes the larger of "
+            "the taken and the damping from the unsheltered area, never the sum, never below 0; strained() counts the strain "
+            "against the unsheltered area (GC-P123)")
+    verdict_java = java("ecology/Verdict.java")
+    reasons = _java_body(verdict_java, "public List<Text> reasons(Niche niche, Habitat habitat)")
+    if "range.judge(habitat.strained())" not in _java_body(verdict_java, "public static Verdict of(Niche niche, Habitat habitat)") \
+            or reasons.count("habitat.unsheltered(), habitat.strain()") != 2:
+        err("ecology/Verdict.java: of judges the strain on Habitat.strained (undamped); reasons' strained lines show the "
+            "unsheltered area (GC-P123)")
+    if "return range(Factor.DISTURBANCE).idealMin() > 0;" not in _java_body(java("ecology/Niche.java"), "public boolean wantsStir()"):
+        err("ecology/Niche.java: wantsStir is the ideal disturbance starting above 0 (GC-P122)")
+    if 'habitat.shelter() > 0 ? Text.of("ecology.sheltered", habitat.shelter(), habitat.unsheltered()) : null' not in inspection \
+            or inspection.count("addSheltered(out, state.habitat());") != 2 \
+            or '"ecology.inspect.disturbance_strained", state.habitat().unsheltered()' not in line:
+        err("ecology/HabitatInspection.java: a sheltered reading's line, on both Inspect page forms, and a strained disturbance "
+            "row that adds the strain to the unsheltered area, as Verdict.of counts it (GC-P125)")
+    for path in sorted((root / "ecology").glob("*.java")) + sorted(garden.glob("*.java")) + sorted((root / "spirits").glob("*.java")):
+        if path.name != "Habitat.java" and re.search(r"new Habitat\((?:[^(),]*(?:\([^()]*\))?[^(),]*,){6}", path.read_text(encoding="utf-8")):
+            err(f"concordance/{path.parent.name}/{path.name}: only Habitat.sheltered makes a sheltered reading (GC-P123; "
+                "HabitatAdvice keeps a shelter with with/withStrain, GC-P137)")
+    sheltering = _java_body(bed, "private Habitat sheltered(ServerLevel level, Habitat habitat)")
+    plant = _java_body(bed, "public @Nullable Organism canopyPlant(ServerLevel level)")
+    order = [sheltering.find(n) for n in ("Canopies.any(level)", "canopyPlant(level)",
+                                          "Canopies.damping(level, worldPosition, niche(plant).wantsStir(), level.getGameTime())",
+                                          "habitat.sheltered(damping)")]
+    if "return sheltered(level, Sampler.habitat(" not in _java_body(bed, "public @Nullable Habitat cachedHabitat(ServerLevel level)") \
+            or -1 in order or order != sorted(order) or "instanceof OrganismCropBlock crop" not in plant \
+            or "instanceof HabitatGaugeBlockEntity gauge" not in plant or re.search(r"VerdantHeart|Gleaner|MulchMaw", plant):
+        err("VerdantBedBlockEntity: cachedHabitat applies the largest canopy over it to the plant above alone (a crop, or a "
+            "Gauge's attuned organism), never a Heart; none read while no canopy is kept (GC-P122)")
+    crop_report = _java_body(crop_block, "public void report(ServerLevel level, BlockPos pos, BlockState state, ServerPlayer player)")
+    if "HabitatInspection.sheltered(habitat)" not in _java_body(bed, "public void report(ServerLevel level, ServerPlayer player)") \
+            or "HabitatInspection.sheltered(habitat)" not in crop_report:
+        err("VerdantBedBlockEntity.report and OrganismCropBlock.report: say Sheltered by Amdusias where they say the habitat (GC-P125)")
+    if re.search(r'HabitatInspection\.sheltered\(|"ecology\.sheltered"|\.shelter\(\)',
+                 _java_body(bed, "public void note(Verdict verdict, Habitat habitat, Organism organism)")):
+        err("VerdantBedBlockEntity.note: the saved and sent note never carries a canopy's line, which would outlive it (GC-S21)")
+    canopies = java("Canopies.java", garden)
+    damping = _java_body(canopies, "public static int damping(ServerLevel level, BlockPos bed, boolean wantsStir, long now)")
+    for needle in ("Math.clamp(damping, 0, MAX_DAMPING)", "kept.size() == MAX_BEDS", "now >= refreshedAt && now - refreshedAt < LAPSE_TICKS",
+                   "old != null && old.live(now) && !old.perch().equals(perch)", "new WeakHashMap<>()"):
+        if needle not in canopies:
+            err(f"garden/Canopies.java: {needle} (damping 0..2, at most 16 beds, lapsing 40 ticks after its refresh, one a "
+                "holder, a level's own; GC-P124)")
+    if "most = Math.max(most, canopy.damping());" not in damping or "(canopy.all() || !wantsStir)" not in damping \
+            or re.search(r"\+= ?canopy\.damping\(\)|most \+ canopy", damping):
+        err("Canopies.damping: the largest live canopy over the bed, never the sum; a plant wanting the stir only under 'all'")
+    if re.search(r"ValueOutput|ValueInput|CompoundTag|SavedData|Codec|StreamCodec|PacketByteBuf|ServerPlayNetworking", canopies):
+        err("garden/Canopies.java: memory only, never saved or sent (GC-S21)")
+    # The canopy's constants (GC-P124): CONSTANTS holds them from GC-09b, before his service joins SERVICE_CLASSES.
+    for const, value in co.garden_pacts.CONSTANTS.get("canopy_shelter", {}).get("garden/Canopies.java", {}).items():
+        if not re.search(rf"\bint {const} = {value};", canopies):
+            err(f"concordance/garden/Canopies.java: {const} differs from tools/concordance_garden_pacts.py CONSTANTS ({value}; GC-P124)")
+    for path in sorted(JAVA_ROOT.rglob("*.java")):
+        relative = path.relative_to(JAVA_ROOT).as_posix()
+        if re.search(r"\bCanopies\.", path.read_text(encoding="utf-8")) and relative not in (
+                "concordance/garden/Canopies.java", "concordance/garden/VerdantBedBlockEntity.java", "concordance/spirits/CanopyShelter.java"):
+            err(f"{relative}: only a bed reads the canopies and only Amdusias's service writes them (GC-P124)")
+    gauge_java = java("HabitatGaugeBlockEntity.java", garden)
+    saved = _java_body(gauge_java, "protected void saveAdditional(") + _java_body(gauge_java, "protected void loadAdditional(")
+    if "sheltered = habitat == null ? 0 : habitat.shelter();" not in _java_body(gauge_java, "public int read(ServerLevel level)") or "sheltered" in saved:
+        err("HabitatGaugeBlockEntity: keeps its reading's shelter in memory for Jade, never saved (GC-P125)")
+    provider = java("compat/jade/ConcordanceDataProvider.java", JAVA_ROOT)
+    if 'snapshot.putInt("sheltered", habitat.shelter())' not in _java_body(provider, "public static CompoundTag bedSnapshot(") \
+            or 'snapshot.putInt("sheltered", gauge.sheltered())' not in _java_body(provider, "public static CompoundTag deviceSnapshot(") \
+            or jade_client.count('"tooltip.jugcraft.concordance.jade.sheltered"') != 1 \
+            or jade_client.count('sheltered(tooltip, data.getIntOr("sheltered", 0), ') != 3:
+        err("Jade: a bed's and a Gauge's reading say what a canopy takes from the stir now, from the server's live value, short "
+            "or whole in Jade's details (GC-P125)")
+    if "ecology.sheltered" not in ec.TEXT or "jade.sheltered" not in ec.TOOLTIPS:
+        err("tools/concordance_ecology.py: the canopy's words (ecology.sheltered, jade.sheltered)")
+    advice = java("ecology/HabitatAdvice.java")
+    if advice and "habitat.withStrain(value)" not in advice:
+        err("ecology/HabitatAdvice.java: a changed strain keeps the reading's shelter (withStrain; GC-P137)")
 
 
 def _graft_effect(values, base):

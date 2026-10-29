@@ -22,6 +22,15 @@ public record Niche(Map<Factor, Range> ranges) {
 	}
 
 	/**
+	 * Concordance garden cohort, GC-09 (GC-P122): whether this niche thrives only with some disturbance (its ideal starts
+	 * above 0: a Gloamcap), so a canopy lowering the stir could slow it. A niche that does not is never slowed by one: below
+	 * its ideal top, less stir is as good or better.
+	 */
+	public boolean wantsStir() {
+		return range(Factor.DISTURBANCE).idealMin() > 0;
+	}
+
+	/**
 	 * The values it can live with ({@code min} to {@code max}) and those it thrives on ({@code idealMin} to
 	 * {@code idealMax}), with {@code min <= idealMin <= idealMax <= max}.
 	 */

@@ -8,9 +8,10 @@ to 2 lower, never below nothing. He is the cohort's sixth garden spirit (Bifrons
 service changes no block, item or saved value: a crop under his canopy only reads the stir lower, from a registry held
 in memory that lapses when he stops.
 
-Status: brief only (GC-09a), committed before any of his body files (D-D5), as the contract's per-spirit template asks.
-Nothing of Amdusias is built yet: no entity, pact definition, service, canopy, sound event, lang, body file, audit or
-test. This page holds his character (the contract's Dossier 6), the short words the magic screens are to draw for him
+Status: brief (GC-09a), committed before any of his body files (D-D5), as the contract's per-spirit template asks, then
+the canopy's pure rule and the garden's memory of canopies (GC-09b, [below](#the-canopys-shelter-gc-09b)) with no user
+yet: nothing a player sees changes while no canopy exists. Nothing of Amdusias himself is built yet: no entity, pact
+definition, service, sound event, body file, or audit or test of his own. This page holds his character (the contract's Dossier 6), the short words the magic screens are to draw for him
 and the owner files his body and cues are to use; the runtime files and builders it names are what GC-09 is to build.
 Where it goes beyond Dossier 6 (the amended greeting and its stage direction, the canopy's rule and registry, how his
 body is built, which cue plays which file at what pitch, the short words the screens draw) it is unit 6's proposal
@@ -260,11 +261,106 @@ and whistles): no new file is copied. No voice.
 The library's notices are kept with the originals; provenance as `art/owner-library/PROVENANCE.md` records it. The
 library is unchanged and nothing in it is executed.
 
+## The canopy's shelter (GC-09b)
+
+What GC-09b builds, before any spirit uses it (GC-P122 to GC-P125, GC-P137, with the unit critique's items 3 to 5, 7, 8
+and 11). Nothing calls `Canopies.cover` yet, so no canopy forms and every reading is what it was: a bed asks nothing more
+while no canopy is kept in its level (`Canopies.any`).
+
+- **The pure rule** (`ecology`, still pure): `Habitat` gains a seventh component, `shelter`, 0 through every earlier
+  constructor (so a reading without a canopy is record-equal to what it was). `sheltered(damping)` lowers the area's
+  disturbance by up to the damping, never below 0, and keeps what it took; sheltered again it takes the larger damping
+  from the unsheltered area, never the sum. `unsheltered()` is the area's own; `strained()` counts the strain against
+  it, so a canopy never eases strain; `with` keeps the shelter (within the room a new disturbance leaves) and
+  `withStrain` keeps it whole. `Verdict.of` is unchanged; `Verdict.reasons`' two strained lines show the unsheltered
+  value the strain was counted against. `Niche.wantsStir` is the niche's ideal disturbance starting above 0 (today only
+  Gloamcap's). `HabitatInspection.sheltered` is the line a sheltered reading adds ("Sheltered by Amdusias: the stir here
+  reads 2 lower (4 unsheltered); harvest strain still counts against the unsheltered stir"), at the end of both forms
+  of the Inspect page; a strained disturbance row there adds the strain to the unsheltered area, as `Verdict.of` counts
+  it (the critique's item 7).
+- **The garden's memory** (`garden/Canopies`): per level (a `WeakHashMap`, as the sampling budgets), one canopy a
+  holder (another perch's refused while one stands), its beds indexed by chunk, at most 16, its damping clamped to 0..2,
+  lapsing 40 ticks after its last refresh (a clock run back reads it lapsed), pruned at most once a tick; never saved
+  or sent. A bed reads the largest damping of the live canopies covering it, never their sum, and a plant that wants the
+  stir only from a canopy whose holder answered "shelter all".
+- **One place, every reader:** `VerdantBedBlockEntity.cachedHabitat` builds the reading sheltered for the plant above
+  (a crop, or the organism a Habitat Gauge on the bed is attuned to; never a Verdant Heart, a device or bare soil), so
+  growth, the Inspect page, the Gauge, Marax's reading and Jade read one value. The bed's and the crop's reports add the
+  canopy's line after the habitat (the critique's item 8). The Gauge keeps what its last reading's canopy took, in
+  memory, for Jade. Jade's bed and Gauge snapshots carry `sheltered` (the server's live value), shown whole in Jade's
+  details and short otherwise.
+- **Marax's advice** (`HabitatAdvice`, GC-P137): a changed strain keeps a canopy's shelter (`habitat.withStrain(value)`),
+  so an eased strain is still judged against the unsheltered area.
+
+Decided by the session (none is the owner's):
+
+- **Marax names the value the plant reads.** On a sheltered reading his disturbance advice names the sheltered value
+  (what growth judges, and what the Inspect page, the Gauge and Jade show), and its target is the reading the plant must
+  reach; the alternative, the unsheltered area, would contradict every other reader and cannot be known exactly where
+  the reading is 0 (the canopy then took less than its damping). The cost: where a sheltered reading is 0, the area
+  must rise further than the step named before the plant reads the target; only a plant that wants the stir under a
+  canopy answered "shelter all" (a Gloamcap) is ever told to raise it. The harness below finds the target holds either
+  way.
+- **The note carries no canopy.** The bed's saved and sent note never holds the canopy's line, which would outlive it
+  (the critique's item 4); so a crop's own Jade tooltip, drawn from that note, does not name the canopy, while the bed's
+  and the Gauge's Jade, the Inspect page and both reports do.
+- **Jade's line is short and whole.** The restyle draws Jade's plain view short: the canopy's line there is "Sheltered
+  by Amdusias: -2" with the tick mark (`tools/magic_ui.py` `SENTENCES` and `SENTENCE_MARKS`, `MagicGlance.MARKS`), and
+  whole in Jade's details; so the line is drawn from three calls (the bed's plain view and details, the Gauge's line),
+  where the critique's audit counted two. The Inspect page's and the reports' sentence has the same short form.
+- **No `Canopies.forget` or `Canopies.live`.** The critique's item 5 removes every test's level-wide reading and
+  forgetting; neither then has a caller, so neither is built.
+- **The canopy's constants are audited from GC-09b** (`CONSTANTS["canopy_shelter"]`, the critique's item 11), in
+  `check_ecology`, before his service joins the shared constants rule.
+- **The `HabitatAdvice` edit lands here**, on this line, since unit 3 is in its base; the design left it to a merge.
+- **The registry test's "shelter all" canopy has the smaller damping** (1, the other 2), so a Gloamcap reading 1
+  shows that only the canopy answered "shelter all" counts; with the design's (2 answered, 1 not) it reads 2 either way.
+
+The two server tests of GC-09b (`ConcordanceGardenGameTests`): `aShelteredHabitatKeepsItsStrainedValue` (the pure
+rule's named cases, Marax's advice on a sheltered reading, and a Sunpetal on a real bed under a canopy set by hand,
+sampled through the shared `afterSampling`, with its Inspect page) and
+`theCanopyRegistryTakesTheLargestNeverTheSumAndLapses` (the registry by hand, real ticks). Each asserts only its own
+holders and positions, since the canopies of every test beside it share the level.
+
+**Harnesses (scratch, not in Git), compiled with JDK 21 against the committed `ecology` classes** (`Habitat`
+`ccb59860f259363d2df7dbb894d7d586074a156532627cad9e865d4ba98a0d32`, `Verdict`
+`e4da46f9d9eb2747f83061c4e5318391d8471fa6bfc38c7f6ab85ec3ff64f683`, both the design's exact text; `HabitatInspection`
+`a7578e9af10815331b83ca15e9fd91165c7b05918d4e02496a74f58f5b5c4f28`, the design's with the critique's item 7; `Niche`
+`7ae32a26cd3e7525e84e8454f7f0417e4fdc9f3a85bd6d9712d065033172ebe2`; `HabitatAdvice`
+`19e41b40cb1b8212610a433cd386f4e27d784e281ad88d9fc1188eaa767cc194`):
+
+- The design's shelter harness, extended with `Niche.wantsStir` and the Inspect page's rows, against the classes as
+  they were before GC-09b in a second class loader, over every shipped niche, moisture {0, 2, 4, 7}, light
+  {0, 8, 11, 13, 15}, nutrients {0, 2, 4, 32}, diversity {1, 3, 8}, disturbance 0 to 15, strain 0 to 3 and two
+  dampings 0 to 4: **13,221,792 checks, 0 failures**. Without a canopy every verdict, growth, fit, reason and Inspect row
+  is the old classes'; only disturbance is lowered, by at most the damping, never below 0; `strained()` is unchanged;
+  two canopies give the larger; a crop not wanting the stir is never slower (a canopy of 2 raised a step in 194 Sunpetal,
+  432 Mendvetch and 176 of the Heart's readings with no strain) and a Gloamcap sheltered by 2 is slowed in 528 (why he
+  spares it); Marax's one-change advice on 137,743 sheltered readings holds. With the strain branch as it was (the
+  shelter dropped), 9,056 of those advices would not hold (Gloamcap 288, Mendvetch 4,536, Sunpetal 2,184, the Heart's
+  niche 2,048).
+- Unit 3's advice harness ([Marax's record](marax-pact.md#the-rule-gc-p64)) on the changed classes, unchanged:
+  **30,604,024 checks, 0 failures**, 29.3 s.
+- The same harness with a shelter dimension (every one of its readings also sheltered by 1 to 4; its strain changed with
+  `withStrain`): **151,395,025 checks of its own families, 0 failures** (30,604,016 of them at damping 0: the run
+  above's, less its 8 named cases), and **16,516,020 checks of three new families, 0 failures**: the value named is the one the plant reads; a
+  change applied keeps the shelter; and the change made in the world under the same canopy gives what the advice
+  promises, for 654,422 eased strains and for 860,754 lowering and 151,040 raising advices on sheltered readings (all
+  the raising ones a Gloamcap's). In 69,120 of the raising ones the reading is 0 and the area must rise further than the
+  step named (above).
+
 ## Verification
 
-Not run: nothing of Amdusias is built yet, so no build, game test, client shot or audit exercises him, and nothing of
+Nothing of Amdusias himself is built yet, so no build, game test, client shot or audit exercises him, and nothing of
 unit 6 has run in CI. The line this brief starts from (`4201217b3`, with Foras) is in CI with no result recorded here;
 the newest result it descends from is run 40840353835, green in full on `3bfd63a97`.
+
+GC-09b: no Minecraft jar here, so its Java was parse-checked only (the `ecology` package, all but its JSON parser,
+also compiled with JDK 21 for the harnesses above); its two server tests have not run. Run and passed locally:
+`tools/generate_material_data.py` and `tools/owner_art.py` (the generated difference: the two lang sentences and their two
+short forms), `owner_art.py --check`, `tools/check_mod_data.py` (with `check_ecology`'s GC-09 block),
+`scripts/check_repository.py`, `concordance_journey.py --check`, `concordance_economy.py` (gaining cycles: none),
+`check_icon_maps.py`, `tools/magic_ui.py`, the world designer's model tests, `scripts/tests` and `git diff --check`.
 
 For this brief only:
 

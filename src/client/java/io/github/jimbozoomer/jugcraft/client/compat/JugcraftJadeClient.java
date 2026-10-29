@@ -351,8 +351,8 @@ public final class JugcraftJadeClient implements JugcraftJadePlugin.ClientRegist
 
 	/**
 	 * Magic interfaces unit 2: a Verdant Bed short: dormant, or its growth with its mark ("Thriving"); its nutrients with the
-	 * bed glyph; the first reason it gives, short ("Moisture too low"); its strain. Jade's details show its habitat and every
-	 * reason whole.
+	 * bed glyph; the first reason it gives, short ("Moisture too low"); its strain; since the garden cohort (GC-09) what a
+	 * canopy takes from its stir. Jade's details show its habitat and every reason whole.
 	 */
 	private static void bedGlances(ITooltip tooltip, CompoundTag data, int capacity) {
 		String growth = data.getStringOr("growth", "");
@@ -363,6 +363,7 @@ public final class JugcraftJadeClient implements JugcraftJadePlugin.ClientRegist
 		}
 		line(tooltip, glyph("bed"), Component.translatable("tooltip.jugcraft.concordance.jade.nutrients", data.getIntOr("nutrients", 0), capacity));
 		reasonGlances(tooltip, data.getStringOr("reasons", ""), data.getIntOr("strain", 0));
+		sheltered(tooltip, data.getIntOr("sheltered", 0), false);
 	}
 
 	/** A bed's first reason short ("Moisture too low") and its strain ("Strain 2/8"), each with its mark (a bed's, a crop's). */
@@ -533,6 +534,21 @@ public final class JugcraftJadeClient implements JugcraftJadePlugin.ClientRegist
 	private static void strain(ITooltip tooltip, int strain) {
 		if (strain > 0) {
 			tooltip.add(Component.translatable("compose.jugcraft.ecology.strain", strain, Habitat.MAX_STRAIN));
+		}
+	}
+
+	/**
+	 * Concordance garden cohort, GC-09: what a canopy takes from the stir a bed's or a Gauge's reading reads now (the server's
+	 * live value, never the bed's saved note), whole in Jade's details and short otherwise ("Sheltered by Amdusias: -2").
+	 */
+	private static void sheltered(ITooltip tooltip, int sheltered, boolean details) {
+		if (sheltered > 0) {
+			Component line = Component.translatable("tooltip.jugcraft.concordance.jade.sheltered", sheltered);
+			if (details) {
+				tooltip.add(line);
+			} else {
+				glance(tooltip, line);
+			}
 		}
 	}
 
@@ -720,6 +736,7 @@ public final class JugcraftJadeClient implements JugcraftJadePlugin.ClientRegist
 					}
 					verdict(tooltip, data.getStringOr("growth", ""), data.getStringOr("reasons", ""));
 					strain(tooltip, data.getIntOr("strain", 0));
+					sheltered(tooltip, data.getIntOr("sheltered", 0), true);
 				}
 				if (capacity >= 0) {
 					// Concordance Chunk C (C-09): the graft it carries, when the rules know it.
@@ -750,6 +767,7 @@ public final class JugcraftJadeClient implements JugcraftJadePlugin.ClientRegist
 						tooltip.add(Component.translatable("tooltip.jugcraft.concordance.jade.gauge",
 								Component.translatable(mode.equals("suitability") ? "compose.jugcraft.ecology.gauge.suitability" : "compose.jugcraft.factor." + mode),
 								data.getIntOr("signal", 0)));
+						sheltered(tooltip, data.getIntOr("sheltered", 0), accessor.showDetails());
 					}
 				}
 				String sky = data.getStringOr("sky", "");

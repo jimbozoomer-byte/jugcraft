@@ -1223,6 +1223,10 @@ SENTENCES = {
     _JADE + "pact.note.graft_keeping.no_host": ("Nothing to graft", (), "Nothing to graft", "jade"),
     # GC-08 unit 5
     # GC-09 unit 6
+    # GC-09: what a canopy takes from the stir: Jade's line on a bed and a Gauge (the server's live value), and the Inspect
+    # page's and the reports' sentence.
+    _JADE + "sheltered": ("Sheltered by Amdusias: -%1$s", (2,), "Sheltered by Amdusias: -2", "jade"),
+    _ECOLOGY + "sheltered": ("Sheltered by Amdusias: -%1$s", (2, 4), "Sheltered by Amdusias: -2", "jade"),
     "message.jugcraft.concordance.disabled": ("Switched off", (), "Switched off", "jade"),
     "compose.jugcraft.diagnostic.conflicting_agreement": ("A copy: does nothing", (), "A copy: does nothing", "jade"),
     _JADE + "body": ("Integrity %1$s/%2$s", (10, 20, 300, 400), "Integrity 10/20", "jade"),
@@ -1288,6 +1292,7 @@ SENTENCE_MARKS = {
     _JADE + "pact.note.graft_keeping.no_host": "moon",
     # GC-08 unit 5
     # GC-09 unit 6
+    _JADE + "sheltered": "tick", _ECOLOGY + "sheltered": "tick",
 }
 SENTENCE_PREFIX = "screen.jugcraft.glance."
 # The roster screen's own short words (screen.jugcraft.roster.short.<name>; its whole sentences stay the messages, the

@@ -93,6 +93,9 @@ CONSTANTS = {"strain_tending": {"spirits/StrainTending.java": {"MEMORY": 16, "MA
              "graft_keeping": {"spirits/GraftKeeping.java": {"MAX_ASKED": 8}},
              # GC-08 unit 5
              # GC-09 unit 6
+             # GC-09: a canopy lowers the stir a crop reads by at most 2, over at most 16 beds at once, and lapses 40 ticks
+             # after its last refresh (garden/Canopies, held by check_ecology from GC-09b; his service's own come with it).
+             "canopy_shelter": {"garden/Canopies.java": {"MAX_DAMPING": 2, "MAX_BEDS": 16, "LAPSE_TICKS": 40}},
              }
 REACH = {"MAX_BEDS": 64, "REFRESH_TICKS": 200}  # Java: spirits/GardenReach (GC-P2)
 # GE8: mechanically distinct services. Each garden work changes one kind of state through one call that only its service

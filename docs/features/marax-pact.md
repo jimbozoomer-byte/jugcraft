@@ -215,6 +215,11 @@ prefix (GC-06b). For a crop's niche and one reading of its habitat:
 - The graft clause: the first graft by id whose host is the plant, offered only while the bed carries none, that alone
   would raise it a step on this reading (the Dewlit graft for a Sunpetal at light 9 to 12).
 - Bounded: at most `MOST_VERDICTS` (129) verdicts a call, and one a graft offered.
+- **On a sheltered reading** (since the garden cohort's GC-09b, GC-P137: [Amdusias's canopy](amdusias-pact.md#the-canopys-shelter-gc-09b)).
+  Decided by the session: the disturbance named is the one the plant reads under the canopy, the value growth, the
+  Inspect page, the Gauge and Jade show. An eased strain keeps the canopy's shelter (`Habitat.withStrain`), so it is
+  still counted against the unsheltered area. The harness below was first run before that line changed; re-run on the
+  changed classes it is unchanged, and Amdusias's record gives its run with a shelter dimension.
 
 **Its harness (scratch, not in Git).** A brute-force harness written for the unit's design checks the rule over every
 shipped niche (Dewmoss, Gloamcap, Mendvetch, Sunpetal, the Verdant Heart's) and Sunpetal under Dewlit, 524,288 readings
