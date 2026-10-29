@@ -71,6 +71,7 @@ public final class CommissionMenu extends AbstractContainerMenu {
         boolean done=id>=8?HalloweenQuests.complete(owner,id-8)
             :id<4?TownCommissions.deliver(owner,id):TownCommissions.claim(Jugs.data(owner.level().getServer()),owner.getUUID(),id-4,TownCommissions.cycle(owner));
         if(!done)owner.sendOverlayMessage(Component.translatable("message.jugcraft.commission.unavailable"));
+        else if(id>=4&&id<8)BountyList.questCompleted(owner);
         broadcastChanges();return done;
     }
     @Override public ItemStack quickMoveStack(Player player,int slot){return ItemStack.EMPTY;}

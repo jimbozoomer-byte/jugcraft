@@ -4,6 +4,7 @@ the town itself (tools/town.py)."""
 from PIL import Image
 
 import halloween_quests
+import bounty_list
 import town_lang
 import town_commissions
 
@@ -130,6 +131,7 @@ def assets(assets_dir, write, lang):
     town_commissions.assets(assets_dir, write, lang)
     lang.update(town_lang.lang())
     lang.update(halloween_quests.lang())
+    lang.update(bounty_list.lang())
     lang["entity.jugcraft.town_guard_mecha"] = "City Guard Walker"
 
 

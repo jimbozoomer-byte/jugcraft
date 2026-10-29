@@ -40,14 +40,19 @@ public class HalloweenQuestsGameTests {
 			long before = data.balance(id);
 			h.assertTrue(HalloweenQuests.complete(player, 0), "Carrying them all hands the errand in");
 			h.assertTrue(player.getInventory().getItem(1).getCount() == blessing.count(), "The named items are untouched");
-			int left = player.getInventory().getItem(0).getCount() + player.getInventory().getItem(2).getCount();
+			// The gift and the book go into emptied slots, so count by item: the named ones and 2 plain ones are left.
+			int left = player.getInventory().countItem(blessing.itemType()) - blessing.count();
 			h.assertTrue(left == 2, "Exactly " + blessing.count() + " plain items were taken, leaving " + left + " of 8");
 			h.assertTrue(data.balance(id) == before + blessing.reward(), "It pays " + blessing.reward() + " Jugs");
 			h.assertTrue(player.getInventory().countItem(blessing.giftType()) == blessing.gifts(), "It gives its decoration");
+			h.assertTrue(player.getInventory().countItem(Items.WRITTEN_BOOK) == 1 && BountyList.given(data, id),
+					"The first quest completed gives the Bounty List");
 			player.getInventory().setItem(0, new ItemStack(blessing.itemType(), blessing.count()));
 			h.assertTrue(!HalloweenQuests.complete(player, 0), "It is done once a Halloween");
 			var restored = Jugs.Data.CODEC.parse(JsonOps.INSTANCE, Jugs.Data.CODEC.encodeStart(JsonOps.INSTANCE, data).getOrThrow()).getOrThrow();
 			h.assertTrue(HalloweenQuests.done(restored, id, 0), "Done survives a save");
+			h.assertTrue(BountyList.given(restored, id) && !BountyList.questCompleted(player)
+					&& player.getInventory().countItem(Items.WRITTEN_BOOK) == 1, "The Bounty List is given once, and that survives a save");
 			// A purse too full for the Jugs: the errand waits and nothing is taken.
 			HalloweenQuests.Quest treats = HalloweenQuests.QUESTS.get(4);
 			data.add(id, TownShops.get().maxBalance);

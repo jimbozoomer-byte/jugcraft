@@ -115,6 +115,7 @@ public final class HalloweenQuests {
 		data.add(player.getUUID(), quest.reward());
 		data.setDirty();
 		player.getInventory().placeItemBackInInventory(new ItemStack(quest.giftType(), quest.gifts()), Prediction.SERVER_ONLY);
+		BountyList.questCompleted(player);
 		return true;
 	}
 

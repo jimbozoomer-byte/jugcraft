@@ -17250,6 +17250,27 @@ TOWN_WATER_LEAKY = re.compile(r"(wall|slab|stairs|fence|pane|bars|lantern|chain|
                               r"button|lever|torch|carpet|banner|plate|hopper)")
 
 
+def check_bounty_list():
+    """The Bounty List (tools/bounty_list.py, docs/features/bounty-list.md): Java's table is the tool's, in its order;
+    every boss is a named creature, every lair item a registered item, and every page has its words and fits."""
+    import bounty_list as bl
+    java = (JAVA_ROOT / "town" / "BountyList.java").read_text(encoding="utf-8")
+    found = re.findall(r'new Boss\("([a-z_]+)", "([a-z_]+)"\)', java)
+    expected = [(boss, item) for boss, item, _words in bl.BOSSES]
+    if found != expected:
+        err(f"BountyList.BOSSES {found} != tools/bounty_list.py {expected}")
+    lang = load(ASSETS / "lang" / "en_us.json") or {}
+    for boss, item, words in bl.BOSSES:
+        if f"entity.{MOD}.{boss}" not in lang:
+            err(f"tools/bounty_list.py: {boss} is not a named creature")
+        if f"item.{MOD}.{item}" not in lang:
+            err(f"tools/bounty_list.py: {boss}'s {item} is not a registered item")
+        if lang.get(f"bounty_list.{MOD}.{boss}") != words:
+            err(f"lang: {boss}'s Bounty List page is missing or stale")
+        if len(words) > bl.PAGE_LIMIT:
+            err(f"tools/bounty_list.py: {boss}'s page is {len(words)} characters, over {bl.PAGE_LIMIT}")
+
+
 def check_halloween_quests():
     """Halloween quests (tools/halloween_quests.py, docs/features/halloween-quests.md): Java's table is the tool's, in its
     order; every item asked for or given is registered, and every job is one some town resident has."""
@@ -24392,6 +24413,7 @@ def main():
     check_pixel_hollows()
     check_town()
     check_halloween_quests()
+    check_bounty_list()
     check_diagonal_connections()
     check_aluminum_bootstrap()
     check_concordance(registered)
