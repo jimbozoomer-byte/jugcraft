@@ -668,7 +668,7 @@ public class ConcordanceJourneyGameTests {
 			"pact_perch", "spirit_anchor", "courier_post", "porter_key");
 	/** The garden cohort, GC-03: the recipes of tools/acquisition.py GARDEN_PACTS (check_acquisition holds the two equal); GC-04 adds the perch and Mendvetch, GC-05 the Verdant Heart and the Gleaner. */
 	private static final List<String> GARDEN_RECIPES = List.of("sunpetal", "verdant_bed", "bonding_charm", "pact_perch", "mendvetch", "verdant_heart",
-			"gleaner");
+			"gleaner", "dewmoss");
 
 	// The pact hall in the yard (jugcraft-test:drone_depot, its floor laid first). WorkshopHands' corner (x 1 to 3, z 2 to 5)
 	// keeps the workshop hand's post, chest, crucible and anchor, as the hand's own tests place them.

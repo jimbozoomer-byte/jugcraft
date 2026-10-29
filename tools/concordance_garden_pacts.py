@@ -41,6 +41,7 @@ MASTERY_SPIRITS = 3  # Java: GardenPacts.MASTERY_SPIRITS: the mastered rule's di
 ACTS = ["tend", "device",
         # GC-06 unit 3
         # GC-07 unit 4
+        "graft",
         # GC-08 unit 5
         # GC-09 unit 6
         ]
@@ -55,6 +56,10 @@ HOOKS = {"tend": ("garden/VerdantBedBlock.java", "static void tendBy(",
                     "useEmpty(device, server, serverLevel);", "}\n\t\treturn InteractionResult.SUCCESS;"),
          # GC-06 unit 3
          # GC-07 unit 4
+         # GC-07: a crop grafted by hand with its donor (after the donor is spent, before the gesture's success).
+         "graft": ("garden/OrganismCropBlock.java", "private InteractionResult graftBed(",
+                   "PactObligations.performed(level, player, PactObligations.Act.GRAFT, pos.below());",
+                   "donor.consume(1, player);", "return InteractionResult.SUCCESS;"),
          # GC-08 unit 5
          # GC-09 unit 6
          }
@@ -62,6 +67,7 @@ HOOKS = {"tend": ("garden/VerdantBedBlock.java", "static void tendBy(",
 OBLIGATIONS = {"strain_tending": "tend", "verdance_carrying": "device",
                # GC-06 unit 3
                # GC-07 unit 4
+               "graft_keeping": "graft",
                # GC-08 unit 5
                # GC-09 unit 6
                }
@@ -73,6 +79,8 @@ CONSTANTS = {"strain_tending": {"spirits/StrainTending.java": {"MEMORY": 16, "MA
              "verdance_carrying": {"spirits/VerdanceCarrying.java": {"MOVE_MAX": 8, "MAX_BATCHES": 3, "MAX_ASKED": 8}},
              # GC-06 unit 3
              # GC-07 unit 4
+             # GC-07: at most 8 places asked a think.
+             "graft_keeping": {"spirits/GraftKeeping.java": {"MAX_ASKED": 8}},
              # GC-08 unit 5
              # GC-09 unit 6
              }
@@ -89,6 +97,10 @@ DISTINCT = {
                           "also": "heart.pourInto(pylon, level, MAX_BATCHES)"},
     # GC-06 unit 3
     # GC-07 unit 4
+    # GC-07: Foras's; "also" is his second call (the donor's one transaction), made once by his class (check_garden_pacts).
+    "graft_keeping": {"verb": "transform, spending a donor", "state": "a Verdant Bed's graft",
+                      "call": "Grafting.apply(level, host.crop(), host.bed(), host.graft())", "class": "GraftKeeping",
+                      "also": "spend(storage, donor)"},
     # GC-08 unit 5
     # GC-09 unit 6
 }
@@ -135,6 +147,7 @@ MESSAGES = {
         "device": "read or set an awake Verdant Heart, Gleaner, Mulch Maw or Habitat Gauge",
         # GC-06 unit 3
         # GC-07 unit 4
+        "graft": "graft a host crop with its donor",
         # GC-08 unit 5
         # GC-09 unit 6
     }.items()},
@@ -216,6 +229,41 @@ PAGES = [
      "in a ring of dust.", ("garden_regard", "understood")),
     # GC-06 unit 3
     # GC-07 unit 4
+    # GC-07: Foras's (Dossier 4), their numbers read from his offer and the tables that hold the Java's, as Buer's and
+    # Bathin's. No source quotation (GC-S14); his objection's page is the accord's, worded with his answers' own words.
+    ("text", "Foras",
+     "Foras, a spirit of the old books, keeps what would be lost and argues kindly with whoever wastes it. Build a **Pact "
+     "Perch** with a **chest** (or another plain container) touching it and a crop that takes a graft (a **Sunpetal**, "
+     "which takes **Dewlit** from a Dewmoss) on a **Verdant Bed** of yours within "
+     f"{pacts.SPIRITS['foras']['pact']['service']['radius']} blocks, and use it: a tall elder in a robe of bark and moss "
+     "stands beside the perch, tips his acorn cap, and names every term before anything is spent. Without a store he does "
+     "not come: \"Where shall I keep the cuttings? Set a store beside me.\"", ("garden_regard", "understood")),
+    ("text", "His Service",
+     f"At any hour, while you are within {workers.PACT['REACH']} blocks of the perch, he grafts a host crop on a bed of "
+     "yours or your party's in his area with one donor (a **Dewmoss** for a Sunpetal) from the store beside him, one graft "
+     f"at a time, at most {pacts.SPIRITS['foras']['pact']['service']['quota']} a game day. He takes only from a store you "
+     "could open and change yourself, grafts only a crop and bed you could change by hand, and never replaces a graft the "
+     "rules know. A graft stays through every harvest and replanting of its host; if another crop grows there it is lost, "
+     "and when the host returns he grafts it again. After each graft he says how many he has made today.",
+     ("garden_regard", "understood")),
+    ("text", "The Logician's Objection",
+     "A Dewlit graft narrows what a Sunpetal can bear: on a dry bed it would harm. So Foras grafts only where the graft "
+     "makes the host's place suit it better, read from the bed's last reading, and names the rest: \"Three hosts here "
+     "would gain nothing; shall I graft them anyway?\" Answer on the pact's page at the perch: **"
+     + pacts.SERVICE_WORDS["graft_keeping"]["accords"]["prudent"] + "**, or **"
+     + pacts.SERVICE_WORDS["graft_keeping"]["accords"]["always"] + "**. Until you answer, the roster says \"awaiting your "
+     "answer\" and he keeps to the first. You may change your answer whenever you like; nothing is spent either way.",
+     ("garden_regard", "understood")),
+    ("text", "His Price",
+     "The compact, paid as you accept: **"
+     + " and ".join(("a" if cost["count"] == 1 else str(cost["count"])) + " "
+                    + {rid("dewmoss"): "Dewmoss", "minecraft:honeycomb": "honeycomb"}[cost["item"]]
+                    for cost in pacts.SPIRITS["foras"]["pact"]["compact"]["items"])
+     + "**. Then a honeycomb every " + str(pacts.SPIRITS["foras"]["pact"]["upkeep"]["period_days"]) + " game days, up to "
+     + str(pacts.SPIRITS["foras"]["pact"]["upkeep"]["cap"]) + " weeks paid ahead; a missed week is warned and he carries "
+     "on through a day's grace, then the pact is suspended with nothing lost. Your first obligation: graft a host by hand "
+     "in his area while the pact is active. Ending it returns what was paid ahead once: he bows, folds his satchel and "
+     "fades.", ("garden_regard", "understood")),
     # GC-08 unit 5
     # GC-09 unit 6
 ]

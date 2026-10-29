@@ -186,6 +186,16 @@ class ClientTestSelectionTests(unittest.TestCase):
     # The garden cohort: each later unit's case (GC-06 to GC-09) under its line.
     # GC-06 unit 3
     # GC-07 unit 4
+    def test_foras_body_entity_and_service_select_the_garden_client_test(self):
+        # Concordance garden cohort, GC-07: Foras's body, entity and graft keeping are shown by the garden's client class.
+        for path in ("src/main/resources/assets/jugcraft/textures/entity/foras.png",
+                     "src/main/resources/assets/jugcraft/geckolib/models/entity/foras.geo.json",
+                     "src/main/java/io/github/jimbozoomer/jugcraft/concordance/spirits/ForasEntity.java",
+                     "src/main/java/io/github/jimbozoomer/jugcraft/concordance/spirits/GraftKeeping.java"):
+            with self.subTest(path=path):
+                chosen, _ = selection.select([path], self.tests, set())
+                self.assertIn("ConcordanceGardenPactClientGameTests", chosen)
+
     # GC-08 unit 5
     # GC-09 unit 6
 

@@ -44,9 +44,11 @@ import io.github.jimbozoomer.jugcraft.concordance.spirits.BondingCharmItem;
 import io.github.jimbozoomer.jugcraft.concordance.spirits.BoundWills;
 import io.github.jimbozoomer.jugcraft.concordance.spirits.BuerEntity;
 import io.github.jimbozoomer.jugcraft.concordance.spirits.ClockworkPorterEntity;
+import io.github.jimbozoomer.jugcraft.concordance.spirits.ForasEntity;
 import io.github.jimbozoomer.jugcraft.concordance.spirits.GardenPacts;
 import io.github.jimbozoomer.jugcraft.concordance.spirits.GardenReach;
 import io.github.jimbozoomer.jugcraft.concordance.spirits.GatheringShadeEntity;
+import io.github.jimbozoomer.jugcraft.concordance.spirits.GraftKeeping;
 import io.github.jimbozoomer.jugcraft.concordance.spirits.HearthlingEntity;
 import io.github.jimbozoomer.jugcraft.concordance.spirits.PactAccords;
 import io.github.jimbozoomer.jugcraft.concordance.spirits.PactHistory;
@@ -112,6 +114,9 @@ import java.util.stream.IntStream;
 import local.peepo.MobTransportCrate;
 import net.fabricmc.fabric.api.entity.FakePlayer;
 import net.fabricmc.fabric.api.gametest.v1.GameTest;
+import net.fabricmc.fabric.api.transfer.v1.item.ItemVariant;
+import net.fabricmc.fabric.api.transfer.v1.storage.base.SingleVariantStorage;
+import net.fabricmc.fabric.api.transfer.v1.transaction.Transaction;
 import net.minecraft.advancements.AdvancementHolder;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -133,6 +138,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.tags.TagKey;
 import net.minecraft.util.Mth;
 import net.minecraft.util.ProblemReporter;
+import net.minecraft.world.Container;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.damagesource.DamageSource;
@@ -7369,6 +7375,796 @@ public class ConcordanceWorkerGameTests {
 
 	// GC-06 unit 3
 	// GC-07 unit 4
+	// ---------------------------------------------------------------- Concordance garden cohort, GC-07: Foras, his service and his matter
+
+	/** GC-07: his service's words (tools/concordance_pacts.py SERVICE_WORDS["graft_keeping"]). */
+	static final String GRAFTING_KEY = "message.jugcraft.concordance.pact.graft_keeping.";
+	/** GC-07: the graft he keeps (data/jugcraft/concordance/graft/dewlit.json). */
+	static final String FORAS_GRAFT = "jugcraft:dewlit";
+
+	static {
+		// GC-07 (SG12): Foras comes where a plain container touches the perch and a crop of a known graft's host grows on an
+		// awake Verdant Bed the inviter keeps within 8: a chest east of the perch's grid cell and a Sunpetal on a bed in the
+		// floor at x + 1, z - 1 (clear of every other fixture: the next grid cell's x - 1 is x + 2). The bed already carries
+		// Dewlit: a host kept, so a random tick's sample never raises his matter and every shared case reads him idle; the
+		// chest is empty, so nothing is ever grafted. SG12's structure has no floor, so he keeps his perch's top there.
+		FIXTURES.put(ForasEntity.COUNTERPART, (helper, player, perch) -> {
+			BlockPos chest = perch.east();
+			BlockPos bed = perch.offset(1, -1, -1);
+			helper.setBlock(chest, Blocks.CHEST);
+			keptBed(helper, bed, player.getUUID(), 0).setGraft(FORAS_GRAFT);
+			helper.setBlock(bed.above(), Garden.SUNPETAL_CROP);
+			return List.of(chest, bed, bed.above());
+		});
+	}
+
+	/** Foras's offer as the server loaded it (data/jugcraft/concordance/pact/foras.json). */
+	static PactDefinition forasOffer() {
+		PactDefinition offer = PactPerchBlockEntity.definition(ForasEntity.COUNTERPART);
+		if (offer == null) {
+			throw new AssertionError("Foras's offer is loaded");
+		}
+		return offer;
+	}
+
+	/** Foras's pact sealed for {@code holder} at a perch they placed at {@code at}, at game time {@code now}; they stand beside it (2.5 south). */
+	static PactPerchBlockEntity forasPact(GameTestHelper helper, ServerPlayer holder, BlockPos at, long now) {
+		PactPerchBlockEntity perch = perch(helper, at, holder);
+		beside(helper, holder, at);
+		helper.assertValueEqual(perch.holder().seal(helper.getLevel(), holder, PactPerchBlockEntity.sealing(forasOffer(), null, null), now).outcome(),
+				Pacts.Outcome.DONE, "Foras's pact is sealed at the perch");
+		return perch;
+	}
+
+	/** The Foras kept at {@code perch} (its presence), asserted there. */
+	static ForasEntity foras(GameTestHelper helper, PactPerchBlockEntity perch) {
+		PactSpiritEntity<?> found = perch.presence(helper.getLevel());
+		helper.assertTrue(found instanceof ForasEntity, "Foras is at his perch: " + found);
+		return (ForasEntity) found;
+	}
+
+	static GraftKeeping.Memory keeping(ForasEntity foras) {
+		return foras.serviceMemory(GraftKeeping.Memory.class, GraftKeeping.Memory::new);
+	}
+
+	/** A host of Foras's: an awake, wet Verdant Bed at {@code at} kept by {@code keeper} (keptBed) with a Sunpetal on it; no sample taken. */
+	static VerdantBedBlockEntity forasHost(GameTestHelper helper, BlockPos at, UUID keeper) {
+		VerdantBedBlockEntity bed = keptBed(helper, at, keeper, 0);
+		helper.setBlock(at.above(), Garden.SUNPETAL_CROP);
+		return bed;
+	}
+
+	/** A store at {@code at}: a single chest holding {@code dewmoss} Dewmoss (0: empty). */
+	static ChestBlockEntity forasStore(GameTestHelper helper, BlockPos at, int dewmoss) {
+		helper.setBlock(at, Blocks.CHEST);
+		ChestBlockEntity chest = helper.getBlockEntity(at, ChestBlockEntity.class);
+		if (dewmoss > 0) {
+			chest.setItem(0, new ItemStack(Garden.DEWMOSS, dewmoss));
+		}
+		return chest;
+	}
+
+	static int dewmossIn(Container store) {
+		return store.countItem(Garden.DEWMOSS);
+	}
+
+	/** The holder answers Foras's matter at {@code perch} with {@code accord} (PactAccords.resolve, the kept page's own call); the perch keeps it. */
+	static void forasAnswer(GameTestHelper helper, ServerPlayer holder, PactPerchBlockEntity perch, String accord, long now) {
+		helper.assertTrue(PactAccords.resolve(helper.getLevel(), holder, perch, GraftKeeping.WORK, accord, now), "The holder answers " + accord);
+		helper.assertValueEqual(perch.accord(), accord, "The perch keeps the answer " + accord);
+	}
+
+	/** A one-variant store holding one Dewmoss whose extraction is refused ({@code refuses}) or allowed. */
+	static SingleVariantStorage<ItemVariant> oneDewmoss(boolean refuses) {
+		SingleVariantStorage<ItemVariant> store = new SingleVariantStorage<>() {
+			@Override
+			protected ItemVariant getBlankVariant() {
+				return ItemVariant.blank();
+			}
+
+			@Override
+			protected long getCapacity(ItemVariant variant) {
+				return 64;
+			}
+
+			@Override
+			protected boolean canExtract(ItemVariant variant) {
+				return !refuses;
+			}
+		};
+		store.variant = ItemVariant.of(Garden.DEWMOSS);
+		store.amount = 1;
+		return store;
+	}
+
+	/**
+	 * GC-07 (the garden cohort's shared sampling, GC-06b, from tick {@code from}): {@code beds} sampled one request a tick,
+	 * for the first bed still unsampled, from tick {@code from} to {@code from} + 2 * beds + 2 (a request the level's
+	 * allowance refuses is made again the next tick), then {@code body} at {@code from} + 2 * beds + 3, and the test succeeds
+	 * after it. ConcordanceGardenGameTests.afterSampling begun later, for a test that must first let the light engine settle.
+	 */
+	static void sampledFrom(GameTestHelper helper, int from, List<VerdantBedBlockEntity> beds, Runnable body) {
+		ServerLevel level = helper.getLevel();
+		for (int t = from; t <= from + 2 * beds.size() + 2; t++) {
+			helper.runAtTickTime(t, () -> {
+				for (VerdantBedBlockEntity bed : beds) {
+					if (bed.cachedHabitat(level) == null) {
+						bed.habitat(level);
+						break;
+					}
+				}
+			});
+		}
+		helper.runAtTickTime(from + 2L * beds.size() + 3, () -> {
+			for (VerdantBedBlockEntity bed : beds) {
+				helper.assertTrue(bed.cachedHabitat(level) != null, "The bed's area is sampled: " + bed.getBlockPos());
+			}
+			body.run();
+			helper.succeed();
+		});
+	}
+
+	/**
+	 * GC-07 (GE4; Dossier 4 item 3): answered "graft every host", three hosts and a store of five Dewmoss: three thinks graft
+	 * the three, one Dewmoss each, and the fourth grafts nothing; nothing is dropped and the holder's inventory is untouched.
+	 * A host whose crop its holder may not change is refused with nothing spent; an extraction a store refuses, or one it
+	 * cannot fill, spends nothing and leaves no transaction open.
+	 */
+	@GameTest(maxTicks = 20)
+	public void forasSpendsOneDonorAGraftAndNeverTwo(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		ServerPlayer holder = gardenHolder(helper);
+		long now = dayStart(level, 1);
+		BlockPos at = new BlockPos(3, 1, 3);
+		ChestBlockEntity chest = forasStore(helper, at.east(), 5);
+		List<VerdantBedBlockEntity> beds = new ArrayList<>();
+		for (int x : new int[] {1, 3, 5}) {
+			beds.add(forasHost(helper, new BlockPos(x, 1, 1), holder.getUUID()));
+		}
+		PactPerchBlockEntity perch = forasPact(helper, holder, at, now);
+		ForasEntity foras = foras(helper, perch);
+		forasAnswer(helper, holder, perch, GraftKeeping.ALWAYS, now);
+		int items = carried(holder);
+		for (int i = 1; i <= 3; i++) {
+			// The second think at midnight: his hours are every hour (GC-P81; CR2 4's rule).
+			helper.assertValueEqual(foras.think(level, i == 2 ? MIDNIGHT : 6000L, now + i), Status.WORKING, "Think " + i + " grafts a host");
+			helper.assertValueEqual(dewmossIn(chest), 5 - i, "and spends exactly one Dewmoss");
+			helper.assertValueEqual(beds.stream().filter(bed -> FORAS_GRAFT.equals(bed.graft())).count(), (long) i, "One more bed carries Dewlit");
+		}
+		helper.assertValueEqual(foras.think(level, 6000L, now + 4), Status.IDLE, "Every host grafted, he grafts nothing more");
+		helper.assertTrue(dewmossIn(chest) == 2 && keeping(foras).idle() == GraftKeeping.Idle.NO_HOST && loose(helper) == 0 && carried(holder) == items,
+				"Two Dewmoss left, nothing dropped, the holder's inventory untouched: " + dewmossIn(chest) + ", " + keeping(foras).idle());
+		BlockPos refused = new BlockPos(6, 1, 5);
+		VerdantBedBlockEntity claimed = forasHost(helper, refused, holder.getUUID());
+		keeping(foras).forget();
+		try (TestClaims claims = TestClaims.open()) {
+			claims.block(helper.absolutePos(refused.above()), STRANGER);
+			helper.assertValueEqual(foras.think(level, 6000L, now + 5), Status.IDLE, "A host whose crop is another's is not grafted");
+			helper.assertTrue(claimed.graft().isEmpty() && dewmossIn(chest) == 2, "and nothing is spent for it");
+		}
+		SingleVariantStorage<ItemVariant> refusing = oneDewmoss(true);
+		helper.assertTrue(!GraftKeeping.spend(refusing, ItemVariant.of(Garden.DEWMOSS)) && refusing.amount == 1 && !Transaction.isOpen(),
+				"A store that refuses the extraction gives nothing, and no transaction is left open");
+		SingleVariantStorage<ItemVariant> willing = oneDewmoss(false);
+		helper.assertTrue(GraftKeeping.spend(willing, ItemVariant.of(Garden.DEWMOSS)) && willing.amount == 0 && !Transaction.isOpen(),
+				"A willing store gives exactly one");
+		helper.assertTrue(!GraftKeeping.spend(willing, ItemVariant.of(Garden.DEWMOSS)) && willing.amount == 0 && !Transaction.isOpen(),
+				"An empty one gives nothing");
+		helper.succeed();
+	}
+
+	/** GC-07: a graft the rules know is never replaced; one they no longer know is replaced by the next. */
+	@GameTest(maxTicks = 20)
+	public void forasNeverReplacesAKnownGraft(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		ServerPlayer holder = gardenHolder(helper);
+		long now = dayStart(level, 1);
+		BlockPos at = new BlockPos(3, 1, 3);
+		ChestBlockEntity chest = forasStore(helper, at.east(), 3);
+		VerdantBedBlockEntity known = forasHost(helper, new BlockPos(1, 1, 1), holder.getUUID());
+		known.setGraft(FORAS_GRAFT);
+		VerdantBedBlockEntity gone = forasHost(helper, new BlockPos(5, 1, 1), holder.getUUID());
+		gone.setGraft("jugcraft:gone");
+		PactPerchBlockEntity perch = forasPact(helper, holder, at, now);
+		ForasEntity foras = foras(helper, perch);
+		forasAnswer(helper, holder, perch, GraftKeeping.ALWAYS, now);
+		helper.assertValueEqual(foras.think(level, 6000L, now + 1), Status.WORKING, "The host whose graft the rules no longer know is grafted");
+		GraftKeeping.Grafted last = keeping(foras).last();
+		helper.assertTrue(FORAS_GRAFT.equals(gone.graft()) && last != null && last.crop().equals(gone.getBlockPos().above()) && dewmossIn(chest) == 2,
+				"Its bed now carries Dewlit, one Dewmoss spent: " + gone.graft() + ", " + last);
+		helper.assertValueEqual(foras.think(level, 6000L, now + 2), Status.IDLE, "Every host carries a graft the rules know");
+		helper.assertTrue(keeping(foras).idle() == GraftKeeping.Idle.NO_HOST && dewmossIn(chest) == 2 && FORAS_GRAFT.equals(known.graft())
+				&& keeping(foras).last().crop().equals(gone.getBlockPos().above()), "Nothing more spent; the known graft never touched");
+		helper.succeed();
+	}
+
+	/** GC-07 ("recover things lost"): a graft stays through a replanting; lost to another crop, its host is grafted again when it returns. */
+	@GameTest(maxTicks = 20)
+	public void forasGraftsAgainAfterAReplanting(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		ServerPlayer holder = gardenHolder(helper);
+		long now = dayStart(level, 1);
+		BlockPos at = new BlockPos(3, 1, 3);
+		ChestBlockEntity chest = forasStore(helper, at.east(), 3);
+		BlockPos host = new BlockPos(1, 1, 1);
+		VerdantBedBlockEntity bed = forasHost(helper, host, holder.getUUID());
+		PactPerchBlockEntity perch = forasPact(helper, holder, at, now);
+		ForasEntity foras = foras(helper, perch);
+		forasAnswer(helper, holder, perch, GraftKeeping.ALWAYS, now);
+		helper.assertValueEqual(foras.think(level, 6000L, now + 1), Status.WORKING, "He grafts the host");
+		helper.assertTrue(FORAS_GRAFT.equals(bed.graft()) && dewmossIn(chest) == 2, "Dewlit, one Dewmoss spent");
+		helper.setBlock(host.above(), Blocks.AIR);
+		helper.setBlock(host.above(), Garden.SUNPETAL_CROP);
+		helper.assertValueEqual(foras.think(level, 6000L, now + 2), Status.IDLE, "Harvested and replanted, the host keeps its graft");
+		helper.assertTrue(FORAS_GRAFT.equals(bed.graft()) && keeping(foras).idle() == GraftKeeping.Idle.NO_HOST && dewmossIn(chest) == 2,
+				"and nothing is spent: " + bed.graft());
+		// Growth's own call when another organism grew on the bed: the graft is lost.
+		bed.clearGraftUnlessFor("jugcraft:gloamcap");
+		helper.setBlock(host.above(), Blocks.AIR);
+		helper.setBlock(host.above(), Garden.SUNPETAL_CROP);
+		helper.assertTrue(bed.graft().isEmpty(), "Another crop grew there: the graft was lost");
+		keeping(foras).forget();
+		helper.assertValueEqual(foras.think(level, 6000L, now + 3), Status.WORKING, "The host returned, he grafts it again");
+		helper.assertTrue(FORAS_GRAFT.equals(bed.graft()) && dewmossIn(chest) == 1, "Dewlit again, one more Dewmoss spent");
+		helper.succeed();
+	}
+
+	/**
+	 * GC-P83: he takes only from a plain container touching his perch that his holder could open and change by hand: a
+	 * stranger's chest beside the perch is never his store, a chest two blocks off is none; one of the holder's beside it is.
+	 */
+	@GameTest(maxTicks = 20)
+	public void forasTakesOnlyFromAStoreTheHolderMayChange(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		ServerPlayer holder = gardenHolder(helper);
+		long now = dayStart(level, 1);
+		BlockPos at = new BlockPos(3, 1, 3);
+		ChestBlockEntity claimedChest = forasStore(helper, at.east(), 2);
+		ChestBlockEntity own = forasStore(helper, at.north(), 0);
+		ChestBlockEntity far = forasStore(helper, at.offset(2, 0, 0).south(), 4);
+		VerdantBedBlockEntity bed = forasHost(helper, new BlockPos(1, 1, 1), holder.getUUID());
+		helper.assertTrue(!GardenReach.withStores(helper.absolutePos(at), 8, found -> true).stores(level, now).contains(far.getBlockPos()),
+				"A chest two blocks off is no store of his");
+		try (TestClaims claims = TestClaims.open()) {
+			claims.block(claimedChest.getBlockPos(), STRANGER);
+			PactPerchBlockEntity perch = forasPact(helper, holder, at, now);
+			ForasEntity foras = foras(helper, perch);
+			forasAnswer(helper, holder, perch, GraftKeeping.ALWAYS, now);
+			helper.assertValueEqual(foras.think(level, 6000L, now + 1), Status.IDLE, "A stranger's chest and an empty one: no donor he may take");
+			helper.assertTrue(keeping(foras).idle() == GraftKeeping.Idle.NO_DONOR && dewmossIn(claimedChest) == 2 && dewmossIn(far) == 4
+					&& bed.graft().isEmpty(), "Nothing taken from the stranger's chest or the far one: " + keeping(foras).idle());
+			helper.assertTrue(keys(GraftKeeping.rows(level, pactOf(level, perch), now + 1)).contains(GRAFTING_KEY + "row.no_donor"),
+					"His page says he waits for a donor");
+			own.setItem(0, new ItemStack(Garden.DEWMOSS, 1));
+			helper.assertValueEqual(foras.think(level, 6000L, now + 2), Status.WORKING, "A Dewmoss in the holder's own chest: he grafts");
+			GraftKeeping.Grafted last = keeping(foras).last();
+			helper.assertTrue(dewmossIn(claimedChest) == 2 && dewmossIn(own) == 0 && dewmossIn(far) == 4 && last != null
+					&& last.store().equals(own.getBlockPos()) && FORAS_GRAFT.equals(bed.graft()), "From the holder's chest alone: " + last);
+		}
+		helper.succeed();
+	}
+
+	/** GC-S7: a host whose bed, or whose crop, its holder may not change by hand is refused, nothing spent; once they may, he grafts. */
+	@GameTest(maxTicks = 20)
+	public void forasRefusedWhereTheHolderMayNotBuild(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		ServerPlayer holder = gardenHolder(helper);
+		long now = dayStart(level, 1);
+		BlockPos at = new BlockPos(3, 1, 3);
+		ChestBlockEntity chest = forasStore(helper, at.east(), 2);
+		BlockPos first = new BlockPos(1, 1, 1);
+		BlockPos second = new BlockPos(5, 1, 1);
+		VerdantBedBlockEntity bedClaimed = forasHost(helper, first, holder.getUUID());
+		VerdantBedBlockEntity cropClaimed = forasHost(helper, second, holder.getUUID());
+		PactPerchBlockEntity perch = forasPact(helper, holder, at, now);
+		ForasEntity foras = foras(helper, perch);
+		forasAnswer(helper, holder, perch, GraftKeeping.ALWAYS, now);
+		try (TestClaims claims = TestClaims.open()) {
+			claims.block(helper.absolutePos(first), STRANGER).block(helper.absolutePos(second.above()), STRANGER);
+			helper.assertValueEqual(foras.think(level, 6000L, now + 1), Status.IDLE, "Neither host is his holder's to change by hand");
+			helper.assertTrue(keeping(foras).idle() == GraftKeeping.Idle.NO_HOST && bedClaimed.graft().isEmpty() && cropClaimed.graft().isEmpty()
+					&& dewmossIn(chest) == 2, "Nothing grafted, nothing spent");
+		}
+		keeping(foras).forget();
+		helper.assertValueEqual(foras.think(level, 6000L, now + 2), Status.WORKING, "The claims lifted, he grafts");
+		helper.assertTrue((FORAS_GRAFT.equals(bedClaimed.graft()) ? 1 : 0) + (FORAS_GRAFT.equals(cropClaimed.graft()) ? 1 : 0) == 1 && dewmossIn(chest) == 1,
+				"One host, one Dewmoss");
+		helper.succeed();
+	}
+
+	/** GC-07: a stranger's bed, or a bed nobody woke, is never his host. */
+	@GameTest(maxTicks = 20)
+	public void forasNeverGraftsAStrangersBed(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		ServerPlayer holder = gardenHolder(helper);
+		long now = dayStart(level, 1);
+		BlockPos at = new BlockPos(3, 1, 3);
+		ChestBlockEntity chest = forasStore(helper, at.east(), 2);
+		VerdantBedBlockEntity strangers = forasHost(helper, new BlockPos(1, 1, 1), STRANGER);
+		BlockPos dormantAt = new BlockPos(5, 1, 1);
+		helper.setBlock(dormantAt, Garden.VERDANT_BED.defaultBlockState().setValue(VerdantBedBlock.MOISTURE, VerdantBedBlock.WET));
+		helper.setBlock(dormantAt.above(), Garden.SUNPETAL_CROP);
+		VerdantBedBlockEntity dormant = helper.getBlockEntity(dormantAt, VerdantBedBlockEntity.class);
+		PactPerchBlockEntity perch = forasPact(helper, holder, at, now);
+		ForasEntity foras = foras(helper, perch);
+		forasAnswer(helper, holder, perch, GraftKeeping.ALWAYS, now);
+		helper.assertValueEqual(foras.think(level, 6000L, now + 1), Status.IDLE, "A stranger's bed and a sleeping one hold no host of his");
+		helper.assertValueEqual(foras.think(level, 6000L, now + 2), Status.IDLE, "and never do");
+		helper.assertTrue(keeping(foras).idle() == GraftKeeping.Idle.NO_HOST && strangers.graft().isEmpty() && dormant.graft().isEmpty()
+				&& !dormant.awake() && dewmossIn(chest) == 2, "Nothing grafted, nothing spent");
+		helper.succeed();
+	}
+
+	/** GC-07 (GE5): two holders' Foras (a party) over one host graft it once, one Dewmoss in all; the second finds it kept. */
+	@GameTest(maxTicks = 20)
+	public void twoForasNeverGraftOneBedTwice(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		ServerPlayer first = gardenHolder(helper);
+		ServerPlayer second = gardenHolder(helper);
+		PartyManager parties = JugcraftParties.manager();
+		long ms = System.currentTimeMillis();
+		try {
+			helper.assertTrue(parties.invite(first.getUUID(), second.getUUID(), ms) == PartyManager.Result.OK
+					&& parties.accept(second.getUUID(), ms) == PartyManager.Result.OK, "Two holders in one party");
+			long now = dayStart(level, 1);
+			BlockPos atA = new BlockPos(1, 1, 5);
+			BlockPos atB = new BlockPos(6, 1, 5);
+			ChestBlockEntity storeA = forasStore(helper, atA.east(), 2);
+			ChestBlockEntity storeB = forasStore(helper, atB.east(), 2);
+			VerdantBedBlockEntity bed = forasHost(helper, new BlockPos(3, 1, 1), first.getUUID());
+			PactPerchBlockEntity a = forasPact(helper, first, atA, now);
+			PactPerchBlockEntity b = forasPact(helper, second, atB, now);
+			ForasEntity one = foras(helper, a), other = foras(helper, b);
+			forasAnswer(helper, first, a, GraftKeeping.ALWAYS, now);
+			forasAnswer(helper, second, b, GraftKeeping.ALWAYS, now);
+			helper.assertValueEqual(one.think(level, 6000L, now + 1), Status.WORKING, "The first Foras grafts the party's host");
+			helper.assertValueEqual(other.think(level, 6000L, now + 1), Status.IDLE, "The second, in the same tick, finds it grafted");
+			helper.assertTrue(FORAS_GRAFT.equals(bed.graft()) && keeping(other).idle() == GraftKeeping.Idle.NO_HOST
+					&& dewmossIn(storeA) + dewmossIn(storeB) == 3, "One graft, one Dewmoss in all: " + dewmossIn(storeA) + " + " + dewmossIn(storeB));
+		} finally {
+			parties.adminDisband(first.getUUID());
+		}
+		helper.succeed();
+	}
+
+	/**
+	 * GC-P84, GC-P86 (Dossier 4 items 3 and 5): unanswered, Foras leaves a host the graft would not improve (full sky: ideal
+	 * either way), names it once (his matter, raised with his inspect gesture) and awaits the answer; a host whose bed holds
+	 * no reading he waits on too. Answered "where it helps", he still leaves both, Jade naming the first; that host gone,
+	 * Jade says hosts wait for their bed's first reading (CR4 8).
+	 */
+	@GameTest(maxTicks = 20)
+	public void aPrudentForasSkipsAUselessGraft(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		ServerPlayer holder = gardenHolder(helper);
+		BlockPos at = new BlockPos(3, 1, 3);
+		ChestBlockEntity chest = forasStore(helper, at.east(), 2);
+		BlockPos open = new BlockPos(1, 1, 1);
+		VerdantBedBlockEntity sampled = forasHost(helper, open, holder.getUUID());
+		VerdantBedBlockEntity unread = forasHost(helper, new BlockPos(5, 1, 1), holder.getUUID());
+		ConcordanceGardenGameTests.afterSampling(helper, List.of(sampled), () -> {
+			long now = dayStart(level, 1);
+			// Forgotten here, not at the start: its crop's random tick before now may have read it.
+			unread.forgetSample();
+			helper.assertTrue(unread.cachedHabitat(level) == null, "The second bed holds no reading");
+			PactPerchBlockEntity perch = forasPact(helper, holder, at, now);
+			ForasEntity foras = foras(helper, perch);
+			helper.assertValueEqual(foras.think(level, 6000L, now + 1), Status.AWAITING_ANSWER, "Unanswered, he names the host and awaits the answer (GC-P47)");
+			PactService.Complication matter = GraftKeeping.SERVICE.complication(level, pactOf(level, perch), perch, now + 1);
+			helper.assertTrue(cued(foras, "inspect") == 1 && keeping(foras).useless().equals(List.of(helper.absolutePos(open.above())))
+					&& matter != null && GraftKeeping.NO_GAIN.equals(matter.id()) && Integer.valueOf(1).equals(arg(matter.line(), 0))
+					&& matter.answers().equals(GraftKeeping.ACCORDS) && dewmossIn(chest) == 2,
+					"His matter, raised with his inspect gesture, one host: " + keeping(foras).useless() + " " + matter);
+			helper.assertValueEqual(foras.think(level, 6000L, now + 2), Status.AWAITING_ANSWER, "Still waiting");
+			helper.assertTrue(cued(foras, "inspect") == 1, "and his matter is raised once a presence");
+			forasAnswer(helper, holder, perch, GraftKeeping.PRUDENT, now + 2);
+			helper.assertValueEqual(foras.think(level, 6000L, now + 3), Status.IDLE, "Answered where it helps, he leaves both");
+			helper.assertTrue(sampled.graft().isEmpty() && unread.graft().isEmpty() && dewmossIn(chest) == 2
+					&& new PactService.Note("no_gain", 1).equals(GraftKeeping.SERVICE.note(level, foras, pactOf(level, perch), 6000L, now + 3)),
+					"Nothing grafted; Jade names the host a graft would not help");
+			helper.setBlock(open.above(), Blocks.AIR);
+			helper.assertValueEqual(foras.think(level, 6000L, now + 4), Status.IDLE, "That host gone, one waits for its reading");
+			helper.assertTrue(new PactService.Note("no_reading", 1).equals(GraftKeeping.SERVICE.note(level, foras, pactOf(level, perch), 6000L, now + 4))
+					&& GraftKeeping.SERVICE.complication(level, pactOf(level, perch), perch, now + 4) == null,
+					"Jade says one host waits for its bed's first reading; no matter stands");
+		});
+	}
+
+	/**
+	 * GC-P84, GC-P86 (Dossier 4 items 3 and 5): unanswered, Foras grafts only where the graft helps. A Sunpetal shut in stone
+	 * beside crying obsidian (light 9: short for it, tolerable grafted) gains; one in full sky (light 15: ideal either way)
+	 * does not. His first think names the second (his matter, raised once with his inspect gesture), spends nothing and
+	 * awaits the answer; his next grafts the first under the safe course, still awaiting it (CR4 4); the second is left, and
+	 * his matter is not raised again. Sealed once the light engine has lit the new blocks (from the 30th tick, the beds
+	 * sampled one a tick: the shared sampling rule).
+	 */
+	@GameTest(maxTicks = 80)
+	public void aPrudentForasGraftsWhereItHelps(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		ServerPlayer holder = gardenHolder(helper);
+		BlockPos at = new BlockPos(3, 1, 3);
+		ChestBlockEntity chest = forasStore(helper, at.east(), 1);
+		BlockPos shut = new BlockPos(6, 1, 1);
+		BlockPos open = new BlockPos(1, 1, 1);
+		VerdantBedBlockEntity shutBed = keptBed(helper, shut, holder.getUUID(), 0);
+		VerdantBedBlockEntity openBed = keptBed(helper, open, holder.getUUID(), 0);
+		BlockPos cell = shut.above();
+		for (BlockPos wall : List.of(cell.above(), cell.north(), cell.east(), cell.west())) {
+			helper.setBlock(wall, Blocks.STONE);
+		}
+		helper.setBlock(cell.south(), Blocks.CRYING_OBSIDIAN);
+		helper.setBlock(cell, Garden.SUNPETAL_CROP);
+		helper.setBlock(open.above(), Garden.SUNPETAL_CROP);
+		sampledFrom(helper, 30, List.of(shutBed, openBed), () -> {
+			long now = dayStart(level, 1);
+			int dim = level.getRawBrightness(helper.absolutePos(cell), 0);
+			int lit = level.getRawBrightness(helper.absolutePos(open.above()), 0);
+			helper.assertTrue(dim == 9 && lit == 15, "The shut host reads light 9 and the open one 15: " + dim + ", " + lit);
+			PactPerchBlockEntity perch = forasPact(helper, holder, at, now);
+			ForasEntity foras = foras(helper, perch);
+			helper.assertValueEqual(foras.think(level, 6000L, now + 1), Status.AWAITING_ANSWER,
+					"Unanswered, he first names the host a graft would not help, and awaits the answer (GC-P47)");
+			helper.assertTrue(keeping(foras).useless().equals(List.of(helper.absolutePos(open.above()))) && dewmossIn(chest) == 1
+					&& cued(foras, "inspect") == 1 && foras.attending() != null,
+					"The open host is his matter, raised with his inspect gesture toward it; nothing spent: " + keeping(foras).useless());
+			helper.assertValueEqual(foras.think(level, 6000L, now + 2), Status.AWAITING_ANSWER,
+					"Then he grafts the host it helps under the safe answer, still awaiting it (GC-P47; unit 2's B-06)");
+			helper.assertTrue(FORAS_GRAFT.equals(shutBed.graft()) && openBed.graft().isEmpty() && dewmossIn(chest) == 0
+					&& Pacts.done(pactOf(level, perch).pact(), now + 2) == 1,
+					"The shut host carries Dewlit, one graft counted; the open one does not: " + shutBed.graft() + ", " + openBed.graft());
+			foras.think(level, 6000L, now + 3);
+			helper.assertTrue(openBed.graft().isEmpty() && cued(foras, "inspect") == 1, "The open host is left, and his matter is raised once a presence");
+		});
+	}
+
+	/** GC-P86: answered "graft every host", he grafts a host the graft would not help and one whose bed holds no reading; his matter stands no more. */
+	@GameTest(maxTicks = 20)
+	public void anAlwaysAnswerGraftsEveryHost(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		ServerPlayer holder = gardenHolder(helper);
+		BlockPos at = new BlockPos(3, 1, 3);
+		ChestBlockEntity chest = forasStore(helper, at.east(), 3);
+		VerdantBedBlockEntity useless = forasHost(helper, new BlockPos(1, 1, 1), holder.getUUID());
+		VerdantBedBlockEntity unread = forasHost(helper, new BlockPos(5, 1, 1), holder.getUUID());
+		ConcordanceGardenGameTests.afterSampling(helper, List.of(useless), () -> {
+			long now = dayStart(level, 1);
+			PactPerchBlockEntity perch = forasPact(helper, holder, at, now);
+			ForasEntity foras = foras(helper, perch);
+			forasAnswer(helper, holder, perch, GraftKeeping.ALWAYS, now);
+			helper.assertValueEqual(foras.think(level, 6000L, now + 1), Status.WORKING, "Answered every host, he grafts");
+			helper.assertValueEqual(foras.think(level, 6000L, now + 2), Status.WORKING, "and grafts the other");
+			PactService.Note note = GraftKeeping.SERVICE.note(level, foras, pactOf(level, perch), 6000L, now + 2);
+			helper.assertTrue(FORAS_GRAFT.equals(useless.graft()) && FORAS_GRAFT.equals(unread.graft()) && dewmossIn(chest) == 1
+					&& (note == null || !"no_gain".equals(note.id()))
+					&& GraftKeeping.SERVICE.complication(level, pactOf(level, perch), perch, now + 2) == null,
+					"Both carry Dewlit, two Dewmoss spent; no matter stands: " + note);
+		});
+	}
+
+	/** GC-P81: his terms' grafts a game day (8) and no more; the next day he goes on. */
+	@GameTest(structure = "jugcraft-test:drone_depot", maxTicks = 20)
+	public void forasStopsAtHisQuota(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		ServerPlayer holder = gardenHolder(helper);
+		long now = dayStart(level, 1);
+		BlockPos at = new BlockPos(8, 1, 8);
+		ChestBlockEntity chest = forasStore(helper, at.east(), 16);
+		List<VerdantBedBlockEntity> beds = new ArrayList<>();
+		for (int x = 4; x <= 12; x++) {
+			beds.add(forasHost(helper, new BlockPos(x, 1, 4), holder.getUUID()));
+		}
+		PactPerchBlockEntity perch = forasPact(helper, holder, at, now);
+		ForasEntity foras = foras(helper, perch);
+		forasAnswer(helper, holder, perch, GraftKeeping.ALWAYS, now);
+		int quota = forasOffer().quota();
+		helper.assertValueEqual(quota, 8, "His terms: 8 grafts a game day (GC-P81)");
+		for (int k = 0; k < quota; k++) {
+			helper.assertValueEqual(foras.think(level, 6000L, now + 20L * k), Status.WORKING, "Graft " + k + " of his " + quota);
+		}
+		helper.assertValueEqual(foras.think(level, 6000L, now + 20L * quota), Status.FINISHED, "His day's grafts spent, he stops");
+		helper.assertTrue(dewmossIn(chest) == 8 && beds.stream().filter(bed -> bed.graft().isEmpty()).count() == 1
+				&& Pacts.done(pactOf(level, perch).pact(), now) == quota, "Eight grafts, eight Dewmoss, one host left: " + dewmossIn(chest));
+		helper.assertValueEqual(foras.think(level, 6000L, dayStart(level, 2)), Status.WORKING, "The next game day he grafts again");
+		helper.succeed();
+	}
+
+	/** GC-07 (GE1, GE2): no stand-in; nothing grafted for a holder away; back beside the perch, he grafts. */
+	@GameTest(maxTicks = 20)
+	public void forasWaitsForAPresentHolder(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		ServerPlayer holder = gardenHolder(helper);
+		long now = dayStart(level, 1);
+		BlockPos at = new BlockPos(3, 1, 3);
+		ChestBlockEntity chest = forasStore(helper, at.east(), 2);
+		VerdantBedBlockEntity bed = forasHost(helper, new BlockPos(1, 1, 1), holder.getUUID());
+		PactPerchBlockEntity perch = forasPact(helper, holder, at, now);
+		ForasEntity foras = foras(helper, perch);
+		forasAnswer(helper, holder, perch, GraftKeeping.ALWAYS, now);
+		BlockPos home = helper.absolutePos(at);
+		holder.snapTo(home.getX() + 70.5, home.getY(), home.getZ() + 0.5, 0.0F, 0.0F);
+		helper.assertValueEqual(foras.think(level, 6000L, now + 1), Status.OWNER_OFFLINE, "70 blocks off: not near, he waits");
+		helper.assertTrue(bed.graft().isEmpty() && dewmossIn(chest) == 2 && Pacts.done(pactOf(level, perch).pact(), now) == 0,
+				"Nothing grafted, spent or counted meanwhile");
+		beside(helper, holder, at);
+		helper.assertValueEqual(foras.think(level, 6000L, now + 2), Status.WORKING, "Back beside the perch, he grafts");
+		helper.assertTrue(FORAS_GRAFT.equals(bed.graft()) && dewmossIn(chest) == 1, "Dewlit, one Dewmoss");
+		helper.succeed();
+	}
+
+	/**
+	 * GC-07 (GC-P90's first obligation): the holder's own graft by hand in his area while the pact is active keeps it, once;
+	 * outside his area, or while the pact is suspended, it keeps nothing; a second graft by hand records nothing more.
+	 */
+	@GameTest(structure = "jugcraft-test:drone_depot", maxTicks = 20)
+	public void forassFirstObligationIsAGraftByHand(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		ServerPlayer holder = gardenHolder(helper);
+		long g0 = level.getGameTime();
+		BlockPos at = new BlockPos(2, 1, 2);
+		PactPerchBlockEntity perch = forasPact(helper, holder, at, g0);
+		BlockPos outside = new BlockPos(12, 1, 2);
+		List<BlockPos> inside = List.of(new BlockPos(4, 1, 2), new BlockPos(2, 1, 5), new BlockPos(5, 1, 5));
+		forasHost(helper, outside, holder.getUUID());
+		for (BlockPos host : inside) {
+			forasHost(helper, host, holder.getUUID());
+		}
+		helper.assertTrue(GraftKeeping.SERVICE.obligation() == PactObligations.Act.GRAFT
+				&& keys(GraftKeeping.SERVICE.obligationRows(level, holder, pactOf(level, perch), g0))
+						.equals(List.of("message.jugcraft.concordance.garden_pact.obligation")), "His page names the act");
+		int heard = GARDEN_SERVED.getOrDefault(holder.getUUID(), 0);
+		ConcordanceGardenGameTests.handUse(helper, holder, outside.above(), new ItemStack(Garden.DEWMOSS), false);
+		helper.assertTrue(FORAS_GRAFT.equals(helper.getBlockEntity(outside, VerdantBedBlockEntity.class).graft())
+				&& !PactObligations.kept(holder, ForasEntity.COUNTERPART) && GARDEN_SERVED.getOrDefault(holder.getUUID(), 0) == heard,
+				"A graft by hand 10 blocks off, outside his area, keeps nothing");
+		helper.assertTrue(PactKeeping.suspend(level, holder, perch.holder(), g0) == AgreementHolder.Toggle.SUSPENDED, "Its holder suspends it");
+		ConcordanceGardenGameTests.handUse(helper, holder, inside.get(0).above(), new ItemStack(Garden.DEWMOSS), false);
+		helper.assertTrue(FORAS_GRAFT.equals(helper.getBlockEntity(inside.get(0), VerdantBedBlockEntity.class).graft())
+				&& !PactObligations.kept(holder, ForasEntity.COUNTERPART) && GARDEN_SERVED.getOrDefault(holder.getUUID(), 0) == heard,
+				"Suspended, a graft by hand in his area keeps nothing");
+		helper.assertTrue(PactKeeping.resume(level, holder, perch.holder(), g0) == AgreementHolder.Toggle.RESUMED, "Resumed");
+		ConcordanceGardenGameTests.handUse(helper, holder, inside.get(1).above(), new ItemStack(Garden.DEWMOSS), false);
+		helper.assertTrue(PactObligations.kept(holder, ForasEntity.COUNTERPART) && GARDEN_SERVED.getOrDefault(holder.getUUID(), 0) == heard + 1
+				&& keys(GraftKeeping.SERVICE.obligationRows(level, holder, pactOf(level, perch), g0))
+						.equals(List.of("message.jugcraft.concordance.garden_pact.obligation_kept"))
+				&& PactObligations.key(ForasEntity.COUNTERPART).equals("practice:" + GardenPacts.ACTIVITY + ":" + ForasEntity.COUNTERPART),
+				"A graft by hand in his area while the pact is active keeps it, once");
+		ConcordanceGardenGameTests.handUse(helper, holder, inside.get(2).above(), new ItemStack(Garden.DEWMOSS), false);
+		helper.assertTrue(GARDEN_SERVED.getOrDefault(holder.getUUID(), 0) == heard + 1, "and it is not recorded again");
+		helper.succeed();
+	}
+
+	/**
+	 * GC-07 (detail b): two grafts, and his kept page's rows say the day's count against his quota first, then his last graft
+	 * (its host and its store), with his first obligation after; his count aloud is the same; no row names a player.
+	 */
+	@GameTest(maxTicks = 20)
+	public void theKeptPageCountsForasGrafts(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		ServerPlayer holder = gardenHolder(helper);
+		long now = dayStart(level, 1);
+		BlockPos at = new BlockPos(3, 1, 3);
+		ChestBlockEntity chest = forasStore(helper, at.east(), 3);
+		BlockPos nearer = new BlockPos(2, 1, 1);
+		BlockPos farther = new BlockPos(6, 1, 1);
+		forasHost(helper, nearer, holder.getUUID());
+		forasHost(helper, farther, holder.getUUID());
+		PactPerchBlockEntity perch = forasPact(helper, holder, at, now);
+		ForasEntity foras = foras(helper, perch);
+		forasAnswer(helper, holder, perch, GraftKeeping.ALWAYS, now);
+		helper.assertValueEqual(foras.think(level, 6000L, now + 1), Status.WORKING, "The nearer host");
+		helper.assertValueEqual(foras.think(level, 6000L, now + 2), Status.WORKING, "and the farther");
+		List<Component> rows = GraftKeeping.rows(level, pactOf(level, perch), now + 2);
+		helper.assertTrue(keys(rows).equals(List.of(GRAFTING_KEY + "row.service", GRAFTING_KEY + "row.last"))
+				&& Integer.valueOf(2).equals(arg(rows.get(0), 0)) && Integer.valueOf(8).equals(arg(rows.get(0), 1))
+				&& helper.absolutePos(farther.above()).toShortString().equals(arg(rows.get(1), 0))
+				&& chest.getBlockPos().toShortString().equals(arg(rows.get(1), 1)) && dewmossIn(chest) == 1,
+				"2 of 8 grafts today, then his last, the farther host from the chest: " + rows);
+		Component count = GraftKeeping.countLine(pactOf(level, perch).pact(), now + 2);
+		helper.assertTrue(key(count).equals(GRAFTING_KEY + "counted") && Integer.valueOf(2).equals(arg(count, 0)) && Integer.valueOf(8).equals(arg(count, 1)),
+				"He counts aloud the same: 2 of 8 grafts today");
+		PactMenu menu = open(helper, holder, perch);
+		List<String> page = keys(menu.lastSent().notes());
+		int service = page.indexOf(GRAFTING_KEY + "row.service");
+		int last = page.indexOf(GRAFTING_KEY + "row.last");
+		int obligation = page.indexOf("message.jugcraft.concordance.garden_pact.obligation");
+		String shown = menu.lastSent().notes().stream().map(Component::getString).toList().toString();
+		helper.assertTrue(service >= 0 && service < last && last < obligation && !shown.contains(holder.getName().getString())
+				&& !shown.contains(holder.getUUID().toString()), "His kept page: the count, his last graft, then his first obligation; no player named: " + page);
+		holder.closeContainer();
+		helper.succeed();
+	}
+
+	/**
+	 * GC-07 (Jade; GC-P90): the readings of his perch and of him: kept, his work, active; with a host the graft would not
+	 * help, both carry his note (no_gain, one host) and his matter, naming no player; answered "graft every host" with his
+	 * store empty, his note is that no donor waits.
+	 */
+	@GameTest(maxTicks = 20)
+	public void forassReadingSaysItsNoteAndNamesNoPlayer(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		ServerPlayer holder = gardenHolder(helper);
+		BlockPos at = new BlockPos(3, 1, 3);
+		forasStore(helper, at.east(), 0);
+		VerdantBedBlockEntity sampled = forasHost(helper, new BlockPos(1, 1, 1), holder.getUUID());
+		VerdantBedBlockEntity unread = forasHost(helper, new BlockPos(5, 1, 1), holder.getUUID());
+		ConcordanceGardenGameTests.afterSampling(helper, List.of(sampled), () -> {
+			long now = dayStart(level, 1);
+			// Forgotten here, not at the start: its crop's random tick before now may have read it.
+			unread.forgetSample();
+			PactPerchBlockEntity perch = forasPact(helper, holder, at, now);
+			ForasEntity foras = foras(helper, perch);
+			helper.assertValueEqual(foras.think(level, 6000L, now + 1), Status.AWAITING_ANSWER, "A host the graft would not help: his matter waits");
+			CompoundTag ofPerch = PactReading.holder(level, perch, now + 1);
+			CompoundTag ofHim = PactReading.presence(level, foras, now + 1);
+			for (CompoundTag reading : List.of(ofPerch, ofHim)) {
+				helper.assertTrue("kept".equals(reading.getStringOr("standing", "")) && GraftKeeping.WORK.equals(reading.getStringOr("service", ""))
+						&& "no_gain".equals(reading.getStringOr("note", "")) && reading.getIntOr("note_count", 0) == 1
+						&& GraftKeeping.NO_GAIN.equals(reading.getStringOr("matter", "")) && !reading.contains("accord")
+						&& PactReading.KEYS.containsAll(reading.keySet()), "His note and his matter, no answer yet: " + reading);
+			}
+			helper.assertTrue(ForasEntity.COUNTERPART.equals(ofPerch.getStringOr("counterpart", "")), "The perch's reading names him: " + ofPerch);
+			forasAnswer(helper, holder, perch, GraftKeeping.ALWAYS, now + 1);
+			helper.assertValueEqual(foras.think(level, 6000L, now + 2), Status.IDLE, "Every host his, but no donor in his store");
+			CompoundTag waiting = PactReading.presence(level, foras, now + 2);
+			helper.assertTrue("no_donor".equals(waiting.getStringOr("note", "")) && keeping(foras).idle() == GraftKeeping.Idle.NO_DONOR,
+					"Jade says no donor waits: " + waiting);
+			String all = ofPerch + " " + ofHim + " " + waiting;
+			helper.assertTrue(!all.contains(holder.getUUID().toString()) && !all.contains(holder.getName().getString()), "and no player is named: " + all);
+		});
+	}
+
+	/**
+	 * GC-P89 (unit 3's Station.BESIDE, GC-P67): summoned for a holder south of his perch, Foras stands on the ground two
+	 * blocks west of it (a quarter turn clockwise from them), facing them; led off, he is back at his next think; his side
+	 * walled, he takes the next clear side clockwise from it (north); with no side clear, the perch's top.
+	 */
+	@GameTest(maxTicks = 20)
+	public void forasStandsBesideThePerchFacingHisInviter(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		ServerPlayer holder = gardenHolder(helper);
+		long now = dayStart(level, 1);
+		BlockPos at = new BlockPos(3, 1, 3);
+		floor(helper);
+		forasStore(helper, at.east(), 0);
+		forasHost(helper, new BlockPos(1, 1, 1), holder.getUUID());
+		ForasEntity foras = foras(helper, forasPact(helper, holder, at, now));
+		Vec3 west = Vec3.atBottomCenterOf(helper.absolutePos(at.west(2)));
+		helper.assertTrue(foras.position().distanceTo(west) < 1.0E-3, "He stands on the ground two blocks west of his perch: " + foras.position());
+		float facing = PactSpiritEntity.bearing(foras.position(), holder.position(), 0.0F);
+		helper.assertTrue(Math.abs(Mth.wrapDegrees(foras.getYRot() - facing)) < 1.0F, "and faces his holder: " + foras.getYRot() + " for " + facing);
+		foras.teleportTo(west.x, west.y, west.z + 3.0);
+		foras.think(level, 6000L, now + 1);
+		helper.assertTrue(foras.position().distanceTo(west) < 1.0E-3, "Led off, he is back on his side at his next think: " + foras.position());
+		helper.setBlock(at.west(), Blocks.STONE);
+		foras.think(level, 6000L, now + 2);
+		helper.assertTrue(foras.position().distanceTo(Vec3.atBottomCenterOf(helper.absolutePos(at.north(2)))) < 1.0E-3,
+				"His side walled, he takes the next clear side clockwise from it, the north: " + foras.position());
+		helper.setBlock(at.north(), Blocks.STONE);
+		helper.setBlock(at.south(), Blocks.STONE);
+		foras.think(level, 6000L, now + 3);
+		helper.assertTrue(foras.position().distanceTo(Vec3.atBottomCenterOf(helper.absolutePos(at.above()))) < 1.0E-3,
+				"With no side clear (his store fills the east) he stands on the perch's top: " + foras.position());
+		helper.succeed();
+	}
+
+	/**
+	 * GC-P88 (Dossier 4 item 2): with a host near but no plain container touching the perch (a chest two blocks off is none),
+	 * he says why in his own words, is listed not ready and does not come; accepting is refused with nothing spent; a chest
+	 * touching the perch, nothing is missing.
+	 */
+	@GameTest(structure = "jugcraft-test:drone_depot", maxTicks = 20)
+	public void forasRefusesWithoutAStore(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		helper.assertTrue(Language.getInstance().has(GRAFTING_KEY + "missing.store"), "the server reads the mod's words (Fabric's language loader)");
+		ServerPlayer keeper = gardenHolder(helper);
+		pocketFor(keeper, forasOffer(), 1);
+		BlockPos at = new BlockPos(4, 1, 4);
+		PactPerchBlockEntity perch = perch(helper, at, keeper);
+		beside(helper, keeper, at);
+		forasHost(helper, new BlockPos(8, 1, 4), keeper.getUUID());
+		forasStore(helper, at.east(2), 0);
+		List<PactService.Missing> missing = GraftKeeping.SERVICE.missing(level, keeper, perch, forasOffer());
+		helper.assertTrue(missing.stream().map(PactService.Missing::reason).toList().equals(List.of(GraftKeeping.NO_STORE))
+				&& missing.getFirst().note().getString().startsWith("\"Where shall I keep the cuttings? Set a store beside me.\""),
+				"No store touches the perch: that alone is missing, in his words: " + missing);
+		PactMenu chooser = open(helper, keeper, perch);
+		PactStatePayload.Choice listed = chooser.lastSent().patterns().stream().filter(choice -> choice.id().equals(ForasEntity.SIGN)).findFirst().orElse(null);
+		helper.assertTrue(chooser.lastSent().mode() == PactStatePayload.INVITE && listed != null && !listed.ready() && listed.amount() == 1,
+				"The chooser lists him not ready, one thing missing: " + listed);
+		keeper.closeContainer();
+		RateGate.forget(keeper.getUUID());
+		PactMenu menu = offerOf(helper, keeper, perch, forasOffer());
+		PactStatePayload state = menu.lastSent();
+		helper.assertTrue(keys(state.notes()).contains(GRAFTING_KEY + "missing.store") && perch.visitor() == null,
+				"He says why and does not come: " + keys(state.notes()));
+		PactStatePayload refused = send(keeper, menu, PactRequestPayload.ACCEPT, 0);
+		helper.assertTrue(answered(refused, GraftKeeping.NO_STORE) && !refused.result().get().done()
+				&& said(refused).equals(GRAFTING_KEY + "missing.store") && pocketed(keeper, 1, forasOffer()) && recordOf(level, keeper) == null,
+				"Accepting is refused with his reason; nothing spent, nothing held");
+		keeper.closeContainer();
+		forasStore(helper, at.east(), 0);
+		helper.assertTrue(GraftKeeping.SERVICE.missing(level, keeper, perch, forasOffer()).isEmpty(), "A chest touching the perch: nothing is missing");
+		helper.succeed();
+	}
+
+	/**
+	 * GC-P88: with a store touching the perch but no crop of a known graft's host on a bed the inviter keeps within 8 (a
+	 * Gloamcap takes no graft; a Sunpetal 9 off is outside), he says so; a grafted Sunpetal within 8 counts, grafted or not.
+	 */
+	@GameTest(structure = "jugcraft-test:drone_depot", maxTicks = 20)
+	public void forasRefusesWithoutAHost(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		ServerPlayer keeper = gardenHolder(helper);
+		BlockPos at = new BlockPos(4, 1, 4);
+		PactPerchBlockEntity perch = perch(helper, at, keeper);
+		beside(helper, keeper, at);
+		forasStore(helper, at.east(), 0);
+		keptBed(helper, new BlockPos(2, 1, 4), keeper.getUUID(), 0);
+		helper.setBlock(new BlockPos(2, 2, 4), Garden.GLOAMCAP_CROP);
+		forasHost(helper, new BlockPos(13, 1, 4), keeper.getUUID());
+		List<PactService.Missing> missing = GraftKeeping.SERVICE.missing(level, keeper, perch, forasOffer());
+		helper.assertTrue(missing.stream().map(PactService.Missing::reason).toList().equals(List.of(GraftKeeping.NO_HOST))
+				&& key(missing.getFirst().note()).equals(GRAFTING_KEY + "missing.host") && Integer.valueOf(8).equals(arg(missing.getFirst().note(), 0)),
+				"No host within 8 (a Gloamcap takes no graft, a Sunpetal 9 off is outside): " + missing);
+		forasHost(helper, new BlockPos(6, 1, 4), keeper.getUUID()).setGraft(FORAS_GRAFT);
+		helper.assertTrue(GraftKeeping.SERVICE.missing(level, keeper, perch, forasOffer()).isEmpty(), "A Sunpetal within 8, grafted or not: nothing missing");
+		helper.succeed();
+	}
+
+	/** GC-07: which gesture answers which action, which loop each state shows, every cue's sound registered. */
+	@GameTest(maxTicks = 20)
+	public void forasAnswersEachActionWithHisGesture(GameTestHelper helper) {
+		helper.assertTrue(ForasEntity.reaction(PactRequestPayload.ACCEPT, PactMenu.SEALED, true) == ForasEntity.Gesture.ASSENT
+				&& ForasEntity.reaction(PactRequestPayload.ACCEPT, GraftKeeping.NO_STORE, false) == ForasEntity.Gesture.REFUSE
+				&& ForasEntity.reaction(PactRequestPayload.ACCEPT, GraftKeeping.NO_HOST, false) == ForasEntity.Gesture.REFUSE
+				&& ForasEntity.reaction(PactRequestPayload.DEPOSIT, PactMenu.DEPOSITED, true) == ForasEntity.Gesture.INSPECT
+				&& ForasEntity.reaction(PactRequestPayload.DEPOSIT, PactMenu.NOTHING_DEPOSITED, false) == null
+				&& ForasEntity.reaction(PactRequestPayload.RESUME, "resumed", true) == ForasEntity.Gesture.ASSENT
+				&& ForasEntity.reaction(PactRequestPayload.RESOLVE, "resolved", true) == ForasEntity.Gesture.ASSENT
+				&& ForasEntity.reaction(PactRequestPayload.RESOLVE, "resolved", false) == null
+				&& ForasEntity.reaction(PactRequestPayload.RECALL, "recalled", true) == null
+				&& ForasEntity.reaction(PactRequestPayload.ACCEPT, PactMenu.NOT_OFFERED, false) == null, "His answers");
+		helper.assertTrue(ForasEntity.loop(Status.WORKING, false) == ForasEntity.Loop.IDLE && ForasEntity.loop(Status.IDLE, true) == ForasEntity.Loop.LISTEN
+				&& ForasEntity.loop(Status.OWNER_OFFLINE, false) == ForasEntity.Loop.WAITING
+				&& ForasEntity.loop(Status.UPKEEP_DUE, false) == ForasEntity.Loop.ASTIR && ForasEntity.loop(Status.UPKEEP_HELD, true) == ForasEntity.Loop.LISTEN
+				&& ForasEntity.loop(Status.SUSPENDED, false) == ForasEntity.Loop.SUSPENDED && ForasEntity.loop(Status.DISABLED, true) == ForasEntity.Loop.WAITING
+				&& ForasEntity.loop(Status.FINISHED, true) == ForasEntity.Loop.LISTEN && ForasEntity.loop(Status.FINISHED, false) == ForasEntity.Loop.WAITING
+				&& ForasEntity.loop(Status.AWAITING_ANSWER, false) == ForasEntity.Loop.IDLE, "His loops");
+		for (String cue : ForasEntity.SOUND_IDS) {
+			helper.assertTrue(BuiltInRegistries.SOUND_EVENT.containsKey(Jugcraft.id("foras." + cue)), "jugcraft:foras." + cue + " is registered");
+		}
+		helper.succeed();
+	}
+
+	/** GC-07: a second Foras at the perch, or a copy of his save, is no presence: it leaves at once and grafts nothing; his own grafts once. */
+	@GameTest(maxTicks = 20)
+	public void aDuplicateForasGraftsNothing(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		ServerPlayer holder = gardenHolder(helper);
+		long now = dayStart(level, 1);
+		BlockPos at = new BlockPos(3, 1, 3);
+		ChestBlockEntity chest = forasStore(helper, at.east(), 1);
+		VerdantBedBlockEntity bed = forasHost(helper, new BlockPos(1, 1, 1), holder.getUUID());
+		PactPerchBlockEntity perch = forasPact(helper, holder, at, now);
+		ForasEntity foras = foras(helper, perch);
+		forasAnswer(helper, holder, perch, GraftKeeping.ALWAYS, now);
+		ForasEntity stranger = Workers.FORAS.create(level, EntitySpawnReason.MOB_SUMMONED);
+		stranger.setOwner(holder.getUUID());
+		stranger.setPerch(perch.getBlockPos());
+		helper.assertValueEqual(stranger.think(level, 6000L, now + 1), Status.FINISHED, "A Foras not the perch's presence leaves");
+		TagValueOutput saved = TagValueOutput.createWithContext(ProblemReporter.DISCARDING, level.registryAccess());
+		foras.saveWithoutId(saved);
+		ForasEntity twin = Workers.FORAS.create(level, EntitySpawnReason.LOAD);
+		twin.load(TagValueInput.create(ProblemReporter.DISCARDING, level.registryAccess(), saved.buildResult()));
+		twin.setUUID(UUID.randomUUID());
+		helper.assertValueEqual(twin.think(level, 6000L, now + 1), Status.FINISHED, "A copy of his save, under another id, leaves");
+		helper.assertTrue(bed.graft().isEmpty() && dewmossIn(chest) == 1 && keeping(stranger).last() == null && keeping(twin).last() == null
+				&& Pacts.done(pactOf(level, perch).pact(), now) == 0 && stranger.gone() && twin.gone(), "Neither grafted, spent or counted anything");
+		helper.assertValueEqual(foras.think(level, 6000L, now + 2), Status.WORKING, "The presence grafts, once");
+		helper.assertTrue(FORAS_GRAFT.equals(bed.graft()) && dewmossIn(chest) == 0, "By him alone");
+		helper.succeed();
+	}
+
 	// GC-08 unit 5
 	// GC-09 unit 6
 }

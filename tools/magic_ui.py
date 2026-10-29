@@ -927,9 +927,38 @@ WORK_GLANCES = {
                      "Needs your awake Heart, a Gleaner or pylon, in 10 blocks", "blocker")],
         "card": ("Needs Heart and Gleaner", (10, 10), "Needs Heart and Gleaner"),
     },
+    # GC-07 (Foras; docs/features/foras-pact.md): graft keeping. Two refusals, each its own blocker and card; today's gauge
+    # is his count (detail b); his matter asks whether to graft hosts that would gain nothing.
+    "graft_keeping": {
+        "icon": "jugcraft:dewmoss", "name": "Graft keeping", "line": "Grafts hosts from the store beside him",
+        "row.service": [("", "%1$s/%2$s today", (3, 8), "3/8 today", "chip")],
+        "row.last": [("", "Last: the host at %1$s grafted", ("12, 64, -30", "13, 64, -28"),
+                      "Last: the host at 12, 64, -30 grafted", "row")],
+        "row.no_donor": [("", "No donor in the store beside him", (), "No donor in the store beside him", "row")],
+        "matter.no_gain": [("", "%1$s hosts would gain nothing: graft them anyway?", (3,),
+                            "3 hosts would gain nothing: graft them anyway?", "row")],
+        "missing.store": [("", "Needs a chest or store touching the perch", (), "Needs a chest or store touching the perch",
+                           "blocker")],
+        "missing.host": [("", "Needs your host crop on a bed within %1$s blocks", (8,),
+                          "Needs your host crop on a bed within 8 blocks", "blocker")],
+        # Two words each: with Stolas ready and Buer, Bathin and Foras not, the chooser draws 25 words (its budget).
+        "card": {"missing.store": ("Store needed", (), "Store needed"), "missing.host": ("Host needed", (8,), "Host needed")},
+    },
 }
 # A work's fields that are not its rows' glances: its chooser reason, its icon, its name and its service line.
 WORK_FIELDS = ("card", "icon", "name", "line")
+
+
+def work_cards(rows):
+    """A work's chooser reasons, as (its refusal's key under pact.<work>., the reason): its "card" is the reason of its one
+    refusal (pact.<work>.missing), or, for a work with several (GC-07: Foras's missing.store and missing.host), a dict of
+    each refusal's key to its reason."""
+    card = rows.get("card")
+    if not card:
+        return []
+    return list(card.items()) if isinstance(card, dict) else [("missing", card)]
+
+
 for _work, _rows in WORK_GLANCES.items():
     # A row without its name or line is reported by problems(), not a failure to load this module.
     if _rows.get("line"):
@@ -949,7 +978,7 @@ CARDS = {
     "pact.missing.step": ("Research more first", ("The Garden's Regard", "Observed", "Harvest a ripe organism crop"),
                           "Research more first"),
     "pact.unavailable": ("Cannot be read here", ("Bathin",), "Cannot be read here"),
-    **{f"pact.{work}.missing": rows["card"] for work, rows in WORK_GLANCES.items() if rows.get("card")},
+    **{f"pact.{work}.{key}": card for work, rows in WORK_GLANCES.items() for key, card in work_cards(rows)},
 }
 # The roster's one fact per card (unit 2 draws them; at most 4 words): the server's next and task lines.
 ROSTER_GLANCES = {
@@ -1110,6 +1139,11 @@ SENTENCES = {
     _JADE + "pact.note.verdance_carrying.empty": ("Nothing to carry", (), "Nothing to carry", "jade"),
     _JADE + "pact.note.verdance_carrying.nowhere": ("Nowhere to carry it", (), "Nowhere to carry it", "jade"),
     _JADE + "pact.note.verdance_carrying.two_roads": ("Two roads: %1$s", (2,), "Two roads: 2", "jade"),
+    _JADE + "pact.matter.graft_keeping.no_gain": ("Hosts gain nothing", (), "Hosts gain nothing", "jade"),
+    _JADE + "pact.note.graft_keeping.no_gain": ("No gain: %1$s hosts", (3,), "No gain: 3 hosts", "jade"),
+    _JADE + "pact.note.graft_keeping.no_reading": ("Unread hosts: %1$s", (2,), "Unread hosts: 2", "jade"),
+    _JADE + "pact.note.graft_keeping.no_donor": ("No donor", (), "No donor", "jade"),
+    _JADE + "pact.note.graft_keeping.no_host": ("Nothing to graft", (), "Nothing to graft", "jade"),
     "message.jugcraft.concordance.disabled": ("Switched off", (), "Switched off", "jade"),
     "compose.jugcraft.diagnostic.conflicting_agreement": ("A copy: does nothing", (), "A copy: does nothing", "jade"),
     _JADE + "body": ("%1$s/%2$s · %3$s/%4$s Charge", (10, 20, 300, 400), "10/20 · 300/400 Charge", "jade"),
@@ -1145,7 +1179,10 @@ SENTENCE_MARKS = {
     _JADE + "pact.lost": "moon", _JADE + "pact.accord": "tick", _JADE + "pact.matter.verdance_carrying.two_roads": "ask",
     _JADE + "pact.note.strain_tending.asleep": "moon", _JADE + "pact.note.strain_tending.overworked": "hourglass",
     _JADE + "pact.note.verdance_carrying.empty": "moon", _JADE + "pact.note.verdance_carrying.nowhere": "hourglass",
-    _JADE + "pact.note.verdance_carrying.two_roads": "ask", "message.jugcraft.concordance.disabled": "lock",
+    _JADE + "pact.note.verdance_carrying.two_roads": "ask", _JADE + "pact.matter.graft_keeping.no_gain": "ask",
+    _JADE + "pact.note.graft_keeping.no_gain": "ask", _JADE + "pact.note.graft_keeping.no_reading": "hourglass",
+    _JADE + "pact.note.graft_keeping.no_donor": "hourglass", _JADE + "pact.note.graft_keeping.no_host": "moon",
+    "message.jugcraft.concordance.disabled": "lock",
     "compose.jugcraft.diagnostic.conflicting_agreement": "cross", _JADE + "dormant": "moon",
     _ECOLOGY + "growth.thriving": "tick", _ECOLOGY + "growth.tolerating": "hourglass", _ECOLOGY + "growth.stalled": "cross",
     _ECOLOGY + "strain": "hourglass", _ECOLOGY + "short": "hourglass", _ECOLOGY + "excess": "hourglass",
@@ -1468,8 +1505,10 @@ def problems(lang=None, load=None, read=read_library):
         if server not in GLANCES and server not in FOLDED:
             out.append(f"{server}: the server can send it, but it has neither a glance nor a place in FOLDED (spec 1.7)")
     for work, rows in WORK_GLANCES.items():
-        if work in pacts.SERVICE_WORDS and "missing" in pacts.SERVICE_WORDS[work]["messages"] and not rows.get("card"):
-            out.append(f"{work}: no chooser card reason")
+        carded = {key for key, _ in work_cards(rows)}
+        for key in pacts.SERVICE_WORDS.get(work, {}).get("messages", {}):
+            if key.startswith("missing") and key not in carded:
+                out.append(f"{work}: no chooser card reason for {key}")
         if not re.fullmatch(r"[a-z0-9_.-]+:[a-z0-9_/.-]+", rows.get("icon") or ""):
             out.append(f"{work}: no icon (an item id) in WORK_GLANCES (its service line's and its own rows' item)")
         if not rows.get("name") or not rows.get("line"):

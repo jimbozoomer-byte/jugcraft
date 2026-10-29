@@ -36,6 +36,8 @@ public final class PactObligations {
 		// Each unit's constant under its own line, ending ","; the lone ";" below closes the list.
 		// GC-06 unit 3
 		// GC-07 unit 4
+		/** GC-07 (Foras): a crop grafted by hand with its donor (OrganismCropBlock.graftBed, on success). */
+		GRAFT("graft"),
 		// GC-08 unit 5
 		// GC-09 unit 6
 		;

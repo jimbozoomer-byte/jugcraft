@@ -35,6 +35,7 @@ SERVICES = {
     "verdance_carrying": "Verdance carrying: at once, from your Hearts to a far Gleaner or a pylon",
     # GC-06 unit 3
     # GC-07 unit 4
+    "graft_keeping": "Graft keeping: a host grafted with a donor from the store beside his perch",
     # GC-08 unit 5
     # GC-09 unit 6
 }

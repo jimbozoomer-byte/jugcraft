@@ -16,6 +16,7 @@ import io.github.jimbozoomer.jugcraft.concordance.ecology.Niche;
 import io.github.jimbozoomer.jugcraft.concordance.ecology.Organism;
 import io.github.jimbozoomer.jugcraft.concordance.ecology.Verdict;
 import io.github.jimbozoomer.jugcraft.concordance.rules.Evidence;
+import io.github.jimbozoomer.jugcraft.concordance.spirits.PactObligations;
 import java.util.List;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -322,6 +323,8 @@ public class OrganismCropBlock extends CropBlock {
 		Grafting.apply(level, pos, bed, graft);
 		donor.consume(1, player);
 		Garden.tell(player, "garden.grafted", getName(), ComposeText.name(new Text.Ref("graft", graft.id())));
+		// The garden cohort, GC-07: a graft by hand is Foras's first obligation (PactObligations; one line, on success).
+		PactObligations.performed(level, player, PactObligations.Act.GRAFT, pos.below());
 		return InteractionResult.SUCCESS;
 	}
 

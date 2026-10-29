@@ -19758,6 +19758,7 @@ GC05_CARRYING_TESTS = {
 GC05_ACCORDS = {"verdance_carrying": ["yield", "claim"],
                 # GC-06 unit 3
                 # GC-07 unit 4
+                "graft_keeping": ["prudent", "always"],
                 # GC-08 unit 5
                 # GC-09 unit 6
                 }
@@ -21157,6 +21158,34 @@ def check_pacts(co, root, lang, registered, research):
                 err(f"{cls}: missing the garden cohort's GC-06b game test {name}")
     # GC-06 unit 3
     # GC-07 unit 4
+    # --- GC-07: Foras (Dossier 4). His station is unit 3's (GC-P67): each row's Body keeps the station its row names, as
+    # unit 3's GC-06 rule does (with its reaching bone); the merge keeps one (decided by the session). ---
+    for name, spirit in pa.SPIRITS.items():
+        line = re.search(rf'new Body\("{name}", SOUND_IDS,[^;]*\);', java(f"spirits/{spirit['java']}.java"))
+        beside = bool(line) and "Station.BESIDE" in line.group(0)
+        if spirit.get("station") not in ("perch", "beside") or not line or beside != (spirit["station"] == "beside") \
+                or "Station.PERCH" in line.group(0):
+            err(f"spirits/{spirit['java']}.java: its Body keeps the station SPIRITS[{name!r}] names ({spirit.get('station')}; GC-P67)")
+    foras = java("spirits/ForasEntity.java")
+    if "case PactRequestPayload.RESOLVE -> done ? Gesture.ASSENT : null;" not in _java_body(foras, "public static @Nullable Gesture reaction(") \
+            or "case PactRequestPayload.ACCEPT -> done ? Gesture.ASSENT : Gesture.REFUSE;" not in _java_body(foras, "public static @Nullable Gesture reaction("):
+        err("spirits/ForasEntity.java: he assents to a seal and to his matter answered, and objects to a refusal (every gesture paired with words)")
+    if "sendParticles(" in foras or "void gestured(" in foras:
+        err("spirits/ForasEntity.java: no particle and no gesture hook of his own; his details are his clips and his count (GC-P93)")
+    if "Foras" not in pa.PERCH_TOOLTIP or "touching the perch" not in pa.PERCH_TOOLTIP:
+        err("tools/concordance_pacts.py PERCH_TOOLTIP: names what Foras wants at the perch")
+    pages = [page[1] for page in co.garden_pacts.PAGES] if hasattr(co, "garden_pacts") else []
+    want = ["Foras", "His Service", "The Logician's Objection", "His Price"]
+    if not any(pages[i:i + len(want)] == want for i in range(len(pages))):
+        err("tools/concordance_garden_pacts.py PAGES: Foras's codex pages, all four in order (Dossier 4 item 2)")
+    offer = pa.SPIRITS["foras"]["pact"]
+    if offer["upkeep"]["count"] != 1 or offer["service"]["quota"] != 8 or offer["service"]["radius"] != 8 or offer["beneficiaries"] != "party":
+        err("SPIRITS['foras']: radius 8, 8 grafts a day, a honeycomb a week, his party (GC-P81)")
+    for cls, names in GC07_FORAS_TESTS.items():
+        source = (tests / f"{cls}.java").read_text(encoding="utf-8") if (tests / f"{cls}.java").is_file() else ""
+        for name in names:
+            if not re.search(rf"public void {name}\(GameTestHelper \w+\)", source):
+                err(f"{cls}: missing the garden cohort's GC-07 game test {name}")
     # GC-08 unit 5
     # GC-09 unit 6
 
@@ -21666,6 +21695,65 @@ def check_garden_pacts(co, root, lang, registered, research):
         for name in names:
             if not re.search(rf"public void {name}\(GameTestHelper \w+\)", source):
                 err(f"{cls}: missing the garden cohort's GC-07 game test {name}")
+    # --- GC-07: Foras's graft keeping (Dossier 4 item 3; GC-P84 to GC-P88) ---
+    keeping = strip(text(spirits / "GraftKeeping.java"))
+    step = _java_body(keeping, "static Status keep(")
+    order = [step.find(n) for n in ("Pacts.inHours(service, time)", "Pacts.done(record.pact(), now) >= service.quota()",
+                                    "reach.beds(level, now)", "memory.raise()", "reach.stores(level, now)",
+                                    "asking.both(host.crop(), host.bed().keeper(), host.bed().getBlockPos(), host.bed().keeper())",
+                                    "asking.ask(at, record.holder())", "StorageUtil.findStoredResource(storage,",
+                                    "spend(storage, donor)", "Grafting.apply(level, host.crop(), host.bed(), host.graft());", "return grafted(")]
+    if -1 in order or order != sorted(order):
+        err("GraftKeeping.keep: hours, quota, the hosts and the matter, then each host asked at crop and bed, each store asked as "
+            "the holder's, the donor found, spent in its transaction, then grafted (GC-P85; Dossier 4 item 3)")
+    if "new GardenAsking(level, record, time, now, MAX_ASKED)" not in keeping:
+        err("GraftKeeping.keep: its questions are GardenAsking's, at most MAX_ASKED a think (GC-P85; CR4 6)")
+    if keeping.count(gp.DISTINCT.get("graft_keeping", {}).get("also", "?")) != 1:
+        err(f"spirits/GraftKeeping.java: makes {gp.DISTINCT.get('graft_keeping', {}).get('also')} once (DISTINCT)")
+    spend = _java_body(keeping, "public static boolean spend(")
+    if spend.count("Transaction.openOuter()") != 1 or spend.count("store.extract(donor, 1, transaction) != 1") != 1 \
+            or spend.count("transaction.commit();") != 1 or re.search(r"Grafting|setGraft|level\b|insert\(|attendWork|gesture|taskDone", spend) \
+            or keeping.count("Transaction.openOuter()") != 1 or keeping.count(".extract(") != 1 or keeping.count(".commit()") != 1:
+        err("GraftKeeping.spend: one outer transaction, one extraction of exactly one donor, committed only then, nothing else "
+            "inside it, and no other transaction in the service (GC-P82, GC-P85)")
+    for banned in (".setGraft(", ".consume(", "getInventory()", ".insert(", "ItemStack", "Garden.sample(", ".habitat(level)",
+                   "forgetSample(", "sendParticles(", "CourierLedger", "Logistics.", "getPlayer(record.holder()).getInventory"):
+        if banned in keeping:
+            err(f"spirits/GraftKeeping.java: never {banned} (the graft is Grafting.apply's, the donor the store's in its "
+                "transaction; no inventory, no sample, never cargo: no courier ledger, reservation or transit; GC-07, CR2 6)")
+    landed = _java_body(keeping, "private static Status grafted(")
+    order = [landed.find(n) for n in ("memory.grafted(graft);", "holder.taskDone(level, now);",
+                                      "foras.attendWork(graft.crop(), ForasEntity.Gesture.WORK.ticks, now);",
+                                      "foras.gesture(ForasEntity.Gesture.WORK);", "counted(level, record, holder, now);", "return Status.WORKING;")]
+    if -1 in order or order != sorted(order) or keeping.count("return Status.WORKING;") != 1 or keeping.count("holder.taskDone(") != 1 \
+            or "player.sendOverlayMessage(countLine(" not in _java_body(keeping, "private static void counted(") \
+            or 'Component.translatable(KEY + "counted", Pacts.done(pact, now), pact.service().quota())' not in _java_body(keeping, "public static Component countLine("):
+        err("GraftKeeping.grafted: one graft remembered, counted once, faced, gestured and counted aloud, his count its quota's "
+            "(Dossier 4 detail b)")
+    helps = _java_body(keeping, "static @Nullable Boolean helps(")
+    if "cachedHabitat(level)" not in helps or "Grafting.gains(" not in helps \
+            or "Grafting.holds(bed)" not in _java_body(keeping, "static @Nullable Host host("):
+        err("GraftKeeping: hosts carry no graft the rules know; the gain is read from the cached habitat by Grafting.gains (GC-P84)")
+    if not re.search(r"public static final List<String> ACCORDS = List\.of\(PRUDENT, ALWAYS\);", keeping) \
+            or 'String PRUDENT = "prudent";' not in keeping or 'String ALWAYS = "always";' not in keeping \
+            or "PactAccords.answer(level, perch)" not in _java_body(keeping, "static @Nullable String answer(") or ".accord()" in keeping \
+            or list(co.pacts.SERVICE_WORDS.get("graft_keeping", {}).get("accords", {})) != ["prudent", "always"]:
+        err("GraftKeeping: his answers are prudent then always (append only), worded in SERVICE_WORDS and read through "
+            "PactAccords.answer, so an unknown one reads as unanswered (GC-P86)")
+    # CR4 8: Jade says why he waits: his matter (unless answered "graft every host"), then hosts whose beds hold no reading.
+    noted = _java_body(keeping, "public PactService.@Nullable Note note(")
+    if not 0 <= noted.find('new PactService.Note("no_gain", memory.useless().size())') \
+            < noted.find('if (memory.idle() == Idle.NO_GAIN) {') < noted.find('new PactService.Note("no_reading", memory.unread())') \
+            < noted.find('new PactService.Note("no_donor", 0)') or "!ALWAYS.equals(answer(level, foras))" not in noted:
+        err("GraftKeeping.note: hosts that would gain nothing unless answered always, then hosts with no reading yet, then no "
+            "donor or no host (GC-P90; CR4 8)")
+    invited = _java_body(keeping, "public List<Missing> missing(")
+    if "GardenReach.withStores(perch.getBlockPos(), definition.radius(), bed -> own.equals(bed.keeper()))" not in invited \
+            or not 0 <= invited.find('"missing.store"') < invited.find('"missing.host"') or "knownHost(level, bed)" not in invited:
+        err("GraftKeeping.missing: a store touching the perch, then a host on a bed the inviter keeps within his radius (GC-P88)")
+    gains = _java_body(text(root / "garden" / "Grafting.java"), "public static boolean gains(Niche own, Niche grafted, Habitat habitat)")
+    if "if (now > was) {" not in gains or "better |= now < was;" not in gains or "return better;" not in gains:
+        err("Grafting.gains: no factor's fit worse, one better (GC-P84)")
     # GC-08 unit 5
     # GC-09 unit 6
 
@@ -22322,6 +22410,117 @@ def check_spirit_bodies(co):
             err(f"ConcordanceGardenPactClientGameTests: his {key} loop is photographed through loopPoseOf (no gesture over it)")
     # GC-06 unit 3
     # GC-07 unit 4
+    # --- GC-07: Foras's body, built, with the owner's acorn cap (GC-S12, GC-P92, GC-P93) ---
+    body = pa.SPIRITS["foras"]["body"]
+    built = {"geckolib/models/entity/foras.geo.json": ((pa.ACORN_GEO, pa.ACORN_TEXTURE), "garden_bodies.foras_model"),
+             "geckolib/animations/entity/foras.animation.json": ((), "garden_bodies.foras_animations"),
+             "textures/entity/foras.png": ((pa.FIR, pa.MOSS, pa.ACORN_TEXTURE), "garden_bodies.foras_skin")}
+    if body.get("built") != built or body.get("owner_files") or body.get("adapted") \
+            or {t: v for t, v in pa.BUILT.items() if "/foras" in t} != built \
+            or not set(built) <= {target for target, _, _ in owner_art.builds()}:
+        err("SPIRITS['foras']: his body is built by tools/garden_bodies.py from the fir log, the Spanish moss and the owner's "
+            "acorn cap; nothing of his is copied or adapted by path (GC-P92)")
+    originals = ROOT / "art" / "owner-library" / "originals"
+    read = lambda path: (originals / path if path.partition("/")[0] == owner_art.PART2_NAME else originals / "Blocks" / path).read_bytes()
+    catalog = (load(ROOT / "art" / "owner-library" / "catalog" / "edited-2026-10-18-part2" / "files.json") or {}).get("files", [])
+    for path, (index, digest) in pa.OWNER_PART2_PINS.items():
+        entry = catalog[index] if index < len(catalog) else {}
+        if entry.get("path") != path.partition("/")[2] or entry.get("sha256") != digest or hashlib.sha256(read(path)).hexdigest() != digest:
+            err(f"{path}: the owner's acorn cap as catalogued (files[{index}], {digest}), the original unedited (GC-07)")
+    geo = load(ASSETS / "geckolib" / "models" / "entity" / "foras.geo.json") or {}
+    clips = (load(ASSETS / "geckolib" / "animations" / "entity" / "foras.animation.json") or {}).get("animations", {})
+    if geo != garden_bodies.foras_model(read) or clips != garden_bodies.foras_animations(read)["animations"]:
+        err("foras.geo.json and foras.animation.json: tools/garden_bodies.py's, unedited (run tools/owner_art.py)")
+    bones = (geo.get("minecraft:geometry") or [{}])[0].get("bones", [])
+    by = {bone["name"]: bone for bone in bones}
+    own = [cube for bone in bones if bone["name"] != "cap" for cube in bone.get("cubes", [])]
+    if not own or garden_bodies.coplanar(geo) or any(0 in cube["size"] for cube in own) \
+            or any("rotation" in bone for bone in bones) or any("rotation" in cube for bone in bones for cube in bone.get("cubes", [])):
+        err(f"foras.geo.json: none of his own cubes flat, nothing turned at rest, no two faces on one plane facing one way: "
+            f"{garden_bodies.coplanar(geo) if own else 'no cubes'}")
+    owner = next((b for b in json.loads(read(pa.ACORN_GEO))["minecraft:geometry"][0]["bones"] if b["name"] == "armorHead"), {})
+    shift = [a - b for a, b in zip(garden_bodies.FORAS_HEAD, garden_bodies.BIPED_HEAD)]
+    cap = by.get("cap", {}).get("cubes", [])
+    wanted = []
+    for cube in owner.get("cubes", []):
+        moved = dict(cube, origin=[round(o + s, 4) for o, s in zip(cube["origin"], shift)])
+        if 0 in cube["size"]:
+            (u, v), (w, h, d) = cube["uv"], cube["size"]
+            moved["uv"] = {"north": {"uv": [u + d, v + d], "uv_size": [w, h]}}   # its south face draws nothing: dropped
+        wanted.append(moved)
+    if by.get("cap", {}).get("parent") != "head" or cap != wanted or [c for c in cap if 0 in c["size"]] == []:
+        err("foras.geo.json: the cap bone holds the owner's armorHead cubes moved onto his head, their sizes and UVs the owner's, "
+            "only the leaf's clear south face dropped (GC-P92)")
+    try:
+        colours = set(garden_bodies.palette(read, pa.FIR, 7)) | set(garden_bodies.palette(read, pa.MOSS, 8))
+    except SystemExit as stopped:
+        colours = set()
+        err(str(stopped))
+    skin_path = ASSETS / "textures" / "entity" / "foras.png"
+    if not skin_path.is_file():
+        err("textures/entity/foras.png: missing (run tools/owner_art.py)")
+    else:
+        with Image.open(skin_path) as a, Image.open(originals / pa.ACORN_TEXTURE) as b:
+            skin, acorn = a.convert("RGBA"), b.convert("RGBA")
+        x0, y0, w0, h0 = garden_bodies.ACORN_REGION
+        box = acorn.getchannel("A").getbbox()
+        wrong = sum(1 for y in range(skin.height) for x in range(skin.width)
+                    if (skin.getpixel((x, y)) != acorn.getpixel((x, y)) if x0 <= x < x0 + w0 and y0 <= y < y0 + h0
+                        else skin.getpixel((x, y))[3] not in (0, 255) or (skin.getpixel((x, y))[3] and skin.getpixel((x, y))[:3] not in colours)))
+        if skin.size != garden_bodies.FORAS_TEXTURE or wrong or not box or not (box[0] >= x0 and box[1] >= y0 and box[2] <= x0 + w0 and box[3] <= y0 + h0):
+            err(f"textures/entity/foras.png: the owner's acorn cap texel for texel in its region, everything else opaque or clear "
+                f"in the fir log's and the moss's colours ({wrong} texels wrong)")
+    if (ASSETS / "textures" / "entity" / "foras_glowmask.png").exists() or body["render"]["glow"]:
+        err("Foras has no glowmask (nothing of his glows)")
+    foras_java = text(JAVA_ROOT / "concordance" / "spirits" / "ForasEntity.java")
+    for key, name in body["loops"].items():
+        if clips.get(name, {}).get("loop") is not True or clips[name].get("animation_length") != body["loop_lengths"][key] \
+                or f'RawAnimation.begin().thenLoop("{name}")' not in foras_java:
+            err(f"foras.animation.json / ForasEntity.Loop: his {key} loop {name} loops, {body['loop_lengths'][key]} s, and plays")
+    for gesture, (length, (start, end)) in body["gesture_times"].items():
+        clip = clips.get(body["gestures"][gesture], {})
+        ticks = round(length * 20)
+        play = "thenPlayAndHold" if gesture == "depart" else "thenPlay"
+        held = "hold_on_last_frame" if gesture == "depart" else False
+        if abs(float(clip.get("animation_length", -1)) - length) > 1e-9 or clip.get("loop") != held or not 0 <= start < end <= length \
+                or not re.search(rf'{gesture.upper()}\("{gesture}", {ticks}, RawAnimation\.begin\(\)\.{play}\("animation\.foras\.{gesture}"\)\)',
+                                 foras_java):
+            err(f"foras.animation.json / ForasEntity.Gesture: {gesture} lasts {length} s ({ticks} ticks), its telling window inside it")
+    # Detail (a): his cap tips at his greeting and at each graft, and only then (each key a vector, eased ones as objects: CR4 3).
+    tipped = sorted(name for name, clip in clips.items() if "cap" in clip.get("bones", {}))
+    vector = lambda key: key["vector"] if isinstance(key, dict) else key
+    peaks = {name: max(abs(vector(v)[0]) for v in clips[name]["bones"]["cap"]["rotation"].values()) for name in tipped}
+    if tipped != ["animation.foras.arrive", "animation.foras.work"] or set(peaks.values()) != {abs(body["cap_tip"][0])}:
+        err("foras.animation.json: his cap tips at his greeting and at each graft, and only then (Dossier 4 detail a)")
+    if not {"jugcraft_garden_foras_grafting", "jugcraft_garden_foras_kept", "jugcraft_garden_foras_matter"} <= set(pa.GARDEN_CLIENT_SHOTS):
+        err("GARDEN_CLIENT_SHOTS: Foras's flow photographs his graft with his cap tipped, the kept page's count and his "
+            "matter (GC-07 client shots)")
+    check_geckolib("foras", foras_java, None, None, kind="entity")
+    # His box holds his height and robe; his culling box his arms and his cap (GC-P92).
+    cubes = [cube for bone in bones for cube in bone.get("cubes", [])]
+    if cubes:
+        low = [min(c["origin"][a] for c in cubes) for a in range(3)]
+        high = [max(c["origin"][a] + c["size"][a] for c in cubes) for a in range(3)]
+        across = max(high[0] - low[0], high[2] - low[2]) / 16 * body["scale"]
+        tall = (high[1] - low[1]) / 16 * body["scale"]
+        size, r = pa.SPIRITS["foras"]["entity"], body["render"]
+        if abs(size["height"] - tall) > 0.1 * tall or across > size["width"] + 2 * r["wide"] or tall > size["height"] + r["above"]:
+            err(f"Foras's box {size['width']} x {size['height']} holds his height ({tall:.2f}); his culling box his reach ({across:.2f})")
+    # His poses and shots, from his front, each gesture frozen inside its window (CR4 5; the client read without comments).
+    posed = {key.lower(): (float(a), float(b)) for key, a, b in re.findall(
+        r'clipPose\(context, server, perch, FORAS, ForasEntity\.Gesture\.([A-Z]+), ([0-9.]+), ([0-9.]+), "jugcraft_garden_foras_[a-z]+"\);',
+        garden_client)}
+    if posed != {key: window for key, (_, window) in body["gesture_times"].items()}:
+        err(f"ConcordanceGardenPactClientGameTests: each of Foras's gestures frozen inside its telling pose: {posed}")
+    for name in body["shots"]:
+        if f'"{name}"' not in garden_client:
+            err(f"ConcordanceGardenPactClientGameTests: takes {name}")
+    for key, name in body["loops"].items():
+        if key != "astir" and not re.search(rf'loopPoseOf\(context, server, perch, FORAS, FORAS_{key.upper()}, '
+                                            rf'"jugcraft_garden_foras_{key}", (true|false)\);', garden_client):
+            err(f"ConcordanceGardenPactClientGameTests: his {key} loop is photographed through loopPoseOf (no gesture over it)")
+        if key != "astir" and f'"{name}"' not in garden_client:
+            err(f"ConcordanceGardenPactClientGameTests: checks his {key} loop ({name})")
     # GC-08 unit 5
     # GC-09 unit 6
 
@@ -25440,6 +25639,18 @@ GC06B_TESTS = {
 GC07_GRAFT_TESTS = {
     "ConcordanceGardenGameTests": ["theGraftGestureBehavesAsBefore", "aGraftGainsOnlyWhereEveryFitIsNoWorseAndOneBetter",
                                    "theGardenReachIndexesStoresTouchingThePerch"],
+    "ConcordanceWorkerGameTests": [
+        "forasSpendsOneDonorAGraftAndNeverTwo", "forasNeverReplacesAKnownGraft", "forasGraftsAgainAfterAReplanting",
+        "forasTakesOnlyFromAStoreTheHolderMayChange", "forasRefusedWhereTheHolderMayNotBuild", "forasNeverGraftsAStrangersBed",
+        "twoForasNeverGraftOneBedTwice", "aPrudentForasSkipsAUselessGraft", "aPrudentForasGraftsWhereItHelps",
+        "anAlwaysAnswerGraftsEveryHost", "forasStopsAtHisQuota", "forasWaitsForAPresentHolder",
+        "forassFirstObligationIsAGraftByHand", "theKeptPageCountsForasGrafts", "forassReadingSaysItsNoteAndNamesNoPlayer"],
+    "ConcordancePersistenceGameTests": ["aForasReloadedKeepsHisStoreAndAnswer"],
+}
+# The garden cohort, GC-07's game tests of Foras as a character and of his standing station (check_pacts).
+GC07_FORAS_TESTS = {
+    "ConcordanceWorkerGameTests": ["forasStandsBesideThePerchFacingHisInviter", "forasRefusesWithoutAStore", "forasRefusesWithoutAHost",
+                                   "forasAnswersEachActionWithHisGesture", "aDuplicateForasGraftsNothing"],
 }
 # GC-08 unit 5
 # GC-09 unit 6
