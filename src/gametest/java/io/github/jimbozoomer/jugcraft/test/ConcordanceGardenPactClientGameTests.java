@@ -1781,6 +1781,13 @@ public class ConcordanceGardenPactClientGameTests implements FabricClientGameTes
 			boolean says = context.computeOnClient(client -> RosterClient.state().rows().stream()
 					.anyMatch(row -> row.waiting().getString().equals(awaiting) && row.icon() == RosterStatePayload.WAITING));
 			check(says && awaiting.contains("awaiting your answer"), "Bathin's row says awaiting your answer, with the waiting icon: " + rows);
+			// Magic interfaces unit 2: his relic card draws that state short, its whole sentence his card's narration and tip.
+			context.waitFor(client -> client.gui.screen() instanceof RosterScreen screen && screen.settled() && !RosterClient.waiting(), WAIT);
+			String card = context.computeOnClient(client -> Component.translatable("entity.jugcraft.bathin").getString() + " "
+					+ Component.translatable("screen.jugcraft.glance.compose.jugcraft.worker.status.awaiting_answer").getString());
+			List<String> drawn = context.computeOnClient(client -> ((RosterScreen) client.gui.screen()).drawn());
+			Jugcraft.LOGGER.info("[garden-check] the roster's cards while his matter waits: {}", drawn);
+			check(drawn.stream().anyMatch(text -> text.startsWith(card)), "Bathin's card draws his state short (\"" + card + "\"): " + drawn);
 			shot(context, "jugcraft_garden_roster_awaiting");
 			context.getInput().pressKey(InputConstants.KEY_ESCAPE);
 			context.waitForScreen(null);

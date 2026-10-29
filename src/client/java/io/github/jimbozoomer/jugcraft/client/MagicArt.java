@@ -12,6 +12,9 @@ import net.minecraft.client.gui.screens.inventory.tooltip.BelowOrAboveWidgetTool
 import net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipPositioner;
 import net.minecraft.client.gui.screens.inventory.tooltip.MenuTooltipPositioner;
 import net.minecraft.client.renderer.RenderPipelines;
+import net.minecraft.locale.Language;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.FormattedText;
 import net.minecraft.resources.Identifier;
 import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.util.Util;
@@ -234,6 +237,47 @@ final class MagicArt {
 			return text;
 		}
 		return font.plainSubstrByWidth(text, Math.max(0, width - font.width("…"))) + "…";
+	}
+
+	/** {@code text} (its style kept: a bold name stays bold) cut with "…" to {@code width}, as a line to draw. */
+	static FormattedCharSequence fit(Font font, Component text, int width) {
+		if (font.width(text) <= width) {
+			return text.getVisualOrderText();
+		}
+		FormattedText cut = font.substrByWidth(text, Math.max(0, width - font.width("…")));
+		return Language.getInstance().getVisualOrder(FormattedText.composite(cut, FormattedText.of("…")));
+	}
+
+	/** A lit card's outline (the chooser's portrait cards, the roster's cards; spec 2.8). */
+	static final int CARD_LIGHT = 0xFFFFFCAB;
+
+	/**
+	 * A family title on the cosmos (spec 2.14: the chooser's "Invite a spirit", the roster's "Roster"): {@code heading} in
+	 * gold with vanilla's shadow at ({@code x}, {@code y}), over the documentation underline in gold, {@code underline} wide
+	 * and centred under it.
+	 */
+	static void title(GuiGraphicsExtractor g, Font font, Component heading, int x, int y, int underline) {
+		g.text(font, heading, x, y, MagicTheme.GOLD, true);
+		underline(g, x + (font.width(heading) - underline) / 2, y + 10, underline, MagicTheme.GOLD);
+	}
+
+	/**
+	 * A state as the family draws it on dark (spec 1.2: never colour alone; the chooser's "Ready" and "Not yet", a roster
+	 * card's state): its mark, then its word in {@code colour} with vanilla's shadow, the word's line at {@code y}.
+	 */
+	static void state(GuiGraphicsExtractor g, Font font, Mark mark, FormattedCharSequence word, int x, int y, int colour) {
+		mark(g, mark, x, y - 1);
+		g.text(font, word, x + mark.width + 3, y, colour, true);
+	}
+
+	/** {@link #state} of a whole word. */
+	static void state(GuiGraphicsExtractor g, Font font, Mark mark, Component word, int x, int y, int colour) {
+		state(g, font, mark, word.getVisualOrderText(), x, y, colour);
+	}
+
+	/** How wide {@link #state} draws {@code word} after {@code mark}. */
+	static int stateWidth(Font font, Mark mark, Component word) {
+		return mark.width + 3 + font.width(word);
 	}
 
 	/**

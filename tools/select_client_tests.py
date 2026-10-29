@@ -146,13 +146,20 @@ for _name in ("MagicArt", "MagicTheme", "MagicLayout", "MagicScreen", "MagicButt
               "MagicPortrait", "MagicPortraits", "PactGlance", "RosterGlance", "PactAfford", "KeepFirstConfirmScreen", "ComposerScroll",
               "ConcordanceClientOptions"):
     SHOWN_BY[_name] = SHOWN_BY.get(_name, set()) | MAGIC_SHOWN
+# The magic interfaces' unit 2: a whole sentence's short form (MagicGlance) draws the roster's card states and Jade's short
+# lines; Jade's lines on the pact perch and the spirits are photographed by the pact and garden classes (when Jade is
+# loaded), and those on Concordance blocks by the encyclopedia's.
+SHOWN_BY["MagicGlance"] = SHOWN_BY.get("MagicGlance", set()) | MAGIC_SHOWN
+SHOWN_BY["JugcraftJadeClient"] = SHOWN_BY.get("JugcraftJadeClient", set()) | {
+    "ConcordancePactClientGameTests", "ConcordanceGardenPactClientGameTests", "EncyclopediaClientGameTests"}
 MAGIC_ASSETS = re.compile(r"^src/main/resources/assets/jugcraft/textures/gui/(?:sprites/(?:magic|tooltip)/|magic/)")
 # The language file is otherwise judged by nothing (its words are judged by the generators' checks), but the magic screens'
 # whole-screen word budgets are judged only by their client tests: a change to a key they draw or narrate (a glance, a
-# short label, a pact or roster screen's words, or a server sentence of the pacts, garden pacts or workers) selects them.
+# short label, a pact or roster screen's words, a whole sentence's short form, or a server sentence of the pacts, garden
+# pacts, workers or roster) selects them.
 LANG_FILE = re.compile(r"^src/main/resources/assets/jugcraft/lang/[a-z_]+\.json$")
-MAGIC_WORDS = re.compile(r'^[-+]\s*"(?:screen\.jugcraft\.pact\.|screen\.jugcraft\.roster\.glance\.'
-                         r'|message\.jugcraft\.concordance\.(?:pact|garden_pact|workers)\.)')
+MAGIC_WORDS = re.compile(r'^[-+]\s*"(?:screen\.jugcraft\.pact\.|screen\.jugcraft\.roster\.|screen\.jugcraft\.glance\.'
+                         r'|message\.jugcraft\.concordance\.(?:pact|garden_pact|workers|roster)\.)')
 # Files that change nothing a client test shows.
 NOTHING = (
     re.compile(r"^docs/"),

@@ -143,6 +143,20 @@ class ClientTestSelectionTests(unittest.TestCase):
                 self.assertEqual("ConcordancePactClientGameTests" in chosen, picked)
                 self.assertEqual("ConcordanceGardenPactClientGameTests" in chosen, picked)
 
+    def test_the_roster_cards_and_jades_short_lines_select_their_tests(self):
+        # The magic interfaces' unit 2: a whole sentence's short form, the roster's words and Jade's client lines.
+        chosen, _ = selection.select(["src/client/java/io/github/jimbozoomer/jugcraft/client/MagicGlance.java"], self.tests, set())
+        self.assertTrue(selection.MAGIC_SHOWN <= chosen, selection.MAGIC_SHOWN - chosen)
+        chosen, _ = selection.select(["src/client/java/io/github/jimbozoomer/jugcraft/client/compat/JugcraftJadeClient.java"], self.tests, set())
+        self.assertIn("ConcordancePactClientGameTests", chosen)
+        self.assertIn("ConcordanceGardenPactClientGameTests", chosen)
+        lang = "src/main/resources/assets/jugcraft/lang/en_us.json"
+        for key in ("screen.jugcraft.glance.compose.jugcraft.worker.status.idle", "screen.jugcraft.roster.short.page"):
+            diff = '+++ b/' + lang + '\n+  "' + key + '": "x",\n'
+            with self.subTest(key=key), patch.object(selection, "git", side_effect=lambda *args, d=diff: d if args[0] == "diff" else ""):
+                chosen, _ = selection.select([lang], self.tests, set(), "base", "head")
+                self.assertIn("ConcordanceRosterClientGameTests", chosen)
+
     def test_pact_network_test_is_its_own_class_and_weighed(self):
         # Concordance Chunk D unit 5 (D-09): the two-client attempt is a client class of its own, with a running-time estimate.
         chosen, _ = selection.select(["src/gametest/java/io/github/jimbozoomer/jugcraft/test/ConcordancePactNetworkTests.java"], self.tests, set())

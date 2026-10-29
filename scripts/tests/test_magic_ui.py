@@ -69,6 +69,7 @@ class WordsTests(unittest.TestCase):
         self.assertEqual(lang["screen.jugcraft.pact.short.standing.hint"], "The same for every spirit")
         self.assertEqual(lang["screen.jugcraft.roster.glance.task.none"], "Nothing now")
         count = sum(len(glances) for glances in mu.GLANCES.values()) + len(mu.CARDS) + len(mu.SHORT) + len(mu.STEP_GLANCES)
+        count += len(mu.SENTENCES) + len(mu.ROSTER_SHORT)  # unit 2: whole sentences' short forms, the roster's short words
         self.assertEqual(len(lang), count)
 
     def test_marks_follow_the_shape_of_the_server_key(self):
@@ -330,6 +331,85 @@ class IconTests(unittest.TestCase):
             self.assertTrue(any("glyph:feather" in problem for problem in mu.problems()))
         finally:
             mu.ICON_RULES = saved
+
+
+
+class RosterAndJadeTests(unittest.TestCase):
+    """Unit 2: the roster's cards (their state, fact, name and kind) and Jade's short lines."""
+
+    def test_short_forms_render_from_the_sentences_own_arguments(self):
+        lang = {}
+        mu.lang_entries(lang)
+        self.assertEqual(lang["screen.jugcraft.glance.compose.jugcraft.worker.status.awaiting_answer"], "Awaits answer")
+        self.assertEqual(lang["screen.jugcraft.glance.tooltip.jugcraft.concordance.jade.pact.next"], "Next in %1$s days")
+        self.assertEqual(lang["screen.jugcraft.roster.short.page"], "%1$s / %2$s")
+        self.assertEqual(lang["screen.jugcraft.roster.glance.request"], "Request #%1$s")
+        for key, (pattern, args, expected, kind) in mu.SENTENCES.items():
+            with self.subTest(key=key):
+                self.assertEqual(mu.render(pattern, args), expected)
+                self.assertFalse(mu.placeholders(pattern)[1])
+                self.assertLessEqual(mu.nwords(expected), mu.LIMITS[kind])
+
+    def test_a_cards_state_and_fact_fit_the_narrowest_card(self):
+        # The smallest GUI (320 wide): two cards of 153, the text 37 in, the actions in a column 19 from the right.
+        self.assertEqual(mu.CARD_TEXT, 94)
+        for server, glances in mu.ROSTER_GLANCES.items():
+            for _, _, _, expected, kind in glances:
+                with self.subTest(server=server):
+                    if kind == "state":
+                        self.assertLessEqual(mu.width(expected), mu.STATE_ROOM)
+                    if kind == "fact":
+                        self.assertLessEqual(mu.width(expected), mu.FACT_ROOM)
+        for key, (_, _, expected, kind) in mu.SENTENCES.items():
+            if kind == "state":
+                with self.subTest(key=key):
+                    self.assertLessEqual(mu.width(expected), mu.STATE_ROOM)
+
+    def test_a_state_too_wide_for_a_card_is_reported(self):
+        saved = copy.deepcopy(mu.SENTENCES)
+        try:
+            key = "compose.jugcraft.worker.status.awaiting_answer"
+            mu.SENTENCES[key] = ("Awaits your answer", (), "Awaits your answer", "state")
+            lang = dict(LANG)
+            mu.lang_entries(lang)
+            self.assertTrue(any(key in p and "for its state" in p for p in mu.unit2_problems(lang)))
+        finally:
+            mu.SENTENCES.clear()
+            mu.SENTENCES.update(saved)
+
+    def test_a_roster_state_or_answer_without_its_glance_is_reported(self):
+        saved = copy.deepcopy(mu.ROSTER_GLANCES)
+        try:
+            del mu.ROSTER_GLANCES["roster.waiting.lost"]
+            self.assertTrue(any("roster.waiting.lost" in p and "no glance" in p for p in mu.unit2_problems(LANG)))
+        finally:
+            mu.ROSTER_GLANCES.clear()
+            mu.ROSTER_GLANCES.update(saved)
+
+    def test_a_short_form_naming_an_argument_the_sentence_lacks_is_reported(self):
+        saved = copy.deepcopy(mu.SENTENCES)
+        try:
+            key = "tooltip.jugcraft.concordance.jade.pact.next"
+            mu.SENTENCES[key] = ("Next in %2$s days", (7,), "Next in 7 days", "jade")
+            lang = dict(LANG)
+            mu.lang_entries(lang)
+            self.assertTrue(any(key in p and "do not fit" in p for p in mu.unit2_problems(lang)))
+        finally:
+            mu.SENTENCES.clear()
+            mu.SENTENCES.update(saved)
+
+    def test_a_stray_short_form_and_a_bad_mark_are_reported(self):
+        lang = dict(LANG)
+        lang["screen.jugcraft.glance.compose.jugcraft.worker.status.dreaming"] = "Dreaming"
+        found = mu.unit2_problems(lang)
+        self.assertTrue(any("status.dreaming" in p and "SENTENCES does not hold" in p for p in found))
+        saved = dict(mu.SENTENCE_MARKS)
+        try:
+            mu.SENTENCE_MARKS["compose.jugcraft.worker.status.idle"] = "star"
+            self.assertTrue(any("status.idle" in p and "not one of MARKS" in p for p in mu.unit2_problems(LANG)))
+        finally:
+            mu.SENTENCE_MARKS.clear()
+            mu.SENTENCE_MARKS.update(saved)
 
 
 if __name__ == "__main__":

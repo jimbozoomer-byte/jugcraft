@@ -2,6 +2,7 @@ package io.github.jimbozoomer.jugcraft.test;
 
 import com.mojang.blaze3d.platform.InputConstants;
 import io.github.jimbozoomer.jugcraft.Jugcraft;
+import io.github.jimbozoomer.jugcraft.client.KeepFirstConfirmScreen;
 import io.github.jimbozoomer.jugcraft.client.PactScreen;
 import io.github.jimbozoomer.jugcraft.client.RosterClient;
 import io.github.jimbozoomer.jugcraft.client.RosterScreen;
@@ -91,6 +92,9 @@ import org.jspecify.annotations.Nullable;
  * <li><b>Full</b>: 32 roster entries, 32 Bound Wills and 16 requests: 64 rows listed and the rest counted, eight pages turned
  * with Page Down ({@code jugcraft_roster_full}, {@code jugcraft_roster_full_small}).</li>
  * </ul>
+ * Since the magic interfaces' unit 2 (docs/features/magic-interfaces.md, spec 1.1 and 2.14) the roster is two columns of
+ * relic cards: before each shot the page is read once it is settled (MagicScreen.settled, no answer awaited) and held to the
+ * roster's budget of 70 words drawn, with no card's words cut; the end confirmation, on the scroll, to its 25.
  * The narrator is not heard, and one client is not two.
  */
 public class ConcordanceRosterClientGameTests implements FabricClientGameTest {
@@ -104,6 +108,10 @@ public class ConcordanceRosterClientGameTests implements FabricClientGameTest {
 	private static final int TEST_KEY = InputConstants.KEY_F7;
 	/** D-09: ticks the workshop hand may take to claim, carry and deliver one request. */
 	private static final int WORK_WAIT = 1200;
+	/** The roster's word budget (spec 1.1: a page of eight cards, its title, page and footer, at most 70 words drawn). */
+	private static final int BUDGET = 70;
+	/** The end confirmation's (spec 1.1, as the pact's). */
+	private static final int CONFIRM_BUDGET = 25;
 
 	private record Setup(BlockPos second, BlockPos destination, UUID pact, UUID shade, UUID shadeBody, long stranded, long open) {
 	}
@@ -253,6 +261,7 @@ public class ConcordanceRosterClientGameTests implements FabricClientGameTest {
 				&& screen(client).control("empty") != null), "Before anything is kept the roster says it is empty");
 		fits(context, "the empty roster");
 		named(context);
+		reads(context, "the empty roster");
 		shot(context, "jugcraft_roster_empty");
 		context.getInput().pressKey(InputConstants.KEY_ESCAPE);
 		context.waitForScreen(null);
@@ -292,6 +301,7 @@ public class ConcordanceRosterClientGameTests implements FabricClientGameTest {
 		// Back to the first row, so the shot below shows the roster from its top.
 		tabTo(context, "row:" + shown.getFirst());
 		context.waitTicks(2);
+		settled(context);
 		List<UUID> unworded = context.computeOnClient(ConcordanceRosterClientGameTests::unworded);
 		check(unworded.isEmpty(), "Every row says its state in words beside its mark: " + unworded);
 		check(context.computeOnClient(client -> screen(client).getNarrationMessage().getString()
@@ -299,6 +309,7 @@ public class ConcordanceRosterClientGameTests implements FabricClientGameTest {
 				"The screen says which page it shows");
 		fits(context, "the roster at GUI scale 2");
 		named(context);
+		reads(context, "the roster at GUI scale 2");
 		shot(context, "jugcraft_roster");
 	}
 
@@ -315,10 +326,12 @@ public class ConcordanceRosterClientGameTests implements FabricClientGameTest {
 		check(applied == 4, "The high-scale shot is at GUI scale 4: " + applied);
 		fits(context, "the roster at GUI scale 4");
 		named(context);
+		reads(context, "the roster at GUI scale 4");
 		shot(context, "jugcraft_roster_scale4");
 		smallest(context);
 		fits(context, "the roster in the smallest GUI");
 		named(context);
+		reads(context, "the roster in the smallest GUI");
 		shot(context, "jugcraft_roster_small");
 		context.getInput().resizeWindow(width, height);
 		context.runOnClient(client -> {
@@ -339,6 +352,7 @@ public class ConcordanceRosterClientGameTests implements FabricClientGameTest {
 		check(suspended.done() && "suspended".equals(suspended.reason()) && server.computeOnServer(m -> hold(m, setup.pact())) == BoundWill.Hold.HOLDER,
 				"Suspend from the roster holds Stolas's pact on its Bound Will: " + suspended.reason());
 		context.waitFor(client -> row(STOLAS).offers(RosterRequestPayload.RESUME) && row(STOLAS).icon() == RosterStatePayload.SUSPENDED, WAIT);
+		reads(context, "Stolas's pact suspended");
 		shot(context, "jugcraft_roster_suspended");
 		context.waitTicks(SETTLE);
 		tabTo(context, "resume:" + id);
@@ -359,6 +373,11 @@ public class ConcordanceRosterClientGameTests implements FabricClientGameTest {
 		check(context.computeOnClient(client -> client.gui.screen() instanceof ConfirmScreen confirm
 				&& confirm.getNarrationMessage().getString().contains(Component.translatable("entity.jugcraft.gathering_shade").getString())),
 				"It names who leaves, in the server's words");
+		// Unit 2: it asks on the scroll (KeepFirstConfirmScreen.magic), within its budget.
+		List<String> asked = context.computeOnClient(client -> client.gui.screen() instanceof KeepFirstConfirmScreen confirm ? confirm.drawn() : List.of());
+		Jugcraft.LOGGER.info("[roster-check] the end confirmation: {} words drawn: {}", words(asked), asked);
+		check(!asked.isEmpty() && words(asked) <= CONFIRM_BUDGET, "The end confirmation is drawn on the scroll within " + CONFIRM_BUDGET
+				+ " words: " + words(asked) + " " + asked);
 		shot(context, "jugcraft_roster_end_confirm");
 		context.getInput().pressKey(InputConstants.KEY_ESCAPE);
 		context.waitForScreen(RosterScreen.class);
@@ -381,6 +400,7 @@ public class ConcordanceRosterClientGameTests implements FabricClientGameTest {
 		context.waitFor(client -> row(SHADE) == null, WAIT);
 		check(context.computeOnClient(client -> screen(client).focusedKey().startsWith("row:")),
 				"The keyboard stays on the roster, on the row now in the ended one's place");
+		reads(context, "the shade's agreement ended");
 		shot(context, "jugcraft_roster_ended");
 	}
 
@@ -395,6 +415,7 @@ public class ConcordanceRosterClientGameTests implements FabricClientGameTest {
 		check(recovered.done() && "recovered".equals(recovered.reason()) && after.equals("true 2"),
 				"Recover hands the two stranded glowstone to the player once and closes the request: " + after);
 		context.waitFor(client -> stranded() == null, WAIT);
+		reads(context, "the stranded cargo recovered");
 		shot(context, "jugcraft_roster_recovered");
 		UUID openId = context.computeOnClient(client -> open().id());
 		context.waitTicks(SETTLE);
@@ -507,11 +528,13 @@ public class ConcordanceRosterClientGameTests implements FabricClientGameTest {
 				"Page Down reaches the last page, which says how many more there are");
 		fits(context, "the full roster's last page");
 		named(context);
+		reads(context, "the full roster's last page");
 		shot(context, "jugcraft_roster_full");
 		int width = context.computeOnClient(client -> client.getWindow().getWidth());
 		int height = context.computeOnClient(client -> client.getWindow().getHeight());
 		smallest(context);
 		fits(context, "the full roster in the smallest GUI");
+		reads(context, "the full roster in the smallest GUI");
 		shot(context, "jugcraft_roster_full_small");
 		context.getInput().resizeWindow(width, height);
 		context.runOnClient(client -> {
@@ -597,12 +620,46 @@ public class ConcordanceRosterClientGameTests implements FabricClientGameTest {
 		context.getInput().pressKey(InputConstants.KEY_RETURN);
 		context.waitFor(client -> RosterClient.lastAnswer() > before && !RosterClient.waiting() && client.gui.screen() instanceof RosterScreen, WAIT);
 		context.waitTicks(2);
+		settled(context);
 		PactStatePayload.Result result = context.computeOnClient(client -> RosterClient.result());
 		check(result != null, "The server answered");
 		return result;
 	}
 
+	/** Waits until the roster shows its latest state (MagicScreen.settled: no rebuild pending) and no answer is awaited. */
+	private static void settled(ClientGameTestContext context) {
+		context.waitFor(client -> client.gui.screen() instanceof RosterScreen screen && screen.settled() && !RosterClient.waiting(), WAIT);
+	}
+
+	/**
+	 * Unit 2 (spec 1.1, 4.5): the settled page within the roster's budget, counted from the strings the screen drew, and no
+	 * card's words cut to fit.
+	 */
+	private static void reads(ClientGameTestContext context, String where) {
+		settled(context);
+		List<String> drawn = context.computeOnClient(client -> screen(client).drawn());
+		int words = context.computeOnClient(client -> screen(client).words());
+		List<String> cut = context.computeOnClient(client -> screen(client).cut());
+		Jugcraft.LOGGER.info("[roster-check] {}: {} words drawn: {}", where, words, drawn);
+		check(words <= BUDGET, "The roster draws at most " + BUDGET + " words (" + where + "): " + words + " " + drawn);
+		check(cut.isEmpty(), "No card's words are cut (" + where + "): " + cut);
+	}
+
+	/** Words as spec 1.1 counts them: whitespace tokens with a letter or digit. */
+	private static int words(List<String> drawn) {
+		int words = 0;
+		for (String text : drawn) {
+			for (String token : text.split("\\s+")) {
+				if (token.chars().anyMatch(Character::isLetterOrDigit)) {
+					words++;
+				}
+			}
+		}
+		return words;
+	}
+
 	private static void fits(ClientGameTestContext context, String where) {
+		settled(context);
 		List<String> outside = context.computeOnClient(client -> {
 			RosterScreen screen = screen(client);
 			List<String> out = new ArrayList<>(screen.outside());
@@ -616,6 +673,7 @@ public class ConcordanceRosterClientGameTests implements FabricClientGameTest {
 	}
 
 	private static void named(ClientGameTestContext context) {
+		settled(context);
 		List<String> blank = context.computeOnClient(client -> blank(client.gui.screen()));
 		check(blank.isEmpty(), "Every reachable control has words for the narrator: " + blank);
 	}

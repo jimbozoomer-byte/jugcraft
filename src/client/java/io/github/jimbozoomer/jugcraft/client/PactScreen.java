@@ -81,7 +81,7 @@ public class PactScreen extends MagicScreen implements MenuAccess<PactMenu> {
 	private static final int[] COLUMNS = {0, 355, 680, 1000};
 	/** The scroll's stain colour, behind the chosen pattern; the light outline of a lit card (spec 2.8). */
 	private static final int STAIN = 0xFFE2BA97;
-	private static final int CARD_LIGHT = 0xFFFFFCAB;
+	private static final int CARD_LIGHT = MagicArt.CARD_LIGHT;
 	/** The wood's brown, the price row's rule. */
 	private static final int WOOD = 0xFFB17245;
 	private static final int FOOTER_WIDEST = 76;
@@ -1465,9 +1465,7 @@ public class PactScreen extends MagicScreen implements MenuAccess<PactMenu> {
 	@Override
 	protected void extractChrome(GuiGraphicsExtractor g, int mouseX, int mouseY, float delta) {
 		if (surface == Surface.CHOOSER) {
-			int y = titleY();
-			g.text(font, heading, (width - font.width(heading)) / 2, y, MagicTheme.GOLD, true);
-			MagicArt.underline(g, (width - 132) / 2, y + 10, 132, MagicTheme.GOLD);
+			MagicArt.title(g, font, heading, (width - font.width(heading)) / 2, titleY(), 132);
 			return;
 		}
 		ScreenRectangle header = layout.header();
@@ -1840,9 +1838,7 @@ public class PactScreen extends MagicScreen implements MenuAccess<PactMenu> {
 			int sy = py + MagicArt.PLATE_HEIGHT + 4;
 			MagicArt.Mark mark = choice.ready() ? MagicArt.Mark.TICK : MagicArt.Mark.LOCK;
 			Component state = choice.ready() ? ui("short.ready") : ui("short.not_yet");
-			int w = mark.width + 3 + font.width(state);
-			MagicArt.mark(g, mark, cx - w / 2, sy - 1);
-			g.text(font, state, cx - w / 2 + mark.width + 3, sy, choice.ready() ? MagicTheme.GOOD : MagicTheme.LAVENDER, true);
+			MagicArt.state(g, font, mark, state, cx - MagicArt.stateWidth(font, mark, state) / 2, sy, choice.ready() ? MagicTheme.GOOD : MagicTheme.LAVENDER);
 			int ry = sy + 11;
 			for (FormattedCharSequence line : reason) {
 				g.text(font, line, cx - font.width(line) / 2, ry, MagicTheme.LAVENDER, true);

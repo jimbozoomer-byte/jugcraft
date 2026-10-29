@@ -1,14 +1,29 @@
 package io.github.jimbozoomer.jugcraft.client;
 
+import io.github.jimbozoomer.jugcraft.concordance.spirits.RosterStatePayload;
+import java.util.List;
+import java.util.UUID;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.contents.TranslatableContents;
+import net.minecraft.world.item.ItemStack;
 
 /**
  * The roster's glances (docs/features/magic-interfaces.md, spec 2.14): a card's one fact of at most four words, from the
  * server's own row (its next obligation, else its task), through the same keyed table as the pact's
  * (screen.jugcraft.roster.glance.&lt;key&gt;, tools/magic_ui.py ROSTER_GLANCES). The card's message keeps every word of the
- * row. Pure formatting; anything without a glance shows its whole line.
+ * row. Pure formatting; anything without a glance shows its whole line. Unit 2 adds a card's name, kind and state (its
+ * row's waiting reason, short: a roster sentence's glance, else a worker's or courier's short form, MagicGlance) and the
+ * item its fact draws.
  */
 final class RosterGlance {
+	private static final String ROSTER = PactGlance.SERVER + "roster.";
+	/** The offering sentences whose second argument names the offering's tag (Roster.next). */
+	private static final List<String> OFFERINGS = List.of("next.offering", "next.at_visit", "next.warned", "next.held");
+
+	/** A card's fact: its words (empty: none) and the items its icon shows in turn (none, one, or an offering tag's). */
+	record Fact(Component shown, List<ItemStack> items) {
+	}
+
 	private RosterGlance() {
 	}
 
@@ -28,5 +43,71 @@ final class RosterGlance {
 		}
 		PactGlance.Glance doing = of(task);
 		return doing.isShort() ? doing.shown() : next;
+	}
+
+	/**
+	 * {@code row}'s fact (as {@link #fact(Component, Component)}) and the items it draws: an offering's tag, a request's own
+	 * item for its deliveries, the carried request's item for a courier's task, the work's item for a pact's day of tasks.
+	 */
+	static Fact fact(RosterStatePayload.Row row, List<RosterStatePayload.Row> rows) {
+		PactGlance.Glance owed = of(row.next());
+		if (owed.isShort()) {
+			return new Fact(owed.shown(), items(row, row.next(), rows));
+		}
+		PactGlance.Glance doing = of(row.task());
+		return doing.isShort() ? new Fact(doing.shown(), items(row, row.task(), rows)) : new Fact(row.next(), List.of());
+	}
+
+	/** A card's name: a request's short name ("Request #3"), else the row's own. */
+	static Component name(RosterStatePayload.Row row) {
+		return of(row.name()).shown();
+	}
+
+	/** A card's kind: a request's short kind ("Courier"), else the row's own. */
+	static Component kind(RosterStatePayload.Row row) {
+		return of(row.kind()).shown();
+	}
+
+	/** A card's state: its waiting reason short (a roster sentence's glance, else a worker's or courier's short form), else {@code word}. */
+	static Component state(RosterStatePayload.Row row, Component word) {
+		PactGlance.Glance glance = of(row.waiting());
+		if (glance.isShort()) {
+			return glance.shown();
+		}
+		Component shortened = MagicGlance.of(row.waiting());
+		return shortened != row.waiting() ? shortened : word;
+	}
+
+	private static List<ItemStack> items(RosterStatePayload.Row row, Component line, List<RosterStatePayload.Row> rows) {
+		if (!(line.getContents() instanceof TranslatableContents contents) || !contents.getKey().startsWith(ROSTER)) {
+			return List.of();
+		}
+		String key = contents.getKey().substring(ROSTER.length());
+		Object[] args = contents.getArgs();
+		if (OFFERINGS.contains(key) && args.length > 1 && args[1] instanceof Component tag
+				&& tag.getContents() instanceof TranslatableContents named && named.getFallback() != null) {
+			return MagicStacks.tag(named.getFallback());
+		}
+		if (key.equals("next.delivered")) {
+			return one(PactGlance.item(row.portrait()));
+		}
+		if ((key.equals("task.carrying") || key.equals("task.claimed")) && args.length > 0 && args[0] instanceof Number number) {
+			UUID request = new UUID(0L, number.longValue());
+			for (RosterStatePayload.Row other : rows) {
+				if (other.id().equals(request)) {
+					return one(PactGlance.item(other.portrait()));
+				}
+			}
+			return List.of();
+		}
+		if (key.equals("next.quota") && row.service().getContents() instanceof TranslatableContents service
+				&& service.getKey().startsWith(ROSTER + "service.")) {
+			return one(PactGlance.workIcon(service.getKey().substring((ROSTER + "service.").length()), ""));
+		}
+		return List.of();
+	}
+
+	private static List<ItemStack> one(ItemStack item) {
+		return item.isEmpty() ? List.of() : List.of(item);
 	}
 }

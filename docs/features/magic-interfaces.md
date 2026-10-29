@@ -5,6 +5,9 @@ the shared Magic layer; its second moves the pact screen onto the layer in every
 amended D-S15 and their checks; its third applies the pact screens' review (see "What the review's fixes change"). Unit 1 ends with an evidence checkpoint (the client shots of every pact state beside the
 design's pictures). **Nothing of it has been compiled or run in Minecraft yet** (see Known limits). Built on the garden cohort's line (draft pull request
 [#526](https://github.com/jimbozoomer-byte/jugcraft/pull/526): units 1 and 2, unit 3's shared prefix, merged with main).
+**Unit 2 built, not merged** (one commit on unit 1's line): the roster as two columns of relic cards on the layer, the
+chooser's shared pieces moved into the layer, and Jade's short lines (see "Unit 2: the roster as relic cards, and short
+Jade lines"). Like unit 1's, nothing of it has been compiled or run in Minecraft here.
 Proposal issue: none; the owner's request of 28 October 2026 is the scope.
 Owner: @jimbozoomer-byte. AI-assisted implementation with Claude Code; the model is named in the commit trailers.
 Target milestone and tier: every tier's magic screens (the pact perch first, then the roster, the composer, the Field
@@ -35,6 +38,9 @@ mockups (kept with the session's design notes, not in the repository). Its answe
 | **The beats shortened** (spec 1.5: at most 18 words a line, a stage direction of at most 8), a `Terms` skip on beats 1 and 2, and a spirit's beats once heard not shown again (the next visit opens on his terms; a client-only set in Jugcraft's client options) | **Decided by the session, in answer to the owner's request for far less reading; reviewable at the checkpoint.** Not owner-accepted. Applied in the screen commit to Stolas's, Buer's and Bathin's beats (their records quote the new words) |
 | The service sentences (`term.service.<work>`) stay as shipped; GC-S7's two phrases stay in them | Spec 1.6 (a rewrite saved four to six words) |
 | **A kept page that draws both a pending first task and its spirit's matter may draw that task's row** (at most 12 words, its act drawn short) beyond the kept page's budget of 45 (48 compact); its client shots allow that row's words (`firstTask()` in the garden client test). The spec measured the matter page without a first task; with Bathin's row cut from 18 words to 10 the page still draws about 55 in the composed picture | **Decided by the session, in answer to the owner's request for far less reading; reviewable at the checkpoint.** Not owner-accepted (the pact screens' review asked for the allowance to be dropped once the row was shorter; it cannot be without cutting the matter's or the last carry's words) |
+| **Unit 2: Jade shows a few short lines by default** on the pact perch, the Spirit Anchor, the spirits, Verdant Beds and living devices (at most five, each a glance with its mark or item), and **every line whole while Jade's details key is held** (sneak by default) | **Decided by the session, in answer to the owner's request for far less reading; reviewable at the checkpoint.** Not owner-accepted. Each short line narrates its whole sentence |
+| **Unit 2: a card's state is its row's own waiting reason, short** ("Awaits answer", "Following you", "Not loaded"), beside the mark of its icon, else the state's word | **Decided by the session** (spec 1.4 #3 names such states); the card's narration and tip keep every word of the row |
+| **Unit 2: Resume, Cancel and Recover's icons** are the kit's turning arrows, the cross and the up arrow (spec 2.14 names End's cross and Suspend's bars only) | **Decided by the session**; each icon's message is its label, its tip names the card ("Resume Stolas") |
 
 ## What the first commit adds
 
@@ -403,6 +409,139 @@ Deviations from the spec in this commit:
   (`garden_pact.act.device`), a step glance (`step.concordance_garden_regard_encountered`) and two short labels for the
   price's narration (`short.have`, `short.short_of`).
 
+## Unit 2: the roster as relic cards, and short Jade lines
+
+The design's unit 2 (spec 4.6): the roster as cards, the chooser's shared pieces, Jade's short lines (spec 2.14, 1.1).
+
+### What the player sees
+
+- **The roster** (`RosterScreen`, now on `MagicScreen`): the gold title "Roster" over its underline and the page ("1 / 1")
+  over the cosmos, and two columns of dark relic cards (the gold frame and its purple well, at most 224 wide each): the
+  portrait in the HUD's gilded card frame (the worker's own model, cached and ticked by `MagicPortraits`, so a spirit
+  plays its idle pose; a request's item), the name (bold; regular on a narrow card), the state's mark and a few words
+  ("At work", "Awaits answer", "Not loaded", "In transit"), one fact of at most four words with its item ("due in 7
+  days" with the offering cycling once a second, "2/8 tasks today", "Carrying #3" with the carried item, "0/16
+  delivered"), the kind at the card's foot, and its actions as the kit's icons at its top right: Suspend (two bars), End
+  (a cross), Resume (the turning arrows), Cancel (the cross), Recover (the up arrow). Every sentence of the row stays its
+  narration and its tip (hover or keyboard focus); an action's tip is one line naming the card ("End Bathin...") and
+  stays in its own card's band, its narration the whole hint. The footer: the page's arrows at the left, Refresh and
+  Close at the right. The server's answer is a short line with its mark at the top ("Suspended", "Not on your roster
+  now"), the whole sentence its narration and tip. A page of eight draws 62 words (the composed picture at
+  427x240; the budget is 70, the old roster's 346).
+- **Narrow and short screens** (spec 2.14): under 180 wide a card draws its name regular, stacks its actions in its right
+  column and moves its kind to its tip; at 320x180 a page holds six cards ("1 / 2"), as the design's picture shows.
+- **Ending from the roster** asks on the scroll over the cosmos, as the pact's does: "End the agreement with Gathering
+  Shade?", "It leaves; anything held comes back once.", "This cannot be undone.", End it and Keep it (the keyboard on Keep
+  it); its narration is the server's whole sentence.
+- **Jade, short by default** (spec 1.1: at most five lines of at most four words, each with an icon): on the pact perch and
+  the Spirit Anchor "With Stolas" (his sign), the state with its mark ("Active", "Offering due"), the service with its
+  work's item, "Next in 7 days" (or "Grace: 1 days") and one more line, the one most worth knowing (his matter, else why
+  his presence waits, else his service's note, else the answer kept); on a spirit its status short with its mark
+  ("Awaits answer") and the same reading without "With"; on a Verdant Bed its growth or "Dormant" with its mark, its
+  nutrients, its first reason short ("Moisture too low") and its strain ("Strain 2/8"); on a living device its status
+  short with its mark ("No Verdance", "Keeper away"). **Jade's details key (sneak by default) shows every line whole, as
+  before**, the bed's habitat and every reason included; each short line narrates its whole sentence.
+
+### What changes
+
+- **The chooser's shared pieces move into the layer:** `MagicArt.title` (a title in gold over the documentation
+  underline), `MagicArt.state` and `stateWidth` (a mark beside its word), `MagicArt.CARD_LIGHT` (a lit card's light) and
+  `MagicArt.fit` for a styled line; the chooser (`PactScreen`) and the roster draw with them. `MagicLayout.roster` lays
+  out the roster; `MagicButton.at` places an action's tip.
+- **`MagicGlance`** (new, client, public for the Jade adapter): the short form of a whole sentence that is not one of the
+  pact screen's server glances (`screen.jugcraft.glance.<the sentence's own key>`, fed its own arguments by position) and
+  the mark its line draws. `RosterGlance` gains a card's name, kind, state and fact with its items.
+- **`RosterScreen.Portraits` is gone:** the roster's portraits are `MagicPortraits`' and `MagicPortrait.draw`'s, so they
+  play their idle pose; leaving a world clears them as before.
+- **Words** (`tools/magic_ui.py`): `SENTENCES` (74 short forms: the 22 worker statuses and 18 courier states and notes a
+  card's state can be, Jade's pact, bed and device lines), `SENTENCE_MARKS` (62 marks, mirrored by `MagicGlance.MARKS`),
+  `ROSTER_SHORT` (12 roster words: the page, the empty roster, the "more" line, the actions' tips, the end's line) and 20
+  appended `ROSTER_GLANCES` (a request's name and kind, 13 card states, the roster's 5 answers). The roster's fact "an
+  offering resumes it" became "Offer to resume": unit 1 wrote the roster's glances before the cards were measured, and it
+  ran past a card's room.
+- **Audits:** `check_magic_ui` holds `MagicGlance.MARKS` and its prefix to the tables, the chooser's and the roster's
+  shared pieces, and Jade's short lines (each provider's whole lines kept for its details, at most five short lines on a
+  kept pact); `magic_ui.unit2_problems` renders every short form from its sentence's own arguments, holds a card's
+  state and fact to the narrowest card's room (`CARD_TEXT`, 94 px at 320 wide), and names a roster state or answer the
+  server can send without its glance, a stray short form or a mark that is not one; `check_roster_screen` follows the
+  screen onto the layer (its portraits, marks, ending on the scroll, subtitles read from `MagicScreen`, and its shots'
+  budget). `RosterScreen` joins `MAGIC_SCREENS`.
+- **Tests:** `ConcordanceRosterClientGameTests` keeps every shot and key; before each shot it reads the settled page
+  (`MagicScreen.settled`, no answer awaited) within the roster's 70 words with no card's words cut (`RosterScreen.cut`),
+  and the end confirmation within 25; its answers are read once the page is settled. `ConcordanceGardenPactClientGameTests`
+  checks that Bathin's card draws "Awaits answer" while his matter waits. `scripts/tests/test_magic_ui.py` (6 more) and
+  `test_client_test_selection.py` (1 more: `MagicGlance`, the Jade adapter and the roster's words select their classes).
+- **No payload, request, server decision or Jade server data changes.**
+
+### Record fields (unit 2)
+
+| Field | The roster's cards and Jade's short lines |
+|---|---|
+| Tier | every tier's roster and Jade lines; nothing is gated by it |
+| Input producer | RosterStatePayload's rows and answers, PactReading and the Concordance data providers' snapshots (all unchanged) |
+| Output consumer | the roster screen, its end confirmation, Jade on the pact perch, the Spirit Anchor, the spirits, beds and living devices |
+| Costs | none in play; the roster draws at most eight visual-only portraits (the cache's sixteen, as before) |
+| Unlocks | nothing; presentation only |
+| Failure behaviour | a state without a short form shows its icon's word; a fact without a glance its whole line; a sentence without a short form, or with fewer arguments than it names, is drawn whole; a card's word too long for its room loses, in turn, its kind, its item and its end ("…"); Jade's details always show the whole reading |
+| Test evidence | `check_magic_ui`, `check_roster_screen` and their mutations, `scripts/tests/test_magic_ui.py` and `test_client_test_selection.py`, the generators' checks and the composed roster at four sizes, run locally (see Verification, unit 2); the client tests' new checks have not run |
+
+### Deviations from the spec
+
+- **A state glance of "Awaits answer"**, not the design's "Awaits your answer": at 320 wide a card has 94 pixels for its
+  mark and state, and "Awaits your answer" needs 98.
+- **The card's fact draws the fact the server sends** (its next obligation, else its task), not the design's "5/16 beds
+  today" for Buer: his row's next obligation is his offering ("due in 6 days"), and no payload changes in this unit.
+- **Jade's next offering draws the calendar glyph, not the offering's item:** the reading carries the days, not the
+  offering's tag, and Jade's server data is unchanged in this unit.
+- **The Alembic Crucible's "Next step" line** (spec 2.14's last sentence) is left to the alchemy family's unit (unit 4):
+  this unit's Jade lines are the pact perch's, the spirits', the beds' and the devices'.
+- **Not shortened in Jade:** a work's matters and notes without a short form (a later garden spirit's, until its unit
+  adds one to `SENTENCES` and `SENTENCE_MARKS`) are drawn whole, without a mark.
+
+### Known limits (unit 2)
+
+- **Not compiled or run in Minecraft here** (no jar): every call was checked against the decompiled 26.3 sources, Jade
+  26.3.5's own source (the pinned jar's version: `Accessor.showDetails`, `JadeUI.sprite`, `smallItem`, `spacer`, `text`,
+  `Element.narration`, `ITooltip.add` and `append`) and the repository's own uses; the files parse.
+- The composed pictures are a port of the screen's geometry to the generated files, not the game's drawing; the client
+  tests count what the game draws.
+- Jade's short lines are photographed only where the client tests take Jade shots with Jade loaded (the pact and garden
+  classes); none of them reads Jade's lines.
+
+### Verification (unit 2)
+
+Run locally, all passing (none of it in CI, and nothing in Minecraft):
+
+- The generator, alone: `python3 -B tools/generate_material_data.py` (the language file: 106 keys added, the roster's held
+  fact changed); its reordering of `docs/features/jug-nouveau-content-map.json` and its whitespace-only rewrites of the
+  Jimtafacts animation, model and `.mcmeta` files were restored. No art changed: `python3 tools/owner_art.py --check`
+  (every imported owner file matches its source).
+- `python3 -B tools/check_mod_data.py` (with `check_magic_ui`, `check_roster_screen`, `check_pact_screen` and
+  `check_pacts`): PASS. `python3 scripts/check_repository.py`, `python3 tools/concordance_journey.py --check`, `python3
+  tools/concordance_economy.py` (gaining cycles: none), `python3 tools/check_icon_maps.py`, `node --test
+  tools/world-designer/model.test.cjs` (12), `python3 -m unittest discover -s scripts/tests` (341: `test_magic_ui.py` 43,
+  `test_client_test_selection.py` 18) and `git diff --check`.
+- Every changed Java file parses (11 files); every vanilla call was read in the decompiled 26.3 sources or the
+  repository's own uses, and every Jade call in Jade 26.3.5's source. Nothing compiled.
+- The audits' mutations, each on a scratch copy of the tree: 26 made, 26 caught (a portrait cache of the roster's own,
+  a roster icon without its mark, the End through the plain confirmation, the notes back on `BookArt.Paragraph`, a
+  card's state drawn whole, a mark changed in Java only and in Python only, `MagicGlance`'s prefix, literal text in
+  `MagicGlance`, a card's state and a card's fact too wide for the narrowest card, a roster state without its glance, a
+  stray short form, a short form naming an argument its sentence lacks, a roster word over its limit, a spirit's and a
+  bed's Jade lines always whole, a short Jade line narrating only its glance, a short pact reading that is the whole
+  one, the chooser's title drawn inline, the roster's state without the layer's piece, the roster's shots over a looser
+  budget or one shot not read, the subtitles not drawn, and `MagicGlance` or the Jade adapter dropped from the
+  client-test selection). The selection's first mutation first missed: the roster's own class names `MagicGlance`, so
+  its test now asks for every class `MAGIC_SHOWN` names, and catches it.
+- **The roster composed from the generated files** (a port of `MagicLayout.roster` and `RosterScreen`'s geometry: the
+  sprites, their slices and the language file) at 427x240, 320x180, 480x270 and 320x240, and looked at beside the
+  design's pictures: eight cards (six and "1 / 2" at 320x180), each card's portrait, state, fact, kind and actions where
+  the design puts them, End's tip in its card's band. Looking at them moved the title up clear of the cards, and made
+  a page hold the rows of cards that fit whole (at 320x180 the scroll's ball had sat over the top right card's End). The
+  composed page draws 62 words at 427x240 and 480x270, 54 at 320x240 and 42 at 320x180 (the budget is 70); no control
+  outside its area, no card's words cut, at all four sizes. The empty roster draws 19 words, the full roster's last page
+  24.
+
 ## Known limits
 
 - **Nothing here has been compiled or run in Minecraft.** No Minecraft jar is available where this was written: every
@@ -508,5 +647,6 @@ None: presentation only.
 - Unit 1 ends at the owner's checkpoint: CI's first compile, then the client shots of every pact state beside the
   design's pictures, with each shot's word count from its log.
 - The owner reviews variant B, the D-S15 wording and the shortened beats at that checkpoint.
-- Unit 2 moves the roster onto the layer (its glances are already in place); units 3 and 4 the composer and Field Guide,
-  then the alchemy and Nouveau screens.
+- Unit 2 (the roster's cards, the chooser's shared pieces and Jade's short lines) is built and ends at its own
+  checkpoint: the roster's client shots at every size beside the design's pictures, with each shot's word count from its
+  log, and Jade's shots. Units 3 and 4: the composer and Field Guide, then the alchemy and Nouveau screens.

@@ -44,6 +44,7 @@ import io.github.jimbozoomer.jugcraft.concordance.reliquary.ReliquaryShrineBlock
 import io.github.jimbozoomer.jugcraft.compat.jade.SpireDataProvider;
 import io.github.jimbozoomer.jugcraft.concordance.spire.SpireHeartBlock;
 import io.github.jimbozoomer.jugcraft.Jugcraft;
+import io.github.jimbozoomer.jugcraft.client.MagicGlance;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.core.registries.BuiltInRegistries;
 import io.github.jimbozoomer.jugcraft.machine.MachineBlock;
@@ -51,6 +52,7 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.ItemStack;
+import org.jspecify.annotations.Nullable;
 import snownee.jade.api.BlockAccessor;
 import snownee.jade.api.EntityAccessor;
 import snownee.jade.api.IEntityComponentProvider;
@@ -58,8 +60,15 @@ import snownee.jade.api.IBlockComponentProvider;
 import snownee.jade.api.ITooltip;
 import snownee.jade.api.IWailaClientRegistration;
 import snownee.jade.api.config.IPluginConfig;
+import snownee.jade.api.ui.Element;
+import snownee.jade.api.ui.JadeUI;
 
-/** Resolved only from Jade's client-registration callback. */
+/**
+ * Resolved only from Jade's client-registration callback. Since the magic interfaces' unit 2 (docs/features/
+ * magic-interfaces.md, spec 1.1 and 2.14) the pact perch, the Spirit Anchor, the spirits, Verdant Beds and living devices
+ * show a few short lines (a glance of at most four words, its mark or item first: MagicGlance), and Jade's extended view
+ * (its "show details" key, sneak by default) shows every line whole, as before; each short line narrates its whole sentence.
+ */
 public final class JugcraftJadeClient implements JugcraftJadePlugin.ClientRegistration {
 	@Override
 	public void register(IWailaClientRegistration registration) {
@@ -119,22 +128,38 @@ public final class JugcraftJadeClient implements JugcraftJadePlugin.ClientRegist
 		@Override
 		public void appendTooltip(ITooltip tooltip, EntityAccessor accessor, IPluginConfig config) {
 			accessor.getServerData().getCompound(WorkerDataProvider.KEY).ifPresent(data -> {
-				tooltip.add(Component.translatable("compose.jugcraft.worker.status." + data.getStringOr("status", "idle")));
+				Component status = Component.translatable("compose.jugcraft.worker.status." + data.getStringOr("status", "idle"));
+				boolean details = accessor.showDetails();
+				if (details) {
+					tooltip.add(status);
+				} else {
+					glance(tooltip, status);
+				}
 				int bondMax = data.getIntOr("bond_max", 0);
 				if (bondMax > 0) {
 					tooltip.add(Component.translatable("tooltip.jugcraft.concordance.jade.bond", data.getIntOr("bond", 0), bondMax));
 				}
 				int integrityMax = data.getIntOr("integrity_max", 0);
 				if (integrityMax > 0) {
-					tooltip.add(Component.translatable("tooltip.jugcraft.concordance.jade.body", data.getIntOr("integrity", 0), integrityMax,
-							data.getLongOr("energy", 0L), data.getIntOr("energy_max", 0)));
+					Component body = Component.translatable("tooltip.jugcraft.concordance.jade.body", data.getIntOr("integrity", 0), integrityMax,
+							data.getLongOr("energy", 0L), data.getIntOr("energy_max", 0));
+					if (details) {
+						tooltip.add(body);
+					} else {
+						glance(tooltip, body);
+					}
 				}
 				int carried = data.getIntOr("carried", 0);
 				if (carried > 0) {
 					tooltip.add(Component.translatable("tooltip.jugcraft.concordance.jade.carried", carried));
 				}
-				// Concordance Chunk D, D-06: Stolas's pact: its service, state, next offering and grace (PactReading).
-				data.getCompound("pact").ifPresent(pact -> pactLines(tooltip, pact));
+				// Concordance Chunk D, D-06: Stolas's pact: its service, state, next offering and grace (PactReading); short unless
+				// Jade's details are asked for (magic interfaces unit 2).
+				if (details) {
+					data.getCompound("pact").ifPresent(pact -> pactLines(tooltip, pact));
+				} else {
+					data.getCompound("pact").ifPresent(pact -> pactGlances(tooltip, pact, false));
+				}
 			});
 		}
 	}
@@ -215,6 +240,125 @@ public final class JugcraftJadeClient implements JugcraftJadePlugin.ClientRegist
 		return id == null ? Component.empty() : Component.translatable("entity." + id.getNamespace() + "." + id.getPath());
 	}
 
+	/**
+	 * Magic interfaces unit 2 (spec 1.1: at most five lines of at most four words, each with an icon): a pact's or
+	 * agreement's reading short. On a block: with whom (the spirit's sign); then, on either, its state (its mark), its service
+	 * (its work's item), the next offering or the grace, and the one thing most worth knowing: the matter its spirit raises,
+	 * else why its presence waits, else its service's note, else the answer kept. {@link #pactLines} is the whole reading
+	 * (Jade's details); each line here narrates its whole sentence.
+	 */
+	private static void pactGlances(ITooltip tooltip, CompoundTag data, boolean block) {
+		if (data.getBooleanOr("departing", false)) {
+			tooltip.add(Component.translatable("tooltip.jugcraft.concordance.jade.pact.departing"));
+		}
+		switch (data.getStringOr("standing", "")) {
+			case "disabled" -> glance(tooltip, Component.translatable("message.jugcraft.concordance.disabled"));
+			case "none" -> glance(tooltip, data.getBooleanOr("visiting", false)
+					? Component.translatable("tooltip.jugcraft.concordance.jade.pact.visiting", entityName(data.getStringOr("visitor", "")))
+					: Component.translatable("tooltip.jugcraft.concordance.jade.pact.none"));
+			case "copy" -> glance(tooltip, ComposeText.show(Text.of(Diagnostic.PREFIX + Code.CONFLICTING_AGREEMENT.id)));
+			case "unreadable" -> glance(tooltip, Component.translatable("tooltip.jugcraft.concordance.jade.pact.unreadable"));
+			case "kept" -> {
+				String named = data.getStringOr("counterpart", "");
+				if (block && !named.isEmpty()) {
+					ItemStack sign = MagicGlance.sign(named);
+					line(tooltip, sign.isEmpty() ? glyph("person") : JadeUI.smallItem(sign),
+							Component.translatable("tooltip.jugcraft.concordance.jade.pact.keeps", entityName(named)));
+				}
+				glance(tooltip, Component.translatable("tooltip.jugcraft.concordance.jade.pact.state." + data.getStringOr("state", "active")));
+				String service = data.getStringOr("service", "");
+				if (!service.isEmpty()) {
+					Component name = Component.translatable("tooltip.jugcraft.concordance.jade.pact.service." + service);
+					ItemStack work = MagicGlance.work(service);
+					line(tooltip, work.isEmpty() ? glyph("scroll") : JadeUI.smallItem(work), MagicGlance.of(name),
+							Component.translatable("tooltip.jugcraft.concordance.jade.pact.service", name));
+				}
+				int due = data.getIntOr("due_days", -1);
+				int grace = data.getIntOr("grace_days", -1);
+				if (due >= 0) {
+					line(tooltip, glyph("calendar"), Component.translatable("tooltip.jugcraft.concordance.jade.pact.next", due));
+				} else if (grace >= 0) {
+					line(tooltip, glyph("hourglass"), Component.translatable("tooltip.jugcraft.concordance.jade.pact.grace", grace));
+				}
+				String matter = data.getStringOr("matter", "");
+				String waiting = data.getStringOr("waiting", "");
+				String note = data.getStringOr("note", "");
+				String accord = data.getStringOr("accord", "");
+				if (!matter.isEmpty() && !service.isEmpty()) {
+					glance(tooltip, Component.translatable("tooltip.jugcraft.concordance.jade.pact.matter." + service + "." + matter));
+				} else if (waiting.equals("lost")) {
+					glance(tooltip, Component.translatable("tooltip.jugcraft.concordance.jade.pact.lost"));
+				} else if (!waiting.isEmpty()) {
+					Component why = Component.translatable("compose.jugcraft.worker.status." + waiting);
+					MagicGlance.Icon mark = MagicGlance.mark(why);
+					line(tooltip, mark == null ? null : sprite(mark), MagicGlance.of(why),
+							Component.translatable("tooltip.jugcraft.concordance.jade.pact.waiting", why));
+				} else if (!note.isEmpty() && !service.isEmpty()) {
+					glance(tooltip, Component.translatable("tooltip.jugcraft.concordance.jade.pact.note." + service + "." + note,
+							data.getIntOr("note_count", 0)));
+				} else if (!accord.isEmpty() && !service.isEmpty()) {
+					glance(tooltip, Component.translatable("tooltip.jugcraft.concordance.jade.pact.accord",
+							Component.translatableWithFallback("message.jugcraft.concordance.pact." + service + ".accord." + accord, accord)));
+				}
+			}
+			default -> {
+			}
+		}
+	}
+
+	/** {@code full} as one short line (its glance, MagicGlance), its mark first when it has one; it narrates the whole sentence. */
+	private static void glance(ITooltip tooltip, Component full) {
+		MagicGlance.Icon mark = MagicGlance.mark(full);
+		line(tooltip, mark == null ? null : sprite(mark), MagicGlance.of(full), full);
+	}
+
+	/** {@code full} as one short line after {@code icon}. */
+	private static void line(ITooltip tooltip, @Nullable Element icon, Component full) {
+		line(tooltip, icon, MagicGlance.of(full), full);
+	}
+
+	/** One line: {@code icon} (none: the words alone), then {@code shown}; its narration {@code full}, the whole sentence. */
+	private static void line(ITooltip tooltip, @Nullable Element icon, Component shown, Component full) {
+		if (icon == null) {
+			tooltip.add(JadeUI.text(shown).narration(full));
+			return;
+		}
+		tooltip.add(icon.narration(""));
+		tooltip.append(JadeUI.spacer(3, 0));
+		tooltip.append(JadeUI.text(shown).narration(full));
+	}
+
+	/** A mark or glyph of the magic interfaces (GUI-atlas sprites), at its own size. */
+	private static Element sprite(MagicGlance.Icon icon) {
+		return JadeUI.sprite(icon.sprite(), icon.width(), icon.height());
+	}
+
+	private static Element glyph(String name) {
+		return sprite(MagicGlance.glyph(name));
+	}
+
+	/**
+	 * Magic interfaces unit 2: a Verdant Bed short: dormant, or its growth with its mark; its nutrients; the first reason it
+	 * gives, short ("Moisture too low"); its strain. Jade's details show its habitat and every reason whole.
+	 */
+	private static void bedGlances(ITooltip tooltip, CompoundTag data, int capacity) {
+		String growth = data.getStringOr("growth", "");
+		if (!data.getBooleanOr("awake", true)) {
+			glance(tooltip, Component.translatable("tooltip.jugcraft.concordance.jade.dormant"));
+		} else if (!growth.isEmpty()) {
+			glance(tooltip, growthText(growth));
+		}
+		tooltip.add(Component.translatable("tooltip.jugcraft.concordance.jade.nutrients", data.getIntOr("nutrients", 0), capacity));
+		String reasons = data.getStringOr("reasons", "");
+		if (!reasons.isEmpty()) {
+			glance(tooltip, reasonText(reasons.split("\n")[0]));
+		}
+		int strain = data.getIntOr("strain", 0);
+		if (strain > 0) {
+			glance(tooltip, Component.translatable("compose.jugcraft.ecology.strain", strain, Habitat.MAX_STRAIN));
+		}
+	}
+
 	/** Concordance Chunk D, D-06 (G11): a pact perch or a Spirit Anchor: the agreement it keeps and how it stands; no player, no escrow. */
 	private enum AgreementTooltip implements IBlockComponentProvider {
 		PERCH(PactDataProvider.PERCH),
@@ -233,7 +377,11 @@ public final class JugcraftJadeClient implements JugcraftJadePlugin.ClientRegist
 
 		@Override
 		public void appendTooltip(ITooltip tooltip, BlockAccessor accessor, IPluginConfig config) {
-			accessor.getServerData().getCompound(provider.dataKey).ifPresent(data -> pactLines(tooltip, data));
+			if (accessor.showDetails()) {
+				accessor.getServerData().getCompound(provider.dataKey).ifPresent(data -> pactLines(tooltip, data));
+			} else {
+				accessor.getServerData().getCompound(provider.dataKey).ifPresent(data -> pactGlances(tooltip, data, true));
+			}
 		}
 	}
 
@@ -525,7 +673,10 @@ public final class JugcraftJadeClient implements JugcraftJadePlugin.ClientRegist
 					}
 				}
 				int capacity = data.getIntOr("capacity", -1);
-				if (capacity >= 0) {
+				if (capacity >= 0 && !accessor.showDetails()) {
+					// Magic interfaces unit 2: a few short lines; Jade's details show the whole reading below.
+					bedGlances(tooltip, data, capacity);
+				} else if (capacity >= 0) {
 					if (!data.getBooleanOr("awake", true)) {
 						tooltip.add(Component.translatable("tooltip.jugcraft.concordance.jade.dormant"));
 					}
@@ -537,6 +688,8 @@ public final class JugcraftJadeClient implements JugcraftJadePlugin.ClientRegist
 					}
 					verdict(tooltip, data.getStringOr("growth", ""), data.getStringOr("reasons", ""));
 					strain(tooltip, data.getIntOr("strain", 0));
+				}
+				if (capacity >= 0) {
 					// Concordance Chunk C (C-09): the graft it carries, when the rules know it.
 					String graft = data.getStringOr("graft", "");
 					if (!graft.isEmpty()) {
@@ -545,7 +698,13 @@ public final class JugcraftJadeClient implements JugcraftJadePlugin.ClientRegist
 				}
 				String device = data.getStringOr("device", "");
 				if (!device.isEmpty()) {
-					tooltip.add(Component.translatable("compose.jugcraft.ecology.status." + device));
+					Component status = Component.translatable("compose.jugcraft.ecology.status." + device);
+					if (accessor.showDetails()) {
+						tooltip.add(status);
+					} else {
+						// Magic interfaces unit 2: its status short, with its mark.
+						glance(tooltip, status);
+					}
 					int verdanceCapacity = data.getIntOr("verdance_capacity", 0);
 					if (verdanceCapacity > 0) {
 						tooltip.add(Component.translatable("tooltip.jugcraft.concordance.jade.verdance", data.getLongOr("verdance", 0L), verdanceCapacity));

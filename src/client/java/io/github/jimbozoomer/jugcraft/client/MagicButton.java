@@ -212,6 +212,12 @@ class MagicButton extends Button implements MagicScreen.Drawn {
 		positioner = new FooterTip(band, this);
 	}
 
+	/** Places its tip by {@code at} (a roster card's action: inside its own card's band, spec 2.14); null: vanilla's placement. */
+	MagicButton at(@Nullable ClientTooltipPositioner at) {
+		positioner = at;
+		return this;
+	}
+
 	/** Whether it draws an icon and no words (the narrow footer's paging plates, a glyph alone). */
 	boolean iconOnly() {
 		return label.getString().isEmpty();
