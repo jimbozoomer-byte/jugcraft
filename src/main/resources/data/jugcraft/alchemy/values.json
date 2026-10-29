@@ -1187,6 +1187,11 @@
       "denominator": 1,
       "source": "fallback (balance pending)"
     },
+    "jugcraft:bat_table_runner": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
     "jugcraft:bat_weathervane": {
       "numerator": 1,
       "denominator": 1,
@@ -12971,6 +12976,16 @@
       "numerator": 16,
       "denominator": 1,
       "source": "reference tag minecraft:small_flowers"
+    },
+    "jugcraft:goodie_bag": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
+    "jugcraft:goodie_bag_tree": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
     },
     "jugcraft:gorse_leaves": {
       "numerator": 1,
@@ -35091,6 +35106,11 @@
       "numerator": 448,
       "denominator": 1,
       "source": "recipe jugcraft:skull_footstool"
+    },
+    "jugcraft:skull_goblets": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
     },
     "jugcraft:sky_lantern": {
       "numerator": 101,

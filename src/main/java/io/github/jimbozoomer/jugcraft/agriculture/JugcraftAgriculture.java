@@ -3138,7 +3138,14 @@ public final class JugcraftAgriculture {
 				.mapColor(MapColor.COLOR_BLACK).strength(1.0F).sound(SoundType.METAL).noOcclusion().pushReaction(PushReaction.POPPED));
 		Block mould = registerBlock("eyeball_jelly_mould", EyeballJellyMouldBlock::new, BlockBehaviour.Properties.of()
 				.mapColor(MapColor.SNOW).strength(0.5F).sound(SoundType.DECORATED_POT).noOcclusion().pushReaction(PushReaction.POPPED));
-		for (Block block : List.of(dispenser, tower, platter, tray, cauldron, mould)) {
+		// Part 5: the table: the Goodie Bag Tree and its bags, the Skull Goblets, and the Bat Table Runner (laid on a
+		// Feast Table: FeastTableBlock.RUNNER).
+		Block tree = registerBlock("goodie_bag_tree", GoodieBagTreeBlock::new, BlockBehaviour.Properties.of()
+				.mapColor(MapColor.COLOR_ORANGE).strength(0.5F).sound(SoundType.METAL).noOcclusion().pushReaction(PushReaction.POPPED));
+		Block goblets = registerBlock("skull_goblets", SkullGobletsBlock::new, BlockBehaviour.Properties.of()
+				.mapColor(MapColor.SAND).strength(0.5F).sound(SoundType.DECORATED_POT).noOcclusion().lightLevel(SkullGobletsBlock::light)
+				.pushReaction(PushReaction.POPPED));
+		for (Block block : List.of(dispenser, tower, platter, tray, cauldron, mould, tree, goblets)) {
 			registerItem(BuiltInRegistries.BLOCK.getKey(block).getPath(), props -> new BlockItem(block, props),
 					new Item.Properties().useBlockDescriptionPrefix(), BUILDING_TAB);
 		}
@@ -3146,6 +3153,8 @@ public final class JugcraftAgriculture {
 		meal("mummy_sausage", 3, 0.5F);
 		food("witch_finger", 2, 0.1F, COMPOST_MEDIUM_HIGH);
 		food("eyeball_jelly", 2, 0.2F, COMPOST_MEDIUM_HIGH);
+		registerItem("goodie_bag", GoodieBagItem::new, new Item.Properties().stacksTo(16), FOOD_TAB);
+		registerItem("bat_table_runner", Item::new, new Item.Properties(), BUILDING_TAB);
 	}
 
 	/** Bleached bones: they come away easily, and a piston pops them off. */

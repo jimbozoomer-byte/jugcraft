@@ -35,6 +35,20 @@ Part 3, the trays (table pieces too, holding a food each as the cake stands do):
 - Their foods (items): the Mummy Sausage (`food`; four from a cooked porkchop and pastry dough), the Witch Finger (eight,
   as cookies are, from two wheat, sugar and green dye) and the Eyeball Jelly (four from sugar, two sweet berries, bone
   meal for its gelatin and a glow berry for the eyes).
+Part 5, the table:
+- The Bat Table Runner (an item, `BAT_RUNNER`): a black felt runner `width` pixels wide bound in orange, orange felt bats
+  and cream crescent moons along it. Used on a length of Feast Table (agriculture/FeastTableBlock, its `runner`), it is
+  laid over that length's orange runner, and where the table ends it hangs `drape` pixels down over the end, pointed,
+  with an orange tassel at its point. Shears take it off again; it drops with the length when that is broken.
+- The Goodie Bag (GoodieBagItem, `GOODIE_BAG`): a clear cellophane treat bag tied with purple curling ribbon, the
+  party's favour for its guests. It is filled with `contents` (two candy corn, a Ghost Meringue and a Witch Finger) and
+  some paper and string; used, it is torn open and gives back its `contents`, so nothing is gained.
+- The Goodie Bag Tree (GoodieBagTreeBlock, `GOODIE_TREE`): a black wire tree 67 cm high standing in an orange
+  jack-o'-lantern pail heaped with candy corn, holding up to `capacity` Goodie Bags hung from its branches by their
+  ribbons. A table piece, as the trays are.
+- Skull Goblets (SkullGobletsBlock, `SKULL_GOBLETS`): a set of `capacity` goblets 20 cm high, each a bone-white skull
+  for its cup on a black stem and foot. Witch's Brew Punch used on them is poured into the next empty goblet; an empty
+  hand takes a goblet's punch back. The punch glows, so while any goblet holds some they give `light`. A table piece.
 Sizes in pixels, facing north (its front, with the crank, to the north).
 """
 
@@ -49,6 +63,11 @@ MERINGUE = {"item": "ghost_meringue", "display": "Ghost Meringue", "meringue": (
 MUMMY_TRAY = {"block": "mummy_sausage_tray", "display": "Mummy Sausage Tray", "serves": "mummy_sausage", "capacity": 8}
 FINGER_CAULDRON = {"block": "witch_finger_cauldron", "display": "Witch-Finger Cauldron", "serves": "witch_finger", "capacity": 10}
 JELLY_MOULD = {"block": "eyeball_jelly_mould", "display": "Eyeball Jelly Mould", "serves": "eyeball_jelly", "capacity": 8}
+BAT_RUNNER = {"item": "bat_table_runner", "display": "Bat Table Runner", "width": 8.0, "drape": 7.0}
+GOODIE_BAG = {"item": "goodie_bag", "display": "Goodie Bag",
+              "contents": ["jugcraft:candy_corn", "jugcraft:candy_corn", "jugcraft:ghost_meringue", "jugcraft:witch_finger"]}
+GOODIE_TREE = {"block": "goodie_bag_tree", "display": "Goodie Bag Tree", "serves": "goodie_bag", "capacity": 6}
+SKULL_GOBLETS = {"block": "skull_goblets", "display": "Skull Goblets", "serves": "witchs_brew_punch", "capacity": 4, "light": 4}
 # Their foods; the sausage, being meat, doesn't compost.
 FOODS = {"mummy_sausage": {"display": "Mummy Sausage", "food": (3, 0.5), "compost": None, "tags": ["c:foods/cooked_meat"]},
          "witch_finger": {"display": "Witch Finger", "food": (2, 0.1), "compost": "medium_high", "tags": ["c:foods"]},
@@ -58,6 +77,7 @@ ITEMS = {
     MERINGUE["item"]: {"display": MERINGUE["display"], "food": list(MERINGUE["meringue"]), "compost": "medium_high", "tags": ["c:foods/candy"]},
     **{item: {"display": f["display"], "food": list(f["food"]), **({"compost": f["compost"]} if f["compost"] else {}), "tags": f["tags"]}
        for item, f in FOODS.items()},
+    BAT_RUNNER["item"]: {"display": BAT_RUNNER["display"], "tags": []},
 }
 
 RECIPES = [
@@ -85,6 +105,18 @@ RECIPES = [
     {"id": JELLY_MOULD["block"], "pattern": ["CBC"],
      "key": {"C": "minecraft:clay_ball", "B": "minecraft:bone_meal"},
      "result": JELLY_MOULD["block"], "count": 1, "category": "building"},
+    # The runner: black carpet bound with orange, two lengths from two carpets.
+    {"id": BAT_RUNNER["item"], "pattern": ["KOK"],
+     "key": {"K": "minecraft:black_carpet", "O": "minecraft:orange_dye"},
+     "result": BAT_RUNNER["item"], "count": 2, "category": "building"},
+    # The tree: black wire branches (sticks, blacked) in an orange pail.
+    {"id": GOODIE_TREE["block"], "pattern": ["SBS", " S ", " O "],
+     "key": {"S": "minecraft:stick", "B": "minecraft:black_dye", "O": "minecraft:orange_dye"},
+     "result": GOODIE_TREE["block"], "count": 1, "category": "building"},
+    # The goblets: bone-white clay, on black stems.
+    {"id": SKULL_GOBLETS["block"], "pattern": ["CBC", " K "],
+     "key": {"C": "minecraft:clay_ball", "B": "minecraft:bone_meal", "K": "minecraft:black_dye"},
+     "result": SKULL_GOBLETS["block"], "count": 1, "category": "building"},
 ]
 # Meringue: an egg's white whipped with sugar, piped into ghosts, with cocoa for their eyes.
 SHAPELESS = [
@@ -99,19 +131,23 @@ SHAPELESS = [
     # Berry jelly set with gelatin from bone, a glow berry for the eyes.
     {"id": "eyeball_jelly", "inputs": ["minecraft:sugar", "minecraft:sweet_berries", "minecraft:sweet_berries", "minecraft:bone_meal",
                                        "minecraft:glow_berries"], "result": "eyeball_jelly", "count": 4, "category": "misc"},
+    # A goodie bag: paper for the bag and string to tie it, filled with the party's treats.
+    {"id": GOODIE_BAG["item"], "inputs": ["minecraft:paper", "minecraft:string"] + GOODIE_BAG["contents"], "result": GOODIE_BAG["item"],
+     "count": 1, "category": "misc"},
 ]
 
 
 def blocks():
     return [DISPENSER["block"], CUPCAKE_TOWER["block"], MERINGUE_PLATTER["block"], MUMMY_TRAY["block"], FINGER_CAULDRON["block"],
-            JELLY_MOULD["block"]]
+            JELLY_MOULD["block"], GOODIE_TREE["block"], SKULL_GOBLETS["block"]]
 
 
 def serving():
     """The table pieces that hold a food."""
-    return [CUPCAKE_TOWER, MERINGUE_PLATTER, MUMMY_TRAY, FINGER_CAULDRON, JELLY_MOULD]
+    return [CUPCAKE_TOWER, MERINGUE_PLATTER, MUMMY_TRAY, FINGER_CAULDRON, JELLY_MOULD, GOODIE_TREE, SKULL_GOBLETS]
 
 
 def items():
-    """The table pieces (the Ghost Meringue is in ITEMS)."""
-    return blocks()
+    """The table pieces and the Goodie Bag, its own kind of item (party_table_data.assets draws it); the foods and the
+    runner are in ITEMS."""
+    return blocks() + [GOODIE_BAG["item"]]

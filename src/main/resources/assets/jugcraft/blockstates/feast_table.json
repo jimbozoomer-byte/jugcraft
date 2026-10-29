@@ -1,31 +1,59 @@
 {
   "variants": {
-    "axis=x,part=single": {
+    "axis=x,part=single,runner=harvest": {
       "model": "jugcraft:block/feast_table_single"
     },
-    "axis=z,part=single": {
+    "axis=z,part=single,runner=harvest": {
       "model": "jugcraft:block/feast_table_single",
       "y": 90
     },
-    "axis=x,part=start": {
+    "axis=x,part=single,runner=bats": {
+      "model": "jugcraft:block/feast_table_single_bats"
+    },
+    "axis=z,part=single,runner=bats": {
+      "model": "jugcraft:block/feast_table_single_bats",
+      "y": 90
+    },
+    "axis=x,part=start,runner=harvest": {
       "model": "jugcraft:block/feast_table_start"
     },
-    "axis=z,part=start": {
+    "axis=z,part=start,runner=harvest": {
       "model": "jugcraft:block/feast_table_start",
       "y": 90
     },
-    "axis=x,part=middle": {
+    "axis=x,part=start,runner=bats": {
+      "model": "jugcraft:block/feast_table_start_bats"
+    },
+    "axis=z,part=start,runner=bats": {
+      "model": "jugcraft:block/feast_table_start_bats",
+      "y": 90
+    },
+    "axis=x,part=middle,runner=harvest": {
       "model": "jugcraft:block/feast_table_middle"
     },
-    "axis=z,part=middle": {
+    "axis=z,part=middle,runner=harvest": {
       "model": "jugcraft:block/feast_table_middle",
       "y": 90
     },
-    "axis=x,part=end": {
+    "axis=x,part=middle,runner=bats": {
+      "model": "jugcraft:block/feast_table_middle_bats"
+    },
+    "axis=z,part=middle,runner=bats": {
+      "model": "jugcraft:block/feast_table_middle_bats",
+      "y": 90
+    },
+    "axis=x,part=end,runner=harvest": {
       "model": "jugcraft:block/feast_table_end"
     },
-    "axis=z,part=end": {
+    "axis=z,part=end,runner=harvest": {
       "model": "jugcraft:block/feast_table_end",
+      "y": 90
+    },
+    "axis=x,part=end,runner=bats": {
+      "model": "jugcraft:block/feast_table_end_bats"
+    },
+    "axis=z,part=end,runner=bats": {
+      "model": "jugcraft:block/feast_table_end_bats",
       "y": 90
     }
   }

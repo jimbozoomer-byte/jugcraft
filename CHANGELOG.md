@@ -8,6 +8,15 @@ Every change to Jugcraft, newest first, grouped by pull request. For what each t
 
 No numbered release yet. Entries on feature branches remain proposed until their pull requests merge.
 
+### Unmerged: Halloween Party Table, part 5 (the table)
+- **Bat Table Runner**: a black felt runner bound in orange with an orange bat on each length. Used on a Feast Table length, it is laid over the orange runner and hangs down over the table's ends, pointed with a tassel. Shears take it off, and a length drops it when broken.
+- **Goodie Bag Tree**: a black wire tree in a jack-o'-lantern pail of candy corn, holding 6 Goodie Bags hung from its branches.
+- **Goodie Bag**: a clear cellophane treat bag with a purple ribbon. It is made from paper, string, two candy corn, a Ghost Meringue and a Witch Finger, and opened it gives back the four treats.
+- **Skull Goblets**: four bone-white skull goblets on black stems. Witch's Brew Punch poured in glows green, and while any goblet holds punch they give a little light.
+- The tree and the goblets are filled and served by hand like the trays, and are set down onto a Feast Table.
+- Record: [halloween-party-table.md](docs/features/halloween-party-table.md). Decor set 8's fifth and last part.
+- **Checked:** the record's Verification. Game tests and screenshots run in CI only; not played by hand.
+
 ### Unmerged: Halloween Party Table, part 4 (the Pumpkin Layer Cake)
 - **Pumpkin Layer Cake**: an eighth cake beside the owner's seven. It has three layers of pumpkin sponge and cream cheese, orange buttercream with black chocolate ganache dripping down it, candy corn round its top and a fondant pumpkin in the middle.
 - Cake Batter, a sugar, a pumpkin and candy corn make the raw cake. It bakes in the Hearth Oven and is eaten or cut a quarter at a time like the other cakes.

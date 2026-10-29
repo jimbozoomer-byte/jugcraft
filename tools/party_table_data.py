@@ -10,6 +10,8 @@ whose palettes it shares): each material one colour stepped into tones, its mark
   each column of them a texel lower than the last, lit on their left; counted down from the candy's surface, so they
   run on from one ring of the globe to the next.
 """
+import math
+
 import decor20_data as d20d
 import flora_art as fa
 import party_table as pt
@@ -34,6 +36,10 @@ CRUMB = pal("6a4422", "8a5c30", "a87840")
 PORCELAIN = pal("b8b4ac", "d8d4cc", "ecebe6", "f8f7f4")
 JELLY = pal("5a0a12", "8a121e", "b41c2a", "d8343c")
 IRIS = (52, 104, 168)
+RIBBON = pal("3c1c58", "5a2c82", "7a40a8", "9a5cc8")
+BONE = pal("a89c7c", "c8bc9c", "e0d6bc", "f0e8d4")
+PUNCH = pal("2a9a2a", "3ac83a", "5ae04a", "8af86a")
+MOON = (236, 222, 168)
 CANDY = {"tip": (246, 238, 220), "middle": (236, 124, 28), "foot": (250, 196, 54)}
 
 
@@ -504,6 +510,268 @@ def eyeball_jelly_mould():
         sc.models[f"slot_{k}"] = el
     return sc
 
+# ---------------------------------------------------------------- part 5: the table
+
+def cellophane():
+    """A clear cellophane bag: faint and see-through, its crinkled top row a little brighter, and a gleam a texel wide
+    down its left on a side two texels across or more."""
+    def paint(p):
+        for y in range(p.h):
+            for x in range(p.w):
+                gleam = p.w >= 2 and x == 0
+                p.put(x, y, (250, 252, 255) if gleam else GLASS, 140 if gleam else 80 if y == 0 and p.h > 1 else 40)
+    paint.tag = repr(("cellophane",))
+    return paint
+
+
+def treats():
+    """A goodie bag's treats seen through it, in layers: a meringue ghost's white on top, then candy corn heaped below
+    it, its kernels' orange middles over their yellow feet."""
+    rows = (ICING, CANDY["middle"], CANDY["foot"])
+
+    def paint(p):
+        for y in range(p.h):
+            for x in range(p.w):
+                p.put(x, y, rows[min(y, 2)])
+    paint.tag = repr(("treats",))
+    return paint
+
+
+def wire():
+    """Black wire twisted from two strands: the black, lit on every other texel along a slant."""
+    def paint(p):
+        for y in range(p.h):
+            for x in range(p.w):
+                p.put(x, y, shade(BLACK, 3 if (x + y) % 2 == 0 else 1))
+    paint.tag = repr(("wire",))
+    return paint
+
+
+def pail():
+    """A moulded orange plastic pumpkin pail: ribs two texels apart, each lit, the hollow between a tone deeper; its rim
+    row lit."""
+    def paint(p):
+        for y in range(p.h):
+            for x in range(p.w):
+                k = 4 if y == 0 and p.h > 1 else 3 if x % 2 == 0 else 2
+                p.put(x, y, shade(ORANGE, k))
+    paint.tag = repr(("pail",))
+    return paint
+
+
+def punch():
+    """Witch's Brew Punch: bright green and lit from within, flat, its top the brightest."""
+    def paint(p):
+        for y in range(p.h):
+            for x in range(p.w):
+                p.put(x, y, shade(PUNCH, 3 if y == 0 and p.h > 1 else 2))
+    paint.tag = repr(("punch",))
+    return paint
+
+
+# Each bag's branch: where along the trunk it leaves (height), which way it points, how long it is, and how it is
+# turned: the four lower ones tilted 22.5 degrees up toward north, east, south and west, the two upper ones level and
+# turned 45 degrees to the north-east and south-west.
+BRANCHES = ((5.5, "north", 4.0, 22.5), (5.5, "east", 4.0, 22.5), (5.5, "south", 4.0, 22.5), (5.5, "west", 4.0, 22.5),
+            (8.5, "north_east", 3.5, 45.0), (8.5, "south_west", 3.5, 45.0))
+
+
+def branch(sc, y, way, length, angle):
+    """A branch of black wire from the trunk at `y`: (its element, the point at its tip it hangs a bag from)."""
+    a = math.radians(angle)
+    if way in ("east", "north_east"):
+        lo, hi, sign = (8.0, y - 0.25, 7.75), (8.0 + length, y + 0.25, 8.25), 1
+    elif way in ("west", "south_west"):
+        lo, hi, sign = (8.0 - length, y - 0.25, 7.75), (8.0, y + 0.25, 8.25), -1
+    else:
+        sign = -1 if way == "north" else 1
+        lo, hi = (7.75, y - 0.25, 8.0 if sign > 0 else 8.0 - length), (8.25, y + 0.25, 8.0 + length if sign > 0 else 8.0)
+    if way in ("east", "west"):
+        # About z, positive turns +x up: so the east branch turns +22.5 and the west -22.5.
+        rot = fa.rotation((8.0, y, 8.0), "z", angle * sign)
+        tip = (8.0 + sign * length * math.cos(a), y + length * math.sin(a), 8.0)
+    elif way in ("north", "south"):
+        # About x, positive turns -z up: so the north branch turns +22.5 and the south -22.5.
+        rot = fa.rotation((8.0, y, 8.0), "x", -angle * sign)
+        tip = (8.0, y + length * math.sin(a), 8.0 + sign * length * math.cos(a))
+    else:
+        # About y, positive turns +x toward -z: so +x turned 45 points north-east, and -x south-west.
+        rot = fa.rotation((8.0, y, 8.0), "y", angle)
+        tip = (8.0 + sign * length * math.cos(a), y, 8.0 - sign * length * math.sin(a))
+    return panel(sc, "branch", wire(), lo, hi, rot=rot), tip
+
+
+def goodie_bag(sc, tip):
+    """A Goodie Bag hung from `tip` by its ribbon: a clear cellophane bag 12.5 cm square and 17 cm high, its crinkled top
+    flared above a purple ribbon tied round its neck, and in it the treats."""
+    tx, ty, tz = tip
+    top = ty - 0.75
+    clear, ribbon = cellophane(), toned(RIBBON)
+    return [panel(sc, "bag_string", ribbon, (tx - 0.125, top, tz - 0.125), (tx + 0.125, ty, tz + 0.125)),
+            panel(sc, "bag_ruffle", clear, (tx - 0.75, top - 0.75, tz - 0.75), (tx + 0.75, top, tz + 0.75)),
+            panel(sc, "bag_tie", ribbon, (tx - 0.5, top - 1.0, tz - 0.5), (tx + 0.5, top - 0.75, tz + 0.5)),
+            panel(sc, "bag_treats", treats(), (tx - 0.625, top - 3.625, tz - 0.625), (tx + 0.625, top - 1.375, tz + 0.625)),
+            # the witch finger standing up out of the treats, its almond nail at its tip
+            panel(sc, "bag_finger", finger(), (tx + 0.125, top - 1.375, tz - 0.375), (tx + 0.5, top - 0.75, tz)),
+            panel(sc, "bag", clear, (tx - 1.0, top - 3.75, tz - 1.0), (tx + 1.0, top - 1.0, tz + 1.0))]
+
+
+def goodie_bag_tree():
+    """The Goodie Bag Tree, facing north: an orange jack-o'-lantern pail 25 cm across (two boxes crossed), its face on
+    its front, heaped with candy corn; a trunk of twisted black wire rising from it, 67 cm high in all, curling at its
+    top, and six branches. Models: `whole` (the pail and tree) and `slot_0` up to the last (each bag, hung from its
+    branch's tip)."""
+    spec = pt.GOODIE_TREE
+    sc = Sculpt(spec["block"], 2807, 128)
+    black, metal = flat_colour(shade(BLACK, 0)), wire()
+    el = round_plate(sc, "pail", pail(), 4.0, 0.0, 2.75)
+    # Its jack-o'-lantern face, moulded black: two eyes and a wide grin turned up at its ends.
+    face = ((6.75, 1.5, 7.25, 2.0), (8.75, 1.5, 9.25, 2.0), (6.75, 0.75, 9.25, 1.0), (6.5, 1.0, 6.75, 1.25), (9.25, 1.0, 9.5, 1.25))
+    for x0, y0, x1, y1 in face:
+        el.append(panel(sc, "pail_face", black, (x0, y0, 5.95), (x1, y1, 6.0), sides=("north", "up", "down", "east", "west")))
+    el.append(panel(sc, "pail_candy", candy_corn(), (6.25, 2.75, 6.25), (9.75, 3.0, 9.75), sides=("up", "north", "south", "east", "west")))
+    el.append(panel(sc, "pail_candy", candy_corn(1), (7.0, 3.0, 7.0), (9.0, 3.25, 9.0), sides=("up", "north", "south", "east", "west")))
+    el.append(panel(sc, "trunk", metal, (7.75, 2.75, 7.75), (8.25, 10.0, 8.25)))
+    for way, angle in (("north", 22.5), ("south", 22.5)):
+        el.append(branch(sc, 10.0, way, 1.5, angle)[0])
+    tips = []
+    for y, way, length, angle in BRANCHES:
+        element, tip = branch(sc, y, way, length, angle)
+        el.append(element)
+        tips.append(tip)
+    sc.models["whole"] = el
+    for k, tip in enumerate(tips):
+        sc.models[f"slot_{k}"] = goodie_bag(sc, tip)
+    return sc
+
+
+def goblet_slots():
+    """Where each goblet stands, in the order they are filled: the front two, then the back two."""
+    return [(x, z) for z in (6.0, 10.0) for x in (6.0, 10.0)]
+
+
+def skull_goblet(sc, cx, cz):
+    """A skull goblet 20 cm high, facing north: a black foot, a stem with a knop, and a bone-white skull for its cup, its
+    jaw narrower beneath, hollow to its rim, two dark eye sockets, a nose and the line of its teeth on its front."""
+    stand, bone, dark_ = enamel(), toned(BONE), flat_colour(shade(BLACK, 0))
+    el = [panel(sc, "goblet_foot", stand, (cx - 0.75, 0.0, cz - 0.75), (cx + 0.75, 0.25, cz + 0.75)),
+          panel(sc, "goblet_stem", stand, (cx - 0.25, 0.25, cz - 0.25), (cx + 0.25, 1.25, cz + 0.25)),
+          panel(sc, "goblet_knop", stand, (cx - 0.375, 0.625, cz - 0.375), (cx + 0.375, 0.875, cz + 0.375)),
+          panel(sc, "skull_jaw", bone, (cx - 0.75, 1.25, cz - 0.75), (cx + 0.75, 1.75, cz + 0.75)),
+          panel(sc, "skull_floor", bone, (cx - 0.75, 1.75, cz - 0.75), (cx + 0.75, 2.0, cz + 0.75))]
+    el += walls(sc, "skull", bone, cx - 1.0, cz - 1.0, cx + 1.0, cz + 1.0, 0.25, 1.75, 3.25)
+    for x0, y0, x1, y1, z in ((cx - 0.7, 2.25, cx - 0.15, 2.75, cz - 1.0), (cx + 0.15, 2.25, cx + 0.7, 2.75, cz - 1.0),
+                              (cx - 0.125, 1.85, cx + 0.125, 2.1, cz - 1.0), (cx - 0.5, 1.45, cx + 0.5, 1.55, cz - 0.75)):
+        el.append(panel(sc, "skull_socket", dark_, (x0, y0, z - 0.05), (x1, y1, z), sides=("north", "up", "down", "east", "west")))
+    return el
+
+
+def skull_goblets():
+    """Skull Goblets, facing north: four goblets on a block, two at its front and two behind. Models: `whole` (the empty
+    goblets) and `slot_0` up to the last (the glowing punch in each, an eyeball floating in it)."""
+    spec = pt.SKULL_GOBLETS
+    sc = Sculpt(spec["block"], 2808, 128)
+    el = []
+    for x, z in goblet_slots():
+        el += skull_goblet(sc, x, z)
+    sc.models["whole"] = el
+    white, iris = toned(PORCELAIN, lit=False), flat_colour(IRIS)
+    for k, (x, z) in enumerate(goblet_slots()):
+        surface = panel(sc, "punch", punch(), (x - 0.75, 2.0, z - 0.75), (x + 0.75, 3.0, z + 0.75), sides=("up",))
+        surface["light_emission"] = LIGHT_PUNCH
+        sc.models[f"slot_{k}"] = [surface,
+                                  panel(sc, "punch_eyeball", white, (x - 0.45, 2.85, z - 0.45), (x - 0.05, 3.25, z - 0.05)),
+                                  panel(sc, "punch_iris", iris, (x - 0.35, 3.0, z - 0.5), (x - 0.15, 3.2, z - 0.45),
+                                        sides=("north", "up", "down", "east", "west"))]
+    return sc
+
+
+# How bright the punch's surface is drawn (the block's own light is SKULL_GOBLETS light).
+LIGHT_PUNCH = 10
+
+
+def bat_runner_texture():
+    """The Bat Table Runner's texture, laid out for its pieces (feast_data.table_model takes them by their places):
+    - rows 0 to 7, the runner along a length: black felt bound in orange along both edges (a running stitch a tone
+      deeper every other texel), and once a length an orange felt bat with its wings spread, a tone brighter than the
+      binding, its head lit, with a cream star either side;
+    - row 8, its edge;
+    - rows 9 to 12 (8 wide), the end hanging down over the table's end, bound at its sides, a cream moon on it; rows 13
+      to 15, its point narrowing two texels a row, bound at its sides;
+    - the tassel (9 to 10 across, rows 9 to 11) and a patch of the binding (11 to 12 across, rows 9 to 10)."""
+    from PIL import Image
+    img = Image.new("RGBA", (16, 16), (0, 0, 0, 0))
+    felt, edge, stitch, lit = shade(BLACK, 1), shade(ORANGE, 2), shade(ORANGE, 1), shade(ORANGE, 4)
+    bright = shade(ORANGE, 3)
+
+    def put(x, y, colour):
+        img.putpixel((x, y), (*colour, 255))
+
+    for x in range(16):
+        for y in range(8):
+            put(x, y, (stitch if x % 2 else edge) if y in (0, 7) else felt)
+        put(x, 8, edge)
+    # One bat a length, its wings spread, its head and ears between them; a star either side of it.
+    bat = ("    X X    ", "X   XXX   X", "XX XXXXX XX", "XXXXXXXXXXX", " X X   X X ")
+    moon = (" XX", "XX ", "XX ", " XX")
+    for dy, row in enumerate(bat):
+        for dx, c in enumerate(row):
+            if c == "X":
+                put(2 + dx, 2 + dy, lit if dy in (0, 1) and 4 <= dx <= 6 else bright)
+    for x, y in ((14, 2), (0, 5)):
+        put(x, y, MOON)
+    for y in range(9, 13):
+        for x in range(8):
+            put(x, y, edge if x in (0, 7) else felt)
+    for dy, row in enumerate(moon):
+        for dx, c in enumerate(row):
+            if c == "X":
+                put(3 + dx, 9 + dy, MOON)
+    for y, (x0, x1) in ((13, (1, 6)), (14, (2, 5)), (15, (3, 4))):
+        for x in range(x0, x1 + 1):
+            put(x, y, edge if x in (x0, x1) else felt)
+    for y in range(9, 12):
+        put(9, y, lit if y == 9 else edge)
+        put(10, y, edge if y == 9 else stitch)
+    for x in (11, 12):
+        put(x, 9, edge)
+        put(x, 10, edge)
+    return img
+
+
+# Where each piece of the runner is on its texture (u0, v0, u1, v1).
+BAT_UV = {"top": [0, 0, 16, 8], "edge": [0, 8, 16, 8.25], "end": [0, 9, 8, 13], "point": ([1, 13, 7, 14], [2, 14, 6, 15], [3, 15, 5, 16]),
+          "tassel": [9, 9, 9.5, 10.5], "binding": [11, 9, 12, 10]}
+
+
+def bat_runner(west, east):
+    """The Bat Table Runner on a length of Feast Table (feast_data.table_model): laid along it, `width` wide, in place
+    of its orange runner; at the table's `west` or `east` end (the length's own ends, where its legs are) it hangs
+    `drape` pixels down over the end, square for four and then pointed, an orange tassel at its point."""
+    from decor_data import box
+    w = pt.BAT_RUNNER["width"]
+    z0, z1, top = 8.0 - w / 2, 8.0 + w / 2, pt.TABLE["table_top"] + 0.25
+    t = "#bats"
+    out = [box((0, pt.TABLE["table_top"], z0), (16, top, z1), t, faces=["up", "north", "south"],
+               uvs={"up": BAT_UV["top"], "north": BAT_UV["edge"], "south": BAT_UV["edge"]})]
+    # Square for as long as the texture's end is, then a texel narrower each side a row, to its point.
+    square = BAT_UV["end"][3] - BAT_UV["end"][1]
+    if square + len(BAT_UV["point"]) != pt.BAT_RUNNER["drape"]:
+        raise ValueError("party_table.py BAT_RUNNER drape must be the runner's end and its point")
+    steps = [(top - square, top, z0, z1, BAT_UV["end"])]
+    for k, uv in enumerate(BAT_UV["point"]):
+        steps.append((top - square - 1 - k, top - square - k, z0 + 1 + k, z1 - 1 - k, uv))
+    tip = steps[-1][0]
+    for end, (x0, x1), face in ((west, (-0.25, 0.0), "west"), (east, (16.0, 16.25), "east")):
+        if not end:
+            continue
+        for y0, y1, za, zb, uv in steps:
+            out.append(box((x0, y0, za), (x1, y1, zb), t, uvs={side: (uv if side == face else BAT_UV["binding"])
+                                                                 for side in ("north", "south", "east", "west", "up", "down")}))
+        out.append(box((x0, tip - 1.5, 7.75), (x1, tip, 8.25), t, uvs={side: BAT_UV["tassel"]
+                                                                          for side in ("north", "south", "east", "west", "up", "down")}))
+    return out
+
 
 def lowered(elements):
     """`elements` set down onto a Feast Table: `table_drop` pixels lower."""
@@ -515,7 +783,8 @@ def lowered(elements):
 _built = {}
 BUILDERS = {pt.DISPENSER["block"]: candy_corn_dispenser, pt.CUPCAKE_TOWER["block"]: spider_cupcake_tower,
             pt.MERINGUE_PLATTER["block"]: ghost_meringue_platter, pt.MUMMY_TRAY["block"]: mummy_sausage_tray,
-            pt.FINGER_CAULDRON["block"]: witch_finger_cauldron, pt.JELLY_MOULD["block"]: eyeball_jelly_mould}
+            pt.FINGER_CAULDRON["block"]: witch_finger_cauldron, pt.JELLY_MOULD["block"]: eyeball_jelly_mould,
+            pt.GOODIE_TREE["block"]: goodie_bag_tree, pt.SKULL_GOBLETS["block"]: skull_goblets}
 
 
 def build(block):
@@ -554,6 +823,10 @@ def assets(root, write, lang):
     write(root / "items" / f"{block}.json", {"model": {"type": "minecraft:model", "model": rid(f"item/{block}")}})
     for spec in pt.serving():
         serving_assets(root, write, lang, spec)
+    # The Goodie Bag (GoodieBagItem), a flat item drawn from its icon map.
+    import decor_data
+    decor_data.flat_item(root, write, pt.GOODIE_BAG["item"])
+    lang[f"item.{MOD}.{pt.GOODIE_BAG['item']}"] = pt.GOODIE_BAG["display"]
 
 
 def serving_assets(root, write, lang, spec):
@@ -607,9 +880,11 @@ def tags(tags):
 
 
 def textures():
-    """Each piece's block texture, and each food's icon, drawn from its map (tools/item_icons/<food>.txt)."""
+    """Each piece's block texture, the Bat Table Runner's (on a Feast Table), and each item's icon, drawn from its map
+    (tools/item_icons/<item>.txt)."""
     import item_icons
     out = {("block", block): build(block).atlas.img for block in pt.blocks()}
-    for item in pt.ITEMS:
+    out[("block", "feast_table_bat_runner")] = bat_runner_texture()
+    for item in list(pt.ITEMS) + [pt.GOODIE_BAG["item"]]:
         out[("item", item)] = item_icons.draw(item)
     return out

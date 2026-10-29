@@ -8769,8 +8769,10 @@ def check_feast(java, main):
     states = (load(ASSETS / "blockstates" / f"{fe['block']}.json") or {}).get("variants", {})
     for axis in ("x", "z"):
         for part in ("single", "start", "middle", "end"):
-            if f"axis={axis},part={part}" not in states:
-                err(f"The feast table's blockstate has no variant for axis={axis},part={part}")
+            # Each runner a length can wear (its own, or the Halloween Party Table's Bat Table Runner).
+            for runner in ("harvest", "bats"):
+                if f"axis={axis},part={part},runner={runner}" not in states:
+                    err(f"The feast table's blockstate has no variant for axis={axis},part={part},runner={runner}")
     lang = load(ASSETS / "lang" / "en_us.json") or {}
     for key in ["dish_taken", "empty"] + [f"tier.{tier}" for tier in range(5)]:
         if f"message.jugcraft.feast_table.{key}" not in lang:
@@ -15388,7 +15390,11 @@ def check_party_table():
     serving while they hold more than that many, on a Feast Table and off it; each `_table` model is the table's drop
     lower, and the drop is the Feast Table's own (its top's height); their loot drops what they hold; and the Ghost
     Meringue is the table's food, a candy a Candy Bag takes. Part 3: the same for the tray, the cauldron and the jelly
-    mould, and their foods are registered as the table says (the sausage, being meat, as a meal that doesn't compost)."""
+    mould, and their foods are registered as the table says (the sausage, being meat, as a meal that doesn't compost).
+    Part 5: the same for the Goodie Bag Tree and the Skull Goblets, whose light is the table's and whose punch glows;
+    a Goodie Bag gives back what its recipe puts in, and no more; the Bat Table Runner is a Feast Table's `runner`, its
+    every length and runner has its model (the runner hanging over a table's ends only where its legs are), and a
+    length drops the runner laid on it."""
     import party_table as pt
     import party_table_data as ptd
 
@@ -15453,7 +15459,8 @@ def check_party_table():
         err(f"tools/party_table.py TABLE: the drop must bring a piece down onto the Feast Table's top ({pt.TABLE['table_top']})")
     stands = ((pt.CUPCAKE_TOWER, "SpiderCupcakeTowerBlock", ptd.tower_slots()), (pt.MERINGUE_PLATTER, "GhostMeringuePlatterBlock", ptd.platter_slots()),
               (pt.MUMMY_TRAY, "MummySausageTrayBlock", ptd.sausage_slots()), (pt.FINGER_CAULDRON, "WitchFingerCauldronBlock", ptd.FINGERS),
-              (pt.JELLY_MOULD, "EyeballJellyMouldBlock", ptd.jelly_slots()))
+              (pt.JELLY_MOULD, "EyeballJellyMouldBlock", ptd.jelly_slots()), (pt.GOODIE_TREE, "GoodieBagTreeBlock", ptd.BRANCHES),
+              (pt.SKULL_GOBLETS, "SkullGobletsBlock", ptd.goblet_slots()))
     if [spec["block"] for spec, _, _ in stands] != [spec["block"] for spec in pt.serving()]:
         err("check_party_table: every table piece that holds a food must be checked")
     for spec, cls, slots in stands:
@@ -15498,8 +15505,48 @@ def check_party_table():
         registered = f'meal("{item}", {n}, {sat}F)' if food["compost"] is None else f'food("{item}", {n}, {sat}F, COMPOST_{food["compost"].upper()})'
         if registered not in java_main:
             err(f"JugcraftAgriculture: {item} must be registered as {registered} (tools/party_table.py FOODS)")
-    if {spec["serves"] for spec in pt.serving()} - set(pt.ITEMS) - {"spiderweb_cupcake"}:
-        err("tools/party_table.py: every food a table piece holds must be one of its own foods, or the Spiderweb Cupcake")
+    if {spec["serves"] for spec in pt.serving()} - set(pt.ITEMS) - {pt.GOODIE_BAG["item"], "spiderweb_cupcake", "witchs_brew_punch"}:
+        err("tools/party_table.py: every food a table piece holds must be one of its own, the Spiderweb Cupcake or the punch")
+    # Part 5: the goblets' light, the Goodie Bag's contents, and the Bat Table Runner on the Feast Table.
+    sg = pt.SKULL_GOBLETS
+    goblets = read(JAVA_ROOT / "agriculture" / "SkullGobletsBlock.java")
+    if f"LIGHT = {sg['light']};" not in goblets or ".lightLevel(SkullGobletsBlock::light)" not in java_main:
+        err(f"SkullGobletsBlock: it must give light {sg['light']} while any goblet holds punch (tools/party_table.py SKULL_GOBLETS)")
+    for k in range(sg["capacity"]):
+        elements = (load(ASSETS / "models" / "block" / f"{sg['block']}_slot_{k}.json") or {}).get("elements", [])
+        if not any(e.get("light_emission") == ptd.LIGHT_PUNCH for e in elements):
+            err(f"models/block/{sg['block']}_slot_{k}.json: its punch must glow (light_emission {ptd.LIGHT_PUNCH})")
+    gb = pt.GOODIE_BAG
+    bag = read(JAVA_ROOT / "agriculture" / "GoodieBagItem.java")
+    contents = ", ".join(f'"{item.split(":")[-1]}"' for item in gb["contents"])
+    if f"CONTENTS = List.of({contents});" not in bag or f'registerItem("{gb["item"]}", GoodieBagItem::new' not in java_main \
+            or f"item.{MOD}.{gb['item']}" not in lang:
+        err(f"GoodieBagItem: registered, it must give back {gb['contents']} (tools/party_table.py GOODIE_BAG)")
+    made = load(DATA / MOD / "recipe" / f"{gb['item']}.json") or {}
+    filled = sorted(i if isinstance(i, str) else i.get("item", "") for i in made.get("ingredients", []))
+    if filled != sorted(["minecraft:paper", "minecraft:string"] + gb["contents"]):
+        err(f"recipe/{gb['item']}.json: a Goodie Bag must be filled with paper, string and its contents, no fewer: {filled}")
+    br = pt.BAT_RUNNER
+    if 'EnumProperty.create("runner", Runner.class)' not in feast or f'BAT_RUNNER = "{br["item"]}";' not in feast \
+            or 'HARVEST("harvest"), BATS("bats");' not in feast or br["item"] not in pt.ITEMS:
+        err(f"FeastTableBlock: a length must take the {br['item']} as its runner (harvest or bats), and the item be registered")
+    import feast_data
+    variants = (load(ASSETS / "blockstates" / "feast_table.json") or {}).get("variants", {})
+    for part in feast_data.PARTS:
+        for runner in feast_data.RUNNERS:
+            for axis in ("x", "z"):
+                model = variants.get(f"axis={axis},part={part},runner={runner}", {}).get("model")
+                if model != f"{MOD}:block/{feast_data.model_name('feast_table', part, runner)}":
+                    err(f"blockstates/feast_table.json: axis {axis}, part {part}, runner {runner} must be its model, not {model}")
+        dressed = (load(ASSETS / "models" / "block" / f"feast_table_{part}_bats.json") or {}).get("elements", [])
+        west = any(e["to"][0] <= 0.0 for e in dressed)
+        east = any(e["from"][0] >= 16.0 for e in dressed)
+        if (west, east) != (part in ("single", "start"), part in ("single", "end")) \
+                or (west or east) and not any(abs(e["from"][1] - (pt.TABLE["table_top"] + 0.25 - br["drape"])) < 0.01 for e in dressed if e["to"][0] <= 0.0 or e["from"][0] >= 16.0):
+            err(f"models/block/feast_table_{part}_bats.json: the runner must hang {br['drape']} down over the table's ends, only where its legs are")
+    pools = (load(DATA / MOD / "loot_table" / "blocks" / "feast_table.json") or {}).get("pools", [])
+    if not any(p["entries"][0]["name"] == f"{MOD}:{br['item']}" and "runner" in str(p.get("condition")) for p in pools):
+        err(f"loot_table/blocks/feast_table.json: a length must drop the {br['item']} laid on it")
 
 
 def check_hearth():

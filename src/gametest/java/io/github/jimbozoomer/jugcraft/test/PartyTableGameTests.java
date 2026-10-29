@@ -6,9 +6,12 @@ import io.github.jimbozoomer.jugcraft.agriculture.CandyBagItem;
 import io.github.jimbozoomer.jugcraft.agriculture.CandyCornDispenserBlock;
 import io.github.jimbozoomer.jugcraft.agriculture.CandyCornDispenserBlockEntity;
 import io.github.jimbozoomer.jugcraft.agriculture.FacingDecorationBlock;
+import io.github.jimbozoomer.jugcraft.agriculture.FeastTableBlock;
+import io.github.jimbozoomer.jugcraft.agriculture.GoodieBagItem;
 import io.github.jimbozoomer.jugcraft.agriculture.JugcraftAgriculture;
 import io.github.jimbozoomer.jugcraft.agriculture.PartyServingBlock;
 import io.github.jimbozoomer.jugcraft.agriculture.PieFilling;
+import io.github.jimbozoomer.jugcraft.agriculture.SkullGobletsBlock;
 import net.fabricmc.fabric.api.gametest.v1.GameTest;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -21,6 +24,7 @@ import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.block.Blocks;
@@ -161,7 +165,8 @@ public class PartyTableGameTests {
 		floor(helper);
 		ServerPlayer player = standing(helper, new BlockPos(3, 2, 1));
 		String[][] stands = {{"spider_cupcake_tower", "spiderweb_cupcake"}, {"ghost_meringue_platter", "ghost_meringue"},
-				{"mummy_sausage_tray", "mummy_sausage"}, {"witch_finger_cauldron", "witch_finger"}, {"eyeball_jelly_mould", "eyeball_jelly"}};
+				{"mummy_sausage_tray", "mummy_sausage"}, {"witch_finger_cauldron", "witch_finger"}, {"eyeball_jelly_mould", "eyeball_jelly"},
+				{"goodie_bag_tree", "goodie_bag"}, {"skull_goblets", "witchs_brew_punch"}};
 		for (int k = 0; k < stands.length; k++) {
 			BlockPos rel = new BlockPos(1 + k, 2, 3);
 			BlockPos at = helper.absolutePos(rel);
@@ -212,6 +217,74 @@ public class PartyTableGameTests {
 		helper.succeed();
 	}
 
+	/** Part 5: the Skull Goblets give light while any holds punch, and none empty. */
+	@GameTest
+	public void theSkullGobletsGlowWhileFilled(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		floor(helper);
+		ServerPlayer player = standing(helper, new BlockPos(3, 2, 1));
+		BlockPos at = helper.absolutePos(new BlockPos(3, 2, 3));
+		place(player, helper, new BlockPos(3, 2, 3), new ItemStack(item("skull_goblets")));
+		helper.assertTrue(level.getBlockState(at).getBlock() instanceof SkullGobletsBlock && level.getBlockState(at).getLightEmission() == 0,
+				"Empty, the goblets give no light");
+		use(player, level, at, new ItemStack(item("witchs_brew_punch")));
+		helper.assertTrue(level.getBlockState(at).getValue(SkullGobletsBlock.SERVINGS) == 1
+				&& level.getBlockState(at).getLightEmission() == SkullGobletsBlock.LIGHT, "Punch poured in, they glow");
+		player.getInventory().clearContent();
+		use(player, level, at, ItemStack.EMPTY);
+		helper.assertTrue(level.getBlockState(at).getLightEmission() == 0 && carried(player, item("witchs_brew_punch")) == 1,
+				"Its punch taken back, they go dark");
+		helper.succeed();
+	}
+
+	/** Part 5: a Goodie Bag, opened, gives back the treats its recipe puts in, and is used up. */
+	@GameTest
+	public void aGoodieBagGivesBackItsTreats(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		floor(helper);
+		ServerPlayer player = standing(helper, new BlockPos(3, 2, 3));
+		player.getInventory().clearContent();
+		player.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(item("goodie_bag"), 2));
+		player.gameMode.useItem(player, level, player.getMainHandItem(), InteractionHand.MAIN_HAND);
+		helper.assertTrue(carried(player, item("goodie_bag")) == 1 && carried(player, item("candy_corn")) == 2
+				&& carried(player, item("ghost_meringue")) == 1 && carried(player, item("witch_finger")) == 1,
+				"Opened, a bag gives two candy corn, a Ghost Meringue and a Witch Finger, and is used up");
+		helper.assertTrue(GoodieBagItem.CONTENTS.size() == 4, "A bag holds four treats: " + GoodieBagItem.CONTENTS);
+		helper.succeed();
+	}
+
+	/**
+	 * Part 5: a Bat Table Runner used on a length of Feast Table is laid on it, one to a length; shears take it off into
+	 * the player's inventory; broken, a length drops the runner laid on it.
+	 */
+	@GameTest(maxTicks = 40)
+	public void theBatTableRunnerDressesAFeastTable(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		floor(helper);
+		ServerPlayer player = standing(helper, new BlockPos(3, 2, 1));
+		helper.setBlock(new BlockPos(3, 2, 3), JugcraftAgriculture.block("feast_table"));
+		BlockPos at = helper.absolutePos(new BlockPos(3, 2, 3));
+		helper.assertTrue(level.getBlockState(at).getValue(FeastTableBlock.RUNNER) == FeastTableBlock.Runner.HARVEST,
+				"A length is made with its own orange runner");
+		use(player, level, at, new ItemStack(item(FeastTableBlock.BAT_RUNNER), 2));
+		helper.assertTrue(level.getBlockState(at).getValue(FeastTableBlock.RUNNER) == FeastTableBlock.Runner.BATS
+				&& player.getMainHandItem().getCount() == 1, "The Bat Table Runner is laid on it");
+		use(player, level, at, player.getMainHandItem());
+		helper.assertTrue(player.getMainHandItem().getCount() == 1, "One runner to a length");
+		player.getInventory().clearContent();
+		use(player, level, at, new ItemStack(Items.SHEARS));
+		helper.assertTrue(level.getBlockState(at).getValue(FeastTableBlock.RUNNER) == FeastTableBlock.Runner.HARVEST
+				&& carried(player, item(FeastTableBlock.BAT_RUNNER)) == 1 && player.getMainHandItem().getDamageValue() == 1,
+				"Shears take it off, into the player's inventory");
+		use(player, level, at, new ItemStack(Items.SHEARS));
+		helper.assertTrue(carried(player, item(FeastTableBlock.BAT_RUNNER)) == 1, "Shears do nothing to a length with its own runner");
+		use(player, level, at, new ItemStack(item(FeastTableBlock.BAT_RUNNER)));
+		level.destroyBlock(at, true);
+		helper.assertTrue(dropped(helper, item("feast_table")) == 1 && dropped(helper, item(FeastTableBlock.BAT_RUNNER)) == 1,
+				"Broken, a length drops itself and the runner laid on it");
+		helper.succeed();
+	}
+
 	@GameTest
 	public void partyTableDataLoads(GameTestHelper helper) {
 		ServerLevel level = helper.getLevel();
@@ -220,11 +293,11 @@ public class PartyTableGameTests {
 		helper.assertTrue(PieFilling.PUMPKIN_LAYER_CAKE.cake && JugcraftAgriculture.block("pumpkin_layer_cake") instanceof CakeBlock
 				&& level.recipeAccess().byKey(ResourceKey.create(Registries.RECIPE, Jugcraft.id("raw_pumpkin_layer_cake"))).isPresent(),
 				"The Pumpkin Layer Cake is a cake, set down as a CakeBlock, its raw cake from Cake Batter");
-		for (String food : new String[] {"mummy_sausage", "witch_finger", "eyeball_jelly"}) {
+		for (String food : new String[] {"mummy_sausage", "witch_finger", "eyeball_jelly", "goodie_bag", FeastTableBlock.BAT_RUNNER}) {
 			helper.assertTrue(level.recipeAccess().byKey(ResourceKey.create(Registries.RECIPE, Jugcraft.id(food))).isPresent(), food + " has a recipe");
 		}
 		for (String id : new String[] {"candy_corn_dispenser", "spider_cupcake_tower", "ghost_meringue_platter", "mummy_sausage_tray",
-				"witch_finger_cauldron", "eyeball_jelly_mould"}) {
+				"witch_finger_cauldron", "eyeball_jelly_mould", "goodie_bag_tree", "skull_goblets"}) {
 			helper.assertTrue(level.recipeAccess().byKey(ResourceKey.create(Registries.RECIPE, Jugcraft.id(id))).isPresent(), id + " has a recipe");
 			helper.assertTrue(level.getServer().reloadableRegistries().getLootTable(ResourceKey.create(Registries.LOOT_TABLE,
 					Jugcraft.id("blocks/" + id))) != LootTable.EMPTY, id + "'s loot loads");
