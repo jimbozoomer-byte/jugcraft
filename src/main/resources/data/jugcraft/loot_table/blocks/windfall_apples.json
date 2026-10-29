@@ -1,0 +1,56 @@
+{
+  "type": "minecraft:block",
+  "pools": [
+    {
+      "condition": {
+        "type": "minecraft:survives_explosion"
+      },
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:apple",
+          "modifier": [
+            {
+              "type": "minecraft:set_count",
+              "count": 2,
+              "add": false,
+              "condition": {
+                "type": "minecraft:match_block",
+                "blocks": "jugcraft:windfall_apples",
+                "state": {
+                  "apples": "2"
+                }
+              }
+            },
+            {
+              "type": "minecraft:set_count",
+              "count": 3,
+              "add": false,
+              "condition": {
+                "type": "minecraft:match_block",
+                "blocks": "jugcraft:windfall_apples",
+                "state": {
+                  "apples": "3"
+                }
+              }
+            },
+            {
+              "type": "minecraft:set_count",
+              "count": 4,
+              "add": false,
+              "condition": {
+                "type": "minecraft:match_block",
+                "blocks": "jugcraft:windfall_apples",
+                "state": {
+                  "apples": "4"
+                }
+              }
+            }
+          ]
+        }
+      ],
+      "rolls": 1
+    }
+  ],
+  "random_sequence": "jugcraft:blocks/windfall_apples"
+}

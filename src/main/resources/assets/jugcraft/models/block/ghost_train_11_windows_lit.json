@@ -1,0 +1,71 @@
+{
+  "parent": "minecraft:block/block",
+  "ambientocclusion": false,
+  "textures": {
+    "p": "jugcraft:block/ghost_train",
+    "particle": "jugcraft:block/ghost_train"
+  },
+  "elements": [
+    {
+      "from": [
+        3.95,
+        0,
+        1.45
+      ],
+      "to": [
+        12.05,
+        5.05,
+        1.5
+      ],
+      "faces": {
+        "north": {
+          "uv": [
+            1.625,
+            4.25,
+            2.75,
+            4.9375
+          ],
+          "texture": "#p"
+        },
+        "south": {
+          "uv": [
+            1.625,
+            4.25,
+            2.75,
+            4.9375
+          ],
+          "texture": "#p"
+        },
+        "west": {
+          "texture": "#p",
+          "uv": [
+            2.184,
+            4.25,
+            2.191,
+            4.9375
+          ]
+        },
+        "east": {
+          "texture": "#p",
+          "uv": [
+            2.184,
+            4.25,
+            2.191,
+            4.9375
+          ]
+        },
+        "up": {
+          "texture": "#p",
+          "uv": [
+            1.625,
+            4.5903,
+            2.75,
+            4.5972
+          ]
+        }
+      },
+      "light_emission": 15,
+      "shade": false
+    }
+  ]
+}

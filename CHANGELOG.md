@@ -8,6 +8,325 @@ Every change to Jugcraft, newest first, grouped by pull request. For what each t
 
 No numbered release yet. Entries on feature branches remain proposed until their pull requests merge.
 
+### Unmerged: Harvest Festival Grounds, part 4 (Harvest Bunting and the Sack-Race Sack)
+- **Harvest Bunting**: a new strand for the String Light Hooks, a twine cord hung with leaf-shaped pennants, a red maple leaf, a gold aspen leaf and a hessian pennant in turn.
+- **Sack-Race Sack**: a hessian sack worn on the legs. In it you walk at two fifths of your speed, can't step up a block without hopping, and jump a little higher, though not over a fence.
+- Both are woven from the farm's flax. Record: [harvest-festival-grounds.md](docs/features/harvest-festival-grounds.md). Decor set 10's fourth and last part.
+- **Checked:** the record's Verification. Game tests and screenshots run in CI only; not played by hand.
+
+### Unmerged: Harvest Festival Grounds, part 3 (the Steam Traction Engine and the Hay Wagon)
+- **Steam Traction Engine**: a farm traction engine of about 1910 at its real size, 5 m long and 3 m to its chimney, three blocks across, three up and five deep. It has a green lagged boiler under brass bands, a black smokebox and chimney, red wheels with strakes, a flywheel 1.3 m across, and a footplate and coal tender.
+- Fire it with coal or charcoal (a furnace's burn each, up to four). While it is fired its flywheel turns, its crank, connecting rod and crosshead drive it, its governor spins, its fire glows through the fire door and smoke rises from the chimney. When the coal is gone it runs down and stops.
+- **Hay Wagon**: a four-wheeled farm wagon 4 m long under a roped load of hay, with hay ladders and a pitchfork. Placed behind the engine, its drawbar meets the engine's hook.
+- Record: [harvest-festival-grounds.md](docs/features/harvest-festival-grounds.md). Decor set 10's third part.
+- **Checked:** the record's Verification. Game tests and screenshots run in CI only; not played by hand.
+
+### Unmerged: Harvest Festival Grounds, part 2 (the Giant Vegetable Show)
+- **Giant Cabbage, Giant Marrow, Giant Turnip and Giant Carrot**: prize show vegetables at a show's sizes, each with its entry card on a wire stake, each grown from nine of its crop.
+- **Prize Ribbon Board**: a green-painted results board on two posts, two blocks tall, with brass hooks numbered 1, 2 and 3. Use a First, Second or Third Prize Ribbon (the Harvest Scale's) on it to hang it on its hook. An empty hand takes one back. Broken, it drops the ribbons hanging on it.
+- Record: [harvest-festival-grounds.md](docs/features/harvest-festival-grounds.md). Decor set 10's second part.
+- **Checked:** the record's Verification. Game tests and screenshots run in CI only; not played by hand.
+
+### Unmerged: Harvest Festival Grounds, part 1 (the Giant Cornucopia)
+- **Giant Cornucopia**: a woven willow horn of plenty 2.7 m long lying on its side, three blocks across, two up and two deep. Its tail curls up behind it, and its mouth, 1.25 m across, spills pumpkins, squashes, corn, wheat, grapes, gourds and apples, each at its own size.
+- Made from sticks, wheat, a pumpkin, an apple and the farm's own corn and butternut squash.
+- Record: [harvest-festival-grounds.md](docs/features/harvest-festival-grounds.md). Decor set 10's first part.
+- **Checked:** the record's Verification. Game tests and screenshots run in CI only; not played by hand.
+
+### Unmerged: Clockwork Animatronics, part 6 (the Show Controller)
+- **Animatronic Show Controller**: a dieselpunk riveted steel control cabinet on the JE network, with gauges, a turning programme drum, amber lamps, a red beacon and a knife switch.
+- It drives every clockwork figure within 8 blocks (up to 12) without shafts, all in time: it holds them still for a moment, then starts them together from one count. It pays for their needs in JE at the electric motor's rate.
+- Record: [clockwork-animatronics.md](docs/features/clockwork-animatronics.md). Decor set 9's sixth and last part.
+- **Checked:** the record's Verification. Game tests and screenshots run in CI only; not played by hand.
+
+### Unmerged: Clockwork Animatronics, part 5 (the Pumpkin-Headed Drummer)
+- **Pumpkin-Headed Drummer**: a bandsman with a carved jack-o'-lantern for a head under a black shako, in a red coat frogged with gold, a rope-tensioned bass drum slung in front of him, two blocks tall.
+- He runs on kinetic power, 4 KE a tick. While he runs he beats a march on his drum with both mallets, his head dipping on the beat, and the candle in his head lights his carved face.
+- Record: [clockwork-animatronics.md](docs/features/clockwork-animatronics.md). Decor set 9's fifth part.
+- **Checked:** the record's Verification. Game tests and screenshots run in CI only; not played by hand.
+
+### Unmerged: Clockwork Animatronics, part 4 (the Clockwork Raven)
+- **Clockwork Raven**: a life-size raven of black enamelled steel plates with red glass eyes, perched on a brass bird stand 1.3 m tall, two blocks tall.
+- It runs on kinetic power, 2 KE a tick. While it runs the flywheel in the stand's drum turns, its head looks slowly from side to side, its eyes glow red, and every six seconds it caws three times, its beak opening and its wings beating with each caw.
+- Record: [clockwork-animatronics.md](docs/features/clockwork-animatronics.md). Decor set 9's fourth part.
+- **Checked:** the record's Verification. Game tests and screenshots run in CI only; not played by hand.
+
+### Unmerged: Clockwork Animatronics, part 3 (the Flying Crank Ghost)
+- **Flying Crank Ghost**: a hooded cheesecloth ghost hanging in the air on three wires from a crank on an iron post, two blocks tall.
+- It runs on kinetic power, 4 KE a tick. While it runs the crank swings the ghost round a small circle, its torn arms rise in turn on their wires, its eyes glow pale green, and every ten seconds it moans.
+- Record: [clockwork-animatronics.md](docs/features/clockwork-animatronics.md). Decor set 9's third part.
+- **Checked:** the record's Verification. Game tests and screenshots run in CI only; not played by hand.
+
+### Unmerged: Clockwork Animatronics, part 2 (the Animatronic Werewolf)
+- **Animatronic Werewolf**: a hunched werewolf in torn trousers on a brass turntable, two blocks tall.
+- It runs on kinetic power, 8 KE a tick. While it runs the turntable turns it slowly round, and every eight seconds it raises its claws, throws back its head and howls.
+- The figures now share one clockwork. The Organ-Grinder Skeleton's jaw now keeps time with its notes.
+- Record: [clockwork-animatronics.md](docs/features/clockwork-animatronics.md). Decor set 9's second part.
+- **Checked:** the record's Verification. Game tests and screenshots run in CI only; not played by hand.
+
+### Unmerged: Clockwork Animatronics, part 1 (the Organ-Grinder Skeleton)
+- **Organ-Grinder Skeleton**: a life-size skeleton in a top hat and a moth-eaten waistcoat behind a barrel organ on a cart, two blocks tall.
+- It runs on kinetic power, 4 KE a tick, from a hand crank, a steam engine's shafts or an electric motor touching its lower block.
+- While it runs, its hand turns the organ's crank, the organ plays an original waltz on note-block sounds, its head nods and its jaw chatters. Its power stopped, it runs down and stops.
+- Record: [clockwork-animatronics.md](docs/features/clockwork-animatronics.md). Decor set 9's first part.
+- **Checked:** the record's Verification. Game tests and screenshots run in CI only; not played by hand.
+
+### Unmerged: Halloween Party Table, part 5 (the table)
+- **Bat Table Runner**: a black felt runner bound in orange with an orange bat on each length. Used on a Feast Table length, it is laid over the orange runner and hangs down over the table's ends, pointed with a tassel. Shears take it off, and a length drops it when broken.
+- **Goodie Bag Tree**: a black wire tree in a jack-o'-lantern pail of candy corn, holding 6 Goodie Bags hung from its branches.
+- **Goodie Bag**: a clear cellophane treat bag with a purple ribbon. It is made from paper, string, two candy corn, a Ghost Meringue and a Witch Finger, and opened it gives back the four treats.
+- **Skull Goblets**: four bone-white skull goblets on black stems. Witch's Brew Punch poured in glows green, and while any goblet holds punch they give a little light.
+- The tree and the goblets are filled and served by hand like the trays, and are set down onto a Feast Table.
+- Record: [halloween-party-table.md](docs/features/halloween-party-table.md). Decor set 8's fifth and last part.
+- **Checked:** the record's Verification. Game tests and screenshots run in CI only; not played by hand.
+
+### Unmerged: Halloween Party Table, part 4 (the Pumpkin Layer Cake)
+- **Pumpkin Layer Cake**: an eighth cake beside the owner's seven. It has three layers of pumpkin sponge and cream cheese, orange buttercream with black chocolate ganache dripping down it, candy corn round its top and a fondant pumpkin in the middle.
+- Cake Batter, a sugar, a pumpkin and candy corn make the raw cake. It bakes in the Hearth Oven and is eaten or cut a quarter at a time like the other cakes.
+- It comes last in the Hearth Oven's fillings, so saved ovens keep their pies and cakes.
+- Record: [halloween-party-table.md](docs/features/halloween-party-table.md) and [cakes.md](docs/features/cakes.md). Decor set 8's fourth part.
+- **Checked:** the record's Verification. Game tests and screenshots run in CI only; not played by hand.
+
+### Unmerged: Halloween Party Table, part 3 (the trays)
+- **Mummy Sausage Tray**: a black baking tray with a ramekin of mustard, holding 8 Mummy Sausages.
+- **Witch-Finger Cauldron**: a little cast-iron cauldron of cookie crumbs, holding 10 Witch Fingers poking up out of it.
+- **Eyeball Jelly Mould**: a ring of clear red jelly on a white plate, 8 segments, each with an eyeball in it.
+- **New foods**:
+  - **Mummy Sausage**: four from a cooked porkchop and pastry dough.
+  - **Witch Finger**: eight from two wheat, sugar and green dye.
+  - **Eyeball Jelly**: four from sugar, sweet berries, bone meal and a glow berry.
+- Each piece is filled with its food and served by hand like the cake stands, and sits down onto a Feast Table.
+- Record: [halloween-party-table.md](docs/features/halloween-party-table.md). Decor set 8's third part.
+- **Checked:** the record's Verification. Game tests and screenshots run in CI only; not played by hand.
+
+### Unmerged: Halloween Party Table, part 2 (the cake stands)
+- **Spider Cupcake Tower**: a black three-tier stand 50 cm high holding 13 Spiderweb Cupcakes, every third with a licorice spider on it. Use a cupcake to put one on; an empty hand takes one off.
+- **Ghost Meringue Platter**: an oval black-glazed platter holding 9 Ghost Meringues in three rows, put on and taken off the same way.
+- **Ghost Meringue**: a new candy, a piped meringue ghost with cocoa eyes. Six from an egg, two sugar and a cocoa bean; a Candy Bag takes it.
+- On a Feast Table both stands are set down onto its top instead of floating above it.
+- Record: [halloween-party-table.md](docs/features/halloween-party-table.md). Decor set 8's second part.
+- **Checked:** the record's Verification. Game tests and screenshots run in CI only; not played by hand.
+
+### Unmerged: Halloween Party Table, part 1 (the Candy Corn Dispenser)
+- **Candy Corn Dispenser**: a jumbo gumball machine 86 cm high, its glass globe 41 cm across on a black cast-iron pedestal banded in orange, with a brass crank and chute flap.
+- Candy corn used on it pours in, up to 64 pieces, and its globe shows how full it is. An empty hand turns the crank once round, and one piece drops out of the chute as the flap swings open.
+- Recipe: five glass over two iron ingots and black dye.
+- Record: [halloween-party-table.md](docs/features/halloween-party-table.md). Decor set 8's first part.
+- **Checked:** the record's Verification. Game tests and screenshots run in CI only; not played by hand.
+
+### Unmerged: Front-Yard Haunt Scenes, part 5 (the Trick-or-Treat Candy Chute)
+- **Trick-or-Treat Candy Chute**: a paper chute 2.5 m long wrapped in orange and black, from a funnel at porch-rail height down to a mouth at a child's hand height, three blocks long and two high.
+- Use a treat on it (anything a Candy Bag takes) and it slides down the chute, tumbling, and drops into the Candy Bag of whoever waits at the mouth, or out onto the path. One at a time, up to eight in the chute; what is sliding is saved, and drops if the chute is broken.
+- Recipe: three paper, orange dye, black dye and a stick.
+- Record: [front-yard-haunt.md](docs/features/front-yard-haunt.md). Decor set 7's fifth and last part.
+- **Checked:** the record's Verification. Game tests and screenshots run in CI only; not played by hand.
+
+### Unmerged: Front-Yard Haunt Scenes, part 4 (the Crashed Witch)
+- **Crashed Witch**: a witch stuck out to her hips in a tree or a wall where she flew her broom into it. Her ragged skirt is bunched round the hole, her legs stick out in orange-and-black striped stockings and buckled boots, and her snapped broom pokes out by her.
+- Her legs kick now and then, and the whole time while anyone is within 6 blocks. An empty hand makes her cackle and kick harder.
+- Recipe: four black wool and two orange wool over leather, a stick and wheat.
+- Record: [front-yard-haunt.md](docs/features/front-yard-haunt.md). Decor set 7's fourth part.
+- **Checked:** the record's Verification. Game tests and screenshots run in CI only; not played by hand.
+
+### Unmerged: Front-Yard Haunt Scenes, part 3 (the doorway)
+- **Gargoyle Door Knocker**: a bronze gargoyle's head with a ring in its jaws. It hangs on a wall or on either face of a wooden door, as the wreaths do. An empty hand raps it three times, its ring swinging and its eyes glowing ember-red. With a Candy Bag it knocks for trick-or-treat at its door. It is haunted: now and then it raps by itself.
+- **Bat Wreath**: black twigs wound into a ring with three paper bats flying off it and a purple bow, for walls and doors.
+- **Beware Doormat**: a coir mat with a skull and crossbones. Now and then whoever treads on it hears a heart beating under the boards.
+- The door wreaths' attachment now asks what hangs on it what it is, instead of singling out the holly wreath; the autumn and holly wreaths behave as before.
+- Recipes: an iron ingot and five nuggets (the knocker); five sticks, paper and black dye (the wreath); five wheat and black dye (the mat).
+- Record: [front-yard-haunt.md](docs/features/front-yard-haunt.md). Decor set 7's third part.
+- **Checked:** the record's Verification. Game tests and screenshots run in CI only; not played by hand.
+
+### Unmerged: Front-Yard Haunt Scenes, part 2 (the bones and the risen)
+- **Skeleton Dog, Skeleton Cat and Skeleton Crow**: the bleached bones of a big dog sitting, a cat arched with its tail up and fangs bared, and a crow perched, each at real size, their skulls' sockets square. Each faces whoever places it, and an empty hand rattles its bones. The dog's tail sweeps the ground while anyone is within 6 blocks; the cat's tail sways; the crow's skull turns to watch whoever is within 8 blocks, in a bird's quick snaps, and glances about when no one is.
+- **Rising Zombie**: a zombie clawing its way out of a mound of dug earth, two blocks high: a torn burial shirt with its ribs showing through, its head lolling, its arms raised and clawing at the air. The nearer anyone comes, the higher they reach. An empty hand makes it groan.
+- Recipes: five bones and string (the dog), three bones and string (the cat), two bones, a feather and string (the crow); rotten flesh round a bone over coarse dirt (the zombie).
+- Record: [front-yard-haunt.md](docs/features/front-yard-haunt.md). Decor set 7's second part.
+- **Checked:** the record's Verification. Game tests and screenshots run in CI only; not played by hand.
+
+### Unmerged: Front-Yard Haunt Scenes, part 1 (the path)
+- **Haunted Mailbox**: a large rural mailbox of black sheet steel on a weathered post, two blocks high, a cobweb under its arm. An empty hand raises or lowers its red flag. Now and then its door rattles open a crack; walk within 4 blocks and it falls open, two glowing eyes staring out of the dark inside.
+- **Pumpkin Path Light**: a wrought-iron shepherd's hook 1.3 m high, a little jack-o'-lantern swaying on a chain from its crook. Placed lit (light 10); an empty hand puts it out or lights it again.
+- Recipes: iron nuggets round a spider eye and red dye, over a wooden fence (the mailbox); iron bars and a jack-o'-lantern (two path lights).
+- Record: [front-yard-haunt.md](docs/features/front-yard-haunt.md). Decor set 7's first part.
+- **Checked:** the record's Verification. Game tests and screenshots run in CI only; not played by hand.
+
+### Unmerged: Haunted Midway, part 5 (the haunted carousel)
+- **Haunted Carousel**: a travelling merry-go-round seven blocks across and five high, turned by kinetic power from under its middle, as the Ferris wheel is. Its deck, mirrored column and striped canopy turn round its middle block, the drive house and band organ. Black horses, giant bats and the Pumpkin Coach ride round it, the horses and bats rising and sinking on their brass poles and the bats beating their wings. Its organ plays a waltz of its own while it turns, and its bulbs light. An empty hand boards the nearest free mount (thirteen seats), and riders turn with their mounts; sneaking, an empty hand quiets the organ.
+- Recipe: orange wool round a redstone lamp, over iron bars round a note block, over planks round a gold ingot.
+- Record: [haunted-midway.md](docs/features/haunted-midway.md). Set 6 is complete with it.
+- **Checked:** the record's Verification. Game tests and screenshots run in CI only; not played by hand.
+
+### Unmerged: Haunted Midway, part 4 (the ghost train)
+- **Ghost Train**: a dark ride's front, five blocks across and four up, a haunted house's clapboard wall lettered GHOST TRAIN, with lit windows and two doorways at track level, IN and OUT. A track of rails runs through its doorways; when a minecart (or the Haunted Hayride) comes, that doorway's doors swing open, and a ghost springs up over the IN doors with a cackle. The ride behind it is the player's to build.
+- Recipe: planks round a glass pane, two wooden doors and a jack-o'-lantern, over planks round a rail.
+- Record: [haunted-midway.md](docs/features/haunted-midway.md).
+- **Checked:** the record's Verification. Game tests and screenshots run in CI only; not played by hand.
+
+### Unmerged: Haunted Midway, part 3 (the shooting gallery)
+- **Shooting Gallery**: a booth three blocks across and two up, lettered SHOOTING, with a night sky on its back wall. Four orange tin bats and four white tin ghosts run along two rails, opposite ways. A Midway Ticket starts a 30-second round; shots from the payer (arrows, snowballs or anything thrown) knock the targets down, and all eight down win a prize from the midway's prize table.
+- Recipe: three orange wool over a bow between planks, over three planks.
+- Record: [haunted-midway.md](docs/features/haunted-midway.md).
+- **Checked:** the record's Verification. Game tests and screenshots run in CI only; not played by hand.
+
+### Unmerged: Haunted Midway, part 2 (the ticket booth and Whack-a-Zombie)
+- **Ticket Booth**: a violet kiosk two blocks high with a brass ticket dispenser on its counter. Paper loads its roll (two tickets a sheet); an empty hand turns its crank and prints a Midway Ticket.
+- **Midway Ticket**: a round's admission at the midway's games, printed from paper. It isn't money and buys nothing else.
+- **Whack-a-Zombie**: a game cabinet two blocks high. A ticket starts a 20-second round; zombie heads pop up from five holes, and the Carnival Mallet knocks them down, lighting a lamp each. All eight lamps win a prize from the midway's prize table. Only the player who paid can whack.
+- Recipes: glass panes over a dispenser between planks, over planks; torches over rotten flesh between planks, over a piston between planks.
+- Record: [haunted-midway.md](docs/features/haunted-midway.md).
+- **Checked:** the record's Verification. Game tests and screenshots run in CI only; not played by hand.
+
+### Unmerged: Haunted Midway, part 1 (the sweet stalls)
+- **Cotton-Candy Cart**: a violet and orange cart two blocks high, with a steel spinning bowl and a striped canopy. An empty hand switches it on and its spinner head spins; sugar is spun into pink floss on the bowl's wall, up to three servings, and paper winds a serving onto a cone.
+- **Cotton Candy**: a new candy (2 hunger), made only at the cart.
+- **Caramel-Corn Wagon**: an old popcorn wagon two blocks high, with a glass case, a hung kettle and a jack-o'-lantern on its crest. Lit, a corn kernel pops in its kettle, which tips to spill one Popcorn into the case, up to eight. An empty hand takes one out, and Caramel coats two into Caramel Popcorn, as the crafting recipe does.
+- Recipes: purple wool over iron, a bucket and iron, over planks and a stick; glass panes round a jack-o'-lantern and a cauldron, over planks and iron.
+- Record: [haunted-midway.md](docs/features/haunted-midway.md).
+- **Checked:** the record's Verification. Game tests and screenshots run in CI only; not played by hand.
+
+### Unmerged: Cozy Fall Hearth, part 5 (the lights)
+- **Hurricane Lamp**: a brass table oil lamp with a glass chimney. Flint and steel lights it and an empty hand turns it down; lit, its chimney glows and it gives light 12.
+- **Mason-Jar Candles**: wax candles in half-gallon mason jars with twine bows, one to four to a block, lit and added to as vanilla's candles are; lit, their glass glows.
+- Recipes: glass panes round a torch over a copper ingot; a mason jar, a candle and a string.
+- Set 5 is complete. Record: [cozy-fall-hearth.md](docs/features/cozy-fall-hearth.md).
+- **Checked:** the record's Verification. Game tests and screenshots run in CI only; not played by hand.
+
+### Unmerged: Cozy Fall Hearth, part 4 (the comforts)
+- **Blanket Ladder**: a wooden ladder leaning on a wall, two blocks high. Wool carpets of any colour fold over its top three rungs as throws in their colours, with a striped border and a fringe; an empty hand takes back the last; it falls if its wall goes.
+- **Knitting Basket**: a wicker basket holding four balls of yarn, each shown in its own dyed colour, and a pair of knitting needles, kept as worn as they were.
+- Recipes: planks and a stick; a foraging basket and a ball of yarn.
+- Record: [cozy-fall-hearth.md](docs/features/cozy-fall-hearth.md).
+- **Checked:** the record's Verification. Game tests and screenshots run in CI only; not played by hand.
+
+### Unmerged: Cozy Fall Hearth, part 3 (the woodpile)
+- **Firewood Rack**: a wrought-iron log rack that holds 16 logs of any kind, each shown as a split log, four to a layer. An empty hand takes back the last; a comparator reads how full it is; broken, it gives them back as they went in.
+- **Chopping Block**: a sawn round of oak with a hatchet in it. Use a log on it to split it into exactly the planks crafting gives; the hatchet swings each time.
+- Recipes: four iron bars and three iron ingots; a log and an iron axe.
+- Record: [cozy-fall-hearth.md](docs/features/cozy-fall-hearth.md).
+- **Checked:** the record's Verification. Game tests and screenshots run in CI only; not played by hand.
+
+### Unmerged: Cozy Fall Hearth, part 2 (the stove)
+- **Cast-Iron Woodstove**: a parlour box stove 1 m high, its fire showing through mica windows. Lit with flint and steel or a fire charge (a shovel puts it out), it gives light 13 and heats what stands on it, as a campfire or the Kitchen Stove does: a Cooking Pot brews mint tea, hot cocoa and mulled cider on it. It burns no fuel.
+- **Tea Kettle**: a copper kettle that boils on any heat source, steaming, its lid rattling.
+- **Simmer Pot**: an enamel saucepan of spiced water, apple slices, cinnamon and cloves that simmers on any heat source. Neither makes anything.
+- Recipes: seven iron ingots and a furnace; five copper ingots and an iron nugget; an iron ingot, a water bucket, an apple and mulling spices.
+- Record: [cozy-fall-hearth.md](docs/features/cozy-fall-hearth.md).
+- **Checked:** the record's Verification. Game tests and screenshots run in CI only; not played by hand.
+
+### Unmerged: Cozy Fall Hearth, part 1 (the hearth)
+- **Stone Fireplace**: a fieldstone chimney breast three blocks across and three up, on a flagstone hearth, with an oak mantel at 1.4 m. Flint and steel or a fire charge lights it and a shovel puts it out; lit, a fire burns in its firebox in smooth bands and gives light 15. A decoration: it burns no fuel and makes nothing.
+- **Mantel Garland**: autumn leaves, little pumpkins and pine cones, draped along a fireplace's mantel; sneak with an empty hand to take it back.
+- Recipes: cobblestone, planks, a campfire and a smooth stone slab; two leaves, a pumpkin and a string.
+- Record: [cozy-fall-hearth.md](docs/features/cozy-fall-hearth.md).
+- **Checked:** the record's Verification. Game tests and screenshots run in CI only; not played by hand.
+
+### Unmerged: Fall Garden & Porch, part 4 (café lights)
+- **Café String Lights**: warm Edison bulbs on a black cord, strung between String Light Hooks and lit by redstone or electricity like the other strands. While lit they light the air along their length (light 12 about every two blocks), and put those lights out when they go dark or come down.
+- Recipe: two string, glowstone dust, a glass pane and black dye.
+- Record: [fall-garden-and-porch.md](docs/features/fall-garden-and-porch.md).
+- **Checked:** the record's Verification. Game tests and screenshots run in CI only; not played by hand.
+
+### Unmerged: Fall Garden & Porch, part 3 (the porch)
+- **Porch Swing**: a slatted bench swing 1.5 m wide hung on chains from a ceiling two blocks up. Two can sit on it; it sways in the breeze, and more with someone on it. It comes down when its ceiling goes.
+- **Wheat Stook** (six sheaves stood to dry), **Corn Dolly** (a plaited straw harvest knot with a red bow, on a wall), **Bittersweet Wreath** (eight bittersweet make one) and **Quilt Rail** (a porch rail with a patchwork quilt over it).
+- Record: [fall-garden-and-porch.md](docs/features/fall-garden-and-porch.md).
+- **Checked:** the record's Verification. Game tests and screenshots run in CI only; not played by hand.
+
+### Unmerged: Fall Garden & Porch, part 2 (planters)
+- **Window Box** (on a wall, three flowers), **Half-Barrel Planter** (one) and **Galvanized Tub Planter** (two): use any small flower on one to plant it, an empty hand to take back the last. The flowers grow in them as their own models.
+- A barrel and two dirt make two half-barrels; planks round dirt make a window box; iron round dirt a tub.
+- Record: [fall-garden-and-porch.md](docs/features/fall-garden-and-porch.md).
+- **Checked:** the record's Verification. Game tests and screenshots run in CI only; not played by hand.
+
+### Unmerged: Fall Garden & Porch, part 1 (the fall garden's plants)
+- Seven fall plants, sculpted in the graveyard flora's style: **New England Aster**, **Autumn Stonecrop**, **Ornamental Kale**, **Ornamental Cabbage** (small flowers with potted forms), **Pampas Grass** (a tall flower, 2 m to its plumes), **Dried Sunflower** (a two-block plant, its seed head bowed) and **Bittersweet** (a vine of scarlet berries in orange husks).
+- Asters grow in plains and forests, stonecrop and pampas grass in plains, and bittersweet in forests. A cabbage seed and purple dye make an ornamental kale, a cabbage seed and bone meal an ornamental cabbage, and a sunflower makes a dried one.
+- Record: [fall-garden-and-porch.md](docs/features/fall-garden-and-porch.md).
+- **Checked:** the record's Verification. Game tests and screenshots run in CI only; not played by hand.
+
+### Unmerged: Barn & Harvest Tools, part 5 (the barn's stores and fittings)
+- **Grain Sacks**: burlap sacks of grain, tied and stamped, that stack three to a block and drop each sack. A wool and three wheat make one.
+- **Milk Can**: a tinplate dairy can that stands facing you.
+- **Pitchfork and Rake Rack**: a peg rail on a barn wall with a pitchfork and a hay rake under it (two up); it comes off with its wall.
+- **Feed Trough**: a plank trough two blocks long that holds 128 horse feed (hay bales, wheat, apples, carrots), the hay rising in it as it fills.
+- **Barn Lantern**: a real-sized hurricane lantern on an iron wall bracket, light 15; an empty hand puts it out and lights it.
+- Record: [barn-and-harvest-tools.md](docs/features/barn-and-harvest-tools.md).
+- **Checked:** the record's Verification. Game tests and screenshots run in CI only; not played by hand.
+
+### Unmerged: Barn & Harvest Tools, part 4 (the Hay-Loft Pulley and the Harvest Bell)
+- **Hay-Loft Pulley**: a braced beam on a wall with an iron pulley and a rope down to a hay hook. Use it to let the rope down a block (to four) and sneak-use to haul it up; the wheel turns and the rope runs, and the hook sways as it hangs.
+- **Harvest Bell**: a bronze farm bell in an iron yoke on a post (two up). Use it to ring it: it swings and rings, the swing dying away, and can be rung again once it settles.
+- Record: [barn-and-harvest-tools.md](docs/features/barn-and-harvest-tools.md).
+- **Checked:** the record's Verification. Game tests and screenshots run in CI only; not played by hand.
+
+### Unmerged: Barn & Harvest Tools, part 3 (the Drying Rack and the Corn Crib)
+- **Drying Rack**: a freestanding two-block frame with four hooks. Hang bunches of four herb sprigs or peppers; each dries in two minutes into Dried Herbs or Dried Chili, one for one, shown on its hook, and comes down with an empty hand.
+- **Corn Crib**: a slatted crib on posts under a tin gable roof (two across, two up). It holds 256 corn, the ears showing through the slats as it fills.
+- Record: [barn-and-harvest-tools.md](docs/features/barn-and-harvest-tools.md).
+- **Checked:** the record's Verification. Game tests and screenshots run in CI only; not played by hand.
+
+### Unmerged: Barn & Harvest Tools, part 2 (the Quern and the Butter Churn)
+- **Quern**: hand millstones in a flour tray on a wooden stand. Fill its eye with wheat or dried chili, then turn the upper stone with an empty hand; it turns once round, and every two turns grind a piece out of the spout (wheat into Flour, a chili into two Paprika).
+- **Butter Churn**: a stave dash churn with iron hoops. Pour in a bucket of milk (the bucket comes back) and work the dasher; the eighth stroke churns two Butter.
+- **Flour**, **Butter** and **Pancakes**: flour makes Wheat Dough as wheat does; two flour, an egg and a butter make two Pancakes.
+- Record: [barn-and-harvest-tools.md](docs/features/barn-and-harvest-tools.md).
+- **Checked:** the record's Verification. Game tests and screenshots run in CI only; not played by hand.
+
+### Unmerged: Barn & Harvest Tools, part 1 (the planned hand tools)
+- **Steel Sickle**: the third sickle, harvesting and replanting ripe crops in a 7 by 7 square. Three steel ingots and a stick.
+- **Watering Can**: a tinplate can that holds 16 pours, filled at any water. A pour wets the farmland in the 3 by 3 square round it and gives each crop there a one-in-six chance of a growth step, half a second between pours.
+- **Seed Pouch**: a wool pouch that holds four kinds of seed. Use it to gather your seeds, use it on farmland to sow the empty 3 by 3 round it, sneak-use it to empty it.
+- Record: [barn-and-harvest-tools.md](docs/features/barn-and-harvest-tools.md).
+- **Checked:** the record's Verification. Game tests run in CI only; not played by hand.
+
+### Unmerged: Orchard & Apple Harvest, part 3 (the Caramel Apple Stand)
+- **Caramel Apple Stand**: a two-block counter painted CARAMEL APPLES, with a copper dipping pot on a burner, a jar of sticks and a cooling tray.
+  - Stock it with Caramel and sticks, then dip apples. An apple, a stick and a serving make a caramel apple, as the recipe does.
+  - The apples set on the tray for 30 seconds before an empty hand takes them.
+  - The caramel bubbles and the flame flickers in smooth, blended frames.
+- Record: [orchard-apple-harvest.md](docs/features/orchard-apple-harvest.md).
+- **Checked:** the record's Verification. Game tests and screenshots run in CI only; not played by hand.
+
+### Unmerged: Orchard & Apple Harvest, part 2 (crates, windfalls and the handcart)
+- **Apple crates**: wooden field crates heaped with red, green or golden apples. Each has slatted sides and labelled end boards; stack three to a block.
+- **Windfall Apples**: one to four apples lying in the grass. Two apples make two; broken, they give the apples back.
+- **Orchard Handcart**: a two-wheeled handcart that holds 128 apples and pears, its load showing in four stages.
+- Record: [orchard-apple-harvest.md](docs/features/orchard-apple-harvest.md).
+- **Checked:** the record's Verification. Game tests and screenshots run in CI only; not played by hand.
+
+### Unmerged: Orchard & Apple Harvest, part 1 (the ladder, the bin and the bag)
+- **Orchard Ladder**: a nine-foot three-legged orchard ladder (one across, three up, two deep). Its rails taper to a cap, with flat steps, and a pole is hinged at the top leaning back to the ground. Climb it like a ladder.
+- **Apple Bin**: a 1.2 m slatted bulk bin on a pallet (two by two). It holds 256 apples and pears, the heap inside rising through four stages and showing the fruit that went in last.
+- **Picking Bag**: a canvas picking bag with an iron hoop mouth on a wall hook. It holds 16 fruit, shown heaped in its mouth.
+- Use fruit on the bin or bag to put it in; an empty hand takes back a stack; breaking spills the fruit.
+- Record: [orchard-apple-harvest.md](docs/features/orchard-apple-harvest.md).
+- **Checked:** the record's Verification. Game tests and screenshots run in CI only; not played by hand.
+
+### Unmerged: The Pumpkin Patch Market, part 3 (the sign, the ground and the giant)
+- **Chalkboard Sign**: an A-frame of two slate boards in wooden frames, hinged at the top, the market's words chalked on both faces. Use it to chalk the next: PUMPKINS, FRESH PICKED, U-PICK, GOURDS, SQUASH, PIES, CIDER, OPEN. A named Name Tag (or renaming it in an anvil) chalks your own words; sneak-use wipes them. It needs build permission and keeps its words when broken.
+- **Pumpkin Vine Cover**: a mat of pumpkin vine, broad leaves, tendrils and a flower lying flat on the ground, walked through, at a random turn so a spread doesn't tile. Two vines and pumpkin seeds make six.
+- **Giant Warty Gourd**: the Warty Gourd three times bigger, on its own textures, two blocks wide and deep and three tall, placed and broken as one. Nine Warty Gourds make one.
+- Record: [pumpkin-patch-market.md](docs/features/pumpkin-patch-market.md).
+- **Checked:** the record's Verification. Game tests and screenshots run in CI only; not played by hand.
+
+### Unmerged: The Pumpkin Patch Market, part 2 (the market's displays)
+- **Three real-life-sized displays for your produce**, each several blocks placed and broken as one:
+  - the **Pumpkin Wheelbarrow**: two blocks long, an iron-shod spoked wheel, a flared plank tray; holds 5;
+  - the **Pumpkin Wagon**: two wide, two high, four long, on four spoked wheels, with barn-red slatted sides on stakes and a hay floor; holds 28;
+  - the **Pumpkin Pyramid**: three blocks square, three stepped tiers with lips; holds 25.
+- **Using them:** use any produce the Pumpkin Crate takes on any block of one to set a piece on its next spot; an empty hand takes the last back; breaking it spills them.
+- **Drawn by the owner's rules:** every face painted for itself at vanilla's density (boards along each face's long edge, placed nails, flat iron, striped hay, no noise); cut into blocks so the pictures run on unbroken; no shared planes.
+- Record: [pumpkin-patch-market.md](docs/features/pumpkin-patch-market.md).
+- **Checked:** the record's Verification. Game tests and screenshots run in CI only; not played by hand.
+
+### Unmerged: The Pumpkin Patch Market, part 1 (six squashes and gourds)
+- **Six new squashes and gourds** for fall displays and kitchens, each grown from its seeds on a stem like every gourd: the **Turban Squash** (red-orange, wearing a striped green and cream turban), the **Blue Hubbard Squash** (big, slate blue, warty, lying on its side), the **Sweet Dumpling Squash** (small, cream, striped green along its ribs), the **Long Island Cheese Pumpkin** (a flat buff wheel that bakes a pumpkin pie), the **Spoon Gourd** (a yellow bowl on a green handle) and the **Swan Gourd** (speckled green, its long neck arched like a swan's).
+- **Where they come from:** short grass (sharing the grass-seed chance), wild patches in their own biomes, and four seeds from each fruit in a crafting grid.
+- **What they are for:** Pumpkin Crates and Farm Stands, the Crowfield's harvest, compost, and (the three squashes) any recipe that takes a vegetable.
+- **Drawn by the owner's rules:** shaped models, skins in the vanilla manner (one colour stepped into tones, regular grooves, warts and specks on an even lattice, no noise or gradient), and 16×16 seed icons drawn from maps. Record: [pumpkin-patch-market.md](docs/features/pumpkin-patch-market.md).
+- **Checked:** see the record's Verification. The game tests and client screenshots run in CI only; not played by hand.
+
 ### Unmerged: The Blood Moon
 - **A Blood Moon rises every fourth night of the Halloween season, and on Halloween night:** the night sky turns blood red with a red haze about you, zombies and skeletons put on costumes far more often (40%), costumed mobs drop double candy, will-o'-wisps gather thick, and the Headless Horseman rides by everyone who hasn't seen him that day. Being out when it rises earns **Bad Moon Rising**.
 - Switch: `halloween.blood_moon` (on by default). Record: [blood-moon.md](docs/features/blood-moon.md).

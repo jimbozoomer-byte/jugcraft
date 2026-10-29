@@ -216,7 +216,7 @@ public class CakeGameTests {
 			recipes.add(cake.rawPie());
 			helper.assertTrue(new ItemStack(item(cake.slice())).is(foods), cake.slice() + " is a food");
 		}
-		helper.assertTrue(CAKES.size() == 7, "Seven cakes: " + CAKES);
+		helper.assertTrue(CAKES.size() == 8, "Eight cakes, the owner's seven and the Pumpkin Layer Cake: " + CAKES);
 		for (String recipe : recipes) {
 			helper.assertTrue(level.recipeAccess().byKey(ResourceKey.create(Registries.RECIPE, Jugcraft.id(recipe))).isPresent(), recipe + " loads");
 		}

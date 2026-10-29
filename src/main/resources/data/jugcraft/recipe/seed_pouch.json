@@ -1,0 +1,23 @@
+{
+  "fabric:load_conditions": [
+    {
+      "condition": "jugcraft:feature_enabled",
+      "feature": "agriculture"
+    }
+  ],
+  "type": "minecraft:crafting_shaped",
+  "category": "equipment",
+  "pattern": [
+    " S ",
+    "C C",
+    " C "
+  ],
+  "key": {
+    "S": "minecraft:string",
+    "C": "#minecraft:wool"
+  },
+  "result": {
+    "id": "jugcraft:seed_pouch",
+    "count": 1
+  }
+}

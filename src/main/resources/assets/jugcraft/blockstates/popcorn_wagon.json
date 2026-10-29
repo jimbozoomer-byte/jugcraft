@@ -1,0 +1,740 @@
+{
+  "multipart": [
+    {
+      "when": {
+        "facing": "north",
+        "part": "0",
+        "runner": "false"
+      },
+      "apply": {
+        "model": "jugcraft:block/popcorn_wagon_0"
+      }
+    },
+    {
+      "when": {
+        "facing": "north",
+        "part": "0",
+        "runner": "false",
+        "popcorn": "1"
+      },
+      "apply": {
+        "model": "jugcraft:block/popcorn_wagon_0_heap1"
+      }
+    },
+    {
+      "when": {
+        "facing": "north",
+        "part": "0",
+        "runner": "false",
+        "popcorn": "2"
+      },
+      "apply": {
+        "model": "jugcraft:block/popcorn_wagon_0_heap2"
+      }
+    },
+    {
+      "when": {
+        "facing": "north",
+        "part": "0",
+        "runner": "false",
+        "popcorn": "3"
+      },
+      "apply": {
+        "model": "jugcraft:block/popcorn_wagon_0_heap3"
+      }
+    },
+    {
+      "when": {
+        "facing": "north",
+        "part": "0",
+        "runner": "false",
+        "popcorn": "4"
+      },
+      "apply": {
+        "model": "jugcraft:block/popcorn_wagon_0_heap4"
+      }
+    },
+    {
+      "when": {
+        "facing": "north",
+        "part": "0",
+        "runner": "false",
+        "popcorn": "5"
+      },
+      "apply": {
+        "model": "jugcraft:block/popcorn_wagon_0_heap5"
+      }
+    },
+    {
+      "when": {
+        "facing": "north",
+        "part": "0",
+        "runner": "false",
+        "popcorn": "6"
+      },
+      "apply": {
+        "model": "jugcraft:block/popcorn_wagon_0_heap6"
+      }
+    },
+    {
+      "when": {
+        "facing": "north",
+        "part": "0",
+        "runner": "false",
+        "popcorn": "7"
+      },
+      "apply": {
+        "model": "jugcraft:block/popcorn_wagon_0_heap7"
+      }
+    },
+    {
+      "when": {
+        "facing": "north",
+        "part": "0",
+        "runner": "false",
+        "popcorn": "8"
+      },
+      "apply": {
+        "model": "jugcraft:block/popcorn_wagon_0_heap8"
+      }
+    },
+    {
+      "when": {
+        "facing": "north",
+        "part": "1",
+        "runner": "false"
+      },
+      "apply": {
+        "model": "jugcraft:block/popcorn_wagon_1"
+      }
+    },
+    {
+      "when": {
+        "facing": "north",
+        "part": "1",
+        "runner": "false",
+        "lit": "true"
+      },
+      "apply": {
+        "model": "jugcraft:block/popcorn_wagon_1_lit"
+      }
+    },
+    {
+      "when": {
+        "facing": "north",
+        "part": "1",
+        "runner": "false",
+        "popcorn": "5"
+      },
+      "apply": {
+        "model": "jugcraft:block/popcorn_wagon_1_heap5"
+      }
+    },
+    {
+      "when": {
+        "facing": "north",
+        "part": "1",
+        "runner": "false",
+        "popcorn": "6"
+      },
+      "apply": {
+        "model": "jugcraft:block/popcorn_wagon_1_heap6"
+      }
+    },
+    {
+      "when": {
+        "facing": "north",
+        "part": "1",
+        "runner": "false",
+        "popcorn": "7"
+      },
+      "apply": {
+        "model": "jugcraft:block/popcorn_wagon_1_heap7"
+      }
+    },
+    {
+      "when": {
+        "facing": "north",
+        "part": "1",
+        "runner": "false",
+        "popcorn": "8"
+      },
+      "apply": {
+        "model": "jugcraft:block/popcorn_wagon_1_heap8"
+      }
+    },
+    {
+      "when": {
+        "facing": "north",
+        "runner": "true"
+      },
+      "apply": {
+        "model": "jugcraft:block/popcorn_wagon_kettle"
+      }
+    },
+    {
+      "when": {
+        "facing": "east",
+        "part": "0",
+        "runner": "false"
+      },
+      "apply": {
+        "model": "jugcraft:block/popcorn_wagon_0",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "facing": "east",
+        "part": "0",
+        "runner": "false",
+        "popcorn": "1"
+      },
+      "apply": {
+        "model": "jugcraft:block/popcorn_wagon_0_heap1",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "facing": "east",
+        "part": "0",
+        "runner": "false",
+        "popcorn": "2"
+      },
+      "apply": {
+        "model": "jugcraft:block/popcorn_wagon_0_heap2",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "facing": "east",
+        "part": "0",
+        "runner": "false",
+        "popcorn": "3"
+      },
+      "apply": {
+        "model": "jugcraft:block/popcorn_wagon_0_heap3",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "facing": "east",
+        "part": "0",
+        "runner": "false",
+        "popcorn": "4"
+      },
+      "apply": {
+        "model": "jugcraft:block/popcorn_wagon_0_heap4",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "facing": "east",
+        "part": "0",
+        "runner": "false",
+        "popcorn": "5"
+      },
+      "apply": {
+        "model": "jugcraft:block/popcorn_wagon_0_heap5",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "facing": "east",
+        "part": "0",
+        "runner": "false",
+        "popcorn": "6"
+      },
+      "apply": {
+        "model": "jugcraft:block/popcorn_wagon_0_heap6",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "facing": "east",
+        "part": "0",
+        "runner": "false",
+        "popcorn": "7"
+      },
+      "apply": {
+        "model": "jugcraft:block/popcorn_wagon_0_heap7",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "facing": "east",
+        "part": "0",
+        "runner": "false",
+        "popcorn": "8"
+      },
+      "apply": {
+        "model": "jugcraft:block/popcorn_wagon_0_heap8",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "facing": "east",
+        "part": "1",
+        "runner": "false"
+      },
+      "apply": {
+        "model": "jugcraft:block/popcorn_wagon_1",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "facing": "east",
+        "part": "1",
+        "runner": "false",
+        "lit": "true"
+      },
+      "apply": {
+        "model": "jugcraft:block/popcorn_wagon_1_lit",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "facing": "east",
+        "part": "1",
+        "runner": "false",
+        "popcorn": "5"
+      },
+      "apply": {
+        "model": "jugcraft:block/popcorn_wagon_1_heap5",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "facing": "east",
+        "part": "1",
+        "runner": "false",
+        "popcorn": "6"
+      },
+      "apply": {
+        "model": "jugcraft:block/popcorn_wagon_1_heap6",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "facing": "east",
+        "part": "1",
+        "runner": "false",
+        "popcorn": "7"
+      },
+      "apply": {
+        "model": "jugcraft:block/popcorn_wagon_1_heap7",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "facing": "east",
+        "part": "1",
+        "runner": "false",
+        "popcorn": "8"
+      },
+      "apply": {
+        "model": "jugcraft:block/popcorn_wagon_1_heap8",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "facing": "east",
+        "runner": "true"
+      },
+      "apply": {
+        "model": "jugcraft:block/popcorn_wagon_kettle",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "facing": "south",
+        "part": "0",
+        "runner": "false"
+      },
+      "apply": {
+        "model": "jugcraft:block/popcorn_wagon_0",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "facing": "south",
+        "part": "0",
+        "runner": "false",
+        "popcorn": "1"
+      },
+      "apply": {
+        "model": "jugcraft:block/popcorn_wagon_0_heap1",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "facing": "south",
+        "part": "0",
+        "runner": "false",
+        "popcorn": "2"
+      },
+      "apply": {
+        "model": "jugcraft:block/popcorn_wagon_0_heap2",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "facing": "south",
+        "part": "0",
+        "runner": "false",
+        "popcorn": "3"
+      },
+      "apply": {
+        "model": "jugcraft:block/popcorn_wagon_0_heap3",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "facing": "south",
+        "part": "0",
+        "runner": "false",
+        "popcorn": "4"
+      },
+      "apply": {
+        "model": "jugcraft:block/popcorn_wagon_0_heap4",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "facing": "south",
+        "part": "0",
+        "runner": "false",
+        "popcorn": "5"
+      },
+      "apply": {
+        "model": "jugcraft:block/popcorn_wagon_0_heap5",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "facing": "south",
+        "part": "0",
+        "runner": "false",
+        "popcorn": "6"
+      },
+      "apply": {
+        "model": "jugcraft:block/popcorn_wagon_0_heap6",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "facing": "south",
+        "part": "0",
+        "runner": "false",
+        "popcorn": "7"
+      },
+      "apply": {
+        "model": "jugcraft:block/popcorn_wagon_0_heap7",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "facing": "south",
+        "part": "0",
+        "runner": "false",
+        "popcorn": "8"
+      },
+      "apply": {
+        "model": "jugcraft:block/popcorn_wagon_0_heap8",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "facing": "south",
+        "part": "1",
+        "runner": "false"
+      },
+      "apply": {
+        "model": "jugcraft:block/popcorn_wagon_1",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "facing": "south",
+        "part": "1",
+        "runner": "false",
+        "lit": "true"
+      },
+      "apply": {
+        "model": "jugcraft:block/popcorn_wagon_1_lit",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "facing": "south",
+        "part": "1",
+        "runner": "false",
+        "popcorn": "5"
+      },
+      "apply": {
+        "model": "jugcraft:block/popcorn_wagon_1_heap5",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "facing": "south",
+        "part": "1",
+        "runner": "false",
+        "popcorn": "6"
+      },
+      "apply": {
+        "model": "jugcraft:block/popcorn_wagon_1_heap6",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "facing": "south",
+        "part": "1",
+        "runner": "false",
+        "popcorn": "7"
+      },
+      "apply": {
+        "model": "jugcraft:block/popcorn_wagon_1_heap7",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "facing": "south",
+        "part": "1",
+        "runner": "false",
+        "popcorn": "8"
+      },
+      "apply": {
+        "model": "jugcraft:block/popcorn_wagon_1_heap8",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "facing": "south",
+        "runner": "true"
+      },
+      "apply": {
+        "model": "jugcraft:block/popcorn_wagon_kettle",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "facing": "west",
+        "part": "0",
+        "runner": "false"
+      },
+      "apply": {
+        "model": "jugcraft:block/popcorn_wagon_0",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "facing": "west",
+        "part": "0",
+        "runner": "false",
+        "popcorn": "1"
+      },
+      "apply": {
+        "model": "jugcraft:block/popcorn_wagon_0_heap1",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "facing": "west",
+        "part": "0",
+        "runner": "false",
+        "popcorn": "2"
+      },
+      "apply": {
+        "model": "jugcraft:block/popcorn_wagon_0_heap2",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "facing": "west",
+        "part": "0",
+        "runner": "false",
+        "popcorn": "3"
+      },
+      "apply": {
+        "model": "jugcraft:block/popcorn_wagon_0_heap3",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "facing": "west",
+        "part": "0",
+        "runner": "false",
+        "popcorn": "4"
+      },
+      "apply": {
+        "model": "jugcraft:block/popcorn_wagon_0_heap4",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "facing": "west",
+        "part": "0",
+        "runner": "false",
+        "popcorn": "5"
+      },
+      "apply": {
+        "model": "jugcraft:block/popcorn_wagon_0_heap5",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "facing": "west",
+        "part": "0",
+        "runner": "false",
+        "popcorn": "6"
+      },
+      "apply": {
+        "model": "jugcraft:block/popcorn_wagon_0_heap6",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "facing": "west",
+        "part": "0",
+        "runner": "false",
+        "popcorn": "7"
+      },
+      "apply": {
+        "model": "jugcraft:block/popcorn_wagon_0_heap7",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "facing": "west",
+        "part": "0",
+        "runner": "false",
+        "popcorn": "8"
+      },
+      "apply": {
+        "model": "jugcraft:block/popcorn_wagon_0_heap8",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "facing": "west",
+        "part": "1",
+        "runner": "false"
+      },
+      "apply": {
+        "model": "jugcraft:block/popcorn_wagon_1",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "facing": "west",
+        "part": "1",
+        "runner": "false",
+        "lit": "true"
+      },
+      "apply": {
+        "model": "jugcraft:block/popcorn_wagon_1_lit",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "facing": "west",
+        "part": "1",
+        "runner": "false",
+        "popcorn": "5"
+      },
+      "apply": {
+        "model": "jugcraft:block/popcorn_wagon_1_heap5",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "facing": "west",
+        "part": "1",
+        "runner": "false",
+        "popcorn": "6"
+      },
+      "apply": {
+        "model": "jugcraft:block/popcorn_wagon_1_heap6",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "facing": "west",
+        "part": "1",
+        "runner": "false",
+        "popcorn": "7"
+      },
+      "apply": {
+        "model": "jugcraft:block/popcorn_wagon_1_heap7",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "facing": "west",
+        "part": "1",
+        "runner": "false",
+        "popcorn": "8"
+      },
+      "apply": {
+        "model": "jugcraft:block/popcorn_wagon_1_heap8",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "facing": "west",
+        "runner": "true"
+      },
+      "apply": {
+        "model": "jugcraft:block/popcorn_wagon_kettle",
+        "y": 270
+      }
+    }
+  ]
+}

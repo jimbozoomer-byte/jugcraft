@@ -65,7 +65,7 @@ Every crop has two independent entry points, so none is locked behind a biome, a
 - **Picking.** Ripe tall crops go back to a younger stage *of the same height* when picked (corn and sunflowers go back to stage 5 of 7), so they regrow produce without shrinking.
 - **Legumes feed their neighbours.** Crops next to beans (any of the 8 surrounding blocks) grow **1.5× as fast**. Beans themselves do not get the bonus, so the best field mixes crops. This is the classic *Three Sisters* planting (corn, beans and squash) that the stew is named after. The legume list is the block tag `jugcraft:nitrogen_fixing_crops`, so data packs and later crops can join it.
 - **Growth.** Otherwise Jugcraft crops grow like vanilla crops: farmland under and around the plant, moisture, and light 9 or more. Corn takes 1.5× and sunflowers 1.25× as long as wheat per stage, because they are bigger plants that regrow after picking. Bone meal works: 1–2 stages on tall crops, as far as there is room above.
-- **Sickles.** Right-click a crop with a sickle to harvest every *ripe* crop around it: 3×3 for the **Flint Sickle**, 5×5 for the **Bronze Sickle**, one block up or down. One-block crops (including vanilla wheat, carrots, potatoes and beetroots) are replanted automatically with a seed from their own drops; tall crops and cranberry bushes are picked and stay standing; squash and gourds still on their stems are cut off (gourds set down as decoration are left alone); unripe crops are left alone. Each use costs 1 durability. The sickle checks spawn protection and claims for every block it touches.
+- **Sickles.** Right-click a crop with a sickle to harvest every *ripe* crop around it: 3×3 for the **Flint Sickle**, 5×5 for the **Bronze Sickle**, 7×7 for the **Steel Sickle** ([Barn & Harvest Tools](../features/barn-and-harvest-tools.md)), one block up or down. One-block crops (including vanilla wheat, carrots, potatoes and beetroots) are replanted automatically with a seed from their own drops; tall crops and cranberry bushes are picked and stay standing; squash and gourds still on their stems are cut off (gourds set down as decoration are left alone); unripe crops are left alone. Each use costs 1 durability. The sickle checks spawn protection and claims for every block it touches.
 - **Composting and animal feed.** Every crop item composts at vanilla-like rates (seeds 30 %, produce 65 %, cooked food 85 %). Pigs eat corn, sweet potatoes, cabbage, turnips and chestnuts; rabbits eat cabbage and turnips; foxes eat cranberries; cows, sheep and goats eat oats and barley; horses eat oats; chickens and parrots eat every Jugcraft seed (vanilla animal-food tags, so breeding works).
 
 ### Food
@@ -1486,9 +1486,9 @@ Hand tools and farmstead blocks, made from wood, stone and early metals. None ne
 | Equipment | What it does | Tier |
 | --- | --- | --- |
 | **Flint and Bronze Sickles** ✅ | Harvest and replant ripe crops in 3×3 or 5×5 | Discovery |
-| Steel Sickle | 7×7 once the steel tier lands | Workshops |
-| Watering Can (tinplate) | Moistens farmland in a 3×3 area and gives crops a small, bounded growth chance per use; refills at any water | Discovery |
-| Seed Pouch | Holds several seed types; right-click plants a 3×3 patch of farmland from it | Discovery |
+| **Steel Sickle** ✅ | Harvests and replants ripe crops in 7×7; see [Barn & Harvest Tools](../features/barn-and-harvest-tools.md) | Workshops |
+| **Watering Can (tinplate)** ✅ | Holds 16 pours; moistens farmland in a 3×3 area and gives each crop on it a one-in-six chance of a growth step per pour; refills at any water | Discovery |
+| **Seed Pouch** ✅ | Holds four kinds of seed; use on farmland to sow the empty 3×3 patch round it | Discovery |
 | **Trellis (wood)** ✅ | Supports climbing crops (tomatoes now; grapes, hops and pole beans later); also a garden decoration | Discovery |
 | **Carving Knife** ✅ | Carves any face into the sides of a pumpkin, a pixel at a time; see [Pumpkin Carving](#what-exists-now-pumpkin-carving) | Discovery |
 | **Scarecrow** ✅ | Decoration for fields and Halloween, in a flannel shirt you dye, with any pumpkin for a head; see [the Halloween harvest](#what-exists-now-the-halloween-harvest). Keeps [crows](#crows-and-working-scarecrows) off the crops round it (4 blocks, 8 with a head, 12 with a lit one) | Discovery |
@@ -1496,10 +1496,10 @@ Hand tools and farmstead blocks, made from wood, stone and early metals. None ne
 | **Harvest Scale** ✅ | Weighs giant pumpkins, keeps a board of the three heaviest and gives prize ribbons | Discovery |
 | Bushel Basket | Small produce storage for markets | Discovery |
 | Compost Bin | Turns scraps into Compost, an organic fertilizer that makes farmland *fertile* for a while (faster growth); the no-chemistry route | Discovery |
-| Quern (hand mill) | Grinds corn into cornmeal and grain into flour (cornbread, pancakes) | Discovery |
-| Drying Rack | Retts flax into linen fibre, dries herbs and fruit, makes jerky | Workshops |
+| **Quern (hand mill)** ✅ | Grinds wheat into Flour (wheat dough, Pancakes) and dried chili into paprika; see [Barn & Harvest Tools](../features/barn-and-harvest-tools.md). Corn into cornmeal waits | Discovery |
+| **Drying Rack** ✅ (herbs and peppers) | Dries herbs into Dried Herbs and peppers into Dried Chili (Discovery; see [Barn & Harvest Tools](../features/barn-and-harvest-tools.md)); retting flax into linen fibre, drying fruit and making jerky wait for their items | Workshops |
 | Fruit and Seed Press (apples ✅) | Apples into cider (built: the **Cider Press**, a Discovery-tier hand press; see [the cider mill](#the-cider-mill)); grapes into juice, and **sunflower or flax seeds into plant oil at a low hand-press yield**, so engineers can buy early lubricant from farmers (planned) | Workshops |
-| Butter Churn and Cheese Press | Dairy from the husbandry slice | Workshops |
+| **Butter Churn** ✅ / Cheese Press | The churn turns a bucket of milk into Butter (Discovery; see [Barn & Harvest Tools](../features/barn-and-harvest-tools.md)); the cheese press waits for the husbandry slice | Workshops |
 | **Cooking Pot** ✅ | Multi-ingredient meals over a campfire (expedition rations later) | Discovery (iron and a campfire; planned for Workshops, moved earlier because it needs no workshop) |
 
 ## Connections to other branches

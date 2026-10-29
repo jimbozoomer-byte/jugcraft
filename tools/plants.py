@@ -82,6 +82,22 @@ PLANTS = {
                    "patch": {"biomes": ["IS_SPOOKY"], "rarity": 6, "tries": 24}},
     "shroud_moss": {"kind": "hanging", "display": "Shroud Moss", "art": "flora"},
     "creeping_ivy": {"kind": "vine", "display": "Creeping Ivy", "art": "flora"},
+    # The fall garden (decor set 4, part 1; docs/features/fall-garden-and-porch.md), sculpted as the graveyard flora is
+    # (tools/fall_garden_flora.py). The wild ones grow in vanilla's biomes; the ornamental cabbages and the dried
+    # sunflower are garden plants, made from what they come from (tools/fall_garden.py).
+    "aster": {"kind": "flower", "display": "New England Aster", "dye": "purple", "effect": "minecraft:luck", "seconds": 6.0,
+              "art": "flora", "patch": {"biomes": ["IS_PLAINS", "IS_FOREST"], "rarity": 12, "tries": 24}},
+    "sedum": {"kind": "flower", "display": "Autumn Stonecrop", "dye": "pink", "effect": "minecraft:resistance", "seconds": 4.0,
+              "art": "flora", "patch": {"biomes": ["IS_PLAINS"], "rarity": 14, "tries": 20}},
+    "ornamental_kale": {"kind": "flower", "display": "Ornamental Kale", "dye": "magenta", "effect": "minecraft:haste", "seconds": 5.0,
+                        "art": "flora"},
+    "ornamental_cabbage": {"kind": "flower", "display": "Ornamental Cabbage", "dye": "white", "effect": "minecraft:jump_boost",
+                           "seconds": 5.0, "art": "flora"},
+    "pampas_grass": {"kind": "tall_flower", "display": "Pampas Grass", "dye": "white", "art": "flora",
+                     "patch": {"biomes": ["IS_PLAINS"], "rarity": 16, "tries": 16}},
+    "dried_sunflower": {"kind": "tall_plant", "display": "Dried Sunflower", "art": "flora"},
+    "bittersweet": {"kind": "vine", "display": "Bittersweet", "art": "flora",
+                    "patch": {"biomes": ["IS_FOREST"], "rarity": 16, "tries": 16}},
 }
 KINDS = ("flower", "tall_flower", "flowerbed", "tall_plant", "dune_plant", "floor_plant", "water_plant", "surface", "grass", "tall_grass",
          "hanging", "vine")

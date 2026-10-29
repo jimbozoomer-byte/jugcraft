@@ -1,0 +1,49 @@
+{
+  "variants": {
+    "facing=north,runner=0": {
+      "model": "jugcraft:block/crashed_witch"
+    },
+    "facing=north,runner=1": {
+      "model": "jugcraft:block/crashed_witch_left_leg"
+    },
+    "facing=north,runner=2": {
+      "model": "jugcraft:block/crashed_witch_right_leg"
+    },
+    "facing=east,runner=0": {
+      "model": "jugcraft:block/crashed_witch",
+      "y": 90
+    },
+    "facing=east,runner=1": {
+      "model": "jugcraft:block/crashed_witch_left_leg",
+      "y": 90
+    },
+    "facing=east,runner=2": {
+      "model": "jugcraft:block/crashed_witch_right_leg",
+      "y": 90
+    },
+    "facing=south,runner=0": {
+      "model": "jugcraft:block/crashed_witch",
+      "y": 180
+    },
+    "facing=south,runner=1": {
+      "model": "jugcraft:block/crashed_witch_left_leg",
+      "y": 180
+    },
+    "facing=south,runner=2": {
+      "model": "jugcraft:block/crashed_witch_right_leg",
+      "y": 180
+    },
+    "facing=west,runner=0": {
+      "model": "jugcraft:block/crashed_witch",
+      "y": 270
+    },
+    "facing=west,runner=1": {
+      "model": "jugcraft:block/crashed_witch_left_leg",
+      "y": 270
+    },
+    "facing=west,runner=2": {
+      "model": "jugcraft:block/crashed_witch_right_leg",
+      "y": 270
+    }
+  }
+}

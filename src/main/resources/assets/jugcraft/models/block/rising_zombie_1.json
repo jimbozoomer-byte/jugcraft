@@ -1,0 +1,9 @@
+{
+  "parent": "minecraft:block/block",
+  "ambientocclusion": false,
+  "textures": {
+    "p": "jugcraft:block/rising_zombie",
+    "particle": "jugcraft:block/rising_zombie"
+  },
+  "elements": []
+}

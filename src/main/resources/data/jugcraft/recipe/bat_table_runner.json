@@ -1,0 +1,21 @@
+{
+  "fabric:load_conditions": [
+    {
+      "condition": "jugcraft:feature_enabled",
+      "feature": "agriculture"
+    }
+  ],
+  "type": "minecraft:crafting_shaped",
+  "category": "building",
+  "pattern": [
+    "KOK"
+  ],
+  "key": {
+    "K": "minecraft:black_carpet",
+    "O": "minecraft:orange_dye"
+  },
+  "result": {
+    "id": "jugcraft:bat_table_runner",
+    "count": 2
+  }
+}

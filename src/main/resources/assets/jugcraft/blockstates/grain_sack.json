@@ -1,0 +1,49 @@
+{
+  "variants": {
+    "facing=north,sacks=1": {
+      "model": "jugcraft:block/grain_sack_1"
+    },
+    "facing=east,sacks=1": {
+      "model": "jugcraft:block/grain_sack_1",
+      "y": 90
+    },
+    "facing=south,sacks=1": {
+      "model": "jugcraft:block/grain_sack_1",
+      "y": 180
+    },
+    "facing=west,sacks=1": {
+      "model": "jugcraft:block/grain_sack_1",
+      "y": 270
+    },
+    "facing=north,sacks=2": {
+      "model": "jugcraft:block/grain_sack_2"
+    },
+    "facing=east,sacks=2": {
+      "model": "jugcraft:block/grain_sack_2",
+      "y": 90
+    },
+    "facing=south,sacks=2": {
+      "model": "jugcraft:block/grain_sack_2",
+      "y": 180
+    },
+    "facing=west,sacks=2": {
+      "model": "jugcraft:block/grain_sack_2",
+      "y": 270
+    },
+    "facing=north,sacks=3": {
+      "model": "jugcraft:block/grain_sack_3"
+    },
+    "facing=east,sacks=3": {
+      "model": "jugcraft:block/grain_sack_3",
+      "y": 90
+    },
+    "facing=south,sacks=3": {
+      "model": "jugcraft:block/grain_sack_3",
+      "y": 180
+    },
+    "facing=west,sacks=3": {
+      "model": "jugcraft:block/grain_sack_3",
+      "y": 270
+    }
+  }
+}

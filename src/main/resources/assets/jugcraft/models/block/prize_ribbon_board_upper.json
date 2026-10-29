@@ -1,0 +1,7 @@
+{
+  "parent": "minecraft:block/block",
+  "textures": {
+    "particle": "jugcraft:block/prize_ribbon_board"
+  },
+  "elements": []
+}

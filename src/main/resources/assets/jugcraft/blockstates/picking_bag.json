@@ -1,0 +1,94 @@
+{
+  "variants": {
+    "facing=north,fill=0,fruit=apple": {
+      "model": "jugcraft:block/picking_bag"
+    },
+    "facing=north,fill=1,fruit=apple": {
+      "model": "jugcraft:block/picking_bag_apple_1"
+    },
+    "facing=north,fill=2,fruit=apple": {
+      "model": "jugcraft:block/picking_bag_apple_2"
+    },
+    "facing=north,fill=0,fruit=pear": {
+      "model": "jugcraft:block/picking_bag"
+    },
+    "facing=north,fill=1,fruit=pear": {
+      "model": "jugcraft:block/picking_bag_pear_1"
+    },
+    "facing=north,fill=2,fruit=pear": {
+      "model": "jugcraft:block/picking_bag_pear_2"
+    },
+    "facing=east,fill=0,fruit=apple": {
+      "model": "jugcraft:block/picking_bag",
+      "y": 90
+    },
+    "facing=east,fill=1,fruit=apple": {
+      "model": "jugcraft:block/picking_bag_apple_1",
+      "y": 90
+    },
+    "facing=east,fill=2,fruit=apple": {
+      "model": "jugcraft:block/picking_bag_apple_2",
+      "y": 90
+    },
+    "facing=east,fill=0,fruit=pear": {
+      "model": "jugcraft:block/picking_bag",
+      "y": 90
+    },
+    "facing=east,fill=1,fruit=pear": {
+      "model": "jugcraft:block/picking_bag_pear_1",
+      "y": 90
+    },
+    "facing=east,fill=2,fruit=pear": {
+      "model": "jugcraft:block/picking_bag_pear_2",
+      "y": 90
+    },
+    "facing=south,fill=0,fruit=apple": {
+      "model": "jugcraft:block/picking_bag",
+      "y": 180
+    },
+    "facing=south,fill=1,fruit=apple": {
+      "model": "jugcraft:block/picking_bag_apple_1",
+      "y": 180
+    },
+    "facing=south,fill=2,fruit=apple": {
+      "model": "jugcraft:block/picking_bag_apple_2",
+      "y": 180
+    },
+    "facing=south,fill=0,fruit=pear": {
+      "model": "jugcraft:block/picking_bag",
+      "y": 180
+    },
+    "facing=south,fill=1,fruit=pear": {
+      "model": "jugcraft:block/picking_bag_pear_1",
+      "y": 180
+    },
+    "facing=south,fill=2,fruit=pear": {
+      "model": "jugcraft:block/picking_bag_pear_2",
+      "y": 180
+    },
+    "facing=west,fill=0,fruit=apple": {
+      "model": "jugcraft:block/picking_bag",
+      "y": 270
+    },
+    "facing=west,fill=1,fruit=apple": {
+      "model": "jugcraft:block/picking_bag_apple_1",
+      "y": 270
+    },
+    "facing=west,fill=2,fruit=apple": {
+      "model": "jugcraft:block/picking_bag_apple_2",
+      "y": 270
+    },
+    "facing=west,fill=0,fruit=pear": {
+      "model": "jugcraft:block/picking_bag",
+      "y": 270
+    },
+    "facing=west,fill=1,fruit=pear": {
+      "model": "jugcraft:block/picking_bag_pear_1",
+      "y": 270
+    },
+    "facing=west,fill=2,fruit=pear": {
+      "model": "jugcraft:block/picking_bag_pear_2",
+      "y": 270
+    }
+  }
+}

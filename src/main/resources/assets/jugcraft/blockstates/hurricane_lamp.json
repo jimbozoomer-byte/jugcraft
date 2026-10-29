@@ -1,0 +1,117 @@
+{
+  "multipart": [
+    {
+      "when": {
+        "facing": "north"
+      },
+      "apply": {
+        "model": "jugcraft:block/hurricane_lamp"
+      }
+    },
+    {
+      "when": {
+        "facing": "north",
+        "lit": "false"
+      },
+      "apply": {
+        "model": "jugcraft:block/hurricane_lamp_chimney"
+      }
+    },
+    {
+      "when": {
+        "facing": "north",
+        "lit": "true"
+      },
+      "apply": {
+        "model": "jugcraft:block/hurricane_lamp_chimney_lit"
+      }
+    },
+    {
+      "when": {
+        "facing": "east"
+      },
+      "apply": {
+        "model": "jugcraft:block/hurricane_lamp",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "facing": "east",
+        "lit": "false"
+      },
+      "apply": {
+        "model": "jugcraft:block/hurricane_lamp_chimney",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "facing": "east",
+        "lit": "true"
+      },
+      "apply": {
+        "model": "jugcraft:block/hurricane_lamp_chimney_lit",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "facing": "south"
+      },
+      "apply": {
+        "model": "jugcraft:block/hurricane_lamp",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "facing": "south",
+        "lit": "false"
+      },
+      "apply": {
+        "model": "jugcraft:block/hurricane_lamp_chimney",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "facing": "south",
+        "lit": "true"
+      },
+      "apply": {
+        "model": "jugcraft:block/hurricane_lamp_chimney_lit",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "facing": "west"
+      },
+      "apply": {
+        "model": "jugcraft:block/hurricane_lamp",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "facing": "west",
+        "lit": "false"
+      },
+      "apply": {
+        "model": "jugcraft:block/hurricane_lamp_chimney",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "facing": "west",
+        "lit": "true"
+      },
+      "apply": {
+        "model": "jugcraft:block/hurricane_lamp_chimney_lit",
+        "y": 270
+      }
+    }
+  ]
+}

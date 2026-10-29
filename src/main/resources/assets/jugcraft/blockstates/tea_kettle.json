@@ -1,0 +1,64 @@
+{
+  "variants": {
+    "facing=north,heated=false,runner=false": {
+      "model": "jugcraft:block/tea_kettle"
+    },
+    "facing=north,heated=false,runner=true": {
+      "model": "jugcraft:block/tea_kettle_lid"
+    },
+    "facing=north,heated=true,runner=false": {
+      "model": "jugcraft:block/tea_kettle"
+    },
+    "facing=north,heated=true,runner=true": {
+      "model": "jugcraft:block/tea_kettle_lid"
+    },
+    "facing=east,heated=false,runner=false": {
+      "model": "jugcraft:block/tea_kettle",
+      "y": 90
+    },
+    "facing=east,heated=false,runner=true": {
+      "model": "jugcraft:block/tea_kettle_lid",
+      "y": 90
+    },
+    "facing=east,heated=true,runner=false": {
+      "model": "jugcraft:block/tea_kettle",
+      "y": 90
+    },
+    "facing=east,heated=true,runner=true": {
+      "model": "jugcraft:block/tea_kettle_lid",
+      "y": 90
+    },
+    "facing=south,heated=false,runner=false": {
+      "model": "jugcraft:block/tea_kettle",
+      "y": 180
+    },
+    "facing=south,heated=false,runner=true": {
+      "model": "jugcraft:block/tea_kettle_lid",
+      "y": 180
+    },
+    "facing=south,heated=true,runner=false": {
+      "model": "jugcraft:block/tea_kettle",
+      "y": 180
+    },
+    "facing=south,heated=true,runner=true": {
+      "model": "jugcraft:block/tea_kettle_lid",
+      "y": 180
+    },
+    "facing=west,heated=false,runner=false": {
+      "model": "jugcraft:block/tea_kettle",
+      "y": 270
+    },
+    "facing=west,heated=false,runner=true": {
+      "model": "jugcraft:block/tea_kettle_lid",
+      "y": 270
+    },
+    "facing=west,heated=true,runner=false": {
+      "model": "jugcraft:block/tea_kettle",
+      "y": 270
+    },
+    "facing=west,heated=true,runner=true": {
+      "model": "jugcraft:block/tea_kettle_lid",
+      "y": 270
+    }
+  }
+}

@@ -1,0 +1,317 @@
+{
+  "multipart": [
+    {
+      "when": {
+        "facing": "north",
+        "part": "0",
+        "runner": "false"
+      },
+      "apply": {
+        "model": "jugcraft:block/cotton_candy_cart_0"
+      }
+    },
+    {
+      "when": {
+        "facing": "north",
+        "part": "0",
+        "runner": "false",
+        "lit": "true"
+      },
+      "apply": {
+        "model": "jugcraft:block/cotton_candy_cart_0_heater"
+      }
+    },
+    {
+      "when": {
+        "facing": "north",
+        "part": "0",
+        "runner": "false",
+        "floss": "1"
+      },
+      "apply": {
+        "model": "jugcraft:block/cotton_candy_cart_0_floss1"
+      }
+    },
+    {
+      "when": {
+        "facing": "north",
+        "part": "0",
+        "runner": "false",
+        "floss": "2"
+      },
+      "apply": {
+        "model": "jugcraft:block/cotton_candy_cart_0_floss2"
+      }
+    },
+    {
+      "when": {
+        "facing": "north",
+        "part": "0",
+        "runner": "false",
+        "floss": "3"
+      },
+      "apply": {
+        "model": "jugcraft:block/cotton_candy_cart_0_floss3"
+      }
+    },
+    {
+      "when": {
+        "facing": "north",
+        "part": "1",
+        "runner": "false"
+      },
+      "apply": {
+        "model": "jugcraft:block/cotton_candy_cart_1"
+      }
+    },
+    {
+      "when": {
+        "facing": "north",
+        "runner": "true"
+      },
+      "apply": {
+        "model": "jugcraft:block/cotton_candy_cart_head"
+      }
+    },
+    {
+      "when": {
+        "facing": "east",
+        "part": "0",
+        "runner": "false"
+      },
+      "apply": {
+        "model": "jugcraft:block/cotton_candy_cart_0",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "facing": "east",
+        "part": "0",
+        "runner": "false",
+        "lit": "true"
+      },
+      "apply": {
+        "model": "jugcraft:block/cotton_candy_cart_0_heater",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "facing": "east",
+        "part": "0",
+        "runner": "false",
+        "floss": "1"
+      },
+      "apply": {
+        "model": "jugcraft:block/cotton_candy_cart_0_floss1",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "facing": "east",
+        "part": "0",
+        "runner": "false",
+        "floss": "2"
+      },
+      "apply": {
+        "model": "jugcraft:block/cotton_candy_cart_0_floss2",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "facing": "east",
+        "part": "0",
+        "runner": "false",
+        "floss": "3"
+      },
+      "apply": {
+        "model": "jugcraft:block/cotton_candy_cart_0_floss3",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "facing": "east",
+        "part": "1",
+        "runner": "false"
+      },
+      "apply": {
+        "model": "jugcraft:block/cotton_candy_cart_1",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "facing": "east",
+        "runner": "true"
+      },
+      "apply": {
+        "model": "jugcraft:block/cotton_candy_cart_head",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "facing": "south",
+        "part": "0",
+        "runner": "false"
+      },
+      "apply": {
+        "model": "jugcraft:block/cotton_candy_cart_0",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "facing": "south",
+        "part": "0",
+        "runner": "false",
+        "lit": "true"
+      },
+      "apply": {
+        "model": "jugcraft:block/cotton_candy_cart_0_heater",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "facing": "south",
+        "part": "0",
+        "runner": "false",
+        "floss": "1"
+      },
+      "apply": {
+        "model": "jugcraft:block/cotton_candy_cart_0_floss1",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "facing": "south",
+        "part": "0",
+        "runner": "false",
+        "floss": "2"
+      },
+      "apply": {
+        "model": "jugcraft:block/cotton_candy_cart_0_floss2",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "facing": "south",
+        "part": "0",
+        "runner": "false",
+        "floss": "3"
+      },
+      "apply": {
+        "model": "jugcraft:block/cotton_candy_cart_0_floss3",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "facing": "south",
+        "part": "1",
+        "runner": "false"
+      },
+      "apply": {
+        "model": "jugcraft:block/cotton_candy_cart_1",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "facing": "south",
+        "runner": "true"
+      },
+      "apply": {
+        "model": "jugcraft:block/cotton_candy_cart_head",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "facing": "west",
+        "part": "0",
+        "runner": "false"
+      },
+      "apply": {
+        "model": "jugcraft:block/cotton_candy_cart_0",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "facing": "west",
+        "part": "0",
+        "runner": "false",
+        "lit": "true"
+      },
+      "apply": {
+        "model": "jugcraft:block/cotton_candy_cart_0_heater",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "facing": "west",
+        "part": "0",
+        "runner": "false",
+        "floss": "1"
+      },
+      "apply": {
+        "model": "jugcraft:block/cotton_candy_cart_0_floss1",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "facing": "west",
+        "part": "0",
+        "runner": "false",
+        "floss": "2"
+      },
+      "apply": {
+        "model": "jugcraft:block/cotton_candy_cart_0_floss2",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "facing": "west",
+        "part": "0",
+        "runner": "false",
+        "floss": "3"
+      },
+      "apply": {
+        "model": "jugcraft:block/cotton_candy_cart_0_floss3",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "facing": "west",
+        "part": "1",
+        "runner": "false"
+      },
+      "apply": {
+        "model": "jugcraft:block/cotton_candy_cart_1",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "facing": "west",
+        "runner": "true"
+      },
+      "apply": {
+        "model": "jugcraft:block/cotton_candy_cart_head",
+        "y": 270
+      }
+    }
+  ]
+}

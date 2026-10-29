@@ -1,0 +1,9 @@
+{
+  "parent": "minecraft:block/block",
+  "ambientocclusion": false,
+  "textures": {
+    "p": "jugcraft:block/porch_swing",
+    "particle": "jugcraft:block/porch_swing"
+  },
+  "elements": []
+}

@@ -1,0 +1,23 @@
+{
+  "fabric:load_conditions": [
+    {
+      "condition": "jugcraft:feature_enabled",
+      "feature": "agriculture"
+    }
+  ],
+  "type": "minecraft:crafting_shaped",
+  "category": "building",
+  "pattern": [
+    "NBN",
+    " N ",
+    "NNN"
+  ],
+  "key": {
+    "N": "minecraft:iron_nugget",
+    "B": "minecraft:black_dye"
+  },
+  "result": {
+    "id": "jugcraft:spider_cupcake_tower",
+    "count": 1
+  }
+}

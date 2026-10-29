@@ -1,0 +1,23 @@
+{
+  "fabric:load_conditions": [
+    {
+      "condition": "jugcraft:feature_enabled",
+      "feature": "agriculture"
+    }
+  ],
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    "BB",
+    "BJ",
+    "B "
+  ],
+  "key": {
+    "B": "minecraft:iron_bars",
+    "J": "minecraft:jack_o_lantern"
+  },
+  "result": {
+    "id": "jugcraft:pumpkin_path_light",
+    "count": 2
+  }
+}

@@ -109,6 +109,21 @@ public abstract class MultiDecorationBlock extends Block {
 		return out;
 	}
 
+	/** The part shapes of a prop made of several boxes {x0, y0, z0, x1, y1, z1} in its frame, each part's pieces joined. */
+	protected static Map<Direction, VoxelShape[]> shapesOf(int[][] cells, double[]... boxes) {
+		Map<Direction, VoxelShape[]> out = partShapes(boxes[0], cells);
+		for (int i = 1; i < boxes.length; i++) {
+			Map<Direction, VoxelShape[]> more = partShapes(boxes[i], cells);
+			for (Map.Entry<Direction, VoxelShape[]> entry : out.entrySet()) {
+				VoxelShape[] shapes = entry.getValue();
+				for (int part = 0; part < shapes.length; part++) {
+					shapes[part] = Shapes.or(shapes[part], more.get(entry.getKey())[part]);
+				}
+			}
+		}
+		return out;
+	}
+
 	/**
 	 * Each part's shape, for each facing, of a prop of {@code cells} (as {@link #cells} gives them) whose whole box is
 	 * {@code whole} ({x0, y0, z0, x1, y1, z1} in pixels in its frame, facing north: x across to the placer's left from

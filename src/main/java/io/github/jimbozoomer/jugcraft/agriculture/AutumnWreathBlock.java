@@ -37,7 +37,9 @@ import org.jspecify.annotations.Nullable;
 /**
  * The Autumn Wreath: chestnut leaves wound into a ring with ears of ornamental corn and a spray of mums. It hangs on
  * the side of a block or on a door, facing out, and falls if what holds it goes. Use a mum on it to swap its flowers
- * for that colour ({@link #FLOWERS}); the mum is used.
+ * for that colour ({@link #FLOWERS}); the mum is used. The other things hung the same way (the Holly and Bat Wreaths and
+ * the Gargoyle Door Knocker) are kinds of it, saying by {@link #takesMums}, {@link #doorBox}, {@link #useOnDoor} and
+ * {@link #doorTick} how they differ on a door ({@link DoorWreath}).
  */
 public class AutumnWreathBlock extends Block {
 	public static final EnumProperty<Direction> FACING = HorizontalDirectionalBlock.FACING;
@@ -80,6 +82,28 @@ public class AutumnWreathBlock extends Block {
 	@Override
 	protected VoxelShape getShape(BlockState state, BlockGetter level, BlockPos pos, CollisionContext context) {
 		return SHAPES.get(state.getValue(FACING));
+	}
+
+	/** Whether a mum swaps its flowers, as on this wreath; the others are dressed for good. */
+	public boolean takesMums() {
+		return true;
+	}
+
+	/** Its box on a door, in pixels: half its width across the door, and its foot and top. */
+	public double[] doorBox() {
+		return new double[] {7.0, 0.5, 15.0};
+	}
+
+	/**
+	 * Used on a door it hangs on ({@code ornament}), by {@code player}'s {@code hand} (after a mum, which only
+	 * {@link #takesMums} wreaths take): {@link InteractionResult#PASS} lets the use open the door, as a wreath does.
+	 */
+	public InteractionResult useOnDoor(DoorWreath ornament, Player player, InteractionHand hand) {
+		return InteractionResult.PASS;
+	}
+
+	/** Each server tick it hangs on a door ({@code ornament}): nothing, for a wreath. */
+	public void doorTick(ServerLevel level, DoorWreath ornament) {
 	}
 
 	/** It needs a sturdy side behind it, or a door. */

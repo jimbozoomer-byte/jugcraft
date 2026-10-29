@@ -1,0 +1,128 @@
+{
+  "parent": "minecraft:block/block",
+  "ambientocclusion": false,
+  "textures": {
+    "p": "jugcraft:block/popcorn_wagon",
+    "particle": "jugcraft:block/popcorn_wagon"
+  },
+  "elements": [
+    {
+      "from": [
+        2.5,
+        0,
+        4.25
+      ],
+      "to": [
+        13.5,
+        0.95,
+        11.75
+      ],
+      "faces": {
+        "north": {
+          "uv": [
+            7.125,
+            1.5,
+            8.5,
+            1.6484
+          ],
+          "texture": "#p"
+        },
+        "south": {
+          "uv": [
+            7.125,
+            1.5,
+            8.5,
+            1.6484
+          ],
+          "texture": "#p"
+        },
+        "east": {
+          "uv": [
+            9.875,
+            1.5,
+            10.875,
+            1.6484
+          ],
+          "texture": "#p"
+        },
+        "west": {
+          "uv": [
+            9.875,
+            1.5,
+            10.875,
+            1.6484
+          ],
+          "texture": "#p"
+        },
+        "up": {
+          "uv": [
+            1.625,
+            1.5,
+            3.0,
+            2.5
+          ],
+          "texture": "#p"
+        }
+      }
+    },
+    {
+      "from": [
+        4.5,
+        0.95,
+        5.75
+      ],
+      "to": [
+        11.5,
+        1.85,
+        10.25
+      ],
+      "faces": {
+        "north": {
+          "uv": [
+            14.5,
+            3.25,
+            15.375,
+            3.375
+          ],
+          "texture": "#p"
+        },
+        "south": {
+          "uv": [
+            14.5,
+            3.25,
+            15.375,
+            3.375
+          ],
+          "texture": "#p"
+        },
+        "east": {
+          "uv": [
+            3.5,
+            3.5,
+            4.125,
+            3.625
+          ],
+          "texture": "#p"
+        },
+        "west": {
+          "uv": [
+            3.5,
+            3.5,
+            4.125,
+            3.625
+          ],
+          "texture": "#p"
+        },
+        "up": {
+          "uv": [
+            5.5,
+            1.5,
+            6.375,
+            2.125
+          ],
+          "texture": "#p"
+        }
+      }
+    }
+  ]
+}
