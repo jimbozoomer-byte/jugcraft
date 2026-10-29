@@ -1334,3 +1334,11 @@ GARDEN_CLIENT_SHOTS += ["jugcraft_garden_foras_no_store", "jugcraft_garden_foras
                         "jugcraft_garden_foras_counted", "jugcraft_garden_foras_end_confirm", "jugcraft_garden_foras_ended"]
 # GC-08 unit 5
 # GC-09 unit 6
+# ---------------------------------------------------------------------------------------- garden cohort, GC-09: Amdusias
+# GC-09 (GC-P126): a work whose quota caps what it holds at once, counting nothing it does, has its own words for it on
+# the terms page (its service's PactService.quotaTerm, "term.quota." + its work): pact.term.quota.<work> under
+# message.jugcraft.concordance., one %s (the quota), never a day's count. Its term chip's glance is tools/magic_ui.py's
+# GLANCES "pact.term.quota.<work>" (the restyled chips draw no label of their own). Every other work keeps the shared
+# "term.quota" ("%s a game day").
+QUOTA_TERMS = {}
+MESSAGES.update({f"pact.term.quota.{work}": words for work, words in QUOTA_TERMS.items()})

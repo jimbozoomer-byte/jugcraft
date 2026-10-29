@@ -1595,6 +1595,8 @@ def problems(lang=None, load=None, read=read_library):
     sent += [k for k in pacts.MESSAGES if k.startswith(("pact.row.", "pact.missing.", "pact.answer.", "pact.reckoning."))]
     sent += [k for k in garden.MESSAGES if k.startswith("garden_pact.obligation")]
     sent += list(ANSWERS)
+    # GC-09 (GC-P126): a work whose quota is a cap words it in its own term (tools/concordance_pacts.py QUOTA_TERMS).
+    sent += [f"pact.term.quota.{work}" for work in pacts.QUOTA_TERMS]
     for work, words in pacts.SERVICE_WORDS.items():
         if work not in WORK_GLANCES:
             out.append(f"{work}: no WORK_GLANCES row in tools/magic_ui.py (its service line, rows, blockers and card)")
@@ -1625,6 +1627,12 @@ def problems(lang=None, load=None, read=read_library):
             if suffix == "" and pattern != "%1$s/%2$s today":
                 out.append(f"pact.{work}.row.service: {pattern!r}, but the gauge draws \"%1$s/%2$s today\" (done, then the "
                            "day's quota) and nothing else")
+    # GC-09 (GC-P126): a quota that caps what a work holds at once is never worded as a day's count, in its term
+    # (tools/concordance_pacts.py QUOTA_TERMS) or its chip's glance.
+    for work, words in pacts.QUOTA_TERMS.items():
+        said = [words] + [expected for *_, expected, _ in GLANCES.get(f"pact.term.quota.{work}", ())]
+        if any(re.search(r"\b(?:to)?days?\b", text, re.I) for text in said):
+            out.append(f"pact.term.quota.{work}: a quota that caps what it holds at once never counts by the day: {said}")
     for kind, text, name in ICON_RULES:
         if kind not in ("prefix", "suffix", "exact", "contains") or not (
                 name == "work" or name.startswith("glyph:") and name[6:] in GLYPHS

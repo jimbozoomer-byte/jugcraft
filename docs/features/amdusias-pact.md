@@ -9,8 +9,9 @@ service changes no block, item or saved value: a crop under his canopy only read
 in memory that lapses when he stops.
 
 Status: brief (GC-09a), committed before any of his body files (D-D5), as the contract's per-spirit template asks, then
-the canopy's pure rule and the garden's memory of canopies (GC-09b, [below](#the-canopys-shelter-gc-09b)) with no user
-yet: nothing a player sees changes while no canopy exists. Nothing of Amdusias himself is built yet: no entity, pact
+the canopy's pure rule and the garden's memory of canopies (GC-09b, [below](#the-canopys-shelter-gc-09b)) and a cue a
+beat late and a quota worded as a cap (GC-09d, [below](#a-cue-a-beat-late-and-a-quota-worded-as-a-cap-gc-09d)), each
+with no user yet: nothing a player sees changes while no canopy exists and no spirit holds a cue or words its quota. Nothing of Amdusias himself is built yet: no entity, pact
 definition, service, sound event, body file, or audit or test of his own. This page holds his character (the contract's Dossier 6), the short words the magic screens are to draw for him
 and the owner files his body and cues are to use; the runtime files and builders it names are what GC-09 is to build.
 Where it goes beyond Dossier 6 (the amended greeting and its stage direction, the canopy's rule and registry, how his
@@ -164,8 +165,9 @@ Two of these depart from the unit's design and one from the shared rule; GC-09 s
 
 - **The quota's words.** The design gave the terms page a label ("Beds at once") beside the quota's sentence and a
   `PactScreen` change to draw it. The restyled terms page draws chips with no labels (the style's 1.1), so the server
-  still names its own quota sentence (`PactService.quotaTerm`, GC-P126) and the chip draws its glance; no screen code
-  changes, and the label key is not added.
+  still names its own quota sentence (`PactService.quotaTerm`, GC-P126) and the chip draws its glance; the label key is
+  not added. The one screen change, shared and made before him (GC-09d), is the chip's picture: a calendar only for
+  the shared daily count.
 - **The gauge's word.** `check_magic_ui` holds every work's `row.service` glance to "%1$s/%2$s today", the day's
   quota. His counts beds sheltered now, and "3/16 today" would say the daily count his terms deny (the contract: "never
   as a daily count"). Proposed: "%1$s/%2$s now", with that rule taking "now" for a work whose quota is a cap
@@ -349,6 +351,47 @@ holders and positions, since the canopies of every test beside it share the leve
   the raising ones a Gloamcap's). In 69,120 of the raising ones the reading is 0 and the area must rise further than the
   step named (above).
 
+## A cue a beat late and a quota worded as a cap (GC-09d)
+
+What GC-09d builds, before any spirit uses it (GC-P126, GC-P127, with the unit critique's items 1 and 16). No spirit
+holds a cue and no service words its own quota yet, so every cue sounds with its gesture and every terms page reads as
+it did.
+
+- **A cue a beat late** (`PactSpiritEntity`): a spirit may hold a cue's sound for a beat after its gesture
+  (`cueBeat(id)`, 0 by default; Amdusias's horn is to be its first). A held cue is noted, subtitled and gestured at once,
+  bounded as every cue is; its sound plays when its beat comes, from the spirit's own server tick, where it then stands
+  (a positional sound with the same event and subtitle, so it is heard though a departing body has gone), departing or
+  not; a clock run back sounds it at once; the first one waiting keeps its time. Switched off meanwhile, a held cue is
+  dropped unsounded, but for a departure's, as no cue shows while the Concordance is off but the departure (the
+  critique's item 16). When each cue's sound last played is kept for the tests (`soundedAt`, `Long.MIN_VALUE` before
+  any). Every other cue's sound still plays at the spirit with its gesture, as D-06's audit holds. Nothing of it is saved.
+- **A quota worded as a cap** (`PactService.quotaTerm`, `PactMenu.service`): the terms page's quota is its service's own
+  sentence, `term.quota` ("%s a game day") by default and, for a service whose quota caps what it holds at once,
+  `term.quota.` + its work (`tools/concordance_pacts.py` `QUOTA_TERMS`, empty until his unit; a work this version does
+  not serve keeps the shared one). The restyled chip draws that sentence's glance (`tools/magic_ui.py` `GLANCES`
+  "pact.term.quota.<work>", which the module requires for every `QUOTA_TERMS` work) and keeps the sentence as its
+  message, narration and tip.
+
+Decided by the session (none is the owner's):
+
+- **A cap's chip draws its work's item, not the calendar.** The shared daily count keeps the calendar; a work's own
+  quota words, a cap held at once, draw that work's own item (its service line's, `PactGlance.workIcon`), so the chip
+  never pictures a day's count. This is the one screen change for the quota, made before him in shared code; his unit
+  then adds data only.
+- **No label.** `QUOTA_TERMS` holds only each work's sentence; the design's screen label and its `PactScreen.termLabel`
+  are not built (the restyled chips draw no labels).
+- **A held cue's time is kept only when it sounds.** `soundedAt` names when a sound played, so a held cue dropped while
+  the Concordance is off, or one with no registered sound, leaves it as it was (the design noted the time either way).
+- **The audits read each file once, without comments** (`check_pacts`' own `java(...)` reader, as the critique's item 1
+  asks, where the design called a reader that function does not have), and hold more than the design's: the on-time
+  branch keeps its time, the held branch sits before it in `cueing`, the switch is read before a held sound plays,
+  `soundedAt` reads the times kept, `PactMenu.quotaTerm` falls back to the shared count, only the shared count draws a
+  calendar, a service overriding `quotaTerm` in any other way is refused, `QUOTA_TERMS` names only works this version
+  serves, each of its sentences takes one `%s` and is generated with its chip's glance, and neither the sentence nor
+  the glance counts by the day (`tools/magic_ui.py`).
+- **The gauge's word is still open.** `check_magic_ui` holds every work's `row.service` gauge to "%1$s/%2$s today";
+  whether his reads "now" ([above](#his-words-on-the-magic-interfaces-gc-s26)) is settled with his words in his unit.
+
 ## Verification
 
 Nothing of Amdusias himself is built yet, so no build, game test, client shot or audit exercises him, and nothing of
@@ -361,6 +404,16 @@ also compiled with JDK 21 for the harnesses above); its two server tests have no
 short forms), `owner_art.py --check`, `tools/check_mod_data.py` (with `check_ecology`'s GC-09 block),
 `scripts/check_repository.py`, `concordance_journey.py --check`, `concordance_economy.py` (gaining cycles: none),
 `check_icon_maps.py`, `tools/magic_ui.py`, the world designer's model tests, `scripts/tests` and `git diff --check`.
+
+GC-09d: its Java was parse-checked only; no game test or client shot exercises it, and the regression it must leave
+(Stolas's, Buer's, Bathin's, Marax's and Foras's cues and terms pages unchanged) rests on their existing tests in CI,
+which have not run on it. The generators wrote nothing new (no lang key: `QUOTA_TERMS` is empty). Run and passed
+locally: the generators, `owner_art.py --check`, `tools/check_mod_data.py` (with `check_pacts`' GC-09 block),
+`scripts/check_repository.py`, `concordance_journey.py --check`, `concordance_economy.py` (gaining cycles: none),
+`check_icon_maps.py`, `tools/magic_ui.py`, the world designer's model tests, `scripts/tests` and `git diff --check`.
+Twenty audit mutations on a scratch copy (each of the held cue's and the quota's rules, the switch, the save, a
+quota worded by the day, a quota term with no service, override or glance) were each caught; a consistent cap (its
+sentence, its service's override, its glance and keys) passed as the control.
 
 For this brief only:
 

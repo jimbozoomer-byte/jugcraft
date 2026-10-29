@@ -83,6 +83,8 @@ import org.jspecify.annotations.Nullable;
  * <p>
  * Its cues: each gesture and its listening is fired by the server's action, once, with its sound (jugcraft:<spirit>.<cue>)
  * and subtitle, at most one of a kind every {@link #CUE_TICKS} and none while the Concordance is off but its departure.
+ * GC-09: a spirit may hold a cue's sound a beat after its gesture ({@link #cueBeat}); it is noted and gestured at once and
+ * sounds where the spirit stands when its beat comes (switched off meanwhile, only a departure's still sounds).
  * Saved: {@code perch} and {@code record}, here and nowhere else (a subclass saves nothing of its own).
  * <p>
  * GC-06: its station (on its perch, or beside it for a standing body) and its work target (synced, never saved) are here too.
@@ -182,6 +184,10 @@ public abstract class PactSpiritEntity<T extends PactSpiritEntity<T>> extends Wo
 	/** GC-02: what a service's step has it look at (a bed, a reservoir), and until when (game time); memory only, never saved. */
 	private @Nullable BlockPos working;
 	private long workingUntil;
+	/** GC-09 (GC-P127): each cue whose sound waits a beat after its gesture, with its gesture's game time; memory only, never saved. */
+	private final Map<String, Long> late = new HashMap<>(4);
+	/** GC-09: when each of its cues' sounds last played (game time); memory only, never saved (tests read it: soundedAt). */
+	private final Map<String, Long> sounded = new HashMap<>(8);
 	/**
 	 * Concordance garden cohort, GC-03: what this presence's service keeps between its thinks (a garden spirit's bed index
 	 * and what it remembers today), made the first time it is asked; never saved and lost with the entity, so nothing is owed
@@ -493,9 +499,11 @@ public abstract class PactSpiritEntity<T extends PactSpiritEntity<T>> extends Wo
 		gesture(body.depart());
 	}
 
-	/** Departing, it only waits for its going; otherwise it thinks as every worker does. */
+	/** A cue held a beat sounds when it comes (GC-09); departing, it only waits for its going; otherwise it thinks as every worker does. */
 	@Override
 	protected void customServerAiStep(ServerLevel level) {
+		// GC-09: a cue held a beat sounds on time, departing or not.
+		lateCues(level);
 		if (departAt != 0) {
 			departed(level.getGameTime());
 			return;
@@ -743,7 +751,8 @@ public abstract class PactSpiritEntity<T extends PactSpiritEntity<T>> extends Wo
 	/**
 	 * Whether cue {@code id} shows now; if so its sound plays at it (entity-attached, NEUTRAL, heard within 16 blocks:
 	 * sounds.json) and it is noted. Never while the Concordance is off, and at most one of a kind every CUE_TICKS, when
-	 * {@code bounded} (its departure is neither: it happens once, when it leaves).
+	 * {@code bounded} (its departure is neither: it happens once, when it leaves). GC-09: a cue its spirit holds a beat
+	 * ({@link #cueBeat}) is noted now and sounds when its beat comes, where the spirit then stands ({@link #lateCues}).
 	 */
 	private boolean cueing(ServerLevel level, String id, boolean bounded) {
 		int kind = body.cues().indexOf(id);
@@ -753,14 +762,60 @@ public abstract class PactSpiritEntity<T extends PactSpiritEntity<T>> extends Wo
 		}
 		cued[kind] = now;
 		SoundEvent sound = SOUNDS.get(body.spirit() + "." + id);
-		if (sound != null) {
+		if (cueBeat(id) > 0) {
+			// GC-09 (GC-P127): its sound waits a beat after the gesture (Amdusias's horn); the first one waiting keeps its time.
+			late.putIfAbsent(id, now);
+		} else if (sound != null) {
 			level.playSound(null, this, sound, SoundSource.NEUTRAL, 1.0F, 1.0F);
+			sounded.put(id, now);
 		}
 		shown.addLast(id);
 		while (shown.size() > SHOWN) {
 			shown.removeFirst();
 		}
 		return true;
+	}
+
+	/**
+	 * GC-09 (GC-P127): how many ticks after its gesture cue {@code id}'s sound plays: 0, with it (every spirit but Amdusias,
+	 * whose horn is heard a beat late). A subclass's beat is less than its departure's length (check_pacts), so a departing
+	 * spirit's late sound still plays.
+	 */
+	protected int cueBeat(String id) {
+		return 0;
+	}
+
+	/**
+	 * GC-09: sounds each held cue whose beat has come (or whose clock ran back), where it stands now: a positional sound, the
+	 * same event and subtitle, heard though its body has gone (Amdusias's horn after his departing bow). Switched off
+	 * meanwhile, a held cue is dropped unsounded, but for its departure's (as {@link #cueing} shows none but that while the
+	 * Concordance is off). At most its Body's cues a tick; nothing else follows from it.
+	 */
+	private void lateCues(ServerLevel level) {
+		if (late.isEmpty()) {
+			return;
+		}
+		long now = level.getGameTime();
+		late.entrySet().removeIf(cue -> {
+			if (!Workers.enabled() && !cue.getKey().equals(body.depart().id())) {
+				return true;
+			}
+			long since = now - cue.getValue();
+			if (since >= 0 && since < cueBeat(cue.getKey())) {
+				return false;
+			}
+			SoundEvent sound = SOUNDS.get(body.spirit() + "." + cue.getKey());
+			if (sound != null) {
+				level.playSound(null, getX(), getY(), getZ(), sound, SoundSource.NEUTRAL, 1.0F, 1.0F);
+				sounded.put(cue.getKey(), now);
+			}
+			return true;
+		});
+	}
+
+	/** GC-09: the game time cue {@code id}'s sound last played (a held one when its beat came), or Long.MIN_VALUE. Memory only. */
+	public long soundedAt(String id) {
+		return sounded.getOrDefault(id, Long.MIN_VALUE);
 	}
 
 	/**

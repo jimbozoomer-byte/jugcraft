@@ -21287,6 +21287,57 @@ def check_pacts(co, root, lang, registered, research):
                 err(f"{cls}: missing the garden cohort's GC-07 game test {name}")
     # GC-08 unit 5
     # GC-09 unit 6
+    # --- GC-09 (GC-P127): a cue a beat late. A spirit may hold a cue's sound (cueBeat, 0 by default): the cue is noted and
+    # gestured at once (D-06's needle above, StolasEntity.cueing, still holds every other cue's sound at the spirit), and its
+    # sound plays where the spirit stands when its beat comes, departing or not, dropped unsounded while the Concordance is
+    # off but for a departure's; nothing of it is saved. ---
+    cue_base = uncommented(java("spirits/PactSpiritEntity.java"))
+    cue_step = _java_body(cue_base, "protected void customServerAiStep(ServerLevel level)")
+    cue_late = _java_body(cue_base, "private void lateCues(ServerLevel level)")
+    cue_now = _java_body(cue_base, "private boolean cueing(")
+    cue_saved = _java_body(cue_base, "protected void addAdditionalSaveData(") + _java_body(cue_base, "protected void readAdditionalSaveData(")
+    held = [cue_now.find(needle) for needle in ("if (cueBeat(id) > 0) {", "late.putIfAbsent(id, now);", "} else if (sound != null) {",
+                                                "level.playSound(null, this, sound, SoundSource.NEUTRAL, 1.0F, 1.0F);", "sounded.put(id, now);")]
+    if not re.search(r"protected int cueBeat\(String id\) \{\s*return 0;\s*\}", cue_base) or -1 in held or held != sorted(held) \
+            or not 0 <= cue_step.find("lateCues(level);") < cue_step.find("if (departAt != 0)") \
+            or not 0 <= cue_late.find("if (!Workers.enabled() && !cue.getKey().equals(body.depart().id())) {") \
+            < cue_late.find("since < cueBeat(cue.getKey())") \
+            < cue_late.find("level.playSound(null, getX(), getY(), getZ(), sound, SoundSource.NEUTRAL, 1.0F, 1.0F);") \
+            < cue_late.find("sounded.put(cue.getKey(), now);") \
+            or "level.playSound(null, this," in cue_late \
+            or "return sounded.getOrDefault(id, Long.MIN_VALUE);" not in _java_body(cue_base, "public long soundedAt(String id)") \
+            or re.search(r"\blate\b|\bsounded\b", cue_saved):
+        err("PactSpiritEntity: a held cue (cueBeat, 0 by default) is noted and gestured at once and sounds its beat later where the "
+            "spirit stands, departing or not, never while the Concordance is off but a departure's; nothing of it saved (GC-P127)")
+    # --- GC-09 (GC-P126): the terms page's quota in its service's own words (PactService.quotaTerm): the shared daily count
+    # by default, a cap held at once in its work's own (tools/concordance_pacts.py QUOTA_TERMS), each a term chip whose glance
+    # is tools/magic_ui.py's; only the shared daily count draws a calendar. ---
+    import magic_ui as mu
+    menu_java = uncommented(java("spirits/PactMenu.java"))
+    quota_menu = _java_body(menu_java, "private static List<PactStatePayload.Term> service(")
+    quota_chip = _java_body(uncommented((CLIENT_JAVA_ROOT / "PactScreen.java").read_text(encoding="utf-8")), "private AbstractWidget chip(")
+    if not re.search(r'default String quotaTerm\(\) \{\s*return "term\.quota";\s*\}', uncommented(java("spirits/PactService.java"))) \
+            or "line(quotaTerm(work), quota)" not in quota_menu or 'line("term.quota"' in quota_menu \
+            or 'return service == null ? "term.quota" : service.quotaTerm();' not in _java_body(menu_java, "private static String quotaTerm(String work)") \
+            or not 0 <= quota_chip.find('if (server.equals("pact.term.quota")) {') < quota_chip.find("chip.glyph(MagicArt.Glyph.CALENDAR);") \
+            < quota_chip.find("PactGlance.workIcon(state.spirit().work(), state.spirit().sign())") \
+            or quota_chip.count("MagicArt.Glyph.CALENDAR") != 1:
+        err("The terms page: a service's quota in its own words (PactService.quotaTerm; PactMenu.service), its chip a calendar only "
+            "for the shared daily count, a cap's its work's own item (GC-P126)")
+    if not set(pa.QUOTA_TERMS) <= set(pa.SERVICE_CLASSES):
+        err(f"tools/concordance_pacts.py QUOTA_TERMS: only a work this version serves words its quota ({sorted(set(pa.QUOTA_TERMS) - set(pa.SERVICE_CLASSES))})")
+    for work, cls in pa.SERVICE_CLASSES.items():
+        source = uncommented(java(f"spirits/{cls}.java"))
+        named = re.search(r'public String quotaTerm\(\) \{\s*return "term\.quota\." \+ WORK;\s*\}', source)
+        if (work in pa.QUOTA_TERMS) != bool(named) or (re.search(r"\bString quotaTerm\(\)", source) and not named):
+            err(f"spirits/{cls}.java: quotaTerm is its own (\"term.quota.\" + WORK) exactly when tools/concordance_pacts.py "
+                "QUOTA_TERMS words its quota (GC-P126)")
+    for work, words in pa.QUOTA_TERMS.items():
+        key = f"pact.term.quota.{work}"
+        if words.count("%s") != 1 or "%" in words.replace("%s", "") or lang.get(f"message.jugcraft.concordance.{key}") != words \
+                or mu.glance_key(key) not in lang:
+            err(f"tools/concordance_pacts.py QUOTA_TERMS[{work!r}]: one %s (the quota), generated with its chip's glance "
+                f"{mu.glance_key(key)} (GC-P126)")
 
 
 def check_stolas_regard(co, root, lang, research):
