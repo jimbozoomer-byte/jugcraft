@@ -2675,6 +2675,7 @@
   "block.jugcraft.tool_rack": "Pitchfork and Rake Rack",
   "block.jugcraft.tortilla": "Tortilla",
   "block.jugcraft.tortilla_chip": "Tortilla Chip",
+  "block.jugcraft.town_commission_board": "City Commission Board",
   "block.jugcraft.training_screen": "Training Screen",
   "block.jugcraft.trampled_snow": "Trampled Snow",
   "block.jugcraft.transformer_casing": "Transformer Casing",
@@ -11927,6 +11928,7 @@
   "message.jugcraft.coffin.restless": "Nothing rests easy here",
   "message.jugcraft.coffin.unlocked": "Unlocked.",
   "message.jugcraft.coffin.wrong_key": "This key doesn't fit.",
+  "message.jugcraft.commission.unavailable": "This delivery or reward is unavailable. Check your items, progress and purse capacity.",
   "message.jugcraft.concordance.alchemy.added": "Added %s",
   "message.jugcraft.concordance.alchemy.applied": "Applied the salve",
   "message.jugcraft.concordance.alchemy.automation_busy": "The crucible is following a formula",
@@ -24145,7 +24147,5 @@
   "effect.jugcraft.jimtafacts_vigor": "Vigor",
   "effect.jugcraft.jimtafacts_echoing_strikes": "Echoing Strikes",
   "effect.jugcraft.jimtafacts_frostbitten_strikes": "Frostbite",
-  "entity.jugcraft.jimtafacts_spectral_steed": "Spectral Steed",
-  "block.jugcraft.town_commission_board": "City Commission Board",
-  "message.jugcraft.commission.unavailable": "This delivery or reward is unavailable. Check your items, progress and purse capacity."
+  "entity.jugcraft.jimtafacts_spectral_steed": "Spectral Steed"
 }

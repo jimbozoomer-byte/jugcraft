@@ -410,6 +410,7 @@
     "jugcraft:timber_shoring",
     "jugcraft:tomato_crate",
     "jugcraft:tool_rack",
+    "jugcraft:town_commission_board",
     "jugcraft:trebuchet",
     "jugcraft:tree_fern_trunk",
     "jugcraft:tree_tap",
@@ -444,7 +445,6 @@
     "peepo_companion:red_companion_bed",
     "peepo_companion:white_companion_bed",
     "peepo_companion:wooden_stool",
-    "peepo_companion:yellow_companion_bed",
-    "jugcraft:town_commission_board"
+    "peepo_companion:yellow_companion_bed"
   ]
 }
