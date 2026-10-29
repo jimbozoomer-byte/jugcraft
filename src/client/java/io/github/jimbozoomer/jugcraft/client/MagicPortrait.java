@@ -1,5 +1,6 @@
 package io.github.jimbozoomer.jugcraft.client;
 
+import io.github.jimbozoomer.jugcraft.concordance.spirits.PactSpiritEntity;
 import io.github.jimbozoomer.jugcraft.concordance.spirits.PactSpirits;
 import java.util.List;
 import net.minecraft.client.Minecraft;
@@ -23,7 +24,8 @@ import org.jspecify.annotations.Nullable;
  * the creature drawn inside it, facing the reader. While a spirit visits or keeps the perch it is the real one standing
  * there ({@link #atPerch}: ticked by the world, playing its real gestures); for the chooser and the roster it is
  * {@link MagicPortraits}' visual-only one; with neither, the spirit's sign item sits centred. A pact that has ended draws
- * its portrait greyed.
+ * its portrait greyed. A spirit still arriving is drawn as it will stand ({@link #shown}), so its window is never empty
+ * on its first beat.
  */
 final class MagicPortrait {
 	/** How far from the perch the real spirit is looked for: it stands on the perch, so a block or two. */
@@ -87,10 +89,28 @@ final class MagicPortrait {
 	private static final int GLOW = 0x60F2DCA8;
 
 	/**
-	 * The window at (x, y), w x h: the cosmos, then {@code creature} (or {@code sign}'s item when it is null), greyed when
-	 * {@code ended}.
+	 * What a portrait draws for {@code creature} (the unit 3 fixes, CI's pictures: Buer's and Marax's windows were empty on
+	 * their first beat): a pact spirit whose arrival this client still draws (PactSpiritRenderers.arriving; Marax grows from
+	 * nothing, Buer rises from a small bud) is drawn as it will stand, its visual-only portrait (MagicPortraits, playing its
+	 * idle pose), so the window shows the spirit whole whatever its arrival hides; the world draws the arrival as before,
+	 * and the window draws the real one again once it has arrived. Anything else is drawn as it is.
 	 */
-	static void draw(GuiGraphicsExtractor g, int x, int y, int w, int h, @Nullable LivingEntity creature, String sign, boolean ended) {
+	static @Nullable LivingEntity shown(@Nullable LivingEntity creature) {
+		if (creature instanceof PactSpiritEntity<?> spirit && PactSpiritRenderers.arriving(spirit)) {
+			LivingEntity standing = MagicPortraits.of(spirit.counterpart());
+			if (standing != null) {
+				return standing;
+			}
+		}
+		return creature;
+	}
+
+	/**
+	 * The window at (x, y), w x h: the cosmos, then {@code live} as {@link #shown} draws it (or {@code sign}'s item when it
+	 * is null), greyed when {@code ended}.
+	 */
+	static void draw(GuiGraphicsExtractor g, int x, int y, int w, int h, @Nullable LivingEntity live, String sign, boolean ended) {
+		LivingEntity creature = shown(live);
 		MagicArt.cosmosWindow(g, x, y, w, h);
 		// A warm glow rising behind the spirit, so a dark one (Stolas's raven) stands off the cosmos (CI's pictures).
 		g.fillGradient(x, y + h / 3, x + w, y + h, GLOW & 0x00FFFFFF, GLOW);

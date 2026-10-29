@@ -5,15 +5,18 @@ forty-sixth spirit, is a low mound of roots studded with stones that rises into 
 to. By night he runs one root at a time from a full Verdant Bed of his holder's to a hungry one: two nutrients leave the
 full bed, one reaches the hungry bed, and the other is lost along the root. When only beds with crops growing on them
 could give, he asks which beds are reserves. He is the cohort's fifth garden spirit, on the same pact record, perch,
-screen, roster, journal and Jade lines as Stolas, Buer, Bathin and Marax, and he stands on the ground beside the perch
-as Marax does.
+screen, roster, journal and Jade lines as Stolas, Buer, Bathin, Marax and Foras, and he stands on the ground beside the
+perch as Marax and Foras do.
 
-Status: **built, not yet compiled or run in CI, not merged** (Concordance garden cohort, unit 5: brief `1c57700dd`; the
-feeding act and SG12 at each spirit's hours, GC-08b `ce4f71b66`; Bifrons `a3e672ba8`; his review's fixes `7b08d26a0`;
-these records, the commit after it). This line's head before the brief, `3c2d36b0f` (Marax and the roster), is in CI
-with no result recorded here; the newest CI result this line descends from is run 40782439981, green in full on
-`d7185041b` (units 1 and 2, before Marax). Nothing of Bifrons has been compiled or has run in CI: none of his server
-tests or client shots has run ([Verification](#verification)). Every Java file of his was parse-checked only; the
+Status: **built and merged into the cohort after unit 4, not yet compiled or run in CI, not merged to main** (Concordance
+garden cohort, unit 5: brief `1c57700dd`; the feeding act and SG12 at each spirit's hours, GC-08b `ce4f71b66`; Bifrons
+`a3e672ba8`; his review's fixes `7b08d26a0`; these records, `d6f63f32b`; then the merge of the cohort line at
+`5e93bb0a7`, units 3 and 4 first, in the order 3, 4, 5). His line was built from `3c2d36b0f` (Marax and the roster).
+The newest CI results the merged line descends from are the cohort line's: run 40840353835, green in full on `3bfd63a97`
+(the magic interfaces' polish), and run 40852556175 on `5e93bb0a7` (Marax, Foras and the polish), in which both server
+jobs passed and 15 of 16 client shards passed (the 16th, `PeepoPopulationClientTests`, is being re-run as not this pull
+request's). Nothing of Bifrons has been compiled or has run in CI: none of his server tests or client shots has run
+([Verification](#verification)). Every Java file of his was parse-checked only; the
 repository's Python checks and audits ran on his files. No person has played him. This page began as his brief (GC-08a),
 committed before any of his body files as the contract's per-spirit template asks (D-D5); his character, his words and
 his assets below began as that brief and now describe him as built, as the sections after them do. Where unit 5's
@@ -316,11 +319,13 @@ an unknown one read as unanswered) survives a restart (`theReservesAnswerSurvive
 measures are never saved, so a restart mid-measure loses nothing. One presence a pact: a copy, a duplicate or a stray
 Bifrons leaves at its first think. Stable ids once released: `jugcraft:bifrons`, `jugcraft:bifrons_pact`,
 `concordance/pact/bifrons.json`, `#jugcraft:bifrons_offerings`, the seven `jugcraft:bifrons.*` sound events, the work
-`root_running` (saved in a Bound Will's service; append only), the accord values `fallow` and `full`, his codex pages
-`p16` to `p19` of `binding/garden_regard` on this line (the entry's last page, "Mastered", `p20` now, moves to the end
-as each later spirit adds pages; at the merge after Foras his are `p20` to `p23`). The act `feed` is a word, never saved.
-No migration: every addition is new or appended. Switching the Concordance off (`concordance.enabled=false`) keeps every
-registration of his and every record: his clocks wait, and nothing of his is unregistered or forgotten.
+`root_running` (saved in a Bound Will's service; append only), the accord values `fallow` and `full`, his four codex
+pages of `binding/garden_regard` after Foras's and before "Mastered", named by title ("Bifrons", "His Service", "Which
+Beds Are Reserves", "His Price"; `p20` to `p23` since the merge after Foras, `p16` to `p19` on his line before it; the
+entry's last page, "Mastered", `p24` now, moves to the end as each later spirit adds pages). The act `feed` is a word,
+never saved. No migration: every addition is new or appended. Switching the Concordance off
+(`concordance.enabled=false`) keeps every registration of his and every record: his clocks wait, and nothing of his is
+unregistered or forgotten.
 
 ## What changed in shared code
 
@@ -330,8 +335,8 @@ registration of his and every record: his clocks wait, and nothing of his is unr
   `concordance_progression.ingredient_node`, so an offering tag may name a tag (GC-P114).
 - **With Bifrons (`a3e672ba8`):** `PactParser.WORK` and `REQUIRED`, `Workers` (his type, attributes, service and
   sounds), `PactSpiritRenderers` (his row), `PactGlance.WORK_ICONS` and `MagicGlance.MARKS` (one line each under his
-  marker), the economy's `root_running`, the codex entry's pages `p16` to `p20`; `oak_log` in the progression tool's
-  vanilla sources.
+  marker), the economy's `root_running`, the codex entry's pages `p16` to `p20` (`p20` to `p24` since the merge after
+  Foras); `oak_log` in the progression tool's vanilla sources.
 - **With his review's fixes:** `PactScreen.offering` lists at most three of an offering tag's items in its tip, then how
   many more ("Any of: Oak Log, Spruce Log, Birch Log and n more"), since his `#minecraft:logs` holds dozens. It is every
   spirit's upkeep chip: Stolas's tag of four now ends "and 1 more" where it named all four (no test reads that tip).
@@ -396,7 +401,7 @@ His review's fixes (one commit after `a3e672ba8`): refused beds skipped until th
 of a large tag (`PactScreen.offering`); his question in general, short ("Which beds are reserves?"); his matter's glance
 keeping its bed ("Bed x, y, z is growing: draw from growing beds?") and "Reserves kept: n"; the chooser's cards and his
 first beat's portrait checked as the cohort's other spirits' are (`cardsWhole`, `portraitWhole`: the cohort's helpers,
-which this line gains at its merge). Not applied here: the review's finding 11 (each kind of log carried
+which this line gained at its merge). Not applied here: the review's finding 11 (each kind of log carried
 draws its own Offer plate), which it directs to the cohort's line, where the shared kept page's Offer plates are drawn
 for every spirit (Stolas's client flow chooses its plate by kind).
 
@@ -424,23 +429,23 @@ The unit's proposals as built (each row in full, with its amendments, in the con
 | GC-P114 | An offering tag may name a tag (`ingredient_node`, `offering_key`); `oak_log` in the vanilla sources | Proposed |
 | GC-P115 | SG12's three status-asserting thinks at `d.from()` | Proposed |
 | GC-P116 | No forced test lines: the base's generic ones (GC-P77) | Proposed; restated (the shared prefix) |
-| GC-P117 | 22 server tests (`GC08_TESTS`) and SG12's cases; his flow after Marax's, 36 shots (26 of `GARDEN_CLIENT_SHOTS` and 10 body shots), `WEIGHTS` +240 (1060 on his line) | Proposed; amended (22 tests, not 20) |
+| GC-P117 | 22 server tests (`GC08_TESTS`) and SG12's cases; his flow after Foras's (after Marax's on his line), 36 shots (26 of `GARDEN_CLIENT_SHOTS` and 10 body shots), `WEIGHTS` +240 (1060 on his line, 1280 merged: 560 + 260 + 220 + 240) | Proposed; amended (22 tests, not 20) |
 | GC-P118 | Four codex pages after the last spirit's before him, before "Mastered"; three journey steps; his roster line | Proposed |
 | GC-P119 | The shared-line register: his lines under his `GC-08 unit 5` markers, resolved by hand where none can stand; no GC-08m | Proposed; restated (no post-merge commit) |
 
 ## Verification
 
 **Not run in CI.** Nothing of Bifrons has been compiled: no Minecraft jar was available where he was built, so every
-Java file of his was only parse-checked, and none of the tests and shots below has run. This line's head before his
-brief, `3c2d36b0f`, is in CI with no result recorded here. Still to run, on a head holding him (once his line is merged
-into the cohort: his client test uses the cohort's helpers): the `mod` and `optional integrations absent` jobs, the
-garden client class and one workflow_dispatch of every client class. Each brief item and the evidence that will show it
+Java file of his was only parse-checked, and none of the tests and shots below has run. His line, built from
+`3c2d36b0f`, is merged with the cohort line at `5e93bb0a7` (its CI in the status above; none of it holds him). Still to
+run, on the merged head: the `mod` and `optional integrations absent` jobs, the garden client class (its weight 1280)
+and one workflow_dispatch of every client class. Each brief item and the evidence that will show it
 (the contract's GE9), none of it a result yet:
 
 | Brief item | Evidence (server game tests in `ConcordanceWorkerGameTests` unless named; shots of `ConcordanceGardenPactClientGameTests`) | Result |
 |---|---|---|
 | 1. Identity | his body files from `tools/owner_art.py` (`--check`), `check_spirit_bodies` (bones, clips and their lengths, his four eyes, the silhouette rule for every pair of spirits, no flat cube); shots `jugcraft_garden_bifrons_by_night`, `_rising`, `_idle`, `_listen` | the audits pass locally; shots not run |
-| 2. Invitation and route | `bifronsRefusesWithFewerThanTwoBeds`, `aPerchOffersOnlyWhatThePlayerMayInvite` (generic); `tools/concordance_journey.py --check` (his three steps); shots `jugcraft_garden_bifrons_no_two_beds`, `_chooser` | not run; the journey check passes locally |
+| 2. Invitation and route | `bifronsRefusesWithFewerThanTwoBeds`, `aPerchOffersOnlyWhatThePlayerMayInvite` (generic); `tools/concordance_journey.py --check` (his three steps, 17 to 19); shots `jugcraft_garden_bifrons_no_two_beds`, `_chooser` | not run; the journey check passes locally |
 | 3. Service | `aRootRunnerLosesHalfAndMintsNone`, `aRootRunnerMeasuresBeforeEachRun`, `aRootRunnerNeverTakesWithoutRoom`, `aRootRunnerNeverEasesStrain`, `aRootRunnerRunsOnlyByNight`, `aRootRunnerNeverHoldsNutrients`, `aRootRunnerSkipsBedsRefusedHim`, `theKeptPageNamesBifronssLastRun`; `ConcordanceEconomyGameTests.rootRunningLeavesNoGainingCycle`; `tools/concordance_economy.py`; shots `jugcraft_garden_bifrons_measure_source`, `_measure_destination`, `_run_row` | not run; the economy tool passes locally |
 | 4. Upkeep and suspension | SG12's `everySpiritSealsOnceAndSpendsOnce`, `everySpiritsUpkeepWarnsGivesGraceSuspendsAndResumes`, `aStandInNeverAnswersAnySpiritsUpkeep`; `aSuspendedBifronsRunsNothing`; `noGardenTermOrRefusalNamesAnAstrolabe`; shots `jugcraft_garden_bifrons_terms` (three sizes), `_refused`, `_kept`, `_suspended` | not run |
 | 5. Conflict: which beds are reserves | `aRootRunnerTakesOnlyFromFallowBedsUntilAnswered`, `aFullAnswerNeverTakesFromAHeartsBed`, `aRefusedFallowBedLeavesHisReservesAsked`, `bifronssReadingSaysItsNoteAndNamesNoPlayer`; `ConcordancePersistenceGameTests.theReservesAnswerSurvivesARestart`; shots `jugcraft_garden_bifrons_matter` (three sizes), `_answered` | not run |
@@ -455,13 +460,15 @@ garden client class and one workflow_dispatch of every client class. Each brief 
 `ConcordanceEconomyGameTests.rootRunningLeavesNoGainingCycle`. SG12's fifteen shared cases run for him through his
 fixture (two awake beds of the player's at 4 nutrients each, nothing to run), at his first hour (GC-P115). Not run.
 
-**Client** (`./gradlew runClientGameTest -PclientTests=ConcordanceGardenPactClientGameTests`): his flow after Marax's, at
-the same perch, by night; 36 shots, `jugcraft_garden_bifrons_` + `no_two_beds`, `chooser`, `conversation` and `terms`
-(each at three sizes), `refused`, `kept`, `by_night`, `rising`, `measure_source`, `measure_destination`, `run_row`,
-`matter` (three sizes), `answered`, `jade`, `idle`, `listen`, `suspended`, `waiting`, `inspect`, `assent`, `refuse`,
-`work`, `depart`, `arrive`, `faces_east`, `_south`, `_west`, `_north`, `end_confirm` and `ended`, each held to its word
-budget; since his review, the ended flow's kept page also checks his question in general and its budget. Not run; none
-of its pictures exists yet.
+**Client** (`./gradlew runClientGameTest -PclientTests=ConcordanceGardenPactClientGameTests`): his flow after Foras's
+(after Marax's on his line before the merge), at the same perch, by night, its yard cleared first (Foras's chest, host
+bed and Sunpetal among what it clears); his choosers draw six cards (Stolas and the five garden spirits), inside the
+polish's placement for one to seven; 36 shots, `jugcraft_garden_bifrons_` + `no_two_beds`, `chooser`, `conversation` and
+`terms` (each at three sizes), `refused`, `kept`, `by_night`, `rising`, `measure_source`, `measure_destination`,
+`run_row`, `matter` (three sizes), `answered`, `jade`, `idle`, `listen`, `suspended`, `waiting`, `inspect`, `assent`,
+`refuse`, `work`, `depart`, `arrive`, `faces_east`, `_south`, `_west`, `_north`, `end_confirm` and `ended`, each held to
+its word budget; since his review, the ended flow's kept page also checks his question in general and its budget. Not
+run; none of its pictures exists yet.
 
 **Local** (each commit's tree, these records' included; no Minecraft build here): `python3 tools/owner_art.py --check`,
 `python3 -B tools/check_mod_data.py`, `python3 scripts/check_repository.py`, `python3 tools/concordance_journey.py
@@ -477,19 +484,25 @@ sounds, from the runtime copy too, and each equals its catalog row or entry: `ar
 `beast-runtime.json` copies above. The two paintings' colours were counted (both 16 x 16 and wholly opaque: the pine
 log's six colours, the sphalerite's five) and the three sound files' Vorbis identification headers read (one channel,
 44.1 kHz; each length from its last page's granule position). His runtime body files are written and checked by
-`tools/owner_art.py`. No Minecraft build, game test or client test ran here.
+`tools/owner_art.py`. For the merge of the cohort line at `5e93bb0a7`, the same checks ran on the merged tree and
+passed (`scripts/tests` 345 tests), after the generators, with the parse check of the 26 Java files the merge touched
+([the merge](concordance-garden-cohort.md#unit-5s-merge-after-unit-4)). No Minecraft build, game test or client test
+ran here.
 
 **Not confirmed** (no build, no client): the actual words drawn on screen, and each page's word count; GeckoLib 5.5.7's
 main controller playing his listening loop's rise once, then the risen loop, and his sinking on its blend back; the
 client under `tick freeze` while the screen closes and he stays risen (his risen poses rest on it, as his rising picture
 does); whether the four facing pictures and his poses frame him; the light of a paused midnight with night vision; and
 every call his commits name as checked only against the repository's uses and the 26.3 sources. The client test calls
-`cardsWhole` and `portraitWhole`, which are the cohort's (its chooser and portrait fixes) and not on this line: the class
-compiles only once this line is merged into the cohort, as every unit line is built.
+the cohort's `cardsWhole` and `portraitWhole` (its chooser and portrait fixes), on this line since the merge; the class
+has not compiled yet. His facing pictures are framed by the polish's camera (`frame`), whose `face` has no row of his (as
+it has none of Foras's): it checks that nothing stands before a face at his box's half width ahead and from his eyes'
+height (0.5) to 0.3 below, his low shape's, while risen he is drawn far above it. Whether the chest Foras's flow leaves
+by the perch spills its Dewmoss when the yard clears it, and so shows in his pictures, is not known.
 
 **Not covered:** people; sound (CI has none: the subtitles are checked as defined and fired); two clients at his perch
 (the garden's two-client test is unit 7's); the narrator heard; a player's hardware; his astir loop (not photographed,
-as Buer's, Bathin's and Marax's).
+as Buer's, Bathin's, Marax's and Foras's are not).
 
 ## Known limits
 
@@ -515,9 +528,9 @@ world clock of the level he serves in. No seasonal gate. No cave, dungeon, boss 
 
 ## Rollout and open questions
 
-Ships with the garden cohort's unit 5 (GC-08), behind the Concordance's switch; built, not yet compiled or run in CI, not
-merged. Open: every test and shot of his is still to run in CI, and his pictures to be looked at; root-running rests on a
-softened reading of his entry's corpse-moving line, with a wood or orchard service the alternative (the cohort's
-checkpoint, question 1); his body is built rather than the owner's (no owner rig fits; question 1); whether 24 runs a
-night is the right measure (question 2); the Offer plates for several kinds of log (his review's finding 11, for the
-cohort's line); his astir loop is not photographed.
+Ships with the garden cohort's unit 5 (GC-08), behind the Concordance's switch; built and merged into the cohort after
+unit 4, not yet compiled or run in CI, not merged to main. Open: every test and shot of his is still to run in CI, and
+his pictures to be looked at; root-running rests on a softened reading of his entry's corpse-moving line, with a wood or
+orchard service the alternative (the cohort's checkpoint, question 1); his body is built rather than the owner's (no
+owner rig fits; question 1); whether 24 runs a night is the right measure (question 2); the Offer plates for several
+kinds of log (his review's finding 11, for the cohort's line); his astir loop is not photographed.

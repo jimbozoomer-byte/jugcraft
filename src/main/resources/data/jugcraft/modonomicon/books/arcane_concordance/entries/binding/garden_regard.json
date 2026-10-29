@@ -287,6 +287,62 @@
       "show_title_separator": true,
       "condition": {
         "type": "modonomicon:research_node_unlocked",
+        "node_id": "jugcraft:concordance/garden_regard_understood",
+        "tooltip": {
+          "translate": "book.jugcraft.arcane_concordance.locked.garden_regard.understood"
+        }
+      }
+    },
+    {
+      "type": "modonomicon:text",
+      "id": "p21",
+      "title": "book.jugcraft.arcane_concordance.binding.garden_regard.p21.title",
+      "text": "book.jugcraft.arcane_concordance.binding.garden_regard.p21.text",
+      "show_title_separator": true,
+      "condition": {
+        "type": "modonomicon:research_node_unlocked",
+        "node_id": "jugcraft:concordance/garden_regard_understood",
+        "tooltip": {
+          "translate": "book.jugcraft.arcane_concordance.locked.garden_regard.understood"
+        }
+      }
+    },
+    {
+      "type": "modonomicon:text",
+      "id": "p22",
+      "title": "book.jugcraft.arcane_concordance.binding.garden_regard.p22.title",
+      "text": "book.jugcraft.arcane_concordance.binding.garden_regard.p22.text",
+      "show_title_separator": true,
+      "condition": {
+        "type": "modonomicon:research_node_unlocked",
+        "node_id": "jugcraft:concordance/garden_regard_understood",
+        "tooltip": {
+          "translate": "book.jugcraft.arcane_concordance.locked.garden_regard.understood"
+        }
+      }
+    },
+    {
+      "type": "modonomicon:text",
+      "id": "p23",
+      "title": "book.jugcraft.arcane_concordance.binding.garden_regard.p23.title",
+      "text": "book.jugcraft.arcane_concordance.binding.garden_regard.p23.text",
+      "show_title_separator": true,
+      "condition": {
+        "type": "modonomicon:research_node_unlocked",
+        "node_id": "jugcraft:concordance/garden_regard_understood",
+        "tooltip": {
+          "translate": "book.jugcraft.arcane_concordance.locked.garden_regard.understood"
+        }
+      }
+    },
+    {
+      "type": "modonomicon:text",
+      "id": "p24",
+      "title": "book.jugcraft.arcane_concordance.binding.garden_regard.p24.title",
+      "text": "book.jugcraft.arcane_concordance.binding.garden_regard.p24.text",
+      "show_title_separator": true,
+      "condition": {
+        "type": "modonomicon:research_node_unlocked",
         "node_id": "jugcraft:concordance/garden_regard_mastered",
         "tooltip": {
           "translate": "book.jugcraft.arcane_concordance.locked.garden_regard.mastered"

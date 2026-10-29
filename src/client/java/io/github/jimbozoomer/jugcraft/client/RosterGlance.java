@@ -50,12 +50,17 @@ final class RosterGlance {
 	 * item for its deliveries, the carried request's item for a courier's task, the work's item for a pact's day of tasks.
 	 */
 	static Fact fact(RosterStatePayload.Row row, List<RosterStatePayload.Row> rows) {
-		PactGlance.Glance owed = of(row.next());
-		if (owed.isShort()) {
-			return new Fact(owed.shown(), items(row, row.next(), rows));
-		}
-		PactGlance.Glance doing = of(row.task());
-		return doing.isShort() ? new Fact(doing.shown(), items(row, row.task(), rows)) : new Fact(row.next(), List.of());
+		Component line = factLine(row);
+		PactGlance.Glance glance = of(line);
+		return glance.isShort() ? new Fact(glance.shown(), items(row, line, rows)) : new Fact(line, List.of());
+	}
+
+	/**
+	 * The line {@code row}'s fact is drawn from: its next obligation when that has a glance, else its task when that has one,
+	 * else its next obligation (drawn whole). The card's tip carries this line's whole sentence (the unit 3 fixes).
+	 */
+	static Component factLine(RosterStatePayload.Row row) {
+		return of(row.next()).isShort() || !of(row.task()).isShort() ? row.next() : row.task();
 	}
 
 	/** A card's name: a request's short name ("Request #3"), else the row's own. */
