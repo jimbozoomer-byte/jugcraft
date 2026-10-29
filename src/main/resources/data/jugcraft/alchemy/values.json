@@ -12787,10 +12787,20 @@
       "denominator": 1,
       "source": "recipe jugcraft:giant_bone_hand"
     },
+    "jugcraft:giant_cabbage": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
     "jugcraft:giant_candy": {
       "numerator": 11,
       "denominator": 6,
       "source": "recipe jugcraft:giant_candy"
+    },
+    "jugcraft:giant_carrot": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
     },
     "jugcraft:giant_cornucopia": {
       "numerator": 1,
@@ -12802,12 +12812,22 @@
       "denominator": 1,
       "source": "recipe jugcraft:giant_fake_spider"
     },
+    "jugcraft:giant_marrow": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
     "jugcraft:giant_pumpkin": {
       "numerator": 1,
       "denominator": 1,
       "source": "fallback (balance pending)"
     },
     "jugcraft:giant_pumpkin_seeds": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
+    "jugcraft:giant_turnip": {
       "numerator": 1,
       "denominator": 1,
       "source": "fallback (balance pending)"
@@ -32886,6 +32906,11 @@
       "numerator": 8707,
       "denominator": 4,
       "source": "recipe jugcraft:printer"
+    },
+    "jugcraft:prize_ribbon_board": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
     },
     "jugcraft:prize_wheel": {
       "numerator": 22585,

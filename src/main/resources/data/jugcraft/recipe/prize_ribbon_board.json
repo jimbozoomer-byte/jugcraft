@@ -1,0 +1,25 @@
+{
+  "fabric:load_conditions": [
+    {
+      "condition": "jugcraft:feature_enabled",
+      "feature": "agriculture"
+    }
+  ],
+  "type": "minecraft:crafting_shaped",
+  "category": "building",
+  "pattern": [
+    "PGP",
+    "PNP",
+    "S S"
+  ],
+  "key": {
+    "P": "#minecraft:planks",
+    "G": "minecraft:green_dye",
+    "N": "minecraft:gold_nugget",
+    "S": "minecraft:stick"
+  },
+  "result": {
+    "id": "jugcraft:prize_ribbon_board",
+    "count": 1
+  }
+}

@@ -15693,7 +15693,13 @@ def check_harvest_festival():
     frame; it is registered with its item; its model, drawn whole, lies in its frame (nothing of it cut away), its mouth
     is the table's and wider than the horn behind it, which narrows to its tail, the horn the table's length from rim to
     tail; its blockstate covers every facing, part and `lit`, each part's model written; it drops once, from its first
-    block; its recipe takes the farm's corn and butternut squash; and its name has its text."""
+    block; its recipe takes the farm's corn and butternut squash; and its name has its text. Part 2: each show vegetable
+    is a FacingDecorationBlock whose model lies in its block, drawn at every facing, made from nine of its crop, dropping
+    itself, its name its text; the Prize Ribbon Board's hooks take the Harvest Scale's ribbons in their order, its Java
+    keeps a hook for each on both halves, only for a player who may build, and is registered with its two-block item; hook
+    1 is at the left as you face it; its blockstate draws the board, an empty upper half and each rosette while it hangs;
+    broken, it drops itself once and each ribbon hanging on it; its recipe has its paint and hooks; and its texts are
+    there."""
     import harvest_festival as hf
     import harvest_festival_data as hfd
 
@@ -15741,6 +15747,67 @@ def check_harvest_festival():
         err(f"recipe/{block}.json: it must take the farm's corn and butternut squash")
     if lang.get(f"block.{MOD}.{block}") != spec["display"]:
         err(f"block.{MOD}.{block}: the text must be {spec['display']}")
+    # Part 2: the Giant Vegetable Show and the Prize Ribbon Board.
+    for veg in hf.SHOW.values():
+        block = veg["block"]
+        if f'registerBlock("{block}", props -> new FacingDecorationBlock(' not in java_main:
+            err(f"JugcraftAgriculture: {block} must be a FacingDecorationBlock")
+        whole = hfd.build(block).models["whole"]
+        if any(min(e["from"]) < 0 or max(e["to"][0], e["to"][2]) > 16 for e in whole if "rotation" not in e):
+            err(f"tools/harvest_festival_data.py {block}: every box must lie in its block")
+        variants = (load(ASSETS / "blockstates" / f"{block}.json") or {}).get("variants", {})
+        if any(variants.get(f"facing={face}", {}).get("model") != f"{MOD}:block/{block}" for face in ("north", "east", "south", "west")):
+            err(f"blockstates/{block}.json: every facing must be block/{block}")
+        recipe = load(DATA / MOD / "recipe" / f"{block}.json") or {}
+        if recipe.get("key") != {"C": veg["crop"]} or recipe.get("pattern") != ["CCC", "CCC", "CCC"]:
+            err(f"recipe/{block}.json: it must take nine of {veg['crop']}")
+        pools = (load(DATA / MOD / "loot_table" / "blocks" / f"{block}.json") or {}).get("pools", [])
+        if len(pools) != 1 or f'"{MOD}:{block}"' not in json.dumps(pools):
+            err(f"loot_table/blocks/{block}.json: it drops itself")
+        if lang.get(f"block.{MOD}.{block}") != veg["display"]:
+            err(f"block.{MOD}.{block}: the text must be {veg['display']}")
+    spec = hf.RIBBON_BOARD
+    block = spec["block"]
+    java = read(JAVA_ROOT / "agriculture" / "PrizeRibbonBoardBlock.java")
+    scale = read(JAVA_ROOT / "agriculture" / "HarvestScaleBlockEntity.java")
+    ribbons = [ribbon for ribbon, _ in spec["hooks"]]
+    kinds = [kind for _, kind in spec["hooks"]]
+    if "List.of(" + ", ".join(f'"{r}"' for r in ribbons) + ")" not in scale:
+        err("tools/harvest_festival.py RIBBON_BOARD: its hooks take the Harvest Scale's ribbons, in their order")
+    for item in ["extends TallDecorationBlock", "HOOKS = List.of(" + ", ".join(k.upper() for k in kinds) + ")", "player.mayBuild()",
+                 "level.mayInteract(player, pos)", "setBoth(level, pos"] + [f'BooleanProperty.create("{k}")' for k in kinds]:
+        if item not in java:
+            err(f"PrizeRibbonBoardBlock: missing {item} (tools/harvest_festival.py RIBBON_BOARD)")
+    if f'registerBlock("{block}", PrizeRibbonBoardBlock::new' not in java_main \
+            or f'registerItem("{block}", props -> new DoubleHighBlockItem(board, props)' not in java_main:
+        err(f"JugcraftAgriculture: {block} must be a PrizeRibbonBoardBlock with a two-block item")
+    if not hfd.hook_x(0) > hfd.hook_x(1) > hfd.hook_x(2) or not (spec["panel"][0] < hfd.hook_x(2) and hfd.hook_x(0) < spec["panel"][2]):
+        err("tools/harvest_festival_data.py hook_x: hook 1 is at the left as you face the board (east, facing north), all on it")
+    parts = (load(ASSETS / "blockstates" / f"{block}.json") or {}).get("multipart", [])
+    for face in ("north", "east", "south", "west"):
+        for when, model in [({"facing": face, "half": "lower"}, block), ({"facing": face, "half": "upper"}, f"{block}_upper")] + \
+                [({"facing": face, "half": "lower", kind: "true"}, f"{block}_{kind}") for kind in kinds]:
+            if not any(p.get("when") == when and p.get("apply", {}).get("model") == f"{MOD}:block/{model}" for p in parts):
+                err(f"blockstates/{block}.json: {when} must draw block/{model}")
+    for kind in kinds:
+        if not (load(ASSETS / "models" / "block" / f"{block}_{kind}.json") or {}).get("elements"):
+            err(f"models/block/{block}_{kind}.json: the {kind} rosette must be drawn")
+    if (load(ASSETS / "models" / "block" / f"{block}_upper.json") or {}).get("elements") != []:
+        err(f"models/block/{block}_upper.json: the upper half draws nothing (the lower half's model is the whole board)")
+    pools = (load(DATA / MOD / "loot_table" / "blocks" / f"{block}.json") or {}).get("pools", [])
+    for ribbon, kind in spec["hooks"]:
+        pool = [p for p in pools if f'"{MOD}:{ribbon}"' in json.dumps(p.get("entries"))]
+        if len(pool) != 1 or pool[0].get("condition") != {"type": "minecraft:match_block", "blocks": f"{MOD}:{block}",
+                                                          "state": {"half": "lower", kind: "true"}}:
+            err(f"loot_table/blocks/{block}.json: broken, it drops its {kind} ribbon while it hangs, from its lower half")
+    if len(pools) != 4 or '"half": "lower"' not in json.dumps(pools[0]) or f'"{MOD}:{block}"' not in json.dumps(pools[0].get("entries")):
+        err(f"loot_table/blocks/{block}.json: it drops itself once, from its lower half")
+    keys = set(((load(DATA / MOD / "recipe" / f"{block}.json") or {}).get("key") or {}).values())
+    if not {"minecraft:green_dye", "minecraft:gold_nugget"} <= keys:
+        err(f"recipe/{block}.json: its paint (green dye) and its brass hooks (a gold nugget)")
+    for key, text in ((f"block.{MOD}.{block}", spec["display"]), (f"message.{MOD}.{block}.taken", None)):
+        if key not in lang or (text and lang[key] != text):
+            err(f"{key} has no text, or not its own")
 
 
 def check_party_table():

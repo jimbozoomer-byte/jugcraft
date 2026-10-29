@@ -14,6 +14,7 @@ A prop of several blocks is modelled whole in its frame (16 pixels a block) and 
 (pumpkin_patch_data.cut), so its picture runs on unbroken across them.
 """
 import decor17_data as d17d
+import decor20_data as d20d
 import flora_art as fa
 import harvest_festival as hf
 import pumpkin_patch_data as ppd
@@ -34,6 +35,26 @@ WHEAT = pal("9a7426", "bc9438", "d8b04e", "ecca6c")
 GRAPE = pal("2a1430", "3e1e48", "56306a", "70468a")
 APPLE = pal("6e1010", "981a16", "be2a20", "dc4a34")
 LEAF = pal("2a4a18", "3c6422", "52802e")
+CABBAGE = pal("27402a", "3a5a3a", "50764c", "6c9264", "8cae80", "b4cca4")
+CABBAGE_HEART = pal("5c7a46", "789658", "94b26c", "b2ca86", "d0e0a6")
+MARROW = pal("16280f", "223a18", "2f4c20", "3e602a")
+MARROW_STRIPE = pal("6c8a3e", "8ca850", "acc468")
+TURNIP_PURPLE = pal("4a1f4e", "6c2f70", "8e4592", "b067b0")
+TURNIP_WHITE = pal("b9ad9a", "d8cfbd", "ece6d8", "faf7ef")
+TURNIP_BLUSH = pal("c8a4bc", "a8749e")
+TURNIP_LEAF = pal("24481c", "2f5d22", "3d7429", "4f8c33", "6aa645")
+CARROT = pal("7e320a", "a64814", "cc6422", "e8823a", "f6a45a")
+FROND = pal("1e4214", "2c5a1c", "3e7428", "548e38")
+CARD = pal("a8a498", "ccc8bc", "e8e4d8", "f8f6ee")
+INK = pal("1e2028", "3a3c48")
+BOARD = pal("16301c", "214428", "2c5834", "3a6e44", "4c8456")
+CREAM = pal("b4a882", "d4c8a0", "ece2c0")
+BRASS = pal("5a3c0a", "8c6418", "bc9030", "e0bc5a", "fbe7a4")
+# The Harvest Scale's ribbons' colours (tools/halloween_textures.py ribbon_item), darkest first, and their buttons.
+RIBBONS = {"first": pal("14265e", "1e3890", "2a4ec0", "4c6ed8", "7a94e4"),
+           "second": pal("5e1414", "901e1e", "c02a2a", "d84c4c", "e47a7a"),
+           "third": pal("8c8c86", "b0b0aa", "d0d0ca", "e8e8e4", "f8f8f4")}
+BUTTON = pal("8c6418", "d8b84a", "f4e8b0")
 
 
 def rid(path):
@@ -247,15 +268,407 @@ def giant_cornucopia():
     return sc
 
 
+# ---------------------------------------------------------------- part 2: the Giant Vegetable Show
+
+def cabbage_leaf():
+    """An outer cabbage leaf, blue-green: its midrib pale down the middle of its length, veins a tone lighter running
+    out from it on the slant every third texel, the blade between them by turns its own tone and a tone darker, its
+    edge a tone lighter."""
+    def paint(p):
+        along_x = p.w >= p.h
+        span, across = (p.w, p.h) if along_x else (p.h, p.w)
+        mid = across // 2
+        for y in range(p.h):
+            for x in range(p.w):
+                s, a = (x, y) if along_x else (y, x)
+                if a == mid:
+                    k = 5
+                elif a in (0, across - 1):
+                    k = 3
+                elif (s + abs(a - mid)) % 3 == 0:
+                    k = 4
+                else:
+                    k = (2, 1)[(s // 2 + a) % 2]
+                p.put(x, y, shade(CABBAGE, k))
+    paint.tag = repr(("cabbage_leaf",))
+    return paint
+
+
+def cabbage_heart():
+    """The tight head: its leaves wrapped round it in bands three texels high, each band's edge lit along its top, a
+    shadow under it, and a vein a tone darker every fourth column, each band's two along from the last's."""
+    def paint(p):
+        for y in range(p.h):
+            band, row = divmod(y, 3)
+            for x in range(p.w):
+                if row == 0:
+                    k = 4
+                elif row == 2:
+                    k = 1
+                else:
+                    k = 2 if (x + 2 * band) % 4 == 0 else 3
+                p.put(x, y, shade(CABBAGE_HEART, k))
+    paint.tag = repr(("cabbage_heart",))
+    return paint
+
+
+def cabbage_crown():
+    """The top of the head: its leaves folded over it, in rings a texel wide round its middle, lit and shaded by turns."""
+    def paint(p):
+        cx, cy = (p.w - 1) / 2, (p.h - 1) / 2
+        for y in range(p.h):
+            for x in range(p.w):
+                ring = int(max(abs(x - cx), abs(y - cy)))
+                p.put(x, y, shade(CABBAGE_HEART, (4, 2, 3, 1)[ring % 4]))
+    paint.tag = repr(("cabbage_crown",))
+    return paint
+
+
+def marrow_skin():
+    """A marrow's skin: dark green with pale stripes running its length, a stripe every third texel round it, each broken
+    for a texel every fifth along (each stripe's breaks two along from the last's); its upper row lit."""
+    def paint(p):
+        along_x = p.w >= p.h
+        for y in range(p.h):
+            for x in range(p.w):
+                s, a = (x, y) if along_x else (y, x)
+                if a % 3 == 1 and (s + 2 * (a // 3)) % 5 != 0:
+                    p.put(x, y, shade(MARROW_STRIPE, 1 if a else 2))
+                else:
+                    p.put(x, y, shade(MARROW, 3 if a == 0 else 2 if a % 3 == 0 else 1))
+    paint.tag = repr(("marrow_skin",))
+    return paint
+
+
+def marrow_end():
+    """A marrow's end, seen end on: dark green, its top row lit, a dark scar in its middle."""
+    def paint(p):
+        cx, cy = (p.w - 1) / 2, (p.h - 1) / 2
+        for y in range(p.h):
+            for x in range(p.w):
+                if abs(x - cx) < 1 and abs(y - cy) < 1:
+                    p.put(x, y, shade(MARROW, 0))
+                else:
+                    p.put(x, y, shade(MARROW, 2 if y == 0 else 1))
+    paint.tag = repr(("marrow_end",))
+    return paint
+
+
+def turnip_skin():
+    """A turnip's root: purple shoulders over white, the purple's top row lit, blushing down into the white in streaks
+    of a fixed run of lengths (0 to 2 texels, column by column), then white with a faint ring a tone darker every third
+    row, its foot in shadow."""
+    def paint(p):
+        meet = max(1, round(p.h * 0.45))
+        for y in range(p.h):
+            for x in range(p.w):
+                streak = (1, 2, 0, 1, 0, 2, 1)[x % 7]
+                if y < meet:
+                    c = shade(TURNIP_PURPLE, 3 if y == 0 else 2)
+                elif y < meet + streak:
+                    c = shade(TURNIP_BLUSH, 1 if y == meet else 0)
+                elif y == meet:
+                    c = shade(TURNIP_BLUSH, 0)
+                elif y == p.h - 1 and p.h > 2:
+                    c = shade(TURNIP_WHITE, 0)
+                else:
+                    c = shade(TURNIP_WHITE, 1 if (y - meet) % 3 == 2 else 2)
+                p.put(x, y, c)
+    paint.tag = repr(("turnip_skin",))
+    return paint
+
+
+def turnip_leaf():
+    """A turnip leaf standing up: its pale stalk at the foot, then its midrib lit up the middle, the blade a tone lighter
+    and darker by turns out from it, and its lobes notched dark into its edges every third row."""
+    def paint(p):
+        mid = p.w // 2
+        for y in range(p.h):
+            for x in range(p.w):
+                if y >= p.h - 2:
+                    k = 3 if x == mid else 1
+                elif x == mid:
+                    k = 4
+                elif x in (0, p.w - 1) and y % 3 == 2:
+                    k = 0
+                else:
+                    k = (2, 3)[(x + y) % 2]
+                p.put(x, y, shade(TURNIP_LEAF, k))
+    paint.tag = repr(("turnip_leaf",))
+    return paint
+
+
+def carrot_skin():
+    """A carrot's root: orange, its upper row lit, ringed by short dark dashes two texels long every third texel along
+    it, each ring's dash two round from the last's."""
+    def paint(p):
+        along_x = p.w >= p.h
+        for y in range(p.h):
+            for x in range(p.w):
+                s, a = (x, y) if along_x else (y, x)
+                if s % 3 == 0 and (a + s // 3) % 3 != 2:
+                    k = 1
+                else:
+                    k = 4 if a == 0 else 3 if a % 2 == 0 else 2
+                p.put(x, y, shade(CARROT, k))
+    paint.tag = repr(("carrot_skin",))
+    return paint
+
+
+def carrot_shoulder():
+    """The carrot's shoulder, end on: a ring of orange round the green crown its fronds grow from."""
+    def paint(p):
+        for y in range(p.h):
+            for x in range(p.w):
+                edge = x in (0, p.w - 1) or y in (0, p.h - 1)
+                p.put(x, y, shade(CARROT, 2) if edge else shade(FROND, 2 if (x + y) % 2 else 1))
+    paint.tag = repr(("carrot_shoulder",))
+    return paint
+
+
+def frond():
+    """A carrot frond: feathery, its stalk lit up the middle and its leaflets by turns lit and dark either side of it,
+    a fishbone."""
+    def paint(p):
+        along_x = p.w >= p.h
+        across = p.h if along_x else p.w
+        mid = across // 2
+        for y in range(p.h):
+            for x in range(p.w):
+                s, a = (x, y) if along_x else (y, x)
+                p.put(x, y, shade(FROND, 3 if a == mid else 2 if (s + (a > mid)) % 2 == 0 else 0))
+    paint.tag = repr(("frond",))
+    return paint
+
+
+def entry_card():
+    """A show's entry card: white card, its top row lit, its entry number inked at the left of its foot (two texels)."""
+    def paint(p):
+        for y in range(p.h):
+            for x in range(p.w):
+                if y == p.h - 1 and p.h > 1 and x < min(2, p.w - 1):
+                    p.put(x, y, shade(INK, 0))
+                else:
+                    p.put(x, y, shade(CARD, 3 if y == 0 else 2))
+    paint.tag = repr(("entry_card",))
+    return paint
+
+
+def crossed_z(sc, name, painter, x, cy, d, z0, z1, rot=None, cut=None, **kw):
+    """A round thing `d` across lying along z from z0 to z1 about (x, cy): two boxes crossed, each a fifth of its width
+    (or `cut`) shorter at its corners (to the half pixel)."""
+    r, c = d / 2, (round(d / 5 * 2) / 2 if cut is None else cut)
+    return [panel(sc, name, painter, (x - r + c, cy - r, z0), (x + r - c, cy + r, z1), rot=rot, **kw),
+            panel(sc, name, painter, (x - r, cy - r + c, z0), (x + r, cy + r - c, z1), rot=rot, **kw)]
+
+
+def card(sc, x, z):
+    """The entry card on its wire stake, the stake's foot at (x, z), the card's face to the north."""
+    return [panel(sc, "stake", ppd.flat(ppd.IRON), (x - 0.125, 0.0, z - 0.125), (x + 0.125, 3.0, z + 0.125)),
+            panel(sc, "card", ppd.flat(CARD), (x - 1.5, 2.5, z - 0.375), (x + 1.5, 4.5, z - 0.125), north=entry_card())]
+
+
+def giant_cabbage():
+    """The Giant Cabbage, facing north: its head 50 cm across and 47 cm high, domed, sitting in its outer leaves, which
+    spread 94 cm across: four cupped up at 22.5 degrees to the north, east, south and west, and four lying flat between
+    them (two leaves crossed at 45 degrees); its entry card at its front left corner."""
+    spec = hf.SHOW["cabbage"]
+    sc = Sculpt(spec["block"], 3311, 64)
+    leaf, heart, crown = cabbage_leaf(), cabbage_heart(), cabbage_crown()
+    head, reach = spec["head"], spec["spread"] / 2
+    el = crossed_y(sc, "head", heart, 8.0, 8.0, head, 0.5, 6.5, up=crown)
+    el += crossed_y(sc, "crown", heart, 8.0, 8.0, head - 2.5, 6.5, 7.5, up=crown)
+    # The flat leaves, crossed, under the cupped ones.
+    for angle in (45.0, -45.0):
+        el.append(panel(sc, "leaf", leaf, (8.0 - reach + 1.5, 0.0, 5.5), (8.0 + reach - 1.5, 0.5, 10.5),
+                        rot=fa.rotation((8.0, 0.0, 8.0), "y", angle)))
+    # The cupped leaves, each from under the head out to the leaves' reach, turned up about its inner end.
+    inner = 8.0 - head / 2 + 2.0
+    el.append(panel(sc, "leaf", leaf, (5.0, 0.5, 8.0 - reach), (11.0, 1.0, inner), rot=fa.rotation((8.0, 0.5, inner), "x", 22.5)))
+    el.append(panel(sc, "leaf", leaf, (5.0, 0.5, 16.0 - inner), (11.0, 1.0, 8.0 + reach), rot=fa.rotation((8.0, 0.5, 16.0 - inner), "x", -22.5)))
+    el.append(panel(sc, "leaf", leaf, (16.0 - inner, 0.5, 5.0), (8.0 + reach, 1.0, 11.0), rot=fa.rotation((16.0 - inner, 0.5, 8.0), "z", 22.5)))
+    el.append(panel(sc, "leaf", leaf, (8.0 - reach, 0.5, 5.0), (inner, 1.0, 11.0), rot=fa.rotation((inner, 0.5, 8.0), "z", -22.5)))
+    el += card(sc, 2.5, 1.5)
+    sc.models["whole"] = el
+    return sc
+
+
+def giant_marrow():
+    """The Giant Marrow, facing north: 94 cm long and 38 cm across, lying along its block on a bed of straw, round in
+    two crossed boxes, its ends narrower, its stalk at the back; its entry card at its front left corner."""
+    spec = hf.SHOW["marrow"]
+    sc = Sculpt(spec["block"], 3312, 64)
+    skin, end, d = marrow_skin(), marrow_end(), spec["across"]
+    z0, z1 = 0.5, 0.5 + spec["length"]
+    el = [panel(sc, "straw", ppd.hay(), (4.0, 0.0, 0.25), (12.0, 0.5, 15.75))]
+    # Round as an octagon is, its corners cut 1.5 pixels.
+    el += crossed_z(sc, "marrow", skin, 8.0, 0.5 + d / 2, d, z0 + 1.5, z1 - 1.5, cut=1.5)
+    el += crossed_z(sc, "marrow", skin, 8.0, 0.5 + d / 2, d - 1.5, z0, z0 + 1.5, cut=1.0, north=end)
+    el += crossed_z(sc, "marrow", skin, 8.0, 0.5 + d / 2, d - 1.5, z1 - 1.5, z1, cut=1.0, south=end)
+    el.append(panel(sc, "stalk", lengthwise(STEM), (7.5, 0.5 + d / 2 - 0.5, z1), (8.5, 0.5 + d / 2 + 0.5, 16.0)))
+    el += card(sc, 2.0, 1.5)
+    sc.models["whole"] = el
+    return sc
+
+
+def giant_turnip():
+    """The Giant Turnip, facing north: its root 44 cm across, a globe a little wider than high on its taproot, purple
+    over white, under five leaves 38 cm high, four leaning out at 22.5 degrees and one standing up; its entry card at
+    its front left corner."""
+    spec = hf.SHOW["turnip"]
+    sc = Sculpt(spec["block"], 3313, 64)
+    skin, leaf, d = turnip_skin(), turnip_leaf(), spec["across"]
+    top = ppd.flat(TURNIP_PURPLE)
+    el = [panel(sc, "taproot", lengthwise(TURNIP_WHITE), (7.5, 0.0, 7.5), (8.5, 1.0, 8.5))]
+    el += crossed_y(sc, "root", ppd.flat(TURNIP_WHITE), 8.0, 8.0, d - 2.0, 0.5, 1.5)
+    el += crossed_y(sc, "root", skin, 8.0, 8.0, d, 1.5, 6.0, up=top)
+    el += crossed_y(sc, "crown", ppd.flat(TURNIP_PURPLE), 8.0, 8.0, d - 3.0, 6.0, 6.5)
+    for lo, hi, axis, angle, origin in (((6.75, 6.5, 6.5), (9.25, 12.5, 7.0), "x", 22.5, (8.0, 6.5, 7.0)),
+                                        ((6.75, 6.5, 9.0), (9.25, 12.5, 9.5), "x", -22.5, (8.0, 6.5, 9.0)),
+                                        ((9.0, 6.5, 6.75), (9.5, 12.0, 9.25), "z", -22.5, (9.0, 6.5, 8.0)),
+                                        ((6.5, 6.5, 6.75), (7.0, 12.0, 9.25), "z", 22.5, (7.0, 6.5, 8.0))):
+        el.append(panel(sc, "leaf", leaf, lo, hi, rot=fa.rotation(origin, axis, angle)))
+    el.append(panel(sc, "leaf", leaf, (7.0, 6.5, 7.75), (9.0, 12.5, 8.25)))
+    el += card(sc, 2.5, 1.5)
+    sc.models["whole"] = el
+    return sc
+
+
+def giant_carrot():
+    """The Giant Carrot, facing north: its root 25 cm across at its shoulder and 69 cm long, lying along its block from
+    its tip at the front, tapering in five lengths, its fronds rising from its shoulder at the back, three of them
+    leaning back at 22.5 degrees, two of those fanned out; its entry card at its front left corner."""
+    spec = hf.SHOW["carrot"]
+    sc = Sculpt(spec["block"], 3314, 64)
+    skin, fr = carrot_skin(), frond()
+    shoulder = spec["shoulder"]
+    back = 1.0 + spec["length"]
+    lengths = ((1.0, 2.0, 1.0), (2.0, 4.5, 2.0), (4.5, 7.0, 2.5), (7.0, 9.5, 3.5), (9.5, back, shoulder))
+    el = []
+    for z0, z1, d in lengths:
+        if d <= 1.0:
+            el.append(panel(sc, "root", skin, (8.0 - d / 2, 0.0, z0), (8.0 + d / 2, d, z1)))
+        else:
+            el += crossed_z(sc, "root", skin, 8.0, d / 2, d, z0, z1, **({"south": carrot_shoulder()} if z1 == back else {}))
+    top = shoulder / 2
+    el.append(panel(sc, "crown", lengthwise(FROND), (7.25, top - 0.75, back), (8.75, top + 0.75, back + 1.0)))
+    for lo, hi, rot in (((7.25, top, back + 0.25), (8.75, top + 6.0, back + 0.75), fa.rotation((8.0, top, back + 0.5), "x", -22.5)),
+                        ((6.75, top, back + 0.25), (8.25, top + 5.0, back + 0.75), fa.rotation((7.5, top, back + 0.5), "z", 22.5)),
+                        ((7.75, top, back + 0.25), (9.25, top + 5.0, back + 0.75), fa.rotation((8.5, top, back + 0.5), "z", -22.5))):
+        el.append(panel(sc, "frond", fr, lo, hi, rot=rot))
+    el += card(sc, 3.0, 1.5)
+    sc.models["whole"] = el
+    return sc
+
+
+DIGITS = {"1": (".#.", "##.", ".#.", ".#.", "###"), "2": ("###", "..#", "###", "#..", "###"), "3": ("###", "..#", ".##", "..#", "###")}
+
+
+def painted_boards():
+    """Boards painted green, running across: each board three texels high, lit along its top and seamed dark along its
+    foot, no grain showing through the paint."""
+    def paint(p):
+        along_x = p.w >= p.h
+        for y in range(p.h):
+            for x in range(p.w):
+                a = y if along_x else x
+                p.put(x, y, shade(BOARD, (3, 2, 1)[a % 3]))
+    paint.tag = repr(("painted_boards",))
+    return paint
+
+
+def ribbon_board_face():
+    """The board's painted front: its green boards, a dull gold line round its edge, and over each of its three hooks
+    its number, 1, 2 and 3 from the left, in cream, three texels wide and five high, each digit's left column lit a
+    tone."""
+    boards = painted_boards()
+
+    def paint(p):
+        boards(p)
+        for y in range(p.h):
+            for x in range(p.w):
+                if x in (0, p.w - 1) or y in (0, p.h - 1):
+                    p.put(x, y, shade(BRASS, 2))
+        column = p.w // 3
+        for k, digit in enumerate("123"):
+            x0 = k * column + (column - 3) // 2
+            for j, line in enumerate(DIGITS[digit]):
+                for i, ch in enumerate(line):
+                    if ch == "#" and 1 + j < p.h - 1:
+                        p.put(x0 + i, 1 + j, shade(CREAM, 2 if i == 0 else 1))
+    paint.tag = repr(("ribbon_board_face",))
+    return paint
+
+
+def pleats(palette):
+    """A rosette's pleated ring: its pleats a texel wide, lit and shaded by turns."""
+    def paint(p):
+        for y in range(p.h):
+            for x in range(p.w):
+                p.put(x, y, shade(palette, 3 if (x + y) % 2 == 0 else 1))
+    paint.tag = repr(("pleats", palette[2]))
+    return paint
+
+
+def hook_x(i):
+    """Hook `i`'s middle across the board, facing north: hook 1 at the left as you face it, which is the east (+x)."""
+    x0, _, x1, _ = hf.RIBBON_BOARD["panel"]
+    column = (x1 - x0) / 3
+    return x1 - column * (i + 0.5)
+
+
+def rosette(sc, kind, x, y, z):
+    """A prize rosette hung by its top from a hook at (x, y), its back on the board's face at depth z: its pleated ring
+    4 pixels across, round in two crossed boxes, a button in its middle, and its two tails hanging in a V below it."""
+    r = hf.RIBBON_BOARD["rosette"] / 2
+    palette = RIBBONS[kind]
+    ring = pleats(palette)
+    tail = lengthwise(palette)
+    cy = y - r
+    el = [panel(sc, f"{kind}_ring", ring, (x - r, cy - r + 1.0, z - 0.5), (x + r, cy + r - 1.0, z)),
+          panel(sc, f"{kind}_ring", ring, (x - r + 1.0, cy - r, z - 0.5), (x + r - 1.0, cy + r, z)),
+          panel(sc, "button", ppd.flat(BUTTON), (x - 0.75, cy - 0.75, z - 0.75), (x + 0.75, cy + 0.75, z - 0.5))]
+    for side, angle in ((-1, -22.5), (1, 22.5)):
+        tx = x + side * 0.75
+        el.append(panel(sc, f"{kind}_tail", tail, (tx - 0.5, cy - r - 4.0, z - 0.375), (tx + 0.5, cy - r + 0.5, z - 0.125),
+                        rot=fa.rotation((tx, cy - r + 0.5, z - 0.25), "z", angle)))
+    return el
+
+
+def ribbon_board():
+    """The Prize Ribbon Board, facing north: a board of green-painted planks 94 cm across and 69 cm high on two square
+    posts 1.6 m tall, its face 1 m off the ground, three brass cup hooks across it under their numbers; and each prize
+    rosette, hung on its hook (its own model, drawn when it hangs there)."""
+    spec = hf.RIBBON_BOARD
+    sc = Sculpt(spec["block"], 3315, 64)
+    x0, y0, x1, y1 = spec["panel"]
+    post, z = spec["post"], 7.5
+    wood = lengthwise(BOARD)
+    el = [panel(sc, "panel", painted_boards(), (x0, y0, z), (x1, y1, z + 1.0), north=ribbon_board_face())]
+    for px in (x0 + 1.0, x1 - 1.0 - post):
+        el.append(panel(sc, "post", wood, (px, 0.0, z + 1.0), (px + post, spec["height"], z + 1.0 + post)))
+        el.append(panel(sc, "cap", ppd.flat(BOARD), (px - 0.25, spec["height"], z + 0.75), (px + post + 0.25, spec["height"] + 0.5, z + 1.25 + post)))
+    for i in range(3):
+        hx = hook_x(i)
+        el.append(panel(sc, "hook", ppd.flat(BRASS), (hx - 0.25, spec["hook_y"] - 0.5, z - 0.75), (hx + 0.25, spec["hook_y"], z)))
+    sc.models["whole"] = el
+    for i, (_, kind) in enumerate(spec["hooks"]):
+        sc.models[kind] = rosette(sc, kind, hook_x(i), spec["hook_y"] - 0.25, z - 0.25)
+    return sc
+
+
 # ---------------------------------------------------------------- building and files
 
 _built = {}
-BUILDERS = {hf.CORNUCOPIA["block"]: giant_cornucopia}
+BUILDERS = {hf.CORNUCOPIA["block"]: giant_cornucopia, hf.SHOW["cabbage"]["block"]: giant_cabbage, hf.SHOW["marrow"]["block"]: giant_marrow,
+            hf.SHOW["turnip"]["block"]: giant_turnip, hf.SHOW["carrot"]["block"]: giant_carrot, hf.RIBBON_BOARD["block"]: ribbon_board}
+# The atlas each is packed into.
+ATLAS = {hf.CORNUCOPIA["block"]: 128}
 
 
 def build(block):
     if block not in _built:
-        _built[block] = ppd.planned(BUILDERS[block], 128)
+        _built[block] = ppd.planned(BUILDERS[block], ATLAS.get(block, 64))
     return _built[block]
 
 
@@ -292,19 +705,67 @@ def assets(root, write, lang):
         for f in FACINGS for lit in ("false", "true") for p in range(n)}})
     write(root / "models" / "item" / f"{block}.json", fa.model(block, item_model(sc.models["whole"], spec["size"], 1 / 3), DISPLAY))
     write(root / "items" / f"{block}.json", {"model": {"type": "minecraft:model", "model": rid(f"item/{block}")}})
+    # Part 2: each show vegetable one model by facing, its item the same at full size.
+    for veg in hf.SHOW.values():
+        block = veg["block"]
+        lang[f"block.{MOD}.{block}"] = veg["display"]
+        whole = d20d.separated(build(block).models["whole"])
+        write(models / f"{block}.json", fa.model(block, whole))
+        write(root / "blockstates" / f"{block}.json", {"variants": {
+            f"facing={f}": {"model": rid(f"block/{block}"), **({"y": FACINGS[f]} if FACINGS[f] else {})} for f in FACINGS}})
+        write(root / "models" / "item" / f"{block}.json", fa.model(block, whole, DISPLAY))
+        write(root / "items" / f"{block}.json", {"model": {"type": "minecraft:model", "model": rid(f"item/{block}")}})
+    # The Prize Ribbon Board: the whole board in its lower block's model, its upper's empty, and each ribbon's own model
+    # added by a multipart blockstate while it hangs; its item the bare board at 60 percent.
+    spec = hf.RIBBON_BOARD
+    block = spec["block"]
+    lang[f"block.{MOD}.{block}"] = spec["display"]
+    lang[f"message.{MOD}.{block}.taken"] = "A ribbon already hangs on that hook"
+    sc = build(block)
+    write(models / f"{block}.json", fa.model(block, d20d.separated(sc.models["whole"])))
+    write(models / f"{block}_upper.json", {"parent": "minecraft:block/block", "textures": {"particle": rid(f"block/{block}")}, "elements": []})
+    multipart = []
+    for f, y in FACINGS.items():
+        turn = {"y": y} if y else {}
+        multipart.append({"when": {"facing": f, "half": "lower"}, "apply": {"model": rid(f"block/{block}"), **turn}})
+        multipart.append({"when": {"facing": f, "half": "upper"}, "apply": {"model": rid(f"block/{block}_upper"), **turn}})
+        for _, kind in spec["hooks"]:
+            multipart.append({"when": {"facing": f, "half": "lower", kind: "true"}, "apply": {"model": rid(f"block/{block}_{kind}"), **turn}})
+    for _, kind in spec["hooks"]:
+        write(models / f"{block}_{kind}.json", fa.model(block, d20d.separated(sc.models[kind])))
+    write(root / "blockstates" / f"{block}.json", {"multipart": multipart})
+    write(root / "models" / "item" / f"{block}.json", fa.model(block, item_model(sc.models["whole"], (1, 2, 1), 0.6), DISPLAY))
+    write(root / "items" / f"{block}.json", {"model": {"type": "minecraft:model", "model": rid(f"item/{block}")}})
 
 
 def loot(out, write):
-    """The cornucopia drops itself, from its first block only (its other blocks break with it, dropping nothing)."""
+    """The cornucopia drops itself, from its first block only (its other blocks break with it, dropping nothing); each
+    show vegetable drops itself; and the Prize Ribbon Board drops itself and every ribbon hanging on it, from its lower
+    half (its upper breaks with it), its ribbons even in an explosion."""
     block = hf.CORNUCOPIA["block"]
     write(out / f"{block}.json", {"type": "minecraft:block", "pools": [{"condition": {"type": "minecraft:all_of", "terms": [
         {"type": "minecraft:survives_explosion"},
         {"type": "minecraft:match_block", "blocks": rid(block), "state": {"part": "0"}}]},
         "entries": [{"type": "minecraft:item", "name": rid(block)}], "rolls": 1}], "random_sequence": rid(f"blocks/{block}")})
+    for veg in hf.SHOW.values():
+        block = veg["block"]
+        write(out / f"{block}.json", {"type": "minecraft:block", "pools": [{"condition": {"type": "minecraft:survives_explosion"},
+            "entries": [{"type": "minecraft:item", "name": rid(block)}], "rolls": 1}], "random_sequence": rid(f"blocks/{block}")})
+    spec = hf.RIBBON_BOARD
+    block = spec["block"]
+    pools = [{"condition": {"type": "minecraft:all_of", "terms": [
+        {"type": "minecraft:survives_explosion"},
+        {"type": "minecraft:match_block", "blocks": rid(block), "state": {"half": "lower"}}]},
+        "entries": [{"type": "minecraft:item", "name": rid(block)}], "rolls": 1}]
+    for ribbon, kind in spec["hooks"]:
+        pools.append({"condition": {"type": "minecraft:match_block", "blocks": rid(block), "state": {"half": "lower", kind: "true"}},
+                      "entries": [{"type": "minecraft:item", "name": rid(ribbon)}], "rolls": 1})
+    write(out / f"{block}.json", {"type": "minecraft:block", "pools": pools, "random_sequence": rid(f"blocks/{block}")})
 
 
 def tags(tags):
-    tags.add("block", "minecraft:mineable/axe", rid(hf.CORNUCOPIA["block"]))
+    for block in hf.blocks():
+        tags.add("block", "minecraft:mineable/axe", rid(block))
 
 
 def textures():

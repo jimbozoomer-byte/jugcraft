@@ -3211,12 +3211,35 @@ public final class JugcraftAgriculture {
 	}
 
 	/**
-	 * The Harvest Festival Grounds (decor set 10; tools/harvest_festival.py): part 1's Giant Cornucopia.
+	 * The Harvest Festival Grounds (decor set 10; tools/harvest_festival.py): part 1's Giant Cornucopia; part 2's Giant
+	 * Vegetable Show (a Giant Cabbage, Marrow, Turnip and Carrot, each with its entry card) and the Prize Ribbon Board.
 	 */
 	private static void registerHarvestFestival() {
 		Block cornucopia = registerBlock("giant_cornucopia", GiantCornucopiaBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.WOOD)
 				.strength(1.0F).sound(SoundType.WOOD).noOcclusion().ignitedByLava().pushReaction(PushReaction.IMMOVEABLE));
 		registerItem("giant_cornucopia", props -> new BlockItem(cornucopia, props), new Item.Properties().useBlockDescriptionPrefix(), BUILDING_TAB);
+		// Part 2: the show's vegetables, each its shape facing north (tools/harvest_festival.py SHOW), and the board.
+		Block cabbage = registerBlock("giant_cabbage", props -> new FacingDecorationBlock(props, new double[] {1.0, 0.0, 1.0, 15.0, 7.5, 15.0}),
+				showProperties(MapColor.PLANT, SoundType.GRASS));
+		Block marrow = registerBlock("giant_marrow", props -> new FacingDecorationBlock(props, new double[] {4.0, 0.0, 0.25, 12.0, 6.5, 16.0}),
+				showProperties(MapColor.COLOR_GREEN, SoundType.WOOD));
+		Block turnip = registerBlock("giant_turnip", props -> new FacingDecorationBlock(props, new double[] {4.5, 0.0, 4.5, 11.5, 12.5, 11.5}),
+				showProperties(MapColor.COLOR_PURPLE, SoundType.WOOD));
+		Block carrot = registerBlock("giant_carrot", props -> new FacingDecorationBlock(props, new double[] {6.0, 0.0, 1.0, 10.0, 8.0, 15.0}),
+				showProperties(MapColor.COLOR_ORANGE, SoundType.WOOD));
+		Block board = registerBlock("prize_ribbon_board", PrizeRibbonBoardBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_GREEN)
+				.strength(1.0F).sound(SoundType.WOOD).noOcclusion().ignitedByLava().pushReaction(PushReaction.IMMOVEABLE));
+		for (Block block : List.of(cabbage, marrow, turnip, carrot)) {
+			registerItem(BuiltInRegistries.BLOCK.getKey(block).getPath(), props -> new BlockItem(block, props),
+					new Item.Properties().useBlockDescriptionPrefix(), BUILDING_TAB);
+		}
+		registerItem("prize_ribbon_board", props -> new DoubleHighBlockItem(board, props), new Item.Properties().useBlockDescriptionPrefix(),
+				BUILDING_TAB);
+	}
+
+	/** A prize show vegetable: soft, and popped off by a piston. */
+	private static BlockBehaviour.Properties showProperties(MapColor color, SoundType sound) {
+		return BlockBehaviour.Properties.of().mapColor(color).strength(0.8F).sound(sound).noOcclusion().pushReaction(PushReaction.POPPED);
 	}
 
 	/** Bleached bones: they come away easily, and a piston pops them off. */
