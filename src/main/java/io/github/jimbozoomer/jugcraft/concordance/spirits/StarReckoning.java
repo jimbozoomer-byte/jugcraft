@@ -15,6 +15,7 @@ import io.github.jimbozoomer.jugcraft.concordance.rules.ResearchState;
 import io.github.jimbozoomer.jugcraft.concordance.sky.AstralClaims;
 import io.github.jimbozoomer.jugcraft.concordance.sky.AstrolabeItem;
 import io.github.jimbozoomer.jugcraft.concordance.sky.Sky;
+import io.github.jimbozoomer.jugcraft.concordance.worker.PactDefinition;
 import io.github.jimbozoomer.jugcraft.concordance.worker.Pacts;
 import java.util.ArrayList;
 import java.util.List;
@@ -44,6 +45,8 @@ public final class StarReckoning {
 	public static final int MAX_CHOICES = 8;
 	/** The evidence key the first obligation records under Stolas's Regard (EvidenceRule: practice:<activity>:<key>). */
 	public static final String OBLIGATION_KEY = "practice:" + StolasRegard.ACTIVITY + ":" + StolasEntity.COUNTERPART;
+	/** Star-reckoning as the pact service of its work (GC-01, SG1): his sky step, the patterns observed, the reckoning, his rows. */
+	public static final PactService SERVICE = new Service();
 
 	private StarReckoning() {
 	}
@@ -151,5 +154,63 @@ public final class StarReckoning {
 			case TOO_LITTLE -> Component.translatable("message.jugcraft.concordance.pact.reckoning.too_little", pattern == null ? 0 : pattern.recallCost(), name);
 			case RECALLED_ALREADY -> Component.translatable("message.jugcraft.concordance.pact.reckoning.recalled_already", name);
 		};
+	}
+
+	/** Star-reckoning behind PactService (GC-01): each member is what PactMenu and PactKeeping did for him in Chunk D, moved, unchanged. */
+	private static final class Service implements PactService {
+		@Override
+		public String work() {
+			return WORK;
+		}
+
+		@Override
+		public boolean holderOnly() {
+			return true;
+		}
+
+		/** His sky step (D-S12): one observation recorded, ever; until then the invitation waits and an acceptance is refused. */
+		@Override
+		public List<Missing> missing(ServerLevel level, ServerPlayer inviter, PactPerchBlockEntity perch, PactDefinition definition) {
+			return PactMenu.observed(level, inviter) ? List.of()
+					: List.of(new Missing(PactMenu.NO_OBSERVATION, Component.translatable("message.jugcraft.concordance.pact.missing.observation")));
+		}
+
+		/** The patterns the holder observed, each with its recall cost and whether this occurrence can still be recalled. */
+		@Override
+		public List<PactStatePayload.Choice> choices(ServerLevel level, ServerPlayer player, BoundWill record, long now) {
+			long time = Sky.time(level);
+			List<PactStatePayload.Choice> out = new ArrayList<>();
+			for (Pattern pattern : StarReckoning.choices(level.getServer(), player.getUUID())) {
+				out.add(new PactStatePayload.Choice(pattern.id(), Sky.patternName(pattern.id()), pattern.recallCost(),
+						AstrolabeItem.mayRecall(level, player, pattern, time, now)));
+			}
+			return out;
+		}
+
+		@Override
+		public PactMenu.Answered perform(ServerLevel level, ServerPlayer player, AgreementHolder holder, String choice, long time, long now) {
+			Pacts.Reckoning reckoning = reckon(level, player, holder, choice, time, now);
+			BoundWill record = holder.record(level);
+			BoundWill.Service service = record == null || record.pact() == null ? null : record.pact().service();
+			return new PactMenu.Answered(reckoning.id, reckoning == Pacts.Reckoning.RECALLED, told(reckoning, Sky.catalog().pattern(choice), service));
+		}
+
+		@Override
+		public List<Component> serviceRows(ServerLevel level, ServerPlayer player, BoundWill record, long now) {
+			BoundWill.Service service = record.pact().service();
+			return List.of(Component.translatable("message.jugcraft.concordance.pact.row.service", service.quota(),
+					Math.max(0, service.quota() - Pacts.done(record.pact(), now))));
+		}
+
+		@Override
+		public List<Component> obligationRows(ServerLevel level, ServerPlayer player, BoundWill record, long now) {
+			return List.of(Component.translatable(kept(player) ? "message.jugcraft.concordance.pact.row.obligation_kept"
+					: "message.jugcraft.concordance.pact.row.obligation"));
+		}
+
+		@Override
+		public Component suspendedRow(Component name) {
+			return Component.translatable("message.jugcraft.concordance.pact.row.state.suspended");
+		}
 	}
 }

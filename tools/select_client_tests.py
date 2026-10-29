@@ -10,7 +10,8 @@ How a changed file picks classes (src/gametest/resources/fabric.mod.json lists t
 - docs, Markdown, the generators and checks in tools/ and scripts/ (their output is committed and judged below),
   the art sources in art/ (what the game loads is copied into the assets and judged there), data under
   src/main/resources/data, the language file, the optional resource packs no client test turns on, unit tests,
-  server-only game tests and Claude's settings: nothing;
+  server-only game tests and Claude's settings: nothing (except a language change to the magic screens' words, which
+  selects the classes that open them: MAGIC_WORDS);
 - a Java class under src/main or src/client that only gained code (a feature registering itself in a registry, one
   more entry in a list): the classes matching the names and IDs it gained; comments do not count;
 - a Java class whose existing code changed: every class that shows it (names it, or whose IDs match it with "Block",
@@ -78,7 +79,9 @@ WEIGHTS = {
     # measurement). Unit 3 (D-06) adds his nine poses: four loops waited out and five gestures frozen, about 50 s; and
     # subtitles listened for at the refusal and the acceptance, the answers' marks and Jade's two shots, about 30 s more;
     # estimates. Unit 5 (D-09) adds a timed sequence through his refusal, four frozen frames, about 10 s; an estimate.
-    "ConcordancePactClientGameTests": 240,
+    # The garden cohort's GC-02 adds his turning to the holder on each side of the perch: four turns of up to about three
+    # seconds, four shots and his being sent anew, about 20 s more; an estimate, not a measurement.
+    "ConcordancePactClientGameTests": 260,
     # Concordance Chunk D unit 3 (D-07): a dedicated server's start, the roster walked by keyboard (suspend and resume, an
     # end asked first, a recovery and a cancel), 64 rows paged, and ten shots at three sizes: an estimate, not a measurement.
     # Unit 5 (D-09): the workshop hand carrying one request across the yard, about 30 s more; an estimate.
@@ -87,6 +90,32 @@ WEIGHTS = {
     # OwnerCollectionsNetworkTests does), and the stranger's steps at the holder's perch with three shots: an estimate,
     # not a measurement.
     "ConcordancePactNetworkTests": 300,
+    # Concordance garden cohort, GC-04 (GC-P30): a dedicated server's start, the perch refused for want of a bed, the
+    # chooser and Buer's conversation by keyboard at three sizes, a refused and a sealed acceptance, his work on a bed,
+    # the overworked row, Jade, ten poses frozen, his underside, four bearings and the ending: about 35 shots and their
+    # waits, about 330 s at the pace the Winter entry implies (an estimate, not a measurement). GC-05 adds Bathin at the same
+    # perch: the chooser twice, his conversation by keyboard at three sizes, a refused and a sealed acceptance, one carry
+    # frozen, his matter asked and answered (the accord's two steps, about 40 s), Jade, ten poses frozen, four bearings and
+    # the ending: about 34 shots and their waits, about 230 s more (an estimate, not a measurement).
+    # GC-06b: written as a sum, each later spirit's flow added under its unit's line (+ its seconds).
+    "ConcordanceGardenPactClientGameTests": (560
+                                             # GC-06 unit 3
+                                             # GC-06 adds Marax at the same perch: the chooser twice, his conversation by
+                                             # keyboard at three sizes, a refused and a sealed acceptance, a reading at three
+                                             # sizes and his familiar frozen over its bed, his page with a proud bed, his night
+                                             # look, Jade, eleven poses, four bearings and the ending: about 33 shots and their
+                                             # waits, about 260 s more (an estimate, not a measurement).
+                                             + 260
+                                             # GC-07 unit 4
+                                             # GC-07: Foras at the same perch: the chooser twice, his conversation by
+                                             # keyboard at three sizes, a refused and a sealed acceptance, his matter
+                                             # asked and answered at three sizes, one graft frozen with his cap tipped,
+                                             # Jade, ten poses, four bearings and the ending: 32 shots and their waits,
+                                             # about 220 s more (an estimate, not a measurement).
+                                             + 220
+                                             # GC-08 unit 5
+                                             # GC-09 unit 6
+                                             ),
     "JugcraftServerClientGameTests": 90,
     # Companion suites exercise timed AI, inventory trips and cooking, not just
     # showrooms. Allow CI headroom over the focused local runtime measurements.
@@ -105,12 +134,46 @@ WEIGHTS = {
 }
 # Classes a client test shows without naming them (registered by another class, or reached through an optional
 # integration), by the classes that show them: Stolas's renderer (his glowmask layer, scale, culling and departure) and
-# his perch's and anchor's Jade provider (the unit review, D2).
-SHOWN_BY = {"WorkerClient": {"ConcordancePactClientGameTests"}, "PactDataProvider": {"ConcordancePactClientGameTests"}}
+# his perch's and anchor's Jade provider (the unit review, D2), and since the garden cohort, the pact spirits' renderer table
+# and base (GC-01), and Buer's service and the garden reads it shows at work (GC-04).
+SHOWN_BY = {"WorkerClient": {"ConcordancePactClientGameTests"}, "PactDataProvider": {"ConcordancePactClientGameTests"},
+            "PactSpiritRenderers": {"ConcordancePactClientGameTests", "ConcordanceGardenPactClientGameTests"},
+            "PactSpiritEntity": {"ConcordancePactClientGameTests", "ConcordanceGardenPactClientGameTests"},
+            "StrainTending": {"ConcordanceGardenPactClientGameTests"}, "GardenReach": {"ConcordanceGardenPactClientGameTests"},
+            "GardenPacts": {"ConcordanceGardenPactClientGameTests"}}
 HUB = 5  # a class this many test classes name is a shared registry, not one feature
 WIDE = 4  # a changed class shown by this share of the classes (a quarter) or more is picked by its changed lines
 ENDINGS = ("BlockEntityRenderer", "BlockEntity", "Renderer", "Block", "Item", "Entity", "Model", "Screen", "Menu",
            "Blocks", "Items")
+# And the accord machinery (Concordance garden cohort, GC-05), named by no client test: shown on Bathin's kept page and the
+# roster by the garden's client class (a class this selection keeps only while it is listed).
+SHOWN_BY["PactAccords"] = {"ConcordanceGardenPactClientGameTests"}
+# The magic interfaces (docs/features/magic-interfaces.md): the shared Magic layer and its words and art are shown by every
+# class that opens the pact screen (the pact, garden and network classes, the screen fit check) and by the roster's, whose
+# answers carry PactScreen.Verdict; the kit's sprites and the cosmos are named by no test, so a change to them selects these
+# classes too (MAGIC_ASSETS), as does the end confirmation drawn on the scroll.
+MAGIC_SHOWN = {"ConcordancePactClientGameTests", "ConcordanceGardenPactClientGameTests", "ConcordancePactNetworkTests",
+               "ConcordanceRosterClientGameTests", "ScreenFitClientGameTests"}
+for _name in ("MagicArt", "MagicTheme", "MagicLayout", "MagicScreen", "MagicButton", "MagicText", "MagicChip", "MagicStacks",
+              "MagicPortrait", "MagicPortraits", "PactGlance", "RosterGlance", "PactAfford", "KeepFirstConfirmScreen", "ComposerScroll",
+              "ConcordanceClientOptions"):
+    SHOWN_BY[_name] = SHOWN_BY.get(_name, set()) | MAGIC_SHOWN
+# The magic interfaces' unit 2: a whole sentence's short form (MagicGlance) draws the roster's card states and Jade's short
+# lines; Jade's lines on the pact perch and the spirits are photographed by the pact and garden classes (when Jade is
+# loaded), and those on Concordance blocks by the encyclopedia's.
+SHOWN_BY["MagicGlance"] = SHOWN_BY.get("MagicGlance", set()) | MAGIC_SHOWN
+SHOWN_BY["JugcraftJadeClient"] = SHOWN_BY.get("JugcraftJadeClient", set()) | {
+    "ConcordancePactClientGameTests", "ConcordanceGardenPactClientGameTests", "EncyclopediaClientGameTests"}
+# And the roster's class, whose workshop hand at work is photographed with Jade's overlay of it (unit 2's review).
+SHOWN_BY["JugcraftJadeClient"] |= {"ConcordanceRosterClientGameTests"}
+MAGIC_ASSETS = re.compile(r"^src/main/resources/assets/jugcraft/textures/gui/(?:sprites/(?:magic|tooltip)/|magic/)")
+# The language file is otherwise judged by nothing (its words are judged by the generators' checks), but the magic screens'
+# whole-screen word budgets are judged only by their client tests: a change to a key they draw or narrate (a glance, a
+# short label, a pact or roster screen's words, a whole sentence's short form, or a server sentence of the pacts, garden
+# pacts, workers or roster) selects them.
+LANG_FILE = re.compile(r"^src/main/resources/assets/jugcraft/lang/[a-z_]+\.json$")
+MAGIC_WORDS = re.compile(r'^[-+]\s*"(?:screen\.jugcraft\.pact\.|screen\.jugcraft\.roster\.|screen\.jugcraft\.glance\.'
+                         r'|message\.jugcraft\.concordance\.(?:pact|garden_pact|workers|roster)\.)')
 # Files that change nothing a client test shows.
 NOTHING = (
     re.compile(r"^docs/"),
@@ -245,6 +308,12 @@ def changed_code(base, head, path):
     return lines
 
 
+def magic_words(base, head, path):
+    """Whether a language file's change touches a key the magic screens draw or narrate (MAGIC_WORDS)."""
+    return any(MAGIC_WORDS.match(line) for line in git("diff", "-U0", base, head, "--", path).splitlines()
+               if not line.startswith(("---", "+++")))
+
+
 def by_names(lines, tests):
     """The classes naming the Jugcraft classes and IDs these code lines name (a registry many tests use aside)."""
     classes, ids = names_in("\n".join(lines))
@@ -264,6 +333,10 @@ def select(changed, tests, newly_listed, base=None, head=None):
         test = CLIENT_TEST.match(path)
         if test and test.group(1) in tests:
             chosen.add(test.group(1))
+            continue
+        if base and LANG_FILE.match(path) and magic_words(base, head, path):
+            chosen |= MAGIC_SHOWN & tests.keys()
+            reasons.append(f"{path}: the magic screens' words changed")
             continue
         if any(rule.search(path) for rule in NOTHING):
             continue
@@ -297,6 +370,9 @@ def select(changed, tests, newly_listed, base=None, head=None):
             if not hits:
                 reasons.append(f"{path}: no client test shows {name}")
             chosen |= hits
+            continue
+        if MAGIC_ASSETS.match(path):
+            chosen |= MAGIC_SHOWN & tests.keys()
             continue
         asset = ASSET.match(path)
         if asset:

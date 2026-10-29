@@ -587,6 +587,296 @@
       }
     ]
   },
+  "buer.arrive": {
+    "subtitle": "subtitles.jugcraft.buer.arrive",
+    "sounds": [
+      {
+        "name": "jugcraft:menagerie/fable/butterfly_heal",
+        "attenuation_distance": 16
+      }
+    ]
+  },
+  "buer.listen": {
+    "subtitle": "subtitles.jugcraft.buer.listen",
+    "sounds": [
+      {
+        "name": "jugcraft:alchemy/peheal",
+        "attenuation_distance": 16,
+        "pitch": 1.25
+      }
+    ]
+  },
+  "buer.inspect": {
+    "subtitle": "subtitles.jugcraft.buer.inspect",
+    "sounds": [
+      {
+        "name": "jugcraft:alchemy/peheal",
+        "attenuation_distance": 16
+      }
+    ]
+  },
+  "buer.assent": {
+    "subtitle": "subtitles.jugcraft.buer.assent",
+    "sounds": [
+      {
+        "name": "jugcraft:menagerie/grove/entity/cactem/entity.cactem.heal",
+        "attenuation_distance": 16
+      }
+    ]
+  },
+  "buer.refuse": {
+    "subtitle": "subtitles.jugcraft.buer.refuse",
+    "sounds": [
+      {
+        "name": "jugcraft:alchemy/peheal",
+        "attenuation_distance": 16,
+        "pitch": 0.6
+      }
+    ]
+  },
+  "buer.depart": {
+    "subtitle": "subtitles.jugcraft.buer.depart",
+    "sounds": [
+      {
+        "name": "jugcraft:menagerie/fable/butterfly_heal",
+        "attenuation_distance": 16,
+        "pitch": 0.7
+      }
+    ]
+  },
+  "buer.work": {
+    "subtitle": "subtitles.jugcraft.buer.work",
+    "sounds": [
+      {
+        "name": "jugcraft:menagerie/grove/item/item.heal_spell_book.player_heal",
+        "attenuation_distance": 16
+      }
+    ]
+  },
+  "bathin.arrive": {
+    "subtitle": "subtitles.jugcraft.bathin.arrive",
+    "sounds": [
+      {
+        "name": "jugcraft:menagerie/cavern/item/magic_conch/magic_conch_summon",
+        "attenuation_distance": 16,
+        "pitch": 1.5
+      }
+    ]
+  },
+  "bathin.listen": {
+    "subtitle": "subtitles.jugcraft.bathin.listen",
+    "sounds": [
+      {
+        "name": "jugcraft:menagerie/cavern/item/sea_staff/sea_staff_bubble_1",
+        "attenuation_distance": 16,
+        "pitch": 1.2
+      }
+    ]
+  },
+  "bathin.inspect": {
+    "subtitle": "subtitles.jugcraft.bathin.inspect",
+    "sounds": [
+      {
+        "name": "jugcraft:menagerie/cavern/item/sea_staff/sea_staff_bubble_2",
+        "attenuation_distance": 16
+      }
+    ]
+  },
+  "bathin.assent": {
+    "subtitle": "subtitles.jugcraft.bathin.assent",
+    "sounds": [
+      {
+        "name": "jugcraft:menagerie/cavern/item/magic_conch/magic_conch_cast",
+        "attenuation_distance": 16
+      }
+    ]
+  },
+  "bathin.refuse": {
+    "subtitle": "subtitles.jugcraft.bathin.refuse",
+    "sounds": [
+      {
+        "name": "jugcraft:menagerie/cavern/item/magic_conch/magic_conch_cast",
+        "attenuation_distance": 16,
+        "pitch": 0.7
+      }
+    ]
+  },
+  "bathin.depart": {
+    "subtitle": "subtitles.jugcraft.bathin.depart",
+    "sounds": [
+      {
+        "name": "jugcraft:menagerie/cavern/item/magic_conch/magic_conch_cast",
+        "attenuation_distance": 16,
+        "pitch": 1.8
+      }
+    ]
+  },
+  "bathin.work": {
+    "subtitle": "subtitles.jugcraft.bathin.work",
+    "sounds": [
+      {
+        "name": "jugcraft:menagerie/cavern/item/sea_staff/sea_staff_bubble_0",
+        "attenuation_distance": 16
+      }
+    ]
+  },
+  "marax.arrive": {
+    "subtitle": "subtitles.jugcraft.marax.arrive",
+    "sounds": [
+      {
+        "name": "jugcraft:nouveau/gaia_1",
+        "attenuation_distance": 16
+      }
+    ]
+  },
+  "marax.listen": {
+    "subtitle": "subtitles.jugcraft.marax.listen",
+    "sounds": [
+      {
+        "name": "jugcraft:nouveau/gaia_2",
+        "attenuation_distance": 16,
+        "pitch": 1.3
+      }
+    ]
+  },
+  "marax.inspect": {
+    "subtitle": "subtitles.jugcraft.marax.inspect",
+    "sounds": [
+      {
+        "name": "jugcraft:nouveau/gaia_3",
+        "attenuation_distance": 16
+      }
+    ]
+  },
+  "marax.assent": {
+    "subtitle": "subtitles.jugcraft.marax.assent",
+    "sounds": [
+      {
+        "name": "jugcraft:nouveau/gaia_4",
+        "attenuation_distance": 16
+      }
+    ]
+  },
+  "marax.refuse": {
+    "subtitle": "subtitles.jugcraft.marax.refuse",
+    "sounds": [
+      {
+        "name": "jugcraft:nouveau/gaia_2",
+        "attenuation_distance": 16,
+        "pitch": 0.7
+      }
+    ]
+  },
+  "marax.depart": {
+    "subtitle": "subtitles.jugcraft.marax.depart",
+    "sounds": [
+      {
+        "name": "jugcraft:nouveau/gaia_1",
+        "attenuation_distance": 16,
+        "pitch": 0.85
+      }
+    ]
+  },
+  "marax.work": {
+    "subtitle": "subtitles.jugcraft.marax.work",
+    "sounds": [
+      {
+        "name": "jugcraft:nouveau/gaia_3",
+        "attenuation_distance": 16,
+        "pitch": 1.5
+      }
+    ]
+  },
+  "foras.arrive": {
+    "subtitle": "subtitles.jugcraft.foras.arrive",
+    "sounds": [
+      {
+        "name": "jugcraft:menagerie/fable/mojo_spawn",
+        "attenuation_distance": 16,
+        "pitch": 0.85
+      }
+    ]
+  },
+  "foras.listen": {
+    "subtitle": "subtitles.jugcraft.foras.listen",
+    "sounds": [
+      {
+        "name": "jugcraft:menagerie/fable/mojo_idle",
+        "attenuation_distance": 16,
+        "pitch": 0.8
+      }
+    ]
+  },
+  "foras.inspect": {
+    "subtitle": "subtitles.jugcraft.foras.inspect",
+    "sounds": [
+      {
+        "name": "jugcraft:menagerie/fable/mojo_step1",
+        "attenuation_distance": 16
+      },
+      {
+        "name": "jugcraft:menagerie/fable/mojo_step2",
+        "attenuation_distance": 16
+      },
+      {
+        "name": "jugcraft:menagerie/fable/mojo_step3",
+        "attenuation_distance": 16
+      }
+    ]
+  },
+  "foras.assent": {
+    "subtitle": "subtitles.jugcraft.foras.assent",
+    "sounds": [
+      {
+        "name": "jugcraft:menagerie/fable/mojo_base_attack_hit1",
+        "attenuation_distance": 16
+      },
+      {
+        "name": "jugcraft:menagerie/fable/mojo_base_attack_hit2",
+        "attenuation_distance": 16
+      },
+      {
+        "name": "jugcraft:menagerie/fable/mojo_base_attack_hit3",
+        "attenuation_distance": 16
+      }
+    ]
+  },
+  "foras.refuse": {
+    "subtitle": "subtitles.jugcraft.foras.refuse",
+    "sounds": [
+      {
+        "name": "jugcraft:menagerie/fable/mojo_hurt",
+        "attenuation_distance": 16,
+        "pitch": 0.75
+      }
+    ]
+  },
+  "foras.depart": {
+    "subtitle": "subtitles.jugcraft.foras.depart",
+    "sounds": [
+      {
+        "name": "jugcraft:menagerie/fable/mojo_death",
+        "attenuation_distance": 16
+      }
+    ]
+  },
+  "foras.work": {
+    "subtitle": "subtitles.jugcraft.foras.work",
+    "sounds": [
+      {
+        "name": "jugcraft:menagerie/cavern/block/thornwood_branch/thornwood_branch_break_0",
+        "attenuation_distance": 16
+      },
+      {
+        "name": "jugcraft:menagerie/cavern/block/thornwood_branch/thornwood_branch_break_1",
+        "attenuation_distance": 16
+      },
+      {
+        "name": "jugcraft:menagerie/cavern/block/thornwood_branch/thornwood_branch_break_2",
+        "attenuation_distance": 16
+      }
+    ]
+  },
   "alchemy_chargetick": {
     "sounds": [
       "jugcraft:alchemy/chargetick"

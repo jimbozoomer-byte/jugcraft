@@ -4,8 +4,15 @@ Status: merged to main ([#244](https://github.com/jimbozoomer-byte/jugcraft/pull
 `claude/awesome-davinci-iwv3b9`, integrated by [#263](https://github.com/jimbozoomer-byte/jugcraft/pull/263) on
 8 October 2026); see Verification for what has run. Concordance Chunk C's unit 4 (habitat inspection, the canteen on
 beds, the compost page, the mixed bed, harvest strain and the Dewlit graft) is built for
-`claude/chunk-c-living-workshop`, not merged; its tests passed in CI (run 38726242149, with unit 3, and again in run
-38774859294; [contract](concordance-chunk-c.md)).
+`claude/chunk-c-living-workshop` and on main since 27 October 2026 through the owner's #494 (Chunks B to D in one squashed
+commit); its tests passed in CI (run 38726242149, with unit 3, and again in run 38774859294;
+[contract](concordance-chunk-c.md)). The garden cohort's unit 1 (GC-03 and GC-04: two read-only bed reads, the tending
+hook and Buer's strain tending; [contract](concordance-garden-cohort.md)) is not merged (draft #526); its tests passed in
+CI run 40605564166. Its unit 2 (GC-05: the Gleaner's and the Heart's named roads, the bed index's devices and Bathin's
+Verdance carrying; [record](bathin-pact.md)) is not merged either; its tests passed in CI run 40777920181. Its unit 3
+(GC-06: `HabitatAdvice` and Marax's habitat reading; [record](marax-pact.md)) is built and not merged, and not yet
+compiled or run in CI. Its unit 4 (GC-07b and GC-07: the graft in one place and Foras's graft keeping;
+[record](foras-pact.md)) is built and not merged, and not yet compiled or run in CI.
 Proposal issue: none; the owner's Arcane Concordance brief (roadmap step 14) is the scope approval.
 Owner: @jimbozoomer-byte. AI-assisted implementation with Claude Code; the model is named in the commit trailers.
 Target milestone and tier: Concordance milestone 6, Practitioner stage (Jugcraft Workshops). Roadmap step 14.
@@ -55,7 +62,7 @@ each factor holding it back: "Light 6: too little (needs at least 11)". A ripe c
 hand: its produce and Verdant Chaff, and it falls back to step 1 to grow again. A Mendvetch beside other crops also
 speeds them, as Jugcraft's legumes do.
 
-**Inspecting a garden** (Concordance Chunk C, C-07; not merged, like the three paragraphs after it). Open the
+**Inspecting a garden** (Concordance Chunk C, C-07; merged with #494, like the three paragraphs after it). Open the
 encyclopedia while looking at a Verdant Bed, or a crop on one, within your reach, and its Inspect page shows the bed's
 moisture and nutrients, the crop's step and pace, the verdict growth would reach on this reading, and each factor
 against the plant's range (least, best from, best to, most), naming how far its reading reaches: moisture is the bed's
@@ -92,7 +99,13 @@ Sunpetal bears shade, light 9+ (best 11+) for 11+ (best 13+), but wants a wetter
 (best 4+). The graft lasts through every harvest, replanting, save and restart, until a crop of another organism grows
 there. A bed carries one: a second is refused, as is a graft where the gardener may not change the crop or the bed, and
 a refusal spends nothing. Produce, cost, chaff and alchemy are unchanged, so a graft makes nothing. The reports, the
-Inspect page and Jade name it, on a crop only when the crop is its host.
+Inspect page and Jade name it, on a crop only when the crop is its host. Since the garden cohort's GC-07b (not merged;
+not yet run in CI) the graft itself is `garden/Grafting.apply` (the graft set, the ungrafted plant's verdict forgotten,
+the particles), which the hand's gesture ends in after its own checks, messages and spent Dewmoss, unchanged, and which
+Foras's graft keeping ([record](foras-pact.md)) ends in after his: `check_graft`'s rules hold it there, and only growth
+clears a graft. `Grafting.gains` is his "would gain": by the bed's cached reading, the grafted niche no worse on any
+factor and better on one (Dewlit helps a Sunpetal in light 9 to 12 on a bed of moisture 5 or more; on moisture 4 or less
+its moisture would fit worse).
 
 **Four living devices:**
 
@@ -148,11 +161,33 @@ the bed's note, the Habitat Gauge and the Inspect page ask it, and the Verdant H
 disturbance as the worse of the area alone and the area with the strain. A mixed bed multiplies the chance of a step
 (`OrganismCropBlock.speed`; the kinds come from the sample's own set, with no new read), never its cost.
 
+**For pact spirits (the garden cohort, GC-03; not merged).** A bed answers two questions without changing anything:
+`mayTendAt(now)` (awake, the Concordance on, a strain as growth would count it, and outside the 600-tick window of its last
+tending, whoever tended it: by hand or by a pact's service, one window a bed, unsaved: GB14) and `cachedHabitat(level)`
+(the habitat from the area's last sample, whatever its age; none without one; it never takes a sample, so no reader spends
+the level's 16 samples a tick). `habitat` reads through `cachedHabitat` once its sample is fresh, unchanged in what it
+returns. A Greenwarden's tending that eases a strain is also a garden pact's first obligation inside that pact's area
+(`PactObligations`, one line in `VerdantBedBlock.tendBy`); the gesture's own checks, rate gate and messages are unchanged.
+Buer's strain tending (GC-04, [record](buer-pact.md)) calls the same `tend` a Greenwarden's hand does, so the 600-tick
+window is one a bed, whoever tends; he never composts, rests or feeds a bed, and his overworked complaint ends when the bed
+eases by these rules. `check_ecology` allows `tend` from `VerdantBedBlock` and `StrainTending` alone. Since GC-06 (not
+merged; not yet run in CI) the pure `HabitatAdvice.one(niche, habitat, grafts)` names the one change for a plant on one
+reading: nothing while it thrives; when one factor holds it at its step, the value nearest its own that alone raises it
+a step (harvest strain eased first where it decided the disturbance fit, and only ever lowered); when two or more do, the
+first in `Factor` order, "one of n", at its nearest ideal value; only ever toward the ideal range, so a plant that needs
+no disturbance is never told to add magic; and a graft its bed could take that alone would serve (Dewlit for a Sunpetal
+at light 9 to 12). Marax's habitat reading ([record](marax-pact.md)) asks it of a bed's `cachedHabitat` (no sample is
+taken) and changes nothing; using a Verdant Bed itself with an empty hand (its report) is his pact's first obligation
+(`PactObligations`, one line after `report` in `VerdantBedBlock.useWithoutItem`); a crop's own report is not.
+
 **The devices** share `LivingDeviceBlockEntity` (keeper, awake, status word, a staggered pulse) and act only on their
 pulse: the Heart every 200 ticks, the Maw, Gauge and Gleaner every 40. The Heart's Verdance is a typed
 `Reservoir` of `essence/verdance`; the Gleaner draws it through `Transfers.move` with both devices' `Ownership` (the
 keeper's party), so a stranger's Gleaner is refused. The Heart pours into a pylon through the data conversion
-`jugcraft:verdance_to_ley`.
+`jugcraft:verdance_to_ley`. Since the garden cohort (GC-05; not merged) the Gleaner's draw from one Heart
+(`receiveFrom`) and the Heart's pour into one pylon (`pourInto`) can be named at a distance by a pact spirit (Bathin's
+Verdance carrying): the same ownership, the same conversion, both reservoirs changed in one step. The Gleaner's own draw
+and the Heart's pour beside it are these bodies, unchanged in what they do; no device's saved key changed.
 
 **Practice.** Harvesting a ripe crop by hand records `Evidence.Practiced("jugcraft:cultivation", <crop>)`; all four
 crops master Verdant Husbandry.
@@ -175,7 +210,7 @@ crops master Verdant Husbandry.
 - Specialty use without other branches: needs only First Light.
 - Unlocks: nothing new in Concordance Chunk C; the mixed bed, strain and the graft change how a garden grows, not what
   can be made.
-- Since Concordance Chunk C (not merged): Dewmoss is an input of grafting (one spent a graft), whose output is the bed's
+- Since Concordance Chunk C (merged with #494): Dewmoss is an input of grafting (one spent a graft), whose output is the bed's
   trait, Dewlit; the Inspect page is a new reader of beds and crops; the canteen wets beds; compost (bone meal,
   fertilizer, the Maw's nutrient) also eases strain.
 
@@ -223,7 +258,7 @@ crops master Verdant Husbandry.
   Area samples are not saved (the first reading after a load samples again).
 - Disable behaviour: with `concordance.enabled=false`, crops do not grow and devices stop (status "switched off"),
   and everything stays registered.
-- Since Concordance Chunk C (not merged): clients are also sent a bed's strain and whether its crop has ripened since,
+- Since Concordance Chunk C (merged with #494): clients are also sent a bed's strain and whether its crop has ripened since,
   and, only while it carries a graft, the graft and the organism it is for; never the keeper. A bed saves `strain`,
   `ripened` and `graft` only when set (never the graft's host); older saves read 0, false and none, and the bed's
   version stays 1. When a bed was last tended is not saved, so a restart allows one early tending. The Inspect page
@@ -352,6 +387,43 @@ them (the client test by its shard; its shots not viewed). Every job passed agai
 Not yet run: any client (the GeckoLib devices, the Fusion beds, the crop textures, the Jade lines and the codex pages
 in game), a two-client dedicated server, and a long unattended garden on a real server.
 
+**The garden cohort, unit 1 (GC-03, GC-04; not merged).** In CI run 40605564166 (pull request #526 on `4ca363d38`),
+with and without the optional integrations, these passed: `theGardenReachNeverLoadsAChunk`,
+`theGardenReachIsCappedAndCached`, `aCachedHabitatNeverSamples` (the level's sample budget unchanged) and
+`aBedSaysWhetherItMayBeTendedWithoutChangingIt` (`ConcordanceGardenGameTests`); `buerEasesOneStrainAtTheBedsOwnRate`,
+`twoBuersShareOneBedsTendWindow` and `anOverworkedBedWaitsForCompost` (`ConcordanceWorkerGameTests`). In the run before
+(40597482976) `theGardenReachIsCappedAndCached` failed: the test broke its nearest bed at the wrong place (in 26.3
+`GameTestHelper.relativePos` is no inverse of `absolutePos` in an unrotated test), fixed in the test in `4ca363d38`.
+`python3 tools/check_mod_data.py` (`check_ecology`'s `tend` callers) passes locally. Not run: a long unattended garden
+with Buer on a real server; any person.
+
+**The garden cohort, unit 2 (GC-05; not merged).** In CI run 40777920181 (pull request #526 on `8af703330`), with and
+without the optional integrations, these passed: `aGleanerReceivesFromANamedHeartAtAnyDistance`,
+`aHeartPoursIntoANamedPylonByItsOwnRule`, `aHeartSaysWhetherItHasItsOwnRoad` and `theGardenReachCapsItsDevices`
+(`ConcordanceGardenGameTests`); Bathin's carrying tests, among them `bathinCarriesWholeMovesFromABeatingHeart` (a Heart
+beating on a lit bed among three kinds of crop) and `bathinsFirstObligationIsADeviceReadByHand`
+(`ConcordanceWorkerGameTests`); and `noVerdanceIsMintedByCarrying` (`ConcordanceEconomyGameTests`). The existing
+`theHeartBeatsVerdanceIntoAPylon` and Gleaner tests passed unchanged. `check_verdance_roads` and `check_garden_pacts`
+pass locally. Not run: a long unattended garden with Bathin on a real server; any person.
+
+**The garden cohort, unit 3 (GC-06; not merged; not yet run in CI).** `HabitatAdvice` is in the pure package
+(`check_baselines`). A scratch harness outside Git, compiled with JDK 21 against it and the ecology classes as committed
+and holding the shipped organisms' and Dewlit's niches, checks it against brute force over 524,288 readings a niche:
+30,604,024 checks, 0 failures ([the rule](marax-pact.md#the-rule-gc-p64)). Its CI form,
+`ConcordanceGardenGameTests.habitatAdviceHoldsForEveryOrganism`, was in the head of run 40777920181, which passed in
+full; Marax's reading tests (`aReadingNamesOneCorrectionAndChangesNothing`, which also holds the level's sample budget
+unchanged, `aReadingSkipsBedsWithoutACachedSample` and four more) and `maraxsFirstObligationIsABedReadByHand` are written
+and not yet run. Not run: any of them in CI; any person.
+
+**The garden cohort, unit 4 (GC-07b, GC-07; not merged; not yet run in CI).** Written and not yet run:
+`theGraftGestureBehavesAsBefore` (the hand's graft through `Grafting`, its messages and its one spent Dewmoss as before),
+`aGraftGainsOnlyWhereEveryFitIsNoWorseAndOneBetter` (six readings of a Sunpetal with and without Dewlit) and
+`theGardenReachIndexesStoresTouchingThePerch` (`ConcordanceGardenGameTests`); Foras's graft-keeping tests in
+`ConcordanceWorkerGameTests`, among them `forasSpendsOneDonorAGraftAndNeverTwo`, `forasNeverReplacesAKnownGraft`,
+`forasGraftsAgainAfterAReplanting` and `aPrudentForasGraftsWhereItHelps` (a host it helps grafted, one it would not
+left). Chunk C's nine graft tests are unchanged. `check_ecology` and `check_graft` (the graft's rules in `Grafting`) pass
+locally. Not run: any of them in CI; a long unattended garden with Foras on a real server; any person.
+
 ## World and event applicability
 
 No worldgen, creatures or seasons. The crops are not found in the world; they are crafted from vanilla plants.
@@ -366,7 +438,7 @@ No worldgen, creatures or seasons. The crops are not found in the world; they ar
   disturbance sources; item tags `jugcraft:verdant_specimens`, `jugcraft:mulch/quarter`, `/half`, `/three_quarters`,
   `/whole`; the bed joins `#minecraft:supports_crops` and `#minecraft:grows_crops`, the crops `#minecraft:crops`, the
   Mendvetch `#jugcraft:nitrogen_fixing_crops`.
-- Since Concordance Chunk C, unit 4 (not merged): the graft `jugcraft:dewlit` (data folder `concordance/graft`, lang
+- Since Concordance Chunk C, unit 4 (merged with #494): the graft `jugcraft:dewlit` (data folder `concordance/graft`, lang
   `graft.jugcraft.dewlit`); the organism field `neighbours`; bed keys `strain`, `ripened` and `graft` (and, in the
   update tag only, `graft_host`); lang for the Inspect page (`compose.jugcraft.ecology.inspect.*`,
   `encyclopedia.jugcraft.inspect.garden.habitat` and `.here`), the mixed bed and strain

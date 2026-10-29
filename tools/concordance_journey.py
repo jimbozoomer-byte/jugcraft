@@ -41,6 +41,10 @@ Nothing here is generated into the game. tools/check_mod_data.py (check_journey)
   PACT_HALL, made under the Concordance's switch alone, and every row is named; the Open Hand Compact's materials and
   resonance and one of Stolas's offerings are had by the route; the workshop hand is sealed as SpiritAnchorBlock seals it;
   and every step names the server test that walks the whole route;
+- the garden pacts (GARDEN, the garden cohort) hold without Styx or Stolas: one player alone, in the Overworld alone, with
+  no structure loot, nothing mastered and nothing past the Practitioner stage, reaches each step with the research it names
+  (each step needing it) and makes every thing it names, each a row of tools/acquisition.py GARDEN_PACTS; The Garden's
+  Regard is mastered by the route exactly when three garden spirits ship (GB26);
 - the routes' "served once by each kind of worker" is the Binding Arts' mastery, as many kinds as the workers have, the
   workshop hand among the spirits;
 - every game test a step names exists;
@@ -310,6 +314,144 @@ PACT = {
          "reaches": ["item:minecraft:amethyst_shard"],
          "tests": ["upkeepWarnsThenSuspendsAfterGraceAndResumes", "aReturnAfterAbsenceGetsTheFullGrace",
                    "endingReturnsTheEscrowOnce", "endingAnOrphanReturnsItsEscrowOnce", PACT_TEST]},
+    ],
+}
+
+# The garden cohort (docs/features/concordance-garden-cohort.md; GC-03 begins it and each spirit's unit appends its steps,
+# GC-04 Buer's first): The Garden's Regard without Styx or Stolas, then each garden spirit's pact. One player alone, in the
+# Overworld alone, with no structure loot, nothing mastered and nothing past the Practitioner stage, reaches each step with
+# the research it names (each step needing it) and makes every Concordance thing it names (tools/acquisition.py
+# GARDEN_PACTS, made under the Concordance's switch alone, every row named). The Regard is mastered only through three
+# different garden spirits' first obligations (GB26), so while fewer ship the route reaches no mastery of it. Unit 7's
+# GARDEN_TEST will walk every step; until then each step names the tests that exercise it.
+GARDEN = {
+    "name": "The garden pacts",
+    "steps": [
+        {"research": ["first_light", "binding_arts", "verdant_husbandry"], "things": ["sunpetal"],
+         "text": "With the Binding Arts and Verdant Husbandry understood, craft a Sunpetal (or take any garden specimen: a "
+                 "Dewmoss, Gloamcap, Mendvetch or Verdant Chaff) and examine it, sneaking and using it in the air; its tooltip "
+                 "and the codex's Binding category say what it teaches",
+         "reaches": [f"research:{rid('garden_regard')}@encountered"],
+         "tests": ["theGardensRegardSpecimensSayWhatTheyTeach", "theGardensRegardIsReachable"]},
+        {"research": [], "things": ["verdant_bed"],
+         "text": "Lay a Verdant Bed, grow a Sunpetal (or any organism crop) on it and harvest it ripe by hand",
+         "reaches": [f"research:{rid('garden_regard')}@observed"],
+         "tests": ["theGardensRegardAdvancesByHandAndByAWorker", "theGardensRegardIsReachable"]},
+        {"research": [], "things": ["bonding_charm"],
+         "text": "Keep a bound worker at its work: a familiar's mending, a spirit's delivery or a construct's trip (a Hearthling "
+                 "bound with a Bonding Charm is one). The Garden's Regard is understood, and no research notes stand in for any "
+                 "of its evidence",
+         "reaches": [f"research:{rid('garden_regard')}@understood"],
+         "tests": ["theGardensRegardAdvancesByHandAndByAWorker", "notesNeverStandInForTheGardensRegard",
+                   "theGardensRegardIsReachable"]},
+        # GC-04: Buer, from his perch to his departure (Dossier 1). buerFromTheCodexToDeparture walks steps 1 to 6 on one
+        # survival player.
+        {"research": [], "things": ["pact_perch", "mendvetch"],
+         "text": "Build a Pact Perch where you may build, with an awake Verdant Bed of yours within 8 blocks, and use it: "
+                 "Buer comes rooted on the perch and names every term before anything is spent (without the bed he does "
+                 "not come: \"There is nothing here I could mend\"); accept, and his compact (4 Mendvetch, 4 bone meal) "
+                 "is spent once",
+         "reaches": [f"pact:{rid('buer')}"],
+         "tests": ["buerRefusesWithoutABedToMend", "everySpiritSealsOnceAndSpendsOnce", "buerFromTheCodexToDeparture"]},
+        {"research": [], "things": [],
+         "text": "By daylight, while you are near, Buer eases one harvest strain from one of your beds at a time, each by "
+                 "its own tending rule; a bed he mended that is worked back to its worst is overworked until it is fed or "
+                 "rests. Tend a strained bed in his area yourself, with an empty hand: his first obligation",
+         "reaches": [f"practice:{rid('garden_pact_service')}"],
+         "tests": ["buerEasesOneStrainAtTheBedsOwnRate", "anOverworkedBedWaitsForCompost",
+                   "buersFirstObligationIsATendingByHand", "anObligationIsRecordedOncePerPlayerAndSpirit",
+                   "buerFromTheCodexToDeparture"]},
+        {"research": [], "things": [],
+         "text": "Keep the pact with one Mendvetch a week (a missed one is warned and worked through a day's grace, then "
+                 "the service is suspended with nothing taken; an offering resumes it). End it at the perch: what was "
+                 "paid ahead comes back once, and Buer closes and sinks into the perch",
+         "reaches": [],
+         "tests": ["buerTendsThroughHisGrace", "everySpiritsUpkeepWarnsGivesGraceSuspendsAndResumes",
+                   "endingAnySpiritsPactReturnsTheEscrowOnce", "buerFromTheCodexToDeparture"]},
+        # GC-05: Bathin, from his perch to his departure (Dossier 2). No whole-path test of his own (the contract's GC-05);
+        # unit 7's theGardenPactsFromCodexToDeparture walks these steps.
+        {"research": [], "things": ["verdant_heart", "gleaner"],
+         "text": "Set a Verdant Heart on an awake Verdant Bed of yours and a Gleaner of yours, both within 10 blocks of your "
+                 "Pact Perch, the Gleaner more than 4 blocks from the Heart; use the perch and choose Bathin: he is suddenly "
+                 "coiled on it and names every term before anything is spent (without a Heart, or with nowhere to carry, he "
+                 "does not come: \"Nothing here to carry, or nowhere to carry it\"); accept, and his compact (2 ender pearls, "
+                 "8 Verdant Chaff) is spent once",
+         "reaches": [f"pact:{rid('bathin')}"],
+         "tests": ["bathinRefusesWithNothingToCarry", "everySpiritSealsOnceAndSpendsOnce",
+                   "bathinArrivesAndDepartsAtOnceInARingOfDust"]},
+        {"research": [], "things": [],
+         "text": "At any hour, while you are near, Bathin moves Verdance at once from your Heart into the far Gleaner (or, "
+                 "with Circle Lore's Ley Pylon, 3 for 2 into a pylon away from the Heart): both ends shimmer and nothing is "
+                 "on the way; a Heart with its own pylon he leaves alone until you answer at the perch. Use an awake living "
+                 "device in his area with an empty hand: his first obligation",
+         "reaches": [f"practice:{rid('garden_pact_service')}"],
+         "tests": ["bathinMovesVerdanceExactly", "bathinsCarryShimmersBothEndsAtOnce",
+                   "bathinLeavesAHeartWithItsOwnPylonUntilAnswered", "bathinsFirstObligationIsADeviceReadByHand"]},
+        {"research": [], "things": [],
+         "text": "Keep the pact with four Verdant Chaff a week (a missed week is warned and carried through a day's grace, "
+                 "then the service is suspended with nothing taken; an offering resumes it). End it at the perch: what was "
+                 "paid ahead comes back once, and his coil tightens and he is gone in a ring of dust",
+         "reaches": [],
+         "tests": ["everySpiritsUpkeepWarnsGivesGraceSuspendsAndResumes", "endingAnySpiritsPactReturnsTheEscrowOnce",
+                   "bathinArrivesAndDepartsAtOnceInARingOfDust"]},
+        # GC-06 unit 3
+        # GC-06: Marax, from his perch to his departure (Dossier 3), and The Garden's Regard mastered (GB26). Unit 7's
+        # theGardenPactsFromCodexToDeparture walks these steps.
+        {"research": [], "things": ["dewmoss"],
+         "text": "Plant an organism crop on an awake Verdant Bed of yours within 8 blocks of your Pact Perch; use the perch "
+                 "and choose Marax: a great bull with a calm man's face treads up beside it and names every term before "
+                 "anything is spent (with nothing planted he does not come: \"My familiar reads what grows. Nothing grows "
+                 "here.\"); accept, and his compact (a book, 2 Sunpetal and 2 Dewmoss) is spent once",
+         "reaches": [f"pact:{rid('marax')}"],
+         "tests": ["maraxRefusesWhereNothingGrows", "everySpiritSealsOnceAndSpendsOnce",
+                   "maraxStandsBesideThePerchFacingHisInviter"]},
+        {"research": [], "things": [],
+         "text": "Ask Marax for a reading on his page (twice a day, at any hour): his familiar flies to the worst of your "
+                 "planted beds and names the one change that would raise it a step, or the first of its faults, and changes "
+                 "nothing; named three readings running with nothing changed there, it will not read that bed a fourth "
+                 "time. Use a Verdant Bed itself in his area with an empty hand (its side, if a crop covers its top): his "
+                 "first obligation",
+         "reaches": [f"practice:{rid('garden_pact_service')}"],
+         "tests": ["aReadingNamesOneCorrectionAndChangesNothing", "aReadingWithTwoFaultsNamesTheFirst",
+                   "theProudFamiliarSkipsABedNamedThreeTimes", "maraxsFirstObligationIsABedReadByHand"]},
+        {"research": [], "things": [],
+         "text": "Keep the first obligations of three garden spirits' pacts (Buer's, Bathin's and Marax's): The Garden's "
+                 "Regard is mastered",
+         "reaches": [f"research:{rid('garden_regard')}@mastered"],
+         "tests": ["theGardensRegardIsMasteredThroughThreeSpirits"]},
+        {"research": [], "things": [],
+         "text": "Keep the pact with two sheets of paper a week (a missed week is warned and carried through a day's grace, "
+                 "then the service is suspended with nothing taken; an offering resumes it). End it at the perch: what was "
+                 "paid ahead comes back once; his familiar settles between his horns, and he turns, walks two steps and fades",
+         "reaches": [],
+         "tests": ["everySpiritsUpkeepWarnsGivesGraceSuspendsAndResumes", "endingAnySpiritsPactReturnsTheEscrowOnce",
+                   "maraxAnswersEachActionWithHisGesture"]},
+        # GC-07 unit 4
+        # GC-07: Foras, from his perch to his departure (Dossier 4). No whole-path test of his own (CT GC-07); unit 7's
+        # theGardenPactsFromCodexToDeparture walks these steps.
+        {"research": [], "things": ["dewmoss"],
+         "text": "Set a chest touching your Pact Perch and grow a Sunpetal on an awake Verdant Bed of yours within 8 blocks; "
+                 "use the perch and choose Foras: he stands beside it, tips his acorn cap and names every term before "
+                 "anything is spent (without a store he does not come: \"Where shall I keep the cuttings?\"); accept, and "
+                 "his compact (4 Dewmoss, a honeycomb) is spent once",
+         "reaches": [f"pact:{rid('foras')}"],
+         "tests": ["forasRefusesWithoutAStore", "everySpiritSealsOnceAndSpendsOnce", "forasStandsBesideThePerchFacingHisInviter"]},
+        {"research": [], "things": [],
+         "text": "Leave Dewmoss in the chest: at any hour, while you are near, Foras grafts Dewlit onto your Sunpetals that "
+                 "would gain by it, one Dewmoss each, and counts his grafts aloud; hosts it would not help he names, and "
+                 "waits for your answer at the perch. Graft a Sunpetal by hand in his area: his first obligation",
+         "reaches": [f"practice:{rid('garden_pact_service')}"],
+         "tests": ["forasSpendsOneDonorAGraftAndNeverTwo", "aPrudentForasSkipsAUselessGraft", "aPrudentForasGraftsWhereItHelps",
+                   "forassFirstObligationIsAGraftByHand"]},
+        {"research": [], "things": [],
+         "text": "Keep the pact with a honeycomb a week (a missed week is warned and carried through a day's grace, then the "
+                 "service is suspended with nothing taken; an offering resumes it). End it at the perch: what was paid ahead "
+                 "comes back once, and he bows, folds his satchel and fades",
+         "reaches": [],
+         "tests": ["everySpiritsUpkeepWarnsGivesGraceSuspendsAndResumes", "endingAnySpiritsPactReturnsTheEscrowOnce",
+                   "forasAnswersEachActionWithHisGesture"]},
+        # GC-08 unit 5
+        # GC-09 unit 6
     ],
 }
 
@@ -624,6 +766,81 @@ def pact_problems(pg, research, invocations, rituals, at_hand):
     return found
 
 
+def garden_walk(pg, research, invocations, rituals, at_hand, understood, dimensions=None, blocked=()):
+    """What one player alone reaches in {dimensions} (the Overworld alone by default), with no structure loot and nothing
+    past the Practitioner stage, with only the research entries {understood} understood and nothing mastered, The Garden's
+    Regard aside (its states are what the route reaches): the graph, to which every thing the garden route makes or places
+    (tools/acquisition.py GARDEN_PACTS) is added as a step needing it would add it; the nodes {blocked} are taken away as
+    well. Returns (reached, the graph's problems)."""
+    import acquisition
+    problems = []
+    nodes = pg.graph(research, invocations, rituals, at_hand, problems)
+    for item in acquisition.GARDEN_PACTS:
+        pg.item_node(nodes, at_hand, rid(item), problems)
+    # GC-04: each shipped garden pact's compact and offerings (vanilla bone meal among them), as a step needing them would add them.
+    for pact in pg.garden_spirits(at_hand).values():
+        for item in [cost["item"] for cost in pact.get("compact", {}).get("items", [])] + _offerings(pact):
+            pg.item_node(nodes, at_hand, item, problems)
+    without = {pg.research_node(rid(key), state) for key in research for state in pg.RESEARCH_STATES
+               if key != "garden_regard" and (state == "mastered" or key not in understood)}
+    reached = pg.reachable(nodes, research, cap="practitioner", dimensions=set(dimensions or [""]), without=without | set(blocked))
+    return reached, problems
+
+
+def garden_problems(pg, research, invocations, rituals, at_hand):
+    """What is wrong with the garden route (GARDEN): an empty list when it holds."""
+    import acquisition
+    import concordance_garden_pacts as garden
+    found = []
+    steps = GARDEN["steps"]
+    named = [item for step in steps for item in step["things"]]
+    for item in sorted(set(named) - set(acquisition.GARDEN_PACTS)):
+        found.append(f"journey garden: {item} is no row of tools/acquisition.py GARDEN_PACTS")
+    for item in sorted(set(acquisition.GARDEN_PACTS) - set(named)):
+        found.append(f"journey garden: tools/acquisition.py's {item} is named by no step")
+    for item, how in acquisition.GARDEN_PACTS.items():
+        recipe = acquisition.recipe_file(item, how)
+        loads = _switches(recipe) if recipe else {"concordance"}
+        if loads != {"concordance"}:
+            found.append(f"journey garden: {item} must be made under the Concordance's switch alone, not {sorted(loads or [])}")
+    understood = []
+    for number, step in enumerate(steps, 1):
+        if not step["tests"]:
+            found.append(f"journey garden step {number}: name the server tests that exercise it")
+        for key in step["research"]:
+            if key not in research:
+                found.append(f"journey garden step {number}: {key} is not a research entry")
+        understood = understood + [key for key in step["research"] if key not in understood]
+        reached, graph_problems = garden_walk(pg, research, invocations, rituals, at_hand, understood)
+        found.extend(f"journey garden step {number}: {problem}" for problem in graph_problems)
+        wants = list(step["reaches"]) + [f"item:{rid(item)}" for item in step["things"]]
+        for want in wants:
+            if want not in reached:
+                found.append(f"journey garden step {number}: one player alone in the Overworld, with {understood} understood, "
+                             f"nothing else mastered, no structure loot and nothing past the Practitioner stage, does not "
+                             f"reach {want}")
+        for key in step["research"]:
+            lost, _ = garden_walk(pg, research, invocations, rituals, at_hand, [k for k in understood if k != key])
+            if all(want in lost for want in wants):
+                found.append(f"journey garden step {number}: nothing it reaches needs {key}")
+    final, _ = garden_walk(pg, research, invocations, rituals, at_hand, understood)
+    # GC-04: each shipped garden pact asks no resonance (GC-S10), and the route alone has its compact, an offering and its pact.
+    for name, pact in pg.garden_spirits(at_hand).items():
+        if pact.get("compact", {}).get("resonance", 0) != 0:
+            found.append(f"journey garden {name}: a garden compact asks no Astral Resonance (GC-S10)")
+        short = [cost["item"] for cost in pact.get("compact", {}).get("items", []) if f"item:{cost['item']}" not in final]
+        if short:
+            found.append(f"journey garden {name}: its compact's {short} are not had by one player alone in the Overworld")
+        if not any(f"item:{item}" in final for item in _offerings(pact)):
+            found.append(f"journey garden {name}: none of its offerings {_offerings(pact)} is had by the route")
+        if f"pact:{rid(name)}" not in final:
+            found.append(f"journey garden {name}: its pact (perch, bed and compact) is not reached by the route")
+    if (pg.research_node(garden.REGARD, "mastered") in final) != (len(pg.garden_spirits(at_hand)) >= garden.MASTERY_SPIRITS):
+        found.append(f"journey garden: The Garden's Regard is mastered by the route exactly when {garden.MASTERY_SPIRITS} "
+                     "garden spirits ship (GB26)")
+    return found
+
+
 def worker_kinds_problems(research):
     """The routes' "served once by each kind of worker" is the Binding Arts' mastery: the worker_service practice of as many
     distinct kinds as the workers have (tools/concordance_workers.py WORKERS). The workshop hand (Concordance Chunk D,
@@ -711,6 +928,7 @@ def problems():
     found.extend(workshop_problems(pg, research, invocations, rituals, at_hand))
     # The pact hall (Concordance Chunk D, D-03 to D-09), and the routes' three kinds of worker with the workshop hand among them.
     found.extend(pact_problems(pg, research, invocations, rituals, at_hand))
+    found.extend(garden_problems(pg, research, invocations, rituals, at_hand))
     found.extend(worker_kinds_problems(research))
     # Every game test named exists.
     tests = game_tests()
@@ -721,6 +939,8 @@ def problems():
     for step in WORKSHOP["steps"]:
         named += step["tests"]
     for step in PACT["steps"]:
+        named += step["tests"]
+    for step in GARDEN["steps"]:
         named += step["tests"]
     for _text, names in COOPERATIVE:
         named += names
@@ -782,6 +1002,15 @@ def table():
               f"`{PACT_TEST}` walks every step on one survival player.", "",
               "| Step | Understands | Makes or places | Server game tests |", "|---|---|---|---|"]
     for number, step in enumerate(PACT["steps"], 1):
+        made = ", ".join(thing(item) for item in step["things"]) or "nothing new"
+        lines.append(f"| {number}. {step['text']} | {names(step['research']) or 'nothing new'} | {made} | {tests(step['tests'])} |")
+    lines += ["", f"### {GARDEN['name']}", "",
+              "The Garden's Regard found without Styx or Stolas, then each garden spirit's pact as its unit adds it (the garden "
+              "cohort). No stage route: one player alone does each step in the Overworld, with the research understood so far, "
+              "nothing mastered and no structure loot. Its mastery needs three garden spirits' first obligations, so no step "
+              "reaches it until three ship.", "",
+              "| Step | Understands | Makes or places | Server game tests |", "|---|---|---|---|"]
+    for number, step in enumerate(GARDEN["steps"], 1):
         made = ", ".join(thing(item) for item in step["things"]) or "nothing new"
         lines.append(f"| {number}. {step['text']} | {names(step['research']) or 'nothing new'} | {made} | {tests(step['tests'])} |")
     lines += ["", "### Cooperative play", "", "| Shared, and what stays one player's | Server game tests |", "|---|---|"]

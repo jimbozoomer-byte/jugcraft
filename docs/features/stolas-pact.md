@@ -1,7 +1,8 @@
 # Stolas's pact
 
-Status: implemented, unmerged (Concordance Chunk D: unit 2, D-03 to D-05; unit 3, D-06 and D-07; unit 5's evidence,
-D-09); owner checkpoint answered on 26 October 2026 (the contract's D-D3 to D-D5: keep Stolas, D-P50 accepted, gardens next). Built and tested in CI on the candidate `48d99c904` (run 40133540741: every job passed
+Status: implemented (Concordance Chunk D: unit 2, D-03 to D-05; unit 3, D-06 and D-07; unit 5's evidence, D-09); on main
+since 27 October 2026 through the owner's #494 (`46bac6b34`), which brought Chunks B to D to main in one squashed commit
+(Chunk D's own pull request, #474, was closed without merging); owner checkpoint answered on 26 October 2026 (the contract's D-D3 to D-D5: keep Stolas, D-P50 accepted, gardens next). Built and tested in CI on the candidate `48d99c904` (run 40133540741: every job passed
 on the first attempt; see Verification), with three fixes from that run's pictures since (`b773913c4` and `d00fa2167`; run
 40140478331 on `d00fa2167`: every job passed, and the pictures were seen fixed). No person has played it; two automated clients on one machine, no two people or accounts.
 Proposal issue: none; the owner's selected scope ([the chunk's contract](concordance-chunk-d.md), D-D0 to D-D2).
@@ -15,6 +16,26 @@ Will's pact and escrow from unit 1), [celestial cycles](arcane-concordance-celes
 and its recall) and [Styxhexenhammer](styxhexenhammer.md). Session decisions D-S1 to D-S23 (decided by the
 session under D-D2) and the proposals of units 2, 3 and 5 (D-P17 to D-P50, D-P90 to D-P121, D-P122 to D-P137) are in the
 [contract](concordance-chunk-d.md#decisions); none is the owner's.
+
+**Shared since the garden cohort (GC-01; [contract](concordance-garden-cohort.md); not merged, draft #526).** Stolas is
+the first of several pact spirits on one shared base. For him nothing changes: his ids, saved keys, offer, terms, compact,
+upkeep, gestures, loops, sounds, subtitles, Jade lines and rendered words are as described here, and every test written
+for him passes as written except three lines: one that counted the wire's actions, one that rendered a shared line
+without its new argument, and one that parsed his definition alone and now allows the other shipped definitions to be
+reported missing (GC-P17); GC-02 then added his facing checks and pictures to `ConcordancePactClientGameTests` and moved
+its cameras north. What moved, unchanged: his perch, record, listening, departure, cues, gesture controller
+and station keeping are `PactSpiritEntity`'s; `StolasEntity` keeps his class, his gestures and loops, his sound ids and his
+reaction to each answer; Star-reckoning is his `PactService` (`StarReckoning.SERVICE`, work `star_reckoning`), which the
+screen, the kept page and a recall reach by the pact's work; `PactParser.REQUIRED` lists his offer first; his row is the
+first of `tools/concordance_pacts.py`'s `SPIRITS`, and with his row alone every generated file was checked unchanged
+before the table was used. Ten lines every spirit shares now take the spirit's name and still read word for word as
+before for him (`stolasLinesRenderAsBefore`); his own lines and the eleven only Star-reckoning shows are unchanged
+(GC-P12). A player who may invite only him sees no chooser (GC-P10). `jugcraft:pact_service` stays his first obligation
+alone, so another spirit's service never masters his Regard (GB5). The audit this page calls `check_stolas_body` is
+`check_spirit_bodies` since GC-01, his pins its first row. Since GC-04 the perch offers a second spirit, Buer
+([record](buer-pact.md)); with both Regards understood it first asks whom to invite. Stolas, his ids, saved keys, words,
+body and tests are unchanged; an offering due now lets a pact's service step through its grace while its holder is near
+(his takes none, so nothing he does changes).
 
 ## Player experience
 
@@ -48,6 +69,10 @@ last beat of wings; each with its sound and subtitle, and each answer on the scr
 shows whether a perch or an anchor keeps a pact, with whom, its service, state and next offering, naming nobody. The
 roster (its key not bound at first: Controls, then the Keys page) lists every pact, agreement, worker and courier
 request of yours with what each waits for, and suspends, resumes, ends (asked first), cancels or recovers.
+
+Since the garden cohort (GC-02; the session's decision GC-S23, not the owner's): Stolas arrives facing whoever invited
+him, turns to whoever is speaking to him while a conversation is open at his perch, his body following his head within
+about two seconds, and keeps that facing when it closes.
 
 ## Record fields (CLAUDE.md)
 
@@ -233,9 +258,21 @@ opened by using the perch (`PactMenu`, an extended menu with no slots):
   and the screen, an in-game screen, draws subtitles over itself.
 
 It fits windows down to 320×180 scaled pixels and scrolls its body; the client test draws it at GUI scale 4 in a
-1920×1080 window and at GUI scale 2 in a 640×360 one. `PactClient` sends only the five bounded numbers for the open menu
-and decides nothing. `PactStatePayload`'s lists are capped at 3 beats, 16 terms, 12 notes, 8 patterns, 8 offerings and 8
-compact stacks.
+1920×1080 window and in a 640×360 one, where vanilla caps the GUI scale 2 it asks for at 1 (a GUI 640 wide).
+`PactClient` sends only the five bounded numbers for the open menu and decides nothing. `PactStatePayload`'s lists are
+capped at 3 beats, 16 terms, 12 notes, 8 patterns, 8 offerings and 8 compact stacks.
+
+**Since the magic interfaces** ([magic-interfaces.md](magic-interfaces.md), unit 1) the screen is drawn on the relic
+scroll card with far fewer words. His beats are shortened: the stage direction "A raven settles and studies you." and
+his three lines, "You watched the sky and asked the flowers. I am Stolas.", "Once a day, here, I turn the heavens back
+to a star you saw." and "An offering every seven days, kept ahead. Miss one and I wait." The first two carry a Terms
+skip, and once heard they are not shown again. His terms are chips, each narrated and hovered with its whole sentence;
+the six standing terms are one chip whose More shows their lines; the price row marks a short material or resonance
+("6/8 resonance") before Accept. His kept page shows his state, today's recalls, four sockets for what is paid ahead,
+the patterns and Recall. The shortened beats and the amended D-S15 were decided by the session in answer to the owner's
+request for far less reading, reviewable at the checkpoint; not owner-accepted. The control keys and the server's
+answers above are unchanged; Tab now also stops at the new controls (`skip`, `more`, `term:standing`, `term:service`,
+`term:compact`), and the narration reads each chip's whole sentence where it read the page's paragraphs.
 
 ## Stolas's character (D-06)
 
@@ -264,6 +301,19 @@ plays the gestures the server fires (D-P94). Each gesture starts and ends on his
   observatory, has none.
 - **Listening** (D-P95): a synced flag, set at once when a conversation opens at his perch and recomputed at every
   think; his listening cue is not voiced within 10 ticks of his arrival, whose wing beats carry the moment.
+- **Facing** (garden cohort GC-02; GC-S6, GC-P8, GC-P9): summoned, he faces whoever he comes for (the inviter, or the
+  holder he is called back or seated for): his yaw, head and body are set to their bearing before he enters the world,
+  and every client is sent his head's yaw, which it gives his body. While a conversation at his perch is live he attends
+  whoever spoke last (opened the screen or sent a request; `PactSessions.speaker`): `WorkerEntity.attend` sets
+  SmartBrainLib's look target, `LookAtTarget` turns his head at vanilla's 10° a tick and vanilla's body control turns his
+  body after it. He turns at once when a screen opens and within a second of a request. GeckoLib draws his body's yaw;
+  no bone is turned on the client, so his keyed head is never overwritten (a head turn ahead of the body is deferred).
+  With no live conversation the look target is erased: his head eases back to his body, which keeps its facing. At
+  every think his yaw is set to what he faces, or to his body's facing, so a hop back onto his perch never snaps him to
+  the south. One who starts watching him later is sent his head's yaw and draws him facing there at once. The look
+  target's test is `WorkerEntity.unseen` (an entity target dropped when dead or removed, in another level, or beyond 32
+  blocks), because SmartBrainLib 2.0.3's own test asks for the visible-entities memory, which no worker's sensor fills;
+  no sensor was added. Switched off he faces no one; with his day's recall spent he still faces whoever speaks (A-03).
 - **Leaving** (D-P97): his departing gesture lasts 40 ticks of game time, and he is gone when it ends: discarded by his
   own tick or, where his chunk no longer ticks him (a roster End from afar, a holder who goes away within the 40
   ticks), by the server's sweep at the end of every tick (`StolasEntity.registerSweep`; the unit review). He is struck
@@ -532,6 +582,63 @@ two client JVMs on one CI runner. No person has played any of it.
   server's use); client frame times on a player's hardware; a real chunk unload (modelled as a gap); a busy server; his
   astir loop in a frozen pose; a GeckoLib portrait on the roster seen by a person.
 
+### Since the garden cohort's GC-01
+
+Compiled and run in CI on `18ac27f2c` (GC-01a, `62b0095fa`, with Chunk D's merges; workflow_dispatch run
+[40421207295](https://github.com/jimbozoomer-byte/jugcraft/actions/runs/40421207295)): both server jobs passed all 2,788 required server tests, every test of his among them,
+and the client shards holding `ConcordancePactClientGameTests` (5), `ConcordanceRosterClientGameTests` (14) and
+`ConcordancePactNetworkTests` (3) passed; shard 12 failed in a Peepo class and three shards were cancelled with the run,
+so that run as a whole did not pass. GC-01b to GC-04 had no run of their own; with them, on the pull request's
+`4ca363d38` (run [40605564166](https://github.com/jimbozoomer-byte/jugcraft/actions/runs/40605564166)), the `mod` job passed all 3,109 required server tests, the job without the
+optional integrations failed only one test of main's at first (the Herobrine grove test, failing the same way on main)
+and passed all 3,109 on its re-run, and
+`ConcordancePactClientGameTests` (shard 3), `ConcordancePactNetworkTests` (shard 1) and `ConcordanceRosterClientGameTests`
+(shard 6) passed. His own evidence is unchanged: the D-03 to D-07 server tests and `ConcordancePactClientGameTests`, as
+listed above, passing as written (GC-P17's three lines aside). The shared path is held by `stolasLinesRenderAsBefore`,
+`theStateNamesItsSpirit`, `aCompactWithoutResonanceNamesNoAstrolabe`, `theChooserIsSkippedWithOneSpirit`,
+`anInviteOutsideTheInviteModeIsDropped`, `aRecordWithAnUnknownWorkStillEnds`, `aStrandedPactOfAnySpiritIsSeatedOrEnded`,
+`everyWorkHasItsServiceAndEverySpiritItsType` and SG12's fifteen shared cases (run for him and Buer), all passed in run
+40605564166, and by `check_pacts`, `check_spirit_bodies`, `check_pact_screen`, `check_roster` and
+`check_stolas_regard`. With his row alone the generators changed no generated file (GC-01b's zero-diff gate, after the
+generators' incidental rewrites were restored: [the contract's corrections](concordance-garden-cohort.md#corrections-to-unit-1s-commit-messages)).
+
+- **Garden cohort GC-02 (facing):** `ConcordanceWorkerGameTests` `aSpiritArrivesFacingItsInviter`,
+  `aSpiritFacesWhoeverSpeaksToIt`, `theLatestSpeakerIsFaced`, `aTeleportBackKeepsTheFacing`,
+  `aClosedConversationLeavesTheFacing`, `theLookTargetIsDroppedOnlyWhenGoneElsewhereOrFar` and
+  `aWorkTargetOutranksTheSpeakerWhileItsGesturePlays`, passed in run 40605564166 (both server jobs);
+  `ConcordancePactClientGameTests`' arrival check, four facing shots and the late-watcher check passed in its shard 3,
+  logging "facing on arrival: drawn body yaw -180.0, inviter's bearing 180.0", his drawn body and head yaw at each
+  speaker's bearing (east -90.0 against -90.0; south -1.4 against 0.0; west 88.6 against 90.0; north 178.6 against 180.0)
+  and "facing seen anew (sent to this client again, as to a late watcher): drawn body yaw 178.59375, bearing 180.0". Its
+  body, pose, sequence and Jade cameras moved north. The four facing pictures, looked at for this record:
+
+  | Shot | Seen |
+  |---|---|
+  | `jugcraft_pact_stolas_faces_east` | Stolas (dark raven, lit yellow eyes, golden breast) on the perch, his front toward the camera, head cocked; the perch's crossbar seen end-on |
+  | `jugcraft_pact_stolas_faces_south` | his front toward the camera, head cocked; the crossbar seen across |
+  | `jugcraft_pact_stolas_faces_west` | his front toward the camera, head cocked; the crossbar end-on |
+  | `jugcraft_pact_stolas_faces_north` | his front toward the camera, head level; the crossbar seen across |
+
+  Together they show the perch turning under him between the shots while his front stays toward each speaker's camera.
+  His other pictures in that shard were not looked at for this record.
+- **Not run for GC-01 and GC-02:** a person; the chooser with him alone on screen (it needs a second spirit; the garden
+  class photographs it with Buer); two clients at his perch for facing (unit 7).
+- **Since GC-05 (Bathin, [record](bathin-pact.md); not merged):** the perch offers a third spirit, Bathin, so an owner
+  who also understands The Garden's Regard meets the chooser with three entries. GC-05 changed none of Stolas's ids,
+  keys, words, body or tests: his service raises no matter (`PactService.complication` is none by default), so the
+  accord machinery shows him no matter row, and his readings and statuses gain nothing (`08cb27921`). In CI run
+  [40777920181](https://github.com/jimbozoomer-byte/jugcraft/actions/runs/40777920181) (on `8af703330`, which also
+  carries the magic interfaces' restyled screens) both server jobs passed all 3,206 required tests, his among them, and
+  `ConcordancePactClientGameTests` (shard 3), `ConcordancePactNetworkTests` (shard 1) and
+  `ConcordanceRosterClientGameTests` (shard 6) passed; their pictures were not looked at for this record.
+- **Since GC-06 (Marax, [record](marax-pact.md); not merged; not yet run in CI):** the chooser has four entries for an
+  owner who understands both Regards. GC-06 changed none of Stolas's ids, keys, words, body or tests: his body's station
+  is `PERCH` (where he always stood), he shows no work target, and Star-reckoning's Recall is drawn as before (the kept
+  page's new choice plates are for other works' on-request actions only).
+- **Since GC-07 (Foras, [record](foras-pact.md); not merged; not yet run in CI):** the chooser has another entry for an
+  owner who understands both Regards. GC-07 changed none of Stolas's ids, keys, words, body or tests: his body stays on
+  the perch, Star-reckoning raises no matter and asks no question, and the graft Foras makes is a garden service's alone.
+
 ## World and event applicability
 
 - The perch is placed in any dimension where its placer may build (claims, spawn and town protection apply), never in
@@ -558,8 +665,9 @@ Known limits:
   that it has none.
 - Suspending, recalling and resuming once a day keeps the upkeep period counting only a few ticks of active time a day
   (left as built: the owner accepted D-P50 alone, D-D4).
-- Stolas is summoned facing south and keeps that facing, so a holder north of the perch sees his back (the evidence
-  photographs him from the south, D-P133).
+- He turns his whole body to whoever speaks; his head is not turned ahead of it on the client, so a turn shows about 1
+  to 2 s after it begins (GC-02; a head turn is deferred). The evidence photographs him from the north, where his
+  holder speaks from (D-P133 superseded).
 - CI has no sound device: his subtitles are checked as defined and fired, never seen there.
 
 Asked at the owner's checkpoint ([the contract](concordance-chunk-d.md#the-owner-checkpoint-as-reported)): Stolas's look
@@ -576,4 +684,6 @@ Ids are stable once released: `jugcraft:pact_perch` (block, item, block entity a
 `jugcraft:concordance_roster_request` and `jugcraft:concordance_roster_state` (the roster's actions and icons are sent by
 index, so append only); the key `key.jugcraft.concordance_roster`; Jade's providers `jugcraft:pact_perch` and
 `jugcraft:spirit_anchor`. Unit 3 adds no saved data. Disabling the Concordance keeps every registration and every
-record.
+record. GC-01 adds no id and no saved data: `jugcraft:concordance_pact_request` gains the action `invite` (index 9,
+appended), `jugcraft:concordance_pact_state` one nested field (the spirit's sign and work; network only) and Jade's pact
+reading the key `visitor`.

@@ -13,6 +13,7 @@ import io.github.jimbozoomer.jugcraft.concordance.conclave.Standing;
 import io.github.jimbozoomer.jugcraft.concordance.effect.Cause;
 import io.github.jimbozoomer.jugcraft.concordance.effect.EffectSpec;
 import io.github.jimbozoomer.jugcraft.concordance.effect.Ledger;
+import io.github.jimbozoomer.jugcraft.concordance.garden.Garden;
 import io.github.jimbozoomer.jugcraft.concordance.progression.PracticeGate;
 import io.github.jimbozoomer.jugcraft.concordance.progression.ProgressionCatalog;
 import io.github.jimbozoomer.jugcraft.concordance.progression.ProgressionGraph;
@@ -23,8 +24,14 @@ import io.github.jimbozoomer.jugcraft.concordance.rime.Rime;
 import io.github.jimbozoomer.jugcraft.concordance.rime.RimeSurvey;
 import io.github.jimbozoomer.jugcraft.concordance.rules.Definitions;
 import io.github.jimbozoomer.jugcraft.concordance.rules.Evidence;
+import io.github.jimbozoomer.jugcraft.concordance.rules.EvidenceRule;
 import io.github.jimbozoomer.jugcraft.concordance.rules.ResearchEngine;
 import io.github.jimbozoomer.jugcraft.concordance.rules.ResearchState;
+import io.github.jimbozoomer.jugcraft.concordance.spirits.BathinEntity;
+import io.github.jimbozoomer.jugcraft.concordance.spirits.BuerEntity;
+import io.github.jimbozoomer.jugcraft.concordance.spirits.GardenPacts;
+import io.github.jimbozoomer.jugcraft.concordance.spirits.MaraxEntity;
+import io.github.jimbozoomer.jugcraft.concordance.spirits.PactObligations;
 import io.github.jimbozoomer.jugcraft.concordance.spirits.StolasRegard;
 import io.github.jimbozoomer.jugcraft.concordance.spirits.Workers;
 import io.github.jimbozoomer.jugcraft.concordance.stages.StageProgress;
@@ -384,6 +391,85 @@ public class ConcordanceProgressionGameTests {
 		Definitions.Research regard = ConcordanceData.rules().research(StolasRegard.RESEARCH);
 		helper.assertTrue(regard != null && regard.tradition().equals("spiritbinders") && regard.stage().equals("practitioner")
 				&& regard.unlocks().isEmpty(), "the Spiritbinders' practitioner entry, unlocking nothing by data (D-08 checks mastery in code): " + regard);
+		helper.succeed();
+	}
+
+	/**
+	 * The garden cohort, GC-03 (GC-P6): The Garden's Regard is in the live graph and one player alone reaches it to understood.
+	 * It begins after the Binding Arts and Verdant Husbandry are understood; it is observed by cultivation, understood by a bound
+	 * worker's service and mastered by the garden practice kept with three different garden spirits, whose gate ships with it
+	 * and needs it understood; no state takes notes; and the graph finds nothing unprovided. Mastery is not asserted here:
+	 * Java's graph reads every practice through its gate alone (a distinct of one), while tools/concordance_progression.py holds
+	 * GB26 and check_garden_pacts asserts mastery out of reach until three garden spirits ship.
+	 */
+	@GameTest(maxTicks = 20)
+	public void theGardensRegardIsReachable(GameTestHelper helper) {
+		ProgressionCatalog catalog = ConcordanceData.rules().progression();
+		ProgressionGraph graph = catalog.graph();
+		helper.assertTrue(graph != null && graph.problems().isEmpty(), "the graph is whole: " + (graph == null ? "none" : graph.problems()));
+		PracticeGate gate = catalog.practices().get(GardenPacts.ACTIVITY);
+		helper.assertTrue(gate != null && gate.tradition().equals("spiritbinders")
+				&& gate.requires().equals(List.of(new Definitions.Requirement(GardenPacts.RESEARCH, ResearchState.UNDERSTOOD))),
+				"the garden obligations' gate ships with the research: " + gate);
+		String understood = ProgressionGraph.research(GardenPacts.RESEARCH, ResearchState.UNDERSTOOD);
+		Map<String, List<List<String>>> ways = Map.of(
+				ProgressionGraph.research(GardenPacts.RESEARCH, ResearchState.ENCOUNTERED), List.of(List.of()),
+				ProgressionGraph.research(GardenPacts.RESEARCH, ResearchState.OBSERVED), List.of(List.of("practice:" + Garden.ACTIVITY)),
+				understood, List.of(List.of("practice:" + Workers.ACTIVITY)),
+				ProgressionGraph.research(GardenPacts.RESEARCH, ResearchState.MASTERED), List.of(List.of("practice:" + GardenPacts.ACTIVITY)));
+		for (Map.Entry<String, List<List<String>>> way : ways.entrySet()) {
+			ProgressionGraph.Node node = graph.nodes().get(way.getKey());
+			helper.assertTrue(node != null && node.any().equals(way.getValue()), way.getKey() + " is reached only by " + way.getValue() + ": " + node);
+		}
+		ProgressionGraph.Node begun = graph.nodes().get(ProgressionGraph.research(GardenPacts.RESEARCH, ResearchState.ENCOUNTERED));
+		helper.assertTrue(begun.all().equals(List.of(ProgressionGraph.research(Workers.RESEARCH, ResearchState.UNDERSTOOD),
+				ProgressionGraph.research(Garden.RESEARCH, ResearchState.UNDERSTOOD))),
+				"it begins after the Binding Arts and Verdant Husbandry: " + begun.all());
+		ProgressionGraph.Node obligation = graph.nodes().get("practice:" + GardenPacts.ACTIVITY);
+		helper.assertTrue(obligation != null && obligation.all().equals(List.of(understood)), "the obligation needs it understood: " + obligation);
+		Set<String> alone = graph.reachable(true);
+		for (ResearchState state : List.of(ResearchState.ENCOUNTERED, ResearchState.OBSERVED, ResearchState.UNDERSTOOD)) {
+			helper.assertTrue(alone.contains(ProgressionGraph.research(GardenPacts.RESEARCH, state)), "one player alone reaches " + state);
+		}
+		Definitions.Research regard = ConcordanceData.rules().research(GardenPacts.RESEARCH);
+		helper.assertTrue(regard != null && regard.tradition().equals("spiritbinders") && regard.stage().equals("practitioner")
+				&& regard.unlocks().isEmpty(), "the Spiritbinders' practitioner entry, unlocking nothing: " + regard);
+		List<EvidenceRule> mastered = regard.states().get(ResearchState.MASTERED);
+		helper.assertTrue(mastered != null && mastered.size() == 1 && mastered.getFirst().kind() == EvidenceRule.Kind.PRACTICE
+				&& GardenPacts.ACTIVITY.equals(mastered.getFirst().activity()) && mastered.getFirst().distinct() == GardenPacts.MASTERY_SPIRITS,
+				"mastered by the garden practice kept with " + GardenPacts.MASTERY_SPIRITS + " different garden spirits: " + mastered);
+		helper.assertTrue(regard.states().values().stream().flatMap(List::stream).noneMatch(rule -> rule.kind() == EvidenceRule.Kind.NOTES),
+				"no state takes notes: " + regard.states());
+		helper.succeed();
+	}
+
+	/**
+	 * Concordance garden cohort, GC-06 (GB26, GC-P75): The Garden's Regard is mastered by three garden spirits' first
+	 * obligations, each by hand: a strained bed tended and read (Buer's TEND and Marax's READ, one use, both their areas holding
+	 * it) leaves it understood with two kept; a living device read (Bathin's DEVICE) keeps the third and masters it.
+	 */
+	@GameTest(maxTicks = 20)
+	public void theGardensRegardIsMasteredThroughThreeSpirits(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		ServerPlayer keeper = ConcordanceWorkerGameTests.gardenHolder(helper);
+		long now = level.getGameTime();
+		ConcordanceWorkerGameTests.buerPact(helper, keeper, new BlockPos(1, 1, 1), now);
+		ConcordanceWorkerGameTests.bathinPact(helper, keeper, new BlockPos(1, 1, 6), now);
+		ConcordanceWorkerGameTests.maraxPact(helper, keeper, new BlockPos(6, 1, 1), now);
+		BlockPos bed = new BlockPos(4, 1, 3);
+		ConcordanceWorkerGameTests.keptBed(helper, bed, keeper.getUUID(), 2);
+		helper.assertValueEqual(PactObligations.spiritsKept(keeper), 0, "Nothing kept yet");
+		ConcordanceGardenGameTests.handUse(helper, keeper, bed, ItemStack.EMPTY, false);
+		helper.assertTrue(PactObligations.kept(keeper, BuerEntity.COUNTERPART) && PactObligations.kept(keeper, MaraxEntity.COUNTERPART)
+				&& PactObligations.spiritsKept(keeper) == 2
+				&& ConcordanceProgress.knowledge(keeper).state(GardenPacts.RESEARCH) == ResearchState.UNDERSTOOD,
+				"A strained bed tended and read by hand keeps Buer's and Marax's obligations: two, not yet mastered");
+		BlockPos heart = new BlockPos(4, 1, 5);
+		ConcordanceWorkerGameTests.keptHeart(helper, heart, keeper.getUUID(), 0);
+		ConcordanceGardenGameTests.handUse(helper, keeper, heart, ItemStack.EMPTY, false);
+		helper.assertTrue(PactObligations.kept(keeper, BathinEntity.COUNTERPART) && PactObligations.spiritsKept(keeper) == 3
+				&& ConcordanceProgress.knowledge(keeper).state(GardenPacts.RESEARCH) == ResearchState.MASTERED,
+				"A living device read by hand keeps Bathin's: three, and The Garden's Regard is mastered");
 		helper.succeed();
 	}
 }

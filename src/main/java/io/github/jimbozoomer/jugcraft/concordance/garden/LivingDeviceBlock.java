@@ -2,6 +2,7 @@ package io.github.jimbozoomer.jugcraft.concordance.garden;
 
 import io.github.jimbozoomer.jugcraft.concordance.Illumination;
 import io.github.jimbozoomer.jugcraft.concordance.RateGate;
+import io.github.jimbozoomer.jugcraft.concordance.spirits.PactObligations;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -23,7 +24,8 @@ import org.jspecify.annotations.Nullable;
 /**
  * A living device's block (roadmap step 14): placed, it remembers who placed it and wakes at once for a Greenwarden;
  * a Greenwarden's empty hand wakes a dormant one; otherwise an empty hand does what the device does
- * ({@link #useEmpty}). GeckoLib draws the animated ones on the client (their block renders nothing).
+ * ({@link #useEmpty}), which is also a garden pact's first obligation where one is due (the garden cohort). GeckoLib draws
+ * the animated ones on the client (their block renders nothing).
  */
 public abstract class LivingDeviceBlock extends BaseEntityBlock {
 	private final VoxelShape shape;
@@ -61,6 +63,9 @@ public abstract class LivingDeviceBlock extends BaseEntityBlock {
 				return InteractionResult.SUCCESS;
 			}
 			useEmpty(device, server, serverLevel);
+			// The garden cohort, GC-05: an awake living device read or set with an empty hand inside a garden pact's area while
+			// it is active keeps that pact's first obligation (PactObligations: once a player a spirit; Bathin's).
+			PactObligations.performed(serverLevel, server, PactObligations.Act.DEVICE, pos);
 		}
 		return InteractionResult.SUCCESS;
 	}

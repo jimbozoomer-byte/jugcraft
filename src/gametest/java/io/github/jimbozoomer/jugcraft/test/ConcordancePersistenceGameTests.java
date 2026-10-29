@@ -39,8 +39,13 @@ import io.github.jimbozoomer.jugcraft.concordance.sky.AstralClaims;
 import io.github.jimbozoomer.jugcraft.concordance.sky.AstrolabeItem;
 import io.github.jimbozoomer.jugcraft.concordance.spire.SpireRecord;
 import io.github.jimbozoomer.jugcraft.concordance.spirits.AgreementHolder;
+import io.github.jimbozoomer.jugcraft.concordance.spirits.BathinEntity;
 import io.github.jimbozoomer.jugcraft.concordance.spirits.BoundWills;
+import io.github.jimbozoomer.jugcraft.concordance.spirits.ForasEntity;
+import io.github.jimbozoomer.jugcraft.concordance.spirits.GardenReach;
 import io.github.jimbozoomer.jugcraft.concordance.spirits.GatheringShadeEntity;
+import io.github.jimbozoomer.jugcraft.concordance.spirits.GraftKeeping;
+import io.github.jimbozoomer.jugcraft.concordance.spirits.PactAccords;
 import io.github.jimbozoomer.jugcraft.concordance.spirits.PactHistory;
 import io.github.jimbozoomer.jugcraft.concordance.spirits.PactKeeping;
 import io.github.jimbozoomer.jugcraft.concordance.spirits.PactPerchBlockEntity;
@@ -48,6 +53,7 @@ import io.github.jimbozoomer.jugcraft.concordance.spirits.SpiritAnchorBlock;
 import io.github.jimbozoomer.jugcraft.concordance.spirits.SpiritAnchorBlockEntity;
 import io.github.jimbozoomer.jugcraft.concordance.spirits.StarReckoning;
 import io.github.jimbozoomer.jugcraft.concordance.spirits.StolasEntity;
+import io.github.jimbozoomer.jugcraft.concordance.spirits.VerdanceCarrying;
 import io.github.jimbozoomer.jugcraft.concordance.spirits.WorkerRoster;
 import io.github.jimbozoomer.jugcraft.concordance.spirits.Workers;
 import io.github.jimbozoomer.jugcraft.concordance.spirits.WorkshopHandEntity;
@@ -59,6 +65,7 @@ import io.github.jimbozoomer.jugcraft.config.JugcraftConfig;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 import java.util.function.Predicate;
 import java.util.function.UnaryOperator;
@@ -102,6 +109,7 @@ import net.minecraft.world.level.material.Fluids;
 import net.minecraft.world.level.storage.TagValueInput;
 import net.minecraft.world.level.storage.TagValueOutput;
 import net.minecraft.world.phys.AABB;
+import net.minecraft.world.phys.Vec3;
 import org.jspecify.annotations.Nullable;
 
 /**
@@ -117,7 +125,8 @@ import org.jspecify.annotations.Nullable;
  * suspension onto its Bound Will once (D-02); a pact perch keeps its owner and pact through a save, and holds nothing a
  * hopper, an explosion or the switch can take (D-04); and a pact, its escrow and the day's reckoning survive a restart, a
  * suspended or upkeep-held pact staying held with its clock (D-05). D-08: a workshop hand saves only its claim's id and its
- * anchor, the anchor its post, and a claim in progress survives a restart.
+ * anchor, the anchor its post, and a claim in progress survives a restart. The garden cohort, GC-03: a bed's tending window
+ * and a pact presence's service memory are never saved.
  */
 public class ConcordancePersistenceGameTests {
 	private static JsonElement json(String text) {
@@ -722,6 +731,50 @@ public class ConcordancePersistenceGameTests {
 		helper.succeed();
 	}
 
+	/**
+	 * The garden cohort, GC-03 (GB14, S6): the groundwork saves nothing. A bed's tending window is memory only: tended, its save
+	 * holds no key it did not hold before, and read back it may be tended again at once. A pact presence's service memory (a
+	 * garden spirit's bed index) is never written: read back, the presence keeps its record and makes its memory afresh.
+	 */
+	@GameTest(maxTicks = 20)
+	public void theGardenGroundworkSavesNothing(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		BlockPos bedAt = new BlockPos(5, 1, 5);
+		helper.setBlock(bedAt, Garden.VERDANT_BED);
+		VerdantBedBlockEntity bed = (VerdantBedBlockEntity) level.getBlockEntity(helper.absolutePos(bedAt));
+		bed.awaken(new UUID(30L, 9L));
+		bed.setStrain(2);
+		long now = level.getGameTime() + 10_000L;
+		Set<String> keys = Set.copyOf(bed.saveWithoutMetadata(level.registryAccess()).keySet());
+		helper.assertTrue(bed.tend(now) && bed.strain() == 1 && !bed.mayTendAt(now + 1), "Tended, its window is open, in memory");
+		CompoundTag saved = bed.saveWithoutMetadata(level.registryAccess());
+		helper.assertTrue(saved.keySet().equals(keys) && loadBed(level, bed, saved).mayTendAt(now + 1),
+				"Its save holds no new key, and read back it may be tended again at once (GB14): " + saved.keySet());
+		ServerPlayer owner = ConcordanceWorkerGameTests.ready(level, TestPlayers.mock(helper));
+		BlockPos at = new BlockPos(2, 1, 2);
+		ConcordanceWorkerGameTests.acceptedAt(helper, owner, at);
+		owner.closeContainer();
+		PactPerchBlockEntity perch = helper.getBlockEntity(at, PactPerchBlockEntity.class);
+		StolasEntity presence = (StolasEntity) level.getEntity(perch.holder().spirit());
+		// A presence learns its record on its first think (PactSpiritEntity.record), as aPerchKeepsItsOwnerAndPact reads it.
+		presence.think(level, 0L, level.getGameTime());
+		helper.assertTrue(presence.record() != null, "The presence knows its record once it has thought");
+		BlockPos centre = helper.absolutePos(bedAt);
+		GardenReach kept = new GardenReach(centre, 8, found -> false);
+		helper.assertTrue(presence.serviceMemory(GardenReach.class, () -> kept) == kept
+				&& presence.serviceMemory(GardenReach.class, () -> new GardenReach(centre, 8, found -> true)) == kept,
+				"A presence keeps its service's memory between asks");
+		TagValueOutput out = TagValueOutput.createWithContext(ProblemReporter.DISCARDING, level.registryAccess());
+		presence.saveWithoutId(out);
+		CompoundTag body = out.buildResult();
+		StolasEntity copy = Workers.STOLAS.create(level, EntitySpawnReason.LOAD);
+		copy.load(TagValueInput.create(ProblemReporter.DISCARDING, level.registryAccess(), body));
+		GardenReach fresh = new GardenReach(centre, 8, found -> false);
+		helper.assertTrue(presence.record().equals(copy.record()) && copy.serviceMemory(GardenReach.class, () -> fresh) == fresh,
+				"Read back, it keeps its record and makes its memory afresh: nothing of it was saved");
+		helper.succeed();
+	}
+
 	/** D-04 (D-S6, G15, D-S16): the perch is no container: no face offers storage and a hopper beneath takes nothing; an explosion takes the perch but not the pact (without its perch; escrow, hold and clock untouched; only the perch's item and blocks' own drops fall, no offering; nothing ended); broken while switched off, its record is untouched and stranded, nothing released. */
 	@GameTest(maxTicks = 60)
 	public void thePerchHoldsNothing(GameTestHelper helper) {
@@ -1001,4 +1054,84 @@ public class ConcordancePersistenceGameTests {
 		JsonElement written = BoundWills.CODEC.encodeStart(ops, wills).result().orElse(null);
 		return written == null ? null : BoundWills.CODEC.parse(ops, written).result().orElse(null);
 	}
+
+	/**
+	 * Concordance garden cohort, GC-05 (GC-P44): the roster's new saved status, awaiting_answer, reads back from the
+	 * roster's save and from its presence's own; answered, the perch reloaded, the presence no longer awaits.
+	 */
+	@GameTest(maxTicks = 20)
+	public void anAwaitingAnswerSurvivesARestart(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		MinecraftServer server = level.getServer();
+		ServerPlayer keeper = ConcordanceWorkerGameTests.gardenHolder(helper);
+		long g0 = level.getGameTime();
+		ConcordanceWorkerGameTests.heartWithItsOwnRoad(helper, keeper.getUUID(), new BlockPos(5, 2, 5));
+		PactPerchBlockEntity perch = ConcordanceWorkerGameTests.bathinPact(helper, keeper, new BlockPos(1, 1, 1), g0);
+		BathinEntity bathin = ConcordanceWorkerGameTests.bathin(helper, perch);
+		helper.assertValueEqual(bathin.think(level, 6000L, g0), Status.AWAITING_ANSWER, "A choice waits");
+		DynamicOps<JsonElement> ops = level.registryAccess().createSerializationContext(JsonOps.INSTANCE);
+		JsonElement written = WorkerRoster.CODEC.encodeStart(ops, WorkerRoster.of(server)).result().orElseThrow();
+		WorkerRoster read = WorkerRoster.CODEC.parse(ops, written).result().orElseThrow();
+		WorkerRoster.Entry entry = read.workers(keeper.getUUID()).get(bathin.getUUID());
+		helper.assertTrue(entry != null && "awaiting_answer".equals(entry.status()) && Status.fromId(entry.status()) == Status.AWAITING_ANSWER,
+				"The roster's save keeps awaiting_answer: " + entry);
+		TagValueOutput out = TagValueOutput.createWithContext(ProblemReporter.DISCARDING, level.registryAccess());
+		bathin.saveWithoutId(out);
+		BathinEntity copy = Workers.BATHIN.create(level, EntitySpawnReason.LOAD);
+		copy.load(TagValueInput.create(ProblemReporter.DISCARDING, level.registryAccess(), out.buildResult()));
+		helper.assertTrue(copy.status() == Status.AWAITING_ANSWER, "and so does its presence's own save");
+		helper.assertTrue(PactAccords.resolve(level, keeper, perch, VerdanceCarrying.WORK, VerdanceCarrying.CLAIM, g0), "Answered");
+		perch.loadWithComponents(TagValueInput.create(ProblemReporter.DISCARDING, level.registryAccess(), perch.saveWithoutMetadata(level.registryAccess())));
+		helper.assertTrue(bathin.think(level, 6000L, g0 + 20) != Status.AWAITING_ANSWER, "After the restart, answered, it no longer awaits");
+		helper.succeed();
+	}
+
+	// GC-06 unit 3
+	// GC-07 unit 4
+	/**
+	 * Concordance garden cohort, GC-07 (GC-P87): answered "graft every host", Foras's perch and Foras saved and loaded again
+	 * (unit 2's pattern): the perch keeps the answer; his save holds his perch and record but no side and nothing he
+	 * remembers; his first think after the reload finds his store again by its touching the perch and grafts, and he stands
+	 * where he stood.
+	 */
+	@GameTest(maxTicks = 20)
+	public void aForasReloadedKeepsHisStoreAndAnswer(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		ServerPlayer holder = ConcordanceWorkerGameTests.gardenHolder(helper);
+		long now = ConcordanceWorkerGameTests.dayStart(level, 1);
+		BlockPos at = new BlockPos(3, 1, 3);
+		ConcordanceWorkerGameTests.floor(helper);
+		Container store = ConcordanceWorkerGameTests.forasStore(helper, at.east(), 2);
+		VerdantBedBlockEntity bed = ConcordanceWorkerGameTests.forasHost(helper, new BlockPos(1, 1, 1), holder.getUUID());
+		PactPerchBlockEntity perch = ConcordanceWorkerGameTests.forasPact(helper, holder, at, now);
+		ForasEntity foras = ConcordanceWorkerGameTests.foras(helper, perch);
+		// His first think takes his pact's record (PactSpiritEntity.think), so his save has one to hold; prudent, with no
+		// reading of the host yet, it grafts nothing.
+		foras.think(level, 6000L, now);
+		helper.assertTrue(bed.graft().isEmpty() && store.countItem(Garden.DEWMOSS) == 2, "Prudent and with no reading, his first think grafts nothing");
+		ConcordanceWorkerGameTests.forasAnswer(helper, holder, perch, GraftKeeping.ALWAYS, now);
+		Vec3 stood = foras.position();
+		UUID id = foras.getUUID();
+		TagValueOutput out = TagValueOutput.createWithContext(ProblemReporter.DISCARDING, level.registryAccess());
+		foras.saveWithoutId(out);
+		CompoundTag saved = out.buildResult();
+		helper.assertTrue(saved.contains("perch") && saved.contains("record")
+				&& List.of("side", "station", "memory", "reach", "useless", "unread", "raised", "idle", "last").stream().noneMatch(saved::contains),
+				"His save holds his perch and record, no side and nothing he remembers: " + saved.keySet());
+		foras.remove(Entity.RemovalReason.UNLOADED_TO_CHUNK);
+		perch.loadWithComponents(TagValueInput.create(ProblemReporter.DISCARDING, level.registryAccess(), perch.saveWithoutMetadata(level.registryAccess())));
+		helper.assertValueEqual(perch.accord(), GraftKeeping.ALWAYS, "The perch, reloaded, keeps the answer");
+		ForasEntity back = Workers.FORAS.create(level, EntitySpawnReason.LOAD);
+		back.load(TagValueInput.create(ProblemReporter.DISCARDING, level.registryAccess(), saved));
+		helper.assertTrue(id.equals(back.getUUID()) && level.addFreshEntity(back) && perch.presence(level) == back,
+				"Read back from his save: the same Foras, his perch's presence");
+		helper.assertValueEqual(back.think(level, 6000L, now + 1), Status.WORKING, "His first think after the reload finds his store again and grafts");
+		helper.assertTrue(ConcordanceWorkerGameTests.FORAS_GRAFT.equals(bed.graft()) && store.countItem(Garden.DEWMOSS) == 1
+				&& back.position().distanceTo(stood) < 1.0E-3,
+				"Dewlit, one Dewmoss from the store touching the perch; he stands where he stood: " + back.position() + " for " + stood);
+		helper.succeed();
+	}
+
+	// GC-08 unit 5
+	// GC-09 unit 6
 }

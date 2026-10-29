@@ -4,18 +4,27 @@ Status: merged to main ([#244](https://github.com/jimbozoomer-byte/jugcraft/pull
 `claude/awesome-davinci-iwv3b9`, integrated by [#263](https://github.com/jimbozoomer-byte/jugcraft/pull/263) on
 8 October 2026); see Verification for what has run. Extended by Concordance Chunk D, unit 1 (D-01: the agreements
 keep their promises, and a familiar fades only for its person's own play time; D-02: one pact record; [the chunk's
-contract](concordance-chunk-d.md)), not merged; its tests passed in CI with its unit review's fixes (run 40067977680 on
+contract](concordance-chunk-d.md)), merged with Chunk D through the owner's #494; its tests passed in CI with its unit review's fixes (run 40067977680 on
 `da185dd0d`; see Verification). Extended by Concordance Chunk D, unit 4 (D-08: the Workshop Hand, a second spirit,
 carrying a Courier Post's requests; [The Workshop Hand](#the-workshop-hand-concordance-chunk-d-d-08)), built beside unit
-2 and not merged; compiled in CI, and its tests passed in run 40085012234 on `86c4e7127` (both server jobs and every
+2 and merged with Chunk D (#494); compiled in CI, and its tests passed in run 40085012234 on `86c4e7127` (both server jobs and every
 client class; see Verification). Extended by Concordance Chunk D, unit 2
-(D-03 to D-05: [Stolas's pact](stolas-pact.md), a pact kept at a Pact Perch), not merged; its tests first ran in CI
+(D-03 to D-05: [Stolas's pact](stolas-pact.md), a pact kept at a Pact Perch), merged with Chunk D (#494); its tests first ran in CI
 run 40090825848, which failed two of them as defects of the tests (fixed in `8a3425f9e`), and passed in runs
 40094972598 (on `8a3425f9e`) and 40133540741. Extended by Concordance Chunk D, unit 3 (D-06: Stolas's character;
 D-07: [the roster screen](#the-roster-screen-concordance-chunk-d-d-07)), built on its own local branch and merged
-into the pact hall at `554d71ab1`, not merged; its tests were first compiled and run in CI run 40121823509 on
+into the pact hall at `554d71ab1`, merged with Chunk D (#494); its tests were first compiled and run in CI run 40121823509 on
 `040d73ece`, where they passed (after run 40120355940 failed to compile the roster client test), and passed again in
-run 40133540741.
+run 40133540741. Chunk D reached main on 27 October 2026 in the owner's #494 (`46bac6b34`, one squashed commit with
+Chunks B and C and the October 26 community batch; Chunk D's own #474 was closed without merging). Extended by the
+Concordance garden cohort's unit 1 (GC-01 to GC-04: one pact spirit base, a perch for many spirits, facing, the garden
+groundwork and [Buer](buer-pact.md); [contract](concordance-garden-cohort.md)), not merged (draft #526); its tests passed
+in CI run 40605564166 (see Verification). Extended by the cohort's unit 2 (GC-05: [Bathin](bathin-pact.md), the accord
+machinery and the bed index's devices), not merged either; its tests passed in CI run 40777920181. Extended by the
+cohort's unit 3 (GC-06: [Marax](marax-pact.md), a body's station beside its perch and a synced work target), built and
+not merged, and not yet compiled or run in CI. Extended by the cohort's unit 4 (GC-07: [Foras](foras-pact.md), graft
+keeping and the bed index's stores), built on its own line from unit 3's shared prefix and merged after unit 3, not
+merged to main, and not yet compiled or run in CI.
 Proposal issue: none; the owner's Arcane Concordance brief (roadmap step 17) is the scope approval.
 Owner: @jimbozoomer-byte. AI-assisted implementation with Claude Code; the model is named in the commit trailers.
 Target milestone and tier: Concordance milestone 9, Practitioner stage (Jugcraft Workshops). Roadmap step 17.
@@ -106,7 +115,12 @@ no room; one killed is struck off, which is how its anchor knows it was lost.
 behaviours (`LookAtTarget`, `MoveToWalkTarget`). A decision sets the walk-target memory; SmartBrainLib walks there. When
 the brain records that it could not reach its target, the worker counts it (`worker/Navigation.java`): after three
 failures it stops, says it cannot find a way, and tries again after thirty seconds. Only `WorkerEntity` touches the
-brain, and the brain's memories hold nothing a worker owes or carries.
+brain, and the brain's memories hold nothing a worker owes or carries. Since the garden cohort (GC-02),
+`WorkerEntity.attend` also sets or erases the look-target memory (a pact spirit's speaker, or the bed it works on);
+`LookAtTarget`'s target test is `WorkerEntity.unseen`, which drops an entity target only when it is gone, in another level
+or beyond 32 blocks (`LOOK_REACH`), because SmartBrainLib's own test needs the vanilla visible-entities memory, which the
+workers' one sensor, the nearby players', never fills. No sensor was added. Familiars, shades, porters and hands set no
+look target and are unchanged.
 
 **No chunk loading, no portals.** A worker in an unloaded chunk does nothing; one whose destination (its anchor, its
 person's place, a porter's source or target) is unloaded waits and says so; none uses a portal. A familiar may hop
@@ -121,7 +135,7 @@ looping clip for its synced status: the Hearthling's idle, following, supporting
 travelling, working and suspended; the porter's idle, walking, working and broken. Jade shows the status and the
 model's own numbers (bond; carried; integrity, charge and load).
 
-**Pacts** (Concordance Chunk D, unit 2; not merged; [Stolas's pact](stolas-pact.md)). The Pact Perch is a second holder
+**Pacts** (Concordance Chunk D, unit 2; merged with #494; [Stolas's pact](stolas-pact.md)). The Pact Perch is a second holder
 block on the same `AgreementHolder` as the Spirit Anchor, and Stolas a fourth worker entity (not a fourth definition
 kind: his offer is the Concordance's `pact` data, `concordance/pact/stolas.json`):
 - the roster's kind `pact` (`workers.kind.pact`), noted when the pact is sealed or its presence is called again;
@@ -139,6 +153,25 @@ kind: his offer is the Concordance's `pact` data, `concordance/pact/stolas.json`
   his sounds with subtitles and Jade's lines ([Stolas's character](stolas-pact.md#stolass-character-d-06)). His
   presence's departure lingers 40 ticks for its gesture: struck off the roster at once, never saved meanwhile, and never
   a perch's visitor or presence again (`gone()`, D-P97).
+- since the garden cohort's GC-01 ([contract](concordance-garden-cohort.md); not merged): a pact spirit is a
+  `PactSpiritEntity` (its perch and record saved as `perch` and `record`, its listening, departure, cues, gestures and
+  station on the perch), registered in `PactSpirits` by its counterpart with its sign; each pact service is a
+  `PactService` registered once in `PactServices` by its work (Star-reckoning's is `StarReckoning.SERVICE`), and the
+  game refuses to start without one for every work `PactParser.WORK` accepts; a record whose work this version does not
+  know still loads, lists, suspends and ends. `PactParser.REQUIRED` lists every shipped offer in a perch's order. An
+  empty perch's owner who may invite two or more spirits chooses among them (the `invite` mode and action); Jade, the
+  roster's portraits (by counterpart, kind `pact`) and the journal's pacts section name each spirit. Stolas was the first
+  and Buer (GC-04) the second; nothing saved changed. Since GC-04 a pact's service also steps while an offering is due,
+  through its grace, as long as its holder is near (GC-P27). Since GC-05 Bathin is the third, and a pact spirit may show
+  something in the world as a gesture plays (`PactSpiritEntity.gestured`: his ring of dust) and raise a matter for its
+  holder to settle at its perch (the accord, below). Since GC-06 (not yet run in CI) Marax is the fourth: a body names
+  its station (`PactSpiritEntity.Station`: `PERCH`, as every earlier spirit; `BESIDE`, two blocks out on the first clear
+  side, a quarter turn clockwise from its inviter, never between them and the perch, else on the perch; kept each think,
+  saved nowhere), and a spirit may show the block it means to every client (`showTarget`: a synced `TARGET`, set only
+  while a conversation is open at its perch, cleared after it, never saved), which a renderer row's named bone flies to
+  (`PactSpiritRenderers.Row.reach`). Since GC-07 (not yet run in CI) Foras joins them, standing on the ground beside his
+  perch through the shared prefix's `PactSpiritEntity.Station.BESIDE` (GC-06b), the first garden service to spend an
+  item: one donor a graft, taken from a store touching the perch in one transaction.
 
 ## Connections
 
@@ -198,8 +231,8 @@ kind: his offer is the Concordance's `pact` data, `concordance/pact/stolas.json`
 
 No new dependency. Framework use:
 
-- **SmartBrainLib**: the workers' brains (a players sensor, look and walk behaviours, the walk-target and can't-reach
-  memories). Decisions stay in Jugcraft's own models; the brain only moves the body.
+- **SmartBrainLib**: the workers' brains (a players sensor, look and walk behaviours, the walk-target, can't-reach and
+  look-target memories). Decisions stay in Jugcraft's own models; the brain only moves the body.
 - **GeckoLib**: three original entity models with their animations, one looping clip per status group.
 - **Jade (optional)**: worker status, bond, load, integrity and charge; since Concordance Chunk D, unit 3, a pact
   perch's and a Spirit Anchor's agreement (`PactDataProvider`) and Stolas's pact, naming no player and nothing of the
@@ -259,7 +292,7 @@ server, real walking over real terrain (the tests stand workers within reach), a
 
 **Concordance Chunk D, unit 1: D-01 and D-02** (commits `56a74f4be` (D-01), `7477efbcd` (D-S17), `fa5360d0d` (D-02),
 the records' commit `97e1facd4` and "Chunk D unit 1: fixes from the unit review";
-[the chunk's contract](concordance-chunk-d.md), its As built notes and proposals D-P1 to D-P16; not merged). **CI:**
+[the chunk's contract](concordance-chunk-d.md), its As built notes and proposals D-P1 to D-P16; merged with #494). **CI:**
 first compiled and run by CI; with the unit review's fixes and 26.3's white wool, run 40067977680 on `da185dd0d` passed
 every job.
 - New server game tests (29), passed in CI run 40067977680:
@@ -330,7 +363,7 @@ every job.
 
 **Concordance Chunk D, unit 4: D-08** (commits `023b681e8`, `e51ef2b11`, the records' commit "Concordance Chunk D:
 unit 4's records and the schema review" and the commit "Chunk D unit 4: fixes from the unit review"; [the chunk's
-contract](concordance-chunk-d.md); not merged). **CI:** compiled in runs 40079227985 and 40082852322, which failed its
+contract](concordance-chunk-d.md); merged with #494). **CI:** compiled in runs 40079227985 and 40082852322, which failed its
 twenty hand tests at their first step: a test helper compared `ItemStack.useOn`'s answer with the SUCCESS constant,
 which 26.3 never returns for an item's use (fixed in the helper, `WorkshopHands.use`); run 40085012234 on `86c4e7127`
 passed them (both server jobs), and every job, after one re-run of a client shard for main's
@@ -362,7 +395,7 @@ passed them (both server jobs), and every job, after one re-run of a client shar
 
 **Concordance Chunk D, unit 2: D-03 to D-05** (commits `9daf23ae1`, `832129b95`, `7da686ad4`, `ee82c1dc7`, the
 records' commit and the unit review's fixes; [Stolas's pact](stolas-pact.md) and the [contract](concordance-chunk-d.md)'s As built notes, proposals
-D-P17 to D-P50; not merged). **CI:** first compiled in run 40090825848, which failed
+D-P17 to D-P50; merged with #494). **CI:** first compiled in run 40090825848, which failed
 `aBrokenPactDefinitionIsReported` in both server jobs (a defect of the test, fixed in `8a3425f9e`); every job passed in
 runs 40094972598 and 40133540741. In this record's suites: `ConcordanceWorkerGameTests` +22 (D-04's 12 and D-05's 10, with unit 1's four
 upkeep tests now also on Stolas's own pact; 49 in all with unit 4's five),
@@ -376,21 +409,21 @@ audit mutations are reported in the contract's D-05 As built note.
 **Concordance Chunk D, unit 3: D-06 and D-07** (commits `9805a9a7c`, `773b85aba`, `a3ee00822`, `66b741868` and the
 records' commit "Concordance Chunk D: unit 3's records", on the local `wip/chunk-d-u3` from `92868ff82`, merged at `554d71ab1`;
 [Stolas's pact](stolas-pact.md) and the [contract](concordance-chunk-d.md)'s D-06 and D-07 As built notes, proposals
-D-P90 to D-P121; not merged). **CI:** run 40120355940 on `554d71ab1` failed to compile at the roster client test
+D-P90 to D-P121; merged with #494). **CI:** run 40120355940 on `554d71ab1` failed to compile at the roster client test
 (fixed in `040d73ece`); run 40121823509 on `040d73ece` passed every job (`optional integrations absent` after one
 re-run), these tests among them, and so did run 40133540741. In this record's suites:
 `ConcordanceWorkerGameTests` +14 (D-06's seven, D-07's six and `aReplacedHandLoadingWhileSwitchedOffStaysOffTheRoster`;
 63 in all), with unit 2's tests that read Stolas leaving now reading `gone()`; the client classes
-`ConcordancePactClientGameTests` (extended) and `ConcordanceRosterClientGameTests` (new). Audits: `check_stolas_body`,
-`check_pacts` (D-06's block and the hand's roster rule), `check_roster` and `check_roster_screen`. Run and passed
+`ConcordancePactClientGameTests` (extended) and `ConcordanceRosterClientGameTests` (new). Audits: `check_stolas_body`
+(`check_spirit_bodies` since the garden cohort's GC-01), `check_pacts` (D-06's block and the hand's roster rule), `check_roster` and `check_roster_screen`. Run and passed
 locally: `python3 tools/owner_art.py --check`, `python3 -B tools/check_mod_data.py`, `python3 scripts/check_repository.py`,
 `python3 tools/concordance_journey.py --check`, `python3 tools/check_icon_maps.py`,
 `node --test tools/world-designer/model.test.cjs`, `python3 -m unittest discover -s scripts/tests` and
 `git diff --check`; 104 audit mutations, each reported. **Not run where it was written:** `./gradlew build` and the
 game tests (run by CI, above); any client by hand, two people.
 
-**Concordance Chunk D, unit 5 (D-09)** ([the contract](concordance-chunk-d.md#unit-5-evidence-and-handoff-d-09); not
-merged): `ConcordanceRosterClientGameTests` also photographs a workshop hand carrying a request's three copper ingots
+**Concordance Chunk D, unit 5 (D-09)** ([the contract](concordance-chunk-d.md#unit-5-evidence-and-handoff-d-09);
+merged with #494): `ConcordanceRosterClientGameTests` also photographs a workshop hand carrying a request's three copper ingots
 across the yard, frozen with its cargo aboard on its own claim, then delivering them once
 (`jugcraft_workshop_hand_at_work`); `ConcordancePactNetworkTests` has a second client JVM refused at another player's
 perch and roster; `ConcordancePactHallLoadGameTests` measures four workshop hands at work among eight pacts. In run
@@ -401,7 +434,7 @@ not two people.
 
 ## The Workshop Hand (Concordance Chunk D, D-08)
 
-Not merged; built beside Chunk D's unit 2 ([the chunk's contract](concordance-chunk-d.md), D-08's As built note and
+Merged with Chunk D (#494); built beside Chunk D's unit 2 ([the chunk's contract](concordance-chunk-d.md), D-08's As built note and
 proposals D-P70 to D-P83). A spirit of the Gathering Shade's kind, bound to carry: sealed at a Spirit Anchor that a
 Porter Key has bound to its holder's Courier Post, it carries that post's exact requests through the courier ledger with
 the Clockwork Porter's own decision ([logistics](arcane-concordance-logistics.md)).
@@ -463,7 +496,7 @@ the Clockwork Porter's own decision ([logistics](arcane-concordance-logistics.md
 
 ## The roster screen (Concordance Chunk D, D-07)
 
-Not merged; built in Chunk D's unit 3 on its own local branch (commits `a3ee00822`, the server side and the journal's
+Merged with Chunk D (#494); built in Chunk D's unit 3 on its own local branch (commits `a3ee00822`, the server side and the journal's
 pacts, and `66b741868`, the screen; [the chunk's contract](concordance-chunk-d.md), D-07's As built note and proposals
 D-P105 to D-P121). One native, narrated screen for everything a player keeps: their familiars, spirits and constructs,
 their pacts and agreements, and their courier requests.
@@ -519,6 +552,71 @@ their pacts and agreements, and their courier requests.
   `ConcordanceRosterClientGameTests` (ten shots) and the roster in `ScreenFitClientGameTests`. Audits `check_roster`
   and `check_roster_screen`, run and passing.
 
+## Garden pact groundwork (the garden cohort, GC-03)
+
+Not merged (draft #526); [the contract](concordance-garden-cohort.md)'s GC-03 and its As built note. Garden spirits keep
+their perch and work at a distance, so they share three small pieces. **The bed index** (`GardenReach`): per presence,
+never saved; the awake beds of the keepers its pact benefits, in the cube of its radius round the perch, read from the
+block-entity maps of the loaded chunks it overlaps (at most 9), at most 64, nearest first, re-read every 200 ticks; a bed
+broken or asleep since drops out at once, a new one joins at the next refresh; nothing loads a chunk or samples a
+habitat. **Whose land** (`GardenPacts.target`): a service changes a block only where its pact serves now (area, hours,
+the day's quota, not suspended or held), only for a keeper it benefits at that moment (the holder; their party under
+party), only while the holder is online, alive, in the perch's level and within 64 blocks of it (the test upkeep uses: no
+stand-in, whatever the server's absent-owner option), and only where the holder could change it by hand; each refusal is
+a status (outside agreement, suspended, upkeep held, finished, idle, owner offline, blocked by access). **First
+obligations** (`PactObligations`): each garden service names an act the holder does by hand; done inside the active
+pact's area it records `jugcraft:garden_pact_service` keyed by the spirit, once a player a spirit (the Conclave hears it
+once), never Stolas's practice, the Binding Arts' or cultivation's. A presence keeps its service's memory
+(`PactSpiritEntity.serviceMemory`) for its life only (S6).
+
+The first garden spirit is Buer (GC-04, [record](buer-pact.md)): strain tending eases one strain from one beneficiary's
+bed a think, by the bed's own rule; a pact's service now steps through an offering's grace while its holder is near
+(GC-P27). **Verification:** GC-03's twelve server tests and GC-04's twenty-four passed in CI run 40605564166 with and
+without the optional integrations; `ConcordanceGardenPactClientGameTests` passed there (one client; its pictures are
+described in [Buer's Verification](buer-pact.md#verification)). Not played by a person; no second client.
+
+The second garden spirit is Bathin (GC-05, [record](bathin-pact.md)): Verdance carried at once from his holder's Hearts
+to a far Gleaner or a pylon, both ends shimmering and nothing between, one move a think and 12 a day; his first
+obligation is `DEVICE` (an awake living device used with an empty hand in his area). The bed index can also hold the
+Hearts, Gleaners and pylons its pact's beneficiaries keep (or no one owns, for pylons), 16 of each, read in the beds'
+one pass (`GardenReach.devices`). **A matter to settle (the accord):** a pact service may raise one complication that is
+a choice (`PactService.complication`, its `accords()`), shown on the kept page with up to three answers; only the
+record's holder, in person and alive, answers it there (`resolve`, action 10), and the answer is kept by the perch
+(`accord`) until the pact ends. **awaiting your answer** (`awaiting_answer`, appended): a presence whose `decide` returned
+idle while its holder's choice waits reports it whatever its step returned, so the roster shows it with the waiting mark,
+Jade says it and a sign of want shows once as it begins; it still works on the safe course meanwhile, and an offering due
+or the holder away is said first. Saved on the roster like every status; an older build reads it as idle.
+**Verification:** GC-05's thirty-eight server tests (Bathin's carrying, character and accord tests, the garden side's
+four, one economy and one persistence test) passed in CI run 40777920181 with and without the optional integrations, and
+`ConcordanceGardenPactClientGameTests` passed there (its pictures of him are described in
+[Bathin's Verification](bathin-pact.md#verification)). Not played by a person; no second client.
+
+The third garden spirit is Marax (GC-06, [record](marax-pact.md)): habitat reading, for the holder alone and only when
+asked on his kept page (a work's on-request choice, drawn as a plate). His familiar reads up to 8 of the holder's planted
+beds in his area from their cached samples, asking `GardenPacts.target` of at most 16, and names one change for the worst
+(`ecology/HabitatAdvice`), changing nothing; two readings a game day, only a change named counting. **The proud
+familiar** is a task, not a choice: a bed named three readings running with nothing changed is passed over until it
+changes, in his presence's memory only (`PactSpiritEntity.serviceMemory`, never saved); his kept page and Jade's note
+say so, and the roster's status is unchanged. His first obligation is `READ` (a Verdant Bed itself used with an empty
+hand in his area); with Buer's and Bathin's, three garden spirits' obligations master The Garden's Regard. He is the
+first standing body (`Station.BESIDE`) and the first user of the work target. **Verification:** his 22 server tests
+(`GC06B_TESTS`, `GC06_TESTS`) and his flow in `ConcordanceGardenPactClientGameTests` are written and **not yet run**: no
+CI run has compiled him ([his Verification](marax-pact.md#verification)). The shared prefix (GC-06b) was in the head of
+CI run 40777920181, which passed in full. Not played by a person; no second client.
+
+The fourth garden spirit is Foras (GC-07, [record](foras-pact.md)): graft keeping, at any hour while his holder is near.
+He grafts the host crops on his beneficiaries' awake beds in his area with one donor each (a Dewmoss for a Sunpetal's
+Dewlit) from a plain container touching the perch, at most one graft a think and 8 a day, only where the graft helps by
+the bed's cached reading until his holder answers otherwise; he never replaces a graft the rules know. The bed index can
+also hold the plain containers touching its pact's perch, 16 at most, judged in the beds' one pass
+(`GardenReach.withStores`, `CourierWork.plain`); a store is asked as the holder's before it is read, and the donor is
+taken in one outer transaction committed only when exactly one came out, then the graft is `Grafting.apply`'s, the one
+graft the hand makes too. His matter (the accord, above) names the hosts a graft would not help, or would harm; his
+answers are `prudent` and `always`. His first obligation is `GRAFT` (a crop grafted by hand in his area). He stands on the
+ground beside the perch (`Station.BESIDE`). **Verification:** his 25 server tests (`GC07_GRAFT_TESTS`,
+`GC07_FORAS_TESTS`) and his flow in `ConcordanceGardenPactClientGameTests` are written and **not yet run**: no CI run has
+compiled him ([his Verification](foras-pact.md#verification)). Not played by a person; no second client.
+
 ## World and event applicability
 
 Works in every dimension; a shade's agreement and a porter's route belong to the dimension they were made in. No
@@ -532,25 +630,56 @@ data component `jugcraft:porter_route`; saved data `jugcraft:worker_roster` and 
 `jugcraft:binding_arts`; practice `jugcraft:worker_service`; item tag `jugcraft:binding_specimens`; data folder
 `concordance/worker`. Removing them needs a migration.
 
-Since Concordance Chunk D, unit 1 (not merged): saved data `jugcraft:pact_history`; the worker status ids `upkeep_due`
+Since Concordance Chunk D, unit 1 (merged with #494): saved data `jugcraft:pact_history`; the worker status ids `upkeep_due`
 and `upkeep_held` (appended); the seal outcomes (`SEAL_OUTCOMES`), the holds (`none`, `holder`, `upkeep`) and the
 departure reasons (`ended`, `broken`), each saved or worded, so append only; optional saved keys (the anchor's `owner`,
 the bond's `seen_played`, a Bound Will's `pact` and `escrow`). No new block, item or entity.
 
-Since Concordance Chunk D, unit 4 (not merged): the entity `jugcraft:workshop_hand`, its definition
+Since Concordance Chunk D, unit 4 (merged with #494): the entity `jugcraft:workshop_hand`, its definition
 `concordance/worker/workshop_hand.json` and the work `courier` (saved in Bound Wills' service terms, so append only);
 the codex entry `binding/workshop_hand`; optional saved keys (the anchor's `post`, the hand's `anchor` and `task`). No
 new block or item.
 
-Since Concordance Chunk D, unit 2 (not merged): entity `jugcraft:stolas`; block, item, block entity and menu
+Since Concordance Chunk D, unit 2 (merged with #494): entity `jugcraft:stolas`; block, item, block entity and menu
 `jugcraft:pact_perch`; the roster kind `pact`; the seat outcomes (`SEAT_OUTCOMES`, worded, so append only); the perch's
 saved `owner`, `agreement` and `spirit` and Stolas's `perch` and `record` (stamps 1). [Stolas's pact](stolas-pact.md)
 lists the rest.
 
-Since Concordance Chunk D, unit 3 (not merged): the payload types `jugcraft:concordance_roster_request` and
+Since Concordance Chunk D, unit 3 (merged with #494): the payload types `jugcraft:concordance_roster_request` and
 `jugcraft:concordance_roster_state` (the roster's actions and icons travel as indices, so append only), the key
 `key.jugcraft.concordance_roster`, Stolas's sound events `jugcraft:stolas.*` and Jade's providers `jugcraft:pact_perch`
 and `jugcraft:spirit_anchor`. No saved data, block, item or entity.
+
+Since the garden cohort's unit 1 (not merged): the entity `jugcraft:buer`, his definition `concordance/pact/buer.json`
+and agreement `jugcraft:buer_pact`, the work `strain_tending` (saved in a Bound Will's service; appended), the tags
+`#jugcraft:buer_offerings` and `#jugcraft:garden_regard_specimens`, research `jugcraft:garden_regard`, practice
+`jugcraft:garden_pact_service`, four advancements `concordance_garden_regard_*`, the codex entry `binding/garden_regard`,
+his sound events `jugcraft:buer.*`; on the wire (network only) the action `invite` (9), the mode `invite` (4), the state's
+nested `spirit` and Jade's keys `visitor`, `note` and `note_count`. No saved data, block, item or block entity.
+
+Since the garden cohort's unit 2 (not merged): the entity `jugcraft:bathin`, his definition `concordance/pact/bathin.json`
+and agreement `jugcraft:bathin_pact`, the work `verdance_carrying` (saved in a Bound Will's service; appended), the tag
+`#jugcraft:bathin_offerings`, his sound events `jugcraft:bathin.*`, codex pages `p8` to `p11` of `binding/garden_regard`;
+the perch's optional saved `accord` (`yield`, `claim`; stamp 1) and the worker status `awaiting_answer` (appended); on
+the wire (network only) the action `resolve` (10), the reason `resolved` and the state's `spirit.matter` and
+`spirit.answers`; Jade's keys `matter` and `accord`. No block, item or block entity; no migration.
+
+Since the garden cohort's unit 3 (not merged; not yet run in CI): the entity `jugcraft:marax`, his definition
+`concordance/pact/marax.json` and agreement `jugcraft:marax_pact`, the work `habitat_reading` (saved in a Bound Will's
+service; appended; holder only), the tag `#jugcraft:marax_offerings`, his sound events `jugcraft:marax.*`, codex pages
+`p12` to `p16` of `binding/garden_regard` (the last, "Mastered", stays the entry's last page as later spirits add
+theirs); on the wire (network only) the spirit's synced `TARGET`. Nothing saved of his own: his entity writes only the
+base's `perch` and `record`; the station, the target and the familiar's pique are never saved. No block, item or block
+entity; no migration.
+
+Since the garden cohort's unit 4 (not merged; not yet run in CI): the entity `jugcraft:foras`, his definition
+`concordance/pact/foras.json` and agreement `jugcraft:foras_pact`, the work `graft_keeping` (saved in a Bound Will's
+service; appended), the tag `#jugcraft:foras_offerings`, his sound events `jugcraft:foras.*`, his four codex pages of
+`binding/garden_regard` after Marax's and before "Mastered" (named by title, since each unit's pages renumber the
+entry); the perch's accord
+values `prudent` and `always` (appended). Nothing saved of his own: his entity writes only the base's `perch` and
+`record`; his memory and his station's side are never saved, and a bed's `graft` is Chunk C's key. No block, item or
+block entity; no migration.
 
 Open items:
 

@@ -31,6 +31,14 @@ SERVICES = {
     "gather": "Gathers what it finds in its area into its anchor",
     "courier": "Carries its Courier Post's requests",
     "star_reckoning": "Star-reckoning: once a game day, a sky pattern you observed, recalled",
+    "strain_tending": "Strain tending: by daylight, one harvest strain eased on your beds at a time",
+    "verdance_carrying": "Verdance carrying: at once, from your Hearts to a far Gleaner or a pylon",
+    # GC-06 unit 3
+    "habitat_reading": "Habitat reading: one change named for your worst bed, when asked",
+    # GC-07 unit 4
+    "graft_keeping": "Graft keeping: a host grafted with a donor from the store beside his perch",
+    # GC-08 unit 5
+    # GC-09 unit 6
 }
 # Ars Nouveau's helpers on the roster (G13; Java: nouveau/NouveauHelper.kind is "nouveau_" + its species,
 # NouveauHelpers.register lists them).
@@ -46,10 +54,11 @@ KIND_SERVICES = {
 }
 # The portrait of a worker that is not loaded, by kind (Java: Roster.KIND_PORTRAITS); any other kind is jugcraft:<kind>,
 # which names the Ars Nouveau helpers' and the starbuncle's entity types. A spirit has none ("": the client draws the Spirit
-# Anchor), since a Gathering Shade's kind and a Workshop Hand's are both spirit (the unit's critique 8). A loaded worker is
-# drawn as its own entity type, and a record's row as its counterpart.
+# Anchor), since a Gathering Shade's kind and a Workshop Hand's are both spirit (the unit's critique 8). A pact presence has
+# none either (GC-01, GB6): every pact spirit's kind is pact, so the client draws the Spirit Anchor rather than the wrong
+# spirit. A loaded worker is drawn as its own entity type, and a record's row as its counterpart.
 KIND_PORTRAITS = {"familiar": "jugcraft:hearthling", "spirit": "", "construct": "jugcraft:clockwork_porter",
-                  "pact": "jugcraft:stolas"}
+                  "pact": ""}
 # A place's dimension in words (Java: Roster.place; any other is its id): vanilla's three, each lair by its own name
 # (tools/lairs.py LAIRS' display, as lair.jugcraft.<lair> says it, its "The" lower-cased mid-sentence) and a Planarium's
 # cells by the block's name (block.jugcraft.nouveau_planarium; the unit review, D8). check_roster holds it to

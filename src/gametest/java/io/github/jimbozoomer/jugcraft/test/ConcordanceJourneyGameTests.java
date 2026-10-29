@@ -49,10 +49,13 @@ import io.github.jimbozoomer.jugcraft.concordance.sky.Sky;
 import io.github.jimbozoomer.jugcraft.concordance.spire.ConcordSpire;
 import io.github.jimbozoomer.jugcraft.concordance.spire.SpireRecord;
 import io.github.jimbozoomer.jugcraft.concordance.spirits.BoundWills;
+import io.github.jimbozoomer.jugcraft.concordance.spirits.BuerEntity;
 import io.github.jimbozoomer.jugcraft.concordance.spirits.ClockworkPorterEntity;
+import io.github.jimbozoomer.jugcraft.concordance.spirits.GardenPacts;
 import io.github.jimbozoomer.jugcraft.concordance.spirits.PactHistory;
 import io.github.jimbozoomer.jugcraft.concordance.spirits.PactKeeping;
 import io.github.jimbozoomer.jugcraft.concordance.spirits.PactMenu;
+import io.github.jimbozoomer.jugcraft.concordance.spirits.PactObligations;
 import io.github.jimbozoomer.jugcraft.concordance.spirits.PactPerchBlockEntity;
 import io.github.jimbozoomer.jugcraft.concordance.spirits.PactRequestPayload;
 import io.github.jimbozoomer.jugcraft.concordance.spirits.PactStatePayload;
@@ -663,6 +666,9 @@ public class ConcordanceJourneyGameTests {
 	 */
 	private static final List<String> PACT_HALL_RECIPES = List.of("verdant_bed", "sunpetal", "assayers_scale", "observatory", "astrolabe",
 			"pact_perch", "spirit_anchor", "courier_post", "porter_key");
+	/** The garden cohort, GC-03: the recipes of tools/acquisition.py GARDEN_PACTS (check_acquisition holds the two equal); GC-04 adds the perch and Mendvetch, GC-05 the Verdant Heart and the Gleaner. */
+	private static final List<String> GARDEN_RECIPES = List.of("sunpetal", "verdant_bed", "bonding_charm", "pact_perch", "mendvetch", "verdant_heart",
+			"gleaner", "dewmoss");
 
 	// The pact hall in the yard (jugcraft-test:drone_depot, its floor laid first). WorkshopHands' corner (x 1 to 3, z 2 to 5)
 	// keeps the workshop hand's post, chest, crucible and anchor, as the hand's own tests place them.
@@ -717,6 +723,20 @@ public class ConcordanceJourneyGameTests {
 			}
 		}
 		helper.assertTrue(missing.isEmpty(), "These pact-hall recipes did not load: " + missing);
+		helper.succeed();
+	}
+
+	/** The garden cohort, GC-03: every recipe the garden route's rows name loads (check_acquisition holds GARDEN_RECIPES to tools/acquisition.py GARDEN_PACTS). */
+	@GameTest(maxTicks = 20)
+	public void theGardenPactsRecipesLoad(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		List<String> missing = new ArrayList<>();
+		for (String name : GARDEN_RECIPES) {
+			if (level.recipeAccess().byKey(ResourceKey.create(Registries.RECIPE, Jugcraft.id(name))).isEmpty()) {
+				missing.add(name);
+			}
+		}
+		helper.assertTrue(missing.isEmpty(), "These garden recipes did not load: " + missing);
 		helper.succeed();
 	}
 
@@ -1018,5 +1038,188 @@ public class ConcordanceJourneyGameTests {
 			helper.assertTrue(presence.isRemoved() && ConcordanceWorkerGameTests.stolases(helper).isEmpty(), "His gesture over, Stolas is gone from the world");
 			helper.succeed();
 		});
+	}
+
+	// GC-04: Buer's journey in the drone tests' 16 x 8 x 16 box: the Regard's harvest bed far (10 and 10) from his perch, his bed
+	// and the holder's own bed beside it.
+	private static final BlockPos GARDEN_PERCH_AT = new BlockPos(3, 1, 3);
+	private static final BlockPos HARVEST_AT = new BlockPos(13, 1, 13);
+	private static final BlockPos BUER_BED_AT = new BlockPos(6, 1, 3);
+	private static final BlockPos HAND_BED_AT = new BlockPos(3, 1, 6);
+	/** Inventory slots past the hotbar for Buer's compact (three crafts of Mendvetch, then the bone meal), so a use with the main hand never touches them. */
+	private static final int GARDEN_COMPACT_SLOT = 9;
+
+	/** {@code player}'s state of The Garden's Regard. */
+	private static ResearchState garden(ServerPlayer player) {
+		return ConcordanceProgress.knowledge(player).state(GardenPacts.RESEARCH);
+	}
+
+	/** A wet Verdant Bed set at {@code at}, woken by {@code player}'s empty hand (the server's own use): awake and kept by them. */
+	private static void wake(GameTestHelper helper, ServerPlayer player, BlockPos at) {
+		helper.setBlock(at, Garden.VERDANT_BED.defaultBlockState().setValue(VerdantBedBlock.MOISTURE, VerdantBedBlock.WET));
+		VerdantBedBlockEntity bed = helper.getBlockEntity(at, VerdantBedBlockEntity.class);
+		helper.assertTrue(use(helper, player, at, ItemStack.EMPTY).consumesAction() && bed.awake() && player.getUUID().equals(bed.keeper()),
+				"A Verdant Bed woken by its Greenwarden's hand is awake and kept by them");
+	}
+
+	/**
+	 * Concordance garden cohort, GC-04 (GE7; the journey's GARDEN route, steps 1 to 6): Buer from The Garden's Regard to his
+	 * departure, one ordinary survival player, in order, without Styx or Stolas. A Sunpetal examined, a ripe one harvested by
+	 * hand on a bed they woke, a bound worker's service: the Regard understood. A Pact Perch crafted and placed by hand far
+	 * from that bed: Buer does not come ("nothing here I could mend") and nothing is spent. A bed woken beside it: he comes,
+	 * rooted, and names every term; accepting short of the compact is refused with its reason and spends nothing; with 4
+	 * Mendvetch (crafted) and 4 bone meal it seals once and spends once. By daylight he eases one strain; a bed worked back to
+	 * its worst is overworked, refused until bone meal by hand composts it, then mended; their own empty hand on a strained
+	 * bed in his area keeps his first obligation once. Both Mendvetch left over paid ahead (he looks them over); suspended, he
+	 * tends nothing; resumed; ended at the perch, the Mendvetch come back once, he closes and sinks away, the departure is kept
+	 * once, and ending again returns nothing. The path takes one tick; the test then waits out his departing gesture. Since
+	 * GC-05 the owner's open meets the chooser first (Buer and Bathin share The Garden's Regard), and Buer is chosen there by
+	 * his sign (GC-P59); ConcordanceWorkerGameTests and the garden client class show the chooser itself (GC-P29).
+	 */
+	@GameTest(structure = "jugcraft-test:drone_depot", maxTicks = 80)
+	public void buerFromTheCodexToDeparture(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		for (int x = 0; x < 16; x++) {
+			for (int z = 0; z < 16; z++) {
+				helper.setBlock(new BlockPos(x, 0, z), Blocks.STONE);
+			}
+		}
+		MinecraftServer server = level.getServer();
+		PactDefinition offer = ConcordanceWorkerGameTests.buerOffer();
+		ServerPlayer holder = TestPlayers.survivor(helper);
+		UUID id = holder.getUUID();
+		RateGate.forget(id);
+		ConcordanceWorkerGameTests.beside(helper, holder, GARDEN_PERCH_AT);
+
+		// Steps 1 to 3 (GC-03's): The Garden's Regard, from the holder's own deeds.
+		ConcordanceProgress.grant(holder, "jugcraft:first_light", ResearchState.UNDERSTOOD);
+		ConcordanceProgress.grant(holder, Workers.RESEARCH, ResearchState.UNDERSTOOD);
+		ConcordanceProgress.grant(holder, Garden.RESEARCH, ResearchState.UNDERSTOOD);
+		Examination.forget(id);
+		helper.assertTrue(Examination.examine(holder, level, new ItemStack(Garden.SUNPETAL)) != null && garden(holder) == ResearchState.ENCOUNTERED,
+				"A Sunpetal examined begins The Garden's Regard");
+		wake(helper, holder, HARVEST_AT);
+		OrganismCropBlock sunpetal = (OrganismCropBlock) Garden.SUNPETAL_CROP;
+		helper.setBlock(HARVEST_AT.above(), sunpetal.getStateForAge(OrganismCropBlock.MAX_AGE));
+		helper.assertTrue(use(helper, holder, HARVEST_AT.above(), ItemStack.EMPTY).consumesAction() && garden(holder) == ResearchState.OBSERVED,
+				"A ripe Sunpetal harvested by hand: observed");
+		// A bound familiar's mending records the Binding Arts' practice (as HearthlingEntity records it; its own tests mend).
+		ConcordanceProgress.record(holder, new Evidence.Practiced(Workers.ACTIVITY, "familiar"));
+		helper.assertTrue(garden(holder) == ResearchState.UNDERSTOOD, "A bound worker's service: The Garden's Regard is understood");
+
+		// Step 4: the perch, crafted by its recipe and placed by hand; no bed of theirs within 8: he does not come.
+		ItemStack perchItem = craft(helper, Workers.PACT_PERCH_ITEM, 1, of(Items.STICK), of(Items.AMETHYST_SHARD), of(Items.STICK), null,
+				of(Items.DARK_OAK_LOG), null, null, of(Items.POLISHED_DEEPSLATE), null);
+		helper.assertTrue(place(helper, holder, GARDEN_PERCH_AT.below(), perchItem).consumesAction() && helper.getBlockState(GARDEN_PERCH_AT).is(Workers.PACT_PERCH),
+				"The perch, crafted by its recipe, is placed by hand");
+		PactPerchBlockEntity perch = helper.getBlockEntity(GARDEN_PERCH_AT, PactPerchBlockEntity.class);
+		helper.assertTrue(use(helper, holder, GARDEN_PERCH_AT, ItemStack.EMPTY).consumesAction() && holder.containerMenu instanceof PactMenu, "Its owner opens it");
+		PactStatePayload far = chooseBuer(helper, holder, (PactMenu) holder.containerMenu);
+		helper.assertTrue(far.mode() == PactStatePayload.NEGOTIATE && ConcordanceWorkerGameTests.keys(far.notes()).contains(ConcordanceWorkerGameTests.TENDING_KEY + "missing")
+				&& perch.visitor() == null, "Their only bed 10 blocks off: he does not come, and says why");
+		holder.closeContainer();
+		wake(helper, holder, BUER_BED_AT);
+		helper.assertTrue(use(helper, holder, GARDEN_PERCH_AT, ItemStack.EMPTY).consumesAction() && holder.containerMenu instanceof PactMenu, "Opened again");
+		PactMenu menu = (PactMenu) holder.containerMenu;
+		PactStatePayload invited = chooseBuer(helper, holder, menu);
+		helper.assertTrue(invited.mode() == PactStatePayload.NEGOTIATE && invited.notes().isEmpty() && invited.offers(PactRequestPayload.ACCEPT)
+				&& invited.terms().stream().map(PactStatePayload.Term::key).toList().equals(PactStatePayload.TERMS)
+				&& ConcordanceWorkerGameTests.keys(invited.beats()).equals(offer.beats().stream()
+						.map(beat -> ConcordanceWorkerGameTests.PACT_KEY + "buer.beat." + beat).toList()),
+				"With a bed of theirs beside it: his three beats and every term, nothing in the way: " + invited);
+		BuerEntity buer = perch.visitor() != null && level.getEntity(perch.visitor()) instanceof BuerEntity found ? found : null;
+		helper.assertTrue(buer != null && buer.owner() == null && helper.absolutePos(GARDEN_PERCH_AT).equals(buer.perch()) && buer.listening()
+				&& buer.cues().equals(List.of("arrive")), "Buer unfurls on the perch, a visitor bound to no one, and listens");
+		PactStatePayload refused = ConcordanceWorkerGameTests.send(holder, menu, PactRequestPayload.ACCEPT, 0);
+		helper.assertTrue(ConcordanceWorkerGameTests.answered(refused, Pacts.Outcome.CANNOT_AFFORD.id)
+				&& ConcordanceWorkerGameTests.said(refused).equals(ConcordanceWorkerGameTests.PACT_KEY + "answer.cannot_afford.items")
+				&& BoundWills.of(server).ledger().heldBy(id).isEmpty() && !buer.gone(), "Short of the compact: refused, nothing spent, he stays");
+		// The compact past the hotbar (main-inventory slots, not the hand): a use with the main hand below never touches it.
+		for (int i = 0; i < 3; i++) {
+			holder.getInventory().setItem(GARDEN_COMPACT_SLOT + i, craft(helper, Garden.MENDVETCH, 2, of(Items.WHEAT_SEEDS), of(Items.BONE_MEAL),
+					of(Items.AMETHYST_SHARD), null, null, null, null, null, null));
+		}
+		holder.getInventory().setItem(GARDEN_COMPACT_SLOT + 3, new ItemStack(Items.BONE_MEAL, 4));
+		PactStatePayload sealed = ConcordanceWorkerGameTests.send(holder, menu, PactRequestPayload.ACCEPT, 0);
+		BoundWill will = ConcordanceWorkerGameTests.recordOf(level, holder);
+		helper.assertTrue(ConcordanceWorkerGameTests.answered(sealed, PactMenu.SEALED) && sealed.mode() == PactStatePayload.KEEP
+				&& ConcordanceWorkerGameTests.count(holder, "jugcraft:mendvetch") == 2 && ConcordanceWorkerGameTests.count(holder, "minecraft:bone_meal") == 0
+				&& will != null && BuerEntity.COUNTERPART.equals(will.counterpart()) && buer.getUUID().equals(will.pact().presence())
+				&& id.equals(buer.owner()) && ConcordanceWorkerGameTests.escrowed(level, will.id()) == 0,
+				"Sealed once: 4 Mendvetch and 4 bone meal spent once, one Bound Will, its presence Buer");
+		UUID record = will.id();
+		holder.closeContainer();
+
+		// Step 5: by daylight he eases one strain; the overworked bed; the holder's own tending, his first obligation.
+		VerdantBedBlockEntity bed = helper.getBlockEntity(BUER_BED_AT, VerdantBedBlockEntity.class);
+		// Early in a game day (the unit review): his memory of today's eases is cleared at a day's turn, so the overworked
+		// step must not cross one.
+		long t = ConcordanceWorkerGameTests.dayStart(level, 1);
+		bed.setStrain(2);
+		helper.assertValueEqual(buer.think(level, PACT_NOON, t), Status.WORKING, "By day he eases one strain");
+		helper.assertValueEqual(bed.strain(), 1, "2 to 1");
+		bed.setStrain(3);
+		helper.assertValueEqual(buer.think(level, PACT_NOON, t + Garden.TEND_TICKS), Status.IDLE, "Worked back to 3: overworked, refused");
+		helper.assertTrue(use(helper, holder, BUER_BED_AT, new ItemStack(Items.BONE_MEAL)).consumesAction() && bed.strain() == 2, "Bone meal by hand composts it");
+		helper.assertValueEqual(ConcordanceWorkerGameTests.count(holder, "jugcraft:mendvetch"), 2, "the hand's bone meal touched no Mendvetch");
+		helper.assertValueEqual(buer.think(level, PACT_NOON, t + 2L * Garden.TEND_TICKS), Status.WORKING, "and he mends it again");
+		wake(helper, holder, HAND_BED_AT);
+		helper.getBlockEntity(HAND_BED_AT, VerdantBedBlockEntity.class).setStrain(2);
+		use(helper, holder, HAND_BED_AT, ItemStack.EMPTY);
+		helper.assertTrue(helper.getBlockEntity(HAND_BED_AT, VerdantBedBlockEntity.class).strain() == 1 && PactObligations.kept(holder, BuerEntity.COUNTERPART)
+				&& garden(holder) == ResearchState.UNDERSTOOD, "Their own tending in his area keeps his first obligation (mastery needs three spirits)");
+
+		// Step 6: an offering paid ahead; suspended and resumed; ended at the perch, the Mendvetch back once.
+		helper.assertTrue(use(helper, holder, GARDEN_PERCH_AT, ItemStack.EMPTY).consumesAction() && holder.containerMenu instanceof PactMenu, "Kept here, opened");
+		menu = (PactMenu) holder.containerMenu;
+		int slot = ConcordanceWorkerGameTests.offering(menu.lastSent(), "jugcraft:mendvetch");
+		PactStatePayload paid = ConcordanceWorkerGameTests.send(holder, menu, PactRequestPayload.DEPOSIT, slot);
+		// A deposit pays every Mendvetch carried that the escrow has room for (4 ahead; PactKeeping.deposit), not one per request.
+		helper.assertTrue(slot >= 0 && ConcordanceWorkerGameTests.answered(paid, PactMenu.DEPOSITED) && ConcordanceWorkerGameTests.escrowed(level, record) == 2
+				&& ConcordanceWorkerGameTests.count(holder, "jugcraft:mendvetch") == 0 && "inspect".equals(buer.cues().getLast()),
+				"Both Mendvetch they carry paid ahead; he looks them over: " + ConcordanceWorkerGameTests.escrowed(level, record) + " held, "
+						+ ConcordanceWorkerGameTests.count(holder, "jugcraft:mendvetch") + " carried, " + buer.cues());
+		helper.assertTrue(ConcordanceWorkerGameTests.answered(ConcordanceWorkerGameTests.send(holder, menu, PactRequestPayload.SUSPEND, 0), "suspended"), "Suspended");
+		bed.setStrain(2);
+		helper.assertValueEqual(buer.think(level, PACT_NOON, t + 3L * Garden.TEND_TICKS), Status.SUSPENDED, "Suspended, he tends nothing");
+		helper.assertValueEqual(bed.strain(), 2, "untouched");
+		helper.assertTrue(ConcordanceWorkerGameTests.answered(ConcordanceWorkerGameTests.send(holder, menu, PactRequestPayload.RESUME, 0), "resumed")
+				&& buer.cues().stream().filter("assent"::equals).count() == 1,
+				"Resumed (his assent falls within CUE_TICKS of the seal's, one tick: shown once)");
+		PactStatePayload ended = ConcordanceWorkerGameTests.send(holder, menu, PactRequestPayload.END, 0);
+		helper.assertTrue(ConcordanceWorkerGameTests.answered(ended, "ended") && ended.result().get().done()
+				&& ConcordanceWorkerGameTests.count(holder, "jugcraft:mendvetch") == 2 && BoundWills.of(server).escrow(record).isEmpty()
+				&& BoundWills.of(server).ledger().get(record) == null && buer.departing() && buer.gone()
+				&& !WorkerRoster.of(server).workers(id).containsKey(buer.getUUID()) && "depart".equals(buer.cues().getLast()),
+				"Ended: the Mendvetch back once, the record gone, he closes and sinks away, struck off at once");
+		List<Pacts.Departure> history = PactHistory.of(server).history(id);
+		helper.assertTrue(history.size() == 1 && record.equals(history.getFirst().record()) && Pacts.ENDED.equals(history.getFirst().reason()),
+				"The departure is kept once: " + history);
+		helper.assertTrue(!ConcordanceWorkerGameTests.send(holder, menu, PactRequestPayload.END, 0).result().map(PactStatePayload.Result::done).orElse(false)
+				&& ConcordanceWorkerGameTests.count(holder, "jugcraft:mendvetch") == 2, "Ending again returns nothing more");
+		helper.assertTrue(BoundWills.of(server).problems().isEmpty(), "The Bound Wills are sound");
+		helper.runAfterDelay(BuerEntity.Gesture.DEPART.ticks + 5, () -> {
+			helper.assertTrue(buer.isRemoved(), "His departure over, he is gone from the world");
+			helper.succeed();
+		});
+	}
+
+	/**
+	 * GC-05 (GC-P59): with Buer and Bathin both offered to a holder of The Garden's Regard, the owner's open shows the chooser
+	 * first; Buer is chosen there by his sign, as his entry sends INVITE. The state then shown (Buer's offer).
+	 */
+	private static PactStatePayload chooseBuer(GameTestHelper helper, ServerPlayer holder, PactMenu menu) {
+		if (menu.lastSent().mode() == PactStatePayload.INVITE) {
+			List<PactStatePayload.Choice> listed = menu.lastSent().patterns();
+			int index = -1;
+			for (int i = 0; i < listed.size(); i++) {
+				if (listed.get(i).id().equals(BuerEntity.SIGN)) {
+					index = i;
+				}
+			}
+			helper.assertTrue(index >= 0 && ConcordanceWorkerGameTests.answered(ConcordanceWorkerGameTests.invite(holder, menu, index), PactMenu.INVITED),
+					"The chooser lists Buer, and he is invited from it: " + listed.stream().map(PactStatePayload.Choice::id).toList());
+		}
+		return menu.lastSent();
 	}
 }

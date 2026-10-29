@@ -8,7 +8,9 @@ import io.github.jimbozoomer.jugcraft.chemistry.FertilizerItem;
 import io.github.jimbozoomer.jugcraft.compat.jade.ConcordanceDataProvider;
 import io.github.jimbozoomer.jugcraft.concordance.Alchemy;
 import io.github.jimbozoomer.jugcraft.concordance.Authority;
+import io.github.jimbozoomer.jugcraft.concordance.ConcordanceData;
 import io.github.jimbozoomer.jugcraft.concordance.ConcordanceProgress;
+import io.github.jimbozoomer.jugcraft.concordance.Examination;
 import io.github.jimbozoomer.jugcraft.concordance.JugcraftConcordance;
 import io.github.jimbozoomer.jugcraft.concordance.LeyPylonBlockEntity;
 import io.github.jimbozoomer.jugcraft.concordance.RateGate;
@@ -21,6 +23,7 @@ import io.github.jimbozoomer.jugcraft.concordance.ecology.Factor;
 import io.github.jimbozoomer.jugcraft.concordance.ecology.Fit;
 import io.github.jimbozoomer.jugcraft.concordance.ecology.Graft;
 import io.github.jimbozoomer.jugcraft.concordance.ecology.Habitat;
+import io.github.jimbozoomer.jugcraft.concordance.ecology.HabitatAdvice;
 import io.github.jimbozoomer.jugcraft.concordance.ecology.HabitatInspection;
 import io.github.jimbozoomer.jugcraft.concordance.ecology.Niche;
 import io.github.jimbozoomer.jugcraft.concordance.ecology.Organism;
@@ -29,13 +32,24 @@ import io.github.jimbozoomer.jugcraft.concordance.ecology.Sampler;
 import io.github.jimbozoomer.jugcraft.concordance.ecology.Verdict;
 import io.github.jimbozoomer.jugcraft.concordance.garden.Garden;
 import io.github.jimbozoomer.jugcraft.concordance.garden.GleanerBlockEntity;
+import io.github.jimbozoomer.jugcraft.concordance.garden.Grafting;
 import io.github.jimbozoomer.jugcraft.concordance.garden.HabitatGaugeBlockEntity;
 import io.github.jimbozoomer.jugcraft.concordance.garden.MulchMawBlockEntity;
 import io.github.jimbozoomer.jugcraft.concordance.garden.OrganismCropBlock;
 import io.github.jimbozoomer.jugcraft.concordance.garden.VerdantBedBlock;
 import io.github.jimbozoomer.jugcraft.concordance.garden.VerdantBedBlockEntity;
 import io.github.jimbozoomer.jugcraft.concordance.garden.VerdantHeartBlockEntity;
+import io.github.jimbozoomer.jugcraft.concordance.rules.Definitions;
+import io.github.jimbozoomer.jugcraft.concordance.rules.Evidence;
+import io.github.jimbozoomer.jugcraft.concordance.rules.EvidenceRule;
+import io.github.jimbozoomer.jugcraft.concordance.rules.Knowledge;
+import io.github.jimbozoomer.jugcraft.concordance.rules.ResearchEngine;
 import io.github.jimbozoomer.jugcraft.concordance.rules.ResearchState;
+import io.github.jimbozoomer.jugcraft.concordance.spirits.GardenPacts;
+import io.github.jimbozoomer.jugcraft.concordance.spirits.GardenReach;
+import io.github.jimbozoomer.jugcraft.concordance.spirits.StolasRegard;
+import io.github.jimbozoomer.jugcraft.concordance.spirits.Workers;
+import io.github.jimbozoomer.jugcraft.concordance.worker.WorkerParser;
 import io.github.jimbozoomer.jugcraft.config.JugcraftConfig;
 import io.github.jimbozoomer.jugcraft.energy.EnergyStorage;
 import io.github.jimbozoomer.jugcraft.energy.SimpleEnergyStorage;
@@ -45,8 +59,10 @@ import io.github.jimbozoomer.jugcraft.machine.MachineBlock;
 import io.github.jimbozoomer.jugcraft.machine.MachineKind;
 import io.github.jimbozoomer.jugcraft.weapons.ArmItem;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.EnumSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 import net.fabricmc.fabric.api.gametest.v1.GameTest;
@@ -54,18 +70,22 @@ import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.gametest.framework.GameTestHelper;
+import net.minecraft.locale.Language;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.ProblemReporter;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.LightLayer;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.storage.TagValueInput;
 import net.minecraft.world.phys.BlockHitResult;
@@ -141,7 +161,7 @@ public class ConcordanceGardenGameTests {
 	 * {@code player} uses {@code held}, put in the main hand, on the top of the block at {@code at} by the server's own path
 	 * (ServerPlayerGameMode.useItemOn), plainly or sneaking, its rate limit forgotten first.
 	 */
-	private static InteractionResult handUse(GameTestHelper helper, ServerPlayer player, BlockPos at, ItemStack held, boolean sneaking) {
+	static InteractionResult handUse(GameTestHelper helper, ServerPlayer player, BlockPos at, ItemStack held, boolean sneaking) {
 		RateGate.forget(player.getUUID());
 		player.setItemInHand(InteractionHand.MAIN_HAND, held);
 		player.setShiftKeyDown(sneaking);
@@ -619,6 +639,223 @@ public class ConcordanceGardenGameTests {
 			JugcraftConfig.setOption(Authority.ABSENT_OPTION, false);
 		}
 		helper.assertTrue(age(helper, crop) == 1, "the crop falls back to step 1");
+		helper.succeed();
+	}
+
+	// ---------------------------------------------------------------- a Heart's two roads, named at a distance (the garden cohort, GC-05)
+
+	/**
+	 * The garden cohort, GC-05: a Gleaner receives Verdance from a Heart it is given, however far, by its own draw's rule:
+	 * only as an actor both devices trust, never more than its draw of 8, its room or what the Heart holds, and never while
+	 * dormant. The Heart falls by what the Gleaner gains, in the same call.
+	 */
+	@GameTest(maxTicks = 20)
+	public void aGleanerReceivesFromANamedHeartAtAnyDistance(GameTestHelper helper) {
+		ServerLevel level = level(helper);
+		UUID stranger = new UUID(14L, 9L);
+		BlockPos heartAt = new BlockPos(0, 1, 0);
+		helper.setBlock(heartAt, Garden.VERDANT_HEART);
+		VerdantHeartBlockEntity heart = entity(helper, heartAt);
+		heart.awaken(KEEPER);
+		heart.setVerdance(10);
+		BlockPos at = new BlockPos(7, 1, 7);
+		helper.setBlock(at, Garden.GLEANER);
+		GleanerBlockEntity gleaner = entity(helper, at);
+		gleaner.awaken(KEEPER);
+		helper.assertTrue(!gleaner.reaches(heart.getBlockPos()), "7 away: beyond its own draw");
+		helper.assertTrue(gleaner.receiveFrom(heart, stranger, 8, level) == 0 && heart.verdance() == 10 && gleaner.verdance() == 0,
+				"A stranger may not move it: " + heart.verdance() + ", " + gleaner.verdance());
+		helper.assertTrue(gleaner.receiveFrom(heart, KEEPER, 20, level) == 8 && heart.verdance() == 2 && gleaner.verdance() == 8,
+				"Its keeper may, never more than its draw of 8: " + heart.verdance() + ", " + gleaner.verdance());
+		helper.assertTrue(gleaner.receiveFrom(heart, KEEPER, 8, level) == 2 && heart.verdance() == 0 && gleaner.verdance() == 10,
+				"What the Heart held, and no more: " + heart.verdance() + ", " + gleaner.verdance());
+		heart.setVerdance(5);
+		gleaner.setVerdance(GleanerBlockEntity.CAPACITY);
+		helper.assertTrue(gleaner.receiveFrom(heart, KEEPER, 8, level) == 0 && heart.verdance() == 5
+				&& gleaner.verdance() == GleanerBlockEntity.CAPACITY, "Full, it receives nothing: " + heart.verdance());
+		BlockPos theirsAt = new BlockPos(7, 1, 0);
+		helper.setBlock(theirsAt, Garden.GLEANER);
+		GleanerBlockEntity theirs = entity(helper, theirsAt);
+		theirs.awaken(stranger);
+		helper.assertTrue(theirs.receiveFrom(heart, KEEPER, 8, level) == 0 && heart.verdance() == 5 && theirs.verdance() == 0,
+				"Not into a Gleaner its keeper does not share: " + heart.verdance());
+		BlockPos dormantAt = new BlockPos(0, 1, 7);
+		helper.setBlock(dormantAt, Garden.GLEANER);
+		GleanerBlockEntity dormant = entity(helper, dormantAt);
+		helper.assertTrue(!dormant.awake() && dormant.receiveFrom(heart, KEEPER, 8, level) == 0 && heart.verdance() == 5
+				&& dormant.verdance() == 0, "Not into a dormant Gleaner: " + heart.verdance());
+		BlockPos nearAt = new BlockPos(2, 1, 2);
+		helper.setBlock(nearAt, Garden.GLEANER);
+		GleanerBlockEntity near = entity(helper, nearAt);
+		helper.assertTrue(near.reaches(heart.getBlockPos()), "2 away: within its own draw, where it draws by itself");
+		helper.succeed();
+	}
+
+	/**
+	 * GC-05: {@code heart} pours at most {@code batches} into {@code pylon}; asserts that the Verdance it spent is the Ley
+	 * Charge it made, three for two, adds the Verdance to {@code spent} and returns the Ley Charge.
+	 */
+	private static long poured(GameTestHelper helper, VerdantHeartBlockEntity heart, LeyPylonBlockEntity pylon, long batches, long[] spent) {
+		long before = heart.verdance();
+		long made = heart.pourInto(pylon, level(helper), batches);
+		long gone = before - heart.verdance();
+		helper.assertTrue(3 * made == 2 * gone, "Three Verdance for two Ley Charge: " + gone + " spent for " + made);
+		spent[0] += gone;
+		return made;
+	}
+
+	/**
+	 * GC-05: a Heart pours into a Ley Pylon it is given, away from it, by its pour's own rule beside it: whole batches of the
+	 * data conversion (3 Verdance for 2 Ley Charge), never more batches than asked or than fit, and only into a pylon its
+	 * keeper's party owns or no one does. Every Verdance it spends is Ley Charge made, at three for two.
+	 */
+	@GameTest(maxTicks = 20)
+	public void aHeartPoursIntoANamedPylonByItsOwnRule(GameTestHelper helper) {
+		ServerLevel level = level(helper);
+		BlockPos heartAt = new BlockPos(0, 1, 0);
+		helper.setBlock(heartAt, Garden.VERDANT_HEART);
+		VerdantHeartBlockEntity heart = entity(helper, heartAt);
+		heart.awaken(KEEPER);
+		heart.setVerdance(10);
+		BlockPos mineAt = new BlockPos(7, 1, 7);
+		helper.setBlock(mineAt, JugcraftConcordance.LEY_PYLON);
+		LeyPylonBlockEntity mine = entity(helper, mineAt);
+		mine.setOwner(KEEPER);
+		long[] spent = {0L};
+		long made = 0L;
+		helper.assertTrue(!heart.beside(mine.getBlockPos()) && heart.mayPourInto(mine), "Away from it, its keeper's pylon may take a batch");
+		long ley = poured(helper, heart, mine, 1, spent);
+		made += ley;
+		helper.assertTrue(ley == 2 && heart.verdance() == 7 && mine.ley() == 2,
+				"One batch asked, one poured: " + heart.verdance() + ", " + mine.ley());
+		ley = poured(helper, heart, mine, 3, spent);
+		made += ley;
+		helper.assertTrue(ley == 4 && heart.verdance() == 1 && mine.ley() == 6,
+				"Two more whole batches; the 1 left is not a batch: " + heart.verdance() + ", " + mine.ley());
+		helper.assertTrue(!heart.mayPourInto(mine) && poured(helper, heart, mine, 3, spent) == 0 && heart.verdance() == 1 && mine.ley() == 6,
+				"Less than a batch left: nothing poured");
+		heart.setVerdance(10);
+		BlockPos theirsAt = new BlockPos(7, 1, 0);
+		helper.setBlock(theirsAt, JugcraftConcordance.LEY_PYLON);
+		LeyPylonBlockEntity theirs = entity(helper, theirsAt);
+		theirs.setOwner(new UUID(14L, 9L));
+		helper.assertTrue(!heart.mayPourInto(theirs) && poured(helper, heart, theirs, 3, spent) == 0 && theirs.ley() == 0
+				&& heart.verdance() == 10, "Never into a stranger's pylon, as beside it");
+		BlockPos nobodysAt = new BlockPos(0, 1, 7);
+		helper.setBlock(nobodysAt, JugcraftConcordance.LEY_PYLON);
+		LeyPylonBlockEntity nobodys = entity(helper, nobodysAt);
+		helper.assertTrue(nobodys.owner() == null && heart.mayPourInto(nobodys), "A pylon no one owns may take a batch");
+		ley = poured(helper, heart, nobodys, 3, spent);
+		made += ley;
+		helper.assertTrue(ley == 6 && heart.verdance() == 1 && nobodys.ley() == 6,
+				"Three batches into no one's pylon: " + heart.verdance() + ", " + nobodys.ley());
+		mine.setLey(level, 63);
+		heart.setVerdance(10);
+		helper.assertTrue(!heart.mayPourInto(mine) && poured(helper, heart, mine, 3, spent) == 0 && heart.verdance() == 10 && mine.ley() == 63,
+				"Room for less than a batch: nothing poured");
+		helper.assertTrue(heart.pourInto(mine, level, 0) == 0 && heart.verdance() == 10, "No batch asked: nothing poured");
+		helper.assertTrue(made == 12 && spent[0] == 18 && 3 * made == 2 * spent[0],
+				"Throughout, 18 Verdance spent made 12 Ley Charge: " + spent[0] + " for " + made);
+		helper.succeed();
+	}
+
+	/**
+	 * GC-05 (the two roads): a Heart has its own road while a Ley Pylon on one of its six faces is one its own pour feeds (its
+	 * keeper's party's or no one's), full or not; its keeper's pylon two blocks off, or a stranger's beside it, is none.
+	 */
+	@GameTest(maxTicks = 20)
+	public void aHeartSaysWhetherItHasItsOwnRoad(GameTestHelper helper) {
+		ServerLevel level = level(helper);
+		BlockPos heartAt = new BlockPos(3, 1, 3);
+		helper.setBlock(heartAt, Garden.VERDANT_HEART);
+		VerdantHeartBlockEntity heart = entity(helper, heartAt);
+		heart.awaken(KEEPER);
+		helper.assertTrue(!heart.feedsAPylonBeside(level), "No pylon: no road of its own");
+		BlockPos farAt = new BlockPos(5, 1, 3);
+		helper.setBlock(farAt, JugcraftConcordance.LEY_PYLON);
+		LeyPylonBlockEntity far = entity(helper, farAt);
+		far.setOwner(KEEPER);
+		helper.assertTrue(!heart.beside(far.getBlockPos()) && !heart.feedsAPylonBeside(level), "Its keeper's pylon two blocks off is not beside it");
+		BlockPos pylonAt = new BlockPos(4, 1, 3);
+		helper.setBlock(pylonAt, JugcraftConcordance.LEY_PYLON);
+		LeyPylonBlockEntity pylon = entity(helper, pylonAt);
+		pylon.setOwner(new UUID(14L, 9L));
+		helper.assertTrue(heart.beside(pylon.getBlockPos()) && !heart.feedsAPylonBeside(level), "A stranger's pylon beside it is no road of its own");
+		pylon.setOwner(KEEPER);
+		helper.assertTrue(heart.feedsAPylonBeside(level), "Its keeper's pylon beside it is its own road");
+		pylon.setOwner(null);
+		helper.assertTrue(heart.feedsAPylonBeside(level), "and so is a pylon no one owns");
+		pylon.setLey(level, LeyPylonBlockEntity.CAPACITY);
+		helper.assertTrue(heart.feedsAPylonBeside(level), "full or not");
+		helper.setBlock(pylonAt, Blocks.AIR);
+		helper.assertTrue(!heart.feedsAPylonBeside(level), "That pylon broken, the road is gone");
+		BlockPos aboveAt = heartAt.above();
+		helper.setBlock(aboveAt, JugcraftConcordance.LEY_PYLON);
+		LeyPylonBlockEntity above = entity(helper, aboveAt);
+		above.setOwner(KEEPER);
+		helper.assertTrue(heart.beside(above.getBlockPos()) && heart.feedsAPylonBeside(level), "A pylon of its keeper's on any face is its own road");
+		helper.succeed();
+	}
+
+	/**
+	 * The garden cohort, GC-05 (GC-P45, GC-P54): a device index holds the 16 nearest awake Hearts and Gleaners its keepers
+	 * keep and the 16 nearest Ley Pylons they or no one own, from one pass, and no bed; a dormant Heart and a stranger's
+	 * Gleaner and pylon are never indexed. A Heart broken since is gone at the next read, with nothing scanned again. An index
+	 * of beds alone holds no device, and far from anything loaded a device index finds nothing and loads no chunk.
+	 */
+	@GameTest(structure = "jugcraft-test:drone_depot", maxTicks = 20)
+	public void theGardenReachCapsItsDevices(GameTestHelper helper) {
+		ServerLevel level = level(helper);
+		UUID keeper = new UUID(0x6C05L, 1L);
+		UUID stranger = new UUID(0x6C05L, 2L);
+		BlockPos centre = helper.absolutePos(new BlockPos(8, 2, 8));
+		List<BlockPos> hearts = new ArrayList<>();
+		List<BlockPos> gleaners = new ArrayList<>();
+		List<BlockPos> pylons = new ArrayList<>();
+		for (int i = 0; i < 20; i++) {
+			BlockPos h = new BlockPos(i % 16, 1, 1 + i / 16);
+			helper.setBlock(h, Garden.VERDANT_HEART);
+			((VerdantHeartBlockEntity) entity(helper, h)).awaken(keeper);
+			hearts.add(helper.absolutePos(h));
+			BlockPos g = new BlockPos(i % 16, 3, 14 - i / 16);
+			helper.setBlock(g, Garden.GLEANER);
+			((GleanerBlockEntity) entity(helper, g)).awaken(keeper);
+			gleaners.add(helper.absolutePos(g));
+			BlockPos p = new BlockPos(i % 16, 5, 8 + i / 16);
+			helper.setBlock(p, JugcraftConcordance.LEY_PYLON);
+			((LeyPylonBlockEntity) entity(helper, p)).setOwner(i % 2 == 0 ? keeper : null);
+			pylons.add(helper.absolutePos(p));
+		}
+		helper.setBlock(new BlockPos(7, 2, 7), Garden.VERDANT_HEART); // dormant
+		helper.setBlock(new BlockPos(9, 2, 9), Garden.GLEANER);
+		((GleanerBlockEntity) entity(helper, new BlockPos(9, 2, 9))).awaken(stranger);
+		helper.setBlock(new BlockPos(9, 2, 7), JugcraftConcordance.LEY_PYLON);
+		((LeyPylonBlockEntity) entity(helper, new BlockPos(9, 2, 7))).setOwner(stranger);
+		Comparator<BlockPos> nearest = Comparator.<BlockPos>comparingDouble(pos -> pos.distSqr(centre)).thenComparingInt(BlockPos::getY)
+				.thenComparingInt(BlockPos::getX).thenComparingInt(BlockPos::getZ);
+		GardenReach reach = new GardenReach(centre, 10, bed -> false, keeper::equals);
+		long now = level.getGameTime();
+		List<BlockPos> expectedHearts = hearts.stream().sorted(nearest).limit(GardenReach.MAX_DEVICES).toList();
+		helper.assertTrue(reach.hearts(level, now).stream().map(BlockEntity::getBlockPos).toList().equals(expectedHearts)
+				&& reach.gleaners(level, now).stream().map(BlockEntity::getBlockPos).toList()
+						.equals(gleaners.stream().sorted(nearest).limit(GardenReach.MAX_DEVICES).toList())
+				&& reach.pylons(level, now).stream().map(BlockEntity::getBlockPos).toList()
+						.equals(pylons.stream().sorted(nearest).limit(GardenReach.MAX_DEVICES).toList()),
+				"16 of each, nearest first; the dormant Heart and the stranger's Gleaner and pylon never indexed; no one's pylons kept");
+		helper.assertTrue(reach.refreshes() == 1 && reach.beds(level, now).isEmpty(), "One pass for all; a device index holds no beds");
+		BlockPos gone = expectedHearts.getFirst();
+		level.setBlock(gone, Blocks.AIR.defaultBlockState(), Block.UPDATE_ALL);
+		helper.assertTrue(reach.hearts(level, now + 1).stream().map(BlockEntity::getBlockPos).toList()
+				.equals(expectedHearts.subList(1, GardenReach.MAX_DEVICES)) && reach.refreshes() == 1,
+				"A Heart broken is gone at once, nothing scanned again");
+		GardenReach beds = new GardenReach(centre, 10, bed -> true);
+		helper.assertTrue(beds.hearts(level, now).isEmpty() && beds.gleaners(level, now).isEmpty() && beds.pylons(level, now).isEmpty(),
+				"An index of beds alone holds no device");
+		BlockPos far = helper.absolutePos(new BlockPos(1, 1, 1)).offset(200_000, 0, 200_000);
+		GardenReach away = new GardenReach(far, WorkerParser.MAX_RADIUS, bed -> true, any -> true);
+		helper.assertTrue(away.hearts(level, now).isEmpty() && away.gleaners(level, now).isEmpty() && away.pylons(level, now).isEmpty()
+				&& away.scanned() == 0, "Nothing loaded far off: nothing found, nothing examined");
+		helper.assertTrue(noneLoaded(level, far), "and no chunk of it was loaded");
 		helper.succeed();
 	}
 
@@ -1789,4 +2026,501 @@ public class ConcordanceGardenGameTests {
 				"A graft the rules no longer know is kept by another plant's growth, and read by nothing");
 		helper.succeed();
 	}
+
+	// ---------------------------------------------------------------- the garden cohort, GC-03: the groundwork garden pacts share
+
+	/** An awake, wet bed at {@code at} kept by {@code keeper} (not KEEPER: a test of its own index). */
+	private static VerdantBedBlockEntity bedOf(GameTestHelper helper, BlockPos at, UUID keeper) {
+		helper.setBlock(at, Garden.VERDANT_BED.defaultBlockState().setValue(VerdantBedBlock.MOISTURE, VerdantBedBlock.WET));
+		VerdantBedBlockEntity bed = (VerdantBedBlockEntity) level(helper).getBlockEntity(helper.absolutePos(at));
+		bed.awaken(keeper);
+		return bed;
+	}
+
+	/** Whether no chunk the largest garden area round {@code centre} (WorkerParser.MAX_RADIUS) overlaps is held by the server. */
+	private static boolean noneLoaded(ServerLevel level, BlockPos centre) {
+		for (int cx = (centre.getX() - WorkerParser.MAX_RADIUS) >> 4; cx <= (centre.getX() + WorkerParser.MAX_RADIUS) >> 4; cx++) {
+			for (int cz = (centre.getZ() - WorkerParser.MAX_RADIUS) >> 4; cz <= (centre.getZ() + WorkerParser.MAX_RADIUS) >> 4; cz++) {
+				if (level.getChunkSource().hasChunk(cx, cz)) {
+					return false;
+				}
+			}
+		}
+		return true;
+	}
+
+	private static List<BlockPos> positions(List<VerdantBedBlockEntity> beds) {
+		return beds.stream().map(BlockEntity::getBlockPos).toList();
+	}
+
+	/**
+	 * The garden cohort, GC-03 (GC-P2, GB12): the bed index never loads a chunk. Far from anything loaded, a refresh finds
+	 * nothing, examines nothing and leaves every chunk of the area unloaded (its radius clamped to WorkerParser.MAX_RADIUS, so
+	 * at most 9 chunks are asked); near, it finds the bed its keeper keeps.
+	 */
+	@GameTest(maxTicks = 20)
+	public void theGardenReachNeverLoadsAChunk(GameTestHelper helper) {
+		ServerLevel level = level(helper);
+		BlockPos far = helper.absolutePos(new BlockPos(1, 1, 1)).offset(200_000, 0, 200_000);
+		helper.assertTrue(noneLoaded(level, far), "The far area is not loaded");
+		GardenReach reach = new GardenReach(far, WorkerParser.MAX_RADIUS + 4, bed -> true);
+		helper.assertTrue(reach.beds(level, level.getGameTime()).isEmpty() && reach.refreshes() == 1 && reach.scanned() == 0,
+				"Nothing loaded, nothing found, nothing examined (the radius clamped to 12, so 9 chunks at most): " + reach.scanned());
+		helper.assertTrue(noneLoaded(level, far), "and none of its chunks was loaded");
+		UUID own = new UUID(0x6C03L, 1L);
+		VerdantBedBlockEntity bed = bedOf(helper, new BlockPos(1, 1, 1), own);
+		GardenReach near = new GardenReach(helper.absolutePos(new BlockPos(2, 2, 2)), 8, found -> own.equals(found.keeper()));
+		helper.assertTrue(near.beds(level, level.getGameTime()).equals(List.of(bed)), "Near, it finds the bed its keeper keeps");
+		helper.succeed();
+	}
+
+	/**
+	 * The garden cohort, GC-03 (GC-P2, GC-P32): the index keeps the 64 nearest awake beds whose keeper it indexes, nearest
+	 * first (distance, then y, x and z); a dormant bed and a stranger's are never indexed. A bed broken since is gone at the
+	 * next read, with nothing scanned again; a new one waits for the refresh REFRESH_TICKS on; a clock run back, or forgetting
+	 * it, refreshes it.
+	 */
+	@GameTest(maxTicks = 20)
+	public void theGardenReachIsCappedAndCached(GameTestHelper helper) {
+		ServerLevel level = level(helper);
+		UUID keeper = new UUID(0x6C03L, 2L);
+		BlockPos centre = helper.absolutePos(new BlockPos(4, 2, 4));
+		List<BlockPos> placed = new ArrayList<>();
+		for (int x = 0; x < 8; x++) {
+			for (int z = 0; z < 8; z++) {
+				bedOf(helper, new BlockPos(x, 1, z), keeper);
+				placed.add(helper.absolutePos(new BlockPos(x, 1, z)));
+			}
+		}
+		for (int x = 0; x < 3; x++) {
+			for (int z = 0; z < 2; z++) {
+				bedOf(helper, new BlockPos(x, 3, z), keeper);
+				placed.add(helper.absolutePos(new BlockPos(x, 3, z)));
+			}
+		}
+		helper.setBlock(new BlockPos(5, 3, 5), Garden.VERDANT_BED.defaultBlockState());
+		bedOf(helper, new BlockPos(6, 3, 6), new UUID(0x6C03L, 3L));
+		Comparator<BlockPos> nearest = Comparator.<BlockPos>comparingDouble(pos -> pos.distSqr(centre)).thenComparingInt(BlockPos::getY)
+				.thenComparingInt(BlockPos::getX).thenComparingInt(BlockPos::getZ);
+		List<BlockPos> expected = placed.stream().sorted(nearest).limit(GardenReach.MAX_BEDS).toList();
+		GardenReach reach = new GardenReach(centre, 8, bed -> keeper.equals(bed.keeper()));
+		long now = level.getGameTime();
+		helper.assertTrue(positions(reach.beds(level, now)).equals(expected) && reach.refreshes() == 1 && reach.scanned() >= 72,
+				"64 of 70, nearest first; the dormant bed and the stranger's never indexed: " + reach.scanned());
+		// Broken at its own (absolute) place: 26.3's GameTestHelper.relativePos is no inverse of absolutePos in an unrotated
+		// test (it turns the place half round the origin), so the bed it named was never broken.
+		level.setBlockAndUpdate(expected.getFirst(), Blocks.AIR.defaultBlockState());
+		helper.assertTrue(positions(reach.beds(level, now + 1)).equals(expected.subList(1, GardenReach.MAX_BEDS)) && reach.refreshes() == 1,
+				"The nearest broken, it is gone at once, and nothing is scanned again");
+		bedOf(helper, new BlockPos(4, 2, 4), keeper);
+		helper.assertTrue(!positions(reach.beds(level, now + GardenReach.REFRESH_TICKS - 1)).contains(centre) && reach.refreshes() == 1,
+				"A new bed waits for the next refresh");
+		List<BlockPos> refreshed = positions(reach.beds(level, now + GardenReach.REFRESH_TICKS));
+		helper.assertTrue(refreshed.getFirst().equals(centre) && refreshed.size() == GardenReach.MAX_BEDS && reach.refreshes() == 2,
+				"and joins it at the refresh, nearest first: " + refreshed.size());
+		reach.beds(level, now);
+		helper.assertValueEqual(reach.refreshes(), 3, "A clock run back refreshes it");
+		reach.forget();
+		reach.beds(level, now);
+		helper.assertValueEqual(reach.refreshes(), 4, "and so does forgetting it");
+		helper.succeed();
+	}
+
+	/**
+	 * The garden cohort, GC-03 (GB11): a cached habitat never takes a sample. Without one it reads nothing; with a fresh one it
+	 * reads the same habitat as habitat() does, the bed's own nutrients read now; forgotten, it reads nothing again. The level's
+	 * allowance (Garden.budget) is never spent by it.
+	 */
+	@GameTest(maxTicks = 60)
+	public void aCachedHabitatNeverSamples(GameTestHelper helper) {
+		BlockPos at = new BlockPos(1, 1, 1);
+		VerdantBedBlockEntity bed = bed(helper, at, 10);
+		crop(helper, at.above(), Garden.SUNPETAL_CROP, 1);
+		helper.runAtTickTime(5, () -> {
+			ServerLevel level = level(helper);
+			long now = level.getGameTime();
+			// Forgotten here, not at the start: a random tick before now may have read it.
+			bed.forgetSample();
+			int used = Garden.budget(level).used(now);
+			helper.assertTrue(bed.cachedHabitat(level) == null && Garden.budget(level).used(now) == used,
+					"Without a sample it reads nothing and takes none");
+		});
+		prefetch(helper, bed);
+		helper.runAtTickTime(40, () -> {
+			ServerLevel level = level(helper);
+			long now = level.getGameTime();
+			int used = Garden.budget(level).used(now);
+			Habitat cached = bed.cachedHabitat(level);
+			helper.assertTrue(cached != null && cached.equals(bed.cachedHabitat(level)) && Garden.budget(level).used(now) == used,
+					"With a sample it reads the habitat, and takes none: " + cached);
+			helper.assertTrue(cached.equals(bed.habitat(level)) && Garden.budget(level).used(now) == used,
+					"The sample fresh, habitat reads the same and takes none either");
+			bed.setNutrients(12);
+			helper.assertTrue(bed.cachedHabitat(level).nutrients() == 12 && Garden.budget(level).used(now) == used,
+					"The bed's own nutrients are read now");
+			bed.forgetSample();
+			helper.assertTrue(bed.cachedHabitat(level) == null && Garden.budget(level).used(now) == used,
+					"Its sample forgotten, it reads nothing and takes none");
+			helper.succeed();
+		});
+	}
+
+	/**
+	 * The garden cohort, GC-03 (GC-P39): a bed says whether a tending would ease a strain without changing it. Not without a
+	 * strain; strained, yes, and asking changes nothing; within TEND_TICKS of its last tending, whoever tended it, no; after
+	 * it, or with the clock run back, yes. A harvest it saw counts as growth would count it, and asking counts nothing. A
+	 * dormant bed, and any bed while the Concordance is switched off, may not be tended. The ripe crop grows by the bed's own
+	 * rules, so it is lit and its area read early (prefetch), as every harvest test here does.
+	 */
+	@GameTest(maxTicks = 60)
+	public void aBedSaysWhetherItMayBeTendedWithoutChangingIt(GameTestHelper helper) {
+		ServerLevel level = level(helper);
+		long now = level.getGameTime() + 10_000L;
+		VerdantBedBlockEntity bed = bed(helper, new BlockPos(1, 1, 1), 10);
+		bed.setStrain(0);
+		helper.assertTrue(!bed.mayTendAt(now) && !bed.tend(now), "Without a strain there is nothing to tend");
+		bed.setStrain(2);
+		helper.assertTrue(bed.mayTendAt(now) && bed.strain() == 2, "Strained, it may be tended, and asking changed nothing");
+		helper.assertTrue(bed.tend(now) && bed.strain() == 1, "Tended, one strain eases");
+		helper.assertTrue(!bed.mayTendAt(now + Garden.TEND_TICKS - 1) && !bed.tend(now + Garden.TEND_TICKS - 1) && bed.strain() == 1,
+				"Within its window it may not be tended again, whoever asks");
+		helper.assertTrue(bed.mayTendAt(now + Garden.TEND_TICKS) && bed.strain() == 1, "After it, it may");
+		helper.assertTrue(bed.mayTendAt(now - 1), "A clock run back opens the window again, as tend reads it");
+		BlockPos dormantAt = new BlockPos(5, 1, 1);
+		helper.setBlock(dormantAt, Garden.VERDANT_BED.defaultBlockState());
+		VerdantBedBlockEntity dormant = entity(helper, dormantAt);
+		dormant.setStrain(2);
+		helper.assertTrue(!dormant.awake() && !dormant.mayTendAt(now) && dormant.strain() == 2, "A dormant bed may not be tended");
+		boolean on = JugcraftConfig.isFeatureEnabled(JugcraftConcordance.FEATURE);
+		JugcraftConfig.setFeatureEnabled(JugcraftConcordance.FEATURE, false);
+		try {
+			bed.setStrain(2);
+			helper.assertTrue(!bed.mayTendAt(now + 2L * Garden.TEND_TICKS), "Switched off, no bed may be tended");
+		} finally {
+			JugcraftConfig.setFeatureEnabled(JugcraftConcordance.FEATURE, on);
+		}
+		BlockPos ripeAt = new BlockPos(3, 1, 1);
+		VerdantBedBlockEntity ripe = bed(helper, ripeAt, 10);
+		crop(helper, ripeAt.above(), Garden.SUNPETAL_CROP, 1);
+		helper.setBlock(ripeAt.above().south(), Blocks.GLOWSTONE);
+		prefetch(helper, ripe);
+		helper.runAtTickTime(40, () -> {
+			ripen(helper, ripeAt.above(), ripe);
+			level.destroyBlock(helper.absolutePos(ripeAt.above()), false);
+			helper.assertTrue(ripe.strain() == 0 && ripe.ripened() && ripe.mayTendAt(now) && ripe.strain() == 0 && ripe.ripened(),
+					"A harvest seen counts, and asking counted nothing");
+			helper.assertTrue(ripe.tend(now) && ripe.strain() == 0 && !ripe.ripened(), "Tending counts the harvest, then eases it");
+			helper.succeed();
+		});
+	}
+
+	/**
+	 * The garden cohort, GC-03 (GC-P35): The Garden's Regard's specimens, the four organism crops' produce and Verdant Chaff,
+	 * are examinable. Not before Verdant Husbandry is understood; then a Sunpetal begins it and its codex page opens, and another
+	 * specimen teaches nothing more. A feather adds nothing to it, nor a Sunpetal to Stolas's Regard. The examine line and the
+	 * tooltip are the generator's words.
+	 */
+	@GameTest(maxTicks = 20)
+	public void theGardensRegardSpecimensSayWhatTheyTeach(GameTestHelper helper) {
+		helper.assertTrue(Language.getInstance().has("message.jugcraft.concordance.examine.garden_regard")
+				&& Language.getInstance().has("tooltip.jugcraft.concordance.garden_regard_specimen"),
+				"the server reads the mod's words (Fabric's server translations)");
+		ServerLevel level = level(helper);
+		for (Item item : List.of(Garden.SUNPETAL, Garden.DEWMOSS, Garden.GLOAMCAP, Garden.MENDVETCH, Garden.VERDANT_CHAFF)) {
+			ItemStack stack = new ItemStack(item);
+			helper.assertTrue(stack.is(GardenPacts.SPECIMENS) && stack.is(JugcraftConcordance.SPECIMENS), item + " is a garden specimen, and examinable");
+		}
+		ServerPlayer player = TestPlayers.survivor(helper);
+		ConcordanceProgress.grant(player, "jugcraft:first_light", ResearchState.UNDERSTOOD);
+		ConcordanceProgress.grant(player, Workers.RESEARCH, ResearchState.UNDERSTOOD);
+		Examination.forget(player.getUUID());
+		Examination.examine(player, level, new ItemStack(Garden.SUNPETAL));
+		Knowledge.Progress early = ConcordanceProgress.knowledge(player).progress(GardenPacts.RESEARCH);
+		helper.assertTrue(early.state() == ResearchState.NONE && early.evidence().isEmpty(), "Not before Verdant Husbandry: " + early);
+		ConcordanceProgress.grant(player, Garden.RESEARCH, ResearchState.UNDERSTOOD);
+		Examination.forget(player.getUUID());
+		ResearchEngine.Result begun = Examination.examine(player, level, new ItemStack(Garden.SUNPETAL));
+		helper.assertTrue(begun != null && begun.transitions().contains(new ResearchEngine.Transition(GardenPacts.RESEARCH, ResearchState.NONE,
+				ResearchState.ENCOUNTERED)) && ConcordanceProgress.knowledge(player).state(GardenPacts.RESEARCH) == ResearchState.ENCOUNTERED,
+				"A Sunpetal examined begins it: " + (begun == null ? "refused" : begun.transitions()));
+		helper.assertTrue(ConcordanceWorkerGameTests.earned(player, ConcordanceProgress.advancementFor(GardenPacts.RESEARCH, ResearchState.ENCOUNTERED)),
+				"and its codex page opens");
+		Examination.forget(player.getUUID());
+		ResearchEngine.Result again = Examination.examine(player, level, new ItemStack(Garden.VERDANT_CHAFF));
+		helper.assertTrue(again != null && again.transitions().isEmpty() && !again.recorded()
+				&& !ConcordanceProgress.knowledge(player).progress(GardenPacts.RESEARCH).evidence().containsKey("examine:jugcraft:verdant_chaff"),
+				"Examining another specimen teaches nothing more");
+		Examination.forget(player.getUUID());
+		Examination.examine(player, level, new ItemStack(Items.FEATHER));
+		helper.assertTrue(ConcordanceProgress.knowledge(player).progress(GardenPacts.RESEARCH).evidence().keySet().stream()
+				.noneMatch(key -> key.contains("feather")), "A feather adds nothing to The Garden's Regard");
+		helper.assertTrue(ConcordanceProgress.knowledge(player).progress(StolasRegard.RESEARCH).evidence().keySet().stream()
+				.noneMatch(key -> key.contains("sunpetal") || key.contains("verdant_chaff")), "nor a garden specimen to Stolas's Regard");
+		helper.assertValueEqual(Component.translatable("message.jugcraft.concordance.examine.garden_regard", "Sunpetal").getString(),
+				"You look at the Sunpetal as the garden's spirits would: for what its bed gave it", "The examine line");
+		helper.assertValueEqual(Component.translatable("tooltip.jugcraft.concordance.garden_regard_specimen").getString(),
+				"The garden's spirits regard this: sneak and use it in the air to examine it", "The tooltip");
+		helper.succeed();
+	}
+
+	/**
+	 * The garden cohort, GC-03 (GC-P6): The Garden's Regard advances by the player's own hands and a bound worker. A ripe
+	 * Sunpetal harvested by hand is kept for a later state; examining a Sunpetal then begins it and observes it at once; a bound
+	 * familiar's mending understands it. No state takes notes, and nothing yet masters it.
+	 */
+	@GameTest(maxTicks = 40)
+	public void theGardensRegardAdvancesByHandAndByAWorker(GameTestHelper helper) {
+		BlockPos at = new BlockPos(1, 1, 1);
+		BlockPos cropAt = at.above();
+		ServerPlayer player = TestPlayers.survivor(helper);
+		ConcordanceProgress.grant(player, "jugcraft:first_light", ResearchState.UNDERSTOOD);
+		ConcordanceProgress.grant(player, Workers.RESEARCH, ResearchState.UNDERSTOOD);
+		ConcordanceProgress.grant(player, Garden.RESEARCH, ResearchState.UNDERSTOOD);
+		VerdantBedBlockEntity bed = bedOf(helper, at, player.getUUID());
+		bed.setNutrients(10);
+		crop(helper, cropAt, Garden.SUNPETAL_CROP, 1);
+		helper.setBlock(cropAt.south(), Blocks.GLOWSTONE);
+		prefetch(helper, bed);
+		helper.runAtTickTime(35, () -> {
+			ServerLevel level = level(helper);
+			ripen(helper, cropAt, bed);
+			helper.assertTrue(handUse(helper, player, cropAt, ItemStack.EMPTY, false).consumesAction() && age(helper, cropAt) == 1,
+					"The ripe Sunpetal is harvested by hand");
+			Knowledge.Progress kept = ConcordanceProgress.knowledge(player).progress(GardenPacts.RESEARCH);
+			helper.assertTrue(kept.state() == ResearchState.NONE && kept.evidence().containsKey("practice:" + Garden.ACTIVITY + ":jugcraft:sunpetal"),
+					"The harvest is kept for a later state: " + kept);
+			Examination.forget(player.getUUID());
+			ResearchEngine.Result result = Examination.examine(player, level, new ItemStack(Garden.SUNPETAL));
+			helper.assertTrue(result != null && result.transitions().equals(List.of(
+					new ResearchEngine.Transition(GardenPacts.RESEARCH, ResearchState.NONE, ResearchState.ENCOUNTERED),
+					new ResearchEngine.Transition(GardenPacts.RESEARCH, ResearchState.ENCOUNTERED, ResearchState.OBSERVED))),
+					"A Sunpetal examined begins it, and the harvest already held observes it: " + (result == null ? "refused" : result.transitions()));
+			ConcordanceProgress.record(player, new Evidence.Practiced(Workers.ACTIVITY, "familiar"));
+			helper.assertTrue(ConcordanceProgress.knowledge(player).state(GardenPacts.RESEARCH) == ResearchState.UNDERSTOOD
+					&& ConcordanceWorkerGameTests.earned(player, ConcordanceProgress.advancementFor(GardenPacts.RESEARCH, ResearchState.UNDERSTOOD)),
+					"A bound familiar's mending understands it, and its codex page opens");
+			Definitions.Research regard = ConcordanceData.rules().research(GardenPacts.RESEARCH);
+			helper.assertTrue(regard != null && regard.states().values().stream().flatMap(List::stream).noneMatch(rule -> rule.kind() == EvidenceRule.Kind.NOTES),
+					"Research notes never stand in for its evidence");
+			Knowledge.Progress after = ConcordanceProgress.knowledge(player).progress(GardenPacts.RESEARCH);
+			helper.assertTrue(after.state() != ResearchState.MASTERED && after.evidence().keySet().stream().noneMatch(key -> key.startsWith("practice:" + GardenPacts.ACTIVITY)),
+					"Nothing masters it yet: no garden pact's obligation was kept");
+			helper.succeed();
+		});
+	}
+
+	// ---------------------------------------------------------------- the garden cohort, GC-06b: shared sampling and the one-correction rule
+
+	/**
+	 * The garden cohort, GC-06b (shared by GC-06 to GC-09): {@code beds} sampled with one request a tick, for the first bed
+	 * still unsampled, from tick 1 to 2 * beds + 2 (a request the level's allowance refuses, SampleBudget.PER_TICK a tick
+	 * shared with every test running beside this one and the beds' own sampling, is made again the next tick), then
+	 * {@code body} at tick 2 * beds + 3, once each holds a sample, and the test succeeds after it. Called in the test's own
+	 * body (tick 0). A reading test reads cachedHabitat only in that tick, so it takes no sample of its own there. A test
+	 * using it sets maxTicks to at least 2 * beds + 10.
+	 */
+	static void afterSampling(GameTestHelper helper, List<VerdantBedBlockEntity> beds, Runnable body) {
+		helper.assertTrue(helper.getTick() == 0, "afterSampling is called in the test's own body (tick 0)");
+		ServerLevel level = helper.getLevel();
+		int count = beds.size();
+		for (int t = 1; t <= 2 * count + 2; t++) {
+			helper.runAtTickTime(t, () -> {
+				for (VerdantBedBlockEntity bed : beds) {
+					if (bed.cachedHabitat(level) == null) {
+						bed.habitat(level);
+						break;
+					}
+				}
+			});
+		}
+		helper.runAtTickTime(2L * count + 3, () -> {
+			for (VerdantBedBlockEntity bed : beds) {
+				helper.assertTrue(bed.cachedHabitat(level) != null, "The bed's area is sampled: " + bed.getBlockPos());
+			}
+			body.run();
+			helper.succeed();
+		});
+	}
+
+	/**
+	 * The garden cohort, GC-06b (GC-P64; the CI form of the unit's scratch harness): HabitatAdvice over every shipped niche
+	 * and graft and a grid of readings. Nothing to correct while a plant thrives; otherwise the first factor holding it, only
+	 * ever toward its ideal range (never more disturbance where its niche needs none), and a change named alone raises it a
+	 * step. The contract's three cases: a Sunpetal at light 9 (light to 11, alone, or the Dewlit graft), a Sunpetal with two
+	 * faults (the first, one of 2) and a Gloamcap with no magic (a quiet source, to 1).
+	 */
+	@GameTest(maxTicks = 20)
+	public void habitatAdviceHoldsForEveryOrganism(GameTestHelper helper) {
+		EcologyCatalog catalog = Garden.catalog();
+		List<Niche> niches = new ArrayList<>();
+		for (Organism organism : catalog.organisms().values()) {
+			niches.add(organism.niche());
+		}
+		for (Graft graft : catalog.grafts().values()) {
+			Organism host = catalog.organism(graft.host());
+			if (host != null) {
+				niches.add(catalog.niche(host, graft.id()));
+			}
+		}
+		int checked = 0;
+		for (Niche niche : niches) {
+			for (int moisture : new int[] {0, 1, 2, 4, 7}) {
+				for (int light : new int[] {0, 6, 9, 10, 11, 15}) {
+					for (int nutrients : new int[] {0, 1, 3, 32}) {
+						for (int diversity : new int[] {1, 3}) {
+							for (int disturbance : new int[] {0, 1, 2, 3, 6, 12, 15}) {
+								for (int strain : new int[] {0, 1, 3}) {
+									Habitat habitat = new Habitat(moisture, light, nutrients, diversity, disturbance, strain);
+									Verdict verdict = Verdict.of(niche, habitat);
+									HabitatAdvice.Advice advice = HabitatAdvice.one(niche, habitat);
+									checked++;
+									if (verdict.growth() == Verdict.Growth.THRIVING) {
+										helper.assertTrue(advice == null, "Nothing to correct while it thrives: " + habitat);
+										continue;
+									}
+									List<Factor> held = verdict.growth() == Verdict.Growth.STALLED ? verdict.outside() : verdict.tolerable();
+									helper.assertTrue(advice != null && advice.factor() == held.getFirst(), "The first factor holding it: " + habitat + " " + advice);
+									Niche.Range range = niche.range(advice.factor());
+									helper.assertTrue((advice.change() != HabitatAdvice.Change.MORE || advice.value() < range.idealMin())
+											&& (advice.change() != HabitatAdvice.Change.LESS || advice.value() > range.idealMax())
+											&& (advice.change() != HabitatAdvice.Change.EASE || strain > 0 && advice.factor() == Factor.DISTURBANCE)
+											&& !(advice.factor() == Factor.DISTURBANCE && advice.change() == HabitatAdvice.Change.MORE && range.idealMin() == 0)
+											&& (!advice.alone() || held.size() == 1), "Only toward its ideal range: " + habitat + " " + advice);
+									if (advice.alone()) {
+										Habitat changed = advice.change() == HabitatAdvice.Change.EASE
+												? new Habitat(moisture, light, nutrients, diversity, disturbance, advice.target())
+												: habitat.with(advice.factor(), advice.target());
+										helper.assertTrue(Verdict.of(niche, changed).growth().pace > verdict.growth().pace,
+												"Its one change raises it a step: " + habitat + " " + advice);
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+		helper.assertValueEqual(checked, niches.size() * 5 * 6 * 4 * 2 * 7 * 3, "Every reading checked");
+		Organism sunpetal = catalog.organism("jugcraft:sunpetal");
+		HabitatAdvice.Advice dim = HabitatAdvice.one(sunpetal.niche(), new Habitat(7, 9, 10, 1, 0, 0),
+				Map.of("jugcraft:dewlit", catalog.niche(sunpetal, "jugcraft:dewlit")));
+		helper.assertTrue(dim != null && dim.factor() == Factor.LIGHT && dim.change() == HabitatAdvice.Change.MORE && dim.target() == 11
+				&& dim.alone() && "jugcraft:dewlit".equals(dim.graft()), "A Sunpetal at light 9: light to 11, alone, or the Dewlit graft: " + dim);
+		HabitatAdvice.Advice two = HabitatAdvice.one(sunpetal.niche(), new Habitat(1, 15, 0, 3, 0, 0));
+		helper.assertTrue(two != null && two.factor() == Factor.MOISTURE && two.of() == 2 && two.target() == 4, "Two faults: the first, one of 2: " + two);
+		HabitatAdvice.Advice quiet = HabitatAdvice.one(catalog.organism("jugcraft:gloamcap").niche(), new Habitat(7, 2, 10, 1, 0, 0));
+		helper.assertTrue(quiet != null && quiet.factor() == Factor.DISTURBANCE && quiet.change() == HabitatAdvice.Change.MORE
+				&& quiet.target() == 1 && quiet.alone(), "A Gloamcap with no magic: a quiet source, to 1: " + quiet);
+		helper.succeed();
+	}
+
+	// GC-06 unit 3
+	// GC-07 unit 4
+	// ---------------------------------------------------------------- the garden cohort, GC-07: the graft in one place, the stores
+
+	/**
+	 * GC-07 (GC-P87): the graft's body moved into Grafting.apply and the gesture behaves as before: a Greenwarden's Dewmoss on
+	 * a Sunpetal grafts its bed and spends one, and Grafting.apply on another Sunpetal's bed leaves it exactly as the gesture
+	 * left the first (the graft, the ungrafted plant's verdict forgotten, what clients are told); a second gesture is refused
+	 * and spends nothing. The nine Chunk C graft tests above run unchanged.
+	 */
+	@GameTest(maxTicks = 20)
+	public void theGraftGestureBehavesAsBefore(GameTestHelper helper) {
+		ServerLevel level = level(helper);
+		BlockPos byHand = new BlockPos(1, 1, 2);
+		BlockPos byApply = new BlockPos(5, 1, 2);
+		VerdantBedBlockEntity handBed = bed(helper, byHand, 10);
+		VerdantBedBlockEntity applyBed = bed(helper, byApply, 10);
+		crop(helper, byHand.above(), Garden.SUNPETAL_CROP, 1);
+		crop(helper, byApply.above(), Garden.SUNPETAL_CROP, 1);
+		handBed.note(Verdict.Growth.STALLED.id, List.of()); // each ungrafted plant's last verdict
+		applyBed.note(Verdict.Growth.STALLED.id, List.of());
+		ServerPlayer gardener = gardener(helper, true);
+		ItemStack donor = new ItemStack(Garden.DEWMOSS, 2);
+		helper.assertTrue(handUse(helper, gardener, byHand.above(), donor, false).consumesAction() && donor.getCount() == 1,
+				"The gesture consumes the use and spends one Dewmoss: " + donor.getCount());
+		Graft dewlit = Garden.catalog().graft(DEWLIT);
+		helper.assertTrue(dewlit != null && !Grafting.holds(applyBed), "Dewlit is known, and the second bed carries no graft yet");
+		Grafting.apply(level, helper.absolutePos(byApply.above()), applyBed, dewlit);
+		helper.assertTrue(DEWLIT.equals(handBed.graft()) && handBed.graft().equals(applyBed.graft()) && handBed.growth().isEmpty()
+				&& applyBed.growth().isEmpty() && Grafting.holds(handBed) && Grafting.holds(applyBed),
+				"Both beds carry Dewlit and forgot the ungrafted verdict: " + handBed.graft() + ", " + applyBed.graft() + ", "
+						+ handBed.growth() + ", " + applyBed.growth());
+		CompoundTag byHandSent = handBed.getUpdateTag(level.registryAccess());
+		CompoundTag byApplySent = applyBed.getUpdateTag(level.registryAccess());
+		helper.assertTrue(byHandSent.getStringOr(VerdantBedBlockEntity.GRAFT, "").equals(byApplySent.getStringOr(VerdantBedBlockEntity.GRAFT, "-"))
+				&& SUNPETAL.equals(byHandSent.getStringOr(VerdantBedBlockEntity.GRAFT_HOST, ""))
+				&& SUNPETAL.equals(byApplySent.getStringOr(VerdantBedBlockEntity.GRAFT_HOST, "")),
+				"Clients are told the same graft and host either way: " + byHandSent + ", " + byApplySent);
+		helper.assertTrue(handUse(helper, gardener, byHand.above(), donor, false).consumesAction() && donor.getCount() == 1
+				&& DEWLIT.equals(handBed.graft()), "A second gesture is refused and spends nothing: one graft a bed");
+		helper.succeed();
+	}
+
+	/**
+	 * GC-P84: Dewlit is the Sunpetal's graft, from a Dewmoss; a Gloamcap has none. It gains only where no fit is worse and one
+	 * is better: light 12 (tolerable to ideal), light 12 with diversity 1 (the pace unchanged, a fit better), light 10 (short
+	 * to tolerable); never in full light on a wet bed (ideal either way), on a dry bed (moisture tolerable to short), or for a
+	 * trade (moisture 4: ideal to tolerable, light tolerable to ideal).
+	 */
+	@GameTest(maxTicks = 20)
+	public void aGraftGainsOnlyWhereEveryFitIsNoWorseAndOneBetter(GameTestHelper helper) {
+		Organism petal = Garden.catalog().organism(SUNPETAL);
+		Graft dewlit = Grafting.graftFor(SUNPETAL);
+		helper.assertTrue(petal != null && dewlit != null && DEWLIT.equals(dewlit.id()) && "jugcraft:dewmoss".equals(Grafting.donorItem(dewlit))
+				&& Grafting.graftFor("jugcraft:gloamcap") == null, "Dewlit is the Sunpetal's graft, from a Dewmoss; a Gloamcap has none");
+		Niche own = petal.niche();
+		Niche grafted = Garden.catalog().niche(petal, DEWLIT);
+		record Case(Habitat habitat, boolean gains, String why) {
+		}
+		for (Case c : List.of(new Case(new Habitat(7, 12, 10, 3, 0), true, "light 12: tolerable to ideal"),
+				new Case(new Habitat(7, 12, 10, 1, 0), true, "light 12, diversity 1: the pace is the same, a fit is better"),
+				new Case(new Habitat(5, 10, 10, 3, 0), true, "light 10: short to tolerable"),
+				new Case(new Habitat(7, 15, 10, 3, 0), false, "full light on a wet bed: ideal either way"),
+				new Case(new Habitat(3, 12, 10, 3, 0), false, "dry: moisture tolerable to short, though light gains"),
+				new Case(new Habitat(4, 12, 10, 3, 0), false, "moisture 4: ideal to tolerable, for light tolerable to ideal"))) {
+			helper.assertValueEqual(Grafting.gains(own, grafted, c.habitat()), c.gains(), c.why());
+		}
+		helper.succeed();
+	}
+
+	/**
+	 * GC-P83: an index with stores holds the barrels touching its centre, at most 16, the six face-adjacent first; never the
+	 * centre, a furnace (it takes items by side) or a barrel two away. A barrel broken is gone at once; one placed waits for
+	 * the next refresh.
+	 */
+	@GameTest(maxTicks = 20)
+	public void theGardenReachIndexesStoresTouchingThePerch(GameTestHelper helper) {
+		ServerLevel level = level(helper);
+		long now = level.getGameTime();
+		BlockPos centre = new BlockPos(3, 2, 3);
+		helper.setBlock(centre, Blocks.BARREL);
+		Set<BlockPos> faces = new java.util.HashSet<>();
+		for (int dx = -1; dx <= 1; dx++) {
+			for (int dy = -1; dy <= 1; dy++) {
+				for (int dz = -1; dz <= 1; dz++) {
+					if (dx != 0 || dy != 0 || dz != 0) {
+						helper.setBlock(centre.offset(dx, dy, dz), Blocks.BARREL);
+						if (Math.abs(dx) + Math.abs(dy) + Math.abs(dz) == 1) {
+							faces.add(helper.absolutePos(centre.offset(dx, dy, dz)));
+						}
+					}
+				}
+			}
+		}
+		helper.setBlock(centre.offset(2, 0, 0), Blocks.BARREL);
+		GardenReach reach = GardenReach.withStores(helper.absolutePos(centre), 8, bed -> true);
+		List<BlockPos> stores = reach.stores(level, now);
+		helper.assertTrue(stores.size() == GardenReach.MAX_STORES && Set.copyOf(stores.subList(0, 6)).equals(faces)
+				&& !stores.contains(helper.absolutePos(centre)) && !stores.contains(helper.absolutePos(centre.offset(2, 0, 0))),
+				"Sixteen stores, the six face-adjacent first, never the centre or a barrel two away: " + stores);
+		helper.setBlock(centre.above(), Blocks.FURNACE);
+		helper.assertTrue(!reach.stores(level, now).contains(helper.absolutePos(centre.above())), "A broken barrel is gone at once");
+		reach.forget();
+		helper.assertTrue(!reach.stores(level, now).contains(helper.absolutePos(centre.above())), "A furnace (it takes items by side) is never a store");
+		helper.succeed();
+	}
+
+	// GC-08 unit 5
+	// GC-09 unit 6
 }

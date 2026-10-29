@@ -8,6 +8,8 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.mojang.blaze3d.platform.InputConstants;
 import io.github.jimbozoomer.jugcraft.Jugcraft;
+import io.github.jimbozoomer.jugcraft.client.ConcordanceClientOptions;
+import io.github.jimbozoomer.jugcraft.client.MagicScreen;
 import io.github.jimbozoomer.jugcraft.client.PactClient;
 import io.github.jimbozoomer.jugcraft.client.PactScreen;
 import io.github.jimbozoomer.jugcraft.client.RosterClient;
@@ -223,6 +225,8 @@ public final class ConcordancePactNetworkTests implements FabricClientGameTest {
 	/** The second JVM: the stranger. Each step waits for the holder's mark and leaves its own. */
 	private static void peer(ClientGameTestContext context) {
 		mark("peer-entered", "");
+		// The magic interfaces: no spirit's beats heard before (its own profile keeps its options), so his perch opens on them.
+		context.runOnClient(client -> ConcordanceClientOptions.forgetBeats());
 		String address = "127.0.0.1:" + System.getProperty(PEER);
 		context.runOnClient(client -> ConnectScreen.startConnecting(new TitleScreen(), client, ServerAddress.parseString(address),
 				new ServerData("Pact disposable test", address, ServerData.Type.OTHER), false, null));
@@ -251,7 +255,8 @@ public final class ConcordancePactNetworkTests implements FabricClientGameTest {
 		shot(context, "jugcraft_pact_peer_arrival");
 		mark("saw-arrival", "");
 		context.waitFor(client -> client.gui.screen() instanceof PactScreen && PactClient.state() != null, PEER_WAIT);
-		String owner = context.computeOnClient(client -> Component.translatable("message.jugcraft.concordance.pact.missing.owner").getString());
+		String owner = context.computeOnClient(client -> Component.translatable("message.jugcraft.concordance.pact.missing.owner",
+				Component.translatable("entity.jugcraft.stolas")).getString());
 		String shown = context.computeOnClient(client -> PactClient.state().mode() + " " + PactClient.state().offers(PactRequestPayload.ACCEPT) + " "
 				+ PactClient.state().notes().stream().anyMatch(note -> note.getString().equals(owner)));
 		check(shown.equals(PactStatePayload.NEGOTIATE + " false true"),
@@ -270,11 +275,12 @@ public final class ConcordancePactNetworkTests implements FabricClientGameTest {
 		mark("accept.txt", accept.reason());
 		check(!accept.done() && Pacts.Outcome.NOT_PERMITTED.id.equals(accept.reason()),
 				"The stranger's Accept, sent all the same, is refused as not permitted: " + accept.reason());
-		// The refusal, under his terms, brought into view by the keyboard before the picture.
+		// The refusal, above his terms, the keyboard on it before the picture.
 		tabTo(context, "result");
 		check(context.computeOnClient(client -> client.gui.screen() instanceof PactScreen screen && screen.page() == PactScreen.TERMS_PAGE
 				&& screen.control("result") instanceof PactScreen.Verdict verdict && verdict.refused()),
-				"The stranger's screen shows the refusal under his terms");
+				"The stranger's screen shows the refusal above his terms");
+		budget(context, TERMS_WORDS, "the stranger's refusal");
 		shot(context, "jugcraft_pact_peer_refused");
 		context.getInput().pressKey(InputConstants.KEY_ESCAPE);
 		context.waitForScreen(null);
@@ -443,6 +449,26 @@ public final class ConcordancePactNetworkTests implements FabricClientGameTest {
 			context.waitTicks(1);
 		}
 		throw new AssertionError("Tab never reached " + key);
+	}
+
+	/** The magic interfaces' budget for his terms, a refusal included (spec 1.1). */
+	private static final int TERMS_WORDS = 50;
+
+	/**
+	 * Waits until the pact screen shows the state the client holds and awaits no answer: a state packet marks it to rebuild
+	 * on the next tick, and an awaited answer draws its own line, so the words, controls and budgets read the settled page.
+	 */
+	private static void settle(ClientGameTestContext context) {
+		context.waitFor(client -> !PactClient.waiting() && (!(client.gui.screen() instanceof MagicScreen magic) || magic.settled()), WAIT);
+	}
+
+	/** Spec 1.1, 4.5: the pact screen draws at most {@code most} words without hovering, counted from what it drew. */
+	private static void budget(ClientGameTestContext context, int most, String what) {
+		settle(context);
+		List<String> drawn = context.computeOnClient(client -> client.gui.screen() instanceof PactScreen screen ? screen.drawn() : List.of());
+		int words = context.computeOnClient(client -> client.gui.screen() instanceof PactScreen screen ? screen.words() : -1);
+		Jugcraft.LOGGER.info("[pact-network] {} draws {} words (at most {}): {}", what, words, most, drawn);
+		check(words >= 0 && words <= most, what + " draws at most " + most + " words (spec 1.1): " + words + " " + drawn);
 	}
 
 	/** A picture with no toast over it (the peer's own profile keeps it, under owner-network-evidence/). */

@@ -13,7 +13,7 @@ import java.util.List;
 public record PactDefinition(String id, String agreement, String research, String work, int radius, int from, int to, int quota,
 		String offering, int count, long period, long grace, int cap, String beneficiaries, List<Cost> compact, int resonance,
 		List<String> beats) {
-	/** Stolas, the pact hall's first spirit (D-S7): the pact perch offers him. StolasEntity.COUNTERPART is this. */
+	/** Stolas, the pact hall's first spirit (D-S7). StolasEntity.COUNTERPART is this. */
 	public static final String STOLAS = "jugcraft:stolas";
 
 	/** One material of the compact: an item id and how many. */

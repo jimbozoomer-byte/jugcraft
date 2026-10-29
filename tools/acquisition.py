@@ -144,6 +144,15 @@ PACT_HALL = {"verdant_bed": "recipe", "sunpetal": "recipe", "assayers_scale": "r
              "astrolabe": "recipe", "pact_perch": "recipe", "spirit_anchor": "recipe", "courier_post": "recipe",
              "porter_key": "recipe"}
 CHUNK_D_ITEMS = ["pact_perch"]
+# The garden cohort (docs/features/concordance-garden-cohort.md; tools/concordance_journey.py GARDEN): every Concordance
+# thing the garden route makes or places, each made in survival as PACT_HALL's rows say. GC-03: The Garden's Regard to
+# understood (a Sunpetal to examine, a Verdant Bed for its cultivation, a Bonding Charm for a familiar's service); each
+# spirit's unit adds its rows (GC-04: the Pact Perch and Mendvetch; GC-05: the Verdant Heart and the Gleaner, Bathin's
+# fixture; GC-06 and GC-07: Dewmoss, Marax's and Foras's compacts). The cohort registers no item (GC-S22).
+# check_acquisition ties them to the files on disk and to the server test that loads their recipes
+# (ConcordanceJourneyGameTests.GARDEN_RECIPES).
+GARDEN_PACTS = {"sunpetal": "recipe", "verdant_bed": "recipe", "bonding_charm": "recipe", "pact_perch": "recipe",
+                "mendvetch": "recipe", "verdant_heart": "recipe", "gleaner": "recipe", "dewmoss": "recipe"}
 
 
 def recipe_file(item, how):

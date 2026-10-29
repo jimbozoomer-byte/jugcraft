@@ -75,12 +75,89 @@ class ClientTestSelectionTests(unittest.TestCase):
                 chosen, _ = selection.select([path], self.tests, set())
                 self.assertIn("ConcordancePactClientGameTests", chosen)
 
+    def test_pact_spirit_base_and_renderers_select_the_pact_client_test(self):
+        # Concordance garden cohort, GC-01: the pact spirits' renderer table and base, named by no client test, are shown
+        # by the pact's client class (Stolas through them).
+        for path in ("src/client/java/io/github/jimbozoomer/jugcraft/client/PactSpiritRenderers.java",
+                     "src/main/java/io/github/jimbozoomer/jugcraft/concordance/spirits/PactSpiritEntity.java"):
+            with self.subTest(path=path):
+                chosen, _ = selection.select([path], self.tests, set())
+                self.assertIn("ConcordancePactClientGameTests", chosen)
+
+    def test_buer_assets_and_service_select_the_garden_client_test(self):
+        # Concordance garden cohort, GC-04: Buer's body and his service are shown by the garden's client class.
+        for path in ("src/main/resources/assets/jugcraft/textures/entity/buer.png",
+                     "src/main/resources/assets/jugcraft/geckolib/animations/entity/buer.animation.json",
+                     "src/main/java/io/github/jimbozoomer/jugcraft/concordance/spirits/StrainTending.java"):
+            with self.subTest(path=path):
+                chosen, _ = selection.select([path], self.tests, set())
+                self.assertIn("ConcordanceGardenPactClientGameTests", chosen)
+        self.assertIn("ConcordanceGardenPactClientGameTests", selection.WEIGHTS)
+
+    def test_bathin_body_and_entity_select_the_garden_client_test(self):
+        # Concordance garden cohort, GC-05: Bathin's body and entity are shown by the garden's client class.
+        for path in ("src/main/resources/assets/jugcraft/textures/entity/bathin.png",
+                     "src/main/resources/assets/jugcraft/geckolib/models/entity/bathin.geo.json",
+                     "src/main/java/io/github/jimbozoomer/jugcraft/concordance/spirits/BathinEntity.java"):
+            with self.subTest(path=path):
+                chosen, _ = selection.select([path], self.tests, set())
+                self.assertIn("ConcordanceGardenPactClientGameTests", chosen)
+
     def test_roster_screen_selects_the_roster_client_test(self):
         # Concordance Chunk D unit 3 (D-07): the roster screen is shown by its own client class and by the screen fit check.
         chosen, _ = selection.select(["src/client/java/io/github/jimbozoomer/jugcraft/client/RosterScreen.java"], self.tests, set())
         self.assertIn("ConcordanceRosterClientGameTests", chosen)
         self.assertIn("ScreenFitClientGameTests", chosen)
         self.assertIn("ConcordanceRosterClientGameTests", selection.WEIGHTS)
+
+    def test_the_accord_machinery_selects_the_garden_client_test(self):
+        # Concordance garden cohort, GC-05: the accord is shown by the garden's client class (Bathin's matter, the roster).
+        # That class is listed from GC-04 on; until it is, it stands in here with nothing of its own to show.
+        tests = dict(self.tests)
+        tests.setdefault("ConcordanceGardenPactClientGameTests", {"classes": set(), "ids": set()})
+        chosen, _ = selection.select(["src/main/java/io/github/jimbozoomer/jugcraft/concordance/spirits/PactAccords.java"], tests, set())
+        self.assertIn("ConcordanceGardenPactClientGameTests", chosen)
+
+    def test_the_magic_layer_and_its_art_select_the_pact_screens_tests(self):
+        # The magic interfaces: the shared layer and the kit's sprites are named by no test, yet every pact screen shows them.
+        for path in ("src/client/java/io/github/jimbozoomer/jugcraft/client/MagicButton.java",
+                     "src/client/java/io/github/jimbozoomer/jugcraft/client/PactGlance.java",
+                     "src/main/resources/assets/jugcraft/textures/gui/sprites/magic/plate.png",
+                     "src/main/resources/assets/jugcraft/textures/gui/sprites/tooltip/magic_frame.png",
+                     "src/main/resources/assets/jugcraft/textures/gui/magic/cosmos.png"):
+            with self.subTest(path=path):
+                chosen, _ = selection.select([path], self.tests, set())
+                self.assertIn("ConcordancePactClientGameTests", chosen)
+                self.assertIn("ConcordanceGardenPactClientGameTests", chosen)
+                self.assertIn("ScreenFitClientGameTests", chosen)
+
+    def test_a_change_to_the_magic_screens_words_selects_them(self):
+        # The unit 1 review: a change to a glance, a short label or a pact sentence alone is judged by the shots' budgets.
+        lang = "src/main/resources/assets/jugcraft/lang/en_us.json"
+        words = ('+++ b/' + lang + '\n-  "screen.jugcraft.pact.glance.term.area": "%1$s blocks",\n'
+                 '+  "screen.jugcraft.pact.glance.term.area": "%1$s b",\n')
+        other = '+++ b/' + lang + '\n+  "block.jugcraft.thing": "Thing",\n'
+        for diff, picked in ((words, True), (other, False)):
+            with self.subTest(picked=picked), patch.object(selection, "git", side_effect=lambda *args, d=diff: d if args[0] == "diff" else ""):
+                chosen, _ = selection.select([lang], self.tests, set(), "base", "head")
+                self.assertEqual("ConcordancePactClientGameTests" in chosen, picked)
+                self.assertEqual("ConcordanceGardenPactClientGameTests" in chosen, picked)
+
+    def test_the_roster_cards_and_jades_short_lines_select_their_tests(self):
+        # The magic interfaces' unit 2: a whole sentence's short form, the roster's words and Jade's client lines.
+        chosen, _ = selection.select(["src/client/java/io/github/jimbozoomer/jugcraft/client/MagicGlance.java"], self.tests, set())
+        self.assertTrue(selection.MAGIC_SHOWN <= chosen, selection.MAGIC_SHOWN - chosen)
+        chosen, _ = selection.select(["src/client/java/io/github/jimbozoomer/jugcraft/client/compat/JugcraftJadeClient.java"], self.tests, set())
+        self.assertIn("ConcordancePactClientGameTests", chosen)
+        self.assertIn("ConcordanceGardenPactClientGameTests", chosen)
+        # The unit's review: the roster's class photographs the workshop hand with Jade's overlay.
+        self.assertIn("ConcordanceRosterClientGameTests", chosen)
+        lang = "src/main/resources/assets/jugcraft/lang/en_us.json"
+        for key in ("screen.jugcraft.glance.compose.jugcraft.worker.status.idle", "screen.jugcraft.roster.short.page"):
+            diff = '+++ b/' + lang + '\n+  "' + key + '": "x",\n'
+            with self.subTest(key=key), patch.object(selection, "git", side_effect=lambda *args, d=diff: d if args[0] == "diff" else ""):
+                chosen, _ = selection.select([lang], self.tests, set(), "base", "head")
+                self.assertIn("ConcordanceRosterClientGameTests", chosen)
 
     def test_pact_network_test_is_its_own_class_and_weighed(self):
         # Concordance Chunk D unit 5 (D-09): the two-client attempt is a client class of its own, with a running-time estimate.
@@ -107,6 +184,32 @@ class ClientTestSelectionTests(unittest.TestCase):
                 patch.object(selection, "users_of", return_value={}):
             chosen, _ = selection.select([path], tests, set(), "base", "head")
         self.assertEqual(chosen, set(tests))
+
+    # The garden cohort: each later unit's case (GC-06 to GC-09) under its line.
+    # GC-06 unit 3
+    def test_marax_body_and_service_select_the_garden_client_test(self):
+        # Concordance garden cohort, GC-06: Marax's body, entity and reading are shown by the garden's client class.
+        for path in ("src/main/resources/assets/jugcraft/textures/entity/marax.png",
+                     "src/main/resources/assets/jugcraft/geckolib/models/entity/marax.geo.json",
+                     "src/main/java/io/github/jimbozoomer/jugcraft/concordance/spirits/MaraxEntity.java",
+                     "src/main/java/io/github/jimbozoomer/jugcraft/concordance/spirits/HabitatReading.java"):
+            with self.subTest(path=path):
+                chosen, _ = selection.select([path], self.tests, set())
+                self.assertIn("ConcordanceGardenPactClientGameTests", chosen)
+
+    # GC-07 unit 4
+    def test_foras_body_entity_and_service_select_the_garden_client_test(self):
+        # Concordance garden cohort, GC-07: Foras's body, entity and graft keeping are shown by the garden's client class.
+        for path in ("src/main/resources/assets/jugcraft/textures/entity/foras.png",
+                     "src/main/resources/assets/jugcraft/geckolib/models/entity/foras.geo.json",
+                     "src/main/java/io/github/jimbozoomer/jugcraft/concordance/spirits/ForasEntity.java",
+                     "src/main/java/io/github/jimbozoomer/jugcraft/concordance/spirits/GraftKeeping.java"):
+            with self.subTest(path=path):
+                chosen, _ = selection.select([path], self.tests, set())
+                self.assertIn("ConcordanceGardenPactClientGameTests", chosen)
+
+    # GC-08 unit 5
+    # GC-09 unit 6
 
 
 if __name__ == "__main__":

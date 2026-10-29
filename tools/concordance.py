@@ -521,15 +521,22 @@ ember.SLOT_ITEMS.update(rime_kit.TRINKETS)
 import concordance_pacts as pacts  # noqa: E402
 RESEARCH.update(pacts.RESEARCH)
 BLOCKS.update(pacts.BLOCKS)
+# The garden cohort (tools/concordance_garden_pacts.py; docs/features/concordance-garden-cohort.md): The Garden's Regard (GC-03).
+import concordance_garden_pacts as garden_pacts  # noqa: E402
+RESEARCH.update(garden_pacts.RESEARCH)
 # Concordance Chunk D, D-07 (tools/concordance_roster.py): the roster's words, limits and icons, the journal's pacts lines
 # and the Ars Nouveau helpers' roster kinds (G13).
 import concordance_roster as roster  # noqa: E402
+# The magic interfaces (tools/magic_ui.py; docs/features/magic-interfaces.md): the short words the magic screens draw (each
+# glance fed the server's own arguments), the chooser's reasons and the short labels.
+import magic_ui  # noqa: E402
 # Everything a player can examine or study: each research entry's specimens (Java: JugcraftConcordance.SPECIMENS).
 SPECIMEN_TAGS = [SPECIMEN_TAG, rituals.CIRCLE_SPECIMEN_TAG, alchemy.ALCHEMY_SPECIMEN_TAG, ecology.GARDEN_SPECIMEN_TAG,
                  celestial.CELESTIAL_SPECIMEN_TAG, crimson.CRIMSON_SPECIMEN_TAG, workers.BINDING_SPECIMEN_TAG,
                  artifice.ARTIFICE_SPECIMEN_TAG, relics.RELIC_SPECIMEN_TAG, equivalence.ASSAY_SPECIMEN_TAG,
                  hexes.SYMPATHY_SPECIMEN_TAG, hexes.DREAM_SPECIMEN_TAG, ember.EMBER_SPECIMEN_TAG,
-                 rime.RIME_SPECIMEN_TAG, strata.STRATA_SPECIMEN_TAG, pacts.STOLAS_SPECIMEN_TAG]
+                 rime.RIME_SPECIMEN_TAG, strata.STRATA_SPECIMEN_TAG, pacts.STOLAS_SPECIMEN_TAG,
+                 garden_pacts.SPECIMEN_TAG]
 ALL_SPECIMENS_TAG = f"{MOD}:concordance_specimens"
 
 _UNDERSTOOD = {"research": f"{MOD}:first_light", "state": "understood"}
@@ -1070,6 +1077,7 @@ def codex():
         **crimson.codex(),
         **workers.codex(),
         **pacts.codex(),
+        **garden_pacts.codex(),
         **jug_nouveau.codex(),
         **logistics.codex(),
         **artifice.codex(),
@@ -1565,10 +1573,11 @@ SOUND_FILES = {**ember.SOUND_FILES, **strata.SOUND_FILES, **pacts.SOUND_FILES}
 def sounds():
     """Each event plays its drawn cue (tools/concordance_sounds.py), or the owner's recordings it is given instead
     (SOUND_FILES: tools/concordance_ember.py's and tools/concordance_strata.py's), or, for Stolas's cues, runtime files
-    (tools/concordance_pacts.py's), one picked at random. The Exchange artifacts' events are
-    tools/concordance_ee_artifacts.py's."""
+    (tools/concordance_pacts.py's), one picked at random; a pact cue the generator pitches (tools/concordance_pacts.py
+    SOUND_PITCH) carries its pitch. The Exchange artifacts' events are tools/concordance_ee_artifacts.py's."""
     return {**{event: {"subtitle": f"subtitles.{MOD}.{event}",
-                       "sounds": [{"name": f"{MOD}:{name}", "attenuation_distance": 16}
+                       "sounds": [dict({"name": f"{MOD}:{name}", "attenuation_distance": 16},
+                                       **({"pitch": pacts.SOUND_PITCH[event]} if event in pacts.SOUND_PITCH else {}))
                                   for name in SOUND_FILES.get(event, [f"concordance/{event.split('.', 1)[1]}"])]}
                for event in SOUND_EVENTS}, **ee_artifacts.sounds()}
 
@@ -1643,6 +1652,7 @@ MESSAGES = {
     **rime.MESSAGES,
     **strata.MESSAGES,
     **pacts.MESSAGES,
+    **garden_pacts.MESSAGES,
     **conclave.MESSAGES,
     **progression.MESSAGES,
     **spire.MESSAGES,
@@ -1696,6 +1706,7 @@ TOOLTIPS = {
     **spire.TOOLTIPS,
     **rime.TOOLTIPS,
     **pacts.TOOLTIPS,
+    **garden_pacts.TOOLTIPS,
 }
 
 
@@ -1906,7 +1917,9 @@ def write_all(write, assets, data, lang, condition, self_drop):
     signs.lang_entries(lang)
     diagnostics.lang_entries(lang)
     pacts.lang_entries(lang)
+    garden_pacts.lang_entries(lang)
     roster.lang_entries(lang)
+    magic_ui.lang_entries(lang)
     # Items.
     write(assets / "models" / "item" / "initiate_wand.json",
           {"parent": "minecraft:item/handheld", "textures": {"layer0": rid("item/initiate_wand")}})
@@ -2081,6 +2094,7 @@ def tags(tags):
     rime_kit.tags(tags)
     strata.tags(tags)
     pacts.tags(tags)
+    garden_pacts.tags(tags)
     hexes.tags(tags)
     conclave.tags(tags)
     spire.tags(tags)

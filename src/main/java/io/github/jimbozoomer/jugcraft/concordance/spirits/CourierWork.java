@@ -323,9 +323,18 @@ final class CourierWork {
 		return container(level, pos) == null ? null : ItemStorage.SIDED.find(level, pos, null);
 	}
 
+	/**
+	 * Whether {@code entity} is a plain container (not a furnace-like one, which takes items by side), decided on the block
+	 * entity in hand: the bed index's scan asks it while it walks a chunk's map, where reading the level could change that
+	 * very map (LevelChunk.getBlockEntity removes a removed entity; GC-07).
+	 */
+	static boolean plain(@Nullable BlockEntity entity) {
+		return entity instanceof Container && !(entity instanceof WorldlyContainer);
+	}
+
 	/** A plain container at {@code pos} (not a furnace-like one, which takes items by side), or null. */
 	static @Nullable Container container(ServerLevel level, BlockPos pos) {
 		BlockEntity entity = level.getBlockEntity(pos);
-		return entity instanceof Container container && !(entity instanceof WorldlyContainer) ? container : null;
+		return plain(entity) ? (Container) entity : null;
 	}
 }

@@ -82,8 +82,8 @@ MATRIX = {
         ["ConcordancePresentationClientGameTests", "aPorterShowsOnceWhatItLacks", "ConcordanceEmberGearClientGameTests",
          "ConcordanceWinterClientGameTests"],
         "Seen only in CI's small screenshot previews, the water sets since unit 4's client test passed in CI (run "
-        "38549876709, Chunk B, not merged); frame cost of a large installation not measured; the sets' glint is a "
-        "Jugcraft layer, and vanilla trims are not drawn on them"),
+        "38549876709, Chunk B, merged with #494); frame cost of a large installation not measured; the sets' glint "
+        "is a Jugcraft layer, and vanilla trims are not drawn on them"),
     "player-animation-library": (
         "Original cast and release gestures for the invocations; the circle participants' channelling gesture; the "
         "Vigil's offering gesture, sent by the server when an offering is made; none of them plays over a gun or an "
@@ -100,10 +100,11 @@ MATRIX = {
         ["codexLoadsWithoutErrors", "metResearchSaysWhatComesNext"],
         "The codex has been read only as data; nobody has read it in a client"),
     "smartbrainlib": (
-        "The workers' brains: a nearby-players sensor and look and walk behaviours driven by the walk target each "
-        "worker's own decision sets; bonds, agreements, bodies and loads stay Jugcraft's records",
+        "The workers' brains: a nearby-players sensor and look and walk behaviours driven by the walk and look targets "
+        "each worker's own decision sets (a pact spirit looks at whoever speaks to it, or the bed it works on: the garden "
+        "cohort, GC-02); bonds, agreements, bodies and loads stay Jugcraft's records",
         "required",
-        ["aPorterSaysWhyItStops", "aSpiritKeepsToItsAgreement", "aFamiliarMendsByItsBond"],
+        ["aPorterSaysWhyItStops", "aSpiritKeepsToItsAgreement", "aFamiliarMendsByItsBond", "aSpiritFacesWhoeverSpeaksToIt"],
         "Pathing over long distances and through many loaded workers not profiled"),
     "fusion-connected-textures": (
         "Warding Stones and Verdant Beds join their neighbours, through a built-in resource pack registered only when "
@@ -136,7 +137,7 @@ MATRIX = {
          "theRegaliaRaisesTheFireToItsCeiling", "spellPowerEnchantmentsAreRefusedOnTheSet",
          "spellPowerEnchantmentsAreRefusedOnTheWaterSets"],
         "Concordance damage adds Spell Power's points only, not its critical hits; unit 4's water-set test passed in "
-        "CI (run 38549876709, Chunk B, not merged)"),
+        "CI (run 38549876709, Chunk B, merged with #494)"),
     "trinkets-updated": (
         "Resonant Rings in the ring slot and the Hearthstone in the necklace slot, both given by data; the owner's "
         "Spell Focus and Bracelet slots, ported from their Curios data, for the Ember foci, the Fire Bangle, the water "
@@ -153,7 +154,7 @@ MATRIX = {
          "theWaterBangleBracesARimekeeperEveryThirtySeconds"],
         "Cosmetic slots count as worn for show only; of the worn things only the belt and boot are drawn on the body, "
         "in third person only, and seen so far only in CI's client screenshots; unit 4's foci and bangle tests passed "
-        "in CI (run 38549876709, Chunk B, not merged), but no shot shows them in their slots"),
+        "in CI (run 38549876709, Chunk B, merged with #494), but no shot shows them in their slots"),
     "cloth-config": (
         "The Concordance settings screen: the Focus line, reduced motion, exact values, the simple journal, visual "
         "intensity and whether your worn trinkets are shown",
@@ -164,17 +165,17 @@ MATRIX = {
     "jade": (
         "Readouts from server snapshots: bench study, lantern Radiance, sconce charge, circle phase and faults, pylon "
         "charge, crucible state and Preserve's hold, beds and crops, living devices, observatory, workers, courier posts, "
-        "shrines; since Concordance Chunk C (not merged), a crucible's reason and tank, a circle's needs, spending and "
-        "held offerings, the Crucible Stand, a bed's strain and graft",
+        "shrines; since Concordance Chunk C (merged with #494), a crucible's reason and tank, a circle's needs, "
+        "spending and held offerings, the Crucible Stand, a bed's strain and graft",
         "nothing shown on looking; the same facts come from the journal, the commands and each device's own messages",
         ["benchStudyUnderstandsFirstLight", "preserveHoldsOneBandAndExpires", "jadeIsToldTheTankAndWhyNeverTheMakeup",
          "EncyclopediaClientGameTests", "ConcordanceWorkshopClientGameTests"],
         "Server tests run without Jade in CI's optional-absent job; CI runs no client test without it; the client tests "
-        "are written to photograph its overlay on a crucible, a stand, an anchor and a crop (Concordance Chunk C, not "
-        "merged; they pass in CI, run 38774859294); the one Jade shot viewed, the anchor's in that run, shows no Jade box "
-        "at the log's 480x270 preview size, though its snapshot assertion passed, so the overlay is still not seen in a "
-        "client; Preserve's hold, as Jade reads it, passed its test in CI's mod job (run 38519234934, Chunk B unit 3, not "
-        "merged)"),
+        "are written to photograph its overlay on a crucible, a stand, an anchor and a crop (Concordance Chunk C, "
+        "merged with #494; they pass in CI, run 38774859294); the one Jade shot viewed, the anchor's in that run, shows "
+        "no Jade box at the log's 480x270 preview size, though its snapshot assertion passed, so the overlay is still "
+        "not seen in a client; Preserve's hold, as Jade reads it, passed its test in CI's mod job (run 38519234934, "
+        "Chunk B unit 3, merged with #494)"),
     "jei": (
         "Recipe categories for the Lampwright's Bench, the Circle Anchor and the Resonant Ring; alchemy ingredients' "
         "properties as information (never outcomes); since Concordance Chunk A, an information page each on where the "

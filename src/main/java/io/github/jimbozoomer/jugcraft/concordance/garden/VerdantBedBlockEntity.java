@@ -174,7 +174,8 @@ public class VerdantBedBlockEntity extends BlockEntity {
 	 * The habitat for a plant on this bed: the bed's moisture and nutrients, the server's light at the plant (sky or
 	 * block, never the time of day) and the area's sample, taken again when older than {@value Sampler#FRESH_TICKS}
 	 * ticks if the level's allowance permits. Null only when there has never been a sample and none can be taken this
-	 * tick (the plant waits for a reading).
+	 * tick (the plant waits for a reading). Since the garden cohort (GC-03) its reading is {@link #cachedHabitat}'s once the
+	 * sample is fresh.
 	 */
 	public @Nullable Habitat habitat(ServerLevel level) {
 		BlockPos plant = worldPosition.above();
@@ -186,9 +187,21 @@ public class VerdantBedBlockEntity extends BlockEntity {
 				sampledAt = now;
 			}
 		}
+		return cachedHabitat(level);
+	}
+
+	/**
+	 * Concordance garden cohort, GC-03 (GB11): the habitat a plant on this bed reads from the area's last sample, whatever its
+	 * age, without ever taking a sample, so no reader spends the level's allowance (Garden.budget) and none can starve growth
+	 * of its readings. Null while it holds no sample (none since it was loaded, or one forgotten). The bed's moisture and
+	 * nutrients, the light at the plant and the strain growth would count are read now, as {@link #habitat} reads them; only the
+	 * area is the sample's. It only reads. Server only.
+	 */
+	public @Nullable Habitat cachedHabitat(ServerLevel level) {
 		if (area == null) {
 			return null;
 		}
+		BlockPos plant = worldPosition.above();
 		return Sampler.habitat(moisture(), level.getRawBrightness(plant, 0), nutrients, area, strainNow());
 	}
 
@@ -365,12 +378,28 @@ public class VerdantBedBlockEntity extends BlockEntity {
 			return false;
 		}
 		settle();
-		if (strain == 0 || tendedAt != Long.MIN_VALUE && now >= tendedAt && now - tendedAt < Garden.TEND_TICKS) {
+		if (strain == 0 || tendedLately(now)) {
 			return false;
 		}
 		tendedAt = now;
 		ease();
 		return true;
+	}
+
+	/**
+	 * Concordance garden cohort, GC-03: whether {@link #tend} at game time {@code now} would ease a strain, changing nothing:
+	 * awake, the Concordance on, a strain growth would count (a harvest seen and not yet counted included, which tend counts
+	 * first: {@link #strainNow}), and not within {@value Garden#TEND_TICKS} ticks of its last tending, whoever tended it (one
+	 * window a bed, kept in memory only: a restart forgets it, GB14). A pact's service asks it before it tends; the
+	 * Greenwarden's gesture asks its own questions (VerdantBedBlock.tendBy). It only reads.
+	 */
+	public boolean mayTendAt(long now) {
+		return awake && Garden.enabled() && strainNow() > 0 && !tendedLately(now);
+	}
+
+	/** Whether it was tended less than TEND_TICKS before {@code now} (a clock run back opens the window again, as before). */
+	private boolean tendedLately(long now) {
+		return tendedAt != Long.MIN_VALUE && now >= tendedAt && now - tendedAt < Garden.TEND_TICKS;
 	}
 
 	/** Tests only (no game code calls it): sets the strain (clamped) and forgets a ripening not yet counted. */
