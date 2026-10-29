@@ -73,6 +73,9 @@ public final class PactSpiritRenderers {
 		// the bone his work target draws toward (GC-P66).
 		register(Workers.MARAX, new Row(1.0F, 0.9F, 0.9, 0.1, 0.8, true, "familiar"));
 		// GC-07 unit 4
+		// Foras (GC-07): his built model drawn at its own size; his culling box reaches 0.2 sideways for his long arms and his
+		// reach toward a host, 0.1 below, 0.3 above for his cap's tip; nothing of his glows.
+		register(Workers.FORAS, new Row(1.0F, 0.6F, 0.2, 0.1, 0.3, false));
 		// GC-08 unit 5
 		// GC-09 unit 6
 	}

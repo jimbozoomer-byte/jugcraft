@@ -997,3 +997,8 @@ None: presentation only.
 - Unit 2 (the roster's cards, the chooser's shared pieces and Jade's short lines) is built and ends at its own
   checkpoint: the roster's client shots at every size beside the design's pictures, with each shot's word count from its
   log, and Jade's shots. Units 3 and 4: the composer and Field Guide, then the alchemy and Nouveau screens.
+- Since the garden cohort's GC-07 (Foras, [record](foras-pact.md); not merged; not yet run in CI): a work with several
+  refusals gives each its own chooser reason (its `WORK_GLANCES` row's `card` keyed by the blocker; `work_cards`); a
+  blocker named `pact.<work>.missing.<reason>` draws the lock (`MARK_RULES` and `PactGlance`); and `check_magic_ui` asks a
+  glance of every work's question in general (`pact.<work>.question`, drawn once an answer is kept and no matter is
+  raised; Bathin's reads "Take from Hearts that have a road?") and the lock of every blocker.

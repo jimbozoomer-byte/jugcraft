@@ -868,5 +868,293 @@ def marax_animations(read=None):
 
 
 # GC-07 unit 4
+# Foras (GC-07, GC-S12, GC-P92, GC-P93; docs/features/foras-pact.md): built here, as Bathin is, since no rig of the owner's is
+# a tall elder. foras_model reads the owner's acorn cap (art/owner-library/originals/Edited-2026-10-18-Part2/jims mobs/,
+# through tools/owner_art.py's second root: read(path) with the part's folder name first) and copies its four armorHead
+# cubes onto his head; foras_skin paints only in the colours of the fir log's bark and the Spanish moss (Blocks-folder
+# paintings) around the cap's texels, copied unchanged; foras_animations reads nothing. No glowmask.
+# ------------------------------------------------------------------------------------------------- Foras (GC-07)
+
+FIR = pacts.FIR
+MOSS = pacts.MOSS
+ACORN_GEO = pacts.ACORN_GEO
+ACORN_TEXTURE = pacts.ACORN_TEXTURE
+_FORAS = pacts.SPIRITS["foras"]["body"]
+FORAS_TEXTURE = (128, 64)
+# The owner's acorn cap draws only inside this rectangle of its 128 x 128 sheet (x, y, width, height): copied texel for
+# texel to the same place in Foras's sheet, so its cubes keep the owner's UVs unchanged and none of his own parts uses it.
+ACORN_REGION = (0, 0, 40, 24)
+# The owner's armorHead cubes sit on a biped head whose 8-pixel cube starts at (-4, 24, -4); Foras's head cube starts at
+# FORAS_HEAD, so each cap cube moves by the difference and nothing else of it changes (but the leaf's clear face).
+BIPED_HEAD = (-4, 24, -4)
+FORAS_HEAD = (-4, 21, -7)
+# Box-UV regions and sizes (pixels; a box (w, h, d) at (u, v) uses 2(w + d) x (d + h) from (u, v)); none overlaps another
+# or the cap's rectangle; the two arms, the two feet and the two cuttings each share one region, drawn alike.
+FORAS_UV = {"mantle": (40, 0), "head": (88, 0), "nose": (120, 0), "beard": (40, 14), "satchel": (56, 14), "cutting": (70, 14),
+            "foot": (76, 16), "chest": (0, 24), "skirt": (40, 24), "hem": (78, 24), "arm": (0, 41), "flap": (16, 41)}
+FORAS_SIZES = {"mantle": (14, 4, 10), "head": (8, 8, 8), "nose": (2, 2, 1), "beard": (6, 5, 2), "satchel": (5, 5, 2),
+               "cutting": (2, 3, 1), "foot": (3, 2, 4), "chest": (12, 9, 8), "skirt": (11, 9, 8), "hem": (12, 3, 9),
+               "arm": (4, 15, 4), "flap": (6, 1, 3)}
+# His face (the head's front, 8 x 8, row 0 its top, column 0 his right). The cap's brim covers rows 0 to 2 (the owner's
+# hat sits so on any head); B his moss brows, E an eye (the fir's darkest), S pale bark skin, h a moss sideburn. His nose and
+# beard are cubes of their own. No nose holes (docs/ART_DIRECTION.md).
+FORAS_FACE = ["SSSSSSSS", "SSSSSSSS", "SSSSSSSS", "BBBSSBBB", "SESSSSES", "SSSSSSSS", "hSSSSSSh", "hhSSSShh"]
+
+
+def _foras_box(name, origin):
+    u, v = FORAS_UV[name]
+    return {"origin": [float(c) for c in origin], "size": list(FORAS_SIZES[name]), "uv": [u, v]}
+
+
+def acorn_cap(read):
+    """The owner's acorn cap, as Foras wears it: the four cubes of its armorHead bone (art/owner-library/originals/
+    Edited-2026-10-18-Part2/jims mobs/geo/item/armor/acorn.geo.json), each moved by FORAS_HEAD - BIPED_HEAD and otherwise
+    the owner's (size, box UV). Its fourth cube is a leaf of no thickness drawing a north and a south face on one plane;
+    it is written with per-face UVs (the same rectangles box UV gives it, GeckoLib GeometryQuadUvs.ofBoxUv) so the clear
+    face can be dropped (drop_clear_twins: the south, 0 of 16 texels drawn), as Buer's twins are (GB24)."""
+    owner = json.loads(read(ACORN_GEO))
+    head = next(bone for bone in owner["minecraft:geometry"][0]["bones"] if bone["name"] == "armorHead")
+    shift = [a - b for a, b in zip(FORAS_HEAD, BIPED_HEAD)]
+    cubes = []
+    for cube in head["cubes"]:
+        moved = dict(cube, origin=[round(o + s, 4) for o, s in zip(cube["origin"], shift)])
+        if flat_axis(cube) is not None:
+            (u, v), (w, h, d) = cube["uv"], cube["size"]
+            moved["uv"] = {"north": {"uv": [u + d, v + d], "uv_size": [w, h]},
+                           "south": {"uv": [u + 2 * d + w, v + d], "uv_size": [w, h]}}
+        cubes.append(moved)
+    return cubes
+
+
+def foras_model(read):
+    """Foras's geometry: a tall, broad, stooped elder, 35 pixels (2.19 blocks) tall at scale 1 (16 pixels a block; y = 0
+    the floor beside his perch; he faces north, -z; his left is +x). root > robe (the hem, the skirt and his two feet),
+    satchel (at his left hip, in front of his robe: its flap and two cuttings), body (the chest, a hand ahead of the robe: his stoop) > head
+    (and his nose and moss beard) > cap (the owner's acorn cap), arm_left, arm_right (to his knees). Built here but the cap
+    (copied, moved, its leaf's clear face dropped); no cube turned at rest, none flat but the cap's leaf, and no two faces
+    of different cubes on one plane facing the same way (coplanar is empty)."""
+    width, height = FORAS_TEXTURE
+    sheet = Image.open(io.BytesIO(read(ACORN_TEXTURE))).convert("RGBA")
+    hx, hy, hz = FORAS_HEAD
+    out = {"format_version": "1.12.0", "minecraft:geometry": [{
+        "description": {"identifier": "geometry.foras", "texture_width": width, "texture_height": height,
+                        "visible_bounds_width": 3, "visible_bounds_height": 3.5, "visible_bounds_offset": [0, 1.75, 0]},
+        "bones": [
+            {"name": "root", "pivot": [0, 0, 0]},
+            {"name": "robe", "parent": "root", "pivot": [0, 0, 0], "cubes": [
+                _foras_box("hem", (-6, 1, -4.5)), _foras_box("skirt", (-5.5, 4, -4)),
+                _foras_box("foot", (-4, 0, -6)), _foras_box("foot", (1, 0, -6))]},
+            {"name": "satchel", "parent": "root", "pivot": [3.5, 10, -5], "cubes": [
+                _foras_box("satchel", (1, 5, -6)), _foras_box("flap", (0.5, 9.5, -6.5))]},
+            {"name": "cuttings", "parent": "satchel", "pivot": [3.5, 10, -5], "cubes": [
+                _foras_box("cutting", (1.5, 10, -5.5)), _foras_box("cutting", (3.75, 10.5, -5.25))]},
+            {"name": "body", "parent": "root", "pivot": [0, 13, 0], "cubes": [
+                _foras_box("chest", (-6, 13, -4.5)), _foras_box("mantle", (-7, 19, -5.5))]},
+            {"name": "head", "parent": "body", "pivot": [0, 21, -3], "cubes": [
+                _foras_box("head", (hx, hy, hz)), _foras_box("nose", (-1, 23.5, -8.0)), _foras_box("beard", (-3, 17, -8.75))]},
+            {"name": "cap", "parent": "head", "pivot": [0, hy + 8, hz], "cubes": acorn_cap(read)},
+            {"name": "arm_left", "parent": "body", "pivot": [8, 21, -1], "cubes": [_foras_box("arm", (6.5, 6, -3))]},
+            {"name": "arm_right", "parent": "body", "pivot": [-8, 21, -1], "cubes": [_foras_box("arm", (-10.5, 6, -3))]},
+        ]}]}
+    dropped = drop_clear_twins(out, sheet)
+    if dropped != {("cap", 3): "south"}:
+        raise SystemExit(f"tools/garden_bodies.py: the acorn cap's leaf drops {dropped}, not its clear south face: re-brief")
+    return out
+
+
+def foras_sheet(read):
+    """His 128 x 64 skin: the owner's acorn cap texel for texel in ACORN_REGION, and every other texel opaque or clear,
+    painted only in the colours of two of the owner's paintings (cute and clean: two or three tones a part, light from the
+    top left, regular patterns; docs/ART_DIRECTION.md "Creatures and faces"). The fir log's seven tones, darkest first,
+    F0 to F6: his robe F3 lit F5 and shaded F1, in bark furrows of F1 every third column; his skin and hands F5 lit F6 and
+    shaded F4; his satchel F1 lit F3, its flap F0; his eyes F0. The moss's eight, M0 to M7: his mantle M3 to M5 with a fringe,
+    his beard and brows M4 to M7, a moss band round his hem, the cuttings' leaves M4 and M5 on F1 stems."""
+    F = palette(read, FIR, 7)
+    M = palette(read, MOSS, 8)
+    img = Image.new("RGBA", FORAS_TEXTURE, (0, 0, 0, 0))
+    acorn = Image.open(io.BytesIO(read(ACORN_TEXTURE))).convert("RGBA")
+    x0, y0, w0, h0 = ACORN_REGION
+    img.paste(acorn.crop((x0, y0, x0 + w0, y0 + h0)), (x0, y0))
+
+    def part(name):
+        return box_faces(FORAS_UV[name], FORAS_SIZES[name])
+
+    robe = _bevel(F[3], F[5], F[1])
+    skin = _bevel(F[5], F[6], F[4])
+
+    def furrowed(x, y, w, h):
+        return F[1] if x % 3 == 2 and 0 < y < h - 1 else robe(x, y, w, h)
+
+    for name in ("skirt", "chest"):
+        faces = part(name)
+        for side in SIDES:
+            _fill(img, faces[side], furrowed)
+        _fill(img, faces["up"], lambda x, y, w, h: F[4])
+        _fill(img, faces["down"], lambda x, y, w, h: F[1])
+    faces = part("hem")
+    for side in SIDES:
+        _fill(img, faces[side], lambda x, y, w, h: M[5] if y == 0 else M[3] if y == 1 else M[2] if x % 2 == 0 else M[1])
+    _fill(img, faces["up"], lambda x, y, w, h: M[4])
+    _fill(img, faces["down"], lambda x, y, w, h: M[0])
+    faces = part("foot")
+    for side in SIDES + ("up",):
+        _fill(img, faces[side], _bevel(F[2], F[4], F[0]))
+    _fill(img, faces["down"], lambda x, y, w, h: F[0])
+    faces = part("mantle")
+    _fill(img, faces["up"], lambda x, y, w, h: M[5] if y == 0 or x == 0 else M[6] if x % 3 == 1 and y % 2 == 1 else M[4])
+    _fill(img, faces["down"], lambda x, y, w, h: M[1])
+    for side in SIDES:
+        _fill(img, faces[side], lambda x, y, w, h: M[5] if y == 0 else M[4] if y < h - 1 else M[3] if x % 2 == 0 else M[2])
+    faces = part("head")
+
+    def face(x, y, w, h):
+        key = FORAS_FACE[y][x]
+        if key == "S":
+            return skin(x, y, w, h)
+        return {"B": M[6], "E": F[0], "h": M[5]}[key]
+    _fill(img, faces["front"], face)
+    for side in ("right", "left", "back"):
+        _fill(img, faces[side], lambda x, y, w, h: M[5] if y >= h - 2 else skin(x, y, w, h))
+    _fill(img, faces["up"], lambda x, y, w, h: F[5])
+    _fill(img, faces["down"], lambda x, y, w, h: M[4])
+    faces = part("nose")
+    for side in SIDES + ("up", "down"):
+        _fill(img, faces[side], _bevel(F[5], F[6], F[4]))
+    faces = part("beard")
+    _fill(img, faces["front"], lambda x, y, w, h: (M[5] if x % 2 == 0 else M[4]) if y == h - 1 else M[7] if x % 2 == 0 else M[6])
+    for side in ("right", "left", "back"):
+        _fill(img, faces[side], lambda x, y, w, h: M[5])
+    _fill(img, faces["up"], lambda x, y, w, h: M[6])
+    _fill(img, faces["down"], lambda x, y, w, h: M[4])
+    faces = part("arm")
+
+    def arm(x, y, w, h):
+        if y >= h - 3:
+            return skin(x, y - (h - 3), w, 3)
+        if y == h - 4:
+            return M[4]
+        return robe(x, y, w, h - 4)
+    for side in SIDES:
+        _fill(img, faces[side], arm)
+    _fill(img, faces["up"], lambda x, y, w, h: F[4])
+    _fill(img, faces["down"], lambda x, y, w, h: F[5])
+    faces = part("satchel")
+    for side in SIDES + ("up",):
+        _fill(img, faces[side], _bevel(F[1], F[3], F[0]))
+    _fill(img, faces["down"], lambda x, y, w, h: F[0])
+    faces = part("flap")
+    for side in SIDES + ("up", "down"):
+        _fill(img, faces[side], lambda x, y, w, h: F[0] if y == h - 1 or x == w - 1 else F[2])
+    faces = part("cutting")
+    for side in SIDES:
+        _fill(img, faces[side], lambda x, y, w, h: M[5] if y == 0 else M[4] if y == 1 else F[1])
+    _fill(img, faces["up"], lambda x, y, w, h: M[5])
+    _fill(img, faces["down"], lambda x, y, w, h: F[1])
+    return img
+
+
+def foras_skin(read):
+    return foras_sheet(read)
+
+
+def foras_clips():
+    """His own clips, keyed on foras_model's bones (degrees, Bedrock's sense: +x pitches a bone's top forward; a left arm,
+    +x, swings outward with -z, a right one with +z). His screen gestures start and end on his listening pose (ATTEND: his
+    stoop deepened toward his speaker, his head raised to them, his right hand on his satchel's strap); his work starts and
+    ends at rest, the frame his idle begins on. Detail (a): his cap tips forward on its own pivot at his greeting (arrive)
+    and at each graft (work), and only then."""
+    attend = {bone: [float(v) for v in angles] for bone, angles in _FORAS["attend"].items()}
+    lengths = _FORAS["loop_lengths"]
+    times = {name: length for name, (length, _) in _FORAS["gesture_times"].items()}
+    loops, gestures = _FORAS["loops"], _FORAS["gestures"]
+    zero, whole = [0.0, 0.0, 0.0], [1.0, 1.0, 1.0]
+    stoop = [6.0, 0.0, 0.0]
+    tipped = [float(v) for v in _FORAS["cap_tip"]]
+
+    def still(angles):
+        return {"0.0": [round(float(v), 3) + 0.0 for v in angles]}
+
+    def loop(length, bones):
+        return {"loop": True, "animation_length": length, "bones": bones}
+
+    def once(length, bones, hold=False):
+        return {"loop": "hold_on_last_frame" if hold else False, "animation_length": length, "bones": bones}
+
+    def from_attend(bone, *frames, length):
+        return _keys((0, attend[bone]), *frames, (length, attend[bone]), easing=EASE)
+
+    return {
+        # Idle: stooped, breathing slowly, his head turning a little, his long arms swinging a hair.
+        loops["idle"]: loop(lengths["idle"], {
+            "body": {"rotation": _wave(lengths["idle"], 1, stoop, (1.5, 0, 0))},
+            "head": {"rotation": _wave(lengths["idle"], 1, (-4, 0, 0), (0, 8, 0), phase=0.25)},
+            "arm_left": {"rotation": _wave(lengths["idle"], 1, zero, (3, 0, 0))},
+            "arm_right": {"rotation": _wave(lengths["idle"], 1, zero, (-3, 0, 0))}}),
+        # Listening: his stoop deepened toward his speaker, his head raised to them, one hand on his satchel's strap.
+        loops["listen"]: loop(lengths["listen"], {
+            "body": {"rotation": _wave(lengths["listen"], 1, attend["body"], (1, 0, 0))},
+            "head": {"rotation": _wave(lengths["listen"], 1, attend["head"], (2, 0, 0), phase=0.25)},
+            "arm_right": {"rotation": still(attend["arm_right"])}}),
+        # Waiting (off his service, or switched off): arms folded behind him, head bowed in thought, swaying.
+        loops["waiting"]: loop(lengths["waiting"], {
+            "body": {"rotation": _wave(lengths["waiting"], 1, stoop, (0, 0, 1.5))},
+            "head": {"rotation": still((14, 0, 0))},
+            "arm_left": {"rotation": still((28, 0, 10))},
+            "arm_right": {"rotation": still((28, 0, -10))}}),
+        # Suspended: bent low, arms hanging, his satchel slack.
+        loops["suspended"]: loop(lengths["suspended"], {
+            "body": {"rotation": _wave(lengths["suspended"], 1, (20, 0, 0), (1, 0, 0))},
+            "head": {"rotation": still((18, 0, 0))},
+            "satchel": {"rotation": still((0, 0, 8))}}),
+        # Astir (an offering due): tapping his satchel, looking about.
+        loops["astir"]: loop(lengths["astir"], {
+            "body": {"rotation": still(stoop)},
+            "head": {"rotation": _wave(lengths["astir"], 2, zero, (0, 20, 0))},
+            "arm_left": {"rotation": _wave(lengths["astir"], 3, (-20, 0, -8), (8, 0, 0))}}),
+        # Arrive: he grows out of the air beside the perch, straightens, and tips his cap to whoever he came for (the
+        # telling pose, 0.6 to 1.4 s), then settles listening.
+        gestures["arrive"]: once(times["arrive"], {
+            "root": {"scale": _keys((0, (0.3, 0.3, 0.3)), (0.5, whole), (times["arrive"], whole), easing=EASE)},
+            "body": {"rotation": _keys((0, (20, 0, 0)), (0.5, (14, 0, 0)), (0.6, (14, 0, 0)), (1.4, (14, 0, 0)), (2.0, attend["body"]), easing=EASE)},
+            "cap": {"rotation": _keys((0, zero), (0.5, zero), (0.6, tipped), (1.4, tipped), (1.7, zero), (2.0, zero), easing=EASE)},
+            "arm_right": {"rotation": _keys((0, zero), (0.5, (-110, 0, -20)), (1.4, (-110, 0, -20)), (2.0, attend["arm_right"]), easing=EASE)}}),
+        # Inspect: he leans in over what is offered, a hand at his beard (0.4 to 1.2 s).
+        gestures["inspect"]: once(times["inspect"], {
+            "body": {"rotation": from_attend("body", (0.4, (24, 0, 0)), (1.2, (24, 0, 0)), length=times["inspect"])},
+            "head": {"rotation": from_attend("head", (0.4, (10, 0, 0)), (0.7, (10, 12, 0)), (0.95, (10, -12, 0)), (1.2, (10, 0, 0)),
+                                             length=times["inspect"])},
+            "arm_right": {"rotation": from_attend("arm_right", (0.4, (-120, 0, 20)), (1.2, (-120, 0, 20)), length=times["inspect"])}}),
+        # Assent: a slow nod, one open hand raised (0.4 to 1.0 s).
+        gestures["assent"]: once(times["assent"], {
+            "head": {"rotation": from_attend("head", (0.4, (16, 0, 0)), (1.0, (16, 0, 0)), length=times["assent"])},
+            "arm_left": {"rotation": _keys((0, zero), (0.4, (-60, 0, -20)), (1.0, (-60, 0, -20)), (times["assent"], zero), easing=EASE)},
+            "arm_right": {"rotation": still(attend["arm_right"])}}),
+        # Refuse: arms folded across his chest, his head shaking once (0.4 to 1.3 s).
+        gestures["refuse"]: once(times["refuse"], {
+            "arm_left": {"rotation": _keys((0, zero), (0.4, (-70, 0, 45)), (1.3, (-70, 0, 45)), (times["refuse"], zero), easing=EASE)},
+            "arm_right": {"rotation": from_attend("arm_right", (0.4, (-70, 0, -45)), (1.3, (-70, 0, -45)), length=times["refuse"])},
+            "head": {"rotation": from_attend("head", (0.4, (4, -18, 0)), (0.7, (4, 18, 0)), (1.0, (4, -18, 0)), (1.3, (4, 0, 0)),
+                                             length=times["refuse"])}}),
+        # Depart: he bows (0.4 to 1.2 s), folds his satchel shut, and fades to nothing; the last frame holds until the server
+        # removes him.
+        gestures["depart"]: once(times["depart"], {
+            "body": {"rotation": _keys((0, attend["body"]), (0.4, (32, 0, 0)), (1.2, (32, 0, 0)), (1.6, stoop), easing=EASE)},
+            "satchel": {"scale": _keys((0, whole), (1.2, whole), (1.6, (1.0, 0.4, 1.0)), easing=EASE)},
+            "root": {"scale": _keys((0, whole), (1.8, whole), (2.5, zero), (times["depart"], zero), easing=EASE)}}, hold=True),
+        # Work (each graft): his hand goes to his satchel for a cutting, then reaches toward the host he grafts as his cap tips
+        # (the telling pose, 0.8 to 1.5 s), and comes back.
+        gestures["work"]: once(times["work"], {
+            "arm_left": {"rotation": _keys((0, zero), (0.4, (-30, 0, -25)), (0.8, (-85, 0, 0)), (1.5, (-85, 0, 0)), (2.0, zero),
+                                           (times["work"], zero), easing=EASE)},
+            "body": {"rotation": _keys((0, stoop), (0.8, (18, 0, 0)), (1.5, (18, 0, 0)), (2.0, stoop), (times["work"], stoop), easing=EASE)},
+            "cap": {"rotation": _keys((0, zero), (0.8, tipped), (1.5, tipped), (1.9, zero), (times["work"], zero), easing=EASE)},
+            "cuttings": {"scale": _keys((0, whole), (0.4, whole), (0.6, (1.0, 0.6, 1.0)), (2.0, (1.0, 0.6, 1.0)), (times["work"], whole),
+                                        easing=EASE)}}),
+    }
+
+
+def foras_animations(read=None):
+    """The runtime animation file: his eleven clips, sorted by name."""
+    return {"format_version": "1.8.0", "animations": dict(sorted(foras_clips().items()))}
 # GC-08 unit 5
 # GC-09 unit 6

@@ -68,6 +68,11 @@ public final class MagicGlance {
 			// GC-06 unit 3
 			Map.entry(JADE + "pact.note.habitat_reading.proud", MagicArt.Mark.HOURGLASS),
 			// GC-07 unit 4
+			Map.entry(JADE + "pact.matter.graft_keeping.no_gain", MagicArt.Mark.ASK),
+			Map.entry(JADE + "pact.note.graft_keeping.no_gain", MagicArt.Mark.ASK),
+			Map.entry(JADE + "pact.note.graft_keeping.no_reading", MagicArt.Mark.HOURGLASS),
+			Map.entry(JADE + "pact.note.graft_keeping.no_donor", MagicArt.Mark.HOURGLASS),
+			Map.entry(JADE + "pact.note.graft_keeping.no_host", MagicArt.Mark.MOON),
 			// GC-08 unit 5
 			// GC-09 unit 6
 			Map.entry("message.jugcraft.concordance.disabled", MagicArt.Mark.LOCK),

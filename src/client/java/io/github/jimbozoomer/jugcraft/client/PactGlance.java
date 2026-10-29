@@ -75,6 +75,7 @@ final class PactGlance {
 	private static final List<Rule> MARKS = List.of(
 			new Rule("prefix", "pact.missing.", MagicArt.Mark.LOCK),
 			new Rule("suffix", ".missing", MagicArt.Mark.LOCK),
+			new Rule("contains", ".missing.", MagicArt.Mark.LOCK),
 			new Rule("exact", "pact.seat.offer", MagicArt.Mark.LOCK),
 			new Rule("exact", "pact.unavailable", MagicArt.Mark.LOCK),
 			new Rule("exact", "pact.row.state.active", MagicArt.Mark.TICK),
@@ -86,7 +87,8 @@ final class PactGlance {
 			new Rule("contains", ".row.proud", MagicArt.Mark.HOURGLASS),
 			new Rule("suffix", "obligation_kept", MagicArt.Mark.TICK),
 			new Rule("suffix", "obligation", MagicArt.Mark.HOURGLASS),
-			new Rule("contains", ".matter.", MagicArt.Mark.ASK));
+			new Rule("contains", ".matter.", MagicArt.Mark.ASK),
+			new Rule("exact", "pact.graft_keeping.row.no_donor", MagicArt.Mark.HOURGLASS));
 
 	private static final List<IconRule> ICONS = List.of(
 			new IconRule("contains", ".row.overworked", "work"),
@@ -94,6 +96,8 @@ final class PactGlance {
 			new IconRule("exact", "pact.verdance_carrying.row.poured", "item:jugcraft:ley_pylon"),
 			new IconRule("exact", "pact.verdance_carrying.row.moved", "item:jugcraft:gleaner"),
 			new IconRule("exact", "pact.verdance_carrying.row.leaving", "item:jugcraft:verdant_heart"),
+			new IconRule("exact", "pact.graft_keeping.row.no_donor", "item:jugcraft:dewmoss"),
+			new IconRule("exact", "pact.graft_keeping.row.last", "item:jugcraft:sunpetal"),
 			new IconRule("suffix", "obligation", "glyph:pin"),
 			new IconRule("exact", "pact.ended_here", "glyph:pin"),
 			new IconRule("exact", "pact.departed", "glyph:spiral"));
@@ -109,6 +113,7 @@ final class PactGlance {
 			// GC-06 unit 3
 			Map.entry("habitat_reading", "jugcraft:habitat_gauge"),
 			// GC-07 unit 4
+			Map.entry("graft_keeping", "jugcraft:dewmoss"),
 			// GC-08 unit 5
 			// GC-09 unit 6
 			Map.entry("star_reckoning", "jugcraft:astrolabe"));

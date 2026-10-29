@@ -107,6 +107,12 @@ WEIGHTS = {
                                              # waits, about 260 s more (an estimate, not a measurement).
                                              + 260
                                              # GC-07 unit 4
+                                             # GC-07: Foras at the same perch: the chooser twice, his conversation by
+                                             # keyboard at three sizes, a refused and a sealed acceptance, his matter
+                                             # asked and answered at three sizes, one graft frozen with his cap tipped,
+                                             # Jade, ten poses, four bearings and the ending: 32 shots and their waits,
+                                             # about 220 s more (an estimate, not a measurement).
+                                             + 220
                                              # GC-08 unit 5
                                              # GC-09 unit 6
                                              ),

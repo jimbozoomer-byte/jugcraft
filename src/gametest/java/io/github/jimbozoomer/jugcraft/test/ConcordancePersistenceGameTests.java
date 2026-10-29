@@ -41,8 +41,10 @@ import io.github.jimbozoomer.jugcraft.concordance.spire.SpireRecord;
 import io.github.jimbozoomer.jugcraft.concordance.spirits.AgreementHolder;
 import io.github.jimbozoomer.jugcraft.concordance.spirits.BathinEntity;
 import io.github.jimbozoomer.jugcraft.concordance.spirits.BoundWills;
+import io.github.jimbozoomer.jugcraft.concordance.spirits.ForasEntity;
 import io.github.jimbozoomer.jugcraft.concordance.spirits.GardenReach;
 import io.github.jimbozoomer.jugcraft.concordance.spirits.GatheringShadeEntity;
+import io.github.jimbozoomer.jugcraft.concordance.spirits.GraftKeeping;
 import io.github.jimbozoomer.jugcraft.concordance.spirits.PactAccords;
 import io.github.jimbozoomer.jugcraft.concordance.spirits.PactHistory;
 import io.github.jimbozoomer.jugcraft.concordance.spirits.PactKeeping;
@@ -107,6 +109,7 @@ import net.minecraft.world.level.material.Fluids;
 import net.minecraft.world.level.storage.TagValueInput;
 import net.minecraft.world.level.storage.TagValueOutput;
 import net.minecraft.world.phys.AABB;
+import net.minecraft.world.phys.Vec3;
 import org.jspecify.annotations.Nullable;
 
 /**
@@ -1085,6 +1088,46 @@ public class ConcordancePersistenceGameTests {
 
 	// GC-06 unit 3
 	// GC-07 unit 4
+	/**
+	 * Concordance garden cohort, GC-07 (GC-P87): answered "graft every host", Foras's perch and Foras saved and loaded again
+	 * (unit 2's pattern): the perch keeps the answer; his save holds his perch and record but no side and nothing he
+	 * remembers; his first think after the reload finds his store again by its touching the perch and grafts, and he stands
+	 * where he stood.
+	 */
+	@GameTest(maxTicks = 20)
+	public void aForasReloadedKeepsHisStoreAndAnswer(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		ServerPlayer holder = ConcordanceWorkerGameTests.gardenHolder(helper);
+		long now = ConcordanceWorkerGameTests.dayStart(level, 1);
+		BlockPos at = new BlockPos(3, 1, 3);
+		ConcordanceWorkerGameTests.floor(helper);
+		Container store = ConcordanceWorkerGameTests.forasStore(helper, at.east(), 2);
+		VerdantBedBlockEntity bed = ConcordanceWorkerGameTests.forasHost(helper, new BlockPos(1, 1, 1), holder.getUUID());
+		PactPerchBlockEntity perch = ConcordanceWorkerGameTests.forasPact(helper, holder, at, now);
+		ForasEntity foras = ConcordanceWorkerGameTests.foras(helper, perch);
+		ConcordanceWorkerGameTests.forasAnswer(helper, holder, perch, GraftKeeping.ALWAYS, now);
+		Vec3 stood = foras.position();
+		UUID id = foras.getUUID();
+		TagValueOutput out = TagValueOutput.createWithContext(ProblemReporter.DISCARDING, level.registryAccess());
+		foras.saveWithoutId(out);
+		CompoundTag saved = out.buildResult();
+		helper.assertTrue(saved.contains("perch") && saved.contains("record")
+				&& List.of("side", "station", "memory", "reach", "useless", "unread", "raised", "idle", "last").stream().noneMatch(saved::contains),
+				"His save holds his perch and record, no side and nothing he remembers: " + saved.keySet());
+		foras.remove(Entity.RemovalReason.UNLOADED_TO_CHUNK);
+		perch.loadWithComponents(TagValueInput.create(ProblemReporter.DISCARDING, level.registryAccess(), perch.saveWithoutMetadata(level.registryAccess())));
+		helper.assertValueEqual(perch.accord(), GraftKeeping.ALWAYS, "The perch, reloaded, keeps the answer");
+		ForasEntity back = Workers.FORAS.create(level, EntitySpawnReason.LOAD);
+		back.load(TagValueInput.create(ProblemReporter.DISCARDING, level.registryAccess(), saved));
+		helper.assertTrue(id.equals(back.getUUID()) && level.addFreshEntity(back) && perch.presence(level) == back,
+				"Read back from his save: the same Foras, his perch's presence");
+		helper.assertValueEqual(back.think(level, 6000L, now + 1), Status.WORKING, "His first think after the reload finds his store again and grafts");
+		helper.assertTrue(ConcordanceWorkerGameTests.FORAS_GRAFT.equals(bed.graft()) && store.countItem(Garden.DEWMOSS) == 1
+				&& back.position().distanceTo(stood) < 1.0E-3,
+				"Dewlit, one Dewmoss from the store touching the perch; he stands where he stood: " + back.position() + " for " + stood);
+		helper.succeed();
+	}
+
 	// GC-08 unit 5
 	// GC-09 unit 6
 }

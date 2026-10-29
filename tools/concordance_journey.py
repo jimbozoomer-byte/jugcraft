@@ -427,6 +427,29 @@ GARDEN = {
          "tests": ["everySpiritsUpkeepWarnsGivesGraceSuspendsAndResumes", "endingAnySpiritsPactReturnsTheEscrowOnce",
                    "maraxAnswersEachActionWithHisGesture"]},
         # GC-07 unit 4
+        # GC-07: Foras, from his perch to his departure (Dossier 4). No whole-path test of his own (CT GC-07); unit 7's
+        # theGardenPactsFromCodexToDeparture walks these steps.
+        {"research": [], "things": ["dewmoss"],
+         "text": "Set a chest touching your Pact Perch and grow a Sunpetal on an awake Verdant Bed of yours within 8 blocks; "
+                 "use the perch and choose Foras: he stands beside it, tips his acorn cap and names every term before "
+                 "anything is spent (without a store he does not come: \"Where shall I keep the cuttings?\"); accept, and "
+                 "his compact (4 Dewmoss, a honeycomb) is spent once",
+         "reaches": [f"pact:{rid('foras')}"],
+         "tests": ["forasRefusesWithoutAStore", "everySpiritSealsOnceAndSpendsOnce", "forasStandsBesideThePerchFacingHisInviter"]},
+        {"research": [], "things": [],
+         "text": "Leave Dewmoss in the chest: at any hour, while you are near, Foras grafts Dewlit onto your Sunpetals that "
+                 "would gain by it, one Dewmoss each, and counts his grafts aloud; hosts it would not help he names, and "
+                 "waits for your answer at the perch. Graft a Sunpetal by hand in his area: his first obligation",
+         "reaches": [f"practice:{rid('garden_pact_service')}"],
+         "tests": ["forasSpendsOneDonorAGraftAndNeverTwo", "aPrudentForasSkipsAUselessGraft", "aPrudentForasGraftsWhereItHelps",
+                   "forassFirstObligationIsAGraftByHand"]},
+        {"research": [], "things": [],
+         "text": "Keep the pact with a honeycomb a week (a missed week is warned and carried through a day's grace, then the "
+                 "service is suspended with nothing taken; an offering resumes it). End it at the perch: what was paid ahead "
+                 "comes back once, and he bows, folds his satchel and fades",
+         "reaches": [],
+         "tests": ["everySpiritsUpkeepWarnsGivesGraceSuspendsAndResumes", "endingAnySpiritsPactReturnsTheEscrowOnce",
+                   "forasAnswersEachActionWithHisGesture"]},
         # GC-08 unit 5
         # GC-09 unit 6
     ],

@@ -38,6 +38,8 @@ public final class PactObligations {
 		/** GC-06 (Marax): a Verdant Bed itself read with an empty hand (its report; where a crop covers its top, its side). */
 		READ("read"),
 		// GC-07 unit 4
+		/** GC-07 (Foras): a crop grafted by hand with its donor (OrganismCropBlock.graftBed, on success). */
+		GRAFT("graft"),
 		// GC-08 unit 5
 		// GC-09 unit 6
 		;

@@ -19549,11 +19549,15 @@ def check_ecology(co, root, lang, registered, research):
     # The unit review: another crop set on a bed, or a graft, forgets the last plant's verdict at once, so Jade never shows
     # one plant's reasons (or the ungrafted niche's) on another; a step or a harvest of the same crop forgets nothing.
     crop_block = java("OrganismCropBlock.java", garden)
+    # GC-07 (GC-P87): the graft's body is Grafting.apply's, which the gesture (and Foras's keeping) calls.
+    grafting = java("Grafting.java", garden)
+    applied = _java_body(grafting, "public static void apply(ServerLevel level, BlockPos cropPos, VerdantBedBlockEntity bed, Graft graft)")
     placed = _java_body(crop_block, "protected void onPlace(")
     if not re.search(r"if \(!oldState\.is\(this\) && level\.getBlockEntity\(pos\.below\(\)\) instanceof VerdantBedBlockEntity bed\) \{\s*"
                      r"bed\.forgetVerdict\(\);", placed) \
-            or not re.search(r"bed\.setGraft\(graft\.id\(\)\);\s*(//[^\n]*\s*)?bed\.forgetVerdict\(\);", _java_body(crop_block, "private InteractionResult graftBed(")):
-        err("OrganismCropBlock: another crop set on a bed, or a graft, forgets the last plant's verdict at once (C-07, C-P55)")
+            or not re.search(r"bed\.setGraft\(graft\.id\(\)\);\s*(//[^\n]*\s*)?bed\.forgetVerdict\(\);", applied) \
+            or "Grafting.apply(level, pos, bed, graft);" not in _java_body(crop_block, "private InteractionResult graftBed("):
+        err("OrganismCropBlock: another crop set on a bed, or a graft (Grafting.apply), forgets the last plant's verdict at once (C-07, C-P55)")
     pour = _java_body(bed_block, "public static boolean pour(ServerLevel level, BlockPos pos, ServerPlayer player)")
     if not 0 <= pour.find('RateGate.allow(player, "garden", 4)') < pour.find("Authority.mayChange(level, player, pos)") < pour.find("level.setBlock("):
         err("VerdantBedBlock.pour: a canteen's sip wets a bed only for someone who may change it, rate-gated (C-07, C-P56)")
@@ -19597,7 +19601,9 @@ def check_graft(co, root, lang):
     Verdant Heart alone reading its own. The gesture asks research, RateGate and Authority at crop and bed, and a refusal
     consumes the use. Another organism's growth clears it and reading never does. The bed saves it only when it has one and
     tells clients it with its host, never the keeper. Jade and the Inspect page name it on its host's crop only. Every word
-    has its lang."""
+    has its lang. GC-07 (GC-P87, GC-P97): the graft itself is Grafting.apply's (the graft, the verdict forgotten, the
+    particles, nothing else), called only by the gesture, after its checks and before its donor is spent, and by Foras's
+    keeping; the one-graft rule is Grafting.holds."""
     ec = co.ecology
     garden = root / "garden"
 
@@ -19667,20 +19673,36 @@ def check_graft(co, root, lang):
         if needle not in use:
             err(f"OrganismCropBlock.useItemOn: a Greenwarden's donor grafts; anything else goes on as before ({needle}) (C-09)")
     act = _java_body(crop, "private InteractionResult graftBed(")
+    # GC-07 (GC-P87): the graft's body moved into Grafting.apply; the held-graft rule into Grafting.holds.
+    grafting = java(garden / "Grafting.java")
+    applied = _java_body(grafting, "public static void apply(ServerLevel level, BlockPos cropPos, VerdantBedBlockEntity bed, Graft graft)")
     for needle in ('RateGate.allow(player, "garden", 4)', "Authority.mayChange(level, player, pos)",
-                   "Authority.mayChange(level, player, pos.below())", "!bed.graft().isEmpty() && Garden.catalog().graft(bed.graft()) != null",
+                   "Authority.mayChange(level, player, pos.below())", "if (Grafting.holds(bed)) {",
                    "donor.consume(1, player)"):
         if needle not in act:
             err(f"OrganismCropBlock.graftBed: rate, Authority at crop and bed, one graft the rules know a bed (one they no longer "
                 f"know is replaced), one donor spent ({needle}) (C-09)")
+    if "return !bed.graft().isEmpty() && Garden.catalog().graft(bed.graft()) != null;" not in _java_body(grafting, "public static boolean holds(VerdantBedBlockEntity bed)"):
+        err("Grafting.holds: one graft the rules know a bed (one they no longer know is replaced) (C-09)")
+    order = [act.find(n) for n in ('RateGate.allow(player, "garden", 4)', "Authority.mayChange(level, player, pos.below())",
+                                   "Grafting.holds(bed)", "Grafting.apply(level, pos, bed, graft);", "donor.consume(1, player)")]
+    if -1 in order or order != sorted(order):
+        err("OrganismCropBlock.graftBed: rate, Authority, the held graft, then the graft and the one donor spent (C-09, GC-07)")
+    if re.search(r"consume\(|Authority|RateGate|getInventory\(|tell\(", applied) or applied.count(";") != 3:
+        err("Grafting.apply: sets the graft, forgets the verdict, shows the particles, and nothing else (GC-P87)")
     if "InteractionResult.FAIL" in act:
         err("OrganismCropBlock.graftBed: a refused graft consumes the use (CONSUME), so the donor's own use never plants it (C-09)")
     # Clearing, and only growth clears.
     if "bed.clearGraftUnlessFor(organismId());" not in grow or grow.find("bed.clearGraftUnlessFor(") > grow.find("bed.awake()"):
         err("OrganismCropBlock.grow: another organism's growth clears the bed's graft, before the dormant check (C-09)")
     for path in sorted(root.rglob("*.java")):
-        if re.search(r"\.(setGraft|clearGraftUnlessFor)\(", java(path)) and path.name != "OrganismCropBlock.java":
-            err(f"concordance/{path.relative_to(root).as_posix()}: only the gesture grafts and only growth clears (C-09)")
+        source, relative = java(path), path.relative_to(root).as_posix()
+        if re.search(r"\.setGraft\(", source) and relative != "garden/Grafting.java":
+            err(f"concordance/{relative}: only Grafting.apply grafts (the gesture's and Foras's one graft; C-09, GC-07)")
+        if re.search(r"\.clearGraftUnlessFor\(", source) and relative != "garden/OrganismCropBlock.java":
+            err(f"concordance/{relative}: only growth clears a graft (C-09)")
+        if "Grafting.apply(" in source and relative not in ("garden/OrganismCropBlock.java", "spirits/GraftKeeping.java", "garden/Grafting.java"):
+            err(f"concordance/{relative}: a graft is applied only by the gesture and by Foras's keeping (GC-07)")
     if re.search(r"(setGraft|clearGraftUnlessFor)\(", report):
         err("OrganismCropBlock.report: a report reads and clears nothing (C-09)")
     # Saved and sent.
@@ -19738,6 +19760,7 @@ GC05_CARRYING_TESTS = {
 GC05_ACCORDS = {"verdance_carrying": ["yield", "claim"],
                 # GC-06 unit 3
                 # GC-07 unit 4
+                "graft_keeping": ["prudent", "always"],
                 # GC-08 unit 5
                 # GC-09 unit 6
                 }
@@ -21155,6 +21178,27 @@ def check_pacts(co, root, lang, registered, research):
         if not row or (row.group(2) or None) != reach:
             err(f"client/PactSpiritRenderers: {name}'s row reaches its {reach or 'no'} bone as SPIRITS[{name!r}] says (GC-P66)")
     # GC-07 unit 4
+    # --- GC-07: Foras (Dossier 4). His station is held by unit 3's GC-06 loop above (GC-P67). ---
+    foras = java("spirits/ForasEntity.java")
+    if "case PactRequestPayload.RESOLVE -> done ? Gesture.ASSENT : null;" not in _java_body(foras, "public static @Nullable Gesture reaction(") \
+            or "case PactRequestPayload.ACCEPT -> done ? Gesture.ASSENT : Gesture.REFUSE;" not in _java_body(foras, "public static @Nullable Gesture reaction("):
+        err("spirits/ForasEntity.java: he assents to a seal and to his matter answered, and objects to a refusal (every gesture paired with words)")
+    if "sendParticles(" in foras or "void gestured(" in foras:
+        err("spirits/ForasEntity.java: no particle and no gesture hook of his own; his details are his clips and his count (GC-P93)")
+    if "Foras" not in pa.PERCH_TOOLTIP or "touching the perch" not in pa.PERCH_TOOLTIP:
+        err("tools/concordance_pacts.py PERCH_TOOLTIP: names what Foras wants at the perch")
+    pages = [page[1] for page in co.garden_pacts.PAGES] if hasattr(co, "garden_pacts") else []
+    want = ["Foras", "His Service", "The Logician's Objection", "His Price"]
+    if not any(pages[i:i + len(want)] == want for i in range(len(pages))):
+        err("tools/concordance_garden_pacts.py PAGES: Foras's codex pages, all four in order (Dossier 4 item 2)")
+    offer = pa.SPIRITS["foras"]["pact"]
+    if offer["upkeep"]["count"] != 1 or offer["service"]["quota"] != 8 or offer["service"]["radius"] != 8 or offer["beneficiaries"] != "party":
+        err("SPIRITS['foras']: radius 8, 8 grafts a day, a honeycomb a week, his party (GC-P81)")
+    for cls, names in GC07_FORAS_TESTS.items():
+        source = (tests / f"{cls}.java").read_text(encoding="utf-8") if (tests / f"{cls}.java").is_file() else ""
+        for name in names:
+            if not re.search(rf"public void {name}\(GameTestHelper \w+\)", source):
+                err(f"{cls}: missing the garden cohort's GC-07 game test {name}")
     # GC-08 unit 5
     # GC-09 unit 6
 
@@ -21716,6 +21760,114 @@ def check_garden_pacts(co, root, lang, registered, research):
             if not re.search(rf"public void {name}\(GameTestHelper \w+\)", source):
                 err(f"{cls}: missing the garden cohort's GC-06 game test {name}")
     # GC-07 unit 4
+    # --- GC-07 (GC-P82, GC-P83): the bed index's stores, decided on the entity in hand ---
+    courier_java = text(spirits / "CourierWork.java")
+    refresh = _java_body(reach_java, "private void refresh(ServerLevel level, long now)")
+    for needle in ("keptStores.size() > MAX_STORES", "touching(pos) && CourierWork.plain(entity)", "containers = sorted(keptStores, order);"):
+        if needle not in refresh:
+            err(f"GardenReach.refresh: {needle} (GC-07: the plain containers touching the perch, in the one pass, at most {gp.REACH['MAX_STORES']})")
+    if "getBlockEntity(" in refresh or "CourierWork.container(" in refresh or "CourierWork.store(" in refresh:
+        err("GardenReach.refresh: a store is decided on the entity in hand; the level is never read while a chunk's map is walked (GC-P83, F4)")
+    if "level.isLoaded(pos) && CourierWork.container(level, pos) != null" not in _java_body(reach_java, "public List<BlockPos> stores(ServerLevel level, long now)"):
+        err("GardenReach.stores: read back in loaded chunks only, still a plain container (GC-07)")
+    touching = _java_body(reach_java, "private boolean touching(BlockPos pos)")
+    if "!pos.equals(centre)" not in touching or touching.count("<= 1") != 3:
+        err("GardenReach.touching: the 26 cells round the perch, never the perch (GC-P83)")
+    if "return entity instanceof Container && !(entity instanceof WorldlyContainer);" not in _java_body(courier_java, "static boolean plain(") \
+            or "return plain(entity) ? (Container) entity : null;" not in _java_body(courier_java, "static @Nullable Container container("):
+        err("CourierWork: one plain-container rule (plain); container reads through it (GC-P83)")
+    if "NO_DEVICES, true)" not in _java_body(reach_java, "public static GardenReach withStores(BoundWill record)") \
+            or "GardenPacts.benefits(record, bed.keeper())" not in _java_body(reach_java, "public static GardenReach withStores(BoundWill record)"):
+        err("GardenReach.withStores: the beds the pact benefits and the stores touching the perch, no devices (GC-07)")
+    for cls, names in GC07_GRAFT_TESTS.items():
+        source = (tests / f"{cls}.java").read_text(encoding="utf-8") if (tests / f"{cls}.java").is_file() else ""
+        for name in names:
+            if not re.search(rf"public void {name}\(GameTestHelper \w+\)", source):
+                err(f"{cls}: missing the garden cohort's GC-07 game test {name}")
+    # --- GC-07: Foras's graft keeping (Dossier 4 item 3; GC-P84 to GC-P88) ---
+    keeping = strip(text(spirits / "GraftKeeping.java"))
+    step = _java_body(keeping, "static Status keep(")
+    order = [step.find(n) for n in ("Pacts.inHours(service, time)", "Pacts.done(record.pact(), now) >= service.quota()",
+                                    "reach.beds(level, now)", "memory.raise()", "reach.stores(level, now)",
+                                    "asking.both(host.crop(), host.bed().keeper(), host.bed().getBlockPos(), host.bed().keeper())",
+                                    "asking.ask(at, record.holder())", "StorageUtil.findStoredResource(storage,",
+                                    "spend(storage, donor)", "Grafting.apply(level, host.crop(), host.bed(), host.graft());", "return grafted(")]
+    if -1 in order or order != sorted(order):
+        err("GraftKeeping.keep: hours, quota, the hosts and the matter, then each host asked at crop and bed, each store asked as "
+            "the holder's, the donor found, spent in its transaction, then grafted (GC-P85; Dossier 4 item 3)")
+    if "new GardenAsking(level, record, time, now, MAX_ASKED, memory::skipped, memory::skip)" not in keeping:
+        err("GraftKeeping.keep: its questions are GardenAsking's, at most MAX_ASKED a think, a place refused for itself skipped "
+            "until his index is read again (GC-P85; as Bathin's)")
+    # The unit review: a store read without the donor is not asked or read again until the index is; a store is asked before
+    # it is read (reading a loot chest fills it); a think its questions ran out on still says why; a host's crop in his area.
+    memory_java = _java_body(keeping, "public static final class Memory {")
+
+    def member(start):
+        # A member of the nested Memory class: to its first closing brace at two tabs.
+        rest = memory_java[memory_java.find(start):] if start in memory_java else ""
+        return rest[:rest.find("\n\t\t}\n")] if "\n\t\t}\n" in rest else rest
+    order = [step.find(n) for n in ("if (memory.lacks(at, item)) {", "asking.ask(at, record.holder())", "CourierWork.store(level, at)",
+                                    "StorageUtil.findStoredResource(storage,", "memory.lacked(at, item);", "spend(storage, donor)")]
+    noticed, rebuilt = member("void noticed("), member("GardenReach reach(BoundWill record)")
+    if -1 in order or order != sorted(order) or step.count("CourierWork.store(") != 1 \
+            or step.count("memory.idle(reached ? Idle.NO_DONOR : Idle.NO_HOST);") != 3 \
+            or not all(n in noticed for n in ("reach.refreshes() != skippedAt", "skipped.clear();", "lacking.clear();")) \
+            or not all(n in rebuilt for n in ("skipped.clear();", "lacking.clear();")):
+        err("GraftKeeping.keep: a store read without the donor is skipped until his index is read again, asked before it is "
+            "read; a think whose questions ran out still says why; the places skipped forgotten at each read of the index "
+            "(GC-P85; the unit review)")
+    if "!inArea(level, record, host.crop())" not in step \
+            or "!inArea(level, record, crop)" not in _java_body(keeping, "public PactService.@Nullable Complication complication(") \
+            or "pact.place().within(Couriers.place(level, crop), pact.service().radius())" not in _java_body(keeping, "static boolean inArea(") \
+            or "Math.abs(bed.getBlockPos().above().getY() - perch.getBlockPos().getY()) <= definition.radius()" not in _java_body(keeping, "public List<Missing> missing("):
+        err("GraftKeeping: a host's crop stands in his area too (a bed on its top layer has its crop above it), in his step, "
+            "his matter and his invitation (GC-P88; the unit review)")
+    if keeping.count(gp.DISTINCT.get("graft_keeping", {}).get("also", "?")) != 1:
+        err(f"spirits/GraftKeeping.java: makes {gp.DISTINCT.get('graft_keeping', {}).get('also')} once (DISTINCT)")
+    spend = _java_body(keeping, "public static boolean spend(")
+    if spend.count("Transaction.openOuter()") != 1 or spend.count("store.extract(donor, 1, transaction) != 1") != 1 \
+            or spend.count("transaction.commit();") != 1 or re.search(r"Grafting|setGraft|level\b|insert\(|attendWork|gesture|taskDone", spend) \
+            or keeping.count("Transaction.openOuter()") != 1 or keeping.count(".extract(") != 1 or keeping.count(".commit()") != 1:
+        err("GraftKeeping.spend: one outer transaction, one extraction of exactly one donor, committed only then, nothing else "
+            "inside it, and no other transaction in the service (GC-P82, GC-P85)")
+    for banned in (".setGraft(", ".consume(", "getInventory()", ".insert(", "ItemStack", "Garden.sample(", ".habitat(level)",
+                   "forgetSample(", "sendParticles(", "CourierLedger", "Logistics.", "getPlayer(record.holder()).getInventory"):
+        if banned in keeping:
+            err(f"spirits/GraftKeeping.java: never {banned} (the graft is Grafting.apply's, the donor the store's in its "
+                "transaction; no inventory, no sample, never cargo: no courier ledger, reservation or transit; GC-07, GC-P85)")
+    landed = _java_body(keeping, "private static Status grafted(")
+    order = [landed.find(n) for n in ("memory.grafted(graft);", "holder.taskDone(level, now);",
+                                      "foras.attendWork(graft.crop(), ForasEntity.Gesture.WORK.ticks, now);",
+                                      "foras.gesture(ForasEntity.Gesture.WORK);", "counted(level, record, holder, now);", "return Status.WORKING;")]
+    if -1 in order or order != sorted(order) or keeping.count("return Status.WORKING;") != 1 or keeping.count("holder.taskDone(") != 1 \
+            or "player.sendOverlayMessage(countLine(" not in _java_body(keeping, "private static void counted(") \
+            or 'Component.translatable(KEY + "counted", Pacts.done(pact, now), pact.service().quota())' not in _java_body(keeping, "public static Component countLine("):
+        err("GraftKeeping.grafted: one graft remembered, counted once, faced, gestured and counted aloud, his count its quota's "
+            "(Dossier 4 detail b)")
+    helps = _java_body(keeping, "static @Nullable Boolean helps(")
+    if "cachedHabitat(level)" not in helps or "Grafting.gains(" not in helps \
+            or "Grafting.holds(bed)" not in _java_body(keeping, "static @Nullable Host host("):
+        err("GraftKeeping: hosts carry no graft the rules know; the gain is read from the cached habitat by Grafting.gains (GC-P84)")
+    if not re.search(r"public static final List<String> ACCORDS = List\.of\(PRUDENT, ALWAYS\);", keeping) \
+            or 'String PRUDENT = "prudent";' not in keeping or 'String ALWAYS = "always";' not in keeping \
+            or "PactAccords.answer(level, perch)" not in _java_body(keeping, "static @Nullable String answer(") or ".accord()" in keeping \
+            or list(co.pacts.SERVICE_WORDS.get("graft_keeping", {}).get("accords", {})) != ["prudent", "always"]:
+        err("GraftKeeping: his answers are prudent then always (append only), worded in SERVICE_WORDS and read through "
+            "PactAccords.answer, so an unknown one reads as unanswered (GC-P86)")
+    # GC-P90: Jade says why he waits: his matter (unless answered "graft every host"), then hosts whose beds hold no reading.
+    noted = _java_body(keeping, "public PactService.@Nullable Note note(")
+    if not 0 <= noted.find('new PactService.Note("no_gain", memory.useless().size())') \
+            < noted.find('if (memory.idle() == Idle.NO_GAIN) {') < noted.find('new PactService.Note("no_reading", memory.unread())') \
+            < noted.find('new PactService.Note("no_donor", 0)') or "!ALWAYS.equals(answer(level, foras))" not in noted:
+        err("GraftKeeping.note: hosts that would gain nothing unless answered always, then hosts with no reading yet, then no "
+            "donor or no host (GC-P90)")
+    invited = _java_body(keeping, "public List<Missing> missing(")
+    if "GardenReach.withStores(perch.getBlockPos(), definition.radius(), bed -> own.equals(bed.keeper()))" not in invited \
+            or not 0 <= invited.find('"missing.store"') < invited.find('"missing.host"') or "knownHost(level, bed)" not in invited:
+        err("GraftKeeping.missing: a store touching the perch, then a host on a bed the inviter keeps within his radius (GC-P88)")
+    gains = _java_body(text(root / "garden" / "Grafting.java"), "public static boolean gains(Niche own, Niche grafted, Habitat habitat)")
+    if "if (now > was) {" not in gains or "better |= now < was;" not in gains or "return better;" not in gains:
+        err("Grafting.gains: no factor's fit worse, one better (GC-P84)")
     # GC-08 unit 5
     # GC-09 unit 6
 
@@ -22575,6 +22727,117 @@ def check_spirit_bodies(co):
                                             rf'"jugcraft_garden_marax_{key}", (true|false)\);', garden_client):
             err(f"ConcordanceGardenPactClientGameTests: his {key} loop is photographed through loopPoseOf (no gesture over it)")
     # GC-07 unit 4
+    # --- GC-07: Foras's body, built, with the owner's acorn cap (GC-S12, GC-P92, GC-P93) ---
+    body = pa.SPIRITS["foras"]["body"]
+    built = {"geckolib/models/entity/foras.geo.json": ((pa.ACORN_GEO, pa.ACORN_TEXTURE), "garden_bodies.foras_model"),
+             "geckolib/animations/entity/foras.animation.json": ((), "garden_bodies.foras_animations"),
+             "textures/entity/foras.png": ((pa.FIR, pa.MOSS, pa.ACORN_TEXTURE), "garden_bodies.foras_skin")}
+    if body.get("built") != built or body.get("owner_files") or body.get("adapted") \
+            or {t: v for t, v in pa.BUILT.items() if "/foras" in t} != built \
+            or not set(built) <= {target for target, _, _ in owner_art.builds()}:
+        err("SPIRITS['foras']: his body is built by tools/garden_bodies.py from the fir log, the Spanish moss and the owner's "
+            "acorn cap; nothing of his is copied or adapted by path (GC-P92)")
+    originals = ROOT / "art" / "owner-library" / "originals"
+    read = lambda path: (originals / path if path.partition("/")[0] == owner_art.PART2_NAME else originals / "Blocks" / path).read_bytes()
+    catalog = (load(ROOT / "art" / "owner-library" / "catalog" / "edited-2026-10-18-part2" / "files.json") or {}).get("files", [])
+    for path, (index, digest) in pa.OWNER_PART2_PINS.items():
+        entry = catalog[index] if index < len(catalog) else {}
+        if entry.get("path") != path.partition("/")[2] or entry.get("sha256") != digest or hashlib.sha256(read(path)).hexdigest() != digest:
+            err(f"{path}: the owner's acorn cap as catalogued (files[{index}], {digest}), the original unedited (GC-07)")
+    geo = load(ASSETS / "geckolib" / "models" / "entity" / "foras.geo.json") or {}
+    clips = (load(ASSETS / "geckolib" / "animations" / "entity" / "foras.animation.json") or {}).get("animations", {})
+    if geo != garden_bodies.foras_model(read) or clips != garden_bodies.foras_animations(read)["animations"]:
+        err("foras.geo.json and foras.animation.json: tools/garden_bodies.py's, unedited (run tools/owner_art.py)")
+    bones = (geo.get("minecraft:geometry") or [{}])[0].get("bones", [])
+    by = {bone["name"]: bone for bone in bones}
+    own = [cube for bone in bones if bone["name"] != "cap" for cube in bone.get("cubes", [])]
+    if not own or garden_bodies.coplanar(geo) or any(0 in cube["size"] for cube in own) \
+            or any("rotation" in bone for bone in bones) or any("rotation" in cube for bone in bones for cube in bone.get("cubes", [])):
+        err(f"foras.geo.json: none of his own cubes flat, nothing turned at rest, no two faces on one plane facing one way: "
+            f"{garden_bodies.coplanar(geo) if own else 'no cubes'}")
+    owner = next((b for b in json.loads(read(pa.ACORN_GEO))["minecraft:geometry"][0]["bones"] if b["name"] == "armorHead"), {})
+    shift = [a - b for a, b in zip(garden_bodies.FORAS_HEAD, garden_bodies.BIPED_HEAD)]
+    cap = by.get("cap", {}).get("cubes", [])
+    wanted = []
+    for cube in owner.get("cubes", []):
+        moved = dict(cube, origin=[round(o + s, 4) for o, s in zip(cube["origin"], shift)])
+        if 0 in cube["size"]:
+            (u, v), (w, h, d) = cube["uv"], cube["size"]
+            moved["uv"] = {"north": {"uv": [u + d, v + d], "uv_size": [w, h]}}   # its south face draws nothing: dropped
+        wanted.append(moved)
+    if by.get("cap", {}).get("parent") != "head" or cap != wanted or [c for c in cap if 0 in c["size"]] == []:
+        err("foras.geo.json: the cap bone holds the owner's armorHead cubes moved onto his head, their sizes and UVs the owner's, "
+            "only the leaf's clear south face dropped (GC-P92)")
+    try:
+        colours = set(garden_bodies.palette(read, pa.FIR, 7)) | set(garden_bodies.palette(read, pa.MOSS, 8))
+    except SystemExit as stopped:
+        colours = set()
+        err(str(stopped))
+    skin_path = ASSETS / "textures" / "entity" / "foras.png"
+    if not skin_path.is_file():
+        err("textures/entity/foras.png: missing (run tools/owner_art.py)")
+    else:
+        with Image.open(skin_path) as a, Image.open(originals / pa.ACORN_TEXTURE) as b:
+            skin, acorn = a.convert("RGBA"), b.convert("RGBA")
+        x0, y0, w0, h0 = garden_bodies.ACORN_REGION
+        box = acorn.getchannel("A").getbbox()
+        wrong = sum(1 for y in range(skin.height) for x in range(skin.width)
+                    if (skin.getpixel((x, y)) != acorn.getpixel((x, y)) if x0 <= x < x0 + w0 and y0 <= y < y0 + h0
+                        else skin.getpixel((x, y))[3] not in (0, 255) or (skin.getpixel((x, y))[3] and skin.getpixel((x, y))[:3] not in colours)))
+        if skin.size != garden_bodies.FORAS_TEXTURE or wrong or not box or not (box[0] >= x0 and box[1] >= y0 and box[2] <= x0 + w0 and box[3] <= y0 + h0):
+            err(f"textures/entity/foras.png: the owner's acorn cap texel for texel in its region, everything else opaque or clear "
+                f"in the fir log's and the moss's colours ({wrong} texels wrong)")
+    if (ASSETS / "textures" / "entity" / "foras_glowmask.png").exists() or body["render"]["glow"]:
+        err("Foras has no glowmask (nothing of his glows)")
+    foras_java = text(JAVA_ROOT / "concordance" / "spirits" / "ForasEntity.java")
+    for key, name in body["loops"].items():
+        if clips.get(name, {}).get("loop") is not True or clips[name].get("animation_length") != body["loop_lengths"][key] \
+                or f'RawAnimation.begin().thenLoop("{name}")' not in foras_java:
+            err(f"foras.animation.json / ForasEntity.Loop: his {key} loop {name} loops, {body['loop_lengths'][key]} s, and plays")
+    for gesture, (length, (start, end)) in body["gesture_times"].items():
+        clip = clips.get(body["gestures"][gesture], {})
+        ticks = round(length * 20)
+        play = "thenPlayAndHold" if gesture == "depart" else "thenPlay"
+        held = "hold_on_last_frame" if gesture == "depart" else False
+        if abs(float(clip.get("animation_length", -1)) - length) > 1e-9 or clip.get("loop") != held or not 0 <= start < end <= length \
+                or not re.search(rf'{gesture.upper()}\("{gesture}", {ticks}, RawAnimation\.begin\(\)\.{play}\("animation\.foras\.{gesture}"\)\)',
+                                 foras_java):
+            err(f"foras.animation.json / ForasEntity.Gesture: {gesture} lasts {length} s ({ticks} ticks), its telling window inside it")
+    # Detail (a): his cap tips at his greeting and at each graft, and only then (each key a vector, or an object when eased).
+    tipped = sorted(name for name, clip in clips.items() if "cap" in clip.get("bones", {}))
+    vector = lambda key: key["vector"] if isinstance(key, dict) else key
+    peaks = {name: max(abs(vector(v)[0]) for v in clips[name]["bones"]["cap"]["rotation"].values()) for name in tipped}
+    if tipped != ["animation.foras.arrive", "animation.foras.work"] or set(peaks.values()) != {abs(body["cap_tip"][0])}:
+        err("foras.animation.json: his cap tips at his greeting and at each graft, and only then (Dossier 4 detail a)")
+    if not {"jugcraft_garden_foras_grafting", "jugcraft_garden_foras_kept", "jugcraft_garden_foras_matter"} <= set(pa.GARDEN_CLIENT_SHOTS):
+        err("GARDEN_CLIENT_SHOTS: Foras's flow photographs his graft with his cap tipped, the kept page's count and his "
+            "matter (GC-07 client shots)")
+    check_geckolib("foras", foras_java, None, None, kind="entity")
+    # His box holds his height and robe; his culling box his arms and his cap (GC-P92).
+    cubes = [cube for bone in bones for cube in bone.get("cubes", [])]
+    if cubes:
+        low = [min(c["origin"][a] for c in cubes) for a in range(3)]
+        high = [max(c["origin"][a] + c["size"][a] for c in cubes) for a in range(3)]
+        across = max(high[0] - low[0], high[2] - low[2]) / 16 * body["scale"]
+        tall = (high[1] - low[1]) / 16 * body["scale"]
+        size, r = pa.SPIRITS["foras"]["entity"], body["render"]
+        if abs(size["height"] - tall) > 0.1 * tall or across > size["width"] + 2 * r["wide"] or tall > size["height"] + r["above"]:
+            err(f"Foras's box {size['width']} x {size['height']} holds his height ({tall:.2f}); his culling box his reach ({across:.2f})")
+    # His poses and shots, from his front, each gesture frozen inside its window (the client read without comments).
+    posed = {key.lower(): (float(a), float(b)) for key, a, b in re.findall(
+        r'clipPose\(context, server, perch, FORAS, ForasEntity\.Gesture\.([A-Z]+), ([0-9.]+), ([0-9.]+), "jugcraft_garden_foras_[a-z]+"\);',
+        garden_client)}
+    if posed != {key: window for key, (_, window) in body["gesture_times"].items()}:
+        err(f"ConcordanceGardenPactClientGameTests: each of Foras's gestures frozen inside its telling pose: {posed}")
+    for name in body["shots"]:
+        if f'"{name}"' not in garden_client:
+            err(f"ConcordanceGardenPactClientGameTests: takes {name}")
+    for key, name in body["loops"].items():
+        if key != "astir" and not re.search(rf'loopPoseOf\(context, server, perch, FORAS, FORAS_{key.upper()}, '
+                                            rf'"jugcraft_garden_foras_{key}", (true|false)\);', garden_client):
+            err(f"ConcordanceGardenPactClientGameTests: his {key} loop is photographed through loopPoseOf (no gesture over it)")
+        if key != "astir" and f'"{name}"' not in garden_client:
+            err(f"ConcordanceGardenPactClientGameTests: checks his {key} loop ({name})")
     # GC-08 unit 5
     # GC-09 unit 6
 
@@ -25799,6 +26062,24 @@ GC06_TESTS = {
     "ConcordanceProgressionGameTests": ["theGardensRegardIsMasteredThroughThreeSpirits"],
 }
 # GC-07 unit 4
+# Concordance garden cohort, GC-07 (check_garden_pacts): the graft extracted, the bed index's stores, Foras's service.
+GC07_GRAFT_TESTS = {
+    "ConcordanceGardenGameTests": ["theGraftGestureBehavesAsBefore", "aGraftGainsOnlyWhereEveryFitIsNoWorseAndOneBetter",
+                                   "theGardenReachIndexesStoresTouchingThePerch"],
+    "ConcordanceWorkerGameTests": [
+        "forasSpendsOneDonorAGraftAndNeverTwo", "forasNeverReplacesAKnownGraft", "forasGraftsAgainAfterAReplanting",
+        "forasTakesOnlyFromAStoreTheHolderMayChange", "forasRefusedWhereTheHolderMayNotBuild", "forasSkipsPlacesRefusedForThemselves",
+        "forasNeverGraftsAStrangersBed",
+        "twoForasNeverGraftOneBedTwice", "aPrudentForasSkipsAUselessGraft", "aPrudentForasGraftsWhereItHelps",
+        "anAlwaysAnswerGraftsEveryHost", "forasStopsAtHisQuota", "forasWaitsForAPresentHolder",
+        "forassFirstObligationIsAGraftByHand", "theKeptPageCountsForasGrafts", "forassReadingSaysItsNoteAndNamesNoPlayer"],
+    "ConcordancePersistenceGameTests": ["aForasReloadedKeepsHisStoreAndAnswer"],
+}
+# The garden cohort, GC-07's game tests of Foras as a character and of his standing station (check_pacts).
+GC07_FORAS_TESTS = {
+    "ConcordanceWorkerGameTests": ["forasStandsBesideThePerchFacingHisInviter", "forasRefusesWithoutAStore", "forasRefusesWithoutAHost",
+                                   "forasAnswersEachActionWithHisGesture", "aDuplicateForasGraftsNothing"],
+}
 # GC-08 unit 5
 # GC-09 unit 6
 # GC-04 (GB24): Stolas's Flashjack draws these six zero-thickness box-UV cubes on both faces, as the owner made them (D-D3

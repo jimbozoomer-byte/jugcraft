@@ -81,6 +81,8 @@ public final class Workers {
 	/** Concordance garden cohort, GC-06 (Dossier 3): Marax, standing on the ground beside his perch (habitat reading). */
 	public static EntityType<MaraxEntity> MARAX;
 	// GC-07 unit 4
+	/** Concordance garden cohort, GC-07 (Dossier 4): Foras, standing beside his perch (graft keeping). */
+	public static EntityType<ForasEntity> FORAS;
 	// GC-08 unit 5
 	// GC-09 unit 6
 	public static Block PACT_PERCH;
@@ -142,6 +144,11 @@ public final class Workers {
 		FabricDefaultAttributeRegistry.register(MARAX, MaraxEntity.createAttributes());
 		PactSpirits.register(MaraxEntity.COUNTERPART, MARAX, MaraxEntity.SIGN);
 		// GC-07 unit 4
+		// GC-07: Foras, MISC as every worker is (a transport crate refuses him), standing beside his perch (SPIRITS["foras"]).
+		FORAS = entity("foras", EntityType.Builder.<ForasEntity>of(ForasEntity::new, MobCategory.MISC).sized(1.2F, 2.2F).eyeHeight(1.55F)
+				.fireImmune().clientTrackingRange(8));
+		FabricDefaultAttributeRegistry.register(FORAS, ForasEntity.createAttributes());
+		PactSpirits.register(ForasEntity.COUNTERPART, FORAS, ForasEntity.SIGN);
 		// GC-08 unit 5
 		// GC-09 unit 6
 		ResourceKey<Block> perchKey = ResourceKey.create(Registries.BLOCK, Jugcraft.id("pact_perch"));
@@ -160,6 +167,8 @@ public final class Workers {
 		// GC-06: Marax's habitat reading.
 		PactServices.register(HabitatReading.SERVICE);
 		// GC-07 unit 4
+		// GC-07: Foras's graft keeping.
+		PactServices.register(GraftKeeping.SERVICE);
 		// GC-08 unit 5
 		// GC-09 unit 6
 		PactServices.verify();
@@ -174,6 +183,8 @@ public final class Workers {
 		// GC-06: Marax's cues (jugcraft:marax.*).
 		MaraxEntity.registerSounds();
 		// GC-07 unit 4
+		// GC-07: Foras's cues (jugcraft:foras.*).
+		ForasEntity.registerSounds();
 		// GC-08 unit 5
 		// GC-09 unit 6
 		// The unit review: every pact spirit's departure ends on time, its chunk ticking it or not (one sweep, GC-01).

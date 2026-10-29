@@ -14,7 +14,8 @@ adds Bathin's steps (7 to 9; the Gleaner's recipe walked from vines, a hopper an
 they name, with no whole-path test of his own; those tests and `buerFromTheCodexToDeparture`, which now chooses Buer at
 the chooser, passed in both server jobs of run 40777920181. Its unit 3 adds Marax's steps and The Garden's Regard
 mastered (10 to 13; Dewmoss in `GARDEN_RECIPES`), held by the tests they name, written and not yet run in CI; unit 7's
-`theGardenPactsFromCodexToDeparture` is to walk them.
+`theGardenPactsFromCodexToDeparture` is to walk them. Its unit 4 adds Foras's three steps (14 to 16, after Marax's),
+held by the tests they name, written and not yet run in CI; unit 7's walk is to take them too.
 Proposal issue: none; the owner's Arcane Concordance brief (roadmap step 31) is the scope approval.
 Owner: @jimbozoomer-byte. AI-assisted implementation with Claude Code; the model is named in the commit trailers.
 Target milestone and tier: Concordance milestone 23, every stage. Roadmap step 31.
@@ -179,6 +180,9 @@ The Garden's Regard found without Styx or Stolas, then each garden spirit's pact
 | 11. Ask Marax for a reading on his page (twice a day, at any hour): his familiar flies to the worst of your planted beds and names the one change that would raise it a step, or the first of its faults, and changes nothing; named three readings running with nothing changed there, it will not read that bed a fourth time. Use a Verdant Bed itself in his area with an empty hand (its side, if a crop covers its top): his first obligation | nothing new | nothing new | `aReadingNamesOneCorrectionAndChangesNothing`, `aReadingWithTwoFaultsNamesTheFirst`, `theProudFamiliarSkipsABedNamedThreeTimes`, `maraxsFirstObligationIsABedReadByHand` |
 | 12. Keep the first obligations of three garden spirits' pacts (Buer's, Bathin's and Marax's): The Garden's Regard is mastered | nothing new | nothing new | `theGardensRegardIsMasteredThroughThreeSpirits` |
 | 13. Keep the pact with two sheets of paper a week (a missed week is warned and carried through a day's grace, then the service is suspended with nothing taken; an offering resumes it). End it at the perch: what was paid ahead comes back once; his familiar settles between his horns, and he turns, walks two steps and fades | nothing new | nothing new | `everySpiritsUpkeepWarnsGivesGraceSuspendsAndResumes`, `endingAnySpiritsPactReturnsTheEscrowOnce`, `maraxAnswersEachActionWithHisGesture` |
+| 14. Set a chest touching your Pact Perch and grow a Sunpetal on an awake Verdant Bed of yours within 8 blocks; use the perch and choose Foras: he stands beside it, tips his acorn cap and names every term before anything is spent (without a store he does not come: "Where shall I keep the cuttings?"); accept, and his compact (4 Dewmoss, a honeycomb) is spent once | nothing new | Dewmoss | `forasRefusesWithoutAStore`, `everySpiritSealsOnceAndSpendsOnce`, `forasStandsBesideThePerchFacingHisInviter` |
+| 15. Leave Dewmoss in the chest: at any hour, while you are near, Foras grafts Dewlit onto your Sunpetals that would gain by it, one Dewmoss each, and counts his grafts aloud; hosts it would not help he names, and waits for your answer at the perch. Graft a Sunpetal by hand in his area: his first obligation | nothing new | nothing new | `forasSpendsOneDonorAGraftAndNeverTwo`, `aPrudentForasSkipsAUselessGraft`, `aPrudentForasGraftsWhereItHelps`, `forassFirstObligationIsAGraftByHand` |
+| 16. Keep the pact with a honeycomb a week (a missed week is warned and carried through a day's grace, then the service is suspended with nothing taken; an offering resumes it). End it at the perch: what was paid ahead comes back once, and he bows, folds his satchel and fades | nothing new | nothing new | `everySpiritsUpkeepWarnsGivesGraceSuspendsAndResumes`, `endingAnySpiritsPactReturnsTheEscrowOnce`, `forasAnswersEachActionWithHisGesture` |
 
 ### Cooperative play
 

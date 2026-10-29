@@ -101,6 +101,7 @@ WORK = ["star_reckoning", "strain_tending", "verdance_carrying",
         # GC-06 unit 3
         "habitat_reading",
         # GC-07 unit 4
+        "graft_keeping",
         # GC-08 unit 5
         # GC-09 unit 6
         ]
@@ -114,6 +115,7 @@ SERVICE_CLASSES = {"star_reckoning": "StarReckoning", "strain_tending": "StrainT
                    # GC-06 unit 3
                    "habitat_reading": "HabitatReading",
                    # GC-07 unit 4
+                   "graft_keeping": "GraftKeeping",
                    # GC-08 unit 5
                    # GC-09 unit 6
                    }
@@ -146,6 +148,19 @@ MOSS = "biomes and tree blocks/spanish_moss.png"
 MAHOGANY = "biomes and tree blocks/mahogany_log.png"
 CYPRESS = "biomes and tree blocks/cypress_leaves.png"
 # GC-07 unit 4
+# The owner's painting Foras's robe is painted from (the garden cohort, GC-07; art plan): under
+# art/owner-library/originals/Blocks/, catalog files.csv:1808 (the fir log's bark: his robe, skin, satchel and feet); his
+# mantle, beard and cuttings are MOSS's (files.csv:2069). Colours only are read; no texel, shape or layout is copied.
+FIR = "biomes and tree blocks/fir_log.png"
+# The owner's acorn cap (the second edited part; art plan), read through tools/owner_art.py's second root: its geometry
+# (catalog/edited-2026-10-18-part2/files.json files[23467]) and texture (files[25844]). Its four armorHead cubes and its
+# texels are copied unchanged (the cubes moved onto his head, the leaf's clear face dropped); nothing else of it is used.
+ACORN = "Edited-2026-10-18-Part2/jims mobs/"
+ACORN_GEO = ACORN + "geo/item/armor/acorn.geo.json"
+ACORN_TEXTURE = ACORN + "textures/item/armor/acorn.png"
+# Their catalog entries and SHA-256 (check_spirit_bodies holds the library files and the catalog to them).
+OWNER_PART2_PINS = {ACORN_GEO: (23467, "913962495527ed87e4bbe2d0e5fa29a79c04200bb762c602ded852b34f658b13"),
+                    ACORN_TEXTURE: (25844, "947202e4d51ba69035d7fef89566f6619236de79270bfdf79285d538c05db2d3")}
 # GC-08 unit 5
 # GC-09 unit 6
 # Concordance garden cohort, GC-01 (SG11; docs/features/concordance-garden-cohort.md): one row a pact spirit. Its offer
@@ -493,6 +508,92 @@ SPIRITS = {
         },
     },
     # GC-07 unit 4
+    # Concordance garden cohort, GC-07 (Dossier 4; docs/features/foras-pact.md): Foras, the thirty-first spirit, graft
+    # keeping. His body is built (tools/garden_bodies.py) and wears the owner's acorn cap (the second edited part).
+    "foras": {
+        "name": "Foras",
+        "java": "ForasEntity",
+        # A tall, broad, stooped elder: his robe and shoulders 1.2 across, 2.2 tall (GC-P92; a fifth apart from every
+        # other spirit on one axis); his eyes at 1.55, where his face draws them (the brief's 1.95 was above his brow).
+        "entity": {"width": 1.2, "height": 2.2, "eye": 1.55},
+        # He stands beside his perch: unit 3's PactSpiritEntity.Station.BESIDE (GC-P67), no station code of his own (GC-P89).
+        "station": "beside",
+        # His sign: an acorn, what a long keeping starts from (GC-P91).
+        "sign": rid("acorn"),
+        "pact": {
+            "agreement": rid("foras_pact"),
+            "research": rid("garden_regard"),
+            "service": {"work": "graft_keeping", "radius": 8, "from": 0, "to": 24000, "quota": 8},
+            "upkeep": {"offering": rid("foras_offerings"), "count": 1, "period_days": 7, "grace_days": 1, "cap": 4},
+            "beneficiaries": "party",
+            "compact": {"items": [{"item": rid("dewmoss"), "count": 4}, {"item": "minecraft:honeycomb", "count": 1}],
+                        "resonance": 0},
+        },
+        # His offering (GC-P81): a honeycomb, renewable from bee nests; no Styx gift.
+        "offerings": {"name": "Foras's Offerings", "items": ["minecraft:honeycomb"]},
+        # His three beats (GC-P80) with the stage direction before the greeting, held to the magic interfaces' limits (spec
+        # 1.5, GC-S26: a line of at most 18 words, a stage direction of at most 8; the brief's words, decided by the
+        # session). No source quotation in game (GC-S14).
+        "stage": "A bark-robed elder tips his acorn cap.",
+        "beats": {
+            "greeting": "A bark-robed elder tips his acorn cap. \"I am Foras. I keep what would be lost, and I argue with "
+                        "whoever wastes it.\"",
+            "service": "\"Leave cuttings in the store beside me. I graft hosts that would gain, and regraft any lost.\"",
+            "price": "\"A honeycomb a week. Long keeping wants something sweet.\"",
+        },
+        # His service's two conditions, the holder near and only what the holder could change by hand, named before
+        # anything is spent (GC-S7, as Buer's and Bathin's); his quota is its own term.
+        "term": "Graft keeping: at any hour Foras grafts a host crop on an awake Verdant Bed of yours or your party's in his "
+                "area with one donor (a Dewmoss for a Sunpetal) from a chest or other plain container touching his perch: one "
+                "graft at a time, one donor spent for each, never a graft the rules already know replaced. Until you answer "
+                f"otherwise, only where the graft helps the host. He works only while you are within {workers.PACT['REACH']} "
+                "blocks of the perch, and never takes from a store, or grafts a crop or bed, you could not change by hand",
+        # His cues, in ForasEntity.SOUND_IDS' order: (subtitle, runtime files). The art plan's mono files (GC-S13).
+        "cues": {
+            "arrive": ("Foras steps in", ["menagerie/fable/mojo_spawn"]),
+            "listen": ("Foras listens", ["menagerie/fable/mojo_idle"]),
+            "inspect": ("Foras considers", ["menagerie/fable/mojo_step1", "menagerie/fable/mojo_step2", "menagerie/fable/mojo_step3"]),
+            "assent": ("Foras assents", ["menagerie/fable/mojo_base_attack_hit1", "menagerie/fable/mojo_base_attack_hit2",
+                                         "menagerie/fable/mojo_base_attack_hit3"]),
+            "refuse": ("Foras objects", ["menagerie/fable/mojo_hurt"]),
+            "depart": ("Foras folds his satchel and fades", ["menagerie/fable/mojo_death"]),
+            "work": ("Foras grafts a host", ["menagerie/cavern/block/thornwood_branch/thornwood_branch_break_0",
+                                             "menagerie/cavern/block/thornwood_branch/thornwood_branch_break_1",
+                                             "menagerie/cavern/block/thornwood_branch/thornwood_branch_break_2"]),
+        },
+        # An old man's voice, lower than the creature's (GC-P94); his 2.6 s departure cuts at most 0.02 s off the tail of
+        # the departing cue (2.62 s at 1.0; an entity's sound stops when it is gone).
+        "pitch": {"arrive": 0.85, "listen": 0.8, "refuse": 0.75},
+        # His body (GC-S12, GC-P92, GC-P93): every file built by tools/garden_bodies.py ("built": runtime path -> (the owner
+        # files it reads, its builder)), written and checked by tools/owner_art.py (its second root for the acorn cap).
+        "body": {
+            "built": {
+                "geckolib/models/entity/foras.geo.json": ((ACORN_GEO, ACORN_TEXTURE), "garden_bodies.foras_model"),
+                "geckolib/animations/entity/foras.animation.json": ((), "garden_bodies.foras_animations"),
+                "textures/entity/foras.png": ((FIR, MOSS, ACORN_TEXTURE), "garden_bodies.foras_skin"),
+            },
+            "scale": 1.0,
+            "render": {"shadow": 0.6, "wide": 0.2, "low": 0.1, "above": 0.3, "glow": False},
+            "loops": {"idle": "animation.foras.idle", "listen": "animation.foras.listen", "waiting": "animation.foras.waiting",
+                      "suspended": "animation.foras.suspended", "astir": "animation.foras.astir"},
+            "gestures": {"arrive": "animation.foras.arrive", "inspect": "animation.foras.inspect",
+                         "assent": "animation.foras.assent", "refuse": "animation.foras.refuse",
+                         "depart": "animation.foras.depart", "work": "animation.foras.work"},
+            # (seconds, (the telling pose's window)): ConcordanceGardenPactClientGameTests freezes the world inside it.
+            "gesture_times": {"arrive": (2.0, (0.6, 1.4)), "inspect": (2.0, (0.4, 1.2)), "assent": (1.8, (0.4, 1.0)),
+                              "refuse": (2.0, (0.4, 1.3)), "depart": (2.6, (0.4, 1.2)), "work": (2.4, (0.8, 1.5))},
+            "loop_lengths": {"idle": 4.0, "listen": 3.0, "waiting": 6.0, "suspended": 8.0, "astir": 1.6},
+            # His listening pose (degrees): his stoop deepened toward his speaker, head raised to them, his right hand on his
+            # satchel's strap; every screen gesture starts and ends on it.
+            "attend": {"body": (10, 0, 0), "head": (-8, 0, 0), "arm_right": (-25, 0, -8)},
+            # Detail (a): his cap's tip (degrees on its own pivot), in arrive and work only.
+            "cap_tip": (24, 0, 0),
+            "shots": ["jugcraft_garden_foras_idle", "jugcraft_garden_foras_listen", "jugcraft_garden_foras_waiting",
+                      "jugcraft_garden_foras_suspended", "jugcraft_garden_foras_inspect", "jugcraft_garden_foras_assent",
+                      "jugcraft_garden_foras_refuse", "jugcraft_garden_foras_work", "jugcraft_garden_foras_depart",
+                      "jugcraft_garden_foras_arrive"],
+        },
+    },
     # GC-08 unit 5
     # GC-09 unit 6
 }
@@ -514,6 +615,8 @@ PERCH_TOOLTIP = ("Use: invite a pact spirit whose Regard you understand (Stolas 
                  f"; Marax an awake Verdant Bed of yours with a crop on it within {SPIRITS['marax']['pact']['service']['radius']} "
                  "blocks"
                  # GC-07 unit 4
+                 f"; Foras a chest touching the perch and a crop that takes a graft on a bed of yours within "
+                 f"{SPIRITS['foras']['pact']['service']['radius']} blocks"
                  # GC-08 unit 5
                  # GC-09 unit 6
                  "); or keep the pact seated here. Break it and the pact stays yours, without its perch.")
@@ -893,6 +996,7 @@ SERVICE_NAMES = {"gather": "Gathering", "courier": "Carrying its post's requests
                  # GC-06 unit 3
                  "habitat_reading": "Habitat reading",
                  # GC-07 unit 4
+                 "graft_keeping": "Graft keeping",
                  # GC-08 unit 5
                  # GC-09 unit 6
                  }
@@ -1110,6 +1214,43 @@ SERVICE_WORDS = {
         "answers": ["read", "nothing_grows", "no_sample", "nothing_to_correct", "absent"],
     },
     # GC-07 unit 4
+    # GC-07 (Dossier 4 items 2, 3, 5 and 7; GC-P86, GC-P88, GC-P90, GC-P91): Foras's graft keeping.
+    "graft_keeping": {
+        "messages": {
+            "missing.store": "\"Where shall I keep the cuttings? Set a store beside me.\" Foras comes only where a chest, "
+                             "barrel or other plain container touches the perch",
+            "missing.host": "\"I see nothing here a cutting would help.\" Foras comes only where a crop that takes a graft "
+                            "(a Sunpetal takes Dewlit) grows on a Verdant Bed you keep within %s blocks of the perch",
+            "row.service": "Graft keeping: %s of %s grafts today, each with one donor from the store beside him, never a "
+                           "graft the rules already know replaced",
+            "row.last": "Last: grafted the host at %s with a donor from the store at %s",
+            "row.no_donor": "Waiting for donors: no store beside him that he may take from holds one for your hosts",
+            "counted": "Foras: %s of %s grafts today.",
+            "matter.no_gain": "\"Hosts here a graft would not help, or would harm: %s, the nearest at %s. Shall I graft them "
+                              "anyway?\" (a graft narrows what a host bears: where its bed suits it as well already it gains "
+                              "nothing, and where a factor would fit worse it fares worse)",
+        },
+        "screen": {
+            "heading": "Graft keeping",
+            "about": "Foras works by himself, at any hour: the rows above say how many hosts he has grafted today and his "
+                     "last. Hosts a graft would not help wait for your answer.",
+        },
+        # Third person, as every Jade pact line (the C3 review's rule): Jade's reader may be anyone.
+        "notes": {
+            "no_gain": "Hosts a graft would not help: %s; he leaves them unless his holder answers \"Graft every host\" at "
+                       "the perch",
+            "no_reading": "Hosts waiting for their bed's first reading: %s",
+            "no_donor": "No donor: no store beside him holds one for his holder's hosts",
+            "no_host": "Nothing to graft: every host in his area that he may tend carries its graft",
+        },
+        "answers": ["no_store", "no_host"],
+        # The accord machinery's words (unit 2): his answers, the safe course first (Java GraftKeeping.ACCORDS, in this
+        # order; append only; each at most ACCORD_MAX characters), his matter in general and his matter now. Each answer is
+        # at most three words (the magic interfaces, spec 1.1).
+        "accords": {"prudent": "Where it helps", "always": "Graft every host"},
+        "question": "\"Shall I graft a host the graft would not help?\" (a host whose bed suits it no better grafted)",
+        "matters": {"no_gain": "His matter: hosts here that a graft would not help"},
+    },
     # GC-08 unit 5
     # GC-09 unit 6
 }
@@ -1175,5 +1316,21 @@ GARDEN_CLIENT_SHOTS += ["jugcraft_garden_marax_nothing_grows", "jugcraft_garden_
                         "jugcraft_garden_marax_faces_west", "jugcraft_garden_marax_faces_north",
                         "jugcraft_garden_marax_end_confirm", "jugcraft_garden_marax_ended"]
 # GC-07 unit 4
+# ------------------------------------------------------------------------------------------- garden cohort, GC-07: Foras
+ART_SOUNDS["foras"] = ["menagerie/fable/mojo_spawn", "menagerie/fable/mojo_idle", "menagerie/fable/mojo_step1",
+                       "menagerie/fable/mojo_step2", "menagerie/fable/mojo_step3", "menagerie/fable/mojo_base_attack_hit1",
+                       "menagerie/fable/mojo_base_attack_hit2", "menagerie/fable/mojo_base_attack_hit3", "menagerie/fable/mojo_hurt",
+                       "menagerie/fable/mojo_death", "menagerie/cavern/block/thornwood_branch/thornwood_branch_break_0",
+                       "menagerie/cavern/block/thornwood_branch/thornwood_branch_break_1",
+                       "menagerie/cavern/block/thornwood_branch/thornwood_branch_break_2"]
+# What ConcordanceGardenPactClientGameTests photographs of Foras besides his body shots (GC-P95).
+GARDEN_CLIENT_SHOTS += ["jugcraft_garden_foras_no_store", "jugcraft_garden_foras_chooser", "jugcraft_garden_foras_conversation",
+                        "jugcraft_garden_foras_conversation_scale4", "jugcraft_garden_foras_conversation_small",
+                        "jugcraft_garden_foras_terms", "jugcraft_garden_foras_terms_scale4", "jugcraft_garden_foras_terms_small",
+                        "jugcraft_garden_foras_refused", "jugcraft_garden_foras_kept", "jugcraft_garden_foras_matter",
+                        "jugcraft_garden_foras_matter_scale4", "jugcraft_garden_foras_matter_small", "jugcraft_garden_foras_answered",
+                        "jugcraft_garden_foras_grafting", "jugcraft_garden_foras_jade", "jugcraft_garden_foras_faces_east",
+                        "jugcraft_garden_foras_faces_south", "jugcraft_garden_foras_faces_west", "jugcraft_garden_foras_faces_north",
+                        "jugcraft_garden_foras_counted", "jugcraft_garden_foras_end_confirm", "jugcraft_garden_foras_ended"]
 # GC-08 unit 5
 # GC-09 unit 6

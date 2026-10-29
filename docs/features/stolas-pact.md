@@ -635,6 +635,9 @@ generators' incidental rewrites were restored: [the contract's corrections](conc
   owner who understands both Regards. GC-06 changed none of Stolas's ids, keys, words, body or tests: his body's station
   is `PERCH` (where he always stood), he shows no work target, and Star-reckoning's Recall is drawn as before (the kept
   page's new choice plates are for other works' on-request actions only).
+- **Since GC-07 (Foras, [record](foras-pact.md); not merged; not yet run in CI):** the chooser has another entry for an
+  owner who understands both Regards. GC-07 changed none of Stolas's ids, keys, words, body or tests: his body stays on
+  the perch, Star-reckoning raises no matter and asks no question, and the graft Foras makes is a garden service's alone.
 
 ## World and event applicability
 

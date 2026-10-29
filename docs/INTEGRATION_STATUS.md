@@ -15,7 +15,7 @@ consolidation and recipe-picker playtest remains outside this batch.
 
 Updated 11 October 2026 for [integration PR #320](https://github.com/jimbozoomer-byte/jugcraft/pull/320) (source PRs #299–308 and #310–319), following [integration PR #277](https://github.com/jimbozoomer-byte/jugcraft/pull/277) and [follow-up PR #298](https://github.com/jimbozoomer-byte/jugcraft/pull/298). This is the owner-facing index: feature records contain the detailed behavior and historical test evidence. The PRs' current GitHub states determine which combined work has reached `main`.
 
-## Not merged: Concordance garden cohort, units 1 to 3 (Buer, Bathin, Marax)
+## Not merged: Concordance garden cohort, units 1 to 4 (Buer, Bathin, Marax, Foras)
 
 On branch `claude/garden-cohort`; draft pull request [jimbozoomer-byte/jugcraft#526](https://github.com/jimbozoomer-byte/jugcraft/pull/526)
 against main; not merged. Unit 1 (GC-01 to GC-04) of seven is built: one pact spirit base with a perch for many spirits
@@ -38,6 +38,12 @@ standing station beside a perch and the synced work target his familiar flies to
 was in the head of run 40777920181, which passed in full; nothing of Marax himself has been compiled, and his 22 server
 tests and 33 client shots wait for their first run. Checked locally by the repository's Python checks and audits and a
 scratch harness of his one-change rule ([the contract's evidence](features/concordance-garden-cohort.md#unit-3-as-built-and-its-evidence)).
+Unit 4 (GC-07) is built and recorded (on its own line from unit 3's shared prefix, merged after unit 3), **not yet
+compiled or run in CI**: Foras, a garden spirit who keeps grafts, with the graft in one place and the bed index's stores.
+The newest CI result the merged line descends from is run
+[40823371480](https://github.com/jimbozoomer-byte/jugcraft/actions/runs/40823371480), green in full on `5e8e0cba3`,
+before unit 4; his 25 server tests and 33 client shots wait for their first run. Checked locally by the repository's
+Python checks and audits ([the contract's evidence](features/concordance-garden-cohort.md#unit-4-as-built-and-its-evidence)).
 
 | Area | Implemented change | Record |
 | --- | --- | --- |
@@ -49,6 +55,8 @@ scratch harness of his one-change rule ([the contract's evidence](features/conco
 | A matter to settle (GC-05) | A pact spirit may raise a choice its holder answers at the perch; the answer is kept by the perch and may be changed; until then the spirit takes the safe course and the roster says "awaiting your answer" | [Bathin](features/bathin-pact.md#his-matter-two-roads-from-one-heart-the-accord), [workers](features/arcane-concordance-workers.md) |
 | A spirit beside its perch (GC-06b) | A standing spirit takes the first clear side two blocks out, never between its inviter and the perch; a spirit may show the block it means to every client while its answer is on screen (synced, never saved); a work's on-request choice drawn on the kept page. Not yet run in CI | [contract](features/concordance-garden-cohort.md#gc-06-marax-unit-3), [workers](features/arcane-concordance-workers.md) |
 | Marax (GC-06) | Asked at his perch, his familiar reads your planted beds from their last samples and names one change for the worst, changing nothing; a bed named three times with nothing changed is passed over; two readings a day, for you alone; two sheets of paper a week; his first obligation completes The Garden's Regard's mastery with Buer's and Bathin's. Not yet run in CI | [Marax](features/marax-pact.md) |
+| The graft in one place (GC-07b) | Grafting by hand ends in the one graft a spirit makes too (`Grafting.apply`), with the same checks, messages and spent donor; the bed index also holds the plain containers touching a perch (16). Not yet run in CI | [Foras](features/foras-pact.md#what-changed-in-shared-code), [ecology](features/arcane-concordance-ecology.md) |
+| Foras (GC-07) | Beside his perch with a chest touching it, he grafts your Sunpetals and your party's with Dewmoss from the chest where Dewlit helps them, one Dewmoss a graft, 8 a day, and names the hosts it would not help, asking at the perch whether to graft them anyway; a honeycomb a week; a body built for Jugcraft with the owner's acorn cap. Not yet run in CI | [Foras](features/foras-pact.md) |
 
 ## Merged with #494: Concordance Chunk D (pact hall)
 

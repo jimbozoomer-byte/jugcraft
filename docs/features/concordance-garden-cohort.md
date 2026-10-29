@@ -3,8 +3,10 @@
 Status: **contract (GC-00); unit 1 (GC-01 to GC-04) and unit 2 (GC-05, Bathin) built, run in CI and recorded (see
 [unit 1 as built and its evidence](#unit-1-as-built-and-its-evidence) and
 [unit 2 as built and its evidence](#unit-2-as-built-and-its-evidence)); unit 3 (GC-06, Marax) built and recorded, not
-yet compiled or run in CI (see [unit 3 as built and its evidence](#unit-3-as-built-and-its-evidence)); units 4 to 7 not
-built here; nothing of the cohort is merged.** The contract was written read-only from
+yet compiled or run in CI (see [unit 3 as built and its evidence](#unit-3-as-built-and-its-evidence)); unit 4 (GC-07,
+Foras) built from unit 3's shared prefix, recorded and merged after unit 3's line, not yet compiled or run in CI (see
+[unit 4 as built and its evidence](#unit-4-as-built-and-its-evidence)); units 5 to 7 not built here; nothing of the
+cohort is merged.** The contract was written read-only from
 the worktree of `claude/chunk-d-pact-hall` at `5eba71ced` (main's
 `78f9353a7` + Chunk B #465 + Chunk C #466 + Chunk D #474, all then open and unmerged), from the five survey reports
 written for it (`survey-pacts.md`, `survey-gardens.md`, `survey-assets.md`, `survey-sources.md`, `survey-plans.md`; kept with the session's working notes, not committed), from a critique of its
@@ -136,7 +138,7 @@ unchanged. Every Java compile and game test runs only in CI (GC-S24; [Checks](#c
 | 1 | GC-01, GC-02, GC-03, GC-04 | A compile-only first push (SG1 to SG3, Stolas a thin subclass); one perch for many spirits (Stolas unchanged); a spirit faces whoever speaks; the groundwork Buer uses (the bed index for beds, the beneficiary rule, the read-only `mayTendAt` and `cachedHabitat`, obligations with `TEND`, The Garden's Regard reachable to understood); **Buer complete**: strain tending, the overworked bed, his body from the owner's Decor Blossom | this contract; new `buer-pact.md`; `stolas-pact.md`; `arcane-concordance-workers.md`; `arcane-concordance-ecology.md` | Built (`62b0095fa` to `4ca363d38`) and recorded; in CI run 40605564166 every unit-1 server and client test passed (its one remaining failure, after a re-run, is main's `HerobrineClientGameTests`); not merged (draft #526); [evidence](#unit-1-as-built-and-its-evidence) |
 | 2 | GC-05 | **Bathin**: Verdance carrying, two roads from one Heart; with him, the shared accord machinery (`resolve`, the perch's `accord`, the payload's matter and answers, the roster's "awaiting your answer") and the bed index's Hearts, Gleaners and pylons | new `bathin-pact.md` | Built (`28a963b63` to `85eb1a0ba`, and `d7185041b` since) and recorded; in CI run 40777920181 every unit-2 server test passed with and without the optional integrations, and the garden client class passed; not merged (draft #526); [evidence](#unit-2-as-built-and-its-evidence) |
 | 3 | GC-06 | **Marax**: one-correction reading by his familiar, the proud familiar; the synced work target and its renderer hook; The Garden's Regard mastery reachable from here (three spirits) | new `marax-pact.md` | Built (`736d94541` to `1473e99f1`) and recorded; the shared prefix (GC-06a, GC-06b and its review's fixes) was in the head of CI run 40777920181, which passed in full; Marax himself (`bed9f73b4` on) not yet compiled or run in CI; not merged; [evidence](#unit-3-as-built-and-its-evidence) |
-| 4 | GC-07 | **Foras**: graft keeping from a store beside the perch, the logician's objection; the bed index's containers; the owner library's second edited part in `tools/owner_art.py` | new `foras-pact.md` | Not started |
+| 4 | GC-07 | **Foras**: graft keeping from a store beside the perch, the logician's objection; the bed index's containers; the owner library's second edited part in `tools/owner_art.py` | new `foras-pact.md` | Built (`e3194d0be` to `8a50bbd33`) from unit 3's shared prefix and recorded, then merged after unit 3's line; not yet compiled or run in CI; not merged; [evidence](#unit-4-as-built-and-its-evidence) |
 | 5 | GC-08 | **Bifrons**: root-running with half lost, which beds are reserves | new `bifrons-pact.md`; `tools/concordance_economy.py` | Not started |
 | 6 | GC-09 | **Amdusias**: the bending canopy (a one-factor disturbance shelter: the pure rule in `ecology`, the registry in `garden`), the stir a Gloamcap wants | new `amdusias-pact.md`; `arcane-concordance-ecology.md` | Not started |
 | 7 | GC-10 | Combined fixes, the cohort's whole path, its load card, client evidence (the line-up), the two-client test, records, the checkpoint and handoff | this page; the six records; `arcane-concordance-journey.md`; `docs/TESTING.md` | Not started |
@@ -228,7 +230,7 @@ how a habitat is read.
 | GB22 | `PactStatePayload` already has 13 fields in one `StreamCodec.composite`; 26.3's largest overload takes 14, so four new top-level fields would not compile | `S/PactStatePayload.java:81-95`; mc263src `StreamCodec.java:533` | GC-01 (one nested field; closed as built, unit 1) |
 | GB23 | The terms page and the cannot-afford refusal name "Astral Resonance from your astrolabe" whatever the resonance (`d.resonance()`); `term.quota` reads "%s a game day", wrong for a cap | `S/PactMenu.java:301, 489-490, 514`; lang `message.jugcraft.concordance.pact.term.compact`, `.answer.cannot_afford`, `.term.quota` | GC-01 (resonance-free keys): closed as built, unit 1; GC-09 (a per-work quota key): open |
 | GB24 | The owner's Decor Blossom has four zero-thickness cubes each drawing two opposite faces on one plane (GeckoLib draws entities with `entityCutout`, which does not cull in 26.3); `tools/art_check.py` reads block, item and quad models only, not `.geo.json` | `Magic/assets/ars_jimbaux/geo/decor_blossom.geo.json`; GeckoLib `renderer/base/GeoRenderer.java:73-75`; `docs/ART_DIRECTION.md:31`; `tools/art_check.py:489-490, 662` | GC-04 (closed as built, unit 1) |
-| GB25 | `tools/owner_art.py` reads only `Blocks/` and `Magic/`, and adapts only through Stolas's table and `stolas_body` | `tools/owner_art.py:75, 78, 130-140` | GC-04 (the cohort's table and adapters): partly closed, unit 1; the second edited part waits for GC-07 or GC-09 |
+| GB25 | `tools/owner_art.py` reads only `Blocks/` and `Magic/`, and adapts only through Stolas's table and `stolas_body` | `tools/owner_art.py:75, 78, 130-140` | GC-04 (the cohort's table and adapters): partly closed, unit 1; the second edited part waits for GC-07 or GC-09 *(closed, unit 4: the root landed in the shared prefix, GC-06b, and Foras's body, GC-07, is its first reader)* |
 | GB26 | `tools/concordance_progression.py` honours `distinct` only for `examine`, so a practice needing three spirits would read as reachable with one | `tools/concordance_progression.py:527` | GC-03 (closed as built, unit 1) |
 | GB27 | The roster's status is a saved id from a closed enum; nothing can say "awaiting your answer" | `S/WorkerRoster.java:33-40`; `W/Status.java` | GC-05 (closed as built, unit 2: `Status.AWAITING_ANSWER`, appended, saved on the roster as `awaiting_answer`) |
 | GB28 | Three ambience families the asset survey suggested are stereo in every file, which `check_pacts` refuses: `cavern.candy_cavity_ambience_additions`, `cavern.forlorn_hollows_ambience_additions`, `cavern.abyssal_chasm_ambience_additions` | Vorbis headers read for this contract (every file two channels) | Art plan (mono events named) |
@@ -1281,6 +1283,12 @@ a failed precondition or a failed extraction spends nothing and changes no bed),
 `forasNeverGraftsAStrangersBed`, `twoForasNeverGraftOneBedTwice`, `aPrudentForasSkipsAUselessGraft`,
 `anAlwaysAnswerGraftsEveryHost`, `forasRefusesWithoutAStore`, `forasStopsAtHisQuota`, `forasWaitsForAPresentHolder`,
 `forassFirstObligationIsAGraftByHand`, `theGraftGestureBehavesAsBefore` (existing graft tests unchanged), SG12's cases.
+*As built, eleven more:* `aGraftGainsOnlyWhereEveryFitIsNoWorseAndOneBetter` and
+`theGardenReachIndexesStoresTouchingThePerch` (GC-07b, `ConcordanceGardenGameTests`), `aPrudentForasGraftsWhereItHelps`,
+`theKeptPageCountsForasGrafts`, `forassReadingSaysItsNoteAndNamesNoPlayer`,
+`ConcordancePersistenceGameTests.aForasReloadedKeepsHisStoreAndAnswer`, `forasStandsBesideThePerchFacingHisInviter`,
+`forasRefusesWithoutAHost`, `forasAnswersEachActionWithHisGesture`, `aDuplicateForasGraftsNothing`, and from his review
+`forasSkipsPlacesRefusedForThemselves`: 25 in all (`GC07_GRAFT_TESTS`, `GC07_FORAS_TESTS`), none yet run.
 
 **Interfaces changed:** new `G/Grafting.apply`; `OrganismCropBlock.graftBed` calls it (its behaviour unchanged) and
 holds the `GRAFT` hook; `PactObligations.Act` (+`GRAFT`); `GardenReach` (+containers); `tools/owner_art.py` (+the second
@@ -1291,6 +1299,63 @@ and accord question; poses; Jade. **Audits:** `check_garden_pacts` (every precon
 transaction for the extraction, `setGraft` only after its commit, no `ItemStack.consume` from a spirit), `check_graft` (unchanged rules), `owner_art --check` (the acorn cap),
 bodies, `check_acquisition` (honeycomb, Dewmoss). **Acceptance:** Dossier 4's items; exactly one donor for each graft,
 none for a refusal; no graft replaced while the rules know it.
+
+**As built (brief `e3194d0be`; GC-07b `8d8fba4b5`; Foras `e4fca201d`; his review's fixes `8a50bbd33`;
+[record](foras-pact.md); built on unit 4's own line from unit 3's shared prefix, GC-06b, and merged after unit 3's line
+([the merge](#unit-4s-merge-after-unit-3)); none of it yet compiled or run in CI):**
+
+- **Foras as a character:** `S/ForasEntity` on the shared base, registered 1.2 x 2.2 (eyes 1.55), standing on the ground
+  beside the perch through the shared `Station.BESIDE`, with no station code of his own; his body built by
+  `tools/garden_bodies.py` (`foras_model`: 19 box-UV cubes on 9 bones, 15 his own in 12 UV regions and the owner's acorn
+  cap's four in his `cap` bone, a 128 x 64 sheet; `foras_animations`: five loops and six gestures, the cap tipping in
+  arrive and work only; `foras_skin`: the fir log's and the Spanish moss's colours around the cap's copied texels) and
+  written and checked by `tools/owner_art.py` (`BUILT`, reading the second edited part through its root); his seven cues
+  on the thirteen mono files of the art plan's families, told apart by pitch; his sign the Acorn (`jugcraft:acorn`); his
+  four codex pages of `binding/garden_regard` after Bathin's ("Foras", "His Service", "The Logician's Objection", "His
+  Price"), after Marax's since the merge, before "Mastered"; no glowmask.
+- **Graft keeping:** `S/GraftKeeping` (`MAX_ASKED` 8; at most one graft a think and 8 a day; only where it helps until
+  answered otherwise; its `Memory`, never saved); `G/Grafting` (GC-07b), the one graft the gesture and he both end in;
+  `GardenReach.withStores` and `CourierWork.plain` (GC-07b), his stores; `PactObligations.GRAFT` with its one line in
+  `graftBed`; the accord machinery (GC-05) for his matter; tests as listed in `check_mod_data.py`'s `GC07_GRAFT_TESTS` and
+  `GC07_FORAS_TESTS`.
+
+Departures from this ticket and the unit's specification (each recorded, none hidden; the reasons in
+[his record](foras-pact.md#decisions-recorded-with-the-code)):
+
+- **The station is unit 3's** (GC-P89 restated as GC-P67's): the specification's own station (one block out; its commit
+  U4-C3, `arrival` and `stationOf`, its `check_pacts` block, its mutations M12 and M13, its forced count lines and its
+  merge rows M-6 and M-14) is not built; `check_pacts` holds each spirit's row to its `Station`.
+- **One think's questions are the shared `GardenAsking`** (GC-06b), not a private copy of Bathin's rule (GC-P85 amended);
+  since his review a place refused for itself, and a store read without the host's donor, wait until his index is read
+  again, so neither uses up a think's eight questions; a store is always asked before it is read.
+- **"Would gain"** is GC-P84's fit rule (no factor worse, one better), not the growth pace; a host that would fare worse
+  counts as no gain too, so his matter reads "Gain nothing or worse" and names the nearest.
+- **The contract's "assent line"** is the action-bar line he says at each graft ("Foras: 3 of 8 grafts today.",
+  `GraftKeeping.countLine`) and the kept page's gauge (GC-P90).
+- **The client photographs his graft** by running his think on the server in the step that fills his store (so his own
+  ticker cannot graft first), frozen 23 ticks into his work, with the kept page closed first.
+- **The screens** are the magic interfaces' relic scroll card (GC-S26): his beats shortened; his words glances in
+  `WORK_GLANCES`; a chooser reason for each refusal, "Store needed" and "Host needed" (`work_cards`), not the
+  specification's "Needs store and host"; his blockers as lock lines; his question in general drawn short once answered
+  (Bathin's too); Jade's short forms and marks for his matter and notes.
+- **Server tests:** four assertions expect `AWAITING_ANSWER` where his matter waits unanswered (GC-P47); the obligation's
+  key is `practice:<activity>:jugcraft:foras` (`Pacts.counterpart` keeps the namespace); sampling goes through the shared
+  retrying rule (`afterSampling`; `aPrudentForasGraftsWhereItHelps` from its 30th tick, 80 in all); a bed that must hold
+  no reading has its sample forgotten in the test; no forced unit-1 or unit-2 test line (the shared prefix's generic
+  lines, GC-P77).
+- **Eyes at 1.55**, where his face draws them, not the specification's 1.95 at his cap's crown.
+- **A bed on his area's top layer is no host** (its crop stands above the area; his review).
+- **Interfaces not in this ticket's list:** `GraftKeeping.countLine` and `Memory.forget`; `Grafting.holds`, `graftFor`,
+  `donorItem` and `gains`; `CourierWork.plain`; `GardenReach.stores`; `PactGlance`'s lock for a blocker named
+  `pact.<work>.missing.<reason>`, the no-donor row's mark and his two rows' icons; `tools/magic_ui.py`'s `work_cards` and
+  a glance for every work's question.
+- **Left as they are:** the class Javadocs of `Workers` and of the garden client class (no marker; they would conflict at
+  the merge).
+
+Saved: the work `graft_keeping` and the perch's accord values `prudent` and `always`, appended; no new saved key (his
+entity writes only the base's `perch` and `record`; his memory and his station's side are never saved); no migration.
+GB25 closes here: his body is the first reader of the second edited part's root (GC-06b). Evidence:
+[unit 4 as built and its evidence](#unit-4-as-built-and-its-evidence).
 
 ### GC-08. Bifrons (unit 5)
 
@@ -1401,6 +1466,9 @@ Each spirit ticket also delivers, and is accepted only with:
 - its beats within the magic interfaces' limits (18 words a line, a stage direction of 8; GC-S26) and its work's row
   in `tools/magic_ui.py` `WORK_GLANCES` (its name, service line, icon, kept-page rows, blockers and chooser reason), a
   glance for its first task's act when that row would run past 12 words, and its icon's line in `PactGlance.WORK_ICONS`;
+  since GC-07 also a glance for its question in general where it has accords, a chooser reason for each of its refusals
+  and the lock on every blocker (`check_magic_ui` asks for each), and short forms and marks for its Jade notes and matter
+  (`SENTENCES`, `SENTENCE_MARKS`, `MagicGlance.MARKS`), else Jade draws them whole;
 - SG12's shared cases passing for its definition (including `onePresencePerPact`, `...WaitsForANearHolder` and
   `noGardenTermOrRefusalNamesAnAstrolabe`); its own service, conflict, refusal, obligation, stranger and departure tests;
 - its client shots (beats, terms, kept page with its matter, poses in their telling windows from its front, facing, Jade)
@@ -1534,12 +1602,12 @@ any sound heard (CI has no sound device; subtitles are checked as defined and fi
 
 | Code | Requirement | Tickets | Tests |
 |---|---|---|---|
-| GE1 | No one binds another player or works another's land (E1) | GC-01, GC-03 to GC-09 | `anotherPlayerCannotAcceptForAnySpiritsHolder` (SG12, every spirit), `aResolveFromAnotherPlayerIsRefused`, each spirit's stranger test (`buerTendsOnlyBedsOfHisBeneficiaries`, `buerSkipsBedsHeMayNotChange`, `bathinHonoursTheHeartsParty`, `bathinNeverTouchesAClaimedReservoir`, `onlyTheHolderMayAskForAReading`, `maraxNeverReadsAStrangersBed`, `forasTakesOnlyFromAStoreTheHolderMayChange`, `forasNeverGraftsAStrangersBed`, `aRootRunnerNeverTouchesAStrangersBed`, `aStrangersCropIsNeverSheltered`); SG12's `everySpiritWaitsForANearHolder`; the network test |
-| GE2 | Upkeep suspends without hidden offline punishment (E2) | GC-01 (SG12) | SG12's upkeep cases for every definition; each spirit's `...WaitsForAPresentHolder` (`buerWaitsForAPresentHolder`, `bathinWaitsForAPresentHolder`); `aSuspendedBathinCarriesNothing`; SG12's `everySpiritWaitsForANearHolder` (no service where no upkeep accrues) |
-| GE3 | Copying multiplies nothing (E3) | GC-01, GC-05 | `aCopiedPerchIsInertForEverySpirit` and `onePresencePerPactForEverySpirit` (every definition: a copied or duplicate spirit entity never works); `aDuplicateBathinCarriesNothing`; `anAnsweredAccordSurvivesARestart` with a copy reading nothing |
-| GE4 | End, death, unload and restart return property once (E4) | GC-01, GC-05, GC-07, GC-08 | SG12's ending and removal cases; `bathinNeverHoldsVerdance`, `noVerdanceIsMintedByCarrying`; `forasSpendsOneDonorAGraftAndNeverTwo`; `aRootRunnerLosesHalfAndMintsNone` |
+| GE1 | No one binds another player or works another's land (E1) | GC-01, GC-03 to GC-09 | `anotherPlayerCannotAcceptForAnySpiritsHolder` (SG12, every spirit), `aResolveFromAnotherPlayerIsRefused`, each spirit's stranger test (`buerTendsOnlyBedsOfHisBeneficiaries`, `buerSkipsBedsHeMayNotChange`, `bathinHonoursTheHeartsParty`, `bathinNeverTouchesAClaimedReservoir`, `onlyTheHolderMayAskForAReading`, `maraxNeverReadsAStrangersBed`, `forasTakesOnlyFromAStoreTheHolderMayChange`, `forasNeverGraftsAStrangersBed`, `forasRefusedWhereTheHolderMayNotBuild`, `aRootRunnerNeverTouchesAStrangersBed`, `aStrangersCropIsNeverSheltered`); SG12's `everySpiritWaitsForANearHolder`; the network test |
+| GE2 | Upkeep suspends without hidden offline punishment (E2) | GC-01 (SG12) | SG12's upkeep cases for every definition; each spirit's `...WaitsForAPresentHolder` (`buerWaitsForAPresentHolder`, `bathinWaitsForAPresentHolder`, `forasWaitsForAPresentHolder`); `aSuspendedBathinCarriesNothing`; SG12's `everySpiritWaitsForANearHolder` (no service where no upkeep accrues) |
+| GE3 | Copying multiplies nothing (E3) | GC-01, GC-05 | `aCopiedPerchIsInertForEverySpirit` and `onePresencePerPactForEverySpirit` (every definition: a copied or duplicate spirit entity never works); `aDuplicateBathinCarriesNothing`, `aDuplicateForasGraftsNothing`; `anAnsweredAccordSurvivesARestart` with a copy reading nothing |
+| GE4 | End, death, unload and restart return property once (E4) | GC-01, GC-05, GC-07, GC-08 | SG12's ending and removal cases; `bathinNeverHoldsVerdance`, `noVerdanceIsMintedByCarrying`; `forasSpendsOneDonorAGraftAndNeverTwo`, `aForasReloadedKeepsHisStoreAndAnswer`; `aRootRunnerLosesHalfAndMintsNone` |
 | GE5 | Two users cannot both own one pact place or one unique service (E5) | GC-01, GC-04, GC-05, GC-07, GC-09 | `twoNegotiationsAtOnePerchSealOnceForEverySpirit` (every definition; the other player `NOT_PERMITTED`); `twoBuersShareOneBedsTendWindow`, `twoBathinsShareOneHeartExactly`, `twoForasNeverGraftOneBedTwice`, `twoCanopiesNeverStack` |
-| GE6 | The named suites extended (09:172) | every ticket | Worker, Sharing, Persistence, Logistics (none expected), Economy, Journey, Progression, Journal (unit 1: Sharing's `notesNeverStandInForTheGardensRegard` and Persistence's `theGardenGroundworkSavesNothing`, beyond the specification; copies only by the Worker class's `aCopiedPerchIsInertForEverySpirit`; Economy no new test; unit 2: Economy's `noVerdanceIsMintedByCarrying`, Persistence's `anAwaitingAnswerSurvivesARestart`, Garden's four named-road and device tests, Sharing unchanged); `ConcordanceGardenPactClientGameTests`, `ConcordancePactClientGameTests`, `ConcordanceRosterClientGameTests`, `ScreenFitClientGameTests`, `ConcordanceGardenNetworkTests` |
+| GE6 | The named suites extended (09:172) | every ticket | Worker, Sharing, Persistence, Logistics (none expected), Economy, Journey, Progression, Journal (unit 1: Sharing's `notesNeverStandInForTheGardensRegard` and Persistence's `theGardenGroundworkSavesNothing`, beyond the specification; copies only by the Worker class's `aCopiedPerchIsInertForEverySpirit`; Economy no new test; unit 2: Economy's `noVerdanceIsMintedByCarrying`, Persistence's `anAwaitingAnswerSurvivesARestart`, Garden's four named-road and device tests, Sharing unchanged; unit 4, not yet run: Garden's three GC-07b tests, Persistence's `aForasReloadedKeepsHisStoreAndAnswer`, Journey's recipes with Dewmoss, Economy and Sharing unchanged); `ConcordanceGardenPactClientGameTests`, `ConcordancePactClientGameTests`, `ConcordanceRosterClientGameTests`, `ScreenFitClientGameTests`, `ConcordanceGardenNetworkTests` |
 | GE7 | A conversation-to-service-to-departure sequence (09:174) | GC-04, GC-10 | `buerFromTheCodexToDeparture`; `theGardenPactsFromCodexToDeparture`; the client classes |
 | GE8 | Mechanically distinct services (03:170, 03:177) | GC-04 to GC-09 | the distinctness table held by `check_garden_pacts` (one work, one service class, one state changed, distinct verbs); each service's own tests |
 | GE9 | Each dossier's eight items (03:167-175) | GC-04 to GC-09 | the per-spirit template's checklist in each record, every line naming its test, shot or record |
@@ -1866,6 +1934,136 @@ The commits are not rewritten, so their messages are corrected or completed here
 - **`1473e99f1`**'s Decisions rows GC-P63 to GC-P79 carry 27 October 2026, the date of the unit's specification; they
   were added to this page on 29 October.
 
+### Unit 4 as built and its evidence
+
+Written on 29 October 2026 for unit 4's records commit, from the commits and their messages and from this session's own
+local runs. **No CI run has compiled or run unit 4:** its commits were made where no Minecraft jar was available, every
+Java file of it was parse-checked only, and every server test and client shot of it is still to run. "Passed" below
+means a local Python check, audit or harness passed. Nothing here was run by a person. AI-assisted implementation with
+Claude Code; the model is named in the commit trailers.
+
+**Commits** (unit 4's own line, built in parallel with unit 3's from the shared prefix and merged after it, in the
+order 3, 4, 5, 6; not pushed to draft pull request [#526](https://github.com/jimbozoomer-byte/jugcraft/pull/526) when
+this was written; not merged):
+
+| Commit | What it holds |
+|---|---|
+| `362c5fe26` | the line's base: the shared prefix (GC-06a, GC-06b and its review's fixes) with unit 2's records and the magic interfaces' units 1 and 2 merged in |
+| `e3194d0be` | GC-07a: Foras's brief, before any body file (D-D5) |
+| `8d8fba4b5` | GC-07b: the graft in one place (`Grafting`) and the bed index's stores (`GardenReach.withStores`, `CourierWork.plain`); `check_ecology` and `check_graft` follow the graft; three garden tests; nothing changes for players |
+| `e4fca201d` | GC-07: Foras, graft keeping and the logician's objection |
+| `8a50bbd33` | his review's fixes (its 13 findings, all applied; [GC-07's As built](#gc-07-foras-unit-4)) |
+| `a4ebaa8c3`, `d169ef659`, `a104f2bc4` | the records |
+| the merge after unit 3 | unit 3's line at `aa2c173e2` (Marax, the magic interfaces' unit 2 with its review, the target test's fix `5e8e0cba3` and the magic interfaces' fixes from CI's pictures) merged into this line, unit 3's lines first ([the merge](#unit-4s-merge-after-unit-3)) |
+
+**CI.** None for unit 4. Before the merge, the last CI result this line descended from was run
+[40782439981](https://github.com/jimbozoomer-byte/jugcraft/actions/runs/40782439981), green in full on `d7185041b`;
+since it, the newest CI result the merged line descends from is run
+[40823371480](https://github.com/jimbozoomer-byte/jugcraft/actions/runs/40823371480), green in full on `5e8e0cba3`
+(unit 3's line before the magic interfaces' fixes `aa2c173e2`, and before unit 4). Still to run, on the merged head: the
+`mod` and `optional integrations absent` jobs; the client classes `tools/select_client_tests.py` picks (the garden class
+among them, its weight 1040 since the merge: 560 + 260 + 220); then one workflow_dispatch of every client class (unit
+2's practice).
+
+**Server tests written** (none run):
+
+| Table (`tools/check_mod_data.py`) | Tests |
+|---|---|
+| `GC07_GRAFT_TESTS` (20) | `ConcordanceGardenGameTests` (GC-07b): `theGraftGestureBehavesAsBefore`, `aGraftGainsOnlyWhereEveryFitIsNoWorseAndOneBetter`, `theGardenReachIndexesStoresTouchingThePerch`; `ConcordanceWorkerGameTests`: `forasSpendsOneDonorAGraftAndNeverTwo`, `forasNeverReplacesAKnownGraft`, `forasGraftsAgainAfterAReplanting`, `forasTakesOnlyFromAStoreTheHolderMayChange`, `forasRefusedWhereTheHolderMayNotBuild`, `forasSkipsPlacesRefusedForThemselves`, `forasNeverGraftsAStrangersBed`, `twoForasNeverGraftOneBedTwice`, `aPrudentForasSkipsAUselessGraft`, `aPrudentForasGraftsWhereItHelps`, `anAlwaysAnswerGraftsEveryHost`, `forasStopsAtHisQuota`, `forasWaitsForAPresentHolder`, `forassFirstObligationIsAGraftByHand`, `theKeptPageCountsForasGrafts`, `forassReadingSaysItsNoteAndNamesNoPlayer`; `ConcordancePersistenceGameTests.aForasReloadedKeepsHisStoreAndAnswer` |
+| `GC07_FORAS_TESTS` (5) | `forasStandsBesideThePerchFacingHisInviter`, `forasRefusesWithoutAStore`, `forasRefusesWithoutAHost`, `forasAnswersEachActionWithHisGesture`, `aDuplicateForasGraftsNothing` |
+| SG12 and shared | the fifteen SG12 cases through his fixture (a chest beside the perch and a Sunpetal on a bed already grafted, so every shared case reads him idle); `noGardenTermOrRefusalNamesAnAstrolabe` and `talkingTeachesNothing` for every offered spirit; `ConcordanceJourneyGameTests.theGardenPactsRecipesLoad` with Dewmoss in `GARDEN_RECIPES` |
+| Unchanged | Chunk C's nine graft tests (C-09), the gesture now through `Grafting`; no forced unit-1 or unit-2 test line (the shared prefix's generic lines, GC-P77) |
+
+Twenty-five new server tests: the contract's fourteen, ten the specification added and one from his review
+(`forasSkipsPlacesRefusedForThemselves`).
+
+**Client test written** (not run): `ConcordanceGardenPactClientGameTests`, his flow after Marax's at the same perch
+(since the merge), 33 shots ([his record's Verification](foras-pact.md#verification) names them), each pact
+screen held to its word budget; since the merge each of his two choosers' cards is held wholly in view and his first
+beat's portrait whole, as every spirit's are.
+
+**Completion evidence for Foras** (the codes above; **none of these tests has run**):
+
+| Code | Foras (unit 4), as built |
+|---|---|
+| GE1 | `forasTakesOnlyFromAStoreTheHolderMayChange`, `forasNeverGraftsAStrangersBed`, `forasRefusedWhereTheHolderMayNotBuild` (crop or bed), `forasSkipsPlacesRefusedForThemselves`, `anotherPlayerCannotAcceptForAnySpiritsHolder`, `everySpiritWaitsForANearHolder` |
+| GE2 | `forasWaitsForAPresentHolder`; `everySpiritsUpkeepWarnsGivesGraceSuspendsAndResumes` and `aStandInNeverAnswersAnySpiritsUpkeep` (each with his offering count of 1), `everySpiritWaitsForANearHolder` |
+| GE3 | `aDuplicateForasGraftsNothing`, `aCopiedPerchIsInertForEverySpirit`, `onePresencePerPactForEverySpirit` |
+| GE4 | `forasSpendsOneDonorAGraftAndNeverTwo` (one donor a graft; a refused or short extraction spends nothing and leaves no transaction open), `aForasReloadedKeepsHisStoreAndAnswer`, `endingAnySpiritsPactReturnsTheEscrowOnce`, `everySpiritsKeysSurviveASave` |
+| GE5 | `twoForasNeverGraftOneBedTwice` (two holders' Foras over one party bed: one graft, one donor), `twoNegotiationsAtOnePerchSealOnceForEverySpirit`, `everySpiritIsOnePactAHolder` |
+| GE6 | Worker, Garden (GC-07b's three), Persistence (`aForasReloadedKeepsHisStoreAndAnswer`), Journey (`theGardenPactsRecipesLoad`); Sharing, Logistics and Economy unchanged; the garden client class |
+| GE7 | no whole-path server test of his (his three journey steps name the tests that hold them; unit 7's `theGardenPactsFromCodexToDeparture` is to walk them); the client class from the chooser to the ended pact |
+| GE8 | `check_garden_pacts`' distinctness table with `graft_keeping` ("transform, spending a donor": a bed's graft, through `Grafting.apply` and `spend`): one work, one service class, one call, distinct verbs; `CourierLedger` banned in `GraftKeeping` |
+| GE9 | Foras's checklist: [his Verification](foras-pact.md#verification) |
+
+**Local checks and audit mutations, by commit** (each commit's message, and for GC-07b the session's logs): GC-07a,
+three documentation mutations, two caught (a broken link, a trailing space; a broken anchor is read by no repository
+check and was checked by hand); GC-07b, M1 to M9 (with M4a and M4b) and the session's X1 and X2 caught by
+`check_mod_data`, M10 caught by `scripts/tests/test_owner_art_part2.py`; GC-07, 27 caught (M11, M14 to M38, M30 both in
+the builder and in the generated clip); his review's fixes, 19 caught (N1 to N19). Each commit's tree passed
+`tools/owner_art.py --check`, `tools/check_mod_data.py`, `scripts/check_repository.py`, `tools/concordance_journey.py
+--check`, `tools/concordance_economy.py` ("gaining cycles: none"), `tools/check_icon_maps.py`, the world designer's node
+tests and `scripts/tests` (341 tests at GC-07a and GC-07b, 342 after), and `git diff --check` (no record of it was kept at
+GC-07b); each edited Java file passed the parse check, and the body harness reproduced his three body files (after his
+review, with only the nose moved). **For this records commit:** the same checks on its tree, each passed; no generated
+file changes; its documentation mutations are in its message.
+
+**APIs not confirmed against a build** (each checked only by reading): in Fabric API 0.161.0, the anonymous
+`SingleVariantStorage` subclass of the refusing store, `Transaction.openOuter` and the static `Transaction.isOpen`,
+`ItemVariant.of` and `blank`, and `TestInput.setCursorPos`; in the 26.3 sources, `Container.countItem` (a default
+method) on a chest, `BlockPos.containing`, `Vec3.atBottomCenterOf` and `getRawBrightness` beside crying obsidian in a
+test structure; from the repository's own uses, `WorkerRoster.of(server).workers(...).get(...).status()`,
+`PactReading`'s keys, `PartyManager`, `TestClaims`, `afterSampling`, `handUse`, and `ForasEntity.Gesture.WORK.clip()` with
+the controller's animation time; and, for the client, the words actually drawn, the framing of his four facing
+pictures, the 23 ticks into his work at which his graft is photographed, and his own ticker's timing against the flow.
+
+**Not run:** everything of unit 4 in CI (compilation, the server jobs, the garden client class, a dispatch of every
+client class); a second client at his perch; any person, alone or with others; any sound.
+
+#### Corrections to unit 4's commit messages
+
+The commits are not rewritten, so their messages are corrected or completed here:
+
+- **`e3194d0be`** counts the design's stage direction as 23 words; it is 24 (his record says so since `8a50bbd33`).
+- **`8d8fba4b5`** names no local check or mutation; they are recorded in [his record](foras-pact.md#verification) from
+  the session's logs (`8a50bbd33`).
+- **`e4fca201d`** says hosts "a graft would not help" are named; since his review (`8a50bbd33`) the matter counts hosts
+  that would gain nothing or fare worse and names the nearest. Its "20 worker tests" were 20 then; his review added a
+  21st. Its comment on the garden class's weight in `tools/select_client_tests.py` counts 32 shots; the flow takes 33
+  since his review added `jugcraft_garden_foras_counted` (the weight, 220 seconds more, is an estimate either way).
+- **The Decisions rows GC-P83 to GC-P99** carry 27 October 2026, the date of the unit's specification; they were added to
+  this page on 29 October, with the amendments his build and review made.
+- **`a4ebaa8c3`** (these records) listed the tools' `WORK`, `SPIRITS` order, `SERVICE_*` tables and `ACTS` among the lines
+  the merge resolves by hand; a trial merge showed they merge cleanly under their markers, and `d169ef659` corrected
+  [Where to resume](#where-to-resume). Its message says the clean merge was "as the records had said"; it was not: the
+  records had said the opposite.
+
+#### Unit 4's merge after unit 3
+
+Unit 3's line at `aa2c173e2` was merged into this line on 29 October 2026, in the order 3, 4: unit 3's lines first,
+Foras's under his `GC-07 unit 4` markers. Generated files were regenerated, never hand-merged:
+`tools/generate_material_data.py` (`en_us.json`, `sounds.json`, the codex entry `binding/garden_regard.json`,
+`tools/data/generated-material-resources.json`), then `tools/owner_art.py`, then `tools/concordance_journey.py`, whose
+table was pasted into [the journey record](arcane-concordance-journey.md): Foras's steps are 14 to 16, after Marax's,
+and his four codex pages follow Marax's, before "Mastered", the entry's last. Resolved by hand: `PactParser.WORK`,
+`HOLDER_ONLY` and `REQUIRED` (unit 3's, then `graft_keeping` and `jugcraft:foras`); `PactGlance.WORK_ICONS` (his
+`Map.entry` under his marker, Star-reckoning's last); `MagicGlance.MARKS` and, in `tools/magic_ui.py`, his
+`WORK_GLANCES` row, his Jade short forms and marks under the markers and his no-donor mark after unit 3's proud rule;
+the two test classes' imports (sorted union). The magic interfaces' unit 2 files take unit 3's side, which holds its
+review (the roster, Jade and `PactScreen` files, the roster client test, `scripts/tests/test_magic_ui.py`,
+`check_mod_data.py`'s roster blocks, the selection tool's `SHOWN_BY` line and its test, `concordance-chunk-d.md`).
+Merged without a conflict but changed after it, in his flow: its two chooser budgets are unit 3's
+`chooserWords(context)` (unit 3 removed `CHOOSER_WORDS`); his own `parkMouse` is gone, since the shared `shot()` parks
+the cursor before every picture; each of his two choosers is held by `cardsWhole` after `fits`, and his first beat by
+`portraitWhole`, as the magic interfaces' fixes hold every other chooser (`check_pact_screen` asks it of each) and every
+other spirit's first beat; his facing pictures use the shared, now framing, `standingFacing`. A comment in
+`tools/magic_ui.py` and a line of his record that cited the removed 25-word chooser budget now cite the per-card one.
+The records are a union, unit 3's lines first. Checked locally on the merged tree (none of it in CI, nothing in
+Minecraft), each passing: the generators above, `tools/owner_art.py --check`, `tools/check_mod_data.py`,
+`scripts/check_repository.py`, `tools/concordance_journey.py --check`, `tools/concordance_economy.py`,
+`tools/check_icon_maps.py`, the world designer's node tests, `scripts/tests`, `git diff --check`, and the parse check of
+every Java file the merge touched.
+
 ## Schema review (the shared schema against eight services)
 
 | Concern | The six garden services | For the shared schema |
@@ -2093,6 +2291,15 @@ roster's "awaiting your answer") passed, and `ConcordancePactClientGameTests`, `
 `ConcordanceRosterClientGameTests` and `ScreenFitClientGameTests` passed with the restyled screens. The row's local
 checks were run on each commit by the unit's builders and reported passing in the commit messages that list them.
 
+**Unit 4 as written** (row 4 above against the build; **not yet run**: nothing on unit 4's line has run in CI): Worker
+(Foras's graft-keeping, character and accord tests, `GRAFT`, SG12 through his fixture), the existing graft tests
+unchanged (Chunk C's nine, and `theGraftGestureBehavesAsBefore` with GC-07b's two others in Garden), Persistence
+(`aForasReloadedKeepsHisStoreAndAnswer`: his store and his answer across a restart) and the Journey's recipes; Economy
+gains no test (a graft spends a donor and makes nothing; `concordance_economy.py` gains no row). The client row is his
+flow in `ConcordanceGardenPactClientGameTests`, his graft frozen with the cap tipped among its 33 shots. The row's local
+checks (bodies and `owner_art --check`, with the acorn cap from the second edited part) ran on each commit and passed
+([unit 4's evidence](#unit-4-as-built-and-its-evidence)).
+
 ## Decisions
 
 The owner's (GC-D), the session's under the standing instruction (GC-S, "Decided by the session"), and the units'
@@ -2207,6 +2414,23 @@ proposals (GC-P, numbered in the reserved blocks). Chunk A to D decisions are un
 | GC-P79 | 27 October 2026 | The shared-line register for units 4 to 6 (merge order 3, 4, 5, 6): later standing bodies reuse `Station.BESIDE`, later targets reuse `showTarget` and `Row.reach`; unit 3 alone adds mastery; each unit's lines under its own marker (`GC-0n unit n`), `PactGlance.WORK_ICONS` a `Map.ofEntries` that ends with Star-reckoning's entry (Marax's review) | Proposed (unit 3) | GC-07 to GC-09 |
 | GC-P80, GC-P81 | 26 October 2026 | Foras's beats; terms (radius 8, any hour, 8 grafts, party), offering (1 honeycomb a week), compact (4 Dewmoss, 1 honeycomb); prudent by default | Proposed (unit 4) | GC-07 |
 | GC-P82 | 26 October 2026 | `GardenReach` containers: 16 plain containers touching the perch; the graft order (preconditions, then extract and commit, then `setGraft`) | Proposed (unit 4) | GC-07 |
+| GC-P83 | 27 October 2026 | "Touching" is the 26 cells around the perch, not the perch; "plain" is a `Container` that is not a `WorldlyContainer`, decided by the one shared `CourierWork.plain` on the block entity in hand during the bed index's one pass (GC-07b); read again at each use; a store has no keeper of its own and is asked with the holder as keeper (`GardenPacts.target`), so it must be the holder's to change by hand | Proposed (unit 4) | GC-07 |
+| GC-P84 | 27 October 2026 | "Would gain" (the prudent rule): by the bed's cached habitat (never a sample), the grafted niche's fit no worse than the own niche's on any of the five factors and better on one (`Grafting.gains`); no cached sample: unknown, left under `prudent`, grafted under `always`; a host with several known grafts is offered the first by id with a donor item | Proposed (unit 4) | GC-07 |
+| GC-P85 | 27 October 2026 | His step: his hours, the day's quota, the index's hosts and their cached readings, his matter raised once a presence, then hosts nearest first (asked at crop and bed), then stores nearest first (each asked before it is read); at most `MAX_ASKED` 8 places asked a think; at most one graft a think; the donor found without a transaction, taken in one outer transaction committed only at exactly one, then `Grafting.apply` *(amended unit 4: one think's questions are the shared `GardenAsking` of the shared prefix, GC-06b, not a second copy of Bathin's rule; since his review a place refused for itself, and a store read without the host's donor, are skipped until his index is read again, and a think whose questions ran out still says why)* | Proposed (unit 4) | GC-07 |
+| GC-P86 | 27 October 2026 | The logician's objection: the matter `no_gain`, raised once a presence with his inspect gesture toward the nearest such host; answers `prudent` (the default and the reading of an unknown value) and `always`, kept as the perch's `accord` *(amended unit 4, his review: the matter counts hosts that would gain nothing or fare worse and names the nearest, drawn "Gain nothing or worse: 3, nearest x, y, z. Graft anyway?"; the answers drawn "Where it helps" and "Graft every host")* | Proposed (unit 4) | GC-07 |
+| GC-P87 | 27 October 2026 | `G/Grafting` (public): `holds`, `graftFor`, `donorItem`, `gains`, `apply`; `OrganismCropBlock.graftBed` keeps its rate gate, Authority, held-graft refusal (through `holds`), the donor's `consume` and its message, and ends in `apply`; `PactObligations.Act.GRAFT("graft")`, its one hook line in `graftBed` after the donor is spent | Proposed (unit 4) | GC-07 |
+| GC-P88 | 27 October 2026 | His invitation: `no_store` (no plain container touches the perch) and `no_host` (no crop of a known graft's host on an awake bed of the inviter's within his radius, grafted or not), read in one index pass, store first *(amended unit 4, his review: a bed on his area's top layer is no host, its crop standing above the area)* | Proposed (unit 4) | GC-07 |
+| GC-P89 | 27 October 2026 | His station *(restated unit 4: he stands beside his perch through unit 3's `Station.BESIDE`, GC-P67, with no station code of his own; the specification's own station, one block out, is not built)* | Proposed (unit 4) | GC-07 |
+| GC-P90 | 27 October 2026 | Detail (b), "he counts aloud": after each graft the holder's action bar says "Foras: %s of %s grafts today." (`countLine`) and the kept page's gauge draws the same count; Jade's note says why he waits; the contract's "assent line" read as the line he says at each graft *(amended unit 4: his notes `no_gain`, worded true answered or not, `no_reading`, `no_donor` and `no_host`)* | Proposed (unit 4) | GC-07 |
+| GC-P91 | 27 October 2026 | His words, roster line and Jade name ("Graft keeping"); his sign `jugcraft:acorn` (distinct from every other spirit's) | Proposed (unit 4) | GC-07 |
+| GC-P92 | 27 October 2026 | His body built by `tools/garden_bodies.py`: 15 box-UV cubes of his own on 9 bones, the owner's acorn cap's four `armorHead` cubes moved onto his head in his `cap` bone (sizes and UVs the owner's, the leaf's clear face dropped); a 128 x 64 sheet, the cap's texels copied to the same place, the rest painted only in the fir log's 7 and the Spanish moss's 8 colours; entity 1.2 x 2.2; render row shadow 0.6, no glowmask *(amended unit 4: eyes at 1.55, where his face draws them, not 1.95)* | Proposed (unit 4) | GC-07 |
+| GC-P93 | 27 October 2026 | His clips: five loops and six gestures (arrive 2.0 s, inspect 2.0, assent 1.8, refuse 2.0, depart 2.6 held, work 2.4), each screen gesture from and to his listening pose; the cap tips 24 degrees in arrive and work only | Proposed (unit 4) | GC-07 |
+| GC-P94 | 27 October 2026 | His cues `jugcraft:foras.*` on the thirteen mono runtime files of the art plan's families, told apart by pitch (arrive 0.85, listen 0.8, refuse 0.75), each subtitled | Proposed (unit 4) | GC-07 |
+| GC-P95 | 27 October 2026 | Evidence: his server tests, his client flow after Bathin's with `WEIGHTS` +220, SG12 through his fixture *(amended unit 4: 25 server tests, `GC07_GRAFT_TESTS` and `GC07_FORAS_TESTS`; 33 shots; no forced count lines, the shared prefix's generic lines, GC-P77, standing for them)* | Proposed (unit 4) | GC-07 |
+| GC-P96 | 27 October 2026 | `tools/owner_art.py` gains the owner's second edited part as a root built bodies may read (`PART2_NAME`, `_read_owner`, `_origin`); unit 6 reuses it *(amended unit 4: landed in the shared prefix, GC-06b; Foras's body is its first reader)* | Proposed (unit 4) | GC-07, GC-09 |
+| GC-P97 | 27 October 2026 | `check_graft`'s rules pinned to `graftBed` follow the graft into `Grafting` (the same rules, a new place); `.setGraft(` only in `garden/Grafting.java`, `.clearGraftUnlessFor(` only in `garden/OrganismCropBlock.java`, `Grafting.apply(` only from the gesture and his keeping | Proposed (unit 4) | GC-07 |
+| GC-P98 | 27 October 2026 | His four codex pages after Bathin's (named by title: they renumber at each merge), three journey steps, his compact and offering in the acquisition audit (Dewmoss in the words unit 3 writes, GC-P76) | Proposed (unit 4) | GC-07 |
+| GC-P99 | 27 October 2026 | The Garden's Regard's mastery is reachable on unit 4's own line (three garden spirits there); unit 4 adds no mastery page, step or test (unit 3's, GC-P75) | Proposed (unit 4) | GC-07 |
 | GC-P100, GC-P101 | 26 October 2026 | Bifrons's beats; terms (radius 8, 13,000 to 23,000, 24 units, party), offering (2 logs a week), compact (4 oak logs, 1 emerald); source at 24 or more, destination 3 poorer | Proposed (unit 5) | GC-08 |
 | GC-P102 | 26 October 2026 | His measuring as bounded server particles at source, then destination; no client hook | Proposed (unit 5) | GC-08 |
 | GC-P120, GC-P121 | 26 October 2026 | Amdusias's beats; terms (radius 6, any hour, 16 beds covered at once, party), offering (1 sapling a week), compact (1 note block, 2 oak saplings); damping 2; tree within 2, looked at every 200 ticks; lapse 40 ticks | Proposed (unit 6) | GC-09 |
@@ -2265,10 +2489,11 @@ every citation resolves; none is the owner's.
 
 Units 1 (GC-01 to GC-04) and 2 (GC-05) are built, their CI evidence and records are in this page and their records, and
 they wait in draft pull request #526 for the owner's review. Unit 3 (GC-06, Marax) is built and recorded, not yet
-compiled or run in CI. Next:
+compiled or run in CI. Unit 4 (GC-07, Foras) is built and recorded on its own line from unit 3's shared prefix and merged
+after unit 3's line, not yet compiled or run in CI. Next:
 
-1. Look at the pictures of a CI run that includes `d7185041b` (his facing pictures framed whole) and the magic
-   interfaces' `73464e938` (no tip repeating a beat): both are pushed, and no CI result for them is recorded here.
+1. Look at the pictures of run 40782439981 (green in full on `d7185041b`, which holds Bathin's facing pictures framed
+   whole and the magic interfaces' `73464e938`); no record here describes them yet.
 2. Refresh main and the open pull requests; merge main into `claude/garden-cohort` if it moved (generated files
    regenerated, never hand-merged).
 3. Run CI on unit 3 (Marax): the server jobs and the garden client class. Fix in the test what is the test's, in the
@@ -2288,12 +2513,19 @@ compiled or run in CI. Next:
    addition (unit 4); adds its client flow after Marax's, calling `yard` first (his two Sunpetal beds lie in it), and its
    weight under its own line; and, for unit 6, keeps `HabitatAdvice` and Marax's reading right under the sheltered
    habitat (re-running the advice harness and `habitatAdviceHoldsForEveryOrganism`).
-5. Open items units 1 to 3 leave: Buer's listen, asleep and depart pictures and his refused picture (GC-04's As built);
+5. Unit 4 (GC-07, Foras) is merged after unit 3's line ([the merge](#unit-4s-merge-after-unit-3)): his journey steps
+   are 14 to 16, his codex pages follow Marax's, and the garden class's weight is 1040. Run CI on the merged head (the
+   server jobs, the garden client class, a dispatch of every client class; the newest CI result it descends from is run
+   40823371480, green in full on `5e8e0cba3`, before unit 4), look at his 33 pictures and give
+   [his Verification](foras-pact.md#verification) its results and its "Seen" column.
+6. Open items units 1 to 4 leave: Buer's listen, asleep and depart pictures and his refused picture (GC-04's As built);
    Bathin's ring and shimmer drawn as the shared movement and work signs, his arrive and depart pictures alike, his assent
    picture showing no fist at the chest, the matter pictures with the row's tip over the plates, the pylon road not
    photographed (GC-05's As built and [his record](bathin-pact.md#rollout-and-open-questions)); the journey's Buer steps
    still write his numbers as literals; Marax's astir loop not photographed and his reading's sign the shared work sign
-   ([his record](marax-pact.md#rollout-and-open-questions)); GB18 (Gutenberg's record); a dispatch of every client class
+   ([his record](marax-pact.md#rollout-and-open-questions)); Foras's astir loop not photographed, his count an action-bar
+   line rather than a voiced one, and a ripe host whose bed holds no reading waiting until it is read
+   ([his record](foras-pact.md#rollout-and-open-questions)); GB18 (Gutenberg's record); a dispatch of every client class
    on the cohort's head.
 
 ## How this contract was checked
