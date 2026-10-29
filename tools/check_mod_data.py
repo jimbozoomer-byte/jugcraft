@@ -15398,7 +15398,12 @@ def check_clockwork():
     and easing are the table's, its eyes are drawn at full light and its ragged wings are cut out. Part 5, the
     Pumpkin-Headed Drummer: his march, strokes, nod, loudness and pitches are the table's, each mallet's backswing ends
     before its next, the renderer's elbows, backswing, neck, nod and easing are the table's, his face is drawn at full
-    light and cut out but for its cuts, which match the carved rind's, and his mallets hang clear of the drumheads."""
+    light and cut out but for its cuts, which match the carved rind's, and his mallets hang clear of the drumheads. Part
+    6, the Show Controller: its Java's power, reach, cast, timing and lamps are the table's, it pays for its figures at
+    the electric motor's rate rounded up, its cue holds them longer than any figure takes to run down on a client, it is
+    registered with its block entity, its item, its JE storage and its renderer, its moving parts' quads are written and
+    drawn, its renderer's drum, gauges, lamps and switch are the table's, its blockstate covers every facing, switch,
+    show and cast, it drops itself, its texts are there, and the figures' clockwork can be held and cued."""
     import math
     import clockwork as cw
     import clockwork_data as cwd
@@ -15418,7 +15423,7 @@ def check_clockwork():
     classes = {cw.ORGAN_GRINDER["block"]: ("OrganGrinderSkeleton", "grinder"), cw.WEREWOLF["block"]: ("AnimatronicWerewolf", "werewolf"),
                cw.FLYING_GHOST["block"]: ("FlyingCrankGhost", "ghost"), cw.CLOCKWORK_RAVEN["block"]: ("ClockworkRaven", "raven"),
                cw.PUMPKIN_DRUMMER["block"]: ("PumpkinDrummer", "drummer")}
-    if set(classes) != set(cw.blocks()):
+    if set(classes) != set(cw.figure_blocks()):
         err("check_clockwork: every figure must be checked")
     for spec in cw.figures():
         block = spec["block"]
@@ -15622,6 +15627,64 @@ def check_clockwork():
         gap = drum_x[0] - ball["to"][0] if ball["to"][0] <= 8.0 else ball["from"][0] - drum_x[1]
         if not 0.0 < gap <= 0.5:
             err(f"tools/clockwork_data.py pumpkin_drummer: the {side}'s mallet head must hang just clear of its drumhead (gap {gap:.2f})")
+    # Part 6: the Show Controller.
+    sh = cw.SHOW_CONTROLLER
+    block = sh["block"]
+    java = read(JAVA_ROOT / "agriculture" / "ShowControllerBlock.java")
+    works = read(JAVA_ROOT / "agriculture" / "ShowControllerBlockEntity.java")
+    drawn = read(CLIENT_JAVA_ROOT / "ShowControllerRenderer.java")
+    motor = read(JAVA_ROOT / "kinetic" / "ElectricMotorBlockEntity.java")
+    for item in (f"LAMPS = {sh['lamps']};", f"DRUM_TICKS = {sh['drum_ticks']};", f"SWEEP_TICKS = {sh['sweep_ticks']};",
+                 f"LIGHT = {sh['light']};", "implements EnergyConnectable"):
+        if item not in java:
+            err(f"ShowControllerBlock: missing {item} (tools/clockwork.py SHOW_CONTROLLER)")
+    for item in (f"CAPACITY = {sh['capacity']:_};".replace(",", "_"), f"INPUT = {sh['input']};", f"RANGE = {sh['range']};",
+                 f"MAX_CAST = {sh['max_cast']};", f"SCAN_TICKS = {sh['scan_ticks']};", f"CUE_TICKS = {sh['cue_ticks']};",
+                 "EFFICIENCY_PERCENT = ElectricMotorBlockEntity.EFFICIENCY_PERCENT;",
+                 "(need * 100 + EFFICIENCY_PERCENT - 1) / EFFICIENCY_PERCENT"):
+        if item not in works:
+            err(f"ShowControllerBlockEntity: missing {item} (tools/clockwork.py SHOW_CONTROLLER)")
+    if f"EFFICIENCY_PERCENT = {sh['efficiency_percent']};" not in motor:
+        err(f"tools/clockwork.py SHOW_CONTROLLER: its efficiency_percent must be the copper-wound electric motor's")
+    slowest = max(spec["ease"] for spec in cw.figures())
+    if sh["cue_ticks"] < slowest + 10:
+        err(f"tools/clockwork.py SHOW_CONTROLLER: its cue ({sh['cue_ticks']} ticks) must hold its figures longer than any takes to "
+            f"run down on a client ({slowest} ticks), with time to spare, so every client counts them from the top")
+    base = read(JAVA_ROOT / "agriculture" / "ClockworkFigureBlockEntity.java")
+    for item in ("public void hold(BlockPos by, long now, long until)", "public void cue(BlockPos by, long now, int show)",
+                 "public boolean free(BlockPos by, long now)", "now >= heldUntil", "FIGURES.computeIfAbsent(level"):
+        if item not in base:
+            err(f"ClockworkFigureBlockEntity: missing {item} (a show controller holds, cues and finds the figures)")
+    if 'registerBlock("show_controller", ShowControllerBlock::new' not in java_main \
+            or 'SHOW_CONTROLLER_ENTITY = Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, Jugcraft.id("show_controller")' not in java_main \
+            or 'registerItem("show_controller", props -> new BlockItem(controller, props)' not in java_main \
+            or "EnergyStorage.SIDED.registerForBlockEntity((entity, side) -> entity.energy(), SHOW_CONTROLLER_ENTITY);" not in java_main:
+        err("JugcraftAgriculture: show_controller must be a ShowControllerBlock with its block entity, its item and its JE storage")
+    if "BlockEntityRendererRegistry.register(JugcraftAgriculture.SHOW_CONTROLLER_ENTITY, ShowControllerRenderer::new);" not in client:
+        err("ShowControllerRenderer must be registered")
+    for part in cwd.CONTROLLER_MOVING:
+        key = f"{block}_{part}"
+        if not quads.get(key) or f'DecorQuads.get("{key}")' not in drawn:
+            err(f"clockwork_quads.json: {key} must be written and drawn by ShowControllerRenderer")
+    (sdy, sdz), (sgl, sgr), (sly, slz) = sh["drum"], sh["gauges"], sh["lever"]
+    for name, value in (("DRUM_Y", sdy), ("DRUM_Z", sdz), ("GAUGE_LEFT", sgl), ("GAUGE_RIGHT", sgr), ("GAUGE_Y", sh["gauge_y"]),
+                        ("NEEDLE_SWEEP", sh["needle_sweep"]), ("LAMP_STEP", sh["lamp_step"]), ("LEVER_Y", sly), ("LEVER_Z", slz),
+                        ("LEVER_THROW", sh["lever_throw"])):
+        if f"static final float {name} = {value}F;" not in drawn:
+            err(f"ShowControllerRenderer.{name} must be {value} (tools/clockwork.py SHOW_CONTROLLER)")
+    variants = (load(ASSETS / "blockstates" / f"{block}.json") or {}).get("variants", {})
+    for face in ("north", "east", "south", "west"):
+        for count in range(sh["lamps"] + 1):
+            for enabled in ("false", "true"):
+                for running in ("false", "true"):
+                    if variants.get(f"cast={count},enabled={enabled},facing={face},running={running}", {}).get("model") != f"{MOD}:block/{block}":
+                        err(f"blockstates/{block}.json: facing {face}, cast {count}, enabled {enabled}, running {running} must be its model")
+    pools = (load(DATA / MOD / "loot_table" / "blocks" / f"{block}.json") or {}).get("pools", [])
+    if len(pools) != 1 or f'"{MOD}:{block}"' not in json.dumps(pools):
+        err(f"loot_table/blocks/{block}.json: it drops itself")
+    for key, text in ((f"block.{MOD}.{block}", sh["display"]), (f"message.{MOD}.{block}.on", None), (f"message.{MOD}.{block}.off", None)):
+        if not lang.get(key) or (text and lang.get(key) != text):
+            err(f"{key}: its text must be there" + (f" ({text})" if text else ""))
 
 
 def check_party_table():

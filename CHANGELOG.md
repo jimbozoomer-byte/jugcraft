@@ -8,6 +8,12 @@ Every change to Jugcraft, newest first, grouped by pull request. For what each t
 
 No numbered release yet. Entries on feature branches remain proposed until their pull requests merge.
 
+### Unmerged: Clockwork Animatronics, part 6 (the Show Controller)
+- **Animatronic Show Controller**: a dieselpunk riveted steel control cabinet on the JE network, with gauges, a turning programme drum, amber lamps, a red beacon and a knife switch.
+- It drives every clockwork figure within 8 blocks (up to 12) without shafts, all in time: it holds them still for a moment, then starts them together from one count. It pays for their needs in JE at the electric motor's rate.
+- Record: [clockwork-animatronics.md](docs/features/clockwork-animatronics.md). Decor set 9's sixth and last part.
+- **Checked:** the record's Verification. Game tests and screenshots run in CI only; not played by hand.
+
 ### Unmerged: Clockwork Animatronics, part 5 (the Pumpkin-Headed Drummer)
 - **Pumpkin-Headed Drummer**: a bandsman with a carved jack-o'-lantern for a head under a black shako, in a red coat frogged with gold, a rope-tensioned bass drum slung in front of him, two blocks tall.
 - He runs on kinetic power, 4 KE a tick. While he runs he beats a march on his drum with both mallets, his head dipping on the beat, and the candle in his head lights his carved face.

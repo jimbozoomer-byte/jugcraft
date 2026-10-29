@@ -10,9 +10,12 @@ import io.github.jimbozoomer.jugcraft.agriculture.JugcraftAgriculture;
 import io.github.jimbozoomer.jugcraft.agriculture.OrganGrinderSkeletonBlock;
 import io.github.jimbozoomer.jugcraft.agriculture.OrganGrinderSkeletonBlockEntity;
 import io.github.jimbozoomer.jugcraft.agriculture.PumpkinDrummerBlock;
+import io.github.jimbozoomer.jugcraft.agriculture.ShowControllerBlock;
+import io.github.jimbozoomer.jugcraft.agriculture.ShowControllerBlockEntity;
 import io.github.jimbozoomer.jugcraft.kinetic.HandCrankBlock;
 import io.github.jimbozoomer.jugcraft.kinetic.HandCrankBlockEntity;
 import io.github.jimbozoomer.jugcraft.kinetic.JugcraftKinetics;
+import java.util.List;
 import net.fabricmc.fabric.api.gametest.v1.GameTest;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -26,6 +29,7 @@ import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.GameType;
+import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.DoubleBlockHalf;
@@ -43,7 +47,8 @@ import net.minecraft.world.phys.Vec3;
  * Ghost runs on its own need, from any side, and runs down; a hand crank behind it drives it; and it breaks whole. Part
  * 4: the Clockwork Raven runs on its own need, its caws, beak and wings keep time in its cycle, and a hand crank drives it.
  * Part 5: the Pumpkin-Headed Drummer runs on his own need, his mallets' strokes land on their beats and his head dips in
- * time, and a hand crank drives him.
+ * time, and a hand crank drives him. Part 6: a Show Controller on JE drives the figures near it in time, paying for their
+ * needs at the electric motor's rate, and they run down when it is switched off.
  */
 public class ClockworkGameTests {
 	private static void floor(GameTestHelper helper) {
@@ -306,10 +311,62 @@ public class ClockworkGameTests {
 		});
 	}
 
+	/** Stands a figure at {@code lower} (absolute), both its halves, facing north; returns its lower block. */
+	private static BlockPos stand(ServerLevel level, BlockPos lower, String id) {
+		BlockState figure = JugcraftAgriculture.block(id).defaultBlockState();
+		level.setBlock(lower, figure, Block.UPDATE_ALL);
+		level.setBlock(lower.above(), figure.setValue(OrganGrinderSkeletonBlock.HALF, DoubleBlockHalf.UPPER), Block.UPDATE_ALL);
+		return lower;
+	}
+
+	/** Part 6: a Show Controller drives the figures near it in time, on JE, and they run down when it is switched off. */
+	@GameTest(maxTicks = 140)
+	public void theShowControllerDrivesItsFiguresInTime(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		floor(helper);
+		BlockPos at = helper.absolutePos(new BlockPos(3, 2, 2));
+		level.setBlock(at, JugcraftAgriculture.block("show_controller").defaultBlockState().setValue(ShowControllerBlock.ENABLED, true), Block.UPDATE_ALL);
+		if (!(level.getBlockEntity(at) instanceof ShowControllerBlockEntity controller)) {
+			throw helper.assertionException("The controller has its works");
+		}
+		controller.energy().setAmount(ShowControllerBlockEntity.CAPACITY);
+		BlockPos raven = stand(level, helper.absolutePos(new BlockPos(1, 2, 5)), "clockwork_raven");
+		BlockPos drummer = stand(level, helper.absolutePos(new BlockPos(5, 2, 5)), "pumpkin_drummer");
+		ClockworkFigureBlockEntity first = (ClockworkFigureBlockEntity) level.getBlockEntity(raven);
+		ClockworkFigureBlockEntity second = (ClockworkFigureBlockEntity) level.getBlockEntity(drummer);
+		long cost = ShowControllerBlockEntity.cost(List.of(first, second));
+		long need = ClockworkRavenBlock.NEED + PumpkinDrummerBlock.NEED;
+		helper.assertTrue(cost * ShowControllerBlockEntity.EFFICIENCY_PERCENT >= need * 100 && (cost - 1) * ShowControllerBlockEntity.EFFICIENCY_PERCENT < need * 100,
+				"It pays for its figures' needs at the electric motor's rate, rounded up: " + cost + " JE for " + need + " KE");
+		int on = 2 * ShowControllerBlockEntity.SCAN_TICKS + ShowControllerBlockEntity.CUE_TICKS + 10;
+		helper.runAtTickTime(on, () -> {
+			BlockState state = level.getBlockState(at);
+			long used = ShowControllerBlockEntity.CAPACITY - controller.energy().getAmount();
+			// Its cast is every figure within its reach: these two, and any of a neighbouring test's (tests stand apart).
+			List<ClockworkFigureBlockEntity> cast = controller.cast().stream().map(level::getBlockEntity)
+					.filter(ClockworkFigureBlockEntity.class::isInstance).map(ClockworkFigureBlockEntity.class::cast).toList();
+			helper.assertTrue(controller.cast().containsAll(List.of(raven, drummer)) && state.getValue(ShowControllerBlock.RUNNING)
+					&& state.getValue(ShowControllerBlock.CAST) == Math.min(cast.size(), ShowControllerBlock.LAMPS),
+					"It finds both figures near it and runs its show, a lamp lit for each: cast " + controller.cast().size());
+			helper.assertTrue(running(level, raven) && running(level, drummer) && Math.abs(first.played() - second.played()) <= 1,
+					"Both figures run, in time with each other: " + first.played() + " and " + second.played());
+			long each = ShowControllerBlockEntity.cost(cast);
+			helper.assertTrue(used > 0 && used % each == 0, "It uses its cost in JE each tick its show runs: " + used + " at " + each);
+			level.setBlock(at, state.setValue(ShowControllerBlock.ENABLED, false), Block.UPDATE_ALL);
+		});
+		helper.runAtTickTime(on + ClockworkRavenBlock.SPIN_DOWN + 5, () -> {
+			BlockState state = level.getBlockState(at);
+			helper.assertTrue(!running(level, raven) && !running(level, drummer) && !state.getValue(ShowControllerBlock.RUNNING)
+					&& state.getValue(ShowControllerBlock.CAST) == 0, "Switched off, its show ends and its figures run down");
+			helper.succeed();
+		});
+	}
+
 	@GameTest
 	public void clockworkDataLoads(GameTestHelper helper) {
 		ServerLevel level = helper.getLevel();
-		for (String id : new String[] {"organ_grinder_skeleton", "animatronic_werewolf", "flying_crank_ghost", "clockwork_raven", "pumpkin_drummer"}) {
+		for (String id : new String[] {"organ_grinder_skeleton", "animatronic_werewolf", "flying_crank_ghost", "clockwork_raven", "pumpkin_drummer",
+				"show_controller"}) {
 			helper.assertTrue(level.recipeAccess().byKey(ResourceKey.create(Registries.RECIPE, Jugcraft.id(id))).isPresent(), id + " has a recipe");
 			helper.assertTrue(level.getServer().reloadableRegistries().getLootTable(ResourceKey.create(Registries.LOOT_TABLE,
 					Jugcraft.id("blocks/" + id))) != LootTable.EMPTY, id + "'s loot loads");

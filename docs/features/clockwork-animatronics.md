@@ -1,6 +1,6 @@
 # Clockwork Animatronics
 
-Status: parts 1 (the Organ-Grinder Skeleton), 2 (the Animatronic Werewolf), 3 (the Flying Crank Ghost), 4 (the Clockwork Raven) and 5 (the Pumpkin-Headed Drummer) implemented. CI builds them and runs their game tests and client screenshots; not yet played by hand. Part 6 is planned (below).
+Status: all six parts implemented: 1 (the Organ-Grinder Skeleton), 2 (the Animatronic Werewolf), 3 (the Flying Crank Ghost), 4 (the Clockwork Raven), 5 (the Pumpkin-Headed Drummer) and 6 (the Show Controller). CI builds them and runs their game tests and client screenshots; not yet played by hand.
 Proposal issue: none. The owner asked for it directly on 28 October 2026, as set 9 of the ten sets of fall and Halloween decor ("Then I want you to do 1-10 in parts in that order one by one"): an organ-grinder skeleton with a hurdy-gurdy, an animatronic werewolf on a turntable, a ghost on a crank wire, a mechanical raven and a pumpkin-headed drummer, on the power network, brass and steam at first and a dieselpunk steel version later.
 Owner: @jimbozoomer-byte
 Target milestone and tier: the bronze age of kinetic power ([kinetic-power.md](kinetic-power.md)). The figures are made from vanilla things and a clock; they move on kinetic energy from a hand crank or a steam engine, through iron shafts and brass gearboxes, or from the JE network through an electric motor.
@@ -78,8 +78,21 @@ Halloween figures that move by clockwork. Each runs on kinetic power: a shaft, g
   - Recipe: a carved pumpkin over red wool either side of a note block (his drum), over sticks either side of a clock.
   - Broken, either half brings him down, and he drops once.
 
-### Planned
-- **Part 6: the dieselpunk tier**: a steel show controller on the JE network, which drives every figure near it in time, without shafts, in riveted steel and dieselpunk dials.
+### Part 6: the Show Controller
+- **Animatronic Show Controller**: the dieselpunk tier, a riveted gunmetal steel control cabinet 87 cm wide, 1 m tall and 50 cm deep, on the JE network. One block.
+  - Its front has two cream-faced gauges in chrome bezels and a window on its brass programme drum, its steel pins set in rising rows. Below them sit six amber lamps and a cream enamel nameplate lettered in red.
+  - Its sides are louvred, a red beacon sits on its top, a knife switch with a Bakelite knob is on its east side, and a brass cable gland is at its back. Cables connect to it.
+  - **It runs on JE**: it holds 8,000 JE and takes up to 128 JE a tick from cables.
+  - **It drives every clockwork figure within 8 blocks**, up to 12, without shafts, all in time:
+    - switched on (use it to throw its switch) and holding enough JE for them, it cues a show;
+    - it holds its figures still for 1.5 seconds, then drives them all from one count, so the organ's waltz, the drummer's march, the werewolf's howls, the raven's caws and the ghost's flight keep time together;
+    - it pays for each figure's need at the copper-wound electric motor's rate: 100 JE for 75 KE, rounded up. Five figures (22 KE a tick) cost 30 JE a tick.
+  - It looks for figures once a second. When the figures it finds change (one placed, one broken), it cues the show again from the top for all of them.
+  - A figure another running controller drives is left to that one.
+  - **While its show runs**: the programme drum turns, the show gauge's needle swings, a lamp is lit for each figure cued (up to six; the cast gauge shows the same), the beacon is lit and it gives light 4.
+  - **Its show ends** when it is switched off or runs short of JE. Its figures then run down as they would on their own clockwork, and a figure still on a shaft keeps going on that.
+  - Recipe: steel ingots round a glass pane, steel gears either side of a clock and redstone.
+  - It drops itself (a pickaxe).
 
 ## How it is drawn (docs/ART_DIRECTION.md, docs/NATURAL_TEXTURES.md)
 - Built from boxes at real size, one texel to a model pixel (`tools/clockwork_data.py`), in the Haunted Midway's and the Front-Yard Haunt's manner, whose palettes and bones it shares.
@@ -133,6 +146,18 @@ Halloween figures that move by clockwork. Each runs on kinetic power: a shaft, g
     - each forearm, its glove and mallet with it, swings about its elbow, out from its drumhead and in again;
     - his head dips about his neck.
   - Its item shows him at rest, his face carved dark.
+- **The Show Controller** (part 6), dieselpunk as the tier above brass and steam is (docs/ART_DIRECTION.md):
+  - Riveted gunmetal steel plate: its field its middle tone, lit along its top and left edges, shaded along its foot and right, a rivet one in from each corner. The sides are louvred, with dark slots on every third row between the rivets.
+  - Chrome trim (its cap, the bezels, the switch's slot plate), bright with a highlight column. The window shows the dark inside.
+  - The dials are cream enamel, each with a red line at its scale's end. The nameplate is cream with red lettering, and the switch's knob is Bakelite.
+  - The programme drum is brass, its steel pins set one in every seventh texel along a diagonal, as a music box's are.
+  - The lamps are amber and the beacon red, flat glass drawn at full light when lit and tinted dark when out.
+  - Moving parts move, drawn by `ShowControllerRenderer`:
+    - the programme drum turns about its axle;
+    - the needles turn about their gauges' middles;
+    - one lamp is drawn along its row, once for each lamp;
+    - the switch turns about its pivot, back when on and forward when off.
+  - Its item shows it switched off, its lamps along their row.
 - **The previews**, fixed before commit:
   - the organ's pipes, each with a dark mouth texel near its foot, read as a face with a black bar for a mouth; the mouths are gone and the pipes stand on a brass moulding;
   - the waistcoat's moth holes, a texel each on panels two texels wide, read as black blotches; they are now only on its back;
@@ -157,10 +182,13 @@ Halloween figures that move by clockwork. Each runs on kinetic power: a shaft, g
   - the jack-o'-lantern's grin, its corners raised and a tooth left in its middle, read as a checkerboard too at five texels by four; it is now a plain wide grin under two eyes;
   - the coat's gold braid on every other row of the chest read as a striped shirt; it is now two rows.
   - The preview poses each forearm swung back and his head dipped, lit and unlit, from the front, both sides and behind.
+- **The part 6 previews**, fixed before commit:
+  - the programme drum's pins, a tone darker than its brass, did not show; they are now bright steel.
+  - The preview poses the drum turned, the needles at rest and swung, the lamps lit for none to all six, the beacon and the switch on and off.
 
 ## Connections
-- Existing input producer: kinetic power, from the hand crank, the steam engine and the electric motor (which takes JE), through iron shafts, brass gearboxes and belts ([kinetic-power.md](kinetic-power.md)).
-- Recipe inputs: bone blocks, a note block, black wool, planks and a clock (the skeleton); bones, brown wool, iron, gold and a clock (the werewolf); string, white wool, iron and a clock (the ghost); feathers, black dye, iron, gold and a clock (the raven); a carved pumpkin, red wool, a note block, sticks and a clock (the drummer).
+- Existing input producer: kinetic power, from the hand crank, the steam engine and the electric motor (which takes JE), through iron shafts, brass gearboxes and belts ([kinetic-power.md](kinetic-power.md)). The Show Controller takes JE from cables ([machines-and-power.md](machines-and-power.md)).
+- Recipe inputs: bone blocks, a note block, black wool, planks and a clock (the skeleton); bones, brown wool, iron, gold and a clock (the werewolf); string, white wool, iron and a clock (the ghost); feathers, black dye, iron, gold and a clock (the raven); a carved pumpkin, red wool, a note block, sticks and a clock (the drummer); steel ingots, a glass pane, steel gears, a clock and redstone (the controller).
 - Existing output consumer: none; a figure is a power sink, like a machine.
 - Technology/magic connections (or infrastructure/cosmetic applicability): technology. It is decoration that runs on the kinetic network, a use for a hand crank or a small steam engine before electricity.
 - Reachable entry path: a hand crank (planks and an iron shaft), from the first iron. The figure's recipe needs a clock (gold and redstone).
@@ -174,6 +202,7 @@ Halloween figures that move by clockwork. Each runs on kinetic power: a shaft, g
 - The Flying Crank Ghost takes 4 KE a tick, a light ghost on a crank, as the skeleton does.
 - The Clockwork Raven takes 2 KE a tick, the lightest: a hand crank runs eight.
 - The Pumpkin-Headed Drummer takes 4 KE a tick, as the skeleton does.
+- The Show Controller pays for its figures' needs in JE at the copper-wound electric motor's rate, 100 JE for 75 KE, rounded up: never less than the motor and a shaft would cost. It uses nothing while its show is off or cueing, and buffers 8,000 JE.
 - The energy goes into the clockwork: nothing comes back out, and it stores nothing. No loop.
 - Its recipe gives back only itself.
 
@@ -182,9 +211,15 @@ Halloween figures that move by clockwork. Each runs on kinetic power: a shaft, g
 - **The client draws it**: from `running` and its own clock. Each client keeps its own count of the tune from when it saw the figure start, so the crank, the arm, the nod and the jaw move in time with what it hears.
 - It saves nothing: whether it runs comes again from its power on the first tick after a reload.
 - It can't be pushed by a piston.
-- IDs (stable from release): the blocks and items `organ_grinder_skeleton`, `animatronic_werewolf`, `flying_crank_ghost`, `clockwork_raven` and `pumpkin_drummer` (`facing`, `half`, `running`), and their block entities of the same names.
+- IDs (stable from release): the blocks and items `organ_grinder_skeleton`, `animatronic_werewolf`, `flying_crank_ghost`, `clockwork_raven` and `pumpkin_drummer` (`facing`, `half`, `running`), and their block entities of the same names; the block and item `show_controller` (`facing`, `enabled`, `running`, `cast` 0 to 6) and its block entity.
 - Every figure shares one clockwork (`ClockworkFigureBlockEntity`): what differs is its need and what it does as it runs, its tune, its howl, its moan, its caws or its march.
 - The ghost's moan is the server's, a sound every nearby player hears. How it flies and whether its eyes are lit are drawn by each client from `running` alone.
+- **The Show Controller is the server's**:
+  - it finds its figures in the set of figures each server level keeps as they tick, so it never searches blocks;
+  - it looks once a second, at most 12 figures within 8 blocks;
+  - it drives each from one count.
+- **Its cue holds its figures still for 1.5 seconds**, longer than any takes to run down on a client (one second at most). So every client sees them stop and counts them from the top together, and the figures' sounds and motions keep time across the show.
+- Its switch is thrown by using it, on the server. It saves only its JE: after a reload it cues its show again.
 - Its recipe follows the agriculture switch. The block and item stay registered when it is off. It runs on the machines feature's kinetic power: with that off, no hand crank or shaft exists to drive it, and it stands still.
 
 ## Dependencies and assets
@@ -253,6 +288,20 @@ Local checks run on this branch, and their results:
   - `python3 tools/check_icon_maps.py`: PASS.
   - `javac` scan of the new and changed Java for syntax errors: none. Every member the new Java calls is used elsewhere in the code already, or declared in it. The full compile runs in CI.
   - The drummer was previewed offline, each forearm swung back and his head dipped, lit and unlit, from the front, both sides and behind, and in his item pose; what the previews showed and what was fixed is under How it is drawn.
+- Part 6, all on the first run:
+  - `python3 tools/check_mod_data.py`: PASS (8,168 material IDs), including the art check. `check_clockwork` now also checks the Show Controller:
+    - its power, reach, cast, scan, cue, lamps, drum, gauge and light against the table;
+    - that it pays at the copper-wound electric motor's rate, the motor's own number, rounded up;
+    - that its cue holds its figures at least ten ticks longer than any figure takes to run down on a client;
+    - that the figures' clockwork can be found, held and cued;
+    - its registration with its block entity, its item, its JE storage and its renderer;
+    - its moving parts' quads, written and drawn, and its renderer's numbers;
+    - that its blockstate covers every facing, switch, show and cast, it drops itself, and its name and switch messages have their text.
+  - `python3 scripts/check_repository.py`: PASS.
+  - `python3 -m unittest discover -s scripts/tests`: 287 tests, OK.
+  - `python3 tools/check_icon_maps.py`: PASS.
+  - `javac` scan of the new and changed Java for syntax errors: none. Every member the new Java calls is used elsewhere in the code already, or declared in it. The full compile runs in CI.
+  - The controller was previewed offline: its drum turned, its needles at rest and swung, its lamps lit for none to all six, its beacon and switch on and off, from the front, both sides, behind and above, and in its item pose; what the previews showed and what was fixed is under How it is drawn.
 
 `ClockworkGameTests` (run in CI):
 - **The Organ-Grinder runs on its clockwork**:
@@ -287,16 +336,22 @@ Local checks run on this branch, and their results:
   - each mallet is at the head on its beats and at the top of its backswing half a backswing before them, and still while the other beats;
   - his head dips on the beat and lifts between;
   - a hand crank beside him drives him.
-- **Their data loads**: every figure's recipe and loot table.
+- **The Show Controller drives its figures in time** (part 6):
+  - a controller switched on, its JE store full, with a Clockwork Raven and a Pumpkin-Headed Drummer near it, pays 100 JE for 75 KE of their needs, rounded up;
+  - after it has found them and cued its show, both run, within a tick of each other in their counts;
+  - it has a lamp lit for each, and has used its cost in JE for each tick its show has run;
+  - switched off, its show ends and both run down.
+- **Their data loads**: every figure's recipe and loot table, and the controller's.
 
-`ClockworkClientGameTests` takes eleven screenshots on a dark oak floor of two Organ-Grinder Skeletons, one facing the camera and one facing east, and an Animatronic Werewolf facing the camera, each with a hand crank against the back of its lower block:
+`ClockworkClientGameTests` takes twelve screenshots on a dark oak floor of two Organ-Grinder Skeletons, one facing the camera and one facing east, and an Animatronic Werewolf facing the camera, each with a hand crank against the back of its lower block:
 - at rest, from the front;
 - running, their cranks turned, from the front;
 - running, from the east of the skeleton facing the camera, where its crank and its right hand are;
 - the werewolf in its first howl, its arms up and its head back (part 2);
 - a Flying Crank Ghost facing the camera, a hand crank behind it, at rest; then flying, its crank turned and its eyes lit, from the front; and half a turn later, its other arm up, from the side (part 3). The floor reaches further north for these.
 - a Clockwork Raven facing the camera, a hand crank behind it, at rest; then in its first burst of caws, its beak open and its wings up (part 4);
-- a Pumpkin-Headed Drummer facing the camera, a hand crank behind him, at rest; then drumming, his right mallet at the top of its backswing and his face lit (part 5).
+- a Pumpkin-Headed Drummer facing the camera, a hand crank behind him, at rest; then drumming, his right mallet at the top of its backswing and his face lit (part 5);
+- a Show Controller, switched on with its JE given it, driving the ghost, the raven and the drummer near it: three lamps lit, its beacon on (part 6).
 
 Not run: a hand playtest, and a two-client playtest.
 
@@ -304,7 +359,8 @@ Not run: a hand playtest, and a two-client playtest.
 Seasonal in look, not in use: it is made and works all year. It doesn't generate in the world.
 
 ## Rollout and open questions
-- Part 1 is the Organ-Grinder Skeleton, part 2 the Animatronic Werewolf, part 3 the Flying Crank Ghost, part 4 the Clockwork Raven and part 5 the Pumpkin-Headed Drummer; part 6 follows, stacked on the last.
+- The six parts, each stacked on the last: the Organ-Grinder Skeleton, the Animatronic Werewolf, the Flying Crank Ghost, the Clockwork Raven, the Pumpkin-Headed Drummer and the Show Controller.
+- Part 6 added to the shared clockwork a set of the figures on each level, kept as they tick; a hold, for a controller's cue; and a cue, which drives a figure from a controller's count. A figure on its own shafts works as before.
 - The Clockwork Raven is not the Raven on a Perch (`raven_perch`, the Mad Scientist's set): that one is a lifelike raven that watches players and ruffles its feathers. This one is a clockwork automaton on the kinetic network.
 - Part 2 moved the skeleton's clockwork into the shared `ClockworkFigureBlockEntity` (unchanged in what it does), and its renderer now counts its tune at the server's rate, easing only its crank. The renderer's tune count had been eased too, so the jaw ran a quarter-second behind the notes.
-- Open: whether a figure should also take a redstone signal to start and stop (a power switch), and whether the show controller (part 6) should let a builder set each figure's start in a sequence.
+- Open: whether a figure or the controller should also take a redstone signal to start and stop, and whether the controller should let a builder set each figure's start in a sequence.

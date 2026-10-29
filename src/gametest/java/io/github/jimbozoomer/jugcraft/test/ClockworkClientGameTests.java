@@ -6,6 +6,8 @@ import io.github.jimbozoomer.jugcraft.agriculture.FlyingCrankGhostBlock;
 import io.github.jimbozoomer.jugcraft.agriculture.JugcraftAgriculture;
 import io.github.jimbozoomer.jugcraft.agriculture.OrganGrinderSkeletonBlock;
 import io.github.jimbozoomer.jugcraft.agriculture.PumpkinDrummerBlock;
+import io.github.jimbozoomer.jugcraft.agriculture.ShowControllerBlock;
+import io.github.jimbozoomer.jugcraft.agriculture.ShowControllerBlockEntity;
 import io.github.jimbozoomer.jugcraft.kinetic.HandCrankBlock;
 import io.github.jimbozoomer.jugcraft.kinetic.HandCrankBlockEntity;
 import io.github.jimbozoomer.jugcraft.kinetic.JugcraftKinetics;
@@ -23,7 +25,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.DoubleBlockHalf;
 
 /**
- * Client game test for the Clockwork Animatronics, parts 1 to 5 (decor set 9): on a dark oak floor, two Organ-Grinder
+ * Client game test for the Clockwork Animatronics, parts 1 to 6 (decor set 9): on a dark oak floor, two Organ-Grinder
  * Skeletons, one facing the camera (north) and one facing east, and an Animatronic Werewolf facing the camera, each with a
  * hand crank against the back of its lower block. Photographed at rest from the front; then with their cranks turned
  * and their clockwork running, from the front and from the east, where the organ's crank is and the skeleton's right
@@ -32,8 +34,10 @@ import net.minecraft.world.level.block.state.properties.DoubleBlockHalf;
  * rest and then flying, its arms up in turn and its eyes lit (client/FlyingCrankGhostRenderer); and, part 4, a
  * Clockwork Raven facing the camera, its crank behind it, at rest and then in its first burst of caws, its beak open
  * and its wings up (client/ClockworkRavenRenderer); and, part 5, a Pumpkin-Headed Drummer facing the camera, his crank
- * behind him, at rest and then drumming, his right mallet swung back and his face lit (client/PumpkinDrummerRenderer; CI
- * job {@code client}). They go into docs/features/clockwork-animatronics.md.
+ * behind him, at rest and then drumming, his right mallet swung back and his face lit (client/PumpkinDrummerRenderer);
+ * and, part 6, a Show Controller switched on with its JE given it, driving the three figures near it, its lamps lit for
+ * them and its beacon on (client/ShowControllerRenderer; CI job {@code client}). They go into
+ * docs/features/clockwork-animatronics.md.
  */
 public class ClockworkClientGameTests implements FabricClientGameTest {
 	@Override
@@ -85,6 +89,10 @@ public class ClockworkClientGameTests implements FabricClientGameTest {
 			server.runOnServer(minecraft -> turn(minecraft.overworld(), origin.offset(3, 0, -3)));
 			context.waitTicks(PumpkinDrummerBlock.PATTERN.indexOf('R', 10) * PumpkinDrummerBlock.STEP_TICKS - PumpkinDrummerBlock.BACK_TICKS / 2 - 40);
 			shoot(context, singleplayer, x + 3, y + 1, z - 7, 0, 15, "jugcraft_clockwork_drummer_drumming");
+			// A Show Controller, switched on and its JE given it, drives the ghost, the raven and the drummer near it in time.
+			server.runOnServer(minecraft -> showController(minecraft.overworld(), origin.offset(-1, 0, -7)));
+			context.waitTicks(2 * ShowControllerBlockEntity.SCAN_TICKS + ShowControllerBlockEntity.CUE_TICKS - 40);
+			shoot(context, singleplayer, x - 1, y, z - 9, 0, 15, "jugcraft_clockwork_show_controller");
 		}
 	}
 
@@ -118,6 +126,14 @@ public class ClockworkClientGameTests implements FabricClientGameTest {
 	private static void crank(ServerLevel level, BlockPos origin) {
 		for (BlockPos at : new BlockPos[] {origin.offset(0, 0, 2), origin.offset(-4, 0, 1), origin.offset(3, 0, 2)}) {
 			turn(level, at);
+		}
+	}
+
+	/** A Show Controller at {@code at} facing north, switched on, its JE store full. */
+	private static void showController(ServerLevel level, BlockPos at) {
+		level.setBlock(at, JugcraftAgriculture.block("show_controller").defaultBlockState().setValue(ShowControllerBlock.ENABLED, true), Block.UPDATE_ALL);
+		if (level.getBlockEntity(at) instanceof ShowControllerBlockEntity controller) {
+			controller.energy().setAmount(ShowControllerBlockEntity.CAPACITY);
 		}
 	}
 

@@ -34872,6 +34872,11 @@
       "denominator": 1,
       "source": "fallback (balance pending)"
     },
+    "jugcraft:show_controller": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
     "jugcraft:show_launcher": {
       "numerator": 983,
       "denominator": 1,

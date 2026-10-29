@@ -418,6 +418,7 @@ public final class JugcraftAgriculture {
 	public static BlockEntityType<FlyingCrankGhostBlockEntity> FLYING_CRANK_GHOST_ENTITY;
 	public static BlockEntityType<ClockworkRavenBlockEntity> CLOCKWORK_RAVEN_ENTITY;
 	public static BlockEntityType<PumpkinDrummerBlockEntity> PUMPKIN_DRUMMER_ENTITY;
+	public static BlockEntityType<ShowControllerBlockEntity> SHOW_CONTROLLER_ENTITY;
 	public static BlockEntityType<FirewoodRackBlockEntity> FIREWOOD_RACK_ENTITY;
 	public static BlockEntityType<DecorationBlockEntity> CHOPPING_BLOCK_ENTITY;
 	public static BlockEntityType<BlanketLadderBlockEntity> BLANKET_LADDER_ENTITY;
@@ -3166,7 +3167,8 @@ public final class JugcraftAgriculture {
 	/**
 	 * Decor set 9, the Clockwork Animatronics (tools/clockwork.py): Halloween figures moved by clockwork on kinetic power.
 	 * Part 1: the Organ-Grinder Skeleton; part 2: the Animatronic Werewolf; part 3: the Flying Crank Ghost; part 4: the
-	 * Clockwork Raven; part 5: the Pumpkin-Headed Drummer; each two blocks tall, its clockwork in its lower block.
+	 * Clockwork Raven; part 5: the Pumpkin-Headed Drummer; each two blocks tall, its clockwork in its lower block. Part 6:
+	 * the Show Controller, a cabinet on the JE network that drives the figures near it in time.
 	 */
 	private static void registerClockwork() {
 		Block grinder = registerBlock("organ_grinder_skeleton", OrganGrinderSkeletonBlock::new, BlockBehaviour.Properties.of()
@@ -3199,6 +3201,12 @@ public final class JugcraftAgriculture {
 				FabricBlockEntityTypeBuilder.create(PumpkinDrummerBlockEntity::new, drummer).build());
 		registerItem("pumpkin_drummer", props -> new DoubleHighBlockItem(drummer, props), new Item.Properties().useBlockDescriptionPrefix(),
 				BUILDING_TAB);
+		Block controller = registerBlock("show_controller", ShowControllerBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.METAL)
+				.strength(3.5F).sound(SoundType.METAL).requiresCorrectToolForDrops().noOcclusion().lightLevel(ShowControllerBlock::light));
+		registerItem("show_controller", props -> new BlockItem(controller, props), new Item.Properties().useBlockDescriptionPrefix(), BUILDING_TAB);
+		SHOW_CONTROLLER_ENTITY = Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, Jugcraft.id("show_controller"),
+				FabricBlockEntityTypeBuilder.create(ShowControllerBlockEntity::new, controller).build());
+		EnergyStorage.SIDED.registerForBlockEntity((entity, side) -> entity.energy(), SHOW_CONTROLLER_ENTITY);
 	}
 
 	/** Bleached bones: they come away easily, and a piston pops them off. */

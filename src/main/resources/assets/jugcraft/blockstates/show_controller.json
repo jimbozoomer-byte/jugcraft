@@ -1,0 +1,424 @@
+{
+  "variants": {
+    "cast=0,enabled=false,facing=north,running=false": {
+      "model": "jugcraft:block/show_controller"
+    },
+    "cast=0,enabled=false,facing=north,running=true": {
+      "model": "jugcraft:block/show_controller"
+    },
+    "cast=0,enabled=true,facing=north,running=false": {
+      "model": "jugcraft:block/show_controller"
+    },
+    "cast=0,enabled=true,facing=north,running=true": {
+      "model": "jugcraft:block/show_controller"
+    },
+    "cast=1,enabled=false,facing=north,running=false": {
+      "model": "jugcraft:block/show_controller"
+    },
+    "cast=1,enabled=false,facing=north,running=true": {
+      "model": "jugcraft:block/show_controller"
+    },
+    "cast=1,enabled=true,facing=north,running=false": {
+      "model": "jugcraft:block/show_controller"
+    },
+    "cast=1,enabled=true,facing=north,running=true": {
+      "model": "jugcraft:block/show_controller"
+    },
+    "cast=2,enabled=false,facing=north,running=false": {
+      "model": "jugcraft:block/show_controller"
+    },
+    "cast=2,enabled=false,facing=north,running=true": {
+      "model": "jugcraft:block/show_controller"
+    },
+    "cast=2,enabled=true,facing=north,running=false": {
+      "model": "jugcraft:block/show_controller"
+    },
+    "cast=2,enabled=true,facing=north,running=true": {
+      "model": "jugcraft:block/show_controller"
+    },
+    "cast=3,enabled=false,facing=north,running=false": {
+      "model": "jugcraft:block/show_controller"
+    },
+    "cast=3,enabled=false,facing=north,running=true": {
+      "model": "jugcraft:block/show_controller"
+    },
+    "cast=3,enabled=true,facing=north,running=false": {
+      "model": "jugcraft:block/show_controller"
+    },
+    "cast=3,enabled=true,facing=north,running=true": {
+      "model": "jugcraft:block/show_controller"
+    },
+    "cast=4,enabled=false,facing=north,running=false": {
+      "model": "jugcraft:block/show_controller"
+    },
+    "cast=4,enabled=false,facing=north,running=true": {
+      "model": "jugcraft:block/show_controller"
+    },
+    "cast=4,enabled=true,facing=north,running=false": {
+      "model": "jugcraft:block/show_controller"
+    },
+    "cast=4,enabled=true,facing=north,running=true": {
+      "model": "jugcraft:block/show_controller"
+    },
+    "cast=5,enabled=false,facing=north,running=false": {
+      "model": "jugcraft:block/show_controller"
+    },
+    "cast=5,enabled=false,facing=north,running=true": {
+      "model": "jugcraft:block/show_controller"
+    },
+    "cast=5,enabled=true,facing=north,running=false": {
+      "model": "jugcraft:block/show_controller"
+    },
+    "cast=5,enabled=true,facing=north,running=true": {
+      "model": "jugcraft:block/show_controller"
+    },
+    "cast=6,enabled=false,facing=north,running=false": {
+      "model": "jugcraft:block/show_controller"
+    },
+    "cast=6,enabled=false,facing=north,running=true": {
+      "model": "jugcraft:block/show_controller"
+    },
+    "cast=6,enabled=true,facing=north,running=false": {
+      "model": "jugcraft:block/show_controller"
+    },
+    "cast=6,enabled=true,facing=north,running=true": {
+      "model": "jugcraft:block/show_controller"
+    },
+    "cast=0,enabled=false,facing=east,running=false": {
+      "model": "jugcraft:block/show_controller",
+      "y": 90
+    },
+    "cast=0,enabled=false,facing=east,running=true": {
+      "model": "jugcraft:block/show_controller",
+      "y": 90
+    },
+    "cast=0,enabled=true,facing=east,running=false": {
+      "model": "jugcraft:block/show_controller",
+      "y": 90
+    },
+    "cast=0,enabled=true,facing=east,running=true": {
+      "model": "jugcraft:block/show_controller",
+      "y": 90
+    },
+    "cast=1,enabled=false,facing=east,running=false": {
+      "model": "jugcraft:block/show_controller",
+      "y": 90
+    },
+    "cast=1,enabled=false,facing=east,running=true": {
+      "model": "jugcraft:block/show_controller",
+      "y": 90
+    },
+    "cast=1,enabled=true,facing=east,running=false": {
+      "model": "jugcraft:block/show_controller",
+      "y": 90
+    },
+    "cast=1,enabled=true,facing=east,running=true": {
+      "model": "jugcraft:block/show_controller",
+      "y": 90
+    },
+    "cast=2,enabled=false,facing=east,running=false": {
+      "model": "jugcraft:block/show_controller",
+      "y": 90
+    },
+    "cast=2,enabled=false,facing=east,running=true": {
+      "model": "jugcraft:block/show_controller",
+      "y": 90
+    },
+    "cast=2,enabled=true,facing=east,running=false": {
+      "model": "jugcraft:block/show_controller",
+      "y": 90
+    },
+    "cast=2,enabled=true,facing=east,running=true": {
+      "model": "jugcraft:block/show_controller",
+      "y": 90
+    },
+    "cast=3,enabled=false,facing=east,running=false": {
+      "model": "jugcraft:block/show_controller",
+      "y": 90
+    },
+    "cast=3,enabled=false,facing=east,running=true": {
+      "model": "jugcraft:block/show_controller",
+      "y": 90
+    },
+    "cast=3,enabled=true,facing=east,running=false": {
+      "model": "jugcraft:block/show_controller",
+      "y": 90
+    },
+    "cast=3,enabled=true,facing=east,running=true": {
+      "model": "jugcraft:block/show_controller",
+      "y": 90
+    },
+    "cast=4,enabled=false,facing=east,running=false": {
+      "model": "jugcraft:block/show_controller",
+      "y": 90
+    },
+    "cast=4,enabled=false,facing=east,running=true": {
+      "model": "jugcraft:block/show_controller",
+      "y": 90
+    },
+    "cast=4,enabled=true,facing=east,running=false": {
+      "model": "jugcraft:block/show_controller",
+      "y": 90
+    },
+    "cast=4,enabled=true,facing=east,running=true": {
+      "model": "jugcraft:block/show_controller",
+      "y": 90
+    },
+    "cast=5,enabled=false,facing=east,running=false": {
+      "model": "jugcraft:block/show_controller",
+      "y": 90
+    },
+    "cast=5,enabled=false,facing=east,running=true": {
+      "model": "jugcraft:block/show_controller",
+      "y": 90
+    },
+    "cast=5,enabled=true,facing=east,running=false": {
+      "model": "jugcraft:block/show_controller",
+      "y": 90
+    },
+    "cast=5,enabled=true,facing=east,running=true": {
+      "model": "jugcraft:block/show_controller",
+      "y": 90
+    },
+    "cast=6,enabled=false,facing=east,running=false": {
+      "model": "jugcraft:block/show_controller",
+      "y": 90
+    },
+    "cast=6,enabled=false,facing=east,running=true": {
+      "model": "jugcraft:block/show_controller",
+      "y": 90
+    },
+    "cast=6,enabled=true,facing=east,running=false": {
+      "model": "jugcraft:block/show_controller",
+      "y": 90
+    },
+    "cast=6,enabled=true,facing=east,running=true": {
+      "model": "jugcraft:block/show_controller",
+      "y": 90
+    },
+    "cast=0,enabled=false,facing=south,running=false": {
+      "model": "jugcraft:block/show_controller",
+      "y": 180
+    },
+    "cast=0,enabled=false,facing=south,running=true": {
+      "model": "jugcraft:block/show_controller",
+      "y": 180
+    },
+    "cast=0,enabled=true,facing=south,running=false": {
+      "model": "jugcraft:block/show_controller",
+      "y": 180
+    },
+    "cast=0,enabled=true,facing=south,running=true": {
+      "model": "jugcraft:block/show_controller",
+      "y": 180
+    },
+    "cast=1,enabled=false,facing=south,running=false": {
+      "model": "jugcraft:block/show_controller",
+      "y": 180
+    },
+    "cast=1,enabled=false,facing=south,running=true": {
+      "model": "jugcraft:block/show_controller",
+      "y": 180
+    },
+    "cast=1,enabled=true,facing=south,running=false": {
+      "model": "jugcraft:block/show_controller",
+      "y": 180
+    },
+    "cast=1,enabled=true,facing=south,running=true": {
+      "model": "jugcraft:block/show_controller",
+      "y": 180
+    },
+    "cast=2,enabled=false,facing=south,running=false": {
+      "model": "jugcraft:block/show_controller",
+      "y": 180
+    },
+    "cast=2,enabled=false,facing=south,running=true": {
+      "model": "jugcraft:block/show_controller",
+      "y": 180
+    },
+    "cast=2,enabled=true,facing=south,running=false": {
+      "model": "jugcraft:block/show_controller",
+      "y": 180
+    },
+    "cast=2,enabled=true,facing=south,running=true": {
+      "model": "jugcraft:block/show_controller",
+      "y": 180
+    },
+    "cast=3,enabled=false,facing=south,running=false": {
+      "model": "jugcraft:block/show_controller",
+      "y": 180
+    },
+    "cast=3,enabled=false,facing=south,running=true": {
+      "model": "jugcraft:block/show_controller",
+      "y": 180
+    },
+    "cast=3,enabled=true,facing=south,running=false": {
+      "model": "jugcraft:block/show_controller",
+      "y": 180
+    },
+    "cast=3,enabled=true,facing=south,running=true": {
+      "model": "jugcraft:block/show_controller",
+      "y": 180
+    },
+    "cast=4,enabled=false,facing=south,running=false": {
+      "model": "jugcraft:block/show_controller",
+      "y": 180
+    },
+    "cast=4,enabled=false,facing=south,running=true": {
+      "model": "jugcraft:block/show_controller",
+      "y": 180
+    },
+    "cast=4,enabled=true,facing=south,running=false": {
+      "model": "jugcraft:block/show_controller",
+      "y": 180
+    },
+    "cast=4,enabled=true,facing=south,running=true": {
+      "model": "jugcraft:block/show_controller",
+      "y": 180
+    },
+    "cast=5,enabled=false,facing=south,running=false": {
+      "model": "jugcraft:block/show_controller",
+      "y": 180
+    },
+    "cast=5,enabled=false,facing=south,running=true": {
+      "model": "jugcraft:block/show_controller",
+      "y": 180
+    },
+    "cast=5,enabled=true,facing=south,running=false": {
+      "model": "jugcraft:block/show_controller",
+      "y": 180
+    },
+    "cast=5,enabled=true,facing=south,running=true": {
+      "model": "jugcraft:block/show_controller",
+      "y": 180
+    },
+    "cast=6,enabled=false,facing=south,running=false": {
+      "model": "jugcraft:block/show_controller",
+      "y": 180
+    },
+    "cast=6,enabled=false,facing=south,running=true": {
+      "model": "jugcraft:block/show_controller",
+      "y": 180
+    },
+    "cast=6,enabled=true,facing=south,running=false": {
+      "model": "jugcraft:block/show_controller",
+      "y": 180
+    },
+    "cast=6,enabled=true,facing=south,running=true": {
+      "model": "jugcraft:block/show_controller",
+      "y": 180
+    },
+    "cast=0,enabled=false,facing=west,running=false": {
+      "model": "jugcraft:block/show_controller",
+      "y": 270
+    },
+    "cast=0,enabled=false,facing=west,running=true": {
+      "model": "jugcraft:block/show_controller",
+      "y": 270
+    },
+    "cast=0,enabled=true,facing=west,running=false": {
+      "model": "jugcraft:block/show_controller",
+      "y": 270
+    },
+    "cast=0,enabled=true,facing=west,running=true": {
+      "model": "jugcraft:block/show_controller",
+      "y": 270
+    },
+    "cast=1,enabled=false,facing=west,running=false": {
+      "model": "jugcraft:block/show_controller",
+      "y": 270
+    },
+    "cast=1,enabled=false,facing=west,running=true": {
+      "model": "jugcraft:block/show_controller",
+      "y": 270
+    },
+    "cast=1,enabled=true,facing=west,running=false": {
+      "model": "jugcraft:block/show_controller",
+      "y": 270
+    },
+    "cast=1,enabled=true,facing=west,running=true": {
+      "model": "jugcraft:block/show_controller",
+      "y": 270
+    },
+    "cast=2,enabled=false,facing=west,running=false": {
+      "model": "jugcraft:block/show_controller",
+      "y": 270
+    },
+    "cast=2,enabled=false,facing=west,running=true": {
+      "model": "jugcraft:block/show_controller",
+      "y": 270
+    },
+    "cast=2,enabled=true,facing=west,running=false": {
+      "model": "jugcraft:block/show_controller",
+      "y": 270
+    },
+    "cast=2,enabled=true,facing=west,running=true": {
+      "model": "jugcraft:block/show_controller",
+      "y": 270
+    },
+    "cast=3,enabled=false,facing=west,running=false": {
+      "model": "jugcraft:block/show_controller",
+      "y": 270
+    },
+    "cast=3,enabled=false,facing=west,running=true": {
+      "model": "jugcraft:block/show_controller",
+      "y": 270
+    },
+    "cast=3,enabled=true,facing=west,running=false": {
+      "model": "jugcraft:block/show_controller",
+      "y": 270
+    },
+    "cast=3,enabled=true,facing=west,running=true": {
+      "model": "jugcraft:block/show_controller",
+      "y": 270
+    },
+    "cast=4,enabled=false,facing=west,running=false": {
+      "model": "jugcraft:block/show_controller",
+      "y": 270
+    },
+    "cast=4,enabled=false,facing=west,running=true": {
+      "model": "jugcraft:block/show_controller",
+      "y": 270
+    },
+    "cast=4,enabled=true,facing=west,running=false": {
+      "model": "jugcraft:block/show_controller",
+      "y": 270
+    },
+    "cast=4,enabled=true,facing=west,running=true": {
+      "model": "jugcraft:block/show_controller",
+      "y": 270
+    },
+    "cast=5,enabled=false,facing=west,running=false": {
+      "model": "jugcraft:block/show_controller",
+      "y": 270
+    },
+    "cast=5,enabled=false,facing=west,running=true": {
+      "model": "jugcraft:block/show_controller",
+      "y": 270
+    },
+    "cast=5,enabled=true,facing=west,running=false": {
+      "model": "jugcraft:block/show_controller",
+      "y": 270
+    },
+    "cast=5,enabled=true,facing=west,running=true": {
+      "model": "jugcraft:block/show_controller",
+      "y": 270
+    },
+    "cast=6,enabled=false,facing=west,running=false": {
+      "model": "jugcraft:block/show_controller",
+      "y": 270
+    },
+    "cast=6,enabled=false,facing=west,running=true": {
+      "model": "jugcraft:block/show_controller",
+      "y": 270
+    },
+    "cast=6,enabled=true,facing=west,running=false": {
+      "model": "jugcraft:block/show_controller",
+      "y": 270
+    },
+    "cast=6,enabled=true,facing=west,running=true": {
+      "model": "jugcraft:block/show_controller",
+      "y": 270
+    }
+  }
+}

@@ -900,12 +900,165 @@ def drummer_posed(sc, spec):
     return sc.models["left_forearm"] + sc.models["right_forearm"] + sc.models["head"]
 
 
+# ---------------------------------------------------------------- part 6: the Show Controller
+
+GUNMETAL = pal("1e2226", "2c3238", "3c444c", "4e5862", "66727e")
+CHROME = pal("6e7680", "9aa4ae", "c8d0d8", "eef2f6")
+CREAM = pal("bfb48e", "dcd2ae", "f0e8cc")
+BAKELITE = pal("1e120a", "2e1c10", "422a18")
+AMBER_LAMP = (255, 176, 40)
+RED_LAMP = (255, 52, 36)
+
+
+def steel_plate(louvres=False):
+    """Riveted gunmetal steel plate: its field its middle tone, lit along its top and left edges and shaded along its
+    foot and right, a rivet a tone lighter one in from each corner; `louvres`, ventilation slots across it, dark, on every
+    third row between its rivets."""
+    def paint(p):
+        for y in range(p.h):
+            for x in range(p.w):
+                corner = p.w >= 4 and p.h >= 4 and x in (1, p.w - 2) and y in (1, p.h - 2)
+                if corner:
+                    p.put(x, y, shade(GUNMETAL, 4))
+                elif louvres and p.w >= 6 and 2 <= x <= p.w - 3 and 3 <= y <= p.h - 4 and y % 3 == 1:
+                    p.put(x, y, shade(BLACK, 0))
+                elif y == 0 or x == 0:
+                    p.put(x, y, shade(GUNMETAL, 3))
+                elif y == p.h - 1 or x == p.w - 1:
+                    p.put(x, y, shade(GUNMETAL, 1))
+                else:
+                    p.put(x, y, shade(GUNMETAL, 2))
+    paint.tag = repr(("steel_plate", louvres))
+    return paint
+
+
+def chrome():
+    """Chrome trim: bright, its top row brightest, its second column catching a highlight."""
+    def paint(p):
+        for y in range(p.h):
+            for x in range(p.w):
+                p.put(x, y, shade(CHROME, 3 if y == 0 and p.h > 1 else 3 if x == 1 and p.w > 2 else 2))
+    paint.tag = repr(("chrome",))
+    return paint
+
+
+def interior():
+    """The dark inside of the cabinet, seen through its window."""
+    def paint(p):
+        for y in range(p.h):
+            for x in range(p.w):
+                p.put(x, y, shade(BLACK, 0))
+    paint.tag = repr(("interior",))
+    return paint
+
+
+def dial():
+    """A gauge's cream enamel dial, its red line at the top of its scale's end (its top right corner)."""
+    def paint(p):
+        for y in range(p.h):
+            for x in range(p.w):
+                p.put(x, y, shade(RED, 2) if (x, y) == (p.w - 1, 0) and p.w > 2 else shade(CREAM, 2))
+    paint.tag = repr(("dial",))
+    return paint
+
+
+def programme_drum():
+    """The programme drum: brass, its steel pins (each a bright texel) set in rising rows across it, one every seventh
+    texel along a diagonal, as a music box's are."""
+    def paint(p):
+        for y in range(p.h):
+            for x in range(p.w):
+                p.put(x, y, shade(STEEL, 4) if (3 * x + 5 * y) % 7 == 0 else shade(GOLD, 3 if y == 0 and p.h > 1 else 2))
+    paint.tag = repr(("programme_drum",))
+    return paint
+
+
+def enamel_sign():
+    """The cream enamel nameplate: red lettering on every other texel between its ends."""
+    def paint(p):
+        for y in range(p.h):
+            for x in range(p.w):
+                p.put(x, y, shade(RED, 2) if 0 < x < p.w - 1 and x % 2 == 1 else shade(CREAM, 2))
+    paint.tag = repr(("enamel_sign",))
+    return paint
+
+
+def lamp_glass(colour):
+    """A lamp's glass, flat in its colour; the renderer draws it at full light when it is lit."""
+    def paint(p):
+        for y in range(p.h):
+            for x in range(p.w):
+                p.put(x, y, colour)
+    paint.tag = repr(("lamp_glass", colour))
+    return paint
+
+
+def show_controller():
+    """The Show Controller, facing north, in its block's pixels.
+    - The cabinet (`whole`): a black steel plinth; a riveted gunmetal steel body 87 cm wide, 1 m tall and 50 cm deep, its
+      sides louvred and its top capped in chrome; its front plate around a window on the dark inside, where the
+      programme drum turns; two gauges, each a chrome bezel round a cream dial; an enamel nameplate; the knife switch's
+      chrome slot plate on its east side; and a brass cable gland and its cable at its back.
+    - The programme drum (`drum`), brass with its pins, across the window on its axle.
+    - A gauge's needle (`needle`), drawn on the west gauge; the renderer moves it to the east one too.
+    - A lamp (`lamp`), the westmost of the row of amber lamps under the window; the renderer steps it along the row.
+    - The red beacon on top (`beacon`), and the knife switch (`lever`): a steel arm up from its pivot, a Bakelite knob on
+      its end."""
+    spec = cw.SHOW_CONTROLLER
+    sc = Sculpt(spec["block"], 2906, 128)
+    plate, sides, ch = steel_plate(), steel_plate(louvres=True), chrome()
+    el = [panel(sc, "plinth", flat(BLACK), (1.5, 0.0, 4.5), (14.5, 1.0, 11.5)),
+          panel(sc, "body", plate, (1.0, 1.0, 6.0), (15.0, 15.0, 12.0), north=interior(), east=sides, west=sides),
+          panel(sc, "front", plate, (1.0, 1.0, 4.0), (15.0, 5.0, 6.0)),
+          panel(sc, "front", plate, (1.0, 9.0, 4.0), (15.0, 15.0, 6.0)),
+          panel(sc, "front", plate, (1.0, 5.0, 4.0), (4.0, 9.0, 6.0)),
+          panel(sc, "front", plate, (12.0, 5.0, 4.0), (15.0, 9.0, 6.0)),
+          panel(sc, "cap", ch, (1.0, 15.0, 4.0), (15.0, 15.5, 12.0)),
+          panel(sc, "sign", enamel_sign(), (5.0, 1.5, 3.9), (11.0, 2.5, 4.0), sides=("north", "up", "down", "east", "west")),
+          panel(sc, "slot_plate", ch, (15.0, 6.0, 6.0), (15.25, 12.0, 10.0)),
+          panel(sc, "gland", brass(), (7.0, 6.0, 12.0), (9.0, 8.0, 13.0)),
+          panel(sc, "cable", flat(BLACK), (7.5, 6.5, 13.0), (8.5, 7.5, 16.0))]
+    gy = spec["gauge_y"]
+    for gx in spec["gauges"]:
+        el += round_plate(sc, "bezel", ch, 4.0, 3.6, 4.0, gx, gy, cut=1.0)
+        el += round_plate(sc, "dial", dial(), 3.0, 3.5, 3.6, gx, gy)
+    sc.models["whole"] = el
+    dy, dz = spec["drum"]
+    drum = programme_drum()
+    sc.models["drum"] = [panel(sc, "drum", drum, (4.5, dy - 1.5, dz - 1.0), (11.5, dy + 1.5, dz + 1.0)),
+                         panel(sc, "drum", drum, (4.5, dy - 1.0, dz - 1.5), (11.5, dy + 1.0, dz + 1.5)),
+                         panel(sc, "axle", iron(), (4.0, dy - 0.25, dz - 0.25), (12.0, dy + 0.25, dz + 0.25))]
+    gx = spec["gauges"][0]
+    sc.models["needle"] = [panel(sc, "needle", flat(BLACK), (gx - 0.125, gy, 3.35), (gx + 0.125, gy + 1.5, 3.45)),
+                           panel(sc, "hub", flat(BLACK), (gx - 0.25, gy - 0.25, 3.3), (gx + 0.25, gy + 0.25, 3.5))]
+    sc.models["lamp"] = [panel(sc, "lamp", lamp_glass(AMBER_LAMP), (2.5, 3.0, 3.75), (3.5, 4.0, 4.0))]
+    sc.models["beacon"] = [panel(sc, "beacon", lamp_glass(RED_LAMP), (7.0, 15.5, 7.0), (9.0, 16.0, 9.0))]
+    ly, lz = spec["lever"]
+    sc.models["lever"] = [panel(sc, "lever", plate, (15.25, ly, lz - 0.25), (15.75, ly + 5.0, lz + 0.25)),
+                          panel(sc, "knob", flat(BAKELITE), (15.0, ly + 4.5, lz - 0.5), (16.0, ly + 5.5, lz + 0.5))]
+    return sc
+
+
+CONTROLLER_MOVING = ("drum", "needle", "lamp", "beacon", "lever")
+
+
+def controller_posed(sc, spec):
+    """The controller's item pose: switched off, its lever thrown forward as near as a block model's turn allows (22.5
+    degrees), its lamps all along their row, its needles upright."""
+    ly, lz = spec["lever"]
+    lamps = [e for i in range(spec["lamps"]) for e in fa.transformed(sc.models["lamp"], 1.0, (i * spec["lamp_step"], 0.0, 0.0))]
+    lever = [dict(e, rotation=fa.rotation((15.5, ly, lz), "x", -22.5)) for e in sc.models["lever"]]
+    gx0, gx1 = spec["gauges"]
+    needles = sc.models["needle"] + fa.transformed(sc.models["needle"], 1.0, (gx1 - gx0, 0.0, 0.0))
+    return sc.models["drum"] + needles + lamps + sc.models["beacon"] + lever
+
+
 # ---------------------------------------------------------------- building and files
 
 _built = {}
 BUILDERS = {cw.ORGAN_GRINDER["block"]: organ_grinder_skeleton, cw.WEREWOLF["block"]: animatronic_werewolf,
             cw.FLYING_GHOST["block"]: flying_crank_ghost, cw.CLOCKWORK_RAVEN["block"]: clockwork_raven,
-            cw.PUMPKIN_DRUMMER["block"]: pumpkin_drummer}
+            cw.PUMPKIN_DRUMMER["block"]: pumpkin_drummer, cw.SHOW_CONTROLLER["block"]: show_controller}
 # Each figure's moving parts (clockwork_quads.json, `<block>_<part>`), and the parts its item shows, posed.
 PARTS = {cw.ORGAN_GRINDER["block"]: MOVING, cw.WEREWOLF["block"]: WEREWOLF_MOVING, cw.FLYING_GHOST["block"]: GHOST_MOVING,
          cw.CLOCKWORK_RAVEN["block"]: RAVEN_MOVING, cw.PUMPKIN_DRUMMER["block"]: DRUMMER_MOVING}
@@ -936,7 +1089,8 @@ ITEM_DISPLAY = {
 
 def assets(root, write, lang):
     """Each figure's lower model (the whole figure but its moving parts) and empty upper model, its blockstate by facing
-    and half, its item (the figure whole, at rest), and the moving parts' quads (clockwork_quads.json)."""
+    and half, its item (the figure whole, at rest), and the moving parts' quads (clockwork_quads.json); and the Show
+    Controller's model, blockstate by facing, switch, show and cast, item and moving parts' quads."""
     write = fa.closing_writer(write, _image_of)
     models = root / "models" / "block"
     out_quads = {}
@@ -962,12 +1116,34 @@ def assets(root, write, lang):
                 for quad in drawn:
                     quad["cutout"] = True
             out_quads[f"{block}_{name}"] = drawn
+    # The Show Controller: one block, by facing, switch, show and cast (its lamps); its item at rest.
+    spec = cw.SHOW_CONTROLLER
+    block = spec["block"]
+    lang[f"block.{MOD}.{block}"] = spec["display"]
+    lang[f"message.{MOD}.{block}.on"] = "Show switched on"
+    lang[f"message.{MOD}.{block}.off"] = "Show switched off"
+    sc = build(block)
+    write(models / f"{block}.json", fa.model(block, d20d.separated(sc.models["whole"])))
+    variants = {}
+    for f, y in FACINGS.items():
+        for cast in range(spec["lamps"] + 1):
+            for enabled in ("false", "true"):
+                for running in ("false", "true"):
+                    variants[f"cast={cast},enabled={enabled},facing={f},running={running}"] = {"model": rid(f"block/{block}"), **({"y": y} if y else {})}
+    write(root / "blockstates" / f"{block}.json", {"variants": variants})
+    write(root / "models" / "item" / f"{block}.json", fa.model(block, d20d.separated(sc.models["whole"] + controller_posed(sc, spec))))
+    write(root / "items" / f"{block}.json", {"model": {"type": "minecraft:model", "model": rid(f"item/{block}")}})
+    for name in CONTROLLER_MOVING:
+        out_quads[f"{block}_{name}"] = quads(sc.models[name], {"p": block})
     write(root / "clockwork_quads.json", out_quads)
 
 
 def loot(out, write):
-    """Each figure drops itself, from its lower block only."""
-    for block in cw.blocks():
+    """Each figure drops itself, from its lower block only; the Show Controller drops itself."""
+    block = cw.SHOW_CONTROLLER["block"]
+    write(out / f"{block}.json", {"type": "minecraft:block", "pools": [{"condition": {"type": "minecraft:survives_explosion"},
+        "entries": [{"type": "minecraft:item", "name": rid(block)}], "rolls": 1}], "random_sequence": rid(f"blocks/{block}")})
+    for block in cw.figure_blocks():
         write(out / f"{block}.json", {"type": "minecraft:block", "pools": [{"condition": {"type": "minecraft:all_of", "terms": [
             {"type": "minecraft:survives_explosion"},
             {"type": "minecraft:match_block", "blocks": rid(block), "state": {"half": "lower"}}]},
@@ -975,8 +1151,9 @@ def loot(out, write):
 
 
 def tags(tags):
-    for block in cw.blocks():
+    for block in cw.figure_blocks():
         tags.add("block", "minecraft:mineable/axe", rid(block))
+    tags.add("block", "minecraft:mineable/pickaxe", rid(cw.SHOW_CONTROLLER["block"]))
 
 
 def textures():

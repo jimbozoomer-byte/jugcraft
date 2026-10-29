@@ -67,6 +67,18 @@ a riveted brass gear housing behind. While it runs:
 - his head dips `nod` degrees about his neck (`neck`: height, depth) on every `nod_steps`th step, in time;
 - the candle in his head lights his carved face.
 Stopped, his mallets and his head come to rest where they hang, and his face goes dark.
+Part 6, the Show Controller (agriculture/ShowControllerBlock, ShowControllerBlockEntity): the dieselpunk tier, a riveted
+gunmetal steel control cabinet 87 cm wide and 1 m tall on the JE network (docs/features/machines-and-power.md), which drives
+every figure within `range` blocks of it, up to `max_cast` of them, without shafts, all in time. It takes JE from cables
+(buffer `capacity`, up to `input` a tick). Switched on (its knife switch, `enabled`) and holding enough JE for its
+cast's needs, paid at the copper-wound electric motor's rate (`efficiency_percent` KE to 100 JE, rounded up), it cues a
+show: it holds its figures still for `cue_ticks` ticks, so every client sees them stop and counts them from the top,
+then drives them all from one count, a tick at a time. It looks for figures every `scan_ticks` ticks, and cues the show
+again from the top when the figures it finds change; a figure another running controller already drives is left to
+that one. Its front: two gauges (the cast against its lamps, and the show's pressure), a window on its programme drum
+(which turns once every `drum_ticks` ticks while the show runs), `lamps` amber lamps (one lit for each figure cued, up to
+their number) and an enamel nameplate; on its top a red beacon, lit while the show runs; on its side the knife switch.
+Its figures run on its show as they would on their own clockwork, and stop as they would when it stops.
 Sizes in pixels of the lower block, facing north (its front, the organ or the werewolf's face, to the north).
 """
 
@@ -134,6 +146,15 @@ PUMPKIN_DRUMMER = {
     "drum_sound": "minecraft:block.note_block.basedrum", "volume": 0.9, "pitch_right": 0.6, "pitch_left": 0.75,
 }
 
+SHOW_CONTROLLER = {
+    "block": "show_controller", "display": "Animatronic Show Controller",
+    "capacity": 8000, "input": 128, "efficiency_percent": 75,
+    "range": 8, "max_cast": 12, "scan_ticks": 20, "cue_ticks": 30,
+    "lamps": 6, "lamp_step": 2.0, "drum_ticks": 160, "drum": (7.0, 5.5), "sweep_ticks": 40,
+    "gauges": (4.5, 11.5), "gauge_y": 12.0, "needle_sweep": 120.0,
+    "lever": (9.0, 8.0), "lever_throw": 30.0, "light": 4,
+}
+
 RECIPES = [
     # The skeleton (two bone blocks), its top hat (black wool), its organ (a note block on planks) and its clockwork
     # (a clock).
@@ -164,6 +185,12 @@ RECIPES = [
      "key": {"P": "minecraft:carved_pumpkin", "W": "minecraft:red_wool", "N": "minecraft:note_block", "S": "minecraft:stick",
              "C": "minecraft:clock"},
      "result": PUMPKIN_DRUMMER["block"], "count": 1, "category": "building"},
+    # The controller: a steel cabinet, a glass window on its programme drum, steel gears either side of a clock (the
+    # show's timing), and redstone (its circuits).
+    {"id": SHOW_CONTROLLER["block"], "pattern": ["SGS", "ECE", "SRS"],
+     "key": {"S": "#c:ingots/steel", "G": "minecraft:glass_pane", "E": "jugcraft:steel_gear", "C": "minecraft:clock",
+             "R": "minecraft:redstone"},
+     "result": SHOW_CONTROLLER["block"], "count": 1, "category": "redstone"},
 ]
 
 
@@ -176,8 +203,13 @@ def figures():
     return [ORGAN_GRINDER, WEREWOLF, FLYING_GHOST, CLOCKWORK_RAVEN, PUMPKIN_DRUMMER]
 
 
-def blocks():
+def figure_blocks():
     return [spec["block"] for spec in figures()]
+
+
+def blocks():
+    """The figures' blocks and the Show Controller's."""
+    return figure_blocks() + [SHOW_CONTROLLER["block"]]
 
 
 def items():
