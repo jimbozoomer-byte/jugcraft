@@ -3,6 +3,7 @@ package io.github.jimbozoomer.jugcraft.test;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import io.github.jimbozoomer.jugcraft.town.JugcraftTown;
+import io.github.jimbozoomer.jugcraft.town.CommissionBoardBlock;
 import io.github.jimbozoomer.jugcraft.town.Jugs;
 import io.github.jimbozoomer.jugcraft.town.ShopMenu;
 import io.github.jimbozoomer.jugcraft.town.TownData;
@@ -102,6 +103,7 @@ public class TownRoutineGameTests {
 		h.assertTrue(old.size == next.size && old.height == next.height && old.yMin == next.yMin, "The town keeps its footprint");
 		int added = 0;
 		BlockPos board = null;
+		int boardParts = 0;
 		for (int y = next.yMin; y < next.yMin + next.height; y++) {
 			for (int z = 0; z < next.size; z++) {
 				for (int x = 0; x < next.size; x++) {
@@ -117,13 +119,18 @@ public class TownRoutineGameTests {
 					h.assertTrue(next.mask(x, z) == TownData.INSIDE, "Additions stay inside the wall: " + after + where);
 					h.assertTrue(!next.state(next.index(x, y, z)).hasBlockEntity(), "No block entity or container is added: " + after + where);
 					if (after.startsWith("jugcraft:town_commission_board")) {
-						board = new BlockPos(x, y, z);
+						boardParts++;
+						var state = next.state(next.index(x, y, z));
+						BlockPos root = CommissionBoardBlock.rootPos(new BlockPos(x, y, z), state);
+						h.assertTrue(new BlockPos(104, 1, 112).equals(root), "Every board panel belongs to the southern square noticeboard");
+						if (state.getValue(CommissionBoardBlock.PART) == 0) board = root;
 					}
 				}
 			}
 		}
 		h.assertTrue(added > 20 && added < 200, "Revision 4 adds street furniture, not a new town: " + added + " cells");
-		h.assertTrue(new BlockPos(110, 1, 100).equals(board), "The commission board stands on the square at 110 1 100, not " + board);
+		h.assertTrue(boardParts == 9 && new BlockPos(104, 1, 112).equals(board),
+				"The nine-panel noticeboard stands at the southern square edge, clear of the market stalls: " + board);
 		h.assertTrue(next.spots.size() >= old.spots.size(), "No resident is dropped");
 		for (int i = 0; i < old.spots.size(); i++) {
 			TownData.Spot a = old.spots.get(i), b = next.spots.get(i);

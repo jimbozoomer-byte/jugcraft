@@ -32,8 +32,10 @@ public class CursedMirrorGameTests {
 	}
 
 	private static ServerPlayer player(GameTestHelper helper, GameType mode) {
-		ServerPlayer player = helper.makeMockServerPlayerInLevel();
+		// Vanilla's mock permanently reports creative, even after setGameMode.
+		ServerPlayer player = TestPlayers.survivor(helper);
 		player.setGameMode(mode);
+		helper.assertTrue(player.isCreative() == (mode == GameType.CREATIVE), "The breaker has the requested game mode");
 		BlockPos absolute = helper.absolutePos(new BlockPos(2, 2, 0));
 		player.setPos(absolute.getX() + 0.5, absolute.getY(), absolute.getZ() + 0.5);
 		return player;

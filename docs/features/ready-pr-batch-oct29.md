@@ -99,3 +99,11 @@ Read-only inspection of the hosting panel on 29 October confirms the server is s
 ## Rollout
 
 No live restart is authorized by this update request. Prepare and validate the exact merged source, matching artifacts and rollback files first. Then obtain fresh owner restart confirmation, send the authorized in-game warning and wait all 30 seconds. Preserve worlds/player data/configuration, replace only managed release files, verify startup and then promote the client channel. Publishing a release alone must not activate client updates.
+
+## Combined-check repairs
+
+The initial combined server run exposed two outdated fixtures: Cursed Mirror used vanilla's permanently-creative mock even after asking for Survival, and TownRoutine still asserted the old one-block board position. The mirror suite now uses TestPlayers.survivor and verifies the requested mode. The town suite checks all nine panels resolve to the new southern-square root, clear of stalls. Gameplay behavior is not weakened to satisfy these assertions.
+
+The resource audit also caught the Concordance delivery matrix still claiming Iris was unused. It now records the optional GeckoLib emissive/shadow adapter and the existing shader/no-Iris evidence, retaining the unconfirmed live-scene limitation. The commission board's missing essence entry was corrected to its actual 296/3 recipe cost.
+
+The corrected-font Python run completed 290 tests: 284 passed; six Git Bash fixture tests were blocked by Windows sandbox signal-pipe creation and are being rerun outside that sandbox. No remaining Python content failure appeared in that run. The native build and GitHub integration checks remain pending; this is not deployment approval.
