@@ -398,6 +398,8 @@ GENERAL = {
 
 CLIENT = {
     "key.jugcraft.encyclopedia": "Jugcraft Encyclopedia",
+    "message.jugcraft.encyclopedia.welcome": "Welcome to Jugcraft! Press %s, or the scroll button in your inventory, to open the "
+                                             "Encyclopedia: your first steps, the machinery and magic routes, and every key.",
     "screen.jugcraft.encyclopedia.title": "Jugcraft Encyclopedia",
     "screen.jugcraft.encyclopedia.refresh": "Refresh",
     "screen.jugcraft.encyclopedia.loading": "Asking the server...",
