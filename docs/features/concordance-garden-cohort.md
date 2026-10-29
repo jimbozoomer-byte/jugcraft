@@ -1868,6 +1868,10 @@ The commits are not rewritten, so their messages are corrected or completed here
   since his review added `jugcraft_garden_foras_counted` (the weight, 220 seconds more, is an estimate either way).
 - **The Decisions rows GC-P83 to GC-P99** carry 27 October 2026, the date of the unit's specification; they were added to
   this page on 29 October, with the amendments his build and review made.
+- **`a4ebaa8c3`** (these records) listed the tools' `WORK`, `SPIRITS` order, `SERVICE_*` tables and `ACTS` among the lines
+  the merge resolves by hand; a trial merge showed they merge cleanly under their markers, and `d169ef659` corrected
+  [Where to resume](#where-to-resume). Its message says the clean merge was "as the records had said"; it was not: the
+  records had said the opposite.
 
 ## Schema review (the shared schema against eight services)
 
