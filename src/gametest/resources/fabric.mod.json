@@ -401,7 +401,8 @@
       "io.github.jimbozoomer.jugcraft.test.JimtaPaintbrushGameTests",
       "io.github.jimbozoomer.jugcraft.test.JimtaTransitGameTests",
       "io.github.jimbozoomer.jugcraft.test.StorageCrateGameTests",
-      "io.github.jimbozoomer.jugcraft.town.LivingCityCommissionGameTests"
+      "io.github.jimbozoomer.jugcraft.town.LivingCityCommissionGameTests",
+      "io.github.jimbozoomer.jugcraft.town.HalloweenQuestsGameTests"
     ],
     "jei_mod_plugin": [
       "io.github.jimbozoomer.jugcraft.test.JeiStationClientGameTests$WithJei$Probe"

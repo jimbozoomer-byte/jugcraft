@@ -3,6 +3,7 @@ blockstate, item model, textures drawn here, loot), the town's usable-blocks tag
 the town itself (tools/town.py)."""
 from PIL import Image
 
+import halloween_quests
 import town_lang
 import town_commissions
 
@@ -128,6 +129,7 @@ def assets(assets_dir, write, lang):
     write(assets_dir / "items" / "atm.json", {"model": {"type": "minecraft:model", "model": rid("block/atm")}})
     town_commissions.assets(assets_dir, write, lang)
     lang.update(town_lang.lang())
+    lang.update(halloween_quests.lang())
     lang["entity.jugcraft.town_guard_mecha"] = "City Guard Walker"
 
 
