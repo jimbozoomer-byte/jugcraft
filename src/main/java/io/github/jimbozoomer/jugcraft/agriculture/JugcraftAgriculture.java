@@ -2433,6 +2433,7 @@ public final class JugcraftAgriculture {
 		registerFrontYard();
 		registerPartyTable();
 		registerClockwork();
+		registerHarvestFestival();
 	}
 
 	/**
@@ -3207,6 +3208,15 @@ public final class JugcraftAgriculture {
 		SHOW_CONTROLLER_ENTITY = Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, Jugcraft.id("show_controller"),
 				FabricBlockEntityTypeBuilder.create(ShowControllerBlockEntity::new, controller).build());
 		EnergyStorage.SIDED.registerForBlockEntity((entity, side) -> entity.energy(), SHOW_CONTROLLER_ENTITY);
+	}
+
+	/**
+	 * The Harvest Festival Grounds (decor set 10; tools/harvest_festival.py): part 1's Giant Cornucopia.
+	 */
+	private static void registerHarvestFestival() {
+		Block cornucopia = registerBlock("giant_cornucopia", GiantCornucopiaBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.WOOD)
+				.strength(1.0F).sound(SoundType.WOOD).noOcclusion().ignitedByLava().pushReaction(PushReaction.IMMOVEABLE));
+		registerItem("giant_cornucopia", props -> new BlockItem(cornucopia, props), new Item.Properties().useBlockDescriptionPrefix(), BUILDING_TAB);
 	}
 
 	/** Bleached bones: they come away easily, and a piston pops them off. */

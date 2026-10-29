@@ -8,6 +8,12 @@ Every change to Jugcraft, newest first, grouped by pull request. For what each t
 
 No numbered release yet. Entries on feature branches remain proposed until their pull requests merge.
 
+### Unmerged: Harvest Festival Grounds, part 1 (the Giant Cornucopia)
+- **Giant Cornucopia**: a woven willow horn of plenty 2.7 m long lying on its side, three blocks across, two up and two deep. Its tail curls up behind it, and its mouth, 1.25 m across, spills pumpkins, squashes, corn, wheat, grapes, gourds and apples, each at its own size.
+- Made from sticks, wheat, a pumpkin, an apple and the farm's own corn and butternut squash.
+- Record: [harvest-festival-grounds.md](docs/features/harvest-festival-grounds.md). Decor set 10's first part.
+- **Checked:** the record's Verification. Game tests and screenshots run in CI only; not played by hand.
+
 ### Unmerged: Clockwork Animatronics, part 6 (the Show Controller)
 - **Animatronic Show Controller**: a dieselpunk riveted steel control cabinet on the JE network, with gauges, a turning programme drum, amber lamps, a red beacon and a knife switch.
 - It drives every clockwork figure within 8 blocks (up to 12) without shafts, all in time: it holds them still for a moment, then starts them together from one count. It pays for their needs in JE at the electric motor's rate.

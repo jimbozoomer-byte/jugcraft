@@ -15687,6 +15687,62 @@ def check_clockwork():
             err(f"{key}: its text must be there" + (f" ({text})" if text else ""))
 
 
+def check_harvest_festival():
+    """Harvest Festival Grounds (tools/harvest_festival.py, docs/features/harvest-festival-grounds.md). Part 1, the Giant
+    Cornucopia: its Java block is a MultiDecorationBlock the table's size, with nothing to light, and its shapes lie in its
+    frame; it is registered with its item; its model, drawn whole, lies in its frame (nothing of it cut away), its mouth
+    is the table's and wider than the horn behind it, which narrows to its tail, the horn the table's length from rim to
+    tail; its blockstate covers every facing, part and `lit`, each part's model written; it drops once, from its first
+    block; its recipe takes the farm's corn and butternut squash; and its name has its text."""
+    import harvest_festival as hf
+    import harvest_festival_data as hfd
+
+    def read(path):
+        return path.read_text(encoding="utf-8") if path.is_file() else ""
+
+    java_main = read(JAVA_ROOT / "agriculture" / "JugcraftAgriculture.java")
+    lang = load(ASSETS / "lang" / "en_us.json") or {}
+    spec = hf.CORNUCOPIA
+    block = spec["block"]
+    w, h, d = spec["size"]
+    java = read(JAVA_ROOT / "agriculture" / "GiantCornucopiaBlock.java")
+    for item in ("extends MultiDecorationBlock", f"box({w}, {h}, {d})", "return InteractionResult.PASS;"):
+        if item not in java:
+            err(f"GiantCornucopiaBlock: missing {item} (tools/harvest_festival.py CORNUCOPIA)")
+    for box in re.findall(r"new double\[\] \{([^}]*)\}", java):
+        x0, y0, z0, x1, y1, z1 = (float(v) for v in box.split(","))
+        if not (0 <= x0 < x1 <= 16 * w and 0 <= y0 < y1 <= 16 * h and 0 <= z0 < z1 <= 16 * d):
+            err(f"GiantCornucopiaBlock: the shape {{{box}}} must lie in its {16 * w} x {16 * h} x {16 * d} frame")
+    if "registerHarvestFestival();" not in java_main or f'registerBlock("{block}", GiantCornucopiaBlock::new' not in java_main \
+            or f'registerItem("{block}", props -> new BlockItem(cornucopia, props)' not in java_main:
+        err(f"JugcraftAgriculture: {block} must be a GiantCornucopiaBlock with its item, registered by registerHarvestFestival")
+    whole = hfd.build(block).models["whole"]
+    plain = [e for e in whole if "rotation" not in e]
+    if any(min(e["from"]) < 0 or e["to"][0] > 16 * w or e["to"][1] > 16 * h or e["to"][2] > 16 * d for e in plain):
+        err("tools/harvest_festival_data.py giant_cornucopia: every box must lie in its frame, or its blocks' models lose it")
+    widths = [length[2] for length in hfd.HORN]
+    if not spec["mouth"] > widths[0] or any(b >= a for a, b in zip(widths, widths[1:])):
+        err("tools/harvest_festival_data.py HORN: the horn must narrow from its mouth (CORNUCOPIA mouth) to its tail")
+    if abs(max(e["to"][0] for e in whole) - hfd.RIM_X - spec["length"]) > 0.5:
+        err(f"tools/harvest_festival_data.py giant_cornucopia: the horn must be {spec['length']} pixels from rim to tail")
+    variants = (load(ASSETS / "blockstates" / f"{block}.json") or {}).get("variants", {})
+    for part in range(w * h * d):
+        if not (ASSETS / "models" / "block" / f"{block}_{part}.json").is_file():
+            err(f"models/block/{block}_{part}.json must be written")
+        for face in ("north", "east", "south", "west"):
+            for lit in ("false", "true"):
+                if variants.get(f"facing={face},lit={lit},part={part}", {}).get("model") != f"{MOD}:block/{block}_{part}":
+                    err(f"blockstates/{block}.json: facing {face}, lit {lit}, part {part} must be {block}_{part}")
+    pools = (load(DATA / MOD / "loot_table" / "blocks" / f"{block}.json") or {}).get("pools", [])
+    if len(pools) != 1 or '"part": "0"' not in json.dumps(pools):
+        err(f"loot_table/blocks/{block}.json: it drops once, from its first block")
+    keys = set(((load(DATA / MOD / "recipe" / f"{block}.json") or {}).get("key") or {}).values())
+    if not {f"{MOD}:corn", f"{MOD}:butternut_squash"} <= keys:
+        err(f"recipe/{block}.json: it must take the farm's corn and butternut squash")
+    if lang.get(f"block.{MOD}.{block}") != spec["display"]:
+        err(f"block.{MOD}.{block}: the text must be {spec['display']}")
+
+
 def check_party_table():
     """Halloween Party Table (tools/party_table.py, docs/features/halloween-party-table.md), part 1: the Candy Corn
     Dispenser's Java is the table's; it is registered with its block entity, which saves what it holds and drops it when
@@ -24013,6 +24069,7 @@ def main():
     check_front_yard()
     check_party_table()
     check_clockwork()
+    check_harvest_festival()
     check_hessian_horseman()
     check_cydonian_sentinel()
     check_material_sets()

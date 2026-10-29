@@ -12792,6 +12792,11 @@
       "denominator": 6,
       "source": "recipe jugcraft:giant_candy"
     },
+    "jugcraft:giant_cornucopia": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
     "jugcraft:giant_fake_spider": {
       "numerator": 272,
       "denominator": 1,
