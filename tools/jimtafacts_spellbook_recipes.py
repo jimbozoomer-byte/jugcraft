@@ -36,8 +36,9 @@ def generate(dump,RES,SOURCE):
    if field in row:row[field]=ingredient(row[field])
   if 'result' in row:row['result']=result(row['result'])
   # Each exact source recipe has a unique path. Remove native bootstrap shortcuts only for its produced item.
+  # Uninscribing only returns a blank rune by spending an inscribed one, so the stone + arcane essence shortcut stays as the way in.
   product=row.get('result',{}).get('id','')
-  if product.startswith('jugcraft:jimta_spellbooks_'):
+  if product.startswith('jugcraft:jimta_spellbooks_') and path.stem!='uninscribe_rune':
    shortcut=RES/f'data/jugcraft/recipe/{product.split(":")[1]}.json'
    if shortcut.exists():shortcut.unlink()
   dump(RES/'data/jugcraft/recipe/jimtafacts/source'/path.relative_to(source/'recipe'),row)
