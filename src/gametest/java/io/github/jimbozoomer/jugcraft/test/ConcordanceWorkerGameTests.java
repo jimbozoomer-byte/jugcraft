@@ -7906,6 +7906,9 @@ public class ConcordanceWorkerGameTests {
 			keeper.closeContainer();
 			marax.think(level, NOON, now);
 			helper.assertTrue(!marax.listening() && marax.target().isEmpty(), "The conversation over: cleared at the next think");
+			// Fed a little overnight, its verdict changes and the count starts again: a fourth reading of an unchanged bed
+			// would find it proud (PIQUE) and name nothing. Still the only bed and not thriving, it is named again.
+			bed.setNutrients(1);
 			long day = dayStart(level, 1);
 			helper.assertTrue(reading(helper, keeper, perch, day).done() && marax.target().isEmpty(), "With no screen open a reading shows nothing");
 			open(helper, keeper, perch);
