@@ -10,6 +10,8 @@ import com.geckolib.renderer.base.RenderPassInfo;
 import com.geckolib.renderer.layer.builtin.AutoGlowingGeoLayer;
 import io.github.jimbozoomer.jugcraft.concordance.spirits.PactSpiritEntity;
 import io.github.jimbozoomer.jugcraft.concordance.spirits.Workers;
+import java.util.HashMap;
+import java.util.Map;
 import net.fabricmc.fabric.api.client.rendering.v1.EntityRendererRegistry;
 import net.minecraft.client.renderer.culling.Frustum;
 import net.minecraft.client.renderer.entity.state.EntityRenderState;
@@ -30,8 +32,12 @@ import org.jspecify.annotations.Nullable;
  * <p>
  * GC-06: a row may name a bone its work target draws toward, flown out and back by the client over FLIGHT_TICKS; only
  * drawing, of server state.
+ * <p>
+ * The magic interfaces' unit 3 fixes (CI's pictures): {@link #arriving} tells a portrait that a spirit's arrival is still
+ * drawn (it can hide it), and {@link #standing} where its body is drawn as it stands, for the client tests' facing
+ * pictures. Both only read.
  */
-final class PactSpiritRenderers {
+public final class PactSpiritRenderers {
 	/**
 	 * One spirit's drawing: its scale, its shadow's radius, its culling box widened sideways and below and reaching above,
 	 * its glowmask; GC-06 (GC-P66): the root-child bone its work target draws toward (Marax's familiar), or null.
@@ -46,6 +52,8 @@ final class PactSpiritRenderers {
 	/** GC-06: where a row's reaching bone is drawn this frame (its model's drawn frame, blocks), and how far through its flight. */
 	private static final DataTicket<Vec3> REACH = DataTicket.create("jugcraft_pact_reach", Vec3.class);
 	private static final DataTicket<Float> FLIGHT = DataTicket.create("jugcraft_pact_flight", Float.class);
+	/** Each spirit's row by its entity type, as registered (standing reads it). */
+	private static final Map<EntityType<?>, Row> ROWS = new HashMap<>();
 
 	private PactSpiritRenderers() {
 	}
@@ -70,6 +78,7 @@ final class PactSpiritRenderers {
 	}
 
 	static <T extends PactSpiritEntity<T>> void register(EntityType<T> type, Row row) {
+		ROWS.put(type, row);
 		EntityRendererRegistry.register(type, context -> {
 			GeoEntityRenderer<T, EntityRenderState> renderer = new GeoEntityRenderer<T, EntityRenderState>(context, type) {
 				{
@@ -148,5 +157,30 @@ final class PactSpiritRenderers {
 		AnimatableManager<PactSpiritEntity<?>> manager = spirit.getAnimatableInstanceCache().getManagerForId(spirit.getId());
 		AnimationController<?> gestures = manager.getAnimationControllers().get(PactSpiritEntity.GESTURE_CONTROLLER);
 		return gestures != null && spirit.body().depart().animation().equals(gestures.getCurrentRawAnimation());
+	}
+
+	/**
+	 * The magic interfaces' unit 3 fixes (CI's pictures: a spirit's portrait was empty on its first beat): whether this
+	 * client still draws {@code spirit}'s arrival, which can hide it (Marax grows from nothing, Buer rises from a small bud):
+	 * its gesture controller was triggered with its arriving gesture and has not played it out (a clip starts only when it is
+	 * drawn, so one not drawn yet is still to come), within the gesture's length of its coming into this client's world
+	 * (one never drawn there, off the screen, is not waited on). Read from the trigger, as {@link #departs} is.
+	 */
+	public static boolean arriving(PactSpiritEntity<?> spirit) {
+		AnimatableManager<PactSpiritEntity<?>> manager = spirit.getAnimatableInstanceCache().getManagerForId(spirit.getId());
+		AnimationController<?> gestures = manager.getAnimationControllers().get(PactSpiritEntity.GESTURE_CONTROLLER);
+		return gestures != null && spirit.body().arrive().animation().equals(gestures.getCurrentRawAnimation())
+				&& !gestures.hasAnimationFinished() && spirit.tickCount <= spirit.body().arrive().ticks();
+	}
+
+	/**
+	 * Where {@code spirit}'s body is drawn as it stands: its box widened and raised as its row says (what its gestures reach
+	 * sideways and above), without the reach below a sinking departure or toward a work target; its box alone for a type
+	 * without a row. The garden client tests frame a facing picture by it (the unit 3 fixes). Reads only.
+	 */
+	public static AABB standing(PactSpiritEntity<?> spirit) {
+		Row row = ROWS.get(spirit.getType());
+		AABB box = spirit.getBoundingBox();
+		return row == null ? box : box.inflate(row.wide(), 0.0, row.wide()).expandTowards(0.0, row.above(), 0.0);
 	}
 }

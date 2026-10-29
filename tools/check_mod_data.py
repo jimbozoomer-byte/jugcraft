@@ -21879,6 +21879,70 @@ def check_pact_screen(co, lang):
         err("ConcordanceGardenPactClientGameTests: waits for no screen (the level loaded) before its first picture")
     if '"io.github.jimbozoomer.jugcraft.test.ConcordanceGardenPactClientGameTests"' not in (ROOT / "src" / "gametest" / "resources" / "fabric.mod.json").read_text(encoding="utf-8"):
         err("src/gametest/resources/fabric.mod.json: ConcordanceGardenPactClientGameTests is a fabric-client-gametest entrypoint")
+    # The magic interfaces' unit 3 fixes (CI's pictures). (A) The chooser places its cards by one pure method, every card
+    # whole above the footer for one to seven cards (Stolas and the six garden spirits), a card's size read from its
+    # rectangle and a reason with no room under it carried by its tip and narration; the garden client test calls the
+    # placement at every size the client tests use and holds each drawn chooser's cards in view.
+    invite_body = _java_body(screen, "private void invite(PactStatePayload state)")
+    cards_body = _java_body(screen, "public static List<ScreenRectangle> chooserCards(int count, ScreenRectangle area)")
+    card_class = screen.split("private final class Card extends MagicButton {", 1)[-1]
+    for needle, where in (("List<ScreenRectangle> places = chooserCards(state.patterns().size(), room);", invite_body),
+                          ('inBodyAt("invite:" + i, card, place.top() - area.top());', invite_body),
+                          ("int widest = Math.max(1, Math.min(count, area.width() / CARD_CELL));", cards_body),
+                          ("for (CardSize size : CardSize.values()) {", cards_body),
+                          ("if (rows * size.height(lines) + (rows - 1) * CARD_ROW_GAP <= area.height()) {", cards_body),
+                          ("this.size = CardSize.of(height);", card_class),
+                          ("lines.size() <= size.lines(height);", card_class),
+                          ("hint(note, Component.empty());", card_class)):
+        if needle not in where:
+            err(f"client/PactScreen.java: the chooser places every card whole above its footer (chooserCards), each card's size its "
+                f"rectangle's, a reason with no room under its card carried by its tip (the unit 3 fixes: {needle})")
+    placements = _java_body(garden, "private static void placements(ClientGameTestContext context)")
+    for needle in ("{{427, 240}, {320, 180}, {480, 270}, {320, 240}}", "for (boolean compact : new boolean[] {false, true}) {",
+                   "for (int count = 1; count <= 7; count++) {", "PactScreen.chooserCards(count, area)", "area.bottom() > footer.top()",
+                   "!area.encompasses(cards.get(i))", "cards.get(i).intersects(cards.get(j))",
+                   'check(faults.isEmpty(), '):
+        if needle not in placements:
+            err(f"ConcordanceGardenPactClientGameTests.placements: one to seven chooser cards placed at every size the client tests use, "
+                f"each inside the scroll above the footer, none overlapping (the unit 3 fixes: {needle})")
+    chooser_fits = re.findall(r'fits\(context, "(the chooser[^"]*)"\);', garden)
+    whole = re.findall(r'fits\(context, "(the chooser[^"]*)"\);\s*cardsWhole\(context, "\1"\);', garden)
+    if len(chooser_fits) < 8 or whole != chooser_fits or "placements(context);" not in garden \
+            or "if (screen(client).control(key) == null || !screen(client).inView(key)) {" not in _java_body(garden, "private static void cardsWhole(") \
+            or "marked == waiting && shown + tipped == waiting" not in _java_body(garden, "private static void reasons("):
+        err("ConcordanceGardenPactClientGameTests: every chooser it pictures holds each card wholly in view (cardsWhole after fits), "
+            "the placement is checked once (placements), and a card's reason is drawn or in its tip (reasons; the unit 3 fixes)")
+    # (C) Every picture parks the cursor where no control is and makes the mouse the last input first (no hover's or
+    # keyboard's tip over a row), but a shot named for a tip or a hover; shots are taken only through shot().
+    for cls in ("ConcordancePactClientGameTests", "ConcordanceGardenPactClientGameTests"):
+        source = re.sub(r"//[^\n]*|/\*.*?\*/", " ", text(TESTS_ROOT / f"{cls}.java"), flags=re.S)
+        shot_body = _java_body(source, "private static void shot(ClientGameTestContext context, String name)")
+        park = _java_body(source, "private static @Nullable InputType park(ClientGameTestContext context)")
+        if 'InputType input = name.contains("tip") || name.contains("hover") ? null : park(context);' not in shot_body \
+                or not 0 <= shot_body.find("park(context)") < shot_body.find("context.takeScreenshot(name);") \
+                or "client.setLastInputType(input)" not in shot_body or source.count("takeScreenshot(") != 1 \
+                or "context.getInput().setCursorPos(corner[0], corner[1]);" not in park \
+                or "client.setLastInputType(InputType.MOUSE)" not in park or "widget.getRectangle().containsPoint(at[0], at[1])" not in park:
+            err(f"{cls}: each picture parks the cursor where no control is and makes the mouse the last input first (shot, park; "
+                "a shot named for a tip or a hover keeps them), and pictures are taken through shot alone (the unit 3 fixes)")
+    # (D) The first beat's portrait draws each garden spirit whole, as it will stand while it still arrives.
+    if garden.count("portraitWhole(context, ") < 3 or 'screen(client).portrait()' not in _java_body(garden, "private static void portraitWhole(") \
+            or "PactSpiritRenderers.arriving(spirit)" not in _java_body(garden, "private static void portraitWhole("):
+        err("ConcordanceGardenPactClientGameTests: each garden spirit's first beat draws its portrait whole, as it will stand while "
+            "it still arrives (portraitWhole, the unit 3 fixes)")
+    if 'portrait = creature == null ? "sign" : MagicPortrait.shown(creature) != creature ? "standing" : "live";' not in screen:
+        err("client/PactScreen.java: the header records what its portrait drew (portrait(), for the client tests)")
+    # (E) Each facing picture frames its spirit whole from along its speaker's bearing, nothing before its face.
+    camera_body = _java_body(garden, "private static double @Nullable [] camera(Minecraft client, BlockPos perch, String id, Vec3 speaker)")
+    if garden.count("frame(context, server, perch, ") != 3 or garden.count("land(context, server, speaker);") != 3 \
+            or "AABB body = PactSpiritRenderers.standing(spirit);" not in camera_body \
+            or "!frames(from, look, body, tall, wide) || !seen(client, from, face)" not in camera_body \
+            or "at.x + bearing.x * (spoke + back)" not in camera_body \
+            or "ClipContext.Block.OUTLINE" not in _java_body(garden, "private static boolean seen(") \
+            or "private static final double FRAME_FILL = 0.8;" not in garden:
+        err("ConcordanceGardenPactClientGameTests: each facing picture (Buer's, spiritFacing's, standingFacing's) is framed along the "
+            "speaker's bearing, the spirit's drawn body whole with a margin and no block's outline before its face (frame, "
+            "camera, seen), the player back where they spoke after (land; the unit 3 fixes)")
 
 
 def check_spirit_facing(co):
@@ -22651,6 +22715,19 @@ def check_magic_ui(lang):
     stacks = sources.get("MagicStacks", "")
     if "PactAfford.Count" not in stacks or "isShort(line)" not in stacks:
         err("client/MagicStacks: marks a short slot from PactAfford's count (spec 2.6)")
+    # The unit 3 fixes (CI's pictures: Buer's and Marax's portraits were empty on their first beat): a portrait draws a pact
+    # spirit this client still draws arriving as it will stand (its visual-only portrait), the world's drawing unchanged.
+    portrait = sources.get("MagicPortrait", "")
+    shown = _java_body(portrait, "static @Nullable LivingEntity shown(@Nullable LivingEntity creature)")
+    renderers = (CLIENT_JAVA_ROOT / "PactSpiritRenderers.java").read_text(encoding="utf-8")
+    arriving = _java_body(renderers, "public static boolean arriving(PactSpiritEntity<?> spirit)")
+    if "LivingEntity creature = shown(live);" not in _java_body(portrait, "static void draw(") \
+            or "creature instanceof PactSpiritEntity<?> spirit && PactSpiritRenderers.arriving(spirit)" not in shown \
+            or "MagicPortraits.of(spirit.counterpart())" not in shown \
+            or "spirit.body().arrive().animation().equals(gestures.getCurrentRawAnimation())" not in arriving \
+            or "!gestures.hasAnimationFinished()" not in arriving or "arriving(" in _java_body(renderers, "public boolean shouldRender("):
+        err("client/MagicPortrait.java: a pact spirit still arriving is drawn as it will stand (shown: its visual-only portrait, "
+            "PactSpiritRenderers.arriving read from its gesture's trigger), and the world draws its arrival as before")
     for name in mu.MAGIC_SCREENS:
         text = (CLIENT_JAVA_ROOT / f"{name}.java").read_text(encoding="utf-8")
         if "new MagicButton(" not in text or "new MagicText(" not in text or "BookArt.Tab" in text or "BookArt.Paragraph" in text:
@@ -22845,6 +22922,30 @@ def check_roster_screen(co, lang):
             "requests is read with an answer (the unit 2 review)")
     if "check(drawn.stream().anyMatch(text -> text.startsWith(card))" not in text(tests / "ConcordanceGardenPactClientGameTests.java"):
         err("ConcordanceGardenPactClientGameTests: Bathin's roster card draws his state short (\"Bathin Awaits answer\")")
+    # The magic interfaces' unit 3 fixes (spec 1.1; CI's pictures: a card's tip was every sentence of its row, nine lines):
+    # a card's tip is its state's whole sentence and its fact's, together at most LIMITS["tip"] words and three lines, else
+    # its state's alone; every sentence stays its narration. The client test reads each card's tip before each shot.
+    import magic_ui as mu
+    card = screen.split("private final class Card extends AbstractWidget implements MagicScreen.Drawn {", 1)[-1]
+    if f"public static final int TIP_WORDS = {mu.LIMITS['tip']};" not in screen or "public static final int TIP_LINES = 3;" not in screen \
+            or "tip.addAll(first);" not in card or "if (!second.isEmpty() && first.size() + second.size() <= TIP_LINES" not in card \
+            or "&& MagicScreen.words(stateSentence.getString()) + MagicScreen.words(factSentence.getString()) <= TIP_WORDS) {" not in card \
+            or "details(row)" in card or "super(x, 0, width, height, words(row));" not in card \
+            or "Component line = RosterGlance.factLine(row);" not in _java_body(screen, "private static Component factSentence("):
+        err("client/RosterScreen.java: a card's tip is its state's sentence and its fact's within TIP_WORDS (spec 1.1's 20) and "
+            "TIP_LINES, else its state's alone, every sentence of its row its narration (the unit 3 fixes)")
+    tips = _java_body(shots, "private static void tips(ClientGameTestContext context, String where)")
+    if f"private static final int TIP_WORDS = {mu.LIMITS['tip']};" not in shots or "private static final int TIP_LINES = 3;" not in shots \
+            or "tips(context, where);" not in reads or "if (tip.size() < 2 || tip.size() > 3 || lines > TIP_LINES || said > TIP_WORDS) {" not in tips \
+            or "screen(client).tip(row.id())" not in tips:
+        err("ConcordanceRosterClientGameTests: before each shot every card's tip is held to its words and lines (tips, the unit 3 fixes)")
+    roster_shot = _java_body(shots, "private static void shot(ClientGameTestContext context, String name)")
+    roster_park = _java_body(shots, "private static @Nullable InputType park(ClientGameTestContext context)")
+    if 'InputType input = name.contains("tip") || name.contains("hover") ? null : park(context);' not in roster_shot \
+            or shots.count("takeScreenshot(") != 1 or "client.setLastInputType(InputType.MOUSE)" not in roster_park \
+            or "context.getInput().setCursorPos(corner[0], corner[1]);" not in roster_park:
+        err("ConcordanceRosterClientGameTests: each picture parks the cursor where no control is and makes the mouse the last "
+            "input first, so no card's or Refresh's tip covers the page (shot, park; the unit 3 fixes)")
     # D-09 (D-P135; the unit 5 critique): the hand at work is walked in the run itself, after the recovery and the cancel and
     # before the full roster (which files all sixteen of the holder's open requests). Read without comments, so a step
     # commented out no longer counts (the unit 5 review).

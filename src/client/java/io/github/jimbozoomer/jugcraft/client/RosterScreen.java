@@ -39,14 +39,15 @@ import org.jspecify.annotations.Nullable;
  * the gold title "Roster" and its page over the cosmos, and two columns of dark relic cards, each the portrait in its gilded
  * card frame (a render of the worker's own model; a request's item), the name, the state's mark and a few words (never
  * colour alone), one fact of at most four words with its item, the kind, and its actions as icons. Every sentence of the
- * row stays whole as the card's narration and its tip (hover or keyboard focus): its state and why it waits, its service,
- * place and whether it is loaded, its task and next obligation. The actions: suspend (two bars), resume, end (a cross,
- * which asks first, the keyboard on Keep it), cancel and recover; each sends one bounded request through
- * {@link RosterClient}, and the server's answer, a refusal included, is shown short with its mark (PactScreen.Verdict) in
+ * row stays whole as the card's narration: its state and why it waits, its service, place and whether it is loaded, its
+ * task and next obligation; its tip (hover or keyboard focus) is its state's whole sentence and its fact's, at most
+ * {@value #TIP_WORDS} words (spec 1.1; the unit 3 fixes: every sentence covered half the page). The actions: suspend
+ * (two bars), resume, end (a cross, which asks first, the keyboard on Keep it), cancel and recover; each sends one
+ * bounded request through {@link RosterClient}, and the server's answer, a refusal included, is shown short with its mark (PactScreen.Verdict) in
  * the title row and read aloud whole (the switched-off note and the opening line sit there too, never pushing the cards).
  * Eight cards a page (Page Up and Page Down, or the footer's plates, turn it; how many more are not listed sits between
  * them and Refresh), six or fewer on a screen too short for four rows of cards (spec 2.14: six at 320x180); a page that
- * would draw over its 70 words drops its cards' kinds (each stays in its card's tip). Every card is one focusable, narrated
+ * would draw over its 70 words drops its cards' kinds (each stays in its card's narration). Every card is one focusable, narrated
  * control and every action a button, which the mouse presses through its card: Tab and Shift+Tab move, Enter or Space
  * presses, Esc closes. It fits the smallest GUI (ScreenKit.Fitted; ScreenFitClientGameTests) and, an in-game screen, draws
  * subtitles over itself (MagicScreen). No text box, chat command, vanilla Dialog or GuiLib, and no second inventory: cargo
@@ -63,11 +64,18 @@ public class RosterScreen extends MagicScreen {
 	/** A card's text starts this far in (after its portrait); its actions sit this far from its right edge. */
 	private static final int TEXT_X = 37;
 	private static final int ACTION_X = 19;
-	/** A card under this wide draws the narrow card (spec 2.14): its name regular, its actions stacked, its kind in its tip. */
+	/** A card under this wide draws the narrow card (spec 2.14): its name regular, its actions stacked, its kind in its narration. */
 	private static final int NARROW_CARD = 180;
 	/** A card's height: four rows a page where the screen is tall enough, never under the portrait frame's 41 and a rim. */
 	private static final int CARD_MIN = 42;
 	private static final int CARD_MAX = 48;
+	/**
+	 * A card's tip (spec 1.1, the unit 3 fixes): its state's whole sentence and its fact's, together at most this many words
+	 * and lines at the tip's width, else its state's alone, always whole (nearly every state is within both; the longest, a
+	 * reservation waiting on a container not loaded, runs to about 22 words in four lines).
+	 */
+	public static final int TIP_WORDS = 20;
+	public static final int TIP_LINES = 3;
 	/** The title row's and the footer's band: the cards' dark purple at 85% (C8). */
 	private static final int BAND = 0xD8170F24;
 	/** A row's actions, in the order their keys follow its card. */
@@ -196,7 +204,7 @@ public class RosterScreen extends MagicScreen {
 	/**
 	 * This page's cards, two to a row: each card, then its actions (their keys follow it), as many rows as the body holds. A
 	 * page that would draw more than its {@value #BUDGET} words (every card at eight, an answer at the top) draws its cards
-	 * without their kinds, each kind kept in its card's tip and narration (spec 1.1).
+	 * without their kinds, each kind kept in its card's narration (spec 1.1).
 	 */
 	private void cards(List<RosterStatePayload.Row> rows, ScreenRectangle area) {
 		int card = layout.rosterCard();
@@ -521,6 +529,19 @@ public class RosterScreen extends MagicScreen {
 		return -1;
 	}
 
+	/**
+	 * The tip of row {@code id}'s card (tests; the unit 3 fixes): its sentences, then how many lines it takes as the last
+	 * entry; empty when no card for it is on this page.
+	 */
+	public List<String> tip(UUID id) {
+		if (controls.get("row:" + id) instanceof Card card) {
+			List<String> out = new ArrayList<>(card.tipText());
+			out.add(String.valueOf(card.tipLines()));
+			return out;
+		}
+		return List.of();
+	}
+
 	/** How row {@code id}'s portrait was last drawn: "portrait", "icon", or "" if not yet (tests). */
 	public String drawn(UUID id) {
 		return drawn.getOrDefault(id, "");
@@ -553,6 +574,18 @@ public class RosterScreen extends MagicScreen {
 		parts.add(ui("row.title", row.name(), row.kind()));
 		parts.addAll(details(row));
 		return CommonComponents.joinForNarration(parts.toArray(Component[]::new));
+	}
+
+	/**
+	 * The whole sentence a card's fact is drawn from (RosterGlance.fact): its next obligation's ("Next: ..."), else its
+	 * task's ("Now: ..."); empty when it draws none.
+	 */
+	private static Component factSentence(RosterStatePayload.Row row) {
+		Component line = RosterGlance.factLine(row);
+		if (line.getString().isEmpty()) {
+			return Component.empty();
+		}
+		return line == row.task() ? ui("row.task", line) : ui("row.obligation", line);
 	}
 
 	/** The row's whole sentences after its title: its state and why, its service, its place, its task and its next obligation. */
@@ -640,9 +673,10 @@ public class RosterScreen extends MagicScreen {
 	/**
 	 * One row as a relic card (spec 2.14): the gold frame and its purple well; the portrait in the gilded card frame; the
 	 * name (bold, regular on a narrow card); the state's mark and a few words; one fact with its item; the kind at its foot
-	 * (on a narrow card, or on a page over its budget, in its tip). It takes the keyboard so the narrator reads the row as
-	 * one, every word of it; its tip is every sentence of the row; its actions are the keys after it, and the mouse over one
-	 * reaches the action, not the card. A word too long for its room loses, in turn, the kind beside it, its item, and only
+	 * (on a narrow card, or on a page over its budget, in its narration). It takes the keyboard so the narrator reads the
+	 * row as one, every word of it; its tip is its state's whole sentence and its fact's (at most {@value #TIP_WORDS} words,
+	 * else the state's alone); its actions are the keys after it, and the mouse over one reaches the action, not the card.
+ * A word too long for its room loses, in turn, the kind beside it, its item, and only
 	 * then its end ("…", and {@link #cut()} says so).
 	 */
 	private final class Card extends AbstractWidget implements MagicScreen.Drawn {
@@ -656,6 +690,7 @@ public class RosterScreen extends MagicScreen {
 		private final List<ItemStack> items;
 		private final Component kind;
 		private final List<FormattedCharSequence> tip = new ArrayList<>();
+		private final List<String> tipText = new ArrayList<>();
 		private final String text;
 		private final boolean cut;
 		private final ClientTooltipPositioner side = new CardSide(this);
@@ -699,11 +734,31 @@ public class RosterScreen extends MagicScreen {
 			String drawnState = MagicArt.fit(font, shownState.getString(), stateRoom);
 			String drawnFact = MagicArt.fit(font, shownFact.shown().getString(), factRoom);
 			this.text = String.join(" ", List.of(drawnName, drawnState, drawnFact, kind.getString())).trim().replaceAll(" +", " ");
-			// Its tip: every sentence of the row, its title first (the narrow card's kind is there).
-			tip.addAll(font.split(ui("row.title", row.name(), row.kind()), 200));
-			for (Component line : details(row)) {
-				tip.addAll(font.split(line, 200));
+			// Its tip (spec 1.1; the unit 3 fixes, CI's pictures: every sentence of the row was nine lines over half the page):
+			// its state's whole sentence, then its fact's, while the two keep to TIP_WORDS and TIP_LINES; else its state's alone.
+			// Every sentence of the row stays its narration (its message).
+			Component stateSentence = away ? row.place().getString().isEmpty() ? stateWord(RosterStatePayload.UNLOADED)
+					: ui("row.unloaded", row.place()) : said(row);
+			Component factSentence = factSentence(row);
+			List<FormattedCharSequence> first = font.split(stateSentence, MagicChip.TIP_WIDTH);
+			List<FormattedCharSequence> second = factSentence.getString().isEmpty() ? List.of() : font.split(factSentence, MagicChip.TIP_WIDTH);
+			tip.addAll(first);
+			tipText.add(stateSentence.getString());
+			if (!second.isEmpty() && first.size() + second.size() <= TIP_LINES
+					&& MagicScreen.words(stateSentence.getString()) + MagicScreen.words(factSentence.getString()) <= TIP_WORDS) {
+				tip.addAll(second);
+				tipText.add(factSentence.getString());
 			}
+		}
+
+		/** Its tip's sentences (tests). */
+		List<String> tipText() {
+			return tipText;
+		}
+
+		/** How many lines its tip takes (tests). */
+		int tipLines() {
+			return tip.size();
 		}
 
 		boolean narrow() {

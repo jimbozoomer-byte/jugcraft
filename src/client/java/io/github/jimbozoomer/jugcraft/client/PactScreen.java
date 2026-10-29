@@ -25,6 +25,7 @@ import net.minecraft.network.chat.FormattedText;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.Style;
 import net.minecraft.network.chat.contents.TranslatableContents;
+import net.minecraft.resources.Identifier;
 import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Inventory;
@@ -40,8 +41,9 @@ import org.jspecify.annotations.Nullable;
  * each (a glyph or item and a few words), the six standing terms as one "Standing terms" chip whose More shows their six
  * lines, every blocker as a lock line at the top, and the price pinned at the foot as item stacks, each short one marked
  * before Accept (PactAfford: display only; the server decides). At an empty perch whose owner may invite two or more
- * spirits it first lists them as cards (GC-01), each not ready with its reason drawn. Nothing is spent or agreed until
- * Accept, and the keyboard lands on the terms' first line, never on Accept.
+ * spirits it first lists them as cards (GC-01), every card whole above the footer for up to seven (chooserCards), each not
+ * ready with its reason drawn under it where its card has room, else in its tip. Nothing is spent or agreed until Accept,
+ * and the keyboard lands on the terms' first line, never on Accept.
  * <p>
  * For a kept pact the header holds its service, its state, today's work as a gauge and the periods paid ahead as sockets;
  * the body its rows (what needs doing first), the matter its spirit raises (GC-05: the question and each answer as a
@@ -119,6 +121,8 @@ public class PactScreen extends MagicScreen implements MenuAccess<PactMenu> {
 	private int pips = -1;
 	private int priceRule = -1;
 	private Component heading = Component.empty();
+	/** What the header's portrait drew in the last frame (tests): "live", "standing" (a spirit still arriving), "sign" or "". */
+	private String portrait = "";
 	// The body's pinned parts, while building.
 	private int top;
 	private int bottom;
@@ -928,17 +932,15 @@ public class PactScreen extends MagicScreen implements MenuAccess<PactMenu> {
 
 	/**
 	 * GC-01 (SG4): the chooser: each spirit its owner may invite, a card each (its portrait, its name on a plate, and ready
-	 * or not yet, a reason of at most four words under each not ready); choosing one sends INVITE with its index, and its
-	 * visit begins: its beats, then its terms.
+	 * or not yet, a reason of at most four words under each not ready where its card has room); choosing one sends INVITE
+	 * with its index, and its visit begins: its beats, then its terms. Since the unit 3 fixes (CI's pictures: Marax's fourth
+	 * card ran under Close) every card stands whole above the footer, placed by {@link #chooserCards}.
 	 */
 	private void invite(PactStatePayload state) {
 		surface = Surface.CHOOSER;
 		heading = ui("short.invite").copy().withStyle(ChatFormatting.BOLD);
 		drew(heading.getString());
-		ScreenRectangle footer = layout.footer();
-		int titleY = titleY();
-		// The cards start 18 under the title; the scroll starts 3 above them, room for the focused card's outline.
-		ScreenRectangle area = new ScreenRectangle(8, titleY + 15, Math.max(40, width - 16), Math.max(24, footer.top() - 4 - titleY - 15));
+		ScreenRectangle area = chooserArea(layout);
 		openBody(area);
 		at = 0;
 		if (PactClient.waiting() || state.result().isPresent()) {
@@ -948,10 +950,10 @@ public class PactScreen extends MagicScreen implements MenuAccess<PactMenu> {
 			}
 		}
 		boolean free = !PactClient.waiting();
-		int step = width < MagicLayout.WIDE_FROM ? 96 : 110;
-		int perRow = Math.max(1, Math.min(state.patterns().size(), area.width() / step));
+		// The cards share the room under the answer, when one is shown.
+		ScreenRectangle room = new ScreenRectangle(area.left(), area.top() + at, area.width(), Math.max(24, area.height() - at));
+		List<ScreenRectangle> places = chooserCards(state.patterns().size(), room);
 		int notes = 0;
-		int rowTop = at + 3;
 		for (int i = 0; i < state.patterns().size(); i++) {
 			PactStatePayload.Choice choice = state.patterns().get(i);
 			Component note = Component.empty();
@@ -961,22 +963,159 @@ public class PactScreen extends MagicScreen implements MenuAccess<PactMenu> {
 				reason = PactGlance.card(note);
 			}
 			int index = i;
-			Card card = new Card(choice, reason, note, step - 4, unused -> PactClient.request(menu, PactRequestPayload.INVITE, index));
+			ScreenRectangle place = places.get(i);
+			Card card = new Card(choice, reason, note, place.width(), place.height(), unused -> PactClient.request(menu, PactRequestPayload.INVITE, index));
 			card.active = free && state.offers(PactRequestPayload.INVITE);
-			int column = i % perRow;
-			int inRow = Math.min(perRow, state.patterns().size() - i + column);
-			if (column == 0 && i > 0) {
-				rowTop += card.getHeight() + 6;
-			}
-			card.setX(area.left() + (area.width() - inRow * step) / 2 + column * step + 2);
-			inBodyAt("invite:" + i, card, rowTop);
+			card.setX(place.left());
+			inBodyAt("invite:" + i, card, place.top() - area.top());
 		}
 		body.ball(MagicArt.SCROLL_BALL, area.right() - 12, 12);
 		footer(FOOTER_WIDEST, new String[] {"close"}, plate(ui("close"), ui("short.close"), this::onClose));
 	}
 
 	private int titleY() {
-		return layout.compact() ? 4 : 10 + (height - MagicLayout.FULL_FROM) / 2;
+		return titleY(layout);
+	}
+
+	/** The chooser's title line in {@code layout}: near the top when compact, else where the full layout's header starts. */
+	private static int titleY(MagicLayout layout) {
+		return layout.compact() ? 4 : 10 + (layout.screenHeight() - MagicLayout.FULL_FROM) / 2;
+	}
+
+	/** The chooser's scroll in {@code layout}: under its title's underline, 8 in from the screen's sides, 4 above the footer. */
+	private static ScreenRectangle chooserArea(MagicLayout layout) {
+		int titleY = titleY(layout);
+		return new ScreenRectangle(8, titleY + 15, Math.max(40, layout.screenWidth() - 16), Math.max(24, layout.footer().top() - 4 - titleY - 15));
+	}
+
+	/**
+	 * The chooser's scroll, where its cards go, in a {@code width} x {@code height} GUI, full or (as a crowded page is drawn)
+	 * {@code compact}, for tests.
+	 */
+	public static ScreenRectangle chooserArea(int width, int height, boolean compact) {
+		return chooserArea(MagicLayout.pact(width, height, compact ? Integer.MAX_VALUE : 0));
+	}
+
+	/** The chooser's footer row (its Close) in that GUI and layout, for tests. */
+	public static ScreenRectangle chooserFooter(int width, int height, boolean compact) {
+		return MagicLayout.pact(width, height, compact ? Integer.MAX_VALUE : 0).footer();
+	}
+
+	/**
+	 * The chooser's card sizes (spec 2.14; the unit 3 fixes), largest first, each the gilded frame with the spirit in its
+	 * window, the name on a plate under it and "Ready" or "Not yet" with its mark under that: the portrait card (48x77);
+	 * the kit's small card frame (30x41, which its chains fit), so no pixel of either is resampled; and that frame with its
+	 * plate over its foot, for the smallest screens. A card not ready is chained and locked: the kit's padlock on the
+	 * portrait card, the lock mark on the small frame (the padlock would hide its window). A card's height says its size;
+	 * what it has under its size's own height holds its reason, a line in ten.
+	 */
+	enum CardSize {
+		FULL(48, 77, 7, 10, 34, 49, 8, 14, 17, 54, 79, 64),
+		SMALL(30, 41, 5, 6, 20, 29, -1, 0, 11, 25, 43, 40),
+		TIGHT(30, 41, 5, 6, 20, 29, -1, 0, 11, 19, 30, 40);
+
+		final int frameWidth;
+		final int frameHeight;
+		final int windowX;
+		final int windowY;
+		final int windowWidth;
+		final int windowHeight;
+		final int chainsX;
+		final int chainsY;
+		final int lockX;
+		final int lockY;
+		/** Where its plate starts, from its frame's top. */
+		final int plateTop;
+		/** Its plate's least width (the full card's is the spec's 64). */
+		final int plate;
+
+		CardSize(int frameWidth, int frameHeight, int windowX, int windowY, int windowWidth, int windowHeight, int chainsX, int chainsY,
+				int lockX, int lockY, int plateTop, int plate) {
+			this.frameWidth = frameWidth;
+			this.frameHeight = frameHeight;
+			this.windowX = windowX;
+			this.windowY = windowY;
+			this.windowWidth = windowWidth;
+			this.windowHeight = windowHeight;
+			this.chainsX = chainsX;
+			this.chainsY = chainsY;
+			this.lockX = lockX;
+			this.lockY = lockY;
+			this.plateTop = plateTop;
+			this.plate = plate;
+		}
+
+		/** Its height without a reason: the lit outline's 2 above the frame, the frame and plate, the state's line. */
+		int height() {
+			return 2 + plateTop + MagicArt.PLATE_HEIGHT + 4 + 9;
+		}
+
+		/** Its height with {@code lines} lines of reason under its state. */
+		int height(int lines) {
+			return lines == 0 ? height() : height() + 1 + 10 * lines;
+		}
+
+		/** How many lines of reason a card {@code height} tall of this size holds. */
+		int lines(int height) {
+			return Math.max(0, (height - height() - 1) / 10);
+		}
+
+		Identifier frame() {
+			return this == FULL ? MagicArt.PORTRAIT_CARD : MagicArt.CARD_FRAME_ACTIVE;
+		}
+
+		/** The size a card {@code height} tall draws: the largest whose own height it holds. */
+		static CardSize of(int height) {
+			return height >= FULL.height() ? FULL : height >= SMALL.height() ? SMALL : TIGHT;
+		}
+	}
+
+	/** A chooser card's least column: its widest plate (64) and two either side. */
+	static final int CARD_CELL = 68;
+	/** The widest a chooser card is drawn: its plate and its reason's lines. */
+	static final int CARD_WIDEST = 106;
+	/** The least room between two rows of chooser cards (the lower one's lit outline stays clear of the upper's words). */
+	static final int CARD_ROW_GAP = 3;
+
+	/**
+	 * Where the chooser draws each of {@code count} cards in {@code area} (spec 2.14; the unit 3 fixes, CI's pictures): in
+	 * as few rows as its width allows (each column at least {@value #CARD_CELL}), the rows as even as can be, the first the
+	 * longest, each centred; the largest card, with as many lines of its reason as fit (two, one, none), whose rows all
+	 * stand whole in the area, the spare height (up to 8) between them. Every rectangle lies inside {@code area} and none
+	 * overlaps another for one to seven cards at every size the client tests use; with no size that fits (an answer above
+	 * the cards on the smallest screen), the smallest size in its rows, running on below the area, and the body scrolls.
+	 * Pure: the client tests call it.
+	 */
+	public static List<ScreenRectangle> chooserCards(int count, ScreenRectangle area) {
+		List<ScreenRectangle> out = new ArrayList<>();
+		if (count <= 0) {
+			return out;
+		}
+		int widest = Math.max(1, Math.min(count, area.width() / CARD_CELL));
+		int rows = (count + widest - 1) / widest;
+		int perRow = (count + rows - 1) / rows;
+		int cell = area.width() / perRow;
+		int height = CardSize.TIGHT.height();
+		search:
+		for (CardSize size : CardSize.values()) {
+			for (int lines = size == CardSize.TIGHT ? 0 : 2; lines >= 0; lines--) {
+				if (rows * size.height(lines) + (rows - 1) * CARD_ROW_GAP <= area.height()) {
+					height = size.height(lines);
+					break search;
+				}
+			}
+		}
+		int spare = Math.max(0, area.height() - rows * height - (rows - 1) * CARD_ROW_GAP);
+		int gap = CARD_ROW_GAP + (rows > 1 ? Math.min(8, spare / (rows - 1)) : 0);
+		int width = Math.max(1, Math.min(CARD_WIDEST, cell - 4));
+		for (int i = 0; i < count; i++) {
+			int row = i / perRow;
+			int column = i % perRow;
+			int inRow = Math.min(perRow, count - row * perRow);
+			int x = area.left() + (area.width() - inRow * cell) / 2 + column * cell + (cell - width) / 2;
+			out.add(new ScreenRectangle(x, area.top() + row * (height + gap), width, height));
+		}
+		return out;
 	}
 
 	/** Nothing the reader can do here (the notes say why): the pact ended here, another's pact, the Concordance off. */
@@ -1468,12 +1607,14 @@ public class PactScreen extends MagicScreen implements MenuAccess<PactMenu> {
 	protected void extractChrome(GuiGraphicsExtractor g, int mouseX, int mouseY, float delta) {
 		if (surface == Surface.CHOOSER) {
 			MagicArt.title(g, font, heading, (width - font.width(heading)) / 2, titleY(), 132);
+			portrait = "";
 			return;
 		}
 		ScreenRectangle header = layout.header();
 		ScreenRectangle scroll = layout.body();
 		PactStatePayload state = PactClient.state(menu);
 		if (layout.compact()) {
+			portrait = "";
 			MagicArt.panel(g, MagicArt.PLATE, header.left(), header.top(), header.width(), MagicArt.PLATE_HEIGHT);
 			ItemStack shownSign = PactGlance.item(sign);
 			if (!shownSign.isEmpty()) {
@@ -1491,6 +1632,7 @@ public class PactScreen extends MagicScreen implements MenuAccess<PactMenu> {
 				creature = MagicPortrait.ofSign(sign);
 			}
 			MagicPortrait.draw(g, header.left() + 7, header.top() + 10, 34, 49, creature, sign, ended);
+			portrait = creature == null ? "sign" : MagicPortrait.shown(creature) != creature ? "standing" : "live";
 			int x = header.left() + 56;
 			int right = headerRight();
 			g.text(font, bold(name, right - tagRoom - x), x, header.top() + 19, MagicTheme.NAME, false);
@@ -1577,6 +1719,29 @@ public class PactScreen extends MagicScreen implements MenuAccess<PactMenu> {
 	/** Whether More's six standing lines are shown, for tests. */
 	public boolean more() {
 		return more;
+	}
+
+	/**
+	 * What the header's portrait drew in the last frame, for tests (the unit 3 fixes): "live" (the spirit at the perch),
+	 * "standing" (one still arriving, drawn as it will stand: MagicPortrait.shown), "sign" (its item) or "" (none: the
+	 * compact header, the chooser).
+	 */
+	public String portrait() {
+		return portrait;
+	}
+
+	/**
+	 * The chooser's cards whose reason has no room under them and is carried by their tip and narration alone (the server's
+	 * whole sentence), for tests (the unit 3 fixes): every other card not ready draws its reason.
+	 */
+	public List<String> tippedReasons() {
+		List<String> out = new ArrayList<>();
+		controls.forEach((key, widget) -> {
+			if (widget instanceof Card card && card.reasonInTip()) {
+				out.add(key);
+			}
+		});
+		return out;
 	}
 
 	// ------------------------------------------------------------------------------------------------ its widgets
@@ -1809,45 +1974,73 @@ public class PactScreen extends MagicScreen implements MenuAccess<PactMenu> {
 
 	/**
 	 * A spirit on the chooser (spec 2.14): its card (the gilded frame and the spirit in it, chained and locked when it is
-	 * not ready), its name on a plate, and under it "Ready" or "Not yet" with its reason of at most four words, drawn on
-	 * every card that is not ready. Its message is the spirit's name (Fabric's tabToNamed finds it by that); the server's
-	 * whole sentence of what is missing is its tip and is read after "Not yet".
+	 * not ready), its name on a plate, and under it "Ready" or "Not yet" with its mark, then, on every card not ready whose
+	 * rectangle holds it, its reason of at most four words. Its size is its rectangle's (CardSize.of; chooserCards places
+	 * it). Its message is the spirit's name (Fabric's tabToNamed finds it by that); the server's whole sentence of what is
+	 * missing is its tip and is read after "Not yet", so a reason with no room under its card is still a hover away.
 	 */
 	private final class Card extends MagicButton {
 		private final PactStatePayload.Choice choice;
+		private final CardSize size;
 		private final List<FormattedCharSequence> reason;
 		private final String reasonText;
+		private final boolean reasonInTip;
 		private final Component note;
+		private final FormattedCharSequence shownName;
+		private final String nameText;
+		private final int plate;
 
-		Card(PactStatePayload.Choice choice, Component reason, Component note, int width, OnPress press) {
+		Card(PactStatePayload.Choice choice, Component reason, Component note, int width, int height, OnPress press) {
 			super(Look.LINK, choice.name(), choice.name(), press);
 			this.choice = choice;
-			this.reason = font.split(reason, Math.max(40, width));
-			this.reasonText = reason.getString();
+			this.size = CardSize.of(height);
+			// Its reason under it where its rectangle has the lines; else "Not yet" alone, the whole sentence its tip.
+			List<FormattedCharSequence> lines = font.split(reason, Math.max(40, width - 2));
+			boolean drawn = !reason.getString().isEmpty() && lines.size() <= size.lines(height);
+			this.reason = drawn ? lines : List.of();
+			this.reasonText = drawn ? reason.getString() : "";
+			this.reasonInTip = !drawn && !reason.getString().isEmpty();
 			this.note = note;
 			hint(note, Component.empty());
-			setRectangle(Math.max(64, width), 77 + 2 + MagicArt.PLATE_HEIGHT + 3 + 10 + this.reason.size() * 10, 0, 0);
+			// Its name on its plate: bold, else regular, else cut with "…" (its message stays whole); the plate as wide as the
+			// name needs, from its size's least to the card's width.
+			Component bold = choice.name().copy().withStyle(ChatFormatting.BOLD);
+			int room = Math.max(10, width - 10);
+			this.plate = Math.min(width, Math.max(size.plate, font.width(bold) + 12));
+			int words = Math.min(room, plate - 10);
+			this.shownName = font.width(bold) <= words ? bold.getVisualOrderText() : MagicArt.fit(font, choice.name(), words);
+			this.nameText = font.width(bold) <= words ? choice.name().getString() : MagicArt.fit(font, choice.name().getString(), words);
+			setRectangle(width, height, 0, 0);
+		}
+
+		/** Whether its reason is carried by its tip and narration alone (its card has no room for its lines). */
+		boolean reasonInTip() {
+			return reasonInTip;
 		}
 
 		@Override
 		protected void extractContents(GuiGraphicsExtractor g, int mouseX, int mouseY, float delta) {
 			int cx = getX() + getWidth() / 2;
-			int y = getY();
-			int card = cx - 24;
-			MagicPortrait.draw(g, card + 7, y + 10, 34, 49, MagicPortrait.ofSign(choice.id()), choice.id(), !choice.ready());
-			MagicArt.panel(g, MagicArt.PORTRAIT_CARD, card, y, 48, 77);
+			int top = getY() + 2;
+			int frame = cx - size.frameWidth / 2;
+			MagicPortrait.draw(g, frame + size.windowX, top + size.windowY, size.windowWidth, size.windowHeight, MagicPortrait.ofSign(choice.id()),
+					choice.id(), !choice.ready());
+			MagicArt.panel(g, size.frame(), frame, top, size.frameWidth, size.frameHeight);
 			if (!choice.ready()) {
-				MagicArt.panel(g, MagicArt.CARD_CHAINS, card + 8, y + 14, 32, 41);
-				MagicArt.panel(g, MagicArt.CARD_LOCK, card + 17, y + 54, 14, 17);
+				MagicArt.panel(g, MagicArt.CARD_CHAINS, frame + size.chainsX, top + size.chainsY, 32, 41);
+				if (size == CardSize.FULL) {
+					MagicArt.panel(g, MagicArt.CARD_LOCK, frame + size.lockX, top + size.lockY, 14, 17);
+				} else {
+					MagicArt.mark(g, MagicArt.Mark.LOCK, frame + size.lockX, top + size.lockY);
+				}
 			}
 			boolean lit = isHoveredOrFocused();
 			if (lit) {
-				g.outline(card - 2, y - 2, 52, 81, CARD_LIGHT);
+				g.outline(frame - 2, top - 2, size.frameWidth + 4, size.frameHeight + 4, CARD_LIGHT);
 			}
-			int py = y + 79;
-			MagicArt.panel(g, lit ? MagicArt.sprite("plate_highlighted") : MagicArt.PLATE, cx - 32, py, 64, MagicArt.PLATE_HEIGHT);
-			Component name = choice.name().copy().withStyle(ChatFormatting.BOLD);
-			g.text(font, name, cx - font.width(name) / 2, py + 6, MagicTheme.CREAM, true);
+			int py = top + size.plateTop;
+			MagicArt.panel(g, lit ? MagicArt.sprite("plate_highlighted") : MagicArt.PLATE, cx - plate / 2, py, plate, MagicArt.PLATE_HEIGHT);
+			g.text(font, shownName, cx - font.width(shownName) / 2, py + 6, MagicTheme.CREAM, true);
 			int sy = py + MagicArt.PLATE_HEIGHT + 4;
 			MagicArt.Mark mark = choice.ready() ? MagicArt.Mark.TICK : MagicArt.Mark.LOCK;
 			Component state = choice.ready() ? ui("short.ready") : ui("short.not_yet");
@@ -1870,7 +2063,7 @@ public class PactScreen extends MagicScreen implements MenuAccess<PactMenu> {
 		@Override
 		public String drawnText() {
 			String state = (choice.ready() ? ui("short.ready") : ui("short.not_yet")).getString();
-			return choice.name().getString() + " " + state + (reasonText.isEmpty() ? "" : " " + reasonText);
+			return nameText + " " + state + (reasonText.isEmpty() ? "" : " " + reasonText);
 		}
 	}
 }

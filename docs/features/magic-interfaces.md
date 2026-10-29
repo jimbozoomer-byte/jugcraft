@@ -8,6 +8,10 @@ design's pictures). **Nothing of it has been compiled or run in Minecraft yet** 
 **Unit 2 built, not merged** (one commit on unit 1's line): the roster as two columns of relic cards on the layer, the
 chooser's shared pieces moved into the layer, and Jade's short lines (see "Unit 2: the roster as relic cards, and short
 Jade lines"). Like unit 1's, nothing of it has been compiled or run in Minecraft here.
+**Fixes from CI's pictures** (one commit on the cohort's line, after Marax): every chooser card whole above its footer for
+up to seven spirits, a roster card's tip held to its state's and its fact's sentences, a spirit's portrait whole on its
+first beat, and the client tests' pictures without tips and with each spirit framed whole (see "Fixes from CI's
+pictures").
 Proposal issue: none; the owner's request of 28 October 2026 is the scope.
 Owner: @jimbozoomer-byte. AI-assisted implementation with Claude Code; the model is named in the commit trailers.
 Target milestone and tier: every tier's magic screens (the pact perch first, then the roster, the composer, the Field
@@ -651,6 +655,136 @@ Verification of the fixes, run locally, all passing (none of it in CI, and nothi
   whole at 320x180 (from 107,72) and a second-row card's at 427x240 (from 5,76). No control outside its area and no
   card's words cut at any size.
 
+## Fixes from CI's pictures (units 1 to 3 on the cohort's line)
+
+CI run 40820647569 ran the client tests on 3c2d36b0f (units 1 and 2 of these interfaces merged into the garden cohort's
+line with Buer, Bathin and Marax), all 16 client shards green. Its pictures showed five faults, each fixed in the shared
+code, so the later garden spirits (Foras, Bifrons and Amdusias, units 4 to 6) take the fixes when they merge. These fixes
+themselves have not been compiled or run: nothing here was built in Minecraft (see their verification below).
+
+### What the player sees
+
+- **Every spirit on the chooser stands whole above Close**, one to seven of them (Stolas and the six garden spirits). With
+  Marax a fourth card had wrapped under the footer's Close plate. One row of the portrait cards with each reason under
+  them while the row fits (up to six at 427x240 and 480x270, four at 320 wide); seven in two rows (four and three) of the
+  kit's small gilded card frame, chained and marked with the lock when not ready, a line of reason under each where it
+  fits; at 320x180, from five on, the small frame with its name plate over its foot. "Ready" or "Not yet" and its mark
+  are always drawn; a reason with no room under its card is carried by its tip and narration (the server's whole
+  sentence), a hover away.
+- **A roster card's tip is short**: its state's whole sentence and its fact's (at most 20 words and three lines in all),
+  else its state's alone. It had been every sentence of the row, nine lines over half the page. Every sentence of the row
+  stays the card's narration; a narrow card's kind, and a page's kinds dropped for its budget, are in the narration.
+- **A spirit's portrait is whole on its first beat.** While this client still draws a spirit's arrival (Marax grows from
+  nothing, Buer rises from a small bud), the header's window draws it as it will stand (its visual-only portrait, playing
+  its idle pose), then the real one once it has arrived. The world draws the arrival as before.
+- **The client tests' pictures show no tooltip over a row** (the terms, the proud reading, the roster): before each
+  picture the cursor is parked where no control is and the mouse is made the client's last input; a picture named for a
+  tip or a hover keeps its cursor.
+- **The facing pictures show each spirit whole, facing its speaker, with nothing before its face**: Buer's petals no
+  longer touch the top, and the perch's post no longer stands before Marax's face from the east (nor Buer's bed from the
+  west).
+
+### What changes
+
+- **`PactScreen`** (client): `chooserCards(count, area)`, a pure placement: as few rows as the width allows (each column
+  at least 68), the rows as even as can be, each centred; the largest card size, with two, one or no lines of reason,
+  whose rows stand whole in the scroll above the footer; the spare height (up to 8) between rows. `CardSize` holds the
+  three sizes (the portrait card 48x77; the small card frame 30x41 with its plate under it; the same frame with its plate
+  over its foot); a card's size is read from its rectangle's height, so the card draws what the placement gave it.
+  `chooserArea(width, height, compact)` and `chooserFooter(...)` give the tests the scroll and footer; `tippedReasons()`
+  names the cards whose reason is in their tip; `portrait()` says what the header's portrait drew ("live", "standing",
+  "sign").
+- **`MagicPortrait.shown`** (client): a pact spirit still arriving is drawn as its visual-only portrait.
+  **`PactSpiritRenderers`** is public, with `arriving(spirit)` (its gesture controller triggered with its arrival and not
+  played out, within the gesture's length of its coming into this client's world) and `standing(spirit)` (its box widened
+  and raised as its renderer's row says: where its body is drawn as it stands). Nothing the world draws changes.
+- **`RosterScreen`** (client): `TIP_WORDS` (20, spec 1.1) and `TIP_LINES` (3); a card's tip from its state's sentence
+  (for a card not loaded, its place's "not loaded" line) and its fact's (`RosterGlance.factLine`, the line `fact` draws
+  from); `tip(id)` for the tests.
+- **Client tests:** `ConcordancePactClientGameTests`, `ConcordanceGardenPactClientGameTests` and
+  `ConcordanceRosterClientGameTests` take every picture through `shot`, which first parks the cursor on a corner of the
+  screen no control covers (asserted) and makes the mouse the last input (`park`), then gives the input back after the
+  picture; every shot keeps its literal name. The garden class checks the placement for one to seven cards at 427x240,
+  320x180, 480x270 and 320x240, full and compact (`placements`: inside the scroll, the scroll above the footer, no two
+  overlapping), each pictured chooser's cards wholly in view (`cardsWhole`), a reason drawn or in its card's tip
+  (`reasons`), and each garden spirit's first-beat portrait whole (`portraitWhole`); its facing pictures (Buer's,
+  `spiritFacing`, `standingFacing`) fly the camera along the speaker's bearing to where the spirit's drawn body stands
+  whole with a tenth's margin at each edge and no block's outline stands between the camera and its face (its eyes and a
+  little below, at its middle and its front; a level look first, steeper only where needed), asserted found, then land
+  the player where they spoke from (`frame`, `camera`, `land`). The roster class holds each card's tip to its words and
+  lines before every shot (`tips`).
+- **Audits:** `check_pact_screen` (the chooser's placement and its use, the size read from the rectangle, the tipped
+  reason; the garden test's placement check, `cardsWhole` after each chooser's `fits`, `reasons`, `portraitWhole`, the
+  facing camera; the pact and garden classes' parked shots, pictures taken through `shot` alone), `check_magic_ui` (a
+  spirit still arriving drawn as it will stand, the world's drawing unchanged) and `check_roster_screen` (the tip's
+  words and lines, its two sentences, `details` no longer in the tip; the roster test's `tips` and parked shots).
+- **No payload, request or server decision changes**; no word or sprite is added (the generated files are unchanged).
+
+### Decisions
+
+| Decision | Status |
+|---|---|
+| The chooser's smaller cards are the kit's own small card frame (30x41, which its chains fit), not the portrait card scaled, so no pixel is resampled; on it the lock mark replaces the kit's padlock (14x17, which would hide its 20x29 window); at the smallest size its plate covers the frame's foot | **Decided by the session**, in answer to the cohort's seven cards; reviewable at the checkpoint |
+| A card keeps the portrait card while its row fits, before it keeps its reason's lines (a full card without reason before a small card with them) | **Decided by the session** |
+| A roster card's tip may take three lines (spec 1.1 says two): a long state sentence alone ("Upkeep: suspended for its upkeep: nothing is taken or lost, and an offering resumes it") takes three at the tip's 200 px; both sentences are kept only within 20 words and three lines | **Decided by the session** |
+| A picture's parking also makes the mouse the client's last input for that picture (moving the mouse alone leaves the keyboard's in 26.3: `MouseHandler` sets it only on a click), so a keyboard-focus tip (the roster's first card, Refresh) clears; the input is given back after | **Decided by the session** |
+| A facing picture's camera flies (the player's abilities, for the frozen picture only) along the speaker's bearing; it may look down up to 45 degrees where a block stands before the face (Marax's west picture, over Buer's bed, about 33 degrees in a port of the yard) | **Decided by the session** |
+
+### Known limits (these fixes)
+
+- **Not compiled or run in Minecraft here** (no jar): every call was read in the decompiled 26.3 sources, GeckoLib 5.5.7's
+  source or the repository's own uses; the files parse. The client tests' new checks have not run.
+- Marax stands two blocks west of the perch and his head reaches over Buer's bed, kept beside the perch since unit 1's
+  flow: from the west the bed hides his chin whatever the camera, so that picture looks down over it at his face (the
+  face points inside the bed are not looked for).
+- `standing` is the renderer's culling reach, a generous bound: Marax is framed with room above him for his familiar's
+  flight in.
+- A spirit whose arrival this client never drew (its perch off the screen) is drawn live once its arrival's length has
+  passed; during its arrival the portrait plays the visual-only spirit's idle pose, not its live gestures.
+- A state sentence longer than the tip's limits is still shown whole, alone: the longest a card can have, a reservation
+  waiting on a container not loaded, runs to about 22 words in four lines (no client test's row has it).
+- With an answer shown above seven cards on a 320x180 screen the cards no longer fit whole, and the scroll scrolls (as
+  every chooser did before).
+- The composed pictures are a port of the chooser's geometry to the generated files, not the game's drawing.
+
+### Verification (these fixes)
+
+Run locally, all passing (none of it in CI, and nothing in Minecraft):
+
+- No generator was run: no word, sprite or table changed. `python3 tools/owner_art.py --check`: every imported owner file
+  matches its source.
+- `python3 -B tools/check_mod_data.py` (with `check_pact_screen`, `check_magic_ui` and `check_roster_screen` as changed):
+  PASS. `python3 scripts/check_repository.py`, `python3 tools/concordance_journey.py --check`, `python3
+  tools/concordance_economy.py` (gaining cycles: none), `python3 tools/check_icon_maps.py`, `node --test
+  tools/world-designer/model.test.cjs` (12), `python3 -m unittest discover -s scripts/tests` (343) and `git diff --check`.
+- Every changed Java file parses (8). Every call added was read in the decompiled 26.3 sources, GeckoLib 5.5.7's source
+  or the repository's own uses: `ScreenRectangle.encompasses`, `intersects` and `containsPoint`, `Minecraft.getLastInputType`
+  and `setLastInputType`, `InputType.MOUSE` (and that `MouseHandler` sets the last input only on a click),
+  `AnimationController.getCurrentRawAnimation` and `hasAnimationFinished`, `Abilities.mayfly` and `flying` with
+  `onUpdateAbilities`, `ClipContext.Block.OUTLINE` on the client's level, `BlockState.getShape(...).bounds().move(pos)`,
+  `AABB.getCenter`, `contains`, `inflate` and `expandTowards`, `Vec3.cross`, `dot` and `horizontalDistance`,
+  `BlockPos.containing`, `options.fov()`, `Window.getGuiScale`. Nothing compiled.
+- The audits' mutations, each on a scratch copy of the tree: 35 made, 35 caught (the chooser placed without
+  `chooserCards`, with one size, ignoring the area's height; a card's size not its rectangle's; a reason drawn whatever
+  its room; the test's placement without the smallest screen or the overlap check; a chooser's cards not held in view;
+  `reasons` back to drawn reasons only; the pact, garden or roster test's shots not parked, a tip's shot parked, the
+  keyboard's input left, the cursor parked over a control, a picture taken around `shot`; the portrait drawing the
+  arrival, `arriving` blind to the clip's end, the world hiding an arriving spirit, the stand-in not the spirit's own, a
+  first beat's portrait not checked, the screen's portrait not recorded; a facing picture not framed or never landed,
+  the camera blind to what stands before the face, framing the box alone, off the speaker's bearing, or seeing through
+  outlines; a looser tip, every sentence back in it, its words or lines not counted, the fact's sentence not its line;
+  the roster test's tips not read, looser or wordless).
+- **The chooser composed from the generated files** (a port of `chooserArea`, `chooserCards`, `CardSize` and `Card`: the
+  sprites, their slices and the language file) with three, four, five and seven cards at 427x240, 320x180, 480x270 and
+  320x240, and looked at; looking at them replaced the kit's padlock on the small frame with the lock mark (the padlock
+  hid its window). The port's placement for one to seven cards at those sizes and at 360 and 367 wide, full and
+  compact: every card inside the scroll above the footer, none overlapping. Four cards draw 22 words at 427x240, seven 26
+  (each card's budget is 7, the title and Close 4).
+- **The facing camera's search run in a port of the yard** (the perch's outline, the beds and their crops as boxes,
+  default field of view and window): Buer framed from 3 blocks and Bathin from 2.75, a level look; Marax from 4 blocks
+  (from the east lifted a quarter, over the perch's post) and from the west 3.5 blocks back and 1.75 up, looking down
+  about 33 degrees over Buer's bed, his face's point inside the bed not looked for.
+
 ## Known limits
 
 - **Nothing here has been compiled or run in Minecraft.** No Minecraft jar is available where this was written: every
@@ -756,6 +890,8 @@ None: presentation only.
 - Unit 1 ends at the owner's checkpoint: CI's first compile, then the client shots of every pact state beside the
   design's pictures, with each shot's word count from its log.
 - The owner reviews variant B, the D-S15 wording and the shortened beats at that checkpoint.
+- The fixes from CI's pictures end at the next CI run's client shots: the chooser with four cards at every size, the
+  first beats' portraits, the terms, proud and roster shots without a tip, and the facing pictures, beside these.
 - Unit 2 (the roster's cards, the chooser's shared pieces and Jade's short lines) is built and ends at its own
   checkpoint: the roster's client shots at every size beside the design's pictures, with each shot's word count from its
   log, and Jade's shots. Units 3 and 4: the composer and Field Guide, then the alchemy and Nouveau screens.

@@ -49,6 +49,7 @@ import net.fabricmc.fabric.api.transfer.v1.item.ItemStorage;
 import net.fabricmc.fabric.api.transfer.v1.item.ItemVariant;
 import net.fabricmc.fabric.api.transfer.v1.storage.Storage;
 import net.fabricmc.loader.api.FabricLoader;
+import net.minecraft.client.InputType;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.AbstractWidget;
@@ -56,6 +57,7 @@ import net.minecraft.client.gui.components.events.ContainerEventHandler;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.navigation.ScreenRectangle;
 import net.minecraft.client.gui.screens.ConfirmScreen;
+import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.GlobalPos;
 import net.minecraft.network.chat.Component;
@@ -96,7 +98,9 @@ import org.jspecify.annotations.Nullable;
  * relic cards: before each shot the page is read once it is settled (MagicScreen.settled, no answer awaited) and held to the
  * roster's budget of 70 words drawn, with no card's words cut; the end confirmation, on the scroll, to its 25. Since its
  * review, End is also pressed with the mouse (a click on an action reaches it, not the card under it), the full roster's
- * "more" line is checked in view, and a page of request cards is read with an answer in its title row.
+ * "more" line is checked in view, and a page of request cards is read with an answer in its title row. Since the unit 3
+ * fixes each card's tip is held to its state's and its fact's sentences, at most 20 words and three lines, and every
+ * picture is taken with the cursor parked where no control is and the mouse the last input, so no tip covers the page.
  * The narrator is not heard, and one client is not two.
  */
 public class ConcordanceRosterClientGameTests implements FabricClientGameTest {
@@ -114,6 +118,12 @@ public class ConcordanceRosterClientGameTests implements FabricClientGameTest {
 	private static final int BUDGET = 70;
 	/** The end confirmation's (spec 1.1, as the pact's). */
 	private static final int CONFIRM_BUDGET = 25;
+	/**
+	 * A card's tip (spec 1.1; the unit 3 fixes, CI's pictures: every sentence of its row, nine lines over half the page): its
+	 * state's sentence and its fact's, at most this many words in all and lines (RosterScreen.TIP_WORDS and TIP_LINES).
+	 */
+	private static final int TIP_WORDS = 20;
+	private static final int TIP_LINES = 3;
 
 	private record Setup(BlockPos second, BlockPos destination, UUID pact, UUID shade, UUID shadeBody, long stranded, long open) {
 	}
@@ -681,7 +691,7 @@ public class ConcordanceRosterClientGameTests implements FabricClientGameTest {
 
 	/**
 	 * Unit 2 (spec 1.1, 4.5): the settled page within the roster's budget, counted from the strings the screen drew, and no
-	 * card's words cut to fit.
+	 * card's words cut to fit. Since the unit 3 fixes, each card's tip within its words and lines too.
 	 */
 	private static void reads(ClientGameTestContext context, String where) {
 		settled(context);
@@ -691,6 +701,32 @@ public class ConcordanceRosterClientGameTests implements FabricClientGameTest {
 		Jugcraft.LOGGER.info("[roster-check] {}: {} words drawn: {}", where, words, drawn);
 		check(words <= BUDGET, "The roster draws at most " + BUDGET + " words (" + where + "): " + words + " " + drawn);
 		check(cut.isEmpty(), "No card's words are cut (" + where + "): " + cut);
+		tips(context, where);
+	}
+
+	/**
+	 * The unit 3 fixes (spec 1.1): every card on the page has a tip of its state's sentence and, where both keep to the
+	 * limits, its fact's: at most {@value #TIP_WORDS} words and {@value #TIP_LINES} lines (RosterScreen.tip: its sentences,
+	 * then its lines). Every sentence of the row stays the card's narration.
+	 */
+	private static void tips(ClientGameTestContext context, String where) {
+		List<String> over = context.computeOnClient(client -> {
+			List<String> out = new ArrayList<>();
+			for (RosterStatePayload.Row row : RosterClient.state().rows()) {
+				List<String> tip = screen(client).tip(row.id());
+				if (tip.isEmpty()) {
+					continue;
+				}
+				int lines = Integer.parseInt(tip.getLast());
+				int said = words(tip.subList(0, tip.size() - 1));
+				if (tip.size() < 2 || tip.size() > 3 || lines > TIP_LINES || said > TIP_WORDS) {
+					out.add(lines + " lines, " + said + " words: " + tip);
+				}
+			}
+			return out;
+		});
+		check(over.isEmpty(), "Each card's tip is its state's sentence and its fact's, at most " + TIP_WORDS + " words and " + TIP_LINES
+				+ " lines (" + where + "): " + over);
 	}
 
 	/** Words as spec 1.1 counts them: whitespace tokens with a letter or digit. */
@@ -794,10 +830,55 @@ public class ConcordanceRosterClientGameTests implements FabricClientGameTest {
 		return will == null || will.pact() == null ? null : will.pact().hold();
 	}
 
+	/**
+	 * A picture (the unit 3 fixes, CI's pictures: a tip over a row of the terms, the proud reading and the roster): first the
+	 * cursor parked where no control is and the mouse made the last input ({@link #park}), so neither a hover's tip nor the
+	 * keyboard's is drawn, then a tick for the hover to clear; the last input given back after, so the keyboard goes on as
+	 * before. A shot whose name says it shows a tip or a hover keeps its cursor and input.
+	 */
 	private static void shot(ClientGameTestContext context, String name) {
 		context.runOnClient(client -> client.gui.toastManager().clear());
+		InputType input = name.contains("tip") || name.contains("hover") ? null : park(context);
 		context.waitTicks(2);
 		context.takeScreenshot(name);
+		if (input != null) {
+			context.runOnClient(client -> client.setLastInputType(input));
+		}
+	}
+
+	/**
+	 * With a screen open: the cursor moved to a corner of it that no control covers (one is asserted), and the mouse made the
+	 * last input, since moving the mouse alone leaves the keyboard's (MouseHandler sets it only on a click) and a control
+	 * focused by the keyboard shows its tip while the keyboard is the last input; then a tick. Returns the input it replaced,
+	 * or null with no screen open (nothing is hovered then).
+	 */
+	private static @Nullable InputType park(ClientGameTestContext context) {
+		if (!context.computeOnClient(client -> client.gui.screen() != null)) {
+			return null;
+		}
+		double[] corner = context.computeOnClient(client -> {
+			Screen screen = client.gui.screen();
+			int[][] corners = {{1, 1}, {screen.width - 2, 1}, {1, screen.height - 2}, {screen.width - 2, screen.height - 2}};
+			for (int[] at : corners) {
+				boolean free = true;
+				for (GuiEventListener child : screen.children()) {
+					if (child instanceof AbstractWidget widget && widget.visible && widget.getRectangle().containsPoint(at[0], at[1])) {
+						free = false;
+					}
+				}
+				if (free) {
+					int scale = client.getWindow().getGuiScale();
+					return new double[] {(at[0] + 0.5) * scale, (at[1] + 0.5) * scale};
+				}
+			}
+			return null;
+		});
+		check(corner != null, "A corner of the screen with no control under it, to park the cursor on before a picture");
+		context.getInput().setCursorPos(corner[0], corner[1]);
+		InputType before = context.computeOnClient(client -> client.getLastInputType());
+		context.runOnClient(client -> client.setLastInputType(InputType.MOUSE));
+		context.waitTicks(1);
+		return before;
 	}
 
 	private static RosterScreen screen(Minecraft client) {

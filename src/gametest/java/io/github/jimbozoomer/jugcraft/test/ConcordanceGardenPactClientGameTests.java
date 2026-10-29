@@ -12,6 +12,7 @@ import io.github.jimbozoomer.jugcraft.client.KeepFirstConfirmScreen;
 import io.github.jimbozoomer.jugcraft.client.MagicScreen;
 import io.github.jimbozoomer.jugcraft.client.PactClient;
 import io.github.jimbozoomer.jugcraft.client.PactScreen;
+import io.github.jimbozoomer.jugcraft.client.PactSpiritRenderers;
 import io.github.jimbozoomer.jugcraft.client.RosterClient;
 import io.github.jimbozoomer.jugcraft.client.RosterScreen;
 import io.github.jimbozoomer.jugcraft.concordance.ConcordanceProgress;
@@ -59,12 +60,14 @@ import net.fabricmc.fabric.api.client.gametest.v1.context.ClientGameTestContext;
 import net.fabricmc.fabric.api.client.gametest.v1.context.TestDedicatedServerConnection;
 import net.fabricmc.fabric.api.client.gametest.v1.context.TestDedicatedServerContext;
 import net.fabricmc.loader.api.FabricLoader;
+import net.minecraft.client.InputType;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.MouseHandler;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.events.ContainerEventHandler;
 import net.minecraft.client.gui.components.events.GuiEventListener;
+import net.minecraft.client.gui.navigation.ScreenRectangle;
 import net.minecraft.client.gui.screens.ConfirmScreen;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.InventoryScreen;
@@ -93,11 +96,14 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.TooltipFlag;
+import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
+import net.minecraft.world.phys.shapes.VoxelShape;
 import org.jspecify.annotations.Nullable;
 
 /**
@@ -135,8 +141,11 @@ import org.jspecify.annotations.Nullable;
  * poses, his night look among them; four bearings round where he stands; the end ({@code jugcraft_garden_marax_*}).</li>
  * </ul>
  * The helpers that name no spirit are Chunk D's, copied (its file stays as it is). The perch is opened by the server's use of
- * it (no aimed click), each open at least its rate gate's ten ticks after the last. The narrator is not heard, and one
- * client is not two.
+ * it (no aimed click), each open at least its rate gate's ten ticks after the last. Since the magic interfaces' unit 3
+ * fixes: every chooser's cards are held wholly in view and the chooser's placement is checked for one to seven cards at
+ * every size; each spirit's first beat draws its portrait whole; the facing pictures are framed whole from along each
+ * speaker's bearing with nothing before the face; every picture but the tooltip's is taken with the cursor parked where
+ * no control is. The narrator is not heard, and one client is not two.
  */
 public class ConcordanceGardenPactClientGameTests implements FabricClientGameTest {
 	private static final int WAIT = 200;
@@ -325,6 +334,7 @@ public class ConcordanceGardenPactClientGameTests implements FabricClientGameTes
 		boolean ready = context.computeOnClient(client -> PactClient.state().patterns().get(stolas).ready());
 		check(waiting && ready, "Without a bed Buer is not ready, one thing missing in his own words, and Stolas is: " + entries);
 		fits(context, "the chooser without a bed");
+		cardsWhole(context, "the chooser without a bed");
 		named(context);
 		reasons(context);
 		budget(context, chooserWords(context), "the chooser without a bed");
@@ -357,6 +367,8 @@ public class ConcordanceGardenPactClientGameTests implements FabricClientGameTes
 		Jugcraft.LOGGER.info("[garden-check] chooser: {} ready={}", ids, flags);
 		context.waitFor(client -> client.gui.screen() instanceof PactScreen, WAIT);
 		fits(context, "the chooser at GUI scale 2");
+		cardsWhole(context, "the chooser at GUI scale 2");
+		placements(context);
 		named(context);
 		reasons(context);
 		budget(context, chooserWords(context), "the chooser");
@@ -373,6 +385,7 @@ public class ConcordanceGardenPactClientGameTests implements FabricClientGameTes
 		check(applied == 4, "The high-scale chooser is at GUI scale 4: " + applied);
 		context.waitFor(client -> client.gui.screen() instanceof PactScreen, WAIT);
 		fits(context, "the chooser at GUI scale 4");
+		cardsWhole(context, "the chooser at GUI scale 4");
 		named(context);
 		budget(context, chooserWords(context), "the chooser at GUI scale 4");
 		shot(context, "jugcraft_garden_chooser_scale4");
@@ -384,6 +397,7 @@ public class ConcordanceGardenPactClientGameTests implements FabricClientGameTes
 		context.waitTicks(10);
 		context.waitFor(client -> client.gui.screen() instanceof PactScreen, WAIT);
 		fits(context, "the chooser at 320x180");
+		cardsWhole(context, "the chooser at 320x180");
 		named(context);
 		budget(context, chooserWords(context), "the chooser at 320x180");
 		shot(context, "jugcraft_garden_chooser_small");
@@ -413,6 +427,7 @@ public class ConcordanceGardenPactClientGameTests implements FabricClientGameTes
 				"Buer speaks three beats, nothing stands in the way, and his terms name every term, in order: " + shown);
 		fits(context, "a beat at GUI scale 2");
 		named(context);
+		portraitWhole(context, BUER);
 		budget(context, BEAT_WORDS, "his first beat");
 		shot(context, "jugcraft_garden_buer_conversation");
 		// Spec 1.5: his first beat's Terms control skips to his terms, the keyboard on their first line, never on Accept.
@@ -781,7 +796,8 @@ public class ConcordanceGardenPactClientGameTests implements FabricClientGameTes
 	/**
 	 * GC-02's rule for Buer: the holder opens the perch from two blocks east, south, west and north of it in turn; each time,
 	 * once his drawn body yaw is within FACING_BODY_TOLERANCE of the holder's bearing, the screen is closed, the world frozen,
-	 * the drawn yaw logged and he is photographed from where his speaker stood.
+	 * the drawn yaw logged and he is photographed along his speaker's bearing, framed whole ({@link #frame}; the unit 3
+	 * fixes: from where his speaker stood his petals ran off the top), the holder then back where they spoke from.
 	 */
 	private static void facing(ClientGameTestContext context, TestDedicatedServerContext server, TestDedicatedServerConnection connection,
 			BlockPos perch) {
@@ -798,6 +814,7 @@ public class ConcordanceGardenPactClientGameTests implements FabricClientGameTes
 				context.waitForScreen(null);
 				context.getInput().lookAt(perch.above());
 				context.waitTicks(5);
+				Vec3 speaker = new Vec3(perch.getX() + 0.5 + 2 * side.dx(), perch.getY(), perch.getZ() + 0.5 + 2 * side.dz());
 				server.runCommand("tick freeze");
 				try {
 					context.waitTicks(5);
@@ -805,8 +822,10 @@ public class ConcordanceGardenPactClientGameTests implements FabricClientGameTes
 					Jugcraft.LOGGER.info("[garden-check] facing {}: speaker's bearing {}, drawn body yaw {}", side.name(), side.yaw(), body);
 					check(Mth.degreesDifferenceAbs(body, side.yaw()) <= FACING_BODY_TOLERANCE,
 							"Spoken to from the " + side.name() + ", he is drawn facing his speaker: body " + body + " against " + side.yaw());
+					frame(context, server, perch, BUER, speaker, side.name());
 					shot(context, side.shot());
 				} finally {
+					land(context, server, speaker);
 					server.runCommand("tick unfreeze");
 				}
 			}
@@ -1162,14 +1181,100 @@ public class ConcordanceGardenPactClientGameTests implements FabricClientGameTes
 		check(!drawn.isEmpty() && words <= 25, "The end confirmation draws at most 25 words: " + words + " " + drawn);
 	}
 
-	/** Spec 2.14: the chooser draws "Not yet" and a reason on every card not ready, without a hover. */
+	/**
+	 * Spec 2.14: the chooser draws "Not yet" on every card not ready, and its reason under it, without a hover, wherever its
+	 * card has room; since the unit 3 fixes a card with no room for its reason's lines carries it in its tip and narration
+	 * (the server's whole sentence; PactScreen.tippedReasons), so seven cards stand whole on the smallest screen.
+	 */
 	private static void reasons(ClientGameTestContext context) {
 		settle(context);
 		String notYet = context.computeOnClient(client -> Component.translatable("screen.jugcraft.pact.short.not_yet").getString());
 		List<String> drawn = context.computeOnClient(client -> screen(client).drawn());
 		long waiting = context.computeOnClient(client -> PactClient.state().patterns().stream().filter(choice -> !choice.ready()).count());
+		long marked = drawn.stream().filter(card -> card.contains(notYet)).count();
 		long shown = drawn.stream().filter(card -> card.contains(notYet) && card.length() > card.indexOf(notYet) + notYet.length() + 1).count();
-		check(shown == waiting, "Every card not ready draws Not yet and its reason, unhovered: " + shown + " of " + waiting + " " + drawn);
+		int tipped = context.computeOnClient(client -> screen(client).tippedReasons().size());
+		check(marked == waiting && shown + tipped == waiting, "Every card not ready draws Not yet, and its reason under it or, with no room, in "
+				+ "its tip: " + marked + " marked, " + shown + " drawn and " + tipped + " in tips of " + waiting + " " + drawn);
+	}
+
+	/**
+	 * The unit 3 fixes (CI's pictures: Marax's fourth card ran under Close): every card on the drawn chooser stands wholly in
+	 * view, in the body above the footer (fits checks the body and its width).
+	 */
+	private static void cardsWhole(ClientGameTestContext context, String where) {
+		settle(context);
+		List<String> hidden = context.computeOnClient(client -> {
+			List<String> out = new ArrayList<>();
+			for (int i = 0; i < PactClient.state().patterns().size(); i++) {
+				String key = "invite:" + i;
+				if (screen(client).control(key) == null || !screen(client).inView(key)) {
+					out.add(key);
+				}
+			}
+			return out;
+		});
+		Jugcraft.LOGGER.info("[garden-check] {}: cards not wholly in view {}", where, hidden);
+		check(hidden.isEmpty(), "Every card of the chooser is wholly in view above the footer (" + where + "): " + hidden);
+	}
+
+	/**
+	 * The unit 3 fixes: the chooser's placement (PactScreen.chooserCards, pure) for one to seven cards (Stolas and the six
+	 * garden spirits) at every size the client tests use (427x240, 320x180, 480x270 at GUI scale 4, and the smallest GUI,
+	 * 320x240), full and compact: every card's rectangle inside the chooser's scroll, the scroll above the footer, no two
+	 * cards overlapping.
+	 */
+	private static void placements(ClientGameTestContext context) {
+		List<String> faults = context.computeOnClient(client -> {
+			List<String> out = new ArrayList<>();
+			int[][] sizes = {{427, 240}, {320, 180}, {480, 270}, {320, 240}};
+			for (int[] size : sizes) {
+				for (boolean compact : new boolean[] {false, true}) {
+					ScreenRectangle area = PactScreen.chooserArea(size[0], size[1], compact);
+					ScreenRectangle footer = PactScreen.chooserFooter(size[0], size[1], compact);
+					String at = size[0] + "x" + size[1] + (compact ? " compact" : "");
+					if (area.bottom() > footer.top()) {
+						out.add(at + ": the scroll runs over the footer");
+					}
+					for (int count = 1; count <= 7; count++) {
+						List<ScreenRectangle> cards = PactScreen.chooserCards(count, area);
+						if (cards.size() != count) {
+							out.add(at + ", " + count + " cards: " + cards.size() + " placed");
+						}
+						for (int i = 0; i < cards.size(); i++) {
+							if (!area.encompasses(cards.get(i))) {
+								out.add(at + ", " + count + " cards: card " + i + " " + cards.get(i) + " outside " + area);
+							}
+							for (int j = 0; j < i; j++) {
+								if (cards.get(i).intersects(cards.get(j))) {
+									out.add(at + ", " + count + " cards: cards " + j + " and " + i + " overlap");
+								}
+							}
+						}
+					}
+				}
+			}
+			return out;
+		});
+		check(faults.isEmpty(), "Every chooser card whole in its scroll above the footer, none overlapping, for one to seven cards: " + faults);
+	}
+
+	/**
+	 * The unit 3 fixes (CI's pictures: Buer's and Marax's windows were empty on their first beat): the header's portrait
+	 * draws the spirit, and while this client still draws its arrival, draws it as it will stand (MagicPortrait.shown),
+	 * never the arrival that hides it. Read in one go: a spirit arriving now was arriving at the frame drawn before.
+	 */
+	private static void portraitWhole(ClientGameTestContext context, String id) {
+		settle(context);
+		context.waitTicks(1);
+		String seen = context.computeOnClient(client -> {
+			BlockPos perch = screen(client).getMenu().opening.perch();
+			boolean arriving = spiritAt(client, perch, id) instanceof PactSpiritEntity<?> spirit && PactSpiritRenderers.arriving(spirit);
+			return screen(client).portrait() + (arriving ? " arriving" : "");
+		});
+		Jugcraft.LOGGER.info("[garden-check] {}'s portrait on his first beat: {}", id, seen);
+		check(seen.equals("standing arriving") || seen.equals("standing") || seen.equals("live"),
+				"His first beat's portrait draws him whole, as he will stand while he still arrives: " + seen);
 	}
 
 	private static void fits(ClientGameTestContext context, String where) {
@@ -1196,10 +1301,55 @@ public class ConcordanceGardenPactClientGameTests implements FabricClientGameTes
 		return out;
 	}
 
+	/**
+	 * A picture (the unit 3 fixes, CI's pictures: a tip over a row of the terms, the proud reading and the roster): first the
+	 * cursor parked where no control is and the mouse made the last input ({@link #park}), so neither a hover's tip nor the
+	 * keyboard's is drawn, then a tick for the hover to clear; the last input given back after, so the keyboard goes on as
+	 * before. A shot whose name says it shows a tip or a hover keeps its cursor and input.
+	 */
 	private static void shot(ClientGameTestContext context, String name) {
 		context.runOnClient(client -> client.gui.toastManager().clear());
+		InputType input = name.contains("tip") || name.contains("hover") ? null : park(context);
 		context.waitTicks(2);
 		context.takeScreenshot(name);
+		if (input != null) {
+			context.runOnClient(client -> client.setLastInputType(input));
+		}
+	}
+
+	/**
+	 * With a screen open: the cursor moved to a corner of it that no control covers (one is asserted), and the mouse made the
+	 * last input, since moving the mouse alone leaves the keyboard's (MouseHandler sets it only on a click) and a control
+	 * focused by the keyboard shows its tip while the keyboard is the last input; then a tick. Returns the input it replaced,
+	 * or null with no screen open (nothing is hovered then).
+	 */
+	private static @Nullable InputType park(ClientGameTestContext context) {
+		if (!context.computeOnClient(client -> client.gui.screen() != null)) {
+			return null;
+		}
+		double[] corner = context.computeOnClient(client -> {
+			Screen screen = client.gui.screen();
+			int[][] corners = {{1, 1}, {screen.width - 2, 1}, {1, screen.height - 2}, {screen.width - 2, screen.height - 2}};
+			for (int[] at : corners) {
+				boolean free = true;
+				for (GuiEventListener child : screen.children()) {
+					if (child instanceof AbstractWidget widget && widget.visible && widget.getRectangle().containsPoint(at[0], at[1])) {
+						free = false;
+					}
+				}
+				if (free) {
+					int scale = client.getWindow().getGuiScale();
+					return new double[] {(at[0] + 0.5) * scale, (at[1] + 0.5) * scale};
+				}
+			}
+			return null;
+		});
+		check(corner != null, "A corner of the screen with no control under it, to park the cursor on before a picture");
+		context.getInput().setCursorPos(corner[0], corner[1]);
+		InputType before = context.computeOnClient(client -> client.getLastInputType());
+		context.runOnClient(client -> client.setLastInputType(InputType.MOUSE));
+		context.waitTicks(1);
+		return before;
 	}
 
 	private static PactScreen screen(Minecraft client) {
@@ -1369,7 +1519,8 @@ public class ConcordanceGardenPactClientGameTests implements FabricClientGameTes
 	/**
 	 * GC-02's rule for any spirit: from each side of the perch in turn (east, south, west, north), two blocks off and facing
 	 * it, the player opens the perch; the spirit's drawn body turns to them (GC-P8); the screen is closed (the body keeps its
-	 * facing) and the world frozen and photographed from the player's eyes, so from the spirit's front, as {@code shots} name.
+	 * facing), the world frozen, and it is photographed from its front along that speaker's bearing, framed whole with nothing
+	 * before its face ({@link #frame}; the unit 3 fixes), as {@code shots} name; the player is then back where they spoke from.
 	 */
 	private static void spiritFacing(ClientGameTestContext context, TestDedicatedServerContext server, BlockPos perch, String id, List<String> shots) {
 		String[] sides = {"east", "south", "west", "north"};
@@ -1397,11 +1548,14 @@ public class ConcordanceGardenPactClientGameTests implements FabricClientGameTes
 				check(off <= BATHIN_FACING_TOLERANCE, id + " turns to whoever speaks, from the " + sides[i] + ": " + yaw);
 				context.getInput().pressKey(InputConstants.KEY_ESCAPE);
 				context.waitForScreen(null);
+				Vec3 speaker = new Vec3(perch.getX() + 0.5 + offsets[i][0], perch.getY(), perch.getZ() + 0.5 + offsets[i][1]);
 				server.runCommand("tick freeze");
 				try {
 					context.waitTicks(3);
+					frame(context, server, perch, id, speaker, sides[i]);
 					shot(context, shots.get(i));
 				} finally {
+					land(context, server, speaker);
 					server.runCommand("tick unfreeze");
 				}
 			}
@@ -1414,8 +1568,10 @@ public class ConcordanceGardenPactClientGameTests implements FabricClientGameTes
 	 * GC-06b (GC-P78; shared by GC-06 to GC-09): GC-02's facing rule for a standing body (Station.BESIDE), which stands where
 	 * spiritFacing would put the player: from each side of the spirit itself in turn (east, south, west, north), three blocks
 	 * off and facing it, the player opens the perch; its drawn body turns to them (GC-P8: within BATHIN_FACING_TOLERANCE);
-	 * the screen is closed (the body keeps its facing) and the world frozen and photographed from the player's eyes, as
-	 * {@code shots} name (literal names, in that order, so check_pact_screen sees each).
+	 * the screen is closed (the body keeps its facing), the world frozen, and it is photographed from its front along that
+	 * speaker's bearing, framed whole with nothing before its face ({@link #frame}; the unit 3 fixes: the perch's post stood
+	 * before Marax's face from the east), as {@code shots} name (literal names, in that order, so check_pact_screen sees
+	 * each); the player is then back where they spoke from.
 	 */
 	private static void standingFacing(ClientGameTestContext context, TestDedicatedServerContext server, BlockPos perch, String id, List<String> shots) {
 		Vec3 at = server.computeOnServer(minecraft -> presenceOf(minecraft, perch).position());
@@ -1438,17 +1594,137 @@ public class ConcordanceGardenPactClientGameTests implements FabricClientGameTes
 				check(off <= BATHIN_FACING_TOLERANCE, id + " turns to whoever speaks, from the " + sides[i] + ": " + yaw);
 				context.getInput().pressKey(InputConstants.KEY_ESCAPE);
 				context.waitForScreen(null);
+				Vec3 speaker = new Vec3(at.x + offsets[i][0], at.y, at.z + offsets[i][1]);
 				server.runCommand("tick freeze");
 				try {
 					context.waitTicks(3);
+					frame(context, server, perch, id, speaker, sides[i]);
 					shot(context, shots.get(i));
 				} finally {
+					land(context, server, speaker);
 					server.runCommand("tick unfreeze");
 				}
 			}
 		} finally {
 			restoreHud(context, hidden);
 		}
+	}
+
+	/** How much of a facing picture's height and width a spirit's drawn body may fill: a tenth's margin at each edge. */
+	private static final double FRAME_FILL = 0.8;
+	/** The steepest a facing picture looks down at its spirit, tried in turn: a level look first, steeper only where needed. */
+	private static final double[] FRAME_PITCHES = {15.0, 25.0, 35.0, 45.0};
+
+	/**
+	 * The unit 3 fixes (CI's pictures: Buer's petals ran off the top; the perch's post stood before Marax's face from the
+	 * east, Buer's bed from the west): a facing picture's camera, the world frozen and the screen closed. Along the bearing
+	 * from the spirit to {@code speaker} (the cell the test spoke from, so the picture still shows it facing them), as far
+	 * back and as high as its drawn body needs (PactSpiritRenderers.standing) to stand whole in the picture with a tenth's
+	 * margin at each edge, and from where no block's outline stands between the camera and its face: its eyes and a little
+	 * below them, at its middle and at its front (a point inside a block cannot be seen from anywhere and is not looked for).
+	 * A level look is tried first, a steeper one only where something stands before its face. Asserted found; the player
+	 * flies there, and {@link #land} puts them back.
+	 */
+	private static void frame(ClientGameTestContext context, TestDedicatedServerContext server, BlockPos perch, String id, Vec3 speaker,
+			String side) {
+		double[] camera = context.computeOnClient(client -> camera(client, perch, id, speaker));
+		Jugcraft.LOGGER.info("[garden-check] {} framed from the {}: feet, yaw and pitch {}", id, side, Arrays.toString(camera));
+		check(camera != null, id + " stands whole in its facing picture from the " + side + ", nothing before its face");
+		server.runOnServer(minecraft -> {
+			ServerPlayer player = player(minecraft);
+			player.getAbilities().mayfly = true;
+			player.getAbilities().flying = true;
+			player.onUpdateAbilities();
+		});
+		server.runCommand(String.format(Locale.ROOT, "tp @a %.3f %.3f %.3f %.1f %.1f", camera[0], camera[1], camera[2], camera[3], camera[4]));
+		Vec3 feet = new Vec3(camera[0], camera[1], camera[2]);
+		context.waitFor(client -> client.player.position().distanceToSqr(feet) < 0.01, WAIT);
+		context.waitTicks(3);
+	}
+
+	/** Back on the cell they spoke from, on their feet: the camera's flight ends. */
+	private static void land(ClientGameTestContext context, TestDedicatedServerContext server, Vec3 speaker) {
+		server.runCommand(String.format(Locale.ROOT, "tp @a %.3f %.3f %.3f", speaker.x, speaker.y, speaker.z));
+		server.runOnServer(minecraft -> {
+			ServerPlayer player = player(minecraft);
+			player.getAbilities().flying = false;
+			player.getAbilities().mayfly = false;
+			player.onUpdateAbilities();
+		});
+		context.waitTicks(2);
+	}
+
+	/** The feet and look ({x, y, z, yaw, pitch}) {@link #frame} puts the player at, or null when no place within reach frames it so. */
+	private static double @Nullable [] camera(Minecraft client, BlockPos perch, String id, Vec3 speaker) {
+		PactSpiritEntity<?> spirit = spiritAt(client, perch, id);
+		if (spirit == null) {
+			return null;
+		}
+		AABB body = PactSpiritRenderers.standing(spirit);
+		Vec3 centre = body.getCenter();
+		Vec3 at = spirit.position();
+		Vec3 toward = new Vec3(speaker.x - at.x, 0.0, speaker.z - at.z);
+		double spoke = toward.horizontalDistance();
+		Vec3 bearing = toward.normalize();
+		double tall = FRAME_FILL * Math.tan(Math.toRadians(client.options.fov().get() / 2.0));
+		double wide = tall * client.getWindow().getWidth() / Math.max(1, client.getWindow().getHeight());
+		List<Vec3> face = new ArrayList<>();
+		for (double forward : new double[] {0.0, spirit.getBbWidth() / 2.0}) {
+			for (double below : new double[] {-0.05, 0.3}) {
+				Vec3 point = spirit.getEyePosition().add(bearing.scale(forward)).subtract(0.0, below, 0.0);
+				BlockPos cell = BlockPos.containing(point);
+				VoxelShape shape = client.level.getBlockState(cell).getShape(client.level, cell);
+				if (shape.isEmpty() || !shape.bounds().move(cell).inflate(1.0E-4).contains(point)) {
+					face.add(point);
+				}
+			}
+		}
+		double eye = client.player.getEyeHeight();
+		for (double steepest : FRAME_PITCHES) {
+			for (double back = 0.0; back <= 8.0; back += 0.25) {
+				for (double lift = 0.0; lift <= 5.0; lift += 0.25) {
+					Vec3 from = new Vec3(at.x + bearing.x * (spoke + back), speaker.y + eye + lift, at.z + bearing.z * (spoke + back));
+					Vec3 look = centre.subtract(from);
+					double pitch = -Math.toDegrees(Math.atan2(look.y, look.horizontalDistance()));
+					if (pitch < -10.0 || pitch > steepest || !frames(from, look, body, tall, wide) || !seen(client, from, face)) {
+						continue;
+					}
+					float yaw = Mth.wrapDegrees((float) (Mth.atan2(look.z, look.x) * Mth.RAD_TO_DEG) - 90.0F);
+					return new double[] {from.x, from.y - eye, from.z, yaw, pitch};
+				}
+			}
+		}
+		return null;
+	}
+
+	/** Whether every corner of {@code body} lies inside the picture's middle, seen from {@code from} looking along {@code look}. */
+	private static boolean frames(Vec3 from, Vec3 look, AABB body, double tall, double wide) {
+		Vec3 forward = look.normalize();
+		Vec3 right = forward.cross(new Vec3(0.0, 1.0, 0.0)).normalize();
+		Vec3 up = right.cross(forward);
+		for (double x : new double[] {body.minX, body.maxX}) {
+			for (double y : new double[] {body.minY, body.maxY}) {
+				for (double z : new double[] {body.minZ, body.maxZ}) {
+					Vec3 to = new Vec3(x, y, z).subtract(from);
+					double depth = to.dot(forward);
+					if (depth <= 0.1 || Math.abs(to.dot(up)) > tall * depth || Math.abs(to.dot(right)) > wide * depth) {
+						return false;
+					}
+				}
+			}
+		}
+		return true;
+	}
+
+	/** Whether no block's outline stands on the line from {@code from} to any of {@code face} (the client's world). */
+	private static boolean seen(Minecraft client, Vec3 from, List<Vec3> face) {
+		for (Vec3 point : face) {
+			if (client.level.clip(new ClipContext(from, point, ClipContext.Block.OUTLINE, ClipContext.Fluid.NONE, client.player)).getType()
+					!= HitResult.Type.MISS) {
+				return false;
+			}
+		}
+		return true;
 	}
 
 	// ---------------------------------------------------------------- GC-05: Bathin (Dossier 2)
@@ -1521,6 +1797,7 @@ public class ConcordanceGardenPactClientGameTests implements FabricClientGameTes
 				&& PactClient.state().notes().stream().anyMatch(note -> note.getString().contains(NOTHING_TO_CARRY)));
 		check(listed, "Bathin listed, not ready, in his words: " + entries);
 		fits(context, "the chooser without his Heart");
+		cardsWhole(context, "the chooser without his Heart");
 		named(context);
 		reasons(context);
 		budget(context, chooserWords(context), "the chooser without his Heart");
@@ -1551,6 +1828,7 @@ public class ConcordanceGardenPactClientGameTests implements FabricClientGameTes
 		Jugcraft.LOGGER.info("[garden-check] chooser with his Heart and Gleaner: {}", entries);
 		context.waitFor(client -> client.gui.screen() instanceof PactScreen, WAIT);
 		fits(context, "the chooser with three spirits");
+		cardsWhole(context, "the chooser with three spirits");
 		named(context);
 		budget(context, chooserWords(context), "the chooser with three spirits");
 		shot(context, "jugcraft_garden_bathin_chooser");
@@ -1576,6 +1854,7 @@ public class ConcordanceGardenPactClientGameTests implements FabricClientGameTes
 		check(whole, "Bathin speaks three beats, nothing stands in the way, and his terms name every term, in order: " + shown);
 		fits(context, "his beat at GUI scale 2");
 		named(context);
+		portraitWhole(context, BATHIN);
 		budget(context, BEAT_WORDS, "his first beat");
 		shot(context, "jugcraft_garden_bathin_conversation");
 		tabTo(context, "next");
@@ -2113,6 +2392,7 @@ public class ConcordanceGardenPactClientGameTests implements FabricClientGameTes
 				&& PactClient.state().notes().stream().anyMatch(note -> note.getString().contains(NOTHING_GROWS)));
 		check(listed, "Marax listed, not ready, in his words: " + entries);
 		fits(context, "the chooser with nothing planted");
+		cardsWhole(context, "the chooser with nothing planted");
 		named(context);
 		reasons(context);
 		budget(context, chooserWords(context), "the chooser with nothing planted");
@@ -2148,6 +2428,7 @@ public class ConcordanceGardenPactClientGameTests implements FabricClientGameTes
 		Jugcraft.LOGGER.info("[garden-check] chooser with his beds planted: {}", entries);
 		context.waitFor(client -> client.gui.screen() instanceof PactScreen, WAIT);
 		fits(context, "the chooser with four spirits");
+		cardsWhole(context, "the chooser with four spirits");
 		named(context);
 		reasons(context);
 		budget(context, chooserWords(context), "the chooser with four spirits");
@@ -2177,6 +2458,7 @@ public class ConcordanceGardenPactClientGameTests implements FabricClientGameTes
 				&& beats.get(2).contains("My familiar writes small"), "His beats keep the contract's closing words: " + beats);
 		fits(context, "his beat at GUI scale 2");
 		named(context);
+		portraitWhole(context, MARAX);
 		budget(context, BEAT_WORDS, "his first beat");
 		shot(context, "jugcraft_garden_marax_conversation");
 		tabTo(context, "next");
