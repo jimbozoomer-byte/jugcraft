@@ -30,17 +30,24 @@ import org.jspecify.annotations.Nullable;
  * {@code i} buys offer {@code i} of the shop's sales in that theme, button {@link #SELL_BASE}{@code + i} sells offer
  * {@code i} of what it buys. The server checks everything again: the shopkeeper still near ({@link TownShops#tradeRange}),
  * the offer still on sale, the price, the player's Jugs and items, and at most one trade every {@link #MIN_TICKS} ticks.
+ * A shop trades only in its hours ({@link TownShops.Shop#openAt}). At any hour an innkeeper opens the essentials
+ * counter, which lists and sells only the General Store's essentials, at its prices, and buys nothing.
  */
 public class ShopMenu extends AbstractContainerMenu {
 	public static final int SELL_BASE = 64;
 	public static final int MIN_TICKS = 2;
 	private static final Map<UUID, Long> LAST_TRADE = new HashMap<>();
 
-	/** What the client is told when a shop opens: which shop, its theme, and the shopkeeper. */
-	public record Opening(String shop, String theme, int keeper) {
+	/** What the client is told when a shop opens: which shop, its theme, the shopkeeper, and whether only its essentials. */
+	public record Opening(String shop, String theme, int keeper, boolean essentials) {
 		public static final StreamCodec<RegistryFriendlyByteBuf, Opening> STREAM_CODEC = StreamCodec.composite(
 				ByteBufCodecs.STRING_UTF8, Opening::shop, ByteBufCodecs.STRING_UTF8, Opening::theme, ByteBufCodecs.VAR_INT, Opening::keeper,
-				Opening::new);
+				ByteBufCodecs.BOOL, Opening::essentials, Opening::new);
+
+		/** The whole shop. */
+		public Opening(String shop, String theme, int keeper) {
+			this(shop, theme, keeper, false);
+		}
 	}
 
 	public final Opening opening;
@@ -63,10 +70,28 @@ public class ShopMenu extends AbstractContainerMenu {
 	/** Opens a shopkeeper's shop for a player (server side). */
 	public static void open(ServerPlayer player, Townsfolk keeper) {
 		TownShops.Shop shop = TownShops.get().shop(keeper.shop());
-		if (shop == null) {
-			return;
+		if (shop != null) {
+			open(player, keeper, shop, false, Component.translatable("shop.jugcraft." + shop.id()));
 		}
-		Opening opening = new Opening(shop.id(), TownDecor.theme(), keeper.getId());
+	}
+
+	/** Opens the essentials counter (an innkeeper's, at any hour) for a player (server side). */
+	public static void openEssentials(ServerPlayer player, Townsfolk keeper) {
+		TownShops.Shop shop = TownShops.get().essentialsShop();
+		if (shop != null) {
+			open(player, keeper, shop, true, Component.translatable("screen.jugcraft.shop.essentials"));
+		}
+	}
+
+	/** The server's menu for a keeper's shop, or (with {@code essentials}) for the essentials counter; null if none. */
+	public static @Nullable ShopMenu serve(int containerId, ServerPlayer player, Townsfolk keeper, boolean essentials) {
+		TownShops.Shop shop = essentials ? TownShops.get().essentialsShop() : TownShops.get().shop(keeper.shop());
+		return shop == null ? null : new ShopMenu(containerId, player.getInventory(),
+				new Opening(shop.id(), TownDecor.theme(), keeper.getId(), essentials), balanceData(player.level().getServer(), player.getUUID()), keeper);
+	}
+
+	private static void open(ServerPlayer player, Townsfolk keeper, TownShops.Shop shop, boolean essentials, Component title) {
+		Opening opening = new Opening(shop.id(), TownDecor.theme(), keeper.getId(), essentials);
 		MinecraftServer server = player.level().getServer();
 		player.openMenu(new ExtendedMenuProvider<Opening>() {
 			@Override
@@ -76,7 +101,7 @@ public class ShopMenu extends AbstractContainerMenu {
 
 			@Override
 			public Component getDisplayName() {
-				return Component.translatable("shop.jugcraft." + shop.id());
+				return title;
 			}
 
 			@Override
@@ -115,15 +140,16 @@ public class ShopMenu extends AbstractContainerMenu {
 		return TownShops.get().shop(opening.shop());
 	}
 
-	/** The offers on sale, as listed (in the theme the shop opened in). */
+	/** The offers on sale, as listed (in the theme the shop opened in; only its essentials at the essentials counter). */
 	public List<TownShops.Offer> sales() {
 		TownShops.Shop shop = shop();
-		return shop == null ? List.of() : shop.sellsIn(opening.theme());
+		return shop == null ? List.of() : opening.essentials() ? shop.essentialsIn(opening.theme()) : shop.sellsIn(opening.theme());
 	}
 
+	/** What the shop buys (nothing at the essentials counter). */
 	public List<TownShops.Offer> purchases() {
 		TownShops.Shop shop = shop();
-		return shop == null ? List.of() : shop.buys();
+		return shop == null || opening.essentials() ? List.of() : shop.buys();
 	}
 
 	@Override
@@ -151,6 +177,15 @@ public class ShopMenu extends AbstractContainerMenu {
 			return false;
 		}
 		LAST_TRADE.put(player.getUUID(), now);
+		TownShops.Shop shop = shop();
+		if (shop == null) {
+			return false;
+		}
+		// A shop left open past closing trades no more; the essentials counter never shuts.
+		if (!opening.essentials() && !shop.openAt(keeper.clockTime())) {
+			server.sendOverlayMessage(Component.translatable("message.jugcraft.shop.closed_now", TownRoutine.clock(shop.opens())));
+			return false;
+		}
 		if (id >= 0 && id < SELL_BASE) {
 			List<TownShops.Offer> sales = sales();
 			return id < sales.size() && buy(server, sales.get(id));

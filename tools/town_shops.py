@@ -22,17 +22,19 @@ SHOPS = {
             ["minecraft:white_bed", 1, 8], ["minecraft:oak_sapling", 2, 2], ["minecraft:flower_pot", 2, 2],
         ],
         "buys": [
-            ["minecraft:wheat", 16, 3], ["minecraft:carrot", 16, 3], ["minecraft:potato", 16, 3],
-            ["minecraft:beetroot", 16, 3], ["minecraft:pumpkin", 4, 3], ["minecraft:melon_slice", 32, 3],
-            ["minecraft:sugar_cane", 16, 2], ["minecraft:cocoa_beans", 16, 3], ["minecraft:sweet_berries", 16, 2],
-            ["minecraft:apple", 8, 3], ["minecraft:egg", 12, 2], ["minecraft:leather", 4, 3],
-            ["minecraft:white_wool", 8, 3], ["minecraft:feather", 16, 2], ["minecraft:string", 16, 3],
-            ["minecraft:bone", 16, 3], ["minecraft:rotten_flesh", 32, 1], ["minecraft:gunpowder", 8, 4],
-            ["minecraft:honeycomb", 4, 3], ["minecraft:oak_log", 16, 3], ["minecraft:spruce_log", 16, 3],
-            ["minecraft:birch_log", 16, 3], ["minecraft:cobblestone", 64, 1], ["minecraft:coal", 16, 4],
-            ["minecraft:copper_ingot", 16, 5], ["minecraft:iron_ingot", 8, 8], ["minecraft:gold_ingot", 4, 8],
-            ["minecraft:redstone", 32, 6], ["minecraft:lapis_lazuli", 16, 6], ["minecraft:emerald", 1, 3],
-            ["minecraft:amethyst_shard", 8, 4], ["minecraft:cod", 8, 3], ["minecraft:salmon", 8, 3],
+            # Owner currency anchor: one gold ingot is one Jug. Farm output is bulk income,
+            # not several gold ingots for a handful of crops. No speculative diamond peg.
+            ["minecraft:wheat", 64, 1], ["minecraft:carrot", 64, 1], ["minecraft:potato", 64, 1],
+            ["minecraft:beetroot", 64, 1], ["minecraft:pumpkin", 32, 1], ["minecraft:melon_slice", 64, 1],
+            ["minecraft:sugar_cane", 64, 1], ["minecraft:cocoa_beans", 64, 1], ["minecraft:sweet_berries", 64, 1],
+            ["minecraft:apple", 32, 1], ["minecraft:egg", 16, 1], ["minecraft:leather", 16, 1],
+            ["minecraft:white_wool", 32, 1], ["minecraft:feather", 64, 1], ["minecraft:string", 64, 1],
+            ["minecraft:bone", 64, 1], ["minecraft:rotten_flesh", 64, 1], ["minecraft:gunpowder", 32, 1],
+            ["minecraft:honeycomb", 16, 1], ["minecraft:oak_log", 64, 1], ["minecraft:spruce_log", 64, 1],
+            ["minecraft:birch_log", 64, 1], ["minecraft:cobblestone", 64, 1], ["minecraft:coal", 32, 1],
+            ["minecraft:copper_ingot", 32, 1], ["minecraft:iron_ingot", 16, 2], ["minecraft:gold_ingot", 4, 4],
+            ["minecraft:redstone", 64, 1], ["minecraft:lapis_lazuli", 32, 1], ["minecraft:emerald", 4, 1],
+            ["minecraft:amethyst_shard", 32, 1], ["minecraft:cod", 32, 1], ["minecraft:salmon", 32, 1],
         ],
     },
     "seasonal": {
@@ -91,6 +93,25 @@ SHOPS = {
     },
 }
 
+# Opening hours, in the day's ticks (0 is 6 am, 1000 an hour): every shop opens at 7 am and shuts at 6 pm, when its
+# keeper goes out for the evening (town/TownRoutine.java). The taverns never shut: at any hour their innkeepers sell the
+# General Store's ESSENTIALS, at the store's own prices, so nobody is ever left without light, food or a bed.
+HOURS = {shop: [1000, 12000] for shop in SHOPS}
+ESSENTIALS_FROM = "general"
+ESSENTIALS = ["minecraft:torch", "minecraft:bread", "minecraft:cooked_beef", "minecraft:white_bed"]
+
+
+def clock(ticks):
+    """A time of day as a sign shows it: 1000 -> "7am"."""
+    hour = (ticks // 1000 + 6) % 24
+    return f"{hour % 12 or 12}{'am' if hour < 12 else 'pm'}"
+
+
+def hours_line(shop):
+    open_at, close_at = HOURS[shop]
+    return f"Open {clock(open_at)}-{clock(close_at)}"
+
+
 # Roles townsfolk can have, and the shop each shopkeeper keeps (see tools/town.py's spots).
 WELCOME_JUGS = 20
 MAX_BALANCE = 1_000_000_000
@@ -108,7 +129,9 @@ def offers(shop, side):
 def data():
     out = {}
     for shop, info in SHOPS.items():
-        out[shop] = {"name": info["name"], "sells": [], "buys": []}
+        out[shop] = {"name": info["name"], "sells": [], "buys": [], "hours": HOURS[shop]}
+        if shop == ESSENTIALS_FROM:
+            out[shop]["essentials"] = ESSENTIALS
         for side in ("sells", "buys"):
             for item, count, price, themes in offers(shop, side):
                 entry = {"item": item, "count": count, "price": price}
@@ -136,4 +159,11 @@ def loop_errors():
             for item, count, price, themes in offers(shop, side):
                 if count < 1 or count > 64 or price < 1:
                     errors.append(f"{shop} {side} {item}: count {count}, price {price}")
+        open_at, close_at = HOURS[shop]
+        if not 0 <= open_at < close_at <= 18000:
+            errors.append(f"{shop}: hours {open_at}-{close_at} must fall between dawn and midnight")
+    always = {item for item, _, _, themes in offers(ESSENTIALS_FROM, "sells") if themes is None}
+    for item in ESSENTIALS:
+        if item not in always:
+            errors.append(f"essential {item} is not always on sale at the {ESSENTIALS_FROM} shop")
     return errors

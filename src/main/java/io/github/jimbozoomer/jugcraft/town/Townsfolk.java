@@ -41,10 +41,17 @@ import net.minecraft.world.level.storage.ValueOutput;
  * their counters and open their shop when spoken to; vendors, the banker, the mayor, the priest, the innkeeper and the
  * baker keep to their places and chat; townsfolk stroll the streets; guards walk near their gate and fight monsters
  * that come into town; decorators walk round changing the town's decor when the season or an event changes
- * ({@link TownDecor}). All of it is the server's: the client is only told the skin.
+ * ({@link TownDecor}). All of it is the server's: the client is only told the skin and what they are doing.
+ *
+ * <p>The town's residents keep a day ({@link TownRoutine}): from dawn they work at their place (a counter, a planter,
+ * a crate stack, a lamp, a street, the fountain), from 6 pm they gather at a tavern's door or round the fountain, and
+ * at midnight they walk to bed and sleep there till dawn. Nobody walks about at night but the watch: a resident who
+ * cannot reach their bed rests where they are. Innkeepers keep the taverns open all night, selling essentials.
  */
 public class Townsfolk extends PathfinderMob {
 	private static final EntityDataAccessor<String> SKIN = SynchedEntityData.defineId(Townsfolk.class, EntityDataSerializers.STRING);
+	/** What they are doing at their place ({@link TownRoutine.Activity}), for the client's poses. */
+	private static final EntityDataAccessor<Integer> ACTIVITY = SynchedEntityData.defineId(Townsfolk.class, EntityDataSerializers.INT);
 	public static final int DECORATOR_REACH = 96;
 	public static final int DECORATE_TIMEOUT = 900;
 
@@ -55,6 +62,11 @@ public class Townsfolk extends PathfinderMob {
 	private int lastTalk;
 	private @Nullable Player listener;
 	private int listeningUntil;
+	private TownRoutine.@Nullable Places places;
+	private @Nullable BlockPos placesOrigin;
+	private int placesTick = -1;
+	/** Where they rest tonight, having given up on reaching their bed (cleared at dawn). */
+	private @Nullable BlockPos nightRest;
 
 	public Townsfolk(EntityType<? extends Townsfolk> type, Level level) {
 		super(type, level);
@@ -72,6 +84,7 @@ public class Townsfolk extends PathfinderMob {
 	protected void defineSynchedData(SynchedEntityData.Builder builder) {
 		super.defineSynchedData(builder);
 		builder.define(SKIN, "townsfolk_1");
+		builder.define(ACTIVITY, 0);
 	}
 
 	@Override
@@ -97,9 +110,10 @@ public class Townsfolk extends PathfinderMob {
 		});
 		// A guard glances at Herobrine once in a while; it never targets him (creatures/herobrine/HerobrineGlanceGoal).
 		goalSelector.addGoal(1, new io.github.jimbozoomer.jugcraft.creatures.herobrine.HerobrineGlanceGoal(this, this::isGuard));
-		goalSelector.addGoal(2, new ReturnHomeGoal());
+		goalSelector.addGoal(2, new ReturnToPlaceGoal());
 		goalSelector.addGoal(3, new DecorateGoal());
-		goalSelector.addGoal(5, new StrollNearHomeGoal());
+		goalSelector.addGoal(5, new StrollNearPlaceGoal());
+		goalSelector.addGoal(6, new FacePlaceGoal());
 		goalSelector.addGoal(6, new LookAtPlayerGoal(this, Player.class, 8.0F));
 		goalSelector.addGoal(7, new RandomLookAroundGoal(this));
 		targetSelector.addGoal(1, new NearestAttackableTargetGoal<>(this, Monster.class, true) {
@@ -121,6 +135,7 @@ public class Townsfolk extends PathfinderMob {
 		this.shop = place.shop() == null ? "" : place.shop();
 		this.home = home.immutable();
 		this.spot = place.index();
+		this.placesTick = -1;
 		entityData.set(SKIN, place.skin());
 		setCustomName(Component.literal(place.name()));
 	}
@@ -164,6 +179,94 @@ public class Townsfolk extends PathfinderMob {
 		return role.equals("guard") || role.equals("flak_guard") || role.equals("mecha_guard");
 	}
 
+	/** What they are doing at their place now (synced; NONE on the way somewhere, asleep, or listening). */
+	public TownRoutine.Activity activity() {
+		return TownRoutine.Activity.byId(entityData.get(ACTIVITY));
+	}
+
+	/** The time of day their day keeps (the Overworld's clock). */
+	public long clockTime() {
+		return scheduleTime();
+	}
+
+	public TownRoutine.Period period() {
+		return TownRoutine.period(scheduleTime());
+	}
+
+	/** Their job: the blueprint's (revision 4 on), or their role's for anyone without one. */
+	public String job() {
+		TownRoutine.Places mine = places();
+		return mine != null ? mine.job() : isGuard() ? "watch" : role;
+	}
+
+	/**
+	 * Their places in the world, from the town's blueprint; null for anyone not in its list (an Academy instructor, a
+	 * resident of an older blueprint), who keeps to their own place as the town always did.
+	 */
+	protected TownRoutine.@Nullable Places places() {
+		if (placesTick == tickCount) {
+			return places;
+		}
+		placesTick = tickCount;
+		if (spot < 0 || !(level() instanceof ServerLevel level)) {
+			return places = null;
+		}
+		BlockPos origin = TownState.get(level).origin();
+		TownRoutine.Places relative = TownData.get().routines.get(spot);
+		if (origin == null || relative == null) {
+			return places = null;
+		}
+		if (places == null || !origin.equals(placesOrigin)) {
+			places = relative.offset(origin);
+			placesOrigin = origin;
+		}
+		return places;
+	}
+
+	/** Where they belong now: work by day, their gathering in the evening, their bed (or where they rest) at night. */
+	public BlockPos anchor() {
+		TownRoutine.Places mine = places();
+		if (mine == null) {
+			return home;
+		}
+		return switch (period()) {
+			case MORNING, WORK -> mine.work() != null ? mine.work() : home;
+			case EVENING -> mine.evening() != null ? mine.evening() : home;
+			case NIGHT -> {
+				if (nightRest != null) {
+					yield nightRest;
+				}
+				BlockPos bed = bed();
+				yield bed != null ? bed : home;
+			}
+		};
+	}
+
+	/** How far from {@link #anchor()} they wander now. */
+	public int placeRange() {
+		TownRoutine.Places mine = places();
+		if (mine == null) {
+			return range();
+		}
+		TownRoutine.Period period = period();
+		boolean hasPlace = period.daytime() ? mine.work() != null : period != TownRoutine.Period.EVENING || mine.evening() != null;
+		return TownRoutine.reach(mine.job(), range(), period, hasPlace);
+	}
+
+	/** What they look at while at their place: their work, or the middle of their gathering. */
+	public @Nullable BlockPos focus() {
+		TownRoutine.Places mine = places();
+		if (mine == null) {
+			return null;
+		}
+		TownRoutine.Period period = period();
+		return period.daytime() ? mine.workLook() : period == TownRoutine.Period.EVENING ? mine.eveningLook() : null;
+	}
+
+	private boolean within(BlockPos at, int reach) {
+		return distanceToSqr(at.getX() + 0.5, at.getY(), at.getZ() + 0.5) <= (double) reach * reach;
+	}
+
 	/** How far from their place a role wanders. */
 	public int range() {
 		return switch (role) {
@@ -192,6 +295,16 @@ public class Townsfolk extends PathfinderMob {
 	@Override
 	protected void customServerAiStep(ServerLevel level) {
 		super.customServerAiStep(level);
+		// Asleep only in their own bed and only at night: one loaded asleep in daylight (or whose bed has moved) wakes.
+		if (isSleeping() && (!bedtime(scheduleTime()) || !getSleepingPos().map(at -> at.equals(bed())).orElse(false))) {
+			stopSleeping();
+		}
+		if (nightRest != null && period() != TownRoutine.Period.NIGHT) {
+			nightRest = null;
+		}
+		if (tickCount % 10 == 0) {
+			updateActivity();
+		}
         if (tickCount % 100 == 0) TownDefense.crew(level, this);
 		if (tickCount % 100 == 0) {
 			// A townsperson the town has since replaced (after it went missing) steps aside.
@@ -209,9 +322,26 @@ public class Townsfolk extends PathfinderMob {
 		}
 	}
 
+	/** What they are doing, worked out from where they are and the time of day. */
+	private void updateActivity() {
+		TownRoutine.Activity next = TownRoutine.Activity.NONE;
+		TownRoutine.Places mine = places();
+		if (mine != null && !isSleeping() && !isPassenger() && listener == null && getTarget() == null && getNavigation().isDone()
+				&& within(anchor(), placeRange() + 2)) {
+			TownRoutine.Period period = period();
+			// A civilian kept from their bed dozes where they rest.
+			next = period == TownRoutine.Period.NIGHT && !isGuard() && !mine.job().equals("innkeeper") ? TownRoutine.Activity.DOZE
+					: TownRoutine.activity(mine.job(), mine.gathering(), period);
+		}
+		if (next.ordinal() != entityData.get(ACTIVITY)) {
+			entityData.set(ACTIVITY, next.ordinal());
+		}
+	}
+
 	/**
 	 * A player speaks to this townsperson (every interaction comes here: no leads, name tags or other items work on
-	 * them). Shopkeepers open their shop; everyone else says something for the season.
+	 * them). Shopkeepers open their shop in its hours and say when it opens otherwise; innkeepers open the essentials
+	 * counter at any hour; everyone else says something for the season or about their day.
 	 */
 	public InteractionResult talkTo(Player player, InteractionHand hand) {
 		if (!(player instanceof ServerPlayer server) || hand != InteractionHand.MAIN_HAND) {
@@ -219,7 +349,7 @@ public class Townsfolk extends PathfinderMob {
 		}
 		getLookControl().setLookAt(player);
         if (isSleeping()) {
-            player.sendSystemMessage(Component.literal("" + getName().getString() + " is asleep. Come back in the morning."));
+            player.sendSystemMessage(Component.translatable("message.jugcraft.townsfolk.asleep", getDisplayName()));
             return InteractionResult.SUCCESS;
         }
         listener = player;
@@ -228,8 +358,28 @@ public class Townsfolk extends PathfinderMob {
 			io.github.jimbozoomer.jugcraft.academy.JugcraftAcademy.consult(server);
 			return InteractionResult.SUCCESS;
 		}
-		if (role.equals("shopkeeper") && TownShops.get().shop(shop) != null) {
-			ShopMenu.open(server, this);
+		TownShops.Shop own = role.equals("shopkeeper") ? TownShops.get().shop(shop) : null;
+		if (own != null) {
+			if (own.openAt(clockTime())) {
+				ShopMenu.open(server, this);
+				server.sendOverlayMessage(Component.translatable("message.jugcraft.shop.hours", Component.translatable("shop.jugcraft." + own.id()),
+						TownRoutine.clock(own.opens()), TownRoutine.clock(own.closes())));
+			} else if (tickCount - lastTalk >= 20) {
+				lastTalk = tickCount;
+				player.sendSystemMessage(Component.translatable("message.jugcraft.townsfolk.says", getDisplayName(),
+						Component.translatable("message.jugcraft.shop.closed", Component.translatable("shop.jugcraft." + own.id()),
+								TownRoutine.clock(own.opens()), TownRoutine.clock(own.closes()))));
+			}
+			return InteractionResult.SUCCESS;
+		}
+		if (role.equals("innkeeper") && TownShops.get().essentialsShop() != null) {
+			// The tavern never shuts: a word for the hour, and the essentials counter.
+			String greeting = TownRoutine.line("innkeeper", period(), Math.floorMod(getUUID().hashCode() + tickCount / 200, 3));
+			if (greeting != null && tickCount - lastTalk >= 20) {
+				lastTalk = tickCount;
+				player.sendSystemMessage(Component.translatable("message.jugcraft.townsfolk.says", getDisplayName(), Component.translatable(greeting)));
+			}
+			ShopMenu.openEssentials(server, this);
 			return InteractionResult.SUCCESS;
 		}
 		if (tickCount - lastTalk < 20) {
@@ -237,10 +387,13 @@ public class Townsfolk extends PathfinderMob {
 		}
 		lastTalk = tickCount;
 		String theme = TownDecor.theme();
-		int line = Math.floorMod(getUUID().hashCode() + tickCount / 200, 3);
+		// Half the time something for the season, half the time something about their day.
+		int line = Math.floorMod(getUUID().hashCode() + tickCount / 200, 6);
+		String daily = line >= 3 ? TownRoutine.line(job(), period(), line - 3) : null;
 		Component said = role.equals("banker")
 				? Component.translatable("message.jugcraft.townsfolk.banker", Jugs.balance(server.level().getServer(), server.getUUID()))
-				: Component.translatable("message.jugcraft.townsfolk." + roleKey() + "." + theme + "." + line);
+				: daily != null ? Component.translatable(daily)
+				: Component.translatable("message.jugcraft.townsfolk." + roleKey() + "." + theme + "." + line % 3);
 		player.sendSystemMessage(Component.translatable("message.jugcraft.townsfolk.says", getDisplayName(), said));
 		if (isGuard()) player.sendSystemMessage(Component.translatable("message.jugcraft.town.map_hint"));
 		level().playSound(null, blockPosition(), SoundEvents.VILLAGER_AMBIENT, SoundSource.NEUTRAL, 0.5F, 1.2F);
@@ -280,8 +433,9 @@ public class Townsfolk extends PathfinderMob {
 
     public static boolean bedtime(long dayTime) { return Math.floorMod(dayTime, 24000L) >= 18000; }
 
+    /** Their bed; none for the watch (on duty all night) or the innkeepers (who keep the taverns open). */
     public @Nullable BlockPos bed() {
-        if (isGuard() || spot < 0 || !(level() instanceof ServerLevel level)) return null;
+        if (isGuard() || role.equals("innkeeper") || spot < 0 || !(level() instanceof ServerLevel level)) return null;
         BlockPos origin = TownState.get(level).origin(), relative = TownData.get().beds.get(spot);
         return origin == null || relative == null ? null : origin.offset(relative);
     }
@@ -298,13 +452,20 @@ public class Townsfolk extends PathfinderMob {
         super.travel(input);
     }
 
-    /** Civilian bedtime is midnight, not sunset. Guards stay on duty. No teleporting or chunk tickets. */
+    /**
+     * Civilian bedtime is midnight, not sunset. Guards stay on duty. No teleporting or chunk tickets. A resident who
+     * gets no nearer their bed for 20 seconds (a blocked door, a bed walled in) stops trying and rests where they are
+     * until dawn, rather than wandering about in the dark.
+     */
     private class LateBedGoal extends Goal {
+        private static final int GIVE_UP_AFTER = 4;
         private @Nullable BlockPos bed;
         private int retryAt;
+        private double nearest;
+        private int stalls;
         LateBedGoal() { setFlags(EnumSet.of(Flag.MOVE, Flag.LOOK, Flag.JUMP)); }
         @Override public boolean canUse() {
-            if (!bedtime(scheduleTime()) || isGuard() || getTarget() != null) return false;
+            if (!bedtime(scheduleTime()) || isGuard() || getTarget() != null || nightRest != null) return false;
             bed = Townsfolk.this.bed();
             return bed != null && validBed();
         }
@@ -320,14 +481,17 @@ public class Townsfolk extends PathfinderMob {
                 && (isSleeping() || !block.getValue(net.minecraft.world.level.block.BedBlock.OCCUPIED));
         }
         @Override public boolean canContinueToUse() {
-            return bedtime(scheduleTime()) && !isGuard() && getTarget() == null && validBed();
+            return bedtime(scheduleTime()) && !isGuard() && getTarget() == null && nightRest == null && validBed();
         }
-        @Override public void start() { listener = null; retryAt = 0; getNavigation().stop(); }
+        @Override public void start() { listener = null; retryAt = 0; nearest = Double.MAX_VALUE; stalls = 0; getNavigation().stop(); }
         @Override public void tick() {
             if (bed == null || isSleeping()) return;
             if (distanceToSqr(bed.getX()+.5,bed.getY(),bed.getZ()+.5) < 4 && Math.abs(getY()-bed.getY()) < 1.5) {
                 getNavigation().stop(); startSleeping(bed);
             } else if (tickCount >= retryAt) {
+                double distance = Math.sqrt(distanceToSqr(bed.getX()+.5,bed.getY(),bed.getZ()+.5));
+                if (distance < nearest - 1) { nearest = distance; stalls = 0; }
+                else if (++stalls >= GIVE_UP_AFTER) { nightRest = blockPosition(); getNavigation().stop(); return; }
                 // Long cross-town trips are split into navigable stages by vanilla's pathfinder.
                 getNavigation().moveTo(bed.getX()+.5,bed.getY(),bed.getZ()+.5, .85);
                 retryAt = tickCount + 100;
@@ -338,43 +502,73 @@ public class Townsfolk extends PathfinderMob {
 
     // ---------------------------------------------------------------- goals
 
-	/** Back towards their place when they have strayed (after a chase, or pushed). */
-	private class ReturnHomeGoal extends Goal {
-		ReturnHomeGoal() {
+	/**
+	 * To where they belong now ({@link #anchor()}): to work in the morning, to their gathering at 6 pm, to rest at night
+	 * if their bed is out of reach, and back after a chase or a push. Someone not in the town's list comes back to their
+	 * own place when they stray, as the town always did.
+	 */
+	private class ReturnToPlaceGoal extends Goal {
+		private @Nullable BlockPos target;
+		private int retryAt;
+
+		ReturnToPlaceGoal() {
 			setFlags(EnumSet.of(Goal.Flag.MOVE));
+		}
+
+		private int slack() {
+			return places() == null ? 4 : 3;
 		}
 
 		@Override
 		public boolean canUse() {
-			int r = range() + 4;
-			return !isSleeping() && !isPassenger() && getTarget() == null && distanceToSqr(home.getX() + 0.5, home.getY(), home.getZ() + 0.5) > (double) r * r;
+			if (isSleeping() || isPassenger() || getTarget() != null || tickCount < retryAt) {
+				return false;
+			}
+			return !within(anchor(), placeRange() + slack());
 		}
 
 		@Override
 		public void start() {
-			getNavigation().moveTo(home.getX() + 0.5, home.getY(), home.getZ() + 0.5, 1.0);
+			BlockPos to = anchor();
+			target = to;
+			double speed = places() == null ? 1.0 : period() == TownRoutine.Period.NIGHT ? 0.85 : within(to, 48) ? 0.8 : 1.0;
+			getNavigation().moveTo(to.getX() + 0.5, to.getY(), to.getZ() + 0.5, speed);
 		}
 
 		@Override
 		public boolean canContinueToUse() {
-			return !isSleeping() && !isPassenger() && !getNavigation().isDone();
+			return !isSleeping() && !isPassenger() && !getNavigation().isDone() && anchor().equals(target);
+		}
+
+		@Override
+		public void stop() {
+			// A long way still to go when the path ran out: try again shortly rather than every tick.
+			if (target != null && !within(target, placeRange() + slack())) {
+				retryAt = tickCount + 40;
+			}
+			target = null;
 		}
 	}
 
-	/** A short walk to somewhere near their place, now and then. */
-	private class StrollNearHomeGoal extends Goal {
-		StrollNearHomeGoal() {
+	/** A short walk to somewhere near their place, now and then; never at night, except for the watch. */
+	private class StrollNearPlaceGoal extends Goal {
+		StrollNearPlaceGoal() {
 			setFlags(EnumSet.of(Goal.Flag.MOVE));
 		}
 
 		@Override
 		public boolean canUse() {
-			if (isSleeping() || isPassenger() || getRandom().nextInt(range() <= 2 ? 200 : 80) != 0) {
+			if (isSleeping() || isPassenger()
+					|| places() != null && !isGuard() && period() == TownRoutine.Period.NIGHT) {
 				return false;
 			}
+			int r = placeRange();
+			if (getRandom().nextInt(r <= 2 ? 200 : 80) != 0) {
+				return false;
+			}
+			BlockPos at = anchor();
 			for (int tries = 0; tries < 6; tries++) {
-				int r = range();
-				BlockPos to = home.offset(getRandom().nextInt(2 * r + 1) - r, 0, getRandom().nextInt(2 * r + 1) - r);
+				BlockPos to = at.offset(getRandom().nextInt(2 * r + 1) - r, 0, getRandom().nextInt(2 * r + 1) - r);
 				if (getNavigation().moveTo(to.getX() + 0.5, to.getY(), to.getZ() + 0.5, 0.6)) {
 					return true;
 				}
@@ -385,6 +579,38 @@ public class Townsfolk extends PathfinderMob {
 		@Override
 		public boolean canContinueToUse() {
 			return !isSleeping() && !isPassenger() && !getNavigation().isDone();
+		}
+	}
+
+	/** At their place, they turn to their work (a planter, a lamp, the crowd) or to the middle of their gathering. */
+	private class FacePlaceGoal extends Goal {
+		private int until;
+
+		FacePlaceGoal() {
+			setFlags(EnumSet.of(Goal.Flag.LOOK));
+		}
+
+		@Override
+		public boolean canUse() {
+			return activity() != TownRoutine.Activity.NONE && focus() != null && getRandom().nextInt(20) == 0;
+		}
+
+		@Override
+		public void start() {
+			until = tickCount + 60 + getRandom().nextInt(80);
+		}
+
+		@Override
+		public boolean canContinueToUse() {
+			return tickCount < until && activity() != TownRoutine.Activity.NONE && focus() != null;
+		}
+
+		@Override
+		public void tick() {
+			BlockPos at = focus();
+			if (at != null) {
+				getLookControl().setLookAt(at.getX() + 0.5, at.getY() + 0.5, at.getZ() + 0.5);
+			}
 		}
 	}
 
@@ -400,6 +626,10 @@ public class Townsfolk extends PathfinderMob {
 		@Override
 		public boolean canUse() {
 			if (isSleeping() || isPassenger() || !role.equals("decorator") || !(level() instanceof ServerLevel level) || tickCount % 40 != 0) {
+				return false;
+			}
+			// Decorating is day work: in the evening they join their gathering.
+			if (places() != null && !period().daytime()) {
 				return false;
 			}
 			site = TownDecor.claim(level, blockPosition(), getUUID(), DECORATOR_REACH);

@@ -387,6 +387,7 @@
     "peepo_companion:red_companion_bed",
     "peepo_companion:white_companion_bed",
     "peepo_companion:wooden_stool",
-    "peepo_companion:yellow_companion_bed"
+    "peepo_companion:yellow_companion_bed",
+    "jugcraft:town_commission_board"
   ]
 }

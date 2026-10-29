@@ -31,6 +31,7 @@ import town_decor  # noqa: E402
 import town_shops  # noqa: E402
 import town_skins  # noqa: E402
 import town_wayfinding
+import town_living  # noqa: E402
 from town_voxels import S, Voxels, connections, stair_shapes, parse, vanilla_states, check_state  # noqa: E402
 
 SEED = 1907
@@ -122,6 +123,7 @@ class Town:
         self.used = np.zeros((SIZE, SIZE), dtype=np.int8)   # [z, x]: 1 street/square, 2 building, 3 wall
         self.surface = {}   # (x, z) -> state of the top block outside the wall (paths on the blended ground)
         self.houses = []
+        self.stalls = []    # each market stall's box (x0, z0, x1, z1), for tools/town_living.py
 
     # ------------------------------------------------ helpers
 
@@ -383,7 +385,7 @@ class Town:
             piece = tb.stall(rng)
             if shop is None:
                 piece.spots = [{**s, "role": "vendor"} for s in piece.spots]
-            self.place_centred(piece, cx, cz, turns, purpose=shop)
+            self.stalls.append(self.place_centred(piece, cx, cz, turns, purpose=shop))
 
     # ------------------------------------------------ houses along the streets
 
@@ -675,6 +677,8 @@ class Town:
             self.v.set(x, y, z, S("jugcraft:atm", facing=facing))
         stair_shapes(self.v)
         connections(self.v)
+        # Revision 4, last: additive street furniture and the commission board, then the residents' daily places.
+        town_living.routines(self, town_living.decorate(self))
         return self
 
 
@@ -839,12 +843,18 @@ def check(town):
     return errors
 
 
+def living_errors(data):
+    """Revision 4 against the frozen revision 3: only additions into authored air (tools/town_living.py)."""
+    frozen = OUT.parent / "revisions" / "3.json.gz"
+    return town_living.check(json.loads(gzip.decompress(frozen.read_bytes())), data)
+
+
 def write():
     """Writes the skins, the town data and the shops (for tools/generate_material_data.py); returns any problems."""
     town_skins.write()
     town = Town().build()
     errors = check(town)
-    export(town)
+    errors += living_errors(export(town))
     return errors
 
 
@@ -852,9 +862,10 @@ def main():
     town_skins.write()
     town = Town().build()
     errors = check(town)
+    data = export(town)
+    errors += living_errors(data)
     for e in sorted(set(errors))[:40]:
         print("town:", e)
-    data = export(town)
     kinds = {}
     for s in town.sites:
         kinds[s["kind"]] = kinds.get(s["kind"], 0) + 1

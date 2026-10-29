@@ -1284,6 +1284,7 @@ def compaction(recipes, feature, small_tag, small, big, category="building"):
 
 def recipes():
     out = DATA / MOD / "recipe"
+    write(out / "town_commission_board.json", town_assets.town_commissions.RECIPE)
     for metal, info in METALS.items():
         feature = info["feature"]
         ingot, nugget = f"{metal}_ingot", f"{metal}_nugget"
@@ -1590,7 +1591,8 @@ def tags():
             tags.add("block", f"minecraft:mineable/{info['tool']}", rid(block))
     tags.add("block", "minecraft:mineable/pickaxe", rid(ph.CLUSTER))
     for block in town_assets.blocks():
-        tags.add("block", "minecraft:mineable/pickaxe", rid(block))
+        tool = "axe" if block == "town_commission_board" else "pickaxe"
+        tags.add("block", f"minecraft:mineable/{tool}", rid(block))
     for value in town_assets.USABLE:
         tags.add("block", "jugcraft:town_usable", value)
     tags.add("block", "minecraft:mineable/axe", rid(ph.CABINET))

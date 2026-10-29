@@ -126,7 +126,9 @@ public final class TownProtection {
 		for (var side : net.minecraft.core.Direction.values()) if (hasStoredResources(level, pos, side)) return false;
 		if (state.getBlock() instanceof io.github.jimbozoomer.jugcraft.menagerie.HouseholdBlock household)
 			return household.publicTownInteraction();
-		if (state.is(USABLE)) return true;
+		// These menus keep their own ownership/bet checks and expose no stored item inventory.
+        if (state.getBlock() instanceof io.github.jimbozoomer.jugcraft.finance.CasinoBlock) return true;
+        if (state.is(USABLE)) return true;
 		// Non-container furniture/workstations can be used without permitting item mutations.
 		// Flower pots hold removable town decorations, so treat them as small containers.
 		return entity == null && !(state.getBlock() instanceof net.minecraft.world.level.block.FlowerPotBlock);

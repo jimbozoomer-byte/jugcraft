@@ -603,6 +603,9 @@ def trunk_block(tree):
 def leaf_looks(tree):
     """Texture (and model) names for each state of a tree's leaves: {state: {texture: weight}}."""
     leaves = TREES[tree]["leaves"]
+    # Keep the saved winter state, but never give aspens the web-like bare-twig look.
+    if tree == "aspen":
+        return {"green": {leaves: 1}, "gold": {f"{leaves}_gold": 1}, "bare": {leaves: 1}}
     if tree == "holly":
         return {"green": {leaves: 2, f"{leaves}_berries": 1},
                 "gold": {f"{leaves}_berries": 1}, "bare": {f"{leaves}_berries": 1}}

@@ -43,10 +43,24 @@ public final class TownShops {
 		}
 	}
 
-	public record Shop(String id, String name, List<Offer> sells, List<Offer> buys) {
+	/**
+	 * A shop: its offers, its hours (day ticks, {@link TownRoutine}: open from {@code opens} until {@code closes}) and
+	 * the items it counts as essentials, which the taverns sell for it at any hour.
+	 */
+	public record Shop(String id, String name, List<Offer> sells, List<Offer> buys, int opens, int closes, List<String> essentials) {
 		/** The offers for sale in this theme, in order. */
 		public List<Offer> sellsIn(String theme) {
 			return sells.stream().filter(offer -> offer.onSale(theme)).toList();
+		}
+
+		/** Whether the shop is open at this time of day. */
+		public boolean openAt(long dayTime) {
+			return TownRoutine.open(opens, closes, dayTime);
+		}
+
+		/** Its essentials on sale in this theme, in order. */
+		public List<Offer> essentialsIn(String theme) {
+			return sellsIn(theme).stream().filter(offer -> essentials.contains(offer.item())).toList();
 		}
 	}
 
@@ -62,8 +76,15 @@ public final class TownShops {
 		Map<String, Shop> shops = new LinkedHashMap<>();
 		for (Map.Entry<String, JsonElement> e : root.getAsJsonObject("shops").entrySet()) {
 			JsonObject o = e.getValue().getAsJsonObject();
+			// Without hours a shop is open all day; without essentials the taverns sell nothing for it.
+			JsonArray hours = o.has("hours") ? o.getAsJsonArray("hours") : null;
+			List<String> essentials = new ArrayList<>();
+			for (JsonElement item : o.has("essentials") ? o.getAsJsonArray("essentials") : new JsonArray()) {
+				essentials.add(item.getAsString());
+			}
 			shops.put(e.getKey(), new Shop(e.getKey(), o.get("name").getAsString(), offers(o.getAsJsonArray("sells")),
-					offers(o.getAsJsonArray("buys"))));
+					offers(o.getAsJsonArray("buys")), hours == null ? 0 : hours.get(0).getAsInt(),
+					hours == null ? (int) TownRoutine.DAY : hours.get(1).getAsInt(), List.copyOf(essentials)));
 		}
 		this.shops = shops;
 		JsonObject economy = root.getAsJsonObject("economy");
@@ -91,6 +112,11 @@ public final class TownShops {
 
 	public @Nullable Shop shop(@Nullable String id) {
 		return id == null ? null : shops.get(id);
+	}
+
+	/** The shop whose essentials the taverns sell at any hour (the General Store), if any. */
+	public @Nullable Shop essentialsShop() {
+		return shops.values().stream().filter(shop -> !shop.essentials().isEmpty()).findFirst().orElse(null);
 	}
 
 	/** An offer on sale, and the shop selling it. */
