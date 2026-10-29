@@ -171,6 +171,11 @@ public class EncyclopediaRoutesScreen extends Screen {
 	}
 
     @Override public boolean keyPressed(KeyEvent event) {
+        // The encyclopedia's key closes the guides as it closes the encyclopedia (to the game, or the inventory it came from).
+        if (EncyclopediaClient.key().matches(event)) {
+            if (parent instanceof EncyclopediaScreen book) book.onClose(); else onClose();
+            return true;
+        }
         if (route < 0) return super.keyPressed(event);
         if (event.input() == InputConstants.KEY_BACKSPACE) { showHome(); return true; }
         if (event.input() == InputConstants.KEY_DOWN || event.input() == InputConstants.KEY_UP) {

@@ -202,3 +202,39 @@ is a wrapped paragraph in a scrolling page; `check_encyclopedia_routes` now requ
 Known limit, calculated and not yet seen in a screenshot: the home tab (`BookArt.Tab`) cuts its label with "…", and at
 CI's 427×240 GUI it leaves 134 pixels for a title, so "Magic: the Arcane Concordance" (about 158 by the font's widths)
 will be cut there.
+
+## Fixes (27 October 2026)
+
+A contributor reported the encyclopedia (B) as "bugged and broken in general". CI screenshots of `main` (fork run
+40422697487, shards 11 and 12) and the code showed five faults, fixed here without changing the book's look:
+
+- **Most chapters could not be opened by clicking.** The contents spread listed six fixed chapters, but the server
+  sends up to twelve pages (Jug Nouveau, Menagerie, Woodland, Household, Habitats, Beasts, Caverns, the digital network,
+  Inspect); those were reachable only with the Left and Right keys, which nothing on screen mentions. The contents now
+  lists the two guides and then every page the server sent, with the Keys page last, in the same tabs; the list scrolls
+  when there are more than six.
+- **A chapter chosen before the server answered stayed empty.** Clicking a chapter in the moment after opening showed
+  "Nothing to show yet" and kept showing it after the pages came. It now opens once they arrive.
+- **Discover's first topic was empty.** A page's heading followed by a step became a topic of its own with only its
+  title ("From a glow to your first spell", 1 of 13). Headings now lead the topic that follows them, so Discover opens
+  on its first step.
+- **Backspace went to the contents,** though the help says it goes back a page, and a followed link had no way back.
+  It now returns to the page read before, and to the contents from the first.
+- **B did nothing in the Technology & Magic guides,** while it closes the encyclopedia itself. It now closes the guides
+  too (to the game, or to the inventory the encyclopedia was opened from).
+
+Implemented with Claude Opus 5.5 (Claude Code) for the contributor, on the fork. Verification: new checks in
+`EncyclopediaClientGameTests` (every page has a chapter; Discover's first topic is its first step; Backspace from Keys
+returns to Expeditions) and `EncyclopediaRoutesClientGameTests` (B closes the guides). Local: a tree-sitter parse of the
+changed Java found no syntax errors; `python tools/check_mod_data.py` and `python scripts/check_repository.py` passed.
+The first CI run ([40430018384](https://github.com/mmme123-spec/jugcraftfork/actions/runs/40430018384), on `e6a34dbd1`)
+failed in both encyclopedia client tests: the test framework's `clickScreenButton` does not look inside the scrolling
+chapter list, so it could not find "Technology" or "First steps". The tests now press a chapter with
+`EncyclopediaScreen.pressChapter`, which runs the same tab's action. CI on that change, fork
+[run 40442426943](https://github.com/mmme123-spec/jugcraftfork/actions/runs/40442426943) on `889304c2a`: green, every
+job and all sixteen client shards. Its shots show the contents listing Technology, Magic, First steps, Jug Nouveau,
+Wildlife & Companions and Woodland & Fable Creatures with a scroll bar for the rest (pages with nothing to show, such
+as a newcomer's Spellcraft, are not sent and so not listed), and First steps opening on "Find something that glows"
+(1 of 12) with the page's heading above it. Not run: a human clicking through the encyclopedia.
+
+After merging main (5b8d6520c): fork [run 40464332925](https://github.com/mmme123-spec/jugcraftfork/actions/runs/40464332925) on `dde00ce56`, green, every job and all sixteen client shards.

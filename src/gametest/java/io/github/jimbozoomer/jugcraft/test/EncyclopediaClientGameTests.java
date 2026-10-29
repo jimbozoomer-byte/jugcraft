@@ -189,9 +189,20 @@ public class EncyclopediaClientGameTests implements FabricClientGameTest {
                 context.waitTicks(2);
                 context.takeScreenshot("jugcraft_encyclopedia_discover_new");
         check(context.computeOnClient(client -> ((EncyclopediaScreen) client.gui.screen()).isHome()), "The guide should open on the simple contents spread");
-        context.clickScreenButton("ui.jugcraft.book.discover");
+        context.runOnClient(client -> ((EncyclopediaScreen) client.gui.screen()).pressChapter("discover"));
         context.waitTicks(3);
         check(context.computeOnClient(client -> !((EncyclopediaScreen) client.gui.screen()).isHome()), "First steps should open the topic directory");
+		List<String> unlisted = context.computeOnClient(client -> {
+			List<String> shown = ((EncyclopediaScreen) client.gui.screen()).chapters();
+			return EncyclopediaClient.navigator().pages().stream().map(EncyclopediaPayload.Page::id).filter(id -> !shown.contains(id)).toList();
+		});
+		Jugcraft.LOGGER.info("[encyclopedia-check] pages without a chapter on the contents: {}", unlisted);
+		check(unlisted.isEmpty(), "Every page should have a chapter on the contents spread: missing " + unlisted);
+		List<String> topics = context.computeOnClient(client -> ((EncyclopediaScreen) client.gui.screen()).topics().stream().map(Component::getString).toList());
+		String firstStep = context.computeOnClient(client -> EncyclopediaClient.navigator().current().rows().stream()
+				.filter(row -> row.kindOf() == EncyclopediaPayload.Kind.STEP).findFirst().map(row -> row.text().getString()).orElse(""));
+		Jugcraft.LOGGER.info("[encyclopedia-check] Discover's topics: {}", topics);
+		check(!topics.isEmpty() && topics.getFirst().equals(firstStep), "Discover's first topic should be its first step, not a heading alone: " + topics);
         context.takeScreenshot("jugcraft_field_guide_first_steps");
 
 		context.getInput().pressKey(key);
@@ -943,6 +954,12 @@ public class EncyclopediaClientGameTests implements FabricClientGameTest {
 		context.runOnClient(client -> client.gui.toastManager().clear());
                 context.waitTicks(2);
                 context.takeScreenshot("jugcraft_encyclopedia_keys");
+		// Backspace goes back to the page read before, as the help says.
+		context.getInput().pressKey(InputConstants.KEY_BACKSPACE);
+		context.waitTicks(3);
+		String backTo = context.computeOnClient(client -> ((EncyclopediaScreen) client.gui.screen()).page());
+		Jugcraft.LOGGER.info("[encyclopedia-check] Backspace from Keys: {}", backTo);
+		check(backTo.equals("expedition"), "Backspace should go back to the page read before: " + backTo);
 		context.getInput().pressKey(InputConstants.KEY_ESCAPE);
 		context.waitForScreen(null);
 	}

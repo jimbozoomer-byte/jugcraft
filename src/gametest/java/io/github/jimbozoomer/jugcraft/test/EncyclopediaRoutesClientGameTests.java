@@ -38,7 +38,7 @@ public class EncyclopediaRoutesClientGameTests implements FabricClientGameTest {
 			// The key, from the game.
 			context.getInput().pressKey(EncyclopediaClient.key());
 			context.waitForScreen(EncyclopediaScreen.class);
-			context.clickScreenButton("ui.jugcraft.book.technology");
+			context.runOnClient(client -> ((EncyclopediaScreen) client.gui.screen()).pressChapter("technology"));
 			context.waitForScreen(EncyclopediaRoutesScreen.class);
 			context.waitTicks(2);
 			context.runOnClient(client -> client.gui.toastManager().clear());
@@ -93,7 +93,7 @@ public class EncyclopediaRoutesClientGameTests implements FabricClientGameTest {
 			// The guide directory is a child of the live encyclopedia; closing returns there.
 			context.getInput().pressKey(EncyclopediaClient.key());
 			context.waitForScreen(EncyclopediaScreen.class);
-			context.clickScreenButton("ui.jugcraft.book.technology");
+			context.runOnClient(client -> ((EncyclopediaScreen) client.gui.screen()).pressChapter("technology"));
 			context.waitForScreen(EncyclopediaRoutesScreen.class);
             context.getInput().pressKey(InputConstants.KEY_DOWN);
             // Enter must activate the focused Contents button, not reopen the selected topic.
@@ -106,6 +106,14 @@ public class EncyclopediaRoutesClientGameTests implements FabricClientGameTest {
             context.getInput().pressKey(InputConstants.KEY_RETURN);
 			context.waitForScreen(EncyclopediaScreen.class);
 			context.getInput().pressKey(ESCAPE);
+			context.waitForScreen(null);
+
+			// The encyclopedia's key closes the guides too, as it closes the encyclopedia.
+			context.getInput().pressKey(EncyclopediaClient.key());
+			context.waitForScreen(EncyclopediaScreen.class);
+			context.runOnClient(client -> ((EncyclopediaScreen) client.gui.screen()).pressChapter("technology"));
+			context.waitForScreen(EncyclopediaRoutesScreen.class);
+			context.getInput().pressKey(EncyclopediaClient.key());
 			context.waitForScreen(null);
 		}
 	}
