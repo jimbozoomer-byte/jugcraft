@@ -33,6 +33,13 @@ gone it runs down and stops. The Hay Wagon (agriculture/HayWagonBlock, three acr
 farm wagon 4 m long under a load of hay 2 m high, roped down, with hay ladders at either end and a pitchfork in the
 hay; placed behind the engine, its drawbar reaches the engine's hook.
 Sizes in pixels of each one's frame, facing north.
+
+Part 4, the bunting and the sacks. Harvest Bunting (agriculture/StringLightsItem, a new Strand on the String Light
+Hooks): a twine cord hung with leaf-shaped pennants, a red maple leaf, a gold aspen leaf and a hessian pennant in turn,
+each `pennant` blocks across at one texel to a pixel, every `spacing` blocks (client/StringLightsRenderer). The
+Sack-Race Sack: a hessian sack worn in the legs slot, up to the waist; in it a player walks at `speed` (multiplied),
+can't step up a block without hopping (`step`), and jumps `jump` harder, just short of clearing a fence. Attributes
+of the item, so nothing ticks for them.
 """
 
 # Its mouth across its opening inside the rim (20 px, 1.25 m) and the horn's length from its rim to the back of its tail
@@ -63,6 +70,13 @@ ENGINE = {"block": "steam_traction_engine", "display": "Steam Traction Engine", 
           "governor": (20.0, 28.0), "chimney": (24.0, 47.0, 7.0)}
 # The Hay Wagon: its frame (48 across, 32 up, 64 deep).
 WAGON = {"block": "hay_wagon", "display": "Hay Wagon", "size": (3, 2, 4)}
+# Harvest Bunting: its strand's name, its pennants' size (blocks; seven texels and a clear one at a texel to a pixel)
+# and spacing, and their kinds in turn.
+BUNTING = {"item": "harvest_bunting", "display": "Harvest Bunting", "strand": "harvest", "pennant": 0.5, "spacing": 0.6,
+           "kinds": ("maple", "aspen", "hessian")}
+# The Sack-Race Sack: its attributes worn (movement speed multiplied, step height and jump strength added). Jump strength
+# 0.42 + 0.04 rises 1.48 blocks, short of a fence's 1.5.
+SACK = {"item": "sack_race_sack", "display": "Sack-Race Sack", "speed": -0.6, "step": -0.6, "jump": 0.04}
 
 RECIPES = [
     # The horn's willow (sticks woven round wheat) and the harvest in it, grown on the farm: a pumpkin, a butternut
@@ -89,10 +103,19 @@ RECIPES = [
      "result": WAGON["block"], "count": 1, "category": "building"},
 ]
 
+SHAPELESS = [
+    # Twine, paper leaves dyed red and gold, and flax woven for the hessian pennants.
+    {"id": BUNTING["item"], "inputs": ["minecraft:string", "minecraft:paper", "minecraft:red_dye", "minecraft:yellow_dye", "jugcraft:flax"],
+     "result": BUNTING["item"], "count": 1, "category": "building"},
+    # Hessian woven from flax, with a drawstring.
+    {"id": SACK["item"], "inputs": ["jugcraft:flax", "jugcraft:flax", "jugcraft:flax", "minecraft:string"], "result": SACK["item"], "count": 1,
+     "category": "equipment"},
+]
+
 
 def blocks():
     return [CORNUCOPIA["block"]] + [spec["block"] for spec in SHOW.values()] + [RIBBON_BOARD["block"], ENGINE["block"], WAGON["block"]]
 
 
 def items():
-    return blocks()
+    return blocks() + [BUNTING["item"], SACK["item"]]

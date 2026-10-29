@@ -22,8 +22,9 @@ import org.jspecify.annotations.Nullable;
  * Draws a String Light Hook's strand, sagging from this hook to the one it is strung to. String lights are a dark
  * wire with a tiny pumpkin bulb about every {@value #SPACING} blocks; lit, the bulbs glow at full brightness, unlit
  * they are dim orange. Bat Bunting is a twine cord hung with orange and black pennants and paper bats about every
- * {@value #PENNANT_SPACING} blocks. Drawn from the hook that holds the strand, and off screen too, since a strand can
- * be long.
+ * {@value #PENNANT_SPACING} blocks. Harvest Bunting is a twine cord hung with leaf-shaped pennants about every
+ * {@value #HARVEST_SPACING} blocks, each {@value #HARVEST_PENNANT} blocks across at a texel to a pixel. Drawn from the
+ * hook that holds the strand, and off screen too, since a strand can be long.
  */
 public class StringLightsRenderer implements BlockEntityRenderer<StringLightHookBlockEntity, StringLightsRenderer.State> {
 	private static final RenderType STRAND = RenderTypes.entityCutout(Jugcraft.id("textures/entity/string_lights.png"));
@@ -32,6 +33,11 @@ public class StringLightsRenderer implements BlockEntityRenderer<StringLightHook
 	/** A garland's cord (u 0-0.25), its leaves (0.25-0.5 and 0.5-0.75) and a warm bulb (0.75-1). */
 	private static final RenderType VINE_GARLAND = RenderTypes.entityCutout(Jugcraft.id("textures/entity/pumpkin_vine_garland.png"));
 	private static final RenderType LEAF_GARLAND = RenderTypes.entityCutout(Jugcraft.id("textures/entity/autumn_leaf_garland.png"));
+	/** Harvest Bunting: twine (u 0-0.25), a red maple leaf (0.25-0.5), a gold aspen leaf (0.5-0.75) and a hessian pennant (0.75-1). */
+	private static final RenderType HARVEST = RenderTypes.entityCutout(Jugcraft.id("textures/entity/harvest_bunting.png"));
+	/** Its pennants' size and spacing, blocks (tools/harvest_festival.py BUNTING). */
+	static final float HARVEST_PENNANT = 0.5F;
+	static final float HARVEST_SPACING = 0.6F;
 	/** Café lights: a black cord (u 0-0.5) and a warm Edison bulb (0.5-1). */
 	private static final RenderType CAFE = RenderTypes.entityCutout(Jugcraft.id("textures/entity/cafe_string_lights.png"));
 	private static final float CAFE_BULB = 3.5F / 16;
@@ -99,6 +105,10 @@ public class StringLightsRenderer implements BlockEntityRenderer<StringLightHook
 		int light = state.lightCoords;
 		if (state.strand == StringLightHookBlockEntity.Strand.BUNTING) {
 			submitBunting(pose, collector, offset, length, sag, segments, start, light);
+			return;
+		}
+		if (state.strand == StringLightHookBlockEntity.Strand.HARVEST) {
+			submitHarvest(pose, collector, offset, length, sag, segments, start, light);
 			return;
 		}
 		if (state.strand == StringLightHookBlockEntity.Strand.CAFE) {
@@ -187,6 +197,38 @@ public class StringLightsRenderer implements BlockEntityRenderer<StringLightHook
 				normal = normal.lengthSquared() < 1.0E-8F ? new Vector3f(1, 0, 0) : normal.normalize();
 				// Seen from both sides: two sides lifted off the pennant's middle, never one plane drawn twice.
 				DecorDraw.twoSided(buffer, matrix, corners(bottom0, bottom1, top1, top0, u0, u0 + 0.25F), normal.x(), normal.y(), normal.z(),
+						0xFFFFFFFF, light, DecorDraw.TWO_SIDED_LIFT);
+			}
+		});
+	}
+
+	/**
+	 * Harvest Bunting: the twine cord, then a leaf-shaped pennant hanging below it about every {@value #HARVEST_SPACING}
+	 * blocks, a red maple leaf, a gold aspen leaf and a hessian pennant in turn, each a square {@value #HARVEST_PENNANT}
+	 * blocks across along the cord (its picture eight texels to a side), seen from both sides.
+	 */
+	private static void submitHarvest(PoseStack pose, SubmitNodeCollector collector, Vec3 offset, float length, float sag, int segments,
+			Vector3f start, int light) {
+		int pennants = Math.max(1, (int) Math.floor(length / HARVEST_SPACING));
+		collector.submitCustomGeometry(pose, HARVEST, (matrix, buffer) -> {
+			for (int i = 0; i < segments; i++) {
+				Vector3f a = along(start, offset, sag, i / (float) segments);
+				Vector3f b = along(start, offset, sag, (i + 1) / (float) segments);
+				wire(buffer, matrix, light, a, b, new Vector3f(0, WIRE, 0), 0.0F, 0.25F);
+				Vector3f side = new Vector3f(b).sub(a).cross(0, 1, 0);
+				wire(buffer, matrix, light, a, b, side.lengthSquared() < 1.0E-8F ? new Vector3f(WIRE, 0, 0) : side.normalize().mul(WIRE), 0.0F, 0.25F);
+			}
+			float half = Math.min(HARVEST_PENNANT, length / pennants * 0.9F) / 2 / length;
+			for (int i = 0; i < pennants; i++) {
+				float middle = (i + 0.5F) / pennants;
+				Vector3f a = along(start, offset, sag, middle - half);
+				Vector3f b = along(start, offset, sag, middle + half);
+				float u0 = 0.25F + (i % 3) * 0.25F;
+				Vector3f bottom0 = new Vector3f(a).sub(0, HARVEST_PENNANT, 0);
+				Vector3f bottom1 = new Vector3f(b).sub(0, HARVEST_PENNANT, 0);
+				Vector3f normal = new Vector3f(b).sub(a).cross(0, 1, 0);
+				normal = normal.lengthSquared() < 1.0E-8F ? new Vector3f(1, 0, 0) : normal.normalize();
+				DecorDraw.twoSided(buffer, matrix, corners(bottom0, bottom1, b, a, u0, u0 + 0.25F), normal.x(), normal.y(), normal.z(),
 						0xFFFFFFFF, light, DecorDraw.TWO_SIDED_LIFT);
 			}
 		});

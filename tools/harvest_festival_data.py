@@ -977,6 +977,97 @@ def hay_wagon():
     return sc
 
 
+# ---------------------------------------------------------------- part 4: the bunting and the sacks
+
+MAPLE = pal("5a1008", "8c1c0e", "b8301a", "d84c26", "ec7040")
+ASPEN = pal("6a4410", "9c6a1a", "c8942a", "e4b848", "f2d47a")
+HESSIAN = pal("5e4826", "7c6234", "9a7e46", "b89a5c", "d2b67a")
+TWINE = pal("6a5432", "8c7246", "ae925e")
+SACK_RED = pal("6e1a14", "98281e")
+# The pennants, seven texels across and seven down under a clear column, each hanging from the cord by its top row:
+# a maple leaf's stem and five points, an aspen leaf's stem and round blade, a hessian pennant's hem and point.
+PENNANTS = {
+    "maple": ("...s...", "#..#..#", "##.#.##", "#######", ".#####.", "..###..", "...#..."),
+    "aspen": ("...s...", "..###..", ".#####.", "#######", ".#####.", "..###..", "...#..."),
+    "hessian": ("#######", "#######", ".#####.", ".#####.", "..###..", "..###..", "...#..."),
+}
+
+
+def bunting_strand():
+    """Harvest Bunting's strand (entity/harvest_bunting, 32 x 8, read by StringLightsRenderer): twine (u 0-8), twisted
+    two texels to a turn in its three tones, then the pennants, eight texels each (seven drawn, one clear): a red maple
+    leaf, its midrib lit and its two side veins lit on the slant; a gold aspen leaf, its midrib lit and its edge a tone
+    darker; and a hessian pennant, woven two tones by turns texel by texel, its hem a stitched row along its top."""
+    from PIL import Image
+    img = Image.new("RGBA", (32, 8), (0, 0, 0, 0))
+    for y in range(8):
+        for x in range(8):
+            img.putpixel((x, y), tuple(shade(TWINE, (x + y) // 2 % 3)) + (255,))
+    for k, kind in enumerate(hf.BUNTING["kinds"]):
+        for y, row in enumerate(PENNANTS[kind]):
+            for x, ch in enumerate(row):
+                if ch == ".":
+                    continue
+                if ch == "s":
+                    c = shade(STEM, 1)
+                elif kind == "maple":
+                    vein = x == 3 or abs(x - 3) == 4 - y
+                    c = shade(MAPLE, 4 if vein else 2 if (x + y) % 2 else 3)
+                elif kind == "aspen":
+                    edge = x == 0 or x == 6 or row[x - 1] == "." or row[x + 1] == "."
+                    c = shade(ASPEN, 4 if x == 3 else 1 if edge else 2 + (x + y) % 2)
+                else:
+                    c = shade(HESSIAN, 1 if y == 0 and x % 2 == 0 else 0 if y == 0 else 2 + (x + y) % 2)
+                img.putpixel((8 + 8 * k + x, y), tuple(c) + (255,))
+    return img
+
+
+def sack_worn():
+    """The Sack-Race Sack worn (entity/equipment/humanoid_leggings, 64 x 32, the leggings' layout): hessian over both
+    legs and the lower half of the body to the waist, woven two tones by turns texel by texel, a darker weft every fourth
+    row; a red stripe two texels deep round each leg at the knee, as on a grain sack; its rolled top a tone darker with
+    its drawstring, a twine texel every other column; and its foot closed, a seam across it."""
+    from PIL import Image
+    img = Image.new("RGBA", (64, 32), (0, 0, 0, 0))
+
+    def weave(x, y, row):
+        if row % 4 == 3:
+            return shade(HESSIAN, 1)
+        return shade(HESSIAN, 2 + (x + y) % 2)
+
+    # The legs: their box at (0, 16): top 4..8 and bottom 8..12 of rows 16..20, the sides rows 20..32 round u 0..16.
+    for y in range(20, 32):
+        row = y - 20
+        for x in range(16):
+            c = weave(x, y, row)
+            if row in (6, 7):
+                c = shade(SACK_RED, 1 if row == 6 else 0)
+            img.putpixel((x, y), tuple(c) + (255,))
+    for x in range(8, 12):
+        for y in range(16, 20):
+            img.putpixel((x, y), tuple(shade(HESSIAN, 1 if (x + y) % 2 else 0)) + (255,))  # the closed foot, seamed
+    # The body to the waist: its sides' lower rows (26..32) round u 16..40, the rolled top on row 26.
+    for y in range(26, 32):
+        for x in range(16, 40):
+            if y == 26:
+                c = shade(TWINE, 2) if x % 2 == 0 else shade(HESSIAN, 1)
+            else:
+                c = weave(x, y, y - 26)
+            img.putpixel((x, y), tuple(c) + (255,))
+    return img
+
+
+def bunting_assets(root, write, lang):
+    """Harvest Bunting's item and the Sack-Race Sack's item and its worn look (equipment/sack_race_sack: the leggings
+    layer)."""
+    for spec in (hf.BUNTING, hf.SACK):
+        item = spec["item"]
+        lang[f"item.{MOD}.{item}"] = spec["display"]
+        write(root / "models" / "item" / f"{item}.json", {"parent": "minecraft:item/generated", "textures": {"layer0": rid(f"item/{item}")}})
+        write(root / "items" / f"{item}.json", {"model": {"type": "minecraft:model", "model": rid(f"item/{item}")}})
+    write(root / "equipment" / f"{hf.SACK['item']}.json", {"layers": {"humanoid_leggings": [{"texture": rid(hf.SACK["item"])}]}})
+
+
 # ---------------------------------------------------------------- building and files
 
 _built = {}
@@ -1070,6 +1161,8 @@ def assets(root, write, lang):
     spec = hf.WAGON
     lang[f"block.{MOD}.{spec['block']}"] = spec["display"]
     multiblock(root, write, models, spec, build(spec["block"]), 1 / 4)
+    # Part 4.
+    bunting_assets(root, write, lang)
 
 
 # The engine's moving parts, drawn by client/SteamTractionEngineRenderer from harvest_festival_quads.json
@@ -1130,4 +1223,10 @@ def tags(tags):
 
 
 def textures():
-    return {("block", block): build(block).atlas.img for block in hf.blocks()}
+    import item_icons
+    out = {("block", block): build(block).atlas.img for block in hf.blocks()}
+    out[("entity", hf.BUNTING["item"])] = bunting_strand()
+    out[("entity/equipment/humanoid_leggings", hf.SACK["item"])] = sack_worn()
+    for spec in (hf.BUNTING, hf.SACK):
+        out[("item", spec["item"])] = item_icons.draw(spec["item"])
+    return out

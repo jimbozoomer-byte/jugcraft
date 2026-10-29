@@ -1,6 +1,6 @@
 # Harvest Festival Grounds
 
-Status: parts 1 (the Giant Cornucopia), 2 (the Giant Vegetable Show and the Prize Ribbon Board) and 3 (the Steam Traction Engine and the Hay Wagon) implemented. CI builds them and runs their game tests and client screenshots; they have not been played by hand. Part 4 is planned.
+Status: all four parts implemented: 1 (the Giant Cornucopia), 2 (the Giant Vegetable Show and the Prize Ribbon Board), 3 (the Steam Traction Engine and the Hay Wagon) and 4 (Harvest Bunting and the Sack-Race Sack). CI builds them and runs their game tests and client screenshots; they have not been played by hand.
 Proposal issue: none. The owner asked for it directly on 28 October 2026, as set 10 of the ten sets of fall and Halloween decor ("Then I want you to do 1-10 in parts in that order one by one"): the grounds of a country harvest festival, with:
 - a giant cornucopia;
 - a giant vegetable show with prize-ribbon boards;
@@ -81,8 +81,19 @@ Four prize show vegetables at a show's sizes, each one block. Each stands facing
   - **Recipe**: three hay bales over planks either side of a stick, over two iron ingots.
   - **Breaking it**: any block brings it down, and it drops once.
 
-### Planned: part 4
-- Part 4: harvest bunting, a new kind of strand on the café lights' string system, and sack-race sacks.
+### Part 4: Harvest Bunting and the Sack-Race Sack
+- **Harvest Bunting**: a new strand for the String Light Hooks, the café lights' and Bat Bunting's.
+  - It is a twine cord hung with leaf-shaped pennants every 0.6 blocks, each 44 cm across: a red maple leaf, a gold aspen leaf and a hessian pennant in turn.
+  - **Stringing it**: use it on one hook and then on another, up to the hooks' reach away. One strand is used up.
+  - Hooks chain as before. Breaking the hook that holds it drops the bunting.
+  - **Recipe**: string, paper, red dye, yellow dye and flax.
+- **Sack-Race Sack**: a hessian sack, worn on the legs, up to the waist.
+  - Worn, its wearer:
+    - moves at two fifths of their speed;
+    - can't step up a block without hopping;
+    - jumps a little harder, rising 1.48 blocks, short of clearing a fence.
+  - Taken off, all three are as they were. It gives no armor and doesn't wear out.
+  - **Recipe**: three flax and a string.
 
 ## How it is drawn (docs/ART_DIRECTION.md, docs/NATURAL_TEXTURES.md)
 - Built from boxes at real size, one texel to a model pixel (`tools/harvest_festival_data.py`), in the Pumpkin Patch Market's manner. It shares that set's pumpkin stem and cut, and the Haunted Midway's pumpkin orange.
@@ -132,6 +143,16 @@ Four prize show vegetables at a show's sizes, each one block. Each stands facing
     - the governor's balls spin on its pillar;
     - the fire, its middle row the hottest, glows through the fire door at full light while it is fired.
   - **The item** shows it whole at a fifth of its size, its flywheel in a block model's turns (16 segments, eight spokes) and its fire out.
+- **Harvest Bunting** (part 4): its strand's texture is the twine and three pennants, eight texels square each, drawn at a texel to a pixel (a pennant is half a block across).
+  - The twine twists two texels to a turn in its three tones.
+  - The maple leaf is red, its midrib lit and its two side veins lit on the slant.
+  - The aspen leaf is gold, its midrib lit and its edge a tone darker.
+  - The hessian pennant is woven two tones by turns, texel by texel, its hem a stitched row along its top.
+  - Each leaf hangs by its stem from the cord.
+- **The Sack-Race Sack** (part 4) is drawn as leggings, in the leggings' own layout (`entity/equipment/humanoid_leggings/sack_race_sack`):
+  - hessian over both legs and the lower half of the body, woven two tones by turns with a darker weft every fourth row;
+  - a red stripe two texels deep round each leg, as on a grain sack;
+  - its rolled top with a twine drawstring, and its foot closed with a seam across it.
 - **The Hay Wagon** (part 3): its bed is blue planks; its sides blue, lined; its wheels the engine's red, smaller. Its hay is the Pumpkin Patch Market's hay, its ropes plain rope along their length. The hay ladders lean out at 22.5 degrees, each cut at the blocks it crosses so each piece lies in one block. The pitchfork's handle leans back at 22.5 degrees.
 
 ## Connections
@@ -141,7 +162,9 @@ Four prize show vegetables at a show's sizes, each one block. Each stands facing
   - each show vegetable: nine of its crop;
   - the ribbon board: planks, green dye, a gold nugget and sticks.
   - the engine: iron blocks, a blast furnace, a piston, a clock and green dye;
-  - the wagon: hay bales, planks, a stick and iron.
+  - the wagon: hay bales, planks, a stick and iron;
+  - the bunting: string, paper, red and yellow dye, and flax ([fall-harvest.md](fall-harvest.md));
+  - the sack: flax and string.
 - Existing output consumer: none; it is decoration. The ribbon board gives a player's prize ribbons somewhere to be shown. The engine burns coal or charcoal, a sink for either.
 - Technology/magic connections (or infrastructure/cosmetic applicability): cosmetic. It is a festival display for a farm's harvest.
 - Reachable entry path: corn and butternut squash grow from their seeds, found or traded early. Everything else is vanilla.
@@ -152,6 +175,7 @@ Four prize show vegetables at a show's sizes, each one block. Each stands facing
 - Decor only. One recipe makes one Giant Cornucopia, which drops only itself. Nothing turns it back into its harvest, so no loop gains.
 - Nine of a crop make one show vegetable, which drops only itself and turns back into nothing.
 - The ribbon board makes no ribbons. It holds at most one of each, and gives back exactly the ones hung on it, taken off or when it is broken.
+- The bunting and the sack are made from a recipe and turn back into nothing. The sack only takes away: it gives no armor, and its jump stays short of a fence, so it is no way round one. No loop.
 - **Units**: ticks of burn. A coal or charcoal fires the engine for 1,600 ticks, as it would a furnace, and the firebox holds 6,400. It makes nothing: the coal is spent on its show. No loop.
 
 ## Multiplayer and persistence
@@ -171,9 +195,12 @@ Four prize show vegetables at a show's sizes, each one block. Each stands facing
   - Coal is taken only from a player who may build there.
 - **The client draws its motion** from `lit` and its own count of the turns, easing up and down over two seconds. Each client turns its flywheel at the same rate, but not in step with another's.
 - The engine and wagon can't be pushed by a piston.
+- **Harvest Bunting** is strung on the server, as every strand is (`StringLightsItem`), and saved on its hook as its strand's name, `harvest`.
+- **The Sack-Race Sack's** effects are its item's attribute modifiers on the legs slot, applied by the game on the server when it is worn. Nothing ticks for them.
 - IDs (stable from release):
   - the block and item `steam_traction_engine` (`facing`, `lit`, `part` 0 to 44) and its block entity `steam_traction_engine`;
   - the block and item `hay_wagon` (`facing`, `lit`, `part` 0 to 23; `lit` is always on);
+  - the items `harvest_bunting` and `sack_race_sack`, the strand name `harvest`, the equipment asset `sack_race_sack`, and the attribute modifier IDs `sack_race_speed`, `sack_race_step` and `sack_race_jump`;
   - the block and item `giant_cornucopia` (`facing`, `lit`, `part` 0 to 11; `lit` is always on, as it has no lanterns);
   - the blocks and items `giant_cabbage`, `giant_marrow`, `giant_turnip` and `giant_carrot` (`facing`);
   - the block and item `prize_ribbon_board` (`facing`, `half`, `first`, `second`, `third`).
@@ -220,6 +247,18 @@ Local checks run on this branch, and their results:
   - `python3 scripts/check_repository.py`: PASS. The tools' unit tests: 287 tests, OK. `python3 tools/check_icon_maps.py`: PASS, with its existing warnings.
   - Not run locally: `./gradlew build` and the game tests (CI runs them).
 
+- Part 4:
+  - `python3 tools/check_mod_data.py`: PASS on the second run (8,178 material IDs). The first run failed twice, and both are fixed:
+    - the icons' red (`cloth_red`) was too close to its outline for an icon's main colour; they now use `red_paint`;
+    - the Bat Bunting check's list of strands didn't yet know the new one.
+  - Its `check_harvest_festival` now also checks:
+    - that Harvest Bunting is its own strand, its item a `StringLightsItem` of it, drawn by `StringLightsRenderer` from its own texture, its pennants the table's size and spacing at a texel to a pixel;
+    - that the Sack-Race Sack goes on the legs, drawn as leggings from its own texture, its attributes the table's;
+    - that in the sack a player is slowed, hops up every block and can't jump a fence;
+    - that both are woven from the farm's flax, and that their names have their text.
+  - `python3 tools/check_icon_maps.py`: PASS on the second run (285 maps). The first failed on the red above, and so did one of the tools' unit tests, which runs it. `python3 -m unittest discover -s scripts/tests`: 287 tests, OK on the second run. `python3 scripts/check_repository.py`: PASS.
+  - Not run locally: `./gradlew build` and the game tests (CI runs them).
+
 Game tests (`HarvestFestivalGameTests`, run by CI's `gametest` job):
 - `theGiantCornucopiaStandsWhole`: placed, it stands facing the player, all twelve of its blocks there in order. Use does nothing to it. Broken at its tail, it all goes, and it drops itself once.
 - `theShowVegetablesStandAndDropThemselves` (part 2): each of the four, placed, stands facing the player; broken, it drops itself once.
@@ -238,7 +277,12 @@ Game tests (`HarvestFestivalGameTests`, run by CI's `gametest` job):
   - its coal burnt, it is let out on every block;
   - broken at its chimney, it all goes, and it drops itself once.
 - `theHayWagonStandsWhole` (part 3): it stands whole, three by two by four; broken at its back, it all goes, and it drops itself once.
-- `harvestFestivalDataLoads`: every block's recipe and loot load.
+- `harvestBuntingStringsBetweenHooks` (part 4): used on one hook and then another, it is strung between them as Harvest Bunting, and one is used up; the hook holding it broken, it drops.
+- `theSackRaceSackMakesItsWearerHop` (part 4):
+  - it goes on the legs;
+  - worn by an armor stand, its wearer's speed is two fifths of what it was, its step is gone and its jump is 0.04 stronger;
+  - taken off, all three are as they were.
+- `harvestFestivalDataLoads`: every block's recipe and loot load, and both items' recipes.
 
 Client screenshots (`HarvestFestivalClientGameTests`, CI's `client` job):
 - the Giant Cornucopia on the grass, facing the camera, from the front;
@@ -247,7 +291,8 @@ Client screenshots (`HarvestFestivalClientGameTests`, CI's `client` job):
 - the show (part 2): the four vegetables in a row facing the camera, the Prize Ribbon Board behind them with all three ribbons hung;
 - close on the board;
 - the Steam Traction Engine fired, its motion running, with the Hay Wagon behind it (part 3), from its flywheel side, from ahead of it, and close over its motion;
-- along the wagon.
+- along the wagon;
+- Harvest Bunting strung between two hooks on spruce posts, an armor stand under it in a Sack-Race Sack (part 4).
 
 Not run: a hand playtest, and a two-client playtest.
 
@@ -255,6 +300,7 @@ Not run: a hand playtest, and a two-client playtest.
 Seasonal in look, not in use: it is made and stands all year. It doesn't generate in the world.
 
 ## Rollout and open questions
-- The parts, each stacked on the last: the Giant Cornucopia; the giant vegetable show; the steam traction engine and hay wagon; the bunting and sack-race sacks.
+- The parts, each stacked on the last: the Giant Cornucopia; the giant vegetable show; the steam traction engine and hay wagon; the bunting and sack-race sacks. The set is complete.
+- Open: whether a race should be timed, with a start and finish line that give the Harvest Scale's ribbons, as the corn maze does.
 - The engine is decoration for now: it doesn't move or tow, and it doesn't drive the kinetic network. Open: whether a later part should let it drive a belt to a threshing machine on the kinetic network, or be driven.
 - Open: whether a cornucopia should take real produce to fill its mouth, as the Pumpkin Patch Market's displays do.

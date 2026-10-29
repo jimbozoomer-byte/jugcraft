@@ -56,7 +56,12 @@ public class StringLightHookBlockEntity extends BlockEntity {
 		 * Fall Garden & Porch, part 4 (tools/fall_garden.py CAFE_LIGHTS): café lights, warm Edison bulbs on a black cord,
 		 * which light the air along their length while they glow ({@link #lamps}).
 		 */
-		CAFE("cafe", "cafe_string_lights", true);
+		CAFE("cafe", "cafe_string_lights", true),
+		/**
+		 * The Harvest Festival Grounds, part 4 (tools/harvest_festival.py BUNTING): a twine cord hung with leaf-shaped
+		 * pennants, a red maple leaf, a gold aspen leaf and a hessian pennant in turn.
+		 */
+		HARVEST("harvest", "harvest_bunting");
 
 		public final String name;
 		public final String item;

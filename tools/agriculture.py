@@ -3071,6 +3071,7 @@ ITEMS.update(party_table.ITEMS)
 SHAPED += clockwork.RECIPES
 # Harvest Festival Grounds, decor set 10 (tools/harvest_festival.py).
 SHAPED += harvest_festival.RECIPES
+SHAPELESS += harvest_festival.SHAPELESS
 SHAPELESS += decor20.SHAPELESS
 
 # Kitchen and cooking expansion, slice 1: the Farmhouse Kitchen (tools/kitchen.py).

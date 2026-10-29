@@ -9,23 +9,32 @@ import io.github.jimbozoomer.jugcraft.agriculture.MultiDecorationBlock;
 import io.github.jimbozoomer.jugcraft.agriculture.PrizeRibbonBoardBlock;
 import io.github.jimbozoomer.jugcraft.agriculture.SteamTractionEngineBlock;
 import io.github.jimbozoomer.jugcraft.agriculture.SteamTractionEngineBlockEntity;
+import io.github.jimbozoomer.jugcraft.agriculture.StringLightHookBlock;
+import io.github.jimbozoomer.jugcraft.agriculture.StringLightHookBlockEntity;
 import net.fabricmc.fabric.api.gametest.v1.GameTest;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.world.entity.ai.attributes.Attributes;
+import net.minecraft.world.entity.decoration.ArmorStand;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.context.UseOnContext;
+import net.minecraft.world.item.equipment.Equippable;
 import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.properties.AttachFace;
 import net.minecraft.world.level.storage.loot.LootTable;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.BlockHitResult;
@@ -41,7 +50,10 @@ import net.minecraft.world.phys.Vec3;
  * and broken drops itself and the ribbons hanging on it; and their recipes and loot load. Part 3: the Steam Traction
  * Engine stands whole, cold; coal or charcoal fires it on every block, a furnace's burn each, up to its firebox's room,
  * and no more; a player who may not build fires nothing; its coal burnt, it is let out; broken, it drops itself once.
- * The Hay Wagon stands whole and breaks whole, dropping itself once.
+ * The Hay Wagon stands whole and breaks whole, dropping itself once. Part 4: Harvest Bunting, used on one String Light
+ * Hook and then another, is strung between them as its own strand, used up, and drops when the hook holding it goes;
+ * the Sack-Race Sack, worn on the legs, slows its wearer to two fifths, takes away their step and lifts their jump
+ * by its table's amounts, and all of it goes when it comes off.
  */
 public class HarvestFestivalGameTests {
 	private static void floor(GameTestHelper helper) {
@@ -296,6 +308,71 @@ public class HarvestFestivalGameTests {
 		});
 	}
 
+	/**
+	 * Harvest Bunting used on one String Light Hook and then on another is strung between them as Harvest Bunting, and
+	 * used up; the hook holding it broken, the bunting drops.
+	 */
+	@GameTest(maxTicks = 40)
+	public void harvestBuntingStringsBetweenHooks(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		floor(helper);
+		BlockPos a = new BlockPos(1, 4, 3);
+		BlockPos b = new BlockPos(6, 4, 3);
+		for (BlockPos hook : new BlockPos[] {a, b}) {
+			helper.setBlock(hook.below(), Blocks.STONE);
+			helper.setBlock(hook.below(2), Blocks.STONE);
+			helper.setBlock(hook, JugcraftAgriculture.block("string_light_hook").defaultBlockState().setValue(StringLightHookBlock.FACE, AttachFace.FLOOR)
+					.setValue(StringLightHookBlock.FACING, Direction.NORTH));
+		}
+		ServerPlayer player = player(helper, new BlockPos(3, 2, 2));
+		Item bunting = JugcraftAgriculture.item("harvest_bunting");
+		player.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(bunting, 2));
+		for (BlockPos hook : new BlockPos[] {a, b}) {
+			player.getMainHandItem().useOn(new UseOnContext(player, InteractionHand.MAIN_HAND, hit(helper, hook, Direction.UP)));
+		}
+		StringLightHookBlockEntity start = helper.getBlockEntity(a, StringLightHookBlockEntity.class);
+		helper.assertTrue(helper.absolutePos(b).equals(start.link()) && start.strand() == StringLightHookBlockEntity.Strand.HARVEST,
+				"It is strung from the first hook to the second, as Harvest Bunting: " + start.link() + " " + start.strand());
+		helper.assertTrue(player.getMainHandItem().getCount() == 1, "One strand is used up");
+		level.destroyBlock(helper.absolutePos(a), true);
+		helper.runAfterDelay(3, () -> {
+			helper.assertTrue(dropped(helper, bunting) == 1, "Its hook broken, the bunting drops");
+			helper.succeed();
+		});
+	}
+
+	/**
+	 * The Sack-Race Sack goes on the legs. Worn (on an armor stand, which ticks its equipment as any living thing does),
+	 * its wearer's speed is two fifths of what it was, their step is gone and their jump is the table's amount stronger;
+	 * taken off, all three are as they were.
+	 */
+	@GameTest(maxTicks = 40)
+	public void theSackRaceSackMakesItsWearerHop(GameTestHelper helper) {
+		floor(helper);
+		ArmorStand stand = helper.spawn(EntityType.ARMOR_STAND, new BlockPos(3, 2, 3));
+		double speed = stand.getAttributeValue(Attributes.MOVEMENT_SPEED);
+		double step = stand.getAttributeValue(Attributes.STEP_HEIGHT);
+		double jump = stand.getAttributeValue(Attributes.JUMP_STRENGTH);
+		ItemStack sack = new ItemStack(JugcraftAgriculture.item("sack_race_sack"));
+		Equippable equippable = sack.get(DataComponents.EQUIPPABLE);
+		helper.assertTrue(equippable != null && equippable.slot() == EquipmentSlot.LEGS, "It goes on the legs");
+		stand.setItemSlot(EquipmentSlot.LEGS, sack);
+		helper.runAfterDelay(2, () -> {
+			helper.assertTrue(Math.abs(stand.getAttributeValue(Attributes.MOVEMENT_SPEED) - speed * (1.0 + JugcraftAgriculture.SACK_SPEED)) < 1.0E-6,
+					"In it, its wearer's speed is two fifths of what it was: " + stand.getAttributeValue(Attributes.MOVEMENT_SPEED));
+			helper.assertTrue(Math.abs(stand.getAttributeValue(Attributes.STEP_HEIGHT) - Math.max(0.0, step + JugcraftAgriculture.SACK_STEP)) < 1.0E-6,
+					"In it, its wearer can't step up: " + stand.getAttributeValue(Attributes.STEP_HEIGHT));
+			helper.assertTrue(Math.abs(stand.getAttributeValue(Attributes.JUMP_STRENGTH) - (jump + JugcraftAgriculture.SACK_JUMP)) < 1.0E-6,
+					"In it, its wearer jumps a little harder: " + stand.getAttributeValue(Attributes.JUMP_STRENGTH));
+			stand.setItemSlot(EquipmentSlot.LEGS, ItemStack.EMPTY);
+			helper.runAfterDelay(2, () -> {
+				helper.assertTrue(stand.getAttributeValue(Attributes.MOVEMENT_SPEED) == speed && stand.getAttributeValue(Attributes.STEP_HEIGHT) == step
+						&& stand.getAttributeValue(Attributes.JUMP_STRENGTH) == jump, "Out of it, all three are as they were");
+				helper.succeed();
+			});
+		});
+	}
+
 	@GameTest
 	public void harvestFestivalDataLoads(GameTestHelper helper) {
 		ServerLevel level = helper.getLevel();
@@ -304,6 +381,9 @@ public class HarvestFestivalGameTests {
 			helper.assertTrue(level.recipeAccess().byKey(ResourceKey.create(Registries.RECIPE, Jugcraft.id(id))).isPresent(), id + " has a recipe");
 			helper.assertTrue(level.getServer().reloadableRegistries().getLootTable(ResourceKey.create(Registries.LOOT_TABLE,
 					Jugcraft.id("blocks/" + id))) != LootTable.EMPTY, id + "'s loot loads");
+		}
+		for (String id : new String[] {"harvest_bunting", "sack_race_sack"}) {
+			helper.assertTrue(level.recipeAccess().byKey(ResourceKey.create(Registries.RECIPE, Jugcraft.id(id))).isPresent(), id + " has a recipe");
 		}
 		helper.succeed();
 	}

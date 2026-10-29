@@ -13657,6 +13657,11 @@
       "denominator": 1,
       "source": "fallback (balance pending)"
     },
+    "jugcraft:harvest_bunting": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
     "jugcraft:harvest_crown": {
       "numerator": 4315,
       "denominator": 1,
@@ -34518,6 +34523,11 @@
       "source": "recipe jugcraft:ruthenium_catalyst_bed"
     },
     "jugcraft:ruthenium_powder": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
+    "jugcraft:sack_race_sack": {
       "numerator": 1,
       "denominator": 1,
       "source": "fallback (balance pending)"

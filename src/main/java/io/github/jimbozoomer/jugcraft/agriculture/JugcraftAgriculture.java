@@ -64,7 +64,10 @@ import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.EntityTypes;
 import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.world.entity.EquipmentSlotGroup;
 import net.minecraft.world.entity.MobCategory;
+import net.minecraft.world.entity.ai.attributes.AttributeModifier;
+import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.food.FoodProperties;
 import net.minecraft.world.item.ArrowItem;
 import net.minecraft.world.item.BlockItem;
@@ -80,6 +83,7 @@ import net.minecraft.world.item.component.Consumable;
 import net.minecraft.world.item.component.BundleContents;
 import net.minecraft.world.item.component.Consumables;
 import net.minecraft.world.item.component.Fireworks;
+import net.minecraft.world.item.component.ItemAttributeModifiers;
 import net.minecraft.world.item.consume_effects.ApplyStatusEffectsConsumeEffect;
 import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraft.world.item.crafting.RecipeType;
@@ -420,6 +424,10 @@ public final class JugcraftAgriculture {
 	public static BlockEntityType<PumpkinDrummerBlockEntity> PUMPKIN_DRUMMER_ENTITY;
 	public static BlockEntityType<ShowControllerBlockEntity> SHOW_CONTROLLER_ENTITY;
 	public static BlockEntityType<SteamTractionEngineBlockEntity> STEAM_TRACTION_ENGINE_ENTITY;
+	/** The Sack-Race Sack's attributes worn (tools/harvest_festival.py SACK): movement speed (multiplied), step height and jump strength (added). */
+	public static final double SACK_SPEED = -0.6;
+	public static final double SACK_STEP = -0.6;
+	public static final double SACK_JUMP = 0.04;
 	public static BlockEntityType<FirewoodRackBlockEntity> FIREWOOD_RACK_ENTITY;
 	public static BlockEntityType<DecorationBlockEntity> CHOPPING_BLOCK_ENTITY;
 	public static BlockEntityType<BlanketLadderBlockEntity> BLANKET_LADDER_ENTITY;
@@ -3214,7 +3222,8 @@ public final class JugcraftAgriculture {
 	/**
 	 * The Harvest Festival Grounds (decor set 10; tools/harvest_festival.py): part 1's Giant Cornucopia; part 2's Giant
 	 * Vegetable Show (a Giant Cabbage, Marrow, Turnip and Carrot, each with its entry card) and the Prize Ribbon Board;
-	 * part 3's Steam Traction Engine, its firebox a block entity on its first block, and the Hay Wagon.
+	 * part 3's Steam Traction Engine, its firebox a block entity on its first block, and the Hay Wagon; part 4's Harvest
+	 * Bunting, a strand for the String Light Hooks, and the Sack-Race Sack, worn on the legs.
 	 */
 	private static void registerHarvestFestival() {
 		Block cornucopia = registerBlock("giant_cornucopia", GiantCornucopiaBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.WOOD)
@@ -3248,6 +3257,21 @@ public final class JugcraftAgriculture {
 			registerItem(BuiltInRegistries.BLOCK.getKey(block).getPath(), props -> new BlockItem(block, props),
 					new Item.Properties().useBlockDescriptionPrefix(), BUILDING_TAB);
 		}
+		// Part 4: the bunting, and the sack (tools/harvest_festival.py SACK): worn on the legs, it slows its wearer, takes
+		// away their step so they hop up every block, and lifts their jump a little, short of clearing a fence.
+		registerItem("harvest_bunting", props -> new StringLightsItem(props, StringLightHookBlockEntity.Strand.HARVEST), new Item.Properties(),
+				BUILDING_TAB);
+		registerItem("sack_race_sack", Item::new, new Item.Properties().stacksTo(1)
+				.component(DataComponents.EQUIPPABLE, Equippable.builder(EquipmentSlot.LEGS).setEquipSound(SoundEvents.ARMOR_EQUIP_LEATHER)
+						.setAsset(ResourceKey.create(EquipmentAssets.ROOT_ID, Jugcraft.id("sack_race_sack"))).build())
+				.attributes(ItemAttributeModifiers.builder()
+						.add(Attributes.MOVEMENT_SPEED, new AttributeModifier(Jugcraft.id("sack_race_speed"), SACK_SPEED,
+								AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL), EquipmentSlotGroup.LEGS)
+						.add(Attributes.STEP_HEIGHT, new AttributeModifier(Jugcraft.id("sack_race_step"), SACK_STEP,
+								AttributeModifier.Operation.ADD_VALUE), EquipmentSlotGroup.LEGS)
+						.add(Attributes.JUMP_STRENGTH, new AttributeModifier(Jugcraft.id("sack_race_jump"), SACK_JUMP,
+								AttributeModifier.Operation.ADD_VALUE), EquipmentSlotGroup.LEGS)
+						.build()), BUILDING_TAB);
 	}
 
 	/** A prize show vegetable: soft, and popped off by a piston. */

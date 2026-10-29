@@ -6481,8 +6481,10 @@ def check_decor2(java):
     if candle["max"] * candle["light_per_candle"] > 15:
         err("Floating candles would give more than light 15")
     strands = re.findall(r'[A-Z_]+\("([a-z_]+)", "([a-z_]+)"\)', java.get("StringLightHookBlockEntity", ""))
+    import harvest_festival
     if dict(strands) != {"lights": ag.STRING_LIGHTS["strand"], "bunting": bunting["item"],
-                         **{strand: garland["item"] for strand, garland in decor20.GARLANDS.items()}}:
+                         **{strand: garland["item"] for strand, garland in decor20.GARLANDS.items()},
+                         harvest_festival.BUNTING["strand"]: harvest_festival.BUNTING["item"]}:
         err(f"StringLightHookBlockEntity.Strand {strands} differs from the strand items in tools/agriculture.py")
 
     def variants(block):
@@ -15705,7 +15707,11 @@ def check_harvest_festival():
     written and drawn, the fire at full light; its rod outreaches its crank and its crosshead stays on its slide bars;
     its flywheel turns clear of the ground; the engine and the wagon are the table's size, their models in their
     frames, their blockstates whole, each dropping once; the wagon's drawbar meets the engine's hook; the engine is
-    mined with a pickaxe; and its texts are there."""
+    mined with a pickaxe; and its texts are there. Part 4: Harvest Bunting is its own strand, its item a StringLightsItem
+    of it, drawn by StringLightsRenderer from its own texture, its pennants the table's size and spacing at a texel to a
+    pixel; the Sack-Race Sack goes on the legs, drawn as leggings from its own texture, its attributes the table's, so
+    that in it a player is slowed, hops up every block and can't jump a fence; both are woven from the farm's flax; and
+    their names have their text."""
     import harvest_festival as hf
     import harvest_festival_data as hfd
 
@@ -15887,6 +15893,47 @@ def check_harvest_festival():
     for key in ("fired", "cold", "full"):
         if f"message.{MOD}.{engine['block']}.{key}" not in lang:
             err(f"Message {engine['block']}.{key} has no text")
+    # Part 4: Harvest Bunting and the Sack-Race Sack.
+    bunting, sack = hf.BUNTING, hf.SACK
+    hooks = read(JAVA_ROOT / "agriculture" / "StringLightHookBlockEntity.java")
+    lights = read(CLIENT_JAVA_ROOT / "StringLightsRenderer.java")
+    if f'HARVEST("{bunting["strand"]}", "{bunting["item"]}")' not in hooks:
+        err("StringLightHookBlockEntity.Strand: Harvest Bunting must be its own strand (tools/harvest_festival.py BUNTING)")
+    if f'registerItem("{bunting["item"]}", props -> new StringLightsItem(props, StringLightHookBlockEntity.Strand.HARVEST)' not in java_main:
+        err(f"JugcraftAgriculture: {bunting['item']} must be a StringLightsItem of the HARVEST strand")
+    for item in ('Jugcraft.id("textures/entity/harvest_bunting.png")', f"HARVEST_PENNANT = {bunting['pennant']}F;",
+                 f"HARVEST_SPACING = {bunting['spacing']}F;", "StringLightHookBlockEntity.Strand.HARVEST", "submitHarvest("):
+        if item not in lights:
+            err(f"StringLightsRenderer: missing {item} (tools/harvest_festival.py BUNTING)")
+    from PIL import Image
+    strand = ASSETS / "textures" / "entity" / f"{bunting['item']}.png"
+    if not strand.is_file() or Image.open(strand).size != (8 * (1 + len(bunting["kinds"])), 8):
+        err(f"textures/entity/{bunting['item']}.png: the twine and each pennant eight texels square")
+    elif bunting["pennant"] * 16 != 8:
+        err("tools/harvest_festival.py BUNTING: a pennant is eight texels across at a texel to a pixel")
+    if 'registerItem("sack_race_sack", Item::new' not in java_main or "Equippable.builder(EquipmentSlot.LEGS)" not in java_main \
+            or 'Jugcraft.id("sack_race_sack")' not in java_main:
+        err("JugcraftAgriculture: the Sack-Race Sack must go on the legs, drawn as its own equipment")
+    for name, attribute, key in (("SACK_SPEED", "MOVEMENT_SPEED", "speed"), ("SACK_STEP", "STEP_HEIGHT", "step"), ("SACK_JUMP", "JUMP_STRENGTH", "jump")):
+        if f"double {name} = {sack[key]};" not in java_main or f"Attributes.{attribute}, new AttributeModifier(" not in java_main:
+            err(f"JugcraftAgriculture.{name}: the sack's {attribute} is tools/harvest_festival.py SACK's {sack[key]}")
+    rise, v = 0.0, 0.42 + sack["jump"]
+    for _ in range(40):
+        rise, v = max(rise, rise + v) if v > 0 else rise, (v - 0.08) * 0.98
+    if rise >= 1.5 or not -1.0 < sack["speed"] < 0.0 or 0.6 + sack["step"] > 0.0:
+        err("tools/harvest_festival.py SACK: in it a player is slowed, hops up every block, and can't jump a fence")
+    worn = load(ASSETS / "equipment" / f"{sack['item']}.json") or {}
+    if worn.get("layers", {}).get("humanoid_leggings") != [{"texture": f"{MOD}:{sack['item']}"}]:
+        err(f"equipment/{sack['item']}.json: the sack is drawn as leggings")
+    legs = ASSETS / "textures" / "entity" / "equipment" / "humanoid_leggings" / f"{sack['item']}.png"
+    if not legs.is_file() or Image.open(legs).size != (64, 32):
+        err(f"textures/entity/equipment/humanoid_leggings/{sack['item']}.png: the sack worn, in the leggings' 64 x 32 layout")
+    for spec in (bunting, sack):
+        recipe = load(DATA / MOD / "recipe" / f"{spec['item']}.json") or {}
+        if f"{MOD}:flax" not in json.dumps(recipe.get("ingredients")):
+            err(f"recipe/{spec['item']}.json: its hessian is woven from the farm's flax")
+        if lang.get(f"item.{MOD}.{spec['item']}") != spec["display"]:
+            err(f"item.{MOD}.{spec['item']}: the text must be {spec['display']}")
 
 
 def check_party_table():

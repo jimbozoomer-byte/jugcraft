@@ -8,6 +8,9 @@ import io.github.jimbozoomer.jugcraft.agriculture.MultiDecorationBlock;
 import io.github.jimbozoomer.jugcraft.agriculture.PrizeRibbonBoardBlock;
 import io.github.jimbozoomer.jugcraft.agriculture.SteamTractionEngineBlock;
 import io.github.jimbozoomer.jugcraft.agriculture.SteamTractionEngineBlockEntity;
+import io.github.jimbozoomer.jugcraft.agriculture.StringLightHookBlock;
+import io.github.jimbozoomer.jugcraft.agriculture.StringLightHookBlockEntity;
+import io.github.jimbozoomer.jugcraft.agriculture.StringLightsItem;
 import java.util.Locale;
 import net.fabricmc.fabric.api.client.gametest.v1.FabricClientGameTest;
 import net.fabricmc.fabric.api.client.gametest.v1.context.ClientGameTestContext;
@@ -17,9 +20,15 @@ import net.minecraft.client.gui.screens.worldselection.WorldCreationUiState;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.entity.EntitySpawnReason;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.world.entity.decoration.ArmorStand;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.properties.AttachFace;
 
 /**
  * Client game test for the Harvest Festival Grounds (decor set 10): part 1's Giant Cornucopia on the grass, facing the
@@ -27,8 +36,9 @@ import net.minecraft.world.level.block.state.BlockState;
  * the north-east over its tail; then, in its place, part 2's show: the Giant Cabbage, Marrow, Turnip and Carrot in a row
  * facing the camera, the Prize Ribbon Board behind them with all three ribbons hung, from the front and then close on
  * the board; then part 3's Steam Traction Engine, fired, its motion running, with the Hay Wagon behind it, from its
- * flywheel side, from ahead of it, close over its motion, and along the wagon (CI job {@code client}). They go into
- * docs/features/harvest-festival-grounds.md.
+ * flywheel side, from ahead of it, close over its motion, and along the wagon; then part 4's Harvest Bunting strung
+ * between two hooks on spruce posts, and an armor stand under it in a Sack-Race Sack (CI job {@code client}). They go
+ * into docs/features/harvest-festival-grounds.md.
  */
 public class HarvestFestivalClientGameTests implements FabricClientGameTest {
 	@Override
@@ -68,6 +78,11 @@ public class HarvestFestivalClientGameTests implements FabricClientGameTest {
 			shoot(context, singleplayer, x + 5, y + 2, z - 10, 30, 15, "jugcraft_harvest_festival_traction_engine_front");
 			shoot(context, singleplayer, x + 3, y + 3, z - 4, 90, 35, "jugcraft_harvest_festival_traction_engine_motion");
 			shoot(context, singleplayer, x + 6, y + 1, z + 1, 90, 10, "jugcraft_harvest_festival_hay_wagon");
+			// Part 4: the bunting and a sack, where the engine was.
+			server.runCommand("fill %d %d %d %d %d %d minecraft:air".formatted(x - 7, y, z - 12, x + 7, y + 5, z + 6));
+			server.runOnServer(minecraft -> bunting(minecraft.overworld(), origin));
+			context.waitTicks(20);
+			shoot(context, singleplayer, x, y + 1, z - 4, 0, 5, "jugcraft_harvest_festival_bunting");
 		}
 	}
 
@@ -117,6 +132,27 @@ public class HarvestFestivalClientGameTests implements FabricClientGameTest {
 		BlockState hay = wagon.defaultBlockState().setValue(MultiDecorationBlock.FACING, Direction.NORTH);
 		level.setBlock(wagonAt, hay, Block.UPDATE_ALL);
 		wagon.setPlacedBy(level, wagonAt, hay, null, new ItemStack(wagon));
+	}
+
+	/**
+	 * Harvest Bunting strung between two hooks on spruce posts two high, six blocks apart either side of the middle,
+	 * and an armor stand under it in a Sack-Race Sack, facing north.
+	 */
+	private static void bunting(ServerLevel level, BlockPos origin) {
+		for (int across : new int[] {-3, 3}) {
+			for (int up = 0; up < 2; up++) {
+				level.setBlock(origin.offset(across, up, 0), Blocks.STRIPPED_SPRUCE_LOG.defaultBlockState(), Block.UPDATE_ALL);
+			}
+			level.setBlock(origin.offset(across, 2, 0), JugcraftAgriculture.block("string_light_hook").defaultBlockState()
+					.setValue(StringLightHookBlock.FACE, AttachFace.FLOOR).setValue(StringLightHookBlock.FACING, Direction.NORTH), Block.UPDATE_ALL);
+		}
+		StringLightsItem.string(level, origin.offset(-3, 2, 0), origin.offset(3, 2, 0), StringLightHookBlockEntity.Strand.HARVEST);
+		ArmorStand stand = EntityType.ARMOR_STAND.create(level, EntitySpawnReason.COMMAND);
+		if (stand != null) {
+			stand.snapTo(origin.getX() + 0.5, origin.getY(), origin.getZ() + 0.5, 180.0F, 0.0F);
+			stand.setItemSlot(EquipmentSlot.LEGS, new ItemStack(JugcraftAgriculture.item("sack_race_sack")));
+			level.addFreshEntity(stand);
+		}
 	}
 
 	/** The Giant Cornucopia, its first block (its tail's) at {@code master}, facing north: its mouth to the west. */
