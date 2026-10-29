@@ -171,6 +171,16 @@ class ClientTestSelectionTests(unittest.TestCase):
 
     # The garden cohort: each later unit's case (GC-06 to GC-09) under its line.
     # GC-06 unit 3
+    def test_marax_body_and_service_select_the_garden_client_test(self):
+        # Concordance garden cohort, GC-06: Marax's body, entity and reading are shown by the garden's client class.
+        for path in ("src/main/resources/assets/jugcraft/textures/entity/marax.png",
+                     "src/main/resources/assets/jugcraft/geckolib/models/entity/marax.geo.json",
+                     "src/main/java/io/github/jimbozoomer/jugcraft/concordance/spirits/MaraxEntity.java",
+                     "src/main/java/io/github/jimbozoomer/jugcraft/concordance/spirits/HabitatReading.java"):
+            with self.subTest(path=path):
+                chosen, _ = selection.select([path], self.tests, set())
+                self.assertIn("ConcordanceGardenPactClientGameTests", chosen)
+
     # GC-07 unit 4
     # GC-08 unit 5
     # GC-09 unit 6

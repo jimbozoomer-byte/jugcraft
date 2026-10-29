@@ -103,7 +103,8 @@ final class PactGlance {
 	static final Map<String, String> WORK_ICONS = Map.of(
 			"star_reckoning", "jugcraft:astrolabe",
 			"strain_tending", "jugcraft:verdant_bed",
-			"verdance_carrying", "jugcraft:verdant_heart");
+			"verdance_carrying", "jugcraft:verdant_heart",
+			"habitat_reading", "jugcraft:habitat_gauge");
 
 	private PactGlance() {
 	}

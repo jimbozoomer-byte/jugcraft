@@ -152,7 +152,9 @@ CHUNK_D_ITEMS = ["pact_perch"]
 # check_acquisition ties them to the files on disk and to the server test that loads their recipes
 # (ConcordanceJourneyGameTests.GARDEN_RECIPES).
 GARDEN_PACTS = {"sunpetal": "recipe", "verdant_bed": "recipe", "bonding_charm": "recipe", "pact_perch": "recipe",
-                "mendvetch": "recipe", "verdant_heart": "recipe", "gleaner": "recipe"}
+                "mendvetch": "recipe", "verdant_heart": "recipe", "gleaner": "recipe",
+                # GC-06 (GC-P76): Marax's compact asks Dewmoss (its own recipe, made under the Concordance's switch alone).
+                "dewmoss": "recipe"}
 
 
 def recipe_file(item, how):

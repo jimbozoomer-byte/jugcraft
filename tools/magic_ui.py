@@ -862,6 +862,8 @@ GLANCES = {
     # A first task's act, as its row draws it (garden_pact.obligation's argument; spec 1.1: the row at most 12 words). An
     # act short enough as the server words it needs none (ACT_GLANCES' acts are the long ones).
     "garden_pact.act.device": [("", "use an awake living device", (), "use an awake living device", "act")],
+    # GC-06: Marax's ("read a Verdant Bed itself (its side, where a crop covers it)"; the whole act stays the row's tip).
+    "garden_pact.act.read": [("", "read a Verdant Bed itself", (), "read a Verdant Bed itself", "act")],
     # Blockers (every one drawn above the terms as a lock line, keeping its action).
     "pact.missing.owner": [("", "Only the perch's owner may invite %1$s", ("Bathin",),
                             "Only the perch's owner may invite Bathin", "blocker")],
@@ -926,6 +928,46 @@ WORK_GLANCES = {
         "missing": [("", "Needs your awake Heart, a Gleaner or pylon, in %1$s blocks", (10, 10),
                      "Needs your awake Heart, a Gleaner or pylon, in 10 blocks", "blocker")],
         "card": ("Needs Heart and Gleaner", (10, 10), "Needs Heart and Gleaner"),
+    },
+    # GC-06: Marax's habitat reading. His reading's answer is drawn as its change ("Light 9 → 11", and ", first of 2" when
+    # it is one of several), the whole sentence its tip and narration: the read glance draws its remedy (argument 4) and its
+    # clause (argument 5) by their own glances (PactGlance.nestedKey), the alone clause by none. Its other answers each in
+    # at most six words (spec 1.1), as Star-reckoning's are; its choice's plate in two.
+    "habitat_reading": {
+        "icon": "jugcraft:habitat_gauge", "name": "Habitat reading", "line": "Names one change for your worst bed",
+        "row.service": [("", "%1$s/%2$s today", (1, 2), "1/2 today", "chip")],
+        "row.last": [("", "Last: %1$s at %2$s, %3$s", ("Sunpetal", "102, 64, -18", "Light"),
+                      "Last: Sunpetal at 102, 64, -18, Light", "row")],
+        "row.last_none": [("", "No reading yet: ask below", (), "No reading yet: ask below", "row")],
+        "row.proud": [("", "Proud: won't reread %1$s until it changes", ("102, 64, -18", 3),
+                       "Proud: won't reread 102, 64, -18 until it changes", "row")],
+        "row.proud_more": [("", "Proud: won't reread %1$s beds, nearest %2$s", (3, "102, 64, -18"),
+                            "Proud: won't reread 3 beds, nearest 102, 64, -18", "row")],
+        "missing": [("", "Needs your planted Verdant Bed within %1$s blocks", (8,), "Needs your planted Verdant Bed within 8 blocks",
+                     "blocker")],
+        "card": ("Needs a crop near", (8,), "Needs a crop near"),
+        "ask": [("", "Ask him", (), "Ask him", "button")],
+        "read": [("", "%4$s%5$s", ("Sunpetal", "102, 64, -18", "not growing", "Moisture 1 → 4", ", first of 2", "", ""),
+                  "Moisture 1 → 4, first of 2", "answer")],
+        "advice.alone": [("", "", (), "", "answer")],
+        "advice.one_of": [("", ", first of %1$s", (2,), ", first of 2", "answer")],
+        **{f"remedy.{factor}.{way}": [("", "%1$s %2$s → %3$s", (name, low, high, 13, 15), f"{name} {low} → {high}", "chip")]
+           for factor, name in (("moisture", "Moisture"), ("light", "Light"), ("nutrients", "Nutrients"),
+                                ("diversity", "Diversity"), ("disturbance", "Disturbance"))
+           for way, low, high in (("more", 9, 11), ("less", 11, 9))},
+        "remedy.strain": [("", "Strain %2$s → %3$s", ("Disturbance", 3, 0, 0, 2), "Strain 3 → 0", "chip")],
+        "nothing_grows": [("", "Nothing grows here", (), "Nothing grows here", "answer")],
+        "no_sample": [("", "Let your crops grow first", (), "Let your crops grow first", "answer")],
+        "nothing_to_correct": [("", "Every crop is thriving", (), "Every crop is thriving", "answer")],
+        "nothing_to_correct.proud": [("", "Nothing new to correct", ("102, 64, -18",), "Nothing new to correct", "answer")],
+        "absent": [("", "Call him back first", (), "Call him back first", "answer")],
+        "not_holder": [("", "Only its holder may ask", (), "Only its holder may ask", "answer")],
+        "nothing": [("", "No pact with Marax here", (), "No pact with Marax here", "answer")],
+        "suspended": [("", "Suspended: resume it first", (), "Suspended: resume it first", "answer")],
+        "upkeep_held": [("", "Suspended: an offering resumes it", (), "Suspended: an offering resumes it", "answer")],
+        "outside_area": [("", "Stand within his area", (), "Stand within his area", "answer")],
+        "outside_hours": [("", "Only in his hours", (), "Only in his hours", "answer")],
+        "quota_spent": [("", "Done for today", (2,), "Done for today", "answer")],
     },
 }
 # A work's fields that are not its rows' glances: its chooser reason, its icon, its name and its service line.

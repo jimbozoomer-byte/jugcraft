@@ -60,6 +60,10 @@ final class PactSpiritRenderers {
 		// pointing arm, 0.1 below for his hover, 0.3 above; his eyes lit.
 		register(Workers.BATHIN, new Row(1.0F, 0.5F, 0.3, 0.1, 0.3, true));
 		// GC-06 unit 3
+		// Marax (GC-06): his built model drawn at its own size; his culling box reaches 0.9 sideways for his length and his
+		// walk on leaving, 0.1 below, 0.8 above for his familiar's flight in on arriving; the familiar's eyes lit; his familiar
+		// the bone his work target draws toward (GC-P66).
+		register(Workers.MARAX, new Row(1.0F, 0.9F, 0.9, 0.1, 0.8, true, "familiar"));
 		// GC-07 unit 4
 		// GC-08 unit 5
 		// GC-09 unit 6

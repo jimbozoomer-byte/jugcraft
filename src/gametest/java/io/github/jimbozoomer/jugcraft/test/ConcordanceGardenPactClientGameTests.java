@@ -19,6 +19,7 @@ import io.github.jimbozoomer.jugcraft.concordance.JugcraftConcordance;
 import io.github.jimbozoomer.jugcraft.concordance.LeyPylonBlockEntity;
 import io.github.jimbozoomer.jugcraft.concordance.garden.Garden;
 import io.github.jimbozoomer.jugcraft.concordance.garden.GleanerBlockEntity;
+import io.github.jimbozoomer.jugcraft.concordance.garden.OrganismCropBlock;
 import io.github.jimbozoomer.jugcraft.concordance.garden.VerdantBedBlock;
 import io.github.jimbozoomer.jugcraft.concordance.garden.VerdantBedBlockEntity;
 import io.github.jimbozoomer.jugcraft.concordance.garden.VerdantHeartBlockEntity;
@@ -29,6 +30,8 @@ import io.github.jimbozoomer.jugcraft.concordance.spirits.BathinEntity;
 import io.github.jimbozoomer.jugcraft.concordance.spirits.BoundWills;
 import io.github.jimbozoomer.jugcraft.concordance.spirits.BuerEntity;
 import io.github.jimbozoomer.jugcraft.concordance.spirits.GardenPacts;
+import io.github.jimbozoomer.jugcraft.concordance.spirits.HabitatReading;
+import io.github.jimbozoomer.jugcraft.concordance.spirits.MaraxEntity;
 import io.github.jimbozoomer.jugcraft.concordance.spirits.PactKeeping;
 import io.github.jimbozoomer.jugcraft.concordance.spirits.PactPerchBlockEntity;
 import io.github.jimbozoomer.jugcraft.concordance.spirits.PactReading;
@@ -46,6 +49,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.function.Predicate;
@@ -124,6 +128,10 @@ import org.jspecify.annotations.Nullable;
  * with both ends shimmering; his matter on the roster ("awaiting your answer"), in Jade and on his kept page, answered
  * and changed back; Jade; ten poses; four bearings; the end ({@code jugcraft_garden_bathin_*},
  * {@code jugcraft_garden_roster_awaiting}).</li>
+ * <li><b>Marax</b> (GC-06; docs/features/marax-pact.md), at the same perch: listed not ready with nothing planted, then
+ * chosen by keyboard and treading up two blocks beside the perch; his conversation at three sizes, refused and sealed; a
+ * reading on his page at three sizes, drawn as its one change, with his familiar frozen over the bed it names; Jade; eleven
+ * poses, his night look among them; four bearings round where he stands; the end ({@code jugcraft_garden_marax_*}).</li>
  * </ul>
  * The helpers that name no spirit are Chunk D's, copied (its file stays as it is). The perch is opened by the server's use of
  * it (no aimed click), each open at least its rate gate's ten ticks after the last. The narrator is not heard, and one
@@ -230,6 +238,8 @@ public class ConcordanceGardenPactClientGameTests implements FabricClientGameTes
 				// GC-05: Bathin at the same perch, chosen from the chooser (Stolas's, Buer's and his entries), to his departure.
 				bathin(context, server, connection, perch);
 				// GC-06 unit 3
+				// GC-06: Marax at the same perch, chosen from the chooser (four spirits), to his departure.
+				marax(context, server, connection, perch);
 				// GC-07 unit 4
 				// GC-08 unit 5
 				// GC-09 unit 6
@@ -2023,6 +2033,514 @@ public class ConcordanceGardenPactClientGameTests implements FabricClientGameTes
 	}
 
 	// GC-06 unit 3
+	// GC-06: Marax (tools/concordance_pacts.py SPIRITS["marax"]; check_spirit_bodies).
+	private static final String MARAX = "jugcraft:marax";
+	private static final String MARAX_IDLE = "animation.marax.idle";
+	private static final String MARAX_LISTEN = "animation.marax.listen";
+	private static final String MARAX_WAITING = "animation.marax.waiting";
+	private static final String MARAX_SUSPENDED = "animation.marax.suspended";
+	private static final String MARAX_STARGAZE = "animation.marax.stargaze";
+	/** His refusal at a perch with nothing planted of the inviter's near (Dossier 3 item 6). */
+	private static final String NOTHING_GROWS = "My familiar reads what grows. Nothing grows here.";
+	/** His compact (data/jugcraft/concordance/pact/marax.json): no resonance, so no astrolabe. */
+	private static final List<String> MARAX_COMPACT = List.of("minecraft:book 1", "jugcraft:sunpetal 2", "jugcraft:dewmoss 2");
+
+	// ---------------------------------------------------------------- GC-06: Marax (Dossier 3)
+
+	/**
+	 * GC-06: Marax at the perch Bathin left, from the chooser to his departure: listed not ready with nothing planted, chosen
+	 * by keyboard and treading up beside the perch; his conversation at three sizes, refused and sealed; a reading on his
+	 * page at three sizes with his familiar frozen over the bed it names; Jade; eleven poses, his night look among them; four
+	 * bearings round where he stands; the end.
+	 */
+	private static void marax(ClientGameTestContext context, TestDedicatedServerContext server, TestDedicatedServerConnection connection,
+			BlockPos perch) {
+		BlockPos poor = perch.offset(3, 0, 3);
+		BlockPos plain = perch.offset(1, 0, 5);
+		// The critique's item 5: the daylight cycle ran on through Buer's and Bathin's flows; his pictures and idle pose are by day.
+		server.runCommand("time set noon");
+		server.runCommand("weather clear");
+		server.runOnServer(minecraft -> yard(minecraft, perch));
+		standSouth(context, server, perch);
+		connection.waitForChunksRender();
+		nothingGrows(context, server, perch, poor);
+		maraxChooser(context, server, perch, poor, plain);
+		maraxConversation(context, server);
+		maraxSizes(context);
+		Hearing hearing = hear(context);
+		maraxAcceptance(context, server);
+		maraxHeard(context, server, hearing, perch);
+		maraxReading(context, server, perch, poor, plain);
+		maraxJade(context, server, perch);
+		maraxPoses(context, server, perch);
+		standingFacing(context, server, perch, MARAX, List.of("jugcraft_garden_marax_faces_east", "jugcraft_garden_marax_faces_south",
+				"jugcraft_garden_marax_faces_west", "jugcraft_garden_marax_faces_north"));
+		standSouth(context, server, perch);
+		maraxEnding(context, server, perch);
+	}
+
+	/** Dossier 3 item 6: an awake bed of the player's in his area with nothing planted, and the chooser lists him not ready, in his words. */
+	private static void nothingGrows(ClientGameTestContext context, TestDedicatedServerContext server, BlockPos perch, BlockPos poor) {
+		server.runOnServer(minecraft -> {
+			minecraft.overworld().setBlockAndUpdate(poor, Garden.VERDANT_BED.defaultBlockState().setValue(VerdantBedBlock.MOISTURE, VerdantBedBlock.WET));
+			bed(minecraft, poor).awaken(player(minecraft).getUUID());
+		});
+		context.waitTicks(OPEN_GAP);
+		open(context, server, perch);
+		context.waitFor(client -> PactClient.state() != null && PactClient.state().mode() == PactStatePayload.INVITE, WAIT);
+		String entries = context.computeOnClient(client -> entries(PactClient.state()));
+		Jugcraft.LOGGER.info("[garden-check] chooser with nothing planted: {}", entries);
+		boolean listed = context.computeOnClient(client -> PactClient.state().patterns().stream()
+				.anyMatch(choice -> choice.id().equals(MaraxEntity.SIGN) && !choice.ready() && choice.amount() == 1)
+				&& PactClient.state().notes().stream().anyMatch(note -> note.getString().contains(NOTHING_GROWS)));
+		check(listed, "Marax listed, not ready, in his words: " + entries);
+		fits(context, "the chooser with nothing planted");
+		named(context);
+		reasons(context);
+		budget(context, CHOOSER_WORDS, "the chooser with nothing planted");
+		shot(context, "jugcraft_garden_marax_nothing_grows");
+		context.getInput().pressKey(InputConstants.KEY_ESCAPE);
+		context.waitForScreen(null);
+	}
+
+	/**
+	 * Two wet beds of the player's planted with a Sunpetal (the poor one holding no nutrients, the plain one four); the chooser
+	 * lists him ready; chosen by keyboard, he treads up two blocks west of the perch (GC-P67), arriving with his gesture.
+	 */
+	private static void maraxChooser(ClientGameTestContext context, TestDedicatedServerContext server, BlockPos perch, BlockPos poor,
+			BlockPos plain) {
+		server.runOnServer(minecraft -> {
+			ServerLevel level = minecraft.overworld();
+			ServerPlayer player = player(minecraft);
+			for (BlockPos at : List.of(poor, plain)) {
+				if (!(level.getBlockEntity(at) instanceof VerdantBedBlockEntity)) {
+					level.setBlockAndUpdate(at, Garden.VERDANT_BED.defaultBlockState().setValue(VerdantBedBlock.MOISTURE, VerdantBedBlock.WET));
+				}
+				VerdantBedBlockEntity kept = bed(minecraft, at);
+				kept.awaken(player.getUUID());
+				kept.setNutrients(at.equals(poor) ? 0 : 4);
+				level.setBlockAndUpdate(at.above(), ((OrganismCropBlock) Garden.SUNPETAL_CROP).getStateForAge(OrganismCropBlock.MAX_AGE));
+			}
+		});
+		context.waitTicks(25);
+		open(context, server, perch);
+		context.waitFor(client -> PactClient.state() != null && PactClient.state().mode() == PactStatePayload.INVITE
+				&& PactClient.state().patterns().stream().anyMatch(choice -> choice.id().equals(MaraxEntity.SIGN) && choice.ready()), WAIT);
+		String entries = context.computeOnClient(client -> entries(PactClient.state()));
+		Jugcraft.LOGGER.info("[garden-check] chooser with his beds planted: {}", entries);
+		context.waitFor(client -> client.gui.screen() instanceof PactScreen, WAIT);
+		fits(context, "the chooser with four spirits");
+		named(context);
+		reasons(context);
+		budget(context, CHOOSER_WORDS, "the chooser with four spirits");
+		shot(context, "jugcraft_garden_marax_chooser");
+		String name = context.computeOnClient(client -> Component.translatable("entity.jugcraft.marax").getString());
+		tabToNamed(context, name);
+		context.getInput().pressKey(InputConstants.KEY_RETURN);
+		context.waitFor(client -> PactClient.state() != null && PactClient.state().mode() == PactStatePayload.NEGOTIATE
+				&& MaraxEntity.SIGN.equals(PactClient.state().spirit().sign()) && spiritAt(client, perch, MARAX) != null, WAIT);
+		context.waitFor(client -> MaraxEntity.Gesture.ARRIVE.animation.equals(gesturedOf(client, perch, MARAX)), WAIT);
+		Vec3 at = server.computeOnServer(minecraft -> presenceOf(minecraft, perch).position());
+		Jugcraft.LOGGER.info("[garden-check] invited marax: he stands at {}", at);
+		check(at.distanceTo(Vec3.atBottomCenterOf(perch.west(2))) < 1.0E-3,
+				"Chosen, he treads up two blocks west of the perch, on the ground, never between it and the player (GC-P67): " + at);
+	}
+
+	/** His three beats, held to the magic interfaces' limits, then every term by keyboard (Enter three times), none naming an astrolabe or resonance (GB23). */
+	private static void maraxConversation(ClientGameTestContext context, TestDedicatedServerContext server) {
+		String shown = context.computeOnClient(client -> describe(PactClient.state()));
+		Jugcraft.LOGGER.info("[garden-check] marax's offer: {}", shown);
+		boolean whole = context.computeOnClient(client -> PactClient.state().beats().size() == 3 && PactClient.state().notes().isEmpty()
+				&& PactClient.state().offers(PactRequestPayload.ACCEPT)
+				&& PactClient.state().terms().stream().map(PactStatePayload.Term::key).toList().equals(PactStatePayload.TERMS));
+		check(whole, "Marax speaks three beats, nothing stands in the way, and his terms name every term, in order: " + shown);
+		List<String> beats = context.computeOnClient(client -> PactClient.state().beats().stream().map(Component::getString).toList());
+		check(beats.get(0).contains("I keep a friend who knows the ground") && beats.get(1).contains("Only one")
+				&& beats.get(2).contains("My familiar writes small"), "His beats are the contract's words: " + beats);
+		fits(context, "his beat at GUI scale 2");
+		named(context);
+		budget(context, BEAT_WORDS, "his first beat");
+		shot(context, "jugcraft_garden_marax_conversation");
+		tabTo(context, "next");
+		for (int beat = 0; beat < 3; beat++) {
+			context.getInput().pressKey(InputConstants.KEY_RETURN);
+			context.waitTicks(3);
+		}
+		boolean onTerms = context.computeOnClient(client -> screen(client).page() == PactScreen.TERMS_PAGE && "para:0".equals(screen(client).focusedKey()));
+		check(onTerms, "Enter three times reaches his terms, the keyboard on their first line, never on Accept");
+		String words = context.computeOnClient(client -> String.join(" ", PactClient.state().terms().stream()
+				.map(term -> term.value().getString()).toList()).toLowerCase(Locale.ROOT));
+		Jugcraft.LOGGER.info("[garden-check] his terms: {}", words);
+		check(!words.contains("astrolabe") && !words.contains("resonance") && words.contains("habitat reading"),
+				"His terms name his service and no astrolabe or resonance: " + words);
+		fits(context, "his terms at GUI scale 2");
+		named(context);
+		budget(context, TERMS_WORDS, "his terms");
+		shot(context, "jugcraft_garden_marax_terms");
+		boolean held = server.computeOnServer(minecraft -> holds(minecraft, MARAX));
+		check(!held, "Hearing his terms records nothing");
+	}
+
+	/** His terms and a beat at GUI scale 4 (1920 x 1080) and in a 320 x 180 window. */
+	private static void maraxSizes(ClientGameTestContext context) {
+		int width = context.computeOnClient(client -> client.getWindow().getWidth());
+		int height = context.computeOnClient(client -> client.getWindow().getHeight());
+		context.getInput().resizeWindow(1920, 1080);
+		context.runOnClient(client -> {
+			client.options.guiScale().set(4);
+			client.resizeGui();
+		});
+		context.waitTicks(10);
+		int applied = context.computeOnClient(client -> client.getWindow().getGuiScale());
+		check(applied == 4, "His high-scale shots are at GUI scale 4: " + applied);
+		fits(context, "his terms at GUI scale 4");
+		named(context);
+		budget(context, TERMS_WORDS, "his terms at GUI scale 4");
+		shot(context, "jugcraft_garden_marax_terms_scale4");
+		press(context, "back");
+		fits(context, "his beat at GUI scale 4");
+		named(context);
+		budget(context, BEAT_WORDS, "his last beat at GUI scale 4");
+		shot(context, "jugcraft_garden_marax_conversation_scale4");
+		press(context, "next");
+		context.runOnClient(client -> {
+			client.options.guiScale().set(2);
+			client.resizeGui();
+		});
+		context.getInput().resizeWindow(320, 180);
+		context.waitTicks(10);
+		String gui = context.computeOnClient(client -> client.getWindow().getGuiScaledWidth() + "x" + client.getWindow().getGuiScaledHeight());
+		check("320x180".equals(gui), "A 320x180 window draws a 320x180 GUI: " + gui);
+		fits(context, "his terms at 320x180");
+		named(context);
+		budget(context, TERMS_WORDS, "his terms at 320x180");
+		shot(context, "jugcraft_garden_marax_terms_small");
+		press(context, "back");
+		fits(context, "his beat at 320x180");
+		named(context);
+		budget(context, BEAT_WORDS, "his last beat at 320x180");
+		shot(context, "jugcraft_garden_marax_conversation_small");
+		press(context, "next");
+		context.getInput().resizeWindow(width, height);
+		context.waitTicks(10);
+		boolean back = context.computeOnClient(client -> screen(client).page() == PactScreen.TERMS_PAGE);
+		check(back, "Back on his terms");
+	}
+
+	/**
+	 * A book and 2 Sunpetal but no Dewmoss: Accept is refused and nothing is spent; with 2 Dewmoss too, sealed once and spent
+	 * once. His kept page: today's readings 0 of 2, no reading yet, his first task, and his reading's plate.
+	 */
+	private static void maraxAcceptance(ClientGameTestContext context, TestDedicatedServerContext server) {
+		server.runOnServer(minecraft -> {
+			player(minecraft).getInventory().add(new ItemStack(Items.BOOK, 1));
+			player(minecraft).getInventory().add(new ItemStack(Garden.SUNPETAL, 2));
+		});
+		context.waitTicks(5);
+		tabTo(context, "accept");
+		PactStatePayload.Result refused = answer(context);
+		String said = refused.message().getString();
+		int refusedMode = context.computeOnClient(client -> PactClient.state().mode());
+		Jugcraft.LOGGER.info("[garden-check] Accept without his Dewmoss: {} ({})", refused.reason(), said);
+		check("cannot_afford".equals(refused.reason()) && !refused.done() && !said.toLowerCase(Locale.ROOT).contains("astrolabe")
+				&& refusedMode == PactStatePayload.NEGOTIATE, "Without his Dewmoss Accept is refused, worded without an astrolabe: " + said);
+		String kept = server.computeOnServer(minecraft -> holds(minecraft, MARAX) + " " + player(minecraft).getInventory().countItem(Items.BOOK)
+				+ " " + player(minecraft).getInventory().countItem(Garden.SUNPETAL));
+		check("false 1 2".equals(kept), "A refusal records and spends nothing: " + kept);
+		context.waitFor(client -> screen(client).control("result") instanceof PactScreen.Verdict verdict && verdict.refused(), WAIT);
+		budget(context, TERMS_WORDS, "his refusal");
+		shot(context, "jugcraft_garden_marax_refused");
+		List<String> cost = context.computeOnClient(client -> PactClient.state().compact().stream()
+				.map(stack -> BuiltInRegistries.ITEM.getKey(stack.getItem()) + " " + stack.getCount()).toList());
+		int resonance = context.computeOnClient(client -> PactClient.state().resonance());
+		Jugcraft.LOGGER.info("[garden-check] his compact: {} and {} resonance", cost, resonance);
+		check(cost.equals(MARAX_COMPACT) && resonance == 0, "His compact: a book, 2 Sunpetal and 2 Dewmoss, no resonance: " + cost);
+		server.runOnServer(minecraft -> player(minecraft).getInventory().add(new ItemStack(Garden.DEWMOSS, 2)));
+		context.waitTicks(5);
+		tabTo(context, "accept");
+		PactStatePayload.Result sealed = answer(context);
+		int sealedMode = context.computeOnClient(client -> PactClient.state().mode());
+		check(sealed.done() && "sealed".equals(sealed.reason()) && sealedMode == PactStatePayload.KEEP, "Accepting with his compact seals the pact: " + sealed.reason());
+		String spent = server.computeOnServer(minecraft -> holds(minecraft, MARAX) + " "
+				+ cost.stream().mapToInt(line -> player(minecraft).getInventory().countItem(stack(line).getItem())).sum());
+		Jugcraft.LOGGER.info("[garden-check] sealed: held, compact left = {}", spent);
+		check("true 0".equals(spent), "Sealed once, his compact spent once: " + spent);
+		context.waitFor(client -> screen(client).control("result") instanceof PactScreen.Verdict verdict && !verdict.refused()
+				&& screen(client).control("work:0") != null, WAIT);
+		List<String> rows = context.computeOnClient(client -> lines(PactClient.state()));
+		String plate = context.computeOnClient(client -> screen(client).control("work:0").getMessage().getString());
+		boolean ready = context.computeOnClient(client -> PactClient.state().patterns().stream()
+				.anyMatch(choice -> choice.id().equals(HabitatReading.CHOICE) && choice.ready() && choice.amount() == 2));
+		Jugcraft.LOGGER.info("[garden-check] his kept page: {}; plate {}", rows, plate);
+		check(ready && plate.equals("Ask Marax for a reading") && rows.stream().anyMatch(row -> row.contains("0 of 2 readings given today"))
+				&& rows.stream().anyMatch(row -> row.startsWith("No reading given yet")) && rows.stream().anyMatch(row -> row.startsWith("First obligation")),
+				"His kept page: none of 2 read today, none given yet, his first task, and the plate to ask, 2 left: " + rows);
+		fits(context, "his kept pact at GUI scale 2");
+		named(context);
+		budget(context, keptWords(context), "his kept pact");
+		shot(context, "jugcraft_garden_marax_kept");
+	}
+
+	/** His refuse and assent fired by the server, their subtitles his, and his work's; heard where the machine can play sound. */
+	private static void maraxHeard(ClientGameTestContext context, TestDedicatedServerContext server, Hearing hearing, BlockPos perch) {
+		String refuse = context.computeOnClient(client -> Component.translatable("subtitles.jugcraft.marax.refuse").getString());
+		String assent = context.computeOnClient(client -> Component.translatable("subtitles.jugcraft.marax.assent").getString());
+		String work = context.computeOnClient(client -> Component.translatable("subtitles.jugcraft.marax.work").getString());
+		boolean defined = context.computeOnClient(client -> refuse.equals(subtitle(client, "marax.refuse"))
+				&& assent.equals(subtitle(client, "marax.assent")) && work.equals(subtitle(client, "marax.work")));
+		check(!refuse.startsWith("subtitles.") && !work.startsWith("subtitles.") && defined,
+				"His refuse, assent and work have their subtitles in the client's sounds: " + refuse + ", " + assent + ", " + work);
+		List<String> cues = server.computeOnServer(minecraft -> presenceOf(minecraft, perch).cues());
+		Jugcraft.LOGGER.info("[garden-check] Marax's cues so far: {}", cues);
+		check(cues.contains("refuse") && "assent".equals(cues.getLast()), "The server fired his refusal, then his assent: " + cues);
+		try {
+			if (hearing.sounding()) {
+				context.waitFor(client -> hearing.heard().contains(refuse) && hearing.heard().contains(assent), WAIT);
+				Jugcraft.LOGGER.info("[garden-check] subtitles heard: {}", hearing.heard());
+			} else {
+				Jugcraft.LOGGER.info("[garden-check] no sound device: the sound engine is off, so no subtitle can show; checked as defined and as fired");
+			}
+		} finally {
+			context.runOnClient(client -> {
+				client.getSoundManager().removeListener(hearing.listener());
+				client.options.showSubtitles().set(hearing.subtitles());
+			});
+		}
+	}
+
+	/**
+	 * Dossier 3 items 3 and 7(b), the contract's shot: asked on his page, his familiar reads both beds from their samples, flies
+	 * to the worst and hovers there while the answer is on screen. The answer is drawn as its change (the glance), the whole
+	 * sentence its tip. Frozen as soon as the familiar is over the bed (the critique's item 11: SHOW_TICKS passing while the
+	 * pictures are taken would clear it), photographed at three sizes and then from north of the perch with the screen
+	 * closed; thawed, his next think clears the target and the familiar flies home.
+	 */
+	private static void maraxReading(ClientGameTestContext context, TestDedicatedServerContext server, BlockPos perch, BlockPos poor,
+			BlockPos plain) {
+		for (BlockPos at : List.of(poor, plain)) {
+			// Each bed's area read as a growing plant would (random ticks are off, so its plant has not), one request a tick.
+			untilServer(context, server, minecraft -> bed(minecraft, at).habitat(minecraft.overworld()) != null, "The bed at " + at + " is sampled");
+		}
+		standSouth(context, server, perch);
+		context.waitTicks(OPEN_GAP);
+		open(context, server, perch);
+		context.waitFor(client -> PactClient.state() != null && PactClient.state().mode() == PactStatePayload.KEEP
+				&& PactClient.state().patterns().stream().anyMatch(choice -> choice.id().equals(HabitatReading.CHOICE) && choice.ready())
+				&& screen(client).control("work:0") != null, WAIT);
+		tabTo(context, "work:0");
+		PactStatePayload.Result read = answer(context);
+		String said = read.message().getString();
+		Jugcraft.LOGGER.info("[garden-check] marax's reading: {} ({})", said, read.reason());
+		check(read.done() && HabitatReading.READ.equals(read.reason()) && said.contains(poor.toShortString()) && said.contains("Nutrients")
+				&& said.contains("That alone will move it on"), "It names the poor bed, its nutrients and the one change: " + said);
+		context.waitFor(client -> screen(client).control("result") instanceof PactScreen.Verdict verdict && !verdict.refused(), WAIT);
+		String drawn = context.computeOnClient(client -> ((PactScreen.Verdict) screen(client).control("result")).drawnText());
+		Jugcraft.LOGGER.info("[garden-check] his reading drawn: {}", drawn);
+		check("Nutrients 0 → 1".equals(drawn), "The answer is drawn as its one change, the whole sentence its tip: " + drawn);
+		context.waitFor(client -> spiritAt(client, perch, MARAX) instanceof PactSpiritEntity<?> spirit && poor.equals(spirit.flown())
+				&& spirit.flight(0.0F) >= 1.0F, WAIT);
+		server.runCommand("tick freeze");
+		try {
+			fits(context, "the reading");
+			named(context);
+			budget(context, keptWords(context), "his reading");
+			shot(context, "jugcraft_garden_marax_reading");
+			readingSizes(context);
+			context.getInput().pressKey(InputConstants.KEY_ESCAPE);
+			context.waitForScreen(null);
+			// From north of the perch, looking south over it: the perch, Marax on its west, the familiar over the poor bed.
+			server.runCommand(String.format(Locale.ROOT, "tp @a %.1f %d %.1f 0 10", perch.getX() + 0.5, perch.getY(), perch.getZ() - 2.5));
+			context.waitTicks(3);
+			boolean hovering = context.computeOnClient(client -> spiritAt(client, perch, MARAX) instanceof PactSpiritEntity<?> spirit
+					&& spirit.target().equals(Optional.of(poor)) && spirit.flight(0.0F) >= 1.0F);
+			Jugcraft.LOGGER.info("[garden-check] frozen, the familiar over {}: {}", poor.toShortString(), hovering);
+			check(hovering, "Frozen with the answer just closed, his familiar hovers over the bed it named");
+			shot(context, "jugcraft_garden_marax_familiar");
+		} finally {
+			server.runCommand("tick unfreeze");
+		}
+		context.waitFor(client -> spiritAt(client, perch, MARAX) instanceof PactSpiritEntity<?> spirit && spirit.target().isEmpty()
+				&& spirit.flight(0.0F) <= 0.0F, WAIT);
+		boolean clear = server.computeOnServer(minecraft -> presenceOf(minecraft, perch).target().isEmpty());
+		check(clear, "The conversation over, the target clears and the familiar flies home");
+	}
+
+	/** The reading's page at GUI scale 4 (1920 x 1080) and in a 320 x 180 window, then as it was (the world frozen throughout). */
+	private static void readingSizes(ClientGameTestContext context) {
+		int width = context.computeOnClient(client -> client.getWindow().getWidth());
+		int height = context.computeOnClient(client -> client.getWindow().getHeight());
+		context.getInput().resizeWindow(1920, 1080);
+		context.runOnClient(client -> {
+			client.options.guiScale().set(4);
+			client.resizeGui();
+		});
+		context.waitTicks(10);
+		int applied = context.computeOnClient(client -> client.getWindow().getGuiScale());
+		check(applied == 4, "At GUI scale 4: " + applied);
+		fits(context, "his reading at GUI scale 4");
+		named(context);
+		budget(context, keptWords(context), "his reading at GUI scale 4");
+		shot(context, "jugcraft_garden_marax_reading_scale4");
+		context.runOnClient(client -> {
+			client.options.guiScale().set(2);
+			client.resizeGui();
+		});
+		context.getInput().resizeWindow(320, 180);
+		context.waitTicks(10);
+		fits(context, "his reading at 320x180");
+		named(context);
+		budget(context, keptWords(context), "his reading at 320x180");
+		shot(context, "jugcraft_garden_marax_reading_small");
+		context.getInput().resizeWindow(width, height);
+		context.waitTicks(10);
+	}
+
+	/** Jade's readings of his perch and of him (read on the server: no Jade class); with Jade loaded, his overlay. */
+	private static void maraxJade(ClientGameTestContext context, TestDedicatedServerContext server, BlockPos perch) {
+		String readings = server.computeOnServer(minecraft -> {
+			ServerLevel level = minecraft.overworld();
+			CompoundTag ofPerch = PactReading.holder(level, (PactPerchBlockEntity) level.getBlockEntity(perch), level.getGameTime());
+			CompoundTag ofHim = PactReading.presence(level, presenceOf(minecraft, perch), level.getGameTime());
+			String both = ofPerch + " " + ofHim;
+			boolean right = "kept".equals(ofPerch.getStringOr("standing", "")) && MARAX.equals(ofPerch.getStringOr("counterpart", ""))
+					&& HabitatReading.WORK.equals(ofPerch.getStringOr("service", "")) && "active".equals(ofPerch.getStringOr("state", ""))
+					&& ofPerch.getIntOr("due_days", -1) == 7 && "kept".equals(ofHim.getStringOr("standing", ""))
+					&& PactReading.KEYS.containsAll(ofPerch.keySet()) && PactReading.KEYS.containsAll(ofHim.keySet())
+					&& !both.contains(player(minecraft).getUUID().toString()) && !both.contains(player(minecraft).getName().getString());
+			return (right ? "ok " : "bad ") + both;
+		});
+		Jugcraft.LOGGER.info("[garden-check] Jade's readings of his perch and of Marax: {}", readings);
+		check(readings.startsWith("ok"), "Jade's readings: his pact, service, state and next offering, naming no player: " + readings);
+		if (FabricLoader.getInstance().isModLoaded("jade")) {
+			boolean hidden = context.computeOnClient(client -> client.gui.hud.isHidden());
+			context.runOnClient(client -> {
+				if (client.gui.hud.isHidden()) {
+					client.gui.hud.toggle();
+				}
+			});
+			try {
+				maraxCamera(context, server, perch);
+				context.getInput().lookAt(perch.west(2));
+				context.waitTicks(20);
+				shot(context, "jugcraft_garden_marax_jade");
+			} finally {
+				restoreHud(context, hidden);
+			}
+		} else {
+			Jugcraft.LOGGER.info("[garden-check] Jade is not loaded: no Jade shot of Marax");
+		}
+	}
+
+	/** The camera for his body: three blocks south of where he stands, at his middle's height in view, facing north (his front, once he faces whoever opened the perch there). */
+	private static void maraxCamera(ClientGameTestContext context, TestDedicatedServerContext server, BlockPos perch) {
+		Vec3 at = server.computeOnServer(minecraft -> presenceOf(minecraft, perch).position());
+		double middle = server.computeOnServer(minecraft -> presenceOf(minecraft, perch).getBbHeight() / 2.0);
+		float pitch = (float) -Math.toDegrees(Math.atan2(middle - 1.62, 3.0));
+		server.runCommand(String.format(Locale.ROOT, "tp @a %.1f %.1f %.1f 180 %.1f", at.x, at.y, at.z + 3.0, pitch));
+		context.waitTicks(10);
+	}
+
+	/**
+	 * His body from his front (three blocks south of him; he faces whoever opened the perch there): each loop as the server
+	 * drives it and each gesture frozen inside its telling pose, the HUD hidden. Idle and the rest by day (the critique's item
+	 * 5); his night look with the time set to midnight (Dossier 3 item 7a), then noon again; waiting with the Concordance
+	 * switched off; his astir loop is not posed (an offering due would change the upkeep later steps read, as Buer's and
+	 * Bathin's). Departing he turns, walks two steps and fades (held), and arriving replaces it.
+	 */
+	private static void maraxPoses(ClientGameTestContext context, TestDedicatedServerContext server, BlockPos perch) {
+		boolean hidden = hideHud(context);
+		try {
+			maraxCamera(context, server, perch);
+			context.waitTicks(OPEN_GAP);
+			open(context, server, perch);
+			context.waitFor(client -> spiritAt(client, perch, MARAX) instanceof LivingEntity body
+					&& Mth.degreesDifferenceAbs(body.yBodyRot, 0.0F) <= BATHIN_FACING_TOLERANCE, WAIT);
+			context.getInput().pressKey(InputConstants.KEY_ESCAPE);
+			context.waitForScreen(null);
+			server.runCommand("time set noon");
+			loopPoseOf(context, server, perch, MARAX, MARAX_IDLE, "jugcraft_garden_marax_idle", false);
+			context.waitTicks(OPEN_GAP);
+			open(context, server, perch);
+			context.waitFor(client -> spiritAt(client, perch, MARAX) instanceof MaraxEntity marax && marax.listening(), WAIT);
+			loopPoseOf(context, server, perch, MARAX, MARAX_LISTEN, "jugcraft_garden_marax_listen", true);
+			context.waitFor(client -> MARAX_IDLE.equals(drawingOf(client, perch, MARAX, MAIN)), WAIT);
+			AgreementHolder.Toggle suspended = server.computeOnServer(minecraft -> PactKeeping.suspend(minecraft.overworld(), player(minecraft),
+					holder(minecraft, perch), minecraft.overworld().getGameTime()));
+			check(suspended == AgreementHolder.Toggle.SUSPENDED, "Its holder suspends the pact: " + suspended);
+			loopPoseOf(context, server, perch, MARAX, MARAX_SUSPENDED, "jugcraft_garden_marax_suspended", false);
+			AgreementHolder.Toggle resumed = server.computeOnServer(minecraft -> PactKeeping.resume(minecraft.overworld(), player(minecraft),
+					holder(minecraft, perch), minecraft.overworld().getGameTime()));
+			check(resumed == AgreementHolder.Toggle.RESUMED, "and resumes it: " + resumed);
+			context.waitFor(client -> MARAX_IDLE.equals(drawingOf(client, perch, MARAX, MAIN)), WAIT);
+			boolean on = server.computeOnServer(minecraft -> JugcraftConfig.isFeatureEnabled(JugcraftConcordance.FEATURE));
+			server.runOnServer(minecraft -> JugcraftConfig.setFeatureEnabled(JugcraftConcordance.FEATURE, false));
+			try {
+				loopPoseOf(context, server, perch, MARAX, MARAX_WAITING, "jugcraft_garden_marax_waiting", false);
+			} finally {
+				server.runOnServer(minecraft -> JugcraftConfig.setFeatureEnabled(JugcraftConcordance.FEATURE, on));
+			}
+			context.waitFor(client -> MARAX_IDLE.equals(drawingOf(client, perch, MARAX, MAIN)), WAIT);
+			// Dossier 3 item 7(a): by night, between readings, he lifts his head to the sky (the client's own dark sky).
+			server.runCommand("time set midnight");
+			try {
+				loopPoseOf(context, server, perch, MARAX, MARAX_STARGAZE, "jugcraft_garden_marax_stargaze", false);
+			} finally {
+				server.runCommand("time set noon");
+			}
+			context.waitFor(client -> MARAX_IDLE.equals(drawingOf(client, perch, MARAX, MAIN)), WAIT);
+			clipPose(context, server, perch, MARAX, MaraxEntity.Gesture.INSPECT, 0.4, 1.2, "jugcraft_garden_marax_inspect");
+			clipPose(context, server, perch, MARAX, MaraxEntity.Gesture.ASSENT, 0.3, 0.9, "jugcraft_garden_marax_assent");
+			clipPose(context, server, perch, MARAX, MaraxEntity.Gesture.REFUSE, 0.3, 1.0, "jugcraft_garden_marax_refuse");
+			clipPose(context, server, perch, MARAX, MaraxEntity.Gesture.WORK, 0.4, 1.2, "jugcraft_garden_marax_work");
+			// He leaves (depart holds its last frame: nothing of him drawn) and comes back (his arrival replaces it).
+			clipPose(context, server, perch, MARAX, MaraxEntity.Gesture.DEPART, 0.5, 1.1, "jugcraft_garden_marax_depart");
+			clipPose(context, server, perch, MARAX, MaraxEntity.Gesture.ARRIVE, 0.9, 1.6, "jugcraft_garden_marax_arrive");
+			context.waitFor(client -> drawingOf(client, perch, MARAX, GESTURES).isEmpty()
+					&& MARAX_IDLE.equals(drawingOf(client, perch, MARAX, MAIN)), WAIT);
+			boolean kept = server.computeOnServer(minecraft -> holds(minecraft, MARAX) && presenceOf(minecraft, perch).isAlive());
+			check(kept, "His gestures change nothing: the pact is kept and he stands beside his perch");
+		} finally {
+			restoreHud(context, hidden);
+		}
+	}
+
+	/** Dossier 3 item 6: End asks first; then his familiar settles, and he turns, walks two steps and fades; the pact ends once. */
+	private static void maraxEnding(ClientGameTestContext context, TestDedicatedServerContext server, BlockPos perch) {
+		context.waitTicks(OPEN_GAP);
+		open(context, server, perch);
+		context.waitFor(client -> PactClient.state() != null && PactClient.state().mode() == PactStatePayload.KEEP, WAIT);
+		UUID him = server.computeOnServer(minecraft -> presenceOf(minecraft, perch).getUUID());
+		press(context, "end");
+		context.waitForScreen(ConfirmScreen.class);
+		boolean keepFocused = context.computeOnClient(client -> client.gui.screen().getFocused() instanceof AbstractWidget keep
+				&& keep.getMessage().getString().equals(Component.translatable("screen.jugcraft.pact.end.no").getString()));
+		check(keepFocused, "End asks first, the keyboard on Keep it");
+		confirmBudget(context);
+		shot(context, "jugcraft_garden_marax_end_confirm");
+		context.getInput().pressKey(InputConstants.KEY_ESCAPE);
+		context.waitForScreen(PactScreen.class);
+		context.waitTicks(5);
+		boolean stillHeld = server.computeOnServer(minecraft -> holds(minecraft, MARAX));
+		check(stillHeld, "Keep it (Esc) ends nothing");
+		press(context, "end");
+		context.waitForScreen(ConfirmScreen.class);
+		tabToLabel(context, Component.translatable("screen.jugcraft.pact.end.yes").getString());
+		PactStatePayload.Result ended = answer(context);
+		context.waitFor(client -> MaraxEntity.Gesture.DEPART.animation.equals(gesturedOf(client, perch, MARAX)), WAIT);
+		RawAnimation going = context.computeOnClient(client -> gesturedOf(client, perch, MARAX));
+		String after = server.computeOnServer(minecraft -> holds(minecraft, MARAX) + " "
+				+ (minecraft.overworld().getEntity(him) instanceof MaraxEntity left ? "departing " + left.departing() : "gone"));
+		int endedMode = context.computeOnClient(client -> PactClient.state().mode());
+		Jugcraft.LOGGER.info("[garden-check] ended: {}; held, then his presence = {}", ended.reason(), after);
+		check(ended.done() && "ended".equals(ended.reason()) && MaraxEntity.Gesture.DEPART.animation.equals(going)
+				&& endedMode == PactStatePayload.CLOSED && after.startsWith("false"), "Ending ends the pact once; he turns, walks and fades: " + after);
+		context.waitFor(client -> spiritAt(client, perch, MARAX) == null, WAIT);
+		budget(context, ENDED_WORDS, "the ended page");
+		shot(context, "jugcraft_garden_marax_ended");
+		context.getInput().pressKey(InputConstants.KEY_ESCAPE);
+		context.waitForScreen(null);
+	}
+
 	// GC-07 unit 4
 	// GC-08 unit 5
 	// GC-09 unit 6

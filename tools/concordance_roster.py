@@ -34,6 +34,7 @@ SERVICES = {
     "strain_tending": "Strain tending: by daylight, one harvest strain eased on your beds at a time",
     "verdance_carrying": "Verdance carrying: at once, from your Hearts to a far Gleaner or a pylon",
     # GC-06 unit 3
+    "habitat_reading": "Habitat reading: one change named for your worst bed, when asked",
     # GC-07 unit 4
     # GC-08 unit 5
     # GC-09 unit 6

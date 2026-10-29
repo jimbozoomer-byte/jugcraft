@@ -21134,6 +21134,18 @@ def check_pacts(co, root, lang, registered, research):
             if not re.search(rf"public void {name}\(GameTestHelper \w+\)", source):
                 err(f"{cls}: missing the garden cohort's GC-06b game test {name}")
     # GC-06 unit 3
+    # --- Concordance garden cohort, GC-06 (Marax; GC-P66, GC-P67): each spirit's station and reaching bone as its SPIRITS row
+    # names them, its Body line and its renderer row read without comments. ---
+    for name, spirit in pa.SPIRITS.items():
+        line = re.search(rf'new Body\("{name}", SOUND_IDS,[^;]*\);', uncommented(java(f"spirits/{spirit['java']}.java")))
+        beside = bool(line) and "Station.BESIDE" in line.group(0)
+        if spirit.get("station") not in ("perch", "beside") or not line or beside != (spirit.get("station") == "beside") \
+                or "Station.PERCH" in line.group(0):
+            err(f"spirits/{spirit['java']}.java: its Body keeps the station SPIRITS[{name!r}] names ({spirit.get('station')}; GC-P67)")
+        reach = spirit["body"]["render"].get("reach")
+        row = re.search(rf'register\(Workers\.{name.upper()}, new Row\([^;]*?(, "([a-z_]+)")?\)\);', renderers)
+        if not row or (row.group(2) or None) != reach:
+            err(f"client/PactSpiritRenderers: {name}'s row reaches its {reach or 'no'} bone as SPIRITS[{name!r}] says (GC-P66)")
     # GC-07 unit 4
     # GC-08 unit 5
     # GC-09 unit 6
@@ -21619,6 +21631,73 @@ def check_garden_pacts(co, root, lang, registered, research):
         err("tools/concordance_pacts.py SERVICE_WORDS verdance_carrying row.service: names MOVE_MAX and MAX_BATCHES as "
             "tools/concordance_garden_pacts.py CONSTANTS holds them")
     # GC-06 unit 3
+    # --- GC-06 (Marax; docs/features/marax-pact.md): habitat reading, the one-correction rule and the proud familiar. ---
+    pa = co.pacts
+    reading = strip(text(spirits / "HabitatReading.java"))
+    read = _java_body(reading, "public static PactMenu.Answered read(")
+    # Refused before anything is counted, in Star-reckoning's order; at most READ_BEDS planted beds, each asked whose land
+    # it is; cached samples only; a proud bed skipped; one advice; counted once, he faces the bed, the familiar shown.
+    order = [read.find(n) for n in (
+        "Workers.enabled()", "holder.verify(level, now)", "!WORK.equals(service.work())",
+        "Authority.isStandIn(player) || !record.holder().equals(player.getUUID())",
+        "Pacts.serves(record, Couriers.place(level, player.blockPosition()), time, now)",
+        "GardenPacts.presence(level, record, MaraxEntity.class)", "memory.judge(level);", "++asked > READ_BEDS",
+        "GardenPacts.target(level, record, pos, bed.keeper(), time, now)", "bed.cachedHabitat(level)", "memory.proud(pos)",
+        "HabitatAdvice.one(niche, habitat, grafts)", "memory.named(", "holder.taskDone(level, now);",
+        "marax.attendWork(pos, MaraxEntity.Gesture.WORK.ticks, now);", "marax.showTarget(pos, now + SHOW_TICKS);")]
+    if -1 in order or order != sorted(order) or reading.count("holder.taskDone(") != 1:
+        err("HabitatReading.read: switched on; the pact verified, Marax's and its holder's in person; served where they stand; "
+            "Marax present; at most READ_BEDS planted beds asked of GardenPacts.target, cached samples only, a proud bed "
+            "skipped; one advice; then counted once, faced and shown (GC-06; GC-P68; GC-02)")
+    for banned in ("Garden.sample(", ".habitat(", ".note(", ".forgetSample(", "setNutrients(", "setStrain(", "setGraft(",
+                   ".tend(", ".report(", "budget(", "setBlock", "shrink(", "CourierLedger", "ValueOutput", "output.store("):
+        if banned in reading:
+            err(f"spirits/HabitatReading.java: a reading changes nothing, takes no sample and saves nothing ({banned}; Dossier 3 item 3)")
+    if reading.count("HabitatAdvice.one(") != 1 or reading.count("cachedHabitat(level)") != 2:
+        err("spirits/HabitatReading.java: one advice, from the cached habitat (the reading's and the proud memory's)")
+    # The magic interfaces (spec 1.7; decided by the session): the reading's remedy and clause are arguments of its own, so
+    # the kept page's glance draws the change and the whole sentence stays its tip and narration.
+    said = _java_body(reading, "static Component said(")
+    if 'Component.translatable(KEY + "read", crop, pos.toShortString(), growth, remedy(advice), clause, graft, proud)' not in said:
+        err("HabitatReading.said: its sentence's arguments are crop, bed, growth, remedy, clause, graft, proud (the glance draws "
+            "the remedy and the clause)")
+    marax = strip(text(spirits / "MaraxEntity.java"))
+    if "level().isDarkOutside()" not in _java_body(marax, "protected RawAnimation animation(Status status)") \
+            or "default -> night ? Loop.STARGAZE : Loop.IDLE;" not in marax:
+        err("spirits/MaraxEntity.java: his night look is his idle loop under the client's dark sky, never a status (Dossier 3 item 7a)")
+    # The contract's numbers (GC-P60, GC-P61).
+    row = pa.SPIRITS["marax"]
+    pact = row["pact"]
+    if pact["service"] != {"work": "habitat_reading", "radius": 8, "from": 0, "to": 24000, "quota": 2} \
+            or pact["beneficiaries"] != "personal" or (pact["upkeep"]["count"], pact["upkeep"]["period_days"]) != (2, 7) \
+            or row["offerings"]["items"] != ["minecraft:paper"] or pact["compact"]["resonance"] != 0 \
+            or sorted((i["item"], i["count"]) for i in pact["compact"]["items"]) \
+            != [("jugcraft:dewmoss", 2), ("jugcraft:sunpetal", 2), ("minecraft:book", 1)]:
+        err("tools/concordance_pacts.py SPIRITS['marax']: radius 8, any hour, 2 readings, personal; 2 paper a week; a book, "
+            "2 Sunpetal and 2 Dewmoss (GC-P61)")
+    # His beats as the contract words them, held to the magic interfaces' limits (spec 1.5; the service's first sentence
+    # shortened, decided by the session): the greeting and the price whole, the service's last sentence.
+    for key, wanted in (("greeting", "\"I am Marax. I do not dig; I keep a friend who knows the ground.\""),
+                        ("service", "Only one: the rest you learn by doing it.\""), ("price", "\"Two sheets of paper a week. My familiar writes small.\"")):
+        if wanted not in row["beats"][key]:
+            err(f"tools/concordance_pacts.py SPIRITS['marax'] beats: his {key} as the contract words it (GC-P60)")
+    # The advice rule: pure, bounded, and the only judge of the one change.
+    advice = text(root / "ecology" / "HabitatAdvice.java")
+    if "MOST_VERDICTS = 1 + 2 * (2 * Habitat.MAX_NUTRIENTS)" not in advice \
+            or re.search(r"^import (?!java\.util\.|org\.jspecify\.)", advice, re.M) or "first != Factor.DISTURBANCE" not in advice:
+        err("ecology/HabitatAdvice.java: pure (java.util and jspecify only), at most MOST_VERDICTS verdicts a call, the strain "
+            "eased only for disturbance (GC-P64)")
+    # GC-P75: the mastered page is the last page of the Regard's entry (the codex entry read above), with the third spirit.
+    entry_pages = entry.get("pages", [])
+    mastered = [i for i, page in enumerate(entry_pages)
+                if page.get("condition", {}).get("node_id") == f"{MOD}:concordance/garden_regard_mastered"]
+    if mastered and mastered != [len(entry_pages) - 1]:
+        err("codex binding/garden_regard: one mastered page, the entry's last (GC-P75)")
+    for cls, names in GC06_TESTS.items():
+        source = text(tests / f"{cls}.java")
+        for name in names:
+            if not re.search(rf"public void {name}\(GameTestHelper \w+\)", source):
+                err(f"{cls}: missing the garden cohort's GC-06 game test {name}")
     # GC-07 unit 4
     # GC-08 unit 5
     # GC-09 unit 6
@@ -21975,7 +22054,9 @@ def check_spirit_bodies(co):
     renderers = text(CLIENT_JAVA_ROOT / "PactSpiritRenderers.java")
     for name, spirit in pa.SPIRITS.items():
         r = spirit["body"]["render"]
-        row = f"register(Workers.{name.upper()}, new Row({spirit['body']['scale']}F, {r['shadow']}F, {r['wide']}, {r['low']}, {r['above']}, {str(r['glow']).lower()}));"
+        # GC-06 (GC-P66): a row with a reaching bone names it last.
+        row = (f"register(Workers.{name.upper()}, new Row({spirit['body']['scale']}F, {r['shadow']}F, {r['wide']}, {r['low']}, {r['above']}, "
+               f"{str(r['glow']).lower()}" + (f", \"{r['reach']}\"" if r.get("reach") else "") + "));")
         if row not in renderers:
             err(f"client/PactSpiritRenderers.java: {name} is drawn by its SPIRITS row ({row})")
     for needle in ("shadowRadius = row.shadow();", ".inflate(row.wide(), row.low(), row.wide()).expandTowards(0.0, row.above(), 0.0)",
@@ -22275,6 +22356,101 @@ def check_spirit_bodies(co):
                                             rf'"jugcraft_garden_bathin_{key}", (true|false)\);', garden_client):
             err(f"ConcordanceGardenPactClientGameTests: his {key} loop is photographed through loopPoseOf (no gesture over it)")
     # GC-06 unit 3
+    # --- GC-06: Marax's body, built (GC-S12, GC-P63, GC-P66, GC-P71) ---
+    body = pa.SPIRITS["marax"]["body"]
+    built = {"geckolib/models/entity/marax.geo.json": ((), "garden_bodies.marax_model"),
+             "geckolib/animations/entity/marax.animation.json": ((), "garden_bodies.marax_animations"),
+             "textures/entity/marax.png": ((pa.MAHOGANY, pa.MOSS, pa.CYPRESS), "garden_bodies.marax_skin"),
+             "textures/entity/marax_glowmask.png": ((pa.MAHOGANY, pa.MOSS, pa.CYPRESS), "garden_bodies.marax_glowmask")}
+    if body.get("built") != built or body.get("owner_files") or body.get("adapted") \
+            or {t: v for t, v in pa.BUILT.items() if "/marax" in t} != built \
+            or not set(built) <= {target for target, _, _ in owner_art.builds()}:
+        err("tools/concordance_pacts.py SPIRITS['marax']: his body is built by tools/garden_bodies.py and painted only from the "
+            "mahogany log, the Spanish moss and the cypress leaves; nothing of it is copied or adapted (GC-S12)")
+    geo = load(ASSETS / "geckolib" / "models" / "entity" / "marax.geo.json") or {}
+    clips = (load(ASSETS / "geckolib" / "animations" / "entity" / "marax.animation.json") or {}).get("animations", {})
+    if geo != garden_bodies.marax_model(read) or clips != garden_bodies.marax_animations(read)["animations"]:
+        err("marax.geo.json and marax.animation.json: tools/garden_bodies.py's, unedited (run tools/owner_art.py)")
+    bones = (geo.get("minecraft:geometry") or [{}])[0].get("bones", [])
+    cubes = [cube for bone in bones for cube in bone.get("cubes", [])]
+    if not cubes or garden_bodies.coplanar(geo) or any(0 in cube["size"] for cube in cubes) \
+            or any("rotation" in bone for bone in bones) or any("rotation" in cube for cube in cubes):
+        err(f"marax.geo.json: no flat cube, nothing turned at rest, no two faces on one plane facing one way "
+            f"(docs/ART_DIRECTION.md): {garden_bodies.coplanar(geo) if cubes else 'no cubes'}")
+    # His skin: every texel opaque or clear and one of the three paintings' colours; his glowmask the familiar's two eyes alone.
+    try:
+        colours = set(garden_bodies.palette(read, pa.MAHOGANY, 5)) | set(garden_bodies.palette(read, pa.MOSS, 8)) \
+            | set(garden_bodies.palette(read, pa.CYPRESS, 6))
+    except SystemExit as stopped:
+        colours = set()
+        err(str(stopped))
+    skin, mask = ASSETS / "textures" / "entity" / "marax.png", ASSETS / "textures" / "entity" / "marax_glowmask.png"
+    if skin.is_file() and mask.is_file():
+        with Image.open(skin) as a, Image.open(mask) as b:
+            sheet, glow = a.convert("RGBA"), b.convert("RGBA")
+            drawn = sheet.getcolors(1 << 16) or []
+            lit = {(x, y) for y in range(glow.height) for x in range(glow.width) if glow.getpixel((x, y))[3]}
+            if sheet.size != tuple(garden_bodies.MARAX_TEXTURE) or {p[3] for _, p in drawn} - {0, 255} \
+                    or not {p[:3] for _, p in drawn if p[3]} <= colours:
+                err("textures/entity/marax.png: 128 x 64, opaque or clear, only the mahogany log's, the Spanish moss's and the "
+                    "cypress leaves' colours")
+            fx, fy, _, _ = garden_bodies.box_faces(garden_bodies.MARAX_UV["familiar"], garden_bodies.MARAX_SIZES["familiar"])["front"]
+            eyes = {(fx, fy + 1), (fx + 2, fy + 1)}
+            if glow.size != sheet.size or lit != eyes or {tuple(t) for t in body["eye_texels"]} != eyes \
+                    or any(glow.getpixel(p) != sheet.getpixel(p) for p in lit):
+                err(f"textures/entity/marax_glowmask.png: his familiar's eyes alone, as his skin draws them on its front "
+                    f"({sorted(eyes)}; eye_texels {body['eye_texels']}): {sorted(lit)}")
+    else:
+        err("textures/entity/marax.png and marax_glowmask.png: run tools/owner_art.py (Marax's body)")
+    # His clips: each loop loops at its length; each gesture its length, played once (departure held), its telling pose inside.
+    for key, name in body["loops"].items():
+        if clips.get(name, {}).get("loop") is not True or clips[name].get("animation_length") != body["loop_lengths"][key]:
+            err(f"marax.animation.json: his {key} loop {name} loops, {body['loop_lengths'][key]} s")
+    for key, (length, (start, end)) in body["gesture_times"].items():
+        clip = clips.get(body["gestures"][key], {})
+        held = "hold_on_last_frame" if key == "depart" else False
+        if clip.get("animation_length") != length or clip.get("loop") != held or not 0 < start < end < length or end - start < 0.5:
+            err(f"marax.animation.json: his {key} is {length} s, {'held' if held else 'played once'}, its telling pose inside it")
+    marax_java = text(JAVA_ROOT / "concordance" / "spirits" / "MaraxEntity.java")
+    for key, name in body["loops"].items():
+        if f'RawAnimation.begin().thenLoop("{name}")' not in marax_java:
+            err(f"spirits/MaraxEntity.java: his {key} loop plays {name}")
+    declared = re.findall(r'^\t\t([A-Z]+)\("([a-z]+)", (\d+), RawAnimation\.begin\(\)\.then(Play|PlayAndHold)\("([a-z.]+)"\)\)[,;]$',
+                          marax_java, re.M)
+    wanted = [(key.upper(), key, str(round(length * 20)), "PlayAndHold" if key == "depart" else "Play", body["gestures"][key])
+              for key, (length, _) in body["gesture_times"].items()]
+    if declared != wanted:
+        err(f"spirits/MaraxEntity.java: Gesture is {[g[1] for g in wanted]}, each its clip and its length in ticks: {declared}")
+    check_geckolib("marax", marax_java, None, None, kind="entity")
+    # His box holds his bulk to his hump; his culling box his length and his familiar's flight up (GC-P63).
+    if cubes:
+        low = [min(c["origin"][a] for c in cubes) for a in range(3)]
+        high = [max(c["origin"][a] + c["size"][a] for c in cubes) for a in range(3)]
+        wide, tall, long = ((high[a] - low[a]) / 16 * body["scale"] for a in range(3))
+        hump = max(c["origin"][1] + c["size"][1] for bone in bones if bone["name"] == "body" for c in bone["cubes"]) / 16 * body["scale"]
+        size, r = pa.SPIRITS["marax"]["entity"], body["render"]
+        if not wide <= size["width"] <= long or abs(size["height"] - hump) > 0.2 \
+                or long > size["width"] + 2 * r["wide"] or tall + 10 / 16 > size["height"] + r["above"]:
+            err(f"Marax's box {size['width']} x {size['height']} lies between his width ({wide:.2f}) and length ({long:.2f}) "
+                f"and at his hump ({hump:.2f}); his culling box holds his length and his familiar's flight")
+    # GC-P66: his reaching bone is a root child of his model, and no clip of his work moves it (the renderer's hook alone).
+    reach = body["render"]["reach"]
+    if not any(bone["name"] == reach and bone.get("parent") == "root" for bone in bones) \
+            or "position" in clips.get(body["gestures"]["work"], {}).get("bones", {}).get(reach, {}):
+        err(f"marax.geo.json: his reaching bone {reach} is a root child, and his work clip never keys its position (GC-P66)")
+    # His poses and shots, from his front, each gesture frozen inside its window, every loop but astir through loopPoseOf.
+    posed = {key.lower(): (float(a), float(b)) for key, a, b in re.findall(
+        r'clipPose\(context, server, perch, MARAX, MaraxEntity\.Gesture\.([A-Z]+), ([0-9.]+), ([0-9.]+), "jugcraft_garden_marax_[a-z]+"\);',
+        garden_client)}
+    if posed != {key: window for key, (_, window) in body["gesture_times"].items()}:
+        err(f"ConcordanceGardenPactClientGameTests: each of Marax's gestures frozen inside its telling pose: {posed}")
+    for name in body["shots"]:
+        if f'"{name}"' not in garden_client:
+            err(f"ConcordanceGardenPactClientGameTests: takes {name}")
+    for key in body["loops"]:
+        if key != "astir" and not re.search(rf'loopPoseOf\(context, server, perch, MARAX, MARAX_{key.upper()}, '
+                                            rf'"jugcraft_garden_marax_{key}", (true|false)\);', garden_client):
+            err(f"ConcordanceGardenPactClientGameTests: his {key} loop is photographed through loopPoseOf (no gesture over it)")
     # GC-07 unit 4
     # GC-08 unit 5
     # GC-09 unit 6
@@ -25330,6 +25506,18 @@ GC06B_TESTS = {
 }
 # Each later unit's tables (GC-06 to GC-09) under its line.
 # GC-06 unit 3
+# The garden cohort, GC-06's server tests (check_garden_pacts; CT GC-06 names the first twelve), by class.
+GC06_TESTS = {
+    "ConcordanceWorkerGameTests": [
+        "aReadingNamesOneCorrectionAndChangesNothing", "aReadingNeverAdvisesDisturbanceToASunpetal",
+        "aReadingAdvisesAQuietSourceForAGloamcap", "aReadingSkipsBedsWithoutACachedSample", "aReadingWithTwoFaultsNamesTheFirst",
+        "onlyTheHolderMayAskForAReading", "maraxNeverReadsAStrangersBed", "theTargetIsNeverSaved",
+        "theProudFamiliarSkipsABedNamedThreeTimes", "maraxRefusesWhereNothingGrows", "maraxsFirstObligationIsABedReadByHand",
+        "maraxStandsBesideThePerchFacingHisInviter", "aStandingSpiritFallsBackToThePerchWithNoFreeSide",
+        "theTargetClearsWhenTheConversationEnds", "maraxsReadingSaysItsNoteAndNamesNoPlayer",
+        "maraxAnswersEachActionWithHisGesture"],
+    "ConcordanceProgressionGameTests": ["theGardensRegardIsMasteredThroughThreeSpirits"],
+}
 # GC-07 unit 4
 # GC-08 unit 5
 # GC-09 unit 6

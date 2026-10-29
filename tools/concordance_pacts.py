@@ -20,7 +20,7 @@ PactStatePayload, PactSessions, PactCompact, PactKeeping, PactSpiritEntity (ever
 cohort, GC-01), PactSpirits, PactService, PactServices, PactAccords (a pact's accord: the garden cohort, GC-05),
 StarReckoning, StolasEntity, BuerEntity and StrainTending (the garden cohort, GC-04: Buer, his body adapted by
 tools/garden_bodies.py), BathinEntity and VerdanceCarrying (GC-05: Bathin, his body built by tools/garden_bodies.py from
-BUILT); concordance/worker/PactDefinition,
+BUILT), MaraxEntity and HabitatReading (GC-06: Marax, his body built there too); concordance/worker/PactDefinition,
 PactParser, PactCatalog; client/PactClient, PactScreen and PactSpiritRenderers (each spirit's renderer from its SPIRITS
 row; Stolas's raven body, D-06 (D-S5): the Flashjack rig's geometry copied by tools/owner_art.py from OWNER_FILES, its
 skin, glowmask and animations adapted by tools/stolas_body.py from ADAPTED). tools/concordance.py merges these tables into
@@ -99,16 +99,20 @@ JOURNAL = {
 PARSER = {"MAX_COMPACT_ITEMS": 4, "MAX_COMPACT_COUNT": 64, "MAX_RESONANCE": 32, "MAX_BEATS": 3}
 WORK = ["star_reckoning", "strain_tending", "verdance_carrying",
         # GC-06 unit 3
+        "habitat_reading",
         # GC-07 unit 4
         # GC-08 unit 5
         # GC-09 unit 6
         ]
 # The works that serve only their holder (Java: PactParser.HOLDER_ONLY): a definition with one must be "personal".
-HOLDER_ONLY = ["star_reckoning"]
+HOLDER_ONLY = ["star_reckoning",
+               # GC-06 (GC-P1): the only holder-only garden work.
+               "habitat_reading"]
 # Each work's service class (Java: spirits/<class>.java implements PactService, its WORK constant; registered once in
 # Workers.register). Append with each work (GC-04: "strain_tending": "StrainTending"; GC-05: "verdance_carrying").
 SERVICE_CLASSES = {"star_reckoning": "StarReckoning", "strain_tending": "StrainTending", "verdance_carrying": "VerdanceCarrying",
                    # GC-06 unit 3
+                   "habitat_reading": "HabitatReading",
                    # GC-07 unit 4
                    # GC-08 unit 5
                    # GC-09 unit 6
@@ -135,6 +139,12 @@ BLOSSOM = "assets/ars_jimbaux/"
 WILLOW = "biomes and tree blocks/willow_log.png"
 MOSS = "biomes and tree blocks/spanish_moss.png"
 # GC-06 unit 3
+# Marax's body (GC-06; art plan) is painted in the colours of three of the owner's paintings under
+# art/owner-library/originals/Blocks/: catalog files.csv:1925 (the mahogany log's bark: his hide, face and horns), :2069
+# (the Spanish moss: his hump, forelock, tail tuft and the familiar's eyes) and :1758 (the cypress leaves: his familiar).
+# Colours only are read; no texel, shape or layout is copied.
+MAHOGANY = "biomes and tree blocks/mahogany_log.png"
+CYPRESS = "biomes and tree blocks/cypress_leaves.png"
 # GC-07 unit 4
 # GC-08 unit 5
 # GC-09 unit 6
@@ -393,6 +403,95 @@ SPIRITS = {
         },
     },
     # GC-06 unit 3
+    # Concordance garden cohort, GC-06 (Dossier 3; docs/features/marax-pact.md): Marax, the twenty-first spirit, habitat
+    # reading through his familiar. His body is built (tools/garden_bodies.py): no owner rig is a bull with a man's face.
+    "marax": {
+        "name": "Marax",
+        "java": "MaraxEntity",
+        # His box holds his bulk to his hump (1.44); his 2.1-block length reaches past it as a horse's does (GC-P63).
+        "entity": {"width": 1.6, "height": 1.4, "eye": 1.0},
+        # He stands on the ground two blocks beside the perch (PactSpiritEntity.Station.BESIDE; GC-P67).
+        "station": "beside",
+        # His sign: a book and quill, the astronomy and liberal sciences of his entry (GC-P63).
+        "sign": "minecraft:writable_book",
+        "pact": {
+            "agreement": rid("marax_pact"),
+            "research": rid("garden_regard"),
+            "service": {"work": "habitat_reading", "radius": 8, "from": 0, "to": 24000, "quota": 2},
+            "upkeep": {"offering": rid("marax_offerings"), "count": 2, "period_days": 7, "grace_days": 1, "cap": 4},
+            "beneficiaries": "personal",
+            "compact": {"items": [{"item": "minecraft:book", "count": 1}, {"item": rid("sunpetal"), "count": 2},
+                                  {"item": rid("dewmoss"), "count": 2}],
+                        "resonance": 0},
+        },
+        # His offering (GC-P61): paper, for the familiar who writes small.
+        "offerings": {"name": "Marax's Offerings", "items": ["minecraft:paper"]},
+        # His three beats (GC-P60) and the stage direction before the greeting, as the others have, held to the magic
+        # interfaces' limits (spec 1.1 and 1.5: a line at most 18 words, a stage direction at most 8; decided by the session,
+        # reviewable at the checkpoint): the greeting and price are the contract's words; the service keeps its "Only one:
+        # the rest you learn by doing it.", its first sentence shortened.
+        "stage": "A man-faced bull treads up beside the perch.",
+        "beats": {
+            "greeting": "A man-faced bull treads up beside the perch. \"I am Marax. I do not dig; I keep a friend who knows "
+                        "the ground.\"",
+            "service": "\"My familiar reads your beds and names one change. Only one: the rest you learn by doing it.\"",
+            "price": "\"Two sheets of paper a week. My familiar writes small.\"",
+        },
+        # His service's two conditions (GC-S7), the holder near and only what the holder could change by hand, named before
+        # anything is spent, as Buer's and Bathin's are.
+        "term": "Habitat reading: at any hour, when you ask on his page, Marax's familiar reads up to 8 planted Verdant Beds "
+                "of yours in his area from what they last showed (it takes no sample) and names, for the worst, the one "
+                "change that alone would raise it a step, or the first of its faults; it changes nothing. He reads only "
+                f"while you are within {workers.PACT['REACH']} blocks of the perch, and never a bed you could not change by "
+                "hand. For you alone",
+        # His cues, in MaraxEntity.SOUND_IDS' order: (subtitle, runtime files). The art plan's earth family, the four gaia
+        # recordings already in the repository, told apart by pitch (GC-P72).
+        "cues": {
+            "arrive": ("Marax treads up", ["nouveau/gaia_1"]),
+            "listen": ("Marax listens", ["nouveau/gaia_2"]),
+            "inspect": ("Marax's familiar looks it over", ["nouveau/gaia_3"]),
+            "assent": ("Marax assents", ["nouveau/gaia_4"]),
+            "refuse": ("Marax refuses", ["nouveau/gaia_2"]),
+            "depart": ("Marax fades", ["nouveau/gaia_1"]),
+            "work": ("Marax's familiar flies to a bed", ["nouveau/gaia_3"]),
+        },
+        # gaia_1 at 0.85 lasts 1.94 s, inside his 2.0 s departure (an entity's sound stops when it is gone).
+        "pitch": {"listen": 1.3, "refuse": 0.7, "depart": 0.85, "work": 1.5},
+        # His body (GC-S12, GC-P71): every file built by tools/garden_bodies.py ("built": runtime path -> (the Blocks-folder
+        # paintings it reads, its builder)), written and checked by tools/owner_art.py.
+        "body": {
+            "built": {
+                "geckolib/models/entity/marax.geo.json": ((), "garden_bodies.marax_model"),
+                "geckolib/animations/entity/marax.animation.json": ((), "garden_bodies.marax_animations"),
+                "textures/entity/marax.png": ((MAHOGANY, MOSS, CYPRESS), "garden_bodies.marax_skin"),
+                "textures/entity/marax_glowmask.png": ((MAHOGANY, MOSS, CYPRESS), "garden_bodies.marax_glowmask"),
+            },
+            "scale": 1.0,
+            # GC-P66: "reach" is the root-child bone his work target draws toward (his familiar).
+            "render": {"shadow": 0.9, "wide": 0.9, "low": 0.1, "above": 0.8, "glow": True, "reach": "familiar"},
+            # His loops (MaraxEntity.Loop; stargaze his night look, Dossier 3 item 7a) and gestures (MaraxEntity.Gesture).
+            "loops": {"idle": "animation.marax.idle", "listen": "animation.marax.listen", "waiting": "animation.marax.waiting",
+                      "suspended": "animation.marax.suspended", "astir": "animation.marax.astir",
+                      "stargaze": "animation.marax.stargaze"},
+            "gestures": {"arrive": "animation.marax.arrive", "inspect": "animation.marax.inspect",
+                         "assent": "animation.marax.assent", "refuse": "animation.marax.refuse",
+                         "depart": "animation.marax.depart", "work": "animation.marax.work"},
+            # (seconds, (the telling pose's window)): ConcordanceGardenPactClientGameTests freezes the world inside it.
+            "gesture_times": {"arrive": (2.0, (0.9, 1.6)), "inspect": (2.0, (0.4, 1.2)), "assent": (1.5, (0.3, 0.9)),
+                              "refuse": (1.6, (0.3, 1.0)), "depart": (2.0, (0.5, 1.1)), "work": (2.0, (0.4, 1.2))},
+            "loop_lengths": {"idle": 4.0, "listen": 3.0, "waiting": 6.0, "suspended": 8.0, "astir": 1.5, "stargaze": 6.0},
+            # His listening pose (degrees): his head inclined to his speaker; every screen gesture starts and ends on it.
+            "attend": {"head": (6, 0, 0)},
+            # Where his familiar sits between his horns while he listens (pixels from its rest).
+            "familiar_rest": (0, 1, 0),
+            # The texels his glowmask lights: the familiar's two eyes on its front face (garden_bodies.marax_sheet).
+            "eye_texels": ((91, 39), (93, 39)),
+            "shots": ["jugcraft_garden_marax_idle", "jugcraft_garden_marax_listen", "jugcraft_garden_marax_waiting",
+                      "jugcraft_garden_marax_suspended", "jugcraft_garden_marax_stargaze", "jugcraft_garden_marax_inspect",
+                      "jugcraft_garden_marax_assent", "jugcraft_garden_marax_refuse", "jugcraft_garden_marax_work",
+                      "jugcraft_garden_marax_depart", "jugcraft_garden_marax_arrive"],
+        },
+    },
     # GC-07 unit 4
     # GC-08 unit 5
     # GC-09 unit 6
@@ -412,6 +511,7 @@ PERCH_TOOLTIP = ("Use: invite a pact spirit whose Regard you understand (Stolas 
                  "awake Verdant Heart of yours and an awake Gleaner of yours or a Ley Pylon of yours or no one's within "
                  f"{SPIRITS['bathin']['pact']['service']['radius']} blocks"
                  # GC-06 unit 3
+                 f"; Marax a planted Verdant Bed of yours within {SPIRITS['marax']['pact']['service']['radius']} blocks"
                  # GC-07 unit 4
                  # GC-08 unit 5
                  # GC-09 unit 6
@@ -790,6 +890,7 @@ JADE_STATES = ["active", "suspended", "upkeep_due", "upkeep_held"]
 SERVICE_NAMES = {"gather": "Gathering", "courier": "Carrying its post's requests", "star_reckoning": "Star-reckoning",
                  "strain_tending": "Strain tending", "verdance_carrying": "Verdance carrying",
                  # GC-06 unit 3
+                 "habitat_reading": "Habitat reading",
                  # GC-07 unit 4
                  # GC-08 unit 5
                  # GC-09 unit 6
@@ -946,6 +1047,67 @@ SERVICE_WORDS = {
         "matters": {"two_roads": "His matter: a Heart here already pours into a pylon of its own"},
     },
     # GC-06 unit 3
+    # GC-06 (Dossier 3 items 2, 3, 5 and 8; GC-P64, GC-P68, GC-P69): Marax's habitat reading. Its reading is one sentence
+    # whose remedy and clause are arguments of their own (the kept page's glance draws them short; decided by the session).
+    "habitat_reading": {
+        "messages": {
+            "missing": "\"My familiar reads what grows. Nothing grows here.\" Marax comes only where an awake Verdant Bed you "
+                       "keep, with an organism crop on it, lies within %s blocks of the perch",
+            "ask": "Ask Marax for a reading",
+            "absent": "Marax is not at his perch to send his familiar: call him back there first",
+            "nothing_grows": "\"My familiar reads what grows. Nothing grows here.\" No awake Verdant Bed of yours in his area "
+                             "has a crop he may read",
+            "no_sample": "\"My familiar reads only what the ground has already shown it.\" None of your planted beds in his "
+                         "area has been read by its plant yet: come back when they have grown a while",
+            "nothing_to_correct": "\"Nothing to correct: every crop my familiar read is thriving.\"",
+            "nothing_to_correct.proud": "\"My familiar will not repeat itself a fourth time about the bed at %s, and every "
+                                        "other crop it read is thriving.\" Change something at that bed and it will look again",
+            "read": "Marax's familiar settles over the %s at %s. \"It is %s: %s. %s\"%s%s",
+            "read.proud": " (It will not repeat itself a fourth time about the bed at %s.)",
+            "advice.alone": "That alone will move it on",
+            "advice.one_of": "That is one of %s things to mend",
+            "advice.graft": " Marax adds: \"Or graft it to %s; that alone would serve.\"",
+            "remedy.moisture.more": "its %s is %s; wet its bed to %s (best %s to %s): water within 4 blocks, a wet sprinkler, "
+                                    "rain or a canteen",
+            "remedy.moisture.less": "its %s is %s; let its bed dry to %s (best %s to %s): keep water further than 4 blocks",
+            "remedy.light.more": "its %s is %s; give it %s (best %s to %s): open sky over it, or a lamp beside it",
+            "remedy.light.less": "its %s is %s; shade it to %s (best %s to %s): a roof over it, or fewer lamps near it",
+            "remedy.nutrients.more": "its %s are %s; feed its bed to %s (best %s to %s): bone meal, a Mulch Maw, or a fixer "
+                                     "growing beside it",
+            "remedy.nutrients.less": "its %s are %s; let its bed run down to %s (best %s to %s): harvests spend what it holds",
+            "remedy.diversity.more": "its %s is %s; bring it to %s kinds (best %s to %s): another kind of plant within 2 "
+                                     "blocks at its height",
+            "remedy.diversity.less": "its %s is %s; bring it to %s kinds (best %s to %s): fewer other kinds within 2 blocks",
+            "remedy.disturbance.more": "its %s is %s; it wants %s (best %s to %s): a quiet source of magic within 2 blocks, "
+                                       "such as an amethyst cluster or a Lumen",
+            "remedy.disturbance.less": "its %s is %s; bring it down to %s (best %s to %s): move working magic further than "
+                                       "2 blocks from the plant",
+            "remedy.strain": "its %s counts its recent harvests (strain %s); ease the strain to %s (its best is %s to %s): "
+                             "rest the bed, compost it, or have it tended",
+            "not_holder": "Only the pact's holder may ask Marax for a reading",
+            "nothing": "No pact with Marax is kept here to ask",
+            "suspended": "The pact is suspended: resume it before asking for a reading",
+            "upkeep_held": "The pact is held for its offering: pay it before asking for a reading",
+            "outside_area": "Stand within his area to ask for a reading",
+            "outside_hours": "Marax reads only in his hours",
+            "quota_spent": "\"My familiar has read enough for today.\" Marax gives %s readings a day: ask again tomorrow",
+            "row.service": "Habitat reading: %s of %s readings given today. Each names one change and changes nothing",
+            "row.last": "Last reading: the %s at %s, its %s",
+            "row.last_none": "No reading given yet: ask below",
+            "row.proud": "Proud: his familiar will not read the bed at %s again until something there changes (it said the "
+                         "same %s times)",
+            "row.proud_more": "Proud: his familiar will not read %s beds again, the nearest at %s, until something at each "
+                              "changes",
+        },
+        "screen": {
+            "heading": "Habitat reading",
+            "about": "Ask, and Marax's familiar reads your planted beds in his area from what they last showed, flies to the "
+                     "worst and names one change for it. It changes nothing: the rest you learn by doing it.",
+        },
+        # Jade shows a reading to whoever looks, so his note is in the third person, as Bathin's are.
+        "notes": {"proud": "Beds his familiar will not read again yet: %s"},
+        "answers": ["read", "nothing_grows", "no_sample", "nothing_to_correct", "absent"],
+    },
     # GC-07 unit 4
     # GC-08 unit 5
     # GC-09 unit 6
@@ -998,6 +1160,18 @@ GARDEN_CLIENT_SHOTS += ["jugcraft_garden_roster_awaiting", "jugcraft_garden_bath
 # (client/PactScreen.workService; Marax's reading its first user).
 SCREEN.update({f"screen.{MOD}.pact.work.left": "%s left today", f"screen.{MOD}.pact.work.spent": "None left today"})
 # GC-06 unit 3
+# ------------------------------------------------------------------------------------------- garden cohort, GC-06: Marax
+ART_SOUNDS["marax"] = ["nouveau/gaia_1", "nouveau/gaia_2", "nouveau/gaia_3", "nouveau/gaia_4"]
+# What ConcordanceGardenPactClientGameTests photographs of Marax besides his body shots (GC-P78).
+GARDEN_CLIENT_SHOTS += ["jugcraft_garden_marax_nothing_grows", "jugcraft_garden_marax_chooser",
+                        "jugcraft_garden_marax_conversation", "jugcraft_garden_marax_conversation_scale4",
+                        "jugcraft_garden_marax_conversation_small", "jugcraft_garden_marax_terms",
+                        "jugcraft_garden_marax_terms_scale4", "jugcraft_garden_marax_terms_small", "jugcraft_garden_marax_refused",
+                        "jugcraft_garden_marax_kept", "jugcraft_garden_marax_reading", "jugcraft_garden_marax_reading_scale4",
+                        "jugcraft_garden_marax_reading_small", "jugcraft_garden_marax_familiar", "jugcraft_garden_marax_jade",
+                        "jugcraft_garden_marax_faces_east", "jugcraft_garden_marax_faces_south",
+                        "jugcraft_garden_marax_faces_west", "jugcraft_garden_marax_faces_north",
+                        "jugcraft_garden_marax_end_confirm", "jugcraft_garden_marax_ended"]
 # GC-07 unit 4
 # GC-08 unit 5
 # GC-09 unit 6

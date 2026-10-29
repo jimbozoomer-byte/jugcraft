@@ -395,6 +395,37 @@ GARDEN = {
          "tests": ["everySpiritsUpkeepWarnsGivesGraceSuspendsAndResumes", "endingAnySpiritsPactReturnsTheEscrowOnce",
                    "bathinArrivesAndDepartsAtOnceInARingOfDust"]},
         # GC-06 unit 3
+        # GC-06: Marax, from his perch to his departure (Dossier 3), and The Garden's Regard mastered (GB26). Unit 7's
+        # theGardenPactsFromCodexToDeparture walks these steps.
+        {"research": [], "things": ["dewmoss"],
+         "text": "Plant an organism crop on an awake Verdant Bed of yours within 8 blocks of your Pact Perch; use the perch "
+                 "and choose Marax: a great bull with a calm man's face treads up beside it and names every term before "
+                 "anything is spent (with nothing planted he does not come: \"My familiar reads what grows. Nothing grows "
+                 "here.\"); accept, and his compact (a book, 2 Sunpetal and 2 Dewmoss) is spent once",
+         "reaches": [f"pact:{rid('marax')}"],
+         "tests": ["maraxRefusesWhereNothingGrows", "everySpiritSealsOnceAndSpendsOnce",
+                   "maraxStandsBesideThePerchFacingHisInviter"]},
+        {"research": [], "things": [],
+         "text": "Ask Marax for a reading on his page (twice a day, at any hour): his familiar flies to the worst of your "
+                 "planted beds and names the one change that would raise it a step, or the first of its faults, and changes "
+                 "nothing; named three readings running with nothing changed there, it will not read that bed a fourth "
+                 "time. Use a Verdant Bed itself in his area with an empty hand (its side, if a crop covers its top): his "
+                 "first obligation",
+         "reaches": [f"practice:{rid('garden_pact_service')}"],
+         "tests": ["aReadingNamesOneCorrectionAndChangesNothing", "aReadingWithTwoFaultsNamesTheFirst",
+                   "theProudFamiliarSkipsABedNamedThreeTimes", "maraxsFirstObligationIsABedReadByHand"]},
+        {"research": [], "things": [],
+         "text": "Keep the first obligations of three garden spirits' pacts (Buer's, Bathin's and Marax's): The Garden's "
+                 "Regard is mastered",
+         "reaches": [f"research:{rid('garden_regard')}@mastered"],
+         "tests": ["theGardensRegardIsMasteredThroughThreeSpirits"]},
+        {"research": [], "things": [],
+         "text": "Keep the pact with two sheets of paper a week (a missed week is warned and carried through a day's grace, "
+                 "then the service is suspended with nothing taken; an offering resumes it). End it at the perch: what was "
+                 "paid ahead comes back once; his familiar settles between his horns, and he turns, walks two steps and fades",
+         "reaches": [],
+         "tests": ["everySpiritsUpkeepWarnsGivesGraceSuspendsAndResumes", "endingAnySpiritsPactReturnsTheEscrowOnce",
+                   "maraxAnswersEachActionWithHisGesture"]},
         # GC-07 unit 4
         # GC-08 unit 5
         # GC-09 unit 6

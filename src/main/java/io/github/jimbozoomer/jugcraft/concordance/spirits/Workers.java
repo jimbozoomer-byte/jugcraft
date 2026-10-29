@@ -78,6 +78,8 @@ public final class Workers {
 	/** Concordance garden cohort, GC-05 (Dossier 2): Bathin, coiled on his perch (Verdance carrying). */
 	public static EntityType<BathinEntity> BATHIN;
 	// GC-06 unit 3
+	/** Concordance garden cohort, GC-06 (Dossier 3): Marax, standing on the ground beside his perch (habitat reading). */
+	public static EntityType<MaraxEntity> MARAX;
 	// GC-07 unit 4
 	// GC-08 unit 5
 	// GC-09 unit 6
@@ -134,6 +136,11 @@ public final class Workers {
 		FabricDefaultAttributeRegistry.register(BATHIN, BathinEntity.createAttributes());
 		PactSpirits.register(BathinEntity.COUNTERPART, BATHIN, BathinEntity.SIGN);
 		// GC-06 unit 3
+		// Concordance garden cohort, GC-06: Marax, MISC as every worker is (a transport crate refuses him), standing beside his perch.
+		MARAX = entity("marax", EntityType.Builder.<MaraxEntity>of(MaraxEntity::new, MobCategory.MISC).sized(1.6F, 1.4F).eyeHeight(1.0F)
+				.fireImmune().clientTrackingRange(8));
+		FabricDefaultAttributeRegistry.register(MARAX, MaraxEntity.createAttributes());
+		PactSpirits.register(MaraxEntity.COUNTERPART, MARAX, MaraxEntity.SIGN);
 		// GC-07 unit 4
 		// GC-08 unit 5
 		// GC-09 unit 6
@@ -150,6 +157,8 @@ public final class Workers {
 		// GC-05: Bathin's Verdance carrying.
 		PactServices.register(VerdanceCarrying.SERVICE);
 		// GC-06 unit 3
+		// GC-06: Marax's habitat reading.
+		PactServices.register(HabitatReading.SERVICE);
 		// GC-07 unit 4
 		// GC-08 unit 5
 		// GC-09 unit 6
@@ -162,6 +171,8 @@ public final class Workers {
 		// GC-05: Bathin's cues (jugcraft:bathin.*).
 		BathinEntity.registerSounds();
 		// GC-06 unit 3
+		// GC-06: Marax's cues (jugcraft:marax.*).
+		MaraxEntity.registerSounds();
 		// GC-07 unit 4
 		// GC-08 unit 5
 		// GC-09 unit 6

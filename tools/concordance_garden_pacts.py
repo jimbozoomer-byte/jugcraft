@@ -15,7 +15,7 @@ GC-03 (GC-S9, GC-P6, GC-P7): The Garden's Regard, the cohort's one research, and
 
 tools/concordance.py merges these tables into its own; tools/check_mod_data.py (check_garden_pacts) holds the Java and the
 data to them. Each spirit's unit adds its work to OBLIGATIONS and CONSTANTS and its codex page to PAGES (GC-04: Buer's;
-GC-05: Bathin's), and its row to DISTINCT.
+GC-05: Bathin's), and its row to DISTINCT. GC-06 adds the mastered page (MASTERY) with the third spirit.
 """
 
 import concordance_ecology as ecology
@@ -40,6 +40,7 @@ MASTERY_SPIRITS = 3  # Java: GardenPacts.MASTERY_SPIRITS: the mastered rule's di
 # Java: PactObligations.Act, in order; append only (unit 2 device, 3 read, 4 graft, 5 feed, 6 harvest).
 ACTS = ["tend", "device",
         # GC-06 unit 3
+        "read",
         # GC-07 unit 4
         # GC-08 unit 5
         # GC-09 unit 6
@@ -54,6 +55,10 @@ HOOKS = {"tend": ("garden/VerdantBedBlock.java", "static void tendBy(",
                     "PactObligations.performed(serverLevel, server, PactObligations.Act.DEVICE, pos);",
                     "useEmpty(device, server, serverLevel);", "}\n\t\treturn InteractionResult.SUCCESS;"),
          # GC-06 unit 3
+         # GC-06 (GC-P70): a Verdant Bed itself read with an empty hand (after its report; a full hand passes before it).
+         "read": ("garden/VerdantBedBlock.java", "protected InteractionResult useWithoutItem(",
+                  "PactObligations.performed(serverLevel, server, PactObligations.Act.READ, pos);",
+                  "bed.report(serverLevel, server);", "return InteractionResult.SUCCESS;"),
          # GC-07 unit 4
          # GC-08 unit 5
          # GC-09 unit 6
@@ -61,6 +66,7 @@ HOOKS = {"tend": ("garden/VerdantBedBlock.java", "static void tendBy(",
 # work -> act (each act at most one work); GC-04: Buer's; GC-05: Bathin's; GC-06 on, each unit's under its line.
 OBLIGATIONS = {"strain_tending": "tend", "verdance_carrying": "device",
                # GC-06 unit 3
+               "habitat_reading": "read",
                # GC-07 unit 4
                # GC-08 unit 5
                # GC-09 unit 6
@@ -72,6 +78,9 @@ OBLIGATIONS = {"strain_tending": "tend", "verdance_carrying": "device",
 CONSTANTS = {"strain_tending": {"spirits/StrainTending.java": {"MEMORY": 16, "MAX_ASKED": 8}},
              "verdance_carrying": {"spirits/VerdanceCarrying.java": {"MOVE_MAX": 8, "MAX_BATCHES": 3, "MAX_ASKED": 8}},
              # GC-06 unit 3
+             # GC-06: a reading asks at most 8 planted beds; a bed named 3 readings running is proud; the familiar hovers at most
+             # 400 ticks while the answer is on screen.
+             "habitat_reading": {"spirits/HabitatReading.java": {"READ_BEDS": 8, "PIQUE": 3, "SHOW_TICKS": 400}},
              # GC-07 unit 4
              # GC-08 unit 5
              # GC-09 unit 6
@@ -88,6 +97,9 @@ DISTINCT = {
                           "call": "gleaner.receiveFrom(heart, record.holder(), MOVE_MAX, level)", "class": "VerdanceCarrying",
                           "also": "heart.pourInto(pylon, level, MAX_BATCHES)"},
     # GC-06 unit 3
+    # GC-06: Marax's, a reading that changes nothing (its one call names the change; HabitatReading alone makes it).
+    "habitat_reading": {"verb": "read and advise", "state": "nothing (a reading only)",
+                        "call": "HabitatAdvice.one(niche, habitat, grafts)", "class": "HabitatReading"},
     # GC-07 unit 4
     # GC-08 unit 5
     # GC-09 unit 6
@@ -132,6 +144,8 @@ MESSAGES = {
         "tend": "tend a strained Verdant Bed",
         "device": "read or set an awake Verdant Heart, Gleaner, Mulch Maw or Habitat Gauge",
         # GC-06 unit 3
+        # A crop's outline covers its bed's top, so where one grows the bed is used by its side (the critique's item 10).
+        "read": "read a Verdant Bed itself (its side, where a crop covers it)",
         # GC-07 unit 4
         # GC-08 unit 5
         # GC-09 unit 6
@@ -148,6 +162,10 @@ _BUER_OFFERING = _BUER_ITEMS[pacts.SPIRITS["buer"]["offerings"]["items"][0]]
 # GC-05: Bathin's (Dossier 2), their numbers read from his offer and the tables that hold the Java's, as Buer's.
 _BATHIN = pacts.SPIRITS["bathin"]["pact"]
 _BATHIN_ITEMS = {"minecraft:ender_pearl": "ender pearls", rid("verdant_chaff"): "Verdant Chaff"}  # his compact's and offering's words
+# GC-06: Marax's (Dossier 3), their numbers read from his offer, as Bathin's; each page at most 60 words (the magic
+# interfaces' spec 1.1, decided by the session).
+_MARAX = pacts.SPIRITS["marax"]["pact"]
+_MARAX_ITEMS = {"minecraft:book": "book", rid("sunpetal"): "Sunpetal", rid("dewmoss"): "Dewmoss", "minecraft:paper": "paper"}
 
 
 def _count(n):
@@ -213,10 +231,38 @@ PAGES = [
      "an empty hand while the pact is active. Ending it returns what was paid ahead once: his coil tightens, and he is gone "
      "in a ring of dust.", ("garden_regard", "understood")),
     # GC-06 unit 3
+    # GC-06: Marax's (Dossier 3).
+    ("text", "Marax",
+     "A great bull with a calm man's face, who keeps a wise familiar. Invite him at your **Pact Perch** once an awake "
+     f"Verdant Bed of yours **with a crop on it** lies within {_MARAX['service']['radius']} blocks: \"My familiar reads what "
+     "grows.\" He stands on the ground beside the perch. His compact: "
+     + ", ".join(f"{cost['count']} **{_MARAX_ITEMS[cost['item']]}**" for cost in _MARAX["compact"]["items"]) + ".",
+     ("garden_regard", "understood")),
+    ("text", "His Reading",
+     "Ask on his page, " + ("twice" if _MARAX["service"]["quota"] == 2 else f"{_MARAX['service']['quota']} times")
+     + " a day, for you alone. His familiar reads up to 8 of your planted beds from their last sample, flies to the worst "
+     "and names **one** change: the one that alone moves it a step, or the first of several. For a Sunpetal at light 9 "
+     "to 12, also the **Dewlit** graft. It changes nothing.",
+     ("garden_regard", "understood")),
+    ("text", "The Proud Familiar",
+     "Named three readings running for the same bed and fault with nothing changed, his familiar will not repeat itself "
+     "a fourth time: it reads the next-worst bed until something there changes. It remembers this only while Marax stays; "
+     "nothing is ever owed.", ("garden_regard", "understood")),
+    ("text", "His Price",
+     f"{_count(_MARAX['upkeep']['count']).capitalize()} sheets of **paper** every {_MARAX['upkeep']['period_days']} game "
+     "days, paid ahead. Your first obligation: use a Verdant Bed itself in his area with an empty hand (its side, if a "
+     "crop covers it) while the pact is active. By night he looks at the sky. Ended, his familiar settles and he walks "
+     "two steps and fades.", ("garden_regard", "understood")),
     # GC-07 unit 4
     # GC-08 unit 5
     # GC-09 unit 6
 ]
+# GC-06 (GB26, GC-P75): the mastered page, with the third garden spirit (check_garden_pacts refuses it while fewer ship).
+# Added once, here; later spirits' units add pages to PAGES only.
+MASTERY = [("text", "Mastered",
+            "Three garden spirits have each seen you keep their first obligation by your own hand: The Garden's Regard is "
+            "mastered. It opens nothing more; each garden spirit's page counts its obligation kept.",
+            ("garden_regard", "mastered"))]
 
 
 def codex():
@@ -240,7 +286,7 @@ def codex():
          "The garden's spirits will hear an invitation now. Use your perch: each names its terms before anything is spent, "
          "none asks for an astrolabe, and each works only your beds (or your party's) while you are near.",
          (research, "understood")),
-    ] + PAGES
+    ] + PAGES + MASTERY
     return {("binding", research): {
         "name": "The Garden's Regard", "x": x, "y": y, "icon": rid("verdant_bed"),
         "condition": ("binding_arts", "understood"),
