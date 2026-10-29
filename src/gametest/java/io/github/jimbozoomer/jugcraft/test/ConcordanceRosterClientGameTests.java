@@ -119,11 +119,12 @@ public class ConcordanceRosterClientGameTests implements FabricClientGameTest {
 	/** The end confirmation's (spec 1.1, as the pact's). */
 	private static final int CONFIRM_BUDGET = 25;
 	/**
-	 * A card's tip (spec 1.1; the unit 3 fixes, CI's pictures: every sentence of its row, nine lines over half the page): its
-	 * state's sentence and its fact's, at most this many words in all and lines (RosterScreen.TIP_WORDS and TIP_LINES).
+	 * A card's tip (spec 1.1: at most two lines and twenty words; the unit 3 fixes, CI's pictures: every sentence of its row,
+	 * nine lines over half the page): its state's sentence and its fact's, at most this many words in all and lines
+	 * (RosterScreen.TIP_WORDS and TIP_LINES).
 	 */
 	private static final int TIP_WORDS = 20;
-	private static final int TIP_LINES = 3;
+	private static final int TIP_LINES = 2;
 
 	private record Setup(BlockPos second, BlockPos destination, UUID pact, UUID shade, UUID shadeBody, long stranded, long open) {
 	}
@@ -705,9 +706,10 @@ public class ConcordanceRosterClientGameTests implements FabricClientGameTest {
 	}
 
 	/**
-	 * The unit 3 fixes (spec 1.1): every card on the page has a tip of its state's sentence and, where both keep to the
-	 * limits, its fact's: at most {@value #TIP_WORDS} words and {@value #TIP_LINES} lines (RosterScreen.tip: its sentences,
-	 * then its lines). Every sentence of the row stays the card's narration.
+	 * The unit 3 fixes (spec 1.1): every card on the page has a tip of its state's sentence (short where whole it is over the
+	 * limits, led by its kind where the card draws none) and, where both keep to the limits, its fact's: at most
+	 * {@value #TIP_WORDS} words and {@value #TIP_LINES} lines (RosterScreen.tip: its sentences, then its lines). Every
+	 * sentence of the row stays the card's narration.
 	 */
 	private static void tips(ClientGameTestContext context, String where) {
 		List<String> over = context.computeOnClient(client -> {

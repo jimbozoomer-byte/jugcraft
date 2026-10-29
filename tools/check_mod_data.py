@@ -21886,7 +21886,7 @@ def check_pact_screen(co, lang):
     invite_body = _java_body(screen, "private void invite(PactStatePayload state)")
     cards_body = _java_body(screen, "public static List<ScreenRectangle> chooserCards(int count, ScreenRectangle area)")
     card_class = screen.split("private final class Card extends MagicButton {", 1)[-1]
-    for needle, where in (("List<ScreenRectangle> places = chooserCards(state.patterns().size(), room);", invite_body),
+    for needle, where in (("List<ScreenRectangle> places = chooserCards(state.patterns().size(), area);", invite_body),
                           ('inBodyAt("invite:" + i, card, place.top() - area.top());', invite_body),
                           ("int widest = Math.max(1, Math.min(count, area.width() / CARD_CELL));", cards_body),
                           ("for (CardSize size : CardSize.values()) {", cards_body),
@@ -21897,6 +21897,20 @@ def check_pact_screen(co, lang):
         if needle not in where:
             err(f"client/PactScreen.java: the chooser places every card whole above its footer (chooserCards), each card's size its "
                 f"rectangle's, a reason with no room under its card carried by its tip (the unit 3 fixes: {needle})")
+    # The polish's review: the chooser's answer, or that one is awaited, is one line in its title row in place of the heading
+    # (pinned over the cards it pushed a second row under the scroll at 320x180), and the cards have the whole scroll.
+    title_answer = _java_body(screen, "private boolean titleAnswer(PactStatePayload state)")
+    chrome = _java_body(screen, "protected void extractChrome(GuiGraphicsExtractor g, int mouseX, int mouseY, float delta)")
+    for needle, where in (("titled = titleAnswer(state);", invite_body), ("ScreenRectangle row = chooserTitle(layout);", title_answer),
+                          ("line = new Verdict(result.message(), shown, result.done(), font, Math.min(row.width(), need),", title_answer),
+                          ("result.done() ? MagicTheme.GOOD : MagicTheme.WARN, true, true);", title_answer),
+                          (".maxLines(1);", title_answer), ('onScreen("result", line, row);', title_answer),
+                          ("if (!titled) {\n\t\t\t\tMagicArt.title(g, font, heading,", chrome)):
+        if needle not in where:
+            err(f"client/PactScreen.java: the chooser's answer, or that one is awaited, is one line in its title row in place of the "
+                f"heading, never over its cards (titleAnswer; the polish's review: {needle})")
+    if "result(state);" in invite_body or "area.top() + at" in invite_body:
+        err("client/PactScreen.java: the chooser's cards take the whole scroll; its answer is in the title row (the polish's review)")
     placements = _java_body(garden, "private static void placements(ClientGameTestContext context)")
     for needle in ("{{427, 240}, {320, 180}, {480, 270}, {320, 240}}", "for (boolean compact : new boolean[] {false, true}) {",
                    "for (int count = 1; count <= 7; count++) {", "PactScreen.chooserCards(count, area)", "area.bottom() > footer.top()",
@@ -21905,6 +21919,13 @@ def check_pact_screen(co, lang):
         if needle not in placements:
             err(f"ConcordanceGardenPactClientGameTests.placements: one to seven chooser cards placed at every size the client tests use, "
                 f"each inside the scroll above the footer, none overlapping (the unit 3 fixes: {needle})")
+    refused_invite = _java_body(garden, "private static void refusedInvite(ClientGameTestContext context)")
+    if "refusedInvite(context);" not in garden or "context.getInput().resizeWindow(320, 180);" not in refused_invite \
+            or "PactClient.request(screen(client).getMenu(), PactRequestPayload.INVITE," not in refused_invite \
+            or "PactClient.state().patterns().size()));" not in refused_invite or "verdict.refused()" not in refused_invite \
+            or 'cardsWhole(context, "the chooser at 320x180 after a refused invite");' not in refused_invite:
+        err("ConcordanceGardenPactClientGameTests: an invite the server refuses answers on the chooser at 320x180, every card still "
+            "wholly in view (refusedInvite; the polish's review)")
     chooser_fits = re.findall(r'fits\(context, "(the chooser[^"]*)"\);', garden)
     whole = re.findall(r'fits\(context, "(the chooser[^"]*)"\);\s*cardsWhole\(context, "\1"\);', garden)
     if len(chooser_fits) < 8 or whole != chooser_fits or "placements(context);" not in garden \
@@ -21926,23 +21947,44 @@ def check_pact_screen(co, lang):
             err(f"{cls}: each picture parks the cursor where no control is and makes the mouse the last input first (shot, park; "
                 "a shot named for a tip or a hover keeps them), and pictures are taken through shot alone (the unit 3 fixes)")
     # (D) The first beat's portrait draws each garden spirit whole, as it will stand while it still arrives.
-    if garden.count("portraitWhole(context, ") < 3 or 'screen(client).portrait()' not in _java_body(garden, "private static void portraitWhole(") \
-            or "PactSpiritRenderers.arriving(spirit)" not in _java_body(garden, "private static void portraitWhole("):
+    portrait_whole = _java_body(garden, "private static void portraitWhole(")
+    if garden.count("portraitWhole(context, ") < 3 or 'screen(client).portrait()' not in portrait_whole \
+            or "PactSpiritRenderers.arriving(spirit)" not in portrait_whole \
+            or 'check(seen.equals("standing arriving") || seen.equals("standing") || seen.equals("live"),' not in portrait_whole:
         err("ConcordanceGardenPactClientGameTests: each garden spirit's first beat draws its portrait whole, as it will stand while "
             "it still arrives (portraitWhole, the unit 3 fixes)")
-    if 'portrait = creature == null ? "sign" : MagicPortrait.shown(creature) != creature ? "standing" : "live";' not in screen:
-        err("client/PactScreen.java: the header records what its portrait drew (portrait(), for the client tests)")
+    if 'portrait = creature == null ? "sign" : !liveSpirit ? "portrait" : MagicPortrait.shown(creature) != creature ? "standing" : "live";' \
+            not in screen:
+        err("client/PactScreen.java: the header records what its portrait drew, \"live\" only for the spirit at the perch (portrait(), "
+            "for the client tests; the polish's review)")
     # (E) Each facing picture frames its spirit whole from along its speaker's bearing, nothing before its face.
     camera_body = _java_body(garden, "private static double @Nullable [] camera(Minecraft client, BlockPos perch, String id, Vec3 speaker)")
     if garden.count("frame(context, server, perch, ") != 3 or garden.count("land(context, server, speaker);") != 3 \
             or "AABB body = PactSpiritRenderers.standing(spirit);" not in camera_body \
             or "!frames(from, look, body, tall, wide) || !seen(client, from, face)" not in camera_body \
+            or "|| !client.level.noCollision(client.player," not in camera_body \
+            or "client.player.getDimensions(Pose.STANDING).makeBoundingBox(new Vec3(from.x, from.y - eye, from.z)).deflate(1.0E-7)" not in camera_body \
+            or "double[] drawn = face(spirit, id);" not in camera_body or "new double[] {0.0, drawn[0]}" not in camera_body \
+            or "new double[] {-0.05, drawn[1]}" not in camera_body \
             or "at.x + bearing.x * (spoke + back)" not in camera_body \
             or "ClipContext.Block.OUTLINE" not in _java_body(garden, "private static boolean seen(") \
             or "private static final double FRAME_FILL = 0.8;" not in garden:
         err("ConcordanceGardenPactClientGameTests: each facing picture (Buer's, spiritFacing's, standingFacing's) is framed along the "
             "speaker's bearing, the spirit's drawn body whole with a margin and no block's outline before its face (frame, "
-            "camera, seen), the player back where they spoke after (land; the unit 3 fixes)")
+            "camera, seen), never from where the standing player meets a block, the player back where they spoke after (land; "
+            "the unit 3 fixes and the polish's review)")
+    # The polish's review: Marax's face is sampled at his head's drawn front and chin, read from his model and his eyes.
+    face_body = _java_body(garden, "private static double[] face(PactSpiritEntity<?> spirit, String id)")
+    marax_face = re.search(r"case MARAX -> new double\[\] \{([0-9.]+) / 16\.0, ([0-9.]+)\};", face_body)
+    marax_geo = load(ASSETS / "geckolib" / "models" / "entity" / "marax.geo.json") or {}
+    head = [cube for geometry in marax_geo.get("minecraft:geometry", []) for bone in geometry.get("bones", [])
+            if bone.get("name") == "head" for cube in bone.get("cubes", [])]
+    marax_eye = re.search(r'MARAX = entity\("marax",[^;]*?\.eyeHeight\(([0-9.]+)F\)', text(JAVA_ROOT / "concordance" / "spirits" / "Workers.java"))
+    if not marax_face or not head or not marax_eye or "default -> new double[] {spirit.getBbWidth() / 2.0, 0.3};" not in face_body \
+            or abs(float(marax_face.group(1)) - max(-cube["origin"][2] for cube in head)) > 1e-6 \
+            or abs(float(marax_face.group(2)) - (float(marax_eye.group(1)) - min(cube["origin"][1] for cube in head) / 16.0)) > 0.01:
+        err("ConcordanceGardenPactClientGameTests.face: Marax's face is sampled at his head's drawn front and chin (marax.geo.json's "
+            "head and his eye height), any other spirit's at its box's half width (the polish's review)")
 
 
 def check_spirit_facing(co):
@@ -22725,9 +22767,13 @@ def check_magic_ui(lang):
             or "creature instanceof PactSpiritEntity<?> spirit && PactSpiritRenderers.arriving(spirit)" not in shown \
             or "MagicPortraits.of(spirit.counterpart())" not in shown \
             or "spirit.body().arrive().animation().equals(gestures.getCurrentRawAnimation())" not in arriving \
-            or "!gestures.hasAnimationFinished()" not in arriving or "arriving(" in _java_body(renderers, "public boolean shouldRender("):
+            or "!gestures.hasAnimationFinished()" not in arriving or "arriving(" in _java_body(renderers, "public boolean shouldRender(") \
+            or "&& spirit.tickCount <= spirit.body().arrive().ticks();" not in arriving \
+            or "box.inflate(row.wide(), 0.0, row.wide()).expandTowards(0.0, row.above(), 0.0)" \
+            not in _java_body(renderers, "public static AABB standing(PactSpiritEntity<?> spirit)"):
         err("client/MagicPortrait.java: a pact spirit still arriving is drawn as it will stand (shown: its visual-only portrait, "
-            "PactSpiritRenderers.arriving read from its gesture's trigger), and the world draws its arrival as before")
+            "PactSpiritRenderers.arriving read from its gesture's trigger, within its arrival's length of coming into this "
+            "world), and the world draws its arrival as before; standing is its box widened and raised as its row says")
     for name in mu.MAGIC_SCREENS:
         text = (CLIENT_JAVA_ROOT / f"{name}.java").read_text(encoding="utf-8")
         if "new MagicButton(" not in text or "new MagicText(" not in text or "BookArt.Tab" in text or "BookArt.Paragraph" in text:
@@ -22923,19 +22969,28 @@ def check_roster_screen(co, lang):
     if "check(drawn.stream().anyMatch(text -> text.startsWith(card))" not in text(tests / "ConcordanceGardenPactClientGameTests.java"):
         err("ConcordanceGardenPactClientGameTests: Bathin's roster card draws his state short (\"Bathin Awaits answer\")")
     # The magic interfaces' unit 3 fixes (spec 1.1; CI's pictures: a card's tip was every sentence of its row, nine lines):
-    # a card's tip is its state's whole sentence and its fact's, together at most LIMITS["tip"] words and three lines, else
-    # its state's alone; every sentence stays its narration. The client test reads each card's tip before each shot.
+    # a card's tip is its state's whole sentence and its fact's, together at most LIMITS["tip"] words and spec 1.1's two
+    # lines at the wide tip's width, else its state's alone, short where whole it is over them (the polish's review), led by
+    # its kind where the card draws none (spec 2.14); every sentence stays its narration. The client test reads each card's
+    # tip before each shot.
     import magic_ui as mu
     card = screen.split("private final class Card extends AbstractWidget implements MagicScreen.Drawn {", 1)[-1]
-    if f"public static final int TIP_WORDS = {mu.LIMITS['tip']};" not in screen or "public static final int TIP_LINES = 3;" not in screen \
+    if f"public static final int TIP_WORDS = {mu.LIMITS['tip']};" not in screen or "public static final int TIP_LINES = 2;" not in screen \
             or "tip.addAll(first);" not in card or "if (!second.isEmpty() && first.size() + second.size() <= TIP_LINES" not in card \
-            or "&& MagicScreen.words(stateSentence.getString()) + MagicScreen.words(factSentence.getString()) <= TIP_WORDS) {" not in card \
+            or "&& MagicScreen.words(lead.getString()) + MagicScreen.words(factSentence.getString()) <= TIP_WORDS) {" not in card \
+            or "List<FormattedCharSequence> first = font.split(lead, MagicChip.WIDE_TIP);" not in card or "MagicChip.TIP_WIDTH" in card \
+            or "if (first.size() > TIP_LINES || MagicScreen.words(lead.getString()) > TIP_WORDS) {" not in card \
+            or 'Component brief = shownState.getString().equals(word.getString()) ? word : ui("row.state", word, shownState);' not in card \
+            or 'lead = kindInTip ? ui("row.title", shownKind, brief) : brief;' not in card \
+            or 'Component lead = kindInTip ? ui("row.title", shownKind, stateSentence) : stateSentence;' not in card \
+            or "boolean kindInTip = kind.getString().isEmpty() && !shownKind.getString().isEmpty()" not in card \
             or "details(row)" in card or "super(x, 0, width, height, words(row));" not in card \
             or "Component line = RosterGlance.factLine(row);" not in _java_body(screen, "private static Component factSentence("):
         err("client/RosterScreen.java: a card's tip is its state's sentence and its fact's within TIP_WORDS (spec 1.1's 20) and "
-            "TIP_LINES, else its state's alone, every sentence of its row its narration (the unit 3 fixes)")
+            "TIP_LINES (its 2) at the wide tip's width, else its state's alone, short where whole it is over them, led by its kind "
+            "where the card draws none, every sentence of its row its narration (the unit 3 fixes; the polish's review)")
     tips = _java_body(shots, "private static void tips(ClientGameTestContext context, String where)")
-    if f"private static final int TIP_WORDS = {mu.LIMITS['tip']};" not in shots or "private static final int TIP_LINES = 3;" not in shots \
+    if f"private static final int TIP_WORDS = {mu.LIMITS['tip']};" not in shots or "private static final int TIP_LINES = 2;" not in shots \
             or "tips(context, where);" not in reads or "if (tip.size() < 2 || tip.size() > 3 || lines > TIP_LINES || said > TIP_WORDS) {" not in tips \
             or "screen(client).tip(row.id())" not in tips:
         err("ConcordanceRosterClientGameTests: before each shot every card's tip is held to its words and lines (tips, the unit 3 fixes)")

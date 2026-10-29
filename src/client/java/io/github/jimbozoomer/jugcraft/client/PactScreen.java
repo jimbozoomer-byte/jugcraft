@@ -42,8 +42,9 @@ import org.jspecify.annotations.Nullable;
  * lines, every blocker as a lock line at the top, and the price pinned at the foot as item stacks, each short one marked
  * before Accept (PactAfford: display only; the server decides). At an empty perch whose owner may invite two or more
  * spirits it first lists them as cards (GC-01), every card whole above the footer for up to seven (chooserCards), each not
- * ready with its reason drawn under it where its card has room, else in its tip. Nothing is spent or agreed until Accept,
- * and the keyboard lands on the terms' first line, never on Accept.
+ * ready with its reason drawn under it where its card has room, else in its tip; an answer there, or that one is awaited,
+ * takes the title's row. Nothing is spent or agreed until Accept, and the keyboard lands on the terms' first line, never
+ * on Accept.
  * <p>
  * For a kept pact the header holds its service, its state, today's work as a gauge and the periods paid ahead as sockets;
  * the body its rows (what needs doing first), the matter its spirit raises (GC-05: the question and each answer as a
@@ -121,7 +122,12 @@ public class PactScreen extends MagicScreen implements MenuAccess<PactMenu> {
 	private int pips = -1;
 	private int priceRule = -1;
 	private Component heading = Component.empty();
-	/** What the header's portrait drew in the last frame (tests): "live", "standing" (a spirit still arriving), "sign" or "". */
+	/** Whether the chooser's title row holds an answer, or that one is awaited, in place of its heading (titleAnswer). */
+	private boolean titled;
+	/**
+	 * What the header's portrait drew in the last frame (tests): "live" (the spirit at the perch), "standing" (one still
+	 * arriving), "portrait" (the visual-only one of a page without the live spirit), "sign" or "".
+	 */
 	private String portrait = "";
 	// The body's pinned parts, while building.
 	private int top;
@@ -934,25 +940,20 @@ public class PactScreen extends MagicScreen implements MenuAccess<PactMenu> {
 	 * GC-01 (SG4): the chooser: each spirit its owner may invite, a card each (its portrait, its name on a plate, and ready
 	 * or not yet, a reason of at most four words under each not ready where its card has room); choosing one sends INVITE
 	 * with its index, and its visit begins: its beats, then its terms. Since the unit 3 fixes (CI's pictures: Marax's fourth
-	 * card ran under Close) every card stands whole above the footer, placed by {@link #chooserCards}.
+	 * card ran under Close) every card stands whole above the footer, placed by {@link #chooserCards}; since the polish's
+	 * review the answer, or that one is awaited, takes the title's row ({@link #titleAnswer}), so the cards keep the scroll.
 	 */
 	private void invite(PactStatePayload state) {
 		surface = Surface.CHOOSER;
 		heading = ui("short.invite").copy().withStyle(ChatFormatting.BOLD);
-		drew(heading.getString());
+		titled = titleAnswer(state);
+		if (!titled) {
+			drew(heading.getString());
+		}
 		ScreenRectangle area = chooserArea(layout);
 		openBody(area);
-		at = 0;
-		if (PactClient.waiting() || state.result().isPresent()) {
-			result(state);
-			if (controls.get("result") != null) {
-				controls.get("result").setX(area.left() + Math.max(0, (area.width() - controls.get("result").getWidth()) / 2));
-			}
-		}
 		boolean free = !PactClient.waiting();
-		// The cards share the room under the answer, when one is shown.
-		ScreenRectangle room = new ScreenRectangle(area.left(), area.top() + at, area.width(), Math.max(24, area.height() - at));
-		List<ScreenRectangle> places = chooserCards(state.patterns().size(), room);
+		List<ScreenRectangle> places = chooserCards(state.patterns().size(), area);
 		int notes = 0;
 		for (int i = 0; i < state.patterns().size(); i++) {
 			PactStatePayload.Choice choice = state.patterns().get(i);
@@ -973,8 +974,39 @@ public class PactScreen extends MagicScreen implements MenuAccess<PactMenu> {
 		footer(FOOTER_WIDEST, new String[] {"close"}, plate(ui("close"), ui("short.close"), this::onClose));
 	}
 
+	/**
+	 * The chooser's answer to the last invite, or that one is awaited (the polish's review: pinned over the cards it pushed a
+	 * second row of them under the scroll at 320x180): one line in the title's row in place of the heading, centred as the
+	 * heading is, short with its mark (the roster's title-row Verdict, cut with "…" where it needs more room) and its whole
+	 * sentence its tip and narration. Whether one is shown.
+	 */
+	private boolean titleAnswer(PactStatePayload state) {
+		ScreenRectangle row = chooserTitle(layout);
+		AbstractWidget line;
+		if (PactClient.waiting()) {
+			Component waiting = ui("waiting");
+			line = new MagicText(waiting, font, Math.min(row.width(), font.width(waiting) + 4), MagicTheme.LAVENDER, MagicTheme.DARK).maxLines(1);
+		} else if (state.result().isPresent()) {
+			PactStatePayload.Result result = state.result().get();
+			Component shown = PactGlance.of(result.message()).shown();
+			int need = MagicArt.Mark.CROSS.width + 8 + font.width(shown);
+			line = new Verdict(result.message(), shown, result.done(), font, Math.min(row.width(), need),
+					result.done() ? MagicTheme.GOOD : MagicTheme.WARN, true, true);
+		} else {
+			return false;
+		}
+		line.setPosition(row.left() + (row.width() - line.getWidth()) / 2, row.top() + 1);
+		onScreen("result", line, row);
+		return true;
+	}
+
 	private int titleY() {
 		return titleY(layout);
+	}
+
+	/** The chooser's title row in {@code layout}: from just above the title's line to the scroll, 8 in from the screen's sides. */
+	private static ScreenRectangle chooserTitle(MagicLayout layout) {
+		return new ScreenRectangle(8, titleY(layout) - 2, Math.max(40, layout.screenWidth() - 16), 16);
 	}
 
 	/** The chooser's title line in {@code layout}: near the top when compact, else where the full layout's header starts. */
@@ -1082,9 +1114,9 @@ public class PactScreen extends MagicScreen implements MenuAccess<PactMenu> {
 	 * as few rows as its width allows (each column at least {@value #CARD_CELL}), the rows as even as can be, the first the
 	 * longest, each centred; the largest card, with as many lines of its reason as fit (two, one, none), whose rows all
 	 * stand whole in the area, the spare height (up to 8) between them. Every rectangle lies inside {@code area} and none
-	 * overlaps another for one to seven cards at every size the client tests use; with no size that fits (an answer above
-	 * the cards on the smallest screen), the smallest size in its rows, running on below the area, and the body scrolls.
-	 * Pure: the client tests call it.
+	 * overlaps another for one to seven cards at every size the client tests use (the chooser's answer is in its title row,
+	 * titleAnswer, so the cards always have the whole scroll); with no size that fits (an area smaller than those), the
+	 * smallest size in its rows, running on below the area, and the body scrolls. Pure: the client tests call it.
 	 */
 	public static List<ScreenRectangle> chooserCards(int count, ScreenRectangle area) {
 		List<ScreenRectangle> out = new ArrayList<>();
@@ -1519,7 +1551,10 @@ public class PactScreen extends MagicScreen implements MenuAccess<PactMenu> {
 		pin("result", line);
 	}
 
-	/** Pins {@code widget} at the body's top, or, on a page without a pinned top (the chooser), at the scroll's start. */
+	/**
+	 * Pins {@code widget} at the body's top, or, on a page without a pinned top, at the scroll's start (the chooser's answer
+	 * is in its title row instead: titleAnswer).
+	 */
 	private void pin(String key, AbstractWidget widget) {
 		if (surface == Surface.CHOOSER || body != null) {
 			widget.setX(layout.text().left());
@@ -1606,7 +1641,10 @@ public class PactScreen extends MagicScreen implements MenuAccess<PactMenu> {
 	@Override
 	protected void extractChrome(GuiGraphicsExtractor g, int mouseX, int mouseY, float delta) {
 		if (surface == Surface.CHOOSER) {
-			MagicArt.title(g, font, heading, (width - font.width(heading)) / 2, titleY(), 132);
+			// An answer, or that one is awaited, holds the title's row in place of the heading (titleAnswer).
+			if (!titled) {
+				MagicArt.title(g, font, heading, (width - font.width(heading)) / 2, titleY(), 132);
+			}
 			portrait = "";
 			return;
 		}
@@ -1632,7 +1670,7 @@ public class PactScreen extends MagicScreen implements MenuAccess<PactMenu> {
 				creature = MagicPortrait.ofSign(sign);
 			}
 			MagicPortrait.draw(g, header.left() + 7, header.top() + 10, 34, 49, creature, sign, ended);
-			portrait = creature == null ? "sign" : MagicPortrait.shown(creature) != creature ? "standing" : "live";
+			portrait = creature == null ? "sign" : !liveSpirit ? "portrait" : MagicPortrait.shown(creature) != creature ? "standing" : "live";
 			int x = header.left() + 56;
 			int right = headerRight();
 			g.text(font, bold(name, right - tagRoom - x), x, header.top() + 19, MagicTheme.NAME, false);
@@ -1723,8 +1761,8 @@ public class PactScreen extends MagicScreen implements MenuAccess<PactMenu> {
 
 	/**
 	 * What the header's portrait drew in the last frame, for tests (the unit 3 fixes): "live" (the spirit at the perch),
-	 * "standing" (one still arriving, drawn as it will stand: MagicPortrait.shown), "sign" (its item) or "" (none: the
-	 * compact header, the chooser).
+	 * "standing" (one still arriving, drawn as it will stand: MagicPortrait.shown), "portrait" (the visual-only one, on a
+	 * page without the live spirit: MagicPortrait.ofSign), "sign" (its item) or "" (none: the compact header, the chooser).
 	 */
 	public String portrait() {
 		return portrait;

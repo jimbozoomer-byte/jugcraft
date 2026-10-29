@@ -44,7 +44,7 @@ mockups (kept with the session's design notes, not in the repository). Its answe
 | **A kept page that draws both a pending first task and its spirit's matter may draw that task's row** (at most 12 words, its act drawn short) beyond the kept page's budget of 45 (48 compact); its client shots allow that row's words (`firstTask()` in the garden client test). The spec measured the matter page without a first task; with Bathin's row cut from 18 words to 10 the page still draws about 55 in the composed picture | **Decided by the session, in answer to the owner's request for far less reading; reviewable at the checkpoint.** Not owner-accepted (the pact screens' review asked for the allowance to be dropped once the row was shorter; it cannot be without cutting the matter's or the last carry's words) |
 | **The chooser's budget grows with its cards** (spec 1.1's chooser row amended): 4 words (the title and Close) and 7 a card (a name, "Not yet" and a reason of at most 4 words), so 25 for three cards as the spec measured. With Marax a fourth card stands beside Stolas, Buer and Bathin wherever The Garden's Regard is understood: the chooser without a bed drew 20 words for three cards in CI, and his card not ready adds 7, about 27; each later unit's spirit adds a card of at most 7. `chooserWords()` in the garden client test reads the cards from the state | **Decided by the session (Marax's review), in answer to the owner's request for far less reading; reviewable at the checkpoint.** Not owner-accepted. The other way, a shorter reason on cards not ready, would leave a fourth not-ready spirit over 25 anyway |
 | **Unit 2: Jade shows a few short lines by default** on the pact perch, the Spirit Anchor, the spirits, Verdant Beds and living devices (at most five, each a glance with its mark or item), and **every line whole while Jade's details key is held** (sneak by default) | **Decided by the session, in answer to the owner's request for far less reading; reviewable at the checkpoint.** Not owner-accepted. Each short line narrates its whole sentence |
-| **Unit 2: a card's state is its row's own waiting reason, short** ("Awaits answer", "Following you", "Not loaded"), beside the mark of its icon, else the state's word | **Decided by the session** (spec 1.4 #3 names such states); the card's narration and tip keep every word of the row |
+| **Unit 2: a card's state is its row's own waiting reason, short** ("Awaits answer", "Following you", "Not loaded"), beside the mark of its icon, else the state's word | **Decided by the session** (spec 1.4 #3 names such states); the card's narration keeps every word of the row (its tip, since the fixes from CI's pictures below, its state's sentence and its fact's) |
 | **Unit 2: Resume, Cancel and Recover's icons** are the kit's turning arrows, the cross and the up arrow (spec 2.14 names End's cross and Suspend's bars only) | **Decided by the session**; each icon's message is its label, its tip names the card ("Resume Stolas") |
 
 ## What the first commit adds
@@ -438,7 +438,8 @@ The design's unit 2 (spec 4.6): the roster as cards, the chooser's shared pieces
   days" with the offering cycling once a second, "2/8 tasks today", "Carrying #3" with the carried item, "0/16
   delivered"), the kind at the card's foot, and its actions as the kit's icons at its top right: Suspend (two bars), End
   (a cross), Resume (a play triangle, since the review), Cancel (the cross), Recover (the up arrow). Every sentence of the
-  row stays its narration and its tip (hover or keyboard focus); an action's tip is one line naming the card ("End
+  row stays its narration (and was its tip, on hover or keyboard focus, until the fixes from CI's pictures below held the
+  tip to its state's sentence and its fact's); an action's tip is one line naming the card ("End
   Bathin...") and stays in its own card's band, its narration the whole hint. The footer: the page's arrows at the left,
   Refresh and Close at the right. The server's answer is a short line with its mark in the title row, beside the title
   ("Suspended", "Not on your roster now"), the whole sentence its narration and tip. A page of eight draws 62 words
@@ -671,9 +672,11 @@ themselves have not been compiled or run: nothing here was built in Minecraft (s
   fits; at 320x180, from five on, the small frame with its name plate over its foot. "Ready" or "Not yet" and its mark
   are always drawn; a reason with no room under its card is carried by its tip and narration (the server's whole
   sentence), a hover away.
-- **A roster card's tip is short**: its state's whole sentence and its fact's (at most 20 words and three lines in all),
-  else its state's alone. It had been every sentence of the row, nine lines over half the page. Every sentence of the row
-  stays the card's narration; a narrow card's kind, and a page's kinds dropped for its budget, are in the narration.
+- **A roster card's tip is short**: its state's whole sentence and its fact's (at most 20 words and, since the polish's
+  review below, two lines in all, as spec 1.1 says), else its state's alone, and a state sentence over those limits by
+  itself its short form ("Waiting: Not loaded"). It had been every sentence of the row, nine lines over half the page.
+  Every sentence of the row stays the card's narration; a card that draws no kind (a narrow card, a page's kinds dropped
+  for its budget) has its kind leading its tip ("Courier · ..."), as spec 2.14 says, and in its narration.
 - **A spirit's portrait is whole on its first beat.** While this client still draws a spirit's arrival (Marax grows from
   nothing, Buer rises from a small bud), the header's window draws it as it will stand (its visual-only portrait, playing
   its idle pose), then the real one once it has arrived. The world draws the arrival as before.
@@ -681,8 +684,7 @@ themselves have not been compiled or run: nothing here was built in Minecraft (s
   picture the cursor is parked where no control is and the mouse is made the client's last input; a picture named for a
   tip or a hover keeps its cursor.
 - **The facing pictures show each spirit whole, facing its speaker, with nothing before its face**: Buer's petals no
-  longer touch the top, and the perch's post no longer stands before Marax's face from the east (nor Buer's bed from the
-  west).
+  longer touch the top, and the perch's post no longer stands before Marax's face from the east.
 
 ### What changes
 
@@ -693,14 +695,14 @@ themselves have not been compiled or run: nothing here was built in Minecraft (s
   over its foot); a card's size is read from its rectangle's height, so the card draws what the placement gave it.
   `chooserArea(width, height, compact)` and `chooserFooter(...)` give the tests the scroll and footer; `tippedReasons()`
   names the cards whose reason is in their tip; `portrait()` says what the header's portrait drew ("live", "standing",
-  "sign").
+  "sign"; "portrait" for the visual-only one since the polish's review).
 - **`MagicPortrait.shown`** (client): a pact spirit still arriving is drawn as its visual-only portrait.
   **`PactSpiritRenderers`** is public, with `arriving(spirit)` (its gesture controller triggered with its arrival and not
   played out, within the gesture's length of its coming into this client's world) and `standing(spirit)` (its box widened
   and raised as its renderer's row says: where its body is drawn as it stands). Nothing the world draws changes.
-- **`RosterScreen`** (client): `TIP_WORDS` (20, spec 1.1) and `TIP_LINES` (3); a card's tip from its state's sentence
-  (for a card not loaded, its place's "not loaded" line) and its fact's (`RosterGlance.factLine`, the line `fact` draws
-  from); `tip(id)` for the tests.
+- **`RosterScreen`** (client): `TIP_WORDS` (20, spec 1.1) and `TIP_LINES` (3 in this commit; 2 since the polish's
+  review); a card's tip from its state's sentence (for a card not loaded, its place's "not loaded" line) and its fact's
+  (`RosterGlance.factLine`, the line `fact` draws from); `tip(id)` for the tests.
 - **Client tests:** `ConcordancePactClientGameTests`, `ConcordanceGardenPactClientGameTests` and
   `ConcordanceRosterClientGameTests` take every picture through `shot`, which first parks the cursor on a corner of the
   screen no control covers (asserted) and makes the mouse the last input (`park`), then gives the input back after the
@@ -726,7 +728,7 @@ themselves have not been compiled or run: nothing here was built in Minecraft (s
 |---|---|
 | The chooser's smaller cards are the kit's own small card frame (30x41, which its chains fit), not the portrait card scaled, so no pixel is resampled; on it the lock mark replaces the kit's padlock (14x17, which would hide its 20x29 window); at the smallest size its plate covers the frame's foot | **Decided by the session**, in answer to the cohort's seven cards; reviewable at the checkpoint |
 | A card keeps the portrait card while its row fits, before it keeps its reason's lines (a full card without reason before a small card with them) | **Decided by the session** |
-| A roster card's tip may take three lines (spec 1.1 says two): a long state sentence alone ("Upkeep: suspended for its upkeep: nothing is taken or lost, and an offering resumes it") takes three at the tip's 200 px; both sentences are kept only within 20 words and three lines | **Decided by the session** |
+| A roster card's tip keeps to spec 1.1's two lines at the wide tip's 280 px (`MagicChip.WIDE_TIP`), where every state sentence but one fits two lines; that one, a reservation waiting on a container not loaded (about 22 words), and any other over the limits by itself, is shown short in the tip ("Waiting: Not loaded"), the whole sentence in the narration; both sentences are kept only within 20 words and two lines | **Decided by the session** (the polish's review; this commit had allowed three lines at 200 px) |
 | A picture's parking also makes the mouse the client's last input for that picture (moving the mouse alone leaves the keyboard's in 26.3: `MouseHandler` sets it only on a click), so a keyboard-focus tip (the roster's first card, Refresh) clears; the input is given back after | **Decided by the session** |
 | A facing picture's camera flies (the player's abilities, for the frozen picture only) along the speaker's bearing; it may look down up to 45 degrees where a block stands before the face (Marax's west picture, over Buer's bed, about 33 degrees in a port of the yard) | **Decided by the session** |
 
@@ -741,10 +743,11 @@ themselves have not been compiled or run: nothing here was built in Minecraft (s
   flight in.
 - A spirit whose arrival this client never drew (its perch off the screen) is drawn live once its arrival's length has
   passed; during its arrival the portrait plays the visual-only spirit's idle pose, not its live gestures.
-- A state sentence longer than the tip's limits is still shown whole, alone: the longest a card can have, a reservation
-  waiting on a container not loaded, runs to about 22 words in four lines (no client test's row has it).
-- With an answer shown above seven cards on a 320x180 screen the cards no longer fit whole, and the scroll scrolls (as
-  every chooser did before).
+- A state sentence longer than the tip's limits is shown short in the tip since the polish's review ("Waiting: Not
+  loaded"), whole only in the narration (no client test's row has the longest, a reservation waiting on a container not
+  loaded).
+- An answer shown above the cards on a 320x180 screen pushed a second row of five to seven under the scroll; since the
+  polish's review the answer is in the title row instead, and the cards keep the whole scroll.
 - The composed pictures are a port of the chooser's geometry to the generated files, not the game's drawing.
 
 ### Verification (these fixes)
@@ -782,8 +785,107 @@ Run locally, all passing (none of it in CI, and nothing in Minecraft):
   (each card's budget is 7, the title and Close 4).
 - **The facing camera's search run in a port of the yard** (the perch's outline, the beds and their crops as boxes,
   default field of view and window): Buer framed from 3 blocks and Bathin from 2.75, a level look; Marax from 4 blocks
-  (from the east lifted a quarter, over the perch's post) and from the west 3.5 blocks back and 1.75 up, looking down
-  about 33 degrees over Buer's bed, his face's point inside the bed not looked for.
+  and from the west 3.5 blocks back and 1.75 up, looking down about 33 degrees over Buer's bed, his face's point inside
+  the bed not looked for. The polish's review found two faults this port missed: from the west Buer's and Bathin's
+  cameras put the player's feet in Buer's bed (the client pushes a player out of a block, so the flight never arrived and
+  the test would have timed out), and from the east the perch's crossbar still hid the lower part of Marax's face, which
+  is drawn ahead of his box; the corrected search is below.
+
+### Fixes from the polish's review
+
+A review of these fixes (two reviews, verified against the 26.3 sources, GeckoLib 5.5.7's source and ports of the
+camera and the tips' wrapping) confirmed seven faults, each fixed here in the same shared code. Like the fixes above,
+none of this has been compiled or run: the last client run is CI run 40820647569's (all 16 client shards green on
+3c2d36b0f), from before both.
+
+#### What the player sees
+
+- **The chooser's answer sits in its title row.** An answer to an invite, or "He considers your answer...", is one line in
+  place of "Invite a spirit", centred, short with its mark (the whole sentence its tip and narration). It had been pinned
+  over the cards, so at 320x180 with five to seven spirits a second row ran under the scroll; the cards now keep the whole
+  scroll at every size.
+- **A roster card's tip is at most two lines**, as spec 1.1 says, at most 20 words: wrapped at the wide tip's 280 px, a state
+  sentence and its fact's while both fit; else the state's alone; and a state sentence over those limits by itself (a
+  reservation waiting on a container not loaded, about 22 words) its short form, "Waiting: Not loaded". A card that draws
+  no kind (a narrow card at 320 wide, a page that drops its kinds for its budget, a card short of room) starts its tip
+  with it ("Courier · ..."), as spec 2.14 says. Every sentence of the row stays the card's narration.
+
+#### What changes
+
+- **`PactScreen`** (client): `titleAnswer` pins the answer (the roster's one-line `Verdict`, done in green-yellow,
+  refused in amber, with vanilla's shadow) or the waiting line (a one-line `MagicText` in lavender) to the chooser's
+  title row (`chooserTitle`, from just above the title to the scroll), centred; `extractChrome` skips the heading while it
+  is shown (`titled`); `chooserCards` is given the whole scroll. `portrait()` reports "portrait" for the visual-only
+  spirit of a page without the live one, so "live" means only the spirit at the perch.
+- **`RosterScreen`** (client): `TIP_LINES` is 2 and the tip wraps at `MagicChip.WIDE_TIP`; the short state form and the
+  kind's lead as above; the class, `TIP_LINES`, `CardSide` and `Card` javadocs say what the tip now holds.
+- **`ConcordanceGardenPactClientGameTests`:** `camera` skips any place where the standing player's box meets a block
+  (`noCollision` of `getDimensions(Pose.STANDING).makeBoundingBox(feet).deflate(1.0E-7)`, as
+  `Player.canPlayerFitWithinBlocksAndEntitiesWhen` asks): from the west Buer's and Bathin's cameras had put the player's
+  feet in Buer's bed, and the client pushes a player out of a block (`LocalPlayer.moveTowardsClosestSpace`), so the
+  flight never arrived and the wait would have timed out at Buer's west picture. `face(spirit, id)` says where each
+  spirit's face is drawn: Marax's head's front 19/16 ahead of his middle and his chin 0.34 below his eyes (his model), any
+  other spirit its box's half width and 0.3; the later garden spirits add theirs. `refusedInvite`, after Marax's chooser
+  with nothing planted, resizes to 320x180, sends an invite one past the chooser's list (the server answers "Not possible
+  here now" and keeps the chooser), waits for the refusal in the title row and holds every card in view.
+- **`ConcordanceRosterClientGameTests`:** `TIP_LINES` is 2.
+- **Audits:** `check_pact_screen` (`titleAnswer` and its one line held to its row, the heading skipped, the cards given the
+  whole scroll; `refusedInvite`; the states `portraitWhole` accepts; the portrait record; the camera's test of the player's
+  box and its face sampling, Marax's face held to `marax.geo.json`'s head and his eye height in `Workers`),
+  `check_magic_ui` (`arriving`'s window of its arrival's length, `standing`'s widened and raised box) and
+  `check_roster_screen` (two lines, the wide tip, the short form, the kind's lead).
+- **No payload, request, server decision, word or sprite changes**; no generator was needed.
+
+#### Decisions
+
+| Decision | Status |
+|---|---|
+| The chooser's answer takes the heading's place in its title row, centred, in the roster's title-row colours, rather than smaller cards under it | **Decided by the session** (the review's proposal) |
+| A card that draws no kind starts its tip with "kind · " (the row title's separator), the kind's words counted toward the 20 | **Decided by the session**; spec 2.14 puts a narrow card's kind in its tip, the form is the session's |
+| The garden test's refused invite is one past the chooser's list (the server's refusal of a choice it did not list, as when the list changes under a click): a not-ready card's own invite opens that spirit's offer with what it lacks instead | **Decided by the session** |
+
+#### Known limits
+
+- **Not compiled or run in Minecraft here**; the new checks (`refusedInvite`, the camera's box test) have not run.
+- On the chooser an answer appears only after a refusal of the request itself (a changed list, a request too fast, terms
+  changed): a not-ready card's invite is answered by that spirit's offer, not on the chooser.
+- An answer without a short form wider than the screen less 16 is cut with "…" in its row (the chooser's own answers
+  all have one, the widest "His terms changed: read them again", 195 px with its mark).
+- At 280 px a roster tip spans most of a 320-wide screen, though never more than two lines.
+- Marax's face is sampled from numbers read off his model (the audit holds them to it); a later spirit drawn ahead of its
+  box needs its own entry in `face`.
+
+#### Verification (the polish's review)
+
+- No generator was run (no word, sprite or table changed). `python3 tools/owner_art.py --check`, `python3 -B
+  tools/check_mod_data.py` (PASS), `python3 scripts/check_repository.py`, `python3 tools/concordance_journey.py --check`,
+  `python3 tools/concordance_economy.py` (gaining cycles: none), `python3 tools/check_icon_maps.py`, `node --test
+  tools/world-designer/model.test.cjs`, `python3 -m unittest discover -s scripts/tests` and `git diff --check`, all
+  passing; the four changed Java files parse.
+- The audits' mutations, each on a scratch copy: 34 made, 34 caught (the answer pinned over the cards, the cards given
+  the room under it, the title row's line on many lines or not held to its row, the heading drawn under it; the refused
+  invite not walked, not at 320x180, an index in the list, its refusal not waited for, its cards not held in view;
+  `portraitWhole` accepting the visual-only portrait, the portrait record "live" for it; `arriving` without its window,
+  `standing` not raised or not widened; the camera blind to the player's box, its box crouched or at the eyes, the face
+  sampled inside the box or without its chin, Marax's front or chin off his model, any other spirit's face off its box;
+  three tip lines in the screen or the test, the narrow tip's width for either sentence, no short form, the limits not
+  read, the short form the bare word, no kind's lead, the kind leading where it is drawn, the fact weighed against the
+  state alone).
+- Every call added was read in the decompiled 26.3 sources or the repository's own uses: `noCollision(Entity, AABB)`,
+  `LivingEntity.getDimensions(Pose)`, `EntityDimensions.makeBoundingBox(Vec3)` and `AABB.deflate` (as
+  `Player.canPlayerFitWithinBlocksAndEntitiesWhen` calls them; the mirror has no `CollisionGetter` or
+  `EntityDimensions` source of its own), `LocalPlayer.moveTowardsClosestSpace`, `PactMenu.receive` and `invite` (a choice
+  under eight past the list answered "not offered", the chooser kept), `PactClient.request`, `lastAnswer` and
+  `waiting`. Nothing compiled.
+- **The camera's corrected search in the review's port of the yard:** Buer and Bathin from the west lifted a block
+  (looking down about 11 degrees) clear of Buer's bed, every other side as before; Marax from the east 4 blocks back and
+  1.25 up (about 24 degrees), clear of the crossbar to his chin, south, north and west as before.
+- **The chooser composed from the generated files with its answer in the title row** (the earlier port with
+  `titleAnswer`): five and seven cards with "Not possible here now", "His terms changed: read them again" and the waiting
+  line, at 427x240, 320x180, 480x270 and 320x240: every card whole above the footer and the line inside its row.
+- **The tips' wrapping in a port with the font's advances** (`tools/magic_ui.py` `ADVANCE`): at 280 px every state
+  sentence but the reservation's fits two lines and 20 words by itself; with a kind before it, "Not yet claimed" (a
+  construct's) and "Without its place: Its place keeps it no longer" also go over and take their short form.
 
 ## Known limits
 

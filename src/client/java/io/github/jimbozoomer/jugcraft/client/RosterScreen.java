@@ -41,13 +41,14 @@ import org.jspecify.annotations.Nullable;
  * colour alone), one fact of at most four words with its item, the kind, and its actions as icons. Every sentence of the
  * row stays whole as the card's narration: its state and why it waits, its service, place and whether it is loaded, its
  * task and next obligation; its tip (hover or keyboard focus) is its state's whole sentence and its fact's, at most
- * {@value #TIP_WORDS} words (spec 1.1; the unit 3 fixes: every sentence covered half the page). The actions: suspend
+ * {@value #TIP_WORDS} words and {@value #TIP_LINES} lines (spec 1.1; the unit 3 fixes: every sentence covered half the
+ * page), led by its kind where the card draws none (spec 2.14). The actions: suspend
  * (two bars), resume, end (a cross, which asks first, the keyboard on Keep it), cancel and recover; each sends one
  * bounded request through {@link RosterClient}, and the server's answer, a refusal included, is shown short with its mark (PactScreen.Verdict) in
  * the title row and read aloud whole (the switched-off note and the opening line sit there too, never pushing the cards).
  * Eight cards a page (Page Up and Page Down, or the footer's plates, turn it; how many more are not listed sits between
  * them and Refresh), six or fewer on a screen too short for four rows of cards (spec 2.14: six at 320x180); a page that
- * would draw over its 70 words drops its cards' kinds (each stays in its card's narration). Every card is one focusable, narrated
+ * would draw over its 70 words drops its cards' kinds (each stays in its card's tip and narration). Every card is one focusable, narrated
  * control and every action a button, which the mouse presses through its card: Tab and Shift+Tab move, Enter or Space
  * presses, Esc closes. It fits the smallest GUI (ScreenKit.Fitted; ScreenFitClientGameTests) and, an in-game screen, draws
  * subtitles over itself (MagicScreen). No text box, chat command, vanilla Dialog or GuiLib, and no second inventory: cargo
@@ -64,18 +65,19 @@ public class RosterScreen extends MagicScreen {
 	/** A card's text starts this far in (after its portrait); its actions sit this far from its right edge. */
 	private static final int TEXT_X = 37;
 	private static final int ACTION_X = 19;
-	/** A card under this wide draws the narrow card (spec 2.14): its name regular, its actions stacked, its kind in its narration. */
+	/** A card under this wide draws the narrow card (spec 2.14): its name regular, its actions stacked, its kind in its tip and narration. */
 	private static final int NARROW_CARD = 180;
 	/** A card's height: four rows a page where the screen is tall enough, never under the portrait frame's 41 and a rim. */
 	private static final int CARD_MIN = 42;
 	private static final int CARD_MAX = 48;
 	/**
-	 * A card's tip (spec 1.1, the unit 3 fixes): its state's whole sentence and its fact's, together at most this many words
-	 * and lines at the tip's width, else its state's alone, always whole (nearly every state is within both; the longest, a
-	 * reservation waiting on a container not loaded, runs to about 22 words in four lines).
+	 * A card's tip (spec 1.1: at most two lines and twenty words; the unit 3 fixes and the polish's review): its state's whole
+	 * sentence and its fact's, together at most this many words and lines at the wide tip's width (MagicChip.WIDE_TIP), else
+	 * its state's alone; a state sentence over them alone (a reservation waiting on a container not loaded, about 22 words) is
+	 * its short form ("Waiting: Not loaded"). Where the card draws no kind, the kind leads it, its words counted.
 	 */
 	public static final int TIP_WORDS = 20;
-	public static final int TIP_LINES = 3;
+	public static final int TIP_LINES = 2;
 	/** The title row's and the footer's band: the cards' dark purple at 85% (C8). */
 	private static final int BAND = 0xD8170F24;
 	/** A row's actions, in the order their keys follow its card. */
@@ -653,7 +655,7 @@ public class RosterScreen extends MagicScreen {
 	}
 
 	/**
-	 * A card's own tip (every sentence of its row; the unit's review, C4): beside the card toward the other column, as far
+	 * A card's own tip (its state's sentence and its fact's; the unit's review, C4): beside the card toward the other column, as far
 	 * as the screen allows (where it has no room it overlaps the card, as little as it can), its top at the card's, and
 	 * always whole on the screen (a tall tip never starts above it).
 	 */
@@ -673,10 +675,11 @@ public class RosterScreen extends MagicScreen {
 	/**
 	 * One row as a relic card (spec 2.14): the gold frame and its purple well; the portrait in the gilded card frame; the
 	 * name (bold, regular on a narrow card); the state's mark and a few words; one fact with its item; the kind at its foot
-	 * (on a narrow card, or on a page over its budget, in its narration). It takes the keyboard so the narrator reads the
-	 * row as one, every word of it; its tip is its state's whole sentence and its fact's (at most {@value #TIP_WORDS} words,
-	 * else the state's alone); its actions are the keys after it, and the mouse over one reaches the action, not the card.
- * A word too long for its room loses, in turn, the kind beside it, its item, and only
+	 * (on a narrow card, or on a page over its budget, in its tip and narration). It takes the keyboard so the narrator reads
+	 * the row as one, every word of it; its tip is its state's whole sentence and its fact's (at most {@value #TIP_WORDS} words
+	 * and {@value #TIP_LINES} lines, else the state's alone, short where whole it is over them), led by its kind where it draws
+	 * none; its actions are the keys after it, and the mouse over one reaches the action, not the card.
+	 * A word too long for its room loses, in turn, the kind beside it, its item, and only
 	 * then its end ("…", and {@link #cut()} says so).
 	 */
 	private final class Card extends AbstractWidget implements MagicScreen.Drawn {
@@ -735,17 +738,27 @@ public class RosterScreen extends MagicScreen {
 			String drawnFact = MagicArt.fit(font, shownFact.shown().getString(), factRoom);
 			this.text = String.join(" ", List.of(drawnName, drawnState, drawnFact, kind.getString())).trim().replaceAll(" +", " ");
 			// Its tip (spec 1.1; the unit 3 fixes, CI's pictures: every sentence of the row was nine lines over half the page):
-			// its state's whole sentence, then its fact's, while the two keep to TIP_WORDS and TIP_LINES; else its state's alone.
-			// Every sentence of the row stays its narration (its message).
+			// its state's whole sentence, then its fact's, while the two keep to TIP_WORDS and TIP_LINES at the wide tip's width;
+			// else its state's alone, and a state sentence over them alone its short form, "Waiting: Not loaded" (the polish's
+			// review). Where the card draws no kind (narrow, a page over its budget, no room) the kind leads it, as spec 2.14
+			// says, its words counted. Every sentence of the row stays its narration (its message).
 			Component stateSentence = away ? row.place().getString().isEmpty() ? stateWord(RosterStatePayload.UNLOADED)
 					: ui("row.unloaded", row.place()) : said(row);
+			Component word = away ? stateWord(RosterStatePayload.UNLOADED) : stateWord(row.icon());
+			Component brief = shownState.getString().equals(word.getString()) ? word : ui("row.state", word, shownState);
+			boolean kindInTip = kind.getString().isEmpty() && !shownKind.getString().isEmpty() && !shownKind.getString().equals(shownName.getString());
+			Component lead = kindInTip ? ui("row.title", shownKind, stateSentence) : stateSentence;
+			List<FormattedCharSequence> first = font.split(lead, MagicChip.WIDE_TIP);
+			if (first.size() > TIP_LINES || MagicScreen.words(lead.getString()) > TIP_WORDS) {
+				lead = kindInTip ? ui("row.title", shownKind, brief) : brief;
+				first = font.split(lead, MagicChip.WIDE_TIP);
+			}
 			Component factSentence = factSentence(row);
-			List<FormattedCharSequence> first = font.split(stateSentence, MagicChip.TIP_WIDTH);
-			List<FormattedCharSequence> second = factSentence.getString().isEmpty() ? List.of() : font.split(factSentence, MagicChip.TIP_WIDTH);
+			List<FormattedCharSequence> second = factSentence.getString().isEmpty() ? List.of() : font.split(factSentence, MagicChip.WIDE_TIP);
 			tip.addAll(first);
-			tipText.add(stateSentence.getString());
+			tipText.add(lead.getString());
 			if (!second.isEmpty() && first.size() + second.size() <= TIP_LINES
-					&& MagicScreen.words(stateSentence.getString()) + MagicScreen.words(factSentence.getString()) <= TIP_WORDS) {
+					&& MagicScreen.words(lead.getString()) + MagicScreen.words(factSentence.getString()) <= TIP_WORDS) {
 				tip.addAll(second);
 				tipText.add(factSentence.getString());
 			}

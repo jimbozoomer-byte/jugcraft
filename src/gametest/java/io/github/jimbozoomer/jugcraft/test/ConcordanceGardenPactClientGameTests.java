@@ -92,6 +92,7 @@ import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.Pose;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
@@ -1620,10 +1621,12 @@ public class ConcordanceGardenPactClientGameTests implements FabricClientGameTes
 	 * east, Buer's bed from the west): a facing picture's camera, the world frozen and the screen closed. Along the bearing
 	 * from the spirit to {@code speaker} (the cell the test spoke from, so the picture still shows it facing them), as far
 	 * back and as high as its drawn body needs (PactSpiritRenderers.standing) to stand whole in the picture with a tenth's
-	 * margin at each edge, and from where no block's outline stands between the camera and its face: its eyes and a little
-	 * below them, at its middle and at its front (a point inside a block cannot be seen from anywhere and is not looked for).
-	 * A level look is tried first, a steeper one only where something stands before its face. Asserted found; the player
-	 * flies there, and {@link #land} puts them back.
+	 * margin at each edge, and from where no block's outline stands between the camera and its face: its eyes and its chin,
+	 * at its middle and at its drawn front ({@link #face}; a point inside a block cannot be seen from anywhere and is not
+	 * looked for). A level look is tried first, a steeper one only where something stands before its face; never from where
+	 * the standing player's box meets a block (the polish's review: from the west the camera put the player's feet in Buer's
+	 * bed, the client pushed them out of it, and the flight never arrived). Asserted found; the player flies there, and
+	 * {@link #land} puts them back.
 	 */
 	private static void frame(ClientGameTestContext context, TestDedicatedServerContext server, BlockPos perch, String id, Vec3 speaker,
 			String side) {
@@ -1669,8 +1672,9 @@ public class ConcordanceGardenPactClientGameTests implements FabricClientGameTes
 		double tall = FRAME_FILL * Math.tan(Math.toRadians(client.options.fov().get() / 2.0));
 		double wide = tall * client.getWindow().getWidth() / Math.max(1, client.getWindow().getHeight());
 		List<Vec3> face = new ArrayList<>();
-		for (double forward : new double[] {0.0, spirit.getBbWidth() / 2.0}) {
-			for (double below : new double[] {-0.05, 0.3}) {
+		double[] drawn = face(spirit, id);
+		for (double forward : new double[] {0.0, drawn[0]}) {
+			for (double below : new double[] {-0.05, drawn[1]}) {
 				Vec3 point = spirit.getEyePosition().add(bearing.scale(forward)).subtract(0.0, below, 0.0);
 				BlockPos cell = BlockPos.containing(point);
 				VoxelShape shape = client.level.getBlockState(cell).getShape(client.level, cell);
@@ -1686,7 +1690,9 @@ public class ConcordanceGardenPactClientGameTests implements FabricClientGameTes
 					Vec3 from = new Vec3(at.x + bearing.x * (spoke + back), speaker.y + eye + lift, at.z + bearing.z * (spoke + back));
 					Vec3 look = centre.subtract(from);
 					double pitch = -Math.toDegrees(Math.atan2(look.y, look.horizontalDistance()));
-					if (pitch < -10.0 || pitch > steepest || !frames(from, look, body, tall, wide) || !seen(client, from, face)) {
+					if (pitch < -10.0 || pitch > steepest || !frames(from, look, body, tall, wide) || !seen(client, from, face)
+							|| !client.level.noCollision(client.player,
+									client.player.getDimensions(Pose.STANDING).makeBoundingBox(new Vec3(from.x, from.y - eye, from.z)).deflate(1.0E-7))) {
 						continue;
 					}
 					float yaw = Mth.wrapDegrees((float) (Mth.atan2(look.z, look.x) * Mth.RAD_TO_DEG) - 90.0F);
@@ -1695,6 +1701,23 @@ public class ConcordanceGardenPactClientGameTests implements FabricClientGameTes
 			}
 		}
 		return null;
+	}
+
+	/**
+	 * Where {@code spirit}'s face is drawn, for its facing pictures: {forward, below}, how far ahead of its middle its face's
+	 * front stands and how far below its eyes its chin (the polish's review: Marax's head reaches past his box, so the face
+	 * sampled inside it was clear while the perch's crossbar hid his chin from the east). From each spirit's model; one not
+	 * listed, its box's half width and 0.3. Each later garden spirit adds its own.
+	 */
+	private static double[] face(PactSpiritEntity<?> spirit, String id) {
+		return switch (id) {
+			// GC-06 unit 3: marax.geo.json's head runs from 9 to 19 px ahead of him and from 10.5 px up; his eyes are at 1.0.
+			case MARAX -> new double[] {19.0 / 16.0, 0.34};
+			// GC-07 unit 4
+			// GC-08 unit 5
+			// GC-09 unit 6
+			default -> new double[] {spirit.getBbWidth() / 2.0, 0.3};
+		};
 	}
 
 	/** Whether every corner of {@code body} lies inside the picture's middle, seen from {@code from} looking along {@code look}. */
@@ -2397,8 +2420,36 @@ public class ConcordanceGardenPactClientGameTests implements FabricClientGameTes
 		reasons(context);
 		budget(context, chooserWords(context), "the chooser with nothing planted");
 		shot(context, "jugcraft_garden_marax_nothing_grows");
+		refusedInvite(context);
 		context.getInput().pressKey(InputConstants.KEY_ESCAPE);
 		context.waitForScreen(null);
+	}
+
+	/**
+	 * The polish's review (A): on the chooser at 320x180, an invite the server refuses (an index past its list, as when the
+	 * list changes under a click) answers in the title row, the chooser kept and every card still wholly in view above the
+	 * footer (an answer pinned over the cards had pushed a second row under the scroll); the window put back after.
+	 */
+	private static void refusedInvite(ClientGameTestContext context) {
+		int width = context.computeOnClient(client -> client.getWindow().getWidth());
+		int height = context.computeOnClient(client -> client.getWindow().getHeight());
+		context.getInput().resizeWindow(320, 180);
+		context.waitTicks(10);
+		context.waitFor(client -> client.gui.screen() instanceof PactScreen, WAIT);
+		settle(context);
+		int before = context.computeOnClient(client -> PactClient.lastAnswer());
+		int sent = context.computeOnClient(client -> PactClient.request(screen(client).getMenu(), PactRequestPayload.INVITE,
+				PactClient.state().patterns().size()));
+		check(sent > 0, "An invite past the chooser's list is sent");
+		context.waitFor(client -> PactClient.lastAnswer() > before && !PactClient.waiting() && PactClient.state() != null, WAIT);
+		boolean refused = context.computeOnClient(client -> PactClient.state().mode() == PactStatePayload.INVITE
+				&& PactClient.state().result().filter(result -> !result.done()).isPresent());
+		check(refused, "An invite past the chooser's list is refused, the chooser kept");
+		context.waitFor(client -> screen(client).control("result") instanceof PactScreen.Verdict verdict && verdict.refused(), WAIT);
+		fits(context, "the chooser at 320x180 after a refused invite");
+		cardsWhole(context, "the chooser at 320x180 after a refused invite");
+		context.getInput().resizeWindow(width, height);
+		context.waitTicks(10);
 	}
 
 	/**
