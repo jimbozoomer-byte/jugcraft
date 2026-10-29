@@ -359,6 +359,26 @@ No numbered release yet. Entries on feature branches remain proposed until their
 - **Checked:** all 40 Herobrine game tests and 393 scheduler assertions pass natively, and automated rendered and two-client tests pass. CI and a human playtest have not run yet.
 - **His look:** the game's own default player texture, read at run time, under a full-bright eyes layer of four white pixels. No game asset is copied.
 
+### Unmerged: Guns, slice 16B (two microjet guns and a grapeshot gun)
+- **Three more guns** from the owner's own GeckoLib models and animations, from their upload of 23 October: the **Comet Pistol** (the owner's Gyrojet Pistol), held in one hand, six **flying Microjets** a magazine that jet flame from its slide; the **Narwhal Lance** (the Bomb Lance), a whaler's lance carried at the hip that fires one Microjet at a time, the fastest and furthest-flying; and the **Halibut Gun** (the Floundergat), a grapeshot gun of four shells loaded a shell at a time that **throws back** what it hits, and its shooter.
+- Record: [guns.md, slice 16B](docs/features/guns.md#slice-16b-two-microjet-guns-and-a-grapeshot-gun).
+
+### Unmerged: Guns, slice 16A (a silenced pistol, a burst rifle and a repeater)
+- **Three iron guns** from the owner's own GeckoLib models and animations, from their upload of 23 October: the **Hush Pistol** (the owner's Mokova), held in one hand and silenced the length of its barrel, eight muffled light rounds a magazine; the **Salvo Rifle** (the Kalaskah), which fires a **burst of three** rifle rounds to a pull from a magazine of 18; and the **Highball Repeater** (the Saketini Ironport), the Highball Rifle made over into a repeater of six heavy rounds loaded through a lid a round at a time, as true from the hip as aimed, piercing 2 points of armour.
+- **Converter:** a bone the owner turned that an animation turns about another axis keeps its turn, so the Repeater's cap flips open about its own hinge as the owner made it. The check of the owner's parts compares a turn's origin only where it moves anything.
+- Record: [guns.md, slice 16A](docs/features/guns.md#slice-16a-a-silenced-pistol-a-burst-rifle-and-a-repeater).
+
+### Unmerged: Guns, flying microjets and heavy guns that slow their holder
+- The **Maelstrom Gun**'s microjets now fly to their mark as little rockets, at the owner's 1.5 blocks a tick, instead of striking at once. Each stops at the first creature or block in its way or at the end of the gun's range, and hits as a bullet does; none breaks a block.
+- Eight heavy guns slow whoever holds them in their main hand, at the owner's numbers: the **Stoker**, **Borer** and **Cloudburst Gun** to 0.8 of their speed, the **Thresher** to 0.85, the **Maelstrom Gun** and **Geode Cutter** to 0.9, and the **Earthmover** and **Harrow** to 0.95. The tooltip shows it.
+- Record: [guns.md, flying microjets and heavy guns that slow their holder](docs/features/guns.md#follow-up-flying-microjets-and-heavy-guns-that-slow-their-holder).
+
+### Unmerged: Guns that push their shooter back
+- 27 guns now push their shooter back with each shot, at the owner's strengths: most shotguns a step or two (0.1 to 0.5 blocks a tick), the **Bulldog Pistol** and the **Stoker** harder, and the **Goshawk Revolver** and the **Flatboat Gun** several blocks.
+- The push is level, away from where the shooter looks, and brings them back up to the gun's strength rather than adding to it, so holding the trigger never drives them faster; a shot at the ground does not lift them. Knockback resistance lessens it.
+- Their tooltips say so.
+- Record: [guns.md, guns that push their shooter back](docs/features/guns.md#follow-up-guns-that-push-their-shooter-back).
+
 ### Unmerged: Guns, armour piercing and knockback for the older guns
 - 46 of the guns built before slice 15 take the owner's armour piercing, knockback or both: 27 pierce armour (up to 7 points, the Lament Rifle's, the Murmur SMG's and the Reverb's) and 24 knock back what they hit further. Against a creature without armour their damage is as before.
 - The **Flatboat Gun** takes the owner's knockback of 8 and throws what it hits; the **Caisson Pistol**'s arc now pierces a point of armour.

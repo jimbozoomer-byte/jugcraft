@@ -30,6 +30,7 @@ import net.minecraft.core.particles.BlockParticleOption;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.protocol.game.ClientboundSetEntityMotionPacket;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -106,6 +107,9 @@ import org.jspecify.annotations.Nullable;
  * <li>Slice 15D: a burst gun ({@link JugcraftGuns#BURSTS}) fires its burst a shot at a time as the client asks, each
  * shot spending trigger credit as any gun's does; its credit refills at a burst per {@link JugcraftGuns.Burst#cycle},
  * and banks a whole burst.</li>
+ * <li>The flying-microjets follow-up: a jet gun ({@link JugcraftGuns#JET}, the Maelstrom Gun) fires a {@link Microjet}
+ * from the eye along the look, at the gun's jet speed; it flies, holding that speed, to the first creature the shooter
+ * may strike or the first block within the gun's range, and lands a bullet's hit there ({@link #jet}, {@link #land}).</li>
  * </ul>
  */
 public final class GunShots {
@@ -214,6 +218,7 @@ public final class GunShots {
 			case JugcraftGuns.ARC -> arc(level, player, spec, spread, hand, JugcraftGuns.bleed(gun), JugcraftGuns.hitEffect(gun),
 					JugcraftGuns.piercing(gun));
 			case JugcraftGuns.ROCKET -> rocket(level, player, gun, spec, spread);
+			case JugcraftGuns.JET -> jet(level, player, gun, spec, spread);
 			default -> shoot(level, player, gun, spec, spread);
 		}
 		if (!free) {
@@ -221,6 +226,7 @@ public final class GunShots {
 		}
 		player.awardStat(Stats.ITEM_USED.get(gun));
 		player.gameEvent(GameEvent.PROJECTILE_SHOOT);
+		kick(player, JugcraftGuns.kick(gun));
 		Vec3 eye = player.getEyePosition();
 		// The shooter's client plays its own shot; everyone else hears it here.
 		level.playSound(player, eye.x, eye.y, eye.z, JugcraftGuns.sound("guns." + gun.name() + ".fire"), SoundSource.PLAYERS,
@@ -614,19 +620,29 @@ public final class GunShots {
 				.getOrThrow(JugcraftGuns.BULLET), shooter, shooter);
 		// Guns fire faster than the half second a creature is shielded after a hit; the bullet damage type is tagged
 		// minecraft:bypasses_cooldown, so each shot counts.
-		hits.forEach((target, dealt) -> {
-			if (target.hurtServer(level, source, pierced(target, dealt, pierce))) {
-				if (knockback > 0.0F) {
-					target.knockback(knockback, shooter.getX() - target.getX(), shooter.getZ() - target.getZ(), source, dealt);
-				}
-				if (ignites) {
-					target.igniteForSeconds(BURN_SECONDS);
-				}
-				bleed(target, bleed, shooter, random);
-				afflict(target, effect, shooter, random);
-			}
-		});
+		hits.forEach((target, dealt) -> land(level, target, source, dealt, shooter, ignites, knockback, pierce, bleed, effect, random));
 		smoke(level, eye, look);
+	}
+
+	/**
+	 * Lands a bullet's hit of {@code dealt} on {@code target} ({@link #bullets}; the flying-microjets follow-up, a
+	 * {@link Microjet}'s): through {@code pierce} points of its armour ({@link #pierced}), and, if it hurts, knocked back
+	 * again by {@code knockback} away from {@code shooter}, set alight when {@code ignites}, and with the gun's bleed and
+	 * hit effect at their chances.
+	 */
+	static void land(ServerLevel level, LivingEntity target, DamageSource source, float dealt, LivingEntity shooter, boolean ignites,
+			float knockback, float pierce, JugcraftGuns.@Nullable Bleed bleed, JugcraftGuns.@Nullable HitEffect effect,
+			RandomSource random) {
+		if (target.hurtServer(level, source, pierced(target, dealt, pierce))) {
+			if (knockback > 0.0F) {
+				target.knockback(knockback, shooter.getX() - target.getX(), shooter.getZ() - target.getZ(), source, dealt);
+			}
+			if (ignites) {
+				target.igniteForSeconds(BURN_SECONDS);
+			}
+			bleed(target, bleed, shooter, random);
+			afflict(target, effect, shooter, random);
+		}
 	}
 
 	/**
@@ -644,6 +660,31 @@ public final class GunShots {
 			left -= length;
 		}
 		return path;
+	}
+
+	/**
+	 * Pushes {@code player} back from a shot of this {@code strength} (the recoil-push follow-up, {@link JugcraftGuns#KICK}):
+	 * away from where they look, level, until they move back at least {@code strength} blocks a tick times the level share
+	 * of the look (all of it looking level, none looking straight up or down), less their knockback resistance. A shooter
+	 * already moving back as fast is left as they are, so a gun held on the trigger does not drive them ever faster; there
+	 * is no push up or down. Their client is told, as a player moves themselves. Nothing for a strength of 0.
+	 */
+	public static void kick(ServerPlayer player, float strength) {
+		Vec3 look = player.getLookAngle();
+		Vec3 back = new Vec3(-look.x, 0.0, -look.z);
+		double level = back.length();
+		if (strength <= 0.0F || level < 1.0E-6) {
+			return;
+		}
+		Vec3 way = back.scale(1.0 / level);
+		double resist = Math.max(0.0, 1.0 - player.getAttributeValue(Attributes.KNOCKBACK_RESISTANCE));
+		double wanted = strength * level * resist;
+		double along = player.getDeltaMovement().dot(way);
+		if (along >= wanted) {
+			return;
+		}
+		player.setDeltaMovement(player.getDeltaMovement().add(way.scale(wanted - along)));
+		player.connection.send(new ClientboundSetEntityMotionPacket(player));
 	}
 
 	/** Makes {@code target} bleed, at {@code bleed}'s chance, for its ticks (the darts-and-bleeding follow-up); none for null. */
@@ -729,6 +770,19 @@ public final class GunShots {
 		CombatRocket rocket = Projectile.spawnProjectileFromRotation(CombatRocket::new, level, new ItemStack(JugcraftRocketry.HE_ROCKET),
 				player, 0.0F, speed, spread);
 		rocket.fuse(Mth.ceil(spec.range() / speed));
+		smoke(level, player);
+	}
+
+	/**
+	 * Fires one of the gun's Microjets (the flying-microjets follow-up): from the eye along the look, at the gun's jet speed
+	 * ({@link JugcraftGuns#jetSpeed}) and strayed by about the gun's spread in degrees. It flies straight, untouched by
+	 * gravity and holding its speed, to the first creature the shooter may strike or the first block within the gun's
+	 * range, and deals the gun's damage there as a bullet does ({@link Microjet}).
+	 */
+	private static void jet(ServerLevel level, ServerPlayer player, GunItem gun, GunSpec spec, float spread) {
+		Microjet jet = Projectile.spawnProjectileFromRotation(Microjet::new, level, new ItemStack(JugcraftGuns.ammo(spec)), player,
+				0.0F, JugcraftGuns.jetSpeed(gun), spread);
+		jet.arm(gun.name(), spec.damage(), spec.range());
 		smoke(level, player);
 	}
 

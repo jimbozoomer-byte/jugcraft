@@ -1848,6 +1848,10 @@ def check_guns():
     speeds = ", ".join(f'"{gun}", {spec["rocket_speed"]}F' for gun, spec in guns.GUNS.items() if "rocket_speed" in spec)
     if f"ROCKET_SPEED = Map.of({speeds});" not in java:
         err(f"JugcraftGuns.ROCKET_SPEED differs from tools/guns.py GUNS rocket_speed: expected Map.of({speeds})")
+    # The flying-microjets follow-up: the jet guns' Microjets' speed.
+    jets = ", ".join(f'"{gun}", {spec["jet_speed"]}F' for gun, spec in guns.GUNS.items() if "jet_speed" in spec)
+    if f"JET_SPEED = Map.of({jets});" not in java:
+        err(f"JugcraftGuns.JET_SPEED differs from tools/guns.py GUNS jet_speed: expected Map.of({jets})")
     spins = ", ".join(f'"{gun}", {spec["spin_up"]}' for gun, spec in guns.GUNS.items() if spec.get("spin_up"))
     if f"SPIN_UP = Map.of({spins});" not in java:
         err(f"JugcraftGuns.SPIN_UP differs from tools/guns.py GUNS spin_up: expected Map.of({spins})")
@@ -1902,6 +1906,37 @@ def check_guns():
                     f"{value} (more than 0, at most 8)")
     if any(guns.GUNS[gun].get("shot") == "arc" for gun in guns.PIERCING) and "pierced(foe, damage, pierce)" not in shots_java:
         err("tools/guns.py PIERCING names an arc gun, but GunShots.arc does not pass its hits through pierced()")
+    # The recoil-push follow-up: the guns whose shot pushes their shooter back, and how hard.
+    kicks = ", ".join(f'Map.entry("{gun}", {value}F)' for gun, value in guns.KICK.items())
+    if f"KICK = Map.ofEntries({kicks});" not in java:
+        err(f"JugcraftGuns.KICK differs from tools/guns.py: expected Map.ofEntries({kicks})")
+    for gun, value in guns.KICK.items():
+        if gun not in guns.GUNS or not 0 < value <= 8:
+            err(f"tools/guns.py KICK names {gun}, which is not a gun, or gives it {value} (more than 0, at most 8)")
+    if "kick(player, JugcraftGuns.kick(gun));" not in shots_java:
+        err("GunShots.fire must push its shooter back by the gun's KICK (kick)")
+    # The flying-microjets follow-up: the heavy guns that slow whoever holds them, and the Microjet in flight.
+    carry = ", ".join(f'Map.entry("{gun}", {value}F)' for gun, value in guns.CARRY_SPEED.items())
+    if f"CARRY_SPEED = Map.ofEntries({carry});" not in java:
+        err(f"JugcraftGuns.CARRY_SPEED differs from tools/guns.py: expected Map.ofEntries({carry})")
+    for gun, share in guns.CARRY_SPEED.items():
+        if gun not in guns.GUNS or not 0.5 <= share < 1.0:
+            err(f"tools/guns.py CARRY_SPEED names {gun}, which is not a gun, or gives it {share} (0.5 to under 1)")
+    if ("carried(name, properties" not in java or "share - 1.0, AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL), EquipmentSlotGroup.MAINHAND"
+            not in java):
+        err("JugcraftGuns must give each CARRY_SPEED gun's item a main-hand movement-speed modifier of its share (carried)")
+    jet_java = JAVA_ROOT / "guns" / "Microjet.java"
+    jet_source = jet_java.read_text(encoding="utf-8") if jet_java.is_file() else ""
+    if (f'Jugcraft.id("{guns.JET_ENTITY}")' not in java or "case JugcraftGuns.JET -> jet(level, player, gun, spec, spread);" not in shots_java
+            or "GunShots.land(" not in jet_source or "GunShots.allowed(player, level, foe)" not in jet_source
+            or "GunShots.target(player, foe)" not in jet_source):
+        err(f"JugcraftGuns must register the Microjet (jugcraft:{guns.JET_ENTITY}), GunShots.fire fire it for a jet gun, and "
+            "Microjet land a bullet's hit only on what its shooter may strike")
+    jet_lang = load(ASSETS / "lang" / "en_us.json") or {}
+    if jet_lang.get(f"entity.jugcraft.{guns.JET_ENTITY}") != guns.JET_DISPLAY:
+        err(f"en_us.json does not name the Microjet in flight {guns.JET_DISPLAY!r}")
+    if "JugcraftGuns.MICROJET, ThrownItemRenderer::new" not in (CLIENT_JAVA_ROOT / "JugcraftClient.java").read_text(encoding="utf-8"):
+        err("JugcraftClient does not draw the Microjet in flight (ThrownItemRenderer)")
     # The darts-and-bleeding follow-up: how a dart flies, how bleeding hurts, and which guns' hits make a creature bleed.
     for line in (f"DART_SPEED = {guns.DART_SPEED};", f"DART_DROP = {guns.DART_DROP};", f"BLEED_TICKS = {guns.BLEED_TICKS};",
                  f"BLEED_DAMAGE = {guns.BLEED_DAMAGE}F;", f'DART = "dart";'):

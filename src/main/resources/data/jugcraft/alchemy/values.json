@@ -1,5 +1,4 @@
 {
-  "schema": 1,
   "fallback": 1,
   "items": {
     "jugcraft:abrasive_head": {
@@ -7317,6 +7316,11 @@
       "denominator": 1,
       "source": "recipe jugcraft:combined_cycle_power_plant"
     },
+    "jugcraft:comet_pistol": {
+      "numerator": 717,
+      "denominator": 1,
+      "source": "recipe jugcraft:comet_pistol"
+    },
     "jugcraft:compact_monopole": {
       "numerator": 1,
       "denominator": 1,
@@ -13552,6 +13556,11 @@
       "denominator": 2,
       "source": "recipe jugcraft:half_tatami_mat"
     },
+    "jugcraft:halibut_gun": {
+      "numerator": 4533,
+      "denominator": 4,
+      "source": "recipe jugcraft:halibut_gun"
+    },
     "jugcraft:halloween_bonfire": {
       "numerator": 131,
       "denominator": 1,
@@ -13736,6 +13745,11 @@
       "numerator": 481,
       "denominator": 27,
       "source": "recipe jugcraft:pot_cooking/haw_jelly"
+    },
+    "jugcraft:hawker_rifle": {
+      "numerator": 8209,
+      "denominator": 1,
+      "source": "recipe jugcraft:hawker_rifle"
     },
     "jugcraft:haws": {
       "numerator": 1,
@@ -14116,6 +14130,11 @@
       "numerator": 1,
       "denominator": 1,
       "source": "fallback (balance pending)"
+    },
+    "jugcraft:highball_repeater": {
+      "numerator": 1037,
+      "denominator": 1,
+      "source": "recipe jugcraft:highball_repeater"
     },
     "jugcraft:highball_rifle": {
       "numerator": 16,
@@ -16737,6 +16756,11 @@
       "denominator": 1,
       "source": "fallback (balance pending)"
     },
+    "jugcraft:hush_pistol": {
+      "numerator": 573,
+      "denominator": 1,
+      "source": "recipe jugcraft:hush_pistol"
+    },
     "jugcraft:hv_chem_feeder": {
       "numerator": 2566,
       "denominator": 3,
@@ -17081,6 +17105,11 @@
       "numerator": 70669,
       "denominator": 72,
       "source": "recipe jugcraft:imperial_gas_lamp"
+    },
+    "jugcraft:impetus_shotgun": {
+      "numerator": 8210,
+      "denominator": 1,
+      "source": "recipe jugcraft:impetus_shotgun"
     },
     "jugcraft:industrial_fermenter": {
       "numerator": 6059,
@@ -28882,6 +28911,11 @@
       "denominator": 1,
       "source": "fallback (balance pending)"
     },
+    "jugcraft:narwhal_lance": {
+      "numerator": 9589,
+      "denominator": 9,
+      "source": "recipe jugcraft:narwhal_lance"
+    },
     "jugcraft:navvy_shotgun": {
       "numerator": 399,
       "denominator": 2,
@@ -33277,6 +33311,11 @@
       "denominator": 1,
       "source": "fallback (balance pending)"
     },
+    "jugcraft:quill_rifle": {
+      "numerator": 8520,
+      "denominator": 1,
+      "source": "recipe jugcraft:quill_rifle"
+    },
     "jugcraft:quilt_rail": {
       "numerator": 1,
       "denominator": 1,
@@ -34626,6 +34665,11 @@
       "numerator": 1,
       "denominator": 1,
       "source": "fallback (balance pending)"
+    },
+    "jugcraft:salvo_rifle": {
+      "numerator": 1101,
+      "denominator": 1,
+      "source": "recipe jugcraft:salvo_rifle"
     },
     "jugcraft:sampling_spoon": {
       "numerator": 132,
@@ -45771,21 +45815,7 @@
       "numerator": 112,
       "denominator": 1,
       "source": "recipe peepo_companion:yellow_companion_bed"
-    },
-    "jugcraft:hawker_rifle": {
-      "numerator": 8209,
-      "denominator": 1,
-      "source": "recipe jugcraft:hawker_rifle"
-    },
-    "jugcraft:impetus_shotgun": {
-      "numerator": 8210,
-      "denominator": 1,
-      "source": "recipe jugcraft:impetus_shotgun"
-    },
-    "jugcraft:quill_rifle": {
-      "numerator": 8520,
-      "denominator": 1,
-      "source": "recipe jugcraft:quill_rifle"
     }
-  }
+  },
+  "schema": 1
 }
