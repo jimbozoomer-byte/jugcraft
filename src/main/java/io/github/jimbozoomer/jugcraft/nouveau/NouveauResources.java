@@ -34,7 +34,7 @@ public final class NouveauResources {
     public static void register(){
         for(var entry:list("sounds")){String name=entry.getAsString();var id=Jugcraft.id("nouveau."+name);SOUNDS.put(name,Registry.register(BuiltInRegistries.SOUND_EVENT,id,SoundEvent.createVariableRangeEvent(id)));}
         for(var entry:list("particles")){String name=entry.getAsString();PARTICLES.put(name,Registry.register(BuiltInRegistries.PARTICLE_TYPE,Jugcraft.id("nouveau/"+name),FabricParticleTypes.simple()));}
-        for(String name:List.of("shielding","recovery","freezing","blasting","mana_regen"))for(int tier=0;tier<3;tier++){
+        for(String name:List.of("shielding","recovery","freezing","blasting","mana_regen","immolate","looting"))for(int tier=0;tier<3;tier++){
             String suffix=tier==1?"_long":tier==2?"_strong":"";int duration=name.equals("blasting")?100:tier==1?9600:tier==2?1800:3600;
             Registry.register(BuiltInRegistries.POTION,Jugcraft.id("nouveau_"+name+suffix),new Potion("nouveau_"+name+suffix,new MobEffectInstance(NouveauStatuses.EFFECTS.get(name),duration,tier==2?1:0)));
         }
