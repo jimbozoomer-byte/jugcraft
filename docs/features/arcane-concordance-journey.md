@@ -14,7 +14,10 @@ adds Bathin's steps (7 to 9; the Gleaner's recipe walked from vines, a hopper an
 they name, with no whole-path test of his own; those tests and `buerFromTheCodexToDeparture`, which now chooses Buer at
 the chooser, passed in both server jobs of run 40777920181. Its unit 3 adds Marax's steps and The Garden's Regard
 mastered (10 to 13; Dewmoss in `GARDEN_RECIPES`), held by the tests they name, written and not yet run in CI; unit 7's
-`theGardenPactsFromCodexToDeparture` is to walk them.
+`theGardenPactsFromCodexToDeparture` is to walk them. Its unit 5 adds Bifrons's three steps (14 to 16 on his own line,
+after Marax's; after Foras's once merged), held by the tests they name, written and not yet run in CI; the route adds and
+checks a pact's offerings through `concordance_progression.ingredient_node`, so his tag of `#minecraft:logs` is followed
+to vanilla logs, and his compact's oak logs and emerald are vanilla; unit 7's walk is to take them too.
 Proposal issue: none; the owner's Arcane Concordance brief (roadmap step 31) is the scope approval.
 Owner: @jimbozoomer-byte. AI-assisted implementation with Claude Code; the model is named in the commit trailers.
 Target milestone and tier: Concordance milestone 23, every stage. Roadmap step 31.

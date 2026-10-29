@@ -635,6 +635,11 @@ generators' incidental rewrites were restored: [the contract's corrections](conc
   owner who understands both Regards. GC-06 changed none of Stolas's ids, keys, words, body or tests: his body's station
   is `PERCH` (where he always stood), he shows no work target, and Star-reckoning's Recall is drawn as before (the kept
   page's new choice plates are for other works' on-request actions only).
+- **Since GC-08 (Bifrons, [record](bifrons-pact.md); not merged; not yet run in CI):** the chooser has five entries for
+  an owner who understands both Regards. One change reaches him: his upkeep chip's tip, a tag of four (his starflower,
+  lupine, mourningbell and the amethyst shard), now lists three and "and 1 more" (Bifrons's review: a tag of more than
+  three lists three); no test reads it. SG12's shared cases think at each spirit's first hour, his 0 as before. His ids,
+  keys, words, body and tests are otherwise unchanged.
 
 ## World and event applicability
 

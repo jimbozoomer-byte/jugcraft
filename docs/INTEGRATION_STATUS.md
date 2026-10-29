@@ -15,7 +15,7 @@ consolidation and recipe-picker playtest remains outside this batch.
 
 Updated 11 October 2026 for [integration PR #320](https://github.com/jimbozoomer-byte/jugcraft/pull/320) (source PRs #299–308 and #310–319), following [integration PR #277](https://github.com/jimbozoomer-byte/jugcraft/pull/277) and [follow-up PR #298](https://github.com/jimbozoomer-byte/jugcraft/pull/298). This is the owner-facing index: feature records contain the detailed behavior and historical test evidence. The PRs' current GitHub states determine which combined work has reached `main`.
 
-## Not merged: Concordance garden cohort, units 1 to 3 (Buer, Bathin, Marax)
+## Not merged: Concordance garden cohort, units 1 to 3 and 5 (Buer, Bathin, Marax, Bifrons)
 
 On branch `claude/garden-cohort`; draft pull request [jimbozoomer-byte/jugcraft#526](https://github.com/jimbozoomer-byte/jugcraft/pull/526)
 against main; not merged. Unit 1 (GC-01 to GC-04) of seven is built: one pact spirit base with a perch for many spirits
@@ -38,6 +38,11 @@ standing station beside a perch and the synced work target his familiar flies to
 was in the head of run 40777920181, which passed in full; nothing of Marax himself has been compiled, and his 22 server
 tests and 33 client shots wait for their first run. Checked locally by the repository's Python checks and audits and a
 scratch harness of his one-change rule ([the contract's evidence](features/concordance-garden-cohort.md#unit-3-as-built-and-its-evidence)).
+Unit 5 (GC-08) is built and recorded on its own line from unit 3's head, **not yet compiled or run in CI**: Bifrons, a
+garden spirit who runs roots between beds by night, with feeding by hand as a garden act. Nothing of him has been
+compiled; his 22 server tests and 36 client shots wait for their first run, which comes once his line is merged into the
+cohort after unit 4. Checked locally by the repository's Python checks and audits
+([the contract's evidence](features/concordance-garden-cohort.md#unit-5-as-built-and-its-evidence)).
 
 | Area | Implemented change | Record |
 | --- | --- | --- |
@@ -49,6 +54,8 @@ scratch harness of his one-change rule ([the contract's evidence](features/conco
 | A matter to settle (GC-05) | A pact spirit may raise a choice its holder answers at the perch; the answer is kept by the perch and may be changed; until then the spirit takes the safe course and the roster says "awaiting your answer" | [Bathin](features/bathin-pact.md#his-matter-two-roads-from-one-heart-the-accord), [workers](features/arcane-concordance-workers.md) |
 | A spirit beside its perch (GC-06b) | A standing spirit takes the first clear side two blocks out, never between its inviter and the perch; a spirit may show the block it means to every client while its answer is on screen (synced, never saved); a work's on-request choice drawn on the kept page. Not yet run in CI | [contract](features/concordance-garden-cohort.md#gc-06-marax-unit-3), [workers](features/arcane-concordance-workers.md) |
 | Marax (GC-06) | Asked at his perch, his familiar reads your planted beds from their last samples and names one change for the worst, changing nothing; a bed named three times with nothing changed is passed over; two readings a day, for you alone; two sheets of paper a week; his first obligation completes The Garden's Regard's mastery with Buer's and Bathin's. Not yet run in CI | [Marax](features/marax-pact.md) |
+| Feeding by hand (GC-08b) | Bone meal by hand on a Verdant Bed, or on the crop growing on one, is a garden act a pact spirit may ask as its first task; SG12's shared cases think at each spirit's first hour. Not yet run in CI | [Bifrons](features/bifrons-pact.md#what-changed-in-shared-code), [ecology](features/arcane-concordance-ecology.md) |
+| Bifrons (GC-08) | By night, while you are near, he runs one root at a time from a full Verdant Bed of yours or your party's to the hungriest, measuring both first: 2 nutrients taken, 1 given, the other lost; a bed with a crop growing on it is a reserve until you answer at the perch; at most 24 runs a game day; two logs a week; a body built for Jugcraft from the owner's paintings' colours. Not yet run in CI | [Bifrons](features/bifrons-pact.md), [economy](features/arcane-concordance-economy.md) |
 
 ## Merged with #494: Concordance Chunk D (pact hall)
 

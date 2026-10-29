@@ -418,6 +418,13 @@ stands `PERCH`, as before. His per-think questions were lifted unchanged into th
 `1473e99f1`; his words, sounds, service, matter and tests are otherwise unchanged. His first obligation is now one of
 three that can master The Garden's Regard (with Buer's and Marax's).
 
+**Since GC-08** ([Bifrons](bifrons-pact.md); not merged, not yet run in CI): the chooser has a fifth entry; Bathin's body
+stays on the perch. Bifrons's root-running asks its questions through the same shared `GardenAsking`, unchanged; his
+matter is a second user of the accord machinery (`fallow`, `full`). Bathin's words, sounds, service, matter and tests are
+unchanged, and SG12's shared cases think at his first hour, 0 as before. Bifrons never draws from the bed under a
+Verdant Heart, though he may feed it. His first obligation counts toward The Garden's Regard's mastery as Buer's,
+Marax's and Bifrons's do (any three garden spirits').
+
 **Local** (this record's commit; no Minecraft build here): `python3 tools/owner_art.py --check`, `python3 -B
 tools/check_mod_data.py`, `python3 scripts/check_repository.py`, `python3 tools/concordance_journey.py --check`,
 `python3 tools/concordance_economy.py` ("gaining cycles: none"), `python3 tools/check_icon_maps.py`, `node --test

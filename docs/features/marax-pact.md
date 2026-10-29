@@ -439,6 +439,13 @@ tests as it does in Buer's).
 (the garden's two-client test is unit 7's); the narrator heard; a player's hardware; his astir loop (not photographed,
 as Buer's and Bathin's); the two over-budget page states above.
 
+**Since GC-08** ([Bifrons](bifrons-pact.md); not merged, not yet run in CI): the chooser has a fifth entry; Marax's words,
+sounds, service and tests are unchanged, and SG12's shared cases think at his first hour, 0 as before. A Bifrons run
+changes a bed's nutrients, so a planted bed his familiar passed over as proud is read again once Bifrons feeds it (or,
+answered "any full bed", draws from it): the proud count starts again when the bed changes, by design. His familiar never
+reads a fallow bed, and fallow beds are all Bifrons draws from until he is answered. His first obligation counts toward
+The Garden's Regard's mastery as Buer's, Bathin's and Bifrons's do (any three garden spirits').
+
 ## World and event applicability
 
 Overworld, Nether and End alike (a perch and planted beds in one level; his area never crosses levels). His night look

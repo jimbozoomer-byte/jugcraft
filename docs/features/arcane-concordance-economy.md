@@ -194,6 +194,12 @@ held by `check_economy` and its ritual tests, which passed in run 38693262154. C
 card measures the workshop's server cost (C-10; in run 38774859294, +0.240 ms median and +0.550 ms p95 a tick, net, on
 CI's runner); it is a measurement, not an economy test.
 
+The garden cohort, unit 5 (GC-08; not merged): `ConcordanceEconomyGameTests` gains `rootRunningLeavesNoGainingCycle`,
+and `tools/concordance_economy.py` the conversion `root_running` (2 nutrients for 1) with its installation row,
+"Bifrons's pact, kept and served every night"; `python3 tools/concordance_economy.py` still says "gaining cycles: none",
+run locally for each unit-5 commit, and `check_economy` holds his figures to the Java and data. Written where no
+Minecraft jar is available; not yet compiled or run in CI.
+
 Not yet run:
 - a representative installation simulated over real world time in a running world (the tests advance their systems by
   their own pulses);
