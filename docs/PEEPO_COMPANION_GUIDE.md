@@ -140,6 +140,8 @@ For both Crafters, configure the real recipe grid first, then select its finishe
 
 ## Supported jobs
 
+Peepo and Jughead can perform their assigned work with vanilla `minecraft:mob_griefing` set to `false`. Other mobs still obey that rule. Claims, town protection, enabled jobs, tools, supplies and energy requirements remain in force; see [companion work permissions](features/companion-work-permissions.md).
+
 The regular **Crafting Table** now supports companion work. Assign it with the Planner, link Supply/Output, and put desired finished products into **Filter**; its usual stock targets apply. No seeded crafting grid is required. Peepo or Jughead chooses an available ordinary shaped/shapeless recipe, works for **three seconds per craft at 240 JE** (**180 JE with Mechanic's Coveralls**), and delivers the products and container leftovers. An empty Filter allows any supported available recipe. Only one companion works at a table at a time; custom special recipes remain manual.
 
 Normal right-click still opens the player's vanilla crafting menu. **Shift-right-click with an empty hand** recovers the companion's buffered ingredients/results; anything that will not fit stays at the table. Its saved companion workspace means crafting tables can no longer be moved by pistons. See [crafting-table work](features/companion-crafting-table.md).
@@ -322,7 +324,7 @@ Supply **glass bottles**, **empty buckets**, or **empty/partly filled Gourd Cant
 
 Bottles become ordinary water potions; canteens refill to all three charges and keep their custom components. Both preserve the source. Buckets use normal Minecraft pickup and **remove the source block**: use a renewable/infinite-water pool for continuous bucket filling. Flowing water, cauldrons and waterlogged blocks are not collection targets. A missing source pauses the assignment without losing already-filled cargo; it resumes when source water returns. Full cargo or Output pauses collection rather than discarding containers.
 
-A collection Output chest can also be Supply for brewing, cooking or another job. This collects portable water containers; it does not irrigate crops or fill machine tanks directly. Mob-griefing, town protection, job priorities, resting and settings-menu pauses apply. See the [water collection feature record](features/companion-water-collection.md).
+A collection Output chest can also be Supply for brewing, cooking or another job. This collects portable water containers; it does not irrigate crops or fill machine tanks directly. Town protection, job priorities, resting and settings-menu pauses apply. See the [water collection feature record](features/companion-water-collection.md).
 
 ### Fishing
 
@@ -340,7 +342,7 @@ Select a companion with the Planner and right-click a placed **Tree Tap**. Each 
 
 Collection takes **40 ticks / 2 seconds at 4 reserve JE/t (160 JE per batch)** plus normal delivery effort. Leave clear ground in front of or beside the tap; reachable raised taps can be serviced from below. Empty taps show **Waiting for latex**; missing bottles and full cargo have their own statuses. Full or missing Output retains collected latex in cargo. The existing Supply/Output Auto/On/Off controls apply. Supply may also be provided directly in the eight cargo slots.
 
-Companions do not install bucket upgrades, grow rubber trees or speed up the native fill timer. Native tree requirements remain unchanged. Only one helper works at a tap at a time; claims, mob griefing, feature settings and live storage capacity are checked before collection. See the [tree-tap feature record](features/companion-tree-taps.md).
+Companions do not install bucket upgrades, grow rubber trees or speed up the native fill timer. Native tree requirements remain unchanged. Only one helper works at a tap at a time; claims, feature settings and live storage capacity are checked before collection. See the [tree-tap feature record](features/companion-tree-taps.md).
 
 ### Bat House collection
 
@@ -350,7 +352,7 @@ Peepo uses the general two-arm interaction animation to scoop the house's accumu
 
 Leave safe standing room in front of or beside the house. Peepo can reach a house one block above its standing level; higher houses need a platform. Full cargo leaves the guano on the ledge. A full/missing Output leaves collected goods in cargo until they can be delivered. Only one companion collects at a house at a time; a player's manual collection is rechecked before the companion takes anything. The status shows **Waiting for guano** when empty.
 
-Collection does not release or summon bats, speed up production, or apply fertilizer. The existing agriculture feature switch, mob-griefing rule, town protection, work priorities, rest and settings-menu pause apply. See the [Bat House feature record](features/companion-bat-house.md).
+Collection does not release or summon bats, speed up production, or apply fertilizer. The existing agriculture feature switch, town protection, work priorities, rest and settings-menu pause apply. See the [Bat House feature record](features/companion-bat-house.md).
 
 ### Serving stations
 
@@ -404,7 +406,7 @@ During shearing and milking, Peepo briefly holds the animal still. Babies, leash
 
 For **egg collection**, select Peepo with the Planner and right-click a chicken, or enable Eggs in a combined zone. Peepo picks up eggs already on the ground; laying rates stay unchanged and no chicken is held still. Each pickup takes one second and uses 80 reserve JE, plus delivery costs. He collects as much of a stack as fits, leaves the rest on the ground, and sends collected eggs to Output. Player-given eggs already in cargo remain personal inventory. Eggs outside the area, in water/fire, inaccessible or reserved by another helper are skipped.
 
-Peepo opens and closes permitted, unpowered fence gates along its path. Animals retain a collision barrier during a companion-operated opening. Gates opened by players/redstone and other gaps still need normal pen management. Keep ground approaches accessible, including in diagonal-fence layouts. Animal jobs and automatic gate opening require `mobGriefing` to be enabled.
+Peepo opens and closes permitted, unpowered fence gates along its path. Animals retain a collision barrier during a companion-operated opening. Gates opened by players/redstone and other gaps still need normal pen management. Keep ground approaches accessible, including in diagonal-fence layouts. Animal jobs and permitted automatic gate opening also work with vanilla mob griefing disabled.
 
 ## Food, energy and rest
 
@@ -469,7 +471,8 @@ Recipes unlock when you obtain the job item. The outfits are also in Creative's 
 ## Personal touches and moving companions
 
 - Use a name tag to name a companion; its name appears in relevant interfaces.
-- Empty-hand right-click makes it blush. Enable **Social** in Routine for greetings and little conversations during suitable idle time.
+- Empty-hand right-click makes it blush. Enable **Social** in Routine for greetings and little conversations during suitable idle time. Conversations can end with a close-range high-five, shared laughter, or a farewell wave and nod. Both Peepo and Jughead participate, including mixed pairs. High-fives require free hands; jobs, food and rest always take priority. Socializing adds no energy cost and does not make them walk away to find a partner.
+- With **Social** enabled, idle companions dance in place within eight blocks of a playing vanilla jukebox. Peepo and Jughead sway, tap their feet, bob their heads and occasionally wave or wiggle. They can dance while staying put or waiting near their owner in Follow mode; moving, work, deliveries, eating, recovery and settings take priority. Dancing adds no energy cost or bonus. Removing the disc, ending the song or leaving its range lets the dance settle; an inserted but finished disc does not count as playing. Other music blocks are not dance triggers yet.
 - Give it a Jack o'Lantern for the pumpkin costume, or manage the Costume slot in its inventory. Remove the costume from that slot to restore its default outfit.
 - Wooden **Mob Transport Crates** hold four friendly mobs; iron crates hold eight. Right-click a suitable mob to capture it, right-click the top of a block to release one, or shift-right-click to choose a stored mob to release beside you. Companions retain their inventory, owner, energy and assignments. Assignments remain tied to their original dimension, so check them after moving. See [crate controls and restrictions](features/mob-transport-crates.md#using-a-crate).
 
@@ -504,5 +507,5 @@ Assign a Beehive or Bee Nest with the Planner, link Supply and Output, then use 
 - **Honey:** Supply empty glass bottles. Peepo stocks up to four bottles at the hive and consumes one per harvest.
 - **Honeycomb:** Equip shears or provide them through an existing Tools supply chest. Each harvest consumes one durability. Unused stocked bottles are sent to Output when switching to Honeycomb.
 - Harvesting takes three seconds at **4 JE/tick (240 JE per completed harvest)**, plus normal delivery effort. He uses the existing two-handed reaching/snipping motion with a bottle or real shears and vanilla sounds.
-- No smoke, missing bottles/shears, full collection storage, blocked access or disabled mob griefing pauses harvesting. Bees are neither released nor angered by the harvesting action.
+- No smoke, missing bottles/shears, full collection storage, blocked access pauses harvesting. Bees are neither released nor angered by the harvesting action.
 - Collected products occupy twelve saved collection slots at the hive until transported. Empty-hand sneak-use retrieves stored products and unused bottles manually; breaking the hive drops them. Filters are station-wide, so companions assigned to the same hive share its selection and only one harvest worker can claim it at a time.

@@ -39,6 +39,7 @@ public final class CompanionJobs {
         for(var adapter:ADAPTERS){var job=adapter.resolve(npc,be);if(job!=null)return job;}
         return null;
     }
+    /** Assigned companion work is exempt from mob_griefing, never from loaded-chunk, town or owner permissions. */
     public static boolean permitted(PeepoEntity npc,BlockPos pos){
         return npc.level().hasChunkAt(pos) && !TownProtection.shieldsBlock(npc.level(),pos)
             && io.github.jimbozoomer.jugcraft.finance.LandRegistry.mayBuildFor(npc.orders.ownerId(),npc.level(),pos);

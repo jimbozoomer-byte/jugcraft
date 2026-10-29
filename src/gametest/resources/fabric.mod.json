@@ -455,6 +455,8 @@
       "local.peepo.PeepoCraftingTableClientTests",
       "local.peepo.PeepoCraftingAnimationClientTests",
       "local.peepo.PeepoFeedbackClientTests",
+      "local.peepo.PeepoSocialClientTests",
+      "local.peepo.PeepoDanceClientTests",
       "local.peepo.PeepoTaskDetailClientTests",
       "local.peepo.PeepoHandlingClientTests",
       "local.peepo.PeepoRestClientTests",
