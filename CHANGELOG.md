@@ -8,6 +8,13 @@ Every change to Jugcraft, newest first, grouped by pull request. For what each t
 
 No numbered release yet. Entries on feature branches remain proposed until their pull requests merge.
 
+### Unmerged: Clockwork Animatronics, part 2 (the Animatronic Werewolf)
+- **Animatronic Werewolf**: a hunched werewolf in torn trousers on a brass turntable, two blocks tall.
+- It runs on kinetic power, 8 KE a tick. While it runs the turntable turns it slowly round, and every eight seconds it raises its claws, throws back its head and howls.
+- The figures now share one clockwork. The Organ-Grinder Skeleton's jaw now keeps time with its notes.
+- Record: [clockwork-animatronics.md](docs/features/clockwork-animatronics.md). Decor set 9's second part.
+- **Checked:** the record's Verification. Game tests and screenshots run in CI only; not played by hand.
+
 ### Unmerged: Clockwork Animatronics, part 1 (the Organ-Grinder Skeleton)
 - **Organ-Grinder Skeleton**: a life-size skeleton in a top hat and a moth-eaten waistcoat behind a barrel organ on a cart, two blocks tall.
 - It runs on kinetic power, 4 KE a tick, from a hand crank, a steam engine's shafts or an electric motor touching its lower block.

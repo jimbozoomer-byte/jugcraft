@@ -517,6 +517,11 @@
       "denominator": 1,
       "source": "recipe jugcraft:angelic_feather"
     },
+    "jugcraft:animatronic_werewolf": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
     "jugcraft:antidote": {
       "numerator": 1,
       "denominator": 1,

@@ -299,6 +299,7 @@ public final class JugcraftClient implements ClientModInitializer {
 		BlockEntityRendererRegistry.register(JugcraftAgriculture.INFLATABLE_ENTITY, InflatableRenderer::new);
 		BlockEntityRendererRegistry.register(JugcraftAgriculture.PORCH_WITCH_ENTITY, PorchWitchRenderer::new);
 		BlockEntityRendererRegistry.register(JugcraftAgriculture.ORGAN_GRINDER_SKELETON_ENTITY, OrganGrinderSkeletonRenderer::new);
+		BlockEntityRendererRegistry.register(JugcraftAgriculture.ANIMATRONIC_WEREWOLF_ENTITY, AnimatronicWerewolfRenderer::new);
 		BlockEntityRendererRegistry.register(JugcraftAgriculture.WIND_CHIMES_ENTITY, BoneWindChimesRenderer::new);
 		BlockEntityRendererRegistry.register(JugcraftAgriculture.WEATHERVANE_ENTITY, WeathervaneRenderer::new);
 		BlockEntityRendererRegistry.register(JugcraftAgriculture.SPOOKY_SIGN_ENTITY, SpookySignRenderer::new);

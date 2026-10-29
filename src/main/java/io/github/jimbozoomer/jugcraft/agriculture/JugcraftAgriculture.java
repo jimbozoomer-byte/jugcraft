@@ -414,6 +414,7 @@ public final class JugcraftAgriculture {
 	public static BlockEntityType<CandyChuteBlockEntity> CANDY_CHUTE_ENTITY;
 	public static BlockEntityType<CandyCornDispenserBlockEntity> CANDY_CORN_DISPENSER_ENTITY;
 	public static BlockEntityType<OrganGrinderSkeletonBlockEntity> ORGAN_GRINDER_SKELETON_ENTITY;
+	public static BlockEntityType<AnimatronicWerewolfBlockEntity> ANIMATRONIC_WEREWOLF_ENTITY;
 	public static BlockEntityType<FirewoodRackBlockEntity> FIREWOOD_RACK_ENTITY;
 	public static BlockEntityType<DecorationBlockEntity> CHOPPING_BLOCK_ENTITY;
 	public static BlockEntityType<BlanketLadderBlockEntity> BLANKET_LADDER_ENTITY;
@@ -3161,7 +3162,8 @@ public final class JugcraftAgriculture {
 
 	/**
 	 * Decor set 9, the Clockwork Animatronics (tools/clockwork.py): Halloween figures moved by clockwork on kinetic power.
-	 * Part 1: the Organ-Grinder Skeleton, two blocks tall, its clockwork in its lower block.
+	 * Part 1: the Organ-Grinder Skeleton; part 2: the Animatronic Werewolf; each two blocks tall, its clockwork in its
+	 * lower block.
 	 */
 	private static void registerClockwork() {
 		Block grinder = registerBlock("organ_grinder_skeleton", OrganGrinderSkeletonBlock::new, BlockBehaviour.Properties.of()
@@ -3169,6 +3171,12 @@ public final class JugcraftAgriculture {
 		ORGAN_GRINDER_SKELETON_ENTITY = Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, Jugcraft.id("organ_grinder_skeleton"),
 				FabricBlockEntityTypeBuilder.create(OrganGrinderSkeletonBlockEntity::new, grinder).build());
 		registerItem("organ_grinder_skeleton", props -> new DoubleHighBlockItem(grinder, props), new Item.Properties().useBlockDescriptionPrefix(),
+				BUILDING_TAB);
+		Block werewolf = registerBlock("animatronic_werewolf", AnimatronicWerewolfBlock::new, BlockBehaviour.Properties.of()
+				.mapColor(MapColor.COLOR_BROWN).strength(1.5F).sound(SoundType.METAL).noOcclusion().pushReaction(PushReaction.IMMOVEABLE));
+		ANIMATRONIC_WEREWOLF_ENTITY = Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, Jugcraft.id("animatronic_werewolf"),
+				FabricBlockEntityTypeBuilder.create(AnimatronicWerewolfBlockEntity::new, werewolf).build());
+		registerItem("animatronic_werewolf", props -> new DoubleHighBlockItem(werewolf, props), new Item.Properties().useBlockDescriptionPrefix(),
 				BUILDING_TAB);
 	}
 

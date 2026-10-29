@@ -19,7 +19,16 @@ hurdy-gurdy, as an organ-grinder's is called) on a two-wheeled cart, two blocks 
   `jaw_hinge`, height and depth, by `jaw` degrees).
 Stopped, the crank runs down over `ease` ticks and stops where it is, the head and the jaw settle, and the organ falls
 silent.
-Sizes in pixels of the lower block, facing north (its front, the organ, to the north).
+Part 2, the Animatronic Werewolf (agriculture/AnimatronicWerewolfBlock, AnimatronicWerewolfBlockEntity): a werewolf
+1.75 m tall hunched (taller upright), in torn trousers, standing on a brass turntable 69 cm across on a black iron
+plinth, two blocks tall. While it runs:
+- the turntable turns it slowly round, once every `turn_ticks` ticks (client/AnimatronicWerewolfRenderer);
+- every `howl_every` ticks it howls: over `raise_ticks` ticks its arms swing up from `arms_rest` to `arms_raised`
+  degrees about its shoulders (`shoulder`), its head goes back `head_back` degrees about its neck (`neck`) and its jaw
+  drops `jaw` degrees about its hinge (`jaw_hinge`); it holds them `hold_ticks` ticks while it howls (`howl_sound`), and
+  lowers them over `raise_ticks` again.
+Stopped, the turntable runs down over `ease` ticks and stops where it is, and the werewolf lowers its arms.
+Sizes in pixels of the lower block, facing north (its front, the organ or the werewolf's face, to the north).
 """
 
 # The waltz, original to the organ: A minor, three-four time, six steps (quavers) a bar, eight bars. Each step's
@@ -46,6 +55,15 @@ ORGAN_GRINDER = {
     "melody_sound": "minecraft:block.note_block.flute", "bass_sound": "minecraft:block.note_block.bass", "volume": 0.6,
 }
 
+WEREWOLF = {
+    "block": "animatronic_werewolf", "display": "Animatronic Werewolf",
+    "need": 8, "spin_down": 10, "ease": 20.0,
+    "turn_ticks": 320, "howl_every": 160, "raise_ticks": 12, "hold_ticks": 24,
+    "shoulder": (22.13, 5.09), "arms_rest": 22.5, "arms_raised": 130.0,
+    "neck": (24.0, 6.5), "head_back": 35.0, "jaw_hinge": (23.75, 4.0), "jaw": 30.0,
+    "howl_sound": "minecraft:entity.wolf.howl", "volume": 1.2, "pitch": 0.7,
+}
+
 RECIPES = [
     # The skeleton (two bone blocks), its top hat (black wool), its organ (a note block on planks) and its clockwork
     # (a clock).
@@ -53,6 +71,12 @@ RECIPES = [
      "key": {"W": "minecraft:black_wool", "B": "minecraft:bone_block", "N": "minecraft:note_block", "P": "#minecraft:planks",
              "C": "minecraft:clock"},
      "result": ORGAN_GRINDER["block"], "count": 1, "category": "building"},
+    # The werewolf (a wolf's worth of brown wool over bones), its turntable (a gold block's brass on iron) and its
+    # clockwork (a clock).
+    {"id": WEREWOLF["block"], "pattern": ["BWB", "WCW", "IGI"],
+     "key": {"B": "minecraft:bone", "W": "minecraft:brown_wool", "C": "minecraft:clock", "I": "minecraft:iron_ingot",
+             "G": "minecraft:gold_ingot"},
+     "result": WEREWOLF["block"], "count": 1, "category": "building"},
 ]
 
 
@@ -60,8 +84,13 @@ def tune_length():
     return len(ORGAN_GRINDER["melody"])
 
 
+def figures():
+    """Every figure's table, in the order they were added."""
+    return [ORGAN_GRINDER, WEREWOLF]
+
+
 def blocks():
-    return [ORGAN_GRINDER["block"]]
+    return [spec["block"] for spec in figures()]
 
 
 def items():

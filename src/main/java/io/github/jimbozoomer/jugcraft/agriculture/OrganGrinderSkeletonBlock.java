@@ -10,7 +10,6 @@ import net.minecraft.world.level.block.entity.BlockEntityTicker;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
-import net.minecraft.world.level.block.state.properties.BooleanProperty;
 import net.minecraft.world.level.block.state.properties.DoubleBlockHalf;
 import org.jspecify.annotations.Nullable;
 
@@ -18,13 +17,12 @@ import org.jspecify.annotations.Nullable;
  * The Organ-Grinder Skeleton (Clockwork Animatronics, part 1; tools/clockwork.py ORGAN_GRINDER): a skeleton 1.75 m tall
  * in a battered top hat and a moth-eaten red waistcoat, standing behind a street barrel organ (a hurdy-gurdy) on a
  * two-wheeled cart, two blocks tall. Its clockwork runs on kinetic power: a shaft, gearbox or source touching its lower
- * block gives it up to {@value #NEED} KE a tick ({@link OrganGrinderSkeletonBlockEntity}). While it runs ({@link #RUNNING})
+ * block gives it up to {@value #NEED} KE a tick ({@link ClockworkFigureBlockEntity}). While it runs ({@link #RUNNING})
  * its right hand turns the organ's crank, its head nods and its jaw chatters (drawn by the client,
  * client/OrganGrinderSkeletonRenderer), and the organ plays its waltz ({@link #MELODY}, {@link #BASS}). Its model is
  * tools/clockwork_data.py organ_grinder_skeleton().
  */
-public class OrganGrinderSkeletonBlock extends TallDecorationBlock implements EntityBlock {
-	public static final BooleanProperty RUNNING = BooleanProperty.create("running");
+public class OrganGrinderSkeletonBlock extends TallDecorationBlock implements EntityBlock, ClockworkFigure {
 	/** The KE a tick its clockwork takes; it runs only on all of it. */
 	public static final int NEED = 4;
 	/** Ticks it keeps running after its last full tick of power, as a shaft keeps turning. */
@@ -66,8 +64,19 @@ public class OrganGrinderSkeletonBlock extends TallDecorationBlock implements En
 		return (tickLevel, pos, tickState, entity) -> ((OrganGrinderSkeletonBlockEntity) entity).serverTick((ServerLevel) tickLevel, pos, tickState);
 	}
 
+	@Override
+	public int need() {
+		return NEED;
+	}
+
+	@Override
+	public int spinDown() {
+		return SPIN_DOWN;
+	}
+
 	/** Sets whether the figure at {@code lower} runs, on both its halves. */
-	static void run(ServerLevel level, BlockPos lower, BlockState state, boolean running) {
+	@Override
+	public void setRunning(ServerLevel level, BlockPos lower, BlockState state, boolean running) {
 		setBoth(level, lower, state.setValue(RUNNING, running));
 	}
 

@@ -25,7 +25,8 @@ import org.jspecify.annotations.Nullable;
  * right arm, the upper arm swung about the shoulder and the forearm about the elbow so the hand stays on the crank's
  * handle (two bones, the elbow kept back, {@link #arm}); its head, nodding once a bar about its neck; and its jaw, dropping
  * on each note of the melody. Stopped, its clockwork runs down over {@link #EASE} ticks and everything comes to rest
- * where it is. The client keeps its own count of the tune, from when it saw the figure start. Coordinates are pixels of
+ * where it is. The client keeps its own count of the tune, from when it saw the figure start, at the server's rate (so
+ * the jaw keeps time with the notes it hears), and eases only the crank. Coordinates are pixels of
  * the lower block, for a figure facing north (tools/clockwork.py ORGAN_GRINDER).
  */
 public class OrganGrinderSkeletonRenderer implements BlockEntityRenderer<OrganGrinderSkeletonBlockEntity, OrganGrinderSkeletonRenderer.State> {
@@ -48,7 +49,10 @@ public class OrganGrinderSkeletonRenderer implements BlockEntityRenderer<OrganGr
 	static final float JAW = 20.0F;
 	/** Ticks the clockwork takes to come up to speed, or run down. */
 	static final float EASE = 10.0F;
-	/** Each figure as this client last left it: {its tune's ticks, its speed (0 to 1), the game time}. */
+	/**
+	 * Each figure as this client last left it: {its crank's ticks (eased, as it comes up to speed and runs down), its speed
+	 * (0 to 1), the game time, the ticks it has run since it started (as the server counts them, for its tune)}.
+	 */
 	private final Map<OrganGrinderSkeletonBlockEntity, double[]> clocks = new WeakHashMap<>();
 
 	public static final class State extends BlockEntityRenderState {
@@ -108,18 +112,21 @@ public class OrganGrinderSkeletonRenderer implements BlockEntityRenderer<OrganGr
 		state.facing = block.getValue(OrganGrinderSkeletonBlock.FACING);
 		boolean running = block.getValue(OrganGrinderSkeletonBlock.RUNNING);
 		double now = level.getGameTime() + (double) partialTick;
-		double[] clock = clocks.computeIfAbsent(figure, f -> new double[] {0.0, 0.0, now});
+		double[] clock = clocks.computeIfAbsent(figure, f -> new double[] {0.0, 0.0, now, 0.0});
 		double elapsed = Math.max(0.0, Math.min(20.0, now - clock[2]));
 		if (running && clock[1] <= 0.0) {
-			clock[0] = 0.0; // Started from rest: the tune from the top, as the organ plays it.
+			clock[3] = 0.0; // Started from rest: the tune from the top, as the organ plays it.
+		}
+		if (running) {
+			clock[3] += elapsed;
 		}
 		double before = clock[1];
 		clock[1] = Mth.clamp(clock[1] + (running ? 1.0 : -1.0) * elapsed / EASE, 0.0, 1.0);
 		clock[0] += elapsed * (before + clock[1]) / 2.0;
 		clock[2] = now;
-		double ticks = clock[0];
+		double ticks = clock[3];
 		float speed = (float) clock[1];
-		state.crank = (float) (360.0 * (ticks % OrganGrinderSkeletonBlock.CRANK_TICKS) / OrganGrinderSkeletonBlock.CRANK_TICKS);
+		state.crank = (float) (360.0 * (clock[0] % OrganGrinderSkeletonBlock.CRANK_TICKS) / OrganGrinderSkeletonBlock.CRANK_TICKS);
 		float[] arm = arm(state.crank);
 		state.upperArm = arm[0];
 		state.elbowY = arm[1];

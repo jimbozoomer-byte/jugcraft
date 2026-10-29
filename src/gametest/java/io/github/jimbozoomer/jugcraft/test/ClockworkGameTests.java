@@ -1,6 +1,9 @@
 package io.github.jimbozoomer.jugcraft.test;
 
 import io.github.jimbozoomer.jugcraft.Jugcraft;
+import io.github.jimbozoomer.jugcraft.agriculture.AnimatronicWerewolfBlock;
+import io.github.jimbozoomer.jugcraft.agriculture.ClockworkFigure;
+import io.github.jimbozoomer.jugcraft.agriculture.ClockworkFigureBlockEntity;
 import io.github.jimbozoomer.jugcraft.agriculture.JugcraftAgriculture;
 import io.github.jimbozoomer.jugcraft.agriculture.OrganGrinderSkeletonBlock;
 import io.github.jimbozoomer.jugcraft.agriculture.OrganGrinderSkeletonBlockEntity;
@@ -32,7 +35,8 @@ import net.minecraft.world.phys.Vec3;
  * Game tests for the Clockwork Animatronics (decor set 9; docs/features/clockwork-animatronics.md), part 1: the
  * Organ-Grinder Skeleton is placed two blocks tall facing the player; it takes no more than its need of kinetic energy a
  * tick, runs only on all of it, plays while it runs and runs down after its power stops; a hand crank beside it drives
- * it; broken, it comes down whole and drops once; and its recipe and loot load.
+ * it; broken, it comes down whole and drops once; and its recipe and loot load. Part 2: the Animatronic Werewolf runs on
+ * its own need, its howl rises, holds and falls within its cycle, and a hand crank drives it.
  */
 public class ClockworkGameTests {
 	private static void floor(GameTestHelper helper) {
@@ -53,7 +57,11 @@ public class ClockworkGameTests {
 
 	/** Places the figure from the player's hand on the block below {@code pos} (relative), and returns its lower block. */
 	private static BlockPos placed(GameTestHelper helper, ServerPlayer player, BlockPos pos) {
-		player.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(JugcraftAgriculture.item("organ_grinder_skeleton")));
+		return placed(helper, player, pos, "organ_grinder_skeleton");
+	}
+
+	private static BlockPos placed(GameTestHelper helper, ServerPlayer player, BlockPos pos, String id) {
+		player.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(JugcraftAgriculture.item(id)));
 		BlockPos below = helper.absolutePos(pos.below());
 		player.getMainHandItem().useOn(new UseOnContext(player, InteractionHand.MAIN_HAND,
 				new BlockHitResult(Vec3.atCenterOf(below).relative(Direction.UP, 0.5), Direction.UP, below, false)));
@@ -70,7 +78,7 @@ public class ClockworkGameTests {
 	private static boolean running(ServerLevel level, BlockPos lower) {
 		BlockState below = level.getBlockState(lower);
 		BlockState above = level.getBlockState(lower.above());
-		return below.getValue(OrganGrinderSkeletonBlock.RUNNING) && above.getValue(OrganGrinderSkeletonBlock.RUNNING);
+		return below.getValue(ClockworkFigure.RUNNING) && above.getValue(ClockworkFigure.RUNNING);
 	}
 
 	@GameTest(maxTicks = 80)
@@ -138,13 +146,46 @@ public class ClockworkGameTests {
 		});
 	}
 
+	/** Part 2: the Animatronic Werewolf runs on its own need, howls in its cycle, and a hand crank beside it drives it. */
+	@GameTest(maxTicks = 60)
+	public void theWerewolfHowlsOnItsClockwork(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		floor(helper);
+		ServerPlayer player = standing(helper, new BlockPos(3, 2, 1));
+		BlockPos lower = placed(helper, player, new BlockPos(3, 2, 3), "animatronic_werewolf");
+		BlockState state = level.getBlockState(lower);
+		helper.assertTrue(state.getBlock() instanceof AnimatronicWerewolfBlock && state.getValue(AnimatronicWerewolfBlock.FACING) == Direction.NORTH
+				&& !state.getValue(ClockworkFigure.RUNNING) && level.getBlockEntity(lower) instanceof ClockworkFigureBlockEntity,
+				"It stands two blocks tall on its turntable, facing the player, at rest");
+		ClockworkFigureBlockEntity figure = (ClockworkFigureBlockEntity) level.getBlockEntity(lower);
+		long took = figure.acceptKinetic(Direction.SOUTH, 64);
+		helper.assertTrue(took == AnimatronicWerewolfBlock.NEED && figure.acceptKinetic(Direction.SOUTH, 64) == 0,
+				"It takes its need a tick and no more: " + took);
+		int start = AnimatronicWerewolfBlock.howlStart();
+		int top = start + AnimatronicWerewolfBlock.RAISE_TICKS;
+		helper.assertTrue(AnimatronicWerewolfBlock.howl(0) == 0.0F && AnimatronicWerewolfBlock.howl(start) == 0.0F
+				&& AnimatronicWerewolfBlock.howl(top) == 1.0F && AnimatronicWerewolfBlock.howl(top + AnimatronicWerewolfBlock.HOLD_TICKS) == 1.0F
+				&& AnimatronicWerewolfBlock.howl(AnimatronicWerewolfBlock.HOWL_EVERY) == 0.0F
+				&& AnimatronicWerewolfBlock.howl(start + AnimatronicWerewolfBlock.RAISE_TICKS / 2.0) > 0.0F,
+				"Its howl rises, holds and falls within its cycle");
+		helper.setBlock(new BlockPos(4, 2, 3), JugcraftKinetics.HAND_CRANK.defaultBlockState().setValue(HandCrankBlock.FACING, Direction.WEST));
+		if (level.getBlockEntity(helper.absolutePos(new BlockPos(4, 2, 3))) instanceof HandCrankBlockEntity crank) {
+			crank.addTurns(HandCrankBlockEntity.TICKS_PER_CRANK);
+		}
+		helper.runAtTickTime(20, () -> {
+			helper.assertTrue(running(level, lower), "A hand crank turning beside its lower block drives it");
+			helper.succeed();
+		});
+	}
+
 	@GameTest
 	public void clockworkDataLoads(GameTestHelper helper) {
 		ServerLevel level = helper.getLevel();
-		helper.assertTrue(level.recipeAccess().byKey(ResourceKey.create(Registries.RECIPE, Jugcraft.id("organ_grinder_skeleton"))).isPresent(),
-				"organ_grinder_skeleton has a recipe");
-		helper.assertTrue(level.getServer().reloadableRegistries().getLootTable(ResourceKey.create(Registries.LOOT_TABLE,
-				Jugcraft.id("blocks/organ_grinder_skeleton"))) != LootTable.EMPTY, "organ_grinder_skeleton's loot loads");
+		for (String id : new String[] {"organ_grinder_skeleton", "animatronic_werewolf"}) {
+			helper.assertTrue(level.recipeAccess().byKey(ResourceKey.create(Registries.RECIPE, Jugcraft.id(id))).isPresent(), id + " has a recipe");
+			helper.assertTrue(level.getServer().reloadableRegistries().getLootTable(ResourceKey.create(Registries.LOOT_TABLE,
+					Jugcraft.id("blocks/" + id))) != LootTable.EMPTY, id + "'s loot loads");
+		}
 		helper.succeed();
 	}
 }

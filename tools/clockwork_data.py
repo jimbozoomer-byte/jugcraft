@@ -235,6 +235,164 @@ def organ_grinder_skeleton():
     return sc
 
 
+# ---------------------------------------------------------------- part 2: the Animatronic Werewolf
+
+WOLF = pal("231c17", "33291f", "45382b", "584838", "6e5c47")
+CHEST = pal("3e3429", "55483a", "6c5d4b", "82725d")
+DENIM = pal("1a2030", "262f46", "34405e", "455476")
+IVORY = pal("8c8168", "b0a688", "d2c9ab", "ebe4cc")
+AMBER = (236, 168, 44)
+
+
+def shaggy(palette=WOLF):
+    """Shaggy fur: tufts a texel wide in rows two texels deep, each row's tufts two texels on from the last's, a tuft
+    lit, the next dark, so it hangs in locks; its top row lit."""
+    def paint(p):
+        for y in range(p.h):
+            for x in range(p.w):
+                k = (x + 2 * (y // 2)) % 4
+                p.put(x, y, shade(palette, 3 if y == 0 and p.h > 1 else 3 if k == 0 else 1 if k == 2 else 2))
+    paint.tag = repr(("shaggy", palette))
+    return paint
+
+
+def ragged():
+    """Torn trousers: faded denim, a seam a tone darker every fourth column, the hem along its foot torn in a zigzag
+    that shows the fur beneath on every other texel."""
+    def paint(p):
+        for y in range(p.h):
+            for x in range(p.w):
+                if y == p.h - 1 and p.h > 2 and x % 2 == 0:
+                    p.put(x, y, shade(WOLF, 2))
+                else:
+                    p.put(x, y, shade(DENIM, 3 if y == 0 and p.h > 1 else 1 if x % 4 == 3 else 2))
+    paint.tag = repr(("ragged",))
+    return paint
+
+
+def clawed(palette=WOLF):
+    """A paw's or a hand's front: fur, and its foot row ivory claws on every other texel."""
+    def paint(p):
+        for y in range(p.h):
+            for x in range(p.w):
+                if y == p.h - 1 and x % 2 == 0:
+                    p.put(x, y, shade(IVORY, 2))
+                else:
+                    p.put(x, y, shade(palette, 2 if y else 3))
+    paint.tag = repr(("clawed", palette))
+    return paint
+
+
+def wolf_face():
+    """The werewolf's brow and eyes: fur, its top row lit, two amber eyes at its outer columns on its second row."""
+    def paint(p):
+        shaggy()(p)
+        if p.h > 1 and p.w > 2:
+            for x in (0, p.w - 1):
+                p.put(x, 1, AMBER)
+    paint.tag = repr(("wolf_face",))
+    return paint
+
+
+def muzzle(gum):
+    """The front of the werewolf's muzzle, fur above and two white fangs hanging at the outer columns of its foot row;
+    with `gum` (its jaw's front, seen when it drops), the gum red between them."""
+    def paint(p):
+        for y in range(p.h):
+            for x in range(p.w):
+                if y == p.h - 1 and x in (0, p.w - 1):
+                    p.put(x, y, (242, 238, 226))
+                elif y == p.h - 1 and gum:
+                    p.put(x, y, shade(RED, 1))
+                else:
+                    p.put(x, y, shade(WOLF, 3 if y == 0 and p.h > 1 else 2))
+    paint.tag = repr(("muzzle", gum))
+    return paint
+
+
+def riveted():
+    """The turntable's brass deck: plain brass, a rivet a tone darker every third texel round the rim of its top; its
+    edge (a row high) lit."""
+    def paint(p):
+        for y in range(p.h):
+            for x in range(p.w):
+                if p.h == 1:
+                    p.put(x, y, shade(GOLD, 1 if x % 3 == 0 else 3))
+                else:
+                    rim = y in (0, p.h - 1) or x in (0, p.w - 1)
+                    p.put(x, y, shade(GOLD, 1 if rim and (x + y) % 3 == 0 else 2))
+    paint.tag = repr(("riveted",))
+    return paint
+
+
+def iron():
+    """Black cast iron: the black's middle tone, lit along its top row."""
+    def paint(p):
+        for y in range(p.h):
+            for x in range(p.w):
+                p.put(x, y, shade(BLACK, 3 if y == 0 and p.h > 1 else 2))
+    paint.tag = repr(("iron",))
+    return paint
+
+
+def round_box(sc, name, painter, w, y0, y1, cx=8.0, cz=8.0, **kw):
+    """A round slab `w` across, from y0 to y1: two boxes crossed, each a sixth shorter at its ends."""
+    c = w / 6.0
+    return [panel(sc, name, painter, (cx - w / 2 + c, y0, cz - w / 2), (cx + w / 2 - c, y1, cz + w / 2), **kw),
+            panel(sc, name, painter, (cx - w / 2, y0, cz - w / 2 + c), (cx + w / 2, y1, cz + w / 2 - c), **kw)]
+
+
+def animatronic_werewolf():
+    """The Animatronic Werewolf, facing north, in its lower block's pixels (two blocks tall).
+    - A black iron plinth 75 cm across, round (two boxes crossed), with a brass gear housing at its front: the static
+      block model (`whole`).
+    - On it the brass turntable deck, 69 cm across, riveted round its rim, and the werewolf standing on it, 1.75 m tall
+      and hunched: digitigrade legs (long paws clawed at their fronts, hocks high behind, shins forward, thighs back to
+      the hips, each a 22.5-degree lean), torn denim trousers to the knee, a shaggy torso leaning forward, its chest a
+      lighter fur, and a ruff round its neck. All of it turns with the deck (`spin`).
+    - Its arms (`left_arm`, `right_arm`), long and clawed, hanging straight down from its shoulders; its head (`head`:
+      the brow with amber eyes, the muzzle with its upper fangs, a black nose and two pointed ears) and its jaw
+      (`jaw`), its lower fangs at its front."""
+    spec = cw.WEREWOLF
+    sc = Sculpt(spec["block"], 2902, 128)
+    fur, chest, coat = shaggy(), shaggy(CHEST), ragged()
+    sc.models["whole"] = round_box(sc, "plinth", iron(), 12.0, 0.0, 0.75) + [
+        panel(sc, "gear_housing", brass(), (7.0, 0.25, 1.25), (9.0, 1.25, 2.25))]
+    el = round_box(sc, "deck", riveted(), 11.0, 0.75, 1.5)
+    for x0, x1 in ((5.25, 7.0), (9.0, 10.75)):
+        mid = (x0 + x1) / 2
+        el.append(panel(sc, "paw", fur, (x0, 1.5, 5.0), (x1, 2.25, 8.0), north=clawed()))
+        el.append(panel(sc, "foot", fur, (mid - 0.625, 2.25, 7.25), (mid + 0.625, 6.25, 8.25), rot=fa.rotation((mid, 2.25, 7.75), "x", 22.5)))
+        el.append(panel(sc, "shin", fur, (mid - 0.625, 5.95, 8.78), (mid + 0.625, 10.95, 9.78), rot=fa.rotation((mid, 5.95, 9.28), "x", -22.5)))
+        el.append(panel(sc, "thigh", coat, (x0, 10.57, 6.62), (x1, 15.07, 8.12), rot=fa.rotation((mid, 10.57, 7.37), "x", 22.5)))
+    el.append(panel(sc, "hips", coat, (4.75, 13.75, 8.0), (11.25, 16.25, 11.0)))
+    el.append(panel(sc, "torso", fur, (4.5, 15.5, 6.5), (11.5, 24.5, 11.5), north=chest, rot=fa.rotation((8.0, 15.5, 10.0), "x", -22.5)))
+    el.append(panel(sc, "ruff", fur, (5.5, 22.25, 5.25), (10.5, 24.25, 9.25)))
+    sc.models["spin"] = el
+    sy, sz = spec["shoulder"]
+    for side, (x0, x1) in (("left_arm", (2.5, 4.25)), ("right_arm", (11.75, 13.5))):
+        sc.models[side] = [panel(sc, "upper_arm", fur, (x0, sy - 6.0, sz - 0.85), (x1, sy, sz + 0.85)),
+                           panel(sc, "forearm", fur, (x0 + 0.1, sy - 11.5, sz - 0.75), (x1 - 0.1, sy - 6.0, sz + 0.75)),
+                           panel(sc, "hand", fur, (x0, sy - 13.5, sz - 0.85), (x1, sy - 11.5, sz + 0.85), north=clawed())]
+    sc.models["head"] = [panel(sc, "brow", fur, (6.25, 23.5, 3.5), (9.75, 27.0, 7.5), north=wolf_face()),
+                         panel(sc, "muzzle", fur, (6.75, 23.75, 1.0), (9.25, 25.75, 3.5), north=muzzle(False)),
+                         panel(sc, "nose", flat(BLACK), (7.5, 25.0, 0.75), (8.5, 25.75, 1.0), sides=("north", "up", "down", "east", "west"))]
+    for x0, angle in ((6.5, 22.5), (8.5, -22.5)):
+        sc.models["head"].append(panel(sc, "ear", fur, (x0, 27.0, 5.5), (x0 + 1.0, 29.0, 6.5), rot=fa.rotation((x0 + 0.5, 27.0, 6.0), "z", angle)))
+    sc.models["jaw"] = [panel(sc, "jaw", fur, (7.0, 23.0, 1.25), (9.0, 23.75, 4.0), north=muzzle(True))]
+    return sc
+
+
+WEREWOLF_MOVING = ("spin", "left_arm", "right_arm", "head", "jaw")
+
+
+def werewolf_posed(sc, spec):
+    """The werewolf's item pose: on its deck, its arms forward at rest (`arms_rest`, a block model's turn), its head and
+    jaw closed."""
+    sy, sz = spec["shoulder"]
+    arms = [dict(e, rotation=fa.rotation((8.0, sy, sz), "x", spec["arms_rest"])) for side in ("left_arm", "right_arm") for e in sc.models[side]]
+    return sc.models["spin"] + arms + sc.models["head"] + sc.models["jaw"]
+
 MOVING = ("crank", "upper_arm", "forearm", "head", "jaw")
 # The pose the item shows the figure in, its hand on the crank as near as a block model's turns allow (22.5 degrees at a
 # time): the crank turned 112.5 degrees, the upper arm back 22.5, the forearm forward 45.
@@ -264,7 +422,10 @@ def posed(sc, spec):
 # ---------------------------------------------------------------- building and files
 
 _built = {}
-BUILDERS = {cw.ORGAN_GRINDER["block"]: organ_grinder_skeleton}
+BUILDERS = {cw.ORGAN_GRINDER["block"]: organ_grinder_skeleton, cw.WEREWOLF["block"]: animatronic_werewolf}
+# Each figure's moving parts (clockwork_quads.json, `<block>_<part>`), and the parts its item shows, posed.
+PARTS = {cw.ORGAN_GRINDER["block"]: MOVING, cw.WEREWOLF["block"]: WEREWOLF_MOVING}
+POSES = {cw.ORGAN_GRINDER["block"]: posed, cw.WEREWOLF["block"]: werewolf_posed}
 
 
 def build(block):
@@ -292,8 +453,9 @@ def assets(root, write, lang):
     write = fa.closing_writer(write, _image_of)
     models = root / "models" / "block"
     out_quads = {}
-    for block in cw.blocks():
-        lang[f"block.{MOD}.{block}"] = cw.ORGAN_GRINDER["display"]
+    for spec in cw.figures():
+        block = spec["block"]
+        lang[f"block.{MOD}.{block}"] = spec["display"]
         sc = build(block)
         tex = f"{MOD}:block/{block}"
         write(models / f"{block}.json", fa.model(block, d20d.separated(sc.models["whole"])))
@@ -304,10 +466,10 @@ def assets(root, write, lang):
                 for running in ("false", "true"):
                     variants[f"facing={f},half={half},running={running}"] = {"model": rid(f"block/{model}"), **({"y": y} if y else {})}
         write(root / "blockstates" / f"{block}.json", {"variants": variants})
-        shown = sc.models["whole"] + posed(sc, cw.ORGAN_GRINDER)
+        shown = sc.models["whole"] + POSES[block](sc, spec)
         write(root / "models" / "item" / f"{block}.json", fa.model(block, d20d.separated(shown), display=ITEM_DISPLAY))
         write(root / "items" / f"{block}.json", {"model": {"type": "minecraft:model", "model": rid(f"item/{block}")}})
-        for name in MOVING:
+        for name in PARTS[block]:
             out_quads[f"{block}_{name}"] = quads(sc.models[name], {"p": block})
     write(root / "clockwork_quads.json", out_quads)
 

@@ -15381,12 +15381,16 @@ def check_front_yard():
 
 
 def check_clockwork():
-    """Clockwork Animatronics (tools/clockwork.py, docs/features/clockwork-animatronics.md), part 1: the Organ-Grinder
-    Skeleton's Java holds the table's power, timing and waltz, its block entity takes kinetic energy, and it is
-    registered with its block entity, its two-block item and its renderer; the renderer's crank, arm, neck and jaw are
-    the table's, and the arm reaches the crank's handle all the way round; its moving parts' quads are written and read;
-    its blockstate covers every facing, half and `running`, its upper half's model is empty, and it drops once, from its
-    lower half; and its name has its text."""
+    """Clockwork Animatronics (tools/clockwork.py, docs/features/clockwork-animatronics.md). Every figure: its block is a
+    ClockworkFigure holding the table's need and run-down, its clockwork a ClockworkFigureBlockEntity (which takes
+    kinetic energy up to the figure's need a tick), and it is registered with its block entity, its two-block item and
+    its renderer; its moving parts' quads are written, read and drawn; its blockstate covers every facing, half and
+    `running`, its upper half's model is empty, and it drops once, from its lower half; and its name has its text. Part
+    1, the Organ-Grinder Skeleton: its timing, waltz and loudness are the table's, the renderer's crank, arm, neck and
+    jaw are, and the arm reaches the crank's handle all the way round. Part 2, the Animatronic Werewolf: its turn,
+    howl and sound are the table's, the howl fits in its cycle, and the renderer's shoulders, arms, neck, jaw and
+    easing are the table's."""
+    import math
     import clockwork as cw
     import clockwork_data as cwd
 
@@ -15396,29 +15400,64 @@ def check_clockwork():
     java_main = read(JAVA_ROOT / "agriculture" / "JugcraftAgriculture.java")
     client = read(CLIENT_JAVA_ROOT / "JugcraftClient.java")
     lang = load(ASSETS / "lang" / "en_us.json") or {}
+    base = read(JAVA_ROOT / "agriculture" / "ClockworkFigureBlockEntity.java")
+    if "implements KineticConsumer" not in base or "figure.need() - taken" not in base or "now - fed <= figure.spinDown()" not in base:
+        err("ClockworkFigureBlockEntity: it must take kinetic energy up to the figure's need a tick, and run on it for its run-down")
+    if '"clockwork_quads.json"' not in read(CLIENT_JAVA_ROOT / "DecorQuads.java"):
+        err("DecorQuads must read clockwork_quads.json")
+    quads = load(ASSETS / "clockwork_quads.json") or {}
+    classes = {cw.ORGAN_GRINDER["block"]: ("OrganGrinderSkeleton", "grinder"), cw.WEREWOLF["block"]: ("AnimatronicWerewolf", "werewolf")}
+    if set(classes) != set(cw.blocks()):
+        err("check_clockwork: every figure must be checked")
+    for spec in cw.figures():
+        block = spec["block"]
+        name, local = classes.get(block, ("?", "?"))
+        java = read(JAVA_ROOT / "agriculture" / f"{name}Block.java")
+        held = read(JAVA_ROOT / "agriculture" / f"{name}BlockEntity.java")
+        drawn = read(CLIENT_JAVA_ROOT / f"{name}Renderer.java")
+        for item in (f"NEED = {spec['need']};", f"SPIN_DOWN = {spec['spin_down']};", "extends TallDecorationBlock implements EntityBlock, ClockworkFigure"):
+            if item not in java:
+                err(f"{name}Block: missing {item} (tools/clockwork.py)")
+        if f"extends ClockworkFigureBlockEntity" not in held:
+            err(f"{name}BlockEntity must be a ClockworkFigureBlockEntity")
+        entity = re.sub(r"(?<!^)(?=[A-Z])", "_", name).upper() + "_ENTITY"
+        if f'registerBlock("{block}", {name}Block::new' not in java_main \
+                or f'{entity} = Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, Jugcraft.id("{block}")' not in java_main \
+                or f'registerItem("{block}", props -> new DoubleHighBlockItem({local}, props)' not in java_main:
+            err(f"JugcraftAgriculture: {block} must be a {name}Block with its block entity and a two-block item")
+        if f"BlockEntityRendererRegistry.register(JugcraftAgriculture.{entity}, {name}Renderer::new);" not in client:
+            err(f"{name}Renderer must be registered")
+        for part in cwd.PARTS[block]:
+            key = f"{block}_{part}"
+            if not quads.get(key) or f'DecorQuads.get("{key}")' not in drawn:
+                err(f"clockwork_quads.json: {key} must be written and drawn by {name}Renderer")
+        variants = (load(ASSETS / "blockstates" / f"{block}.json") or {}).get("variants", {})
+        for face in ("north", "east", "south", "west"):
+            for half in ("lower", "upper"):
+                for running in ("false", "true"):
+                    want = f"{MOD}:block/{block}" + ("" if half == "lower" else "_upper")
+                    if variants.get(f"facing={face},half={half},running={running}", {}).get("model") != want:
+                        err(f"blockstates/{block}.json: facing {face}, half {half}, running {running} must be {want}")
+        if (load(ASSETS / "models" / "block" / f"{block}_upper.json") or {}).get("elements") != []:
+            err(f"models/block/{block}_upper.json: the upper half draws nothing (the lower half's model is the whole figure)")
+        pools = (load(DATA / MOD / "loot_table" / "blocks" / f"{block}.json") or {}).get("pools", [])
+        if len(pools) != 1 or '"half": "lower"' not in json.dumps(pools):
+            err(f"loot_table/blocks/{block}.json: it drops once, from its lower half")
+        if lang.get(f"block.{MOD}.{block}") != spec["display"]:
+            err(f"block.{MOD}.{block}: the text must be {spec['display']}")
+    # Part 1: the Organ-Grinder Skeleton.
     og = cw.ORGAN_GRINDER
-    block = og["block"]
     java = read(JAVA_ROOT / "agriculture" / "OrganGrinderSkeletonBlock.java")
+    drawn = read(CLIENT_JAVA_ROOT / "OrganGrinderSkeletonRenderer.java")
     melody = ", ".join(str(-1 if n is None else n) for n in og["melody"])
-    for item in (f"NEED = {og['need']};", f"SPIN_DOWN = {og['spin_down']};", f"CRANK_TICKS = {og['crank_ticks']};",
-                 f"STEP_TICKS = {og['step_ticks']};", f"STEPS_PER_BAR = {og['steps_per_bar']};", f"VOLUME = {og['volume']}F;",
-                 "BASS = {" + ", ".join(map(str, og["bass"])) + "};", "extends TallDecorationBlock implements EntityBlock"):
+    for item in (f"CRANK_TICKS = {og['crank_ticks']};", f"STEP_TICKS = {og['step_ticks']};", f"STEPS_PER_BAR = {og['steps_per_bar']};",
+                 f"VOLUME = {og['volume']}F;", "BASS = {" + ", ".join(map(str, og["bass"])) + "};"):
         if item not in java:
             err(f"OrganGrinderSkeletonBlock: missing {item} (tools/clockwork.py ORGAN_GRINDER)")
     if f"MELODY = {{ {melody}}};" not in " ".join(java.split()):
         err("OrganGrinderSkeletonBlock.MELODY must be the waltz in tools/clockwork.py ORGAN_GRINDER melody (-1 where held)")
     if len(og["bass"]) * og["steps_per_bar"] != len(og["melody"]):
         err("tools/clockwork.py ORGAN_GRINDER: a bass note for every bar of the melody")
-    held = read(JAVA_ROOT / "agriculture" / "OrganGrinderSkeletonBlockEntity.java")
-    if "implements KineticConsumer" not in held or "OrganGrinderSkeletonBlock.NEED - taken" not in held:
-        err("OrganGrinderSkeletonBlockEntity: it must take kinetic energy, up to NEED a tick")
-    if f'registerBlock("{block}", OrganGrinderSkeletonBlock::new' not in java_main \
-            or f'ORGAN_GRINDER_SKELETON_ENTITY = Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, Jugcraft.id("{block}")' not in java_main \
-            or f'registerItem("{block}", props -> new DoubleHighBlockItem(grinder, props)' not in java_main:
-        err(f"JugcraftAgriculture: {block} must be an OrganGrinderSkeletonBlock with its block entity and a two-block item")
-    drawn = read(CLIENT_JAVA_ROOT / "OrganGrinderSkeletonRenderer.java")
-    if "BlockEntityRendererRegistry.register(JugcraftAgriculture.ORGAN_GRINDER_SKELETON_ENTITY, OrganGrinderSkeletonRenderer::new);" not in client:
-        err("OrganGrinderSkeletonRenderer must be registered")
     (cx, cy, cz), (sx, sy, sz), (upper, lower) = og["crank"], og["shoulder"], og["arm"]
     (_, ny, nz), (jy, jz) = og["neck"], og["jaw_hinge"]
     for name, value in (("CRANK_X", cx), ("CRANK_Y", cy), ("CRANK_Z", cz), ("HANDLE", og["handle"]), ("SHOULDER_Y", sy), ("SHOULDER_Z", sz),
@@ -15426,33 +15465,30 @@ def check_clockwork():
                         ("JAW_Z", jz), ("JAW", og["jaw"]), ("EASE", og["ease"])):
         if f"static final float {name} = {value}F;" not in drawn:
             err(f"OrganGrinderSkeletonRenderer.{name} must be {value} (tools/clockwork.py ORGAN_GRINDER)")
-    import math
     reach = [math.hypot(cy + og["handle"] * math.cos(math.radians(a)) - sy, cz + og["handle"] * math.sin(math.radians(a)) - sz)
              for a in range(0, 360, 5)]
     if max(reach) > upper + lower or min(reach) < abs(upper - lower):
         err(f"tools/clockwork.py ORGAN_GRINDER: the arm ({upper} + {lower}) must reach the handle all the way round "
             f"({min(reach):.2f} to {max(reach):.2f} from the shoulder)")
-    if '"clockwork_quads.json"' not in read(CLIENT_JAVA_ROOT / "DecorQuads.java"):
-        err("DecorQuads must read clockwork_quads.json")
-    quads = load(ASSETS / "clockwork_quads.json") or {}
-    for name in cwd.MOVING:
-        key = f"{block}_{name}"
-        if not quads.get(key) or f'DecorQuads.get("{key}")' not in drawn:
-            err(f"clockwork_quads.json: {key} must be written and drawn by OrganGrinderSkeletonRenderer")
-    variants = (load(ASSETS / "blockstates" / f"{block}.json") or {}).get("variants", {})
-    for face in ("north", "east", "south", "west"):
-        for half in ("lower", "upper"):
-            for running in ("false", "true"):
-                want = f"{MOD}:block/{block}" + ("" if half == "lower" else "_upper")
-                if variants.get(f"facing={face},half={half},running={running}", {}).get("model") != want:
-                    err(f"blockstates/{block}.json: facing {face}, half {half}, running {running} must be {want}")
-    if (load(ASSETS / "models" / "block" / f"{block}_upper.json") or {}).get("elements") != []:
-        err(f"models/block/{block}_upper.json: the upper half draws nothing (the lower half's model is the whole figure)")
-    pools = (load(DATA / MOD / "loot_table" / "blocks" / f"{block}.json") or {}).get("pools", [])
-    if len(pools) != 1 or '"half": "lower"' not in json.dumps(pools):
-        err(f"loot_table/blocks/{block}.json: it drops once, from its lower half")
-    if f"block.{MOD}.{block}" not in lang:
-        err(f"block.{MOD}.{block}: the text is missing")
+    # Part 2: the Animatronic Werewolf.
+    ww = cw.WEREWOLF
+    java = read(JAVA_ROOT / "agriculture" / "AnimatronicWerewolfBlock.java")
+    held = read(JAVA_ROOT / "agriculture" / "AnimatronicWerewolfBlockEntity.java")
+    drawn = read(CLIENT_JAVA_ROOT / "AnimatronicWerewolfRenderer.java")
+    for item in (f"TURN_TICKS = {ww['turn_ticks']};", f"HOWL_EVERY = {ww['howl_every']};", f"RAISE_TICKS = {ww['raise_ticks']};",
+                 f"HOLD_TICKS = {ww['hold_ticks']};", f"VOLUME = {ww['volume']}F;", f"PITCH = {ww['pitch']}F;"):
+        if item not in java:
+            err(f"AnimatronicWerewolfBlock: missing {item} (tools/clockwork.py WEREWOLF)")
+    if 2 * ww["raise_ticks"] + ww["hold_ticks"] > ww["howl_every"]:
+        err("tools/clockwork.py WEREWOLF: a howl (its arms up, held and down) must fit in its cycle")
+    if f'Identifier.withDefaultNamespace("{ww["howl_sound"].split(":")[1]}")' not in held:
+        err(f"AnimatronicWerewolfBlockEntity: it must howl with {ww['howl_sound']}")
+    (wsy, wsz), (wny, wnz), (wjy, wjz) = ww["shoulder"], ww["neck"], ww["jaw_hinge"]
+    for name, value in (("SHOULDER_Y", wsy), ("SHOULDER_Z", wsz), ("ARMS_REST", ww["arms_rest"]), ("ARMS_RAISED", ww["arms_raised"]),
+                        ("NECK_Y", wny), ("NECK_Z", wnz), ("HEAD_BACK", ww["head_back"]), ("JAW_Y", wjy), ("JAW_Z", wjz), ("JAW", ww["jaw"]),
+                        ("EASE", ww["ease"])):
+        if f"static final float {name} = {value}F;" not in drawn:
+            err(f"AnimatronicWerewolfRenderer.{name} must be {value} (tools/clockwork.py WEREWOLF)")
 
 
 def check_party_table():

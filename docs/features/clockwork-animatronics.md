@@ -1,6 +1,6 @@
 # Clockwork Animatronics
 
-Status: part 1 (the Organ-Grinder Skeleton) implemented. CI builds it and runs its game tests and client screenshots; not yet played by hand. Parts 2 to 6 are planned (below).
+Status: parts 1 (the Organ-Grinder Skeleton) and 2 (the Animatronic Werewolf) implemented. CI builds them and runs their game tests and client screenshots; not yet played by hand. Parts 3 to 6 are planned (below).
 Proposal issue: none. The owner asked for it directly on 28 October 2026, as set 9 of the ten sets of fall and Halloween decor ("Then I want you to do 1-10 in parts in that order one by one"): an organ-grinder skeleton with a hurdy-gurdy, an animatronic werewolf on a turntable, a ghost on a crank wire, a mechanical raven and a pumpkin-headed drummer, on the power network, brass and steam at first and a dieselpunk steel version later.
 Owner: @jimbozoomer-byte
 Target milestone and tier: the bronze age of kinetic power ([kinetic-power.md](kinetic-power.md)). The figures are made from vanilla things and a clock; they move on kinetic energy from a hand crank or a steam engine, through iron shafts and brass gearboxes, or from the JE network through an electric motor.
@@ -23,8 +23,18 @@ Halloween figures that move by clockwork. Each runs on kinetic power: a shaft, g
   - Recipe: black wool for the hat over a note block between two bone blocks, over a clock between two planks.
   - Broken, either half brings the whole figure down, and it drops once.
 
+### Part 2: the Animatronic Werewolf
+- **Animatronic Werewolf**: a werewolf 1.75 m tall hunched (taller upright), in torn denim trousers, standing on a riveted brass turntable 69 cm across on a black iron plinth with a brass gear housing at its front. Two blocks tall.
+  - It has digitigrade legs, with long clawed paws, its hocks high behind and its shins forward, and long clawed arms. Its head has amber eyes, a black nose, fangs and two pointed ears.
+  - **It runs on 8 KE a tick**, as the skeleton does on 4, from a shaft, gearbox or kinetic source touching its lower block.
+  - **While it runs**:
+    - the turntable turns it slowly round, once every 16 seconds;
+    - every 8 seconds it howls. Its arms swing up from its sides over 0.6 seconds and its head goes back, its jaw dropping. It holds that for 1.2 seconds, howling a wolf's howl, deep and slow, then lowers them again.
+  - **Its power stopped**, the turntable runs down over a second and stops where it is, and it lowers its arms. Started again, its first howl comes 5.6 seconds in.
+  - Recipe: bones and brown wool round a clock, over iron ingots either side of a gold ingot (the turntable's brass).
+  - Broken, either half brings it down, and it drops once.
+
 ### Planned
-- **Part 2: the werewolf**: an animatronic werewolf on a brass turntable, turning slowly, raising its claws and throwing back its head to howl.
 - **Part 3: the ghost**: a ghost on a crank wire, a cheesecloth ghost lifted and swung by a wire crank on a post above it.
 - **Part 4: the raven**: a mechanical raven on a brass perch, its wings flapping, its head turning and its beak opening as it caws.
 - **Part 5: the drummer**: a pumpkin-headed drummer beating a bass drum in time.
@@ -47,16 +57,29 @@ Halloween figures that move by clockwork. Each runs on kinetic power: a shaft, g
   - the head nods about its neck, and the jaw drops about its hinge.
 - **The figure's block model** is the whole figure but its moving parts, in its lower block's model, two blocks tall; its upper block's model is empty.
 - **The item** shows it with its hand on the crank, as near as a block model's turns allow: the crank turned 112.5 degrees, the upper arm back 22.5 and the forearm forward 45.
+- **The werewolf** (part 2):
+  - Its fur is shaggy: tufts a texel wide in rows two texels deep, each row's two texels on from the last's, lit and dark by turns, so it hangs in locks. Its chest is a lighter fur.
+  - Its trousers are faded denim with a seam every fourth column, torn at the knee in a zigzag that shows the fur on every other texel.
+  - Its paws and hands have ivory claws on every other texel of their front's foot row. Its brow has two amber eyes at its outer columns, and its muzzle two white fangs at the corners of its foot row; the jaw's front shows its red gum between its fangs as it drops.
+  - Each leg is three bones each leaning 22.5 degrees, a block model's own turn: the foot back to a high hock, the shin forward to the knee, the thigh back to the hip. The torso leans forward 22.5.
+  - The turntable's deck is plain brass with a rivet a tone darker every third texel round its rim, on a black iron plinth.
+  - Moving parts move, drawn by `AnimatronicWerewolfRenderer`: the deck and everything on it turn about the block's middle; the arms swing about the shoulders; the head goes back about its neck, and the jaw drops about its hinge.
+  - Its item shows it on its deck, its arms forward at rest (22.5 degrees).
 - **The previews**, fixed before commit:
   - the organ's pipes, each with a dark mouth texel near its foot, read as a face with a black bar for a mouth; the mouths are gone and the pipes stand on a brass moulding;
   - the waistcoat's moth holes, a texel each on panels two texels wide, read as black blotches; they are now only on its back;
   - the pelvis, one box, read as a block; it is now its wings, sacrum and pubic arch;
   - the item's right arm hung straight down; it now holds the crank.
   - The crank was previewed at three angles from the east, to check that the hand stays on the handle (the preview turns the parts as the renderer does).
+- **The part 2 previews**, fixed before commit:
+  - the muzzle's foot row was red gum between its fangs, and read as a white-and-red block; the gum now shows only on the jaw, as it drops;
+  - the chest fur was too light, and read as an apron; it is now a tone or two lighter than the rest;
+  - the deck's top was lit along one edge and spotted all over, and read as noise; it is now plain brass with its rivets round its rim.
+  - The preview first drew each part with one turn only, and showed the arms still; it now chains the turns as the quads do (the arms', then the turntable's), and shows the arms up and the head back in the howl.
 
 ## Connections
 - Existing input producer: kinetic power, from the hand crank, the steam engine and the electric motor (which takes JE), through iron shafts, brass gearboxes and belts ([kinetic-power.md](kinetic-power.md)).
-- Recipe inputs: bone blocks, a note block, black wool, planks and a clock.
+- Recipe inputs: bone blocks, a note block, black wool, planks and a clock (the skeleton); bones, brown wool, iron, gold and a clock (the werewolf).
 - Existing output consumer: none; a figure is a power sink, like a machine.
 - Technology/magic connections (or infrastructure/cosmetic applicability): technology. It is decoration that runs on the kinetic network, a use for a hand crank or a small steam engine before electricity.
 - Reachable entry path: a hand crank (planks and an iron shaft), from the first iron. The figure's recipe needs a clock (gold and redstone).
@@ -66,6 +89,7 @@ Halloween figures that move by clockwork. Each runs on kinetic power: a shaft, g
 ## Balance and automation
 - **Units**: KE per tick, as the kinetic network's.
 - The Organ-Grinder Skeleton takes 4 KE a tick while it runs, and only on all 4. A hand crank (16 KE a tick) runs four of them; a steam engine (64) sixteen.
+- The Animatronic Werewolf takes 8 KE a tick, a heavier figure on a turntable: a hand crank runs two, a steam engine eight.
 - The energy goes into the clockwork: nothing comes back out, and it stores nothing. No loop.
 - Its recipe gives back only itself.
 
@@ -74,7 +98,8 @@ Halloween figures that move by clockwork. Each runs on kinetic power: a shaft, g
 - **The client draws it**: from `running` and its own clock. Each client keeps its own count of the tune from when it saw the figure start, so the crank, the arm, the nod and the jaw move in time with what it hears.
 - It saves nothing: whether it runs comes again from its power on the first tick after a reload.
 - It can't be pushed by a piston.
-- IDs (stable from release): the block and item `organ_grinder_skeleton` (`facing`, `half`, `running`), and its block entity `organ_grinder_skeleton`.
+- IDs (stable from release): the blocks and items `organ_grinder_skeleton` and `animatronic_werewolf` (`facing`, `half`, `running`), and their block entities of the same names.
+- Every figure shares one clockwork (`ClockworkFigureBlockEntity`): what differs is its need and what it does as it runs, its tune or its howl.
 - Its recipe follows the agriculture switch. The block and item stay registered when it is off. It runs on the machines feature's kinetic power: with that off, no hand crank or shaft exists to drive it, and it stands still.
 
 ## Dependencies and assets
@@ -100,6 +125,16 @@ Local checks run on this branch, and their results:
   - `python3 tools/check_icon_maps.py`: PASS (283 maps; the figure's item is its 3D model, not a map).
   - `javac` scan of the new and changed Java for syntax errors: none. Every member the new Java calls is used elsewhere in the code already, or declared in it, with the same arguments where the call is new. The full compile runs in CI.
   - The model was previewed offline, with the moving parts turned as the renderer turns them; what the previews showed and what was fixed is under How it is drawn.
+- Part 2, all on the first run:
+  - `python3 tools/check_mod_data.py`: PASS (8,164 material IDs), including the art check. `check_clockwork` now checks every figure the same way:
+    - its block is a `ClockworkFigure` holding the table's need and run-down, and its clockwork a `ClockworkFigureBlockEntity`, which takes kinetic energy up to the figure's need a tick;
+    - its registration, two-block item, renderer, quads, blockstate, empty upper model, single drop and name.
+    - For the werewolf, its turn, howl and sound are the table's, the howl fits in its cycle, and its renderer's shoulders, arms, neck, jaw and easing are the table's.
+  - `python3 scripts/check_repository.py`: PASS.
+  - `python3 -m unittest discover -s scripts/tests`: 287 tests, OK.
+  - `python3 tools/check_icon_maps.py`: PASS.
+  - `javac` scan of the new and changed Java for syntax errors: none. Every member the new Java calls is used elsewhere in the code already, or declared in it. The full compile runs in CI.
+  - The werewolf was previewed offline, posed at rest and in its howl, turned on its deck; what the previews showed and what was fixed is under How it is drawn.
 
 `ClockworkGameTests` (run in CI):
 - **The Organ-Grinder runs on its clockwork**:
@@ -109,12 +144,18 @@ Local checks run on this branch, and their results:
   - its power stopped, it runs down and stops, its tune back at the top.
 - **A hand crank drives it**: a hand crank beside its lower block, turning, sets it running.
 - **It breaks whole**: broken at its upper half, both halves go and it drops once.
-- **Its data loads**: its recipe and loot table.
+- **The werewolf howls on its clockwork** (part 2):
+  - placed, it stands two blocks tall on its turntable, facing the player, at rest, its clockwork a `ClockworkFigureBlockEntity`;
+  - it takes its need, 8 KE, in a tick and no more;
+  - its howl is 0 at rest and at its cycle's start, rises, holds at 1, and falls back to 0 by the cycle's end;
+  - a hand crank beside it drives it.
+- **Their data loads**: both figures' recipes and loot tables.
 
-`ClockworkClientGameTests` takes three screenshots of two Organ-Grinder Skeletons on a dark oak floor, one facing the camera and one facing east, each with a hand crank against the back of its lower block:
+`ClockworkClientGameTests` takes four screenshots on a dark oak floor of two Organ-Grinder Skeletons, one facing the camera and one facing east, and an Animatronic Werewolf facing the camera, each with a hand crank against the back of its lower block:
 - at rest, from the front;
 - running, their cranks turned, from the front;
-- running, from the east of the one facing the camera, where its crank and its right hand are.
+- running, from the east of the skeleton facing the camera, where its crank and its right hand are;
+- the werewolf in its first howl, its arms up and its head back (part 2).
 
 Not run: a hand playtest, and a two-client playtest.
 
@@ -122,5 +163,6 @@ Not run: a hand playtest, and a two-client playtest.
 Seasonal in look, not in use: it is made and works all year. It doesn't generate in the world.
 
 ## Rollout and open questions
-- Part 1 is the Organ-Grinder Skeleton; parts 2 to 6 follow, each stacked on the last.
+- Part 1 is the Organ-Grinder Skeleton and part 2 the Animatronic Werewolf; parts 3 to 6 follow, each stacked on the last.
+- Part 2 moved the skeleton's clockwork into the shared `ClockworkFigureBlockEntity` (unchanged in what it does), and its renderer now counts its tune at the server's rate, easing only its crank. The renderer's tune count had been eased too, so the jaw ran a quarter-second behind the notes.
 - Open: whether a figure should also take a redstone signal to start and stop (a power switch), and whether the show controller (part 6) should let a builder set each figure's start in a sequence.
