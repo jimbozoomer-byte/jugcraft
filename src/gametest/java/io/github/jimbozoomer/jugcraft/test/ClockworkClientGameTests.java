@@ -1,6 +1,7 @@
 package io.github.jimbozoomer.jugcraft.test;
 
 import io.github.jimbozoomer.jugcraft.agriculture.AnimatronicWerewolfBlock;
+import io.github.jimbozoomer.jugcraft.agriculture.FlyingCrankGhostBlock;
 import io.github.jimbozoomer.jugcraft.agriculture.JugcraftAgriculture;
 import io.github.jimbozoomer.jugcraft.agriculture.OrganGrinderSkeletonBlock;
 import io.github.jimbozoomer.jugcraft.kinetic.HandCrankBlock;
@@ -20,12 +21,14 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.DoubleBlockHalf;
 
 /**
- * Client game test for the Clockwork Animatronics, parts 1 and 2 (decor set 9): on a dark oak floor, two Organ-Grinder
+ * Client game test for the Clockwork Animatronics, parts 1 to 3 (decor set 9): on a dark oak floor, two Organ-Grinder
  * Skeletons, one facing the camera (north) and one facing east, and an Animatronic Werewolf facing the camera, each with a
  * hand crank against the back of its lower block. Photographed at rest from the front; then with their cranks turned
  * and their clockwork running, from the front and from the east, where the organ's crank is and the skeleton's right
  * hand on it (drawn by client/OrganGrinderSkeletonRenderer); and the werewolf, its turntable turning, in its howl
- * (client/AnimatronicWerewolfRenderer; CI job {@code client}). They go into docs/features/clockwork-animatronics.md.
+ * (client/AnimatronicWerewolfRenderer); and, part 3, a Flying Crank Ghost facing the camera, its crank behind it, at
+ * rest and then flying, its arms up in turn and its eyes lit (client/FlyingCrankGhostRenderer; CI job {@code client}).
+ * They go into docs/features/clockwork-animatronics.md.
  */
 public class ClockworkClientGameTests implements FabricClientGameTest {
 	@Override
@@ -43,8 +46,8 @@ public class ClockworkClientGameTests implements FabricClientGameTest {
 			server.runCommand("gamerule minecraft:spawn_mobs false");
 			server.runCommand("time set noon");
 			server.runCommand("weather clear");
-			server.runCommand("fill %d %d %d %d %d %d minecraft:dark_oak_planks".formatted(x - 5, y - 1, z - 5, x + 5, y - 1, z + 5));
-			server.runCommand("fill %d %d %d %d %d %d minecraft:air".formatted(x - 5, y, z - 5, x + 5, y + 4, z + 5));
+			server.runCommand("fill %d %d %d %d %d %d minecraft:dark_oak_planks".formatted(x - 5, y - 1, z - 9, x + 5, y - 1, z + 5));
+			server.runCommand("fill %d %d %d %d %d %d minecraft:air".formatted(x - 5, y, z - 9, x + 5, y + 4, z + 5));
 			server.runOnServer(minecraft -> build(minecraft.overworld(), origin));
 			context.waitTicks(40);
 			singleplayer.getConnection().waitForChunksRender();
@@ -57,6 +60,14 @@ public class ClockworkClientGameTests implements FabricClientGameTest {
 			// The werewolf in its first howl, its arms up and its head back (it howls from 112 to 160 ticks into its run).
 			context.waitTicks(Math.max(0, AnimatronicWerewolfBlock.howlStart() + AnimatronicWerewolfBlock.RAISE_TICKS - 120));
 			shoot(context, singleplayer, x + 3, y, z - 3, 0, 5, "jugcraft_clockwork_werewolf_howl");
+			// The ghost, at rest; then flying, its crank turned and its eyes lit, from the front and, half a turn on, from the
+			// side.
+			server.runOnServer(minecraft -> place(minecraft.overworld(), origin.offset(0, 0, -4), Direction.NORTH, "flying_crank_ghost"));
+			shoot(context, singleplayer, x, y + 1, z - 8, 0, 10, "jugcraft_clockwork_crank_ghost");
+			server.runOnServer(minecraft -> turn(minecraft.overworld(), origin.offset(0, 0, -3)));
+			shoot(context, singleplayer, x, y + 1, z - 8, 0, 10, "jugcraft_clockwork_crank_ghost_flying");
+			context.waitTicks(FlyingCrankGhostBlock.CRANK_TICKS / 2);
+			shoot(context, singleplayer, x - 3, y + 1, z - 7, -45, 15, "jugcraft_clockwork_crank_ghost_side");
 		}
 	}
 
@@ -86,12 +97,16 @@ public class ClockworkClientGameTests implements FabricClientGameTest {
 				Block.UPDATE_ALL);
 	}
 
-	/** Sets both hand cranks turning, as long as a crank keeps going. */
+	/** Sets the figures' hand cranks turning, as long as a crank keeps going. */
 	private static void crank(ServerLevel level, BlockPos origin) {
 		for (BlockPos at : new BlockPos[] {origin.offset(0, 0, 2), origin.offset(-4, 0, 1), origin.offset(3, 0, 2)}) {
-			if (level.getBlockEntity(at) instanceof HandCrankBlockEntity crank) {
-				crank.addTurns(HandCrankBlockEntity.MAX_TICKS);
-			}
+			turn(level, at);
+		}
+	}
+
+	private static void turn(ServerLevel level, BlockPos at) {
+		if (level.getBlockEntity(at) instanceof HandCrankBlockEntity crank) {
+			crank.addTurns(HandCrankBlockEntity.MAX_TICKS);
 		}
 	}
 }

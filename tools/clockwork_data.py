@@ -8,6 +8,8 @@ whose palettes and bones it shares (tools/haunted_midway_data.py, tools/front_ya
 - Bone: its middle tone, lit along its upper or left edge and shaded along the other, its knuckles a tone lighter.
 - Felt and cloth (the top hat, its band and the waistcoat): flat, as cloth is; the waistcoat's moth holes in a fixed
   pattern, never at random.
+- Cheesecloth (the crank ghost): pale, hanging in folds, torn and worn through in fixed patterns (never at random),
+  cut out.
 Each figure's moving parts are drawn by its renderer from quads (assets/jugcraft/clockwork_quads.json), cut from the
 same boxes as its block and item models; its block model is the rest of it, the whole figure in its lower block's
 model (two blocks tall), its upper block's model empty.
@@ -19,8 +21,8 @@ import pumpkin_patch_data as ppd
 from decor6_data import quads
 from flora_art import Sculpt, pal, shade
 from front_yard_data import RED, bone, skull, vertebrae
-from haunted_midway_data import BLACK, BONE, GOLD, STEEL
-from pumpkin_patch_data import IRON, WOOD, flat, lengthwise, panel, walls
+from haunted_midway_data import BLACK, BONE, GOLD, STEEL, clear
+from pumpkin_patch_data import ALL6, IRON, WOOD, flat, lengthwise, panel, walls
 
 MOD = "jugcraft"
 FACINGS = ppd.FACINGS
@@ -419,13 +421,216 @@ def posed(sc, spec):
         out.append(dict(e, rotation=fa.rotation((sx, ey, ez), "x", ITEM_POSE["forearm"])))
     return out + sc.models["head"] + sc.models["jaw"]
 
+# ---------------------------------------------------------------- part 3: the Flying Crank Ghost
+
+GAUZE = pal("6c747a", "959ca2", "b9c0c4", "d7dcde", "eef0ee")
+HOLLOW = (12, 12, 18)
+GLOW = (196, 255, 212)
+# How far up each strip of cloth is torn from its foot (texels), column by column round a piece, over and over: the
+# hood's and the cape's hems a little, the robe's into long strips, the cuffs between.
+HOOD_TEAR = (1, 0, 1, 2)
+CAPE_TEAR = (1, 0, 2, 1, 0, 2, 1)
+ROBE_TEAR = (2, 6, 1, 4, 7, 3, 5, 0, 6, 2)
+CUFF_TEAR = (3, 1, 2, 0)
+
+
+def cheesecloth(tears=(), offset=0, holes=False):
+    """Loose cheesecloth gone pale: folds hanging down it, a column lit, the next lit, one in between, one in shadow, over
+    and over; its top row lit. Its foot torn into strips, column by column (`tears`, counted from `offset` so the pieces
+    round a part go on where the last left off), cut out; with `holes`, worn through in a staggered grid (a texel in
+    every fourth column of every fourth row, each band of rows two columns along from the last), cut out, never in the
+    torn rows or the row above them (so no scrap of it hangs loose)."""
+    def paint(p):
+        torn = bool(tears) and p.h > max(tears)
+        sound = p.h - 1 - (max(tears) if torn else 0)
+        for y in range(p.h):
+            for x in range(p.w):
+                c = x + offset
+                if torn and p.h - 1 - y < tears[c % len(tears)]:
+                    clear(p, x, y)
+                elif holes and y < sound and y % 4 == 2 and c % 4 == (1 if (y // 4) % 2 == 0 else 3):
+                    clear(p, x, y)
+                else:
+                    p.put(x, y, shade(GAUZE, 4 if y == 0 and p.h > 1 else (3, 3, 2, 1)[c % 4]))
+    paint.tag = repr(("cheesecloth", tuple(tears), offset, holes))
+    return paint
+
+
+def ghost_face():
+    """The ghost's face, three texels across and four high, the cheesecloth drawn tight over it: its brow lit; under it two
+    hollow eye sockets at its outer columns and between them the bridge of its nose; below, its mouth agape down the
+    middle, its chin in shadow either side."""
+    def paint(p):
+        for y in range(p.h):
+            for x in range(p.w):
+                hollow = (y == 1 and x in (0, p.w - 1)) or (y >= 2 and x == p.w // 2)
+                p.put(x, y, HOLLOW if hollow else shade(GAUZE, 3 if y == 0 else 1 if y == p.h - 1 else 2))
+    paint.tag = repr(("ghost_face",))
+    return paint
+
+
+def rag_tube(sc, name, x0, x1, z0, z1, t, y0, y1, tears, holes=False):
+    """Four cloth walls `t` thick round x0..x1 by z0..z1, from y0 to y1, open at the foot, where each is torn
+    (`cheesecloth`): the north and south walls the full width, the east and west between them. Their tears are counted on
+    round the tube, so the strips go on from wall to wall."""
+    walls = (((x0, z0), (x1, z0 + t)), ((x1 - t, z0 + t), (x1, z1 - t)), ((x0, z1 - t), (x1, z1)), ((x0, z0 + t), (x0 + t, z1 - t)))
+    out, offset = [], 0
+    for (ax, az), (bx, bz) in walls:
+        rag = cheesecloth(tears, offset, holes)
+        out.append(panel(sc, name, rag, (ax, y0, az), (bx, y1, bz), sides=("north", "south", "east", "west", "up"),
+                         up=cheesecloth(holes=False)))
+        offset += int(round(max(bx - ax, bz - az)))
+    return out
+
+
+def glow():
+    """An eye's lamp: pale green, flat; the renderer draws it at full light while the ghost runs."""
+    def paint(p):
+        for y in range(p.h):
+            for x in range(p.w):
+                p.put(x, y, GLOW)
+    paint.tag = repr(("glow",))
+    return paint
+
+
+def wire():
+    """Steel wire: dull and flat (the renderer stretches it to length, so it has no pattern along it to stretch)."""
+    def paint(p):
+        for y in range(p.h):
+            for x in range(p.w):
+                p.put(x, y, shade(STEEL, 0))
+    paint.tag = repr(("wire",))
+    return paint
+
+
+def round_plate(sc, name, painter, w, z0, z1, cx, cy, cut=0.5, **kw):
+    """A round plate `w` across standing across z, from z0 to z1, centred on (cx, cy): two boxes crossed, each `cut`
+    shorter at its ends."""
+    return [panel(sc, name, painter, (cx - w / 2 + cut, cy - w / 2, z0), (cx + w / 2 - cut, cy + w / 2, z1), **kw),
+            panel(sc, name, painter, (cx - w / 2, cy - w / 2 + cut, z0), (cx + w / 2, cy + w / 2 - cut, z1), **kw)]
+
+
+WIRE = 0.25
+SIDES4 = ("north", "south", "east", "west")
+
+
+def flying_crank_ghost():
+    """The Flying Crank Ghost, facing north, in its lower block's pixels (two blocks tall).
+    - The frame (`whole`): a round black iron base plate 50 cm across, a riveted brass gear housing on it at the back,
+      where its drive comes in; an iron post 2 m tall from it, a brass coupling at its foot, another half way up and a
+      cap on its top; an iron boom forward from its top, braced at 45 degrees; across the boom's front, an iron
+      crossbar 94 cm long, a brass pulley hung at each end in front of it on an iron strap; and on it, where the boom
+      meets it, a riveted brass gearbox.
+    - The crank (`crank`): a brass disc 19 cm across on the gearbox's front, its iron pin at the top.
+    - The ghost (`ghost`), hanging from the pin by its hood's top: a cheesecloth hood round its pale face, hollow-eyed
+      and open-mouthed; over its shoulders a hollow cape, its hem torn; and from under that a hollow robe falling to
+      1.3 m below its hood's top, worn through and torn at its foot into strips. Its eyes' lamps (`eyes`).
+    - Its arms (`left_arm`, `right_arm`): thin cheesecloth sleeves hanging straight down from its shoulders, their cuffs
+      worn through and torn.
+    - A wire (`wire`), 16 pixels long up from its foot, in the plane of the wires, which the renderer stretches and
+      turns into each of the five."""
+    spec = cw.FLYING_GHOST
+    sc = Sculpt(spec["block"], 2903, 128)
+    cast, br, studded = iron(), brass(), riveted()
+    cx, cy = spec["crank"]
+    wz = spec["wire_z"]
+    el = [panel(sc, "base", cast, (5.5, 0.0, 8.0), (10.5, 0.75, 16.0)), panel(sc, "base", cast, (4.0, 0.0, 9.5), (12.0, 0.75, 14.5))]
+    el.append(panel(sc, "housing", studded, (6.5, 0.75, 10.5), (9.5, 2.75, 14.5)))
+    for y0, y1 in ((2.75, 3.5), (15.5, 16.25), (31.0, 31.5)):
+        el.append(panel(sc, "coupling", br, (7.0, y0, 11.0), (9.0, y1, 13.0)))
+    el.append(panel(sc, "post", cast, (7.5, 3.0, 11.5), (8.5, 31.0, 12.5)))
+    el.append(panel(sc, "boom", cast, (7.5, 30.0, 8.5), (8.5, 31.0, 11.5)))
+    el.append(panel(sc, "brace", cast, (7.75, 28.5, 8.48), (8.25, 29.0, 12.02), rot=fa.rotation((8.0, 28.75, 10.25), "x", 45.0)))
+    el.append(panel(sc, "crossbar", cast, (0.5, 29.5, 7.25), (15.5, 30.5, 8.25)))
+    for px in spec["pulleys"]:
+        py = spec["pulley_y"]
+        el += round_plate(sc, "pulley", br, 2.0, wz - 0.25, wz + 0.25, px, py)
+        el.append(panel(sc, "strap", cast, (px - 0.25, py + 0.25, wz), (px + 0.25, py + 1.25, 7.5)))
+    el.append(panel(sc, "gearbox", studded, (6.0, 28.0, 7.0), (10.0, 32.0, 9.0)))
+    sc.models["whole"] = el
+    # The crank, its pin at the top.
+    r = spec["pin"]
+    sc.models["crank"] = round_plate(sc, "disc", br, 3.0, wz + 0.25, 7.0, cx, cy) + [
+        panel(sc, "pin", cast, (cx - 0.25, cy + r - 0.25, wz - 0.25), (cx + 0.25, cy + r + 0.25, wz + 0.25))]
+    # The ghost: its hood and its face, the cape over its shoulders and the robe falling from under it.
+    hx, hy = spec["head_top"]
+    cloth, hood = cheesecloth(), cheesecloth(HOOD_TEAR)
+    g = [panel(sc, "crown", cloth, (hx - 1.5, hy - 0.5, wz - 1.5), (hx + 1.5, hy, wz + 1.5)),
+         panel(sc, "hood", cloth, (hx - 2.0, hy - 1.5, wz - 2.0), (hx + 2.0, hy - 0.5, wz + 2.0)),
+         panel(sc, "face", cloth, (hx - 1.5, hy - 5.5, wz - 1.75), (hx + 1.5, hy - 1.5, wz + 1.5), north=ghost_face())]
+    for x0 in (hx - 2.0, hx + 1.5):
+        g.append(panel(sc, "hood", hood, (x0, hy - 5.5, wz - 2.0), (x0 + 0.5, hy - 1.5, wz + 2.0), sides=SIDES4 + ("up",)))
+    g.append(panel(sc, "hood", hood, (hx - 1.5, hy - 5.5, wz + 1.5), (hx + 1.5, hy - 1.5, wz + 2.0), sides=SIDES4 + ("up",)))
+    sy = spec["shoulder_y"]
+    g += rag_tube(sc, "cape", hx - 3.0, hx + 3.0, wz - 1.5, wz + 1.5, 0.5, sy - 6.0, sy + 1.0, CAPE_TEAR)
+    g.append(panel(sc, "cape", cloth, (hx - 2.5, sy + 0.5, wz - 1.0), (hx + 2.5, sy + 1.0, wz + 1.0)))
+    g += rag_tube(sc, "robe", hx - 2.0, hx + 2.0, wz - 0.75, wz + 0.75, 0.5, sy - 15.5, sy + 0.5, ROBE_TEAR, holes=True)
+    sc.models["ghost"] = g
+    sc.models["eyes"] = [panel(sc, "eye", glow(), (x0, hy - 3.5, wz - 1.85), (x0 + 1.0, hy - 2.5, wz - 1.77))
+                         for x0 in (hx - 1.5, hx + 0.5)]
+    # The arms, hanging straight down from the shoulders: a sleeve to the wrist, and its cuff.
+    for side, px in zip(("left_arm", "right_arm"), spec["shoulders"]):
+        wrist = sy - spec["wrist"]
+        sc.models[side] = [panel(sc, "sleeve", cloth, (px - 0.5, wrist + 0.5, wz - 0.25), (px + 0.5, sy + 0.5, wz + 0.25)),
+                           panel(sc, "cuff", cheesecloth(CUFF_TEAR, holes=True), (px - 1.0, wrist - 4.5, wz - 0.5), (px + 1.0, wrist + 0.5, wz + 0.5),
+                                 sides=SIDES4 + ("up",), up=cloth)]
+    sc.models["wire"] = [panel(sc, "wire", wire(), (-WIRE / 2, 0.0, wz - WIRE / 2), (WIRE / 2, 16.0, wz + WIRE / 2))]
+    sc.models["posed_wires"] = posed_wires(sc, spec)
+    return sc
+
+
+GHOST_MOVING = ("crank", "ghost", "eyes", "left_arm", "right_arm", "wire")
+# The ghost's parts drawn cut out (its cheesecloth is torn and worn through).
+GHOST_CUTOUT = ("ghost", "left_arm", "right_arm")
+
+
+def posed_wires(sc, spec):
+    """The ghost's wires as its item shows them, as near as a block model's turns allow (22.5 degrees at a time): with
+    the crank's pin at the top and both arms half raised (`ghost_posed`), straight up from its hood to the pin, from the
+    pin out to each pulley 22.5 degrees down, and from each pulley straight down to the sleeve."""
+    import math
+    cx, cy = spec["crank"]
+    wz, hw = spec["wire_z"], WIRE / 2
+    hx, hy = spec["head_top"]
+    sy, py = spec["shoulder_y"], spec["pulley_y"]
+    lift = math.radians(ITEM_LIFT)
+    pin = cy + spec["pin"]
+    out = [panel(sc, "wire", wire(), (hx - hw, hy, wz - hw), (hx + hw, pin, wz + hw))]
+    for px, shoulder, sign in zip(spec["pulleys"], spec["shoulders"], (-1, 1)):
+        reach = math.hypot(px - cx, pin - py)
+        lo, hi = (cx - reach, cx) if sign < 0 else (cx, cx + reach)
+        out.append(panel(sc, "wire", wire(), (lo, pin - hw, wz - hw), (hi, pin + hw, wz + hw),
+                         rot=fa.rotation((cx, pin, wz), "z", -sign * 22.5)))
+        hand = sy - spec["wrist"] * math.cos(lift)
+        wx = (px + shoulder + sign * spec["wrist"] * math.sin(lift)) / 2
+        out.append(panel(sc, "wire", wire(), (wx - hw, hand, wz - hw), (wx + hw, py, wz + hw)))
+    return out
+
+
+# The ghost's arms as its item shows them: half raised (`arms_rest` + `flap` / 2).
+ITEM_LIFT = cw.FLYING_GHOST["arms_rest"] + cw.FLYING_GHOST["flap"] / 2
+
+
+def ghost_posed(sc, spec):
+    """The ghost's item pose: the crank's pin at the top, the ghost hanging straight under it, both arms half raised
+    (45 degrees), and its wires (`posed_wires`)."""
+    sy, wz = spec["shoulder_y"], spec["wire_z"]
+    out = sc.models["crank"] + sc.models["ghost"] + sc.models["eyes"] + sc.models["posed_wires"]
+    for side, shoulder, sign in zip(("left_arm", "right_arm"), spec["shoulders"], (-1, 1)):
+        out += [dict(e, rotation=fa.rotation((shoulder, sy, wz), "z", sign * ITEM_LIFT)) for e in sc.models[side]]
+    return out
+
+
 # ---------------------------------------------------------------- building and files
 
 _built = {}
-BUILDERS = {cw.ORGAN_GRINDER["block"]: organ_grinder_skeleton, cw.WEREWOLF["block"]: animatronic_werewolf}
+BUILDERS = {cw.ORGAN_GRINDER["block"]: organ_grinder_skeleton, cw.WEREWOLF["block"]: animatronic_werewolf,
+            cw.FLYING_GHOST["block"]: flying_crank_ghost}
 # Each figure's moving parts (clockwork_quads.json, `<block>_<part>`), and the parts its item shows, posed.
-PARTS = {cw.ORGAN_GRINDER["block"]: MOVING, cw.WEREWOLF["block"]: WEREWOLF_MOVING}
-POSES = {cw.ORGAN_GRINDER["block"]: posed, cw.WEREWOLF["block"]: werewolf_posed}
+PARTS = {cw.ORGAN_GRINDER["block"]: MOVING, cw.WEREWOLF["block"]: WEREWOLF_MOVING, cw.FLYING_GHOST["block"]: GHOST_MOVING}
+POSES = {cw.ORGAN_GRINDER["block"]: posed, cw.WEREWOLF["block"]: werewolf_posed, cw.FLYING_GHOST["block"]: ghost_posed}
+# The moving parts drawn cut out, by figure.
+CUTOUT = {cw.FLYING_GHOST["block"]: GHOST_CUTOUT}
 
 
 def build(block):
@@ -470,7 +675,11 @@ def assets(root, write, lang):
         write(root / "models" / "item" / f"{block}.json", fa.model(block, d20d.separated(shown), display=ITEM_DISPLAY))
         write(root / "items" / f"{block}.json", {"model": {"type": "minecraft:model", "model": rid(f"item/{block}")}})
         for name in PARTS[block]:
-            out_quads[f"{block}_{name}"] = quads(sc.models[name], {"p": block})
+            drawn = quads(sc.models[name], {"p": block})
+            if name in CUTOUT.get(block, ()):
+                for quad in drawn:
+                    quad["cutout"] = True
+            out_quads[f"{block}_{name}"] = drawn
     write(root / "clockwork_quads.json", out_quads)
 
 

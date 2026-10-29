@@ -1,0 +1,7 @@
+{
+  "parent": "minecraft:block/block",
+  "textures": {
+    "particle": "jugcraft:block/flying_crank_ghost"
+  },
+  "elements": []
+}

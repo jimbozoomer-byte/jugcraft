@@ -28,6 +28,20 @@ plinth, two blocks tall. While it runs:
   drops `jaw` degrees about its hinge (`jaw_hinge`); it holds them `hold_ticks` ticks while it howls (`howl_sound`), and
   lowers them over `raise_ticks` again.
 Stopped, the turntable runs down over `ease` ticks and stops where it is, and the werewolf lowers its arms.
+Part 3, the Flying Crank Ghost (agriculture/FlyingCrankGhostBlock, FlyingCrankGhostBlockEntity): a hooded cheesecloth
+ghost 1.3 m long hanging in the air from a crank on a black iron post 2 m tall, its drive carried up the post from a
+brass gear housing at its foot to a brass gearbox on a crossbar at its top. Three wires hang it: one from the crank's
+pin to the top of its hood, and one from the pin over a pulley at each end of the crossbar (`pulleys`, at `pulley_y`)
+to each of its wrists. While it runs:
+- the crank turns once round every `crank_ticks` ticks about its axle (`crank`), its pin `pin` from it; the ghost hangs
+  from the pin, so it rides a circle that size, swaying `sway` degrees about the top of its hood (`head_top`) as it
+  goes (client/FlyingCrankGhostRenderer);
+- as the pin swings away from a pulley it draws that wire in, so each arm (pivoting at a shoulder, `shoulders` across
+  at `shoulder_y`, its wrist `wrist` from it) rises from `arms_rest` degrees out from hanging straight down to
+  `arms_rest` + `flap`, the two in turn;
+- its eyes glow pale green (a lamp in its hood), and every `moan_every` ticks it moans (`moan_sound`).
+Stopped, the crank runs down over `ease` ticks and stops where it is, and its eyes go dark. The wires all lie in one
+plane across the figure (`wire_z` deep).
 Sizes in pixels of the lower block, facing north (its front, the organ or the werewolf's face, to the north).
 """
 
@@ -64,6 +78,16 @@ WEREWOLF = {
     "howl_sound": "minecraft:entity.wolf.howl", "volume": 1.2, "pitch": 0.7,
 }
 
+FLYING_GHOST = {
+    "block": "flying_crank_ghost", "display": "Flying Crank Ghost",
+    "need": 4, "spin_down": 10, "ease": 10.0,
+    "crank_ticks": 40, "crank": (8.0, 30.0), "pin": 1.0, "wire_z": 6.0,
+    "pulleys": (1.5, 14.5), "pulley_y": 29.0, "head_top": (8.0, 26.5),
+    "shoulders": (5.25, 10.75), "shoulder_y": 21.0, "wrist": 7.0,
+    "arms_rest": 22.5, "flap": 45.0, "sway": 6.0,
+    "moan_every": 200, "moan_sound": "minecraft:entity.ghast.ambient", "volume": 0.6, "pitch": 0.9,
+}
+
 RECIPES = [
     # The skeleton (two bone blocks), its top hat (black wool), its organ (a note block on planks) and its clockwork
     # (a clock).
@@ -77,6 +101,11 @@ RECIPES = [
      "key": {"B": "minecraft:bone", "W": "minecraft:brown_wool", "C": "minecraft:clock", "I": "minecraft:iron_ingot",
              "G": "minecraft:gold_ingot"},
      "result": WEREWOLF["block"], "count": 1, "category": "building"},
+    # The ghost (white wool, its cheesecloth), its wires (string), its post and crossbar (iron) and its clockwork (a
+    # clock).
+    {"id": FLYING_GHOST["block"], "pattern": ["SCS", "WIW", " I "],
+     "key": {"S": "minecraft:string", "C": "minecraft:clock", "W": "minecraft:white_wool", "I": "minecraft:iron_ingot"},
+     "result": FLYING_GHOST["block"], "count": 1, "category": "building"},
 ]
 
 
@@ -86,7 +115,7 @@ def tune_length():
 
 def figures():
     """Every figure's table, in the order they were added."""
-    return [ORGAN_GRINDER, WEREWOLF]
+    return [ORGAN_GRINDER, WEREWOLF, FLYING_GHOST]
 
 
 def blocks():

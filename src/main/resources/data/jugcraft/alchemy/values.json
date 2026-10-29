@@ -12302,6 +12302,11 @@
       "denominator": 1,
       "source": "recipe jugcraft:flying_broomstick"
     },
+    "jugcraft:flying_crank_ghost": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
     "jugcraft:flying_eyeball": {
       "numerator": 512,
       "denominator": 1,

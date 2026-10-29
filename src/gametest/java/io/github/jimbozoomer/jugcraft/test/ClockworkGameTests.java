@@ -4,6 +4,7 @@ import io.github.jimbozoomer.jugcraft.Jugcraft;
 import io.github.jimbozoomer.jugcraft.agriculture.AnimatronicWerewolfBlock;
 import io.github.jimbozoomer.jugcraft.agriculture.ClockworkFigure;
 import io.github.jimbozoomer.jugcraft.agriculture.ClockworkFigureBlockEntity;
+import io.github.jimbozoomer.jugcraft.agriculture.FlyingCrankGhostBlock;
 import io.github.jimbozoomer.jugcraft.agriculture.JugcraftAgriculture;
 import io.github.jimbozoomer.jugcraft.agriculture.OrganGrinderSkeletonBlock;
 import io.github.jimbozoomer.jugcraft.agriculture.OrganGrinderSkeletonBlockEntity;
@@ -36,7 +37,8 @@ import net.minecraft.world.phys.Vec3;
  * Organ-Grinder Skeleton is placed two blocks tall facing the player; it takes no more than its need of kinetic energy a
  * tick, runs only on all of it, plays while it runs and runs down after its power stops; a hand crank beside it drives
  * it; broken, it comes down whole and drops once; and its recipe and loot load. Part 2: the Animatronic Werewolf runs on
- * its own need, its howl rises, holds and falls within its cycle, and a hand crank drives it.
+ * its own need, its howl rises, holds and falls within its cycle, and a hand crank drives it. Part 3: the Flying Crank
+ * Ghost runs on its own need, from any side, and runs down; a hand crank behind it drives it; and it breaks whole.
  */
 public class ClockworkGameTests {
 	private static void floor(GameTestHelper helper) {
@@ -178,10 +180,54 @@ public class ClockworkGameTests {
 		});
 	}
 
+	/** Part 3: the Flying Crank Ghost runs on its own need, runs down after it, and a hand crank behind it drives it. */
+	@GameTest(maxTicks = 80)
+	public void theCrankGhostFliesOnItsClockwork(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		floor(helper);
+		ServerPlayer player = standing(helper, new BlockPos(3, 2, 1));
+		BlockPos lower = placed(helper, player, new BlockPos(3, 2, 3), "flying_crank_ghost");
+		BlockState state = level.getBlockState(lower);
+		helper.assertTrue(state.getBlock() instanceof FlyingCrankGhostBlock && state.getValue(FlyingCrankGhostBlock.FACING) == Direction.NORTH
+				&& level.getBlockState(lower.above()).getValue(FlyingCrankGhostBlock.HALF) == DoubleBlockHalf.UPPER
+				&& !state.getValue(ClockworkFigure.RUNNING) && level.getBlockEntity(lower) instanceof ClockworkFigureBlockEntity,
+				"It stands two blocks tall on its post, facing the player, at rest");
+		ClockworkFigureBlockEntity figure = (ClockworkFigureBlockEntity) level.getBlockEntity(lower);
+		long[] took = new long[2];
+		helper.onEachTick(() -> {
+			long now = helper.getTick();
+			if (now >= 2 && now < 20) {
+				took[0] = figure.acceptKinetic(Direction.WEST, 64);
+				took[1] = figure.acceptKinetic(Direction.EAST, 64);
+			}
+		});
+		helper.runAtTickTime(15, () -> helper.assertTrue(took[0] == FlyingCrankGhostBlock.NEED && took[1] == 0 && running(level, lower),
+				"Fed, it takes its need a tick and no more, from any side, and runs: took " + took[0] + " then " + took[1]));
+		helper.runAtTickTime(20 + FlyingCrankGhostBlock.SPIN_DOWN + 5, () -> {
+			helper.assertTrue(!running(level, lower) && figure.played() == 0, "Its power stopped, it runs down and stops");
+			// A hand crank behind its lower block, facing into it, as its gear housing is.
+			helper.setBlock(new BlockPos(3, 2, 4), JugcraftKinetics.HAND_CRANK.defaultBlockState().setValue(HandCrankBlock.FACING, Direction.NORTH));
+			if (level.getBlockEntity(helper.absolutePos(new BlockPos(3, 2, 4))) instanceof HandCrankBlockEntity crank) {
+				crank.addTurns(HandCrankBlockEntity.TICKS_PER_CRANK);
+			}
+		});
+		helper.runAtTickTime(20 + FlyingCrankGhostBlock.SPIN_DOWN + 25, () -> {
+			helper.assertTrue(running(level, lower), "A hand crank turning behind its lower block drives it");
+			level.destroyBlock(lower.above(), true);
+		});
+		helper.runAtTickTime(20 + FlyingCrankGhostBlock.SPIN_DOWN + 35, () -> {
+			int dropped = level.getEntitiesOfClass(ItemEntity.class, new AABB(lower).inflate(3.0),
+					drop -> drop.getItem().is(JugcraftAgriculture.item("flying_crank_ghost"))).stream().mapToInt(drop -> drop.getItem().getCount()).sum();
+			helper.assertTrue(level.getBlockState(lower).isAir() && level.getBlockState(lower.above()).isAir() && dropped == 1,
+					"Broken at its upper half, it comes down whole and drops once: " + dropped);
+			helper.succeed();
+		});
+	}
+
 	@GameTest
 	public void clockworkDataLoads(GameTestHelper helper) {
 		ServerLevel level = helper.getLevel();
-		for (String id : new String[] {"organ_grinder_skeleton", "animatronic_werewolf"}) {
+		for (String id : new String[] {"organ_grinder_skeleton", "animatronic_werewolf", "flying_crank_ghost"}) {
 			helper.assertTrue(level.recipeAccess().byKey(ResourceKey.create(Registries.RECIPE, Jugcraft.id(id))).isPresent(), id + " has a recipe");
 			helper.assertTrue(level.getServer().reloadableRegistries().getLootTable(ResourceKey.create(Registries.LOOT_TABLE,
 					Jugcraft.id("blocks/" + id))) != LootTable.EMPTY, id + "'s loot loads");

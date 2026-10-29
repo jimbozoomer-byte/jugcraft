@@ -15389,7 +15389,10 @@ def check_clockwork():
     1, the Organ-Grinder Skeleton: its timing, waltz and loudness are the table's, the renderer's crank, arm, neck and
     jaw are, and the arm reaches the crank's handle all the way round. Part 2, the Animatronic Werewolf: its turn,
     howl and sound are the table's, the howl fits in its cycle, and the renderer's shoulders, arms, neck, jaw and
-    easing are the table's."""
+    easing are the table's. Part 3, the Flying Crank Ghost: its crank, moan and sound are the table's, the renderer's
+    crank, pulleys, hood, shoulders, arms, sway and easing are the table's, its eyes are drawn at full light, its torn
+    cheesecloth parts are cut out, its wire is drawn 16 pixels up from its foot in the wires' plane, and its arms never
+    rise past level nor its wrists above their pulleys."""
     import math
     import clockwork as cw
     import clockwork_data as cwd
@@ -15406,7 +15409,8 @@ def check_clockwork():
     if '"clockwork_quads.json"' not in read(CLIENT_JAVA_ROOT / "DecorQuads.java"):
         err("DecorQuads must read clockwork_quads.json")
     quads = load(ASSETS / "clockwork_quads.json") or {}
-    classes = {cw.ORGAN_GRINDER["block"]: ("OrganGrinderSkeleton", "grinder"), cw.WEREWOLF["block"]: ("AnimatronicWerewolf", "werewolf")}
+    classes = {cw.ORGAN_GRINDER["block"]: ("OrganGrinderSkeleton", "grinder"), cw.WEREWOLF["block"]: ("AnimatronicWerewolf", "werewolf"),
+               cw.FLYING_GHOST["block"]: ("FlyingCrankGhost", "ghost")}
     if set(classes) != set(cw.blocks()):
         err("check_clockwork: every figure must be checked")
     for spec in cw.figures():
@@ -15489,6 +15493,46 @@ def check_clockwork():
                         ("EASE", ww["ease"])):
         if f"static final float {name} = {value}F;" not in drawn:
             err(f"AnimatronicWerewolfRenderer.{name} must be {value} (tools/clockwork.py WEREWOLF)")
+    # Part 3: the Flying Crank Ghost.
+    fg = cw.FLYING_GHOST
+    block = fg["block"]
+    java = read(JAVA_ROOT / "agriculture" / "FlyingCrankGhostBlock.java")
+    held = read(JAVA_ROOT / "agriculture" / "FlyingCrankGhostBlockEntity.java")
+    drawn = read(CLIENT_JAVA_ROOT / "FlyingCrankGhostRenderer.java")
+    for item in (f"CRANK_TICKS = {fg['crank_ticks']};", f"MOAN_EVERY = {fg['moan_every']};", f"VOLUME = {fg['volume']}F;",
+                 f"PITCH = {fg['pitch']}F;"):
+        if item not in java:
+            err(f"FlyingCrankGhostBlock: missing {item} (tools/clockwork.py FLYING_GHOST)")
+    if fg["moan_sound"] != "minecraft:entity.ghast.ambient" or "SoundEvents.GHAST_AMBIENT" not in held:
+        err(f"FlyingCrankGhostBlockEntity: it must moan with {fg['moan_sound']} (SoundEvents.GHAST_AMBIENT)")
+    (fcx, fcy), (plx, prx), (hx, hy), (slx, srx) = fg["crank"], fg["pulleys"], fg["head_top"], fg["shoulders"]
+    for name, value in (("CRANK_X", fcx), ("CRANK_Y", fcy), ("PIN", fg["pin"]), ("WIRE_Z", fg["wire_z"]), ("PULLEY_LEFT", plx),
+                        ("PULLEY_RIGHT", prx), ("PULLEY_Y", fg["pulley_y"]), ("HEAD_X", hx), ("HEAD_Y", hy), ("SWAY", fg["sway"]),
+                        ("SHOULDER_LEFT", slx), ("SHOULDER_RIGHT", srx), ("SHOULDER_Y", fg["shoulder_y"]), ("WRIST", fg["wrist"]),
+                        ("ARMS_REST", fg["arms_rest"]), ("FLAP", fg["flap"]), ("EASE", fg["ease"])):
+        if f"static final float {name} = {value}F;" not in drawn:
+            err(f"FlyingCrankGhostRenderer.{name} must be {value} (tools/clockwork.py FLYING_GHOST)")
+    if "LightCoordsUtil.FULL_BRIGHT" not in drawn:
+        err("FlyingCrankGhostRenderer: its eyes glow at full light while it runs")
+    for part in cwd.GHOST_CUTOUT:
+        if not quads.get(f"{block}_{part}") or not all(q.get("cutout") for q in quads[f"{block}_{part}"]):
+            err(f"clockwork_quads.json: {block}_{part} is torn cheesecloth, drawn cut out")
+    ys = [v[1] for q in quads.get(f"{block}_wire", []) for v in q["vertices"]]
+    zs = [v[2] for q in quads.get(f"{block}_wire", []) for v in q["vertices"]]
+    if not ys or abs(min(ys)) > 1e-3 or abs(max(ys) - 16.0) > 1e-3 or abs((min(zs) + max(zs)) / 2 - fg["wire_z"]) > 1e-3:
+        err(f"clockwork_quads.json: {block}_wire must run 16 pixels up from its foot, in the wires' plane ({fg['wire_z']} deep)")
+    if fg["arms_rest"] + fg["flap"] >= 90.0:
+        err("tools/clockwork.py FLYING_GHOST: its arms must never rise past level (arms_rest + flap under 90)")
+    for a in range(0, 360, 5):
+        # The ghost hangs as the renderer poses it (FlyingCrankGhostRenderer.pose), at most the pin and its sway off.
+        sw, sn = math.radians(-fg["sway"] * math.cos(math.radians(a))), math.sin(math.radians(a))
+        for shoulder, turn in ((slx, -(fg["arms_rest"] + fg["flap"] * (0.5 + 0.5 * sn))), (srx, fg["arms_rest"] + fg["flap"] * (0.5 - 0.5 * sn))):
+            x = shoulder + fg["wrist"] * math.sin(math.radians(turn)) - hx
+            y = fg["shoulder_y"] - fg["wrist"] * math.cos(math.radians(turn)) - hy
+            wy = hy + fg["pin"] * (math.cos(math.radians(a)) - 1) + x * math.sin(sw) + y * math.cos(sw)
+            if wy >= fg["pulley_y"]:
+                err(f"tools/clockwork.py FLYING_GHOST: a wrist rises to its pulley's height with the crank at {a} degrees")
+                break
 
 
 def check_party_table():
