@@ -88,7 +88,9 @@ final class MagicArt {
 	/** The glyph family of spec 2.5: white, seven rows, each at its own width (tools/magic_ui.py GLYPHS, in order). */
 	enum Glyph {
 		INF(11), SPIRAL(7), SPARKLE(7), MOON(8), KEY(10), SUN(7), CLOCK(7), RING(7), CALENDAR(7), HOURGLASS(7), PERSON(7),
-		PARTY(12), SCROLL(7), PAUSE(5), CROSS(7), LOCK(7), TICK(7), PIN(7), ARROW(7), ASK(5), BED(7), BACK(7);
+		PARTY(12), SCROLL(7), PAUSE(5), CROSS(7), LOCK(7), TICK(7), PIN(7), ARROW(7), ASK(5), BED(7), BACK(7),
+		/** The roster's Resume (its action frame's play triangle). */
+		PLAY(4);
 
 		static final int HEIGHT = 7;
 		final int width;

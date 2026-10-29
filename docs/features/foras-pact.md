@@ -11,9 +11,10 @@ Status: **built and recorded, not yet compiled or run in CI, not merged** (Conco
 `e3194d0be` (GC-07a); the graft in one place and the bed index's stores `8d8fba4b5` (GC-07b); Foras `e4fca201d` (GC-07);
 his review's fixes `8a50bbd33`; these records). Nothing of unit 4 has been compiled: no Minecraft build was possible
 where it was written, so every Java file of it was parse-checked only, and none of his server tests or client shots has
-run ([Verification](#verification)). The last CI result this line descends from is run
-[40782439981](https://github.com/jimbozoomer-byte/jugcraft/actions/runs/40782439981), green in full on `d7185041b`,
-before unit 4; nothing on unit 4's line has run in CI. The repository's Python checks and audits ran on his files. No
+run ([Verification](#verification)). His line is merged after unit 3's (Marax; [the
+merge](concordance-garden-cohort.md#unit-4s-merge-after-unit-3)); the newest CI result the merged line descends from is
+run [40823371480](https://github.com/jimbozoomer-byte/jugcraft/actions/runs/40823371480), green in full on `5e8e0cba3`,
+before unit 4; nothing of unit 4 has run in CI. The repository's Python checks and audits ran on his files. No
 person has played him. This page began as his brief (GC-07a), committed before any of his body files (D-D5); the
 sections after "Dependencies and assets" describe him as built. Where it goes beyond Dossier 4 (the greeting's stage
 direction, how his body is built, which cue plays which file at what pitch, the short words the screens draw) it is
@@ -290,7 +291,8 @@ weekly honeycomb goes on (the cohort's checkpoint question 2; Jade says "Nothing
   every work's question in general given a glance, Bathin's "Take from Hearts that have a road?" among them; his Jade
   short forms); `tools/acquisition.py` and the journey test's `GARDEN_RECIPES` gain Dewmoss (the same lines unit 3
   writes); `tools/concordance_roster.py` his roster line; `tools/select_client_tests.py` the garden class's weight +220;
-  his four codex pages after Bathin's and three journey steps. No device's or bed's saved key changed.
+  his four codex pages after Bathin's and three journey steps (since the merge with unit 3, his pages after Marax's and
+  before "Mastered", his steps 14 to 16). No device's or bed's saved key changed.
 
 ## The pact screen
 
@@ -323,8 +325,9 @@ Each is the session's, reviewable at the cohort's checkpoint; none is the owner'
   it skips a store read without a donor until then too, remembered by store and donor item, so a store without one
   graft's donor is still read for another's (decided by the session; only Dewlit is known today).
 - **His chooser card reasons are "Store needed" and "Host needed"** (decided by the session, under the magic interfaces'
-  budgets): with Stolas ready and Buer, Bathin and Foras not, the chooser draws its 25 words only if his reason is two
-  words, and a work with two refusals needs a reason for each, so `tools/magic_ui.py`'s `card` may name one per refusal
+  budgets): with Stolas ready and Buer, Bathin and Foras not, the chooser drew its 25 words only if his reason was two
+  words (since the merge with unit 3 the chooser's budget is 7 words a card, `chooserWords`, which two words keep), and a
+  work with two refusals needs a reason for each, so `tools/magic_ui.py`'s `card` may name one per refusal
   (`work_cards`) and `check_magic_ui` asks each `missing*` key for one.
 - **His Jade notes add `no_reading`** and his `no_gain` note reads true answered or not (GC-P90).
 - **His matter names how many and the nearest, and that a graft can harm** (decided by the session, from the unit review):
@@ -341,15 +344,17 @@ Each is the session's, reviewable at the cohort's checkpoint; none is the owner'
 - **Four server assertions expect AWAITING_ANSWER** where his think raises or keeps his matter unanswered (GC-P47).
 - **His first obligation's test** checks the graft outside his area and the one while suspended before the one that
   keeps it, then one more that records nothing.
-- **The client flow** (after Bathin's, under unit 4's marker): noon and clear weather first and noon again before his
-  poses (in the merged order Marax's flow comes first); `standingFacing` with his literal `FORAS_FACES` (so
-  `check_pact_screen` sees each shot's name), not a
-  `forasFacing` of his own; the chooser's card reached with `tabToNamed`, as the restyled chooser asks; the matter's
-  answers asserted none kept before the answer (the safe course is not a kept answer); the roster's "awaiting your answer"
-  read from the server's roster entry and the client's words for it, without opening the roster again (unit 2
-  photographed it); the ending's count expects one graft unless the game day turned since it; the mouse parked off every
-  chip for his whole flow (the 26.3 lesson); nothing paid ahead, so the ending checks no escrow
-  (`endingAnySpiritsPactReturnsTheEscrowOnce` holds it for every spirit).
+- **The client flow** (after Bathin's, under unit 4's marker; after Marax's since the merge): noon and clear weather
+  first and noon again before his poses (in the merged order Marax's flow comes first); `standingFacing` with his
+  literal `FORAS_FACES` (so `check_pact_screen` sees each shot's name), not a `forasFacing` of his own; the chooser's
+  card reached with `tabToNamed`, as the restyled chooser asks; the matter's answers asserted none kept before the
+  answer (the safe course is not a kept answer); the roster's "awaiting your answer" read from the server's roster entry
+  and the client's words for it, without opening the roster again (unit 2 photographed it); the ending's count expects
+  one graft unless the game day turned since it; the mouse parked off every chip for his whole flow (the 26.3 lesson;
+  since the merge his own `parkMouse` is gone, as the shared `shot()` parks the cursor where no control is before every
+  picture, and his choosers are held by `cardsWhole`, his first beat by `portraitWhole`, and his budgets by unit 3's
+  `chooserWords`); nothing paid ahead, so the ending checks no escrow (`endingAnySpiritsPactReturnsTheEscrowOnce` holds
+  it for every spirit).
 - **Two class Javadocs are left as they are** (`Workers` and the garden client class): neither has a marker, and the
   merge with units 3, 5 and 6 would conflict there.
 - **His records** (decided by the session): his codex pages are named by title, not by page number, since each unit's
@@ -399,7 +404,7 @@ under "Not confirmed" below. Each brief item and the evidence named (the contrac
 | Brief item | Evidence (server game tests in `ConcordanceWorkerGameTests` unless named; shots of `ConcordanceGardenPactClientGameTests`) | Result |
 |---|---|---|
 | 1. Identity | his body files from `tools/garden_bodies.py` through `tools/owner_art.py` (`--check`); `check_spirit_bodies` (his bones, clips and their lengths, the cap from the owner's file, the skin's colours, the cap's tip in his arrive and work clips only, his box, his poses' windows, his loops and shots in the client); his poses from his front (`_idle`, `_listen`, `_waiting`, `_suspended`, `_inspect`, `_assent`, `_refuse`, `_work`, `_depart`, `_arrive`) | the audits pass locally; shots not run |
-| 2. Invitation and route | `forasRefusesWithoutAStore`, `forasRefusesWithoutAHost`, `forasStandsBesideThePerchFacingHisInviter`; `tools/concordance_journey.py --check` (the garden pacts' steps 10 to 12 on this line); shots `jugcraft_garden_foras_no_store`, `_chooser` | not run; the journey check passes locally |
+| 2. Invitation and route | `forasRefusesWithoutAStore`, `forasRefusesWithoutAHost`, `forasStandsBesideThePerchFacingHisInviter`; `tools/concordance_journey.py --check` (the garden pacts' steps 10 to 12 on this line, 14 to 16 since the merge); shots `jugcraft_garden_foras_no_store`, `_chooser` | not run; the journey check passes locally |
 | 3. Service | `forasSpendsOneDonorAGraftAndNeverTwo`, `forasNeverReplacesAKnownGraft`, `forasGraftsAgainAfterAReplanting`, `forasTakesOnlyFromAStoreTheHolderMayChange` (a store read empty is read again with his index), `forasSkipsPlacesRefusedForThemselves`, `forasStopsAtHisQuota`; `ConcordanceGardenGameTests`' `theGraftGestureBehavesAsBefore`, `aGraftGainsOnlyWhereEveryFitIsNoWorseAndOneBetter`, `theGardenReachIndexesStoresTouchingThePerch` (GC-07b); shot `_grafting` | not run |
 | 4. Upkeep and suspension | SG12's fifteen shared cases through his fixture (a chest beside the perch and a grafted Sunpetal), `noGardenTermOrRefusalNamesAnAstrolabe`, `talkingTeachesNothing`; `check_acquisition` (his compact and offering reachable); shots `_terms` (three sizes), `_refused`, `_kept` | not run; the audit passes locally |
 | 5. Conflict: the logician's objection | `aPrudentForasSkipsAUselessGraft`, `aPrudentForasGraftsWhereItHelps`, `anAlwaysAnswerGraftsEveryHost`, `forassReadingSaysItsNoteAndNamesNoPlayer`; `ConcordancePersistenceGameTests.aForasReloadedKeepsHisStoreAndAnswer`; shots `_matter` (three sizes), `_answered`, `_jade` | not run |
@@ -424,8 +429,8 @@ for every offered spirit; `ConcordanceJourneyGameTests.theGardenPactsRecipesLoad
 Chunk C's graft tests (C-09's nine) are unchanged and now hold the gesture through `Grafting`. None of these has run on
 this line.
 
-**Client** (`./gradlew runClientGameTest -PclientTests=ConcordanceGardenPactClientGameTests`): his flow after Bathin's,
-at the same perch (after Marax's once unit 3 is merged); 33 shots, `jugcraft_garden_foras_` + `no_store`, `chooser`,
+**Client** (`./gradlew runClientGameTest -PclientTests=ConcordanceGardenPactClientGameTests`): his flow after Marax's,
+at the same perch (since the merge with unit 3); 33 shots, `jugcraft_garden_foras_` + `no_store`, `chooser`,
 `conversation` and `terms` (each at three sizes), `refused`, `kept`, `matter` (three sizes), `answered`, `grafting`,
 `jade`, `idle`, `listen`, `waiting`, `suspended`, `inspect`, `assent`, `refuse`, `work`, `depart`, `arrive`,
 `faces_east`, `_south`, `_west`, `_north`, `counted`, `end_confirm` and `ended` (23 named in `GARDEN_CLIENT_SHOTS`, his
@@ -519,8 +524,8 @@ seasonal gate. No cave, dungeon, boss or loot role.
 
 Ships with the garden cohort's unit 4 (GC-07), behind the Concordance's switch; built, not yet compiled or run in CI,
 not merged. Open: every test and shot of his is still to run in CI (the server jobs, then the garden client class and a
-dispatch of every client class), his pictures to be looked at and this record given their "Seen" column; his line is to
-be merged after unit 3's (Marax), as the cohort's order 3, 4, 5, 6 asks. Known limits: nearly idle once his hosts are
+dispatch of every client class), his pictures to be looked at and this record given their "Seen" column; his line is
+merged after unit 3's (Marax), as the cohort's order 3, 4, 5, 6 asks. Known limits: nearly idle once his hosts are
 grafted, while his weekly honeycomb goes on (the cohort's checkpoint question 2); his count is an action-bar line, not a
 voiced one; a host whose bed holds no reading waits until it has one (he never samples): its crop's growth reads it, but
 a reading is not saved and a ripe crop no longer grows, so after a restart or a chunk reload a ripe host waits until it

@@ -8,6 +8,10 @@ design's pictures). **Nothing of it has been compiled or run in Minecraft yet** 
 **Unit 2 built, not merged** (one commit on unit 1's line): the roster as two columns of relic cards on the layer, the
 chooser's shared pieces moved into the layer, and Jade's short lines (see "Unit 2: the roster as relic cards, and short
 Jade lines"). Like unit 1's, nothing of it has been compiled or run in Minecraft here.
+**Fixes from CI's pictures** (one commit on the cohort's line, after Marax): every chooser card whole above its footer for
+up to seven spirits, a roster card's tip held to its state's and its fact's sentences, a spirit's portrait whole on its
+first beat, and the client tests' pictures without tips and with each spirit framed whole (see "Fixes from CI's
+pictures").
 Proposal issue: none; the owner's request of 28 October 2026 is the scope.
 Owner: @jimbozoomer-byte. AI-assisted implementation with Claude Code; the model is named in the commit trailers.
 Target milestone and tier: every tier's magic screens (the pact perch first, then the roster, the composer, the Field
@@ -38,6 +42,7 @@ mockups (kept with the session's design notes, not in the repository). Its answe
 | **The beats shortened** (spec 1.5: at most 18 words a line, a stage direction of at most 8), a `Terms` skip on beats 1 and 2, and a spirit's beats once heard not shown again (the next visit opens on his terms; a client-only set in Jugcraft's client options) | **Decided by the session, in answer to the owner's request for far less reading; reviewable at the checkpoint.** Not owner-accepted. Applied in the screen commit to Stolas's, Buer's and Bathin's beats (their records quote the new words) |
 | The service sentences (`term.service.<work>`) stay as shipped; GC-S7's two phrases stay in them | Spec 1.6 (a rewrite saved four to six words) |
 | **A kept page that draws both a pending first task and its spirit's matter may draw that task's row** (at most 12 words, its act drawn short) beyond the kept page's budget of 45 (48 compact); its client shots allow that row's words (`firstTask()` in the garden client test). The spec measured the matter page without a first task; with Bathin's row cut from 18 words to 10 the page still draws about 55 in the composed picture | **Decided by the session, in answer to the owner's request for far less reading; reviewable at the checkpoint.** Not owner-accepted (the pact screens' review asked for the allowance to be dropped once the row was shorter; it cannot be without cutting the matter's or the last carry's words) |
+| **The chooser's budget grows with its cards** (spec 1.1's chooser row amended): 4 words (the title and Close) and 7 a card (a name, "Not yet" and a reason of at most 4 words), so 25 for three cards as the spec measured. With Marax a fourth card stands beside Stolas, Buer and Bathin wherever The Garden's Regard is understood: the chooser without a bed drew 20 words for three cards in CI, and his card not ready adds 7, about 27; each later unit's spirit adds a card of at most 7. `chooserWords()` in the garden client test reads the cards from the state | **Decided by the session (Marax's review), in answer to the owner's request for far less reading; reviewable at the checkpoint.** Not owner-accepted. The other way, a shorter reason on cards not ready, would leave a fourth not-ready spirit over 25 anyway |
 | **Unit 2: Jade shows a few short lines by default** on the pact perch, the Spirit Anchor, the spirits, Verdant Beds and living devices (at most five, each a glance with its mark or item), and **every line whole while Jade's details key is held** (sneak by default) | **Decided by the session, in answer to the owner's request for far less reading; reviewable at the checkpoint.** Not owner-accepted. Each short line narrates its whole sentence |
 | **Unit 2: a card's state is its row's own waiting reason, short** ("Awaits answer", "Following you", "Not loaded"), beside the mark of its icon, else the state's word | **Decided by the session** (spec 1.4 #3 names such states); the card's narration and tip keep every word of the row |
 | **Unit 2: Resume, Cancel and Recover's icons** are the kit's turning arrows, the cross and the up arrow (spec 2.14 names End's cross and Suspend's bars only) | **Decided by the session**; each icon's message is its label, its tip names the card ("Resume Stolas") |
@@ -87,7 +92,7 @@ word counts are from screens composed from the generated files at 427x240 (spec 
 
 | Mode | What the player sees first | Words |
 |---|---|---|
-| Chooser | "Invite a spirit" in gold over the cosmos; a portrait card a spirit (`invite:N`), "Ready" or "Not yet" with its short reason under each; Close | 15 (25) |
+| Chooser | "Invite a spirit" in gold over the cosmos; a portrait card a spirit (`invite:N`), "Ready" or "Not yet" with its short reason under each; Close | 15 (25 for three cards; 4 + 7 a card, Decisions) |
 | Beats | the header (the live spirit, his name, three pips, `Terms` and its arrow on beats 1 and 2 (`skip`), his service's icon and name); the ruled scroll with the stage direction dim and his line (`beat`); gold arrows beside it (`back`, `next`; beat 3's captioned "Terms"); Leave. Under 360 wide the arrows are footer plates | 26, 16 (30) |
 | Terms | "His terms" (`para:0`); blockers and the answer pinned on top; a chip a term (`term:hours` ... `term:beneficiaries`) and "Standing terms" (`term:standing`); the price row: "Price", the stacks (a short one rimmed red with have/need), the resonance (boxed red when short), More (`more`); Accept, Decline and the back arrow | Buer 36, Bathin with three blockers 50, refused 39 to 43 (50); More 63 (70) |
 | Kept page | the header adds the state (`note:0`), today's gauge and four sockets for what is paid ahead; the service tab: what needs doing first, the matter and its answers, the other rows, Star-reckoning's patterns and Recall or the work's choices, the next offering with Offer and "×N carried" at the foot; the terms tab: the chips and the price paid at sealing; bookmarks for the tabs; Suspend or Resume, End..., Close | 35 to 44 (45; 48 compact, where the sockets read "0/4 ahead") |
@@ -145,7 +150,7 @@ word counts are from screens composed from the generated files at 427x240 (spec 
 - **Consumers:** the magic screens as each moves onto the layer (`tools/magic_ui.py` `MAGIC_SCREENS`), in the order of
   the design's units: the pact screen, the roster and chooser, the composer and Field Guide, the alchemy and Nouveau
   family.
-- **Garden units 4 to 6** (Marax, Foras, Bifrons, Amdusias) add each work's row to `WORK_GLANCES` (its name, service
+- **Garden units 3 to 6** (Marax, Foras, Bifrons, Amdusias) add each work's row to `WORK_GLANCES` (its name, service
   line, icon, kept-page rows, blockers and chooser reason; its gauge row, if any, "%1$s/%2$s today"); `check_magic_ui`
   names any row the server can send without one, and a row missing its name or line. A first task whose act runs its
   row past 12 words needs an act glance (`garden_pact.act.<act>`; the row is rendered with every act). Marks follow the
@@ -153,7 +158,9 @@ word counts are from screens composed from the generated files at 427x240 (spec 
   theirs with no Java change; row icons other than the work's own are keyed by exact keys (`ICON_RULES`). A work's icon
   is `WORK_GLANCES[work]["icon"]` and one line in `PactGlance.WORK_ICONS` (`check_magic_ui` holds the two equal; until
   it is added, the header shows the spirit's sign). Its beats and stage direction live in `tools/concordance_pacts.py`
-  beside its other words, held to spec 1.5's limits.
+  beside its other words, held to spec 1.5's limits. Each of its Jade notes and matters gets a short form and mark in
+  `SENTENCES` and `SENTENCE_MARKS` and a line in `MagicGlance.MARKS` (held equal), each under its unit's marker; Marax's
+  "Proud beds: %1$s" (the hourglass) was added when unit 2 of these interfaces joined his line.
 
 ## Multiplayer, server authority and persistence
 
@@ -202,6 +209,10 @@ rows from `magic_ui.change`; `check_magic_ui` holds this table to the files, row
 | `textures/gui/sprites/magic/action/refresh_highlighted.png` | `originals/Magic/assets/jymbelics/textures/gui/description/ability/reroll_button_active.png` | `a59b016ab74310cc15b8f45a681ac43ef857e92f268435ffe25fe4f278b96aa7` | the kit's action outline drawn over it |
 | `textures/gui/sprites/magic/action/refresh_highlighted.png` | `originals/Magic/assets/jymbelics/textures/gui/description/ability/action_button_outline.png` | `733909e2f675286434d935046fe247199ddbd1500ae86145021f3cf4ab935cd1` | its lit outline: this file drawn over the copy |
 | `textures/gui/sprites/magic/action/refresh_inactive.png` | `originals/Magic/assets/jymbelics/textures/gui/description/ability/reroll_button_inactive.png` | `e0e5d428474a577d2a54743aaccbdd21b2892f31abbf8e948d260b47e5a6f279` | none: copied, written as RGBA |
+| `textures/gui/sprites/magic/action/resume.png` | `originals/Magic/assets/jymbelics/textures/gui/description/ability/upgrade_button_active.png` | `4f2b06d9979e76fcc7ca1c2ed1b1e399ef51bbb669ddf92c2d15e8b7c022276f` | the upgrade frame's arrow covered (x 3-10, y 3-9) and a play triangle set in it |
+| `textures/gui/sprites/magic/action/resume_highlighted.png` | `originals/Magic/assets/jymbelics/textures/gui/description/ability/upgrade_button_active.png` | `4f2b06d9979e76fcc7ca1c2ed1b1e399ef51bbb669ddf92c2d15e8b7c022276f` | the upgrade frame's arrow covered (x 3-10, y 3-9) and a play triangle set in it, the kit's action outline drawn over it |
+| `textures/gui/sprites/magic/action/resume_highlighted.png` | `originals/Magic/assets/jymbelics/textures/gui/description/ability/action_button_outline.png` | `733909e2f675286434d935046fe247199ddbd1500ae86145021f3cf4ab935cd1` | its lit outline: this file drawn over the copy |
+| `textures/gui/sprites/magic/action/resume_inactive.png` | `originals/Magic/assets/jymbelics/textures/gui/description/ability/upgrade_button_inactive.png` | `1448f0a53421bf1c62a8a70db7c224fcba05ecc983efcd91e0fa78cbc1eef41d` | the inactive upgrade frame's arrow covered (x 3-10, y 3-9) and a play triangle set in it |
 | `textures/gui/sprites/magic/action/suspend.png` | `originals/Magic/assets/jymbelics/textures/gui/description/ability/upgrade_button_active.png` | `4f2b06d9979e76fcc7ca1c2ed1b1e399ef51bbb669ddf92c2d15e8b7c022276f` | the upgrade frame's arrow covered (x 3-10, y 3-9) and two bars set in it |
 | `textures/gui/sprites/magic/action/suspend_highlighted.png` | `originals/Magic/assets/jymbelics/textures/gui/description/ability/upgrade_button_active.png` | `4f2b06d9979e76fcc7ca1c2ed1b1e399ef51bbb669ddf92c2d15e8b7c022276f` | the upgrade frame's arrow covered (x 3-10, y 3-9) and two bars set in it, the kit's action outline drawn over it |
 | `textures/gui/sprites/magic/action/suspend_highlighted.png` | `originals/Magic/assets/jymbelics/textures/gui/description/ability/action_button_outline.png` | `733909e2f675286434d935046fe247199ddbd1500ae86145021f3cf4ab935cd1` | its lit outline: this file drawn over the copy |
@@ -295,6 +306,10 @@ rows from `magic_ui.change`; `check_magic_ui` holds this table to the files, row
 | `textures/gui/sprites/magic/glyph/pause.png` | drawn for Jugcraft |  | the pause glyph, drawn for Jugcraft in the strip's one-pixel style, white (no library file) |
 | `textures/gui/sprites/magic/glyph/person.png` | drawn for Jugcraft |  | the person glyph, drawn for Jugcraft in the strip's one-pixel style, white (no library file) |
 | `textures/gui/sprites/magic/glyph/pin.png` | drawn for Jugcraft |  | the pin glyph, drawn for Jugcraft in the strip's one-pixel style, white (no library file) |
+| `textures/gui/sprites/magic/action/resume.png` | `originals/Magic/assets/jymbelics/textures/gui/description/ability/upgrade_button_active.png` | `4f2b06d9979e76fcc7ca1c2ed1b1e399ef51bbb669ddf92c2d15e8b7c022276f` | the upgrade frame's arrow covered (x 3-10, y 3-9) and a play triangle set in it |
+| `textures/gui/sprites/magic/action/resume_highlighted.png` | `originals/Magic/assets/jymbelics/textures/gui/description/ability/upgrade_button_active.png` | `4f2b06d9979e76fcc7ca1c2ed1b1e399ef51bbb669ddf92c2d15e8b7c022276f` | the upgrade frame's arrow covered (x 3-10, y 3-9) and a play triangle set in it, the kit's action outline drawn over it |
+| `textures/gui/sprites/magic/action/resume_inactive.png` | `originals/Magic/assets/jymbelics/textures/gui/description/ability/upgrade_button_inactive.png` | `1448f0a53421bf1c62a8a70db7c224fcba05ecc983efcd91e0fa78cbc1eef41d` | the inactive upgrade frame's arrow covered (x 3-10, y 3-9) and a play triangle set in it |
+| `textures/gui/sprites/magic/glyph/play.png` | drawn for Jugcraft |  | the play glyph, drawn for Jugcraft in the strip's one-pixel style, white (no library file) |
 | `textures/gui/sprites/magic/glyph/ring.png` | drawn for Jugcraft |  | the ring glyph, drawn for Jugcraft in the strip's one-pixel style, white (no library file) |
 | `textures/gui/sprites/magic/glyph/scroll.png` | drawn for Jugcraft |  | the scroll glyph, drawn for Jugcraft in the strip's one-pixel style, white (no library file) |
 | `textures/gui/sprites/magic/glyph/tick.png` | drawn for Jugcraft |  | the tick glyph, drawn for Jugcraft in the strip's one-pixel style, white (no library file) |
@@ -422,12 +437,12 @@ The design's unit 2 (spec 4.6): the roster as cards, the chooser's shared pieces
   ("At work", "Awaits answer", "Not loaded", "In transit"), one fact of at most four words with its item ("due in 7
   days" with the offering cycling once a second, "2/8 tasks today", "Carrying #3" with the carried item, "0/16
   delivered"), the kind at the card's foot, and its actions as the kit's icons at its top right: Suspend (two bars), End
-  (a cross), Resume (the turning arrows), Cancel (the cross), Recover (the up arrow). Every sentence of the row stays its
-  narration and its tip (hover or keyboard focus); an action's tip is one line naming the card ("End Bathin...") and
-  stays in its own card's band, its narration the whole hint. The footer: the page's arrows at the left, Refresh and
-  Close at the right. The server's answer is a short line with its mark at the top ("Suspended", "Not on your roster
-  now"), the whole sentence its narration and tip. A page of eight draws 62 words (the composed picture at
-  427x240; the budget is 70, the old roster's 346).
+  (a cross), Resume (a play triangle, since the review), Cancel (the cross), Recover (the up arrow). Every sentence of the
+  row stays its narration and its tip (hover or keyboard focus); an action's tip is one line naming the card ("End
+  Bathin...") and stays in its own card's band, its narration the whole hint. The footer: the page's arrows at the left,
+  Refresh and Close at the right. The server's answer is a short line with its mark in the title row, beside the title
+  ("Suspended", "Not on your roster now"), the whole sentence its narration and tip. A page of eight draws 62 words
+  (the composed picture at 427x240; the budget is 70, the old roster's 346); the review's fixes below change these.
 - **Narrow and short screens** (spec 2.14): under 180 wide a card draws its name regular, stacks its actions in its right
   column and moves its kind to its tip; at 320x180 a page holds six cards ("1 / 2"), as the design's picture shows.
 - **Ending from the roster** asks on the scroll over the cosmos, as the pact's does: "End the agreement with Gathering
@@ -435,12 +450,13 @@ The design's unit 2 (spec 4.6): the roster as cards, the chooser's shared pieces
   it); its narration is the server's whole sentence.
 - **Jade, short by default** (spec 1.1: at most five lines of at most four words, each with an icon): on the pact perch and
   the Spirit Anchor "With Stolas" (his sign), the state with its mark ("Active", "Offering due"), the service with its
-  work's item, "Next in 7 days" (or "Grace: 1 days") and one more line, the one most worth knowing (his matter, else why
-  his presence waits, else his service's note, else the answer kept); on a spirit its status short with its mark
-  ("Awaits answer") and the same reading without "With"; on a Verdant Bed its growth or "Dormant" with its mark, its
-  nutrients, its first reason short ("Moisture too low") and its strain ("Strain 2/8"); on a living device its status
-  short with its mark ("No Verdance", "Keeper away"). **Jade's details key (sneak by default) shows every line whole, as
-  before**, the bed's habitat and every reason included; each short line narrates its whole sentence.
+  work's item, the next offering ("7 d" after the calendar; the grace "1 d" after the hourglass, since the review) and one
+  more line, the one most worth knowing (his matter, else why his presence waits, else his service's note, else the
+  answer kept); on a spirit its status short with its mark ("Awaits answer") and the same reading without "With"; on a
+  Verdant Bed its growth or "Dormant" with its mark, its nutrients, its first reason short ("Moisture too low") and its
+  strain ("Strain 2/8"); on a living device its status short with its mark ("No Verdance", "Keeper away"). **Jade's
+  details key (sneak by default) shows every line whole, as before**, the bed's habitat and every reason included; each
+  short line narrates its whole sentence.
 
 ### What changes
 
@@ -460,8 +476,8 @@ The design's unit 2 (spec 4.6): the roster as cards, the chooser's shared pieces
   offering resumes it" became "Offer to resume": unit 1 wrote the roster's glances before the cards were measured, and it
   ran past a card's room.
 - **Audits:** `check_magic_ui` holds `MagicGlance.MARKS` and its prefix to the tables, the chooser's and the roster's
-  shared pieces, and Jade's short lines (each provider's whole lines kept for its details, at most five short lines on a
-  kept pact); `magic_ui.unit2_problems` renders every short form from its sentence's own arguments, holds a card's
+  shared pieces, and Jade's short lines (that they are drawn, that `showDetails` is read at least four times, and at
+  most five short lines on a kept pact; which branch draws which view is held since the review, below); `magic_ui.unit2_problems` renders every short form from its sentence's own arguments, holds a card's
   state and fact to the narrowest card's room (`CARD_TEXT`, 94 px at 320 wide), and names a roster state or answer the
   server can send without its glance, a stray short form or a mark that is not one; `check_roster_screen` follows the
   screen onto the layer (its portraits, marks, ending on the scroll, subtitles read from `MagicScreen`, and its shots'
@@ -496,7 +512,8 @@ The design's unit 2 (spec 4.6): the roster as cards, the chooser's shared pieces
 - **The Alembic Crucible's "Next step" line** (spec 2.14's last sentence) is left to the alchemy family's unit (unit 4):
   this unit's Jade lines are the pact perch's, the spirits', the beds' and the devices'.
 - **Not shortened in Jade:** a work's matters and notes without a short form (a later garden spirit's, until its unit
-  adds one to `SENTENCES` and `SENTENCE_MARKS`) are drawn whole, without a mark.
+  adds one to `SENTENCES` and `SENTENCE_MARKS`) are drawn whole, without a mark. Since the review
+  `magic_ui.unit2_problems` names any such key, so a garden spirit's unit adds its rows with its note.
 
 ### Known limits (unit 2)
 
@@ -506,7 +523,8 @@ The design's unit 2 (spec 4.6): the roster as cards, the chooser's shared pieces
 - The composed pictures are a port of the screen's geometry to the generated files, not the game's drawing; the client
   tests count what the game draws.
 - Jade's short lines are photographed only where the client tests take Jade shots with Jade loaded (the pact and garden
-  classes); none of them reads Jade's lines.
+  classes, and the roster class's workshop hand at work, `jugcraft_workshop_hand_at_work`); none of them reads Jade's
+  lines, and no client test photographs a Verdant Bed's, a crop's or a living device's short lines.
 
 ### Verification (unit 2)
 
@@ -541,6 +559,231 @@ Run locally, all passing (none of it in CI, and nothing in Minecraft):
   composed page draws 62 words at 427x240 and 480x270, 54 at 320x240 and 42 at 320x180 (the budget is 70); no control
   outside its area, no card's words cut, at all four sizes. The empty roster draws 19 words, the full roster's last page
   24.
+
+### The review's fixes (unit 2)
+
+The unit's review confirmed twenty findings and rejected three. What changes:
+
+- **A click on a card's action presses it.** A card sat before its actions in the body, so a click on Suspend, Resume,
+  End, Cancel or Recover reached the card and did nothing. A card is now not under the mouse where one of its actions
+  sits (`Card.isMouseOver`), and is not lit, tipped or narrated as hovered there either, so a greyed action shows its own
+  tip. The client test presses End with the mouse and waits for the confirmation.
+- **Nothing pushes the cards out of the body.** The answer (or "Asking the server..."), the switched-off note and the
+  opening line sit in the title row between the title and the page, one line each and held there (`outside()`); an
+  answer wider than its room (one without a glance) is cut with "…", whole in its tip and narration (`PactScreen.Verdict`'s
+  one-line form). "16 more not listed" sits in the footer between the page's arrows and Refresh; while an answer holds
+  the title row, the switched-off note joins it there. The note's short words are now "Concordance off" after the lock
+  ("Concordance off: nothing can be done" was too wide for the smallest title row).
+- **The title row and the footer stand on a dark band** (the cards' purple at 85%, its corners cut), so the gold title and
+  the lavender page read at 4.5:1 or more over a bright world.
+- **A card's tip opens beside the card, toward the other column, and always whole on the screen**
+  (`RosterScreen.CardSide`; a tall tip could start above the screen at 320x180).
+- **A familiar or construct not loaded says "Not loaded"** with the moon, not its last status as if it were live; any
+  other card draws the mark its waiting sentence has in Jade (`MagicGlance.MARKS`: idle the moon, no access a cross, done
+  for today a tick), else its icon's.
+- **A page keeps to its 70 words:** one that would draw more (eight request cards of eight words and an answer) draws its
+  cards without their kinds, each kind kept in its card's tip and narration. The client test cancels one of sixteen open
+  requests from their page and reads it.
+- **A resize keeps its rows in view:** when the cards a page holds change (eight from 240 tall, six at 320x180), the page
+  becomes the one holding the row the keyboard is on, else the first row shown.
+- **Resume is a play triangle** in the action frame (`magic/action/resume` and its lit and inactive states, adapted as
+  End's and Suspend's are, and a drawn `play` glyph), no longer the footer's Refresh.
+- **Jade's short lines each have an icon:** a spirit's bond (the party glyph), its body ("Integrity 10/20", the person),
+  what it carries (the arrow), a departing spirit and a perch that keeps no agreement (the moon), a bed's nutrients (the
+  bed); the next offering and the grace read "7 d" and "1 d" after the calendar and the hourglass (they read "1 days"); a
+  bed's growth and the rest of a living device's statuses have capitalised short forms ("Thriving", "Growing slowly",
+  "Nothing to eat"; nine more `SENTENCES` rows, 83 in all, and two more marks, 64). A crop's Jade is short too (its
+  growth, its first reason and its strain, each with its mark; a ripe crop's growth as it grew narrates "As it grew: ...")
+  and whole while its details key is held.
+- **Audits:** the older Jade audits (a bed's strain line, the matter and the answer kept, a service's note) read the whole
+  reading's own methods (`strain`, `pactLines`), so deleting those lines fails though the short lines repeat their keys;
+  `check_magic_ui` holds which branch draws which view (Jade's details the whole lines, the plain view the short ones,
+  for the spirit, the perch and anchor, the bed, the device and the crop), that a short line narrates its whole sentence
+  and never its glance, and that every `Map.entry` of `MagicGlance.MARKS` is read; `magic_ui.unit2_problems` names a
+  work's Jade matter or note without its short form and mark (a later garden spirit's unit adds them with its note:
+  Marax's `pact.note.habitat_reading.proud` is the next); `check_roster_screen` holds the page's own budget, the click's
+  route to the action, the test's comparisons (`words <= BUDGET`, `cut.isEmpty()`, the end confirmation's 25, Bathin's
+  card) and the end sent only from its confirmation's yes. `tools/select_client_tests.py` selects the roster's class when
+  the Jade adapter changes.
+- **Tests:** the empty roster's check and the full roster's last page now wait for the settled screen, and the last
+  page's "more" line is checked in view.
+
+Decided by the session in these fixes: the switched-off note's short words; a card's tip held toward the other column
+when it has no room there (it then covers as little of its own card as it can); the glyphs of Jade's value lines; the
+dark band behind the footer as well as the title row.
+
+Known limits of these fixes:
+
+- An answer without a glance that is wider than the title row is cut with "…" (at 320 wide, "Gathering Shade departs; 0
+  offerings came back" and the courier's longer refusals); its whole sentence is its tip and narration, and the answer is
+  read aloud when it comes.
+- On a switched-off server's last page with an answer showing, "more" and the note share the footer's band, each cut
+  with "…" at 320 wide.
+- The roster's own offering facts still read "due in 1 days" and "due: 1 days left" for a single day (`ROSTER_GLANCES`,
+  outside the review's findings).
+
+Verification of the fixes, run locally, all passing (none of it in CI, and nothing in Minecraft):
+
+- The generators, one at a time: `python3 -B tools/generate_material_data.py` (the language file: 9 short forms added, 4
+  changed; its whitespace-only and reordered rewrites of the Jimtafacts files and the content map were restored), then
+  `python3 tools/owner_art.py` (the three Resume sprites and the `play` glyph; its identical-pixel rewrites of two
+  ornamental corn textures were restored); `python3 tools/owner_art.py --check` and `python3 tools/magic_ui.py`.
+- `python3 -B tools/check_mod_data.py`, `python3 scripts/check_repository.py`, `python3 tools/concordance_journey.py
+  --check`, `python3 tools/concordance_economy.py` (gaining cycles: none), `python3 tools/check_icon_maps.py`, `node --test
+  tools/world-designer/model.test.cjs` (12), `python3 -m unittest discover -s scripts/tests` (342) and `git diff --check`.
+- Every changed Java file parses (8); every vanilla call was read in the decompiled 26.3 sources (`AbstractWidget`'s
+  `isHovered`, `isMouseOver` and `getRight`, `ContainerEventHandler.getChildAt`, `AbstractContainerWidget.mouseClicked`,
+  `InputConstants.MOUSE_BUTTON_LEFT`) or the repository's own uses (the client tests' `setCursorPos`, `pressMouse` and
+  `getGuiScale`). Nothing compiled.
+- The audits' mutations, each on a scratch copy of the tree: 34 made, 34 caught (the card under the mouse over its
+  actions, or lit there; the test's click dropped; the answer or "more" back in the body, or not held to its room; Resume
+  drawn as Refresh; "more" not checked in view; a page over its budget keeping its kinds, or a looser budget; the page of
+  requests not read; the test's budget, cut and end-confirmation comparisons loosened; a cut card not reported; the
+  garden test's card check dropped; the end sent whatever the answer; an action pressable while an answer waits; each
+  of the six views inverted or drawn by the other's lines; a device's status whole in the plain view; a short line
+  narrating its glance; a duplicated mark entry; Marax's note without its rows; the strain, the matter, the answer kept
+  and the note deleted from the whole reading; the roster's class dropped from the Jade adapter's selection; a day line
+  back to "Next in 7 days"). The end confirmation's comparison first passed loosened (`<= CONFIRM_BUDGET * 2` still held
+  the needle); the needle now ends at its comma, and catches it.
+- **The roster composed again from the generated files** (the same port, now with the title row's answer and band, the
+  footer's band and line, the reviewed marks, `CardSide` and the kinds rule) at 427x240, 320x180, 480x270 and 320x240,
+  and looked at beside the design's pictures: the answer ("Suspended", its tick) beside the title; Stolas suspended with
+  Resume's play triangle; the construct not loaded with the moon; End's tip in its card's band with the card unlit under
+  the cursor. With the answer showing the page draws 57 words at 427x240 and 480x270, 50 at 320x240 and 41 at 320x180. A
+  page of eight request cards with "Request #29 cancelled" would draw 71 at 427x240, so it draws its cards without kinds
+  (63); the full roster's last page draws 32 with "16 more not listed" in the footer; a middle card's ten-line tip opens
+  whole at 320x180 (from 107,72) and a second-row card's at 427x240 (from 5,76). No control outside its area and no
+  card's words cut at any size.
+
+## Fixes from CI's pictures (units 1 to 3 on the cohort's line)
+
+CI run 40820647569 ran the client tests on 3c2d36b0f (units 1 and 2 of these interfaces merged into the garden cohort's
+line with Buer, Bathin and Marax), all 16 client shards green. Its pictures showed five faults, each fixed in the shared
+code, so the later garden spirits (Foras, Bifrons and Amdusias, units 4 to 6) take the fixes when they merge. These fixes
+themselves have not been compiled or run: nothing here was built in Minecraft (see their verification below).
+
+### What the player sees
+
+- **Every spirit on the chooser stands whole above Close**, one to seven of them (Stolas and the six garden spirits). With
+  Marax a fourth card had wrapped under the footer's Close plate. One row of the portrait cards with each reason under
+  them while the row fits (up to six at 427x240 and 480x270, four at 320 wide); seven in two rows (four and three) of the
+  kit's small gilded card frame, chained and marked with the lock when not ready, a line of reason under each where it
+  fits; at 320x180, from five on, the small frame with its name plate over its foot. "Ready" or "Not yet" and its mark
+  are always drawn; a reason with no room under its card is carried by its tip and narration (the server's whole
+  sentence), a hover away.
+- **A roster card's tip is short**: its state's whole sentence and its fact's (at most 20 words and three lines in all),
+  else its state's alone. It had been every sentence of the row, nine lines over half the page. Every sentence of the row
+  stays the card's narration; a narrow card's kind, and a page's kinds dropped for its budget, are in the narration.
+- **A spirit's portrait is whole on its first beat.** While this client still draws a spirit's arrival (Marax grows from
+  nothing, Buer rises from a small bud), the header's window draws it as it will stand (its visual-only portrait, playing
+  its idle pose), then the real one once it has arrived. The world draws the arrival as before.
+- **The client tests' pictures show no tooltip over a row** (the terms, the proud reading, the roster): before each
+  picture the cursor is parked where no control is and the mouse is made the client's last input; a picture named for a
+  tip or a hover keeps its cursor.
+- **The facing pictures show each spirit whole, facing its speaker, with nothing before its face**: Buer's petals no
+  longer touch the top, and the perch's post no longer stands before Marax's face from the east (nor Buer's bed from the
+  west).
+
+### What changes
+
+- **`PactScreen`** (client): `chooserCards(count, area)`, a pure placement: as few rows as the width allows (each column
+  at least 68), the rows as even as can be, each centred; the largest card size, with two, one or no lines of reason,
+  whose rows stand whole in the scroll above the footer; the spare height (up to 8) between rows. `CardSize` holds the
+  three sizes (the portrait card 48x77; the small card frame 30x41 with its plate under it; the same frame with its plate
+  over its foot); a card's size is read from its rectangle's height, so the card draws what the placement gave it.
+  `chooserArea(width, height, compact)` and `chooserFooter(...)` give the tests the scroll and footer; `tippedReasons()`
+  names the cards whose reason is in their tip; `portrait()` says what the header's portrait drew ("live", "standing",
+  "sign").
+- **`MagicPortrait.shown`** (client): a pact spirit still arriving is drawn as its visual-only portrait.
+  **`PactSpiritRenderers`** is public, with `arriving(spirit)` (its gesture controller triggered with its arrival and not
+  played out, within the gesture's length of its coming into this client's world) and `standing(spirit)` (its box widened
+  and raised as its renderer's row says: where its body is drawn as it stands). Nothing the world draws changes.
+- **`RosterScreen`** (client): `TIP_WORDS` (20, spec 1.1) and `TIP_LINES` (3); a card's tip from its state's sentence
+  (for a card not loaded, its place's "not loaded" line) and its fact's (`RosterGlance.factLine`, the line `fact` draws
+  from); `tip(id)` for the tests.
+- **Client tests:** `ConcordancePactClientGameTests`, `ConcordanceGardenPactClientGameTests` and
+  `ConcordanceRosterClientGameTests` take every picture through `shot`, which first parks the cursor on a corner of the
+  screen no control covers (asserted) and makes the mouse the last input (`park`), then gives the input back after the
+  picture; every shot keeps its literal name. The garden class checks the placement for one to seven cards at 427x240,
+  320x180, 480x270 and 320x240, full and compact (`placements`: inside the scroll, the scroll above the footer, no two
+  overlapping), each pictured chooser's cards wholly in view (`cardsWhole`), a reason drawn or in its card's tip
+  (`reasons`), and each garden spirit's first-beat portrait whole (`portraitWhole`); its facing pictures (Buer's,
+  `spiritFacing`, `standingFacing`) fly the camera along the speaker's bearing to where the spirit's drawn body stands
+  whole with a tenth's margin at each edge and no block's outline stands between the camera and its face (its eyes and a
+  little below, at its middle and its front; a level look first, steeper only where needed), asserted found, then land
+  the player where they spoke from (`frame`, `camera`, `land`). The roster class holds each card's tip to its words and
+  lines before every shot (`tips`).
+- **Audits:** `check_pact_screen` (the chooser's placement and its use, the size read from the rectangle, the tipped
+  reason; the garden test's placement check, `cardsWhole` after each chooser's `fits`, `reasons`, `portraitWhole`, the
+  facing camera; the pact and garden classes' parked shots, pictures taken through `shot` alone), `check_magic_ui` (a
+  spirit still arriving drawn as it will stand, the world's drawing unchanged) and `check_roster_screen` (the tip's
+  words and lines, its two sentences, `details` no longer in the tip; the roster test's `tips` and parked shots).
+- **No payload, request or server decision changes**; no word or sprite is added (the generated files are unchanged).
+
+### Decisions
+
+| Decision | Status |
+|---|---|
+| The chooser's smaller cards are the kit's own small card frame (30x41, which its chains fit), not the portrait card scaled, so no pixel is resampled; on it the lock mark replaces the kit's padlock (14x17, which would hide its 20x29 window); at the smallest size its plate covers the frame's foot | **Decided by the session**, in answer to the cohort's seven cards; reviewable at the checkpoint |
+| A card keeps the portrait card while its row fits, before it keeps its reason's lines (a full card without reason before a small card with them) | **Decided by the session** |
+| A roster card's tip may take three lines (spec 1.1 says two): a long state sentence alone ("Upkeep: suspended for its upkeep: nothing is taken or lost, and an offering resumes it") takes three at the tip's 200 px; both sentences are kept only within 20 words and three lines | **Decided by the session** |
+| A picture's parking also makes the mouse the client's last input for that picture (moving the mouse alone leaves the keyboard's in 26.3: `MouseHandler` sets it only on a click), so a keyboard-focus tip (the roster's first card, Refresh) clears; the input is given back after | **Decided by the session** |
+| A facing picture's camera flies (the player's abilities, for the frozen picture only) along the speaker's bearing; it may look down up to 45 degrees where a block stands before the face (Marax's west picture, over Buer's bed, about 33 degrees in a port of the yard) | **Decided by the session** |
+
+### Known limits (these fixes)
+
+- **Not compiled or run in Minecraft here** (no jar): every call was read in the decompiled 26.3 sources, GeckoLib 5.5.7's
+  source or the repository's own uses; the files parse. The client tests' new checks have not run.
+- Marax stands two blocks west of the perch and his head reaches over Buer's bed, kept beside the perch since unit 1's
+  flow: from the west the bed hides his chin whatever the camera, so that picture looks down over it at his face (the
+  face points inside the bed are not looked for).
+- `standing` is the renderer's culling reach, a generous bound: Marax is framed with room above him for his familiar's
+  flight in.
+- A spirit whose arrival this client never drew (its perch off the screen) is drawn live once its arrival's length has
+  passed; during its arrival the portrait plays the visual-only spirit's idle pose, not its live gestures.
+- A state sentence longer than the tip's limits is still shown whole, alone: the longest a card can have, a reservation
+  waiting on a container not loaded, runs to about 22 words in four lines (no client test's row has it).
+- With an answer shown above seven cards on a 320x180 screen the cards no longer fit whole, and the scroll scrolls (as
+  every chooser did before).
+- The composed pictures are a port of the chooser's geometry to the generated files, not the game's drawing.
+
+### Verification (these fixes)
+
+Run locally, all passing (none of it in CI, and nothing in Minecraft):
+
+- No generator was run: no word, sprite or table changed. `python3 tools/owner_art.py --check`: every imported owner file
+  matches its source.
+- `python3 -B tools/check_mod_data.py` (with `check_pact_screen`, `check_magic_ui` and `check_roster_screen` as changed):
+  PASS. `python3 scripts/check_repository.py`, `python3 tools/concordance_journey.py --check`, `python3
+  tools/concordance_economy.py` (gaining cycles: none), `python3 tools/check_icon_maps.py`, `node --test
+  tools/world-designer/model.test.cjs` (12), `python3 -m unittest discover -s scripts/tests` (343) and `git diff --check`.
+- Every changed Java file parses (8). Every call added was read in the decompiled 26.3 sources, GeckoLib 5.5.7's source
+  or the repository's own uses: `ScreenRectangle.encompasses`, `intersects` and `containsPoint`, `Minecraft.getLastInputType`
+  and `setLastInputType`, `InputType.MOUSE` (and that `MouseHandler` sets the last input only on a click),
+  `AnimationController.getCurrentRawAnimation` and `hasAnimationFinished`, `Abilities.mayfly` and `flying` with
+  `onUpdateAbilities`, `ClipContext.Block.OUTLINE` on the client's level, `BlockState.getShape(...).bounds().move(pos)`,
+  `AABB.getCenter`, `contains`, `inflate` and `expandTowards`, `Vec3.cross`, `dot` and `horizontalDistance`,
+  `BlockPos.containing`, `options.fov()`, `Window.getGuiScale`. Nothing compiled.
+- The audits' mutations, each on a scratch copy of the tree: 35 made, 35 caught (the chooser placed without
+  `chooserCards`, with one size, ignoring the area's height; a card's size not its rectangle's; a reason drawn whatever
+  its room; the test's placement without the smallest screen or the overlap check; a chooser's cards not held in view;
+  `reasons` back to drawn reasons only; the pact, garden or roster test's shots not parked, a tip's shot parked, the
+  keyboard's input left, the cursor parked over a control, a picture taken around `shot`; the portrait drawing the
+  arrival, `arriving` blind to the clip's end, the world hiding an arriving spirit, the stand-in not the spirit's own, a
+  first beat's portrait not checked, the screen's portrait not recorded; a facing picture not framed or never landed,
+  the camera blind to what stands before the face, framing the box alone, off the speaker's bearing, or seeing through
+  outlines; a looser tip, every sentence back in it, its words or lines not counted, the fact's sentence not its line;
+  the roster test's tips not read, looser or wordless).
+- **The chooser composed from the generated files** (a port of `chooserArea`, `chooserCards`, `CardSize` and `Card`: the
+  sprites, their slices and the language file) with three, four, five and seven cards at 427x240, 320x180, 480x270 and
+  320x240, and looked at; looking at them replaced the kit's padlock on the small frame with the lock mark (the padlock
+  hid its window). The port's placement for one to seven cards at those sizes and at 360 and 367 wide, full and
+  compact: every card inside the scroll above the footer, none overlapping. Four cards draw 22 words at 427x240, seven 26
+  (each card's budget is 7, the title and Close 4).
+- **The facing camera's search run in a port of the yard** (the perch's outline, the beds and their crops as boxes,
+  default field of view and window): Buer framed from 3 blocks and Bathin from 2.75, a level look; Marax from 4 blocks
+  (from the east lifted a quarter, over the perch's post) and from the west 3.5 blocks back and 1.75 up, looking down
+  about 33 degrees over Buer's bed, his face's point inside the bed not looked for.
 
 ## Known limits
 
@@ -647,6 +890,8 @@ None: presentation only.
 - Unit 1 ends at the owner's checkpoint: CI's first compile, then the client shots of every pact state beside the
   design's pictures, with each shot's word count from its log.
 - The owner reviews variant B, the D-S15 wording and the shortened beats at that checkpoint.
+- The fixes from CI's pictures end at the next CI run's client shots: the chooser with four cards at every size, the
+  first beats' portraits, the terms, proud and roster shots without a tip, and the facing pictures, beside these.
 - Unit 2 (the roster's cards, the chooser's shared pieces and Jade's short lines) is built and ends at its own
   checkpoint: the roster's client shots at every size beside the design's pictures, with each shot's word count from its
   log, and Jade's shots. Units 3 and 4: the composer and Field Guide, then the alchemy and Nouveau screens.

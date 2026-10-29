@@ -26,9 +26,9 @@ import org.jspecify.annotations.Nullable;
  * tools/concordance_pacts.py (WORK, HOLDER_ONLY, PARSER; check_pacts).
  */
 public final class PactParser {
-	public static final List<String> WORK = List.of("star_reckoning", "strain_tending", "verdance_carrying", "graft_keeping");
-	/** The works that serve only their holder (StarReckoning refuses anyone else): their beneficiaries must be personal. */
-	public static final List<String> HOLDER_ONLY = List.of("star_reckoning");
+	public static final List<String> WORK = List.of("star_reckoning", "strain_tending", "verdance_carrying", "habitat_reading", "graft_keeping");
+	/** The works that serve only their holder (StarReckoning and HabitatReading refuse anyone else): their beneficiaries must be personal. */
+	public static final List<String> HOLDER_ONLY = List.of("star_reckoning", "habitat_reading");
 	public static final int MAX_COMPACT_ITEMS = 4;
 	public static final int MAX_COMPACT_COUNT = 64;
 	/** An astrolabe's capacity (sky/AstrolabeItem.CAPACITY; check_pacts compares). */
@@ -38,7 +38,7 @@ public final class PactParser {
 	 * Every pact the game ships, in the order a perch offers them (tools/concordance_pacts.py SPIRITS; GC-01, GC-P15): each
 	 * missing one is reported. Strings, so this parser stays free of game classes; append only.
 	 */
-	public static final List<String> REQUIRED = List.of(PactDefinition.STOLAS, "jugcraft:buer", "jugcraft:bathin", "jugcraft:foras");
+	public static final List<String> REQUIRED = List.of(PactDefinition.STOLAS, "jugcraft:buer", "jugcraft:bathin", "jugcraft:marax", "jugcraft:foras");
 
 	private final List<String> problems = new ArrayList<>();
 

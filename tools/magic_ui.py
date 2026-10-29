@@ -151,6 +151,8 @@ DRAWN = {
     # The narrow footer's back plate (the arrow's mirror): cream on the plate, as the documentation's dark page arrows
     # could not be (1.3 to 1.9:1).
     "back": [".......", "...#...", "..#....", ".######", "..#....", "...#...", "......."],
+    # The roster's Resume (unit 2's review): a play triangle in the action frame, so Resume no longer looks like Refresh.
+    "play": ["#...", "##..", "###.", "####", "###.", "##..", "#..."],
 }
 GLYPHS = tuple(WYRM) + tuple(DRAWN)  # Java: MagicArt.Glyph, in this order
 # The state marks (spec 2.5): a glyph in colour with a one-pixel dark edge, nine rows tall and its glyph's width and two
@@ -223,6 +225,13 @@ ADAPTED = {
                                                     **({"overlay": JB + "ability/action_button_outline.png"}
                                                        if state == "_highlighted" else {})}}
        for name, glyph in (("end", "cross"), ("suspend", "pause")) for state in ("", "_inactive", "_highlighted")},
+    # The roster's Resume (unit 2's review): the same frame with the play triangle.
+    **{S + f"action/resume{state}.png": {"source": JB + f"ability/upgrade_button_{'inactive' if state == '_inactive' else 'active'}.png",
+                                         "adapter": "action", "glyph": "play", "state": state,
+                                         "region": {"boxes": [(3, 3, 10, 9)],
+                                                    **({"overlay": JB + "ability/action_button_outline.png"}
+                                                       if state == "_highlighted" else {})}}
+       for state in ("", "_inactive", "_highlighted")},
     **{S + f"action/{name}_highlighted.png": {"source": JB + f"ability/{source}_button_active.png", "adapter": "outlined",
                                               "outline": JB + "ability/action_button_outline.png",
                                               "region": {"overlay": JB + "ability/action_button_outline.png"}}
@@ -447,8 +456,9 @@ def _tint(img, colour):
 
 
 def action(read, entry):
-    """magic/action/end and suspend: the upgrade frame with its arrow covered and a cross (End: it no longer resembles
-    Refresh) or two bars (Suspend) set in it; inactive from the inactive frame; highlighted with the kit's outline."""
+    """magic/action/end, suspend and resume: the upgrade frame with its arrow covered and a cross (End: it no longer
+    resembles Refresh), two bars (Suspend) or a play triangle (Resume) set in it; inactive from the inactive frame;
+    highlighted with the kit's outline."""
     img = _source(read, entry)
     inactive = entry["state"] == "_inactive"
     fill, ink = (0x8E3E28, 0x40190E) if inactive else (0xC46A10, 0xFFF2C0)
@@ -572,7 +582,7 @@ def change(target, source=None):
                                                "_disabled": ", desaturated to a fifth and darkened to half"}[entry["state"]]
     if kind == "action":
         frame = "the inactive upgrade frame's" if entry["state"] == "_inactive" else "the upgrade frame's"
-        mark = "a cross" if entry["glyph"] == "cross" else "two bars"
+        mark = {"cross": "a cross", "pause": "two bars", "play": "a play triangle"}[entry["glyph"]]
         return (f"{frame} arrow covered (x 3-10, y 3-9) and {mark} set in it"
                 + (outline["action"] if entry["state"] == "_highlighted" else ""))
     if kind == "outlined":
@@ -862,6 +872,13 @@ GLANCES = {
     # A first task's act, as its row draws it (garden_pact.obligation's argument; spec 1.1: the row at most 12 words). An
     # act short enough as the server words it needs none (ACT_GLANCES' acts are the long ones).
     "garden_pact.act.device": [("", "use an awake living device", (), "use an awake living device", "act")],
+    # GC-06 unit 3
+    # GC-06: Marax's ("read a Verdant Bed itself (its side, where a crop covers it)"; the whole act stays the row's tip).
+    # Drawn as how it is done (Marax's review): a planted bed's top is its crop's, so the bed is used from its side.
+    "garden_pact.act.read": [("", "use a Verdant Bed's side", (), "use a Verdant Bed's side", "act")],
+    # GC-07 unit 4
+    # GC-08 unit 5
+    # GC-09 unit 6
     # Blockers (every one drawn above the terms as a lock line, keeping its action).
     "pact.missing.owner": [("", "Only the perch's owner may invite %1$s", ("Bathin",),
                             "Only the perch's owner may invite Bathin", "blocker")],
@@ -929,6 +946,47 @@ WORK_GLANCES = {
                      "Needs your awake Heart, a Gleaner or pylon, in 10 blocks", "blocker")],
         "card": ("Needs Heart and Gleaner", (10, 10), "Needs Heart and Gleaner"),
     },
+    # GC-06 unit 3
+    # GC-06: Marax's habitat reading. His reading's answer is drawn as its change ("Light 9 → 11", and ", first of 2" when
+    # it is one of several), the whole sentence its tip and narration: the read glance draws its remedy (argument 4) and its
+    # clause (argument 5) by their own glances (PactGlance.nestedKey), the alone clause by none. Its other answers each in
+    # at most six words (spec 1.1), as Star-reckoning's are; its choice's plate in two.
+    "habitat_reading": {
+        "icon": "jugcraft:habitat_gauge", "name": "Habitat reading", "line": "Names one change for your worst bed",
+        "row.service": [("", "%1$s/%2$s today", (1, 2), "1/2 today", "chip")],
+        # The last and proud rows drawn short (Marax's review): with both and his first task, the kept page draws about 44
+        # of its 45 words; the crop and the proud count stay in the tip.
+        "row.last": [("", "Last: %2$s, %3$s", ("Sunpetal", "102, 64, -18", "Light"), "Last: 102, 64, -18, Light", "row")],
+        "row.last_none": [("", "No reading yet: ask below", (), "No reading yet: ask below", "row")],
+        "row.proud": [("", "%1$s skipped till changed", ("102, 64, -18", 3), "102, 64, -18 skipped till changed", "row")],
+        "row.proud_more": [("", "%1$s beds skipped till changed", (3, "102, 64, -18"), "3 beds skipped till changed", "row")],
+        "missing": [("", "Needs your awake, planted Verdant Bed within %1$s blocks", (8,),
+                     "Needs your awake, planted Verdant Bed within 8 blocks", "blocker")],
+        "card": ("Needs a crop near", (8,), "Needs a crop near"),
+        "ask": [("", "Ask him", (), "Ask him", "button")],
+        "read": [("", "%4$s%5$s", ("Sunpetal", "102, 64, -18", "not growing", "Moisture 1 → 4", ", first of 2", "", ""),
+                  "Moisture 1 → 4, first of 2", "answer")],
+        "advice.alone": [("", "", (), "", "answer")],
+        "advice.one_of": [("", ", first of %1$s", (2,), ", first of 2", "answer")],
+        **{f"remedy.{factor}.{way}": [("", "%1$s %2$s → %3$s", (name, low, high, 13, 15), f"{name} {low} → {high}", "chip")]
+           for factor, name in (("moisture", "Moisture"), ("light", "Light"), ("nutrients", "Nutrients"),
+                                ("diversity", "Diversity"), ("disturbance", "Disturbance"))
+           for way, low, high in (("more", 9, 11), ("less", 11, 9))},
+        "remedy.strain": [("", "Strain %2$s → %3$s", ("Disturbance", 3, 0, 0, 2), "Strain 3 → 0", "chip")],
+        "nothing_grows": [("", "Nothing grows here", (), "Nothing grows here", "answer")],
+        "no_sample": [("", "Let your crops grow first", (), "Let your crops grow first", "answer")],
+        "nothing_to_correct": [("", "Every crop is thriving", (), "Every crop is thriving", "answer")],
+        "nothing_to_correct.proud": [("", "Nothing new to correct", ("102, 64, -18",), "Nothing new to correct", "answer")],
+        "absent": [("", "Call him back first", (), "Call him back first", "answer")],
+        "not_holder": [("", "Only its holder may ask", (), "Only its holder may ask", "answer")],
+        "nothing": [("", "No pact with Marax here", (), "No pact with Marax here", "answer")],
+        "suspended": [("", "Suspended: resume it first", (), "Suspended: resume it first", "answer")],
+        "upkeep_held": [("", "Suspended: an offering resumes it", (), "Suspended: an offering resumes it", "answer")],
+        "outside_area": [("", "Stand within his area", (), "Stand within his area", "answer")],
+        "outside_hours": [("", "Only in his hours", (), "Only in his hours", "answer")],
+        "quota_spent": [("", "Done for today", (2,), "Done for today", "answer")],
+    },
+    # GC-07 unit 4
     # GC-07 (Foras; docs/features/foras-pact.md): graft keeping. Two refusals, each its own blocker and card; today's gauge
     # is his count (detail b); his matter asks whether to graft hosts that would gain nothing, or would fare worse, naming
     # the nearest (as Bathin's names his Heart); his service line names the host's donor and its cost.
@@ -946,9 +1004,11 @@ WORK_GLANCES = {
                            "blocker")],
         "missing.host": [("", "Needs a Sunpetal on your bed within %1$s blocks", (8,),
                           "Needs a Sunpetal on your bed within 8 blocks", "blocker")],
-        # Two words each: with Stolas ready and Buer, Bathin and Foras not, the chooser draws 25 words (its budget).
+        # Two words each, within a card's four (LIMITS["card"]; the chooser's budget is 7 words a card, chooserWords).
         "card": {"missing.store": ("Store needed", (), "Store needed"), "missing.host": ("Host needed", (8,), "Host needed")},
     },
+    # GC-08 unit 5
+    # GC-09 unit 6
 }
 # A work's fields that are not its rows' glances: its chooser reason, its icon, its name and its service line.
 WORK_FIELDS = ("card", "icon", "name", "line")
@@ -1031,7 +1091,8 @@ MARK_RULES = (
     ("exact", "pact.unavailable", "lock"), ("exact", "pact.row.state.active", "tick"),
     ("exact", "pact.row.state.upkeep_due", "hourglass"), ("prefix", "pact.row.state.", "moon"),
     ("exact", "pact.row.lost", "moon"), ("suffix", ".row.asleep", "moon"), ("contains", ".row.overworked", "hourglass"),
-    ("suffix", "obligation_kept", "tick"), ("suffix", "obligation", "hourglass"), ("contains", ".matter.", "ask"),
+    ("contains", ".row.proud", "hourglass"), ("suffix", "obligation_kept", "tick"), ("suffix", "obligation", "hourglass"),
+    ("contains", ".matter.", "ask"),
     # GC-07: the row that waits on the player (a donor to put in his store) among the rows that need them.
     ("exact", "pact.graft_keeping.row.no_donor", "hourglass"),
 )
@@ -1056,6 +1117,7 @@ def mark(server):
 # change here.
 ICON_RULES = (
     ("contains", ".row.overworked", "work"),
+    ("contains", ".row.proud", "work"),
     # Bathin's own rows, by their exact keys (a later work's rows of the same names draw their own icons, or none).
     ("exact", "pact.verdance_carrying.row.poured", "item:jugcraft:ley_pylon"),
     ("exact", "pact.verdance_carrying.row.moved", "item:jugcraft:gleaner"),
@@ -1140,8 +1202,8 @@ SENTENCES = {
     _JADE + "pact.state.suspended": ("Suspended", (), "Suspended", "jade"),
     _JADE + "pact.state.upkeep_due": ("Offering due", (), "Offering due", "jade"),
     _JADE + "pact.state.upkeep_held": ("Upkeep held", (), "Upkeep held", "jade"),
-    _JADE + "pact.next": ("Next in %1$s days", (7,), "Next in 7 days", "jade"),
-    _JADE + "pact.grace": ("Grace: %1$s days", (1,), "Grace: 1 days", "jade"),
+    _JADE + "pact.next": ("%1$s d", (7,), "7 d", "jade"),
+    _JADE + "pact.grace": ("%1$s d", (1,), "1 d", "jade"),
     _JADE + "pact.lost": ("Presence lost", (), "Presence lost", "jade"),
     _JADE + "pact.accord": ("Answer: %1$s", ("Leave it",), "Answer: Leave it", "jade"),
     _JADE + "pact.service.courier": ("Courier work", (), "Courier work", "jade"),
@@ -1151,14 +1213,19 @@ SENTENCES = {
     _JADE + "pact.note.verdance_carrying.empty": ("Nothing to carry", (), "Nothing to carry", "jade"),
     _JADE + "pact.note.verdance_carrying.nowhere": ("Nowhere to carry it", (), "Nowhere to carry it", "jade"),
     _JADE + "pact.note.verdance_carrying.two_roads": ("Two roads: %1$s", (2,), "Two roads: 2", "jade"),
+    # GC-06 unit 3
+    _JADE + "pact.note.habitat_reading.proud": ("Proud beds: %1$s", (2,), "Proud beds: 2", "jade"),
+    # GC-07 unit 4
     _JADE + "pact.matter.graft_keeping.no_gain": ("Hosts gain nothing", (), "Hosts gain nothing", "jade"),
     _JADE + "pact.note.graft_keeping.no_gain": ("Would gain nothing: %1$s", (3,), "Would gain nothing: 3", "jade"),
     _JADE + "pact.note.graft_keeping.no_reading": ("Unread hosts: %1$s", (2,), "Unread hosts: 2", "jade"),
     _JADE + "pact.note.graft_keeping.no_donor": ("No donor", (), "No donor", "jade"),
     _JADE + "pact.note.graft_keeping.no_host": ("Nothing to graft", (), "Nothing to graft", "jade"),
+    # GC-08 unit 5
+    # GC-09 unit 6
     "message.jugcraft.concordance.disabled": ("Switched off", (), "Switched off", "jade"),
     "compose.jugcraft.diagnostic.conflicting_agreement": ("A copy: does nothing", (), "A copy: does nothing", "jade"),
-    _JADE + "body": ("%1$s/%2$s · %3$s/%4$s Charge", (10, 20, 300, 400), "10/20 · 300/400 Charge", "jade"),
+    _JADE + "body": ("Integrity %1$s/%2$s", (10, 20, 300, 400), "Integrity 10/20", "jade"),
     # Jade on a Verdant Bed: dormant, its strain, and its reasons (Verdict.reasons; the factor named first).
     _JADE + "dormant": ("Dormant", (), "Dormant", "jade"),
     _ECOLOGY + "strain": ("Strain %1$s/%2$s", (2, 8), "Strain 2/8", "jade"),
@@ -1175,6 +1242,16 @@ SENTENCES = {
     _ECOLOGY + "status.no_verdance": ("No Verdance", (), "No Verdance", "jade"),
     _ECOLOGY + "status.stalled": ("Held back", (), "Held back", "jade"),
     _ECOLOGY + "status.starved": ("Bed too poor", (), "Bed too poor", "jade"),
+    # Unit 2's review: a bed's growth and the rest of a living device's statuses, capitalised as Jade's other short lines.
+    _ECOLOGY + "growth.thriving": ("Thriving", (), "Thriving", "jade"),
+    _ECOLOGY + "growth.tolerating": ("Growing slowly", (), "Growing slowly", "jade"),
+    _ECOLOGY + "growth.stalled": ("Not growing", (), "Not growing", "jade"),
+    _ECOLOGY + "status.dormant": ("Dormant", (), "Dormant", "jade"),
+    _ECOLOGY + "status.full": ("Full", (), "Full", "jade"),
+    _ECOLOGY + "status.hungry": ("Nothing to eat", (), "Nothing to eat", "jade"),
+    _ECOLOGY + "status.idle": ("Nothing to do", (), "Nothing to do", "jade"),
+    _ECOLOGY + "status.waiting": ("Waiting for a reading", (), "Waiting for a reading", "jade"),
+    _ECOLOGY + "status.working": ("Working", (), "Working", "jade"),
 }
 # The mark Jade draws before a sentence's line, short or whole, by the sentence's own key (Java: client/MagicGlance.MARKS,
 # held equal by check_magic_ui); a line without one draws its own icon (the spirit's sign, the work's item, a glyph) or
@@ -1191,10 +1268,7 @@ SENTENCE_MARKS = {
     _JADE + "pact.lost": "moon", _JADE + "pact.accord": "tick", _JADE + "pact.matter.verdance_carrying.two_roads": "ask",
     _JADE + "pact.note.strain_tending.asleep": "moon", _JADE + "pact.note.strain_tending.overworked": "hourglass",
     _JADE + "pact.note.verdance_carrying.empty": "moon", _JADE + "pact.note.verdance_carrying.nowhere": "hourglass",
-    _JADE + "pact.note.verdance_carrying.two_roads": "ask", _JADE + "pact.matter.graft_keeping.no_gain": "ask",
-    _JADE + "pact.note.graft_keeping.no_gain": "ask", _JADE + "pact.note.graft_keeping.no_reading": "hourglass",
-    _JADE + "pact.note.graft_keeping.no_donor": "hourglass", _JADE + "pact.note.graft_keeping.no_host": "moon",
-    "message.jugcraft.concordance.disabled": "lock",
+    _JADE + "pact.note.verdance_carrying.two_roads": "ask", "message.jugcraft.concordance.disabled": "lock",
     "compose.jugcraft.diagnostic.conflicting_agreement": "cross", _JADE + "dormant": "moon",
     _ECOLOGY + "growth.thriving": "tick", _ECOLOGY + "growth.tolerating": "hourglass", _ECOLOGY + "growth.stalled": "cross",
     _ECOLOGY + "strain": "hourglass", _ECOLOGY + "short": "hourglass", _ECOLOGY + "excess": "hourglass",
@@ -1204,6 +1278,16 @@ SENTENCE_MARKS = {
         "beds_full": "hourglass", "disabled": "lock", "dormant": "moon", "full": "hourglass", "hungry": "moon", "idle": "moon",
         "keeper_away": "moon", "no_bed": "cross", "no_verdance": "cross", "stalled": "cross", "starved": "cross",
         "waiting": "moon", "working": "tick"}.items()},
+    # Unit 2's review: a departing spirit and a perch that keeps no agreement draw the moon.
+    _JADE + "pact.departing": "moon", _JADE + "pact.none": "moon",
+    # GC-06 unit 3
+    _JADE + "pact.note.habitat_reading.proud": "hourglass",
+    # GC-07 unit 4
+    _JADE + "pact.matter.graft_keeping.no_gain": "ask", _JADE + "pact.note.graft_keeping.no_gain": "ask",
+    _JADE + "pact.note.graft_keeping.no_reading": "hourglass", _JADE + "pact.note.graft_keeping.no_donor": "hourglass",
+    _JADE + "pact.note.graft_keeping.no_host": "moon",
+    # GC-08 unit 5
+    # GC-09 unit 6
 }
 SENTENCE_PREFIX = "screen.jugcraft.glance."
 # The roster screen's own short words (screen.jugcraft.roster.short.<name>; its whole sentences stay the messages, the
@@ -1213,7 +1297,7 @@ ROSTER_SHORT = {
     "empty": ("Nothing on your roster yet", "row"),
     "empty.hint": ("Bond a familiar, seal a pact or file a request", "row"),
     "more": ("%1$s more not listed", "fact"),
-    "disabled": ("Concordance off: nothing can be done", "row"),
+    "disabled": ("Concordance off", "row"),
     "unavailable": ("No roster on this server", "row"),
     "suspend.tip": ("Suspend %1$s", "label"),
     "resume.tip": ("Resume %1$s", "label"),
@@ -1614,6 +1698,11 @@ def unit2_problems(lang):
         if nwords(shown) > LIMITS[kind]:
             out.append(f"{key}: {nwords(shown)} words, over the {kind} limit of {LIMITS[kind]}: {shown!r}")
     for key in lang:
+        # A work's matter or note (a garden spirit's unit adds its own) is one of Jade's short lines: its short form and
+        # its mark are due with it (unit 2's review), or Jade draws it whole and unmarked.
+        if key.startswith((_JADE + "pact.matter.", _JADE + "pact.note.")) and (key not in SENTENCES or key not in SENTENCE_MARKS):
+            out.append(f"{key}: a work's matter or note Jade shows, without its short form in SENTENCES and its mark in "
+                       "SENTENCE_MARKS")
         if key.startswith(SENTENCE_PREFIX) and key[len(SENTENCE_PREFIX):] not in SENTENCES:
             out.append(f"{key}: a short form tools/magic_ui.py's SENTENCES does not hold")
         if key.startswith("screen.jugcraft.roster.short.") and key[len("screen.jugcraft.roster.short."):] not in ROSTER_SHORT:

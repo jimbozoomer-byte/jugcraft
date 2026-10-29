@@ -176,6 +176,7 @@ class ArtTests(unittest.TestCase):
         self.assertNotEqual(mu.change(mu.S + "plate.png"), mu.change(mu.S + "plate_disabled.png"))
         self.assertIn("a cross", mu.change(mu.S + "action/end_inactive.png"))
         self.assertIn("two bars", mu.change(mu.S + "action/suspend_highlighted.png"))
+        self.assertIn("a play triangle", mu.change(mu.S + "action/resume_inactive.png"))
 
     def test_nothing_never_imported_is_imported(self):
         for target in list(mu.OWNER_FILES) + list(mu.ADAPTED):
@@ -341,7 +342,10 @@ class RosterAndJadeTests(unittest.TestCase):
         lang = {}
         mu.lang_entries(lang)
         self.assertEqual(lang["screen.jugcraft.glance.compose.jugcraft.worker.status.awaiting_answer"], "Awaits answer")
-        self.assertEqual(lang["screen.jugcraft.glance.tooltip.jugcraft.concordance.jade.pact.next"], "Next in %1$s days")
+        # The unit's review: a day line is its glyph and "7 d", which reads right for one day too.
+        self.assertEqual(lang["screen.jugcraft.glance.tooltip.jugcraft.concordance.jade.pact.next"], "%1$s d")
+        self.assertEqual(lang["screen.jugcraft.glance.tooltip.jugcraft.concordance.jade.body"], "Integrity %1$s/%2$s")
+        self.assertEqual(lang["screen.jugcraft.glance.compose.jugcraft.ecology.growth.tolerating"], "Growing slowly")
         self.assertEqual(lang["screen.jugcraft.roster.short.page"], "%1$s / %2$s")
         self.assertEqual(lang["screen.jugcraft.roster.glance.request"], "Request #%1$s")
         for key, (pattern, args, expected, kind) in mu.SENTENCES.items():
@@ -397,6 +401,18 @@ class RosterAndJadeTests(unittest.TestCase):
         finally:
             mu.SENTENCES.clear()
             mu.SENTENCES.update(saved)
+
+    def test_a_works_matter_or_note_without_its_short_form_and_mark_is_reported(self):
+        # The unit's review: a later garden spirit's Jade note without its rows in SENTENCES and SENTENCE_MARKS (Marax's
+        # "proud" note has its rows since his line joined this one, so the note here is one no spirit sends).
+        lang = dict(LANG)
+        mu.lang_entries(lang)
+        key = "tooltip.jugcraft.concordance.jade.pact.note.later_work.unshortened"
+        lang[key] = "A note no spirit sends"
+        found = mu.unit2_problems(lang)
+        self.assertTrue(any("later_work.unshortened" in p and "SENTENCE_MARKS" in p for p in found), found)
+        del lang[key]
+        self.assertEqual([], mu.unit2_problems(lang))
 
     def test_a_stray_short_form_and_a_bad_mark_are_reported(self):
         lang = dict(LANG)

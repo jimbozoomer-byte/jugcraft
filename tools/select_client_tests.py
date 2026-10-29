@@ -100,6 +100,12 @@ WEIGHTS = {
     # GC-06b: written as a sum, each later spirit's flow added under its unit's line (+ its seconds).
     "ConcordanceGardenPactClientGameTests": (560
                                              # GC-06 unit 3
+                                             # GC-06 adds Marax at the same perch: the chooser twice, his conversation by
+                                             # keyboard at three sizes, a refused and a sealed acceptance, a reading at three
+                                             # sizes and his familiar frozen over its bed, his page with a proud bed, his night
+                                             # look, Jade, eleven poses, four bearings and the ending: about 33 shots and their
+                                             # waits, about 260 s more (an estimate, not a measurement).
+                                             + 260
                                              # GC-07 unit 4
                                              # GC-07: Foras at the same perch: the chooser twice, his conversation by
                                              # keyboard at three sizes, a refused and a sealed acceptance, his matter
@@ -158,6 +164,8 @@ for _name in ("MagicArt", "MagicTheme", "MagicLayout", "MagicScreen", "MagicButt
 SHOWN_BY["MagicGlance"] = SHOWN_BY.get("MagicGlance", set()) | MAGIC_SHOWN
 SHOWN_BY["JugcraftJadeClient"] = SHOWN_BY.get("JugcraftJadeClient", set()) | {
     "ConcordancePactClientGameTests", "ConcordanceGardenPactClientGameTests", "EncyclopediaClientGameTests"}
+# And the roster's class, whose workshop hand at work is photographed with Jade's overlay of it (unit 2's review).
+SHOWN_BY["JugcraftJadeClient"] |= {"ConcordanceRosterClientGameTests"}
 MAGIC_ASSETS = re.compile(r"^src/main/resources/assets/jugcraft/textures/gui/(?:sprites/(?:magic|tooltip)/|magic/)")
 # The language file is otherwise judged by nothing (its words are judged by the generators' checks), but the magic screens'
 # whole-screen word budgets are judged only by their client tests: a change to a key they draw or narrate (a glance, a

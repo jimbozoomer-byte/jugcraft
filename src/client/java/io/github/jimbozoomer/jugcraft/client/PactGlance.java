@@ -84,6 +84,7 @@ final class PactGlance {
 			new Rule("exact", "pact.row.lost", MagicArt.Mark.MOON),
 			new Rule("suffix", ".row.asleep", MagicArt.Mark.MOON),
 			new Rule("contains", ".row.overworked", MagicArt.Mark.HOURGLASS),
+			new Rule("contains", ".row.proud", MagicArt.Mark.HOURGLASS),
 			new Rule("suffix", "obligation_kept", MagicArt.Mark.TICK),
 			new Rule("suffix", "obligation", MagicArt.Mark.HOURGLASS),
 			new Rule("contains", ".matter.", MagicArt.Mark.ASK),
@@ -91,6 +92,7 @@ final class PactGlance {
 
 	private static final List<IconRule> ICONS = List.of(
 			new IconRule("contains", ".row.overworked", "work"),
+			new IconRule("contains", ".row.proud", "work"),
 			new IconRule("exact", "pact.verdance_carrying.row.poured", "item:jugcraft:ley_pylon"),
 			new IconRule("exact", "pact.verdance_carrying.row.moved", "item:jugcraft:gleaner"),
 			new IconRule("exact", "pact.verdance_carrying.row.leaving", "item:jugcraft:verdant_heart"),
@@ -102,13 +104,19 @@ final class PactGlance {
 
 	/**
 	 * Each work's own item: its service line's and its "work" rows' icon (tools/magic_ui.py WORK_GLANCES[work]["icon"], one
-	 * line here a work, held equal by check_magic_ui); a work not here draws its spirit's sign.
+	 * line here a work, held equal by check_magic_ui); a work not here draws its spirit's sign. Each garden unit adds
+	 * its line under its own marker, above Star-reckoning's, which stays last, so the units' merges never meet.
 	 */
-	static final Map<String, String> WORK_ICONS = Map.of(
-			"star_reckoning", "jugcraft:astrolabe",
-			"strain_tending", "jugcraft:verdant_bed",
-			"verdance_carrying", "jugcraft:verdant_heart",
-			"graft_keeping", "jugcraft:dewmoss");
+	static final Map<String, String> WORK_ICONS = Map.ofEntries(
+			Map.entry("strain_tending", "jugcraft:verdant_bed"),
+			Map.entry("verdance_carrying", "jugcraft:verdant_heart"),
+			// GC-06 unit 3
+			Map.entry("habitat_reading", "jugcraft:habitat_gauge"),
+			// GC-07 unit 4
+			Map.entry("graft_keeping", "jugcraft:dewmoss"),
+			// GC-08 unit 5
+			// GC-09 unit 6
+			Map.entry("star_reckoning", "jugcraft:astrolabe"));
 
 	private PactGlance() {
 	}

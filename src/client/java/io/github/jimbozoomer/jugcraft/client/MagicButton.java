@@ -44,6 +44,8 @@ class MagicButton extends Button implements MagicScreen.Drawn {
 		ACTION_SUSPEND(action("suspend"), null, 14, 13, 0, 0, true),
 		ACTION_REFRESH(action("refresh"), null, 14, 13, 0, 0, true),
 		ACTION_OFFER(action("offer"), null, 14, 13, 0, 0, true),
+		/** The roster's Resume: a play triangle in the action frame (it no longer looks like the footer's Refresh). */
+		ACTION_RESUME(action("resume"), null, 14, 13, 0, 0, true),
 		BOOKMARK_FAMILIAR(bookmark("familiar"), bookmark("familiar_selected"), 23, 20, 0, 0, true),
 		BOOKMARK_DOCUMENTATION(bookmark("documentation"), bookmark("documentation_selected"), 23, 20, 0, 0, true),
 		BOOKMARK_SUMMON_CIRCLE(bookmark("summon_circle"), bookmark("summon_circle_selected"), 23, 20, 0, 0, true),

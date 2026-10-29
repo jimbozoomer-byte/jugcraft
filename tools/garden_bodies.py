@@ -29,6 +29,11 @@ the Spanish moss), whose `read(path)` is relative to that folder (tools/concorda
 ["built"], written and checked by tools/owner_art.py). Shared rules for built bodies: box_faces (GeckoLib's box-UV layout),
 palette (a painting's colours), coplanar (docs/ART_DIRECTION.md's "no shared face planes").
 
+Marax (GC-06, GC-S12; docs/features/marax-pact.md): built here, not adapted, since no rig of the owner's is a bull with a
+man's face. marax_model and marax_animations read nothing; marax_skin and marax_glowmask paint only in the colours of
+three of the owner's paintings (the mahogany log's bark, the Spanish moss and the cypress leaves). His familiar is a root
+child (never his head's), so the renderer's reaching hook moves it in his own frame (GC-P66).
+
 For Buer, `read(path)` returns a library file's bytes, `path` relative to art/owner-library/originals/Magic/.
 """
 import copy
@@ -582,6 +587,286 @@ def bathin_animations(read=None):
 
 # Each later spirit's body (GC-06 to GC-09) under its unit's line.
 # GC-06 unit 3
+# ------------------------------------------------------------------------------------------------- Marax (GC-06)
+# Uses this module's box_faces, SIDES, palette, _fill and _bevel (GC-05) and _keys, _wave and EASE (GC-04).
+
+MAHOGANY = pacts.MAHOGANY
+CYPRESS = pacts.CYPRESS
+_MARAX = pacts.SPIRITS["marax"]["body"]
+MARAX_TEXTURE = (128, 64)
+# Box-UV regions and sizes (pixels): a box (w, h, d) at (u, v) uses 2(w + d) x (d + h) from (u, v). None overlaps another;
+# the four legs share one region, each horn's two parts one each, the two wings one (drawn alike; check_geckolib allows a
+# repeat).
+MARAX_UV = {"torso": (0, 0), "hump": (78, 0), "head": (0, 35), "leg": (40, 35), "tail": (60, 35), "horn_base": (68, 35),
+            "horn_tip": (80, 35), "familiar": (88, 35), "crest": (100, 35), "wing": (104, 35)}
+MARAX_SIZES = {"torso": (16, 12, 23), "hump": (14, 4, 9), "head": (10, 10, 10), "leg": (5, 9, 5), "tail": (2, 8, 2),
+               "horn_base": (4, 2, 2), "horn_tip": (2, 4, 2), "familiar": (3, 3, 3), "crest": (1, 1, 1), "wing": (3, 2, 1)}
+# His face (the head's front, 10 x 10, column 0 his right), a man's face kept gentle: H and h his moss forelock, S his skin
+# (lit at his right edge, shaded at his left), b his brows, E his eyes (dark, calm, no shine: only the familiar's eyes glow),
+# n the shade beside his nose, m his mouth, j his jaw's shade. No nose holes, no teeth (docs/ART_DIRECTION.md).
+MARAX_FACE = ["hHHhHHhHHh", "SSSSSSSSSS", "SbbSSSSbbS", "SSESSSSESS", "SSSSSSSSSS",
+              "SSSSnnSSSS", "SSSSSSSSSS", "SSSmmmmSSS", "SSSSSSSSSS", "jjjjjjjjjj"]
+
+
+def _marax_box(name, origin):
+    u, v = MARAX_UV[name]
+    return {"origin": list(origin), "size": list(MARAX_SIZES[name]), "uv": [u, v]}
+
+
+def marax_model(read=None):
+    """Marax's geometry: a low, massive bull with a man's calm face, mossed shoulders and two pale horns, about 1.5 blocks
+    to his familiar's crest and 2.1 long at scale 1 (16 pixels a block; y = 0 is the ground he stands on; he faces north,
+    -z; his left is +x). root > body (torso, the moss hump over his shoulders) > head (and its horns), tail; root > four
+    legs; root > familiar (a leaf-winged sprite between his horns, its two wings its children). The familiar hangs from the
+    root, never from his head, so the renderer's hook (PactSpiritRenderers, GC-06) moves it in his own frame, and his clips
+    key it where it sits: whenever his head pitches more than a few degrees it is in the air or on his hump. No cube is flat
+    or turned at rest, and no two faces lie on one plane facing the same way (coplanar is empty)."""
+    width, height = MARAX_TEXTURE
+    return {"format_version": "1.12.0", "minecraft:geometry": [{
+        "description": {"identifier": "geometry.marax", "texture_width": width, "texture_height": height,
+                        "visible_bounds_width": 4, "visible_bounds_height": 3, "visible_bounds_offset": [0, 1, 0]},
+        "bones": [
+            {"name": "root", "pivot": [0, 0, 0]},
+            {"name": "body", "parent": "root", "pivot": [0, 14, 0], "cubes": [
+                _marax_box("torso", (-8, 8, -10)), _marax_box("hump", (-7, 19, -9.5))]},
+            {"name": "head", "parent": "body", "pivot": [0, 15, -10], "cubes": [_marax_box("head", (-5, 10.5, -19))]},
+            {"name": "horns", "parent": "head", "pivot": [0, 18, -14], "cubes": [
+                _marax_box("horn_base", (4.5, 17, -15)), _marax_box("horn_tip", (7, 18.5, -14.75)),
+                _marax_box("horn_base", (-8.5, 17, -15)), _marax_box("horn_tip", (-9, 18.5, -14.75))]},
+            {"name": "tail", "parent": "body", "pivot": [0, 18, 13.5], "cubes": [_marax_box("tail", (-1, 10, 12.5))]},
+            {"name": "leg_front_left", "parent": "root", "pivot": [5, 8.5, -5.5], "cubes": [_marax_box("leg", (2.5, 0, -8))]},
+            {"name": "leg_front_right", "parent": "root", "pivot": [-5, 8.5, -5.5], "cubes": [_marax_box("leg", (-7.5, 0, -8))]},
+            {"name": "leg_back_left", "parent": "root", "pivot": [5, 8.5, 8.5], "cubes": [_marax_box("leg", (2.5, 0, 6))]},
+            {"name": "leg_back_right", "parent": "root", "pivot": [-5, 8.5, 8.5], "cubes": [_marax_box("leg", (-7.5, 0, 6))]},
+            {"name": "familiar", "parent": "root", "pivot": [0, 22.25, -14], "cubes": [
+                _marax_box("familiar", (-1.5, 20.75, -15.5)), _marax_box("crest", (-0.5, 23.75, -14.5))]},
+            {"name": "familiar_wing_left", "parent": "familiar", "pivot": [1.5, 22.25, -14],
+             "cubes": [_marax_box("wing", (1.5, 21.25, -14.5))]},
+            {"name": "familiar_wing_right", "parent": "familiar", "pivot": [-1.5, 22.25, -14],
+             "cubes": [_marax_box("wing", (-4.5, 21.25, -14.5))]},
+        ]}]}
+
+
+def marax_sheet(read):
+    """His 128 x 64 skin, every texel opaque and one of three paintings' colours (cute and clean: two or three tones a part,
+    light from the top left, regular patterns; docs/ART_DIRECTION.md "Creatures and faces"). The mahogany log's five tones,
+    darkest first, H0 to H4: his hide H2 lit H3 and shaded H1, his face H3, his features H0 to H2, his hooves H0, his horns
+    H4 and H3. The Spanish moss's eight, M0 to M7: his hump and forelock M1 to M5, his tail's tuft M2 and M3, the familiar's
+    eyes M7. The cypress leaves' six, C0 to C5: the familiar's body and leaf wings C3 to C5."""
+    H0, H1, H2, H3, H4 = palette(read, MAHOGANY, 5)
+    M0, M1, M2, M3, M4, M5, M6, M7 = palette(read, MOSS, 8)
+    C0, C1, C2, C3, C4, C5 = palette(read, CYPRESS, 6)
+    img = Image.new("RGBA", MARAX_TEXTURE, (0, 0, 0, 0))
+
+    def part(name):
+        return box_faces(MARAX_UV[name], MARAX_SIZES[name])
+
+    hide = _bevel(H2, H3, H1)
+    faces = part("torso")
+    for side in SIDES:
+        _fill(img, faces[side], hide)
+    _fill(img, faces["up"], _bevel(H3, H4, H2))
+    _fill(img, faces["down"], lambda x, y, w, h: H1)
+    faces = part("hump")
+    _fill(img, faces["up"], lambda x, y, w, h: M4 if y == 0 or x == 0 else M5 if x % 3 == 1 and y % 2 == 1 else M3)
+    _fill(img, faces["down"], lambda x, y, w, h: M1)
+    for side in SIDES:
+        _fill(img, faces[side], lambda x, y, w, h: M4 if y == 0 else M3 if y < h - 1 else M2 if x % 2 == 0 else M1)
+    faces = part("head")
+
+    def face(x, y, w, h):
+        key = MARAX_FACE[y][x]
+        if key == "S":
+            return H4 if x == 0 else H2 if x == w - 1 else H3
+        return {"H": M3, "h": M2, "b": H1, "E": H0, "n": H2, "m": H1, "j": H2}[key]
+    _fill(img, faces["front"], face)
+    _fill(img, faces["up"], lambda x, y, w, h: M3 if y >= h - 3 else _bevel(H3, H4, H2)(x, y, w, h))
+    for side in ("right", "left"):
+        _fill(img, faces[side], lambda x, y, w, h: M2 if y == 0 else hide(x, y, w, h))
+    _fill(img, faces["back"], lambda x, y, w, h: H2)
+    _fill(img, faces["down"], lambda x, y, w, h: H1)
+    for name in ("horn_base", "horn_tip"):
+        faces = part(name)
+        for side in SIDES:
+            _fill(img, faces[side], _bevel(H4, H4, H3))
+        _fill(img, faces["up"], lambda x, y, w, h: H4)
+        _fill(img, faces["down"], lambda x, y, w, h: H3)
+    faces = part("leg")
+    for side in SIDES:
+        _fill(img, faces[side], lambda x, y, w, h: H0 if y >= h - 2 else hide(x, y, w, h))
+    _fill(img, faces["up"], lambda x, y, w, h: H2)
+    _fill(img, faces["down"], lambda x, y, w, h: H0)
+    faces = part("tail")
+    for side in SIDES:
+        _fill(img, faces[side], lambda x, y, w, h: (M3 if x % 2 == 0 else M2) if y >= h - 3 else H2 if x == 0 else H1)
+    _fill(img, faces["up"], lambda x, y, w, h: H1)
+    _fill(img, faces["down"], lambda x, y, w, h: M2)
+    faces = part("familiar")
+    eyes = {(0, 1), (2, 1)}
+    _fill(img, faces["front"], lambda x, y, w, h: M7 if (x, y) in eyes else C5 if y == 0 else C3 if y == h - 1 else C4)
+    for side in ("right", "left", "back"):
+        _fill(img, faces[side], _bevel(C4, C5, C3))
+    _fill(img, faces["up"], lambda x, y, w, h: C5)
+    _fill(img, faces["down"], lambda x, y, w, h: C3)
+    faces = part("crest")
+    for side in SIDES:
+        _fill(img, faces[side], lambda x, y, w, h: C5)
+    _fill(img, faces["up"], lambda x, y, w, h: M6)
+    _fill(img, faces["down"], lambda x, y, w, h: C4)
+    faces = part("wing")
+    for side in ("front", "back"):
+        _fill(img, faces[side], lambda x, y, w, h: C5 if y == 0 else C4)
+    for side in ("right", "left"):
+        _fill(img, faces[side], lambda x, y, w, h: C3)
+    _fill(img, faces["up"], lambda x, y, w, h: C5)
+    _fill(img, faces["down"], lambda x, y, w, h: C3)
+    return img
+
+
+def marax_skin(read):
+    return marax_sheet(read)
+
+
+def marax_glowmask(read):
+    """The familiar's two eyes alone (SPIRITS["marax"]["body"]["eye_texels"]), as his skin draws them; everything else clear."""
+    sheet = marax_sheet(read)
+    out = Image.new("RGBA", sheet.size, (0, 0, 0, 0))
+    for texel in _MARAX["eye_texels"]:
+        out.putpixel(tuple(texel), sheet.getpixel(tuple(texel)))
+    return out
+
+
+def marax_clips():
+    """His own clips, keyed on marax_model's bones (degrees, Bedrock's sense: +x pitches a bone's top forward; positions in
+    pixels of his own frame). His screen gestures and his work (a reading, given while he listens) start and end on his
+    listening pose (ATTEND: his head inclined to his speaker, the familiar a pixel up between his horns). The familiar rides
+    between his horns, flies up when his head pitches, and sits on his hump while he waits; its flight to a bed is the
+    renderer's hook, never a clip (no clip keys it in his work). He departs as the dossier says: the familiar settles, he
+    turns about, walks two steps and fades (his root shrinks to nothing, the last frame held until the server removes him)."""
+    attend = {bone: [float(v) for v in angles] for bone, angles in _MARAX["attend"].items()}
+    perch = [float(v) for v in _MARAX["familiar_rest"]]
+    lengths = _MARAX["loop_lengths"]
+    times = {name: length for name, (length, _) in _MARAX["gesture_times"].items()}
+    loops, gestures = _MARAX["loops"], _MARAX["gestures"]
+    zero, whole = [0.0, 0.0, 0.0], [1.0, 1.0, 1.0]
+    on_hump = [0.0, 2.25, 9.0]
+
+    def still(values):
+        return {"0.0": [round(float(v), 3) + 0.0 for v in values]}
+
+    def loop(length, bones):
+        return {"loop": True, "animation_length": length, "bones": bones}
+
+    def once(length, bones, hold=False):
+        return {"loop": "hold_on_last_frame" if hold else False, "animation_length": length, "bones": bones}
+
+    def wings(length, cycles, beat):
+        return {"familiar_wing_left": {"rotation": _wave(length, cycles, zero, (0, 0, -beat))},
+                "familiar_wing_right": {"rotation": _wave(length, cycles, zero, (0, 0, beat))}}
+
+    def from_attend(bone, *frames, length, channel="rotation"):
+        rest = attend[bone] if channel == "rotation" else perch
+        return _keys((0, rest), *frames, (length, rest), easing=EASE)
+
+    def flap(start, end, beat=30.0, every=0.15):
+        """The familiar's wings beating from {start} to {end} seconds, then folded."""
+        left, right, t, up = [(0, zero)], [(0, zero)], start, True
+        while t < end - 1e-9:
+            left.append((round(t, 4), (0, 0, -beat if up else beat)))
+            right.append((round(t, 4), (0, 0, beat if up else -beat)))
+            t, up = t + every, not up
+        left.append((end, zero))
+        right.append((end, zero))
+        return {"familiar_wing_left": {"rotation": _keys(*left)}, "familiar_wing_right": {"rotation": _keys(*right)}}
+
+    walk = {}
+    for leg, sign in (("leg_front_left", 1), ("leg_back_right", 1), ("leg_front_right", -1), ("leg_back_left", -1)):
+        walk[leg] = {"rotation": _keys((0, zero), (0.6, zero), (0.825, (20 * sign, 0, 0)), (1.05, (-20 * sign, 0, 0)),
+                                       (1.275, (20 * sign, 0, 0)), (1.5, zero), (times["depart"], zero), easing=EASE)}
+    return {
+        # Idle: breathing, a slow nod, his tail swishing, the familiar bobbing between his horns, its wings stirring.
+        loops["idle"]: loop(lengths["idle"], {
+            "body": {"scale": _wave(lengths["idle"], 1, whole, (0, 0.015, 0))},
+            "head": {"rotation": _wave(lengths["idle"], 1, zero, (2, 0, 0), phase=0.25)},
+            "tail": {"rotation": _wave(lengths["idle"], 2, zero, (0, 0, 10))},
+            "familiar": {"position": _wave(lengths["idle"], 2, perch, (0, 0.5, 0))},
+            **wings(lengths["idle"], 2, 8)}),
+        # Listening: his head inclined to his speaker, the familiar alert, its wings fluttering fast (also while it hovers
+        # over the bed a reading names: the conversation is still open).
+        loops["listen"]: loop(lengths["listen"], {
+            "head": {"rotation": _wave(lengths["listen"], 1, attend["head"], (1, 0, 0))},
+            "familiar": {"position": _wave(lengths["listen"], 2, perch, (0, 0.3, 0))},
+            **wings(lengths["listen"], 6, 25)}),
+        # Waiting (off his service, or switched off): his head low, the familiar asleep on his hump, wings folded.
+        loops["waiting"]: loop(lengths["waiting"], {
+            "body": {"scale": _wave(lengths["waiting"], 1, whole, (0, 0.01, 0))},
+            "head": {"rotation": still((15, 0, 0))},
+            "familiar": {"position": still(on_hump)}}),
+        # Suspended: sunk a pixel, head lower still, his tail limp, the familiar on his hump.
+        loops["suspended"]: loop(lengths["suspended"], {
+            "body": {"position": still((0, -1, 0))},
+            "head": {"rotation": _wave(lengths["suspended"], 1, (25, 0, 0), (1, 0, 0))},
+            "tail": {"rotation": still((15, 0, 0))},
+            "familiar": {"position": still(on_hump)}}),
+        # Astir (an offering due): his tail lashing, a hoof stamping, his head tossing, the familiar fluttering above him.
+        loops["astir"]: loop(lengths["astir"], {
+            "head": {"rotation": _wave(lengths["astir"], 3, (-4, 0, 0), (0, 6, 0))},
+            "tail": {"rotation": _wave(lengths["astir"], 2, zero, (0, 25, 0))},
+            "leg_front_right": {"rotation": _wave(lengths["astir"], 3, zero, (-15, 0, 0))},
+            "familiar": {"position": _wave(lengths["astir"], 3, (0, 4, 0), (0, 0.5, 0))},
+            **wings(lengths["astir"], 6, 30)}),
+        # Detail (a), his night look between readings: his head lifted to the sky, the familiar hovering above him.
+        loops["stargaze"]: loop(lengths["stargaze"], {
+            "head": {"rotation": _wave(lengths["stargaze"], 1, (-35, 0, 0), (2, 0, 0))},
+            "tail": {"rotation": _wave(lengths["stargaze"], 1, zero, (0, 0, 6))},
+            "familiar": {"position": _wave(lengths["stargaze"], 2, (0, 6, 1), (0, 0.5, 0))},
+            **wings(lengths["stargaze"], 2, 20)}),
+        # Arrive: he grows into being beside the perch (0 to 0.5 s), his head down; it lifts to his speaker as the familiar
+        # flies in from above and behind and alights between his horns (the telling pose, 0.9 to 1.6 s).
+        gestures["arrive"]: once(times["arrive"], {
+            "root": {"scale": _keys((0, zero), (0.5, whole), (times["arrive"], whole), easing=EASE)},
+            "head": {"rotation": _keys((0, (20, 0, 0)), (0.5, (20, 0, 0)), (1.4, attend["head"]), (times["arrive"], attend["head"]),
+                                       easing=EASE)},
+            "familiar": {"position": _keys((0, (0, 10, 6)), (0.6, (0, 10, 6)), (1.5, perch), (times["arrive"], perch), easing=EASE)},
+            **flap(0.6, 1.5)}),
+        # Inspect: he bows his head over what is offered; the familiar hops out ahead of his horns to look (0.4 to 1.2 s).
+        gestures["inspect"]: once(times["inspect"], {
+            "head": {"rotation": from_attend("head", (0.4, (25, 10, 0)), (1.2, (25, 10, 0)), length=times["inspect"])},
+            "familiar": {"position": from_attend("familiar", (0.4, (0, 4, -4)), (1.2, (0, 4, -4)), length=times["inspect"],
+                                                 channel="position")}}),
+        # Assent: one slow, deep nod; the familiar lifts off his head as it dips (0.3 to 0.9 s).
+        gestures["assent"]: once(times["assent"], {
+            "head": {"rotation": from_attend("head", (0.3, (20, 0, 0)), (0.9, (20, 0, 0)), length=times["assent"])},
+            "familiar": {"position": from_attend("familiar", (0.3, (0, 3, 0)), (0.9, (0, 3, 0)), length=times["assent"],
+                                                 channel="position")}}),
+        # Refuse: a slow shake of his head and a scrape of a front hoof; the familiar flits up (0.3 to 1.0 s).
+        gestures["refuse"]: once(times["refuse"], {
+            "head": {"rotation": _keys((0, attend["head"]), (0.3, (6, 20, 0)), (0.55, (6, -20, 0)), (0.8, (6, 20, 0)),
+                                       (1.0, attend["head"]), (times["refuse"], attend["head"]), easing=EASE)},
+            "leg_front_right": {"rotation": _keys((0, zero), (0.4, (-25, 0, 0)), (0.8, zero), (times["refuse"], zero), easing=EASE)},
+            "familiar": {"position": from_attend("familiar", (0.3, (0, 4, 0)), (1.0, (0, 4, 0)), length=times["refuse"],
+                                                 channel="position")}}),
+        # Work, a reading given: he lifts his head to watch his familiar go (0.4 to 1.2 s), his tail swishing once; the
+        # familiar's flight to the bed and back is the renderer's (no key here, so the hook alone moves it).
+        gestures["work"]: once(times["work"], {
+            "head": {"rotation": from_attend("head", (0.4, (-10, 0, 0)), (1.2, (-10, 0, 0)), length=times["work"])},
+            "tail": {"rotation": _keys((0, zero), (0.6, (0, 0, 15)), (1.2, (0, 0, -15)), (times["work"], zero), easing=EASE)}}),
+        # Depart: the familiar settles (0 to 0.3 s); he turns about (to 0.6 s), walks two steps away (0.6 to 1.5 s: the
+        # telling pose, 0.5 to 1.1 s), and fades (his root shrinks to nothing by 1.85 s), the last frame held.
+        gestures["depart"]: once(times["depart"], {
+            "familiar": {"position": _keys((0, perch), (0.3, (0, 0, 0)), (times["depart"], (0, 0, 0)), easing=EASE)},
+            "root": {"rotation": _keys((0, zero), (0.6, (0, 180, 0)), (times["depart"], (0, 180, 0)), easing=EASE),
+                     "position": _keys((0, zero), (0.6, zero), (1.5, (0, 0, 10)), (times["depart"], (0, 0, 10)), easing=EASE),
+                     "scale": _keys((0, whole), (1.5, whole), (1.85, zero), (times["depart"], zero))},
+            **walk}, hold=True),
+    }
+
+
+def marax_animations(read=None):
+    """The runtime animation file: his twelve clips, sorted by name."""
+    return {"format_version": "1.8.0", "animations": dict(sorted(marax_clips().items()))}
+
+
 # GC-07 unit 4
 # Foras (GC-07, GC-S12, GC-P92, GC-P93; docs/features/foras-pact.md): built here, as Bathin is, since no rig of the owner's is
 # a tall elder. foras_model reads the owner's acorn cap (art/owner-library/originals/Edited-2026-10-18-Part2/jims mobs/,

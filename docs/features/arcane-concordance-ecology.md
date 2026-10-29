@@ -9,9 +9,10 @@ commit); its tests passed in CI (run 38726242149, with unit 3, and again in run 
 [contract](concordance-chunk-c.md)). The garden cohort's unit 1 (GC-03 and GC-04: two read-only bed reads, the tending
 hook and Buer's strain tending; [contract](concordance-garden-cohort.md)) is not merged (draft #526); its tests passed in
 CI run 40605564166. Its unit 2 (GC-05: the Gleaner's and the Heart's named roads, the bed index's devices and Bathin's
-Verdance carrying; [record](bathin-pact.md)) is not merged either; its tests passed in CI run 40777920181. Its unit 4
-(GC-07b and GC-07: the graft in one place and Foras's graft keeping; [record](foras-pact.md)) is built and not merged,
-and not yet compiled or run in CI.
+Verdance carrying; [record](bathin-pact.md)) is not merged either; its tests passed in CI run 40777920181. Its unit 3
+(GC-06: `HabitatAdvice` and Marax's habitat reading; [record](marax-pact.md)) is built and not merged, and not yet
+compiled or run in CI. Its unit 4 (GC-07b and GC-07: the graft in one place and Foras's graft keeping;
+[record](foras-pact.md)) is built and not merged, and not yet compiled or run in CI.
 Proposal issue: none; the owner's Arcane Concordance brief (roadmap step 14) is the scope approval.
 Owner: @jimbozoomer-byte. AI-assisted implementation with Claude Code; the model is named in the commit trailers.
 Target milestone and tier: Concordance milestone 6, Practitioner stage (Jugcraft Workshops). Roadmap step 14.
@@ -169,7 +170,15 @@ returns. A Greenwarden's tending that eases a strain is also a garden pact's fir
 (`PactObligations`, one line in `VerdantBedBlock.tendBy`); the gesture's own checks, rate gate and messages are unchanged.
 Buer's strain tending (GC-04, [record](buer-pact.md)) calls the same `tend` a Greenwarden's hand does, so the 600-tick
 window is one a bed, whoever tends; he never composts, rests or feeds a bed, and his overworked complaint ends when the bed
-eases by these rules. `check_ecology` allows `tend` from `VerdantBedBlock` and `StrainTending` alone.
+eases by these rules. `check_ecology` allows `tend` from `VerdantBedBlock` and `StrainTending` alone. Since GC-06 (not
+merged; not yet run in CI) the pure `HabitatAdvice.one(niche, habitat, grafts)` names the one change for a plant on one
+reading: nothing while it thrives; when one factor holds it at its step, the value nearest its own that alone raises it
+a step (harvest strain eased first where it decided the disturbance fit, and only ever lowered); when two or more do, the
+first in `Factor` order, "one of n", at its nearest ideal value; only ever toward the ideal range, so a plant that needs
+no disturbance is never told to add magic; and a graft its bed could take that alone would serve (Dewlit for a Sunpetal
+at light 9 to 12). Marax's habitat reading ([record](marax-pact.md)) asks it of a bed's `cachedHabitat` (no sample is
+taken) and changes nothing; using a Verdant Bed itself with an empty hand (its report) is his pact's first obligation
+(`PactObligations`, one line after `report` in `VerdantBedBlock.useWithoutItem`); a crop's own report is not.
 
 **The devices** share `LivingDeviceBlockEntity` (keeper, awake, status word, a staggered pulse) and act only on their
 pulse: the Heart every 200 ticks, the Maw, Gauge and Gleaner every 40. The Heart's Verdance is a typed
@@ -396,6 +405,15 @@ beating on a lit bed among three kinds of crop) and `bathinsFirstObligationIsADe
 (`ConcordanceWorkerGameTests`); and `noVerdanceIsMintedByCarrying` (`ConcordanceEconomyGameTests`). The existing
 `theHeartBeatsVerdanceIntoAPylon` and Gleaner tests passed unchanged. `check_verdance_roads` and `check_garden_pacts`
 pass locally. Not run: a long unattended garden with Bathin on a real server; any person.
+
+**The garden cohort, unit 3 (GC-06; not merged; not yet run in CI).** `HabitatAdvice` is in the pure package
+(`check_baselines`). A scratch harness outside Git, compiled with JDK 21 against it and the ecology classes as committed
+and holding the shipped organisms' and Dewlit's niches, checks it against brute force over 524,288 readings a niche:
+30,604,024 checks, 0 failures ([the rule](marax-pact.md#the-rule-gc-p64)). Its CI form,
+`ConcordanceGardenGameTests.habitatAdviceHoldsForEveryOrganism`, was in the head of run 40777920181, which passed in
+full; Marax's reading tests (`aReadingNamesOneCorrectionAndChangesNothing`, which also holds the level's sample budget
+unchanged, `aReadingSkipsBedsWithoutACachedSample` and four more) and `maraxsFirstObligationIsABedReadByHand` are written
+and not yet run. Not run: any of them in CI; any person.
 
 **The garden cohort, unit 4 (GC-07b, GC-07; not merged; not yet run in CI).** Written and not yet run:
 `theGraftGestureBehavesAsBefore` (the hand's graft through `Grafting`, its messages and its one spent Dewmoss as before),

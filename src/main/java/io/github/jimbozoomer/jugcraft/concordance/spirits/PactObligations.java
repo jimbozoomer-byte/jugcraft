@@ -35,6 +35,8 @@ public final class PactObligations {
 		DEVICE("device"),
 		// Each unit's constant under its own line, ending ","; the lone ";" below closes the list.
 		// GC-06 unit 3
+		/** GC-06 (Marax): a Verdant Bed itself read with an empty hand (its report; where a crop covers its top, its side). */
+		READ("read"),
 		// GC-07 unit 4
 		/** GC-07 (Foras): a crop grafted by hand with its donor (OrganismCropBlock.graftBed, on success). */
 		GRAFT("graft"),

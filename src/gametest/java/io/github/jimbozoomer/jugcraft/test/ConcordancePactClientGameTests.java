@@ -40,6 +40,7 @@ import net.fabricmc.fabric.api.client.gametest.v1.context.ClientGameTestContext;
 import net.fabricmc.fabric.api.client.gametest.v1.context.TestDedicatedServerConnection;
 import net.fabricmc.fabric.api.client.gametest.v1.context.TestDedicatedServerContext;
 import net.fabricmc.loader.api.FabricLoader;
+import net.minecraft.client.InputType;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.events.ContainerEventHandler;
@@ -50,6 +51,7 @@ import net.minecraft.client.gui.narration.NarrationThunk;
 import net.minecraft.client.gui.narration.NarrationTrigger;
 import net.minecraft.client.gui.navigation.ScreenRectangle;
 import net.minecraft.client.gui.screens.ConfirmScreen;
+import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.client.sounds.SoundEngine;
 import net.minecraft.client.sounds.SoundEventListener;
@@ -103,7 +105,8 @@ import org.jspecify.annotations.Nullable;
  * screen's word budget, counted from what the screen draws; his terms are a chip each with the standing terms as one, in
  * at most 20 Tab stops; the short materials are marked before Accept; Accept's tip opens clear of the body and its
  * narration says nothing is spent before it; a tip shows on keyboard focus; a second visit opens on his terms; a kept
- * pact opens on how it stands.</li>
+ * pact opens on how it stands. Since the unit 3 fixes every picture is taken with the cursor parked where no control is
+ * and the mouse the last input, so no tip covers a row.</li>
  * </ul>
  * The perch is opened by the server's use of it (no aimed click), and each step that opens it waits for a menu newer than
  * the one open before, with its first state. The narrator is not heard, and one client is not two.
@@ -959,10 +962,55 @@ public class ConcordancePactClientGameTests implements FabricClientGameTest {
 		return out;
 	}
 
+	/**
+	 * A picture (the unit 3 fixes, CI's pictures: a tip over a row of the terms, the proud reading and the roster): first the
+	 * cursor parked where no control is and the mouse made the last input ({@link #park}), so neither a hover's tip nor the
+	 * keyboard's is drawn, then a tick for the hover to clear; the last input given back after, so the keyboard goes on as
+	 * before. A shot whose name says it shows a tip or a hover keeps its cursor and input.
+	 */
 	private static void shot(ClientGameTestContext context, String name) {
 		context.runOnClient(client -> client.gui.toastManager().clear());
+		InputType input = name.contains("tip") || name.contains("hover") ? null : park(context);
 		context.waitTicks(2);
 		context.takeScreenshot(name);
+		if (input != null) {
+			context.runOnClient(client -> client.setLastInputType(input));
+		}
+	}
+
+	/**
+	 * With a screen open: the cursor moved to a corner of it that no control covers (one is asserted), and the mouse made the
+	 * last input, since moving the mouse alone leaves the keyboard's (MouseHandler sets it only on a click) and a control
+	 * focused by the keyboard shows its tip while the keyboard is the last input; then a tick. Returns the input it replaced,
+	 * or null with no screen open (nothing is hovered then).
+	 */
+	private static @Nullable InputType park(ClientGameTestContext context) {
+		if (!context.computeOnClient(client -> client.gui.screen() != null)) {
+			return null;
+		}
+		double[] corner = context.computeOnClient(client -> {
+			Screen screen = client.gui.screen();
+			int[][] corners = {{1, 1}, {screen.width - 2, 1}, {1, screen.height - 2}, {screen.width - 2, screen.height - 2}};
+			for (int[] at : corners) {
+				boolean free = true;
+				for (GuiEventListener child : screen.children()) {
+					if (child instanceof AbstractWidget widget && widget.visible && widget.getRectangle().containsPoint(at[0], at[1])) {
+						free = false;
+					}
+				}
+				if (free) {
+					int scale = client.getWindow().getGuiScale();
+					return new double[] {(at[0] + 0.5) * scale, (at[1] + 0.5) * scale};
+				}
+			}
+			return null;
+		});
+		check(corner != null, "A corner of the screen with no control under it, to park the cursor on before a picture");
+		context.getInput().setCursorPos(corner[0], corner[1]);
+		InputType before = context.computeOnClient(client -> client.getLastInputType());
+		context.runOnClient(client -> client.setLastInputType(InputType.MOUSE));
+		context.waitTicks(1);
+		return before;
 	}
 
 	private static PactScreen screen(Minecraft client) {

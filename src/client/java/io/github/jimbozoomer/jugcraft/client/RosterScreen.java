@@ -39,27 +39,45 @@ import org.jspecify.annotations.Nullable;
  * the gold title "Roster" and its page over the cosmos, and two columns of dark relic cards, each the portrait in its gilded
  * card frame (a render of the worker's own model; a request's item), the name, the state's mark and a few words (never
  * colour alone), one fact of at most four words with its item, the kind, and its actions as icons. Every sentence of the
- * row stays whole as the card's narration and its tip (hover or keyboard focus): its state and why it waits, its service,
- * place and whether it is loaded, its task and next obligation. The actions: suspend (two bars), resume, end (a cross,
- * which asks first, the keyboard on Keep it), cancel and recover; each sends one bounded request through
- * {@link RosterClient}, and the server's answer, a refusal included, is shown short with its mark (PactScreen.Verdict) and
- * read aloud whole. Eight cards a page (Page Up and Page Down, or the footer's plates, turn it), six or fewer on a screen too
- * short for four rows of cards (spec 2.14: six at 320x180). Every card is one focusable, narrated control and every action a button: Tab and
- * Shift+Tab move, Enter or Space presses, Esc closes. It fits the smallest GUI (ScreenKit.Fitted; ScreenFitClientGameTests)
- * and, an in-game screen, draws subtitles over itself (MagicScreen). No text box, chat command, vanilla Dialog or GuiLib,
- * and no second inventory: cargo is the courier ledger's and only the server moves it.
+ * row stays whole as the card's narration: its state and why it waits, its service, place and whether it is loaded, its
+ * task and next obligation; its tip (hover or keyboard focus) is its state's whole sentence and its fact's, at most
+ * {@value #TIP_WORDS} words (spec 1.1; the unit 3 fixes: every sentence covered half the page). The actions: suspend
+ * (two bars), resume, end (a cross, which asks first, the keyboard on Keep it), cancel and recover; each sends one
+ * bounded request through {@link RosterClient}, and the server's answer, a refusal included, is shown short with its mark (PactScreen.Verdict) in
+ * the title row and read aloud whole (the switched-off note and the opening line sit there too, never pushing the cards).
+ * Eight cards a page (Page Up and Page Down, or the footer's plates, turn it; how many more are not listed sits between
+ * them and Refresh), six or fewer on a screen too short for four rows of cards (spec 2.14: six at 320x180); a page that
+ * would draw over its 70 words drops its cards' kinds (each stays in its card's narration). Every card is one focusable, narrated
+ * control and every action a button, which the mouse presses through its card: Tab and Shift+Tab move, Enter or Space
+ * presses, Esc closes. It fits the smallest GUI (ScreenKit.Fitted; ScreenFitClientGameTests) and, an in-game screen, draws
+ * subtitles over itself (MagicScreen). No text box, chat command, vanilla Dialog or GuiLib, and no second inventory: cargo
+ * is the courier ledger's and only the server moves it.
  */
 public class RosterScreen extends MagicScreen {
-	/** Rows a page shows at most (the server sends at most RosterStatePayload.MAX_ROWS: at most eight pages); see {@link #perPage}. */
+	/**
+	 * Rows a page shows at most (the server sends at most RosterStatePayload.MAX_ROWS: eight pages at eight a page, eleven at
+	 * six); see {@link #perPage}.
+	 */
 	public static final int ROWS_PER_PAGE = 8;
+	/** The words a page draws at most (spec 1.1: a page of eight cards, its title, page and footer). */
+	private static final int BUDGET = 70;
 	/** A card's text starts this far in (after its portrait); its actions sit this far from its right edge. */
 	private static final int TEXT_X = 37;
 	private static final int ACTION_X = 19;
-	/** A card under this wide draws the narrow card (spec 2.14): its name regular, its actions stacked, its kind in its tip. */
+	/** A card under this wide draws the narrow card (spec 2.14): its name regular, its actions stacked, its kind in its narration. */
 	private static final int NARROW_CARD = 180;
 	/** A card's height: four rows a page where the screen is tall enough, never under the portrait frame's 41 and a rim. */
 	private static final int CARD_MIN = 42;
 	private static final int CARD_MAX = 48;
+	/**
+	 * A card's tip (spec 1.1, the unit 3 fixes): its state's whole sentence and its fact's, together at most this many words
+	 * and lines at the tip's width, else its state's alone, always whole (nearly every state is within both; the longest, a
+	 * reservation waiting on a container not loaded, runs to about 22 words in four lines).
+	 */
+	public static final int TIP_WORDS = 20;
+	public static final int TIP_LINES = 3;
+	/** The title row's and the footer's band: the cards' dark purple at 85% (C8). */
+	private static final int BAND = 0xD8170F24;
 	/** A row's actions, in the order their keys follow its card. */
 	private static final int[] ACTIONS = {RosterRequestPayload.SUSPEND, RosterRequestPayload.RESUME, RosterRequestPayload.END,
 			RosterRequestPayload.CANCEL, RosterRequestPayload.RECOVER};
@@ -75,6 +93,9 @@ public class RosterScreen extends MagicScreen {
 	private boolean fromTop;
 	private int page;
 	private int focusRow = -1;
+	/** How many cards a page held when last built, and the first row it showed: a resize keeps the rows in view (C12). */
+	private int builtPer;
+	private int firstShown;
 
 	public RosterScreen() {
 		super(Component.translatable("screen.jugcraft.roster.title"));
@@ -113,36 +134,78 @@ public class RosterScreen extends MagicScreen {
 		RosterStatePayload state = RosterClient.state();
 		List<RosterStatePayload.Row> rows = state == null ? List.of() : state.rows();
 		int pages = pages();
-		page = Math.max(0, Math.min(page, pages - 1));
-		ScreenRectangle area = layout.body();
-		// Its gold ball (only while an answer or a note pushes the cards past the body) beside the cards, else on their gap.
-		int ball = area.right() + 13 <= width ? area.right() + 1 : area.left() + layout.rosterCard() + MagicLayout.ROSTER_GAP / 2 - 6;
-		openBody(area).ball(MagicArt.SCROLL_BALL, ball, 12);
-		answer(area);
-		if (state == null) {
-			boolean available = RosterClient.available();
-			say(ui(available ? "opening" : "unavailable"), available ? ui("opening") : ui("short.unavailable"), MagicTheme.LAVENDER, "opening");
-		} else {
-			if (!state.enabled()) {
-				say(ui("disabled"), ui("short.disabled"), MagicTheme.WARN, "note");
-			}
-			if (rows.isEmpty()) {
-				say(ui("empty"), ui("short.empty"), MagicTheme.CREAM, "empty");
-				say(ui("empty.hint"), ui("short.empty.hint"), MagicTheme.LAVENDER, "");
-			}
-			cards(rows, area);
-			if (state.more() > 0 && page == pages - 1) {
-				say(ui("more", state.more(), RosterStatePayload.MAX_ROWS), ui("short.more", state.more()), MagicTheme.LAVENDER, "more");
-			}
+		int per = perPage();
+		if (builtPer > 0 && per != builtPer) {
+			// Another GUI size holds another number of cards a page: the page that holds the row the keyboard is on, else the
+			// first row shown, so a resize keeps them in view.
+			page = (focusRow >= 0 ? focusRow : firstShown) / per;
 		}
+		page = Math.max(0, Math.min(page, pages - 1));
+		builtPer = per;
+		firstShown = page * per;
 		pageText = state == null ? Component.empty() : ui("short.page", page + 1, pages);
 		drew(heading.getString());
 		drew(pageText.getString());
-		footer(pages);
+		// The title row's room: the answer, else the switched-off note, else the opening line (none of them moves the cards).
+		ScreenRectangle room = titleRoom();
+		boolean answered = answer(room);
+		boolean noted = state != null && !state.enabled();
+		if (state == null) {
+			boolean available = RosterClient.available();
+			pin("opening", line(ui(available ? "opening" : "unavailable"), available ? ui("opening") : ui("short.unavailable"), MagicTheme.LAVENDER,
+					room.width(), null), room, 2);
+		} else if (noted && !answered) {
+			pin("note", note(room.width()), room, 2);
+		}
+		ScreenRectangle area = layout.body();
+		// Its gold ball (only while the body scrolls: the empty roster's lines in the smallest body) beside the cards, else on
+		// their gap.
+		int ball = area.right() + 13 <= width ? area.right() + 1 : area.left() + layout.rosterCard() + MagicLayout.ROSTER_GAP / 2 - 6;
+		openBody(area).ball(MagicArt.SCROLL_BALL, ball, 12);
+		if (state != null && rows.isEmpty()) {
+			say(ui("empty"), ui("short.empty"), MagicTheme.CREAM, "empty");
+			say(ui("empty.hint"), ui("short.empty.hint"), MagicTheme.LAVENDER, "");
+		}
+		boolean more = state != null && state.more() > 0 && page == pages - 1;
+		footer(pages, more ? state.more() : 0, noted && answered);
+		if (state != null) {
+			// Last: a page weighs its cards against what the rest of the screen already draws.
+			cards(rows, area);
+		}
 		keepPlace(rows);
 	}
 
-	/** This page's cards, two to a row: each card, then its actions (their keys follow it), as many rows as the body holds. */
+	/** The title row's room between the title (its underline included) and the page. */
+	private ScreenRectangle titleRoom() {
+		ScreenRectangle header = layout.header();
+		int from = header.left() + font.width(heading) + 28;
+		int to = header.right() - 4 - (pageText.getString().isEmpty() ? 0 : font.width(pageText) + 4);
+		return new ScreenRectangle(from, header.top(), Math.max(30, to - from), header.height());
+	}
+
+	/** A line pinned to {@code room} (the title row, the footer's band), {@code down} below its top, held there (outside()). */
+	private void pin(String key, AbstractWidget widget, ScreenRectangle room, int down) {
+		widget.setX(room.left());
+		widget.setY(room.top() + down);
+		onScreen(key, widget, room);
+	}
+
+	/** One line on the cosmos, {@code width} wide, cut with "…" when it needs more (its whole sentence then its tip). */
+	private MagicText line(Component full, Component shown, int colour, int width, MagicArt.@Nullable Mark mark) {
+		MagicText line = new MagicText(full, shown, font, width, colour, MagicTheme.DARK).maxLines(1);
+		return mark == null ? line : line.lead(mark);
+	}
+
+	/** The switched-off note: its lock and its few words, the server's whole sentence its tip and narration. */
+	private MagicText note(int width) {
+		return line(ui("disabled"), ui("short.disabled"), MagicTheme.WARN, width, MagicArt.Mark.LOCK);
+	}
+
+	/**
+	 * This page's cards, two to a row: each card, then its actions (their keys follow it), as many rows as the body holds. A
+	 * page that would draw more than its {@value #BUDGET} words (every card at eight, an answer at the top) draws its cards
+	 * without their kinds, each kind kept in its card's narration (spec 1.1).
+	 */
 	private void cards(List<RosterStatePayload.Row> rows, ScreenRectangle area) {
 		int card = layout.rosterCard();
 		int gap = gap();
@@ -150,28 +213,50 @@ public class RosterScreen extends MagicScreen {
 		int tall = Math.max(CARD_MIN, Math.min(CARD_MAX, (area.height() - (lines - 1) * gap) / lines));
 		int first = page * perPage();
 		int last = Math.min(rows.size(), first + perPage());
+		List<Card> made = make(rows, first, last, area, card, tall, false);
+		int words = words();
+		for (Card each : made) {
+			words += MagicScreen.words(each.drawnText());
+		}
+		if (words > BUDGET) {
+			made = make(rows, first, last, area, card, tall, true);
+		}
 		int top = at;
 		boolean free = !RosterClient.waiting() && RosterClient.available();
 		for (int i = first; i < last; i++) {
 			int slot = i - first;
-			int x = area.left() + slot % 2 * (card + MagicLayout.ROSTER_GAP);
-			int offset = top + slot / 2 * (tall + gap);
-			card(rows.get(i), i, rows, x, offset, card, tall, free);
+			card(made.get(slot), rows.get(i), i, top + slot / 2 * (tall + gap), free);
 		}
 		if (last > first) {
 			at = top + (last - first + 1) / 2 * (tall + gap) + 1;
 		}
 	}
 
-	private void card(RosterStatePayload.Row row, int index, List<RosterStatePayload.Row> rows, int x, int offset, int width, int height,
-			boolean free) {
+	/** The cards of rows {@code first} to {@code last} (not yet added), with or without their kinds. */
+	private List<Card> make(List<RosterStatePayload.Row> rows, int first, int last, ScreenRectangle area, int card, int tall, boolean kindless) {
+		List<Card> made = new ArrayList<>();
+		for (int i = first; i < last; i++) {
+			int x = area.left() + (i - first) % 2 * (card + MagicLayout.ROSTER_GAP);
+			made.add(new Card(rows.get(i), rows, x, card, tall, offered(rows.get(i)).size(), kindless));
+		}
+		return made;
+	}
+
+	/** The actions a row offers, in {@link #ACTIONS}' order. */
+	private static List<Integer> offered(RosterStatePayload.Row row) {
 		List<Integer> offered = new ArrayList<>();
 		for (int action : ACTIONS) {
 			if (row.offers(action)) {
 				offered.add(action);
 			}
 		}
-		Card card = new Card(row, rows, x, width, height, offered.size());
+		return offered;
+	}
+
+	private void card(Card card, RosterStatePayload.Row row, int index, int offset, boolean free) {
+		List<Integer> offered = offered(row);
+		int x = card.getX();
+		int width = card.getWidth();
 		inBodyAt("row:" + row.id(), card, offset);
 		places.put("row:" + row.id(), index);
 		if (card.cut()) {
@@ -198,30 +283,33 @@ public class RosterScreen extends MagicScreen {
 		}
 	}
 
-	/** An action's icon (spec 2.14): End and Cancel the cross, Suspend the two bars, Resume the turning arrows, Recover the up arrow. */
+	/** An action's icon (spec 2.14): End and Cancel the cross, Suspend the two bars, Resume the play triangle, Recover the up arrow. */
 	private static MagicButton.Look look(int action) {
 		return switch (action) {
 			case RosterRequestPayload.SUSPEND -> MagicButton.Look.ACTION_SUSPEND;
-			case RosterRequestPayload.RESUME -> MagicButton.Look.ACTION_REFRESH;
+			case RosterRequestPayload.RESUME -> MagicButton.Look.ACTION_RESUME;
 			case RosterRequestPayload.RECOVER -> MagicButton.Look.ACTION_OFFER;
 			default -> MagicButton.Look.ACTION_END;
 		};
 	}
 
-	/** The server's answer to the last action, short with its mark (D-06's Verdict), kept until the next is sent; while one waits, that it waits. */
-	private void answer(ScreenRectangle area) {
+	/**
+	 * The server's answer to the last action, short with its mark (D-06's Verdict) on one line of the title row, kept until
+	 * the next is sent; while one waits, that it waits. Whether either was pinned.
+	 */
+	private boolean answer(ScreenRectangle room) {
 		if (RosterClient.waiting()) {
-			say(ui("waiting"), ui("waiting"), MagicTheme.LAVENDER, "result");
-			return;
+			pin("result", line(ui("waiting"), ui("waiting"), MagicTheme.LAVENDER, room.width(), null), room, 2);
+			return true;
 		}
 		PactStatePayload.Result answer = RosterClient.result();
-		if (answer != null) {
-			int colour = answer.done() ? MagicTheme.GOOD : MagicTheme.WARN;
-			PactScreen.Verdict line = new PactScreen.Verdict(answer.message(), PactGlance.of(answer.message()).shown(), answer.done(), font,
-					area.width() - 4, colour, true);
-			line.setX(area.left() + 2);
-			inBody("result", line, 4);
+		if (answer == null) {
+			return false;
 		}
+		int colour = answer.done() ? MagicTheme.GOOD : MagicTheme.WARN;
+		pin("result", new PactScreen.Verdict(answer.message(), PactGlance.of(answer.message()).shown(), answer.done(), font, room.width(), colour,
+				true, true), room, 2);
+		return true;
 	}
 
 	private void say(Component full, Component shown, int colour, String key) {
@@ -231,8 +319,12 @@ public class RosterScreen extends MagicScreen {
 		inBody(key, line, 4);
 	}
 
-	/** The footer (spec 2.14): the page's arrows at its left, Refresh and Close at its right, their tips below or beside it. */
-	private void footer(int pages) {
+	/**
+	 * The footer (spec 2.14): the page's arrows at its left, Refresh and Close at its right, their tips below or beside it;
+	 * between them, on the last page, how many {@code more} are not listed, and the switched-off note when an answer holds
+	 * the title row ({@code noted}).
+	 */
+	private void footer(int pages, int more, boolean noted) {
 		ScreenRectangle row = layout.footer();
 		boolean free = !RosterClient.waiting() && RosterClient.available();
 		MagicButton previous = plate(ui("previous"), Component.empty(), () -> turn(page - 1)).glyph(MagicArt.Glyph.BACK)
@@ -247,8 +339,23 @@ public class RosterScreen extends MagicScreen {
 		MagicButton close = plate(ui("close"), ui("close"), this::onClose);
 		int closeWidth = Math.max(56, close.labelWidth(font));
 		place("previous", previous, row.left(), previous.labelWidth(font), row);
-		place("next", next, row.left() + previous.labelWidth(font) + 4, next.labelWidth(font), row);
-		place("refresh", refresh, row.right() - closeWidth - 5 - refresh.labelWidth(font), refresh.labelWidth(font), row);
+		int nextX = row.left() + previous.labelWidth(font) + 4;
+		place("next", next, nextX, next.labelWidth(font), row);
+		int refreshX = row.right() - closeWidth - 5 - refresh.labelWidth(font);
+		// The band between the arrows and Refresh (C7: on screen whatever the page's cards), held there.
+		int from = nextX + next.labelWidth(font) + 6;
+		int room = refreshX - 6 - from;
+		int shared = more > 0 && noted ? (room - 6) / 2 : room;
+		if (more > 0) {
+			ScreenRectangle band = new ScreenRectangle(from, row.top(), Math.max(20, shared), row.height());
+			pin("more", line(ui("more", more, RosterStatePayload.MAX_ROWS), ui("short.more", more), MagicTheme.LAVENDER, band.width(), null), band, 4);
+			from += shared + 6;
+		}
+		if (noted) {
+			ScreenRectangle band = new ScreenRectangle(from, row.top(), Math.max(20, shared), row.height());
+			pin("note", note(band.width()), band, 4);
+		}
+		place("refresh", refresh, refreshX, refresh.labelWidth(font), row);
 		place("close", close, row.right() - closeWidth, closeWidth, row);
 	}
 
@@ -349,12 +456,24 @@ public class RosterScreen extends MagicScreen {
 
 	@Override
 	protected void extractChrome(GuiGraphicsExtractor g, int mouseX, int mouseY, float delta) {
-		// The title in gold over its underline at the panel's left, the page at its right (spec 2.14); no panel art: the cards are it.
+		// The title row and the footer on a dark band (C8: the title and the page at 4.5:1 or more over a bright world), then
+		// the title in gold over its underline at the panel's left, the page at its right (spec 2.14); no panel art: the cards
+		// are it.
 		ScreenRectangle header = layout.header();
+		ScreenRectangle foot = layout.footer();
+		band(g, header);
+		band(g, foot);
 		MagicArt.title(g, font, heading, header.left() + 12, header.top() + 3, font.width(heading) + 24);
 		if (!pageText.getString().isEmpty()) {
 			g.text(font, pageText, header.right() - 4 - font.width(pageText), header.top() + 3, MagicTheme.LAVENDER, true);
 		}
+	}
+
+	/** A dark band behind a row of the chrome: the card's well, nearly opaque, its corners cut. */
+	private static void band(GuiGraphicsExtractor g, ScreenRectangle row) {
+		g.fill(row.left() + 1, row.top(), row.right() - 1, row.bottom(), BAND);
+		g.fill(row.left(), row.top() + 1, row.left() + 1, row.bottom() - 1, BAND);
+		g.fill(row.right() - 1, row.top() + 1, row.right(), row.bottom() - 1, BAND);
 	}
 
 	@Override
@@ -410,6 +529,19 @@ public class RosterScreen extends MagicScreen {
 		return -1;
 	}
 
+	/**
+	 * The tip of row {@code id}'s card (tests; the unit 3 fixes): its sentences, then how many lines it takes as the last
+	 * entry; empty when no card for it is on this page.
+	 */
+	public List<String> tip(UUID id) {
+		if (controls.get("row:" + id) instanceof Card card) {
+			List<String> out = new ArrayList<>(card.tipText());
+			out.add(String.valueOf(card.tipLines()));
+			return out;
+		}
+		return List.of();
+	}
+
 	/** How row {@code id}'s portrait was last drawn: "portrait", "icon", or "" if not yet (tests). */
 	public String drawn(UUID id) {
 		return drawn.getOrDefault(id, "");
@@ -442,6 +574,18 @@ public class RosterScreen extends MagicScreen {
 		parts.add(ui("row.title", row.name(), row.kind()));
 		parts.addAll(details(row));
 		return CommonComponents.joinForNarration(parts.toArray(Component[]::new));
+	}
+
+	/**
+	 * The whole sentence a card's fact is drawn from (RosterGlance.fact): its next obligation's ("Next: ..."), else its
+	 * task's ("Now: ..."); empty when it draws none.
+	 */
+	private static Component factSentence(RosterStatePayload.Row row) {
+		Component line = RosterGlance.factLine(row);
+		if (line.getString().isEmpty()) {
+			return Component.empty();
+		}
+		return line == row.task() ? ui("row.task", line) : ui("row.obligation", line);
 	}
 
 	/** The row's whole sentences after its title: its state and why, its service, its place, its task and its next obligation. */
@@ -509,11 +653,31 @@ public class RosterScreen extends MagicScreen {
 	}
 
 	/**
+	 * A card's own tip (every sentence of its row; the unit's review, C4): beside the card toward the other column, as far
+	 * as the screen allows (where it has no room it overlaps the card, as little as it can), its top at the card's, and
+	 * always whole on the screen (a tall tip never starts above it).
+	 */
+	private record CardSide(AbstractWidget card) implements ClientTooltipPositioner {
+		private static final int PAD = 5;
+
+		@Override
+		public Vector2ic positionTooltip(int screenWidth, int screenHeight, int x, int y, int tooltipWidth, int tooltipHeight) {
+			boolean leftColumn = card.getX() + card.getWidth() / 2 < screenWidth / 2;
+			int left = leftColumn ? card.getRight() + PAD + 2 : card.getX() - PAD - 2 - tooltipWidth;
+			left = Math.max(PAD, Math.min(left, screenWidth - PAD - tooltipWidth));
+			int top = Math.max(PAD, Math.min(card.getY() + PAD, screenHeight - PAD - tooltipHeight));
+			return new Vector2i(left, top);
+		}
+	}
+
+	/**
 	 * One row as a relic card (spec 2.14): the gold frame and its purple well; the portrait in the gilded card frame; the
 	 * name (bold, regular on a narrow card); the state's mark and a few words; one fact with its item; the kind at its foot
-	 * (on a narrow card, in its tip). It takes the keyboard so the narrator reads the row as one, every word of it; its tip
-	 * is every sentence of the row; its actions are the keys after it. A word too long for its room loses, in turn, the
-	 * kind beside it, its item, and only then its end ("…", and {@link #cut()} says so).
+	 * (on a narrow card, or on a page over its budget, in its narration). It takes the keyboard so the narrator reads the
+	 * row as one, every word of it; its tip is its state's whole sentence and its fact's (at most {@value #TIP_WORDS} words,
+	 * else the state's alone); its actions are the keys after it, and the mouse over one reaches the action, not the card.
+ * A word too long for its room loses, in turn, the kind beside it, its item, and only
+	 * then its end ("…", and {@link #cut()} says so).
 	 */
 	private final class Card extends AbstractWidget implements MagicScreen.Drawn {
 		private final RosterStatePayload.Row row;
@@ -526,10 +690,12 @@ public class RosterScreen extends MagicScreen {
 		private final List<ItemStack> items;
 		private final Component kind;
 		private final List<FormattedCharSequence> tip = new ArrayList<>();
+		private final List<String> tipText = new ArrayList<>();
 		private final String text;
 		private final boolean cut;
+		private final ClientTooltipPositioner side = new CardSide(this);
 
-		Card(RosterStatePayload.Row row, List<RosterStatePayload.Row> rows, int x, int width, int height, int offered) {
+		Card(RosterStatePayload.Row row, List<RosterStatePayload.Row> rows, int x, int width, int height, int offered, boolean kindless) {
 			super(x, 0, width, height, words(row));
 			this.row = row;
 			this.narrow = width < NARROW_CARD;
@@ -538,17 +704,17 @@ public class RosterScreen extends MagicScreen {
 			int lineRoom = (narrow && offered > 0 ? width - ACTION_X - 3 : width - 6) - TEXT_X;
 			Component shownName = RosterGlance.name(row);
 			Component styled = narrow ? shownName : shownName.copy().withStyle(ChatFormatting.BOLD);
-			MagicArt.Mark shownMark = mark(row.icon());
-			if (row.icon() == RosterStatePayload.WAITING && MagicGlance.markOf(row.waiting()) == MagicArt.Mark.ASK) {
-				// Waiting on its holder's answer (a matter at its perch): the "?" of a question asked.
-				shownMark = MagicArt.Mark.ASK;
-			}
-			this.mark = shownMark;
-			Component shownState = RosterGlance.state(row, stateWord(row.icon()));
+			// A familiar or construct not loaded says so (the status it sends is only its last report; the unit's review, C9);
+			// any other row draws the mark its waiting reason has in Jade too (MagicGlance: "?" for an answer asked, the moon
+			// for idle), else its icon's.
+			boolean away = !row.request() && row.next().getString().isEmpty() && !row.loaded() && row.icon() != RosterStatePayload.DISABLED;
+			MagicArt.Mark said = MagicGlance.markOf(row.waiting());
+			this.mark = away ? mark(RosterStatePayload.UNLOADED) : said != null ? said : mark(row.icon());
+			Component shownState = away ? stateWord(RosterStatePayload.UNLOADED) : RosterGlance.state(row, stateWord(row.icon()));
 			RosterGlance.Fact shownFact = RosterGlance.fact(row, rows);
 			Component shownKind = RosterGlance.kind(row);
 			int factWidth = font.width(shownFact.shown());
-			int kindRoom = narrow || shownKind.getString().equals(shownName.getString()) ? 0 : font.width(shownKind) + 6;
+			int kindRoom = narrow || kindless || shownKind.getString().equals(shownName.getString()) ? 0 : font.width(shownKind) + 6;
 			int iconRoom = shownFact.items().isEmpty() ? 0 : 17;
 			if (kindRoom > 0 && factWidth + iconRoom > lineRoom - kindRoom) {
 				kindRoom = 0;
@@ -568,11 +734,31 @@ public class RosterScreen extends MagicScreen {
 			String drawnState = MagicArt.fit(font, shownState.getString(), stateRoom);
 			String drawnFact = MagicArt.fit(font, shownFact.shown().getString(), factRoom);
 			this.text = String.join(" ", List.of(drawnName, drawnState, drawnFact, kind.getString())).trim().replaceAll(" +", " ");
-			// Its tip: every sentence of the row, its title first (the narrow card's kind is there).
-			tip.addAll(font.split(ui("row.title", row.name(), row.kind()), 200));
-			for (Component line : details(row)) {
-				tip.addAll(font.split(line, 200));
+			// Its tip (spec 1.1; the unit 3 fixes, CI's pictures: every sentence of the row was nine lines over half the page):
+			// its state's whole sentence, then its fact's, while the two keep to TIP_WORDS and TIP_LINES; else its state's alone.
+			// Every sentence of the row stays its narration (its message).
+			Component stateSentence = away ? row.place().getString().isEmpty() ? stateWord(RosterStatePayload.UNLOADED)
+					: ui("row.unloaded", row.place()) : said(row);
+			Component factSentence = factSentence(row);
+			List<FormattedCharSequence> first = font.split(stateSentence, MagicChip.TIP_WIDTH);
+			List<FormattedCharSequence> second = factSentence.getString().isEmpty() ? List.of() : font.split(factSentence, MagicChip.TIP_WIDTH);
+			tip.addAll(first);
+			tipText.add(stateSentence.getString());
+			if (!second.isEmpty() && first.size() + second.size() <= TIP_LINES
+					&& MagicScreen.words(stateSentence.getString()) + MagicScreen.words(factSentence.getString()) <= TIP_WORDS) {
+				tip.addAll(second);
+				tipText.add(factSentence.getString());
 			}
+		}
+
+		/** Its tip's sentences (tests). */
+		List<String> tipText() {
+			return tipText;
+		}
+
+		/** How many lines its tip takes (tests). */
+		int tipLines() {
+			return tip.size();
 		}
 
 		boolean narrow() {
@@ -583,8 +769,28 @@ public class RosterScreen extends MagicScreen {
 			return cut;
 		}
 
+		/** Whether ({@code x}, {@code y}) is on one of its actions, pressable or not (they sit on it). */
+		private boolean overAction(double x, double y) {
+			for (MagicButton action : actions) {
+				if (x >= action.getX() && x < action.getX() + action.getWidth() && y >= action.getY() && y < action.getY() + action.getHeight()) {
+					return true;
+				}
+			}
+			return false;
+		}
+
+		/** Not under the mouse where an action is: a click there is the action's (its card is before it in the body). */
+		@Override
+		public boolean isMouseOver(double mouseX, double mouseY) {
+			return super.isMouseOver(mouseX, mouseY) && !overAction(mouseX, mouseY);
+		}
+
 		@Override
 		protected void extractWidgetRenderState(GuiGraphicsExtractor g, int mouseX, int mouseY, float delta) {
+			if (isHovered && overAction(mouseX, mouseY)) {
+				// The action under the mouse is lit, tipped and narrated, not its card.
+				isHovered = false;
+			}
 			int x0 = getX();
 			int y0 = getY();
 			MagicArt.panel(g, MagicArt.GOLD_FRAME, x0, y0, width, height);
@@ -620,13 +826,7 @@ public class RosterScreen extends MagicScreen {
 
 		@Override
 		protected void extractTooltipForNextRenderPass(GuiGraphicsExtractor g, int mouseX, int mouseY) {
-			for (MagicButton action : actions) {
-				if (action.isMouseOver(mouseX, mouseY)) {
-					// The action under the mouse shows its own tip, not the card's.
-					return;
-				}
-			}
-			MagicArt.tip(g, this, tip, null, mouseX, mouseY);
+			MagicArt.tip(g, this, tip, side, mouseX, mouseY);
 		}
 
 		@Override

@@ -65,11 +65,16 @@ public final class MagicGlance {
 			Map.entry(JADE + "pact.note.verdance_carrying.empty", MagicArt.Mark.MOON),
 			Map.entry(JADE + "pact.note.verdance_carrying.nowhere", MagicArt.Mark.HOURGLASS),
 			Map.entry(JADE + "pact.note.verdance_carrying.two_roads", MagicArt.Mark.ASK),
+			// GC-06 unit 3
+			Map.entry(JADE + "pact.note.habitat_reading.proud", MagicArt.Mark.HOURGLASS),
+			// GC-07 unit 4
 			Map.entry(JADE + "pact.matter.graft_keeping.no_gain", MagicArt.Mark.ASK),
 			Map.entry(JADE + "pact.note.graft_keeping.no_gain", MagicArt.Mark.ASK),
 			Map.entry(JADE + "pact.note.graft_keeping.no_reading", MagicArt.Mark.HOURGLASS),
 			Map.entry(JADE + "pact.note.graft_keeping.no_donor", MagicArt.Mark.HOURGLASS),
 			Map.entry(JADE + "pact.note.graft_keeping.no_host", MagicArt.Mark.MOON),
+			// GC-08 unit 5
+			// GC-09 unit 6
 			Map.entry("message.jugcraft.concordance.disabled", MagicArt.Mark.LOCK),
 			Map.entry("compose.jugcraft.diagnostic.conflicting_agreement", MagicArt.Mark.CROSS),
 			Map.entry(JADE + "dormant", MagicArt.Mark.MOON),
@@ -95,7 +100,10 @@ public final class MagicGlance {
 			Map.entry(ECOLOGY + "status.stalled", MagicArt.Mark.CROSS),
 			Map.entry(ECOLOGY + "status.starved", MagicArt.Mark.CROSS),
 			Map.entry(ECOLOGY + "status.waiting", MagicArt.Mark.MOON),
-			Map.entry(ECOLOGY + "status.working", MagicArt.Mark.TICK));
+			Map.entry(ECOLOGY + "status.working", MagicArt.Mark.TICK),
+			// Unit 2's review: a departing spirit, and a perch that keeps no agreement.
+			Map.entry(JADE + "pact.departing", MagicArt.Mark.MOON),
+			Map.entry(JADE + "pact.none", MagicArt.Mark.MOON));
 
 	/** An icon a line draws first: a sprite of the GUI atlas at its own size (a mark, a glyph). */
 	public record Icon(Identifier sprite, int width, int height) {

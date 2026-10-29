@@ -720,6 +720,73 @@
       }
     ]
   },
+  "marax.arrive": {
+    "subtitle": "subtitles.jugcraft.marax.arrive",
+    "sounds": [
+      {
+        "name": "jugcraft:nouveau/gaia_1",
+        "attenuation_distance": 16
+      }
+    ]
+  },
+  "marax.listen": {
+    "subtitle": "subtitles.jugcraft.marax.listen",
+    "sounds": [
+      {
+        "name": "jugcraft:nouveau/gaia_2",
+        "attenuation_distance": 16,
+        "pitch": 1.3
+      }
+    ]
+  },
+  "marax.inspect": {
+    "subtitle": "subtitles.jugcraft.marax.inspect",
+    "sounds": [
+      {
+        "name": "jugcraft:nouveau/gaia_3",
+        "attenuation_distance": 16
+      }
+    ]
+  },
+  "marax.assent": {
+    "subtitle": "subtitles.jugcraft.marax.assent",
+    "sounds": [
+      {
+        "name": "jugcraft:nouveau/gaia_4",
+        "attenuation_distance": 16
+      }
+    ]
+  },
+  "marax.refuse": {
+    "subtitle": "subtitles.jugcraft.marax.refuse",
+    "sounds": [
+      {
+        "name": "jugcraft:nouveau/gaia_2",
+        "attenuation_distance": 16,
+        "pitch": 0.7
+      }
+    ]
+  },
+  "marax.depart": {
+    "subtitle": "subtitles.jugcraft.marax.depart",
+    "sounds": [
+      {
+        "name": "jugcraft:nouveau/gaia_1",
+        "attenuation_distance": 16,
+        "pitch": 0.85
+      }
+    ]
+  },
+  "marax.work": {
+    "subtitle": "subtitles.jugcraft.marax.work",
+    "sounds": [
+      {
+        "name": "jugcraft:nouveau/gaia_3",
+        "attenuation_distance": 16,
+        "pitch": 1.5
+      }
+    ]
+  },
   "foras.arrive": {
     "subtitle": "subtitles.jugcraft.foras.arrive",
     "sounds": [

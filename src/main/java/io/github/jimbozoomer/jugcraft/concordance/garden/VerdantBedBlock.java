@@ -177,6 +177,8 @@ public class VerdantBedBlock extends BaseEntityBlock {
 			} else {
 				tendBy(serverLevel, pos, server, bed);
 				bed.report(serverLevel, server);
+				// GC-06 (GC-P70): Marax's first obligation, a Verdant Bed read by hand (its one hook).
+				PactObligations.performed(serverLevel, server, PactObligations.Act.READ, pos);
 			}
 		}
 		return InteractionResult.SUCCESS;

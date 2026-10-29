@@ -150,6 +150,8 @@ class ClientTestSelectionTests(unittest.TestCase):
         chosen, _ = selection.select(["src/client/java/io/github/jimbozoomer/jugcraft/client/compat/JugcraftJadeClient.java"], self.tests, set())
         self.assertIn("ConcordancePactClientGameTests", chosen)
         self.assertIn("ConcordanceGardenPactClientGameTests", chosen)
+        # The unit's review: the roster's class photographs the workshop hand with Jade's overlay.
+        self.assertIn("ConcordanceRosterClientGameTests", chosen)
         lang = "src/main/resources/assets/jugcraft/lang/en_us.json"
         for key in ("screen.jugcraft.glance.compose.jugcraft.worker.status.idle", "screen.jugcraft.roster.short.page"):
             diff = '+++ b/' + lang + '\n+  "' + key + '": "x",\n'
@@ -185,6 +187,16 @@ class ClientTestSelectionTests(unittest.TestCase):
 
     # The garden cohort: each later unit's case (GC-06 to GC-09) under its line.
     # GC-06 unit 3
+    def test_marax_body_and_service_select_the_garden_client_test(self):
+        # Concordance garden cohort, GC-06: Marax's body, entity and reading are shown by the garden's client class.
+        for path in ("src/main/resources/assets/jugcraft/textures/entity/marax.png",
+                     "src/main/resources/assets/jugcraft/geckolib/models/entity/marax.geo.json",
+                     "src/main/java/io/github/jimbozoomer/jugcraft/concordance/spirits/MaraxEntity.java",
+                     "src/main/java/io/github/jimbozoomer/jugcraft/concordance/spirits/HabitatReading.java"):
+            with self.subTest(path=path):
+                chosen, _ = selection.select([path], self.tests, set())
+                self.assertIn("ConcordanceGardenPactClientGameTests", chosen)
+
     # GC-07 unit 4
     def test_foras_body_entity_and_service_select_the_garden_client_test(self):
         # Concordance garden cohort, GC-07: Foras's body, entity and graft keeping are shown by the garden's client class.

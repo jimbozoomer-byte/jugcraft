@@ -27,7 +27,11 @@ import io.github.jimbozoomer.jugcraft.concordance.rules.Evidence;
 import io.github.jimbozoomer.jugcraft.concordance.rules.EvidenceRule;
 import io.github.jimbozoomer.jugcraft.concordance.rules.ResearchEngine;
 import io.github.jimbozoomer.jugcraft.concordance.rules.ResearchState;
+import io.github.jimbozoomer.jugcraft.concordance.spirits.BathinEntity;
+import io.github.jimbozoomer.jugcraft.concordance.spirits.BuerEntity;
 import io.github.jimbozoomer.jugcraft.concordance.spirits.GardenPacts;
+import io.github.jimbozoomer.jugcraft.concordance.spirits.MaraxEntity;
+import io.github.jimbozoomer.jugcraft.concordance.spirits.PactObligations;
 import io.github.jimbozoomer.jugcraft.concordance.spirits.StolasRegard;
 import io.github.jimbozoomer.jugcraft.concordance.spirits.Workers;
 import io.github.jimbozoomer.jugcraft.concordance.stages.StageProgress;
@@ -436,6 +440,36 @@ public class ConcordanceProgressionGameTests {
 				"mastered by the garden practice kept with " + GardenPacts.MASTERY_SPIRITS + " different garden spirits: " + mastered);
 		helper.assertTrue(regard.states().values().stream().flatMap(List::stream).noneMatch(rule -> rule.kind() == EvidenceRule.Kind.NOTES),
 				"no state takes notes: " + regard.states());
+		helper.succeed();
+	}
+
+	/**
+	 * Concordance garden cohort, GC-06 (GB26, GC-P75): The Garden's Regard is mastered by three garden spirits' first
+	 * obligations, each by hand: a strained bed tended and read (Buer's TEND and Marax's READ, one use, both their areas holding
+	 * it) leaves it understood with two kept; a living device read (Bathin's DEVICE) keeps the third and masters it.
+	 */
+	@GameTest(maxTicks = 20)
+	public void theGardensRegardIsMasteredThroughThreeSpirits(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		ServerPlayer keeper = ConcordanceWorkerGameTests.gardenHolder(helper);
+		long now = level.getGameTime();
+		ConcordanceWorkerGameTests.buerPact(helper, keeper, new BlockPos(1, 1, 1), now);
+		ConcordanceWorkerGameTests.bathinPact(helper, keeper, new BlockPos(1, 1, 6), now);
+		ConcordanceWorkerGameTests.maraxPact(helper, keeper, new BlockPos(6, 1, 1), now);
+		BlockPos bed = new BlockPos(4, 1, 3);
+		ConcordanceWorkerGameTests.keptBed(helper, bed, keeper.getUUID(), 2);
+		helper.assertValueEqual(PactObligations.spiritsKept(keeper), 0, "Nothing kept yet");
+		ConcordanceGardenGameTests.handUse(helper, keeper, bed, ItemStack.EMPTY, false);
+		helper.assertTrue(PactObligations.kept(keeper, BuerEntity.COUNTERPART) && PactObligations.kept(keeper, MaraxEntity.COUNTERPART)
+				&& PactObligations.spiritsKept(keeper) == 2
+				&& ConcordanceProgress.knowledge(keeper).state(GardenPacts.RESEARCH) == ResearchState.UNDERSTOOD,
+				"A strained bed tended and read by hand keeps Buer's and Marax's obligations: two, not yet mastered");
+		BlockPos heart = new BlockPos(4, 1, 5);
+		ConcordanceWorkerGameTests.keptHeart(helper, heart, keeper.getUUID(), 0);
+		ConcordanceGardenGameTests.handUse(helper, keeper, heart, ItemStack.EMPTY, false);
+		helper.assertTrue(PactObligations.kept(keeper, BathinEntity.COUNTERPART) && PactObligations.spiritsKept(keeper) == 3
+				&& ConcordanceProgress.knowledge(keeper).state(GardenPacts.RESEARCH) == ResearchState.MASTERED,
+				"A living device read by hand keeps Bathin's: three, and The Garden's Regard is mastered");
 		helper.succeed();
 	}
 }

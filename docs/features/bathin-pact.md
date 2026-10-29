@@ -128,7 +128,7 @@ the paintings, `art/owner-library/PROVENANCE.md`; the library is unchanged and n
 | Costs | the compact once; four Verdant Chaff every 7 game days, at most 4 periods ahead; no resonance; a carry into a pylon loses a third of the Verdance (3 for 2), as the Heart's own pour does; a carry into a Gleaner loses nothing and makes nothing |
 | Unlocks | the invitation (the Regard understood, an awake Heart and an awake Gleaner or a pylon); Verdance carrying (the pact); one obligation toward The Garden's Regard mastered |
 | Failure behaviour | every refusal spends nothing and names its reason; with his holder away (no stand-in, whatever the server's absent-owner option), suspended, held for upkeep or past his twelve moves, he carries nothing and says why; nothing to carry or nowhere to carry it: he waits and Jade says which; a Gleaner or Heart refused for itself is skipped until his index is next read; a Heart that pours into its own pylon is left alone until answered; a missed offering warns, gives a day's grace (he works on), then suspends with nothing lost; ending returns what was paid ahead once; a broken perch ends nothing and drops the answer; switched off, everything waits |
-| Test evidence | the 38 server tests of `GC05_CARRYING_TESTS`, `GC05_ACCORD_TESTS` and `GC05_BATHIN_TESTS`, SG12's fifteen cases for `jugcraft:bathin` and the forced unit-1 lines (GC-P59), all passed in CI run 40777920181 with and without the optional integrations; `ConcordanceGardenPactClientGameTests` passed there, its pictures of him looked at; not played by a person ([Verification](#verification)) |
+| Test evidence | the 38 server tests of `GC05_CARRYING_TESTS`, `GC05_ACCORD_TESTS` and `GC05_BATHIN_TESTS`, SG12's fifteen cases for `jugcraft:bathin` and the forced unit-1 lines (GC-P59; four of them in GC-06b's generic form, GC-P77: [Verification](#verification)), all passed in CI run 40777920181 with and without the optional integrations; `ConcordanceGardenPactClientGameTests` passed there, its pictures of him looked at; not played by a person ([Verification](#verification)) |
 
 ## Connections
 
@@ -341,7 +341,11 @@ evidence named (the contract's GE9):
 `GC05_CARRYING_TESTS` (24, four in `ConcordanceGardenGameTests` and one in `ConcordanceEconomyGameTests`),
 `GC05_ACCORD_TESTS` (9, one in `ConcordancePersistenceGameTests`) and `GC05_BATHIN_TESTS` (5), SG12's fifteen cases and
 `noGardenTermOrRefusalNamesAnAstrolabe` and `talkingTeachesNothing` (each run for every offered spirit, Bathin among
-them), and the unit-1 tests GC-P59's forced lines changed. **Without the optional integrations**
+them), and the unit-1 tests GC-P59's forced lines changed. Four of those ran in GC-06b's generic form, not unit 2's
+(corrected with unit 3): the run tested `8af703330`, which already held GC-06b (`8cf0ef994`), and that commit had
+rewritten `aPerchOffersOnlyWhatThePlayerMayInvite` and `ConcordanceJournalGameTests.theJournalNamesEachRegardsNextStep`
+generic over the shipped garden spirits and moved the second perch of `everySpiritIsOnePactAHolder` and
+`everySpiritsPactIsSeatedAgain` north of the first (GC-P77). **Without the optional integrations**
 (`-PjugcraftOptionalIntegrations=false`): all 3,206 required tests passed. Each job re-ran three of main's tests within
 the run (a Lair, an Arms VIII and a Tatterlace test), none of the cohort's, and reported every required test passed.
 
@@ -408,12 +412,18 @@ pictures; no CI result for either is recorded here.
 | `bathin_end_confirm` | ending, asked first | a scroll over the cosmos: "End your pact with Bathin?", "He leaves; offerings paid ahead come back once.", "This cannot be undone."; End the pact, Keep it (focused) |
 | `bathin_ended` | the pact ended | his portrait greyed, "Bathin", "Verdance carrying", "Ended"; "Pact ended. Use the perch to invite Bathin again"; "Bathin departs; 0 offerings came back", its tip repeating the whole sentence ("... (ended by its holder); 0 offerings came back to you"); Close |
 
+**Since GC-06** ([Marax](marax-pact.md); not merged, not yet run in CI): the chooser has a fourth entry; Bathin's body
+stands `PERCH`, as before. His per-think questions were lifted unchanged into the shared `GardenAsking` by GC-06b
+(`8cf0ef994`, in the head of run 40777920181), and his work icon's line in `PactGlance.WORK_ICONS` is a `Map.entry` since
+`1473e99f1`; his words, sounds, service, matter and tests are otherwise unchanged. His first obligation is now one of
+three that can master The Garden's Regard (with Buer's and Marax's).
+
 **Since GC-07** ([Foras](foras-pact.md); not merged, not yet run in CI): the chooser has another entry; Bathin's body
 stays on the perch. Once he is answered and no matter is raised, his kept page draws his question in general short,
 "Take from Hearts that have a road?" (his `WORK_GLANCES` row's `question`, the whole sentence its tip and narration),
 since `check_magic_ui` now asks a glance of every work's question; Foras's graft keeping shares his per-think questions
 (`GardenAsking`, GC-06b). His words, sounds, service, matter and tests are otherwise unchanged. His first obligation
-counts toward The Garden's Regard's mastery with Buer's and Foras's.
+counts toward The Garden's Regard's mastery as Buer's, Marax's and Foras's do (any three garden spirits').
 
 **Local** (this record's commit; no Minecraft build here): `python3 tools/owner_art.py --check`, `python3 -B
 tools/check_mod_data.py`, `python3 scripts/check_repository.py`, `python3 tools/concordance_journey.py --check`,

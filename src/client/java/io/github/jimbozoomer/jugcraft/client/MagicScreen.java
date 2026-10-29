@@ -379,10 +379,17 @@ public abstract class MagicScreen extends Screen implements ScreenKit.Fitted {
 	public int words() {
 		int words = 0;
 		for (String text : drawn()) {
-			for (String token : text.split("\\s+")) {
-				if (token.chars().anyMatch(Character::isLetterOrDigit)) {
-					words++;
-				}
+			words += words(text);
+		}
+		return words;
+	}
+
+	/** How many words {@code text} holds, as {@link #words()} counts them (a screen weighing a part before it adds it). */
+	static int words(String text) {
+		int words = 0;
+		for (String token : text.split("\\s+")) {
+			if (token.chars().anyMatch(Character::isLetterOrDigit)) {
+				words++;
 			}
 		}
 		return words;
