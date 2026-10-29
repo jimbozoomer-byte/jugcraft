@@ -357,6 +357,10 @@ screens) both server jobs passed all 3,206 required tests, his among them, and `
 passed with his flow first; his 33 pictures of that run were not looked at for this record (the Seen column above is run
 40605564166's).
 
+**Since GC-07** ([Foras](foras-pact.md); not merged, not yet run in CI): the chooser has another entry; Buer's body
+stays on the perch, and his words, sounds, service and tests are unchanged. His first obligation counts toward The
+Garden's Regard's mastery with Bathin's and Foras's.
+
 **Local** (this record's commit; no Minecraft build here): `python3 scripts/check_repository.py` (structure and links), `python3 tools/concordance_journey.py
 --check`, `python3 -B tools/check_mod_data.py` (its `check_delivery` holding the re-pasted delivery matrix) and
 `git diff --check`, each run on this commit's tree and passed; `python3 tools/owner_art.py --provenance pacts` printed

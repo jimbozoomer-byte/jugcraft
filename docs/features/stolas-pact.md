@@ -631,6 +631,9 @@ generators' incidental rewrites were restored: [the contract's corrections](conc
   carries the magic interfaces' restyled screens) both server jobs passed all 3,206 required tests, his among them, and
   `ConcordancePactClientGameTests` (shard 3), `ConcordancePactNetworkTests` (shard 1) and
   `ConcordanceRosterClientGameTests` (shard 6) passed; their pictures were not looked at for this record.
+- **Since GC-07 (Foras, [record](foras-pact.md); not merged; not yet run in CI):** the chooser has another entry for an
+  owner who understands both Regards. GC-07 changed none of Stolas's ids, keys, words, body or tests: his body stays on
+  the perch, Star-reckoning raises no matter and asks no question, and the graft Foras makes is a garden service's alone.
 
 ## World and event applicability
 

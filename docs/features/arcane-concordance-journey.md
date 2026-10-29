@@ -12,7 +12,9 @@ cohort's unit 1 adds the garden pacts (`GARDEN`; `ConcordanceJourneyGameTests.bu
 `theGardenPactsRecipesLoad`), not merged (draft #526); both passed in both server jobs of run 40605564166. Its unit 2
 adds Bathin's steps (7 to 9; the Gleaner's recipe walked from vines, a hopper and a flower pot), held by the worker tests
 they name, with no whole-path test of his own; those tests and `buerFromTheCodexToDeparture`, which now chooses Buer at
-the chooser, passed in both server jobs of run 40777920181.
+the chooser, passed in both server jobs of run 40777920181. Its unit 4 adds Foras's three steps (10 to 12 on its own
+line, after Marax's once merged; Dewmoss in `GARDEN_RECIPES`), held by the tests they name, written and not yet run in
+CI; unit 7's `theGardenPactsFromCodexToDeparture` is to walk them.
 Proposal issue: none; the owner's Arcane Concordance brief (roadmap step 31) is the scope approval.
 Owner: @jimbozoomer-byte. AI-assisted implementation with Claude Code; the model is named in the commit trailers.
 Target milestone and tier: Concordance milestone 23, every stage. Roadmap step 31.

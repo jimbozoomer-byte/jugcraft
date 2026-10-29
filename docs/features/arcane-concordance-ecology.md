@@ -9,7 +9,9 @@ commit); its tests passed in CI (run 38726242149, with unit 3, and again in run 
 [contract](concordance-chunk-c.md)). The garden cohort's unit 1 (GC-03 and GC-04: two read-only bed reads, the tending
 hook and Buer's strain tending; [contract](concordance-garden-cohort.md)) is not merged (draft #526); its tests passed in
 CI run 40605564166. Its unit 2 (GC-05: the Gleaner's and the Heart's named roads, the bed index's devices and Bathin's
-Verdance carrying; [record](bathin-pact.md)) is not merged either; its tests passed in CI run 40777920181.
+Verdance carrying; [record](bathin-pact.md)) is not merged either; its tests passed in CI run 40777920181. Its unit 4
+(GC-07b and GC-07: the graft in one place and Foras's graft keeping; [record](foras-pact.md)) is built and not merged,
+and not yet compiled or run in CI.
 Proposal issue: none; the owner's Arcane Concordance brief (roadmap step 14) is the scope approval.
 Owner: @jimbozoomer-byte. AI-assisted implementation with Claude Code; the model is named in the commit trailers.
 Target milestone and tier: Concordance milestone 6, Practitioner stage (Jugcraft Workshops). Roadmap step 14.
@@ -96,7 +98,13 @@ Sunpetal bears shade, light 9+ (best 11+) for 11+ (best 13+), but wants a wetter
 (best 4+). The graft lasts through every harvest, replanting, save and restart, until a crop of another organism grows
 there. A bed carries one: a second is refused, as is a graft where the gardener may not change the crop or the bed, and
 a refusal spends nothing. Produce, cost, chaff and alchemy are unchanged, so a graft makes nothing. The reports, the
-Inspect page and Jade name it, on a crop only when the crop is its host.
+Inspect page and Jade name it, on a crop only when the crop is its host. Since the garden cohort's GC-07b (not merged;
+not yet run in CI) the graft itself is `garden/Grafting.apply` (the graft set, the ungrafted plant's verdict forgotten,
+the particles), which the hand's gesture ends in after its own checks, messages and spent Dewmoss, unchanged, and which
+Foras's graft keeping ([record](foras-pact.md)) ends in after his: `check_graft`'s rules hold it there, and only growth
+clears a graft. `Grafting.gains` is his "would gain": by the bed's cached reading, the grafted niche no worse on any
+factor and better on one (Dewlit helps a Sunpetal in light 9 to 12 on a bed of moisture 5 or more; on moisture 4 or less
+its moisture would fit worse).
 
 **Four living devices:**
 
@@ -388,6 +396,15 @@ beating on a lit bed among three kinds of crop) and `bathinsFirstObligationIsADe
 (`ConcordanceWorkerGameTests`); and `noVerdanceIsMintedByCarrying` (`ConcordanceEconomyGameTests`). The existing
 `theHeartBeatsVerdanceIntoAPylon` and Gleaner tests passed unchanged. `check_verdance_roads` and `check_garden_pacts`
 pass locally. Not run: a long unattended garden with Bathin on a real server; any person.
+
+**The garden cohort, unit 4 (GC-07b, GC-07; not merged; not yet run in CI).** Written and not yet run:
+`theGraftGestureBehavesAsBefore` (the hand's graft through `Grafting`, its messages and its one spent Dewmoss as before),
+`aGraftGainsOnlyWhereEveryFitIsNoWorseAndOneBetter` (six readings of a Sunpetal with and without Dewlit) and
+`theGardenReachIndexesStoresTouchingThePerch` (`ConcordanceGardenGameTests`); Foras's graft-keeping tests in
+`ConcordanceWorkerGameTests`, among them `forasSpendsOneDonorAGraftAndNeverTwo`, `forasNeverReplacesAKnownGraft`,
+`forasGraftsAgainAfterAReplanting` and `aPrudentForasGraftsWhereItHelps` (a host it helps grafted, one it would not
+left). Chunk C's nine graft tests are unchanged. `check_ecology` and `check_graft` (the graft's rules in `Grafting`) pass
+locally. Not run: any of them in CI; a long unattended garden with Foras on a real server; any person.
 
 ## World and event applicability
 

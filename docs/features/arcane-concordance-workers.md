@@ -20,7 +20,9 @@ Chunks B and C and the October 26 community batch; Chunk D's own #474 was closed
 Concordance garden cohort's unit 1 (GC-01 to GC-04: one pact spirit base, a perch for many spirits, facing, the garden
 groundwork and [Buer](buer-pact.md); [contract](concordance-garden-cohort.md)), not merged (draft #526); its tests passed
 in CI run 40605564166 (see Verification). Extended by the cohort's unit 2 (GC-05: [Bathin](bathin-pact.md), the accord
-machinery and the bed index's devices), not merged either; its tests passed in CI run 40777920181.
+machinery and the bed index's devices), not merged either; its tests passed in CI run 40777920181. Extended by the
+cohort's unit 4 (GC-07: [Foras](foras-pact.md), graft keeping and the bed index's stores), built on its own line from
+unit 3's shared prefix and not merged, and not yet compiled or run in CI.
 Proposal issue: none; the owner's Arcane Concordance brief (roadmap step 17) is the scope approval.
 Owner: @jimbozoomer-byte. AI-assisted implementation with Claude Code; the model is named in the commit trailers.
 Target milestone and tier: Concordance milestone 9, Practitioner stage (Jugcraft Workshops). Roadmap step 17.
@@ -160,7 +162,9 @@ kind: his offer is the Concordance's `pact` data, `concordance/pact/stolas.json`
   and Buer (GC-04) the second; nothing saved changed. Since GC-04 a pact's service also steps while an offering is due,
   through its grace, as long as its holder is near (GC-P27). Since GC-05 Bathin is the third, and a pact spirit may show
   something in the world as a gesture plays (`PactSpiritEntity.gestured`: his ring of dust) and raise a matter for its
-  holder to settle at its perch (the accord, below).
+  holder to settle at its perch (the accord, below). Since GC-07 (not yet run in CI) Foras joins them, standing on the
+  ground beside his perch through the shared prefix's `PactSpiritEntity.Station.BESIDE` (GC-06b), the first garden
+  service to spend an item: one donor a graft, taken from a store touching the perch in one transaction.
 
 ## Connections
 
@@ -580,6 +584,19 @@ four, one economy and one persistence test) passed in CI run 40777920181 with an
 `ConcordanceGardenPactClientGameTests` passed there (its pictures of him are described in
 [Bathin's Verification](bathin-pact.md#verification)). Not played by a person; no second client.
 
+The fourth garden spirit is Foras (GC-07, [record](foras-pact.md)): graft keeping, at any hour while his holder is near.
+He grafts the host crops on his beneficiaries' awake beds in his area with one donor each (a Dewmoss for a Sunpetal's
+Dewlit) from a plain container touching the perch, at most one graft a think and 8 a day, only where the graft helps by
+the bed's cached reading until his holder answers otherwise; he never replaces a graft the rules know. The bed index can
+also hold the plain containers touching its pact's perch, 16 at most, judged in the beds' one pass
+(`GardenReach.withStores`, `CourierWork.plain`); a store is asked as the holder's before it is read, and the donor is
+taken in one outer transaction committed only when exactly one came out, then the graft is `Grafting.apply`'s, the one
+graft the hand makes too. His matter (the accord, above) names the hosts a graft would not help, or would harm; his
+answers are `prudent` and `always`. His first obligation is `GRAFT` (a crop grafted by hand in his area). He stands on the
+ground beside the perch (`Station.BESIDE`). **Verification:** his 25 server tests (`GC07_GRAFT_TESTS`,
+`GC07_FORAS_TESTS`) and his flow in `ConcordanceGardenPactClientGameTests` are written and **not yet run**: no CI run has
+compiled him ([his Verification](foras-pact.md#verification)). Not played by a person; no second client.
+
 ## World and event applicability
 
 Works in every dimension; a shade's agreement and a porter's route belong to the dimension they were made in. No
@@ -626,6 +643,14 @@ and agreement `jugcraft:bathin_pact`, the work `verdance_carrying` (saved in a B
 the perch's optional saved `accord` (`yield`, `claim`; stamp 1) and the worker status `awaiting_answer` (appended); on
 the wire (network only) the action `resolve` (10), the reason `resolved` and the state's `spirit.matter` and
 `spirit.answers`; Jade's keys `matter` and `accord`. No block, item or block entity; no migration.
+
+Since the garden cohort's unit 4 (not merged; not yet run in CI): the entity `jugcraft:foras`, his definition
+`concordance/pact/foras.json` and agreement `jugcraft:foras_pact`, the work `graft_keeping` (saved in a Bound Will's
+service; appended), the tag `#jugcraft:foras_offerings`, his sound events `jugcraft:foras.*`, his four codex pages of
+`binding/garden_regard` after Bathin's (named by title, since each unit's pages renumber the entry); the perch's accord
+values `prudent` and `always` (appended). Nothing saved of his own: his entity writes only the base's `perch` and
+`record`; his memory and his station's side are never saved, and a bed's `graft` is Chunk C's key. No block, item or
+block entity; no migration.
 
 Open items:
 
