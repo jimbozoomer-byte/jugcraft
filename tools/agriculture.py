@@ -1628,6 +1628,25 @@ def decor14_items():
     return decor14_blocks() + list(OUTFITS)
 
 
+# Costume disguises (agriculture/Disguises.java, mixin/DisguiseTargetMixin), all year, not only in the season: a player
+# wearing a costume of a kind (any armour slot) is taken for one of their own by the monsters of that kind, which never
+# pick them as a target until the player hurts one. Per kind, `costumes` are the item tag DISGUISE_TAG/<kind> and `fools`
+# the entity type tag of the same name. Bosses are in no `fools` list (a boss always knows who you are). The server's
+# `option` (on or off) turns them off.
+DISGUISE_TAG = "jugcraft:disguises"
+DISGUISES = {"option": "costumes.disguises",
+             "kinds": {"skeleton": {"costumes": ["jugcraft:skeleton_suit"],
+                                    "fools": ["minecraft:skeleton", "minecraft:stray", "minecraft:bogged"]},
+                       "walking_dead": {"costumes": ["jugcraft:mummy_wraps"],
+                                        "fools": ["minecraft:zombie", "minecraft:husk", "minecraft:zombie_villager",
+                                                  "minecraft:drowned"]},
+                       "witch": {"costumes": ["jugcraft:witch_hat"], "fools": ["minecraft:witch"]},
+                       "werewolf": {"costumes": ["jugcraft:werewolf_mask", "jugcraft:alphas_hood"], "fools": ["jugcraft:werewolf"]},
+                       "ghost": {"costumes": ["jugcraft:ghost_sheet"], "fools": ["minecraft:vex"]},
+                       "cat": {"costumes": ["jugcraft:cat_ears_and_tail"], "fools": ["minecraft:creeper"]},
+                       "night": {"costumes": ["jugcraft:bat_wings", "jugcraft:vampire_cape"], "fools": ["minecraft:phantom"]}}}
+
+
 # ---------------------------------------------------------------- Fall additions 1: the chandlery
 # The Wax Melting Pot (WaxPotBlock + entity) holds up to `capacity` measures of one wax (`waxes`: what puts it in, as an
 # item tag, how many measures an item gives, how long a candle burns for each layer of it, and its natural colour). Over

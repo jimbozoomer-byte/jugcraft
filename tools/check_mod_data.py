@@ -4649,6 +4649,7 @@ def check_agriculture():
     check_decor12(java)
     check_decor13(java)
     check_decor14(java)
+    check_disguises(java)
     check_chandlery(java)
     check_cider(java)
     check_pantry(java, main)
@@ -8402,6 +8403,47 @@ def check_decor13(java):
     tag = load(DATA / "jugcraft" / "tags" / "item" / "witchs_brew_ingredients.json") or {}
     if tag.get("values") != bowl["ingredients"]:
         err("Item tag jugcraft:witchs_brew_ingredients differs from PUNCH_BOWL's ingredients")
+
+
+def check_disguises(java):
+    """Costume disguises: Disguises.java's kinds and option match tools/agriculture.py, the option is on by default, the
+    mixin is registered and asks Disguises.fooled before a monster picks a target, a monster the player has hurt still
+    fights back, each kind's item and entity type tags hold exactly the table's costumes and monsters, every costume is
+    a trick-or-treat costume, and no boss is ever fooled."""
+    table = ag.DISGUISES
+    source = java.get("Disguises", "")
+    kinds = re.search(r"KINDS = List\.of\(([^)]*)\)", source)
+    if not kinds or re.findall(r'"([a-z_]+)"', kinds.group(1)) != list(table["kinds"]):
+        err("Disguises.KINDS differs from tools/agriculture.py DISGUISES")
+    if f'OPTION = "{table["option"]}";' not in source:
+        err(f"Disguises.OPTION is not {table['option']!r}")
+    if f'Map.entry("{table["option"]}", "on")' not in CONFIG.read_text(encoding="utf-8"):
+        err(f"JugcraftConfig: {table['option']} should default to on")
+    if "mob.getLastHurtByMob() == player" not in source:
+        err("Disguises.fooled must let a monster the player has hurt fight back")
+    mixin_path = JAVA_ROOT / "mixin" / "DisguiseTargetMixin.java"
+    mixin = mixin_path.read_text(encoding="utf-8") if mixin_path.exists() else ""
+    if not all(part in mixin for part in ('@Mixin(Mob.class)', 'method = "setTarget"', "Disguises.fooled(", "ci.cancel();")):
+        err("DisguiseTargetMixin must cancel Mob.setTarget when Disguises.fooled")
+    mixins = load(RES / f"{MOD}.mixins.json") or {}
+    if "DisguiseTargetMixin" not in mixins.get("mixins", []):
+        err("jugcraft.mixins.json doesn't register DisguiseTargetMixin")
+    costumes = set((load(DATA / "jugcraft" / "tags" / "item" / f"{ag.COSTUME_TAG.split(':')[1]}.json") or {}).get("values", []))
+    import arms_variants
+    bosses = set(arms_variants.FRIGHTLESS) | {"minecraft:ender_dragon", "minecraft:wither", "minecraft:warden",
+                                              "minecraft:elder_guardian"}
+    path = ag.DISGUISE_TAG.split(":")[1]
+    for kind, entry in table["kinds"].items():
+        for registry, key in (("item", "costumes"), ("entity_type", "fools")):
+            values = (load(DATA / "jugcraft" / "tags" / registry / path / f"{kind}.json") or {}).get("values", [])
+            if not entry[key] or values != entry[key]:
+                err(f"{ag.DISGUISE_TAG}/{kind} ({registry}) doesn't hold exactly DISGUISES[{kind!r}][{key!r}]")
+        for item in entry["costumes"]:
+            if item not in costumes:
+                err(f"disguise {kind}: {item} is not a trick-or-treat costume ({ag.COSTUME_TAG})")
+        for entity in entry["fools"]:
+            if entity in bosses or entity.startswith("#"):
+                err(f"disguise {kind}: {entity} is a boss or a tag; bosses are never fooled")
 
 
 def check_decor14(java):
