@@ -39,6 +39,8 @@ public final class PactObligations {
 		READ("read"),
 		// GC-07 unit 4
 		// GC-08 unit 5
+		/** GC-08 (Bifrons): a Verdant Bed, or the organism crop growing on one, fed with bone meal by hand. */
+		FEED("feed"),
 		// GC-09 unit 6
 		;
 

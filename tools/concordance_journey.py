@@ -754,10 +754,13 @@ def garden_walk(pg, research, invocations, rituals, at_hand, understood, dimensi
     nodes = pg.graph(research, invocations, rituals, at_hand, problems)
     for item in acquisition.GARDEN_PACTS:
         pg.item_node(nodes, at_hand, rid(item), problems)
-    # GC-04: each shipped garden pact's compact and offerings (vanilla bone meal among them), as a step needing them would add them.
+    # GC-04: each shipped garden pact's compact and offerings (vanilla bone meal among them), as a step needing them would add
+    # them; GC-08: an offering may be a tag of tags (#minecraft:logs).
     for pact in pg.garden_spirits(at_hand).values():
-        for item in [cost["item"] for cost in pact.get("compact", {}).get("items", [])] + _offerings(pact):
+        for item in [cost["item"] for cost in pact.get("compact", {}).get("items", [])]:
             pg.item_node(nodes, at_hand, item, problems)
+        for entry in _offerings(pact):
+            pg.ingredient_node(nodes, at_hand, entry, problems)
     without = {pg.research_node(rid(key), state) for key in research for state in pg.RESEARCH_STATES
                if key != "garden_regard" and (state == "mastered" or key not in understood)}
     reached = pg.reachable(nodes, research, cap="practitioner", dimensions=set(dimensions or [""]), without=without | set(blocked))
@@ -808,7 +811,7 @@ def garden_problems(pg, research, invocations, rituals, at_hand):
         short = [cost["item"] for cost in pact.get("compact", {}).get("items", []) if f"item:{cost['item']}" not in final]
         if short:
             found.append(f"journey garden {name}: its compact's {short} are not had by one player alone in the Overworld")
-        if not any(f"item:{item}" in final for item in _offerings(pact)):
+        if not any(pg.offering_key(entry) in final for entry in _offerings(pact)):
             found.append(f"journey garden {name}: none of its offerings {_offerings(pact)} is had by the route")
         if f"pact:{rid(name)}" not in final:
             found.append(f"journey garden {name}: its pact (perch, bed and compact) is not reached by the route")

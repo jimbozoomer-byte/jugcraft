@@ -21156,6 +21156,13 @@ def check_pacts(co, root, lang, registered, research):
             err(f"client/PactSpiritRenderers: {name}'s row reaches its {reach or 'no'} bone as SPIRITS[{name!r}] says (GC-P66)")
     # GC-07 unit 4
     # GC-08 unit 5
+    # --- Concordance garden cohort, GC-08 (GC-P115): SG12's status-asserting thinks pass each spirit's first hour (d.from()),
+    # so a spirit serving by night (Bifrons) is held to the same cases as one serving by day; the others keep 0. ---
+    sg12 = (tests / "ConcordanceWorkerGameTests.java").read_text(encoding="utf-8")
+    for name, wanted in (("everySpiritWaitsForANearHolder", 1), ("everySpiritsKeysSurviveASave", 2)):
+        body = _java_body(sg12, f"public void {name}(")
+        if body.count("think(level, d.from(), ") != wanted or re.search(r"think\(level, 0L, g0[^)]*\)(, Status\.IDLE| == Status\.IDLE)", body):
+            err(f"ConcordanceWorkerGameTests.{name}: a think asserting IDLE passes d.from(), the spirit's first hour (GC-P115)")
     # GC-09 unit 6
 
 
@@ -21331,7 +21338,7 @@ def check_garden_pacts(co, root, lang, registered, research):
         if ("GardenPacts.ACTIVITY" in source or f'"{gp.GARDEN_PACT_SERVICE}"' in source) \
                 and relative not in ("concordance/spirits/GardenPacts.java", "concordance/spirits/PactObligations.java"):
             err(f"{relative}: {gp.GARDEN_PACT_SERVICE} is recorded by PactObligations alone (GC-03)")
-        if "PactObligations.performed(" in source and relative not in ["concordance/" + hook[0] for hook in gp.HOOKS.values()]:
+        if "PactObligations.performed(" in source and relative not in ["concordance/" + hook[0] for act in gp.HOOKS for hook in gp.hooks(act)]:
             err(f"{relative}: a garden obligation is reported only from its act's hook (HOOKS)")
     if re.search(r"StolasRegard\.ACTIVITY|Workers\.ACTIVITY|Garden\.ACTIVITY|\"jugcraft:(pact_service|worker_service|cultivation)\"", duties_java):
         err("spirits/PactObligations.java: records only jugcraft:garden_pact_service (GB5; Don'ts 6 and 7)")
@@ -21343,12 +21350,15 @@ def check_garden_pacts(co, root, lang, registered, research):
     if -1 in order or order != sorted(order):
         err("PactObligations.performed: nothing for a stand-in or switched off; only a pact whose service names the act, active, "
             "in its area, kept by its perch; a kept obligation never recorded again; then the record (GC-03)")
-    # Each act's one hook, in its gesture, on success; each obligation an act, each act one work.
+    # Each act's hooks, in their gestures, on success (GC-08: an act may be done in more than one gesture: hooks()); each
+    # obligation an act, each act one work.
+    if set(gp.HOOKS) != set(gp.ACTS):
+        err(f"tools/concordance_garden_pacts.py HOOKS {sorted(gp.HOOKS)}: every act of ACTS has its hooks, and only those")
     for act in gp.ACTS:
-        file, member, line, after, before = gp.HOOKS[act]
-        body = _java_body(text(root / file), member)
-        if body.count(line) != 1 or not 0 <= body.find(after) < body.find(line) < body.find(before):
-            err(f"{file} {member.strip()}: the {act} obligation's hook is one line, after the act succeeded ({line})")
+        for file, member, line, after, before in gp.hooks(act) if act in gp.HOOKS else []:
+            body = _java_body(text(root / file), member)
+            if body.count(line) != 1 or not 0 <= body.find(after) < body.find(line) < body.find(before):
+                err(f"{file} {member.strip()}: the {act} obligation's hook is one line, after the act succeeded ({line})")
     if set(gp.OBLIGATIONS.values()) - set(gp.ACTS) or len(set(gp.OBLIGATIONS.values())) != len(gp.OBLIGATIONS):
         err(f"tools/concordance_garden_pacts.py OBLIGATIONS {gp.OBLIGATIONS}: each work an act of ACTS, each act one work (GC-P7)")
     service_java = text(spirits / "PactService.java")

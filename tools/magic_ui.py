@@ -878,6 +878,9 @@ GLANCES = {
     "garden_pact.act.read": [("", "use a Verdant Bed's side", (), "use a Verdant Bed's side", "act")],
     # GC-07 unit 4
     # GC-08 unit 5
+    # GC-08: Bifrons's ("feed a Verdant Bed, or the crop growing on one, with bone meal"; the whole act stays the row's tip):
+    # the row reads "First task: feed a Verdant Bed bone meal by hand here" (11 words; 18 with the whole act).
+    "garden_pact.act.feed": [("", "feed a Verdant Bed bone meal", (), "feed a Verdant Bed bone meal", "act")],
     # GC-09 unit 6
     # Blockers (every one drawn above the terms as a lock line, keeping its action).
     "pact.missing.owner": [("", "Only the perch's owner may invite %1$s", ("Bathin",),

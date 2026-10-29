@@ -16,6 +16,7 @@ import io.github.jimbozoomer.jugcraft.concordance.ecology.Niche;
 import io.github.jimbozoomer.jugcraft.concordance.ecology.Organism;
 import io.github.jimbozoomer.jugcraft.concordance.ecology.Verdict;
 import io.github.jimbozoomer.jugcraft.concordance.rules.Evidence;
+import io.github.jimbozoomer.jugcraft.concordance.spirits.PactObligations;
 import java.util.List;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -282,6 +283,8 @@ public class OrganismCropBlock extends CropBlock {
 				stack.consume(1, player);
 				level.levelEvent(LevelEvent.PARTICLES_AND_SOUND_PLANT_GROWTH, pos, 5);
 				Garden.tell(server, "garden.fed", bed.nutrients(), VerdantBedBlockEntity.CAPACITY);
+				// Concordance garden cohort, GC-08: so is feeding the crop on one (its bed below).
+				PactObligations.performed(serverLevel, server, PactObligations.Act.FEED, pos.below());
 			}
 			return InteractionResult.SUCCESS;
 		}

@@ -562,6 +562,17 @@ def item_node(nodes, at_hand, item, problems):
     return _Items(nodes, at_hand, problems).item(item)
 
 
+def ingredient_node(nodes, at_hand, ingredient, problems):
+    """As item_node, for an item or a tag ("#namespace:path", read as a recipe's ingredient is): a pact's offering tag may
+    name a tag (GC-08: #minecraft:logs, answered by VANILLA_TAGS). Returns the node's key."""
+    return _Items(nodes, at_hand, problems).ingredient(ingredient)
+
+
+def offering_key(entry):
+    """The node an offering tag's entry is had by in a walk: tag:<id> for "#<id>", item:<id> for an item (GC-08)."""
+    return f"tag:{entry[1:]}" if entry.startswith("#") else f"item:{entry}"
+
+
 def graph(research, invocations, rituals, at_hand=None, problems=None):
     """The progression graph over the data (Java: ProgressionGraph.build, which has no items). research: {path:
     definition}; invocations: {path: definition with research and stage}; rituals: {path: definition with research,

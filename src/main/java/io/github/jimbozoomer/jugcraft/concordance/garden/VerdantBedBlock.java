@@ -156,6 +156,8 @@ public class VerdantBedBlock extends BaseEntityBlock {
 			stack.consume(1, player);
 			level.levelEvent(LevelEvent.PARTICLES_AND_SOUND_PLANT_GROWTH, pos.above(), 5);
 			Garden.tell(server, "garden.fed", bed.nutrients(), VerdantBedBlockEntity.CAPACITY);
+			// Concordance garden cohort, GC-08: feeding a bed by hand is Bifrons's first obligation (PactObligations).
+			PactObligations.performed(serverLevel, server, PactObligations.Act.FEED, pos);
 		}
 		return InteractionResult.SUCCESS;
 	}

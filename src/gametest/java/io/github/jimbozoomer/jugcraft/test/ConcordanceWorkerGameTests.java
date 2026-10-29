@@ -3968,7 +3968,8 @@ public class ConcordanceWorkerGameTests {
 
 	// SG12: the shared pact cases, run for every spirit a perch offers. A fixture table says what each spirit needs, besides its
 	// research, before it will come (its service's missing met); every offered definition must have one, so each new spirit
-	// inherits the cases by adding its row. Every think passes world time 0 (06:00, inside every unit-1 spirit's hours: A-05).
+	// inherits the cases by adding its row. A think whose status is asserted passes d.from(), the first tick of that spirit's
+	// hours (GC-08: Bifrons serves by night); the others pass 0.
 
 	/** GC-01 (SG12): what a test player needs before a spirit will come to a perch at {@code perch}, besides its research; the blocks it set (cleared by the case). */
 	@FunctionalInterface
@@ -4470,7 +4471,7 @@ public class ConcordanceWorkerGameTests {
 					&& Pacts.done(pactOf(level, perch).pact(), g0 + 20) == 0 && before.equals(pactOf(level, perch)),
 					d.id() + ": nothing is looked at, taken, served or changed");
 			beside(helper, keeper, at);
-			helper.assertValueEqual(presence.think(level, 0L, g0 + 40), Status.IDLE, d.id() + ": back near, it idles");
+			helper.assertValueEqual(presence.think(level, d.from(), g0 + 40), Status.IDLE, d.id() + ": back near, it idles");
 		}
 		helper.succeed();
 	}
@@ -4545,7 +4546,7 @@ public class ConcordanceWorkerGameTests {
 			long g0 = level.getGameTime();
 			PactPerchBlockEntity perch = pactWith(helper, keeper, d, at, g0);
 			PactSpiritEntity<?> presence = presenceAt(level, perch);
-			helper.assertValueEqual(presence.think(level, 0L, g0), Status.IDLE, d.id() + ": its presence serves, and knows its record");
+			helper.assertValueEqual(presence.think(level, d.from(), g0), Status.IDLE, d.id() + ": its presence serves, and knows its record");
 			TagValueOutput out = TagValueOutput.createWithContext(ProblemReporter.DISCARDING, level.registryAccess());
 			presence.saveWithoutId(out);
 			CompoundTag saved = out.buildResult();
@@ -4555,7 +4556,7 @@ public class ConcordanceWorkerGameTests {
 			PactSpiritEntity<?> loaded = PactSpirits.get(d.id()).type().create(level, EntitySpawnReason.LOAD);
 			loaded.load(TagValueInput.create(ProblemReporter.DISCARDING, level.registryAccess(), saved));
 			helper.assertTrue(helper.absolutePos(at).equals(loaded.perch()) && presence.record().equals(loaded.record()) && keeper.getUUID().equals(loaded.owner())
-					&& loaded.think(level, 0L, g0 + 20) == Status.IDLE, d.id() + ": loaded with its original discarded, it is the presence and serves on");
+					&& loaded.think(level, d.from(), g0 + 20) == Status.IDLE, d.id() + ": loaded with its original discarded, it is the presence and serves on");
 			PactKeeping.tick(level, perch.holder(), perch.getBlockPos(), g0 + 40);
 			PactSpiritEntity<?> another = presenceAt(level, perch);
 			helper.assertTrue(another != null && !another.getUUID().equals(loaded.getUUID()) && loaded.think(level, 0L, g0 + 60) == Status.FINISHED

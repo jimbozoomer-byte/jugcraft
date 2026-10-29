@@ -43,6 +43,7 @@ ACTS = ["tend", "device",
         "read",
         # GC-07 unit 4
         # GC-08 unit 5
+        "feed",
         # GC-09 unit 6
         ]
 # Each act's one-line hook: (Java file under concordance/, the member it is in, the line, what it follows, what it precedes).
@@ -61,8 +62,28 @@ HOOKS = {"tend": ("garden/VerdantBedBlock.java", "static void tendBy(",
                   "bed.report(serverLevel, server);", "return InteractionResult.SUCCESS;"),
          # GC-07 unit 4
          # GC-08 unit 5
+         # GC-08: a Verdant Bed fed with bone meal by hand, and the crop on one (its bed below): one line after each gesture's
+         # success message. A list: the act is done in two gestures (hooks()). In each member the first "}" then return at
+         # that indentation is the bone-meal branch's own (every earlier return is PASS, FAIL, CONSUME or super's).
+         "feed": [("garden/VerdantBedBlock.java", "protected InteractionResult useItemOn(",
+                   "PactObligations.performed(serverLevel, server, PactObligations.Act.FEED, pos);",
+                   'Garden.tell(server, "garden.fed", bed.nutrients(), VerdantBedBlockEntity.CAPACITY);',
+                   "}\n\t\treturn InteractionResult.SUCCESS;"),
+                  ("garden/OrganismCropBlock.java", "protected InteractionResult useItemOn(",
+                   "PactObligations.performed(serverLevel, server, PactObligations.Act.FEED, pos.below());",
+                   'Garden.tell(server, "garden.fed", bed.nutrients(), VerdantBedBlockEntity.CAPACITY);',
+                   "}\n\t\t\treturn InteractionResult.SUCCESS;")],
          # GC-09 unit 6
          }
+
+
+def hooks(act):
+    """The one-line hooks of {act}: HOOKS holds one (file, member, line, after, before) tuple, or a list of them when the act
+    is done by hand in more than one gesture (GC-08's feed). Every reader of HOOKS reads it through this."""
+    entry = HOOKS[act]
+    return entry if isinstance(entry, list) else [entry]
+
+
 # work -> act (each act at most one work); GC-04: Buer's; GC-05: Bathin's; GC-06 on, each unit's under its line.
 OBLIGATIONS = {"strain_tending": "tend", "verdance_carrying": "device",
                # GC-06 unit 3
@@ -149,6 +170,8 @@ MESSAGES = {
         "read": "read a Verdant Bed itself (its side, where a crop covers it)",
         # GC-07 unit 4
         # GC-08 unit 5
+        # GC-08: Bifrons's (the unit-5 review's item 16: the hook reads neither the bed's keeper nor whether it is awake).
+        "feed": "feed a Verdant Bed, or the crop growing on one, with bone meal",
         # GC-09 unit 6
     }.items()},
 }
