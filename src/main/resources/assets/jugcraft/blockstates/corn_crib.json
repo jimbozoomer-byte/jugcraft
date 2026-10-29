@@ -1,0 +1,848 @@
+{
+  "multipart": [
+    {
+      "when": {
+        "facing": "north",
+        "part": "0"
+      },
+      "apply": {
+        "model": "jugcraft:block/corn_crib_0"
+      }
+    },
+    {
+      "when": {
+        "facing": "north",
+        "part": "0",
+        "fill": "1"
+      },
+      "apply": {
+        "model": "jugcraft:block/corn_crib_0_heap_1"
+      }
+    },
+    {
+      "when": {
+        "facing": "north",
+        "part": "0",
+        "fill": "2"
+      },
+      "apply": {
+        "model": "jugcraft:block/corn_crib_0_heap_2"
+      }
+    },
+    {
+      "when": {
+        "facing": "north",
+        "part": "0",
+        "fill": "3"
+      },
+      "apply": {
+        "model": "jugcraft:block/corn_crib_0_heap_3"
+      }
+    },
+    {
+      "when": {
+        "facing": "north",
+        "part": "0",
+        "fill": "4"
+      },
+      "apply": {
+        "model": "jugcraft:block/corn_crib_0_heap_4"
+      }
+    },
+    {
+      "when": {
+        "facing": "north",
+        "part": "1"
+      },
+      "apply": {
+        "model": "jugcraft:block/corn_crib_1"
+      }
+    },
+    {
+      "when": {
+        "facing": "north",
+        "part": "1",
+        "fill": "1"
+      },
+      "apply": {
+        "model": "jugcraft:block/corn_crib_1_heap_1"
+      }
+    },
+    {
+      "when": {
+        "facing": "north",
+        "part": "1",
+        "fill": "2"
+      },
+      "apply": {
+        "model": "jugcraft:block/corn_crib_1_heap_2"
+      }
+    },
+    {
+      "when": {
+        "facing": "north",
+        "part": "1",
+        "fill": "3"
+      },
+      "apply": {
+        "model": "jugcraft:block/corn_crib_1_heap_3"
+      }
+    },
+    {
+      "when": {
+        "facing": "north",
+        "part": "1",
+        "fill": "4"
+      },
+      "apply": {
+        "model": "jugcraft:block/corn_crib_1_heap_4"
+      }
+    },
+    {
+      "when": {
+        "facing": "north",
+        "part": "2"
+      },
+      "apply": {
+        "model": "jugcraft:block/corn_crib_2"
+      }
+    },
+    {
+      "when": {
+        "facing": "north",
+        "part": "2",
+        "fill": "1"
+      },
+      "apply": {
+        "model": "jugcraft:block/corn_crib_2_heap_1"
+      }
+    },
+    {
+      "when": {
+        "facing": "north",
+        "part": "2",
+        "fill": "2"
+      },
+      "apply": {
+        "model": "jugcraft:block/corn_crib_2_heap_2"
+      }
+    },
+    {
+      "when": {
+        "facing": "north",
+        "part": "2",
+        "fill": "3"
+      },
+      "apply": {
+        "model": "jugcraft:block/corn_crib_2_heap_3"
+      }
+    },
+    {
+      "when": {
+        "facing": "north",
+        "part": "2",
+        "fill": "4"
+      },
+      "apply": {
+        "model": "jugcraft:block/corn_crib_2_heap_4"
+      }
+    },
+    {
+      "when": {
+        "facing": "north",
+        "part": "3"
+      },
+      "apply": {
+        "model": "jugcraft:block/corn_crib_3"
+      }
+    },
+    {
+      "when": {
+        "facing": "north",
+        "part": "3",
+        "fill": "1"
+      },
+      "apply": {
+        "model": "jugcraft:block/corn_crib_3_heap_1"
+      }
+    },
+    {
+      "when": {
+        "facing": "north",
+        "part": "3",
+        "fill": "2"
+      },
+      "apply": {
+        "model": "jugcraft:block/corn_crib_3_heap_2"
+      }
+    },
+    {
+      "when": {
+        "facing": "north",
+        "part": "3",
+        "fill": "3"
+      },
+      "apply": {
+        "model": "jugcraft:block/corn_crib_3_heap_3"
+      }
+    },
+    {
+      "when": {
+        "facing": "north",
+        "part": "3",
+        "fill": "4"
+      },
+      "apply": {
+        "model": "jugcraft:block/corn_crib_3_heap_4"
+      }
+    },
+    {
+      "when": {
+        "facing": "east",
+        "part": "0"
+      },
+      "apply": {
+        "model": "jugcraft:block/corn_crib_0",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "facing": "east",
+        "part": "0",
+        "fill": "1"
+      },
+      "apply": {
+        "model": "jugcraft:block/corn_crib_0_heap_1",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "facing": "east",
+        "part": "0",
+        "fill": "2"
+      },
+      "apply": {
+        "model": "jugcraft:block/corn_crib_0_heap_2",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "facing": "east",
+        "part": "0",
+        "fill": "3"
+      },
+      "apply": {
+        "model": "jugcraft:block/corn_crib_0_heap_3",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "facing": "east",
+        "part": "0",
+        "fill": "4"
+      },
+      "apply": {
+        "model": "jugcraft:block/corn_crib_0_heap_4",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "facing": "east",
+        "part": "1"
+      },
+      "apply": {
+        "model": "jugcraft:block/corn_crib_1",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "facing": "east",
+        "part": "1",
+        "fill": "1"
+      },
+      "apply": {
+        "model": "jugcraft:block/corn_crib_1_heap_1",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "facing": "east",
+        "part": "1",
+        "fill": "2"
+      },
+      "apply": {
+        "model": "jugcraft:block/corn_crib_1_heap_2",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "facing": "east",
+        "part": "1",
+        "fill": "3"
+      },
+      "apply": {
+        "model": "jugcraft:block/corn_crib_1_heap_3",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "facing": "east",
+        "part": "1",
+        "fill": "4"
+      },
+      "apply": {
+        "model": "jugcraft:block/corn_crib_1_heap_4",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "facing": "east",
+        "part": "2"
+      },
+      "apply": {
+        "model": "jugcraft:block/corn_crib_2",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "facing": "east",
+        "part": "2",
+        "fill": "1"
+      },
+      "apply": {
+        "model": "jugcraft:block/corn_crib_2_heap_1",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "facing": "east",
+        "part": "2",
+        "fill": "2"
+      },
+      "apply": {
+        "model": "jugcraft:block/corn_crib_2_heap_2",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "facing": "east",
+        "part": "2",
+        "fill": "3"
+      },
+      "apply": {
+        "model": "jugcraft:block/corn_crib_2_heap_3",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "facing": "east",
+        "part": "2",
+        "fill": "4"
+      },
+      "apply": {
+        "model": "jugcraft:block/corn_crib_2_heap_4",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "facing": "east",
+        "part": "3"
+      },
+      "apply": {
+        "model": "jugcraft:block/corn_crib_3",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "facing": "east",
+        "part": "3",
+        "fill": "1"
+      },
+      "apply": {
+        "model": "jugcraft:block/corn_crib_3_heap_1",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "facing": "east",
+        "part": "3",
+        "fill": "2"
+      },
+      "apply": {
+        "model": "jugcraft:block/corn_crib_3_heap_2",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "facing": "east",
+        "part": "3",
+        "fill": "3"
+      },
+      "apply": {
+        "model": "jugcraft:block/corn_crib_3_heap_3",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "facing": "east",
+        "part": "3",
+        "fill": "4"
+      },
+      "apply": {
+        "model": "jugcraft:block/corn_crib_3_heap_4",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "facing": "south",
+        "part": "0"
+      },
+      "apply": {
+        "model": "jugcraft:block/corn_crib_0",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "facing": "south",
+        "part": "0",
+        "fill": "1"
+      },
+      "apply": {
+        "model": "jugcraft:block/corn_crib_0_heap_1",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "facing": "south",
+        "part": "0",
+        "fill": "2"
+      },
+      "apply": {
+        "model": "jugcraft:block/corn_crib_0_heap_2",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "facing": "south",
+        "part": "0",
+        "fill": "3"
+      },
+      "apply": {
+        "model": "jugcraft:block/corn_crib_0_heap_3",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "facing": "south",
+        "part": "0",
+        "fill": "4"
+      },
+      "apply": {
+        "model": "jugcraft:block/corn_crib_0_heap_4",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "facing": "south",
+        "part": "1"
+      },
+      "apply": {
+        "model": "jugcraft:block/corn_crib_1",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "facing": "south",
+        "part": "1",
+        "fill": "1"
+      },
+      "apply": {
+        "model": "jugcraft:block/corn_crib_1_heap_1",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "facing": "south",
+        "part": "1",
+        "fill": "2"
+      },
+      "apply": {
+        "model": "jugcraft:block/corn_crib_1_heap_2",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "facing": "south",
+        "part": "1",
+        "fill": "3"
+      },
+      "apply": {
+        "model": "jugcraft:block/corn_crib_1_heap_3",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "facing": "south",
+        "part": "1",
+        "fill": "4"
+      },
+      "apply": {
+        "model": "jugcraft:block/corn_crib_1_heap_4",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "facing": "south",
+        "part": "2"
+      },
+      "apply": {
+        "model": "jugcraft:block/corn_crib_2",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "facing": "south",
+        "part": "2",
+        "fill": "1"
+      },
+      "apply": {
+        "model": "jugcraft:block/corn_crib_2_heap_1",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "facing": "south",
+        "part": "2",
+        "fill": "2"
+      },
+      "apply": {
+        "model": "jugcraft:block/corn_crib_2_heap_2",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "facing": "south",
+        "part": "2",
+        "fill": "3"
+      },
+      "apply": {
+        "model": "jugcraft:block/corn_crib_2_heap_3",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "facing": "south",
+        "part": "2",
+        "fill": "4"
+      },
+      "apply": {
+        "model": "jugcraft:block/corn_crib_2_heap_4",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "facing": "south",
+        "part": "3"
+      },
+      "apply": {
+        "model": "jugcraft:block/corn_crib_3",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "facing": "south",
+        "part": "3",
+        "fill": "1"
+      },
+      "apply": {
+        "model": "jugcraft:block/corn_crib_3_heap_1",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "facing": "south",
+        "part": "3",
+        "fill": "2"
+      },
+      "apply": {
+        "model": "jugcraft:block/corn_crib_3_heap_2",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "facing": "south",
+        "part": "3",
+        "fill": "3"
+      },
+      "apply": {
+        "model": "jugcraft:block/corn_crib_3_heap_3",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "facing": "south",
+        "part": "3",
+        "fill": "4"
+      },
+      "apply": {
+        "model": "jugcraft:block/corn_crib_3_heap_4",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "facing": "west",
+        "part": "0"
+      },
+      "apply": {
+        "model": "jugcraft:block/corn_crib_0",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "facing": "west",
+        "part": "0",
+        "fill": "1"
+      },
+      "apply": {
+        "model": "jugcraft:block/corn_crib_0_heap_1",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "facing": "west",
+        "part": "0",
+        "fill": "2"
+      },
+      "apply": {
+        "model": "jugcraft:block/corn_crib_0_heap_2",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "facing": "west",
+        "part": "0",
+        "fill": "3"
+      },
+      "apply": {
+        "model": "jugcraft:block/corn_crib_0_heap_3",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "facing": "west",
+        "part": "0",
+        "fill": "4"
+      },
+      "apply": {
+        "model": "jugcraft:block/corn_crib_0_heap_4",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "facing": "west",
+        "part": "1"
+      },
+      "apply": {
+        "model": "jugcraft:block/corn_crib_1",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "facing": "west",
+        "part": "1",
+        "fill": "1"
+      },
+      "apply": {
+        "model": "jugcraft:block/corn_crib_1_heap_1",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "facing": "west",
+        "part": "1",
+        "fill": "2"
+      },
+      "apply": {
+        "model": "jugcraft:block/corn_crib_1_heap_2",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "facing": "west",
+        "part": "1",
+        "fill": "3"
+      },
+      "apply": {
+        "model": "jugcraft:block/corn_crib_1_heap_3",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "facing": "west",
+        "part": "1",
+        "fill": "4"
+      },
+      "apply": {
+        "model": "jugcraft:block/corn_crib_1_heap_4",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "facing": "west",
+        "part": "2"
+      },
+      "apply": {
+        "model": "jugcraft:block/corn_crib_2",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "facing": "west",
+        "part": "2",
+        "fill": "1"
+      },
+      "apply": {
+        "model": "jugcraft:block/corn_crib_2_heap_1",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "facing": "west",
+        "part": "2",
+        "fill": "2"
+      },
+      "apply": {
+        "model": "jugcraft:block/corn_crib_2_heap_2",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "facing": "west",
+        "part": "2",
+        "fill": "3"
+      },
+      "apply": {
+        "model": "jugcraft:block/corn_crib_2_heap_3",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "facing": "west",
+        "part": "2",
+        "fill": "4"
+      },
+      "apply": {
+        "model": "jugcraft:block/corn_crib_2_heap_4",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "facing": "west",
+        "part": "3"
+      },
+      "apply": {
+        "model": "jugcraft:block/corn_crib_3",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "facing": "west",
+        "part": "3",
+        "fill": "1"
+      },
+      "apply": {
+        "model": "jugcraft:block/corn_crib_3_heap_1",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "facing": "west",
+        "part": "3",
+        "fill": "2"
+      },
+      "apply": {
+        "model": "jugcraft:block/corn_crib_3_heap_2",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "facing": "west",
+        "part": "3",
+        "fill": "3"
+      },
+      "apply": {
+        "model": "jugcraft:block/corn_crib_3_heap_3",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "facing": "west",
+        "part": "3",
+        "fill": "4"
+      },
+      "apply": {
+        "model": "jugcraft:block/corn_crib_3_heap_4",
+        "y": 270
+      }
+    }
+  ]
+}

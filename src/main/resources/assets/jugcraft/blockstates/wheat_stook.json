@@ -1,0 +1,19 @@
+{
+  "variants": {
+    "facing=north": {
+      "model": "jugcraft:block/wheat_stook"
+    },
+    "facing=east": {
+      "model": "jugcraft:block/wheat_stook",
+      "y": 90
+    },
+    "facing=south": {
+      "model": "jugcraft:block/wheat_stook",
+      "y": 180
+    },
+    "facing=west": {
+      "model": "jugcraft:block/wheat_stook",
+      "y": 270
+    }
+  }
+}

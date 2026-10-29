@@ -300,7 +300,7 @@ def check_assets(registered):
     for block in (all_blocks() + machine_blocks() + ag.all_blocks() + petro.petro_blocks() + deposits.all_blocks()
                   + list(tank_display.BLOCKS) + plastic.blocks() + ph.blocks() + (town_assets.blocks() + styx.blocks()) + seasons.BLOCKS
                   + construction.blocks() + control_electronics.blocks() + rocketry.blocks() + dieselworks.blocks() + kaiserworks.blocks() + trenchworks.blocks() + fortifications.blocks() + bunkerworks.blocks() + aged_wood.blocks() + fire_control.blocks()
-                  + concordance.blocks() + guns.blocks() + industrial_forms.blocks() + list(vehicle_bays.BLOCKS) + menagerie.blocks() + starter_workshop.BLOCKS
+                  + concordance.blocks() + guns.blocks() + industrial_forms.blocks() + list(vehicle_bays.BLOCKS) + menagerie.blocks() + starter_workshop.BLOCKS + ["cursed_mirror"]
                   + crates + sorted(jimtafacts_catalog.blocks() & jimtafacts_catalog.items())):
         state = load(ASSETS / "blockstates" / f"{block}.json")
         if state:
@@ -326,7 +326,7 @@ def check_assets(registered):
         if item not in jimtafacts_catalog.blocks() and item not in (all_blocks() + machine_blocks() + ag.all_blocks() + petro.petro_blocks() + deposits.all_blocks()
                         + list(tank_display.BLOCKS) + plastic.blocks() + ph.blocks() + (town_assets.blocks() + styx.blocks())
                         + construction.blocks() + control_electronics.blocks() + rocketry.blocks() + dieselworks.blocks() + kaiserworks.blocks() + trenchworks.blocks() + fortifications.blocks() + bunkerworks.blocks() + aged_wood.blocks() + fire_control.blocks()
-                        + concordance.blocks() + guns.blocks() + industrial_forms.blocks() + list(vehicle_bays.BLOCKS) + menagerie.blocks() + starter_workshop.BLOCKS
+                        + concordance.blocks() + guns.blocks() + industrial_forms.blocks() + list(vehicle_bays.BLOCKS) + menagerie.blocks() + starter_workshop.BLOCKS + ["cursed_mirror"]
                         + exchange_blocks.BLOCKS + exchange_poker.BLOCKS + exchange_casino.BLOCKS + exchange_casino.ITEMS + crates) and f"item.{MOD}.{item}" not in lang:
             err(f"Missing name for item {item}")
 
@@ -425,7 +425,7 @@ import guide_books
 import exchange_blocks
 import exchange_poker
 import exchange_casino
-NON_METAL = set(guide_books.BOOKS) | {"sawdust"} | set(MINERALS) | set(ITEMS) | set(machine_blocks()) | set(machine_items()) | set(CIRCUITS) | {b for m in MINERALS for b in (f"{m}_ore", f"deepslate_{m}_ore", f"{m}_block")} | {"oil_sand"} | set(petro.petro_items()) | set(ag.all_blocks()) | set(ag.all_items()) | set(petro.petro_blocks()) | set(tank_display.BLOCKS) | set(ph.blocks()) | set(ph.items()) | set((town_assets.blocks() + styx.blocks()))
+NON_METAL = {"cursed_mirror"} | set(guide_books.BOOKS) | {"sawdust"} | set(MINERALS) | set(ITEMS) | set(machine_blocks()) | set(machine_items()) | set(CIRCUITS) | {b for m in MINERALS for b in (f"{m}_ore", f"deepslate_{m}_ore", f"{m}_block")} | {"oil_sand"} | set(petro.petro_items()) | set(ag.all_blocks()) | set(ag.all_items()) | set(petro.petro_blocks()) | set(tank_display.BLOCKS) | set(ph.blocks()) | set(ph.items()) | set((town_assets.blocks() + styx.blocks()))
 
 
 def item_units(ref):
@@ -796,6 +796,7 @@ def check_tags():
         import nouveau_content
         known = set(known)
         if registry == 'block': known.update(starter_workshop.BLOCKS)
+        if registry == 'block': known.add("cursed_mirror")
         if registry == 'item': known.update(starter_workshop.NAMES)
         if registry == 'item': known.update(jimtafacts.items())
         if registry == 'item': known.update(jimtafacts_network.ids()); known.update(jimtafacts_spellbooks.items()); known.update(jimtafacts_industry.items())
@@ -1848,6 +1849,10 @@ def check_guns():
     speeds = ", ".join(f'"{gun}", {spec["rocket_speed"]}F' for gun, spec in guns.GUNS.items() if "rocket_speed" in spec)
     if f"ROCKET_SPEED = Map.of({speeds});" not in java:
         err(f"JugcraftGuns.ROCKET_SPEED differs from tools/guns.py GUNS rocket_speed: expected Map.of({speeds})")
+    # The flying-microjets follow-up: the jet guns' Microjets' speed.
+    jets = ", ".join(f'"{gun}", {spec["jet_speed"]}F' for gun, spec in guns.GUNS.items() if "jet_speed" in spec)
+    if f"JET_SPEED = Map.of({jets});" not in java:
+        err(f"JugcraftGuns.JET_SPEED differs from tools/guns.py GUNS jet_speed: expected Map.of({jets})")
     spins = ", ".join(f'"{gun}", {spec["spin_up"]}' for gun, spec in guns.GUNS.items() if spec.get("spin_up"))
     if f"SPIN_UP = Map.of({spins});" not in java:
         err(f"JugcraftGuns.SPIN_UP differs from tools/guns.py GUNS spin_up: expected Map.of({spins})")
@@ -1902,6 +1907,37 @@ def check_guns():
                     f"{value} (more than 0, at most 8)")
     if any(guns.GUNS[gun].get("shot") == "arc" for gun in guns.PIERCING) and "pierced(foe, damage, pierce)" not in shots_java:
         err("tools/guns.py PIERCING names an arc gun, but GunShots.arc does not pass its hits through pierced()")
+    # The recoil-push follow-up: the guns whose shot pushes their shooter back, and how hard.
+    kicks = ", ".join(f'Map.entry("{gun}", {value}F)' for gun, value in guns.KICK.items())
+    if f"KICK = Map.ofEntries({kicks});" not in java:
+        err(f"JugcraftGuns.KICK differs from tools/guns.py: expected Map.ofEntries({kicks})")
+    for gun, value in guns.KICK.items():
+        if gun not in guns.GUNS or not 0 < value <= 8:
+            err(f"tools/guns.py KICK names {gun}, which is not a gun, or gives it {value} (more than 0, at most 8)")
+    if "kick(player, JugcraftGuns.kick(gun));" not in shots_java:
+        err("GunShots.fire must push its shooter back by the gun's KICK (kick)")
+    # The flying-microjets follow-up: the heavy guns that slow whoever holds them, and the Microjet in flight.
+    carry = ", ".join(f'Map.entry("{gun}", {value}F)' for gun, value in guns.CARRY_SPEED.items())
+    if f"CARRY_SPEED = Map.ofEntries({carry});" not in java:
+        err(f"JugcraftGuns.CARRY_SPEED differs from tools/guns.py: expected Map.ofEntries({carry})")
+    for gun, share in guns.CARRY_SPEED.items():
+        if gun not in guns.GUNS or not 0.5 <= share < 1.0:
+            err(f"tools/guns.py CARRY_SPEED names {gun}, which is not a gun, or gives it {share} (0.5 to under 1)")
+    if ("carried(name, properties" not in java or "share - 1.0, AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL), EquipmentSlotGroup.MAINHAND"
+            not in java):
+        err("JugcraftGuns must give each CARRY_SPEED gun's item a main-hand movement-speed modifier of its share (carried)")
+    jet_java = JAVA_ROOT / "guns" / "Microjet.java"
+    jet_source = jet_java.read_text(encoding="utf-8") if jet_java.is_file() else ""
+    if (f'Jugcraft.id("{guns.JET_ENTITY}")' not in java or "case JugcraftGuns.JET -> jet(level, player, gun, spec, spread);" not in shots_java
+            or "GunShots.land(" not in jet_source or "GunShots.allowed(player, level, foe)" not in jet_source
+            or "GunShots.target(player, foe)" not in jet_source):
+        err(f"JugcraftGuns must register the Microjet (jugcraft:{guns.JET_ENTITY}), GunShots.fire fire it for a jet gun, and "
+            "Microjet land a bullet's hit only on what its shooter may strike")
+    jet_lang = load(ASSETS / "lang" / "en_us.json") or {}
+    if jet_lang.get(f"entity.jugcraft.{guns.JET_ENTITY}") != guns.JET_DISPLAY:
+        err(f"en_us.json does not name the Microjet in flight {guns.JET_DISPLAY!r}")
+    if "JugcraftGuns.MICROJET, ThrownItemRenderer::new" not in (CLIENT_JAVA_ROOT / "JugcraftClient.java").read_text(encoding="utf-8"):
+        err("JugcraftClient does not draw the Microjet in flight (ThrownItemRenderer)")
     # The darts-and-bleeding follow-up: how a dart flies, how bleeding hurts, and which guns' hits make a creature bleed.
     for line in (f"DART_SPEED = {guns.DART_SPEED};", f"DART_DROP = {guns.DART_DROP};", f"BLEED_TICKS = {guns.BLEED_TICKS};",
                  f"BLEED_DAMAGE = {guns.BLEED_DAMAGE}F;", f'DART = "dart";'):
@@ -4614,6 +4650,7 @@ def check_agriculture():
     check_decor12(java)
     check_decor13(java)
     check_decor14(java)
+    check_disguises(java)
     check_chandlery(java)
     check_cider(java)
     check_pantry(java, main)
@@ -5446,7 +5483,9 @@ def check_pies_and_tarts():
               for bake, info in pies_and_tarts.BAKES.items()]
     if declared != wanted:
         err(f"PieFilling.java's pies and tarts {declared} differ from tools/pies_and_tarts.py BAKES (ID, slice food, colour, height, in order)")
-    last_cake = max((filling.find(f'"{c}"') for c in cakes.CAKES), default=-1)
+    # The cakes the owner drew come before the pies and tarts; a cake added later (cakes.PAINTED) follows them, at the end,
+    # so that no saved filling moves.
+    last_cake = max((filling.find(f'"{c}"') for c in cakes.CAKES if c not in cakes.PAINTED), default=-1)
     if filling.find(f'"{next(iter(pies_and_tarts.BAKES))}"') < last_cake:
         err("PieFilling.java must list the pies and tarts after the cakes: the Hearth Oven saves a filling by its place")
     if "public CakeBlock(@Nullable PieFilling filling, int height, Properties properties)" not in java.get("CakeBlock", ""):
@@ -6479,8 +6518,10 @@ def check_decor2(java):
     if candle["max"] * candle["light_per_candle"] > 15:
         err("Floating candles would give more than light 15")
     strands = re.findall(r'[A-Z_]+\("([a-z_]+)", "([a-z_]+)"\)', java.get("StringLightHookBlockEntity", ""))
+    import harvest_festival
     if dict(strands) != {"lights": ag.STRING_LIGHTS["strand"], "bunting": bunting["item"],
-                         **{strand: garland["item"] for strand, garland in decor20.GARLANDS.items()}}:
+                         **{strand: garland["item"] for strand, garland in decor20.GARLANDS.items()},
+                         harvest_festival.BUNTING["strand"]: harvest_festival.BUNTING["item"]}:
         err(f"StringLightHookBlockEntity.Strand {strands} differs from the strand items in tools/agriculture.py")
 
     def variants(block):
@@ -8365,6 +8406,47 @@ def check_decor13(java):
         err("Item tag jugcraft:witchs_brew_ingredients differs from PUNCH_BOWL's ingredients")
 
 
+def check_disguises(java):
+    """Costume disguises: Disguises.java's kinds and option match tools/agriculture.py, the option is on by default, the
+    mixin is registered and asks Disguises.fooled before a monster picks a target, a monster the player has hurt still
+    fights back, each kind's item and entity type tags hold exactly the table's costumes and monsters, every costume is
+    a trick-or-treat costume, and no boss is ever fooled."""
+    table = ag.DISGUISES
+    source = java.get("Disguises", "")
+    kinds = re.search(r"KINDS = List\.of\(([^)]*)\)", source)
+    if not kinds or re.findall(r'"([a-z_]+)"', kinds.group(1)) != list(table["kinds"]):
+        err("Disguises.KINDS differs from tools/agriculture.py DISGUISES")
+    if f'OPTION = "{table["option"]}";' not in source:
+        err(f"Disguises.OPTION is not {table['option']!r}")
+    if f'Map.entry("{table["option"]}", "on")' not in CONFIG.read_text(encoding="utf-8"):
+        err(f"JugcraftConfig: {table['option']} should default to on")
+    if "mob.getLastHurtByMob() == player" not in source:
+        err("Disguises.fooled must let a monster the player has hurt fight back")
+    mixin_path = JAVA_ROOT / "mixin" / "DisguiseTargetMixin.java"
+    mixin = mixin_path.read_text(encoding="utf-8") if mixin_path.exists() else ""
+    if not all(part in mixin for part in ('@Mixin(Mob.class)', 'method = "setTarget"', "Disguises.fooled(", "ci.cancel();")):
+        err("DisguiseTargetMixin must cancel Mob.setTarget when Disguises.fooled")
+    mixins = load(RES / f"{MOD}.mixins.json") or {}
+    if "DisguiseTargetMixin" not in mixins.get("mixins", []):
+        err("jugcraft.mixins.json doesn't register DisguiseTargetMixin")
+    costumes = set((load(DATA / "jugcraft" / "tags" / "item" / f"{ag.COSTUME_TAG.split(':')[1]}.json") or {}).get("values", []))
+    import arms_variants
+    bosses = set(arms_variants.FRIGHTLESS) | {"minecraft:ender_dragon", "minecraft:wither", "minecraft:warden",
+                                              "minecraft:elder_guardian"}
+    path = ag.DISGUISE_TAG.split(":")[1]
+    for kind, entry in table["kinds"].items():
+        for registry, key in (("item", "costumes"), ("entity_type", "fools")):
+            values = (load(DATA / "jugcraft" / "tags" / registry / path / f"{kind}.json") or {}).get("values", [])
+            if not entry[key] or values != entry[key]:
+                err(f"{ag.DISGUISE_TAG}/{kind} ({registry}) doesn't hold exactly DISGUISES[{kind!r}][{key!r}]")
+        for item in entry["costumes"]:
+            if item not in costumes:
+                err(f"disguise {kind}: {item} is not a trick-or-treat costume ({ag.COSTUME_TAG})")
+        for entity in entry["fools"]:
+            if entity in bosses or entity.startswith("#"):
+                err(f"disguise {kind}: {entity} is a boss or a tag; bosses are never fooled")
+
+
 def check_decor14(java):
     """Costumes: Java matches tools/agriculture.py (the outfits, the trunk's slots and how long its lid stays open), every
     outfit omits its flat equipment asset, has boxes in costumes.json on body parts and motions the client knows,
@@ -8767,8 +8849,10 @@ def check_feast(java, main):
     states = (load(ASSETS / "blockstates" / f"{fe['block']}.json") or {}).get("variants", {})
     for axis in ("x", "z"):
         for part in ("single", "start", "middle", "end"):
-            if f"axis={axis},part={part}" not in states:
-                err(f"The feast table's blockstate has no variant for axis={axis},part={part}")
+            # Each runner a length can wear (its own, or the Halloween Party Table's Bat Table Runner).
+            for runner in ("harvest", "bats"):
+                if f"axis={axis},part={part},runner={runner}" not in states:
+                    err(f"The feast table's blockstate has no variant for axis={axis},part={part},runner={runner}")
     lang = load(ASSETS / "lang" / "en_us.json") or {}
     for key in ["dish_taken", "empty"] + [f"tier.{tier}" for tier in range(5)]:
         if f"message.jugcraft.feast_table.{key}" not in lang:
@@ -14632,6 +14716,1715 @@ def check_alpha_werewolf():
                             ("TeleportTransition", "crosses dimensions")):
             if banned in text:
                 err(f"{cls}.java {why} ({banned})")
+
+
+def check_pumpkin_patch():
+    """The Pumpkin Patch Market's displays (tools/pumpkin_patch.py DISPLAYS, docs/features/pumpkin-patch-market.md): each
+    display's Java class has the table's blocks, spots and scale, the renderer turns its pieces by the table's TURNS, and
+    every spot lies inside the display's frame; part 3's Chalkboard Sign has the table's words, in order, with their text,
+    and its renderer the model's boards; the Giant Warty Gourd is the table's size."""
+    import pumpkin_patch as pp
+    classes = {"wheelbarrow": "PumpkinWheelbarrowBlock", "wagon": "PumpkinWagonBlock", "pyramid": "PumpkinPyramidBlock"}
+    for key, spec in pp.DISPLAYS.items():
+        path = JAVA_ROOT / "agriculture" / f"{classes[key]}.java"
+        if not path.is_file():
+            err(f"agriculture/{classes[key]}.java is missing: the {spec['display']}")
+            continue
+        java = path.read_text(encoding="utf-8")
+        w, h, d = spec["size"]
+        if f"box({w}, {h}, {d})" not in java:
+            err(f"{classes[key]} is not {w} x {h} x {d} blocks as tools/pumpkin_patch.py DISPLAYS['{key}'] says")
+        block = re.search(r"SPOTS = \{(.*?)\};", java, re.S)
+        spots = [tuple(float(v) for v in re.findall(r"(-?[\d.]+)F", row)) for row in re.findall(r"\{([^{}]*)\}", block.group(1))] if block else []
+        if spots != [tuple(float(v) for v in spot) for spot in spec["spots"]]:
+            err(f"{classes[key]}.SPOTS is not tools/pumpkin_patch.py DISPLAYS['{key}']['spots']")
+        scale = re.search(r"SCALE = ([\d.]+)F;", java)
+        if not scale or float(scale.group(1)) != spec["scale"]:
+            err(f"{classes[key]}.SCALE is not tools/pumpkin_patch.py's {spec['scale']}")
+        for x, y, z in spec["spots"]:
+            if not (0 <= x <= 16 * w and 0 <= y <= 16 * h and 0 <= z <= 16 * d):
+                err(f"the {spec['display']}'s spot {(x, y, z)} lies outside its frame")
+    base = (JAVA_ROOT / "agriculture" / "ProduceDisplayBlock.java").read_text(encoding="utf-8")
+    turns = re.search(r"TURNS = \{([^}]*)\}", base)
+    if not turns or [float(v) for v in re.findall(r"(-?[\d.]+)F", turns.group(1))] != list(pp.TURNS):
+        err("ProduceDisplayBlock.TURNS is not tools/pumpkin_patch.py TURNS")
+    # Part 3: the Chalkboard Sign's words and boards, and the Giant Warty Gourd's size.
+    board = (JAVA_ROOT / "agriculture" / "ChalkboardSignBlock.java").read_text(encoding="utf-8")
+    words = re.search(r"enum Words implements StringRepresentable \{\s*([A-Z_, ]+);", board)
+    if not words or [w.strip().lower() for w in words.group(1).split(",")] != list(pp.WORDS):
+        err("ChalkboardSignBlock.Words is not tools/pumpkin_patch.py WORDS, in order")
+    renderer = (CLIENT_JAVA_ROOT / "ChalkboardSignRenderer.java").read_text(encoding="utf-8")
+    chalk = pp.CHALKBOARD
+    for name, value in (("LEAN", chalk["lean"]), ("HINGE_Y", chalk["hinge"][0]), ("HINGE_Z", chalk["hinge"][1]),
+                        ("SLATE_DROP", chalk["slate_drop"]), ("SLATE_OUT", chalk["slate_out"]), ("WIDTH", chalk["slate_width"]),
+                        ("HEIGHT", chalk["slate_height"])):
+        found = re.search(rf"\b{name} = ([\d.]+)F;", renderer)
+        if not found or float(found.group(1)) != value:
+            err(f"ChalkboardSignRenderer.{name} is not tools/pumpkin_patch.py CHALKBOARD's {value}")
+    lang = load(ASSETS / "lang" / "en_us.json") or {}
+    for key in [f"chalkboard_sign.{w}" for w in pp.WORDS] + ["chalkboard_sign.written", "chalkboard_sign.unnamed_tag"]:
+        if f"message.{MOD}.{key}" not in lang:
+            err(f"Message {key} has no text")
+    giant = (JAVA_ROOT / "agriculture" / "GiantWartyGourdBlock.java").read_text(encoding="utf-8")
+    w, h, d = pp.GIANT_WARTY["size"]
+    if f"box({w}, {h}, {d})" not in giant or f"SCALE = {pp.GIANT_WARTY['scale']};" not in giant:
+        err(f"GiantWartyGourdBlock is not {w} x {h} x {d} blocks, {pp.GIANT_WARTY['scale']} times the Warty Gourd, as tools/pumpkin_patch.py says")
+
+
+def check_barn_tools():
+    """Barn & Harvest Tools (tools/barn_tools.py, docs/features/barn-and-harvest-tools.md), part 1: the Watering Can's
+    capacity, reach, growth odds and cooldown and the Seed Pouch's kinds and reach are the table's; the can's water
+    component is bounded by its capacity; their recipes exist and the tooltips have their text. Part 2: the Quern's
+    capacity, turns and turn time and the Butter Churn's strokes, butter and stroke time are the table's; each one's
+    runner variants name its moving part's model; the flour and pancake recipes exist; the messages have their text.
+    Part 3: the Drying Rack's bunch and drying time and the Corn Crib's capacity, stages and sizes are the table's.
+    Part 4: the Hay-Loft Pulley's reach and haul time and the Harvest Bell's size and swing are the table's, and their
+    renderers turn and hang their pieces where the models are drawn. Part 5: the Grain Sacks', Pitchfork and Rake Rack's,
+    Feed Trough's and Barn Lantern's numbers are the table's, and the lantern's flame shows only while it is lit."""
+    import barn_tools as bt
+    agri = JAVA_ROOT / "agriculture"
+    can = (agri / "WateringCanItem.java").read_text(encoding="utf-8") if (agri / "WateringCanItem.java").is_file() else ""
+    for name, key in (("CAPACITY", "capacity"), ("RADIUS", "radius"), ("GROW_ODDS", "grow_odds"), ("COOLDOWN", "cooldown")):
+        if f"int {name} = {bt.WATERING_CAN[key]};" not in can:
+            err(f"WateringCanItem.{name} is not tools/barn_tools.py WATERING_CAN's {bt.WATERING_CAN[key]}")
+    pouch = (agri / "SeedPouchItem.java").read_text(encoding="utf-8") if (agri / "SeedPouchItem.java").is_file() else ""
+    for name, key in (("KINDS", "kinds"), ("RADIUS", "radius")):
+        if f"int {name} = {bt.SEED_POUCH[key]};" not in pouch:
+            err(f"SeedPouchItem.{name} is not tools/barn_tools.py SEED_POUCH's {bt.SEED_POUCH[key]}")
+    main = (agri / "JugcraftAgriculture.java").read_text(encoding="utf-8") if (agri / "JugcraftAgriculture.java").is_file() else ""
+    if "Codec.intRange(0, WateringCanItem.CAPACITY)" not in main:
+        err("JugcraftAgriculture: the Watering Can's water component should be bounded by WateringCanItem.CAPACITY")
+    for recipe in bt.RECIPES:
+        if not (DATA / MOD / "recipe" / f"{recipe['id']}.json").is_file():
+            err(f"{recipe['id']}: tools/barn_tools.py's recipe was not generated")
+    lang = load(ASSETS / "lang" / "en_us.json") or {}
+    for key in ("item.jugcraft.watering_can.water", "item.jugcraft.seed_pouch.contents", "message.jugcraft.quern.full",
+                "message.jugcraft.quern.other", "message.jugcraft.butter_churn.full", "message.jugcraft.drying_rack.full",
+                "message.jugcraft.harvest_bell.ringing"):
+        if key not in lang:
+            err(f"{key}: the text is missing")
+    # Part 2: the Quern's and the Butter Churn's numbers, their moving parts' models, and their recipes.
+    quern = (agri / "QuernBlock.java").read_text(encoding="utf-8") if (agri / "QuernBlock.java").is_file() else ""
+    for name, key in (("CAPACITY", "capacity"), ("TURNS", "turns"), ("SPIN_TICKS", "spin_ticks")):
+        if f"int {name} = {bt.QUERN[key]};" not in quern:
+            err(f"QuernBlock.{name} is not tools/barn_tools.py QUERN's {bt.QUERN[key]}")
+    churn = (agri / "ButterChurnBlock.java").read_text(encoding="utf-8") if (agri / "ButterChurnBlock.java").is_file() else ""
+    for name, key in (("STROKES", "strokes"), ("BUTTER", "butter"), ("STROKE_TICKS", "stroke_ticks")):
+        if f"int {name} = {bt.CHURN[key]};" not in churn:
+            err(f"ButterChurnBlock.{name} is not tools/barn_tools.py CHURN's {bt.CHURN[key]}")
+    for block in (bt.QUERN["block"], bt.CHURN["block"]):
+        states = load(ASSETS / "blockstates" / f"{block}.json") or {}
+        runners = [k for k in states.get("variants", {}) if "runner=true" in k]
+        if not runners or any(states["variants"][k]["model"] == f"jugcraft:block/{block}" for k in runners):
+            err(f"{block}: its blockstate's runner=true variants should name the moving part's own model")
+    for recipe in bt.SHAPELESS:
+        if not (DATA / MOD / "recipe" / f"{recipe['id']}.json").is_file():
+            err(f"{recipe['id']}: tools/barn_tools.py's recipe was not generated")
+    # Part 3: the Drying Rack's and the Corn Crib's numbers and sizes.
+    rack = (agri / "DryingRackBlock.java").read_text(encoding="utf-8") if (agri / "DryingRackBlock.java").is_file() else ""
+    for name, value in (("BUNCH", bt.RACK["bunch"]), ("DRY_TICKS", bt.RACK["dry_ticks"])):
+        if f"int {name} = {value};" not in rack:
+            err(f"DryingRackBlock.{name} is not tools/barn_tools.py RACK's {value}")
+    crib = (agri / "CornCribBlock.java").read_text(encoding="utf-8") if (agri / "CornCribBlock.java").is_file() else ""
+    if f"int CAPACITY = {bt.CRIB['capacity']};" not in crib:
+        err(f"CornCribBlock.CAPACITY is not tools/barn_tools.py CRIB's {bt.CRIB['capacity']}")
+    bins = (agri / "FruitBinBlock.java").read_text(encoding="utf-8") if (agri / "FruitBinBlock.java").is_file() else ""
+    if f"int STAGES = {bt.CRIB['stages']};" not in bins:
+        err(f"the Corn Crib shows FruitBinBlock.STAGES, not tools/barn_tools.py CRIB's {bt.CRIB['stages']} stages")
+    for cls, spec in (("DryingRackBlock", bt.RACK), (None, bt.CRIB)):
+        java = rack if cls else crib
+        w, h, d = spec["size"]
+        if f"box({w}, {h}, {d})" not in java:
+            err(f"{spec['block']} is not {w} x {h} x {d} blocks as tools/barn_tools.py says")
+    # Part 4: the Hay-Loft Pulley's and the Harvest Bell's numbers, and where their renderers turn and hang their pieces
+    # (as tools/barn_tools_data.py draws them).
+    import barn_tools_data as btd
+    pulley = (agri / "HayPulleyBlock.java").read_text(encoding="utf-8") if (agri / "HayPulleyBlock.java").is_file() else ""
+    for name, value in (("DROPS", bt.PULLEY["drops"]), ("HAUL_TICKS", bt.PULLEY["haul_ticks"])):
+        if f"int {name} = {value};" not in pulley:
+            err(f"HayPulleyBlock.{name} is not tools/barn_tools.py PULLEY's {value}")
+    bell = (agri / "HarvestBellBlock.java").read_text(encoding="utf-8") if (agri / "HarvestBellBlock.java").is_file() else ""
+    w, h, d = bt.BELL["size"]
+    if f"int SWING_TICKS = {bt.BELL['swing_ticks']};" not in bell or f"box({w}, {h}, {d})" not in bell:
+        err(f"HarvestBellBlock is not tools/barn_tools.py BELL's {w} x {h} x {d} blocks with a {bt.BELL['swing_ticks']}-tick swing")
+    client = ROOT / "src" / "client" / "java" / "io" / "github" / "jimbozoomer" / "jugcraft" / "client"
+    renderer = (client / "HayPulleyRenderer.java").read_text(encoding="utf-8") if (client / "HayPulleyRenderer.java").is_file() else ""
+    for name, value in (("AXLE_Y", btd.WHEEL_AXLE[0]), ("AXLE_Z", btd.WHEEL_AXLE[1]), ("ROPE_Z", btd.ROPE_AT[1]), ("ROPE_TOP", btd.ROPE_TOP)):
+        if f"float {name} = {value}F;" not in renderer:
+            err(f"HayPulleyRenderer.{name} is not where tools/barn_tools_data.py draws it ({value})")
+    worked = (client / "HandWorkedRenderer.java").read_text(encoding="utf-8") if (client / "HandWorkedRenderer.java").is_file() else ""
+    for name, value in (("BELL_AXLE_Y", btd.BELL_AXLE[0] - 16.0), ("BELL_AXLE_Z", btd.BELL_AXLE[1])):
+        if f"float {name} = {value}F;" not in worked:
+            err(f"HandWorkedRenderer.{name} is not where tools/barn_tools_data.py hangs the bell ({value})")
+    # Part 5: the sacks' most to a block and height, the tool rack's and the trough's sizes, the trough's capacity and
+    # feed, and the lantern's light, which shows only while it is lit (its flame alone full-bright).
+    sacks = (agri / "GrainSackBlock.java").read_text(encoding="utf-8") if (agri / "GrainSackBlock.java").is_file() else ""
+    if f"int MAX = {bt.SACK['max']};" not in sacks or f"SACK_HEIGHT = {bt.SACK['height']};" not in sacks:
+        err(f"GrainSackBlock is not tools/barn_tools.py SACK's {bt.SACK['max']} sacks of {bt.SACK['height']} pixels")
+    for cls, spec in (("ToolRackBlock", bt.TOOL_RACK), ("FeedTroughBlock", bt.TROUGH)):
+        java = (agri / f"{cls}.java").read_text(encoding="utf-8") if (agri / f"{cls}.java").is_file() else ""
+        w, h, d = spec["size"]
+        if f"box({w}, {h}, {d})" not in java:
+            err(f"{cls} is not {w} x {h} x {d} blocks as tools/barn_tools.py says")
+    trough = (agri / "FeedTroughBlock.java").read_text(encoding="utf-8") if (agri / "FeedTroughBlock.java").is_file() else ""
+    if f"int CAPACITY = {bt.TROUGH['capacity']};" not in trough or 'withDefaultNamespace("horse_food")' not in trough:
+        err(f"FeedTroughBlock keeps tools/barn_tools.py TROUGH's {bt.TROUGH['capacity']} of #minecraft:horse_food")
+    lamp = (agri / "BarnLanternBlock.java").read_text(encoding="utf-8") if (agri / "BarnLanternBlock.java").is_file() else ""
+    if f"int LIGHT = {bt.LANTERN['light']};" not in lamp \
+            or "state.getValue(BarnLanternBlock.LIT) ? BarnLanternBlock.LIGHT : 0" not in main:
+        err(f"the Barn Lantern gives tools/barn_tools.py LANTERN's light {bt.LANTERN['light']}, and only while lit")
+    for name, glows in ((bt.LANTERN["block"], False), (f"{bt.LANTERN['block']}_flame", True)):
+        model = load(ASSETS / "models" / "block" / f"{name}.json") or {}
+        if any(e.get("light_emission") for e in model.get("elements", [])) != glows:
+            err(f"models/block/{name}.json: only the lantern's flame is drawn full-bright")
+    lit = [part for part in (load(ASSETS / "blockstates" / f"{bt.LANTERN['block']}.json") or {}).get("multipart", [])
+           if part.get("apply", {}).get("model") == f"{MOD}:block/{bt.LANTERN['block']}_flame"]
+    if not lit or any(part.get("when", {}).get("lit") != "true" for part in lit):
+        err("barn_lantern: its blockstate adds the flame only while it is lit")
+
+
+def check_fall_garden():
+    """Fall Garden & Porch (tools/fall_garden.py, docs/features/fall-garden-and-porch.md), part 1: each fall plant is a
+    sculpted plant of tools/plants.py with its builder; the garden plants' recipes were generated, and each makes the
+    plant from its cabbage seed or sunflower; the wild ones have their vanilla-biome patches. Part 2: the planters' Java
+    numbers are the table's, their renderer is registered, and their recipes and message exist. Part 3: the Porch Swing's
+    numbers are the table's, its renderer turns it about the model's hooks, and its runner variants name the swing. Part
+    4: the café lights' strand, lamps, texture and item."""
+    import fall_garden as fg
+    java_main = (JAVA_ROOT / "agriculture" / "JugcraftAgriculture.java").read_text(encoding="utf-8") \
+        if (JAVA_ROOT / "agriculture" / "JugcraftAgriculture.java").is_file() else ""
+    import flora_models as fm
+    for plant in fg.PLANTS:
+        info = plants.PLANTS.get(plant)
+        if not info or info.get("art") != "flora" or plant not in fm.BUILDERS:
+            err(f"{plant}: a fall garden plant must be a sculpted plant of tools/plants.py with a builder (tools/fall_garden_flora.py)")
+    for recipe in fg.SHAPELESS:
+        made = load(DATA / MOD / "recipe" / f"{recipe['id']}.json") or {}
+        if made.get("result", {}).get("id") != f"{MOD}:{recipe['result']}":
+            err(f"recipe/{recipe['id']}.json: tools/fall_garden.py's recipe for {recipe['result']} was not generated")
+    garden = {r["result"] for r in fg.SHAPELESS}
+    for plant in fg.PLANTS:
+        if plant not in garden and "patch" not in plants.PLANTS.get(plant, {}):
+            err(f"{plant}: a wild fall plant needs its patch in vanilla's biomes, or a recipe, to be found at all")
+    # Part 2: each planter's spots, soil, size of what grows in it and whether it hangs on a wall are the table's, in
+    # PlanterBlock; the renderer is registered; the full message has its text; the recipes were generated.
+    planter = (JAVA_ROOT / "agriculture" / "PlanterBlock.java").read_text(encoding="utf-8") \
+        if (JAVA_ROOT / "agriculture" / "PlanterBlock.java").is_file() else ""
+    for block, spec in fg.PLANTERS.items():
+        spots = "{" + ", ".join(f"{{{x}, {z}}}" for x, z in spec["spots"]) + "}"
+        expected = f"new double[][] {spots}, {spec['soil']}, {spec['scale']}F, {'true' if spec['wall'] else 'false'})"
+        if f"Planter {spec['java']} = new Planter(" not in planter or expected not in planter:
+            err(f"PlanterBlock.{spec['java']} is not tools/fall_garden.py's {block} (spots, soil, scale, wall: {expected})")
+        if f'registerBlock("{block}", props -> new PlanterBlock(props, PlanterBlock.{spec["java"]})' not in java_main:
+            err(f"JugcraftAgriculture: {block} must be registered as a PlanterBlock of PlanterBlock.{spec['java']}")
+    client = (CLIENT_JAVA_ROOT / "JugcraftClient.java").read_text(encoding="utf-8") if (CLIENT_JAVA_ROOT / "JugcraftClient.java").is_file() else ""
+    if "BlockEntityRendererRegistry.register(JugcraftAgriculture.PLANTER_ENTITY, PlanterRenderer::new);" not in client:
+        err("JugcraftClient: the planters' flowers need PlanterRenderer")
+    lang = load(ASSETS / "lang" / "en_us.json") or {}
+    if f"message.{MOD}.planter.full" not in lang:
+        err(f"message.{MOD}.planter.full: the text is missing")
+    for recipe in fg.RECIPES:
+        if not (DATA / MOD / "recipe" / f"{recipe['id']}.json").is_file():
+            err(f"{recipe['id']}: tools/fall_garden.py's recipe was not generated")
+    # Part 3: the Porch Swing's size, seat and sway are the table's, and its renderer turns it about the hooks the model
+    # hangs it from.
+    sw = fg.SWING
+    swing = (JAVA_ROOT / "agriculture" / "PorchSwingBlock.java").read_text(encoding="utf-8") \
+        if (JAVA_ROOT / "agriculture" / "PorchSwingBlock.java").is_file() else ""
+    w, h, d = sw["size"]
+    for needed in (f"box({w}, {h}, {d})", f"SEAT_HEIGHT = {sw['seat']};", f"BREEZE_SWING = {sw['breeze']}F;", f"SITTER_SWING = {sw['sitter']}F;",
+                   f"SWING_TICKS = {sw['ticks']}F;"):
+        if needed not in swing:
+            err(f"PorchSwingBlock: missing {needed} (tools/fall_garden.py SWING)")
+    renderer = (CLIENT_JAVA_ROOT / "PorchSwingRenderer.java").read_text(encoding="utf-8") \
+        if (CLIENT_JAVA_ROOT / "PorchSwingRenderer.java").is_file() else ""
+    if f"PIVOT_Y = {sw['pivot'][0]}F;" not in renderer or f"PIVOT_Z = {sw['pivot'][1]}F;" not in renderer:
+        err(f"PorchSwingRenderer: the swing must turn about its hooks, tools/fall_garden.py SWING pivot {sw['pivot']}")
+    if "BlockEntityRendererRegistry.register(JugcraftAgriculture.PORCH_SWING_ENTITY, PorchSwingRenderer::new);" not in client:
+        err("JugcraftClient: the Porch Swing needs PorchSwingRenderer")
+    states = load(ASSETS / "blockstates" / f"{sw['block']}.json") or {}
+    runners = [k for k in states.get("variants", {}) if "runner=true" in k]
+    if not runners or any(states["variants"][k]["model"] != f"{MOD}:block/{sw['block']}_swing" for k in runners):
+        err(f"{sw['block']}: its runner=true variants must name the swing's own model")
+    # Part 4: the café lights' strand lights along its length with the table's lamps, is drawn with its own texture, and
+    # its item strings it.
+    cafe = fg.CAFE_LIGHTS
+    hook = (JAVA_ROOT / "agriculture" / "StringLightHookBlockEntity.java").read_text(encoding="utf-8") \
+        if (JAVA_ROOT / "agriculture" / "StringLightHookBlockEntity.java").is_file() else ""
+    for needed in (f'CAFE("cafe", "{cafe["item"]}", true)', f"LAMP_LIGHT = {cafe['light']};", f"LAMP_SPACING = {cafe['spacing']};"):
+        if needed not in hook:
+            err(f"StringLightHookBlockEntity: missing {needed} (tools/fall_garden.py CAFE_LIGHTS)")
+    strands = (CLIENT_JAVA_ROOT / "StringLightsRenderer.java").read_text(encoding="utf-8") \
+        if (CLIENT_JAVA_ROOT / "StringLightsRenderer.java").is_file() else ""
+    if 'Jugcraft.id("textures/entity/cafe_string_lights.png")' not in strands or "submitCafe(" not in strands:
+        err("StringLightsRenderer: the café lights need their own strand, drawn with textures/entity/cafe_string_lights.png")
+    if not (ASSETS / "textures" / "entity" / "cafe_string_lights.png").is_file():
+        err("textures/entity/cafe_string_lights.png: the café lights' strand has no texture")
+    if f'registerItem("{cafe["item"]}", props -> new StringLightsItem(props, StringLightHookBlockEntity.Strand.CAFE)' not in java_main:
+        err(f"JugcraftAgriculture: {cafe['item']} must be a StringLightsItem of Strand.CAFE")
+    if f"item.{MOD}.{cafe['item']}" not in lang:
+        err(f"item.{MOD}.{cafe['item']}: the text is missing")
+
+
+def check_haunted_midway():
+    """Haunted Midway (tools/haunted_midway.py, docs/features/haunted-midway.md), part 1: each stall's Java block is the
+    table's size and numbers and is registered with its own block entity, its renderer registered; the cart's spinner
+    head turns about the table's bowl and the wagon's kettle about the table's pivot, each from its runner model alone;
+    the cart's heater and the wagon's lamp and lantern glow full-bright; there is a floss model for each serving and a
+    heap for each popcorn; the wagon's upper block gives its light; Cotton Candy is a food of the table's; the wagon coats
+    two popcorn as the crafting recipe does; both drop with what they hold; the recipes were generated; and every message
+    has its text. Parts 2 to 5 (the Ticket Booth and Whack-a-Zombie, the Shooting Gallery, the Ghost Train and the
+    Haunted Carousel) against the table, below."""
+    import haunted_midway as hm
+    import menu
+    cc, pw = hm.COTTON_CANDY, hm.POPCORN_WAGON
+
+    def read(path):
+        return path.read_text(encoding="utf-8") if path.is_file() else ""
+
+    cart = read(JAVA_ROOT / "agriculture" / "CottonCandyCartBlock.java")
+    w, h, d = cc["size"]
+    for needed in (f"box({w}, {h}, {d})", f"FLOSS = {cc['floss']};", f"SPIN = {cc['spin']}F;", f"BOWL_X = {cc['bowl'][0]}F;",
+                   f"BOWL_Z = {cc['bowl'][1]}F;", "Items.SUGAR", "Items.PAPER", 'item("cotton_candy")'):
+        if needed not in cart:
+            err(f"CottonCandyCartBlock: missing {needed} (tools/haunted_midway.py COTTON_CANDY)")
+    wagon = read(JAVA_ROOT / "agriculture" / "PopcornWagonBlock.java")
+    w, h, d = pw["size"]
+    for needed in (f"box({w}, {h}, {d})", f"CAPACITY = {pw['capacity']};", f"POP_TICKS = {pw['pop_ticks']};", f"LIGHT = {pw['light']};",
+                   f"TIP = {pw['tip']}F;", f"TIP_TICKS = {pw['tip_ticks']};", f"PIVOT_Y = {pw['pivot'][0]}F;", f"PIVOT_Z = {pw['pivot'][1]}F;",
+                   'item("corn_kernels")', 'item("caramel")', 'item("caramel_popcorn")', 'item("popcorn")', "popcorn - 2",
+                   "state.getValue(PART) == TOP ? LIGHT : 0"):
+        if needed not in wagon:
+            err(f"PopcornWagonBlock: missing {needed} (tools/haunted_midway.py POPCORN_WAGON)")
+    # The wagon's Caramel turns two popcorn into one Caramel Popcorn because the crafting recipe does.
+    if menu.SHAPELESS.get("caramel_popcorn") != [["jugcraft:popcorn", "jugcraft:popcorn", "jugcraft:caramel"], 1]:
+        err("tools/menu.py: Caramel Popcorn is no longer two popcorn and a caramel; PopcornWagonBlock coats two at a time")
+    java_main = read(JAVA_ROOT / "agriculture" / "JugcraftAgriculture.java")
+    for block, cls, entity in ((cc["block"], "CottonCandyCartBlock", "COTTON_CANDY_CART_ENTITY"), (pw["block"], "PopcornWagonBlock", "POPCORN_WAGON_ENTITY")):
+        if f'registerBlock("{block}", {cls}::new' not in java_main or f'{entity} = Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, Jugcraft.id("{block}")' not in java_main:
+            err(f"JugcraftAgriculture: {block} must be a {cls} with its own block entity {entity}")
+    if ".lightLevel(PopcornWagonBlock::light)" not in java_main:
+        err(f"JugcraftAgriculture: {pw['block']} must be lit by PopcornWagonBlock::light")
+    food = hm.ITEMS[hm.CANDY["item"]]["food"]
+    if f'food("{hm.CANDY["item"]}", {food[0]}, {food[1]}F, COMPOST_' not in java_main:
+        err(f"JugcraftAgriculture: {hm.CANDY['item']} must be a food of {food} (tools/haunted_midway.py ITEMS)")
+    client = read(CLIENT_JAVA_ROOT / "JugcraftClient.java")
+    for entity, renderer in (("COTTON_CANDY_CART_ENTITY", "CottonCandyCartRenderer"), ("POPCORN_WAGON_ENTITY", "PopcornWagonRenderer")):
+        if f"BlockEntityRendererRegistry.register(JugcraftAgriculture.{entity}, {renderer}::new);" not in client:
+            err(f"JugcraftClient: {entity} needs {renderer}")
+    spinner = read(CLIENT_JAVA_ROOT / "CottonCandyCartRenderer.java")
+    if "CottonCandyCartBlock.BOWL_X" not in spinner or "CottonCandyCartBlock.spin(" not in spinner:
+        err("CottonCandyCartRenderer: the spinner head must spin about the bowl's middle by CottonCandyCartBlock.spin")
+    kettle = read(CLIENT_JAVA_ROOT / "PopcornWagonRenderer.java")
+    if "PopcornWagonBlock.PIVOT_Y" not in kettle or "PopcornWagonBlock.tip(" not in kettle:
+        err("PopcornWagonRenderer: the kettle must tip about its pivot by PopcornWagonBlock.tip")
+    for spec, runner, prop, count in ((cc, "head", "floss", cc["floss"]), (pw, "kettle", "popcorn", pw["capacity"])):
+        block = spec["block"]
+        states = load(ASSETS / "blockstates" / f"{block}.json") or {}
+        parts = states.get("multipart", [])
+        runners = [p for p in parts if p.get("when", {}).get("runner") == "true"]
+        if not runners or any(p["apply"]["model"] != f"{MOD}:block/{block}_{runner}" for p in runners) \
+                or any(p.get("when", {}).get("runner") != "false" for p in parts if p not in runners):
+            err(f"blockstates/{block}.json: its runner must show the {runner} alone, and nothing else with it")
+        shown = {p["when"][prop] for p in parts if prop in p.get("when", {})}
+        if shown != {str(n) for n in range(1, count + 1)}:
+            err(f"blockstates/{block}.json: a model for each {prop} from 1 to {count}, not {sorted(shown)}")
+        if not load(ASSETS / "models" / "block" / f"{block}_{runner}.json"):
+            err(f"models/block/{block}_{runner}.json: the runner model was not generated")
+        loot = json.dumps(load(DATA / MOD / "loot_table" / "blocks" / f"{block}.json") or {})
+        if f'"{prop}": "{count}"' not in loot:
+            err(f"loot_table/blocks/{block}.json: it must give back what it holds, by {prop}")
+    for name in ("heater",):
+        for path in (ASSETS / "models" / "block").glob(f"{cc['block']}_*_{name}.json"):
+            if any(e.get("light_emission") != 15 or e.get("shade") is not False for e in (load(path) or {}).get("elements", [])):
+                err(f"{path.name}: the heater band must glow, full-bright and unshaded")
+    lit = list((ASSETS / "models" / "block").glob(f"{pw['block']}_*_lit.json"))
+    if not lit or any(e.get("light_emission") != 15 or e.get("shade") is not False for path in lit for e in (load(path) or {}).get("elements", [])):
+        err(f"{pw['block']}: its lamp and lantern must glow, full-bright and unshaded")
+    if '"popping": "true"' not in json.dumps(load(DATA / MOD / "loot_table" / "blocks" / f"{pw['block']}.json") or {}):
+        err(f"loot_table/blocks/{pw['block']}.json: a kernel still in the kettle must be given back")
+    for recipe in hm.RECIPES + hm.SHAPELESS:
+        made = load(DATA / MOD / "recipe" / f"{recipe['id']}.json") or {}
+        if made.get("result", {}).get("id") != f"{MOD}:{recipe['result']}":
+            err(f"recipe/{recipe['id']}.json: tools/haunted_midway.py's recipe for {recipe['result']} was not generated")
+    lang = load(ASSETS / "lang" / "en_us.json") or {}
+    keys = [f"block.{MOD}.{cc['block']}", f"block.{MOD}.{pw['block']}", f"item.{MOD}.{hm.CANDY['item']}"]
+    keys += [f"message.{MOD}.{cc['block']}.{k}" for k in ("off", "full", "empty")]
+    keys += [f"message.{MOD}.{pw['block']}.{k}" for k in ("light", "popping", "full", "two")]
+    for key in keys:
+        if key not in lang:
+            err(f"{key}: the text is missing")
+    for refusal in re.findall(r'"(off|full|empty)"', cart):
+        if f"message.{MOD}.{cc['block']}.{refusal}" not in lang:
+            err(f"message.{MOD}.{cc['block']}.{refusal}: CottonCandyCartBlock refuses with it, but the text is missing")
+    for refusal in re.findall(r'"(light|popping|full|two)"', wagon):
+        if f"message.{MOD}.{pw['block']}.{refusal}" not in lang:
+            err(f"message.{MOD}.{pw['block']}.{refusal}: PopcornWagonBlock refuses with it, but the text is missing")
+    # Part 2: the booth's roll, sheet and crank are the table's, it prints the ticket and the crank turns about the
+    # table's axle; Whack-a-Zombie's holes, head, lamps and round are the table's, a ticket starts a round, the mallet
+    # whacks (by left click through Midway.attack too), a win rolls the midway's prize table, and its renderer raises
+    # the head from the hole that's up; both renderers are registered, the score lamps glow, and their texts exist.
+    tb, wz = hm.TICKET_BOOTH, hm.WHACK
+    booth = read(JAVA_ROOT / "agriculture" / "TicketBoothBlock.java")
+    w, h, d = tb["size"]
+    for needed in (f"box({w}, {h}, {d})", f"ROLL = {tb['roll']};", f"PER_SHEET = {tb['per_sheet']};", f"CRANK_TICKS = {tb['crank_ticks']};",
+                   f"AXLE_Y = {tb['axle'][0]}F;", f"AXLE_Z = {tb['axle'][1]}F;", "Items.PAPER", 'item("midway_ticket")'):
+        if needed not in booth:
+            err(f"TicketBoothBlock: missing {needed} (tools/haunted_midway.py TICKET_BOOTH)")
+    game = read(JAVA_ROOT / "agriculture" / "WhackAZombieBlock.java")
+    w, h, d = wz["size"]
+    xs = "{" + ", ".join(f"{x}F" for x, _ in wz["holes"]) + "}"
+    zs = "{" + ", ".join(f"{z}F" for _, z in wz["holes"]) + "}"
+    for needed in (f"box({w}, {h}, {d})", f"FIELD = {wz['field']}F;", f"HEAD_PIXELS = {wz['head']}F;", f"LAMPS = {wz['lamps']};",
+                   f"ROUND_TICKS = {wz['round_ticks']};", f"UP_TICKS = {wz['up_ticks']};", f"GAP_TICKS = {wz['gap_ticks']};",
+                   f"RISE_TICKS = {wz['rise_ticks']};", f"HOLES_X = {xs};", f"HOLES_Z = {zs};", 'item("midway_ticket")', "Midway.mallet()",
+                   "Midway.prize(", "level.mayInteract(player, master)", "Midway.REACH * Midway.REACH"):
+        if needed not in game:
+            err(f"WhackAZombieBlock: missing {needed} (tools/haunted_midway.py WHACK)")
+    if "instanceof WhackAZombieBlock whack" not in read(JAVA_ROOT / "agriculture" / "Midway.java"):
+        err("Midway.attack: a swing of the Carnival Mallet at Whack-a-Zombie must whack it")
+    for block, cls, entity in ((tb["block"], "TicketBoothBlock", "TICKET_BOOTH_ENTITY"), (wz["block"], "WhackAZombieBlock", "WHACK_A_ZOMBIE_ENTITY")):
+        if f'registerBlock("{block}", {cls}::new' not in java_main or f'{entity} = Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, Jugcraft.id("{block}")' not in java_main:
+            err(f"JugcraftAgriculture: {block} must be a {cls} with its own block entity {entity}")
+    if f'registerItem("{hm.TICKET["item"]}"' not in java_main:
+        err(f"JugcraftAgriculture: the {hm.TICKET['item']} item must be registered")
+    for entity, renderer in (("TICKET_BOOTH_ENTITY", "TicketBoothRenderer"), ("WHACK_A_ZOMBIE_ENTITY", "WhackAZombieRenderer")):
+        if f"BlockEntityRendererRegistry.register(JugcraftAgriculture.{entity}, {renderer}::new);" not in client:
+            err(f"JugcraftClient: {entity} needs {renderer}")
+    if "TicketBoothBlock.AXLE_Y" not in read(CLIENT_JAVA_ROOT / "TicketBoothRenderer.java"):
+        err("TicketBoothRenderer: the crank must turn about TicketBoothBlock's axle")
+    heads = read(CLIENT_JAVA_ROOT / "WhackAZombieRenderer.java")
+    if "WhackAZombieBlock.HOLES_X[state.hole]" not in heads or "WhackAZombieBlock.rise(" not in heads:
+        err("WhackAZombieRenderer: the head must rise by WhackAZombieBlock.rise from the hole that's up")
+    for spec, runner in ((tb, "crank"), (wz, "head")):
+        block = spec["block"]
+        parts = (load(ASSETS / "blockstates" / f"{block}.json") or {}).get("multipart", [])
+        runners = [p for p in parts if p.get("when", {}).get("runner") == "true"]
+        if not runners or any(p["apply"]["model"] != f"{MOD}:block/{block}_{runner}" for p in runners) \
+                or any(p.get("when", {}).get("runner") != "false" for p in parts if p not in runners):
+            err(f"blockstates/{block}.json: its runner must show the {runner} alone, and nothing else with it")
+    lamps = sorted((ASSETS / "models" / "block").glob(f"{wz['block']}_*_lamp*.json"))
+    if len(lamps) != wz["lamps"] or any(e.get("light_emission") != 15 or e.get("shade") is not False
+                                         for path in lamps for e in (load(path) or {}).get("elements", [])):
+        err(f"{wz['block']}: each of its {wz['lamps']} score lamps must have its lit model, full-bright and unshaded")
+    if '"roll": "4"' not in json.dumps(load(DATA / MOD / "loot_table" / "blocks" / f"{tb['block']}.json") or {}):
+        err(f"loot_table/blocks/{tb['block']}.json: it must give back the paper on its roll")
+    # Part 3: the gallery's rails, targets, track, speed, round and distance are the table's; a ticket starts a round, a
+    # projectile is judged where it reached the back wall and followed back to the rails, and a win rolls the prize
+    # table; its renderer draws its targets where targetX puts them, from its runner models 1 and 2; its bulbs glow.
+    sg = hm.GALLERY
+    gal = read(JAVA_ROOT / "agriculture" / "ShootingGalleryBlock.java")
+    w, h, d = sg["size"]
+    (bat_y, bat_z, bat_way, _), (ghost_y, ghost_z, ghost_way, _) = sg["rails"]
+    bw, bh = sg["targets"]["bat"]
+    gw, gh = sg["targets"]["ghost"]
+    for needed in (f"box({w}, {h}, {d})", f"PER_RAIL = {sg['per_rail']};", f"SPEED = {sg['speed']}F;", f"ROUND_TICKS = {sg['round_ticks']};",
+                   f"MIN_DISTANCE = {sg['min_distance']};", f"COUNTER = {sg['counter']}F;", f"BOARD = {sg['board']}F;",
+                   f"RAIL_Y = {{{bat_y}F, {ghost_y}F}};", f"RAIL_Z = {{{bat_z}F, {ghost_z}F}};", f"WAYS = {{{bat_way}, {ghost_way}}};",
+                   f"TARGET_W = {{{float(bw)}F, {float(gw)}F}};", f"TARGET_H = {{{float(bh)}F, {float(gh)}F}};",
+                   f"TRACK_FROM = {sg['track'][0]}F;", f"TRACK_TO = {sg['track'][1]}F;", 'item("midway_ticket")',
+                   "protected void onProjectileHit(", "projectile.getOwner() instanceof ServerPlayer", "Midway.prize(",
+                   "level.mayInteract(shooter, master)"):
+        if needed not in gal:
+            err(f"ShootingGalleryBlock: missing {needed} (tools/haunted_midway.py GALLERY)")
+    if f'registerBlock("{sg["block"]}", ShootingGalleryBlock::new' not in java_main \
+            or f'SHOOTING_GALLERY_ENTITY = Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, Jugcraft.id("{sg["block"]}")' not in java_main:
+        err(f"JugcraftAgriculture: {sg['block']} must be a ShootingGalleryBlock with its own block entity")
+    if "BlockEntityRendererRegistry.register(JugcraftAgriculture.SHOOTING_GALLERY_ENTITY, ShootingGalleryRenderer::new);" not in client:
+        err("JugcraftClient: SHOOTING_GALLERY_ENTITY needs ShootingGalleryRenderer")
+    if "ShootingGalleryBlock.targetX(" not in read(CLIENT_JAVA_ROOT / "ShootingGalleryRenderer.java"):
+        err("ShootingGalleryRenderer: the targets must be drawn where ShootingGalleryBlock.targetX puts them, as the server judges them")
+    parts = (load(ASSETS / "blockstates" / f"{sg['block']}.json") or {}).get("multipart", [])
+    shown = {p["when"]["runner"]: p["apply"]["model"] for p in parts if p.get("when", {}).get("runner") in ("1", "2")}
+    if shown != {"1": f"{MOD}:block/{sg['block']}_bat", "2": f"{MOD}:block/{sg['block']}_ghost"} \
+            or any(p.get("when", {}).get("runner") not in ("0", "1", "2") for p in parts):
+        err(f"blockstates/{sg['block']}.json: its runners 1 and 2 must show a bat and a ghost alone, and the gallery only at 0")
+    bulbs = list((ASSETS / "models" / "block").glob(f"{sg['block']}_*_bulbs_lit.json"))
+    if not bulbs or any(e.get("light_emission") != 15 or e.get("shade") is not False for path in bulbs for e in (load(path) or {}).get("elements", [])):
+        err(f"{sg['block']}: its bulbs must glow while a round runs, full-bright and unshaded")
+    for key in [f"block.{MOD}.{sg['block']}"] + [f"message.{MOD}.{sg['block']}.{k}" for k in ("ticket", "playing", "won", "lost", "too_close")]:
+        if key not in lang:
+            err(f"{key}: the text is missing")
+    # Part 4: the ghost train's doorways, leaves, wall and timings are the table's; its cells leave the doorways free and
+    # its models are cut by those same cells; it looks for minecarts from its ticker and swings its doors and springs its
+    # ghost by block events; its renderer swings the leaves and the ghost from its runner models 1 to 3; its windows glow.
+    gt = hm.GHOST_TRAIN
+    front = read(JAVA_ROOT / "agriculture" / "GhostTrainBlock.java")
+    for needed in (f"LOOK_TICKS = {gt['look_ticks']};", f"REACH = {gt['reach']};", f"SWING_TICKS = {gt['swing_ticks']};",
+                   f"HOLD_TICKS = {gt['hold_ticks']};", f"SPOOK_TICKS = {gt['spook_ticks']};", f"LIGHT = {gt['light']};",
+                   f"DOORS = {{{gt['doors'][0]}, {gt['doors'][1]}}};", f"LEAF_W = {gt['leaf'][0]}F;", f"LEAF_H = {gt['leaf'][1]}F;",
+                   f"WALL_FROM = {gt['wall'][0]}F;", f"WALL_TO = {gt['wall'][1]}F;", f"ACROSS = {gt['size'][0]};", f"UP = {gt['size'][1]};",
+                   "getEntitiesOfClass(AbstractMinecart.class", "getTicker("):
+        if needed not in front:
+            err(f"GhostTrainBlock: missing {needed} (tools/haunted_midway.py GHOST_TRAIN)")
+    import haunted_midway_data as hmd
+    cells = hmd.train_cells()
+    if len(cells) != gt["size"][0] * gt["size"][1] - 2 * len(gt["doors"]) or any(r in gt["doors"] and u < 2 for r, u in cells):
+        err("tools/haunted_midway_data.py train_cells(): the ghost train's blocks must leave its two doorways' lower blocks free")
+    parts = (load(ASSETS / "blockstates" / f"{gt['block']}.json") or {}).get("multipart", [])
+    if {p["when"]["part"] for p in parts if "part" in p.get("when", {})} != {str(k) for k in range(len(cells))}:
+        err(f"blockstates/{gt['block']}.json: a model for each of its {len(cells)} blocks")
+    shown = {p["when"]["runner"]: p["apply"]["model"] for p in parts if p.get("when", {}).get("runner") in ("1", "2", "3")}
+    if shown != {"1": f"{MOD}:block/{gt['block']}_leaf_left", "2": f"{MOD}:block/{gt['block']}_leaf_right", "3": f"{MOD}:block/{gt['block']}_spook"}:
+        err(f"blockstates/{gt['block']}.json: its runners 1 to 3 must show its two door leaves and its ghost alone")
+    if f'registerBlock("{gt["block"]}", GhostTrainBlock::new' not in java_main or ".lightLevel(GhostTrainBlock::light)" not in java_main \
+            or f'GHOST_TRAIN_ENTITY = Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, Jugcraft.id("{gt["block"]}")' not in java_main:
+        err(f"JugcraftAgriculture: {gt['block']} must be a GhostTrainBlock lit by GhostTrainBlock::light, with its own block entity")
+    doors = read(CLIENT_JAVA_ROOT / "GhostTrainRenderer.java")
+    if "BlockEntityRendererRegistry.register(JugcraftAgriculture.GHOST_TRAIN_ENTITY, GhostTrainRenderer::new);" not in client \
+            or "GhostTrainBlock.swing(" not in doors or "GhostTrainBlock.spook(" not in doors:
+        err("GhostTrainRenderer: registered, it must swing the doors by GhostTrainBlock.swing and spring the ghost by GhostTrainBlock.spook")
+    lit = list((ASSETS / "models" / "block").glob(f"{gt['block']}_*_windows_lit.json"))
+    if not lit or any(e.get("light_emission") != 15 or e.get("shade") is not False for path in lit for e in (load(path) or {}).get("elements", [])):
+        err(f"{gt['block']}: its lit windows must glow, full-bright and unshaded")
+    if f"block.{MOD}.{gt['block']}" not in lang:
+        err(f"block.{MOD}.{gt['block']}: the text is missing")
+    # Part 5: the carousel's numbers and tune are the table's; its middle block raises it, boards it and quiets its organ,
+    # and takes kinetic power; it, its block entity and its renderer are registered; its quads are among DecorQuads' files,
+    # every part there on the carousel's own entity texture, the bats' wings cut out; its text.
+    cs = hm.CAROUSEL
+    ride = read(JAVA_ROOT / "agriculture" / "HauntedCarousel.java")
+    middle = read(JAVA_ROOT / "agriculture" / "HauntedCarouselBlock.java")
+    melody = [n for bar in cs["tune"] for n in bar]
+
+    def listed(values):
+        return "{" + ", ".join(str(v) for v in values) + "}"
+    for needed in (f"WIDTH = {cs['width']};", f"SLOTS = {len(cs['mounts'])};", f"DECK = {cs['deck']};", f"OUTER = {cs['outer']};",
+                   f"INNER = {cs['inner']};", f"HORSE_SEAT = {cs['seats']['horse']};", f"BAT_SEAT = {cs['seats']['bat']};",
+                   f"COACH_SEAT = {cs['seats']['coach']};", f"SEAT_BACK = {cs['seat_back']};", f"COACH_ACROSS = {cs['coach_across']};",
+                   f"BOB = {cs['bob']};", f"BOBS = {cs['bobs']};", f"NEED = {cs['need']};", f"TURN_TICKS = {cs['turn_ticks']};",
+                   f"ACCEL = FULL_SPEED / {round(1 / cs['accel'])}.0F;", f"DECEL = FULL_SPEED / {round(1 / cs['decel'])}.0F;",
+                   f"BOARD_REACH = {cs['board_reach']};", f"BEAT_TICKS = {cs['beat_ticks']};",
+                   "OUTER_MOUNTS = " + listed(m.upper() for m in cs["mounts"]) + ";", "INNER_SLOTS = " + listed(cs["inner_slots"]) + ";",
+                   "MELODY = " + listed(melody) + ";", "BASS = " + listed(cs["bass"]) + ";", "CHORD = " + listed(cs["chord"]) + ";",
+                   "SoundSource.RECORDS", "protected Vec3 getPassengerAttachmentPoint(", "public boolean blocked(", "isLocalPlayer()"):
+        if needed not in ride:
+            err(f"HauntedCarousel: missing {needed} (tools/haunted_midway.py CAROUSEL)")
+    if len(melody) != 3 * len(cs["bass"]) or len(cs["chord"]) != len(cs["bass"]) \
+            or any(not -1 <= n <= 24 for n in melody) or any(not 0 <= n <= 24 for n in cs["bass"] + cs["chord"]):
+        err("tools/haunted_midway.py CAROUSEL: the tune must be three beats a bar, a bass and chord note a bar, all note-block steps 0 to 24")
+    for needed in (f"HEIGHT = {cs['height']};", f"LIGHT = {cs['light']};", "isSecondaryUseActive()", "HauntedCarousel.raise(",
+                   "affectNeighborsAfterRemoval("):
+        if needed not in middle:
+            err(f"HauntedCarouselBlock: missing {needed} (tools/haunted_midway.py CAROUSEL)")
+    if "HauntedCarousel.NEED - taken" not in read(JAVA_ROOT / "agriculture" / "HauntedCarouselBlockEntity.java"):
+        err("HauntedCarouselBlockEntity: it must take at most HauntedCarousel.NEED KE a tick")
+    for needed in ("registerBlock(HauntedCarouselBlock.ID, HauntedCarouselBlock::new", ".lightLevel(HauntedCarouselBlock::light)",
+                   "HAUNTED_CAROUSEL_DRIVE = Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, Jugcraft.id(HauntedCarouselBlock.ID)",
+                   f'HAUNTED_CAROUSEL = entity("{cs["entity"]}"'):
+        if needed not in java_main:
+            err(f"JugcraftAgriculture: missing {needed}")
+    turning = read(CLIENT_JAVA_ROOT / "HauntedCarouselRenderer.java")
+    if "EntityRendererRegistry.register(JugcraftAgriculture.HAUNTED_CAROUSEL, HauntedCarouselRenderer::new);" not in client \
+            or "HauntedCarousel.seatHeight(" not in turning or "HauntedCarousel.flap(" not in turning or "FULL_BRIGHT" not in turning:
+        err("HauntedCarouselRenderer: registered, it must ride the mounts by HauntedCarousel.seatHeight, beat the wings by flap and light the bulbs")
+    if '"haunted_midway_quads.json"' not in read(CLIENT_JAVA_ROOT / "DecorQuads.java"):
+        err("DecorQuads must read haunted_midway_quads.json")
+    quads = load(ASSETS / "haunted_midway_quads.json") or {}
+    for name in ("spin", "bulbs", "horse", "bat", "bat_wing_left", "bat_wing_right", "coach"):
+        part = quads.get(f"haunted_carousel_{name}")
+        if not part:
+            err(f"haunted_midway_quads.json has no quads for haunted_carousel_{name}")
+        elif any(q["texture"] != f"entity/{cs['entity']}" for q in part):
+            err(f"haunted_midway_quads.json: haunted_carousel_{name} must be drawn on the carousel's own texture, entity/{cs['entity']}")
+        elif name.startswith("bat_wing") and not any(q.get("cutout") for q in part):
+            err(f"haunted_midway_quads.json: haunted_carousel_{name}'s skin must be cut out round its scallops")
+    for key in [f"block.{MOD}.{cs['block']}", f"entity.{MOD}.{cs['entity']}"] + [
+            f"message.{MOD}.{cs['block']}.{k}" for k in ("no_room", "full", "jammed", "organ_on", "organ_off")]:
+        if key not in lang:
+            err(f"{key}: the text is missing")
+    keys = [f"block.{MOD}.{tb['block']}", f"block.{MOD}.{wz['block']}", f"item.{MOD}.{hm.TICKET['item']}"]
+    keys += [f"message.{MOD}.{tb['block']}.{k}" for k in ("full", "empty")]
+    keys += [f"message.{MOD}.{wz['block']}.{k}" for k in ("ticket", "playing", "not_yours", "won", "lost")]
+    for key in keys:
+        if key not in lang:
+            err(f"{key}: the text is missing")
+
+
+def check_front_yard():
+    """Front-Yard Haunt Scenes (tools/front_yard.py, docs/features/front-yard-haunt.md), part 1: the Haunted Mailbox's
+    and the Pumpkin Path Light's Java is the table's; each is registered with its own block entity and renderer, which
+    opens the mailbox's door by `lid` and shows its eyes by `eyes`, and sways the light's lantern by `sway`; each
+    blockstate shows its runners alone (the door and eyes, the lantern and glow) and the mailbox its flag down and up by
+    `flag`; the eyes and the lantern's face glow full-bright; the path light gives its light from its lower block; and
+    their names have their text. Part 2: the skeleton animals' and the Rising Zombie's Java is the table's (each animal's
+    shape and pivot, the wag, sway and watch, the claw, reach and shoulders); each is registered (the animals sharing one
+    block entity) with its renderer, which moves them by `wag`, `sway` and `watch`, and `claw` and `lurch`; each animal's
+    blockstate shows its moving part alone at runner 1, and the zombie's its arms alone at runners 1 and 2, each arm
+    leaning out whole from its shoulder; and their names have their text. Part 3: the knocker's, the doormat's and the
+    bat wreath's Java is the table's; the knocker and the bat wreath are kinds of the Autumn Wreath, with wreath items, so
+    they hang on doors; the door attachment asks each what it is by its hooks, not by its class; the knocker's renderer
+    swings its ring and lights its eyes on walls and doors; its eyes glow; and the knocker and wreath sit within a door
+    wreath's depth. Part 4: the Crashed Witch's Java is the table's; she is registered with her block entity and her
+    renderer splays and kicks her legs; her blockstate shows each leg alone, each standing out from her hip at the wall.
+    Part 5: the Candy Chute's Java is the table's; it takes treats by the Candy Bag's tag and fills Candy Bags at its
+    mouth; it is registered with its block entity and its renderer slides its treats down by `slide` from the funnel to
+    the mouth; its blockstate shows each of its blocks at every facing."""
+    import front_yard as fy
+
+    def read(path):
+        return path.read_text(encoding="utf-8") if path.is_file() else ""
+
+    java_main = read(JAVA_ROOT / "agriculture" / "JugcraftAgriculture.java")
+    client = read(CLIENT_JAVA_ROOT / "JugcraftClient.java")
+    lang = load(ASSETS / "lang" / "en_us.json") or {}
+    mb, pl = fy.MAILBOX, fy.PATH_LIGHT
+    box = read(JAVA_ROOT / "agriculture" / "HauntedMailboxBlock.java")
+    for needed in (f"RATTLE_TICKS = {mb['rattle']};", f"STARE = {mb['stare']};", f"OPEN = {mb['open']}F;", f"HINGE_Y = {mb['hinge'][0]}F;",
+                   f"HINGE_Z = {mb['hinge'][1]}F;", "box({}, {}, {})".format(*mb["size"]), 'BooleanProperty.create("flag")'):
+        if needed not in box:
+            err(f"HauntedMailboxBlock: missing {needed} (tools/front_yard.py MAILBOX)")
+    hook = read(JAVA_ROOT / "agriculture" / "PumpkinPathLightBlock.java")
+    for needed in (f"LIGHT = {pl['light']};", f"SWAY = {pl['sway']}F;", f"PERIOD = {pl['period']};", f"PIVOT_Y = {pl['pivot'][0]}F;",
+                   f"PIVOT_Z = {pl['pivot'][1]}F;", "box({}, {}, {})".format(*pl["size"]), "state.getValue(PART) == MASTER ? LIGHT : 0"):
+        if needed not in hook:
+            err(f"PumpkinPathLightBlock: missing {needed} (tools/front_yard.py PATH_LIGHT)")
+    for block, cls, entity, renderer, calls in ((mb["block"], "HauntedMailboxBlock", "HAUNTED_MAILBOX_ENTITY", "HauntedMailboxRenderer",
+                                                 ("HauntedMailboxBlock.lid(", "HauntedMailboxBlock.eyes(")),
+                                                (pl["block"], "PumpkinPathLightBlock", "PUMPKIN_PATH_LIGHT_ENTITY", "PumpkinPathLightRenderer",
+                                                 ("PumpkinPathLightBlock.sway(",))):
+        if f'registerBlock("{block}", {cls}::new' not in java_main \
+                or f'{entity} = Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, Jugcraft.id("{block}")' not in java_main:
+            err(f"JugcraftAgriculture: {block} must be a {cls} with its own block entity")
+        drawn = read(CLIENT_JAVA_ROOT / f"{renderer}.java")
+        if f"BlockEntityRendererRegistry.register(JugcraftAgriculture.{entity}, {renderer}::new);" not in client \
+                or any(call not in drawn for call in calls):
+            err(f"{renderer}: registered, it must draw {block}'s moving parts by {', '.join(calls)}")
+        if f"block.{MOD}.{block}" not in lang:
+            err(f"block.{MOD}.{block}: the text is missing")
+    if ".lightLevel(PumpkinPathLightBlock::light)" not in java_main:
+        err("JugcraftAgriculture: the Pumpkin Path Light must give light by PumpkinPathLightBlock::light")
+    for block, runners, overlays in ((mb["block"], {"1": "lid", "2": "eyes"}, {"flag_down": "false", "flag_up": "true"}),
+                                     (pl["block"], {"1": "lantern", "2": "glow"}, {})):
+        parts = (load(ASSETS / "blockstates" / f"{block}.json") or {}).get("multipart", [])
+        shown = {p["when"]["runner"]: p["apply"]["model"] for p in parts if p.get("when", {}).get("runner") in runners}
+        if shown != {k: f"{MOD}:block/{block}_{v}" for k, v in runners.items()} \
+                or any(p.get("when", {}).get("runner") not in ["0"] + list(runners) for p in parts):
+            err(f"blockstates/{block}.json: its runners {', '.join(runners)} must show {', '.join(runners.values())} alone")
+        for name, flag in overlays.items():
+            if not any(p["apply"]["model"].endswith(f"_{name}") and p["when"].get("flag") == flag for p in parts):
+                err(f"blockstates/{block}.json: its {name} must show when its flag is {flag}")
+    for name in (f"{mb['block']}_eyes", f"{pl['block']}_glow"):
+        elements = (load(ASSETS / "models" / "block" / f"{name}.json") or {}).get("elements", [])
+        if not elements or any(e.get("light_emission") != 15 or e.get("shade") is not False for e in elements):
+            err(f"models/block/{name}.json: it must glow, full-bright and unshaded")
+    # Part 2: the skeleton animals and the Rising Zombie.
+    dog, cat, crow, rz = fy.SKELETON_DOG, fy.SKELETON_CAT, fy.SKELETON_CROW, fy.RISING_ZOMBIE
+    animal = read(JAVA_ROOT / "agriculture" / "SkeletonAnimalBlock.java")
+    needed = [f"WAG = {dog['wag']}F;", f"WAG_TICKS = {dog['wag_ticks']};", f"NEAR = {dog['near']};", f"SWAY = {cat['sway']}F;",
+              f"SWAY_TICKS = {cat['period']};", f"WATCH = {crow['watch']};", f"TURN = {crow['turn']}F;", f"SNAP_TICKS = {crow['snap']};"]
+    for kind, spec in (("DOG", dog), ("CAT", cat), ("CROW", crow)):
+        needed.append("{}(new double[] {{{}}}, new float[] {{{}}}".format(kind, ", ".join(str(v) for v in spec["box"]),
+                                                                       ", ".join(f"{v}F" for v in spec["pivot"])))
+        if f'registerBlock("{spec["block"]}", props -> new SkeletonAnimalBlock(props, SkeletonAnimalBlock.Kind.{kind}), boneProperties())' not in java_main:
+            err(f"JugcraftAgriculture: {spec['block']} must be a SkeletonAnimalBlock of the kind {kind}")
+        if f"block.{MOD}.{spec['block']}" not in lang:
+            err(f"block.{MOD}.{spec['block']}: the text is missing")
+        variants = (load(ASSETS / "blockstates" / f"{spec['block']}.json") or {}).get("variants", {})
+        runner = {"dog": "tail", "cat": "tail", "crow": "head"}[kind.lower()]
+        for face in ("north", "east", "south", "west"):
+            if variants.get(f"facing={face},runner=0", {}).get("model") != f"{MOD}:block/{spec['block']}" \
+                    or variants.get(f"facing={face},runner=1", {}).get("model") != f"{MOD}:block/{spec['block']}_{runner}":
+                err(f"blockstates/{spec['block']}.json: facing {face} must show the animal at runner 0 and its {runner} alone at 1")
+    for item in needed:
+        if item not in animal:
+            err(f"SkeletonAnimalBlock: missing {item} (tools/front_yard.py SKELETON_DOG, SKELETON_CAT, SKELETON_CROW)")
+    if 'SKELETON_ANIMAL_ENTITY = Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, Jugcraft.id("skeleton_animal")' not in java_main:
+        err("JugcraftAgriculture: the skeleton animals must share the block entity skeleton_animal")
+    zombie = read(JAVA_ROOT / "agriculture" / "RisingZombieBlock.java")
+    sx, sy, sz = rz["shoulder"]
+    for item in (f"CLAW = {rz['claw']}F;", f"CLAW_TICKS = {rz['period']};", f"REACH = {rz['reach']};", f"LURCH = {rz['lurch']}F;",
+                 f"SHOULDER_X = {sx}F;", f"SHOULDER_Y = {sy}F;", f"SHOULDER_Z = {sz}F;", "box({}, {}, {})".format(*rz["size"])):
+        if item not in zombie:
+            err(f"RisingZombieBlock: missing {item} (tools/front_yard.py RISING_ZOMBIE)")
+    if f'registerBlock("{rz["block"]}", RisingZombieBlock::new' not in java_main \
+            or f'RISING_ZOMBIE_ENTITY = Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, Jugcraft.id("{rz["block"]}")' not in java_main:
+        err(f"JugcraftAgriculture: {rz['block']} must be a RisingZombieBlock with its own block entity")
+    if f"block.{MOD}.{rz['block']}" not in lang:
+        err(f"block.{MOD}.{rz['block']}: the text is missing")
+    for entity, renderer, calls in (("SKELETON_ANIMAL_ENTITY", "SkeletonAnimalRenderer",
+                                     ("SkeletonAnimalBlock.wag(", "SkeletonAnimalBlock.sway(", "SkeletonAnimalBlock.watch(")),
+                                    ("RISING_ZOMBIE_ENTITY", "RisingZombieRenderer", ("RisingZombieBlock.claw(", "RisingZombieBlock.lurch("))):
+        drawn = read(CLIENT_JAVA_ROOT / f"{renderer}.java")
+        if f"BlockEntityRendererRegistry.register(JugcraftAgriculture.{entity}, {renderer}::new);" not in client \
+                or any(call not in drawn for call in calls):
+            err(f"{renderer}: registered, it must draw the moving parts by {', '.join(calls)}")
+    parts = (load(ASSETS / "blockstates" / f"{rz['block']}.json") or {}).get("multipart", [])
+    arms = {"1": "left_arm", "2": "right_arm"}
+    shown = {p["when"]["runner"]: p["apply"]["model"] for p in parts if p.get("when", {}).get("runner") in arms}
+    if shown != {k: f"{MOD}:block/{rz['block']}_{v}" for k, v in arms.items()} \
+            or any(p.get("when", {}).get("runner") not in ["0"] + list(arms) for p in parts):
+        err(f"blockstates/{rz['block']}.json: its runners 1 and 2 must show its left and right arms alone")
+    for name, angle in (("left_arm", rz["lean"][1]), ("right_arm", -rz["lean"][0])):
+        elements = (load(ASSETS / "models" / "block" / f"{rz['block']}_{name}.json") or {}).get("elements", [])
+        if not elements or any(e.get("rotation", {}).get("axis") != "z" or e["rotation"].get("angle") != angle
+                               or e["rotation"].get("origin", [None])[0] != (sx if name == "right_arm" else 16.0 - sx) for e in elements):
+            err(f"models/block/{rz['block']}_{name}.json: the arm must lean {angle} degrees out from its shoulder, whole")
+    # Part 3: the doorway.
+    kn, bw, dm = fy.KNOCKER, fy.BAT_WREATH, fy.DOORMAT
+    knocker = read(JAVA_ROOT / "agriculture" / "GargoyleKnockerBlock.java")
+    for item in (f"RAPS = {kn['raps']};", f"RAP_TICKS = {kn['rap_ticks']};", f"SWING = {kn['swing']}F;", f"PIVOT_Y = {kn['pivot'][0]}F;",
+                 f"PIVOT_Z = {kn['pivot'][1]}F;", f"HAUNT = {kn['haunt']};", f"DOOR_CHANCE = {kn['door_chance']};",
+                 "extends AutumnWreathBlock implements EntityBlock", "TrickOrTreat.knockWith("):
+        if item not in knocker:
+            err(f"GargoyleKnockerBlock: missing {item} (tools/front_yard.py KNOCKER)")
+    if f"HEARTBEAT = {dm['heartbeat']};" not in read(JAVA_ROOT / "agriculture" / "BewareDoormatBlock.java"):
+        err("BewareDoormatBlock: its heartbeat must be the table's (tools/front_yard.py DOORMAT)")
+    if "extends AutumnWreathBlock" not in read(JAVA_ROOT / "agriculture" / "BatWreathBlock.java"):
+        err("BatWreathBlock: it must be a kind of AutumnWreathBlock, to hang on doors as the other wreaths do")
+    for block, cls in ((kn["block"], "GargoyleKnockerBlock"), (bw["block"], "BatWreathBlock"), (dm["block"], "BewareDoormatBlock")):
+        if f'registerBlock("{block}", {cls}::new' not in java_main:
+            err(f"JugcraftAgriculture: {block} must be a {cls}")
+        if f"block.{MOD}.{block}" not in lang:
+            err(f"block.{MOD}.{block}: the text is missing")
+    if 'GARGOYLE_KNOCKER_ENTITY = Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, Jugcraft.id("gargoyle_knocker")' not in java_main \
+            or "props -> block instanceof AutumnWreathBlock ? new WreathBlockItem(block, props) : new BlockItem(block, props)" not in java_main:
+        err("JugcraftAgriculture: the knocker needs its block entity, and it and the bat wreath their wreath items, to hang on doors")
+    drawn = read(CLIENT_JAVA_ROOT / "GargoyleKnockerRenderer.java")
+    door_drawn = read(CLIENT_JAVA_ROOT / "DoorWreathRenderer.java")
+    if "BlockEntityRendererRegistry.register(JugcraftAgriculture.GARGOYLE_KNOCKER_ENTITY, GargoyleKnockerRenderer::new);" not in client \
+            or any(call not in drawn for call in ("GargoyleKnockerBlock.ring(", "GargoyleKnockerBlock.eyes(")) \
+            or "GargoyleKnockerRenderer.draw(" not in door_drawn:
+        err("GargoyleKnockerRenderer: registered, it must swing the ring by ring and light the eyes by eyes, on walls and (by DoorWreathRenderer) doors")
+    wreath_java = read(JAVA_ROOT / "agriculture" / "DoorWreath.java")
+    if "instanceof HollyWreathBlock" in wreath_java or "ornament.useOnDoor(" not in wreath_java or "ornament.doorTick(" not in wreath_java:
+        err("DoorWreath: what hangs on a door must say how it differs by AutumnWreathBlock's takesMums, doorBox, useOnDoor and doorTick")
+    variants = (load(ASSETS / "blockstates" / f"{kn['block']}.json") or {}).get("variants", {})
+    for face in ("north", "east", "south", "west"):
+        if [variants.get(f"facing={face},runner={r}", {}).get("model") for r in "012"] != \
+                [f"{MOD}:block/{kn['block']}{suffix}" for suffix in ("", "_ring", "_eyes")]:
+            err(f"blockstates/{kn['block']}.json: facing {face} must show the knocker, its ring and its eyes by runner")
+    eyes = (load(ASSETS / "models" / "block" / f"{kn['block']}_eyes.json") or {}).get("elements", [])
+    if not eyes or any(e.get("light_emission") != 15 or e.get("shade") is not False for e in eyes):
+        err(f"models/block/{kn['block']}_eyes.json: its eyes must glow, full-bright and unshaded")
+    ring = (load(ASSETS / "models" / "block" / f"{kn['block']}_ring.json") or {}).get("elements", [])
+    if not ring or min(e["from"][2] for e in ring) < 11.5:
+        err(f"models/block/{kn['block']}_ring.json: the ring must hang within a door wreath's depth")
+    for block in (kn["block"], bw["block"]):
+        elements = (load(ASSETS / "models" / "block" / f"{block}.json") or {}).get("elements", [])
+        if not elements or min(e["from"][2] for e in elements) < 11.5 or max(e["to"][2] for e in elements) > 16.0:
+            err(f"models/block/{block}.json: it must sit against what it hangs on, within a door wreath's depth (4.5 pixels)")
+    # Part 4: the Crashed Witch.
+    cw = fy.CRASHED_WITCH
+    witch = read(JAVA_ROOT / "agriculture" / "CrashedWitchBlock.java")
+    hy, hz = cw["hips"]
+    for item in (f"KICK = {cw['kick']}F;", f"KICK_TICKS = {cw['kick_ticks']};", f"BURST = {cw['burst']};", f"EVERY = {cw['every']};",
+                 f"NEAR = {cw['near']};", f"HIP_Y = {hy}F;", f"HIP_Z = {hz}F;", f"HIP_X = {cw['hip_x']}F;", f"SPLAY = {cw['splay']}F;",
+                 "extends WallDecorationBlock implements EntityBlock"):
+        if item not in witch:
+            err(f"CrashedWitchBlock: missing {item} (tools/front_yard.py CRASHED_WITCH)")
+    if f'registerBlock("{cw["block"]}", CrashedWitchBlock::new' not in java_main \
+            or f'CRASHED_WITCH_ENTITY = Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, Jugcraft.id("{cw["block"]}")' not in java_main:
+        err(f"JugcraftAgriculture: {cw['block']} must be a CrashedWitchBlock with its own block entity")
+    if f"block.{MOD}.{cw['block']}" not in lang:
+        err(f"block.{MOD}.{cw['block']}: the text is missing")
+    drawn = read(CLIENT_JAVA_ROOT / "CrashedWitchRenderer.java")
+    if "BlockEntityRendererRegistry.register(JugcraftAgriculture.CRASHED_WITCH_ENTITY, CrashedWitchRenderer::new);" not in client \
+            or "CrashedWitchBlock.kick(" not in drawn or "CrashedWitchBlock.SPLAY" not in drawn:
+        err("CrashedWitchRenderer: registered, it must splay her legs by SPLAY and kick them by kick")
+    variants = (load(ASSETS / "blockstates" / f"{cw['block']}.json") or {}).get("variants", {})
+    for face in ("north", "east", "south", "west"):
+        if [variants.get(f"facing={face},runner={r}", {}).get("model") for r in "012"] != \
+                [f"{MOD}:block/{cw['block']}{suffix}" for suffix in ("", "_left_leg", "_right_leg")]:
+            err(f"blockstates/{cw['block']}.json: facing {face} must show the witch and each leg alone by runner")
+    for side in ("left", "right"):
+        elements = (load(ASSETS / "models" / "block" / f"{cw['block']}_{side}_leg.json") or {}).get("elements", [])
+        hx = 8.0 + (cw["hip_x"] if side == "right" else -cw["hip_x"])
+        if not elements or max(e["to"][2] for e in elements) > hz + 0.01 or not any(abs((e["from"][0] + e["to"][0]) / 2 - hx) < 0.01 for e in elements):
+            err(f"models/block/{cw['block']}_{side}_leg.json: the leg must stand out from her hip at the wall ({hx}, depth {hz})")
+    # Part 5: the Trick-or-Treat Candy Chute.
+    cc = fy.CANDY_CHUTE
+    chute = read(JAVA_ROOT / "agriculture" / "CandyChuteBlock.java")
+    (fy_, fz), (my, mz) = cc["funnel"], cc["mouth"]
+    for item in (f"SLIDE_TICKS = {cc['slide_ticks']};", f"HOLD = {cc['hold']};", f"DROP_TICKS = {cc['drop_ticks']};", f"CATCH = {cc['catch']};",
+                 f"FUNNEL_Y = {fy_}F;", f"FUNNEL_Z = {fz}F;", f"MOUTH_Y = {my}F;", f"MOUTH_Z = {mz}F;", "box({}, {}, {})".format(*cc["size"]),
+                 "extends MultiDecorationBlock implements EntityBlock", "stack.is(CandyBagItem.TREATS)"):
+        if item not in chute:
+            err(f"CandyChuteBlock: missing {item} (tools/front_yard.py CANDY_CHUTE)")
+    held = read(JAVA_ROOT / "agriculture" / "CandyChuteBlockEntity.java")
+    if any(call not in held for call in ("treat.is(CandyBagItem.TREATS)", "TrickOrTreat.candyBag(", "CandyBagItem.fill(", "preRemoveSideEffects")):
+        err("CandyChuteBlockEntity: it must take only treats, fill the Candy Bag of whoever waits at the mouth, and drop what is sliding when broken")
+    if f'registerBlock("{cc["block"]}", CandyChuteBlock::new' not in java_main \
+            or f'CANDY_CHUTE_ENTITY = Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, Jugcraft.id("{cc["block"]}")' not in java_main:
+        err(f"JugcraftAgriculture: {cc['block']} must be a CandyChuteBlock with its own block entity")
+    if f"block.{MOD}.{cc['block']}" not in lang:
+        err(f"block.{MOD}.{cc['block']}: the text is missing")
+    drawn = read(CLIENT_JAVA_ROOT / "CandyChuteRenderer.java")
+    if "BlockEntityRendererRegistry.register(JugcraftAgriculture.CANDY_CHUTE_ENTITY, CandyChuteRenderer::new);" not in client \
+            or any(call not in drawn for call in ("CandyChuteBlock.slide(", "CandyChuteBlock.FUNNEL_Y", "CandyChuteBlock.MOUTH_Z")):
+        err("CandyChuteRenderer: registered, it must slide the treats by slide from the funnel to the mouth")
+    parts = (load(ASSETS / "blockstates" / f"{cc['block']}.json") or {}).get("multipart", [])
+    shown = {(p["when"].get("facing"), p["when"].get("part")): p["apply"]["model"] for p in parts}
+    cells = cc["size"][0] * cc["size"][1] * cc["size"][2]
+    if shown != {(f, str(n)): f"{MOD}:block/{cc['block']}_{n}" for f in ("north", "east", "south", "west") for n in range(cells)}:
+        err(f"blockstates/{cc['block']}.json: it must show each of its {cells} blocks at every facing")
+
+
+def check_clockwork():
+    """Clockwork Animatronics (tools/clockwork.py, docs/features/clockwork-animatronics.md). Every figure: its block is a
+    ClockworkFigure holding the table's need and run-down, its clockwork a ClockworkFigureBlockEntity (which takes
+    kinetic energy up to the figure's need a tick), and it is registered with its block entity, its two-block item and
+    its renderer; its moving parts' quads are written, read and drawn; its blockstate covers every facing, half and
+    `running`, its upper half's model is empty, and it drops once, from its lower half; and its name has its text. Part
+    1, the Organ-Grinder Skeleton: its timing, waltz and loudness are the table's, the renderer's crank, arm, neck and
+    jaw are, and the arm reaches the crank's handle all the way round. Part 2, the Animatronic Werewolf: its turn,
+    howl and sound are the table's, the howl fits in its cycle, and the renderer's shoulders, arms, neck, jaw and
+    easing are the table's. Part 3, the Flying Crank Ghost: its crank, moan and sound are the table's, the renderer's
+    crank, pulleys, hood, shoulders, arms, sway and easing are the table's, its eyes are drawn at full light, its torn
+    cheesecloth parts are cut out, its wire is drawn 16 pixels up from its foot in the wires' plane, and its arms never
+    rise past level nor its wrists above their pulleys. Part 4, the Clockwork Raven: its flywheel, look, caws, beak and
+    sound are the table's, a burst of caws fits in its cycle and each caw's beak shuts before the next opens, its wings
+    are at the top of a beat on each caw and folded between bursts, the renderer's lean, flywheel, neck, beak, shoulders
+    and easing are the table's, its eyes are drawn at full light and its ragged wings are cut out. Part 5, the
+    Pumpkin-Headed Drummer: his march, strokes, nod, loudness and pitches are the table's, each mallet's backswing ends
+    before its next, the renderer's elbows, backswing, neck, nod and easing are the table's, his face is drawn at full
+    light and cut out but for its cuts, which match the carved rind's, and his mallets hang clear of the drumheads. Part
+    6, the Show Controller: its Java's power, reach, cast, timing and lamps are the table's, it pays for its figures at
+    the electric motor's rate rounded up, its cue holds them longer than any figure takes to run down on a client, it is
+    registered with its block entity, its item, its JE storage and its renderer, its moving parts' quads are written and
+    drawn, its renderer's drum, gauges, lamps and switch are the table's, its blockstate covers every facing, switch,
+    show and cast, it drops itself, its texts are there, and the figures' clockwork can be held and cued."""
+    import math
+    import clockwork as cw
+    import clockwork_data as cwd
+
+    def read(path):
+        return path.read_text(encoding="utf-8") if path.is_file() else ""
+
+    java_main = read(JAVA_ROOT / "agriculture" / "JugcraftAgriculture.java")
+    client = read(CLIENT_JAVA_ROOT / "JugcraftClient.java")
+    lang = load(ASSETS / "lang" / "en_us.json") or {}
+    base = read(JAVA_ROOT / "agriculture" / "ClockworkFigureBlockEntity.java")
+    if "implements KineticConsumer" not in base or "figure.need() - taken" not in base or "now - fed <= figure.spinDown()" not in base:
+        err("ClockworkFigureBlockEntity: it must take kinetic energy up to the figure's need a tick, and run on it for its run-down")
+    if '"clockwork_quads.json"' not in read(CLIENT_JAVA_ROOT / "DecorQuads.java"):
+        err("DecorQuads must read clockwork_quads.json")
+    quads = load(ASSETS / "clockwork_quads.json") or {}
+    classes = {cw.ORGAN_GRINDER["block"]: ("OrganGrinderSkeleton", "grinder"), cw.WEREWOLF["block"]: ("AnimatronicWerewolf", "werewolf"),
+               cw.FLYING_GHOST["block"]: ("FlyingCrankGhost", "ghost"), cw.CLOCKWORK_RAVEN["block"]: ("ClockworkRaven", "raven"),
+               cw.PUMPKIN_DRUMMER["block"]: ("PumpkinDrummer", "drummer")}
+    if set(classes) != set(cw.figure_blocks()):
+        err("check_clockwork: every figure must be checked")
+    for spec in cw.figures():
+        block = spec["block"]
+        name, local = classes.get(block, ("?", "?"))
+        java = read(JAVA_ROOT / "agriculture" / f"{name}Block.java")
+        held = read(JAVA_ROOT / "agriculture" / f"{name}BlockEntity.java")
+        drawn = read(CLIENT_JAVA_ROOT / f"{name}Renderer.java")
+        for item in (f"NEED = {spec['need']};", f"SPIN_DOWN = {spec['spin_down']};", "extends TallDecorationBlock implements EntityBlock, ClockworkFigure"):
+            if item not in java:
+                err(f"{name}Block: missing {item} (tools/clockwork.py)")
+        if f"extends ClockworkFigureBlockEntity" not in held:
+            err(f"{name}BlockEntity must be a ClockworkFigureBlockEntity")
+        entity = re.sub(r"(?<!^)(?=[A-Z])", "_", name).upper() + "_ENTITY"
+        if f'registerBlock("{block}", {name}Block::new' not in java_main \
+                or f'{entity} = Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, Jugcraft.id("{block}")' not in java_main \
+                or f'registerItem("{block}", props -> new DoubleHighBlockItem({local}, props)' not in java_main:
+            err(f"JugcraftAgriculture: {block} must be a {name}Block with its block entity and a two-block item")
+        if f"BlockEntityRendererRegistry.register(JugcraftAgriculture.{entity}, {name}Renderer::new);" not in client:
+            err(f"{name}Renderer must be registered")
+        for part in cwd.PARTS[block]:
+            key = f"{block}_{part}"
+            if not quads.get(key) or f'DecorQuads.get("{key}")' not in drawn:
+                err(f"clockwork_quads.json: {key} must be written and drawn by {name}Renderer")
+        variants = (load(ASSETS / "blockstates" / f"{block}.json") or {}).get("variants", {})
+        for face in ("north", "east", "south", "west"):
+            for half in ("lower", "upper"):
+                for running in ("false", "true"):
+                    want = f"{MOD}:block/{block}" + ("" if half == "lower" else "_upper")
+                    if variants.get(f"facing={face},half={half},running={running}", {}).get("model") != want:
+                        err(f"blockstates/{block}.json: facing {face}, half {half}, running {running} must be {want}")
+        if (load(ASSETS / "models" / "block" / f"{block}_upper.json") or {}).get("elements") != []:
+            err(f"models/block/{block}_upper.json: the upper half draws nothing (the lower half's model is the whole figure)")
+        pools = (load(DATA / MOD / "loot_table" / "blocks" / f"{block}.json") or {}).get("pools", [])
+        if len(pools) != 1 or '"half": "lower"' not in json.dumps(pools):
+            err(f"loot_table/blocks/{block}.json: it drops once, from its lower half")
+        if lang.get(f"block.{MOD}.{block}") != spec["display"]:
+            err(f"block.{MOD}.{block}: the text must be {spec['display']}")
+    # Part 1: the Organ-Grinder Skeleton.
+    og = cw.ORGAN_GRINDER
+    java = read(JAVA_ROOT / "agriculture" / "OrganGrinderSkeletonBlock.java")
+    drawn = read(CLIENT_JAVA_ROOT / "OrganGrinderSkeletonRenderer.java")
+    melody = ", ".join(str(-1 if n is None else n) for n in og["melody"])
+    for item in (f"CRANK_TICKS = {og['crank_ticks']};", f"STEP_TICKS = {og['step_ticks']};", f"STEPS_PER_BAR = {og['steps_per_bar']};",
+                 f"VOLUME = {og['volume']}F;", "BASS = {" + ", ".join(map(str, og["bass"])) + "};"):
+        if item not in java:
+            err(f"OrganGrinderSkeletonBlock: missing {item} (tools/clockwork.py ORGAN_GRINDER)")
+    if f"MELODY = {{ {melody}}};" not in " ".join(java.split()):
+        err("OrganGrinderSkeletonBlock.MELODY must be the waltz in tools/clockwork.py ORGAN_GRINDER melody (-1 where held)")
+    if len(og["bass"]) * og["steps_per_bar"] != len(og["melody"]):
+        err("tools/clockwork.py ORGAN_GRINDER: a bass note for every bar of the melody")
+    (cx, cy, cz), (sx, sy, sz), (upper, lower) = og["crank"], og["shoulder"], og["arm"]
+    (_, ny, nz), (jy, jz) = og["neck"], og["jaw_hinge"]
+    for name, value in (("CRANK_X", cx), ("CRANK_Y", cy), ("CRANK_Z", cz), ("HANDLE", og["handle"]), ("SHOULDER_Y", sy), ("SHOULDER_Z", sz),
+                        ("UPPER_ARM", upper), ("FOREARM", lower), ("NECK_Y", ny), ("NECK_Z", nz), ("NOD", og["nod"]), ("JAW_Y", jy),
+                        ("JAW_Z", jz), ("JAW", og["jaw"]), ("EASE", og["ease"])):
+        if f"static final float {name} = {value}F;" not in drawn:
+            err(f"OrganGrinderSkeletonRenderer.{name} must be {value} (tools/clockwork.py ORGAN_GRINDER)")
+    reach = [math.hypot(cy + og["handle"] * math.cos(math.radians(a)) - sy, cz + og["handle"] * math.sin(math.radians(a)) - sz)
+             for a in range(0, 360, 5)]
+    if max(reach) > upper + lower or min(reach) < abs(upper - lower):
+        err(f"tools/clockwork.py ORGAN_GRINDER: the arm ({upper} + {lower}) must reach the handle all the way round "
+            f"({min(reach):.2f} to {max(reach):.2f} from the shoulder)")
+    # Part 2: the Animatronic Werewolf.
+    ww = cw.WEREWOLF
+    java = read(JAVA_ROOT / "agriculture" / "AnimatronicWerewolfBlock.java")
+    held = read(JAVA_ROOT / "agriculture" / "AnimatronicWerewolfBlockEntity.java")
+    drawn = read(CLIENT_JAVA_ROOT / "AnimatronicWerewolfRenderer.java")
+    for item in (f"TURN_TICKS = {ww['turn_ticks']};", f"HOWL_EVERY = {ww['howl_every']};", f"RAISE_TICKS = {ww['raise_ticks']};",
+                 f"HOLD_TICKS = {ww['hold_ticks']};", f"VOLUME = {ww['volume']}F;", f"PITCH = {ww['pitch']}F;"):
+        if item not in java:
+            err(f"AnimatronicWerewolfBlock: missing {item} (tools/clockwork.py WEREWOLF)")
+    if 2 * ww["raise_ticks"] + ww["hold_ticks"] > ww["howl_every"]:
+        err("tools/clockwork.py WEREWOLF: a howl (its arms up, held and down) must fit in its cycle")
+    if f'Identifier.withDefaultNamespace("{ww["howl_sound"].split(":")[1]}")' not in held:
+        err(f"AnimatronicWerewolfBlockEntity: it must howl with {ww['howl_sound']}")
+    (wsy, wsz), (wny, wnz), (wjy, wjz) = ww["shoulder"], ww["neck"], ww["jaw_hinge"]
+    for name, value in (("SHOULDER_Y", wsy), ("SHOULDER_Z", wsz), ("ARMS_REST", ww["arms_rest"]), ("ARMS_RAISED", ww["arms_raised"]),
+                        ("NECK_Y", wny), ("NECK_Z", wnz), ("HEAD_BACK", ww["head_back"]), ("JAW_Y", wjy), ("JAW_Z", wjz), ("JAW", ww["jaw"]),
+                        ("EASE", ww["ease"])):
+        if f"static final float {name} = {value}F;" not in drawn:
+            err(f"AnimatronicWerewolfRenderer.{name} must be {value} (tools/clockwork.py WEREWOLF)")
+    # Part 3: the Flying Crank Ghost.
+    fg = cw.FLYING_GHOST
+    block = fg["block"]
+    java = read(JAVA_ROOT / "agriculture" / "FlyingCrankGhostBlock.java")
+    held = read(JAVA_ROOT / "agriculture" / "FlyingCrankGhostBlockEntity.java")
+    drawn = read(CLIENT_JAVA_ROOT / "FlyingCrankGhostRenderer.java")
+    for item in (f"CRANK_TICKS = {fg['crank_ticks']};", f"MOAN_EVERY = {fg['moan_every']};", f"VOLUME = {fg['volume']}F;",
+                 f"PITCH = {fg['pitch']}F;"):
+        if item not in java:
+            err(f"FlyingCrankGhostBlock: missing {item} (tools/clockwork.py FLYING_GHOST)")
+    if fg["moan_sound"] != "minecraft:entity.ghast.ambient" or "SoundEvents.GHAST_AMBIENT" not in held:
+        err(f"FlyingCrankGhostBlockEntity: it must moan with {fg['moan_sound']} (SoundEvents.GHAST_AMBIENT)")
+    (fcx, fcy), (plx, prx), (hx, hy), (slx, srx) = fg["crank"], fg["pulleys"], fg["head_top"], fg["shoulders"]
+    for name, value in (("CRANK_X", fcx), ("CRANK_Y", fcy), ("PIN", fg["pin"]), ("WIRE_Z", fg["wire_z"]), ("PULLEY_LEFT", plx),
+                        ("PULLEY_RIGHT", prx), ("PULLEY_Y", fg["pulley_y"]), ("HEAD_X", hx), ("HEAD_Y", hy), ("SWAY", fg["sway"]),
+                        ("SHOULDER_LEFT", slx), ("SHOULDER_RIGHT", srx), ("SHOULDER_Y", fg["shoulder_y"]), ("WRIST", fg["wrist"]),
+                        ("ARMS_REST", fg["arms_rest"]), ("FLAP", fg["flap"]), ("EASE", fg["ease"])):
+        if f"static final float {name} = {value}F;" not in drawn:
+            err(f"FlyingCrankGhostRenderer.{name} must be {value} (tools/clockwork.py FLYING_GHOST)")
+    if "LightCoordsUtil.FULL_BRIGHT" not in drawn:
+        err("FlyingCrankGhostRenderer: its eyes glow at full light while it runs")
+    for part in cwd.GHOST_CUTOUT:
+        if not quads.get(f"{block}_{part}") or not all(q.get("cutout") for q in quads[f"{block}_{part}"]):
+            err(f"clockwork_quads.json: {block}_{part} is torn cheesecloth, drawn cut out")
+    ys = [v[1] for q in quads.get(f"{block}_wire", []) for v in q["vertices"]]
+    zs = [v[2] for q in quads.get(f"{block}_wire", []) for v in q["vertices"]]
+    if not ys or abs(min(ys)) > 1e-3 or abs(max(ys) - 16.0) > 1e-3 or abs((min(zs) + max(zs)) / 2 - fg["wire_z"]) > 1e-3:
+        err(f"clockwork_quads.json: {block}_wire must run 16 pixels up from its foot, in the wires' plane ({fg['wire_z']} deep)")
+    if fg["arms_rest"] + fg["flap"] >= 90.0:
+        err("tools/clockwork.py FLYING_GHOST: its arms must never rise past level (arms_rest + flap under 90)")
+    for a in range(0, 360, 5):
+        # The ghost hangs as the renderer poses it (FlyingCrankGhostRenderer.pose), at most the pin and its sway off.
+        sw, sn = math.radians(-fg["sway"] * math.cos(math.radians(a))), math.sin(math.radians(a))
+        for shoulder, turn in ((slx, -(fg["arms_rest"] + fg["flap"] * (0.5 + 0.5 * sn))), (srx, fg["arms_rest"] + fg["flap"] * (0.5 - 0.5 * sn))):
+            x = shoulder + fg["wrist"] * math.sin(math.radians(turn)) - hx
+            y = fg["shoulder_y"] - fg["wrist"] * math.cos(math.radians(turn)) - hy
+            wy = hy + fg["pin"] * (math.cos(math.radians(a)) - 1) + x * math.sin(sw) + y * math.cos(sw)
+            if wy >= fg["pulley_y"]:
+                err(f"tools/clockwork.py FLYING_GHOST: a wrist rises to its pulley's height with the crank at {a} degrees")
+                break
+    # Part 4: the Clockwork Raven.
+    cr = cw.CLOCKWORK_RAVEN
+    block = cr["block"]
+    java = read(JAVA_ROOT / "agriculture" / "ClockworkRavenBlock.java")
+    held = read(JAVA_ROOT / "agriculture" / "ClockworkRavenBlockEntity.java")
+    drawn = read(CLIENT_JAVA_ROOT / "ClockworkRavenRenderer.java")
+    for item in (f"FLYWHEEL_TICKS = {cr['flywheel_ticks']};", f"LOOK_TICKS = {cr['look_ticks']};", f"CYCLE = {cr['cycle']};",
+                 f"BURST = {cr['burst']};", f"CAWS = {cr['caws']};", f"CAW_EVERY = {cr['caw_every']};", f"BEAK_TICKS = {cr['beak_ticks']};",
+                 f"BEAK_HOLD = {cr['beak_hold']};", f"VOLUME = {cr['volume']}F;", f"PITCH = {cr['pitch']}F;"):
+        if item not in java:
+            err(f"ClockworkRavenBlock: missing {item} (tools/clockwork.py CLOCKWORK_RAVEN)")
+    if cr["caw_sound"] != "minecraft:entity.parrot.ambient" or "SoundEvents.PARROT_AMBIENT" not in held:
+        err(f"ClockworkRavenBlockEntity: it must caw with {cr['caw_sound']} (SoundEvents.PARROT_AMBIENT)")
+    beat = cr["caw_every"]
+    if cr["burst"] - beat / 2 < 0 or cr["burst"] + cr["caws"] * beat - beat / 2 > cr["cycle"]:
+        err("tools/clockwork.py CLOCKWORK_RAVEN: a burst of caws, its wings beating from half a beat before the first to half "
+            "a beat after the last, must fit in its cycle")
+    if 2 * cr["beak_ticks"] + cr["beak_hold"] > beat:
+        err("tools/clockwork.py CLOCKWORK_RAVEN: its beak must shut after one caw before it opens for the next")
+    # Its wings as the block's wings() has them: at the top on each caw, folded at the burst's ends and between bursts.
+    def wings(t):
+        t = t % cr["cycle"] - (cr["burst"] - beat / 2)
+        return 0.0 if t < 0 or t > cr["caws"] * beat else 0.5 - 0.5 * math.cos(2 * math.pi * t / beat)
+    if any(abs(wings(cr["burst"] + i * beat) - 1.0) > 1e-9 for i in range(cr["caws"])) or wings(0) != 0.0 \
+            or abs(wings(cr["burst"] - beat / 2)) > 1e-9 or abs(wings(cr["burst"] + (cr["caws"] - 0.5) * beat)) > 1e-9:
+        err("tools/clockwork.py CLOCKWORK_RAVEN: its wings must be at the top of a beat on each caw, and folded between bursts")
+    if "ticks % CYCLE - (BURST - CAW_EVERY / 2.0)" not in java or "Math.cos(2.0 * Math.PI * t / CAW_EVERY)" not in java:
+        err("ClockworkRavenBlock.wings: its wings beat once a caw, at the top on each (tools/check_mod_data.py check_clockwork)")
+    (rby, rbz), (rfx, rfy), (rnx, rnz), (rjy, rjz), (rsl, rsr) = cr["body_origin"], cr["flywheel"], cr["neck"], cr["jaw_hinge"], cr["shoulders"]
+    for name, value in (("TILT", cr["tilt"]), ("BODY_Y", rby), ("BODY_Z", rbz), ("FLYWHEEL_X", rfx), ("FLYWHEEL_Y", rfy), ("NECK_X", rnx),
+                        ("NECK_Z", rnz), ("LOOK", cr["look"]), ("JAW_Y", rjy), ("JAW_Z", rjz), ("JAW", cr["jaw"]), ("SHOULDER_LEFT", rsl),
+                        ("SHOULDER_RIGHT", rsr), ("SHOULDER_Y", cr["shoulder_y"]), ("FLAP", cr["flap"]), ("EASE", cr["ease"])):
+        if f"static final float {name} = {value}F;" not in drawn:
+            err(f"ClockworkRavenRenderer.{name} must be {value} (tools/clockwork.py CLOCKWORK_RAVEN)")
+    if "LightCoordsUtil.FULL_BRIGHT" not in drawn:
+        err("ClockworkRavenRenderer: its eyes glow at full light while it runs")
+    for part in cwd.RAVEN_CUTOUT:
+        if not quads.get(f"{block}_{part}") or not all(q.get("cutout") for q in quads[f"{block}_{part}"]):
+            err(f"clockwork_quads.json: {block}_{part} has a ragged edge, drawn cut out")
+    # Part 5: the Pumpkin-Headed Drummer.
+    pd = cw.PUMPKIN_DRUMMER
+    block = pd["block"]
+    java = read(JAVA_ROOT / "agriculture" / "PumpkinDrummerBlock.java")
+    held = read(JAVA_ROOT / "agriculture" / "PumpkinDrummerBlockEntity.java")
+    drawn = read(CLIENT_JAVA_ROOT / "PumpkinDrummerRenderer.java")
+    for item in (f"STEP_TICKS = {pd['step_ticks']};", f'PATTERN = "{pd["pattern"]}";', f"BACK_TICKS = {pd['back_ticks']};",
+                 f"NOD_STEPS = {pd['nod_steps']};", f"VOLUME = {pd['volume']}F;", f"PITCH_RIGHT = {pd['pitch_right']}F;",
+                 f"PITCH_LEFT = {pd['pitch_left']}F;"):
+        if item not in java:
+            err(f"PumpkinDrummerBlock: missing {item} (tools/clockwork.py PUMPKIN_DRUMMER)")
+    if pd["drum_sound"] != "minecraft:block.note_block.basedrum" or "SoundEvents.NOTE_BLOCK_BASEDRUM" not in held:
+        err(f"PumpkinDrummerBlockEntity: the drum must sound {pd['drum_sound']} (SoundEvents.NOTE_BLOCK_BASEDRUM)")
+    march = pd["pattern"]
+    if set(march) - set("RL.") or "R" not in march or "L" not in march:
+        err("tools/clockwork.py PUMPKIN_DRUMMER: the march is R, L and . steps, with both mallets in it")
+    for hand in "RL":
+        steps = [i for i, c in enumerate(march) if c == hand]
+        gaps = [((b - a) % len(march) or len(march)) * pd["step_ticks"] for a, b in zip(steps, steps[1:] + steps[:1])]
+        if min(gaps) < pd["back_ticks"]:
+            err(f"tools/clockwork.py PUMPKIN_DRUMMER: the {hand} mallet's backswing ({pd['back_ticks']} ticks) must end before "
+                f"its next beat ({min(gaps)} ticks)")
+    (pel, per), (pny, pnz) = pd["elbows"], pd["neck"]
+    for name, value in (("ELBOW_LEFT", pel), ("ELBOW_RIGHT", per), ("ELBOW_Y", pd["elbow_y"]), ("BACK", pd["back"]), ("NECK_Y", pny),
+                        ("NECK_Z", pnz), ("NOD", pd["nod"]), ("EASE", pd["ease"])):
+        if f"static final float {name} = {value}F;" not in drawn:
+            err(f"PumpkinDrummerRenderer.{name} must be {value} (tools/clockwork.py PUMPKIN_DRUMMER)")
+    if "LightCoordsUtil.FULL_BRIGHT" not in drawn:
+        err("PumpkinDrummerRenderer: his face's candlelight is drawn at full light while he runs")
+    for part in cwd.DRUMMER_CUTOUT:
+        if not quads.get(f"{block}_{part}") or not all(q.get("cutout") for q in quads[f"{block}_{part}"]):
+            err(f"clockwork_quads.json: {block}_{part} is candlelight in its cuts only, drawn cut out")
+    if len(set(len(r) for r in cwd.JACK)) != 1 or not any("E" in r for r in cwd.JACK) or not any("M" in r for r in cwd.JACK):
+        err("clockwork_data.JACK: the jack-o'-lantern's face is rows of one width, with its eyes and its mouth")
+    # The mallet heads hang beside the drumheads, a little clear of them, at rest.
+    sc = cwd.build(block)
+    heads = [e for e in sc.models["whole"] if e["from"][0] <= 8.0 <= e["to"][0] and e["to"][1] - e["from"][1] >= 4.0 and e["from"][2] < 9.0]
+    drum_x = (min(e["from"][0] for e in heads), max(e["to"][0] for e in heads)) if heads else (8.0, 8.0)
+    for side in ("left_forearm", "right_forearm"):
+        ball = sc.models[side][-1]
+        gap = drum_x[0] - ball["to"][0] if ball["to"][0] <= 8.0 else ball["from"][0] - drum_x[1]
+        if not 0.0 < gap <= 0.5:
+            err(f"tools/clockwork_data.py pumpkin_drummer: the {side}'s mallet head must hang just clear of its drumhead (gap {gap:.2f})")
+    # Part 6: the Show Controller.
+    sh = cw.SHOW_CONTROLLER
+    block = sh["block"]
+    java = read(JAVA_ROOT / "agriculture" / "ShowControllerBlock.java")
+    works = read(JAVA_ROOT / "agriculture" / "ShowControllerBlockEntity.java")
+    drawn = read(CLIENT_JAVA_ROOT / "ShowControllerRenderer.java")
+    motor = read(JAVA_ROOT / "kinetic" / "ElectricMotorBlockEntity.java")
+    for item in (f"LAMPS = {sh['lamps']};", f"DRUM_TICKS = {sh['drum_ticks']};", f"SWEEP_TICKS = {sh['sweep_ticks']};",
+                 f"LIGHT = {sh['light']};", "implements EnergyConnectable"):
+        if item not in java:
+            err(f"ShowControllerBlock: missing {item} (tools/clockwork.py SHOW_CONTROLLER)")
+    for item in (f"CAPACITY = {sh['capacity']:_};".replace(",", "_"), f"INPUT = {sh['input']};", f"RANGE = {sh['range']};",
+                 f"MAX_CAST = {sh['max_cast']};", f"SCAN_TICKS = {sh['scan_ticks']};", f"CUE_TICKS = {sh['cue_ticks']};",
+                 "EFFICIENCY_PERCENT = ElectricMotorBlockEntity.EFFICIENCY_PERCENT;",
+                 "(need * 100 + EFFICIENCY_PERCENT - 1) / EFFICIENCY_PERCENT"):
+        if item not in works:
+            err(f"ShowControllerBlockEntity: missing {item} (tools/clockwork.py SHOW_CONTROLLER)")
+    if f"EFFICIENCY_PERCENT = {sh['efficiency_percent']};" not in motor:
+        err(f"tools/clockwork.py SHOW_CONTROLLER: its efficiency_percent must be the copper-wound electric motor's")
+    slowest = max(spec["ease"] for spec in cw.figures())
+    if sh["cue_ticks"] < slowest + 10:
+        err(f"tools/clockwork.py SHOW_CONTROLLER: its cue ({sh['cue_ticks']} ticks) must hold its figures longer than any takes to "
+            f"run down on a client ({slowest} ticks), with time to spare, so every client counts them from the top")
+    base = read(JAVA_ROOT / "agriculture" / "ClockworkFigureBlockEntity.java")
+    for item in ("public void hold(BlockPos by, long now, long until)", "public void cue(BlockPos by, long now, int show)",
+                 "public boolean free(BlockPos by, long now)", "now >= heldUntil", "FIGURES.computeIfAbsent(level"):
+        if item not in base:
+            err(f"ClockworkFigureBlockEntity: missing {item} (a show controller holds, cues and finds the figures)")
+    if 'registerBlock("show_controller", ShowControllerBlock::new' not in java_main \
+            or 'SHOW_CONTROLLER_ENTITY = Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, Jugcraft.id("show_controller")' not in java_main \
+            or 'registerItem("show_controller", props -> new BlockItem(controller, props)' not in java_main \
+            or "EnergyStorage.SIDED.registerForBlockEntity((entity, side) -> entity.energy(), SHOW_CONTROLLER_ENTITY);" not in java_main:
+        err("JugcraftAgriculture: show_controller must be a ShowControllerBlock with its block entity, its item and its JE storage")
+    if "BlockEntityRendererRegistry.register(JugcraftAgriculture.SHOW_CONTROLLER_ENTITY, ShowControllerRenderer::new);" not in client:
+        err("ShowControllerRenderer must be registered")
+    for part in cwd.CONTROLLER_MOVING:
+        key = f"{block}_{part}"
+        if not quads.get(key) or f'DecorQuads.get("{key}")' not in drawn:
+            err(f"clockwork_quads.json: {key} must be written and drawn by ShowControllerRenderer")
+    (sdy, sdz), (sgl, sgr), (sly, slz) = sh["drum"], sh["gauges"], sh["lever"]
+    for name, value in (("DRUM_Y", sdy), ("DRUM_Z", sdz), ("GAUGE_LEFT", sgl), ("GAUGE_RIGHT", sgr), ("GAUGE_Y", sh["gauge_y"]),
+                        ("NEEDLE_SWEEP", sh["needle_sweep"]), ("LAMP_STEP", sh["lamp_step"]), ("LEVER_Y", sly), ("LEVER_Z", slz),
+                        ("LEVER_THROW", sh["lever_throw"])):
+        if f"static final float {name} = {value}F;" not in drawn:
+            err(f"ShowControllerRenderer.{name} must be {value} (tools/clockwork.py SHOW_CONTROLLER)")
+    variants = (load(ASSETS / "blockstates" / f"{block}.json") or {}).get("variants", {})
+    for face in ("north", "east", "south", "west"):
+        for count in range(sh["lamps"] + 1):
+            for enabled in ("false", "true"):
+                for running in ("false", "true"):
+                    if variants.get(f"cast={count},enabled={enabled},facing={face},running={running}", {}).get("model") != f"{MOD}:block/{block}":
+                        err(f"blockstates/{block}.json: facing {face}, cast {count}, enabled {enabled}, running {running} must be its model")
+    pools = (load(DATA / MOD / "loot_table" / "blocks" / f"{block}.json") or {}).get("pools", [])
+    if len(pools) != 1 or f'"{MOD}:{block}"' not in json.dumps(pools):
+        err(f"loot_table/blocks/{block}.json: it drops itself")
+    for key, text in ((f"block.{MOD}.{block}", sh["display"]), (f"message.{MOD}.{block}.on", None), (f"message.{MOD}.{block}.off", None)):
+        if not lang.get(key) or (text and lang.get(key) != text):
+            err(f"{key}: its text must be there" + (f" ({text})" if text else ""))
+
+
+def check_harvest_festival():
+    """Harvest Festival Grounds (tools/harvest_festival.py, docs/features/harvest-festival-grounds.md). Part 1, the Giant
+    Cornucopia: its Java block is a MultiDecorationBlock the table's size, with nothing to light, and its shapes lie in its
+    frame; it is registered with its item; its model, drawn whole, lies in its frame (nothing of it cut away), its mouth
+    is the table's and wider than the horn behind it, which narrows to its tail, the horn the table's length from rim to
+    tail; its blockstate covers every facing, part and `lit`, each part's model written; it drops once, from its first
+    block; its recipe takes the farm's corn and butternut squash; and its name has its text. Part 2: each show vegetable
+    is a FacingDecorationBlock whose model lies in its block, drawn at every facing, made from nine of its crop, dropping
+    itself, its name its text; the Prize Ribbon Board's hooks take the Harvest Scale's ribbons in their order, its Java
+    keeps a hook for each on both halves, only for a player who may build, and is registered with its two-block item; hook
+    1 is at the left as you face it; its blockstate draws the board, an empty upper half and each rosette while it hangs;
+    broken, it drops itself once and each ribbon hanging on it; its recipe has its paint and hooks; and its texts are
+    there. Part 3: the Steam Traction Engine's Java is the table's (its fuel, turn, crank, rod, governor and chimney),
+    fired only with coal or charcoal by a player who may build; its firebox burns a tick a tick, lets it out when empty
+    and saves; a coal burns as in a furnace; it is registered with its block entity and renderer, its motion's quads
+    written and drawn, the fire at full light; its rod outreaches its crank and its crosshead stays on its slide bars;
+    its flywheel turns clear of the ground; the engine and the wagon are the table's size, their models in their
+    frames, their blockstates whole, each dropping once; the wagon's drawbar meets the engine's hook; the engine is
+    mined with a pickaxe; and its texts are there. Part 4: Harvest Bunting is its own strand, its item a StringLightsItem
+    of it, drawn by StringLightsRenderer from its own texture, its pennants the table's size and spacing at a texel to a
+    pixel; the Sack-Race Sack goes on the legs, drawn as leggings from its own texture, its attributes the table's, so
+    that in it a player is slowed, hops up every block and can't jump a fence; both are woven from the farm's flax; and
+    their names have their text."""
+    import harvest_festival as hf
+    import harvest_festival_data as hfd
+
+    def read(path):
+        return path.read_text(encoding="utf-8") if path.is_file() else ""
+
+    java_main = read(JAVA_ROOT / "agriculture" / "JugcraftAgriculture.java")
+    lang = load(ASSETS / "lang" / "en_us.json") or {}
+    spec = hf.CORNUCOPIA
+    block = spec["block"]
+    w, h, d = spec["size"]
+    java = read(JAVA_ROOT / "agriculture" / "GiantCornucopiaBlock.java")
+    for item in ("extends MultiDecorationBlock", f"box({w}, {h}, {d})", "return InteractionResult.PASS;"):
+        if item not in java:
+            err(f"GiantCornucopiaBlock: missing {item} (tools/harvest_festival.py CORNUCOPIA)")
+    for box in re.findall(r"new double\[\] \{([^}]*)\}", java):
+        x0, y0, z0, x1, y1, z1 = (float(v) for v in box.split(","))
+        if not (0 <= x0 < x1 <= 16 * w and 0 <= y0 < y1 <= 16 * h and 0 <= z0 < z1 <= 16 * d):
+            err(f"GiantCornucopiaBlock: the shape {{{box}}} must lie in its {16 * w} x {16 * h} x {16 * d} frame")
+    if "registerHarvestFestival();" not in java_main or f'registerBlock("{block}", GiantCornucopiaBlock::new' not in java_main \
+            or f'registerItem("{block}", props -> new BlockItem(cornucopia, props)' not in java_main:
+        err(f"JugcraftAgriculture: {block} must be a GiantCornucopiaBlock with its item, registered by registerHarvestFestival")
+    whole = hfd.build(block).models["whole"]
+    plain = [e for e in whole if "rotation" not in e]
+    if any(min(e["from"]) < 0 or e["to"][0] > 16 * w or e["to"][1] > 16 * h or e["to"][2] > 16 * d for e in plain):
+        err("tools/harvest_festival_data.py giant_cornucopia: every box must lie in its frame, or its blocks' models lose it")
+    widths = [length[2] for length in hfd.HORN]
+    if not spec["mouth"] > widths[0] or any(b >= a for a, b in zip(widths, widths[1:])):
+        err("tools/harvest_festival_data.py HORN: the horn must narrow from its mouth (CORNUCOPIA mouth) to its tail")
+    if abs(max(e["to"][0] for e in whole) - hfd.RIM_X - spec["length"]) > 0.5:
+        err(f"tools/harvest_festival_data.py giant_cornucopia: the horn must be {spec['length']} pixels from rim to tail")
+    variants = (load(ASSETS / "blockstates" / f"{block}.json") or {}).get("variants", {})
+    for part in range(w * h * d):
+        if not (ASSETS / "models" / "block" / f"{block}_{part}.json").is_file():
+            err(f"models/block/{block}_{part}.json must be written")
+        for face in ("north", "east", "south", "west"):
+            for lit in ("false", "true"):
+                if variants.get(f"facing={face},lit={lit},part={part}", {}).get("model") != f"{MOD}:block/{block}_{part}":
+                    err(f"blockstates/{block}.json: facing {face}, lit {lit}, part {part} must be {block}_{part}")
+    pools = (load(DATA / MOD / "loot_table" / "blocks" / f"{block}.json") or {}).get("pools", [])
+    if len(pools) != 1 or '"part": "0"' not in json.dumps(pools):
+        err(f"loot_table/blocks/{block}.json: it drops once, from its first block")
+    keys = set(((load(DATA / MOD / "recipe" / f"{block}.json") or {}).get("key") or {}).values())
+    if not {f"{MOD}:corn", f"{MOD}:butternut_squash"} <= keys:
+        err(f"recipe/{block}.json: it must take the farm's corn and butternut squash")
+    if lang.get(f"block.{MOD}.{block}") != spec["display"]:
+        err(f"block.{MOD}.{block}: the text must be {spec['display']}")
+    # Part 2: the Giant Vegetable Show and the Prize Ribbon Board.
+    for veg in hf.SHOW.values():
+        block = veg["block"]
+        if f'registerBlock("{block}", props -> new FacingDecorationBlock(' not in java_main:
+            err(f"JugcraftAgriculture: {block} must be a FacingDecorationBlock")
+        whole = hfd.build(block).models["whole"]
+        if any(min(e["from"]) < 0 or max(e["to"][0], e["to"][2]) > 16 for e in whole if "rotation" not in e):
+            err(f"tools/harvest_festival_data.py {block}: every box must lie in its block")
+        variants = (load(ASSETS / "blockstates" / f"{block}.json") or {}).get("variants", {})
+        if any(variants.get(f"facing={face}", {}).get("model") != f"{MOD}:block/{block}" for face in ("north", "east", "south", "west")):
+            err(f"blockstates/{block}.json: every facing must be block/{block}")
+        recipe = load(DATA / MOD / "recipe" / f"{block}.json") or {}
+        if recipe.get("key") != {"C": veg["crop"]} or recipe.get("pattern") != ["CCC", "CCC", "CCC"]:
+            err(f"recipe/{block}.json: it must take nine of {veg['crop']}")
+        pools = (load(DATA / MOD / "loot_table" / "blocks" / f"{block}.json") or {}).get("pools", [])
+        if len(pools) != 1 or f'"{MOD}:{block}"' not in json.dumps(pools):
+            err(f"loot_table/blocks/{block}.json: it drops itself")
+        if lang.get(f"block.{MOD}.{block}") != veg["display"]:
+            err(f"block.{MOD}.{block}: the text must be {veg['display']}")
+    spec = hf.RIBBON_BOARD
+    block = spec["block"]
+    java = read(JAVA_ROOT / "agriculture" / "PrizeRibbonBoardBlock.java")
+    scale = read(JAVA_ROOT / "agriculture" / "HarvestScaleBlockEntity.java")
+    ribbons = [ribbon for ribbon, _ in spec["hooks"]]
+    kinds = [kind for _, kind in spec["hooks"]]
+    if "List.of(" + ", ".join(f'"{r}"' for r in ribbons) + ")" not in scale:
+        err("tools/harvest_festival.py RIBBON_BOARD: its hooks take the Harvest Scale's ribbons, in their order")
+    for item in ["extends TallDecorationBlock", "HOOKS = List.of(" + ", ".join(k.upper() for k in kinds) + ")", "player.mayBuild()",
+                 "level.mayInteract(player, pos)", "setBoth(level, pos"] + [f'BooleanProperty.create("{k}")' for k in kinds]:
+        if item not in java:
+            err(f"PrizeRibbonBoardBlock: missing {item} (tools/harvest_festival.py RIBBON_BOARD)")
+    if f'registerBlock("{block}", PrizeRibbonBoardBlock::new' not in java_main \
+            or f'registerItem("{block}", props -> new DoubleHighBlockItem(board, props)' not in java_main:
+        err(f"JugcraftAgriculture: {block} must be a PrizeRibbonBoardBlock with a two-block item")
+    if not hfd.hook_x(0) > hfd.hook_x(1) > hfd.hook_x(2) or not (spec["panel"][0] < hfd.hook_x(2) and hfd.hook_x(0) < spec["panel"][2]):
+        err("tools/harvest_festival_data.py hook_x: hook 1 is at the left as you face the board (east, facing north), all on it")
+    parts = (load(ASSETS / "blockstates" / f"{block}.json") or {}).get("multipart", [])
+    for face in ("north", "east", "south", "west"):
+        for when, model in [({"facing": face, "half": "lower"}, block), ({"facing": face, "half": "upper"}, f"{block}_upper")] + \
+                [({"facing": face, "half": "lower", kind: "true"}, f"{block}_{kind}") for kind in kinds]:
+            if not any(p.get("when") == when and p.get("apply", {}).get("model") == f"{MOD}:block/{model}" for p in parts):
+                err(f"blockstates/{block}.json: {when} must draw block/{model}")
+    for kind in kinds:
+        if not (load(ASSETS / "models" / "block" / f"{block}_{kind}.json") or {}).get("elements"):
+            err(f"models/block/{block}_{kind}.json: the {kind} rosette must be drawn")
+    if (load(ASSETS / "models" / "block" / f"{block}_upper.json") or {}).get("elements") != []:
+        err(f"models/block/{block}_upper.json: the upper half draws nothing (the lower half's model is the whole board)")
+    pools = (load(DATA / MOD / "loot_table" / "blocks" / f"{block}.json") or {}).get("pools", [])
+    for ribbon, kind in spec["hooks"]:
+        pool = [p for p in pools if f'"{MOD}:{ribbon}"' in json.dumps(p.get("entries"))]
+        if len(pool) != 1 or pool[0].get("condition") != {"type": "minecraft:match_block", "blocks": f"{MOD}:{block}",
+                                                          "state": {"half": "lower", kind: "true"}}:
+            err(f"loot_table/blocks/{block}.json: broken, it drops its {kind} ribbon while it hangs, from its lower half")
+    if len(pools) != 4 or '"half": "lower"' not in json.dumps(pools[0]) or f'"{MOD}:{block}"' not in json.dumps(pools[0].get("entries")):
+        err(f"loot_table/blocks/{block}.json: it drops itself once, from its lower half")
+    keys = set(((load(DATA / MOD / "recipe" / f"{block}.json") or {}).get("key") or {}).values())
+    if not {"minecraft:green_dye", "minecraft:gold_nugget"} <= keys:
+        err(f"recipe/{block}.json: its paint (green dye) and its brass hooks (a gold nugget)")
+    for key, text in ((f"block.{MOD}.{block}", spec["display"]), (f"message.{MOD}.{block}.taken", None)):
+        if key not in lang or (text and lang[key] != text):
+            err(f"{key} has no text, or not its own")
+    # Part 3: the Steam Traction Engine and the Hay Wagon.
+    client = read(CLIENT_JAVA_ROOT / "JugcraftClient.java")
+    engine, wagon = hf.ENGINE, hf.WAGON
+    java = read(JAVA_ROOT / "agriculture" / "SteamTractionEngineBlock.java")
+    held = read(JAVA_ROOT / "agriculture" / "SteamTractionEngineBlockEntity.java")
+    drawn = read(CLIENT_JAVA_ROOT / "SteamTractionEngineRenderer.java")
+    kx, ky, kz = engine["crank"]
+    gx, gz = engine["governor"]
+    cx, cy, cz = engine["chimney"]
+    for item in ["extends MultiDecorationBlock implements EntityBlock", "box({}, {}, {})".format(*engine["size"]), "ItemTags.COALS",
+                 "player.mayBuild()", "level.mayInteract(player, pos)", f"BURN = {engine['burn']};", f"MAX_FUEL = {engine['max_fuel']};",
+                 f"TURN_TICKS = {engine['turn_ticks']};", f"CRANK_X = {kx}F;", f"CRANK_Y = {ky}F;", f"CRANK_Z = {kz}F;",
+                 f"THROW = {engine['throw']}F;", f"ROD = {engine['rod']}F;", f"GOVERNOR_X = {gx}F;", f"GOVERNOR_Z = {gz}F;",
+                 f"CHIMNEY_X = {cx}F;", f"CHIMNEY_Y = {cy}F;", f"CHIMNEY_Z = {cz}F;"]:
+        if item not in java:
+            err(f"SteamTractionEngineBlock: missing {item} (tools/harvest_festival.py ENGINE)")
+    if "fuel--;" not in held or "engine.setLit(level, pos, false)" not in held or 'output.putInt("fuel", fuel)' not in held:
+        err("SteamTractionEngineBlockEntity: it must burn a tick's coal a tick, let the engine out when it is gone, and save what is left")
+    if engine["max_fuel"] % engine["burn"] or engine["burn"] != 1600:
+        err("tools/harvest_festival.py ENGINE: a coal burns as long as in a furnace (1600 ticks), and the firebox holds a whole number of them")
+    if 'registerBlock("steam_traction_engine", SteamTractionEngineBlock::new' not in java_main \
+            or 'STEAM_TRACTION_ENGINE_ENTITY = Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, Jugcraft.id("steam_traction_engine")' not in java_main \
+            or 'registerBlock("hay_wagon", HayWagonBlock::new' not in java_main:
+        err("JugcraftAgriculture: the engine with its block entity, and the wagon, must be registered")
+    if "BlockEntityRendererRegistry.register(JugcraftAgriculture.STEAM_TRACTION_ENGINE_ENTITY, SteamTractionEngineRenderer::new);" not in client:
+        err("SteamTractionEngineRenderer must be registered")
+    if '"harvest_festival_quads.json"' not in read(CLIENT_JAVA_ROOT / "DecorQuads.java"):
+        err("DecorQuads must read harvest_festival_quads.json")
+    quads = load(ASSETS / "harvest_festival_quads.json") or {}
+    for name in hfd.ENGINE_PARTS:
+        key = f"{engine['block']}_{name}"
+        if not quads.get(key) or f'DecorQuads.get("{key}")' not in drawn:
+            err(f"harvest_festival_quads.json: {key} must be written and drawn by SteamTractionEngineRenderer")
+    if "LightCoordsUtil.FULL_BRIGHT" not in drawn:
+        err("SteamTractionEngineRenderer: the fire is drawn at full light")
+    throw, rod = engine["throw"], engine["rod"]
+    little = (kz - throw - rod, kz + throw - rod)
+    slide = [e for e in hfd.build(engine["block"]).models["whole"] if e["to"][0] - e["from"][0] == 3.0 and e["from"][2] == 24.5]
+    if not rod > 2 * throw or not slide or not (slide[0]["from"][2] < little[0] - 1.0 and little[1] + 1.0 < slide[0]["to"][2]):
+        err("tools/harvest_festival.py ENGINE: the connecting rod must outreach the crank, and the crosshead stay on its slide bars all the way")
+    fx0, fx1, fr = engine["flywheel"]
+    if not (ky - fr > 0 and ky + fr <= 16 * engine["size"][1] and fx1 <= 16 * engine["size"][0]):
+        err("tools/harvest_festival.py ENGINE: the flywheel must turn clear of the ground, within its frame")
+    for spec, cls in ((engine, "SteamTractionEngineBlock"), (wagon, "HayWagonBlock")):
+        block = spec["block"]
+        w, h, d = spec["size"]
+        if f"box({w}, {h}, {d})" not in read(JAVA_ROOT / "agriculture" / f"{cls}.java"):
+            err(f"{cls} is not {w} x {h} x {d} blocks as tools/harvest_festival.py says")
+        whole = hfd.build(block).models["whole"]
+        if any(min(e["from"]) < 0 or e["to"][0] > 16 * w or e["to"][1] > 16 * h or e["to"][2] > 16 * d for e in whole if "rotation" not in e):
+            err(f"tools/harvest_festival_data.py {block}: every box must lie in its frame, or its blocks' models lose it")
+        variants = (load(ASSETS / "blockstates" / f"{block}.json") or {}).get("variants", {})
+        for part in range(w * h * d):
+            for face in ("north", "east", "south", "west"):
+                for lit in ("false", "true"):
+                    if variants.get(f"facing={face},lit={lit},part={part}", {}).get("model") != f"{MOD}:block/{block}_{part}":
+                        err(f"blockstates/{block}.json: facing {face}, lit {lit}, part {part} must be {block}_{part}")
+        pools = (load(DATA / MOD / "loot_table" / "blocks" / f"{block}.json") or {}).get("pools", [])
+        if len(pools) != 1 or '"part": "0"' not in json.dumps(pools):
+            err(f"loot_table/blocks/{block}.json: it drops once, from its first block")
+        if lang.get(f"block.{MOD}.{block}") != spec["display"]:
+            err(f"block.{MOD}.{block}: the text must be {spec['display']}")
+    # Hitched: the wagon's drawbar ring at its frame's front, the engine's hook at its frame's back, at one height.
+    hook = [e for e in hfd.build(engine["block"]).models["whole"] if e["to"][2] == 16 * engine["size"][2]]
+    ring = [e for e in hfd.build(wagon["block"]).models["whole"] if e["from"][2] == 0.0]
+    if not hook or not ring or not (hook[0]["from"][1] < ring[0]["to"][1] and ring[0]["from"][1] < hook[0]["to"][1]):
+        err("tools/harvest_festival_data.py: placed behind the engine, the wagon's drawbar must meet the engine's hook")
+    pickaxe = load(DATA / "minecraft" / "tags" / "block" / "mineable" / "pickaxe.json") or {}
+    if f"{MOD}:{engine['block']}" not in pickaxe.get("values", []):
+        err("The Steam Traction Engine is iron: it is mined with a pickaxe")
+    for key in ("fired", "cold", "full"):
+        if f"message.{MOD}.{engine['block']}.{key}" not in lang:
+            err(f"Message {engine['block']}.{key} has no text")
+    # Part 4: Harvest Bunting and the Sack-Race Sack.
+    bunting, sack = hf.BUNTING, hf.SACK
+    hooks = read(JAVA_ROOT / "agriculture" / "StringLightHookBlockEntity.java")
+    lights = read(CLIENT_JAVA_ROOT / "StringLightsRenderer.java")
+    if f'HARVEST("{bunting["strand"]}", "{bunting["item"]}")' not in hooks:
+        err("StringLightHookBlockEntity.Strand: Harvest Bunting must be its own strand (tools/harvest_festival.py BUNTING)")
+    if f'registerItem("{bunting["item"]}", props -> new StringLightsItem(props, StringLightHookBlockEntity.Strand.HARVEST)' not in java_main:
+        err(f"JugcraftAgriculture: {bunting['item']} must be a StringLightsItem of the HARVEST strand")
+    for item in ('Jugcraft.id("textures/entity/harvest_bunting.png")', f"HARVEST_PENNANT = {bunting['pennant']}F;",
+                 f"HARVEST_SPACING = {bunting['spacing']}F;", "StringLightHookBlockEntity.Strand.HARVEST", "submitHarvest("):
+        if item not in lights:
+            err(f"StringLightsRenderer: missing {item} (tools/harvest_festival.py BUNTING)")
+    from PIL import Image
+    strand = ASSETS / "textures" / "entity" / f"{bunting['item']}.png"
+    if not strand.is_file() or Image.open(strand).size != (8 * (1 + len(bunting["kinds"])), 8):
+        err(f"textures/entity/{bunting['item']}.png: the twine and each pennant eight texels square")
+    elif bunting["pennant"] * 16 != 8:
+        err("tools/harvest_festival.py BUNTING: a pennant is eight texels across at a texel to a pixel")
+    if 'registerItem("sack_race_sack", Item::new' not in java_main or "Equippable.builder(EquipmentSlot.LEGS)" not in java_main \
+            or 'Jugcraft.id("sack_race_sack")' not in java_main:
+        err("JugcraftAgriculture: the Sack-Race Sack must go on the legs, drawn as its own equipment")
+    for name, attribute, key in (("SACK_SPEED", "MOVEMENT_SPEED", "speed"), ("SACK_STEP", "STEP_HEIGHT", "step"), ("SACK_JUMP", "JUMP_STRENGTH", "jump")):
+        if f"double {name} = {sack[key]};" not in java_main or f"Attributes.{attribute}, new AttributeModifier(" not in java_main:
+            err(f"JugcraftAgriculture.{name}: the sack's {attribute} is tools/harvest_festival.py SACK's {sack[key]}")
+    rise, v = 0.0, 0.42 + sack["jump"]
+    for _ in range(40):
+        rise, v = max(rise, rise + v) if v > 0 else rise, (v - 0.08) * 0.98
+    if rise >= 1.5 or not -1.0 < sack["speed"] < 0.0 or 0.6 + sack["step"] > 0.0:
+        err("tools/harvest_festival.py SACK: in it a player is slowed, hops up every block, and can't jump a fence")
+    worn = load(ASSETS / "equipment" / f"{sack['item']}.json") or {}
+    if worn.get("layers", {}).get("humanoid_leggings") != [{"texture": f"{MOD}:{sack['item']}"}]:
+        err(f"equipment/{sack['item']}.json: the sack is drawn as leggings")
+    legs = ASSETS / "textures" / "entity" / "equipment" / "humanoid_leggings" / f"{sack['item']}.png"
+    if not legs.is_file() or Image.open(legs).size != (64, 32):
+        err(f"textures/entity/equipment/humanoid_leggings/{sack['item']}.png: the sack worn, in the leggings' 64 x 32 layout")
+    for spec in (bunting, sack):
+        recipe = load(DATA / MOD / "recipe" / f"{spec['item']}.json") or {}
+        if f"{MOD}:flax" not in json.dumps(recipe.get("ingredients")):
+            err(f"recipe/{spec['item']}.json: its hessian is woven from the farm's flax")
+        if lang.get(f"item.{MOD}.{spec['item']}") != spec["display"]:
+            err(f"item.{MOD}.{spec['item']}: the text must be {spec['display']}")
+
+
+def check_party_table():
+    """Halloween Party Table (tools/party_table.py, docs/features/halloween-party-table.md), part 1: the Candy Corn
+    Dispenser's Java is the table's; it is registered with its block entity, which saves what it holds and drops it when
+    broken; its renderer turns the crank by `crank` and swings the flap by `flap`; its blockstate shows it at runner 0, the
+    candy by `fill` there, and its crank and flap alone at runners 1 and 2; its candy stands higher at each level, within
+    the globe; its globe is see-through; and its name has its text. Part 2: the tower's and the platter's capacities and
+    foods are the table's, each has a place for every serving, and both are registered; their blockstates add each
+    serving while they hold more than that many, on a Feast Table and off it; each `_table` model is the table's drop
+    lower, and the drop is the Feast Table's own (its top's height); their loot drops what they hold; and the Ghost
+    Meringue is the table's food, a candy a Candy Bag takes. Part 3: the same for the tray, the cauldron and the jelly
+    mould, and their foods are registered as the table says (the sausage, being meat, as a meal that doesn't compost).
+    Part 5: the same for the Goodie Bag Tree and the Skull Goblets, whose light is the table's and whose punch glows;
+    a Goodie Bag gives back what its recipe puts in, and no more; the Bat Table Runner is a Feast Table's `runner`, its
+    every length and runner has its model (the runner hanging over a table's ends only where its legs are), and a
+    length drops the runner laid on it."""
+    import party_table as pt
+    import party_table_data as ptd
+
+    def read(path):
+        return path.read_text(encoding="utf-8") if path.is_file() else ""
+
+    java_main = read(JAVA_ROOT / "agriculture" / "JugcraftAgriculture.java")
+    client = read(CLIENT_JAVA_ROOT / "JugcraftClient.java")
+    lang = load(ASSETS / "lang" / "en_us.json") or {}
+    dp = pt.DISPENSER
+    block = dp["block"]
+    java = read(JAVA_ROOT / "agriculture" / "CandyCornDispenserBlock.java")
+    (cy, cz), (hy, hz) = dp["crank"], dp["hinge"]
+    for item in (f"CAPACITY = {dp['capacity']};", f"LEVELS = {dp['levels']};", f"CRANK_TICKS = {dp['crank_ticks']};", f"CRANK_Y = {cy}F;",
+                 f"CRANK_Z = {cz}F;", f"FLAP = {dp['flap']}F;", f"FLAP_TICKS = {dp['flap_ticks']};", f"HINGE_Y = {hy}F;", f"HINGE_Z = {hz}F;",
+                 'IntegerProperty.create("fill", 0, LEVELS)', "extends FacingDecorationBlock implements EntityBlock"):
+        if item not in java:
+            err(f"CandyCornDispenserBlock: missing {item} (tools/party_table.py DISPENSER)")
+    held = read(JAVA_ROOT / "agriculture" / "CandyCornDispenserBlockEntity.java")
+    if any(call not in held for call in ('output.putInt("count", count)', 'input.getIntOr("count", 0)', "preRemoveSideEffects")):
+        err("CandyCornDispenserBlockEntity: it must save what it holds and drop it when broken")
+    if f'registerBlock("{block}", CandyCornDispenserBlock::new' not in java_main \
+            or f'CANDY_CORN_DISPENSER_ENTITY = Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, Jugcraft.id("{block}")' not in java_main:
+        err(f"JugcraftAgriculture: {block} must be a CandyCornDispenserBlock with its own block entity")
+    drawn = read(CLIENT_JAVA_ROOT / "CandyCornDispenserRenderer.java")
+    if "BlockEntityRendererRegistry.register(JugcraftAgriculture.CANDY_CORN_DISPENSER_ENTITY, CandyCornDispenserRenderer::new);" not in client \
+            or any(call not in drawn for call in ("CandyCornDispenserBlock.crank(", "CandyCornDispenserBlock.flap(")):
+        err("CandyCornDispenserRenderer: registered, it must turn the crank by crank and swing the flap by flap")
+    if f"block.{MOD}.{block}" not in lang:
+        err(f"block.{MOD}.{block}: the text is missing")
+    parts = (load(ASSETS / "blockstates" / f"{block}.json") or {}).get("multipart", [])
+    want = []
+    for face in ("north", "east", "south", "west"):
+        want.append(((face, "0", None), f"{MOD}:block/{block}"))
+        want += [((face, "0", str(n)), f"{MOD}:block/{block}_fill_{n}") for n in range(1, dp["levels"] + 1)]
+        want += [((face, "1", None), f"{MOD}:block/{block}_crank"), ((face, "2", None), f"{MOD}:block/{block}_flap")]
+    shown = [((p["when"].get("facing"), p["when"].get("runner"), p["when"].get("fill")), p["apply"]["model"]) for p in parts]
+    if sorted(map(str, shown)) != sorted(map(str, want)):
+        err(f"blockstates/{block}.json: it must show itself at runner 0, its candy by fill there, and its crank and flap alone at runners 1 and 2")
+    tops = []
+    for n in range(1, dp["levels"] + 1):
+        elements = (load(ASSETS / "models" / "block" / f"{block}_fill_{n}.json") or {}).get("elements", [])
+        tops.append(max((e["to"][1] for e in elements), default=0.0))
+    lid = ptd.GLOBE[-1][1]
+    if tops != sorted(tops) or len(set(tops)) != len(tops) or tops[-1] > lid:
+        err(f"models/block/{block}_fill_*.json: its candy must stand higher at each level, within the globe (below {lid}): {tops}")
+    png = ASSETS / "textures" / "block" / f"{block}.png"
+    if png.is_file():
+        with Image.open(png) as img:
+            counts = img.convert("RGBA").getchannel("A").histogram()
+        if not any(counts[1:255]):
+            err(f"textures/block/{block}.png: its globe must be see-through glass")
+    else:
+        err(f"textures/block/{block}.png: missing")
+    # Part 2: the cake stands and the Ghost Meringue.
+    drop = pt.TABLE["table_drop"]
+    serving = read(JAVA_ROOT / "agriculture" / "PartyServingBlock.java")
+    feast = read(JAVA_ROOT / "agriculture" / "FeastTableBlock.java")
+    if f"TABLE_DROP = {drop}F;" not in serving or "instanceof FeastTableBlock" not in serving:
+        err(f"PartyServingBlock: it must be set down {drop} pixels onto a Feast Table (tools/party_table.py TABLE)")
+    if f"Block.box(0.0, 0.0, 0.0, 16.0, {pt.TABLE['table_top']}, 16.0)" not in feast or pt.TABLE["table_top"] + drop != 16.0:
+        err(f"tools/party_table.py TABLE: the drop must bring a piece down onto the Feast Table's top ({pt.TABLE['table_top']})")
+    stands = ((pt.CUPCAKE_TOWER, "SpiderCupcakeTowerBlock", ptd.tower_slots()), (pt.MERINGUE_PLATTER, "GhostMeringuePlatterBlock", ptd.platter_slots()),
+              (pt.MUMMY_TRAY, "MummySausageTrayBlock", ptd.sausage_slots()), (pt.FINGER_CAULDRON, "WitchFingerCauldronBlock", ptd.FINGERS),
+              (pt.JELLY_MOULD, "EyeballJellyMouldBlock", ptd.jelly_slots()), (pt.GOODIE_TREE, "GoodieBagTreeBlock", ptd.BRANCHES),
+              (pt.SKULL_GOBLETS, "SkullGobletsBlock", ptd.goblet_slots()))
+    if [spec["block"] for spec, _, _ in stands] != [spec["block"] for spec in pt.serving()]:
+        err("check_party_table: every table piece that holds a food must be checked")
+    for spec, cls, slots in stands:
+        block, cap = spec["block"], spec["capacity"]
+        java = read(JAVA_ROOT / "agriculture" / f"{cls}.java")
+        if f"CAPACITY = {cap};" not in java or f'"{spec["serves"]}"' not in java or "extends PartyServingBlock" not in java:
+            err(f"{cls}: it must hold {cap} of {spec['serves']} (tools/party_table.py)")
+        if len(slots) != cap:
+            err(f"tools/party_table_data.py: {block} has {len(slots)} places for {cap} servings")
+        if f'registerBlock("{block}", {cls}::new' not in java_main:
+            err(f"JugcraftAgriculture: {block} must be a {cls}")
+        if f"block.{MOD}.{block}" not in lang:
+            err(f"block.{MOD}.{block}: the text is missing")
+        parts = (load(ASSETS / "blockstates" / f"{block}.json") or {}).get("multipart", [])
+        for face in ("north", "east", "south", "west"):
+            for on, suffix in (("false", ""), ("true", "_table")):
+                for k in range(cap):
+                    want = {"facing": face, "on_table": on, "servings": "|".join(str(n) for n in range(k + 1, cap + 1))}
+                    if not any(p.get("when") == want and p["apply"]["model"] == f"{MOD}:block/{block}_slot_{k}{suffix}" for p in parts):
+                        err(f"blockstates/{block}.json: serving {k} must show while it holds more than {k}, facing {face}, on_table {on}")
+                        break
+        for name in [block] + [f"{block}_slot_{k}" for k in range(cap)]:
+            up = (load(ASSETS / "models" / "block" / f"{name}.json") or {}).get("elements", [])
+            down = (load(ASSETS / "models" / "block" / f"{name}_table.json") or {}).get("elements", [])
+            if not up or len(up) != len(down) or any(abs(a["from"][1] - b["from"][1] - drop) > 0.01 for a, b in zip(up, down)):
+                err(f"models/block/{name}_table.json: it must be {name} set {drop} pixels lower")
+                break
+        pools = (load(DATA / MOD / "loot_table" / "blocks" / f"{block}.json") or {}).get("pools", [])
+        counts = sorted(p["entries"][0]["modifier"][0]["count"] for p in pools if p["entries"][0]["name"] == f"{MOD}:{spec['serves']}")
+        if counts != list(range(1, cap + 1)):
+            err(f"loot_table/blocks/{block}.json: broken, it must drop what it holds (1 to {cap})")
+    mg = pt.MERINGUE
+    nutrition, saturation = mg["meringue"]
+    if f'food("{mg["item"]}", {nutrition}, {saturation}F' not in java_main:
+        err(f"JugcraftAgriculture: {mg['item']} must be a food of {nutrition} and {saturation} (tools/party_table.py MERINGUE)")
+    candy = load(DATA / "c" / "tags" / "item" / "foods" / "candy.json") or {}
+    if f"{MOD}:{mg['item']}" not in candy.get("values", []):
+        err(f"c:foods/candy: {mg['item']} must be candy, so a Candy Bag takes it")
+    # Part 3: the trays' foods.
+    for item, food in pt.FOODS.items():
+        n, sat = food["food"]
+        registered = f'meal("{item}", {n}, {sat}F)' if food["compost"] is None else f'food("{item}", {n}, {sat}F, COMPOST_{food["compost"].upper()})'
+        if registered not in java_main:
+            err(f"JugcraftAgriculture: {item} must be registered as {registered} (tools/party_table.py FOODS)")
+    if {spec["serves"] for spec in pt.serving()} - set(pt.ITEMS) - {pt.GOODIE_BAG["item"], "spiderweb_cupcake", "witchs_brew_punch"}:
+        err("tools/party_table.py: every food a table piece holds must be one of its own, the Spiderweb Cupcake or the punch")
+    # Part 5: the goblets' light, the Goodie Bag's contents, and the Bat Table Runner on the Feast Table.
+    sg = pt.SKULL_GOBLETS
+    goblets = read(JAVA_ROOT / "agriculture" / "SkullGobletsBlock.java")
+    if f"LIGHT = {sg['light']};" not in goblets or ".lightLevel(SkullGobletsBlock::light)" not in java_main:
+        err(f"SkullGobletsBlock: it must give light {sg['light']} while any goblet holds punch (tools/party_table.py SKULL_GOBLETS)")
+    for k in range(sg["capacity"]):
+        elements = (load(ASSETS / "models" / "block" / f"{sg['block']}_slot_{k}.json") or {}).get("elements", [])
+        if not any(e.get("light_emission") == ptd.LIGHT_PUNCH for e in elements):
+            err(f"models/block/{sg['block']}_slot_{k}.json: its punch must glow (light_emission {ptd.LIGHT_PUNCH})")
+    gb = pt.GOODIE_BAG
+    bag = read(JAVA_ROOT / "agriculture" / "GoodieBagItem.java")
+    contents = ", ".join(f'"{item.split(":")[-1]}"' for item in gb["contents"])
+    if f"CONTENTS = List.of({contents});" not in bag or f'registerItem("{gb["item"]}", GoodieBagItem::new' not in java_main \
+            or f"item.{MOD}.{gb['item']}" not in lang:
+        err(f"GoodieBagItem: registered, it must give back {gb['contents']} (tools/party_table.py GOODIE_BAG)")
+    made = load(DATA / MOD / "recipe" / f"{gb['item']}.json") or {}
+    filled = sorted(i if isinstance(i, str) else i.get("item", "") for i in made.get("ingredients", []))
+    if filled != sorted(["minecraft:paper", "minecraft:string"] + gb["contents"]):
+        err(f"recipe/{gb['item']}.json: a Goodie Bag must be filled with paper, string and its contents, no fewer: {filled}")
+    br = pt.BAT_RUNNER
+    if 'EnumProperty.create("runner", Runner.class)' not in feast or f'BAT_RUNNER = "{br["item"]}";' not in feast \
+            or 'HARVEST("harvest"), BATS("bats");' not in feast or br["item"] not in pt.ITEMS:
+        err(f"FeastTableBlock: a length must take the {br['item']} as its runner (harvest or bats), and the item be registered")
+    import feast_data
+    variants = (load(ASSETS / "blockstates" / "feast_table.json") or {}).get("variants", {})
+    for part in feast_data.PARTS:
+        for runner in feast_data.RUNNERS:
+            for axis in ("x", "z"):
+                model = variants.get(f"axis={axis},part={part},runner={runner}", {}).get("model")
+                if model != f"{MOD}:block/{feast_data.model_name('feast_table', part, runner)}":
+                    err(f"blockstates/feast_table.json: axis {axis}, part {part}, runner {runner} must be its model, not {model}")
+        dressed = (load(ASSETS / "models" / "block" / f"feast_table_{part}_bats.json") or {}).get("elements", [])
+        west = any(e["to"][0] <= 0.0 for e in dressed)
+        east = any(e["from"][0] >= 16.0 for e in dressed)
+        if (west, east) != (part in ("single", "start"), part in ("single", "end")) \
+                or (west or east) and not any(abs(e["from"][1] - (pt.TABLE["table_top"] + 0.25 - br["drape"])) < 0.01 for e in dressed if e["to"][0] <= 0.0 or e["from"][0] >= 16.0):
+            err(f"models/block/feast_table_{part}_bats.json: the runner must hang {br['drape']} down over the table's ends, only where its legs are")
+    pools = (load(DATA / MOD / "loot_table" / "blocks" / "feast_table.json") or {}).get("pools", [])
+    if not any(p["entries"][0]["name"] == f"{MOD}:{br['item']}" and "runner" in str(p.get("condition")) for p in pools):
+        err(f"loot_table/blocks/feast_table.json: a length must drop the {br['item']} laid on it")
+
+
+def check_hearth():
+    """Cozy Fall Hearth (tools/hearth.py, docs/features/cozy-fall-hearth.md), part 1: the Stone Fireplace's Java block is
+    the table's size and light, its firebox gives it, and its registration names its light; its fire is a full-bright,
+    unshaded model of the fire texture alone, animated in smooth bands; the fireplace's and the garland's recipes were
+    generated; and the light message has its text. Part 2: the woodstove's light and burn are the table's, it is a heat
+    source, and its fire is full-bright; the kettle's lid is drawn by its renderer, rattling by the table's numbers about
+    its hinge, from its runner model; the simmer pot's surface moves in smooth bands. Part 3: the rack's capacity is the
+    table's, with a model for each count; the chopping block splits by the log's own crafting recipe, and its hatchet is
+    drawn by its renderer, swung by the table's numbers about its grip, from its runner model. Part 4: the ladder's size,
+    throws and rungs are the table's and its renderer hangs the throws at the model's rungs; the basket's capacity is the
+    table's; both renderers are registered and have their textures. Part 5: the lamp's light is the table's and its lit
+    chimney full-bright; the jars' sizes, flame and layout are the table's, and each count's lit model glows."""
+    import hearth as hh
+    fp = hh.FIREPLACE
+    java = (JAVA_ROOT / "agriculture" / "StoneFireplaceBlock.java").read_text(encoding="utf-8") \
+        if (JAVA_ROOT / "agriculture" / "StoneFireplaceBlock.java").is_file() else ""
+    w, h, d = fp["size"]
+    for needed in (f"box({w}, {h}, {d})", f"LIGHT = {fp['light']};", "state.getValue(PART) == FIREBOX ? LIGHT : 0"):
+        if needed not in java:
+            err(f"StoneFireplaceBlock: missing {needed} (tools/hearth.py FIREPLACE)")
+    java_main = (JAVA_ROOT / "agriculture" / "JugcraftAgriculture.java").read_text(encoding="utf-8") \
+        if (JAVA_ROOT / "agriculture" / "JugcraftAgriculture.java").is_file() else ""
+    if f'registerBlock("{fp["block"]}", StoneFireplaceBlock::new' not in java_main or ".lightLevel(StoneFireplaceBlock::light)" not in java_main:
+        err(f"JugcraftAgriculture: {fp['block']} must be a StoneFireplaceBlock lit by StoneFireplaceBlock::light")
+    meta = load(ASSETS / "textures" / "block" / f"{fp['block']}_fire.png.mcmeta") or {}
+    if meta.get("animation", {}).get("interpolate") is not True or meta["animation"].get("frametime") != fp["frametime"]:
+        err(f"textures/block/{fp['block']}_fire.png.mcmeta: the fire must move in smooth bands (interpolated, frametime {fp['frametime']})")
+    fires = sorted((ASSETS / "models" / "block").glob(f"{fp['block']}_*_fire.json"))
+    if not fires:
+        err(f"{fp['block']}: no fire model was generated")
+    for path in fires:
+        model = load(path) or {}
+        textures = set(model.get("textures", {}).values())
+        elements = model.get("elements", [])
+        if textures != {f"{MOD}:block/{fp['block']}_fire"} or any(e.get("light_emission") != 15 or e.get("shade") is not False for e in elements):
+            err(f"{path.name}: the fire must be full-bright and unshaded, in its own texture alone")
+    for recipe in hh.RECIPES + hh.SHAPELESS:
+        made = load(DATA / MOD / "recipe" / f"{recipe['id']}.json") or {}
+        if made.get("result", {}).get("id") != f"{MOD}:{recipe['result']}":
+            err(f"recipe/{recipe['id']}.json: tools/hearth.py's recipe for {recipe['result']} was not generated")
+    lang = load(ASSETS / "lang" / "en_us.json") or {}
+    for key in (f"block.{MOD}.{fp['block']}", f"item.{MOD}.{hh.GARLAND['item']}", f"message.{MOD}.{fp['block']}.light"):
+        if key not in lang:
+            err(f"{key}: the text is missing")
+    # Part 2: the woodstove's light and burn are the table's, it is a heat source, and its fire is full-bright on the
+    # fireplace's fire texture; the kettle's lid is drawn by its renderer, rattling by the table's numbers about its
+    # hinge; the simmer pot's surface moves in smooth bands.
+    ws = hh.WOODSTOVE
+    stove = (JAVA_ROOT / "agriculture" / "WoodstoveBlock.java").read_text(encoding="utf-8") \
+        if (JAVA_ROOT / "agriculture" / "WoodstoveBlock.java").is_file() else ""
+    for needed in (f"LIGHT = {ws['light']};", f"BURN = {ws['burn']}F;"):
+        if needed not in stove:
+            err(f"WoodstoveBlock: missing {needed} (tools/hearth.py WOODSTOVE)")
+    if f'registerBlock("{ws["block"]}", WoodstoveBlock::new' not in java_main or ".lightLevel(WoodstoveBlock::light)" not in java_main:
+        err(f"JugcraftAgriculture: {ws['block']} must be a WoodstoveBlock lit by WoodstoveBlock::light")
+    heat = (load(DATA / MOD / "tags" / "block" / "heat_sources.json") or {}).get("values", [])
+    if f"{MOD}:{ws['block']}" not in heat:
+        err(f"{ws['block']}: the woodstove must be in the block tag {MOD}:heat_sources, so pots and kettles heat on it")
+    model = load(ASSETS / "models" / "block" / f"{ws['block']}_fire.json") or {}
+    if set(model.get("textures", {}).values()) != {f"{MOD}:block/{fp['block']}_fire"} or not model.get("elements") \
+            or any(e.get("light_emission") != 15 or e.get("shade") is not False for e in model["elements"]):
+        err(f"models/block/{ws['block']}_fire.json: the woodstove's fire must be full-bright and unshaded, on the fireplace's fire")
+    kt = hh.KETTLE
+    kettle = (JAVA_ROOT / "agriculture" / "TeaKettleBlock.java").read_text(encoding="utf-8") \
+        if (JAVA_ROOT / "agriculture" / "TeaKettleBlock.java").is_file() else ""
+    for needed in (f"LID_LIFT = {kt['lid_lift']}F;", f"LID_TIP = {kt['lid_tip']}F;"):
+        if needed not in kettle:
+            err(f"TeaKettleBlock: missing {needed} (tools/hearth.py KETTLE)")
+    lid = (CLIENT_JAVA_ROOT / "TeaKettleRenderer.java").read_text(encoding="utf-8") \
+        if (CLIENT_JAVA_ROOT / "TeaKettleRenderer.java").is_file() else ""
+    if f"HINGE_Y = {kt['hinge'][0]}F;" not in lid or f"HINGE_Z = {kt['hinge'][1]}F;" not in lid:
+        err(f"TeaKettleRenderer: the lid must tip about its back edge, tools/hearth.py KETTLE hinge {kt['hinge']}")
+    client = (CLIENT_JAVA_ROOT / "JugcraftClient.java").read_text(encoding="utf-8") if (CLIENT_JAVA_ROOT / "JugcraftClient.java").is_file() else ""
+    if "BlockEntityRendererRegistry.register(JugcraftAgriculture.TEA_KETTLE_ENTITY, TeaKettleRenderer::new);" not in client:
+        err("JugcraftClient: the Tea Kettle's lid needs TeaKettleRenderer")
+    states = load(ASSETS / "blockstates" / f"{kt['block']}.json") or {}
+    runners = [k for k in states.get("variants", {}) if "runner=true" in k]
+    if not runners or any(states["variants"][k]["model"] != f"{MOD}:block/{kt['block']}_lid" for k in runners):
+        err(f"{kt['block']}: its runner=true variants must name the lid's own model")
+    sp = hh.SIMMER_POT
+    meta = load(ASSETS / "textures" / "block" / f"{sp['block']}_brew.png.mcmeta") or {}
+    if meta.get("animation", {}).get("interpolate") is not True or meta["animation"].get("frametime") != sp["frametime"]:
+        err(f"textures/block/{sp['block']}_brew.png.mcmeta: the simmering must move in smooth bands (interpolated, frametime {sp['frametime']})")
+    for key in [f"block.{MOD}.{b}" for b in (ws["block"], kt["block"], sp["block"])]:
+        if key not in lang:
+            err(f"{key}: the text is missing")
+    # Part 3: the rack's capacity is the table's and it has a model for each count; the chopping block splits by the log's
+    # own crafting recipe (never more), and its hatchet is drawn by its renderer, swung by the table's numbers about its grip.
+    rk = hh.RACK
+    rack = (JAVA_ROOT / "agriculture" / "FirewoodRackBlock.java").read_text(encoding="utf-8") \
+        if (JAVA_ROOT / "agriculture" / "FirewoodRackBlock.java").is_file() else ""
+    if f"CAPACITY = {rk['capacity']};" not in rack:
+        err(f"FirewoodRackBlock: missing CAPACITY = {rk['capacity']}; (tools/hearth.py RACK)")
+    states = load(ASSETS / "blockstates" / f"{rk['block']}.json") or {}
+    for logs in range(rk["capacity"] + 1):
+        if not (ASSETS / "models" / "block" / f"{rk['block']}_{logs}.json").is_file() \
+                or states.get("variants", {}).get(f"facing=north,logs={logs}", {}).get("model") != f"{MOD}:block/{rk['block']}_{logs}":
+            err(f"{rk['block']}: no model for {logs} logs on it")
+    if f"message.{MOD}.{rk['block']}.full" not in lang:
+        err(f"message.{MOD}.{rk['block']}.full: the text is missing")
+    cb = hh.CHOPPING_BLOCK
+    chop = (JAVA_ROOT / "agriculture" / "ChoppingBlockBlock.java").read_text(encoding="utf-8") \
+        if (JAVA_ROOT / "agriculture" / "ChoppingBlockBlock.java").is_file() else ""
+    for needed in (f"SWING_TICKS = {cb['swing_ticks']};", f"SWING_DEGREES = {cb['swing']}F;", "getRecipeFor(RecipeType.CRAFTING, input, level)"):
+        if needed not in chop:
+            err(f"ChoppingBlockBlock: missing {needed} (tools/hearth.py CHOPPING_BLOCK; a log splits by its own crafting recipe)")
+    hatchet = (CLIENT_JAVA_ROOT / "ChoppingBlockRenderer.java").read_text(encoding="utf-8") \
+        if (CLIENT_JAVA_ROOT / "ChoppingBlockRenderer.java").is_file() else ""
+    if f"GRIP_Y = {cb['grip'][0]}F;" not in hatchet or f"GRIP_Z = {cb['grip'][1]}F;" not in hatchet:
+        err(f"ChoppingBlockRenderer: the hatchet must swing about its grip, tools/hearth.py CHOPPING_BLOCK grip {cb['grip']}")
+    if "BlockEntityRendererRegistry.register(JugcraftAgriculture.CHOPPING_BLOCK_ENTITY, ChoppingBlockRenderer::new);" not in client:
+        err("JugcraftClient: the Chopping Block's hatchet needs ChoppingBlockRenderer")
+    states = load(ASSETS / "blockstates" / f"{cb['block']}.json") or {}
+    runners = [k for k in states.get("variants", {}) if "runner=true" in k]
+    if not runners or any(states["variants"][k]["model"] != f"{MOD}:block/{cb['block']}_hatchet" for k in runners):
+        err(f"{cb['block']}: its runner=true variants must name the hatchet's own model")
+    for key in (f"block.{MOD}.{rk['block']}", f"block.{MOD}.{cb['block']}"):
+        if key not in lang:
+            err(f"{key}: the text is missing")
+    # Part 4: the ladder's size, throws and rungs are the table's, and its renderer hangs the throws at the model's rungs;
+    # the basket's capacity is the table's; both renderers are registered and have their textures.
+    ld = hh.LADDER
+    ladder = (JAVA_ROOT / "agriculture" / "BlanketLadderBlock.java").read_text(encoding="utf-8") \
+        if (JAVA_ROOT / "agriculture" / "BlanketLadderBlock.java").is_file() else ""
+    w, h, d = ld["size"]
+    for needed in (f"box({w}, {h}, {d})", f"RUNGS = {ld['throws']};"):
+        if needed not in ladder:
+            err(f"BlanketLadderBlock: missing {needed} (tools/hearth.py LADDER)")
+    throws = (CLIENT_JAVA_ROOT / "BlanketLadderRenderer.java").read_text(encoding="utf-8") \
+        if (CLIENT_JAVA_ROOT / "BlanketLadderRenderer.java").is_file() else ""
+    import math
+    tan = math.tan(math.radians(ld["lean"]))
+    top = sorted(ld["rungs"], reverse=True)[:ld["throws"]]
+    for y in top:
+        z = round(ld["foot"] + y * tan, 2)
+        if f"{{{y}F, {z}F}}" not in throws:
+            err(f"BlanketLadderRenderer: a throw must hang at the model's rung {y} high, {z} out (tools/hearth.py LADDER)")
+    bk = hh.BASKET
+    basket = (JAVA_ROOT / "agriculture" / "KnittingBasketBlock.java").read_text(encoding="utf-8") \
+        if (JAVA_ROOT / "agriculture" / "KnittingBasketBlock.java").is_file() else ""
+    if f"BALLS = {bk['balls']};" not in basket:
+        err(f"KnittingBasketBlock: missing BALLS = {bk['balls']}; (tools/hearth.py BASKET)")
+    for entity, renderer, texture in (("BLANKET_LADDER_ENTITY", "BlanketLadderRenderer", "throw_blanket"),
+                                      ("KNITTING_BASKET_ENTITY", "KnittingBasketRenderer", "yarn_ball")):
+        if f"BlockEntityRendererRegistry.register(JugcraftAgriculture.{entity}, {renderer}::new);" not in client:
+            err(f"JugcraftClient: {renderer} must be registered")
+        if not (ASSETS / "textures" / "entity" / f"{texture}.png").is_file():
+            err(f"textures/entity/{texture}.png: {renderer} has no texture")
+    for key in (f"block.{MOD}.{ld['block']}", f"block.{MOD}.{bk['block']}", f"message.{MOD}.{ld['block']}.full", f"message.{MOD}.{bk['block']}.full"):
+        if key not in lang:
+            err(f"{key}: the text is missing")
+    # Part 5: the lamp's light is the table's and its lit chimney is full-bright; the jars' sizes, flame and layout are
+    # the table's, and each count's lit model glows.
+    lp = hh.LAMP
+    lamp = (JAVA_ROOT / "agriculture" / "HurricaneLampBlock.java").read_text(encoding="utf-8") \
+        if (JAVA_ROOT / "agriculture" / "HurricaneLampBlock.java").is_file() else ""
+    if f"LIGHT = {lp['light']};" not in lamp:
+        err(f"HurricaneLampBlock: missing LIGHT = {lp['light']}; (tools/hearth.py LAMP)")
+    if f'registerBlock("{lp["block"]}", HurricaneLampBlock::new' not in java_main or ".lightLevel(HurricaneLampBlock::light)" not in java_main:
+        err(f"JugcraftAgriculture: {lp['block']} must be a HurricaneLampBlock lit by HurricaneLampBlock::light")
+    jc = hh.JAR_CANDLE
+    jars = (JAVA_ROOT / "agriculture" / "MasonJarCandleBlock.java").read_text(encoding="utf-8") \
+        if (JAVA_ROOT / "agriculture" / "MasonJarCandleBlock.java").is_file() else ""
+    needed = [f"JAR_WIDTH = {jc['width']};", f"JAR_HEIGHT = {jc['height']};", f"FLAME_Y = {jc['flame']};"]
+    needed += ["{" + ", ".join("{" + f"{x}, {z}" + "}" for x, z in layout) + "}" for layout in jc["layout"]]
+    for need in needed:
+        if need not in jars:
+            err(f"MasonJarCandleBlock: missing {need} (tools/hearth.py JAR_CANDLE)")
+    glows = [f"{lp['block']}_chimney_lit"] + [f"{jc['block']}_{n}_lit" for n in range(1, len(jc["layout"]) + 1)]
+    for name in glows:
+        model = load(ASSETS / "models" / "block" / f"{name}.json") or {}
+        lit = [e for e in model.get("elements", []) if e.get("light_emission") == 15]
+        if not lit or any(e.get("shade") is not False for e in lit):
+            err(f"models/block/{name}.json: its lit glass must be full-bright and unshaded")
+    for key in (f"block.{MOD}.{lp['block']}", f"block.{MOD}.{jc['block']}"):
+        if key not in lang:
+            err(f"{key}: the text is missing")
+
+
+def check_orchard_harvest():
+    """Orchard & Apple Harvest (tools/orchard_harvest.py, docs/features/orchard-apple-harvest.md): the ladder's, the
+    bin's and the cart's Java blocks are the table's size; the bin's, cart's and bag's capacities and stages, the crates'
+    and windfall apples' most to a block and a crate's height are the table's; the ladder is climbable; the fruit they
+    take is the Cider Press's; and the full message has its text."""
+    import orchard_harvest as oh
+    agri = JAVA_ROOT / "agriculture"
+    for cls, spec in (("OrchardLadderBlock", oh.LADDER), ("AppleBinBlock", oh.BIN)):
+        java = (agri / f"{cls}.java").read_text(encoding="utf-8") if (agri / f"{cls}.java").is_file() else ""
+        w, h, d = spec["size"]
+        if f"box({w}, {h}, {d})" not in java:
+            err(f"{cls} is not {w} x {h} x {d} blocks as tools/orchard_harvest.py says")
+    for cls, spec in (("OrchardHandcartBlock", oh.CART),):
+        java = (agri / f"{cls}.java").read_text(encoding="utf-8") if (agri / f"{cls}.java").is_file() else ""
+        w, h, d = spec["size"]
+        if f"box({w}, {h}, {d})" not in java:
+            err(f"{cls} is not {w} x {h} x {d} blocks as tools/orchard_harvest.py says")
+    for cls, spec, staged in (("AppleBinBlock", oh.BIN, "FruitBinBlock"), ("OrchardHandcartBlock", oh.CART, "FruitBinBlock"),
+                              ("PickingBagBlock", oh.BAG, "PickingBagBlock")):
+        java = (agri / f"{cls}.java").read_text(encoding="utf-8") if (agri / f"{cls}.java").is_file() else ""
+        stages = (agri / f"{staged}.java").read_text(encoding="utf-8") if (agri / f"{staged}.java").is_file() else ""
+        if f"int CAPACITY = {spec['capacity']};" not in java:
+            err(f"{cls}.CAPACITY is not tools/orchard_harvest.py's {spec['capacity']}")
+        if f"int STAGES = {spec['stages']};" not in stages:
+            err(f"{staged}.STAGES is not tools/orchard_harvest.py's {spec['stages']} (for {cls})")
+    for cls, name, value in (("AppleCrateBlock", "MAX", oh.CRATE["max"]), ("WindfallApplesBlock", "MAX", oh.WINDFALL["max"])):
+        java = (agri / f"{cls}.java").read_text(encoding="utf-8") if (agri / f"{cls}.java").is_file() else ""
+        if f"int {name} = {value};" not in java:
+            err(f"{cls}.{name} is not tools/orchard_harvest.py's {value}")
+    crate = (agri / "AppleCrateBlock.java").read_text(encoding="utf-8") if (agri / "AppleCrateBlock.java").is_file() else ""
+    if f"CRATE_HEIGHT = {oh.CRATE['height']};" not in crate:
+        err(f"AppleCrateBlock.CRATE_HEIGHT is not tools/orchard_harvest.py CRATE's {oh.CRATE['height']}")
+    stand = (agri / "CaramelAppleStandBlock.java").read_text(encoding="utf-8") if (agri / "CaramelAppleStandBlock.java").is_file() else ""
+    lang = load(ASSETS / "lang" / "en_us.json") or {}
+    spec = oh.STAND
+    w, h, d = spec["size"]
+    if f"box({w}, {h}, {d})" not in stand:
+        err(f"CaramelAppleStandBlock is not {w} x {h} x {d} blocks as tools/orchard_harvest.py STAND says")
+    for name, key in (("CARAMEL", "caramel"), ("STICKS", "sticks"), ("RACK", "rack"), ("COOL_TICKS", "cool_ticks"), ("LIGHT", "light")):
+        if f"int {name} = {spec[key]};" not in stand:
+            err(f"CaramelAppleStandBlock.{name} is not tools/orchard_harvest.py STAND's {spec[key]}")
+    if len(spec["spots"]) != spec["rack"]:
+        err("tools/orchard_harvest.py STAND has a tray spot for each apple it holds, and only those")
+    for anim in ("caramel", "flame"):
+        name = f"{spec['block']}_{anim}"
+        meta = load(ASSETS / "textures" / "block" / f"{name}.png.mcmeta") or {}
+        if not meta.get("animation", {}).get("interpolate"):
+            err(f"The stand's {anim} must be a blended animation (textures/block/{name}.png.mcmeta)")
+    for key in ("no_caramel", "no_sticks", "rack_full", "setting", "pot_full", "jar_full"):
+        if f"message.{MOD}.caramel_apple_stand.{key}" not in lang:
+            err(f"Message caramel_apple_stand.{key} has no text")
+    store = (agri / "FruitStore.java").read_text(encoding="utf-8") if (agri / "FruitStore.java").is_file() else ""
+    if "FRUIT = CiderPressBlock.APPLES" not in store or oh.FRUIT_TAG != "jugcraft:cider_apples":
+        err("FruitStore.FRUIT is not the Cider Press's fruit (tools/orchard_harvest.py FRUIT_TAG)")
+    kinds = re.search(r"enum Kind implements StringRepresentable \{\s*([A-Z_, ]+);", store)
+    if not kinds or [k.strip().lower() for k in kinds.group(1).split(",")] != list(oh.FRUITS):
+        err("FruitStore.Kind is not tools/orchard_harvest.py FRUITS, in order")
+    climbable = load(RES / "data" / "minecraft" / "tags" / "block" / "climbable.json") or {}
+    if f"{MOD}:{oh.LADDER['block']}" not in climbable.get("values", []):
+        err("The Orchard Ladder is not in #minecraft:climbable")
+    lang = load(ASSETS / "lang" / "en_us.json") or {}
+    if f"message.{MOD}.fruit_store.full" not in lang:
+        err("Message fruit_store.full has no text")
 
 
 def check_pumpkin_king():
@@ -22434,7 +24227,24 @@ def registered_items():
     registered |= set(jimtafacts_computers.items()) | set(jimtafacts_computers.blocks())
     registered |= {metal + '_crate' for metal, _ in storage_crates.TIERS}
     registered |= {metal + '_storage_crate_upgrade' for metal, _ in storage_crates.TIERS[1:]}
+    import cursed_mirror
+    registered |= {cursed_mirror.BLOCK, cursed_mirror.ITEM}
     return registered
+
+
+def check_cursed_mirror():
+    """curse/CursedMirrorBlock and curse/CursedMirror against tools/cursed_mirror.py: the curse length, that breaking
+    gives vanilla Bad Luck, and that the block/item id match."""
+    import cursed_mirror
+    folder = JAVA_ROOT / "curse"
+    block = (folder / "CursedMirrorBlock.java").read_text(encoding="utf-8") if (folder / "CursedMirrorBlock.java").is_file() else ""
+    reg = (folder / "CursedMirror.java").read_text(encoding="utf-8") if (folder / "CursedMirror.java").is_file() else ""
+    if f" CURSE_DAYS = {cursed_mirror.CURSE_DAYS};" not in block:
+        err(f"CursedMirrorBlock.CURSE_DAYS differs from tools/cursed_mirror.py ({cursed_mirror.CURSE_DAYS})")
+    if "MobEffects.UNLUCK" not in block:
+        err("CursedMirrorBlock should give vanilla Bad Luck (MobEffects.UNLUCK) when a player breaks it")
+    if f'ID = "{cursed_mirror.BLOCK}";' not in reg:
+        err(f"CursedMirror.ID differs from tools/cursed_mirror.py ({cursed_mirror.BLOCK})")
 
 
 def main():
@@ -22492,6 +24302,7 @@ def main():
     check_bunkerworks()
     check_fire_control()
     check_raiders()
+    check_cursed_mirror()
     check_plastic()
     check_seasons()
     check_alpine()
@@ -22538,6 +24349,16 @@ def main():
     check_iron_dreadnought()
     check_alpha_werewolf()
     check_pumpkin_king()
+    check_pumpkin_patch()
+    check_orchard_harvest()
+    check_barn_tools()
+    check_fall_garden()
+    check_hearth()
+    check_haunted_midway()
+    check_front_yard()
+    check_party_table()
+    check_clockwork()
+    check_harvest_festival()
     check_hessian_horseman()
     check_cydonian_sentinel()
     check_material_sets()

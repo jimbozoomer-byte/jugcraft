@@ -109,6 +109,30 @@
     {
       "id": "jugcraft:bottle_gourd_stem",
       "required": false
+    },
+    {
+      "id": "jugcraft:turban_squash_stem",
+      "required": false
+    },
+    {
+      "id": "jugcraft:blue_hubbard_squash_stem",
+      "required": false
+    },
+    {
+      "id": "jugcraft:sweet_dumpling_squash_stem",
+      "required": false
+    },
+    {
+      "id": "jugcraft:long_island_cheese_pumpkin_stem",
+      "required": false
+    },
+    {
+      "id": "jugcraft:spoon_gourd_stem",
+      "required": false
+    },
+    {
+      "id": "jugcraft:swan_gourd_stem",
+      "required": false
     }
   ]
 }

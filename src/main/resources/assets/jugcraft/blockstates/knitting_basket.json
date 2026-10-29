@@ -1,0 +1,78 @@
+{
+  "multipart": [
+    {
+      "when": {
+        "facing": "north"
+      },
+      "apply": {
+        "model": "jugcraft:block/knitting_basket"
+      }
+    },
+    {
+      "when": {
+        "facing": "north",
+        "needles": "true"
+      },
+      "apply": {
+        "model": "jugcraft:block/knitting_basket_needles"
+      }
+    },
+    {
+      "when": {
+        "facing": "east"
+      },
+      "apply": {
+        "model": "jugcraft:block/knitting_basket",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "facing": "east",
+        "needles": "true"
+      },
+      "apply": {
+        "model": "jugcraft:block/knitting_basket_needles",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "facing": "south"
+      },
+      "apply": {
+        "model": "jugcraft:block/knitting_basket",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "facing": "south",
+        "needles": "true"
+      },
+      "apply": {
+        "model": "jugcraft:block/knitting_basket_needles",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "facing": "west"
+      },
+      "apply": {
+        "model": "jugcraft:block/knitting_basket",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "facing": "west",
+        "needles": "true"
+      },
+      "apply": {
+        "model": "jugcraft:block/knitting_basket_needles",
+        "y": 270
+      }
+    }
+  ]
+}

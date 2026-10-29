@@ -285,6 +285,9 @@ def all_items():
 
 def feature_of(entry_id):
     """The feature switch that owns a registered ID."""
+    import town_assets
+    if entry_id in town_assets.BLOCKS:
+        return "town"
     import jimtafacts
     if entry_id in jimtafacts.items():
         return "concordance"
@@ -474,5 +477,7 @@ def feature_of(entry_id):
     import industrial_forms
     if entry_id in industrial_forms.blocks():
         return "machines"
+    if entry_id == "cursed_mirror":
+        return "agriculture"
     import pixel_hollows
     return pixel_hollows.feature_of(entry_id)

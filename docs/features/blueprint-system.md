@@ -160,3 +160,79 @@ liquid lost; hand-built structures left as they are; other contributors' decorat
     (before, only a player's break did that), so no part is left on its own and only one item drops.
 - Hand-built structures (tanks built from plates, drone pads, the drone control screen and holo table) still break a
   block at a time, as Justin chose.
+
+## Bio generator preview crash fix (October 28 2026)
+
+Holding an industrial machine item could crash the render thread before placement.
+`LargeMachineBlock.ghost` used the base block's 64-value `PART` property even when
+an industrial form defined a different part range. Both the controller state and
+all preview cells now use `withPart`, matching the existing placement path.
+This also supports forms with more than 64 structural parts. No registry IDs,
+saved states, recipes, costs or progression requirements change.
+
+Regression coverage: `MbsGameTests.industrialMachinePreviewsUseTheirOwnPartRanges`
+checks every preview cell and position against the placement footprint for every
+registered large machine in four orientations. `MbsPreviewClientGameTests` also holds
+both items while aiming at the ground and renders screenshots.
+
+Implemented using OpenAI Codex (GPT-6). Validated October 28 on base 233cca018, Minecraft 26.3 / Fabric Loader 0.19.5 / Fabric API 0.161.0+26.3: repository checks, jar and game-test compilation, the focused server regression (1 required test), and MbsPreviewClientGameTests all passed. Both bio generator screenshots were visually inspected. Tests used a fresh flat creative world. Existing user worlds and multiplayer were not tested.
+
+
+### Full machine preview audit (October 28 2026)
+
+The expanded focused server test passed for 99 registered Jugcraft machines and
+two test fixtures in four orientations (404 previews). Of these, 46 player-facing
+machines and both fixtures lacked the base 64-value part property and would hit
+the original exception. The existing shared fix covers all of them; no additional
+runtime patch or replacement JAR is needed. The other 53 player-facing machines
+also passed. This verifies preview states and positions; rendered-client tests
+remain the two bio generator sizes recorded above.
+
+Affected machines, including the original Bio Generator:
+
+- Electrolytic Separator (`jugcraft:electrolytic_separator`)
+- Bulk Electrolytic Separator (`jugcraft:bulk_electrolytic_separator`)
+- Gas Burning Generator (`jugcraft:gas_burning_generator`)
+- Chemical Infuser (`jugcraft:chemical_infuser`)
+- Bulk Chemical Infuser (`jugcraft:bulk_chemical_infuser`)
+- Chemical Oxidizer (`jugcraft:chemical_oxidizer`)
+- Bulk Chemical Oxidizer (`jugcraft:bulk_chemical_oxidizer`)
+- Industrial Fermenter (`jugcraft:industrial_fermenter`)
+- Bulk Fermenter (`jugcraft:bulk_fermenter`)
+- Bulk Chemical Reactor (`jugcraft:bulk_chemical_reactor`)
+- Anaerobic Digester (`jugcraft:anaerobic_digester`)
+- Coal Gasifier (`jugcraft:coal_gasifier`)
+- Gas Cleanup and Separation Rack (`jugcraft:gas_cleanup_rack`)
+- Bio Generator (`jugcraft:bio_generator`)
+- Large Bio Generator (`jugcraft:large_bio_generator`)
+- Large Gas Burning Generator (`jugcraft:large_gas_burning_generator`)
+- Gas Scrubber (`jugcraft:gas_cleaning_rack`)
+- Biogas Cleaner (`jugcraft:biogas_cleaner`)
+- Digestate Separator (`jugcraft:digestate_separator`)
+- Heated Mashing Station (`jugcraft:mashing_station`)
+- Chemical Distillation Station (`jugcraft:chemical_distillation_station`)
+- Bauxite Digestion Vessel (`jugcraft:bauxite_digester`)
+- Filter Press (`jugcraft:aluminate_filter_press`)
+- Industrial Oven (`jugcraft:alumina_calciner`)
+- Aluminum Reduction Cell (`jugcraft:aluminum_reduction_cell`)
+- Coastal Seawater Intake (`jugcraft:coastal_seawater_intake`)
+- Concentrator (`jugcraft:brine_concentrator`)
+- Mineral Conditioning Station (`jugcraft:mineral_conditioner`)
+- Chloride Drying Oven (`jugcraft:chloride_dryer`)
+- Magnesium Electrolysis Cell (`jugcraft:magnesium_electrolysis_cell`)
+- Titanium Chlorination Vessel (`jugcraft:titanium_chlorinator`)
+- Titanium Reduction Retort (`jugcraft:titanium_reduction_retort`)
+- Polymer Molding Press (`jugcraft:polymer_molding_press`)
+- Monomer Preparation Unit (`jugcraft:monomer_preparation_unit`)
+- Polymerization Kettle (`jugcraft:polymerization_kettle`)
+- Polymer Extruder (`jugcraft:polymer_extruder`)
+- Clean Polymer Reclaimer (`jugcraft:polymer_reclaimer`)
+- Acid Concentrator (`jugcraft:acid_concentrator`)
+- Chemical Dissolution Chamber (`jugcraft:chemical_dissolution_chamber`)
+- Fluorocarbon Reactor (`jugcraft:fluorocarbon_reactor`)
+- Fluoromonomer Cracker (`jugcraft:fluoromonomer_cracker`)
+- PTFE Sintering Oven (`jugcraft:ptfe_sintering_oven`)
+- Lined Fluorochemical Reactor (`jugcraft:lined_fluorochemical_reactor`)
+- Combined Cycle Power Plant (`jugcraft:combined_cycle_power_plant`)
+- Precision Finishing Station (`jugcraft:precision_finisher`)
+- Wafer Wet-processing Bench (`jugcraft:wet_processing_bench`)

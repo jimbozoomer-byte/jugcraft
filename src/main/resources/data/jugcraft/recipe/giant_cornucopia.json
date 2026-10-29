@@ -1,0 +1,27 @@
+{
+  "fabric:load_conditions": [
+    {
+      "condition": "jugcraft:feature_enabled",
+      "feature": "agriculture"
+    }
+  ],
+  "type": "minecraft:crafting_shaped",
+  "category": "building",
+  "pattern": [
+    "SWS",
+    "PBC",
+    "SAS"
+  ],
+  "key": {
+    "S": "minecraft:stick",
+    "W": "minecraft:wheat",
+    "P": "minecraft:pumpkin",
+    "B": "jugcraft:butternut_squash",
+    "C": "jugcraft:corn",
+    "A": "minecraft:apple"
+  },
+  "result": {
+    "id": "jugcraft:giant_cornucopia",
+    "count": 1
+  }
+}

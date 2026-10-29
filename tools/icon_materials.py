@@ -106,6 +106,26 @@ TERRACOTTA = Material((52, 24, 14), (86, 40, 24), (130, 62, 38), (172, 90, 56), 
                       shine=False)
 DEW = Material((30, 60, 90), (60, 100, 140), (90, 140, 190), (126, 192, 232), (206, 238, 255), (240, 250, 255))
 
+# Barn & Harvest Tools' dairy and bakery (tools/item_icons/butter.txt, pancakes.txt): a pale butter yellow, and a golden
+# pancake brown. Foods, not metals: both are flat (no shine).
+BUTTER = Material((58, 50, 22), (140, 124, 66), (210, 192, 118), (234, 220, 156), (246, 238, 196), (252, 250, 228),
+                  shine=False)
+PANCAKE = Material((52, 28, 10), (104, 60, 22), (160, 100, 42), (204, 146, 72), (230, 186, 112), (246, 220, 166),
+                   shine=False)
+
+# Haunted Midway's Cotton Candy (tools/item_icons/cotton_candy.txt): spun sugar floss, a pale pink. A food, not a metal:
+# flat (no shine); a pale material, so its outline may be a third of its mid tone's luma.
+FLOSS = Material((92, 34, 58), (140, 64, 96), (196, 106, 144), (228, 146, 180), (246, 190, 212), (252, 226, 236),
+                 shine=False)
+# Haunted Midway's Midway Ticket (tools/item_icons/midway_ticket.txt): a bright pumpkin-orange card, more yellow and
+# saturated than copper so it can't read as metal. Card, not metal: flat.
+TICKET = Material((70, 30, 4), (120, 56, 8), (200, 98, 8), (238, 142, 22), (250, 182, 48), (254, 220, 124),
+                  shine=False)
+# The Halloween Party Table's Ghost Meringue (tools/item_icons/ghost_meringue.txt): baked meringue, a warm cream white.
+# A food: flat (no shine); a pale material, so its outline may be a third of its mid tone's luma.
+MERINGUE = Material((70, 62, 54), (118, 108, 96), (176, 168, 154), (216, 208, 192), (238, 233, 222), (251, 249, 243),
+                    shine=False)
+
 MATERIALS = {
     "tech_clay": Material((48, 22, 22), (78, 38, 38), (124, 57, 57), (168, 83, 83), (201, 116, 111), (228, 158, 146),
                       shine=False),
@@ -117,6 +137,12 @@ MATERIALS = {
     # the Greenwardens' garden
     "leaf": LEAF, "moss": MOSS, "gloam": GLOAM, "stem": STEM, "petal": PETAL, "straw": STRAW, "terracotta": TERRACOTTA,
     "dew": DEW,
+    # Barn & Harvest Tools' dairy and bakery
+    "butter": BUTTER, "pancake": PANCAKE,
+    # Haunted Midway's cotton candy and ticket
+    "floss": FLOSS, "ticket": TICKET,
+    # the Halloween Party Table's meringue
+    "meringue": MERINGUE,
     # the approved metals ("I like the alternate versions for steel and bronze")
     "bronze": px.BRONZE, "steel": px.STEEL,
     # the arms' other materials (leather, rubber and cloth are wraps: their own outline and dark tones are never drawn,

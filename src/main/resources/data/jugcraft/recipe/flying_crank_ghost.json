@@ -1,0 +1,25 @@
+{
+  "fabric:load_conditions": [
+    {
+      "condition": "jugcraft:feature_enabled",
+      "feature": "agriculture"
+    }
+  ],
+  "type": "minecraft:crafting_shaped",
+  "category": "building",
+  "pattern": [
+    "SCS",
+    "WIW",
+    " I "
+  ],
+  "key": {
+    "S": "minecraft:string",
+    "C": "minecraft:clock",
+    "W": "minecraft:white_wool",
+    "I": "minecraft:iron_ingot"
+  },
+  "result": {
+    "id": "jugcraft:flying_crank_ghost",
+    "count": 1
+  }
+}

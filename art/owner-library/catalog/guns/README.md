@@ -1,6 +1,6 @@
 # Guns
 
-3,825 supplied files.
+3,831 supplied files.
 
 [Library guide](../../README.md) · [Original folder](../../originals/Blocks/Guns)
 
@@ -8,9 +8,9 @@ The [models](../../originals/Blocks/Guns/models) folder (added 7 October 2026, f
 
 The [effect](../../originals/Blocks/Guns/effect) folder (added 8 October 2026, files 354–371) holds the scope reticles and lens vignettes the scope models draw (`effect/...`), and muzzle flash frames; see the [library guide](../../README.md#effect-textures-8-october-2026).
 
-The [geo](../../originals/Blocks/Guns/geo) folder (added 23 October 2026, files 3809–3824) holds GeckoLib geometry from the owner's re-sent gun collection: the Grandle OG's (`geo/item/gun/grandle_og.geo.json`), the one gun whose body has no Java model under `models/special/`, and the MAS 55's, the Prush Gun's, the Valora's, the Krauser's, the Soul Drummer's, the Uppercut's, the MAS Peddler's, the Inertial's, the Zilk 45's, the Drill's, the Drill Conversion's, the Lockewood's, the Cyclone's, the Minksy's and the Shard Culler's (`mas_55`, `prush_gun`, `valora`, `krauser`, `soul_drummer`, `uppercut`, `mas_peddler`, `inertial`, `zilk_45`, `drill`, `drill_conversion`, `lockewood`, `cyclone`, `minksy`, `shard_culler`), the owner's later edits of those guns. See the [library guide](../../README.md#gun-geometry-23-october-2026).
+The [geo](../../originals/Blocks/Guns/geo) folder (added 23 October 2026, files 3809–3830) holds GeckoLib geometry from the owner's re-sent gun collection: the Grandle OG's (`geo/item/gun/grandle_og.geo.json`), the one gun whose body has no Java model under `models/special/`, and the MAS 55's, the Prush Gun's, the Valora's, the Krauser's, the Soul Drummer's, the Uppercut's, the MAS Peddler's, the Inertial's, the Zilk 45's, the Drill's, the Drill Conversion's, the Lockewood's, the Cyclone's, the Minksy's, the Shard Culler's, the Mokova's, the Kalaskah's, the Saketini Ironport's, the Gyrojet Pistol's, the Bomb Lance's and the Floundergat's (`mas_55`, `prush_gun`, `valora`, `krauser`, `soul_drummer`, `uppercut`, `mas_peddler`, `inertial`, `zilk_45`, `drill`, `drill_conversion`, `lockewood`, `cyclone`, `minksy`, `shard_culler`, `mokova`, `kalaskah`, `saketini_ironport`, `gyrojet_pistol`, `bomb_lance`, `floundergat`), the owner's later edits of those guns. See the [library guide](../../README.md#gun-geometry-23-october-2026).
 
-The [mob_effect](../../originals/Blocks/Guns/mob_effect) folder (added 27 October 2026, file 3825) holds the owner's Lacerated effect icon from the same collection, the guns' Bleeding icon. See the [library guide](../../README.md#gun-geometry-23-october-2026).
+The [mob_effect](../../originals/Blocks/Guns/mob_effect) folder (added 27 October 2026, file 3831) holds the owner's Lacerated effect icon from the same collection, the guns' Bleeding icon. See the [library guide](../../README.md#gun-geometry-23-october-2026).
 
 - [Files 1–250](page-001.md)
 - [Files 251–500](page-002.md)
@@ -27,4 +27,4 @@ The [mob_effect](../../originals/Blocks/Guns/mob_effect) folder (added 27 Octobe
 - [Files 3001–3250](page-013.md)
 - [Files 3251–3500](page-014.md)
 - [Files 3501–3750](page-015.md)
-- [Files 3751–3825](page-016.md)
+- [Files 3751–3831](page-016.md)

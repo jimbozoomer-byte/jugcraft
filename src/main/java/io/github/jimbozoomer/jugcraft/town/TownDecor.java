@@ -195,13 +195,28 @@ public final class TownDecor {
 			int[] b = site.blocks()[i];
 			BlockState wanted = stateFor(data, site, theme, b[3]);
 			BlockPos pos = origin.offset(b[0], b[1], b[2]);
-			if (level.getBlockState(pos) != wanted) {
-				TownBuilder.set(level, pos, wanted);
-			}
+            String previous = state.siteTheme(index);
+            int base = data.index(b[0], b[1], b[2]);
+            BlockState expected = previous.isEmpty() ? data.state(base) : stateFor(data, site, previous, b[3]);
+            updateAuthoredDecor(level,pos,expected,wanted);
 		}
 		state.setSiteTheme(index, theme);
 		CLAIMS.remove(index);
 	}
+
+    /** Compare-and-set one seasonal cell, retaining a durable owner override after any conflict. */
+    static boolean updateAuthoredDecor(ServerLevel level, BlockPos pos, BlockState expected, BlockState wanted) {
+        var progress = TownUpgrades.progress(level);
+        if (progress.preservedDecor.contains(pos.asLong())) return false;
+        if (level.getBlockState(pos) == wanted) return true;
+        var entity = level.getBlockEntity(pos);
+        boolean plainBanner = entity instanceof net.minecraft.world.level.block.entity.BannerBlockEntity banner
+            && banner.getCustomName() == null && banner.getPatterns().layers().isEmpty();
+        if (level.getBlockState(pos) != expected || (entity != null && !plainBanner) || TownUpgrades.fixtureNearby(level,pos)) {
+            progress.preservedDecor.add(pos.asLong()); progress.setDirty(); return false;
+        }
+        TownBuilder.set(level,pos,wanted);return true;
+    }
 
 	/** What a site's block shows in a theme (air where the theme leaves it empty). */
 	public static BlockState stateFor(TownData data, TownData.Site site, String theme, int slot) {

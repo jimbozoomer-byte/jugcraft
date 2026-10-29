@@ -1,0 +1,65 @@
+{
+  "parent": "minecraft:block/block",
+  "ambientocclusion": false,
+  "textures": {
+    "p": "jugcraft:block/hay_wagon",
+    "particle": "jugcraft:block/hay_wagon"
+  },
+  "elements": [
+    {
+      "from": [
+        0,
+        13.0,
+        0
+      ],
+      "to": [
+        16,
+        14.5,
+        16
+      ],
+      "faces": {
+        "up": {
+          "uv": [
+            0.625,
+            3.5,
+            2.625,
+            5.5
+          ],
+          "texture": "#p"
+        },
+        "down": {
+          "uv": [
+            0.625,
+            1.5,
+            2.625,
+            3.5
+          ],
+          "texture": "#p"
+        }
+      }
+    },
+    {
+      "from": [
+        0,
+        14.5,
+        0
+      ],
+      "to": [
+        16,
+        16,
+        16
+      ],
+      "faces": {
+        "down": {
+          "uv": [
+            4.25,
+            1.4375,
+            6.25,
+            3.4375
+          ],
+          "texture": "#p"
+        }
+      }
+    }
+  ]
+}

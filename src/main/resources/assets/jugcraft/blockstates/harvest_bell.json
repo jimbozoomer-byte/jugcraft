@@ -1,0 +1,124 @@
+{
+  "variants": {
+    "facing=north,lit=false,part=0,runner=false": {
+      "model": "jugcraft:block/harvest_bell_0"
+    },
+    "facing=north,lit=false,part=0,runner=true": {
+      "model": "jugcraft:block/harvest_bell_bell"
+    },
+    "facing=north,lit=true,part=0,runner=false": {
+      "model": "jugcraft:block/harvest_bell_0"
+    },
+    "facing=north,lit=true,part=0,runner=true": {
+      "model": "jugcraft:block/harvest_bell_bell"
+    },
+    "facing=north,lit=false,part=1,runner=false": {
+      "model": "jugcraft:block/harvest_bell_1"
+    },
+    "facing=north,lit=false,part=1,runner=true": {
+      "model": "jugcraft:block/harvest_bell_bell"
+    },
+    "facing=north,lit=true,part=1,runner=false": {
+      "model": "jugcraft:block/harvest_bell_1"
+    },
+    "facing=north,lit=true,part=1,runner=true": {
+      "model": "jugcraft:block/harvest_bell_bell"
+    },
+    "facing=east,lit=false,part=0,runner=false": {
+      "model": "jugcraft:block/harvest_bell_0",
+      "y": 90
+    },
+    "facing=east,lit=false,part=0,runner=true": {
+      "model": "jugcraft:block/harvest_bell_bell",
+      "y": 90
+    },
+    "facing=east,lit=true,part=0,runner=false": {
+      "model": "jugcraft:block/harvest_bell_0",
+      "y": 90
+    },
+    "facing=east,lit=true,part=0,runner=true": {
+      "model": "jugcraft:block/harvest_bell_bell",
+      "y": 90
+    },
+    "facing=east,lit=false,part=1,runner=false": {
+      "model": "jugcraft:block/harvest_bell_1",
+      "y": 90
+    },
+    "facing=east,lit=false,part=1,runner=true": {
+      "model": "jugcraft:block/harvest_bell_bell",
+      "y": 90
+    },
+    "facing=east,lit=true,part=1,runner=false": {
+      "model": "jugcraft:block/harvest_bell_1",
+      "y": 90
+    },
+    "facing=east,lit=true,part=1,runner=true": {
+      "model": "jugcraft:block/harvest_bell_bell",
+      "y": 90
+    },
+    "facing=south,lit=false,part=0,runner=false": {
+      "model": "jugcraft:block/harvest_bell_0",
+      "y": 180
+    },
+    "facing=south,lit=false,part=0,runner=true": {
+      "model": "jugcraft:block/harvest_bell_bell",
+      "y": 180
+    },
+    "facing=south,lit=true,part=0,runner=false": {
+      "model": "jugcraft:block/harvest_bell_0",
+      "y": 180
+    },
+    "facing=south,lit=true,part=0,runner=true": {
+      "model": "jugcraft:block/harvest_bell_bell",
+      "y": 180
+    },
+    "facing=south,lit=false,part=1,runner=false": {
+      "model": "jugcraft:block/harvest_bell_1",
+      "y": 180
+    },
+    "facing=south,lit=false,part=1,runner=true": {
+      "model": "jugcraft:block/harvest_bell_bell",
+      "y": 180
+    },
+    "facing=south,lit=true,part=1,runner=false": {
+      "model": "jugcraft:block/harvest_bell_1",
+      "y": 180
+    },
+    "facing=south,lit=true,part=1,runner=true": {
+      "model": "jugcraft:block/harvest_bell_bell",
+      "y": 180
+    },
+    "facing=west,lit=false,part=0,runner=false": {
+      "model": "jugcraft:block/harvest_bell_0",
+      "y": 270
+    },
+    "facing=west,lit=false,part=0,runner=true": {
+      "model": "jugcraft:block/harvest_bell_bell",
+      "y": 270
+    },
+    "facing=west,lit=true,part=0,runner=false": {
+      "model": "jugcraft:block/harvest_bell_0",
+      "y": 270
+    },
+    "facing=west,lit=true,part=0,runner=true": {
+      "model": "jugcraft:block/harvest_bell_bell",
+      "y": 270
+    },
+    "facing=west,lit=false,part=1,runner=false": {
+      "model": "jugcraft:block/harvest_bell_1",
+      "y": 270
+    },
+    "facing=west,lit=false,part=1,runner=true": {
+      "model": "jugcraft:block/harvest_bell_bell",
+      "y": 270
+    },
+    "facing=west,lit=true,part=1,runner=false": {
+      "model": "jugcraft:block/harvest_bell_1",
+      "y": 270
+    },
+    "facing=west,lit=true,part=1,runner=true": {
+      "model": "jugcraft:block/harvest_bell_bell",
+      "y": 270
+    }
+  }
+}

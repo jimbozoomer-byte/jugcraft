@@ -1,0 +1,137 @@
+{
+  "parent": "minecraft:block/block",
+  "ambientocclusion": false,
+  "textures": {
+    "p": "jugcraft:block/harvest_bell",
+    "particle": "jugcraft:block/harvest_bell"
+  },
+  "elements": [
+    {
+      "from": [
+        4.0,
+        0.0,
+        4.0
+      ],
+      "to": [
+        12.0,
+        2.0,
+        12.0
+      ],
+      "faces": {
+        "north": {
+          "uv": [
+            11.25,
+            0.0,
+            13.25,
+            0.5
+          ],
+          "texture": "#p"
+        },
+        "south": {
+          "uv": [
+            11.25,
+            0.0,
+            13.25,
+            0.5
+          ],
+          "texture": "#p"
+        },
+        "east": {
+          "uv": [
+            11.25,
+            0.0,
+            13.25,
+            0.5
+          ],
+          "texture": "#p"
+        },
+        "west": {
+          "uv": [
+            11.25,
+            0.0,
+            13.25,
+            0.5
+          ],
+          "texture": "#p"
+        },
+        "up": {
+          "uv": [
+            0.75,
+            0.0,
+            2.75,
+            2.0
+          ],
+          "texture": "#p"
+        },
+        "down": {
+          "uv": [
+            0.75,
+            0.0,
+            2.75,
+            2.0
+          ],
+          "texture": "#p"
+        }
+      }
+    },
+    {
+      "from": [
+        7.0,
+        2.0,
+        7.0
+      ],
+      "to": [
+        9.0,
+        16,
+        9.0
+      ],
+      "faces": {
+        "north": {
+          "uv": [
+            0.0,
+            1.9186,
+            0.5,
+            5.5
+          ],
+          "texture": "#p"
+        },
+        "south": {
+          "uv": [
+            0.0,
+            1.9186,
+            0.5,
+            5.5
+          ],
+          "texture": "#p"
+        },
+        "east": {
+          "uv": [
+            0.0,
+            1.9186,
+            0.5,
+            5.5
+          ],
+          "texture": "#p"
+        },
+        "west": {
+          "uv": [
+            0.0,
+            1.9186,
+            0.5,
+            5.5
+          ],
+          "texture": "#p"
+        },
+        "down": {
+          "uv": [
+            15.0,
+            0.0,
+            15.5,
+            0.5
+          ],
+          "texture": "#p"
+        }
+      }
+    }
+  ]
+}

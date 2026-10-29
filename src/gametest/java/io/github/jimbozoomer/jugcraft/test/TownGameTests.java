@@ -85,7 +85,7 @@ public class TownGameTests {
 				level.setBlockAndUpdate(at, block.defaultBlockState()); var before = level.getBlockState(at);
 				h.assertTrue(click.get().consumesAction() && level.getBlockState(at) != before, "Public control works: " + block);
 			}
-			for (var block : List.of(Blocks.CRAFTING_TABLE, Blocks.STONECUTTER, Blocks.SMITHING_TABLE, Blocks.GRINDSTONE, Blocks.ANVIL, Blocks.ENCHANTING_TABLE, Blocks.ENDER_CHEST, io.github.jimbozoomer.jugcraft.town.JugcraftTown.ATM)) {
+			for (var block : List.of(Blocks.CRAFTING_TABLE, Blocks.STONECUTTER, Blocks.SMITHING_TABLE, Blocks.GRINDSTONE, Blocks.ANVIL, Blocks.ENCHANTING_TABLE, Blocks.ENDER_CHEST, io.github.jimbozoomer.jugcraft.town.JugcraftTown.ATM, io.github.jimbozoomer.jugcraft.town.JugcraftTown.COMMISSION_BOARD)) {
 				level.setBlockAndUpdate(at, block.defaultBlockState()); player.closeContainer();
 				h.assertTrue(click.get().consumesAction() && player.containerMenu != player.inventoryMenu, "Public workstation/personal ender chest opens: " + block);
 				player.closeContainer();
@@ -98,8 +98,16 @@ public class TownGameTests {
 				h.assertTrue(click.get() == net.minecraft.world.InteractionResult.FAIL && player.containerMenu == player.inventoryMenu, "Town inventory stays closed: " + block);
 				if (entity instanceof net.minecraft.world.Container container) { h.assertTrue(container.getItem(0).getCount() == 3, "Stored items untouched"); container.clearContent(); }
 			}
-			level.setBlockAndUpdate(at, io.github.jimbozoomer.jugcraft.menagerie.Menagerie.BLOCKS.get("household_oak_chair").defaultBlockState());
-			h.assertTrue(click.get().consumesAction() && player.isPassenger(), "Visitor can sit on town furniture"); player.stopRiding();
+			for (String seat : List.of("household_oak_chair", "crafted_oak_chair", "crafted_oak_bench")) {
+				var block = net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(net.minecraft.resources.Identifier.parse("jugcraft:" + seat));
+				h.assertTrue(block != Blocks.AIR, "Town seat is registered: " + seat);
+				level.setBlockAndUpdate(at, block.defaultBlockState());
+				h.assertTrue(click.get().consumesAction() && player.isPassenger(), "Visitor can sit on town furniture: " + seat);
+				var occupiedSeat = player.getVehicle();
+				player.stopRiding();
+				// This loop replaces three chairs in the same tick, before an empty seat normally self-cleans.
+				occupiedSeat.discard();
+			}
 			level.setBlockAndUpdate(at, Blocks.STONE.defaultBlockState());
 			player.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(Items.COBBLESTONE,4)); player.setShiftKeyDown(true);
 			player.gameMode.useItemOn(player, level, player.getMainHandItem(), InteractionHand.MAIN_HAND, hit);

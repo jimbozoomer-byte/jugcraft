@@ -1,0 +1,87 @@
+{
+  "parent": "minecraft:block/block",
+  "ambientocclusion": false,
+  "textures": {
+    "p": "jugcraft:block/orchard_ladder",
+    "particle": "jugcraft:block/orchard_ladder"
+  },
+  "elements": [
+    {
+      "from": [
+        7.25,
+        0.25,
+        1.8241
+      ],
+      "to": [
+        8.75,
+        13.5093,
+        3.3241
+      ],
+      "faces": {
+        "north": {
+          "uv": [
+            0.75,
+            0.0,
+            1.25,
+            3.5
+          ],
+          "texture": "#p"
+        },
+        "south": {
+          "uv": [
+            0.75,
+            0.0,
+            1.25,
+            3.5
+          ],
+          "texture": "#p"
+        },
+        "east": {
+          "uv": [
+            0.75,
+            0.0,
+            1.25,
+            3.5
+          ],
+          "texture": "#p"
+        },
+        "west": {
+          "uv": [
+            0.75,
+            0.0,
+            1.25,
+            3.5
+          ],
+          "texture": "#p"
+        },
+        "up": {
+          "uv": [
+            7.0,
+            4.75,
+            7.5,
+            5.25
+          ],
+          "texture": "#p"
+        },
+        "down": {
+          "uv": [
+            7.0,
+            4.75,
+            7.5,
+            5.25
+          ],
+          "texture": "#p"
+        }
+      },
+      "rotation": {
+        "origin": [
+          8.0,
+          0.25,
+          2.5741
+        ],
+        "axis": "x",
+        "angle": -22.5
+      }
+    }
+  ]
+}

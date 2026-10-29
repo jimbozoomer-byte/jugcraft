@@ -1,0 +1,34 @@
+{
+  "variants": {
+    "facing=north,runner=false": {
+      "model": "jugcraft:block/chopping_block"
+    },
+    "facing=north,runner=true": {
+      "model": "jugcraft:block/chopping_block_hatchet"
+    },
+    "facing=east,runner=false": {
+      "model": "jugcraft:block/chopping_block",
+      "y": 90
+    },
+    "facing=east,runner=true": {
+      "model": "jugcraft:block/chopping_block_hatchet",
+      "y": 90
+    },
+    "facing=south,runner=false": {
+      "model": "jugcraft:block/chopping_block",
+      "y": 180
+    },
+    "facing=south,runner=true": {
+      "model": "jugcraft:block/chopping_block_hatchet",
+      "y": 180
+    },
+    "facing=west,runner=false": {
+      "model": "jugcraft:block/chopping_block",
+      "y": 270
+    },
+    "facing=west,runner=true": {
+      "model": "jugcraft:block/chopping_block_hatchet",
+      "y": 270
+    }
+  }
+}

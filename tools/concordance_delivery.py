@@ -190,10 +190,11 @@ MATRIX = {
         [],
         "Not seen in a client"),
     "iris": (
-        "Not used: nothing in the Concordance needs a shader",
-        "nothing changes",
-        [],
-        "No shader pack has been tried with the Concordance"),
+        "Optional Windows GeckoLib emissive and shadow pipeline associations; shader reload is bound to F8",
+        "ordinary unshaded rendering; the guarded adapter does not load",
+        ["GeckoGlowClientGameTests"],
+        "Disposable BSL and Bliss galleries passed, as did the no-Iris gallery; the owner's live-world black streaks "
+        "still need visual confirmation in the affected scene"),
     "sodium": (
         "Not used",
         "nothing changes",
@@ -225,7 +226,7 @@ MATRIX = {
 }
 
 # Libraries the Concordance does not use: their mod ids must not appear in Jugcraft's code.
-UNUSED = {"iris": ("net.irisshaders", "iris"), "sodium": ("net.caffeinemc", "sodium")}
+UNUSED = {"sodium": ("net.caffeinemc", "sodium")}
 
 
 def lock():

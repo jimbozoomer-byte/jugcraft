@@ -1,0 +1,24 @@
+{
+  "fabric:load_conditions": [
+    {
+      "condition": "jugcraft:feature_enabled",
+      "feature": "agriculture"
+    }
+  ],
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    " S ",
+    "MMM",
+    "P P"
+  ],
+  "key": {
+    "S": "minecraft:stick",
+    "M": "minecraft:smooth_stone_slab",
+    "P": "#minecraft:planks"
+  },
+  "result": {
+    "id": "jugcraft:quern",
+    "count": 1
+  }
+}

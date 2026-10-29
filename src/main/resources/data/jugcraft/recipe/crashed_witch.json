@@ -1,0 +1,26 @@
+{
+  "fabric:load_conditions": [
+    {
+      "condition": "jugcraft:feature_enabled",
+      "feature": "agriculture"
+    }
+  ],
+  "type": "minecraft:crafting_shaped",
+  "category": "building",
+  "pattern": [
+    "WOW",
+    "WOW",
+    "LSH"
+  ],
+  "key": {
+    "W": "minecraft:black_wool",
+    "O": "minecraft:orange_wool",
+    "L": "minecraft:leather",
+    "S": "minecraft:stick",
+    "H": "minecraft:wheat"
+  },
+  "result": {
+    "id": "jugcraft:crashed_witch",
+    "count": 1
+  }
+}

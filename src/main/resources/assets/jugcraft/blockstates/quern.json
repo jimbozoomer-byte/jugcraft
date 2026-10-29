@@ -1,0 +1,64 @@
+{
+  "variants": {
+    "facing=north,loaded=false,runner=false": {
+      "model": "jugcraft:block/quern"
+    },
+    "facing=north,loaded=false,runner=true": {
+      "model": "jugcraft:block/quern_runner"
+    },
+    "facing=north,loaded=true,runner=false": {
+      "model": "jugcraft:block/quern"
+    },
+    "facing=north,loaded=true,runner=true": {
+      "model": "jugcraft:block/quern_runner_loaded"
+    },
+    "facing=east,loaded=false,runner=false": {
+      "model": "jugcraft:block/quern",
+      "y": 90
+    },
+    "facing=east,loaded=false,runner=true": {
+      "model": "jugcraft:block/quern_runner",
+      "y": 90
+    },
+    "facing=east,loaded=true,runner=false": {
+      "model": "jugcraft:block/quern",
+      "y": 90
+    },
+    "facing=east,loaded=true,runner=true": {
+      "model": "jugcraft:block/quern_runner_loaded",
+      "y": 90
+    },
+    "facing=south,loaded=false,runner=false": {
+      "model": "jugcraft:block/quern",
+      "y": 180
+    },
+    "facing=south,loaded=false,runner=true": {
+      "model": "jugcraft:block/quern_runner",
+      "y": 180
+    },
+    "facing=south,loaded=true,runner=false": {
+      "model": "jugcraft:block/quern",
+      "y": 180
+    },
+    "facing=south,loaded=true,runner=true": {
+      "model": "jugcraft:block/quern_runner_loaded",
+      "y": 180
+    },
+    "facing=west,loaded=false,runner=false": {
+      "model": "jugcraft:block/quern",
+      "y": 270
+    },
+    "facing=west,loaded=false,runner=true": {
+      "model": "jugcraft:block/quern_runner",
+      "y": 270
+    },
+    "facing=west,loaded=true,runner=false": {
+      "model": "jugcraft:block/quern",
+      "y": 270
+    },
+    "facing=west,loaded=true,runner=true": {
+      "model": "jugcraft:block/quern_runner_loaded",
+      "y": 270
+    }
+  }
+}

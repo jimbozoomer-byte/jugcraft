@@ -13,7 +13,7 @@ are laid out on the texture as a vanilla model box's are (see CostumeLayer).
 """
 import math
 
-from agriculture import OUTFITS, COSTUME_TRUNK, COSTUME_TAG, COSTUME_HAT_TAG
+from agriculture import OUTFITS, COSTUME_TRUNK, COSTUME_TAG, COSTUME_HAT_TAG, DISGUISE_TAG, DISGUISES
 from decor_data import MOD, HORIZONTAL, rid, box, block_model, self_drop, flat_item, turned
 
 PARTS = ("head", "body", "right_arm", "left_arm", "right_leg", "left_leg")
@@ -221,3 +221,9 @@ def tags(tags):
     for name in OUTFITS:
         tags.add("item", COSTUME_TAG, rid(name))
         tags.add("item", COSTUME_HAT_TAG, rid(name))
+    # Costume disguises: which costumes fool which monsters (Disguises.java).
+    for kind, entry in DISGUISES["kinds"].items():
+        for item in entry["costumes"]:
+            tags.add("item", f"{DISGUISE_TAG}/{kind}", item)
+        for entity in entry["fools"]:
+            tags.add("entity_type", f"{DISGUISE_TAG}/{kind}", entity)

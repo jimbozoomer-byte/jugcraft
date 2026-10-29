@@ -1,0 +1,49 @@
+{
+  "variants": {
+    "crates=1,facing=north": {
+      "model": "jugcraft:block/red_apple_crate_1"
+    },
+    "crates=2,facing=north": {
+      "model": "jugcraft:block/red_apple_crate_2"
+    },
+    "crates=3,facing=north": {
+      "model": "jugcraft:block/red_apple_crate_3"
+    },
+    "crates=1,facing=east": {
+      "model": "jugcraft:block/red_apple_crate_1",
+      "y": 90
+    },
+    "crates=2,facing=east": {
+      "model": "jugcraft:block/red_apple_crate_2",
+      "y": 90
+    },
+    "crates=3,facing=east": {
+      "model": "jugcraft:block/red_apple_crate_3",
+      "y": 90
+    },
+    "crates=1,facing=south": {
+      "model": "jugcraft:block/red_apple_crate_1",
+      "y": 180
+    },
+    "crates=2,facing=south": {
+      "model": "jugcraft:block/red_apple_crate_2",
+      "y": 180
+    },
+    "crates=3,facing=south": {
+      "model": "jugcraft:block/red_apple_crate_3",
+      "y": 180
+    },
+    "crates=1,facing=west": {
+      "model": "jugcraft:block/red_apple_crate_1",
+      "y": 270
+    },
+    "crates=2,facing=west": {
+      "model": "jugcraft:block/red_apple_crate_2",
+      "y": 270
+    },
+    "crates=3,facing=west": {
+      "model": "jugcraft:block/red_apple_crate_3",
+      "y": 270
+    }
+  }
+}

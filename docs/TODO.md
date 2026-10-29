@@ -819,3 +819,20 @@ limits and exact results belong in features/jimtafacts-b-h-local.md.
 - [x] Codex underground/underwater half: nine cave layouts, four submerged glowstone patterns, depth-aware discovery cadence, permanent 3D spacing and excavation protections. Combined compilation, 70 native tests, 393 scheduler assertions and both rendered galleries passed; feature branches only ([herobrine-depths.md](features/herobrine-depths.md)).
 - [x] Claude sky/surface half: six floating-island castle/manor/monastery variants with interiors and three surface ruins; shared queue and named commands integrated. Full state/sign/undo checks and rendered gallery passed together with the underground half ([herobrine-sky.md](features/herobrine-sky.md)). Human playtesting and live deployment remain separate.
 - [x] Preserve all world structures indefinitely: no proximity/seasonal cleanup or resetting player modifications; only Herobrine disappears. Explicit operator undo remains a maintenance tool, preserving player edits and adopted containers. Persistence/approach/undo native regressions passed.
+
+## Living city local batch — 28 October 2026
+
+- [x] Integrate NPC work/evening/late-bed routines, animations, dialogue and shop hours from attached Claude locally; preserve identities. Idle gestures yield to active combat.
+- [x] Review additive decoration revision 4 against byte-identical frozen revision 3: 63 additions into authored air, no church-plot changes, protected owner fixtures and seasonal edits. Existing worlds require explicit conservative migration.
+- [x] Validate local commission board, partial deliveries, capped Jugs claims, party contribution tracking, public interactions and seasonal edit preservation together: full combined native baseline plus scoped large-board and rendered regressions.
+- [x] Replace the miniature commission prop with a 3×3 noticeboard on the south edge of the square, clear of market stalls, with nine-cell placement protection and all-panel interaction.
+- [ ] Owner visual playtest before any living-city server/client deployment. See [local feature record](features/living-city-local.md).
+
+- [x] Lower local city buying/commission payouts against the owner’s 1 gold = 1 Jug peg; preserve balances. Diamond peg remains undecided (25 or 50); no conversion added.
+- [x] Keep aspen foliage visible in its winter state; preserve saved states and gold autumn leaves.
+- [x] Reproduce and fix the shared GeckoLib/Iris emissive-pipeline error locally; rendered BSL, Bliss and optional-Iris-absent tests passed. See [rendering investigation](features/rendering-lines-oct28.md).
+- [ ] Confirm the original black-line artifact is gone in the owner’s affected scene with that fix. The isolated baseline reproduced the log error, not the exact visible streaks; no deployment yet.
+## Cursed Mirror — 27 October 2026
+
+- [x] The Cursed Mirror: a gilt standing mirror that gives seven days of vanilla Bad Luck when a player breaks it, with a night-time face flicker on the client ([cursed-mirror.md](features/cursed-mirror.md)). Implemented; CI pending, not yet seen in a client.
+- [ ] Still ideas, if the owner wants them: a matched set of smaller wall mirrors, and a rare chance the face in the glass is a specific unmasked crook.

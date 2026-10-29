@@ -1,0 +1,364 @@
+{
+  "variants": {
+    "facing=north,lit=false,part=0": {
+      "model": "jugcraft:block/giant_cornucopia_0"
+    },
+    "facing=north,lit=false,part=1": {
+      "model": "jugcraft:block/giant_cornucopia_1"
+    },
+    "facing=north,lit=false,part=2": {
+      "model": "jugcraft:block/giant_cornucopia_2"
+    },
+    "facing=north,lit=false,part=3": {
+      "model": "jugcraft:block/giant_cornucopia_3"
+    },
+    "facing=north,lit=false,part=4": {
+      "model": "jugcraft:block/giant_cornucopia_4"
+    },
+    "facing=north,lit=false,part=5": {
+      "model": "jugcraft:block/giant_cornucopia_5"
+    },
+    "facing=north,lit=false,part=6": {
+      "model": "jugcraft:block/giant_cornucopia_6"
+    },
+    "facing=north,lit=false,part=7": {
+      "model": "jugcraft:block/giant_cornucopia_7"
+    },
+    "facing=north,lit=false,part=8": {
+      "model": "jugcraft:block/giant_cornucopia_8"
+    },
+    "facing=north,lit=false,part=9": {
+      "model": "jugcraft:block/giant_cornucopia_9"
+    },
+    "facing=north,lit=false,part=10": {
+      "model": "jugcraft:block/giant_cornucopia_10"
+    },
+    "facing=north,lit=false,part=11": {
+      "model": "jugcraft:block/giant_cornucopia_11"
+    },
+    "facing=north,lit=true,part=0": {
+      "model": "jugcraft:block/giant_cornucopia_0"
+    },
+    "facing=north,lit=true,part=1": {
+      "model": "jugcraft:block/giant_cornucopia_1"
+    },
+    "facing=north,lit=true,part=2": {
+      "model": "jugcraft:block/giant_cornucopia_2"
+    },
+    "facing=north,lit=true,part=3": {
+      "model": "jugcraft:block/giant_cornucopia_3"
+    },
+    "facing=north,lit=true,part=4": {
+      "model": "jugcraft:block/giant_cornucopia_4"
+    },
+    "facing=north,lit=true,part=5": {
+      "model": "jugcraft:block/giant_cornucopia_5"
+    },
+    "facing=north,lit=true,part=6": {
+      "model": "jugcraft:block/giant_cornucopia_6"
+    },
+    "facing=north,lit=true,part=7": {
+      "model": "jugcraft:block/giant_cornucopia_7"
+    },
+    "facing=north,lit=true,part=8": {
+      "model": "jugcraft:block/giant_cornucopia_8"
+    },
+    "facing=north,lit=true,part=9": {
+      "model": "jugcraft:block/giant_cornucopia_9"
+    },
+    "facing=north,lit=true,part=10": {
+      "model": "jugcraft:block/giant_cornucopia_10"
+    },
+    "facing=north,lit=true,part=11": {
+      "model": "jugcraft:block/giant_cornucopia_11"
+    },
+    "facing=east,lit=false,part=0": {
+      "model": "jugcraft:block/giant_cornucopia_0",
+      "y": 90
+    },
+    "facing=east,lit=false,part=1": {
+      "model": "jugcraft:block/giant_cornucopia_1",
+      "y": 90
+    },
+    "facing=east,lit=false,part=2": {
+      "model": "jugcraft:block/giant_cornucopia_2",
+      "y": 90
+    },
+    "facing=east,lit=false,part=3": {
+      "model": "jugcraft:block/giant_cornucopia_3",
+      "y": 90
+    },
+    "facing=east,lit=false,part=4": {
+      "model": "jugcraft:block/giant_cornucopia_4",
+      "y": 90
+    },
+    "facing=east,lit=false,part=5": {
+      "model": "jugcraft:block/giant_cornucopia_5",
+      "y": 90
+    },
+    "facing=east,lit=false,part=6": {
+      "model": "jugcraft:block/giant_cornucopia_6",
+      "y": 90
+    },
+    "facing=east,lit=false,part=7": {
+      "model": "jugcraft:block/giant_cornucopia_7",
+      "y": 90
+    },
+    "facing=east,lit=false,part=8": {
+      "model": "jugcraft:block/giant_cornucopia_8",
+      "y": 90
+    },
+    "facing=east,lit=false,part=9": {
+      "model": "jugcraft:block/giant_cornucopia_9",
+      "y": 90
+    },
+    "facing=east,lit=false,part=10": {
+      "model": "jugcraft:block/giant_cornucopia_10",
+      "y": 90
+    },
+    "facing=east,lit=false,part=11": {
+      "model": "jugcraft:block/giant_cornucopia_11",
+      "y": 90
+    },
+    "facing=east,lit=true,part=0": {
+      "model": "jugcraft:block/giant_cornucopia_0",
+      "y": 90
+    },
+    "facing=east,lit=true,part=1": {
+      "model": "jugcraft:block/giant_cornucopia_1",
+      "y": 90
+    },
+    "facing=east,lit=true,part=2": {
+      "model": "jugcraft:block/giant_cornucopia_2",
+      "y": 90
+    },
+    "facing=east,lit=true,part=3": {
+      "model": "jugcraft:block/giant_cornucopia_3",
+      "y": 90
+    },
+    "facing=east,lit=true,part=4": {
+      "model": "jugcraft:block/giant_cornucopia_4",
+      "y": 90
+    },
+    "facing=east,lit=true,part=5": {
+      "model": "jugcraft:block/giant_cornucopia_5",
+      "y": 90
+    },
+    "facing=east,lit=true,part=6": {
+      "model": "jugcraft:block/giant_cornucopia_6",
+      "y": 90
+    },
+    "facing=east,lit=true,part=7": {
+      "model": "jugcraft:block/giant_cornucopia_7",
+      "y": 90
+    },
+    "facing=east,lit=true,part=8": {
+      "model": "jugcraft:block/giant_cornucopia_8",
+      "y": 90
+    },
+    "facing=east,lit=true,part=9": {
+      "model": "jugcraft:block/giant_cornucopia_9",
+      "y": 90
+    },
+    "facing=east,lit=true,part=10": {
+      "model": "jugcraft:block/giant_cornucopia_10",
+      "y": 90
+    },
+    "facing=east,lit=true,part=11": {
+      "model": "jugcraft:block/giant_cornucopia_11",
+      "y": 90
+    },
+    "facing=south,lit=false,part=0": {
+      "model": "jugcraft:block/giant_cornucopia_0",
+      "y": 180
+    },
+    "facing=south,lit=false,part=1": {
+      "model": "jugcraft:block/giant_cornucopia_1",
+      "y": 180
+    },
+    "facing=south,lit=false,part=2": {
+      "model": "jugcraft:block/giant_cornucopia_2",
+      "y": 180
+    },
+    "facing=south,lit=false,part=3": {
+      "model": "jugcraft:block/giant_cornucopia_3",
+      "y": 180
+    },
+    "facing=south,lit=false,part=4": {
+      "model": "jugcraft:block/giant_cornucopia_4",
+      "y": 180
+    },
+    "facing=south,lit=false,part=5": {
+      "model": "jugcraft:block/giant_cornucopia_5",
+      "y": 180
+    },
+    "facing=south,lit=false,part=6": {
+      "model": "jugcraft:block/giant_cornucopia_6",
+      "y": 180
+    },
+    "facing=south,lit=false,part=7": {
+      "model": "jugcraft:block/giant_cornucopia_7",
+      "y": 180
+    },
+    "facing=south,lit=false,part=8": {
+      "model": "jugcraft:block/giant_cornucopia_8",
+      "y": 180
+    },
+    "facing=south,lit=false,part=9": {
+      "model": "jugcraft:block/giant_cornucopia_9",
+      "y": 180
+    },
+    "facing=south,lit=false,part=10": {
+      "model": "jugcraft:block/giant_cornucopia_10",
+      "y": 180
+    },
+    "facing=south,lit=false,part=11": {
+      "model": "jugcraft:block/giant_cornucopia_11",
+      "y": 180
+    },
+    "facing=south,lit=true,part=0": {
+      "model": "jugcraft:block/giant_cornucopia_0",
+      "y": 180
+    },
+    "facing=south,lit=true,part=1": {
+      "model": "jugcraft:block/giant_cornucopia_1",
+      "y": 180
+    },
+    "facing=south,lit=true,part=2": {
+      "model": "jugcraft:block/giant_cornucopia_2",
+      "y": 180
+    },
+    "facing=south,lit=true,part=3": {
+      "model": "jugcraft:block/giant_cornucopia_3",
+      "y": 180
+    },
+    "facing=south,lit=true,part=4": {
+      "model": "jugcraft:block/giant_cornucopia_4",
+      "y": 180
+    },
+    "facing=south,lit=true,part=5": {
+      "model": "jugcraft:block/giant_cornucopia_5",
+      "y": 180
+    },
+    "facing=south,lit=true,part=6": {
+      "model": "jugcraft:block/giant_cornucopia_6",
+      "y": 180
+    },
+    "facing=south,lit=true,part=7": {
+      "model": "jugcraft:block/giant_cornucopia_7",
+      "y": 180
+    },
+    "facing=south,lit=true,part=8": {
+      "model": "jugcraft:block/giant_cornucopia_8",
+      "y": 180
+    },
+    "facing=south,lit=true,part=9": {
+      "model": "jugcraft:block/giant_cornucopia_9",
+      "y": 180
+    },
+    "facing=south,lit=true,part=10": {
+      "model": "jugcraft:block/giant_cornucopia_10",
+      "y": 180
+    },
+    "facing=south,lit=true,part=11": {
+      "model": "jugcraft:block/giant_cornucopia_11",
+      "y": 180
+    },
+    "facing=west,lit=false,part=0": {
+      "model": "jugcraft:block/giant_cornucopia_0",
+      "y": 270
+    },
+    "facing=west,lit=false,part=1": {
+      "model": "jugcraft:block/giant_cornucopia_1",
+      "y": 270
+    },
+    "facing=west,lit=false,part=2": {
+      "model": "jugcraft:block/giant_cornucopia_2",
+      "y": 270
+    },
+    "facing=west,lit=false,part=3": {
+      "model": "jugcraft:block/giant_cornucopia_3",
+      "y": 270
+    },
+    "facing=west,lit=false,part=4": {
+      "model": "jugcraft:block/giant_cornucopia_4",
+      "y": 270
+    },
+    "facing=west,lit=false,part=5": {
+      "model": "jugcraft:block/giant_cornucopia_5",
+      "y": 270
+    },
+    "facing=west,lit=false,part=6": {
+      "model": "jugcraft:block/giant_cornucopia_6",
+      "y": 270
+    },
+    "facing=west,lit=false,part=7": {
+      "model": "jugcraft:block/giant_cornucopia_7",
+      "y": 270
+    },
+    "facing=west,lit=false,part=8": {
+      "model": "jugcraft:block/giant_cornucopia_8",
+      "y": 270
+    },
+    "facing=west,lit=false,part=9": {
+      "model": "jugcraft:block/giant_cornucopia_9",
+      "y": 270
+    },
+    "facing=west,lit=false,part=10": {
+      "model": "jugcraft:block/giant_cornucopia_10",
+      "y": 270
+    },
+    "facing=west,lit=false,part=11": {
+      "model": "jugcraft:block/giant_cornucopia_11",
+      "y": 270
+    },
+    "facing=west,lit=true,part=0": {
+      "model": "jugcraft:block/giant_cornucopia_0",
+      "y": 270
+    },
+    "facing=west,lit=true,part=1": {
+      "model": "jugcraft:block/giant_cornucopia_1",
+      "y": 270
+    },
+    "facing=west,lit=true,part=2": {
+      "model": "jugcraft:block/giant_cornucopia_2",
+      "y": 270
+    },
+    "facing=west,lit=true,part=3": {
+      "model": "jugcraft:block/giant_cornucopia_3",
+      "y": 270
+    },
+    "facing=west,lit=true,part=4": {
+      "model": "jugcraft:block/giant_cornucopia_4",
+      "y": 270
+    },
+    "facing=west,lit=true,part=5": {
+      "model": "jugcraft:block/giant_cornucopia_5",
+      "y": 270
+    },
+    "facing=west,lit=true,part=6": {
+      "model": "jugcraft:block/giant_cornucopia_6",
+      "y": 270
+    },
+    "facing=west,lit=true,part=7": {
+      "model": "jugcraft:block/giant_cornucopia_7",
+      "y": 270
+    },
+    "facing=west,lit=true,part=8": {
+      "model": "jugcraft:block/giant_cornucopia_8",
+      "y": 270
+    },
+    "facing=west,lit=true,part=9": {
+      "model": "jugcraft:block/giant_cornucopia_9",
+      "y": 270
+    },
+    "facing=west,lit=true,part=10": {
+      "model": "jugcraft:block/giant_cornucopia_10",
+      "y": 270
+    },
+    "facing=west,lit=true,part=11": {
+      "model": "jugcraft:block/giant_cornucopia_11",
+      "y": 270
+    }
+  }
+}

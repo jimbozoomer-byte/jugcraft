@@ -1,0 +1,49 @@
+{
+  "variants": {
+    "facing=north,runner=0": {
+      "model": "jugcraft:block/gargoyle_knocker"
+    },
+    "facing=north,runner=1": {
+      "model": "jugcraft:block/gargoyle_knocker_ring"
+    },
+    "facing=north,runner=2": {
+      "model": "jugcraft:block/gargoyle_knocker_eyes"
+    },
+    "facing=east,runner=0": {
+      "model": "jugcraft:block/gargoyle_knocker",
+      "y": 90
+    },
+    "facing=east,runner=1": {
+      "model": "jugcraft:block/gargoyle_knocker_ring",
+      "y": 90
+    },
+    "facing=east,runner=2": {
+      "model": "jugcraft:block/gargoyle_knocker_eyes",
+      "y": 90
+    },
+    "facing=south,runner=0": {
+      "model": "jugcraft:block/gargoyle_knocker",
+      "y": 180
+    },
+    "facing=south,runner=1": {
+      "model": "jugcraft:block/gargoyle_knocker_ring",
+      "y": 180
+    },
+    "facing=south,runner=2": {
+      "model": "jugcraft:block/gargoyle_knocker_eyes",
+      "y": 180
+    },
+    "facing=west,runner=0": {
+      "model": "jugcraft:block/gargoyle_knocker",
+      "y": 270
+    },
+    "facing=west,runner=1": {
+      "model": "jugcraft:block/gargoyle_knocker_ring",
+      "y": 270
+    },
+    "facing=west,runner=2": {
+      "model": "jugcraft:block/gargoyle_knocker_eyes",
+      "y": 270
+    }
+  }
+}

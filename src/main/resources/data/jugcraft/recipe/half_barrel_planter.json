@@ -1,0 +1,19 @@
+{
+  "fabric:load_conditions": [
+    {
+      "condition": "jugcraft:feature_enabled",
+      "feature": "agriculture"
+    }
+  ],
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    "minecraft:barrel",
+    "minecraft:dirt",
+    "minecraft:dirt"
+  ],
+  "result": {
+    "id": "jugcraft:half_barrel_planter",
+    "count": 2
+  }
+}

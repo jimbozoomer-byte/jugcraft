@@ -1,0 +1,244 @@
+{
+  "variants": {
+    "drop=1,facing=north,piece=block": {
+      "model": "jugcraft:block/hay_pulley"
+    },
+    "drop=1,facing=north,piece=wheel": {
+      "model": "jugcraft:block/hay_pulley_wheel"
+    },
+    "drop=1,facing=north,piece=rope": {
+      "model": "jugcraft:block/hay_pulley_rope"
+    },
+    "drop=1,facing=north,piece=hook": {
+      "model": "jugcraft:block/hay_pulley_hook"
+    },
+    "drop=2,facing=north,piece=block": {
+      "model": "jugcraft:block/hay_pulley"
+    },
+    "drop=2,facing=north,piece=wheel": {
+      "model": "jugcraft:block/hay_pulley_wheel"
+    },
+    "drop=2,facing=north,piece=rope": {
+      "model": "jugcraft:block/hay_pulley_rope"
+    },
+    "drop=2,facing=north,piece=hook": {
+      "model": "jugcraft:block/hay_pulley_hook"
+    },
+    "drop=3,facing=north,piece=block": {
+      "model": "jugcraft:block/hay_pulley"
+    },
+    "drop=3,facing=north,piece=wheel": {
+      "model": "jugcraft:block/hay_pulley_wheel"
+    },
+    "drop=3,facing=north,piece=rope": {
+      "model": "jugcraft:block/hay_pulley_rope"
+    },
+    "drop=3,facing=north,piece=hook": {
+      "model": "jugcraft:block/hay_pulley_hook"
+    },
+    "drop=4,facing=north,piece=block": {
+      "model": "jugcraft:block/hay_pulley"
+    },
+    "drop=4,facing=north,piece=wheel": {
+      "model": "jugcraft:block/hay_pulley_wheel"
+    },
+    "drop=4,facing=north,piece=rope": {
+      "model": "jugcraft:block/hay_pulley_rope"
+    },
+    "drop=4,facing=north,piece=hook": {
+      "model": "jugcraft:block/hay_pulley_hook"
+    },
+    "drop=1,facing=east,piece=block": {
+      "model": "jugcraft:block/hay_pulley",
+      "y": 90
+    },
+    "drop=1,facing=east,piece=wheel": {
+      "model": "jugcraft:block/hay_pulley_wheel",
+      "y": 90
+    },
+    "drop=1,facing=east,piece=rope": {
+      "model": "jugcraft:block/hay_pulley_rope",
+      "y": 90
+    },
+    "drop=1,facing=east,piece=hook": {
+      "model": "jugcraft:block/hay_pulley_hook",
+      "y": 90
+    },
+    "drop=2,facing=east,piece=block": {
+      "model": "jugcraft:block/hay_pulley",
+      "y": 90
+    },
+    "drop=2,facing=east,piece=wheel": {
+      "model": "jugcraft:block/hay_pulley_wheel",
+      "y": 90
+    },
+    "drop=2,facing=east,piece=rope": {
+      "model": "jugcraft:block/hay_pulley_rope",
+      "y": 90
+    },
+    "drop=2,facing=east,piece=hook": {
+      "model": "jugcraft:block/hay_pulley_hook",
+      "y": 90
+    },
+    "drop=3,facing=east,piece=block": {
+      "model": "jugcraft:block/hay_pulley",
+      "y": 90
+    },
+    "drop=3,facing=east,piece=wheel": {
+      "model": "jugcraft:block/hay_pulley_wheel",
+      "y": 90
+    },
+    "drop=3,facing=east,piece=rope": {
+      "model": "jugcraft:block/hay_pulley_rope",
+      "y": 90
+    },
+    "drop=3,facing=east,piece=hook": {
+      "model": "jugcraft:block/hay_pulley_hook",
+      "y": 90
+    },
+    "drop=4,facing=east,piece=block": {
+      "model": "jugcraft:block/hay_pulley",
+      "y": 90
+    },
+    "drop=4,facing=east,piece=wheel": {
+      "model": "jugcraft:block/hay_pulley_wheel",
+      "y": 90
+    },
+    "drop=4,facing=east,piece=rope": {
+      "model": "jugcraft:block/hay_pulley_rope",
+      "y": 90
+    },
+    "drop=4,facing=east,piece=hook": {
+      "model": "jugcraft:block/hay_pulley_hook",
+      "y": 90
+    },
+    "drop=1,facing=south,piece=block": {
+      "model": "jugcraft:block/hay_pulley",
+      "y": 180
+    },
+    "drop=1,facing=south,piece=wheel": {
+      "model": "jugcraft:block/hay_pulley_wheel",
+      "y": 180
+    },
+    "drop=1,facing=south,piece=rope": {
+      "model": "jugcraft:block/hay_pulley_rope",
+      "y": 180
+    },
+    "drop=1,facing=south,piece=hook": {
+      "model": "jugcraft:block/hay_pulley_hook",
+      "y": 180
+    },
+    "drop=2,facing=south,piece=block": {
+      "model": "jugcraft:block/hay_pulley",
+      "y": 180
+    },
+    "drop=2,facing=south,piece=wheel": {
+      "model": "jugcraft:block/hay_pulley_wheel",
+      "y": 180
+    },
+    "drop=2,facing=south,piece=rope": {
+      "model": "jugcraft:block/hay_pulley_rope",
+      "y": 180
+    },
+    "drop=2,facing=south,piece=hook": {
+      "model": "jugcraft:block/hay_pulley_hook",
+      "y": 180
+    },
+    "drop=3,facing=south,piece=block": {
+      "model": "jugcraft:block/hay_pulley",
+      "y": 180
+    },
+    "drop=3,facing=south,piece=wheel": {
+      "model": "jugcraft:block/hay_pulley_wheel",
+      "y": 180
+    },
+    "drop=3,facing=south,piece=rope": {
+      "model": "jugcraft:block/hay_pulley_rope",
+      "y": 180
+    },
+    "drop=3,facing=south,piece=hook": {
+      "model": "jugcraft:block/hay_pulley_hook",
+      "y": 180
+    },
+    "drop=4,facing=south,piece=block": {
+      "model": "jugcraft:block/hay_pulley",
+      "y": 180
+    },
+    "drop=4,facing=south,piece=wheel": {
+      "model": "jugcraft:block/hay_pulley_wheel",
+      "y": 180
+    },
+    "drop=4,facing=south,piece=rope": {
+      "model": "jugcraft:block/hay_pulley_rope",
+      "y": 180
+    },
+    "drop=4,facing=south,piece=hook": {
+      "model": "jugcraft:block/hay_pulley_hook",
+      "y": 180
+    },
+    "drop=1,facing=west,piece=block": {
+      "model": "jugcraft:block/hay_pulley",
+      "y": 270
+    },
+    "drop=1,facing=west,piece=wheel": {
+      "model": "jugcraft:block/hay_pulley_wheel",
+      "y": 270
+    },
+    "drop=1,facing=west,piece=rope": {
+      "model": "jugcraft:block/hay_pulley_rope",
+      "y": 270
+    },
+    "drop=1,facing=west,piece=hook": {
+      "model": "jugcraft:block/hay_pulley_hook",
+      "y": 270
+    },
+    "drop=2,facing=west,piece=block": {
+      "model": "jugcraft:block/hay_pulley",
+      "y": 270
+    },
+    "drop=2,facing=west,piece=wheel": {
+      "model": "jugcraft:block/hay_pulley_wheel",
+      "y": 270
+    },
+    "drop=2,facing=west,piece=rope": {
+      "model": "jugcraft:block/hay_pulley_rope",
+      "y": 270
+    },
+    "drop=2,facing=west,piece=hook": {
+      "model": "jugcraft:block/hay_pulley_hook",
+      "y": 270
+    },
+    "drop=3,facing=west,piece=block": {
+      "model": "jugcraft:block/hay_pulley",
+      "y": 270
+    },
+    "drop=3,facing=west,piece=wheel": {
+      "model": "jugcraft:block/hay_pulley_wheel",
+      "y": 270
+    },
+    "drop=3,facing=west,piece=rope": {
+      "model": "jugcraft:block/hay_pulley_rope",
+      "y": 270
+    },
+    "drop=3,facing=west,piece=hook": {
+      "model": "jugcraft:block/hay_pulley_hook",
+      "y": 270
+    },
+    "drop=4,facing=west,piece=block": {
+      "model": "jugcraft:block/hay_pulley",
+      "y": 270
+    },
+    "drop=4,facing=west,piece=wheel": {
+      "model": "jugcraft:block/hay_pulley_wheel",
+      "y": 270
+    },
+    "drop=4,facing=west,piece=rope": {
+      "model": "jugcraft:block/hay_pulley_rope",
+      "y": 270
+    },
+    "drop=4,facing=west,piece=hook": {
+      "model": "jugcraft:block/hay_pulley_hook",
+      "y": 270
+    }
+  }
+}

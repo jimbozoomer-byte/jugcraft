@@ -1,13 +1,17 @@
-"""Readable vanilla building signs; no changes to layout RNG or resident IDs."""
+"""Readable vanilla building signs; no changes to layout RNG or resident IDs.
+
+Revision 4 posts each shop's opening hours and the taverns' all-hours essentials on the signs (the mod rewrites a sign's
+text only where it still reads as the town wrote it: town/TownUpgrades.java)."""
 from town_voxels import S, turn_xz, turn_facing
+from town_shops import hours_line
 
 SHOP_LINES = {
-    "general": ["GENERAL STORE", "Buy & sell", "Farm/mine goods", "Trade for Jugs"],
-    "seasonal": ["SEASONAL STALL", "Seasonal decor", "Trade for Jugs", "Speak to keeper"],
-    "curios": ["CURIOSITIES", "Music & curios", "Trade for Jugs", "Speak to keeper"],
-    "florist": ["FLORIST", "Flowers & trees", "Trade for Jugs", "Speak to keeper"],
+    "general": ["GENERAL STORE", "Buy & sell", "Trade for Jugs", hours_line("general")],
+    "seasonal": ["SEASONAL STALL", "Seasonal decor", "Trade for Jugs", hours_line("seasonal")],
+    "curios": ["CURIOSITIES", "Music & curios", "Trade for Jugs", hours_line("curios")],
+    "florist": ["FLORIST", "Flowers & trees", "Trade for Jugs", hours_line("florist")],
     "baker": ["THE BAKERY", "Meet the baker", "Local workshop", "No shop menu yet"],
-    "innkeeper": ["THE TAVERN", "Innkeeper here", "Rest & chat", "No shop menu yet"],
+    "innkeeper": ["THE TAVERN", "Open all hours", "Rest & chat", "Essentials sold"],
     "banker": ["JUGS BANK", "Four Jug Tellers", "Jugs transfers", "Use a teller"],
     "mayor": ["TOWN HALL", "Meet the mayor", "Civic gathering", "Welcome!"],
     "priest": ["CHURCH OF NOTCH", "Praise Notch", "Priest of Notch", "All are welcome"],

@@ -20,6 +20,16 @@ import decor17
 import decor18
 import decor19
 import decor20
+import barn_tools
+import fall_garden
+import hearth
+import haunted_midway
+import front_yard
+import party_table
+import clockwork
+import harvest_festival
+import orchard_harvest
+import pumpkin_patch
 import adam_ondi_ahman
 import lairs
 import tatterlace
@@ -189,6 +199,8 @@ GRASS_SEEDS = ["corn_kernels", "sunflower_seeds", "beans", "sweet_potato", "flax
                "butternut_squash_seeds", "acorn_squash_seeds", "warty_gourd_seeds", "turnip", "cranberries", "chestnut",
                "giant_pumpkin_seeds", "white_pumpkin_seeds", "jarrahdale_pumpkin_seeds", "cinderella_pumpkin_seeds", "red_kuri_pumpkin_seeds",
                "kabocha_pumpkin_seeds", "bottle_gourd_seeds",
+               "turban_squash_seeds", "blue_hubbard_squash_seeds", "sweet_dumpling_squash_seeds", "long_island_cheese_pumpkin_seeds",
+               "spoon_gourd_seeds", "swan_gourd_seeds",
                "ornamental_corn_kernels", "mandrake_root"]
 GRASS_SEED_CHANCE = 0.125
 
@@ -321,6 +333,19 @@ ITEMS = {
     "kabocha_tempura": {"display": "Kabocha Tempura", "food": [6, 0.8], "compost": "medium_high", "tags": ["c:foods"]},
     "bottle_gourd_seeds": {"display": "Bottle Gourd Seeds", "plants": "bottle_gourd_stem", "compost": "low",
                            "tags": ["c:seeds/bottle_gourd", "minecraft:chicken_food", "minecraft:parrot_food"]},
+    # The Pumpkin Patch Market's squashes and gourds (tools/pumpkin_patch.py, docs/features/pumpkin-patch-market.md).
+    "turban_squash_seeds": {"display": "Turban Squash Seeds", "plants": "turban_squash_stem", "compost": "low",
+                            "tags": ["c:seeds/turban_squash", "minecraft:chicken_food", "minecraft:parrot_food"]},
+    "blue_hubbard_squash_seeds": {"display": "Blue Hubbard Squash Seeds", "plants": "blue_hubbard_squash_stem", "compost": "low",
+                                  "tags": ["c:seeds/blue_hubbard_squash", "minecraft:chicken_food", "minecraft:parrot_food"]},
+    "sweet_dumpling_squash_seeds": {"display": "Sweet Dumpling Squash Seeds", "plants": "sweet_dumpling_squash_stem", "compost": "low",
+                                    "tags": ["c:seeds/sweet_dumpling_squash", "minecraft:chicken_food", "minecraft:parrot_food"]},
+    "long_island_cheese_pumpkin_seeds": {"display": "Long Island Cheese Pumpkin Seeds", "plants": "long_island_cheese_pumpkin_stem", "compost": "low",
+                                         "tags": ["c:seeds/long_island_cheese_pumpkin", "minecraft:chicken_food", "minecraft:parrot_food"]},
+    "spoon_gourd_seeds": {"display": "Spoon Gourd Seeds", "plants": "spoon_gourd_stem", "compost": "low",
+                          "tags": ["c:seeds/spoon_gourd", "minecraft:chicken_food", "minecraft:parrot_food"]},
+    "swan_gourd_seeds": {"display": "Swan Gourd Seeds", "plants": "swan_gourd_stem", "compost": "low",
+                         "tags": ["c:seeds/swan_gourd", "minecraft:chicken_food", "minecraft:parrot_food"]},
     "dried_bottle_gourd": {"display": "Dried Bottle Gourd", "compost": "medium", "tags": []},
     "ornamental_corn": {"display": "Ornamental Corn", "compost": "medium", "tags": ["c:crops/ornamental_corn"]},
     "ornamental_corn_kernels": {"display": "Ornamental Corn Kernels", "plants": "ornamental_corn_crop", "compost": "low",
@@ -404,6 +429,20 @@ GOURDS = {
                         "compost": "medium", "tags": ["c:crops/pumpkin", "c:crops/kabocha_pumpkin", "jugcraft:heirloom_pumpkins"]},
     "bottle_gourd": {"display": "Bottle Gourd", "seed": "bottle_gourd_seeds", "growth_time": 1.0,
                      "compost": "medium", "tags": ["c:crops/gourd", "c:crops/bottle_gourd"]},
+    # The Pumpkin Patch Market (tools/pumpkin_patch.py): three squashes for the table, a pie pumpkin and two gourds for show.
+    "turban_squash": {"display": "Turban Squash", "seed": "turban_squash_seeds", "growth_time": 1.0,
+                      "compost": "medium", "tags": ["c:crops/squash", "c:crops/turban_squash", "c:foods/vegetable"]},
+    "blue_hubbard_squash": {"display": "Blue Hubbard Squash", "seed": "blue_hubbard_squash_seeds", "growth_time": 1.25,
+                            "compost": "medium", "tags": ["c:crops/squash", "c:crops/blue_hubbard_squash", "c:foods/vegetable"]},
+    "sweet_dumpling_squash": {"display": "Sweet Dumpling Squash", "seed": "sweet_dumpling_squash_seeds", "growth_time": 0.85,
+                              "compost": "medium", "tags": ["c:crops/squash", "c:crops/sweet_dumpling_squash", "c:foods/vegetable"]},
+    "long_island_cheese_pumpkin": {"display": "Long Island Cheese Pumpkin", "seed": "long_island_cheese_pumpkin_seeds",
+                                   "growth_time": 1.0, "compost": "medium",
+                                   "tags": ["c:crops/pumpkin", "c:crops/long_island_cheese_pumpkin"]},
+    "spoon_gourd": {"display": "Spoon Gourd", "seed": "spoon_gourd_seeds", "growth_time": 0.85,
+                    "compost": "medium", "tags": ["c:crops/gourd", "c:crops/spoon_gourd"]},
+    "swan_gourd": {"display": "Swan Gourd", "seed": "swan_gourd_seeds", "growth_time": 1.0,
+                   "compost": "medium", "tags": ["c:crops/gourd", "c:crops/swan_gourd"]},
 }
 STEM_TEXTURES = ["gourd_stem", "gourd_stem_attached", "gourd_stalk"]
 
@@ -603,6 +642,9 @@ def trunk_block(tree):
 def leaf_looks(tree):
     """Texture (and model) names for each state of a tree's leaves: {state: {texture: weight}}."""
     leaves = TREES[tree]["leaves"]
+    # Keep the saved winter state, but never give aspens the web-like bare-twig look.
+    if tree == "aspen":
+        return {"green": {leaves: 1}, "gold": {f"{leaves}_gold": 1}, "bare": {leaves: 1}}
     if tree == "holly":
         return {"green": {leaves: 2, f"{leaves}_berries": 1},
                 "gold": {f"{leaves}_berries": 1}, "bare": {f"{leaves}_berries": 1}}
@@ -641,6 +683,12 @@ FOUND_WILD = {
     "red_kuri_pumpkin": {"biomes": ["IS_TAIGA", "IS_SPOOKY"], "on": "grass"},
     "kabocha_pumpkin": {"biomes": ["IS_FOREST", "IS_JUNGLE"], "on": "grass"},
     "bottle_gourd": {"biomes": ["IS_JUNGLE", "IS_SAVANNA"], "on": "grass"},
+    "turban_squash": {"biomes": ["IS_PLAINS", "IS_FOREST"], "on": "grass"},
+    "blue_hubbard_squash": {"biomes": ["IS_TAIGA", "IS_SNOWY"], "on": "grass"},
+    "sweet_dumpling_squash": {"biomes": ["IS_FLORAL", "IS_BIRCH_FOREST"], "on": "grass"},
+    "long_island_cheese_pumpkin": {"biomes": ["IS_PLAINS", "IS_BEACH"], "on": "grass"},
+    "spoon_gourd": {"biomes": ["IS_SAVANNA", "IS_JUNGLE"], "on": "grass"},
+    "swan_gourd": {"biomes": ["IS_SWAMP", "IS_JUNGLE"], "on": "grass"},
 }
 GOURD_PATCH = {"rarity": 32, "tries": 8, "spread_xz": 4, "spread_y": 2}
 CRANBERRY_PATCH = {"rarity": 4, "tries": 32, "spread_xz": 6}
@@ -1580,6 +1628,25 @@ def decor14_items():
     return decor14_blocks() + list(OUTFITS)
 
 
+# Costume disguises (agriculture/Disguises.java, mixin/DisguiseTargetMixin), all year, not only in the season: a player
+# wearing a costume of a kind (any armour slot) is taken for one of their own by the monsters of that kind, which never
+# pick them as a target until the player hurts one. Per kind, `costumes` are the item tag DISGUISE_TAG/<kind> and `fools`
+# the entity type tag of the same name. Bosses are in no `fools` list (a boss always knows who you are). The server's
+# `option` (on or off) turns them off.
+DISGUISE_TAG = "jugcraft:disguises"
+DISGUISES = {"option": "costumes.disguises",
+             "kinds": {"skeleton": {"costumes": ["jugcraft:skeleton_suit"],
+                                    "fools": ["minecraft:skeleton", "minecraft:stray", "minecraft:bogged"]},
+                       "walking_dead": {"costumes": ["jugcraft:mummy_wraps"],
+                                        "fools": ["minecraft:zombie", "minecraft:husk", "minecraft:zombie_villager",
+                                                  "minecraft:drowned"]},
+                       "witch": {"costumes": ["jugcraft:witch_hat"], "fools": ["minecraft:witch"]},
+                       "werewolf": {"costumes": ["jugcraft:werewolf_mask", "jugcraft:alphas_hood"], "fools": ["jugcraft:werewolf"]},
+                       "ghost": {"costumes": ["jugcraft:ghost_sheet"], "fools": ["minecraft:vex"]},
+                       "cat": {"costumes": ["jugcraft:cat_ears_and_tail"], "fools": ["minecraft:creeper"]},
+                       "night": {"costumes": ["jugcraft:bat_wings", "jugcraft:vampire_cape"], "fools": ["minecraft:phantom"]}}}
+
+
 # ---------------------------------------------------------------- Fall additions 1: the chandlery
 # The Wax Melting Pot (WaxPotBlock + entity) holds up to `capacity` measures of one wax (`waxes`: what puts it in, as an
 # item tag, how many measures an item gives, how long a candle burns for each layer of it, and its natural colour). Over
@@ -2240,6 +2307,10 @@ SICKLES = {
                      "features": []},
     "bronze_sickle": {"display": "Bronze Sickle", "radius": 2, "durability": 350, "material": "#c:ingots/bronze",
                       "features": ["tin"]},
+    # Barn & Harvest Tools (tools/barn_tools.py): the planned Steel Sickle, 7 by 7 once the steel tier lands (steel's
+    # tool uses, tools/gear.py GEAR_TIERS). Its icon is a map, tools/item_icons/steel_sickle.txt.
+    "steel_sickle": {"display": "Steel Sickle", "radius": 3, "durability": 900, "material": "#c:ingots/steel",
+                     "features": ["machines"]},
 }
 SICKLE_PATTERN = [" M ", "  M", "SM "]
 
@@ -2411,6 +2482,15 @@ SHAPELESS = [
     {"id": "red_kuri_pumpkin_seeds", "inputs": ["jugcraft:red_kuri_pumpkin"], "result": "red_kuri_pumpkin_seeds", "count": 4},
     {"id": "kabocha_pumpkin_seeds", "inputs": ["jugcraft:kabocha_pumpkin"], "result": "kabocha_pumpkin_seeds", "count": 4},
     {"id": "bottle_gourd_seeds", "inputs": ["jugcraft:bottle_gourd"], "result": "bottle_gourd_seeds", "count": 4},
+    {"id": "turban_squash_seeds", "inputs": ["jugcraft:turban_squash"], "result": "turban_squash_seeds", "count": 4},
+    {"id": "blue_hubbard_squash_seeds", "inputs": ["jugcraft:blue_hubbard_squash"], "result": "blue_hubbard_squash_seeds", "count": 4},
+    {"id": "sweet_dumpling_squash_seeds", "inputs": ["jugcraft:sweet_dumpling_squash"], "result": "sweet_dumpling_squash_seeds", "count": 4},
+    {"id": "long_island_cheese_pumpkin_seeds", "inputs": ["jugcraft:long_island_cheese_pumpkin"], "result": "long_island_cheese_pumpkin_seeds", "count": 4},
+    {"id": "spoon_gourd_seeds", "inputs": ["jugcraft:spoon_gourd"], "result": "spoon_gourd_seeds", "count": 4},
+    {"id": "swan_gourd_seeds", "inputs": ["jugcraft:swan_gourd"], "result": "swan_gourd_seeds", "count": 4},
+    # The Long Island Cheese is the old pie pumpkin: it bakes a pumpkin pie as a pumpkin does.
+    {"id": "pumpkin_pie_from_long_island_cheese_pumpkin", "inputs": ["jugcraft:long_island_cheese_pumpkin", "minecraft:sugar",
+                                                                      "#minecraft:eggs"], "result": "minecraft:pumpkin_pie", "count": 1},
     {"id": "pumpkin_pie_from_heirloom_pumpkins", "inputs": ["#jugcraft:heirloom_pumpkins", "minecraft:sugar", "#minecraft:eggs"],
      "result": "minecraft:pumpkin_pie", "count": 1},
     {"id": "ornamental_corn_kernels", "inputs": ["jugcraft:ornamental_corn"], "result": "ornamental_corn_kernels", "count": 2},
@@ -2855,7 +2935,7 @@ def all_blocks():
             + regatta_blocks() + festivity_blocks() + night_blocks() + decor1_blocks() + decor2_blocks() + decor3_blocks()
             + decor4_blocks() + decor5_blocks() + decor6_blocks() + decor7_blocks() + decor8_blocks() + decor9_blocks() + decor10_blocks()
             + decor11_blocks() + decor12_blocks() + decor13_blocks() + decor14_blocks() + chandlery_blocks() + cider_blocks() + pantry_blocks()
-            + firework_blocks() + feast_blocks() + maze_blocks() + candy_blocks() + foraging_blocks() + bat_blocks() + [KNITTING["wheel"]] + pie_blocks() + [SPIRIT_BOARD["block"], TURKEYS["roast"], THEREMIN["block"], OFRENDA["block"]] + list(OFRENDA["decor"]) + graveyard.blocks() + [WOLFSBANE["block"], potted(WOLFSBANE["block"])] + WEREWOLF_RUGS + midway.blocks() + ferris_wheel.blocks() + hot_air_balloon.blocks() + plants.blocks() + decor15.blocks() + decor16.blocks() + decor17.blocks() + decor18.blocks() + decor19.blocks() + decor20.blocks() + kitchen.blocks() + feasts.blocks() + menu.blocks() + rice.blocks() + soil.blocks() + orchard.blocks() + cakes.blocks() + pies_and_tarts.blocks() + milkshakes.blocks() + garden.blocks()
+            + firework_blocks() + feast_blocks() + maze_blocks() + candy_blocks() + foraging_blocks() + bat_blocks() + [KNITTING["wheel"]] + pie_blocks() + [SPIRIT_BOARD["block"], TURKEYS["roast"], THEREMIN["block"], OFRENDA["block"]] + list(OFRENDA["decor"]) + graveyard.blocks() + [WOLFSBANE["block"], potted(WOLFSBANE["block"])] + WEREWOLF_RUGS + midway.blocks() + ferris_wheel.blocks() + hot_air_balloon.blocks() + plants.blocks() + decor15.blocks() + decor16.blocks() + decor17.blocks() + decor18.blocks() + decor19.blocks() + decor20.blocks() + pumpkin_patch.display_blocks() + pumpkin_patch.extra_blocks() + orchard_harvest.blocks() + barn_tools.blocks() + fall_garden.blocks() + hearth.blocks() + haunted_midway.blocks() + front_yard.blocks() + party_table.blocks() + clockwork.blocks() + harvest_festival.blocks() + kitchen.blocks() + feasts.blocks() + menu.blocks() + rice.blocks() + soil.blocks() + orchard.blocks() + cakes.blocks() + pies_and_tarts.blocks() + milkshakes.blocks() + garden.blocks()
             + herbs.blocks() + spices.blocks() + lairs.blocks() + vesperine.blocks() + pumpkin_king.blocks()
             + adam_ondi_ahman.blocks_registered())
 
@@ -2868,7 +2948,7 @@ def all_items():
             + decor2_items() + decor3_items() + decor4_items() + decor5_items() + decor6_items() + decor7_items() + decor8_items()
             + decor9_items() + decor10_items() + decor11_items() + decor12_items() + decor13_items() + decor14_items()
             + chandlery_items() + cider_items() + pantry_items() + firework_items()
-            + lantern_items() + feast_blocks() + [MAZE["gate"]] + ghost_items() + face_paint_items() + candy_items() + foraging_items() + bat_items() + knitting_items() + pie_items() + [SPIRIT_BOARD["block"], TURKEYS["roast"], THEREMIN["block"], OFRENDA["block"]] + list(OFRENDA["decor"]) + graveyard.items() + [h["item"] for h in HEX["brews"].values()] + [BROOMSTICK["item"]] + [WOLFSBANE["block"], WEREWOLF["dagger"], WEREWOLF["arrow"]] + WEREWOLF_PELTS + WEREWOLF_RUGS + [SQUIRRELS["acorn"]] + midway.items() + ferris_wheel.items() + pinata.items() + hot_air_balloon.items() + leaf_blower.items() + plants.items() + decor15.items() + decor16.items() + decor17.items() + decor18.items() + decor19.items() + decor20.items() + kitchen.items() + feasts.items() + rice.items() + soil.items() + orchard.items() + [i for i in cakes.items() if i not in cakes.ITEMS] + pies_and_tarts.items() + garden.items()
+            + lantern_items() + feast_blocks() + [MAZE["gate"]] + ghost_items() + face_paint_items() + candy_items() + foraging_items() + bat_items() + knitting_items() + pie_items() + [SPIRIT_BOARD["block"], TURKEYS["roast"], THEREMIN["block"], OFRENDA["block"]] + list(OFRENDA["decor"]) + graveyard.items() + [h["item"] for h in HEX["brews"].values()] + [BROOMSTICK["item"]] + [WOLFSBANE["block"], WEREWOLF["dagger"], WEREWOLF["arrow"]] + WEREWOLF_PELTS + WEREWOLF_RUGS + [SQUIRRELS["acorn"]] + midway.items() + ferris_wheel.items() + pinata.items() + hot_air_balloon.items() + leaf_blower.items() + plants.items() + decor15.items() + decor16.items() + decor17.items() + decor18.items() + decor19.items() + decor20.items() + pumpkin_patch.display_blocks() + pumpkin_patch.extra_blocks() + orchard_harvest.blocks() + barn_tools.items() + fall_garden.blocks() + fall_garden.items() + hearth.items() + haunted_midway.items() + front_yard.items() + party_table.items() + clockwork.items() + harvest_festival.items() + kitchen.items() + feasts.items() + rice.items() + soil.items() + orchard.items() + [i for i in cakes.items() if i not in cakes.ITEMS] + pies_and_tarts.items() + garden.items()
             + herbs.items() + spices.items() + lairs.items() + vesperine.items() + tatterlace.items()
             + yeti_king.items() + cinder_tyrant.items() + mire_hag.items() + crypt_lich.items()
             + iron_dreadnought.items() + alpha_werewolf.items() + pumpkin_king.items() + hessian_horseman.items()
@@ -2979,6 +3059,41 @@ SHAPED += decor19.SHAPED
 SHAPELESS += decor19.SHAPELESS
 # Halloween decorations batch 20, Pumpkin Night (tools/decor20.py); the heirlooms are with the others above.
 SHAPED += decor20.SHAPED
+# The Pumpkin Patch Market's displays (decor set 1, part 2; tools/pumpkin_patch.py).
+SHAPED += pumpkin_patch.DISPLAY_RECIPES
+# Its last pieces (part 3): the Chalkboard Sign, the Pumpkin Vine Cover and the Giant Warty Gourd.
+SHAPED += pumpkin_patch.EXTRA_RECIPES
+SHAPELESS += pumpkin_patch.EXTRA_SHAPELESS
+# Orchard & Apple Harvest, decor set 2 (tools/orchard_harvest.py).
+SHAPED += orchard_harvest.RECIPES
+SHAPELESS += orchard_harvest.SHAPELESS
+# Barn & Harvest Tools, decor set 3 (tools/barn_tools.py).
+SHAPED += barn_tools.RECIPES
+SHAPELESS += barn_tools.SHAPELESS
+ITEMS.update(barn_tools.ITEMS)
+# Fall Garden & Porch, decor set 4 (tools/fall_garden.py): the garden plants' recipes (the plants are tools/plants.py's).
+SHAPELESS += fall_garden.SHAPELESS
+SHAPED += fall_garden.RECIPES
+# Cozy Fall Hearth, decor set 5 (tools/hearth.py).
+SHAPED += hearth.RECIPES
+SHAPELESS += hearth.SHAPELESS
+# Haunted Midway, decor set 6 (tools/haunted_midway.py).
+SHAPED += haunted_midway.RECIPES
+SHAPELESS += haunted_midway.SHAPELESS
+ITEMS.update(haunted_midway.ITEMS)
+# Front-Yard Haunt Scenes, decor set 7 (tools/front_yard.py).
+SHAPED += front_yard.RECIPES
+SHAPELESS += front_yard.SHAPELESS
+ITEMS.update(front_yard.ITEMS)
+# Halloween Party Table, decor set 8 (tools/party_table.py).
+SHAPED += party_table.RECIPES
+SHAPELESS += party_table.SHAPELESS
+ITEMS.update(party_table.ITEMS)
+# Clockwork Animatronics, decor set 9 (tools/clockwork.py).
+SHAPED += clockwork.RECIPES
+# Harvest Festival Grounds, decor set 10 (tools/harvest_festival.py).
+SHAPED += harvest_festival.RECIPES
+SHAPELESS += harvest_festival.SHAPELESS
 SHAPELESS += decor20.SHAPELESS
 
 # Kitchen and cooking expansion, slice 1: the Farmhouse Kitchen (tools/kitchen.py).

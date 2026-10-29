@@ -45,6 +45,18 @@ def extend(root, edge, evidence, items):
         route('agriculture/BubblingCauldronBlock', ['bubbling_cauldron', 'minecraft:water_bucket',
               'minecraft:campfire', 'minecraft:glass_bottle', '#jugcraft:brew/' + d['brew'], '#jugcraft:hex/' + name], [d['item']], 'hex_brewing')
     route('agriculture/SpiceGrinding', ['mortar', 'dried_chili'], ['paprika'], 'grinding')
+    # Barn & Harvest Tools, part 2: the Quern grinds wheat into flour and a dried chili into paprika; the Butter Churn
+    # churns a bucket of milk into butter, giving the bucket back.
+    route('agriculture/QuernBlock', ['quern', 'minecraft:wheat'], ['flour'], 'grinding')
+    route('agriculture/QuernBlock', ['quern', 'dried_chili'], ['paprika'], 'grinding')
+    route('agriculture/ButterChurnBlock', ['butter_churn', 'minecraft:milk_bucket'], ['butter', 'minecraft:bucket'])
+    # Haunted Midway, part 1: the Cotton-Candy Cart spins sugar into floss and winds it onto paper; the Caramel-Corn
+    # Wagon pops a kernel into popcorn and coats two popcorn in caramel, as the crafting recipe does.
+    route('agriculture/CottonCandyCartBlock', ['cotton_candy_cart', 'minecraft:sugar', 'minecraft:paper'], ['cotton_candy'], 'spinning')
+    route('agriculture/PopcornWagonBlock', ['popcorn_wagon', 'corn_kernels'], ['popcorn'], 'popping')
+    route('agriculture/PopcornWagonBlock', ['popcorn_wagon', 'popcorn', 'caramel'], ['caramel_popcorn'], 'coating')
+    # Part 2: the Ticket Booth prints Midway Tickets from paper (Whack-a-Zombie's prizes are the midway's prize table's).
+    route('agriculture/TicketBoothBlock', ['ticket_booth', 'minecraft:paper'], ['midway_ticket'], 'printing')
     route('agriculture/CinnamonLogBlock', ['cinnamon_log', '#minecraft:axes'], ['stripped_cinnamon_log'])
     route('chemistry/FoamSprayerItem', ['foam_sprayer', 'foam_canister'], ['construction_foam'])
     route('agriculture/OrganicCompostBlock', ['organic_compost'], ['rich_soil'], 'compost_maturation')

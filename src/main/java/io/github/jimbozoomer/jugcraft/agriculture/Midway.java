@@ -27,6 +27,8 @@ import net.minecraft.world.level.storage.loot.LootParams;
 import net.minecraft.world.level.storage.loot.LootTable;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParamSets;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
+import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 import org.jspecify.annotations.Nullable;
 
@@ -89,6 +91,15 @@ public final class Midway {
 	 */
 	public static InteractionResult attack(Player player, Level level, InteractionHand hand, BlockPos pos) {
 		BlockState state = level.getBlockState(pos);
+		// Whack-a-Zombie (Haunted Midway, part 2): a swing of the mallet at the cabinet whacks where the player looks.
+		if (state.getBlock() instanceof WhackAZombieBlock whack && player.getItemInHand(hand).is(mallet()) && !player.isSpectator()) {
+			if (level instanceof ServerLevel server && player instanceof ServerPlayer whacker
+					&& player.pick(REACH, 1.0F, false) instanceof BlockHitResult hit && hit.getType() == HitResult.Type.BLOCK) {
+				whack.whack(server, pos, state, whacker, hit.getLocation());
+			}
+			player.resetAttackStrengthTicker();
+			return InteractionResult.SUCCESS;
+		}
 		if (!(state.getBlock() instanceof HighStrikerBlock) || state.getValue(HighStrikerBlock.PART) != 0
 				|| !player.getItemInHand(hand).is(mallet()) || player.isSpectator()) {
 			return InteractionResult.PASS;
