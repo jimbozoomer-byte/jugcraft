@@ -78,9 +78,10 @@ OBLIGATIONS = {"strain_tending": "tend", "verdance_carrying": "device",
 CONSTANTS = {"strain_tending": {"spirits/StrainTending.java": {"MEMORY": 16, "MAX_ASKED": 8}},
              "verdance_carrying": {"spirits/VerdanceCarrying.java": {"MOVE_MAX": 8, "MAX_BATCHES": 3, "MAX_ASKED": 8}},
              # GC-06 unit 3
-             # GC-06: a reading asks at most 8 planted beds; a bed named 3 readings running is proud; the familiar hovers at most
-             # 400 ticks while the answer is on screen.
-             "habitat_reading": {"spirits/HabitatReading.java": {"READ_BEDS": 8, "PIQUE": 3, "SHOW_TICKS": 400}},
+             # GC-06: a reading reads at most 8 planted beds, asking GardenPacts.target about at most 16 (a bed he may not read
+             # uses none of the 8); a bed named 3 readings running is proud; the familiar hovers at most 400 ticks while the
+             # answer is on screen.
+             "habitat_reading": {"spirits/HabitatReading.java": {"READ_BEDS": 8, "MAX_ASKED": 16, "PIQUE": 3, "SHOW_TICKS": 400}},
              # GC-07 unit 4
              # GC-08 unit 5
              # GC-09 unit 6
@@ -238,21 +239,26 @@ PAGES = [
      "grows.\" He stands on the ground beside the perch. His compact: "
      + ", ".join(f"{cost['count']} **{_MARAX_ITEMS[cost['item']]}**" for cost in _MARAX["compact"]["items"]) + ".",
      ("garden_regard", "understood")),
+    # Marax's review: each page states what his peers' pages state (never a bed you could not change by hand; the cap paid
+    # ahead, the grace and suspension with nothing lost), each still at most 60 words.
     ("text", "His Reading",
      "Ask on his page, " + ("twice" if _MARAX["service"]["quota"] == 2 else f"{_MARAX['service']['quota']} times")
-     + " a day, for you alone. His familiar reads up to 8 of your planted beds from their last sample, flies to the worst "
-     "and names **one** change: the one that alone moves it a step, or the first of several. For a Sunpetal at light 9 "
-     "to 12, also the **Dewlit** graft. It changes nothing.",
+     + " a day, for you alone. His familiar reads up to 8 of your planted beds as last shown, none you could not change "
+     "by hand, and names **one** change for the worst: one that alone moves it a step, or the first of several; for a "
+     "dim Sunpetal, the **Dewlit** graft too. It changes nothing.",
      ("garden_regard", "understood")),
     ("text", "The Proud Familiar",
-     "Named three readings running for the same bed and fault with nothing changed, his familiar will not repeat itself "
-     "a fourth time: it reads the next-worst bed until something there changes. It remembers this only while Marax stays; "
-     "nothing is ever owed.", ("garden_regard", "understood")),
+     "When his familiar has named the same bed and fault three readings running, nothing changed there, it will not "
+     "repeat itself a fourth time: it reads the next-worst bed until something there changes. It remembers this only "
+     "while Marax stays; nothing is ever owed. His familiar flies to each bed it names; by night he looks at the sky.",
+     ("garden_regard", "understood")),
     ("text", "His Price",
      f"{_count(_MARAX['upkeep']['count']).capitalize()} sheets of **paper** every {_MARAX['upkeep']['period_days']} game "
-     "days, paid ahead. Your first obligation: use a Verdant Bed itself in his area with an empty hand (its side, if a "
-     "crop covers it) while the pact is active. By night he looks at the sky. Ended, his familiar settles and he walks "
-     "two steps and fades.", ("garden_regard", "understood")),
+     f"days, up to {_MARAX['upkeep']['cap']} paid ahead; past "
+     + ("a day's grace" if _MARAX["upkeep"]["grace_days"] == 1 else f"{_MARAX['upkeep']['grace_days']} days' grace")
+     + " a missed one suspends the pact, with nothing lost. Your first obligation: use a Verdant Bed's side in his area "
+     "with an empty hand while the pact is active. Ended, his familiar settles and he walks two steps and fades.",
+     ("garden_regard", "understood")),
     # GC-07 unit 4
     # GC-08 unit 5
     # GC-09 unit 6

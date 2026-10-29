@@ -862,8 +862,13 @@ GLANCES = {
     # A first task's act, as its row draws it (garden_pact.obligation's argument; spec 1.1: the row at most 12 words). An
     # act short enough as the server words it needs none (ACT_GLANCES' acts are the long ones).
     "garden_pact.act.device": [("", "use an awake living device", (), "use an awake living device", "act")],
+    # GC-06 unit 3
     # GC-06: Marax's ("read a Verdant Bed itself (its side, where a crop covers it)"; the whole act stays the row's tip).
-    "garden_pact.act.read": [("", "read a Verdant Bed itself", (), "read a Verdant Bed itself", "act")],
+    # Drawn as how it is done (Marax's review): a planted bed's top is its crop's, so the bed is used from its side.
+    "garden_pact.act.read": [("", "use a Verdant Bed's side", (), "use a Verdant Bed's side", "act")],
+    # GC-07 unit 4
+    # GC-08 unit 5
+    # GC-09 unit 6
     # Blockers (every one drawn above the terms as a lock line, keeping its action).
     "pact.missing.owner": [("", "Only the perch's owner may invite %1$s", ("Bathin",),
                             "Only the perch's owner may invite Bathin", "blocker")],
@@ -929,6 +934,7 @@ WORK_GLANCES = {
                      "Needs your awake Heart, a Gleaner or pylon, in 10 blocks", "blocker")],
         "card": ("Needs Heart and Gleaner", (10, 10), "Needs Heart and Gleaner"),
     },
+    # GC-06 unit 3
     # GC-06: Marax's habitat reading. His reading's answer is drawn as its change ("Light 9 → 11", and ", first of 2" when
     # it is one of several), the whole sentence its tip and narration: the read glance draws its remedy (argument 4) and its
     # clause (argument 5) by their own glances (PactGlance.nestedKey), the alone clause by none. Its other answers each in
@@ -936,15 +942,14 @@ WORK_GLANCES = {
     "habitat_reading": {
         "icon": "jugcraft:habitat_gauge", "name": "Habitat reading", "line": "Names one change for your worst bed",
         "row.service": [("", "%1$s/%2$s today", (1, 2), "1/2 today", "chip")],
-        "row.last": [("", "Last: %1$s at %2$s, %3$s", ("Sunpetal", "102, 64, -18", "Light"),
-                      "Last: Sunpetal at 102, 64, -18, Light", "row")],
+        # The last and proud rows drawn short (Marax's review): with both and his first task, the kept page draws about 44
+        # of its 45 words; the crop and the proud count stay in the tip.
+        "row.last": [("", "Last: %2$s, %3$s", ("Sunpetal", "102, 64, -18", "Light"), "Last: 102, 64, -18, Light", "row")],
         "row.last_none": [("", "No reading yet: ask below", (), "No reading yet: ask below", "row")],
-        "row.proud": [("", "Proud: won't reread %1$s until it changes", ("102, 64, -18", 3),
-                       "Proud: won't reread 102, 64, -18 until it changes", "row")],
-        "row.proud_more": [("", "Proud: won't reread %1$s beds, nearest %2$s", (3, "102, 64, -18"),
-                            "Proud: won't reread 3 beds, nearest 102, 64, -18", "row")],
-        "missing": [("", "Needs your planted Verdant Bed within %1$s blocks", (8,), "Needs your planted Verdant Bed within 8 blocks",
-                     "blocker")],
+        "row.proud": [("", "%1$s skipped till changed", ("102, 64, -18", 3), "102, 64, -18 skipped till changed", "row")],
+        "row.proud_more": [("", "%1$s beds skipped till changed", (3, "102, 64, -18"), "3 beds skipped till changed", "row")],
+        "missing": [("", "Needs your awake, planted Verdant Bed within %1$s blocks", (8,),
+                     "Needs your awake, planted Verdant Bed within 8 blocks", "blocker")],
         "card": ("Needs a crop near", (8,), "Needs a crop near"),
         "ask": [("", "Ask him", (), "Ask him", "button")],
         "read": [("", "%4$s%5$s", ("Sunpetal", "102, 64, -18", "not growing", "Moisture 1 → 4", ", first of 2", "", ""),
@@ -969,6 +974,9 @@ WORK_GLANCES = {
         "outside_hours": [("", "Only in his hours", (), "Only in his hours", "answer")],
         "quota_spent": [("", "Done for today", (2,), "Done for today", "answer")],
     },
+    # GC-07 unit 4
+    # GC-08 unit 5
+    # GC-09 unit 6
 }
 # A work's fields that are not its rows' glances: its chooser reason, its icon, its name and its service line.
 WORK_FIELDS = ("card", "icon", "name", "line")
@@ -1015,7 +1023,8 @@ MARK_RULES = (
     ("exact", "pact.unavailable", "lock"), ("exact", "pact.row.state.active", "tick"),
     ("exact", "pact.row.state.upkeep_due", "hourglass"), ("prefix", "pact.row.state.", "moon"),
     ("exact", "pact.row.lost", "moon"), ("suffix", ".row.asleep", "moon"), ("contains", ".row.overworked", "hourglass"),
-    ("suffix", "obligation_kept", "tick"), ("suffix", "obligation", "hourglass"), ("contains", ".matter.", "ask"),
+    ("contains", ".row.proud", "hourglass"), ("suffix", "obligation_kept", "tick"), ("suffix", "obligation", "hourglass"),
+    ("contains", ".matter.", "ask"),
 )
 
 
@@ -1038,6 +1047,7 @@ def mark(server):
 # change here.
 ICON_RULES = (
     ("contains", ".row.overworked", "work"),
+    ("contains", ".row.proud", "work"),
     # Bathin's own rows, by their exact keys (a later work's rows of the same names draw their own icons, or none).
     ("exact", "pact.verdance_carrying.row.poured", "item:jugcraft:ley_pylon"),
     ("exact", "pact.verdance_carrying.row.moved", "item:jugcraft:gleaner"),

@@ -6,14 +6,14 @@ Beds from what they last showed and names the one change that would help the wor
 cohort's third garden spirit, on the same pact record, perch, screen, roster, journal and Jade lines as Stolas, Buer and
 Bathin, and the first to stand on the ground beside the perch instead of on it.
 
-Status: brief only (GC-06a), committed before any of his body files (D-D5), as the contract's per-spirit template asks.
-Nothing of Marax is built yet: no entity, pact definition, service, sound event, lang, body file, audit or test. This
-page holds his character (the contract's Dossier 3) and the owner files his body and cues are to use; the runtime files
-and builders it names are what GC-06 is to build. Where it goes beyond Dossier 3 (the greeting's stage direction, how
-his body is built, which cue plays which file at what pitch) it is unit 3's proposal (GC-P63 to GC-P79, added to the
-contract's Decisions when the unit lands), and the palette files may change only here, before any body file (the
-contract's art plan). The rest of the record (player experience, record fields, connections, costs, failure behaviour,
-the pact screen, his reading and the proud familiar) is added with the code.
+Status: built (`bed9f73b4`, its review's fixes after it), not yet compiled or run in CI. This brief (GC-06a) was
+committed before any of his body files (D-D5), as the contract's per-spirit template asks; GC-06 then built his entity,
+pact definition, service, sound events, words, body, audits and tests from it. This page holds his character (the
+contract's Dossier 3) and the owner files his body and cues use. Where it goes beyond Dossier 3 (the greeting's stage
+direction, how his body is built, which cue plays which file at what pitch) it is unit 3's proposal (GC-P63 to GC-P79,
+in the contract's Decisions). The rest of the record (player experience, record fields, connections, costs, failure
+behaviour, the pact screen, his reading and the proud familiar, provenance rows) is written with unit 3's records, once
+CI has run him.
 Proposal issue: none; the owner's selected scope ([the cohort's contract](concordance-garden-cohort.md), GC-D1 to GC-D3).
 Owner: @jimbozoomer-byte. AI-assisted implementation with Claude Code; the model is named in the commit trailers.
 
@@ -31,7 +31,9 @@ his.** Not imported: Genshin Impact's Morax (Zhongli).
 - **Personality:** slow, courteous, scholarly; defers to his familiar on plants; looks at the sky by night.
 - **Beats:** greeting "I am Marax. I do not dig; I keep a friend who knows the ground."; service "Ask, and my familiar
   will read your beds and tell you one thing to change. Only one: the rest you learn by doing it."; price "Two sheets of
-  paper a week. My familiar writes small."
+  paper a week. My familiar writes small." As built, held to the magic interfaces' limits (decided by the session,
+  amending GC-P60): the service beat is "Ask, and my familiar names one change. Only one: the rest you learn by doing
+  it."
 - **Refusal:** "My familiar reads what grows. Nothing grows here." **Departure:** the familiar settles between his horns,
   he turns, walks two steps and fades.
 
@@ -62,9 +64,10 @@ All four are mono, 44.1 kHz, 1.65 s. The library's notices are kept with the ori
 
 ## Verification
 
-Not run: nothing of Marax is built yet, so no build, game test, client shot or audit exercises him. For this brief only,
-each SHA-256 above was computed with `sha256sum` from the library file (and, for the sounds, from the runtime copy too),
-and each equals its `art/owner-library/catalog/files.csv` row (line numbers as above, the header line 1); the three
-paintings' colours were counted (all 16 x 16: the mahogany log's five opaque, the Spanish moss's eight and the cypress
-leaves' six opaque around clear texels) and the four sound files' Vorbis identification headers read (one channel,
-44.1 kHz, 1.65 s each). The tests, shots and runs that verify him are listed here when GC-06 lands.
+Not run in CI: with no Minecraft jar where he was built, nothing of Marax has been compiled, and no game test or client
+shot has exercised him; the repository's Python checks and audits ran on his files (each commit's message says which).
+For this brief, each SHA-256 above was computed with `sha256sum` from the library file (and, for the sounds, from the
+runtime copy too), and each equals its `art/owner-library/catalog/files.csv` row (line numbers as above, the header line
+1); the three paintings' colours were counted (all 16 x 16: the mahogany log's five opaque, the Spanish moss's eight and
+the cypress leaves' six opaque around clear texels) and the four sound files' Vorbis identification headers read (one
+channel, 44.1 kHz, 1.65 s each). The tests, shots and runs that verify him are listed here once CI has run them.

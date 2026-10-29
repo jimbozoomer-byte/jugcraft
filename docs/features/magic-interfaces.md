@@ -35,6 +35,7 @@ mockups (kept with the session's design notes, not in the repository). Its answe
 | **The beats shortened** (spec 1.5: at most 18 words a line, a stage direction of at most 8), a `Terms` skip on beats 1 and 2, and a spirit's beats once heard not shown again (the next visit opens on his terms; a client-only set in Jugcraft's client options) | **Decided by the session, in answer to the owner's request for far less reading; reviewable at the checkpoint.** Not owner-accepted. Applied in the screen commit to Stolas's, Buer's and Bathin's beats (their records quote the new words) |
 | The service sentences (`term.service.<work>`) stay as shipped; GC-S7's two phrases stay in them | Spec 1.6 (a rewrite saved four to six words) |
 | **A kept page that draws both a pending first task and its spirit's matter may draw that task's row** (at most 12 words, its act drawn short) beyond the kept page's budget of 45 (48 compact); its client shots allow that row's words (`firstTask()` in the garden client test). The spec measured the matter page without a first task; with Bathin's row cut from 18 words to 10 the page still draws about 55 in the composed picture | **Decided by the session, in answer to the owner's request for far less reading; reviewable at the checkpoint.** Not owner-accepted (the pact screens' review asked for the allowance to be dropped once the row was shorter; it cannot be without cutting the matter's or the last carry's words) |
+| **The chooser's budget grows with its cards** (spec 1.1's chooser row amended): 4 words (the title and Close) and 7 a card (a name, "Not yet" and a reason of at most 4 words), so 25 for three cards as the spec measured. With Marax a fourth card stands beside Stolas, Buer and Bathin wherever The Garden's Regard is understood: the chooser without a bed drew 20 words for three cards in CI, and his card not ready adds 7, about 27; each later unit's spirit adds a card of at most 7. `chooserWords()` in the garden client test reads the cards from the state | **Decided by the session (Marax's review), in answer to the owner's request for far less reading; reviewable at the checkpoint.** Not owner-accepted. The other way, a shorter reason on cards not ready, would leave a fourth not-ready spirit over 25 anyway |
 
 ## What the first commit adds
 
@@ -81,7 +82,7 @@ word counts are from screens composed from the generated files at 427x240 (spec 
 
 | Mode | What the player sees first | Words |
 |---|---|---|
-| Chooser | "Invite a spirit" in gold over the cosmos; a portrait card a spirit (`invite:N`), "Ready" or "Not yet" with its short reason under each; Close | 15 (25) |
+| Chooser | "Invite a spirit" in gold over the cosmos; a portrait card a spirit (`invite:N`), "Ready" or "Not yet" with its short reason under each; Close | 15 (25 for three cards; 4 + 7 a card, Decisions) |
 | Beats | the header (the live spirit, his name, three pips, `Terms` and its arrow on beats 1 and 2 (`skip`), his service's icon and name); the ruled scroll with the stage direction dim and his line (`beat`); gold arrows beside it (`back`, `next`; beat 3's captioned "Terms"); Leave. Under 360 wide the arrows are footer plates | 26, 16 (30) |
 | Terms | "His terms" (`para:0`); blockers and the answer pinned on top; a chip a term (`term:hours` ... `term:beneficiaries`) and "Standing terms" (`term:standing`); the price row: "Price", the stacks (a short one rimmed red with have/need), the resonance (boxed red when short), More (`more`); Accept, Decline and the back arrow | Buer 36, Bathin with three blockers 50, refused 39 to 43 (50); More 63 (70) |
 | Kept page | the header adds the state (`note:0`), today's gauge and four sockets for what is paid ahead; the service tab: what needs doing first, the matter and its answers, the other rows, Star-reckoning's patterns and Recall or the work's choices, the next offering with Offer and "×N carried" at the foot; the terms tab: the chips and the price paid at sealing; bookmarks for the tabs; Suspend or Resume, End..., Close | 35 to 44 (45; 48 compact, where the sockets read "0/4 ahead") |
@@ -139,7 +140,7 @@ word counts are from screens composed from the generated files at 427x240 (spec 
 - **Consumers:** the magic screens as each moves onto the layer (`tools/magic_ui.py` `MAGIC_SCREENS`), in the order of
   the design's units: the pact screen, the roster and chooser, the composer and Field Guide, the alchemy and Nouveau
   family.
-- **Garden units 4 to 6** (Marax, Foras, Bifrons, Amdusias) add each work's row to `WORK_GLANCES` (its name, service
+- **Garden units 3 to 6** (Marax, Foras, Bifrons, Amdusias) add each work's row to `WORK_GLANCES` (its name, service
   line, icon, kept-page rows, blockers and chooser reason; its gauge row, if any, "%1$s/%2$s today"); `check_magic_ui`
   names any row the server can send without one, and a row missing its name or line. A first task whose act runs its
   row past 12 words needs an act glance (`garden_pact.act.<act>`; the row is rendered with every act). Marks follow the

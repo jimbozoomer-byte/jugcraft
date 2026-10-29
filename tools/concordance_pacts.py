@@ -428,13 +428,13 @@ SPIRITS = {
         "offerings": {"name": "Marax's Offerings", "items": ["minecraft:paper"]},
         # His three beats (GC-P60) and the stage direction before the greeting, as the others have, held to the magic
         # interfaces' limits (spec 1.1 and 1.5: a line at most 18 words, a stage direction at most 8; decided by the session,
-        # reviewable at the checkpoint): the greeting and price are the contract's words; the service keeps its "Only one:
-        # the rest you learn by doing it.", its first sentence shortened.
+        # reviewable at the checkpoint): the greeting and price are the contract's words; the service keeps its "Ask," (he
+        # reads only when asked) and its "Only one: the rest you learn by doing it.", its first sentence shortened.
         "stage": "A man-faced bull treads up beside the perch.",
         "beats": {
             "greeting": "A man-faced bull treads up beside the perch. \"I am Marax. I do not dig; I keep a friend who knows "
                         "the ground.\"",
-            "service": "\"My familiar reads your beds and names one change. Only one: the rest you learn by doing it.\"",
+            "service": "\"Ask, and my familiar names one change. Only one: the rest you learn by doing it.\"",
             "price": "\"Two sheets of paper a week. My familiar writes small.\"",
         },
         # His service's two conditions (GC-S7), the holder near and only what the holder could change by hand, named before
@@ -511,7 +511,8 @@ PERCH_TOOLTIP = ("Use: invite a pact spirit whose Regard you understand (Stolas 
                  "awake Verdant Heart of yours and an awake Gleaner of yours or a Ley Pylon of yours or no one's within "
                  f"{SPIRITS['bathin']['pact']['service']['radius']} blocks"
                  # GC-06 unit 3
-                 f"; Marax a planted Verdant Bed of yours within {SPIRITS['marax']['pact']['service']['radius']} blocks"
+                 f"; Marax an awake Verdant Bed of yours with a crop on it within {SPIRITS['marax']['pact']['service']['radius']} "
+                 "blocks"
                  # GC-07 unit 4
                  # GC-08 unit 5
                  # GC-09 unit 6
@@ -1062,7 +1063,7 @@ SERVICE_WORDS = {
             "nothing_to_correct": "\"Nothing to correct: every crop my familiar read is thriving.\"",
             "nothing_to_correct.proud": "\"My familiar will not repeat itself a fourth time about the bed at %s, and every "
                                         "other crop it read is thriving.\" Change something at that bed and it will look again",
-            "read": "Marax's familiar settles over the %s at %s. \"It is %s: %s. %s\"%s%s",
+            "read": "Marax's familiar settles over the %s at %s. \"It is %s: %s. %s.\"%s%s",
             "read.proud": " (It will not repeat itself a fourth time about the bed at %s.)",
             "advice.alone": "That alone will move it on",
             "advice.one_of": "That is one of %s things to mend",
@@ -1168,7 +1169,8 @@ GARDEN_CLIENT_SHOTS += ["jugcraft_garden_marax_nothing_grows", "jugcraft_garden_
                         "jugcraft_garden_marax_conversation_small", "jugcraft_garden_marax_terms",
                         "jugcraft_garden_marax_terms_scale4", "jugcraft_garden_marax_terms_small", "jugcraft_garden_marax_refused",
                         "jugcraft_garden_marax_kept", "jugcraft_garden_marax_reading", "jugcraft_garden_marax_reading_scale4",
-                        "jugcraft_garden_marax_reading_small", "jugcraft_garden_marax_familiar", "jugcraft_garden_marax_jade",
+                        "jugcraft_garden_marax_reading_small", "jugcraft_garden_marax_familiar", "jugcraft_garden_marax_proud",
+                        "jugcraft_garden_marax_jade",
                         "jugcraft_garden_marax_faces_east", "jugcraft_garden_marax_faces_south",
                         "jugcraft_garden_marax_faces_west", "jugcraft_garden_marax_faces_north",
                         "jugcraft_garden_marax_end_confirm", "jugcraft_garden_marax_ended"]

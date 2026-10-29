@@ -21125,9 +21125,11 @@ def check_pacts(co, root, lang, registered, research):
             or not 0 <= adjust.find("super.adjustModelBonesForRender(info, bones);") < adjust.find("info.getGeckolibData(FLIGHT)"):
         err("client/PactSpiritRenderers: a row's reaching bone is posed by PactSpiritEntity.posed after its clips, its culling "
             "box widened to the reach (GC-P66)")
-    if "ui(\"work.left\", choice.amount())" not in _java_body(uncommented((CLIENT_JAVA_ROOT / "PactScreen.java").read_text(encoding="utf-8")),
-                                                          "private void workService(PactStatePayload state"):
-        err("client/PactScreen.workService: a work's on-request choices are Recall buttons with what is left today (GC-P74)")
+    work_service = _java_body(uncommented((CLIENT_JAVA_ROOT / "PactScreen.java").read_text(encoding="utf-8")),
+                              "private void workService(PactStatePayload state")
+    if "ui(\"work.left\", choice.amount())" not in work_service or "new MagicButton(MagicButton.Look.PRIMARY, choice.name()," not in work_service:
+        err("client/PactScreen.workService: a work's on-request choices are primary Recall plates, as Star-reckoning's Recall "
+            "is (spec 2.3; Marax's review), with what is left today (GC-P74)")
     for cls, names in GC06B_TESTS.items():
         source = (tests / f"{cls}.java").read_text(encoding="utf-8") if (tests / f"{cls}.java").is_file() else ""
         for name in names:
@@ -21635,20 +21637,22 @@ def check_garden_pacts(co, root, lang, registered, research):
     pa = co.pacts
     reading = strip(text(spirits / "HabitatReading.java"))
     read = _java_body(reading, "public static PactMenu.Answered read(")
-    # Refused before anything is counted, in Star-reckoning's order; at most READ_BEDS planted beds, each asked whose land
-    # it is; cached samples only; a proud bed skipped; one advice; counted once, he faces the bed, the familiar shown.
+    # Refused before anything is counted, in Star-reckoning's order; at most READ_BEDS planted beds read, at most MAX_ASKED
+    # asked whose land it is (a bed he may not read uses none of the READ_BEDS: Marax's review); cached samples only; a
+    # proud bed skipped; one advice; counted once, he faces the bed, the familiar shown.
     order = [read.find(n) for n in (
         "Workers.enabled()", "holder.verify(level, now)", "!WORK.equals(service.work())",
         "Authority.isStandIn(player) || !record.holder().equals(player.getUUID())",
         "Pacts.serves(record, Couriers.place(level, player.blockPosition()), time, now)",
-        "GardenPacts.presence(level, record, MaraxEntity.class)", "memory.judge(level);", "++asked > READ_BEDS",
+        "GardenPacts.presence(level, record, MaraxEntity.class)", "memory.judge(level);", "planted >= READ_BEDS || ++asked > MAX_ASKED",
         "GardenPacts.target(level, record, pos, bed.keeper(), time, now)", "bed.cachedHabitat(level)", "memory.proud(pos)",
         "HabitatAdvice.one(niche, habitat, grafts)", "memory.named(", "holder.taskDone(level, now);",
         "marax.attendWork(pos, MaraxEntity.Gesture.WORK.ticks, now);", "marax.showTarget(pos, now + SHOW_TICKS);")]
     if -1 in order or order != sorted(order) or reading.count("holder.taskDone(") != 1:
         err("HabitatReading.read: switched on; the pact verified, Marax's and its holder's in person; served where they stand; "
-            "Marax present; at most READ_BEDS planted beds asked of GardenPacts.target, cached samples only, a proud bed "
-            "skipped; one advice; then counted once, faced and shown (GC-06; GC-P68; GC-02)")
+            "Marax present; at most READ_BEDS planted beds read and MAX_ASKED asked of GardenPacts.target, a bed he may not "
+            "read using none of the READ_BEDS; cached samples only, a proud bed skipped; one advice; then counted once, faced "
+            "and shown (GC-06; GC-P68; GC-02)")
     for banned in ("Garden.sample(", ".habitat(", ".note(", ".forgetSample(", "setNutrients(", "setStrain(", "setGraft(",
                    ".tend(", ".report(", "budget(", "setBlock", "shrink(", "CourierLedger", "ValueOutput", "output.store("):
         if banned in reading:
@@ -21661,6 +21665,13 @@ def check_garden_pacts(co, root, lang, registered, research):
     if 'Component.translatable(KEY + "read", crop, pos.toShortString(), growth, remedy(advice), clause, graft, proud)' not in said:
         err("HabitatReading.said: its sentence's arguments are crop, bed, growth, remedy, clause, graft, proud (the glance draws "
             "the remedy and the clause)")
+    # Marax's review: a bed is proud only after three readings running with no change to it, so the count starts again
+    # when the last bed named has changed by the next reading; every crop thriving is an answer given (drawn done, with his
+    # assent), which counts nothing.
+    if "runs = 0;" not in _java_body(reading, "void judge(ServerLevel level)") \
+            or "new PactMenu.Answered(NOTHING_TO_CORRECT, false" in reading or reading.count("new PactMenu.Answered(NOTHING_TO_CORRECT, true") != 2:
+        err("HabitatReading: the proud count starts again when the last bed named has changed (Memory.judge), and nothing "
+            "to correct is an answer given, done (Dossier 3 item 5; Marax's review)")
     marax = strip(text(spirits / "MaraxEntity.java"))
     if "level().isDarkOutside()" not in _java_body(marax, "protected RawAnimation animation(Status status)") \
             or "default -> night ? Loop.STARGAZE : Loop.IDLE;" not in marax:
@@ -22593,8 +22604,10 @@ def check_magic_ui(lang):
     icons = re.findall(r'new IconRule\("(\w+)", "([^"]+)", "([^"]+)"\)', sources.get("PactGlance", ""))
     if icons != [tuple(rule) for rule in mu.ICON_RULES]:
         err("client/PactGlance.ICONS: its rules are not tools/magic_ui.py's ICON_RULES, in order")
-    block = sources.get("PactGlance", "").split("WORK_ICONS = Map.of(", 1)
-    works = dict(re.findall(r'"([a-z_]+)", "([a-z0-9_.-]+:[a-z0-9_/.-]+)"', block[1].split(");", 1)[0])) if len(block) == 2 else {}
+    # Map.ofEntries, a garden unit's line under its own marker and Star-reckoning's last (Marax's review: merges never meet).
+    block = sources.get("PactGlance", "").split("WORK_ICONS = Map.ofEntries(", 1)
+    works = dict(re.findall(r'Map\.entry\("([a-z_]+)", "([a-z0-9_.-]+:[a-z0-9_/.-]+)"', block[1].split("));", 1)[0])) \
+        if len(block) == 2 else {}
     if works != {work: rows["icon"] for work, rows in mu.WORK_GLANCES.items() if rows.get("icon")}:
         err("client/PactGlance.WORK_ICONS: each work's icon is not tools/magic_ui.py's WORK_GLANCES[work][\"icon\"]")
     for item in list(works.values()) + [rule[2][5:] for rule in mu.ICON_RULES if rule[2].startswith("item:")]:
@@ -25515,7 +25528,8 @@ GC06_TESTS = {
         "theProudFamiliarSkipsABedNamedThreeTimes", "maraxRefusesWhereNothingGrows", "maraxsFirstObligationIsABedReadByHand",
         "maraxStandsBesideThePerchFacingHisInviter", "aStandingSpiritFallsBackToThePerchWithNoFreeSide",
         "theTargetClearsWhenTheConversationEnds", "maraxsReadingSaysItsNoteAndNamesNoPlayer",
-        "maraxAnswersEachActionWithHisGesture"],
+        "maraxAnswersEachActionWithHisGesture", "maraxNeverReadsABedHeMayNotChange", "maraxReadsPastBedsHeMayNotChange",
+        "theProudCountStartsAgainWhenTheBedChanges"],
     "ConcordanceProgressionGameTests": ["theGardensRegardIsMasteredThroughThreeSpirits"],
 }
 # GC-07 unit 4

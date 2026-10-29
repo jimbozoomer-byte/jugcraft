@@ -7611,6 +7611,8 @@ public class ConcordanceWorkerGameTests {
 			// A random tick of its own may have sampled the stalled bed: forgotten, it holds no sample again.
 			unread.forgetSample();
 			int used = Garden.budget(level).used(now);
+			// His page open, so a reading's bed is shown (PactSpiritEntity.showTarget shows nothing to no one listening).
+			open(helper, keeper, perch);
 			PactMenu.Answered named = reading(helper, keeper, perch, now);
 			helper.assertTrue(named.done() && helper.absolutePos(sampledAt).toShortString().equals(arg(named.said(), 1))
 					&& unread.cachedHabitat(level) == null && Garden.budget(level).used(now) == used,
@@ -7618,7 +7620,9 @@ public class ConcordanceWorkerGameTests {
 			read.forgetSample();
 			PactMenu.Answered none = reading(helper, keeper, perch, now);
 			helper.assertTrue(!none.done() && HabitatReading.NO_SAMPLE.equals(none.reason()) && Pacts.done(pactOf(level, perch).pact(), now) == 1
-					&& marax(helper, perch).target().isEmpty(), "None sampled: he says so, and nothing is counted or shown");
+					&& marax(helper, perch).target().equals(Optional.of(helper.absolutePos(sampledAt))),
+					"None sampled: he says so, nothing is counted, and no bed is shown in place of the one last named");
+			keeper.closeContainer();
 		});
 	}
 
@@ -7665,12 +7669,15 @@ public class ConcordanceWorkerGameTests {
 			beside(helper, friend, MARAX_PERCH);
 			MaraxEntity marax = marax(helper, perch);
 			FakePlayer standIn = FakePlayer.get(level, new GameProfile(keeper.getUUID(), "[Concordance]"));
+			// The holder's page open, so a reading's bed would be shown (showTarget shows nothing to no one listening).
+			open(helper, keeper, perch);
 			for (ServerPlayer asker : List.of(stranger, friend, standIn)) {
 				PactMenu.Answered refused = reading(helper, asker, perch, now);
 				helper.assertTrue(!refused.done() && Pacts.Reckoning.NOT_HOLDER.id.equals(refused.reason())
 						&& key(refused.said()).equals(READING_KEY + "not_holder") && Pacts.done(pactOf(level, perch).pact(), now) == 0
 						&& marax.target().isEmpty(), "Only the holder may ask: " + asker.getName().getString());
 			}
+			keeper.closeContainer();
 			PactMenu menu = open(helper, stranger, perch);
 			helper.assertTrue(menu.lastSent().mode() == PactStatePayload.CLOSED && !menu.lastSent().offers(PactRequestPayload.RECALL),
 					"The stranger's page is closed, with no reading offered");
@@ -7718,7 +7725,120 @@ public class ConcordanceWorkerGameTests {
 		});
 	}
 
-	/** GC-06 (save and load): a reading's target and the familiar's memory are never saved; read back, he shows and remembers nothing. */
+	/**
+	 * GC-06 (GC-S7; Marax's review): never a bed the holder could not change by hand. Their stalled bed, nearer the perch,
+	 * stands in a claim; the reading names their own tolerating bed beyond it and leaves the claimed one as it was. With only
+	 * the claimed bed planted, nothing grows for him, and nothing more is counted.
+	 */
+	@GameTest(maxTicks = 80)
+	public void maraxNeverReadsABedHeMayNotChange(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		ServerPlayer keeper = gardenHolder(helper);
+		floor(helper);
+		PactPerchBlockEntity perch = maraxPact(helper, keeper, MARAX_PERCH, level.getGameTime());
+		BlockPos claimedAt = new BlockPos(2, 1, 5);
+		BlockPos ownAt = new BlockPos(5, 1, 5);
+		VerdantBedBlockEntity claimed = plantedBed(helper, claimedAt, keeper.getUUID(), Garden.SUNPETAL_CROP, 0);
+		VerdantBedBlockEntity own = plantedBed(helper, ownAt, keeper.getUUID(), Garden.SUNPETAL_CROP, 4);
+		ConcordanceGardenGameTests.afterSampling(helper, List.of(claimed, own), () -> {
+			long now = level.getGameTime();
+			MaraxEntity marax = marax(helper, perch);
+			try (TestClaims claims = TestClaims.open()) {
+				claims.block(helper.absolutePos(claimedAt), STRANGER);
+				open(helper, keeper, perch);
+				List<String> before = unchanged(helper, List.of(claimed));
+				PactMenu.Answered read = reading(helper, keeper, perch, now);
+				helper.assertTrue(read.done() && helper.absolutePos(ownAt).toShortString().equals(arg(read.said(), 1))
+						&& marax.target().equals(Optional.of(helper.absolutePos(ownAt))),
+						"The claimed stalled bed, though nearer and worse, is passed by; his own tolerating bed is read: " + read.said().getString());
+				helper.assertValueEqual(unchanged(helper, List.of(claimed)), before, "The claimed bed is as it was");
+				helper.setBlock(ownAt.above(), Blocks.AIR);
+				PactMenu.Answered none = reading(helper, keeper, perch, now);
+				helper.assertTrue(!none.done() && HabitatReading.NOTHING_GROWS.equals(none.reason()) && Pacts.done(pactOf(level, perch).pact(), now) == 1,
+						"With only the claimed bed planted, nothing grows for him, and nothing more is counted: " + none.said().getString());
+				keeper.closeContainer();
+			}
+		});
+	}
+
+	/**
+	 * GC-06 (GC-S7; Marax's review): beds he may not change never use up his READ_BEDS. The holder's eight planted beds
+	 * nearest the perch, each only tolerating, stand in a claim; a ninth of theirs, farthest and stalled, is read and named.
+	 * The claim lifted, the eight are read and the ninth, though the worst, is past his READ_BEDS and never read.
+	 */
+	@GameTest(maxTicks = 80)
+	public void maraxReadsPastBedsHeMayNotChange(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		ServerPlayer keeper = gardenHolder(helper);
+		floor(helper);
+		PactPerchBlockEntity perch = maraxPact(helper, keeper, MARAX_PERCH, level.getGameTime());
+		// Round the perch at (3, 1, 2), clear of his station (two west) and of his holder (two south).
+		List<BlockPos> nearAt = List.of(new BlockPos(3, 1, 1), new BlockPos(3, 1, 3), new BlockPos(4, 1, 2), new BlockPos(4, 1, 1),
+				new BlockPos(4, 1, 3), new BlockPos(2, 1, 1), new BlockPos(2, 1, 3), new BlockPos(5, 1, 2));
+		List<VerdantBedBlockEntity> beds = new ArrayList<>();
+		for (BlockPos at : nearAt) {
+			beds.add(plantedBed(helper, at, keeper.getUUID(), Garden.SUNPETAL_CROP, 4));
+		}
+		BlockPos farAt = new BlockPos(7, 1, 7);
+		beds.add(plantedBed(helper, farAt, keeper.getUUID(), Garden.SUNPETAL_CROP, 0));
+		helper.assertValueEqual(nearAt.size(), HabitatReading.READ_BEDS, "As many near beds as one reading reads");
+		ConcordanceGardenGameTests.afterSampling(helper, beds, () -> {
+			long now = level.getGameTime();
+			String far = helper.absolutePos(farAt).toShortString();
+			try (TestClaims claims = TestClaims.open()) {
+				for (BlockPos at : nearAt) {
+					claims.block(helper.absolutePos(at), STRANGER);
+				}
+				PactMenu.Answered read = reading(helper, keeper, perch, now);
+				helper.assertTrue(read.done() && far.equals(arg(read.said(), 1)),
+						"The eight nearest, each in a claim, are passed by and use none of his READ_BEDS; the ninth is read: " + read.said().getString());
+			}
+			PactMenu.Answered lifted = reading(helper, keeper, perch, now);
+			List<String> near = nearAt.stream().map(at -> helper.absolutePos(at).toShortString()).toList();
+			helper.assertTrue(lifted.done() && near.contains(arg(lifted.said(), 1)) && !far.equals(arg(lifted.said(), 1)),
+					"The claim lifted, he reads his READ_BEDS nearest and never the ninth, though it is the worst: " + lifted.said().getString());
+		});
+	}
+
+	/**
+	 * GC-06 (Dossier 3 item 5; Marax's review): a bed is proud only after three readings running with no change to its
+	 * verdict. Named twice, its crop taken (nothing grows; nothing counted) and planted again, it is named once more as if
+	 * for the first time: one running, not proud.
+	 */
+	@GameTest(maxTicks = 80)
+	public void theProudCountStartsAgainWhenTheBedChanges(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		ServerPlayer keeper = gardenHolder(helper);
+		floor(helper);
+		PactPerchBlockEntity perch = maraxPact(helper, keeper, MARAX_PERCH, level.getGameTime());
+		BlockPos at = new BlockPos(5, 1, 5);
+		VerdantBedBlockEntity bed = plantedBed(helper, at, keeper.getUUID(), Garden.SUNPETAL_CROP, 0);
+		BlockState ripe = ((OrganismCropBlock) Garden.SUNPETAL_CROP).getStateForAge(OrganismCropBlock.MAX_AGE);
+		ConcordanceGardenGameTests.afterSampling(helper, List.of(bed), () -> {
+			MaraxEntity marax = marax(helper, perch);
+			String named = helper.absolutePos(at).toShortString();
+			for (long when : new long[] {dayStart(level, 1), dayStart(level, 1) + 100}) {
+				helper.assertTrue(reading(helper, keeper, perch, when).done(), "Its bed named at " + when);
+			}
+			HabitatReading.Memory memory = familiar(marax);
+			helper.assertTrue(memory.runs() == 2 && !memory.proud(helper.absolutePos(at)), "Twice running: not yet proud");
+			long second = dayStart(level, 2);
+			helper.setBlock(at.above(), Blocks.AIR);
+			PactMenu.Answered none = reading(helper, keeper, perch, second);
+			helper.assertTrue(!none.done() && HabitatReading.NOTHING_GROWS.equals(none.reason()) && Pacts.done(pactOf(level, perch).pact(), second) == 0,
+					"Its crop taken: nothing grows, nothing counted");
+			helper.setBlock(at.above(), ripe);
+			PactMenu.Answered again = reading(helper, keeper, perch, second + 100);
+			helper.assertTrue(again.done() && named.equals(arg(again.said(), 1)) && memory.runs() == 1 && !memory.proud(helper.absolutePos(at)),
+					"Planted again, it is named as if for the first time: " + memory.runs() + " running, not proud");
+		});
+	}
+
+	/**
+	 * GC-06 (save and load): a reading's target and the familiar's memory are never saved; read back, he shows and remembers
+	 * nothing. Its only bed named three readings running is proud first, so the save is asked of a pique too, and a fourth
+	 * reading passes it over: nothing to correct, an answer given (his assent) that counts nothing.
+	 */
 	@GameTest(maxTicks = 80)
 	public void theTargetIsNeverSaved(GameTestHelper helper) {
 		ServerLevel level = helper.getLevel();
@@ -7728,9 +7848,23 @@ public class ConcordanceWorkerGameTests {
 		VerdantBedBlockEntity bed = plantedBed(helper, new BlockPos(5, 1, 5), keeper.getUUID(), Garden.SUNPETAL_CROP, 0);
 		ConcordanceGardenGameTests.afterSampling(helper, List.of(bed), () -> {
 			MaraxEntity marax = marax(helper, perch);
+			// He takes his pact's record at his first think (every THINK_TICKS, so maybe not yet at tick 5): think once, so his
+			// save is asked to hold it (the review's item 2).
+			marax.think(level, NOON, level.getGameTime());
 			open(helper, keeper, perch);
 			helper.assertTrue(reading(helper, keeper, perch, level.getGameTime()).done() && marax.target().isPresent()
 					&& familiar(marax).lastBed() != null, "A reading shows its bed and is remembered");
+			for (long when : new long[] {dayStart(level, 1), dayStart(level, 1) + 100}) {
+				helper.assertTrue(reading(helper, keeper, perch, when).done(), "Its only bed named again at " + when);
+			}
+			helper.assertTrue(familiar(marax).proudBeds() == 1, "Named three readings running, nothing changed: proud");
+			long fourth = dayStart(level, 2);
+			PactMenu.Answered passed = reading(helper, keeper, perch, fourth);
+			helper.assertTrue(passed.done() && HabitatReading.NOTHING_TO_CORRECT.equals(passed.reason())
+					&& key(passed.said()).equals(READING_KEY + "nothing_to_correct.proud") && Pacts.done(pactOf(level, perch).pact(), fourth) == 0
+					&& MaraxEntity.reaction(PactRequestPayload.RECALL, passed.reason(), passed.done()) == MaraxEntity.Gesture.ASSENT,
+					"Its only bed proud, nothing to correct: an answer given, with his assent, that counts nothing: " + passed.said().getString());
+			helper.assertTrue(marax.target().isPresent(), "The bed last named is still shown as he is saved");
 			TagValueOutput saved = TagValueOutput.createWithContext(ProblemReporter.DISCARDING, level.registryAccess());
 			marax.saveWithoutId(saved);
 			CompoundTag tag = saved.buildResult();
@@ -7988,7 +8122,7 @@ public class ConcordanceWorkerGameTests {
 		helper.assertTrue(MaraxEntity.reaction(PactRequestPayload.ACCEPT, PactMenu.SEALED, true) == MaraxEntity.Gesture.ASSENT
 				&& MaraxEntity.reaction(PactRequestPayload.ACCEPT, HabitatReading.NOTHING_GROWS, false) == MaraxEntity.Gesture.REFUSE
 				&& MaraxEntity.reaction(PactRequestPayload.RECALL, HabitatReading.READ, true) == MaraxEntity.Gesture.WORK
-				&& MaraxEntity.reaction(PactRequestPayload.RECALL, HabitatReading.NOTHING_TO_CORRECT, false) == MaraxEntity.Gesture.ASSENT
+				&& MaraxEntity.reaction(PactRequestPayload.RECALL, HabitatReading.NOTHING_TO_CORRECT, true) == MaraxEntity.Gesture.ASSENT
 				&& MaraxEntity.reaction(PactRequestPayload.RECALL, Pacts.Reckoning.QUOTA_SPENT.id, false) == MaraxEntity.Gesture.REFUSE
 				&& MaraxEntity.reaction(PactRequestPayload.DEPOSIT, PactMenu.DEPOSITED, true) == MaraxEntity.Gesture.INSPECT
 				&& MaraxEntity.reaction(PactRequestPayload.DEPOSIT, PactMenu.NOTHING_DEPOSITED, false) == null

@@ -33,6 +33,7 @@ import io.github.jimbozoomer.jugcraft.concordance.spirits.GardenPacts;
 import io.github.jimbozoomer.jugcraft.concordance.spirits.HabitatReading;
 import io.github.jimbozoomer.jugcraft.concordance.spirits.MaraxEntity;
 import io.github.jimbozoomer.jugcraft.concordance.spirits.PactKeeping;
+import io.github.jimbozoomer.jugcraft.concordance.spirits.PactMenu;
 import io.github.jimbozoomer.jugcraft.concordance.spirits.PactPerchBlockEntity;
 import io.github.jimbozoomer.jugcraft.concordance.spirits.PactReading;
 import io.github.jimbozoomer.jugcraft.concordance.spirits.PactRequestPayload;
@@ -326,7 +327,7 @@ public class ConcordanceGardenPactClientGameTests implements FabricClientGameTes
 		fits(context, "the chooser without a bed");
 		named(context);
 		reasons(context);
-		budget(context, CHOOSER_WORDS, "the chooser without a bed");
+		budget(context, chooserWords(context), "the chooser without a bed");
 		shot(context, "jugcraft_garden_buer_nothing_to_mend");
 		context.getInput().pressKey(InputConstants.KEY_ESCAPE);
 		context.waitForScreen(null);
@@ -358,7 +359,7 @@ public class ConcordanceGardenPactClientGameTests implements FabricClientGameTes
 		fits(context, "the chooser at GUI scale 2");
 		named(context);
 		reasons(context);
-		budget(context, CHOOSER_WORDS, "the chooser");
+		budget(context, chooserWords(context), "the chooser");
 		shot(context, "jugcraft_garden_chooser");
 		int width = context.computeOnClient(client -> client.getWindow().getWidth());
 		int height = context.computeOnClient(client -> client.getWindow().getHeight());
@@ -373,7 +374,7 @@ public class ConcordanceGardenPactClientGameTests implements FabricClientGameTes
 		context.waitFor(client -> client.gui.screen() instanceof PactScreen, WAIT);
 		fits(context, "the chooser at GUI scale 4");
 		named(context);
-		budget(context, CHOOSER_WORDS, "the chooser at GUI scale 4");
+		budget(context, chooserWords(context), "the chooser at GUI scale 4");
 		shot(context, "jugcraft_garden_chooser_scale4");
 		context.runOnClient(client -> {
 			client.options.guiScale().set(2);
@@ -384,7 +385,7 @@ public class ConcordanceGardenPactClientGameTests implements FabricClientGameTes
 		context.waitFor(client -> client.gui.screen() instanceof PactScreen, WAIT);
 		fits(context, "the chooser at 320x180");
 		named(context);
-		budget(context, CHOOSER_WORDS, "the chooser at 320x180");
+		budget(context, chooserWords(context), "the chooser at 320x180");
 		shot(context, "jugcraft_garden_chooser_small");
 		context.getInput().resizeWindow(width, height);
 		context.waitTicks(10);
@@ -1104,12 +1105,21 @@ public class ConcordanceGardenPactClientGameTests implements FabricClientGameTes
 		return context.computeOnClient(client -> PactClient.state().result().orElseThrow());
 	}
 
-	/** The magic interfaces' word budgets (spec 1.1): the chooser, a beat page, his terms (a refusal included), More, the ended page. */
-	private static final int CHOOSER_WORDS = 25;
+	/** The magic interfaces' word budgets (spec 1.1): a beat page, his terms (a refusal included), More, the ended page. */
 	private static final int BEAT_WORDS = 30;
 	private static final int TERMS_WORDS = 50;
 	private static final int MORE_WORDS = 70;
 	private static final int ENDED_WORDS = 30;
+
+	/**
+	 * The chooser's budget: its title and Close (4 words), and at most 7 a card (a name, "Not yet" and a reason of at most 4
+	 * words). Spec 1.1's 25 is three cards'; a session decision (Marax's review) lets it grow with the spirits listed, as a
+	 * fourth card is drawn once Marax is offered (docs/features/magic-interfaces.md, Decisions), reviewable at the checkpoint.
+	 */
+	private static int chooserWords(ClientGameTestContext context) {
+		settle(context);
+		return 4 + 7 * context.computeOnClient(client -> PactClient.state().patterns().size());
+	}
 
 	/** A kept page's budget: 45, or 48 in the compact layout, which writes what is paid ahead as "0/4 ahead" (spec 1.1). */
 	private static int keptWords(ClientGameTestContext context) {
@@ -1513,7 +1523,7 @@ public class ConcordanceGardenPactClientGameTests implements FabricClientGameTes
 		fits(context, "the chooser without his Heart");
 		named(context);
 		reasons(context);
-		budget(context, CHOOSER_WORDS, "the chooser without his Heart");
+		budget(context, chooserWords(context), "the chooser without his Heart");
 		shot(context, "jugcraft_garden_bathin_nothing_to_carry");
 		context.getInput().pressKey(InputConstants.KEY_ESCAPE);
 		context.waitForScreen(null);
@@ -1542,7 +1552,7 @@ public class ConcordanceGardenPactClientGameTests implements FabricClientGameTes
 		context.waitFor(client -> client.gui.screen() instanceof PactScreen, WAIT);
 		fits(context, "the chooser with three spirits");
 		named(context);
-		budget(context, CHOOSER_WORDS, "the chooser with three spirits");
+		budget(context, chooserWords(context), "the chooser with three spirits");
 		shot(context, "jugcraft_garden_bathin_chooser");
 		String name = context.computeOnClient(client -> Component.translatable("entity.jugcraft.bathin").getString());
 		tabToNamed(context, name);
@@ -2050,8 +2060,8 @@ public class ConcordanceGardenPactClientGameTests implements FabricClientGameTes
 	/**
 	 * GC-06: Marax at the perch Bathin left, from the chooser to his departure: listed not ready with nothing planted, chosen
 	 * by keyboard and treading up beside the perch; his conversation at three sizes, refused and sealed; a reading on his
-	 * page at three sizes with his familiar frozen over the bed it names; Jade; eleven poses, his night look among them; four
-	 * bearings round where he stands; the end.
+	 * page at three sizes with his familiar frozen over the bed it names; his page with a proud bed; Jade; eleven poses, his
+	 * night look among them; four bearings round where he stands; the end.
 	 */
 	private static void marax(ClientGameTestContext context, TestDedicatedServerContext server, TestDedicatedServerConnection connection,
 			BlockPos perch) {
@@ -2071,6 +2081,7 @@ public class ConcordanceGardenPactClientGameTests implements FabricClientGameTes
 		maraxAcceptance(context, server);
 		maraxHeard(context, server, hearing, perch);
 		maraxReading(context, server, perch, poor, plain);
+		maraxProud(context, server, perch, poor);
 		maraxJade(context, server, perch);
 		maraxPoses(context, server, perch);
 		standingFacing(context, server, perch, MARAX, List.of("jugcraft_garden_marax_faces_east", "jugcraft_garden_marax_faces_south",
@@ -2097,7 +2108,7 @@ public class ConcordanceGardenPactClientGameTests implements FabricClientGameTes
 		fits(context, "the chooser with nothing planted");
 		named(context);
 		reasons(context);
-		budget(context, CHOOSER_WORDS, "the chooser with nothing planted");
+		budget(context, chooserWords(context), "the chooser with nothing planted");
 		shot(context, "jugcraft_garden_marax_nothing_grows");
 		context.getInput().pressKey(InputConstants.KEY_ESCAPE);
 		context.waitForScreen(null);
@@ -2132,7 +2143,7 @@ public class ConcordanceGardenPactClientGameTests implements FabricClientGameTes
 		fits(context, "the chooser with four spirits");
 		named(context);
 		reasons(context);
-		budget(context, CHOOSER_WORDS, "the chooser with four spirits");
+		budget(context, chooserWords(context), "the chooser with four spirits");
 		shot(context, "jugcraft_garden_marax_chooser");
 		String name = context.computeOnClient(client -> Component.translatable("entity.jugcraft.marax").getString());
 		tabToNamed(context, name);
@@ -2156,7 +2167,7 @@ public class ConcordanceGardenPactClientGameTests implements FabricClientGameTes
 		check(whole, "Marax speaks three beats, nothing stands in the way, and his terms name every term, in order: " + shown);
 		List<String> beats = context.computeOnClient(client -> PactClient.state().beats().stream().map(Component::getString).toList());
 		check(beats.get(0).contains("I keep a friend who knows the ground") && beats.get(1).contains("Only one")
-				&& beats.get(2).contains("My familiar writes small"), "His beats are the contract's words: " + beats);
+				&& beats.get(2).contains("My familiar writes small"), "His beats keep the contract's closing words: " + beats);
 		fits(context, "his beat at GUI scale 2");
 		named(context);
 		budget(context, BEAT_WORDS, "his first beat");
@@ -2363,6 +2374,45 @@ public class ConcordanceGardenPactClientGameTests implements FabricClientGameTes
 				&& spirit.flight(0.0F) <= 0.0F, WAIT);
 		boolean clear = server.computeOnServer(minecraft -> presenceOf(minecraft, perch).target().isEmpty());
 		check(clear, "The conversation over, the target clears and the familiar flies home");
+	}
+
+	/**
+	 * Dossier 3 item 5 (Marax's review: no shot measured it): his kept page with a proud bed keeps to its budget. The poor bed
+	 * his familiar named on screen is named twice more on the server at the next game day's start (two readings a day;
+	 * nothing on it changed, random ticks being off), so the familiar is proud of it; his page, opened again, draws the
+	 * proud row beside the last reading and his first task.
+	 */
+	private static void maraxProud(ClientGameTestContext context, TestDedicatedServerContext server, BlockPos perch, BlockPos poor) {
+		standSouth(context, server, perch);
+		String proud = server.computeOnServer(minecraft -> {
+			ServerLevel level = minecraft.overworld();
+			long day = (Math.floorDiv(level.getGameTime(), Pacts.DAY) + 1) * Pacts.DAY;
+			StringBuilder out = new StringBuilder();
+			for (long when : new long[] {day + 1_000L, day + 1_100L}) {
+				PactMenu.Answered read = HabitatReading.read(level, player(minecraft), holder(minecraft, perch), level.getOverworldClockTime(), when);
+				out.append(read.reason()).append(read.said().getString().contains(poor.toShortString()) ? " poor, " : " other, ");
+			}
+			PactSpiritEntity<?> marax = presenceOf(minecraft, perch);
+			// Each reading turned him to the bed until its own game time plus his work gesture's: a day ahead, so that is ended
+			// now, and he faces whoever speaks to him again (no screen was open, so no bed was shown).
+			marax.attendWork(poor, 0, level.getGameTime());
+			HabitatReading.Memory memory = marax.serviceMemory(HabitatReading.Memory.class, HabitatReading.Memory::new);
+			return out.append(memory.proud(poor) ? "proud" : "not proud").toString();
+		});
+		Jugcraft.LOGGER.info("[garden-check] the poor bed named twice more: {}", proud);
+		check(proud.equals("read poor, read poor, proud"), "Named three readings running, nothing changed, the poor bed is proud: " + proud);
+		context.waitTicks(OPEN_GAP);
+		open(context, server, perch);
+		context.waitFor(client -> PactClient.state() != null && PactClient.state().mode() == PactStatePayload.KEEP
+				&& lines(PactClient.state()).stream().anyMatch(row -> row.startsWith("Proud: his familiar will not read the bed at")), WAIT);
+		List<String> rows = context.computeOnClient(client -> lines(PactClient.state()));
+		Jugcraft.LOGGER.info("[garden-check] his kept page with a proud bed: {}", rows);
+		fits(context, "his kept page with a proud bed");
+		named(context);
+		budget(context, keptWords(context), "his kept page with a proud bed");
+		shot(context, "jugcraft_garden_marax_proud");
+		context.getInput().pressKey(InputConstants.KEY_ESCAPE);
+		context.waitForScreen(null);
 	}
 
 	/** The reading's page at GUI scale 4 (1920 x 1080) and in a 320 x 180 window, then as it was (the world frozen throughout). */

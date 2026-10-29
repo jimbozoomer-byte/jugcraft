@@ -102,9 +102,9 @@ WEIGHTS = {
                                              # GC-06 unit 3
                                              # GC-06 adds Marax at the same perch: the chooser twice, his conversation by
                                              # keyboard at three sizes, a refused and a sealed acceptance, a reading at three
-                                             # sizes and his familiar frozen over its bed, his night look, Jade, eleven poses,
-                                             # four bearings and the ending: about 32 shots and their waits, about 260 s more
-                                             # (an estimate, not a measurement).
+                                             # sizes and his familiar frozen over its bed, his page with a proud bed, his night
+                                             # look, Jade, eleven poses, four bearings and the ending: about 33 shots and their
+                                             # waits, about 260 s more (an estimate, not a measurement).
                                              + 260
                                              # GC-07 unit 4
                                              # GC-08 unit 5

@@ -784,15 +784,17 @@ public class PactScreen extends MagicScreen implements MenuAccess<PactMenu> {
 
 	/**
 	 * GC-01 (SG5): another work's service is drawn by its rows (the header's gauge, the body's lines), its words the
-	 * server's. GC-06 (GC-P74): then each choice of its on-request action (Marax's reading), a plate sending RECALL with its
-	 * index, drawn by its glance (spec 1.1: a button at most two words; its whole name its message).
+	 * server's. GC-06 (GC-P74): then each choice of its on-request action (Marax's reading), a primary plate as
+	 * Star-reckoning's Recall is (spec 2.3; it sends the same RECALL, with its index), drawn by its glance (spec 1.1: a
+	 * button at most two words; its whole name its message).
 	 */
 	private void workService(PactStatePayload state, ScreenRectangle text) {
 		boolean free = !PactClient.waiting() && state.offers(PactRequestPayload.RECALL);
 		for (int i = 0; i < state.patterns().size(); i++) {
 			PactStatePayload.Choice choice = state.patterns().get(i);
 			int index = i;
-			MagicButton work = plate(choice.name(), PactGlance.of(choice.name()).shown(), () -> PactClient.request(menu, PactRequestPayload.RECALL, index))
+			MagicButton work = new MagicButton(MagicButton.Look.PRIMARY, choice.name(), PactGlance.of(choice.name()).shown(),
+					unused -> PactClient.request(menu, PactRequestPayload.RECALL, index))
 					.hint(choice.ready() ? ui("work.left", choice.amount()) : ui("work.spent"), Component.empty());
 			work.active = free && choice.ready();
 			work.setRectangle(Math.min(text.width(), Math.max(56, work.labelWidth(font) + 6)), MagicArt.PLATE_HEIGHT, text.left(), 0);

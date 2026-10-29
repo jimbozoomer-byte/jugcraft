@@ -112,7 +112,7 @@ public class MaraxEntity extends PactSpiritEntity<MaraxEntity> {
 		}
 		return switch (action) {
 			case PactRequestPayload.ACCEPT -> done ? Gesture.ASSENT : Gesture.REFUSE;
-			case PactRequestPayload.RECALL -> done ? Gesture.WORK : HabitatReading.NOTHING_TO_CORRECT.equals(reason) ? Gesture.ASSENT : Gesture.REFUSE;
+			case PactRequestPayload.RECALL -> HabitatReading.NOTHING_TO_CORRECT.equals(reason) ? Gesture.ASSENT : done ? Gesture.WORK : Gesture.REFUSE;
 			case PactRequestPayload.DEPOSIT -> done ? Gesture.INSPECT : null;
 			case PactRequestPayload.RESUME -> done ? Gesture.ASSENT : null;
 			default -> null;

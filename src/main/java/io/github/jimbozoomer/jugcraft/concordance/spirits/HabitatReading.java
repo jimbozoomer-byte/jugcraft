@@ -27,6 +27,7 @@ import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.TreeMap;
 import java.util.UUID;
 import net.minecraft.core.BlockPos;
@@ -38,11 +39,13 @@ import org.jspecify.annotations.Nullable;
 /**
  * Concordance garden cohort, GC-06 (Dossier 3 items 3 and 5; docs/features/marax-pact.md): habitat reading, Marax's
  * service. On his holder's request at the perch (the kept page's Recall action; holder only; twice a game day, at any
- * hour) his familiar reads up to {@value #READ_BEDS} of the planted Verdant Beds in his index (GardenReach: the holder's,
- * loaded chunks only, nearest the perch first), each asked of GardenPacts.target, from the sample each bed already holds
- * (VerdantBedBlockEntity.cachedHabitat: it takes none), and names for the worst the one change HabitatAdvice gives. It
- * changes nothing: no sample, note, nutrient, strain, graft, item or practice; only the day's count on the record, and
- * the familiar's flight to the bed (PactSpiritEntity.showTarget: synced, never saved) while the answer is on screen.
+ * hour) his familiar reads the first {@value #READ_BEDS} planted Verdant Beds in his index (GardenReach: the holder's,
+ * loaded chunks only, nearest the perch first) that GardenPacts.target lets it read, asking that of at most
+ * {@value #MAX_ASKED} (a bed it may not read, such as one its holder could not change by hand, uses none of the
+ * {@value #READ_BEDS}), from the sample each bed already holds (VerdantBedBlockEntity.cachedHabitat: it takes none), and
+ * names for the worst the one change HabitatAdvice gives. It changes nothing: no sample, note, nutrient, strain, graft,
+ * item or practice; only the day's count on the record, and the familiar's flight to the bed
+ * (PactSpiritEntity.showTarget: synced, never saved) while the answer is on screen.
  * <p>
  * The proud familiar (GC-P69): a bed named for the same factor on an unchanged verdict at {@value #PIQUE} readings
  * running is not read again while its verdict stays; the next-worst is read instead. What it remembers is the presence's
@@ -62,12 +65,14 @@ public final class HabitatReading {
 	public static final String NOTHING_GROWS = "nothing_grows";
 	/** Planted beds, none of them sampled yet. */
 	public static final String NO_SAMPLE = "no_sample";
-	/** Every crop read is thriving (or left proud). */
+	/** Every crop read is thriving (or left proud): an answer given, which counts nothing. */
 	public static final String NOTHING_TO_CORRECT = "nothing_to_correct";
 	/** No Marax at the perch to send his familiar. */
 	public static final String ABSENT = "absent";
-	/** The most planted beds one reading asks about. Keep equal to tools/concordance_garden_pacts.py CONSTANTS. */
+	/** The most planted beds one reading reads (each one GardenPacts.target lets it read). Keep equal to tools/concordance_garden_pacts.py CONSTANTS. */
 	public static final int READ_BEDS = 8;
+	/** The most planted beds one reading asks GardenPacts.target about (twice READ_BEDS: beds he may not change are passed by). Keep equal to CONSTANTS. */
+	public static final int MAX_ASKED = 16;
 	/** Readings running that name one bed and factor on one verdict before the familiar will not repeat itself. Keep equal to CONSTANTS. */
 	public static final int PIQUE = 3;
 	/** How long the familiar may hover over the bed it named while the answer is on screen (ticks). Keep equal to CONSTANTS. */
@@ -83,7 +88,8 @@ public final class HabitatReading {
 	/**
 	 * {@code player} asks for a reading at {@code holder}'s perch at world time {@code time} and game time {@code now}: the
 	 * answer, refused with one reason before anything is counted. Bounded: one index read (at most 64 beds, refreshed at
-	 * most every 200 ticks), at most READ_BEDS planted beds asked, one HabitatAdvice call.
+	 * most every 200 ticks), at most MAX_ASKED planted beds asked of GardenPacts.target and READ_BEDS read, one
+	 * HabitatAdvice call.
 	 */
 	public static PactMenu.Answered read(ServerLevel level, ServerPlayer player, AgreementHolder holder, long time, long now) {
 		if (!Workers.enabled()) {
@@ -125,12 +131,13 @@ public final class HabitatReading {
 			if (organism == null) {
 				continue;
 			}
-			if (++asked > READ_BEDS) {
+			if (planted >= READ_BEDS || ++asked > MAX_ASKED) {
 				break;
 			}
 			Status refused = GardenPacts.target(level, record, pos, bed.keeper(), time, now);
 			if (refused == Status.IDLE || refused == Status.BLOCKED_BY_ACCESS || refused == Status.OUTSIDE_AGREEMENT) {
-				// This bed's own answer: not a beneficiary's now, not the holder's to touch, or outside his area.
+				// This bed's own answer: not a beneficiary's now, not the holder's to touch, or outside his area. It uses none of
+				// the READ_BEDS beds read, so beds in a claim the holder may not build in never hide farther ones he may.
 				continue;
 			}
 			if (refused != null) {
@@ -166,7 +173,8 @@ public final class HabitatReading {
 			return new PactMenu.Answered(NO_SAMPLE, false, Component.translatable(KEY + "no_sample"));
 		}
 		if (worst == null) {
-			return new PactMenu.Answered(NOTHING_TO_CORRECT, false, passed == null ? Component.translatable(KEY + "nothing_to_correct")
+			// An answer given (his assent; drawn done), though nothing is counted: only a change named is (holder.taskDone).
+			return new PactMenu.Answered(NOTHING_TO_CORRECT, true, passed == null ? Component.translatable(KEY + "nothing_to_correct")
 					: Component.translatable(KEY + "nothing_to_correct.proud", passed.toShortString()));
 		}
 		BlockPos pos = worst.getBlockPos();
@@ -175,7 +183,7 @@ public final class HabitatReading {
 		Map<String, Niche> grafts = grafts(worst, worstOrganism);
 		HabitatAdvice.Advice advice = HabitatAdvice.one(niche, habitat, grafts);
 		if (advice == null) {
-			return new PactMenu.Answered(NOTHING_TO_CORRECT, false, Component.translatable(KEY + "nothing_to_correct"));
+			return new PactMenu.Answered(NOTHING_TO_CORRECT, true, Component.translatable(KEY + "nothing_to_correct"));
 		}
 		Component crop = level.getBlockState(pos.above()).getBlock().getName();
 		memory.named(pos, advice.factor(), worstVerdict, crop);
@@ -271,16 +279,21 @@ public final class HabitatReading {
 
 	/**
 	 * The rows of his kept page for {@code record} at game time {@code now}: today's readings of the quota; the last
-	 * reading (its crop, bed and factor); the proud bed (one, or how many and the nearest). Reads only; names no player.
+	 * reading (its crop, bed and factor), or none yet while none was given today (the memory is never saved, so after a
+	 * restart or a reload a reading given today is forgotten and nothing is said of it); the proud bed (one, or how many
+	 * and the nearest). Reads only; names no player.
 	 */
 	public static List<Component> rows(ServerLevel level, BoundWill record, long now) {
 		BoundWill.Service service = record.pact().service();
 		List<Component> rows = new ArrayList<>();
-		rows.add(Component.translatable(KEY + "row.service", Pacts.done(record.pact(), now), service.quota()));
+		int today = Pacts.done(record.pact(), now);
+		rows.add(Component.translatable(KEY + "row.service", today, service.quota()));
 		MaraxEntity marax = GardenPacts.presence(level, record, MaraxEntity.class);
 		Memory memory = marax == null ? null : marax.serviceMemory(Memory.class, Memory::new);
 		if (memory == null || memory.lastBed() == null) {
-			rows.add(Component.translatable(KEY + "row.last_none"));
+			if (today == 0) {
+				rows.add(Component.translatable(KEY + "row.last_none"));
+			}
 		} else {
 			rows.add(Component.translatable(KEY + "row.last", memory.lastCrop(), memory.lastBed().toShortString(),
 					ComposeText.name(new Text.Ref("factor", memory.lastFactor().id))));
@@ -320,9 +333,16 @@ public final class HabitatReading {
 			return reach;
 		}
 
-		/** Each proud bed read again where its chunk is loaded: gone, unplanted, unsampled or its verdict changed, it is forgiven. */
+		/**
+		 * Each proud bed read again where its chunk is loaded: gone, unplanted, unsampled or its verdict changed, it is
+		 * forgiven. The last bed named, read the same way, changed since: its count starts again (Dossier 3 item 5: three
+		 * readings running with no change to that bed's verdict), so a bed that changes and falls back is not proud at once.
+		 */
 		void judge(ServerLevel level) {
 			proud.entrySet().removeIf(entry -> level.isLoaded(entry.getKey()) && !entry.getValue().equals(verdict(level, entry.getKey())));
+			if (lastBed != null && level.isLoaded(lastBed) && !Objects.equals(lastVerdict, verdict(level, lastBed))) {
+				runs = 0;
+			}
 		}
 
 		/** Whether the familiar will not read the bed at {@code pos} again yet. */

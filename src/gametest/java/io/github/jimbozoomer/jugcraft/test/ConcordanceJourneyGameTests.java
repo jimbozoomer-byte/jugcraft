@@ -666,7 +666,7 @@ public class ConcordanceJourneyGameTests {
 	 */
 	private static final List<String> PACT_HALL_RECIPES = List.of("verdant_bed", "sunpetal", "assayers_scale", "observatory", "astrolabe",
 			"pact_perch", "spirit_anchor", "courier_post", "porter_key");
-	/** The garden cohort, GC-03: the recipes of tools/acquisition.py GARDEN_PACTS (check_acquisition holds the two equal); GC-04 adds the perch and Mendvetch, GC-05 the Verdant Heart and the Gleaner, GC-06 Dewmoss. */
+	/** The garden cohort, GC-03: the recipes of tools/acquisition.py GARDEN_PACTS (check_acquisition holds the two equal); GC-04 adds the perch and Mendvetch, GC-05 the Verdant Heart and the Gleaner. */
 	private static final List<String> GARDEN_RECIPES = List.of("sunpetal", "verdant_bed", "bonding_charm", "pact_perch", "mendvetch", "verdant_heart",
 			"gleaner", "dewmoss");
 
