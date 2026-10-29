@@ -85,13 +85,13 @@ From the boil, each stage lasts between 30 ticks (thread, soft ball, firm ball) 
 | **Jack o'Lantern Mushroom** (an orange cluster) | spooky biomes, forests | not food; it glows (light 9) |
 
 2. They grow on soil: grass, dirt, coarse or rooted dirt, podzol, mycelium and moss (the block tag `jugcraft:mushroom_soil`), not on stone or sand.
-3. **They spread in the shade.** One random tick in 25, a mushroom with fewer than five of its kind within four blocks puts out another nearby (two blocks across, a block up or down), where the light is below 13. Under trees a patch fills in; in the open it doesn't.
+3. **They spread in the shade.** One random tick in 25, a mushroom with fewer than five wild mushrooms (of any kind) within four blocks puts out another nearby (two blocks across, a block up or down), where the light is below 13. Under trees a patch fills in; in the open it doesn't.
 4. **Bone meal** makes it spread at once, in any light, still up to five.
 5. Picked, each drops itself; they go in a composter.
 
 ### Fairy rings
 1. **A fairy ring** is eight or more wild mushrooms in a circle between 2.5 and 3.6 blocks from a centre (a block up or down counts), of any kinds.
-2. **Mushrooms sprout rings under a full moon.** On a full-moon night, one random tick in 40 a wild mushroom plants a ring of its own kind: a circle of radius three that it stands on. A mushroom goes wherever the ground takes one, and nothing sprouts where a ring already stands. Anyone can plant a ring by hand too.
+2. **Mushrooms sprout rings under a full moon.** On a full-moon night, one random tick in 40 a wild mushroom plants a ring of its own kind: a circle of radius three that it stands on. A mushroom goes wherever the ground takes one. Nothing sprouts where a ring already stands, or where eight or more wild mushrooms already stand within eight blocks of the new ring's centre: a ring sprouts only in open ground, so the mushrooms of a ring, or of a crowded patch, never sprout another. (Before 29 October 2026 that second rule was missing, and each full moon rings sprouted rings until the mushrooms covered the ground.) Anyone can plant a ring by hand too.
 3. **Stand in its centre on a full-moon night** (in the Overworld) and you are blessed, once a night: Luck II for five minutes, a chime, a shimmer round the ring, "You dance in the fairy ring under the full moon. You feel lucky", and the advancement **Away with the Fairies**. Luck improves fishing and loot from chests.
 
 ### The Foraging Basket
@@ -507,8 +507,8 @@ Actual results (2 October 2026, Minecraft 26.3, Fabric Loader 0.19.3, Fabric API
 | Client game test (real client, Mesa software rendering, CI job `client`) | **Passes** on `c42f88d` (run 37067986302) and `2e14ff6` (run 37069783476), with the screenshots in [AGRICULTURE.md](../branches/AGRICULTURE.md#autumn-foraging) from the first |
 
 The 4 new game tests (`ForagingGameTests`):
-1. a porcini stands on grass but not on stone; spreading (as bone meal makes it) it puts out another of its kind, one at a time, until five are near, and no more; the jack o'lantern mushroom glows (light 9) and the others don't;
-2. seven fly agarics round a circle are no ring and eight are; a player at the centre is blessed with Luck II for five minutes and earns Away with the Fairies, once a night; rings bless on full-moon nights only; one chanterelle sprouts a ring of its kind round it;
+1. a porcini stands on grass but not on stone; spreading (as bone meal makes it) it puts out another of its kind, one at a time, until five are near, and no more, and a chanterelle among them doesn't spread either (added 29 October 2026); the jack o'lantern mushroom glows (light 9) and the others don't;
+2. seven fly agarics round a circle are no ring and eight are; a player at the centre is blessed with Luck II for five minutes and earns Away with the Fairies, once a night; rings bless on full-moon nights only; one chanterelle sprouts a ring of its kind round it, and then a mushroom of that ring sprouts no new one, sixteen tries over (added 29 October 2026);
 3. the basket refuses stone and takes berries; each of the five mushrooms picked with the basket in the other hand goes straight into it; all five earn Forager;
 4. the dishes', basket's and stew's recipes and every mushroom's patch load.
 
