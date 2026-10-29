@@ -1,0 +1,91 @@
+package io.github.jimbozoomer.jugcraft.test;
+
+import io.github.jimbozoomer.jugcraft.agriculture.JugcraftAgriculture;
+import io.github.jimbozoomer.jugcraft.agriculture.OrganGrinderSkeletonBlock;
+import io.github.jimbozoomer.jugcraft.kinetic.HandCrankBlock;
+import io.github.jimbozoomer.jugcraft.kinetic.HandCrankBlockEntity;
+import io.github.jimbozoomer.jugcraft.kinetic.JugcraftKinetics;
+import java.util.Locale;
+import net.fabricmc.fabric.api.client.gametest.v1.FabricClientGameTest;
+import net.fabricmc.fabric.api.client.gametest.v1.context.ClientGameTestContext;
+import net.fabricmc.fabric.api.client.gametest.v1.context.TestServerContext;
+import net.fabricmc.fabric.api.client.gametest.v1.context.TestSingleplayerContext;
+import net.minecraft.client.gui.screens.worldselection.WorldCreationUiState;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.properties.DoubleBlockHalf;
+
+/**
+ * Client game test for the Clockwork Animatronics, part 1 (decor set 9): on a dark oak floor, two Organ-Grinder Skeletons,
+ * one facing the camera (north) and one facing east, each with a hand crank against the back of its lower block.
+ * Photographed at rest from the front; then with their cranks turned and their clockwork running, from the front and
+ * from the east, where the organ's crank is and the skeleton's right hand on it (drawn by
+ * client/OrganGrinderSkeletonRenderer; CI job {@code client}). They go into docs/features/clockwork-animatronics.md.
+ */
+public class ClockworkClientGameTests implements FabricClientGameTest {
+	@Override
+	public void runTest(ClientGameTestContext context) {
+		try (TestSingleplayerContext singleplayer = context.worldBuilder()
+				.adjustSettings(creator -> creator.setGameMode(WorldCreationUiState.SelectedGameMode.CREATIVE)).create()) {
+			singleplayer.getConnection().waitForChunksRender();
+			BlockPos origin = context.computeOnClient(client -> BlockPos.containing(client.player.position()));
+			int x = origin.getX();
+			int y = origin.getY();
+			int z = origin.getZ();
+			TestServerContext server = singleplayer.getServer();
+			server.runCommand("gamerule minecraft:send_command_feedback false");
+			server.runCommand("gamerule minecraft:advance_time false");
+			server.runCommand("gamerule minecraft:spawn_mobs false");
+			server.runCommand("time set noon");
+			server.runCommand("weather clear");
+			server.runCommand("fill %d %d %d %d %d %d minecraft:dark_oak_planks".formatted(x - 5, y - 1, z - 5, x + 5, y - 1, z + 5));
+			server.runCommand("fill %d %d %d %d %d %d minecraft:air".formatted(x - 5, y, z - 5, x + 5, y + 4, z + 5));
+			server.runOnServer(minecraft -> build(minecraft.overworld(), origin));
+			context.waitTicks(40);
+			singleplayer.getConnection().waitForChunksRender();
+			// At rest, from the front.
+			shoot(context, singleplayer, x, y, z - 3, 0, 10, "jugcraft_clockwork_organ_grinder");
+			// Running: their cranks turned, from the front and then from the east of the one facing north.
+			server.runOnServer(minecraft -> crank(minecraft.overworld(), origin));
+			shoot(context, singleplayer, x, y, z - 3, 0, 10, "jugcraft_clockwork_organ_grinder_playing");
+			shoot(context, singleplayer, x + 3, y + 1, z + 1, 90, 20, "jugcraft_clockwork_organ_grinder_crank");
+		}
+	}
+
+	/** Stands the player at a spot (on an invisible barrier) and takes a screenshot. */
+	private static void shoot(ClientGameTestContext context, TestSingleplayerContext singleplayer, int x, int y, int z,
+			int yaw, int pitch, String name) {
+		TestServerContext server = singleplayer.getServer();
+		server.runCommand("setblock %d %d %d minecraft:barrier".formatted(x, y - 1, z));
+		server.runCommand(String.format(Locale.ROOT, "tp @p %.1f %d %.1f %d %d", x + 0.5, y, z + 0.5, yaw, pitch));
+		context.waitTicks(40);
+		singleplayer.getConnection().waitForChunksRender();
+		context.takeScreenshot(name);
+	}
+
+	/** The two figures, and a hand crank against the back of each one's lower block, facing into it. */
+	private static void build(ServerLevel level, BlockPos origin) {
+		place(level, origin.offset(0, 0, 1), Direction.NORTH);
+		place(level, origin.offset(-3, 0, 1), Direction.EAST);
+	}
+
+	private static void place(ServerLevel level, BlockPos lower, Direction facing) {
+		BlockState figure = JugcraftAgriculture.block("organ_grinder_skeleton").defaultBlockState().setValue(OrganGrinderSkeletonBlock.FACING, facing);
+		level.setBlock(lower, figure, Block.UPDATE_ALL);
+		level.setBlock(lower.above(), figure.setValue(OrganGrinderSkeletonBlock.HALF, DoubleBlockHalf.UPPER), Block.UPDATE_ALL);
+		level.setBlock(lower.relative(facing.getOpposite()), JugcraftKinetics.HAND_CRANK.defaultBlockState().setValue(HandCrankBlock.FACING, facing),
+				Block.UPDATE_ALL);
+	}
+
+	/** Sets both hand cranks turning, as long as a crank keeps going. */
+	private static void crank(ServerLevel level, BlockPos origin) {
+		for (BlockPos at : new BlockPos[] {origin.offset(0, 0, 2), origin.offset(-4, 0, 1)}) {
+			if (level.getBlockEntity(at) instanceof HandCrankBlockEntity crank) {
+				crank.addTurns(HandCrankBlockEntity.MAX_TICKS);
+			}
+		}
+	}
+}

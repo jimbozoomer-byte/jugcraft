@@ -810,6 +810,8 @@ def crop_textures():
     out.update(front_yard_textures())
     from party_table_data import textures as party_table_textures  # and the Halloween Party Table's
     out.update(party_table_textures())
+    from clockwork_data import textures as clockwork_textures  # and the Clockwork Animatronics'
+    out.update(clockwork_textures())
     from lair_textures import lair_textures  # and the lairs' blocks, the Mourning Wreath and the Death Knell
     out.update(lair_textures())
     from adam_ondi_ahman_textures import adam_ondi_ahman_textures  # and Adam-ondi-Ahman's Ancient Altar

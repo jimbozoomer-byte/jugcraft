@@ -8,6 +8,13 @@ Every change to Jugcraft, newest first, grouped by pull request. For what each t
 
 No numbered release yet. Entries on feature branches remain proposed until their pull requests merge.
 
+### Unmerged: Clockwork Animatronics, part 1 (the Organ-Grinder Skeleton)
+- **Organ-Grinder Skeleton**: a life-size skeleton in a top hat and a moth-eaten waistcoat behind a barrel organ on a cart, two blocks tall.
+- It runs on kinetic power, 4 KE a tick, from a hand crank, a steam engine's shafts or an electric motor touching its lower block.
+- While it runs, its hand turns the organ's crank, the organ plays an original waltz on note-block sounds, its head nods and its jaw chatters. Its power stopped, it runs down and stops.
+- Record: [clockwork-animatronics.md](docs/features/clockwork-animatronics.md). Decor set 9's first part.
+- **Checked:** the record's Verification. Game tests and screenshots run in CI only; not played by hand.
+
 ### Unmerged: Halloween Party Table, part 5 (the table)
 - **Bat Table Runner**: a black felt runner bound in orange with an orange bat on each length. Used on a Feast Table length, it is laid over the orange runner and hangs down over the table's ends, pointed with a tassel. Shears take it off, and a length drops it when broken.
 - **Goodie Bag Tree**: a black wire tree in a jack-o'-lantern pail of candy corn, holding 6 Goodie Bags hung from its branches.

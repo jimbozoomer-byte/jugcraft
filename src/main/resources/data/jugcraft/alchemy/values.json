@@ -31317,6 +31317,11 @@
       "denominator": 1,
       "source": "recipe jugcraft:ore_washer"
     },
+    "jugcraft:organ_grinder_skeleton": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
     "jugcraft:organic_compost": {
       "numerator": 1,
       "denominator": 1,

@@ -413,6 +413,7 @@ public final class JugcraftAgriculture {
 	public static BlockEntityType<DecorationBlockEntity> CRASHED_WITCH_ENTITY;
 	public static BlockEntityType<CandyChuteBlockEntity> CANDY_CHUTE_ENTITY;
 	public static BlockEntityType<CandyCornDispenserBlockEntity> CANDY_CORN_DISPENSER_ENTITY;
+	public static BlockEntityType<OrganGrinderSkeletonBlockEntity> ORGAN_GRINDER_SKELETON_ENTITY;
 	public static BlockEntityType<FirewoodRackBlockEntity> FIREWOOD_RACK_ENTITY;
 	public static BlockEntityType<DecorationBlockEntity> CHOPPING_BLOCK_ENTITY;
 	public static BlockEntityType<BlanketLadderBlockEntity> BLANKET_LADDER_ENTITY;
@@ -2426,6 +2427,7 @@ public final class JugcraftAgriculture {
 		registerHauntedMidway();
 		registerFrontYard();
 		registerPartyTable();
+		registerClockwork();
 	}
 
 	/**
@@ -3155,6 +3157,19 @@ public final class JugcraftAgriculture {
 		food("eyeball_jelly", 2, 0.2F, COMPOST_MEDIUM_HIGH);
 		registerItem("goodie_bag", GoodieBagItem::new, new Item.Properties().stacksTo(16), FOOD_TAB);
 		registerItem("bat_table_runner", Item::new, new Item.Properties(), BUILDING_TAB);
+	}
+
+	/**
+	 * Decor set 9, the Clockwork Animatronics (tools/clockwork.py): Halloween figures moved by clockwork on kinetic power.
+	 * Part 1: the Organ-Grinder Skeleton, two blocks tall, its clockwork in its lower block.
+	 */
+	private static void registerClockwork() {
+		Block grinder = registerBlock("organ_grinder_skeleton", OrganGrinderSkeletonBlock::new, BlockBehaviour.Properties.of()
+				.mapColor(MapColor.COLOR_BROWN).strength(1.0F).sound(SoundType.WOOD).noOcclusion().pushReaction(PushReaction.IMMOVEABLE));
+		ORGAN_GRINDER_SKELETON_ENTITY = Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, Jugcraft.id("organ_grinder_skeleton"),
+				FabricBlockEntityTypeBuilder.create(OrganGrinderSkeletonBlockEntity::new, grinder).build());
+		registerItem("organ_grinder_skeleton", props -> new DoubleHighBlockItem(grinder, props), new Item.Properties().useBlockDescriptionPrefix(),
+				BUILDING_TAB);
 	}
 
 	/** Bleached bones: they come away easily, and a piston pops them off. */

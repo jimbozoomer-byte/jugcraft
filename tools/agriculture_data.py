@@ -77,6 +77,7 @@ import hearth_data
 import haunted_midway_data
 import front_yard_data
 import party_table_data
+import clockwork_data
 import pumpkin_patch_data
 import ofrenda_data
 import graveyard_data
@@ -324,6 +325,7 @@ def assets(root, write, lang):
     haunted_midway_data.assets(root, write, lang)
     front_yard_data.assets(root, write, lang)
     party_table_data.assets(root, write, lang)
+    clockwork_data.assets(root, write, lang)
     lair_data.assets(root, write, lang)
     adam_ondi_ahman_data.assets(root, write, lang)
     vesperine_data.assets(root, write, lang)
@@ -499,6 +501,7 @@ def loot(data, write):
     haunted_midway_data.loot(out, write)
     front_yard_data.loot(out, write)
     party_table_data.loot(out, write)
+    clockwork_data.loot(out, write)
     lair_data.loot(out, write)
     adam_ondi_ahman_data.loot(out, write)
     vesperine_data.loot(out, write)
@@ -649,6 +652,7 @@ def tags(tags):
     haunted_midway_data.tags(tags)
     front_yard_data.tags(tags)
     party_table_data.tags(tags)
+    clockwork_data.tags(tags)
     lair_data.tags(tags)
     adam_ondi_ahman_data.tags(tags)
     vesperine_data.tags(tags)

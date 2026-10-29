@@ -1,0 +1,150 @@
+package io.github.jimbozoomer.jugcraft.test;
+
+import io.github.jimbozoomer.jugcraft.Jugcraft;
+import io.github.jimbozoomer.jugcraft.agriculture.JugcraftAgriculture;
+import io.github.jimbozoomer.jugcraft.agriculture.OrganGrinderSkeletonBlock;
+import io.github.jimbozoomer.jugcraft.agriculture.OrganGrinderSkeletonBlockEntity;
+import io.github.jimbozoomer.jugcraft.kinetic.HandCrankBlock;
+import io.github.jimbozoomer.jugcraft.kinetic.HandCrankBlockEntity;
+import io.github.jimbozoomer.jugcraft.kinetic.JugcraftKinetics;
+import net.fabricmc.fabric.api.gametest.v1.GameTest;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.gametest.framework.GameTestHelper;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.entity.item.ItemEntity;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.context.UseOnContext;
+import net.minecraft.world.level.GameType;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.properties.DoubleBlockHalf;
+import net.minecraft.world.level.storage.loot.LootTable;
+import net.minecraft.world.phys.AABB;
+import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.Vec3;
+
+/**
+ * Game tests for the Clockwork Animatronics (decor set 9; docs/features/clockwork-animatronics.md), part 1: the
+ * Organ-Grinder Skeleton is placed two blocks tall facing the player; it takes no more than its need of kinetic energy a
+ * tick, runs only on all of it, plays while it runs and runs down after its power stops; a hand crank beside it drives
+ * it; broken, it comes down whole and drops once; and its recipe and loot load.
+ */
+public class ClockworkGameTests {
+	private static void floor(GameTestHelper helper) {
+		for (int x = 0; x < 8; x++) {
+			for (int z = 0; z < 8; z++) {
+				helper.setBlock(new BlockPos(x, 1, z), Blocks.STONE);
+			}
+		}
+	}
+
+	private static ServerPlayer standing(GameTestHelper helper, BlockPos at) {
+		ServerPlayer player = helper.makeMockServerPlayerInLevel();
+		player.setGameMode(GameType.SURVIVAL);
+		BlockPos absolute = helper.absolutePos(at);
+		player.setPos(absolute.getX() + 0.5, absolute.getY(), absolute.getZ() + 0.5);
+		return player;
+	}
+
+	/** Places the figure from the player's hand on the block below {@code pos} (relative), and returns its lower block. */
+	private static BlockPos placed(GameTestHelper helper, ServerPlayer player, BlockPos pos) {
+		player.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(JugcraftAgriculture.item("organ_grinder_skeleton")));
+		BlockPos below = helper.absolutePos(pos.below());
+		player.getMainHandItem().useOn(new UseOnContext(player, InteractionHand.MAIN_HAND,
+				new BlockHitResult(Vec3.atCenterOf(below).relative(Direction.UP, 0.5), Direction.UP, below, false)));
+		return helper.absolutePos(pos);
+	}
+
+	private static OrganGrinderSkeletonBlockEntity clockwork(GameTestHelper helper, BlockPos lower) {
+		if (helper.getLevel().getBlockEntity(lower) instanceof OrganGrinderSkeletonBlockEntity figure) {
+			return figure;
+		}
+		throw helper.assertionException("The figure's clockwork is in its lower block");
+	}
+
+	private static boolean running(ServerLevel level, BlockPos lower) {
+		BlockState below = level.getBlockState(lower);
+		BlockState above = level.getBlockState(lower.above());
+		return below.getValue(OrganGrinderSkeletonBlock.RUNNING) && above.getValue(OrganGrinderSkeletonBlock.RUNNING);
+	}
+
+	@GameTest(maxTicks = 80)
+	public void theOrganGrinderRunsOnItsClockwork(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		floor(helper);
+		ServerPlayer player = standing(helper, new BlockPos(3, 2, 1));
+		BlockPos lower = placed(helper, player, new BlockPos(3, 2, 3));
+		BlockState state = level.getBlockState(lower);
+		helper.assertTrue(state.getBlock() instanceof OrganGrinderSkeletonBlock && state.getValue(OrganGrinderSkeletonBlock.HALF) == DoubleBlockHalf.LOWER
+				&& level.getBlockState(lower.above()).getValue(OrganGrinderSkeletonBlock.HALF) == DoubleBlockHalf.UPPER
+				&& state.getValue(OrganGrinderSkeletonBlock.FACING) == Direction.NORTH && !state.getValue(OrganGrinderSkeletonBlock.RUNNING),
+				"It stands two blocks tall, facing the player, at rest");
+		OrganGrinderSkeletonBlockEntity figure = clockwork(helper, lower);
+		long first = figure.acceptKinetic(Direction.SOUTH, OrganGrinderSkeletonBlock.NEED - 1);
+		helper.runAtTickTime(3, () -> helper.assertTrue(first == OrganGrinderSkeletonBlock.NEED - 1 && !running(level, lower),
+				"Short of its need, it doesn't run"));
+		// From tick 5 to 24 it gets its fill each tick, offered more than it needs.
+		long[] took = new long[2];
+		helper.onEachTick(() -> {
+			long now = helper.getTick();
+			if (now >= 5 && now < 25) {
+				took[0] = figure.acceptKinetic(Direction.SOUTH, 16);
+				took[1] = figure.acceptKinetic(Direction.EAST, 16);
+			}
+		});
+		helper.runAtTickTime(20, () -> helper.assertTrue(took[0] == OrganGrinderSkeletonBlock.NEED && took[1] == 0 && running(level, lower)
+				&& figure.played() > OrganGrinderSkeletonBlock.STEP_TICKS,
+				"Fed, it takes its need a tick and no more, from any side, and runs: took " + took[0] + " then " + took[1]));
+		helper.runAtTickTime(25 + OrganGrinderSkeletonBlock.SPIN_DOWN + 5, () -> {
+			helper.assertTrue(!running(level, lower) && figure.played() == 0, "Its power stopped, it runs down and stops");
+			helper.succeed();
+		});
+	}
+
+	@GameTest(maxTicks = 60)
+	public void aHandCrankDrivesTheOrganGrinder(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		floor(helper);
+		ServerPlayer player = standing(helper, new BlockPos(3, 2, 1));
+		BlockPos lower = placed(helper, player, new BlockPos(3, 2, 3));
+		helper.setBlock(new BlockPos(4, 2, 3), JugcraftKinetics.HAND_CRANK.defaultBlockState().setValue(HandCrankBlock.FACING, Direction.WEST));
+		if (!(level.getBlockEntity(helper.absolutePos(new BlockPos(4, 2, 3))) instanceof HandCrankBlockEntity crank)) {
+			throw helper.assertionException("A hand crank stands beside it");
+		}
+		crank.addTurns(HandCrankBlockEntity.TICKS_PER_CRANK);
+		helper.runAtTickTime(20, () -> {
+			helper.assertTrue(running(level, lower), "A hand crank turning beside its lower block drives it");
+			helper.succeed();
+		});
+	}
+
+	@GameTest
+	public void theOrganGrinderBreaksWhole(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		floor(helper);
+		ServerPlayer player = standing(helper, new BlockPos(3, 2, 1));
+		BlockPos lower = placed(helper, player, new BlockPos(3, 2, 3));
+		level.destroyBlock(lower.above(), true);
+		helper.succeedWhen(() -> {
+			int dropped = level.getEntitiesOfClass(ItemEntity.class, new AABB(lower).inflate(3.0),
+					drop -> drop.getItem().is(JugcraftAgriculture.item("organ_grinder_skeleton"))).stream().mapToInt(drop -> drop.getItem().getCount()).sum();
+			helper.assertTrue(level.getBlockState(lower).isAir() && level.getBlockState(lower.above()).isAir() && dropped == 1,
+					"Broken at its upper half, it comes down whole and drops once: " + dropped);
+		});
+	}
+
+	@GameTest
+	public void clockworkDataLoads(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		helper.assertTrue(level.recipeAccess().byKey(ResourceKey.create(Registries.RECIPE, Jugcraft.id("organ_grinder_skeleton"))).isPresent(),
+				"organ_grinder_skeleton has a recipe");
+		helper.assertTrue(level.getServer().reloadableRegistries().getLootTable(ResourceKey.create(Registries.LOOT_TABLE,
+				Jugcraft.id("blocks/organ_grinder_skeleton"))) != LootTable.EMPTY, "organ_grinder_skeleton's loot loads");
+		helper.succeed();
+	}
+}
