@@ -832,3 +832,7 @@ limits and exact results belong in features/jimtafacts-b-h-local.md.
 - [x] Keep aspen foliage visible in its winter state; preserve saved states and gold autumn leaves.
 - [x] Reproduce and fix the shared GeckoLib/Iris emissive-pipeline error locally; rendered BSL, Bliss and optional-Iris-absent tests passed. See [rendering investigation](features/rendering-lines-oct28.md).
 - [ ] Confirm the original black-line artifact is gone in the owner’s affected scene with that fix. The isolated baseline reproduced the log error, not the exact visible streaks; no deployment yet.
+## Cursed Mirror — 27 October 2026
+
+- [x] The Cursed Mirror: a gilt standing mirror that gives seven days of vanilla Bad Luck when a player breaks it, with a night-time face flicker on the client ([cursed-mirror.md](features/cursed-mirror.md)). Implemented; CI pending, not yet seen in a client.
+- [ ] Still ideas, if the owner wants them: a matched set of smaller wall mirrors, and a rare chance the face in the glass is a specific unmasked crook.

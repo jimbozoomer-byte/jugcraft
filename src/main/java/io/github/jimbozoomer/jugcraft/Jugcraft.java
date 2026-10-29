@@ -197,6 +197,7 @@ public final class Jugcraft implements ModInitializer {
         io.github.jimbozoomer.jugcraft.grave.DeathGraves.register();
         io.github.jimbozoomer.jugcraft.creatures.herobrine.HerobrineEncounters.register();
         io.github.jimbozoomer.jugcraft.herobrine.HerobrineScheduleDirector.register();
+        io.github.jimbozoomer.jugcraft.curse.CursedMirror.register();
         io.github.jimbozoomer.jugcraft.server.ViewerWorldRules.register();
 		registerMachineStylePack();
 		// Higher-priority data overrides only exist when the optional backpack mod is installed.

@@ -38,6 +38,7 @@
       "io.github.jimbozoomer.jugcraft.test.RecipeConflictGameTests",
       "io.github.jimbozoomer.jugcraft.test.FoodRecipeConflictGameTests",
       "io.github.jimbozoomer.jugcraft.test.CityDefenseGameTests",
+      "io.github.jimbozoomer.jugcraft.test.CursedMirrorGameTests",
       "io.github.jimbozoomer.jugcraft.test.CandyCavityGameTests",
       "io.github.jimbozoomer.jugcraft.test.TownLifeGameTests",
       "io.github.jimbozoomer.jugcraft.test.TownRoutineGameTests",
