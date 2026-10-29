@@ -341,7 +341,8 @@ public class Townsfolk extends PathfinderMob {
 	/**
 	 * A player speaks to this townsperson (every interaction comes here: no leads, name tags or other items work on
 	 * them). Shopkeepers open their shop in its hours and say when it opens otherwise; innkeepers open the essentials
-	 * counter at any hour; everyone else says something for the season or about their day.
+	 * counter at any hour; in the Halloween season a resident with an errand asks for it (HalloweenQuests); everyone
+	 * else says something for the season or about their day.
 	 */
 	public InteractionResult talkTo(Player player, InteractionHand hand) {
 		if (!(player instanceof ServerPlayer server) || hand != InteractionHand.MAIN_HAND) {
@@ -386,6 +387,11 @@ public class Townsfolk extends PathfinderMob {
 			return InteractionResult.SUCCESS;
 		}
 		lastTalk = tickCount;
+		// In the Halloween season a resident with an errand asks for it, or takes it (HalloweenQuests).
+		if (HalloweenQuests.talk(server, this)) {
+			level().playSound(null, blockPosition(), SoundEvents.VILLAGER_AMBIENT, SoundSource.NEUTRAL, 0.5F, 1.2F);
+			return InteractionResult.SUCCESS;
+		}
 		String theme = TownDecor.theme();
 		// Half the time something for the season, half the time something about their day.
 		int line = Math.floorMod(getUUID().hashCode() + tickCount / 200, 6);

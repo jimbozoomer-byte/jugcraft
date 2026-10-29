@@ -17250,6 +17250,53 @@ TOWN_WATER_LEAKY = re.compile(r"(wall|slab|stairs|fence|pane|bars|lantern|chain|
                               r"button|lever|torch|carpet|banner|plate|hopper)")
 
 
+def check_bounty_list():
+    """The Bounty List (tools/bounty_list.py, docs/features/bounty-list.md): Java's table is the tool's, in its order;
+    every boss is a named creature, every lair item a registered item, and every page has its words and fits."""
+    import bounty_list as bl
+    java = (JAVA_ROOT / "town" / "BountyList.java").read_text(encoding="utf-8")
+    found = re.findall(r'new Boss\("([a-z_]+)", "([a-z_]+)"\)', java)
+    expected = [(boss, item) for boss, item, _words in bl.BOSSES]
+    if found != expected:
+        err(f"BountyList.BOSSES {found} != tools/bounty_list.py {expected}")
+    lang = load(ASSETS / "lang" / "en_us.json") or {}
+    for boss, item, words in bl.BOSSES:
+        if f"entity.{MOD}.{boss}" not in lang:
+            err(f"tools/bounty_list.py: {boss} is not a named creature")
+        if f"item.{MOD}.{item}" not in lang:
+            err(f"tools/bounty_list.py: {boss}'s {item} is not a registered item")
+        if lang.get(f"bounty_list.{MOD}.{boss}") != words:
+            err(f"lang: {boss}'s Bounty List page is missing or stale")
+        if len(words) > bl.PAGE_LIMIT:
+            err(f"tools/bounty_list.py: {boss}'s page is {len(words)} characters, over {bl.PAGE_LIMIT}")
+
+
+def check_halloween_quests():
+    """Halloween quests (tools/halloween_quests.py, docs/features/halloween-quests.md): Java's table is the tool's, in its
+    order; every item asked for or given is registered, and every job is one some town resident has."""
+    import gzip
+    import halloween_quests as hq
+    java = (JAVA_ROOT / "town" / "HalloweenQuests.java").read_text(encoding="utf-8")
+    found = [(q, job, item, int(count), int(jugs), gift, int(gifts)) for q, job, item, count, jugs, gift, gifts in re.findall(
+        r'new Quest\("([a-z_]+)", "([a-z_]+)", "([a-z_:]+)", (\d+), (\d+), "([a-z_:]+)", (\d+)\)', java)]
+    expected = [row[:7] for row in hq.QUESTS]
+    if found != expected:
+        err(f"HalloweenQuests.QUESTS {found} != tools/halloween_quests.py {expected}")
+    lang = load(ASSETS / "lang" / "en_us.json") or {}
+    blueprint = json.loads(gzip.open(DATA / MOD / "town" / "town.json.gz").read())
+    jobs = {spot.get("job") for spot in blueprint.get("spots", [])}
+    for quest, job, item, _count, _jugs, gift, _gifts, *_words in hq.QUESTS:
+        if job not in jobs:
+            err(f"tools/halloween_quests.py: {quest} is given by a {job}, and no town resident has that job ({sorted(jobs)})")
+        for ref in (item, gift):
+            namespace, name = ref.split(":")
+            if namespace == MOD and f"item.{MOD}.{name}" not in lang and f"block.{MOD}.{name}" not in lang:
+                err(f"tools/halloween_quests.py: {quest} names {ref}, which is not a registered item")
+        for part in ("patron", "ask", "thanks"):
+            if f"halloween_quest.{MOD}.{quest}.{part}" not in lang:
+                err(f"lang: {quest} has no {part} line")
+
+
 def check_town_water(data):
     """The town's water stays put: no water block has air beside or under it, and no block that can hold water (a
     wall, a slab, stairs ...) touches two water blocks, or the game's infinite-water rule fills it and it spills over
@@ -24365,6 +24412,8 @@ def main():
     check_art()
     check_pixel_hollows()
     check_town()
+    check_halloween_quests()
+    check_bounty_list()
     check_diagonal_connections()
     check_aluminum_bootstrap()
     check_concordance(registered)
