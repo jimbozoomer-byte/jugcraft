@@ -419,6 +419,7 @@ public final class JugcraftAgriculture {
 	public static BlockEntityType<ClockworkRavenBlockEntity> CLOCKWORK_RAVEN_ENTITY;
 	public static BlockEntityType<PumpkinDrummerBlockEntity> PUMPKIN_DRUMMER_ENTITY;
 	public static BlockEntityType<ShowControllerBlockEntity> SHOW_CONTROLLER_ENTITY;
+	public static BlockEntityType<SteamTractionEngineBlockEntity> STEAM_TRACTION_ENGINE_ENTITY;
 	public static BlockEntityType<FirewoodRackBlockEntity> FIREWOOD_RACK_ENTITY;
 	public static BlockEntityType<DecorationBlockEntity> CHOPPING_BLOCK_ENTITY;
 	public static BlockEntityType<BlanketLadderBlockEntity> BLANKET_LADDER_ENTITY;
@@ -3212,7 +3213,8 @@ public final class JugcraftAgriculture {
 
 	/**
 	 * The Harvest Festival Grounds (decor set 10; tools/harvest_festival.py): part 1's Giant Cornucopia; part 2's Giant
-	 * Vegetable Show (a Giant Cabbage, Marrow, Turnip and Carrot, each with its entry card) and the Prize Ribbon Board.
+	 * Vegetable Show (a Giant Cabbage, Marrow, Turnip and Carrot, each with its entry card) and the Prize Ribbon Board;
+	 * part 3's Steam Traction Engine, its firebox a block entity on its first block, and the Hay Wagon.
 	 */
 	private static void registerHarvestFestival() {
 		Block cornucopia = registerBlock("giant_cornucopia", GiantCornucopiaBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.WOOD)
@@ -3235,6 +3237,17 @@ public final class JugcraftAgriculture {
 		}
 		registerItem("prize_ribbon_board", props -> new DoubleHighBlockItem(board, props), new Item.Properties().useBlockDescriptionPrefix(),
 				BUILDING_TAB);
+		// Part 3: the engine (iron, mined with a pickaxe) and the wagon.
+		Block engine = registerBlock("steam_traction_engine", SteamTractionEngineBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_GREEN)
+				.strength(3.5F).sound(SoundType.METAL).requiresCorrectToolForDrops().noOcclusion().pushReaction(PushReaction.IMMOVEABLE));
+		STEAM_TRACTION_ENGINE_ENTITY = Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, Jugcraft.id("steam_traction_engine"),
+				FabricBlockEntityTypeBuilder.create(SteamTractionEngineBlockEntity::new, engine).build());
+		Block wagon = registerBlock("hay_wagon", HayWagonBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_YELLOW)
+				.strength(1.0F).sound(SoundType.WOOD).noOcclusion().ignitedByLava().pushReaction(PushReaction.IMMOVEABLE));
+		for (Block block : List.of(engine, wagon)) {
+			registerItem(BuiltInRegistries.BLOCK.getKey(block).getPath(), props -> new BlockItem(block, props),
+					new Item.Properties().useBlockDescriptionPrefix(), BUILDING_TAB);
+		}
 	}
 
 	/** A prize show vegetable: soft, and popped off by a piston. */

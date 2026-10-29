@@ -3,8 +3,12 @@ package io.github.jimbozoomer.jugcraft.test;
 import io.github.jimbozoomer.jugcraft.Jugcraft;
 import io.github.jimbozoomer.jugcraft.agriculture.FacingDecorationBlock;
 import io.github.jimbozoomer.jugcraft.agriculture.GiantCornucopiaBlock;
+import io.github.jimbozoomer.jugcraft.agriculture.HayWagonBlock;
 import io.github.jimbozoomer.jugcraft.agriculture.JugcraftAgriculture;
+import io.github.jimbozoomer.jugcraft.agriculture.MultiDecorationBlock;
 import io.github.jimbozoomer.jugcraft.agriculture.PrizeRibbonBoardBlock;
+import io.github.jimbozoomer.jugcraft.agriculture.SteamTractionEngineBlock;
+import io.github.jimbozoomer.jugcraft.agriculture.SteamTractionEngineBlockEntity;
 import net.fabricmc.fabric.api.gametest.v1.GameTest;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -34,7 +38,10 @@ import net.minecraft.world.phys.Vec3;
  * loot load. Part 2: each show vegetable stands facing the player and drops itself; the Prize Ribbon Board stands two
  * blocks tall, hangs each prize ribbon on its own hook (both halves), refuses a second on a taken hook and anything that
  * is not a ribbon, gives back the ribbon nearest where an empty hand aims, does nothing for a player who may not build,
- * and broken drops itself and the ribbons hanging on it; and their recipes and loot load.
+ * and broken drops itself and the ribbons hanging on it; and their recipes and loot load. Part 3: the Steam Traction
+ * Engine stands whole, cold; coal or charcoal fires it on every block, a furnace's burn each, up to its firebox's room,
+ * and no more; a player who may not build fires nothing; its coal burnt, it is let out; broken, it drops itself once.
+ * The Hay Wagon stands whole and breaks whole, dropping itself once.
  */
 public class HarvestFestivalGameTests {
 	private static void floor(GameTestHelper helper) {
@@ -210,10 +217,90 @@ public class HarvestFestivalGameTests {
 		});
 	}
 
+	/** Whether every block of the prop whose first block is at {@code first} is there and lit as {@code lit}. */
+	private static boolean all(ServerLevel level, MultiDecorationBlock block, BlockPos first, boolean lit) {
+		for (int part = 0; part < block.cells().length; part++) {
+			BlockState there = level.getBlockState(block.partPos(first, Direction.NORTH, part));
+			if (!there.is(block) || block.part(there) != part || there.getValue(MultiDecorationBlock.LIT) != lit) {
+				return false;
+			}
+		}
+		return true;
+	}
+
+	/**
+	 * The Steam Traction Engine stands whole where it is placed, three by three by five, cold; coal on its tender fires
+	 * it, on every block, a furnace's burn, using the coal up; charcoal too; the firebox takes four and refuses a fifth,
+	 * kept; a player who may not build fires nothing; its coal all but burnt, it is let out within a few ticks; broken
+	 * at its chimney, it all goes and drops itself once.
+	 */
+	@GameTest(maxTicks = 60)
+	public void theTractionEngineFiresAndRunsDown(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		floor(helper);
+		BlockPos master = new BlockPos(4, 2, 1);
+		ServerPlayer player = player(helper, master.north());
+		place(helper, player, "steam_traction_engine", master);
+		SteamTractionEngineBlock block = (SteamTractionEngineBlock) JugcraftAgriculture.block("steam_traction_engine");
+		BlockPos first = helper.absolutePos(master);
+		helper.assertTrue(block.cells().length == 45 && all(level, block, first, false), "It stands whole, three by three by five, cold");
+		SteamTractionEngineBlockEntity engine = (SteamTractionEngineBlockEntity) level.getBlockEntity(first);
+		helper.assertTrue(engine != null && engine.fuel() == 0, "Its firebox is on its first block, empty");
+		BlockPos tender = block.partPos(first, Direction.NORTH, 37);
+		BlockHitResult atTender = new BlockHitResult(Vec3.atCenterOf(tender), Direction.UP, tender, false);
+		player.setGameMode(GameType.ADVENTURE);
+		player.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(Items.COAL));
+		use(player, level, atTender);
+		helper.assertTrue(engine.fuel() == 0 && player.getMainHandItem().getCount() == 1, "A player who may not build fires nothing");
+		player.setGameMode(GameType.SURVIVAL);
+		use(player, level, atTender);
+		helper.assertTrue(engine.fuel() == SteamTractionEngineBlock.BURN && player.getMainHandItem().isEmpty() && all(level, block, first, true),
+				"Coal fires it, on every block, a furnace's burn, and is used up");
+		player.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(Items.CHARCOAL, 4));
+		for (int i = 0; i < 4; i++) {
+			use(player, level, atTender);
+		}
+		helper.assertTrue(engine.fuel() <= SteamTractionEngineBlock.MAX_FUEL && engine.fuel() > SteamTractionEngineBlock.MAX_FUEL - SteamTractionEngineBlock.BURN
+				&& player.getMainHandItem().getCount() == 1, "The firebox takes charcoal up to its room and refuses the rest: " + engine.fuel());
+		engine.setFuel(3);
+		helper.runAfterDelay(6, () -> {
+			helper.assertTrue(engine.fuel() == 0 && all(level, block, first, false), "Its coal burnt, it is let out on every block");
+			level.destroyBlock(block.partPos(first, Direction.NORTH, 7), true);
+			for (int part = 0; part < block.cells().length; part++) {
+				helper.assertFalse(level.getBlockState(block.partPos(first, Direction.NORTH, part)).is(block), "It breaks whole");
+			}
+			helper.runAfterDelay(3, () -> {
+				helper.assertTrue(dropped(helper, JugcraftAgriculture.item("steam_traction_engine")) == 1, "It drops itself once");
+				helper.succeed();
+			});
+		});
+	}
+
+	/** The Hay Wagon stands whole where it is placed, three by two by four; broken at its back, it all goes and drops itself once. */
+	@GameTest(maxTicks = 40)
+	public void theHayWagonStandsWhole(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		floor(helper);
+		BlockPos master = new BlockPos(4, 2, 2);
+		place(helper, player(helper, master.north()), "hay_wagon", master);
+		HayWagonBlock block = (HayWagonBlock) JugcraftAgriculture.block("hay_wagon");
+		BlockPos first = helper.absolutePos(master);
+		helper.assertTrue(block.cells().length == 24 && all(level, block, first, true), "It stands whole, three by two by four");
+		level.destroyBlock(block.partPos(first, Direction.NORTH, 23), true);
+		for (int part = 0; part < block.cells().length; part++) {
+			helper.assertFalse(level.getBlockState(block.partPos(first, Direction.NORTH, part)).is(block), "It breaks whole");
+		}
+		helper.runAfterDelay(3, () -> {
+			helper.assertTrue(dropped(helper, JugcraftAgriculture.item("hay_wagon")) == 1, "It drops itself once");
+			helper.succeed();
+		});
+	}
+
 	@GameTest
 	public void harvestFestivalDataLoads(GameTestHelper helper) {
 		ServerLevel level = helper.getLevel();
-		for (String id : new String[] {"giant_cornucopia", "giant_cabbage", "giant_marrow", "giant_turnip", "giant_carrot", "prize_ribbon_board"}) {
+		for (String id : new String[] {"giant_cornucopia", "giant_cabbage", "giant_marrow", "giant_turnip", "giant_carrot", "prize_ribbon_board",
+				"steam_traction_engine", "hay_wagon"}) {
 			helper.assertTrue(level.recipeAccess().byKey(ResourceKey.create(Registries.RECIPE, Jugcraft.id(id))).isPresent(), id + " has a recipe");
 			helper.assertTrue(level.getServer().reloadableRegistries().getLootTable(ResourceKey.create(Registries.LOOT_TABLE,
 					Jugcraft.id("blocks/" + id))) != LootTable.EMPTY, id + "'s loot loads");

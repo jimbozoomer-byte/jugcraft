@@ -3,7 +3,11 @@ package io.github.jimbozoomer.jugcraft.test;
 import io.github.jimbozoomer.jugcraft.agriculture.FacingDecorationBlock;
 import io.github.jimbozoomer.jugcraft.agriculture.GiantCornucopiaBlock;
 import io.github.jimbozoomer.jugcraft.agriculture.JugcraftAgriculture;
+import io.github.jimbozoomer.jugcraft.agriculture.HayWagonBlock;
+import io.github.jimbozoomer.jugcraft.agriculture.MultiDecorationBlock;
 import io.github.jimbozoomer.jugcraft.agriculture.PrizeRibbonBoardBlock;
+import io.github.jimbozoomer.jugcraft.agriculture.SteamTractionEngineBlock;
+import io.github.jimbozoomer.jugcraft.agriculture.SteamTractionEngineBlockEntity;
 import java.util.Locale;
 import net.fabricmc.fabric.api.client.gametest.v1.FabricClientGameTest;
 import net.fabricmc.fabric.api.client.gametest.v1.context.ClientGameTestContext;
@@ -22,7 +26,9 @@ import net.minecraft.world.level.block.state.BlockState;
  * camera, photographed by day from the front, from the west into its mouth and the harvest spilling out of it, and from
  * the north-east over its tail; then, in its place, part 2's show: the Giant Cabbage, Marrow, Turnip and Carrot in a row
  * facing the camera, the Prize Ribbon Board behind them with all three ribbons hung, from the front and then close on
- * the board (CI job {@code client}). They go into docs/features/harvest-festival-grounds.md.
+ * the board; then part 3's Steam Traction Engine, fired, its motion running, with the Hay Wagon behind it, from its
+ * flywheel side, from ahead of it, close over its motion, and along the wagon (CI job {@code client}). They go into
+ * docs/features/harvest-festival-grounds.md.
  */
 public class HarvestFestivalClientGameTests implements FabricClientGameTest {
 	@Override
@@ -40,8 +46,8 @@ public class HarvestFestivalClientGameTests implements FabricClientGameTest {
 			server.runCommand("gamerule minecraft:spawn_mobs false");
 			server.runCommand("time set noon");
 			server.runCommand("weather clear");
-			server.runCommand("fill %d %d %d %d %d %d minecraft:grass_block".formatted(x - 7, y - 1, z - 6, x + 6, y - 1, z + 6));
-			server.runCommand("fill %d %d %d %d %d %d minecraft:air".formatted(x - 7, y, z - 6, x + 6, y + 5, z + 6));
+			server.runCommand("fill %d %d %d %d %d %d minecraft:grass_block".formatted(x - 7, y - 1, z - 12, x + 7, y - 1, z + 6));
+			server.runCommand("fill %d %d %d %d %d %d minecraft:air".formatted(x - 7, y, z - 12, x + 7, y + 5, z + 6));
 			server.runOnServer(minecraft -> cornucopia(minecraft.overworld(), origin.offset(1, 0, 1)));
 			context.waitTicks(40);
 			singleplayer.getConnection().waitForChunksRender();
@@ -54,6 +60,14 @@ public class HarvestFestivalClientGameTests implements FabricClientGameTest {
 			context.waitTicks(20);
 			shoot(context, singleplayer, x, y + 1, z - 5, 0, 15, "jugcraft_harvest_festival_show");
 			shoot(context, singleplayer, x, y + 1, z, 0, 5, "jugcraft_harvest_festival_ribbon_board");
+			// Part 3: the engine, fired, and the wagon behind it, where the show was.
+			server.runCommand("fill %d %d %d %d %d %d minecraft:air".formatted(x - 7, y, z - 12, x + 7, y + 5, z + 6));
+			server.runOnServer(minecraft -> engine(minecraft.overworld(), origin.offset(1, 0, -6), origin.offset(1, 0, -1)));
+			context.waitTicks(60);
+			shoot(context, singleplayer, x + 6, y + 1, z - 3, 90, 10, "jugcraft_harvest_festival_traction_engine");
+			shoot(context, singleplayer, x + 5, y + 2, z - 10, 30, 15, "jugcraft_harvest_festival_traction_engine_front");
+			shoot(context, singleplayer, x + 3, y + 3, z - 4, 90, 35, "jugcraft_harvest_festival_traction_engine_motion");
+			shoot(context, singleplayer, x + 6, y + 1, z + 1, 90, 10, "jugcraft_harvest_festival_hay_wagon");
 		}
 	}
 
@@ -84,6 +98,25 @@ public class HarvestFestivalClientGameTests implements FabricClientGameTest {
 		BlockPos at = origin.offset(0, 0, 2);
 		level.setBlock(at, hung, Block.UPDATE_ALL);
 		board.setPlacedBy(level, at, hung, null, new ItemStack(board));
+	}
+
+	/**
+	 * The Steam Traction Engine, its first block at {@code engineAt} facing north, fired with its firebox full; and the
+	 * Hay Wagon behind it facing the same way, its first block at {@code wagonAt}, its drawbar at the engine's hook.
+	 */
+	private static void engine(ServerLevel level, BlockPos engineAt, BlockPos wagonAt) {
+		SteamTractionEngineBlock engine = (SteamTractionEngineBlock) JugcraftAgriculture.block("steam_traction_engine");
+		BlockState state = engine.defaultBlockState().setValue(MultiDecorationBlock.FACING, Direction.NORTH);
+		level.setBlock(engineAt, state, Block.UPDATE_ALL);
+		engine.setPlacedBy(level, engineAt, state, null, new ItemStack(engine));
+		if (level.getBlockEntity(engineAt) instanceof SteamTractionEngineBlockEntity firebox) {
+			firebox.setFuel(SteamTractionEngineBlock.MAX_FUEL);
+		}
+		engine.setLit(level, engineAt, true);
+		HayWagonBlock wagon = (HayWagonBlock) JugcraftAgriculture.block("hay_wagon");
+		BlockState hay = wagon.defaultBlockState().setValue(MultiDecorationBlock.FACING, Direction.NORTH);
+		level.setBlock(wagonAt, hay, Block.UPDATE_ALL);
+		wagon.setPlacedBy(level, wagonAt, hay, null, new ItemStack(wagon));
 	}
 
 	/** The Giant Cornucopia, its first block (its tail's) at {@code master}, facing north: its mouth to the west. */

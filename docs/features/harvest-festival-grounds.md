@@ -1,6 +1,6 @@
 # Harvest Festival Grounds
 
-Status: parts 1 (the Giant Cornucopia) and 2 (the Giant Vegetable Show and the Prize Ribbon Board) implemented. CI builds them and runs their game tests and client screenshots; they have not been played by hand. Parts 3 and 4 are planned.
+Status: parts 1 (the Giant Cornucopia), 2 (the Giant Vegetable Show and the Prize Ribbon Board) and 3 (the Steam Traction Engine and the Hay Wagon) implemented. CI builds them and runs their game tests and client screenshots; they have not been played by hand. Part 4 is planned.
 Proposal issue: none. The owner asked for it directly on 28 October 2026, as set 10 of the ten sets of fall and Halloween decor ("Then I want you to do 1-10 in parts in that order one by one"): the grounds of a country harvest festival, with:
 - a giant cornucopia;
 - a giant vegetable show with prize-ribbon boards;
@@ -8,7 +8,7 @@ Proposal issue: none. The owner asked for it directly on 28 October 2026, as set
 - harvest bunting and sack-race sacks.
 
 Owner: @jimbozoomer-byte
-Target milestone and tier: early farming. The cornucopia is made from sticks, wheat, a pumpkin and an apple, and from the farm's own corn and butternut squash. Each show vegetable is grown from nine of its crop. The ribbon board is made from planks, green dye, sticks and a gold nugget, and shows the prize ribbons a player has won.
+Target milestone and tier: early farming. The cornucopia is made from sticks, wheat, a pumpkin and an apple, and from the farm's own corn and butternut squash. Each show vegetable is grown from nine of its crop. The ribbon board is made from planks, green dye, sticks and a gold nugget, and shows the prize ribbons a player has won. The traction engine wants iron (blocks of it, a blast furnace and a piston) and a clock, and coal to fire it; the hay wagon, hay and planks.
 Primary specialty and supported player role: building, with farming. A farmer grows its harvest, and a builder sets out the festival's grounds. Nothing in it is needed to progress.
 
 ## Player experience
@@ -54,8 +54,34 @@ Four prize show vegetables at a show's sizes, each one block. Each stands facing
   - **Recipe**: planks either side of green dye, over planks either side of a gold nugget (the hooks' brass), over two sticks.
   - **Breaking it**: either half brings it down, and it drops itself and every ribbon hanging on it.
 
-### Planned: parts 3 and 4
-- Part 3: a steam traction engine and a hay wagon behind it. Several blocks long, its flywheel and crank turning while it is fired.
+### Part 3: the Steam Traction Engine and the Hay Wagon
+- **Steam Traction Engine**: a farm traction engine of about 1910 at its real size, 5 m long, 2.2 m wide and 3 m to its chimney's top. Three blocks across, three up and five deep.
+  - Its boiler is lagged in green-painted strips under brass bands. Its smokebox and chimney are black, under a copper cap, with a round smokebox door.
+  - Its rear wheels are 1.75 m across, with strakes across their treads; its front wheels 1.1 m; all red with iron tyres.
+  - Its single cylinder sits on the boiler's front, with the slide bars behind it. The crankshaft runs across the hornplates over the firebox.
+  - Its flywheel is 1.3 m across, on the left as you face it. Its governor stands on a brass pillar beside the cylinder, and the safety valves and whistle are brass.
+  - Behind the firebox are the footplate in chequer plate, the steering wheel, and a tender heaped with coal, with a drawbar hook at the back.
+  - **Firing it**: use coal or charcoal on any block of it. Each burns 1,600 ticks (80 seconds), as in a furnace, and is used up.
+    - The firebox holds 6,400 ticks (four coals); a coal more than it has room for is refused and kept.
+    - Firing needs build permission.
+  - **While it is fired**:
+    - its flywheel turns, 150 times a minute;
+    - its crank turns with it, driving the connecting rod and the crosshead along the slide bars;
+    - its governor spins on its pillar;
+    - its fire glows through the fire door;
+    - smoke rises from its chimney, and the fire crackles now and then.
+  - When the coal is gone it is let out, and the flywheel runs down over two seconds and stops where it is.
+  - Use it with an empty hand to see how many seconds of coal are left.
+  - **Recipe**: two iron blocks over a blast furnace, a piston and a clock, over iron blocks either side of green dye.
+  - **Breaking it**: any block brings the whole engine down, and it drops once. It drops no coal; what was in the firebox burns.
+- **Hay Wagon**: a four-wheeled farm wagon 4 m long and 2.6 m to the top of its load. Three blocks across, two up and four deep.
+  - Its bed is painted blue and lined, its wheels red, 0.9 m at the front and 1.15 m at the back.
+  - A hay ladder leans out at each end. Its load of hay is heaped in three courses, roped across and along, with a pitchfork stuck in the top.
+  - **Hitching it**: placed behind a traction engine facing the same way, its drawbar reaches the engine's hook.
+  - **Recipe**: three hay bales over planks either side of a stick, over two iron ingots.
+  - **Breaking it**: any block brings it down, and it drops once.
+
+### Planned: part 4
 - Part 4: harvest bunting, a new kind of strand on the café lights' string system, and sack-race sacks.
 
 ## How it is drawn (docs/ART_DIRECTION.md, docs/NATURAL_TEXTURES.md)
@@ -92,6 +118,21 @@ Four prize show vegetables at a show's sizes, each one block. Each stands facing
   - Its posts are green-painted timber with caps.
   - **Each rosette** is 25 cm across: its pleated ring a texel to a pleat, lit and shaded by turns, round in two crossed boxes. It has a cream and gold button in its middle, and two tails hanging in a V below it, turned 22.5 degrees each way. Its colours are the ribbon items': blue for first, red for second, white for third.
   - Each rosette is its own model, added to the board by its blockstate while it hangs.
+- **The Steam Traction Engine** (part 3):
+  - **The lagging** is green strips three texels wide along the barrel, each strip's first texel lit. The brass bands stand proud of it.
+  - **The painted iron** (the firebox, cylinder, hornplates and tender) is green, lit along its top, and lined out in fine yellow one texel in from each panel's edge, as engines were.
+  - **The wheels**: each tyre is iron, a ring of 16 segments (straight at the top, bottom, front and back, and the rest turned 22.5 and 45 degrees, a block model's own turns). The rear tyres' treads are crossed by strakes, bars two texels wide on the slant four apart. Inside each is a red felloe and red spokes: 16 on a rear wheel, 8 on a front one, as bars through an iron hub.
+  - **The smokebox, barrel and firebox top** are round, as two crossed boxes cut to an octagon. The chimney is round the same way, under its copper cap.
+  - **The footplate** is chequer plate: iron with a lit lozenge every other texel on the slant.
+  - **The coal** is lumps two texels across, each lit at its top left and dark at its foot.
+  - **Its motion is drawn by `SteamTractionEngineRenderer`** from quads (`assets/jugcraft/harvest_festival_quads.json`), cut from the same kinds of box:
+    - the flywheel is a red rim of 24 segments with a bright machined face and six red spokes, turning with the crank about the crankshaft;
+    - the crosshead slides along the slide bars, carrying the piston rod in and out of the cylinder;
+    - the connecting rod runs from the crosshead's pin to the crank's, turned to reach it at every point of the turn;
+    - the governor's balls spin on its pillar;
+    - the fire, its middle row the hottest, glows through the fire door at full light while it is fired.
+  - **The item** shows it whole at a fifth of its size, its flywheel in a block model's turns (16 segments, eight spokes) and its fire out.
+- **The Hay Wagon** (part 3): its bed is blue planks; its sides blue, lined; its wheels the engine's red, smaller. Its hay is the Pumpkin Patch Market's hay, its ropes plain rope along their length. The hay ladders lean out at 22.5 degrees, each cut at the blocks it crosses so each piece lies in one block. The pitchfork's handle leans back at 22.5 degrees.
 
 ## Connections
 - Existing input producer: farming. Corn ([fall-harvest.md](fall-harvest.md)), butternut squash and turnips ([festival-crops.md](festival-crops.md)), cabbages ([garden-crops.md](garden-crops.md)), zucchini ([vegetables-herbs-and-spices.md](vegetables-herbs-and-spices.md)), carrots, wheat, pumpkins and apples. The prize ribbons come from the Harvest Scale and the corn maze ([fall-additions.md](fall-additions.md)).
@@ -99,7 +140,9 @@ Four prize show vegetables at a show's sizes, each one block. Each stands facing
   - the cornucopia: sticks, wheat, a pumpkin, a butternut squash, an ear of corn and an apple;
   - each show vegetable: nine of its crop;
   - the ribbon board: planks, green dye, a gold nugget and sticks.
-- Existing output consumer: none; it is decoration. The ribbon board gives a player's prize ribbons somewhere to be shown.
+  - the engine: iron blocks, a blast furnace, a piston, a clock and green dye;
+  - the wagon: hay bales, planks, a stick and iron.
+- Existing output consumer: none; it is decoration. The ribbon board gives a player's prize ribbons somewhere to be shown. The engine burns coal or charcoal, a sink for either.
 - Technology/magic connections (or infrastructure/cosmetic applicability): cosmetic. It is a festival display for a farm's harvest.
 - Reachable entry path: corn and butternut squash grow from their seeds, found or traded early. Everything else is vanilla.
 - Which connections are required vs optional; trade and solo routes: all optional, made solo, tradeable.
@@ -109,6 +152,7 @@ Four prize show vegetables at a show's sizes, each one block. Each stands facing
 - Decor only. One recipe makes one Giant Cornucopia, which drops only itself. Nothing turns it back into its harvest, so no loop gains.
 - Nine of a crop make one show vegetable, which drops only itself and turns back into nothing.
 - The ribbon board makes no ribbons. It holds at most one of each, and gives back exactly the ones hung on it, taken off or when it is broken.
+- **Units**: ticks of burn. A coal or charcoal fires the engine for 1,600 ticks, as it would a furnace, and the firebox holds 6,400. It makes nothing: the coal is spent on its show. No loop.
 
 ## Multiplayer and persistence
 - The cornucopia has no block entity and keeps nothing; its blocks' `facing` and `part` are all it is.
@@ -120,7 +164,16 @@ Four prize show vegetables at a show's sizes, each one block. Each stands facing
   - Its loot table drops the board and each hung ribbon from its lower half. Breaking the upper half brings the lower down with its drops. The ribbons drop even in an explosion.
   - Broken in creative, nothing drops, as with any block.
   - A piston can't push it.
+- **The Steam Traction Engine is the server's**:
+  - its firebox (a block entity on its first block) holds its coal's ticks and burns one a tick while there are any. That is one decrement a tick, and nothing at all while it is cold.
+  - When the last tick is gone, the server lets it out, setting `lit` off on its blocks.
+  - It saves what is left, so a reloaded engine burns on.
+  - Coal is taken only from a player who may build there.
+- **The client draws its motion** from `lit` and its own count of the turns, easing up and down over two seconds. Each client turns its flywheel at the same rate, but not in step with another's.
+- The engine and wagon can't be pushed by a piston.
 - IDs (stable from release):
+  - the block and item `steam_traction_engine` (`facing`, `lit`, `part` 0 to 44) and its block entity `steam_traction_engine`;
+  - the block and item `hay_wagon` (`facing`, `lit`, `part` 0 to 23; `lit` is always on);
   - the block and item `giant_cornucopia` (`facing`, `lit`, `part` 0 to 11; `lit` is always on, as it has no lanterns);
   - the blocks and items `giant_cabbage`, `giant_marrow`, `giant_turnip` and `giant_carrot` (`facing`);
   - the block and item `prize_ribbon_board` (`facing`, `half`, `first`, `second`, `third`).
@@ -155,6 +208,18 @@ Local checks run on this branch, and their results:
   - `python3 scripts/check_repository.py`: PASS. The tools' unit tests: 287 tests, OK. `python3 tools/check_icon_maps.py`: PASS, with its existing warnings.
   - Not run locally: `./gradlew build` and the game tests (CI runs them).
 
+- Part 3:
+  - `python3 tools/check_mod_data.py`: PASS on the first run (8,176 material IDs), including the art check of every block and item model (25,190 models and 3,777 quad parts). Its `check_harvest_festival` now also checks:
+    - that the engine's Java is the table's: its fuel, turn, crank, rod, governor and chimney;
+    - that it is fired only with coal or charcoal, by a player who may build;
+    - that its firebox burns a tick a tick, lets it out when empty and saves, and that a coal burns as in a furnace;
+    - its registration with its block entity and renderer, its motion's quads written and drawn, and its fire drawn at full light;
+    - that its rod outreaches its crank, its crosshead stays on its slide bars all the way, and its flywheel turns clear of the ground;
+    - that the engine and the wagon are the table's size, their models in their frames, their blockstates whole, each dropping once;
+    - that the wagon's drawbar meets the engine's hook, that the engine is mined with a pickaxe, and that its texts are there.
+  - `python3 scripts/check_repository.py`: PASS. The tools' unit tests: 287 tests, OK. `python3 tools/check_icon_maps.py`: PASS, with its existing warnings.
+  - Not run locally: `./gradlew build` and the game tests (CI runs them).
+
 Game tests (`HarvestFestivalGameTests`, run by CI's `gametest` job):
 - `theGiantCornucopiaStandsWhole`: placed, it stands facing the player, all twelve of its blocks there in order. Use does nothing to it. Broken at its tail, it all goes, and it drops itself once.
 - `theShowVegetablesStandAndDropThemselves` (part 2): each of the four, placed, stands facing the player; broken, it drops itself once.
@@ -165,6 +230,14 @@ Game tests (`HarvestFestivalGameTests`, run by CI's `gametest` job):
   - a Third hangs on the third hook;
   - an empty hand aimed at the third hook takes back the Third, and only it; aimed there again, it takes the nearest ribbon left, the First;
   - broken at its top with a First hanging, it all goes and drops itself once and the First, and no ribbon that wasn't hanging.
+- `theTractionEngineFiresAndRunsDown` (part 3):
+  - it stands whole, three by three by five, cold, its firebox empty on its first block;
+  - a player who may not build fires nothing;
+  - coal fires it on every block, a furnace's burn, and is used up;
+  - the firebox takes charcoal up to its room and refuses the rest, kept;
+  - its coal burnt, it is let out on every block;
+  - broken at its chimney, it all goes, and it drops itself once.
+- `theHayWagonStandsWhole` (part 3): it stands whole, three by two by four; broken at its back, it all goes, and it drops itself once.
 - `harvestFestivalDataLoads`: every block's recipe and loot load.
 
 Client screenshots (`HarvestFestivalClientGameTests`, CI's `client` job):
@@ -172,7 +245,9 @@ Client screenshots (`HarvestFestivalClientGameTests`, CI's `client` job):
 - from the west, into its mouth and the harvest spilling out of it;
 - from the north-east, over its tail;
 - the show (part 2): the four vegetables in a row facing the camera, the Prize Ribbon Board behind them with all three ribbons hung;
-- close on the board.
+- close on the board;
+- the Steam Traction Engine fired, its motion running, with the Hay Wagon behind it (part 3), from its flywheel side, from ahead of it, and close over its motion;
+- along the wagon.
 
 Not run: a hand playtest, and a two-client playtest.
 
@@ -181,4 +256,5 @@ Seasonal in look, not in use: it is made and stands all year. It doesn't generat
 
 ## Rollout and open questions
 - The parts, each stacked on the last: the Giant Cornucopia; the giant vegetable show; the steam traction engine and hay wagon; the bunting and sack-race sacks.
+- The engine is decoration for now: it doesn't move or tow, and it doesn't drive the kinetic network. Open: whether a later part should let it drive a belt to a threshing machine on the kinetic network, or be driven.
 - Open: whether a cornucopia should take real produce to fill its mouth, as the Pumpkin Patch Market's displays do.

@@ -13757,6 +13757,11 @@
       "denominator": 1,
       "source": "fallback (balance pending)"
     },
+    "jugcraft:hay_wagon": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
     "jugcraft:haymaker": {
       "numerator": 3509,
       "denominator": 4,
@@ -35721,6 +35726,11 @@
       "numerator": 5031,
       "denominator": 2,
       "source": "recipe jugcraft:steam_generator"
+    },
+    "jugcraft:steam_traction_engine": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
     },
     "jugcraft:steampunk_boots": {
       "numerator": 14357,

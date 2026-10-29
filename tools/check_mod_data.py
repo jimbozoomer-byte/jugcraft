@@ -15699,7 +15699,13 @@ def check_harvest_festival():
     keeps a hook for each on both halves, only for a player who may build, and is registered with its two-block item; hook
     1 is at the left as you face it; its blockstate draws the board, an empty upper half and each rosette while it hangs;
     broken, it drops itself once and each ribbon hanging on it; its recipe has its paint and hooks; and its texts are
-    there."""
+    there. Part 3: the Steam Traction Engine's Java is the table's (its fuel, turn, crank, rod, governor and chimney),
+    fired only with coal or charcoal by a player who may build; its firebox burns a tick a tick, lets it out when empty
+    and saves; a coal burns as in a furnace; it is registered with its block entity and renderer, its motion's quads
+    written and drawn, the fire at full light; its rod outreaches its crank and its crosshead stays on its slide bars;
+    its flywheel turns clear of the ground; the engine and the wagon are the table's size, their models in their
+    frames, their blockstates whole, each dropping once; the wagon's drawbar meets the engine's hook; the engine is
+    mined with a pickaxe; and its texts are there."""
     import harvest_festival as hf
     import harvest_festival_data as hfd
 
@@ -15808,6 +15814,79 @@ def check_harvest_festival():
     for key, text in ((f"block.{MOD}.{block}", spec["display"]), (f"message.{MOD}.{block}.taken", None)):
         if key not in lang or (text and lang[key] != text):
             err(f"{key} has no text, or not its own")
+    # Part 3: the Steam Traction Engine and the Hay Wagon.
+    client = read(CLIENT_JAVA_ROOT / "JugcraftClient.java")
+    engine, wagon = hf.ENGINE, hf.WAGON
+    java = read(JAVA_ROOT / "agriculture" / "SteamTractionEngineBlock.java")
+    held = read(JAVA_ROOT / "agriculture" / "SteamTractionEngineBlockEntity.java")
+    drawn = read(CLIENT_JAVA_ROOT / "SteamTractionEngineRenderer.java")
+    kx, ky, kz = engine["crank"]
+    gx, gz = engine["governor"]
+    cx, cy, cz = engine["chimney"]
+    for item in ["extends MultiDecorationBlock implements EntityBlock", "box({}, {}, {})".format(*engine["size"]), "ItemTags.COALS",
+                 "player.mayBuild()", "level.mayInteract(player, pos)", f"BURN = {engine['burn']};", f"MAX_FUEL = {engine['max_fuel']};",
+                 f"TURN_TICKS = {engine['turn_ticks']};", f"CRANK_X = {kx}F;", f"CRANK_Y = {ky}F;", f"CRANK_Z = {kz}F;",
+                 f"THROW = {engine['throw']}F;", f"ROD = {engine['rod']}F;", f"GOVERNOR_X = {gx}F;", f"GOVERNOR_Z = {gz}F;",
+                 f"CHIMNEY_X = {cx}F;", f"CHIMNEY_Y = {cy}F;", f"CHIMNEY_Z = {cz}F;"]:
+        if item not in java:
+            err(f"SteamTractionEngineBlock: missing {item} (tools/harvest_festival.py ENGINE)")
+    if "fuel--;" not in held or "engine.setLit(level, pos, false)" not in held or 'output.putInt("fuel", fuel)' not in held:
+        err("SteamTractionEngineBlockEntity: it must burn a tick's coal a tick, let the engine out when it is gone, and save what is left")
+    if engine["max_fuel"] % engine["burn"] or engine["burn"] != 1600:
+        err("tools/harvest_festival.py ENGINE: a coal burns as long as in a furnace (1600 ticks), and the firebox holds a whole number of them")
+    if 'registerBlock("steam_traction_engine", SteamTractionEngineBlock::new' not in java_main \
+            or 'STEAM_TRACTION_ENGINE_ENTITY = Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, Jugcraft.id("steam_traction_engine")' not in java_main \
+            or 'registerBlock("hay_wagon", HayWagonBlock::new' not in java_main:
+        err("JugcraftAgriculture: the engine with its block entity, and the wagon, must be registered")
+    if "BlockEntityRendererRegistry.register(JugcraftAgriculture.STEAM_TRACTION_ENGINE_ENTITY, SteamTractionEngineRenderer::new);" not in client:
+        err("SteamTractionEngineRenderer must be registered")
+    if '"harvest_festival_quads.json"' not in read(CLIENT_JAVA_ROOT / "DecorQuads.java"):
+        err("DecorQuads must read harvest_festival_quads.json")
+    quads = load(ASSETS / "harvest_festival_quads.json") or {}
+    for name in hfd.ENGINE_PARTS:
+        key = f"{engine['block']}_{name}"
+        if not quads.get(key) or f'DecorQuads.get("{key}")' not in drawn:
+            err(f"harvest_festival_quads.json: {key} must be written and drawn by SteamTractionEngineRenderer")
+    if "LightCoordsUtil.FULL_BRIGHT" not in drawn:
+        err("SteamTractionEngineRenderer: the fire is drawn at full light")
+    throw, rod = engine["throw"], engine["rod"]
+    little = (kz - throw - rod, kz + throw - rod)
+    slide = [e for e in hfd.build(engine["block"]).models["whole"] if e["to"][0] - e["from"][0] == 3.0 and e["from"][2] == 24.5]
+    if not rod > 2 * throw or not slide or not (slide[0]["from"][2] < little[0] - 1.0 and little[1] + 1.0 < slide[0]["to"][2]):
+        err("tools/harvest_festival.py ENGINE: the connecting rod must outreach the crank, and the crosshead stay on its slide bars all the way")
+    fx0, fx1, fr = engine["flywheel"]
+    if not (ky - fr > 0 and ky + fr <= 16 * engine["size"][1] and fx1 <= 16 * engine["size"][0]):
+        err("tools/harvest_festival.py ENGINE: the flywheel must turn clear of the ground, within its frame")
+    for spec, cls in ((engine, "SteamTractionEngineBlock"), (wagon, "HayWagonBlock")):
+        block = spec["block"]
+        w, h, d = spec["size"]
+        if f"box({w}, {h}, {d})" not in read(JAVA_ROOT / "agriculture" / f"{cls}.java"):
+            err(f"{cls} is not {w} x {h} x {d} blocks as tools/harvest_festival.py says")
+        whole = hfd.build(block).models["whole"]
+        if any(min(e["from"]) < 0 or e["to"][0] > 16 * w or e["to"][1] > 16 * h or e["to"][2] > 16 * d for e in whole if "rotation" not in e):
+            err(f"tools/harvest_festival_data.py {block}: every box must lie in its frame, or its blocks' models lose it")
+        variants = (load(ASSETS / "blockstates" / f"{block}.json") or {}).get("variants", {})
+        for part in range(w * h * d):
+            for face in ("north", "east", "south", "west"):
+                for lit in ("false", "true"):
+                    if variants.get(f"facing={face},lit={lit},part={part}", {}).get("model") != f"{MOD}:block/{block}_{part}":
+                        err(f"blockstates/{block}.json: facing {face}, lit {lit}, part {part} must be {block}_{part}")
+        pools = (load(DATA / MOD / "loot_table" / "blocks" / f"{block}.json") or {}).get("pools", [])
+        if len(pools) != 1 or '"part": "0"' not in json.dumps(pools):
+            err(f"loot_table/blocks/{block}.json: it drops once, from its first block")
+        if lang.get(f"block.{MOD}.{block}") != spec["display"]:
+            err(f"block.{MOD}.{block}: the text must be {spec['display']}")
+    # Hitched: the wagon's drawbar ring at its frame's front, the engine's hook at its frame's back, at one height.
+    hook = [e for e in hfd.build(engine["block"]).models["whole"] if e["to"][2] == 16 * engine["size"][2]]
+    ring = [e for e in hfd.build(wagon["block"]).models["whole"] if e["from"][2] == 0.0]
+    if not hook or not ring or not (hook[0]["from"][1] < ring[0]["to"][1] and ring[0]["from"][1] < hook[0]["to"][1]):
+        err("tools/harvest_festival_data.py: placed behind the engine, the wagon's drawbar must meet the engine's hook")
+    pickaxe = load(DATA / "minecraft" / "tags" / "block" / "mineable" / "pickaxe.json") or {}
+    if f"{MOD}:{engine['block']}" not in pickaxe.get("values", []):
+        err("The Steam Traction Engine is iron: it is mined with a pickaxe")
+    for key in ("fired", "cold", "full"):
+        if f"message.{MOD}.{engine['block']}.{key}" not in lang:
+            err(f"Message {engine['block']}.{key} has no text")
 
 
 def check_party_table():

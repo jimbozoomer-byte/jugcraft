@@ -13,13 +13,16 @@ pumpkins it shares (tools/pumpkin_patch_data.py, tools/haunted_midway_data.py).
 A prop of several blocks is modelled whole in its frame (16 pixels a block) and cut into its blocks' models
 (pumpkin_patch_data.cut), so its picture runs on unbroken across them.
 """
+import math
+
 import decor17_data as d17d
 import decor20_data as d20d
 import flora_art as fa
 import harvest_festival as hf
 import pumpkin_patch_data as ppd
 from flora_art import Sculpt, pal, shade
-from haunted_midway_data import PUMPKIN, STEM
+from decor6_data import quads
+from haunted_midway_data import BLACK, PUMPKIN, STEEL, STEM
 from pumpkin_patch_data import lengthwise, panel
 
 MOD = "jugcraft"
@@ -657,13 +660,331 @@ def ribbon_board():
     return sc
 
 
+# ---------------------------------------------------------------- part 3: the Steam Traction Engine and the Hay Wagon
+
+ENGINE_GREEN = pal("0e2416", "163220", "1f422c", "2a5638", "386a46")
+ENGINE_RED = pal("4a0c0c", "6c1414", "8e1e1a", "ae2c22", "c8402e")
+LINE = pal("b88a24", "e0b040")
+COPPER = pal("5a2a14", "84401e", "a8582a", "c8763c", "e09a5c")
+COAL = pal("0e0e10", "1a1a1e", "28282e", "3a3a42")
+FIRE = pal("c8401a", "ec7a1e", "fcb43a", "fee27a")
+WAGON_BLUE = pal("1a2a3e", "243a54", "304c6a", "40607e", "56789a")
+ROPE = pal("6a5432", "8c7246", "ae925e")
+
+
+def lagging():
+    """A boiler's lagging: strips of wood three texels wide along it, painted green, each strip's first texel lit, the
+    barrel's upper row lit again."""
+    def paint(p):
+        along_x = p.w >= p.h
+        for y in range(p.h):
+            for x in range(p.w):
+                a = y if along_x else x
+                p.put(x, y, shade(ENGINE_GREEN, 4 if a == 0 else (3, 2, 2)[a % 3]))
+    paint.tag = repr(("lagging",))
+    return paint
+
+
+def lined(palette, line=LINE):
+    """A painted panel lined out: its paint lit along its top row, a fine yellow line one texel in from its edges where
+    it is big enough to hold one (five texels each way)."""
+    def paint(p):
+        for y in range(p.h):
+            for x in range(p.w):
+                inner = p.w >= 5 and p.h >= 5 and ((x in (1, p.w - 2) and 1 <= y <= p.h - 2) or (y in (1, p.h - 2) and 1 <= x <= p.w - 2))
+                p.put(x, y, shade(line, 1) if inner else shade(palette, 3 if y == 0 else 2))
+    paint.tag = repr(("lined", palette[2], line[1]))
+    return paint
+
+
+def tread():
+    """A rear wheel's iron tyre: grey iron crossed by strakes, raised bars two texels wide on the slant four texels apart,
+    each lit along its leading side, the iron between them in shadow."""
+    def paint(p):
+        for y in range(p.h):
+            for x in range(p.w):
+                p.put(x, y, shade(ppd.IRON, (4, 3, 1, 1)[(x + y) % 4]))
+    paint.tag = repr(("tread",))
+    return paint
+
+
+def checker():
+    """A footplate's chequer plate: iron, a raised lit lozenge every other texel on the slant."""
+    def paint(p):
+        for y in range(p.h):
+            for x in range(p.w):
+                p.put(x, y, shade(ppd.IRON, 3 if (x + y) % 2 == 0 and (x - y) % 4 == 0 else 2))
+    paint.tag = repr(("checker",))
+    return paint
+
+
+def coal():
+    """Coal heaped in the tender: lumps two texels across, each lit at its top left and dark at its foot right, the
+    lumps staggered row by row."""
+    def paint(p):
+        for y in range(p.h):
+            for x in range(p.w):
+                lx, ly = (x + (y // 2) % 2) % 2, y % 2
+                k = 3 if (lx, ly) == (0, 0) else 0 if (lx, ly) == (1, 1) else 1 + (x // 2 + y // 2) % 2
+                p.put(x, y, shade(COAL, k))
+    paint.tag = repr(("coal",))
+    return paint
+
+
+def fire():
+    """The fire seen through the fire door: its middle row the hottest, the rows above and below it flame and ember by
+    turns texel by texel."""
+    def paint(p):
+        for y in range(p.h):
+            mid = abs(y - (p.h - 1) / 2)
+            for x in range(p.w):
+                p.put(x, y, shade(FIRE, 3 if mid < 0.6 else 2 if x % 2 == 0 else 1))
+    paint.tag = repr(("fire",))
+    return paint
+
+
+def turned(origin, axis, angle):
+    """An element's turn by any angle, for parts a renderer draws from quads (a block model's own turns are 22.5 and 45
+    degrees only: flora_art.rotation)."""
+    return {"origin": [round(c, 4) for c in origin], "axis": axis, "angle": angle} if angle else None
+
+
+def ring_x(sc, name, x0, x1, cy, cz, r, t, side, outer=None, steps=16):
+    """A ring standing across x (x0..x1) about (cy, cz), `r` to its outside and `t` thick: `steps` segments round it.
+    For a block model, 16: straight at the top, bottom, front and back, and the rest turned 22.5 and 45 degrees about its
+    middle, each turned set set in a little across x from its neighbours so no two share a plane where they meet. For
+    quads (`steps` other than 16), the top segment turned round by equal steps. `outer` paints each segment's outside
+    (a tyre's tread)."""
+    span = 2 * r * math.tan(math.pi / steps) + 0.25
+    mid = (x0 + x1) / 2
+    el = []
+
+    def seg(lo, hi, face, inset, angle, quad=False):
+        over = {face: outer} if outer else {}
+        rot = turned((mid, cy, cz), "x", angle) if quad else fa.rotation((mid, cy, cz), "x", angle)
+        el.append(panel(sc, name, side, (x0 + inset, lo[0], lo[1]), (x1 - inset, hi[0], hi[1]), rot=rot, **over))
+
+    top = ((cy + r - t, cz - span / 2), (cy + r, cz + span / 2))
+    if steps != 16:
+        for k in range(steps):
+            seg(*top, "up", 0.05 * (k % 2), 360.0 * k / steps, quad=True)
+        return el
+    bottom = ((cy - r, cz - span / 2), (cy - r + t, cz + span / 2))
+    front = ((cy - span / 2, cz - r), (cy + span / 2, cz - r + t))
+    back = ((cy - span / 2, cz + r - t), (cy + span / 2, cz + r))
+    for (lo, hi), face in ((top, "up"), (bottom, "down")):
+        for angle, inset in ((0, 0.0), (22.5, 0.05), (-22.5, 0.05), (45, 0.1), (-45, 0.1)):
+            seg(lo, hi, face, inset, angle)
+    for (lo, hi), face in ((front, "north"), (back, "south")):
+        for angle, inset in ((0, 0.0), (22.5, 0.05), (-22.5, 0.05)):
+            seg(lo, hi, face, inset, angle)
+    return el
+
+
+def spokes_x(sc, name, painter, x0, x1, cy, cz, reach, w, count, quad=False):
+    """`count` spokes round an axle across x at (cy, cz), each from the hub out to `reach`, `w` wide: as bars through
+    the hub, each set in a little across x from the last so none shares a plane with another. A block model's spokes
+    are 8 or 16 (its turns); a renderer's any even number."""
+    bars = count // 2
+    if quad:
+        angles = [180.0 * k / bars for k in range(bars)]
+    else:
+        angles = {4: [0, 90, 45, -45], 8: [0, 22.5, -22.5, 45, -45, 90, 112.5, 67.5]}[bars]
+    el = []
+    for k, angle in enumerate(angles):
+        inset = 0.04 * (k + 1)
+        if quad:
+            rot = turned(((x0 + x1) / 2, cy, cz), "x", angle)
+            el.append(panel(sc, name, painter, (x0 + inset, cy - reach, cz - w / 2), (x1 - inset, cy + reach, cz + w / 2), rot=rot))
+        elif angle in (90, 112.5, 67.5):
+            # Lying along z, turned back toward the vertical: 90 is straight along z, 112.5 and 67.5 it turned -22.5 and 22.5.
+            rot = fa.rotation(((x0 + x1) / 2, cy, cz), "x", {90: 0, 112.5: 22.5, 67.5: -22.5}[angle])
+            el.append(panel(sc, name, painter, (x0 + inset, cy - w / 2, cz - reach), (x1 - inset, cy + w / 2, cz + reach), rot=rot))
+        else:
+            rot = fa.rotation(((x0 + x1) / 2, cy, cz), "x", angle)
+            el.append(panel(sc, name, painter, (x0 + inset, cy - reach, cz - w / 2), (x1 - inset, cy + reach, cz + w / 2), rot=rot))
+    return el
+
+
+def engine_wheel(sc, name, x0, x1, cy, cz, r, spokes, straked):
+    """A traction engine's wheel across x: its iron tyre (`straked`, strakes across its tread), red spokes to an iron hub
+    standing proud of it."""
+    # The spokes set in from the wheel's sides as far as leaves them a texel across at least.
+    inset = min(1.0, (x1 - x0 - 1.0) / 2)
+    el = ring_x(sc, f"{name}_tyre", x0, x1, cy, cz, r, 1.5, ppd.flat(ppd.IRON), tread() if straked else None)
+    el += ring_x(sc, f"{name}_felloe", x0 + 0.25, x1 - 0.25, cy, cz, r - 1.5, 1.0, ppd.flat(ENGINE_RED))
+    el += spokes_x(sc, f"{name}_spoke", lengthwise(ENGINE_RED), x0 + inset, x1 - inset, cy, cz, r - 2.0, 1.0, spokes)
+    el.append(panel(sc, f"{name}_hub", ppd.hub(), (x0 + 0.5, cy - 2.0, cz - 2.0), (x1 - 0.5, cy + 2.0, cz + 2.0)))
+    return el
+
+
+def traction_engine():
+    """The Steam Traction Engine, facing north, in its frame (48 across, 48 up, 80 deep), its middle line at 24 across:
+    - its front wheels (1.1 m) on an axle under the smokebox, its rear wheels (1.75 m, straked) either side of the firebox;
+    - the boiler barrel, lagged green under brass bands, between the black smokebox (its round door at the front, the
+      chimney rising from it to 3 m under a copper cap) and the firebox, lined out, its fire door at the back;
+    - the cylinder on the barrel's front, lined, with its slide bars behind it; the hornplates either side of the
+      firebox's top carrying the crankshaft across; the governor's pillar; the safety valves and whistle in brass;
+    - the footplate in chequer plate, the tender behind it heaped with coal, its drawbar hook at the back, and the
+      steering wheel on its column at the footplate's right;
+    and, drawn by its renderer from their own models: the flywheel, the crank, the connecting rod, the crosshead and
+    piston rod, the governor's balls, and the fire seen through its door."""
+    spec = hf.ENGINE
+    sc = Sculpt(spec["block"], 3321, 128)
+    cx, (kx, ky, kz) = 24.0, spec["crank"]
+    green, red, black = lined(ENGINE_GREEN), ppd.flat(ENGINE_RED), ppd.flat(BLACK)
+    brass, iron = ppd.flat(BRASS), ppd.flat(ppd.IRON)
+    by = 22.0
+    el = []
+    # The wheels and axles.
+    for x0, x1 in ((9.5, 12.5), (35.5, 38.5)):
+        el += engine_wheel(sc, "front_wheel", x0, x1, 9.0, 12.0, 9.0, 8, False)
+    for x0, x1 in ((1.0, 8.0), (40.0, 47.0)):
+        el += engine_wheel(sc, "rear_wheel", x0, x1, 14.0, 58.0, 14.0, 16, True)
+    el.append(panel(sc, "axle", iron, (10.5, 8.5, 11.5), (37.5, 9.5, 12.5)))
+    el.append(panel(sc, "axle", iron, (6.5, 13.5, 57.5), (41.5, 14.5, 58.5)))
+    # The front axle's perch, up to the smokebox's saddle.
+    el.append(panel(sc, "perch", iron, (21.0, 9.5, 9.5), (27.0, 14.0, 14.5)))
+    # The smokebox, its door and dart, the chimney and its copper cap.
+    el += crossed_z(sc, "smokebox", black, cx, by, 16.0, 4.0, 12.0, cut=4.5)
+    el += crossed_z(sc, "door", black, cx, by, 13.0, 3.0, 4.0, cut=3.5)
+    el.append(panel(sc, "door_ring", brass, (cx - 4.0, by - 0.5, 2.75), (cx + 4.0, by + 0.5, 3.0)))
+    el.append(panel(sc, "dart", ppd.flat(STEEL), (cx - 0.5, by - 2.0, 2.0), (cx + 0.5, by + 2.0, 3.0)))
+    el += crossed_y(sc, "chimney", black, cx, 7.0, 5.0, by + 7.0, 44.5)
+    el += crossed_y(sc, "chimney_cap", ppd.flat(COPPER), cx, 7.0, 6.5, 44.5, spec["chimney"][1])
+    # The barrel, lagged, and its brass bands.
+    el += crossed_z(sc, "barrel", lagging(), cx, by, 14.0, 12.0, 44.0, cut=4.0)
+    for z in (17.0, 25.0, 33.0, 41.0):
+        el += crossed_z(sc, "band", brass, cx, by, 14.5, z, z + 1.0, cut=4.0)
+    # The firebox, lined, its top rounded to the barrel's, its fire door at the back (the fire behind it is drawn lit).
+    el.append(panel(sc, "firebox", green, (cx - 8.0, 8.0, 44.0), (cx + 8.0, by + 2.0, 56.0)))
+    el += crossed_z(sc, "firebox", green, cx, by, 16.0, 44.0, 56.0, cut=4.5)
+    el.append(panel(sc, "fire_door", black, (cx - 2.5, 12.5, 56.0), (cx + 2.5, 17.5, 56.5)))
+    el.append(panel(sc, "fire_door_handle", brass, (cx + 1.0, 14.5, 56.5), (cx + 2.0, 15.0, 57.0)))
+    # The cylinder on the barrel's front, its covers brass, and the slide bars behind it.
+    el.append(panel(sc, "cylinder", green, (kx - 3.0, ky - 4.0, 14.0), (kx + 3.0, ky + 4.0, 24.0)))
+    for z0, z1 in ((13.5, 14.0), (24.0, 24.5)):
+        el.append(panel(sc, "cylinder_cover", brass, (kx - 2.5, ky - 3.5, z0), (kx + 2.5, ky + 3.5, z1)))
+    el.append(panel(sc, "cylinder_foot", green, (kx - 3.5, by + 6.0, 13.5), (kx + 3.5, ky - 4.0, 24.5)))
+    for y in (ky - 1.75, ky + 1.25):
+        el.append(panel(sc, "slide_bar", ppd.flat(STEEL), (kx - 1.5, y, 24.5), (kx + 1.5, y + 0.5, 35.5)))
+    el.append(panel(sc, "slide_bracket", iron, (kx - 2.0, by + 6.0, 35.0), (kx + 2.0, ky + 2.0, 36.0)))
+    # The hornplates either side of the firebox's top and the crankshaft across them.
+    for x0, x1 in ((cx - 9.0, cx - 7.0), (cx + 7.0, cx + 9.0)):
+        el.append(panel(sc, "hornplate", green, (x0, by, 40.0), (x1, ky + 4.0, 50.0)))
+    el.append(panel(sc, "crankshaft", ppd.flat(STEEL), (11.0, ky - 0.75, kz - 0.75), (spec["flywheel"][1] + 1.0, ky + 0.75, kz + 0.75)))
+    # The governor's pillar beside the cylinder, the safety valves and whistle on the firebox.
+    gx, gz = spec["governor"]
+    el.append(panel(sc, "governor_pillar", brass, (gx - 0.5, by + 6.5, gz - 0.5), (gx + 0.5, by + 13.0, gz + 0.5)))
+    el.append(panel(sc, "governor_foot", iron, (gx - 1.5, by + 6.0, gz - 1.5), (gx + 1.5, by + 7.0, gz + 1.5)))
+    el += crossed_y(sc, "valve", brass, cx, 47.0, 3.0, by + 8.0, by + 11.0)
+    el += crossed_y(sc, "whistle", brass, cx + 3.0, 52.0, 1.5, by + 8.0, by + 14.0)
+    # The footplate, the tender heaped with coal, its drawbar hook, and the steering wheel on its column.
+    el.append(panel(sc, "footplate", checker(), (12.0, 10.0, 56.0), (36.0, 11.0, 64.0)))
+    el.append(panel(sc, "tender", green, (10.0, 8.0, 64.0), (38.0, 26.0, 78.0)))
+    el.append(panel(sc, "coal", coal(), (12.0, 26.0, 66.0), (36.0, 28.0, 76.0)))
+    el.append(panel(sc, "coal", coal(), (16.0, 28.0, 68.0), (32.0, 29.0, 74.0)))
+    el.append(panel(sc, "hook", iron, (cx - 1.0, 9.0, 78.0), (cx + 1.0, 10.5, 80.0)))
+    el.append(panel(sc, "column", iron, (13.0, 11.0, 60.0), (14.0, 22.0, 61.0)))
+    el += ring_x(sc, "steering", 12.5, 13.5, 22.0, 60.5, 3.5, 0.75, ppd.flat(ppd.IRON))
+    sc.models["whole"] = el
+    # The moving parts, each drawn at rest: the crank pin at the front (toward the cylinder).
+    fx0, fx1, fr = spec["flywheel"]
+    throw, rod = spec["throw"], spec["rod"]
+    sc.models["flywheel"] = (ring_x(sc, "flywheel_rim", fx0, fx1, ky, kz, fr, 1.5, red, ppd.flat(STEEL), steps=24)
+                             + spokes_x(sc, "flywheel_spoke", lengthwise(ENGINE_RED), fx0 + 0.4, fx1 - 0.4, ky, kz, fr - 1.2, 1.0, 6, quad=True)
+                             + [panel(sc, "flywheel_hub", ppd.hub(), (fx0 - 0.5, ky - 1.75, kz - 1.75), (fx1 + 0.5, ky + 1.75, kz + 1.75))])
+    # The flywheel as the item shows it, in a block model's own turns: its rim in 16 and four of its spokes.
+    sc.models["flywheel_item"] = (ring_x(sc, "flywheel_rim", fx0, fx1, ky, kz, fr, 1.5, red, ppd.flat(STEEL))
+                                  + spokes_x(sc, "flywheel_spoke", lengthwise(ENGINE_RED), fx0 + 0.4, fx1 - 0.4, ky, kz, fr - 1.2, 1.0, 8)
+                                  + [panel(sc, "flywheel_hub", ppd.hub(), (fx0 - 0.5, ky - 1.75, kz - 1.75), (fx1 + 0.5, ky + 1.75, kz + 1.75))])
+    sc.models["crank"] = [panel(sc, "crank_web", ppd.flat(STEEL), (x0, ky - 1.25, kz - throw - 1.25), (x0 + 1.0, ky + 1.25, kz + 0.75))
+                          for x0 in (kx - 2.0, kx + 1.0)] + \
+                         [panel(sc, "crank_pin", ppd.flat(STEEL), (kx - 1.0, ky - 0.5, kz - throw - 0.5), (kx + 1.0, ky + 0.5, kz - throw + 0.5))]
+    little = kz - throw - rod
+    sc.models["rod"] = [panel(sc, "rod", ppd.flat(STEEL), (kx - 0.5, ky - 0.5, little), (kx + 0.5, ky + 0.5, kz - throw)),
+                        panel(sc, "rod_end", ppd.flat(BRASS), (kx - 0.75, ky - 1.0, kz - throw - 1.0), (kx + 0.75, ky + 1.0, kz - throw + 1.0))]
+    sc.models["crosshead"] = [panel(sc, "crosshead", ppd.flat(BRASS), (kx - 1.5, ky - 1.25, little - 1.0), (kx + 1.5, ky + 1.25, little + 1.0)),
+                              panel(sc, "piston_rod", ppd.flat(STEEL), (kx - 0.35, ky - 0.35, 23.0), (kx + 0.35, ky + 0.35, little - 1.0))]
+    sc.models["governor"] = [panel(sc, "governor_spindle", ppd.flat(STEEL), (gx - 0.25, by + 13.0, gz - 0.25), (gx + 0.25, by + 16.0, gz + 0.25))]
+    for side in (-1, 1):
+        sc.models["governor"] += [
+            panel(sc, "governor_arm", ppd.flat(STEEL), (gx + side * 0.25 - (side < 0) * 1.5, by + 15.0, gz - 0.2),
+                  (gx + side * 0.25 + (side > 0) * 1.5, by + 15.4, gz + 0.2)),
+            panel(sc, "governor_ball", ppd.flat(BRASS), (gx + side * 2.0 - 0.75, by + 14.25, gz - 0.75), (gx + side * 2.0 + 0.75, by + 15.75, gz + 0.75))]
+    sc.models["fire"] = [panel(sc, "fire", fire(), (cx - 1.5, 14.25, 56.5), (cx + 1.5, 15.75, 56.6))]
+    return sc
+
+
+def split_x(sc, name, painter, lo, hi, axis_origin, angle, **kw):
+    """A box turned about an x-wide axis through `axis_origin` (y, z), cut at every block across x so each piece lies in
+    one block, its turn's origin in that piece (a turn about x is the same wherever along x its origin lies)."""
+    cuts = sorted({lo[0], hi[0]} | {16.0 * k for k in range(1, 4) if lo[0] < 16.0 * k < hi[0]})
+    return [panel(sc, name, painter, (x0, lo[1], lo[2]), (x1, hi[1], hi[2]), rot=fa.rotation(((x0 + x1) / 2, *axis_origin), "x", angle), **kw)
+            for x0, x1 in zip(cuts, cuts[1:])]
+
+
+def hay_wagon():
+    """The Hay Wagon, facing north, in its frame (48 across, 32 up, 64 deep), its middle line at 24 across: four
+    wheels (0.9 m at the front, 1.15 m at the back, red, iron-tyred) on their axles and bolsters; a bed of planks with
+    low sides, painted blue and lined; a hay ladder at either end leaning out at 22.5 degrees; the load of hay heaped
+    on it in three courses, roped across in two places and along; a pitchfork stuck in the top; and its drawbar out to
+    the front, where it meets a traction engine's hook."""
+    spec = hf.WAGON
+    sc = Sculpt(spec["block"], 3322, 128)
+    cx = 24.0
+    blue, wood, iron, straw = lined(WAGON_BLUE), lengthwise(ppd.WOOD), ppd.flat(ppd.IRON), ppd.hay()
+    el = []
+    for x0, x1 in ((8.5, 10.5), (37.5, 39.5)):
+        el += engine_wheel(sc, "front_wheel", x0, x1, 7.0, 12.0, 7.0, 8, False)
+    for x0, x1 in ((7.5, 9.5), (38.5, 40.5)):
+        el += engine_wheel(sc, "rear_wheel", x0, x1, 9.0, 50.0, 9.0, 16, False)
+    el.append(panel(sc, "axle", iron, (9.5, 6.5, 11.5), (38.5, 7.5, 12.5)))
+    el.append(panel(sc, "axle", iron, (8.5, 8.5, 49.5), (39.5, 9.5, 50.5)))
+    el.append(panel(sc, "bolster", wood, (12.0, 7.5, 10.0), (36.0, 13.0, 14.0)))
+    el.append(panel(sc, "bolster", wood, (12.0, 9.5, 48.0), (36.0, 13.0, 52.0)))
+    # The drawbar to the front, its ring at the end.
+    el.append(panel(sc, "drawbar", wood, (cx - 1.0, 8.0, 1.5), (cx + 1.0, 9.5, 10.0)))
+    el.append(panel(sc, "drawbar_ring", iron, (cx - 1.25, 7.75, 0.0), (cx + 1.25, 9.75, 1.5)))
+    # The bed and its sides.
+    el.append(panel(sc, "bed", ppd.planks(WAGON_BLUE, board=3, nails=False), (11.0, 13.0, 4.0), (37.0, 14.5, 60.0)))
+    for x0, x1 in ((10.0, 11.0), (37.0, 38.0)):
+        el.append(panel(sc, "side", blue, (x0, 13.0, 4.0), (x1, 17.0, 60.0)))
+    # The hay ladders, leaning out from the bed's ends.
+    for z0, z1, angle in ((3.0, 4.0, -22.5), (60.0, 61.0, 22.5)):
+        foot = (14.0, (z0 + z1) / 2)
+        for x0, x1 in ((11.0, 12.0), (36.0, 37.0)):
+            el += split_x(sc, "ladder", wood, (x0, 14.0, z0), (x1, 30.0, z1), foot, angle)
+        for y in (19.0, 24.0, 29.0):
+            el += split_x(sc, "rung", wood, (12.0, y - 0.5, z0 + 0.25), (36.0, y + 0.5, z1 - 0.25), foot, angle)
+    # The load: hay inside the bed's sides, bulging out over them, and two courses more, roped across twice and along once.
+    el.append(panel(sc, "hay", straw, (11.0, 14.5, 4.5), (37.0, 17.0, 59.5)))
+    el.append(panel(sc, "hay", straw, (9.5, 17.0, 5.0), (38.5, 26.0, 59.0)))
+    el.append(panel(sc, "hay", straw, (12.0, 26.0, 7.0), (36.0, 29.5, 57.0)))
+    el.append(panel(sc, "hay", straw, (16.0, 29.5, 10.0), (32.0, 31.0, 54.0)))
+    rope = lengthwise(ROPE)
+    for z in (20.0, 44.0):
+        el.append(panel(sc, "rope", rope, (15.75, 31.0, z - 0.5), (32.25, 31.25, z + 0.5)))
+        el.append(panel(sc, "rope", rope, (11.75, 29.5, z - 0.5), (16.0, 29.75, z + 0.5)))
+        el.append(panel(sc, "rope", rope, (32.0, 29.5, z - 0.5), (36.25, 29.75, z + 0.5)))
+        el.append(panel(sc, "rope", rope, (9.25, 17.5, z - 0.5), (9.5, 26.0, z + 0.5)))
+        el.append(panel(sc, "rope", rope, (38.5, 17.5, z - 0.5), (38.75, 26.0, z + 0.5)))
+    el.append(panel(sc, "rope", rope, (cx - 0.5, 31.0, 9.75), (cx + 0.5, 31.25, 54.25)))
+    # The pitchfork stuck in the top, leaning back, its iron head in the hay.
+    el.append(panel(sc, "fork_head", iron, (28.0, 30.5, 35.5), (30.5, 31.5, 36.5)))
+    el.append(panel(sc, "fork_handle", wood, (28.875, 31.0, 35.625), (29.625, 43.0, 36.375), rot=fa.rotation((29.25, 31.0, 36.0), "x", 22.5)))
+    sc.models["whole"] = el
+    return sc
+
+
 # ---------------------------------------------------------------- building and files
 
 _built = {}
 BUILDERS = {hf.CORNUCOPIA["block"]: giant_cornucopia, hf.SHOW["cabbage"]["block"]: giant_cabbage, hf.SHOW["marrow"]["block"]: giant_marrow,
-            hf.SHOW["turnip"]["block"]: giant_turnip, hf.SHOW["carrot"]["block"]: giant_carrot, hf.RIBBON_BOARD["block"]: ribbon_board}
+            hf.SHOW["turnip"]["block"]: giant_turnip, hf.SHOW["carrot"]["block"]: giant_carrot, hf.RIBBON_BOARD["block"]: ribbon_board,
+            hf.ENGINE["block"]: traction_engine, hf.WAGON["block"]: hay_wagon}
 # The atlas each is packed into.
-ATLAS = {hf.CORNUCOPIA["block"]: 128}
+ATLAS = {hf.CORNUCOPIA["block"]: 128, hf.ENGINE["block"]: 128, hf.WAGON["block"]: 128}
 
 
 def build(block):
@@ -736,12 +1057,46 @@ def assets(root, write, lang):
     write(root / "blockstates" / f"{block}.json", {"multipart": multipart})
     write(root / "models" / "item" / f"{block}.json", fa.model(block, item_model(sc.models["whole"], (1, 2, 1), 0.6), DISPLAY))
     write(root / "items" / f"{block}.json", {"model": {"type": "minecraft:model", "model": rid(f"item/{block}")}})
+    # Part 3: the engine (its item with its motion at rest, the fire out) and its moving parts' quads; and the wagon.
+    spec = hf.ENGINE
+    block = spec["block"]
+    lang[f"block.{MOD}.{block}"] = spec["display"]
+    lang[f"message.{MOD}.{block}.fired"] = "Fired: %s seconds of coal in the firebox"
+    lang[f"message.{MOD}.{block}.cold"] = "Fire it with coal or charcoal"
+    lang[f"message.{MOD}.{block}.full"] = "The firebox is full"
+    sc = build(block)
+    multiblock(root, write, models, spec, sc, 1 / 5, ("flywheel_item", "crank", "rod", "crosshead", "governor"))
+    write(root / "harvest_festival_quads.json", {f"{block}_{name}": quads(sc.models[name], {"p": block}) for name in ENGINE_PARTS})
+    spec = hf.WAGON
+    lang[f"block.{MOD}.{spec['block']}"] = spec["display"]
+    multiblock(root, write, models, spec, build(spec["block"]), 1 / 4)
+
+
+# The engine's moving parts, drawn by client/SteamTractionEngineRenderer from harvest_festival_quads.json
+# (`steam_traction_engine_<part>`), in its frame's pixels; the fire is drawn at full light while it is fired.
+ENGINE_PARTS = ("flywheel", "crank", "rod", "crosshead", "governor", "fire")
+
+
+def multiblock(root, write, models, spec, sc, scale, extra=()):
+    """A prop of several blocks: its blocks' models cut from its whole, its blockstate by facing, `lit` and part, and
+    its item, the whole (and `extra`, drawn as the item shows it) at `scale`."""
+    block = spec["block"]
+    n = len(d17d.cells(spec["size"]))
+    for part, elements in enumerate(ppd.cut(sc.models["whole"], spec["size"])):
+        write(models / f"{block}_{part}.json", fa.model(block, elements))
+    write(root / "blockstates" / f"{block}.json", {"variants": {
+        f"facing={f},lit={lit},part={p}": {"model": rid(f"block/{block}_{p}"), **({"y": FACINGS[f]} if FACINGS[f] else {})}
+        for f in FACINGS for lit in ("false", "true") for p in range(n)}})
+    shown = sc.models["whole"] + [e for name in extra for e in sc.models[name]]
+    write(root / "models" / "item" / f"{block}.json", fa.model(block, item_model(shown, spec["size"], scale), DISPLAY))
+    write(root / "items" / f"{block}.json", {"model": {"type": "minecraft:model", "model": rid(f"item/{block}")}})
 
 
 def loot(out, write):
     """The cornucopia drops itself, from its first block only (its other blocks break with it, dropping nothing); each
-    show vegetable drops itself; and the Prize Ribbon Board drops itself and every ribbon hanging on it, from its lower
-    half (its upper breaks with it), its ribbons even in an explosion."""
+    show vegetable drops itself; the Prize Ribbon Board drops itself and every ribbon hanging on it, from its lower
+    half (its upper breaks with it), its ribbons even in an explosion; and the engine and the wagon drop themselves,
+    each from its first block."""
     block = hf.CORNUCOPIA["block"]
     write(out / f"{block}.json", {"type": "minecraft:block", "pools": [{"condition": {"type": "minecraft:all_of", "terms": [
         {"type": "minecraft:survives_explosion"},
@@ -761,11 +1116,17 @@ def loot(out, write):
         pools.append({"condition": {"type": "minecraft:match_block", "blocks": rid(block), "state": {"half": "lower", kind: "true"}},
                       "entries": [{"type": "minecraft:item", "name": rid(ribbon)}], "rolls": 1})
     write(out / f"{block}.json", {"type": "minecraft:block", "pools": pools, "random_sequence": rid(f"blocks/{block}")})
+    for block in (hf.ENGINE["block"], hf.WAGON["block"]):
+        write(out / f"{block}.json", {"type": "minecraft:block", "pools": [{"condition": {"type": "minecraft:all_of", "terms": [
+            {"type": "minecraft:survives_explosion"},
+            {"type": "minecraft:match_block", "blocks": rid(block), "state": {"part": "0"}}]},
+            "entries": [{"type": "minecraft:item", "name": rid(block)}], "rolls": 1}], "random_sequence": rid(f"blocks/{block}")})
 
 
 def tags(tags):
+    """Iron comes off with a pickaxe, the rest with an axe."""
     for block in hf.blocks():
-        tags.add("block", "minecraft:mineable/axe", rid(block))
+        tags.add("block", "minecraft:mineable/pickaxe" if block == hf.ENGINE["block"] else "minecraft:mineable/axe", rid(block))
 
 
 def textures():

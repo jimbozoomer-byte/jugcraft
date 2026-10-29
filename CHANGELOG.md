@@ -8,6 +8,13 @@ Every change to Jugcraft, newest first, grouped by pull request. For what each t
 
 No numbered release yet. Entries on feature branches remain proposed until their pull requests merge.
 
+### Unmerged: Harvest Festival Grounds, part 3 (the Steam Traction Engine and the Hay Wagon)
+- **Steam Traction Engine**: a farm traction engine of about 1910 at its real size, 5 m long and 3 m to its chimney, three blocks across, three up and five deep. It has a green lagged boiler under brass bands, a black smokebox and chimney, red wheels with strakes, a flywheel 1.3 m across, and a footplate and coal tender.
+- Fire it with coal or charcoal (a furnace's burn each, up to four). While it is fired its flywheel turns, its crank, connecting rod and crosshead drive it, its governor spins, its fire glows through the fire door and smoke rises from the chimney. When the coal is gone it runs down and stops.
+- **Hay Wagon**: a four-wheeled farm wagon 4 m long under a roped load of hay, with hay ladders and a pitchfork. Placed behind the engine, its drawbar meets the engine's hook.
+- Record: [harvest-festival-grounds.md](docs/features/harvest-festival-grounds.md). Decor set 10's third part.
+- **Checked:** the record's Verification. Game tests and screenshots run in CI only; not played by hand.
+
 ### Unmerged: Harvest Festival Grounds, part 2 (the Giant Vegetable Show)
 - **Giant Cabbage, Giant Marrow, Giant Turnip and Giant Carrot**: prize show vegetables at a show's sizes, each with its entry card on a wire stake, each grown from nine of its crop.
 - **Prize Ribbon Board**: a green-painted results board on two posts, two blocks tall, with brass hooks numbered 1, 2 and 3. Use a First, Second or Third Prize Ribbon (the Harvest Scale's) on it to hang it on its hook. An empty hand takes one back. Broken, it drops the ribbons hanging on it.
