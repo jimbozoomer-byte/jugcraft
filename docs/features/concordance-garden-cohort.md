@@ -1,8 +1,10 @@
 # Concordance garden cohort: six garden spirits on the shared pact record (contract)
 
-Status: **contract (GC-00); unit 1 (GC-01 to GC-04) built, run in CI and recorded (see
-[unit 1 as built and its evidence](#unit-1-as-built-and-its-evidence)); units 2 to 7 not started; nothing of the cohort
-is merged.** The contract was written read-only from the worktree of `claude/chunk-d-pact-hall` at `5eba71ced` (main's
+Status: **contract (GC-00); unit 1 (GC-01 to GC-04) and unit 2 (GC-05, Bathin) built, run in CI and recorded (see
+[unit 1 as built and its evidence](#unit-1-as-built-and-its-evidence) and
+[unit 2 as built and its evidence](#unit-2-as-built-and-its-evidence)); unit 3's shared prefix (GC-06a, GC-06b) built
+([GC-06](#gc-06-marax-unit-3)); units 3 to 7 otherwise not started; nothing of the cohort is merged.** The contract was written read-only from
+the worktree of `claude/chunk-d-pact-hall` at `5eba71ced` (main's
 `78f9353a7` + Chunk B #465 + Chunk C #466 + Chunk D #474, all then open and unmerged), from the five survey reports
 written for it (`survey-pacts.md`, `survey-gardens.md`, `survey-assets.md`, `survey-sources.md`, `survey-plans.md`; kept with the session's working notes, not committed), from a critique of its
 first draft (27 corrections, each checked against the code before it was applied; see
@@ -131,7 +133,7 @@ unchanged. Every Java compile and game test runs only in CI (GC-S24; [Checks](#c
 |---|---|---|---|---|
 | 0 | GC-00 | This contract | `docs/features/concordance-garden-cohort.md` | Contract |
 | 1 | GC-01, GC-02, GC-03, GC-04 | A compile-only first push (SG1 to SG3, Stolas a thin subclass); one perch for many spirits (Stolas unchanged); a spirit faces whoever speaks; the groundwork Buer uses (the bed index for beds, the beneficiary rule, the read-only `mayTendAt` and `cachedHabitat`, obligations with `TEND`, The Garden's Regard reachable to understood); **Buer complete**: strain tending, the overworked bed, his body from the owner's Decor Blossom | this contract; new `buer-pact.md`; `stolas-pact.md`; `arcane-concordance-workers.md`; `arcane-concordance-ecology.md` | Built (`62b0095fa` to `4ca363d38`) and recorded; in CI run 40605564166 every unit-1 server and client test passed (its one remaining failure, after a re-run, is main's `HerobrineClientGameTests`); not merged (draft #526); [evidence](#unit-1-as-built-and-its-evidence) |
-| 2 | GC-05 | **Bathin**: Verdance carrying, two roads from one Heart; with him, the shared accord machinery (`resolve`, the perch's `accord`, the payload's matter and answers, the roster's "awaiting your answer") and the bed index's Hearts, Gleaners and pylons | new `bathin-pact.md` | Not started |
+| 2 | GC-05 | **Bathin**: Verdance carrying, two roads from one Heart; with him, the shared accord machinery (`resolve`, the perch's `accord`, the payload's matter and answers, the roster's "awaiting your answer") and the bed index's Hearts, Gleaners and pylons | new `bathin-pact.md` | Built (`28a963b63` to `85eb1a0ba`, and `d7185041b` since) and recorded; in CI run 40777920181 every unit-2 server test passed with and without the optional integrations, and the garden client class passed; not merged (draft #526); [evidence](#unit-2-as-built-and-its-evidence) |
 | 3 | GC-06 | **Marax**: one-correction reading by his familiar, the proud familiar; the synced work target and its renderer hook; The Garden's Regard mastery reachable from here (three spirits) | new `marax-pact.md` | Not started |
 | 4 | GC-07 | **Foras**: graft keeping from a store beside the perch, the logician's objection; the bed index's containers; the owner library's second edited part in `tools/owner_art.py` | new `foras-pact.md` | Not started |
 | 5 | GC-08 | **Bifrons**: root-running with half lost, which beds are reserves | new `bifrons-pact.md`; `tools/concordance_economy.py` | Not started |
@@ -220,14 +222,14 @@ how a habitat is read.
 | GB17 | The journal's pacts section goes through `StolasRegard::report` only | `journal/Journal.java:95` (re-read) | GC-01 (closed as built, unit 1) |
 | GB18 | The repository's only Goetia citation names the work "The Lesser Key of Solomon" and links Gutenberg #72679, which Gutenberg records as L. W. de Laurence's 1916 reprint of the Mathers text | `docs/features/styxhexenhammer.md:37` (re-read); Gutenberg's record *(survey)* | GC-04 records, after the record is checked: **open**: Gutenberg's record not read (`www.gutenberg.org` was not reachable from the session on 28 October 2026), so `styxhexenhammer.md:37` is unchanged |
 | GB19 | Main's #475 is not in the stack | REST today | before unit 1 (GC-S16): closed (`54a2acb6c`) |
-| GB20 | No conflict or complication mechanism exists for any pact | `survey-plans.md` §2.1 | GC-04 (task): closed as built, unit 1 (Buer's overworked bed); GC-05 (choice): open |
+| GB20 | No conflict or complication mechanism exists for any pact | `survey-plans.md` §2.1 | GC-04 (task): closed as built, unit 1 (Buer's overworked bed); GC-05 (choice): closed as built, unit 2 (Bathin's two roads from one Heart, the accord machinery) |
 | GB21 | `LookAtTarget` is registered with SmartBrainLib's default `invalidTarget` (`!pos.isVisibleBy(entity)`, checked as it starts); vanilla `EntityTracker.isVisibleBy` needs the target in `NEAREST_VISIBLE_LIVING_ENTITIES`, which the worker's only sensor (`NearbyPlayersSensor`) never fills, so an entity look target would never start | `S/WorkerEntity.java:187-194`; SmartBrainLib `api/core/behaviour/custom/look/LookAtTarget.java:31, 171`; mc263src `net/minecraft/world/entity/ai/behavior/EntityTracker.java:51`; SmartBrainLib `NearbyPlayersSensor.java:30` | GC-02 (closed as built, unit 1) |
 | GB22 | `PactStatePayload` already has 13 fields in one `StreamCodec.composite`; 26.3's largest overload takes 14, so four new top-level fields would not compile | `S/PactStatePayload.java:81-95`; mc263src `StreamCodec.java:533` | GC-01 (one nested field; closed as built, unit 1) |
 | GB23 | The terms page and the cannot-afford refusal name "Astral Resonance from your astrolabe" whatever the resonance (`d.resonance()`); `term.quota` reads "%s a game day", wrong for a cap | `S/PactMenu.java:301, 489-490, 514`; lang `message.jugcraft.concordance.pact.term.compact`, `.answer.cannot_afford`, `.term.quota` | GC-01 (resonance-free keys): closed as built, unit 1; GC-09 (a per-work quota key): open |
 | GB24 | The owner's Decor Blossom has four zero-thickness cubes each drawing two opposite faces on one plane (GeckoLib draws entities with `entityCutout`, which does not cull in 26.3); `tools/art_check.py` reads block, item and quad models only, not `.geo.json` | `Magic/assets/ars_jimbaux/geo/decor_blossom.geo.json`; GeckoLib `renderer/base/GeoRenderer.java:73-75`; `docs/ART_DIRECTION.md:31`; `tools/art_check.py:489-490, 662` | GC-04 (closed as built, unit 1) |
 | GB25 | `tools/owner_art.py` reads only `Blocks/` and `Magic/`, and adapts only through Stolas's table and `stolas_body` | `tools/owner_art.py:75, 78, 130-140` | GC-04 (the cohort's table and adapters): partly closed, unit 1; the second edited part waits for GC-07 or GC-09 |
 | GB26 | `tools/concordance_progression.py` honours `distinct` only for `examine`, so a practice needing three spirits would read as reachable with one | `tools/concordance_progression.py:527` | GC-03 (closed as built, unit 1) |
-| GB27 | The roster's status is a saved id from a closed enum; nothing can say "awaiting your answer" | `S/WorkerRoster.java:33-40`; `W/Status.java` | GC-05 |
+| GB27 | The roster's status is a saved id from a closed enum; nothing can say "awaiting your answer" | `S/WorkerRoster.java:33-40`; `W/Status.java` | GC-05 (closed as built, unit 2: `Status.AWAITING_ANSWER`, appended, saved on the roster as `awaiting_answer`) |
 | GB28 | Three ambience families the asset survey suggested are stereo in every file, which `check_pacts` refuses: `cavern.candy_cavity_ambience_additions`, `cavern.forlorn_hollows_ambience_additions`, `cavern.abyssal_chasm_ambience_additions` | Vorbis headers read for this contract (every file two channels) | Art plan (mono events named) |
 
 ### Open pull requests (REST, 26 October 2026, about 17:30Z; refresh before each unit, 09:11)
@@ -1073,6 +1075,90 @@ perch's `accord` is pinned there, not in `check_persistence`'s `ENTRY_BY_ENTRY`,
 entry with `Saved.keeping` (`tools/check_mod_data.py:21758`). **Acceptance:** Dossier 2's eight items each shown by a
 named test, shot or record line; GE1 to GE9 for Bathin; Verdance conserved in every test.
 
+**As built (GC-05; brief `28a963b63`; the garden side `2e4f0acd2` and `c36b9758c`; the bed index's devices `5499bf505`;
+the accord machinery `08cb27921` and `2ad18f703`; Bathin `63cf1a83d`; the unit review's fixes `4fcf55513`; whole moves
+`4d035fe64` and `7af654e9a`; client test fixes `3f2bde5cf`, `85eb1a0ba` and `d7185041b`; [record](bathin-pact.md)):**
+
+- **Bathin as a character:** `S/BathinEntity` on the shared base, registered 0.9 x 1.9 (eyes 1.65), hovering coiled on
+  the perch; his body built by `tools/garden_bodies.py` (`bathin_model`: 12 box-UV cubes on 8 bones, 11 UV regions, a
+  128 x 64 sheet; `bathin_skin`, `bathin_glowmask`, `bathin_animations`: five loops, six gestures) and written and
+  checked by `tools/owner_art.py` (`BUILT`), painted only in colours read from the willow log and the Spanish moss (art
+  plan); his ring of dust through the base's new `gestured(ServerLevel, Clip)` hook and his `shimmer` at both ends of a
+  carry, nothing between; his seven cues on the art plan's five mono files, told apart by pitch; his sign the ender pearl;
+  his codex pages `p8` to `p11` of `binding/garden_regard`; the contract's silhouette rule (a fifth apart on one axis)
+  built in `check_spirit_bodies` for every pair of spirits.
+- **Verdance carrying:** `S/VerdanceCarrying` (one move a think, the Gleaner road before the pylon road, at most 8
+  places asked), `S/GardenReach` (`devices(record)`: 16 Hearts, Gleaners and pylons each, in the beds' one pass),
+  `G/GleanerBlockEntity.receiveFrom`, `G/VerdantHeartBlockEntity.pourInto`, `PactObligations.DEVICE` with its one line
+  in `LivingDeviceBlock`, `GardenPacts.presence`; tests as listed in `check_mod_data.py`'s `GC05_CARRYING_TESTS`.
+- **The accord machinery:** `S/PactAccords` holds the accord's rules (the answer kept, the course, the matter shown, a
+  choice waiting, the answer given); `PactService` gained `Complication`, `complication(...)` and `accords()` (after
+  `work()`); the perch keeps the optional `accord` (GC-P42, GC-P46); `resolve` is action 10 and answered `resolved`
+  (GC-P43); `PactStatePayload.Spirit` carries `matter` and at most three `answers`, the payload still fourteen top-level
+  fields; the kept page's matter row; `Status.AWAITING_ANSWER` appended and reported as GC-P47 says, with one sign of
+  want; Jade's readings carry `matter` and `accord` (GC-P48; `PactReading.KEYS` ends `visitor`, `note`, `note_count`,
+  `matter`, `accord`, which `check_pacts` reads as `JADE_KEYS[12:14]`); words as GC-P49; tests as listed in
+  `GC05_ACCORD_TESTS`.
+
+Departures from this ticket and the unit's specification (each recorded, none hidden):
+
+- **The matter's id** is `two_roads` everywhere (B-01; the part design's `own_road` renamed).
+- **The invitation** is this contract's (B-02): an awake Heart of the inviter's within 10, and an awake Gleaner of theirs
+  or a pylon of theirs or no one's within 10; the narrower "somewhere" rule of one part design is not taken (where the
+  Verdance can go is the work's question: Jade's `nowhere`). Since `4fcf55513` the refusal, the perch's tooltip and codex
+  page "Bathin" say "awake", as the rule always counted.
+- **His two details are the shared signs** (B-03 as built): `check_signs` forbids `sendParticles` in the Concordance, so
+  the ring is `Sign.SHOVE` (a few puffs of cloud at his coil) and the shimmer `Sign.WORK` (light rising at each end),
+  shown by `BathinEntity` (`RING`, `SHIMMER`; his `SPIRITS` row's `"ring": "shove"`, `"shimmer": "work"`), the shimmer
+  kept in memory for tests (`lastShimmer`) and the signs counted through the tests' `SignWatch`. Neither the part design's
+  twelve dust puffs in a ring nor B-03's eight `GLOW` glints was built; Dossier 2 item 7's "dust ring" is drawn as puffs.
+  A true ring needs a new shared sign (`Sign`, `SIGNS`, `SignClient`), a coordinated change.
+- **A carry made while the matter waits reports `AWAITING_ANSWER`** (B-06), whatever the step returned, never over an
+  offering due (GC-P44 as amended).
+- **One Jade test**, `bathinsReadingSaysItsNoteAndNamesNoPlayer` (B-10).
+- **`_poured` is not photographed** (B-12): the pylon road is held by the server tests.
+- **The hook is `gestured`** (B-15), since the base already keeps a private `shown` deque.
+- **`VerdanceCarrying.Memory.forget()`** (B-16): the client's raise calls it, since his device index serves 200 ticks.
+- **The accord machinery landed first with no user** (R26, `08cb27921`), a compile-and-regression slice as GC-01a was;
+  GC-S19 holds per unit.
+- **Interfaces not in this ticket's list:** `PactSpiritEntity.gestured`, `GardenPacts.presence`, `tools/owner_art.py`'s
+  built bodies (`BUILT`), `VerdanceCarrying.Memory.forget`, `GleanerBlockEntity.reaches` and `setVerdance`,
+  `VerdantHeartBlockEntity.mayPourInto`, `beside` and `feedsAPylonBeside`.
+- **Whole moves from a beating Heart** (GC-S25, decided by the session, `4d035fe64` and `7af654e9a`):
+  `bathinCarriesWholeMovesFromABeatingHeart`.
+- **The unit review's fixes** (`4fcf55513`): his matter, its note and his inspect turn count only a Heart whose keeper his
+  pact still serves (`Memory.notice` and `complication` ask again; `aFormerMembersHeartRaisesNoMatter`); a place refused
+  for itself is skipped until his index is next read, asking it costs no question, at most 48 are remembered, and
+  `Idle.NOWHERE` is set when his questions run out (`refusedGleanersNeverStarveBathinsPylonRoad`;
+  `bathinNeverTouchesAClaimedReservoir` now carries only once his index is read again, as Buer's refused beds wait); the
+  two SG12 upkeep tests and `everySpiritWaitsForANearHolder` deposit each spirit's own offering count (his is 4); the
+  term names whose Gleaner and whose pylon; the codex audit wants his four pages in order.
+- **Words:** his Jade notes and matter are in the third person (Jade shows them to anyone looking); his term reads its
+  numbers from the tables and names GC-S7's two conditions; the page row's 8 and 3 batches are tied to `CONSTANTS` by an
+  audit, not derived (importing back would be circular).
+- **Tools:** `tools/concordance_progression.py`'s `VANILLA_SOURCES` gains vine, hopper and flower pot (the journey walks
+  to the Gleaner's recipe; a file outside the specification's list); `check_acquisition` accepts a compact item listed in
+  `concordance.progression.PRODUCERS` (Verdant Chaff, grown); `check_spirit_bodies` keeps a local `import garden_bodies`
+  (R24 assumed a module-level one that the file lacks, so later blocks sit after it); the garden side's audit is
+  `check_verdance_roads`; `GC05_ACCORD_TESTS` stands beside `GC05_ACCORDS` and `GC05_BATHIN_TESTS` beside `GC04_TESTS`;
+  `REACH["MAX_DEVICES"]` is set on its own line; `owner_art.errors` names a hand-edited built file as differing from what
+  `tools/garden_bodies.py` builds.
+- **Forced unit-1 lines** (GC-P59): those the specification lists, and one more in
+  `aVisitorOfAnotherSpiritLeavesWhenTheChosenCannotCome` (now at least three entries, Bathin's found by his sign and not
+  ready); the journey's goes through a `chooseBuer` helper; the journal test names Buer and Bathin as siblings;
+  `aStaleChooserRevisionIsRefused` needed none (it reads Stolas's definition only). Tests use `Workers.BATHIN` for his
+  type and `BathinEntity.COUNTERPART` for his id.
+- **The client flow** uses `tabToNamed`, waits by condition (`waitFor`) rather than fixed ticks, the shared
+  `standSouth` (3.0 blocks off, not 2.5) and an explicit list of facing shots; binds the roster's unbound key for its one
+  look (`3f2bde5cf`); waits for the matter's controls on the page (`85eb1a0ba`); and aims the facing camera at the
+  spirit's middle (`d7185041b`; no CI result recorded here).
+- **The screens** are the magic interfaces' relic scroll card (GC-S26): his beats shortened, his terms as chips, his kept
+  page's gauge, sockets, matter plates and rows ([his record](bathin-pact.md#the-pact-screen)).
+
+Saved: the perch's optional `accord` (`yield`, `claim`) and the roster status `awaiting_answer`; no migration. GB20 (choice
+half) and GB27 closed; GB25 unchanged (the second edited part waits for GC-07 or GC-09). Evidence:
+[unit 2 as built and its evidence](#unit-2-as-built-and-its-evidence).
+
 ### GC-06. Marax (unit 3)
 
 **Changes:** `S/MaraxEntity` (`jugcraft:marax`, standing station beside the perch; a familiar bone group);
@@ -1386,12 +1472,12 @@ any sound heard (CI has no sound device; subtitles are checked as defined and fi
 
 | Code | Requirement | Tickets | Tests |
 |---|---|---|---|
-| GE1 | No one binds another player or works another's land (E1) | GC-01, GC-03 to GC-09 | `anotherPlayerCannotAcceptForAnySpiritsHolder` (SG12, every spirit), `aResolveFromAnotherPlayerIsRefused`, each spirit's stranger test (`buerTendsOnlyBedsOfHisBeneficiaries`, `buerSkipsBedsHeMayNotChange`, `bathinHonoursTheHeartsParty`, `onlyTheHolderMayAskForAReading`, `maraxNeverReadsAStrangersBed`, `forasTakesOnlyFromAStoreTheHolderMayChange`, `forasNeverGraftsAStrangersBed`, `aRootRunnerNeverTouchesAStrangersBed`, `aStrangersCropIsNeverSheltered`); SG12's `everySpiritWaitsForANearHolder`; the network test |
-| GE2 | Upkeep suspends without hidden offline punishment (E2) | GC-01 (SG12) | SG12's upkeep cases for every definition; each spirit's `...WaitsForAPresentHolder`; SG12's `everySpiritWaitsForANearHolder` (no service where no upkeep accrues) |
-| GE3 | Copying multiplies nothing (E3) | GC-01, GC-05 | `aCopiedPerchIsInertForEverySpirit` and `onePresencePerPactForEverySpirit` (every definition: a copied or duplicate spirit entity never works); `anAnsweredAccordSurvivesARestart` with a copy reading nothing |
-| GE4 | End, death, unload and restart return property once (E4) | GC-01, GC-05, GC-07, GC-08 | SG12's ending and removal cases; `bathinNeverHoldsVerdance`; `forasSpendsOneDonorAGraftAndNeverTwo`; `aRootRunnerLosesHalfAndMintsNone` |
-| GE5 | Two users cannot both own one pact place or one unique service (E5) | GC-01, GC-04, GC-07, GC-09 | `twoNegotiationsAtOnePerchSealOnceForEverySpirit` (every definition; the other player `NOT_PERMITTED`); `twoBuersShareOneBedsTendWindow`, `twoForasNeverGraftOneBedTwice`, `twoCanopiesNeverStack` |
-| GE6 | The named suites extended (09:172) | every ticket | Worker, Sharing, Persistence, Logistics (none expected), Economy, Journey, Progression, Journal (unit 1: Sharing's `notesNeverStandInForTheGardensRegard` and Persistence's `theGardenGroundworkSavesNothing`, beyond the specification; copies only by the Worker class's `aCopiedPerchIsInertForEverySpirit`; Economy no new test); `ConcordanceGardenPactClientGameTests`, `ConcordancePactClientGameTests`, `ConcordanceRosterClientGameTests`, `ScreenFitClientGameTests`, `ConcordanceGardenNetworkTests` |
+| GE1 | No one binds another player or works another's land (E1) | GC-01, GC-03 to GC-09 | `anotherPlayerCannotAcceptForAnySpiritsHolder` (SG12, every spirit), `aResolveFromAnotherPlayerIsRefused`, each spirit's stranger test (`buerTendsOnlyBedsOfHisBeneficiaries`, `buerSkipsBedsHeMayNotChange`, `bathinHonoursTheHeartsParty`, `bathinNeverTouchesAClaimedReservoir`, `onlyTheHolderMayAskForAReading`, `maraxNeverReadsAStrangersBed`, `forasTakesOnlyFromAStoreTheHolderMayChange`, `forasNeverGraftsAStrangersBed`, `aRootRunnerNeverTouchesAStrangersBed`, `aStrangersCropIsNeverSheltered`); SG12's `everySpiritWaitsForANearHolder`; the network test |
+| GE2 | Upkeep suspends without hidden offline punishment (E2) | GC-01 (SG12) | SG12's upkeep cases for every definition; each spirit's `...WaitsForAPresentHolder` (`buerWaitsForAPresentHolder`, `bathinWaitsForAPresentHolder`); `aSuspendedBathinCarriesNothing`; SG12's `everySpiritWaitsForANearHolder` (no service where no upkeep accrues) |
+| GE3 | Copying multiplies nothing (E3) | GC-01, GC-05 | `aCopiedPerchIsInertForEverySpirit` and `onePresencePerPactForEverySpirit` (every definition: a copied or duplicate spirit entity never works); `aDuplicateBathinCarriesNothing`; `anAnsweredAccordSurvivesARestart` with a copy reading nothing |
+| GE4 | End, death, unload and restart return property once (E4) | GC-01, GC-05, GC-07, GC-08 | SG12's ending and removal cases; `bathinNeverHoldsVerdance`, `noVerdanceIsMintedByCarrying`; `forasSpendsOneDonorAGraftAndNeverTwo`; `aRootRunnerLosesHalfAndMintsNone` |
+| GE5 | Two users cannot both own one pact place or one unique service (E5) | GC-01, GC-04, GC-05, GC-07, GC-09 | `twoNegotiationsAtOnePerchSealOnceForEverySpirit` (every definition; the other player `NOT_PERMITTED`); `twoBuersShareOneBedsTendWindow`, `twoBathinsShareOneHeartExactly`, `twoForasNeverGraftOneBedTwice`, `twoCanopiesNeverStack` |
+| GE6 | The named suites extended (09:172) | every ticket | Worker, Sharing, Persistence, Logistics (none expected), Economy, Journey, Progression, Journal (unit 1: Sharing's `notesNeverStandInForTheGardensRegard` and Persistence's `theGardenGroundworkSavesNothing`, beyond the specification; copies only by the Worker class's `aCopiedPerchIsInertForEverySpirit`; Economy no new test; unit 2: Economy's `noVerdanceIsMintedByCarrying`, Persistence's `anAwaitingAnswerSurvivesARestart`, Garden's four named-road and device tests, Sharing unchanged); `ConcordanceGardenPactClientGameTests`, `ConcordancePactClientGameTests`, `ConcordanceRosterClientGameTests`, `ScreenFitClientGameTests`, `ConcordanceGardenNetworkTests` |
 | GE7 | A conversation-to-service-to-departure sequence (09:174) | GC-04, GC-10 | `buerFromTheCodexToDeparture`; `theGardenPactsFromCodexToDeparture`; the client classes |
 | GE8 | Mechanically distinct services (03:170, 03:177) | GC-04 to GC-09 | the distinctness table held by `check_garden_pacts` (one work, one service class, one state changed, distinct verbs); each service's own tests |
 | GE9 | Each dossier's eight items (03:167-175) | GC-04 to GC-09 | the per-spirit template's checklist in each record, every line naming its test, shot or record |
@@ -1509,6 +1595,116 @@ and 23, and `4ca363d38`'s from the records' review):
   message than the harness expected (the unit review's re-run found the same).
 - **`4ca363d38`** says the "optional integrations absent" job failed the three tests; in run 40597482976 the `mod` job
   failed the same three.
+
+### Unit 2 as built and its evidence
+
+Written on 28 October 2026 for unit 2's records commit from CI run 40777920181's job list and logs (read through GitHub's
+REST API and its job-log tool) and from the commits' messages. "Passed" means the run's log says so. Nothing here was run
+by a person, and one client is not two: the garden's two-client test is unit 7's. AI-assisted implementation with Claude
+Code; the model is named in the commit trailers.
+
+**Commits** (branch `claude/garden-cohort`; draft pull request [#526](https://github.com/jimbozoomer-byte/jugcraft/pull/526)
+against main, not merged):
+
+| Commit | What it holds |
+|---|---|
+| `28a963b63` | GC-05a: Bathin's brief, before any body file (D-D5) |
+| `2e4f0acd2`, `c36b9758c` | GC-05b: the Heart's pour and the Gleaner's draw as shared bodies (`pourInto`, `receiveFrom`), their three garden tests and `check_verdance_roads`; the early slice's review fixes (a Javadoc, the brief's owner declaration) |
+| `5499bf505` | GC-05b2: the bed index's devices (`GardenReach.devices`, `MAX_DEVICES`), `theGardenReachCapsItsDevices` |
+| `08cb27921` | GC-05c: the accord machinery with no user yet (R26) |
+| `2ad18f703` | the devices and accord review's fixes (Jade's answer line in the third person; `resolve`'s living-player rule in the audit) |
+| `63cf1a83d` | GC-05: Bathin, Verdance carrying and his matter |
+| `4fcf55513` | the unit review's fixes ([GC-05's As built](#gc-05-bathin-unit-2)) |
+| `4d035fe64`, `7af654e9a` | whole moves from a beating Heart (GC-S25) and its review's fixes; his pose windows checked |
+| `3f2bde5cf`, `85eb1a0ba` | two faults of the garden client test that CI found, fixed in the test (the roster's unbound key; the matter's controls a frame after its state) |
+| `d7185041b` | his facing pictures framed whole (the camera aimed at the spirit's middle); no CI result recorded here |
+| the merges | unit 1's line and main (#525, #528, #537, #541, #567) merged in, generated files regenerated, never hand-merged |
+| this commit | the records |
+
+**CI run** (the pull request run tests #526 merged into main's `a5803a77e`):
+
+| Run | Event and commit | Result |
+|---|---|---|
+| [40777920181](https://github.com/jimbozoomer-byte/jugcraft/actions/runs/40777920181) | pull_request on `8af703330` (unit 2 whole, unit 3's shared prefix GC-06a and GC-06b, and the magic interfaces' unit 1) | Passed in full. `mod` and `optional integrations absent` each passed all 3,206 required server tests (each re-ran three of main's tests within the job, none of the cohort's). The selection picked 33 of 282 client classes; all 16 client shards passed: `ConcordanceGardenPactClientGameTests` in shard 0 (67 pictures), `ConcordancePactNetworkTests` in 1, `ConcordancePactClientGameTests` in 3, `ConcordanceRosterClientGameTests` in 6, `ScreenFitClientGameTests` in 15. The opted-in `pact clients without optional integrations` job and the load cards were skipped, as in every pull request run |
+
+Unit 2's earlier pushes ran in CI too; their runs are not recorded here. As the fixing commits' messages say, the garden
+client test failed on two faults of the test before this run: the roster's key has no default binding, so the test's
+press to show his matter on the roster was refused (`3f2bde5cf`), and the matter step looked for the page's controls a
+frame before the screen built them (`85eb1a0ba`).
+
+**Server tests** (all passed in run 40777920181, with and without the optional integrations):
+
+| Table (`tools/check_mod_data.py`) | Tests |
+|---|---|
+| `GC05_CARRYING_TESTS` (24) | `ConcordanceGardenGameTests`: `theGardenReachCapsItsDevices`, `aGleanerReceivesFromANamedHeartAtAnyDistance`, `aHeartPoursIntoANamedPylonByItsOwnRule`, `aHeartSaysWhetherItHasItsOwnRoad`; `ConcordanceWorkerGameTests`: `bathinMovesVerdanceExactly`, `bathinPoursIntoAFarPylonAtThreeForTwo`, `bathinPrefersAFarGleanerToAPylon`, `bathinChangesAtMostOneMoveAThink`, `bathinNeverHoldsVerdance`, `bathinHonoursTheHeartsParty`, `bathinNeverTouchesAClaimedReservoir`, `bathinLeavesAHeartWithItsOwnPylonUntilAnswered`, `aClaimAnswerLetsBathinTakeFromIt`, `bathinStopsAtHisQuota`, `bathinWaitsForAPresentHolder`, `aSuspendedBathinCarriesNothing`, `twoBathinsShareOneHeartExactly`, `bathinFacesWhereHeSetsItDown`, `bathinsFirstObligationIsADeviceReadByHand`, `bathinsReadingSaysItsNoteAndNamesNoPlayer`, `refusedGleanersNeverStarveBathinsPylonRoad`, `aFormerMembersHeartRaisesNoMatter`, `bathinCarriesWholeMovesFromABeatingHeart`; `ConcordanceEconomyGameTests`: `noVerdanceIsMintedByCarrying` |
+| `GC05_ACCORD_TESTS` (9) | `theKeptPageAsksTheMatterAndKeepsTheAnswer`, `theRosterSaysAwaitingYourAnswer`, `anAnsweredAccordSurvivesARestart`, `anUnknownAccordReadsAsUnanswered`, `aResolveFromAnotherPlayerIsRefused`, `aResolveOutsideTheKeepModeIsDropped`, `anAccordIsClearedWhenItsPactEnds`, `theAccordWireIsBounded`; `ConcordancePersistenceGameTests.anAwaitingAnswerSurvivesARestart` |
+| `GC05_BATHIN_TESTS` (5) | `bathinRefusesWithNothingToCarry`, `bathinArrivesAndDepartsAtOnceInARingOfDust`, `bathinsCarryShimmersBothEndsAtOnce`, `bathinAnswersEachActionWithHisGesture`, `aDuplicateBathinCarriesNothing` |
+| SG12 and shared | the fifteen SG12 cases, `noGardenTermOrRefusalNamesAnAstrolabe` and `talkingTeachesNothing`, each run for every offered spirit, Bathin among them |
+| Forced lines (GC-P59) | `everySpiritSealsOnceAndSpendsOnce` (through `sealThrough`), `everySpiritIsOnePactAHolder`, the two SG12 upkeep tests and `everySpiritWaitsForANearHolder` (each spirit's own offering count), `buerRefusesWithoutABedToMend`, `aPerchOffersOnlyWhatThePlayerMayInvite`, `anInviteIndexOutOfRangeIsDropped`, `aVisitorOfAnotherSpiritLeavesWhenTheChosenCannotCome`, `ConcordanceJourneyGameTests.buerFromTheCodexToDeparture` (through `chooseBuer`), `ConcordanceJournalGameTests.theJournalNamesEachRegardsNextStep`; every other unit-1 and Chunk D test unchanged |
+
+Thirty-eight new server tests: the specification's thirty-five and three from the review and the follow-up
+(`refusedGleanersNeverStarveBathinsPylonRoad`, `aFormerMembersHeartRaisesNoMatter`,
+`bathinCarriesWholeMovesFromABeatingHeart`).
+
+**Client tests** (one client each except `ConcordancePactNetworkTests`, which runs two client JVMs; run 40777920181):
+`ConcordanceGardenPactClientGameTests` (weight 560) passed in shard 0; its 34 pictures of Bathin and his roster row were
+extracted from the log, compared byte for byte with the log's previews, looked at for this record and each described in
+[Bathin's Verification](bathin-pact.md#verification), with what it does not show (Buer's 33 in the same run were not
+described again). Its log names each step's word budget, the chooser's three entries, one carry ("working 0 8 true"), the
+roster's waiting row, Jade's readings and his gestures each frozen inside its window. The other four pact classes passed
+as above.
+
+**Completion evidence for Bathin** (the codes above; every test named passed in run 40777920181):
+
+| Code | Bathin (unit 2), as built |
+|---|---|
+| GE1 | `bathinHonoursTheHeartsParty`, `bathinNeverTouchesAClaimedReservoir`, `aFormerMembersHeartRaisesNoMatter`, `aResolveFromAnotherPlayerIsRefused`, `bathinWaitsForAPresentHolder`, `anotherPlayerCannotAcceptForAnySpiritsHolder`, `everySpiritWaitsForANearHolder` |
+| GE2 | `everySpiritsUpkeepWarnsGivesGraceSuspendsAndResumes`, `aStandInNeverAnswersAnySpiritsUpkeep` (each with his count of 4), `bathinWaitsForAPresentHolder`, `aSuspendedBathinCarriesNothing`, `everySpiritWaitsForANearHolder` |
+| GE3 | `aCopiedPerchIsInertForEverySpirit`, `onePresencePerPactForEverySpirit`, `aDuplicateBathinCarriesNothing`, `bathinChangesAtMostOneMoveAThink`; a copy reads no answer (`anAnsweredAccordSurvivesARestart`) |
+| GE4 | `bathinNeverHoldsVerdance` (a kill, an unload and a restart between thinks change no reservoir), `noVerdanceIsMintedByCarrying`, `endingAnySpiritsPactReturnsTheEscrowOnce`, `anAccordIsClearedWhenItsPactEnds`, `everySpiritsKeysSurviveASave`, `anAwaitingAnswerSurvivesARestart` |
+| GE5 | `twoNegotiationsAtOnePerchSealOnceForEverySpirit`, `everySpiritIsOnePactAHolder`, `twoBathinsShareOneHeartExactly` |
+| GE6 | Worker, Garden, Economy (`noVerdanceIsMintedByCarrying`), Persistence (`anAwaitingAnswerSurvivesARestart`), Journey and Journal (forced lines); Sharing, Logistics and Progression unchanged; the client classes above |
+| GE7 | no whole-path server test of his (his journey steps 7 to 9 name the worker tests that hold them); the client class from the chooser to the ended pact |
+| GE8 | `check_garden_pacts`' distinctness table with two garden services (`strain_tending`, `verdance_carrying`): one work, one service class, one state changed, distinct verbs |
+| GE9 | Bathin's checklist: [his Verification](bathin-pact.md#verification) |
+
+**APIs the specification left unconfirmed** (refreshed): every unit-2 class compiled in run 40777920181, so the
+compile-level ones hold (`AnimatableManager<PactSpiritEntity<?>>` inferred in the `gestured` hook's controller, the
+payload's nested `Spirit` with `matter` and `answers`, `PactRequestPayload.RESOLVE`). The tests that rest on the run-time
+ones passed: `GameTestHelper.absoluteVec` and `Vec3` equality (`bathinArrivesAndDepartsAtOnceInARingOfDust`),
+`Language.getInstance().has` on the server (`bathinRefusesWithNothingToCarry`), `Sign.SHOVE` and `Sign.WORK` counted by
+`SignWatch` (`bathinArrivesAndDepartsAtOnceInARingOfDust`, `bathinsCarryShimmersBothEndsAtOnce`), `RosterClient.key()`
+with a bound key and `pressKey` (the garden class), `TestClaims.open().block` and the party manager's invite, accept and leave
+(`bathinNeverTouchesAClaimedReservoir`, `bathinHonoursTheHeartsParty`, `aFormerMembersHeartRaisesNoMatter`). Still unconfirmed: how the two signs look
+to a person (the pictures show cloud puffs and white sparkles); any sound (no sound device).
+
+**Local checks for this records commit** (no Minecraft build here): `python3 tools/owner_art.py --check`, `python3 -B
+tools/check_mod_data.py`, `python3 scripts/check_repository.py`, `python3 tools/concordance_journey.py --check`,
+`python3 tools/concordance_economy.py` ("gaining cycles: none"), `python3 tools/check_icon_maps.py`,
+`node --test tools/world-designer/model.test.cjs`, `python3 -m unittest discover -s scripts/tests` and `git diff --check`,
+each run on this commit's tree and passed; `python3 tools/owner_art.py --provenance pacts` printed Bathin's rows. This
+commit changes no generated file. No Minecraft build, game test or client test ran here.
+
+**Not run:** a workflow_dispatch of every client class on the cohort's head (the pull request's selection ran 33 of 282
+classes); the opted-in `pact clients without optional integrations` job and the load cards; a second client at
+Bathin's perch; any person playing, alone or with others; any sound; the pictures of `d7185041b`'s reframed facing
+shots and of `73464e938`'s screens.
+
+#### Corrections to unit 2's commit messages
+
+The commits are pushed and are not rewritten, so their messages are corrected or completed here:
+
+- **`63cf1a83d`** says he "arrives in a ring of dust"; as built the ring is the shared movement sign, a few puffs of cloud,
+  as the same message's "His signs go through the shared Signs" implies (GC-05's As built). Its "all 54 of the C4 audit
+  mutations were caught" holds for the commit as made: two (T13, an extra eye texel, and T14, a texel changed in the
+  skin) were caught only after an audit was added and the mutation harness corrected, before the commit.
+- **`4fcf55513`** leaves "small moves still spend his daily quota" for these records and the checkpoint; `4d035fe64`
+  then chose whole moves (GC-S25), so that limit no longer holds.
+- **`2ad18f703`** asks these records to list its review's deviations: unit 2's Jade-key check read `JADE_KEYS[-2:]` until
+  the merge with GC-04 (it now reads `JADE_KEYS[12:14]`); `PactService`'s GC-05 members stand after `work()`; the
+  docstring of `tools/concordance_pacts.py` names `spirits/PactAccords` since `63cf1a83d`; the device needles stand
+  inside `check_garden_pacts`; `REACH["MAX_DEVICES"]` is set on its own line; and the devices commit is titled GC-05b2,
+  since the early slice had taken GC-05b.
 
 ## Schema review (the shared schema against eight services)
 
@@ -1727,6 +1923,16 @@ chooser moved to the garden class, GC-P18) ran and passed; `ConcordanceRosterCli
 by the unit's builders and reported passing (in the commit messages that list them and the session's working notes), with
 the generators' incidental rewrites restored ([Corrections](#corrections-to-unit-1s-commit-messages)).
 
+**Unit 2 as run** (row 2 above against the build; run 40777920181): Worker (Bathin's carrying, character and accord
+tests, `DEVICE`, SG12 for all three spirits), Garden (the named roads and the device cap), Economy
+(`noVerdanceIsMintedByCarrying`), Persistence and the Journal and Journey tests with their forced lines ran and passed
+in both server jobs. The accord's save cases are in `ConcordancePersistenceGameTests` (`anAwaitingAnswerSurvivesARestart`)
+and `ConcordanceWorkerGameTests`; the copy case is in `anAnsweredAccordSurvivesARestart`; `ConcordanceSharingGameTests` is
+unchanged. Of the client classes, `ConcordanceGardenPactClientGameTests` (Bathin's poses, shimmer, matter and the
+roster's "awaiting your answer") passed, and `ConcordancePactClientGameTests`, `ConcordancePactNetworkTests`,
+`ConcordanceRosterClientGameTests` and `ScreenFitClientGameTests` passed with the restyled screens. The row's local
+checks were run on each commit by the unit's builders and reported passing in the commit messages that list them.
+
 ## Decisions
 
 The owner's (GC-D), the session's under the standing instruction (GC-S, "Decided by the session"), and the units'
@@ -1802,10 +2008,24 @@ proposals (GC-P, numbered in the reserved blocks). Chunk A to D decisions are un
 | GC-P38 | 26 October 2026 | One shared first-obligation row for every garden service (`PactObligations.rows`: the act to do, or "kept: n of 3 toward mastery") | Proposed (unit 1) | GC-04 to GC-09 |
 | GC-P39 | 26 October 2026 | `habitat()` reads through `cachedHabitat()` (one place for unit 6's canopy); `tend` and `mayTendAt` share `tendedLately` | Proposed (unit 1) | GC-03, GC-09 |
 | GC-P40, GC-P41 | 26 October 2026 | Bathin's beats; terms (radius 10, any hour, 12 moves, party), offering (4 Verdant Chaff a week), compact (2 ender pearls, 8 chaff) | Proposed (unit 2) | GC-05 |
-| GC-P42 | 26 October 2026 | The perch's `accord`: a string of at most 16 characters from the service's list; absent when unanswered; read as unanswered when unknown; cleared on end or unseat | Proposed (unit 2) | GC-05 |
+| GC-P42 | 26 October 2026 | The perch's `accord`: a string of at most 16 characters from the service's list; absent when unanswered; read as unanswered when unknown; cleared on end or unseat *(amended unit 2, wording: forgotten with its pact: never read or saved while its perch keeps no pact, and reset when a pact is sealed or seated there; the same for every reader)* | Proposed (unit 2) | GC-05 |
 | GC-P43 | 26 October 2026 | Wire in unit 2: `resolve` action 10 (the `keep` mode, the holder only); `spirit.matter`, `spirit.answers` (at most 3) | Proposed (unit 2) | GC-05 |
-| GC-P44 | 26 October 2026 | `Status.AWAITING_ANSWER` ("awaiting_answer"), appended, reported when a choice waits and the presence would otherwise be idle | Proposed (unit 2) | GC-05 |
-| GC-P45 | 26 October 2026 | `GardenReach` devices: 16 each of Hearts, Gleaners and Ley Pylons | Proposed (unit 2) | GC-05 |
+| GC-P44 | 26 October 2026 | `Status.AWAITING_ANSWER` ("awaiting_answer"), appended, reported when a choice waits and the presence would otherwise be idle *(amended unit 2: reported while a choice waits once `decide` returned IDLE, whatever the service's step returned; never over an offering due or a reason of `decide`'s; GC-P47)* | Proposed (unit 2) | GC-05 |
+| GC-P45 | 26 October 2026 | `GardenReach` devices: 16 each of Hearts, Gleaners and Ley Pylons *(as built; detailed by GC-P54)* | Proposed (unit 2) | GC-05 |
+| GC-P46 | 26 October 2026 | The accord's rules in one class, `PactAccords`: a service's accords list its safe course first; the matter shown while a choice is raised or an answer kept, as the kept page's matter row and its answers; any answer may be changed at any time, the same answer again kept as it was, answering spends nothing and is allowed whatever the pact's hold; only the record's holder, in person, alive, with the Concordance on, for the page's work, writes it; the perch reads it only while a pact counts there, keeps an unknown value as written, drops one over 16 characters or without a pact at load, and starts every pact sealed or seated there unanswered; no hook in the shared `AgreementHolder`; no `course` for a spirit (B-05: the service reads `PactAccords.answer` for its perch) | Proposed (unit 2) | GC-05 to GC-09 |
+| GC-P47 | 26 October 2026 | `AWAITING_ANSWER` replaces whatever the service's step returned once `decide` returned `IDLE` and a choice waits; never over an offering due or any reason of `decide`'s (the holder away is said instead); `Sign.WANT` on the change; said by the page, the roster, Jade and that one sign; no chat line | Proposed (unit 2) | GC-05 to GC-09 |
+| GC-P48 | 26 October 2026 | Jade's readings append `matter` (the matter raised now) and `accord` (the answer kept); a choice waiting is said by the presence's status (`waiting`); Bathin's notes `two_roads` (a count), `empty`, `nowhere`; his matter's id `two_roads` (B-01) | Proposed (unit 2) | GC-05 |
+| GC-P49 | 26 October 2026 | Words per work in `SERVICE_WORDS` (`accords`, `question`, `matters`); the shared lines `row.matter.awaiting`, `row.matter.answered`, `answer.resolved`, the screen's `matter.*`, Jade's `jade.pact.accord`, the status "awaiting your answer at its perch"; each work's shipped accords pinned in `check_pacts`' `GC05_ACCORDS` (append only) | Proposed (unit 2) | GC-05 to GC-09 |
+| GC-P50 | 26 October 2026 | The move: one a think; the Gleaner road before the pylon road; the fullest Heart, the emptiest Gleaner, nearest the perch among equals; a Gleaner only with room for 8, a pylon only with room for a batch, at most 3 batches; "within reach" = `HEART_REACH` on every axis, "beside" = a shared face, "its own road" = an awake Heart with a pylon on a face it may feed, full or not; no one's pylon fed as the Heart's own pour feeds it and asked as the holder's own *(amended unit 2, GC-S25: a Heart still beating is a source only with a whole move)* | Proposed (unit 2) | GC-05 |
+| GC-P51 | 26 October 2026 | The matter `two_roads`; answers `yield`, `claim` (append only); `yield` the safe course and the reading of an unanswered or unknown value (through `PactAccords.answer`, B-05); raised once a presence by his inspect gesture toward the nearest such Heart; the matter stands whenever such a Heart is indexed, answered or not *(amended unit 2, `4fcf55513`: only a Heart whose keeper the pact still serves)* | Proposed (unit 2) | GC-05 |
+| GC-P52 | 26 October 2026 | Failure: IDLE with Jade's `empty` or `nowhere`; a place's refusal skips it, the pact's ends the think with its status; at most 8 places asked a think *(amended unit 2, `4fcf55513`: a place refused for itself is skipped until the index is next read, at no question, at most 48 remembered; `nowhere` when the questions run out)* | Proposed (unit 2) | GC-05 |
+| GC-P53 | 26 October 2026 | `DEVICE`: an awake living device (Heart, Gleaner, Mulch Maw, Habitat Gauge) read or set with an empty hand in his area while his pact is active; a waking is not; one line after `useEmpty` | Proposed (unit 2) | GC-05 |
+| GC-P54 | 26 October 2026 | The device index: one pass with the beds; `GardenReach.devices(record)` apart from `of(record)` (a bed index costs what it did); pylons by owner, no one's kept; 16 each | Proposed (unit 2) | GC-05 |
+| GC-P55 | 26 October 2026 | Interfaces and economy: `receiveFrom` and `pourInto` return the amount (0: nothing moved); `GleanerBlockEntity.setVerdance` for operators and tests; `GardenPacts.presence`; `VerdanceCarrying.Memory.forget` (B-16); no conversion and no installation row; `check_garden_pacts` and `check_verdance_roads` hold his calls, the pour's body and the conversion's loss | Proposed (unit 2) | GC-05 |
+| GC-P56 | 26 October 2026 | His body built by `tools/garden_bodies.py` (no owner rig fits; the Siren is not used): 12 box-UV cubes on 8 bones (11 UV regions; a coil and tail tip as one group, the waist, chest, head and arms apart, so a coil drawn tight never squeezes his chest), a 128 x 64 sheet painted only in the willow log's and the Spanish moss's colours, his eyes lit; entity 0.9 x 1.9, eyes 1.65; `tools/owner_art.py` writes and checks built files (`BUILT`); the silhouette rule (a fifth apart on one axis) for every pair of spirits | Proposed (unit 2) | GC-05; every later built body |
+| GC-P57 | 26 October 2026 | His clips: five loops (idle 4.0, listen 3.0, waiting 2.0, suspended 6.0, astir 1.5 s) and six gestures with telling windows (arrive 1.5 s / 0.1-0.6, inspect 2.0 / 0.4-1.2, assent 1.5 / 0.3-0.9, refuse 1.6 / 0.3-1.0, depart 1.0 / 0.25-0.75, gone at 0.8-0.85, work 1.5 / 0.15-0.75); a protected no-op hook `PactSpiritEntity.gestured(ServerLevel, Clip)` called once a cue shows (B-15); his ring as he arrives and departs and his shimmer at both ends of a carry, the only particles a carry shows, kept in memory only *(amended unit 2: as the shared signs `SHOVE` and `WORK`, not `DUST_PLUME` puffs or `GLOW` glints: `check_signs`)* | Proposed (unit 2) | GC-05; the hook for later spirits |
+| GC-P58 | 26 October 2026 | Cues, words and sign: seven cues on the art plan's five mono files, told apart by pitch (arrive 1.5, listen 1.2, refuse 0.7, depart 1.8), subtitled; his sign the ender pearl (unique among `SPIRITS`, audited); the greeting's stage direction; his term; his refusal with two arguments and the reason `nothing_to_carry`; four codex pages; the perch tooltip's clause; Jade's and the roster's service names; the invitation the contract's (B-02) | Proposed (unit 2) | GC-05 |
+| GC-P59 | 26 October 2026 | Evidence: his flow in the one garden client class after Buer's, at the same perch (the chooser with three entries), shots `jugcraft_garden_bathin_*` and `jugcraft_garden_roster_awaiting`; waiting posed with the Concordance off; the shimmer photographed frozen just after the carry; `offerOf` and the forced unit-1 lines a second garden spirit makes (as GC-P17 records unit 1's); one Jade test (B-10); the client's carrying Heart on the floor, no bed (B-18); `WEIGHTS` 560 | Proposed (unit 2) | GC-05 to GC-10 |
 | GC-P60, GC-P61 | 26 October 2026 | Marax's beats; terms (radius 8, any hour, 2 readings, personal), offering (2 paper a week), compact (1 book, 2 Sunpetal, 2 Dewmoss); 8 beds a reading; pique after 3 | Proposed (unit 3) | GC-06 |
 | GC-P62 | 26 October 2026 | The first-fault rule (the first outside factor in `Factor` order, "one of n"); the synced `TARGET` and the familiar's bone hook, culling box to 8 blocks | Proposed (unit 3) | GC-06 |
 | GC-P80, GC-P81 | 26 October 2026 | Foras's beats; terms (radius 8, any hour, 8 grafts, party), offering (1 honeycomb a week), compact (4 Dewmoss, 1 honeycomb); prudent by default | Proposed (unit 4) | GC-07 |
@@ -1866,19 +2086,19 @@ every citation resolves; none is the owner's.
 
 ## Where to resume
 
-Unit 1 (GC-01 to GC-04) is built, its CI evidence and records are in this page and its records, and it waits in draft
-pull request #526 for the owner's review. Next:
+Units 1 (GC-01 to GC-04) and 2 (GC-05) are built, their CI evidence and records are in this page and their records, and
+they wait in draft pull request #526 for the owner's review. Next:
 
-1. Run 40605564166's one remaining failure, `HerobrineClientGameTests`' placement (NO_VISIBLE_SPOT, twice on
-   `4ca363d38`; passed on `10566d074` and on main), is main's class; unit 1 changes no Herobrine file. Re-run it once
-   more, or leave it to main, before the owner's review; it is not the cohort's to fix.
+1. Look at the pictures of a CI run that includes `d7185041b` (his facing pictures framed whole) and the magic
+   interfaces' `73464e938` (no tip repeating a beat): both are pushed, and no CI result for them is recorded here.
 2. Refresh main and the open pull requests; merge main into `claude/garden-cohort` if it moved (generated files
    regenerated, never hand-merged).
-3. Start unit 2 (GC-05, Bathin) from unit 1's head: the accord machinery, `Status.AWAITING_ANSWER`, the bed index's
-   Hearts, Gleaners and pylons, and `PactObligations.DEVICE`, with GC-P40 to GC-P59.
-4. Open items unit 1 leaves: the listen, asleep and depart pictures, and the refused picture, which shows Accept's
-   tooltip and the terms' last lines, not his refusal (GC-04's As built); the journey's Buer steps still
-   write his numbers as literals; GB18 (Gutenberg's record); a dispatch of every client class on the cohort's head.
+3. Continue unit 3 (GC-06, Marax) from its shared prefix (GC-06a, GC-06b); units 4 to 6 branch from that prefix.
+4. Open items units 1 and 2 leave: Buer's listen, asleep and depart pictures and his refused picture (GC-04's As built);
+   Bathin's ring and shimmer drawn as the shared movement and work signs, his arrive and depart pictures alike, his assent
+   picture showing no fist at the chest, the matter pictures with the row's tip over the plates, the pylon road not
+   photographed (GC-05's As built and [his record](bathin-pact.md#rollout-and-open-questions)); the journey's Buer steps
+   still write his numbers as literals; GB18 (Gutenberg's record); a dispatch of every client class on the cohort's head.
 
 ## How this contract was checked
 
@@ -1937,6 +2157,12 @@ pull request #526 for the owner's review. Next:
   run 40605564166 extracted from the logs and looked at one by one; the pull requests #465, #466, #474, #494 and #526
   by REST; the unit's commits and messages; the code lines the As built notes name. Gutenberg's record #72679 could not
   be read (the host was not reachable from the session).
+- **Unit 2's records (28 October 2026):** CI run 40777920181 read through GitHub's REST API (jobs) and its job-log tool
+  (the `mod`, `optional integrations absent`, client-selection and shard 0 jobs' last 5,000 lines: the server tests'
+  summaries, the selection, the garden class's `[garden-check]` lines and pictures); Bathin's 34 pictures of
+  `ConcordanceGardenPactClientGameTests` (shard 0) extracted from the log, compared byte for byte with the log's previews
+  and looked at one by one; the unit's commits and messages; the unit's build and review reports kept with the
+  session's working notes; the code lines the As built notes name; `python3 tools/owner_art.py --provenance pacts`.
 - **Not done:** no scan of the 1904 text was opened; nothing was built, generated, run or tested (no local game build
   exists); the default `LookAtTarget` predicate was read from an unversioned reference copy, not the pinned jar's
   sources; no repository file was edited.

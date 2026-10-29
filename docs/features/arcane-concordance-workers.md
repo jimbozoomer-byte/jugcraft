@@ -19,7 +19,8 @@ run 40133540741. Chunk D reached main on 27 October 2026 in the owner's #494 (`4
 Chunks B and C and the October 26 community batch; Chunk D's own #474 was closed without merging). Extended by the
 Concordance garden cohort's unit 1 (GC-01 to GC-04: one pact spirit base, a perch for many spirits, facing, the garden
 groundwork and [Buer](buer-pact.md); [contract](concordance-garden-cohort.md)), not merged (draft #526); its tests passed
-in CI run 40605564166 (see Verification).
+in CI run 40605564166 (see Verification). Extended by the cohort's unit 2 (GC-05: [Bathin](bathin-pact.md), the accord
+machinery and the bed index's devices), not merged either; its tests passed in CI run 40777920181.
 Proposal issue: none; the owner's Arcane Concordance brief (roadmap step 17) is the scope approval.
 Owner: @jimbozoomer-byte. AI-assisted implementation with Claude Code; the model is named in the commit trailers.
 Target milestone and tier: Concordance milestone 9, Practitioner stage (Jugcraft Workshops). Roadmap step 17.
@@ -157,7 +158,9 @@ kind: his offer is the Concordance's `pact` data, `concordance/pact/stolas.json`
   empty perch's owner who may invite two or more spirits chooses among them (the `invite` mode and action); Jade, the
   roster's portraits (by counterpart, kind `pact`) and the journal's pacts section name each spirit. Stolas was the first
   and Buer (GC-04) the second; nothing saved changed. Since GC-04 a pact's service also steps while an offering is due,
-  through its grace, as long as its holder is near (GC-P27).
+  through its grace, as long as its holder is near (GC-P27). Since GC-05 Bathin is the third, and a pact spirit may show
+  something in the world as a gesture plays (`PactSpiritEntity.gestured`: his ring of dust) and raise a matter for its
+  holder to settle at its perch (the accord, below).
 
 ## Connections
 
@@ -561,6 +564,22 @@ bed a think, by the bed's own rule; a pact's service now steps through an offeri
 without the optional integrations; `ConcordanceGardenPactClientGameTests` passed there (one client; its pictures are
 described in [Buer's Verification](buer-pact.md#verification)). Not played by a person; no second client.
 
+The second garden spirit is Bathin (GC-05, [record](bathin-pact.md)): Verdance carried at once from his holder's Hearts
+to a far Gleaner or a pylon, both ends shimmering and nothing between, one move a think and 12 a day; his first
+obligation is `DEVICE` (an awake living device used with an empty hand in his area). The bed index can also hold the
+Hearts, Gleaners and pylons its pact's beneficiaries keep (or no one owns, for pylons), 16 of each, read in the beds'
+one pass (`GardenReach.devices`). **A matter to settle (the accord):** a pact service may raise one complication that is
+a choice (`PactService.complication`, its `accords()`), shown on the kept page with up to three answers; only the
+record's holder, in person and alive, answers it there (`resolve`, action 10), and the answer is kept by the perch
+(`accord`) until the pact ends. **awaiting your answer** (`awaiting_answer`, appended): a presence whose `decide` returned
+idle while its holder's choice waits reports it whatever its step returned, so the roster shows it with the waiting mark,
+Jade says it and a sign of want shows once as it begins; it still works on the safe course meanwhile, and an offering due
+or the holder away is said first. Saved on the roster like every status; an older build reads it as idle.
+**Verification:** GC-05's thirty-eight server tests (Bathin's carrying, character and accord tests, the garden side's
+four, one economy and one persistence test) passed in CI run 40777920181 with and without the optional integrations, and
+`ConcordanceGardenPactClientGameTests` passed there (its pictures of him are described in
+[Bathin's Verification](bathin-pact.md#verification)). Not played by a person; no second client.
+
 ## World and event applicability
 
 Works in every dimension; a shade's agreement and a porter's route belong to the dimension they were made in. No
@@ -600,6 +619,13 @@ and agreement `jugcraft:buer_pact`, the work `strain_tending` (saved in a Bound 
 `jugcraft:garden_pact_service`, four advancements `concordance_garden_regard_*`, the codex entry `binding/garden_regard`,
 his sound events `jugcraft:buer.*`; on the wire (network only) the action `invite` (9), the mode `invite` (4), the state's
 nested `spirit` and Jade's keys `visitor`, `note` and `note_count`. No saved data, block, item or block entity.
+
+Since the garden cohort's unit 2 (not merged): the entity `jugcraft:bathin`, his definition `concordance/pact/bathin.json`
+and agreement `jugcraft:bathin_pact`, the work `verdance_carrying` (saved in a Bound Will's service; appended), the tag
+`#jugcraft:bathin_offerings`, his sound events `jugcraft:bathin.*`, codex pages `p8` to `p11` of `binding/garden_regard`;
+the perch's optional saved `accord` (`yield`, `claim`; stamp 1) and the worker status `awaiting_answer` (appended); on
+the wire (network only) the action `resolve` (10), the reason `resolved` and the state's `spirit.matter` and
+`spirit.answers`; Jade's keys `matter` and `accord`. No block, item or block entity; no migration.
 
 Open items:
 
