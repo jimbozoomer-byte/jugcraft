@@ -21178,14 +21178,7 @@ def check_pacts(co, root, lang, registered, research):
         if not row or (row.group(2) or None) != reach:
             err(f"client/PactSpiritRenderers: {name}'s row reaches its {reach or 'no'} bone as SPIRITS[{name!r}] says (GC-P66)")
     # GC-07 unit 4
-    # --- GC-07: Foras (Dossier 4). His station is unit 3's (GC-P67): each row's Body keeps the station its row names, as
-    # unit 3's GC-06 rule does (with its reaching bone); the merge keeps one (decided by the session). ---
-    for name, spirit in pa.SPIRITS.items():
-        line = re.search(rf'new Body\("{name}", SOUND_IDS,[^;]*\);', java(f"spirits/{spirit['java']}.java"))
-        beside = bool(line) and "Station.BESIDE" in line.group(0)
-        if spirit.get("station") not in ("perch", "beside") or not line or beside != (spirit["station"] == "beside") \
-                or "Station.PERCH" in line.group(0):
-            err(f"spirits/{spirit['java']}.java: its Body keeps the station SPIRITS[{name!r}] names ({spirit.get('station')}; GC-P67)")
+    # --- GC-07: Foras (Dossier 4). His station is held by unit 3's GC-06 loop above (GC-P67). ---
     foras = java("spirits/ForasEntity.java")
     if "case PactRequestPayload.RESOLVE -> done ? Gesture.ASSENT : null;" not in _java_body(foras, "public static @Nullable Gesture reaction(") \
             or "case PactRequestPayload.ACCEPT -> done ? Gesture.ASSENT : Gesture.REFUSE;" not in _java_body(foras, "public static @Nullable Gesture reaction("):
