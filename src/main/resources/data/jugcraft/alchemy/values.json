@@ -37511,6 +37511,11 @@
       "denominator": 1,
       "source": "recipe jugcraft:toss_ring"
     },
+    "jugcraft:town_commission_board": {
+      "numerator": 296,
+      "denominator": 3,
+      "source": "recipe jugcraft:town_commission_board"
+    },
     "jugcraft:training_screen": {
       "numerator": 83743,
       "denominator": 128,
