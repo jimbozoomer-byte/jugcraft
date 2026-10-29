@@ -22,7 +22,9 @@ groundwork and [Buer](buer-pact.md); [contract](concordance-garden-cohort.md)), 
 in CI run 40605564166 (see Verification). Extended by the cohort's unit 2 (GC-05: [Bathin](bathin-pact.md), the accord
 machinery and the bed index's devices), not merged either; its tests passed in CI run 40777920181. Extended by the
 cohort's unit 3 (GC-06: [Marax](marax-pact.md), a body's station beside its perch and a synced work target), built and
-not merged, and not yet compiled or run in CI.
+not merged, and not yet compiled or run in CI. Extended by the cohort's unit 5 (GC-08: [Bifrons](bifrons-pact.md),
+root-running by night and the feeding act), built on its own line from unit 3's head, not merged, and not yet compiled
+or run in CI.
 Proposal issue: none; the owner's Arcane Concordance brief (roadmap step 17) is the scope approval.
 Owner: @jimbozoomer-byte. AI-assisted implementation with Claude Code; the model is named in the commit trailers.
 Target milestone and tier: Concordance milestone 9, Practitioner stage (Jugcraft Workshops). Roadmap step 17.
@@ -167,7 +169,9 @@ kind: his offer is the Concordance's `pact` data, `concordance/pact/stolas.json`
   side, a quarter turn clockwise from its inviter, never between them and the perch, else on the perch; kept each think,
   saved nowhere), and a spirit may show the block it means to every client (`showTarget`: a synced `TARGET`, set only
   while a conversation is open at its perch, cleared after it, never saved), which a renderer row's named bone flies to
-  (`PactSpiritRenderers.Row.reach`).
+  (`PactSpiritRenderers.Row.reach`). Since GC-08 (not yet run in CI) Bifrons serves by night only (a pact's hours need
+  not begin at the world clock's 0, 06:00; SG12's shared cases think at each spirit's first hour) and works in two beats a think apart,
+  remembering a measure under way in his presence only, never saved.
 
 ## Connections
 
@@ -600,6 +604,17 @@ first standing body (`Station.BESIDE`) and the first user of the work target. **
 CI run has compiled him ([his Verification](marax-pact.md#verification)). The shared prefix (GC-06b) was in the head of
 CI run 40777920181, which passed in full. Not played by a person; no second client.
 
+The garden's root-runner is Bifrons (GC-08, [record](bifrons-pact.md)): by night, for his holder and party, while the
+holder is near, he runs one root at a time from a full Verdant Bed (24 nutrients or more) to the hungriest with room, at
+least 3 poorer: 2 nutrients taken, 1 given, the other lost (the economy's `root_running`). He measures first, a think
+apart, the shared preparation sign at each bed, and holds nothing between his beats; at most 8 beds asked a think, a bed
+refused for itself skipped until his index is next read, 24 runs a game day. A growing full bed is a reserve: his matter
+(the accord machinery's `fallow` and `full`) asks whether he may draw from growing beds, never from the bed under a
+Verdant Heart. His first obligation is `FEED` (bone meal on a Verdant Bed, or on the crop growing on one, by hand in his
+area). He stands on `Station.BESIDE`. **Verification:** his 22 server tests (`GC08_TESTS`) and his flow in
+`ConcordanceGardenPactClientGameTests` are written and **not yet run**: no CI run has compiled him
+([his Verification](bifrons-pact.md#verification)). Not played by a person; no second client.
+
 ## World and event applicability
 
 Works in every dimension; a shade's agreement and a porter's route belong to the dimension they were made in. No
@@ -654,6 +669,14 @@ service; appended; holder only), the tag `#jugcraft:marax_offerings`, his sound 
 theirs); on the wire (network only) the spirit's synced `TARGET`. Nothing saved of his own: his entity writes only the
 base's `perch` and `record`; the station, the target and the familiar's pique are never saved. No block, item or block
 entity; no migration.
+
+Since the garden cohort's unit 5 (not merged; not yet run in CI): the entity `jugcraft:bifrons`, his definition
+`concordance/pact/bifrons.json` and agreement `jugcraft:bifrons_pact`, the work `root_running` (saved in a Bound Will's
+service; appended), the tag `#jugcraft:bifrons_offerings` (`#minecraft:logs`), his sound events `jugcraft:bifrons.*`,
+codex pages `p16` to `p19` of `binding/garden_regard` on his line (before the entry's last page, "Mastered"), the
+perch's saved `accord` values `fallow` and `full`. Nothing saved of his own: his entity writes only the base's `perch`
+and `record`; his measures, marks, reserves and the beds he skips are never saved. No block, item or block entity; no
+migration.
 
 Open items:
 

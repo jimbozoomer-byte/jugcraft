@@ -21767,21 +21767,36 @@ def check_garden_pacts(co, root, lang, registered, research):
     running = strip(text(spirits / "RootRunning.java"))
     step = _java_body(running, "static Status run(")
     order = [step.find(n) for n in (
-        "Pacts.inHours(service, time)", "Pacts.done(record.pact(), now) >= service.quota()", "memory.reach(record).beds(level, now)",
-        "String kept = answer(level, bifrons);", "new GardenAsking(level, record, time, now, MAX_ASKED)",
+        "Pacts.inHours(service, time)", "Pacts.done(record.pact(), now) >= service.quota()", "memory.beds(level, record, now)",
+        "String kept = answer(level, bifrons);", "new GardenAsking(level, record, time, now, MAX_ASKED, memory::skipped, memory::skip)",
         "now - measure.at() < MEASURE_TICKS ? Status.WORKING : ran(", "Garden.poorest(wanting)",
         "asking.ask(poorest.getBlockPos(), poorest.keeper())",
         "if (bed == to || !GardenPacts.benefits(record, bed.keeper()) || !gives(bed, to)) {", "if (fallow(level, bed)) {",
-        "} else if (!underAHeart(level, bed)) {", "new ArrayList<>(fallow.isEmpty() ? planted : List.of())",
-        "first = asking.ask(reserves.getFirst().getBlockPos(), reserves.getFirst().keeper());",
-        "memory.reserves(first == Asked.SPENT ? List.of() : reserves);",
-        "if (kept == null && reserve != null && first == Asked.MAY && memory.raise()) {", "if (full) {",
-        "Comparator.comparingInt(VerdantBedBlockEntity::nutrients).reversed()", "asking.ask(from.getBlockPos(), from.keeper())",
-        "memory.begin(new Measure(from.getBlockPos(), to.getBlockPos(), now));", "bifrons.mark(level, from.getBlockPos(), true, now);")]
+        "} else if (!underAHeart(level, bed)) {", "reserves(bifrons, memory, asking, kept, fallow.isEmpty() ? planted : List.of(), now)",
+        "if (full) {", "Comparator.comparingInt(VerdantBedBlockEntity::nutrients).reversed()",
+        "asking.ask(from.getBlockPos(), from.keeper())", "memory.begin(new Measure(from.getBlockPos(), to.getBlockPos(), now));",
+        "bifrons.mark(level, from.getBlockPos(), true, now);", "if (!full && !fallow.isEmpty() && !planted.isEmpty()) {",
+        "reserves(bifrons, memory, asking, kept, planted, now)", "memory.idle(Idle.NO_FULL);")]
     if -1 in order or order != sorted(order):
-        err("RootRunning.run: hours, quota, the index, the answer, a measure's second beat, the poorest asked, sources by the "
-            "answer (fallow, or any full bed but a Heart's; a beneficiary's now), his matter only for a reserve he may change and "
-            "raised once, the fullest asked, then the first beat (GC-P102 to GC-P106; the unit-5 review's item 8)")
+        err("RootRunning.run: hours, quota, the index (beds refused for themselves skipped until its next read), the answer, a "
+            "measure's second beat, the poorest asked, sources by the answer (fallow, or any full bed but a Heart's; a "
+            "beneficiary's now), his reserves while no fallow bed could give, the fullest asked, the first beat, and his reserves "
+            "again when every fallow bed was refused him (GC-P102 to GC-P106; Dossier 5 item 5)")
+    kept_back = _java_body(running, "private static @Nullable Status reserves(")
+    order = [kept_back.find(n) for n in (
+        "new ArrayList<>(planted)", "while (kept == null && !reserves.isEmpty()) {",
+        "first = asking.ask(reserves.getFirst().getBlockPos(), reserves.getFirst().keeper());", "return asking.stop();",
+        "memory.reserves(first == Asked.SPENT ? List.of() : reserves);",
+        "if (kept == null && reserve != null && first == Asked.MAY && memory.raise()) {",
+        "bifrons.gesture(BifronsEntity.Gesture.INSPECT);", "return Status.IDLE;", "return null;")]
+    if -1 in order or order != sorted(order):
+        err("RootRunning.reserves: unanswered, his matter names only a reserve he may change now (none past the think's "
+            "questions), remembered, and raised once a presence with his inspect gesture (GC-P106)")
+    remembered = _java_body(running, "public static final class Memory")
+    if "if (skipped.size() < GardenReach.MAX_BEDS) {" not in remembered or "if (index.refreshes() != skippedAt) {" not in remembered \
+            or remembered.count("skipped.clear();") != 2:
+        err("RootRunning.Memory: the beds refused for themselves, at most GardenReach.MAX_BEDS, forgotten at each read of the "
+            "index and when it is made again (as Buer's)")
     beat = _java_body(running, "private static Status ran(")
     order = [beat.find(n) for n in (
         "memory.drop();", "!gives(source, destination)", "fallow(level, source) || full && !underAHeart(level, source)",
@@ -21800,7 +21815,8 @@ def check_garden_pacts(co, root, lang, registered, research):
         err("RootRunning: fallow is the garden's own planted test (no organism crop, no Heart on it), and a Heart's bed is never "
             "a source (GC-P104)")
     for needle, count in (("source.take(TAKE)", 1), ("destination.give(GIVE)", 1), (".take(", 1), (".give(", 1),
-                          ("holder.taskDone(", 1), ("GardenPacts.target(", 0), ("new GardenAsking(level, record, time, now, MAX_ASKED)", 1),
+                          ("holder.taskDone(", 1), ("GardenPacts.target(", 0),
+                          ("new GardenAsking(level, record, time, now, MAX_ASKED, memory::skipped, memory::skip)", 1), ("new GardenAsking(", 1),
                           ("PactAccords.answer(level, perch)", 1), ("bifrons.mark(", 2)):
         if running.count(needle) != count:
             err(f"spirits/RootRunning.java: {needle} {count} time(s), not {running.count(needle)} (one run, one count, his "
@@ -21818,7 +21834,7 @@ def check_garden_pacts(co, root, lang, registered, research):
     if "bed.nutrients() < SOURCE_MIN || fallow(level, bed) || underAHeart(level, bed)" not in matter \
             or "!GardenPacts.benefits(record, bed.keeper())" not in matter:
         err("RootRunning.complication: his matter stands only while its bed is still a beneficiary's full, growing reserve "
-            "(GC-P106; the unit-5 review's item 8)")
+            "(GC-P106: the index keeps its keepers only from its last refresh)")
     if running.count(gp.DISTINCT.get("root_running", {}).get("also", "?")) != 1:
         err(f"spirits/RootRunning.java: makes {gp.DISTINCT.get('root_running', {}).get('also')} once (DISTINCT)")
     if not re.search(r"public static final List<String> ACCORDS = List\.of\(FALLOW, FULL\);", running) \
@@ -21833,6 +21849,14 @@ def check_garden_pacts(co, root, lang, registered, research):
     if f"each {limits.get('TAKE')} nutrients taken" not in service_row or f"and {limits.get('GIVE')} given" not in service_row:
         err("tools/concordance_pacts.py SERVICE_WORDS root_running row.service: names TAKE and GIVE as "
             "tools/concordance_garden_pacts.py CONSTANTS holds them")
+    # His kept page's short words (his review): his question in general where an answer is kept and no reserve stands, and
+    # his matter's glance keeping the bed it is about, as Bathin's keeps his Heart (spec 1.1).
+    import magic_ui as mu
+    running_glances = mu.WORK_GLANCES.get("root_running", {})
+    matter_glance = (running_glances.get("matter.reserves") or [("", "")])[0][1]
+    if not running_glances.get("question") or "%1$s" not in matter_glance:
+        err("tools/magic_ui.py WORK_GLANCES['root_running']: a short glance for his question in general, and his matter's "
+            "glance naming its bed (%1$s)")
     for cls, names in GC08_TESTS.items():
         source = text(tests / f"{cls}.java")
         for name in names:
@@ -21932,6 +21956,11 @@ def check_pact_screen(co, lang):
     if "for (String key : STANDING)" not in standing_body or 'ui("short.standing.hint")' not in standing_body \
             or "all.append(term.value())" not in standing_body:
         err("client/PactScreen.standing: one chip narrating all six standing sentences, its tip \"The same for every spirit\" (D-S15 amended)")
+    offering_body = _java_body(screen, "private MagicChip offering(")
+    if 'ui("short.any_of_more", ComponentUtils.formatList(items.subList(0, 3), ItemStack::getHoverName), items.size() - 3)' not in offering_body \
+            or offering_body.find("items.size() > 3") > offering_body.find('ui("short.any_of",'):
+        err("client/PactScreen.offering: a tag of more than three items lists its first three and how many more in its tip, "
+            "never every item (Bifrons's #minecraft:logs; spec 1.1's tooltip)")
     for needle in ('onScreen("more", toggle, text);', "more = !more;", "notes(state, MagicTheme.NEED, PRICE_FOOT)", "priceRow(state, false);",
                    "ConcordanceClientOptions.heardBeats(", "ConcordanceClientOptions.hearBeats(", 'onScreen("skip", skip, headerRoom());',
                    'ui("short.accept.narration")'):
@@ -22699,12 +22728,19 @@ def check_spirit_bodies(co):
                       text(JAVA_ROOT / "concordance" / "spirits" / "Workers.java"), re.S)
     if not sized or tuple(float(v) for v in sized.groups()) != (row["entity"]["width"], row["entity"]["height"], row["entity"]["eye"]):
         err("spirits/Workers.java: BIFRONS is sized as SPIRITS['bifrons']['entity'] (his low shape; GC-P107)")
-    # His poses and shots, from his front, each gesture frozen inside its window, every loop but astir through loopPoseOf.
+    # His poses and shots, from his front, each gesture frozen inside its window, every loop but astir through loopPoseOf; his
+    # assent and refusal risen (bifronsRisenPose), since they move only the man's bones, which his low shape hides.
     posed = {key.lower(): (float(a), float(b)) for key, a, b in re.findall(
-        r'clipPose\(context, server, perch, BIFRONS, BifronsEntity\.Gesture\.([A-Z]+), ([0-9.]+), ([0-9.]+), "jugcraft_garden_bifrons_[a-z]+"\);',
-        garden_client)}
+        r'(?:clipPose\(context, server, perch, BIFRONS, |bifronsRisenPose\(context, server, perch, )BifronsEntity\.Gesture\.([A-Z]+), '
+        r'([0-9.]+), ([0-9.]+), "jugcraft_garden_bifrons_[a-z]+"\);', garden_client)}
     if posed != {key: window for key, (_, window) in body["gesture_times"].items()}:
         err(f"ConcordanceGardenPactClientGameTests: each of Bifrons's gestures frozen inside its telling pose: {posed}")
+    risen_pose = _java_body(garden_client, "private static void bifronsRisenPose(")
+    if set(re.findall(r'bifronsRisenPose\(context, server, perch, BifronsEntity\.Gesture\.([A-Z]+),', garden_client)) != {"ASSENT", "REFUSE"} \
+            or "bifrons.listening()" not in risen_pose or "BIFRONS_LISTEN.equals(risen)" not in risen_pose \
+            or not 0 <= risen_pose.find('server.runCommand("tick freeze");') < risen_pose.find("InputConstants.KEY_ESCAPE"):
+        err("ConcordanceGardenPactClientGameTests: his assent and refusal are photographed risen (bifronsRisenPose: the perch "
+            "open and his listening loop drawn, the world frozen before the screen closes, checked risen)")
     for name in body["shots"]:
         if f'"{name}"' not in garden_client:
             err(f"ConcordanceGardenPactClientGameTests: takes {name}")
@@ -22718,9 +22754,12 @@ def check_spirit_bodies(co):
     # clock running and night vision cleared for the flows after his (it pauses the clock at midnight).
     flow = _java_body(garden_client, "private static void bifrons(")
     for needle in ("standingFacing(context, server, perch, BIFRONS, BIFRONS_FACES);", 'server.runCommand("effect clear @a minecraft:night_vision");',
-                   'server.runCommand("time resume");'):
+                   'server.runCommand("time resume");', "level.setBlockAndUpdate(perch.west(3), Blocks.AIR.defaultBlockState());"):
         if needle not in flow:
-            err(f"ConcordanceGardenPactClientGameTests.bifrons: {needle} (his bearings taken; the clock and the player left as found)")
+            err(f"ConcordanceGardenPactClientGameTests.bifrons: {needle} (his bearings taken; the clock and the player left as found; "
+                "Buer's bed taken out of the yard and its cell left empty, so nothing stands between him and the west camera)")
+    if "perch.west(3), Blocks.STONE" in flow:
+        err("ConcordanceGardenPactClientGameTests.bifrons: no block at standing height three west of the perch (the west camera)")
     # GC-09 unit 6
 
 
@@ -25919,7 +25958,8 @@ GC08_TESTS = {
         "aRootRunnerNeverTouchesAStrangersBed", "aRootRunnerRunsOnlyByNight", "aRootRunnerWaitsForAPresentHolder",
         "aRootRunnerNeverHoldsNutrients", "bifronsRefusesWithFewerThanTwoBeds", "bifronssFirstObligationIsAFeedingByHand",
         "aSuspendedBifronsRunsNothing", "aDuplicateBifronsRunsNothing", "bifronssReadingSaysItsNoteAndNamesNoPlayer",
-        "bifronsAnswersEachActionWithHisGesture", "bifronsRisesOnlyWhileSpokenTo", "theKeptPageNamesBifronssLastRun"],
+        "bifronsAnswersEachActionWithHisGesture", "bifronsRisesOnlyWhileSpokenTo", "theKeptPageNamesBifronssLastRun",
+        "aRootRunnerSkipsBedsRefusedHim", "aRefusedFallowBedLeavesHisReservesAsked"],
     "ConcordancePersistenceGameTests": ["theReservesAnswerSurvivesARestart"],
     "ConcordanceEconomyGameTests": ["rootRunningLeavesNoGainingCycle"],
 }

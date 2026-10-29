@@ -11,7 +11,8 @@ hook and Buer's strain tending; [contract](concordance-garden-cohort.md)) is not
 CI run 40605564166. Its unit 2 (GC-05: the Gleaner's and the Heart's named roads, the bed index's devices and Bathin's
 Verdance carrying; [record](bathin-pact.md)) is not merged either; its tests passed in CI run 40777920181. Its unit 3
 (GC-06: `HabitatAdvice` and Marax's habitat reading; [record](marax-pact.md)) is built and not merged, and not yet
-compiled or run in CI.
+compiled or run in CI. Its unit 5 (GC-08b and GC-08: the feeding act and Bifrons's root-running between beds;
+[record](bifrons-pact.md)) is built on its own line and not merged, and not yet compiled or run in CI.
 Proposal issue: none; the owner's Arcane Concordance brief (roadmap step 14) is the scope approval.
 Owner: @jimbozoomer-byte. AI-assisted implementation with Claude Code; the model is named in the commit trailers.
 Target milestone and tier: Concordance milestone 6, Practitioner stage (Jugcraft Workshops). Roadmap step 14.
@@ -171,7 +172,14 @@ first in `Factor` order, "one of n", at its nearest ideal value; only ever towar
 no disturbance is never told to add magic; and a graft its bed could take that alone would serve (Dewlit for a Sunpetal
 at light 9 to 12). Marax's habitat reading ([record](marax-pact.md)) asks it of a bed's `cachedHabitat` (no sample is
 taken) and changes nothing; using a Verdant Bed itself with an empty hand (its report) is his pact's first obligation
-(`PactObligations`, one line after `report` in `VerdantBedBlock.useWithoutItem`); a crop's own report is not.
+(`PactObligations`, one line after `report` in `VerdantBedBlock.useWithoutItem`); a crop's own report is not. Since GC-08
+(not merged; not yet run in CI) Bifrons's root-running ([record](bifrons-pact.md)) moves nutrients between beds through
+the beds' own `take` (exact) and `give` (never past a bed's 32): 2 taken from a full bed, 1 given to a hungry one, in one
+server step, so the beds always hold less than before; he never composts, rests or tends a bed, and a fallow bed (no
+organism crop and no Verdant Heart on it, the garden's own planted test) is his only source until his holder answers
+otherwise. Feeding a Verdant Bed, or the crop growing on one, with bone meal by hand is his pact's first obligation
+(`PactObligations`, one line after each bone-meal success in `VerdantBedBlock` and `OrganismCropBlock`); a dispenser's
+bone meal is not.
 
 **The devices** share `LivingDeviceBlockEntity` (keeper, awake, status word, a staggered pulse) and act only on their
 pulse: the Heart every 200 ticks, the Maw, Gauge and Gleaner every 40. The Heart's Verdance is a typed
@@ -407,6 +415,13 @@ and holding the shipped organisms' and Dewlit's niches, checks it against brute 
 full; Marax's reading tests (`aReadingNamesOneCorrectionAndChangesNothing`, which also holds the level's sample budget
 unchanged, `aReadingSkipsBedsWithoutACachedSample` and four more) and `maraxsFirstObligationIsABedReadByHand` are written
 and not yet run. Not run: any of them in CI; any person.
+
+**The garden cohort, unit 5 (GC-08b, GC-08; not merged; not yet run in CI).** Written and not yet run: Bifrons's
+root-running tests in `ConcordanceWorkerGameTests`, among them `aRootRunnerLosesHalfAndMintsNone`,
+`aRootRunnerNeverEasesStrain` (no strain eased on either bed), `aFullAnswerNeverTakesFromAHeartsBed` and
+`bifronssFirstObligationIsAFeedingByHand` (bone meal on a bed, and on the crop on one, by hand); and
+`rootRunningLeavesNoGainingCycle` (`ConcordanceEconomyGameTests`). `check_garden_pacts` and `check_economy` pass
+locally. Not run: any of them in CI; a long unattended garden with Bifrons on a real server; any person.
 
 ## World and event applicability
 

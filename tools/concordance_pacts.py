@@ -1231,7 +1231,7 @@ SERVICE_WORDS = {
                            "a hungry one; the other is lost along the root",
             "row.asleep": "By day he rests in the ground: he runs roots from %s to %s",
             "row.last": "Last: %s nutrients taken from the bed at %s, %s given to the bed at %s, %s lost along the root",
-            "row.reserved": "Keeping %s growing beds as reserves, as you answered: he draws only from fallow beds",
+            "row.reserved": "Growing beds kept as reserves: %s, as you answered; he draws only from fallow beds",
             "matter.reserves": "\"Your only full beds are growing. Shall I draw from them?\" (the bed at %s holds %s "
                                "nutrients and a crop)",
         },

@@ -2641,15 +2641,16 @@ public class ConcordanceGardenPactClientGameTests implements FabricClientGameTes
 		BlockPos destination = perch.offset(-3, 0, 2);
 		server.runOnServer(minecraft -> {
 			yard(minecraft, perch);
-			// The unit-5 review's item 4: Buer's bed (perch.west(3), awake and the player's; yard keeps it) would be a second bed
-			// of theirs in his area, so it leaves the yard: his refusal, his chooser and his thinks see only the beds set here.
+			// Buer's bed (perch.west(3), awake and the player's; yard keeps it) would be a second bed of theirs in his area, so it
+			// leaves the yard: his refusal, his chooser and his thinks see only the beds set here. Its cell is left empty (the yard's
+			// stone floor is below it), so nothing stands between him, two west of the perch, and a camera west of him.
 			ServerLevel level = minecraft.overworld();
 			level.setBlockAndUpdate(perch.west(3).above(), Blocks.AIR.defaultBlockState());
-			level.setBlockAndUpdate(perch.west(3), Blocks.STONE.defaultBlockState());
+			level.setBlockAndUpdate(perch.west(3), Blocks.AIR.defaultBlockState());
 		});
 		server.runCommand("time set 18000");
 		server.runCommand("time pause");
-		// The unit-5 review's item 12: a paused midnight in an unlit yard would leave every picture of him dark.
+		// A paused midnight in an unlit yard would leave every picture of him dark.
 		server.runCommand("effect give @a minecraft:night_vision infinite 0 true");
 		standSouth(context, server, perch);
 		connection.waitForChunksRender();
@@ -2716,6 +2717,7 @@ public class ConcordanceGardenPactClientGameTests implements FabricClientGameTes
 				&& PactClient.state().notes().stream().anyMatch(note -> note.getString().contains(NO_TWO_BEDS)));
 		check(listed, "Bifrons listed, not ready, in his words: " + entries);
 		fits(context, "the chooser with one bed");
+		cardsWhole(context, "the chooser with one bed");
 		named(context);
 		reasons(context);
 		budget(context, chooserWords(context), "the chooser with one bed");
@@ -2738,6 +2740,7 @@ public class ConcordanceGardenPactClientGameTests implements FabricClientGameTes
 		Jugcraft.LOGGER.info("[garden-check] chooser with his two beds: {}", entries);
 		context.waitFor(client -> client.gui.screen() instanceof PactScreen, WAIT);
 		fits(context, "the chooser with his two beds");
+		cardsWhole(context, "the chooser with his two beds");
 		named(context);
 		reasons(context);
 		budget(context, chooserWords(context), "the chooser with his two beds");
@@ -2767,6 +2770,7 @@ public class ConcordanceGardenPactClientGameTests implements FabricClientGameTes
 				&& beats.get(2).contains("A root must remember wood"), "His beats keep the contract's closing words: " + beats);
 		fits(context, "his beat at GUI scale 2");
 		named(context);
+		portraitWhole(context, BIFRONS);
 		budget(context, BEAT_WORDS, "his first beat");
 		shot(context, "jugcraft_garden_bifrons_conversation");
 		tabTo(context, "next");
@@ -2882,7 +2886,7 @@ public class ConcordanceGardenPactClientGameTests implements FabricClientGameTes
 
 	/**
 	 * His refuse and assent fired by the server, their subtitles his, heard where the machine can play sound; his arrival
-	 * fired too (the unit-5 review's item 14: it came before the hearing began). His listening cue is not fired yet (his
+	 * fired too (it came before the hearing began). His listening cue is not fired yet (his
 	 * arrival carried that moment): bifronsShapes checks it when the perch is next opened.
 	 */
 	private static void bifronsHeard(ClientGameTestContext context, TestDedicatedServerContext server, Hearing hearing, BlockPos perch) {
@@ -2964,7 +2968,7 @@ public class ConcordanceGardenPactClientGameTests implements FabricClientGameTes
 
 	/**
 	 * Dossier 5 detail (b): one run, frozen at each beat, seen from seven south of the perch looking down over both beds and
-	 * him (the unit-5 review's item 5). With the world frozen (no think of his own between), the source is set fallow at 32
+	 * him. With the world frozen (no think of his own between), the source is set fallow at 32
 	 * and the destination at 0 and his first beat is run in one server step; two ticks are stepped so this client takes the
 	 * sign and his inspect gesture, and the source is photographed. His second beat runs a beat later by his own clock
 	 * (MEASURE_TICKS on): the destination marked and the root run; the source is set below SOURCE_MIN in the same step, so no
@@ -3033,7 +3037,7 @@ public class ConcordanceGardenPactClientGameTests implements FabricClientGameTes
 		context.waitTicks(BifronsEntity.Gesture.WORK.ticks);
 	}
 
-	/** The unit-5 review's item 10, in the client: his kept page names today's run of 24 and his last, both beds, what was taken, given and lost. */
+	/** His kept page in the client: it names today's run of 24 and his last, both beds, what was taken, given and lost. */
 	private static void bifronsRunRow(ClientGameTestContext context, TestDedicatedServerContext server, BlockPos perch, BlockPos source,
 			BlockPos destination) {
 		String last = "Last: 2 nutrients taken from the bed at " + source.toShortString() + ", 1 given to the bed at " + destination.toShortString()
@@ -3058,7 +3062,7 @@ public class ConcordanceGardenPactClientGameTests implements FabricClientGameTes
 	 * Dossier 5 item 5: his matter, asked and answered by keyboard. Frozen, in one server step: a young Sunpetal on the source,
 	 * the source 32 and the destination 0, and his think raises the matter (his only full bed is growing). His kept page asks
 	 * which beds are reserves, "Fallow beds only" first (the safe course), none kept; it fits at GUI 2, GUI 4 and 320x180.
-	 * The unit-5 review's item 11: the world frozen before Enter on "Any full bed", so no think of his own measures the bed
+	 * The world is frozen before Enter on "Any full bed", so no think of his own measures the bed
 	 * before the answer is read; in the step that reads the answer the source is set to 4, so no run follows; his assent.
 	 */
 	private static void bifronsMatter(ClientGameTestContext context, TestDedicatedServerContext server, BlockPos perch, BlockPos source,
@@ -3238,8 +3242,9 @@ public class ConcordanceGardenPactClientGameTests implements FabricClientGameTes
 			}
 			context.waitFor(client -> BIFRONS_IDLE.equals(drawingOf(client, perch, BIFRONS, MAIN)), WAIT);
 			clipPose(context, server, perch, BIFRONS, BifronsEntity.Gesture.INSPECT, 0.5, 1.3, "jugcraft_garden_bifrons_inspect");
-			clipPose(context, server, perch, BIFRONS, BifronsEntity.Gesture.ASSENT, 0.3, 0.9, "jugcraft_garden_bifrons_assent");
-			clipPose(context, server, perch, BIFRONS, BifronsEntity.Gesture.REFUSE, 0.3, 1.0, "jugcraft_garden_bifrons_refuse");
+			// His assent and refusal move only the man's bones, which his low shape draws inside the mound: posed risen.
+			bifronsRisenPose(context, server, perch, BifronsEntity.Gesture.ASSENT, 0.3, 0.9, "jugcraft_garden_bifrons_assent");
+			bifronsRisenPose(context, server, perch, BifronsEntity.Gesture.REFUSE, 0.3, 1.0, "jugcraft_garden_bifrons_refuse");
 			clipPose(context, server, perch, BIFRONS, BifronsEntity.Gesture.WORK, 0.4, 1.2, "jugcraft_garden_bifrons_work");
 			// He leaves (depart holds its last frame: nothing of him above the ground) and comes back (his arrival replaces it).
 			clipPose(context, server, perch, BIFRONS, BifronsEntity.Gesture.DEPART, 0.3, 0.9, "jugcraft_garden_bifrons_depart");
@@ -3253,11 +3258,56 @@ public class ConcordanceGardenPactClientGameTests implements FabricClientGameTes
 		}
 	}
 
-	/** Dossier 5 item 4: End asks first; then he sinks into the ground; the pact ends once. */
+	/**
+	 * clipPose for a gesture he makes risen (his assent and refusal move only the man's bones, which his low shape scales into
+	 * the mound): the perch opened, he rises and listens (his listening loop drawn, unblended); the server fires {@code clip};
+	 * frozen at the middle of its telling pose ({@code from} to {@code to} seconds in), the screen closed under the frozen
+	 * world (he stays risen), checked risen and inside the window, photographed; thawed and played out, and he sinks back.
+	 */
+	private static void bifronsRisenPose(ClientGameTestContext context, TestDedicatedServerContext server, BlockPos perch,
+			PactSpiritEntity.Clip clip, double from, double to, String name) {
+		int middle = (int) Math.round((from + to) * 10.0);
+		String clipName = clip.animation().getAnimationStages().getFirst().animationName();
+		context.waitTicks(OPEN_GAP);
+		open(context, server, perch);
+		context.waitFor(client -> spiritAt(client, perch, BIFRONS) instanceof BifronsEntity bifrons && bifrons.listening()
+				&& BIFRONS_LISTEN.equals(drawingOf(client, perch, BIFRONS, MAIN)) && !blendingOf(client, perch, BIFRONS, MAIN), WAIT);
+		server.runOnServer(minecraft -> presenceOf(minecraft, perch).gesture(clip));
+		context.waitTicks(middle);
+		server.runCommand("tick freeze");
+		try {
+			context.getInput().pressKey(InputConstants.KEY_ESCAPE);
+			context.waitForScreen(null);
+			context.waitTicks(5);
+			String risen = context.computeOnClient(client -> drawingOf(client, perch, BIFRONS, MAIN));
+			double at = context.computeOnClient(client -> clipName.equals(drawingOf(client, perch, BIFRONS, GESTURES))
+					? controllerOf(client, perch, BIFRONS, GESTURES).getCurrentAnimationTime() : -1.0);
+			Jugcraft.LOGGER.info("[garden-check] bifrons's {} frozen {} s into its clip, his loop {}", clip.id(), at, risen);
+			check(BIFRONS_LISTEN.equals(risen) && at >= from && at <= to,
+					"His " + clip.id() + " is caught risen, in its telling pose, " + from + " to " + to + " s into it: " + risen + " " + at);
+			shot(context, name);
+		} finally {
+			server.runCommand("tick unfreeze");
+		}
+		context.waitTicks(clip.ticks() - middle + 5);
+		context.waitFor(client -> BIFRONS_IDLE.equals(drawingOf(client, perch, BIFRONS, MAIN)), WAIT);
+	}
+
+	/**
+	 * Dossier 5 item 4: answered "any full bed", with no reserve now (the source below SOURCE_MIN), his kept page draws his
+	 * question in general, short, within the kept page's budget; End asks first; then he sinks into the ground; the pact ends
+	 * once.
+	 */
 	private static void bifronsEnding(ClientGameTestContext context, TestDedicatedServerContext server, BlockPos perch) {
 		context.waitTicks(OPEN_GAP);
 		open(context, server, perch);
 		context.waitFor(client -> PactClient.state() != null && PactClient.state().mode() == PactStatePayload.KEEP, WAIT);
+		settle(context);
+		List<String> drawn = context.computeOnClient(client -> screen(client).drawn());
+		String question = context.computeOnClient(client -> Component.translatable("screen.jugcraft.pact.glance.root_running.question").getString());
+		Jugcraft.LOGGER.info("[garden-check] his kept page answered, no reserve now: {}", drawn);
+		check(String.join(" ", drawn).contains(question), "Answered, no matter raised now: his question in general, drawn short: " + drawn);
+		budget(context, keptWords(context) + firstTask(context), "his kept page answered");
 		UUID him = server.computeOnServer(minecraft -> bifronsAt(minecraft, perch).getUUID());
 		press(context, "end");
 		context.waitForScreen(ConfirmScreen.class);

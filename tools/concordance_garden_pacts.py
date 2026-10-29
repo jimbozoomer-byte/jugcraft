@@ -180,7 +180,7 @@ MESSAGES = {
         "read": "read a Verdant Bed itself (its side, where a crop covers it)",
         # GC-07 unit 4
         # GC-08 unit 5
-        # GC-08: Bifrons's (the unit-5 review's item 16: the hook reads neither the bed's keeper nor whether it is awake).
+        # GC-08: Bifrons's (the hook reads neither the bed's keeper nor whether it is awake).
         "feed": "feed a Verdant Bed, or the crop growing on one, with bone meal",
         # GC-09 unit 6
     }.items()},

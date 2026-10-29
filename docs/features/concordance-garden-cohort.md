@@ -533,7 +533,8 @@ source's words; where the game goes beyond the text it says "Jugcraft adaptation
 7. **Details.** (a) He rises into a man's shape only while someone speaks to him, and sinks when the screen closes (his
    `listen` pose is the stand). (b) Before each run he measures: he attends the source and a ring of root-marks rises
    there, then a beat later a second ring rises at the destination (bounded server particles at each, his inspect
-   gesture; no travelling particle and no bone pointing, so no client hook).
+   gesture; no travelling particle and no bone pointing, so no client hook) *(amended unit 5: the Concordance's shared
+   preparation sign at each bed, `Sign.GATHER` through `Signs.show`, not particles of his own: `check_signs`)*.
 8. **Evidence.** *Accessibility:* every cue subtitled and every gesture paired with words on the kept page, the roster and Jade; its screens keyboard-only and narrated, fitting 320x180 and GUI 4; its matter and answers read aloud; each run named in words (from, to, given, lost). *Ownership:* `aRootRunnerNeverTouchesAStrangersBed`, SG12's `...WaitsForANearHolder`. *Save/reload:* SG12's entity-key case; the accord across a restart. *No duplication:* `aRootRunnerLosesHalfAndMintsNone`, `rootRunningLeavesNoGainingCycle`, SG12's `onePresencePerPact`.
 
 ### Dossier 6: Amdusias (entry 67), the bending canopy
@@ -1296,7 +1297,8 @@ none for a refusal; no graft replaced while the rules know it.
 
 **Changes:** `S/BifronsEntity` (`jugcraft:bifrons`, low station beside the perch; stands while listening);
 `S/RootRunning` (`root_running`; accords `fallow`, `full`; `obligation() = FEED`, its hook one line where bone meal on a
-bed or crop succeeds; the measuring marks as bounded server particles at source and destination, no client hook); `tools/concordance_economy.py`
+bed or crop succeeds; the measuring marks as bounded server particles at source and destination, no client hook
+*(amended unit 5: the shared preparation sign at each, through `Signs.show`)*); `tools/concordance_economy.py`
 `CONVERSIONS` + `("root_running", "nutrient", 2, "nutrient", 1)` with its `ANCHORS`; data, sounds, lang, body (built),
 renderer, record `bifrons-pact.md`.
 
@@ -1312,8 +1314,40 @@ hook (`FEED`), `PactObligations.Act` (+`FEED`), `PactParser.WORK` (+`root_runnin
 `concordance/pact/bifrons.json`, `#jugcraft:bifrons_offerings`, `jugcraft:bifrons.*`, accord values `fallow`, `full`.
 **Client shots:** his low shape and his risen shape (listening), the two-beat measuring gesture, a run's kept-page line,
 poses, Jade. **Audits:** `check_garden_pacts` (`take(2)` before `give(1)` only after a room check; no `compost` or
-`setNutrients` call), `check_economy` ("gaining cycles: none"), bodies, `check_acquisition` (logs, emerald).
-**Acceptance:** Dossier 5's items; nutrients never rise in sum; half of every unit lost and accounted.
+`setNutrients` call), `check_economy` ("gaining cycles: none"), bodies, `check_acquisition` (logs, emerald) *(amended
+unit 5: no `check_acquisition` row; both are vanilla, held by the progression tool's vanilla sources and the journey's
+route)*. **Acceptance:** Dossier 5's items; nutrients never rise in sum; half of every unit lost and accounted.
+
+**As built (brief `1c57700dd`; GC-08b `ce4f71b66`, the feeding act and SG12 at each spirit's hours; Bifrons `a3e672ba8`;
+his review's fixes and records in one commit after it; [record](bifrons-pact.md); not yet compiled or run in CI, built
+on unit 5's own line from unit 3's head, `3c2d36b0f`, and not yet merged into the cohort):**
+
+- **Bifrons as a character:** `S/BifronsEntity` on the shared base, registered 1.2 x 0.7 (eyes 0.5; his low shape, the
+  risen man drawn above it: GC-P107), standing beside the perch on GC-06b's `Station.BESIDE` with no station code of his
+  own (GC-P105 in the base, no GC-08m); his body built by `tools/garden_bodies.py` (`bifrons_model`, twelve clips in
+  `bifrons_animations`, `bifrons_skin` and `bifrons_glowmask`, his four eyes), written and checked by
+  `tools/owner_art.py` (`BUILT`), painted only in colours read from the pine log and the sphalerite (art plan); his
+  listening loop plays his rise once, then loops risen (GC-P109); his seven cues on three runtime files told apart by pitch
+  (GC-P110); his sign the hanging roots; his codex pages `p16` to `p19` of `binding/garden_regard` before the mastered
+  page (`p20` on this line).
+- **Root-running:** `S/RootRunning` (`TAKE` 2, `GIVE` 1, `SOURCE_MIN` 24, `GAP` 3, `MAX_ASKED` 8, `MEASURE_TICKS` 20,
+  `MEASURE_LIMIT` 60, `MAX_RESERVES` 16; accords `fallow`, `full`); its questions through `GardenAsking` with his memory
+  of beds refused for themselves (since his review); `PactObligations.FEED` with one hook line after each bone-meal
+  success by hand (GC-08b); the economy's `root_running` (2 for 1) with its installation row; tests as listed in
+  `check_mod_data.py`'s `GC08_TESTS`.
+
+Departures from this ticket and the unit's specification (each recorded, none hidden; the reasons in
+[his record](bifrons-pact.md#as-built)): one run every two thinks, not one each think (his 24 runs take 960 of the
+night's 10,000 ticks); no `check_acquisition` row for logs or the emerald; by day, an unanswered matter shows his idle
+loop and AWAITING_ANSWER (GC-P47), not his waiting loop; his marks the shared preparation sign, not particles; his
+questions through the shared `GardenAsking`; his matter only for a reserve he may change now, and standing also when
+every fallow bed that could give is refused him (his review); the restyled screens' short words (GC-S26), among them the
+service glance "Runs roots from full to hungry beds"; his client flow's camera, clock and yard choices, and his assent
+and refusal posed risen (his review). Not applied on his line: his review's finding 11 (the shared kept page draws an
+Offer plate for each kind of offering carried), which it directs to the cohort's line. Saved: nothing new of his own
+(his entity writes only the base's `perch` and `record`); the perch's `accord` takes `fallow` and `full`; no migration.
+The units table, his Decisions rows (GC-P100 to GC-P119, GC-P102 amended to the shared sign), the GE cells and the
+line-up ("Bifrons 1.8 risen and 0.7 low") are written in unit 5's merge commit (the cohort's cross-unit plan).
 
 ### GC-09. Amdusias (unit 6)
 
@@ -2392,7 +2426,8 @@ above. Where a correction offered alternatives, or named an example, the choice 
   `RosterStatePayload` field; it lands with its first user in unit 2, not unit 1.
 - **19 (client work for two details):** the synced target and renderer hook for Marax's familiar (unit 3, his signature
   detail); Bifrons's two-beat measuring re-worded to bounded server particles at source and destination, so units 3 and
-  5 stay independent and Bifrons needs no client hook.
+  5 stay independent and Bifrons needs no client hook *(amended unit 5: the shared preparation sign at each bed, still
+  with no client hook; `check_signs`)*.
 
 Also corrected while applying the critique, though it did not raise them: the two-client scenario no longer says the
 peer's opening of the holder's perch is refused (a stranger may open it and is refused only its requests, as

@@ -456,7 +456,9 @@ public class PactScreen extends MagicScreen implements MenuAccess<PactMenu> {
 
 	/**
 	 * A chip of an offering ({@code full}'s argument {@code tagArgument} names its tag, {@code countArgument} its count):
-	 * its tag's items cycling with their count or "+N", and the whole tag listed under its tip.
+	 * its tag's items cycling with their count or "+N", and its tag listed under its tip: every item of a tag of up to
+	 * three, else the first three and how many more (a tag of tags such as #minecraft:logs holds dozens; spec 1.1's tooltip
+	 * is at most two lines and 20 words).
 	 */
 	private MagicChip offering(MagicChip chip, Component full, int countArgument, int tagArgument) {
 		List<ItemStack> items = List.of();
@@ -475,7 +477,9 @@ public class PactScreen extends MagicScreen implements MenuAccess<PactMenu> {
 			return chip;
 		}
 		chip.items(items).count(count);
-		if (items.size() > 1) {
+		if (items.size() > 3) {
+			chip.tipLine(ui("short.any_of_more", ComponentUtils.formatList(items.subList(0, 3), ItemStack::getHoverName), items.size() - 3));
+		} else if (items.size() > 1) {
 			chip.tipLine(ui("short.any_of", ComponentUtils.formatList(items, ItemStack::getHoverName)));
 		}
 		return chip;

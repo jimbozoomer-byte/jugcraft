@@ -8425,9 +8425,10 @@ public class ConcordanceWorkerGameTests {
 	}
 
 	/**
-	 * GC-08 (GC-S7; the unit-5 review's item 8): a stranger's bed is never his; the holder's own inside a claim they may not
-	 * build in is never drawn from; a party member's is his only while they are in the party, refused at once when they leave
-	 * (asked at the change), and a former member's growing bed raises no matter.
+	 * GC-08 (GC-S7; GC-P106): a stranger's bed is never his; the holder's own inside a claim they may not build in is never
+	 * drawn from, and once the claim is lifted it is asked again at his index's next read; a party member's is his only while
+	 * they are in the party, refused at once when they leave (asked again at his second beat, so a measure made before they
+	 * left runs nothing), and a former member's growing bed raises no matter.
 	 */
 	@GameTest(maxTicks = 20)
 	public void aRootRunnerNeverTouchesAStrangersBed(GameTestHelper helper) {
@@ -8447,9 +8448,11 @@ public class ConcordanceWorkerGameTests {
 		runner(bifrons).forget();
 		try (TestClaims claims = TestClaims.open().block(helper.absolutePos(new BlockPos(5, 1, 5)), STRANGER)) {
 			helper.assertValueEqual(bifrons.think(level, MIDNIGHT, now + 20), Status.IDLE, "His holder could not change the claimed bed by hand");
-			helper.assertTrue(claimed.nutrients() == 32 && runner(bifrons).measure() == null, "so it is not measured, nor drawn from");
+			helper.assertTrue(claimed.nutrients() == 32 && runner(bifrons).measure() == null && runner(bifrons).skipped(claimed.getBlockPos()),
+					"so it is not measured, nor drawn from, and is skipped until his index is read again");
 		}
-		helper.assertValueEqual(bifrons.think(level, MIDNIGHT, now + 40), Status.WORKING, "Unclaimed, it is measured");
+		runner(bifrons).forget();
+		helper.assertValueEqual(bifrons.think(level, MIDNIGHT, now + 40), Status.WORKING, "Unclaimed, at his index's next read it is measured");
 		helper.assertValueEqual(bifrons.think(level, MIDNIGHT, now + 60), Status.WORKING, "and run from");
 		helper.assertTrue(claimed.nutrients() == 30 && hungry.nutrients() == 1, "Two out, one in");
 		claimed.setNutrients(10);
@@ -8469,13 +8472,88 @@ public class ConcordanceWorkerGameTests {
 			ripeOn(helper, new BlockPos(6, 1, 6));
 			helper.assertValueEqual(bifrons.think(level, MIDNIGHT, joined + 40), Status.AWAITING_ANSWER,
 					"A crop on it, the member's bed is the only full one: a reserve, and he asks");
+			helper.setBlock(new BlockPos(6, 2, 6), Blocks.AIR);
+			helper.assertValueEqual(bifrons.think(level, MIDNIGHT, joined + 60), Status.WORKING, "Its crop gone, the member's fallow bed is measured");
+			RootRunning.Measure measured = runner(bifrons).measure();
+			helper.assertTrue(measured != null && measured.from().equals(members.getBlockPos()), "from the member's bed: " + measured);
 			helper.assertTrue(parties.leave(member.getUUID()) == PartyManager.Result.OK, "The member leaves the party");
-			helper.assertValueEqual(bifrons.think(level, MIDNIGHT, joined + 60), Status.IDLE, "Their bed refused at once (asked at the change)");
+			helper.assertValueEqual(bifrons.think(level, MIDNIGHT, joined + 80), Status.IDLE,
+					"At his second beat their bed is refused at once (asked at the change): no run");
+			RootRunning.Run last = runner(bifrons).last();
+			helper.assertTrue(members.nutrients() == 30 && hungry.nutrients() == 2 && runner(bifrons).measure() == null
+					&& last != null && last.at() == joined + 20, "Nothing taken or given; his last run is still the one made in the party: " + last);
+			ripeOn(helper, new BlockPos(6, 1, 6));
+			helper.assertValueEqual(bifrons.think(level, MIDNIGHT, joined + 100), Status.IDLE, "A crop on it again, the former member's bed is no reserve");
 			helper.assertTrue(members.nutrients() == 30 && runner(bifrons).reserves().isEmpty()
-					&& RootRunning.SERVICE.complication(level, pactOf(level, perch), perch, joined + 60) == null,
+					&& RootRunning.SERVICE.complication(level, pactOf(level, perch), perch, joined + 100) == null,
 					"untouched, and a former member's growing bed raises no matter");
 		} finally {
 			parties.adminDisband(keeper.getUUID());
+		}
+		helper.succeed();
+	}
+
+	/**
+	 * GC-08 (GC-S7; as Buer's beds): beds refused him never crowd out those he may run. Eight of the holder's beds, the
+	 * poorest, stand in a claim. His first think asks those eight, is refused each and has no question left; his next, inside
+	 * the same read of his index, skips them, and measures from the full bed to the open one beyond them.
+	 */
+	@GameTest(maxTicks = 20)
+	public void aRootRunnerSkipsBedsRefusedHim(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		ServerPlayer keeper = gardenHolder(helper);
+		long now = dayStart(level, 1);
+		PactPerchBlockEntity perch = bifronsPact(helper, keeper, BIFRONS_PERCH, now);
+		BifronsEntity bifrons = bifrons(helper, perch);
+		VerdantBedBlockEntity full = bifronsBed(helper, new BlockPos(5, 1, 2), keeper.getUUID(), 32);
+		VerdantBedBlockEntity beyond = bifronsBed(helper, new BlockPos(7, 1, 7), keeper.getUUID(), 1);
+		List<VerdantBedBlockEntity> claimed = new ArrayList<>();
+		try (TestClaims claims = TestClaims.open()) {
+			for (int x = 4; x <= 6; x++) {
+				for (int z = 4; z <= 6 && claimed.size() < RootRunning.MAX_ASKED; z++) {
+					BlockPos at = new BlockPos(x, 1, z);
+					claimed.add(bifronsBed(helper, at, keeper.getUUID(), 0));
+					claims.block(helper.absolutePos(at), STRANGER);
+				}
+			}
+			helper.assertValueEqual(bifrons.think(level, MIDNIGHT, now), Status.IDLE, "The eight poorest asked, each in a claim: refused, no question left");
+			helper.assertTrue(claimed.stream().allMatch(bed -> runner(bifrons).skipped(bed.getBlockPos())) && !runner(bifrons).skipped(beyond.getBlockPos())
+					&& runner(bifrons).measure() == null && bifrons.marks().isEmpty(), "Those eight are skipped until his index is read again; nothing measured");
+			helper.assertValueEqual(bifrons.think(level, MIDNIGHT, now + RootRunning.MEASURE_TICKS), Status.WORKING,
+					"His next think skips them and measures the open bed's run");
+			RootRunning.Measure measure = runner(bifrons).measure();
+			helper.assertTrue(measure != null && measure.from().equals(full.getBlockPos()) && measure.to().equals(beyond.getBlockPos())
+					&& full.nutrients() == 32 && claimed.stream().allMatch(bed -> bed.nutrients() == 0),
+					"From the full bed to the open one beyond them; nothing moved yet: " + measure);
+		}
+		helper.succeed();
+	}
+
+	/**
+	 * GC-08 (Dossier 5 item 5; GC-P106): no fallow bed can give when the only one rich enough is refused him (a claim the
+	 * holder may not build in), so a growing full bed is still a reserve: unanswered, his matter stands and he asks; nothing
+	 * is measured or taken.
+	 */
+	@GameTest(maxTicks = 20)
+	public void aRefusedFallowBedLeavesHisReservesAsked(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		ServerPlayer keeper = gardenHolder(helper);
+		long now = dayStart(level, 1);
+		PactPerchBlockEntity perch = bifronsPact(helper, keeper, BIFRONS_PERCH, now);
+		BifronsEntity bifrons = bifrons(helper, perch);
+		VerdantBedBlockEntity fallow = bifronsBed(helper, new BlockPos(5, 1, 2), keeper.getUUID(), 32);
+		VerdantBedBlockEntity growing = bifronsBed(helper, new BlockPos(5, 1, 5), keeper.getUUID(), 30);
+		ripeOn(helper, new BlockPos(5, 1, 5));
+		VerdantBedBlockEntity hungry = bifronsBed(helper, new BlockPos(2, 1, 5), keeper.getUUID(), 0);
+		try (TestClaims claims = TestClaims.open().block(helper.absolutePos(new BlockPos(5, 1, 2)), STRANGER)) {
+			helper.assertValueEqual(bifrons.think(level, MIDNIGHT, now), Status.AWAITING_ANSWER,
+					"The fallow bed refused him, the growing bed is his reserve: he asks");
+			PactService.Complication matter = RootRunning.SERVICE.complication(level, pactOf(level, perch), perch, now);
+			helper.assertTrue(runner(bifrons).reserves().equals(List.of(growing.getBlockPos())) && matter != null
+					&& matter.id().equals(RootRunning.RESERVES) && growing.getBlockPos().equals(matter.pos()),
+					"His reserves: the growing bed, which his matter names: " + matter);
+			helper.assertTrue(fallow.nutrients() == 32 && growing.nutrients() == 30 && hungry.nutrients() == 0
+					&& runner(bifrons).measure() == null && bifrons.marks().isEmpty(), "Nothing measured or taken");
 		}
 		helper.succeed();
 	}
@@ -8797,7 +8875,7 @@ public class ConcordanceWorkerGameTests {
 	}
 
 	/**
-	 * GC-08 (the unit-5 review's item 10): his kept page's rows at the run's own times: today's runs of 24 and his last run (both
+	 * GC-08 (his page as the server builds it): his kept page's rows at the run's own times: today's runs of 24 and his last run (both
 	 * beds, what was taken, given and lost); with no presence of his, today's runs alone.
 	 */
 	@GameTest(maxTicks = 20)

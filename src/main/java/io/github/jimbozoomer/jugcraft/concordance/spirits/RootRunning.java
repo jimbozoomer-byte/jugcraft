@@ -10,6 +10,7 @@ import io.github.jimbozoomer.jugcraft.concordance.worker.Pacts;
 import io.github.jimbozoomer.jugcraft.concordance.worker.Status;
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.HashSet;
 import java.util.List;
 import java.util.UUID;
 import net.minecraft.core.BlockPos;
@@ -34,13 +35,14 @@ import org.jspecify.annotations.Nullable;
  * </ol>
  * The destination is the poorest awake bed of his beneficiaries with room (Garden.poorest over his bed index); the source
  * the fullest holding at least SOURCE_MIN and GAP more than it, fallow (no organism crop and no Verdant Heart on it)
- * unless the holder has answered "any full bed" at the perch, and never the bed under a Heart. When no fallow bed could
- * give but a planted one of a beneficiary's could, the planted ones are his reserves: his matter (PactAccords), raised once
- * a presence with his inspect gesture toward the first, once he may change it. Every bed is asked at the change
- * (GardenAsking: GardenPacts.target, serves there, a beneficiary's, the holder near, the holder's own hands), at most
- * MAX_ASKED a think. He feeds a bed by no other rule, eases no strain, moves no item and makes no nutrient: the economy's
- * root_running, two for one. What he remembers ({@link Memory}: his bed index, a measure under way, his last run, his
- * reserves) is the presence's alone, never saved.
+ * unless the holder has answered "any full bed" at the perch, and never the bed under a Heart. When no fallow bed can
+ * give (none rich enough, or every one refused him) but a planted one of a beneficiary's could, the planted ones are his
+ * reserves: his matter (PactAccords), raised once a presence with his inspect gesture toward the first, once he may change
+ * it. Every bed is asked at the change (GardenAsking: GardenPacts.target, serves there, a beneficiary's, the holder near,
+ * the holder's own hands), at most MAX_ASKED a think, a bed refused for itself only once each time the index is read. He
+ * feeds a bed by no other rule, eases no strain, moves no item and makes no nutrient: the economy's root_running, two for
+ * one. What he remembers ({@link Memory}: his bed index, the beds refused for themselves, a measure under way, his last
+ * run, his reserves) is the presence's alone, never saved.
  */
 public final class RootRunning {
 	/** Its work id (worker/PactParser.WORK; tools/concordance_pacts.py WORK). */
@@ -106,8 +108,9 @@ public final class RootRunning {
 	 * perch's). WORKING when he measured or ran (or is between his two beats); OUTSIDE_AGREEMENT outside his hours;
 	 * FINISHED with the day's quota spent; what GardenPacts.target answers for the whole pact (suspended, held, the quota
 	 * spent, the holder not near); else IDLE (no hungry bed, no full one, his matter raised, a measure abandoned, or no
-	 * question left this think). Bounded: one index read (at most 64 beds), at most MAX_ASKED beds asked, one block read
-	 * above each indexed bed, at most one run and two signs.
+	 * question left this think). Bounded: one index read (at most 64 beds, refreshed at most every 200 ticks), at most
+	 * MAX_ASKED beds asked (a bed refused for itself only once each time the index is read), at most two block reads above
+	 * each indexed bed (fallow, then under a Heart), at most one run and two signs.
 	 */
 	static Status run(ServerLevel level, BifronsEntity bifrons, BoundWill record, AgreementHolder holder, long time, long now) {
 		Memory memory = bifrons.serviceMemory(Memory.class, Memory::new);
@@ -121,10 +124,10 @@ public final class RootRunning {
 			memory.drop();
 			return Status.FINISHED;
 		}
-		List<VerdantBedBlockEntity> beds = memory.reach(record).beds(level, now);
+		List<VerdantBedBlockEntity> beds = memory.beds(level, record, now);
 		String kept = answer(level, bifrons);
 		boolean full = FULL.equals(kept);
-		GardenAsking asking = new GardenAsking(level, record, time, now, MAX_ASKED);
+		GardenAsking asking = new GardenAsking(level, record, time, now, MAX_ASKED, memory::skipped, memory::skip);
 		Measure measure = memory.measure();
 		if (measure != null && now >= measure.at() && now - measure.at() <= MEASURE_LIMIT) {
 			// Between his beats he is still measuring; a beat later he marks the destination and runs the root.
@@ -156,7 +159,7 @@ public final class RootRunning {
 		List<VerdantBedBlockEntity> fallow = new ArrayList<>();
 		List<VerdantBedBlockEntity> planted = new ArrayList<>();
 		for (VerdantBedBlockEntity bed : beds) {
-			// A beneficiary's now (the index keeps its keepers only from its last refresh: the review's item 8), rich enough.
+			// A beneficiary's now (the index keeps its keepers only from its last refresh; GC-P106), rich enough.
 			if (bed == to || !GardenPacts.benefits(record, bed.keeper()) || !gives(bed, to)) {
 				continue;
 			}
@@ -167,28 +170,9 @@ public final class RootRunning {
 			}
 		}
 		// His reserves: the planted beds that could give while no fallow bed can (his matter), nearest the perch first.
-		List<VerdantBedBlockEntity> reserves = new ArrayList<>(fallow.isEmpty() ? planted : List.of());
-		Asked first = Asked.NOT_HERE;
-		while (kept == null && !reserves.isEmpty()) {
-			// Unanswered, his matter names only a reserve he may change now (the review's item 8): one he may not (a claim the
-			// holder may not build in) is no reserve of his, and none is named past the think's questions.
-			first = asking.ask(reserves.getFirst().getBlockPos(), reserves.getFirst().keeper());
-			if (first == Asked.PACT) {
-				return asking.stop();
-			}
-			if (first != Asked.NOT_HERE) {
-				break;
-			}
-			reserves.removeFirst();
-		}
-		memory.reserves(first == Asked.SPENT ? List.of() : reserves);
-		BlockPos reserve = memory.reserve();
-		if (kept == null && reserve != null && first == Asked.MAY && memory.raise()) {
-			// Raised once a presence, and only for a bed he may change: he turns to the first reserve and weighs it; his words
-			// wait on the kept page, in Jade and on the roster (the accord machinery). Nothing runs this think.
-			bifrons.attendWork(reserve, BifronsEntity.Gesture.INSPECT.ticks, now);
-			bifrons.gesture(BifronsEntity.Gesture.INSPECT);
-			return Status.IDLE;
+		Status matter = reserves(bifrons, memory, asking, kept, fallow.isEmpty() ? planted : List.of(), now);
+		if (matter != null) {
+			return matter;
 		}
 		List<VerdantBedBlockEntity> sources = new ArrayList<>(fallow);
 		if (full) {
@@ -213,8 +197,48 @@ public final class RootRunning {
 				return Status.WORKING;
 			}
 		}
+		if (!full && !fallow.isEmpty() && !planted.isEmpty()) {
+			// Every fallow bed that could give was refused for itself (no question left returned above): none can give after all,
+			// so the planted ones are his reserves, and his matter stands (Dossier 5 item 5; GC-P106).
+			matter = reserves(bifrons, memory, asking, kept, planted, now);
+			if (matter != null) {
+				return matter;
+			}
+		}
 		memory.idle(Idle.NO_FULL);
 		return Status.IDLE;
+	}
+
+	/**
+	 * His reserves among {@code planted} (the beds that could give while no fallow bed can), nearest the perch first, kept in
+	 * his memory for his page, Jade and the perch. Unanswered ({@code kept} null), his matter names only a reserve he may
+	 * change now: one he may not (a claim the holder may not build in) is no reserve of his, and none is named past the
+	 * think's questions. Raised once a presence, and only for a bed he may change: he turns to the first reserve and weighs
+	 * it; his words wait on the kept page, in Jade and on the roster (the accord machinery), and nothing runs this think.
+	 * Returns how the think ends (the pact's own reason, or IDLE when raised), or null when it goes on.
+	 */
+	private static @Nullable Status reserves(BifronsEntity bifrons, Memory memory, GardenAsking asking, @Nullable String kept,
+			List<VerdantBedBlockEntity> planted, long now) {
+		List<VerdantBedBlockEntity> reserves = new ArrayList<>(planted);
+		Asked first = Asked.NOT_HERE;
+		while (kept == null && !reserves.isEmpty()) {
+			first = asking.ask(reserves.getFirst().getBlockPos(), reserves.getFirst().keeper());
+			if (first == Asked.PACT) {
+				return asking.stop();
+			}
+			if (first != Asked.NOT_HERE) {
+				break;
+			}
+			reserves.removeFirst();
+		}
+		memory.reserves(first == Asked.SPENT ? List.of() : reserves);
+		BlockPos reserve = memory.reserve();
+		if (kept == null && reserve != null && first == Asked.MAY && memory.raise()) {
+			bifrons.attendWork(reserve, BifronsEntity.Gesture.INSPECT.ticks, now);
+			bifrons.gesture(BifronsEntity.Gesture.INSPECT);
+			return Status.IDLE;
+		}
+		return null;
 	}
 
 	/**
@@ -318,11 +342,14 @@ public final class RootRunning {
 
 	/**
 	 * What one Bifrons presence remembers between its thinks (PactSpiritEntity.serviceMemory: never saved, lost with the
-	 * entity): his bed index, a measure under way, his last run, his reserves, whether he has raised his matter and why he
-	 * last idled. It never holds nutrients: a run is over when its call returns. Server thread only.
+	 * entity): his bed index; the beds refused for themselves since the index was last read, at most GardenReach.MAX_BEDS,
+	 * forgotten at its next read (as Buer's); a measure under way, his last run, his reserves, whether he has raised his
+	 * matter and why he last idled. It never holds nutrients: a run is over when its call returns. Server thread only.
 	 */
 	public static final class Memory {
 		private @Nullable GardenReach reach;
+		private final HashSet<BlockPos> skipped = new HashSet<>();
+		private int skippedAt = -1;
 		private @Nullable Measure measure;
 		private @Nullable Run last;
 		private List<BlockPos> reserves = List.of();
@@ -332,17 +359,46 @@ public final class RootRunning {
 		public Memory() {
 		}
 
-		/** {@code record}'s bed index, made again when its perch or radius changed (GardenReach.covers). */
+		/** {@code record}'s bed index, made again (forgetting the beds skipped) when its perch or radius changed (GardenReach.covers). */
 		GardenReach reach(BoundWill record) {
 			if (reach == null || !reach.covers(record)) {
 				reach = GardenReach.of(record);
+				skipped.clear();
+				skippedAt = -1;
 			}
 			return reach;
 		}
 
 		/**
+		 * {@code record}'s indexed beds at game time {@code now} (GardenReach.beds). When that read refreshed the index, the
+		 * beds skipped since the last are forgotten, so a claim lifted or a keeper who joined the party is asked again.
+		 */
+		List<VerdantBedBlockEntity> beds(ServerLevel level, BoundWill record, long now) {
+			GardenReach index = reach(record);
+			List<VerdantBedBlockEntity> beds = index.beds(level, now);
+			if (index.refreshes() != skippedAt) {
+				skippedAt = index.refreshes();
+				skipped.clear();
+			}
+			return beds;
+		}
+
+		/** GardenPacts.target refused the bed at {@code pos} for itself: not asked again until the index is next read. */
+		void skip(BlockPos pos) {
+			if (skipped.size() < GardenReach.MAX_BEDS) {
+				skipped.add(pos.immutable());
+			}
+		}
+
+		/** Whether the bed at {@code pos} was refused for itself since the index was last read (tests and run). */
+		public boolean skipped(BlockPos pos) {
+			return skipped.contains(pos);
+		}
+
+		/**
 		 * Forgets his bed index, so his next think reads his area again (GardenReach.forget): an operator's or a test's,
-		 * after beds were placed within the index's REFRESH_TICKS. Nothing else he remembers changes.
+		 * after beds were placed within the index's REFRESH_TICKS. The beds skipped are forgotten at that read; nothing else
+		 * he remembers changes.
 		 */
 		public void forget() {
 			if (reach != null) {

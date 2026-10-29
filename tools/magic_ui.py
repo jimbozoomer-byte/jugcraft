@@ -990,15 +990,18 @@ WORK_GLANCES = {
     # GC-07 unit 4
     # GC-08 unit 5
     # GC-08: Bifrons's root-running (no on-request action: his kept page is his rows and his matter). His last run is drawn
-    # as its two beds, the amounts in its tip; his matter's question in at most 12 words, its answers in 3 (spec 1.1).
+    # as its two beds, the amounts in its tip; his matter's question in at most 12 words, keeping the bed it is about (as
+    # Bathin's keeps his Heart), its answers in 3 (spec 1.1); his question in general where none is raised and one is kept.
     "root_running": {
         "icon": "minecraft:rooted_dirt", "name": "Root-running", "line": "Runs roots from full to hungry beds",
         "row.service": [("", "%1$s/%2$s today", (3, 24), "3/24 today", "chip")],
         "row.asleep": [("", "Asleep until %1$s", ("19:00", "05:00"), "Asleep until 19:00", "row")],
         "row.last": [("", "Last: %2$s → %4$s", (2, "102, 64, -18", 1, "98, 64, -18", 1), "Last: 102, 64, -18 → 98, 64, -18", "row")],
-        "row.reserved": [("", "%1$s growing beds kept as reserves", (2,), "2 growing beds kept as reserves", "row")],
-        "matter.reserves": [("", "Your full beds are growing: draw from them?", ("102, 64, -18", 32),
-                             "Your full beds are growing: draw from them?", "row")],
+        "row.reserved": [("", "Reserves kept: %1$s", (2,), "Reserves kept: 2", "row")],
+        "matter.reserves": [("", "Bed %1$s is growing: draw from growing beds?", ("102, 64, -18", 32),
+                             "Bed 102, 64, -18 is growing: draw from growing beds?", "row")],
+        # His matter in general, drawn where none is raised now and an answer is kept (PactAccords: <work>.question).
+        "question": [("", "Which beds are reserves?", (), "Which beds are reserves?", "row")],
         "missing": [("", "Needs two awake Verdant Beds of yours within %1$s blocks", (8,),
                      "Needs two awake Verdant Beds of yours within 8 blocks", "blocker")],
         "card": ("Needs two beds near", (8,), "Needs two beds near"),
@@ -1124,6 +1127,8 @@ SHORT = {
     "ended": ("Ended", "label"), "ready": ("Ready", "label"), "not_yet": ("Not yet", "label"),
     "invite": ("Invite a spirit", "label"), "used": ("used", "label"),
     "resonance": ("%1$s/%2$s resonance", "label"), "any_of": ("Any of: %1$s", "tip"),
+    # An offering tag of more than three items (Bifrons's #minecraft:logs: dozens) lists its first three and the count.
+    "any_of_more": ("Any of: %1$s and %2$s more", "tip"),
     "standing.hint": ("The same for every spirit", "tip"), "accept.hint": ("Pays the price and seals the pact", "tip"),
     "accept.narration": ("Nothing is spent before this", "tip"), "skip.hint": ("Skip to his terms", "tip"),
     "end.leaves": ("He leaves; offerings paid ahead come back once.", "tip"),
@@ -1132,6 +1137,7 @@ SHORT = {
     "have": ("%1$s %2$s/%3$s", "tip"), "short_of": ("Short: %1$s", "tip"),
 }
 SHORT_SAMPLES = {"carried": (12,), "resonance": (6, 8), "any_of": ("Stolas Starflower, Amethyst Shard",),
+                 "any_of_more": ("Stripped Pale Oak Wood, Stripped Dark Oak Wood, Stripped Mangrove Wood", 64),
                  "have": ("Ender Pearl", 1, 2), "short_of": ("Ender Pearl 1/2, 6/8 resonance",)}
 
 # ------------------------------------------------------------------------------------------------ unit 2: the roster and Jade
